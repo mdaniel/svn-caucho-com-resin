@@ -446,6 +446,13 @@ abstract public class
       instance.preConfigInit();
 
       for (DeployConfig config : initList) {
+        ConfigProgram program = config.getClassLoaderProgram();
+
+        if (program != null)
+          program.configure(instance);
+      }
+
+      for (DeployConfig config : initList) {
         ConfigProgram program = config.getBuilderProgram();
 
         if (program != null)

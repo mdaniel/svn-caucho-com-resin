@@ -1011,7 +1011,7 @@ public class SessionImpl implements HttpSession, CacheListener {
 
     // server/015k, server/10g2
     if (_isInvalidating
-        || ! _manager.isPersistenceEnabled()
+        || _manager.isDestroyOnLru()
         || _accessTime + getMaxInactiveInterval() < now) {
       notifyDestroy();
     }

@@ -108,10 +108,18 @@ public class JstlCoreSet extends JstlNode {
    *
    * @param os write stream to the generated XML.
    */
+  @Override
   public void printXml(WriteStream os)
     throws IOException
   {
-    os.print("<c:set");
+    String prefix = getNamespacePrefix("http://java.sun.com/jsp/jstl/core");
+
+    if (prefix == null) {
+      prefix = "c";
+      os.print("<c:set xmlns:c='http://java.sun.com/jsp/jstl/core'");
+    }
+    else
+      os.print("<" + prefix + ":set");
 
     if (_value != null) {
       os.print(" value=\"");

@@ -78,6 +78,9 @@ public class DeployConfig {
   // if true, skip defaults
   private boolean _isSkipDefaultConfig;
 
+  // The classloader program
+  private ContainerProgram _classLoaderProgram = new ContainerProgram();
+
   // The configuration program
   private ContainerProgram _program = new ContainerProgram();
 
@@ -234,6 +237,19 @@ public class DeployConfig {
   public DeployConfig getPrologue()
   {
     return null;
+  }
+
+  /**
+   * Adds to the classloader
+   */
+  public void addClassLoader(ConfigProgram program)
+  {
+    _classLoaderProgram.addProgram(program);
+  }
+  
+  public ConfigProgram getClassLoaderProgram()
+  {
+    return _classLoaderProgram;
   }
 
   /**

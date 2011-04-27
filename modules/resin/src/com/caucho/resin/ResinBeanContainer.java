@@ -329,9 +329,10 @@ public class ResinBeanContainer {
     try {
       thread.setContextClassLoader(_classLoader);
 
-      _classLoader.start();
-
+      // env/0e81
       _cdiManager.update();
+      
+      _classLoader.start();
     } finally {
       thread.setContextClassLoader(oldLoader);
     }

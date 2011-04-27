@@ -106,58 +106,69 @@ public class CauchoRequestWrapper extends AbstractCauchoRequest {
   {
     return _request.getProtocol();
   }
-  
+
+  @Override
   public String getScheme()
   {
     return _request.getScheme();
   }
   
+  @Override
   public String getServerName()
   {
     return _request.getServerName();
   }
   
+  @Override
   public int getServerPort()
   {
     return _request.getServerPort();
   }
   
+  @Override
   public String getRemoteAddr()
   {
     return _request.getRemoteAddr();
   }
   
+  @Override
   public String getRemoteHost()
   {
     return _request.getRemoteHost();
   }
   
+  @Override
   public int getRemotePort()
   {
     return _request.getRemotePort();
   }
   
+  @Override
   public String getLocalAddr()
   {
     return _request.getLocalAddr();
   }
   
+  @Override
   public String getLocalName()
   {
     return _request.getLocalName();
   }
   
+  @Override
   public int getLocalPort()
   {
     return _request.getLocalPort();
   }
   
+  @Override
   public String getParameter(String name)
   {
     return _request.getParameter(name);
   }
   
-  public Map getParameterMap()
+  @Override
+  public Map<String,String[]> getParameterMap()
   {
     return _request.getParameterMap();
   }
@@ -219,21 +230,25 @@ public class CauchoRequestWrapper extends AbstractCauchoRequest {
     return _request.getLocale();
   }
   
-  public Enumeration getLocales()
+  @Override
+  public Enumeration<Locale> getLocales()
   {
     return _request.getLocales();
   }
   
+  @Override
   public boolean isSecure()
   {
     return _request.isSecure();
   }
   
+  @Override
   public Object getAttribute(String name)
   {
     return _request.getAttribute(name);
   }
   
+  @Override
   public void setAttribute(String name, Object o)
   {
     _request.setAttribute(name, o);
@@ -290,17 +305,20 @@ public class CauchoRequestWrapper extends AbstractCauchoRequest {
   }
   */
 
+  @Override
   public ServletContext getServletContext()
   {
     return getWebApp();
   }
 
+  @Override
   public AsyncContext startAsync()
     throws IllegalStateException
   {
     return _request.startAsync();
   }
 
+  @Override
   public AsyncContext startAsync(ServletRequest servletRequest,
                                  ServletResponse servletResponse)
     throws IllegalStateException
@@ -308,16 +326,19 @@ public class CauchoRequestWrapper extends AbstractCauchoRequest {
     return _request.startAsync(servletRequest, servletResponse);
   }
 
+  @Override
   public AsyncContext getAsyncContext()
   {
     return _request.getAsyncContext();
   }
 
+  @Override
   public boolean isAsyncStarted()
   {
     return _request.isAsyncStarted();
   }
 
+  @Override
   public boolean isAsyncSupported()
   {
     return _request.isAsyncSupported();
@@ -333,6 +354,7 @@ public class CauchoRequestWrapper extends AbstractCauchoRequest {
     return wrappedType.isAssignableFrom(_request.getClass());
   }
 
+  @Override
   public DispatcherType getDispatcherType()
   {
     return _request.getDispatcherType();
@@ -342,11 +364,13 @@ public class CauchoRequestWrapper extends AbstractCauchoRequest {
   // HttpServletRequest
   //
   
+  @Override
   public String getMethod()
   {
     return _request.getMethod();
   }
   
+  @Override
   public String getRequestURI()
   {
     return _request.getRequestURI();
@@ -441,26 +465,31 @@ public class CauchoRequestWrapper extends AbstractCauchoRequest {
     return _request.getIntHeader(name);
   }
   
+  @Override
   public long getDateHeader(String name)
   {
     return _request.getDateHeader(name);
   }
   
+  @Override
   public Cookie []getCookies()
   {
     return _request.getCookies();
   }
 
+  @Override
   public String getRequestedSessionId()
   {
     return _request.getRequestedSessionId();
   }
 
+  @Override
   public boolean isRequestedSessionIdValid()
   {
     return _request.isRequestedSessionIdValid();
   }
   
+  @Override
   public boolean isRequestedSessionIdFromCookie()
   {
     return _request.isRequestedSessionIdFromCookie();
@@ -502,11 +531,13 @@ public class CauchoRequestWrapper extends AbstractCauchoRequest {
       return ! _request.isRequestedSessionIdFromURL();
   }
   
+  @Override
   public String getAuthType()
   {
     return _request.getAuthType();
   }
   
+  @Override
   public String getRemoteUser()
   {
     return _request.getRemoteUser();
@@ -533,12 +564,14 @@ public class CauchoRequestWrapper extends AbstractCauchoRequest {
   }
   */
 
+  @Override
   public Part getPart(String name)
     throws IOException, ServletException
   {
     return _request.getPart(name);
   }
 
+  @Override
   public Collection<Part> getParts()
     throws IOException, ServletException
   {
@@ -553,6 +586,7 @@ public class CauchoRequestWrapper extends AbstractCauchoRequest {
   }
   */
 
+  @Override
   public void logout()
     throws ServletException
   {
@@ -563,55 +597,84 @@ public class CauchoRequestWrapper extends AbstractCauchoRequest {
   // CauchoRequest
   //
   
+  @Override
   public String getPageURI()
   {
-    CauchoRequest cRequest = (CauchoRequest) _request;
+    CauchoRequest cRequest = getCauchoRequest();
 
-    return cRequest.getPageURI();
+    if (cRequest != null)
+      return cRequest.getPageURI();
+    else
+      return _request.getRequestURI();
   }
   
+  @Override
   public String getPageContextPath()
   {
-    CauchoRequest cRequest = (CauchoRequest) _request;
+    CauchoRequest cRequest = getCauchoRequest();
 
-    return cRequest.getPageContextPath();
+    if (cRequest != null)
+      return cRequest.getPageContextPath();
+    else
+      return _request.getContextPath();
   }
   
+  @Override
   public String getPageServletPath()
   {
-    CauchoRequest cRequest = (CauchoRequest) _request;
+    CauchoRequest cRequest = getCauchoRequest();
 
-    return cRequest.getPageServletPath();
+    if (cRequest != null)
+      return cRequest.getPageServletPath();
+    else
+      return _request.getServletPath();
   }
   
+  @Override
   public String getPagePathInfo()
   {
-    CauchoRequest cRequest = (CauchoRequest) _request;
+    CauchoRequest cRequest = getCauchoRequest();
 
-    return cRequest.getPagePathInfo();
+    if (cRequest != null)
+      return cRequest.getPagePathInfo();
+    else
+      return _request.getPathInfo();
   }
   
+  @Override
   public String getPageQueryString()
   {
-    CauchoRequest cRequest = (CauchoRequest) _request;
+    CauchoRequest cRequest = getCauchoRequest();
 
-    return cRequest.getPageQueryString();
+    if (cRequest != null)
+      return cRequest.getPageQueryString();
+    else
+      return _request.getQueryString();
   }
   
+  @Override
   public WebApp getWebApp()
   {
-    CauchoRequest cRequest = (CauchoRequest) _request;
+    CauchoRequest cRequest = getCauchoRequest();
 
-    return cRequest.getWebApp();
+    if (cRequest != null)
+      return cRequest.getWebApp();
+    else
+      return (WebApp) _request.getServletContext();
   }
   
+  @Override
   public ReadStream getStream() throws IOException
   {
-    CauchoRequest cRequest = (CauchoRequest) _request;
+    CauchoRequest cRequest = getCauchoRequest();
 
-    return cRequest.getStream();
+    if (cRequest != null)
+      return cRequest.getStream();
+    else
+      throw new UnsupportedOperationException(getClass().getName());
   }
   
+  @Override
   public int getRequestDepth(int depth)
   {
     if (_request instanceof CauchoRequest) {
@@ -623,145 +686,204 @@ public class CauchoRequestWrapper extends AbstractCauchoRequest {
       return 0;
   }
   
+  @Override
   public void setHeader(String key, String value)
   {
-    CauchoRequest cRequest = (CauchoRequest) _request;
+    CauchoRequest cRequest = getCauchoRequest();
 
-    cRequest.setHeader(key, value);
+    if (cRequest != null)
+      cRequest.setHeader(key, value);
   }
   
+  @Override
   public boolean isSyntheticCacheHeader()
   {
-    CauchoRequest cRequest = (CauchoRequest) _request;
+    CauchoRequest cRequest = getCauchoRequest();
 
-    return cRequest.isSyntheticCacheHeader();
+    if (cRequest != null)
+      return cRequest.isSyntheticCacheHeader();
+    else
+      return false;
   }
   
+  @Override
   public void setSyntheticCacheHeader(boolean isSynthetic)
   {
-    CauchoRequest cRequest = (CauchoRequest) _request;
+    CauchoRequest cRequest = getCauchoRequest();
 
-    cRequest.setSyntheticCacheHeader(isSynthetic);
+    if (cRequest != null)
+      cRequest.setSyntheticCacheHeader(isSynthetic);
   }
   
+  @Override
   public boolean getVaryCookies()
   {
-    CauchoRequest cRequest = (CauchoRequest) _request;
+    CauchoRequest cRequest = getCauchoRequest();
 
-    return cRequest.getVaryCookies();
+    if (cRequest != null)
+      return cRequest.getVaryCookies();
+    else
+      return false;
   }
   
+  @Override
   public void setVaryCookie(String cookie)
   {
-    CauchoRequest cRequest = (CauchoRequest) _request;
+    CauchoRequest cRequest = getCauchoRequest();
 
-    cRequest.setVaryCookie(cookie);
+    if (cRequest != null)
+      cRequest.setVaryCookie(cookie);
   }
   
+  @Override
   public boolean getHasCookie()
   {
-    CauchoRequest cRequest = (CauchoRequest) _request;
+    CauchoRequest cRequest = getCauchoRequest();
 
-    return cRequest.getHasCookie();
+    if (cRequest != null)
+      return cRequest.getHasCookie();
+    else
+      return false;
   }
   
 
+  @Override
   public boolean isTop()
   {
     return false;
   }
   
 
+  @Override
   public boolean hasRequest()
   {
-    CauchoRequest cRequest = (CauchoRequest) _request;
+    CauchoRequest cRequest = getCauchoRequest();
 
-    return cRequest.hasRequest();
+    if (cRequest != null)
+      return cRequest.hasRequest();
+    else
+      return false;
   }
   
-  
+  @Override
   public HttpSession getMemorySession()
   {
-    CauchoRequest cRequest = (CauchoRequest) _request;
+    CauchoRequest cRequest = getCauchoRequest();
 
-    return cRequest.getMemorySession();
+    if (cRequest != null)
+      return cRequest.getMemorySession();
+    else
+      throw new UnsupportedOperationException(getClass().getName());
   }
   
+  @Override
   public Cookie getCookie(String name)
   {
-    CauchoRequest cRequest = (CauchoRequest) _request;
+    CauchoRequest cRequest = getCauchoRequest();
 
-    return cRequest.getCookie(name);
+    if (cRequest != null)
+      return cRequest.getCookie(name);
+    else
+      throw new UnsupportedOperationException(getClass().getName());
   }
   
+  @Override
   public void setHasCookie()
   {
-    CauchoRequest cRequest = (CauchoRequest) _request;
+    CauchoRequest cRequest = getCauchoRequest();
 
-    cRequest.setHasCookie();
+    if (cRequest != null)
+      cRequest.setHasCookie();
   }
   
+  @Override
   public void killKeepalive()
   {
-    CauchoRequest cRequest = (CauchoRequest) _request;
+    CauchoRequest cRequest = getCauchoRequest();
 
-    cRequest.killKeepalive();
+    if (cRequest != null)
+      cRequest.killKeepalive();
   }
   
+  @Override
   public boolean isSuspend()
   {
-    CauchoRequest cRequest = (CauchoRequest) _request;
+    CauchoRequest cRequest = getCauchoRequest();
 
-    return cRequest.isSuspend();
+    if (cRequest != null)
+      return cRequest.isSuspend();
+    else
+      return false;
   }
   
+  @Override
   public boolean isComet()
   {
-    CauchoRequest cRequest = (CauchoRequest) _request;
+    CauchoRequest cRequest = getCauchoRequest();
 
-    return cRequest.isComet();
+    if (cRequest != null)
+      return cRequest.isComet();
+    else
+      return false;
   }
   
+  @Override
   public boolean isDuplex()
   {
-    CauchoRequest cRequest = (CauchoRequest) _request;
+    CauchoRequest cRequest = getCauchoRequest();
 
-    return cRequest.isDuplex();
+    if (cRequest != null)
+      return cRequest.isDuplex();
+    else
+      return false;
   }
   
+  @Override
   public boolean isKeepaliveAllowed()
   {
-    CauchoRequest cRequest = (CauchoRequest) _request;
+    CauchoRequest cRequest = getCauchoRequest();
 
-    return cRequest.isKeepaliveAllowed();
+    if (cRequest != null)
+      return cRequest.isKeepaliveAllowed();
+    else
+      return false;
   }
   
+  @Override
   public boolean isClientDisconnect()
   {
-    CauchoRequest cRequest = (CauchoRequest) _request;
+    CauchoRequest cRequest = getCauchoRequest();
 
-    return cRequest.isClientDisconnect();
+    if (cRequest != null)
+      return cRequest.isClientDisconnect();
+    else
+      return false;
   }
   
+  @Override
   public void clientDisconnect()
   {
-    CauchoRequest cRequest = (CauchoRequest) _request;
+    CauchoRequest cRequest = getCauchoRequest();
 
-    cRequest.clientDisconnect();
+    if (cRequest != null)
+      cRequest.clientDisconnect();
   }
 
   @Override
   public boolean isLoginRequested()
   {
-    CauchoRequest cRequest = (CauchoRequest) _request;
+    CauchoRequest cRequest = getCauchoRequest();
 
-    return cRequest.isLoginRequested();
+    if (cRequest != null)
+      return cRequest.isLoginRequested();
+    else
+      return false;
   }
 
   @Override
   public void requestLogin()
   {
-    CauchoRequest cRequest = (CauchoRequest) _request;
+    CauchoRequest cRequest = getCauchoRequest();
 
     if (cRequest != null)
       cRequest.requestLogin();
@@ -776,18 +898,26 @@ public class CauchoRequestWrapper extends AbstractCauchoRequest {
   }
   */
   
+  @Override
   public ServletResponse getServletResponse()
   {
-    CauchoRequest cRequest = (CauchoRequest) _request;
+    CauchoRequest cRequest = getCauchoRequest();
 
-    return cRequest.getServletResponse();
+    if (cRequest != null)
+      return cRequest.getServletResponse();
+    else
+      throw new UnsupportedOperationException(getClass().getName());
   }
   
+  @Override
   public AbstractHttpRequest getAbstractHttpRequest()
   {
-    CauchoRequest cRequest = (CauchoRequest) _request;
+    CauchoRequest cRequest = getCauchoRequest();
 
-    return cRequest.getAbstractHttpRequest();
+    if (cRequest != null)
+      return cRequest.getAbstractHttpRequest();
+    else
+      throw new UnsupportedOperationException(getClass().getName());
   }
 
   private CauchoRequest getCauchoRequest()

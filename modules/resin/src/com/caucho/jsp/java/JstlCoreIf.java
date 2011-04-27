@@ -99,7 +99,9 @@ public class JstlCoreIf extends JstlNode {
   public void printXml(WriteStream os)
     throws IOException
   {
-    os.print("<c:if test=\"");
+    os.print("<c:if");
+    
+    os.print(" test=\"");
     if (_testAttr != null)
       _testAttr.printXml(os);
     else

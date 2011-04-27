@@ -171,7 +171,7 @@ class WatchdogChildProcess
         s = connectToChild(ss);
 
         _status = _process.waitFor();
-        
+
         logStatus(_status);
       }
     } catch (Exception e) {
@@ -223,13 +223,14 @@ class WatchdogChildProcess
   private void logStatus(int status)
   {
     String type = "unknown";
+    String code = " (exit code=" + status + ")";
     
     if (status == 0)
       type = "normal exit";
     else if (status >= 0 && status < ExitCode.values().length) {
       type = ExitCode.values()[status].toString();
     }
-    else if (status > 128 && status < 128 + 31) {
+    else if (status >= 128 && status < 128 + 32) {
       switch (status - 128) {
       case 1:
         type = "SIGHUP";
@@ -262,11 +263,13 @@ class WatchdogChildProcess
         type = "signal=" + (status - 128);
         break;
       }
+      
+      code = " (signal=" + (status - 128) + ")";
     }
     
     log.warning("Watchdog detected close of "
                 + "Resin[" + _watchdog.getId() + ",pid=" + _pid + "]"
-                + "\n  exit reason: " + type + " (exit code=" + status + ")");
+                + "\n  exit reason: " + type + code);
   }
 
   /**

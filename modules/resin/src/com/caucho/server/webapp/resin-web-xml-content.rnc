@@ -960,6 +960,9 @@ r_session-config = element session-config {
   & (attribute cookie-version { r_int }
      | element cookie-version { r_int })?
 
+  & (attribute destroy-on-lru { r_boolean-Type }
+     | element destroy-on-lru { r_boolean-Type })?
+
   & (attribute distribution-id { string }
      | element distribution-id { string })?
 

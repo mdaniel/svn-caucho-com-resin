@@ -34,7 +34,9 @@ import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
 import java.lang.reflect.Type;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Set;
 
 import javax.enterprise.inject.spi.Annotated;
 import javax.enterprise.inject.spi.AnnotatedMethod;
@@ -54,6 +56,9 @@ public class AnnotatedMethodImpl<T>
   private AnnotatedType<T> _declaringType;
   
   private Method _method;
+  private AnnotatedMethod<T> _baseMethod;
+  
+  private HashMap<String,BaseType> _paramMap;
 
   private List<AnnotatedParameter<T>> _parameterList;
   
@@ -66,19 +71,25 @@ public class AnnotatedMethodImpl<T>
                              Annotated annotated,
                              Method method)
   {
-    this(declaringType, annotated, method, method.getAnnotations());
+    this(declaringType, annotated, method, method.getAnnotations(), null);
   }
     
   public AnnotatedMethodImpl(AnnotatedType<T> declaringType,
                              Annotated annotated,
                              Method method,
-                             Annotation []annotations)
+                             Annotation []annotations,
+                             HashMap<String,BaseType> paramMap)
   {
     super(createBaseType(declaringType, method.getGenericReturnType()),
           annotated, annotations);
 
     _declaringType = declaringType;
     _method = method;
+    
+    if (annotated instanceof AnnotatedMethod<?>)
+      _baseMethod = (AnnotatedMethod<T>) annotated;
+    
+    _paramMap = paramMap;
   }
 
   @Override
@@ -102,8 +113,15 @@ public class AnnotatedMethodImpl<T>
   @Override
   public List<AnnotatedParameter<T>> getParameters()
   {
-    if (_parameterList == null)
-      _parameterList = introspectParameters(_method);
+    if (_parameterList == null) {
+      if (_baseMethod != null) {
+        // XXX: config issues with multiple XML config beans?
+        _parameterList = _baseMethod.getParameters();
+      }
+      else {
+        _parameterList = introspectParameters(_method);
+      }
+    }
     
     return _parameterList;
   }
@@ -124,12 +142,26 @@ public class AnnotatedMethodImpl<T>
     
     for (int i = 0; i < paramTypes.length; i++) {
       AnnotatedParameterImpl<T> param
-        = new AnnotatedParameterImpl<T>(this, paramTypes[i], annTypes[i], i);
-    
+        = new AnnotatedParameterImpl<T>(this, paramTypes[i], _paramMap,
+                                        annTypes[i], i);
       parameterList.add(param);
     }
     
     return parameterList;
+  }
+
+  @Override
+  protected void fillTypeVariables(Set<VarType<?>> typeVariables)
+  {
+    getBaseTypeImpl().fillSyntheticTypes(typeVariables);
+    
+    for (AnnotatedParameter<T> param : _parameterList) {
+      if (param instanceof BaseTypeAnnotated) {
+        BaseTypeAnnotated annType = (BaseTypeAnnotated) param;
+        
+        annType.getBaseTypeImpl().fillSyntheticTypes(typeVariables);
+      }
+    }
   }
 
   public static boolean isMatch(Method methodA, Method methodB)

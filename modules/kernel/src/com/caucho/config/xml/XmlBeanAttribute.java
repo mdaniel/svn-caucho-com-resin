@@ -119,7 +119,6 @@ public class XmlBeanAttribute extends Attribute {
     // ioc/13jm
     ConfigType<?> type = TypeFactory.getFactory().getEnvironmentType(qName);
     
-    System.out.println("TYP: " + type + " " + qName);
     if (type != null) {
       return type.create(parent, qName);
     }

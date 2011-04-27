@@ -33,6 +33,7 @@ import java.lang.annotation.Annotation;
 import java.lang.reflect.Constructor;
 import java.lang.reflect.Type;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 
 import javax.enterprise.inject.spi.AnnotatedConstructor;
@@ -99,11 +100,13 @@ public class AnnotatedConstructorImpl<T>
   private void introspect(Constructor<T> ctor)
   {
     Type []paramTypes = ctor.getGenericParameterTypes();
+    HashMap<String,BaseType> paramMap = null;
     Annotation [][]annTypes = ctor.getParameterAnnotations();
     
     for (int i = 0; i < paramTypes.length; i++) {
       AnnotatedParameterImpl<T> param
-        = new AnnotatedParameterImpl<T>(this, paramTypes[i], annTypes[i], i);
+        = new AnnotatedParameterImpl<T>(this, paramTypes[i], paramMap,
+                                        annTypes[i], i);
 
       _parameterList.add(param);
     }

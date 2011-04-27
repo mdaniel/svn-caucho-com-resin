@@ -156,6 +156,7 @@ public final class SessionManager implements SessionCookieConfig, AlarmListener
   private boolean _isPersistenceEnabled = false;
   private boolean _isSaveTriplicate = true;
   private boolean _isSaveBackup = true;
+  private boolean _isDestroyOnLru = true;
 
   // If true, serialization errors should not be logged
   // XXX: changed for JSF
@@ -733,6 +734,16 @@ public final class SessionManager implements SessionCookieConfig, AlarmListener
   public boolean isPersistenceEnabled()
   {
     return _isPersistenceEnabled;
+  }
+  
+  public void setDestroyOnLru(boolean isDestroy)
+  {
+    _isDestroyOnLru = isDestroy;
+  }
+  
+  public boolean isDestroyOnLru()
+  {
+    return _isDestroyOnLru || ! isPersistenceEnabled();
   }
 
   public String getDistributionId()

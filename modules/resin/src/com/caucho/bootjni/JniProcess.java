@@ -164,6 +164,7 @@ public class JniProcess extends Process
     nativeChown(name, len, user, group);
   }
 
+  @Override
   public int waitFor()
   {
     int pid = _pid;
@@ -176,6 +177,7 @@ public class JniProcess extends Process
     return _status;
   }
 
+  @Override
   public int exitValue()
   {
     if (_status >= 0)

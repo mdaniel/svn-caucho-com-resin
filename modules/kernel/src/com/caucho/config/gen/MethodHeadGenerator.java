@@ -32,13 +32,10 @@ import java.io.IOException;
 import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
 import java.util.HashMap;
-import java.util.Set;
 
 import javax.enterprise.inject.spi.AnnotatedMethod;
 
 import com.caucho.config.reflect.AnnotatedTypeUtil;
-import com.caucho.config.reflect.BaseTypeAnnotated;
-import com.caucho.config.reflect.VarType;
 import com.caucho.inject.Module;
 import com.caucho.java.JavaWriter;
 

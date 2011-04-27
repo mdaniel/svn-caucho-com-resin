@@ -31,6 +31,7 @@ package com.caucho.config.reflect;
 
 import java.lang.annotation.Annotation;
 import java.lang.reflect.Type;
+import java.util.HashMap;
 
 import javax.enterprise.inject.spi.AnnotatedCallable;
 import javax.enterprise.inject.spi.AnnotatedParameter;
@@ -51,39 +52,24 @@ public class AnnotatedParameterImpl<T>
   
   public AnnotatedParameterImpl(AnnotatedCallable<T> callable,
                                 Type type,
+                                HashMap<String,BaseType> paramMap,
                                 Annotation []annList,
                                 int position)
   {
-    super(createBaseType(callable, type), null, annList);
+    super(createBaseType(callable, type, paramMap), null, annList);
 
     _callable = callable;
     _position = position;
   }
   
   protected static BaseType createBaseType(AnnotatedCallable<?> callable,
-                                           Type type)
+                                           Type type,
+                                           HashMap<String,BaseType> paramMap)
   {
     if (callable != null && callable.getDeclaringType() != null) {
       AnnotatedType<?> declAnnType = callable.getDeclaringType();
       
-      Type declType = declAnnType.getBaseType();
-
-      return createBaseType(declAnnType, type);
-      /*
-      if (declType instanceof Class<?>)
-        return createBaseType(type);
-      
-      if (! (declAnnType instanceof AnnotatedTypeImpl<?>))
-        return createBaseType(type);
-      
-      AnnotatedTypeImpl<?> declAnnTypeImpl = (AnnotatedTypeImpl<?>) declAnnType;
-      
-      BaseType declBaseType = declAnnTypeImpl.getBaseTypeImpl();
-      
-      BaseType paramType = declBaseType.createForTarget(type, declBaseType.getParamMap());
-      
-      return paramType;
-      */
+      return createBaseType(declAnnType, type, paramMap);
     }
     
     return createBaseType(type);

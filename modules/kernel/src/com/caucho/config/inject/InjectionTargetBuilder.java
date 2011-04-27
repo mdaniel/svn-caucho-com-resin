@@ -435,6 +435,40 @@ public class InjectionTargetBuilder<X> implements InjectionTarget<X>
     }
   }
 
+  public static void
+    introspectInit(ArrayList<ConfigProgram> initList,
+                   Class<?> type)
+    throws ConfigException
+  {
+    if (type == null)
+      return;
+    
+    introspectInit(initList, type.getSuperclass());
+    
+    for (Method method: type.getDeclaredMethods()) {
+      if (! method.isAnnotationPresent(PostConstruct.class)) {
+        // && ! isAnnotationPresent(annList, Inject.class)) {
+        continue;
+      }
+
+      if (method.getParameterTypes().length == 1
+          && InvocationContext.class.equals(method.getParameterTypes()[0]))
+        continue;
+
+      if (method.isAnnotationPresent(PostConstruct.class)
+          && method.getParameterTypes().length != 0) {
+          throw new ConfigException(location(method)
+                                    + L.l("{0}: @PostConstruct is requires zero arguments"));
+      }
+
+      PostConstructProgram initProgram
+        = new PostConstructProgram(null, method);
+
+      if (! initList.contains(initProgram))
+        initList.add(initProgram);
+    }
+  }
+
   private void
     introspectDestroy(ArrayList<ConfigProgram> destroyList, 
                       AnnotatedType<?> type)

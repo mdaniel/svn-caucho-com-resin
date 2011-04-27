@@ -123,7 +123,7 @@ public class InlineBeanType<T> extends ConfigType<T>
   private ManagedBeanImpl<T> _bean;
   private InjectionTarget<T> _injectionTarget;
 
-  private ArrayList<ConfigProgram> _injectList;
+  //private ArrayList<ConfigProgram> _injectList;
   private ArrayList<ConfigProgram> _initList;
 
   private boolean _isIntrospecting;
@@ -426,8 +426,10 @@ public class InlineBeanType<T> extends ConfigType<T>
   {
     introspectInject();
     
+    /*
     for (int i = 0; i < _injectList.size(); i++)
       _injectList.get(i).inject(bean, null);
+      */
   }
 
   /**
@@ -910,13 +912,15 @@ public class InlineBeanType<T> extends ConfigType<T>
   private void introspectInject()
   {
     synchronized (_introspectLock) {
-      if (_injectList != null)
+      if (_initList != null)
         return;
 
-      _injectList = new ArrayList<ConfigProgram>();
-      _initList = new ArrayList<ConfigProgram>();
+      ArrayList<ConfigProgram> initList = new ArrayList<ConfigProgram>();
     
-      InjectionTargetBuilder.introspectInit(_initList, getAnnotatedType());
+      InjectionTargetBuilder.introspectInit(initList, getAnnotatedType());
+      // InjectionTargetBuilder.introspectInit(initList, _beanClass);
+      
+      _initList = initList;
     }
   }
 

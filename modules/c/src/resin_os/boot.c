@@ -367,6 +367,9 @@ Java_com_caucho_bootjni_JniProcess_waitpid(JNIEnv *env,
 
   result = waitpid(pid, &status, is_block ? 0 : WNOHANG);
 
+  fprintf(stdout, "WAIT RES=%d status=%d\n", result, status);
+  fflush(stdout);
+
   if (result == 0)
     return -1;
   
@@ -376,6 +379,9 @@ Java_com_caucho_bootjni_JniProcess_waitpid(JNIEnv *env,
     return -1;
   }
 
-  return WEXITSTATUS(status);
+  if (WIFSIGNALED(status))
+    return 128 + WTERMSIG(status);
+  else
+    return WEXITSTATUS(status);
 #endif
 }

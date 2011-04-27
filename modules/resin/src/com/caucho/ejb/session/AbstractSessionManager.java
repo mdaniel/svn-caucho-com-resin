@@ -569,7 +569,8 @@ abstract public class AbstractSessionManager<X> extends AbstractEjbBeanManager<X
           = new AnnotatedMethodImpl(apiMethod.getDeclaringType(),
                                     method,
                                     apiMethod.getJavaMember(),
-                                    toArray(apiMethod.getAnnotations()));
+                                    toArray(apiMethod.getAnnotations()),
+                                    null);
 
         return extMethod;
       }

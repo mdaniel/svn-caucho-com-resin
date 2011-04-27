@@ -34,8 +34,6 @@ import java.lang.reflect.Method;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Set;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 
 import javax.ejb.ApplicationException;
 import javax.enterprise.inject.spi.AnnotatedMethod;
@@ -51,9 +49,6 @@ import com.caucho.java.JavaWriter;
  */
 @Module
 abstract public class AbstractAspectGenerator<X> implements AspectGenerator<X> {
-  private static final Logger log 
-    = Logger.getLogger(AbstractAspectGenerator.class.getName());
-  
   private AspectFactory<X> _factory;
   private AnnotatedMethod<? super X> _method;
   private AspectGenerator<X> _next;

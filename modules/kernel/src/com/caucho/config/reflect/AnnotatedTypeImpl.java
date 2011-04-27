@@ -105,8 +105,9 @@ public class AnnotatedTypeImpl<X> extends AnnotatedElementImpl
       if (annMethod.getDeclaringType() == annType)
         _methodSet.add(new AnnotatedMethodImpl(this, annMethod, 
                                                annMethod.getJavaMember()));
-      else
+      else {
         _methodSet.add(annMethod);
+      }
     }
   }
   
@@ -132,6 +133,7 @@ public class AnnotatedTypeImpl<X> extends AnnotatedElementImpl
       else
         _methodSet.add(annMethod);
     }
+    System.out.println("AT2: " + this + "\n  " + _methodSet);
   }
   
   public static <X> AnnotatedTypeImpl<X> create(AnnotatedType<X> annType)
