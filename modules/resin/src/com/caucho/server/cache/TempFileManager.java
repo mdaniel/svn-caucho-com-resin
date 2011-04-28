@@ -78,9 +78,7 @@ public class TempFileManager
                                       storePath.getNativePath()));
       }
       
-      boolean isMmap = false;
-    
-      _store = new BlockStore(database, name, null, storePath, isMmap);
+      _store = new BlockStore(database, name, null, storePath);
       _store.setFlushDirtyBlocksOnCommit(false);
       _store.create();
     } catch (Exception e) {

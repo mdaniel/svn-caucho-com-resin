@@ -250,7 +250,7 @@ public class TempFileInode {
       
       for (long block : blockArray) {
         try {
-          _store.freeBlock(block);
+          _store.deallocateBlock(block);
         } catch (IOException e) {
           log.log(Level.WARNING, e.toString(), e);
         }
@@ -264,7 +264,7 @@ public class TempFileInode {
 
       for (long block : blockList) {
         try {
-          _store.freeBlock(block);
+          _store.deallocateBlock(block);
         } catch (IOException e) {
           log.log(Level.WARNING, e.toString(), e);
         }

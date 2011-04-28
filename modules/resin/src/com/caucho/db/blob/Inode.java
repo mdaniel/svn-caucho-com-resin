@@ -737,7 +737,7 @@ public class Inode {
             continue;
           }
 
-          _store.freeBlock(blockAddr);
+          _store.deallocateBlock(blockAddr);
 
           int dblBlockCount
             = (blockCount - DIRECT_BLOCKS - SINGLE_INDIRECT_BLOCKS);
@@ -754,12 +754,12 @@ public class Inode {
               continue;
             }
               
-            _store.freeBlock(blockAddr);
+            _store.deallocateBlock(blockAddr);
           }
 
           // remove the indirect block
           if (blockCount == DIRECT_BLOCKS) {
-            _store.freeBlock(indAddr);
+            _store.deallocateBlock(indAddr);
           }
         }
       }

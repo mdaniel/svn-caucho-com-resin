@@ -30,16 +30,15 @@
 package com.caucho.db.block;
 
 import java.io.IOException;
-import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.atomic.AtomicLong;
+import java.util.concurrent.atomic.AtomicReference;
 import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReadWriteLock;
 import java.util.concurrent.locks.ReentrantReadWriteLock;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
-// import com.caucho.db.lock.Lock;
 import com.caucho.util.FreeList;
 import com.caucho.util.L10N;
 import com.caucho.util.SyncCacheListener;
@@ -64,18 +63,18 @@ public final class Block implements SyncCacheListener {
   private final Lock _readLock;
   private final Lock _writeLock;
   
+  private final AtomicReference<BlockState> _state
+    = new AtomicReference<BlockState>(BlockState.INIT);
+  
+  // _useCount tracks the Block's use in the LRU map. When the useCount is
+  // zero, the Block no longer belongs to the LRU.
   private final AtomicInteger _useCount = new AtomicInteger(1);
 
-  private final AtomicBoolean _isWriteQueued = new AtomicBoolean();
-  private final AtomicLong _dirty = new AtomicLong(INIT_DIRTY);
+  private final AtomicLong _dirtyRange = new AtomicLong(INIT_DIRTY);
   
   private boolean _isFlushDirtyOnCommit;
-  private boolean _isValid;
-  private boolean _isDeallocate;
   
   private byte []_buffer;
-  
-  private boolean _isRemoved;
 
   Block(BlockStore store, long blockId)
   {
@@ -159,7 +158,7 @@ public final class Block implements SyncCacheListener {
 
   public final boolean isValid()
   {
-    return _isValid;
+    return _state.get().isValid();
   }
 
   /**
@@ -167,7 +166,7 @@ public final class Block implements SyncCacheListener {
    */
   public boolean isDirty()
   {
-    return _dirty.get() != INIT_DIRTY;
+    return _dirtyRange.get() != INIT_DIRTY;
   }
 
   /**
@@ -214,26 +213,25 @@ public final class Block implements SyncCacheListener {
   public void read()
     throws IOException
   {
-    if (_isValid)
+    if (_state.get().isValid())
       return;
 
     synchronized (this) {
-      if (_isValid) {
+      if (_state.get().isValid()) {
       } else if (_store.getBlockManager().copyDirtyBlock(this)) {
-        _isValid = true;
-        
         clearDirty();
+        toValid();
       } else {
         if (log.isLoggable(Level.ALL))
           log.log(Level.ALL, "read db-block " + this);
-        
-        clearDirty();
         
         BlockReadWrite readWrite = _store.getReadWrite();
         
         readWrite.readBlock(_blockId & BlockStore.BLOCK_MASK,
                             getBuffer(), 0, BlockStore.BLOCK_SIZE);
-        _isValid = true;
+        
+        clearDirty();
+        toValid();
       }
     }
   }
@@ -247,25 +245,11 @@ public final class Block implements SyncCacheListener {
   }
 
   /**
-   * Marks the block's data as invalid.
-   */
-  public void invalidate()
-  {
-    synchronized (this) {
-      if (_dirty.get() != INIT_DIRTY)
-        throw new IllegalStateException();
-
-      _isValid = false;
-      clearDirty();
-    }
-  }
-
-  /**
    * Marks the data as valid.
    */
-  void validate()
+  void toValid()
   {
-    _isValid = true;
+    toState(BlockState.VALID);
   }
 
   /**
@@ -280,7 +264,7 @@ public final class Block implements SyncCacheListener {
     long newDirty;
     
     do {
-      oldDirty = _dirty.get();
+      oldDirty = _dirtyRange.get();
       
       int dirtyMax = (int) (oldDirty >> 32);
       int dirtyMin = (int) oldDirty;
@@ -292,7 +276,7 @@ public final class Block implements SyncCacheListener {
         dirtyMax = max;
       
       newDirty = ((long) dirtyMax << 32) + dirtyMin;
-    } while (! _dirty.compareAndSet(oldDirty, newDirty));
+    } while (! _dirtyRange.compareAndSet(oldDirty, newDirty));
   }
 
   /**
@@ -300,7 +284,7 @@ public final class Block implements SyncCacheListener {
    */
   private void clearDirty()
   {
-    _dirty.set(INIT_DIRTY);
+    _dirtyRange.set(INIT_DIRTY);
   }
 
   /**
@@ -322,15 +306,14 @@ public final class Block implements SyncCacheListener {
     return _useCount.get();
   }
   
-  public boolean isRemoved()
-  {
-    return _isRemoved;
-  }
-  
   public void deallocate()
     throws IOException
   {
-    _isDeallocate = true;
+    try {
+      getStore().deallocateBlock(getBlockId());
+    } catch (Exception e) {
+      log.log(Level.FINER, e.toString(), e);
+    }
   }
 
   public void saveAllocation()
@@ -344,24 +327,10 @@ public final class Block implements SyncCacheListener {
    */
   public final void free()
   {
-    int useCount = _useCount.decrementAndGet();
-
     if (log.isLoggable(Level.ALL))
-      log.log(Level.ALL, this + " free (" + useCount + ")");
+      log.log(Level.ALL, this + " free (" + _useCount.get() + ")");
     
-    if (useCount < 2 && _isDeallocate) {
-      _isDeallocate = false;
-      
-      try {
-        getStore().freeBlock(getBlockId());
-      } catch (Exception e) {
-        log.log(Level.FINER, e.toString(), e);
-      }
-    }
-    
-    if (useCount < 1) {
-      freeImpl();
-    }
+    releaseUse();
   }
   
   /**
@@ -389,10 +358,7 @@ public final class Block implements SyncCacheListener {
   @Override
   public final void syncLruRemoveEvent()
   {
-    _isRemoved = true;
-    if (! isDirty()) {
-      freeImpl();
-    }
+    releaseUse();
   }
   
   /**
@@ -401,12 +367,7 @@ public final class Block implements SyncCacheListener {
   @Override
   public final void syncRemoveEvent()
   {
-    _useCount.set(0);
-
-    _isRemoved = true;
-    if (! _isWriteQueued.get()) {
-      freeImpl();
-    }
+    releaseUse();
   }
 
   /**
@@ -414,10 +375,11 @@ public final class Block implements SyncCacheListener {
    */
   private boolean save()
   {
-    if (_dirty.get() == INIT_DIRTY)
+    if (_dirtyRange.get() == INIT_DIRTY) {
       return false;
-    else if (_isWriteQueued.compareAndSet(false, true)) {
-      // _useCount.incrementAndGet();
+    }
+    
+    if (toWriteQueued()) {
       _store.getWriter().addDirtyBlock(this);
     }
     
@@ -430,35 +392,27 @@ public final class Block implements SyncCacheListener {
   void writeFromBlockWriter()
     throws IOException
   {
-    int use;
-    
     do {
-      do {
-        use = _useCount.get();
-      } while (use >= 0 && ! _useCount.compareAndSet(use, use + 1));
-      
-      if (use >= 0) {
-        long dirty = _dirty.getAndSet(INIT_DIRTY);
+      long dirty = _dirtyRange.getAndSet(INIT_DIRTY);
 
-        int dirtyMax = (int) (dirty >> 32);
-        int dirtyMin = (int) dirty;
+      int dirtyMax = (int) (dirty >> 32);
+      int dirtyMin = (int) dirty;
 
-        if (dirtyMin < dirtyMax) {
-          if (log.isLoggable(Level.ALL))
-            log.log(Level.ALL, "write db-block " + this + " [" + dirtyMin + ", " + dirtyMax + "]");
+      if (dirtyMin < dirtyMax) {
+        if (log.isLoggable(Level.ALL))
+          log.log(Level.ALL, "write db-block " + this + " [" + dirtyMin + ", " + dirtyMax + "]");
 
-          boolean isPriority = false;
+        boolean isPriority = false;
 
-          writeImpl(dirtyMin, dirtyMax - dirtyMin, isPriority);
-        }
-        
-        _useCount.decrementAndGet();
+        writeImpl(dirtyMin, dirtyMax - dirtyMin, isPriority);
       }
 
-      _isWriteQueued.set(false);
-    } while (use >= 0 && _dirty.get() != INIT_DIRTY);
+      if (_dirtyRange.get() == INIT_DIRTY) {
+        toState(BlockState.VALID);
+      }
+    } while (_dirtyRange.get() != INIT_DIRTY);
 
-    if (_useCount.get() == 0) {
+    if (_useCount.get() <= 0) {
       freeImpl();
     }
   }
@@ -484,52 +438,75 @@ public final class Block implements SyncCacheListener {
   {
     if (block == this)
       return true;
-    
-    int use;
-    do {
-      use = _useCount.get();
-    } while (use >= 0 && ! _useCount.compareAndSet(use, use + 1));
-    
-    if (use < 0)
-      return false;
       
     byte []buffer = _buffer;
-    
+
+    // XXX: need to allocate state
     boolean isValid = isValid();
 
     if (isValid) {
       System.arraycopy(buffer, 0, block.getBuffer(), 0, buffer.length);
-      block.validate();
-    }
-    
-    if (_useCount.decrementAndGet() == 0 && ! isDirty()) {
-      freeImpl();
+      block.toValid();
     }
     
     return isValid;
+  }
+  
+  private void releaseUse()
+  {
+    if (_useCount.decrementAndGet() <= 0) {
+      freeImpl();
+    }
   }
 
   /**
    * Called when the block is removed from the cache.
    */
-  void freeImpl()
+  private void freeImpl()
   {
-    if (_useCount.compareAndSet(0, -1)) {
+    if (_useCount.get() > 0)
+      throw new IllegalStateException("freeImpl");
+
+    //save();
+    
+    if (toDestroy()) {
       byte []buffer = _buffer;
       _buffer = null;
       
       if (buffer != null)
         _freeBuffers.free(buffer);
-      
-      if (_isDeallocate) {
-        try {
-          _store.freeBlock(getBlockId());
-        } catch (Exception e) {
-          log.log(Level.WARNING, e.toString(), e);
-        }
-      }
     }
+  }
+  
+  public boolean isDestroyed()
+  {
+    return _state.get().isDestroyed();
+  }
+
+  private boolean toDestroy()
+  {
+    BlockState oldState;
+    BlockState newState;
     
+    do {
+      oldState = _state.get();
+      newState = oldState.toDestroy();
+    } while (! _state.compareAndSet(oldState, newState));
+    
+    return newState.isDestroyed() && ! oldState.isDestroyed();
+  }
+
+  private boolean toWriteQueued()
+  {
+    BlockState oldState;
+    BlockState newState;
+    
+    do {
+      oldState = _state.get();
+      newState = oldState.toWrite();
+    } while (! _state.compareAndSet(oldState, newState));
+    
+    return newState.isWrite() && ! oldState.isWrite();
   }
 
   private static byte []allocateBuffer()
@@ -541,6 +518,20 @@ public final class Block implements SyncCacheListener {
     }
 
     return buffer;
+  }
+  
+  private BlockState toState(BlockState toState)
+  {
+    BlockState oldState;
+    BlockState newState;
+    
+    do {
+      oldState = _state.get();
+      
+      newState = oldState.toState(toState);
+    } while (! _state.compareAndSet(oldState, newState));
+    
+    return oldState;
   }
 
   @Override

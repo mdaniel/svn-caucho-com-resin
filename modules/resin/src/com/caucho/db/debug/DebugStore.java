@@ -49,7 +49,7 @@ public class DebugStore {
   {
     _path = path;
 
-    _store = BlockStore.create(path, false);
+    _store = BlockStore.create(path);
   }
 
   public static void main(String []args)

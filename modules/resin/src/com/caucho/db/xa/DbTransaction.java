@@ -361,7 +361,7 @@ public class DbTransaction extends StoreTransaction {
     throws IOException
   {
     if (isAutoCommit())
-      block.getStore().freeBlock(block.getBlockId());
+      block.getStore().deallocateBlock(block.getBlockId());
     else {
       if (_deallocateBlocks == null)
         _deallocateBlocks = new ArrayList<Block>();
@@ -470,7 +470,7 @@ public class DbTransaction extends StoreTransaction {
         Block block = _deallocateBlocks.remove(0);
 
         try {
-          block.getStore().freeBlock(block.getBlockId());
+          block.getStore().deallocateBlock(block.getBlockId());
         } catch (IOException e) {
           throw new SQLExceptionWrapper(e);
         }

@@ -139,7 +139,7 @@ public class Table extends BlockStore {
 
   Table(Database database, String name, Row row, Constraint constraints[])
   {
-    super(database, name, null, database.getBlockManager().isEnableMmap());
+    super(database, name, null);
 
     _row = row;
     _constraints = constraints;
@@ -455,7 +455,7 @@ public class Table extends BlockStore {
     long blockAddr = 0;
 
     while ((blockAddr = firstBlock(blockAddr + BLOCK_SIZE, ALLOC_INDEX)) > 0) {
-      freeBlock(blockAddr);
+      deallocateBlock(blockAddr);
     }
   }
 

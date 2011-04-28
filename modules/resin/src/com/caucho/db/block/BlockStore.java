@@ -168,14 +168,12 @@ public class BlockStore {
   
   public BlockStore(Database database, 
                     String name, 
-                    ReadWriteLock tableLock,
-                    boolean isMmap)
+                    ReadWriteLock tableLock)
   {
     this(database,
          name, 
          tableLock, 
-         database.getPath().lookup(name + ".db"),
-         isMmap);
+         database.getPath().lookup(name + ".db"));
   }
 
   /**
@@ -189,8 +187,7 @@ public class BlockStore {
   public BlockStore(Database database, 
                     String name,
                     ReadWriteLock rowLock,
-                    Path path,
-                    boolean isEnableMmap)
+                    Path path)
   {
     _database = database;
     _blockManager = _database.getBlockManager();
@@ -201,7 +198,8 @@ public class BlockStore {
 
     if (path == null)
       throw new NullPointerException();
-    
+
+    boolean isEnableMmap = BlockManager.getBlockManager().isEnableMmap();
     _readWrite = new BlockReadWrite(this, path, isEnableMmap);
     
     _writer = new BlockWriter(this);
@@ -219,24 +217,10 @@ public class BlockStore {
   public static BlockStore create(Path path)
     throws IOException, SQLException
   {
-    BlockManager blockManager = BlockManager.getBlockManager();
-    
-    if (blockManager != null)
-      return create(path, blockManager.isEnableMmap());
-    else
-      return create(path, true);
-  }
-
-  /**
-   * Creates an independent store.
-   */
-  public static BlockStore create(Path path, boolean isMmap)
-    throws IOException, SQLException
-  {
     Database db = new Database();
     db.init();
 
-    BlockStore store = new BlockStore(db, "temp", null, path, isMmap);
+    BlockStore store = new BlockStore(db, "temp", null, path);
     
     if (path.canRead())
       store.init();
@@ -624,7 +608,7 @@ public class BlockStore {
     for (int i = BLOCK_SIZE - 1; i >= 0; i--)
       buffer[i] = 0;
 
-    block.validate();
+    block.toValid();
     block.setDirty(0, BLOCK_SIZE);
 
     synchronized (_allocationLock) {
@@ -734,7 +718,7 @@ public class BlockStore {
     for (int i = BLOCK_SIZE - 1; i >= 0; i--)
       buffer[i] = 0;
 
-    block.validate();
+    block.toValid();
     block.setDirty(0, BLOCK_SIZE);
 
     // if extending file, write the contents now
@@ -795,7 +779,7 @@ public class BlockStore {
    *
    * @return the block id of the allocated block.
    */
-  public void freeBlock(long blockId)
+  public void deallocateBlock(long blockId)
     throws IOException
   {
     if (blockId == 0)
