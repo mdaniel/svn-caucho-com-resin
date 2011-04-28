@@ -204,8 +204,8 @@ public abstract class Expr extends ValueExpression {
   public Object invoke(ELContext env, Class<?> []argTypes, Object []args)
     throws ELException
   {
-    throw new ELException(L.l("'{0}' is an illegal method expression." + getClass(),
-                              toString()));
+    throw new ELException(L.l("'{0}' is an illegal method expression on {1}",
+                              toString(), getClass().getName()));
   }
 
   /**

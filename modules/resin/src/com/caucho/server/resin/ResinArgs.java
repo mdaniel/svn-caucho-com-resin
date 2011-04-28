@@ -66,6 +66,8 @@ class ResinArgs
   private String _joinCluster;
   private String _serverAddress;
   private int _serverPort;
+  
+  private boolean _isRestart;
 
   private ArrayList<BoundPort> _boundPortList
     = new ArrayList<BoundPort>();

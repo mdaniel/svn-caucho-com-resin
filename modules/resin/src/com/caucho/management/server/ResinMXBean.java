@@ -111,4 +111,16 @@ public interface ResinMXBean extends ManagedObjectMXBean {
   @Description("The user name of the process that is running"
                + " this instance of Resin")
   public String getUserName();
+  
+  /**
+   * Returns true if this was a restarted instance.
+   */
+  @Description("Returns true if this was a restarted Resin")
+  public boolean isRestart();
+  
+  /**
+   * Returns the restart message.
+   */
+  @Description("The watchdog's restart message")
+  public String getRestartMessage();
 }

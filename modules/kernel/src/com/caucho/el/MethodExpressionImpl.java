@@ -42,6 +42,7 @@ import java.util.logging.Logger;
 /**
  * Implementation of the method expression.
  */
+@SuppressWarnings("serial")
 public class MethodExpressionImpl extends MethodExpression
   implements java.io.Serializable
 {
@@ -51,8 +52,8 @@ public class MethodExpressionImpl extends MethodExpression
 
   private final String _expressionString;
   private final Expr _expr;
-  private final Class _expectedType;
-  private final Class []_expectedArgs;
+  private final Class<?> _expectedType;
+  private final Class<?> []_expectedArgs;
 
   // XXX: for serialization
   public MethodExpressionImpl()
@@ -77,16 +78,19 @@ public class MethodExpressionImpl extends MethodExpression
     _expectedArgs = expectedArgs;
   }
 
+  @Override
   public boolean isLiteralText()
   {
     return _expr.isLiteralText();
   }
 
+  @Override
   public String getExpressionString()
   {
     return _expressionString;
   }
   
+  @Override
   public MethodInfo getMethodInfo(ELContext context)
     throws PropertyNotFoundException,
            MethodNotFoundException,
@@ -95,6 +99,7 @@ public class MethodExpressionImpl extends MethodExpression
     return _expr.getMethodInfo(context, _expectedType, _expectedArgs);
   }
 
+  @Override
   public Object invoke(ELContext context,
                        Object []params)
     throws PropertyNotFoundException,
@@ -117,11 +122,13 @@ public class MethodExpressionImpl extends MethodExpression
     return Expr.coerceToType(value, _expectedType);
   }
 
+  @Override
   public int hashCode()
   {
     return _expr.hashCode();
   }
   
+  @Override
   public boolean equals(Object o)
   {
     if (this == o)
@@ -134,6 +141,7 @@ public class MethodExpressionImpl extends MethodExpression
     return _expr.equals(expr._expr);
   }
 
+  @Override
   public String toString()
   {
     return getClass().getName() + "[" + getExpressionString() + "]";

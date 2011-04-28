@@ -256,6 +256,7 @@ class NamespaceConfig {
     addBean("connector", "com.caucho.jca.ra.ConnectorConfig");
     addBean("database", "com.caucho.sql.DBPool");
     addBean("database-default", "com.caucho.sql.DatabaseConfig");
+    addBean("data-source", "com.caucho.config.types.DataSourceRef");
     addBean("dependency", "com.caucho.make.DependencyConfig");
     addBean("dependency-check-interval", "com.caucho.loader.DependencyCheckInterval");
     addBean("ejb-local-ref", "com.caucho.config.types.EjbLocalRef");

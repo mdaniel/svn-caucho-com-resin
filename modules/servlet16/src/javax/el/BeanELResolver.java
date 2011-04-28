@@ -44,17 +44,13 @@ import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Map;
 import java.util.WeakHashMap;
-import java.util.logging.Logger;
 
 /**
  * Resolves properties based on beans.
  */
 public class BeanELResolver extends ELResolver {
-  private final static Logger log
-    = Logger.getLogger(BeanELResolver.class.getName());
-
-  private static WeakHashMap<Class,SoftReference<BeanProperties>> _classMap
-    = new WeakHashMap<Class,SoftReference<BeanProperties>>();
+  private static WeakHashMap<Class<?>,SoftReference<BeanProperties>> _classMap
+    = new WeakHashMap<Class<?>,SoftReference<BeanProperties>>();
   
   private final boolean _isReadOnly;
   
@@ -84,7 +80,7 @@ public class BeanELResolver extends ELResolver {
     if (base == null)
       return null;
 
-    Class cl = base.getClass();
+    Class<?> cl = base.getClass();
     BeanProperties props = getProps(cl);
 
     if (props == null) {
@@ -133,7 +129,7 @@ public class BeanELResolver extends ELResolver {
     if (fieldName.length() == 0)
       return null;
 
-    Class cl = base.getClass();
+    Class<?> cl = base.getClass();
     BeanProperties props = getProps(cl);
 
     if (props == null) {
@@ -174,7 +170,7 @@ public class BeanELResolver extends ELResolver {
     if (fieldName.length() == 0)
       return null;
 
-    Class cl = base.getClass();
+    Class<?> cl = base.getClass();
     BeanProperties props = getProps(cl);
 
     if (props == null) {
@@ -243,7 +239,7 @@ public class BeanELResolver extends ELResolver {
     if (fieldName.length() == 0)
       return;
 
-    Class cl = base.getClass();
+    Class<?> cl = base.getClass();
     BeanProperties props = getProps(cl);
 
     if (props == null) {
@@ -289,8 +285,8 @@ public class BeanELResolver extends ELResolver {
 
     if (methodObj instanceof String)
       methodName = (String) methodObj;
-    else if (methodObj instanceof Enum)
-      methodName = ((Enum) methodObj).name();
+    else if (methodObj instanceof Enum<?>)
+      methodName = ((Enum<?>) methodObj).name();
     else
       methodName = methodObj.toString();
 
@@ -328,7 +324,7 @@ public class BeanELResolver extends ELResolver {
     if (fieldName.length() == 0)
       return null;
 
-    Class cl = base.getClass();
+    Class<?> cl = base.getClass();
     BeanProperties props = getProps(cl);
 
     if (props == null) {
@@ -345,7 +341,7 @@ public class BeanELResolver extends ELResolver {
     return props;
   }
 
-  static BeanProperties getProps(Class cl)
+  static BeanProperties getProps(Class<?> cl)
   {
     synchronized (_classMap) {
       SoftReference<BeanProperties> ref = _classMap.get(cl);
@@ -357,7 +353,7 @@ public class BeanELResolver extends ELResolver {
     }
   }
 
-  static void setProps(Class cl, BeanProperties props)
+  static void setProps(Class<?> cl, BeanProperties props)
   {
     synchronized (_classMap) {
       _classMap.put(cl, new SoftReference<BeanProperties>(props));
@@ -366,15 +362,11 @@ public class BeanELResolver extends ELResolver {
 
   protected static final class BeanProperties
   {
-    private Class _base;
-
     private HashMap<String,BeanProperty> _propMap
       = new HashMap<String,BeanProperty>();
     
     public BeanProperties(Class<?> baseClass)
     {
-      _base = baseClass;
-
       try {
         BeanInfo info = Introspector.getBeanInfo(baseClass);
 
@@ -410,11 +402,14 @@ public class BeanELResolver extends ELResolver {
           // jsp/30ci
           BeanProperty oldProp = _propMap.get(propName);
 
-          if (oldProp != null) {
+          if (oldProp == null) {
             _propMap.put(propName, new BeanProperty(baseClass,
                                                     propName,
                                                     method,
-                                                    oldProp.getWriteMethod()));
+                                                    null));
+          }
+          else if (oldProp != null
+                   && method.equals(oldProp.getReadMethod())) {
           }
           else {
             _propMap.put(propName, new BeanProperty(baseClass,
@@ -427,6 +422,7 @@ public class BeanELResolver extends ELResolver {
         throw new ELException(e);
       }
     }
+    
 
     public BeanProperty getBeanProperty(String property)
     {
@@ -439,7 +435,7 @@ public class BeanELResolver extends ELResolver {
     }
   }
 
-  protected static final class BeanProperty {
+  static final class BeanProperty {
     private Class<?> _base;
     private PropertyDescriptor _descriptor;
     private Method _readMethod;
@@ -517,7 +513,7 @@ public class BeanELResolver extends ELResolver {
       return _descriptor;
     }
 
-    public Class getPropertyType()
+    public Class<?> getPropertyType()
     {
       return _descriptor.getPropertyType();
     }

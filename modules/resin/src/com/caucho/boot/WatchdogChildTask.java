@@ -59,6 +59,8 @@ class WatchdogChildTask implements Runnable
   private final Lifecycle _lifecycle = new Lifecycle();
 
   private WatchdogChildProcess _process;
+  private boolean _isRestart;
+  private String _restartMessage;
 
   WatchdogChildTask(ResinSystem system,
                     WatchdogChild watchdog)
@@ -114,6 +116,16 @@ class WatchdogChildTask implements Runnable
     }
 
     return 0;
+  }
+  
+  boolean isRestart()
+  {
+    return _isRestart;
+  }
+  
+  String getRestartMessage()
+  {
+    return _restartMessage;
   }
   
   Serializable queryGet(Serializable payload)
@@ -190,6 +202,9 @@ class WatchdogChildTask implements Runnable
           if (process != null)
             process.kill();
         }
+        
+        _isRestart = true;
+        _restartMessage = process.getExitMessage();
         
         if (_lifecycle.isActive()
             && process.getStatus() == ExitCode.BAD_CONFIG.ordinal()) {

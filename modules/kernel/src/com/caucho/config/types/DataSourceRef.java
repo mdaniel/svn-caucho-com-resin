@@ -29,24 +29,13 @@
 
 package com.caucho.config.types;
 
-import java.lang.reflect.Type;
-import java.util.LinkedHashSet;
-import java.util.logging.Level;
 import java.util.logging.Logger;
 
 import javax.annotation.PostConstruct;
 import javax.enterprise.context.spi.CreationalContext;
-import javax.naming.InitialContext;
-import javax.naming.NamingException;
-import javax.sql.DataSource;
 
 import com.caucho.config.ConfigException;
 import com.caucho.config.Configurable;
-import com.caucho.config.Names;
-import com.caucho.config.inject.BeanBuilder;
-import com.caucho.config.inject.DefaultLiteral;
-import com.caucho.config.inject.InjectManager;
-import com.caucho.el.Expr;
 import com.caucho.env.jdbc.DatabaseFactory;
 import com.caucho.naming.Jndi;
 import com.caucho.util.L10N;

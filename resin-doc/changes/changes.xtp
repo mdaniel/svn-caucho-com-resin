@@ -13,6 +13,14 @@
 
 <s2 title="4.0.18 - snapshot">
 <ul>
+<li>jpa: when jta-data-source is null and JPA fails to start, allow web-app to start w/o error (#4491)</li>
+<li>watchdog: ResinMXBean now contains information about the last watchdog restart (#4257, rep by Tony Matson)</li>
+<li>jsp/el: MethodExpr invocation was not applied property (#4515)</li>
+<li>candi: @Produces on @Stateless with no interfaces (#4513)</li>
+<li>config: add &lt;data-source> element support (#4487)</li>
+<li>jsp/el: BeanELResolver isValue/getValue mismatch (#4511, rep by Keith Fetterman)</li>
+<li>servlet: web-fragment &lt;name> can have an "id" attribute (#4484)</li>
+<li>candi: ResinBeanContainer beans.xml @Alternatives issue (#4501)</li>
 <li>candi: ResinBeanContainer JPA/beans.xml ordering issues (#4502)</li>
 <li>session: add destroy-on-lru flag to session-config to call SessionListener.destroy on a LRU even when session is persisted (#4504)</li>
 <li>servlet: CauchoRequestWrapper updates for MockHttpServletRequest compatibility (#4509)</li>

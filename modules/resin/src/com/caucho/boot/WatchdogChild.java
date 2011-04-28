@@ -301,6 +301,26 @@ class WatchdogChild
       return 0;
   }
   
+  boolean isRestart()
+  {
+    WatchdogChildTask task = _taskRef.get();
+    
+    if (task != null)
+      return task.isRestart();
+    else
+      return false;
+  }
+  
+  String getRestartMessage()
+  {
+    WatchdogChildTask task = _taskRef.get();
+    
+    if (task != null)
+      return task.getRestartMessage();
+    else
+      return null;
+  }
+  
   Serializable queryGet(Serializable payload)
   {
     WatchdogChildTask task = _taskRef.get();

@@ -146,6 +146,7 @@ public class ScopeAdapter {
   {
     try {
       Object v = _proxyCtor.newInstance(factory);
+      
       return (X) v;
     } catch (Exception e) {
       throw ConfigException.create(e);

@@ -39,7 +39,6 @@ javaee_data-source = element data-source {
   element min-pool-size { string }?,
   element max-idle-time { string }?,
   element max-statements { string }?
-
 }
 
 javaee_description-Group =

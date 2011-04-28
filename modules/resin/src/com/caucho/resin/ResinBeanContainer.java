@@ -296,12 +296,21 @@ public class ResinBeanContainer {
    */
   public void addBeansXml(String pathName)
   {
-    Path path = Vfs.lookup(pathName);
+    Thread thread = Thread.currentThread();
+    ClassLoader oldLoader = thread.getContextClassLoader();
     
-    if (_modulePath != null)
-      _cdiManager.addBeansXmlOverride(_modulePath, path);
-    else
-      _cdiManager.addXmlPath(path);
+    try {
+      thread.setContextClassLoader(getClassLoader());
+
+      Path path = Vfs.lookup(pathName);
+
+      if (_modulePath != null)
+        _cdiManager.addBeansXmlOverride(_modulePath, path);
+      else
+        _cdiManager.addXmlPath(path);
+    } finally {
+      thread.setContextClassLoader(oldLoader);
+    }
   }
 
   public void addResourceRoot(Path path)

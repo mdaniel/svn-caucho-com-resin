@@ -57,6 +57,11 @@ public class WatchdogActor extends SimpleActor
   {
     return getSender().query("resin@admin.resin.caucho", payload);
   }
+  
+  public void message(Serializable payload)
+  {
+    getSender().message("resin@admin.resin.caucho", payload);
+  }
 
   public void sendShutdown()
   {

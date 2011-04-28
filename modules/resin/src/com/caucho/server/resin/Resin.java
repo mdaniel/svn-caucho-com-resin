@@ -158,6 +158,9 @@ public class Resin
 
   private long _initialStartTime;
   private long _startTime;
+  
+  private boolean _isRestart;
+  private String _restartMessage;
 
   private String _licenseErrorMessage;
 
@@ -375,6 +378,22 @@ public class Resin
   public boolean isEmbedded()
   {
     return _isEmbedded;
+  }
+  
+  void setStartInfo(boolean isRestart, String restartMessage)
+  {
+    _isRestart = isRestart;
+    _restartMessage = restartMessage;
+  }
+  
+  public boolean isRestart()
+  {
+    return _isRestart;
+  }
+  
+  public String getRestartMessage()
+  {
+    return _restartMessage;
   }
   
   private void initEnvironment()

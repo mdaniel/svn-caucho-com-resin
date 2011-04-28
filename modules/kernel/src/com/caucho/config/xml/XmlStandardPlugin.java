@@ -173,7 +173,7 @@ public class XmlStandardPlugin implements Extension {
   }
 
   private void configurePath(Path beansPath) throws IOException
-  {   
+  {
     if (beansPath.canRead() && beansPath.getLength() > 0) {      
       // ioc/0041 - tck allows empty beans.xml
       

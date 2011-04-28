@@ -36,6 +36,7 @@ import com.caucho.util.LruCache;
 import com.caucho.util.QDate;
 
 import java.io.*;
+import java.net.URL;
 import java.util.ArrayList;
 import java.util.Map;
 
@@ -120,6 +121,20 @@ public class ClasspathPath extends FilesystemPath {
   public boolean isDirectory()
   {
     return false;
+  }
+  
+  @Override
+  public long getLength()
+  {
+    ClassLoader loader = Thread.currentThread().getContextClassLoader();
+    
+    URL url = loader.getResource(getPath());
+    
+    if (url == null)
+      return 0;
+    else
+      return lookup(url.toString()).getLength();
+    
   }
 
   /**

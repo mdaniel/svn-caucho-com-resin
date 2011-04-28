@@ -36,9 +36,11 @@ import javax.management.MBeanServer;
 import javax.management.ObjectName;
 
 import com.caucho.bam.BamError;
+import com.caucho.bam.Message;
 import com.caucho.bam.Query;
 import com.caucho.bam.actor.SimpleActor;
 import com.caucho.boot.PidQuery;
+import com.caucho.boot.StartInfoMessage;
 import com.caucho.boot.WatchdogStopQuery;
 import com.caucho.env.shutdown.ExitCode;
 import com.caucho.env.shutdown.ShutdownSystem;
@@ -88,6 +90,16 @@ public class ResinActor extends SimpleActor
   //
   // bam callbacks
   //
+  
+  /**
+   * Startup information
+   */
+  @Message
+  public void startInfo(String to, String from, StartInfoMessage msg)
+  {
+    _resin.setStartInfo(msg.isRestart(), msg.getRestartMessage());
+    System.out.println("Message: " + msg);
+  }
   
   /**
    * Query for the process pid.

@@ -53,41 +53,48 @@ public class WebAppFragmentConfig extends WebAppConfig
 
   private Ordering _ordering;
 
-  public String getName() {
+  public String getName()
+  {
     return _name;
   }
 
   @Configurable
-  public void setName(String name) {
-    _name = name;
+  public void setName(NameConfig nameConfig)
+  {
+    _name = nameConfig.getValue();
   }
 
-
-  public boolean isMetadataComplete() {
+  public boolean isMetadataComplete()
+  {
     return _isMetadataComplete;
   }
 
   @Configurable
-  public void setMetadataComplete(boolean metadataComplete) {
+  public void setMetadataComplete(boolean metadataComplete)
+  {
     _isMetadataComplete = metadataComplete;
   }
 
   // XXX: this will make tck tests with misspelled metadata-complete deploy.
   // tck test generally seems valid except for this problem
   @Configurable
-  public void setMetaDataComplete(boolean metadataComplete) {
+  public void setMetaDataComplete(boolean metadataComplete)
+  {
     _isMetadataComplete = metadataComplete;
   }
 
-  public String getJarPath() {
+  public String getJarPath()
+  {
     return _jarPath;
   }
 
-  public void setJarPath(String jarPath) {
+  public void setJarPath(String jarPath)
+  {
     _jarPath = jarPath;
   }
 
-  public Ordering createOrdering() {
+  public Ordering createOrdering()
+  {
     if (_ordering != null)
       throw new IllegalStateException();
 
@@ -96,11 +103,13 @@ public class WebAppFragmentConfig extends WebAppConfig
     return _ordering;
   }
 
-  public Ordering getOrdering() {
+  public Ordering getOrdering()
+  {
     return _ordering;
   }
 
-  public Ordering createAbsoluteOrdering() {
+  public Ordering createAbsoluteOrdering()
+  {
     log.finer(L.l("'{0}' absolute-ordering tag should not be used inside web application descriptor.", this));
 
     return new Ordering();
@@ -112,7 +121,26 @@ public class WebAppFragmentConfig extends WebAppConfig
     return "com/caucho/server/webapp/resin-web-xml.rnc";
   }
 
-  public String toString() {
+  public String toString()
+  {
     return "WebAppFragmentConfig [" + _name + "]";
+  }
+  
+  public static class NameConfig {
+    private String _name;
+    
+    public void setId(String id)
+    {
+    }
+    
+    public void setValue(String value)
+    {
+      _name = value;
+    }
+    
+    public String getValue()
+    {
+      return _name;
+    }
   }
 }

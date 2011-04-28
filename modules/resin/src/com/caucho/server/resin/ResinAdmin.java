@@ -140,6 +140,18 @@ public class ResinAdmin extends AbstractManagedObject
   {
     return System.getProperty("user.name");
   }
+  
+  @Override
+  public boolean isRestart()
+  {
+    return _resin.isRestart();
+  }
+  
+  @Override
+  public String getRestartMessage()
+  {
+    return _resin.getRestartMessage();
+  }
 
   @Override
   public String toString()

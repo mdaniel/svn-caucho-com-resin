@@ -90,6 +90,7 @@ class WatchdogChildProcess
   private int _pid;
 
   private int _status = -1;
+  private String _exitMessage;
 
   WatchdogChildProcess(String id,
                        ResinSystem system,
@@ -121,9 +122,24 @@ class WatchdogChildProcess
       return null;
   }
   
+  /**
+   * General message to the Resin instance.
+   */
+  void message(Serializable payload)
+  {
+    if (_watchdogActor != null) {
+      _watchdogActor.message(payload);
+    }
+  }
+
   public int getStatus()
   {
     return _status;
+  }
+  
+  public String getExitMessage()
+  {
+    return _exitMessage;
   }
 
   public void run()
@@ -169,6 +185,9 @@ class WatchdogChildProcess
         ThreadPool.getCurrent().start(logThread);
 
         s = connectToChild(ss);
+        
+        message(new StartInfoMessage(_watchdog.isRestart(),
+                                     _watchdog.getRestartMessage()));
 
         _status = _process.waitFor();
 
@@ -266,10 +285,14 @@ class WatchdogChildProcess
       
       code = " (signal=" + (status - 128) + ")";
     }
+
+    String msg = ("Watchdog detected close of "
+                  + "Resin[" + _watchdog.getId() + ",pid=" + _pid + "]"
+                  + "\n  exit reason: " + type + code);
     
-    log.warning("Watchdog detected close of "
-                + "Resin[" + _watchdog.getId() + ",pid=" + _pid + "]"
-                + "\n  exit reason: " + type + code);
+    log.warning(msg);
+    
+    _exitMessage = msg;
   }
 
   /**

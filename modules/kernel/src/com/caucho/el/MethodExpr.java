@@ -102,6 +102,24 @@ public class MethodExpr extends Expr {
       return invocationError(e);
     }
   }
+
+  /**
+   * Evaluates the expression, returning an object.
+   *
+   * @param env the variable environment
+   *
+   * @return the value of the expression as an object
+   */
+  @Override
+  public Object invoke(ELContext env, Class<?> []argTypes, Object []args)
+    throws ELException
+  {
+    if (args != null && args.length != 0)
+      throw new ELException(L.l("'{0}' is an illegal method invocation on {1}",
+                                toString(), getClass().getName()));
+    
+    return getValue(env);
+  }
   
   private Method findMethod(Class<?> type)
   {

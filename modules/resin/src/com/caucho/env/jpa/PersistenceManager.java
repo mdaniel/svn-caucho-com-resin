@@ -351,7 +351,19 @@ public class PersistenceManager
       }
       
       for (PersistenceUnitManager pUnit : pUnitList) {
-        pUnit.start();
+        try {
+          pUnit.start();
+        } catch (RuntimeException e) {
+          if (pUnit.getJtaDataSource() == null
+              && pUnit.getNonJtaDataSource() == null) {
+            // env/0e22 #4491
+            log.warning(e.toString());
+            log.log(Level.FINER, e.toString(), e);
+          }
+          else {
+            throw e;
+          }
+        }
       }
     } finally {
       thread.setContextClassLoader(oldLoader);

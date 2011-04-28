@@ -14,8 +14,8 @@ r_beans = element beans {
 }
 
 r_alternatives = element alternatives {
-  w_class*
-  & w_stereotype*
+  r_class*
+  & r_stereotype*
 }
 
 r_decorators = element decorators {

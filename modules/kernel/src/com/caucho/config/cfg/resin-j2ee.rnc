@@ -5,6 +5,61 @@ namespace xsi = "http://www.w3.org/2001/XMLSchema-instance"
 
 r_any = text | (attribute * {string} | element * { r_any })*
 
+r_data-source = element data-source {
+  attribute id { string }?,
+  r_description-Group,
+
+  (attribute name { string }
+   | element name { string })?,
+
+  (attribute class-name { string }
+   | element class-name { string })?,
+
+  (attribute server-name { string }
+   | element server-name { string })?,
+
+  (attribute port-number { string }
+   | element port-number { string })?,
+
+  (attribute database-name { string }
+   | element database-name { string })?,
+   
+  (attribute url { string }
+   | element url {string })?,
+
+  (attribute user { string }
+   | element user { string })?,
+
+  (attribute password { string }
+   | element password { string })?,
+
+  element property { r_property-Type } *,
+
+  (attribute login-timeout { string }
+   | element login-timeout { string })?,
+
+  (attribute transactional { string }
+   | element transactional { string })?,
+
+  (attribute isolation-level { string }
+   | element isolation-level { string })?,
+   
+  (attribute initial-pool-size { string }
+   | element initial-pool-size { string })?,
+   
+  (attribute max-pool-size { string }
+   | element max-pool-size { string })?,
+   
+  (attribute min-pool-size { string }
+   | element min-pool-size { string })?,
+
+  (attribute max-idle-time { string }
+   | element max-idle-time { string })?,
+
+  (attribute max-statements { string }
+   | element max-statements { string })?
+}
+
 r_deployment-extension = element deployment-extension {
   attribute namespace { string },
 
@@ -271,7 +326,9 @@ r_res-type = element res-type {
 }
 
 r_resource-Group =
-  r_ejb-ref*
+  r_data-source*
+
+  & r_ejb-ref*
 
   & r_env-entry*
 
