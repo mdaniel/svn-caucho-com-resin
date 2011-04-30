@@ -2509,7 +2509,7 @@ public final class InjectManager
                                        baseType, ij));
 
     Set<Bean<?>> set = resolveRec(baseType, qualifiers, ij);
-
+    
     if (set == null || set.size() == 0) {
       if (InjectionPoint.class.equals(type))
         return new InjectionPointBean(this, ij);

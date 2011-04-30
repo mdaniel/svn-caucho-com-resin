@@ -36,6 +36,7 @@ import javax.naming.NamingException;
 /**
  * The JNDI proxy for Manager
  */
+@SuppressWarnings("serial")
 public class WebBeansJndiProxy implements ObjectProxy, java.io.Serializable
 {
   /**
@@ -45,7 +46,8 @@ public class WebBeansJndiProxy implements ObjectProxy, java.io.Serializable
    *
    * @return the object named by the proxy.
    */
-  public Object createObject(Hashtable env)
+  @Override
+  public Object createObject(Hashtable<?,?> env)
     throws NamingException
   {
     return InjectManager.create();

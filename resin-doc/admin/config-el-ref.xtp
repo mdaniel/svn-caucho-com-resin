@@ -57,8 +57,6 @@ authenticator can provide single-signon.</p>
 <include-defun name="resin:message"/>
 <include-defun name="resin:set"/>
 <include-defun name="resource" />
-<include-defun name="resource-adapter" />
-<include-defun name="resource-deploy" />
 <include-defun name="resource-ref" />
 <include-defun name="scheduled-task"/>
 <include-defun name="servlet-hack" />

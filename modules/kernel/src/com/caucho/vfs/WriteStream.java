@@ -709,6 +709,46 @@ public class WriteStream extends OutputStreamWithBuffer
   }
 
   /**
+   * Prints a string.
+   */
+  public final void printLatin1NoLf(String string)
+    throws IOException
+  {
+    if (string == null)
+      string = "null";
+
+    int length = string.length();
+    int offset = 0;
+
+    char []chars = _chars;
+    if (chars == null) {
+      _chars = new char[_charsLength];
+      chars = _chars;
+    }
+
+    while (length > 0) {
+      int sublen = length < _charsLength ? length : _charsLength;
+
+      string.getChars(offset, offset + sublen, chars, 0);
+      
+      for (int i = sublen - 1; i >= 0; i--) {
+        char value = chars[i];
+        
+        // server/1kr8
+        if (value == '\r' || value == '\n') {
+          sublen = i;
+          length = sublen;
+        }
+      }
+
+      printLatin1(chars, 0, sublen);
+
+      length -= sublen;
+      offset += sublen;
+    }
+  }
+
+  /**
    * Prints a substring.
    *
    * @param string the string to print

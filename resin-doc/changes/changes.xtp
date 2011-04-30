@@ -13,6 +13,8 @@
 
 <s2 title="4.0.18 - snapshot">
 <ul>
+<li>cdi: abstract decorators were not properly handled (#4406)</li>
+<li>servlet: crlf escaping required for response headers because of rewrite-dispatch (#4525)</li>
 <li>jpa: when jta-data-source is null and JPA fails to start, allow web-app to start w/o error (#4491)</li>
 <li>watchdog: ResinMXBean now contains information about the last watchdog restart (#4257, rep by Tony Matson)</li>
 <li>jsp/el: MethodExpr invocation was not applied property (#4515)</li>

@@ -237,7 +237,7 @@ public class HttpResponse extends AbstractHttpResponse
 
       if (upgrade != null) {
         os.printLatin1("\r\nUpgrade: ");
-        os.printLatin1(upgrade);
+        os.printLatin1NoLf(upgrade);
       }
 
       os.printLatin1("\r\nConnection: Upgrade");
@@ -316,10 +316,10 @@ public class HttpResponse extends AbstractHttpResponse
 
       os.write('\r');
       os.write('\n');
-      os.printLatin1(key);
+      os.printLatin1NoLf(key);
       os.write(':');
       os.write(' ');
-      os.printLatin1((String) _headerValues.get(i));
+      os.printLatin1NoLf((String) _headerValues.get(i));
 
       if (debug) {
         log.fine(_request.dbgId() + "" +

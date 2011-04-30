@@ -30,26 +30,22 @@
 package com.caucho.config.inject;
 
 import java.io.Serializable;
-import java.lang.annotation.Annotation;
-import java.lang.reflect.*;
-import java.util.*;
-import java.util.logging.*;
+
 import javax.enterprise.inject.spi.Bean;
 
-import com.caucho.util.*;
-import com.caucho.config.cfg.*;
+import com.caucho.util.L10N;
 
 /**
  * Handle for webbeans serialization
  */
+@SuppressWarnings("serial")
 public class SingletonHandle implements Serializable
 {
   private static final L10N L = new L10N(SingletonHandle.class);
-  private static final Logger log
-    = Logger.getLogger(SingletonHandle.class.getName());
 
   private final String _id;
 
+  @SuppressWarnings("unused")
   private SingletonHandle()
   {
     _id = null;
@@ -68,7 +64,7 @@ public class SingletonHandle implements Serializable
     try {
       InjectManager inject = InjectManager.create();
 
-      Bean bean = inject.getPassivationCapableBean(_id);
+      Bean<?> bean = inject.getPassivationCapableBean(_id);
 
       if (bean == null)
         throw new IllegalStateException(L.l("'{0}' is an unknown SingletonHandle bean.  Unserializing this bean requires an equivalent Managed Bean to be registered.",

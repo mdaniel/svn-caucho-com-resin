@@ -31,33 +31,26 @@ package com.caucho.config.inject;
 
 import java.io.Serializable;
 import java.lang.annotation.Annotation;
-import java.lang.reflect.*;
-import java.util.*;
-import java.util.logging.*;
-import javax.enterprise.inject.spi.Bean;
 
-import com.caucho.util.*;
-import com.caucho.config.cfg.*;
+import javax.enterprise.inject.spi.Bean;
 
 /**
  * Handle for webbeans serialization
  */
+@SuppressWarnings("serial")
 public class SingletonBindingHandle implements Serializable
 {
-  private static final L10N L = new L10N(SingletonBindingHandle.class);
-  private static final Logger log
-    = Logger.getLogger(SingletonBindingHandle.class.getName());
-
-  private final Class _type;
+  private final Class<?> _type;
   private final Annotation []_binding;
 
+  @SuppressWarnings("unused")
   private SingletonBindingHandle()
   {
     _type = null;
     _binding = null;
   }
 
-  public SingletonBindingHandle(Class type, Annotation ...binding)
+  public SingletonBindingHandle(Class<?> type, Annotation ...binding)
   {
     _type = type;
 
@@ -75,7 +68,7 @@ public class SingletonBindingHandle implements Serializable
     try {
       InjectManager inject = InjectManager.create();
 
-      Bean bean
+      Bean<?> bean
         = inject.resolve(inject.getBeans(_type, _binding));
 
       return inject.getReference(bean);

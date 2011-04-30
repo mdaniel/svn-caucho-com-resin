@@ -166,10 +166,10 @@ public class CandiProducer<X> implements InjectionTarget<X>
       
       
       if (_decoratorBeans != null && _decoratorBeans.size() > 0) {
-        Decorator dec = (Decorator) _decoratorBeans.get(_decoratorBeans.size() - 1);
+        Decorator<?> dec = (Decorator<?>) _decoratorBeans.get(_decoratorBeans.size() - 1);
         
-        if (dec instanceof DecoratorBean && env != null) {
-          ip = ((DecoratorBean) dec).getDelegateInjectionPoint();
+        if (dec instanceof DecoratorBean<?> && env != null) {
+          ip = ((DecoratorBean<?>) dec).getDelegateInjectionPoint();
           env.setInjectionPoint(ip);
         }
       }

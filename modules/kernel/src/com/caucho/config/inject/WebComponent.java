@@ -37,7 +37,6 @@ import java.util.Collections;
 import java.util.Iterator;
 import java.util.LinkedHashSet;
 import java.util.Set;
-import java.util.logging.Logger;
 
 import javax.enterprise.inject.Any;
 import javax.enterprise.inject.Specializes;
@@ -55,7 +54,6 @@ import com.caucho.inject.Module;
  */
 @Module
 public class WebComponent {
-  private static final Logger log = Logger.getLogger(WebComponent.class.getName());
   private InjectManager _beanManager;
 
   private Class<?> _rawType;

@@ -659,8 +659,11 @@ public class Alarm implements ThreadTask, ClassLoaderListener {
 
     try {
       ClassLoader loader = Alarm.class.getClassLoader();
+      
+      boolean isAlarmStart = System.getProperty("caucho.alarm.enable") != null;
 
-      if (loader == null
+      if (isAlarmStart
+          || loader == null
           || loader instanceof DynamicClassLoader
           || loader == systemLoader
           || systemLoader != null && loader == systemLoader.getParent()) {

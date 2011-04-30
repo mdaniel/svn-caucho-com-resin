@@ -33,6 +33,7 @@ package com.caucho.config.inject;
 import com.caucho.management.server.*;
 
 import java.lang.annotation.Annotation;
+import java.lang.reflect.Type;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.Map;
@@ -45,10 +46,10 @@ import javax.enterprise.inject.spi.Bean;
 public class WebBeanAdmin extends AbstractManagedObject
   implements WebBeanMXBean
 {
-  private final Bean _bean;
+  private final Bean<?> _bean;
   private int _id;
 
-  public WebBeanAdmin(Bean bean, int id)
+  public WebBeanAdmin(Bean<?> bean, int id)
   {
     _bean = bean;
     _id = id;
@@ -69,6 +70,7 @@ public class WebBeanAdmin extends AbstractManagedObject
   /**
    * Returns the bean's name
    */
+  @Override
   public String getName()
   {
     String name = _bean.getName();
@@ -84,12 +86,12 @@ public class WebBeanAdmin extends AbstractManagedObject
    */
   public String getBeanSimpleType()
   {
-    Set<Class<?>> types = _bean.getTypes();
+    Set<Type> types = _bean.getTypes();
 
-    Iterator<Class<?>> iter = types.iterator();
+    Iterator<Type> iter = types.iterator();
 
     if (iter.hasNext())
-      return iter.next().getSimpleName();
+      return ((Class<?>) iter.next()).getSimpleName();
     else
       return null;
   }
@@ -97,15 +99,16 @@ public class WebBeanAdmin extends AbstractManagedObject
   /**
    * Returns all the bean's types
    */
+  @Override
   public String []getBeanTypes()
   {
-    Set<Class<?>> types = _bean.getTypes();
+    Set<Type> types = _bean.getTypes();
 
     String []names = new String[types.size()];
 
     int i = 0;
-    for (Class<?> type : types) {
-      names[i++] = type.getName();
+    for (Type type : types) {
+      names[i++] = ((Class<?>) type).getName();
     }
 
     return names;
@@ -114,6 +117,7 @@ public class WebBeanAdmin extends AbstractManagedObject
   /**
    * Returns all the bean's binding types
    */
+  @Override
   public String []getQualifiers()
   {
     Set<Annotation> types = _bean.getQualifiers();
@@ -134,9 +138,10 @@ public class WebBeanAdmin extends AbstractManagedObject
   /**
    * Returns the @ScopeType attribute
    */
+  @Override
   public String getScope()
   {
-    Class annType = _bean.getScope();
+    Class<?> annType = _bean.getScope();
 
     if (annType != null)
       return annType.getName();

@@ -29,7 +29,6 @@
 
 package com.caucho.config.inject;
 
-import javax.enterprise.context.spi.CreationalContext;
 import javax.enterprise.inject.spi.Bean;
 
 /**

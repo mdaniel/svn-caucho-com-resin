@@ -40,7 +40,6 @@ import java.util.HashSet;
 import java.util.LinkedHashSet;
 import java.util.Set;
 
-import javax.decorator.Delegate;
 import javax.enterprise.context.spi.CreationalContext;
 import javax.enterprise.inject.spi.Bean;
 import javax.enterprise.inject.spi.Decorator;
@@ -49,7 +48,7 @@ import javax.inject.Qualifier;
 import javax.interceptor.Interceptor;
 
 import com.caucho.config.ConfigException;
-import com.caucho.config.reflect.AnnotatedFieldImpl;
+import com.caucho.config.bytecode.DecoratorAdapter;
 import com.caucho.config.reflect.AnnotatedTypeUtil;
 import com.caucho.config.reflect.BaseType;
 import com.caucho.inject.Module;
@@ -63,8 +62,6 @@ public class DecoratorBean<T> implements Decorator<T>
 {
   private static final L10N L = new L10N(DecoratorBean.class);
 
-  private InjectManager _cdiManager;
-  
   private Class<T> _type;
 
   private Bean<T> _bean;
@@ -83,7 +80,8 @@ public class DecoratorBean<T> implements Decorator<T>
   public DecoratorBean(InjectManager beanManager,
                        Class<T> type)
   {
-    _cdiManager = beanManager;
+    type = DecoratorAdapter.create(type);
+    
     _type = type;
 
     _bean = beanManager.createManagedBean(type);
@@ -285,8 +283,8 @@ public class DecoratorBean<T> implements Decorator<T>
         _delegateMethod = (Method) _delegateInjectionPoint.getMember();
         _delegateMethod.setAccessible(true);
       }
-      else if (_delegateInjectionPoint.getMember() instanceof Constructor) {
-        _delegateConstructor = (Constructor) _delegateInjectionPoint.getMember();
+      else if (_delegateInjectionPoint.getMember() instanceof Constructor<?>) {
+        _delegateConstructor = (Constructor<?>) _delegateInjectionPoint.getMember();
         _delegateConstructor.setAccessible(true);
       }
       

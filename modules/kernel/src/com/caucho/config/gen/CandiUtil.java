@@ -365,7 +365,7 @@ public class CandiUtil {
       Decorator<?> bean = beans.get(i);
       
       CreationalContextImpl<?> env = new DependentCreationalContext(bean, proxyEnv, null);
-      
+
       Object instance = manager.getReference(bean, bean.getBeanClass(), env);
       
       // XXX:

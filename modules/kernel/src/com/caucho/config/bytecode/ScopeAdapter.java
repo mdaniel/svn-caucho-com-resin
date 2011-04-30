@@ -142,6 +142,7 @@ public class ScopeAdapter {
     
   }
   
+  @SuppressWarnings("unchecked")
   public <X> X wrap(InjectManager.ReferenceFactory<X> factory)
   {
     try {
