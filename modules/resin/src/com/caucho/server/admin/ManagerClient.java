@@ -127,6 +127,23 @@ public class ManagerClient
     return (String) query(query);
   }
 
+  public String listJmx(String pattern,
+                        boolean isPrintAttributes,
+                        boolean isPrintValues,
+                        boolean isPrintOperations,
+                        boolean isAll,
+                        boolean isPlatform)
+  {
+    JmxListQuery query = new JmxListQuery(pattern,
+                                          isPrintAttributes,
+                                          isPrintValues,
+                                          isPrintOperations,
+                                          isAll,
+                                          isPlatform);
+
+    return (String) query(query);
+  }
+
   public String profile(long activeTime, long period, int depth) {
     ProfileQuery query = new ProfileQuery(activeTime, period, depth);
 

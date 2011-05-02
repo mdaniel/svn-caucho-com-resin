@@ -29,20 +29,16 @@
 
 package com.caucho.boot;
 
-import com.caucho.server.admin.WebAppDeployClient;
 import com.caucho.util.L10N;
 
-public class JmxCommand extends AbstractManagementCommand
+public abstract class JmxCommand extends AbstractManagementCommand
 {
   private static final L10N L = new L10N(JmxCommand.class);
 
   @Override
-  public void doCommand(WatchdogArgs args, WatchdogClient client)
-  {
-  }
+  public abstract void doCommand(WatchdogArgs args, WatchdogClient client);
 
   @Override
-  public void usage()
-  {
-  }
+  public abstract void usage();
 }
+

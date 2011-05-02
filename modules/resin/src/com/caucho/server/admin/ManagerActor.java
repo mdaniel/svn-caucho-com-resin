@@ -47,12 +47,17 @@ import com.caucho.util.MemoryPoolAdapter;
 import com.caucho.util.ThreadDump;
 
 import javax.annotation.PostConstruct;
+import javax.management.MBeanAttributeInfo;
+import javax.management.MBeanOperationInfo;
+import javax.management.MBeanParameterInfo;
 import javax.management.MBeanServer;
+import javax.management.MBeanServerFactory;
 import javax.management.ObjectName;
 import java.io.File;
 import java.io.IOException;
 import java.io.PrintWriter;
 import java.io.StringWriter;
+import java.lang.management.ManagementFactory;
 import java.text.DateFormat;
 import java.text.DecimalFormat;
 import java.text.SimpleDateFormat;
@@ -60,7 +65,11 @@ import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.GregorianCalendar;
 import java.util.HashMap;
+import java.util.HashSet;
+import java.util.LinkedList;
+import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -120,7 +129,7 @@ public class ManagerActor extends SimpleActor
 
     File file = new File(hprofDir);
 
-    if (! file.isAbsolute())
+    if (!file.isAbsolute())
       throw new ConfigException("hprof-dir must be an absolute path");
 
     _hprofDir = file;
@@ -179,7 +188,7 @@ public class ManagerActor extends SimpleActor
 
       final String fileName = base + "-" + suffix + ".hprof";
 
-      MemoryPoolAdapter memoryAdapter  = new MemoryPoolAdapter();
+      MemoryPoolAdapter memoryAdapter = new MemoryPoolAdapter();
       if (memoryAdapter.getEdenUsed() > hprofDir.getFreeSpace())
         return L.l("Not enough disk space for `{0}'", fileName);
 
@@ -193,8 +202,8 @@ public class ManagerActor extends SimpleActor
                           new String[]{String.class.getName(), boolean.class.getName()});
 
       final String result = L.l("Heap dump is written to `{0}'.\n"
-                      + "To view the file on the target machine use\n"
-                      + "jvisualvm --openfile {0}", file);
+                                + "To view the file on the target machine use\n"
+                                + "jvisualvm --openfile {0}", file);
 
       return result;
     } catch (Exception e) {
@@ -202,6 +211,116 @@ public class ManagerActor extends SimpleActor
 
       return e.getMessage();
     }
+  }
+
+  @Query
+  public String listJmx(long id, String to, String from, JmxListQuery query)
+  {
+    final List<MBeanServer> servers = new LinkedList<MBeanServer>();
+
+    String result;
+
+    try {
+      if (query.isPlatform()) {
+        servers.add(ManagementFactory.getPlatformMBeanServer());
+      }
+      else {
+        servers.addAll(MBeanServerFactory.findMBeanServer(null));
+      }
+
+      StringBuilder resultBuilder = new StringBuilder();
+
+      Set<ObjectName> beans = new HashSet<ObjectName>();
+
+      ObjectName nameQuery = null;
+      if (query.getPattern() != null)
+        nameQuery = ObjectName.getInstance(query.getPattern());
+      else if (query.isAllBeans())
+        nameQuery = ObjectName.WILDCARD;
+      else if (nameQuery == null && query.isPlatform())
+        nameQuery = ObjectName.getInstance("java.lang:*");
+      else
+        nameQuery = ObjectName.getInstance("resin:*");
+
+      for (final MBeanServer server : servers) {
+        Set<ObjectName> mbeans = server.queryNames(nameQuery, null);
+
+        for (final ObjectName mbean : mbeans) {
+          if (beans.contains(mbean))
+            continue;
+
+          beans.add(mbean);
+
+          resultBuilder.append(mbean).append('\n');
+          if (query.isPrintAttributes()) {
+            resultBuilder.append("  attributes:\n");
+            MBeanAttributeInfo []attributes = server.getMBeanInfo(mbean)
+                                                    .getAttributes();
+            for (MBeanAttributeInfo attribute : attributes) {
+              resultBuilder.append("    ").append(attribute);
+
+              if (query.isPrintValues()) {
+                resultBuilder.append('=');
+                Object value = server.getAttribute(mbean, attribute.getName());
+                resultBuilder.append('=').append(value);
+              }
+              resultBuilder.append('\n');
+            }
+          }
+
+          if (query.isPrintOperations()) {
+            resultBuilder.append("  operations:\n");
+            for (MBeanOperationInfo operation : server.getMBeanInfo(mbean)
+                                                      .getOperations()) {
+              resultBuilder.append("    ")
+                           .append(operation.getName());
+
+              MBeanParameterInfo []params = operation.getSignature();
+              if (params.length > 0) {
+                resultBuilder.append("\n      (\n");
+                for (int i = 0; i < params.length; i++) {
+                  MBeanParameterInfo param = params[i];
+
+                  resultBuilder.append("        ").append(i).append(":");
+                  resultBuilder.append(param.getType())
+                               .append(' ')
+                               .append(param.getName());
+                  if (param.getDescription() != null
+                      && ! param.getDescription().isEmpty())
+                    resultBuilder.append(" /*")
+                                 .append(param.getDescription())
+                                 .append("*/");
+
+                  resultBuilder.append('\n');
+                }
+                resultBuilder.append("      )");
+              } else {
+                resultBuilder.append("()");
+              }
+
+              if (operation.getDescription() != null
+                  && ! operation.getDescription().isEmpty()) {
+                resultBuilder.append("/*")
+                             .append(operation.getDescription())
+                             .append("*/");
+              }
+
+              resultBuilder.append('\n');
+            }
+          }
+        }
+      }
+
+      result = resultBuilder.toString();
+    } catch (Exception e) {
+      log.log(Level.SEVERE, e.getMessage(), e);
+
+      result = e.getMessage();
+    }
+
+    getBroker().queryResult(id, from, to, result);
+
+    return result;
   }
 
   @Query
@@ -282,7 +401,7 @@ public class ManagerActor extends SimpleActor
     StringWriter buffer = new StringWriter();
     PrintWriter out = new PrintWriter(buffer);
 
-    ProfileEntry[] entries = profile.getResults();
+    ProfileEntry []entries = profile.getResults();
 
     if (entries == null || entries.length == 0) {
       out.println("Profile returned no entries.");
@@ -314,7 +433,7 @@ public class ManagerActor extends SimpleActor
       out.println("   % time  |time self(s)|   % sum    | Method Call");
 
       for (ProfileEntry entry : entries) {
-        double timePercent = (double)100 * (double) entry.getCount()
+        double timePercent = (double) 100 * (double) entry.getCount()
                              / sampleTicks;
         double selfPercent = (double) 100 * (double) entry.getCount()
                              / totalTicks;
@@ -322,7 +441,7 @@ public class ManagerActor extends SimpleActor
 
         out.println(String.format("%10.3f | %10.3f | %10.3f | %s",
                                   timePercent,
-                                  (float)entry.getCount() * period * 0.001,
+                                  (float) entry.getCount() * period * 0.001,
                                   totalPercent,
                                   entry.getDescription()));
 
@@ -359,7 +478,8 @@ public class ManagerActor extends SimpleActor
     }
   }
 
-  private synchronized Level getLoggerLevel(String name) {
+  private synchronized Level getLoggerLevel(String name)
+  {
     Level level = _defaultLevels.get(name);
     if (level != null)
       return level;
