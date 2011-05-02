@@ -63,9 +63,6 @@ public class BeanArg<T> extends Arg<T> {
     _bindings = bindings;
     
     _ip = ip;
-    
-    System.out.println("ARG: " + type);
-    Thread.dumpStack();
   }
 
   @Override

@@ -2858,15 +2858,17 @@ public class WebApp extends ServletContextImpl
       Ordering ordering = fragment.getOrdering();
       
       if (ordering != null) {
-        addOrderingNames(names, ordering.getBefore());
-        addOrderingNames(names, ordering.getAfter());
+        addOrderingNames(names, fragment.getName(), ordering.getBefore());
+        addOrderingNames(names, fragment.getName(), ordering.getAfter());
       }
     }
     
     return names;
   }
   
-  private void addOrderingNames(Set<String> names, Ordering ordering)
+  private void addOrderingNames(Set<String> names,
+                                String selfName,
+                                Ordering ordering)
   {
     if (ordering == null)
       return;
@@ -2874,6 +2876,10 @@ public class WebApp extends ServletContextImpl
     for (Object order : ordering.getOrder()) {
       if (order instanceof String) {
         names.add((String) order);
+      }
+      else if (ordering.isOthers(order)) {
+        if (selfName != null)
+          names.add(selfName);
       }
     }
   }
@@ -2909,20 +2915,15 @@ public class WebApp extends ServletContextImpl
                                        List<WebAppFragmentConfig> sourceList,
                                        List<WebAppFragmentConfig> resultList)
   {
-    Ordering ordering = source.getOrdering();
-    
-    if (ordering != null) {
-      Ordering after = source.getOrdering().getAfter();
-    
-      if (! isAllOrderingPresent(resultList, after))
-        return false;
-    }
-    
     if (isBeforeOrderingPresent(source, names, sourceList)) {
       return false;
     }
     
     if (! isBeforeOrderingValid(source, names, sourceList, resultList)) {
+      return false;
+    }
+    
+    if (! isAfterOrderingValid(source, names, sourceList, resultList)) {
       return false;
     }
 
@@ -2959,7 +2960,7 @@ public class WebApp extends ServletContextImpl
       if (ordering != null) {
         Ordering before = ordering.getBefore();
         
-        if (! isBeforeOrderingValid(before, source.getName(), names, 
+        if (! isBeforeOrderingValid(before, source, names, 
                                     sourceList, resultList)) {
           return false;
         }
@@ -2982,7 +2983,7 @@ public class WebApp extends ServletContextImpl
       if (ordering != null) {
         Ordering before = ordering.getBefore();
         
-        if (isOrderingPresent(before, source.getName(), names, sourceList)) {
+        if (isBeforeOrderingPresent(before, source, names, sourceList)) {
           return true;
         }
       }
@@ -2992,13 +2993,15 @@ public class WebApp extends ServletContextImpl
   }
   
   private boolean isBeforeOrderingValid(Ordering before,
-                                        String name,
+                                        WebAppFragmentConfig source,
                                         Set<String> names,
                                         List<WebAppFragmentConfig> sourceList,
                                         List<WebAppFragmentConfig> resultList)
   {
     if (before == null)
       return true;
+    
+    String name = source.getName();
     
     boolean isOthers = false;
     
@@ -3013,6 +3016,45 @@ public class WebApp extends ServletContextImpl
         }
         
         isOthers = isAnyOther(names, sourceList);
+      }
+      else if (order instanceof String) {
+        String key = (String) order;
+        
+        if (! isFragmentInList(resultList, key))
+          return false;
+      }
+    }
+    
+    return true;
+  }
+  
+  private boolean isAfterOrderingValid(WebAppFragmentConfig source,
+                                       Set<String> names,
+                                       List<WebAppFragmentConfig> sourceList,
+                                       List<WebAppFragmentConfig> resultList)
+  {
+    Ordering ordering = source.getOrdering();
+    
+    if (ordering == null)
+      return true;
+    
+    Ordering after = ordering.getAfter();
+    
+    if (after == null)
+      return true;
+    
+    String name = source.getName();
+    
+    for (Object order : after.getOrder()) {
+      /*
+      if (name != null && name.equals(order)) {
+        return ! isOthers;
+      }
+      */
+      
+      if (after.isOthers(order)) {
+        if (isAnyOther(names, sourceList))
+          return false;
       }
       else if (order instanceof String) {
         String key = (String) order;
@@ -3041,16 +3083,21 @@ public class WebApp extends ServletContextImpl
     return name == null || ! names.contains(name);
   }
   
-  private boolean isOrderingPresent(Ordering order,
-                                    String name,
-                                    Set<String> names,
-                                    List<WebAppFragmentConfig> sourceList)
+  private boolean isBeforeOrderingPresent(Ordering before,
+                                          WebAppFragmentConfig source,
+                                          Set<String> names,
+                                          List<WebAppFragmentConfig> sourceList)
   {
-    for (Object subOrder : order.getOrder()) {
+    if (before == null)
+      return false;
+    
+    String name = source.getName();
+    
+    for (Object subOrder : before.getOrder()) {
       if (name != null && name.equals(subOrder))
         return true;
       
-      if (order.isOthers(subOrder)) {
+      if (before.isOthers(subOrder)) {
         if (isOther(name, names))
           return true;
       }
@@ -3086,6 +3133,24 @@ public class WebApp extends ServletContextImpl
                              List<WebAppFragmentConfig> sourceList)
   {
     for (WebAppFragmentConfig fragment : sourceList) {
+      if (isOther(fragment.getName(), names)) {
+        return true;
+      }
+    }
+    
+    return false;
+  }
+  
+  private boolean isAnyOther(String selfName,
+                             Set<String> names,
+                             List<WebAppFragmentConfig> sourceList)
+  {
+    for (WebAppFragmentConfig fragment : sourceList) {
+      if (selfName != null && selfName.equals(fragment.getName())) {
+        // server/1r20
+        continue;
+      }
+      
       if (isOther(fragment.getName(), names)) {
         return true;
       }
