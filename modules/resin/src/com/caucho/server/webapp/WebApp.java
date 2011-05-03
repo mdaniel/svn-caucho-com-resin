@@ -3043,15 +3043,7 @@ public class WebApp extends ServletContextImpl
     if (after == null)
       return true;
     
-    String name = source.getName();
-    
     for (Object order : after.getOrder()) {
-      /*
-      if (name != null && name.equals(order)) {
-        return ! isOthers;
-      }
-      */
-      
       if (after.isOthers(order)) {
         if (isAnyOther(names, sourceList))
           return false;

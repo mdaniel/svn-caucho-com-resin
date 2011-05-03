@@ -36,6 +36,9 @@ import javax.sql.DataSource;
 
 import com.caucho.config.ConfigException;
 import com.caucho.config.types.Period;
+import com.caucho.distcache.jdbc.JdbcCacheManager;
+import com.caucho.env.distcache.DistCacheSystem;
+import com.caucho.env.service.ResinSystem;
 import com.caucho.server.cluster.Server;
 import com.caucho.util.L10N;
 import com.caucho.vfs.Path;
@@ -53,6 +56,7 @@ public class PersistentStoreConfig
   private String _type;
 
   private DataSource _dataSource;
+  private String _tableName;
   
   private boolean _isBackup = true;
   private boolean _isTriplicate = true;
@@ -72,18 +76,25 @@ public class PersistentStoreConfig
   public void setType(String type)
     throws ConfigException
   {
-    Server server = Server.getCurrent();
-    
     _type = type;
   }
 
   public void setDataSource(DataSource dataSource)
   {
+    if (dataSource == null)
+      throw new NullPointerException();
+    
+    _dataSource = dataSource;
   }
 
   @Deprecated
   public void setPath(Path path)
   {
+  }
+  
+  public void setTableName(String tableName)
+  {
+    _tableName = tableName;
   }
 
   public void setAlwaysSave(boolean isAlwaysSave)
@@ -142,6 +153,21 @@ public class PersistentStoreConfig
   public void init()
     throws Exception
   {
+    if ("jdbc".equals(_type) && _dataSource == null)
+      throw new ConfigException(L.l("'jdbc' persistent-store requires a data-source"));
+    
+    if (_dataSource != null) {
+      DistCacheSystem system = DistCacheSystem.getCurrent();
+      
+      if (system.getJdbcCacheManager() == null) {
+        ResinSystem resinSystem = ResinSystem.getCurrent();
+        
+        JdbcCacheManager jdbcManager
+          = new JdbcCacheManager(resinSystem, _dataSource);
+        
+        system.setJdbcCacheManager(jdbcManager);
+      }
+    }
     /*
     if (_name.startsWith("java:comp"))
       Jndi.bindDeep(_name, _store);

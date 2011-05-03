@@ -27,7 +27,7 @@
  * @author Scott Ferguson
  */
 
-package com.caucho.server.distcache;
+package com.caucho.distcache.jdbc;
 
 import java.io.IOException;
 import java.util.ArrayList;
@@ -40,6 +40,11 @@ import com.caucho.db.jdbc.DataSourceImpl;
 import com.caucho.env.distcache.CacheDataBacking;
 import com.caucho.env.service.ResinSystem;
 import com.caucho.env.service.RootDirectorySystem;
+import com.caucho.server.distcache.CacheData;
+import com.caucho.server.distcache.DataStore;
+import com.caucho.server.distcache.HashManager;
+import com.caucho.server.distcache.MnodeStore;
+import com.caucho.server.distcache.MnodeValue;
 import com.caucho.util.HashKey;
 import com.caucho.vfs.Path;
 import com.caucho.vfs.StreamSource;
@@ -48,14 +53,14 @@ import com.caucho.vfs.WriteStream;
 /**
  * Manages the distributed cache
  */
-public class DataCacheBacking implements CacheDataBacking {
+public class JdbcCacheBacking implements CacheDataBacking {
   private static final Logger log
-    = Logger.getLogger(DataCacheBacking.class.getName());
+    = Logger.getLogger(JdbcCacheBacking.class.getName());
   
   private DataStore _dataStore;
   private MnodeStore _mnodeStore;
   
-  public DataCacheBacking()
+  public JdbcCacheBacking()
   {
   }
   

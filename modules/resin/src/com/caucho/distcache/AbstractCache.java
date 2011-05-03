@@ -43,7 +43,6 @@ import java.util.Map;
 import java.util.NoSuchElementException;
 import java.util.Set;
 import java.util.concurrent.ConcurrentLinkedQueue;
-import java.util.logging.Logger;
 
 import javax.annotation.PostConstruct;
 import javax.cache.CacheEntry;
@@ -57,7 +56,6 @@ import com.caucho.config.types.Period;
 import com.caucho.env.distcache.CacheDataBacking;
 import com.caucho.env.distcache.DistCacheSystem;
 import com.caucho.loader.Environment;
-import com.caucho.server.cluster.Server;
 import com.caucho.server.distcache.AbstractCacheManager;
 import com.caucho.server.distcache.CacheConfig;
 import com.caucho.server.distcache.DataStore;
@@ -386,8 +384,11 @@ abstract public class AbstractCache extends AbstractMap
     _persistenceOption = persistenceOption;
   }
   
-  protected void setCacheManager(CacheManager cacheManager)
+  public void setCacheManager(CacheManager cacheManager)
   {
+    if (_localManager != null && _localManager != cacheManager)
+      throw new IllegalStateException();
+    
     _localManager = cacheManager;
   }
 
@@ -1126,8 +1127,11 @@ abstract public class AbstractCache extends AbstractMap
     setScopeMode(scope);
   }
 
-  protected void setManager(DistributedCacheManager manager)
+  public void setManager(DistributedCacheManager manager)
   {
+    if (_manager != null)
+      throw new IllegalStateException();
+    
     _manager = manager;
   }
   

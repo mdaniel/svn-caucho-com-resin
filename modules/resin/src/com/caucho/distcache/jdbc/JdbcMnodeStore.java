@@ -27,7 +27,7 @@
  * @author Scott Ferguson
  */
 
-package com.caucho.server.distcache;
+package com.caucho.distcache.jdbc;
 
 import java.sql.Connection;
 import java.sql.PreparedStatement;
@@ -40,6 +40,9 @@ import java.util.logging.Logger;
 
 import javax.sql.DataSource;
 
+import com.caucho.server.distcache.CacheConfig;
+import com.caucho.server.distcache.CacheData;
+import com.caucho.server.distcache.MnodeValue;
 import com.caucho.util.Alarm;
 import com.caucho.util.AlarmListener;
 import com.caucho.util.FreeList;
@@ -50,12 +53,9 @@ import com.caucho.util.JdbcUtil;
 /**
  * Manages backing for the cache map.
  */
-public class MnodeStore implements AlarmListener {
+public class JdbcMnodeStore implements AlarmListener {
   private static final Logger log
-    = Logger.getLogger(MnodeStore.class.getName());
-
-  private FreeList<CacheMapConnection> _freeConn
-    = new FreeList<CacheMapConnection>(32);
+    = Logger.getLogger(JdbcMnodeStore.class.getName());
 
   private final String _serverName;
   
@@ -85,7 +85,7 @@ public class MnodeStore implements AlarmListener {
   // private long _expireReaperTimeout = 60 * 60 * 1000L;
   private long _expireReaperTimeout = 15 * 60 * 1000L;
 
-  public MnodeStore(DataSource dataSource,
+  public JdbcMnodeStore(DataSource dataSource,
                     String tableName,
                     String serverName)
     throws Exception
@@ -230,7 +230,7 @@ public class MnodeStore implements AlarmListener {
       }
 
       String sql = ("CREATE TABLE " + _tableName + " (\n"
-                    + "  id BINARY(32) PRIMARY KEY,\n"
+                    + "  id CHAR(64) PRIMARY KEY,\n"
                     + "  value BINARY(32),\n"
                     + "  cache_id BINARY(32),\n"
                     + "  expire_timeout BIGINT,\n"
@@ -358,7 +358,9 @@ public class MnodeStore implements AlarmListener {
 
       rs.relative(offset);
       while (rs.next()) {
-        byte []keyHash = rs.getBytes(1);
+        String key = rs.getString(1);
+
+        byte []keyHash = null;
 
         byte []valueHash = rs.getBytes(2);
         byte []cacheHash = rs.getBytes(3);
@@ -415,8 +417,9 @@ public class MnodeStore implements AlarmListener {
       conn = getConnection();
 
       PreparedStatement pstmt = conn.prepareLoad();
-      pstmt.setBytes(1, id.getHash());
-
+      String key = keyToString(id.getHash());
+      pstmt.setString(1, key);
+      
       ResultSet rs = pstmt.executeQuery();
 
       if (rs.next()) {
@@ -487,7 +490,9 @@ public class MnodeStore implements AlarmListener {
       conn = getConnection();
 
       PreparedStatement stmt = conn.prepareInsert();
-      stmt.setBytes(1, id.getHash());
+      String key = keyToString(id.getHash());
+      
+      stmt.setString(1, key);
 
       if (value != null)
         stmt.setBytes(2, value.getHash());
@@ -551,7 +556,9 @@ public class MnodeStore implements AlarmListener {
       stmt.setLong(4, idleTimeout);
       stmt.setLong(5, Alarm.getCurrentTime());
 
-      stmt.setBytes(6, id.getHash());
+      String key = keyToString(id.getHash());
+      stmt.setString(6, key);
+
       stmt.setLong(7, itemVersion);
 
       int count = stmt.executeUpdate();
@@ -592,7 +599,8 @@ public class MnodeStore implements AlarmListener {
       stmt.setLong(1, idleTimeout);
       stmt.setLong(2, updateTime);
 
-      stmt.setBytes(3, id.getHash());
+      String key = keyToString(id.getHash());
+      stmt.setString(3, key);
       stmt.setLong(4, itemVersion);
 
       int count = stmt.executeUpdate();
@@ -632,7 +640,6 @@ public class MnodeStore implements AlarmListener {
       if (count > 0)
         log.finer(this + " expired " + count + " old data");
     } catch (Exception e) {
-      e.printStackTrace();
       log.log(Level.FINE, e.toString(), e);
     } finally {
       conn.close();
@@ -685,7 +692,6 @@ public class MnodeStore implements AlarmListener {
   public void destroy()
   {
     _dataSource = null;
-    _freeConn = null;
 
     Alarm alarm = _alarm;
     _alarm = null;
@@ -697,7 +703,7 @@ public class MnodeStore implements AlarmListener {
   private CacheMapConnection getConnection()
     throws SQLException
   {
-    CacheMapConnection cConn = _freeConn.allocate();
+    CacheMapConnection cConn = null;//_freeConn.allocate();
 
     if (cConn == null) {
       Connection conn = _dataSource.getConnection();
@@ -705,6 +711,20 @@ public class MnodeStore implements AlarmListener {
     }
 
     return cConn;
+  }
+  
+  private String keyToString(byte []bytes)
+  {
+    StringBuilder sb = new StringBuilder();
+    
+    for (int i = 0; i < bytes.length; i++) {
+      int d = bytes[i];
+      
+      sb.append((char) (((d >> 4) & 0xf) + 'a'));
+      sb.append((char) ((d & 0xf) + 'a'));
+    }
+    
+    return sb.toString();
   }
 
   @Override
@@ -800,11 +820,13 @@ public class MnodeStore implements AlarmListener {
 
     void close()
     {
+      /*
       if (_freeConn == null || ! _freeConn.freeCareful(this)) {
-        try {
-          _conn.close();
-        } catch (SQLException e) {
-        }
+      }
+      */
+      try {
+        _conn.close();
+      } catch (SQLException e) {
       }
     }
   }

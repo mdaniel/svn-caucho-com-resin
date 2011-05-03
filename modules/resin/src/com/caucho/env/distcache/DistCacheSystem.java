@@ -43,6 +43,8 @@ public class DistCacheSystem extends AbstractResinSubSystem
   private CacheManager _cacheManager;
   private AbstractCacheManager<?> _distCacheManager;
   
+  private AbstractCacheManager<?> _jdbcCacheManager;
+  
   public DistCacheSystem(AbstractCacheManager<?> distCacheManager)
   {
     if (distCacheManager == null)
@@ -78,6 +80,16 @@ public class DistCacheSystem extends AbstractResinSubSystem
     return _cacheManager;
   }
   
+  public AbstractCacheManager<?> getJdbcCacheManager()
+  {
+    return _jdbcCacheManager;
+  }
+  
+  public void setJdbcCacheManager(AbstractCacheManager<?> jdbcManager)
+  {
+    _jdbcCacheManager = jdbcManager;
+  }
+  
   public CacheBuilder createBuilder(String name)
   {
     return new CacheBuilder(name, _cacheManager, _distCacheManager);
@@ -93,6 +105,9 @@ public class DistCacheSystem extends AbstractResinSubSystem
   public void start()
   {
     _distCacheManager.start();
+    
+    if (_jdbcCacheManager != null)
+      _jdbcCacheManager.start();
   }
   
   @Override

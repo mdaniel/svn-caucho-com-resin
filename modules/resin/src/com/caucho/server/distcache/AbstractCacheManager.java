@@ -46,6 +46,7 @@ import com.caucho.env.distcache.AbstractCacheClusterBacking;
 import com.caucho.env.distcache.CacheClusterBacking;
 import com.caucho.env.distcache.CacheDataBacking;
 import com.caucho.env.service.ResinSystem;
+import com.caucho.inject.Module;
 import com.caucho.util.Alarm;
 import com.caucho.util.HashKey;
 import com.caucho.util.L10N;
@@ -59,6 +60,7 @@ import com.caucho.vfs.WriteStream;
 /**
  * Manages the distributed cache
  */
+@Module
 abstract public class AbstractCacheManager<E extends DistCacheEntry>
   extends DistributedCacheManager
 {
@@ -328,7 +330,7 @@ abstract public class AbstractCacheManager<E extends DistCacheEntry>
                                 long now)
   {
     MnodeValue mnodeValue = getClusterBacking().loadClusterValue(entry, config);
-
+    
     if (mnodeValue == null || mnodeValue.isEntryExpired(now)) {
       CacheLoader loader = config.getCacheLoader();
 
@@ -361,8 +363,8 @@ abstract public class AbstractCacheManager<E extends DistCacheEntry>
    * Sets a cache entry
    */
   final public Object put(E entry,
-                    Object value,
-                    CacheConfig config)
+                          Object value,
+                          CacheConfig config)
   {
     long now = Alarm.getCurrentTime();
 
@@ -416,9 +418,9 @@ abstract public class AbstractCacheManager<E extends DistCacheEntry>
   }
 
   public final ExtCacheEntry putStream(E entry,
-                                 InputStream is,
-                                 CacheConfig config,
-                                 long idleTimeout)
+                                       InputStream is,
+                                       CacheConfig config,
+                                       long idleTimeout)
     throws IOException
   {
     HashKey key = entry.getKeyHash();
@@ -517,7 +519,7 @@ abstract public class AbstractCacheManager<E extends DistCacheEntry>
     return entry;
   }
 
-  final E loadLocalEntry(HashKey key)
+  public final E loadLocalEntry(HashKey key)
   {
     if (key == null)
       throw new NullPointerException();
@@ -534,7 +536,7 @@ abstract public class AbstractCacheManager<E extends DistCacheEntry>
     return entry;
   }
 
-  final E getLocalEntryAndUpdateIdle(HashKey key)
+  public final E getLocalEntryAndUpdateIdle(HashKey key)
   {
     E entry = getLocalEntry(key);
 
@@ -625,7 +627,7 @@ abstract public class AbstractCacheManager<E extends DistCacheEntry>
     }
 
     return getDataBacking().insertLocalValue(key, mnodeValue,
-                                              oldEntryValue, timeout);
+                                             oldEntryValue, timeout);
   }
   
   /**
@@ -653,10 +655,10 @@ abstract public class AbstractCacheManager<E extends DistCacheEntry>
   /**
    * Sets a cache entry
    */
-  final void saveLocalUpdateTime(HashKey key,
-                           long version,
-                           long idleTimeout,
-                           long updateTime)
+  public final void saveLocalUpdateTime(HashKey key,
+                                        long version,
+                                        long idleTimeout,
+                                        long updateTime)
   {
     DistCacheEntry entry = _entryCache.get(key);
 
@@ -786,17 +788,17 @@ abstract public class AbstractCacheManager<E extends DistCacheEntry>
   /**
    * Sets a cache entry
    */
-  final MnodeValue putLocalValue(DistCacheEntry entry,
-                                 long version,
-                                 HashKey valueHash,
-                                 Object value,
-                                 HashKey cacheHash,
-                                 int flags,
-                                 long expireTimeout,
-                                 long idleTimeout,
-                                 long leaseTimeout,
-                                 long localReadTimeout,
-                                 int leaseOwner)
+  public final MnodeValue putLocalValue(DistCacheEntry entry,
+                                        long version,
+                                        HashKey valueHash,
+                                        Object value,
+                                        HashKey cacheHash,
+                                        int flags,
+                                        long expireTimeout,
+                                        long idleTimeout,
+                                        long leaseTimeout,
+                                        long localReadTimeout,
+                                        int leaseOwner)
   {
     HashKey key = entry.getKeyHash();
 
@@ -1053,8 +1055,9 @@ abstract public class AbstractCacheManager<E extends DistCacheEntry>
         return false;
       }
 
-      if (getDataBacking().loadData(valueKey, out))
+      if (getDataBacking().loadData(valueKey, out)) {
         return true;
+      }
 
       log.warning(this + " unexpected load failure in readValue " + valueKey);
 

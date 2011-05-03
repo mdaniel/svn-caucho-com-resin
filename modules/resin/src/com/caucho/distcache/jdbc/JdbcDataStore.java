@@ -27,7 +27,7 @@
  * @author Scott Ferguson
  */
 
-package com.caucho.server.distcache;
+package com.caucho.distcache.jdbc;
 
 import static java.sql.ResultSet.CONCUR_UPDATABLE;
 import static java.sql.ResultSet.TYPE_FORWARD_ONLY;
@@ -44,11 +44,14 @@ import java.util.logging.Logger;
 
 import javax.sql.DataSource;
 
+import com.caucho.cloud.network.NetworkClusterSystem;
 import com.caucho.db.index.SqlIndexAlreadyExistsException;
+import com.caucho.env.distcache.CacheDataBacking;
+import com.caucho.server.distcache.LoadDataCallback;
+import com.caucho.server.distcache.MnodeOrphanListener;
 import com.caucho.util.Alarm;
 import com.caucho.util.AlarmListener;
 import com.caucho.util.ConcurrentArrayList;
-import com.caucho.util.FreeList;
 import com.caucho.util.HashKey;
 import com.caucho.util.IoUtil;
 import com.caucho.util.JdbcUtil;
@@ -59,12 +62,9 @@ import com.caucho.vfs.WriteStream;
 /**
  * Manages the backing for the file database objects
  */
-public class DataStore {
+public class JdbcDataStore {
   private static final Logger log
-    = Logger.getLogger(DataStore.class.getName());
-
-  private FreeList<DataConnection> _freeConn
-    = new FreeList<DataConnection>(32);
+    = Logger.getLogger(JdbcDataStore.class.getName());
 
   private final String _tableName;
   private final String _mnodeTableName;
@@ -91,14 +91,16 @@ public class DataStore {
 
   private Alarm _alarm;
 
-  public DataStore(String serverName,
-                   MnodeStore mnodeStore)
+  public JdbcDataStore(JdbcMnodeStore mnodeStore,
+                       String tableName,
+                       String serverName)
     throws Exception
   {
     _dataSource = mnodeStore.getDataSource();
     _mnodeTableName = mnodeStore.getTableName();
 
-    _tableName = "data";
+    _tableName = tableName;
+    // _serverName = serverName;
 
     if (_tableName == null)
       throw new NullPointerException();
@@ -126,7 +128,7 @@ public class DataStore {
                               + "  " + _tableName + " AS d"
                               + " WHERE m.value = d.id");
                               */
-    _updateAllExpiresQuery = ("SELECT d.expire_time, d.resin_oid, m.value"
+    _updateAllExpiresQuery = ("SELECT d.expire_time, m.value"
                               + " FROM " + _mnodeTableName + " AS m"
                               + " LEFT JOIN " + _tableName + " AS d"
                               + " ON(m.value = d.id)");
@@ -157,10 +159,12 @@ public class DataStore {
 
     initDatabase();
 
-    _alarm = new Alarm(new ExpireAlarm());
-    // _alarm.queue(_expireTimeout);
+    if (NetworkClusterSystem.getCurrentSelfServer().getIndex() == 0) {
+      _alarm = new Alarm(new ExpireAlarm());
+      // _alarm.queue(_expireTimeout);
 
-    _alarm.queue(0);
+      _alarm.queue(0);
+    }
   }
 
   /**
@@ -271,14 +275,11 @@ public class DataStore {
   }
 
   /**
-   * Reads the object from the data store.
-   *
-   * @param id the hash identifier for the data
-   * @param os the WriteStream to hold the data
-   *
-   * @return true on successful load
+   * @param valueKey
+   * @param dataBacking
+   * @return
    */
-  public boolean load(HashKey id, LoadDataCallback cb)
+  public boolean load(HashKey id, CacheDataBacking dataBacking)
   {
     DataConnection conn = null;
 
@@ -297,13 +298,17 @@ public class DataStore {
           return false;
 
         try {
-          cb.onLoad(id, is);
+          dataBacking.getDataStore().save(id, is, -1);
+
+          // os.writeStream(is);
         } finally {
           is.close();
         }
 
+        /*
         if (log.isLoggable(Level.FINER))
-          log.finer(this + " load " + id + " " + cb);
+          log.finer(this + " load " + id + " length:" + os.getPosition());
+          */
 
         return true;
       }
@@ -320,6 +325,7 @@ public class DataStore {
     }
 
     return false;
+
   }
 
   /**
@@ -417,6 +423,15 @@ public class DataStore {
   }
 
   /**
+   * @param valueHash
+   * @param dataBacking
+   */
+  public void save(HashKey valueHash, CacheDataBacking dataBacking)
+  {
+    dataBacking.getDataStore().load(valueHash, new JdbcSaveCallback());
+  }
+
+  /**
    * Saves the data, returning true on success.
    *
    * @param id the object's unique id.
@@ -426,6 +441,8 @@ public class DataStore {
   public boolean save(HashKey id, InputStream is, int length)
     throws IOException
   {
+    length = -1;
+    
     // try updating first to avoid the exception for an insert
     if (updateExpires(id)) {
       return true;
@@ -466,8 +483,6 @@ public class DataStore {
 
       if (log.isLoggable(Level.FINER))
         log.finer(this + " insert " + id + " length:" + length);
-
-      // System.out.println("INSERT: " + id);
 
       return count > 0;
     } catch (SqlIndexAlreadyExistsException e) {
@@ -587,14 +602,14 @@ public class DataStore {
 
       try {
         while (rs.next()) {
-          long oid = rs.getLong(2);
+          long expireTime = rs.getLong(1);
           
-          if (oid > 0) {
+          if (expireTime > 0) {
             rs.updateLong(1, expires);
           }
           else {
             try {
-              notifyOrphan(rs.getBytes(3));
+              notifyOrphan(rs.getBytes(2));
             } catch (Exception e) {
               e.printStackTrace();
               log.log(Level.WARNING, e.toString(), e);
@@ -630,6 +645,7 @@ public class DataStore {
    */
   public void validateDatabase()
   {
+    /*
     DataConnection conn = null;
 
     try {
@@ -644,6 +660,7 @@ public class DataStore {
       if (conn != null)
         conn.close();
     }
+    */
   }
 
   //
@@ -682,7 +699,6 @@ public class DataStore {
   public void destroy()
   {
     _dataSource = null;
-    _freeConn = null;
 
     Alarm alarm = _alarm;
     _alarm = null;
@@ -694,7 +710,7 @@ public class DataStore {
   private DataConnection getConnection()
     throws SQLException
   {
-    DataConnection cConn = _freeConn.allocate();
+    DataConnection cConn = null;//_freeConn.allocate();
 
     if (cConn == null) {
       Connection conn = _dataSource.getConnection();
@@ -871,11 +887,29 @@ public class DataStore {
 
     void close()
     {
+      /*
       if (_freeConn == null || ! _freeConn.freeCareful(this)) {
         try {
           _conn.close();
         } catch (SQLException e) {
         }
+      }
+      */
+      try {
+        _conn.close();
+      } catch (SQLException e) {
+      }
+    }
+  }
+  
+  class JdbcSaveCallback implements LoadDataCallback {
+    @Override
+    public void onLoad(HashKey key, InputStream is)
+    {
+      try {
+        save(key, is, 0);
+      } catch (Exception e) {
+        throw new RuntimeException(e);
       }
     }
   }
