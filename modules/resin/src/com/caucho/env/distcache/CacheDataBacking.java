@@ -51,6 +51,8 @@ public interface CacheDataBacking {
   
   public MnodeStore getMnodeStore();
   
+  public void start();
+  
   public MnodeValue loadLocalEntryValue(HashKey key);
   
   public MnodeValue insertLocalValue(HashKey key, 

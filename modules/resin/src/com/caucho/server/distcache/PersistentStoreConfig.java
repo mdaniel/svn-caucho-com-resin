@@ -36,10 +36,7 @@ import javax.sql.DataSource;
 
 import com.caucho.config.ConfigException;
 import com.caucho.config.types.Period;
-import com.caucho.distcache.jdbc.JdbcCacheManager;
 import com.caucho.env.distcache.DistCacheSystem;
-import com.caucho.env.service.ResinSystem;
-import com.caucho.server.cluster.Server;
 import com.caucho.util.L10N;
 import com.caucho.vfs.Path;
 
@@ -48,11 +45,8 @@ import com.caucho.vfs.Path;
  */
 public class PersistentStoreConfig
 {
-  private static final Logger log
-    = Logger.getLogger(PersistentStoreConfig.class.getName());
   private static final L10N L = new L10N(PersistentStoreConfig.class);
 
-  private String _name = "caucho/persistent-store";
   private String _type;
 
   private DataSource _dataSource;
@@ -67,7 +61,6 @@ public class PersistentStoreConfig
    */
   public void setJndiName(String name)
   {
-    _name = name;
   }
   
   /**
@@ -158,7 +151,9 @@ public class PersistentStoreConfig
     
     if (_dataSource != null) {
       DistCacheSystem system = DistCacheSystem.getCurrent();
-      
+
+      system.setJdbcDataSource(_dataSource);
+      /*
       if (system.getJdbcCacheManager() == null) {
         ResinSystem resinSystem = ResinSystem.getCurrent();
         
@@ -167,6 +162,7 @@ public class PersistentStoreConfig
         
         system.setJdbcCacheManager(jdbcManager);
       }
+      */
     }
     /*
     if (_name.startsWith("java:comp"))

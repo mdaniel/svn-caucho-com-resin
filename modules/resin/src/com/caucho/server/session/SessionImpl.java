@@ -1130,6 +1130,7 @@ public class SessionImpl implements HttpSession, CacheListener {
       if (_isInvalidating && _manager.getSessionStore() != null) {
         boolean isRemove = false;
 
+        /*
         if (logout == Logout.TIMEOUT) {
           // server/016r
           ExtCacheEntry entry
@@ -1141,6 +1142,10 @@ public class SessionImpl implements HttpSession, CacheListener {
         }
         else
           isRemove = true;
+          */
+        
+        // server/018z
+        isRemove = true;
 
         if (isRemove)
           _manager.getSessionStore().remove(_id);

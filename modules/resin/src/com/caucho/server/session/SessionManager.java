@@ -1115,13 +1115,6 @@ public final class SessionManager implements SessionCookieConfig, AlarmListener
         sessionCache = new ClusterByteStreamCache();
         
         DistCacheSystem distCacheSystem = DistCacheSystem.getCurrent();
-        
-        AbstractCacheManager<?> jdbcManager
-          = distCacheSystem.getJdbcCacheManager();
-        
-        if (jdbcManager != null) {
-          sessionCache.setManager(jdbcManager);
-        }
 
         sessionCache.setName("resin:session");
         sessionCache.setBackup(_isSaveBackup);

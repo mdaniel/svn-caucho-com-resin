@@ -48,14 +48,14 @@ import com.caucho.vfs.WriteStream;
 /**
  * Manages the distributed cache
  */
-public class DataCacheBacking implements CacheDataBacking {
+public class CacheDataBackingImpl implements CacheDataBacking {
   private static final Logger log
-    = Logger.getLogger(DataCacheBacking.class.getName());
+    = Logger.getLogger(CacheDataBackingImpl.class.getName());
   
   private DataStore _dataStore;
   private MnodeStore _mnodeStore;
   
-  public DataCacheBacking()
+  public CacheDataBackingImpl()
   {
   }
   

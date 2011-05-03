@@ -71,7 +71,7 @@ abstract public class AbstractCacheManager<E extends DistCacheEntry>
   
   private final ResinSystem _resinSystem;
   
-  private DataCacheBacking _dataBacking;
+  private CacheDataBacking _dataBacking;
   private CacheClusterBacking _clusterBacking;
   
   private final LruCache<HashKey, E> _entryCache
@@ -81,7 +81,6 @@ abstract public class AbstractCacheManager<E extends DistCacheEntry>
   {
     _resinSystem = resinSystem;
     // new AdminPersistentStore(this);
-    _dataBacking = new DataCacheBacking();
     _clusterBacking = new AbstractCacheClusterBacking();
   }
   
@@ -99,6 +98,11 @@ abstract public class AbstractCacheManager<E extends DistCacheEntry>
   protected CacheClusterBacking getClusterBacking()
   {
     return _clusterBacking;
+  }
+  
+  protected CacheDataBacking createDataBacking()
+  {
+    return new CacheDataBackingImpl();
   }
 
   /**
@@ -753,6 +757,7 @@ abstract public class AbstractCacheManager<E extends DistCacheEntry>
   @Override
   public final boolean remove(HashKey key)
   {
+    System.out.println("REMOVE1: " + key);
     E entry = getCacheEntry(key);
     MnodeValue mnodeValue = entry.getMnodeValue();
 
@@ -852,10 +857,10 @@ abstract public class AbstractCacheManager<E extends DistCacheEntry>
     }
     
     return getDataBacking().putLocalValue(mnodeValue, key, oldEntryValue, version,
-                                           valueHash, value, cacheHash,
-                                           flags, expireTimeout, idleTimeout, 
-                                           leaseTimeout,
-                                           localReadTimeout, leaseOwner);
+                                          valueHash, value, cacheHash,
+                                          flags, expireTimeout, idleTimeout, 
+                                          leaseTimeout,
+                                          localReadTimeout, leaseOwner);
   }
 
   final public HashKey writeData(HashKey oldValueHash,
@@ -1115,6 +1120,9 @@ abstract public class AbstractCacheManager<E extends DistCacheEntry>
   public void start()
   {
     super.start();
+    
+    if (_dataBacking == null)
+      _dataBacking = createDataBacking();
     
     if (getDataBacking() == null)
       throw new NullPointerException();
