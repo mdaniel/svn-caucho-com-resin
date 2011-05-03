@@ -144,6 +144,13 @@ public class ManagerClient
     return (String) query(query);
   }
 
+  public String setJmx(String pattern, String attribute, String value)
+  {
+    JmxSetQuery query = new JmxSetQuery(pattern, attribute, value);
+
+    return (String) query(query);
+  }
+
   public String profile(long activeTime, long period, int depth) {
     ProfileQuery query = new ProfileQuery(activeTime, period, depth);
 
@@ -173,5 +180,6 @@ public class ManagerClient
     else
       return getClass().getSimpleName() + "[" + _bamClient + "]";
   }
+
 }
 

@@ -29,6 +29,7 @@
 
 package com.caucho.boot;
 
+import com.caucho.config.ConfigException;
 import com.caucho.server.admin.ManagerClient;
 import com.caucho.util.L10N;
 
@@ -48,9 +49,9 @@ public class JmxListCommand extends JmxCommand
       try {
         ObjectName.getInstance(pattern);
       } catch (MalformedObjectNameException e) {
-        System.err.println(e.getMessage());
-
-        return;
+        throw new ConfigException(L.l("invalid pattern `{0}': `{1}'",
+                                      pattern,
+                                      e.getMessage()));
       }
 
     boolean isPrintAttributes = args.hasOption("-attributes");

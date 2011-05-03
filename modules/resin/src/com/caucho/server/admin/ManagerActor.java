@@ -47,6 +47,7 @@ import com.caucho.util.MemoryPoolAdapter;
 import com.caucho.util.ThreadDump;
 
 import javax.annotation.PostConstruct;
+import javax.management.Attribute;
 import javax.management.MBeanAttributeInfo;
 import javax.management.MBeanOperationInfo;
 import javax.management.MBeanParameterInfo;
@@ -81,6 +82,7 @@ public class ManagerActor extends SimpleActor
 
   private static final L10N L = new L10N(ManagerActor.class);
   private static ClassLoader _systemClassLoader;
+  private static Map<String, Class> classMap = new HashMap<String, Class>();
 
   private Server _server;
   private MBeanServer _mBeanServer;
@@ -323,6 +325,125 @@ public class ManagerActor extends SimpleActor
     return result;
   }
 
+@Query
+  public String setJmx(long id, String to, String from, JmxSetQuery query)
+  {
+    final List<MBeanServer> servers = new LinkedList<MBeanServer>();
+
+    String result;
+
+    try {
+      servers.addAll(MBeanServerFactory.findMBeanServer(null));
+
+      ObjectName nameQuery = ObjectName.getInstance(query.getPattern());
+
+      ObjectName subjectBean = null;
+      MBeanServer subjectBeanServer = null;
+
+      for (final MBeanServer server : servers) {
+        for (final ObjectName mbean : server.queryNames(nameQuery, null)) {
+          if (subjectBean != null) {
+            result = L.l("multiple beans match `{0}'",
+                         query.getPattern());
+
+            getBroker().queryResult(id, from, to, "");
+
+            return result;
+          }
+
+          subjectBean = mbean;
+          subjectBeanServer = server;
+        }
+      }
+
+      final String attributeName = query.getAttribute();
+      MBeanAttributeInfo attributeInfo = null;
+      if (subjectBean != null) {
+        for (MBeanAttributeInfo attribute : subjectBeanServer.getMBeanInfo(
+          subjectBean).getAttributes()) {
+          if (attribute.getName().equals(attributeName)) {
+            attributeInfo = attribute;
+
+            break;
+          }
+        }
+      }
+
+      if (subjectBean == null) {
+        result = L.l("no beans match `{0}'", query.getPattern());
+      }
+      else if (attributeInfo == null) {
+        result = L.l("bean at `{0}' does not appear to have attribute `{1}'",
+                     query.getPattern(),
+                     attributeName);
+      }
+      else {
+        Object oldValue = subjectBeanServer.getAttribute(subjectBean,
+                                                         attributeInfo.getName());
+
+        final Object value = toValue(attributeInfo.getType(), query.getValue());
+        final Attribute attribute = new Attribute(attributeName, value);
+
+        subjectBeanServer.setAttribute(subjectBean, attribute);
+
+        result = L.l(
+          "value for attribute `{0}' on bean `{1}' is changed from `{2}' to `{3}'",
+          attributeName,
+          subjectBean.getCanonicalName(),
+          oldValue,
+          value);
+      }
+    } catch (Exception e) {
+      log.log(Level.SEVERE, e.getMessage(), e);
+
+      result = e.toString();
+    }
+
+    getBroker().queryResult(id, from, to, result);
+
+    return result;
+  }
+
+  private Object toValue(String typeName, String value)
+    throws ClassNotFoundException
+  {
+    Class type = classMap.get(typeName);
+
+    if (type == null)
+      type = Class.forName(typeName);
+
+    if (boolean.class.equals(type) || Boolean.class.equals(type)) {
+      return Boolean.parseBoolean(value);
+    }
+    else if (byte.class.equals(type) || Byte.class.equals(type)) {
+      return Byte.parseByte(value);
+    }
+    else if (short.class.equals(type) || Short.class.equals(type)) {
+      return Short.parseShort(value);
+    }
+    else if (char.class.equals(type) || Character.class.equals(type)) {
+      return new Character((char) Integer.parseInt(value));
+    }
+    else if (int.class.equals(type) || Integer.class.equals(type)) {
+      return Integer.parseInt(value);
+    }
+    else if (long.class.equals(type) || Long.class.equals(type)) {
+      return Long.parseLong(value);
+    }
+    else if (float.class.equals(type) || Float.class.equals(type)) {
+      return Float.parseFloat(value);
+    }
+    else if (double.class.equals(type) || Double.class.equals(type)) {
+      return Double.parseDouble(value);
+    }
+    else if (type.isEnum()) {
+      return Enum.valueOf(type, value);
+    }
+    else {
+      return value;
+    }
+  }
+
   @Query
   public String setLogLevel(long id,
                             String to,
@@ -523,5 +644,21 @@ public class ManagerActor extends SimpleActor
 
   static {
     _systemClassLoader = ClassLoader.getSystemClassLoader();
+
+    classMap.put("boolean", boolean.class);
+    classMap.put(Boolean.class.getName(), Boolean.class);
+    classMap.put("byte", byte.class);
+    classMap.put(Byte.class.getName(), Byte.class);
+    classMap.put("short", Short.class);
+    classMap.put(Short.class.getName(), Short.class);
+    classMap.put("int", int.class);
+    classMap.put(Integer.class.getName(), Integer.class);
+    classMap.put("long", long.class);
+    classMap.put(Long.class.getName(), Long.class);
+    classMap.put("float", long.class);
+    classMap.put(Float.class.getName(), Float.class);
+    classMap.put("double", long.class);
+    classMap.put(Double.class.getName(), Double.class);
+    classMap.put(String.class.getName(), String.class);
   }
 }
