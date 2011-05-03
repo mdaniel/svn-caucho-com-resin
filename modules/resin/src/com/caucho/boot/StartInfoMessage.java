@@ -67,6 +67,6 @@ public class StartInfoMessage implements Serializable {
   @Override
   public String toString()
   {
-    return getClass().getSimpleName() + "[]";
+    return String.format("%s[%s,%s]", getClass().getSimpleName(), _isRestart, _restartMessage);
   }
 }

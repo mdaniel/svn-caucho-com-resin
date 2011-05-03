@@ -40,7 +40,7 @@ import java.util.logging.Logger;
 import com.caucho.config.ConfigException;
 import com.caucho.config.inject.BeanBuilder;
 import com.caucho.config.inject.InjectManager;
-import com.caucho.lifecycle.Lifecycle;
+import com.caucho.lifecycle.*;
 import com.caucho.loader.DynamicClassLoader;
 import com.caucho.loader.Environment;
 import com.caucho.loader.EnvironmentClassLoader;
@@ -262,6 +262,11 @@ public class ResinSystem
   public String getState()
   {
     return _lifecycle.getStateName();
+  }
+  
+  public void addLifecycleListener(LifecycleListener listener)
+  {
+    _lifecycle.addListener(listener);
   }
 
   /**
