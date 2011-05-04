@@ -35,60 +35,63 @@ import com.caucho.util.L10N;
 
 import javax.management.MalformedObjectNameException;
 import javax.management.ObjectName;
+import java.util.HashSet;
+import java.util.Set;
 
-public class JmxSetCommand extends JmxCommand
+public class JmxCallCommand extends JmxCommand
 {
-  private static final L10N L = new L10N(JmxSetCommand.class);
+  private static final L10N L = new L10N(JmxCallCommand.class);
+  private static final Set<String> options = new HashSet<String>();
 
   @Override
   public void doCommand(WatchdogArgs args, WatchdogClient client)
   {
+    String []trailingArgs = args.getTrailingArgs(options);
 
     String pattern = args.getArg("-pattern");
-
     if (pattern == null)
-      throw new ConfigException(L.l(
-        "-pattern is required for jmx-set command"));
+      throw new ConfigException(L.l("jmx-call must specify -pattern"));
 
     try {
       ObjectName.getInstance(pattern);
     } catch (MalformedObjectNameException e) {
-      throw new ConfigException(L.l("invalid pattern `{0}': `{1}'",
+      throw new ConfigException(L.l("incorrect pattern `{0}' :`{`}'",
                                     pattern,
                                     e.getMessage()));
     }
 
-    String attribute = args.getArg("-attribute");
+    String operation = args.getArg("-operation");
+    if (operation == null)
+      throw new ConfigException(L.l("jmx-call must specify -operation"));
 
-    if (attribute == null)
-      throw new ConfigException(L.l(
-        "-attribute is required for jmx-set command"));
-
-    String value = args.getDefaultArg();
-
-    if (value == null)
-      throw new ConfigException(L.l(
-        "jmx-set requires <value> parameter be specified"));
+    int operationIndex = -1;
+    if (operation.contains(":")) {
+      int i = operation.indexOf(':');
+      String name = operation.substring(0, i);
+      String index = operation.substring(i + 1, operation.length());
+      operation = name;
+      operationIndex  = Integer.parseInt(index);
+    }
 
     ManagerClient manager = getManagerClient(args, client);
-
-    String result = manager.setJmx(pattern, attribute, value);
+    String result = manager.callJmx(pattern,
+                                    operation,
+                                    operationIndex,
+                                    trailingArgs);
 
     System.out.println(result);
   }
 
-
-
   @Override
   public void usage()
   {
-    System.err.println(L.l("usage: java -jar resin.jar [-conf <file>] jmx-set -user <user> -password <password> -pattern <pattern> -attribute <attribute> value"));
+    System.err.println(L.l("usage: java -jar resin.jar [-conf <file>] jmx-call -user <user> -password <password> -pattern <pattern> -operation <operation> value..."));
     System.err.println(L.l(""));
     System.err.println(L.l("description:"));
-    System.err.println(L.l("   sets value on a MBeans attribute to <value>"));
+    System.err.println(L.l("   calls method defined with option -operation on MBean using parameters specified at value..."));
     System.err.println(L.l(""));
     System.err.println(L.l("options:"));
     System.err.println(L.l("   -pattern               : pattern to match MBean, adheres to the rules defined for javax.managment.ObjectName e.g. qa:type=Foo"));
-    System.err.println(L.l("   -attribute             : name of the attribute"));
+    System.err.println(L.l("   -operation             : operation to invoke"));
   }
 }

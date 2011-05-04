@@ -64,6 +64,8 @@ import java.text.DecimalFormat;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Calendar;
+import java.util.Collections;
+import java.util.Comparator;
 import java.util.GregorianCalendar;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -325,7 +327,7 @@ public class ManagerActor extends SimpleActor
     return result;
   }
 
-@Query
+  @Query
   public String setJmx(long id, String to, String from, JmxSetQuery query)
   {
     final List<MBeanServer> servers = new LinkedList<MBeanServer>();
@@ -404,6 +406,132 @@ public class ManagerActor extends SimpleActor
     return result;
   }
 
+  @Query
+  public String callJmx(long id, String to, String from, JmxCallQuery query)
+  {
+    final List<MBeanServer> servers = new LinkedList<MBeanServer>();
+
+    String result;
+
+    try {
+      servers.addAll(MBeanServerFactory.findMBeanServer(null));
+
+      ObjectName nameQuery = ObjectName.getInstance(query.getPattern());
+
+      ObjectName subjectBean = null;
+      MBeanServer subjectBeanServer = null;
+
+      for (final MBeanServer server : servers) {
+        for (final ObjectName mbean : server.queryNames(nameQuery, null)) {
+          if (subjectBean != null) {
+            result = L.l("multiple beans match `{0}'",
+                         query.getPattern());
+
+            getBroker().queryResult(id, from, to, result);
+
+            return result;
+          }
+
+          subjectBean = mbean;
+          subjectBeanServer = server;
+        }
+      }
+
+      final String operationName = query.getOperation();
+      final int operationIndex = query.getOperationIndex();
+
+      List<MBeanOperationInfo> operations = new ArrayList<MBeanOperationInfo>();
+      if (subjectBean != null) {
+        for (final MBeanOperationInfo operation : subjectBeanServer.getMBeanInfo(
+          subjectBean).getOperations()) {
+          if (operation.getName().equals(operationName)
+              && operation.getSignature().length == query.getParams().length) {
+            operations.add(operation);
+          }
+        }
+      }
+
+      if (subjectBean == null) {
+        result = L.l("no beans match `{0}'", query.getPattern());
+      }
+      else if (operations.isEmpty()) {
+        result = L.l("bean at `{0}' does not appear to have operation `{1}' accepting `{2}' arguments",
+                     query.getPattern(),
+                     operationName,
+                     query.getParams().length);
+      } else if (operations.size() > 1 && operationIndex == -1) {
+        sort(operations);
+        StringBuilder builder = new StringBuilder(L.l(
+          "Multiple operations match `{0}', please specify operation name with index e.g `{0}:0`\n",
+          operationName));
+
+        for (int i = 0; i < operations.size(); i++) {
+          MBeanOperationInfo operation = operations.get(i);
+          builder.append(operation.getName()).append(':').append(i).append('(');
+          MBeanParameterInfo[] params = operation.getSignature();
+          for (int j = 0; j < params.length; j++) {
+            MBeanParameterInfo param = params[j];
+            builder.append(param.getType());
+            if (j + 1 < params.length)
+              builder.append(", ");
+          }
+          builder.append(')');
+
+          if (i + 1 < operations.size())
+            builder.append('\n');
+        }
+
+        result = builder.toString();
+      }
+      else {
+        MBeanOperationInfo operationInfo;
+        sort(operations);
+        if (operationIndex > -1)
+          operationInfo = operations.get(operationIndex);
+        else
+          operationInfo = operations.get(0);
+
+        MBeanParameterInfo[] parameters = operationInfo.getSignature();
+        String[] signature = new String[parameters.length];
+        for (int i = 0; i < parameters.length; i++) {
+          signature[i] = parameters[i].getType();
+        }
+
+        String[] params = query.getParams();
+        Object[] paramValues = new Object[parameters.length];
+        for (int i = 0; i < params.length; i++) {
+          String param = params[i];
+          if ("__NULL__".equals(param))
+            continue;
+
+          String type = signature[i];
+          Object value = toValue(type, param);
+          paramValues[i] = value;
+        }
+
+        Object obj = subjectBeanServer.invoke(subjectBean,
+                                 operationName,
+                                 paramValues,
+                                 signature);
+
+        result = L.l(
+          "method `{0}' called on `{1}' returned `{2}'.",
+          getSignature(operationInfo),
+          subjectBean.getCanonicalName(),
+          obj);
+      }
+    } catch (Exception e) {
+      log.log(Level.SEVERE, e.getMessage(), e);
+
+      result = e.toString();
+    }
+
+    getBroker().queryResult(id, from, to, result);
+
+    return result;
+  }
+
+
   private Object toValue(String typeName, String value)
     throws ClassNotFoundException
   {
@@ -442,6 +570,42 @@ public class ManagerActor extends SimpleActor
     else {
       return value;
     }
+  }
+
+  private void sort(List<MBeanOperationInfo> operations)
+  {
+    Collections.sort(operations, new Comparator<MBeanOperationInfo>()
+    {
+      @Override
+      public int compare(MBeanOperationInfo o1, MBeanOperationInfo o2)
+      {
+        String signature1 = getSignature(o1);
+        String signature2 = getSignature(o2);
+
+        return signature1.compareTo(signature2);
+      }
+    });
+  }
+
+  private String getSignature(MBeanOperationInfo operation)
+  {
+    StringBuilder builder = new StringBuilder();
+
+    builder.append(operation.getName()).append('(');
+
+    MBeanParameterInfo []params = operation.getSignature();
+
+    for (int i = 0; i < params.length; i++) {
+      MBeanParameterInfo param = params[i];
+      builder.append(param.getType());
+
+      if (i + 1 < params.length)
+        builder.append(", ");
+    }
+
+    builder.append(')');
+
+    return builder.toString();
   }
 
   @Query

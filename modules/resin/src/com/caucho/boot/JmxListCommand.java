@@ -35,17 +35,24 @@ import com.caucho.util.L10N;
 
 import javax.management.MalformedObjectNameException;
 import javax.management.ObjectName;
+import java.util.HashSet;
+import java.util.Set;
 
 public class JmxListCommand extends JmxCommand
 {
   private static final L10N L = new L10N(JmxListCommand.class);
+  private static final Set<String> options = new HashSet<String>();
 
   @Override
   public void doCommand(WatchdogArgs args, WatchdogClient client)
   {
-    String pattern = args.getDefaultArg();
-    if (pattern != null)
+    String[] trailingArgs = args.getTrailingArgs(options);
 
+    String pattern = null;
+    if (trailingArgs.length > 0)
+      pattern = trailingArgs[0];
+
+    if (pattern != null) {
       try {
         ObjectName.getInstance(pattern);
       } catch (MalformedObjectNameException e) {
@@ -53,6 +60,7 @@ public class JmxListCommand extends JmxCommand
                                       pattern,
                                       e.getMessage()));
       }
+    }
 
     boolean isPrintAttributes = args.hasOption("-attributes");
     boolean isPrintOperations = args.hasOption("-operations");
@@ -90,4 +98,13 @@ public class JmxListCommand extends JmxCommand
     System.err.println(L.l("   -all                   : when <pattern> not specified sets the wildcard pattern (*:*)"));
     System.err.println(L.l("   -platform              : when <pattern> not specified sets the pattern to (java.lang:*)"));
   }
+
+  static {
+    options.add("-attributes");
+    options.add("-values");
+    options.add("-operations");
+    options.add("-all");
+    options.add("-platform");
+  }
+
 }

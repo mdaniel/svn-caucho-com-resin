@@ -32,6 +32,7 @@ import com.caucho.bam.RemoteConnectionFailedException;
 import com.caucho.bam.ServiceUnavailableException;
 import com.caucho.bam.actor.ActorSender;
 import com.caucho.bam.broker.Broker;
+import com.caucho.boot.JmxCallCommand;
 import com.caucho.hmtp.HmtpClient;
 import com.caucho.server.cluster.Server;
 import com.caucho.util.L10N;
@@ -151,6 +152,19 @@ public class ManagerClient
     return (String) query(query);
   }
 
+  public String callJmx(String pattern,
+                        String operation,
+                        int opIndex,
+                        String []trailingArgs)
+  {
+    JmxCallQuery query = new JmxCallQuery(pattern,
+                                          operation,
+                                          opIndex,
+                                          trailingArgs);
+
+    return (String) query(query);
+  }
+
   public String profile(long activeTime, long period, int depth) {
     ProfileQuery query = new ProfileQuery(activeTime, period, depth);
 
@@ -180,6 +194,5 @@ public class ManagerClient
     else
       return getClass().getSimpleName() + "[" + _bamClient + "]";
   }
-
 }
 

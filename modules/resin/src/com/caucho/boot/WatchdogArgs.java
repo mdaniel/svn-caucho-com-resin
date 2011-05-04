@@ -45,6 +45,8 @@ import java.lang.management.ManagementFactory;
 import java.net.InetAddress;
 import java.net.URL;
 import java.util.ArrayList;
+import java.util.LinkedList;
+import java.util.Set;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -300,6 +302,31 @@ class WatchdogArgs
     return null;
   }
 
+  /**
+   * returns all trailing following no dash prefixed token args
+   */
+  public String []getTrailingArgs(Set<String> options)
+  {
+    LinkedList<String> result = new LinkedList<String>();
+    ArrayList<String> tailArgs = getTailArgs();
+
+    for (int i = tailArgs.size() - 1; i >= 0; i--) {
+      String arg = tailArgs.get(i);
+
+      if (! arg.startsWith("-")) {
+        result.addFirst(arg);
+      }
+      else if (options.contains(arg)) {
+        break;
+      }
+      else if (! result.isEmpty()) {
+        result.removeFirst();
+      }
+    }
+
+    return result.toArray(new String[result.size()]);
+  }
+
   public boolean isHelp()
   {
     return _isHelp;
@@ -450,7 +477,7 @@ class WatchdogArgs
         _startMode = StartMode.JMX_GET;
       }
       else if ("jmx-call".equals(arg)) {
-        _startMode = StartMode.JMX_INVOKE;
+        _startMode = StartMode.JMX_CALL;
       }
       else if ("jmx-list".equals(arg)) {
         _startMode = StartMode.JMX_LIST;
@@ -874,7 +901,7 @@ class WatchdogArgs
     ENABLE,
     GUI,
     HEAP_DUMP,
-    JMX_INVOKE,
+    JMX_CALL,
     JMX_GET,
     JMX_LIST,
     JMX_SET,
