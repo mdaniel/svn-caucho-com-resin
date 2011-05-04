@@ -142,11 +142,6 @@ public class JniTroubleshoot {
     return _isValid;
   }
 
-  private boolean is64()
-  {
-    return "64".equals(System.getProperty("sun.arch.data.model"));
-  }
-
   private boolean isMacOSX()
   {
     return System.getProperty("os.name").equals("Mac OS X");
@@ -162,13 +157,13 @@ public class JniTroubleshoot {
     Path resinHome = CauchoSystem.getResinHome();
 
     if (isWin()) {
-      if (is64())
+      if (CauchoSystem.is64Bit())
         return resinHome.lookup("win64");
       else
         return resinHome.lookup("win32");
     }
     else {
-      if (is64())
+      if (CauchoSystem.is64Bit())
         return resinHome.lookup("libexec64");
       else
         return resinHome.lookup("libexec");

@@ -251,10 +251,10 @@ public class SystemClassLoader
       }
       else {
         if (CauchoSystem.is64Bit()) {
-          _libexec = CauchoSystem.getResinHome().lookup("libexec");
+          _libexec = CauchoSystem.getResinHome().lookup("libexec64");
         }
         else {
-          _libexec = CauchoSystem.getResinHome().lookup("libexec64");
+          _libexec = CauchoSystem.getResinHome().lookup("libexec");
         }
       }
     }
