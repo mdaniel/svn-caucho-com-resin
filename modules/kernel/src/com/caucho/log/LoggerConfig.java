@@ -54,6 +54,10 @@ public class LoggerConfig {
   
   private ArrayList<Handler> _handlerList
     = new ArrayList<Handler>();
+  
+  public LoggerConfig()
+  {
+  }
 
   /**
    * Sets the name of the logger to configure.

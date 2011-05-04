@@ -266,7 +266,12 @@ abstract public class JarListLoader extends Loader implements Dependency {
   public void getResources(Vector<URL> vector, String name)
   {
     if (_pathMap != null) {
-      JarMap.JarList jarEntryList = _pathMap.get(name);
+      String cleanName = name;
+      
+      if (cleanName.endsWith("/"))
+        cleanName = cleanName.substring(0, cleanName.length() - 1);
+      
+      JarMap.JarList jarEntryList = _pathMap.get(cleanName);
 
       for (; jarEntryList != null; jarEntryList = jarEntryList.getNext()) {
         JarEntry jarEntry = jarEntryList.getEntry();
@@ -316,7 +321,12 @@ abstract public class JarListLoader extends Loader implements Dependency {
   public Path getPath(String pathName)
   {
     if (_pathMap != null) {
-      JarMap.JarList jarEntryList = _pathMap.get(pathName);
+      String cleanPathName = pathName;
+      
+      if (cleanPathName.endsWith("/"))
+        cleanPathName = cleanPathName.substring(0, cleanPathName.length() - 1);
+      
+      JarMap.JarList jarEntryList = _pathMap.get(cleanPathName);
 
       if (jarEntryList != null) {
         return jarEntryList.getEntry().getJarPath().lookup(pathName);

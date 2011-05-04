@@ -396,10 +396,11 @@ public class TypeFactory implements AddLoaderListener
 
     if (type instanceof FlowBeanType<?>)
       attr = new FlowAttribute(type);
-    else if (type.isEnvBean())
+    else if (type.isEnvBean()) {
       attr = new EnvironmentAttribute(type);
+    }
     else {
-      attr = new XmlBeanAttribute(null, type);
+      // attr = new XmlBeanAttribute(null, type);
       //Thread.dumpStack();
       return null;
     }

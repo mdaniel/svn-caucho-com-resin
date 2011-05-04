@@ -114,7 +114,7 @@ class InjectScanManager implements ScanListener {
 
   public boolean isPending()
   {
-    return _pendingScanClassList.size() > 0;
+    return _pendingScanClassList.size() > 0 || _pendingScanRootList.size() > 0;
   }
 
   public void addDiscoveredClass(InjectScanClass injectScanClass)

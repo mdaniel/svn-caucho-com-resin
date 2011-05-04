@@ -98,7 +98,6 @@ public class ResinActor extends SimpleActor
   public void startInfo(String to, String from, StartInfoMessage msg)
   {
     _resin.setStartInfo(msg.isRestart(), msg.getRestartMessage());
-    System.out.println("Message: " + msg);
   }
   
   /**
