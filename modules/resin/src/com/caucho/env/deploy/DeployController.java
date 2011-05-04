@@ -33,7 +33,6 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 
 import com.caucho.config.ConfigException;
-import com.caucho.config.Configurable;
 import com.caucho.config.types.Period;
 import com.caucho.lifecycle.Lifecycle;
 import com.caucho.lifecycle.LifecycleListener;
@@ -66,6 +65,8 @@ abstract public class DeployController<I extends DeployInstance>
   private DeployMode _redeployMode = DeployMode.DEFAULT;
 
   private int _startupPriority = Integer.MAX_VALUE;
+  
+  private DeployControllerType _controllerType = DeployControllerType.STATIC;
 
   private DeployControllerStrategy _strategy
     = StartManualRedeployManualStrategy.STRATEGY;
@@ -147,7 +148,12 @@ abstract public class DeployController<I extends DeployInstance>
   @Override
   public DeployControllerType getControllerType()
   {
-    return DeployControllerType.STATIC;
+    return _controllerType;
+  }
+  
+  public void setControllerType(DeployControllerType type)
+  {
+    _controllerType = type;
   }
 
   /**

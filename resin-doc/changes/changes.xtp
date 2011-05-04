@@ -13,6 +13,9 @@
 
 <s2 title="4.0.18 - snapshot">
 <ul>
+<li>scheduled-task: forward with param was causing NPE (#4530, rep by kenjrwalker)</li>
+<li>web-app: explicit web-app id="/" must override webapps/ROOT (#4531, rep by danielnuriyev)</li>
+<li>session: distributed sessions now allows jdbc as a backup (#3929, rep by jkriesten)</li>
 <li>servlet: fragment after/others ordering issues (#4523)</li>
 <li>cdi: abstract decorators were not properly handled (#4406)</li>
 <li>servlet: crlf escaping required for response headers because of rewrite-dispatch (#4525)</li>

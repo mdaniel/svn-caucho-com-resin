@@ -120,7 +120,7 @@ public class StubServletRequest implements CauchoRequest {
     return (Enumeration) NullEnumeration.create();
   }
   public String []getParameterValues(String name) { return null; }
-  public Map<String,String[]> getParameterMap() { return null; }
+  public Map<String,String[]> getParameterMap() { return new HashMap(); }
   public String getProtocol() { return "none"; }
   
   public String getRemoteAddr() { return "127.0.0.1"; }
