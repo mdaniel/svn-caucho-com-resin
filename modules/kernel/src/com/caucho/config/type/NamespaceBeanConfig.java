@@ -69,6 +69,8 @@ public class NamespaceBeanConfig {
 
         ConfigType<?> type = _factory.createType(cl);
 
+        // ioc/0401
+        type.setEnvBean(true);
         type.introspect();
 
         _configType = type;

@@ -328,9 +328,9 @@ public class InlineBeanType<T> extends ConfigType<T>
     }
     
     // server/13jm - environment beans have priority over the custom bean
-    ConfigType envBean = TypeFactory.getFactory().getEnvironmentType(name);
+    ConfigType<?> envBean = TypeFactory.getFactory().getEnvironmentType(name);
     
-    if (envBean != null)
+    if (envBean != null && envBean.isEnvBean())
       return null;
 
     if (_addCustomBean != null) {

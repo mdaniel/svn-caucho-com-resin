@@ -154,8 +154,8 @@ public class AnnotatedMethodImpl<T>
   protected void fillTypeVariables(Set<VarType<?>> typeVariables)
   {
     getBaseTypeImpl().fillSyntheticTypes(typeVariables);
-    
-    for (AnnotatedParameter<T> param : _parameterList) {
+
+    for (AnnotatedParameter<T> param : getParameters()) {
       if (param instanceof BaseTypeAnnotated) {
         BaseTypeAnnotated annType = (BaseTypeAnnotated) param;
         

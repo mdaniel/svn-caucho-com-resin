@@ -48,13 +48,9 @@ import org.w3c.dom.Node;
 /**
  * Represents an introspected bean type for configuration.
  */
-public class EnvironmentBeanType extends InlineBeanType
+public class EnvironmentBeanType<X> extends InlineBeanType<X>
 {
-  private static final L10N L = new L10N(EnvironmentBeanType.class);
-  private static final Logger log
-    = Logger.getLogger(EnvironmentBeanType.class.getName());
-
-  public EnvironmentBeanType(Class beanClass)
+  public EnvironmentBeanType(Class<X> beanClass)
   {
     super(beanClass);
 

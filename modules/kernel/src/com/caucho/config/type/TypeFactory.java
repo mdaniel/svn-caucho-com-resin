@@ -73,6 +73,7 @@ import com.caucho.config.program.ContainerProgram;
 import com.caucho.config.program.PropertyStringProgram;
 import com.caucho.config.types.AnnotationConfig;
 import com.caucho.config.types.RawString;
+import com.caucho.config.xml.XmlBeanAttribute;
 import com.caucho.config.xml.XmlBeanConfig;
 import com.caucho.config.xml.XmlBeanType;
 import com.caucho.el.Expr;
@@ -395,8 +396,13 @@ public class TypeFactory implements AddLoaderListener
 
     if (type instanceof FlowBeanType<?>)
       attr = new FlowAttribute(type);
-    else
+    else if (type.isEnvBean())
       attr = new EnvironmentAttribute(type);
+    else {
+      attr = new XmlBeanAttribute(null, type);
+      //Thread.dumpStack();
+      return null;
+    }
 
     _envAttrMap.put(name, attr);
 
@@ -656,7 +662,7 @@ public class TypeFactory implements AddLoaderListener
   /**
    * Returns a driver by the url
    */
-  public Class getDriverClassByUrl(Class api, String url)
+  public Class<?> getDriverClassByUrl(Class<?> api, String url)
   {
     String scheme;
 
@@ -681,7 +687,7 @@ public class TypeFactory implements AddLoaderListener
 
     try {
       ClassLoader loader = Thread.currentThread().getContextClassLoader();
-      Class cl = Class.forName(typeName, false, loader);
+      Class<?> cl = Class.forName(typeName, false, loader);
 
       if (! api.isAssignableFrom(cl))
         throw new ConfigException(L.l("'{0}' is not assignable to '{1}' for scheme '{2}'",
@@ -700,7 +706,7 @@ public class TypeFactory implements AddLoaderListener
   /**
    * Returns a driver by the scheme
    */
-  public Class getDriverClassByScheme(Class api, String scheme)
+  public Class<?> getDriverClassByScheme(Class<?> api, String scheme)
   {
     String typeName = getDriverType(api.getName(), scheme);
 
@@ -717,7 +723,7 @@ public class TypeFactory implements AddLoaderListener
 
     try {
       ClassLoader loader = Thread.currentThread().getContextClassLoader();
-      Class cl = Class.forName(typeName, false, loader);
+      Class<?> cl = Class.forName(typeName, false, loader);
 
       if (! api.isAssignableFrom(cl))
         throw new ConfigException(L.l("'{0}' is not assignable to '{1}' for scheme '{2}'",

@@ -63,6 +63,7 @@ public class XmlBeanAttribute extends Attribute {
     _setMethod = setMethod;
   }
 
+  @Override
   public ConfigType<?> getConfigType()
   {
     return _configType;
@@ -118,15 +119,15 @@ public class XmlBeanAttribute extends Attribute {
     
     // ioc/13jm
     ConfigType<?> type = TypeFactory.getFactory().getEnvironmentType(qName);
-    
-    if (type != null) {
+
+    // ioc/0401
+    if (type != null && type.isEnvBean()) {
       return type.create(parent, qName);
     }
     
     Class<?> cl = TypeFactory.loadClass(pkg, localName);
 
     if (cl == null) {
-
       throw new ConfigException(L.l("'{0}.{1}' is an unknown class for element '{2}'",
                                     pkg, localName, qName));
     }
@@ -138,7 +139,6 @@ public class XmlBeanAttribute extends Attribute {
       XmlBeanConfig config = new XmlBeanConfig(qName, cl, parent);
 
       // config.setScope("singleton");
-
       return config;
     }
   }

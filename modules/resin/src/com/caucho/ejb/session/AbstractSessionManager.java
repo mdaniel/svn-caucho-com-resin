@@ -530,7 +530,6 @@ abstract public class AbstractSessionManager<X> extends AbstractEjbBeanManager<X
         extAnnType.addMethod(extMethod);
       else if (method.isAnnotationPresent(Produces.class)
                && ! baseType.isAnnotationPresent(Specializes.class)) {
-        System.out.println("METHOD: " + method + " " + apiList);
         // TCK: conflict
         // ioc/07fa, ioc/07a4
         throw new ConfigException(L.l("{0}.{1} is an invalid @Produces EJB method because the method is not in a @Local interface.",

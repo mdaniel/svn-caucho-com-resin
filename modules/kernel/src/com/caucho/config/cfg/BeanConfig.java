@@ -484,19 +484,6 @@ public class BeanConfig {
       throw new ConfigException(L.l("<{0}> requires a class attribute",
                                     getTagName()));
 
-    /* XXX:
-    if (_cl.isAnnotationPresent(Stateless.class)) {
-      StatelessBeanConfig cfg = new StatelessBeanConfig(this);
-      cfg.init();
-      return;
-    }
-    else if (_cl.isAnnotationPresent(Stateful.class)) {
-      StatefulBeanConfig cfg = new StatefulBeanConfig(this);
-      cfg.init();
-      return;
-    }
-    */
-
     introspect();
 
     InjectManager beanManager = InjectManager.create();
@@ -524,10 +511,6 @@ public class BeanConfig {
       throw new ConfigException(L.l("{0} cannot be configured by <bean> because it has an EJB annotation.  Use CDI syntax instead.",
                                     _annotatedType));
     }
-    /*
-    if (getMBeanName() != null)
-      comp.setMBeanName(getMBeanName());
-    */
 
     // server/21q1
     if (isStartup()
@@ -562,17 +545,6 @@ public class BeanConfig {
     }
     
     builder.annotation(_cdiManager.generateXmlCookie());
-
-    /*
-    if (_isService) {
-      comp.addAnnotation(new AnnotationLiteral<Service>() {});
-    }
-    */
-
-    /*
-    if (_newArgs != null)
-      comp.setNewArgs(_newArgs);
-    */
 
     if (_init != null)
       builder.init(_init);
@@ -624,11 +596,6 @@ public class BeanConfig {
       CreationalContext<?> env = _cdiManager.createCreationalContext(_bean);
 
       Object value = _cdiManager.getReference(_bean, _bean.getBeanClass(), env);
-
-      /*
-      if (_init != null)
-        _init.inject(value, (ConfigContext) env);
-      */
 
       return value;
     }
