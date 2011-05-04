@@ -102,7 +102,6 @@ public class HmtpWebSocketWriter extends AbstractBroker
       _hOut.message(_wsOut, to, from, payload);
       
       _wsOut.close();
-      System.out.println("HMTP-MSG: " + payload);
     } catch (IOException e) {
       throw new ProtocolException(e);
     }

@@ -118,7 +118,9 @@ show how you would create a message for an SOA or JMS application.</p>
 <example title="Serialization">
 ByteArrayOutputStream bos = new ByteArrayOutputStream();
 
-Hessian2Output out = new Hessian2Output(bos);
+HessianFactory factory = new HessianFactory();
+
+Hessian2Output out = factory.createHessian2Output(bos);
 
 out.startMessage();
       
@@ -146,7 +148,9 @@ and read data from the stream.</p>
 <example title="Deserialization">
 ByteArrayInputStream bin = new ByteArrayInputStream(data);
 
-Hessian2Input in = new Hessian2Input(bin);
+HessianFactory factory = new HessianFactory();
+
+Hessian2Input in = factory.createHessianHessian2Input(bin);
 
 in.startMessage();
 
@@ -188,7 +192,8 @@ Deflation envelope = new Deflation();
 
 ByteArrayOutputStream bos = new ByteArrayOutputStream();
 
-Hessian2Output out = new Hessian2Output(bos);
+HessianFactory factory = new HessianFactory();
+Hessian2Output out = facotyr.createHessian2Output(bos);
 
 out = out.wrap(out);
 
@@ -210,7 +215,8 @@ Deflation envelope = new Deflation();
 
 ByteArrayInputStream bin = new ByteArrayInputStream(data);
 
-Hessian2Input in = new Hessian2Input(bin);
+HessianFactory factory = new HessianFactory();
+Hessian2Input in = factory.createHessian2Input(bin);
 
 in = envelope.unwrap(in);
 

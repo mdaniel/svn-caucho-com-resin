@@ -101,8 +101,6 @@ public class MnodeStore implements AlarmListener {
       throw new NullPointerException();
 
     _dataSource = dataSource;
-
-    init();
   }
 
   /**
@@ -133,7 +131,7 @@ public class MnodeStore implements AlarmListener {
   // lifecycle
   //
 
-  private void init()
+  protected void init()
     throws Exception
   {
     _loadQuery = ("SELECT value,cache_id,flags,server_version,item_version,expire_timeout,idle_timeout,lease_timeout,local_read_timeout,update_time"
@@ -196,7 +194,7 @@ public class MnodeStore implements AlarmListener {
   /**
    * Create the database, initializing if necessary.
    */
-  private void initDatabase()
+  protected void initDatabase()
     throws Exception
   {
     Connection conn = _dataSource.getConnection();

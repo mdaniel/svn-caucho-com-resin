@@ -142,8 +142,6 @@ public class DataStore {
     _validateQuery = ("VALIDATE " + _tableName);
 
     _countQuery = "SELECT count(*) FROM " + _tableName;
-
-    init();
   }
 
   DataSource getDataSource()
@@ -151,10 +149,9 @@ public class DataStore {
     return _dataSource;
   }
 
-  private void init()
+  protected void init()
     throws Exception
   {
-
     initDatabase();
 
     _alarm = new Alarm(new ExpireAlarm());

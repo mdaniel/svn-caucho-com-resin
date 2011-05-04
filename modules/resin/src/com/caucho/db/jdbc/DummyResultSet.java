@@ -44,7 +44,7 @@ class DummyResultSet extends AbstractResultSet {
   
   private ArrayList<DummyColumn> _dummyColumns = new ArrayList<DummyColumn>();
   private ArrayList<DummyRow> _dummyRows = new ArrayList<DummyRow>();
-  private int i;
+  private int _i;
 
   static {
     try {
@@ -138,7 +138,10 @@ class DummyResultSet extends AbstractResultSet {
 
   public String getString(int column)
   {
-    DummyRow row = _dummyRows.get(i);
+    if (_dummyRows.size() <= _i)
+      return null;
+    
+    DummyRow row = _dummyRows.get(_i);
 
     return row.getString(column);
   }
@@ -156,10 +159,10 @@ class DummyResultSet extends AbstractResultSet {
   public boolean next()
     throws SQLException
   {
-    if (_dummyRows.size() <= i)
+    if (_dummyRows.size() <= _i)
       return false;
 
-    i++;
+    _i++;
 
     return true;
   }

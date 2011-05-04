@@ -273,7 +273,10 @@ public class CacheDataBackingImpl implements CacheDataBacking {
       String tableName = "mnode";
 
       _mnodeStore = new MnodeStore(dataSource, tableName, serverId);
+      _mnodeStore.init();
+      
       _dataStore = new DataStore(serverId, _mnodeStore);
+      _dataStore.init();
     } catch (Exception e) {
       throw ConfigException.create(e);
     }
