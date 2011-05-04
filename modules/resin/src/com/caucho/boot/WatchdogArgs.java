@@ -569,6 +569,13 @@ class WatchdogArgs
                                + "\n  deploy-start - starts an application"
                                + "\n  deploy-stop - stops an application"
                                + "\n  undeploy - undeploys an application"
+                               + "\n  heap-dump - produces a heap dump"
+                               + "\n  thread-dump - produces a thread dump"
+                               + "\n  profile - profiles the system"
+                               + "\n  log-level - sets a log level"
+                               + "\n  jmx-list - lists MBeans, attributes, operations"
+                               + "\n  jmx-set - sets value on MBean's attribute"
+                               + "\n  jmx-call - invokes a method on MBean"
                                + "\n  help <command> - prints command usage message"
                                + "\n  version - prints version"));
       System.exit(1);
@@ -592,7 +599,7 @@ class WatchdogArgs
   {
     System.err.println(L().l("usage: java -jar resin.jar [-options] [console | status | start | gui | stop | restart | kill | shutdown | version]"));
     System.err.println(L().l("       java -jar resin.jar [-options] [deploy | undeploy | deploy-copy | deploy-list | deploy-start | deploy-stop | deploy-restart]"));
-    System.err.println(L().l("       java -jar resin.jar [-options] [thread-dump | heap-dump | log-level | profile]"));
+    System.err.println(L().l("       java -jar resin.jar [-options] [thread-dump | heap-dump | log-level | profile | jmx-list | jmx-call | jmx-set]"));
     System.err.println(L().l("       java -jar resin.jar help <command>"));
     System.err.println(L().l(""));
     System.err.println(L().l("where options include:"));
