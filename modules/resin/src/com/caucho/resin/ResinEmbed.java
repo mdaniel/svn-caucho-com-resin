@@ -118,6 +118,7 @@ public class ResinEmbed
   public ResinEmbed()
   {
     _resin = Resin.create("embed");
+    _resin.setEmbedded(true);
     _resin.setRootDirectory(Vfs.lookup());
   }
 
