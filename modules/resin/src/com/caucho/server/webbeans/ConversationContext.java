@@ -318,14 +318,18 @@ public class ConversationContext extends AbstractScopeContext
     ExternalContext extContext = facesContext.getExternalContext();
     Map<String,Object> sessionMap = extContext.getSessionMap();
 
-    Scope scope = (Scope) sessionMap.get("caucho.conversation");
+    Scope scope = (Scope) sessionMap.get(SESSION_CONVERSATION);
     
     if (scope == null) {
       if (! isCreate)
         return null;
       
       scope = new Scope();
-      sessionMap.put("caucho.conversation", scope);
+      try {
+        sessionMap.put(SESSION_CONVERSATION, scope);
+      } catch (Exception e) {
+        getSessionScope();
+      }
     }
     
     Map<String,String> requestMap = extContext.getRequestParameterMap();

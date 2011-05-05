@@ -105,6 +105,11 @@ public class ReflectionAnnotatedType<T>
     
     if (getBaseTypeImpl().getParamMap() != null)
       _paramMap.putAll(getBaseTypeImpl().getParamMap());
+    
+    introspectInheritedAnnotations(_javaClass);
+    
+    if (_javaClass.isAnnotationPresent(Specializes.class))
+      introspectSpecializesAnnotations(_javaClass);
   }
 
   /**
@@ -133,8 +138,7 @@ public class ReflectionAnnotatedType<T>
   @Override
   public Set<AnnotatedConstructor<T>> getConstructors()
   {
-    if (! _isIntrospected)
-      introspect();
+    introspect();
     
     return _constructorSet;
   }
@@ -145,8 +149,7 @@ public class ReflectionAnnotatedType<T>
   @Override
   public Set<AnnotatedMethod<? super T>> getMethods()
   {
-    if (! _isIntrospected)
-      introspect();
+    introspect();
     
     return _methodSet;
   }
@@ -175,11 +178,16 @@ public class ReflectionAnnotatedType<T>
   @Override
   public Set<AnnotatedField<? super T>> getFields()
   {
+    introspect();
+    
     return _fieldSet;
   }
 
   private void introspect()
   {
+    if (_isIntrospected)
+      return;
+    
     synchronized (this) {
       if (! _isIntrospected) {
         introspect(_javaClass);
@@ -192,10 +200,12 @@ public class ReflectionAnnotatedType<T>
   private void introspect(Class<T> cl)
   {
     try {
+      /*
       introspectInheritedAnnotations(cl);
       
       if (cl.isAnnotationPresent(Specializes.class))
         introspectSpecializesAnnotations(cl);
+        */
 
       introspectFields(cl);
 

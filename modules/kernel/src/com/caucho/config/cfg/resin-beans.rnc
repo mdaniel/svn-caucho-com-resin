@@ -10,6 +10,10 @@ r_beans = element beans {
 
   & r_alternatives*
 
+  & r_decorators*
+  
+  & r_interceptors*
+
   & element system { r_env-Content }*
 }
 
