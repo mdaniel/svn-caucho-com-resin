@@ -1,0 +1,436 @@
+<document>
+  <header>
+    <product>resin</product>
+    <title>Command Line Resin Administration</title>
+    <type>contents</type>
+    <description>
+      <p>Starting with version 4.0.17 Resin provides extended set of
+        commands that allow administrators and programmers perform debugging
+        and monitoring tasks on remote Resin server using command line.
+      </p>
+
+      <p>All Resin users should familiarize themselves with the thread dump,
+        profile, and heap capabilities.
+      </p>
+
+    </description>
+  </header>
+  <body>
+<localtoc/>
+
+<s1 title="enabling the commands">
+<p>By default these commands are disabled. Enabling the command requires ManagerService
+be registered in resin.xml file.</p>
+
+<example title="enabling Resin ManagerService">
+  &lt;resin xmlns="http://caucho.com/ns/resin"
+         xmlns:resin="urn:java:com.caucho.resin"
+         xmlns:sec="urn:java:com.caucho.security">
+  ...
+  &lt;cluster id=''>
+
+    &lt;sec:AdminAuthenticator password-digest="none">
+      &lt;sec:user name="admin" password="secret"/>
+    &lt;/sec:AdminAuthenticator>
+
+    &lt;resin:RemoteAdminService/>
+
+    &lt;resin:ManagerService/>
+
+    ...
+  &lt;/cluster>
+    ...
+  &lt;/resin>
+</example>
+
+</s1>
+
+<s1 title="available commands">
+  <deftable title="commands">
+    <tr>
+      <th>Command</th>
+      <th>Description</th>
+    </tr>
+    <tr>
+      <td>heap-dump</td>
+      <td>produces heap dump</td>
+    </tr>
+    <tr>
+      <td>thread-dump</td>
+      <td>produces thread dump</td>
+    </tr>
+    <tr>
+      <td>profile</td>
+      <td>turn profiling and displays results after sampling completes</td>
+    </tr>
+    <tr>
+      <td>jmx-list</td>
+      <td>lists MBeans, attributes and operations</td>
+    </tr>
+    <tr>
+      <td>jmx-set</td>
+      <td>sets value of a jmx attribute</td>
+    </tr>
+    <tr>
+      <td>jmx-call</td>
+      <td>calls MBean's method</td>
+    </tr>
+    <tr>
+      <td>log-level</td>
+      <td>changes log-level</td>
+    </tr>
+  </deftable>
+  <p>
+    Since all commands require connecting to Resin server remotely list of
+    required parameters includes authentication and remote connection options
+    such as IP and Port.
+  </p>
+  <deftable title="common options">
+  <tr>
+    <th>Argument</th>
+    <th>Meaning</th>
+    <th>Default</th>
+  </tr>
+  <tr>
+    <td>-conf</td>
+    <td>configuration file</td>
+    <td>conf/resin.xml</td>
+  </tr>
+  <tr>
+    <td>-address</td>
+    <td>ip or host name of the server</td>
+    <td>taken from conf/resin.xml</td>
+  </tr>
+  <tr>
+    <td>-port</td>
+    <td>server http port</td>
+    <td>taken from conf/resin.xml</td>
+  </tr>
+  <tr>
+    <td>-user</td>
+    <td>user name used for authentication to the server</td>
+    <td>none, required</td>
+  </tr>
+  <tr>
+    <td>-password</td>
+    <td>password used for authentication to the server</td>
+    <td>none, required</td>
+  </tr>
+</deftable>
+</s1>
+
+<s1 title="producing heap dump">
+<p>To produce a heap dump resin provides <code>heap-dump</code> command. With
+Resin Open Source, <code>heap-dump</code> will produce a standard heap dump
+file and put it into a temporary directory on a remote machine.</p>
+<p><code>java -jar resin.jar [-conf &lt;file>] heap-dump -user &lt;user> -password &lt;password> [-raw]</code></p>
+<example title="producing a heap dump on Resin Open Source">$java -jar lib/resin.jar -conf conf/resin.conf heap-dump -user foo -password test -raw
+
+Heap dump is written to `/tmp/hprof-default-2011-04-08-02-51-31.hprof'.
+To view the file on the target machine use
+jvisualvm --openfile /tmp/hprof-default-2011-04-08-02-51-31.hprof
+
+</example>
+
+<p>
+Resin Pro, when heap-dump is given no <code>-raw</code> option is capable of
+producing a readable summary report.
+</p>
+
+<example title="">
+$java -jar lib/resin.jar -conf conf/resin.conf heap-dump -user foo -password test
+
+Heap Dump generated Fri May 08 02:51:31 PDT 1998
+   count   |  self size | child size | class name
+        68 |       6528 |    3142736 | com.caucho.util.LruCache
+     28768 |     920576 |    2674000 | java.lang.String
+     29403 |    2066488 |    2066488 | char[]
+        68 |    1927360 |    1927360 | com.caucho.util.LruCache$CacheItem[]
+      7346 |     715416 |    1796320 | java.lang.Object[]
+      5710 |     594200 |    1768624 | java.util.HashMap$Entry[]
+      2827 |     135696 |    1606264 | java.util.HashMap
+     20787 |     665184 |    1489024 | java.util.HashMap$Entry
+      9682 |     852016 |    1235984 | java.lang.reflect.Method
+     61507 |     984112 |     984400 | java.lang.Object
+       337 |      16176 |     889192 | java.util.concurrent.ConcurrentHashMap
+      2881 |     161336 |     883584 | java.util.LinkedHashMap
+      1596 |     178752 |     702296 | com.caucho.quercus.program.ProStaticFunction
+
+</example>
+
+<deftable title="heap-dump options">
+  <tr>
+    <th>Argument/Option</th>
+    <th>Meaning</th>
+    <th>Default</th>
+  </tr>
+  <tr>
+    <td>-raw</td>
+    <td>produces a standard .hprof file</td>
+    <td></td>
+  </tr>
+</deftable>
+  <note>since raw heap dump can be on the order of gigabytes the resulting file
+  is always left on the machine where Resin server is running. </note>
+</s1>
+
+<s1 title="producing thread dump">
+<p>To produce a thread dump resin provides <code>thread-dump</code> command.
+The thread dump is produced on a remote sever and printed out locally.</p>
+<p><code>java -jar resin.jar [-conf &lt;file>] thread-dump -user &lt;user> -password &lt;password> [-raw]</code></p>
+<example title="producing a thread dump">$java -jar lib/resin.jar -conf conf/resin.conf thread-dump -user foo -password test -raw
+
+  Thread Dump:
+
+  "MailboxWorker[manager@resin.caucho]-8" id=31 RUNNABLE
+    at sun.management.ThreadImpl.getThreadInfo0 (ThreadImpl.java) (native)
+    at sun.management.ThreadImpl.getThreadInfo (ThreadImpl.java:147)
+    at com.caucho.util.ThreadDump.threadDumpImpl (ThreadDump.java:88)
+    at com.caucho.util.ThreadDump.getThreadDump (ThreadDump.java:62)
+    at com.caucho.server.admin.ManagerActor.doThreadDump (ManagerActor.java:148)
+    at sun.reflect.NativeMethodAccessorImpl.invoke0 (NativeMethodAccessorImpl.java) (native)
+    at sun.reflect.NativeMethodAccessorImpl.invoke (NativeMethodAccessorImpl.java:39)
+    at sun.reflect.DelegatingMethodAccessorImpl.invoke (DelegatingMethodAccessorImpl.java:25)
+    at java.lang.reflect.Method.invoke (Method.java:597)
+    at com.caucho.bam.actor.BamSkeleton$QueryMethodInvoker.invoke (BamSkeleton.java:501)
+    at com.caucho.bam.actor.BamSkeleton.query (BamSkeleton.java:215)
+    at com.caucho.bam.actor.SkeletonActorFilter.query (SkeletonActorFilter.java:187)
+    at com.caucho.bam.query.QueryActorFilter.query (QueryActorFilter.java:95)
+    at com.caucho.bam.packet.Query.dispatch (Query.java:86)
+    at com.caucho.bam.mailbox.MultiworkerMailbox.dispatch (MultiworkerMailbox.java:268)
+    at com.caucho.bam.mailbox.MailboxWorker.runTask (MailboxWorker.java:73)
+    at com.caucho.env.thread.AbstractTaskWorker.run (AbstractTaskWorker.java:160)
+    at com.caucho.env.thread.ResinThread.runTasks (ResinThread.java:164)
+    at com.caucho.env.thread.ResinThread.run (ResinThread.java:130)
+
+  "Signal Dispatcher" id=5 RUNNABLE
+
+  "http://*:8087-1" id=26 RUNNABLE (in native)
+    at com.caucho.vfs.JniSocketImpl.readNative (JniSocketImpl.java) (native)
+    at com.caucho.vfs.JniSocketImpl.read (JniSocketImpl.java:337)
+    at com.caucho.vfs.JniStream.readTimeout (JniStream.java:90)
+    at com.caucho.vfs.ReadStream.fillWithTimeout (ReadStream.java:1135)
+    at com.caucho.network.listen.TcpSocketLinkListener.keepaliveThreadRead (TcpSocketLinkListener.java:1345)
+    at com.caucho.network.listen.TcpSocketLink.processKeepalive (TcpSocketLink.java:767)
+    at com.caucho.network.listen.DuplexReadTask.doTask (DuplexReadTask.java:91)
+    at com.caucho.network.listen.TcpSocketLink.handleRequests (TcpSocketLink.java:646)
+    at com.caucho.network.listen.AcceptTask.doTask (AcceptTask.java:104)
+    at com.caucho.network.listen.ConnectionReadTask.runThread (ConnectionReadTask.java:98)
+    at com.caucho.network.listen.ConnectionReadTask.run (ConnectionReadTask.java:81)
+    at com.caucho.network.listen.AcceptTask.run (AcceptTask.java:67)
+    at com.caucho.env.thread.ResinThread.runTasks (ResinThread.java:164)
+    at com.caucho.env.thread.ResinThread.run (ResinThread.java:130)
+
+...
+</example>
+</s1>
+
+<s1 title="profiling application">
+  <p>Profiling application can help find bottlenecks. Resin's
+    <code>profile</code>
+    command turn on sampling for requested period of time and prints out
+    profiling resutls.
+  </p>
+  <p><code>java -jar resin.jar [-conf &lt;file>] profile -user &lt;user> -password &lt;password> [-active-time &lt;time>] [-sampling-rate &lt;rate>] [-depth &lt;depth>]</code></p>
+<example title="profiling an application">$java -jar lib/resin.jar -conf conf/resin.conf profile -user foo -password test
+
+Profile started at 1998-05-08 02:51:31.001. Active for a total of 5000ms. Sampling rate 10ms. Depth 16.
+   % time  |time self(s)|   % sum    | Method Call
+   800.000 |     40.080 |     28.407 | com.caucho.env.thread.AbstractTaskWorker.run()
+   300.000 |     15.030 |     39.060 | com.caucho.env.thread.ResinThread.waitForTask()
+   200.000 |     10.020 |     46.162 | com.caucho.vfs.JniSocketImpl.nativeAccept()
+   116.168 |      5.820 |     50.287 | _jsp._test__jsp$1.run()
+   100.000 |      5.010 |     53.838 | com.caucho.env.thread.AbstractTaskWorker.run()
+   100.000 |      5.010 |     57.389 | java.lang.ref.ReferenceQueue.remove()
+   100.000 |      5.010 |     60.940 | com.caucho.server.admin.ManagerActor.profile()
+   100.000 |      5.010 |     64.491 | java.lang.ref.Reference$ReferenceHandler.run()
+   100.000 |      5.010 |     68.042 | java.lang.UNIXProcess.waitForProcessExit()
+   100.000 |      5.010 |     71.593 | java.io.FileInputStream.readBytes()
+   100.000 |      5.010 |     75.144 | com.caucho.util.Alarm$AlarmThread.run()
+   100.000 |      5.010 |     78.694 | com.caucho.env.shutdown.ShutdownSystem$ShutdownThread.run()
+   100.000 |      5.010 |     82.245 | com.caucho.network.listen.JniSelectManager.selectNative()
+   100.000 |      5.010 |     85.796 | unknown
+   100.000 |      5.010 |     89.347 | com.caucho.vfs.JniSocketImpl.readNative()
+   100.000 |      5.010 |     92.898 | com.caucho.test.Test$Timeout.run()
+   100.000 |      5.010 |     96.449 | com.caucho.profile.ProProfile.nativeProfile()
+   100.000 |      5.010 |    100.000 | java.lang.Thread.sleep()
+com.caucho.env.thread.AbstractTaskWorker.run()
+  sun.misc.Unsafe.park()
+  java.util.concurrent.locks.LockSupport.parkUntil()
+  com.caucho.env.thread.AbstractTaskWorker.run()
+  com.caucho.env.thread.ResinThread.runTasks()
+  com.caucho.env.thread.ResinThread.run()
+
+</example>
+
+<deftable title="profile options">
+  <tr>
+    <th>Argument/Option</th>
+    <th>Meaning</th>
+    <th>Default</th>
+  </tr>
+  <tr>
+    <td>-active-time</td>
+    <td>specifies profiling time span in ms (defaults to 5000 - 5 sec.)</td>
+    <td>5s</td>
+  </tr>
+  <tr>
+    <td>-sampling-rate</td>
+    <td>specifies sampling rate (defaults to 10ms)</td>
+    <td>10ms</td>
+  </tr>
+</deftable>
+
+</s1>
+
+<s1 title="setting log level">
+  <p>Command <code>log-level</code> allows to temporarily increase log level
+    for an application.
+  </p>
+  <p><code>java -jar resin.jar [-conf &lt;file>] log-level -user &lt;user> -password &lt;password> [-active-time &lt;time-period>] [-log-name &lt;name>] &lt;level></code></p>
+<example title="profiling an application">$java -jar lib/resin.jar -conf conf/resin.conf log-level -user foo -password test -active-time 5s finer
+
+Log {root}.level is set to `FINER'. Active time 5 seconds.
+</example>
+
+<deftable title="log-level options">
+  <tr>
+    <th>Argument/Option</th>
+    <th>Meaning</th>
+    <th>Default</th>
+  </tr>
+  <tr>
+    <td>-active-time</td>
+    <td>specifies new level active time (default 60s). e.g. 5s</td>
+    <td>60s</td>
+  </tr>
+  <tr>
+    <td>-log-name</td>
+    <td>specifies name of the logger. Defaults to root logger.</td>
+    <td>root logger</td>
+  </tr>
+  <tr>
+    <td>value</td>
+    <td>specifies new log level (finest, finer, fine) </td>
+    <td>none, required</td>
+  </tr>
+</deftable>
+</s1>
+
+<s1 title="listing JMX MBeans, attributes and operations">
+<p>Command<code>jmx-list</code> prints out JMX MBeans, attributes and operations
+registered in a JVM that is running Resin. As its last argument the command
+accepts &lt;pattern>. The &lt;pattern> follows convention defined for
+<code>javax.management.ObjectName</code>, defaulting to resin:*, which matches any
+MBean in resin domain.</p>
+<p><code>java -jar lib/resin.jar [-conf &lt;file>] jmx-list -user &lt;user> -password &lt;password> [-attributes] [-values] [-operations] [-all] [-platform] [&lt;pattern>]</code></p>
+<example title="listing MBeans">$java -jar lib/resin.jar -conf conf/resin.conf jmx-list -user foo -password test com.acme:*
+
+com.acme:type=Foo
+com.acme:type=Bar
+
+</example>
+
+<deftable title="jmx-list options">
+  <tr>
+    <th>Argument/Option</th>
+    <th>Meaning</th>
+  </tr>
+  <tr>
+    <td>-attributes</td>
+    <td>outputs a list of attributes for each MBean</td>
+  </tr>
+  <tr>
+    <td>-values</td>
+    <td>outputs a list of attributes and values for each MBean</td>
+  </tr>
+  <tr>
+    <td>-operations</td>
+    <td>outputs a list of operations each MBean</td>
+  </tr>
+  <tr>
+    <td>-operations</td>
+    <td>outputs a list of operations each MBean</td>
+  </tr>
+  <tr>
+    <td>-platform</td>
+    <td>only queries MBeans in java.lang domain(unless pattern is specified)</td>
+  </tr>
+  <tr>
+    <td>-all</td>
+    <td>queries MBeans in any domain(unless pattern is specified)</td>
+  </tr>
+</deftable>
+<example title="listing MBeans with values">$java -jar lib/resin.jar -conf conf/resin.conf jmx-list -user foo -password test -values com.acme:*
+
+com.acme:type=Foo
+  attributes:
+    javax.management.MBeanAttributeInfo[description=, name=Boolean, type=boolean, read-only, descriptor={}]==false
+
+</example>
+</s1>
+
+<s1 title="setting attribute value on MBeans">
+<p>Command<code>jmx-set</code> sets a value on an attribute belonging to a particular
+JMX MBean.</p>
+<p><code>java -jar lib/resin.jar [-conf &lt;file>] jmx-set -user &lt;user> -password &lt;password> -pattern &lt;pattern> -attribute &lt;attribute> value</code></p>
+<example title="setting attribute value">$java -jar lib/resin.jar -conf conf/resin.conf jmx-set -user foo -password test -pattern com.acme:type=Foo -attribute Foo foo-value
+
+value for attribute `Foo' on bean `com.acme:type=Foo' is changed from `null' to `foo-value'
+
+</example>
+
+<deftable title="jmx-set options">
+  <tr>
+    <th>Argument/Option</th>
+    <th>Meaning</th>
+  </tr>
+  <tr>
+    <td>-pattern</td>
+    <td>specifies pattern to match target MBean</td>
+  </tr>
+  <tr>
+    <td>-attribute</td>
+    <td>sets name of the attribute</td>
+  </tr>
+  <tr>
+    <td>value</td>
+    <td>String representation of the value (primitive types and String are
+      supported)
+    </td>
+  </tr>
+</deftable>
+</s1>
+
+<s1 title="invoking method on a MBean">
+<p>Command<code>jmx-call</code> calls a method on a specified with &lt; pattern> MBean.</p>
+<p><code>java -jar resin.jar [-conf &lt;file>] jmx-call -user &lt;user> -password &lt;password> -pattern &lt;pattern> -operation &lt;operation> value...</code></p>
+<example title="invoking method on MBean">$java -jar lib/resin.jar -conf conf/resin.conf jmx-call -user foo -password test -pattern com.acme:type=Foo -pattern com.acme:type=Foo -operation echo hello
+
+method `echo(java.lang.String)' called on `com.acme:type=Foo' returned `hello'.
+
+</example>
+
+<deftable title="jmx-call options">
+  <tr>
+    <th>Argument/Option</th>
+    <th>Meaning</th>
+  </tr>
+  <tr>
+    <td>-pattern</td>
+    <td>specifies pattern to match target MBean</td>
+  </tr>
+  <tr>
+    <td>-operation</td>
+    <td>sets name of the operation to invoke</td>
+  </tr>
+  <tr>
+    <td>value</td>
+    <td>space separated list of parameters that will be passed to the method (primitive types and String are
+      supported)
+    </td>
+  </tr>
+</deftable>
+</s1>
+  </body>
+</document>

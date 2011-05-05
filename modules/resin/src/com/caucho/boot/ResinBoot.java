@@ -408,7 +408,6 @@ public class ResinBoot {
     _commandMap.put(StartMode.ENABLE, new EnableCommand());
     _commandMap.put(StartMode.HEAP_DUMP, new HeapDumpCommand());
     _commandMap.put(StartMode.JMX_CALL, new JmxCallCommand());
-    _commandMap.put(StartMode.JMX_GET, new JmxGetCommand());
     _commandMap.put(StartMode.JMX_LIST, new JmxListCommand());
     _commandMap.put(StartMode.JMX_SET, new JmxSetCommand());
     _commandMap.put(StartMode.JSPC, new JspcCommand());

@@ -13,12 +13,16 @@
   <body>
 
     <s1>
-      <p>If you have not yet done so, we suggest you use the
+      <p>If you have not yet done so, we suggest you research the
         <a href="http-server.xtp">
           Resin standalone web server
         </a>
         option first.
       </p>
+      <note>
+        Note: isapi_srun.dll should only be used with versions of IIS that do not
+        provide integration with .NET.
+      </note>
     </s1>
 
     <localtoc/>

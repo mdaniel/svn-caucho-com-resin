@@ -89,7 +89,7 @@ public class JmxListCommand extends JmxCommand
     System.err.println(L.l(""));
     System.err.println(L.l("description:"));
     System.err.println(L.l("   lists beans registered with JMX and matching <pattern>. <pattern> is optional and adheres\n"
-                           + "to the rules defined for javax.managment.ObjectName (default resin:*)"));
+                           + "to the rules defined for javax.management.ObjectName (default resin:*)"));
     System.err.println(L.l(""));
     System.err.println(L.l("options:"));
     System.err.println(L.l("   -attributes            : prints MBean's attributes"));

@@ -34,8 +34,11 @@
     <item link="resin-admin.xtp" title="Administration"
           description="/resin-admin monitoring and administration">
     
-      <item link="resin-admin-console.xtp" title="console"
+      <item link="resin-admin-console.xtp" title="web console"
             description="The web-based Resin administration console"/>
+
+      <item link="resin-admin-command-line.xtp" title="command line"
+            description="The Command Line Resin Administration"/>
 
       <!--
       <item link="resin-admin-rest.xtp" title="rest"

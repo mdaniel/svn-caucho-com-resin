@@ -220,11 +220,11 @@ server and controlling application lifecycle.</p>
     <td>un-deploys an application specified by a context</td>
   </tr>
   <tr>
-    <td>list</td>
+    <td>deploy-list</td>
     <td>lists all applications deployed on a server</td>
   </tr>
   <tr>
-    <td>copy</td>
+    <td>deploy-copy</td>
     <td>copies an application from one context to another</td>
   </tr>
   <tr>
@@ -314,19 +314,19 @@ Deployed production/webapp/default/hello-world as hello-world.war to http://127.
 </s3>
 
 <s3 title="listing deployed applications">
-  <p>Listing deployed applications is done with a <code>list</code> command</p>
-  <p><code>java -jar resin.jar [-conf &lt;file>] list -user &lt;user> -password &lt;password></code></p>
-  <example title="">java -jar lib/resin.jar list -user admin -password secret
+  <p>Listing deployed applications is done with a <code>deploy-list</code> command</p>
+  <p><code>java -jar resin.jar [-conf &lt;file>] deploy-list -user &lt;user> -password &lt;password></code></p>
+  <example title="">java -jar lib/resin.jar deploy-list -user admin -password secret
                     production/webapp/default/hello-world</example>
 </s3>
 
 <s3 title="copy application from context '/hello-world' to context '/foo'">
-<p>Copying an applicaiton is done with a <code>copy</code> command</p>
-<p><code>java -jar resin.jar [-conf &lt;file>] copy -user &lt;user> -password &lt;password> [options]</code></p>
-<example title="">java -jar lib/resin.jar copy -user admin -password secret -source hello-world -target foo
+<p>Copying an applicaiton is done with a <code>deploy-copy</code> command</p>
+<p><code>java -jar resin.jar [-conf &lt;file>] deploy-copy -user &lt;user> -password &lt;password> [options]</code></p>
+<example title="">java -jar lib/resin.jar deploy-copy -user admin -password secret -source hello-world -target foo
 copied production/webapp/default/hello-world to production/webapp/default/foo
 </example>
-<deftable title="copy options">
+<deftable title="deploy-copy options">
   <tr>
     <th>Argument</th>
     <th>Meaning</th>

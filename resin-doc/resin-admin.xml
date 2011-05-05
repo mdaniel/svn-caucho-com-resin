@@ -56,6 +56,7 @@
 
   <chapter title="Resin monitoring and administration web application">
     <linked-section link="admin/resin-admin-console.xtp" />
+    <linked-section link="admin/resin-admin-command-line.xtp" />
   </chapter>
 
   <chapter title="Advanced Topics">

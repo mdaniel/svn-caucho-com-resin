@@ -473,9 +473,6 @@ class WatchdogArgs
       else if ("heap-dump".equals(arg)) {
         _startMode = StartMode.HEAP_DUMP;
       }
-      else if ("jmx-get".equals(arg)) {
-        _startMode = StartMode.JMX_GET;
-      }
       else if ("jmx-call".equals(arg)) {
         _startMode = StartMode.JMX_CALL;
       }
@@ -909,7 +906,6 @@ class WatchdogArgs
     GUI,
     HEAP_DUMP,
     JMX_CALL,
-    JMX_GET,
     JMX_LIST,
     JMX_SET,
     JSPC,
