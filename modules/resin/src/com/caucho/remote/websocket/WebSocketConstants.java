@@ -33,18 +33,19 @@ package com.caucho.remote.websocket;
  * WebSocketOutputStream writes a single WebSocket packet.
  *
  * <code><pre>
- * 0x84 0x8X 0x8X 0x0X binarydata
+ * 0x82 0x8X 0x8X 0x0X binarydata
  * </pre></code>
  */
 public interface WebSocketConstants {
   public static final int FLAG_FIN = 0x80;
   
   public static final int OP_CONT = 0x00;
-  public static final int OP_CLOSE = 0x01;
-  public static final int OP_PING = 0x02;
-  public static final int OP_PONG = 0x03;
-  public static final int OP_TEXT = 0x04;
-  public static final int OP_BINARY = 0x05;
+  public static final int OP_TEXT = 0x01;
+  public static final int OP_BINARY = 0x02;
+  
+  public static final int OP_CLOSE = 0x08;
+  public static final int OP_PING = 0x09;
+  public static final int OP_PONG = 0x0a;
   
   public static final int OP_EXT = 0x0E;
 }

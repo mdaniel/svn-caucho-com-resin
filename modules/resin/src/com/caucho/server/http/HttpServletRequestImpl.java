@@ -1471,6 +1471,7 @@ public final class HttpServletRequestImpl extends AbstractCauchoRequest
   /**
    * Logs out the principal.
    */
+  @Override
   public void logout()
   {
     Login login = getLogin();
@@ -1841,7 +1842,7 @@ public final class HttpServletRequestImpl extends AbstractCauchoRequest
 
     String version = getHeader("Sec-WebSocket-Version");
 
-    String requiredVersion = "6";
+    String requiredVersion = "7";
     if (! requiredVersion.equals(version)) {
       getResponse().sendError(HttpServletResponse.SC_BAD_REQUEST);
       

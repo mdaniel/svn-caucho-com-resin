@@ -692,6 +692,12 @@ abstract public class AbstractCacheManager<E extends DistCacheEntry>
         && mnodeValue.getVersion() < oldEntryValue.getVersion()) {
       return oldEntryValue;
     }
+    
+    if (oldEntryValue != null
+        && mnodeValue.getLastAccessTime() == oldEntryValue.getLastAccessTime()
+        && mnodeValue.getLastUpdateTime() == oldEntryValue.getLastUpdateTime()) {
+      return oldEntryValue;
+    }
 
     // the failure cases are not errors because this put() could
     // be immediately followed by an overwriting put()
@@ -702,7 +708,7 @@ abstract public class AbstractCacheManager<E extends DistCacheEntry>
 
       return entry.getMnodeValue();
     }
-    
+
     return getDataBacking().saveLocalUpdateTime(entry.getKeyHash(),
                                                  mnodeValue,
                                                  oldEntryValue);
@@ -757,7 +763,6 @@ abstract public class AbstractCacheManager<E extends DistCacheEntry>
   @Override
   public final boolean remove(HashKey key)
   {
-    System.out.println("REMOVE1: " + key);
     E entry = getCacheEntry(key);
     MnodeValue mnodeValue = entry.getMnodeValue();
 

@@ -36,6 +36,7 @@ import java.util.logging.Logger;
 
 import com.caucho.config.types.PathBuilder;
 import com.caucho.env.deploy.DeployContainer;
+import com.caucho.env.deploy.DeployControllerType;
 import com.caucho.env.deploy.DeployGenerator;
 import com.caucho.loader.Environment;
 import com.caucho.loader.EnvironmentListener;
@@ -236,7 +237,6 @@ public class WebAppSingleDeployGenerator
     // _controller.addConfigDefault(_config);
 
     _controller.setPrologue(_config.getPrologue());
-
     _controller.setStartupPriority(_config.getStartupPriority());
 
     _controller.setSourceType("single");
@@ -303,7 +303,10 @@ public class WebAppSingleDeployGenerator
 
       webApp.setArchivePath(_controller.getArchivePath());
       webApp.setStartupPriority(_controller.getStartupPriority());
-      // webApp.merge(_controller);
+      
+      // server/12ab
+      webApp.merge(_controller);
+      webApp.setControllerType(DeployControllerType.STATIC);
 
       list.add(webApp);
     }
@@ -315,10 +318,11 @@ public class WebAppSingleDeployGenerator
   @Override
   public void mergeController(WebAppController controller, String name)
   {
-    if (controller.getRootDirectory().equals(_controller.getRootDirectory())) {
+    if (controller.getRootDirectory().equals(_controller.getRootDirectory())
+        || _controller.isNameMatch(name)) {
       // if directory matches, merge the two controllers.  The
       // last controller has priority.
-      // server/1h10
+      // server/1h10, server/1d90
       controller.setContextPath(_controller.getContextPath());
       
       controller.setDynamicDeploy(false);

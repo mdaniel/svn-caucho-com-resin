@@ -52,6 +52,8 @@ import java.io.InputStream;
 abstract public class FrameInputStream extends InputStream 
   implements WebSocketConstants
 {
+  private int _op;
+  
   abstract public void init(InputStream is);
   
   abstract public int getOpcode();

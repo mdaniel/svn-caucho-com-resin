@@ -59,7 +59,6 @@ public class MaskedFrameInputStream extends FrameInputStream
   private boolean _isFinal;
   private int _op;
   private long _length;
-  
 
   public MaskedFrameInputStream()
   {
@@ -87,6 +86,11 @@ public class MaskedFrameInputStream extends FrameInputStream
   {
     return _length;
   }
+  
+  public final byte []getMask()
+  {
+    return _mask;
+  }
 
   @Override
   public int read()
@@ -103,7 +107,7 @@ public class MaskedFrameInputStream extends FrameInputStream
         int maskOffset = _maskOffset;
         _maskOffset = (maskOffset + 1) & 0x3;
         
-        return (ch ^ _mask[maskOffset]) & 0xff;
+        return (ch ^ getMask()[maskOffset]) & 0xff;
       }
       else
         return -1;
@@ -134,7 +138,7 @@ public class MaskedFrameInputStream extends FrameInputStream
       return sublen;
     
     int maskOffset = _maskOffset;
-    byte []mask = _mask;
+    byte []mask = getMask();
     
     for (int i = 0; i < sublen; i++) {
       buffer[offset + i] ^= mask[(maskOffset + i) & 0x3];
@@ -145,28 +149,18 @@ public class MaskedFrameInputStream extends FrameInputStream
     
     return sublen;
   }
-  
+
   @Override
   protected boolean readFrameHeaderImpl()
     throws IOException
   {
     InputStream is = _is;
     
-    byte []mask = _mask;
-    
-    mask[0] = (byte) is.read();
-    mask[1] = (byte) is.read();
-    mask[2] = (byte) is.read();
-    mask[3] = (byte) is.read();
-    
     int frame1 = is.read();
     int frame2 = is.read();
 
     if (frame2 < 0)
       return false;
-    
-    frame1 = ((frame1 ^ mask[0]) & 0xff);
-    frame2 = ((frame2 ^ mask[1]) & 0xff);
 
     boolean isFinal = (frame1 & FLAG_FIN) == FLAG_FIN;
     _op = frame1 & 0xf;
@@ -176,29 +170,39 @@ public class MaskedFrameInputStream extends FrameInputStream
     long length = frame2 & 0x7f;
 
     if (length < 0x7e) {
-      _maskOffset = 2;
     }
     else if (length == 0x7e) {
-      _maskOffset = 0;
-      
-      length = ((((is.read() ^ mask[2]) & 0xffL) << 8)
-          + (((is.read() ^ mask[3]) & 0xffL)));
+      length = ((((long) is.read()) << 8)
+          + (((long) is.read())));
     }
     else {
-      _maskOffset = 2;
-      
-      length = ((((is.read() ^ mask[2]) & 0xffL) << 56)
-               + (((is.read() ^ mask[3]) & 0xffL) << 48)
-               + (((is.read() ^ mask[0]) & 0xffL) << 40)
-               + (((is.read() ^ mask[1]) & 0xffL) << 32)
-               + (((is.read() ^ mask[2]) & 0xffL) << 24)
-               + (((is.read() ^ mask[3]) & 0xffL) << 16)
-               + (((is.read() ^ mask[0]) & 0xffL) << 8)
-               + (((is.read() ^ mask[1]) & 0xffL)));
+      length = ((((long) is.read()) << 56)
+          + (((long) is.read()) << 48)
+          + (((long) is.read()) << 40)
+          + (((long) is.read()) << 32)
+          + (((long) is.read()) << 24)
+          + (((long) is.read()) << 16)
+          + (((long) is.read()) << 8)
+          + (((long) is.read())));
     }
 
     _length = length;
     
+    byte []mask = getMask();
+    if ((frame2 & 0x80) != 0) {
+      mask[0] = (byte) is.read();
+      mask[1] = (byte) is.read();
+      mask[2] = (byte) is.read();
+      mask[3] = (byte) is.read();
+      _maskOffset = 0;
+    }
+    else {
+      mask[0] = 0;
+      mask[1] = 0;
+      mask[2] = 0;
+      mask[3] = 0;
+    }
+
     return true;
   }
 }

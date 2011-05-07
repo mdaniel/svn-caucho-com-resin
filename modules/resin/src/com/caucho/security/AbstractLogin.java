@@ -480,6 +480,7 @@ public abstract class AbstractLogin implements Login {
    *
    * @return the logged in principal on success, null on failure.
    */
+  @Override
   public boolean isUserInRole(Principal user, String role)
   {
     return getAuthenticator().isUserInRole(user, role);
@@ -492,6 +493,7 @@ public abstract class AbstractLogin implements Login {
    * directly from user code.  Resin stores the web-app's login object
    * in the ServletContext attribute "caucho.login".
    */
+  @Override
   public void logout(Principal user,
                      HttpServletRequest request,
                      HttpServletResponse response)
@@ -499,6 +501,11 @@ public abstract class AbstractLogin implements Login {
     String sessionId = request.getRequestedSessionId();
 
     logoutImpl(user, request, response);
+    
+    HttpSession session = request.getSession(false);
+    
+    if (session != null)
+      session.removeAttribute(LOGIN_USER_PRINCIPAL);
 
     SingleSignon singleSignon = getSingleSignon();
 
@@ -509,6 +516,7 @@ public abstract class AbstractLogin implements Login {
   /**
    * Called when the session invalidates.
    */
+  @Override
   public void sessionInvalidate(HttpSession session,
                                 boolean isTimeout)
   {

@@ -205,6 +205,10 @@ public class WebAppVersioningController extends WebAppController {
   {
     if (_primaryController != null)
       _primaryController.merge(oldControllerV);
+    else {
+      // server/12ab
+      super.merge(oldControllerV);
+    }
   }
 
   
@@ -252,6 +256,8 @@ public class WebAppVersioningController extends WebAppController {
         }
 
         newPrimaryController.setVersionAlias(true);
+        // server/12ab
+        newPrimaryController.merge(this);
         _primaryController = newPrimaryController;
         _primaryVersion = version;
 

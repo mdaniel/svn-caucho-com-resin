@@ -31,6 +31,7 @@ package com.caucho.server.host;
 
 import com.caucho.config.Config;
 import com.caucho.env.deploy.DeployContainer;
+import com.caucho.env.deploy.DeployControllerType;
 import com.caucho.env.deploy.DeployGenerator;
 import com.caucho.vfs.Path;
 
@@ -146,13 +147,16 @@ public class HostSingleDeployGenerator
     if (hostName != null) {
       _controller = new HostController(id, rootDirectory,
                                        hostName, _config, _container, null);
+      _controller.setControllerType(DeployControllerType.STATIC);
 
       if (hostId != null)
         _controller.addHostAlias(hostId);
     }
-    else
+    else {
       _controller = new HostController(id, rootDirectory,
                                        hostId, _config, _container, null);
+      _controller.setControllerType(DeployControllerType.STATIC);
+    }
   }
 
   /**
@@ -182,6 +186,7 @@ public class HostSingleDeployGenerator
       host = new HostController(_controller.getId(), rootDirectory,
                                 _controller.getHostName(), _config,
                                 _container, null);
+      host.setControllerType(DeployControllerType.STATIC);
 
       // host = host.merge(_controller);
       

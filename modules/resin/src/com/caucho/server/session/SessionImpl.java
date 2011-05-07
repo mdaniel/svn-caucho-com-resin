@@ -56,6 +56,7 @@ import javax.servlet.http.HttpSessionListener;
 import com.caucho.distcache.ByteStreamCache;
 import com.caucho.distcache.ExtCacheEntry;
 import com.caucho.security.Login;
+import com.caucho.server.cluster.Server;
 import com.caucho.server.webapp.WebApp;
 import com.caucho.util.Alarm;
 import com.caucho.util.CacheListener;
@@ -166,6 +167,7 @@ public class SessionImpl implements HttpSession, CacheListener {
   /**
    * Returns the last objectAccess time.
    */
+  @Override
   public long getLastAccessedTime()
   {
     // this test forced by TCK
@@ -262,9 +264,30 @@ public class SessionImpl implements HttpSession, CacheListener {
 
     if (inUse())
       return false;
-    else {
-      return _lastUseTime + maxIdleTime < now;
+    else if (now < _lastUseTime + maxIdleTime) {
+      return false;
     }
+    else {
+      long lastUseTime = getLastUseTime();
+      
+      return lastUseTime + maxIdleTime < now;
+    }
+  }
+  
+  private long getLastUseTime()
+  {
+    ByteStreamCache cache = _manager.getCache();
+
+    if (cache == null)
+      return _lastUseTime;
+
+    ExtCacheEntry entry = cache.peekExtCacheEntry(_id);
+    // server/01ke
+    
+    if (entry == null)
+      return _lastUseTime;
+    else
+      return entry.getLastAccessTime();
   }
 
   boolean isClosing()
@@ -508,7 +531,7 @@ public class SessionImpl implements HttpSession, CacheListener {
   boolean addUse()
   {
     _lastUseTime = Alarm.getCurrentTime();
-    
+
     _useCount.incrementAndGet();
 
     /*
@@ -577,7 +600,7 @@ public class SessionImpl implements HttpSession, CacheListener {
     // server/0122
     _accessTime = Alarm.getCurrentTime();
     _isNew = false;
-    
+
     // update cache access?
     if (_useCount.decrementAndGet() > 0)
       return;

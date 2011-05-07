@@ -175,7 +175,7 @@ public class WebSocketClient implements WebSocketContext, WebSocketConstants {
     
     _os.print("Sec-WebSocket-Key: " + key + "\r\n");
     
-    String version = "6";
+    String version = "7";
     
     _os.print("Sec-WebSocket-Version: " + version + "\r\n");
       

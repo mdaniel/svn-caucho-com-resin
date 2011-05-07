@@ -115,17 +115,17 @@ public class XmlStandardPlugin implements Extension {
 
   public void beforeDiscovery(@Observes BeforeBeanDiscovery event)
   {
-    ArrayList<Path> paths = new ArrayList<Path>(_pendingRoots);
-    _pendingRoots.clear();
-    
-    ArrayList<Path> xmlPaths = new ArrayList<Path>(_pendingXml);
-    _pendingXml.clear();
-
     try {
+      ArrayList<Path> paths = new ArrayList<Path>(_pendingRoots);
+      _pendingRoots.clear();
+      
       for (Path root : paths) {
         configureRoot(root);
       }
       
+      ArrayList<Path> xmlPaths = new ArrayList<Path>(_pendingXml);
+      _pendingXml.clear();
+
       for (Path xml : xmlPaths) {
         configurePath(xml);
       }
@@ -153,17 +153,17 @@ public class XmlStandardPlugin implements Extension {
     List<Path> beansXmlOverride = _cdiManager.getBeansXmlOverride(root);
 
     if (beansXmlOverride == null) {
-      configurePath(root.lookup("META-INF/beans.xml"));
-      configurePath(root.lookup("META-INF/resin-beans.xml"));
+      addPath(root.lookup("META-INF/beans.xml"));
+      addPath(root.lookup("META-INF/resin-beans.xml"));
 
       if (root.getFullPath().endsWith("WEB-INF/classes/")) {
-        configurePath(root.lookup("../beans.xml"));
-        configurePath(root.lookup("../resin-beans.xml"));
+        addPath(root.lookup("../beans.xml"));
+        addPath(root.lookup("../resin-beans.xml"));
       } else if (!root.lookup("META-INF/beans.xml").canRead()
           && !root.lookup("META-INF/resin-beans.xml").canRead()) {
         // ejb/11h0
-        configurePath(root.lookup("beans.xml"));
-        configurePath(root.lookup("resin-beans.xml"));
+        addPath(root.lookup("beans.xml"));
+        addPath(root.lookup("resin-beans.xml"));
       }
     } else {
       for (Path beansXMLPath : beansXmlOverride) {
@@ -171,16 +171,24 @@ public class XmlStandardPlugin implements Extension {
       }
     }
   }
+  
+  private void addPath(Path beansPath)
+  {
+    if (beansPath.canRead()
+        && beansPath.getLength() > 0
+        && ! _pendingXml.contains(beansPath)) {
+      _pendingXml.add(beansPath);
+    }
+  }
 
   private void configurePath(Path beansPath) throws IOException
   {
-    if (beansPath.canRead() && beansPath.getLength() > 0) {      
+    if (beansPath.canRead() && beansPath.getLength() > 0) {
       // ioc/0041 - tck allows empty beans.xml
       
       BeansConfig beans = new BeansConfig(_cdiManager, beansPath);
 
       beansPath.setUserPath(beansPath.getURL());
-
       new Config().configure(beans, beansPath, SCHEMA);
 
       _pendingBeans.add(beans);

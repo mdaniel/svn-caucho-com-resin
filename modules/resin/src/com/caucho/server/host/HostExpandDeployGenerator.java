@@ -29,24 +29,25 @@
 
 package com.caucho.server.host;
 
-import com.caucho.config.Config;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.logging.Level;
+import java.util.logging.Logger;
+
+import javax.el.ELContext;
+import javax.el.ELResolver;
+
 import com.caucho.config.ConfigELContext;
 import com.caucho.config.ConfigException;
 import com.caucho.config.types.RawString;
 import com.caucho.el.EL;
 import com.caucho.el.MapVariableResolver;
 import com.caucho.env.deploy.DeployContainer;
+import com.caucho.env.deploy.DeployControllerType;
 import com.caucho.env.deploy.DeployMode;
 import com.caucho.env.deploy.ExpandDeployGenerator;
 import com.caucho.env.deploy.ExpandVersion;
 import com.caucho.vfs.Path;
-
-import javax.el.ELContext;
-import javax.el.ELResolver;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 
 /**
  * The generator for the host deploy
@@ -179,7 +180,6 @@ public class HostExpandDeployGenerator
       HashMap<String,Object> varMap = new HashMap<String,Object>();
       varMap.put("host", new HostRegexpVar(key));
       
-      ELContext parentEnv = Config.getEnvironment();
       ELResolver resolver = new MapVariableResolver(varMap);
 
       ELContext env = new ConfigELContext(resolver);
@@ -189,6 +189,7 @@ public class HostExpandDeployGenerator
 
     HostController controller
       = new HostController(id, rootDirectory, hostName, _container);
+    controller.setControllerType(DeployControllerType.DYNAMIC);
 
     Path jarPath = getArchivePath(key);
     controller.setArchivePath(jarPath);

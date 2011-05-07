@@ -39,16 +39,13 @@ import com.caucho.util.L10N;
  *
  * <code><pre>
  * +-+------+---------+-+---------+
- * |F|xxx(3)|opcode(4)|R|len(7)   |
+ * |F|xxx(3)|opcode(4)|M|len(7)   |
  * +-+------+---------+-+---------+
  * 
  * OPCODES
  *   0 - cont
- *   1 - close
- *   2 - ping
- *   3 - pong
- *   4 - text
- *   5 - binary
+ *   1 - text
+ *   2 - binary
  * </pre></code>
  */
 public class WebSocketMaskedInputStream extends WebSocketInputStream 

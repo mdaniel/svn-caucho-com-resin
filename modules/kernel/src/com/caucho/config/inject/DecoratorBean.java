@@ -62,7 +62,8 @@ public class DecoratorBean<T> implements Decorator<T>
 {
   private static final L10N L = new L10N(DecoratorBean.class);
 
-  private Class<T> _type;
+  private Class<T> _selfType;
+  private Class<T> _adapterType;
 
   private Bean<T> _bean;
   
@@ -80,9 +81,11 @@ public class DecoratorBean<T> implements Decorator<T>
   public DecoratorBean(InjectManager beanManager,
                        Class<T> type)
   {
+    _selfType = type;
+    
     type = DecoratorAdapter.create(type);
     
-    _type = type;
+    _adapterType = type;
 
     _bean = beanManager.createManagedBean(type);
 
@@ -245,15 +248,15 @@ public class DecoratorBean<T> implements Decorator<T>
         && _delegateMethod == null
         && _delegateConstructor == null)
       throw new ConfigException(L.l("{0} is missing a @Delegate field.  All @Decorators need a @Delegate field for a delegate injection",
-                                    _type.getName()));
+                                    _adapterType.getName()));
     
-    if (_type.isAnnotationPresent(Interceptor.class))
+    if (_adapterType.isAnnotationPresent(Interceptor.class))
       throw new ConfigException(L.l("{0} is an invalid @Delegate because it has an @Interceptor annotation.",
-                                    _type.getName()));
+                                    _adapterType.getName()));
     
-    if (Modifier.isFinal(_type.getModifiers())) {
+    if (Modifier.isFinal(_adapterType.getModifiers())) {
       throw new ConfigException(L.l("{0} is an invalid @Decorator because it is a final class.",
-                                    _type.getName()));
+                                    _adapterType.getName()));
     }
   }
 
@@ -290,7 +293,7 @@ public class DecoratorBean<T> implements Decorator<T>
       
       InjectManager manager = InjectManager.getCurrent();
       
-      BaseType selfType = manager.createTargetBaseType(_type);
+      BaseType selfType = manager.createTargetBaseType(_selfType);
       BaseType delegateType 
         = manager.createSourceBaseType(_delegateInjectionPoint.getType());
             
@@ -298,12 +301,12 @@ public class DecoratorBean<T> implements Decorator<T>
       
       for (Type type : selfType.getTypeClosure(manager)) {
         BaseType baseType = manager.createSourceBaseType(type);
-        
+
         if (! baseType.getRawClass().isInterface())
           continue;
         if (baseType.getRawClass().equals(Serializable.class))
           continue;
-        
+
         // ioc/0i5g, ioc/0i3r
         if (baseType.isAssignableFrom(delegateType)) {
           _typeSet.add(type);
@@ -321,8 +324,8 @@ public class DecoratorBean<T> implements Decorator<T>
         else if (isDeclaredInterface(selfType, baseType)){
           // ioc/0i5a
           // only types declared directly are errors
-          throw new ConfigException(L.l("{0}: '{1}' is an Decorator type not implemented by the delegate {2}",
-                                        _type, baseType, delegateType));
+          throw new ConfigException(L.l("{0}: '{1}' is a Decorator type not implemented by the delegate {2}",
+                                        _selfType.getName(), baseType, delegateType));
         }
         else {
           // ioc/0i3r
@@ -379,7 +382,7 @@ public class DecoratorBean<T> implements Decorator<T>
 
     sb.append(getClass().getSimpleName());
     sb.append("[");
-    sb.append(_type.getSimpleName());
+    sb.append(_adapterType.getSimpleName());
 
     if (_delegateField != null)
       sb.append(",").append(_delegateField.getType().getSimpleName());

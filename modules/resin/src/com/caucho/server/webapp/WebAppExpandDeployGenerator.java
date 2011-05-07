@@ -254,6 +254,7 @@ public class WebAppExpandDeployGenerator
                                          contextPath,
                                          this,
                                          _container);
+      controller.setControllerType(DeployControllerType.VERSIONING);
     
       return controller;
     }
