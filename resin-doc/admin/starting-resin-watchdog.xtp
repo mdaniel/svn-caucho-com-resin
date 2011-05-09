@@ -28,7 +28,7 @@ for protection and security.
 
 <p>Because the watchdog runs quietly as a separate service, most of
 the time you won't need to pay attention to the watchdog at all.  The
-standard configuration launches on watchdog per machine which
+standard configuration launches one watchdog per machine which
 monitors all the Resin JVMs on that matchine, so most sites will not
 need to change any watchdog configuration.</p>
 
@@ -49,8 +49,8 @@ status.</p>
 
 <p>While most users will use the watchdog automatically with no extra
 configuration, ISPs and larger and complicated sites can create a
-specialised watchdog.xml with a &lt;watchdog-manager> tag to control
-the watchdog at a much finer level.  The &lt;watchdog-manager> lets an
+specialised <var>watchdog.xml</var> with a <code>&lt;watchdog-manager></code> tag to control
+the watchdog at a much finer level.  The <code>&lt;watchdog-manager></code> lets an
 ISP run the watchdog under its own control, and specify exactly the
 command-line parameters for their users' Resin instances, including
 the ability to create secure chroot instances for their users.

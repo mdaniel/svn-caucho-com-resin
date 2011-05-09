@@ -510,8 +510,8 @@ id, <var>ca8MbyA</var>, decodes to an server index of 3, mapping
 to Server&#160;C.  Resin determines the backup host from the cookie
 as well.
 Server&#160;A must know the owning host
-for every cookie so it can communicate with the owning srun.
-The example configuration defines all the sruns Server&#160;A needs to
+for every cookie so it can communicate with the owning server.
+The example configuration defines all the Server&#160;A needs to
 know about.  If Server&#160;C is unavailable, Server&#160;A can use its
 configuration knowledge to use Server&#160;D as a backup
 for <var>ca8MbyA</var> instead..</p>
@@ -576,7 +576,7 @@ from disk when the server is restarted.</p>
 balancer can direct requests to the next server in the ring.  The
 backup server is always ready to take control.  The failover will
 succeed even for dumb load balancers, as in the non-sticky-session
-case, because the srun hosts will use the backup as the new owning
+case, because the server hosts will use the backup as the new owning
 server.</p>
 
 <p>In the example, either Server&#160;C or Server&#160;D can stop and
@@ -858,7 +858,7 @@ ports, and a set of virtual &lt;host&gt;s.</p>
 
 <p>Only one &lt;cluster&gt; is active in any on server.  At runtime,
 the &lt;cluster&gt; is selected by the &lt;server&gt; with <var>id</var>
-matching the -server-id on the command line.</p>
+matching the -server on the command line.</p>
 
 <deftable title="&lt;cluster> Attributes">
 <tr>
@@ -1776,7 +1776,7 @@ element root-directory {
 <p>The &lt;server> tag configures a JVM instance in
 the cluster.  Each &lt;server&gt; is uniquely identified by
 its <var>id</var> attribute.  The <var>id</var> will match
-the -server-id command line argument.</p>
+the -server command line argument.</p>
 
 <p>See the full <a config-tag="server"/> configuration
 for more details of the &lt;server> tag and its children.</p>

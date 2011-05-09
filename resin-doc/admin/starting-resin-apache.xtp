@@ -177,11 +177,11 @@ JDK and set some environment variables.</p>
 
 <example>
 # Java Location
-JAVA_HOME=/&lt;installdir&gt;/jdk1.4
+JAVA_HOME=/usr/java
 export JAVA_HOME
 
 # Resin location (optional).  Usually Resin can figure this out.
-RESIN_HOME=/&lt;installdir&gt;/resin-3.2.2
+RESIN_HOME=/usr/local/resin
 export RESIN_HOME
 
 # If you're using additional class libraries, you'll need to put them
@@ -205,7 +205,7 @@ The httpd.conf file is also easily modified manually:
 
 <example title="httpd.conf">
 LoadModule caucho_module \
-    &lt;installdir&gt;/resin-3.2.x/win32/apache-2.0/mod_caucho.dll
+    &lt;installdir&gt;/resin-pro-4.0.17/win32/apache-2.2/mod_caucho.dll
 
 ResinConfigServer localhost 6800
 &lt;Location /caucho-status&gt;
@@ -214,7 +214,6 @@ ResinConfigServer localhost 6800
 </example>
 
 </s1> <!-- windows -->
-
 
 <s1 title="Configuring resin.xml">
 
@@ -255,9 +254,9 @@ should be consistent between Apache and the backend Resin server.
 
 
 <p>The default resin.xml looks in
-<code>resin-3.2.x/webapps/ROOT</code> 
+<code>resin-4.0.x/webapps/ROOT</code> 
 for JSP files and
-<code>resin-3.2.x/webapps/ROOT/WEB-INF/classes</code>
+<code>resin-4.0.x/webapps/ROOT/WEB-INF/classes</code>
 for servlets and java source files.  To tell Resin
 to use Apache's document area, you configure an explicit 
 <var>web-app</var> with the appropriate document-directory:
@@ -294,25 +293,54 @@ with Apache or standalone.  See the <a href="http-server.xtp#deploy">Resin Web S
 for a detailed description.</p>
 
 <example>
-unix&gt; java -jar $RESIN_HOME/lib/resin.jar
+unix&gt; java -jar $RESIN_HOME/lib/resin.jar start 
 
-unix&gt; bin/resin.sh
+unix&gt; bin/resin.sh start
 
 win&gt; resin.exe
 </example>
 
 <results>
-Resin 3.2.2 (built Mon Aug  4 09:26:44 PDT 2006)
-Copyright(c) 1998-2006 Caucho Technology.  All rights reserved.
- 
-Starting Resin on Mon, 04 Aug 2006 09:43:39 -0700 (PDT)
-[09:43:40.664] Loaded Socket JNI library.
-[09:43:40.664] http listening to *:8080
-[09:43:40.664] ServletServer[] starting
-[09:43:40.879] hmux listening to *:6800
-[09:43:41.073] Host[] starting
-[09:43:41.446] Application[http://localhost:8080/resin-doc] starting
-[09:43:41.496] Application[http://localhost:8080] starting
+May 6, 2011 3:06:05 PM com.caucho.boot.WatchdogChildTask run
+INFO: WatchdogChild[] starting
+May 6, 2011 3:06:05 PM com.caucho.boot.WatchdogChildProcess run
+WARNING: Watchdog starting Resin[]
+Resin Professional 4.0.17 (built Fri, 15 Apr 2011 06:35:56 PDT)
+Copyright(c) 1998-2010 Caucho Technology.  All rights reserved.
+
+  current.license -- 1 Resin server Caucho
+
+Starting Resin Professional on Fri, 06 May 2011 15:06:06 -0400 (EDT)
+
+[11-05-06 15:06:07.824] {main} Proxy Cache disk-size=1024M memory-size=64M
+[11-05-06 15:06:08.179] {main} 
+[11-05-06 15:06:08.179] {main} Mac OS X 10.6.7 x86_64
+[11-05-06 15:06:08.179] {main} Java(TM) SE Runtime Environment 1.6.0_24-b07-334-10M3326, MacRoman, en
+[11-05-06 15:06:08.179] {main} Java HotSpot(TM) 64-Bit Server VM 19.1-b02-334, 64, mixed mode, Apple Inc.
+[11-05-06 15:06:08.179] {main} 
+[11-05-06 15:06:08.179] {main} user.name  = caucho
+[11-05-06 15:06:08.472] {main} 
+[11-05-06 15:06:08.479] {main} server listening to localhost:6800
+[11-05-06 15:06:08.555] {main} 
+[11-05-06 15:06:08.873] {main} 
+[11-05-06 15:06:08.874] {main} resin.home = /Users/caucho/resin-pro-4.0.17/
+[11-05-06 15:06:08.878] {main} resin.root = /Users/caucho/resin-pro-4.0.17/
+[11-05-06 15:06:08.879] {main} resin.conf = /Users/caucho/resin-pro-4.0.17/conf/resin.xml
+[11-05-06 15:06:08.889] {main} 
+[11-05-06 15:06:08.889] {main} server    = 127.0.0.1:6800 (app-tier:default)
+[11-05-06 15:06:08.899] {main} stage      = production
+[11-05-06 15:06:09.526] {main} WebApp[production/webapp/default/resin-admin] active
+[11-05-06 15:06:10.245] {main} WebApp[production/webapp/default/resin-doc] active
+[11-05-06 15:06:10.445] {main} WebApp[production/webapp/default/ROOT] active
+[11-05-06 15:06:10.446] {main} Host[production/host/default] active
+[11-05-06 15:06:10.447] {main} ProServer[id=default,cluster=app-tier] active
+[11-05-06 15:06:10.448] {main}   JNI: file, nio keepalive (max=9984), socket
+[11-05-06 15:06:10.448] {main} 
+[11-05-06 15:06:10.449] {main} 
+[11-05-06 15:06:10.450] {main} http listening to *:8080
+[11-05-06 15:06:11.023] {main} https listening to *:8443
+[11-05-06 15:06:11.092] {main} 
+[11-05-06 15:06:11.160] {main} ProResin[id=default] started in 4222ms
 </results>
 
 <p>
@@ -382,7 +410,7 @@ ResinConfigServer localhost 6800
 
 <example title="Windows - httpd.conf">
 LoadModule caucho_module \
-    &lt;installdir&gt;/resin-3.2.x/libexec/apache-2.0/mod_caucho.dll
+    &lt;installdir&gt;/resin-pro-4.0.17/win32/apache-2.2/mod_caucho.dll
 
 ResinConfigServer localhost 6800
 &lt;Location /caucho-status&gt;
@@ -682,7 +710,7 @@ properly started.
 will show red, and Resin hasn't started properly.
 </li>
 <li>If Resin doesn't start properly, you should look at the logs
-in resin-3.2.x/log.  You should start <var>resin.sh -verbose</var> or
+in resin-4.0.x/log.  You should start <var>resin.sh -verbose</var> or
 <var>resin.exe -verbose</var> to get more information.
 </li>
 <li>If Resin never shows a "hmux listening to *:6800" line,

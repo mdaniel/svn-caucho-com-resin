@@ -15,50 +15,80 @@
   <body>
     <localtoc/>
 
-<s1><figure src="httpd.gif"/></s1>
+<s1>
+<p>The easiest and fastest Resin configuration uses the Resin as the primary or
+only web server.  This configuration provides a Java HTTP server. We recommend
+you start with this before trying any other configuration.</p>
 
-<s1 title="Unix (including Linux and MacOS-X)">
+<figure src="httpd.gif"/>
+
+<p>The server listens at port 8080 in the default configuration and
+can be changed to the HTTP port 80 during deployment.</p>
+</s1>
+
+<s1 title="Unix, Linux, and Mac OS X">
 
 <s2 title="Getting Started">
 
 <p>The following steps will start Resin for development:</p>
 
 <ol>
-<li>Install JDK 1.5 or later and link <var>/usr/java</var> to your Java home or
-set environment variable <var>JAVA_HOME</var>.</li>
-<li><code>tar -vzxf resin-3.2.0.tar.gz</code> in <var>/usr/local/share</var></li>
-<li>(Optional) Link <var>/usr/local/share/resin</var> to the <var>resin-3.2.0</var> directory.</li>
-<li>./configure; make; make install
-  <ul><li>some <a href="starting-resin-command-line-ref.xtp">./configure options</a> are available</li></ul>
-  </li>
-<li>Run <code>java -jar resin/lib/resin.jar</code>
-<ul><li>Or run <code>resin/bin/resin.sh</code></li></ul>
+<li>Install JDK 1.6 or later and link /usr/java to the Java home or define the 
+environment variable <var>JAVA_HOME</var>.</li>
+<li><code>tar -vzxf resin-4.0.x.tar.gz</code></li>
+<li><code>cd resin-4.0.x</code></li>
+<li><code>./configure --prefix=`pwd`</code>
+  <ul><li>some <a href="starting-resin-command-line.xtp">./configure options</a> are available</li></ul>
 </li>
-<li>Browse <var>http://localhost:8080</var></li>
+<li><code>make</code></li>
+<li><code>make install</code></li>
+<li>Execute <code>java -jar lib/resin.jar console</code>
+  <ul><li>Or run <code>bin/resin.sh console</code></li></ul>
+</li>
+<li>Browse to <a href="http://localhost:8080">http://localhost:8080</a></li>
 </ol>
-
 <example title="Successful Foreground Startup Output">
-unix&gt; java -jar resin/lib/resin.jar
-Resin Professional 3.2.0 (built Wed, 06 Aug 2008 12:49:30 PDT)
-Copyright(c) 1998-2008 Caucho Technology.  All rights reserved.
+unix> java -jar lib/resin.jar console
+May 6, 2011 3:06:05 PM com.caucho.boot.WatchdogChildTask run
+INFO: WatchdogChild[] starting
+May 6, 2011 3:06:05 PM com.caucho.boot.WatchdogChildProcess run
+WARNING: Watchdog starting Resin[]
+Resin Professional 4.0.17 (built Fri, 15 Apr 2011 06:35:56 PDT)
+Copyright(c) 1998-2010 Caucho Technology.  All rights reserved.
 
-  001111.license - 1 Resin server Hogwarts School
+  current.license -- 1 Resin server Caucho
 
-Starting Resin on Thu, 07 Aug 2008 19:11:52 -0700 (PDT)
+Starting Resin Professional on Fri, 06 May 2011 15:06:06 -0400 (EDT)
 
-[21:22:21.282] Proxy Cache disk-size=1024M memory-size=8M
-[21:22:21.477] Server[id=,cluster=app-tier] starting
-[21:22:21.477] 
-[21:22:21.477] Mac OS X 10.4.7 ppc
-[21:22:21.477] Java 1.5.0_06-64, 32, mixed mode, sharing, MacRoman, en, "Apple Computer, Inc."
-[21:22:21.477] resin.home = /usr/local/share/resin
-[21:22:21.478] resin.root = /var/www
-[21:22:21.478] 
-[21:22:21.492] Loaded Socket JNI library.
-[21:22:21.595] hmux listening to localhost:6800
-[21:22:21.696] http listening to *:8080
-[21:22:21.842] Host[] starting
-[21:22:22.089] WebApp[] starting
+[11-05-06 15:06:07.824] {main} Proxy Cache disk-size=1024M memory-size=64M
+[11-05-06 15:06:08.179] {main} 
+[11-05-06 15:06:08.179] {main} Mac OS X 10.6.7 x86_64
+[11-05-06 15:06:08.179] {main} Java(TM) SE Runtime Environment 1.6.0_24-b07-334-10M3326, MacRoman, en
+[11-05-06 15:06:08.179] {main} Java HotSpot(TM) 64-Bit Server VM 19.1-b02-334, 64, mixed mode, Apple Inc.
+[11-05-06 15:06:08.179] {main} 
+[11-05-06 15:06:08.179] {main} user.name  = caucho
+[11-05-06 15:06:08.472] {main} 
+[11-05-06 15:06:08.479] {main} server listening to localhost:6800
+[11-05-06 15:06:08.555] {main} 
+[11-05-06 15:06:08.873] {main} 
+[11-05-06 15:06:08.874] {main} resin.home = /Users/caucho/resin-pro-4.0.17/
+[11-05-06 15:06:08.878] {main} resin.root = /Users/caucho/resin-pro-4.0.17/
+[11-05-06 15:06:08.879] {main} resin.conf = /Users/caucho/resin-pro-4.0.17/conf/resin.xml
+[11-05-06 15:06:08.889] {main} 
+[11-05-06 15:06:08.889] {main} server    = 127.0.0.1:6800 (app-tier:default)
+[11-05-06 15:06:08.899] {main} stage      = production
+[11-05-06 15:06:09.526] {main} WebApp[production/webapp/default/resin-admin] active
+[11-05-06 15:06:10.245] {main} WebApp[production/webapp/default/resin-doc] active
+[11-05-06 15:06:10.445] {main} WebApp[production/webapp/default/ROOT] active
+[11-05-06 15:06:10.446] {main} Host[production/host/default] active
+[11-05-06 15:06:10.447] {main} ProServer[id=default,cluster=app-tier] active
+[11-05-06 15:06:10.448] {main}   JNI: file, nio keepalive (max=9984), socket
+[11-05-06 15:06:10.448] {main} 
+[11-05-06 15:06:10.449] {main} 
+[11-05-06 15:06:10.450] {main} http listening to *:8080
+[11-05-06 15:06:11.023] {main} https listening to *:8443
+[11-05-06 15:06:11.092] {main} 
+[11-05-06 15:06:11.160] {main} ProResin[id=default] started in 4222ms
 </example>
 
 </s2>
@@ -70,23 +100,35 @@ make Resin and website upgrades easier and more maintainable.</p>
 
 <ol>
 <li>Create a user to run Resin (e.g. <var>resin</var> or another non-root user)</li>
-<li>Link <var>/usr/local/share/resin</var> to the current Resin directory. This is <var>$RESIN_HOME</var>.</li>
-<li>Create a deployment root, e.g. <var>/var/www</var>, owned by
-the resin user. This is <var>$RESIN_ROOT</var>.</li>
+<li>Link <var>/usr/local/resin</var> to the current Resin directory. This is <var>$RESIN_HOME</var>.</li>
+<li>Create a deployment root, e.g. <var>/var/www</var>, owned by the resin user. This is <var>$RESIN_ROOT</var>.</li>
 <li>Put the modified <var>resin.xml</var> in <var>/etc/resin/resin.conf</var></li>
-<li>Put the site documents in <var>/var/www/hosts/default/webapps/ROOT</var>.</li>
-<li>Put any .war files in <var>/var/www/hosts/default/webapps</var>.</li>
-<li>Put any virtual hosts in <var>/var/www/hosts/www.foo.com</var>.</li>
+<li>Put the site documents in <var>/var/www/webapps/ROOT</var>.</li>
+<li>Put any .war files in <var>/var/www/webapps</var>.</li>
+<li>Put any virtual hosts in <var>/var/www/hosts/www.foo.com</var>.
+  <ul><li>Refer to <a href="http-virtual-hosts.xtp">virtual hosts</a> for more information.</li></ul>
+</li>
 <li>Output logs will appear in <var>/var/www/log</var>.</li>
-<li>Create a startup script and configure the server to start it
-when the machine reboots.</li>
+<li>Create a startup script and configure the server to start it when the machine reboots.</li>
 </ol>
 
 </s2>
 
 <s2 name="script" title="Startup Script">
 
-<p>You can create your own startup script which will start and stop
+<p>If you installed using the .deb package or ran "<code>sudo make install</code>", 
+the installer created a file named <var>/etc/init.d/resin</var>
+which contains a standard Unix init.d startup file.  This file will start
+Resin when invoked as:
+</p>
+<example>
+/etc/init.d/resin start
+</example>
+<p>Use the tools that came with your system to execute the script
+on startup.  
+</p>
+
+<p>Or you can create your own startup script which will start and stop
 the <a href="#Running Resin">ResinWatchdog</a>, and will pass any <a href="#command-line">command-line arguments</a>.  The script
 might typically do a number of things:</p>
 
@@ -104,7 +146,7 @@ might typically do a number of things:</p>
 #!/bin/sh
 
 JAVA_HOME=/usr/java
-RESIN_HOME=/usr/local/share/resin
+RESIN_HOME=/usr/local/resin
 RESIN_ROOT=/var/www
 
 java=$JAVA_HOME/bin/java
@@ -144,49 +186,66 @@ you might use <code>-server</code>.</p>
 <s2 title="Getting Started">
 
 <ol>
-<li>Install JDK 1.5 or later.</li>
-<li>Make sure the JDK installation set the environment variable <var>JAVA_HOME</var> correctly</li>
-<li>Unzip resin-3.2.0.zip</li>
-<li>Run <code>java -jar resin-3.2.0/lib/resin.jar</code></li>
-<li>Or execute <var>resin-3.2.0/resin.exe</var></li>
-<li>Browse <var>http://localhost:8080</var></li>
+<li>Install JDK 1.6 or later.</li>
+<li>Check that the environment variable <var>JAVA_HOME</var> is set to the JDK 
+location, e.g. <code>c:\java\jdk1.6.0_14</code></li>
+<li>Unzip resin-4.0.x.zip</li>
+<li>Define the environment variable <var>RESIN_HOME</var> to the location of
+Resin, for example <code>c:\resin-4.0.x</code></li>
+<li>Execute <code>resin.exe</code></li>
+<li>Browse to <a href="http://localhost:8080">http://localhost:8080</a></li>
 </ol>
 
 <example title="Starting on Win32">
-C:\win32&gt; resin-3.2.0\bin\resin.exe
-Resin 3.2.0 (built Wed Aug 06 18:21:13 PST 2008)
-Copyright(c) 1998-2008 Caucho Technology.  All rights reserved.
+C:\resin-pro-4.0.17>resin.exe
+May 6, 2011 4:41:28 PM com.caucho.boot.WatchdogChildTask run
+INFO: WatchdogChild[] starting
+May 6, 2011 4:41:28 PM com.caucho.boot.WatchdogChildProcess run
+WARNING: Watchdog starting Resin[]
+Resin Professional 4.0.17 (built Fri, 15 Apr 2011 06:35:56 PDT)
+Copyright(c) 1998-2010 Caucho Technology.  All rights reserved.
 
-Starting Resin on Thu, 07 Aug 2008 19:11:52 -0500 (EST)
-[19:11:56.479] ServletServer[] starting
-[19:11:57.000] Host[] starting
-[19:11:58.312] Application[http://localhost:8380/doc] starting
-[19:12:11.872] Application[http://localhost:8380/quercus] starting
+  current.license -- 1 Resin server Caucho
 
-...
+Starting Resin Professional on Fri, 06 May 2011 16:41:29 -0400 (EDT)
 
-[19:12:12.803]http listening to *:8380
-[19:12:12.933]hmux listening to *:6802
+[11-05-06 16:41:29.895] {main} Proxy Cache disk-size=1024M memory-size=64M
+[11-05-06 16:41:30.083] {main}
+[11-05-06 16:41:30.083] {main} Windows Vista 6.0 amd64
+[11-05-06 16:41:30.083] {main} Java(TM) SE Runtime Environment 1.6.0_23-b05, Cp1252, en
+[11-05-06 16:41:30.084] {main} Java HotSpot(TM) 64-Bit Server VM 19.0-b09, 64, mixed mode, Sun Microsystems Inc.
+[11-05-06 16:41:30.084] {main}
+[11-05-06 16:41:30.084] {main} user.name  = caucho
+[11-05-06 16:41:30.327] {main}
+[11-05-06 16:41:30.329] {main} server listening to 127.0.0.1:6800
+[11-05-06 16:41:30.337] {main}
+[11-05-06 16:41:30.604] {main}
+[11-05-06 16:41:30.604] {main} resin.home = C:\resin-pro-4.0.17
+[11-05-06 16:41:30.605] {main} resin.root = C:\resin-pro-4.0.17
+[11-05-06 16:41:30.605] {main} resin.conf = C:\resin-pro-4.0.17\conf\resin.xml
+[11-05-06 16:41:30.605] {main}
+[11-05-06 16:41:30.605] {main} server    = 127.0.0.1:6800 (app-tier:default)
+[11-05-06 16:41:30.605] {main} stage      = production
+[11-05-06 16:41:31.037] {main} WebApp[production/webapp/default/resin-admin] active
+[11-05-06 16:41:31.573] {main} WebApp[production/webapp/default/resin-doc] active
+[11-05-06 16:41:31.648] {main} WebApp[production/webapp/default/ROOT] active
+[11-05-06 16:41:31.648] {main} Host[production/host/default] active
+[11-05-06 16:41:31.649] {main} ProServer[id=default,cluster=app-tier] active
+[11-05-06 16:41:31.649] {main}   JNI keepalive: not available on Windows
+[11-05-06 16:41:31.649] {main}   JNI: file, socket
+[11-05-06 16:41:31.649] {main}
+[11-05-06 16:41:31.649] {main}
+[11-05-06 16:41:31.650] {main} http listening to *:8080
+[11-05-06 16:41:32.022] {main} https listening to *:8443
+[11-05-06 16:41:32.038] {main}
+[11-05-06 16:41:32.057] {main} ProResin[id=default] started in 2774ms
 </example>
 
 </s2>
 
 <s2 title="Deploying as a Windows Service">
 
-<p>The Resin Web Server can be installed as an Windows service.</p>
-
-<p>To install the service, use</p>
-
-<example>
-C:\&gt; resin-3.2.x\resin.exe -install -conf conf/myconf.xml \
-                              -user MyResinUser -password mypassword
-</example>
-
-<p>To remove the service, use</p>
-
-<example>
-C:\&gt; resin-3.2.x\resin.exe -remove
-</example>
+<p>To install the service run <var>setup.exe</var></p>
 
 <p>You will either need to reboot the machine or start the service
 from the Control&#160;Panel/Services panel to start the server.  On a
@@ -200,20 +259,6 @@ C:\&gt; net start resin
 C:\&gt; net stop resin
 </example>
 
-<p>Resin's <var>-install</var> saves the command-line arguments and starts the service
-with those arguments. You can look view them in the control panel, under
-the executable string.</p>
-
-<p>With multiple named servers, you can use <var>-install-as foo</var> to specify
-the service name.</p>
-
-<example>
-C:\&gt; resin-3.2.x\resin.exe -install-as ResinA \
-                              -conf conf/myconf.conf \
-                              -server a
-C:\&gt; net start ResinA
-</example>
-
 </s2>
 </s1>
 
@@ -222,7 +267,7 @@ C:\&gt; net start ResinA
 <p>Resin runs as multiple processes that begin with the following JVM command:</p>
 
 <example>
-unix> java -jar /usr/local/share/resin/lib/resin.jar \
+unix> java -jar /usr/local/resin/lib/resin.jar \
            -conf /etc/resin/resin.xml \
            start
 </example>
@@ -234,8 +279,8 @@ path to your Resin configuration file. Lastly, Resin accepts <var>start</var>,
 process</a>. An additional command-line option, <var>-server</var> is used
 in <a href="clustering-overview.xtp">load-balanced deployments</a>.</p>
 
-<p>JDK 1.5 includes a
-<a href="http://java.sun.com/j2se/1.5.0/docs/tooldocs/share/jps.html">jps</a>
+<p>JDK 1.6 includes a
+<a href="http://download.oracle.com/javase/6/docs/technotes/tools/share/jps.html">jps</a>
 command which will show the pids of any java processes.</p>
 
 <example title="Example jps Process List">

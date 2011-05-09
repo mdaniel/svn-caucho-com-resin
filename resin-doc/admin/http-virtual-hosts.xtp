@@ -387,7 +387,7 @@ unix&gt; java -jar lib/resin.jar -server slytherin stop
 
 <s2 title="Resin web-tier load balancer">
 
-<p>The host-specific back-end servers are ready to receive requests on their srun
+<p>The host-specific back-end servers are ready to receive requests on their server
 ports.  A third Resin server can be used as the front-end load-balancer.
 It receives all requests and dispatches to the back-end servers.</p>
 
@@ -629,7 +629,7 @@ an error.</note>
 
 <s2 title="Apache front-end">
 
-<p>The host-specific back-end JVMs are ready to receive requests on their srun
+<p>The host-specific back-end JVMs are ready to receive requests on their server
 ports.  Apache is the front-end server, and is configured to dispatch to the
 appropriate back-end Resin JVM for the host: </p>
 

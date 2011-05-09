@@ -872,7 +872,7 @@ The cluster typically configures a set of &lt;server&gt;s, each with some
 ports, and a set of virtual &lt;host&gt;s.</p>
 <p>Only one &lt;cluster&gt; is active in any on server.  At runtime,
 the &lt;cluster&gt; is selected by the &lt;server&gt; with <var>id</var>
-matching the -server-id on the command line.</p>
+matching the -server on the command line.</p>
 </description>
 <attributes>
 <tr>
@@ -1108,10 +1108,10 @@ clusters in the &lt;resin&gt; server.</p>
 <p>&lt;cluster-port> configures the cluster and load balancing socket,
 for load balancing, distributed sessions, and distributed management.</p>
 <p>When configuring Resin in a load-balanced cluster, each Resin instance
-will have its own &lt;srun&gt; configuration, which Resin uses for distributed
+will have its own &lt;server&gt; configuration, which Resin uses for distributed
 session management and for the load balancing itself.</p>
-<p>When configuring multiple JVMs, each &lt;srun&gt; has a
-unique &lt;id&gt; which allows the -server command-line to select
+<p>When configuring multiple JVMs, each &lt;server&gt; has a
+unique &lt;server-id&gt; which allows the -server command-line to select
 which ports the server should listen to.</p>
 <deftable-childtags>
 <tr><td>address</td>
@@ -1139,7 +1139,6 @@ which ports the server should listen to.</p>
     <td>sets the NO_DELAY socket parameter</td>
     <td>true</td></tr>
 </deftable-childtags>
-<p>The class that corresponds to &lt;srun&gt; is <a javadoc="com.caucho.server.cluster.ClusterPort"/></p>
 </defun>
 
 <defun title="&lt;compiling-loader>" name="compiling-loader" occur="*" version="Resin 3.0" type="defun">
@@ -3050,9 +3049,9 @@ individually.</p>
 <javadoc class="com.caucho.health.action.DumpHealh"/>
 
 <description>
-<p>Create a heap dump of memory.  The heap dump will be logged to the resin 
-log file using com.caucho.health.action.DumpHeap as the class, at the info 
-level.</p>
+<p>Create a memory heap dump.  The heap dump will be logged to the resin 
+log file using <code>com.caucho.health.action.DumpHeap</code> as the class, at 
+the <var>info</var> level.</p>
 </description>
 
 <attributes>
@@ -3087,8 +3086,8 @@ level.</p>
 
 <description>
 <p>Create a thread dump.  The thread dump will be logged to the resin 
-log file using com.caucho.server.admin.AdminThreadDump as the class, at the 
-info level.</p>
+log file using <code>com.caucho.server.admin.AdminThreadDump</code> as the 
+class, at the <var>info</var> level.</p>
 </description>
 
 <attributes>
@@ -3100,7 +3099,7 @@ info level.</p>
   </tr>
   <tr>
     <td>only-active</td>
-    <td>Output only currently active threads (RUNNABLE state)</td>
+    <td>Output only currently active threads (<var>RUNNABLE</var> state)</td>
     <td>boolean</td>
     <td>false</td>
   </tr>
@@ -3339,7 +3338,7 @@ since it will be created upon startup with default values.</p>
 <javadoc class="com.caucho.health.check.HealthSystemHealthCheck"/>
 
 <description>
-<p>Monitors the health system itself by using a separate thread to determine if 
+<p>Monitors the health system itself by using a separate thread to detect if 
 health checking is frozen or taking too long.</p>
 </description>
 
@@ -4506,6 +4505,119 @@ heap memory on JVMs where there is no tenured pool.</p>
 
 </defun>
 
+<defun title="&lt;health:OnRestart>" name="health:OnRestart">
+
+<parents>cluster</parents>
+<javadoc class="com.caucho.health.predicate.OnRestart"/>
+
+<description>
+<p>Qualifies an action to match only when Resin is restarted by the watchdog.  
+This generally only occurs during an error condition.  <a href="#health:OnStart">
+OnStart</a> will fire during this event also.</p>
+</description>
+
+<attributes>
+  <tr>
+    <th>Attribute</th>
+    <th>Description</th>
+    <th>Type</th>
+    <th>Default</th>
+  </tr>
+  <tr>
+    <td colspan="4">None</td>
+  </tr>
+</attributes>
+
+<example title="Example: &lt;health:OnRestart> in health.xml">
+&lt;cluster xmlns="http://caucho.com/ns/resin"
+         xmlns:resin="urn:java:com.caucho.resin"
+         xmlns:health="urn:java:com.caucho.health"
+         xmlns:ee="urn:java:ee">
+
+  &lt;health:SendMail>
+    &lt;to>admin@yourdomain.com&lt;/to>
+    &lt;health:OnRestart/>
+  &lt;/health:SendMail> 
+
+&lt;/cluster>
+</example>
+
+</defun>
+
+<defun title="&lt;health:OnStart>" name="health:OnStart">
+
+<parents>cluster</parents>
+<javadoc class="com.caucho.health.predicate.OnStart"/>
+
+<description>
+<p>Qualifies an action to match only when Resin is starting.</p>
+</description>
+
+<attributes>
+  <tr>
+    <th>Attribute</th>
+    <th>Description</th>
+    <th>Type</th>
+    <th>Default</th>
+  </tr>
+  <tr>
+    <td colspan="4">None</td>
+  </tr>
+</attributes>
+
+<example title="Example: &lt;health:OnStart> in health.xml">
+&lt;cluster xmlns="http://caucho.com/ns/resin"
+         xmlns:resin="urn:java:com.caucho.resin"
+         xmlns:health="urn:java:com.caucho.health"
+         xmlns:ee="urn:java:ee">
+
+  &lt;health:SendMail>
+    &lt;to>admin@yourdomain.com&lt;/to>
+    &lt;health:OnStart/>
+  &lt;/health:SendMail> 
+
+&lt;/cluster>
+</example>
+
+</defun>
+
+<defun title="&lt;health:OnStop>" name="health:OnStop">
+
+<parents>cluster</parents>
+<javadoc class="com.caucho.health.predicate.OnStop"/>
+
+<description>
+<p>Qualifies an action to match only when Resin is stopping.</p>
+</description>
+
+<attributes>
+  <tr>
+    <th>Attribute</th>
+    <th>Description</th>
+    <th>Type</th>
+    <th>Default</th>
+  </tr>
+  <tr>
+    <td colspan="4">None</td>
+  </tr>
+</attributes>
+
+<example title="Example: &lt;health:OnStop> in health.xml">
+&lt;cluster xmlns="http://caucho.com/ns/resin"
+         xmlns:resin="urn:java:com.caucho.resin"
+         xmlns:health="urn:java:com.caucho.health"
+         xmlns:ee="urn:java:ee">
+
+  &lt;health:SendMail>
+    &lt;to>admin@yourdomain.com&lt;/to>
+    &lt;health:OnStop/>
+  &lt;/health:SendMail> 
+
+&lt;/cluster>
+</example>
+
+</defun>
+
 <defun title="&lt;health:Or>" name="health:Or">
 
 <parents>cluster</parents>
@@ -4609,14 +4721,14 @@ heap memory on JVMs where there is no tenured pool.</p>
   </tr>
   <tr>
     <td>mail</td>
-    <td>A <a config-tag="mail">&lt;mail></a> resource to use to send, see example</td>
+    <td>A <a config-tag="mail">&lt;mail></a> resource to use, see example</td>
     <td>javax.mail.Session</td>
     <td>N/A</td>
   </tr>
 </attributes>
 
 <p>Without the <var>mail</var> parameter, the default behaviour for sending 
-mail is to contact a SMTP server at host 127.0.0.1 (the localhost) on port 25. 
+mail is to contact an SMTP server at host 127.0.0.1 (the localhost) on port 25. 
 System properties can be used to configure a different SMTP server.</p>
 
 <example title="resin.xml - smtp server configuration">
@@ -10552,7 +10664,7 @@ element security-provider {
 <p>&lt;server> configures a JVM instance in the cluster.
 Each &lt;server&gt; is uniquely identified by
 its <var>id</var> attribute.  The <var>id</var> will match
-the -server-id command line argument.</p>
+the -server command line argument.</p>
 <p>The server listens to an internal network address,
 e.g. 192.168.0.10:6800 for clustering, load balancing,
 and administration.</p>
@@ -10598,7 +10710,7 @@ threads and virtual hosts.</p>
 <ul>
 <li>Common resources for all virtual hosts and web-apps.</li>
 <li>Thread pooling</li>
-<li>HTTP and SRUN/Cluster ports</li>
+<li>HTTP and Server/Cluster ports</li>
 <li>Caching</li>
 <li>virtual host configuration and common web-app-default</li>
 </ul>
@@ -10608,7 +10720,7 @@ to be dropped into resin/lib.  &lt;server&gt; configures
 the main dynamic environment.  Database pools common to all virtual hosts,
 for example, should be configured in the &lt;server&gt; block.</p>
 <p>The &lt;server&gt; configures the &lt;thread-pool&gt; and a set
-of &lt;http&gt; and &lt;srun&gt; ports which share the thread pool.
+of &lt;http&gt; and &lt;server&gt; ports which share the thread pool.
 Requests received on those ports will use worker threads from the
 thread pool.</p>
 <deftable-childtags>

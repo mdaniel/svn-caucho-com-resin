@@ -178,7 +178,7 @@ threads and virtual hosts.</p>
 <ul>
 <li>Common resources for all virtual hosts and web-apps.</li>
 <li>Thread pooling</li>
-<li>HTTP and SRUN/Cluster ports</li>
+<li>HTTP and Server/Cluster ports</li>
 <li>Caching</li>
 <li>virtual host configuration and common web-app-default</li>
 </ul>
@@ -190,7 +190,7 @@ the main dynamic environment.  Database pools common to all virtual hosts,
 for example, should be configured in the &lt;server&gt; block.</p>
 
 <p>The &lt;server&gt; configures the &lt;thread-pool&gt; and a set
-of &lt;http&gt; and &lt;srun&gt; ports which share the thread pool.
+of &lt;http&gt; and &lt;server&gt; ports which share the thread pool.
 Requests received on those ports will use worker threads from the
 thread pool.</p>
 
@@ -482,11 +482,11 @@ to connect to the server.</p>
 for load balancing, distributed sessions, and distributed management.</p>
 
 <p>When configuring Resin in a load-balanced cluster, each Resin instance
-will have its own &lt;srun&gt; configuration, which Resin uses for distributed
+will have its own &lt;server&gt; configuration, which Resin uses for distributed
 session management and for the load balancing itself.</p>
 
-<p>When configuring multiple JVMs, each &lt;srun&gt; has a
-unique &lt;id&gt; which allows the -server command-line to select
+<p>When configuring multiple JVMs, each &lt;server&gt; has a
+unique &lt;server-id&gt; which allows the -server command-line to select
 which ports the server should listen to.</p>
 
 <deftable-childtags>
@@ -515,8 +515,6 @@ which ports the server should listen to.</p>
     <td>sets the NO_DELAY socket parameter</td>
     <td>true</td></tr>
 </deftable-childtags>
-
-<p>The class that corresponds to &lt;srun&gt; is <a javadoc="com.caucho.server.cluster.ClusterPort"/></p>
 
 </defun>
 
@@ -1019,7 +1017,7 @@ and connection management.</p>
 <p>&lt;server> configures a JVM instance in the cluster.
 Each &lt;server&gt; is uniquely identified by
 its <var>id</var> attribute.  The <var>id</var> will match
-the -server-id command line argument.</p>
+the -server command line argument.</p>
 
 <p>The server listens to an internal network address,
 e.g. 192.168.0.10:6800 for clustering, load balancing,
@@ -1071,7 +1069,7 @@ threads and virtual hosts.</p>
 <ul>
 <li>Common resources for all virtual hosts and web-apps.</li>
 <li>Thread pooling</li>
-<li>HTTP and SRUN/Cluster ports</li>
+<li>HTTP and Server/Cluster ports</li>
 <li>Caching</li>
 <li>virtual host configuration and common web-app-default</li>
 </ul>
@@ -1083,7 +1081,7 @@ the main dynamic environment.  Database pools common to all virtual hosts,
 for example, should be configured in the &lt;server&gt; block.</p>
 
 <p>The &lt;server&gt; configures the &lt;thread-pool&gt; and a set
-of &lt;http&gt; and &lt;srun&gt; ports which share the thread pool.
+of &lt;http&gt; and &lt;server&gt; ports which share the thread pool.
 Requests received on those ports will use worker threads from the
 thread pool.</p>
 
@@ -2361,10 +2359,10 @@ SSL cryptographic ciphers.</p>
 for load balancing, distributed sessions, and distributed management.</p>
 
 <p>When configuring Resin in a load-balanced cluster, each Resin instance
-will have its own &lt;srun&gt; configuration, which Resin uses for distributed
+will have its own &lt;server&gt; configuration, which Resin uses for distributed
 session management and for the load balancing itself.</p>
 
-<p>When configuring multiple JVMs, each &lt;srun&gt; will have a
+<p>When configuring multiple JVMs, each &lt;server&gt; will have a
 unique &lt;server-id&gt; which allows the -server command-line to select
 which ports the server should listen to.</p>
 
@@ -2391,8 +2389,6 @@ which ports the server should listen to.</p>
     <td>sets the NO_DELAY socket parameter</td>
     <td>true</td></tr>
 </deftable-childtags>
-
-<p>The class that corresponds to &lt;srun&gt; is <a javadoc="com.caucho.server.cluster.ClusterPort"/></p>
 
 </defun>
 

@@ -191,10 +191,10 @@ pages to see if you can cache more.
 
 <s1 title="Resin's JMX Interfaces">
 
-<p>See <a href="http://caucho.com/resin-javadoc/com/caucho/management/server/package-summary.html">com.caucho.management.server JavaDoc</a>.</p>
+<p>See <a javadoc="com.caucho.management.server.package-summary">com.caucho.management.server</a>.</p>
 
 <ul>
-<li><a href="http://caucho.com/resin-javadoc/com/caucho/management/server/BlockManagerMXBean">BlockManagerMXBean</a>
+<li><a javadoc="com.caucho.management.server.BlockManagerMXBean">BlockManagerMXBean</a> 
 - performance data for the proxy cache, clustered sessions,
 and JMS queues.</li>
 

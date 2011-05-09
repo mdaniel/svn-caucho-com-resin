@@ -644,9 +644,6 @@ function display_health_status()
   if (! $health) {
     echo "n/a";
   }
-  if (! $health) {
-    echo "n/a";
-  }
   else {
     print_health($health->Status, "Health " . $health->Status);
   }

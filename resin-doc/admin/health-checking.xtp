@@ -5,7 +5,7 @@
   <description>
   <p>Resin Professional includes a powerful and configurable system for monitoring 
   application server health. The system is intentionally similar to the 
-  Resin's URL rewrite rules, based on a configurable set of checks, conditions, 
+  Resin's "URL Rewrite" rules, based on a configurable set of checks, conditions, 
   and actions. The health checking system runs internal to Resin on a periodic 
   basis. Checks are generally always performed on the local Resin node, and if 
   actions are to be taken, they are performed against the local Resin node as 
@@ -81,10 +81,10 @@ child of <code>&lt;cluster&gt;</code> or <code>&lt;cluster-default&gt;</code>.</
 <s2 title="health: namespace">
 
 <p>health.xml introduces a new XML namespace, <var>health:</var>, 
-defined using <code>xmlns:health="urn:java:com.caucho.health"</code>.  
+defined by <code>xmlns:health="urn:java:com.caucho.health"</code>.  
 <code>health:</code> separates health objects from standard <code>resin:</code> 
 elements for clarity and performance.  The packages references by 
-<code>health:</code> are as follows:</p>
+<code>health:</code> are:</p>
 <ul>
  <li><a javadoc="com.caucho.health.package-summary">com.caucho.health</a></li>
  <li><a javadoc="com.caucho.health.check.package-summary">com.caucho.health.check</a></li> 
@@ -99,10 +99,10 @@ elements for clarity and performance.  The packages references by
 
 <s3 title="ee: namespace">
 
-<p>The <var>ee:</var> namespace is used for naming objects, such as   
+<p>The <var>ee:</var> namespace is used for naming objects, for example 
 <code>ee:Named="someName"</code>, so that they may be referred to 
-by name later in the configuration. This is necessary because some health 
-predicates permit a reference to a specific named health check, as 
+by name later in the configuration. This is sometimes necessary as some health 
+conditions permit referencing a specific health check, as 
 demonstrated in the following example.</p>
 
 <example title="Example: referencing named objects">
@@ -123,7 +123,8 @@ demonstrated in the following example.</p>
 &lt;/cluster>
 </example>
 
-<p>In this example, HttpStatusHealthCheck is named 'pingJspCheck' and refered 
+<p>In this example, an instance of HttpStatusHealthCheck is named 
+'pingJspCheck' and referred 
 to by name in the IfHealthCritical criteria using an EL expression.  The 
 Restart action will only trigger if the health status is <var>CRITICAL</var> 
 for this specific health check and no others.</p> 
@@ -132,8 +133,8 @@ for this specific health check and no others.</p>
 
 <s3 title="Default names">
 
-<p><b>Note</b>: All health checks classes are annotated with <code>@Named</code>, and 
-therefore have a default name that corresponds to their bean name; for example 
+<p>All health checks classes are annotated with <code>@Named</code>, and 
+therefore have a default name that corresponds to their bean name.  For example 
 <code>&lt;health:CpuHealthCheck/></code> can be referred to by 
 <code>${cpuHealthCheck}</code> without the use of <code>ee:Named</code>.</p>
 
@@ -158,10 +159,10 @@ therefore have a default name that corresponds to their bean name; for example
 
 <s3 title="Duplicate names">
 
-<p>Duplicate health check names are not permitted, and Resin will fail to 
+<p>Duplicate health check names are not permitted.  Resin will fail to 
 startup due to invalid configuration in this case.  This can be caused by 
 configuring duplicate checks without using <code>ee:Named</code>, or 
-by configuring different checks with the same name.  The following examples 
+by configuring more than one check with the same name.  The following examples 
 demonstrate both illegal cases.</p>
 
 <example title="Example: illegal unnamed duplicate checks">
@@ -209,11 +210,11 @@ of the type of check.</p>
 
 <s2 title="Default health configuration">
 
-<p>If for any reason you are missing health.xml, or you are upgrading from an 
+<p>If for any reason you are missing health.xml, for example you are upgrading from an 
 older version of Resin and don't have the health.xml import in resin.xml, 
 there's no need to worry.  Resin creates some checks by default regardless of 
-the presence of health.xml.  Furthermore, Resin will detect that no checks are 
-configured and setup some basic actions and conditions.</p>
+the presence of health.xml.  Furthermore, Resin will detect if no checks are 
+configured and setup default actions and conditions.</p>
 
 <s3 title="Standard health checks">
 
@@ -243,7 +244,7 @@ however health.xml is missing or empty, the following basic actions will be
 created.</p>
 
 <example>
-   &lt;health:Restart>
+  &lt;health:Restart>
     &lt;health:IfHealthFatal/>
   &lt;/health:Restart>
 </example>
@@ -266,7 +267,8 @@ results of all the configured health checks.</p>
 
 <s2 title="Health status">
 <p>Every time a health check executes it produces a 
-<a javadoc="com.caucho.env.health.HealthStatus">HealthStatus</a>.  The 
+<a javadoc="com.caucho.env.health.HealthStatus">HealthStatus</a> and a 
+message.  The 
 following is a list of all health statuses and their generally implied 
 meaning.</p>
 
@@ -410,12 +412,12 @@ than once provided they have different names.</p>
 
 <s1 title="Health actions">
 
-<p>Health actions perform a task, usually as determined by specific conditions, 
+<p>Health actions perform a task, usually in response to specific conditions, 
 or as remediation for a health check status.  Like health checks, health actions 
 are configured in health.xml and executed by the health system on a periodic 
 basis.  Health actions are usually accompanied by one or more conditions, 
 or <i>predicates</i>, but this is not required.  All actions have the potential 
-to be executed once per period, but that is determined by evaluation of 
+to be executed once per period, determined by evaluation of 
 associated conditions.  A health action with no conditions will execute 
 once per period.</p>  
 
@@ -434,17 +436,19 @@ once per period.</p>
 <s1 title="Health conditions">
 
 <p>Health condition, or <i>predicates</i>, qualify an action to execute based 
-on a specific set of criteria.  The action/condition pattern is intentionally 
+on a set of criteria.  The action/condition pattern is intentionally 
 similar to Resin's rewrite dispatch/condition pattern, so it should be 
-familiar to some users.  Health actions by default execute every period. 
-Conditions prevent the execution of an action unless all evaluate to true.  
-A health action with no conditions will execute once per period.</p>
+familiar to some users.  Health actions are evaluated every period. 
+Conditions prevent the execution of an action unless all condition evaluate to true.  
+A health action with no conditions will execute once per period.  When more 
+than one condition is present for an action, the default combining condion 
+is <a href="#health:And">&lt;health;And></a>.</p>
 
 <s2 title="Basic conditions">
 
 <p>Basic conditions evaluate some general criteria and return true if the 
 condition  matches.  Basic conditions do not evaluate the status of a health 
-check.  Instead they evaluate general criteria like the time of day.</p>
+check.  Instead they evaluate some general criteria like the time of day.</p>
 
 <include-defun name="health:IfCron"/>
 
@@ -493,6 +497,19 @@ parameter, overall aggregated Resin health will be used.</p>
 <include-defun name="health:IfMessage"/>
 
 <include-defun name="health:IfRecovered"/>
+
+</s2>
+
+<s2 title="Lifecycle conditions">
+
+<p>Lifecycle conditions evaluate the current state of Resin, qualifying actions 
+to execute only during a Resin lifecycle state change.</p>
+
+<include-defun name="health:OnStart"/>
+
+<include-defun name="health:OnStop"/>
+
+<include-defun name="health:OnRestart"/>
 
 </s2>
 

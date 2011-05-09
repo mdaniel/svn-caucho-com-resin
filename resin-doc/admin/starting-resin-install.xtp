@@ -40,7 +40,7 @@ Application Server able to serve even the most demanding web sites.
 
 <s2 title="Preparing for installation">
 <ol>
-<li>Install JDK 1.5 or later.  You'll need to set the JAVA_HOME
+<li>Install JDK 1.6 or later.  You'll need to set the <var>JAVA_HOME</var>
 variable in your shell or link /usr/java to the Java home
 directory.</li>
 <li>Download the latest version of Resin 4 from the <a
@@ -48,7 +48,8 @@ href="http://www.caucho.com/download">Resin download page</a>.
 Grab the Professional version if:
 <ul>
   <li>You have purchased a Resin Professional license.</li>
-  <li>You have obtained an evaluation Resin Professional license.</li>
+  <li>You have obtained an <a href="http://www.caucho.com/evaluation-license/"> 
+  evaluation Resin Professional license</a>.</li>
   <li>
     You are considering purchasing Resin Professional (without
     a license, Resin Professional simply downgrades to the open 
@@ -58,8 +59,8 @@ Grab the Professional version if:
 </ul>
 </li>
 <li>Unzip or untar the Resin download.  If you downloaded Resin
-Professional, it will unzip into resin-pro-4.x.x/, otherwise it
-will download into resin-4.x.x/.</li>
+Professional, it will extract into <var>resin-pro-4.0.x/</var>, otherwise it
+will extract into <var>resin-4.0.x/</var>.</li>
 </ol>
 </s2>
 
@@ -104,8 +105,7 @@ for Apache.  If you want to use Apache or another 3rd party HTTP
 server in front of Resin (unrecommended), please take a look
 at our <a href="install-3rd-party.xtp">third-party HTTP server
 setup documentation</a>.  If you need to configure other options
-with Resin, now is the time to do it.  Please consult the <a
-href="reference.xtp">reference to all the configuration options</a>.
+with Resin, now is the time to do it.  Please consult <code>./configure --help</code>
 </p>
 
 <p>
@@ -115,21 +115,26 @@ will display a summary like the following:
 <example>
 Resin Configuration summary:
 
-  RESIN_HOME: /usr/local/resin
-      root: /var/www
-      conf: /etc/resin/conf
-      log : /var/log/resin
-      init: /etc/init.d/resin
+  RESIN_HOME  : /usr/local/resin
+      root    : /var/www
+      conf    : /etc/resin
+      log     : /var/log/resin
+      plugins : common apache2 resin_os resin resinssl
+  JAVA_HOME: /System/Library/Java/JavaVirtualMachines/1.6.0.jdk/Contents/Home
 
-  + epoll() for keepalives
-  + OpenSSL 0.9.8g 19 Oct 2007
-      OpenSSL include: /usr/include
-      OpenSSL lib: /usr/lib
-      OpenSSL libraries:  -lssl -lcrypto
+    + 64-bit JNI in -I/System/Library/Java/JavaVirtualMachines/1.6.0.jdk/Contents/Home/include
+    + JNI CFLAGS: -g -O2 -DPOLL -D_POSIX_PTHREAD_SEMANTICS -DB64 -DHAS_SOCK_TIMEOUT -DHAS_JVMTI
+    + poll() for keepalives
+    + OpenSSL 0.9.8l 5 Nov 2009
+        OpenSSL include: /usr/include
+        OpenSSL lib: /usr/lib
+        OpenSSL libraries:  -lssl -lcrypto
 
-  JAVA_HOME: /usr/lib/jvm/java-6-sun
-    + 32-bit JNI in -I/usr/lib/jvm/java-6-sun/include -I/usr/lib/jvm/java-6-sun/include/linux
-      JNI CFLAGS: -g -O2 -DPOLL -DEPOLL -D_POSIX_PTHREAD_SEMANTICS -DHAS_SOCK_TIMEOUT -DHAS_JVMTI
+  Apache: /usr
+      conf: /private/etc/apache2/httpd.conf
+      libexec: /usr/libexec/apache2
+      include: /usr/include/apache2
+      CFLAGS:   -DDARWIN -DSIGPROCMASK_SETS_THREAD_MASK  
 </example>
 </s3>
 
@@ -144,8 +149,8 @@ the root user:</p>
 <example>
 sudo make install
 </example>
-<p>Where ever you install Resin to, we'll refer to that directory as
-<b>resin.home</b>.</p>
+<p>Wherever you install Resin to, we'll refer to that directory as
+<var>resin.home</var>.</p>
 <p>
 If you have a license file for Resin, save it in <var>/usr/local/resin/licenses</var>
 </p>
@@ -181,7 +186,7 @@ Finally, install Resin Professional using the following:
 apt-get install resin-pro
 </example>
 <p>
-If you have a license file for Resin, save it in <var>/usr/share/resin/licenses</var>
+If you have a license file for Resin, save it in <var>/usr/local/resin/licenses</var>
 </p>
 <p>
 Or install Resin Open Source with this command:
@@ -212,7 +217,8 @@ href="http://www.caucho.com/download">Resin download page</a>.
 Grab the Professional version if:
 <ul>
   <li>You have purchased a Resin Professional license.</li>
-  <li>You have obtained an evaluation Resin Professional license.</li>
+  <li>You have obtained an <a href="http://www.caucho.com/evaluation-license/"> 
+  evaluation Resin Professional license</a>.</li>
   <li>
     You are considering purchasing Resin Professional (without
     a license, Resin Professional simply downgrades to the open 
@@ -222,9 +228,8 @@ Grab the Professional version if:
 </ul>
 </li>
 <li>Unzip or untar the Resin download.  If you downloaded Resin
-Professional, it will unzip into resin-pro-4.x.x\, otherwise it
-will download into resin-4.x.x\.
-</li>
+Professional, it will extract into <var>resin-pro-4.0.x</var>, otherwise it
+will extract into <var>resin-4.0.x</var>.</li>
 <li>Move the directory from the previous step to <var>C:\Resin</var>
 </li>
 <li>Run <var>C:\Resin\setup.exe</var></li>
@@ -242,7 +247,7 @@ content.</p>
 webapps. As an administrator, your developers have probably provided
 you with a webapp in the form of a .war file or a webapp directory.
 In the Resin root directory is a special subdirectory named
-<code>webapps</code> which is a <b>webapp deploy directory</b>.
+<var>webapps</var> which is a <b>webapp deploy directory</b>.
 Deploying applications in Resin is as easy as copying a .war
 file or web application directory to one of these webapp deploy
 directories. Resin detects the applications and deploys them
@@ -252,9 +257,9 @@ automatically.</p>
 
 <p>
 In the directory structure above, notice the special webapp
-directories named "ROOT".  These will map to the "/" (root)
+directory named <var>ROOT</var>.  This will map to the "/" (root)
 application.  Other webapps will map to their name.  For example,
-"wordpress" will map to "http://www.example.com/wordpress".
+<var>wordpress</var> will map to <code>http://www.example.com/wordpress</code>.
 </p>
 </s2>
 
@@ -282,7 +287,7 @@ automatically specify the root and log directories.
 
 <s1 title="Starting Resin">
 <s2 title="Creating Unix startup scripts for Resin">
-<p>When you installed using the .deb package or when you ran "make install"
+<p>When you installed using the .deb package or when you ran "<code>sudo make install</code>"
 earlier, the installer created a file named <var>/etc/init.d/resin</var>
 which contains a standard Unix init.d startup file.  This file will start
 Resin when invoked as:
@@ -320,12 +325,10 @@ you to access the server remotely.
   <li>Edit <var>/etc/resin/resin.xml</var></li>
   <li>Change the line:
     <example>
-&lt;resin:set var="resin_admin_external" value="false"/>
-    </example>
+&lt;resin:set var="resin_admin_external" value="false"/></example>
     <p>to</p> 
     <example>
-&lt;resin:set var="resin_admin_external" value="true"/>
-    </example>
+&lt;resin:set var="resin_admin_external" value="true"/></example>
   </li>
   <li>Save <var>/etc/resin/resin.xml</var> and restart the server.</li>
   <li>Replace "localhost" with the name of your host in the URLs below.</li> 
@@ -338,23 +341,22 @@ the only way to change the password is to create a file with the
 authentication information on that machine.  
 </p>
 <ol>
-<li>Browse to <var>http://localhost:8080/resin-admin/</var><br/><br/>
+<li>Browse to <a href="http://localhost:8080/resin-admin/">http://localhost:8080/resin-admin/</a>
 </li>
 <li>Enter a username and password in the lower half of the page, then 
-click "Create Configuration File".  The recommended username is "admin".
-
+click "Create Configuration File".  The recommended username is "admin".<br/>
 <figure src="admin-password-create.png"/>
-
 </li>
-<li>After going to the next page, a new "admin-users.xml.generated"
+<li>After going to the next page, a new <code>admin-users.xml.generated</code>
 file has been created for you in the same directory as your
 resin.xml file is located.  (If you followed the directions above,
-this should be in /etc/resin for Unix and C:\Resin\conf for Windows.)
-Just rename this file to admin-users.xml and Resin will use it to
+this should be in <code>/etc/resin</code> for Unix and <code>C:\Resin\conf</code> 
+for Windows.)  Just rename this file to <code>admin-users.xml</code> and Resin 
+will use it. <br/>
 <figure src="admin-password-save.png"/>
 </li>
-<li>Browse back to <var>http://localhost:8080/resin-admin/</var>.  The
-change you made should force Resin to restart and return a 503 error. 
+<li>Browse back to <a href="http://localhost:8080/resin-admin/">http://localhost:8080/resin-admin/</a>.  The
+change you made should force Resin to restart and return a <code>503</code> error. 
 Just hit refresh in a few moments to bring up the page again.</li>
 <li>You should now be able to login using the username and password
 that you gave above.</li> 

@@ -58,8 +58,8 @@
     
     <s1 title="Startup Options">
       <p>As of Resin 4.0, startup options should be declared in the
-        configuration file. However, some startup options are available
-        via the command line.</p>
+        configuration file using &lt;<a config-tag="jvm-arg"/>&gt;. However, some 
+        startup options are available via the command line.</p>
       <s2 name="command-line" title="Command-line arguments">
 
       <deftable>
@@ -284,7 +284,7 @@ appropriate value for most situations.
 </deftable>
 
 <p><code>-Xss</code> determines the size of the stack: <code>-Xss1024k</code>.
-If the stack space is too small, eventually you will see an exception <a javadoc="java.lang.StackOverflowError"/>.
+If the stack space is too small, eventually you will see a java.lang.StackOverflowError.
 
 </p><p>Some people have reported that it is necessary to change stack size
 settings at the OS level for Linux.  A call to <code>ulimit</code> may
@@ -298,11 +298,10 @@ unix> ulimit -s 2048
 <s1 name="monitor" title="Monitoring the JVM">
 
 <p>
-JDK 5 includes a number of tools that are useful for monitoring the JVM.
+JDK 6 includes a number of tools that are useful for monitoring the JVM.
 Documentation for these tools is available from the
-<a href="http://java.sun.com/j2se/1.5.0/docs/tooldocs/index.html#manage">Sun
-website</a>.  For JDK's prior to 5, Sun provides the
-<a href="http://developer.sun.com/dev/coolstuff/jvmstat">jvmstat tools</a>.
+<a href="http://download.oracle.com/javase/6/docs/technotes/tools">Sun
+website</a>.
 </p>
 
 <p>

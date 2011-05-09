@@ -155,8 +155,8 @@ dll libraries into <code>$RESIN_HOME</code>:</p>
 
 <example title="Copying the Windows SSL libraries into $RESIN_HOME">
 C:\&gt; cd %RESIN_HOME%
-C:\resin-3.0&gt; copy "C:\Program Files\GnuWin32\bin\libssl32.dll" .\libssl32.dll
-C:\resin-3.0&gt; copy "C:\Program Files\GnuWin32\bin\libeay32.dll" .\libeay32.dll
+C:\resin-4.0.x&gt; copy "C:\Program Files\GnuWin32\bin\libssl32.dll" .\libssl32.dll
+C:\resin-4.0.x&gt; copy "C:\Program Files\GnuWin32\bin\libeay32.dll" .\libeay32.dll
 </example>
 
 
