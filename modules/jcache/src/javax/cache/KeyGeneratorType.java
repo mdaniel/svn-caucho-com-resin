@@ -27,29 +27,9 @@
  * @author Scott Ferguson
  */
 
-package com.caucho.env.distcache;
+package javax.cache;
 
-import com.caucho.distcache.CacheManagerImpl;
-import com.caucho.distcache.ObjectCache;
-import com.caucho.server.distcache.AbstractCacheManager;
-
-/**
- * Builds a local cache.
- */
-public class CacheBuilder {
-  private final DistCache _cache;
-  
-  CacheBuilder(String name,
-               CacheManagerImpl cacheManager,
-               AbstractCacheManager<?> backingManager)
-  {
-    _cache = new DistCache(name, cacheManager, backingManager);
-  }
-  
-  public ObjectCache createObjectCache()
-  {
-    _cache.init();
-    
-    return _cache;
-  }
+public enum KeyGeneratorType
+{
+  DEFAULT, HASH_CODE, STRING, CUSTOM;
 }

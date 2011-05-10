@@ -27,29 +27,18 @@
  * @author Scott Ferguson
  */
 
-package com.caucho.env.distcache;
+package javax.cache;
 
-import com.caucho.distcache.CacheManagerImpl;
-import com.caucho.distcache.ObjectCache;
-import com.caucho.server.distcache.AbstractCacheManager;
+import java.lang.annotation.ElementType;
+import java.lang.annotation.Retention;
+import java.lang.annotation.RetentionPolicy;
+import java.lang.annotation.Target;
 
-/**
- * Builds a local cache.
- */
-public class CacheBuilder {
-  private final DistCache _cache;
-  
-  CacheBuilder(String name,
-               CacheManagerImpl cacheManager,
-               AbstractCacheManager<?> backingManager)
-  {
-    _cache = new DistCache(name, cacheManager, backingManager);
-  }
-  
-  public ObjectCache createObjectCache()
-  {
-    _cache.init();
-    
-    return _cache;
-  }
+import javax.inject.Qualifier;
+
+@Target({ElementType.TYPE })
+@Retention(RetentionPolicy.RUNTIME)
+@Qualifier
+public @interface HashKeyGen
+{
 }

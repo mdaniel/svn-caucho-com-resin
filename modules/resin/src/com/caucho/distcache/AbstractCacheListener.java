@@ -32,40 +32,41 @@ package com.caucho.distcache;
 import javax.cache.CacheListener;
 
 /**
- * Provides a base class that can extended to override the method or methods of interest.
- *
- * @note The listener is only when events occur on an entry that has been leased.
+ * Provides a base class that can extended to override the method or methods of
+ * interest.
+ * 
+ * @note The listener is only when events occur on an entry that has been
+ *       leased.
  */
 
-public abstract class AbstractCacheListener<K> implements CacheListener<K> {
-
+public abstract class AbstractCacheListener<K> implements CacheListener {
   protected AbstractCacheListener()
   {
-
   }
 
-  public void onLoad(K key)
+  @Override
+  public void onLoad(Object key)
+  {
+  }
+
+  @Override
+  public void onEvict(Object key)
   {
 
   }
 
-  public void onEvict(K key)
+  @Override
+  public void onClear()
   {
-
   }
 
-  public void onClear(K key)
+  @Override
+  public void onPut(Object key)
   {
-
   }
 
-  public void onPut(K key)
+  @Override
+  public void onRemove(Object key)
   {
-
-  }
-
-  public void onRemove(K key)
-  {
-
   }
 }

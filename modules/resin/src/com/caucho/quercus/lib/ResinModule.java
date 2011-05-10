@@ -54,7 +54,7 @@ import javax.transaction.UserTransaction;
 import com.caucho.VersionFactory;
 import com.caucho.config.inject.InjectManager;
 import com.caucho.distcache.AbstractCache;
-import com.caucho.distcache.CacheManager;
+import com.caucho.distcache.CacheManagerImpl;
 import com.caucho.env.distcache.DistCacheSystem;
 import com.caucho.naming.Jndi;
 import com.caucho.quercus.QuercusModuleException;
@@ -500,7 +500,7 @@ public class ResinModule
   //
   public static QuercusDistcache resin_create_distcache(Env env, String name)
   {
-    CacheManager manager = DistCacheSystem.getCurrent().getCacheManager();
+    CacheManagerImpl manager = DistCacheSystem.getCurrent().getCacheManager();
 
     return new QuercusDistcache(manager.create(name));
   }

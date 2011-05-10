@@ -166,6 +166,7 @@ public class CandiAspectBeanFactory<X> implements AspectBeanFactory<X> {
     AspectFactory<X> next = new MethodTailFactory<X>(this);
     
     next = new InterceptorFactory<X>(this, next, manager);
+    next = new CacheFactory<X>(this, next);
     next = new XaFactory<X>(this, next);
     next = new LockFactory<X>(this, next);
     next = new AsynchronousFactory<X>(this, next);

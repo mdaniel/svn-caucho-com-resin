@@ -53,6 +53,7 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 import javax.annotation.PostConstruct;
+import javax.cache.CacheManager;
 import javax.enterprise.inject.InjectionException;
 import javax.enterprise.inject.spi.Bean;
 import javax.management.ObjectName;
@@ -100,6 +101,7 @@ import com.caucho.config.ConfigException;
 import com.caucho.config.Configurable;
 import com.caucho.config.SchemaBean;
 import com.caucho.config.el.CandiElResolver;
+import com.caucho.config.inject.BeanBuilder;
 import com.caucho.config.inject.InjectManager;
 import com.caucho.config.inject.SingletonBindingHandle;
 import com.caucho.config.j2ee.PersistenceContextRefConfig;
@@ -110,6 +112,8 @@ import com.caucho.config.types.PathBuilder;
 import com.caucho.config.types.Period;
 import com.caucho.config.types.ResourceRef;
 import com.caucho.config.types.Validator;
+import com.caucho.distcache.ClusterCacheManager;
+import com.caucho.distcache.ClusterCacheManagerDelegate;
 import com.caucho.ejb.manager.EjbManager;
 import com.caucho.ejb.manager.EjbModule;
 import com.caucho.env.deploy.DeployContainer;
@@ -582,8 +586,15 @@ public class WebApp extends ServletContextImpl
   /**
    * Initialization before configuration
    */
+  @Override
   public void preConfigInit()
   {
+    ClusterCacheManagerDelegate cacheManager
+      = ClusterCacheManagerDelegate.create();
+    
+    BeanBuilder<?> factory = _cdiManager.createBeanFactory(CacheManager.class);
+    
+    _cdiManager.addBean(factory.singleton(cacheManager));
     /*
     OsgiManager manager = _classLoader.createOsgiManager();
 

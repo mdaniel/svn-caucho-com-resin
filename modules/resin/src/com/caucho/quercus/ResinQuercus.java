@@ -166,7 +166,7 @@ public class ResinQuercus extends QuercusContext
   public Map getSessionCache()
   {
     if (_sessionCache == null && Server.getCurrent() != null) {
-      CacheManager cacheManager = DistCacheSystem.getCurrent().getCacheManager();
+      CacheManagerImpl cacheManager = DistCacheSystem.getCurrent().getCacheManager();
       AbstractCache cache = cacheManager.create("resin:quercus:session");
 
       cache.setIdleTimeoutMillis(3600 * 1000L);

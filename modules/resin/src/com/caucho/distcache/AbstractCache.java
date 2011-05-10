@@ -77,15 +77,15 @@ abstract public class AbstractCache extends AbstractMap
 {
   private static final L10N L = new L10N(AbstractCache.class);
 
-  private CacheManager _localManager;
+  private CacheManagerImpl _localManager;
   private DistributedCacheManager _manager;
 
   private String _name = null;
 
   private String _guid;
 
-  private Collection<CacheListener<?>> _listeners
-    = new ConcurrentLinkedQueue<CacheListener<?>>();
+  private Collection<CacheListener> _listeners
+    = new ConcurrentLinkedQueue<CacheListener>();
 
   private CacheConfig _config = new CacheConfig();
 
@@ -384,7 +384,7 @@ abstract public class AbstractCache extends AbstractMap
     _persistenceOption = persistenceOption;
   }
   
-  public void setCacheManager(CacheManager cacheManager)
+  public void setCacheManager(CacheManagerImpl cacheManager)
   {
     if (_localManager != null && _localManager != cacheManager)
       throw new IllegalStateException();
@@ -396,7 +396,7 @@ abstract public class AbstractCache extends AbstractMap
   {
     DistCacheSystem cacheService = DistCacheSystem.getCurrent();
     
-    CacheManager localManager = cacheService.getCacheManager();
+    CacheManagerImpl localManager = cacheService.getCacheManager();
 
     String contextId = Environment.getEnvironmentName();
 
@@ -722,6 +722,7 @@ abstract public class AbstractCache extends AbstractMap
    *
    * @param key
    */
+  @Override
   public void load(Object key)
   {
     if (containsKey(key) || get(key) != null)
@@ -763,6 +764,7 @@ abstract public class AbstractCache extends AbstractMap
   /**
    * Adds a listener to the cache.
    */
+  @Override
   public void addListener(CacheListener listener)
   {
     _listeners.add(listener);
@@ -771,6 +773,7 @@ abstract public class AbstractCache extends AbstractMap
   /**
    * Removes a listener from the cache.
    */
+  @Override
   public void removeListener(CacheListener listener)
   {
     _listeners.remove(listener);
@@ -779,6 +782,7 @@ abstract public class AbstractCache extends AbstractMap
   /**
    * Returns the CacheStatistics for this cache.
    */
+  @Override
   public CacheStatistics getCacheStatistics()
   {
     return this;
@@ -787,6 +791,7 @@ abstract public class AbstractCache extends AbstractMap
   /**
    * Ignored, since evictions are handled by the container.
    */
+  @Override
   public void evict()
   {
     notifyEvict(null);
@@ -889,6 +894,7 @@ abstract public class AbstractCache extends AbstractMap
    * Returns the number of cache hits that have occured since the cache started or
    * since the last call to clearStatistics.
    */
+  @Override
   public int getCacheHits()
   {
     return (int) (_entryCache.getHitCount() - _priorHits);
@@ -898,6 +904,7 @@ abstract public class AbstractCache extends AbstractMap
    * Returns the number of cache misses that have occured since the cache started or
    * since the last call to clearStatistics.
    */
+  @Override
   public int getCacheMisses()
   {
     return (int) (_entryCache.getMissCount() - _priorMisses);
@@ -906,6 +913,7 @@ abstract public class AbstractCache extends AbstractMap
   /**
    * Returns the number of entries currently in the local cache.
    */
+  @Override
   public int getObjectCount()
   {
     return _entryCache.size();
@@ -914,6 +922,7 @@ abstract public class AbstractCache extends AbstractMap
   /**
    * Simulates a reset of the counters for cache hits and misses.
    */
+  @Override
   public void clearStatistics()
   {
     _priorHits = _entryCache.getHitCount();
@@ -923,6 +932,7 @@ abstract public class AbstractCache extends AbstractMap
   /**
    * Defines the accuracy of this implementation.
    */
+  @Override
   public int getStatisticsAccuracy()
   {
     return CacheStatistics.STATISTICS_ACCURACY_BEST_EFFORT;
@@ -995,7 +1005,7 @@ abstract public class AbstractCache extends AbstractMap
   protected void notifyClear(Object key)
   {
     for (CacheListener listener : _listeners) {
-      listener.onClear(key);
+      listener.onClear();
     }
   }
 
@@ -1013,11 +1023,13 @@ abstract public class AbstractCache extends AbstractMap
     }
   }
 
+  @Override
   public boolean isClosed()
   {
     return _isClosed;
   }
 
+  @Override
   public void close()
   {
     _isClosed = true;

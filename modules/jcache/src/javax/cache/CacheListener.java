@@ -29,15 +29,15 @@
 
 package javax.cache;
 
-public interface CacheListener<K>
+public interface CacheListener
 {
-  public void onLoad(K key);
+  public void onLoad(Object key);
   
-  public void onEvict(K key);
+  public void onPut(Object key);
   
-  public void onClear(K key);
+  public void onEvict(Object key);
   
-  public void onPut(K key);
+  public void onRemove(Object key);
   
-  public void onRemove(K key);
+  public void onClear();
 }

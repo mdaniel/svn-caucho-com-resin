@@ -1,4 +1,4 @@
-/*
+/**
  * Copyright (c) 1998-2011 Caucho Technology -- all rights reserved
  *
  * This file is part of Resin(R) Open Source
@@ -24,32 +24,18 @@
  *   59 Temple Place, Suite 330
  *   Boston, MA 02111-1307  USA
  *
- * @author Scott Ferguson
+ * @author Fred Zappert (fred@caucho.com)
  */
 
-package com.caucho.env.distcache;
-
-import com.caucho.distcache.CacheManagerImpl;
-import com.caucho.distcache.ObjectCache;
-import com.caucho.server.distcache.AbstractCacheManager;
+package com.caucho.distcache;
 
 /**
- * Builds a local cache.
+ * Provides a null implementation of {@link javax.cache.CacheListener}
+ *
+ * @note This implementation of CacheListne is synchrnoous to the operation being observed.
  */
-public class CacheBuilder {
-  private final DistCache _cache;
-  
-  CacheBuilder(String name,
-               CacheManagerImpl cacheManager,
-               AbstractCacheManager<?> backingManager)
-  {
-    _cache = new DistCache(name, cacheManager, backingManager);
-  }
-  
-  public ObjectCache createObjectCache()
-  {
-    _cache.init();
-    
-    return _cache;
-  }
+public class CacheListenerImpl
+  extends AbstractCacheListener
+  implements javax.cache.CacheListener
+{
 }

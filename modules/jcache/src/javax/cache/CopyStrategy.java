@@ -1,6 +1,13 @@
 /*
  * Copyright (c) 1998-2011 Caucho Technology -- all rights reserved
  *
+ * This interface is defined in JSR 107.
+ *
+ * It may be used to access both local and cluster caches.
+ *
+ * Some bulk operations will act only upon the local cache, and will not affect a cluster cache, as noted in the
+ * JavaDoc entry for each method.
+ *
  * This file is part of Resin(R) Open Source
  *
  * Each copy or derived work must preserve the copyright notice and this
@@ -27,29 +34,18 @@
  * @author Scott Ferguson
  */
 
-package com.caucho.env.distcache;
+package javax.cache;
 
-import com.caucho.distcache.CacheManagerImpl;
-import com.caucho.distcache.ObjectCache;
-import com.caucho.server.distcache.AbstractCacheManager;
+import java.io.Serializable;
+import java.util.Collection;
+import java.util.Map;
+import java.util.Set;
 
 /**
- * Builds a local cache.
+ * Strategy to copy objects for a write.
  */
-public class CacheBuilder {
-  private final DistCache _cache;
+public interface CopyStrategy<T> extends Serializable {
+  public T copyForWrite(final T value);
   
-  CacheBuilder(String name,
-               CacheManagerImpl cacheManager,
-               AbstractCacheManager<?> backingManager)
-  {
-    _cache = new DistCache(name, cacheManager, backingManager);
-  }
-  
-  public ObjectCache createObjectCache()
-  {
-    _cache.init();
-    
-    return _cache;
-  }
+  public T copyForRead(final T value);
 }

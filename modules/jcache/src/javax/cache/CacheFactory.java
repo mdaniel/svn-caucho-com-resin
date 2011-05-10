@@ -40,16 +40,11 @@ import java.util.Map;
 public interface CacheFactory {
 
   /**
-   *  Key supported in the map parameter for the createCache method.
-   */
-    public static final String CACHE_NAME = "com.caucho.cluser.name";
-
-  /**
    * Provides a means for dynamically obtaining a cache.
    *
    * @param env If null, the configured and required cache name is used.
    * @return  the requested cache.
-   * @throws CacheException if a cache with the name has already beeen created.
+   * @throws CacheException if a cache with the name has already been created.
    */
   public Cache createCache(Map env)
     throws CacheException;

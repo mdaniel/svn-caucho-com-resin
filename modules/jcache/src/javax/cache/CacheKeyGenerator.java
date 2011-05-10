@@ -27,29 +27,14 @@
  * @author Scott Ferguson
  */
 
-package com.caucho.env.distcache;
+package javax.cache;
 
-import com.caucho.distcache.CacheManagerImpl;
-import com.caucho.distcache.ObjectCache;
-import com.caucho.server.distcache.AbstractCacheManager;
+import java.io.Serializable;
 
-/**
- * Builds a local cache.
- */
-public class CacheBuilder {
-  private final DistCache _cache;
-  
-  CacheBuilder(String name,
-               CacheManagerImpl cacheManager,
-               AbstractCacheManager<?> backingManager)
-  {
-    _cache = new DistCache(name, cacheManager, backingManager);
-  }
-  
-  public ObjectCache createObjectCache()
-  {
-    _cache.init();
-    
-    return _cache;
-  }
+import javax.interceptor.InvocationContext;
+
+public interface CacheKeyGenerator<T extends Serializable>
+{
+  T generateKey(InvocationContext invocationContext);
+  T generateKey(Object... parameters);
 }

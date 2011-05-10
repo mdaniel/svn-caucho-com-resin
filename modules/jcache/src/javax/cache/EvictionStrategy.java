@@ -34,18 +34,18 @@ import java.util.Map;
 /**
  * This interface is not implemented in this implementation of JSR 107.
  */
-public interface EvictionStrategy
+public interface EvictionStrategy<K,V>
 {
   /**
    * Use the clear() method in {@link Cache}.
    */
   public void clear();
 
-  public CacheEntry createEntry(Object key, Object value, long expireTimeout);
+  public CacheEntry<K,V> createEntry(K key, V value, long expireTimeout);
 
-  public void discardEntry(CacheEntry entry);
+  public void discardEntry(CacheEntry<K,V> entry);
 
-  public Map evict(Cache cache);
+  public Map<K,V> evict(Cache<K,V> cache);
 
-  public void touchEntry(CacheEntry entry);
+  public void touchEntry(CacheEntry<K,V> entry);
 }

@@ -1596,8 +1596,10 @@ public class InterceptorGenerator<X>
 
       out.pushDepth();
 
+      /*
       if (! isFirst)
         out.print(",");
+        */
       isFirst = false;
 
       out.println();
@@ -1644,6 +1646,10 @@ public class InterceptorGenerator<X>
     else if (value instanceof Enum<?>) {
       out.printClass(value.getClass());
       out.print("." + value);
+    }
+    else if (value instanceof Class<?>) {
+      out.printClass((Class<?>) value);
+      out.print(".class");
     }
     else
       out.print(value);

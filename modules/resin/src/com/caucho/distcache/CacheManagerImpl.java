@@ -27,14 +27,16 @@
  * @author Scott Ferguson
  */
 
-package com.caucho.env.distcache;
+package com.caucho.distcache;
 
-import com.caucho.distcache.AbstractCache;
-import com.caucho.distcache.CacheManagerImpl;
-import com.caucho.server.distcache.AbstractCacheManager;
+import java.util.concurrent.ConcurrentHashMap;
+
+import javax.enterprise.context.ApplicationScoped;
+
+import com.caucho.config.Configurable;
 
 /**
- * Cache which stores consistent copies on all clusters.
+ * Cache which stores consistent copies on the cluster segment.
  *
  * Using the cache is like using java.util.Map.  To add a new entry,
  * call <code>cache.put(key, value)</code>.  To get the entry, call
@@ -44,23 +46,42 @@ import com.caucho.server.distcache.AbstractCacheManager;
  * and consistency.
  */
 
-class DistCache extends AbstractCache
+@ApplicationScoped
+@Configurable
+public class CacheManagerImpl
 {
-  DistCache(String name,
-            CacheManagerImpl cacheManager,
-            AbstractCacheManager<?> manager)
+  private ConcurrentHashMap<String,AbstractCache> _cacheMap;
+
+  public CacheManagerImpl()
   {
-    if (name == null)
-      throw new NullPointerException();
-    
-    if (cacheManager == null)
-      throw new NullPointerException();
-    
-    if (manager == null)
-      throw new NullPointerException();
-    
-    setName(name);
-    setCacheManager(cacheManager);
-    setManager(manager);
+    _cacheMap = new ConcurrentHashMap<String,AbstractCache>();
+  }
+
+  public AbstractCache get(String name)
+  {
+    return _cacheMap.get(name);
+  }
+
+  public AbstractCache create(String name)
+  {
+    AbstractCache cache = _cacheMap.get(name);
+
+    if (cache == null) {
+      cache = new ClusterCache(name);
+      cache.init();
+      _cacheMap.putIfAbsent(name, cache);
+    }
+
+    return _cacheMap.get(name);
+  }
+
+  public AbstractCache putIfAbsent(String name, AbstractCache cache)
+  {
+    return _cacheMap.putIfAbsent(name, cache);
+  }
+  
+  public void remove(String name)
+  {
+    _cacheMap.remove(name);
   }
 }

@@ -44,14 +44,14 @@ import java.util.Set;
  * The persistent or distributed cache is usable like a normal map, but loads
  * and stores data across the cluster.
  */
-public interface Cache extends Map {
+public interface Cache<K,V> extends Map<K,V> {
     /**
      * Returns the object specified by the given key.
      * <p/>
      * If the item does not exist and a CacheLoader has been specified,
      * the CacheLoader will be used to create a cache value.
      */
-    public Object get(Object key);
+    public V get(Object key);
 
     /**
      * Puts a new item in the cache.
@@ -59,104 +59,31 @@ public interface Cache extends Map {
      * @param key   the key of the item to put
      * @param value the value of the item to put
      */
-    public Object put(Object key, Object value);
+    public V put(K key, V value);
 
     /**
      * Removes the entry from the cache
      */
-    public Object remove(Object key);
-
-    /**
-     * Returns the cache entry for the object with the given key.
-     */
-    public CacheEntry getCacheEntry(Object key);
-
-    /**
-     * Returns the object with the given key, but does not check
-     * distributed caches or trigger a CacheLoader.
-     */
-    public Object peek(Object key);
-
-    /**
-     * Loads and returns a map of all values specified by the key collection.
-     */
-    public Map getAll(Collection keys)
-      throws CacheException;
-
-    /**
-     * Asynchronous call to preload the cache item.
-     */
-    public void load(Object key) throws CacheException;
-
-    /**
-     * Asynchronous call to preload all the cache items mentioned by the keys.
-     * This method can  be used to "warm-up" a cache.
-     */
-    public void loadAll(Collection keys) throws CacheException;
-
-    /**
-     * Returns the CacheStatistics instance for this cache.
-     */
-    public CacheStatistics getCacheStatistics();
-
-    /**
-     * Removes expired items from the cache
-     */
-    public void evict();
-
-    /**
-     * Adds a listener for cache events
-     */
-    public void addListener(CacheListener listener);
-
-    /**
-     * Removes a registered listener for cache events
-     */
-    public void removeListener(CacheListener listener);
-
-    /**
-     * Returns true if the key is present in the local cache.
-     */
-    public boolean containsKey(Object key);
-
-    /**
-     * Returns true if the value is present in at least one entry in the local cache.
-     * Note that this is an O(size()) method.
-     */
-    public boolean containsValue(Object value);
-
-    /**
-     * Returns the set of entries from the current local cache.
-     */
-    public Set entrySet();
-
-    /**
-     * Returns true is the local cache is empty.
-     */
-    public boolean isEmpty();
-
-    /**
-     * Returns the set of keys currently present in the local cache.
-     */
-    public Set keySet();
-
-    /**
-     * Adds the content of the map to the Cache.
-     */
-    public void putAll(Map map);
-
-    /**
-     * Returns the number of entries in the local cache.
-     */
-    public int size();
-
-    /**
-     * Retunrs a collection of the values in the local cache.
-     */
-    public Collection values();
-
-    /**
-     *  Clears the local cache of all entries.
-     */
-    public void clear();
+    public V remove(Object key);
+    
+    //
+    // extra operations
+    
+    Map<K,V> getAll(Collection<Object> keys) throws CacheException;
+    
+    void load(Object key) throws CacheException;
+    
+    void loadAll(Collection keys) throws CacheException;
+    
+    V peek(Object key);
+    
+    CacheEntry<K,V> getCacheEntry(Object key);
+    
+    CacheStatistics getCacheStatistics();
+    
+    void evict();
+    
+    void addListener(CacheListener listener);
+    
+    void removeListener(CacheListener listener);
 }

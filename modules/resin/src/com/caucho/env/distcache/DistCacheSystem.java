@@ -31,7 +31,7 @@ package com.caucho.env.distcache;
 
 import javax.sql.DataSource;
 
-import com.caucho.distcache.CacheManager;
+import com.caucho.distcache.CacheManagerImpl;
 import com.caucho.env.service.*;
 import com.caucho.server.distcache.AbstractCacheManager;
 
@@ -42,7 +42,7 @@ public class DistCacheSystem extends AbstractResinSubSystem
 {
   public static final int START_PRIORITY = START_PRIORITY_CACHE_SERVICE;
 
-  private CacheManager _cacheManager;
+  private CacheManagerImpl _cacheManager;
   
   private AbstractCacheManager<?> _distCacheManager;
   
@@ -53,7 +53,7 @@ public class DistCacheSystem extends AbstractResinSubSystem
     if (distCacheManager == null)
       throw new NullPointerException();
 
-    _cacheManager = new CacheManager();
+    _cacheManager = new CacheManagerImpl();
     _distCacheManager = distCacheManager;
   }
   
@@ -78,7 +78,7 @@ public class DistCacheSystem extends AbstractResinSubSystem
     return _distCacheManager;
   }
   
-  public CacheManager getCacheManager()
+  public CacheManagerImpl getCacheManager()
   {
     return _cacheManager;
   }

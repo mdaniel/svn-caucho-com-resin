@@ -29,12 +29,19 @@
 
 package com.caucho.distcache;
 
+import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
+
+import javax.cache.Cache;
+import javax.cache.CacheException;
+import javax.cache.CacheFactory;
+import javax.cache.CacheManager;
+import javax.enterprise.context.ApplicationScoped;
+import javax.transaction.UserTransaction;
+
 import com.caucho.config.Configurable;
 import com.caucho.loader.Environment;
-import com.caucho.loader.EnvironmentLocal;
-
-import java.util.concurrent.ConcurrentHashMap;
-import javax.enterprise.context.ApplicationScoped;
+import com.caucho.util.L10N;
 
 /**
  * Cache which stores consistent copies on the cluster segment.
@@ -49,40 +56,60 @@ import javax.enterprise.context.ApplicationScoped;
 
 @ApplicationScoped
 @Configurable
-public class CacheManager
+public class ClusterCacheManager implements CacheManager
 {
-  private ConcurrentHashMap<String,AbstractCache> _cacheMap;
-
-  public CacheManager()
-  {
-    _cacheMap = new ConcurrentHashMap<String,AbstractCache>();
-  }
-
-  public AbstractCache get(String name)
-  {
-    return _cacheMap.get(name);
-  }
-
-  public AbstractCache create(String name)
-  {
-    AbstractCache cache = _cacheMap.get(name);
-
-    if (cache == null) {
-      cache = new ClusterCache(name);
-      cache.init();
-      _cacheMap.putIfAbsent(name, cache);
-    }
-
-    return _cacheMap.get(name);
-  }
-
-  public AbstractCache putIfAbsent(String name, AbstractCache cache)
-  {
-    return _cacheMap.putIfAbsent(name, cache);
-  }
+  private static final L10N L = new L10N(ClusterCacheManager.class);
   
-  public void remove(String name)
+  public static final String NAME = "name";
+
+  private String _contextId;
+  
+  private ConcurrentHashMap<String,ClusterCache> _cacheMap;
+
+  public ClusterCacheManager()
   {
-    _cacheMap.remove(name);
+    _cacheMap = new ConcurrentHashMap<String,ClusterCache>();
+    
+    _contextId = Environment.getEnvironmentName();
+  }
+
+  /*
+   * @see javax.cache.CacheFactory#createCache(java.util.Map)
+   */
+  @Override
+  public Cache getCache(String name) throws CacheException
+  {
+    if (name == null)
+      throw new IllegalArgumentException(L.l("Cache 'name' is required."));
+    
+    ClusterCache cache = _cacheMap.get(name);
+    
+    if (cache == null) {
+      cache = new ClusterCache();
+      cache.setName(name);
+      cache.setGuid(_contextId + ":" + name);
+      cache.init();
+      
+      _cacheMap.putIfAbsent(name, cache);
+      
+      cache = _cacheMap.get(name);
+    }
+    
+    return cache;
+  }
+
+  /* (non-Javadoc)
+   * @see javax.cache.CacheManager#getUserTransaction()
+   */
+  @Override
+  public UserTransaction getUserTransaction()
+  {
+    throw new UnsupportedOperationException(getClass().getSimpleName());
+  }
+ 
+  @Override
+  public String toString()
+  {
+    return getClass().getSimpleName() + "[" + _contextId + "]";
   }
 }
