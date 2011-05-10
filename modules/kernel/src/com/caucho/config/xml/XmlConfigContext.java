@@ -589,7 +589,8 @@ public class XmlConfigContext {
       return false;
   }
 
-  private boolean configureInlineBean(Object parent, Node node,
+  private boolean configureInlineBean(Object parent,
+                                      Node node,
                                       Attribute attrStrategy)
   {
     /* server/0219
@@ -604,9 +605,10 @@ public class XmlConfigContext {
       return false;
     }
     
-    QName qName = ((QNode) childNode).getQName();
+    QName parentQname = ((QNode) node).getQName();
+    QName childQname = ((QNode) childNode).getQName();
 
-    ConfigType<?> type = TypeFactory.getFactory().getEnvironmentType(qName);
+    ConfigType<?> type = TypeFactory.getFactory().getEnvironmentType(childQname);
 
     if (type == null || ! attrStrategy.isInlineType(type)) {
       // server/6500
@@ -624,7 +626,7 @@ public class XmlConfigContext {
       childBean = createNew(type, parent, childNew);
     else if (type.isQualifier()) {
       // ioc/04f8
-      Object qualifier = type.create(parent, qName);
+      Object qualifier = type.create(parent, childQname);
 
       ConfigType<?> qualifierType = TypeFactory.getType(qualifier);
 
@@ -645,7 +647,7 @@ public class XmlConfigContext {
       childBean = cdiManager.getReference(bean, attrType, cxt); 
     }
     else
-      childBean = type.create(parent, qName);
+      childBean = type.create(parent, childQname);
 
     if (childBean == null)
       return false;
@@ -656,7 +658,8 @@ public class XmlConfigContext {
     childBean = configureChildBean(childBean, childType,
                                    childNode, attrStrategy);
 
-    attrStrategy.setValue(parent, qName, childBean);
+    // ejb/7006
+    attrStrategy.setValue(parent, parentQname, childBean);
 
     return true;
   }

@@ -333,10 +333,14 @@ abstract public class
   @Override
   public void merge(DeployControllerApi<I> oldControllerV)
   {
-    super.merge(oldControllerV);
-
     EnvironmentDeployController<I,C> oldController;
     oldController = (EnvironmentDeployController<I,C>) oldControllerV;
+    
+    // server/10l4
+    if (! getRootDirectory().equals(oldController.getRootDirectory()))
+      return;
+    
+    super.merge(oldControllerV);
     // setId(oldController.getId());
 
     ArrayList<C> configDefaults = new ArrayList<C>();
@@ -350,7 +354,7 @@ abstract public class
     }
 
     configDefaults.addAll(oldController._configDefaults);
-    
+
     if (getConfig() == null)
       setConfig(oldController.getConfig());
     else if (oldController.getConfig() != null) {

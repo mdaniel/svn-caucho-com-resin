@@ -59,7 +59,7 @@ public final class JniSocketImpl extends QSocket {
 
   private final AtomicBoolean _isClosed = new AtomicBoolean();
 
-  JniSocketImpl()
+  public JniSocketImpl()
   {
     _fd = nativeAllocate();
   }
@@ -75,6 +75,29 @@ public final class JniSocketImpl extends QSocket {
       return _jniTroubleshoot.getMessage();
     else
       return null;
+  }
+  
+  public static JniSocketImpl connect(String host, int port)
+    throws IOException
+  {
+    JniSocketImpl socket = new JniSocketImpl();
+    
+    if (socket.connectImpl(host, port))
+      return socket;
+    else {
+      socket.close();
+      
+      return null;
+    }
+  }
+
+  /**
+   * Creates the new server socket.
+   */
+  public boolean connectImpl(String host, int port)
+    throws IOException
+  {
+    return nativeConnect(_fd, host, port);
   }
 
   boolean accept(long serverSocketFd)
@@ -564,6 +587,10 @@ public final class JniSocketImpl extends QSocket {
                                       long socketfd,
                                       byte []localAddress,
                                       byte []remoteAddress);
+
+  private native boolean nativeConnect(long socketfd,
+                                       String host,
+                                       int port);
 
   native String getCipher(long fd);
 

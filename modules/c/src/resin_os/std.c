@@ -255,14 +255,13 @@ std_write(connection_t *conn, char *buf, int len)
     return -1;
 
   conn->sent_data = 1;
-  
+
   if (! conn->is_recv_timeout && poll_write(fd, conn->socket_timeout) == 0) {
     return -1;
   }
 
   do {
     result = send(fd, buf, len, 0);
-
     if (result >= 0)
       return result;
 

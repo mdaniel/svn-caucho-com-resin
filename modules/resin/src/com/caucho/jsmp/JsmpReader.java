@@ -44,9 +44,9 @@ import com.caucho.json.JsonInput;
 /**
  * JmtpReader stream handles client packets received from the server.
  */
-public class JmtpReader {
+public class JsmpReader {
   private static final Logger log
-    = Logger.getLogger(JmtpReader.class.getName());
+    = Logger.getLogger(JsmpReader.class.getName());
 
   private static final HashMap<String,HmtpPacketType> _typeMap
     = new HashMap<String,HmtpPacketType>();
@@ -54,11 +54,11 @@ public class JmtpReader {
   private InputStream _is;
   private JsonInput _in;
 
-  public JmtpReader()
+  public JsmpReader()
   {
   }
 
-  public JmtpReader(InputStream is)
+  public JsmpReader(InputStream is)
   {
     init(is);
   }

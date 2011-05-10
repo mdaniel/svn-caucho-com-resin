@@ -91,6 +91,7 @@ public class AnnotationConfig implements InvocationHandler {
     _valueMap.put(name, value);
   }
 
+  @Override
   public Object invoke(Object proxy, Method method, Object []args)
   {
     if (ANNOTATION_TYPE.equals(method)) {

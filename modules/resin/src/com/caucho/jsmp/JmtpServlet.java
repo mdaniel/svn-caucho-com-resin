@@ -100,7 +100,7 @@ public class JmtpServlet extends GenericServlet {
     private InputStream _is;
     private OutputStream _os;
 
-    private JmtpReader _jmtpReader;
+    private JsmpReader _jmtpReader;
     private JsmpWriter _jmtpWriter;
     
     private JmtpMailbox _jmtpMailbox;
@@ -128,7 +128,7 @@ public class JmtpServlet extends GenericServlet {
     public void onReadBinary(WebSocketContext context, InputStream is)
       throws IOException
     {
-      JmtpReader reader = new JmtpReader(is);
+      JsmpReader reader = new JsmpReader(is);
       
       reader.readPacket(_actorStream);
     }

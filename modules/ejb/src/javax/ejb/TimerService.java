@@ -275,8 +275,9 @@ public interface TimerService {
    *           If this method could not complete due to a system-level failure.
    */
   public Timer createCalendarTimer(ScheduleExpression schedule,
-      TimerConfig timerConfig) throws IllegalArgumentException,
-      IllegalStateException, EJBException;
+                                   TimerConfig timerConfig)
+  throws IllegalArgumentException,
+         IllegalStateException, EJBException;
 
   /**
    * Get all the active timers associated with this bean.

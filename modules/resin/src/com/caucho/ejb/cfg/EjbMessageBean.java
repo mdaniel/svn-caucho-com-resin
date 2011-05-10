@@ -457,7 +457,6 @@ public class EjbMessageBean<X> extends EjbBean<X> {
         for (ActivationConfigProperty prop : activationConfig) {
           addActivationConfigProperty(prop.propertyName(),
                                       prop.propertyValue());
-
         }
       }
 
@@ -811,6 +810,14 @@ public class EjbMessageBean<X> extends EjbBean<X> {
     public String getActivationConfigPropertyValue()
     {
       return _value;
+    }
+   
+    @Override
+    public String toString()
+    {
+      return (getClass().getSimpleName()
+              + "[" + getActivationConfigPropertyName()
+              + "=" + getActivationConfigPropertyValue() + "]");
     }
   }
 

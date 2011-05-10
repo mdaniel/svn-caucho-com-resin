@@ -37,8 +37,6 @@ import com.caucho.util.L10N;
 import com.caucho.xml.QName;
 
 public class AnnotationAttribute<T> extends Attribute {
-  private static final L10N L = new L10N(AnnotationAttribute.class);
-
   private String _name;
   private ConfigType<T> _type;
 

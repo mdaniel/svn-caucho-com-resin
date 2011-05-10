@@ -327,7 +327,8 @@ public class WebAppSingleDeployGenerator
       
       controller.setDynamicDeploy(false);
       
-      controller.merge(_controller);
+      // server/1h12
+      //controller.merge(_controller);
     }
     else if (! _controller.isNameMatch(name)) {
       // else if the names don't match, return the new controller

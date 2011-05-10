@@ -111,6 +111,7 @@ Java_com_caucho_vfs_JniSocketImpl_readNative(JNIEnv *env,
   connection_t *conn = (connection_t *) (PTR) conn_fd;
   int sublen;
   char buffer[STACK_BUFFER_SIZE];
+  char *temp_buf;
 
   if (! conn || conn->fd < 0 || ! buf)
     return -1;
@@ -1003,6 +1004,64 @@ Java_com_caucho_vfs_JniSocketImpl_nativeAccept(JNIEnv *env,
     return 0;
 
   socket_fill_address(env, obj, ss, conn, local_addr, remote_addr);
+
+  return 1;
+}
+
+JNIEXPORT jboolean JNICALL
+Java_com_caucho_vfs_JniSocketImpl_nativeConnect(JNIEnv *env,
+						jobject obj,
+						jlong conn_fd,
+						jstring jhost,
+						jint port)
+{
+  connection_t *conn = (connection_t *) (PTR) conn_fd;
+  int val = 0;
+  const char *addr_string = 0;
+  int sock;
+  int family = 0;
+  int protocol = 0;
+  server_socket_t *ss;
+  char sin_data[256];
+  struct sockaddr_in *sin = (struct sockaddr_in *) sin_data;
+  int sin_length = sizeof(sin_data);
+
+  if (! conn || ! env || ! jhost)
+    return 0;
+
+  if (conn->fd >= 0) {
+    conn->jni_env = env;
+
+    conn->ops->close(conn);
+  }
+
+  addr_string = (*env)->GetStringUTFChars(env, jhost, 0);
+  
+  if (addr_string) {
+    sin = lookup_addr(env, addr_string, port, sin_data,
+		      &family, &protocol, &sin_length);
+  
+    (*env)->ReleaseStringUTFChars(env, jhost, addr_string);
+  }
+  else {
+    resin_throw_exception(env, "java/lang/NullPointerException", "missing addr");
+    return 0;
+  }
+  
+  if (! sin)
+    return 0;
+
+  sock = socket(family, SOCK_STREAM, 0);
+  if (sock < 0) {
+    return 0;
+  }
+
+  if (connect(sock, (struct sockaddr *) sin, sin_length) < 0) {
+    return 0;
+  }
+
+  conn->fd = sock;
+  conn->socket_timeout = 10000;
 
   return 1;
 }

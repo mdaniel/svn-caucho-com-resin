@@ -106,5 +106,10 @@ public class DescriptionGroupConfig
     {
       _largeIcon = largeIcon;
     }
+    
+    public void setValue(String value)
+    {
+      setSmallIcon(value);
+    }
   }
 }

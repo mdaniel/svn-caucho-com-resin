@@ -29,12 +29,8 @@
 
 package com.caucho.ejb.message;
 
-import javax.jms.*;
-import javax.resource.*;
-import javax.resource.spi.*;
-import javax.resource.spi.endpoint.*;
-import javax.resource.spi.work.*;
-import javax.transaction.xa.*;
+import javax.resource.spi.ActivationSpec;
+import javax.resource.spi.ResourceAdapter;
 
 public class JmsActivationSpec implements ActivationSpec {
   private JmsResourceAdapter _ra;
