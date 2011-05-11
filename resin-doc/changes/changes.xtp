@@ -13,6 +13,7 @@
 
 <s2 title="4.0.18 - snapshot">
 <ul>
+<li>ant-plugin: ant plugin has been moved to http://github.com/caucho/ant-plugin</li>
 <li>resin-cli: added jmx-list, jmx-set, jmx-call commands</li>
 <li>health: add  OnStart, OnStop, OnRestart health predicates (#4257)</li>
 <li>scheduled-task: forward with param was causing NPE (#4530, rep by kenjrwalker)</li>

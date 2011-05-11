@@ -305,6 +305,13 @@ http://maven.apache.org/maven-v4_0_0.xsd">
     </s1>
 
     <s1 title="Ant Deploy Client">
+      <note>Please note that ant plugin has been moved to a new home:
+        <a href="https://github.com/caucho/ant-plugin">
+          https://github.com/caucho/ant-plugin</a>. Current snapshot can be
+        downloaded from 'target' directory at<a
+            href="https://github.com/caucho/ant-plugin">
+          https://github.com/caucho/ant-plugin</a>.
+      </note>
       <example title="Using the Ant tasks">
 &lt;project xmlns:resin="antlib:com.caucho.ant">
   &lt;-- if resin-ant.jar is not installed locally -->
