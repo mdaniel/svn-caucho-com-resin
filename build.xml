@@ -12,7 +12,7 @@
   <property name="eclipse.home" value="${user.home}/eclipse"/>
 
   <target name="compile" 
-          depends="init, hessian, javaee, jaxstream, jcache, portlet, script, resin-kernel, quercus, resin, ecmascript, cdi, webutil, conf, ext, j2ee-management,   resin-eclipselink">
+          depends="init, hessian, javaee, jaxstream, portlet, script, resin-kernel, quercus, resin, ecmascript, cdi, webutil, conf, ext, j2ee-management,   resin-eclipselink">
   </target>
 
   <!--
@@ -460,7 +460,7 @@
     </copy>
   </target>
 
-  <target name="javaee" depends="ejb, jca, jms, jpa, servlet16, jcache, jstl, jta, cdi">
+  <target name="javaee" depends="ejb, jca, jms, jpa, servlet16, cdi, jcache, jstl, jta">
     <!--
        - javaee-16.jar
       -->
