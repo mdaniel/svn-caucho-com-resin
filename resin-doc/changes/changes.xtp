@@ -13,6 +13,8 @@
 
 <s2 title="4.0.18 - snapshot">
 <ul>
+<li>watchdog: set the LD_LIBRARY_PATH_64 variable on 64-bit systems (#4536)</li>
+<li>access-log: rollover rescheduling of alarm was not reliable (#4540, rep by mros2stf)</li>
 <li>ant-plugin: ant plugin has been moved to http://github.com/caucho/ant-plugin</li>
 <li>resin-cli: added jmx-list, jmx-set, jmx-call commands</li>
 <li>health: add  OnStart, OnStop, OnRestart health predicates (#4257)</li>
