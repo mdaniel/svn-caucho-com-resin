@@ -14,5 +14,22 @@
 
 </s1>
 
+<s1 title="(CLI) Resin command line updates">
+  <p>Resin 4.0.18 introduces commands to manage jmx objects. New set of JMX
+    Commands consists of jmx-list, jmx-set and jmx-call commands.
+    Documentation
+    for an updated CLI interface can be viewed with<code>java -jar
+      lib/resin.jar
+      help</code>. Documentation for a particular command can be viewed with
+    <code>java -jar lib/resin.jar help &lt;command></code>
+  </p>
+</s1>
+
+<s1 title="Resin Ant Plugin">
+<p>Resin Ant Plugin has been moved to a new home at github:
+  <a href="https://github.com/caucho/ant-plugin">https://github.com/caucho/ant-plugin</a>.
+</p>
+</s1>
+
 </body>
 </document>
