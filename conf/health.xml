@@ -160,7 +160,7 @@
   </health:JmxMeter>
 
   <health:JmxMeter>
-    <name>JVM|Memory|Tenured Memory Used</name>
+    <name>JVM|Memory|Tenured Memory Free</name>
     <objectName>resin:type=Memory</objectName>
     <attribute>TenuredFree</attribute>
   </health:JmxMeter>

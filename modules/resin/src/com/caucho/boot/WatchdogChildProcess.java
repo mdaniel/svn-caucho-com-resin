@@ -553,8 +553,11 @@ class WatchdogChildProcess
 
     if (_watchdog.is64bit()) {
       WatchdogClient.appendEnvPath(env,
-                    "LD_LIBRARY_PATH",
-                    resinHome.lookup("libexec64").getNativePath());
+                                   "LD_LIBRARY_PATH",
+                                   resinHome.lookup("libexec64").getNativePath());
+      WatchdogClient.appendEnvPath(env,
+                                   "LD_LIBRARY_PATH_64",
+                                   resinHome.lookup("libexec64").getNativePath());
       WatchdogClient.appendEnvPath(env,
                     "DYLD_LIBRARY_PATH",
                     resinHome.lookup("libexec64").getNativePath());

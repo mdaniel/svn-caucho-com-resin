@@ -11,7 +11,7 @@
 <li><a href="http://caucho.com/resin-3.1/changes/changes.xtp">Resin 3.1 changes</a></li>
 </ul>
 
-<s2 title="4.0.18 - snapshot">
+<s2 title="4.0.18 - May 12, 2010">
 <ul>
 <li>watchdog: set the LD_LIBRARY_PATH_64 variable on 64-bit systems (#4536)</li>
 <li>access-log: rollover rescheduling of alarm was not reliable (#4540, rep by mros2stf)</li>

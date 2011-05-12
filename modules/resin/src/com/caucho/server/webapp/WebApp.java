@@ -589,12 +589,6 @@ public class WebApp extends ServletContextImpl
   @Override
   public void preConfigInit()
   {
-    ClusterCacheManagerDelegate cacheManager
-      = ClusterCacheManagerDelegate.create();
-    
-    BeanBuilder<?> factory = _cdiManager.createBeanFactory(CacheManager.class);
-    
-    _cdiManager.addBean(factory.singleton(cacheManager));
     /*
     OsgiManager manager = _classLoader.createOsgiManager();
 

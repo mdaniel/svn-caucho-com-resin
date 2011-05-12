@@ -62,5 +62,24 @@ logging, documentation, and lifecycle conditions.</p>
 
 </s1>
 
+<s1 title="maven/junit embedding/integration with JPA/data sources">
+
+<p>When embedded Resin is launched inside a maven/junit task, the default
+behavior is to disable Resin's Alarm, which manages timeouts. To re-enable
+the alarm, use a '-Dcaucho.alarm-enable' on the command-line when launching
+Java.</p>
+
+<p>The alarm is disabled in embedded cases to handle of embedded
+Quercus in a non-Resin container.</p>
+
+</s1>
+
+<s1 title="WebSocket draft v7">
+
+<p>Resin's WebSocket support has been upgraded to the test v7 draft of the
+IETF specification.</p>
+
+</s1>
+
 </body>
 </document>

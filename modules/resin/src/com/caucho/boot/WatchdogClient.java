@@ -394,6 +394,7 @@ class WatchdogClient
       libexecPath = resinHome.lookup("libexec64").getNativePath();
 
       appendEnvPath(env, "LD_LIBRARY_PATH", libexecPath);
+      appendEnvPath(env, "LD_LIBRARY_PATH_64", libexecPath);
       appendEnvPath(env, "DYLD_LIBRARY_PATH", libexecPath);
       if (CauchoSystem.isWindows())
         appendEnvPath(env, "Path", resinHome.lookup("win64").getNativePath());

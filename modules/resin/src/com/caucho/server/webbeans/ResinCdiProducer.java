@@ -34,6 +34,7 @@ import java.util.concurrent.ScheduledExecutorService;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
+import javax.cache.CacheManager;
 import javax.enterprise.context.RequestScoped;
 import javax.enterprise.inject.Disposes;
 import javax.enterprise.inject.Produces;
@@ -49,6 +50,7 @@ import javax.transaction.UserTransaction;
 import com.caucho.config.CauchoDeployment;
 import com.caucho.config.ContextDependent;
 import com.caucho.config.inject.InjectManager;
+import com.caucho.distcache.ClusterCacheManagerDelegate;
 import com.caucho.jmx.Jmx;
 import com.caucho.security.SecurityContext;
 import com.caucho.security.SecurityContextException;
@@ -185,5 +187,12 @@ public class ResinCdiProducer
     }
     
     return null;
+  }
+  
+  @javax.inject.Singleton
+  @Produces()
+  public CacheManager createCacheManager()
+  {
+    return ClusterCacheManagerDelegate.create();
   }
 }

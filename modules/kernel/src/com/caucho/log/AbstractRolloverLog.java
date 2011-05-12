@@ -97,8 +97,6 @@ public class AbstractRolloverLog {
   // How many archives are allowed.
   private int _rolloverCount;
 
-  private QDate _calendar = QDate.createLocal();
-
   private Path _pwd = Vfs.lookup();
 
   protected Path _path;
@@ -335,12 +333,14 @@ public class AbstractRolloverLog {
       _nextPeriodEnd = nextRolloverTime(now);
     }
     
-    Alarm alarm = _rolloverAlarm;
-    if (_nextPeriodEnd > 0 && alarm != null)
-      alarm.queueAt(_nextPeriodEnd);
-
-    if (_nextPeriodEnd < _nextRolloverCheckTime && _nextPeriodEnd > 0)
-      _nextRolloverCheckTime = _nextPeriodEnd;
+    long nextDay = now + DAY;
+    
+    if (_nextPeriodEnd < _nextRolloverCheckTime && _nextPeriodEnd > 0) {
+      if (_nextPeriodEnd < nextDay)
+        _nextRolloverCheckTime = _nextPeriodEnd;
+      else
+        _nextRolloverCheckTime = nextDay;
+    }
 
     if (_archiveFormat != null || getRolloverPeriod() <= 0) {
     }
@@ -355,9 +355,13 @@ public class AbstractRolloverLog {
 
     rolloverLog();
     
-    if (_nextPeriodEnd > 0) {
-      _rolloverAlarm = new WeakAlarm(new RolloverAlarm());
+    _rolloverAlarm = new WeakAlarm(new RolloverAlarm());
+    
+    if (_nextPeriodEnd > 0 && _nextPeriodEnd < nextDay) {
       _rolloverAlarm.queueAt(_nextPeriodEnd);
+    }
+    else {
+      _rolloverAlarm.queue(DEFAULT_ROLLOVER_CHECK_PERIOD);
     }
   }
   
@@ -479,10 +483,6 @@ public class AbstractRolloverLog {
       long lastPeriodEnd = _nextPeriodEnd;
 
       _nextPeriodEnd = nextRolloverTime(now);
-      
-      Alarm alarm = _rolloverAlarm;
-      if (_nextPeriodEnd > 0 && alarm != null)
-        alarm.queueAt(_nextPeriodEnd);
 
       Path path = getPath();
 
@@ -935,8 +935,18 @@ public class AbstractRolloverLog {
     @Override
     public void handleAlarm(Alarm alarm)
     {
-      if (! isClosed()) {
+      if (isClosed())
+        return;
+
+      try {
         rolloverLog();
+      } finally {
+        long nextDay = Alarm.getCurrentTime() + DAY;
+
+        if (_nextPeriodEnd > 0 && _nextPeriodEnd < nextDay)
+          alarm.queueAt(_nextPeriodEnd);
+        else
+          alarm.queueAt(nextDay);
       }
     }
   }
