@@ -31,5 +31,36 @@
 </p>
 </s1>
 
+<s1 title="Health Check Updates">
+
+<p>Changes to the health system this release include improved stability, 
+logging, documentation, and lifecycle conditions.</p>
+
+<ul>
+ <li>Parameter checking and error reporting - All health checks, actions, and 
+ conditions were updated to check for missing or invalid attributes and 
+ report clearer error logs.</li>
+ 
+ <li>Documentation - Full documentation of the health checking system is now 
+ present at <a href="../admin/health.xtp">/resin-doc/admin/health.xtp</a>.</li>
+
+ <li>Lifecycle conditions - Resin can now be configured to execute health 
+ actions on startup, shutdown, and restart.</li>
+</ul>
+
+<example title="Example: Sending an email on startup in health.xml">
+&lt;cluster xmlns="http://caucho.com/ns/resin"
+         xmlns:health="urn:java:com.caucho.health">
+
+  &lt;health:SendMail>
+    &lt;to>admin@yourdomain.com&lt;/to>
+    &lt;health:OnStartup/>
+  &lt;/health:SendMail>
+ 
+&lt;/cluster>
+</example>
+
+</s1>
+
 </body>
 </document>
