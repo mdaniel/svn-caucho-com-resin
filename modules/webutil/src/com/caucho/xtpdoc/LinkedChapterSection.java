@@ -134,4 +134,27 @@ public class LinkedChapterSection extends ChapterSection {
       return;
     }
   }
+  
+  @Override
+  public void writeAsciiDoc(PrintWriter out)
+    throws IOException
+  {
+    Path xtpFile = Vfs.lookup(_link);
+    Document document = configureDocument(xtpFile);
+
+    try {
+      if (document != null) {
+        document.writeAsciiDoc(out);
+      }
+    } catch (Exception e) {
+      System.err.println("Error configuring document (" + xtpFile + "): " + e);
+
+      if (e.getCause() != null)
+        e.getCause().printStackTrace();
+      else 
+        e.printStackTrace();
+
+      return;
+    }
+  }
 }

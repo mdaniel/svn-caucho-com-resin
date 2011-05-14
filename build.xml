@@ -784,6 +784,10 @@
     -->
   </target>
 
+  <target name="pdf2" depends="init">
+    <generate-pdf2 name="resin-admin"/>
+  </target>
+
   <target name="test-pdf" depends="init">
     <generate-pdf name="test"/>
   </target>

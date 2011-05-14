@@ -71,4 +71,10 @@ public class LineBreak implements ContentItem {
   {
     writeLaTeX(out);
   }
+
+  @Override
+  public void writeAsciiDoc(PrintWriter out)
+    throws IOException
+  {
+  }
 }

@@ -245,4 +245,8 @@ public class Header {
     out.println("\\section{" + LaTeXUtil.escapeForLaTeX(_title) + "}");
     */
   }
+
+  public void writeAsciiDoc(PrintWriter out)
+  {
+  }
 }

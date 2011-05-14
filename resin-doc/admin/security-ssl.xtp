@@ -322,9 +322,7 @@ certificates (and documentation) from mod_ssl for Resin.</p>
 
 </s2>
 
-<s2 title="Testing">
-
-<s3 title="Testing with the browser">
+<s2 title="Testing SSL with the browser">
 <!--
 <p><jsp:scriptlet>if (request.isSecure()) {</jsp:scriptlet>
 </p><p><code>request.isSecure()</code> is reporting true, so it looks like
@@ -344,9 +342,9 @@ url and you will get a message telling that SSL is working.
 <example>
 Secure? &lt;%= request.isSecure() %&gt;
 </example>
-</s3>
+</s2>
 
-<s3 title="Using openssl to test the server">
+<s2 title="Testing with openssl to test the server">
 <p>
 The openssl tool can be used as a client, showing some interesting information
 about the conversation between the client and the server:
@@ -355,7 +353,7 @@ about the conversation between the client and the server:
 <example>
 unix$ openssl s_client -connect www.some.host:443 -prexit
 </example>
-</s3>
+
 </s2> <!-- testing -->
 
 <s2 title="Certificate Chains">

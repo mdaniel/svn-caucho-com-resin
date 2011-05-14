@@ -143,4 +143,23 @@ public class Table extends Node implements ContentItem {
   {
     writeLaTeX(out);
   }
+
+  @Override
+  public void writeAsciiDoc(PrintWriter out)
+    throws IOException
+  {
+    out.println();
+    out.println();
+    if (_title != null)
+      out.println("." + _title);
+    
+    if (_rows.size() > 0 && (_rows.get(0).isHeader()))
+      out.println("[options=\"header\"]");
+
+    out.println("|=======");
+    for (TableRow row : _rows) {
+      row.writeAsciiDoc(out);
+    }
+    out.println("|=======");
+  }
 }

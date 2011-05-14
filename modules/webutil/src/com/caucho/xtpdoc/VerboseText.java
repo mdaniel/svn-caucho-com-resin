@@ -37,7 +37,7 @@ import java.io.PrintWriter;
 import java.io.StringReader;
 import java.util.logging.Logger;
 
-public class VerboseText implements ContentItem {
+public class VerboseText extends AbstractContentItem {
   private Logger log = Logger.getLogger(VerboseText.class.getName());
   private String _text;
   private Document _document;
@@ -89,5 +89,12 @@ public class VerboseText implements ContentItem {
     throws IOException
   {
     writeLaTeX(out);
+  }
+
+  @Override
+  public void writeAsciiDoc(PrintWriter out)
+    throws IOException
+  {
+    escapeAsciiDoc(out, _text);
   }
 }

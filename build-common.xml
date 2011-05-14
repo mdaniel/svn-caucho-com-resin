@@ -385,6 +385,33 @@
     </sequential>
   </macrodef>
 
+  <macrodef name="generate-pdf2">
+    <attribute name="name"/>
+
+    <sequential>
+
+      <mkdir dir="${build}/pdf/@{name}"/>
+
+      <java classname="com.caucho.xtpdoc.Printer" fork="true" 
+            output="${build}/pdf/@{name}/@{name}.ad" logError="true"
+            dir="${resin.doc}">
+        <jvmarg value="-Djava.awt.headless=true"/>
+        <arg value="--new"/>
+        <arg file="${resin.doc}/@{name}.xml"/>
+        <classpath>
+          <pathelement location="${java.home}/../lib/tools.jar"/>
+          <dirset dir="${resin.modules}">
+            <include name="*/classes"/>
+          </dirset>
+          <fileset dir="${resin.modules}/ext">
+            <include name="**/*.jar"/>
+          </fileset>
+        </classpath>
+      </java>
+
+    </sequential>
+  </macrodef>
+
 <!--
   <target name="pdf" depends="init">
     <delete dir="${build}/pdf" />

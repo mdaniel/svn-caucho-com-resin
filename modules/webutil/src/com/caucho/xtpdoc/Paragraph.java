@@ -59,4 +59,14 @@ public class Paragraph extends FormattedTextWithAnchors {
 
     super.writeLaTeX(out);
   }
+
+  @Override
+  public void writeAsciiDoc(PrintWriter out)
+    throws IOException
+  {
+    out.println();
+    out.println();
+
+    super.writeAsciiDoc(out);
+  }
 }

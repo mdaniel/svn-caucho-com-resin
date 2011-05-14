@@ -173,4 +173,18 @@ public class Defun extends Section {
 
     super.writeLaTeX(out);
   }
+
+  @Override
+  public void writeAsciiDoc(PrintWriter out)
+    throws IOException
+  {
+    out.println();
+    out.println();
+    
+    if (_title != null) {
+      out.println("==== " + _title + " ====");
+    }
+
+    super.writeAsciiDoc(out);
+  }
 }

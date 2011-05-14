@@ -12107,9 +12107,7 @@ switch to a non-root user after binding to port 80.</p>
 
 </defun>
 
-<defun title="Variables" name="variables">
-
-<s2 title="java">
+<defun title="Variables: java">
 
 <deftable title="java properties">
 <tr>
@@ -12122,9 +12120,9 @@ switch to a non-root user after binding to port 80.</p>
 </tr>
 </deftable>
 
-</s2>
+</defun>
 
-<s2 title="resin">
+<defun title="Variables: resin">
 
 <deftable title="resin properties">
 <tr>
@@ -12173,8 +12171,8 @@ switch to a non-root user after binding to port 80.</p>
 </tr>
 </deftable>
 
-</s2>
-<s2 title="system">
+</defun>
+<defun title="Variables: system">
 
 <p>The ${system} variable return the <code>System.getProperties()</code>
 value.</p>
@@ -12189,7 +12187,6 @@ value.</p>
 &lt;/resin>
 </example>
 
-</s2>
 </defun>
 
 

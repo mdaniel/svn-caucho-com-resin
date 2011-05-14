@@ -38,7 +38,15 @@ import java.io.OutputStreamWriter;
 import java.io.PrintWriter;
 
 public class Printer {
+  private String _fileName;
+  private boolean _isNew;
+  
   public static void main(String []args)
+  {
+    new Printer(args);
+  }
+  
+  Printer(String []args)
   {
     Config config = new Config();
     config.setEL(false);
@@ -47,8 +55,10 @@ public class Printer {
       System.out.println("usage: " + Printer.class.getName() + " <book.xml>");
       System.exit(1);
     }
+    
+    parseArgs(args);
 
-    Path xtpFile = Vfs.lookup(args[0]);
+    Path xtpFile = Vfs.lookup(_fileName);
     Book book = new Book();
 
     try {
@@ -57,7 +67,12 @@ public class Printer {
       OutputStreamWriter osw = new OutputStreamWriter(System.out);
       PrintWriter out = new PrintWriter(osw);
 
-      book.writeLaTeX(out);
+      if (_isNew) {
+        book.writeAsciiDoc(out);
+      }
+      else {
+        book.writeLaTeX(out);
+      }
 
       osw.close();
       out.close();
@@ -68,5 +83,13 @@ public class Printer {
 
       e.printStackTrace();
     }
+  }
+    
+  private void parseArgs(String []args)
+  {
+    _fileName = args[args.length - 1];
+    
+    if (args[0].equals("--new"))
+      _isNew = true;
   }
 }

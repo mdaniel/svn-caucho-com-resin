@@ -553,6 +553,8 @@ add the following to your resin.xml:</p>
 
 <s2 title="/resin-admin">
 
+<p>The /resin-admin URL provides an overview of the current state of Resin.</p>
+
 <s3 title="block cache miss ratio">
 
 <p>The block cache miss ratio tells how often Resin needs to access the

@@ -97,4 +97,20 @@ public class Def extends VerboseFormattedTextWithAnchors {
     out.println("\\end{Verbatim}");
     out.println("\\end{center}");
   }
+  
+  @Override
+  public void writeAsciiDoc(PrintWriter out)
+    throws IOException
+  {
+    out.println();
+    out.println();
+    
+    out.println("----");
+
+    super.writeAsciiDoc(out);
+    
+    out.println();
+    
+    out.println("----");
+}
 }

@@ -120,7 +120,18 @@ public abstract class ContainerNode implements ContentItem {
   public void writeLaTeXArticle(PrintWriter out)
     throws IOException
   {
+      for (ContentItem item : _items)
+        item.writeLaTeXTop(out);
+  }
+
+  /**
+   * @param out
+   */
+  @Override
+  public void writeAsciiDoc(PrintWriter out)
+    throws IOException
+  {
     for (ContentItem item : _items)
-      item.writeLaTeXTop(out);
+      item.writeAsciiDoc(out);
   }
 }

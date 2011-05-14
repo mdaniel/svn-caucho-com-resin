@@ -34,7 +34,7 @@ import javax.xml.stream.XMLStreamWriter;
 import java.io.IOException;
 import java.io.PrintWriter;
 
-public class Text implements ContentItem {
+public class Text extends AbstractContentItem {
   private String _text;
 
   public Text(String text)
@@ -75,6 +75,13 @@ public class Text implements ContentItem {
     throws IOException
   {
     writeLaTeX(out);
+  }
+
+  @Override
+  public void writeAsciiDoc(PrintWriter out)
+    throws IOException
+  {
+    escapeAsciiDoc(out, _text);
   }
 
   public String toString()

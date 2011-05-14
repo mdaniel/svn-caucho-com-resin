@@ -132,4 +132,15 @@ public class Book {
 
     out.println("\\end{document}");
   }
+
+  public void writeAsciiDoc(PrintWriter out)
+    throws IOException
+  {
+    out.println();
+    out.println("= " + _title + " =");
+    
+    for (Chapter chapter : _chapters) {
+      chapter.writeAsciiDoc(out);
+    }
+  }
 }

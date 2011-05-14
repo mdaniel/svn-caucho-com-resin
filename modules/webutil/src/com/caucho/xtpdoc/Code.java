@@ -59,4 +59,17 @@ public class Code extends FormattedText {
 
     out.print("}");
   }
+
+  @Override
+  public void writeAsciiDoc(PrintWriter out)
+    throws IOException
+  {
+    // out.println("[source,java]");
+    out.println();
+    out.print("++");
+
+    super.writeAsciiDoc(out);
+
+    out.println("++");
+  }
 }

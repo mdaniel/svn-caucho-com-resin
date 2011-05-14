@@ -110,4 +110,10 @@ public class ReferenceLegend implements ContentItem {
   {
     // irrelevant to latex
   }
+
+  @Override
+  public void writeAsciiDoc(PrintWriter out)
+    throws IOException
+  {
+  }
 }

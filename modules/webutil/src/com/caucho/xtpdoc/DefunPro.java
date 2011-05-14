@@ -84,4 +84,10 @@ public class DefunPro implements ContentItem {
   {
     throw new ConfigException("<pro> not allowed in a verbatim context");
   }
+
+  @Override
+  public void writeAsciiDoc(PrintWriter out)
+    throws IOException
+  {
+  }
 }

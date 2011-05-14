@@ -49,4 +49,7 @@ public interface ContentItem {
 
   public void writeLaTeXEnclosed(PrintWriter out)
     throws IOException;
+
+  public void writeAsciiDoc(PrintWriter out)
+    throws IOException;
 }

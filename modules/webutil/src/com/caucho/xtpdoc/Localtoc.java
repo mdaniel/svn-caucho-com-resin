@@ -115,4 +115,10 @@ public class Localtoc implements ContentItem {
   {
     throw new ConfigException("<localtoc> not allowed in a verbatim context");
   }
+
+  @Override
+  public void writeAsciiDoc(PrintWriter out)
+    throws IOException
+  {
+  }
 }

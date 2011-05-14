@@ -41,4 +41,10 @@ public abstract class ChapterSection {
   {
     writeLaTeX(out);
   }
+  
+  public void writeAsciiDoc(PrintWriter out)
+    throws IOException
+  {
+    out.println("Section: " + this);
+  }
 }

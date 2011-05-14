@@ -346,4 +346,14 @@ public abstract class Section extends ContainerNode {
 
   abstract public void writeLaTeXEnclosed(PrintWriter out)
     throws IOException;
+
+  @Override
+  public void writeAsciiDoc(PrintWriter out)
+    throws IOException
+  {
+    if (isWebOnly())
+      return;
+        
+    super.writeAsciiDoc(out);
+  }
 }

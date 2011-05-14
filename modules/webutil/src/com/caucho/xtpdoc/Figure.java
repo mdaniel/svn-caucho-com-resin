@@ -134,4 +134,17 @@ public class Figure implements ContentItem {
   {
     writeLaTeX(out);
   }
+
+  @Override
+  public void writeAsciiDoc(PrintWriter out)
+    throws IOException
+  {
+    int dot = _source.lastIndexOf('.');
+
+    String basename = _source.substring(0, dot);
+    
+    out.println();
+    out.println();
+    out.println("image::images/" + _source + "[alt=\"" + _source + "\"]");
+  }
 }

@@ -266,8 +266,6 @@ element security-provider {
 
 <defun title="Variables">
 
-<s2 title="java">
-
 <deftable title="java properties">
 <tr>
   <th>Property</th>
@@ -278,10 +276,6 @@ element security-provider {
   <td>Returns the JDK version from the java.version property</td>
 </tr>
 </deftable>
-
-</s2>
-
-<s2 title="resin">
 
 <deftable title="resin properties">
 <tr>
@@ -330,10 +324,6 @@ element security-provider {
 </tr>
 </deftable>
 
-</s2>
-
-<s2 title="system">
-
 <p>The ${system} variable return the <code>System.getProperties()</code>
 value.</p>
 
@@ -346,8 +336,6 @@ value.</p>
   ...
 &lt;/resin>
 </example>
-
-</s2>
 
 </defun>
 

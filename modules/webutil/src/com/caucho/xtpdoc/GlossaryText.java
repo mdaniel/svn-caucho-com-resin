@@ -80,4 +80,10 @@ public class GlossaryText implements ContentItem {
   {
     out.print(_value);
   }
+
+  @Override
+  public void writeAsciiDoc(PrintWriter out)
+    throws IOException
+  {
+  }
 }

@@ -112,4 +112,10 @@ public class DefunJavadoc implements ContentItem {
   {
     throw new ConfigException("<javadoc> not allowed in a verbatim context");
   }
+
+  @Override
+  public void writeAsciiDoc(PrintWriter out)
+    throws IOException
+  {
+  }
 }

@@ -90,4 +90,10 @@ public class Index implements ContentItem {
   {
     throw new ConfigException("<ixx> not allowed in a verbatim context");
   }
+
+  @Override
+  public void writeAsciiDoc(PrintWriter out)
+    throws IOException
+  {
+  }
 }

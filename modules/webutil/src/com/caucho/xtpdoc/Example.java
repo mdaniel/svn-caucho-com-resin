@@ -135,4 +135,24 @@ public class Example extends VerboseFormattedTextWithAnchors {
   {
     throw new ConfigException("<example> should not be in a verbatim context");
   }
+
+  @Override
+  public void writeAsciiDoc(PrintWriter out)
+    throws IOException
+  {
+    out.println();
+    out.println();
+    if (_title != null)
+      out.println("." + _title);
+    
+    if (_language != null)
+      out.println("[source," + _language + "]");
+      
+    out.println("----");
+
+    super.writeAsciiDoc(out);
+
+    out.println();
+    out.println("----");
+  }
 }

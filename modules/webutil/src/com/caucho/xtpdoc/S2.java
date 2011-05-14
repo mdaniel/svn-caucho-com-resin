@@ -109,4 +109,15 @@ public class S2 extends Section {
 
     super.writeLaTeX(out);
   }
+
+  @Override
+  public void writeAsciiDoc(PrintWriter out)
+    throws IOException
+  {
+    out.println();
+    out.println();
+    out.println("==== " + _title + " ====");
+
+    super.writeAsciiDoc(out);
+  }
 }

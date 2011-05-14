@@ -48,6 +48,11 @@ public class TableRow {
   {
     return _cells.size();
   }
+  
+  public boolean isHeader()
+  {
+    return _cells.size() > 0 && (_cells.get(0) instanceof TableHeader);
+  }
 
   public TableData createTd()
   {
@@ -82,15 +87,29 @@ public class TableRow {
   public void writeLaTeX(PrintWriter out)
     throws IOException
   {
-    for (int i = 0; i < _cells.size(); i++) {
-      _cells.get(i).writeLaTeX(out);
+      for (int i = 0; i < _cells.size(); i++) {
+        _cells.get(i).writeLaTeX(out);
 
-      if (i < _cells.size() - 1)
-        out.print("&");
-      else
-        out.println("\\\\");
+        if (i < _cells.size() - 1)
+          out.print("&");
+        else
+          out.println("\\\\");
 
-      out.flush();
-    }
+        out.flush();
+      }
+  }
+
+  /**
+   * @param out
+   */
+  public void writeAsciiDoc(PrintWriter out)
+    throws IOException
+  {
+      for (int i = 0; i < _cells.size(); i++) {
+        out.print("|");
+        
+        _cells.get(i).writeAsciiDoc(out);
+      }
+      out.println();
   }
 }

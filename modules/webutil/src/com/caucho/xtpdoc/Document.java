@@ -417,6 +417,13 @@ public class Document {
     _body.writeLaTeX(out);
   }
 
+  public void writeAsciiDoc(PrintWriter out)
+    throws IOException
+  {
+    _header.writeAsciiDoc(out);
+    _body.writeAsciiDoc(out);
+  }
+
   public String toString()
   {
     return "Document[" + _documentPath + "]";

@@ -134,4 +134,10 @@ public class Summary implements ContentItem {
   {
     throw new ConfigException("<summary> not allowed in a verbatim context");
   }
+
+  @Override
+  public void writeAsciiDoc(PrintWriter out)
+    throws IOException
+  {
+  }
 }

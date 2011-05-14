@@ -14,7 +14,9 @@
     <linked-section link="admin/deploy.xtp" />
     <linked-section link="admin/deploy-git-overview.xtp" />
     <linked-section link="admin/deploy-tool-reference.xtp" />
+    <!--
     <linked-section link="admin/deploy-pomegranate.xtp" />
+    -->
   </chapter>
 
   <chapter title="Configuration">
@@ -65,6 +67,6 @@
   </chapter>
 
   <chapter title="Reference">
-    <linked-section link="admin/reference.xtp" />
+    <linked-section link="reference.xtp" />
   </chapter>
 </book>

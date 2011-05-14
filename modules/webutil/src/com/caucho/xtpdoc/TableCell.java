@@ -40,4 +40,10 @@ public interface TableCell {
 
   public void writeLaTeX(PrintWriter out)
     throws IOException;
+
+  /**
+   * @param out
+   */
+  public void writeAsciiDoc(PrintWriter out)
+    throws IOException;
 }

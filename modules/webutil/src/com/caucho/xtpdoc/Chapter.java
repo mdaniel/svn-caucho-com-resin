@@ -74,4 +74,15 @@ public class Chapter {
       section.writeLaTeXArticle(out);
     }
   }
+
+  public void writeAsciiDoc(PrintWriter out)
+    throws IOException
+  {
+    out.println();
+    out.println("== " + _title + " ==");
+    
+    for (ChapterSection section : _sections) {
+      section.writeAsciiDoc(out);
+    }
+  }
 }

@@ -29,10 +29,6 @@
 
 package com.caucho.xtpdoc;
 
-import javax.xml.stream.XMLStreamException;
-import javax.xml.stream.XMLStreamWriter;
-import java.io.IOException;
-import java.io.PrintWriter;
 
 public class DefunSchema extends Def {
 

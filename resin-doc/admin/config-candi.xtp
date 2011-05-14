@@ -1127,9 +1127,7 @@ following steps:</p>
 
 </s2>
 
-<s2 title="Compound types">
-
-<s3 title="list">
+<s2 title="list">
 
 <p>Setters taking a <code>List</code> or array argument can be configured
 with list values.</p>
@@ -1187,9 +1185,9 @@ with <code>addXXX</code>.</p>
 &lt;/my-bean>
 </example>
 
-</s3>
+</s2>
 
-<s3 title="map">
+<s2 title="map">
 
 <p>Generic maps can use an &lt;entry> syntax to define property values.</p>
 
@@ -1202,8 +1200,6 @@ with <code>addXXX</code>.</p>
   &lt;/values>
 &lt;/my-bean>
 </example>
-
-</s3>
 
 </s2>
 

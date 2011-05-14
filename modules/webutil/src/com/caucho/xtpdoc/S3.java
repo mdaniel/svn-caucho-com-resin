@@ -109,4 +109,18 @@ public class S3 extends Section {
 
     super.writeLaTeX(out);
   }
+
+  @Override
+  public void writeAsciiDoc(PrintWriter out)
+    throws IOException
+  {
+    if (isWebOnly())
+      return;
+    
+    out.println();
+    out.println();
+    out.println("===== " + _title + " =====");
+        
+    super.writeAsciiDoc(out);
+  }
 }

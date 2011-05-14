@@ -84,4 +84,11 @@ public class NamedText implements ContentItem {
   {
     writeLaTeX(out);
   }
+
+  @Override
+  public void writeAsciiDoc(PrintWriter out)
+    throws IOException
+  {
+  }
 }
+
