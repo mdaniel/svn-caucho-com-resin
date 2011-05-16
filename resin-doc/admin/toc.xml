@@ -26,6 +26,9 @@
             description="Using Microsoft IIS 7 with Resin"
             reference="starting-resin-iis-7-ref.xtp"/>
 
+      <item link="starting-resin-licenses.xtp" title="Resin Pro Licenses"
+            description="Resin Pro Licenses"/>
+
     </item>
 
     <item link="migration.xtp" title="Migrating"
