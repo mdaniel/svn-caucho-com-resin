@@ -11,6 +11,12 @@
 <li><a href="http://caucho.com/resin-3.1/changes/changes.xtp">Resin 3.1 changes</a></li>
 </ul>
 
+<s2 title="4.0.19 - snapshot">
+<ul>
+<li>network: read/write timeout needs handling in Java layer (#4506, #4524, rep by Matthew Schmidt, Prabhu)</li>
+</ul>
+</s2>
+
 <s2 title="4.0.18 - May 12, 2010">
 <ul>
 <li>watchdog: set the LD_LIBRARY_PATH_64 variable on 64-bit systems (#4536)</li>

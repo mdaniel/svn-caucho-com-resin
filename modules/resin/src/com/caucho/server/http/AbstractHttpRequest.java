@@ -1631,6 +1631,8 @@ public abstract class AbstractHttpRequest
 
   public boolean isCometActive()
   {
+    if (_tcpConn != null)
+      System.out.println("ACTIVE: " + _tcpConn.isCometActive() + " " + _tcpConn.getDisplayState());
     return _tcpConn != null && _tcpConn.isCometActive();
   }
 

@@ -56,7 +56,9 @@ public final class JniSocketImpl extends QSocket {
 
   private Object _readLock = new Object();
   private Object _writeLock = new Object();
-
+  
+  private long _socketTimeout;
+  
   private final AtomicBoolean _isClosed = new AtomicBoolean();
 
   public JniSocketImpl()
@@ -97,10 +99,12 @@ public final class JniSocketImpl extends QSocket {
   public boolean connectImpl(String host, int port)
     throws IOException
   {
+    _socketTimeout = 10000;
+    
     return nativeConnect(_fd, host, port);
   }
 
-  boolean accept(long serverSocketFd)
+  boolean accept(long serverSocketFd, long socketTimeout)
   {
     _localName = null;
     _localAddr = null;
@@ -109,6 +113,8 @@ public final class JniSocketImpl extends QSocket {
     _remoteName = null;
     _remoteAddr = null;
     _remoteAddrLength = 0;
+    
+    _socketTimeout = socketTimeout;
 
     _isSecure = false;
     _isClosed.set(false);
@@ -352,14 +358,19 @@ public final class JniSocketImpl extends QSocket {
     throws IOException
   {
     synchronized (_readLock) {
-      long expires = timeout + Alarm.getCurrentTimeActual();
+      long expires;
+      
+      if (timeout >= 0)
+        expires = timeout + Alarm.getCurrentTimeActual();
+      else
+        expires = _socketTimeout + Alarm.getCurrentTimeActual();
 
       int result = 0;
 
       do {
         result = readNative(_fd, buffer, offset, length, timeout);
       } while (result == JniStream.TIMEOUT_EXN
-               && Alarm.getCurrentTimeActual() <= expires);
+               && Alarm.getCurrentTimeActual() < expires);
 
       return result;
     }
@@ -372,13 +383,19 @@ public final class JniSocketImpl extends QSocket {
     throws IOException
   {
     synchronized (_writeLock) {
-      if (! isEnd)
-        return writeNative(_fd, buffer, offset, length);
-      else {
-        _isClosed.set(true);
-
-        return writeCloseNative(_fd, buffer, offset, length);
+      long expires = _socketTimeout + Alarm.getCurrentTimeActual();;
+      int result;
+      
+      do {
+        result = writeNative(_fd, buffer, offset, length);
+      } while (result == JniStream.TIMEOUT_EXN
+               && Alarm.getCurrentTimeActual() < expires);
+      
+      if (isEnd) {
+        close();
       }
+      
+      return result;
     }
   }
 

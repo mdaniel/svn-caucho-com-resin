@@ -1707,7 +1707,12 @@ public final class HttpServletRequestImpl extends AbstractCauchoRequest
   {
     AbstractHttpRequest request = _request;
     
-    return request != null && request.isCometActive();
+    AsyncContextImpl asyncContext = _asyncContext;
+    
+    if (asyncContext == null)
+      return false;
+    
+    return asyncContext.isAsyncStarted();
   }
 
   /**

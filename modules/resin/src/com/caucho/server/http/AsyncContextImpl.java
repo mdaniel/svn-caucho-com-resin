@@ -170,6 +170,13 @@ public class AsyncContextImpl
     return _cometController != null;
   }
   
+  public boolean isAsyncStarted()
+  {
+    AsyncController controller = _cometController;
+    
+    return controller != null && controller.isAsyncStarted();
+  }
+  
   //
   // dispatch values
   //
@@ -222,6 +229,8 @@ public class AsyncContextImpl
     
     if (cometController == null)
       throw new IllegalStateException(L.l("dispatch is not valid when no AsyncContext is available"));
+    else if (! cometController.isAsyncStarted())
+      throw new IllegalStateException(L.l("dispatch is not valid when async cycle has not started, i.e. before startAsync."));
      
     cometController.wake();
   }

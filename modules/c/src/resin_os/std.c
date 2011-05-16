@@ -82,13 +82,17 @@ write_exception_status(connection_t *conn, int error)
 static int
 read_exception_status(connection_t *conn, int error)
 {
-  if (error == EAGAIN || error == EWOULDBLOCK || error == EINTR) {
+  switch (error) {
+  case EAGAIN:
+  case EWOULDBLOCK:
+  case EINTR:
     return TIMEOUT_EXN;
-  }
-  else if (error == EPIPE || error == ECONNRESET) {
+
+  case EPIPE:
+  case ECONNRESET:
     return -1;
-  }
-  else {
+
+  default:
     return -1;
   }
 }
@@ -182,7 +186,7 @@ std_read(connection_t *conn, char *buf, int len, int timeout)
 {
   int fd;
   int result;
-  int retry = 10;
+  int retry = 3;
 
   if (! conn)
     return -1;
@@ -210,22 +214,31 @@ std_read(connection_t *conn, char *buf, int len, int timeout)
     return TIMEOUT_EXN;
   }
 
+  if (! conn->is_recv_timeout
+      && timeout < 0
+      && poll_read(fd, conn->socket_timeout) <= 0) {
+    return TIMEOUT_EXN;
+  }
+
   do {
-    if (! conn->is_recv_timeout
-        && timeout < 0
-        && poll_read(fd, conn->socket_timeout) <= 0) {
-      return TIMEOUT_EXN;
-    }
-
+    /* recv returns 0 on end of file */
     result = recv(fd, buf, len, 0);
-  } while (result < 0
-	   && (errno == EINTR)
-	   && conn->fd == fd
-	   && retry-- >= 0
-           && len > 0);
 
-  /* EAGAIN is returned by a timeout */
-  /* recv returns 0 on end of file */
+    if (result >= 0)
+      return result;
+
+    error = errno;
+    
+    if (errno == EINTR) {
+      /* EAGAIN is returned by a timeout */
+      if (poll_read(fd, conn->socket_timeout) <= 0) {
+	return read_exception_status(conn, errno);
+      }
+    }
+    else {
+      return read_exception_status(conn, errno);
+    }
+  } while (retry-- >= 0);
     
   if (result > 0) {
     return result;
@@ -243,7 +256,7 @@ std_write(connection_t *conn, char *buf, int len)
 {
   int fd;
   int result;
-  int retry = 10;
+  int retry = 3;
   int error;
 
   if (! conn)
@@ -355,22 +368,12 @@ std_accept(server_socket_t *ss, connection_t *conn)
     return 0;
   }
 #endif
-  /* pthread_mutex_lock(&ss->accept_lock); */
   
-  sock = -1;
-
-  /* XXX: no need to for the poll?  needs to match nonblock.
-  poll_result = poll_read(fd, 5000);
-
-  if (poll_result > 0)
-    sock = accept(fd, sin, &sin_len);
-  */
   sock = accept(fd, sin, &sin_len);
 
 #ifdef WIN32
   ReleaseMutex(ss->accept_lock);
 #endif
-  /* pthread_mutex_unlock(&ss->accept_lock); */
   
   if (sock < 0)
     return 0;

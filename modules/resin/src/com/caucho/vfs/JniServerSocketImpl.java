@@ -46,6 +46,8 @@ public class JniServerSocketImpl extends QServerSocket {
   private String _id;
   
   private String _host;
+  
+  private long _socketTimeout = 120 * 1000L;
 
   /**
    * Creates the new server socket.
@@ -159,6 +161,8 @@ public class JniServerSocketImpl extends QServerSocket {
   @Override
   public void setConnectionSocketTimeout(int ms)
   {
+    _socketTimeout = ms;
+    
     nativeSetConnectionSocketTimeout(_fd, ms);
   }
 
@@ -178,7 +182,7 @@ public class JniServerSocketImpl extends QServerSocket {
     if (_fd == 0)
       throw new IOException("accept from closed socket");
 
-    return jniSocket.accept(_fd);
+    return jniSocket.accept(_fd, _socketTimeout);
   }
 
   /**

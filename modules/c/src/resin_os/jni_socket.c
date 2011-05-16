@@ -1025,6 +1025,7 @@ Java_com_caucho_vfs_JniSocketImpl_nativeConnect(JNIEnv *env,
   char sin_data[256];
   struct sockaddr_in *sin = (struct sockaddr_in *) sin_data;
   int sin_length = sizeof(sin_data);
+  struct timeval timeout;
 
   if (! conn || ! env || ! jhost)
     return 0;
@@ -1062,6 +1063,21 @@ Java_com_caucho_vfs_JniSocketImpl_nativeConnect(JNIEnv *env,
 
   conn->fd = sock;
   conn->socket_timeout = 10000;
+
+#ifdef HAS_SOCK_TIMEOUT
+  timeout.tv_sec = conn->socket_timeout / 1000;
+  timeout.tv_usec = conn->socket_timeout % 1000 * 1000;
+  
+  if (setsockopt(sock, SOL_SOCKET, SO_RCVTIMEO,
+                 (char *) &timeout, sizeof(timeout)) == 0) {
+    conn->is_recv_timeout = 1;
+  }
+
+  timeout.tv_sec = conn->socket_timeout / 1000;
+  timeout.tv_usec = conn->socket_timeout % 1000 * 1000;
+  setsockopt(sock, SOL_SOCKET, SO_SNDTIMEO,
+	     (char *) &timeout, sizeof(timeout));
+#endif
 
   return 1;
 }

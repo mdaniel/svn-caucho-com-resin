@@ -114,6 +114,15 @@ class TcpCometController extends AsyncController {
   {
     _isWakeRequested = isWake;
   }
+  
+  public boolean isAsyncStarted()
+  {
+    TcpSocketLink conn = _conn;
+    
+    return (conn != null 
+            && (conn.isCometActive() || conn.isCometSuspend())
+            && ! _isWakeRequested);
+  }
 
   /**
    * Returns true for a duplex controller

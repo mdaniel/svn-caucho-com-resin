@@ -62,6 +62,11 @@ public class AsyncController {
     return false;
   }
   
+  public boolean isAsyncStarted()
+  {
+    return false;
+  }
+  
   public void timeout()
   {
   }
