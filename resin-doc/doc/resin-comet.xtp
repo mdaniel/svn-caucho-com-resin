@@ -22,7 +22,7 @@ applications need to continually update the client when new information
 becomes available to the server.
 </p>
 
-<figure src="cometcomm.png"/>
+<figure src="cometcomm.png" alt="javascript/api <-> <- java/api" />
 
 <p>The architecture in the picture uses two HTTP streams to the server
 application, one for normal client-server requests, and a second
@@ -278,7 +278,7 @@ machine.  After the initial request, the servlet spends most of its
 time suspended, waiting for the <code>TimerService</code> to call
 <code>wake()</code>.</p>
 
-<figure src="cometstate.png"/>
+<figure src="cometstate.png" alt="comet state machine"/>
 
 </s2>
 </s1>

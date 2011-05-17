@@ -191,12 +191,12 @@ is not available over a non-encrypted channel.</em></li>
 <li>Browse to the "webapp" tab of the resin-admin server and at the bottom
 of the page, enter the virtual host, URL, and local .war file specifying
 the web application, then press "Deploy".
-<figure src="deploy-webapp.png"/>
+<figure src="deploy-webapp.png" alt="Virtual Host:default, URL:/foo, .war file:/tmp/foo.war, Deploy button"/>
 </li>
 <li>
 The application should now be deployed on the server.  In a few moments,
 all the servers in the cluster will have the webapp.
-<figure src="deployed-webapp.png"/>
+<figure src="deployed-webapp.png" alt="WebApps: /:active, /foo:active, /resin-admin:active"/>
 </li>
 </ol>
 </s1>

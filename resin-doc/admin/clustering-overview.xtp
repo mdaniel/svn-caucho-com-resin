@@ -220,7 +220,7 @@ deployment repository, it is propagated to all the servers in the
 cluster - including any dynamic servers that are added to the cluster
 at a later point in time after initial propagation happens.</p>
 
-<figure src="deployment.png"/>
+<figure src="deployment.png" alt="Deployment unit -> Resin/Git(Instance1 <-> Instance2 <-> Instance 3)"/>
 
 <p>When you deploy an application, it's always a good idea to check that
 all servers in the cluster have received the correct web-app. Because
@@ -234,7 +234,7 @@ version (date) is in green to indicate that the hash validation matches
 for each server. If one server had a different content, the date would be
 marked with a red 'x'.</p>
 
-<figure src="webapp-deploy.png"/>
+<figure src="webapp-deploy.png" alt="/foo,Active,Red X,Timestamp  /hello1,Active,Red X,Timestamp  Deploy server list"/>
 
 <p> The details for each Ant and Maven based clustered deployment API
 is outlined <a href="clustering-deployment-ref.xtp">here</a>.  </p>
@@ -263,7 +263,7 @@ app-tier servers. Since Resin's clustering configuration already
 defines the servers in a cluster, the only additional configuration
 is to use the &lt;resin:LoadBalance> tag to forward request to the backend.</p>
 
-<figure src="cluster-load-balance.png"/>
+<figure src="cluster-load-balance.png" alt="web-tier(80:web-a) -> app-tier(6800:app-a(foo.com,bar.com), 6801:app-b(foo.com,bar.com))" />
 
 <p>Dispatching requests with load balancing in Resin is accomplished through
 the <a href="http-rewrite-ref.xtp">&lt;resin:LoadBalance></a> tag
@@ -489,7 +489,7 @@ load. Resin uses a set of timeout values to manage the socket pool and
 to handle any failures or freezes of the backend servers. The
 following diagram illustrates the main timeout values:</p>
 
-<figure src="load-balance-idle-time.png"/>
+<figure src="load-balance-idle-time.png" alt="web-a:connecty-timeout,app-a:socket-timeout,web-a:recover-time,app-a:keepalive-timeout,web-a:idle-time"/>
 <ul>
 <li><b>load-balance-connect-timeout</b>: the load balancer timeout
 for the <code>connect()</code> system call to complete to
@@ -630,7 +630,7 @@ new server only needs to speak to the triad, not all servers.</li>
 than 64-servers to maintain scalability.</li>
 </ul>
 
-<figure src="resin-cloud.jpg"/>
+<figure src="resin-cloud.jpg" alt="resin triad -> cloud(resin servers)"/>
 
 <s2 title="Cluster Heartbeat">
 
@@ -925,14 +925,14 @@ application's "cluster" tab. If you have enabled dynamic servers for
 your cluster, you should see a form allowing you to register the
 server in the "Cluster Overview" table.  </p>
 
-<figure src="dynamic-server-add.png"/>
+<figure src="dynamic-server-add.png" alt="Server Id, IP, Port, Add Dynamic Server button"/>
 
 <p> Once you have entered the values and added the server, it should
 show up in the table as a dead server because we haven't started it
 yet.  The dynamic server's registration will be propagated to all the
 servers in the cluster.  </p>
 
-<figure src="dynamic-server-added.png"/>
+<figure src="dynamic-server-added.png" alt="Server dyn-a added, red (not running)"/>
 </s2>
 
 <s2 title="Starting a Dynamic Server">
@@ -957,7 +957,7 @@ immediately contacts the triad to join the cluster. Once it has
 successfully joined, the "Cluster" tab of the administration
 application should look like this: </p>
 
-<figure src="dynamic-server-started.png"/>
+<figure src="dynamic-server-started.png" alt="Server dyn-a added, yellow (running)"/>
 </s2>
 </s1>
 -->

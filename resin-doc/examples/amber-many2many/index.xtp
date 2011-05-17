@@ -14,6 +14,10 @@
 
 <s1 title="Files in this tutorial">
 <deftable>
+<tr>
+  <th>File</th>
+  <th>Description</th>
+</tr>
 <tr><td><viewfile-link file="WEB-INF/resin-web.xml"/>
     </td><td>resin-web.xml configuration
 </td></tr><tr><td><viewfile-link file="WEB-INF/classes/META-INF/persistence.xml"/>

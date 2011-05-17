@@ -25,6 +25,10 @@ public web server.  The <var>magic8ball</var> protocol is at the same level as
 
 <s1 title="Files in this tutorial">
 <deftable>
+<tr>
+  <th>File</th>
+  <th>Description</th>
+</tr>
 <tr><td><viewfile-link file="src/example/Magic8Ball.java"/>
     </td><td>The orignal Magic8Ball class, it knows nothing about the code that uses it.
 </td></tr><tr><td><viewfile-link file="src/example/Magic8BallProtocol.java"/>

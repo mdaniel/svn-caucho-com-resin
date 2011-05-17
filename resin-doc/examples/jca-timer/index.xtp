@@ -22,6 +22,10 @@ combination with the JCA work management API.</p>
 
 <s1 title="Files in this tutorial">
 <deftable>
+<tr>
+  <th>File</th>
+  <th>Description</th>
+</tr>
 <tr><td><viewfile-link file="WEB-INF/web.xml"/>
     </td><td>Configures the TimerResource
 </td></tr><tr><td><viewfile-link file="WEB-INF/classes/example/TimerResource.java"/>

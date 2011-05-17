@@ -118,11 +118,13 @@ public class ReferenceDocument extends Document {
       if (oldDefun != null) {
         _defuns.remove(getName());
 
-        for (String parent : oldDefun.getParents())
-          _defuns.put(parent + ":" + getName(), oldDefun);
+        if (oldDefun.getParents() != null)
+          for (String parent : oldDefun.getParents())
+            _defuns.put(parent + ":" + getName(), oldDefun);
 
-        for (String parent : getParents())
-          _defuns.put(parent + ":" + getName(), this);
+        if (getParents() != null)
+          for (String parent : getParents())
+            _defuns.put(parent + ":" + getName(), this);
       }
       else 
         _defuns.put(getName(), this);

@@ -41,7 +41,7 @@ the request from the browser. Resin's <code>mod_caucho</code> plugin integrates
 with Apache, it dispatches requests for JSPs and Servlets to one or more
 backend Resin servers.</p>
 
-<figure src="apache_srun.gif"/>
+<figure src="apache_srun.gif" alt="browser <-> (Apache/mod_caucho <- html) <-> Resin httpd/servlets,beans <- html,jsp"/>
 
 <p>
 mod_caucho queries the backend server to distinguish the URLs going to Resin
@@ -76,7 +76,7 @@ There's a more complete discussion of the URL dispatching in the
 <p>You need a version of Apache with DSO support enabled. Apache has
 full documentation at <a href="http://httpd.apache.org/docs/dso.html">their website</a>.
 To check if your apache has DSO support, you can check for
-<var>mod_so.c</var> in your your httpd
+<var>mod_so.c</var> in your your httpd.</p>
 
 <example title="checking apache httpd for mod_so.c">
 unix&gt; /usr/local/apache/bin/httpd -l
@@ -86,7 +86,7 @@ Compiled-in modules:
   ...
  </example>
 
-</p><p>Many distributions, e.g. Red Hat Linux, will have Apache preinstalled.
+<p>Many distributions, e.g. Red Hat Linux, will have Apache preinstalled.
 However, because the standard distribution has files all over the
 place, some people prefer to recompile Apache from scratch.</p>
 
@@ -158,6 +158,10 @@ In general, you should use --with-apache or --with-apxs, but the other
 variables are there if you know what you're doing.</p>
 
 <deftable>
+<tr>
+  <th>Flag</th>
+  <th>Description</th>
+</tr>
 <tr><td>--with-apache=dir</td><td>The Apache root directory.
 </td></tr><tr><td>--with-apxs=apxs</td><td>Pointer to the Apache extension script
 </td></tr><tr><td>--with-apache-include=dir</td><td>The Apache include directory

@@ -49,7 +49,6 @@ relations and objects is a good starting model.</p>
   <th>File</th>
   <th>Description</th>
 </tr>
-
 <tr>
   <td><viewfile-link file="WEB-INF/resin-web.xml"/></td>
   <td>resin-web.xml configuration</td>

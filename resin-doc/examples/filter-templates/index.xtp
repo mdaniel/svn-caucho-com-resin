@@ -16,6 +16,10 @@ anything useful, but you can use them as a basis for development.</p>
 <summary/>
 <s1 title="Files in this tutorial">
 <deftable>
+<tr>
+  <th>File</th>
+  <th>Description</th>
+</tr>
 <tr><td><viewfile-link file="WEB-INF/classes/example/filters/ExampleResponseHeadersFilter.java"/>
     </td><td>A filter class that sets response headers
 </td></tr><tr><td><viewfile-link file="WEB-INF/classes/example/filters/ExampleRequestFilter.java"/>

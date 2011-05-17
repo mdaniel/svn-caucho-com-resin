@@ -40,14 +40,9 @@ This is the default page for the Resin web server.
 
 <% if (hasResinDoc) { %>
 
-<% if (hasOrientation) { %>
-<p>
-New users can start <a href="/resin-doc/orientation.xtp?xtpflag=default-homepage">here.</a>.
-<% } %>
+<p>Documentation is available at <a href="/resin-doc">/resin-doc</a>.
 
-<p>Documentation is available <a href="/resin-doc">here</a>.
-
-<p>Administration is available <a href="/resin-admin">here</a>.
+<p>Administration is available at <a href="/resin-admin">/resin-admin</a>.
 
 <% } else { %>
 <p>

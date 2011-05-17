@@ -313,7 +313,7 @@ host and can even create chroot directories for each JVM.</p>
 <p>A front-end web server receives all requests, and is configured to
 dispatch to back-end Resin server that correspond to the host name.</p>
 
-<figure src="config-jvmpervirtualhost.png" width="481" height="145"/>
+<figure src="config-jvmpervirtualhost.png" width="481" height="145" alt="client <-> front-end webserver <-> (resin:6802(jvm), resin:6803(jvm))"/>
 
 <s2 title="Back-end JVMs">
 
@@ -391,7 +391,7 @@ unix&gt; java -jar lib/resin.jar -server slytherin stop
 ports.  A third Resin server can be used as the front-end load-balancer.
 It receives all requests and dispatches to the back-end servers.</p>
 
-<figure src="config-jvmpervirtualhost-resin.png" width="481" height="145"/>
+<figure src="config-jvmpervirtualhost-resin.png" width="481" height="145" alt="client <-> Resin front-end webserver <-> (resin:6802(jvm), resin:6803(jvm))"/>
 
 <p>The Resin web server is configured using <a href="http-rewrite.xtp">rewrite</a> with a <a href="clustering-overview.xtp">&lt;resin:LoadBalance</a> directive to dispatch to the back-end server.  A cluster is
 defined for each back-end host, so that the
@@ -459,7 +459,7 @@ unix&gt; java -jar lib/resin.jar -server web -conf conf/resin.xml stop
   services each using a unique name. The name will need to be supplied into
   'Service Name' field.</p>
 
-<figure src="setup-exe.png"/>
+<figure src="setup-exe.png" alt="Resin setup.exe screenshot"/>
 
 <p>You will either need to reboot the machine or start the service from the
 Control Panel/Services panel to start the server. On a machine reboot, NT will
@@ -633,7 +633,7 @@ an error.</note>
 ports.  Apache is the front-end server, and is configured to dispatch to the
 appropriate back-end Resin JVM for the host: </p>
 
-<figure src="config-jvmpervirtualhost-apache.png" width="481" height="145"/>
+<figure src="config-jvmpervirtualhost-apache.png" width="481" height="145" alt="client <-> Apache <-> (resin:6802(jvm), resin:6803(jvm))"/>
 
 <example title="httpd.conf">
 UseCanonicalName on

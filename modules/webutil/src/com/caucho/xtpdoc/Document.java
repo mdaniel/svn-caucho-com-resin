@@ -360,11 +360,11 @@ public class Document {
     throws XMLStreamException
   {
     out.writeStartDocument(_encoding, "1.0");
-    out.writeDTD("<!DOCTYPE html PUBLIC \"-//W3C//DTD XHTML 1.0 Strict//EN\" " +
-                 "\"http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd\">");
+    out.writeDTD("<!DOCTYPE html PUBLIC \"-//W3C//DTD XHTML 1.0 Transitional//EN\" \"http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd\">");
 
     out.writeStartElement("html");
     out.writeDefaultNamespace("http://www.w3.org/1999/xhtml");
+    out.writeAttribute("lang", "en");
 
     if (_header != null)
       _header.writeHtml(out);

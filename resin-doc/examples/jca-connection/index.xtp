@@ -19,6 +19,10 @@ pooling and transactions for any Connector following the interface.</p>
 
 <s1 title="Files in this tutorial">
 <deftable>
+<tr>
+  <th>File</th>
+  <th>Description</th>
+</tr>
 <tr><td><viewfile-link file="WEB-INF/web.xml"/>
     </td><td>Configures the Connector
 </td></tr><tr><td><viewfile-link file="WEB-INF/classes/example/ConnectionImpl.java"/>
@@ -51,6 +55,10 @@ of the factory and the server's view of the connection.</p>
 the user connection, the user's view of the connection.</p>
 
 <deftable>
+<tr>
+  <th>Connection Type</th>
+  <th>Description</th>
+</tr>
 <tr><td>user connection</td><td>User's view of the connection</td>
 </tr><tr><td>user connection factory</td><td>User's view of the connection factory</td>
 </tr><tr><td>managed connection</td><td>Resin's view of the connection</td>

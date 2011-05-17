@@ -49,6 +49,7 @@ public class Note extends FormattedTextWithAnchors {
 
     out.writeEmptyElement("img");
     out.writeAttribute("class", "note");
+    out.writeAttribute("alt", "note");
     out.writeAttribute("src", 
                        getDocument().getContextPath() + "/images/note.png");
 

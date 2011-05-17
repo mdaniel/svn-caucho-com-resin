@@ -86,7 +86,7 @@ the base of the name.  For cluster node index 0, Resin prefixes the name
 with <code>00|</code>.  /resin-admin will then use the cluster index and first 
 two keys to create drill downs to logically organized meters for display.</p>
 
-<figure src="health-meters.png"/>
+<figure src="health-meters.png" alt="Graphs: 00|JVM|Compilation|Compilation Time, Time:1 Hour"/>
 
 </s2>
 

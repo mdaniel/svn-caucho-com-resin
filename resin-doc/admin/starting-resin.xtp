@@ -125,7 +125,7 @@ links to some other ports of the JDK.</p>
 only web server.  This configuration provides a Java HTTP server. We recommend
 you start with this before trying any other configuration.</p>
 
-<figure src="httpd.gif"/>
+<figure src="httpd.gif" alt="browser <-> Resin httpd/servlets,beans <- html,jsp"/>
 
 <p>The server listens at port 8080 in the default configuration and
 can be changed to the HTTP port 80 during deployment.</p>
@@ -180,7 +180,7 @@ Apache (<var>mod_caucho</var>) and Java program supporting servlets and
 JSP (<var>Resin</var>.)  The two pieces communicate with a special high-speed
 protocol.</p>
 
-<figure src="apache_srun.gif"/>
+<figure src="apache_srun.gif" alt="browser <-> (Apache/mod_caucho <- html) <-> Resin httpd/servlets,beans <- html,jsp"/>
 
 <p>To configure Apache with Resin, you must
 configure both Apache and Resin.  The Resin

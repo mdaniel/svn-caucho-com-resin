@@ -56,6 +56,7 @@
         protocol) with the connection made to the port defined in Resin's
         configuration file. Matching Resin configuration for the example IIS
         configuration given above must bind Resin HMUX listener to port 6800.
+      </p>
 
          <example title="resin.xml">
 &lt;resin xmlns="http://caucho.com/ns/resin"
@@ -66,6 +67,7 @@
     <b>&lt;server id="" address="127.0.0.1" port="6800"/&gt;</b>
        ...
       </example>
+      <p>
         Port 6800 is the default HMUX port used by Resin.
       </p>
 
@@ -74,14 +76,9 @@
       </p>
       <deftable>
         <tr>
-          <td><b>Name</b></td>
-          <td><b>Description</b></td>
-          <td><b>Default</b></td>
-        </tr>
-        <tr>
-          <td></td>
-          <td></td>
-          <td></td>
+          <th>Name</th>
+          <th>Description</th>
+          <th>Default</th>
         </tr>
         <tr>
           <td>resin.servers</td>

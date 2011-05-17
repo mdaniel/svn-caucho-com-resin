@@ -16,6 +16,10 @@
 <s1 title="Files in this tutorial">
 <deftable>
 <tr>
+  <th>File</th>
+  <th>Description</th>
+</tr>
+<tr>
   <td><viewfile-link file="hello.php"/></td>
   <td>The PHP Hello, World</td>
 </tr>

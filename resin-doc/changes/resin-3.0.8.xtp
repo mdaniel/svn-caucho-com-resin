@@ -16,7 +16,7 @@ been upgraded to use the snazzier "dependency injection" buzzword.
 Since Resin's configuration is based on setters, the proper buzzword
 is "setter based dependency injection."</p>
 
-<figure src="assembler-eg1.gif"/>
+<figure src="assembler-eg1.gif" alt="Assembler(Resin),Registry(JNDI) -> (MovieLocator,MovieFinderImpl)" />
 
 <p>The upgraded, buzzword-compliant documentation includes:</p>
 
@@ -310,8 +310,8 @@ on EJB.</p>
 
 <p>The new meta-info attributes for <code>_hessian_getAttribute(attrName)</code> are:</p>
 <deftable>
-<tr><td>attribute</td><td>description.
-</td></tr><tr><td>java.api.class</td><td>Returns the java API interface for this URL.
+<tr><th>attribute</th><th>description.
+</th></tr><tr><td>java.api.class</td><td>Returns the java API interface for this URL.
 </td></tr><tr><td>java.home.class</td><td>Returns the java API interface for the factory/home URL, i.e. stripped of the "?id=XXX".
 </td></tr><tr><td>java.object.class</td><td>Returns the java API interface for the object instances URL, i.e. those which have query string "?id=XXX".
 </td></tr></deftable>

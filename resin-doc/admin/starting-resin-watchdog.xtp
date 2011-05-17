@@ -45,7 +45,7 @@ program (<code>ResinBoot</code>), which has commands to start, stop,
 and restart Resin instances as well as reporting the watchdog
 status.</p>
 
-<figure src="startup-watchdog.png"/>
+<figure src="startup-watchdog.png" alt="java resin.jar start: ResinBoot -> ResinWatchdog -> Resin"/>
 
 <p>While most users will use the watchdog automatically with no extra
 configuration, ISPs and larger and complicated sites can create a
@@ -136,7 +136,7 @@ standard HTTP port 80 and running the server as the "resin" user.  In this
 example, the watchdog typically runs as root so it can bind to the
 protected port 80, while the Resin instance runs as "resin" for security.</p>
 
-<figure src="watchdog-single.png"/>
+<figure src="watchdog-single.png" alt="ResinBoot <-> Watchdog <-> Resin"/>
 
 <p>Since this configuration uses the default, the watchdog listens to
 port 6600 for commands.</p>
@@ -186,7 +186,7 @@ multiple servers are running on the same machine and manages all of them
 automatically.</p>
 
 
-<figure src="watchdog-multiple.png"/>
+<figure src="watchdog-multiple.png" alt="Watchdog -> (web-a,app-a,app-b)"/>
 
 <example title="Example: /etc/resin/resin.xml">
 &lt;resin xmlns="http://caucho.com/ns/resin"

@@ -27,6 +27,10 @@ like the web.xml.</p>
 
 <s1 title="Files in this tutorial">
 <deftable>
+<tr>
+  <th>File</th>
+  <th>Description</th>
+</tr>
 <tr><td><viewfile-link file="WEB-INF/web.xml"/>
     </td><td>Configures the Servlet with bean-style init
 </td></tr><tr><td><viewfile-link file="WEB-INF/classes/test/HelloServlet.java"/>
@@ -41,6 +45,7 @@ servlet.  Instead of hardcoding the "Hello, world" string, it lets the
 web.xml configure the string as <var>greeting</var>.  To make that work,
 <code>HelloWorld</code> adds a bean-style <code>setGreeting(String)</code>
 jmethod.
+</p>
 
 <example title="WEB-INF/classes/test/HelloServlet.java">
 package test;
@@ -70,7 +75,7 @@ public class HelloServlet extends HttpServlet {
 }
 </example>
 
-</p></s1>
+</s1>
 
 <s1 title="Configuration">
 

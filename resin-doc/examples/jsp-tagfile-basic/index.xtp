@@ -17,6 +17,10 @@ making development simpler.</p>
 <summary/>
 <s1 title="Files in this tutorial">
 <deftable>
+<tr>
+  <th>File</th>
+  <th>Description</th>
+</tr>
 <tr><td><viewfile-link file="test.jsp"/>
     </td><td>The jsp page that uses the tags
 </td></tr><tr><td><viewfile-link file="WEB-INF/tags/test.tagx"/>

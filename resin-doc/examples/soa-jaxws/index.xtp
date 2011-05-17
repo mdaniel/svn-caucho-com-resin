@@ -27,6 +27,10 @@ understand XML configuration.
 
 <s1 title="Files in this tutorial">
 <deftable>
+<tr>
+  <th>File</th>
+  <th>Description</th>
+</tr>
 <tr><td><viewfile-link file="WEB-INF/classes/example/UserService.java"/>
     </td><td>The main service implementation.
 </td></tr><tr><td><viewfile-link file="WEB-INF/classes/example/User.java"/>

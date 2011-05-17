@@ -40,11 +40,9 @@ This is the default page for the Resin web server.
 
 <% if (hasResinDoc) { %>
 
-<p>
-Documentation is available <a href="/resin-doc">here</a>.
+<p>Documentation is available at <a href="/resin-doc">/resin-doc</a>.
 
-<p>
-Administration is available <a href="/resin-admin">here</a>.
+<p>Administration is available at <a href="/resin-admin">/resin-admin</a>.
 
 <% } else { %>
 <p>

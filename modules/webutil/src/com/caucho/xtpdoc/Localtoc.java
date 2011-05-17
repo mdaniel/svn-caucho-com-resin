@@ -33,6 +33,7 @@ import javax.xml.stream.XMLStreamException;
 import javax.xml.stream.XMLStreamWriter;
 import java.io.IOException;
 import java.io.PrintWriter;
+import java.net.URLEncoder;
 
 import com.caucho.config.ConfigException;
 
@@ -73,26 +74,35 @@ public class Localtoc implements ContentItem {
     if (container == null)
       return;
 
-    out.writeStartElement("ol");
-
+    boolean wroteStart = false;
+    
     for (ContentItem item : container.getItems()) {
       if (item instanceof Section) {
         Section section = (Section) item;
 
-        if (section.getTitle() != null
-            && ! "".equals(section.getTitle())) {
+        if (section.getTitle() != null && ! "".equals(section.getTitle())) {
+          
+          if (! wroteStart) {
+            out.writeStartElement("ol");
+            wroteStart = true;
+          }
+          
           out.writeStartElement("li");
           out.writeStartElement("a");
           out.writeAttribute("href", "#" + section.getHref());
           out.writeCharacters(section.getTitle());
-          out.writeEndElement();
-          out.writeEndElement();
+          out.writeEndElement(); // a
 
           writeContainerRec(out, section);
+          
+          out.writeEndElement();
         }
       }
     }
-    out.writeEndElement(); // </ul>
+
+    if (wroteStart) {
+      out.writeEndElement(); // </ul>
+    }
   }
 
   public void writeLaTeX(PrintWriter writer)

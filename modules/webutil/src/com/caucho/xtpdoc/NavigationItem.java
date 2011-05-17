@@ -286,13 +286,13 @@ public class NavigationItem {
   {
     initSummary();
 
-    out.writeStartElement("dl");
+    out.writeStartElement("div");
     out.writeAttribute("class", "atoc-top");
     
     for (NavigationItem item : _items)
       item.writeHtmlImpl(out, path, 0, 0, 3);
     
-    out.writeEndElement(); // dl
+    out.writeEndElement(); // div
   }
 
   public void writeHtml(XMLStreamWriter out, String path,
@@ -340,7 +340,7 @@ public class NavigationItem {
       out.writeEndElement(); // h2
     }
     else {
-      out.writeStartElement("dt");
+      out.writeStartElement("div");
 
       out.writeStartElement("b");
 
@@ -383,16 +383,15 @@ public class NavigationItem {
         out.writeCharacters(_description);
       }
 
-      out.writeEndElement(); // dt
+      out.writeEndElement(); // div
     }
 
-    out.writeStartElement("dd");
+    out.writeStartElement("div");
+    out.writeAttribute("class", "nav-item");
 
     // XXX: brief/paragraph/none
     if (_fullDescription != null && depth + styleDepth <= 1) {
-      out.writeStartElement("p");
       _fullDescription.writeHtml(out);
-      out.writeEndElement(); // p
     }
 
     if (_link != null) {
@@ -407,7 +406,7 @@ public class NavigationItem {
       boolean hasDL = false;
 
       if (_child != null || _items.size() > 0) {
-        out.writeStartElement("dl");
+        out.writeStartElement("div");
         out.writeAttribute("class", "atoc-" + (depth + 1));
 
         if (_child != null)
@@ -416,11 +415,11 @@ public class NavigationItem {
           for (NavigationItem item : _items)
             item.writeHtmlImpl(out, tail, depth + 1, styleDepth, maxDepth);
         }
-        out.writeEndElement();
+        out.writeEndElement(); //div
       }
     }
 
-    out.writeEndElement(); // dd
+    out.writeEndElement(); // div
   }
 
   public void writeLeftNav(XMLStreamWriter out)
@@ -432,13 +431,13 @@ public class NavigationItem {
     writeLeftNavItem(out, this);
       
     if (_items.size() > 0) {
-      out.writeStartElement("ul");
+      out.writeStartElement("div");
       out.writeAttribute("class", "leftnav");
 
       for (NavigationItem item : _items)
         item.writeLeftNavNoParent(out, this);
 
-      out.writeEndElement(); // ul
+      out.writeEndElement(); // div
     }
 
     if (_parent != null)
@@ -456,7 +455,7 @@ public class NavigationItem {
     writeLeftNavItem(out, caller);
 
     if (_items.size() > 0) {
-      out.writeStartElement("ul");
+      out.writeStartElement("div");
       out.writeAttribute("class", "leftnav");
 
       for (NavigationItem item : _items) {
@@ -487,7 +486,7 @@ public class NavigationItem {
           found = true;
       }
 
-      out.writeEndElement(); // ul
+      out.writeEndElement(); // div
     }
 
     if (_parent != null) {
@@ -501,23 +500,25 @@ public class NavigationItem {
     writeLeftNavItem(out, caller);
 
     if (_items.size() > 0) {
-      out.writeStartElement("ul");
+      out.writeStartElement("div");
       out.writeAttribute("class", "leftnav");
 
       for (NavigationItem item : _items)
         item.writeLeftNavNoParent(out, this);
 
-      out.writeEndElement(); // ul
+      out.writeEndElement(); // div
     }
   }
 
   private void writeLeftNavItem(XMLStreamWriter out, NavigationItem caller)
     throws XMLStreamException
   {
-    out.writeStartElement("li");
+    out.writeStartElement("div");
 
     if (caller != null && _uri.equals(caller.getUri())) {
       out.writeAttribute("class", "selected");
+    } else {
+      out.writeAttribute("class", "not-selected");
     }
 
     out.writeStartElement("a");
@@ -540,7 +541,7 @@ public class NavigationItem {
       out.writeEndElement(); // span
     }
 
-    out.writeEndElement(); // li
+    out.writeEndElement(); // div
   }
 
   public void writeLink(XMLStreamWriter out)
@@ -556,5 +557,10 @@ public class NavigationItem {
   public void writeLaTeX(PrintWriter writer)
     throws IOException
   {
+  }
+  
+  public String toString()
+  {
+    return getClass().getSimpleName() + "[" + getTitle() + "]";
   }
 }

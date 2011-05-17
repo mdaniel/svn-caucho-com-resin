@@ -20,6 +20,10 @@ cross-platform binary web services protocol.  With these changes, Hessian
 <s1 title="Files in this tutorial">
 <deftable>
 <tr>
+  <th>File</th>
+  <th>Description</th>
+</tr>
+<tr>
   <td><viewfile-link file="WEB-INF/classes/example/HessianSerializeServlet.java"/></td>
   <td>Serialization Servlet</td>
 </tr>
@@ -52,6 +56,10 @@ send compact, cross-language messages without having to use bloated
 XML solutions like SOAP.</p>
 
 <deftable>
+<tr>
+  <th>Service</th>
+  <th>Size</th>
+</tr>
 <tr>
   <td>Hessian 2.0</td>
   <td>139 bytes</td>

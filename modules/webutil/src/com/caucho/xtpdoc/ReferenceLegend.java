@@ -46,41 +46,62 @@ public class ReferenceLegend implements ContentItem {
     out.writeAttribute("id", "reference-legend");
 
     out.writeStartElement("form");
+    out.writeAttribute("action", "#");
 
     out.writeStartElement("input");
     out.writeAttribute("type", "checkbox");
     out.writeAttribute("id", "reference-description-checkbox");
-    out.writeAttribute("checked", "true");
+    out.writeAttribute("checked", "checked");
     out.writeAttribute("onchange", 
                        "toggleElementsByClass(this, 'reference-description')");
+    //out.writeCharacters("description");
+    out.writeEndElement();
+    
+    out.writeStartElement("label");
+    out.writeAttribute("for", "reference-description-checkbox");
     out.writeCharacters("description");
     out.writeEndElement();
 
     out.writeStartElement("input");
     out.writeAttribute("type", "checkbox");
     out.writeAttribute("id", "reference-schema-checkbox");
-    out.writeAttribute("checked", "true");
+    out.writeAttribute("checked", "checked");
     out.writeAttribute("onchange", 
                        "toggleElementsByClass(this, 'reference-schema')");
+    //out.writeCharacters("schema");
+    out.writeEndElement();
+    
+    out.writeStartElement("label");
+    out.writeAttribute("for", "reference-schema-checkbox");
     out.writeCharacters("schema");
     out.writeEndElement();
 
     out.writeStartElement("input");
     out.writeAttribute("type", "checkbox");
     out.writeAttribute("id", "reference-attributes-checkbox");
-    out.writeAttribute("checked", "true");
+    out.writeAttribute("checked", "checked");
     out.writeAttribute("onchange", 
                        "toggleElementsByClass(this, 'reference-attributes')");
-    out.writeCharacters("attributes");
+    //out.writeCharacters("attributes");
     out.writeEndElement();
 
+    out.writeStartElement("label");
+    out.writeAttribute("for", "reference-attributes-checkbox");
+    out.writeCharacters("attributes");
+    out.writeEndElement();
+    
     out.writeStartElement("input");
     out.writeAttribute("type", "checkbox");
     out.writeAttribute("id", "reference-example-checkbox");
-    out.writeAttribute("checked", "true");
+    out.writeAttribute("checked", "checked");
     out.writeAttribute("onchange", 
                        "toggleElementsByClass(this, 'reference-example')");
-    out.writeCharacters("example");
+    //out.writeCharacters("example");
+    out.writeEndElement();
+
+    out.writeStartElement("label");
+    out.writeAttribute("for", "reference-example-checkbox");
+    out.writeCharacters("examples");
     out.writeEndElement();
 
     out.writeEndElement();

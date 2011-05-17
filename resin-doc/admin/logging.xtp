@@ -893,6 +893,11 @@ which process owns the file.</warn>
 
 <deftable-childtags>
 <tr>
+  <th>Attribute</th>
+  <th>Description</th>
+  <th>Default</th>
+</tr>
+<tr>
   <td>archive-format</td>
   <td>the format for the archive filename when a rollover occurs,
         see <a href="#rollover">Rollovers</a>.
@@ -979,6 +984,11 @@ command line with <code>-stderr</code>.  If it is, there will be conflicts with
 which process owns the file.</warn>
 
 <deftable-childtags>
+<tr>
+  <th>Attribute</th>
+  <th>Description</th>
+  <th>Default</th>
+</tr>
 <tr><td>path
     </td><td>Output path for the stream, see <a href="#path">"Log Paths"</a>.  
     </td><td>required

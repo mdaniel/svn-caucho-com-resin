@@ -124,15 +124,9 @@ public abstract class Section extends ContainerNode {
 
     for (int i = 0; i < href.length(); i++) {
       char ch = href.charAt(i);
-
-      switch (ch) {
-        case '<': case '>': case '(': case ')': case '?':
-          break;
-
-        default:
-          sb.append(ch);
-          break;
-      }
+      
+      if (Character.isLetterOrDigit(ch))
+        sb.append(ch);
     }
 
     return sb.toString();
@@ -355,5 +349,10 @@ public abstract class Section extends ContainerNode {
       return;
         
     super.writeAsciiDoc(out);
+  }
+  
+  public String toString()
+  {
+    return getClass().getSimpleName() + "[" + getTitle() + "]";
   }
 }

@@ -51,8 +51,7 @@ add a WEB-INF/pom.xml telling Resin that you need the "framework"
 artifact with version 1.0.1 and the "persistence" artifact
 with version 2.2.2.</p>
 
-
-<figure src="project-jars.jpg"/>
+<figure src="project-jars.jpg" alt="misc jars -> /my-web-app (relevant jars)"/>
 
 <p>Your web-app can declare its dependencies in two ways: a Maven-standard WEB-INF/pom.xml jar, or using a &lt;dependency> tag in the resin-web-pre.xml.
 The following example shows that the pom.xml might look like:</p>

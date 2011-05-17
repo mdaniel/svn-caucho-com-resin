@@ -54,14 +54,20 @@ WEB-INF/classes, even make-loader for more complex auto-compilation.</p>
 <p>The compiling-loader will automatically compile Java code into .class
 files loading them.</p>
 
-<deftable-childtags>
+<attributes>
+<tr>
+  <th>Attribute</th>
+  <th>Description</th>
+  <th>Default</th>
+</tr>
 <tr><td>args</td><td>Additional arguments to be passed to the Java compiler. Resin 3.0</td><td>none
 </td></tr><tr><td>batch</td><td>If true, multiple changed *.java files will be compiled in a single batch. Resin 3.0.7</td><td>true
 </td></tr><tr><td>encoding</td><td>I18N encoding for the Java compiler. Since Resin 3.0</td><td>none
 </td></tr><tr><td>path</td><td>Filesystem path for the class loader.  Since Resin 3.0</td><td>required
 </td></tr><tr><td>source</td><td>Java source directory. Since Resin 3.0</td><td>value of path
 </td></tr><tr><td>require-source</td><td>If true, .class files without matching .java files will be deleted. Since Resin 3.0</td><td>false
-</td></tr></deftable-childtags>
+</td></tr>
+</attributes>
 
 </defun>
 
@@ -74,9 +80,15 @@ files loading them.</p>
 Jar files are recognized when they have a filename extension of
 <code>.jar</code> or <code>.zip</code>.</p>
 
-<deftable-childtags>
-<tr><td>path</td><td>Filesystem path for the class loader.  Since Resin 3.0</td><td>required
-</td></tr></deftable-childtags>
+<attributes>
+<tr>
+  <th>Attribute</th>
+  <th>Description</th>
+  <th>Default</th>
+</tr>
+<tr><td>path</td><td>Filesystem path for the class loader.  Since Resin 3.0</td>
+<td>required</td></tr>
+</attributes>
 
 <p>See <a javadoc="com.caucho.loader.DirectoryLoader"/>.</p>
 </defun>
@@ -89,9 +101,16 @@ Jar files are recognized when they have a filename extension of
 <a config-tag="library-loader"/>, but will also find <code>.jar</code> and
 <code>.zip</code> files in subdirectories.</p>
 
-<deftable-childtags>
+<attributes>
+<tr>
+  <th>Attribute</th>
+  <th>Description</th>
+  <th>Default</th>
+</tr>
+
 <tr><td>path</td><td>Filesystem path for the class loader.  Since Resin 3.0</td><td>required
-</td></tr></deftable-childtags>
+</td></tr>
+</attributes>
 
 <p>See <a javadoc="com.caucho.loader.TreeLoader"/>.</p>
 </defun>
@@ -125,10 +144,16 @@ have priority.</p>
 <p>.class files in the specified directory will be loaded without any
 special compilation steps (in contrast with compiling-loader.)</p>
 
-<deftable-childtags>
+<attributes>
+<tr>
+  <th>Attribute</th>
+  <th>Description</th>
+  <th>Default</th>
+</tr>
 <tr><td>path</td><td>Filesystem path for the class loader.  Since Resin 3.0</td><td>required
 </td></tr><tr><td>prefix</td><td>Class package prefix to only load to a subset of classes. Resin 3.0</td><td>none
-</td></tr></deftable-childtags>
+</td></tr>
+</attributes>
 
 </defun>
 

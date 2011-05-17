@@ -3,9 +3,11 @@
 /* hr #fab41d */
 /* red #98012e;  */
 body {
-  border : solid;
-  border-width : 0px;
+  border : none;
   font-family : serif;
+  margin : 0.5em;
+  padding : 0;
+  background : #ffffff;
 }
 
 .breadcrumb {
@@ -47,13 +49,13 @@ a.topnav:hover,visited {
 a.topnav {
   text-decoration : none;
   color : #4c2004;
-  font-family: Verdana, Arial, Helvetica, sans-serif;
+  font-family : Verdana, Arial, Helvetica, sans-serif;
 }
 
 a.leftnav {
   text-decoration : none;
   color : #4c2004;
-  font-family: Verdana, Helvetica, Arial, sans-serif;
+  font-family : Verdana, Helvetica, Arial, sans-serif;
   font-size : 80%;
 }
 
@@ -142,6 +144,10 @@ div.section-title {
   padding : 0.2em;
 }
 
+div.nav-item {
+  padding-left : 2em;
+}
+
 .leftnav {
 /*  background : #b9cef7; */
 /*  bgcolor : #b9cef7; */
@@ -152,7 +158,7 @@ div.section-title {
 }
 
 .faqdesc {
-  font-style: italic;
+  font-style : italic;
 }
 
 .egpad {
@@ -240,8 +246,8 @@ div.definition-body {
 
 .schema-title {
   margin-left : 1.3em;
-  font-weight: bold;
-  font-family: Helvetica, Arial, sans-serif;
+  font-weight : bold;
+  font-family : Helvetica, Arial, sans-serif;
   color : #666666;
   text-align : left;
   font-size : 120%
@@ -250,8 +256,8 @@ div.definition-body {
 
 .def-caption {
   margin-left : 1.3em;
-  font-weight: bold;
-  font-family: Helvetica, Arial, sans-serif;
+  font-weight : bold;
+  font-family : Helvetica, Arial, sans-serif;
   color : #666666;
   text-align : left;
   font-size : 120%
@@ -259,8 +265,8 @@ div.definition-body {
 
 .caption {
   margin-left : 1.3em;
-  font-weight: bold;
-  font-family: Helvetica, Arial, sans-serif;
+  font-weight : bold;
+  font-family : Helvetica, Arial, sans-serif;
   color : #990033;
   text-align : left;
   font-size : 120%
@@ -273,13 +279,13 @@ table.deftable {
   margin : 1em 0em 1em 1.6em;
   border : solid 1px;
   width : 90%;
-  border-collapse: collapse;
+  border-collapse : collapse;
 }
 
 caption {
   padding : 0.3em 0em;
-  font-weight: bold;
-  font-family: Helvetica, Arial, Helvetica, sans-serif;
+  font-weight : bold;
+  font-family : Helvetica, Arial, Helvetica, sans-serif;
   color : #990033;
   text-align : left;
   font-size : 120%
@@ -288,7 +294,7 @@ caption {
 table.deftable th {
   text-align : left;
   background : white;
-  font-family: Arial, Helvetica, sans-serif;
+  font-family : Arial, Helvetica, sans-serif;
   font-variant : small-caps;
   font-weight : normal;
   font-size : 85%;
@@ -309,10 +315,6 @@ table.deftable tr.a {
 
 table.deftable tr.b {
   background : #f8f8f8;
-}
-
-td.leftnav ul {
-  width: 170px;
 }
 
 /* XXX: netscape ignores
@@ -381,7 +383,7 @@ span.example {
 }
 
 .todo {
-  color: green;
+  color : green;
 }
 
 code {
@@ -393,44 +395,65 @@ code {
   color : #003399;
 }
 
-ul.leftnav {
-  list-style : none;
-  padding-left : 1em;
-  margin : 0;
-  list-style-position : outside;
+div.leftnav {
+  margin-left : .75em;
 }
 
-ul.leftnav li.selected {
-  list-style : disc;
+div.selected {
+	background-color : #e5d1ac;
+  padding-left : 2px;
+  padding-top : 1px;
+  padding-bottom : 1px; 
+}
+
+div.not-selected {
+  padding-left : 2px;
+  padding-top : 1px;
+  padding-bottom : 1px;
 }
 
 ul.none {
   list-style : none
 }
 
-dl.atoc-top {
+div.atoc-top {
   margin : 0;
 }
 
-dl.atoc-1 {
+div.atoc-1 {
     padding : 5px;
     margin : 0.5em;
 }
 
-dl.atoc-top > dt {
+div.atoc-2 {
+    padding : 5px;
+    margin : 0.5em;
+}
+
+div.atoc-3 {
+    padding : 5px;
+    margin : 0.5em;
+}
+
+div.atoc-4 {
+    padding : 5px;
+    margin : 0.5em;
+}
+
+div.atoc-top > div {
     font-size : large;
-    font-weight: bold;
+    font-weight : bold;
     background : #ccddff;
     padding : 5px;
     margin : 0.5em;
 }
 
 div.reference-parents > span.child-of {
-  font-weight: bold;
+  font-weight : bold;
 }
 
 div.javadoc > span.javadoc {
-  font-weight: bold;
+  font-weight : bold;
 }
 
 div#reference-legend {
@@ -453,25 +476,25 @@ div#popup {
 }
 
 div.note {
-  background-color: #fef3dd;
-  min-height: 65px;
-  border: solid 1px #fdba31;
-  padding: 1em;
+  background-color : #fef3dd;
+  min-height : 65px;
+  border : solid 1px #fdba31;
+  padding : 1em;
   margin : 1em 1em;
   width : 87.5%;
 }
 
 div.note > div.note-header {
-  font-weight: bold;
-  font-size: 1.1em;
+  font-weight : bold;
+  font-size : 1.1em;
 }
 
 div.note > img.note {
-  float: left;
-  padding-right: 1em;
-  padding-bottom: 1em;
+  float : left;
+  padding-right : 1em;
+  padding-bottom : 1em;
 }
 
 div.pro {
-  font-style: italic;
+  font-style : italic;
 }

@@ -253,7 +253,7 @@ file or web application directory to one of these webapp deploy
 directories. Resin detects the applications and deploys them
 automatically.</p>
 
-<figure src="content-directories.png"/>
+<figure src="content-directories.png" alt="/var/www = Root, webapps = Deploy Directory, ROOT,wordpress,mediawiki = Webapp Directories"/>
 
 <p>
 In the directory structure above, notice the special webapp
@@ -345,7 +345,7 @@ authentication information on that machine.
 </li>
 <li>Enter a username and password in the lower half of the page, then 
 click "Create Configuration File".  The recommended username is "admin".<br/>
-<figure src="admin-password-create.png"/>
+<figure src="admin-password-create.png" alt="create admin password"/>
 </li>
 <li>After going to the next page, a new <code>admin-users.xml.generated</code>
 file has been created for you in the same directory as your
@@ -353,7 +353,7 @@ resin.xml file is located.  (If you followed the directions above,
 this should be in <code>/etc/resin</code> for Unix and <code>C:\Resin\conf</code> 
 for Windows.)  Just rename this file to <code>admin-users.xml</code> and Resin 
 will use it. <br/>
-<figure src="admin-password-save.png"/>
+<figure src="admin-password-save.png" alt="save admin-users.xml"/>
 </li>
 <li>Browse back to <a href="http://localhost:8080/resin-admin/">http://localhost:8080/resin-admin/</a>.  The
 change you made should force Resin to restart and return a <code>503</code> error. 

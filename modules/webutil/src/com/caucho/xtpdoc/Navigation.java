@@ -205,12 +205,8 @@ public class Navigation {
                         int depth, int styleDepth, int maxDepth)
     throws XMLStreamException
   {
-    out.writeStartElement("ol");
-
     for (NavigationItem item : _items)
       item.writeHtml(out, path, depth, styleDepth, maxDepth);
-
-    out.writeEndElement(); // ol
   }
 
   protected void initSummary()

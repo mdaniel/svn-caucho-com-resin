@@ -28,6 +28,10 @@
 
     <deftable>
     <tr>
+      <th>Flag</th>
+      <th>Description</th>
+    </tr>
+    <tr>
       <td>--help</td>
       <td>Help for all ./configure command line options</td></tr>
     <tr>

@@ -67,7 +67,7 @@ description.</li>
 
 <s1 title="Introduction">
 <p></p>
-<figure src="soa.png"/>
+<figure src="soa.png" alt="Resin Service-Oriented Architecture: Hessian, REST, SOAP, JNDI"/>
 <p>
 The Resin remoting is an infrastructure that
 allows a service to be exposed via many different service protocols.

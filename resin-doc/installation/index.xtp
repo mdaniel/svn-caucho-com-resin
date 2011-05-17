@@ -251,7 +251,7 @@ file or web application directory to one of these webapp deploy
 directories. Resin detects the applications and deploys them
 automatically.</p>
 
-<figure src="content-directories.png"/>
+<figure src="content-directories.png" alt="/var/www = Root, webapps = Deploy Directory, ROOT,wordpress,mediawiki = Webapp Directories"/>
 
 <p>
 In the directory structure above, notice the special webapp
@@ -303,7 +303,7 @@ Resin can be installed as a Windows Service from a setup.exe utility supplied wi
   the distribution. The setup.exe utility requires administrative privileges and will
   upon start-up ask for administrative privileges.
 </p>
-<figure src="setup-exe.png"/>
+<figure src="setup-exe.png" alt="Resin setup.exe screenshot"/>
 
 <p>To install or remove a service run setup.exe. Setup.exe provides a set of
 configuration options to use with a service. Most option have a
@@ -418,7 +418,7 @@ authentication information on that machine.
 <li>Enter a username and password in the lower half of the page, then 
 click "Create Configuration File".  The recommended username is "admin".
 
-<figure src="admin-password-create.png"/>
+<figure src="admin-password-create.png" alt="create admin password"/>
 
 </li>
 <li>After going to the next page, a new "admin-users.xml.generated"
@@ -426,7 +426,7 @@ file has been created for you in the same directory as your
 resin.xml file is located.  (If you followed the directions above,
 this should be in /etc/resin for Unix and C:\Resin\conf for Windows.)
 Just rename this file to admin-users.xml and Resin will use it to
-<figure src="admin-password-save.png"/>
+<figure src="admin-password-save.png" alt="save admin-users.xml"/>
 </li>
 <li>Browse back to <var>http://localhost:8080/resin-admin/</var>.  The
 change you made should force Resin to restart and return a 503 error. 

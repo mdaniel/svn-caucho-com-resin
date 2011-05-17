@@ -27,7 +27,7 @@ the content, and distributing the load to the app-tier servers.</p>
 web-applications and servlets, and use the same resin.xml.  Adding a new
 machine just requires adding a new &lt;server> tag to the cluster.</p>
 
-<figure src="cluster-load-balance.png"/>
+<figure src="cluster-load-balance.png" alt="web-tier(80:web-a) -> app-tier(6800:app-a(foo.com,bar.com), 6801:app-b(foo.com,bar.com))" />
 
 <p>The new server has a unique name like "app-b" and a TCP cluster-port
 consisting of an &lt;IP,port>, so the other servers can communicate with
@@ -141,7 +141,7 @@ set of timeout values to manage those idle sockets and to handle any
 failures or freezes of the backend servers.  The following diagram
 illustrates the main timeout values:</p>
 
-<figure src="load-balance-idle-time.png"/>
+<figure src="load-balance-idle-time.png" alt="web-a:connecty-timeout,app-a:socket-timeout,web-a:recover-time,app-a:keepalive-timeout,web-a:idle-time"/>
 
 <ul>
 <li><b>load-balance-connect-timeout</b>: the load balancer timeout

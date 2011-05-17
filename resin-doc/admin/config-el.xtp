@@ -193,6 +193,11 @@ available as variables in el expressions, for example <code>${LANG}</code>.
 
 <deftable-parameters>
 <tr>
+  <th>Parameter</th>
+  <th>Description</th>
+  <th>Default</th>
+</tr>
+<tr>
   <td>format</td>
   <td>the format string (see below)</td>
   <td>required</td>
@@ -220,6 +225,10 @@ conversion specifications, each of which is introduced by `%'. (To include
 <p>The following TYPE's are supported:</p>
 
 <deftable>
+<tr>
+  <th>Code</th>
+  <th>Meaning</th>
+</tr>
 <tr>
   <td>%%</td>
   <td>a percent sign</td>
@@ -288,6 +297,10 @@ the same.</p>
 
 <p>The following optional FLAGS are supported:</p>
 <deftable>
+<tr>
+  <th>Code</th>
+  <th>Meaning</th>
+</tr>
 <tr>
   <td>0</td>
   <td>If the TYPE character is an integer leading zeroes are used 
@@ -362,6 +375,11 @@ to print after the decimal point for floating points.</p>
 <example>fmt.timestamp(format[,date])</example>
 
 <deftable-parameters>
+<tr>
+  <th>Parameter</th>
+  <th>Description</th>
+  <th>Default</th>
+</tr>
 <tr>
   <td>format</td>
   <td>the format string (see below)</td>

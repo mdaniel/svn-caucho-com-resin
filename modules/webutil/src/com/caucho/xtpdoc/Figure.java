@@ -46,6 +46,7 @@ public class Figure implements ContentItem {
   private String _source;
   private String _title;
   private Document _document;
+  private String _alt;
 
   public Figure(Document document)
   {
@@ -76,6 +77,11 @@ public class Figure implements ContentItem {
   {
     _title = title;
   }
+  
+  public void setAlt(String alt)
+  {
+    _alt = alt;
+  }
 
   public void writeHtml(XMLStreamWriter out)
     throws XMLStreamException
@@ -91,6 +97,15 @@ public class Figure implements ContentItem {
 
     if (_title != null)
       out.writeAttribute("title", _title);
+    
+    if (_alt != null)
+      out.writeAttribute("alt", _alt);
+    
+    if (_alt == null && _title != null)
+      out.writeAttribute("alt", _title);
+
+    if (_alt != null && _title == null)
+      out.writeAttribute("title", _alt);
 
     if (_width >= 0)
       out.writeAttribute("width", Integer.toString(_width));

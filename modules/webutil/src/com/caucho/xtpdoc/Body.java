@@ -131,9 +131,6 @@ public class Body extends ContainerNode {
     if (_class != null)
       out.writeAttribute("class", _class);
 
-    out.writeAttribute("bgcolor", "white");
-    out.writeAttribute("leftmargin", "0");
-
     out.writeStartElement("table");
     out.writeAttribute("width", "98%");
     out.writeAttribute("border", "0");
@@ -145,7 +142,7 @@ public class Body extends ContainerNode {
 
     out.writeStartElement("tr");
     out.writeStartElement("td");
-    out.writeAttribute("colspan", "3");
+    out.writeAttribute("colspan", "2");
     out.writeEndElement();
 
     out.writeStartElement("td");
@@ -169,14 +166,10 @@ public class Body extends ContainerNode {
     // left navigation
     out.writeStartElement("tr");
     out.writeAttribute("valign", "top");
-    out.writeStartElement("td");
-    out.writeAttribute("class", "leftnav");
-    out.writeEndElement();
 
     out.writeStartElement("td");
     out.writeAttribute("class", "leftnav");
-    out.writeAttribute("width", "160");
-
+    
     parseNavigation();
 
     getDocument().writeLeftNav(out);
@@ -305,7 +298,7 @@ public class Body extends ContainerNode {
     // space row
     out.writeStartElement("tr");
     out.writeStartElement("td");
-    out.writeAttribute("colspan", "4");
+    out.writeAttribute("colspan", "3");
 
     writePixel(out, 1, height);
 
@@ -330,32 +323,15 @@ public class Body extends ContainerNode {
     // logo block
     out.writeStartElement("tr");
 
-    // spacer
     out.writeStartElement("td");
-    out.writeAttribute("width", "2");
-    out.writeStartElement("img");
-    out.writeAttribute("alt", "");
-    out.writeAttribute("width", "2");
-    out.writeAttribute("height", "1");
-    out.writeAttribute("src", getDocument().getContextPath() + "/images/pixel.gif");
-    out.writeEndElement(); // </img>
-    out.writeEndElement(); // </td>
+    out.writeAttribute("width", "180");
+    writePixel(out, 180, 1);
+    out.writeEndElement();
 
-    // logo
-    out.writeStartElement("td");
-    // old logo area
-    out.writeEndElement(); // </td>
-
-    // spacer
     out.writeStartElement("td");
     out.writeAttribute("width", "10");
-    out.writeStartElement("img");
-    out.writeAttribute("alt", "");
-    out.writeAttribute("width", "10");
-    out.writeAttribute("height", "1");
-    out.writeAttribute("src", getDocument().getContextPath() + "/images/pixel.gif");
-    out.writeEndElement(); // </img>
-    out.writeEndElement(); // </td>
+    writePixel(out, 10, 1);
+    out.writeEndElement();
 
     // top label
     out.writeStartElement("td");

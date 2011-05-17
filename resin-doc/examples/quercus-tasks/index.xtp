@@ -15,6 +15,10 @@
 
 <s1 title="Files in this tutorial">
 <deftable>
+<tr>
+  <th>File</th>
+  <th>Description</th>
+</tr>
 <tr><td><viewfile-link file="WEB-INF/resin-web.xml"/>
     </td><td>web.xml configuration
 </td></tr><tr><td><viewfile-link file="frontend.php"/>

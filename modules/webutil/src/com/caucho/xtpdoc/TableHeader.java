@@ -41,6 +41,8 @@ public class TableHeader extends FormattedTextWithAnchors implements TableCell {
   private String _rowspan;
   private String _colspan;
   private String _width;
+  private String _id;
+  private String _scope;
 
   public TableHeader(Document document)
   {
@@ -60,6 +62,16 @@ public class TableHeader extends FormattedTextWithAnchors implements TableCell {
   public void setWidth(String width)
   {
     _width = width;
+  }
+
+  public void setId(String id)
+  {
+    _id = id;
+  }
+  
+  public void setScope(String scope)
+  {
+    _scope = scope;
   }
 
   @Override
@@ -82,6 +94,14 @@ public class TableHeader extends FormattedTextWithAnchors implements TableCell {
 
     if (_rowspan != null)
       out.writeAttribute("rowspan", _rowspan);
+
+    if (_scope != null)
+      out.writeAttribute("scope", _scope);
+    else
+      out.writeAttribute("scope", "col");
+
+    if (_id != null)
+      out.writeAttribute("id", _id);
 
     super.writeHtml(out);
 

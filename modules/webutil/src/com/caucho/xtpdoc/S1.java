@@ -50,24 +50,27 @@ public class S1 extends Section {
   public void writeHtml(XMLStreamWriter out)
     throws XMLStreamException
   {
-    out.writeCharacters("\n");
-    out.writeStartElement("div");
-    out.writeAttribute("class", "s1");
+    if (getHref() != null || _title != null) {
 
-    if (getHref() != null) {
-      out.writeStartElement("a");
-      out.writeAttribute("name", getHref());
+      out.writeCharacters("\n");
+      out.writeStartElement("div");
+      out.writeAttribute("class", "s1");
+
+      if (getHref() != null) {
+        out.writeStartElement("a");
+        out.writeAttribute("name", getHref());
+        out.writeEndElement();
+      }
+
+      if (_title != null) {
+        out.writeStartElement("h1");
+        out.writeAttribute("class", "section");
+        out.writeCharacters(_title);
+        out.writeEndElement();
+      }
+
       out.writeEndElement();
     }
-
-    if (_title != null) {
-      out.writeStartElement("h1");
-      out.writeAttribute("class", "section");
-      out.writeCharacters(_title);
-      out.writeEndElement();
-    }
-
-    out.writeEndElement();
 
     super.writeHtml(out);
   }

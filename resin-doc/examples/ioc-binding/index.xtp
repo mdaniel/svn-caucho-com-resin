@@ -65,7 +65,7 @@ to the user's needs.</p>
 
 <s2 title="Tutorial Architecture">
 
-<figure src="ioc-binding.png"/>
+<figure src="ioc-binding.png" alt="(@Blue BlueResourceBean, @Red RedResourceBean) -> (SetServlet @Inject MyService, GetServlet @Inject MyService) <- MyServiceBean" />
 
 <p>Since the purpose of the service pattern is encapsulating state and
 managment for multiple clients, the tutorial shows a single service
@@ -194,8 +194,11 @@ iterator over all the discovered and configured beans, and
 </s1>
 
 <s1 title="Files in this tutorial" web-only='true'>
-
 <deftable title="Files: Service Pattern">
+<tr>
+  <th>File</th>
+  <th>Description</th>
+</tr>
 <tr>
   <td><viewfile-link file="WEB-INF/classes/example/MyServiceBean.java"/></td>
   <td>Implementation of the MyService service bean.</td>
@@ -228,6 +231,10 @@ iterator over all the discovered and configured beans, and
 
 <deftable title="Files: Configuration and Plugin Pattern">
 <tr>
+  <th>File</th>
+  <th>Description</th>
+</tr>
+<tr>
   <td><viewfile-link file="WEB-INF/resin-web.xml"/></td>
   <td>Configuration of custom resources.</td>
 </tr>
@@ -250,6 +257,10 @@ iterator over all the discovered and configured beans, and
 </deftable>
 
 <deftable title="Files: Startup Pattern">
+<tr>
+  <th>File</th>
+  <th>Description</th>
+</tr>
 <tr>
   <td><viewfile-link file="WEB-INF/classes/example/MyStartupBean.java"/></td>
   <td>Startup bean to configure other resources on web-app initialization.</td>

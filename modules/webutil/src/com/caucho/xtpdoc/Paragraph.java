@@ -69,4 +69,11 @@ public class Paragraph extends FormattedTextWithAnchors {
 
     super.writeAsciiDoc(out);
   }
+  
+  
+  @Override
+  public Example createExample()
+  {
+    throw new IllegalStateException("Close block with </p> before <example>");
+  }
 }

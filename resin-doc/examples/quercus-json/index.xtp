@@ -23,6 +23,10 @@ user's browser using JavaScript's <code>eval()</code> function.
 <s1 title="Files in this tutorial">
 <deftable>
 <tr>
+  <th>File</th>
+  <th>Description</th>
+</tr>
+<tr>
   <td><viewfile-link file="json.html"/></td>
   <td>The JSON example page</td>
 </tr>

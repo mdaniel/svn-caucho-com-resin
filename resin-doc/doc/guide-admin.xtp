@@ -48,7 +48,7 @@ restarting Resin <em>servers</em> for reliability.</li>
 Drupal or Mediawiki site.  All content belongs to a webapp.</li>
 </ul>
 
-<figure src="cluster-load-balance.png"/>
+<figure src="cluster-load-balance.png" alt="web-tier(80:web-a) -> app-tier(6800:app-a(foo.com,bar.com), 6801:app-b(foo.com,bar.com))" />
 
 <p>In the previous figure:</p>
 <ul>
@@ -263,7 +263,7 @@ and serves the content.</li>
 
 </ul>
 
-<figure src="startup-watchdog.png"/>
+<figure src="startup-watchdog.png" alt="java resin.jar start: ResinBoot -> ResinWatchdog -> Resin"/>
 
 <p>Because the Resin server is started as a child of the watchdog
 process, its own JVM arguments come from the resin.xml,

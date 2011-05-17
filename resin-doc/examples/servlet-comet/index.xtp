@@ -24,7 +24,7 @@ applications need to continually update the client when new information
 becomes available to the server.
 </p>
 
-<figure src="cometcomm.png"/>
+<figure src="cometcomm.png" alt="javascript/api <-> <- java/api" />
 
 <p>The architecture in the picture uses two HTTP streams to the server
 application, one for normal client-server requests, and a second
@@ -39,6 +39,10 @@ application sending Hessian packets to update the monitoring display.</p>
 
 <s1 title="Files in this tutorial">
 <deftable>
+<tr>
+  <th>File</th>
+  <th>Description</th>
+</tr>
 <tr>
   <td><viewfile-link file="WEB-INF/resin-web.xml"/></td>
   <td>resin-web.xml configuration</td>
@@ -324,7 +328,7 @@ machine.  After the initial request, the servlet spends most of its
 time suspended, waiting for the <code>TimerService</code> to call
 <code>complete()</code>.</p>
 
-<figure src="cometstate.png"/>
+<figure src="cometstate.png" alt="comet state machine"/>
 
 </s2>
 </s1>

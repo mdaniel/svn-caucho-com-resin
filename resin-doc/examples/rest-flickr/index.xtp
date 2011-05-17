@@ -33,6 +33,10 @@ a subset of the flickr<sup><small>TM</small></sup> API.
 
 <s1 title="Files in this tutorial">
 <deftable>
+<tr>
+  <th>File</th>
+  <th>Description</th>
+</tr>
 <tr><td><viewfile-link file="WEB-INF/classes/example/FlickrAPI.java"/>
     </td><td>Interface for the hello service.
 </td></tr><tr><td><viewfile-link file="WEB-INF/classes/example/FlickrImpl.java"/>
@@ -82,7 +86,7 @@ well-designed and consistent which allows very clean client construction.
 
 <s1 title="REST Client Architecture">
 <p></p>
-<figure src="rest-client.png"/>
+<figure src="rest-client.png" alt="request(client -> proxy -> jaxb) -> REST service -> response(jaxb -> proxy -> client)"/>
 <p>
 The REST client architecture in Resin can be thought of as a stack.  At the
 top of the stack is the client, which calls methods on a proxy.  That proxy

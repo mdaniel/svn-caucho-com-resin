@@ -103,7 +103,7 @@ applications.</p>
 administration consoles, stock trading applications, or notification
 protocols like Atom or instant messaging.</p>
 
-<figure src="tictactoe-game.png"/>
+<figure src="tictactoe-game.png" alt="flash clients -> server client -> bam broker -> hosts -> java class"/>
 
 </s1>
 

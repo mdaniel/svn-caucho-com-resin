@@ -1113,7 +1113,13 @@ session management and for the load balancing itself.</p>
 <p>When configuring multiple JVMs, each &lt;server&gt; has a
 unique &lt;server-id&gt; which allows the -server command-line to select
 which ports the server should listen to.</p>
-<deftable-childtags>
+
+<attributes>
+<tr>
+  <th>Attribute</th>
+  <th>Description</th>
+  <th>Default</th>
+</tr>
 <tr><td>address</td>
     <td>hostname of the interface to listen to</td>
     <td>*</td></tr>
@@ -1138,7 +1144,8 @@ which ports the server should listen to.</p>
 <tr><td>tcp-no-delay</td>
     <td>sets the NO_DELAY socket parameter</td>
     <td>true</td></tr>
-</deftable-childtags>
+</attributes>
+
 </defun>
 
 <defun title="&lt;compiling-loader>" name="compiling-loader" occur="*" version="Resin 3.0" type="defun">
@@ -1207,7 +1214,7 @@ files before loading them.</p>
 
 <attributes>
 <tr>
-  <th>attribute</th>
+  <th>Attribute</th>
   <th>Description</th>
   <th>Default</th>
 </tr>
@@ -5105,6 +5112,11 @@ will use @virtual-host.</note>
 
 <!-- XXX sync with schema -->
 <attributes>
+<tr>
+  <th>Attribute</th>
+  <th>Description</th>
+  <th>Default</th>
+</tr>
 <tr><td>address/host</td>
     <td>IP address of the interface to listen to</td>
     <td>*</td></tr>
@@ -7096,7 +7108,7 @@ active cluster and the &lt;cluster&gt; definition is at the &lt;server&gt; level
 Sessions activate the persistent store with the &lt;use-persistent-store&gt;
 tag of the &lt;session-config&gt;.</p>
 
-<deftable title="&lt;persistent-store> Attributes">
+<attributes>
 <tr>
   <th>Attribute</th>
   <th>Description</th>
@@ -7112,7 +7124,7 @@ tag of the &lt;session-config&gt;.</p>
   <td>cluster, jdbc, or file</td>
   <td>required</td>
 </tr>
-</deftable>
+</attributes>
 
 <def title="&lt;persistent-store> schema">
 element persistent-store {
@@ -7707,8 +7719,8 @@ for an example.</li>
 <deftable title="remote-client protocols">
 
 <tr>
-  <td>URI</td>
-  <td>Description</td>
+  <th>URI</th>
+  <th>Description</th>
 </tr>
 <tr>
   <td><var>cxf</var>:url=http://foo.com/hello/cxf</td>
@@ -7842,10 +7854,10 @@ element resin-system-auth-key {
   </p>
 </description>
 
-<deftable>
+<attributes>
 <tr>
   <th>Attribute</th>
-  <th>Meaning</th>
+  <th>Description</th>
   <th>Default</th>
 </tr>
 <tr>
@@ -7871,7 +7883,7 @@ element resin-system-auth-key {
   <td>If true, the user will be logged out when the session times out.</td>
   <td>true</td>
 </tr>
-</deftable>
+</attributes>
 
 </defun>
 
@@ -7889,6 +7901,10 @@ is the most common type of top level authorization tag.</p>
 
 <!-- XXX: What are the defaults for this? -->
 <attributes>
+<tr>
+  <th>Attribute</th>
+  <th>Description</th>
+</tr>
 <tr>
   <td>url-pattern</td>
   <td>URL pattern describing the resource to be secured.</td>
@@ -8184,6 +8200,10 @@ pattern is restricted.</p>
 <!-- XXX: What are the defaults for this? -->
 <attributes>
 <tr>
+  <th>Attribute</th>
+  <th>Description</th>
+</tr>
+<tr>
   <td>url-pattern</td>
   <td>URL pattern describing the resource to be secured.</td>
 </tr>
@@ -8462,10 +8482,10 @@ to the client.
 
 <attributes>
 <tr>
-  <th>attribute</th>
-  <th>description</th>
-  <th>default</th>
-</tr>  
+  <th>Attribute</th>
+  <th>Description</th>
+  <th>Default</th>
+</tr>
 <tr>
   <td>form-login-page</td>
   <td>The page to be used to prompt the user login.</td>
@@ -10420,7 +10440,12 @@ element resource-ref {
 <parents>session-config</parents>
 <p>&lt;save-mode> configures when Resin should save a persistence
 session during a request.  The values are:</p>
-<deftable>
+<attributes>
+<tr>
+  <th>Attribute</th>
+  <th>Description</th>
+</tr>
+
 <tr>
   <td>after-request</td>
   <td>Save the session after the request has been served and completed</td>
@@ -10433,7 +10458,7 @@ session during a request.  The values are:</p>
   <td>on-shutdown</td>
   <td>Only save the session when Resin is shutting down</td>
 </tr>
-</deftable>
+</attributes>
 <p>In some situations, like redirects, a fast browser can send a request
 back to Resin before the session is persisted with the
 <var>after-request</var> save-mode.  If the server is configured
@@ -10674,7 +10699,13 @@ The <g>ObjectName</g> is <var>resin:type=Server</var>.</p>
 <p>Peer servers are managed with 
 <a href="javadoc|com.caucho.management.server.ServerConnectorMXBean">ServerConnectorMXBean</a>. 
 The ObjectName is <var>resin:type=ServerConnector,name=server-id</var>.</p>
-<deftable-childtags>
+<attributes>
+<tr>
+  <th>Attribute</th>
+  <th>Description</th>
+  <th>Default</th>
+</tr>
+
 <tr><td>id</td>
     <td>unique server identifier</td>
     <td>required</td></tr>
@@ -10684,7 +10715,7 @@ The ObjectName is <var>resin:type=ServerConnector,name=server-id</var>.</p>
 <tr><td>port</td>
     <td>The cluster port</td>
     <td>6800</td></tr>
-</deftable-childtags>
+</attributes>
 <example title="server">
 &lt;resin xmlns="http://caucho.com/ns/resin"&gt;
     &lt;cluster id="web-tier"&gt;
@@ -10723,7 +10754,12 @@ for example, should be configured in the &lt;server&gt; block.</p>
 of &lt;http&gt; and &lt;server&gt; ports which share the thread pool.
 Requests received on those ports will use worker threads from the
 thread pool.</p>
-<deftable-childtags>
+<attributes>
+<tr>
+  <th>Attribute</th>
+  <th>Description</th>
+  <th>Default</th>
+</tr>
 <tr><td>alternate-session-url-prefix</td>
     <td>a prefix to add the session to the beginning of the URL as a path
         prefix instead of the standard ;jsessionid= suffix. For clients like
@@ -10736,7 +10772,7 @@ thread pool.</p>
 <tr><td>keepalive-thread-timeout</td>
     <td>the maximum time a connection is maintained in the keepalive state</td>
     <td>120s</td></tr>
-</deftable-childtags>
+</attributes>
 <example title="alternate-session-url-prefix">
 &lt;server&gt;
   ...

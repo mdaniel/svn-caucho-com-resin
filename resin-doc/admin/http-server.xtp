@@ -20,7 +20,7 @@
 only web server.  This configuration provides a Java HTTP server. We recommend
 you start with this before trying any other configuration.</p>
 
-<figure src="httpd.gif"/>
+<figure src="httpd.gif" alt="browser <-> Resin httpd/servlets,beans <- html,jsp"/>
 
 <p>The server listens at port 8080 in the default configuration and
 can be changed to the HTTP port 80 during deployment.</p>
@@ -301,7 +301,7 @@ the second process, the ResinWatchdogManager. This watchdog process takes care o
 starting the actual Resin process(es). ResinWatchdogManager monitors the state
 of Resin and restarts it if necessary, improving reliability.</p>
 
-<figure src="startup-watchdog.png"/>
+<figure src="startup-watchdog.png" alt="java resin.jar start: ResinBoot -> ResinWatchdog -> Resin"/>
 
 </s2>
 

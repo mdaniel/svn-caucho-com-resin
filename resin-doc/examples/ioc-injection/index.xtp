@@ -23,6 +23,10 @@ resource dependencies.</p>
 <s1 title="Files in this tutorial">
 <deftable>
 <tr>
+  <th>File</th>
+  <th>Description</th>
+</tr>
+<tr>
   <td><viewfile-link file="WEB-INF/resin-web.xml"/></td>
   <td>Configures the movie application</td>
 </tr>
@@ -85,7 +89,7 @@ Injection</a> article.</p>
 
 <s2 title="Configuration as Assembly Line">
 
-<figure src="assembler-eg1.gif"/>
+<figure src="assembler-eg1.gif" alt="Assembler(Resin),Registry(JNDI) -> (MovieLocator,MovieFinderImpl)" />
 
 <p>The Dependency Injector pattern could also be called
 the Assembly pattern because it resembles an assembly

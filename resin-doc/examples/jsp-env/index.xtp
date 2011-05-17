@@ -14,6 +14,10 @@
 <summary/>
 <s1 title="Files in this tutorial">
 <deftable>
+<tr>
+  <th>File</th>
+  <th>Description</th>
+</tr>
 <tr><td><viewfile-link file="env.jsp"/>
     </td><td>The environment jsp page.
 </td></tr></deftable>

@@ -28,6 +28,10 @@ intervals.
 
 <s1 title="Files in this tutorial">
 <deftable>
+<tr>
+  <th>File</th>
+  <th>Description</th>
+</tr>
   <tr><td><viewfile-link file="WEB-INF/classes/example/PeriodicTask.java"/>
     </td><td>The implementation of the class that performs the task
 </td></tr>

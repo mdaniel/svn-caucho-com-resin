@@ -26,7 +26,12 @@ SSL certificates can use documentation for Apache.</p>
 The <a href="security-ssl.xtp">SSL</a> section of the Security documentation provides a comprehensive overview of SSL.
 </p>
 
-<deftable-childtags>
+<attributes>
+<tr>
+  <th>Attribute</th>
+  <th>Description</th>
+  <th>Default</th>
+</tr>
 <tr>
   <td>ca-certificate-file</td>
   <td>Path to a CA certificate file for intermediate CA support</td>
@@ -102,7 +107,7 @@ The <a href="security-ssl.xtp">SSL</a> section of the Security documentation pro
   <td>Depth of the client certificate chains to validate</td>
   <td>unlimited</td>
 </tr>
-</deftable-childtags>
+</attributes>
 
 </defun>
 
@@ -174,7 +179,12 @@ certificate is available, it will be put in the
 javax.servlet.request.X509Certificate request attribute. 
 </p>
 
-<deftable>
+<attributes>
+<tr>
+  <th>Attribute</th>
+  <th>Description</th>
+</tr>
+
 <tr>
   <td>none</td>
   <td>do not ask for a client certificate (default)</td>
@@ -191,7 +201,7 @@ javax.servlet.request.X509Certificate request attribute.
   <td>optional-no-ca</td>
   <td>ask for a client certificate, but do not validate the Certificate Authority</td>
 </tr>
-</deftable>
+</attributes>
 
 <example title="Obtaining the client certificate">
   X509Certificate []certs = (X509Certificate [])

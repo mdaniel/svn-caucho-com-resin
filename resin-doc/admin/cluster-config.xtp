@@ -44,11 +44,16 @@ sharing distributed sessions.</p>
 &lt;/resin&gt;
 </example>
 
-<deftable-childtags>
+<attributes>
+<tr>
+  <th>Attribute</th>
+  <th>Description</th>
+  <th>Default</th>
+</tr>
 <tr><td>id</td>
     <td>Name of the cluster</td>
     <td>required</td></tr>
-</deftable-childtags>
+</attributes>
 
 </defun>
 
@@ -194,7 +199,13 @@ of &lt;http&gt; and &lt;server&gt; ports which share the thread pool.
 Requests received on those ports will use worker threads from the
 thread pool.</p>
 
-<deftable-childtags>
+<attributes>
+<tr>
+  <th>Attribute</th>
+  <th>Description</th>
+  <th>Default</th>
+</tr>
+
 <tr><td>alternate-session-url-prefix</td>
     <td>a prefix to add the session to the beginning of the URL as a path
         prefix instead of the standard ;jsessionid= suffix. For clients like
@@ -207,7 +218,7 @@ thread pool.</p>
 <tr><td>keepalive-timeout</td>
     <td>the maximum time a connection is maintained in the keepalive state</td>
     <td>120s</td></tr>
-</deftable-childtags>
+</attributes>
 
 <example title="alternate-session-url-prefix">
 &lt;server&gt;
@@ -252,7 +263,13 @@ shutdown gracefully before forcing an exit.</p>
 
 <p>&lt;thread-pool> configures the thread pool shared among all ports.</p>
 
-<deftable-childtags>
+<attributes>
+<tr>
+  <th>Attribute</th>
+  <th>Description</th>
+  <th>Default</th>
+</tr>
+
 <tr><td>thread-max</td>
     <td>maximum number of working threads</td>
     <td>200</td></tr>
@@ -260,7 +277,7 @@ shutdown gracefully before forcing an exit.</p>
 <tr><td>spare-thread-max</td><td>maximum number of spare working threads</td><td>20</td></tr>
 -->
 <tr><td>spare-thread-min</td><td>minimum number of spare working threads</td><td>5</td></tr>
-</deftable-childtags>
+</attributes>
 
 <p>&lt;thread-max&gt; is the absolute maximum number of connection worker
 threads allowed.  &lt;thread-max&gt; may be limited by OS/JVM
@@ -306,6 +323,11 @@ reserved ports as root.</p>
 modelled after the ant tag by the same name.</p>
 
 <deftable-childtags>
+<tr>
+  <th>Attribute</th>
+  <th>Description</th>
+  <th>Default</th>
+</tr>
 <tr><td>dir</td>
     <td>the starting directory</td>
     <td>required</td></tr>
@@ -489,7 +511,13 @@ session management and for the load balancing itself.</p>
 unique &lt;server-id&gt; which allows the -server command-line to select
 which ports the server should listen to.</p>
 
-<deftable-childtags>
+<attributes>
+<tr>
+  <th>Attribute</th>
+  <th>Description</th>
+  <th>Default</th>
+</tr>
+
 <tr><td>address</td>
     <td>hostname of the interface to listen to</td>
     <td>*</td></tr>
@@ -514,7 +542,7 @@ which ports the server should listen to.</p>
 <tr><td>tcp-no-delay</td>
     <td>sets the NO_DELAY socket parameter</td>
     <td>true</td></tr>
-</deftable-childtags>
+</attributes>
 
 </defun>
 
@@ -554,7 +582,13 @@ switch to a non-root user after binding to port 80.</p>
 unique &lt;server-id&gt; which allows the -server command-line to select
 which ports the server should listen to.</p>
 
-<deftable-childtags>
+<attributes>
+<tr>
+  <th>Attribute</th>
+  <th>Description</th>
+  <th>Default</th>
+</tr>
+
 <tr><td>address</td>
     <td>IP address of the interface to listen to</td>
     <td>*</td></tr>
@@ -582,7 +616,7 @@ which ports the server should listen to.</p>
 <tr><td>jsse-ssl</td>
     <td>configures the port to use JSSE for SSL</td>
     <td>none</td></tr>
-</deftable-childtags>
+</attributes>
 
 <p>The <var>virtual-host</var> attribute overrides the browser's
 Host directive, specifying the explicit host and port for
@@ -1030,7 +1064,13 @@ The <g>ObjectName</g> is <var>resin:type=Server</var>.</p>
 <p>Peer servers are managed with 
 <a javadoc="com.caucho.management.server.ServerConnectorMXBean">ServerConnectorMXBean</a>. The ObjectName is <var>resin:type=ServerConnector,name=server-id</var>.</p>
 
-<deftable-childtags>
+<attributes>
+<tr>
+  <th>Attribute</th>
+  <th>Description</th>
+  <th>Default</th>
+</tr>
+
 <tr><td>id</td>
     <td>unique server identifier</td>
     <td>required</td></tr>
@@ -1040,7 +1080,7 @@ The <g>ObjectName</g> is <var>resin:type=Server</var>.</p>
 <tr><td>port</td>
     <td>The cluster port</td>
     <td>6800</td></tr>
-</deftable-childtags>
+</attributes>
 
 <example title="server">
 &lt;resin xmlns="http://caucho.com/ns/resin"&gt;
@@ -1085,7 +1125,13 @@ of &lt;http&gt; and &lt;server&gt; ports which share the thread pool.
 Requests received on those ports will use worker threads from the
 thread pool.</p>
 
-<deftable-childtags>
+<attributes>
+<tr>
+  <th>Attribute</th>
+  <th>Description</th>
+  <th>Default</th>
+</tr>
+
 <tr><td>alternate-session-url-prefix</td>
     <td>a prefix to add the session to the beginning of the URL as a path
         prefix instead of the standard ;jsessionid= suffix. For clients like
@@ -1098,7 +1144,7 @@ thread pool.</p>
 <tr><td>keepalive-thread-timeout</td>
     <td>the maximum time a connection is maintained in the keepalive state</td>
     <td>120s</td></tr>
-</deftable-childtags>
+</attributes>
 
 <example title="alternate-session-url-prefix">
 &lt;server&gt;
@@ -1516,6 +1562,11 @@ when serializing the session.</p>
 <p>Session configuration parameters.</p>
 
 <deftable-childtags title="Servlet 2.4 definition for session-timeout">
+<tr>
+  <th>Attribute</th>
+  <th>Description</th>
+  <th>Default</th>
+</tr>
 
 <tr>
   <td>session-timeout</td>
@@ -1527,6 +1578,11 @@ when serializing the session.</p>
 <p>Resin adds a number of <var>session-config</var> tags.</p>
 
 <deftable-childtags title="Resin extensions to session-config">
+<tr>
+  <th>Attribute</th>
+  <th>Description</th>
+  <th>Default</th>
+</tr>
 <tr>
   <td>always-load-session</td>
   <td>Reload data from the store on every request. (resin 1.2)</td>
@@ -1667,7 +1723,11 @@ sessions may be larger.</p>
 <p>&lt;save-mode> configures when Resin should save a persistence
 session during a request.  The values are:</p>
 
-<deftable>
+<attributes>
+<tr>
+  <th>Attribute</th>
+  <th>Description</th>
+</tr>
 <tr>
   <td>after-request</td>
   <td>Save the session after the request has been served and completed</td>
@@ -1680,7 +1740,7 @@ session during a request.  The values are:</p>
   <td>on-shutdown</td>
   <td>Only save the session when Resin is shutting down</td>
 </tr>
-</deftable>
+</attributes>
 
 <p>In some situations, like redirects, a fast browser can send a request
 back to Resin before the session is persisted with the
@@ -2366,7 +2426,13 @@ session management and for the load balancing itself.</p>
 unique &lt;server-id&gt; which allows the -server command-line to select
 which ports the server should listen to.</p>
 
-<deftable-childtags>
+<attributes>
+<tr>
+  <th>Attribute</th>
+  <th>Description</th>
+  <th>Default</th>
+</tr>
+
 <tr><td>address</td>
     <td>hostname of the interface to listen to</td>
     <td>*</td></tr>
@@ -2388,7 +2454,7 @@ which ports the server should listen to.</p>
 <tr><td>tcp-no-delay</td>
     <td>sets the NO_DELAY socket parameter</td>
     <td>true</td></tr>
-</deftable-childtags>
+</attributes>
 
 </defun>
 
@@ -2409,7 +2475,13 @@ concurrent connections on this port.</p>
 unique &lt;server-id&gt; which allows the -server command-line to select
 which ports the server should listen to.</p>
 
-<deftable-childtags>
+<attributes>
+<tr>
+  <th>Attribute</th>
+  <th>Description</th>
+  <th>Default</th>
+</tr>
+
 <tr><td>address</td>
     <td>IP address of the interface to listen to</td>
     <td>*</td></tr>
@@ -2434,7 +2506,7 @@ which ports the server should listen to.</p>
 <tr><td>jsse-ssl</td>
     <td>configures the port to use JSSE for SSL</td>
     <td>none</td></tr>
-</deftable-childtags>
+</attributes>
 
 <p>The <var>virtual-host</var> attribute overrides the browser's
 Host directive, specifying the explicit host and port for
@@ -2455,7 +2527,13 @@ support.</p>
 The <a href="../admin/security.xtp">SSL</a> section of the Security documentation provides a comprehensive overview of SSL.
 </p>
 
-<deftable-childtags>
+<attributes>
+<tr>
+  <th>Attribute</th>
+  <th>Description</th>
+  <th>Default</th>
+</tr>
+
 <tr>
   <td>alias</td>
   <td>Configures the key alias name in the key store file.</td>
@@ -2491,7 +2569,7 @@ The <a href="../admin/security.xtp">SSL</a> section of the Security documentatio
   <td>Settings for client validation</td>
   <td>required</td>
 </tr>
-</deftable-childtags>
+</attributes>
 
 </defun>
 
@@ -2516,7 +2594,13 @@ SSL certificates can use documentation for Apache.</p>
 The <a href="../admin/security.xtp">SSL</a> section of the Security documentation provides a comprehensive overview of SSL.
 </p>
 
-<deftable-childtags>
+<attributes>
+<tr>
+  <th>Attribute</th>
+  <th>Description</th>
+  <th>Default</th>
+</tr>
+
 <tr>
   <td>ca-certificate-file</td>
   <td>Path to a CA certificate file for intermediate CA support</td>
@@ -2592,7 +2676,7 @@ The <a href="../admin/security.xtp">SSL</a> section of the Security documentatio
   <td>Depth of the client certificate chains to validate</td>
   <td>unlimited</td>
 </tr>
-</deftable-childtags>
+</attributes>
 
 </defun>
 
@@ -2701,7 +2785,12 @@ certificate is available, it will be put in the
 javax.servlet.request.X509Certificate request attribute. 
 </p>
 
-<deftable>
+<attributes>
+<tr>
+  <th>Attribute</th>
+  <th>Description</th>
+</tr>
+
 <tr>
   <td>none</td>
   <td>do not ask for a client certificate (default)</td>
@@ -2718,7 +2807,7 @@ javax.servlet.request.X509Certificate request attribute.
   <td>optional-no-ca</td>
   <td>ask for a client certificate, but do not validate the Certificate Authority</td>
 </tr>
-</deftable>
+</attributes>
 
 <example title="Obtaining the client certificate">
   X509Certificate []certs = (X509Certificate [])
