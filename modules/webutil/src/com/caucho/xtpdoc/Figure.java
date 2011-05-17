@@ -145,7 +145,7 @@ public class Figure implements ContentItem {
   {
     int dot = _source.lastIndexOf('.');
 
-    String basename = _source.substring(0, dot);
+    String baseName = _source.substring(0, dot);
     
     out.println();
     out.println();
