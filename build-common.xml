@@ -417,8 +417,9 @@
 
       <exec dir="${build}/pdf/@{name}" executable="a2x">
 	<arg value="--doctype=book"/>
-	<arg value="--format=docbook"/>
+	<arg value="--format=pdf"/>
 	<arg value="--no-xmllint"/>
+	<arg value="--verbose"/>
 	<arg value="--icons"/>
 	<arg value="--resource=${resin.doc}"/>
 	<arg value="--asciidoc-opts=--attribute=include-dir='${resin.doc}'"/>

@@ -149,13 +149,38 @@ public class Figure implements ContentItem {
     
     out.println();
     out.println();
-    out.print("image::images/" + _source + "[alt=\"" + _source + "\"");
-    
+
+    String pdfName = baseName + ".pdf";
+    boolean isPdf = false;
+
+    if (new File(pdfName).exists()) {
+      out.print("image::images/" + pdfName + "[alt=\"" + _source + "\"");
+      isPdf = true;
+    }
+    else {
+      out.print("image::images/" + _source + "[alt=\"" + _source + "\"");
+    }
+
     int width = getWidth(_source);
     
+    /*
     if (width > 0)
       out.print(",width=" + width);
-    out.print(",align=center,scalefit=0");
+    
+    int height = getHeight(_source);
+    
+    if (height > 0)
+      out.print(",height=" + height);
+
+      out.print(",align=center");
+    */
+    //if (width > 0)
+    //  out.print(",scaledwidth=" + width);
+    if (! isPdf) {
+	out.print(",scaledwidth=\"100%\"");
+	out.print(",height=\"100%\"");
+    }
+    out.print(",align=center");
     out.println("]");
   }
   
@@ -169,6 +194,23 @@ public class Figure implements ContentItem {
       java.awt.Image image = ImageIO.read(file);
         
       return image.getWidth(null);
+    } catch (Exception e) {
+      // log.log(Level.FINER, e.toString(), e);
+      
+      return -1;
+    }
+  }
+  
+  public static int getHeight(String source)
+  {
+    try {
+      Toolkit toolkit = Toolkit.getDefaultToolkit();
+      
+      File file = new File("images/" + source);
+      
+      java.awt.Image image = ImageIO.read(file);
+        
+      return image.getHeight(null);
     } catch (Exception e) {
       // log.log(Level.FINER, e.toString(), e);
       
