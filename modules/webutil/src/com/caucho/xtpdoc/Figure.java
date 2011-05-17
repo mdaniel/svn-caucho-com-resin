@@ -29,8 +29,12 @@
 
 package com.caucho.xtpdoc;
 
+import javax.imageio.ImageIO;
 import javax.xml.stream.XMLStreamException;
 import javax.xml.stream.XMLStreamWriter;
+
+import java.awt.Toolkit;
+import java.io.File;
 import java.io.IOException;
 import java.io.PrintWriter;
 
@@ -145,6 +149,30 @@ public class Figure implements ContentItem {
     
     out.println();
     out.println();
-    out.println("image::images/" + _source + "[alt=\"" + _source + "\"]");
+    out.print("image::images/" + _source + "[alt=\"" + _source + "\"");
+    
+    int width = getWidth(_source);
+    
+    if (width > 0)
+      out.print(",width=" + width);
+    out.print(",align=center,scalefit=0");
+    out.println("]");
+  }
+  
+  public static int getWidth(String source)
+  {
+    try {
+      Toolkit toolkit = Toolkit.getDefaultToolkit();
+      
+      File file = new File("images/" + source);
+      
+      java.awt.Image image = ImageIO.read(file);
+        
+      return image.getWidth(null);
+    } catch (Exception e) {
+      // log.log(Level.FINER, e.toString(), e);
+      
+      return -1;
+    }
   }
 }

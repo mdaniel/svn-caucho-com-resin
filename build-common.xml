@@ -409,6 +409,23 @@
         </classpath>
       </java>
 
+      <copy todir="${build}/pdf/@{name}/images"
+            preservelastmodified="true"
+            overwrite="true">
+        <fileset dir="${resin.doc}/images"/>
+      </copy>
+
+      <exec dir="${build}/pdf/@{name}" executable="a2x">
+	<arg value="--doctype=book"/>
+	<arg value="--format=docbook"/>
+	<arg value="--no-xmllint"/>
+	<arg value="--icons"/>
+	<arg value="--resource=${resin.doc}"/>
+	<arg value="--asciidoc-opts=--attribute=include-dir='${resin.doc}'"/>
+	<arg value="--asciidoc-opts=--attribute=imagesdir='${resin.doc}'"/>
+        <arg value="@{name}.ad"/>
+      </exec>
+
     </sequential>
   </macrodef>
 
