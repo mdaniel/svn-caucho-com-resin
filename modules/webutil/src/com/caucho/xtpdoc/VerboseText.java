@@ -95,6 +95,6 @@ public class VerboseText extends AbstractContentItem {
   public void writeAsciiDoc(PrintWriter out)
     throws IOException
   {
-    escapeAsciiDoc(out, _text);
+    escapeAsciiDoc(out, _text, true);
   }
 }

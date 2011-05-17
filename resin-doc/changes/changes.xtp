@@ -13,6 +13,12 @@
 
 <s2 title="4.0.19 - snapshot">
 <ul>
+<li>ejb: synthetic/bridge methods should not be reflected (#4555, rep by dicr)</li>
+<li>ejb: static methods for session beans should not be overridden (#4552, rep by dicr)</li>
+<li>config doc: clarified database init-param vs IoC-style configuration (#4550, rep by dicr)</li>
+<li>./configure: updated config.guess and config.sub (#4407, rep by GT500)</li>
+<li>db-store: free block scanning needs to test for store close (#4562, rep by S Francis)</li>
+<li>mod_caucho: allocation/free of locks needs to be locked (#4529, rep by remkodev)</li>
 <li>network: read/write timeout needs handling in Java layer (#4506, #4524, rep by Matthew Schmidt, Prabhu)</li>
 </ul>
 </s2>

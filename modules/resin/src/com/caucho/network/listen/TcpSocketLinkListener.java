@@ -118,7 +118,7 @@ public class TcpSocketLinkListener
 
   private InetAddress _socketAddress;
 
-  private int _acceptListenBacklog = 1000;
+  private int _acceptListenBacklog = 4000;
 
   private int _connectionMax = 1024 * 1024;
 
@@ -1224,12 +1224,16 @@ public class TcpSocketLinkListener
     try {
       while (_lifecycle.isActive()) {
         Thread.interrupted();
+
         if (_serverSocket.accept(socket)) {
+          //System.out.println("REMOTE: " + socket.getRemotePort());
           if (_throttle.accept(socket)) {
             return true;
           }
-          else
+          else {
+            System.out.println("THROTTLE_FAIL:");
             socket.close();
+          }
         }
       }
     } catch (Throwable e) {

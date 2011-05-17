@@ -34,7 +34,7 @@ import java.io.PrintWriter;
 
 
 public abstract class AbstractContentItem implements ContentItem {
-  public void escapeAsciiDoc(PrintWriter out, String text)
+  public void escapeAsciiDoc(PrintWriter out, String text, boolean isVerbatim)
     throws IOException
   {
     boolean isSpace = false;
@@ -52,7 +52,7 @@ public abstract class AbstractContentItem implements ContentItem {
       
       isSpace = (ch == ' ' || ch == '\n');
       
-      if (ch == '\n') {
+      if (ch == '\n' && ! isVerbatim) {
         for (int j = i + 1; j < text.length(); j++) {
           if (text.charAt(j) == ' ' || text.charAt(j) == '\t') {
             i = j;

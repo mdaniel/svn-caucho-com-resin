@@ -79,6 +79,7 @@ public class Chapter {
     throws IOException
   {
     out.println();
+    out.println();
     out.println("== " + _title + " ==");
     
     for (ChapterSection section : _sections) {

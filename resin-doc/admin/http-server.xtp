@@ -15,10 +15,7 @@
   <body>
     <localtoc/>
 
-<s1>
-<p>The easiest and fastest Resin configuration uses the Resin as the primary or
-only web server.  This configuration provides a Java HTTP server. We recommend
-you start with this before trying any other configuration.</p>
+<s1 title="HTTP Server Overview">
 
 <figure src="httpd.gif" alt="browser <-> Resin httpd/servlets,beans <- html,jsp"/>
 

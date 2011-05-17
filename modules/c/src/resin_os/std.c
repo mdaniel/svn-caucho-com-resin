@@ -82,17 +82,13 @@ write_exception_status(connection_t *conn, int error)
 static int
 read_exception_status(connection_t *conn, int error)
 {
-  switch (error) {
-  case EAGAIN:
-  case EWOULDBLOCK:
-  case EINTR:
+  if (error == EAGAIN || error == EWOULDBLOCK || error == EINTR) {
     return TIMEOUT_EXN;
-
-  case EPIPE:
-  case ECONNRESET:
+  }
+  else if (error == EPIPE || error == ECONNRESET) {
     return -1;
-
-  default:
+  }
+  else {
     return -1;
   }
 }
@@ -227,8 +223,6 @@ std_read(connection_t *conn, char *buf, int len, int timeout)
     if (result >= 0)
       return result;
 
-    error = errno;
-    
     if (errno == EINTR) {
       /* EAGAIN is returned by a timeout */
       if (poll_read(fd, conn->socket_timeout) <= 0) {
@@ -370,6 +364,16 @@ std_accept(server_socket_t *ss, connection_t *conn)
 #endif
   
   sock = accept(fd, sin, &sin_len);
+
+  if (sock < 0) {
+    fprintf(stdout, "fail %d sock=%d errno=%d\n", fd, sock, errno);
+    fflush(stdout);
+  }
+  /*  
+  fprintf(stdout, "REMOTE2: %d\n", ntohs(((struct sockaddr_in *)sin)->sin_port));
+  fflush(stdout);
+  */
+
 
 #ifdef WIN32
   ReleaseMutex(ss->accept_lock);

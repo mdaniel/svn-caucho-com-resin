@@ -60,6 +60,9 @@ APR_DECLARE_OPTIONAL_FN(char *, ssl_var_lookup,
 
 static APR_OPTIONAL_FN_TYPE(ssl_var_lookup) *g_ssl_lookup = NULL;
 
+/* lock for allocating the lock itself */
+static apr_thread_mutext_t *g_lock_lock;
+
 /*
  * Apache magic module declaration.
  */
@@ -124,7 +127,11 @@ cse_create_lock(config_t *config)
 {
   apr_thread_mutex_t *lock = 0;
 
+  cse_lock(g_lock_lock);
+
   apr_thread_mutex_create(&lock, APR_THREAD_MUTEX_DEFAULT, config->web_pool);
+
+  cse_unlock(g_lock_lock);
 
   return lock;
 }
@@ -132,7 +139,11 @@ cse_create_lock(config_t *config)
 void
 cse_free_lock(config_t *config, void *vlock)
 {
+  cse_lock(g_lock_lock);
+
   apr_thread_mutex_destroy(vlock);
+  
+  cse_unlock(g_lock_lock);
 }
 
 int
@@ -1367,6 +1378,8 @@ prefork_post_config(apr_pool_t *p, apr_pool_t *plog,
   ap_add_version_component(p, VERSION);
 
   g_ssl_lookup = APR_RETRIEVE_OPTIONAL_FN(ssl_var_lookup);
+
+  apr_thread_mutex_create(&g_lock_lock, APR_THREAD_MUTEX_DEFAULT, p);
 
   return OK;
 }

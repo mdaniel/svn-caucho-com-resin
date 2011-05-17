@@ -176,7 +176,7 @@ public class Figure implements ContentItem {
       out.print("image::images/" + _source + "[alt=\"" + _source + "\"");
     }
 
-    int width = getWidth(_source);
+    // int width = getWidth(_source);
     
     /*
     if (width > 0)

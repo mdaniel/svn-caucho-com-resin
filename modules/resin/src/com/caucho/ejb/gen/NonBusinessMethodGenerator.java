@@ -56,6 +56,9 @@ public class NonBusinessMethodGenerator<X> implements AspectGenerator<X>
   public NonBusinessMethodGenerator(AnnotatedMethod<? super X> method)
   {
     _method = method;
+    
+    if (method.isStatic())
+      throw new IllegalStateException();
   }
 
   // will always be @Override because we're only generating this method
@@ -65,6 +68,7 @@ public class NonBusinessMethodGenerator<X> implements AspectGenerator<X>
     return true;
   }
 
+  @Override
   public AnnotatedMethod<? super X> getMethod()
   {
     return _method;

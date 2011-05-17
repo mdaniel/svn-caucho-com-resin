@@ -291,8 +291,13 @@ abstract public class SessionGenerator<X> extends BeanGenerator<X> {
     
       int modifiers = javaMethod.getModifiers();
 
-      if (! Modifier.isPublic(modifiers) && ! Modifier.isPrivate(modifiers))
+      if (! Modifier.isPublic(modifiers)
+          && ! Modifier.isPrivate(modifiers)
+          && ! Modifier.isStatic(modifiers)
+          && ! javaMethod.isSynthetic()
+          && ! javaMethod.isBridge()) {
         addNonBusinessMethod(apiMethod);
+      }
     }
   }
   

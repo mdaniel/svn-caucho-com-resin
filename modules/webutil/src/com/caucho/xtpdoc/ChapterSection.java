@@ -45,6 +45,5 @@ public abstract class ChapterSection {
   public void writeAsciiDoc(PrintWriter out)
     throws IOException
   {
-    out.println("Section: " + this);
   }
 }

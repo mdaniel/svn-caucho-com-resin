@@ -911,7 +911,7 @@ public class Table extends BlockStore {
 
   private void fillFreeRows()
   {
-    if (_rowTailOffset.get() < _rowTailTop)
+    if (_rowTailOffset.get() < _rowTailTop && isClosed())
       return;
     
     while (scanClock()) {
@@ -923,7 +923,7 @@ public class Table extends BlockStore {
   
   private boolean scanClock()
   {
-    while (isFreeRowBlockIdAvailable()) {
+    while (isFreeRowBlockIdAvailable() && ! isClosed()) {
       long clockBlockId = _rowClockOffset;
 
       try {
