@@ -1757,6 +1757,9 @@ public class TcpSocketLinkListener
         _completeSet.clear();
 
         long now = Alarm.getCurrentTime();
+        
+        // wake the launcher in case of freeze
+        _launcher.wake();
 
         _suspendSet.addAll(_suspendConnectionSet);
         for (int i = _suspendSet.size() - 1; i >= 0; i--) {
