@@ -999,6 +999,7 @@ Java_com_caucho_vfs_JniSocketImpl_nativeAccept(JNIEnv *env,
 
   if (conn->fd >= 0) {
     resin_throw_exception(env, "java/lang/IllegalStateException", "unclosed socket");
+    return 0;
   }
 
   if (! ss->accept(ss, conn))

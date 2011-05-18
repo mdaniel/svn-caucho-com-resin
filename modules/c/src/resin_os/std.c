@@ -354,6 +354,9 @@ std_accept(server_socket_t *ss, connection_t *conn)
   if (fd < 0)
     return 0;
 
+  if (conn->fd > 0)
+    return 0;
+
   memset(sin_data, 0, sizeof(sin_data));
   sin = (struct sockaddr *) &sin_data;
   sin_len = sizeof(sin_data);
