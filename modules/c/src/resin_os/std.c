@@ -320,10 +320,14 @@ conn_close(connection_t *conn)
     return -1;
 
   fd = conn->fd;
-  
   conn->fd = -1;
 
-  if (fd >= 0) {
+  if (fd > 0) {
+    /*
+    fprintf(stdout, "CLOSE %d\n", fd);
+    fflush(stdout);
+    */
+    
     closesocket(fd);
   }
 

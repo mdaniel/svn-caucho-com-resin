@@ -313,6 +313,9 @@ Java_com_caucho_vfs_JniSocketImpl_nativeCloseFd(JNIEnv *env,
   }
 
   if (fd >= 0) {
+    fprintf(stdout, "CLOSE2 %d\n", fd);
+    fflush(stdout);
+    
     closesocket(fd);
   }
 }
@@ -995,9 +998,7 @@ Java_com_caucho_vfs_JniSocketImpl_nativeAccept(JNIEnv *env,
     return 0;
 
   if (conn->fd >= 0) {
-    conn->jni_env = env;
-
-    conn->ops->close(conn);
+    resin_throw_exception(env, "java/lang/IllegalStateException", "unclosed socket");
   }
 
   if (! ss->accept(ss, conn))
@@ -1031,9 +1032,7 @@ Java_com_caucho_vfs_JniSocketImpl_nativeConnect(JNIEnv *env,
     return 0;
 
   if (conn->fd >= 0) {
-    conn->jni_env = env;
-
-    conn->ops->close(conn);
+    resin_throw_exception(env, "java/lang/IllegalStateException", "unclosed socket");
   }
 
   addr_string = (*env)->GetStringUTFChars(env, jhost, 0);

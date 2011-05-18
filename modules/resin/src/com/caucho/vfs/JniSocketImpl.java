@@ -101,7 +101,9 @@ public final class JniSocketImpl extends QSocket {
   {
     _socketTimeout = 10000;
     
-    return nativeConnect(_fd, host, port);
+    synchronized (_writeLock) {
+      return nativeConnect(_fd, host, port);
+    }
   }
 
   boolean accept(long serverSocketFd, long socketTimeout)
@@ -119,7 +121,7 @@ public final class JniSocketImpl extends QSocket {
     _isSecure = false;
     _isClosed.set(false);
 
-    synchronized (this) {
+    synchronized (_writeLock) {
       // initialize fields from the _fd
       return nativeAccept(serverSocketFd, _fd, _localAddrBuffer, _remoteAddrBuffer);
     }
@@ -299,7 +301,9 @@ public final class JniSocketImpl extends QSocket {
   @Override
   public String getCipherSuite()
   {
-    return getCipher(_fd);
+    synchronized (this) {
+      return getCipher(_fd);
+    }
   }
 
   /**
@@ -386,9 +390,10 @@ public final class JniSocketImpl extends QSocket {
   public int write(byte []buffer, int offset, int length, boolean isEnd)
     throws IOException
   {
+    int result;
+    
     synchronized (_writeLock) {
       long expires = _socketTimeout + Alarm.getCurrentTimeActual();;
-      int result;
       
       do {
         result = writeNative(_fd, buffer, offset, length);
@@ -398,13 +403,13 @@ public final class JniSocketImpl extends QSocket {
         }
       } while (result == JniStream.TIMEOUT_EXN
                && Alarm.getCurrentTimeActual() < expires);
-      
-      if (isEnd) {
-        close();
-      }
-      
-      return result;
     }
+    
+    if (isEnd) {
+      close();
+    }
+    
+    return result;
   }
 
   /**
@@ -580,26 +585,30 @@ public final class JniSocketImpl extends QSocket {
     if (_isClosed.getAndSet(true))
       return;
 
-    if (_stream != null)
-      _stream.close();
+    synchronized (_readLock) {
+      synchronized (_writeLock) {
+        if (_stream != null)
+          _stream.close();
 
-    // can't be locked because of shutdown
-    nativeClose(_fd);
+        // XXX: can't be locked because of shutdown
+        nativeClose(_fd);
+      }
+    }
   }
 
   @Override
   protected void finalize()
     throws Throwable
   {
+    long fd = _fd;
+    _fd = 0;
+    
     try {
       super.finalize();
 
-      close();
+      nativeClose(fd);
     } catch (Throwable e) {
     }
-
-    long fd = _fd;
-    _fd = 0;
 
     nativeFree(fd);
   }
