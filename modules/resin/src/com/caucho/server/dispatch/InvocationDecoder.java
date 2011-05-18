@@ -53,13 +53,15 @@ public class InvocationDecoder {
 
   private String _sessionCookie = "JSESSIONID";
   private String _sslSessionCookie;
-  
+
   // The URL-encoded session suffix
   private String _sessionSuffix = ";jsessionid=";
   private char _sessionSuffixChar = ';';
 
   // The URL-encoded session prefix
   private String _sessionPrefix;
+
+  private int _maxUriLength = 1024;
 
   /**
    * Creates the invocation decoder.
@@ -86,7 +88,7 @@ public class InvocationDecoder {
   {
     _encoding = encoding;
   }
-  
+
   /**
    * Sets the session cookie
    */
@@ -102,7 +104,7 @@ public class InvocationDecoder {
   {
     return _sessionCookie;
   }
-  
+
   /**
    * Sets the SSL session cookie
    */
@@ -120,6 +122,11 @@ public class InvocationDecoder {
       return _sslSessionCookie;
     else
       return _sessionCookie;
+  }
+
+  public void setMaxUriLength(int length)
+  {
+    _maxUriLength = length;
   }
 
   /**
@@ -151,7 +158,7 @@ public class InvocationDecoder {
 
     if (prefix.lastIndexOf('/') > 0)
       throw new ConfigException(L.l("`{0}' is an invalidate alternate-session-url-prefix.  The url-prefix must not have any embedded '/'.", prefix));
-    
+
     _sessionPrefix = prefix;
     _sessionSuffix = null;
   }
@@ -187,7 +194,7 @@ public class InvocationDecoder {
 
     String rawURIString = byteToChar(rawURI, 0, uriLength, "ISO-8859-1");
     invocation.setRawURI(rawURIString);
-    
+
     String decodedURI = normalizeUriEscape(rawURI, 0, uriLength, _encoding);
 
     if (_sessionSuffix != null) {
@@ -252,12 +259,12 @@ public class InvocationDecoder {
     int p = rawURI.indexOf('?');
     if (p > 0) {
       invocation.setQueryString(rawURI.substring(p + 1));
-      
+
       rawURI = rawURI.substring(0, p);
     }
 
     invocation.setRawURI(rawURI);
-    
+
     String uri = normalizeUri(rawURI);
 
     invocation.setURI(uri);
@@ -271,7 +278,7 @@ public class InvocationDecoder {
     throws IOException
   {
     invocation.setRawURI(rawURI);
-    
+
     String uri = normalizeUri(rawURI);
 
     invocation.setURI(uri);
@@ -309,7 +316,7 @@ public class InvocationDecoder {
     try {
       for (; length > 0; length--)
         converter.addByte(buffer[offset++]);
-      
+
       return converter.getConvertedString();
     } catch (IOException e) {
       return "unknown";
@@ -322,7 +329,7 @@ public class InvocationDecoder {
    * @param uri the raw uri to be normalized
    * @return a normalized URI
    */
-  public static String normalizeUri(String uri)
+  public String normalizeUri(String uri)
     throws IOException
   {
     return normalizeUri(uri, CauchoSystem.isWindows());
@@ -334,14 +341,14 @@ public class InvocationDecoder {
    * @param uri the raw uri to be normalized
    * @return a normalized URI
    */
-  public static String normalizeUri(String uri, boolean isWindows)
+  public String normalizeUri(String uri, boolean isWindows)
     throws IOException
   {
     CharBuffer cb = new CharBuffer();
 
     int len = uri.length();
-    
-    if (len > 1024)
+
+    if (len > _maxUriLength)
       throw new BadRequestException(L.l("The request contains an illegal URL."));
 
     boolean isBogus;
@@ -355,52 +362,52 @@ public class InvocationDecoder {
 
       if (ch == '/' || ch == '\\') {
       dots:
-	while (i + 1 < len) {
-	  ch = uri.charAt(i + 1);
+        while (i + 1 < len) {
+          ch = uri.charAt(i + 1);
 
-	  if (ch == '/' || ch == '\\')
-	    i++;
-	  else if (ch != '.')
-	    break dots;
-	  else if (len <= i + 2
-		   || (ch = uri.charAt(i + 2)) == '/' || ch == '\\') {
-	    i += 2;
-	  }
-	  else if (ch != '.')
-	    break dots;
-	  else if (len <= i + 3
-		   || (ch = uri.charAt(i + 3)) == '/' || ch == '\\') {
-	    int j;
-	    
-	    for (j = cb.length() - 1; j >= 0; j--) {
-	      if ((ch = cb.charAt(j)) == '/' || ch == '\\')
-		break;
-	    }
-	    if (j > 0)
-	      cb.setLength(j);
-	    else
-	      cb.setLength(0);
-	    i += 3;
-	  } else {
+          if (ch == '/' || ch == '\\')
+            i++;
+          else if (ch != '.')
+            break dots;
+          else if (len <= i + 2
+                   || (ch = uri.charAt(i + 2)) == '/' || ch == '\\') {
+            i += 2;
+          }
+          else if (ch != '.')
+            break dots;
+          else if (len <= i + 3
+                   || (ch = uri.charAt(i + 3)) == '/' || ch == '\\') {
+            int j;
+
+            for (j = cb.length() - 1; j >= 0; j--) {
+              if ((ch = cb.charAt(j)) == '/' || ch == '\\')
+                break;
+            }
+            if (j > 0)
+              cb.setLength(j);
+            else
+              cb.setLength(0);
+            i += 3;
+          } else {
             throw new BadRequestException(L.l("The request contains an illegal URL."));
           }
-	}
+        }
 
-	while (isWindows && cb.getLength() > 0
-	       && ((ch = cb.getLastChar()) == '.' || ch == ' ')) {
-	  cb.setLength(cb.getLength() - 1);
-	}
+        while (isWindows && cb.getLength() > 0
+               && ((ch = cb.getLastChar()) == '.' || ch == ' ')) {
+          cb.setLength(cb.getLength() - 1);
+        }
 
-	cb.append('/');
+        cb.append('/');
       }
       else if (ch == 0)
         throw new BadRequestException(L.l("The request contains an illegal URL."));
       else
-	cb.append(ch);
+        cb.append(ch);
     }
 
     while (isWindows && cb.getLength() > 0
-	   && ((ch = cb.getLastChar()) == '.' || ch == ' ')) {
+           && ((ch = cb.getLastChar()) == '.' || ch == ' ')) {
       cb.setLength(cb.getLength() - 1);
     }
 
@@ -472,8 +479,8 @@ public class InvocationDecoder {
       int ch4 = i < len ? (rawUri[i++] & 0xff) : -1;
 
       converter.addChar((char) ((toHex(ch1) << 12) +
-                                (toHex(ch2) << 8) + 
-                                (toHex(ch3) << 4) + 
+                                (toHex(ch2) << 8) +
+                                (toHex(ch3) << 4) +
                                 (toHex(ch4))));
     }
     else {

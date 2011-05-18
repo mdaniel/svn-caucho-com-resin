@@ -754,12 +754,17 @@ abstract public class AbstractHttpResponse implements CauchoResponse {
 
     try {
       if (queryString != null)
-        return hostPrefix + InvocationDecoder.normalizeUri(path) + '?' + queryString;
+        return hostPrefix + getInvocationDecoder().normalizeUri(path) + '?' + queryString;
       else
-        return hostPrefix + InvocationDecoder.normalizeUri(path);
+        return hostPrefix + getInvocationDecoder().normalizeUri(path);
     } catch (IOException e) {
       throw new RuntimeException(e);
     }
+  }
+
+  private InvocationDecoder getInvocationDecoder()
+  {
+    return getRequest().getWebApp().getInvocationDecoder();
   }
 
   /**

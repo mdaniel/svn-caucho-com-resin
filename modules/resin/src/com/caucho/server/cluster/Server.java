@@ -119,7 +119,7 @@ public class Server extends ProtocolDispatchServer
 
   // <server> configuration compat
   private int _acceptListenBacklog = 100;
-  
+
   private int _acceptThreadMin = 5;
   private int _acceptThreadMax = 10;
 
@@ -127,21 +127,21 @@ public class Server extends ProtocolDispatchServer
 
   // default is in Port
   private int _keepaliveMax = -1;
-  
+
   private long _keepaliveConnectionTimeMax = 10 * 60 * 1000L;
-  
+
   private boolean _keepaliveSelectEnable = true;
   private int _keepaliveSelectMax = -1;
   private long _keepaliveSelectThreadTimeout = 1000;
 
   private Management _management;
-  
+
   private long _suspendTimeMax = 600000;
 
   private long _memoryFreeMin = 1024 * 1024;
-  
+
   private long _shutdownWaitMax = 60 * 1000;
-  
+
   private int _threadMax = 4096;
   private int _threadExecutorTaskMax = -1;
   private int _threadIdleMin = 5;
@@ -170,7 +170,7 @@ public class Server extends ProtocolDispatchServer
   {
     if (clusterServer == null)
       throw new NullPointerException();
-    
+
     _clusterServer = clusterServer;
     _resin = _clusterServer.getCluster().getResin();
 
@@ -189,18 +189,18 @@ public class Server extends ProtocolDispatchServer
 
       try {
         thread.setContextClassLoader(_classLoader);
-	
-	_serverIdLocal.set(_clusterServer.getId());
+
+        _serverIdLocal.set(_clusterServer.getId());
 
         _hostContainer = new HostContainer();
         _hostContainer.setClassLoader(_classLoader);
         _hostContainer.setDispatchServer(this);
 
-	_admin = new ServerAdmin(this);
-	
-	_alarm = new Alarm(this);
+        _admin = new ServerAdmin(this);
 
-	_clusterServer.getServerProgram().configure(this);
+        _alarm = new Alarm(this);
+
+        _clusterServer.getServerProgram().configure(this);
       } finally {
         thread.setContextClassLoader(oldLoader);
       }
@@ -550,8 +550,8 @@ public class Server extends ProtocolDispatchServer
   {
     if (max < 0)
       throw new ConfigException(L.l("<thread-max> ({0}) must be greater than zero.",
-				    max));
-    
+                                    max));
+
     _threadMax = max;
   }
 
@@ -671,6 +671,8 @@ public class Server extends ProtocolDispatchServer
   public void setUrlLengthMax(int max)
   {
     _urlLengthMax = max;
+
+    getInvocationDecoder().setMaxUriLength(max);
   }
 
   /**
@@ -1002,7 +1004,7 @@ public class Server extends ProtocolDispatchServer
       invocation.setFilterChain(new ExceptionFilterChain(_configException));
       invocation.setWebApp(getErrorWebApp());
       invocation.setDependency(AlwaysModified.create());
-      
+
       return invocation;
     }
     else if (_lifecycle.waitForActive(_waitForActiveTime)) {
@@ -1065,7 +1067,7 @@ public class Server extends ProtocolDispatchServer
     else
       return getErrorWebApp();
   }
-  
+
   /**
    * Returns the matching web-app for a URL.
    */
@@ -1203,18 +1205,18 @@ public class Server extends ProtocolDispatchServer
 
     if (_threadMax < _threadIdleMax)
       throw new ConfigException(L.l("<thread-idle-max> ({0}) must be less than <thread-max> ({1})",
-				    _threadIdleMax, _threadMax));
+                                    _threadIdleMax, _threadMax));
 
     if (_threadIdleMax < _threadIdleMin)
       throw new ConfigException(L.l("<thread-idle-min> ({0}) must be less than <thread-idle-max> ({1})",
-				    _threadIdleMin, _threadIdleMax));
+                                    _threadIdleMin, _threadIdleMax));
 
     if (_threadMax < _threadExecutorTaskMax)
       throw new ConfigException(L.l("<thread-executor-task-max> ({0}) must be less than <thread-max> ({1})",
-				    _threadExecutorTaskMax, _threadMax));
-    
+                                    _threadExecutorTaskMax, _threadMax));
+
     ThreadPool threadPool = ThreadPool.getThreadPool();
-    
+
     threadPool.setThreadMax(_threadMax);
     threadPool.setThreadIdleMax(_threadIdleMax);
     threadPool.setThreadIdleMin(_threadIdleMin);
@@ -1235,8 +1237,8 @@ public class Server extends ProtocolDispatchServer
       }
 
       if (getSelectManager() != null) {
-	if (_keepaliveSelectMax > 0)
-	  getSelectManager().setSelectMax(_keepaliveSelectMax);
+        if (_keepaliveSelectMax > 0)
+          getSelectManager().setSelectMax(_keepaliveSelectMax);
       }
     }
   }
@@ -1262,19 +1264,19 @@ public class Server extends ProtocolDispatchServer
         log.info("");
 
         log.info(System.getProperty("os.name")
-		 + " " + System.getProperty("os.version")
-		 + " " + System.getProperty("os.arch"));
+                 + " " + System.getProperty("os.version")
+                 + " " + System.getProperty("os.arch"));
 
-	log.info(System.getProperty("java.runtime.name")
-		 + " " + System.getProperty("java.runtime.version")
-		 + ", " + System.getProperty("file.encoding")
-		 + ", " + System.getProperty("user.language"));
-		 
+        log.info(System.getProperty("java.runtime.name")
+                 + " " + System.getProperty("java.runtime.version")
+                 + ", " + System.getProperty("file.encoding")
+                 + ", " + System.getProperty("user.language"));
+
         log.info(System.getProperty("java.vm.name")
-		 + " " + System.getProperty("java.vm.version")
-		 + ", " + System.getProperty("sun.arch.data.model")
-		 + ", " + System.getProperty("java.vm.info")
-		 + ", " + System.getProperty("java.vm.vendor"));
+                 + " " + System.getProperty("java.vm.version")
+                 + ", " + System.getProperty("sun.arch.data.model")
+                 + ", " + System.getProperty("java.vm.info")
+                 + ", " + System.getProperty("java.vm.vendor"));
 
         log.info("user.name: " + System.getProperty("user.name"));
 
@@ -1295,19 +1297,19 @@ public class Server extends ProtocolDispatchServer
       _lifecycle.toStarting();
 
       if (_resin != null && _resin.getManagement() != null)
-	_resin.getManagement().start(this);
+        _resin.getManagement().start(this);
 
       AbstractSelectManager selectManager = getSelectManager();
-      
+
       if (! _keepaliveSelectEnable
-	  || selectManager == null
-	  || ! selectManager.start()) {
-	initSelectManager(null);
+          || selectManager == null
+          || ! selectManager.start()) {
+        initSelectManager(null);
       }
 
       if (! _isBindPortsAtEnd) {
         bindPorts();
-	startPorts();
+        startPorts();
       }
 
       _classLoader.start();
@@ -1319,27 +1321,27 @@ public class Server extends ProtocolDispatchServer
       // will only occur if bind-ports-at-end is true
       if (_isBindPortsAtEnd) {
         bindPorts();
-	startPorts();
+        startPorts();
       }
 
       _alarm.queue(ALARM_INTERVAL);
-      
+
       _lifecycle.toActive();
     } catch (RuntimeException e) {
       log.log(Level.WARNING, e.toString(), e);
-      
+
       _lifecycle.toError();
-      
+
       throw e;
     } catch (Exception e) {
       log.log(Level.WARNING, e.toString(), e);
-      
+
       _lifecycle.toError();
-      
+
       // if the server can't start, it needs to completely fail, especially
       // for the watchdog
       throw new RuntimeException(e);
-      
+
       // log.log(Level.WARNING, e.toString(), e);
 
       // _configException = e;
@@ -1368,11 +1370,11 @@ public class Server extends ProtocolDispatchServer
 
       ArrayList<Port> ports = _clusterServer.getPorts();
       for (int i = 0; i < ports.size(); i++) {
-	Port port = ports.get(i);
+        Port port = ports.get(i);
 
-	port.setServer(this);
+        port.setServer(this);
 
-	port.bind();
+        port.bind();
       }
     } finally {
       thread.setContextClassLoader(oldLoader);
@@ -1394,7 +1396,7 @@ public class Server extends ProtocolDispatchServer
       for (int i = 0; i < ports.size(); i++) {
         Port port = ports.get(i);
 
-	port.start();
+        port.start();
       }
     } finally {
       thread.setContextClassLoader(oldLoader);
@@ -1421,8 +1423,8 @@ public class Server extends ProtocolDispatchServer
       }
 
       try {
-	ArrayList<Port> ports = _clusterServer.getPorts();
-	
+        ArrayList<Port> ports = _clusterServer.getPorts();
+
         for (int i = 0; i < ports.size(); i++) {
           Port port = ports.get(i);
 
@@ -1641,8 +1643,8 @@ public class Server extends ProtocolDispatchServer
       }
 
       try {
-	if (_hostContainer != null)
-	  _hostContainer.stop();
+        if (_hostContainer != null)
+          _hostContainer.stop();
       } catch (Throwable e) {
         log.log(Level.WARNING, e.toString(), e);
       }
@@ -1676,11 +1678,11 @@ public class Server extends ProtocolDispatchServer
       thread.setContextClassLoader(_classLoader);
 
       try {
-	Management management = _management;
-	_management = null;
+        Management management = _management;
+        _management = null;
 
-	if (management != null)
-	  management.destroy();
+        if (management != null)
+          management.destroy();
       } catch (Throwable e) {
         log.log(Level.WARNING, e.toString(), e);
       }
@@ -1713,7 +1715,7 @@ public class Server extends ProtocolDispatchServer
   public String toString()
   {
     return ("Server[id=" + getServerId()
-	    + ",cluster=" + _clusterServer.getCluster().getId() + "]");
+            + ",cluster=" + _clusterServer.getCluster().getId() + "]");
   }
 
   public static class SelectManagerCompat {

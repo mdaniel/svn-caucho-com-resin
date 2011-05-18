@@ -96,7 +96,7 @@ public class Port
 
   // The SSL factory, if any
   private SSLFactory _sslFactory;
-  
+
   // Secure override for load-balancers/proxies
   private boolean _isSecure;
 
@@ -110,12 +110,12 @@ public class Port
   private int _connectionMax = DEFAULT;
 
   private int _keepaliveMax = DEFAULT;
-  
+
   private long _keepaliveTimeMax = DEFAULT;
   private long _keepaliveTimeout = DEFAULT;
   private long _keepaliveSelectThreadTimeout = DEFAULT;
   private int _minSpareConnection = 16;
-  
+
   // default timeout
   private long _socketTimeout = DEFAULT;
 
@@ -206,36 +206,36 @@ public class Port
       Server server = (Server) protocolServer;
 
       if (_acceptThreadMax == DEFAULT)
-	_acceptThreadMax = server.getAcceptThreadMax();
+        _acceptThreadMax = server.getAcceptThreadMax();
 
       if (_acceptThreadMin == DEFAULT)
-	_acceptThreadMin = server.getAcceptThreadMin();
+        _acceptThreadMin = server.getAcceptThreadMin();
 
       if (_acceptListenBacklog == DEFAULT)
-	_acceptListenBacklog = server.getAcceptListenBacklog();
+        _acceptListenBacklog = server.getAcceptListenBacklog();
 
       if (_connectionMax == DEFAULT)
-	_connectionMax = server.getConnectionMax();
+        _connectionMax = server.getConnectionMax();
 
       if (_keepaliveMax == DEFAULT)
-	_keepaliveMax = server.getKeepaliveMax();
+        _keepaliveMax = server.getKeepaliveMax();
 
       if (_keepaliveTimeMax == DEFAULT)
-	_keepaliveTimeMax = server.getKeepaliveConnectionTimeMax();
+        _keepaliveTimeMax = server.getKeepaliveConnectionTimeMax();
 
       if (_keepaliveTimeout == DEFAULT)
-	_keepaliveTimeout = server.getKeepaliveTimeout();
+        _keepaliveTimeout = server.getKeepaliveTimeout();
 
       if (_keepaliveSelectThreadTimeout == DEFAULT) {
-	_keepaliveSelectThreadTimeout
-	  = server.getKeepaliveSelectThreadTimeout();
+        _keepaliveSelectThreadTimeout
+          = server.getKeepaliveSelectThreadTimeout();
       }
 
       if (_suspendTimeMax == DEFAULT)
-	_suspendTimeMax = server.getSuspendTimeMax();
+        _suspendTimeMax = server.getSuspendTimeMax();
 
       if (_socketTimeout == DEFAULT)
-	_socketTimeout = server.getSocketTimeout();
+        _socketTimeout = server.getSocketTimeout();
     }
   }
 
@@ -284,7 +284,7 @@ public class Port
   {
     return _admin;
   }
-  
+
   /**
    * Set protocol.
    */
@@ -398,7 +398,7 @@ public class Port
   {
     try {
       ClassLoader loader = Thread.currentThread().getContextClassLoader();
-      
+
       Class cl = Class.forName("com.caucho.vfs.OpenSSLFactory", false, loader);
 
       _sslFactory = (SSLFactory) cl.newInstance();
@@ -634,7 +634,7 @@ public class Port
       _throttle = Throttle.createPro();
 
       if (_throttle == null)
-	throw new ConfigException(L.l("throttle configuration requires Resin Professional"));
+        throw new ConfigException(L.l("throttle configuration requires Resin Professional"));
     }
 
     return _throttle;
@@ -665,7 +665,7 @@ public class Port
   //
   // statistics
   //
-  
+
   /**
    * Returns the number of connections
    */
@@ -788,7 +788,7 @@ public class Port
   //
   // statistics
   //
-  
+
   /**
    * Returns the thread count.
    */
@@ -930,7 +930,7 @@ public class Port
 
     if (_throttle == null)
       _throttle = new Throttle();
-    
+
     if (_serverSocket != null) {
       if (_port == 0) {
       }
@@ -994,7 +994,7 @@ public class Port
     _serverSocket = ss;
 
     String scheme = _protocol.getProtocolName();
-    
+
     if (_address != null)
       log.info(scheme + " listening to " + _address + ":" + _port);
     else
@@ -1021,7 +1021,7 @@ public class Port
       _selectManager = _server.getSelectManager();
 
       if (_selectManager == null) {
-	throw new IllegalStateException(L.l("Cannot load select manager"));
+        throw new IllegalStateException(L.l("Cannot load select manager"));
       }
     }
 
@@ -1033,7 +1033,7 @@ public class Port
 
     if (_keepaliveMax < 0)
       _keepaliveMax = 256;
-      
+
     _admin.register();
   }
 
@@ -1044,12 +1044,12 @@ public class Port
     throws java.io.IOException
   {
     QServerSocket ss;
-    
+
     if (_socketAddress != null) {
       ss = QJniServerSocket.createJNI(_socketAddress, _port);
 
       if (ss == null)
-	return null;
+        return null;
 
       log.fine(this + " watchdog binding to " + _socketAddress.getHostName() + ":" + _port);
     }
@@ -1057,7 +1057,7 @@ public class Port
       ss = QJniServerSocket.createJNI(null, _port);
 
       if (ss == null)
-	return null;
+        return null;
 
       log.fine(this + " watchdog binding to *:" + _port);
     }
@@ -1074,7 +1074,7 @@ public class Port
     ss.setConnectionSocketTimeout((int) getSocketTimeout());
 
     return ss;
-  }  
+  }
 
   /**
    * Starts the port listening.
@@ -1084,7 +1084,7 @@ public class Port
   {
     if (_port == 0)
       return;
-    
+
     if (! _lifecycle.toStarting())
       return;
 
@@ -1098,7 +1098,7 @@ public class Port
       thread.setDaemon(true);
 
       thread.start();
-      
+
       enable();
 
       _suspendAlarm = new Alarm(new SuspendReaper());
@@ -1107,7 +1107,7 @@ public class Port
       isValid = true;
     } finally {
       if (! isValid)
-	close();
+        close();
     }
   }
 
@@ -1176,10 +1176,10 @@ public class Port
         if (_serverSocket.accept(socket)) {
           conn.initSocket();
 
-	  if (_throttle.accept(socket))
-	    return true;
-	  else
-	    socket.close();
+          if (_throttle.accept(socket))
+            return true;
+          else
+            socket.close();
         }
         else {
           if (_acceptThreadMax < _idleThreadCount) {
@@ -1249,15 +1249,15 @@ public class Port
   {
     synchronized (_keepaliveCountLock) {
       if (! _lifecycle.isActive())
-	return false;
+        return false;
       else if (acceptStartTime + _keepaliveTimeMax < Alarm.getCurrentTime())
-	return false;
+        return false;
       else if (_keepaliveMax <= _keepaliveCount)
-	return false;
+        return false;
       else if (_connectionMax <= _connectionCount + _minSpareConnection)
-	return false;
+        return false;
       else
-	return true;
+        return true;
     }
   }
 
@@ -1270,23 +1270,23 @@ public class Port
       if (! _lifecycle.isActive())
         return false;
       else if (_connectionMax <= _connectionCount + _minSpareConnection) {
-	log.warning(conn + " failed keepalive, connection-max=" + _connectionCount);
-	
+        log.warning(conn + " failed keepalive, connection-max=" + _connectionCount);
+
         return false;
       }
       else if (false &&
-	       acceptStartTime + _keepaliveTimeMax < Alarm.getCurrentTime()) {
-	// #2262 - skip this check to avoid confusing the load balancer
-	// the keepalive check is in allowKeepalive
-	log.warning(conn + " failed keepalive, delay=" + (Alarm.getCurrentTime() - acceptStartTime));
-	
-	return false;
+               acceptStartTime + _keepaliveTimeMax < Alarm.getCurrentTime()) {
+        // #2262 - skip this check to avoid confusing the load balancer
+        // the keepalive check is in allowKeepalive
+        log.warning(conn + " failed keepalive, delay=" + (Alarm.getCurrentTime() - acceptStartTime));
+
+        return false;
       }
       else if (false && _keepaliveMax <= _keepaliveCount) {
-	// #2262 - skip this check to avoid confusing the load balancer
-	// the keepalive check is in allowKeepalive
-	log.warning(conn + " failed keepalive, keepalive-max " + _keepaliveCount);
-	
+        // #2262 - skip this check to avoid confusing the load balancer
+        // the keepalive check is in allowKeepalive
+        log.warning(conn + " failed keepalive, keepalive-max " + _keepaliveCount);
+
         return false;
       }
 
@@ -1312,7 +1312,7 @@ public class Port
       }
     }
   }
-  
+
   /**
    * Starts a keepalive thread.
    */
@@ -1322,7 +1322,7 @@ public class Port
       _keepaliveThreadCount++;
     }
   }
-  
+
   /**
    * Ends a keepalive thread.
    */
@@ -1342,15 +1342,15 @@ public class Port
 
     synchronized (_suspendList) {
       if (conn.isWake()) {
-	isResume = true;
-	conn.setResume();
+        isResume = true;
+        conn.setResume();
       }
       else if (conn.isComet()) {
-	_suspendList.add(conn);
-	return true;
+        _suspendList.add(conn);
+        return true;
       }
       else
-	return false;
+        return false;
     }
 
     if (isResume) {
@@ -1378,8 +1378,8 @@ public class Port
   {
     synchronized (_suspendList) {
       if (! _suspendList.remove(conn))
-	return false;
-      
+        return false;
+
       conn.setResume();
     }
 
@@ -1400,7 +1400,7 @@ public class Port
       log.warning(connController + " should be duplex TcpConnectionConroller");
       return false;
     }
-    
+
     TcpConnectionController tcpController
       = (TcpConnectionController) connController;
 
@@ -1408,22 +1408,22 @@ public class Port
 
     synchronized (_writeSuspendList) {
       if (conn.isWake()) {
-	isResumeWrite = true;
-	conn.setResume();
+        isResumeWrite = true;
+        conn.setResume();
       }
       else if (conn.isComet()) {
-	_writeSuspendList.add(conn);
+        _writeSuspendList.add(conn);
       }
       else
-	return false;
+        return false;
     }
 
     if (isResumeWrite) {
       Runnable writeTask = tcpController.getWriteTask();
 
       if (writeTask == null)
-	return false;
-      
+        return false;
+
       ThreadPool.getThreadPool().schedule(writeTask);
     }
 
@@ -1444,15 +1444,15 @@ public class Port
 
     synchronized (_writeSuspendList) {
       if (conn.isWake()) {
-	conn.setResume();
-	return false;
+        conn.setResume();
+        return false;
       }
       else if (conn.isComet()) {
-	_writeSuspendList.add(conn);
-	return true;
+        _writeSuspendList.add(conn);
+        return true;
       }
       else
-	return true;
+        return true;
     }
   }
 
@@ -1463,11 +1463,11 @@ public class Port
   {
     TcpConnectionController tcpController
       = (TcpConnectionController) controller;
-    
+
     synchronized (_suspendList) {
       if (! _writeSuspendList.remove(conn))
-	return false;
-      
+        return false;
+
       conn.setResume();
     }
 
@@ -1500,8 +1500,10 @@ public class Port
       try {
         // need delay to avoid spawing too many threads over a short time,
         // when the load doesn't justify it
+        /*
         Thread.yield();
         Thread.sleep(10);
+        */
 
         synchronized (this) {
           isStart = _startThreadCount + _idleThreadCount < _acceptThreadMin;
@@ -1526,7 +1528,7 @@ public class Port
             conn.setRequest(_protocol.createRequest(conn));
           }
 
-	  conn.start();
+          conn.start();
 
           ThreadPool.getThreadPool().schedule(conn);
         }
@@ -1613,7 +1615,7 @@ public class Port
 
     Alarm suspendAlarm = _suspendAlarm;
     _suspendAlarm = null;
-    
+
     if (suspendAlarm != null)
       suspendAlarm.dequeue();
 
@@ -1693,7 +1695,7 @@ public class Port
         }
       }
     }
-    
+
     TcpConnection conn;
     while ((conn = _freeConn.allocate()) != null) {
       conn.destroy();
@@ -1711,37 +1713,37 @@ public class Port
     public void handleAlarm(Alarm alarm)
     {
       try {
-	ArrayList<TcpConnection> oldList = null;
+        ArrayList<TcpConnection> oldList = null;
 
-	long now = Alarm.getCurrentTime();
-	synchronized (_suspendList) {
-	  for (int i = _suspendList.size() - 1; i >=0; i--) {
-	    TcpConnection conn = _suspendList.get(i);
+        long now = Alarm.getCurrentTime();
+        synchronized (_suspendList) {
+          for (int i = _suspendList.size() - 1; i >=0; i--) {
+            TcpConnection conn = _suspendList.get(i);
 
-	    if (conn.getSuspendTime() + _suspendTimeMax < now) {
-	      _suspendList.remove(i);
-	      
-	      if (oldList == null)
-		oldList = new ArrayList<TcpConnection>();
+            if (conn.getSuspendTime() + _suspendTimeMax < now) {
+              _suspendList.remove(i);
 
-	      oldList.add(conn);
-	    }
-	  }
-	}
+              if (oldList == null)
+                oldList = new ArrayList<TcpConnection>();
 
-	if (oldList != null) {
-	  for (int i = 0; i < oldList.size(); i++) {
-	    TcpConnection conn = oldList.get(i);
+              oldList.add(conn);
+            }
+          }
+        }
 
-	    if (log.isLoggable(Level.FINE))
-	      log.fine(this + " comet idle timeout " + conn);
-	    
-	    conn.destroy();
-	  }
-	}
+        if (oldList != null) {
+          for (int i = 0; i < oldList.size(); i++) {
+            TcpConnection conn = oldList.get(i);
+
+            if (log.isLoggable(Level.FINE))
+              log.fine(this + " comet idle timeout " + conn);
+
+            conn.destroy();
+          }
+        }
       } finally {
-	if (! isClosed())
-	  alarm.queue(60000);
+        if (! isClosed())
+          alarm.queue(60000);
       }
     }
   }
