@@ -201,18 +201,18 @@ std_read(connection_t *conn, char *buf, int len, int timeout)
     else if (result == 0)
       return -1;
     else if (errno == EAGAIN)
-      return 0;
+      return TIMEOUT_EXN;
     else
       return -1;
   }
 
-  if (timeout >= 0 && poll_read(fd, timeout) <= 0) {
-    return TIMEOUT_EXN;
+  if (timeout >= 0) {
+    if (poll_read(fd, timeout) <= 0) {
+      return TIMEOUT_EXN;
+    }
   }
-
-  if (! conn->is_recv_timeout
-      && timeout < 0
-      && poll_read(fd, conn->socket_timeout) <= 0) {
+  else if (! conn->is_recv_timeout
+           && poll_read(fd, conn->socket_timeout) <= 0) {
     return TIMEOUT_EXN;
   }
 
@@ -220,8 +220,10 @@ std_read(connection_t *conn, char *buf, int len, int timeout)
     /* recv returns 0 on end of file */
     result = recv(fd, buf, len, 0);
 
-    if (result >= 0)
+    if (result > 0)
       return result;
+    else if (result == 0)
+      return -1;
 
     if (errno == EINTR) {
       /* EAGAIN is returned by a timeout */

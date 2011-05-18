@@ -51,6 +51,7 @@ public class JniStream extends StreamImpl {
     return ! _socket.isClosed();
   }
 
+  @Override
   public int read(byte []buf, int offset, int length)
     throws IOException
   {

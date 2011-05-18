@@ -364,7 +364,7 @@ abstract public class AbstractThreadLauncher extends AbstractTaskWorker {
   {
     while (doStart()) {
       long now = getCurrentTimeActual();
-        
+
       updateIdleExpireTime(now);
 
       int id = _gId.incrementAndGet();

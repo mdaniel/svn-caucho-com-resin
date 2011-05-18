@@ -1135,7 +1135,6 @@ public final class ReadStream extends InputStream
     int readLength
       = source.readTimeout(_readBuffer, 0, _readBuffer.length, timeout);
 
-    // Setting to 0 is needed to avoid int to long conversion errors with AIX
     if (readLength > 0) {
       _readLength = readLength;
       _position += readLength;

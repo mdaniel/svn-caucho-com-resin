@@ -40,6 +40,9 @@ r_access-log = element access-log {
 
      & (attribute shared-buffer { r_boolean-Type }
         | element shared-buffer { r_boolean-Type })?
+
+     & (attribute rollover-check-time { r_period-Type }
+        | element rollover-check-time { r_period-Type })?
   
     & r_init?)
 }

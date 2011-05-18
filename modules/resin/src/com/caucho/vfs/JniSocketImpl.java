@@ -373,10 +373,6 @@ public final class JniSocketImpl extends QSocket {
 
       do {
         result = readNative(_fd, buffer, offset, length, timeout);
-        
-        if (result <= 0) {
-          System.out.println("READ: " + result + " " + this);
-        }
       } while (result == JniStream.TIMEOUT_EXN
                && Alarm.getCurrentTimeActual() < expires);
 
@@ -585,15 +581,11 @@ public final class JniSocketImpl extends QSocket {
     if (_isClosed.getAndSet(true))
       return;
 
-    synchronized (_readLock) {
-      synchronized (_writeLock) {
-        if (_stream != null)
-          _stream.close();
+    if (_stream != null)
+      _stream.close();
 
-        // XXX: can't be locked because of shutdown
-        nativeClose(_fd);
-      }
-    }
+    // XXX: can't be locked because of shutdown
+    nativeClose(_fd);
   }
 
   @Override

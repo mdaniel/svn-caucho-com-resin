@@ -313,8 +313,10 @@ Java_com_caucho_vfs_JniSocketImpl_nativeCloseFd(JNIEnv *env,
   }
 
   if (fd >= 0) {
+    /*
     fprintf(stdout, "CLOSE2 %d\n", fd);
     fflush(stdout);
+    */
     
     closesocket(fd);
   }

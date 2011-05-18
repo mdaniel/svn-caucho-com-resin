@@ -77,7 +77,7 @@ public class TcpSocketLinkListener
   private static final Logger log
     = Logger.getLogger(TcpSocketLinkListener.class.getName());
   
-  private static final int ACCEPT_IDLE_MAX = 32;
+  private static final int ACCEPT_IDLE_MAX = 64;
 
   private final AtomicInteger _connectionCount = new AtomicInteger();
 

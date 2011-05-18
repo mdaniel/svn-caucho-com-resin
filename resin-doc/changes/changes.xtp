@@ -13,6 +13,8 @@
 
 <s2 title="4.0.19 - snapshot">
 <ul>
+<li>access-log: add rollover-check-time configuration (#4533, rep by peng yao)</li>
+<li>./configure: removed OPENSSL_LIB search instead using standard library (rep by Michael O'Dea)</li>
 <li>ejb: synthetic/bridge methods should not be reflected (#4555, rep by dicr)</li>
 <li>ejb: static methods for session beans should not be overridden (#4552, rep by dicr)</li>
 <li>config doc: clarified database init-param vs IoC-style configuration (#4550, rep by dicr)</li>

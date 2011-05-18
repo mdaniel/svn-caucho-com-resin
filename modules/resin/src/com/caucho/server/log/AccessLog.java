@@ -197,9 +197,9 @@ public class AccessLog extends AbstractAccessLog implements AlarmListener
    * @param period how often the log rollover will be checked.
    */
   @Configurable
-  public void setRolloverCheckTime(long period)
+  public void setRolloverCheckTime(Period period)
   {
-    _logWriter.setRolloverCheckPeriod(period);
+    _logWriter.setRolloverCheckPeriod(period.getPeriod());
   }
 
   /**
