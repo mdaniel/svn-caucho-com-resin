@@ -29,6 +29,9 @@
 
 package com.caucho.quercus.lib.dom;
 
+import com.caucho.quercus.QuercusException;
+import com.caucho.quercus.QuercusLineRuntimeException;
+import com.caucho.quercus.QuercusRuntimeException;
 import com.caucho.quercus.UnimplementedException;
 import com.caucho.quercus.annotation.Optional;
 import com.caucho.quercus.annotation.ReturnNullAsFalse;
@@ -532,7 +535,7 @@ public class DOMDocument
 
     try {
       os = path.openWrite();
-      saveToStream(os, isHTML);
+      saveToStream(this, os, isHTML);
     }
     catch (IOException ex) {
       env.warning(ex);
@@ -552,22 +555,33 @@ public class DOMDocument
     return LongValue.create(path.getLength());
   }
 
-  private void saveToStream(WriteStream os, boolean isHTML)
+  private void saveToStream(DOMNode delegate, WriteStream os, boolean isHTML)
     throws IOException
   {
     XmlPrinter printer = new XmlPrinter(os);
 
     printer.setMethod(isHTML ? "html" : "xml");
 
-    printer.setPrintDeclaration(true);
-
-    printer.setVersion(_delegate.getXmlVersion());
     printer.setEncoding(_encoding);
+    if(delegate._delegate instanceof Document)
+    {
+        /*
+        Print the XML Declaration ( the <?xml thing ) only for Documents,
+        as they don't make sense when just printing nodes.
+         */
+        printer.setPrintDeclaration(true);
 
-    if (_delegate.getXmlStandalone())
-      printer.setStandalone("yes");
-
-    printer.printXml(_delegate);
+        Document document = (Document) delegate._delegate;
+        printer.setVersion(document.getXmlVersion());
+        if (document.getXmlStandalone()){
+            printer.setStandalone("yes");
+        }
+        printer.printXml(document);
+    }
+      else
+    {
+        printer.printXml((org.w3c.dom.Node) delegate._delegate);
+    }
 
     if (hasChildNodes())
       os.println();
@@ -576,10 +590,10 @@ public class DOMDocument
   @ReturnNullAsFalse
   public StringValue saveHTML(Env env)
   {
-    return saveToString(env, true);
+    return saveToString(env, this, true);
   }
 
-  private StringValue saveToString(Env env, boolean isHTML)
+  private StringValue saveToString(Env env, DOMNode node, boolean isHTML)
   {
     TempStream tempStream = new TempStream();
 
@@ -587,7 +601,7 @@ public class DOMDocument
       tempStream.openWrite();
       WriteStream os = new WriteStream(tempStream);
 
-      saveToStream(os, isHTML);
+      saveToStream(node, os, isHTML);
 
       os.close();
     }
@@ -614,9 +628,27 @@ public class DOMDocument
   }
 
   @ReturnNullAsFalse
-  public StringValue saveXML(Env env)
+  public StringValue saveXML(Env env, @Optional DOMNode node, @Optional Value options)
+          throws DOMException
   {
-    return saveToString(env, false);
+    if (options != null)
+      env.stub(L.l("`{0}' is ignored", "options"));
+
+    if(node != null){
+        // check if node is from another document
+
+        if(node.getDelegate().getOwnerDocument() != this._delegate)
+        {
+//            throw new QuercusLineRuntimeException(new DOMException(
+//                    getImpl(),
+//                    new org.w3c.dom.DOMException(
+//                            org.w3c.dom.DOMException.WRONG_DOCUMENT_ERR,
+//                            "Wrong Document Error")));
+            // TODO throw DOMException here
+        }
+    }
+
+    return saveToString(env, node, false);
   }
 
   public boolean schemaValidate(String schemaFilename)
