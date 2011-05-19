@@ -68,6 +68,7 @@ public class DefunParents extends FormattedText implements Iterable<String> {
     }
   }
 
+  @Override
   public Iterator<String> iterator()
   {
     return _parents.iterator();
@@ -111,5 +112,11 @@ public class DefunParents extends FormattedText implements Iterable<String> {
     throws IOException
   {
     writeLaTeX(out);
+  }
+
+  @Override
+  public void writeAsciiDoc(PrintWriter out)
+    throws IOException
+  {
   }
 }

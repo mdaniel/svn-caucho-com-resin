@@ -243,4 +243,40 @@ public class Anchor extends FormattedText {
       out.print("}");
     }
   }
+
+  @Override
+  public void writeAsciiDoc(PrintWriter out)
+    throws IOException
+  {
+    if (_configTag != null) {
+      setDefaultText(_configTag);
+      super.writeAsciiDoc(out);
+    }
+    else if (_javadoc != null) {
+      setDefaultText(_javadoc);
+      super.writeAsciiDoc(out);
+    }
+    else if (_href == null) {
+      super.writeAsciiDoc(out);
+    } 
+    /*
+    else if (_href.startsWith("doc|")) {
+      String link = _href.substring("doc|".length()).replace("|", "/");
+      link = link.replace("#", ":");
+
+      out.print("\\hyperlink{" + link + "}{");
+
+      super.writeLaTeX(out);
+
+      out.print("}");
+    }
+    */
+    else {
+      out.print(_href);
+      out.print(" ");
+//      super.writeAsciiDoc(out);
+  //    out.print("}");
+       
+    }
+  }
 }
