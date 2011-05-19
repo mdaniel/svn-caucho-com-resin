@@ -639,12 +639,11 @@ public class DOMDocument
 
         if(node.getDelegate().getOwnerDocument() != this._delegate)
         {
-//            throw new QuercusLineRuntimeException(new DOMException(
-//                    getImpl(),
-//                    new org.w3c.dom.DOMException(
-//                            org.w3c.dom.DOMException.WRONG_DOCUMENT_ERR,
-//                            "Wrong Document Error")));
-            // TODO throw DOMException here
+            throw new DOMException(getImpl(),
+                    new org.w3c.dom.DOMException(
+                            org.w3c.dom.DOMException.WRONG_DOCUMENT_ERR,
+                            "Wrong Document Error")
+                    );
         }
         return saveToString(env, node, false);
     }
