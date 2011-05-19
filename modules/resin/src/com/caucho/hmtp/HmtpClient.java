@@ -192,11 +192,10 @@ public class HmtpClient implements ActorSender {
         
         String serverNonce = nonceResult.getNonce();
         String serverSignature = nonceResult.getSignature();
-        
         String testSignature = _authManager.sign(uid, clientNonce, password);
         
         if (! testSignature.equals(serverSignature) && "".equals(uid))
-          throw new BamException(L.l("{0} resin-system-auth-key does not match",
+          throw new BamException(L.l("{0} resin-system-auth-key does not match the server's value",
                                       this));
 
         String signature = _authManager.sign(uid, serverNonce, password);

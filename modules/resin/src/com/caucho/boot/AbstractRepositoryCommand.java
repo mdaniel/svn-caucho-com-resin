@@ -99,12 +99,10 @@ public abstract class AbstractRepositoryCommand extends AbstractBootCommand {
     String user = args.getArg("-user");
     String password = args.getArg("-password");
     
-    /*
-    if (user == null) {
+    if (user == null || "".equals(user)) {
       user = "";
       password = client.getResinSystemAuthKey();
     }
-    */
     
     return new WebAppDeployClient(address, port, user, password);
   }

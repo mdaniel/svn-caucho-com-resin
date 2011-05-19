@@ -54,6 +54,7 @@ public class ResinDocServlet extends HttpServlet {
   private XMLOutputFactory _outputFactory;
   private String _encoding = "utf-8";
   private boolean _isDisableAction;
+  private boolean _isCache = true;
 
   public void setDocumentEncoding(String encoding)
   {
@@ -73,6 +74,11 @@ public class ResinDocServlet extends HttpServlet {
   public boolean isDisableAction()
   {
     return _isDisableAction;
+  }
+  
+  public void setCache(boolean isCache)
+  {
+    _isCache = isCache;
   }
 
   public void init(ServletConfig config)
@@ -115,7 +121,9 @@ public class ResinDocServlet extends HttpServlet {
 
     try {
       response.setContentType("text/html");
-      response.setHeader("Cache-Control", "max-age=3600");
+      
+      if (_isCache)
+        response.setHeader("Cache-Control", "max-age=3600");
 
       XMLStreamWriter xmlOut
         = _outputFactory.createXMLStreamWriter(os, _encoding);

@@ -12,6 +12,7 @@
 
   <chapter title="Deployment">
     <linked-section link="admin/deploy.xtp" />
+    <linked-section link="admin/deploy-command-line.xtp" />
     <linked-section link="admin/deploy-git-overview.xtp" />
     <linked-section link="admin/deploy-tool-reference.xtp" />
     <!--

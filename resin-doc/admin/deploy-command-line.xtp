@@ -1,0 +1,109 @@
+<?xml version="1.0"?>
+<document>
+  <header>
+    <product>resin</product>
+    <title>Deployment From The Command-Line</title>
+    <type>contents</type>
+    <description>
+      <p>.war files can be deployed to a cluster using
+      the Resin command-line. The uploaded file will be distributed to
+      all Resin servers.</p>
+    </description>
+  </header>
+<body>
+
+<s1 title="resin.xml requirements">
+
+<p>For security reasons, Resin's deployment must be
+enabled in the resin.xml. The default behavior is to disable deployment.</p>
+
+<p>The configuration has four requirements:</p>
+
+<ul>
+<li>Start the RemoteAdminService to enable remote administration.</li>
+<li>Add an AdminAuthenticator to protect deployment with a password.</li>
+<li>Start the DeployService itself to enable remote deployment.</li>
+<li>A web-app-deploy to provide a location for the deployed .war files.</li>
+</ul>
+
+<example title="Example: minimal resin.xml for deployment">
+&lt;resin xmlns="http://caucho.com/ns/resin"
+       xmlns:resin="urn:java:com.caucho.resin">
+
+  &lt;cluster id="app-tier">
+    &lt;resin:AdminAuthenticator password-digest="none">
+      &lt;user name="foo" password="test"/>
+    &lt;/resin:AdminAuthenticator>
+
+    &lt;resin:RemoteAdminService/>
+    &lt;resin:DeployService/>
+
+    &lt;server id="" port="6800">
+       &lt;http port="8080"/>
+    &lt;/server>
+
+    &lt;host id="">
+      &lt;web-app-deploy path="webapps"/>
+    &lt;/host>
+  &lt;/cluster>
+&lt;/resin>
+</example>
+
+</s1>
+
+<s1 title="command-line deployment">
+
+<s2 title="deploy for default host">
+
+<p>The "deploy" command deploys a .war file to the default virtual
+host. Since the AdminAuthenticator requires a user and password, you'll
+need to pass those arguments as well.</p>
+
+<example title="Example: deploy hello.war">
+unix> java -jar lib/resin.jar deploy hello.war \
+           -user foo -password test
+</example>
+
+</s2>
+
+<s2 title="undeploy for default host">
+
+<p>The "undeploy" command removes a  .war from the default virtual
+host. Since the AdminAuthenticator requires a user and password, you'll
+need to pass those arguments as well.</p>
+
+<example title="Example: undeploy hello">
+unix> java -jar lib/resin.jar undeploy hello \
+           -user foo -password test
+</example>
+
+</s2>
+
+<s2 title="deploy with specified host">
+
+<p>The "deploy" command allows a "-host" argument to specify a virtual
+host.</p>
+
+<example title="Example: deploy www.example.com hello.war">
+unix> java -jar lib/resin.jar deploy -host www.example.com hello.war \
+           -user foo -password test
+</example>
+
+</s2>
+
+<s2 title="undeploy for www.example.com">
+
+<p>The "undeploy" command removes a .war from the virtual
+host.</p>
+
+<example title="Example: undeploy www.example.com hello">
+unix> java -jar lib/resin.jar undeploy -host www.example.com hello \
+           -user foo -password test
+</example>
+
+</s2>
+
+</s1>
+
+</body>
+</document>

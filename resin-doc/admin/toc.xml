@@ -86,6 +86,9 @@
             description="Using the webapps/ directory for deployment"/>
       -->
     
+      <item link="deploy-command-line.xtp" title="command-line"
+            description="deploying .wars using the Resin command line"/>
+    
       <item link="deploy-git-overview.xtp" title=".git overview"
             description="Overview of the clustered .git deployment"/>
     
