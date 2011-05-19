@@ -1231,7 +1231,6 @@ public class TcpSocketLinkListener
             return true;
           }
           else {
-            System.out.println("THROTTLE_FAIL:");
             socket.close();
           }
         }

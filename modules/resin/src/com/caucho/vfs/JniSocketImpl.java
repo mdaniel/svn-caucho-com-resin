@@ -364,10 +364,13 @@ public final class JniSocketImpl extends QSocket {
     synchronized (_readLock) {
       long expires;
       
+      // gap is because getCurrentTimeActual() isn't exact
+      long gap = 20;
+      
       if (timeout >= 0)
-        expires = timeout + Alarm.getCurrentTimeActual();
+        expires = timeout + Alarm.getCurrentTimeActual() - gap;
       else
-        expires = _socketTimeout + Alarm.getCurrentTimeActual();
+        expires = _socketTimeout + Alarm.getCurrentTimeActual() - gap;
 
       int result = 0;
 
@@ -375,7 +378,7 @@ public final class JniSocketImpl extends QSocket {
         result = readNative(_fd, buffer, offset, length, timeout);
       } while (result == JniStream.TIMEOUT_EXN
                && Alarm.getCurrentTimeActual() < expires);
-
+      
       return result;
     }
   }
@@ -389,7 +392,7 @@ public final class JniSocketImpl extends QSocket {
     int result;
     
     synchronized (_writeLock) {
-      long expires = _socketTimeout + Alarm.getCurrentTimeActual();;
+      long expires = _socketTimeout + Alarm.getCurrentTimeActual();
       
       do {
         result = writeNative(_fd, buffer, offset, length);
