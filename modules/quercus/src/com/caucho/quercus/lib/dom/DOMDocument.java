@@ -646,9 +646,9 @@ public class DOMDocument
 //                            "Wrong Document Error")));
             // TODO throw DOMException here
         }
+        return saveToString(env, node, false);
     }
-
-    return saveToString(env, node, false);
+    return saveToString( env, this, false);
   }
 
   public boolean schemaValidate(String schemaFilename)
