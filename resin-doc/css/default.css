@@ -2,6 +2,7 @@
 /* yellow (hover) #ffcc33 */
 /* hr #fab41d */
 /* red #98012e;  */
+
 body {
   border : none;
   font-family : serif;
@@ -85,7 +86,8 @@ hr {
   border : 0;
   height : 1px;
 /*  background : #999; */
-  background : #fab41d;
+/*  background : #fab41d; */
+  background : #999;
   margin : 0.2em 0em;
 }
 
@@ -98,24 +100,28 @@ h1.title {
   font-family : Helvetica, Arial, sans-serif;
   font-variant : normal;
 
-  color : #990033;
 }
+
+/* old red: #990033 */
 
 h1 {
   margin-right : 1em;
-  border-bottom : 1px solid #fab41d;
+/*  border-bottom : 1px solid #fab41d; */
+  border-bottom : 1px solid #999;
 
   font-family : Helvetica, Arial, sans-serif;
   font-size : 170%;
 
-  color : #003366;
+  color : #4c2004;
 }
+/* old blue  color : #003366; */
 
 h2 {
   font-family : Helvetica, Arial, sans-serif;
   font-weight : normal;
 
-  color : #003366;
+  color : #4c2004;
+/*  color : #003366; */
 }
 
 /* background-color : #ccccdd; */
@@ -123,18 +129,20 @@ h2.section {
   font-family : Helvetica, Arial, sans-serif;
   font-weight : normal;
 
-  color : #003366;
+/*  color : #003366; */
   padding : 2px;
 }
 
 h3 {
   font-family : Helvetical, Arial, sans-serif;
-  color : #6699cc;
+/*  color : #6699cc; */
+  color : #333;
 }
 
 h4 {
   font-family : Arial, Helvetica, sans-serif;
   font-variant : small-caps;
+  color : #333;
 }
 
 /* background : #b9cef7; */
@@ -267,7 +275,8 @@ div.definition-body {
   margin-left : 1.3em;
   font-weight : bold;
   font-family : Helvetica, Arial, sans-serif;
-  color : #990033;
+/*  color : #990033; */
+  color : #4c2004;
   text-align : left;
   font-size : 120%
 }
@@ -277,7 +286,7 @@ div.definition-body {
 
 table.deftable {
   margin : 1em 0em 1em 1.6em;
-  border : solid 1px;
+  border : solid 1px #333;
   width : 90%;
   border-collapse : collapse;
 }
@@ -286,7 +295,8 @@ caption {
   padding : 0.3em 0em;
   font-weight : bold;
   font-family : Helvetica, Arial, Helvetica, sans-serif;
-  color : #990033;
+/*  color : #990033; */
+  color : #666;
   text-align : left;
   font-size : 120%
 }
@@ -298,8 +308,12 @@ table.deftable th {
   font-variant : small-caps;
   font-weight : normal;
   font-size : 85%;
+/*
   border-top : 1px solid  #fab41d;
   border-bottom : 1px solid #fab41d;
+  */
+  border-top : 1px solid  #666;
+  border-bottom : 1px solid #666;
 
   color : #666;
   padding : 0.3em 0.3em;
