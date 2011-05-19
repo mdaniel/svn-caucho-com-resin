@@ -12,6 +12,7 @@
 
 <s2 title="3.1.11 snapshot">
 <ul>
+<li>db-store: close should not clear _path (#4557, rep by Tyson Weihs)</li>
 <li>isapi_srun: use GetTickCount64 for time (#4203)</li>
 <li>servlet: include/forward should not call servlet request.init (#4305, rep by ladlestein)</li>
 <li>ssl: backpatch ssl locking from 4.0 (#4256, rep by dkelly)</li>

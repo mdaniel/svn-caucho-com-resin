@@ -1846,7 +1846,7 @@ public class Store {
     long id = _id;
     _id = 0;
 
-    _path = null;
+    // _path = null;
     
     RandomAccessWrapper wrapper = null;
     

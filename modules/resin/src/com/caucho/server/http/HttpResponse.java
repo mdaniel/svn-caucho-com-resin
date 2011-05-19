@@ -252,10 +252,10 @@ public class HttpResponse extends AbstractHttpResponse
       String key = (String) _headerKeys.get(i);
       os.write('\r');
       os.write('\n');
-      os.print(key);
+      os.printLatin1NoLf(key);
       os.write(':');
       os.write(' ');
-      os.print((String) _headerValues.get(i));
+      os.printLatin1NoLf((String) _headerValues.get(i));
 
       if (debug) {
         log.fine(_request.dbgId() + "" +
