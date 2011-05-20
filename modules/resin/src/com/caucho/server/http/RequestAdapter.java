@@ -553,7 +553,7 @@ public class RequestAdapter extends RequestWrapper
       return null;
   }
 
-  public boolean isClientDisconnect()
+  public boolean isConnectionClosed()
   {
     return false;
   }

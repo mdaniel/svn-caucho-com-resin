@@ -840,12 +840,12 @@ public class CauchoRequestWrapper extends AbstractCauchoRequest {
   }
   
   @Override
-  public boolean isClientDisconnect()
+  public boolean isConnectionClosed()
   {
     CauchoRequest cRequest = getCauchoRequest();
 
     if (cRequest != null)
-      return cRequest.isClientDisconnect();
+      return cRequest.isConnectionClosed();
     else
       return false;
   }

@@ -1626,9 +1626,9 @@ public final class HttpServletRequestImpl extends AbstractCauchoRequest
     _request.killKeepalive();
   }
 
-  public boolean isClientDisconnect()
+  public boolean isConnectionClosed()
   {
-    return _request.isClientDisconnect();
+    return _request.isConnectionClosed();
   }
 
   public SocketLink getConnection()

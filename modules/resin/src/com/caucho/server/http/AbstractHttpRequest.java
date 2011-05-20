@@ -368,7 +368,7 @@ public abstract class AbstractHttpRequest
   /**
    * Returns true if the client has disconnected
    */
-  public boolean isClientDisconnect()
+  public boolean isConnectionClosed()
   {
     if (_tcpConn != null)
       return _tcpConn.isClosed();

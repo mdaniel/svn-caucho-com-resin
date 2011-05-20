@@ -771,15 +771,24 @@ public class HttpRequest extends AbstractHttpRequest
       startRequest(server.allocateHttpBuffer());
 
       if (! parseRequest()) {
-         return false;
+        if (log.isLoggable(Level.FINER)) {
+          log.finer(dbgId() + " empty request");
+        }
+        
+        return false;
       }
 
       CharSequence host = getInvocationHost();
 
       Invocation invocation = getInvocation(host, _uri, _uriLength);
 
-      if (invocation == null)
+      if (invocation == null) {
+        if (log.isLoggable(Level.FINER)) {
+          log.finer(dbgId() + " empty invocation");
+        }
+        
         return false;
+      }
 
       HttpServletRequestImpl requestFacade = getRequestFacade();
 

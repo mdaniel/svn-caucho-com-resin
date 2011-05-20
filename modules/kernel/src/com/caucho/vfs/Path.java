@@ -1327,8 +1327,9 @@ public abstract class Path {
       int length = buffer.length;
       int len;
 
-      while ((len = is.read(buffer, 0, length)) > 0)
+      while ((len = is.read(buffer, 0, length)) > 0) {
         os.write(buffer, 0, len);
+      }
     } finally {
       TempBuffer.free(tempBuffer);
       tempBuffer = null;

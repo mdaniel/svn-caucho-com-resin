@@ -339,7 +339,8 @@ public abstract class AbstractResponseStream extends OutputStreamWithBuffer {
   {
   }
   
-  public final boolean isClosed()
+  @Override
+  public boolean isClosed()
   {
     return _state.isClosed();
   }

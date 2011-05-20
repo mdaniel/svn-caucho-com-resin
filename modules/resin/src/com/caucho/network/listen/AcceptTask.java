@@ -104,7 +104,7 @@ class AcceptTask extends ConnectionReadTask {
       result = socketLink.handleRequests(isKeepalive);
 
       switch (result) {
-      case CONNECTION_COMPLETE:
+      case REQUEST_COMPLETE:
         socketLink.close();
         break;
         

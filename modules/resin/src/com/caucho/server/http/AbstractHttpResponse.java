@@ -127,11 +127,11 @@ abstract public class AbstractHttpResponse {
   }
 
   /**
-   * Return true if the client has disconnected
+   * Return true if the connection has disconnected
    */
-  public boolean isClientDisconnect()
+  public boolean isConnectionClosed()
   {
-    return _request.isClientDisconnect();
+    return _request.isConnectionClosed();
   }
 
   /**

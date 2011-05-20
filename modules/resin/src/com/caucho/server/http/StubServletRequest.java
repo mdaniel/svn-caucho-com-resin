@@ -239,7 +239,7 @@ public class StubServletRequest implements CauchoRequest {
   {
   }
   
-  public boolean isClientDisconnect()
+  public boolean isConnectionClosed()
   {
     return false;
   }

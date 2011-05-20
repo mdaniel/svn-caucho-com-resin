@@ -58,6 +58,12 @@ public class HttpResponseStream extends ResponseStream {
     _nextStream = next;
   }
 
+  @Override
+  public boolean isClosed()
+  {
+    return super.isClosed() || _nextStream.isClosed();
+  }
+
   /**
    * initializes the Response stream at the beginning of a request.
    */
@@ -69,7 +75,6 @@ public class HttpResponseStream extends ResponseStream {
     _isChunkedEncoding = false;
     _bufferStartOffset = 0;
   }
-
   //
   // implementations
   //

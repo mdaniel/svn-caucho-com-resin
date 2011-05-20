@@ -336,6 +336,14 @@ public class StreamImpl {
   {
     close();
   }
+  
+  /**
+   * Returns true if the stream is closed.
+   */
+  public boolean isClosed()
+  {
+    return false;
+  }
 
   /**
    * Closes the stream.

@@ -1247,9 +1247,10 @@ public class WriteStream extends OutputStreamWithBuffer
   /**
    * Returns true if the stream is closed.
    */
+  @Override
   public final boolean isClosed()
   {
-    return _source != null;
+    return _source == null || _source.isClosed();
   }
 
   /**

@@ -516,7 +516,7 @@ abstract public class ResponseStream extends ToByteResponseStream {
   private boolean lengthException(byte []buf, int offset, int length,
                                   long contentLengthHeader)
   {
-    if (_response.isClientDisconnect() || isHead() || isClosed()) {
+    if (_response.isConnectionClosed() || isHead() || isClosed()) {
     }
     else if (contentLengthHeader < _contentLength) {
       AbstractHttpRequest request = _response.getRequest();
@@ -844,7 +844,7 @@ abstract public class ResponseStream extends ToByteResponseStream {
 
   protected final boolean isNextValid()
   {
-    return ! _response.isClientDisconnect();
+    return ! _response.isConnectionClosed();
   }
   
   protected void clearNext()

@@ -654,13 +654,13 @@ public class TcpSocketLink extends AbstractSocketLink
     throws IOException
   {
     do {
-      RequestState result = RequestState.CONNECTION_COMPLETE;
+      RequestState result = RequestState.EXIT;
       
       if (_listener.isClosed()) {
         return RequestState.EXIT;
       }
 
-      if (isKeepalive && (result = processKeepalive()) != RequestState.CONNECTION_COMPLETE) {
+      if (isKeepalive && (result = processKeepalive()) != RequestState.REQUEST_COMPLETE) {
         return result;
       }
 
@@ -673,13 +673,13 @@ public class TcpSocketLink extends AbstractSocketLink
         }
       }
       
-      if (result != RequestState.CONNECTION_COMPLETE)
+      if (result != RequestState.REQUEST_COMPLETE)
         return result;
       
       isKeepalive = true;
     } while (_state.isKeepaliveAllocated());
 
-    return RequestState.CONNECTION_COMPLETE;
+    return RequestState.REQUEST_COMPLETE;
   }
   
   private RequestState handleRequest(boolean isKeepalive)
@@ -698,7 +698,7 @@ public class TcpSocketLink extends AbstractSocketLink
       return RequestState.THREAD_DETACHED;
     }
    
-    return RequestState.CONNECTION_COMPLETE;
+    return RequestState.REQUEST_COMPLETE;
   }
 
   private void dispatchRequest()
@@ -766,7 +766,7 @@ public class TcpSocketLink extends AbstractSocketLink
     int available = port.keepaliveThreadRead(getReadStream());
     
     if (available > 0) {
-      return RequestState.CONNECTION_COMPLETE;
+      return RequestState.REQUEST_COMPLETE;
     }
     else if (available < 0) {
       setStatState(null);
@@ -812,7 +812,7 @@ public class TcpSocketLink extends AbstractSocketLink
           delta = 0;
         
         if (getReadStream().fillWithTimeout(delta) > 0) {
-          return RequestState.CONNECTION_COMPLETE;
+          return RequestState.REQUEST_COMPLETE;
         }
         break;
       } catch (SocketTimeoutException e) {
