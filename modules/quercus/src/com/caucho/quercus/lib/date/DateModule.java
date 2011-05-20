@@ -39,6 +39,8 @@ import com.caucho.util.CharBuffer;
 import com.caucho.util.L10N;
 import com.caucho.util.QDate;
 
+import java.util.HashMap;
+import java.util.Map;
 import java.util.TimeZone;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -75,6 +77,10 @@ public class DateModule extends AbstractQuercusModule {
   private static final long MINUTE = 60000L;
   private static final long HOUR = 60 * MINUTE;
   private static final long DAY = 24 * HOUR;
+
+  private static final HashMap<StringValue,Value> _constMap
+    = new HashMap<StringValue,Value>();
+
 
   /**
    * Returns true for the date extension.
@@ -1224,7 +1230,26 @@ public class DateModule extends AbstractQuercusModule {
   {
     return new DateTimeZone(timeZone);
   }
-  
+
+  static {
+    addConstant(_constMap, "DATE_ATOM", DateTime.ATOM);
+    addConstant(_constMap, "DATE_COOKIE", DateTime.COOKIE);
+    addConstant(_constMap, "DATE_ISO8601 ", DateTime.ISO8601);
+    addConstant(_constMap, "DATE_RFC822", DateTime.RFC822);
+    addConstant(_constMap, "DATE_RFC850", DateTime.RFC850);
+    addConstant(_constMap, "DATE_RFC1036", DateTime.RFC1036);
+    addConstant(_constMap, "DATE_RFC1123", DateTime.RFC1123);
+    addConstant(_constMap, "DATE_RFC2822", DateTime.RFC2822);
+    addConstant(_constMap, "DATE_RFC3339", DateTime.ATOM); //     Same as DATE_ATOM (since PHP 5.1.3)
+    addConstant(_constMap, "DATE_RSS", DateTime.RSS);
+    addConstant(_constMap, "DATE_W3C", DateTime.W3C);
+  }
+
+
+  @Override
+  public Map<StringValue, Value> getConstMap() {
+      return _constMap;
+  }
   /* commented out for wordpress-2.8.1
   public static Value timezone_transitions_get(DateTimeZone dateTimeZone)
   {
