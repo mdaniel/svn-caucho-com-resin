@@ -1352,7 +1352,7 @@ public abstract class Path {
       int offset = os.getBufferOffset();
       int length = buffer.length;
 
-      while (true) {
+      while (! os.isClosed()) {
         int sublen = length - offset;
 
         if (sublen <= 0) {

@@ -67,4 +67,6 @@ abstract public class OutputStreamWithBuffer extends OutputStream
    */
   abstract public byte []nextBuffer(int offset)
     throws IOException;
+  
+  abstract public boolean isClosed();
 }

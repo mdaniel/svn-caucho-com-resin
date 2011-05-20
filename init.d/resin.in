@@ -76,7 +76,10 @@ if test "$?" != 0; then
     
       echo -n "$1: $2"
   }
-  
+fi  
+
+type log_end_msg 1> /dev/null 2> /dev/null
+if test "$?" != 0; then
   log_end_msg () {
       [ -z "$1" ] && return 1
 

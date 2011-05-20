@@ -917,7 +917,7 @@ public class TcpSocketLink extends AbstractSocketLink
     
     // TCK
     if (async != null && async.isCompleteRequested())
-       throw new IllegalStateException(L.l("Comet cannot be requested after complete()."));
+      throw new IllegalStateException(L.l("Comet cannot be requested after complete()."));
     
     _state = _state.toComet();
     
@@ -1227,10 +1227,12 @@ public class TcpSocketLink extends AbstractSocketLink
     }
 
     QSocket socket = _socket;
+    
+    TcpSocketLinkListener port = getListener();
 
     // detach any comet
     if (state.isComet() || state.isCometSuspend())
-      getListener().cometDetach(this);
+      port.cometDetach(this);
     
     try {
       closeAsync();
@@ -1243,8 +1245,6 @@ public class TcpSocketLink extends AbstractSocketLink
     } catch (Throwable e) {
       log.log(Level.WARNING, e.toString(), e);
     }
-   
-    TcpSocketLinkListener port = getListener();
 
     if (log.isLoggable(Level.FINER)) {
       if (port != null)
@@ -1266,8 +1266,8 @@ public class TcpSocketLink extends AbstractSocketLink
       log.log(Level.FINER, e.toString(), e);
     }
 
-    if (socket != null) {
-      getListener().closeSocket(socket);
+    if (port != null) {
+      port.closeSocket(socket);
 
       try {
         socket.close();

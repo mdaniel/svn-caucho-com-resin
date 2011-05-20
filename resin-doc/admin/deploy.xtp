@@ -1,9 +1,12 @@
 <document>
 <header>
-<title>Packaging/Deployment</title>
+<title>Deploying Web-Applications</title>
 <description>
-<p>Resin provides a wide variety of custom packaging and deployment
-options.
+
+<p>Resin's deployment capabilities include 
+clustered deployment, remote deployment, versioning and rollback,
+command-line deployment, browser deployment, and standard
+webapps directory filesystem deployment.
 </p>
 </description>
 </header>
@@ -12,7 +15,37 @@ options.
 
 <localtoc/>
 
-<s1 title="Custom web-app with .war file">
+<s1 title="Overview">
+
+<ul>
+<li><b>cloud deployment:</b> Resin's cloud deployment will distribute a
+new web-application to all servers in the cloud, using a transactional
+store to ensure consistency.</li>
+
+<li><b>activation control:</b> deployment and activation can be
+controlled independently, allowing applications to be deployed and verified
+on all servers, and then activated at once or on a rolling-server basis.</li>
+
+<li><b>archiving and rollback:</b> deployed web-applications can be archived
+and quickly rolled-back if a deployment needs to be reversed.</li>
+
+<li><b>graceful upgrading:</b> web-applications can be deployed
+with versions, letting current user continue with the old version and
+moving new users to the new version.</li>
+
+<li><b>command-line:</b> web-applications can be deployed to the cloud
+from the command-line for scriptable deployment.</li>
+
+<li><b>browser:</b> for convenience, applications can also be deployed
+from a browser using the /resin-admin site.</li>
+
+</ul>
+
+</s1>
+
+<s1 title="Deployment Methods">
+
+<s2 title="Filesystem deployment: Custom web-app with .war file">
 
 <p>In this scenario, you want to configure a web-app with a
 specific root-directory and specify the location of the .war file.
@@ -75,9 +108,116 @@ archive files should be placed, beyond the standard webapps directory.</p>
 &lt;/resin>
 </example>
 
+</s2>
+
+<s2 title="Command-Line Remote Deployment">
+
+<p>The "deploy" command deploys a .war file to the default virtual
+host. Since the AdminAuthenticator requires a user and password, you'll
+need to pass those arguments as well.</p>
+
+<example title="Example: deploy hello.war">
+unix> java -jar lib/resin.jar deploy hello.war \
+           -user foo -password test
+</example>
+
+</s2>
+
+<s2 title="Browser-based Remote Deployment">
+<p>
+As of Resin 4.0.0, it is now possible to deploy web applications remotely
+to a shared repository that is distributed across the cluster.  This feature
+allows you to deploy once to any triad server and have the application
+be updated automatically across the entire cluster.  When a new 
+<a href="clustering-overview.xtp">dynamic server</a> joins the cluster, the
+triad will populate it with these applications as well.
+</p>
+<p>
+To deploy an application remotely:
+</p>
+<ol>
+<li>log into the resin-admin console on
+any triad server.  <em>Make sure you are connecting over SSL, as this feature
+is not available over a non-encrypted channel.</em></li>
+<li>Browse to the "webapp" tab of the resin-admin server and at the bottom
+of the page, enter the virtual host, URL, and local .war file specifying
+the web application, then press "Deploy".
+<figure src="deploy-webapp.png" alt="Virtual Host:default, URL:/foo, .war file:/tmp/foo.war, Deploy button"/>
+</li>
+<li>
+The application should now be deployed on the server.  In a few moments,
+all the servers in the cluster will have the webapp.
+<figure src="deployed-webapp.png" alt="WebApps: /:active, /foo:active, /resin-admin:active"/>
+</li>
+</ol>
+</s2>
+
+<s2 title="ant/maven Remote Deployment">
+
+<p>Deployment may be interegrated with ant/maven using the command-line
+interface or with ant/maven plugins. See the deploy-ant-maven page for
+more information.</p>
+
+</s2>
+
 </s1>
 
-<s1 title="Startup and Redeploy Modes">
+<s1 title="Cloud Deployment">
+
+<p>Resin deploys a web-application to all servers in
+the cluster when you deploy using the command-line
+or the browser. This process happens automatically and does not require
+any configuration beyond Resin's normal cluster configuration.</p>
+
+<p>This cloud deployment does not occur when you deploy using the filesystem
+by placing a .war in a webapps directory. Cloud deployment only occurs on
+the command-line or browser.</p>
+
+<p>Resin replicates the deployed application to all three triad servers,
+or to all available server if you have less than three servers. Any server
+beyond the triad will copy the deployed application from the triad. Normally,
+you don't need to be aware of the triad, except to make sure at least one of
+the first three servers is always available.</p>
+
+<p>When you add a new dynamic server or restart a server, the server will
+check with the triad and update to the most recent copy of the application.
+The system is reliable if servers crash or even if a server crash or network
+outage occurs during deployment. Since the deployment is transactional,
+the new version is only activated when every file has been copied
+and verified on the server.</p>
+
+</s1>
+
+<s1 title="Archiving and Rollback">
+
+<p>Resin's deployment supports archiving and rollback as part of
+the underlying system. Like the Subversion version-control-system,
+you can copy the tag for an application to a unique name. So you can
+permanently save your webapp as "archive/webapp/foo/2011-05-19" and later
+rollback to that version if it becomes necessary.</p>
+
+<p>The deployment system associates each .war archive with a tag. A deployed
+application might look like "production/webapp/my-host.com/my-app". The
+tag name is the same as the WebApp name in the Resin logs. To archive
+an application, you copy the tag to an archive
+name like "archive/webapp/my-app/2011-05-09".</p>
+
+<p>To rollback a version, just copy the archive tag
+back to the web-app tag.</p>
+
+</s1>
+
+<s1 title="Activating deployed applications">
+
+<p>Applications can be activiated independent of their deployment, letting
+you upload a new deployment to a cloud, and then activating all servers at
+once or creating a rolling activation.</p>
+
+<p>By default, activation is automatic. When an application is deployed,
+it is automatically activated. You can change the default behavior by setting
+the startup-mode and redeploy-mode for the web-app-deploy.</p>
+
+<s2 title="Startup and Redeploy Modes">
 <p>
 The startup-mode is used in a number of places to determine the behaviour of a resource when the server starts.
 </p>
@@ -104,9 +244,46 @@ The redeploy-mode has two values: "automatic", and "manual".
   <li>automatic - restarts the resource when it is modified (web.xml, *.class, *.war, etc).</li>
   <li>manual - waits for JMX to restart the resource when changes occur.</li>
 </ul>
+</s2>
+
+<s2 title="Deploying to a live server without interruption">
+<p>It may be possible to deploy a web application to a live server
+without interruption to service if certain conditions are met.</p>
+
+<ol>
+  <li>The session objects for your users are being persisted.</li>
+  <li>The usage of session scoped objects between the old version and the new is compatible.
+  </li>
+  <li>The usage of application scoped objects between the old version and the new is compatible.</li>
+  <li>Database schema changes are not required.</li>
+</ol>
+
+<p>Resin allows you to have a backup instance running.  The idea is that
+this backup instance of Resin takes over if your primary Resin
+instance goes down.</p>
+
+<p>If you are using a load balancer to distribute your load to multiple
+primary servers, each primary server has a backup server.</p>
+
+<p>You can use this feature to deploy to a live server without
+interruption of service.</p>
+
+<ol>
+<li>shutdown primary server(s) (backup server(s) takes over)</li>
+
+<li>deploy new war to primary server(s)</li>
+
+<li>start primary server(s).  As soon as the primary server starts,
+the user will be using the new version of the application.</li>
+
+<li>deploy new war to backup server(s)</li>
+</ol>
+
+</s2>
+
 </s1>
 
-<s1 title="web-app versioning">
+<s1 title="Versioning and Graceful Upgrades">
 
 <p>Resin can deploy multiple versions of a web-app simultaneously,
 simplifying any application upgrades.  The old version of the web-app
@@ -135,417 +312,6 @@ enables versioning:</p>
 &lt;/cluster>
 &lt;/resin>
 </example>
-
-</s1>
-
-<s1 title="Deploying to a live server without interruption">
-<p>It may be possible to deploy a web application to a live server
-without interruption to service if certain conditions are met.</p>
-
-<ol>
-  <li>The session objects for your users are being persisted.
-  </li><li>The usage of session scoped objects between the old version and the new is compatible.
-  </li><li>The usage of application scoped objects between the old version and the new is compatible.
-  </li><li>Database schema changes are not required.
-</li></ol>
-
-<p>Resin allows you to have a backup instance running.  The idea is that
-this backup instance of Resin takes over if your primary Resin
-instance goes down.</p>
-
-<p>If you are using a load balancer to distribute your load to multiple
-primary servers, each primary server has a backup server.</p>
-
-<p>You can use this feature to deploy to a live server without
-interruption of service.</p>
-
-<ol>
-<li>shutdown primary server(s) (backup server(s) takes over)
-
-</li><li>deploy new war to primary server(s)
-
-</li><li>start primary server(s).  As soon as the primary server starts,
-the user will be using the new version of the application.
-    
-</li><li>deploy new war to backup server(s)
-</li></ol>
-
-</s1>
-
-<s1 title="Browser-based Remote Deployment">
-<p>
-As of Resin 4.0.0, it is now possible to deploy web applications remotely
-to a shared repository that is distributed across the cluster.  This feature
-allows you to deploy once to any triad server and have the application
-be updated automatically across the entire cluster.  When a new 
-<a href="clustering-overview.xtp">dynamic server</a> joins the cluster, the
-triad will populate it with these applications as well.
-</p>
-<p>
-To deploy an application remotely:
-</p>
-<ol>
-<li>log into the resin-admin console on
-any triad server.  <em>Make sure you are connecting over SSL, as this feature
-is not available over a non-encrypted channel.</em></li>
-<li>Browse to the "webapp" tab of the resin-admin server and at the bottom
-of the page, enter the virtual host, URL, and local .war file specifying
-the web application, then press "Deploy".
-<figure src="deploy-webapp.png" alt="Virtual Host:default, URL:/foo, .war file:/tmp/foo.war, Deploy button"/>
-</li>
-<li>
-The application should now be deployed on the server.  In a few moments,
-all the servers in the cluster will have the webapp.
-<figure src="deployed-webapp.png" alt="WebApps: /:active, /foo:active, /resin-admin:active"/>
-</li>
-</ol>
-</s1>
-
-<s1 title="command line deployment">
-<p>Command line deployment capabilities were introduced in Resin 4.0.14. The set
-of commands allows deploying, undeploying, listing applications deployed on the
-server and controlling application lifecycle.</p>
-<s2 title="Synopsis of the provided commands and options">
-<deftable title="commands">
-  <tr>
-    <th>Command</th>
-    <th>Description</th>
-  </tr>
-  <tr>
-    <td>deploy</td>
-    <td>deploys an application archive</td>
-  </tr>
-  <tr>
-    <td>undeploy</td>
-    <td>un-deploys an application specified by a context</td>
-  </tr>
-  <tr>
-    <td>deploy-list</td>
-    <td>lists all applications deployed on a server</td>
-  </tr>
-  <tr>
-    <td>deploy-copy</td>
-    <td>copies an application from one context to another</td>
-  </tr>
-  <tr>
-    <td>start-webapp</td>
-    <td>starts web application context</td>
-  </tr>
-  <tr>
-    <td>stop-webapp</td>
-    <td>stops web application context</td>
-  </tr>
-  <tr>
-    <td>restart-webapp</td>
-    <td>restarts web application context</td>
-  </tr>
-</deftable>
-
-<deftable title="common options">
-  <tr>
-    <th>Argument</th>
-    <th>Meaning</th>
-    <th>Default</th>
-  </tr>
-  <tr>
-    <td>-conf</td>
-    <td>configuration file</td>
-    <td>conf/resin.xml</td>
-  </tr>
-  <tr>
-    <td>-address</td>
-    <td>ip or host name of the server</td>
-    <td>taken from conf/resin.xml</td>
-  </tr>
-  <tr>
-    <td>-port</td>
-    <td>server http port</td>
-    <td>taken from conf/resin.xml</td>
-  </tr>
-  <tr>
-    <td>-user</td>
-    <td>user name used for authentication to the server</td>
-    <td>none, required</td>
-  </tr>
-  <tr>
-    <td>-password</td>
-    <td>password used for authentication to the server</td>
-    <td>none, required</td>
-  </tr>
-  <tr>
-    <td>-m</td>
-    <td>commit message</td>
-    <td>none, optional</td>
-  </tr>
-</deftable>
-
-<s3 title="deploying application">
-<p>Deploying an application is done with a <code>deploy</code> command</p>
-<p><code>java -jar resin.jar [-conf &lt;file>] deploy -user &lt;user> -password &lt;password> [options] &lt;war-file></code></p>
-<example title="deploying an application from a hello-world.war archive">java -jar lib/resin.jar deploy -user admin -password secret /projects/hello-world/hello-world.war
-Deployed production/webapp/default/hello-world as hello-world.war to http://127.0.0.1:8080/hmtp</example>
-<deftable title="deploy options">
-  <tr>
-    <th>Argument</th>
-    <th>Meaning</th>
-    <th>Default</th>
-  </tr>
-  <tr>
-    <td>-host</td>
-    <td>virtual host to make application available on</td>
-    <td>default</td>
-  </tr>
-  <tr>
-    <td>-name</td>
-    <td>name of the context to deploy to, defaults to war-file name</td>
-    <td>[/foo].war</td>
-  </tr>
-  <tr>
-    <td>-stage</td>
-    <td>specifies stage for staging an application</td>
-    <td>production</td>
-  </tr>
-  <tr>
-    <td>-version</td>
-    <td>version of application formatted as &lt;major.minor.micro.qualifier></td>
-    <td>none</td>
-  </tr>
-</deftable>
-</s3>
-
-<s3 title="listing deployed applications">
-  <p>Listing deployed applications is done with a <code>deploy-list</code> command</p>
-  <p><code>java -jar resin.jar [-conf &lt;file>] deploy-list -user &lt;user> -password &lt;password></code></p>
-  <example title="">java -jar lib/resin.jar deploy-list -user admin -password secret
-                    production/webapp/default/hello-world</example>
-</s3>
-
-<s3 title="copy application from context '/hello-world' to context '/foo'">
-<p>Copying an applicaiton is done with a <code>deploy-copy</code> command</p>
-<p><code>java -jar resin.jar [-conf &lt;file>] deploy-copy -user &lt;user> -password &lt;password> [options]</code></p>
-<example title="">java -jar lib/resin.jar deploy-copy -user admin -password secret -source hello-world -target foo
-copied production/webapp/default/hello-world to production/webapp/default/foo
-</example>
-<deftable title="deploy-copy options">
-  <tr>
-    <th>Argument</th>
-    <th>Meaning</th>
-    <th>Default</th>
-  </tr>
-  <tr>
-    <td>-source</td>
-    <td>context to copy application from</td>
-    <td>none</td>
-  </tr>
-  <tr>
-    <td>-source host</td>
-    <td>host to copy application from</td>
-    <td>default</td>
-  </tr>
-  <tr>
-    <td>-source-stage</td>
-    <td>source stage</td>
-    <td>production</td>
-  </tr>
-  <tr>
-    <td>-source-version</td>
-    <td>version of the source application formatted as &lt;major.minor.micro.qualifier></td>
-    <td>none</td>
-  </tr>
-  <tr>
-    <td>-target</td>
-    <td>context to copy application to</td>
-    <td>none</td>
-  </tr>
-  <tr>
-    <td>-target-host</td>
-    <td>host to copy an application to</td>
-    <td>default</td>
-  </tr>
-  <tr>
-    <td>-target-stage</td>
-    <td>target stage</td>
-    <td>production</td>
-  </tr>
-  <tr>
-    <td>-target-version</td>
-    <td>version application to use for a target, formatted as &lt;major.minor.micro.qualifier></td>
-    <td>none</td>
-  </tr>
-</deftable>
-</s3>
-<s3 title="undeploying application">
-<p>Undeploying an application is done with an <code>undeploy</code> command</p>
-<p><code>java -jar lib/resin.jar [-conf &lt;file>] undeploy -user &lt;user> -password &lt;password> [options] &lt;name></code></p>
-<example title="">java -jar lib/resin.jar undeploy -user admin -password secret undeploy foo
-Undeployed foo from http://127.0.0.1:8080/hmtp</example>
-  <deftable title="undeploy options">
-    <tr>
-      <th>Argument</th>
-      <th>Meaning</th>
-      <th>Default</th>
-    </tr>
-    <tr>
-      <td>-host</td>
-      <td>virtual host to make application available on</td>
-      <td>default</td>
-    </tr>
-    <tr>
-      <td>-stage</td>
-      <td>specifies stage for staging an application</td>
-      <td>production</td>
-    </tr>
-    <tr>
-      <td>-version</td>
-      <td>version of application formatted as &lt;major.minor.micro.qualifier></td>
-      <td>none</td>
-    </tr>
-  </deftable>
-</s3>
-<s3 title="starting application">
-<p>Starting an application is done with an <code>start-webapp</code> command</p>
-<p><code>java -jar resin.jar [-conf &lt;file>] start-webapp -user &lt;user> -password &lt;password> [options] &lt;name></code></p>
-<example title="start web application deployed at context '/foo'">java -jar lib/resin.jar start-webapp -user admin -password secret foo
-'production/webapp/default/foo' is started</example>
-  <deftable title="start-webapp options">
-    <tr>
-      <th>Argument</th>
-      <th>Meaning</th>
-      <th>Default</th>
-    </tr>
-    <tr>
-      <td>-host</td>
-      <td>virtual host to make application available on</td>
-      <td>default</td>
-    </tr>
-    <tr>
-      <td>-stage</td>
-      <td>specifies stage for staging an application</td>
-      <td>production</td>
-    </tr>
-    <tr>
-      <td>-version</td>
-      <td>version of application formatted as &lt;major.minor.micro.qualifier></td>
-      <td>none</td>
-    </tr>
-  </deftable>
-</s3>
-<s3 title="stopping application">
-<p>Stopping an application is done with an <code>stop-webapp</code> command</p>
-<p><code>java -jar resin.jar [-conf &lt;file>] stop-webapp -user &lt;user> -password &lt;password> [options] &lt;name></code></p>
-<example title="stop web application deployed at context '/foo'">java -jar lib/resin.jar stop-webapp -user admin -password secret foo
-'production/webapp/default/foo' is stopped</example>
-  <deftable title="stop-webapp options">
-    <tr>
-      <th>Argument</th>
-      <th>Meaning</th>
-      <th>Default</th>
-    </tr>
-    <tr>
-      <td>-host</td>
-      <td>virtual host to make application available on</td>
-      <td>default</td>
-    </tr>
-    <tr>
-      <td>-stage</td>
-      <td>specifies stage for staging an application</td>
-      <td>production</td>
-    </tr>
-    <tr>
-      <td>-version</td>
-      <td>version of application formatted as &lt;major.minor.micro.qualifier></td>
-      <td>none</td>
-    </tr>
-  </deftable>
-</s3>
-<s3 title="restarting application">
-<p>Restarting an application is done with an <code>restart-webapp</code> command</p>
-<p><code>java -jar resin.jar [-conf &lt;file>] restart-webapp -user &lt;user> -password &lt;password> [options] &lt;name></code></p>
-<example title="stop web application deployed at context '/foo'">java -jar lib/resin.jar restart-webapp -user admin -password secret foo
-'production/webapp/default/foo' is restarted</example>
-  <deftable title="restart-webapp options">
-    <tr>
-      <th>Argument</th>
-      <th>Meaning</th>
-      <th>Default</th>
-    </tr>
-    <tr>
-      <td>-host</td>
-      <td>virtual host to make application available on</td>
-      <td>default</td>
-    </tr>
-    <tr>
-      <td>-stage</td>
-      <td>specifies stage for staging an application</td>
-      <td>production</td>
-    </tr>
-    <tr>
-      <td>-version</td>
-      <td>version of application formatted as &lt;major.minor.micro.qualifier></td>
-      <td>none</td>
-    </tr>
-  </deftable>
-</s3>
-</s2>
-</s1>
-
-<s1 title="ant/maven Remote Deployment">
-
-<p>With remote deployment, you can use an ant or maven task to deploy
-a .war file to a running Resin instance.  This will require some configuration
-of the resin.xml to enable deployment.  For security reasons, remote
-deployment and administration is disabled by default, so you will need
-to enable the features to use them.</p>
-
-<ul>
-<li>Enable remote administration (the HMTP service).</li>
-<li>Add at least one admin user in AdminAuthenticator.</li>
-<li>Enable the remote deploy service.</li>
-</ul>
-
-<p>The first step is enabling remote administration, so you can manage
-the server remotely, either with eclipse, or ant, or maven.
-If disabled, Resin will ignore all remote administration requests.
-The disabled error message will be something like "Failed to connect
-to HMTP because HMTP service has not been enabled."  In
-the resin.xml, the &lt;resin:RemoteAdminService> tag enables remote
-administration:</p>
-
-<example title="Example: resin.xml enable remote administration">
-&lt;resin xmlns="http://caucho.com/ns/resin"
-       xmlns:resin="urn:java:com.caucho.resin">
-       ...
-
-  &lt;resin:AdminAuthenticator>
-     &lt;resin:user name="harry" password="..."/>
-  &lt;/resin:AdminAuthenticator>
-
-  &lt;cluster id="">
-
-    &lt;resin:RemoteAdminService/>
-    &lt;resin:DeployService/>
-
-    ...
-  &lt;/cluster>
-&lt;/resin>
-</example>
-
-<p>The second step is adding at least one administration user, so only
-authorized administrators can update the server.  The <a
-href="security.xtp">&lt;resin:AdminAuthenticator></a> tag configures
-administrators.  If no administrators are added, Resin will reject any
-remote administration requests.</p>
-
-<p>The third step is enabling the deploy service itself with the
-&lt;resin:DeployService> tag.  The deploy service is responsible for
-managing uploads of new applications and distributing them to the
-servers in the cluster.</p>
-
-<p>When troubleshooting, it's helpful to know that Resin uses BAM/HMTP
-to connect the deployment client with the deployment server.  The
-&lt;resin:RemoteAdminService> enables BAM/HMTP.  If the server is down
-or the remote admin service isn't enabled, the error messages will
-complain that the BAM/HMTP connection is not allowed.</p>
 
 </s1>
 

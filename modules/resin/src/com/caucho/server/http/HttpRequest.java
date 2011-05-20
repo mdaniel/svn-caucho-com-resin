@@ -791,14 +791,22 @@ public class HttpRequest extends AbstractHttpRequest
 
       invocation.service(requestFacade, getResponseFacade());
     } catch (ClientDisconnectException e) {
-      getResponseFacade().killCache();
+      CauchoResponse response = getResponseFacade();
+      
+      if (response != null)
+        response.killCache();
+
       killKeepalive();
 
       throw e;
     } catch (Throwable e) {
       log.log(Level.FINE, e.toString(), e);
 
-      getResponseFacade().killCache();
+      CauchoResponse response = getResponseFacade();
+      
+      if (response != null)
+        response.killCache();
+      
       killKeepalive();
 
       sendRequestError(e);

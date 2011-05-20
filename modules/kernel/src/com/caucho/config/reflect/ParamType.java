@@ -176,6 +176,14 @@ public class ParamType extends BaseType implements ParameterizedType
     
     return new ParamType(_type, types, paramMap);
   }
+  
+  @Override
+  public void fillSyntheticTypes(Set<VarType<?>> varTypeList)
+  {
+    for (BaseType param : _param) {
+      param.fillSyntheticTypes(varTypeList);
+    }
+  }
 
   @Override
   public boolean isAssignableFrom(BaseType type)

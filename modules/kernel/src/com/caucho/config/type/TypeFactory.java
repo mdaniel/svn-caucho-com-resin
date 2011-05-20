@@ -121,8 +121,8 @@ public class TypeFactory implements AddLoaderListener
   private final HashMap<String,ArrayList<String>> _packageImportMap
     = new HashMap<String,ArrayList<String>>();
 
-  private final HashMap<String,ConfigType<?>> _typeMap
-    = new HashMap<String,ConfigType<?>>();
+  private final ConcurrentHashMap<String,ConfigType<?>> _typeMap
+    = new ConcurrentHashMap<String,ConfigType<?>>();
 
   private final HashMap<String,XmlBeanType<?>> _customBeanMap
     = new HashMap<String,XmlBeanType<?>>();
@@ -514,22 +514,22 @@ public class TypeFactory implements AddLoaderListener
 
   private ConfigType getConfigTypeImpl(Class type)
   {
-    synchronized (_introspectLock) {
-      ConfigType strategy = _typeMap.get(type.getName());
+    ConfigType strategy = _typeMap.get(type.getName());
+    
+    if (strategy == null) {
+      strategy = _primitiveTypes.get(type);
 
-      if (strategy == null) {
-        strategy = _primitiveTypes.get(type);
+      if (strategy == null)
+        strategy = createType(type);
 
-        if (strategy == null)
-          strategy = createType(type);
+      _typeMap.putIfAbsent(type.getName(), strategy);
 
-        _typeMap.put(type.getName(), strategy);
-
-        strategy.introspect();
-      }
-
-      return strategy;
+      strategy = _typeMap.get(type.getName());
     }
+    
+    strategy.carefulIntrospect();
+
+    return strategy;
   }
 
   ConfigType createType(Class<?> type)

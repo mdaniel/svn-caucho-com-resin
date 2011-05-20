@@ -51,12 +51,25 @@ abstract public class ConfigType<T>
   private static final L10N L = new L10N(ConfigType.class);
   
   private boolean _isEnvBean;
+  private boolean _isIntrospected;
   
   /**
    * Returns the Java type.
    */
   abstract public Class<T> getType();
 
+  public void carefulIntrospect()
+  {
+    if (_isIntrospected)
+      return;
+    
+    synchronized (this) {
+      if (! _isIntrospected)
+        introspect();
+      
+      _isIntrospected = true;
+    }
+  }
   /**
    * Introspect the type.
    */

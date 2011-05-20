@@ -172,6 +172,9 @@ public class CometServletFilterChain implements FilterChain {
       
       AsyncContext oldContext = _context;
       
+      if (_request.isClientDisconnect() || _request.isClosed())
+        return;
+      
       _context = _request.startAsync();
 
       if (oldContext != null)

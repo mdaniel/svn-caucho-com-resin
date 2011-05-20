@@ -51,6 +51,34 @@ be registered in resin.xml file.</p>
       <th>Command</th>
       <th>Description</th>
     </tr>
+  <tr>
+    <td>deploy</td>
+    <td>deploys an application archive</td>
+  </tr>
+  <tr>
+    <td>undeploy</td>
+    <td>un-deploys an application specified by a context</td>
+  </tr>
+  <tr>
+    <td>deploy-list</td>
+    <td>lists all applications deployed on a server</td>
+  </tr>
+  <tr>
+    <td>deploy-copy</td>
+    <td>copies an application from one context to another</td>
+  </tr>
+  <tr>
+    <td>start-webapp</td>
+    <td>starts web application context</td>
+  </tr>
+  <tr>
+    <td>stop-webapp</td>
+    <td>stops web application context</td>
+  </tr>
+  <tr>
+    <td>restart-webapp</td>
+    <td>restarts web application context</td>
+  </tr>
     <tr>
       <td>heap-dump</td>
       <td>produces heap dump</td>
@@ -119,7 +147,7 @@ be registered in resin.xml file.</p>
 </deftable>
 </s1>
 
-<s1 title="producing heap dump">
+<s1 title="heap-dump: producing JVM memory heap dump">
 <p>To produce a heap dump resin provides <code>heap-dump</code> command. With
 Resin Open Source, <code>heap-dump</code> will produce a standard heap dump
 file and put it into a temporary directory on a remote machine.</p>
@@ -174,7 +202,7 @@ Heap Dump generated Fri May 08 02:51:31 PDT 1998
   is always left on the machine where Resin server is running. </note>
 </s1>
 
-<s1 title="producing thread dump">
+<s1 title="thread-dump: producing a thread dump">
 <p>To produce a thread dump resin provides <code>thread-dump</code> command.
 The thread dump is produced on a remote sever and printed out locally.</p>
 <p><code>java -jar resin.jar [-conf &lt;file>] thread-dump -user &lt;user> -password &lt;password> [-raw]</code></p>
@@ -225,7 +253,7 @@ The thread dump is produced on a remote sever and printed out locally.</p>
 </example>
 </s1>
 
-<s1 title="profiling application">
+<s1 title="profile: profiling application">
   <p>Profiling application can help find bottlenecks. Resin's
     <code>profile</code>
     command turn on sampling for requested period of time and prints out
@@ -283,7 +311,7 @@ com.caucho.env.thread.AbstractTaskWorker.run()
 
 </s1>
 
-<s1 title="setting log level">
+<s1 title="log-level: setting log level">
   <p>Command <code>log-level</code> allows to temporarily increase log level
     for an application.
   </p>
@@ -317,7 +345,7 @@ Log {root}.level is set to `FINER'. Active time 5 seconds.
 </deftable>
 </s1>
 
-<s1 title="listing JMX MBeans, attributes and operations">
+<s1 title="jmx-list: listing JMX MBeans, attributes and operations">
 <p>Command<code>jmx-list</code> prints out JMX MBeans, attributes and operations
 registered in a JVM that is running Resin. As its last argument the command
 accepts &lt;pattern>. The &lt;pattern> follows convention defined for
@@ -370,7 +398,7 @@ com.acme:type=Foo
 </example>
 </s1>
 
-<s1 title="setting attribute value on MBeans">
+<s1 title="jmx-set: setting attribute value on MBeans">
 <p>Command<code>jmx-set</code> sets a value on an attribute belonging to a particular
 JMX MBean.</p>
 <p><code>java -jar lib/resin.jar [-conf &lt;file>] jmx-set -user &lt;user> -password &lt;password> -pattern &lt;pattern> -attribute &lt;attribute> value</code></p>
@@ -402,7 +430,7 @@ value for attribute `Foo' on bean `com.acme:type=Foo' is changed from `null' to 
 </deftable>
 </s1>
 
-<s1 title="invoking method on a MBean">
+<s1 title="jmx-call: invoking method on a MBean">
 <p>Command<code>jmx-call</code> calls a method on a specified with &lt; pattern> MBean.</p>
 <p><code>java -jar resin.jar [-conf &lt;file>] jmx-call -user &lt;user> -password &lt;password> -pattern &lt;pattern> -operation &lt;operation> value...</code></p>
 <example title="invoking method on MBean">$java -jar lib/resin.jar -conf conf/resin.conf jmx-call -user foo -password test -pattern com.acme:type=Foo -pattern com.acme:type=Foo -operation echo hello
@@ -432,5 +460,217 @@ method `echo(java.lang.String)' called on `com.acme:type=Foo' returned `hello'.
   </tr>
 </deftable>
 </s1>
+
+<s1 title="deploy: deploying a web application">
+<p>Deploying an application is done with a <code>deploy</code> command</p>
+<p><code>java -jar resin.jar [-conf &lt;file>] deploy -user &lt;user> -password &lt;password> [options] &lt;war-file></code></p>
+<example title="deploying an application from a hello-world.war archive">java -jar lib/resin.jar deploy -user admin -password secret /projects/hello-world/hello-world.war
+Deployed production/webapp/default/hello-world as hello-world.war to http://127.0.0.1:8080/hmtp</example>
+<deftable title="deploy options">
+  <tr>
+    <th>Argument</th>
+    <th>Meaning</th>
+    <th>Default</th>
+  </tr>
+  <tr>
+    <td>-host</td>
+    <td>virtual host to make application available on</td>
+    <td>default</td>
+  </tr>
+  <tr>
+    <td>-name</td>
+    <td>name of the context to deploy to, defaults to war-file name</td>
+    <td>[/foo].war</td>
+  </tr>
+  <tr>
+    <td>-stage</td>
+    <td>specifies stage for staging an application</td>
+    <td>production</td>
+  </tr>
+  <tr>
+    <td>-version</td>
+    <td>version of application formatted as &lt;major.minor.micro.qualifier></td>
+    <td>none</td>
+  </tr>
+</deftable>
+</s1>
+
+<s1 title="deploy-list: listing deployed applications">
+  <p>Listing deployed applications is done with a <code>deploy-list</code> command</p>
+  <p><code>java -jar resin.jar [-conf &lt;file>] deploy-list -user &lt;user> -password &lt;password></code></p>
+  <example title="">java -jar lib/resin.jar deploy-list -user admin -password secret
+                    production/webapp/default/hello-world</example>
+</s1>
+
+<s1 title="deploy-copy: copy application from context '/hello-world' to context '/foo'">
+<p>Copying an applicaiton is done with a <code>deploy-copy</code> command</p>
+<p><code>java -jar resin.jar [-conf &lt;file>] deploy-copy -user &lt;user> -password &lt;password> [options]</code></p>
+<example title="">java -jar lib/resin.jar deploy-copy -user admin -password secret -source hello-world -target foo
+copied production/webapp/default/hello-world to production/webapp/default/foo
+</example>
+<deftable title="deploy-copy options">
+  <tr>
+    <th>Argument</th>
+    <th>Meaning</th>
+    <th>Default</th>
+  </tr>
+  <tr>
+    <td>-source</td>
+    <td>context to copy application from</td>
+    <td>none</td>
+  </tr>
+  <tr>
+    <td>-source host</td>
+    <td>host to copy application from</td>
+    <td>default</td>
+  </tr>
+  <tr>
+    <td>-source-stage</td>
+    <td>source stage</td>
+    <td>production</td>
+  </tr>
+  <tr>
+    <td>-source-version</td>
+    <td>version of the source application formatted as &lt;major.minor.micro.qualifier></td>
+    <td>none</td>
+  </tr>
+  <tr>
+    <td>-target</td>
+    <td>context to copy application to</td>
+    <td>none</td>
+  </tr>
+  <tr>
+    <td>-target-host</td>
+    <td>host to copy an application to</td>
+    <td>default</td>
+  </tr>
+  <tr>
+    <td>-target-stage</td>
+    <td>target stage</td>
+    <td>production</td>
+  </tr>
+  <tr>
+    <td>-target-version</td>
+    <td>version application to use for a target, formatted as &lt;major.minor.micro.qualifier></td>
+    <td>none</td>
+  </tr>
+</deftable>
+</s1>
+
+<s1 title="undeploy: undeploying application">
+<p>Undeploying an application is done with an <code>undeploy</code> command</p>
+<p><code>java -jar lib/resin.jar [-conf &lt;file>] undeploy -user &lt;user> -password &lt;password> [options] &lt;name></code></p>
+<example title="">java -jar lib/resin.jar undeploy -user admin -password secret undeploy foo
+Undeployed foo from http://127.0.0.1:8080/hmtp</example>
+  <deftable title="undeploy options">
+    <tr>
+      <th>Argument</th>
+      <th>Meaning</th>
+      <th>Default</th>
+    </tr>
+    <tr>
+      <td>-host</td>
+      <td>virtual host to make application available on</td>
+      <td>default</td>
+    </tr>
+    <tr>
+      <td>-stage</td>
+      <td>specifies stage for staging an application</td>
+      <td>production</td>
+    </tr>
+    <tr>
+      <td>-version</td>
+      <td>version of application formatted as &lt;major.minor.micro.qualifier></td>
+      <td>none</td>
+    </tr>
+  </deftable>
+</s1>
+
+<s1 title="start-webapp: starting application">
+<p>Starting an application is done with an <code>start-webapp</code> command</p>
+<p><code>java -jar resin.jar [-conf &lt;file>] start-webapp -user &lt;user> -password &lt;password> [options] &lt;name></code></p>
+<example title="start web application deployed at context '/foo'">java -jar lib/resin.jar start-webapp -user admin -password secret foo
+'production/webapp/default/foo' is started</example>
+  <deftable title="start-webapp options">
+    <tr>
+      <th>Argument</th>
+      <th>Meaning</th>
+      <th>Default</th>
+    </tr>
+    <tr>
+      <td>-host</td>
+      <td>virtual host to make application available on</td>
+      <td>default</td>
+    </tr>
+    <tr>
+      <td>-stage</td>
+      <td>specifies stage for staging an application</td>
+      <td>production</td>
+    </tr>
+    <tr>
+      <td>-version</td>
+      <td>version of application formatted as &lt;major.minor.micro.qualifier></td>
+      <td>none</td>
+    </tr>
+  </deftable>
+</s1>
+
+<s1 title="stop-webapp: stopping application">
+<p>Stopping an application is done with an <code>stop-webapp</code> command</p>
+<p><code>java -jar resin.jar [-conf &lt;file>] stop-webapp -user &lt;user> -password &lt;password> [options] &lt;name></code></p>
+<example title="stop web application deployed at context '/foo'">java -jar lib/resin.jar stop-webapp -user admin -password secret foo
+'production/webapp/default/foo' is stopped</example>
+  <deftable title="stop-webapp options">
+    <tr>
+      <th>Argument</th>
+      <th>Meaning</th>
+      <th>Default</th>
+    </tr>
+    <tr>
+      <td>-host</td>
+      <td>virtual host to make application available on</td>
+      <td>default</td>
+    </tr>
+    <tr>
+      <td>-stage</td>
+      <td>specifies stage for staging an application</td>
+      <td>production</td>
+    </tr>
+    <tr>
+      <td>-version</td>
+      <td>version of application formatted as &lt;major.minor.micro.qualifier></td>
+      <td>none</td>
+    </tr>
+  </deftable>
+</s1>
+<s1 title="restart-webapp: restarting application">
+<p>Restarting an application is done with an <code>restart-webapp</code> command</p>
+<p><code>java -jar resin.jar [-conf &lt;file>] restart-webapp -user &lt;user> -password &lt;password> [options] &lt;name></code></p>
+<example title="stop web application deployed at context '/foo'">java -jar lib/resin.jar restart-webapp -user admin -password secret foo
+'production/webapp/default/foo' is restarted</example>
+  <deftable title="restart-webapp options">
+    <tr>
+      <th>Argument</th>
+      <th>Meaning</th>
+      <th>Default</th>
+    </tr>
+    <tr>
+      <td>-host</td>
+      <td>virtual host to make application available on</td>
+      <td>default</td>
+    </tr>
+    <tr>
+      <td>-stage</td>
+      <td>specifies stage for staging an application</td>
+      <td>production</td>
+    </tr>
+    <tr>
+      <td>-version</td>
+      <td>version of application formatted as &lt;major.minor.micro.qualifier></td>
+      <td>none</td>
+    </tr>
+  </deftable>
+</s1>
+
   </body>
 </document>

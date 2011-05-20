@@ -37,7 +37,6 @@ import com.caucho.quercus.env.ArrayValueImpl;
 import com.caucho.quercus.env.Env;
 import com.caucho.quercus.env.NullValue;
 import com.caucho.quercus.env.Post;
-import com.caucho.quercus.env.UnicodeValueImpl;
 import com.caucho.quercus.env.Value;
 import com.caucho.quercus.lib.ArrayModule;
 import com.caucho.util.L10N;
@@ -78,11 +77,13 @@ public class StringUtility
         int ch = 0;
         byteToChar.clear();
 
-        for (; i < len && querySeparatorMap[ch = str.charAt(i)] > 0; i++) {
+        for (;
+             i < len && isSeparator(querySeparatorMap, ch = str.charAt(i));
+             i++) {
         }
       
         for (; i < len && (ch = str.charAt(i)) != '='
-             && querySeparatorMap[ch] == 0; i++) {
+             && ! isSeparator(querySeparatorMap, ch); i++) {
           i = addQueryChar(byteToChar, str, len, i, ch);
         }
 
@@ -93,7 +94,7 @@ public class StringUtility
         String value;
         if (ch == '=') {
           for (i++; i < len
-               && querySeparatorMap[ch = str.charAt(i)] == 0; i++) {
+               && ! isSeparator(querySeparatorMap, (ch = str.charAt(i))); i++) {
             i = addQueryChar(byteToChar, str, len, i, ch);
           }
 
@@ -152,6 +153,11 @@ public class StringUtility
     } catch (IOException e) {
       throw new QuercusModuleException(e);
     }
+  }
+  
+  private static boolean isSeparator(int []sep, int ch)
+  {
+    return (ch < sep.length && sep[ch] > 0);
   }
 
   protected static int addQueryChar(ByteToChar byteToChar,

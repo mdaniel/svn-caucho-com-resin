@@ -13,6 +13,9 @@
 
 <s2 title="4.0.19 - snapshot">
 <ul>
+<li>async/comet: with Resin comet API, check for complete on suspend (#4534, rep by Brent Plump)</li>
+<li>ejb: with generics Class<T> as argument and return (#4551, rep by dicr)</li>
+<li>servlet: finally handling for request needs to check for null (#4545)</li>
 <li>access-log: add rollover-check-time configuration (#4533, rep by peng yao)</li>
 <li>./configure: removed OPENSSL_LIB search instead using standard library (rep by Michael O'Dea)</li>
 <li>ejb: synthetic/bridge methods should not be reflected (#4555, rep by dicr)</li>

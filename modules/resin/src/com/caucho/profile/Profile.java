@@ -95,11 +95,13 @@ public class Profile
     throw new AbstractMethodError();
   }
 
-  public long getTicks() {
+  public long getTicks()
+  {
     throw new AbstractMethodError();
   }
 
-  public long getRunTime() {
+  public long getRunTime()
+  {
     throw new AbstractMethodError();
   }
 

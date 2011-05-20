@@ -4284,7 +4284,7 @@ public class WebApp extends ServletContextImpl
       webApp = (WebApp) getContext(fullURI);
 
       if (webApp == null)
-        return null;
+        webApp = this;
 
       String cp = webApp.getContextPath();
       tail = fullURI.substring(cp.length());
