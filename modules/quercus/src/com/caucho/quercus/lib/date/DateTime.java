@@ -90,8 +90,8 @@ public class DateTime
                                      @Optional("now") String time,
                                      @Optional DateTimeZone timeZone)
   {
-    if(time == null)
-        time = "now";
+    if (time == null)
+      time = "now";
     if (timeZone == null)
       return new DateTime(env, time);
     else

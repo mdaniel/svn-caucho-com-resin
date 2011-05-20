@@ -628,26 +628,27 @@ public class DOMDocument
   }
 
   @ReturnNullAsFalse
-  public StringValue saveXML(Env env, @Optional DOMNode node, @Optional Value options)
-          throws DOMException
+  public StringValue saveXML(Env env,
+                             @Optional DOMNode node,
+                             @Optional Value options)
+    throws DOMException
   {
     if (options != null)
       env.stub(L.l("`{0}' is ignored", "options"));
 
-    if(node != null){
-        // check if node is from another document
+    if (node != null) {
+      // check if node is from another document
 
-        if(node.getDelegate().getOwnerDocument() != this._delegate)
-        {
-            throw new DOMException(getImpl(),
-                    new org.w3c.dom.DOMException(
-                            org.w3c.dom.DOMException.WRONG_DOCUMENT_ERR,
-                            "Wrong Document Error")
-                    );
-        }
-        return saveToString(env, node, false);
+      if (node.getDelegate().getOwnerDocument() != this._delegate) {
+        throw new DOMException(getImpl(),
+                               new org.w3c.dom.DOMException(
+                                 org.w3c.dom.DOMException.WRONG_DOCUMENT_ERR,
+                                 "Wrong Document Error")
+        );
+      }
+      return saveToString(env, node, false);
     }
-    return saveToString( env, this, false);
+    return saveToString(env, this, false);
   }
 
   public boolean schemaValidate(String schemaFilename)
