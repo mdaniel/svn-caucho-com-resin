@@ -4,24 +4,29 @@ admin_init();
 
 $pages = load_pages("rest");
 
-echo "<h1>REST links</h1>";
+echo "<h1>REST Links</h1>";
+
+echo "<ul>\n";
 foreach ($pages as $key => $page) {
-  if ($page == "index")
+  if ($key == "index")
     continue;
     
-  echo "<a href='?q=" . $key . "'>" . $key . "</a><br>\n";
+  echo "<li><a href='?q=" . $key . "'>" . $key . "</a></li>\n";
 }
+echo "</ul>\n";
 
 ?>
 
-<h1>Writing a custom REST page</h1>
+<br/>
+
+<h2>Writing a custom REST page</h2>
 
 <p>To gather custom JMX data, you'll create a custom REST page, which
 is just a PHP page accessing JMX.  The page has the extension .rest
 and can be named whatever you like, e.g. mypage.rest.  Put the 
-my-app.rest page in WEB-INF/php/mypage.rest.
+my-app.rest page in WEB-INF/php/mypage.rest.</p>
 
-<h2>Location of mypage.rest</h2>
+<h3>Location of mypage.rest</h3>
 
 <p>The mypage.rest can be put directly in WEB-INF/php or in a custom 
 location given by "resin_admin_ext_path.  We recommend using
@@ -29,7 +34,7 @@ resin_admin_ext_path so you can keep your extensions distinct from
 Resin's standard pages.   The resin_admin_ext_path is configured
 in the resin.xml like:</p>
 
-<code><pre>
+<pre><code>
 &lt;resin xmlns="http://caucho.com/ns/resin">
   ...
 
@@ -41,13 +46,13 @@ in the resin.xml like:</p>
                value="/var/www/admin/php"/></b>
  &lt;/prologue>
 &lt;/web-app>
-</pre></code>
+</code></pre>
 
-<h2>mypage.rest sample code</h2>
+<h3>mypage.rest sample code</h3>
 
-<p>The code for a REST page will look like:
+<p>The code for a REST page will look like:</p>
 
-<code><pre>
+<pre><code>
 &lt;?php
 
 header("Content-Type: text/plain; charset=utf-8");
@@ -59,8 +64,12 @@ $jvm_thread = $mbean_server->lookup("java.lang:type=Threading");
 printf("JvmThreadCount: %d\n", $jvm_thread->ThreadCount);
 
 ?>
-</pre></code>
+</code></pre>
 
 <p>The $mbean_server is a Resin's PHP interface to Java JMX MBeanServer.
 The <code>lookup($name)</code> method looks up a MBean by its
 ObjectName.  The field reference is a JXM attribute.</p>
+
+<?php
+display_footer($g_page, $javascript);
+?>

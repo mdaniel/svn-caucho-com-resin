@@ -357,16 +357,16 @@ class BooleanField extends FormField {
 
     if ($value == "true") {
       echo "  <option value=''>---</option>\n";
-      echo "  <option selected value='true'>true</option>\n";
+      echo "  <option selected='selected' value='true'>true</option>\n";
       echo "  <option value='false'>false</option>\n";
     }
     elseif ($value == 'false') {
       echo "  <option value=''>---</option>\n";
       echo "  <option value='true'>true</option>\n";
-      echo "  <option selected value='false'>false</option>\n";
+      echo "  <option selected='selected' value='false'>false</option>\n";
     }
     else {
-      echo "  <option selected value=''>---</option>\n";
+      echo "  <option selected='selected' value=''>---</option>\n";
       echo "  <option value='true'>true</option>\n";
       echo "  <option value='false'>false</option>\n";
     }
@@ -438,7 +438,7 @@ class ChoiceField extends TextField {
 
     if ($this->_title != NULL) {
       if ($this->get_value() == NULL)
-        echo "  <option selected value=''>{$this->_title}</option>\n";
+        echo "  <option selected='selected' value=''>{$this->_title}</option>\n";
       else
         echo "  <option value=''>{$this->_title}</option>\n";
     }
@@ -446,7 +446,7 @@ class ChoiceField extends TextField {
     foreach ($this->_choices as $choice) {
       $choice_value = $choice->get_value();
       if ($this->get_value() == $choice_value)
-        echo "  <option selected value='$choice_value'>$choice_value</option>\n";
+        echo "  <option selected='selected' value='$choice_value'>$choice_value</option>\n";
       else
         echo "  <option value='$choice_value'>$choice_value</option>\n";
     }
@@ -621,7 +621,7 @@ class RootForm extends SubForm {
   {
     $this->add_submit();
 
-    echo "<form id='{$this->_name}' name='{$this->_name}' method='POST'>";
+    echo "<form id='{$this->_name}' name='{$this->_name}' method='post'>";
     echo "<input type='hidden' name='form-name' value='{$this->_name}'/>\n";
 
     echo "<table class='form'>\n";

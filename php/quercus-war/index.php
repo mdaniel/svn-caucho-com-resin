@@ -50,7 +50,7 @@ Quercus&#153; Start Page
 </head>
 
 <body>
-<a href="http://www.caucho.com"><img border="0" src="images/caucho-white.jpg"></a>
+<a href="http://www.caucho.com"><img border="0" src="images/caucho-white.jpg" alt="Caucho Technology"></a>
 
 <p>
 Testing for Quercus&#153;...
@@ -65,11 +65,11 @@ PHP is being interpreted, but not by Quercus&#153;!  Please check your configura
 </div>
 
 <div class="message" id="success_pro">
-<img src="images/dragonfly-tiny.png">Congratulations!  Quercus&#153; <?php if (quercus_test()) echo quercus_version(); ?> is compiling PHP pages.  Have fun!
+<img src="images/dragonfly-tiny.png" alt="Caucho Dragonfly Logo">Congratulations!  Quercus&#153; <?php if (quercus_test()) echo quercus_version(); ?> is compiling PHP pages.  Have fun!
 </div>
 
 <div class="message" id="success_open_source">
-<img src="images/dragonfly-tiny.png">Congratulations!  Quercus&#153; <?php if (quercus_test()) echo quercus_version(); ?> is interpreting PHP pages.  Have fun!
+<img src="images/dragonfly-tiny.png" alt="Caucho Dragonfly Logo">Congratulations!  Quercus&#153; <?php if (quercus_test()) echo quercus_version(); ?> is interpreting PHP pages.  Have fun!
 </div>
 
 <div>

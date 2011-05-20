@@ -15,11 +15,9 @@ html {
 body {
   font-family: Arial,Helvetica,sans-serif;
   font-size: small;
-  border: 0px;
-  padding: 0;
   margin: 0;
+  padding: 0;
   width: 100%;
-  height: 100%;
 }
 
 .breadcrumb {
@@ -102,20 +100,16 @@ hr {
 h1.title {
   margin : 0em 0.5em;
   border-bottom : 0;
-
   font-family : Helvetica, Arial, sans-serif;
   font-variant : normal;
-
   color : #990033;
 }
 
 h1 {
-  margin-right : 1em;
+  margin-top : 0;
   border-bottom : 1px solid #4c2004;
-
   font-family : Helvetica, Arial, sans-serif;
   font-size : 170%;
-
   color : #4c2004;
 }
 
@@ -152,7 +146,6 @@ div.section-title {
   padding : 0.2em;
 }
 
-
 div.section {
   padding-left: 2em;
 }
@@ -162,11 +155,6 @@ pre {
   color : black;
   font-family : monospace;
   font-size : .9em;
-}
-
-.leftnav {
-/*  background : #b9cef7; */
-/*  bgcolor : #b9cef7; */
 }
 
 .desc {
@@ -459,7 +447,16 @@ code {
 }
 
 #layout {
-  margin-top: 2em;
+  padding: 0;
+  margin: 0;
+  width: 100%;
+  border: none;
+}
+
+td.leftnav {
+	width: 150px;
+	padding-left: 0.5em;
+	padding-right: 10px;
 }
 
 ul.leftnav {
@@ -505,7 +502,6 @@ li.server {
   position: fixed;
   top: 0;
   z-index: 500;
-  width: 100%;
   background: #f4f4f4;
   border-bottom:1px solid gray; 
   margin: 0;
@@ -795,12 +791,6 @@ span.warning {
   font-style : italic;
 }
 
-td.leftnav {
-/*  background : #E0E6F8; */
-  color : black;
-/*  vertical-align : top; */
-  padding : 3px;
-}
 .nav-cluster {
   font-weight : bold;
   font-size : 120%;
@@ -918,6 +908,10 @@ table.schema tr th {
 
 .switch {
   vertical-align: middle;
+}
+
+.debug {
+	border: 1px solid red;
 }
 
 .highlight { 
@@ -1065,3 +1059,24 @@ div.form-input-help {
   font-size : 90%;
 }
 
+.webapp-expand {
+	border : 1px solid grey; 
+	padding : 0em 1em 1em 1em;
+	width: 58em;
+}
+
+.webapp-data {
+  width: 60em;
+}
+
+.webapp-actions {
+  text-align: center;
+  white-space: nowrap;
+  width: 15em;
+}
+
+.top-header {
+	width: 100%;
+	text-align: right;
+	padding-top: 2em;
+}

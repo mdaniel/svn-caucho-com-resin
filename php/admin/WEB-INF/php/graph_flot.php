@@ -84,24 +84,25 @@ function stat_graph($canvas, $width, $height, $start, $end, $names,
   $tz_offset = $date->getOffset() * 1000;
 
   if ($legend == "none") {
-    echo "<div id='$canvas' style='width:${width}px;height:${height}px'></div>\n";
+    echo "<div id='$canvas-plot' style='width:${width}px;height:${height}px'></div>\n";
   }
   else if ($legend == "right") {
     echo "<table border='0' cellspacing='0' cellpadding='0'>\n";
     echo "<tr><td>";
-    echo "<div id='$canvas' style='width:${width}px;height:${height}px'></div>\n";
+    echo "<div id='$canvas-plot' style='width:${width}px;height:${height}px'></div>\n";
     echo "</td><td>";
 
     echo "<div id='${canvas}-legend' style='width:${width}px;height:${label_height}px'></div>\n";
-    echo "</td></table>\n";
+    echo "</td></tr></table>\n";
   }
   else {
-    echo "<div id='$canvas' style='width:${width}px;height:${height}px'></div>\n";
+    echo "<div id='$canvas-plot' style='width:${width}px;height:${height}px'></div>\n";
 
     echo "<div id='${canvas}-legend' style='width:${width}px;height:${label_height}px'></div>\n";
   }
 
-  echo "<script id='source' language='javascript' type='text/javascript'>\n";
+  echo "<script id='$canvas-script' language='javascript' type='text/javascript'>\n";
+  echo "<!-- \n";
   echo '$(function () {' . "\n";
 
   $index = null;
@@ -146,7 +147,7 @@ function stat_graph($canvas, $width, $height, $start, $end, $names,
 	  $labelWidth = 60;
   }
 
-  echo '$.plot($("#' . $canvas . '"), graphs,';
+  echo '$.plot($("#' . $canvas . '-plot"), graphs,';
   echo '{ ';
   echo 'xaxis: { mode:"time" }, ';
   echo "yaxis: {labelWidth:$labelWidth,tickFormatter: function(val, axis) {\n";
@@ -171,5 +172,6 @@ function stat_graph($canvas, $width, $height, $start, $end, $names,
   echo '});' . "\n";
   
   echo "});\n";
+  echo " -->\n";
   echo "</script>";
 }

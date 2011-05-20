@@ -156,7 +156,7 @@ function thread_display_group($group_name, $threads)
     
   echo "<table class='threads'>\n";
   
-  echo "<tr class='head'><th colspan='5' align='left'>";
+  echo "<tr class='head'><th colspan='5' align='left' id='${group_name}'>";
   
   echo "<span id='sw_" . $group_name . "' class='switch'></span>\n";
   echo "$name (" . thread_count_rec($threads) . ")";
@@ -165,13 +165,17 @@ function thread_display_group($group_name, $threads)
 
   echo "<tr>";
 //  echo "<td style='border-width:0'>&nbsp;&nbsp;&nbsp;</td>";
-  echo "<th>id</th>";
-  echo "<th>name</th>";
-  echo "<th>method</th>";
-  echo "<th>state</th>";
-  echo "<th>url</th>";
+  echo "<th id='${group_name}_id'>id</th>";
+  echo "<th id='${group_name}_name'>name</th>";
+  echo "<th id='${group_name}_method'>method</th>";
+  echo "<th id='${group_name}_state'>state</th>";
+  echo "<th id='${group_name}_url'>url</th>";
   echo "</tr>\n";
 
+  echo "<tr>";
+  echo "<th id='${group_name}_stack' colspan='5'>stack</th>";
+  echo "</tr>\n";
+  
   $count = 0;
   foreach ($threads as $thread) {
     $info = $thread["info"];
@@ -210,10 +214,10 @@ function thread_display_thread($info, $group_name, $count)
   $id = $info->threadId;
 
 //    echo "<td style='border-width:0'>&nbsp;&nbsp;&nbsp;</td>";
-  echo "<td><a name='th_${id}'></a>";
+  echo "<td headers='${group_name} ${group_name}_id'><a name='th_${id}'></a>";
   echo "<span id='sw_${group_name}_${id}' class='switch'></span>\n";
   echo $id . "</td>";
-  echo "<td>" . $info->threadName . "</td>";
+  echo "<td headers='${group_name} ${group_name}_name'>" . $info->threadName . "</td>";
 
   $topStack = thread_get_description($info);
 
@@ -222,13 +226,13 @@ function thread_display_thread($info, $group_name, $count)
     $tail = strrchr($name, '.');
     if ($tail)
       $name = substr($tail, 1);
-    echo "<td>" . $name . "."
+    echo "<td headers='${group_name} ${group_name}_method'>" . $name . "."
 	 . $topStack->methodName . "()</td>";
   }
   else
-    echo "<td></td>";
+    echo "<td headers='${group_name} ${group_name}_id'></td>";
     
-  echo "<td>" . $info->threadState;
+  echo "<td headers='${group_name} ${group_name}_state'>" . $info->threadState;
   if ($info->isInNative())
     echo " (JNI)";
   if ($info->getBlockedTime() > 0)
@@ -237,7 +241,7 @@ function thread_display_thread($info, $group_name, $count)
     echo sprintf(" (%dms)", $info->getWaitedTime())
   echo "</td>";
 
-  echo "<td>" . $thread["url"] . "</td>\n";
+  echo "<td headers='${group_name} ${group_name}_url'>" . $thread["url"] . "</td>\n";
 
   echo "</tr>\n";
 
@@ -249,7 +253,7 @@ function thread_display_thread($info, $group_name, $count)
 function thread_display_stack($id, $group, $info)
 {
   echo "<tr class='stack_trace toggle-sw_${group} toggle-sw_${group}_${id}'>";
-  echo "<td colspan='5'>";
+  echo "<td colspan='5' headers='${group} ${group}_stack'>";
  // echo "<pre class='stack_trace toggle-sw_${group}'>";
   echo "<pre class='stack_trace'>";
 
@@ -310,7 +314,6 @@ foreach ($thread_ids as $id) {
   var_dump($jvm_thread->getThreadInfo($id));
 }
 */
-echo "</pre>";
 
 /*
 

@@ -59,7 +59,7 @@ if ($profile) {
     echo "  <option>25ms";
     echo "  <option>100ms";
     echo "  <option>250ms";
-    echo "  <option selected>1000ms";
+    echo "  <option selected='selected'>1000ms";
     echo "  <option>2500ms";
     echo "  <option>10000ms";
     echo "</select>";
@@ -68,7 +68,7 @@ if ($profile) {
     echo "  <option>4";
     echo "  <option>8";
     echo "  <option>12";
-    echo "  <option selected>16";
+    echo "  <option selected='selected'>16";
     echo "  <option>20";
     echo "  <option>32";
     echo "  <option>250";

@@ -72,7 +72,7 @@ if ($profile) {
 
     foreach ($PERIODS as $period) {
       if ($period == $postedPeriod) 
-        echo "  <option selected value='{$period}'>{$period}ms</option>";
+        echo "  <option selected='selected' value='{$period}'>{$period}ms</option>";
       else
         echo "  <option value='{$period}'>{$period}ms</option>";
     }
@@ -92,7 +92,7 @@ if ($profile) {
 
     foreach ($DEPTHS as $depth) {
       if ($depth == $postedDepth) 
-        echo "  <option selected>{$depth}</option>";
+        echo "  <option selected='selected'>{$depth}</option>";
       else
         echo "  <option>{$depth}</option>";
     }
@@ -236,7 +236,7 @@ function print_profile_tab($entries, $name, $count, $profile)
     echo "<td colspan='4'>";
 
     echo "<div class='stack-trace'>";
-    echo "<hr>";
+    echo "<hr/>";
 
     foreach ($entry->getStackTrace() as $stack) {
       echo "  at " . print_stack_entry($stack);

@@ -159,14 +159,20 @@ function format_hit_ratio($hit, $miss)
     return sprintf("%.2f%% (%d / %d)", 100 * $hit / $total, $hit, $total);
 }
 
-function format_ago_td_pair($value, $date, $fail=3600, $warn=14400)
+function format_ago_td_pair($value, $date, $headers=null)
 {
   $ago_class = format_ago_class($date);
   if ($ago_class)
     $ago_class="class='$ago_class'";
 
-  echo "<td>$value</td>\n";
-  echo "<td $ago_class>";
+  if ($headers != null) {
+	  echo "<td headers='$headers'>$value</td>\n";
+	  echo "<td headers='$headers' $ago_class>";
+  } else {
+	  echo "<td>$value</td>\n";
+	  echo "<td $ago_class>";
+  }
+  
   echo format_ago($date);
   echo "</td>\n";
 }
@@ -361,7 +367,7 @@ if (is_null($target_uri))
 $user_principal = quercus_servlet_request()->getUserPrincipal();
 $is_read_role = quercus_servlet_request()->isUserInRole("read");
 $is_write_role = quercus_servlet_request()->isUserInRole("write");
-
+  
 $display_header_script = NULL;
 $display_header_title = NULL;
 $is_display_footer = false;
@@ -420,7 +426,8 @@ function display_jmx($mbean_server, $group_mbeans)
           $v = $mbean->$attr_name;
           display_jmx_data($v);
         } catch (Exception $e) {
-          echo "Data unavailable due to error: " . $e;
+          echo "Data unavailable due to error: ";
+          var_dump($e);
         }
         
         echo "</td>\n";
@@ -450,13 +457,14 @@ function display_jmx_data($v)
     foreach ($v as $k => $v) {
       echo "  ";
       if (is_string($k)) {
-        echo "$k => ";
+        echo htmlspecialchars($v);
+        echo " => ";
       }
 
       if (is_string($v))
         echo htmlspecialchars("\"$v\",\n");
       else
-        var_dump($v);
+        htmlvardump($v);
     }
     echo "}</pre>";
   }
@@ -471,7 +479,7 @@ function display_jmx_data($v)
     echo "<tbody>\n";
     foreach ($v->getKeys() as $key) {
       echo "<tr>\n";
-      echo "<th>" . $key . "</th>\n";
+      echo "<th>" . htmlspecialchars($key) . "</th>\n";
       echo "<td>";
       display_jmx_data($v->$key);
       echo "</td>\n";
@@ -485,8 +493,16 @@ function display_jmx_data($v)
 
     $v = wordwrap($v);
 	  
-    echo $v;
+    echo htmlspecialchars($v);
   }
+}
+
+function htmlvardump($var)
+{
+	ob_start(); 
+	call_user_func_array('var_dump', $var); 
+	echo htmlspecialchars(ob_get_clean());
+	ob_end_clean();
 }
 
 function jmx_partition($mbean_list, $keys)
@@ -592,10 +608,9 @@ function display_header($script, $title, $server,
   if (! empty($display_header_script))
     return;
 
-  $g_next_url = "?q=" . $g_page . "&s=" . $g_server_index . $query;
-
+  $g_next_url = "?q=" . $g_page . "&amp;s=" . $g_server_index . $query;
   if (isset($_REQUEST["new_s"]) && $_REQUEST["new_s"] != $_GET["s"]) {
-    header("Location: " . $g_next_url);
+    header("Location: " . "?q=" . $g_page . "&s=" . $g_server_index . $query);
     return false;
   }
 
@@ -604,13 +619,13 @@ function display_header($script, $title, $server,
 
   $logout_uri = uri("logout.php");
 ?>
-<!DOCTYPE HTML>
-
-<html>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html lang="en" xmlns="http://www.w3.org/1999/xhtml">
 <head>
   <title><?= $title ?></title>
   <link rel='stylesheet' href='<?= uri("default.css") ?>' type='text/css' />
   <link rel='stylesheet' href='jquery-ui/jquery.ui.all.css' type='text/css' />
+  <meta http-equiv="Content-Type" content="text/html; charset=utf-8"/>
 <?php
 if ($is_refresh) {
   echo "<meta http-equiv=\"refresh\" content=\"60\" />\n";
@@ -675,46 +690,17 @@ else {
 <div style='float: right; width: 20%; text-align: right;'>
  <span class='status-item'><a target="caucho-wiki" href="http://wiki.caucho.com/Admin: <?= ucfirst($g_page) ?>">help</a></span>
  <span class='status-item'><a href="<?= $g_next_url ?>">refresh</a></span>
- <span class='status-item logout'><a href="?q=index.php&logout=true">logout</a></span>
+ <span class='status-item logout'><a href="?q=index.php&amp;logout=true">logout</a></span>
 </div>
 </div>
 <?php
 }
 ?>
 
-<table id="layout" width="100%" cellpadding="0" cellspacing="0" border="0">
-<tr>
-  <td width="160" align="center">
-  </td>
-
-  <td width="10">
-  </td>
-
-  <td align='right'>
-   <img src='<?= uri("images/caucho-logo.png") ?>' width='300'>
-  </td>
-</tr>
-<tr>
-  <td width="150">
-   <img src='<?= uri("images/pixel.gif") ?>' height="14">
-  </td>
-
-  <td width="10">
-  </td>
-
-  <td>
-  </td>
-
-  <td>
-  </td>
-</tr>
-
-<tr>
-<td width="150">
-<hr>
-</td>
-</tr>
-
+<div class="top-header">
+	<img src='<?= uri("images/caucho-logo.png") ?>' width='300' alt="Caucho Technology"/>
+</div>
+<table id="layout">
 <tr>
   <td class="leftnav" valign="top">
     <ul class="leftnav">
@@ -727,12 +713,7 @@ else {
     ?>
     </ul>
   </td>
-
-  <td width="10">
-  </td>
-  <td valign='top' colspan='2'>
-
-  <div>
+  <td valign='top'>
 <?php
   if (! $server && $g_server_id) {
     echo "<h3 class='fail'>Can't contact $g_server_id</h3>";
@@ -744,7 +725,7 @@ else {
 
 function javascript_create_tab($tab_name)
 {
-  $javascript .= 'var tabs = $("#' . $tab_name . '").tabs();' . "\n";
+  $javascript = 'var tabs = $("#' . $tab_name . '").tabs();' . "\n";
   $javascript .= 'tabs.find(".ui-tabs-nav").sortable({axis:\'x\'});' . "\n";
   $javascript .= '$("#'. $tab_name . '").show();' . "\n";
 
@@ -768,7 +749,7 @@ function display_pages()
     if ($g_page == $name) {
       echo "<li class='selected'>$name</li>";
     } else {
-      echo "<li><a href='?q=$name&s=$g_server_index'>$name</a></li>";
+      echo "<li><a href='?q=$name&amp;s=$g_server_index'>$name</a></li>";
     }
   }
 }
@@ -838,9 +819,10 @@ function display_health()
 {
   global $g_server;
   $resin = $g_server->Cluster->Resin;
+  
   // $clusters = $resin->Clusters;
   $clusters = array($g_server->Cluster);
-
+  
   $down_servers = array();
   $error = "";
 
@@ -854,66 +836,63 @@ function display_health()
         array_push($triads, array($triad, new MBeanServer($triad->Name)));
       }
     }
-
+    
     foreach ($servers as $s) {
       if ($s->Name == "")
         $display_name = "{$c->Name}:default";
       else
         $display_name = "{$c->Name}:{$s->Name}";
- 
+        
       $error = "";
 
       foreach ($triads as $triad_pair) {
         list($triad, $triad_mbean_server) = $triad_pair;
-
+        
         if ($s->SelfServer->Name == $triad->Name)
           continue;
 
         $s_mbean_server = new MBeanServer($s->Name);
         $s_server = $s_mbean_server->lookup("resin:type=Server");
-        $s_triad_server 
-          = $s_server->SelfServer->Cluster->Servers[$triad->ClusterIndex];
-
+        $s_triad_server = $s_server->SelfServer->Cluster->Servers[$triad->ClusterIndex];
+        
         $triad_server = $triad_mbean_server->lookup("resin:type=Server");
         $triad_cluster = $triad_server->SelfServer->Cluster;
         $triad_cluster_server = $triad_cluster->Servers[$s->ClusterIndex];
 
-        if (! $s_triad_server
-            || ! $s_triad_server->isHeartbeatActive()) {
+        if (! $s_triad_server || ! $s_triad_server->isHeartbeatActive()) {
           $error .= "\"${display_name}\" cannot contact triad \"" . $triad->Name . "\"\n";
         }
 
-        if (! $triad_cluster_server
-            || ! $triad_cluster_server->isHeartbeatActive()) {
+        if (! $triad_cluster_server || ! $triad_cluster_server->isHeartbeatActive()) {
           $error .= "Triad server \"{$triad->Name}\" cannot contact \"${display_name}\n";
         }
       }
 
       if ($error) {
-       array_push($down_servers, array($display_name, $error));
+				array_push($down_servers, array($display_name, $error));
       }
     }
   }
-
+  
   $health = (count($down_servers) == 0);
 
-
   if ($health) {
+  	echo "System Health: ";
     print_check_or_x($health);
-    echo "System Health";
   }
   else {
-    echo "<span class='menu-switch' id='down-servers'>"
+    echo "System Health: ";
     print_check_or_x($health);
-    echo "System Health (" . count($down_servers) . ")";
+    echo " (" . count($down_servers) . ") ";
+    echo "<span class='menu-switch' id='down-servers'>"
     echo "<ul class='toggle-down-servers' style='display: none'>";
-    foreach ($down_servers as $down_server) {
+  	foreach ($down_servers as $down_server) {
       list($display_name, $error) = $down_server;
       $title = htmlspecialchars($error);
 
       global $g_server_index;
 
-      $next_url = "?q=heartbeat&s=" . $g_server_index;
+      $next_url = "?q=heartbeat&amp;s=" . $g_server_index;
       echo "<li class='fail' title='$title'><a href='$next_url'>$display_name</a></li>";
     }
     echo "</ul>";
@@ -931,9 +910,9 @@ function display_servers($server)
     $server = $g_server;
   }
 
-  echo "<form class='status-item' name='servers' method='POST' action='" . $g_next_url . "'>";
-  echo "Server: "; 
-  echo "<select name='new_s' onchange='document.forms.servers.submit();'>\n";
+  echo "<form class='status-item' name='servers' method='post' action='" . $g_next_url . "'>";
+  echo "<label for='new_s'>Server</label>: "; 
+  echo "<select id='new_s' name='new_s' onchange='document.forms.servers.submit();'>\n";
 
   $self_server = $server->SelfServer;
 
@@ -944,7 +923,7 @@ function display_servers($server)
 
     echo "  <option";
     if ($cluster_server->ClusterIndex == $g_server_index)
-      echo " selected";
+      echo " selected='selected'";
 
     echo " value=\"" . $cluster_server->ClusterIndex ."\">";
     printf("%02d - %s\n", $cluster_server->ClusterIndex, $id);
@@ -984,7 +963,7 @@ function display_footer($script, $javascript="")
 
 ?>
   <div id="busyIndicator">
-    <img src="images/loading.gif"/>
+    <img src="images/loading.gif" alt="loading..."/>
   </div>
 
 </td></tr></table>
@@ -992,7 +971,7 @@ function display_footer($script, $javascript="")
 <div id="footer">
 <hr />
 <p>
-<em><?= resin_version() ?></em>
+&nbsp;<em><?= resin_version() ?></em>
 </p>
 </div>
 
@@ -1001,6 +980,7 @@ function display_footer($script, $javascript="")
 <script type="text/javascript" src="pie-chart.js"></script>
 <script type="text/javascript" src="flot/jquery.flot.js"></script>
 <script type="text/javascript">
+<!--
   $(document).ready(function() {
     init();
 
@@ -1008,6 +988,7 @@ function display_footer($script, $javascript="")
 
     $("#busyIndicator").hide();
   });
+-->
 </script>
 
 </body>
@@ -1027,11 +1008,11 @@ function print_show_hide($message, $id, $names)
 
   echo "<ul style='list-style-type:none;padding:0;margin:0'>";
   echo "<li id='s_${id}' onclick=\"${show}\">";
-  echo "<img src='images/close-item.png'></img> $message";
+  echo "<img src='images/close-item.png' alt='closed'/> $message";
   echo "</li>";
 
   echo "<li id='h_${id}' style='display:none' onclick=\"${hide}\">";
-  echo "<img src='images/open-item.png'></img> $message";
+  echo "<img src='images/open-item.png' alt='opened'/> $message";
   echo "</li>";
   echo "</ul>";
 
@@ -1169,35 +1150,43 @@ function server_find_by_index($g_mbean_server, $index)
     
 function print_ok($message)
 {
+	if (is_null($message))
+		$message = "OK";
   echo "<span style='color:#00c000'>&#x2713;</span>&nbsp;$message";
 }
     
 function print_fail($message)
 {
-  echo "<span style='color:#c00000'>&#x2717;&nbsp;$message</span>";
+	if (is_null($message))
+		$message = "FAIL";
+	echo "<span style='color:#c00000'>&#x2717;&nbsp;$message</span>";
 }
     
 function print_warn($message)
 {
-  echo "<span style='color:#cc8811'>!&nbsp;$message</span>";
+	if (is_null($message))
+		$message = "WARNING";
+	echo "<span style='color:#cc8811'>!&nbsp;$message</span>";
 }
 
 function print_unknown($message)
 {
-  echo "<span style='color:#909090'>?&nbsp;$message</span>";
+	if (is_null($message))
+		$message = "UNKNOWN";
+	echo "<span style='color:#909090'>?&nbsp;$message</span>";
 }
 
 function print_check_or_x($status)
 {
   if ($status) {
-    echo "<span style='color:#00c000'>&#x2713;</span>";
+    echo "<span style='color:#00c000'>&#x2713; OK</span>";
   }
   else {
-    echo "<span style='color:#c00000'>&#x2717;</span>";
+    echo "<span style='color:#c00000'>&#x2717; ERROR</span>";
   }
 }
 
-function print_health($status, $message)
+function print_health($status, $message=null)
 {
   if ($status == "OK") {
     print_ok($message);
@@ -1214,6 +1203,62 @@ function print_health($status, $message)
   else {
     echo $message;
   }
+}
+
+function display_health_status($s)
+{
+  $si = sprintf("%02d", $s->ClusterIndex);
+  $server_id = $s->Name;
+  if ($server_id == "")
+  	$server_id = "default";
+
+  $mbean_server = new MBeanServer($server_id);
+
+  $label = $si . " - " . $server_id;
+  echo "<h2>Server: $label</h2>\n"; 
+  
+  echo "<table class='data'>\n";
+  echo "<tr><th scope='col' class='item'>Status</th>";
+  echo "<th scope='col' class='item'>Check <span id='sw_health_status_${si}' class='switch'></span></th>";
+  echo "<th scope='col' class='item'>Message</th></tr>\n";
+  
+  echo "<tr><td>";
+
+  if ($mbean_server) {
+    $health = $mbean_server->lookup("resin:type=HealthCheck,name=Resin");
+  }
+  
+  if (! $health) {
+    print_health("CRITICAL");
+    $message = "cannot connect to server $label";
+  }
+  else {
+    print_health($health->Status);
+    $message = $health->Message;
+  }
+	
+  echo "</td><td>Overall</td><td>$message</td></tr>\n";
+
+  if ($mbean_server && $health) {
+    $health_list = $mbean_server->query("resin:type=HealthCheck,*");
+    foreach ($health_list as $s_health) {
+    	if ($s_health->Name == 'Resin')
+    		continue;
+      echo "<tr class='toggle-sw_health_status_${si}'>";
+      echo "<td>";
+      print_health($s_health->Status);
+      echo "</td>";
+      echo "<td>";
+      echo $s_health->Name;
+      echo "</td>";
+      echo "<td>";
+      echo $s_health->Message;
+      echo "</td>";
+      echo "</tr>";
+    }
+  }
+  
+  echo "</table><br/>";
 }
 
 ?>

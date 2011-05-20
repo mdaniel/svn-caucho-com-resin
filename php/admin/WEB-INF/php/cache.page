@@ -31,15 +31,15 @@ echo "</ul>";
 
 <div id="overview">
 <h2>Overview</h2>
-<table class="data">
+<table class="data" summary="Proxy Cache Overview">
   <tr title="Percentage of requests that have been served from the proxy cache:">
-    <th>Proxy cache miss ratio:<?php print_help("Proxy Cache#miss ratio"); ?></th>
+    <th scope="row">Proxy cache miss ratio:<?php print_help("Proxy Cache#miss ratio"); ?></th>
     <td><?= format_miss_ratio($proxy_cache->HitCountTotal,
                               $proxy_cache->MissCountTotal) ?></td>
   </tr>
 
   <tr title="Percentage of requests that have been served from the proxy cache:">
-    <th><?= info("Block cache miss ratio") ?>:</th>
+    <th scope="row"><?= info("Block cache miss ratio") ?>:</th>
     <td><?= format_miss_ratio($block_cache->HitCountTotal,
                               $block_cache->MissCountTotal) ?></td>
   </tr>
@@ -47,7 +47,7 @@ echo "</ul>";
 <!-- XXX: show how cacheable apps are: cacheable/non-cacheable -->
 
   <tr>
-    <th>Invocation miss ratio:<?php print_help("Proxy Cache#invocation"); ?></th>
+    <th scope="row">Invocation miss ratio:<?php print_help("Proxy Cache#invocation"); ?></th>
     <td><?= format_miss_ratio($g_server->InvocationCacheHitCountTotal,
                               $g_server->InvocationCacheMissCountTotal) ?></td>
   </tr>

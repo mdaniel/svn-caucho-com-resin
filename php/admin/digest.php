@@ -104,23 +104,23 @@ to install the configuration file.
 ?>
 
 <tr>
-<th>Username:</th>
-<td><input name="digest_username" size="50" value="<?= $digest_username ?>"></td>
+<th><label for="digest_username">Username</label>:</th>
+<td><input id="digest_username" name="digest_username" size="50" value="<?= $digest_username ?>"></td>
 </tr>
 
 <tr>
-<th>Password:</th>
-<td><input name="digest_password1" type="password" size="50" value=""></td>
+<th><label for="digest_password1">Password</label>:</th>
+<td><input id="digest_password1" name="digest_password1" type="password" size="50" value=""></td>
 </tr>
 
 <tr>
-<th>Re-enter password:</th>
-<td><input name="digest_password2" type="password" size="50" value=""></td>
+<th><label for="digest_password2">Re-enter password</label>:</th>
+<td><input id="digest_password2" name="digest_password2" type="password" size="50" value=""></td>
 </tr>
 
 <tr>
-<th>Realm:</th>
-<td><input name="digest_realm" size="50" value="<?= $digest_realm ?>"></td>
+<th><label for="digest_realm">Realm</label>:</th>
+<td><input id="digest_realm" name="digest_realm" size="50" value="<?= $digest_realm ?>"></td>
 </tr>
 
 <tr><td colspan='2' class='buttons'><input type="submit" value="Create Configuration File"></td></tr>

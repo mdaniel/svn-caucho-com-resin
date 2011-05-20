@@ -60,7 +60,7 @@ else if ($p_submit) {
   }
 }
 
-$query = "&h=" . $p_hash . "&p=" . $p_period;
+$query = "&amp;h=" . $p_hash . "&amp;p=" . $p_period;
 
 require_once "WEB-INF/php/inc.php";
 
@@ -128,11 +128,11 @@ function display_graph_selection()
   global $g_server;
   global $self_index;
 
-  echo "<form name='def_graph' method='POST' action='" . $g_next_url . "'>";
+  echo "<form name='def_graph' method='post' action='" . $g_next_url . "'>";
   echo "<input type='hidden' name='period' value='$p_period'/>\n";
-  echo "<b>Meters:</b>\n";
+  echo "<b><label for='user-meters'>Meters</label>:</b>\n";
 
-  echo "<select name='user-meters' onchange='javascript:document.forms.def_graph.submit();'>\n";
+  echo "<select name='user-meters' onchange='javascript:document.forms.def_graph.submit();' id='user-meters'>\n";
 
   $selected = false;
   foreach ($user_item['user-graphs'] as $name => $hash) {
@@ -144,7 +144,7 @@ function display_graph_selection()
     echo " value='{$name}'>{$name}</option>\n";
   }
   if (! $selected)
-    echo "<option selected>--------</option>\n";
+    echo "<option selected='selected'>--------</option>\n";
 
   echo "</select>\n";
 
@@ -163,8 +163,8 @@ function display_graph_selection()
   echo "<input type='hidden' name='server-all'"
        . " value='" . $all . "' />\n";
 
-  echo "<b>Server Set:</b>\n";
-  echo "<select name='server-set'>\n";
+  echo "<b><label for='server-set'>Server Set</label>:</b>\n";
+  echo "<select name='server-set' id='server-set'>\n";
 
   echo "<option value='self'";
 
@@ -199,14 +199,14 @@ function display_period_selection()
 
   echo "<div class='graph-period'>\n";
 
-  echo "Time: "
+  echo "<label for='period'>Time</label>: "
 
-  echo "<select name='period'>\n";
+  echo "<select name='period' id='period'>\n";
 
   echo " <option value='" . (60) . "'";
 
   if ($p_period == 60)
-    echo " selected";
+    echo " selected='selected'";
 
   echo ">1 hour</option>\n";
 
@@ -267,7 +267,7 @@ function display_main_graph()
     echo "<div><a href='{$rest_url}'>Embedded graph URL</a></div>";
   }*/
 
-  echo "<br>";
+  echo "<br/>";
 }
 
 function display_new_graph_form() 
@@ -315,7 +315,7 @@ function display_new_graph_form()
 
   // server
   echo "<form name='name_form' method='post' action='" . $g_next_url . "'>"
-  echo "<input type='hidden' name='submit' value='true'>\n";
+  echo "<input type='hidden' name='submit' value='true'/>\n";
   echo "<h2><span id='meter-switch' class='switch'></span>Meters</h2>";
   echo "<button id='clear-graph' style='margin: 0 1em'>Clear Meters</button>";
 
@@ -340,8 +340,11 @@ function display_new_graph_form()
       if (preg_grep($regexp, $p_names)) {
         echo "checked ";
       }
+      
+      $id = str_replace(array(' ', '|', '%'), '', "$section|$name");
         
-      echo "value='$section|$name'>$name<br>\n";
+      echo "value='$section|$name' id='$id'/><label for='$id'>$name</label><br/>\n";
+      echo "</li>\n";
     }
     echo "</ul>";
     echo "</li>";
@@ -350,10 +353,10 @@ function display_new_graph_form()
 
   echo "<div style='text-align: right'>\n";
   echo "<div id='validation-notice' class='ui-state-error ui-corner-all' style='display:none'></div>\n";
-  echo "<input name='name' style='width: 100%;'>"
-  echo "</input>\n";
+  echo "<label for='name'>Meter Set Name: </label>\n";
+  echo "<input name='name' style='width: 50%;' id='name'/>"
 
-  echo "<input type='submit' value='Save Meters'><br>\n";
+  echo "<input type='submit' value='Save Meters'/><br/>\n";
   echo "</div>\n";
 
   echo "</form>\n";

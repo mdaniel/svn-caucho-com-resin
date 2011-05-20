@@ -9,17 +9,17 @@ function print_db_pools($db_pools)
 <table class="data">
   <tr>
     <th>&nbsp;</th>
-    <th colspan='5'><?= info("Connections", "Database_Connections") ?></th>
-    <th colspan='2'><?= info("Config", "Database_Connections") ?></th>
+    <th colspan='5' id='connections'><?= info("Connections", "Database_Connections") ?></th>
+    <th colspan='2' id='config'><?= info("Config", "Database_Connections") ?></th>
   </tr>
   <tr>
-    <th>Name</th>
-    <th>Active</th>
-    <th>Idle</th>
-    <th>Created</th>
-    <th colspan='2'>Failed</th>
-    <th>max-connections</th>
-    <th>idle-time</th>
+    <th id='name'>Name</th>
+    <th id='active'>Active</th>
+    <th id='idle'>Idle</th>
+    <th id='created'>Created</th>
+    <th id='failed' colspan='2'>Failed</th>
+    <th id='max-connections'>max-connections</th>
+    <th id='idle-time'>idle-time</th>
   </tr>
 
 <?php
@@ -28,16 +28,15 @@ function print_db_pools($db_pools)
 ?>
 
   <tr class='<?= row_style($row++) ?>'>
-    <td><?= $pool->Name ?></td>
-    <td><?= $pool->ConnectionActiveCount ?></td>
-    <td><?= $pool->ConnectionIdleCount ?></td>
-    <td><?= format_miss_ratio($pool->ConnectionCountTotal,
-                              $pool->ConnectionCreateCountTotal) ?></td>
-    <td><?= $pool->ConnectionFailCountTotal ?></td>
-    <td class='<?= format_ago_class($pool->LastFailTime) ?>'>
+    <td headers="name"><?= $pool->Name ?></td>
+    <td headers="connections active"><?= $pool->ConnectionActiveCount ?></td>
+    <td headers="connections idle"><?= $pool->ConnectionIdleCount ?></td>
+    <td headers="connections created"><?= format_miss_ratio($pool->ConnectionCountTotal, $pool->ConnectionCreateCountTotal) ?></td>
+    <td headers="connections failed"><?= $pool->ConnectionFailCountTotal ?></td>
+    <td headers="connections failed" class='<?= format_ago_class($pool->LastFailTime) ?>'>
         <?= format_ago($pool->LastFailTime) ?></td>
-    <td><?= $pool->MaxConnections ?></td>
-    <td><?= sprintf("%.2fs", $pool->MaxIdleTime * 0.001) ?></td>
+    <td headers="config max-connections"><?= $pool->MaxConnections ?></td>
+    <td headers="config idle-time"><?= sprintf("%.2fs", $pool->MaxIdleTime * 0.001) ?></td>
   </tr>
 <?php
   }

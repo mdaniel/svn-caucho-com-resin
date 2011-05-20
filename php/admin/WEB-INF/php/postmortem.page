@@ -57,16 +57,17 @@ $restart_time = floor($restart_ms / 1000);
 
 echo "<h2>Restart at " . date("Y-m-d H:i", $restart_time) . "</h2>\n";
 
-echo "<form name='restarts' method='POST' action='" . $g_next_url . "'>";
-echo "<select name='time' onchange='document.forms.restarts.submit();'>\n";
+echo "<form name='restarts' method='post' action='" . $g_next_url . "'>";
+echo "<label for='time'>Time</label>: <select name='time' onchange='document.forms.restarts.submit();' id='time'>\n";
 foreach ($restart_list as $time_ms) {
   $time = floor($time_ms / 1000);
   
   echo "<option value='$time_ms'"
   if ($time_ms == $restart_ms)
-    echo " selected";
+    echo " selected='selected'";
   echo ">";
   echo date("Y-m-d H:i", $time);
+  echo "</option>";
 }
 echo "</select>\n";
 echo "</form>";
@@ -106,35 +107,39 @@ function display_postmortem_graph()
 
   $height = 150;
 
-  echo "<table>";
+  echo "<table border='1'>";
 
-  echo "<tr><th>Health<th>";
-  echo "<tr valign='top'><td colspan='2'>";
+  echo "<tr><th colspan='2' id='health'>Health</th></tr>\n";
+  echo "<tr valign='top'><td colspan='2' headers='health'>";
   stat_graph_regexp("health", 300, $height, $start, $end,
                   "/^$si\|Resin\|Health/", "right");
-  echo "</td></tr>";
+  echo "</td></tr>\n";
 
-  echo "<tr><th>Request Count<th>Request Time";
-  echo "<tr valign='top'><td>";
+  echo "<tr><th id='req_count'>Request Count</th>";
+  echo "<th id='req_time'>Request Time</th></tr>\n";
+  echo "<tr valign='top'><td headers='req_count'>";
   stat_graph("request", 300, $height, $start, $end,
              array("$si|Resin|Http|Request Count"));
-  echo "<td>";
+  echo "</td><td headers='req_time'>";
   stat_graph("request_time", 300, $height, $start, $end,
              array("$si|Resin|Http|Request Time",
                    "$si|Resin|Http|Request Time Max"));
-
-  echo "<tr><th>Database Query Active<th>Database Query Time";
-  echo "<tr valign='top'><td>";
+  echo "</td></tr>\n";
+  
+  echo "<tr><th id='query_active'>Database Query Active</th>";
+  echo "<th id='query_time'>Database Query Time</th></tr>\n";
+  echo "<tr valign='top'><td headers='query_active'>";
   stat_graph("database", 300, $height, $start, $end,
              array("$si|Resin|Database|Query Active"));
-
-  echo "<td>";
+  echo "</td><td headers='query_time'>";
   stat_graph("database_time", 300, $height, $start, $end,
              array("$si|Resin|Database|Query Time",
                    "$si|Resin|Database|Query Time Max"));
-
-  echo "<tr><th>Thread<th>CPU";
-  echo "<tr valign='top'><td>";
+  echo "</td></tr>\n";
+             
+  echo "<tr><th id='threads'>Thread</th>";
+  echo "<th id='cpu'>CPU</th></tr>\n";
+  echo "<tr valign='top'><td headers='threads'>";
   stat_graph("thread", 300, $height, $start, $end,
              array("$si|JVM|Thread|JVM Thread Count",
                    "$si|Resin|Thread|Thread Count",
@@ -143,22 +148,23 @@ function display_postmortem_graph()
                    "$si|Resin|Thread|Thread Task Queue",
                    "$si|Resin|Thread|Thread Priority Queue",
                    "$si|Resin|Thread|Thread Overflow Count"));
-
-  echo "<td>";
+  echo "</td><td headers='cpu'>";
   stat_graph_regexp("cpu", 300, $height, $start, $end,
                     "/^$si\|OS\|CPU\|CPU Active/");
-
-  echo "<tr><th>Memory<th>GC Time";
-  echo "<tr valign='top'><td>";
+  echo "</td></tr>\n";
+  
+  echo "<tr><th id='memory'>Memory</th>";
+  echo "<th id='gc'>GC Time</th></tr>\n";
+  echo "<tr valign='top'><td headers='memory'>";
   stat_graph("memory", 300, $height, $start, $end,
              array("$si|JVM|Memory|Heap Memory Free",
                    "$si|JVM|Memory|Tenured Memory Free",
                    "$si|JVM|Memory|PermGen Memory Free"));
-
-  echo "<td>";
+  echo "</td><td headers='gc'>";
   stat_graph_regexp("memory_gc", 300, $height, $start, $end,
                     "/$si\|JVM\|Memory\|GC Time/");
 
+  echo "</td></tr>\n";
   echo "</table>";
 }
 
@@ -177,7 +183,12 @@ function display_postmortem_logs($log_mbean)
     echo "<h2>Log Messages</h2>\n";
 
     echo "<table class='data'>\n";
-
+    echo "<thead>\n";
+    echo "<tr><th scope='col' class='date'>Date</th>";
+    echo "    <th scope='col' class='level'>Level</th>";
+    echo "    <th scope='col' class='message'>Message</th></tr>\n";
+    echo "</thead>\n";
+    
     $messages = array_reverse($messages);
 
     echo "<tbody class='scroll'>\n";
@@ -186,7 +197,7 @@ function display_postmortem_logs($log_mbean)
     echo "<tr class='severe'>";
     echo "  <td class='date'>";
     echo strftime("%Y-%m-%d&nbsp;%H:%M:%S", $restart_time);
-    echo "</td>";
+    echo "  </td>";
     echo "  <td class='level'></td>";
     echo "  <td class='severe'>Start Time</td>";
     echo "</tr>";

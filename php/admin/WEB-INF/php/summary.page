@@ -15,6 +15,8 @@ $mbean_server = $g_mbean_server;
 $resin = $g_resin;
 $server = $g_server;
 
+echo "<h1>Summary</h1>\n";
+
 echo "<div id='summary-tabs'>\n";
 echo "<ul>\n";
 
@@ -30,7 +32,7 @@ print_overview();
 
 echo "<h2>Health"; print_Help("Health"); echo "</h2>\n";
 
-display_health_status();
+display_health_status($g_server->SelfServer);
 
 echo "</div>";
 
@@ -70,47 +72,45 @@ function print_overview()
   $row = 0;
 ?>
 
-<table class="data">
+<table class="data" summary="Overview">
   <tr class='<?= row_style($row++) ?>'>
-    <td class='item'
+    <th id="server_id" class='item'
         title="The server id used when starting this instance of Resin, the value of '-server'.">
-    Server id:</td>
-    <td><?= $server->Id ? $server->Id : '""' ?></td>
-    
-    <td class='item'
+    Server id:</th>
+    <td headers="server_id"><?= $server->Id ? $server->Id : '""' ?></td>
+    <th id="user" class='item'
         title="The operating system user that is running this instance of Resin.">
-      User:
-    </td>
-    <td><?= $resin->UserName ?></td>
+      User:</th>
+    <td headers="user"><?= $resin->UserName ?></td>
     
-    <td class='item'
+    <th id='machine' class='item'
         title="The ip address of the machine that is running this instance of Resin.">
       Machine:
-    </td>
-    <td><?= $runtime->Name ?></td>
+    </th>
+    <td headers="machine"><?= $runtime->Name ?></td>
   </tr>
 
   <tr class='<?= row_style($row++) ?>'>
-    <td class='item'
+    <th id='version' class='item'
         title="The Resin version.">
       Resin:
-    </td>
-    <td colspan='5'><?= $resin->Version ?></td>
+    </th>
+    <td headers="version" colspan='5'><?= $resin->Version ?></td>
   </tr>
 
   <tr class='<?= row_style($row++) ?>'>
-    <td class='item'
+    <th id="jdk" class='item'
         title="The JDK version.">
       JDK:
-    </td>
-    <td colspan='5'><?= $runtime->VmName ?> <?= $runtime->VmVersion ?></td>
+    </th>
+    <td headers="jdk" colspan='5'><?= $runtime->VmName ?> <?= $runtime->VmVersion ?></td>
   </tr>
 
   <tr class='<?= row_style($row++) ?>'>
-    <td class='item'
+    <th id="os" class='item'
         title="The OS version.">
     OS:</th>
-    <td colspan='5'>
+    <td headers="os" colspan='5'>
       <?= $os->AvailableProcessors ?> cpu,
       <?= $os->Name ?>
       <?= $os->Arch ?>
@@ -119,25 +119,25 @@ function print_overview()
   </tr>
 
   <tr class='<?= row_style($row++) ?>'>
-    <td class='item'
+    <th id="state" class='item'
         title="The current lifecycle state">
       State:
-    </td>
-    <td class="<?= $server->State ?>"><?= $server->State ?></td>
+    </th>
+    <td headers="state" class="<?= $server->State ?>"><?= $server->State ?></td>
 
-    <td class='item'
+    <th id="uptime" class='item'
         title="The time that this instance was last started or restarted.">
       Uptime:
-    </td>
+    </th>
     <?php
       $start_time = $server->StartTime->time / 1000;
       $now = $server->CurrentTime->time / 1000;
       $uptime = $now - $start_time;
 
       if ($uptime < 12 * 3600)
-        echo "<td class='warmup' colspan='3'>";
+        echo "<td headers='uptime' class='warmup' colspan='3'>";
       else
-        echo "<td colspan='3'>";
+        echo "<td headers='uptime' colspan='3'>";
 
       echo sprintf("%d days %02d:%02d:%02d",
                    $uptime / (24 * 3600),
@@ -150,53 +150,53 @@ function print_overview()
   </tr>
 
   <tr class='<?= row_style($row++) ?>'>
-    <td class='item'
+    <th id="heap_free" class='item'
         title="The current free amount of heap memory available for the JVM, in bytes.">
 	Free heap:
-    </td>
-    <td><?= format_memory($server->RuntimeMemoryFree) ?></td>
+    </th>
+    <td headers="heap_free"><?= format_memory($server->RuntimeMemoryFree) ?></td>
     
-    <td class='item'
+    <th id="heap_total" class='item'
         title="The current total amount of heap memory available for the JVM, in bytes.">
       Total heap:
-    </td>
-    <td colspan='3'><?= format_memory($server->RuntimeMemory) ?></td>
+    </th>
+    <td headers="heap_total" colspan='3'><?= format_memory($server->RuntimeMemory) ?></td>
   </tr>
 
   <tr class='<?= row_style($row++) ?>'>
-    <td class='item'
+    <th id="fd_count" class='item'
         title="The current file descriptors used.">
 	File des:
-    </td>
-    <td><?= $os->OpenFileDescriptorCount ?></td>
+    </th>
+    <td headers="fd_count"><?= $os->OpenFileDescriptorCount ?></td>
     
-    <td class='item'
+    <th id="fd_max" class='item'
         title="The maximum file descriptors available.">
 	File des max:
-    </td>
-    <td colspan='3'><?= $os->MaxFileDescriptorCount ?></td>
+    </th>
+    <td headers="fd_max" colspan='3'><?= $os->MaxFileDescriptorCount ?></td>
   </tr>
 
   <tr class='<?= row_style($row++) ?>'>
-    <td class='item'
+    <th id="swap_free" class='item'
         title="The free amount of operating-system swap space.">
 	Free Swap:
-    </td>
-    <td><?= format_memory($os->FreeSwapSpaceSize) ?></td>
+    </th>
+    <td headers="swap_free"><?= format_memory($os->FreeSwapSpaceSize) ?></td>
     
-    <td class='item'
+    <th id="swap_total" class='item'
         title="The total amount of operating-system swap space.">Total Swap:</th>
-    <td colspan='3'><?= format_memory($os->TotalSwapSpaceSize) ?></td>
+    <td headers="swap_total" colspan='3'><?= format_memory($os->TotalSwapSpaceSize) ?></td>
   </tr>
 
   <tr class='<?= row_style($row++) ?>'>
-    <td class='item'
-        title="The free amount of operating-system physical memory.">Free Physical:</td>
-    <td><?= format_memory($os->FreePhysicalMemorySize) ?></td>
+    <th id="mem_free" class='item'
+        title="The free amount of operating-system physical memory.">Free Physical:</th>
+    <td headers="mem_free"><?= format_memory($os->FreePhysicalMemorySize) ?></td>
     
-    <td class='item'
-        title="The total amount of operating-system physical memory.">Total Physical:</td>
-    <td colspan='3'><?= format_memory($os->TotalPhysicalMemorySize) ?></td>
+    <th id="mem_total" class='item'
+        title="The total amount of operating-system physical memory.">Total Physical:</th>
+    <td headers="mem_total" colspan='3'><?= format_memory($os->TotalPhysicalMemorySize) ?></td>
   </tr>
 
 
@@ -233,17 +233,17 @@ function print_graphs()
     $height = 150;
     $width = 240;
 
-    echo "<table>";
+    echo "<table summary='Graphs'>";
 
-    echo "<tr><th>Request Count<th>Request Time<th>Threads";
+    echo "<tr><th scope='col'>Request Count</th><th scope='col'>Request Time</th><th scope='col'>Threads</th></tr>";
     echo "<tr valign='top'><td>";
     stat_graph("request", $width, $height, $start, $end,
                array("$si|Resin|Http|Request Count"));
-    echo "<td>";
+    echo "</td><td>";
     stat_graph("request_time", $width, $height, $start, $end,
                array("$si|Resin|Http|Request Time",
                      "$si|Resin|Http|Request Time Max"));
-    echo "<td>";
+    echo "</td><td>";
     stat_graph("thread", $width, $height, $start, $end,
                array("$si|JVM|Thread|JVM Thread Count",
                      "$si|Resin|Thread|Thread Count",
@@ -251,22 +251,23 @@ function print_graphs()
                      "$si|Resin|Thread|Thread Task Queue",
                      "$si|Resin|Thread|Thread Priority Queue",
                      "$si|Resin|Thread|Thread Overflow Count"));
-
-    echo "<tr><th>Database Query Active<th>Database Query Time<th>CPU";
+    echo "</td></tr>";
+    echo "<tr><th scope='col'>Database Query Active</th><th scope='col'>Database Query Time</th><th scope='col'>CPU</th></tr>";
     echo "<tr valign='top'><td>";
     stat_graph("database", $width, $height, $start, $end,
                array("$si|Resin|Database|Connection Active"));
 
-    echo "<td>";
+    echo "</td><td>";
     stat_graph("database_time", $width, $height, $start, $end,
                array("$si|Resin|Database|Query Time",
                      "$si|Resin|Database|Query Time Max"));
 
-    echo "<td>";
+    echo "</td><td>";
     stat_graph("cpu", $width, $height, $start, $end,
                array("$si|OS|CPU|CPU Active"));
 
-    echo "<tr><th>Memory<th>GC Time<th>Netstat";
+    echo "</td></tr>";
+    echo "<tr><th scope='col'>Memory</th><th scope='col'>GC Time</th><th scope='col'>Netstat</th></tr>";
     echo "<tr valign='top'><td>";
     stat_graph("memory", $width, $height, $start, $end,
                array("$si|JVM|Memory|Heap Memory Used",
@@ -274,14 +275,15 @@ function print_graphs()
                      "$si|JVM|Memory|Tenured Memory Used",
                      "$si|JVM|Memory|PermGen Memory Used"));
 
-    echo "<td>";
+    echo "</td><td>";
     stat_graph_regexp("memory_gc", $width, $height, $start, $end,
                       "/$si\|JVM\|Memory\|GC Time/");
                      
-    echo "<td>";
+    echo "</td><td>";
     stat_graph_regexp("netstat", $width, $height, $start, $end,
                       "/$si\|OS\|Network\|(?!tcp-time)/");
                     
+    echo "</td></tr>";
     echo "</table>";
   }
 }
@@ -309,13 +311,11 @@ function recent_messages()
       echo "<h2>Recent Messages</h2>\n";
 
       echo "<table class='data'>\n";
-  /*
-      //echo "<thead class='scroll'>\n";
-      echo "<tr><th class='date'>Date</th>";
-      echo "    <th class='level'>Level</th>";
-      echo "    <th class='message'>Message</th></tr>\n";
-      //echo "</thead>\n";
-  */
+      echo "<thead>\n";
+      echo "<tr><th scope='col' class='date'>Date</th>";
+      echo "    <th scope='col' class='level'>Level</th>";
+      echo "    <th scope='col' class='message'>Message</th></tr>\n";
+      echo "</thead>\n";
 
       $messages = array_reverse($messages);
 
@@ -346,14 +346,12 @@ function recent_messages()
       echo "<h2>Shutdown Messages</h2>\n";
 
       echo "<table class='data'>\n";
-/*
-    //echo "<thead class='scroll'>\n";
-    echo "<tr><th class='date'>Date</th>";
-    echo "    <th class='level'>Level</th>";
-    echo "    <th class='message'>Message</th></tr>\n";
-    //echo "</thead>\n";
-*/
-
+      echo "<thead>\n";
+      echo "<tr><th scope='col' class='date'>Date</th>";
+      echo "    <th scope='col' class='level'>Level</th>";
+      echo "    <th scope='col' class='message'>Message</th></tr>\n";
+      echo "</thead>\n";
+      
       $messages = array_reverse($messages);
 
       echo "<tbody class='scroll'>\n";
@@ -398,21 +396,22 @@ function print_tcp_ports()
 <table class="data">
   <tr>
     <th colspan='2'>&nbsp;</th>
-  <th colspan='3'>Threads</th>
-  <th colspan='4'>Keepalive</th>
+    <th colspan='3' id='threads'>Threads</th>
+    <th colspan='4' id='keepalive'>Keepalive</th>
+  </tr>
 
   <tr>
-    <th>&nbsp;</th>
-    <th>Status</th>
+    <th id='listener'>Listener</th>
+    <th id='port-status'>Status</th>
 
-    <th>Active</th>
-    <th>Idle</th>
-    <th>Total</th>
+    <th id='thread-active'>Active</th>
+    <th id='thread-idle'>Idle</th>
+    <th id='thread-total'>Total</th>
 
-    <th>Total</th>
-    <th>Thread</th>
-    <th>Non-Block</th>
-    <th>Comet</th>
+    <th id='keepalive-active'>Total</th>
+    <th id='keepalive-thread'>Thread</th>
+    <th id='keepalive-non-block'>Non-Block</th>
+    <th id='keepalive-comet'>Comet</th>
   </tr>
 <?php
     $count = 0;
@@ -423,16 +422,16 @@ function print_tcp_ports()
 ?>
 
   <tr class='<?= $row++ % 2 == 0 ? "ra" : "rb" ?>'>
-    <td class='item'><?= $port->ProtocolName ?>://<?= $port->Address ? $port->Address : "*" ?>:<?= $port->Port ?></td>
-    <td class="<?= $port->State ?>"><?= $port->State ?></td>
-    <td><?= $port->ThreadActiveCount ?></td>
-    <td><?= $port->ThreadIdleCount ?></td>
-    <td><?= $port->ThreadCount ?></td>
+    <td class='item' headers="listener"><?= $port->ProtocolName ?>://<?= $port->Address ? $port->Address : "*" ?>:<?= $port->Port ?></td>
+    <td class="<?= $port->State ?>" headers="port-status"><?= $port->State ?></td>
+    <td headers="threads thread-active"><?= $port->ThreadActiveCount ?></td>
+    <td headers="threads thread-idle"><?= $port->ThreadIdleCount ?></td>
+    <td headers="threads thread-total"><?= $port->ThreadCount ?></td>
 
-    <td><?= $port->KeepaliveCount ?></td>
-    <td><?= $port->KeepaliveThreadCount ?></td>
-    <td><?= $port->KeepaliveSelectCount ?></td>
-    <td><?= $port->CometIdleCount ?>
+    <td headers="keepalive keepalive-active"><?= $port->KeepaliveCount ?></td>
+    <td headers="keepalive keepalive-thread"><?= $port->KeepaliveThreadCount ?></td>
+    <td headers="keepalive keepalive-non-block"><?= $port->KeepaliveSelectCount ?></td>
+    <td headers="keepalive keepalive-comet"><?= $port->CometIdleCount ?></td>
   </tr>
 <?php
     }
@@ -464,8 +463,8 @@ function print_threads()
 
   echo "<h3>Open Connections</h3>";
 
-  echo "<table class='data'>";
-  echo "<tr><th><th>time<th>id<th>url<th>IP</tr>\n";
+  echo "<table class='data' summary='Open Connections'>";
+  echo "<tr><th scope='col'>action</th><th scope='col'>time</th><th scope='col'>id</th><th scope='col'>url</th><th scope='col'>IP</th></tr>\n";
 
   foreach ($connInfoList as $connInfo) {
     if ($connInfo->requestTime >= 0 && $connInfo->threadId >= 0) {
@@ -535,16 +534,16 @@ function print_load_balance()
 
 <table class="data">
   <tr>
-    <th>Server</th>
-    <th>Address</th>
-    <th>Status</th>
-    <th>Active</th>
-    <th>Idle</th>
-    <th>Connection Miss</th>
-    <th>Load</th>
-    <th>Latency</th>
-    <th colspan='2'>Failures</th>
-    <th colspan='2'>Busy</th>
+    <th id="cluster-server">Server</th>
+    <th id="cluster-address">Address</th>
+    <th id="cluster-status">Status</th>
+    <th id="cluster-active">Active</th>
+    <th id="cluster-idle">Idle</th>
+    <th id="cluster-conn_miss">Connection Miss</th>
+    <th id="cluster-load">Load</th>
+    <th id="cluster-latency">Latency</th>
+    <th id="cluster-failures" colspan='2'>Failures</th>
+    <th id="cluster-busy" colspan='2'>Busy</th>
   </tr>
 <?php
 
@@ -552,29 +551,25 @@ function print_load_balance()
     if (empty($cluster->Servers))
       continue;
 
-    echo "<tr><td class='group' colspan='12'>$cluster->Name</td></tr>\n";
+    echo "<tr><td class='group' colspan='12' id='$cluster->Name'>$cluster->Name</td></tr>\n";
 
   $count = 0;
   foreach ($cluster->Servers as $client) {
 ?>
 
   <tr class='<?= $count++ % 2 == 0 ? "ra" : "rb" ?>'>
-    <td class='item'><?= $client->Name ?></td>
-    <td><?= $client->Address ?>:<?= $client->Port ?></td>
-    <td class="<?= $client->State ?>"><?= $client->State ?></td>
-    <td><?= $client->ConnectionActiveCount ?></td>
-    <td><?= $client->ConnectionIdleCount ?></td>
-    <td><?= format_miss_ratio($client->ConnectionKeepaliveCountTotal,
+    <td class='item' headers="cluster-server <?=$cluster->Name?>"><?= $client->Name ?></td>
+    <td headers="cluster-address <?=$cluster->Name?>"><?= $client->Address ?>:<?= $client->Port ?></td>
+    <td headers="cluster-status <?=$cluster->Name?>" class="<?= $client->State ?>"><?= $client->State ?></td>
+    <td headers="cluster-active <?=$cluster->Name?>"><?= $client->ConnectionActiveCount ?></td>
+    <td headers="cluster-idle <?=$cluster->Name?>"><?= $client->ConnectionIdleCount ?></td>
+    <td headers="cluster-conn_miss <?=$cluster->Name?>"><?= format_miss_ratio($client->ConnectionKeepaliveCountTotal,
                               $client->ConnectionNewCountTotal) ?></td>
-    <td><?= sprintf("%.2f", $client->ServerCpuLoadAvg) ?></td>
-    <td><?= sprintf("%.2f", $client->LatencyFactor) ?></td>
+    <td headers="cluster-load <?=$cluster->Name?>"><?= sprintf("%.2f", $client->ServerCpuLoadAvg) ?></td>
+    <td headers="cluster-latency <?=$cluster->Name?>"><?= sprintf("%.2f", $client->LatencyFactor) ?></td>
     <?php
-      format_ago_td_pair($client->ConnectionFailCountTotal,
-                         $client->LastFailTime);
-
-      format_ago_td_pair($client->ConnectionBusyCountTotal,
-                         $client->LastBusyTime);
-
+      format_ago_td_pair($client->ConnectionFailCountTotal, $client->LastFailTime, "cluster-failures " . $cluster->Name);
+      format_ago_td_pair($client->ConnectionBusyCountTotal, $client->LastBusyTime, "cluster-busy " . $cluster->Name);
     ?>
   </tr>
 <?php 
@@ -626,78 +621,6 @@ function conn_time_cmp($conn_a, $conn_b)
   return $conn_b->requestTime - $conn_a->requestTime;
 }
 
-function display_health_status()
-{
-  global $g_mbean_server;
-
-  $health = $g_mbean_server->lookup("resin:type=HealthCheck,name=Resin");
-      
-  $is_health = $health;
-
-  echo "<table border='0'>";
-  echo "<tr><td>";
-
-  echo "<span id='sw_health' class='switch'></span>";
-
-  echo "</td><td>";
-
-  if (! $health) {
-    echo "n/a";
-  }
-  else {
-    print_health($health->Status, "Health " . $health->Status);
-  }
-  echo "</td></tr>";
-
-  if ($g_mbean_server && $health) {
-    $health_list = $g_mbean_server->query("resin:type=HealthCheck,*");
-    foreach ($health_list as $s_health) {
-      echo "<tr class='toggle-sw_health'>";
-      echo "<td>";
-      echo "</td>";
-      echo "<td>";
-
-      print_health($s_health->Status, "Health " . $s_health->Name);
-      
-      echo "</td>";
-      echo "<td>";
-      echo $s_health->Message;
-      echo "</td>";
-      echo "</tr>";
-    }
-  }
-
-  echo "</table>";
-
-  display_health_graph();
-}
-
-function display_health_graph()
-{
-  global $mbean_server;
-  global $server;
-
-  $si = sprintf("%02d", $server->ServerIndex);
-  $stat_service = $mbean_server->lookup("resin:type=StatService");
-
-  if ($stat_service) {
-    $period = 24 * 60 * 60;
-    $end = time();
-    $start = $end - $period;
-
-    $height = 150;
-    $width = 400;
-
-    $health_system = $mbean_server->lookup("resin:type=HealthSystem");
-    if ($health_system) {
-			$status_names = $health_system->HealthStatusNames;
-    }
-    
-    stat_graph_regexp("health", $width, $height, $start, $end,
-                      "/^$si\|Resin\|Health/", "right", $mbean_server, $status_names);
-  }
-}
-
-  display_footer($g_page, $javascript. javascript_create_tab("summary-tabs"));
+display_footer($g_page, $javascript. javascript_create_tab("summary-tabs"));
 
 ?>

@@ -11,6 +11,8 @@ if (! admin_init()) {
   return;
 }
 
+echo "<h1>Configuration</h1>";
+
 echo "<div id='config-tabs'>";
 echo "<ul>";
 $count = 0;
@@ -30,27 +32,27 @@ echo "</ul>\n";
 <div class='section'>
 <table class="data">
   <tr title="The server id used when starting this instance of Resin, the value of '-server'.">
-    <th>Server id:</th>
+    <th scope="row">Server id:</th>
     <td><?= $g_server->Id ? $g_server->Id : '""' ?></td>
   </tr>
 
   <tr title="The configuration file used when starting this instance of Resin, the value of '-conf'.">
-    <th>Version:</th>
+    <th scope="row">Version:</th>
     <td><?= $g_resin->Version ?></td>
   </tr>
 
   <tr title="The configuration file used when starting this instance of Resin, the value of '-conf'.">
-    <th>Config file:</th>
+    <th scope="row">Config file:</th>
     <td><?= $g_resin->ConfigFile ?></td>
   </tr>
 
   <tr title="The Resin home directory used when starting this instance of Resin. This is the location of the Resin program files.">
-  <th>Resin home:</th>
+   <th scope="row">Resin home:</th>
     <td><?= $g_resin->ResinHome ?></td>
   </tr>
 
   <tr title="The resin root directory used when starting this instance of Resin. This is the root directory of the web server files.">
-    <th>Resin root:</th>
+    <th scope="row">Resin root:</th>
     <td><?= $g_resin->RootDirectory ?></td>
   </tr>
   </table>
@@ -61,11 +63,11 @@ echo "</ul>\n";
    $env = $g_server->Environment;
 
    echo "<table class='data'>\n"
-   echo "<tr><td class='item' valign='top'>classpath ";
+   echo "<tr><th scope='col' class='item' valign='top'>classpath ";
    echo "<a id='s_classpath' href=\"javascript:show('classpath');show('h_classpath');hide('s_classpath')\">[show]</a> ";
    echo "<a id='h_classpath' href=\"javascript:hide('classpath');show('s_classpath');hide('h_classpath');\" style='display:none'>[hide]</a>";
-   echo "</td>";
-   echo "<td>";
+   echo "</th></tr>";
+   echo "<tr><td>";
    echo "<pre id='classpath' style='display:none'>";
    foreach ($env->ClassPath as $item) {
      echo $item . "\n";
@@ -110,7 +112,7 @@ $cluster = $g_server->Cluster;
 
 $cluster_name = empty($cluster->Name) ? "default" : $cluster->Name;
 
-echo "<h2>Cluster: $cluster_name</h2>";
+echo "<h1>Cluster: $cluster_name</h1>";
 echo "<div class='section'>";
 
 $servers = $cluster->Servers;
@@ -132,9 +134,9 @@ foreach ($hosts as $host) {
   <h2>Host <?= $host->URL ?></h2>
   <div class='section'>
 
-  <table class='data'>
+  <table class='data' width='100%'>
   <tr>
-    <td class='item'>root-directory</td>
+    <th class='item' scope="row">root-directory</th>
     <td><?= $host->RootDirectory ?></td>
   </tr>
   </table>
@@ -154,25 +156,28 @@ foreach ($webapps as $webapp) {
 
   <p />
   <table class='data' width='100%'>
-  <tr><td class='group' colspan='2'>
+  <tr>
+  	<th class='group' scope='row'>context-path</th>
+  	<td>
        <?= empty($webapp->ContextPath) ? "/" : $webapp->ContextPath ?>
     </td>
+  </tr>
   <tr>
-    <td class='item' width='25%'>root-directory</td>
+    <th class='item' width='25%' scope="row">root-directory</th>
     <td>
        <?= $webapp->RootDirectory ?>
     </td>
   </tr>
 
   <tr>
-    <td class='item'>session-timeout</td>
+    <th class='item' scope="row">session-timeout</th>
     <td>
        <?= $session->SessionTimeout / 1000 ?>s
     </td>
   </tr>
 
   <tr>
-    <td class='item'>session-max</td>
+    <th class='item' scope="row">session-max</th>
     <td>
        <?= $session->SessionMax ?>
     </td>
@@ -181,14 +186,14 @@ foreach ($webapps as $webapp) {
 <?php if ($persistent_store) { ?>
 
   <tr>
-    <td class='item'>persistent-store</td>
+    <th class='item' scope="row">persistent-store</th>
     <td>
        <?= $persistent_store->StoreType ?>
     </td>
   </tr>
 
   <tr>
-    <td class='item'>save-mode</td>
+    <th class='item' scope="row">save-mode</th>
     <td>
        <?= $session->SaveMode ?>
     </td>

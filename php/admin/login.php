@@ -16,15 +16,15 @@ if ($GLOBAL["error"]) {
 <form method="POST" action="j_security_check?j_uri=index.php">
 <table border='0'>
 <tr>
-  <th>Username: </th>
+  <th><label for="j_username">Username</label>: </th>
   <td>
-    <input name="j_username" width="40"></input>
+    <input id="j_username" name="j_username" width="40"></input>
   </td>
 </tr>
 <tr>
-  <th>Password: </th>
+  <th><label for="j_password">Password</label>: </th>
   <td>
-    <input name="j_password" width="40" type="password"></input>
+    <input id="j_password" name="j_password" width="40" type="password"></input>
   </td>
 </tr>
 <tr>

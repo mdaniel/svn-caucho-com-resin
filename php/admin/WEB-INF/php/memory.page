@@ -49,12 +49,12 @@ $row = 0;
 echo "<table class='data'>\n"
 
 echo "<tr>";
-echo "<th>pool</th>\n";
-echo "<th>% free</th>\n";
-echo "<th>free"; print_help("Memory#free"); echo "</th>\n";
-echo "<th>used"; print_help("Memory#used"); echo "</th>\n";
-echo "<th>max"; print_help("Memory#max"); echo "</th>\n";
-echo "<th>committed</th>\n";
+echo "<th scope='col'>pool</th>\n";
+echo "<th scope='col'>% free</th>\n";
+echo "<th scope='col'>free"; print_help("Memory#free"); echo "</th>\n";
+echo "<th scope='col'>used"; print_help("Memory#used"); echo "</th>\n";
+echo "<th scope='col'>max"; print_help("Memory#max"); echo "</th>\n";
+echo "<th scope='col'>committed</th>\n";
 echo "</tr>";
 
 echo "<tr class='" . row_style($row++) . "'>";
@@ -121,8 +121,8 @@ $heap_file = "/tmp/java.hprof";
 
 if ($heap) {
   echo "<form action='?q=memory' method='post'>";
-  echo "Resin Heap Dump: <input type='submit' name='action' value='dump heap'><br>";
-  echo "JVM Heap Dump: <input type='submit' name='action' value='jvm heap dump'> (saves JVM binary heap to $heap_file)";
+  echo "Resin Heap Dump: <input type='submit' name='action' value='dump heap'/><br/>";
+  echo "JVM Heap Dump: <input type='submit' name='action' value='jvm heap dump'/> (saves JVM binary heap to $heap_file)";
   echo "</form>";
 
   if ($_POST['action'] == 'jvm heap dump') {
@@ -160,12 +160,12 @@ function display_heap_dump_subtab($name, $entries)
 
     echo "<table id='${name}-heap-dump' class='heap-dump data'>";
     echo "<tr>\n";
-    echo "  <th>% self</th>\n";
-    echo "  <th>self+desc</th>\n";
-    echo "  <th>self</th>\n";
-    echo "  <th>desc</th>\n";
-    echo "  <th>count</th>\n";
-    echo "  <th colspan='2'>class</th>\n";
+    echo "  <th scope='col'>% self</th>\n";
+    echo "  <th scope='col'>self+desc</th>\n";
+    echo "  <th scope='col'>self</th>\n";
+    echo "  <th scope='col'>desc</th>\n";
+    echo "  <th scope='col'>count</th>\n";
+    echo "  <th  scope='col' colspan='2'>class</th>\n";
     echo "</tr>\n";
 
     for ($i = 0; $i < sizeof($entries); $i++) {

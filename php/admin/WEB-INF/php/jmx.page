@@ -9,6 +9,8 @@ if (! admin_init($query)) {
   return;
 }
 
+echo "<h1>JMX</h1>";
+
 function collect_mbean_groups()
 {
   global $g_mbean_server;
