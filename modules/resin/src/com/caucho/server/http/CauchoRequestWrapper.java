@@ -840,17 +840,6 @@ public class CauchoRequestWrapper extends AbstractCauchoRequest {
   }
   
   @Override
-  public boolean isKeepaliveAllowed()
-  {
-    CauchoRequest cRequest = getCauchoRequest();
-
-    if (cRequest != null)
-      return cRequest.isKeepaliveAllowed();
-    else
-      return false;
-  }
-  
-  @Override
   public boolean isClientDisconnect()
   {
     CauchoRequest cRequest = getCauchoRequest();

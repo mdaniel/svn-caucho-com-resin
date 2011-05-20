@@ -370,7 +370,10 @@ public abstract class AbstractHttpRequest
    */
   public boolean isClientDisconnect()
   {
-    return _response.isClientDisconnect();
+    if (_tcpConn != null)
+      return _tcpConn.isClosed();
+    else
+      return false;
   }
 
   /**
@@ -1644,24 +1647,6 @@ public abstract class AbstractHttpRequest
   {
     return _tcpConn != null && _tcpConn.isDuplex();
   }
-
-  /**
-   * Returns true if a keepalive has been allocated for the request.
-   *
-   * The keepalives are preallocated at the start of the request to keep
-   * the connection state machine simple.
-   */
-  /*
-  public boolean isKeepaliveAllowed()
-  {
-    SocketLink conn = _conn;
-    
-    if (conn != null)
-      return conn.isKeepaliveAllocated();
-    else
-      return false;
-  }
-  */
 
   protected HashMapImpl<String,String[]> getForm()
   {

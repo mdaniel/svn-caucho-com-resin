@@ -1626,11 +1626,6 @@ public final class HttpServletRequestImpl extends AbstractCauchoRequest
     _request.killKeepalive();
   }
 
-  public boolean isKeepaliveAllowed()
-  {
-    return _request.isKeepalive();
-  }
-
   public boolean isClientDisconnect()
   {
     return _request.isClientDisconnect();

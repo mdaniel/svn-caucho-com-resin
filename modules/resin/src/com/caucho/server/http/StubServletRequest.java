@@ -248,122 +248,140 @@ public class StubServletRequest implements CauchoRequest {
   {
   }
 
-  public boolean isKeepaliveAllowed()
-  {
-    return false;
-  }
-
+  @Override
   public boolean isDuplex()
   {
     return false;
   }
 
+  @Override
   public boolean isComet()
   {
     return false;
   }
 
+  @Override
   public boolean isSuspend()
   {
     return false;
   }
 
+  @Override
   public void killKeepalive()
   {
   }
 
+  @Override
   public void setHasCookie()
   {
   }
 
+  @Override
   public Cookie getCookie(String name)
   {
     throw new UnsupportedOperationException(getClass().getName());
   }
 
+  @Override
   public HttpSession getMemorySession()
   {
     throw new UnsupportedOperationException(getClass().getName());
   }
 
+  @Override
   public boolean hasRequest()
   {
     return true;
   }
 
+  @Override
   public boolean isTop()
   {
     return true;
   }
 
+  @Override
   public boolean getHasCookie()
   {
     return true;
   }
 
+  @Override
   public void setVaryCookie(String cookie)
   {
   }
 
+  @Override
   public boolean getVaryCookies()
   {
     return true;
   }
 
+  @Override
   public void setHeader(String k, String v)
   {
   }
 
+  @Override
   public int getRequestDepth(int i)
   {
     return i + 1;
   }
   
+  @Override
   public ReadStream getStream()
   {
     throw new UnsupportedOperationException(getClass().getName());
   }
 
+  @Override
   public WebApp getWebApp()
   {
     throw new UnsupportedOperationException(getClass().getName());
   }
 
+  @Override
   public Collection<Part> getParts()
     throws IOException, ServletException
   {
     throw new UnsupportedOperationException(getClass().getName());
   }
 
+  @Override
   public Part getPart(String name)
     throws IOException, ServletException
   {
     throw new UnsupportedOperationException(getClass().getName());
   }
 
+  @Override
   public boolean authenticate(HttpServletResponse response)
       throws IOException,ServletException
   {
     throw new UnsupportedOperationException(getClass().getName());
   }
   
+  @Override
   public void login(String username, String password)
     throws ServletException
   {
     throw new UnsupportedOperationException(getClass().getName());
   }
 
+  @Override
   public void logout()
     throws ServletException
   {
     throw new UnsupportedOperationException(getClass().getName());
   }
   
+  @Override
   public boolean isRequestedSessionIdValid()
   {
     return false;
   }
   
+  @Override
   public boolean isRequestedSessionIdFromCookie()
   {
     return false;

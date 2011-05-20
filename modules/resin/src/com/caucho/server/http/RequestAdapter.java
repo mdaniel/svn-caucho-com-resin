@@ -543,11 +543,6 @@ public class RequestAdapter extends RequestWrapper
   public void killKeepalive()
   {
   }
-  
-  public boolean isKeepaliveAllowed()
-  {
-    return true;
-  }
 
   @Override
   public SocketLink getSocketLink()
