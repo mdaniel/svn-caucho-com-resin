@@ -34,7 +34,7 @@ package com.caucho.network.listen;
  */
 
 enum RequestState {
-  REQUEST,
+  CONNECTION_COMPLETE,
   THREAD_DETACHED,
   DUPLEX,
   EXIT

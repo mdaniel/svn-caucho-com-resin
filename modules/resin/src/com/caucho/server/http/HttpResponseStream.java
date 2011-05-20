@@ -180,7 +180,7 @@ public class HttpResponseStream extends ResponseStream {
       AbstractHttpRequest req = _response.getRequest();
       if (req.isCometActive() || req.isDuplex()) {
       }
-      else if (! req.isKeepaliveAllowed()) {
+      else if (! req.isKeepalive()) {
         if (log.isLoggable(Level.FINE)) {
           log.fine(dbgId() + "close stream");
         }

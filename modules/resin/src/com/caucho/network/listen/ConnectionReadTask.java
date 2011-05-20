@@ -107,6 +107,7 @@ abstract class ConnectionReadTask implements Runnable {
       
       thread.setName(oldThreadName);
 
+      // XXX: if result == null, does this create counting problems?
       if (result == null)
         _socketLink.destroy();
 

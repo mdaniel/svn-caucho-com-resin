@@ -379,7 +379,7 @@ public abstract class AbstractHttpRequest
   public void clientDisconnect()
   {
     if (_tcpConn != null)
-      _tcpConn.requestClose();
+      _tcpConn.requestEarlyClose();
   }
 
   public final HttpServletRequestImpl getRequestFacade()
@@ -1651,6 +1651,7 @@ public abstract class AbstractHttpRequest
    * The keepalives are preallocated at the start of the request to keep
    * the connection state machine simple.
    */
+  /*
   public boolean isKeepaliveAllowed()
   {
     SocketLink conn = _conn;
@@ -1658,8 +1659,9 @@ public abstract class AbstractHttpRequest
     if (conn != null)
       return conn.isKeepaliveAllocated();
     else
-      return true;
+      return false;
   }
+  */
 
   protected HashMapImpl<String,String[]> getForm()
   {

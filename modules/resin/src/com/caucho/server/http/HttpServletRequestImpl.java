@@ -1628,17 +1628,12 @@ public final class HttpServletRequestImpl extends AbstractCauchoRequest
 
   public boolean isKeepaliveAllowed()
   {
-    return _request.isKeepaliveAllowed();
+    return _request.isKeepalive();
   }
 
   public boolean isClientDisconnect()
   {
     return _request.isClientDisconnect();
-  }
-
-  public void clientDisconnect()
-  {
-    _request.clientDisconnect();
   }
 
   public SocketLink getConnection()
@@ -1705,8 +1700,6 @@ public final class HttpServletRequestImpl extends AbstractCauchoRequest
   @Override
   public boolean isAsyncStarted()
   {
-    AbstractHttpRequest request = _request;
-    
     AsyncContextImpl asyncContext = _asyncContext;
     
     if (asyncContext == null)

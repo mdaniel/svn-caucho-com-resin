@@ -551,6 +551,7 @@ public class CauchoRequestWrapper extends AbstractCauchoRequest {
   */
   
   @Override
+  @SuppressWarnings("deprecation")
   public boolean isRequestedSessionIdFromUrl()
   {
     return _request.isRequestedSessionIdFromUrl();
@@ -858,15 +859,6 @@ public class CauchoRequestWrapper extends AbstractCauchoRequest {
       return cRequest.isClientDisconnect();
     else
       return false;
-  }
-  
-  @Override
-  public void clientDisconnect()
-  {
-    CauchoRequest cRequest = getCauchoRequest();
-
-    if (cRequest != null)
-      cRequest.clientDisconnect();
   }
 
   @Override

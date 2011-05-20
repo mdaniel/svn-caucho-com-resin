@@ -96,7 +96,6 @@ abstract public class AbstractHttpResponse {
   private HttpBufferStore _bufferStore;
 
   private boolean _isHeaderWritten;
-  private boolean _isClientDisconnect;
 
   protected long _contentLength;
   private boolean _isClosed;
@@ -132,7 +131,7 @@ abstract public class AbstractHttpResponse {
    */
   public boolean isClientDisconnect()
   {
-    return _isClientDisconnect;
+    return _request.isClientDisconnect();
   }
 
   /**
@@ -141,8 +140,6 @@ abstract public class AbstractHttpResponse {
   public void clientDisconnect()
   {
     _request.clientDisconnect();
-
-    _isClientDisconnect = true;
   }
 
   /**
@@ -199,7 +196,6 @@ abstract public class AbstractHttpResponse {
     _responseStream.start();
 
     _isHeaderWritten = false;
-    _isClientDisconnect = false;
 
     _contentLength = -1;
     _isClosed = false;
@@ -1023,7 +1019,7 @@ abstract public class AbstractHttpResponse {
       }
     } catch (ClientDisconnectException e) {
       _request.killKeepalive();
-      _isClientDisconnect = true;
+      clientDisconnect();
 
       if (isIgnoreClientDisconnect())
         log.fine(e.toString());
@@ -1031,7 +1027,7 @@ abstract public class AbstractHttpResponse {
         throw e;
     } catch (IOException e) {
       _request.killKeepalive();
-      _isClientDisconnect = true;
+      clientDisconnect();
 
       throw e;
     }

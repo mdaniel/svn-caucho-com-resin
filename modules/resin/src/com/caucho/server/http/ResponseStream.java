@@ -67,7 +67,6 @@ abstract public class ResponseStream extends ToByteResponseStream {
 
   private boolean _isAllowFlush = true;
   private boolean _isComplete;
-  private boolean _isNextDisconnect;
 
   public ResponseStream()
   {
@@ -110,7 +109,6 @@ abstract public class ResponseStream extends ToByteResponseStream {
     _isDisableAutoFlush = false;
     _cacheStream = null;
     _proxyCacheResponse = null;
-    _isNextDisconnect = false;
     _isComplete = false;
   }
 
@@ -846,7 +844,7 @@ abstract public class ResponseStream extends ToByteResponseStream {
 
   protected final boolean isNextValid()
   {
-    return ! _isNextDisconnect;
+    return ! _response.isClientDisconnect();
   }
   
   protected void clearNext()
@@ -872,13 +870,11 @@ abstract public class ResponseStream extends ToByteResponseStream {
       
       isValid = true;
     } catch (ClientDisconnectException e) {
-      _response.clientDisconnect();
-
       if (! _response.isIgnoreClientDisconnect())
         throw e;
     } finally {
       if (! isValid)
-        _isNextDisconnect = true;
+        _response.clientDisconnect();
     }
   }
 
@@ -896,15 +892,13 @@ abstract public class ResponseStream extends ToByteResponseStream {
       
       return buffer;
     } catch (ClientDisconnectException e) {
-      _response.clientDisconnect();
-
       if (! _response.isIgnoreClientDisconnect())
         throw e;
       
       return getNextBuffer();
     } finally {
       if (! isValid)
-        _isNextDisconnect = true;
+        _response.clientDisconnect();
     }
   }
 
@@ -921,13 +915,11 @@ abstract public class ResponseStream extends ToByteResponseStream {
       
       isValid = true;
     } catch (ClientDisconnectException e) {
-      _response.clientDisconnect();
-
       if (! _response.isIgnoreClientDisconnect())
         throw e;
     } finally {
       if (! isValid)
-        _isNextDisconnect = true;
+        _response.clientDisconnect();
     }
   }
 
@@ -943,8 +935,9 @@ abstract public class ResponseStream extends ToByteResponseStream {
       
       isValid = true;
     } finally {
-      if (! isValid)
-        _isNextDisconnect = true;
+      if (! isValid) {
+        _response.clientDisconnect();
+      }
     }
   }
 
@@ -961,7 +954,7 @@ abstract public class ResponseStream extends ToByteResponseStream {
       isValid = true;
     } finally {
       if (! isValid)
-        _isNextDisconnect = true;
+        _response.clientDisconnect();
     }
   }
 

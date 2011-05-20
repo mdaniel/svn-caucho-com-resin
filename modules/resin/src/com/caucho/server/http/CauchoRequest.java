@@ -75,7 +75,6 @@ public interface CauchoRequest extends HttpServletRequest {
   public boolean isDuplex();
   public boolean isKeepaliveAllowed();
   public boolean isClientDisconnect();
-  public void clientDisconnect();
 
   public boolean isLoginRequested();
   public void requestLogin();

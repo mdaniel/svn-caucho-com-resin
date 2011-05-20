@@ -286,16 +286,19 @@ public class CauchoResponseWrapper extends AbstractCauchoResponse
     return _response.encodeRedirectURL(name);
   }
 
+  @SuppressWarnings("deprecation")
   public void setStatus(int sc, String msg)
   {
     _response.setStatus(sc, msg);
   }
 
+  @SuppressWarnings("deprecation")
   public String encodeUrl(String url)
   {
     return _response.encodeUrl(url);
   }
 
+  @SuppressWarnings("deprecation")
   public String encodeRedirectUrl(String url)
   {
     return _response.encodeRedirectUrl(url);

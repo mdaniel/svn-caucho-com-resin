@@ -103,11 +103,23 @@ class AcceptTask extends ConnectionReadTask {
       boolean isKeepalive = false;
       result = socketLink.handleRequests(isKeepalive);
 
-      if (result == RequestState.THREAD_DETACHED) {
+      switch (result) {
+      case CONNECTION_COMPLETE:
+        socketLink.close();
+        break;
+        
+      case THREAD_DETACHED:
         return result;
-      }
-      else if (result == RequestState.DUPLEX) {
+        
+      case EXIT:
+        socketLink.close();
+        return result;
+
+      case DUPLEX:
         return socketLink.doDuplex();
+
+      default:
+        throw new IllegalStateException(String.valueOf(result));
       }
 
       socketLink.close();

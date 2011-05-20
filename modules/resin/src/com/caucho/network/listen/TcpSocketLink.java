@@ -608,7 +608,7 @@ public class TcpSocketLink extends AbstractSocketLink
   {
     Thread thread = Thread.currentThread();
 
-    RequestState result = null;
+    RequestState result = RequestState.EXIT;
 
     try {
       // clear the interrupted flag
@@ -637,8 +637,7 @@ public class TcpSocketLink extends AbstractSocketLink
       thread.setContextClassLoader(_loader);
 
       if (result == null) {
-        destroy();
-        return RequestState.EXIT;
+        result = RequestState.EXIT;
       }
     }
 
@@ -655,13 +654,13 @@ public class TcpSocketLink extends AbstractSocketLink
     throws IOException
   {
     do {
-      RequestState result = RequestState.REQUEST;
+      RequestState result = RequestState.CONNECTION_COMPLETE;
       
       if (_listener.isClosed()) {
         return RequestState.EXIT;
       }
 
-      if (isKeepalive && (result = processKeepalive()) != RequestState.REQUEST) {
+      if (isKeepalive && (result = processKeepalive()) != RequestState.CONNECTION_COMPLETE) {
         return result;
       }
 
@@ -674,13 +673,13 @@ public class TcpSocketLink extends AbstractSocketLink
         }
       }
       
-      if (result != RequestState.REQUEST)
+      if (result != RequestState.CONNECTION_COMPLETE)
         return result;
       
       isKeepalive = true;
     } while (_state.isKeepaliveAllocated());
 
-    return RequestState.REQUEST;
+    return RequestState.CONNECTION_COMPLETE;
   }
   
   private RequestState handleRequest(boolean isKeepalive)
@@ -699,7 +698,7 @@ public class TcpSocketLink extends AbstractSocketLink
       return RequestState.THREAD_DETACHED;
     }
    
-    return RequestState.REQUEST;
+    return RequestState.CONNECTION_COMPLETE;
   }
 
   private void dispatchRequest()
@@ -767,7 +766,7 @@ public class TcpSocketLink extends AbstractSocketLink
     int available = port.keepaliveThreadRead(getReadStream());
     
     if (available > 0) {
-      return RequestState.REQUEST;
+      return RequestState.CONNECTION_COMPLETE;
     }
     else if (available < 0) {
       setStatState(null);
@@ -813,7 +812,7 @@ public class TcpSocketLink extends AbstractSocketLink
           delta = 0;
         
         if (getReadStream().fillWithTimeout(delta) > 0) {
-          return RequestState.REQUEST;
+          return RequestState.CONNECTION_COMPLETE;
         }
         break;
       } catch (SocketTimeoutException e) {
@@ -1139,8 +1138,11 @@ public class TcpSocketLink extends AbstractSocketLink
    * 
    * XXX: may want to revise this logic
    */
-  public void requestClose()
+  public void requestEarlyClose()
   {
+    if (log.isLoggable(Level.FINE))
+      log.fine(this +" early close, most likely from client disconnect.");
+    
     close();
   }
 
@@ -1173,14 +1175,6 @@ public class TcpSocketLink extends AbstractSocketLink
   private void finishRequest()
   {
     closeAsync();
-  }
-
-  /**
-   * Finish a connection.
-   */
-  void finishConnection()
-  {
-    closeConnection();
   }
 
   /**
