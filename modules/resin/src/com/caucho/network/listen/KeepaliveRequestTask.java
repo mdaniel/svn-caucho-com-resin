@@ -49,14 +49,11 @@ class KeepaliveRequestTask extends ConnectionReadTask {
   @Override
   public void run()
   {
-    // SocketLinkListener listener = getListener();
     SocketLinkThreadLauncher launcher = getLauncher();
     
     launcher.onChildThreadResume();
 
     try {
-      // listener.startConnection(getSocketLink());
-      
       super.run();
     } finally {
       launcher.onChildThreadEnd();
@@ -72,16 +69,25 @@ class KeepaliveRequestTask extends ConnectionReadTask {
     boolean isKeepalive = true;
     RequestState result = socketLink.handleRequests(isKeepalive);
 
-    if (result == RequestState.THREAD_DETACHED) {
+    switch (result) {
+    case THREAD_DETACHED:
+    case ASYNC:
       return result;
-    }
-    else if (result == RequestState.DUPLEX) {
+      
+    case DUPLEX:
       return socketLink.doDuplex();
+      
+    case EXIT:
+      socketLink.close();
+      return result;
+      
+    case REQUEST_COMPLETE:
+      // acceptTask significantly faster than finishing
+      socketLink.close();
+      return socketLink.doAccept();
+      
+    default:
+      throw new IllegalStateException(String.valueOf(result));
     }
-
-    socketLink.close();
-
-    // acceptTask significantly faster than finishing
-    return socketLink.doAccept();
   }
 }

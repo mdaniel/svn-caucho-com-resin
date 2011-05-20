@@ -396,10 +396,6 @@ public final class JniSocketImpl extends QSocket {
       
       do {
         result = writeNative(_fd, buffer, offset, length);
-        
-        if (result < 0) {
-          System.out.println("WRITE: " + result + " " + this);
-        }
       } while (result == JniStream.TIMEOUT_EXN
                && Alarm.getCurrentTimeActual() < expires);
     }

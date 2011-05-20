@@ -50,11 +50,10 @@ class AcceptTask extends ConnectionReadTask {
   @Override
   public void run()
   {
-    // SocketLinkListener listener = getListener();
     SocketLinkThreadLauncher launcher = getLauncher();
 
     Thread thread = Thread.currentThread();
-    String threadName = thread.getName();
+    String oldThreadName = thread.getName();
     thread.setName(getSocketLink().getDebugId());
     
     try {
@@ -62,13 +61,12 @@ class AcceptTask extends ConnectionReadTask {
 
       if (log.isLoggable(Level.FINER))
         log.finer(getSocketLink() + " starting listen thread");
-      // listener.startConnection(getSocketLink());
       
       super.run();
     } finally {
       launcher.onChildThreadEnd();
       
-      thread.setName(threadName);
+      thread.setName(oldThreadName);
     }
   }
 
@@ -109,6 +107,7 @@ class AcceptTask extends ConnectionReadTask {
         break;
         
       case THREAD_DETACHED:
+      case ASYNC:
         return result;
         
       case EXIT:

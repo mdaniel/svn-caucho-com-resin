@@ -54,6 +54,7 @@ import com.caucho.util.L10N;
 import com.caucho.vfs.ClientDisconnectException;
 import com.caucho.vfs.QSocket;
 import com.caucho.vfs.ReadStream;
+import com.caucho.vfs.SocketTimeoutException;
 
 /**
  * Handles a new request from an HTTP connection.
@@ -865,6 +866,10 @@ public class HttpRequest extends AbstractHttpRequest
       return true;
     } catch (ClientDisconnectException e) {
       throw e;
+    } catch (SocketTimeoutException e) {
+      log.log(Level.FINER, e.toString(), e);
+      
+      return false;
     } catch (ArrayIndexOutOfBoundsException e) {
       log.log(Level.FINER, e.toString(), e);
       

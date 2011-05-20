@@ -81,7 +81,7 @@ abstract class ConnectionReadTask implements Runnable {
     runThread();
   }
 
-  public void runThread()
+  public final void runThread()
   {
     Thread thread = Thread.currentThread();
     String oldThreadName = thread.getName();
@@ -90,9 +90,9 @@ abstract class ConnectionReadTask implements Runnable {
 
     thread.setContextClassLoader(_listener.getClassLoader());
 
-    RequestState result = null;
+    RequestState result = RequestState.EXIT;
 
-    _socketLink.setThread(thread);
+    _socketLink.startThread(thread);
 
     try {
       result = doTask();
@@ -103,16 +103,11 @@ abstract class ConnectionReadTask implements Runnable {
     } catch (Throwable e) {
       log.log(Level.WARNING, e.toString(), e);
     } finally {
-      _socketLink.setThread(null);
+      _socketLink.startThread(null);
+
+      _socketLink.finishThread(result);
       
       thread.setName(oldThreadName);
-
-      // XXX: if result == null, does this create counting problems?
-      if (result == null)
-        _socketLink.destroy();
-
-      if (result != RequestState.THREAD_DETACHED)
-        _socketLink.finishThread();
     }
   }
 

@@ -477,7 +477,7 @@ public class TcpSocketLink extends AbstractSocketLink
       return -1;
   }
   
-  void setThread(Thread thread)
+  void startThread(Thread thread)
   {
     _thread = thread;
   }
@@ -653,33 +653,32 @@ public class TcpSocketLink extends AbstractSocketLink
   private RequestState handleRequestsImpl(boolean isKeepalive)
     throws IOException
   {
+    RequestState result;
+    
     do {
-      RequestState result = RequestState.EXIT;
+      result = RequestState.EXIT;
       
       if (_listener.isClosed()) {
         return RequestState.EXIT;
       }
 
-      if (isKeepalive && (result = processKeepalive()) != RequestState.REQUEST_COMPLETE) {
+      if (isKeepalive
+          && (result = processKeepalive()) != RequestState.REQUEST_COMPLETE) {
         return result;
       }
 
       try {
         result = handleRequest(isKeepalive);
       } finally {
-        if (result != RequestState.DUPLEX
-            && result != RequestState.THREAD_DETACHED) {
-          finishRequest();
+        if (result.isAsyncOrDuplex()) {
+          closeAsync();
         }
       }
       
-      if (result != RequestState.REQUEST_COMPLETE)
-        return result;
-      
       isKeepalive = true;
-    } while (_state.isKeepaliveAllocated());
+    } while (result.isRequestKeepalive() && _state.isKeepaliveAllocated());
 
-    return RequestState.REQUEST_COMPLETE;
+    return result;
   }
   
   private RequestState handleRequest(boolean isKeepalive)
@@ -695,7 +694,7 @@ public class TcpSocketLink extends AbstractSocketLink
     getWriteStream().flush();
 
     if (_state.isCometActive() && toSuspend()) {
-      return RequestState.THREAD_DETACHED;
+      return RequestState.ASYNC;
     }
    
     return RequestState.REQUEST_COMPLETE;
@@ -992,8 +991,6 @@ public class TcpSocketLink extends AbstractSocketLink
    */
   void doResume()
   {
-    boolean isValid = false;
-
     try {
       TcpCometController async = _async;
 
@@ -1015,11 +1012,9 @@ public class TcpSocketLink extends AbstractSocketLink
       getRequest().handleResume();
 
       if (_state.isCometActive() && toSuspend()) {
-        isValid = true;
       }
       else if (_state.isKeepaliveAllocated()) {
         // server/1l81
-        isValid = true;
         _state = _state.toKeepalive(this);
         _async = null;
         async.onClose();
@@ -1037,10 +1032,6 @@ public class TcpSocketLink extends AbstractSocketLink
       ShutdownSystem.shutdownActive(ExitCode.MEMORY, msg);
     } catch (Throwable e) {
       log.log(Level.WARNING, e.toString(), e);
-    } finally {
-      if (! isValid) {
-        finishThread();
-      }
     }
   }
   
@@ -1158,6 +1149,9 @@ public class TcpSocketLink extends AbstractSocketLink
    */
   public void closeOnShutdown()
   {
+    closeConnection();
+    
+    /*
     QSocket socket = _socket;
 
     if (socket != null) {
@@ -1167,21 +1161,17 @@ public class TcpSocketLink extends AbstractSocketLink
         log.log(Level.FINE, e.toString(), e);
       }
     }
-  }
-
-  /**
-   * Finish a request.
-   */
-  private void finishRequest()
-  {
-    closeAsync();
+    */
   }
 
   /**
    * Completion processing at the end of the thread
    */
-  void finishThread()
+  void finishThread(RequestState requestState)
   {
+    if (requestState.isDetach())
+      return;
+    
     closeConnection();
 
     SocketLinkState state = _state;
@@ -1262,12 +1252,12 @@ public class TcpSocketLink extends AbstractSocketLink
 
     if (port != null) {
       port.closeSocket(socket);
+    }
 
-      try {
-        socket.close();
-      } catch (Throwable e) {
-        log.log(Level.FINER, e.toString(), e);
-      }
+    try {
+      socket.close();
+    } catch (Throwable e) {
+      log.log(Level.FINER, e.toString(), e);
     }
   }
 

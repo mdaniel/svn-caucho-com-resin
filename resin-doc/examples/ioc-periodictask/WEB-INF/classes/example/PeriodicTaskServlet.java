@@ -1,8 +1,5 @@
 package example;
 
-import com.caucho.util.ThreadPool;
-import com.caucho.util.ThreadTask;
-
 import java.io.*;
 
 import java.text.DateFormat;
@@ -23,7 +20,7 @@ import javax.inject.Inject;
  * A Servlet that provides a user interface for managing a PeriodicTask.
  */
 public class PeriodicTaskServlet extends HttpServlet {
-  static protected final Logger log = 
+  static protected final Logger log =
     Logger.getLogger(PeriodicTaskServlet.class.getName());
 
   int _refreshRate = 5;
@@ -77,7 +74,7 @@ public class PeriodicTaskServlet extends HttpServlet {
         // It's tricky to start another Thread from a Servlet.  Here
         // the Resin ThreadPool class is used.  ThreadPool will interrupt a
         // thread and stop it if it runs for too long.
-        ThreadTask threadTask = new ThreadTask() {
+        Runnable threadTask = new Runnable() {
           public void run()
           {
             task.run();
@@ -143,7 +140,7 @@ public class PeriodicTaskServlet extends HttpServlet {
     printSafeHtml(out,heading);
     out.println("</h2></td></tr>");
   }
-  
+
   protected void printField(PrintWriter out, String name, String value)
   {
     out.print("<tr><td>");
