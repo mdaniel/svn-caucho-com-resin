@@ -310,6 +310,12 @@ public class CloudServer {
     
     _state = state;
   }
+
+  public void overrideState(CloudServerState state) {
+    _state = state;
+
+    updateState();
+  }
   
   private void updateState()
   {

@@ -435,6 +435,11 @@ public class CloudPod
     return removedServer;
   }
 
+  public void updateServerState(CloudServer scalingServer)
+  {
+    onServerStateChange(scalingServer);
+  }
+
   void onServerStateChange(CloudServer server)
   {
     for (CloudServerListener listener : _listeners) {
