@@ -41,7 +41,7 @@ public class DisableCommand extends AbstractScalingCommand
   @Override
   public void doCommand(WatchdogArgs args, WatchdogClient client)
   {
-    if (!isPro()) {
+    if (! isPro()) {
       System.out.println("command `disable' is only available with Resin Pro");
 
       return;
