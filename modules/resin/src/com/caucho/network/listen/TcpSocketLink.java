@@ -670,7 +670,7 @@ public class TcpSocketLink extends AbstractSocketLink
       try {
         result = handleRequest(isKeepalive);
       } finally {
-        if (result.isAsyncOrDuplex()) {
+        if (! result.isAsyncOrDuplex()) {
           closeAsync();
         }
       }
@@ -687,6 +687,8 @@ public class TcpSocketLink extends AbstractSocketLink
     dispatchRequest();
 
     if (_state == SocketLinkState.DUPLEX) {
+      if (_duplexReadTask == null)
+        throw new NullPointerException();
       // duplex (xmpp/hmtp) handling
       return RequestState.DUPLEX;
     }
@@ -1265,7 +1267,7 @@ public class TcpSocketLink extends AbstractSocketLink
   {
     DuplexReadTask duplexTask = _duplexReadTask;
     _duplexReadTask = null;
-    
+
     AsyncController async = _async;
     _async = null;
 

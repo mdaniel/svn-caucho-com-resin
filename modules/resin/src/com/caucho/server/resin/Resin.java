@@ -128,6 +128,7 @@ public class Resin
   private String _serverId = "default";
   private final boolean _isWatchdog;
   
+  private String _stage = "production";
   private String _dynamicJoinCluster;
   
   private String _dynamicAddress;
@@ -468,6 +469,9 @@ public class Resin
         setJoinCluster(_args.getJoinCluster());
         setServerAddress(_args.getServerAddress());
         setServerPort(_args.getServerPort());
+        
+        if (_args.getStage() != null)
+          setStage(_args.getStage());
       }
       
       if (getRootDirectory() == null)
@@ -689,6 +693,22 @@ public class Resin
   public String getJoinCluster()
   {
     return _dynamicJoinCluster;
+  }
+  
+  /**
+   * Sets the server stage.
+   */
+  public void setStage(String stage)
+  {
+    _stage = stage;
+  }
+  
+  /**
+   * Returns the server stage.
+   */
+  public String getStage()
+  {
+    return _stage;
   }
 
   /**
@@ -1209,8 +1229,6 @@ public class Resin
     
     bootResin.configureServers();
     
-    BootServerConfig bootServer = bootResin.findServer(_serverId);
-    
     String clusterId = "";
     
     if (_dynamicJoinCluster != null) {
@@ -1219,6 +1237,8 @@ public class Resin
       if (cloudServer != null)
         clusterId = cloudServer.getCluster().getId(); 
     }
+    
+    BootServerConfig bootServer = bootResin.findServer(_serverId);
     
     if (bootServer == null) {
       BootClusterConfig clusterConfig;
@@ -1276,6 +1296,8 @@ public class Resin
 
     if (_args != null && _args.getStage() != null)
       _servletContainer.setStage(_args.getStage());
+    else if (_stage != null)
+      _servletContainer.setStage(_stage);
     
     NetworkListenSystem.createAndAddService(_selfServer);
     
