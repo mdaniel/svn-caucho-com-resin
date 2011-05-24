@@ -31,7 +31,8 @@ $g_colors = array("#ff3030", // red
 $g_label_width = 180;
 
 function stat_graph_regexp($canvas, $width, $height,
-                           $start, $end, $pattern, $label = "bottom",
+                           $start, $end, $pattern, $alt, 
+                           $legend = "bottom",
                            $mbean_server = null, $ticks = null)
 {
   global $g_mbean_server;
@@ -55,11 +56,11 @@ function stat_graph_regexp($canvas, $width, $height,
   $names = preg_grep($pattern, $full_names);
   sort($names);
 
-  stat_graph($canvas, $width, $height, $start, $end, $names,
-             $label, $mbean_server, $ticks);
+  stat_graph($canvas, $width, $height, $start, $end, $names, $alt, 
+             $legend, $mbean_server, $ticks);
 }
 
-function stat_graph($canvas, $width, $height, $start, $end, $names,
+function stat_graph($canvas, $width, $height, $start, $end, $names, $alt, 
                     $legend = "bottom", $mbean_server = null, $ticks = null)
 {
   global $g_mbean_server;
@@ -83,11 +84,13 @@ function stat_graph($canvas, $width, $height, $start, $end, $names,
   $date = new DateTime();
   $tz_offset = $date->getOffset() * 1000;
 
+	#echo "<span title='${alt}'>\n";
+  	
   if ($legend == "none") {
     echo "<div id='$canvas-plot' style='width:${width}px;height:${height}px'></div>\n";
   }
   else if ($legend == "right") {
-    echo "<table border='0' cellspacing='0' cellpadding='0'>\n";
+    echo "<table border='0' cellspacing='0' cellpadding='0' summary='asdf'>\n";
     echo "<tr><td>";
     echo "<div id='$canvas-plot' style='width:${width}px;height:${height}px'></div>\n";
     echo "</td><td>";
@@ -97,9 +100,10 @@ function stat_graph($canvas, $width, $height, $start, $end, $names,
   }
   else {
     echo "<div id='$canvas-plot' style='width:${width}px;height:${height}px'></div>\n";
-
     echo "<div id='${canvas}-legend' style='width:${width}px;height:${label_height}px'></div>\n";
   }
+  
+  #echo "</span>\n";
 
   echo "<script id='$canvas-script' language='javascript' type='text/javascript'>\n";
   echo "<!-- \n";
@@ -130,7 +134,7 @@ function stat_graph($canvas, $width, $height, $start, $end, $names,
 
     $name = preg_replace("/\s/", "&nbsp;", $name);
 
-    echo "graphs[$i] = { label : '" . $name . "', data : values };\n";
+    echo "graphs[$i] = { label : '${name}', data : values, points: { radius: 2, symbol: \"circle\" } };\n";
 
     $i++;
   }
@@ -147,31 +151,66 @@ function stat_graph($canvas, $width, $height, $start, $end, $names,
 	  $labelWidth = 60;
   }
 
-  echo '$.plot($("#' . $canvas . '-plot"), graphs,';
-  echo '{ ';
-  echo 'xaxis: { mode:"time" }, ';
-  echo "yaxis: {labelWidth:$labelWidth,tickFormatter: function(val, axis) {\n";
-  echo "  if (ticks.length > 0) {\n";
-  echo "    if (val >= ticks.length || val < 0 || val % 1 > 0)\n";
+  echo "$.plot($(\"#${canvas}-plot\"), graphs,\n";
+  echo "{\n";
+  echo " xaxis: { mode:\"time\" },\n";
+  echo " yaxis: {\n";
+  echo "  labelWidth: ${labelWidth},\n";
+  echo "  tickFormatter: \n";
+  echo "   function (val, axis) {\n";
+  echo "    if (ticks.length > 0) {\n";
+  echo "     if (val >= ticks.length || val < 0 || val % 1 > 0)\n";
   echo "      return '';\n";
-  echo "    else\n"
+  echo "     else\n"
   echo "      return ticks[val];\n";
-  echo "  } else {\n"
-  echo "    if (val >= 1e9)\n";
+  echo "    }\n"; 
+  echo "    else {\n"
+  echo "     if (val >= 1e9)\n";
   echo "      return (val / 1e9).toFixed(1) + 'G';\n";
-  echo "    if (val >= 1e6)\n";
+  echo "     if (val >= 1e6)\n";
   echo "      return (val / 1e6).toFixed(1) + 'M';\n";
-  echo "    if (val >= 1e3)\n";
+  echo "     if (val >= 1e3)\n";
   echo "      return (val / 1e3).toFixed(1) + 'k';\n";
-  echo "    return val.toFixed(axis.tickDecimals);\n";
-  echo "  }\n";
-  echo "}\n";
-  echo "},\n";
-  echo 'series: { lines: { lineWidth:1 }}, ';
-  echo 'legend: { container: "#' . $canvas . '-legend" }, ';
-  echo '});' . "\n";
+  echo "     return val.toFixed(axis.tickDecimals);\n";
+  echo "    }\n";
+  echo "   }\n";  
+  echo " },\n";
+  echo " series: { lines: { lineWidth:2 } },\n";
+  echo " legend: { container: \"#${canvas}-legend\" },\n";
+  echo " zoom: { interactive: true },\n";
+  echo " pan: { interactive: true },\n";
+  echo " grid: { hoverable: true, autoHighlight: true },\n";
+  echo "});\n";
   
   echo "});\n";
+  
+  echo "function showTooltip(x, y, contents) {\n";
+	echo " $('<div id=\"tooltip\">' + contents + '</div>').css( {\n";
+	echo "  position: 'absolute',\n";
+	echo "  display: 'none',\n";
+	echo "  top: y + 10,\n";
+	echo "  left: x + 10,\n";
+	echo "  border: '1px solid #4c2004',\n";
+	echo "  padding: '2px',\n";
+	echo "  'background-color': '#f4f4f4',\n";
+	echo " }).appendTo(\"body\").fadeIn(200);\n";
+	echo "}\n";
+ 
+	echo "var previousPoint = null;\n";
+	echo "$(\"#${canvas}-plot\").bind(\"plothover\", function (event, pos, item) {\n";
+	echo " if (item) {\n";
+	echo "  if (previousPoint != item.dataIndex) {\n";
+	echo "   previousPoint = item.dataIndex;\n";
+	echo "   $(\"#tooltip\").remove();\n";
+	echo "   showTooltip(item.pageX, item.pageY, item.series.label + \": \" + item.series.yaxis.tickFormatter(item.datapoint[1], item.series.yaxis) + \" at \" + item.series.xaxis.tickFormatter(item.datapoint[0], item.series.xaxis));\n";
+	echo "  }\n";
+  echo " }\n";
+	echo " else {\n";
+	echo "  $(\"#tooltip\").remove();\n";
+	echo "  previousPoint = null;\n";            
+	echo " }\n";
+	echo "});\n";
+  
   echo " -->\n";
   echo "</script>";
 }

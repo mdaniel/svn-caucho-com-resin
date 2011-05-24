@@ -28,18 +28,18 @@ if ($stat_service) {
 
   $end = time();
   $start = $end - 6 * 3600;
-  stat_graph("memory", 600, 200, $start, $end,
+  stat_graph("memory", 600, 200, $start, $end, 
              array("$si|JVM|Memory|Heap Memory Free",
                    "$si|JVM|Memory|Tenured Memory Free",
-                   "$si|JVM|Memory|PermGen Memory Free"));
-
+                   "$si|JVM|Memory|PermGen Memory Free"),
+             "A line graph representing the amount of free memory in each of the heap, tenured, and permgen pools over the last 6 hours.");
+             
   echo "<h2>GC Time</h2>\n";
 
   $end = time();
   $start = $end - 6 * 3600;
-  stat_graph("gc", 600, 200, $start, $end,
-             array("$si|JVM|Memory|GC Time|PS MarkSweep",
-                   "$si|JVM|Memory|GC Time|PS Scavenge"));
+  stat_graph_regexp("gc", 600, 200, $start, $end, "/^$si\|JVM\|Memory\|GC Time/",
+  									"A line graph representing the amount of time spent perfoming garbage collection over the last 6 hours.");
 }
 
 $memory = $g_mbean_server->lookup("resin:type=Memory");
@@ -152,11 +152,13 @@ function display_heap_dump_subtab($name, $entries)
   }
 
   if (sizeof($entries) > 0) {
+  	echo "<span title='A pie chart representing the percentage of heap memory used by each class.'>\n";
     echo "<div id='${name}-heap-dump-tab' class='heap-dump-tab'>\n";
     echo "<div class='pie-chart'>\n";
     echo "<canvas id='${name}-heap-dump-chart'/ width='300' height='300' style='display: block'></canvas>\n";
     echo "<div id='${name}-heap-dump-label' class='chart-label'></div>\n";
     echo "</div>\n";
+    echo "</span>\n";
 
     echo "<table id='${name}-heap-dump' class='heap-dump data'>";
     echo "<tr>\n";

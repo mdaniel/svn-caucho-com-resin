@@ -238,11 +238,15 @@ function print_graphs()
     echo "<tr><th scope='col'>Request Count</th><th scope='col'>Request Time</th><th scope='col'>Threads</th></tr>";
     echo "<tr valign='top'><td>";
     stat_graph("request", $width, $height, $start, $end,
-               array("$si|Resin|Http|Request Count"));
+               array("$si|Resin|Http|Request Count"),
+               "A line graph representing the number HTTP requests received over the last 6 hours.");
+               
     echo "</td><td>";
     stat_graph("request_time", $width, $height, $start, $end,
                array("$si|Resin|Http|Request Time",
-                     "$si|Resin|Http|Request Time Max"));
+                     "$si|Resin|Http|Request Time Max"),
+               "A line graph representing the amount of time spent processing HTTP requests over the last 6 hours.");
+               
     echo "</td><td>";
     stat_graph("thread", $width, $height, $start, $end,
                array("$si|JVM|Thread|JVM Thread Count",
@@ -250,22 +254,27 @@ function print_graphs()
                      "$si|Resin|Thread|Thread Active Count",
                      "$si|Resin|Thread|Thread Task Queue",
                      "$si|Resin|Thread|Thread Priority Queue",
-                     "$si|Resin|Thread|Thread Overflow Count"));
+                     "$si|Resin|Thread|Thread Overflow Count"),
+               "A line graph representing the number of threads in various thread pools over the last 6 hours.");
+               
     echo "</td></tr>";
-    echo "<tr><th scope='col'>Database Query Active</th><th scope='col'>Database Query Time</th><th scope='col'>CPU</th></tr>";
+    echo "<tr><th scope='col'>Database Connection Active</th><th scope='col'>Database Query Time</th><th scope='col'>CPU</th></tr>";
     echo "<tr valign='top'><td>";
     stat_graph("database", $width, $height, $start, $end,
-               array("$si|Resin|Database|Connection Active"));
-
+               array("$si|Resin|Database|Connection Active"),
+               "A line graph representing the amout of time the database connection was active over the last 6 hours.");
+               
     echo "</td><td>";
     stat_graph("database_time", $width, $height, $start, $end,
                array("$si|Resin|Database|Query Time",
-                     "$si|Resin|Database|Query Time Max"));
-
+                     "$si|Resin|Database|Query Time Max"),
+               "A line graph representing the amout of time spent querying the database over the last 6 hours.");
+               
     echo "</td><td>";
     stat_graph("cpu", $width, $height, $start, $end,
-               array("$si|OS|CPU|CPU Active"));
-
+               array("$si|OS|CPU|CPU Active"),
+               "A line graph representing the active CPU usage over the last 6 hours.");
+               
     echo "</td></tr>";
     echo "<tr><th scope='col'>Memory</th><th scope='col'>GC Time</th><th scope='col'>Netstat</th></tr>";
     echo "<tr valign='top'><td>";
@@ -273,15 +282,19 @@ function print_graphs()
                array("$si|JVM|Memory|Heap Memory Used",
                      "$si|JVM|Memory|Heap Memory Free",
                      "$si|JVM|Memory|Tenured Memory Used",
-                     "$si|JVM|Memory|PermGen Memory Used"));
-
+                     "$si|JVM|Memory|PermGen Memory Used"),
+              "A line graph representing the amount of free and used memory in each of the heap, tenured, and permgen pools over the last 6 hours.");
+                              
     echo "</td><td>";
     stat_graph_regexp("memory_gc", $width, $height, $start, $end,
-                      "/$si\|JVM\|Memory\|GC Time/");
-                     
+                      "/$si\|JVM\|Memory\|GC Time/",
+  										"A line graph representing the amount of time spent perfoming garbage collection over the last 6 hours.");
+                         
     echo "</td><td>";
     stat_graph_regexp("netstat", $width, $height, $start, $end,
-                      "/$si\|OS\|Network\|(?!tcp-time)/");
+                      "/$si\|OS\|Network\|(?!tcp-time)/",
+  										"A line graph representing network activity over the last 6 hours.");
+    
                     
     echo "</td></tr>";
     echo "</table>";

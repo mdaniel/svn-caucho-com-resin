@@ -83,7 +83,7 @@ if ($log_mbean) {
 echo "</ul>";
 
 echo "<div id='pm-graph'>\n";
-display_postmortem_graph();
+display_postmortem_graph($mbean_server);
 echo "</div>\n";
 
 if ($log_mbean) {
@@ -94,7 +94,7 @@ if ($log_mbean) {
 
 echo "</div>";
 
-function display_postmortem_graph()
+function display_postmortem_graph($mbean_server)
 {
   global $restart_time;
   global $si;
@@ -106,35 +106,50 @@ function display_postmortem_graph()
   $start = $end - $period;
 
   $height = 150;
+  
+  $health_system = $mbean_server->lookup("resin:type=HealthSystem");
+  if ($health_system) {
+		$status_names = $health_system->HealthStatusNames;
+  }
 
   echo "<table border='1'>";
 
   echo "<tr><th colspan='2' id='health'>Health</th></tr>\n";
   echo "<tr valign='top'><td colspan='2' headers='health'>";
   stat_graph_regexp("health", 300, $height, $start, $end,
-                  "/^$si\|Resin\|Health/", "right");
+                  "/^$si\|Resin\|Health/", 
+                  "A line graph representing the status of each health check performed in the last 60 minutes before the selected restart.",
+                  "right", $mbean_server, $status_names);
   echo "</td></tr>\n";
 
   echo "<tr><th id='req_count'>Request Count</th>";
   echo "<th id='req_time'>Request Time</th></tr>\n";
   echo "<tr valign='top'><td headers='req_count'>";
   stat_graph("request", 300, $height, $start, $end,
-             array("$si|Resin|Http|Request Count"));
+             array("$si|Resin|Http|Request Count"),
+						 "A line graph representing the number HTTP requests received in the last 60 minutes before the selected restart.");
+             
   echo "</td><td headers='req_time'>";
   stat_graph("request_time", 300, $height, $start, $end,
              array("$si|Resin|Http|Request Time",
-                   "$si|Resin|Http|Request Time Max"));
+                   "$si|Resin|Http|Request Time Max"),
+						 "A line graph representing the amount of time spent processing HTTP requests in the last 60 minutes before the selected restart.");
+             
   echo "</td></tr>\n";
   
-  echo "<tr><th id='query_active'>Database Query Active</th>";
+  echo "<tr><th id='query_active'>Database Connection Active</th>";
   echo "<th id='query_time'>Database Query Time</th></tr>\n";
   echo "<tr valign='top'><td headers='query_active'>";
   stat_graph("database", 300, $height, $start, $end,
-             array("$si|Resin|Database|Query Active"));
+             array("$si|Resin|Database|Connection Active"),
+               "A line graph representing the amout of time the database connection was active in the last 60 minutes before the selected restart.");
+                          
   echo "</td><td headers='query_time'>";
   stat_graph("database_time", 300, $height, $start, $end,
              array("$si|Resin|Database|Query Time",
-                   "$si|Resin|Database|Query Time Max"));
+                   "$si|Resin|Database|Query Time Max"),
+               "A line graph representing the amout of time spent querying the database in the last 60 minutes before the selected restart.");
+             
   echo "</td></tr>\n";
              
   echo "<tr><th id='threads'>Thread</th>";
@@ -147,10 +162,14 @@ function display_postmortem_graph()
                    "$si|Resin|Thread|Thread Idle Count",
                    "$si|Resin|Thread|Thread Task Queue",
                    "$si|Resin|Thread|Thread Priority Queue",
-                   "$si|Resin|Thread|Thread Overflow Count"));
+                   "$si|Resin|Thread|Thread Overflow Count"),
+                    "A line graph representing the number of threads in various thread pools in the last 60 minutes before the selected restart.");
+             
   echo "</td><td headers='cpu'>";
   stat_graph_regexp("cpu", 300, $height, $start, $end,
-                    "/^$si\|OS\|CPU\|CPU Active/");
+                    "/^$si\|OS\|CPU\|CPU Active/",
+               		  "A line graph representing the active CPU usage in the last 60 minutes before the selected restart.");
+  
   echo "</td></tr>\n";
   
   echo "<tr><th id='memory'>Memory</th>";
@@ -159,11 +178,14 @@ function display_postmortem_graph()
   stat_graph("memory", 300, $height, $start, $end,
              array("$si|JVM|Memory|Heap Memory Free",
                    "$si|JVM|Memory|Tenured Memory Free",
-                   "$si|JVM|Memory|PermGen Memory Free"));
+                   "$si|JVM|Memory|PermGen Memory Free"),
+  					 "A line graph representing the amount of time spent perfoming garbage collection in the last 60 minutes before the selected restart.");
+             
   echo "</td><td headers='gc'>";
   stat_graph_regexp("memory_gc", 300, $height, $start, $end,
-                    "/$si\|JVM\|Memory\|GC Time/");
-
+                    "/$si\|JVM\|Memory\|GC Time/",
+  										"A line graph representing network activity in the last 60 minutes before the selected restart.");
+  
   echo "</td></tr>\n";
   echo "</table>";
 }
