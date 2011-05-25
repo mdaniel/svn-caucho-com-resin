@@ -112,7 +112,7 @@ function display_postmortem_graph($mbean_server)
 		$status_names = $health_system->HealthStatusNames;
   }
 
-  echo "<table border='1'>";
+  echo "<table>";
 
   echo "<tr><th colspan='2' id='health'>Health</th></tr>\n";
   echo "<tr valign='top'><td colspan='2' headers='health'>";
