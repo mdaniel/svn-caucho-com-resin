@@ -43,9 +43,7 @@ import com.caucho.resin.WebAppEmbed;
  * TODO Add more Javadoc since this is a public API.
  */
 public class ResinRunner extends BlockJUnit4ClassRunner {
-  private Class<?> _testClass;
-
-  private int _port = 8086;
+  private int _httpPort = 8086;
   private String _webApplicationContext = "/";
   private String _webApplicationRoot = ".";
   private String _resinXmlPath = null;
@@ -56,13 +54,13 @@ public class ResinRunner extends BlockJUnit4ClassRunner {
   {
     super(testClass);
 
-    _testClass = testClass;
-  }
+    ResinConfiguration resinConfiguration = testClass
+        .getAnnotation(ResinConfiguration.class);
 
-  @Override
-  protected Object createTest() throws Exception
-  {
-    return _testClass;
+    _httpPort = resinConfiguration.httpPort();
+    _webApplicationContext = resinConfiguration.webApplicationContext();
+    _webApplicationRoot = resinConfiguration.webApplicationRoot();
+    _resinXmlPath = resinConfiguration.resinXml();
   }
 
   @Override
@@ -82,12 +80,11 @@ public class ResinRunner extends BlockJUnit4ClassRunner {
         _resinEmbeddedContainer = new ResinEmbed(_resinXmlPath);
       }
 
-      _resinEmbeddedContainer.addPort(new HttpEmbed(_port));
+      _resinEmbeddedContainer.addPort(new HttpEmbed(_httpPort));
       _resinEmbeddedContainer.addWebApp(new WebAppEmbed(_webApplicationContext,
           _webApplicationRoot));
 
       _resinEmbeddedContainer.start();
-      _resinEmbeddedContainer.join();
     }
 
     return _resinEmbeddedContainer;

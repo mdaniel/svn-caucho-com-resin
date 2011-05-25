@@ -41,15 +41,19 @@ import java.lang.annotation.Target;
  */
 @Documented
 @Retention(RUNTIME)
-@Target( { TYPE })
+@Target({ TYPE })
 public @interface ResinConfiguration {
-  String[] modules() default {};
+  int httpPort() default 8086;
 
-  String[] webXml() default {};
+  String resinXml();
 
-  String[] resinXml() default {};
+  String webXml() default "";
 
   String[] beansXml() default {};
 
-  String[] persistenceXml() default {};
+  String persistenceXml() default "";
+
+  String webApplicationContext() default "/";
+
+  String webApplicationRoot() default ".";
 }
