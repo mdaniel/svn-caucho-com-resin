@@ -198,43 +198,43 @@ pages to see if you can cache more.
 - performance data for the proxy cache, clustered sessions,
 and JMS queues.</li>
 
-<li><a href="http://caucho.com/resin-javadoc/com/caucho/management/server/ConnectionPoolMXBean">ConnectionPoolMXBean</a>
+<li><a href="http://caucho.com/resin-4.0-javadoc/com/caucho/management/server/ConnectionPoolMXBean">ConnectionPoolMXBean</a>
 - JDBC database pools.</li>
 
-<li><a href="http://caucho.com/resin-javadoc/com/caucho/management/server/HostMXBean">HostPoolMXBean</a>
+<li><a href="http://caucho.com/resin-4.0-javadoc/com/caucho/management/server/HostMXBean">HostPoolMXBean</a>
 - virtual host management.</li>
 
-<li><a href="http://caucho.com/resin-javadoc/com/caucho/management/server/JmsQueueMXBean">JmsQueueMXBean</a>
+<li><a href="http://caucho.com/resin-4.0-javadoc/com/caucho/management/server/JmsQueueMXBean">JmsQueueMXBean</a>
 - jms queue management.</li>
 
-<li><a href="http://caucho.com/resin-javadoc/com/caucho/management/server/JmsTopicMXBean">JmsTopicMXBean</a>
+<li><a href="http://caucho.com/resin-4.0-javadoc/com/caucho/management/server/JmsTopicMXBean">JmsTopicMXBean</a>
 - jms topic management.</li>
 
-<li><a href="http://caucho.com/resin-javadoc/com/caucho/management/server/LoggerMXBean">LoggerMXBean</a>
+<li><a href="http://caucho.com/resin-4.0-javadoc/com/caucho/management/server/LoggerMXBean">LoggerMXBean</a>
 - java.util.logging management.</li>
 
-<li><a href="http://caucho.com/resin-javadoc/com/caucho/management/server/PortMXBean">PortMXBean</a>
+<li><a href="http://caucho.com/resin-4.0-javadoc/com/caucho/management/server/PortMXBean">PortMXBean</a>
 - http, https, and custom TCP ports.</li>
 
-<li><a href="http://caucho.com/resin-javadoc/com/caucho/management/server/ProxyCacheMXBean">ProxyCacheMXBean</a>
+<li><a href="http://caucho.com/resin-4.0-javadoc/com/caucho/management/server/ProxyCacheMXBean">ProxyCacheMXBean</a>
 - Resin's integrated proxy cache.</li>
 
-<li><a href="http://caucho.com/resin-javadoc/com/caucho/management/server/ResinMXBean">ResinMXBean</a>
+<li><a href="http://caucho.com/resin-4.0-javadoc/com/caucho/management/server/ResinMXBean">ResinMXBean</a>
 - Parent MXBean for Resin corresponding to the &lt;resin> configuration tag.</li>
 
-<li><a href="http://caucho.com/resin-javadoc/com/caucho/management/server/ServerConnectorMXBean">ServerConnectorMXBean</a>
+<li><a href="http://caucho.com/resin-4.0-javadoc/com/caucho/management/server/ServerConnectorMXBean">ServerConnectorMXBean</a>
 - client view of a peer server in a cluster.</li>
 
-<li><a href="http://caucho.com/resin-javadoc/com/caucho/management/server/ServerMXBean">ServerMXBean</a>
+<li><a href="http://caucho.com/resin-4.0-javadoc/com/caucho/management/server/ServerMXBean">ServerMXBean</a>
 - information about the JVM <a href="http://wiki.caucho.com/Server">server</a> instance.</li>
 
-<li><a href="http://caucho.com/resin-javadoc/com/caucho/management/server/SessionManagerMXBean">SessionManagerMXBean</a>
+<li><a href="http://caucho.com/resin-4.0-javadoc/com/caucho/management/server/SessionManagerMXBean">SessionManagerMXBean</a>
 - information about a web-app's session manager.</li>
 
-<li><a href="http://caucho.com/resin-javadoc/com/caucho/management/server/ThreadPoolMXBean">ThreadPoolMXBean</a>
+<li><a href="http://caucho.com/resin-4.0-javadoc/com/caucho/management/server/ThreadPoolMXBean">ThreadPoolMXBean</a>
 - information about Resin's internal thread pool.</li>
 
-<li><a href="http://caucho.com/resin-javadoc/com/caucho/management/server/WebAppMXBean">WebAppMXBean</a>
+<li><a href="http://caucho.com/resin-4.0-javadoc/com/caucho/management/server/WebAppMXBean">WebAppMXBean</a>
 - information about a Resin web-app.</li>
 
 </ul>
@@ -756,7 +756,7 @@ the available types are:
 </deftable>
 
 <p>
-For a more complete list, see <a href="http://caucho.com/resin-javadoc/com/caucho/server/snmp/package-summary.html">com.caucho.server.snmp JavaDoc</a>.
+For a more complete list, see <a href="http://caucho.com/resin-4.0-javadoc/com/caucho/server/snmp/package-summary.html">com.caucho.server.snmp JavaDoc</a>.
 </p>
 
 </s2>

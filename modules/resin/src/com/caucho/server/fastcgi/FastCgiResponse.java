@@ -172,13 +172,4 @@ public class FastCgiResponse extends AbstractHttpResponse {
 
     return false;
   }
-
-  @Override
-  protected void finishResponseStream(boolean isClose)
-    throws IOException
-  {
-    super.finishResponseStream(isClose);
-
-    //_req.finishResponse();
-  }
 }

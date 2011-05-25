@@ -101,6 +101,8 @@ public final class JniSocketImpl extends QSocket {
   {
     _socketTimeout = 10000;
     
+    _isClosed.set(false);
+    
     synchronized (_writeLock) {
       return nativeConnect(_fd, host, port);
     }
@@ -351,6 +353,7 @@ public final class JniSocketImpl extends QSocket {
   public boolean readNonBlock(int ms)
   {
     synchronized (_readLock) {
+      System.out.println("RNB: " + ms);
       return nativeReadNonBlock(_fd, ms);
     }
   }
@@ -403,7 +406,6 @@ public final class JniSocketImpl extends QSocket {
     if (isEnd) {
       close();
     }
-    
     return result;
   }
 
@@ -579,7 +581,7 @@ public final class JniSocketImpl extends QSocket {
   {
     if (_isClosed.getAndSet(true))
       return;
-
+    
     if (_stream != null)
       _stream.close();
 
@@ -633,9 +635,11 @@ public final class JniSocketImpl extends QSocket {
   private native int writeNative(long fd, byte []buf, int offset, int length)
     throws IOException;
 
+  /*
   private native int writeCloseNative(long fd,
                                       byte []buf, int offset, int length)
     throws IOException;
+    */
 
   native int writeNative2(long fd,
                           byte []buf1, int off1, int len1,

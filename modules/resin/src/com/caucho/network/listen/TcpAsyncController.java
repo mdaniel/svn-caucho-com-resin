@@ -29,6 +29,9 @@
 
 package com.caucho.network.listen;
 
+import java.util.logging.Level;
+import java.util.logging.Logger;
+
 import com.caucho.inject.Module;
 import com.caucho.util.Alarm;
 
@@ -36,17 +39,18 @@ import com.caucho.util.Alarm;
  * Public API to control a comet connection.
  */
 @Module
-class TcpCometController extends AsyncController {
+class TcpAsyncController extends AsyncController {
+  private static final Logger log
+    = Logger.getLogger(TcpAsyncController.class.getName());
+  
   private TcpSocketLink _conn;
 
   private SocketLinkCometListener _cometHandler;
 
-  private boolean _isWakeRequested;
-  
   private boolean _isCompleteRequested;
   private boolean _isTimeout;
 
-  TcpCometController(TcpSocketLink conn)
+  TcpAsyncController(TcpSocketLink conn)
   {
     _conn = conn;
   }
@@ -64,6 +68,7 @@ class TcpCometController extends AsyncController {
   /**
    * Sets the max idle time.
    */
+  @Override
   public void setMaxIdleTime(long idleTime)
   {
     if (idleTime < 0 || Long.MAX_VALUE / 2 < idleTime)
@@ -75,6 +80,7 @@ class TcpCometController extends AsyncController {
   /**
    * Gets the max idle time.
    */
+  @Override
   public long getMaxIdleTime()
   {
     return _conn.getIdleTimeout();
@@ -88,7 +94,11 @@ class TcpCometController extends AsyncController {
   {
     _isCompleteRequested = true;
 
-    wake();
+    try {
+      wake();
+    } catch (Exception e) {
+      log.log(Level.FINEST, e.toString(), e);
+    }
   }
 
   /**
@@ -104,24 +114,13 @@ class TcpCometController extends AsyncController {
     else
       return false;
   }
-
-  boolean isWakeRequested()
-  {
-    return _isWakeRequested;
-  }
-
-  void setWakeRequested(boolean isWake)
-  {
-    _isWakeRequested = isWake;
-  }
   
+  @Override
   public boolean isAsyncStarted()
   {
     TcpSocketLink conn = _conn;
-    
-    return (conn != null 
-            && (conn.isCometActive() || conn.isCometSuspend())
-            && ! _isWakeRequested);
+
+    return (conn != null && conn.isAsyncStarted());
   }
 
   /**
@@ -135,13 +134,19 @@ class TcpCometController extends AsyncController {
   /**
    * Sets the timeout.
    */
+  @Override
   public final void timeout()
   {
     _cometHandler.onTimeout();
 
     _isTimeout = true;
+    _isCompleteRequested = true;
 
-    wake();
+    try {
+      wake();
+    } catch (Exception e) {
+      log.log(Level.FINEST, e.toString(), e);
+    }
   }
 
   void setTimeout()
@@ -211,8 +216,15 @@ class TcpCometController extends AsyncController {
     try {
       _cometHandler.onComplete();
     } finally {
-      _conn = null;
+      // _conn = null;
     }
+  }
+  
+  public void close()
+  {
+    super.close();
+    
+    _conn = null;
   }
 
   @Override

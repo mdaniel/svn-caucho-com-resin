@@ -1375,7 +1375,7 @@ public class TcpSocketLinkListener
     conn.toCometSuspend();
     
     if (conn.isWakeRequested()) {
-      conn.toCometResume();
+      // conn.toCometResume();
       
       _threadPool.schedule(conn.getResumeTask());
     }
@@ -1401,7 +1401,7 @@ public class TcpSocketLinkListener
   boolean cometResume(TcpSocketLink conn)
   {
     if (_suspendConnectionSet.remove(conn)) {
-      conn.toCometResume();
+      // conn.toCometResume();
       
       _threadPool.schedule(conn.getResumeTask());
 

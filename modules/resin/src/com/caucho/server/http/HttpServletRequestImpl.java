@@ -1696,7 +1696,7 @@ public final class HttpServletRequestImpl extends AbstractCauchoRequest
   public boolean isAsyncStarted()
   {
     AsyncContextImpl asyncContext = _asyncContext;
-    
+
     if (asyncContext == null)
       return false;
     

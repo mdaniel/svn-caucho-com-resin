@@ -42,14 +42,27 @@ public abstract class ContainerNode implements ContentItem {
   private Document _document;
   private ArrayList<ContentItem> _items = new ArrayList<ContentItem>();
   private boolean _isWebOnly;
+  
+  private String _location = "";
 
   public ContainerNode(Document document)
   {
     _document = document;
   }
+  
   public Document getDocument()
   {
     return _document;
+  }
+  
+  public String getLocation()
+  {
+    return _location;
+  }
+  
+  public void setConfigLocation(String fileName, int line)
+  {
+    _location = fileName + ":" + line + ": ";
   }
 
   public void setWebOnly(boolean isWebOnly)

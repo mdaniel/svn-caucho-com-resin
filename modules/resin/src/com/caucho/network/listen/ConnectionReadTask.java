@@ -103,8 +103,6 @@ abstract class ConnectionReadTask implements Runnable {
     } catch (Throwable e) {
       log.log(Level.WARNING, e.toString(), e);
     } finally {
-      _socketLink.startThread(null);
-
       _socketLink.finishThread(result);
       
       thread.setName(oldThreadName);

@@ -79,7 +79,7 @@ public class Paragraph extends FormattedTextWithAnchors {
   public Example createExample()
   {
     //throw new IllegalStateException("Close block with </p> before <example>");
-    log.warning("Close block with </p> before <example>");
+    log.warning(getLocation() + "Close block with </p> before <example>");
     return super.createExample();
   }
 }

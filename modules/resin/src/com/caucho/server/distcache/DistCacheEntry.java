@@ -53,7 +53,7 @@ abstract public class DistCacheEntry implements ExtCacheEntry {
   private final AtomicBoolean _isReadUpdate = new AtomicBoolean();
 
   private final AtomicReference<MnodeValue> _mnodeValue
-    = new AtomicReference<MnodeValue>();
+    = new AtomicReference<MnodeValue>(MnodeValue.NULL);
 
   public DistCacheEntry(Object key,
                         HashKey keyHash,

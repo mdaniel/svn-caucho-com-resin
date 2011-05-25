@@ -70,7 +70,7 @@ class KeepaliveRequestTask extends ConnectionReadTask {
     RequestState result = socketLink.handleRequests(isKeepalive);
 
     switch (result) {
-    case THREAD_DETACHED:
+    case KEEPALIVE_SELECT:
     case ASYNC:
       return result;
       

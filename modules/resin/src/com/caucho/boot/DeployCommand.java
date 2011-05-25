@@ -114,7 +114,7 @@ public class DeployCommand extends AbstractRepositoryCommand {
 
     deployClient.close();
     
-    System.out.println("Deployed " + commit.getId() + " from" + war + " to "
+    System.out.println("Deployed " + commit.getId() + " from " + war + " to "
                        + deployClient.getUrl());
   }
 

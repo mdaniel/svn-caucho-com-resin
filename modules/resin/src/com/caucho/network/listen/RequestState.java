@@ -39,7 +39,7 @@ enum RequestState {
     public boolean isRequestKeepalive() { return true; }
   },
   
-  THREAD_DETACHED {
+  KEEPALIVE_SELECT {
     @Override
     public boolean isDetach() { return true; }
   },

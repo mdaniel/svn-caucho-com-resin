@@ -45,11 +45,15 @@ import javax.servlet.UnavailableException;
 import java.io.IOException;
 import java.util.HashMap;
 import java.util.concurrent.atomic.AtomicBoolean;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 /**
  * Represents the final servlet in a filter chain.
  */
 public class CometServletFilterChain implements FilterChain {
+  private static final Logger log
+    = Logger.getLogger(CometServletFilterChain.class.getName());
 
   // servlet config
   private ServletConfigImpl _config;
@@ -253,8 +257,15 @@ public class CometServletFilterChain implements FilterChain {
       if (! _isWake.getAndSet(true)) {
         AsyncContext context = _context;
         
-        if (context != null)
-          context.dispatch();
+        if (context != null) {
+          try {
+            context.dispatch();
+          } catch (Exception e) {
+            log.log(Level.FINER, e.toString(), e);
+            
+            return false;
+          }
+        }
         
         return true;
       }

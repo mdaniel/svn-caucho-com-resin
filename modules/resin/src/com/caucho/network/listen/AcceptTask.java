@@ -106,7 +106,7 @@ class AcceptTask extends ConnectionReadTask {
         socketLink.close();
         break;
         
-      case THREAD_DETACHED:
+      case KEEPALIVE_SELECT:
       case ASYNC:
         return result;
         

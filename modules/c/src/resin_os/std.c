@@ -260,8 +260,9 @@ std_write(connection_t *conn, char *buf, int len)
 
   fd = conn->fd;
 
-  if (fd < 0)
+  if (fd < 0) {
     return -1;
+  }
 
   conn->sent_data = 1;
 
@@ -325,11 +326,6 @@ conn_close(connection_t *conn)
   conn->fd = -1;
 
   if (fd > 0) {
-    /*
-    fprintf(stdout, "CLOSE %d\n", fd);
-    fflush(stdout);
-    */
-    
     closesocket(fd);
   }
 
@@ -378,10 +374,6 @@ std_accept(server_socket_t *ss, connection_t *conn)
     fprintf(stdout, "fail %d sock=%d errno=%d\n", fd, sock, errno);
     fflush(stdout);
   }
-  /*  
-  fprintf(stdout, "REMOTE2: %d\n", ntohs(((struct sockaddr_in *)sin)->sin_port));
-  fflush(stdout);
-  */
 
 
 #ifdef WIN32

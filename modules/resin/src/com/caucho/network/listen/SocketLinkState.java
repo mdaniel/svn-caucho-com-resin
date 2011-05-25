@@ -274,7 +274,16 @@ enum SocketLinkState {
     boolean isCometActive() { return true; }
 
     @Override
+    boolean isAsyncStarted() { return true; }
+
+    @Override
     boolean isKeepaliveAllocated() { return true; }
+
+    @Override
+    SocketLinkState toCometWake()
+    {
+      return COMET_WAKE_KA;
+    }
 
     @Override
     SocketLinkState toCometSuspend()
@@ -282,11 +291,14 @@ enum SocketLinkState {
       return COMET_SUSPEND_KA;
     }
     
+
+    /*
     @Override
     SocketLinkState toCometDispatch()
     {
       return REQUEST_ACTIVE_KA;
     }
+    */
 
     @Override
     SocketLinkState toCometComplete()
@@ -311,12 +323,94 @@ enum SocketLinkState {
     }
   },
 
+  /**
+   * Comet request with a keepalive allocated.
+   */
+  COMET_WAKE_KA { // processing an active comet service with queued KA
+    @Override
+    boolean isComet() { return true; }
+
+    @Override
+    boolean isCometActive() { return true; }
+
+    @Override
+    boolean isKeepaliveAllocated() { return true; }
+
+    @Override
+    SocketLinkState toCometSuspend()
+    {
+      return COMET_SUSPEND_WAKE_KA;
+    }
+
+    @Override
+    SocketLinkState toCometComplete()
+    {
+      return COMET_COMPLETE_KA;
+    }
+
+    @Override
+    SocketLinkState toKillKeepalive(TcpSocketLink conn)
+    {
+      conn.getListener().keepaliveFree();
+      
+      return COMET_WAKE_NKA;
+    }
+    
+    @Override
+    SocketLinkState toClosed(TcpSocketLink conn)
+    {
+      conn.getListener().keepaliveFree();
+      
+      return CLOSED;
+    }
+  },
+
   COMET_NKA {            // processing an active comet service
     @Override
     boolean isComet() { return true; }
 
     @Override
     boolean isCometActive() { return true; }
+
+    @Override
+    boolean isAsyncStarted() { return true; }
+
+    /*
+    @Override
+    SocketLinkState toCometDispatch() 
+    { 
+      return REQUEST_ACTIVE_NKA;
+    }
+    */
+
+    @Override
+    SocketLinkState toCometWake()
+    {
+      return COMET_WAKE_NKA;
+    }
+
+    @Override
+    SocketLinkState toCometSuspend()
+    {
+      return COMET_SUSPEND_NKA;
+    }
+
+    @Override
+    SocketLinkState toCometComplete()
+    {
+      return COMET_COMPLETE_NKA;
+    }
+  },
+
+  COMET_WAKE_NKA {   // processing an active comet service with queued wake
+    @Override
+    boolean isComet() { return true; }
+
+    @Override
+    boolean isCometActive() { return true; }
+
+    @Override
+    boolean isCometWake() { return true; }
 
     @Override
     SocketLinkState toCometDispatch() 
@@ -327,7 +421,7 @@ enum SocketLinkState {
     @Override
     SocketLinkState toCometSuspend()
     {
-      return COMET_SUSPEND_NKA;
+      return COMET_SUSPEND_WAKE_NKA;
     }
 
     @Override
@@ -345,6 +439,9 @@ enum SocketLinkState {
     boolean isCometSuspend() { return true; }
 
     @Override
+    boolean isAsyncStarted() { return true; }
+
+    @Override
     boolean isKeepaliveAllocated() { return true; }
 
     @Override
@@ -356,10 +453,66 @@ enum SocketLinkState {
     }
 
     @Override
+    SocketLinkState toCometWake()
+    {
+      return COMET_SUSPEND_WAKE_KA;
+    }
+
+    /*
+    @Override
     SocketLinkState toCometResume()
     {
       return COMET_KA;
     }
+    */
+    
+    @Override
+    SocketLinkState toClosed(TcpSocketLink conn)
+    {
+      throw new IllegalStateException();
+    }
+
+    @Override
+    SocketLinkState toDestroy(TcpSocketLink conn)
+    {
+      throw new IllegalStateException();
+    }
+  },
+
+  COMET_SUSPEND_WAKE_KA {  // suspended with queued wake
+    @Override
+    boolean isComet() { return true; }
+
+    @Override
+    boolean isCometSuspend() { return true; }
+
+    @Override
+    boolean isCometWake() { return true; }
+
+    @Override
+    boolean isKeepaliveAllocated() { return true; }
+
+    @Override
+    SocketLinkState toKillKeepalive(TcpSocketLink conn)
+    {
+      conn.getListener().keepaliveFree();
+      
+      return COMET_SUSPEND_WAKE_NKA;
+    }
+
+    @Override
+    SocketLinkState toCometDispatch() 
+    { 
+      return REQUEST_ACTIVE_KA;
+    }
+
+    /*
+    @Override
+    SocketLinkState toCometResume()
+    {
+      return COMET_KA;
+    }
+    */
     
     @Override
     SocketLinkState toClosed(TcpSocketLink conn)
@@ -382,9 +535,57 @@ enum SocketLinkState {
     boolean isCometSuspend() { return true; }
 
     @Override
+    boolean isAsyncStarted() { return true; }
+
+    /*
+    @Override
     SocketLinkState toCometResume()
     {
       return COMET_NKA;
+    }
+    */
+
+    @Override
+    SocketLinkState toCometWake()
+    {
+      return COMET_SUSPEND_WAKE_NKA;
+    }
+    
+    @Override
+    SocketLinkState toClosed(TcpSocketLink conn)
+    {
+      throw new IllegalStateException(this + " " + conn);
+    }
+
+    @Override
+    SocketLinkState toDestroy(TcpSocketLink conn)
+    {
+      throw new IllegalStateException(this + " " + conn);
+    }
+  },
+
+  COMET_SUSPEND_WAKE_NKA {    // suspended waiting for a wake
+    @Override
+    boolean isComet() { return true; }
+
+    @Override
+    boolean isCometSuspend() { return true; }
+
+    @Override
+    boolean isCometWake() { return true; }
+
+    /*
+    @Override
+    SocketLinkState toCometResume()
+    {
+      return COMET_NKA;
+    }
+    */
+
+    @Override
+    SocketLinkState toCometDispatch() 
+    { 
+      return REQUEST_ACTIVE_NKA;
     }
     
     @Override
@@ -597,6 +798,16 @@ enum SocketLinkState {
     return false;
   }
 
+  boolean isCometWake()
+  {
+    return false;
+  }
+  
+  boolean isAsyncStarted()
+  {
+    return false;
+  }
+
   boolean isCometComplete()
   {
     return false;
@@ -719,11 +930,18 @@ enum SocketLinkState {
     throw new IllegalStateException(this + " cannot suspend comet");
   }
 
+  /*
   SocketLinkState toCometResume()
   {
     throw new IllegalStateException(this + " cannot resume comet");
   }
+  */
 
+  SocketLinkState toCometWake()
+  {
+    throw new IllegalStateException("dispatch is not valid outside of async: " + this);
+  }
+  
   SocketLinkState toCometDispatch()
   {
     throw new IllegalStateException(this + " cannot dispatch comet");

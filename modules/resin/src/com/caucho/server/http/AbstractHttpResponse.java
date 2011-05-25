@@ -1007,7 +1007,6 @@ abstract public class AbstractHttpResponse {
       }
       else if (isClose) {
         _responseStream.close();
-        finishResponseStream(isClose);
       }
       else if (_request.getRequestFacade().isAsyncStarted()
                && _responseStream.getContentLength() == 0) {
@@ -1015,7 +1014,6 @@ abstract public class AbstractHttpResponse {
       }
       else {
         _responseStream.flush();
-        finishResponseStream(isClose);
       }
     } catch (ClientDisconnectException e) {
       _request.killKeepalive();
@@ -1033,11 +1031,6 @@ abstract public class AbstractHttpResponse {
     }
     
     // server/2600 - for _isClosed
-  }
-
-  protected void finishResponseStream(boolean isClose)
-    throws IOException
-  {
   }
 
   /**

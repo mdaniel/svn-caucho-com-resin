@@ -60,8 +60,6 @@ class ResumeTask extends ConnectionReadTask {
   @Override
   public RequestState doTask()
   {
-    getSocketLink().doResume();
-    
-    return RequestState.THREAD_DETACHED;
+    return getSocketLink().doResume();
   }
 }

@@ -61,7 +61,7 @@ APR_DECLARE_OPTIONAL_FN(char *, ssl_var_lookup,
 static APR_OPTIONAL_FN_TYPE(ssl_var_lookup) *g_ssl_lookup = NULL;
 
 /* lock for allocating the lock itself */
-static apr_thread_mutext_t *g_lock_lock;
+static apr_thread_mutex_t *g_lock_lock;
 
 /*
  * Apache magic module declaration.

@@ -768,6 +768,11 @@ abstract public class ResponseStream extends ToByteResponseStream {
   public void completeCache()
   {
     HttpServletResponseImpl res = _response.getRequest().getResponseFacade();
+    HttpServletRequestImpl req = _response.getRequest().getRequestFacade();
+    
+    // server/1la7
+    if (req.isAsyncStarted())
+      return;
 
     try {
       _isComplete = true;

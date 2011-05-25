@@ -10,12 +10,15 @@ import java.io.IOException;
 import java.io.InterruptedIOException;
 
 import com.caucho.inject.Module;
+import com.caucho.util.L10N;
 
 /**
  * Stream using with JNI.
  */
 @Module
 public class JniStream extends StreamImpl {
+  private static final L10N L = new L10N(JniStream.class);
+  
   private final static int INTERRUPT_EXN = -2;
   private final static int DISCONNECT_EXN = -3;
   public final static int TIMEOUT_EXN = -4;
@@ -135,9 +138,12 @@ public class JniStream extends StreamImpl {
 
     int result = _socket.write(buf, offset, length, isEnd);
 
-    if (result <= -1) {
+    if (result < -1) {
       // server/1l21: -1 with exception is necessary to catch client disconnect
       throw exception(result);
+    }
+    else if (result == -1) {
+      throw new ClientDisconnectException(L.l("unexpected end of file in write"));
     }
 
     _totalWriteBytes += result;
