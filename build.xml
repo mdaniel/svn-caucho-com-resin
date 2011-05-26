@@ -351,6 +351,14 @@
     </antcall>
   </target>
 
+  <target name="app-default-xml" depends="init">
+    <copy tofile="conf/app-default.xml"
+          file="modules/resin/src/META-INF/caucho/app-default.xml"
+          preservelastmodified="true"
+          overwrite="true">
+    </copy>
+  </target>
+
   <target name="resin-xml" depends="init">
     <copy tofile="conf/resin.xml"
           file="conf/resin.xml.in"
@@ -524,7 +532,7 @@
     </antcall>
   </target>
   
-  <target name="resin" depends="init, resin-xml, hessian, jcache, javaee, portlet, script, resin-kernel, resin-compile"/>
+  <target name="resin" depends="init, resin-xml, app-default-xml, hessian, jcache, javaee, portlet, script, resin-kernel, resin-compile"/>
 
   <!--
   <target name="jaf" depends="init">
