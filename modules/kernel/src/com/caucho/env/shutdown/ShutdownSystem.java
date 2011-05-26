@@ -168,11 +168,16 @@ public class ShutdownSystem extends AbstractResinSubSystem
 
   public void startFailSafeShutdown(String msg)
   {
+    startFailSafeShutdown(msg, _shutdownWaitMax);
+  }
+
+  public void startFailSafeShutdown(String msg, long period)
+  {
     // start the fail-safe thread in case the shutdown fails
     FailSafeHaltThread haltThread = _failSafeHaltThread;
-    
+
     if (haltThread != null) {
-      haltThread.startShutdown();
+      haltThread.startShutdown(period);
     }
 
     try {
@@ -189,6 +194,7 @@ public class ShutdownSystem extends AbstractResinSubSystem
   {
     // start the fail-safe thread in case the shutdown fails
     FailSafeHaltThread haltThread = _failSafeHaltThread;
+    
     if (haltThread != null)
       haltThread.startShutdown();
 
@@ -297,8 +303,15 @@ public class ShutdownSystem extends AbstractResinSubSystem
   
   private void waitForShutdown()
   {
+    waitForShutdown(-1);
+  }
+  
+  private void waitForShutdown(long period)
+  {
+    if (period <= 0)
+      period = _shutdownWaitMax;
     
-    long expire = System.currentTimeMillis() + _shutdownWaitMax;
+    long expire = System.currentTimeMillis() + period;
     long now;
 
     while ((now = System.currentTimeMillis()) < expire) {
@@ -367,6 +380,7 @@ public class ShutdownSystem extends AbstractResinSubSystem
 
   class FailSafeHaltThread extends Thread {
     private volatile boolean _isShutdown;
+    private volatile long _period = -1;
 
     FailSafeHaltThread()
     {
@@ -379,7 +393,16 @@ public class ShutdownSystem extends AbstractResinSubSystem
      */
     void startShutdown()
     {
+      startShutdown(-1);
+    }
+    
+    /**
+     * Starts the shutdown sequence
+     */
+    void startShutdown(long period)
+    {
       _isShutdown = true;
+      _period = period;
 
       wake();
     }
@@ -403,7 +426,7 @@ public class ShutdownSystem extends AbstractResinSubSystem
       if (! _lifecycle.isActive())
         return;
       
-      waitForShutdown();
+      waitForShutdown(_period);
 
       if (_lifecycle.isActive()) {
         Runtime.getRuntime().halt(ExitCode.FAIL_SAFE_HALT.ordinal());
