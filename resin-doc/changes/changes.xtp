@@ -13,6 +13,7 @@
 
 <s2 title="4.0.19 - snapshot">
 <ul>
+<li>resin: moved app-default to resin.jar, changed resin.xml's resin:import to load from classpath</li>
 <li>php: fix for DOMDocument::saveXML($node) (#4563, rep by Lisa Stillwell)</li>
 <li>resin-cli: added disable and enable commands to Resin Pro (#3756, rep by Rob Lockstone, Jonas Kowall)</li>
 <li>async/comet: with Resin comet API, check for complete on suspend (#4534, rep by Brent Plump)</li>
