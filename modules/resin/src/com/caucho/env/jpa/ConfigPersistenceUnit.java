@@ -100,7 +100,17 @@ public class ConfigPersistenceUnit {
   {
     _name = name;
   }
-  
+
+  public PersistenceUnitTransactionType getTransactionType()
+  {
+    return _transactionType;
+  }
+
+  public void setTransactionType(PersistenceUnitTransactionType transactionType)
+  {
+    _transactionType = transactionType;
+  }
+
   public URL getRoot()
   {
     return _rootUrl;

@@ -115,10 +115,12 @@ public class PersistenceUnitManager implements PersistenceUnitInfo {
   
   private final EntityManagerFactoryProxy _entityManagerFactoryProxy;
   private final EntityManagerJtaProxy _entityManagerJtaProxy;
-  
+
   private EntityManagerFactory _emfDelegate;
-  
-  PersistenceUnitManager(PersistenceManager manager, String name)
+
+  PersistenceUnitManager(PersistenceManager manager,
+                         String name,
+                         PersistenceUnitTransactionType transactionType)
   {
     _persistenceManager = manager;
     
@@ -127,7 +129,13 @@ public class PersistenceUnitManager implements PersistenceUnitInfo {
     _lifecycle = new Lifecycle(log, "PersistenceUnit[" + name + "]");
     
     _entityManagerFactoryProxy = new EntityManagerFactoryProxy(this);
-    _entityManagerJtaProxy = new EntityManagerJtaProxy(this);
+
+    _transactionType = transactionType;
+
+    if (transactionType == PersistenceUnitTransactionType.JTA)
+      _entityManagerJtaProxy = new EntityManagerJtaProxy(this);
+    else
+      _entityManagerJtaProxy = null;
   }
   
   public String getName()
@@ -230,6 +238,7 @@ public class PersistenceUnitManager implements PersistenceUnitInfo {
     }
   }
   
+/*
   public void setTransactionType(String type)
   {
     if ("JTA".equals(type))
@@ -240,7 +249,8 @@ public class PersistenceUnitManager implements PersistenceUnitInfo {
       throw new ConfigException(L.l("'{0}' is an unknown JPA transaction-type.",
                                     type));
   }
-  
+*/
+
   public void setSharedCacheMode(String mode)
   {
     if ("ALL".equals(mode))
@@ -361,8 +371,9 @@ public class PersistenceUnitManager implements PersistenceUnitInfo {
     }
     
     createDelegate();
-    
-    _entityManagerJtaProxy.init();
+
+    if (_entityManagerJtaProxy != null)
+      _entityManagerJtaProxy.init();
   }
   
   private void addDefaultProperty(String name, String value)

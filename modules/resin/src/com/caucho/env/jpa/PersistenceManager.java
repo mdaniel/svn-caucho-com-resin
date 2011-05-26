@@ -41,6 +41,7 @@ import java.util.logging.Logger;
 import javax.persistence.EntityManager;
 import javax.persistence.EntityManagerFactory;
 import javax.persistence.spi.PersistenceProvider;
+import javax.persistence.spi.PersistenceUnitTransactionType;
 
 import com.caucho.amber.manager.AmberPersistenceProvider;
 import com.caucho.config.Config;
@@ -61,6 +62,7 @@ import com.caucho.loader.enhancer.ScanClass;
 import com.caucho.loader.enhancer.ScanListener;
 import com.caucho.util.CharBuffer;
 import com.caucho.util.IoUtil;
+import com.caucho.util.L10N;
 import com.caucho.vfs.Path;
 import com.caucho.vfs.ReadStream;
 import com.caucho.vfs.Vfs;
@@ -74,6 +76,8 @@ public class PersistenceManager
 {
   private static final Logger log
     = Logger.getLogger(PersistenceManager.class.getName());
+
+  private static final L10N L = new L10N(PersistenceManager.class);
 
   private static final EnvironmentLocal<PersistenceManager> _localManager
     = new EnvironmentLocal<PersistenceManager>();
@@ -198,8 +202,10 @@ public class PersistenceManager
   void addPersistenceUnit(String name,
                           ConfigJpaPersistenceUnit configJpaPersistenceUnit)
   {
-    PersistenceUnitManager pUnit = createPersistenceUnit(name);
-    
+    PersistenceUnitManager pUnit;
+
+    pUnit = createPersistenceUnit(name, PersistenceUnitTransactionType.JTA);
+
     if (pUnit.getRoot() == null)
       pUnit.setRoot(configJpaPersistenceUnit.getPath());
     
@@ -289,8 +295,9 @@ public class PersistenceManager
 
       for (ConfigPersistenceUnit unitConfig : persistence.getUnitList()) {
         PersistenceUnitManager pUnit
-          = createPersistenceUnit(unitConfig.getName());
-        
+          = createPersistenceUnit(unitConfig.getName(),
+                                  unitConfig.getTransactionType());
+
         if (pUnit.getRoot() == null)
           pUnit.setRoot(unitConfig.getRoot());
         
@@ -311,8 +318,9 @@ public class PersistenceManager
       }
     }
   }
-  
-  private PersistenceUnitManager createPersistenceUnit(String name)
+
+  private PersistenceUnitManager createPersistenceUnit(String name,
+                                                       PersistenceUnitTransactionType transactionType)
   {
     PersistenceUnitManager unit;
     
@@ -322,7 +330,7 @@ public class PersistenceManager
       if (unit != null)
         return unit;
       
-      unit = new PersistenceUnitManager(this, name);
+      unit = new PersistenceUnitManager(this, name, transactionType);
       _persistenceUnitMap.put(name, unit);
     }
     
@@ -406,12 +414,17 @@ public class PersistenceManager
       emfFactory.qualifier(Names.create(pUnit.getName()));
       beanManager.addBean(emfFactory.singleton(pUnit.getEntityManagerFactoryProxy()));
 
-      BeanBuilder<EntityManager> emFactory;
-      emFactory = beanManager.createBeanFactory(EntityManager.class);
+      if (pUnit.getTransactionType() == PersistenceUnitTransactionType.JTA) {
+        log.finer(L.l("register persistent-unit `{0}' with transaction-type JTA", pUnit.getName()));
+        BeanBuilder<EntityManager> emFactory;
+        emFactory = beanManager.createBeanFactory(EntityManager.class);
 
-      emFactory.qualifier(CurrentLiteral.CURRENT);
-      emFactory.qualifier(Names.create(pUnit.getName()));
-      beanManager.addBean(emFactory.singleton(pUnit.getEntityManagerJtaProxy()));
+        emFactory.qualifier(CurrentLiteral.CURRENT);
+        emFactory.qualifier(Names.create(pUnit.getName()));
+        beanManager.addBean(emFactory.singleton(pUnit.getEntityManagerJtaProxy()));
+      } else {
+        log.finer(L.l("register persistent-unit `{0}' with transaction-type RESOURCE_LOCAL", pUnit.getName()));
+      }
 
       /*
       factory = manager.createBeanFactory(EntityManager.class);
