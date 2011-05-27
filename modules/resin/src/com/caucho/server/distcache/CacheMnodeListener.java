@@ -27,48 +27,13 @@
  * @author Scott Ferguson
  */
 
-package com.caucho.distcache;
+package com.caucho.server.distcache;
 
-import javax.ejb.Startup;
-import javax.inject.Singleton;
-
-import com.caucho.config.Configurable;
+import com.caucho.util.HashKey;
 
 /**
- * Cache which stores consistent copies on the cluster segment.
- *
- * Using the cache is like using java.util.Map.  To add a new entry,
- * call <code>cache.put(key, value)</code>.  To get the entry, call
- * <code>cache.get(key)</code>.
- *
- * The cache configuration affects the lifetime, local caching timeouts
- * and consistency.
+ * Callback for a cache put.
  */
-
-@Singleton
-@Configurable
-@Startup
-public class ClusterCache extends AbstractCache
-{
-  private String _replicationSourceCluster;
-  
-  public ClusterCache()
-  {
-  }
-
-  public ClusterCache(String name)
-  {
-    setName(name);
-    init();
-  }
-  
-  public void setReplicationSourceCluster(String clusterId)
-  {
-    _replicationSourceCluster = clusterId;
-  }
-  
-  public String getReplicationSourceCluster()
-  {
-    return _replicationSourceCluster;
-  }
+public interface CacheMnodeListener {
+  public void onPut(HashKey key, MnodeValue value);
 }

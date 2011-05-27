@@ -33,6 +33,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.util.Iterator;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import java.util.zip.DeflaterOutputStream;
@@ -74,8 +75,13 @@ abstract public class AbstractCacheManager<E extends DistCacheEntry>
   private CacheDataBacking _dataBacking;
   private CacheClusterBacking _clusterBacking;
   
+  private ConcurrentHashMap<HashKey,CacheMnodeListener> _cacheListenMap
+    = new ConcurrentHashMap<HashKey,CacheMnodeListener>();
+  
   private final LruCache<HashKey, E> _entryCache
     = new LruCache<HashKey, E>(64 * 1024);
+  
+  private boolean _isClosed;
   
   public AbstractCacheManager(ResinSystem resinSystem)
   {
@@ -103,6 +109,11 @@ abstract public class AbstractCacheManager<E extends DistCacheEntry>
   protected CacheDataBacking createDataBacking()
   {
     return new CacheDataBackingImpl();
+  }
+  
+  public void addCacheListener(HashKey cacheKey, CacheMnodeListener listener)
+  {
+    _cacheListenMap.put(cacheKey, listener);
   }
 
   /**
@@ -162,28 +173,6 @@ abstract public class AbstractCacheManager<E extends DistCacheEntry>
 
     return cacheEntry;
   }
-
-  /**
-   * Gets a cache entry
-  final public Object get(E entry,
-                          CacheConfig config,
-                          long now)
-  {
-    return get(entry, config, now);
-  }
-   */
-
-  /**
-   * Gets a cache entry
-   */
-  /*
-  final public Object getLazy(E entry,
-                              CacheConfig config,
-                              long now)
-  {
-    return get(entry, config, now, true);
-  }
-  */
 
   final public Object get(E entry,
                           CacheConfig config,
@@ -861,11 +850,21 @@ abstract public class AbstractCacheManager<E extends DistCacheEntry>
       return null;
     }
     
-    return getDataBacking().putLocalValue(mnodeValue, key, oldEntryValue, version,
-                                          valueHash, value, cacheHash,
-                                          flags, expireTimeout, idleTimeout, 
-                                          leaseTimeout,
-                                          localReadTimeout, leaseOwner);
+    MnodeValue newValue
+      = getDataBacking().putLocalValue(mnodeValue, key, oldEntryValue, version,
+                                       valueHash, value, cacheHash,
+                                       flags, expireTimeout, idleTimeout, 
+                                       leaseTimeout,
+                                       localReadTimeout, leaseOwner);
+    
+    if (cacheHash != null) {
+      CacheMnodeListener listener = _cacheListenMap.get(cacheHash);
+
+      if (listener != null)
+        listener.onPut(key, newValue);
+    }
+    
+    return newValue;
   }
 
   final public HashKey writeData(HashKey oldValueHash,
@@ -1144,7 +1143,14 @@ abstract public class AbstractCacheManager<E extends DistCacheEntry>
   @Override
   public void close()
   {
+    _isClosed = true;
+    
     getDataBacking().close();
+  }
+  
+  public boolean isClosed()
+  {
+    return _isClosed;
   }
   
   //

@@ -34,6 +34,7 @@ import java.io.InputStream;
 import java.io.OutputStream;
 import java.security.MessageDigest;
 
+import com.caucho.distcache.AbstractCache;
 import com.caucho.distcache.CacheSerializer;
 import com.caucho.distcache.ExtCacheEntry;
 import com.caucho.env.distcache.CacheDataBacking;
@@ -50,6 +51,21 @@ abstract public class DistributedCacheManager
   public void start()
   {
   }
+
+  /**
+   * Called when a cache initializes.
+   */
+  public void initCache(AbstractCache abstractCache)
+  {
+  }
+
+  /**
+   * Called when a cache is removed.
+   */
+  public void destroyCache(AbstractCache abstractCache)
+  {
+  }
+
 
   /**
    * Gets a cache key entry
@@ -186,5 +202,4 @@ abstract public class DistributedCacheManager
     {
     }
   }
-
 }

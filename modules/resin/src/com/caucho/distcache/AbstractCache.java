@@ -126,6 +126,11 @@ abstract public class AbstractCache extends AbstractMap
   {
     _guid = guid;
   }
+  
+  public String getGuid()
+  {
+    return _guid;
+  }
 
   /**
    * Sets the CacheLoader that the Cache can then use to populate
@@ -464,6 +469,8 @@ abstract public class AbstractCache extends AbstractMap
       
       Environment.addCloseListener(this);
     }
+    
+    _manager.initCache(this);
   }
 
   /**
@@ -946,6 +953,11 @@ abstract public class AbstractCache extends AbstractMap
   public boolean isTriplicate()
   {
     return _config.isTriplicate();
+  }
+  
+  public HashKey getCacheKey()
+  {
+    return _config.getCacheKey();
   }
 
   /**
