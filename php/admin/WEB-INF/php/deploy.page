@@ -9,15 +9,15 @@ if (! admin_init()) {
 $webapp = $g_mbean_server->lookup($_GET['id']);
 
 $request = quercus_servlet_request();
-$is_secure = $request->isSecure();
 $user = quercus_get_request()->getUserPrincipal();
 $client = @new Java("com.caucho.server.admin.WebAppDeployClient");
+$deploy_enabled = check_deploy_enabled($request->isSecure());
 
 echo "<h1>Deploy new application";
 print_help("Deploy");
 echo "</h1>";
 
-if ($is_secure) {
+if ($deploy_enabled) {
   $action = $_POST['action'];
 
   if ($action == 'deploy') {
@@ -27,16 +27,34 @@ if ($is_secure) {
 
 display_deploy_form($g_mbean_server);
 
+function check_deploy_enabled($is_secure)
+{
+  global $g_server_index;
+	
+  if (! $is_secure)
+		return 0;
+		
+	$mbean_server = new MBeanServer();
+  $server = $mbean_server->lookup("resin:type=Server");
+	$server_index = $server->SelfServer->ClusterIndex;
+		
+	if ($g_server_index != $server_index)
+		return 0;
+	
+	return 1;
+}
+
+
 function display_deploy_form($mbean_server)
 {
-  global $is_secure;
+  global $deploy_enabled;
 
-  if ($is_secure) {
+  if ($deploy_enabled) {
     $disabled = "";
   }
   else {
     $disabled = "disabled='disabled'";
-    echo "<div class='warn'>Actions can only be performed over a secure connection (SSL).";
+    echo "<div class='warn'>Actions can only be performed on a local server and over a secure connection (SSL).";
 
     $host = $_SERVER["SERVER_NAME"];
     $port = $_SERVER["SERVER_PORT"];
@@ -448,7 +466,8 @@ EOF;
   return $javascript;
 }
 
-$javascript = javascript_deploy_form();
+if ($deploy_enabled)
+	$javascript = javascript_deploy_form();
 
 display_footer($g_page, $javascript);
 ?>

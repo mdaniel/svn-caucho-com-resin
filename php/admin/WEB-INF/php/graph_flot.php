@@ -141,11 +141,13 @@ function stat_graph($canvas, $width, $height, $start, $end, $names, $alt,
   
   $labelWidth = 40;
   
-  echo "ticks = [];\n"
+  $ticks_var = str_replace("-", "_", "ticks_$canvas");
+  
+  echo "${ticks_var} = [];\n"
   if ($ticks) {
 	  $i = 0;
 	  foreach ($ticks as $tick) {
-	  	echo "ticks[$i] = '" . $tick . "';\n";
+	  	echo "${ticks_var}[$i] = '" . $tick . "';\n";
 	  	$i++;
 	  }
 	  $labelWidth = 60;
@@ -158,11 +160,11 @@ function stat_graph($canvas, $width, $height, $start, $end, $names, $alt,
   echo "  labelWidth: ${labelWidth},\n";
   echo "  tickFormatter: \n";
   echo "   function (val, axis) {\n";
-  echo "    if (ticks.length > 0) {\n";
-  echo "     if (val >= ticks.length || val < 0 || val % 1 > 0)\n";
+  echo "    if (${ticks_var}.length > 0) {\n";
+  echo "     if (val >= ${ticks_var}.length || val < 0 || val % 1 > 0)\n";
   echo "      return '';\n";
   echo "     else\n"
-  echo "      return ticks[val];\n";
+  echo "      return ${ticks_var}[val];\n";
   echo "    }\n"; 
   echo "    else {\n"
   echo "     if (val >= 1e9)\n";
