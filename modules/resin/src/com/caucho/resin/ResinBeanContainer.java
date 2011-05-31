@@ -193,11 +193,11 @@ public class ResinBeanContainer {
   /**
    * Adds a new module (jar or exploded classes directory)
    */
-  public void addModule(String modulePath)
+  public void addClassPath(String classPath)
   {
-    Path path = Vfs.lookup(modulePath);
+    Path path = Vfs.lookup(classPath);
 
-    if (modulePath.endsWith(".jar")) {
+    if (classPath.endsWith(".jar")) {
       _classLoader.addJar(path);
     } else {
       CompilingLoader loader = new CompilingLoader(_classLoader);

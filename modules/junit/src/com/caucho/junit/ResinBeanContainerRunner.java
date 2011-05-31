@@ -93,8 +93,8 @@ public class ResinBeanContainerRunner extends BlockJUnit4ClassRunner {
       _beanContainer.setModule(_testClassModule);
 
       if (_beanConfiguration != null) {
-        for (String module : _beanConfiguration.modules()) {
-          _beanContainer.addModule(module);
+        for (String path : _beanConfiguration.classPath()) {
+          _beanContainer.addClassPath(path);
         }
 
         for (String conf : _beanConfiguration.beansXml()) {

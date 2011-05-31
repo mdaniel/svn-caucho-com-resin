@@ -65,7 +65,13 @@ import java.lang.annotation.Target;
 @Retention(RUNTIME)
 @Target({ TYPE })
 public @interface ResinBeanConfiguration {
-  String[] modules() default {};
+  /**
+   * Specifies .jar files and directories with classes to add dynamically to
+   * classpath. Specified elements will also be scanned for Managed Beans (CDI)
+   *
+   * @return
+   */
+  String[] classPath() default {};
 
   String[] beansXml() default {};
 
