@@ -80,6 +80,8 @@ public class ResinRunner extends BlockJUnit4ClassRunner {
         _resinEmbeddedContainer = new ResinEmbed(_resinXmlPath);
       }
 
+      _resinEmbeddedContainer.addScanRoot();
+
       _resinEmbeddedContainer.addPort(new HttpEmbed(_httpPort));
       _resinEmbeddedContainer.addWebApp(new WebAppEmbed(_webApplicationContext,
           _webApplicationRoot));

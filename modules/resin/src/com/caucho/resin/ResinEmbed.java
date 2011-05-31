@@ -261,6 +261,10 @@ public class ResinEmbed
     */
   }
 
+  public void addScanRoot() {
+    _resin.getClassLoader().addScanRoot();
+  }
+
   //
   // Lifecycle
   //
