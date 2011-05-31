@@ -95,9 +95,21 @@ public interface CacheDataBacking {
   public long getStartupLastUpdateTime();
 
   /**
+   * Returns the last update time on server startup.
+   */
+  public long getStartupLastUpdateTime(HashKey cacheKey);
+
+  /**
    * Returns a set of entries since an access time.
    */
   public ArrayList<CacheData> getUpdates(long accessTime, int offset);
+
+  /**
+   * Returns a set of entries since an access time.
+   */
+  public ArrayList<CacheData> getUpdates(HashKey cacheKey,
+                                         long accessTime, 
+                                         int offset);
 
   /**
    * Returns a set of entries since an access time.

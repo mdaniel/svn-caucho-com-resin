@@ -241,12 +241,32 @@ public class CacheDataBackingImpl implements CacheDataBacking {
   }
 
   /**
+   * Returns the last update time on server startup.
+   */
+  @Override
+  public long getStartupLastUpdateTime(HashKey cacheKey)
+  {
+    return _mnodeStore.getStartupLastUpdateTime(cacheKey);
+  }
+
+  /**
    * Returns a set of entries since an access time.
    */
   @Override
   public ArrayList<CacheData> getUpdates(long accessTime, int offset)
   {
     return _mnodeStore.getUpdates(accessTime, offset);
+  }
+
+  /**
+   * Returns a set of entries since an access time.
+   */
+  @Override
+  public ArrayList<CacheData> getUpdates(HashKey cacheKey,
+                                         long accessTime, 
+                                         int offset)
+  {
+    return _mnodeStore.getUpdates(cacheKey, accessTime, offset);
   }
 
   /**

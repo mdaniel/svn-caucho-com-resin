@@ -76,6 +76,7 @@ public class MnodeStore implements AlarmListener {
   private String _countQuery;
   private String _updatesSinceQuery;
   private String _globalUpdatesSinceQuery;
+  private String _remoteUpdatesSinceQuery;
 
   private long _serverVersion;
   private long _startupLastUpdateTime;
@@ -125,6 +126,40 @@ public class MnodeStore implements AlarmListener {
   public long getStartupLastUpdateTime()
   {
     return _startupLastUpdateTime;
+  }
+
+  /**
+   * Returns the max update time detected on startup.
+   */
+  public long getStartupLastUpdateTime(HashKey cacheKey)
+  {
+    Connection conn = null;
+
+    try {
+      conn = _dataSource.getConnection();
+      
+      String sql = ("SELECT MAX(update_time)"
+                    + " FROM " + _tableName
+                    + " WHERE cache_id=?");
+        
+      PreparedStatement pStmt = conn.prepareStatement(sql);
+      
+      pStmt.setBytes(1, cacheKey.getHash());
+
+      ResultSet rs = pStmt.executeQuery(sql);
+      
+      if (rs.next()) {
+        return rs.getLong(1);
+      }
+      
+      return 0;
+    } catch (SQLException e) {
+      log.log(Level.WARNING, e.toString(), e);
+      
+      return 0;
+    } finally {
+      JdbcUtil.close(conn);
+    }
   }
 
   //
@@ -180,6 +215,11 @@ public class MnodeStore implements AlarmListener {
                                 + " FROM " + _tableName
                                 + " WHERE ? <= update_time"
                                 + "   AND bitand(flags, " + global + ") <> 0"
+                                + " LIMIT 1024");
+
+    _remoteUpdatesSinceQuery = ("SELECT id,value,cache_id,flags,item_version,update_time,expire_timeout,idle_timeout,lease_timeout,local_read_timeout"
+                                + " FROM " + _tableName
+                                + " WHERE ? = cache_id AND ? <= update_time"
                                 + " LIMIT 1024");
 
     initDatabase();
@@ -400,6 +440,78 @@ public class MnodeStore implements AlarmListener {
   }
 
   /**
+   * Returns the maximum update time on startup
+   */
+  public ArrayList<CacheData> getUpdates(HashKey cacheKey,
+                                          long updateTime,
+                                          int offset)
+  {
+    Connection conn = null;
+
+    try {
+      conn = _dataSource.getConnection();
+
+      String sql;
+
+      sql = _remoteUpdatesSinceQuery;
+
+      PreparedStatement pstmt = conn.prepareStatement(sql);
+
+      pstmt.setBytes(1, cacheKey.getHash());
+      pstmt.setLong(2, updateTime);
+
+      ArrayList<CacheData> entryList = new ArrayList<CacheData>();
+
+      ResultSet rs = pstmt.executeQuery();
+
+      rs.relative(offset);
+      while (rs.next()) {
+        byte []keyHash = rs.getBytes(1);
+
+        byte []valueHash = rs.getBytes(2);
+        byte []cacheHash = rs.getBytes(3);
+        int flags = rs.getInt(4);
+        long version = rs.getLong(5);
+        long itemUpdateTime = rs.getLong(6);
+        long expireTimeout = rs.getLong(7);
+        long idleTimeout = rs.getLong(8);
+        long leaseTimeout = rs.getLong(9);
+        long localReadTimeout = rs.getLong(10);
+
+        HashKey value = valueHash != null ? new HashKey(valueHash) : null;
+        /*
+        HashKey cacheKey = cacheHash != null ? new HashKey(cacheHash) : null;
+        */
+
+        if (keyHash == null)
+          continue;
+
+        entryList.add(new CacheData(new HashKey(keyHash),
+                                    value,
+                                    cacheKey,
+                                    flags,
+                                    version,
+                                    itemUpdateTime,
+                                    expireTimeout,
+                                    idleTimeout,
+                                    leaseTimeout,
+                                    localReadTimeout));
+      }
+
+      if (entryList.size() > 0)
+        return entryList;
+      else
+        return null;
+    } catch (SQLException e) {
+      log.log(Level.WARNING, e.toString(), e);
+    } finally {
+      JdbcUtil.close(conn);
+    }
+
+    return null;
+  }
+
+  /**
    * Reads the object from the data store.
    *
    * @param id the hash identifier for the data
@@ -438,7 +550,7 @@ public class MnodeStore implements AlarmListener {
 
         if (log.isLoggable(Level.FINER))
           log.finer(this + " load " + id + " value=" + valueHashKey + " cache=" + cacheHashKey);
-
+        
         return new MnodeValue(valueHashKey, null, cacheHashKey,
                               flags, itemVersion,
                               expireTimeout, idleTimeout,

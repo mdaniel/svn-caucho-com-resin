@@ -61,6 +61,19 @@ public class HashKey implements Serializable {
   {
     return _hash;
   }
+  
+  public boolean isNull()
+  {
+    byte []hash = _hash;
+    int length = hash.length;
+    
+    for (int i = length - 1; i >= 0; i--) {
+      if (hash[i] != 0)
+        return false;
+    }
+    
+    return true;
+  }
 
   public static String toString(byte []hash)
   {

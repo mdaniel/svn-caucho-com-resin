@@ -569,7 +569,8 @@ abstract public class AbstractCacheManager<E extends DistCacheEntry>
     if (mnodeValue == null || mnodeValue.isImplicitNull()) {
       MnodeValue newMnodeValue = getDataBacking().loadLocalEntryValue(key);
 
-      cacheEntry.compareAndSet(null, newMnodeValue);
+      // cloud/6811
+      cacheEntry.compareAndSet(mnodeValue, newMnodeValue);
 
       mnodeValue = cacheEntry.getMnodeValue();
     }
@@ -1011,7 +1012,6 @@ abstract public class AbstractCacheManager<E extends DistCacheEntry>
 
         if (! getDataBacking().loadData(valueKey, out)) {
           out.close();
-          System.out.println("MISSING_DATA: " + valueKey);
         
           return null;
         }
