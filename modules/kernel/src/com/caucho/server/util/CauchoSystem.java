@@ -83,6 +83,12 @@ public class CauchoSystem {
   
   static String _resinVersion;
   static String _resinFullVersion;
+  
+  private static String []PROPERTIES_64 = {
+     "sun.arch.data.model",
+     "com.ibm.vm.bitmode",
+     "os.arch"
+  };
 
   private static int _isUnix = -1;
   private static String _newline;
@@ -482,6 +488,13 @@ public class CauchoSystem {
    */
   public static boolean is64Bit()
   {
-    return "64".equals(System.getProperty("sun.arch.data.model"));
+    for (String prop : PROPERTIES_64) {
+      String value = System.getProperty(prop);
+      
+      if (value != null)
+        return value.indexOf("64") >= 0;
+    }
+    
+    return false;
   }
 }

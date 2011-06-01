@@ -36,9 +36,9 @@ install	:
 		cp -r $(CP_U_FLAG) doc/* $(resin_root)/doc; \
 		mkdir -p $(resin_root)/project-jars; \
 		cp -r $(CP_U_FLAG) project-jars/* $(resin_root)/project-jars; \
-		mkdir -p $(resin_root)/webapp-jars; \
-		cp -r $(CP_U_FLAG) webapp-jars/* $(resin_root)/webapp-jars; \
-		cp -r $(CP_U_FLAG) endorsed $(resin_root); \
+		mkdir -p $(resin_home)/webapp-jars; \
+		cp -r $(CP_U_FLAG) webapp-jars/* $(resin_home)/webapp-jars; \
+		cp -r $(CP_U_FLAG) endorsed $(resin_home); \
 	fi
 	@ echo "Installing Resin home directory $(resin_root)"
 	@ if test "$(resin_home)" != $(abs_builddir); then \

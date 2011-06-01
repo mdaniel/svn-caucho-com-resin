@@ -40,6 +40,7 @@ import com.caucho.config.types.Period;
 import com.caucho.log.AbstractRolloverLog;
 import com.caucho.log.RotateStream;
 import com.caucho.network.listen.TcpSocketLinkListener;
+import com.caucho.server.util.CauchoSystem;
 import com.caucho.vfs.Path;
 import com.caucho.vfs.Vfs;
 
@@ -106,7 +107,7 @@ class WatchdogConfig
     
     _pwd = Vfs.lookup();
 
-    _is64bit = "64".equals(System.getProperty("sun.arch.data.model"));
+    _is64bit = CauchoSystem.is64Bit();
   }
 
   public void setId(String id)

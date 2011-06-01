@@ -301,7 +301,7 @@ struct stream_t {
 #define CSE_STATUS          'S'
 #define CSE_SEND_HEADER     'G'
 
-#define CSE_PING            'P'
+/* #define CSE_PING            'P' */
 #define CSE_QUERY           'Q'
 
 #define CSE_ACK             'A'

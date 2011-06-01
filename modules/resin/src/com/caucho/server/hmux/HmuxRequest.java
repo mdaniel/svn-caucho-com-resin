@@ -39,7 +39,6 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Enumeration;
 import java.util.HashSet;
-import java.util.Locale;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -185,13 +184,12 @@ public class HmuxRequest extends AbstractHttpRequest
 
   // other, specialized protocols
   public static final int CSE_QUERY =           'Q';
-  public static final int CSE_PING =            'P';
 
   public static final int HMUX_TO_UNIDIR_HMTP = '7';
   public static final int HMUX_SWITCH_TO_HMTP = '8';
   public static final int HMUX_HMTP_OK        = '9';
 
-  public static final int HMUX_CLUSTER_PROTOCOL = 0x101;
+  // public static final int HMUX_CLUSTER_PROTOCOL = 0x101;
   public static final int HMUX_DISPATCH_PROTOCOL = 0x102;
   public static final int HMUX_JMS_PROTOCOL = 0x103;
 
@@ -246,8 +244,7 @@ public class HmuxRequest extends AbstractHttpRequest
   private CharBuffer _cb2;
   private boolean _hasRequest;
 
-  private AbstractClusterRequest _clusterRequest;
-  private HmuxDispatchRequest _dispatchRequest;
+  private final HmuxDispatchRequest _dispatchRequest;
 
   private HmtpRequest _hmtpRequest;
   private boolean _isHmtpRequest;
@@ -922,14 +919,8 @@ public class HmuxRequest extends AbstractHttpRequest
   {
     int result = HMUX_EXIT;
     boolean isKeepalive = false;
-    if (value == HMUX_CLUSTER_PROTOCOL) {
-      if (log.isLoggable(Level.FINE))
-        log.fine(dbgId() + (char) code + "-r: cluster protocol");
-      _filter.setClientClosed(true);
-
-      result = _clusterRequest.handleRequest(is, _rawWrite);
-    }
-    else if (value == HMUX_DISPATCH_PROTOCOL) {
+    
+    if (value == HMUX_DISPATCH_PROTOCOL) {
       if (log.isLoggable(Level.FINE))
         log.fine(dbgId() + (char) code + "-r: dispatch protocol");
 

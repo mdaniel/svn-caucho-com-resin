@@ -143,7 +143,7 @@ public class JstlCoreSet extends JstlNode {
 
     printXmlChildren(os);
 
-    os.print("</c:set>");
+    os.print("</" + prefix + ":set>");
   }
   
   /**

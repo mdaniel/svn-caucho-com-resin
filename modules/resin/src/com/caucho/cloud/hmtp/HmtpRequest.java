@@ -31,20 +31,16 @@ package com.caucho.cloud.hmtp;
 
 import java.io.IOException;
 import java.io.InputStream;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 
 import com.caucho.bam.broker.Broker;
 import com.caucho.bam.broker.ManagedBroker;
 import com.caucho.bam.broker.PassthroughBroker;
 import com.caucho.bam.mailbox.Mailbox;
 import com.caucho.bam.mailbox.MultiworkerMailbox;
-import com.caucho.bam.stream.MessageStream;
 import com.caucho.cloud.bam.BamSystem;
 import com.caucho.hemp.servlet.ClientStubManager;
-import com.caucho.hemp.servlet.ServerProxyBroker;
 import com.caucho.hemp.servlet.ServerGatewayBroker;
-import com.caucho.hessian.io.HessianDebugInputStream;
+import com.caucho.hemp.servlet.ServerProxyBroker;
 import com.caucho.hmtp.HmtpWebSocketReader;
 import com.caucho.hmtp.HmtpWebSocketWriter;
 import com.caucho.network.listen.AbstractProtocolConnection;
@@ -62,8 +58,6 @@ import com.caucho.vfs.WriteStream;
 public class HmtpRequest extends AbstractProtocolConnection
 {
   private static final L10N L = new L10N(HmtpRequest.class);
-  private static final Logger log
-    = Logger.getLogger(HmtpRequest.class.getName());
 
   public static final int HMUX_TO_UNIDIR_HMTP = '7';
   public static final int HMUX_SWITCH_TO_HMTP = '8';

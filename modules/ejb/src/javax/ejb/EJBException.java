@@ -32,6 +32,8 @@ package javax.ejb;
  * The main ejb context.
  */
 public class EJBException extends RuntimeException {
+  private static final long serialVersionUID = 2512003687642492863L;
+  
   private Exception causeException;
   
   public EJBException()

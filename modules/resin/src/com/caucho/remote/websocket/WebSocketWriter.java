@@ -114,9 +114,10 @@ public class WebSocketWriter extends Writer
     int wsOffset = _offset;
 
     for (; length > 0; length--) {
-      if (wsOffset + 2 >= wsBuffer.length) {
+      if (wsBuffer.length <= wsOffset + 2) {
         _offset = wsOffset;
         complete(false);
+        wsOffset = _offset;
       }
       
       char ch = buffer[offset++];

@@ -95,7 +95,8 @@ class AcceptTask extends ConnectionReadTask {
       socketLink.toStartConnection();
 
       if (log.isLoggable(Level.FINER)) {
-        log.finer(socketLink + " accept");
+        log.finer(socketLink + " accept from "
+                  + socketLink.getRemoteHost() + ":" + socketLink.getRemotePort());
       }
 
       boolean isKeepalive = false;

@@ -200,8 +200,9 @@ Java_com_caucho_vfs_JniSocketImpl_writeNative(JNIEnv *env,
     result = conn->ops->write(conn, buffer, sublen);
     
     if (result < 0) {
-    fprintf(stdout, "write-ops: write\n");
-    fflush(stdout);
+      fprintf(stdout, "write-ops: write result=%d errno=%d\n", 
+              result, errno);
+      fflush(stdout);
       return result;
     }
 

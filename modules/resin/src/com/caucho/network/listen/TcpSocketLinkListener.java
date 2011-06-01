@@ -55,6 +55,7 @@ import com.caucho.lifecycle.Lifecycle;
 import com.caucho.management.server.PortMXBean;
 import com.caucho.management.server.TcpConnectionInfo;
 import com.caucho.server.cluster.Server;
+import com.caucho.server.util.CauchoSystem;
 import com.caucho.util.Alarm;
 import com.caucho.util.AlarmListener;
 import com.caucho.util.FreeList;
@@ -195,7 +196,7 @@ public class TcpSocketLinkListener
 
   public TcpSocketLinkListener()
   {
-    if ("64".equals(System.getProperty("sun.arch.data.model"))) {
+    if (CauchoSystem.is64Bit()) {
       // on 64-bit machines we can use more threads before parking in nio
       _keepaliveSelectThreadTimeout = 60000;
     }

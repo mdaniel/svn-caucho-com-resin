@@ -183,6 +183,7 @@ std_read(connection_t *conn, char *buf, int len, int timeout)
   int fd;
   int result;
   int retry = 3;
+  int poll_result;
 
   if (! conn)
     return -1;
@@ -207,7 +208,9 @@ std_read(connection_t *conn, char *buf, int len, int timeout)
   }
 
   if (timeout >= 0) {
-    if (poll_read(fd, timeout) <= 0) {
+    poll_result = poll_read(fd, timeout);
+
+    if (poll_result <= 0) {
       return TIMEOUT_EXN;
     }
   }
@@ -227,8 +230,13 @@ std_read(connection_t *conn, char *buf, int len, int timeout)
 
     if (errno == EINTR) {
       /* EAGAIN is returned by a timeout */
-      if (poll_read(fd, conn->socket_timeout) <= 0) {
-	return read_exception_status(conn, errno);
+      poll_result = poll_read(fd, conn->socket_timeout);
+
+      if (poll_result == 0) {
+	return TIMEOUT_EXN;
+      }
+      else if (poll_result < 0 && errno != EINTR) {
+        return read_exception_status(conn, errno);
       }
     }
     else {
@@ -252,7 +260,8 @@ std_write(connection_t *conn, char *buf, int len)
 {
   int fd;
   int result;
-  int retry = 3;
+  int retry = 5;
+  int poll_result;
   int error;
 
   if (! conn)
@@ -267,7 +276,7 @@ std_write(connection_t *conn, char *buf, int len)
   conn->sent_data = 1;
 
   if (! conn->is_recv_timeout && poll_write(fd, conn->socket_timeout) == 0) {
-    return -1;
+    return TIMEOUT_EXN;
   }
 
   do {
@@ -278,7 +287,12 @@ std_write(connection_t *conn, char *buf, int len)
     error = errno;
     
     if (errno == EINTR || errno == EAGAIN) {
-      if (poll_write(fd, conn->socket_timeout) == 0) {
+      poll_result = poll_write(fd, conn->socket_timeout);
+
+      if (poll_result == 0) {
+        return TIMEOUT_EXN;
+      }
+      else if (poll_result < 0 && errno != EINTR) {
 	return write_exception_status(conn, errno);
       }
     }
@@ -370,12 +384,6 @@ std_accept(server_socket_t *ss, connection_t *conn)
   
   sock = accept(fd, sin, &sin_len);
 
-  if (sock < 0) {
-    fprintf(stdout, "fail %d sock=%d errno=%d\n", fd, sock, errno);
-    fflush(stdout);
-  }
-
-
 #ifdef WIN32
   ReleaseMutex(ss->accept_lock);
 #endif
@@ -398,12 +406,12 @@ std_accept(server_socket_t *ss, connection_t *conn)
   if (setsockopt(sock, SOL_SOCKET, SO_RCVTIMEO,
                  (char *) &timeout, sizeof(timeout)) == 0) {
     conn->is_recv_timeout = 1;
-  }
 
-  timeout.tv_sec = ss->conn_socket_timeout / 1000;
-  timeout.tv_usec = ss->conn_socket_timeout % 1000 * 1000;
-  setsockopt(sock, SOL_SOCKET, SO_SNDTIMEO,
-	     (char *) &timeout, sizeof(timeout));
+    timeout.tv_sec = ss->conn_socket_timeout / 1000;
+    timeout.tv_usec = ss->conn_socket_timeout % 1000 * 1000;
+    setsockopt(sock, SOL_SOCKET, SO_SNDTIMEO,
+               (char *) &timeout, sizeof(timeout));
+  }
 #endif
 
   conn->ss = ss;

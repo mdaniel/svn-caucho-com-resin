@@ -637,8 +637,9 @@ class WatchdogChildProcess
     if (! _watchdog.hasXmx())
       jvmArgs.add("-Xmx256m");
     
-    // #4308
-    jvmArgs.add("-Xrs");
+    // #4308, #4585
+    if (CauchoSystem.isWindows())
+      jvmArgs.add("-Xrs");
 
     String[] argv = _watchdog.getArgv();
 
