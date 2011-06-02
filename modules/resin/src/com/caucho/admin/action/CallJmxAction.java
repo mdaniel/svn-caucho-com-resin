@@ -33,6 +33,7 @@ import java.util.logging.*;
 
 import javax.management.*;
 
+import com.caucho.config.ConfigException;
 import com.caucho.util.L10N;
 
 public class CallJmxAction extends AbstractJmxAction implements AdminAction
@@ -46,109 +47,105 @@ public class CallJmxAction extends AbstractJmxAction implements AdminAction
                         String operationName, 
                         int operationIndex, 
                         String []params)
+    throws ConfigException, JMException, ClassNotFoundException
   {
     final List<MBeanServer> servers = new LinkedList<MBeanServer>();
 
-    try {
-      servers.addAll(MBeanServerFactory.findMBeanServer(null));
+    servers.addAll(MBeanServerFactory.findMBeanServer(null));
 
-      ObjectName nameQuery = ObjectName.getInstance(pattern);
+    ObjectName nameQuery = ObjectName.getInstance(pattern);
 
-      ObjectName subjectBean = null;
-      MBeanServer subjectBeanServer = null;
+    ObjectName subjectBean = null;
+    MBeanServer subjectBeanServer = null;
 
-      for (final MBeanServer server : servers) {
-        for (final ObjectName mbean : server.queryNames(nameQuery, null)) {
-          if (subjectBean != null) {
-            return L.l("multiple beans match `{0}'", pattern);
-          }
-
-          subjectBean = mbean;
-          subjectBeanServer = server;
-        }
-      }
-
-      List<MBeanOperationInfo> operations = new ArrayList<MBeanOperationInfo>();
-      if (subjectBean != null) {
-        for (final MBeanOperationInfo operation : subjectBeanServer.getMBeanInfo(
-          subjectBean).getOperations()) {
-          if (operation.getName().equals(operationName)
-              && operation.getSignature().length == params.length) {
-            operations.add(operation);
-          }
-        }
-      }
-
-      if (subjectBean == null) {
-        return L.l("no beans match `{0}'", pattern);
-      }
-      else if (operations.isEmpty()) {
-        return L.l("bean at `{0}' does not appear to have operation `{1}' accepting `{2}' arguments",
-                     pattern,
-                     operationName,
-                     params.length);
-      } else if (operations.size() > 1 && operationIndex == -1) {
-        sort(operations);
-        StringBuilder builder = new StringBuilder(L.l(
-          "Multiple operations match `{0}', please specify operation name with index e.g `{0}:0`\n",
-          operationName));
-
-        for (int i = 0; i < operations.size(); i++) {
-          MBeanOperationInfo operation = operations.get(i);
-          builder.append(operation.getName()).append(':').append(i).append('(');
-          MBeanParameterInfo[] paramInfos = operation.getSignature();
-          for (int j = 0; j < paramInfos.length; j++) {
-            MBeanParameterInfo paramInfo = paramInfos[j];
-            builder.append(paramInfo.getType());
-            if (j + 1 < paramInfos.length)
-              builder.append(", ");
-          }
-          builder.append(')');
-
-          if (i + 1 < operations.size())
-            builder.append('\n');
+    for (final MBeanServer server : servers) {
+      for (final ObjectName mbean : server.queryNames(nameQuery, null)) {
+        if (subjectBean != null) {
+          throw new ConfigException(L.l("multiple beans match `{0}'", pattern));
         }
 
-        return builder.toString();
+        subjectBean = mbean;
+        subjectBeanServer = server;
       }
-      else {
-        MBeanOperationInfo operationInfo;
-        sort(operations);
-        if (operationIndex > -1)
-          operationInfo = operations.get(operationIndex);
-        else
-          operationInfo = operations.get(0);
+    }
 
-        MBeanParameterInfo[] parameters = operationInfo.getSignature();
-        String[] signature = new String[parameters.length];
-        for (int i = 0; i < parameters.length; i++) {
-          signature[i] = parameters[i].getType();
+    List<MBeanOperationInfo> operations = new ArrayList<MBeanOperationInfo>();
+    if (subjectBean != null) {
+      for (final MBeanOperationInfo operation : subjectBeanServer.getMBeanInfo(
+        subjectBean).getOperations()) {
+        if (operation.getName().equals(operationName)
+            && operation.getSignature().length == params.length) {
+          operations.add(operation);
         }
-
-        Object[] paramValues = new Object[parameters.length];
-        for (int i = 0; i < params.length; i++) {
-          String param = params[i];
-          if ("__NULL__".equals(param))
-            continue;
-
-          String type = signature[i];
-          Object value = toValue(type, param);
-          paramValues[i] = value;
-        }
-
-        Object obj = subjectBeanServer.invoke(subjectBean,
-                                              operationName,
-                                              paramValues,
-                                              signature);
-
-        return L.l("method `{0}' called on `{1}' returned `{2}'.",
-                   getSignature(operationInfo),
-                   subjectBean.getCanonicalName(),
-                   obj);
       }
-    } catch (Exception e) {
-      log.log(Level.SEVERE, e.getMessage(), e);
-      return e.toString();
+    }
+
+    if (subjectBean == null) {
+      throw new ConfigException(L.l("no beans match `{0}'", pattern));
+    }
+    else if (operations.isEmpty()) {
+      throw new ConfigException(L.l("bean at `{0}' does not appear to have operation `{1}' accepting `{2}' arguments",
+                                    pattern,
+                                    operationName,
+                                    params.length));
+    } else if (operations.size() > 1 && operationIndex == -1) {
+      sort(operations);
+      StringBuilder builder = new StringBuilder(L.l(
+        "Multiple operations match `{0}', please specify operation name with index e.g `{0}:0`\n",
+        operationName));
+
+      for (int i = 0; i < operations.size(); i++) {
+        MBeanOperationInfo operation = operations.get(i);
+        builder.append(operation.getName()).append(':').append(i).append('(');
+        MBeanParameterInfo[] paramInfos = operation.getSignature();
+        for (int j = 0; j < paramInfos.length; j++) {
+          MBeanParameterInfo paramInfo = paramInfos[j];
+          builder.append(paramInfo.getType());
+          if (j + 1 < paramInfos.length)
+            builder.append(", ");
+        }
+        builder.append(')');
+
+        if (i + 1 < operations.size())
+          builder.append('\n');
+      }
+
+      throw new ConfigException(builder.toString());
+    }
+    else {
+      MBeanOperationInfo operationInfo;
+      sort(operations);
+      if (operationIndex > -1)
+        operationInfo = operations.get(operationIndex);
+      else
+        operationInfo = operations.get(0);
+
+      MBeanParameterInfo[] parameters = operationInfo.getSignature();
+      String[] signature = new String[parameters.length];
+      for (int i = 0; i < parameters.length; i++) {
+        signature[i] = parameters[i].getType();
+      }
+
+      Object[] paramValues = new Object[parameters.length];
+      for (int i = 0; i < params.length; i++) {
+        String param = params[i];
+        if ("__NULL__".equals(param))
+          continue;
+
+        String type = signature[i];
+        Object value = toValue(type, param);
+        paramValues[i] = value;
+      }
+
+      Object obj = subjectBeanServer.invoke(subjectBean,
+                                            operationName,
+                                            paramValues,
+                                            signature);
+
+      return L.l("method `{0}' called on `{1}' returned `{2}'.",
+                 getSignature(operationInfo),
+                 subjectBean.getCanonicalName(),
+                 obj);
     }
   }
 }

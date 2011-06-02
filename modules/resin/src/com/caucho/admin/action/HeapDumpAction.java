@@ -48,6 +48,7 @@ public class HeapDumpAction implements AdminAction
   private static final L10N L = new L10N(HeapDumpAction.class);
   
   public String execute(boolean raw, String serverId, File hprofDir)
+    throws ConfigException, JMException, IOException
   {
     if (raw)
       return doRawHeapDump(serverId, hprofDir);
@@ -56,71 +57,58 @@ public class HeapDumpAction implements AdminAction
   }
   
   private String doRawHeapDump(String serverId, File hprofDir)
+    throws ConfigException, JMException, IOException
   {
-    try {
-      ObjectName name = new ObjectName(
-        "com.sun.management:type=HotSpotDiagnostic");
+    ObjectName name = new ObjectName(
+      "com.sun.management:type=HotSpotDiagnostic");
 
-      final String base = "hprof-" + serverId;
-      final Calendar date = new GregorianCalendar();
-      date.setTimeInMillis(Alarm.getCurrentTime());
-      DecimalFormat f = new DecimalFormat("00");
-      String suffix = f.format(date.get(Calendar.YEAR)) + "-" +
-                      f.format(date.get(Calendar.MONTH)) + "-" +
-                      f.format(date.get(Calendar.DAY_OF_MONTH)) + "-" +
-                      f.format(date.get(Calendar.HOUR_OF_DAY)) + "-" +
-                      f.format(date.get(Calendar.MINUTE)) + "-" +
-                      f.format(date.get(Calendar.SECOND));
+    final String base = "hprof-" + serverId;
+    final Calendar date = new GregorianCalendar();
+    date.setTimeInMillis(Alarm.getCurrentTime());
+    DecimalFormat f = new DecimalFormat("00");
+    String suffix = f.format(date.get(Calendar.YEAR)) + "-" +
+                    f.format(date.get(Calendar.MONTH)) + "-" +
+                    f.format(date.get(Calendar.DAY_OF_MONTH)) + "-" +
+                    f.format(date.get(Calendar.HOUR_OF_DAY)) + "-" +
+                    f.format(date.get(Calendar.MINUTE)) + "-" +
+                    f.format(date.get(Calendar.SECOND));
 
-      if (hprofDir == null)
-        hprofDir = new File(System.getProperty("java.io.tmpdir"));
+    if (hprofDir == null)
+      hprofDir = new File(System.getProperty("java.io.tmpdir"));
 
-      final String fileName = base + "-" + suffix + ".hprof";
+    final String fileName = base + "-" + suffix + ".hprof";
 
-      MemoryPoolAdapter memoryAdapter = new MemoryPoolAdapter();
-      if (memoryAdapter.getEdenUsed() > hprofDir.getFreeSpace())
-        return L.l("Not enough disk space for `{0}'", fileName);
+    MemoryPoolAdapter memoryAdapter = new MemoryPoolAdapter();
+    if (memoryAdapter.getEdenUsed() > hprofDir.getFreeSpace())
+      throw new ConfigException(L.l("Not enough disk space for `{0}'", fileName));
 
-      File file = new File(hprofDir, fileName);
-      if (file.exists())
-        return L.l("File `{0}' exists.", file);
+    File file = new File(hprofDir, fileName);
+    if (file.exists())
+      throw new ConfigException(L.l("File `{0}' exists.", file));
 
-      MBeanServer mBeanServer = Jmx.getGlobalMBeanServer();
-      mBeanServer.invoke(name,
-                         "dumpHeap",
-                         new Object[]{file.getCanonicalPath(), Boolean.TRUE},
-                         new String[]{String.class.getName(), boolean.class.getName()});
+    MBeanServer mBeanServer = Jmx.getGlobalMBeanServer();
+    mBeanServer.invoke(name,
+                       "dumpHeap",
+                       new Object[]{file.getCanonicalPath(), Boolean.TRUE},
+                       new String[]{String.class.getName(), boolean.class.getName()});
 
-      final String result = L.l("Heap dump is written to `{0}'.\n"
-                                + "To view the file on the target machine use\n"
-                                + "jvisualvm --openfile {0}", file);
+    final String result = L.l("Heap dump is written to `{0}'.\n"
+                              + "To view the file on the target machine use\n"
+                              + "jvisualvm --openfile {0}", file);
 
-      return result;
-    } catch (Exception e) {
-      log.log(Level.FINE, e.getMessage(), e);
-
-      return e.getMessage();
-    }
+    return result;
   }
   
   private String doProHeapDump()
+    throws IOException
   {
-    try {
-      HeapDump dump = HeapDump.create();
-      StringWriter buffer = new StringWriter();
-      PrintWriter writer = new PrintWriter(buffer);
-      dump.writeExtendedHeapDump(writer);
-      writer.flush();
-
-      return buffer.toString();
-    } catch (ConfigException e) {
-      log.log(Level.FINE, e.getMessage(), e);
-
-      return e.getMessage();
-    } catch (IOException e) {
-      log.log(Level.FINE, e.getMessage(), e);
-
-      return e.getMessage();
-    }
+    HeapDump dump = HeapDump.create();
+    
+    StringWriter buffer = new StringWriter();
+    PrintWriter writer = new PrintWriter(buffer);
+    dump.writeExtendedHeapDump(writer);
+    writer.flush();
+    
+    return buffer.toString();
   }
 }

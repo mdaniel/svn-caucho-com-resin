@@ -41,7 +41,7 @@ import com.caucho.util.L10N;
 import javax.annotation.PostConstruct;
 import java.io.File;
 import java.util.concurrent.atomic.AtomicBoolean;
-import java.util.logging.Logger;
+import java.util.logging.*;
 
 public class ManagerActor extends SimpleActor
 {
@@ -104,17 +104,39 @@ public class ManagerActor extends SimpleActor
                              String from,
                              ThreadDumpQuery query)
   {
-    String result = new ThreadDumpAction().execute();
+    String result = null;
+    
+    try {
+      result = new ThreadDumpAction().execute();
+    } catch (ConfigException e) {
+      log.log(Level.WARNING, e.getMessage(), e);
+      result = e.getMessage();
+    } catch (Exception e) {
+      log.log(Level.WARNING, e.getMessage(), e);
+      result = e.toString();
+    }
+    
     getBroker().queryResult(id, from, to, result);
-    return result;  
+    return result;
   }
 
   @Query
   public String doHeapDump(long id, String to, String from, HeapDumpQuery query)
   {
-    String result = new HeapDumpAction().execute(query.isRaw(), 
-                                                 _server.getServerId(), 
-                                                 _hprofDir);
+    String result = null;
+    
+    try {
+      result = new HeapDumpAction().execute(query.isRaw(), 
+                                            _server.getServerId(), 
+                                            _hprofDir);
+    } catch (ConfigException e) {
+      log.log(Level.WARNING, e.getMessage(), e);
+      result = e.getMessage();
+    } catch (Exception e) {
+      log.log(Level.WARNING, e.getMessage(), e);
+      result = e.toString();
+    }
+    
     getBroker().queryResult(id, from, to, result);
     return result;
   }
@@ -122,12 +144,23 @@ public class ManagerActor extends SimpleActor
   @Query
   public String listJmx(long id, String to, String from, JmxListQuery query)
   {
-    String result = new ListJmxAction().execute(query.getPattern(),
-                                                query.isPrintAttributes(),
-                                                query.isPrintValues(),
-                                                query.isPrintOperations(),
-                                                query.isAllBeans(),
-                                                query.isPlatform());
+    String result = null;
+    
+    try {
+      result = new ListJmxAction().execute(query.getPattern(),
+                                           query.isPrintAttributes(),
+                                           query.isPrintValues(),
+                                           query.isPrintOperations(),
+                                           query.isAllBeans(),
+                                           query.isPlatform());
+    } catch (ConfigException e) {
+      log.log(Level.WARNING, e.getMessage(), e);
+      result = e.getMessage();
+    } catch (Exception e) {
+      log.log(Level.WARNING, e.getMessage(), e);
+      result = e.toString();
+    }
+    
     getBroker().queryResult(id, from, to, result);
     return result;  
   }
@@ -135,9 +168,20 @@ public class ManagerActor extends SimpleActor
   @Query
   public String setJmx(long id, String to, String from, JmxSetQuery query)
   {
-    String result = new SetJmxAction().execute(query.getPattern(),
-                                               query.getAttribute(),
-                                               query.getValue());
+    String result = null;
+    
+    try {
+      result = new SetJmxAction().execute(query.getPattern(),
+                                          query.getAttribute(),
+                                          query.getValue());
+    } catch (ConfigException e) {
+      log.log(Level.WARNING, e.getMessage(), e);
+      result = e.getMessage();
+    } catch (Exception e) {
+      log.log(Level.WARNING, e.getMessage(), e);
+      result = e.toString();
+    }
+    
     getBroker().queryResult(id, from, to, result);
     return result;
   }
@@ -145,10 +189,21 @@ public class ManagerActor extends SimpleActor
   @Query
   public String callJmx(long id, String to, String from, JmxCallQuery query)
   {
-    String result = new CallJmxAction().execute(query.getPattern(),
-                                                query.getOperation(),
-                                                query.getOperationIndex(),
-                                                query.getParams());
+    String result = null;
+    
+    try {
+      result = new CallJmxAction().execute(query.getPattern(),
+                                           query.getOperation(),
+                                           query.getOperationIndex(),
+                                           query.getParams());
+    } catch (ConfigException e) {
+      log.log(Level.WARNING, e.getMessage(), e);
+      result = e.getMessage();
+    } catch (Exception e) {
+      log.log(Level.WARNING, e.getMessage(), e);
+      result = e.toString();
+    }
+      
     getBroker().queryResult(id, from, to, result);
     return result;
   }
@@ -159,9 +214,20 @@ public class ManagerActor extends SimpleActor
                             String from, 
                             LogLevelQuery query)
   {
-    String result = new SetLogLevelAction().execute(query.getLogger(),
-                                                    query.getLevel(),
-                                                    query.getPeriod());
+    String result = null;
+    
+    try {
+      result = new SetLogLevelAction().execute(query.getLogger(),
+                                               query.getLevel(),
+                                               query.getPeriod());
+    } catch (ConfigException e) {
+      log.log(Level.WARNING, e.getMessage(), e);
+      result = e.getMessage();
+    } catch (Exception e) {
+      log.log(Level.WARNING, e.getMessage(), e);
+      result = e.toString();
+    }
+
     getBroker().queryResult(id, from, to, result);
     return result;
   }
@@ -169,9 +235,20 @@ public class ManagerActor extends SimpleActor
   @Query
   public String profile(long id, String to, String from, ProfileQuery query)
   {
-    String result = new ProfileAction().execute(query.getActiveTime(), 
-                                                query.getPeriod(), 
-                                                query.getDepth());
+    String result = null;
+    
+    try {
+      result = new ProfileAction().execute(query.getActiveTime(), 
+                                           query.getPeriod(), 
+                                           query.getDepth());
+    } catch (ConfigException e) {
+      log.log(Level.WARNING, e.getMessage(), e);
+      result = e.getMessage();
+    } catch (Exception e) {
+      log.log(Level.WARNING, e.getMessage(), e);
+      result = e.toString();
+    }
+    
     getBroker().queryResult(id, from, to, result);
     return result;
   }

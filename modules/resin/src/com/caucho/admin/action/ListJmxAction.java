@@ -34,6 +34,7 @@ import java.util.logging.*;
 
 import javax.management.*;
 
+import com.caucho.config.ConfigException;
 import com.caucho.util.L10N;
 
 public class ListJmxAction extends AbstractJmxAction implements AdminAction
@@ -49,104 +50,100 @@ public class ListJmxAction extends AbstractJmxAction implements AdminAction
                         boolean printOperations,
                         boolean allBeans,
                         boolean usePlatform)
+    throws ConfigException, JMException, ClassNotFoundException
   {
     final List<MBeanServer> servers = new LinkedList<MBeanServer>();
 
-    try {
-      if (usePlatform) {
-        servers.add(ManagementFactory.getPlatformMBeanServer());
-      }
-      else {
-        servers.addAll(MBeanServerFactory.findMBeanServer(null));
-      }
+    if (usePlatform) {
+      servers.add(ManagementFactory.getPlatformMBeanServer());
+    }
+    else {
+      servers.addAll(MBeanServerFactory.findMBeanServer(null));
+    }
 
-      StringBuilder resultBuilder = new StringBuilder();
+    StringBuilder resultBuilder = new StringBuilder();
 
-      Set<ObjectName> beans = new HashSet<ObjectName>();
+    Set<ObjectName> beans = new HashSet<ObjectName>();
 
-      ObjectName nameQuery = null;
-      if (pattern != null)
-        nameQuery = ObjectName.getInstance(pattern);
-      else if (allBeans)
-        nameQuery = ObjectName.WILDCARD;
-      else if (nameQuery == null && usePlatform)
-        nameQuery = ObjectName.getInstance("java.lang:*");
-      else
-        nameQuery = ObjectName.getInstance("resin:*");
+    ObjectName nameQuery = null;
+    if (pattern != null)
+      nameQuery = ObjectName.getInstance(pattern);
+    else if (allBeans)
+      nameQuery = ObjectName.WILDCARD;
+    else if (nameQuery == null && usePlatform)
+      nameQuery = ObjectName.getInstance("java.lang:*");
+    else
+      nameQuery = ObjectName.getInstance("resin:*");
 
-      for (final MBeanServer server : servers) {
-        Set<ObjectName> mbeans = server.queryNames(nameQuery, null);
+    for (final MBeanServer server : servers) {
+      Set<ObjectName> mbeans = server.queryNames(nameQuery, null);
 
-        for (final ObjectName mbean : mbeans) {
-          if (beans.contains(mbean))
-            continue;
+      for (final ObjectName mbean : mbeans) {
+        if (beans.contains(mbean))
+          continue;
 
-          beans.add(mbean);
+        beans.add(mbean);
 
-          resultBuilder.append(mbean).append('\n');
-          if (printAttributes) {
-            resultBuilder.append("  attributes:\n");
-            MBeanAttributeInfo []attributes = server.getMBeanInfo(mbean)
-                                                    .getAttributes();
-            for (MBeanAttributeInfo attribute : attributes) {
-              resultBuilder.append("    ").append(attribute);
+        resultBuilder.append(mbean).append('\n');
+        if (printAttributes) {
+          resultBuilder.append("  attributes:\n");
+          MBeanAttributeInfo []attributes = server.getMBeanInfo(mbean)
+                                                  .getAttributes();
+          for (MBeanAttributeInfo attribute : attributes) {
+            resultBuilder.append("    ").append(attribute);
 
-              if (printValues) {
-                resultBuilder.append('=');
-                Object value = server.getAttribute(mbean, attribute.getName());
-                resultBuilder.append('=').append(value);
-              }
-              resultBuilder.append('\n');
+            if (printValues) {
+              resultBuilder.append('=');
+              Object value = server.getAttribute(mbean, attribute.getName());
+              resultBuilder.append('=').append(value);
             }
+            resultBuilder.append('\n');
           }
+        }
 
-          if (printOperations) {
-            resultBuilder.append("  operations:\n");
-            for (MBeanOperationInfo operation : server.getMBeanInfo(mbean)
-                                                      .getOperations()) {
-              resultBuilder.append("    ")
-                           .append(operation.getName());
+        if (printOperations) {
+          resultBuilder.append("  operations:\n");
+          for (MBeanOperationInfo operation : server.getMBeanInfo(mbean)
+                                                    .getOperations()) {
+            resultBuilder.append("    ")
+                         .append(operation.getName());
 
-              MBeanParameterInfo []params = operation.getSignature();
-              if (params.length > 0) {
-                resultBuilder.append("\n      (\n");
-                for (int i = 0; i < params.length; i++) {
-                  MBeanParameterInfo param = params[i];
+            MBeanParameterInfo []params = operation.getSignature();
+            if (params.length > 0) {
+              resultBuilder.append("\n      (\n");
+              for (int i = 0; i < params.length; i++) {
+                MBeanParameterInfo param = params[i];
 
-                  resultBuilder.append("        ").append(i).append(":");
-                  resultBuilder.append(param.getType())
-                               .append(' ')
-                               .append(param.getName());
-                  if (param.getDescription() != null
-                      && ! param.getDescription().isEmpty())
-                    resultBuilder.append(" /*")
-                                 .append(param.getDescription())
-                                 .append("*/");
+                resultBuilder.append("        ").append(i).append(":");
+                resultBuilder.append(param.getType())
+                             .append(' ')
+                             .append(param.getName());
+                if (param.getDescription() != null
+                    && ! param.getDescription().isEmpty())
+                  resultBuilder.append(" /*")
+                               .append(param.getDescription())
+                               .append("*/");
 
-                  resultBuilder.append('\n');
-                }
-                resultBuilder.append("      )");
-              } else {
-                resultBuilder.append("()");
+                resultBuilder.append('\n');
               }
-
-              if (operation.getDescription() != null
-                  && ! operation.getDescription().isEmpty()) {
-                resultBuilder.append("/*")
-                             .append(operation.getDescription())
-                             .append("*/");
-              }
-
-              resultBuilder.append('\n');
+              resultBuilder.append("      )");
+            } else {
+              resultBuilder.append("()");
             }
+
+            if (operation.getDescription() != null
+                && ! operation.getDescription().isEmpty()) {
+              resultBuilder.append("/*")
+                           .append(operation.getDescription())
+                           .append("*/");
+            }
+
+            resultBuilder.append('\n');
           }
         }
       }
-
-      return resultBuilder.toString();
-    } catch (Exception e) {
-      log.log(Level.SEVERE, e.getMessage(), e);
-      return e.getMessage();
     }
+
+    return resultBuilder.toString();
   }
 }

@@ -2887,6 +2887,44 @@ switch to a non-root user after binding to port 80.</p>
 
 </defun>
 
+<defun title="&lt;health:ActionSequence>" name="health:ActionSequence">
+
+<parents>cluster</parents>
+<javadoc class="com.caucho.health.action.ActionSequence"/>
+
+<description>
+<p>Executes a sequence of child health actions in order.</p>
+</description>
+
+<attributes>
+  <tr>
+    <th>Attribute</th>
+    <th>Description</th>
+    <th>Type</th>
+    <th>Default</th>
+  </tr>
+  <tr>
+    <td colspan="4">None</td>
+  </tr>
+</attributes>
+
+<example title="Example: &lt;health:ActionSequence> in health.xml">
+&lt;cluster xmlns="http://caucho.com/ns/resin"
+         xmlns:resin="urn:java:com.caucho.resin"
+         xmlns:health="urn:java:com.caucho.health"
+         xmlns:ee="urn:java:ee">
+         
+  &lt;health:ActionSequence>
+    &lt;health:DumpThreads/>
+    &lt;health:DumpHeap/>
+    &lt;health:IfHealthCritical time="5m"/>
+  &lt;/health:ActionSequence>
+
+&lt;/cluster>
+</example>
+
+</defun>
+
 <defun title="&lt;health:And>" name="health:And">
 
 <parents>cluster</parents>
@@ -2896,7 +2934,7 @@ switch to a non-root user after binding to port 80.</p>
 <p>Qualifies an action to match if all of the child predicates match.</p>
 
 <p><i>Note: &lt;health:And> is implied and thus not strictly necessary except 
-in when used in conjunction with more complex combining conditions.</i></p>
+when used in conjunction with more complex combining conditions.</i></p>
 </description>
 
 <attributes>
@@ -2923,6 +2961,67 @@ in when used in conjunction with more complex combining conditions.</i></p>
       &lt;health:IfHealthCritical health-check="${memoryPermGenHealthCheck}"/>      
     &lt;/health:And>
   &lt;/health:Restart> 
+
+&lt;/cluster>
+</example>
+
+</defun>
+
+<defun title="&lt;health:CallJmxOperation>" name="health:CallJmxOperation">
+
+<parents>cluster</parents>
+<javadoc class="com.caucho.health.action.CallJmxOperation"/>
+
+<description>
+<p>Executes a JMX MBean operation with parameters.</p>
+<p>Note: Calling a JMX operation can also be performed on-demand using the 
+<var>jmx-call</var> command line.</p>
+</description>
+
+<attributes>
+  <tr>
+    <th>Attribute</th>
+    <th>Description</th>
+    <th>Type</th>
+    <th>Default</th>
+  </tr>
+  <tr>
+    <td>objectName</td>
+    <td>The JMX MBean name</td>
+    <td>String</td>
+    <td>N/A</td>
+  </tr>
+  <tr>
+    <td>operation</td>
+    <td>The method name</td>
+    <td>String</td>
+    <td>N/A</td>
+  </tr>
+  <tr>
+    <td>operationIndex</td>
+    <td>Unique method index in case multiple methods match operation</td>
+    <td>int</td>
+    <td>-1</td>
+  </tr>
+  <tr>
+    <td>param</td>
+    <td>Method parameters that will be converted to the appropriate type.</td>
+    <td>String</td>
+    <td>N/A</td>
+  </tr>
+</attributes>
+
+<example title="Example: &lt;health:CallJmxOperation> in health.xml">
+&lt;cluster xmlns="http://caucho.com/ns/resin"
+         xmlns:resin="urn:java:com.caucho.resin"
+         xmlns:health="urn:java:com.caucho.health"
+         xmlns:ee="urn:java:ee">
+         
+  &lt;health:CallJmxOperation>
+    &lt;objectName>java.lang:type=Threading&lt;/objectName>
+    &lt;operation>resetPeakThreadCount&lt;/operation>
+    &lt;health:IfNotRecent time='5m'/>
+  &lt;/health:CallJmxOperation>
 
 &lt;/cluster>
 </example>
@@ -3053,12 +3152,14 @@ individually.</p>
 <defun title="&lt;health:DumpHeap>" name="health:DumpHeap">
 
 <parents>cluster</parents>
-<javadoc class="com.caucho.health.action.DumpHealh"/>
+<javadoc class="com.caucho.health.action.DumpHeap"/>
 
 <description>
 <p>Create a memory heap dump.  The heap dump will be logged to the resin 
 log file using <code>com.caucho.health.action.DumpHeap</code> as the class, at 
 the <var>info</var> level.</p>
+<p>Note: Creating a heap dump can also be performed on-demand using the 
+<var>heap-dump</var> command line, and from /resin-admin.</p>
 </description>
 
 <attributes>
@@ -3095,6 +3196,8 @@ the <var>info</var> level.</p>
 <p>Create a thread dump.  The thread dump will be logged to the resin 
 log file using <code>com.caucho.server.admin.AdminThreadDump</code> as the 
 class, at the <var>info</var> level.</p>
+<p>Note: Creating a thread dump can also be performed on-demand using the 
+<var>thread-dump</var> command line.</p>
 </description>
 
 <attributes>
@@ -3264,6 +3367,52 @@ class, at the <var>info</var> level.</p>
   &lt;health:ExprHealthCheck>
     &lt;critical-test>${mbean('java.lang:type=Threading').ThreadCount > 100}&lt;/critical-test>
   &lt;/health:ExprHealthCheck>
+
+&lt;/cluster>
+</example>
+
+</defun>
+
+<defun title="&lt;health:FailSafeRestart>" name="health:FailSafeRestart">
+
+<parents>cluster</parents>
+<javadoc class="com.caucho.health.action.FailSafeRestart"/>
+
+<description>
+<p>A timed restart of Resin, normally used in conjunction with an 
+ActionSequence to gather shutdown information</p>
+</description>
+
+<attributes>
+  <tr>
+    <th>Attribute</th>
+    <th>Description</th>
+    <th>Type</th>
+    <th>Default</th>
+  </tr>
+  <tr>
+    <td>timeout</td>
+    <td>Time to force a restart if one has not yet occurred.</td>
+    <td><a javadoc="com.caucho.config.types.Period">Period</a></td>
+    <td>N/A</td>
+  </tr>
+</attributes>
+
+<example title="Example: &lt;health:FailSafeRestart> in health.xml">
+&lt;cluster xmlns="http://caucho.com/ns/resin"
+         xmlns:resin="urn:java:com.caucho.resin"
+         xmlns:health="urn:java:com.caucho.health"
+         xmlns:ee="urn:java:ee">
+         
+  &lt;health:ActionSequence>
+    &lt;health:FailSafeRestart timeout="10m">
+    &lt;health:DumpThreads/>
+    &lt;health:DumpHeap/>
+    &lt;health:StartProfiler active-time="5m"/>
+    &lt;health:Restart/>
+    
+    &lt;health:IfHealthCritical time="5m"/>
+  &lt;/health:ActionSequence>
 
 &lt;/cluster>
 </example>
@@ -3943,6 +4092,51 @@ properties, and JMX mbean attributes.</p>
     &lt;health:IfHealthCritical/>
     &lt;health:IfMessage health-check="${httpStatusCheck}" regexp="Not Found"/>
   &lt;/health:Restart> 
+
+&lt;/cluster>
+</example>
+
+</defun>
+
+<defun title="&lt;health:IfNotRecent>" name="health:IfNotRecent">
+
+<parents>cluster</parents>
+<javadoc class="com.caucho.health.predicate.IfNotRecent"/>
+
+<description>
+<p>Qualifies an action to match at most an amount of time after the last execution.
+This is usefull to prevent unecessary frequent execution of an action.</p> 
+</description>
+
+<attributes>
+  <tr>
+    <th>Attribute</th>
+    <th>Description</th>
+    <th>Type</th>
+    <th>Default</th>
+  </tr>
+  <tr>
+    <td>time</td>
+    <td>The time before the action can execute again.</td>
+    <td><a javadoc="com.caucho.config.types.Period">Period</a></td>
+    <td>N/A</td>
+  </tr>
+</attributes>
+
+<example title="Example: &lt;health:IfNotRecent> in health.xml">
+&lt;cluster xmlns="http://caucho.com/ns/resin"
+         xmlns:resin="urn:java:com.caucho.resin"
+         xmlns:health="urn:java:com.caucho.health"
+         xmlns:ee="urn:java:ee">
+
+  &lt;health:HttpStatusHealthCheck ee:Named="httpStatusCheck">
+    &lt;url>http://localhost:8080/test-ping.jsp&lt;/url>
+  &lt;/health:HttpStatusHealthCheck>
+  
+  &lt;health:DumpHeap>
+    &lt;health:IfHealthCritical healthCheck="${httpStatusCheck}"/>
+    &lt;health:IfNotRecent time='5m'/>
+  &lt;/health:DumpHeap>
 
 &lt;/cluster>
 </example>
@@ -4776,6 +4970,122 @@ System properties can be used to configure a different SMTP server.</p>
   &lt;health:SendMail mail="${healthMailer}">
     &lt;to>admin@yourdomain.com&lt;/to>
   &lt;health:SendMail>
+
+&lt;/cluster>
+</example>
+
+</defun>
+
+<defun title="&lt;health:SetJmxAttribute>" name="health:SetJmxAttribute">
+
+<parents>cluster</parents>
+<javadoc class="com.caucho.health.action.SetJmxAttribute"/>
+
+<description>
+<p>Sets a JMX attribute to a value.</p>
+<p>Note: Setting a JMX attribute can also be performed on-demand using the 
+<var>jmx-set</var> command line.</p>
+</description>
+
+<attributes>
+  <tr>
+    <th>Attribute</th>
+    <th>Description</th>
+    <th>Type</th>
+    <th>Default</th>
+  </tr>
+  <tr>
+    <td>objectName</td>
+    <td>The JMX MBean name</td>
+    <td>String</td>
+    <td>N/A</td>
+  </tr>
+  <tr>
+    <td>attribute</td>
+    <td>The attribute name</td>
+    <td>String</td>
+    <td>N/A</td>
+  </tr>
+  <tr>
+    <td>value</td>
+    <td>New attribute value that will be converted to the appropriate type.</td>
+    <td>String</td>
+    <td>N/A</td>
+  </tr>
+</attributes>
+
+<example title="Example: &lt;health:SetJmxAttribute> in health.xml">
+&lt;cluster xmlns="http://caucho.com/ns/resin"
+         xmlns:resin="urn:java:com.caucho.resin"
+         xmlns:health="urn:java:com.caucho.health"
+         xmlns:ee="urn:java:ee">
+         
+  &lt;health:SetJmxAttribute>
+    &lt;objectName>java.lang:type=ClassLoading&lt;/objectName>
+    &lt;attribute>Verbose&lt;/attribute>
+    &lt;value>true&lt;/value>
+    &lt;health:OnStart/>
+  &lt;/health:SetJmxAttribute>
+
+&lt;/cluster>
+</example>
+
+</defun>
+
+<defun title="&lt;health:StartProfiler>" name="health:StartProfiler">
+
+<parents>cluster</parents>
+<javadoc class="com.caucho.health.action.StartProfiler"/>
+
+<description>
+<p>Starts a profiler session.  Results are logged to the server log file 
+at the INFO level.</p>
+<p>Note: Starting the profiler can also be performed on-demand using the 
+<var>profile</var> command line, and from /resin-admin.</p>
+</description>
+
+<attributes>
+  <tr>
+    <th>Attribute</th>
+    <th>Description</th>
+    <th>Type</th>
+    <th>Default</th>
+  </tr>
+  <tr>
+    <td>active-time</td>
+    <td>The amount of time to run the profiler</td>
+    <td><a javadoc="com.caucho.config.types.Period">Period</a></td>
+    <td>5s</td>
+  </tr>
+  <tr>
+    <td>sampling-rate</td>
+    <td>The sampling rate</td>
+    <td><a javadoc="com.caucho.config.types.Period">Period</a></td>
+    <td>10ms</td>
+  </tr>
+  <tr>
+    <td>depth</td>
+    <td>The stack trace depth (use smaller number (8) for smaller impact, larger for more information.)</td>
+    <td>int</td>
+    <td>16</td>
+  </tr>
+</attributes>
+
+<example title="Example: &lt;health:StartProfiler> in health.xml">
+&lt;cluster xmlns="http://caucho.com/ns/resin"
+         xmlns:resin="urn:java:com.caucho.resin"
+         xmlns:health="urn:java:com.caucho.health"
+         xmlns:ee="urn:java:ee">
+         
+  &lt;health:ActionSequence>
+    &lt;health:FailSafeRestart timeout="10m">
+    &lt;health:DumpThreads/>
+    &lt;health:DumpHeap/>
+    &lt;health:StartProfiler active-time="5m"/>
+    &lt;health:Restart/>
+    
+    &lt;health:IfHealthCritical time="5m"/>
+  &lt;/health:ActionSequence>
 
 &lt;/cluster>
 </example>

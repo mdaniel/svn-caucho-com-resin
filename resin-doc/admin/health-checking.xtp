@@ -421,15 +421,25 @@ to be executed once per period, determined by evaluation of
 associated conditions.  A health action with no conditions will execute 
 once per period.</p>  
 
+<include-defun name="health:ActionSequence"/>
+
+<include-defun name="health:CallJmxOperation"/>
+
 <include-defun name="health:DumpHeap"/>
 
 <include-defun name="health:DumpThreads"/>
 
 <include-defun name="health:ExecCommand"/>
 
+<include-defun name="health:FailSafeRestart"/>
+
 <include-defun name="health:Restart"/>
 
 <include-defun name="health:SendMail"/>
+
+<include-defun name="health:SetJmxAttribute"/>
+
+<include-defun name="health:StartProfiler"/>
 
 </s1>
 
@@ -453,6 +463,8 @@ check.  Instead they evaluate some general criteria like the time of day.</p>
 <include-defun name="health:IfCron"/>
 
 <include-defun name="health:IfExpr"/>
+
+<include-defun name="health:IfNotRecent"/>
 
 <include-defun name="health:IfRechecked"/>
 

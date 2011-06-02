@@ -28,7 +28,7 @@
 
 package com.caucho.admin.action;
 
-import java.util.*;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.logging.*;
 
 import com.caucho.util.*;
@@ -40,38 +40,36 @@ public class SetLogLevelAction implements AdminAction
 
   private static final L10N L = new L10N(SetLogLevelAction.class);
   
-  private static Map<String, Level> _defaultLevels = new HashMap<String, Level>();
-  private static ClassLoader _systemClassLoader = ClassLoader.getSystemClassLoader();
+  private static ClassLoader _systemClassLoader = 
+    ClassLoader.getSystemClassLoader();
+
+  private static ConcurrentHashMap<String, Level> _defaultLevels = 
+    new ConcurrentHashMap<String, Level>();
 
   public String execute(final String logger, final Level newLevel, final long time)
   {
-    try {
-      final Level oldLevel = getLoggerLevel(logger);
+    final Level oldLevel = getLoggerLevel(logger);
 
-      AlarmListener listener = new AlarmListener()
+    AlarmListener listener = new AlarmListener()
+    {
+      @Override
+      public void handleAlarm(Alarm alarm)
       {
-        @Override
-        public void handleAlarm(Alarm alarm)
-        {
-          setLoggerLevel(logger, oldLevel);
-        }
-      };
+        setLoggerLevel(logger, oldLevel);
+      }
+    };
 
-      new Alarm("log-level", listener, time);
+    new Alarm("log-level", listener, time);
 
-      setLoggerLevel(logger, newLevel);
+    setLoggerLevel(logger, newLevel);
 
-      return L.l("Log {0}.level is set to `{1}'. Active time {2} seconds.",
-                 (logger.isEmpty() ? "{root}" : logger),
-                 newLevel,
-                 (time / 1000));
-    } catch (Exception e) {
-      log.log(Level.SEVERE, e.getMessage(), e);
-      return e.toString();
-    }
+    return L.l("Log {0}.level is set to `{1}'. Active time {2} seconds.",
+               (logger.isEmpty() ? "{root}" : logger),
+               newLevel,
+               (time / 1000));
   }
   
-  private void setLoggerLevel(final String name, final Level level)
+  private static void setLoggerLevel(final String name, final Level level)
   {
     final Logger logger = Logger.getLogger(name);
     final Thread thread = Thread.currentThread();
@@ -85,7 +83,7 @@ public class SetLogLevelAction implements AdminAction
     }
   }
 
-  private synchronized Level getLoggerLevel(String name)
+  private static Level getLoggerLevel(String name)
   {
     Level level = _defaultLevels.get(name);
     if (level != null)
@@ -93,13 +91,14 @@ public class SetLogLevelAction implements AdminAction
 
     final Logger logger = Logger.getLogger(name);
     final Thread thread = Thread.currentThread();
-    final ClassLoader loader = Thread.currentThread().getContextClassLoader();
+    final ClassLoader loader = thread.getContextClassLoader();
 
     try {
       thread.setContextClassLoader(_systemClassLoader);
 
       level = logger.getLevel();
-      _defaultLevels.put(name, level);
+      if (level != null)
+        _defaultLevels.putIfAbsent(name, level);
 
       return level;
     } finally {

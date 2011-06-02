@@ -33,6 +33,7 @@ import java.util.logging.*;
 
 import javax.management.*;
 
+import com.caucho.config.ConfigException;
 import com.caucho.util.L10N;
 
 public class SetJmxAction extends AbstractJmxAction implements AdminAction
@@ -43,65 +44,61 @@ public class SetJmxAction extends AbstractJmxAction implements AdminAction
   private static final L10N L = new L10N(SetJmxAction.class);
 
   public String execute(String pattern, String attributeName, String value)
+    throws ConfigException, JMException, ClassNotFoundException
   {
     final List<MBeanServer> servers = new LinkedList<MBeanServer>();
   
-    try {
-      servers.addAll(MBeanServerFactory.findMBeanServer(null));
-  
-      ObjectName nameQuery = ObjectName.getInstance(pattern);
-  
-      ObjectName subjectBean = null;
-      MBeanServer subjectBeanServer = null;
-  
-      for (final MBeanServer server : servers) {
-        for (final ObjectName mbean : server.queryNames(nameQuery, null)) {
-          if (subjectBean != null) {
-            return L.l("multiple beans match `{0}'", pattern);
-          }
-  
-          subjectBean = mbean;
-          subjectBeanServer = server;
+    servers.addAll(MBeanServerFactory.findMBeanServer(null));
+
+    ObjectName nameQuery = ObjectName.getInstance(pattern);
+
+    ObjectName subjectBean = null;
+    MBeanServer subjectBeanServer = null;
+
+    for (final MBeanServer server : servers) {
+      for (final ObjectName mbean : server.queryNames(nameQuery, null)) {
+        if (subjectBean != null) {
+          throw new ConfigException(L.l("multiple beans match `{0}'", pattern));
+        }
+
+        subjectBean = mbean;
+        subjectBeanServer = server;
+      }
+    }
+
+    MBeanAttributeInfo attributeInfo = null;
+    if (subjectBean != null) {
+      for (MBeanAttributeInfo info : subjectBeanServer.getMBeanInfo(
+        subjectBean).getAttributes()) {
+        if (info.getName().equals(attributeName)) {
+          attributeInfo = info;
+          break;
         }
       }
-  
-      MBeanAttributeInfo attributeInfo = null;
-      if (subjectBean != null) {
-        for (MBeanAttributeInfo info : subjectBeanServer.getMBeanInfo(
-          subjectBean).getAttributes()) {
-          if (info.getName().equals(attributeName)) {
-            attributeInfo = info;
-            break;
-          }
-        }
-      }
-  
-      if (subjectBean == null) {
-        return  L.l("no beans match `{0}'", pattern);
-      }
-      else if (attributeInfo == null) {
-        return L.l("bean at `{0}' does not appear to have attribute `{1}'",
-                     pattern,
-                     attributeName);
-      }
-      else {
-        Object oldValue = subjectBeanServer.getAttribute(subjectBean,
-                                                         attributeInfo.getName());
-  
-        final Object attribValue = toValue(attributeInfo.getType(), value);
-        final Attribute attribute = new Attribute(attributeName, attribValue);
-  
-        subjectBeanServer.setAttribute(subjectBean, attribute);
-  
-        return L.l("value for attribute `{0}' on bean `{1}' is changed from `{2}' to `{3}'",
-                   attributeName,
-                   subjectBean.getCanonicalName(),
-                   oldValue,
-                   attribValue);
-      }
-    } catch (Exception e) {
-      log.log(Level.SEVERE, e.getMessage(), e);
-      return e.toString();
+    }
+
+    if (subjectBean == null) {
+      throw new ConfigException(L.l("no beans match `{0}'", pattern));
+    }
+    else if (attributeInfo == null) {
+      throw new ConfigException(L.l("bean at `{0}' does not appear to have attribute `{1}'",
+                                    pattern,
+                                    attributeName));
+    }
+    else {
+      Object oldValue = subjectBeanServer.getAttribute(subjectBean,
+                                                       attributeInfo.getName());
+
+      final Object attribValue = toValue(attributeInfo.getType(), value);
+      final Attribute attribute = new Attribute(attributeName, attribValue);
+
+      subjectBeanServer.setAttribute(subjectBean, attribute);
+
+      return L.l("value for attribute `{0}' on bean `{1}' is changed from `{2}' to `{3}'",
+                 attributeName,
+                 subjectBean.getCanonicalName(),
+                 oldValue,
+                 attribValue);
     }
   }
 }

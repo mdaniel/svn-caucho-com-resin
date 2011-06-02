@@ -33,6 +33,7 @@ import java.text.*;
 import java.util.*;
 import java.util.logging.Logger;
 
+import com.caucho.config.ConfigException;
 import com.caucho.profile.*;
 import com.caucho.util.*;
 
@@ -44,11 +45,12 @@ public class ProfileAction implements AdminAction
   private static final L10N L = new L10N(ProfileAction.class);
   
   public String execute(long activeTime, long period, int depth)
+    throws ConfigException
   {
     Profile profile = Profile.createProfile();
 
     if (profile.isActive()) {
-      return "Profile is still active";
+      throw new ConfigException(L.l("Profile is still active"));
     }
 
     profile.setPeriod(period);
@@ -85,9 +87,13 @@ public class ProfileAction implements AdminAction
                       activeTime));
       }
       else {
-        out.print(L.l("Profile started at {0}, interruped at {1}.",
+        
+        long et = interruptedAt - startedAt;
+        
+        out.print(L.l("Profile started at {0}, interrupted at {1}. Active for a total of {2}ms.",
                       dateFormat.format(new Date(startedAt)),
-                      dateFormat.format(new Date(interruptedAt))));
+                      dateFormat.format(new Date(interruptedAt)),
+                      et));
       }
 
       out.println(L.l(" Sampling rate {0}ms. Depth {1}.",
