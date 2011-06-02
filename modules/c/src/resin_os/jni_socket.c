@@ -675,7 +675,12 @@ Java_com_caucho_vfs_JniServerSocketImpl_bindPort(JNIEnv *env,
     
     /* somewhat of a hack to clear the old connection. */
     while (result == 0 && i-- >= 0) {
+      int flags;
       int fd = socket(AF_INET, SOCK_STREAM, 0);
+
+      flags = fcntl(fd, F_GETFL);
+      fcntl(fd, F_SETFL, O_NONBLOCK|flags);
+
       result = connect(fd, (struct sockaddr *) &sin, sizeof(sin));
       closesocket(fd);
     }

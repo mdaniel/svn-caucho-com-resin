@@ -55,7 +55,7 @@ class AcceptTask extends ConnectionReadTask {
     Thread thread = Thread.currentThread();
     String oldThreadName = thread.getName();
     thread.setName(getSocketLink().getDebugId());
-    
+
     try {
       launcher.onChildThreadBegin();
 
@@ -89,7 +89,7 @@ class AcceptTask extends ConnectionReadTask {
       if (! accept()) {
         socketLink.close();
 
-        return RequestState.EXIT;
+        continue;
       }
 
       socketLink.toStartConnection();

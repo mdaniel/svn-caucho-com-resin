@@ -1223,7 +1223,7 @@ public class TcpSocketLinkListener
   public boolean accept(QSocket socket)
   {
     try {
-      while (_lifecycle.isActive()) {
+      while (! isClosed()) {
         Thread.interrupted();
 
         if (_serverSocket.accept(socket)) {
@@ -1425,7 +1425,7 @@ public class TcpSocketLinkListener
    */
   public boolean isClosed()
   {
-    return ! _lifecycle.getState().isRunnable();
+    return _lifecycle.getState().isDestroyed();
   }
 
   //

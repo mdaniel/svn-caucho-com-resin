@@ -53,6 +53,15 @@ class SocketLinkThreadLauncher extends AbstractThreadLauncher
   {
     _listener = listener;
   }
+
+  @Override
+  protected boolean isEnable()
+  {
+    if (_listener.isClosed())
+      return false;
+    else
+      return super.isEnable();
+  }
   
   @Override
   protected String getThreadName()

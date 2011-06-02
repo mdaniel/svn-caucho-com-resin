@@ -463,10 +463,14 @@ std_close_ss(server_socket_t *ss)
     /* connect enough times to clear the threads waiting for a connection */
     for (retry = 20; retry >= 0; retry--) {
       int sock = socket(AF_INET, SOCK_STREAM, 0);
+      int flags;
       int result;
 
       if (sock < 0)
 	break;
+
+      flags = fcntl(sock, F_GETFL);
+      fcntl(sock, F_SETFL, O_NONBLOCK|flags);
 
       result = connect(sock, server_sin, sin_len);
 

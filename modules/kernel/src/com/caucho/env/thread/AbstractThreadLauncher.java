@@ -186,6 +186,11 @@ abstract public class AbstractThreadLauncher extends AbstractTaskWorker {
     return _idleTimeout;
   }
   
+  protected boolean isEnable()
+  {
+    return _lifecycle.isActive();
+  }
+  
   //
   // lifecycle method
   //
@@ -317,6 +322,9 @@ abstract public class AbstractThreadLauncher extends AbstractTaskWorker {
   protected boolean doStart()
   {
     if (! _lifecycle.isActive())
+      return false;
+    
+    if (! isEnable())
       return false;
     
     int startingCount = _startingCount.getAndIncrement();
