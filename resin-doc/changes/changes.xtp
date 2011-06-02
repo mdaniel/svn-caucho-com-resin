@@ -13,6 +13,7 @@
 
 <s2 title="4.0.19 - snapshot">
 <ul>
+<li>eclipse-plugin: finishing server wizard early produces bad configuration (#4589,r ep by hwellmann)</li>
 <li>install: webapp-jars need to be copied to resin.home (#4575)</li>
 <li>jsp: c:set validation issue (#4586, rep by thihy)</li>
 <li>websocket: text buffer size issues with 8192 length values (#4584, rep by ihristov)</li>
