@@ -152,14 +152,14 @@ function display_heap_dump_subtab($name, $entries)
   }
 
   if (sizeof($entries) > 0) {
-  	echo "<span title='A pie chart representing the percentage of heap memory used by each class.'>\n";
     echo "<div id='${name}-heap-dump-tab' class='heap-dump-tab'>\n";
     echo "<div class='pie-chart'>\n";
-    echo "<canvas id='${name}-heap-dump-chart'/ width='300' height='300' style='display: block'></canvas>\n";
+  	echo "<span title='A pie chart representing the percentage of heap memory used by each class.'>\n";
+    echo "<canvas id='${name}-heap-dump-chart' width='300' height='300' style='display: block'></canvas>\n";
+    echo "</span>\n";
     echo "<div id='${name}-heap-dump-label' class='chart-label'></div>\n";
     echo "</div>\n";
-    echo "</span>\n";
-
+    
     echo "<table id='${name}-heap-dump' class='heap-dump data'>";
     echo "<tr>\n";
     echo "  <th scope='col'>% self</th>\n";
@@ -264,6 +264,7 @@ else if (! $is_heap_available) {
   echo "</pre>\n";
 }
 
+echo "</div>\n";
 echo "</div>\n";
 echo "</div>\n";
 

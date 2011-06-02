@@ -59,7 +59,7 @@ if ($profile) {
     echo "</h2>";
 
     echo "<form action='?q=profile' method='post' style='display:inline'>";
-    echo "Period: <select type='select' name='period'>";
+    echo "<label for='period'>Period</label>: <select name='period' id='period'>";
 
     $PERIODS = Array(10, 25, 100, 250, 1000, 2500, 10000);
 
@@ -79,7 +79,7 @@ if ($profile) {
 
     echo "</select>";
 
-    echo " Depth: <select type='select' name='depth'>";
+    echo " <label for='depth'>Depth</label>: <select name='depth' id='depth'>";
 
     $DEPTHS = Array(1, 2, 4, 8, 12, 16, 20, 32, 250);
 
@@ -103,7 +103,7 @@ if ($profile) {
 
     echo "<span title='Highlight Quercus function names in stacks and ";
     echo              "decode Quercus-generated Java class names and ";
-    echo              "functions to their original PHP names'>";
+    echo              "functions to their original PHP names'></span>";
 
     echo "</form>";
 
@@ -193,11 +193,11 @@ function print_profile_tab($entries, $name, $count, $profile)
   echo "</th></tr>\n";
 
   echo "<tr>";
-  echo "  <th></th>";
-  echo "  <th>% time</th>";
-  echo "  <th>time self";
-  echo "  <th>% sum</th>";
-  echo "  <th colspan='2'>Method Call</th>";
+  echo "  <th scope='col'></th>";
+  echo "  <th scope='col'>% time</th>";
+  echo "  <th scope='col'>time self</th>";
+  echo "  <th scope='col'>% sum</th>";
+  echo "  <th scope='col' colspan='2'>Method Call</th>";
   echo "</tr>";
 
   $total_percent = 0;
@@ -252,11 +252,11 @@ function print_profile_tab($entries, $name, $count, $profile)
   echo "</td><td style='vertical-align:top'>\n";
   
   echo "<div class='pie-chart'>";
-  echo "<canvas id='${name}-table-chart'/ width='300' height='300' style='display: block'></canvas>\n";
+  echo "<canvas id='${name}-table-chart' width='300' height='300' style='display: block'></canvas>\n";
   echo "<div id='${name}-table-label' class='chart-label'></div>\n";
   echo "</div>\n";
 
-  echo "</table>";
+  echo "</td></tr></table>";
 }
 
 function do_partition_profile($entries)
