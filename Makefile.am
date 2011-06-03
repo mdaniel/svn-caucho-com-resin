@@ -30,8 +30,8 @@ install	:
 			echo "Installing Resin root directory $(resin_root)"; \
 			mkdir -p $(resin_root)/webapps; \
 			cp -r $(CP_U_FLAG) webapps/* $(resin_root)/webapps; \
-			mkdir -p $(resin_log); \
 		fi;\
+		mkdir -p $(resin_log); \
 		mkdir -p $(resin_root)/doc; \
 		cp -r $(CP_U_FLAG) doc/* $(resin_root)/doc; \
 		mkdir -p $(resin_root)/project-jars; \

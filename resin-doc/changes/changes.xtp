@@ -13,7 +13,14 @@
 
 <s2 title="4.0.19 - snapshot">
 <ul>
-<li>eclipse-plugin: finishing server wizard early produces bad configuration (#4589,r ep by hwellmann)</li>
+<li>cache: leasing must apply to cloud servers (#4588, rep by William Kong)</li>
+<li>cloud/bam: hmtp pool must be shared across server (#4588, rep by William Kong)</li>
+<li>cloud/bam: remote send must return error messages (#4588, rep by William Kong)</li>
+<li>eclipse-plugin: finishing server wizard early produces bad configuration (#4589, rep by hwellmann)</li>
+<li>dist: add multiversion for debian packages (#4314, rep by jlangevin)</li>
+<li>health: check MemUsage for max/committed to calculate free memory (#4507)</li>
+<li>install: Makefile needs to create /var/log/resin event if /var/www exists (#4574)</li>
+<li>cache: streaming cache update between clusters &lt;replication-source-cluster> (#4569)</li>
 <li>install: webapp-jars need to be copied to resin.home (#4575)</li>
 <li>jsp: c:set validation issue (#4586, rep by thihy)</li>
 <li>websocket: text buffer size issues with 8192 length values (#4584, rep by ihristov)</li>

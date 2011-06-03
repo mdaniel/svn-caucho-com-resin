@@ -1410,10 +1410,19 @@
       <arg value="${dist}/debian/dists/${debian.stability}/${debian.component}/binary-${debian.architecture}/${shortproduct}_${version}-${debian.architecture}.deb"/>
     </exec>
 
+    <apply executable="ln"
+           dest="${dist}/debian/dists/${debian.stability}/${debian.component}/binary-${debian.architecture}"
+           dir="${dist}/debian/dists/${debian.stability}/${debian.component}/binary-${debian.architecture}">
+      <arg value="-s"/>
+      <mapper type="flatten"/>
+      <fileset dir="/home/caucho/git/download/debian/dists/${debian.stability}/${debian.component}/binary-${debian.architecture}" includes="*.deb"/>
+    </apply>
+
     <exec executable="dpkg-scanpackages"
           dir="${dist}/debian"
           output="${dist}/debian/dists/${debian.stability}/${debian.component}/binary-${debian.architecture}/Packages"
           logError="true">
+      <arg value="--multiversion"/>
       <arg value="dists/${debian.stability}/${debian.component}/binary-${debian.architecture}"/>
     </exec>
 

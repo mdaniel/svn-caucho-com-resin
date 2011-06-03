@@ -139,12 +139,12 @@ abstract public class AbstractTaskWorker implements Runnable {
   @Override
   public final void run()
   {
-    String oldName = null;
+    Thread thread = Thread.currentThread(); 
+    String oldName = thread.getName();
     
     try {
-      _thread = Thread.currentThread();
-      _thread.setContextClassLoader(_classLoader);
-      oldName = _thread.getName();
+      _thread = thread;
+      thread.setContextClassLoader(_classLoader);
       _thread.setName(getThreadName());
       
       onThreadStart();
@@ -155,7 +155,7 @@ abstract public class AbstractTaskWorker implements Runnable {
       
       do {
         while (_taskState.getAndSet(TASK_SLEEP) == TASK_READY) {
-          _thread.setContextClassLoader(_classLoader);
+          thread.setContextClassLoader(_classLoader);
 
           long delta = runTask();
           
@@ -186,7 +186,6 @@ abstract public class AbstractTaskWorker implements Runnable {
       WarningService.sendCurrentWarning(this, e);
       log.log(Level.WARNING, e.toString(), e);
     } finally {
-      Thread thread = _thread;
       _thread = null;
 
       _isActive.set(false);
@@ -196,8 +195,7 @@ abstract public class AbstractTaskWorker implements Runnable {
 
       onThreadComplete();
       
-      if (thread != null && oldName != null)
-        thread.setName(oldName);
+      thread.setName(oldName);
     }
   }
   

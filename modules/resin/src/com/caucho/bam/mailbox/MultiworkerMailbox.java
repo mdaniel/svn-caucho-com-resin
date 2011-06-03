@@ -115,6 +115,11 @@ public class MultiworkerMailbox implements Mailbox, Closeable
   {
     return new MailboxWorker(this);
   }
+  
+  public int getThreadMax()
+  {
+    return _workers.length;
+  }
 
   /**
    * Returns the actor's address

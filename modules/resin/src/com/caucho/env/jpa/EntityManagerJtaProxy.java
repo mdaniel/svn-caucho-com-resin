@@ -904,6 +904,10 @@ public class EntityManagerJtaProxy
 
       if (_emf == null) {
         _emf = _persistenceUnit.getEntityManagerFactoryDelegate();
+        
+        if (_emf == null)
+          throw new IllegalStateException(L.l("{0}: EntityManagerFactory cannot be found from {1}",
+                                              this, _persistenceUnit));
       }
 
       EntityManager em;

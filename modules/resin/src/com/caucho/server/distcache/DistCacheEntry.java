@@ -243,6 +243,7 @@ abstract public class DistCacheEntry implements ExtCacheEntry {
     return getMnodeValue().getLeaseTimeout();
   }
 
+  @Override
   public int getLeaseOwner()
   {
     return getMnodeValue().getLeaseOwner();
@@ -300,6 +301,16 @@ abstract public class DistCacheEntry implements ExtCacheEntry {
   public Object setValue(Object value)
   {
     return getMnodeValue().setValue(value);
+  }
+  
+  //
+  // statistics
+  //
+  
+  @Override
+  public int getLoadCount()
+  {
+    return 0;
   }
 
   public String toString()

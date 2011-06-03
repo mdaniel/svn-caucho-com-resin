@@ -68,4 +68,9 @@ public interface ObjectCache extends Cache
    * Returns true if the cache is closed
    */
   public boolean isClosed();
+  
+  //
+  // for statistics
+  //
+  public ExtCacheEntry getStatCacheEntry(Object entry);
 }

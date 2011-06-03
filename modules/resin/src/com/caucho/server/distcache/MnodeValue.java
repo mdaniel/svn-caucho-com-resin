@@ -248,7 +248,7 @@ public final class MnodeValue implements ExtCacheEntry {
    */
   public final void setLeaseOwner(int leaseOwner, long now)
   {
-    if (leaseOwner > 2) {
+    if (leaseOwner >= 0) {
       _leaseOwner = leaseOwner;
 
       _leaseExpireTime = now + _leaseTimeout;
@@ -424,6 +424,16 @@ public final class MnodeValue implements ExtCacheEntry {
       return -1;
     else
       return getValueHashKey().compareTo(mnode.getValueHashKey());
+  }
+  
+  //
+  // statistics
+  //
+  
+  @Override
+  public int getLoadCount()
+  {
+    return 0;
   }
 
   //

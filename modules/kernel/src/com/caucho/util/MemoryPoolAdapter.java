@@ -299,7 +299,7 @@ public class MemoryPoolAdapter
 
     MemoryUsage usage = MemoryUsage.from(data);
 
-    return new MemUsage(usage.getMax(), usage.getUsed());
+    return new MemUsage(usage.getMax(), usage.getCommitted(), usage.getUsed());
   }
 
   public long getSurvivorCommitted()
@@ -398,7 +398,9 @@ public class MemoryPoolAdapter
 
     MemoryUsage usage = MemoryUsage.from(data);
 
-    return new MemUsage(usage.getMax(), usage.getUsed());
+    return new MemUsage(usage.getMax(), 
+                        usage.getCommitted(),
+                        usage.getUsed());
   }
 
   public static class MemUsage
@@ -406,9 +408,15 @@ public class MemoryPoolAdapter
     private long _max;
     private long _used;
     
-    protected MemUsage(long max, long used)
+    protected MemUsage(long max,
+                       long committed,
+                       long used)
     {
-      _max = max;
+      if (max < committed)
+        _max = committed;
+      else
+        _max = max;
+      
       _used = used;
     }
 

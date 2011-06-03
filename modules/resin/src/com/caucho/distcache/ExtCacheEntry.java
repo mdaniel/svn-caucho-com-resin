@@ -76,4 +76,9 @@ public interface ExtCacheEntry extends CacheEntry
 
   @Override
   public boolean isValid();
+  
+  /**
+   * Returns the load count.
+   */
+  public int getLoadCount();
 }
