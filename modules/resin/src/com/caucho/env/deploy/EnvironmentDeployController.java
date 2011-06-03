@@ -209,7 +209,7 @@ abstract public class
       setRedeployMode(config.getRedeployMode());
 
     if (config.getExpandCleanupFileset() != null)
-      setExpandCleanupFileSet(config.getExpandCleanupFileset());
+      addExpandCleanupFileSet(config.getExpandCleanupFileset());
   }
 
   /**

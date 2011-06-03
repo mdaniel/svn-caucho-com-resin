@@ -248,7 +248,7 @@ public final class MnodeValue implements ExtCacheEntry {
    */
   public final void setLeaseOwner(int leaseOwner, long now)
   {
-    if (leaseOwner >= 0) {
+    if (leaseOwner > 2) {
       _leaseOwner = leaseOwner;
 
       _leaseExpireTime = now + _leaseTimeout;

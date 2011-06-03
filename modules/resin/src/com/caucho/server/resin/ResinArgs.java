@@ -326,7 +326,7 @@ class ResinArgs
       else if (i + 1 < len
           && (argv[i].equals("-server-port")
               || argv[i].equals("--server-port"))) {
-        _serverPort= Integer.parseInt(argv[i + 1]);
+        _serverPort = Integer.parseInt(argv[i + 1]);
    
         i += 2;
       }

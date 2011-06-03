@@ -106,7 +106,7 @@
 
       <!-- creates the webapps directory for .war expansion -->
       <web-app-deploy path="webapps" versioning="true"/>
-
+      
       <!--
          - Defaults applied to each web-app.
         -->

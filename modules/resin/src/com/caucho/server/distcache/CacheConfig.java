@@ -301,6 +301,15 @@ public class CacheConfig
   {
     _localReadTimeout = timeout;
   }
+  
+  /**
+   * Returns true if all gets are synchronous, i.e. must be checked with
+   * the owning server on each request.
+   */
+  public boolean isSynchronousGet()
+  {
+    return getLocalReadTimeout() <= 0;
+  }
 
   /**
    * Returns the key serializer

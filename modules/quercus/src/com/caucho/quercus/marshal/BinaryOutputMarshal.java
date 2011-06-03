@@ -64,7 +64,9 @@ public class BinaryOutputMarshal extends Marshal
 
     Object javaObj = value.toJavaObject();
 
-    if (javaObj instanceof BinaryOutput)
+    if (javaObj == null)
+      return null;
+    else if (javaObj instanceof BinaryOutput)
       return (BinaryOutput) javaObj;
     else if (javaObj instanceof OutputStream)
       return new WriteStreamOutput((OutputStream) javaObj);

@@ -13,6 +13,9 @@
 
 <s2 title="4.0.19 - snapshot">
 <ul>
+<li>cache: lease changes for triad and cloud to reduce network traffic</li>
+<li>deploy: add expand-preserve-fileset to web-app-deploy to improve development (#4592, rep by Harald Wellmann)</li>
+<li>ejb: generic introspection/generation (#4590, rep by Harald Wellmann)</li>
 <li>cache: leasing must apply to cloud servers (#4588, rep by William Kong)</li>
 <li>cloud/bam: hmtp pool must be shared across server (#4588, rep by William Kong)</li>
 <li>cloud/bam: remote send must return error messages (#4588, rep by William Kong)</li>

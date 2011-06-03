@@ -232,9 +232,23 @@ abstract public class ExpandDeployGenerator<E extends ExpandDeployController<?>>
   /**
    * Sets the expand remove file set.
    */
-  public void setExpandCleanupFileset(FileSetType fileSet)
+  public void addExpandCleanupFileset(FileSetType fileSet)
   {
-    _expandCleanupFileSet = fileSet;
+    if (_expandCleanupFileSet == null)
+      _expandCleanupFileSet = fileSet;
+    else
+      _expandCleanupFileSet.add(fileSet);
+  }
+
+  /**
+   * Sets the expand remove file set.
+   */
+  public void addExpandPreserveFileset(FileSetType fileSet)
+  {
+    if (_expandCleanupFileSet == null)
+      _expandCleanupFileSet = new FileSetType();
+
+    _expandCleanupFileSet.addInverse(fileSet);
   }
 
   /**
@@ -650,7 +664,7 @@ abstract public class ExpandDeployGenerator<E extends ExpandDeployController<?>>
       E controller = createController(version);
 
       if (controller != null) {
-        controller.setExpandCleanupFileSet(_expandCleanupFileSet);
+        controller.addExpandCleanupFileSet(_expandCleanupFileSet);
         controllerList.add(controller);
 
         // _controllerNames.add(name); // server/1d19

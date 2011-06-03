@@ -255,7 +255,7 @@ abstract public class AbstractCacheManager<E extends DistCacheEntry>
     if (mnodeValue == null) {
       reloadValue(entry, config, now);
     }
-    else if (isLocalReadValid(mnodeValue, now)) {
+    else if (isLocalReadValid(config, mnodeValue, now)) {
     }
     else { // if (! isLazy) {
       reloadValue(entry, config, now);
@@ -295,7 +295,9 @@ abstract public class AbstractCacheManager<E extends DistCacheEntry>
     reloadValue(entry, config, Alarm.getCurrentTime());
   }
 
-  protected boolean isLocalReadValid(MnodeValue mnodeValue, long now)
+  protected boolean isLocalReadValid(CacheConfig config,
+                                     MnodeValue mnodeValue,
+                                     long now)
   {
     return ! mnodeValue.isEntryExpired(now);
   }
@@ -839,7 +841,9 @@ abstract public class AbstractCacheManager<E extends DistCacheEntry>
                                            updateTime,
                                            true,
                                            false);
-    mnodeValue.setLeaseOwner(leaseOwner, now);
+    
+    // cloud/60g0
+    // mnodeValue.setLeaseOwner(leaseOwner, now);
 
     // the failure cases are not errors because this put() could
     // be immediately followed by an overwriting put()

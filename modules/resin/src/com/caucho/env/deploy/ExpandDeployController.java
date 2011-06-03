@@ -205,9 +205,23 @@ abstract public class ExpandDeployController<I extends DeployInstance>
   /**
    * Sets the archive auto-remove file set.
    */
-  public void setExpandCleanupFileSet(FileSetType fileSet)
+  public void addExpandCleanupFileSet(FileSetType fileSet)
   {
-    _expandCleanupFileSet = fileSet;
+    if (_expandCleanupFileSet == null)
+      _expandCleanupFileSet = fileSet;
+    else
+      _expandCleanupFileSet.add(fileSet);
+  }
+
+  /**
+   * Sets the archive auto-remove file set.
+   */
+  public void addExpandPreserveFileset(FileSetType fileSet)
+  {
+    if (_expandCleanupFileSet == null)
+      _expandCleanupFileSet = new FileSetType();
+    
+    _expandCleanupFileSet.addInverse(fileSet);
   }
 
   public String getAutoDeployStage()

@@ -81,6 +81,11 @@ public class FileSetType {
     
     _includeList.add(pattern);
   }
+  
+  public void addText(String text)
+  {
+    addInclude(new PathPatternType(text));
+  }
 
   /**
    * Adds an exclude pattern.
@@ -88,6 +93,36 @@ public class FileSetType {
   public void addExclude(PathPatternType pattern)
   {
     _excludeList.add(pattern);
+  }
+  
+  public void add(FileSetType fileSet)
+  {
+    if (fileSet._includeList != null) {
+      for (PathPatternType include : fileSet._includeList){
+        addInclude(include);
+      }
+    }
+    
+    if (fileSet._excludeList != null) {
+      for (PathPatternType exclude : fileSet._excludeList){
+        addExclude(exclude);
+      }
+    }
+  }
+  
+  public void addInverse(FileSetType fileSet)
+  {
+    if (fileSet._includeList != null) {
+      for (PathPatternType include : fileSet._includeList){
+        addExclude(include);
+      }
+    }
+    
+    if (fileSet._excludeList != null) {
+      for (PathPatternType exclude : fileSet._excludeList){
+        addInclude(exclude);
+      }
+    }
   }
 
   /**

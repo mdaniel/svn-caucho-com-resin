@@ -55,7 +55,6 @@ import com.caucho.config.ConfigException;
 import com.caucho.config.inject.InjectManager;
 import com.caucho.config.types.Period;
 import com.caucho.distcache.ClusterCache;
-import com.caucho.distcache.GlobalCache;
 import com.caucho.env.service.ResinSystem;
 import com.caucho.env.shutdown.ExitCode;
 import com.caucho.env.shutdown.ShutdownSystem;
@@ -174,7 +173,7 @@ public class Server
 
   // reliable system store
   private ClusterCache _systemStore;
-  private GlobalCache _globalStore;
+  // private GlobalCache _globalStore;
 
   // stats
 
@@ -1074,6 +1073,7 @@ public class Server
   /**
    * Returns the reliable system store
    */
+  /*
   public GlobalCache getGlobalStore()
   {
     synchronized (this) {
@@ -1090,6 +1090,7 @@ public class Server
 
     return _globalStore;
   }
+  */
 
   /**
    * Handles the case where a class loader is activated.
@@ -1507,12 +1508,14 @@ public class Server
         log.log(Level.WARNING, e.toString(), e);
       }
 
+      /*
       try {
         if (_globalStore != null)
           _globalStore.close();
       } catch (Throwable e) {
         log.log(Level.WARNING, e.toString(), e);
       }
+      */
       
       /*
       try {
