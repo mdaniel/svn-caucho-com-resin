@@ -69,7 +69,9 @@ public class AnnotatedParameterImpl<T>
     if (callable != null && callable.getDeclaringType() != null) {
       AnnotatedType<?> declAnnType = callable.getDeclaringType();
       
-      return createBaseType(declAnnType, type, paramMap);
+      String callableName = callable.getJavaMember().getName();
+      
+      return createBaseType(declAnnType, type, paramMap, callableName);
     }
     
     return createBaseType(type);

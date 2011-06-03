@@ -314,7 +314,8 @@ public class ReflectionAnnotatedType<T>
         if (superInterface instanceof Class<?>)
           introspectMethods((Class<?>) superInterface, null);
         else {
-          BaseType type = BaseType.create(superInterface, null, ClassFill.SOURCE);
+          BaseType type = BaseType.create(superInterface, null, null, 
+                                          ClassFill.SOURCE);
           
           introspectMethods(type.getRawClass(), type.getParamMap());
         }

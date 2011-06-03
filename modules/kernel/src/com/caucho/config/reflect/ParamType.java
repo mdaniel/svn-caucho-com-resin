@@ -143,7 +143,7 @@ public class ParamType extends BaseType implements ParameterizedType
     typeSet.add(toType());
     
     for (Type type : _type.getGenericInterfaces()) {
-      BaseType ifaceType = createForSource(type, _paramMap);
+      BaseType ifaceType = createForSource(type, _paramMap, null);
       
       ifaceType.fillTypeClosure(manager, typeSet);
     }
@@ -153,7 +153,7 @@ public class ParamType extends BaseType implements ParameterizedType
     if (superclass == null)
       return;
 
-    BaseType superType = createForSource(superclass, _paramMap);
+    BaseType superType = createForSource(superclass, _paramMap, null);
 
     superType.fillTypeClosure(manager, typeSet);
   }

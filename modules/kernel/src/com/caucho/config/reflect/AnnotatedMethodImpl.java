@@ -80,7 +80,9 @@ public class AnnotatedMethodImpl<T>
                              Annotation []annotations,
                              HashMap<String,BaseType> paramMap)
   {
-    super(createBaseType(declaringType, method.getGenericReturnType()),
+    super(createBaseType(declaringType,
+                         method.getGenericReturnType(),
+                         method.getName()),
           annotated, annotations);
 
     _declaringType = declaringType;

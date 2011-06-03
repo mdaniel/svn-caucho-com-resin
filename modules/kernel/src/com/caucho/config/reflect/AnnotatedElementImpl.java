@@ -113,16 +113,30 @@ public class AnnotatedElementImpl implements Annotated, BaseTypeAnnotated
                                            Type type)
   {
     HashMap<String,BaseType> paramMap = null;
+    String paramDeclName = null;
     
-    return createBaseType(declaringType, type, null);
+    return createBaseType(declaringType, type, paramMap, paramDeclName);
   }
   
   protected static BaseType createBaseType(AnnotatedType<?> declaringType,
                                            Type type,
-                                           HashMap<String,BaseType> paramMap)
+                                           String paramDeclName)
+  {
+    HashMap<String,BaseType> paramMap = null;
+    
+    return createBaseType(declaringType, type, paramMap, paramDeclName);
+  }
+  
+  protected static BaseType createBaseType(AnnotatedType<?> declaringType,
+                                           Type type,
+                                           HashMap<String,BaseType> paramMap,
+                                           String paramDeclName)
   {
     // ioc/0242
-    BaseType baseType = createBaseType(declaringType, type, paramMap,
+    BaseType baseType = createBaseType(declaringType, 
+                                       type,
+                                       paramMap,
+                                       paramDeclName,
                                        BaseType.ClassFill.PLAIN);
     
     return baseType;
@@ -131,6 +145,7 @@ public class AnnotatedElementImpl implements Annotated, BaseTypeAnnotated
   protected static BaseType createBaseType(AnnotatedType<?> declaringType,
                                            Type type,
                                            HashMap<String,BaseType> paramMap,
+                                           String paramDeclName,
                                            BaseType.ClassFill classFill)
     {
       if (declaringType instanceof BaseTypeAnnotated) {
@@ -139,8 +154,8 @@ public class AnnotatedElementImpl implements Annotated, BaseTypeAnnotated
         if (paramMap == null)
           paramMap = baseTypeAnn.getBaseTypeParamMap();
       
-        return BaseType.create(type, paramMap, classFill);
-    }
+        return BaseType.create(type, paramMap, paramDeclName, classFill);
+      }
     /*
     else if (declaringType instanceof ReflectionAnnotatedType<?>) {
       declBaseType = ((ReflectionAnnotatedType<?>) declaringType).getBaseTypeImpl();

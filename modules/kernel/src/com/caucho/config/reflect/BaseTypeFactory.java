@@ -58,7 +58,9 @@ public class BaseTypeFactory
     BaseType baseType = _sourceCache.get(type);
 
     if (baseType == null) {
-      baseType = BaseType.createForSource(type, new HashMap<String,BaseType>());
+      baseType = BaseType.createForSource(type,
+                                          new HashMap<String,BaseType>(),
+                                          null);
 
       if (baseType == null)
         throw new NullPointerException("unsupported BaseType: " + type + " " + type.getClass());
@@ -77,7 +79,9 @@ public class BaseTypeFactory
     BaseType baseType = _targetCache.get(type);
 
     if (baseType == null) {
-      baseType = BaseType.createForTarget(type, new HashMap<String,BaseType>());
+      baseType = BaseType.createForTarget(type,
+                                          new HashMap<String,BaseType>(),
+                                          null);
 
       if (baseType == null)
         throw new NullPointerException("unsupported BaseType: " + type + " " + type.getClass());
