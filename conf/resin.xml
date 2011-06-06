@@ -101,12 +101,13 @@
       -->
     <host-default>
       <access-log path="log/access.log" 
-                format='%h %l %u %t "%r" %s %b "%{Referer}i" "%{User-Agent}i"'
-                rollover-period="1W"/>
+                 format='%h %l %u %t "%r" %s %b "%{Referer}i" "%{User-Agent}i"'
+                 rollover-period="1W"/>
 
       <!-- creates the webapps directory for .war expansion -->
-      <web-app-deploy path="webapps" versioning="true"/>
-      
+      <web-app-deploy path="webapps"
+                      expand-preserve-fileset="WEB-INF/work/**"/>
+
       <!--
          - Defaults applied to each web-app.
         -->

@@ -18,19 +18,53 @@
         <enabled>false</enabled>
       </snapshots>
     </repository>
-
     <repository>
+
       <id>jboss</id>
       <name>JBoss</name>
       <layout>default</layout>
-      <url>http://repository.jboss.com/maven2/</url>
+      <url>http://repository.jboss.org/nexus/content/groups/public</url>
       <snapshots>
         <enabled>false</enabled>
       </snapshots>
     </repository>
+
   </repositories>
 
   <dependencies>
+
+    <dependency>
+      <groupId>org.springframework</groupId>
+      <artifactId>spring</artifactId>
+      <version>2.0.8</version>
+      <scope>provided</scope>
+    </dependency>
+    <dependency>
+      <groupId>org.springframework</groupId>
+      <artifactId>spring</artifactId>
+      <version>2.5.6</version>
+      <scope>provided</scope>
+    </dependency>
+    <dependency>
+      <groupId>org.springframework</groupId>
+      <artifactId>spring-webmvc</artifactId>
+      <version>2.5.6</version>
+      <scope>provided</scope>
+    </dependency>
+    <dependency>
+      <groupId>org.springframework</groupId>
+      <artifactId>spring-mock</artifactId>
+      <version>2.0.8</version>
+      <scope>provided</scope>
+    </dependency>
+    <dependency>
+      <groupId>org.apache.wicket</groupId>
+      <artifactId>wicket</artifactId>
+      <version>1.3.7</version>
+    </dependency>
+
+
+<!--
     <dependency>
       <groupId>asm</groupId>
       <artifactId>asm</artifactId>
@@ -42,7 +76,7 @@
       <version>2.1</version>
     </dependency>
     <dependency>
-      <groupId>apache-slide</groupId>
+      <groupId>slide</groupId>
       <artifactId>webdavlib</artifactId>
       <version>2.0</version>
     </dependency>
@@ -57,11 +91,6 @@
       <version>4.7</version>
     </dependency>
     <dependency>
-      <groupId>org.apache.wicket</groupId>
-      <artifactId>wicket</artifactId>
-      <version>1.3.7</version>
-    </dependency>
-    <dependency>
       <groupId>org.apache.maven</groupId>
       <artifactId>maven-plugin-api</artifactId>
       <version>2.0</version>
@@ -70,34 +99,6 @@
       <groupId>org.apache.openjpa</groupId>
       <artifactId>openjpa</artifactId>
       <version>1.0.2</version>
-    </dependency>
-    <dependency>
-      <groupId>org.springframework</groupId>
-      <artifactId>spring</artifactId>
-      <version>2.0.8</version>
-      <scope>provided</scope>
-      <!-- == transitive=false in ivy -->
-    </dependency>
-    <dependency>
-      <groupId>org.springframework</groupId>
-      <artifactId>spring</artifactId>
-      <version>2.5.6</version>
-      <scope>provided</scope>
-      <!-- == transitive=false in ivy -->
-    </dependency>
-    <dependency>
-      <groupId>org.springframework</groupId>
-      <artifactId>spring-webmvc</artifactId>
-      <version>2.5.6</version>
-      <scope>provided</scope>
-      <!-- == transitive=false in ivy -->
-    </dependency>
-    <dependency>
-      <groupId>org.springframework</groupId>
-      <artifactId>spring-mock</artifactId>
-      <version>2.0.8</version>
-      <scope>provided</scope>
-      <!-- == transitive=false in ivy -->
     </dependency>
     <dependency>
       <groupId>dom4j</groupId>
@@ -175,6 +176,7 @@
       <artifactId>xwork</artifactId>
       <version>2.0.7</version>
     </dependency>
+-->
 
     <dependency>
       <groupId>org.apache.ant</groupId>
