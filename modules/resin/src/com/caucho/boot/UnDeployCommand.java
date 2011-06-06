@@ -45,6 +45,9 @@ public class UnDeployCommand extends AbstractRepositoryCommand
     WebAppDeployClient deployClient = getDeployClient(args, client);
     
     String name = args.getDefaultArg();
+    
+    if (name == null)
+      name = args.getArg("-name");
 
     if (name == null) {
       throw new ConfigException(L.l("Cannot find context argument in command line"));

@@ -39,6 +39,7 @@ import java.util.jar.Manifest;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
+import com.caucho.config.ConfigException;
 import com.caucho.config.types.FileSetType;
 import com.caucho.env.repository.CommitBuilder;
 import com.caucho.env.repository.Repository;
@@ -490,6 +491,13 @@ abstract public class ExpandDeployController<I extends DeployInstance>
       
       String tag = getId();
       String treeHash = _repositorySpi.getTagContentHash(tag);
+      
+      Path archivePath = getArchivePath();
+
+      if (treeHash != null && archivePath != null && archivePath.canRead()) {
+        throw new ConfigException(L.l("{0} cannot be deployed from both an archive {1} and cluster deployment.",
+                                      this, archivePath.getNativePath()));
+      }
 
       if (treeHash == null) {
         tag = getAutoDeployTag();
@@ -522,6 +530,8 @@ abstract public class ExpandDeployController<I extends DeployInstance>
       _rootHash = treeHash;
 
       return true;
+    } catch (ConfigException e) {
+      throw e;
     } catch (IOException e) {
       log.log(Level.FINE, e.toString(), e);
 

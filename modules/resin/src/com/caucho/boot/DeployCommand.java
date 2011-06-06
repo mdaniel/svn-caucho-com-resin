@@ -58,6 +58,11 @@ public class DeployCommand extends AbstractRepositoryCommand {
 
     String name = args.getArg("-name");
     
+    String webapp = args.getArg("-web-app");
+    
+    if (webapp != null)
+      name = webapp;
+    
     String host = args.getArg("-host");
     
     if (host == null)
