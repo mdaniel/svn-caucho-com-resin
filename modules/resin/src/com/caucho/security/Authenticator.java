@@ -36,6 +36,8 @@ import java.security.*;
  */
 public interface Authenticator
 {
+  public String getAlgorithm(Principal uid);
+  
   public Principal authenticate(Principal user,
                                 Credentials credentials,
                                 Object details);

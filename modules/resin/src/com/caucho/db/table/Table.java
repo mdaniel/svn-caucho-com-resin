@@ -923,7 +923,7 @@ public class Table extends BlockStore {
   
   private boolean scanClock()
   {
-    while (isFreeRowBlockIdAvailable() && ! isClosed()) {
+    while (! isClosed () && isFreeRowBlockIdAvailable()) {
       long clockBlockId = _rowClockOffset;
 
       try {

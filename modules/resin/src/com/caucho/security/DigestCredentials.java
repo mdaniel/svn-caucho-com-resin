@@ -49,7 +49,7 @@ public class DigestCredentials implements Credentials, Serializable
   private String _nonce;
   private String _realm;
   
-  private byte []_digest;
+  private String _digest;
   
   public DigestCredentials()
   {
@@ -57,7 +57,7 @@ public class DigestCredentials implements Credentials, Serializable
   
   public DigestCredentials(String userName,
                            String nonce,
-                           byte []digest)
+                           String digest)
   {
     _userName = userName;
     _nonce = nonce;
@@ -94,12 +94,12 @@ public class DigestCredentials implements Credentials, Serializable
     _realm = realm;
   }
 
-  public byte []getDigest()
+  public String getDigest()
   {
     return _digest;
   }
 
-  public void setDigest(byte []digest)
+  public void setDigest(String digest)
   {
     _digest = digest;
   }

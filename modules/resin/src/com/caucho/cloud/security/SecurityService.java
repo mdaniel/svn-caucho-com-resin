@@ -87,6 +87,14 @@ public class SecurityService extends AbstractResinSubSystem
     return _authenticator;
   }
   
+  public String getAlgorithm(String uid)
+  {
+    if (_authenticator != null)
+      return _authenticator.getAlgorithm(new BasicPrincipal(uid));
+    else
+      return "plain";
+  }
+  
   public String signSystem(String uid, String nonce)
   {
     try {
@@ -110,7 +118,9 @@ public class SecurityService extends AbstractResinSubSystem
     }
   }
   
-  public String sign(String uid, String nonce, String password)
+  public String sign(String algorithm,
+                     String uid, String password, 
+                     String nonce)
   {
     try {
       MessageDigest digest = MessageDigest.getInstance("SHA-256");
@@ -120,9 +130,18 @@ public class SecurityService extends AbstractResinSubSystem
       
       digest.update(nonce.getBytes("UTF-8"));
       
-      if (password != null)
+      if (password != null) {
+        char []pwDigest = DigestBuilder.getDigest(new BasicPrincipal(uid),
+                                                  algorithm,
+                                                  password.toCharArray(),
+                                                  algorithm.toCharArray());
+          
+        if (pwDigest != null)
+          password = new String(pwDigest);
+
         digest.update(password.getBytes("UTF-8"));
-      
+      }
+
       return Base64.encode(digest.digest());
     } catch (Exception e) {
       throw new RuntimeException(e);
@@ -145,11 +164,12 @@ public class SecurityService extends AbstractResinSubSystem
     }
   }
   
-  public DigestCredentials createCredentials(String user,
+  public DigestCredentials createCredentials(String algorithm,
+                                             String user,
                                              String password,
                                              String nonce)
   {
-    byte []digest = createDigest(user, password, nonce);
+    String digest = sign(algorithm, user, password, nonce);
     
     DigestCredentials cred = new DigestCredentials(user, nonce, digest);
     cred.setRealm("resin");

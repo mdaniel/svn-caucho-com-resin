@@ -163,27 +163,31 @@ class HmtpLinkFactory implements LinkConnectionFactory {
         
         String clientNonce = String.valueOf(Alarm.getCurrentTime());
         
-        NonceQuery nonceQuery = new NonceQuery(uid, clientNonce);
+        NonceQuery nonceQuery = new NonceQuery("", uid, clientNonce);
         NonceQuery nonceResult = null;
         //          = (NonceQuery) query(null, nonceQuery);
         
+        String algorithm = nonceResult.getAlgorithm();
         String serverNonce = nonceResult.getNonce();
         String serverSignature = nonceResult.getSignature();
         
-        String testSignature = _authManager.sign(uid, clientNonce, password);
+        String testSignature = _authManager.sign(algorithm, uid, clientNonce, password);
         
         if (! testSignature.equals(serverSignature) && "".equals(uid))
           throw new BamException(L.l("{0} server signature does not match",
                                       this));
 
-        String signature = _authManager.sign(uid, serverNonce, password);
+        String signature = _authManager.sign(algorithm, uid, serverNonce, password);
 
         SecurityService security = SecurityService.getCurrent();
         
         if ("".equals(uid))
           credentials = new SignedCredentials(uid, serverNonce, signature);
-        else
-          credentials = security.createCredentials(uid, password, serverNonce);
+        else {
+          credentials = security.createCredentials(algorithm, 
+                                                   uid, password, 
+                                                   serverNonce);
+        }
       }
 
       AuthResult result = null;

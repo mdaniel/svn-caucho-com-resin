@@ -30,7 +30,10 @@
 package com.caucho.hmtp;
 
 import java.security.MessageDigest;
+import java.security.Principal;
 
+import com.caucho.security.BasicPrincipal;
+import com.caucho.security.DigestBuilder;
 import com.caucho.util.Base64;
 
 /**
@@ -38,7 +41,10 @@ import com.caucho.util.Base64;
  */
 
 public class ClientAuthManager {
-  public String sign(String uid, String nonce, String password)
+  public String sign(String algorithm,
+                     String uid, 
+                     String nonce, 
+                     String password)
   {
     try {
       MessageDigest md = MessageDigest.getInstance("SHA-256");
@@ -48,8 +54,23 @@ public class ClientAuthManager {
       
       md.update(nonce.getBytes("UTF-8"));
       
-      if (password != null)
-        md.update(password.getBytes("UTF-8"));
+      if (password != null) {
+        String signed = password;
+        
+        if (algorithm != null) {
+          Principal user = new BasicPrincipal(uid);
+        
+          char []digest = DigestBuilder.getDigest(user,
+                                                  algorithm,
+                                                  password.toCharArray(),
+                                                  algorithm.toCharArray());
+          
+          if (digest != null)
+            signed = new String(digest);
+        }
+
+        md.update(signed.getBytes("UTF-8"));
+      }
       
       byte []digest = md.digest();
       

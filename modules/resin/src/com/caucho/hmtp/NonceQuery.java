@@ -35,6 +35,7 @@ package com.caucho.hmtp;
 @SuppressWarnings("serial")
 public class NonceQuery implements java.io.Serializable {
   private String _uid;
+  private String _algorithm;
   private String _nonce;
   private String _signature;
   
@@ -48,19 +49,24 @@ public class NonceQuery implements java.io.Serializable {
   /**
    * Constructor for the result
    */
-  public NonceQuery(String uid, String nonce)
+  public NonceQuery(String algorithm, String uid, String nonce)
   {
     _uid = uid;
+    _algorithm = algorithm;
     _nonce = nonce;
   }
   
   /**
    * Constructor for the result
    */
-  public NonceQuery(String uid, String nonce, String signature)
+  public NonceQuery(String algorithm,
+                    String uid, 
+                    String nonce,
+                    String signature)
   {
     _uid = uid;
     _nonce = nonce;
+    _algorithm = algorithm;
     _signature = signature;
   }
   
@@ -74,6 +80,11 @@ public class NonceQuery implements java.io.Serializable {
     return _nonce;
   }
   
+  public String getAlgorithm()
+  {
+    return _algorithm;
+  }
+  
   public String getSignature()
   {
     return _signature;
@@ -82,6 +93,6 @@ public class NonceQuery implements java.io.Serializable {
   @Override
   public String toString()
   {
-    return (getClass().getSimpleName() + "[" + _nonce + "]");
+    return (getClass().getSimpleName() + "[" + _algorithm + "," + _nonce + "]");
   }
 }

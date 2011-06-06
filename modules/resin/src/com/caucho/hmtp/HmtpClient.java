@@ -44,6 +44,7 @@ import com.caucho.bam.query.QueryManager;
 import com.caucho.bam.stream.NullActor;
 import com.caucho.cloud.security.SecurityService;
 import com.caucho.remote.websocket.WebSocketClient;
+import com.caucho.security.DigestCredentials;
 import com.caucho.util.Alarm;
 import com.caucho.util.L10N;
 import com.caucho.websocket.WebSocketListener;
@@ -187,29 +188,40 @@ public class HmtpClient implements ActorSender {
         
         String clientNonce = String.valueOf(Alarm.getCurrentTime());
         
-        NonceQuery nonceQuery = new NonceQuery(uid, clientNonce);
+        NonceQuery nonceQuery = new NonceQuery("", uid, clientNonce);
         NonceQuery nonceResult = (NonceQuery) query(null, nonceQuery);
         
+        String serverAlgorithm = nonceResult.getAlgorithm();
         String serverNonce = nonceResult.getNonce();
         String serverSignature = nonceResult.getSignature();
-        String testSignature = _authManager.sign(uid, clientNonce, password);
+        String testSignature = _authManager.sign(serverAlgorithm, 
+                                                 uid, 
+                                                 clientNonce, 
+                                                 password);
         
         if (! testSignature.equals(serverSignature) && "".equals(uid))
           throw new BamException(L.l("{0} resin-system-auth-key does not match the server's value",
                                       this));
 
-        String signature = _authManager.sign(uid, serverNonce, password);
+        String signature = _authManager.sign(serverAlgorithm, 
+                                             uid, 
+                                             serverNonce, 
+                                             password);
 
         SecurityService security = SecurityService.getCurrent();
         
         if ("".equals(uid))
           credentials = new SignedCredentials(uid, serverNonce, signature);
+        else
+          credentials = new DigestCredentials(uid, serverNonce, signature);
+        /*
         else if (security != null)
           credentials = security.createCredentials(uid, password, serverNonce);
         else {
           security = new SecurityService();
           credentials = security.createCredentials(uid, password, serverNonce);
         }
+        */
       }
 
       AuthResult result = (AuthResult) query(null, new AuthQuery(uid, credentials));

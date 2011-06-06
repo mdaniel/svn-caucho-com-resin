@@ -97,6 +97,9 @@ public class FileSetType {
   
   public void add(FileSetType fileSet)
   {
+    if (fileSet == this)
+      return;
+    
     if (fileSet._includeList != null) {
       for (PathPatternType include : fileSet._includeList){
         addInclude(include);

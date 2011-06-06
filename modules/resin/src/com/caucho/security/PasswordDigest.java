@@ -113,6 +113,11 @@ public class PasswordDigest {
   {
     return _realm;
   }
+  
+  public String getType()
+  {
+    return "{" + getAlgorithm() + "-" + getFormat() + "}" + getRealm();
+  }
 
   /**
    * Sets the algorithm for bean-style init.

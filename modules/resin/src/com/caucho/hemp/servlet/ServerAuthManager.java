@@ -151,7 +151,7 @@ public class ServerAuthManager {
     else if (auth == null) {
       log.finer("Authentication failed because no authenticator configured");
       
-      throw new NotAuthorizedException(L.l("'{0}' has invalid credentials",
+      throw new NotAuthorizedException(L.l("'{0}' has missing authenticator",
                                            credentials));
     }
     else if (credentials instanceof DigestCredentials) {
@@ -162,7 +162,7 @@ public class ServerAuthManager {
       user = auth.authenticate(user, digestCred, null);
 
       if (user == null) {
-        throw new NotAuthorizedException(L.l("'{0}' has invalid credentials",
+        throw new NotAuthorizedException(L.l("'{0}' has invalid digest credentials",
                                              digestCred.getUserName()));
       }
     }
@@ -173,7 +173,7 @@ public class ServerAuthManager {
       PasswordCredentials pwdCred = new PasswordCredentials(password);
     
       if (auth.authenticate(user, pwdCred, null) == null) {
-        throw new NotAuthorizedException(L.l("'{0}' has invalid credentials",
+        throw new NotAuthorizedException(L.l("'{0}' has invalid password credentials",
                                              to));
       }
     }
@@ -198,9 +198,11 @@ public class ServerAuthManager {
 
     String clientSignature = _security.signSystem(uid, clientNonce);
     
+    String algorithm = _security.getAlgorithm(uid);
+    
     String nonce = String.valueOf(Alarm.getCurrentTime());
     
-    return new NonceQuery(uid, nonce, clientSignature);
+    return new NonceQuery(algorithm, uid, nonce, clientSignature);
   }
   
   @Override

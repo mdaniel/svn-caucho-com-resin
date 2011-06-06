@@ -19,19 +19,23 @@
 <localtoc/>
 
 <s1 title="enabling the commands">
-<p>By default these commands are disabled. Enabling the command requires ManagerService
-be registered in resin.xml file.</p>
+
+<p>By default these commands are disabled. Enabling the command
+requires ManagerService be registered in resin.xml file.</p>
+
+<p>Since the default resin.xml already includes a &lt;resin:AdminAuthenticator>
+with a &lt;resin:import>, you can just reuse the admin configuration from
+the /resin-admin page.</p>
 
 <example title="enabling Resin ManagerService">
   &lt;resin xmlns="http://caucho.com/ns/resin"
-         xmlns:resin="urn:java:com.caucho.resin"
-         xmlns:sec="urn:java:com.caucho.security">
+         xmlns:resin="urn:java:com.caucho.resin">
   ...
   &lt;cluster id=''>
 
-    &lt;sec:AdminAuthenticator password-digest="none">
-      &lt;sec:user name="admin" password="secret"/>
-    &lt;/sec:AdminAuthenticator>
+    &lt;resin:AdminAuthenticator>
+      &lt;user name="admin" password="{SSHA}h5QdSulQyqIgYP7B1J3YfnRSo56kD847"/>
+    &lt;/resin:AdminAuthenticator>
 
     &lt;resin:RemoteAdminService/>
 

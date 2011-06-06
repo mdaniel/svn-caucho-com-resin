@@ -65,6 +65,9 @@ public class WebAppVersioningController extends WebAppController {
   private ExpandVersion _primaryVersion;
   private WebAppController _primaryController;
   
+  private ArrayList<DeployControllerApi<WebApp>> _mergeList
+    = new ArrayList<DeployControllerApi<WebApp>>();
+  
   private boolean _isModified = false;
   private AtomicBoolean _isUpdating = new AtomicBoolean();
 
@@ -201,13 +204,15 @@ public class WebAppVersioningController extends WebAppController {
   }
   
   @Override
-  public void merge(DeployControllerApi<WebApp> oldControllerV)
+  public void merge(DeployControllerApi<WebApp> newControllerV)
   {
+    _mergeList.add(newControllerV);
+
     if (_primaryController != null)
-      _primaryController.merge(oldControllerV);
+      _primaryController.merge(newControllerV);
     else {
       // server/12ab
-      super.merge(oldControllerV);
+      super.merge(newControllerV);
     }
   }
 
@@ -258,6 +263,11 @@ public class WebAppVersioningController extends WebAppController {
         newPrimaryController.setVersionAlias(true);
         // server/12ab
         newPrimaryController.merge(this);
+        
+        // server/1h35
+        for (DeployControllerApi<WebApp> newController : _mergeList) {
+          newPrimaryController.merge(newController);
+        }
         _primaryController = newPrimaryController;
         _primaryVersion = version;
 

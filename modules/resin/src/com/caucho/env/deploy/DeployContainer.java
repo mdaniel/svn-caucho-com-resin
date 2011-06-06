@@ -44,7 +44,6 @@ import javax.annotation.PostConstruct;
 import com.caucho.lifecycle.Lifecycle;
 import com.caucho.loader.Environment;
 import com.caucho.make.CachedDependency;
-import com.caucho.server.host.HostController;
 import com.caucho.util.ConcurrentArrayList;
 import com.caucho.util.ConcurrentArrayList.Match;
 import com.caucho.vfs.Dependency;
@@ -321,8 +320,9 @@ public class DeployContainer<C extends DeployControllerApi<?>>
     
     // server/1h8j
     for (C controller : controllerList) {
-      if (controller != bestController)
+      if (controller != bestController) {
         bestController.merge((DeployControllerApi) controller);
+      }
     }
 
     // server/1h10
