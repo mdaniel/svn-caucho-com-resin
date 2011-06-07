@@ -164,7 +164,6 @@ class EnvironmentLogger extends Logger implements ClassLoaderListener {
       _systemLevel = level;
     }
     
-
     updateEffectiveLevel(loader);
   }
   

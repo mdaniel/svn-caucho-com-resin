@@ -74,6 +74,10 @@ public abstract class AbstractManagementCommand extends AbstractBootCommand {
 
     String user = args.getArg("-user");
     String password = args.getArg("-password");
+    
+    if (user == null && password == null) {
+      password = client.getResinSystemAuthKey();
+    }
 
     return new ManagerClient(address, port, user, password);
   }

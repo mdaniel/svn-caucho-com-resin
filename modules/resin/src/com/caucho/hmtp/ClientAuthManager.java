@@ -57,7 +57,7 @@ public class ClientAuthManager {
       if (password != null) {
         String signed = password;
         
-        if (algorithm != null) {
+        if (algorithm != null && ! "".equals(uid)) {
           Principal user = new BasicPrincipal(uid);
         
           char []digest = DigestBuilder.getDigest(user,

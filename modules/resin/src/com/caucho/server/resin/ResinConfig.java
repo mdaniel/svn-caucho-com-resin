@@ -47,9 +47,13 @@ import com.caucho.env.service.RootDirectorySystem;
 import com.caucho.jsp.cfg.JspPropertyGroup;
 import com.caucho.loader.EnvironmentBean;
 import com.caucho.loader.EnvironmentProperties;
+import com.caucho.log.LogConfig;
+import com.caucho.log.LogHandlerConfig;
+import com.caucho.log.LoggerConfig;
 import com.caucho.server.admin.Management;
 import com.caucho.server.admin.TransactionManager;
 import com.caucho.server.cache.TempFileManager;
+import com.caucho.util.Alarm;
 import com.caucho.util.L10N;
 import com.caucho.vfs.Path;
 
@@ -161,6 +165,69 @@ public class ResinConfig implements EnvironmentBean
   public void setShutdownWaitMax(Period shutdownWaitMax)
   {
     _resin.setShutdownWaitTime(shutdownWaitMax.getPeriod());
+  }
+  
+  /**
+   * Overrides standard <logger> configuration to change to 
+   * system-class-loader.
+   */
+  @Configurable
+  public void addLogger(ConfigProgram program)
+  {
+    Thread thread = Thread.currentThread();
+    ClassLoader loader = thread.getContextClassLoader();
+    
+    try {
+      if (! Alarm.isTest())
+        thread.setContextClassLoader(ClassLoader.getSystemClassLoader());
+      
+      LoggerConfig log = new LoggerConfig();
+      program.configure(log);
+    } finally {
+      thread.setContextClassLoader(loader);
+    }
+  }
+  
+  /**
+   * Overrides standard <log> configuration to change to 
+   * system-class-loader.
+   */
+  @Configurable
+  public void addLog(ConfigProgram program)
+  {
+    Thread thread = Thread.currentThread();
+    ClassLoader loader = thread.getContextClassLoader();
+    
+    try {
+      if (! Alarm.isTest())
+        thread.setContextClassLoader(ClassLoader.getSystemClassLoader());
+      
+      LogConfig log = new LogConfig();
+      program.configure(log);
+    } finally {
+      thread.setContextClassLoader(loader);
+    }
+  }
+  
+  /**
+   * Overrides standard <log-handler> configuration to change to 
+   * system-class-loader.
+   */
+  @Configurable
+  public void addLogHandler(ConfigProgram program)
+  {
+    Thread thread = Thread.currentThread();
+    ClassLoader loader = thread.getContextClassLoader();
+    
+    try {
+      if (! Alarm.isTest())
+        thread.setContextClassLoader(ClassLoader.getSystemClassLoader());
+      
+      LogHandlerConfig log = new LogHandlerConfig();
+      program.configure(log);
+    } finally {
+      thread.setContextClassLoader(loader);
+    }
   }
 
   /**

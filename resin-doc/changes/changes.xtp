@@ -13,6 +13,7 @@
 
 <s2 title="4.0.19 - snapshot">
 <ul>
+<li>logging: logger in &lt;resin> context needs to use system class loader to match command-line log-level (#4587, rep by William Au)</li>
 <li>resin-admin: added undeploy action for repository managed webapps</li>
 <li>command-line: authentication needs to understand {SSHA} configuration (#4593)</li>
 <li>eclipse-plugin: added auto-restart for redeployed apps (req. by hwellmann, Caucho forums)</li>
