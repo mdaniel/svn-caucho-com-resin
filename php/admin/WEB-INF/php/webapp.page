@@ -1,10 +1,12 @@
-		<?php
+<?php
 
 require_once "WEB-INF/php/inc.php";
 
-if (! admin_init()) {
+if (!admin_init()) {
   return;
 }
+
+$client = @new Java("com.caucho.server.admin.WebAppDeployClient");
 
 echo "<h1>WebApps</h1>\n";
 
@@ -27,6 +29,9 @@ if ($is_secure) {
     $mbean = $g_mbean_server->lookup($_POST['name']);
     $mbean->restart();
   }
+  elseif ($action == "undeploy") {
+    undeploy($_POST['name']);
+  }
 }
 
 display_webapp_summary_page($g_mbean_server);
@@ -34,7 +39,7 @@ display_webapp_summary_page($g_mbean_server);
 function display_webapp_summary_page($g_mbean_server)
 {
   echo "<div id='webapp-tabs' style='display: none'>\n";
-  
+
   echo "<ul>\n";
   echo " <li><a href='#webapp-active'>Active</a></li>\n";
   echo " <li><a href='#webapp-idle'>Idle</a></li>\n";
@@ -43,13 +48,13 @@ function display_webapp_summary_page($g_mbean_server)
   echo "<div id='webapp-active'>\n";
   display_webapp_summary($g_mbean_server, false);
   echo "</div>\n";
-  
+
   echo "<div id='webapp-idle'>\n";
   display_webapp_summary($g_mbean_server, true);
   echo "</div>\n";
 
   echo "</div>\n";
-}  
+}
 
 /**
  * summary of all the webapps
@@ -58,32 +63,32 @@ function display_webapp_summary($g_mbean_server, $is_idle)
 {
   global $is_secure;
 
-	$cluster = $g_mbean_server->Cluster;
-	$cluster_name = empty($cluster->Name) ? "default" : $cluster->Name;
-  
-	echo "<h1>Cluster: $cluster_name</h1>";
-	echo "<div class='section'>\n";
+  $cluster = $g_mbean_server->Cluster;
+  $cluster_name = empty($cluster->Name) ? "default" : $cluster->Name;
 
-	$servers = $cluster->Servers;
-	
-	$webapp_id = 0;
-	
-	$hosts = $g_mbean_server->query("resin:*,type=Host");
-	usort($hosts, "sort_host");
-	foreach ($hosts as $host) {
+  echo "<h1>Cluster: $cluster_name</h1>";
+  echo "<div class='section'>\n";
 
-	  $hostName = empty($host->HostName) ? "default" : $host->HostName;
-    
+  $servers = $cluster->Servers;
+
+  $webapp_id = 0;
+
+  $hosts = $g_mbean_server->query("resin:*,type=Host");
+  usort($hosts, "sort_host");
+  foreach ($hosts as $host) {
+
+    $hostName = empty($host->HostName) ? "default" : $host->HostName;
+
     echo "<h2>Host: $hostName</h2>\n";
     echo "<div class='section'>\n";
 
     $webapps = $host->WebApps;
     usort($webapps, "sort_webapp");
-    
+
     $count = 0;
-    
+
     foreach ($webapps as $webapp) {
-    	
+
       if ($is_idle != ($webapp->State == "STOPPED_IDLE")) {
         continue;
       }
@@ -92,39 +97,39 @@ function display_webapp_summary($g_mbean_server, $is_idle)
       $webapp_id++;
 
       $id = "sw_webapp_" . ($is_idle ? "idle" : "") . $webapp_id;
-      
+
       echo "<h3>WebApp: $webapp_name</h3>\n";
 
-			echo "<table class='data webapp-data'>\n";
-	  	echo " <tr>\n";
-	    echo "	<th scope='col' title='Expand'></th>\n";
-	  	echo "  <th scope='col' title='The context root of the application'>Path</th>\n";
-		  echo "  <th scope='col' title='The current status of the application'>State</th>\n";
-	  	echo "  <th scope='col' title='How long the application has been running'>Uptime</th>\n";
-	    echo "	<th scope='col' colspan='2' title='The number of HTTP 5xx errors the application has experienced and the time of the most recent 5xx error'>500</th>\n";
-	    echo "	<th scope='col' title='Version of cluster-wide deployment, where applicable'>Deploy</th>\n";
-		  echo "  <th scope='col' title='Start, stop, and restart the application on the current server'>Actions</th>\n";
-		  echo " </tr>\n";
-		  
+      echo "<table class='data webapp-data'>\n";
+      echo " <tr>\n";
+      echo "	<th scope='col' title='Expand'></th>\n";
+      echo "  <th scope='col' title='The context root of the application'>Path</th>\n";
+      echo "  <th scope='col' title='The current status of the application'>State</th>\n";
+      echo "  <th scope='col' title='How long the application has been running'>Uptime</th>\n";
+      echo "	<th scope='col' colspan='2' title='The number of HTTP 5xx errors the application has experienced and the time of the most recent 5xx error'>500</th>\n";
+      echo "	<th scope='col' title='Version of cluster-wide deployment, where applicable'>Deploy</th>\n";
+      echo "  <th scope='col' title='Start, stop, and restart the application on the current server'>Actions</th>\n";
+      echo " </tr>\n";
+
       echo " <tr class='" . row_style($count++) . "'>";
       echo "  <td><span id='${id}' class='switch'></span></td>\n";
-      
+
       $is_deploy_valid = true;
       display_webapp($webapp, $is_deploy_valid);
-  
+
       echo " </tr>\n";
-  		echo "</table>\n";
-  		
-  		echo "<br/>\n";
-      
-  		echo "<div class='toggle-${id} webapp-expand'>\n";
+      echo "</table>\n";
+
+      echo "<br/>\n";
+
+      echo "<div class='toggle-${id} webapp-expand'>\n";
       display_webapp_expanded($webapp, $webapp_id, $is_deploy_valid);
       echo "</div>\n";
     }
-    
+
     echo "</div>\n";
   }
-  
+
   echo "</div>\n";
 }
 
@@ -132,15 +137,16 @@ function display_webapp($webapp, &$is_deploy_valid)
 {
   $session = $webapp->SessionManager;
   $context_path = empty($webapp->ContextPath) ? "/" : $webapp->ContextPath;
+  $disabled = "";
 
-  if ($webApp->RepositoryTag) {
-    $context_path .= "<br/>&nbsp;&nbsp;(tag: {$webapp->RepositoryTag})";
-  }
+  //if ($webapp->RepositoryTag) {
+  //  $context_path .= "<br/>&nbsp;&nbsp;(tag: {$webapp->RepositoryTag})";
+  //}
 
   $object_name = $webapp->mbean_name;
 
   echo "<td class='item'>$context_path</td>\n";
-  
+
   echo "<td>";
   if ($webapp->State == "ACTIVE") {
     print_ok("");
@@ -154,25 +160,25 @@ function display_webapp($webapp, &$is_deploy_valid)
     echo "&nbsp;" . $webapp->State;
   }
   echo " </td>\n";
-  
+
   echo "<td class='" . format_ago_class($webapp->StartTime) . "'>";
   if ($webapp->State == "ACTIVE")
 		echo format_ago($webapp->StartTime)
 	else
-		echo "&nbsp;";
-	echo "</td>\n";
-	
+          echo "&nbsp;";
+  echo "</td>\n";
+
   format_ago_td_pair($webapp->Status500CountTotal, $webapp->Status500LastTime);
 
   echo "<td>";
   $deploy = validate_version($webapp);
-  
+
   if ($deploy["version"])
     $version = $deploy["version"];
   else
     $version = $deploy["date"];
 
-  if (! $deploy) {
+  if (!$deploy) {
     $is_deploy_valid = false;
   }
   else if ($deploy["status"] == "OK") {
@@ -186,6 +192,7 @@ function display_webapp($webapp, &$is_deploy_valid)
   echo "</td>";
 
   $name = $webapp->mbean_name;
+  $tag = $webapp->getRepositoryMetaData()->get("tag");
 
   echo "<td class='webapp-actions'>";
   echo "<form method='post' style='display:inline' action='#'>\n";
@@ -214,13 +221,22 @@ function display_webapp($webapp, &$is_deploy_valid)
   else
     echo "<input type='submit' name='submit' value='restart' disabled='disabled'/>\n";
   echo "</form>";
-    
+
   echo "<form method='get' style='display:inline' action='#'>";
   echo "<input type='hidden' name='q' value='deploy'/>";
   echo "<input type='hidden' name='update-name' value='${context_path}'/>";
   echo "<input type='submit' name='submit' value='update'/>";
   echo "</form>";
-  
+
+  echo "<form method='post' style='display:inline' action='#'>";
+  echo "<input type='hidden' name='action' value='undeploy'/>";
+  echo "<input type='hidden' name='name' value='$name'/>\n";
+  if ($tag)
+    echo "<input type='submit' name='submit' value='undeploy' $disabled/>";
+  else
+    echo "<input type='submit' name='submit' value='undeploy' disabled='disabled'/>\n";
+  echo "</form>";
+
   echo "</td>";
 }
 
@@ -231,7 +247,7 @@ function validate_version($webapp)
 
   $repository = $webapp->getRepositoryMetaData();
 
-  if (! $repository || ! $repository["root"]) {
+  if (!$repository || !$repository["root"]) {
     return null;
   }
   else {
@@ -242,18 +258,18 @@ function validate_version($webapp)
       $mbean_server = new MBeanServer($s->Name);
       $s_webapp = $mbean_server->lookup($webapp->mbean_name);
 
-      if (! $s_webapp) {
+      if (!$s_webapp) {
         $status = "FAIL";
         continue;
       }
-      
+
       $s_repository = $s_webapp->getRepositoryMetaData();
 
       if ($s_repository["root"] != $repository["root"]) {
         $status = "FAIL";
       }
     }
-    
+
     return array(status => $status,
                  hash => $repository["root"],
                  version => $repository["version"],
@@ -298,7 +314,7 @@ function display_versions($webapp, $webapp_id, $is_deploy_valid)
 
   $repository = $webapp->getRepositoryMetaData();
 
-  if (! $repository || ! $repository["root"]) {
+  if (!$repository || !$repository["root"]) {
     return;
   }
 
@@ -332,9 +348,9 @@ function display_versions($webapp, $webapp_id, $is_deploy_valid)
     echo "<tr class='toggle-sw_deploy_${webapp_id}'><td></td>";
 
     $name = $s->Name;
-    if (! $name)
+    if (!$name)
       $name = "default";
-      
+
     printf("<td>%02d - %s</td>", $s->SelfServer->ClusterIndex, $name);
 
     echo "<td>";
@@ -342,7 +358,7 @@ function display_versions($webapp, $webapp_id, $is_deploy_valid)
       $s_repository = $s_webapp->getRepositoryMetaData();
 
       if ($s_repository["version"]) {
-        $msg = $s_repository["version"];         
+        $msg = $s_repository["version"];
       }
       else if ($s_repository["date"]) {
         $msg = $s_repository["date"];
@@ -367,6 +383,51 @@ function display_versions($webapp, $webapp_id, $is_deploy_valid)
   }
 
   echo "</table>\n";
+}
+
+function undeploy($name)
+{
+  global $user;
+  global $client;
+  global $g_mbean_server;
+
+  $webapp = $g_mbean_server->lookup($name);
+  $host = $webapp->Host->Name;
+
+  $commit = new Java("com.caucho.env.repository.CommitBuilder");
+
+  $commit->type("webapp");
+
+  $commit->stage("production");
+
+  if (!$host)
+    $host = "default";
+
+  $context = $webapp->ContextPath;
+
+  if ($context == '/')
+    $context = "/ROOT";
+
+  $version = $webapp->Version;
+
+  if ($version) {
+    $parts = explode(".", $version, 4);
+
+    $major = $parts[0];
+    $minor = $parts[1];
+    $micro = $parts[2];
+    $qualifier = $parts[3];
+
+    $commit->version($major, $minor, $micro, $qualifier);
+  }
+
+  $commit->tagKey($host . $context);
+
+  $commit->message("undeployed via resin-admin web form");
+
+  $commit->attribute("user", $user);
+
+  $client->removeTag($commit);
 }
 
 $javascript = javascript_create_tab("webapp-tabs");
