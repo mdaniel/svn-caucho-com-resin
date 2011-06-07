@@ -70,7 +70,10 @@ public class ResinURLStreamHandlerFactory implements URLStreamHandlerFactory
     {
       WebApp webApp = WebApp.getCurrent();
 
-      return webApp.getResource(url);
+      if (webApp != null)
+        return webApp.getResource(url);
+      else
+        return null;
     }
   }
 }

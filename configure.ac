@@ -1125,7 +1125,7 @@ AC_ARG_ENABLE(ssl,
 [AS_HELP_STRING([--enable-ssl], [Turn on ssl])],
 [case "${enableval}" in
  yes) ENABLE_SSL=true ;;
- no)  ENABLE_SSL="false" ;;
+ no)  ENABLE_SSL="" ;;
  *) AC_MSG_ERROR(bad value ${enableval} for --enable-ssl) ;;
  esac],[ENABLE_SSL=""])
 
@@ -1171,7 +1171,7 @@ if test ! -r "${OPENSSL_LIB}/libssl.a" -a \
 fi
 ])
 
-if test "${ENABLE_SSL}" = false; then	
+if test -z "${ENABLE_SSL}"; then	
   foo=bar
 elif test -n "${OPENSSL_INCLUDE}"; then
   foo=bar
@@ -1224,7 +1224,7 @@ fi
 #fi
 
 
-if test "${ENABLE_SSL}" = false; then	
+if -z test "${ENABLE_SSL}"; then	
   foo=bar
 elif test -z "${OPENSSL_LIB}"; then	
   SSL_LIBS="${SSL_LIBS} -lssl"
@@ -1245,7 +1245,7 @@ else
   SSL_LIBS="${SSL_LIBS} -lssl"
 fi
 
-if test "${ENABLE_SSL}" = false; then	
+if test -z "${ENABLE_SSL}"; then	
   foo=bar
 elif test -z "${OPENSSL_LIB}"; then	
   SSL_LIBS="${SSL_LIBS} -lcrypto"
@@ -1262,7 +1262,7 @@ fi
 
 SSL_OBJ=ssl_stub.o
 
-if test "${ENABLE_SSL}" = false; then	
+if test -z "${ENABLE_SSL}"; then	
   echo "Openssl is not enabled"
 #elif test -z "${OPENSSL_LIB}"; then
 #  echo "Openssl library was not found"
