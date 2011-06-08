@@ -227,21 +227,18 @@ public class GitCommitJar {
       ReadStream is = new ReadStream(zipIs);
       
       try {
-        return GitCommitTree.writeBlob(is, zipIs.getZipEntry().getSize());
+        long size = zipIs.getZipEntry().getSize();
+        
+        if (size < 0)
+          size = getLength(sha1);
+        
+        return GitCommitTree.writeBlob(is, size);
       } finally {
         is.close();
         
         zipIs.close();
       }
     }
-  }
-  
-  private String canonicalPathName(String pathName)
-  {
-    if (pathName.startsWith("/"))
-      return pathName.substring(1);
-    else
-      return pathName;
   }
 
   public void close()

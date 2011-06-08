@@ -742,6 +742,10 @@ abstract public class AbstractRepository implements Repository, RepositorySpi
         
         try {
           writeRawGitFile(hash, is);
+        } catch (IOException e) {
+          throw new IOException(commit.findPath(hash) + ":" + hash + ": " + e.getMessage(), e);
+        } catch (RuntimeException e) {
+          throw new RuntimeException(commit.findPath(hash) + ":" + hash + ": " + e.getMessage(), e);
         } finally {
           is.close();
         }

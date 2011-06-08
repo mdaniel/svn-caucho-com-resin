@@ -55,6 +55,7 @@ public class GitJarStreamSource extends StreamSource
   /**
    * Returns an input stream, freeing the results
    */
+  @Override
   public InputStream getInputStream()
     throws IOException
   {
@@ -64,6 +65,7 @@ public class GitJarStreamSource extends StreamSource
   /**
    * Returns an input stream, without freeing the results
    */
+  @Override
   public InputStream openInputStream()
     throws IOException
   {
