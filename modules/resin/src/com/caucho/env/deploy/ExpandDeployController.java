@@ -347,12 +347,14 @@ abstract public class ExpandDeployController<I extends DeployInstance>
     throws IOException
   {
     // adds any .war file to the server-specific repository
-    for (int i = 0; ! commitArchive() && i < 3; i++) {
+    for (int i = 0; ! commitArchiveIgnoreException() && i < 3; i++) {
       try {
         Thread.sleep(2000);
       } catch (InterruptedException e) {
       }
     }
+    
+    commitArchive();
     
     synchronized (_applicationExtractLock) {
       boolean isExtract = extractFromRepository();
@@ -427,6 +429,17 @@ abstract public class ExpandDeployController<I extends DeployInstance>
     return (getAutoDeployStage() + "/" + getIdType() + "/" + getIdKey());
   }
   
+  private boolean commitArchiveIgnoreException()
+  {
+    try {
+      return commitArchive();
+    } catch (Exception e) {
+      log.log(Level.FINE, e.toString(), e);
+      
+      return false;
+    }
+  }
+
   /**
    * Adds any updated .war file to the server-specific repository. The 
    * application will be extracted as part of the usual repository system.
@@ -435,8 +448,8 @@ abstract public class ExpandDeployController<I extends DeployInstance>
    * if the war is in the process of updating.
    */
   private boolean commitArchive()
-    throws IOException
-  {
+  throws IOException
+{
     Path archivePath = getArchivePath();
 
     if (archivePath == null)
@@ -447,36 +460,30 @@ abstract public class ExpandDeployController<I extends DeployInstance>
     
     String hash = Long.toHexString(archivePath.getCrc64());
 
-    try {
-      CommitBuilder commit = new CommitBuilder();
-      commit.stage(getAutoDeployStage());
-      commit.type(getIdType());
-      commit.tagKey(getIdKey());
-      
-      String commitId = commit.getId();
-      
-      RepositoryTagEntry tagEntry = _repositorySpi.getTagMap().get(commitId);
-      
-      if (tagEntry != null 
-          && hash.equals(tagEntry.getAttributeMap().get("archive-digest"))) {
-        return true;
-      }
+    CommitBuilder commit = new CommitBuilder();
+    commit.stage(getAutoDeployStage());
+    commit.type(getIdType());
+    commit.tagKey(getIdKey());
 
-      commit.attribute("archive-digest", hash);
-      commit.message(".war added to repository from "
-                     + archivePath.getNativePath());
-      
-      if (log.isLoggable(Level.FINE))
-        log.fine(this + " adding archive to repository from " + archivePath);
-      
-      _repository.commitArchive(commit, archivePath);
-      
+    String commitId = commit.getId();
+
+    RepositoryTagEntry tagEntry = _repositorySpi.getTagMap().get(commitId);
+
+    if (tagEntry != null 
+        && hash.equals(tagEntry.getAttributeMap().get("archive-digest"))) {
       return true;
-    } catch (Exception e) {
-      log.log(Level.FINE, e.toString(), e);
-      
-      return false;
     }
+
+    commit.attribute("archive-digest", hash);
+    commit.message(".war added to repository from "
+                   + archivePath.getNativePath());
+
+    if (log.isLoggable(Level.FINE))
+      log.fine(this + " adding archive to repository from " + archivePath);
+
+    _repository.commitArchive(commit, archivePath);
+
+    return true;
   }
 
   /**

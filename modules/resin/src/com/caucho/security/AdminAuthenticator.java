@@ -43,7 +43,7 @@ import com.caucho.util.Crc64;
  * purposes.  It's typically defined at the &lt;resin> level.
  *
  * <code><pre>
- * &lt;security:AdminAuthenticator path="WEB-INF/admin-users.xml"/>
+ * &lt;resin:AdminAuthenticator path="WEB-INF/admin-users.xml"/>
  * </pre></code>
  *
  * <p>The format of the static file is as follows:

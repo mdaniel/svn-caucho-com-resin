@@ -41,6 +41,8 @@ import java.util.zip.*;
  * Tree structure
  */
 public class GitWorkingTree {
+  private static final L10N L = new L10N(GitWorkingTree.class);
+  
   private Map<String,Entry> _treeMap = new TreeMap<String,Entry>();
 
   private String _digest;
@@ -227,7 +229,13 @@ public class GitWorkingTree {
   {
     Entry entry = new Entry(name, 0100000 | (mode & 0777), sha1);
 
-    _treeMap.put(name, entry);
+    Entry oldEntry = _treeMap.put(name, entry);
+    
+    if (oldEntry != null && ! oldEntry.getSha1().equals(sha1)) {
+      throw new GitException(L.l(".git directory conflict because two files with the same name '{0}' have different hashes:\n  {1}\n  {2}",
+                                 name, oldEntry.getSha1(), sha1));
+      
+    }
   }
 
   private GitWorkingTree getTree(String name)

@@ -8,23 +8,19 @@
             description="Install Resin on Unix, Windows, and Mac OS X"/>
 
       <item link="starting-resin-command-line.xtp" title="Command Line"
-            description="Command line arguments to the Resin server"
-            reference="starting-resin-command-line-ref.xtp"/>
+            description="Command line arguments to the Resin server"/>
       <!--
       <item link="starting-resin-server-stages.xtp" title="Server Stages"/>
       -->
       
       <item link="starting-resin-watchdog.xtp" title="Watchdog"
-            description="Resin's watchdog process manages Resin servers and checks status for reliability."
-            reference="starting-resin-watchdog-ref.xtp"/>
+            description="Resin's watchdog process manages Resin servers and checks status for reliability."/>
 
       <item link="starting-resin-apache.xtp" title="Apache HTTPd"
-            description="Using Apache HTTPd with Resin"
-            reference="starting-resin-apache-ref.xtp"/>
+            description="Using Apache HTTPd with Resin"/>
 
       <item link="starting-resin-iis-7.xtp" title="IIS 7 Plugin"
-            description="Using Microsoft IIS 7 with Resin"
-            reference="starting-resin-iis-7-ref.xtp"/>
+            description="Using Microsoft IIS 7 with Resin"/>
 
       <item link="starting-resin-licenses.xtp" title="Resin Pro Licenses"
             description="Resin Pro Licenses"/>
@@ -70,17 +66,14 @@
             description="XML configuration for Dependency Injection services"/>
 
       <item link="config-el.xtp" title="EL"
-            description="EL expressions used in configuration"
-            reference="config-el-ref.xtp"/>
+            description="EL expressions used in configuration"/>
     </item>
 
     <item link="database.xtp" title="Database"
-          description="Configuration of the Resin database pool"
-          reference="database-ref.xtp"/>
+          description="Configuration of the Resin database pool"/>
 
     <item link="deploy.xtp" title="Deployment"
-          description="Deploying applications and .war files to a Resin cluster."
-          reference="deploy-ref.xtp">
+          description="Deploying applications and .war files to a Resin cluster."/>
       <!--
       <item link="deploy-file-system.xtp" title="File System Deploy"
             description="Using the webapps/ directory for deployment"/>
@@ -103,20 +96,16 @@
 
     <item link="http.xtp" title="HTTP">
       <item link="http-server.xtp" title="HTTP server"
-            description="Resin's built-in, high performance HTTP server"
-            reference="http-server-ref.xtp"/>
+            description="Resin's built-in, high performance HTTP server"/>
 
        <item link="http-virtual-hosts.xtp" title="Virtual Hosts"
-             description="HTTP Virtual Host configuration for multi-host sites"
-             reference="http-virtual-hosts-ref.xtp"/>
+             description="HTTP Virtual Host configuration for multi-host sites"/>
 
        <item link="http-rewrite.xtp" title="Rewrite"
-             description="Resin's URL rewriting capability, replacing mod_rewrited sites"
-             reference="http-rewrite-ref.xtp"/>
+             description="Resin's URL rewriting capability, replacing mod_rewrited sites"/>
 
        <item link="http-proxy-cache.xtp" title="Proxy Cache"
-             description="Resin's built-in proxy cache"
-             reference="http-proxy-cache-ref.xtp"/>
+             description="Resin's built-in proxy cache"/>
 
        <!--
        <item link="http-10k.xtp" title="Resin 10k"/>
@@ -136,8 +125,7 @@
     </item>
 
     <item link="logging.xtp" title="Logging"
-          description="java.util logging configuration in Resin"
-          reference="logging-ref.xtp">
+          description="java.util logging configuration in Resin"/>
       
       <!--
       <item link="logging-loggers.xtp" .../>

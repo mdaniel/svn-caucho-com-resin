@@ -48,7 +48,7 @@ import com.caucho.vfs.Path;
  * The XML authenticator reads a static file for authentication.
  *
  * <code><pre>
- * &lt;security:XmlAuthenticator path="WEB-INF/users.xml"/>
+ * &lt;resin:XmlAuthenticator path="WEB-INF/users.xml"/>
  * </pre></code>
  *
  * <p>The format of the static file is as follows:
@@ -63,9 +63,9 @@ import com.caucho.vfs.Path;
  * <p>The authenticator can also be configured in the resin-web.xml:
  *
  * <code><pre>
- * &lt;security:XmlAuthenticator password-digest="none">
+ * &lt;resin:XmlAuthenticator password-digest="none">
  *   &lt;user name="Harry Potter" password="quidditch" roles="user,captain"/>
- * &lt;/security:XmlAuthenticator>
+ * &lt;/resin:XmlAuthenticator>
  * </pre></code>
  */
 @Singleton
