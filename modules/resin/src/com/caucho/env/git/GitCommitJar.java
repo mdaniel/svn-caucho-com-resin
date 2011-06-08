@@ -222,7 +222,7 @@ public class GitCommitJar {
       return tree.openFile();
     }
     else {
-      long size = zipIs.getZipEntry().getSize();
+      long size = _jar.getJar().getLength(path);
       
       if (size < 0)
         size = getLength(sha1);
