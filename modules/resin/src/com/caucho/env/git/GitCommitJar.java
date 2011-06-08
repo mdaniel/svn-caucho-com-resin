@@ -222,16 +222,16 @@ public class GitCommitJar {
       return tree.openFile();
     }
     else {
+      long size = zipIs.getZipEntry().getSize();
+      
+      if (size < 0)
+        size = getLength(sha1);
+      
       ZipStreamImpl zipIs = _jar.getJar().openReadImpl(path);
       
       ReadStream is = new ReadStream(zipIs);
       
       try {
-        long size = zipIs.getZipEntry().getSize();
-        
-        if (size < 0)
-          size = getLength(sha1);
-        
         return GitCommitTree.writeBlob(is, size);
       } finally {
         is.close();
