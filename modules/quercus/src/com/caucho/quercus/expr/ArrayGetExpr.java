@@ -193,7 +193,8 @@ public class ArrayGetExpr extends AbstractVarExpr {
     // php/03mk, php/04b3
     Value array = _expr.evalArray(env);
 
-    return array.put(_index.eval(env), value);
+    array.put(_index.eval(env), value);
+    return array.get(_index.eval(env)); // php/03mm php/03mn
   }
 
   /**
