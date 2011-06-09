@@ -444,21 +444,27 @@ public class ServerArrayValue extends ArrayValueImpl
           super.put(isUnicode ? AUTH_TYPE_VU : AUTH_TYPE_V,
                     _env.createString("Basic"));
 
-          if (request.getRemoteUser() != null) {
-            super.put(isUnicode ? PHP_AUTH_USER_VU : PHP_AUTH_USER_V,
-                      _env.createString(request.getRemoteUser()));
-
+            boolean userNameIsSet = false;
+            if (request.getRemoteUser() != null) {
+              super.put(isUnicode ? PHP_AUTH_USER_VU : PHP_AUTH_USER_V,
+                        _env.createString(request.getRemoteUser()));
+                userNameIsSet = true;
+            }
             String digest = authHeader.substring("Basic ".length());
             
             String userPass = Base64.decode(digest);
               
             int i = userPass.indexOf(':');
             if (i > 0) {
+              if(!userNameIsSet)
+              {
+                super.put(isUnicode ? PHP_AUTH_USER_VU : PHP_AUTH_USER_V,
+                          _env.createString(userPass.substring(0,i)));
+              }
               super.put(isUnicode ? PHP_AUTH_PW_VU : PHP_AUTH_PW_V,
                   _env.createString(userPass.substring(i + 1)));
             }
           }
-        }
         else if (authHeader.indexOf("Digest") == 0) {
           super.put(isUnicode ? AUTH_TYPE_VU : AUTH_TYPE_V,
                     _env.createString("Digest"));
