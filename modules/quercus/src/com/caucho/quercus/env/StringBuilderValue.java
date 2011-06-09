@@ -680,7 +680,9 @@ public class StringBuilderValue
   @Override
   public Value put(Value index, Value value)
   {
-    setCharValueAt(index.toLong(), value);
+    // php/03mo php/03mp
+    // put should update the object itself.
+    _buffer = ((StringBuilderValue) setCharValueAt(index.toLong(), value))._buffer;
 
     return value;
   }
