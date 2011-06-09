@@ -45,7 +45,7 @@ abstract public class AbstractThreadLauncher extends AbstractTaskWorker {
 
   private static final int DEFAULT_THREAD_MAX = 8192;
   private static final int DEFAULT_IDLE_MIN = 1;
-  private static final int DEFAULT_IDLE_MAX = DEFAULT_THREAD_MAX;
+  private static final int DEFAULT_IDLE_MAX = Integer.MAX_VALUE / 2;
 
   private static final long DEFAULT_IDLE_TIMEOUT = 120000L;
   
@@ -252,6 +252,10 @@ abstract public class AbstractThreadLauncher extends AbstractTaskWorker {
     if (_threadMax <= _threadCount.getAndDecrement()) {
       wake();
     }
+
+    if (_idleCount.get() <= _idleMin) {
+      wake();
+    }
   }
   
   //
@@ -269,13 +273,23 @@ abstract public class AbstractThreadLauncher extends AbstractTaskWorker {
     long now = getCurrentTimeActual();
     
     long idleExpire = _threadIdleExpireTime.get();
+    
+    int idleCount = _idleCount.get();
 
     // if idle queue is full and the expire is set, return and exit
-    if (_idleMin < _idleCount.get()
-        && (idleExpire < now || _idleMax < _idleCount.get())) {
+    if (_idleMin < idleCount) {
       long nextIdleExpire = now + _idleTimeout;
-      
-      return _threadIdleExpireTime.compareAndSet(idleExpire, nextIdleExpire);
+
+      if (_idleMax < idleCount && _idleMin < _idleMax) {
+        _threadIdleExpireTime.compareAndSet(idleExpire, nextIdleExpire);
+        
+        return true;
+      }
+      else if (idleExpire < now
+               && _threadIdleExpireTime.compareAndSet(idleExpire,
+                                                      nextIdleExpire)) {
+        return true;
+      }
     }
     
     return false;

@@ -78,7 +78,8 @@ public class TcpSocketLinkListener
   private static final Logger log
     = Logger.getLogger(TcpSocketLinkListener.class.getName());
   
-  private static final int ACCEPT_IDLE_MAX = 64;
+  private static final int ACCEPT_IDLE_MIN = 4;
+  private static final int ACCEPT_IDLE_MAX = 16;
 
   private final AtomicInteger _connectionCount = new AtomicInteger();
 
@@ -202,6 +203,7 @@ public class TcpSocketLinkListener
     }
     
     _launcher = new SocketLinkThreadLauncher(this);
+    _launcher.setIdleMin(ACCEPT_IDLE_MIN);
     _launcher.setIdleMax(ACCEPT_IDLE_MAX);
   }
 

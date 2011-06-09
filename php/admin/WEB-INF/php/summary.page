@@ -30,6 +30,8 @@ echo "<div id='overview-tab'>";
 
 print_overview();
 
+print_overview_graphs();
+
 echo "<h2>Health"; print_Help("Health"); echo "</h2>\n";
 
 display_health_status($g_server->SelfServer);
@@ -210,6 +212,70 @@ function print_overview()
   echo "</table>\n";
 }
 
+function print_overview_graphs()
+{
+  global $g_mbean_server;
+  global $g_server;
+
+  $mbean_server = $g_mbean_server;
+  $server = $g_server;
+  
+  $si = sprintf("%02d", $server->ServerIndex);
+  $stat_service = $mbean_server->lookup("resin:type=StatService");
+
+  if (! $stat_service)
+    return;
+
+    $period = 6 * 60 * 60;
+    $end = time();
+    $start = $end - $period;
+
+    $height = 150;
+    $width = 240;
+
+  echo "<h3>Graphs</h3>\n";
+
+  echo "<table summary='Graphs'>\n";
+  echo "<tr>";
+  echo "<th scope='col'>Threads</th>";
+  echo "<th scope='col'>Memory</th>";
+  echo "<th scope='col'>CPU</th>";
+  echo "</tr>";
+  echo "<tr valign='top'>";
+  echo "<td>";
+
+  stat_graph("sum-threads", $width, $height, $start, $end, 
+             array("$si|JVM|Thread|JVM Thread Count",
+                   "$si|Resin|Thread|Thread Idle Count",
+                   "$si|JVM|Thread|JVM Runnable Count",
+                   "$si|JVM|Thread|JVM Blocked Count",
+                   "$si|JVM|Thread|JVM Native Count",
+                   "$si|JVM|Thread|JVM Waiting Count"),
+               "A line graph representing the number of threads in various thread pools over the last 6 hours.");
+               
+  echo "</td>";
+  echo "<td>";
+  
+    stat_graph("sum-memory", $width, $height, $start, $end,
+               array("$si|JVM|Memory|Heap Memory Used",
+                     "$si|JVM|Memory|Heap Memory Free",
+                     "$si|JVM|Memory|Tenured Memory Free",
+                     "$si|JVM|Memory|PermGen Memory Free"),
+              "A line graph representing the amount of free and used memory in each of the heap, tenured, and permgen pools over the last 6 hours.");
+                              
+  echo "</td>";
+
+  echo "<td>";
+  
+    stat_graph("sum-cpu", $width, $height, $start, $end,
+               array("$si|OS|CPU|CPU Active"),
+               "A line graph representing the active CPU usage over the last 6 hours.");
+               
+  echo "</td>";
+  echo "</tr>";
+  echo "</table>";
+}
+
 /* graphs */
 
 function print_graphs()
@@ -248,6 +314,16 @@ function print_graphs()
                "A line graph representing the amount of time spent processing HTTP requests over the last 6 hours.");
                
     echo "</td><td>";
+    stat_graph("threads", $width, $height, $start, $end, 
+               array("$si|JVM|Thread|JVM Thread Count",
+                     "$si|Resin|Thread|Thread Count",
+                     "$si|Resin|Thread|Thread Idle Count",
+                     "$si|JVM|Thread|JVM Runnable Count",
+                     "$si|JVM|Thread|JVM Blocked Count",
+                     "$si|JVM|Thread|JVM Native Count",
+                     "$si|JVM|Thread|JVM Waiting Count"),
+               "A line graph representing the number of threads in various thread pools over the last 6 hours.");
+/*
     stat_graph("thread", $width, $height, $start, $end,
                array("$si|JVM|Thread|JVM Thread Count",
                      "$si|Resin|Thread|Thread Count",
@@ -256,6 +332,7 @@ function print_graphs()
                      "$si|Resin|Thread|Thread Priority Queue",
                      "$si|Resin|Thread|Thread Overflow Count"),
                "A line graph representing the number of threads in various thread pools over the last 6 hours.");
+*/
                
     echo "</td></tr>";
     echo "<tr><th scope='col'>Database Connection Active</th><th scope='col'>Database Query Time</th><th scope='col'>CPU</th></tr>";

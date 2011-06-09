@@ -123,7 +123,8 @@ function display_postmortem_graph($mbean_server)
   echo "</td></tr>\n";
 
   echo "<tr><th id='req_count'>Request Count</th>";
-  echo "<th id='req_time'>Request Time</th></tr>\n";
+  echo "<th id='req_time'>Request Time</th>\n";
+  echo "<th id='netstat'>Netstat</th></tr>\n";
   echo "<tr valign='top'><td headers='req_count'>";
   stat_graph("request", 300, $height, $start, $end,
              array("$si|Resin|Http|Request Count"),
@@ -134,6 +135,12 @@ function display_postmortem_graph($mbean_server)
              array("$si|Resin|Http|Request Time",
                    "$si|Resin|Http|Request Time Max"),
 						 "A line graph representing the amount of time spent processing HTTP requests in the last 60 minutes before the selected restart.");
+                                                 
+  echo "</td><td headers='netstat'>";
+
+  stat_graph_regexp("netstat", $width, $height, $start, $end,
+                      "/$si\|OS\|Network\|(?!tcp-time)/",
+ 										"A line graph representing network activity over the last 6 hours.");
              
   echo "</td></tr>\n";
   
@@ -152,10 +159,23 @@ function display_postmortem_graph($mbean_server)
              
   echo "</td></tr>\n";
              
-  echo "<tr><th id='threads'>Thread</th>";
+  echo "<tr>";
+  echo "<th id='jvm-threads'>JVM Threads</th>";
+  echo "<th id='resin-threads'>Resin Thread</th>";
   echo "<th id='cpu'>CPU</th></tr>\n";
-  echo "<tr valign='top'><td headers='threads'>";
-  stat_graph("thread", 300, $height, $start, $end,
+  echo "<tr valign='top'>";
+  
+  echo "<td headers='jvm-threads'>";
+  stat_graph("jvm-thread", 300, $height, $start, $end,
+             array("$si|JVM|Thread|JVM Thread Count",
+                   "$si|JVM|Thread|JVM Runnable Count",
+                   "$si|JVM|Thread|JVM Native Count",
+                   "$si|JVM|Thread|JVM Waiting Count",
+                   "$si|JVM|Thread|JVM Blocked Count"),
+                    "A line graph representing the number of threads in various thread pools in the last 60 minutes before the selected restart.");
+                    
+  echo "</td><td headers='resin-threads'>";
+  stat_graph("resin-thread", 300, $height, $start, $end,
              array("$si|JVM|Thread|JVM Thread Count",
                    "$si|Resin|Thread|Thread Count",
                    "$si|Resin|Thread|Thread Active Count",
@@ -173,7 +193,8 @@ function display_postmortem_graph($mbean_server)
   echo "</td></tr>\n";
   
   echo "<tr><th id='memory'>Memory</th>";
-  echo "<th id='gc'>GC Time</th></tr>\n";
+  echo "<th id='gc'>GC Time</th>\n";
+  echo "<th id='fdes' scope='col'>File Descriptors</th></tr>\n";
   echo "<tr valign='top'><td headers='memory'>";
   stat_graph("memory", 300, $height, $start, $end,
              array("$si|JVM|Memory|Heap Memory Free",
@@ -185,6 +206,11 @@ function display_postmortem_graph($mbean_server)
   stat_graph_regexp("memory_gc", 300, $height, $start, $end,
                     "/$si\|JVM\|Memory\|GC Time/",
   										"A line graph representing network activity in the last 60 minutes before the selected restart.");
+             
+  echo "</td><td headers='fdes'>";
+  stat_graph_regexp("file_descriptors", 300, $height, $start, $end,
+                    "/$si\|OS\|Process\|File Descriptor Count/",
+  										"A line graph representing the file descriptor count in the last 60 minutes before the selected restart.");
   
   echo "</td></tr>\n";
   echo "</table>";

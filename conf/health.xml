@@ -182,6 +182,30 @@
     <objectName>java.lang:type=Threading</objectName>
     <attribute>ThreadCount</attribute>
   </health:JmxMeter>
+  
+  <health:JmxMeter>
+    <name>JVM|Thread|JVM Runnable Count</name>
+    <objectName>resin:type=JvmThreads</objectName>
+    <attribute>RunnableCount</attribute>
+  </health:JmxMeter>
+  
+  <health:JmxMeter>
+    <name>JVM|Thread|JVM Native Count</name>
+    <objectName>resin:type=JvmThreads</objectName>
+    <attribute>NativeCount</attribute>
+  </health:JmxMeter>
+  
+  <health:JmxMeter>
+    <name>JVM|Thread|JVM Waiting Count</name>
+    <objectName>resin:type=JvmThreads</objectName>
+    <attribute>WaitingCount</attribute>
+  </health:JmxMeter>
+  
+  <health:JmxMeter>
+    <name>JVM|Thread|JVM Blocked Count</name>
+    <objectName>resin:type=JvmThreads</objectName>
+    <attribute>BlockedCount</attribute>
+  </health:JmxMeter>
 
   <health:JmxMeter>
     <name>Resin|Thread|Thread Count</name>

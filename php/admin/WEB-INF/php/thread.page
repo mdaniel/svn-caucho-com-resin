@@ -33,39 +33,6 @@ $thread_pool = $g_server->ThreadPool;
 -->
 
 <!--
-<h2>Thread pool</h2>
-
-<table class="data">
-  <tr>
-    <th colspan='3'>Resin Threads</th>
-
-    <th colspan='2'>JVM Threads</th>
-
-    <th colspan='2'>Config</th>
-  </tr>
-  <tr>
-    <th title="The number of active threads. These threads are busy servicing requests or performing other tasks.">Active</th>
-    <th title="The number of idle threads. These threads are allocated but inactive, available for new requests or tasks.">Idle</th>
-    <th title="The current total number of threads managed by the pool.">Total</th>
-
-    <th title="The number of threads currently running in the JVM.">Total</th>
-    <th title="The maximum number of threads running in the JVM.">Peak</th>
-
-    <th title="The maximum number of threads that Resin can allocate.">thread-max</th>
-    <th title="The minimum number of threads Resin should have available for new requests or other tasks.  This value causes a minimum number of idle threads, useful for situations where there is a sudden increase in the number of threads required.">thread-idle-min</th>
-  </tr>
-  <tr align='right'>
-    <td><?= $thread_pool->ThreadActiveCount ?></td>
-    <td><?= $thread_pool->ThreadIdleCount ?></td>
-    <td><?= $thread_pool->ThreadCount ?></td>
-
-    <td><?= $jvm_thread->ThreadCount ?></td>
-    <td><?= $jvm_thread->PeakThreadCount ?></td>
-
-    <td><?= $thread_pool->ThreadMax ?></td>
-    <td><?= $thread_pool->ThreadIdleMin ?></td>
-  </tr>
-</table>
 -->
 <?php
 
@@ -102,6 +69,9 @@ function display_tabs($thread_group, $groups)
 {
   echo "<div id='thread-tabs'>";
   echo "<ul>";
+
+  echo "<li><a href='#summary-tab'>Summary</a></li>\n";
+
   $count = 0;
   foreach ($groups as $name) {
     $entries = $thread_group[$name];
@@ -120,9 +90,115 @@ function display_tabs($thread_group, $groups)
   }
   echo "</ul>\n";
 
+  thread_display_summary();
+  
   thread_display_content($thread_group, $groups);
 
   echo "</div>\n";
+}
+
+function thread_display_summary()
+{
+  echo "<div id='summary-tab'>\n";
+
+  thread_display_summary_table();
+  
+  thread_display_summary_graph();
+  
+  echo "</div>\n";
+}
+
+function thread_display_summary_table()
+{
+  global $g_mbean_server;
+  global $thread_pool;
+  global $jvm_thread;
+  
+  $resin_jvm_threads = $g_mbean_server->lookup("resin:type=JvmThreads");
+  
+?>
+<table class="data">
+  <tr>
+    <th scope='col' colspan='3'>Resin Threads</th>
+
+    <th scope='col' colspan='6'>JVM Threads</th>
+<!--
+    <th scope='col' colspan='2'>Config</th>
+    -->
+  </tr>
+  <tr>
+    <th scope='col' title="The number of active threads. These threads are busy servicing requests or performing other tasks.">Active</th>
+    <th scope='col' title="The number of idle threads. These threads are allocated but inactive, available for new requests or tasks.">Idle</th>
+    <th scope='col' title="The current total number of threads managed by the pool.">Total</th>
+
+    <th scope='col' title="The number of threads currently running in the JVM.">Total</th>
+    <th scope='col' title="The maximum number of threads running in the JVM.">Peak</th>
+    <th scope='col' title="The number of runnable threads running in the JVM.">Runnable</th>
+    <th scope='col' title="The number of native threads running in the JVM.">Native</th>
+    <th scope='col' title="The number of blocked threads running in the JVM.">Blocked</th>
+    <th scope='col' title="The number of waiting threads running in the JVM.">Waiting</th>
+
+    <!--
+    <th scope='col' title="The maximum number of threads that Resin can allocate.">thread-max</th>
+    <th scope='col' title="The minimum number of threads Resin should have available for new requests or other tasks.  This value causes a minimum number of idle threads, useful for situations where there is a sudden increase in the number of threads required.">thread-idle-min</th>
+    -->
+  </tr>
+  <tr align='right'>
+    <td><?= $thread_pool->ThreadActiveCount ?></td>
+    <td><?= $thread_pool->ThreadIdleCount ?></td>
+    <td><?= $thread_pool->ThreadCount ?></td>
+
+    <td><?= $jvm_thread->ThreadCount ?></td>
+    <td><?= $jvm_thread->PeakThreadCount ?></td>
+    <td><?= $resin_jvm_threads->RunnableCount ?></td>
+    <td><?= $resin_jvm_threads->NativeCount ?></td>
+    <td><?= $resin_jvm_threads->BlockedCount ?></td>
+    <td><?= $resin_jvm_threads->WaitingCount ?></td>
+
+    <!--
+    <td><?= $thread_pool->ThreadMax ?></td>
+    <td><?= $thread_pool->ThreadIdleMin ?></td>
+    -->
+  </tr>
+</table>
+<?php
+}
+
+function thread_display_summary_graph()
+{
+  global $g_mbean_server;
+
+  $stat_service = $g_mbean_server->lookup("resin:type=StatService");
+
+  if (! $stat_service)
+    return;
+
+  $si = sprintf("%02d", $g_server->Index);
+
+  $end = time();
+  $start = $end - 6 * 3600;
+
+  echo "<h3>JVM Threads</h3>\n";
+  
+  stat_graph("jvm-threads", 600, 200, $start, $end, 
+               array("$si|JVM|Thread|JVM Thread Count",
+                     "$si|JVM|Thread|JVM Runnable Count",
+                     "$si|JVM|Thread|JVM Blocked Count",
+                     "$si|JVM|Thread|JVM Native Count",
+                     "$si|JVM|Thread|JVM Waiting Count"),
+               "A line graph representing the number of threads in JVM thread states over the last 6 hours.");
+
+  echo "<h3>Resin Thread Pool</h3>\n";
+  
+  stat_graph("resin-threads", 600, 200, $start, $end, 
+               array("$si|JVM|Thread|JVM Thread Count",
+                     "$si|Resin|Thread|Thread Count",
+                     "$si|Resin|Thread|Thread Active Count",
+                     "$si|Resin|Thread|Thread Idle Count",
+                     "$si|Resin|Thread|Thread Task Queue",
+                     "$si|Resin|Thread|Thread Priority Queue",
+                     "$si|Resin|Thread|Thread Overflow Count"),
+               "A line graph representing the number of threads in the Resin thread pools over the last 6 hours.");
 }
 
 function thread_display_content($partition, $groups)

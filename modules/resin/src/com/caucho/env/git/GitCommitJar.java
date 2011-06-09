@@ -198,17 +198,25 @@ public class GitCommitJar {
     }
   }
 
-  public long getLength(String sha1)
+  private long getLength(String path)
     throws IOException
   {
-    InputStream is = openFile(sha1);
-    long length = 0;
+    InputStream is = null;
 
-    while (is.read() >= 0) {
-      length++;
+    try {
+      ZipStreamImpl zipIs = _jar.getJar().openReadImpl(path); 
+      is = new ReadStream(zipIs);
+    
+      long length = 0;
+
+      while (is.read() >= 0) {
+        length++;
+      }
+
+      return length;
+    } finally {
+      IoUtil.close(is);
     }
-
-    return length;
   }
 
   public InputStream openFile(String sha1)
@@ -225,7 +233,7 @@ public class GitCommitJar {
       long size = _jar.getJar().getLength(path);
       
       if (size < 0)
-        size = getLength(sha1);
+        size = getLength(path);
       
       ZipStreamImpl zipIs = _jar.getJar().openReadImpl(path);
       

@@ -95,7 +95,7 @@ public class ThreadPoolAdmin extends AbstractManagedObject
   @Override
   public int getThreadIdleMax()
   {
-    return 0;
+    return _threadPool.getIdleMax();
   }
 
   /**

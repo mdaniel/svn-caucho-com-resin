@@ -55,6 +55,9 @@ public final class ThreadPool {
 
   private static final long PRIORITY_TIMEOUT = 10L;
   
+  private static final int THREAD_IDLE_MIN = 16;
+  private static final int THREAD_IDLE_MAX = 256;
+  
   private static final NullRunnable NULL_RUNNABLE = new NullRunnable();
 
   private static final AtomicReference<ThreadPool> _globalThreadPool
@@ -123,6 +126,8 @@ public final class ThreadPool {
     _name = name;
     
     _launcher = new ThreadLauncher(this);
+    _launcher.setIdleMin(THREAD_IDLE_MIN);
+    _launcher.setIdleMax(THREAD_IDLE_MAX);
 
     // initialize default values
     init();
@@ -185,6 +190,22 @@ public final class ThreadPool {
   public int getIdleMin()
   {
     return _launcher.getIdleMin();
+  }
+  
+  /**
+   * Returns the thread idle max.
+   */
+  public int getIdleMax()
+  {
+    return _launcher.getIdleMax();
+  }
+  
+  /**
+   * Returns the thread idle max.
+   */
+  public void setIdleMax(int idleMax)
+  {
+    _launcher.setIdleMax(idleMax);
   }
   
   /**

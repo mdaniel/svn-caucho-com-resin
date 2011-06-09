@@ -75,16 +75,20 @@ class AcceptTask extends ConnectionReadTask {
    */
   @Override
   RequestState doTask()
-  throws IOException
+    throws IOException
   {
     TcpSocketLink socketLink = getSocketLink();
     TcpSocketLinkListener listener = getListener();
     
     RequestState result = RequestState.EXIT;
-
+    SocketLinkThreadLauncher launcher = getLauncher();
+    
     while (! listener.isClosed()
            && ! socketLink.getState().isDestroyed()) {
       socketLink.toAccept();
+      
+      if (launcher.isIdleExpire())
+        return RequestState.EXIT;
 
       if (! accept()) {
         socketLink.close();
@@ -131,9 +135,6 @@ class AcceptTask extends ConnectionReadTask {
   private boolean accept()
   {
     SocketLinkThreadLauncher launcher = getLauncher();
-    
-    if (launcher.isIdleExpire())
-      return false;
     
     launcher.onChildIdleBegin();
     try {
