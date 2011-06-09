@@ -3325,6 +3325,7 @@ public class StringModule extends AbstractQuercusModule {
 
     int strLen = string.length();
 
+    int currentArrayIndex = 0;
     for (int i = 0; i < strLen; i += chunk) {
       Value value;
 
@@ -3334,7 +3335,8 @@ public class StringModule extends AbstractQuercusModule {
         value = string.substring(i);
       }
 
-      array.put(LongValue.create(i), value);
+      array.put(LongValue.create(currentArrayIndex), value);
+      currentArrayIndex++;
     }
 
     return array;
