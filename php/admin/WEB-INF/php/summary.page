@@ -585,7 +585,7 @@ function print_threads()
         echo $connInfo->state;
 
       echo "<td>";
-      echo " " . $conn->getRemoteAddress();
+      echo " " . ($conn ? $conn->getRemoteAddress() : "");
       echo "\n";
       echo "</tr>";
 

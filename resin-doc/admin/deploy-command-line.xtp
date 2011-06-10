@@ -60,7 +60,7 @@ host. Since the AdminAuthenticator requires a user and password, you'll
 need to pass those arguments as well.</p>
 
 <example title="Example: deploy hello.war">
-unix> java -jar lib/resin.jar deploy hello.war \
+unix> bin/resin.sh deploy hello.war \
            -user foo -password test
 </example>
 
@@ -73,7 +73,7 @@ host. Since the AdminAuthenticator requires a user and password, you'll
 need to pass those arguments as well.</p>
 
 <example title="Example: undeploy hello">
-unix> java -jar lib/resin.jar undeploy hello \
+unix> bin/resin.sh undeploy hello \
            -user foo -password test
 </example>
 
@@ -85,7 +85,7 @@ unix> java -jar lib/resin.jar undeploy hello \
 host.</p>
 
 <example title="Example: deploy www.example.com hello.war">
-unix> java -jar lib/resin.jar deploy -host www.example.com hello.war \
+unix> bin/resin.sh deploy -host www.example.com hello.war \
            -user foo -password test
 </example>
 
@@ -97,7 +97,7 @@ unix> java -jar lib/resin.jar deploy -host www.example.com hello.war \
 host.</p>
 
 <example title="Example: undeploy www.example.com hello">
-unix> java -jar lib/resin.jar undeploy -host www.example.com hello \
+unix> bin/resin.sh undeploy -host www.example.com hello \
            -user foo -password test
 </example>
 
@@ -188,7 +188,7 @@ deployed on the server and controlling application lifecycle.</p>
 <s3 title="deploying application">
 <p>Deploying an application is done with a <code>deploy</code> command</p>
 <p><code>java -jar resin.jar [-conf &lt;file>] deploy -user &lt;user> -password &lt;password> [options] &lt;war-file></code></p>
-<example title="deploying an application from a hello-world.war archive">java -jar lib/resin.jar deploy -user admin -password secret /projects/hello-world/hello-world.war
+<example title="deploying an application from a hello-world.war archive">bin/resin.sh deploy -user admin -password secret /projects/hello-world/hello-world.war
 Deployed production/webapp/default/hello-world as hello-world.war to http://127.0.0.1:8080/hmtp</example>
 <deftable title="deploy options">
   <tr>
@@ -222,14 +222,14 @@ Deployed production/webapp/default/hello-world as hello-world.war to http://127.
 <s3 title="listing deployed applications">
   <p>Listing deployed applications is done with a <code>deploy-list</code> command</p>
   <p><code>java -jar resin.jar [-conf &lt;file>] deploy-list -user &lt;user> -password &lt;password></code></p>
-  <example title="">java -jar lib/resin.jar deploy-list -user admin -password secret
+  <example title="">bin/resin.sh deploy-list -user admin -password secret
                     production/webapp/default/hello-world</example>
 </s3>
 
 <s3 title="copy application from context '/hello-world' to context '/foo'">
 <p>Copying an applicaiton is done with a <code>deploy-copy</code> command</p>
 <p><code>java -jar resin.jar [-conf &lt;file>] deploy-copy -user &lt;user> -password &lt;password> [options]</code></p>
-<example title="">java -jar lib/resin.jar deploy-copy -user admin -password secret -source hello-world -target foo
+<example title="">bin/resin.sh deploy-copy -user admin -password secret -source hello-world -target foo
 copied production/webapp/default/hello-world to production/webapp/default/foo
 </example>
 <deftable title="deploy-copy options">
@@ -282,8 +282,8 @@ copied production/webapp/default/hello-world to production/webapp/default/foo
 </s3>
 <s3 title="undeploying application">
 <p>Undeploying an application is done with an <code>undeploy</code> command</p>
-<p><code>java -jar lib/resin.jar [-conf &lt;file>] undeploy -user &lt;user> -password &lt;password> [options] &lt;name></code></p>
-<example title="">java -jar lib/resin.jar undeploy -user admin -password secret undeploy foo
+<p><code>bin/resin.sh [-conf &lt;file>] undeploy -user &lt;user> -password &lt;password> [options] &lt;name></code></p>
+<example title="">bin/resin.sh undeploy -user admin -password secret undeploy foo
 Undeployed foo from http://127.0.0.1:8080/hmtp</example>
   <deftable title="undeploy options">
     <tr>
@@ -311,7 +311,7 @@ Undeployed foo from http://127.0.0.1:8080/hmtp</example>
 <s3 title="starting application">
 <p>Starting an application is done with an <code>start-webapp</code> command</p>
 <p><code>java -jar resin.jar [-conf &lt;file>] start-webapp -user &lt;user> -password &lt;password> [options] &lt;name></code></p>
-<example title="start web application deployed at context '/foo'">java -jar lib/resin.jar start-webapp -user admin -password secret foo
+<example title="start web application deployed at context '/foo'">bin/resin.sh start-webapp -user admin -password secret foo
 'production/webapp/default/foo' is started</example>
   <deftable title="start-webapp options">
     <tr>
@@ -339,7 +339,7 @@ Undeployed foo from http://127.0.0.1:8080/hmtp</example>
 <s3 title="stopping application">
 <p>Stopping an application is done with an <code>stop-webapp</code> command</p>
 <p><code>java -jar resin.jar [-conf &lt;file>] stop-webapp -user &lt;user> -password &lt;password> [options] &lt;name></code></p>
-<example title="stop web application deployed at context '/foo'">java -jar lib/resin.jar stop-webapp -user admin -password secret foo
+<example title="stop web application deployed at context '/foo'">bin/resin.sh stop-webapp -user admin -password secret foo
 'production/webapp/default/foo' is stopped</example>
   <deftable title="stop-webapp options">
     <tr>
@@ -367,7 +367,7 @@ Undeployed foo from http://127.0.0.1:8080/hmtp</example>
 <s3 title="restarting application">
 <p>Restarting an application is done with an <code>restart-webapp</code> command</p>
 <p><code>java -jar resin.jar [-conf &lt;file>] restart-webapp -user &lt;user> -password &lt;password> [options] &lt;name></code></p>
-<example title="stop web application deployed at context '/foo'">java -jar lib/resin.jar restart-webapp -user admin -password secret foo
+<example title="stop web application deployed at context '/foo'">bin/resin.sh restart-webapp -user admin -password secret foo
 'production/webapp/default/foo' is restarted</example>
   <deftable title="restart-webapp options">
     <tr>

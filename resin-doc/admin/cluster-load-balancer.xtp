@@ -106,11 +106,11 @@ server <var>id</var> attribute, which must be unique.  When you start
 Resin, you'll use the server-id as part of the command line</p>
 
 <example title="Example: starting servers">
-192.168.0.10> java -jar lib/resin.jar -server app-a start
+192.168.0.10> bin/resin.sh -server app-a start
 
-192.168.0.11> java -jar lib/resin.jar -server app-b start
+192.168.0.11> bin/resin.sh -server app-b start
 
-192.168.0.1> java -jar lib/resin.jar -server web-a start
+192.168.0.1> bin/resin.sh -server web-a start
 </example>
 
 <p>Since Resin lets you start multiple servers on the same machine, a

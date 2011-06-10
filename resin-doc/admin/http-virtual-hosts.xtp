@@ -375,13 +375,13 @@ to ensure consistency.</p>
 <p>Each back-end server is started separately:</p>
 
 <example title="Example: starting backend servers">
-unix&gt; java -jar lib/resin.jar -server gryffindor start
-unix&gt; java -jar lib/resin.jar -server slytherin start
+unix&gt; bin/resin.sh -server gryffindor start
+unix&gt; bin/resin.sh -server slytherin start
 </example>
 
 <example title="Example: stopping backend servers">
-unix&gt; java -jar lib/resin.jar -server gryffindor stop
-unix&gt; java -jar lib/resin.jar -server slytherin stop
+unix&gt; bin/resin.sh -server gryffindor stop
+unix&gt; bin/resin.sh -server slytherin stop
 </example>
 </s2>
 
@@ -446,9 +446,9 @@ defined for each back-end host, so that the
 <p>The front-end server JVM is started similar to the back-end JVMs:</p>
 
 <example title="Example: starting the load balancer" >
-unix&gt; java -jar lib/resin.jar -server web -conf conf/resin.xml start
+unix&gt; bin/resin.sh -server web -conf conf/resin.xml start
 ...
-unix&gt; java -jar lib/resin.jar -server web -conf conf/resin.xml stop
+unix&gt; bin/resin.sh -server web -conf conf/resin.xml stop
 </example>
 
 </s3> <!-- unix startup -->

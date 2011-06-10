@@ -39,13 +39,13 @@ environment variable <var>JAVA_HOME</var>.</li>
 </li>
 <li><code>make</code></li>
 <li><code>make install</code></li>
-<li>Execute <code>java -jar lib/resin.jar console</code>
-  <ul><li>Or run <code>bin/resin.sh console</code></li></ul>
+<li>Execute <code>bin/resin.sh console</code>
+  <ul><li>Or run <code>java -jar lib/resin.jar console</code></li></ul>
 </li>
 <li>Browse to <a href="http://localhost:8080">http://localhost:8080</a></li>
 </ol>
 <example title="Successful Foreground Startup Output">
-unix> java -jar lib/resin.jar console
+unix> bin/resin.sh console
 May 6, 2011 3:06:05 PM com.caucho.boot.WatchdogChildTask run
 INFO: WatchdogChild[] starting
 May 6, 2011 3:06:05 PM com.caucho.boot.WatchdogChildProcess run
@@ -152,7 +152,7 @@ export JAVA_HOME
 export RESIN_HOME
 export RESIN_ROOT
 
-$java -jar $RESIN_HOME/lib/resin.jar \
+$java -jar lib/resin.jar $RESIN_HOME/lib/resin.jar \
       -root-directory $RESIN_ROOT \
       -conf /etc/resin/resin.xml \
       -server a \
@@ -264,7 +264,7 @@ C:\&gt; net stop resin
 <p>Resin runs as multiple processes that begin with the following JVM command:</p>
 
 <example>
-unix> java -jar /usr/local/resin/lib/resin.jar \
+unix> bin/resin.sh /usr/local/resin/lib/resin.jar \
            -conf /etc/resin/resin.xml \
            start
 </example>
