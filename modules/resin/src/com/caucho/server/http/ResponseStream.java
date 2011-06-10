@@ -770,6 +770,9 @@ abstract public class ResponseStream extends ToByteResponseStream {
     HttpServletResponseImpl res = _response.getRequest().getResponseFacade();
     HttpServletRequestImpl req = _response.getRequest().getRequestFacade();
     
+    if (req == null)
+      return;
+    
     // server/1la7
     if (req.isAsyncStarted())
       return;
