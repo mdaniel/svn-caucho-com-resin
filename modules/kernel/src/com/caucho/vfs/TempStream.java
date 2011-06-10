@@ -119,6 +119,9 @@ public class TempStream extends StreamImpl implements java.io.Serializable
     
     if (_head._bufferCount > 8)
       Thread.dumpStack();
+    
+    if (_head._bufferCount > 256)
+      throw new IllegalStateException();
   }
 
   @Override
