@@ -76,14 +76,16 @@ class MultipartForm {
 
       String name = getAttribute(attr, "name");
       String filename = getAttribute(attr, "filename");
+      String contentType = getAttribute(attr, "content-type");
+      
+      if (contentType == null)
+        contentType = ms.getAttribute("content-type");
 
       if (name == null) {
         // XXX: is this an error?
         continue;
       }
       else if (filename != null) {
-        String contentType = (String) ms.getAttribute("content-type");
-
         Path tempDir = CauchoSystem.getWorkPath().lookup("form");
         try {
           tempDir.mkdirs();
@@ -170,6 +172,9 @@ class MultipartForm {
           log.fine("mp-form: " + name + "=" + value);
 
         addTable(table, name, value.toString());
+        
+        if (contentType != null)
+          addTable(table, name + ".content-type", contentType);
       }
 
       parts.add(request.createPart(name,
@@ -201,7 +206,7 @@ class MultipartForm {
       return null;
     
     int length = attr.length();
-    int i = attr.indexOf(name);
+    int i = attr.toLowerCase().indexOf(name);
     if (i < 0)
       return null;
 

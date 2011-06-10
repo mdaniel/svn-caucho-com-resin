@@ -488,6 +488,7 @@ public final class HttpServletRequestImpl extends AbstractCauchoRequest
     System.out.println(Thread.currentThread().getName() + " C2: "+ 
                        _dummyRequest.getRequestURI());
     Thread.dumpStack();
+    _dummyException.printStackTrace();
     
   }
   /**
@@ -1985,10 +1986,13 @@ public final class HttpServletRequestImpl extends AbstractCauchoRequest
     }
 
     _dummyRequest = _request;
+    _dummyException = new IllegalStateException();
+    _dummyException.fillInStackTrace();
     _request = null;
   }
   
   private AbstractHttpRequest _dummyRequest;
+  private Exception _dummyException;
 
   public void cleanup()
   {

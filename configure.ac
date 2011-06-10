@@ -1224,7 +1224,7 @@ fi
 #fi
 
 
-if -z test "${ENABLE_SSL}"; then	
+if test -z "${ENABLE_SSL}"; then	
   foo=bar
 elif test -z "${OPENSSL_LIB}"; then	
   SSL_LIBS="${SSL_LIBS} -lssl"

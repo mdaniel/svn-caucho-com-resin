@@ -80,6 +80,8 @@ public class TcpSocketLinkListener
   
   private static final int ACCEPT_IDLE_MIN = 4;
   private static final int ACCEPT_IDLE_MAX = 16;
+  
+  private static final int KEEPALIVE_MAX = 256;
 
   private final AtomicInteger _connectionCount = new AtomicInteger();
 
@@ -1050,7 +1052,7 @@ public class TcpSocketLinkListener
       _keepaliveMax = _selectManager.getSelectMax();
 
     if (_keepaliveMax < 0)
-      _keepaliveMax = 256;
+      _keepaliveMax = KEEPALIVE_MAX;
 
     _admin.register();
   }

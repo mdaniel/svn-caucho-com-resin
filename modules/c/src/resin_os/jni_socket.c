@@ -485,7 +485,7 @@ Java_com_caucho_vfs_JniSocketImpl_nativeReadNonBlock(JNIEnv *env,
 #ifdef AI_NUMERICHOST
 
 static struct sockaddr_in *
-lookup_addr(JNIEnv *env, char *addr_name, int port,
+lookup_addr(JNIEnv *env, const char *addr_name, int port,
 	    char *buffer, int *p_family, int *p_protocol,
 	    int *p_sin_length)
 {
@@ -1051,8 +1051,9 @@ Java_com_caucho_vfs_JniSocketImpl_nativeConnect(JNIEnv *env,
                           "unclosed socket in connect");
   }
 
+  memset(sin_data, 0, sin_length);
   addr_string = (*env)->GetStringUTFChars(env, jhost, 0);
-  
+
   if (addr_string) {
     sin = lookup_addr(env, addr_string, port, sin_data,
 		      &family, &protocol, &sin_length);
@@ -1071,6 +1072,9 @@ Java_com_caucho_vfs_JniSocketImpl_nativeConnect(JNIEnv *env,
   if (sock < 0) {
     return 0;
   }
+
+  val = 1;
+  setsockopt(sock, SOL_SOCKET, SO_REUSEADDR, (char *) &val, sizeof(int));
 
   if (connect(sock, (struct sockaddr *) sin, sin_length) < 0) {
     return 0;
