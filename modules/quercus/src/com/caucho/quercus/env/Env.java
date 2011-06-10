@@ -1376,11 +1376,6 @@ public class Env
 
     if (outputBuffer == null)
       return false;
-    
-    if (outputBuffer.getLength() > 65536) {
-      System.out.println("LEN: " + outputBuffer.getLength() + " " + this
-                         + " " + _page);
-    }
 
     outputBuffer.close();
 

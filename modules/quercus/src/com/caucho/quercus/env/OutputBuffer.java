@@ -206,9 +206,6 @@ public class OutputBuffer {
       _state |= OutputModule.PHP_OUTPUT_HANDLER_CONT;
       
       _out.flush();
-      
-      if (_tempStream.getLength() > 65536)
-        Thread.dumpStack();
 
       _tempStream.clearWrite();
       
@@ -257,9 +254,6 @@ public class OutputBuffer {
 
     TempStream tempStream = _tempStream;
     _tempStream = null;
-    
-    if (tempStream != null && tempStream.getLength() > 65536)
-      Thread.dumpStack();
 
     try {
       if (out != null)
@@ -305,9 +299,6 @@ public class OutputBuffer {
       _out.flush();
 
       WriteStream out = getNextOut();
-      
-      if (_tempStream.getLength() > 65536)
-        Thread.dumpStack();
 
       _tempStream.writeToStream(out);
 
