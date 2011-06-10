@@ -680,9 +680,7 @@ public class StringBuilderValue
   @Override
   public Value put(Value index, Value value)
   {
-    // php/03mo php/03mp
-    // put should update the object itself.
-    _buffer = ((StringBuilderValue) setCharValueAt(index.toLong(), value))._buffer;
+    setCharValueAt(index.toLong(), value);
 
     return value;
   }
@@ -1813,13 +1811,13 @@ public class StringBuilderValue
 
     for (int i = length - 1; i >= 0; i--) {
       int ch = toLower(buffer[i]);
-      
+
       hash = 65521 * hash + ch;
     }
 
     return hash;
   }
-  
+
   private int toLower(int ch)
   {
     if ('A' <= ch && ch <= 'Z')
