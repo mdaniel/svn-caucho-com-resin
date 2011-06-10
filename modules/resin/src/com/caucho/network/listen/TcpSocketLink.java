@@ -1181,9 +1181,9 @@ public class TcpSocketLink extends AbstractSocketLink
     _thread = null;
     
     SocketLinkState state = _state;
-    
+
     if (! (state.isComet() || state.isDuplex())
-        || ! requestState.isAsyncOrDuplex()) {
+        && ! requestState.isAsyncOrDuplex()) {
       try {
         closeAsync();
       } catch (Throwable e) {

@@ -164,10 +164,16 @@ public interface ClusterServerMXBean extends ManagedObjectMXBean {
   //
 
   /**
-   * Returns the lifecycle state.
+   * Returns the lifecycle state as a cluster server.
    */
   @Description("The current lifecycle state of the client")
-  public String getState();
+  public String getClusterState();
+
+  /**
+   * Returns the load balance state.
+   */
+  @Description("The current lifecycle state of the client")
+  public String getLoadBalanceState();
   
   //
   // Heartbeat

@@ -209,9 +209,19 @@ public class ClusterServerAdmin extends AbstractManagedObject
   //
 
   @Override
-  public String getState()
+  public String getClusterState()
   {
-    //ClientSocketFactory pool = _server.getClusterSocketPool();
+    ClientSocketFactory pool = _server.getClusterSocketPool();
+    
+    if (pool != null)
+      return pool.getState();
+    else
+      return "self";
+  }
+
+  @Override
+  public String getLoadBalanceState()
+  {
     ClientSocketFactory pool = _server.getLoadBalanceSocketPool();
     
     if (pool != null)
