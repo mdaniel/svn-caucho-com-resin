@@ -28,7 +28,7 @@
 
 package com.caucho.admin.action;
 
-import java.util.concurrent.ConcurrentHashMap;
+import java.util.*;
 import java.util.logging.*;
 
 import com.caucho.util.*;
@@ -43,66 +43,104 @@ public class SetLogLevelAction implements AdminAction
   private static ClassLoader _systemClassLoader = 
     ClassLoader.getSystemClassLoader();
 
-  private static ConcurrentHashMap<String, Level> _defaultLevels = 
-    new ConcurrentHashMap<String, Level>();
-
-  public String execute(final String logger, final Level newLevel, final long time)
+  public String execute(final String[] loggerNames, 
+                        final Level newLevel, 
+                        final long time)
   {
-    final Level oldLevel = getLoggerLevel(logger);
-
-    AlarmListener listener = new AlarmListener()
-    {
-      @Override
-      public void handleAlarm(Alarm alarm)
+    if (time > 0) {
+      final Map<String, Level> oldLevels = getLoggerLevels(loggerNames);
+  
+      AlarmListener listener = new AlarmListener()
       {
-        setLoggerLevel(logger, oldLevel);
-      }
-    };
+        @Override
+        public void handleAlarm(Alarm alarm)
+        {
+          setLoggerLevels(oldLevels);
+        }
+      };
+  
+      new Alarm("log-level", listener, time);
+    }
 
-    new Alarm("log-level", listener, time);
+    setLoggerLevels(loggerNames, newLevel);
+    
+    StringBuffer sb = new StringBuffer();
+    for (int i=0; i<loggerNames.length; i++) {
+      if (loggerNames[i].length() == 0)
+        sb.append("{root}");
+      else
+        sb.append(loggerNames[i]);
+      
+      if (i < (loggerNames.length-1))
+        sb.append(", ");
+    }
 
-    setLoggerLevel(logger, newLevel);
-
-    return L.l("Log {0}.level is set to `{1}'. Active time {2} seconds.",
-               (logger.isEmpty() ? "{root}" : logger),
-               newLevel,
-               (time / 1000));
+    if (time > 0) {
+      return L.l("Log level is set to `{0}', active time {1} seconds: {2}",
+                 newLevel,
+                 (time / 1000),
+                 sb.toString());
+    } else {
+      return L.l("Log level is set to `{0}': {1}",
+                 newLevel,
+                 sb.toString());
+    }
   }
   
-  private static void setLoggerLevel(final String name, final Level level)
+  private static void setLoggerLevels(final String[] loggerNames, final Level level)
   {
-    final Logger logger = Logger.getLogger(name);
     final Thread thread = Thread.currentThread();
     final ClassLoader loader = Thread.currentThread().getContextClassLoader();
 
     try {
       thread.setContextClassLoader(_systemClassLoader);
-      logger.setLevel(level);
+      
+      for (String loggerName : loggerNames) {
+        Logger logger = Logger.getLogger(loggerName);
+        logger.setLevel(level);
+      }
     } finally {
       thread.setContextClassLoader(loader);
     }
   }
-
-  private static Level getLoggerLevel(String name)
+  
+  private static void setLoggerLevels(final Map<String, Level> levelsMap)
   {
-    Level level = _defaultLevels.get(name);
-    if (level != null)
-      return level;
-
-    final Logger logger = Logger.getLogger(name);
     final Thread thread = Thread.currentThread();
-    final ClassLoader loader = thread.getContextClassLoader();
+    final ClassLoader loader = Thread.currentThread().getContextClassLoader();
 
     try {
       thread.setContextClassLoader(_systemClassLoader);
-
-      level = logger.getLevel();
-      if (level != null)
-        _defaultLevels.putIfAbsent(name, level);
-
-      return level;
+      
+      for (Map.Entry<String, Level> entry : levelsMap.entrySet()) {
+        Logger logger = Logger.getLogger(entry.getKey());
+        logger.setLevel(entry.getValue());
+      }
     } finally {
       thread.setContextClassLoader(loader);
     }
+  }
+  
+
+  private static Map<String, Level> getLoggerLevels(String[] loggerNames)
+  {
+    Map<String, Level> oldLevels = new HashMap<String, Level>();
+    
+    final Thread thread = Thread.currentThread();
+    final ClassLoader loader = thread.getContextClassLoader();
+    
+    try {
+      thread.setContextClassLoader(_systemClassLoader);
+      
+      for (String loggerName : loggerNames) {
+        Logger logger = Logger.getLogger(loggerName);
+        Level level = logger.getLevel();
+        oldLevels.put(loggerName, level);
+      }
+    } finally {
+      thread.setContextClassLoader(loader);
+    }
+    
+    return oldLevels;
   }
 }

@@ -33,51 +33,61 @@ import com.caucho.config.types.Period;
 import com.caucho.server.admin.ManagerClient;
 import com.caucho.util.L10N;
 
+import java.util.*;
 import java.util.logging.Level;
 
 public class LogLevelCommand extends AbstractManagementCommand
 {
   private static final L10N L = new L10N(LogLevelCommand.class);
+  
+  private static final Map<String, Level> _options = new LinkedHashMap<String, Level>();
+  
+  static {
+    _options.put("-all", Level.ALL);
+    _options.put("-finest", Level.FINEST);
+    _options.put("-finer", Level.FINER);
+    _options.put("-fine", Level.FINE);
+    _options.put("-config", Level.CONFIG);
+    _options.put("-info", Level.INFO);
+    _options.put("-warning", Level.WARNING);
+    _options.put("-severe", Level.SEVERE);
+    _options.put("-off", Level.OFF);
+  }
 
   @Override
   public void doCommand(WatchdogArgs args, WatchdogClient client)
   {
-    String level = args.getDefaultArg();
-
-    if (level == null) {
+    Level logLevel = null;
+    
+    for(Map.Entry<String, Level> entry : _options.entrySet()) {
+      if (args.hasOption(entry.getKey())) {
+        logLevel = entry.getValue();
+        break;
+      }
+    }
+    
+    if (logLevel == null) {
       usage();
-
       return;
     }
 
-    Level logLevel;
-
-    try {
-      logLevel = Level.parse(level.toUpperCase());
-    } catch (IllegalArgumentException e) {
-      System.err.println(e.getMessage());
-      System.err.println();
-
-      usage();
-
-      return;
-    }
-
-    long period = 1000 * 60;
+    long period = 0;
 
     String time = args.getArg("-active-time");
 
     if (time != null)
       period = Period.toPeriod(time);
 
-    String logger = args.getArg("-log-name");
-
-    if (logger == null)
-      logger = "";
+    String[] loggers = args.getTrailingArgs(_options.keySet());
+    if (loggers == null || loggers.length == 0) {
+      loggers = new String[2];
+      loggers[0] = "";
+      loggers[1] = "com.caucho";
+    }
 
     ManagerClient manager = getManagerClient(args, client);
 
-    String message = manager.setLogLevel(logger, logLevel, period);
+    String message = manager.setLogLevel(loggers, logLevel, period);
 
     System.out.println(message);
   }
@@ -85,13 +95,13 @@ public class LogLevelCommand extends AbstractManagementCommand
   @Override
   public void usage()
   {
-    System.err.println(L.l("usage: java -jar resin.jar [-conf <file>] log-level -user <user> -password <password> [-active-time <time-period>] [-log-name <name>] <level>"));
+    System.err.println(L.l("usage: java -jar resin.jar [-conf <file>] log-level -user <user> -password <password> -all|-finest|-finer|-fine|-config|-info|-warning|-severe|-off [-active-time <time-period>] [loggers...]"));
     System.err.println(L.l(""));
     System.err.println(L.l("description:"));
-    System.err.println(L.l("   sets level for root logger to <level> (severe, warning, info, config, fine, finer, finest)"));
+    System.err.println(L.l("   sets level for logger(s).  Defaults to root and `com.caucho' loggers."));
     System.err.println(L.l(""));
     System.err.println(L.l("options:"));
-    System.err.println(L.l("   -log-name            : specifies name of the logger. Defaults to root logger"));
-    System.err.println(L.l("   -active-time         : specifies new level active time (default 60s). e.g. 5s"));
+    System.err.println(L.l("   -<level>             : specifies new log level"));
+    System.err.println(L.l("   -active-time         : specifies temporary level active time (default permanent). e.g. 5s"));
   }
 }

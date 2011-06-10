@@ -217,7 +217,7 @@ public class ManagerActor extends SimpleActor
     String result = null;
     
     try {
-      result = new SetLogLevelAction().execute(query.getLogger(),
+      result = new SetLogLevelAction().execute(query.getLoggers(),
                                                query.getLevel(),
                                                query.getPeriod());
     } catch (ConfigException e) {

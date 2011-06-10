@@ -121,9 +121,9 @@ public class ManagerClient
     return (String) query(query);
   }
 
-  public String setLogLevel(String logger, Level logLevel, long period)
+  public String setLogLevel(String[] loggers, Level logLevel, long period)
   {
-    LogLevelQuery query = new LogLevelQuery(logger, logLevel, period);
+    LogLevelQuery query = new LogLevelQuery(loggers, logLevel, period);
 
     return (String) query(query);
   }
