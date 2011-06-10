@@ -1341,7 +1341,8 @@ public class EjbBean<X> extends DescriptionGroupConfig
     AnnotatedMethod<? super X> method = null;
     AnnotatedType<X> beanClass = getAnnotatedType();
 
-    method = AnnotatedTypeUtil.findMethod(beanClass, methodName, param);
+    // method = AnnotatedTypeUtil.findMethod(beanClass, methodName, param);
+    method = AnnotatedTypeUtil.findMethod(beanClass, sourceMethod);
 
     if (method == null && sourceMethod != null) {
       throw error(L.l("{0}: '{1}' needed on the implementation class to match {2}.{3}",

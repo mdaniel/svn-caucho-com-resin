@@ -121,7 +121,7 @@ public class AnnotatedTypeUtil {
       
       if (! method.getName().equals(methodName))
         continue;
-      
+
       if (isMatch(param, method.getParameterTypes()))
         return annMethod;
     }

@@ -402,9 +402,9 @@ abstract public class AbstractRepository implements Repository, RepositorySpi
     synchronized (this) {
       oldTagMap = _tagMap;
       
-      if (tagMap.getCommitHash().equals(oldTagMap.getCommitHash()))
-        return false;
-      
+      if (tagMap.getCommitHash().equals(oldTagMap.getCommitHash())) {
+        return true;
+      }
       else if (tagMap.compareTo(oldTagMap) < 0) {
         updateRepositoryRoot(oldTagMap.getCommitHash(),
                              oldTagMap.getSequence());
