@@ -171,11 +171,11 @@ function initializeValidators() {
     $(this).submit(function() {
       var areRequiredGiven = true;
 
-      for (var i = 0; i < required.length; i++) { 
-        if (required[i].attr("value") == "") {
+      for (var i = 0; i < required.length; i++) {
+        if (required[i].value == "") {
           required.effect("highlight");
           areRequiredGiven = false;
-        } 
+        }
       }
 
       if (! areRequiredGiven) {

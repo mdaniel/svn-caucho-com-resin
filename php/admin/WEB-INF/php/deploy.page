@@ -30,20 +30,19 @@ display_deploy_form($g_mbean_server);
 function check_deploy_enabled($is_secure)
 {
   global $g_server_index;
-	
-  if (! $is_secure)
-		return 0;
-		
-	$mbean_server = new MBeanServer();
-  $server = $mbean_server->lookup("resin:type=Server");
-	$server_index = $server->SelfServer->ClusterIndex;
-		
-	if ($g_server_index != $server_index)
-		return 0;
-	
-	return 1;
-}
 
+  if (! $is_secure)
+    return 0;
+
+  $mbean_server = new MBeanServer();
+  $server = $mbean_server->lookup("resin:type=Server");
+  $server_index = $server->SelfServer->ClusterIndex;
+
+  if ($g_server_index != $server_index)
+    return 0;
+
+  return 1;
+}
 
 function display_deploy_form($mbean_server)
 {
@@ -72,39 +71,52 @@ function display_deploy_form($mbean_server)
     echo "</div>";
   }
 
-?>
-  <form id='deploy' enctype='multipart/form-data' method='post' action="#">
-    <input type='hidden' name='action' value='deploy'/>
+  ?>
+<form id='deploy' enctype='multipart/form-data' method='post' action="#">
+  <input type='hidden' name='action' value='deploy'/>
 
-    <div class='form-input-block'>
-      <div id='file-title' class='form-input-title'><label for='application'>Application archive file</label></div>
-      <div class='form-input-input'> 
-        <input type='file' name='application' id='application'/>
-      </div>
-      <div class='form-input-help'>The .war file to upload</div>
+  <div class='form-input-block'>
+    <div id='file-title' class='form-input-title'><label for='application'>Application archive file</label></div>
+    <div class='form-input-input'>
+      <input type='file' name='application' id='application'/>
     </div>
+    <div class='form-input-help'>The .war file to upload</div>
+    <div id='file-info-box' class='info-box ui-state-highlight' style='display:none'></div>
+  </div>
 
-    <div class='form-input-block'>
-      <div id='name-title' class='form-input-title'><label for='name'>Name</label></div>
-      <div class='form-input-input'>
-        <input type='text' name='name' value='<?= $_GET['update-name'] ?>' class='required' id='name'/>
-      </div>
-      <div class='form-input-help'>The context root and name of the application</div>
+  <div class='form-input-block'>
+    <div id='name-title' class='form-input-title'><label for='name'>Name</label></div>
+    <div class='form-input-input'>
+      <input type='text' name='name' value='<?= $_GET['update-name'] ?>' class='required' id='name'/>
     </div>
+    <div class='form-input-help'>The context root and name of the application</div>
+  </div>
 
   <div class='form-input-block'>
     <div class='form-input-title'>Version</div>
     <div class='form-input-input'>
-      <input type='number' min='0' size='3' name='version-major' title='Major Version Number' value='0' class='required' id='version-major'/>
-      <input type='number' min='0' size='3' name='version-minor' title='Minor Version Number' value='0' class='required' id='version-minor'/>
-      <input type='number' min='0' size='3' name='version-micro' title='Micro Version Number' value='0' class='required' id='version-micro'/>
-      <input type='text' name='version-qualifier' title='Version Qualifier (free form)' value='' id='version-qualifier'/>
+      <input type='number' min='0' size='3' name='version-major'
+             title='Major Version Number' value='0' class='required'
+             id='version-major'/>
+      <input type='number' min='0' size='3' name='version-minor'
+             title='Minor Version Number' value='0' class='required'
+             id='version-minor'/>
+      <input type='number' min='0' size='3' name='version-micro'
+             title='Micro Version Number' value='0' class='required'
+             id='version-micro'/>
+      <input type='text' name='version-qualifier'
+             title='Version Qualifier (free form)' value=''
+             id='version-qualifier'/>
     </div>
-    <div class='form-input-help'>The version for the application, using the <label for='version-major'>&lt;major></label>.<label for='version-minor'>&lt;minor></label>.<label for='version-micro'>&lt;micro></label>.<label for='version-qualifier'>&lt;qualifier></label> format.</div>
+    <div class='form-input-help'>The version for the application, using the
+      <label for='version-major'>&lt;major></label>.<label for='version-minor'>
+        &lt;minor></label>.<label for='version-micro'>&lt;micro></label>.<label
+        for='version-qualifier'>&lt;qualifier></label> format.
+    </div>
   </div>
 
   <div class='form-input-block'>
-    <div class='form-input-title'><label for='commit-message'>Commit message</label></div>
+    <div class='form-input-title'><label for='commit-message'>Commit  message</label></div>
     <div class='form-input-input'>
       <textarea name='commit-message' id='commit-message' rows='2' cols='80'></textarea>
     </div>
@@ -112,16 +124,16 @@ function display_deploy_form($mbean_server)
   </div>
 
   <div class='switch' id='deploy-advanced-options' style='margin-bottom: 2em;'>Advanced Options</div>
-    <div class='toggle-deploy-advanced-options option-box' style="display: none">
+  <div class='toggle-deploy-advanced-options option-box' style="display: none">
 
     <div class='form-input-block'>
       <div class='form-input-title'>Host</div>
       <div class='form-input-input'>
         <fieldset>
-        <legend>Host:</legend>
-        <input class='host' type='radio' name='host' value='default' checked='checked' id='default-host'/>
+          <legend>Host:</legend>
+          <input class='host' type='radio' name='host' value='default' checked='checked' id='default-host'/>
           <label for='default-host'>Deploy to default host</label>
-        <br/>
+          <br/>
         <span class='another-host'>
           <input type='radio' name='host' value='' id='another-host'/>
           <label for='another-host'>Deploy to another host:</label> 
@@ -135,11 +147,11 @@ function display_deploy_form($mbean_server)
     <div class='form-input-block'>
       <div class='form-input-title'>Stage</div>
       <div class='form-input-input'>
-      	<fieldset>
-      	<legend>Stage</legend>
-        <input class='stage' type='radio' name='stage' value='production' checked='checked' id='default-stage'/>
+        <fieldset>
+          <legend>Stage</legend>
+          <input class='stage' type='radio' name='stage' value='production' checked='checked' id='default-stage'/>
           <label for='default-stage'>Deploy to production</label>
-        <br/>
+          <br/>
         <span class='another-stage'>
           <input type='radio' name='stage' value='' id='another-stage'/>
           <label for='another-stage'>Deploy to another stage:</label> 
@@ -147,14 +159,15 @@ function display_deploy_form($mbean_server)
         </span>
         </fieldset>
       </div>
-      <div class='form-input-help'><label for='another-stage-name'>The stage where the application will appear.</label></div>
+      <div class='form-input-help'><label for='another-stage-name'>The stage
+        where the application will appear.</label></div>
     </div>
   </div>
 
   <div id='deploy-info-box' class='info-box ui-state-highlight' style='display:none'></div>
 
-  <input class='deploy' type='submit' value='Deploy' <?= $disabled ?>/>
-  </form>
+  <input id="submit-button" class='deploy' type='submit' value='Deploy' <?= $disabled ?>/>
+</form>
 <?
 }
 
@@ -213,13 +226,15 @@ function deploy()
   $path = $_FILES['application']['tmp_name'];
 
   if (! $path) {
-?>
-<div class='ui-state-error info-box' style='margin-bottom: 0.5em'>
-  <span class='ui-icon ui-icon-alert' style='float: left; margin: 15px 5px;'></span>
-  <h3>Deploy failed</h3>
-  <p><strong>Please specify an application archive file</strong></p>
-</div>
-<? 
+    ?>
+  <div class='ui-state-error info-box' style='margin-bottom: 0.5em'>
+    <span class='ui-icon ui-icon-alert' style='float: left; margin: 15px 5px;'></span>
+
+    <h3>Deploy failed</h3>
+
+    <p><strong>Please specify an application archive file</strong></p>
+  </div>
+  <?
   }
   else {
     $client->commitArchive($commit, $path);
@@ -230,8 +245,13 @@ function deploy()
 ?>
 <div class='ui-state-highlight info-box' style='margin-bottom: 0.5em'>
   <span class='ui-icon ui-icon-info' style='float: left; margin: 15px 5px;'></span>
+
   <h3>Successfully deployed application</h3>
-  <p>The application may take a few moments to be propagated throughout the cluster.  Please check the <a href="?q=webapp&amp;s=<?= $g_server_index ?>">webapp</a> page for more informtion.</p>
+
+  <p>The application may take a few moments to be propagated throughout the
+    cluster. Please check the <a href="?q=webapp&amp;s=<?= $g_server_index ?>">webapp</a>
+    page for more informtion.</p>
+
   <div><b>Name:</b><?= $name ?></div>
   <div><b>Version:</b><?= $commit->getVersion() ?></div>
   <div><b>Deploy date:</b><?= $date ?></div>
@@ -250,7 +270,7 @@ function javascript_autocomplete()
 
   $stages = array("production");
   $hosts = array();
-  
+
   foreach ($tags as $tag) {
     $elements = explode("/", $tag->getTag());
     array_push($stages, "'{$elements[0]}'");
@@ -274,7 +294,7 @@ EOF;
   $webapps = $g_mbean_server->query("resin:*,type=WebApp");
   $apps = array();
 
-  foreach ($webapps as $webapp) { 
+  foreach ($webapps as $webapp) {
     $contextPath = $webapp->getContextPath();
 
     if ($contextPath == "")
@@ -285,7 +305,7 @@ EOF;
 
     if (count($metadata) == 0) {
       $apps[$key] = array("rootDirectory" => $webapp->getRootDirectory());
-    } 
+    }
     else {
       $apps[$key] = $metadata;
     }
@@ -312,17 +332,35 @@ function javascript_deploy_form()
     var hostRadio = $("input:radio[name=host]");
     var anotherHostRadio = $(".another-host input:radio");
     var anotherHostInput = $(".another-host input:text");
-    var infoBox = $("#deploy-info-box");  
+    var fileInfoBox = $("#file-info-box");
+    var infoBox = $("#deploy-info-box");
+    var submitInput = $("#submit-button");
 
     applicationFileInput.change(function() {
-      if (applicationNameInput.val() == "") {
-        var filename = applicationFileInput.val();
-        var match = /(.*(\/|\\\\))*(.*)\.war$/.exec(filename);
+      var filename = applicationFileInput.val();
+      var match = /(.*(\/|\\\\))*(.*)\.(war|jar|zip)$/.exec(filename);
 
-        if (match) {
-          applicationNameInput.val(match[3]);
-          applicationNameInput.change();
-        }
+      if (! match) {
+        fileInfoBox.addClass("ui-state-error");
+        fileInfoBox.html("<span class='ui-icon ui-icon-alert' " +
+                     "style='float: left; margin: 15px 5px;'></span>" +
+                     "<h3>Application archive must be a .war file</h3>");
+
+        fileInfoBox.show();
+
+        submitInput.attr("disabled", true);
+
+        return;
+      }
+
+      fileInfoBox.removeClass("ui-state-error");
+      fileInfoBox.hide();
+
+      submitInput.attr("disabled", false);
+
+      if (applicationNameInput.val() == "") {
+        applicationNameInput.val(match[3]);
+        applicationNameInput.change();
       }
     });
 
@@ -467,7 +505,7 @@ EOF;
 }
 
 if ($deploy_enabled)
-	$javascript = javascript_deploy_form();
+  $javascript = javascript_deploy_form();
 
 display_footer($g_page, $javascript);
 ?>
