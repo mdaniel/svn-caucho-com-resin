@@ -82,6 +82,7 @@ public class ResinQuercusServlet extends QuercusServletImpl
     quercus.setIni("caucho.server_id", Resin.getLocal().getServerId());
   }
 
+  @Override
   protected WriteStream openWrite(HttpServletResponse response)
     throws IOException
   {

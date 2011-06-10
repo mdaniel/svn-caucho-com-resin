@@ -681,7 +681,7 @@ public class StringBuilderValue
   public Value put(Value index, Value value)
   {
     setCharValueAt(index.toLong(), value);
-
+    
     return value;
   }
 

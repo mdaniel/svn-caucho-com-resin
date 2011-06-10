@@ -162,6 +162,7 @@ public final class HttpServletRequestImpl extends AbstractCauchoRequest
                                             request.getAbstractHttpResponse());
   }
 
+  @Override
   public HttpServletResponseImpl getResponse()
   {
     return _response;
@@ -415,20 +416,19 @@ public final class HttpServletRequestImpl extends AbstractCauchoRequest
 
     AbstractHttpRequest request = _request;
 
-    if (request != null) {
-      WebApp webApp = request.getWebApp();
-      
-      if (webApp != null) {
-        Boolean isSecure = webApp.isRequestSecure();
-        
-        if (isSecure != null)
-          return isSecure;
-      }
-      
-      return request.isSecure();
-    }
-    else
+    if (request == null)
       return false;
+    
+    WebApp webApp = request.getWebApp();
+      
+    if (webApp != null) {
+      Boolean isSecure = webApp.isRequestSecure();
+        
+      if (isSecure != null)
+        return isSecure;
+    }
+      
+    return request.isSecure();
   }
 
   //
@@ -446,7 +446,7 @@ public final class HttpServletRequestImpl extends AbstractCauchoRequest
   public Object getAttribute(String name)
   {
     HashMapImpl<String,Object> attributes = _attributes;
-
+    
     if (attributes != null)
       return attributes.get(name);
     else if (isSecure()) {
@@ -492,6 +492,13 @@ public final class HttpServletRequestImpl extends AbstractCauchoRequest
   public void setAttribute(String name, Object value)
   {
     HashMapImpl<String,Object> attributes = _attributes;
+    
+    if (_request == null) {
+      System.out.println(Thread.currentThread().getName() + " CLOSED: "+ _request + " " + this);
+      System.out.println(Thread.currentThread().getName() + " C2: "+ 
+                         _request.getRequestURI());
+      Thread.dumpStack();
+    }
 
     if (value != null) {
       if (attributes == null) {
@@ -1969,8 +1976,11 @@ public final class HttpServletRequestImpl extends AbstractCauchoRequest
       }
     }
 
+    _dummyRequest = _request;
     _request = null;
   }
+  
+  private AbstractHttpRequest _dummyRequest;
 
   public void cleanup()
   {

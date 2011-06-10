@@ -1376,6 +1376,11 @@ public class Env
 
     if (outputBuffer == null)
       return false;
+    
+    if (outputBuffer.getLength() > 65536) {
+      System.out.println("LEN: " + outputBuffer.getLength() + " " + this
+                         + " " + _page);
+    }
 
     outputBuffer.close();
 
@@ -6953,10 +6958,13 @@ public class Env
 
   public void startDuplex(Object duplex)
   {
+    throw new UnsupportedOperationException(getClass().getName());
+    /*
     if (_duplex != null)
       return;
 
     _duplex = duplex;
+    */
   }
 
   public void closeDuplex()
@@ -6978,10 +6986,12 @@ public class Env
   {
     _quercus.completeEnv(this);
     
+    /*
     if (_duplex != null) {
       log.fine(this + " skipping close for duplex mode");
       return;
     }
+    */
 
     try {
       // php/1l0t

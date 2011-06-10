@@ -216,7 +216,7 @@ public class QuercusContext
   private ConcurrentHashMap<String,DataSource> _databaseMap
     = new ConcurrentHashMap<String,DataSource>();
   
-  protected ConcurrentHashMap<Env,Env> _activeEnvSet
+  private ConcurrentHashMap<Env,Env> _activeEnvSet
     = new ConcurrentHashMap<Env,Env>();
 
   private long _staticId;
@@ -2059,6 +2059,11 @@ public class QuercusContext
   public ExprFactory createExprFactory()
   {
     return new ExprFactory();
+  }
+  
+  protected Map<Env,Env> getActiveEnvSet()
+  {
+    return _activeEnvSet;
   }
 
   public void startEnv(Env env)

@@ -287,7 +287,7 @@ public class ResinQuercus extends QuercusContext
     public void handleAlarm(Alarm alarm)
     {
       try {
-        ArrayList<Env> activeEnv = new ArrayList<Env>(_activeEnvSet.keySet());
+        ArrayList<Env> activeEnv = new ArrayList<Env>(getActiveEnvSet().keySet());
       
         for (Env env : activeEnv) {
           env.updateTimeout();
