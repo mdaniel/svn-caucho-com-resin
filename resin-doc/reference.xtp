@@ -3405,7 +3405,7 @@ ActionSequence to gather shutdown information</p>
          xmlns:ee="urn:java:ee">
          
   &lt;health:ActionSequence>
-    &lt;health:FailSafeRestart timeout="10m">
+    &lt;health:FailSafeRestart timeout="10m"/>
     &lt;health:DumpThreads/>
     &lt;health:DumpHeap/>
     &lt;health:StartProfiler active-time="5m"/>
@@ -5078,7 +5078,7 @@ at the INFO level.</p>
          xmlns:ee="urn:java:ee">
          
   &lt;health:ActionSequence>
-    &lt;health:FailSafeRestart timeout="10m">
+    &lt;health:FailSafeRestart timeout="10m"/>
     &lt;health:DumpThreads/>
     &lt;health:DumpHeap/>
     &lt;health:StartProfiler active-time="5m"/>
