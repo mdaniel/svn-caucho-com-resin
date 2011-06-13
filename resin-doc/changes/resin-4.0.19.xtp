@@ -1,0 +1,23 @@
+<document>
+  <header>
+    <product>resin</product>
+    <title>Resin 4.0.19 Release Notes</title>
+  </header>
+
+<body>
+
+<localtoc/>
+
+<s1 title="Summary">
+
+<p>4.0.18 is primarily a bug fix release.</p>
+
+</s1>
+
+<s1 title="(CLI) Resin command line updates">
+  <p>stuff
+  </p>
+</s1>
+
+</body>
+</document>
