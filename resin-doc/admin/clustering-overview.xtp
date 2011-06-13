@@ -4,15 +4,25 @@
 <description>
 
 <p>
-When your traffic grows beyond the limitations of a single virtual-machine
-instance, Resin's clustering will manage your additional servers.
-With Resins' clustering, your servers gain the reliability of a
-triple-redundant hub, the "triad", which serves as the replicated
-backup of Resin's clustering system.
-The cluster provides automatic health checks and sensor statistics,
-reliable cluster-wise deployment, load-balancing, failover and
-distributed caching and session management.
-</p> 
+Resin's clustering is designed to support a straight-forward
+elastic-server private cloud: allowing servers to join and leave the
+cluster while maintaining uptime and reliability without needing
+configuration changes.
+</p>
+
+<p>To support the elastic-server cloud, Resin maintains the
+following when servers are added and removed:</p>
+
+<ul>
+<li>Data redundancy with a triad hub.</li>
+<li>Application deployment through a clustered transactional
+repository.</li>
+<li>Distributed caching and store for both servlet sessions and jCache
+caching.</li>
+<li>Load balancing to the elastic servers.</li>
+<li>Distributed management, sensing, and health checks.</li>
+<li>Elastic JMS message queues.</li>
+</ul>
 
 </description>
 </header>
@@ -115,6 +125,43 @@ fail-over and clustering, Resin also has support for a distributed
 caching API, clustered application deployment as well as tools for
 administering the cluster.</p>
 
+
+</s1>
+
+<s1 title="Elastic Servers">
+
+<p>Resin lets you add and remove servers dynamically to the system, and
+automatically adjusts the cluster to manage those servers.</p>
+
+<ul>
+<li>Deployed applications pushed to the new server automatically.</li>
+<li>Distributed caching updates replicated data with server adds and removes.</li>
+<li>Load balancing updates to include the new server or remove the old one.</li>
+<li>JMS queues update with the new server.</li>
+<li>Administration updates to the new server.</li>
+</ul>
+
+<s2 title="Starting an elastic server">
+
+<p>The new server requires a copy of the site's resin.xml, which must have
+at least one server configured, because the server needs the IP address of
+the core servers.</p>
+
+<p>The main operation is a "-join-cluster app-tier" which tells the
+new server which cluster to join.</p>
+
+<example title="Example: minimal command-line for dynamic server">
+unix> bin/resin.sh -join-cluster app-tier start \
+          -user my-admin -password my-password
+</example>
+
+<p>As usual, you can name the server with "-server my-name". By default, one
+is generated automatically.</p>
+
+<p>After the server shuts down, the cluster will remember it for 15 minutes,
+giving the server time to restart before removing it from the cluster.</p>
+
+</s2>
 
 </s1>
 
@@ -239,43 +286,6 @@ marked with a red 'x'.</p>
 
 <p> The details for each Ant and Maven based clustered deployment API
 is outlined <a href="clustering-deployment-ref.xtp">here</a>.  </p>
-
-</s1>
-
-<s1 title="Elastic Servers">
-
-<p>Resin lets you add and remove servers dynamically to the system, and
-automatically adjusts the cluster to manage those servers.</p>
-
-<ul>
-<li>Deployed applications pushed to the new server automatically.</li>
-<li>Distributed caching updates replicated data with server adds and removes.</li>
-<li>Load balancing updates to include the new server or remove the old one.</li>
-<li>JMS queues update with the new server.</li>
-<li>Administration updates to the new server.</li>
-</ul>
-
-<s2 title="Starting an elastic server">
-
-<p>The new server requires a copy of the site's resin.xml, which must have
-at least one server configured, because the server needs the IP address of
-the core servers.</p>
-
-<p>The main operation is a "-join-cluster app-tier" which tells the
-new server which cluster to join.</p>
-
-<example title="Example: minimal command-line for dynamic server">
-unix> bin/resin.sh -join-cluster app-tier start \
-          -user my-admin -password my-password
-</example>
-
-<p>As usual, you can name the server with "-server my-name". By default, one
-is generated automatically.</p>
-
-<p>After the server shuts down, the cluster will remember it for 15 minutes,
-giving the server time to restart before removing it from the cluster.</p>
-
-</s2>
 
 </s1>
 
@@ -480,15 +490,15 @@ force the web-tier to use a particular server in the app-tier.  </p>
 
 <p> Since Resin uses the first character of the <var>jsessionid</var>
 to identify the server to use, starting with 'a' will resolve the
-request to app-a.  If wwww.example.com resolves to your web-tier, then
+request to app-a.  If www.example.com resolves to your web-tier, then
 you can use values like this for testing: </p>
 
 <ol>
-<li>http://www.example.com/proxooladmin;jsessionid=aaaXXXXX</li>
-<li>http://www.example.com/proxooladmin;jsessionid=baaXXXXX</li>
-<li>http://www.example.com/proxooladmin;jsessionid=caaXXXXX</li>
-<li>http://www.example.com/proxooladmin;jsessionid=daaXXXXX</li>
-<li>http://www.example.com/proxooladmin;jsessionid=eaaXXXXX</li>
+<li>http://www.example.com/test-servlet;jsessionid=aaaXXXXX</li>
+<li>http://www.example.com/test-servlet;jsessionid=baaXXXXX</li>
+<li>http://www.example.com/test-servlet;jsessionid=caaXXXXX</li>
+<li>http://www.example.com/test-servlet;jsessionid=daaXXXXX</li>
+<li>http://www.example.com/test-servlet;jsessionid=eaaXXXXX</li>
 <li>etc.</li>
 </ol>
 

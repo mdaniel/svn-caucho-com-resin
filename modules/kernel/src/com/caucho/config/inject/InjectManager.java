@@ -288,6 +288,7 @@ public final class InjectManager
 
   private HashSet<Bean<?>> _beanSet = new HashSet<Bean<?>>();
 
+  private boolean _isEnableAutoUpdate = true;
   private boolean _isUpdateNeeded = true;
   private boolean _isAfterValidationNeeded = true;
 
@@ -657,7 +658,12 @@ public final class InjectManager
   public List<Path> getBeansXmlOverride(Path path)
   {
     return _beansXMLOverrides.get(path);
-  }  
+  }
+  
+  public void setEnableAutoUpdate(boolean isEnable)
+  {
+    _isEnableAutoUpdate = isEnable;
+  }
   
   public void setDeploymentTypes(ArrayList<Class<?>> deploymentList)
   {
@@ -2984,6 +2990,10 @@ public final class InjectManager
 
   public void update()
   {
+    // ioc/0044
+    if (! _isEnableAutoUpdate)
+      return;
+    
     if (! _isUpdateNeeded 
         && ! _scanManager.isPending()
         && _pendingAnnotatedTypes.size() == 0) {

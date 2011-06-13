@@ -274,7 +274,7 @@ command line when starting the server.  For example:
 </p>
 
 <example>
-java -jar ${resin.home}/lib/resin.jar --root-directory /var/www
+bin/resin.sh --root-directory /var/www start
 </example>
 
 <p>

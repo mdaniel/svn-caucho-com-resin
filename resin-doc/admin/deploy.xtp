@@ -311,7 +311,7 @@ host. Since the AdminAuthenticator requires a user and password, you'll
 need to pass those arguments as well.</p>
 
 <example title="Example: deploy hello.war">
-unix> java -jar lib/resin.jar deploy hello.war \
+unix> bin/resin.sh deploy hello.war \
            -user foo -password test
 </example>
 

@@ -40,6 +40,7 @@ import javax.el.ELException;
 import javax.management.ObjectName;
 
 import com.caucho.config.ConfigException;
+import com.caucho.config.inject.InjectManager;
 import com.caucho.config.program.ConfigProgram;
 import com.caucho.config.types.PathBuilder;
 import com.caucho.env.repository.RepositoryTagEntry;
@@ -440,8 +441,6 @@ abstract public class
       if (getPrologue() != null)
         initList.add(getPrologue());
 
-      fillInitList(initList);
-
       thread.setContextClassLoader(instance.getClassLoader());
       Vfs.setPwd(getRootDirectory());
 
@@ -449,11 +448,21 @@ abstract public class
 
       instance.preConfigInit();
 
-      for (DeployConfig config : initList) {
-        ConfigProgram program = config.getClassLoaderProgram();
+      fillInitList(initList);
+      
+      InjectManager cdiManager = InjectManager.getCurrent();
 
-        if (program != null)
-          program.configure(instance);
+      cdiManager.setEnableAutoUpdate(false);
+      
+      try {
+        for (DeployConfig config : initList) {
+          ConfigProgram program = config.getClassLoaderProgram();
+
+          if (program != null)
+            program.configure(instance);
+        }
+      } finally {
+        cdiManager.setEnableAutoUpdate(true);
       }
 
       for (DeployConfig config : initList) {

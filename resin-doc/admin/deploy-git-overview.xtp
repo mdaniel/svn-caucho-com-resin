@@ -469,7 +469,7 @@ mvn resin:upload-war -Dresin.stage="preview"
       </p>
 
       <example title="Starting the first triad server">
-java -jar $RESIN_HOME/lib/resin.jar -server a start
+$RESIN_HOME/bin/resin.sh -server a start
       </example>
 
       <p>
@@ -482,7 +482,7 @@ java -jar $RESIN_HOME/lib/resin.jar -server a start
       </p>
 
       <example title="Starting the second triad server as a preview server">
-java -jar $RESIN_HOME/lib/resin.jar -server b -stage preview start
+$RESIN_HOME/bin/resin.sh -server b -stage preview start
       </example>
 
       <p>

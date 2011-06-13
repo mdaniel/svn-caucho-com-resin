@@ -297,7 +297,7 @@ with Apache or standalone.  See the <a href="http-server.xtp#deploy">Resin Web S
 for a detailed description.</p>
 
 <example>
-unix&gt; java -jar $RESIN_HOME/lib/resin.jar start 
+unix&gt; $RESIN_HOME/bin/resin.sh start 
 
 unix&gt; bin/resin.sh start
 

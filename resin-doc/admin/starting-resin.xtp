@@ -41,7 +41,7 @@ something like <code>/var/www</code>.</li>
 
 <li>On Unix, execute <code>./configure --prefix=`pwd`; make; make install</code></li>
 
-<li>Start in development mode by executing <code>java -jar lib/resin.jar console</code> on Unix or simply <code>resin.exe</code> on Windows</li>
+<li>Start in development mode by executing <code>bin/resin.sh console</code> on Unix or simply <code>resin.exe</code> on Windows</li>
 
 <li>Browse to <a href="http://localhost:8080">http://localhost:8080</a></li>
 </ol>
@@ -97,9 +97,9 @@ When running as a daemon, Resin detaches from the console and continues
 running until told to stop.</p>
 
 <ol>
-<li>Start resin with <code>java -jar lib/resin.jar start</code></li>
-<li>Stop resin with <code>java -jar lib/resin.jar stop</code></li>
-<li>Restart resin with <code>java -jar lib/resin.jar restart</code></li>
+<li>Start resin with <code>bin/resin.sh start</code></li>
+<li>Stop resin with <code>bin/resin.sh stop</code></li>
+<li>Restart resin with <code>bin/resin.sh restart</code></li>
 </ol>
 
 </s2>
@@ -156,8 +156,8 @@ environment variable <var>JAVA_HOME</var>.</li>
 </li>
 <li><code>make</code></li>
 <li><code>make install</code></li>
-<li>Execute <code>java -jar lib/resin.jar console</code>
-  <ul><li>Or run <code>bin/resin.sh console</code></li></ul>
+<li>Execute <code>bin/resin.sh console</code>
+  <ul><li>Or run <code>java -jar lib/resin.jar console</code></li></ul>
 </li>
 <li>Browse to <a href="http://localhost:8080">http://localhost:8080</a></li>
 </ol>

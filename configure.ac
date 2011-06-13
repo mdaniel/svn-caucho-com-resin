@@ -1139,6 +1139,7 @@ AC_ARG_WITH(openssl,
 OPENSSL=${withval}
 OPENSSL_INCLUDE=${OPENSSL}/include	
 OPENSSL_LIB=${OPENSSL}/lib	
+ENABLE_SSL=true
 ])
 
 #
@@ -1149,6 +1150,7 @@ AC_ARG_WITH(openssl-include,
                 [Openssl include directory])], 
 [
 OPENSSL_INCLUDE=${withval}
+ENABLE_SSL=true
 
 if test ! -r "${OPENSSL_INCLUDE}/openssl/ssl23.h"; then
   AC_MSG_ERROR([Can't find valid OpenSSL include ${OPENSSL_INCLUDE}])
@@ -1163,6 +1165,7 @@ AC_ARG_WITH(openssl-lib,
                 [Openssl lib directory])], 
 [
 OPENSSL_LIB=${withval}
+ENABLE_SSL=true
 
 if test ! -r "${OPENSSL_LIB}/libssl.a" -a \
         ! -r "${OPENSSL_LIB}/libssl.dylib" -a \
@@ -1171,18 +1174,20 @@ if test ! -r "${OPENSSL_LIB}/libssl.a" -a \
 fi
 ])
 
-if test -z "${ENABLE_SSL}"; then	
+if test -n "${OPENSSL_INCLUDE}"; then
   foo=bar
-elif test -n "${OPENSSL_INCLUDE}"; then
-  foo=bar
-elif test -r ${OPENSSL}/include/openssl/ssl23.h; then
+elif test -r ${OPENSSL}/include/openssl/ssl3.h; then
   OPENSSL_INCLUDE=${OPENSSL}/include
-elif test -r /usr/include/openssl/ssl23.h; then
+  ENABLE_SSL=true
+elif test -r /usr/include/openssl/ssl3.h; then
   OPENSSL_INCLUDE=/usr/include
-elif test -r /usr/local/include/openssl/ssl23.h; then
+  ENABLE_SSL=true
+elif test -r /usr/local/include/openssl/ssl3.h; then
   OPENSSL_INCLUDE=/usr/local/include
-elif test -r /usr/local/ssl/include/openssl/ssl23.h; then
+  ENABLE_SSL=true
+elif test -r /usr/local/ssl/include/openssl/ssl3.h; then
   OPENSSL_INCLUDE=/usr/local/ssl/include
+  ENABLE_SSL=true
 fi
 
 #if test "${ENABLE_SSL}" = false; then	
