@@ -1542,9 +1542,16 @@ public class TcpSocketLinkListener
     TcpSocketLink startConn = _idleConn.allocate();
     
     if (startConn != null) {
-      startConn.toInit(); // change to the init/ready state
+      try {
+        startConn.toInit(); // change to the init/ready state
+      } catch (Exception e) {
+        log.log(Level.WARNING, e.toString(), e);
+        
+        startConn = null;
+      }
     }
-    else {
+    
+    if (startConn == null) {
       int connId = _connectionCount.incrementAndGet();
       QSocket socket = _serverSocket.createSocket();
 

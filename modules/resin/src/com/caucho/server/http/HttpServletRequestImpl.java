@@ -481,16 +481,7 @@ public final class HttpServletRequestImpl extends AbstractCauchoRequest
     else
       return NullEnumeration.create();
   }
-
-  private void debugDummy()
-  {
-    System.out.println(Thread.currentThread().getName() + " CLOSED: "+ _request + " " + this);
-    System.out.println(Thread.currentThread().getName() + " C2: "+ 
-                       _dummyRequest.getRequestURI());
-    Thread.dumpStack();
-    _dummyException.printStackTrace();
-    
-  }
+  
   /**
    * Sets the value of the named request attribute.
    *
@@ -501,10 +492,6 @@ public final class HttpServletRequestImpl extends AbstractCauchoRequest
   public void setAttribute(String name, Object value)
   {
     HashMapImpl<String,Object> attributes = _attributes;
-    
-    if (_request == null) {
-      debugDummy();
-    }
 
     if (value != null) {
       if (attributes == null) {
@@ -867,9 +854,6 @@ public final class HttpServletRequestImpl extends AbstractCauchoRequest
   @Override
   public String getHeader(String name)
   {
-    if (_request == null)
-      debugDummy();
-    
     return _request.getHeader(name);
   }
 
@@ -1984,15 +1968,9 @@ public final class HttpServletRequestImpl extends AbstractCauchoRequest
         }
       }
     }
-
-    _dummyRequest = _request;
-    _dummyException = new IllegalStateException();
-    _dummyException.fillInStackTrace();
+    
     _request = null;
   }
-  
-  private AbstractHttpRequest _dummyRequest;
-  private Exception _dummyException;
 
   public void cleanup()
   {

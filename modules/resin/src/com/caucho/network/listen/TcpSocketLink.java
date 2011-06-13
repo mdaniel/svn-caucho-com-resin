@@ -1149,7 +1149,8 @@ public class TcpSocketLink extends AbstractSocketLink
     if (log.isLoggable(Level.FINE))
       log.fine(this +" early close, most likely from client disconnect.");
     
-    close();
+    // close();
+    killKeepalive();
   }
 
   void close()

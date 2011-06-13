@@ -139,6 +139,12 @@ abstract public class AbstractHttpResponse {
    */
   public void clientDisconnect()
   {
+    try {
+      _responseStream.close();
+    } catch (Exception e) {
+      log.log(Level.FINER, e.toString(), e);
+    }
+    
     _request.clientDisconnect();
   }
 

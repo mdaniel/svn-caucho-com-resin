@@ -360,6 +360,11 @@ abstract public class AbstractThreadLauncher extends AbstractTaskWorker {
     }
   }
   
+  private void onStartFail()
+  {
+    _startingCount.getAndDecrement();
+  }
+  
   protected boolean isIdleTooLow(int startingCount)
   {
     return (_idleCount.get() + startingCount < _idleMin);
@@ -385,13 +390,22 @@ abstract public class AbstractThreadLauncher extends AbstractTaskWorker {
   private void startConnection()
   {
     while (doStart()) {
-      long now = getCurrentTimeActual();
+      boolean isValid = false;
 
-      updateIdleExpireTime(now);
+      try {
+        long now = getCurrentTimeActual();
 
-      int id = _gId.incrementAndGet();
+        updateIdleExpireTime(now);
+
+        int id = _gId.incrementAndGet();
         
-      launchChildThread(id);
+        launchChildThread(id);
+        
+        isValid = true;
+      } finally {
+        if (! isValid)
+          onStartFail();
+      }
     }
   }
   

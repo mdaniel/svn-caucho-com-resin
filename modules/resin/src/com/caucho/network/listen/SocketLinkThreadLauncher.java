@@ -74,11 +74,12 @@ class SocketLinkThreadLauncher extends AbstractThreadLauncher
   {
     Thread thread = Thread.currentThread();
     ClassLoader loader = thread.getContextClassLoader();
+    TcpSocketLink startConn;
     
     try {
       thread.setContextClassLoader(_listener.getClassLoader());
       
-      TcpSocketLink startConn = _listener.allocateConnection();
+      startConn = _listener.allocateConnection();
 
       if (! _threadPool.schedule(startConn.getAcceptTask())) {
         log.severe(L.l("Schedule failed for {0}", startConn));
