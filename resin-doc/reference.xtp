@@ -11079,9 +11079,9 @@ thread pool.</p>
 <tr><td>keepalive-max</td>
     <td>the maximum number of keepalive connections</td>
     <td>512</td></tr>
-<tr><td>keepalive-thread-timeout</td>
+<tr><td>keepalive-timeout</td>
     <td>the maximum time a connection is maintained in the keepalive state</td>
-    <td>120s</td></tr>
+    <td>15s</td></tr>
 </attributes>
 <example title="alternate-session-url-prefix">
 &lt;server&gt;
