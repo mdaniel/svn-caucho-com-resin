@@ -1871,7 +1871,7 @@ to launch the JVM</td>
 <tr>
   <td>load-balance-idle-time</td>
   <td>How long the load balancer can keep an idle socket open to this server (see keepalive-timeout)</td>
-  <td>keepalive-time - 2s</td>
+  <td>keepalive-time - 1s</td>
 </tr>
 <tr>
   <td>load-balance-recover-time</td>
