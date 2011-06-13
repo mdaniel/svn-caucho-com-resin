@@ -10,13 +10,31 @@
 
 <s1 title="Summary">
 
-<p>4.0.18 is primarily a bug fix release.</p>
+<p>4.0.19 is primarily a bug fix release.</p>
 
 </s1>
 
 <s1 title="(CLI) Resin command line updates">
   <p>stuff
   </p>
+</s1>
+
+<s1 title="Resin Eclipse Plugin">
+<p>Resin Eclipse Plugin is updated to publish and reload applications instantly.
+  These settings can be overridden in the Properties dialog (press F3 on the selected server).<br/>
+  Fixed bugs: http://bugs.caucho.com/view.php?id=4589.
+</p>
+<p>Resin Eclispe Snapshot and Release update sites are:<br/>
+  <ul>
+    <li><a href="http://www.caucho.com/eclipse">Eclipse Plugin Release Update Site</a></li>
+    <li><a href="http://www.caucho.com/eclipse-snapshot">Eclipse Plugin Snapshot Update Site</a></li>
+  </ul>
+</p>
+</s1>
+
+<s1 title="Resin Admin Web Console">
+<p>Page listing Web Applications was updated to include an option to undeploy an application.
+</p>
 </s1>
 
 </body>
