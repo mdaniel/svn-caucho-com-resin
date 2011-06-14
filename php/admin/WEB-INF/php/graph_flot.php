@@ -179,7 +179,7 @@ function stat_graph($canvas, $width, $height, $start, $end, $names, $alt,
   echo " },\n";
   echo " series: { lines: { lineWidth:2 } },\n";
   echo " legend: { container: \"#${canvas}-legend\" },\n";
-  echo " zoom: { interactive: true },\n";
+//  echo " zoom: { interactive: true },\n";
   echo " pan: { interactive: true },\n";
   echo " grid: { hoverable: true, autoHighlight: true },\n";
   echo "});\n";
