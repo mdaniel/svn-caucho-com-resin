@@ -195,7 +195,13 @@ std_read(connection_t *conn, char *buf, int len, int timeout)
   }
 
   if (len == 0) {
-    int result = recv(fd, buf, 1, MSG_DONTWAIT);
+    int result;
+
+#ifdef MSG_DONTWAIT	
+	result = recv(fd, buf, 1, MSG_DONTWAIT);
+#else
+	result = recv(fd, buf, 0, 0);
+#endif
 
     if (result > 0)
       return 0;
@@ -469,8 +475,10 @@ std_close_ss(server_socket_t *ss)
       if (sock < 0)
 	break;
 
+#ifdef O_NONBLOCK
       flags = fcntl(sock, F_GETFL);
       fcntl(sock, F_SETFL, O_NONBLOCK|flags);
+#endif
 
       result = connect(sock, server_sin, sin_len);
 

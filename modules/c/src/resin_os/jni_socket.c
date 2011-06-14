@@ -680,8 +680,10 @@ Java_com_caucho_vfs_JniServerSocketImpl_bindPort(JNIEnv *env,
       int flags;
       int fd = socket(AF_INET, SOCK_STREAM, 0);
 
+#ifdef O_NONBLOCK
       flags = fcntl(fd, F_GETFL);
       fcntl(fd, F_SETFL, O_NONBLOCK|flags);
+#endif
 
       result = connect(fd, (struct sockaddr *) &sin, sizeof(sin));
       closesocket(fd);
