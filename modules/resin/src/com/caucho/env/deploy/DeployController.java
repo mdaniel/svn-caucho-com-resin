@@ -29,6 +29,7 @@
 
 package com.caucho.env.deploy;
 
+import java.util.concurrent.atomic.AtomicReference;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -81,7 +82,8 @@ abstract public class DeployController<I extends DeployInstance>
   private long _redeployCheckInterval = REDEPLOY_CHECK_INTERVAL;
   
   private long _startTime;
-  private I _deployInstance;
+  private final AtomicReference<I> _deployInstanceRef
+    = new AtomicReference<I>();
 
   protected DeployController(String id)
   {
@@ -482,7 +484,7 @@ abstract public class DeployController<I extends DeployInstance>
    */
   public I getDeployInstanceImpl()
   {
-    return _deployInstance;
+    return _deployInstanceRef.get();
   }
 
   /**
@@ -618,7 +620,11 @@ abstract public class DeployController<I extends DeployInstance>
     assert(_lifecycle.isAfterInit());
 
     if (DynamicClassLoader.isModified(_parentLoader)) {
-      _deployInstance = null;
+      I instance = _deployInstanceRef.getAndSet(null);
+      
+      if (instance != null)
+        instance.destroy();
+      
       return null;
     }
 
@@ -643,11 +649,17 @@ abstract public class DeployController<I extends DeployInstance>
 
       isStarting = _lifecycle.toStarting();
 
-      if (! isStarting) {
+      if (! isStarting
+          || ! _deployInstanceRef.compareAndSet(null, deployInstance)) {
+        try {
+          deployInstance.destroy();
+        } catch (Throwable e) {
+          log.log(Level.FINEST, e.toString(), e);
+        }
+        
         return getDeployInstance();
       }
       
-      _deployInstance = deployInstance;
       
       preConfigureInstance(deployInstance);
       
@@ -729,7 +741,7 @@ abstract public class DeployController<I extends DeployInstance>
     Thread thread = Thread.currentThread();
     ClassLoader oldLoader = thread.getContextClassLoader();
     
-    I oldInstance = _deployInstance;
+    I oldInstance = _deployInstanceRef.get();
     boolean isStopping = false;
 
     try {
@@ -743,12 +755,8 @@ abstract public class DeployController<I extends DeployInstance>
       if (! isStopping)
         return;
 
-      synchronized (this) {
-        oldInstance = _deployInstance;
-        _deployInstance = null;
-      }
-
-      if (oldInstance != null) {
+      if (oldInstance != null
+          && _deployInstanceRef.compareAndSet(oldInstance, null)) { 
         destroyInstance(oldInstance);
       }
     } finally  {

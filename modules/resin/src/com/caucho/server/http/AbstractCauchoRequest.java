@@ -609,7 +609,7 @@ abstract public class AbstractCauchoRequest implements CauchoRequest {
   {
     SessionImpl session = _session;
     //
-    if (session == null && getSessionId() != null)
+    if (session == null && getSessionId() != null && getWebApp().isActive())
       session = (SessionImpl) getSession(false);
 
     if (session != null)

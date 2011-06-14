@@ -435,7 +435,6 @@ public class WebApp extends ServletContextImpl
   WebApp(WebAppController controller)
   {
     _controller = controller;
-
     _classLoader
       = EnvironmentClassLoader.create(controller.getParentClassLoader(),
                                       "web-app:" + getId());

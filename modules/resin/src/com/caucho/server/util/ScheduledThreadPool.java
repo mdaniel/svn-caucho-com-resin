@@ -392,6 +392,8 @@ public class ScheduledThreadPool implements ScheduledExecutorService,
   private void stop()
   {
     _isShutdown = true;
+    _loader = null;
+    _threadPool = null;
 
     while (true) {
       Future future = null;
@@ -404,13 +406,15 @@ public class ScheduledThreadPool implements ScheduledExecutorService,
 
           _futureSet.remove(future);
         }
+        else
+          break;
       }
 
-      if (future == null)
-        break;
-
-      future.cancel(true);
+      if (future != null)
+        future.cancel(true);
     }
+    
+    _futureSet.clear();
   }
 
   @SuppressWarnings("unchecked")
@@ -419,6 +423,8 @@ public class ScheduledThreadPool implements ScheduledExecutorService,
     synchronized (_futureSet) {
       _futureSet.remove(future);
     }
+    
+    future.cancel(true);
   }
 
   //
@@ -428,6 +434,7 @@ public class ScheduledThreadPool implements ScheduledExecutorService,
   /**
    * Called when the environment config phase
    */
+  @Override
   public void environmentConfigure(EnvironmentClassLoader loader)
   {
   }
@@ -671,7 +678,7 @@ public class ScheduledThreadPool implements ScheduledExecutorService,
     }
 
     AlarmFuture(ClassLoader loader, Runnable runnable, long initialExpires,
-        long period, long delay)
+                long period, long delay)
     {
       _name = "Scheduled[" + runnable + "]";
 
@@ -688,7 +695,8 @@ public class ScheduledThreadPool implements ScheduledExecutorService,
 
     void queue()
     {
-      _alarm.queueAt(_initialExpires);
+      if (! _isShutdown)
+        _alarm.queueAt(_initialExpires);
     }
 
     public boolean isCancelled()
@@ -742,6 +750,12 @@ public class ScheduledThreadPool implements ScheduledExecutorService,
         thread.interrupt();
 
       return true;
+    }
+    
+    void close()
+    {
+      _isDone = true;
+      _alarm.dequeue();
     }
 
     public T get() throws InterruptedException, ExecutionException
@@ -811,13 +825,14 @@ public class ScheduledThreadPool implements ScheduledExecutorService,
         synchronized (this) {
           _alarmCount++;
 
-          if (_isCancelled || _isDone) {
+          if (_isCancelled || _isDone || _isShutdown) {
             removeFuture(this);
           }
           else if (_delay > 0) {
             _nextTime = Alarm.getCurrentTime() + _delay;
 
-            _alarm.queue(_delay);
+            if (! _isShutdown && ! _isDone && ! _isCancelled)
+              _alarm.queue(_delay);
           }
           else if (_period > 0) {
             long now = Alarm.getCurrentTime();

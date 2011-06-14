@@ -34,6 +34,7 @@ import java.net.URL;
 import java.net.URLClassLoader;
 import java.util.ArrayList;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.atomic.AtomicReference;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -913,7 +914,7 @@ public class EnvironmentClassLoader extends DynamicClassLoader
   @Override
   public void stop()
   {
-    if (! _lifecycle.toDestroy())
+    if (! _lifecycle.toStop())
       return;
 
     ArrayList<EnvironmentListener> listeners = getEnvironmentListeners();
@@ -952,9 +953,6 @@ public class EnvironmentClassLoader extends DynamicClassLoader
     try {
       WeakStopListener stopListener = _stopListener;
       _stopListener = null;
-
-      // make sure it's stopped first
-      stop();
 
       super.destroy();
 
