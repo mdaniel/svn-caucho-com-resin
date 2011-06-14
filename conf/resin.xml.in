@@ -84,6 +84,12 @@
        - Admin services
       -->
     <resin:DeployService/>
+
+    <!--
+       - Uncomment to allow remote administration services
+       -
+       - <resin:RemoteAdminService/>
+      -->
     
     <resin:if test="${resin.professional}">
       <resin:AdminServices/>
