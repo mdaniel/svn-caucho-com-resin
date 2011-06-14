@@ -857,7 +857,7 @@
      <exec executable="autoconf"/>
   </target>
 
-  <target name="maven-dist" depends="init, compile, maven-plugin, artifacts, resin.dist.jar">
+  <target name="maven-dist" depends="init, compile, artifacts, resin.dist.jar">
     <property name="maven" value="${maven.root}/com/caucho/"/>
     
     <antcall target="maven2-jar" inheritRefs="true">
@@ -900,13 +900,13 @@
       <param name="jar.name" value="hessian.jar"/>
       <param name="maven.name" value="resin-hessian"/>
     </antcall>
-
+<!--
     <antcall target="maven2-artifact" inheritRefs="true">
       <param name="module.name" value="maven"/>
       <param name="jar.name" value="resin-maven-plugin.jar"/>
       <param name="maven.name" value="resin-maven-plugin"/>
     </antcall>
-
+-->
     <!--
     <antcall target="maven2-artifact" inheritRefs="true">
       <param name="module.name" value="netbeans"/>
@@ -915,11 +915,13 @@
       <param name="maven.name" value="resin-netbeans"/>
     </antcall>
 -->
+    <!--
     <antcall target="maven2-artifact" inheritRefs="true">
       <param name="module.name" value="spring"/>
       <param name="jar.name" value="resin-spring.jar"/>
       <param name="maven.name" value="resin-spring"/>
     </antcall>
+    -->
 
     <!--
     <antcall target="maven2-module" inheritRefs="true">
