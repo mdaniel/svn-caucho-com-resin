@@ -928,7 +928,7 @@ public class Table extends BlockStore {
 
       try {
         clockBlockId = firstRowBlock(clockBlockId);
-
+        
         if (clockBlockId < 0) {
           _rowClockOffset = _rowClockTop;
           
@@ -991,6 +991,9 @@ public class Table extends BlockStore {
   private boolean isRowBlockFree(long blockId)
     throws IOException
   {
+    if (isClosed())
+      return false;
+    
     Block block = readBlock(blockId);
 
     try {

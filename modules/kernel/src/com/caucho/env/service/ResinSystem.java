@@ -142,7 +142,8 @@ public class ResinSystem
   /**
    * Creates a new servlet server.
    */
-  public ResinSystem(String id, Path rootDirectory) throws IOException
+  public ResinSystem(String id, Path rootDirectory)
+  throws IOException
   {
     this(id, rootDirectory, rootDirectory.lookup("resin-data"));
   }
@@ -154,6 +155,7 @@ public class ResinSystem
       throws IOException
   {
     this(id);
+    
     configureRoot(rootDirectory, dataDirectory);
   }
 

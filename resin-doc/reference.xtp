@@ -8121,7 +8121,6 @@ element resin {
   &amp; environment-system-properties?
   &amp; management?
   &amp; min-free-memory?
-  &amp; resin-data-directory?
   &amp; root-directory?
   &amp; security-manager?
   &amp; security-provider?
@@ -8148,23 +8147,6 @@ element resin {
   &lt;/cluster&gt;
 &lt;/resin&gt;
 </example>
-
-</defun>
-
-<defun title="&lt;resin-data-directory>" version="Resin 4.0.0" name="resin-data-directory">
-<parents>resin</parents>
-
-<description>
-<p>&lt;resin-data-directory> specifies the location of Resin's administration
-and data files, including persistent caching, sessions, and administration
-logs.</p>
-</description>
-
-<schema>
-element resin-data-directory {
-  r_path-Type
-}
-</schema>
 
 </defun>
 

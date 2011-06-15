@@ -106,6 +106,10 @@ public class PDFStream {
 
   public void setTextPos(double x, double y)
   {
+    if (_hasTextPos) {
+      println((- _textX) + " " + (- _textY) + " Td");
+    }
+    
     _textX = x;
     _textY = y;
     _hasTextPos = false;

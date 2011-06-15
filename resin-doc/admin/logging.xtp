@@ -81,10 +81,6 @@ useful logs.</p>
   <td>Debug everything</td>
 </tr>
 <tr>
-  <td>com.caucho.amber</td>
-  <td>Amber (JPA) handling</td>
-</tr>
-<tr>
   <td>com.caucho.ejb</td>
   <td>EJB handling</td>
 </tr>
@@ -357,107 +353,6 @@ will set the actual logging level.</p>
 &lt;/web-app>
 </example>
 
-</defun>
-
-<defun title="&lt;log>">
-<parents>resin, server, host-default, host, web-app-default, web-app</parents>
-   
-<p>Configure the amount and destination of debug logging for the JDK
-java.util.logging.* API.</p>
-
-<deftable-childtags title="&lt;log> values">
-<tr>
-  <th>Attribute</th>
-  <th>Description</th>
-  <th>Default</th>
-</tr>
-<tr>
-  <td>name</td>
-  <td>A hierarchical name, typically aligned with the Java packaging names</td>
-  <td>match all names</td>
-</tr>
-<tr>
-  <td>level</td>
-  <td>The <a href="#Log-Levels">log level</a></td>
-  <td>info</td>
-</tr>
-<tr>
-  <td>path</td>
-  <td>Output path for the log messages, see 
-       <a href="#path">"Log Paths"</a>
-    </td>
-  <td>required</td>
-</tr>
-<tr>
-  <td>path-format</td>
-  <td>Selects a format for generating path names.  The syntax is the same as for archive-format</td>
-  <td>optional</td>
-</tr>
-<tr>
-  <td>timestamp</td>
-  <td>a timestamp <a href="#timestamp">format string</a> 
-        to use at the beginning of each log line.
-    </td>
-  <td>"[%Y/%m/%d %H:%M:%S.%s] "</td>
-</tr>
-<tr>
-  <td>format</td>
-  <td>a <a href="#Format-String">format string</a> to control the 
-        output of each log message. Since Resin 3.0.5.
-    </td>
-  <td>${log.message}</td>
-</tr>
-<tr>
-  <td>rollover-count</td>
-  <td>maximum number of rollover files before the oldest ones get overwritten.
-        See <a href="#rollover">Rollovers</a>. 
-    </td>
-  <td>none</td>
-</tr>
-<tr>
-  <td>rollover-period</td>
-  <td>how often to rollover the log.  Specify in days (15D), weeks (2W), 
-        months (1M), or hours (1h). See <a href="#rollover">Rollovers</a>. 
-    </td>
-  <td>none</td>
-</tr>
-<tr>
-  <td>rollover-size</td>
-  <td>maximum size of the file before a rollover occurs, in bytes (50000), 
-        kb (128kb), or megabytes (10mb).  
-        See <a href="#rollover">Rollovers</a>.
-    </td>
-  <td>1mb</td>
-</tr>
-<tr>
-  <td>archive-format</td>
-  <td>the format for the archive filename when a rollover occurs,
-        see <a href="#rollover">Rollovers</a>.
-    </td>
-  <td>see below</td>
-</tr>
-<tr>
-  <td>mbean-name</td>
-  <td>an mbean name, see <a href="#mbean">MBean control</a>.</td>
-  <td>no mbean name, no mbean registration</td>
-</tr>
-<tr>
-  <td>handler</td>
-  <td>add a custom Handler, the name of a class that extends 
-        <a javadoc="java.util.logging.Handler"/>
-    </td>
-  <td>&#160;</td>
-</tr>
-<tr>
-  <td>formatter</td>
-  <td>set a custom Formatter, the name of a class that extends 
-        <a javadoc="java.util.logging.Formatter"/>
-    </td>
-  <td>none, or <a javadoc="com.caucho.log.ELFormatter"/> if 
-        <var>format</var> is used.</td>
-</tr>
-</deftable-childtags>
-
 <p>The default archive format is
 </p>
 
@@ -470,7 +365,7 @@ java.util.logging.* API.</p>
 
 <example title="Example: logging everything to System.err">
 &lt;resin xmlns="http://caucho.com/ns/resin"&gt;
-  &lt;log name='' level='all' path='stderr:' timestamp="[%H:%M:%S.%s]"/&gt;
+  &lt;log-handler name='' level='all' path='stderr:' timestamp="[%H:%M:%S.%s]"/&gt;
   ...
 &lt;/resin&gt;
 </example>
@@ -482,7 +377,7 @@ java.util.logging.* API.</p>
 
 &lt;resin&gt;
   ...
-  &lt;log name='' level='finer' path='log/debug.log'
+  &lt;log-handler name='' level='finer' path='log/debug.log'
        timestamp="[%H:%M:%S.%s]"
        rollover-period='1h' rollover-count='1'/&gt;
   ...
@@ -632,6 +527,32 @@ space pad the values and make the results look a little nicer:</p>
 </results>
 
 </s2> <!-- Format-String -->
+
+</defun>
+
+<defun title="&lt;logger>">
+<parents>resin, server, host-default, host, web-app-default, web-app</parents>
+   
+<p>Configure the logging level JDK
+java.util.logging.* API.</p>
+
+<deftable-childtags title="&lt;logger> values">
+<tr>
+  <th>Attribute</th>
+  <th>Description</th>
+  <th>Default</th>
+</tr>
+<tr>
+  <td>name</td>
+  <td>A hierarchical name, typically aligned with the Java packaging names</td>
+  <td>match all names</td>
+</tr>
+<tr>
+  <td>level</td>
+  <td>The <a href="#Log-Levels">log level</a></td>
+  <td>info</td>
+</tr>
+</deftable-childtags>
 
 </defun>
 

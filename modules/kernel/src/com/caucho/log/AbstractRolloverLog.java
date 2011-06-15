@@ -43,6 +43,7 @@ import com.caucho.util.WeakAlarm;
 import com.caucho.vfs.Path;
 import com.caucho.vfs.ReadStream;
 import com.caucho.vfs.TempStream;
+import com.caucho.vfs.TempStreamApi;
 import com.caucho.vfs.Vfs;
 import com.caucho.vfs.WriteStream;
 
@@ -115,7 +116,7 @@ public class AbstractRolloverLog {
   private final Object _logLock = new Object();
 
   private volatile boolean _isRollingOver;
-  private TempStream _tempStream;
+  private TempStreamApi _tempStream;
   private long _tempStreamSize;
 
   private WriteStream _os;
@@ -405,7 +406,7 @@ public class AbstractRolloverLog {
     throws IOException
   {
     synchronized (_logLock) {
-      if (_isRollingOver && ROLLOVER_OVERFLOW_MAX < _tempStreamSize) {
+      if (_isRollingOver && getTempStreamMax() < _tempStreamSize) {
         try {
           _logLock.wait();
         } catch (Exception e) {
@@ -421,7 +422,7 @@ public class AbstractRolloverLog {
       }
       else {
         if (_tempStream == null) {
-          _tempStream = new TempStream();
+          _tempStream = createTempStream();
           _tempStreamSize = 0;
         }
 
@@ -429,6 +430,16 @@ public class AbstractRolloverLog {
         _tempStream.write(buffer, offset, length, false);
       }
     }
+  }
+  
+  protected TempStreamApi createTempStream()
+  {
+    return new TempStream();
+  }
+  
+  protected long getTempStreamMax()
+  {
+    return ROLLOVER_OVERFLOW_MAX;
   }
 
   /**
@@ -508,8 +519,8 @@ public class AbstractRolloverLog {
         movePathToArchive(savedPath);
       }
     } finally {
-      _isRollingOver = false;
       synchronized (_logLock) {
+        _isRollingOver = false;
         flushTempStream();
       }
     }
@@ -820,25 +831,9 @@ public class AbstractRolloverLog {
   /**
    * error messages from the log itself
    */
-  private void logInfo(String msg)
-  {
-    EnvironmentStream.logStderr(msg);
-  }
-
-  /**
-   * error messages from the log itself
-   */
   private void logWarning(String msg, Throwable e)
   {
     EnvironmentStream.logStderr(msg, e);
-  }
-
-  /**
-   * error messages from the log itself
-   */
-  private void logWarning(String msg)
-  {
-    EnvironmentStream.logStderr(msg);
   }
 
   /**
@@ -895,7 +890,7 @@ public class AbstractRolloverLog {
    */
   private void flushTempStream()
   {
-    TempStream ts = _tempStream;
+    TempStreamApi ts = _tempStream;
     _tempStream = null;
     _tempStreamSize = 0;
 
@@ -914,6 +909,8 @@ public class AbstractRolloverLog {
           }
         } catch (IOException e) {
           e.printStackTrace();
+        } finally {
+          ts.destroy();
         }
       }
     } finally {

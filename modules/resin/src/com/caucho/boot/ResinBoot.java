@@ -122,8 +122,8 @@ public class ResinBoot {
     Path dataDirectory = rootDirectory.lookup("watchdog-data");
     
     ResinSystem system = new ResinSystem("watchdog",
-                                                rootDirectory,
-                                                dataDirectory);
+                                         rootDirectory,
+                                         dataDirectory);
 
     Thread thread = Thread.currentThread();
     thread.setContextClassLoader(system.getClassLoader());

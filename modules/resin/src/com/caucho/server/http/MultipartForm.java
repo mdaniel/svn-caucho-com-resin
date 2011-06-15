@@ -206,12 +206,18 @@ class MultipartForm {
       return null;
     
     int length = attr.length();
-    int i = attr.toLowerCase().indexOf(name);
+    
+    int i = findAttribute(attr, name);
     if (i < 0)
       return null;
 
+    if (length <= i || attr.charAt(i) != '=')
+      return null;
+    
+    /*
     for (i += name.length(); i < length && attr.charAt(i) != '='; i++) {
     }
+    */
     
     for (i++; i < length && attr.charAt(i) == ' '; i++) {
     }
@@ -232,5 +238,39 @@ class MultipartForm {
     }
 
     return value.close();
+  }
+  
+  private static int findAttribute(String attribute, String name)
+  {
+    int length = attribute.length();
+    int nameLength = name.length();
+    
+    for (int i = 0; i < length - nameLength; i++) {
+      if (attribute.regionMatches(true, i, name, 0, nameLength)) {
+        char ch;
+        
+        if (i > 0
+            && (ch = attribute.charAt(i - 1)) != ' '
+            && ch != ';'
+            && ch != '\t') {
+          continue;
+        }
+        
+        int j = i + nameLength;
+        
+        for (; j < length; j++) {
+          ch = attribute.charAt(j);
+          
+          if (ch == '=')
+            return j;
+          else if (ch == ' ' || ch == '\t')
+            continue;
+          else
+            break;
+        }
+      }
+    }
+    
+    return -1;
   }
 }

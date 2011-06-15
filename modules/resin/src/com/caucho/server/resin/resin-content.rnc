@@ -575,8 +575,6 @@ r_resin-Content =
 
   & r_module-repository?
 
-  & r_resin-data-directory?
-  
   & r_resin-system-auth-key?
 
   & r_root-directory?
@@ -600,10 +598,6 @@ r_resin-Content =
       element rcore:when|r:when { rcore_when-Args, r_resin-Content }+,
       element rcore:otherwise|r:otherwise { r_resin-Content }?
     }*
-
-r_resin-data-directory =
-  attribute resin-data-directory { r_path-Type }
-  | element resin-data-directory { r_path-Type }
 
 r_resin-system-auth-key =
   attribute resin-system-auth-key { string }

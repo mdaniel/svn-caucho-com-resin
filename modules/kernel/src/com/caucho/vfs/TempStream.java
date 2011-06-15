@@ -30,7 +30,9 @@ package com.caucho.vfs;
 
 import java.io.*;
 
-public class TempStream extends StreamImpl implements java.io.Serializable
+@SuppressWarnings("serial")
+public class TempStream extends StreamImpl
+  implements java.io.Serializable, TempStreamApi
 {
   private String _encoding;
   private TempBuffer _head;
@@ -130,7 +132,7 @@ public class TempStream extends StreamImpl implements java.io.Serializable
   public ReadStream openRead()
     throws IOException
   {
-    close();
+    closeWrite();
     
     TempReadStream read = new TempReadStream(_head);
     read.setFreeWhenDone(true);
@@ -148,7 +150,7 @@ public class TempStream extends StreamImpl implements java.io.Serializable
   public ReadStream openReadAndSaveBuffer()
     throws IOException
   {
-    close();
+    closeWrite();
 
     TempReadStream read = new TempReadStream(_head);
     read.setFreeWhenDone(false);
@@ -162,7 +164,7 @@ public class TempStream extends StreamImpl implements java.io.Serializable
   public void openRead(ReadStream rs)
     throws IOException
   {
-    close();
+    closeWrite();
 
     TempReadStream tempReadStream = new TempReadStream(_head);
     tempReadStream.setPath(getPath());
@@ -181,7 +183,7 @@ public class TempStream extends StreamImpl implements java.io.Serializable
   public InputStream getInputStream()
     throws IOException
   {
-    close();
+    closeWrite();
     
     TempBuffer head = _head;
     _head = null;
@@ -193,7 +195,7 @@ public class TempStream extends StreamImpl implements java.io.Serializable
   public InputStream openInputStream()
     throws IOException
   {
-    close();
+    closeWrite();
     
     TempBuffer head = _head;
     _head = null;

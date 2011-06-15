@@ -37,9 +37,11 @@ import java.util.logging.Logger;
 import com.caucho.env.meter.SemaphoreMeter;
 import com.caucho.env.thread.TaskWorker;
 import com.caucho.log.AbstractRolloverLog;
+import com.caucho.server.cache.TempFileService;
 import com.caucho.util.Alarm;
 import com.caucho.util.FreeList;
 import com.caucho.util.L10N;
+import com.caucho.vfs.TempStreamApi;
 
 /**
  * Represents an log of every top-level request to the server.
@@ -65,6 +67,8 @@ public class AccessLogWriter extends AbstractRolloverLog
 
   private final LogWriterTask _logWriterTask = new LogWriterTask();
   private SemaphoreMeter _semaphoreProbe;
+  
+  private TempFileService _tempService;
 
   AccessLogWriter(AccessLog log)
   {
@@ -77,6 +81,12 @@ public class AccessLogWriter extends AbstractRolloverLog
     */
 
     // _semaphoreProbe = MeterService.createSemaphoreMeter("Resin|Log|Semaphore");
+    
+    _tempService = TempFileService.getCurrent();
+    
+    if (_tempService == null)
+      throw new IllegalStateException(L.l("'{0}' is required for AccessLog",
+                                          TempFileService.class.getSimpleName()));
   }
 
   @Override
@@ -124,18 +134,6 @@ public class AccessLogWriter extends AbstractRolloverLog
   {
     // server/021g
     _logWriterTask.wake();
-
-    /*
-    boolean isFlush = false;
-
-    synchronized (_bufferLock) {
-      isFlush = flushBuffer();
-    }
-
-    if (isFlush) {
-      scheduleThread();
-    }
-    */
   }
 
   protected void waitForFlush(long timeout)
@@ -230,6 +228,11 @@ public class AccessLogWriter extends AbstractRolloverLog
     _freeList.free(logBuffer);
   }
 
+  @Override
+  protected TempStreamApi createTempStream()
+  {
+    return _tempService.getManager().createTempStream();
+  }
 
   /**
    * Closes the log, flushing the results.
@@ -238,17 +241,6 @@ public class AccessLogWriter extends AbstractRolloverLog
     throws IOException
   {
     _logWriterTask.destroy();
-
-    /*
-    long expire = Alarm.getCurrentTime() + 5000;
-
-    while (_writeQueue.size() > 0 && Alarm.getCurrentTime() < expire) {
-      try {
-        Thread.sleep(1000);
-      } catch (Exception e) {
-      }
-    }
-    */
   }
 
   class LogWriterTask extends TaskWorker {

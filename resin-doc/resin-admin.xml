@@ -1,9 +1,6 @@
 <book title="Resin Administration">
   <chapter title="Starting Resin">
     <linked-section link="admin/starting-resin.xtp" />
-    <linked-section link="admin/starting-resin-command-line.xtp" />
-    <linked-section link="admin/starting-resin-watchdog.xtp" />
-    <linked-section link="admin/starting-resin-apache.xtp" />
   </chapter>
 
   <chapter title="Migrating to Resin 4.0">
@@ -15,9 +12,10 @@
     <linked-section link="admin/deploy-command-line.xtp" />
     <linked-section link="admin/deploy-git-overview.xtp" />
     <linked-section link="admin/deploy-tool-reference.xtp" />
-    <!--
-    <linked-section link="admin/deploy-pomegranate.xtp" />
-    -->
+  </chapter>
+
+  <chapter title="Clustering">
+    <linked-section link="admin/clustering-overview.xtp" />
   </chapter>
 
   <chapter title="Command-Line">
@@ -34,23 +32,26 @@
     <linked-section link="admin/database.xtp" />
   </chapter>
 
-  <chapter title="Logging">
-    <linked-section link="admin/logging.xtp" />
+  <chapter title="Health Checks and Meters">
+    <linked-section link="admin/health-checking.xtp" />
+    <linked-section link="admin/health-meters.xtp" />
   </chapter>
 
-  <chapter title="HTTP">
-    <linked-section link="admin/http-server.xtp" />
-    <linked-section link="admin/http-virtual-hosts.xtp" />
-    <linked-section link="admin/http-proxy-cache.xtp" />
+  <chapter title="Installation">
+    <linked-section link="admin/starting-resin-install.xtp" />
+    <linked-section link="admin/starting-resin-command-line.xtp" />
+    <linked-section link="admin/starting-resin-watchdog.xtp" />
+    <linked-section link="admin/starting-resin-apache.xtp" />
+    <linked-section link="admin/starting-resin-iis-7.xtp" />
+    <linked-section link="admin/starting-resin-licenses.xtp" />
+  </chapter>
+
+  <chapter title="Logging">
+    <linked-section link="admin/logging.xtp" />
   </chapter>
   
   <chapter title="URL Rewriting and Dispatching">
     <linked-section link="admin/http-rewrite.xtp" />
-  </chapter>
-
-  <chapter title="Health Checks and Meters">
-    <linked-section link="admin/health-checking.xtp" />
-    <linked-section link="admin/health-meters.xtp" />
   </chapter>
 
   <chapter title="Security">
@@ -65,8 +66,10 @@
     <linked-section link="admin/scheduled-tasks.xtp" />
   </chapter>
 
-  <chapter title="Clustering">
-    <linked-section link="admin/clustering-overview.xtp" />
+  <chapter title="Web Server">
+    <linked-section link="admin/http-server.xtp" />
+    <linked-section link="admin/http-virtual-hosts.xtp" />
+    <linked-section link="admin/http-proxy-cache.xtp" />
   </chapter>
 
   <chapter title="Resin monitoring and administration web application">

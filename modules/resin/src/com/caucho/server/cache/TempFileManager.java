@@ -29,6 +29,8 @@
 
 package com.caucho.server.cache;
 
+import java.io.IOException;
+import java.io.OutputStream;
 import java.util.logging.Logger;
 
 import com.caucho.config.ConfigException;
@@ -37,6 +39,9 @@ import com.caucho.db.block.BlockStore;
 import com.caucho.server.resin.Resin;
 import com.caucho.util.L10N;
 import com.caucho.vfs.Path;
+import com.caucho.vfs.ReadStream;
+import com.caucho.vfs.TempStreamApi;
+import com.caucho.vfs.Vfs;
 
 /**
  * Represents an inode to a temporary file.
@@ -89,5 +94,51 @@ public class TempFileManager
   public TempFileInode createInode()
   {
     return new TempFileInode(_store);
+  }
+
+  public TempStreamApi createTempStream()
+  {
+    TempFileInode inode = createInode();
+    
+    return new TempStreamImpl(inode);
+  }
+  
+  class TempStreamImpl implements TempStreamApi {
+    private TempFileInode _inode;
+    private OutputStream _os;
+    
+    TempStreamImpl(TempFileInode inode)
+    {
+      _inode = inode;
+      _os = inode.openOutputStream();
+    }
+
+    @Override
+    public ReadStream openRead() throws IOException
+    {
+      OutputStream os = _os;
+      
+      if (os != null)
+        os.close();
+      
+      return Vfs.openRead(_inode.openInputStream());
+    }
+
+    @Override
+    public void write(byte[] buffer, int offset, int length, boolean isEnd)
+        throws IOException
+    {
+      _os.write(buffer, offset, length);
+    }
+    
+    @Override
+    public void destroy()
+    {
+      TempFileInode inode = _inode;
+      _inode = null;
+      
+      if (inode != null)
+        inode.free();
+    }
   }
 }

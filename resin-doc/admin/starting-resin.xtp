@@ -13,102 +13,6 @@ starting Resin with a Java command line.</p>
   <body>
     <localtoc/>
 
-<s1 name="quickstart" title="Quick Start for the Impatient">
-
-<p>The Resin web server starts  listening to HTTP requests on port 8080 and 
-listens on port 6800 for <a href="clustering-overview.xtp">load balancer</a>
-and cluster messages.  Resin can then be used for development or evaluation.  
-The steps are:</p>
-
-<ol>
-<li>Install JDK 1.6 or later.
-
-<ul>
-  <li>On Unix, set the <var>JAVA_HOME</var> variable or
-      link <code>/usr/java</code> to the java home.</li>
-  <li>On Windows, check to make sure the JDK
-      installation sets <var>JAVA_HOME</var> correctly.</li>
-</ul></li>
-
-<li>unzip/untar the Resin download.  It will extract into resin-4.0.x/.
-
-<ul>
-  <li>resin-4.0.x is <var>resin.home</var>, the location of the Resin distribution.</li>
-  <li>For now, it is also <var>resin.root</var>, the location of your content.
-Soon, you will want to move <var>resin.root</var> to
-something like <code>/var/www</code>.</li>
-</ul></li>
-
-<li>On Unix, execute <code>./configure --prefix=`pwd`; make; make install</code></li>
-
-<li>Start in development mode by executing <code>bin/resin.sh console</code> on Unix or simply <code>resin.exe</code> on Windows</li>
-
-<li>Browse to <a href="http://localhost:8080">http://localhost:8080</a></li>
-</ol>
-
-<s2 title="Adding Content">
-
-<p>Once you've made sure Resin is working, you'll want to add some content
-to the default web site:</p>
-
-<ol>
-<li>Add PHP files like <code>resin-4.0.x/webapps/ROOT/hello.php</code>.
-
-<ul><li>The URL in your browser will
-  be <a href="http://localhost:8080/hello.php">http://localhost:8080/hello.php</a></li>
-</ul></li>
-
-<li>Add JSP files like <code>resin-4.0.x/webapps/ROOT/hello.jsp</code>.
-
-<ul><li>The URL in your browser will
-  be <a href="http://localhost:8080/hello.jsp">http://localhost:8080/hello.jsp</a></li>
-</ul></li>
-
-<li>Add servlets like <code>resin-4.0.x/webapps/ROOT/WEB-INF/classes/test/HelloServlet.java</code>
-<ul><li>
-Create a file <code>resin-4.0.x/webapps/hello/WEB-INF/web.xml</code> to
-configure the servlet.</li>
-</ul></li>
-
-<li>Add .war files like <code>resin-4.0.x/webapps/hello.war</code>.
-
-<ul><li>The URL in your browser is
-<a href="http://localhost:8080/hello">http://localhost:8080/hello</a></li>
-</ul></li>
-
-<li>Create web-apps directly like <code>resin-4.0.x/webapps/hello/index.php</code>
-
-The URL in your browser is <a href="http://localhost:8080/hello">http://localhost:8080/hello</a>.
-<ul><li>
-Create a file <code>resin-4.0.x/webapps/hello/WEB-INF/web.xml</code> to
-configure the 'hello' web application.</li>
-</ul></li>
-</ol>
-
-</s2>
-
-
-<s2 title="Running Resin as a daemon">
-
-<p>In a deployment environment, Resin will run as a background daemon.
-The previous steps ran Resin in the foreground, which is convenient
-for development since the logging output goes to the console.
-When running as a daemon, Resin detaches from the console and continues
-running until told to stop.</p>
-
-<ol>
-<li>Start resin with <code>bin/resin.sh start</code></li>
-<li>Stop resin with <code>bin/resin.sh stop</code></li>
-<li>Restart resin with <code>bin/resin.sh restart</code></li>
-</ol>
-
-</s2>
-
-<p>Until you're ready to deploy the server, those are all the
-steps needed to get started with Resin.</p>
-
-</s1>
-
 <s1 title="Preconditions">
 
 <p>Resin 4.0 needs Java before it can run.  It needs JDK 1.6 or a later JDK.</p>
@@ -129,6 +33,18 @@ you start with this before trying any other configuration.</p>
 
 <p>The server listens at port 8080 in the default configuration and
 can be changed to the HTTP port 80 during deployment.</p>
+
+<p>For more details, see the <a href="http-server.xtp">Resin Web Server</a>
+configuration page.</p>
+
+</s1>
+
+<s1 name="quickstart" title="Basic Installation">
+
+<p>The Resin web server starts  listening to HTTP requests on port 8080 and 
+listens on port 6800 for <a href="clustering-overview.xtp">load balancer</a>
+and cluster messages.  Resin can then be used for development or evaluation.  
+The steps are:</p>
 
 <s2 title="Windows">
 
@@ -164,48 +80,102 @@ environment variable <var>JAVA_HOME</var>.</li>
 
 </s2>
 
-<p>For more details, see the <a href="http-server.xtp">Resin Web Server</a>
-configuration page.</p>
-
-</s1>
-
-<s1 title="Resin with Apache">
-
-<p>If you are already using Apache for your web server, you can use Resin with
-Apache.  This configuration uses Apache to serve html, images, PHP, or Perl,
-and Resin to serve JSPs and Servlets.</p>
-
-<p>The Apache configuration uses two pieces: a C program extending
-Apache (<var>mod_caucho</var>) and Java program supporting servlets and
-JSP (<var>Resin</var>.)  The two pieces communicate with a special high-speed
-protocol.</p>
-
-<figure src="apache_srun.gif" alt="browser <-> (Apache/mod_caucho <- html) <-> Resin httpd/servlets,beans <- html,jsp"/>
-
-<p>To configure Apache with Resin, you must
-configure both Apache and Resin.  The Resin
-configuration is identical to Resin's httpd configuration.  The Apache
-configuration tells Apache how to find Resin.</p>
-
-<ol>
-<li>On Unix only, compile mod_caucho.so using <code>--with-apache</code> or 
-<code>--with-apxs</code></li>
-<li>Make any needed Apache <var>httpd.conf</var> changes, such as adding loading the 
-mod_caucho module.  <code>--with-apxs</code> should take care of this automatically</li>
-<li>Make any needed Resin <var>resin.xml</var> changes, such as commenting out the http 
-listener on port 80 or 8080 so that it does not conflict with Apache.</li>
-<li>Restart Apache and Resin</li>
-</ol>
-
-<example title="Compiling Resin with mod_caucho">
-unix&gt; ./configure --prefix=`pwd` --with-apxs=/usr/local/apache/bin/apxs
-unix&gt; make
-unix&gt; make install
+<s2 title="Debian Unix apt-get">
+<p>
+We provide a Debian packaged version of Resin that Debian and Ubuntu
+users can take advantage of.  It performs all of the installation
+steps above for you and creates all the recommended server and
+content directories.  Simply download from the <a
+href="http://caucho.com/download">Resin download page</a> and install
+using dpkg.
+</p>
+<p>
+Alternatively, you can add Caucho's Debian repository to your system's
+repositories to use automated update tools like Synaptic and apt-get.
+To do this, add the following line to your <var>/etc/apt/sources.list</var>
+</p>
+<example>
+deb http://caucho.com/download/debian unstable multiverse
+</example>
+<p>
+After adding this line, update your local repository cache by running:
+</p>
+<example>
+apt-get update
+</example>
+<p>
+Finally, install Resin Professional using the following:
+</p>
+<example>
+apt-get install resin-pro
+</example>
+<p>
+If you have a license file for Resin, save it in <var>/usr/local/resin/licenses</var>
+</p>
+<p>
+Or install Resin Open Source with this command:
+</p>
+<example>
+apt-get install resin
 </example>
 
-<p>For more details, see the <a href="starting-resin-apache.xtp">Resin with Apache</a>
-configuration page.</p>
+</s2>
+</s1>
+
+<s1 title="Adding Content">
+
+<p>Once you've made sure Resin is working, you'll want to add some content
+to the default web site:</p>
+
+<ol>
+<li>Add .war files like <code>resin-4.0.x/webapps/hello.war</code>.
+
+<ul><li>The URL in your browser is
+<a href="http://localhost:8080/hello">http://localhost:8080/hello</a></li>
+</ul></li>
+
+<li>Command-line .war deployment like <code>bin/resin.sh deploy hello.war</code>.
+
+<ul><li>The URL in your browser is
+<a href="http://localhost:8080/hello">http://localhost:8080/hello</a></li>
+</ul></li>
+
+<li>Create web-apps directly like <code>resin-4.0.x/webapps/hello/index.php</code>
+
+The URL in your browser is <a href="http://localhost:8080/hello">http://localhost:8080/hello</a>.
+<ul><li>
+Create a file <code>resin-4.0.x/webapps/hello/WEB-INF/web.xml</code> to
+configure the 'hello' web application.</li>
+</ul></li>
+</ol>
+
+<p>More deployment information is available in the
+<a href="deploy.xtp">deployment documentation</a>.</p>
 
 </s1>
+
+<s1 title="Running Resin as a daemon">
+
+<p>In a deployment environment, Resin will run as a background daemon.
+The previous steps ran Resin in the foreground, which is convenient
+for development since the logging output goes to the console.
+When running as a daemon, Resin detaches from the console and continues
+running until told to stop.</p>
+
+<ol>
+<li>Start resin with <code>bin/resin.sh start</code></li>
+<li>Stop resin with <code>bin/resin.sh stop</code></li>
+<li>Restart resin with <code>bin/resin.sh restart</code></li>
+</ol>
+
+</s1>
+
+<s1 title="More Installation Options">
+
+<p>More installation options and configuration are available at
+<a href="install.xtp">installation options</a>.</p>
+
+</s1>
+
 </body>
 </document>

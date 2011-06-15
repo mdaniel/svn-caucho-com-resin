@@ -729,7 +729,7 @@ public class TcpSocketLink extends AbstractSocketLink
         _state = _state.toActiveNoKeepalive(this);
 
       if (! getRequest().handleRequest()) {
-        _state = _state.toKillKeepalive(this);
+        killKeepalive();
         
         if (log.isLoggable(Level.FINE)) {
           log.fine(this + " disabled keepalive because request failed "

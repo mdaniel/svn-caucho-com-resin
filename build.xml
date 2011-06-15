@@ -782,7 +782,7 @@
       </fileset>
     </copy>
 
-    <generate-pdf name="resin-admin"/>
+    <generate-pdf2 name="resin-admin"/>
 
     <copy tofile="${dist}/resin-4.0-admin.pdf"
           file="${build}/pdf/resin-admin/resin-admin.pdf"/>
@@ -794,6 +794,10 @@
 
   <target name="pdf2" depends="init">
     <generate-pdf2 name="resin-admin"/>
+  </target>
+
+  <target name="pdf-test" depends="init">
+    <generate-pdf2 name="test-doc"/>
   </target>
 
   <target name="test-pdf" depends="init">
