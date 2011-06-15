@@ -141,7 +141,7 @@
       <memory-free-min>1M</memory-free-min>
 
       <!-- Maximum number of threads. -->
-      <thread-max>256</thread-max>
+      <thread-max>4096</thread-max>
 
       <!-- Configures the socket timeout -->
       <socket-timeout>65s</socket-timeout>

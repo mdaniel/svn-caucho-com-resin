@@ -62,7 +62,7 @@ public class MyAuthenticator extends AbstractAuthenticator {
 
 <defun title="&lt;accept-listen-backlog>" name="accept-listen-backlog" version="Resin 3.1">
 <parents>http, connection-port, protocol</parents>
-<default>100</default>
+<default>4000</default>
 
 <description>
 <p>&lt;accept-listen-backlog> configures operating system TCP listen
@@ -1140,7 +1140,7 @@ which ports the server should listen to.</p>
      <td>65s</td></tr>
 <tr><td>accept-listen-backlog</td>
     <td>The socket factory's listen backlog for receiving sockets</td>
-    <td>100</td></tr>
+    <td>4000</td></tr>
 <tr><td>tcp-no-delay</td>
     <td>sets the NO_DELAY socket parameter</td>
     <td>true</td></tr>
@@ -5420,7 +5420,6 @@ Only IP-based virtual hosts which wish to ignore the browser's Host
 will use @virtual-host.</note>
 </description>
 
-<!-- XXX sync with schema -->
 <attributes>
 <tr>
   <th>Attribute</th>
@@ -5433,15 +5432,48 @@ will use @virtual-host.</note>
 <tr><td>port</td>
     <td>port to listen to</td>
     <td>required</td></tr>
+<tr><td>accept-listen-backlog</td>
+    <td>configures operating system TCP listen queue size for the port</td>
+    <td>4000</td></tr>
+<tr><td>accept-thread-idle-timeout</td>
+    <td>configures minimum spare accept-thread idle timeout</td>
+    <td>120s</td></tr>
+<tr><td>accept-thread-min</td>
+    <td>configures the minimum number of threads listening for new connections </td>
+    <td>1</td></tr>
+<tr><td>accept-thread-max</td>
+    <td>configures the maximum number of threads listening for new connections</td>
+    <td>unbound</td></tr>
+<tr><td>keepalive-connection-time-max</td>
+    <td>configures an absolute max time for keepalive connections</td>
+    <td>600s</td></tr>
+<tr><td>keepalive-max</td>
+    <td>configures the maximum number of sockets which can be used directly for keepalive connections</td>
+    <td>256</td></tr>
+<tr><td>keepalive-select-enable</td>
+    <td>enables the select manager for keepalives</td>
+    <td>true</td></tr>
+<tr><td>keepalive-select-thread-timeout</td>
+    <td>configures a short timeout allowing the select manager to wait for a keepalive before detaching the thread</td>
+    <td>1s</td></tr>
+<tr><td>keepalive-timeout</td>
+    <td>configures how long a keepalive connection should wait for a new request before closing</td>
+    <td>120s</td></tr>
+<tr><td>suspend-reaper-timeout</td>
+    <td>configures check interval for suspended (async)connections</td>
+    <td>60s</td></tr>
+<tr><td>suspend-time-max</td>
+    <td>configures timeout for suspended (async) connections</td>
+    <td>600s</td></tr>
+<tr><td>socket-timeout</td>
+    <td>configures timeout for accepted socket's write and read operations</td>
+    <td>120s</td></tr>
+<tr><td>throttle-concurrent-max</td>
+    <td>configures maximum concurrent requests (Resin Pro)</td>
+    <td>unlimited</td></tr>
 <tr><td>tcp-no-delay</td>
     <td>sets the NO_DELAY socket parameter</td>
     <td>true</td></tr>
-<tr><td>read-timeout</td>
-    <td>timeout waiting to read from idle client</td>
-    <td>65s</td></tr>
-<tr><td>write-timeout</td>
-    <td>timeout waiting to write to idle client</td>
-    <td>65s</td></tr>
 <tr><td>socket-listen-backlog</td>
     <td>The socket factory's listen backlog for receiving sockets</td>
     <td>100</td></tr>
@@ -5462,14 +5494,18 @@ element http {
   &amp; (address | host )?
   &amp; port?
   &amp; accept-listen-backlog?
+  &amp; accept-thread-idle-timeout?
   &amp; accept-thread-min?
   &amp; accept-thread-max?
   &amp; connection-max?
   &amp; keepalive-connection-time-max?
   &amp; keepalive-max?
+  &amp; keepalive-select-enable?
+  &amp; keepalive-select-thread-timeout?
   &amp; keepalive-timeout?
   &amp; secure?
   &amp; socket-timeout?
+  &amp; suspend-reaper-timeout?
   &amp; suspend-time-max?
   &amp; tcp-no-delay?
   &amp; throttle-concurrent-max?
