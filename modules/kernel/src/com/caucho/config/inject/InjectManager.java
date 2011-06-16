@@ -928,6 +928,17 @@ public final class InjectManager
   {
     return createBeanFactory(createManagedBean(type));
   }
+  
+  public <T> Bean<T> addSingleton(T obj)
+  {
+    BeanBuilder<T> builder = createBeanFactory((Class<T>) obj.getClass());
+    
+    Bean<T> bean = builder.singleton(obj);
+    
+    addBean(bean);
+    
+    return bean;
+  }
 
   //
   // enabled deployment types, scopes, and qualifiers
@@ -1803,7 +1814,6 @@ public final class InjectManager
         && ((ManagedBeanImpl) bean).validate()) {
     }
 
-    // System.out.println("VALID: " + bean);
     for (InjectionPoint ip : bean.getInjectionPoints()) {
       ReferenceFactory<?> factory = validateInjectionPoint(ip);
 

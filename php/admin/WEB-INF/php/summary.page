@@ -119,6 +119,16 @@ function print_overview()
       <?= $os->Version ?>
     </td>
   </tr>
+  </tr>
+
+  <tr class='<?= row_style($row++) ?>'>
+    <th id="start" class='item'
+        title="The Watchdog Start Message.">
+    Message:</th>
+    <td headers="start" colspan='5'>
+      <?= $resin->WatchdogStartMessage ?>
+    </td>
+  </tr>
 
   <tr class='<?= row_style($row++) ?>'>
     <th id="state" class='item'

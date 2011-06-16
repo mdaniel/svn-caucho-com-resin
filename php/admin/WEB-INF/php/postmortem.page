@@ -223,6 +223,16 @@ function display_postmortem_logs($log_mbean)
   //
   // startup
   //
+  $start_messages = $log_mbean->findMessagesByType("Resin|Startup", "info",
+                                             ($restart_time - 60 * 60) * 1000,
+                                             ($restart_time) * 1000);
+
+  if ($start_messages)
+    $start_message = $start_messages[0]->message;
+
+  if (! $start_message)
+    $start_message = "Start Time";
+
   $messages = $log_mbean->findMessages("warning",
                                        ($restart_time - 60 * 60) * 1000,
                                        ($restart_time) * 1000);
@@ -247,7 +257,7 @@ function display_postmortem_logs($log_mbean)
     echo strftime("%Y-%m-%d&nbsp;%H:%M:%S", $restart_time);
     echo "  </td>";
     echo "  <td class='level'></td>";
-    echo "  <td class='severe'>Start Time</td>";
+    echo "  <td class='severe'>$start_message</td>";
     echo "</tr>";
 
     foreach ($messages as $message) {

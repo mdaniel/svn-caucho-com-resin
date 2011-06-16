@@ -29,6 +29,8 @@
 
 package com.caucho.junit;
 
+import java.net.URL;
+
 import org.junit.runner.notification.RunNotifier;
 import org.junit.runners.BlockJUnit4ClassRunner;
 import org.junit.runners.model.FrameworkMethod;
@@ -91,7 +93,9 @@ public class ResinBeanContainerRunner extends BlockJUnit4ClassRunner {
 
       _beanContainer.setWorkDirectory(System.getProperty("java.io.tmpdir"));
       _beanContainer.setModule(_testClassModule);
-
+      
+      addPackageModule();
+      
       if (_beanConfiguration != null) {
         for (String path : _beanConfiguration.classPath()) {
           _beanContainer.addClassPath(path);
@@ -106,6 +110,25 @@ public class ResinBeanContainerRunner extends BlockJUnit4ClassRunner {
     }
 
     return _beanContainer;
+  }
+  
+  private void addPackageModule()
+  {
+    ClassLoader loader = _testClass.getClassLoader();
+    
+    String testPackage = _testClass.getPackage().getName();
+    
+    URL url = loader.getResource(testPackage.replace('.', '/') + "/META-INF");
+    
+    if (url != null) {
+      _beanContainer.addPackageModule(_testClassModule, testPackage);
+    }
+    
+    url = loader.getResource(testPackage.replace('.', '/') + "/beans.xml");
+    
+    if (url != null) {
+      _beanContainer.addPackageModule(_testClassModule, testPackage);
+    }
   }
 
   private String getTestClassModule(final Class<?> testClass)

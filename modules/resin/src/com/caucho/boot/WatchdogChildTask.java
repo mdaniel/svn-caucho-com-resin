@@ -145,6 +145,9 @@ class WatchdogChildTask implements Runnable
   {
     if (! _lifecycle.toActive())
       return;
+    
+    _isRestart = false;
+    _restartMessage = "user start from watchdog";
 
     ThreadPool.getCurrent().schedule(this);
   }

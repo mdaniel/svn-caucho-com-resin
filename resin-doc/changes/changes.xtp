@@ -13,6 +13,7 @@
 
 <s2 title="4.0.20 - snapshot">
 <ul>
+<li>admin: summary/postmortem now show startup info from watchdog (#4595)</li>
 <li>db: row allocation must check for table close (#4599, rep by Steve Francis)</li>
 </ul>
 </s2>

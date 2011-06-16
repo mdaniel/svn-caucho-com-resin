@@ -42,9 +42,6 @@ import com.caucho.util.*;
 
 public class HeapDumpAction implements AdminAction
 {
-  private static final Logger log
-    = Logger.getLogger(HeapDumpAction.class.getName());
-
   private static final L10N L = new L10N(HeapDumpAction.class);
   
   public String execute(boolean raw, String serverId, File hprofDir)

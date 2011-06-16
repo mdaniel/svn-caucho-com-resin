@@ -11,7 +11,7 @@
     <enabled>true</enabled>
     <startup-delay>15m</startup-delay>
     <period>5m</period>
-    <recheck-period>15s</recheck-period>
+    <recheck-period>30s</recheck-period>
     <recheck-max>5</recheck-max>
   </health:HealthSystem>
   
@@ -23,7 +23,7 @@
      - Restart on critical if the problem persists for 5 min.
     -->
   <health:Restart>
-    <health:IfCriticalRechecked time="5m"/>
+    <health:IfCriticalRechecked/>
   </health:Restart>
 
   <!--
@@ -53,7 +53,7 @@
       <health:IfHealthCritical healthCheck="${memoryTenuredHealthCheck}"/>
       <health:IfHealthCritical healthCheck="${memoryPermGenHealthCheck}"/>
     </health:Or>
-    <health:IfRechecked/>
+    <health:IfNotRecent time="30m"/>
   </health:DumpHeap>
   
   <!--
@@ -69,7 +69,7 @@
   
   <health:DumpThreads>
     <health:IfHealthCritical healthCheck="${cpuHealthCheck}"/>
-    <health:IfRechecked/>
+    <health:IfNotRecent time="15m"/>
   </health:DumpThreads>
   
   <!--

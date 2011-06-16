@@ -148,7 +148,7 @@ public class ResinAdmin extends AbstractManagedObject
   }
   
   @Override
-  public String getRestartMessage()
+  public String getWatchdogStartMessage()
   {
     return _resin.getRestartMessage();
   }

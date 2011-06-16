@@ -162,11 +162,12 @@ class InjectScanManager implements ScanListener {
     if (packageRoot != null) {
       scanRoot = scanRoot.lookup(packageRoot.replace('.', '/'));
     }
-
+    
     if (beansXmlOverride == null) {
       // TODO Should resin-beans.xml be included in this check?
       if (packageRoot != null) {
-        if (! scanRoot.lookup("beans.xml").canRead()) {
+        if (! scanRoot.lookup("beans.xml").canRead()
+            && ! scanRoot.lookup("META-INF/beans.xml").canRead()) {
           return false;
         }
       } else if (! (root.lookup("META-INF/beans.xml").canRead() 

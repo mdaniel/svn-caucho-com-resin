@@ -394,8 +394,9 @@ public class Resin
     _isRestart = isRestart;
     _restartMessage = startMessage;
     
-    for (StartInfoListener listener : _startInfoListeners)
+    for (StartInfoListener listener : _startInfoListeners) {
       listener.setStartInfo(isRestart, startMessage);
+    }
   }
   
   public boolean isRestart()

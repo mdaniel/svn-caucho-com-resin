@@ -44,4 +44,9 @@ public interface LogServiceMXBean extends ManagedObjectMXBean
                                          String level,
                                          long minTime, 
                                          long maxTime);
+  
+  public LogMessage []findMessagesByType(String type,
+                                         String level,
+                                         long minTime, 
+                                         long maxTime);
 }

@@ -304,10 +304,14 @@ public class ResinBeanContainer {
 
       Path path = Vfs.lookup(pathName);
 
+      // support/041a
+      /*
       if (_modulePath != null)
         _cdiManager.addBeansXmlOverride(_modulePath, path);
       else
         _cdiManager.addXmlPath(path);
+        */
+      _cdiManager.addXmlPath(path);
     } finally {
       thread.setContextClassLoader(oldLoader);
     }

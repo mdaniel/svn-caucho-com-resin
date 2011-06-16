@@ -122,5 +122,5 @@ public interface ResinMXBean extends ManagedObjectMXBean {
    * Returns the restart message.
    */
   @Description("The watchdog's restart message")
-  public String getRestartMessage();
+  public String getWatchdogStartMessage();
 }

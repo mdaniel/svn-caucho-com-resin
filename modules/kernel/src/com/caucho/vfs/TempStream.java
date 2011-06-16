@@ -278,6 +278,7 @@ public class TempStream extends StreamImpl
   /**
    * Clean up the temp stream.
    */
+  @Override
   public void destroy()
   {
     try {
