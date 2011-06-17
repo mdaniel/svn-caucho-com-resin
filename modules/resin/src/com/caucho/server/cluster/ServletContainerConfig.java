@@ -47,6 +47,7 @@ import com.caucho.env.thread.ThreadPool;
 import com.caucho.loader.EnvironmentBean;
 import com.caucho.loader.EnvironmentClassLoader;
 import com.caucho.network.listen.TcpSocketLinkListener;
+import com.caucho.rewrite.DispatchRule;
 import com.caucho.server.admin.Management;
 import com.caucho.server.cache.AbstractProxyCache;
 import com.caucho.server.distcache.PersistentStoreConfig;
@@ -56,6 +57,7 @@ import com.caucho.server.host.HostExpandDeployGenerator;
 import com.caucho.server.log.AccessLog;
 import com.caucho.server.resin.Resin;
 import com.caucho.server.rewrite.RewriteDispatch;
+import com.caucho.server.rewrite.RewriteRule;
 import com.caucho.server.webapp.ErrorPage;
 import com.caucho.server.webapp.WebAppConfig;
 import com.caucho.util.L10N;
@@ -527,6 +529,12 @@ public class ServletContainerConfig implements EnvironmentBean, SchemaBean
   public RewriteDispatch createRewriteDispatch()
   {
     return _servletContainer.createRewriteDispatch();
+  }
+  
+  @Configurable
+  public void add(DispatchRule rewrite)
+  {
+    _servletContainer.add(rewrite);
   }
 
   /**

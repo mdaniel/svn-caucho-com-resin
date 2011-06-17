@@ -13,6 +13,9 @@
 
 <s2 title="4.0.20 - snapshot">
 <ul>
+<li>rewrite: CanDI-style rewrite rules in cluster were ignored (#4618, rep by Aaron Freeman)</li>
+<li>scheduled-task: scheduled task remove has stack overflow (#4523, rep by mnsh)</li>
+<li>security: JaasAuthenticator add support for Group/roles (#4621, rep by dicr)</li>
 <li>admin: summary/postmortem now show startup info from watchdog (#4595)</li>
 <li>db: row allocation must check for table close (#4599, rep by Steve Francis)</li>
 </ul>

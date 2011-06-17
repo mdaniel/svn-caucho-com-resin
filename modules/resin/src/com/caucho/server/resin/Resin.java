@@ -95,7 +95,7 @@ import com.caucho.server.cluster.ClusterPod;
 import com.caucho.server.cluster.Server;
 import com.caucho.server.cluster.ServerConfig;
 import com.caucho.server.cluster.ServletContainerConfig;
-import com.caucho.server.cluster.ServletService;
+import com.caucho.server.cluster.ServletSystem;
 import com.caucho.server.distcache.FileCacheManager;
 import com.caucho.server.resin.ResinArgs.BoundPort;
 import com.caucho.server.webbeans.ResinCdiProducer;
@@ -1309,7 +1309,7 @@ public class Resin
       addServices();
     }
      
-    ServletService.createAndAddService(_servletContainer);
+    ServletSystem.createAndAddService(_servletContainer);
     
     ResinConfig resinConfig = new ResinConfig(this);
     

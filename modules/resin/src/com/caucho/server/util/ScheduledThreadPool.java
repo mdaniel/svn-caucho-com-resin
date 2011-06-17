@@ -420,11 +420,14 @@ public class ScheduledThreadPool implements ScheduledExecutorService,
   @SuppressWarnings("unchecked")
   void removeFuture(Future future)
   {
+    boolean isFuture;
+    
     synchronized (_futureSet) {
-      _futureSet.remove(future);
+      isFuture = _futureSet.remove(future);
     }
     
-    future.cancel(true);
+    if (isFuture)
+      future.cancel(true);
   }
 
   //
@@ -521,12 +524,12 @@ public class ScheduledThreadPool implements ScheduledExecutorService,
     public boolean cancel(boolean mayInterrupt)
     {
       synchronized (this) {
-        removeFuture(this);
-
         if (_isCancelled || _isDone)
           return false;
 
         _isCancelled = true;
+        
+        removeFuture(this);
 
         notifyAll();
       }

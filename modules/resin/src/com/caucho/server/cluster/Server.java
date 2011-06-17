@@ -70,6 +70,7 @@ import com.caucho.loader.EnvironmentLocal;
 import com.caucho.make.AlwaysModified;
 import com.caucho.management.server.EnvironmentMXBean;
 import com.caucho.management.server.ServerMXBean;
+import com.caucho.rewrite.DispatchRule;
 import com.caucho.security.AdminAuthenticator;
 import com.caucho.security.PermissionManager;
 import com.caucho.server.cache.AbstractProxyCache;
@@ -705,6 +706,11 @@ public class Server
   public RewriteDispatch createRewriteDispatch()
   {
     return _hostContainer.createRewriteDispatch();
+  }
+  
+  public void add(DispatchRule rewriteRule)
+  {
+    createRewriteDispatch().addRule(rewriteRule);
   }
 
   public AbstractProxyCache getProxyCache()

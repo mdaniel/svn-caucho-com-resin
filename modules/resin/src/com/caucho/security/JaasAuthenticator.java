@@ -30,8 +30,9 @@ package com.caucho.security;
 
 import java.io.IOException;
 import java.security.Principal;
+import java.security.acl.Group;
+import java.util.Enumeration;
 import java.util.HashMap;
-import java.util.Iterator;
 import java.util.Set;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -130,40 +131,30 @@ public class JaasAuthenticator extends AbstractAuthenticator {
       String userName = principal.getName();
       String password = new String(cred.getPassword());
       
-      LoginModule login = (LoginModule) _loginModuleClass.newInstance();
-      Subject subject = new Subject();
-
-      HashMap<String,String> state = new HashMap<String,String>();
-
-      state.put("javax.security.auth.login.name", userName);
-      state.put("javax.security.auth.login.password", password);
-
-      login.initialize(subject,
-                       new Handler(userName, password),
-                       state, _options);
-
-      try {
-        login.login();
-      } catch (Exception e) {
-        login.abort();
-      }
-
-      login.commit();
-
-      Set principals = subject.getPrincipals();
+      Set<Principal> principals = getPrincipals(userName, password);
 
       if (principals == null || principals.size() == 0)
         return null;
+      
+      Principal userPrincipal = null;
+      Group roles = null;
 
-      Iterator iter = principals.iterator();
-      if (iter.hasNext())
-        return (Principal) iter.next();
+      for (Principal loginPrincipal : principals) {
+        if ("roles".equals(loginPrincipal.getName())
+            && loginPrincipal instanceof Group) {
+          roles = (Group) loginPrincipal;
+        }
+        else
+          userPrincipal = loginPrincipal;
+      }
+      
+      if (userPrincipal == null && roles != null)
+        userPrincipal = roles;
 
-      return null;
-    } catch (LoginException e) {
-      log.log(Level.FINE, e.toString(), e);
-
-      return null;
+      if (userPrincipal != null)
+        return new JaasPrincipal(userPrincipal, roles);
+      else
+        return null;
     } catch (RuntimeException e) {
       throw e;
     } catch (Exception e) {
@@ -188,6 +179,100 @@ public class JaasAuthenticator extends AbstractAuthenticator {
       return ((RolePrincipal) principal).isUserInRole(role);
     else
       return "user".equals(role);
+  }
+  
+  private Set<Principal> getPrincipals(String userName,
+                                       String password)
+  {
+    try {
+      LoginModule login = (LoginModule) _loginModuleClass.newInstance();
+      Subject subject = new Subject();
+
+      HashMap<String,String> state = new HashMap<String,String>();
+
+      state.put("javax.security.auth.login.name", userName);
+      state.put("javax.security.auth.login.password", password);
+
+      login.initialize(subject,
+                       new Handler(userName, password),
+                       state, _options);
+
+      try {
+        login.login();
+      } catch (Exception e) {
+        login.abort();
+      }
+
+      login.commit();
+
+      Set<Principal> principals = subject.getPrincipals();
+
+      return principals;
+    } catch (LoginException e) {
+      log.log(Level.FINE, e.toString(), e);
+
+      return null;
+    } catch (RuntimeException e) {
+      throw e;
+    } catch (Exception e) {
+      throw new RuntimeException(e);
+    }
+  }
+  
+  private static class JaasPrincipal implements RolePrincipal {
+    private Principal _principal;
+    private Group _roles;
+    
+    JaasPrincipal(Principal principal, Group roles)
+    {
+      _principal = principal;
+      _roles = roles;
+    }
+    
+    @Override
+    public String getName()
+    {
+      return _principal.getName();
+    }
+    
+    @Override
+    public boolean isUserInRole(String role)
+    {
+      if (_roles == null)
+        return "user".equals(role);
+      
+      Enumeration<? extends Principal> e = _roles.members();
+      while (e.hasMoreElements()) {
+        Principal principal = e.nextElement();
+        
+        if (role.equals(principal.getName()))
+          return true;
+      }
+      
+      return false;
+    }
+    
+    @Override
+    public int hashCode()
+    {
+      return _principal.hashCode();
+    }
+    
+    @Override
+    public boolean equals(Object obj)
+    {
+      if (! (obj instanceof JaasPrincipal))
+        return false;
+      
+      JaasPrincipal principal = (JaasPrincipal) obj;
+      
+      return getName().equals(principal.getName());
+    }
+    
+    public String toString()
+    {
+      return _principal.toString();
+    }
   }
 
   static class Handler implements CallbackHandler {

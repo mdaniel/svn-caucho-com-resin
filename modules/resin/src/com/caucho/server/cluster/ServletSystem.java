@@ -34,28 +34,28 @@ import com.caucho.env.service.*;
 /**
  * The main servlet service in a Resin server. 
  */
-public class ServletService extends AbstractResinSubSystem
+public class ServletSystem extends AbstractResinSubSystem
 {
   private Server _server;
   
-  public ServletService(Server server)
+  public ServletSystem(Server server)
   {
     _server = server;
   }
   
-  public static ServletService createAndAddService(Server server)
+  public static ServletSystem createAndAddService(Server server)
   {
-    ResinSystem system = preCreate(ServletService.class);
+    ResinSystem system = preCreate(ServletSystem.class);
     
-    ServletService service = new ServletService(server);
-    system.addService(ServletService.class, service);
+    ServletSystem service = new ServletSystem(server);
+    system.addService(ServletSystem.class, service);
     
     return service;
   }
   
-  public static ServletService getCurrent()
+  public static ServletSystem getCurrent()
   {
-    return ResinSystem.getCurrentService(ServletService.class);
+    return ResinSystem.getCurrentService(ServletSystem.class);
   }
   
   public Server getServer()
