@@ -73,44 +73,6 @@ enum SocketLinkState {
   },
 
   /**
-   * Connection opened, waiting for the request.
-   */
-  REQUEST_READ {         // after accept, but before any data is read
-    @Override
-    boolean isActive() { return true; }
-
-    @Override
-    boolean isRequestActive() { return true; }
-
-    /**
-     * A slow initial read might go into the keepalive state.
-     * 
-     * XXX: qa
-     */
-    @Override
-    SocketLinkState toKeepalive(TcpSocketLink conn)
-    {
-      conn.getListener().keepaliveAllocate();
-      
-      return REQUEST_KEEPALIVE;
-    }
-    
-    @Override
-    SocketLinkState toActiveWithKeepalive(TcpSocketLink conn) 
-    { 
-      conn.getListener().keepaliveAllocate();
-      
-      return REQUEST_ACTIVE_KA; 
-    }
-
-    @Override
-    SocketLinkState toActiveNoKeepalive(TcpSocketLink conn) 
-    { 
-      return REQUEST_ACTIVE_NKA;
-    }
-  },
-
-  /**
    * Processing a request with a keepalive slot allocated.
    */
   REQUEST_ACTIVE_KA {       // processing a request
@@ -148,7 +110,7 @@ enum SocketLinkState {
     @Override
     SocketLinkState toKeepalive(TcpSocketLink conn)
     {
-      return REQUEST_KEEPALIVE;
+      return KEEPALIVE_THREAD;
     }
 
     @Override
@@ -197,7 +159,7 @@ enum SocketLinkState {
   /**
    * Waiting for a read from the keepalive connection.
    */
-  REQUEST_KEEPALIVE {   // waiting for keepalive data
+  KEEPALIVE_THREAD {   // waiting for keepalive data
     @Override
     boolean isKeepalive() { return true; }
 
@@ -221,7 +183,7 @@ enum SocketLinkState {
     @Override
     SocketLinkState toKeepaliveSelect()
     {
-      return REQUEST_KEEPALIVE_SELECT;
+      return KEEPALIVE_SELECT;
     }
 
     @Override
@@ -233,7 +195,7 @@ enum SocketLinkState {
     }
   },    
 
-  REQUEST_KEEPALIVE_SELECT {   // waiting for keepalive data (select)
+  KEEPALIVE_SELECT {   // waiting for keepalive data (select)
     @Override
     boolean isKeepalive() { return true; }
 
@@ -291,14 +253,6 @@ enum SocketLinkState {
       return COMET_SUSPEND_KA;
     }
     
-
-    /*
-    @Override
-    SocketLinkState toCometDispatch()
-    {
-      return REQUEST_ACTIVE_KA;
-    }
-    */
 
     @Override
     SocketLinkState toCometComplete()
@@ -375,14 +329,6 @@ enum SocketLinkState {
     @Override
     boolean isAsyncStarted() { return true; }
 
-    /*
-    @Override
-    SocketLinkState toCometDispatch() 
-    { 
-      return REQUEST_ACTIVE_NKA;
-    }
-    */
-
     @Override
     SocketLinkState toCometWake()
     {
@@ -457,14 +403,6 @@ enum SocketLinkState {
     {
       return COMET_SUSPEND_WAKE_KA;
     }
-
-    /*
-    @Override
-    SocketLinkState toCometResume()
-    {
-      return COMET_KA;
-    }
-    */
     
     @Override
     SocketLinkState toClosed(TcpSocketLink conn)
@@ -505,14 +443,6 @@ enum SocketLinkState {
     { 
       return REQUEST_ACTIVE_KA;
     }
-
-    /*
-    @Override
-    SocketLinkState toCometResume()
-    {
-      return COMET_KA;
-    }
-    */
     
     @Override
     SocketLinkState toClosed(TcpSocketLink conn)
@@ -536,14 +466,6 @@ enum SocketLinkState {
 
     @Override
     boolean isAsyncStarted() { return true; }
-
-    /*
-    @Override
-    SocketLinkState toCometResume()
-    {
-      return COMET_NKA;
-    }
-    */
 
     @Override
     SocketLinkState toCometWake()
@@ -573,14 +495,6 @@ enum SocketLinkState {
 
     @Override
     boolean isCometWake() { return true; }
-
-    /*
-    @Override
-    SocketLinkState toCometResume()
-    {
-      return COMET_NKA;
-    }
-    */
 
     @Override
     SocketLinkState toCometDispatch() 
@@ -642,7 +556,7 @@ enum SocketLinkState {
     @Override
     SocketLinkState toKeepalive(TcpSocketLink conn)
     {
-      return REQUEST_KEEPALIVE;
+      return KEEPALIVE_THREAD;
     }
     
     @Override
@@ -882,6 +796,16 @@ enum SocketLinkState {
     throw new IllegalStateException(this + " cannot switch to accept");
   }
 
+  /**
+   * Changes to the active state.
+   */
+  SocketLinkState toActive(TcpSocketLink conn, long connectionStartTime)
+  {
+    if (conn.getListener().isKeepaliveAllowed(connectionStartTime))
+      return toActiveWithKeepalive(conn);
+    else
+      return toActiveNoKeepalive(conn);
+  }
   /**
    * Changes to the active state with the keepalive allocated.
    */

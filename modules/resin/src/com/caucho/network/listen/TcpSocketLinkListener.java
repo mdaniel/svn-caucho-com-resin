@@ -81,7 +81,7 @@ public class TcpSocketLinkListener
   private static final int ACCEPT_IDLE_MIN = 4;
   private static final int ACCEPT_IDLE_MAX = 16;
   
-  private static final int KEEPALIVE_MAX = 256;
+  private static final int KEEPALIVE_MAX = 65536;
 
   private final AtomicInteger _connectionCount = new AtomicInteger();
 
@@ -717,7 +717,6 @@ public class TcpSocketLinkListener
   
   public void setKeepaliveSelectMax(int max)
   {
-    
   }
 
   public long getKeepaliveSelectThreadTimeout()
@@ -1035,18 +1034,7 @@ public class TcpSocketLinkListener
       if (pollService != null && isKeepaliveSelectEnabled()) {
         _selectManager = pollService.getSelectManager();
       }
-      
-      /*
-      if (_selectManager == null) {
-        throw new IllegalStateException(L.l("Cannot load select manager"));
-      }
-      */
     }
-
-    /*
-    if (_keepaliveMax < 0)
-      _keepaliveMax = _server.getKeepaliveMax();
-    */
 
     if (_keepaliveMax < 0 && _selectManager != null)
       _keepaliveMax = _selectManager.getSelectMax();

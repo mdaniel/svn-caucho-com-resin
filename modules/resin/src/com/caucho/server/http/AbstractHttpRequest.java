@@ -1629,7 +1629,7 @@ public abstract class AbstractHttpRequest
    */
   protected boolean isKeepalive()
   {
-    return _conn != null && _conn.isKeepaliveAllocated();
+    return _tcpConn != null && _tcpConn.isKeepaliveAllocated();
   }
 
   public boolean isCometActive()

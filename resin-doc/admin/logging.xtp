@@ -1,7 +1,7 @@
 <document>
 <header>
   <product>resin</product>
-  <title>Log</title>
+  <title>Logging</title>
   <description>
   <p>Resin can perform access logging, specify where JDK
   logging interface messages go, and redirect the stderr and
@@ -14,49 +14,46 @@
 
 <s1 title="java.util.logging">
 
-<s2 title="Logger: Application logging">
+<s2 title="Overview">
 
-<p>You can take advantage of the JDK's logging facility to add
-logging to your application.  Choosing a good logging name and levels
-are important for troubleshooting and debugging your code.  Logging
-to much can be almost as confusing as logging too little.</p>
+<p>Resin uses the JDK standard java.util.logging for
+all its internal logging and offers flexible configuration for the logging
+format and the logging level. The logging configuration has two parts:
+the set of log handlers, and the logger level.</p>
 
-<p>The logging name should be the full class name of the class you're
-instrumenting.  Although other schemes are possible, the class name
-is more maintainable.</p>
+<p>A log handler tells Resin where to send logging output. Resin includes
+file-based log handlers, mail handlers, syslog handlers, and any
+custom logging handler following the JDK standard. The log handler
+is configured with a name and a level which must both match for the log
+to be output.</p>
 
-<p>The logging level should be consistent across your application.  For Resin,
-we use the following level conventions:</p>
+<example title="Example: file-based log-handler in resin.xml">
+&lt;resin xmlns="http://caucho.com/ns/resin">
 
-<example title="Example: logging at finer">
-import java.util.logging.Logger;
-import java.util.logging.Level;
-
-public class Foo {
-  private static final Logger log
-    = Logger.getLogger(Foo.class.getName());
-
+  &lt;log-handler name="com.foo" level="all"
+               path="${resin.root}/log/foo.log"
+               timestamp="[%y-%m-%d %H:%M:%S.%s] {%{thread}} "/>
   ...
-  void doFoo(String bar)
-  {
-    // check for log level if your logging call does anything more
-    // than pass parameters
-    if (log.isLoggable(Level.FINER))
-        log.finer(this + "doFoo(" + bar + ")");
-
-    ...
-
-    log.info(...);
-
-    try {
-        ...
-    } catch (ExpectedException ex) {
-      log.log(Level.FINEST, "expected exception", ex);
-    }
-  }
-  ...
-}
+  
+&lt;/resin>  
 </example>
+
+<p>The &lt;logger> configures the logging level for a named logger.
+Because a &lt;logger> will generally have several log-handlers, both
+the logger level and the log-handler level must match for
+the log to output. Since the logger and log-handler names
+are hierarchical, a "com.foo" &lt;logger> will enable "com.foo.bar".</p>
+
+<example title="Example: logging at the 'fine' level in resin.xml">
+&lt;resin xmlns="http://caucho.com/ns/resin">
+
+  &lt;logger name="com.foo" level="fine"/>
+  &lt;logger name="com.foo.bar" level="finest"/>
+  ...
+  
+&lt;/resin>  
+</example>
+
 </s2>
 
 <s2 title="Log names">
@@ -68,8 +65,8 @@ matched.  For example: <code>&lt;logger name="example.hogwarts" ...&gt;</code>
 matches a logging request for both "example.hogwarts.System" and
 "example.hogwarts.gryffindor.System"</p>
 
-<p>Resin's logging is based on Resin's source class names.  The following are
-useful logs.</p>
+<p>Resin's own logging is based on Resin's source class names.
+The following are useful log names in Resin:</p>
 
 <deftable title="Resin log names">
 <tr>
@@ -97,10 +94,6 @@ useful logs.</p>
   <td>TCP port debugging and threading</td>
 </tr>
 <tr>
-  <td>com.caucho.server.port.AcceptPool</td>
-  <td>port thread creation</td>
-</tr>
-<tr>
   <td>com.caucho.server.http</td>
   <td>HTTP-related debugging</td>
 </tr>
@@ -125,8 +118,18 @@ useful logs.</p>
 </s2> <!-- Log names -->
 
 <s2 title="Log levels">
-<p>The <var>level</var> for log tags matches the levels in the JDK 
-<a javadoc="java.util.logging.Level"/>.</p>
+
+<p>
+The logger <var>level</var> enables logs for a given
+debugging granularity. A "severe" level only shows logs which threaten
+the stability of the server, and a "fine" level shows debugging information
+intended for application/library users.
+</p>
+
+<p>
+The logger levels match the values defined by
+the JDK <a javadoc="java.util.logging.Level"/>.
+</p>
 
 <deftable title="Logging Level values">
 <tr>
@@ -164,7 +167,7 @@ e.g. a web-app failing to start or a server restart</td>
 <tr>
   <td>fine</td>
   <td>log.fine("...")</td>
-  <td>debugging at an administrator level, i.e. for someone not familiar with
+  <td>debugging at a user level, i.e. for someone not familiar with
 the source code being debugged</td>
 </tr>
 <tr>
@@ -187,8 +190,7 @@ avoid completely swallowing, or Hessian or XML protocol parsing</td>
 
 </s2>
 
-<defun title="&lt;log-handler>">
-<parents>resin, server, host-default, host, web-app-default, web-app</parents>
+<s2 title="&lt;log-handler>">
    
 <p>Configure a log handler for the JDK java.util.logging.* API.
 java.util.logging has two steps: configure a set of log handlers,
@@ -201,142 +203,131 @@ most common configuration build-in: logging to a rotating file.  Most of the
 configuration attributes are used for the rotating file and are shared
 with the other logging configuration.</p>
 
-<deftable-childtags title="&lt;log-handler> values">
-<tr>
-  <th>Attribute</th>
-  <th>Description</th>
-  <th>Default</th>
-</tr>
-<tr>
-  <td>archive-format</td>
-  <td>the format for the archive filename when a rollover occurs,
-        see <a href="#rollover">Rollovers</a>.
-    </td>
-  <td>see below</td>
-</tr>
-<tr>
-  <td>class</td>
-  <td>configures a custom Handler class</td>
-  <td></td>
-</tr>
-<tr>
-  <td>format</td>
-  <td>An EL expression string to <a href="#Format-String">format</a> the current output.</td>
-  <td></td>
-</tr>
-<tr>
-  <td>formatter</td>
-  <td>Configures a custom java.util.logging.Formatter to format
-the output.</td>
-  <td></td>
-</tr>
-<tr>
-  <td>level</td>
-  <td>The <a href="#Log-Levels">log level</a> for the handler.  Typically,
-the handler's level will be finer than the logger's level</td>
-  <td>info</td>
-</tr>
-<tr>
-  <td>mbean-name</td>
-  <td>an mbean name, see <a href="#mbean">MBean control</a>.</td>
-  <td>no mbean name, no mbean registration</td>
-</tr>
-<tr>
-  <td>name</td>
-  <td>A hierarchical name, typically aligned with the Java packaging names.
-The handler will be registered with the Logger with the matching name.</td>
-  <td>match all names</td>
-</tr>
-<tr>
-  <td>path</td>
-  <td>Output path for the log messages, see 
-       <a href="#path">"Log Paths"</a>
-    </td>
-  <td>required</td>
-</tr>
-<tr>
-  <td>path-format</td>
-  <td>Selects a format for generating path names.  The syntax is the same as for archive-format</td>
-  <td>optional</td>
-</tr>
-<tr>
-  <td>timestamp</td>
-  <td>a timestamp <a href="#timestamp">format string</a> 
-        to use at the beginning of each log line.
-    </td>
-  <td>"[%Y/%m/%d %H:%M:%S.%s] "</td>
-</tr>
-<tr>
-  <td>rollover-count</td>
-  <td>maximum number of rollover files before the oldest ones get overwritten.
-        See <a href="#rollover">Rollovers</a>. 
-    </td>
-  <td>none</td>
-</tr>
-<tr>
-  <td>rollover-cron</td>
-  <td>cron-style specification on rollover times.</td>
-  <td>none</td>
-</tr>
-<tr>
-  <td>rollover-period</td>
-  <td>how often to rollover the log.  Specify in days (15D), weeks (2W), 
-        months (1M), or hours (1h). See <a href="#rollover">Rollovers</a>. 
-    </td>
-  <td>none</td>
-</tr>
-<tr>
-  <td>rollover-size</td>
-  <td>maximum size of the file before a rollover occurs, in bytes (50000), 
-        kb (128kb), or megabytes (10mb).  
-        See <a href="#rollover">Rollovers</a>.
-    </td>
-  <td>1mb</td>
-</tr>
-</deftable-childtags>
+</s2>
 
-<def title="&lt;log-handler> schema">
-element log-handler {
-  archive-format?
-  &amp; class?
-  &amp; filter?
-  &amp; format?
-  &amp; formatter?
-  &amp; level?
-  &amp; mbean-name?
-  &amp; name
-  &amp; path?
-  &amp; path-format?
-  &amp; rollover-count?
-  &amp; rollover-period?
-  &amp; rollover-size?
-  &amp; timestamp?
-  &amp; use-parent-handlers?
-}
-</def>
+<s1 title="log-handler timestamp">
 
-<p>The following example sends warning messages to a JMS queue.  The
-<code>uri="jms:"</code> is an alias
-for <code>com.caucho.log.handler.JmsHandler</code>.  The
-<code>uri="timestamp:"</code> is a formatter alias
-for <code>com.caucho.log.formatter.TimestampFormatter</code></p>
+<p>The <var>timestamp</var> for log tags is a format string which can contain
+percent codes which are substituted with time and date values.</p>
 
-<example title="Example: logging to a JMS queue">
-&lt;web-app xmlns="http://caucho.com/ns/resin"
-    xmlns:resin="urn:java:com.caucho.resin">
+<deftable>
+<tr>
+  <th>Code</th>
+  <th>Meaning</th>
+</tr>
+<tr>
+  <td>%a</td>
+  <td>day of week (short)</td>
+</tr>
+<tr>
+  <td>%A</td>
+  <td>day of week (verbose)</td>
+</tr>
+<tr>
+  <td>%b</td>
+  <td>day of month (short)</td>
+</tr>
+<tr>
+  <td>%B</td>
+  <td>day of month (verbose)</td>
+</tr>
+<tr>
+  <td>%c</td>
+  <td>Java locale date</td>
+</tr>
+<tr>
+  <td>%d</td>
+  <td>day of month (two-digit)</td>
+</tr>
+<tr>
+  <td>%H</td>
+  <td>24-hour (two-digit)</td>
+</tr>
+<tr>
+  <td>%I</td>
+  <td>12-hour (two-digit)</td>
+</tr>
+<tr>
+  <td>%j</td>
+  <td>day of year (three-digit)</td>
+  </tr>
+<tr>
+  <td>%m</td>
+  <td>month (two-digit)</td>
+</tr>
+<tr>
+  <td>%M</td>
+  <td>minutes</td>
+</tr>
+<tr>
+  <td>%p</td>
+  <td>am/pm</td>
+</tr>
+<tr>
+  <td>%S</td>
+  <td>seconds</td>
+</tr>
+<tr>
+  <td>%s</td>
+  <td>milliseconds</td>
+</tr>
+<tr>
+  <td>%W</td>
+  <td>week in year (three-digit)</td>
+</tr>
+<tr>
+  <td>%w</td>
+  <td>day of week (one-digit)</td>
+</tr>
+<tr>
+  <td>%y</td>
+  <td>year (two-digit)</td>
+</tr>
+<tr>
+  <td>%Y</td>
+  <td>year (four-digit)</td>
+</tr>
+<tr>
+  <td>%Z</td>
+  <td>time zone (name)</td>
+</tr>
+<tr>
+  <td>%z</td>
+  <td>time zone (+/-0800)</td>
+</tr>
+<tr>
+  <td>%{thread}</td>
+  <td>Current thread name</td>
+</tr>
+<tr>
+  <td>%{level}</td>
+  <td>Current logging level</td>
+</tr>
+<tr>
+  <td>%{env}</td>
+  <td>Current class-loader environment</td>
+</tr>
+</deftable>
 
-  &lt;resin:MemoryQueue ee:Named="myQueue"/>
 
-  &lt;logger name="qa.test">
-    &lt;resin:JmsLogHandler level="warning">
-      &lt;target>${myQueue}&lt;/target>
+<example title="Example: typical timestamp for the log tag">
+&lt;resin xmlns="http://caucho.com/ns/resin">
 
-      &lt;resin:TimestampLogFormatter/>
-    &lt;/resin:JmsLogHandler>
-  &lt;/logger>
+  &lt;log-handler name='' path='stderr:' timestamp="[%H:%M:%S.%s] {%{thread}}"/&gt;
 
-&lt;/web-app>
+  ...
+&lt;/resin>
 </example>
+
+<results>
+[22:50:11.648] WebApp[/doc] starting
+[22:50:11.698] http listening to *:8080
+[22:50:11.828] hmux listening to *:6800
+</results>
+
+</s1>
+
+<s2 title='log-handler archiving'>
 
 <p>The following example is a standard log handler writing to a rollover
 file.  Because the handler's level is "all", the &lt;logger> configuration
@@ -384,13 +375,13 @@ will set the actual logging level.</p>
 &lt;/resin&gt;
 </example>
 
-<p>The class that corresponds to &lt;log&gt; is <a javadoc="com.caucho.log.LogConfig"/>.</p>
+</s2>
 
-<s2 name="Format-String" title="Log format string">
+<s2 title="log-handler EL formatting">
 
-<p>The <var>format</var> for log tags is used to specify a format string for each
-log message.  <code>format</code> recognizes EL-expressions. The EL variable
-<var>log</var> is a 
+<p>The <var>format</var> for Resin's log-handler tags specifies
+a format string for each log message.  <code>format</code>
+recognizes EL-expressions. The EL variable <var>log</var> is a 
 <a javadoc="com.caucho.log.ELFormatter.ELFormatterLogRecord"/>
  object.</p>
 
@@ -528,35 +519,140 @@ space pad the values and make the results look a little nicer:</p>
 
 </s2> <!-- Format-String -->
 
-</defun>
+<s2 title="Logger: Application logging">
 
-<defun title="&lt;logger>">
-<parents>resin, server, host-default, host, web-app-default, web-app</parents>
-   
-<p>Configure the logging level JDK
-java.util.logging.* API.</p>
+<p>You can take advantage of the JDK's logging facility to add
+logging to your application.  Choosing a good logging name and levels
+are important for troubleshooting and debugging your code.  Logging
+to much can be almost as confusing as logging too little.</p>
 
-<deftable-childtags title="&lt;logger> values">
-<tr>
-  <th>Attribute</th>
-  <th>Description</th>
-  <th>Default</th>
-</tr>
-<tr>
-  <td>name</td>
-  <td>A hierarchical name, typically aligned with the Java packaging names</td>
-  <td>match all names</td>
-</tr>
-<tr>
-  <td>level</td>
-  <td>The <a href="#Log-Levels">log level</a></td>
-  <td>info</td>
-</tr>
-</deftable-childtags>
+<p>The logging name should be the full class name of the class you're
+instrumenting.  Although other schemes are possible, the class name
+is more maintainable.</p>
 
-</defun>
+<p>The logging level should be consistent across your application.  For Resin,
+we use the following level conventions:</p>
 
-<s2 title="Log Handlers">
+<example title="Example: logging at finer">
+import java.util.logging.Logger;
+import java.util.logging.Level;
+
+public class Foo {
+  private static final Logger log
+    = Logger.getLogger(Foo.class.getName());
+
+  ...
+  void doFoo(String bar)
+  {
+    // check for log level if your logging call does anything more
+    // than pass parameters
+    if (log.isLoggable(Level.FINER))
+        log.finer(this + "doFoo(" + bar + ")");
+
+    ...
+
+    log.info(...);
+
+    try {
+        ...
+    } catch (ExpectedException ex) {
+      log.log(Level.FINEST, "expected exception", ex);
+    }
+  }
+  ...
+}
+</example>
+</s2>
+
+<s2 title="Custom and library log handlers">
+
+<p>Custom handlers and log handlers from libraries can be configured
+with Resin's logging system, using the CanDI XML configuration syntax.
+The custom handler is a child of &lt;log-handler> and configured with
+any argument or setters necessary. Resin will install the handler just
+like one of its own handlers.</p>
+
+<example title="Example: JDK's FileHandler">
+&lt;web-app xmlns="http://caucho.com/ns/resin"
+   xmlns:jdk-logging="urn:java.util.logging">
+
+  &lt;log-handler name="com.foo" level="info">
+    &lt;jdk-logging:FileHandler>
+      &lt;new>
+        &lt;value>/tmp/test.out&lt;/value>
+      &lt;/new>
+    &lt;/jdk-logging:FileHandler>
+  &lt;/logger>
+  
+&lt;/web-app>
+</example>
+
+<example title="Example: MyHandler.java">
+package com.foo.demo;
+
+import java.util.logging.*;
+
+public class MyHandler extends Handler
+{
+  @Override
+  public void publish(LogRecord record)
+  {
+    System.out.println(getFormatter().format(record));
+  }
+  
+  @Override
+  public void flush();
+  {
+  }
+  
+  @Override
+  public void close();
+  {
+  }
+}
+</example>
+
+</s2>
+
+<s2 title="Custom log formatting">
+
+<p>The formatting of a log message can be customized just like the
+log handler. The Formatter is a java.util.logging interface which Resin's
+logging understands and can be configured with &lt;log-handler>.</p>
+
+<p>Sites may wish to change the formatting of log messages to gather
+information more appropriate for the site.  The formatter can be
+custom-configured just like the handlers.</p>
+
+<example title="Example: custom formatter configuration">
+&lt;web-app xmlns="http://caucho.com/ns/resin"
+  xmlns:mypkg="urn:java:com.mycom.mypkg">
+
+  &lt;log-handler name="com.foo" level="warning" path="WEB-INF/log.log"&gt;
+    &lt;mypkg:MyFormatter/>
+  &lt;/log-handler>
+  
+&lt;/web-app>
+</example>
+
+<example title="Example: MyFormatter.java">
+package com.mycom.mypkg;
+
+import java.util.logging.*;
+
+public class MyFormatter extends Formatter
+{
+  @Override
+  public String format(LogRecord record)
+  {
+    return "[" + record.getLevel() + "] " + record.getMessage();
+  }
+}
+</example>
+
+</s2> <!-- formatter -->
+
+<s2 title="Resin Builtin Log Handlers">
 
 <p>Resin provides a number of predefined custom log handlers for common
 logging patterns, including sending messages to JMS, HMTP,
@@ -710,89 +806,88 @@ warning, notice, info, debug. The default is <i>info</i>.</p>
 <p>See also `<code>man 3 syslog</code>' and `<code>man syslog.conf</code>'.
 </p></s3>
 
-<s3 title="custom handler">
-
-<example title="Example: custom formatter configuration">
-&lt;web-app xmlns="http://caucho.com/ns/resin"
-   xmlns:demo="urn:com.foo.demo">
-
-  &lt;logger name="">
-    &lt;demo:MyHandler level="warning"/>
-  &lt;/logger>
-  
-&lt;/web-app>
-</example>
-
-<example title="Example: MyHandler.java">
-package com.foo.demo;
-
-import java.util.logging.*;
-
-public class MyHandler extends Handler
-{
-  @Override
-  public void publish(LogRecord record)
-  {
-    System.out.println(getFormatter().format(record));
-  }
-  
-  @Override
-  public void flush();
-  {
-  }
-  
-  @Override
-  public void close();
-  {
-  }
-}
-</example>
-
-</s3>
-
 </s2> <!-- handler -->
 
-<s2 title="Log Formatting">
-
-<p>Sites may wish to change the formatting of log messages to gather information
-more appropriate for the site.  The formatter can be custom-configured just like
-the handlers.</p>
-
-<s3 title="custom handler">
-
-<example title="Example: custom formatter configuration">
-&lt;web-app xmlns="http://caucho.com/ns/resin"
-  xmlns:mypkg="urn:java:com.mycom.mypkg">
-
-  &lt;log-handler name="com.foo" level="warning" path="WEB-INF/log.log"&gt;
-    &lt;formatter>
-      &lt;mypkg:MyFormatter/>
-    &lt;/formatter>
-  &lt;/log-handler>
-  
-&lt;/web-app>
-</example>
-
-<example title="Example: MyFormatter.java">
-package com.mycom.mypkg;
-
-import java.util.logging.*;
-
-public class MyFormatter extends Formatter
-{
-  @Override
-  public String format(LogRecord record)
-  {
-    return "[" + record.getLevel() + "] " + record.getMessage();
-  }
-}
-</example>
-
-</s3>
-
-</s2> <!-- formatter -->
-
 </s1> <!-- java.util.logging  -->
+
+<s1 title="Log rotation and archiving">
+
+<p>Log rotation are a way stop your log files from getting too large,
+and to archive log files on a weekly or daily basis. When a rollover is
+triggered, the existing log file is renamed and a new file is
+started. Logs can be rotated by size or by time.</p>
+
+<p>The same log rotation mechanism in Resin is used for JDK logging,
+HTTP access logging, and standard output logging.</p>
+
+<s2 title="Size based rollover">
+<p>A size based rollover is triggered when the size of the file reaches a
+certain amount.  The default Resin behaviour for log's is to rollover when the
+file size reaches 1mb.</p>
+
+<p><code>rollover-size</code> is used to specify the maximum size, and can be in
+bytes (50000), kilobytes (128kb), or megabytes (10mb).  A value of <code>-1</code>
+disables size based rollovers.</p>
+</s2>
+
+<s2 title="Time based rollover">
+
+<p>A time based rollover is triggered when a certain period of time has passed
+since the last rollover.  The default Resin behaviour is to perform no time
+based rollover, unless rollover-size has been disabled with a value of -1 in
+which case the default time period is 1 month.</p>
+
+<p><code>rollover-period</code> is used to specify the time period, and can be in
+days (15D), weeks (2W), months (1M), or hours (1h).</p>
+</s2>
+
+<s2 title="Archive files">
+<p>When a rollover is triggered, the log file is renamed (archived) and a new
+log file is started.</p>
+
+<p><code>archive-format</code> is used to specify the name of the archive file.  It
+can contain regular characters, <a href="config-el.xtp">EL Environment
+variables</a>, and % codes that capture the current date and time.  The % codes
+are the same as the ones used for <code>timestamp</code> 
+(see <a href="#timestamp">Timestamp format string)</a>.</p>
+
+<p>The default behaviour depends on the value of rollover-period.  If
+rollover-period is greater than one day, or is not being used because
+rollover-size has been specified, the archive filename is the original path
+with <code>.%Y%m%d</code> appended.  If rollover-period is less than one day, the
+archive filename is the original path with <code>.%Y%m%d.%H</code> appended.</p>
+
+</s2>
+
+<s2 title="Disabling rollovers">
+
+<p>To completely disable rollovers, set the <code>rollover-size</code> to such a
+high number that it will never occur:</p>
+
+<example title="disable log rollovers">
+  &lt;stdout-log path="log//stdout.log" rollover-size="1024mb"/&gt;
+</example>
+
+</s2>
+
+<s2 title="Compression">
+
+<p>Rollover log files can be compressed with gzip or zip.  The
+extension of the archive-format determines the compression.</p>
+
+<example>
+&lt;log name="" level="warning" path='log/error.log'
+     archive-format="%Y-%m-%d.error.log.gz"
+     rollover-period="1D"/&gt;
+
+&lt;access-log path="log/access.log"
+            archive-format="access-%Y%m%d.log.gz"
+            rollover-period="1D"/&gt;
+</example>
+
+</s2>
+
+</s1> <!-- rollovers -->
 
 <s1 title="Standard Output Redirection">
 
@@ -996,127 +1091,6 @@ of your filesystem path:</p>
        path="log/debug-${server.id}.log"
        rollover-period="1h" rollover-count="1"/&gt;
 </example>
-
-</s1>
-
-<s1 name="rollover" title="Rollovers">
-<p>Log rollovers are a way to stop your log files from getting too large.  When
-a rollover is triggered, the existing log file is renamed and a new file is
-started.</p>
-
-<s2 title="Size based rollover">
-<p>A size based rollover is triggered when the size of the file reaches a
-certain amount.  The default Resin behaviour for log's is to rollover when the
-file size reaches 1mb.</p>
-
-<p><code>rollover-size</code> is used to specify the maximum size, and can be in
-bytes (50000), kilobytes (128kb), or megabytes (10mb).  A value of <code>-1</code>
-disables size based rollovers.</p>
-</s2>
-
-<s2 title="Time based rollover">
-
-<p>A time based rollover is triggered when a certain period of time has passed
-since the last rollover.  The default Resin behaviour is to perform no time
-based rollover, unless rollover-size has been disabled with a value of -1 in
-which case the default time period is 1 month.</p>
-
-<p><code>rollover-period</code> is used to specify the time period, and can be in
-days (15D), weeks (2W), months (1M), or hours (1h).</p>
-</s2>
-
-<s2 title="Archive files">
-<p>When a rollover is triggered, the log file is renamed (archived) and a new
-log file is started.</p>
-
-<p><code>archive-format</code> is used to specify the name of the archive file.  It
-can contain regular characters, <a href="config-el.xtp">EL Environment
-variables</a>, and % codes that capture the current date and time.  The % codes
-are the same as the ones used for <code>timestamp</code> 
-(see <a href="#timestamp">Timestamp format string)</a>.</p>
-
-<p>The default behaviour depends on the value of rollover-period.  If
-rollover-period is greater than one day, or is not being used because
-rollover-size has been specified, the archive filename is the original path
-with <code>.%Y%m%d</code> appended.  If rollover-period is less than one day, the
-archive filename is the original path with <code>.%Y%m%d.%H</code> appended.</p>
-
-</s2>
-
-<s2 title="Disabling rollovers">
-
-<p>To completely disable rollovers, set the <code>rollover-size</code> to such a
-high number that it will never occur:</p>
-
-<example title="disable log rollovers">
-  &lt;stdout-log path="log//stdout.log" rollover-size="1024mb"/&gt;
-</example>
-
-</s2>
-
-<s2 title="Compression">
-
-<p>Rollover log files can be compressed with gzip or zip.  The
-extension of the archive-format determines the compression.</p>
-
-<example>
-&lt;log name="" level="warning" path='log/error.log'
-     archive-format="%Y-%m-%d.error.log.gz"
-     rollover-period="1D"/&gt;
-
-&lt;access-log path="log/access.log"
-            archive-format="access-%Y%m%d.log.gz"
-            rollover-period="1D"/&gt;
-</example>
-
-</s2>
-
-</s1> <!-- rollovers -->
-
-<s1 name="timestamp" title="Timestamp format string">
-
-<p>The <var>timestamp</var> for log tags is a format string which can contain
-percent codes which are substituted with time and date values.</p>
-
-<deftable>
-<tr><th>Code</th><th>Meaning
-</th></tr><tr><td>%a</td><td>day of week (short)
-</td></tr><tr><td>%A</td><td>day of week (verbose)
-</td></tr><tr><td>%b</td><td>day of month (short)
-</td></tr><tr><td>%B</td><td>day of month (verbose)
-</td></tr><tr><td>%c</td><td>Java locale date
-</td></tr><tr><td>%d</td><td>day of month (two-digit)
-</td></tr><tr><td>%H</td><td>24-hour (two-digit)
-</td></tr><tr><td>%I</td><td>12-hour (two-digit)
-</td></tr><tr><td>%j</td><td>day of year (three-digit)
-</td></tr><tr><td>%m</td><td>month (two-digit)
-</td></tr><tr><td>%M</td><td>minutes
-</td></tr><tr><td>%p</td><td>am/pm
-</td></tr><tr><td>%S</td><td>seconds
-</td></tr><tr><td>%s</td><td>milliseconds
-</td></tr><tr><td>%W</td><td>week in year (three-digit)
-</td></tr><tr><td>%w</td><td>day of week (one-digit)
-</td></tr><tr><td>%y</td><td>year (two-digit)
-</td></tr><tr><td>%Y</td><td>year (four-digit)
-</td></tr><tr><td>%Z</td><td>time zone (name)
-</td></tr><tr><td>%z</td><td>time zone (+/-0800)
-</td></tr></deftable>
-
-
-<example title="Example: typical timestamp for the log tag">
-&lt;resin xmlns="http://caucho.com/ns/resin">
-
-  &lt;log-handler name='' path='stderr:' timestamp="[%H:%M:%S.%s]"/&gt;
-
-  ...
-&lt;/resin>
-</example>
-
-<results>
-[22:50:11.648] WebApp[/doc] starting
-[22:50:11.698] http listening to *:8080
-[22:50:11.828] hmux listening to *:6800
-</results>
 
 </s1>
 

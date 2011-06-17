@@ -723,10 +723,7 @@ public class TcpSocketLink extends AbstractSocketLink
       _readBytes = _socket.getTotalReadBytes();
       _writeBytes = _socket.getTotalWriteBytes();
 
-      if (_listener.isKeepaliveAllowed(_connectionStartTime))
-        _state = _state.toActiveWithKeepalive(this);
-      else
-        _state = _state.toActiveNoKeepalive(this);
+      _state = _state.toActive(this, _connectionStartTime);
 
       if (! getRequest().handleRequest()) {
         killKeepalive();
