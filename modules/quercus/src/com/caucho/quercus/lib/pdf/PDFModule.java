@@ -526,7 +526,7 @@ public class PDFModule extends AbstractQuercusModule {
     if (pdf == null)
       return false;
     
-    return pdf.concat(a, b,c, d, e, f);
+    return pdf.concat(a, b, c, d, e, f);
   }
 
   /**

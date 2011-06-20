@@ -1614,8 +1614,9 @@ public abstract class AbstractHttpRequest
   {
     SocketLink conn = _conn;
 
-    if (conn != null)
+    if (conn != null) {
       conn.killKeepalive();
+    }
 
     /*
     ConnectionController controller = _conn.getController();

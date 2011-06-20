@@ -79,6 +79,8 @@ public class ByteCodeClassScanner {
     _is = is;
 
     _matcher = matcher;
+    
+    _charBufferOffset = 0;
   }
 
   public boolean scan()
@@ -309,24 +311,27 @@ public class ByteCodeClassScanner {
     }
     
     char []buffer = _charBuffer;
+    boolean isIdentifier = true;
     
     while (length > 0) {
       int d1 = is.read();
+      
+      char ch;
 
       if (d1 == '/') {
-        buffer[offset++] = '.';
+        ch = '.';
         
         length--;
       }
       else if (d1 < 0x80) {
-        buffer[offset++] = (char) d1;
+        ch = (char) d1;
         
         length--;
       }
       else if (d1 < 0xe0) {
         int d2 = is.read() & 0x3f;
 
-        buffer[offset++] = (char) (((d1 & 0x1f) << 6) + (d2));
+        ch = (char) (((d1 & 0x1f) << 6) + (d2));
         
         length -= 2;
       }
@@ -334,13 +339,21 @@ public class ByteCodeClassScanner {
         int d2 = is.read() & 0x3f;
         int d3 = is.read() & 0x3f;
 
-        buffer[offset++] = (char) (((d1 & 0xf) << 12) + (d2 << 6) + d3);
+        ch = (char) (((d1 & 0xf) << 12) + (d2 << 6) + d3);
         
         length -= 3;
       }
       else
         throw new IllegalStateException();
+      
+      if (! Character.isJavaIdentifierPart(ch))
+        isIdentifier = false;
+      
+      buffer[offset++] = ch;
     }
+    
+    if (! isIdentifier)
+      return 0;
 
     int charLength = offset - _charBufferOffset;
     

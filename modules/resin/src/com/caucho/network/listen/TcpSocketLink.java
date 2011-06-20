@@ -904,7 +904,12 @@ public class TcpSocketLink extends AbstractSocketLink
   @Override
   public void killKeepalive()
   {
-    _state = _state.toKillKeepalive(this);
+    SocketLinkState state = _state;
+    
+    _state = state.toKillKeepalive(this);
+    
+    if (log.isLoggable(Level.FINE))
+      log.fine(this + " keepalive disabled from " + state);
   }
 
   //

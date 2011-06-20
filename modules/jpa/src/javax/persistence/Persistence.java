@@ -54,9 +54,9 @@ public class Persistence {
   private static final String SERVICE
     = "META-INF/services/javax.persistence.spi.PersistenceProvider";
   
-  private static WeakHashMap<ClassLoader,PersistenceProvider[]>
-    _providerMap = new WeakHashMap<ClassLoader,PersistenceProvider[]>();
-  
+  private static WeakHashMap<ClassLoader,String[]>
+    _providerMap = new WeakHashMap<ClassLoader,String[]>();
+
   private static final String AMBER_PROVIDER
     = "com.caucho.amber.manager.AmberPersistenceProvider";
 
@@ -118,19 +118,17 @@ public class Persistence {
   {
     ClassLoader loader = Thread.currentThread().getContextClassLoader();
 
-    PersistenceProvider []providers = _providerMap.get(loader);
+    String []providerClassNames = _providerMap.get(loader);
 
-    if (providers != null)
-      return providers;
+    if (providerClassNames != null)
+      return loadProviders(providerClassNames);
 
-    ArrayList<PersistenceProvider> list = new ArrayList<PersistenceProvider>();
+    ArrayList<String> list = new ArrayList<String>();
 
     try {
       Class<?> cl = Class.forName(AMBER_PROVIDER, false, loader);
 
-      PersistenceProvider provider = (PersistenceProvider) cl.newInstance();
-
-      list.add(provider);
+      list.add(cl.getName());
     } catch (Exception e) {
       log.log(Level.FINE, e.toString(), e);
     }
@@ -147,18 +145,41 @@ public class Persistence {
       log.log(Level.WARNING, e.toString(), e);
     }
 
-    providers = new PersistenceProvider[list.size()];
-    list.toArray(providers);
+    providerClassNames  = new String[list.size()];
+    list.toArray(providerClassNames);
 
-    _providerMap.put(loader, providers);
+    _providerMap.put(loader, providerClassNames);
 
+    return loadProviders(providerClassNames);
+  }
+  
+  private static PersistenceProvider []loadProviders(String []classNames)
+  {
+    int size = classNames.length;
+      
+    PersistenceProvider []providers = new PersistenceProvider[size];
+      
+    ClassLoader classLoader = Thread.currentThread().getContextClassLoader();
+    
+    for (int i = 0; i < size; i++) {
+      try {
+        Class<?> cl = Class.forName(classNames[i], false, classLoader);
+        
+        PersistenceProvider provider = (PersistenceProvider) cl.newInstance();
+        
+        providers[i] = provider;
+      } catch (Throwable e) {
+        log.log(Level.WARNING, e.toString(), e);
+      }
+    }
+    
     return providers;
   }
 
-  private static List<PersistenceProvider> loadProviders(URL url,
+  private static List<String> loadProviders(URL url,
                                                         ClassLoader loader)
   {
-    List<PersistenceProvider> providers = new ArrayList<PersistenceProvider>();
+    List<String> providers = new ArrayList<String>();
     
     InputStream is = null;
     try {
@@ -186,7 +207,7 @@ public class Persistence {
           try {
             Class<?> cl = Class.forName(className, false, loader);
 
-            providers.add((PersistenceProvider) cl.newInstance());
+            providers.add(cl.getName());
           } catch (Exception e) {
             log.log(Level.FINER, e.getMessage(), e);
           }

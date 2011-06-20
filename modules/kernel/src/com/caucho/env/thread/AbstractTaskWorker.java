@@ -190,10 +190,10 @@ abstract public class AbstractTaskWorker implements Runnable {
 
       _isActive.set(false);
 
+      onThreadComplete();
+      
       if (_taskState.get() == TASK_READY)
         wake();
-
-      onThreadComplete();
       
       thread.setName(oldName);
     }

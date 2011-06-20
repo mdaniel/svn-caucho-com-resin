@@ -29,6 +29,9 @@
 
 package com.caucho.network.listen;
 
+import java.util.logging.Level;
+import java.util.logging.Logger;
+
 import com.caucho.inject.Module;
 
 @Module
@@ -687,6 +690,11 @@ enum SocketLinkState {
       return this;
     }
   };
+  
+  // fields
+  
+  private static final Logger log
+    = Logger.getLogger(SocketLinkState.class.getName());
 
   //
   // predicates
@@ -803,8 +811,12 @@ enum SocketLinkState {
   {
     if (conn.getListener().isKeepaliveAllowed(connectionStartTime))
       return toActiveWithKeepalive(conn);
-    else
+    else {
+      if (log.isLoggable(Level.FINE))
+        log.fine(conn + " keepalive disallowed");
+      
       return toActiveNoKeepalive(conn);
+    }
   }
   /**
    * Changes to the active state with the keepalive allocated.

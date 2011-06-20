@@ -39,6 +39,7 @@ abstract public class TaskWorker extends AbstractTaskWorker {
   protected TaskWorker()
   {
     super(Thread.currentThread().getContextClassLoader());
+    
     _threadPool = ThreadPool.getCurrent();
   }
 

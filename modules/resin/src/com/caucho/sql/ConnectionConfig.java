@@ -60,6 +60,10 @@ public class ConnectionConfig {
       _isolation = Connection.TRANSACTION_REPEATABLE_READ;
     else if ("serializable".equals(name))
       _isolation = Connection.TRANSACTION_SERIALIZABLE;
+    else if (name != null && name.length() > 0
+             && Character.isDigit(name.charAt(0))) {
+      _isolation = Integer.parseInt(name);
+    }
     else
       throw new ConfigException(L.l("'{0}' is an unknown transaction isolation.",
                                     name));

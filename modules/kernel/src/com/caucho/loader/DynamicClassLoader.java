@@ -1443,7 +1443,11 @@ public class DynamicClassLoader extends java.net.URLClassLoader
         else
           cl = findSystemClass(name);
       } catch (ClassNotFoundException e) {
+      } catch (Error e) {
+        System.out.println("CLASS: " + name + " " + getParent() + "\n  " + e);
+        e.printStackTrace();
       }
+      
 
       if (cl == null) {
         // osgi imports
@@ -1791,6 +1795,7 @@ public class DynamicClassLoader extends java.net.URLClassLoader
     if (name.startsWith("/"))
       name = name.substring(1);
 
+    name = getResourceAlias(name);
     /*
     if (name.endsWith("/"))
       name = name.substring(0, name.length() - 1);
@@ -1834,6 +1839,11 @@ public class DynamicClassLoader extends java.net.URLClassLoader
     _resourceCache.put(name, NULL_URL);
 
     return null;
+  }
+  
+  protected String getResourceAlias(String name)
+  {
+    return name;
   }
 
   /**
@@ -1890,6 +1900,8 @@ public class DynamicClassLoader extends java.net.URLClassLoader
 
     if (name.endsWith("/"))
       name = name.substring(0, name.length() - 1);
+    
+    name = getResourceAlias(name);
 
     boolean isNormalJdkOrder = isNormalJdkOrder(name);
     InputStream is = null;
@@ -1958,6 +1970,8 @@ public class DynamicClassLoader extends java.net.URLClassLoader
     if (name.endsWith("/"))
       name = name.substring(0, name.length() - 1);
       */
+    
+    name = getResourceAlias(name);
 
     Vector<URL> resources = new Vector<URL>();
 

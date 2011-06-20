@@ -2746,6 +2746,8 @@ public class WebApp extends ServletContextImpl
       _welcomeFile = welcomeFile;
       
       // add(welcomeFile);
+      
+      initCdiJsfContext();
 
       if (! _isCompileContext) {
         for (int i = 0; i < _resourceValidators.size(); i++) {
@@ -2756,6 +2758,22 @@ public class WebApp extends ServletContextImpl
       }
     } finally {
       _lifecycle.toInit();
+    }
+  }
+  
+  private void initCdiJsfContext()
+  {
+    try {
+      String handler = "com.caucho.server.webbeans.ConversaionJsfViewHandler";
+      
+      Class<?> cl = Class.forName(handler, false, getClassLoader());
+      
+      if (cl != null) {
+        getEnvironmentClassLoader().putResourceAlias("META-INF/faces-config.xml.in",
+                                                     "META-INF/faces-config.xml");
+      }
+    } catch (Exception e) {
+      log.log(Level.FINE, e.toString(), e);
     }
   }
 

@@ -510,6 +510,8 @@ public class XmlParser extends AbstractParser {
       try {
         pushInclude(_extPublicId, _extSystemId);
         hasInclude = true;
+      } catch (RemoteURLException e) {
+        log.finest(e.toString());
       } catch (Exception e) {
         if (log.isLoggable(Level.FINEST))
           log.log(Level.FINER, e.toString(), e);

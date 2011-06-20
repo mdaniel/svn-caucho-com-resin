@@ -36,15 +36,15 @@ import java.io.OutputStream;
  * Stream encapsulating InputStream/OutputStream.
  */
 public class VfsStream extends StreamImpl {
-  private static byte []unixNewline = new byte[] { (byte) '\n' };
+  private static byte []UNIX_NEWLINE = new byte[] { (byte) '\n' };
 
   private InputStream is;
   private OutputStream _os;
-  private boolean flushOnNewline;
-  private boolean closeChildOnClose = true;
-  private byte []newline = unixNewline;
+  private boolean _flushOnNewline;
+  private boolean _closeChildOnClose = true;
+  private byte []_newline = UNIX_NEWLINE;
 
-  private long position;
+  private long _position;
 
   /**
    * Create an empty VfsStream.
@@ -79,19 +79,19 @@ public class VfsStream extends StreamImpl {
     this.is = is;
     _os = os;
     setPath(null);
-    flushOnNewline = false;
-    closeChildOnClose = true;
-    position = 0;
+    _flushOnNewline = false;
+    _closeChildOnClose = true;
+    _position = 0;
   }
 
   public void setNewline(byte []newline)
   {
-    this.newline = newline;
+    this._newline = newline;
   }
 
   public byte []getNewline()
   {
-    return newline;
+    return _newline;
   }
 
   public static ReadWritePair openReadWrite(InputStream is, OutputStream os)
@@ -140,7 +140,7 @@ public class VfsStream extends StreamImpl {
     int len = is.read(buf, offset, length);
 
     if (len > 0)
-      position += len;
+      _position += len;
 
     return len;
   }
@@ -166,7 +166,7 @@ public class VfsStream extends StreamImpl {
 
   public long getReadPosition()
   {
-    return position;
+    return _position;
   }
 
   public boolean canWrite()
@@ -176,12 +176,12 @@ public class VfsStream extends StreamImpl {
 
   public boolean getFlushOnNewline()
   {
-    return flushOnNewline;
+    return _flushOnNewline;
   }
 
   public void setFlushOnNewline(boolean value)
   {
-    flushOnNewline = value;
+    _flushOnNewline = value;
   }
 
   /**
@@ -216,18 +216,18 @@ public class VfsStream extends StreamImpl {
 
   public void setCloseChildOnClose(boolean close)
   {
-    closeChildOnClose = close;
+    _closeChildOnClose = close;
   }
 
   public void close() throws IOException
   {
     try {
-      if (_os != null && closeChildOnClose) {
+      if (_os != null && _closeChildOnClose) {
         _os.close();
         _os = null;
       }
     } finally {
-      if (is != null && closeChildOnClose) {
+      if (is != null && _closeChildOnClose) {
         is.close();
         is = null;
       }

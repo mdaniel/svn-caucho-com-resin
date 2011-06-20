@@ -13,6 +13,10 @@
 
 <s2 title="4.0.20 - snapshot">
 <ul>
+<li>jsf: allow JSF in WEB-INF/lib (will disables CDI) (#4573, rep by cyttesen)</li>
+<li>hessian: debug should not throw illegal state exceptions but should log</li>
+<li>database: allow numeric transaction-isolation values (#4627, rep by mnsh)</li>
+<li>jpa: javax.persistence.Persistence classloader leak (#4628, rep by Patric Rufflar)</li>
 <li>rewrite: CanDI-style rewrite rules in cluster were ignored (#4618, rep by Aaron Freeman)</li>
 <li>scheduled-task: scheduled task remove has stack overflow (#4523, rep by mnsh)</li>
 <li>security: JaasAuthenticator add support for Group/roles (#4621, rep by dicr)</li>

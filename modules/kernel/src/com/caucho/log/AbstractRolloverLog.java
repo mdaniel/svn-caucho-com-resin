@@ -123,6 +123,7 @@ public class AbstractRolloverLog {
   private WriteStream _zipOut;
 
   private boolean _isClosed;
+  private RolloverAlarm _rolloverListener;
   private WeakAlarm _rolloverAlarm;
 
   /**
@@ -356,7 +357,8 @@ public class AbstractRolloverLog {
 
     rolloverLog();
     
-    _rolloverAlarm = new WeakAlarm(new RolloverAlarm());
+    _rolloverListener = new RolloverAlarm();
+    _rolloverAlarm = new WeakAlarm(_rolloverListener);
     
     if (_nextPeriodEnd > 0 && _nextPeriodEnd < nextDay) {
       _rolloverAlarm.queueAt(_nextPeriodEnd);

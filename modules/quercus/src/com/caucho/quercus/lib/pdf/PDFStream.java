@@ -107,7 +107,7 @@ public class PDFStream {
   public void setTextPos(double x, double y)
   {
     if (_hasTextPos) {
-      println((- _textX) + " " + (- _textY) + " Td");
+      flushToGraph();
     }
     
     _textX = x;
@@ -382,6 +382,7 @@ public class PDFStream {
       if (_inText) {
         _out.println("ET");
         _inText = false;
+        _hasTextPos = false;
       }
 
       _out.flush();
