@@ -31,7 +31,6 @@ package com.caucho.bytecode;
 
 import java.io.IOException;
 import java.io.InputStream;
-import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -344,10 +343,14 @@ public class ByteCodeClassScanner {
       else
         throw new IllegalStateException();
       
-      if (isIdentifier && Character.isJavaIdentifierPart(ch))
+      if (isIdentifier
+          && (Character.isJavaIdentifierPart(ch)
+              || ch == '.' || ch == ';')) {
         buffer[offset++] = ch;
-      else
+      }
+      else {
         isIdentifier = false;
+      }
     }
     
     if (! isIdentifier)
@@ -492,7 +495,7 @@ public class ByteCodeClassScanner {
     for (int i = 0; i < count; i++) {
       int annTypeIndex = scanAnnotation(is);
       
-      if (annTypeIndex > 0) {
+      if (annTypeIndex > 0 && _cpLengths[annTypeIndex] > 2) {
         _matcher.addClassAnnotation(_charBuffer, 
                                     _cpData[annTypeIndex] + 1, 
                                     _cpLengths[annTypeIndex] - 2);
