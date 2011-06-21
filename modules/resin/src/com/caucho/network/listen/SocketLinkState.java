@@ -41,7 +41,7 @@ enum SocketLinkState {
    */
   INIT {
     @Override
-    SocketLinkState toInit() 
+    SocketLinkState toInit(TcpSocketLink conn) 
     { 
       return INIT; 
     }
@@ -300,6 +300,12 @@ enum SocketLinkState {
     }
 
     @Override
+    SocketLinkState toCometDispatch() 
+    { 
+      return REQUEST_ACTIVE_KA;
+    }
+
+    @Override
     SocketLinkState toCometComplete()
     {
       return COMET_COMPLETE_KA;
@@ -410,13 +416,13 @@ enum SocketLinkState {
     @Override
     SocketLinkState toClosed(TcpSocketLink conn)
     {
-      throw new IllegalStateException();
+      throw new IllegalStateException(this + " " + conn);
     }
 
     @Override
     SocketLinkState toDestroy(TcpSocketLink conn)
     {
-      throw new IllegalStateException();
+      throw new IllegalStateException(this + " " + conn);
     }
   },
 
@@ -450,13 +456,13 @@ enum SocketLinkState {
     @Override
     SocketLinkState toClosed(TcpSocketLink conn)
     {
-      throw new IllegalStateException();
+      throw new IllegalStateException(this + " " + conn);
     }
 
     @Override
     SocketLinkState toDestroy(TcpSocketLink conn)
     {
-      throw new IllegalStateException();
+      throw new IllegalStateException(this + " " + conn);
     }
   },
 
@@ -508,13 +514,13 @@ enum SocketLinkState {
     @Override
     SocketLinkState toClosed(TcpSocketLink conn)
     {
-      throw new IllegalStateException();
+      throw new IllegalStateException(this + " " + conn);
     }
 
     @Override
     SocketLinkState toDestroy(TcpSocketLink conn)
     {
-      throw new IllegalStateException();
+      throw new IllegalStateException(this + " " + conn);
     }
   },
 
@@ -653,9 +659,15 @@ enum SocketLinkState {
     boolean isIdle() { return true; }
 
     @Override
-    SocketLinkState toInit() 
+    SocketLinkState toInit(TcpSocketLink conn) 
     { 
       return INIT; 
+    }
+    
+    @Override
+    SocketLinkState toFree(TcpSocketLink conn)
+    {
+      return this;
     }
 
     @Override
@@ -671,12 +683,6 @@ enum SocketLinkState {
 
     @Override
     boolean isDestroyed() { return true; }
-
-    @Override
-    SocketLinkState toIdle()
-    {
-      return this;
-    }
 
     @Override
     SocketLinkState toClosed(TcpSocketLink conn)
@@ -791,9 +797,9 @@ enum SocketLinkState {
    * Convert from the idle (pooled) or closed state to the initial state
    * before accepting a connection.
    */
-  SocketLinkState toInit()
+  SocketLinkState toInit(TcpSocketLink conn)
   {
-    throw new IllegalStateException(this + " cannot switch to init");
+    throw new IllegalStateException(this + " cannot switch to init for " + conn);
   }
 
   /**
@@ -909,6 +915,11 @@ enum SocketLinkState {
   SocketLinkState toIdle()
   {
     throw new IllegalStateException(this + " is an illegal idle state");
+  }
+  
+  SocketLinkState toFree(TcpSocketLink conn)
+  {
+    throw new IllegalStateException(this + " is an illegal free state for " + conn);
   }
 
   SocketLinkState toClosed(TcpSocketLink conn)

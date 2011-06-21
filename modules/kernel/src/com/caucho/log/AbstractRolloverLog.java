@@ -360,11 +360,14 @@ public class AbstractRolloverLog {
     _rolloverListener = new RolloverAlarm();
     _rolloverAlarm = new WeakAlarm(_rolloverListener);
     
-    if (_nextPeriodEnd > 0 && _nextPeriodEnd < nextDay) {
-      _rolloverAlarm.queueAt(_nextPeriodEnd);
+    if (_nextPeriodEnd < 0 || nextDay < _nextPeriodEnd) {
+      _rolloverAlarm.queue(DEFAULT_ROLLOVER_CHECK_PERIOD);
+    }
+    else if (_nextPeriodEnd <= now) {
+      _rolloverAlarm.queue(0);
     }
     else {
-      _rolloverAlarm.queue(DEFAULT_ROLLOVER_CHECK_PERIOD);
+      _rolloverAlarm.queueAt(_nextPeriodEnd);
     }
   }
   

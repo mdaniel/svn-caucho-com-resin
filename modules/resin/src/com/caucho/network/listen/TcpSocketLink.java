@@ -844,7 +844,7 @@ public class TcpSocketLink extends AbstractSocketLink
    */
   final void toInit()
   {
-    _state = _state.toInit();
+    _state = _state.toInit(this);
   }
 
   /**
@@ -983,6 +983,7 @@ public class TcpSocketLink extends AbstractSocketLink
   boolean wake()
   {
     _state = _state.toCometWake();
+    
     // comet
     if (getListener().cometResume(this)) {
       log.fine(dbgId() + "wake");
@@ -1019,6 +1020,8 @@ public class TcpSocketLink extends AbstractSocketLink
 
       getRequest().handleResume();
 
+//      System.out.println("STATE: " + _state + "\n  " + this);
+      
       if (_state.isCometActive() && toSuspend()) {
         return RequestState.ASYNC;
       }
@@ -1028,9 +1031,7 @@ public class TcpSocketLink extends AbstractSocketLink
         _async = null;
 
         async.onClose();
-        _keepaliveTask.run();
-        
-        return RequestState.EXIT;
+        return _keepaliveTask.doTask();
       }
       else {
         _async = null;
@@ -1206,6 +1207,11 @@ public class TcpSocketLink extends AbstractSocketLink
     if (state.isAllowIdle()) {
       _listener.free(this);
     }
+  }
+  
+  final void toFree()
+  {
+    _state = _state.toFree(this);
   }
 
   /**

@@ -54,7 +54,8 @@ public class Alarm implements ThreadTask, ClassLoaderListener {
   private static final AlarmThread _alarmThread;
   private static final CoordinatorThread _coordinatorThread;
 
-  private static volatile long _currentTime;
+  private static volatile long _currentTime = System.currentTimeMillis();
+
   private static volatile boolean _isCurrentTimeUsed;
   private static volatile boolean _isSlowTime;
 
@@ -646,8 +647,6 @@ public class Alarm implements ThreadTask, ClassLoaderListener {
   }
 
   static {
-    _currentTime = System.currentTimeMillis();
-
     ClassLoader systemLoader = null;
     AlarmThread alarmThread = null;
     CoordinatorThread coordinator = null;

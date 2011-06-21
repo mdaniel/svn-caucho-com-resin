@@ -1560,6 +1560,8 @@ public class TcpSocketLinkListener
   void free(TcpSocketLink conn)
   {
     closeConnection(conn);
+    
+    conn.toFree();
 
     _idleConn.free(conn);
   }
@@ -1781,19 +1783,31 @@ public class TcpSocketLinkListener
         for (int i = _timeoutSet.size() - 1; i >= 0; i--) {
           TcpSocketLink conn = _timeoutSet.get(i);
 
-          if (log.isLoggable(Level.FINE))
-            log.fine(this + " suspend idle timeout " + conn);
+          if (_suspendConnectionSet.remove(conn)) {
+            if (log.isLoggable(Level.FINE))
+              log.fine(this + " suspend idle timeout " + conn);
 
-          conn.toCometTimeout();
+            try {
+              conn.toCometTimeout();
+            } catch (Exception e) {
+              log.log(Level.WARNING, conn + ": " + e.getMessage(), e);
+            }
+          }
         }
 
         for (int i = _completeSet.size() - 1; i >= 0; i--) {
           TcpSocketLink conn = _completeSet.get(i);
 
-          if (log.isLoggable(Level.FINE))
-            log.fine(this + " async end-of-file " + conn);
+          if (_suspendConnectionSet.remove(conn)) {
+            if (log.isLoggable(Level.FINE))
+              log.fine(this + " async end-of-file " + conn);
 
-          conn.toCometComplete();
+            try {
+              conn.toCometComplete();
+            } catch (Exception e) {
+              log.log(Level.WARNING, conn + ": " + e.getMessage(), e);
+            }
+          }
           /*
           AsyncController async = conn.getAsyncController();
 
