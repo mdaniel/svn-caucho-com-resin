@@ -1201,10 +1201,9 @@ public class TcpSocketLink extends AbstractSocketLink
     
     closeConnection();
 
-    state = _state;
-    _state = state.toIdle();
-
     if (state.isAllowIdle()) {
+      _state = state.toIdle();
+      
       _listener.free(this);
     }
   }

@@ -107,7 +107,8 @@ Throwable e1 = null;
       try {
         _socketLink.finishThread(result);
       } catch (RuntimeException e) {
-        System.out.println("FINISH: " + result + " " + _socketLink + " " + this + "\n  " + e1);
+        e.printStackTrace();
+        System.out.println("FINISH: " + result + " " + _socketLink + " " + this + "\n  " + e1 + "\n  " + e);
         throw e;
       }
       
