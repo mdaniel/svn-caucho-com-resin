@@ -56,7 +56,7 @@ public final class Block implements SyncCacheListener {
 
   private static final FreeList<byte[]> _freeBuffers
     = new FreeList<byte[]>(256);
-
+    
   private final BlockStore _store;
   private final long _blockId;
 
@@ -84,7 +84,9 @@ public final class Block implements SyncCacheListener {
     _blockId = blockId;
 
     // _lock = new Lock("block:" + store.getName() + ":" + Long.toHexString(_blockId));
+    // ReadWriteLock rwLock = new ReentrantReadWriteLock();
     ReadWriteLock rwLock = new ReentrantReadWriteLock();
+    
     _readLock = rwLock.readLock();
     _writeLock = rwLock.writeLock();
 
@@ -473,8 +475,9 @@ public final class Block implements SyncCacheListener {
       byte []buffer = _buffer;
       _buffer = null;
       
-      if (buffer != null)
+      if (buffer != null) {
         _freeBuffers.free(buffer);
+      }
     }
   }
   

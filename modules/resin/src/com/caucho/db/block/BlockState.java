@@ -74,7 +74,7 @@ public enum BlockState {
    
   DESTROYED {
     @Override
-    public boolean isDestroyed() { return false; }
+    public boolean isDestroyed() { return true; }
     
     @Override
     public BlockState toWrite() { return this; }

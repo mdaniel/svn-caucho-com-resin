@@ -33,6 +33,7 @@ import java.io.IOException;
 import java.net.URL;
 import java.util.ArrayList;
 import java.util.Enumeration;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import java.util.zip.ZipEntry;
@@ -43,6 +44,7 @@ import com.caucho.bytecode.ByteCodeClassScanner;
 import com.caucho.inject.Module;
 import com.caucho.loader.EnvironmentClassLoader;
 import com.caucho.util.CharBuffer;
+import com.caucho.vfs.Depend;
 import com.caucho.vfs.Jar;
 import com.caucho.vfs.JarPath;
 import com.caucho.vfs.Path;
@@ -56,6 +58,9 @@ import com.caucho.vfs.Vfs;
 public class ScanManager {
   private static final Logger log
     = Logger.getLogger(ScanManager.class.getName());
+  
+  private static ConcurrentHashMap<Path,Depend> _nullScanPathMap
+    = new ConcurrentHashMap<Path,Depend>();
 
   private final ScanListener []_listeners;
 
@@ -166,6 +171,9 @@ public class ScanManager {
                                  ByteCodeClassScanner classScanner,
                                  JarByteCodeMatcher matcher)
   {
+    if (isNullScanPath(path))
+      return;
+    
     ZipFile zipFile = null;
     Jar jar = JarPath.create(path).getJar();
 
@@ -174,6 +182,8 @@ public class ScanManager {
 
       if (zipFile == null)
         return;
+      
+      boolean isScanMatch = false;
 
       Enumeration<? extends ZipEntry> e = zipFile.entries();
 
@@ -193,16 +203,39 @@ public class ScanManager {
         try {
           classScanner.init(entryName, is, matcher);
 
-          classScanner.scan();
+          if (classScanner.scan())
+            isScanMatch = true;
         } finally {
           is.close();
         }
       }
+      
+      if (! isScanMatch)
+        addNullScanPath(path);
     } catch (IOException e) {
       log.log(Level.FINE, e.toString(), e);
     } finally {
       jar.closeZipFile(zipFile);
     }
+  }
+  
+  /**
+   * Adds a jar where none of the classes have a scanned match.
+   */
+  
+  private void addNullScanPath(Path path)
+  {
+    _nullScanPathMap.put(path, new Depend(path));
+  }
+  
+  /**
+   * Returns true if the jar is known to have no scanned classes. 
+   */
+  private boolean isNullScanPath(Path path)
+  {
+    Depend depend = _nullScanPathMap.get(path);
+    
+    return depend != null && ! depend.isModified();
   }
 
   static class JarByteCodeMatcher extends ScanByteCodeMatcher {
@@ -347,13 +380,18 @@ public class ScanManager {
     }
 
     @Override
-    public void finishScan()
+    public boolean finishScan()
     {
+      boolean isScanValue = false;
+      
       for (ScanClass scanClass : _currentClasses) {
         if (scanClass != null) {
-          scanClass.finishScan();
+          if (scanClass.finishScan())
+            isScanValue = true;
         }
       }
+      
+      return isScanValue;
     }
  
     /**

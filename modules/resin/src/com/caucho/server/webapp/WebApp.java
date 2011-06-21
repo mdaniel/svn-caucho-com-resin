@@ -4920,12 +4920,15 @@ public class WebApp extends ServletContextImpl
      * Complete scan processing.
      */
     @Override
-    public void finishScan()
+    public boolean finishScan()
     {
       if (_isValid) {
         _pendingClasses.add(_className);
+        return true;
       }
-    }    
+      else
+        return false;
+    }
   }
   
   static class ClassComparator implements Comparator<Class<?>> {

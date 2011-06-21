@@ -551,4 +551,10 @@ abstract public class Expr {
     throws SQLException
   {
   }
+
+  public boolean evalEqual(QueryContext context, String evalString)
+    throws SQLException
+  {
+    throw new UnsupportedOperationException(getClass().getName());
+  }
 }

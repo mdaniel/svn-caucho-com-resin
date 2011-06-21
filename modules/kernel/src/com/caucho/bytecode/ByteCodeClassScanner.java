@@ -170,9 +170,7 @@ public class ByteCodeClassScanner {
         }
       }
       
-      _matcher.finishScan();
-
-      return true;
+      return _matcher.finishScan();
     } catch (Exception e) {
       log.log(Level.WARNING,
               "failed scanning class " + _className + "\n" + e.toString(),
@@ -346,10 +344,10 @@ public class ByteCodeClassScanner {
       else
         throw new IllegalStateException();
       
-      if (! Character.isJavaIdentifierPart(ch))
+      if (isIdentifier && Character.isJavaIdentifierPart(ch))
+        buffer[offset++] = ch;
+      else
         isIdentifier = false;
-      
-      buffer[offset++] = ch;
     }
     
     if (! isIdentifier)

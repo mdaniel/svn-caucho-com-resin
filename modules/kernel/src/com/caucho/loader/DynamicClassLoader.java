@@ -953,11 +953,6 @@ public class DynamicClassLoader extends java.net.URLClassLoader
     return _classFileTransformerList;
   }
 
-  public String getHash()
-  {
-    return String.valueOf(Crc64.generate(getClassPath()));
-  }
-  
   public static final String getHash(ClassLoader loader)
   {
     if (! (loader instanceof DynamicClassLoader))
@@ -967,7 +962,22 @@ public class DynamicClassLoader extends java.net.URLClassLoader
     
     return dynLoader.getHash();
   }
-  
+
+  public String getHash()
+  {
+    ArrayList<String> list = new ArrayList<String>();
+    
+    buildClassPath(list);
+
+    long crc64 = 0;
+    
+    for (int i = 0; i < list.size(); i++) {
+      crc64 = Crc64.generate(crc64, list.get(i));
+    }
+    
+    return String.valueOf(crc64);
+  }
+    
   /**
    * Fill data for the class path.  fillClassPath() will add all
    * .jar and .zip files in the directory list.
@@ -1350,7 +1360,8 @@ public class DynamicClassLoader extends java.net.URLClassLoader
   }
 
   @Override
-  public Class<?> loadClass(String name) throws ClassNotFoundException
+  public Class<?> loadClass(String name)
+    throws ClassNotFoundException
   {
     // the Sun JDK implementation of ClassLoader delegates this call
     // to loadClass(name, false), but there is no guarantee that other

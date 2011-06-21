@@ -59,5 +59,5 @@ public interface ScanClass {
   /**
    * Complete scan processing.
    */
-  void finishScan();
+  boolean finishScan();
 }

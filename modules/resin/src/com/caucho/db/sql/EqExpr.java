@@ -29,6 +29,7 @@
 
 package com.caucho.db.sql;
 
+import java.sql.Blob;
 import java.sql.SQLException;
 import java.util.ArrayList;
 
@@ -45,8 +46,8 @@ final class EqExpr extends Expr {
     if (left == null || right == null)
       throw new NullPointerException();
 
-    if (right instanceof UnboundIdentifierExpr &&
-        ! (left instanceof UnboundIdentifierExpr)) {
+    if (right instanceof UnboundIdentifierExpr
+        && ! (left instanceof UnboundIdentifierExpr)) {
       Expr temp = right;
       right = left;
       left = temp;
@@ -70,6 +71,15 @@ final class EqExpr extends Expr {
     else if (newRight instanceof ColumnExpr
              && newRight.getType().equals(String.class)) {
       return new StringEqExpr((ColumnExpr) newRight, newLeft);
+    }
+
+    if ((newLeft instanceof ColumnExpr || newLeft instanceof IdExpr)
+        && newLeft.getType().equals(Blob.class)) {
+      return new BlobEqExpr(newLeft, newRight);
+    }
+    else if ((newRight instanceof ColumnExpr || newRight instanceof IdExpr)
+             && newRight.getType().equals(Blob.class)) {
+      return new BlobEqExpr(newRight, newLeft);
     }
 
     if (newLeft.isLong() && (newRight.isLong() || newRight.isParam()))

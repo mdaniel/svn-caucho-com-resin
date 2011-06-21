@@ -210,13 +210,15 @@ class InjectScanClass implements ScanClass
   }
 
   @Override
-  public void finishScan()
+  public boolean finishScan()
   {
     if (_isRegisterRequired
         || _scanManager.isCustomExtension()
         || _parent != null && _parent.isRegistered()) {
       register();
     }
+
+    return true;
   }  
   
   private void addParent(String className)

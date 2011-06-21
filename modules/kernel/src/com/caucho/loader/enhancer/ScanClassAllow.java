@@ -35,7 +35,7 @@ import com.caucho.inject.Module;
  * Interface for a scanned class.
  */
 @Module
-public final class ScanClassAllow implements ScanClass {
+public final class ScanClassAllow extends AbstractScanClass {
   public static ScanClass ALLOW = new ScanClassAllow();
   
   private ScanClassAllow()
@@ -63,7 +63,8 @@ public final class ScanClassAllow implements ScanClass {
   }
 
   @Override
-  public void finishScan()
+  public boolean finishScan()
   {
+    return false;
   }
 }

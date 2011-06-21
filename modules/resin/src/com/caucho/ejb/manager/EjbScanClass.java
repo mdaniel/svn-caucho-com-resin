@@ -128,11 +128,15 @@ class EjbScanClass extends AbstractScanClass {
   }
 
   @Override
-  public void finishScan()
+  public boolean finishScan()
   {
     if (_isEjb) {
       _ejbContainer.addScanClass(_root, _className);
+      
+      return true;
     }
+    else
+      return false;
   }
 
   @Override

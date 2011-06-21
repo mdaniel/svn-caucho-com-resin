@@ -72,8 +72,9 @@ public class AbstractScanClass implements ScanClass {
    * Complete scan processing.
    */
   @Override
-  public void finishScan()
+  public boolean finishScan()
   {
+    return false;
   }
   
   protected final boolean isMatch(char []bufferA, int offset, int length,

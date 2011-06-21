@@ -30,7 +30,6 @@ package com.caucho.db.sql;
 
 import java.sql.SQLException;
 import java.util.ArrayList;
-import java.util.logging.Logger;
 
 class StringEqExpr extends Expr {
   private ColumnExpr _column;

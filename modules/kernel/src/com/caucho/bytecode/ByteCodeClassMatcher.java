@@ -70,5 +70,5 @@ public interface ByteCodeClassMatcher {
   /**
    * Complete the scan.
    */
-  public void finishScan();
+  public boolean finishScan();
 }
