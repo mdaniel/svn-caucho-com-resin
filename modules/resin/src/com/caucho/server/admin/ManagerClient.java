@@ -31,25 +31,29 @@ package com.caucho.server.admin;
 import com.caucho.bam.RemoteConnectionFailedException;
 import com.caucho.bam.ServiceUnavailableException;
 import com.caucho.bam.actor.ActorSender;
-import com.caucho.bam.broker.Broker;
-import com.caucho.boot.JmxCallCommand;
+import com.caucho.cloud.security.SecurityService;
 import com.caucho.hmtp.HmtpClient;
+import com.caucho.hmtp.NonceQuery;
 import com.caucho.server.cluster.Server;
+import com.caucho.util.Alarm;
 import com.caucho.util.L10N;
 
+import java.io.IOException;
 import java.io.Serializable;
 import java.util.logging.Level;
+import java.util.logging.Logger;
 
 /**
  * Deploy Client API
  */
 public class ManagerClient
 {
+  private static final Logger log
+    = Logger.getLogger(ManagerClient.class.getName());
   private static final L10N L = new L10N(ManagerClient.class);
 
   private static final long MANAGER_TIMEOUT = 600 * 1000L;
 
-  private Broker _broker;
   private ActorSender _bamClient;
   private String _managerAddress;
 
@@ -105,6 +109,27 @@ public class ManagerClient
   public String getUrl()
   {
     return _url;
+  }
+
+  public String addUser(String user, char []password, String []roles)
+  {
+    AddUserQuery query = new AddUserQuery(user, password, roles);
+
+    return (String) query(query);
+  }
+
+  public String removeUser(String user)
+  {
+    RemoveUserQuery query = new RemoveUserQuery(user);
+
+    return (String) query(query);
+  }
+
+  public String listUsers()
+  {
+    ListUsersQuery query = new ListUsersQuery();
+
+    return (String) query(query);
   }
 
   public String doThreadDump()
@@ -189,10 +214,7 @@ public class ManagerClient
   @Override
   public String toString()
   {
-    if (_broker != null)
-      return getClass().getSimpleName() + "[" + _managerAddress + "]";
-    else
-      return getClass().getSimpleName() + "[" + _bamClient + "]";
+    return getClass().getSimpleName() + "[" + _bamClient + "]";
   }
 }
 

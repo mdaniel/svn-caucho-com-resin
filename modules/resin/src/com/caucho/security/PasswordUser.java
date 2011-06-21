@@ -29,12 +29,13 @@
 
 package com.caucho.security;
 
+import java.io.Serializable;
 import java.security.Principal;
 
 /**
  * PasswordUser is used by PasswordAuthenticator implementations.
  */
-public class PasswordUser
+public class PasswordUser implements Serializable
 {
   private final Principal _principal;
   private final char []_password;

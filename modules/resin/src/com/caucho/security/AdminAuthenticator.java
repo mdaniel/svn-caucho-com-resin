@@ -29,14 +29,21 @@
 
 package com.caucho.security;
 
-import javax.inject.Named;
-import javax.enterprise.inject.Default;
-
 import com.caucho.config.Admin;
 import com.caucho.config.CauchoDeployment;
 import com.caucho.config.Service;
+import com.caucho.config.types.Period;
+import com.caucho.distcache.AbstractCache;
+import com.caucho.distcache.ClusterByteStreamCache;
 import com.caucho.util.Base64;
 import com.caucho.util.Crc64;
+import com.caucho.util.L10N;
+
+import javax.enterprise.inject.Default;
+import javax.inject.Named;
+import java.util.Hashtable;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 /**
  * The admin authenticator provides authentication for Resin admin/management
@@ -63,14 +70,64 @@ import com.caucho.util.Crc64;
 @SuppressWarnings("serial")
 public class AdminAuthenticator extends XmlAuthenticator
 {
+  private static final Logger log
+    = Logger.getLogger(AdminAuthenticator.class.getName());
+  private static final L10N L = new L10N(AdminAuthenticator.class);
+
   private String _remoteCookie;
   private boolean _isComplete;
-  
+
+  private Hashtable<String, PasswordUser> _userMap
+    = new Hashtable<String, PasswordUser>();
+
+  private AbstractCache _authStore;
 
   public AdminAuthenticator()
   {
   }
-  
+
+  public final void initStore()
+  {
+    if (_authStore != null)
+      return;
+
+    AbstractCache authStore = AbstractCache.getMatchingCache(
+      "resin:authenticator");
+
+    if (authStore == null) {
+      authStore = new ClusterByteStreamCache();
+
+      authStore.setIdleTimeoutMillis(Period.FOREVER);
+      authStore.setExpireTimeoutMillis(Period.FOREVER);
+
+      authStore.setName("resin:authenticator");
+      authStore.setScopeMode(AbstractCache.Scope.POD);
+      authStore.setBackup(true);
+      authStore.setTriplicate(true);
+
+      authStore = authStore.createIfAbsent();
+    }
+
+    _authStore = authStore;
+  }
+
+  private void loadFromStore()
+  {
+    Hashtable<String, PasswordUser> userMap
+      = (Hashtable<String, PasswordUser>) _authStore.get(
+      "resin-admin-authenticator-map");
+
+    if (userMap != null)
+      _userMap = userMap;
+
+    if (log.isLoggable(Level.FINEST))
+      log.log(Level.FINEST, "admin authenticator loaded " + userMap);
+  }
+
+  private void updateStore() {
+    _authStore.put("resin-admin-authenticator-map", _userMap);
+  }
+
   public boolean isComplete()
   {
     return _isComplete;
@@ -80,7 +137,58 @@ public class AdminAuthenticator extends XmlAuthenticator
   {
     _isComplete = true;
   }
-  
+
+  public void addUser(String userName, char []password, String []roles)
+  {
+    loadFromStore();
+
+    if (super.getUserMap().containsKey(userName))
+      throw new IllegalArgumentException(L.l("user `{0}' already exists",
+                                             userName));
+
+    if (_userMap.containsKey(userName))
+      throw new IllegalArgumentException(L.l("user `{0}' already exists",
+                                             userName));
+
+    char []passwordDigest = getPasswordDigest(userName, password);
+
+    PasswordUser user = new PasswordUser(userName,passwordDigest, roles);
+
+    _userMap.put(userName, user);
+
+    updateStore();
+  }
+
+  public void removeUser(String userName)
+  {
+    loadFromStore();
+
+    if (super.getUserMap().containsKey(userName))
+      throw new IllegalArgumentException(L.l("can not delete user `{0}'", userName));
+
+    if (! _userMap.containsKey(userName))
+      throw new IllegalArgumentException(L.l("unknown user `{0}'", userName));
+
+    _userMap.remove(userName);
+
+    updateStore();
+  }
+
+  @Override
+  public Hashtable<String, PasswordUser> getUserMap()
+  {
+    loadFromStore();
+
+    Hashtable<String, PasswordUser> userMap
+      = new Hashtable<String, PasswordUser>();
+
+    userMap.putAll(super.getUserMap());
+
+    userMap.putAll(_userMap);
+
+    return userMap;
+  }
+
   /**
    * Abstract method to return a user based on the name
    *
@@ -100,8 +208,15 @@ public class AdminAuthenticator extends XmlAuthenticator
       
       return new PasswordUser(userName, hash);
     }
-    else
-      return super.getPasswordUser(userName);
+
+    loadFromStore();
+
+    PasswordUser user = super.getPasswordUser(userName);
+
+    if (user == null)
+      user = _userMap.get(userName);
+
+    return user;
   }
 
   /**

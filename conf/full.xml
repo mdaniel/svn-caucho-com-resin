@@ -71,7 +71,7 @@
 
   <cluster-default>
     <!-- standard servlet behavior, including .jsp, .php, and WEB-INF -->
-    <resin:import path="${__DIR__}/app-default.xml"/>
+    <resin:import path="classpath:META-INF/caucho/app-default.xml"/>
     
     <!--
        - Admin services

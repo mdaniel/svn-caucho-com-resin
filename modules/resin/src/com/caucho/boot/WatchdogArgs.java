@@ -515,6 +515,15 @@ class WatchdogArgs
       else if ("undeploy".equals(arg)) {
         _startMode = StartMode.UNDEPLOY;
       }
+      else if ("user-add".equals(arg)) {
+        _startMode = StartMode.USER_ADD;
+      }
+      else if ("user-list".equals(arg)) {
+        _startMode = StartMode.USER_LIST;
+      }
+      else if ("user-remove".equals(arg)) {
+        _startMode = StartMode.USER_REMOVE;
+      }
       else if ("version".equals(arg)) {
         System.out.println(VersionFactory.getFullVersion());
         System.exit(0);
@@ -573,6 +582,9 @@ class WatchdogArgs
                                + "\n  jmx-list - lists MBeans, attributes, operations"
                                + "\n  jmx-set - sets value on MBean's attribute"
                                + "\n  jmx-call - invokes a method on MBean"
+                               + "\n  user-add - adds an admin user"
+                               + "\n  user-remove - removes an admin user"
+                               + "\n  user-list - lists admin users"
                                + "\n  help <command> - prints command usage message"
                                + "\n  version - prints version"));
       System.exit(1);
@@ -597,6 +609,7 @@ class WatchdogArgs
     System.err.println(L().l("usage: java -jar resin.jar [-options] [console | status | start | gui | stop | restart | kill | shutdown | version]"));
     System.err.println(L().l("       java -jar resin.jar [-options] [deploy | undeploy | deploy-copy | deploy-list | deploy-start | deploy-stop | deploy-restart]"));
     System.err.println(L().l("       java -jar resin.jar [-options] [thread-dump | heap-dump | log-level | profile | jmx-list | jmx-call | jmx-set]"));
+    System.err.println(L().l("       java -jar resin.jar [-options] [user-add | user-list | user-remove]"));
     System.err.println(L().l("       java -jar resin.jar help <command>"));
     System.err.println(L().l(""));
     System.err.println(L().l("where options include:"));
@@ -919,6 +932,9 @@ class WatchdogArgs
     STATUS,
     STOP,
     UNDEPLOY,
+    USER_ADD,
+    USER_LIST,
+    USER_REMOVE,
     WATCHDOG,
   };
 }

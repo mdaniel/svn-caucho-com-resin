@@ -39,13 +39,10 @@ import javax.servlet.http.HttpServletResponse;
 
 import com.caucho.VersionFactory;
 import com.caucho.bam.actor.ActorSender;
-import com.caucho.bam.actor.SimpleActorSender;
 import com.caucho.bam.broker.Broker;
 import com.caucho.bam.broker.ManagedBroker;
 import com.caucho.bam.manager.BamManager;
 import com.caucho.bam.stream.MessageStream;
-import com.caucho.bam.stream.NullActor;
-import com.caucho.bam.stream.NullMessageStream;
 import com.caucho.cloud.bam.BamSystem;
 import com.caucho.cloud.network.ClusterServer;
 import com.caucho.cloud.network.NetworkClusterSystem;
@@ -1240,6 +1237,10 @@ public class Server
       _lifecycle.toActive();
 
       logModules();
+
+      AdminAuthenticator adminAuth = getAdminAuthenticator();
+      if (adminAuth != null)
+        adminAuth.initStore();
     } catch (RuntimeException e) {
       log.log(Level.WARNING, e.toString(), e);
 

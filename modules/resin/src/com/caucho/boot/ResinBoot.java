@@ -416,5 +416,9 @@ public class ResinBoot {
     _commandMap.put(StartMode.THREAD_DUMP, new ThreadDumpCommand());
 
     _commandMap.put(StartMode.UNDEPLOY, new UnDeployCommand());
+
+    _commandMap.put(StartMode.USER_ADD, new AddUserCommand());
+    _commandMap.put(StartMode.USER_LIST, new ListUsersCommand());
+    _commandMap.put(StartMode.USER_REMOVE, new RemoveUserCommand());
   }
 }
