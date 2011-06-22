@@ -208,7 +208,9 @@ public final class HttpServletRequestImpl extends AbstractCauchoRequest
   @Override
   public String getServerName()
   {
-    return _request.getServerName();
+    AbstractHttpRequest request = _request;
+
+    return request != null ? _request.getServerName() : null;
   }
 
   /**
@@ -226,7 +228,9 @@ public final class HttpServletRequestImpl extends AbstractCauchoRequest
   @Override
   public int getServerPort()
   {
-    return _request.getServerPort();
+    AbstractHttpRequest request = _request;
+
+    return request != null ? request.getServerPort() : null;
   }
 
   /**

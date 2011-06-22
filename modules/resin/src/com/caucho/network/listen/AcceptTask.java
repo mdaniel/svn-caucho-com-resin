@@ -39,7 +39,7 @@ import com.caucho.inject.Module;
  * The thread task to handle a newly accepted request.
  */
 @Module
-class AcceptTask extends ConnectionReadTask {
+class AcceptTask extends ConnectionTask {
   private static final Logger log = Logger.getLogger(AcceptTask.class.getName());
   
   AcceptTask(TcpSocketLink socketLink)
@@ -74,73 +74,9 @@ class AcceptTask extends ConnectionReadTask {
    * Loop to accept new connections.
    */
   @Override
-  RequestState doTask()
+  final RequestState doTask()
     throws IOException
   {
-    TcpSocketLink socketLink = getSocketLink();
-    TcpSocketLinkListener listener = getListener();
-    
-    RequestState result = RequestState.EXIT;
-    SocketLinkThreadLauncher launcher = getLauncher();
-    
-    while (! listener.isClosed()
-           && ! socketLink.getState().isDestroyed()) {
-      socketLink.toAccept();
-      
-      if (launcher.isIdleExpire())
-        return RequestState.EXIT;
-
-      if (! accept()) {
-        socketLink.close();
-
-        continue;
-      }
-
-      socketLink.toStartConnection();
-
-      if (log.isLoggable(Level.FINER)) {
-        log.finer(socketLink + " accept from "
-                  + socketLink.getRemoteHost() + ":" + socketLink.getRemotePort());
-      }
-
-      boolean isKeepalive = false;
-      result = socketLink.handleRequests(isKeepalive);
-
-      switch (result) {
-      case REQUEST_COMPLETE:
-        socketLink.close();
-        break;
-        
-      case KEEPALIVE_SELECT:
-      case ASYNC:
-        return result;
-        
-      case EXIT:
-        socketLink.close();
-        return result;
-
-      case DUPLEX:
-        return socketLink.doDuplex();
-
-      default:
-        throw new IllegalStateException(String.valueOf(result));
-      }
-
-      socketLink.close();
-    }
-
-    return RequestState.EXIT;
-  }
-
-  private boolean accept()
-  {
-    SocketLinkThreadLauncher launcher = getLauncher();
-    
-    launcher.onChildIdleBegin();
-    try {
-      return getListener().accept(getSocketLink().getSocket());
-    } finally {
-      launcher.onChildIdleEnd();
-    }
+    return getSocketLink().handleAcceptTask();
   }
 }

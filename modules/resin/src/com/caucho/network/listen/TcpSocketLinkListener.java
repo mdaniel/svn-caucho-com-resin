@@ -59,6 +59,7 @@ import com.caucho.server.util.CauchoSystem;
 import com.caucho.util.Alarm;
 import com.caucho.util.AlarmListener;
 import com.caucho.util.FreeList;
+import com.caucho.util.Friend;
 import com.caucho.util.L10N;
 import com.caucho.vfs.JsseSSLFactory;
 import com.caucho.vfs.QJniServerSocket;
@@ -771,6 +772,11 @@ public class TcpSocketLinkListener
   {
     return _launcher;
   }
+  
+  ThreadPool getThreadPool()
+  {
+    return _threadPool;
+  }
 
   //
   // statistics
@@ -1363,21 +1369,10 @@ public class TcpSocketLinkListener
    *
    * @return true if the connection was added to the suspend list
    */
+  @Friend(TcpSocketLink.class)
   void cometSuspend(TcpSocketLink conn)
   {
-    conn.toCometSuspend();
-    
-    if (conn.isWakeRequested()) {
-      // conn.toCometResume();
-      
-      _threadPool.schedule(conn.getResumeTask());
-    }
-    else {
-      _suspendConnectionSet.add(conn);
-
-      if (conn.isWakeRequested())
-        cometResume(conn);
-    }
+    _suspendConnectionSet.add(conn);
   }
 
   /**
@@ -1396,7 +1391,8 @@ public class TcpSocketLinkListener
     if (_suspendConnectionSet.remove(conn)) {
       // conn.toCometResume();
       
-      _threadPool.schedule(conn.getResumeTask());
+      conn.requestWakeComet();
+      // _threadPool.schedule(conn.getResumeTask());
 
       return true;
     }
@@ -1529,16 +1525,6 @@ public class TcpSocketLinkListener
   {
     TcpSocketLink startConn = _idleConn.allocate();
     
-    if (startConn != null) {
-      try {
-        startConn.toInit(); // change to the init/ready state
-      } catch (Exception e) {
-        log.log(Level.WARNING, e.toString(), e);
-        
-        startConn = null;
-      }
-    }
-    
     if (startConn == null) {
       int connId = _connectionCount.incrementAndGet();
       QSocket socket = _serverSocket.createSocket();
@@ -1553,38 +1539,30 @@ public class TcpSocketLinkListener
   }
 
   /**
+   * Closes the stats for the connection.
+   */
+  @Friend(TcpSocketLink.class)
+  void closeConnection(TcpSocketLink conn)
+  {
+    if (_activeConnectionSet.remove(conn)) {
+      _activeConnectionCount.decrementAndGet();
+    }
+    else {
+      Thread.dumpStack();
+    }
+
+    _launcher.wake();
+  }
+
+  /**
    * Frees the connection to the idle pool.
    *
    * only called from ConnectionState
    */
+  @Friend(TcpSocketLink.class)
   void free(TcpSocketLink conn)
   {
-    closeConnection(conn);
-    
-    conn.toFree();
-
     _idleConn.free(conn);
-  }
-
-  /**
-   * Destroys the connection.
-   *
-   * only called from ConnectionState
-   */
-  void destroy(TcpSocketLink conn)
-  {
-    closeConnection(conn);
-  }
-
-  /**
-   * Closes the stats for the connection.
-   */
-  private void closeConnection(TcpSocketLink conn)
-  {
-    _activeConnectionSet.remove(conn);
-    _activeConnectionCount.decrementAndGet();
-
-    _launcher.wake();
   }
 
   /**
@@ -1783,30 +1761,26 @@ public class TcpSocketLinkListener
         for (int i = _timeoutSet.size() - 1; i >= 0; i--) {
           TcpSocketLink conn = _timeoutSet.get(i);
 
-          if (_suspendConnectionSet.remove(conn)) {
-            if (log.isLoggable(Level.FINE))
-              log.fine(this + " suspend idle timeout " + conn);
+          if (log.isLoggable(Level.FINE))
+            log.fine(this + " suspend idle timeout " + conn);
 
-            try {
-              conn.toCometTimeout();
-            } catch (Exception e) {
-              log.log(Level.WARNING, conn + ": " + e.getMessage(), e);
-            }
+          try {
+            conn.requestCometTimeout();
+          } catch (Exception e) {
+            log.log(Level.WARNING, conn + ": " + e.getMessage(), e);
           }
         }
 
         for (int i = _completeSet.size() - 1; i >= 0; i--) {
           TcpSocketLink conn = _completeSet.get(i);
 
-          if (_suspendConnectionSet.remove(conn)) {
-            if (log.isLoggable(Level.FINE))
-              log.fine(this + " async end-of-file " + conn);
+          if (log.isLoggable(Level.FINE))
+            log.fine(this + " async end-of-file " + conn);
 
-            try {
-              conn.toCometComplete();
-            } catch (Exception e) {
-              log.log(Level.WARNING, conn + ": " + e.getMessage(), e);
-            }
+          try {
+            conn.requestCometComplete();
+          } catch (Exception e) {
+            log.log(Level.WARNING, conn + ": " + e.getMessage(), e);
           }
           /*
           AsyncController async = conn.getAsyncController();
@@ -1822,8 +1796,9 @@ public class TcpSocketLinkListener
       } catch (Throwable e) {
         e.printStackTrace();
       } finally {
-        if (! isClosed())
+        if (! isClosed()) {
           alarm.queue(_suspendReaperTimeout);
+        }
       }
     }
   }

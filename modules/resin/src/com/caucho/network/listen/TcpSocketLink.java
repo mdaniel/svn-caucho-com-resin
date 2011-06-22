@@ -34,20 +34,24 @@ import java.io.InterruptedIOException;
 import java.net.InetAddress;
 import java.security.cert.CertificateException;
 import java.security.cert.X509Certificate;
+import java.util.concurrent.atomic.AtomicReference;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
 import com.caucho.env.shutdown.ExitCode;
 import com.caucho.env.shutdown.ShutdownSystem;
+import com.caucho.env.thread.ThreadPool;
 import com.caucho.inject.Module;
 import com.caucho.inject.RequestContext;
 import com.caucho.loader.Environment;
 import com.caucho.management.server.AbstractManagedObject;
 import com.caucho.management.server.TcpConnectionMXBean;
 import com.caucho.util.Alarm;
+import com.caucho.util.Friend;
 import com.caucho.util.L10N;
 import com.caucho.vfs.ClientDisconnectException;
 import com.caucho.vfs.QSocket;
+import com.caucho.vfs.ReadStream;
 import com.caucho.vfs.SocketTimeoutException;
 import com.caucho.vfs.StreamImpl;
 
@@ -84,13 +88,17 @@ public class TcpSocketLink extends AbstractSocketLink
   // HTTP keepalive task
   private final KeepaliveRequestTask _keepaliveTask;
   // Comet resume task
-  private final ResumeTask _resumeTask;
+  private final CometResumeTask _resumeTask;
   // duplex (websocket) task
   private DuplexReadTask _duplexReadTask;
 
   private final Admin _admin = new Admin();
 
   private SocketLinkState _state = SocketLinkState.INIT;
+  
+  private final AtomicReference<SocketLinkRequestState> _requestStateRef
+    = new AtomicReference<SocketLinkRequestState>(SocketLinkRequestState.INIT)
+    ;
   private TcpAsyncController _async;
 
   private long _idleTimeout;
@@ -138,7 +146,7 @@ public class TcpSocketLink extends AbstractSocketLink
 
     _acceptTask = new AcceptTask(this);
     _keepaliveTask = new KeepaliveRequestTask(this);
-    _resumeTask = new ResumeTask(this);
+    _resumeTask = new CometResumeTask(this);
   }
 
   /**
@@ -285,18 +293,6 @@ public class TcpSocketLink extends AbstractSocketLink
   public final boolean isDestroyed()
   {
     return _state.isDestroyed();
-  }
-
-  @Override
-  public void requestShutdownBegin()
-  {
-    _listener.requestShutdownBegin();
-  }
-
-  @Override
-  public void requestShutdownEnd()
-  {
-    _listener.requestShutdownEnd();
   }
 
   @Override
@@ -480,14 +476,6 @@ public class TcpSocketLink extends AbstractSocketLink
       return -1;
   }
   
-  void startThread(Thread thread)
-  {
-    if (log.isLoggable(Level.FINER))
-      log.finer(this + " start thread " + thread.getName());
-    
-    _thread = thread;
-  }
-  
   //
   // connection information
 
@@ -530,7 +518,7 @@ public class TcpSocketLink extends AbstractSocketLink
   /**
    * Returns the current keepalive task
    */
-  public Runnable getAcceptTask()
+  private Runnable getAcceptTask()
   {
     return _acceptTask;
   }
@@ -538,7 +526,7 @@ public class TcpSocketLink extends AbstractSocketLink
   /**
    * Returns the current keepalive task (request or duplex)
    */
-  public Runnable getKeepaliveTask()
+  private ConnectionTask getKeepaliveTask()
   {
     if (_state.isDuplex())
       return _duplexReadTask;
@@ -549,7 +537,7 @@ public class TcpSocketLink extends AbstractSocketLink
   /**
    * Returns the comet resume task
    */
-  public Runnable getResumeTask()
+  private Runnable getResumeTask()
   {
     return _resumeTask;
   }
@@ -569,7 +557,7 @@ public class TcpSocketLink extends AbstractSocketLink
   /**
    * Sets the user statistics state
    */
-  public void setStatState(String state)
+  private void setStatState(String state)
   {
     _displayState = state;
   }
@@ -581,6 +569,7 @@ public class TcpSocketLink extends AbstractSocketLink
   /**
    * Poll the socket to test for an end-of-file for a comet socket.
    */
+  @Friend(TcpSocketLinkListener.class)
   boolean isReadEof()
   {
     QSocket socket = _socket;
@@ -592,7 +581,7 @@ public class TcpSocketLink extends AbstractSocketLink
     try {
       StreamImpl s = socket.getStream();
 
-      int len = s.read(_testBuffer, 0, 0);
+      int len = s.readNonBlock(_testBuffer, 0, 0);
 
       return len < 0;
     } catch (Exception e) {
@@ -601,15 +590,304 @@ public class TcpSocketLink extends AbstractSocketLink
       return true;
     }
   }
+  
+  //
+  // transition requests from external threads (thread-safe)
+  
+  /**
+   * Start a request connection from the idle state.
+   */
+  void requestAccept()
+  {
+    if (_requestStateRef.get().toAccept(_requestStateRef)) {
+      ThreadPool threadPool = _listener.getThreadPool();
+    
+      if (! threadPool.schedule(getAcceptTask())) {
+        log.severe(L.l("Schedule failed for {0}", this));
+      }
+    }
+  }
+  
+  /**
+   * Wake a connection from a select/poll keepalive.
+   */
+  void requestWakeKeepalive()
+  {
+    if (_requestStateRef.get().toWakeKeepalive(_requestStateRef)) {
+      ThreadPool threadPool = _listener.getThreadPool();
+    
+      if (! threadPool.schedule(getKeepaliveTask())) {
+        log.severe(L.l("Schedule failed for {0}", this));
+      }
+    }
+  }
+  
+  /**
+   * Wake a connection from a comet suspend.
+   */
+  void requestWakeComet()
+  {
+    if (_requestStateRef.get().toAsyncWake(_requestStateRef)) {
+      ThreadPool threadPool = _listener.getThreadPool();
+    
+      if (! threadPool.schedule(getResumeTask())) {
+        log.severe(L.l("Schedule failed for {0}", this));
+      }
+    }
+  }
+
+  /**
+   * Closes the controller.
+   */
+  void requestCometComplete()
+  {
+    TcpAsyncController async = _async;
+    
+    if (async != null) {
+      async.setCompleteRequested();
+    }
+
+    requestWakeComet();
+  }
+
+  /**
+   * Closes the controller.
+   */
+  void requestCometTimeout()
+  {
+    TcpAsyncController async = _async;
+    
+    if (async != null) {
+      async.setTimeout();
+    }
+
+    requestWakeComet();
+  }
+
+  @Override
+  public void requestShutdownBegin()
+  {
+    _listener.requestShutdownBegin();
+  }
+
+  @Override
+  public void requestShutdownEnd()
+  {
+    _listener.requestShutdownEnd();
+  }
 
   //
-  // request processing
+  // Callbacks from the request processing tasks
   //
+  
+  @Friend(ConnectionTask.class)
+  void startThread(Thread thread)
+  {
+    if (log.isLoggable(Level.FINER)) {
+      log.finer(this + " start thread " + thread.getName());
+    }
+    
+    _thread = thread;
+  }
+
+  /**
+   * Completion processing at the end of the thread
+   */
+  @Friend(ConnectionTask.class)
+  void finishThread(RequestState requestState)
+  {
+    if (log.isLoggable(Level.FINER))
+      log.finer(this + " finish thread: " + Thread.currentThread().getName());
+    
+    _thread = null;
+    
+    SocketLinkState state = _state;
+
+    if (! (state.isComet() || state.isDuplex())
+        && ! requestState.isAsyncOrDuplex()) {
+      try {
+        closeAsync();
+      } catch (Throwable e) {
+        log.log(Level.FINE, e.toString(), e);
+      }
+    }
+    
+    if (requestState.isDetach() && ! state.isClosed()) {
+      return;
+    }
+    
+    getListener().closeConnection(this);
+
+    if (state.isAllowIdle()) {
+      _state = state.toIdle();
+      
+      _requestStateRef.get().toIdle(_requestStateRef);
+        
+      _listener.free(this);
+    }
+    else {
+      System.out.println("NOFREE:" + requestState + " " + _requestStateRef.get() + " " + this);
+    }
+  }
+
+  @Friend(AcceptTask.class)
+  RequestState handleAcceptTask()
+    throws IOException
+  {
+    TcpSocketLinkListener listener = getListener();
+    
+    RequestState result = RequestState.REQUEST_COMPLETE;
+    SocketLinkThreadLauncher launcher = _listener.getLauncher();
+    
+    while (result == RequestState.REQUEST_COMPLETE
+           && ! listener.isClosed()
+           && ! getState().isDestroyed()) {
+      setStatState("accept");
+      _state = _state.toAccept();
+      
+      if (launcher.isIdleExpire())
+        return RequestState.EXIT;
+
+      if (! accept()) {
+        close();
+
+        continue;
+      }
+
+      toStartConnection();
+
+      if (log.isLoggable(Level.FINER)) {
+        log.finer(this + " accept from "
+                  + getRemoteHost() + ":" + getRemotePort());
+      }
+
+      result = handleRequests(Task.ACCEPT);
+    }
+
+    return result;
+  }
+
+  private boolean accept()
+  {
+    SocketLinkThreadLauncher launcher = _listener.getLauncher();
+    
+    launcher.onChildIdleBegin();
+    try {
+      return getListener().accept(getSocket());
+    } finally {
+      launcher.onChildIdleEnd();
+    }
+  }
+
+  @Friend(KeepaliveRequestTask.class)
+  RequestState handleKeepaliveTask()
+    throws IOException
+  {
+    return handleRequests(Task.KEEPALIVE);
+  }
+
+  /**
+   * Handles the resume from ResumeTask. 
+   * 
+   * Called by the request thread only.
+   */
+  @Friend(CometResumeTask.class)
+  RequestState handleResumeTask()
+  {
+    try {
+      while (true) {
+        _listener.cometDetach(this);
+        
+        _state = _state.toCometResume();
+      
+        TcpAsyncController async = getAsyncController();
+
+        if (async == null) {
+          return RequestState.EXIT;
+        }
+      
+        // _state = _state.toCometWake();
+        // _state = _state.toCometDispatch();
+      
+      
+        if (async.isTimeout()) {
+          async.timeout();
+          return RequestState.EXIT;
+        }
+
+        async.toResume();
+
+        getRequest().handleResume();
+
+        if (_state.isComet()) {
+          if (toSuspend())
+            return RequestState.ASYNC;
+          else
+            continue;
+        }
+        else if (isKeepaliveAllocated()) {
+          // server/1l81
+          _state = _state.toKeepalive(this);
+          _async = null;
+
+          async.onClose();
+        
+          return getKeepaliveTask().doTask();
+        }
+        else {
+          _async = null;
+
+          async.onClose();
+          
+          close();
+        
+          return RequestState.REQUEST_COMPLETE;
+        }
+      }
+    } catch (IOException e) {
+      log.log(Level.FINE, e.toString(), e);
+    } catch (OutOfMemoryError e) {
+      String msg = "TcpSocketLink OutOfMemory";
+
+      ShutdownSystem.shutdownActive(ExitCode.MEMORY, msg);
+    } catch (Throwable e) {
+      log.log(Level.WARNING, e.toString(), e);
+    }
+    
+    return RequestState.EXIT;
+  }
+
+  @Friend(DuplexReadTask.class)
+  RequestState handleDuplexRead(SocketLinkDuplexController duplex)
+    throws IOException
+  {
+    toDuplexActive();
+
+    RequestState result;
+
+    ReadStream readStream = getReadStream();
+
+    while ((result = processKeepalive()) == RequestState.REQUEST_COMPLETE) {
+      long position = readStream.getPosition();
+
+      duplex.serviceRead();
+
+      if (position == readStream.getPosition()) {
+        log.warning(duplex + " was not processing any data. Shutting down.");
+        
+        close();
+
+        return RequestState.EXIT;
+      }
+    }
+
+    return result;
+  }
 
   /**
    * Handles a new connection/socket from the client.
    */
-  RequestState handleRequests(boolean isKeepalive)
+  private RequestState handleRequests(Task taskType)
     throws IOException
   {
     Thread thread = Thread.currentThread();
@@ -620,7 +898,7 @@ public class TcpSocketLink extends AbstractSocketLink
       // clear the interrupted flag
       Thread.interrupted();
 
-      result = handleRequestsImpl(isKeepalive);
+      result = handleRequestsImpl(taskType == Task.KEEPALIVE);
     } catch (ClientDisconnectException e) {
       _listener.addLifetimeClientDisconnectCount();
 
@@ -647,10 +925,31 @@ public class TcpSocketLink extends AbstractSocketLink
       }
     }
 
-    if (result == RequestState.DUPLEX)
-      return _duplexReadTask.doTask();
-    else
+    switch (result) {
+    case KEEPALIVE_SELECT:
+    case ASYNC:
       return result;
+      
+    case DUPLEX:
+      return _duplexReadTask.doTask();
+      
+    case EXIT:
+      close();
+      return result;
+      
+    case REQUEST_COMPLETE:
+      // acceptTask significantly faster than finishing
+      close();
+      
+      if (taskType == Task.ACCEPT) {
+        return result;
+      }
+      else
+        return _acceptTask.doTask();
+      
+    default:
+      throw new IllegalStateException(String.valueOf(result));
+    }
   }
 
   /**
@@ -701,8 +1000,11 @@ public class TcpSocketLink extends AbstractSocketLink
 
     getWriteStream().flush();
 
-    if (_state.isCometActive() && toSuspend()) {
-      return RequestState.ASYNC;
+    if (_state.isCometActive()) {
+      if (toSuspend())
+        return RequestState.ASYNC;
+      else
+        return handleResumeTask();
     }
    
     return RequestState.REQUEST_COMPLETE;
@@ -761,7 +1063,7 @@ public class TcpSocketLink extends AbstractSocketLink
    * If it returns false, either the connection is closed,
    * or the connection has been registered with the select.
    */
-  RequestState processKeepalive()
+  private RequestState processKeepalive()
     throws IOException
   {
     TcpSocketLinkListener port = _listener;
@@ -789,6 +1091,8 @@ public class TcpSocketLink extends AbstractSocketLink
 
     // use select manager if available
     if (_listener.getSelectManager() != null) {
+      _requestStateRef.get().toKeepalive(_requestStateRef);
+      
       // keepalive to select manager succeeds
       if (_listener.getSelectManager().keepalive(this)) {
         if (log.isLoggable(Level.FINE))
@@ -798,6 +1102,8 @@ public class TcpSocketLink extends AbstractSocketLink
       }
       else {
         log.warning(dbgId() + " failed keepalive (select)");
+        
+        _requestStateRef.get().toWakeKeepalive(_requestStateRef);
       }
     }
 
@@ -840,32 +1146,9 @@ public class TcpSocketLink extends AbstractSocketLink
   //
 
   /**
-   * Change to the initial state after allocation.
-   */
-  final void toInit()
-  {
-    _state = _state.toInit(this);
-  }
-
-  /**
-   * Change to the accepting state.
-   */
-  void toAccept()
-  {
-    setStatState("accept");
-    _state = _state.toAccept();
-  }
-  
-  RequestState doAccept()
-    throws IOException
-  {
-    return _acceptTask.doTask();
-  }
-
-  /**
    * Start a connection
    */
-  void toStartConnection()
+  private void toStartConnection()
     throws IOException
   {
     _connectionStartTime = Alarm.getCurrentTime();
@@ -904,6 +1187,12 @@ public class TcpSocketLink extends AbstractSocketLink
   @Override
   public void killKeepalive()
   {
+    Thread thread = Thread.currentThread();
+    
+    if (thread != _thread)
+      throw new IllegalStateException(L.l("{0} killKeepalive called from invalid thread",
+                                          this));
+    
     SocketLinkState state = _state;
     
     _state = state.toKillKeepalive(this);
@@ -916,6 +1205,11 @@ public class TcpSocketLink extends AbstractSocketLink
   // async/comet state transitions
   //
   
+  TcpAsyncController getAsyncController()
+  {
+    return _async;
+  }
+  
   /**
    * Starts a comet connection.
    * 
@@ -924,11 +1218,19 @@ public class TcpSocketLink extends AbstractSocketLink
   @Override
   public AsyncController toComet(SocketLinkCometListener cometHandler)
   {
+    Thread thread = Thread.currentThread();
+    
+    if (thread != _thread)
+      throw new IllegalStateException(L.l("{0} toComet called from invalid thread",
+                                          this));
+    
     TcpAsyncController async = _async;
     
     // TCK
     if (async != null && async.isCompleteRequested())
       throw new IllegalStateException(L.l("Comet cannot be requested after complete()."));
+    
+    _requestStateRef.get().toAsyncStart(_requestStateRef);
     
     _state = _state.toComet();
     
@@ -945,14 +1247,6 @@ public class TcpSocketLink extends AbstractSocketLink
 
   private boolean toSuspend()
   {
-    TcpAsyncController async = _async;
-    
-    if (async != null && async.isCompleteRequested()) {
-      // server/1l80
-      _state = _state.toCometComplete();
-
-      return false;
-    }
     
     _idleStartTime = Alarm.getCurrentTime();
     _idleExpireTime = _idleStartTime + _suspendTimeout;
@@ -960,29 +1254,26 @@ public class TcpSocketLink extends AbstractSocketLink
     if (log.isLoggable(Level.FINER))
       log.finer(this + " suspending comet");
     
+    _state = _state.toCometSuspend();
+    // XXX: request state
+    
     _listener.cometSuspend(this);
     
-    return true;
+    if (_requestStateRef.get().toAsyncSuspend(_requestStateRef)) {
+      return true;
+    }
+    
+    _listener.cometDetach(this);
+    
+    return false;
   }
-  
-  void toCometSuspend()
-  {
-    _state = _state.toCometSuspend();
-  }
-  
-  /*
-  void toCometResume()
-  {
-    _state = _state.toCometResume();
-  }
-  */
 
   /**
    * Wakes the connection (comet-style).
    */
-  boolean wake()
+  private boolean wake()
   {
-    _state = _state.toCometWake();
+    // _state = _state.toCometWake();
     
     // comet
     if (getListener().cometResume(this)) {
@@ -993,70 +1284,11 @@ public class TcpSocketLink extends AbstractSocketLink
       return false;
     }
   }
-
-  /**
-   * Handles the resume from ResumeTask. 
-   * 
-   * Called by the request thread only.
-   */
-  RequestState doResume()
-  {
-    try {
-      TcpAsyncController async = _async;
-
-      if (async == null) {
-        return RequestState.EXIT;
-      }
-      
-      // _state = _state.toCometWake();
-      _state = _state.toCometDispatch();
-      
-      if (async.isTimeout()) {
-        async.timeout();
-        return RequestState.EXIT;
-      }
-
-      async.toResume();
-
-      getRequest().handleResume();
-
-//      System.out.println("STATE: " + _state + "\n  " + this);
-      
-      if (_state.isCometActive() && toSuspend()) {
-        return RequestState.ASYNC;
-      }
-      else if (_state.isKeepaliveAllocated()) {
-        // server/1l81
-        _state = _state.toKeepalive(this);
-        _async = null;
-
-        async.onClose();
-        return _keepaliveTask.doTask();
-      }
-      else {
-        _async = null;
-
-        async.onClose();
-        
-        return RequestState.EXIT;
-      }
-    } catch (IOException e) {
-      log.log(Level.FINE, e.toString(), e);
-    } catch (OutOfMemoryError e) {
-      String msg = "TcpSocketLink OutOfMemory";
-
-      ShutdownSystem.shutdownActive(ExitCode.MEMORY, msg);
-    } catch (Throwable e) {
-      log.log(Level.WARNING, e.toString(), e);
-    }
-    
-    return RequestState.EXIT;
-  }
   
   /**
    * Called to signal a comet suspend timeout by the TcpSocketLinkListener.
    */
-  void toCometTimeout()
+  private void toCometTimeout()
   {
     TcpAsyncController async = _async;
     
@@ -1070,7 +1302,7 @@ public class TcpSocketLink extends AbstractSocketLink
   /**
    * Called to request the comet connectin complete.
    */
-  public void toCometComplete()
+  private void toCometComplete()
   {
     TcpAsyncController async = _async;
     
@@ -1091,6 +1323,12 @@ public class TcpSocketLink extends AbstractSocketLink
   @Override
   public SocketLinkDuplexController startDuplex(SocketLinkDuplexListener handler)
   {
+    Thread thread = Thread.currentThread();
+    
+    if (thread != _thread)
+      throw new IllegalStateException(L.l("{0} toComet called from invalid thread",
+                                          this));
+    
     _state = _state.toDuplex(this);
 
     SocketLinkDuplexController duplex = new SocketLinkDuplexController(this, handler);
@@ -1111,15 +1349,7 @@ public class TcpSocketLink extends AbstractSocketLink
     return duplex;
   }
   
-  RequestState doDuplex()
-    throws IOException
-  {
-    setStatState("duplex");
-
-    return _duplexReadTask.doTask();
-  }
-  
-  void toDuplexActive()
+  private void toDuplexActive()
   {
     _state = _state.toDuplexActive(this);
   }
@@ -1129,24 +1359,11 @@ public class TcpSocketLink extends AbstractSocketLink
   //
 
   /**
-   * Closes the controller.
-   */
-  protected void requestCometComplete()
-  {
-    TcpAsyncController async = _async;
-    
-    if (async != null) {
-      async.setCompleteRequested();
-    }
-
-    wake();
-  }
-
-  /**
    * Called by HTTP for early close on client disconnect.
    * 
    * XXX: may want to revise this logic
    */
+  /*
   public void requestEarlyClose()
   {
     if (log.isLoggable(Level.FINE))
@@ -1155,6 +1372,7 @@ public class TcpSocketLink extends AbstractSocketLink
     // close();
     killKeepalive();
   }
+  */
 
   void close()
   {
@@ -1171,46 +1389,6 @@ public class TcpSocketLink extends AbstractSocketLink
     if (log.isLoggable(Level.FINER))
       log.finer(this + " closeOnShutdown");
     
-    closeConnection();
-  }
-
-  /**
-   * Completion processing at the end of the thread
-   */
-  void finishThread(RequestState requestState)
-  {
-    if (log.isLoggable(Level.FINER))
-      log.finer(this + " finish thread: " + Thread.currentThread().getName());
-    
-    _thread = null;
-    
-    SocketLinkState state = _state;
-
-    if (! (state.isComet() || state.isDuplex())
-        && ! requestState.isAsyncOrDuplex()) {
-      try {
-        closeAsync();
-      } catch (Throwable e) {
-        log.log(Level.FINE, e.toString(), e);
-      }
-      
-    }
-    
-    if (requestState.isDetach() && ! state.isClosed())
-      return;
-    
-    closeConnection();
-
-    if (state.isAllowIdle()) {
-      _state = state.toIdle();
-      
-      _listener.free(this);
-    }
-  }
-  
-  final void toFree()
-  {
-    _state = _state.toFree(this);
   }
 
   /**
@@ -1244,21 +1422,13 @@ public class TcpSocketLink extends AbstractSocketLink
       return;
     }
 
+    TcpSocketLinkListener port = getListener();
+    
     QSocket socket = _socket;
     
-    TcpSocketLinkListener port = getListener();
-
     // detach any comet
     if (state.isComet() || state.isCometSuspend())
       port.cometDetach(this);
-    
-    /*
-    try {
-      closeAsync();
-    } catch (Throwable e) {
-      log.log(Level.WARNING, e.toString(), e);
-    }
-    */
 
     try {
       getRequest().onCloseConnection();
@@ -1318,7 +1488,7 @@ public class TcpSocketLink extends AbstractSocketLink
     
   }
 
-  protected String dbgId()
+  private String dbgId()
   {
     if (_dbgId == null) {
       Object serverId = Environment.getAttribute("caucho.server-id");
@@ -1411,5 +1581,10 @@ public class TcpSocketLink extends AbstractSocketLink
 
   static {
     _systemClassLoader = ClassLoader.getSystemClassLoader();
+  }
+  
+  enum Task {
+    ACCEPT,
+    KEEPALIVE;
   }
 }

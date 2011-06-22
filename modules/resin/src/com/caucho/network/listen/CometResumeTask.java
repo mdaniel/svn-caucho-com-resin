@@ -32,20 +32,17 @@ package com.caucho.network.listen;
 import com.caucho.inject.Module;
 
 /**
- * A protocol-independent TcpConnection.  TcpConnection controls the
- * TCP Socket and provides buffered streams.
- *
- * <p>Each TcpConnection has its own thread.
+ * Connection task handling a comet resume.
  */
 @Module
-class ResumeTask extends ConnectionReadTask {
-  ResumeTask(TcpSocketLink socketLink)
+class CometResumeTask extends ConnectionTask {
+  CometResumeTask(TcpSocketLink socketLink)
   {
     super(socketLink);
   }
   
   @Override
-  public void run()
+  public final void run()
   {
     SocketLinkThreadLauncher launcher = getLauncher();
     
@@ -58,8 +55,8 @@ class ResumeTask extends ConnectionReadTask {
   }
   
   @Override
-  public RequestState doTask()
+  protected final RequestState doTask()
   {
-    return getSocketLink().doResume();
+    return getSocketLink().handleResumeTask();
   }
 }

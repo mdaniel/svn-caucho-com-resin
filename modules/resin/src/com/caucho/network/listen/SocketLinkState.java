@@ -245,12 +245,6 @@ enum SocketLinkState {
     boolean isKeepaliveAllocated() { return true; }
 
     @Override
-    SocketLinkState toCometWake()
-    {
-      return COMET_WAKE_KA;
-    }
-
-    @Override
     SocketLinkState toCometSuspend()
     {
       return COMET_SUSPEND_KA;
@@ -280,54 +274,6 @@ enum SocketLinkState {
     }
   },
 
-  /**
-   * Comet request with a keepalive allocated.
-   */
-  COMET_WAKE_KA { // processing an active comet service with queued KA
-    @Override
-    boolean isComet() { return true; }
-
-    @Override
-    boolean isCometActive() { return true; }
-
-    @Override
-    boolean isKeepaliveAllocated() { return true; }
-
-    @Override
-    SocketLinkState toCometSuspend()
-    {
-      return COMET_SUSPEND_WAKE_KA;
-    }
-
-    @Override
-    SocketLinkState toCometDispatch() 
-    { 
-      return REQUEST_ACTIVE_KA;
-    }
-
-    @Override
-    SocketLinkState toCometComplete()
-    {
-      return COMET_COMPLETE_KA;
-    }
-
-    @Override
-    SocketLinkState toKillKeepalive(TcpSocketLink conn)
-    {
-      conn.getListener().keepaliveFree();
-      
-      return COMET_WAKE_NKA;
-    }
-    
-    @Override
-    SocketLinkState toClosed(TcpSocketLink conn)
-    {
-      conn.getListener().keepaliveFree();
-      
-      return CLOSED;
-    }
-  },
-
   COMET_NKA {            // processing an active comet service
     @Override
     boolean isComet() { return true; }
@@ -339,44 +285,9 @@ enum SocketLinkState {
     boolean isAsyncStarted() { return true; }
 
     @Override
-    SocketLinkState toCometWake()
-    {
-      return COMET_WAKE_NKA;
-    }
-
-    @Override
     SocketLinkState toCometSuspend()
     {
       return COMET_SUSPEND_NKA;
-    }
-
-    @Override
-    SocketLinkState toCometComplete()
-    {
-      return COMET_COMPLETE_NKA;
-    }
-  },
-
-  COMET_WAKE_NKA {   // processing an active comet service with queued wake
-    @Override
-    boolean isComet() { return true; }
-
-    @Override
-    boolean isCometActive() { return true; }
-
-    @Override
-    boolean isCometWake() { return true; }
-
-    @Override
-    SocketLinkState toCometDispatch() 
-    { 
-      return REQUEST_ACTIVE_NKA;
-    }
-
-    @Override
-    SocketLinkState toCometSuspend()
-    {
-      return COMET_SUSPEND_WAKE_NKA;
     }
 
     @Override
@@ -408,51 +319,11 @@ enum SocketLinkState {
     }
 
     @Override
-    SocketLinkState toCometWake()
+    SocketLinkState toCometResume()
     {
-      return COMET_SUSPEND_WAKE_KA;
-    }
-    
-    @Override
-    SocketLinkState toClosed(TcpSocketLink conn)
-    {
-      throw new IllegalStateException(this + " " + conn);
-    }
-
-    @Override
-    SocketLinkState toDestroy(TcpSocketLink conn)
-    {
-      throw new IllegalStateException(this + " " + conn);
-    }
-  },
-
-  COMET_SUSPEND_WAKE_KA {  // suspended with queued wake
-    @Override
-    boolean isComet() { return true; }
-
-    @Override
-    boolean isCometSuspend() { return true; }
-
-    @Override
-    boolean isCometWake() { return true; }
-
-    @Override
-    boolean isKeepaliveAllocated() { return true; }
-
-    @Override
-    SocketLinkState toKillKeepalive(TcpSocketLink conn)
-    {
-      conn.getListener().keepaliveFree();
-      
-      return COMET_SUSPEND_WAKE_NKA;
-    }
-
-    @Override
-    SocketLinkState toCometDispatch() 
-    { 
       return REQUEST_ACTIVE_KA;
     }
-    
+        
     @Override
     SocketLinkState toClosed(TcpSocketLink conn)
     {
@@ -477,37 +348,8 @@ enum SocketLinkState {
     boolean isAsyncStarted() { return true; }
 
     @Override
-    SocketLinkState toCometWake()
+    SocketLinkState toCometResume()
     {
-      return COMET_SUSPEND_WAKE_NKA;
-    }
-    
-    @Override
-    SocketLinkState toClosed(TcpSocketLink conn)
-    {
-      throw new IllegalStateException(this + " " + conn);
-    }
-
-    @Override
-    SocketLinkState toDestroy(TcpSocketLink conn)
-    {
-      throw new IllegalStateException(this + " " + conn);
-    }
-  },
-
-  COMET_SUSPEND_WAKE_NKA {    // suspended waiting for a wake
-    @Override
-    boolean isComet() { return true; }
-
-    @Override
-    boolean isCometSuspend() { return true; }
-
-    @Override
-    boolean isCometWake() { return true; }
-
-    @Override
-    SocketLinkState toCometDispatch() 
-    { 
       return REQUEST_ACTIVE_NKA;
     }
     
@@ -662,6 +504,12 @@ enum SocketLinkState {
     SocketLinkState toInit(TcpSocketLink conn) 
     { 
       return INIT; 
+    }
+
+    @Override
+    SocketLinkState toAccept()
+    { 
+      return ACCEPT;
     }
     
     @Override
@@ -879,9 +727,9 @@ enum SocketLinkState {
   }
   */
 
-  SocketLinkState toCometWake()
+  SocketLinkState toCometResume()
   {
-    throw new IllegalStateException("dispatch is not valid outside of async: " + this);
+    throw new IllegalStateException(this + " cannot resumse comet");
   }
   
   SocketLinkState toCometDispatch()
@@ -931,7 +779,7 @@ enum SocketLinkState {
   {
     toClosed(conn);
 
-    conn.getListener().destroy(conn);
+    conn.getListener().closeConnection(conn);
 
     return DESTROYED;
   }

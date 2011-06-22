@@ -109,8 +109,10 @@ class TcpAsyncController extends AsyncController {
   {
     TcpSocketLink conn = _conn;
 
-    if (conn != null)
-      return conn.wake();
+    if (conn != null) {
+      conn.requestWakeComet();
+      return true;
+    }
     else
       return false;
   }

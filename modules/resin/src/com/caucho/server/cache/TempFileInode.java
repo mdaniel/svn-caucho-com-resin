@@ -55,7 +55,7 @@ public class TempFileInode {
     = Logger.getLogger(TempFileInode.class.getName());
 
   private final BlockStore _store;
-  private AtomicInteger _useCount = new AtomicInteger();
+  private AtomicInteger _useCount = new AtomicInteger(1);
 
   private ArrayList<Long> _blockList = new ArrayList<Long>();
   private long []_blockArray;
@@ -227,7 +227,7 @@ public class TempFileInode {
     }
     else if (useCount < 0) {
       //System.out.println("BAD: " + useCount);
-      throw new IllegalStateException();
+      throw new IllegalStateException("illegal use count: " + useCount);
     }
   }
 

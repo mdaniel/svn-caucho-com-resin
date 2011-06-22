@@ -6,7 +6,7 @@
  * Each copy or derived work must preserve the copyright notice and this
  * notice unmodified.
  *
- * Resin Open Source is software; you can redistribute it and/or modify
+ * Resin Open Source is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation; either version 2 of the License, or
  * (at your option) any later version.
@@ -27,45 +27,23 @@
  * @author Scott Ferguson
  */
 
-package com.caucho.network.listen;
+package com.caucho.util;
 
-import java.io.IOException;
+import static java.lang.annotation.ElementType.TYPE;
+import static java.lang.annotation.ElementType.FIELD;
+import static java.lang.annotation.ElementType.METHOD;
+import static java.lang.annotation.RetentionPolicy.RUNTIME;
 
-import com.caucho.inject.Module;
+import java.lang.annotation.Documented;
+import java.lang.annotation.Retention;
+import java.lang.annotation.Target;
 
 /**
- * A protocol-independent TcpConnection.  TcpConnection controls the
- * TCP Socket and provides buffered streams.
- *
- * <p>Each TcpConnection has its own thread.
+ * @Field marks a method as usable by a specific other class.
  */
-@Module
-class KeepaliveRequestTask extends ConnectionTask {
-  KeepaliveRequestTask(TcpSocketLink socketLink)
-  {
-    super(socketLink);
-  }
-
-  @Override
-  public final void run()
-  {
-    SocketLinkThreadLauncher launcher = getLauncher();
-    
-    launcher.onChildThreadResume();
-
-    try {
-      super.run();
-    } finally {
-      launcher.onChildThreadEnd();
-    }
-  }
-
-  @Override
-  final RequestState doTask()
-    throws IOException
-  {
-    TcpSocketLink socketLink = getSocketLink();
-    
-    return socketLink.handleKeepaliveTask();
-  }
+@Documented  
+@Retention(RUNTIME)
+@Target({TYPE, FIELD, METHOD})
+public @interface Friend {
+  Class<?> value();
 }

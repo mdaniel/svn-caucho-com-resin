@@ -29,12 +29,9 @@
 
 package com.caucho.network.listen;
 
-import java.util.logging.Logger;
-
 import com.caucho.env.thread.AbstractThreadLauncher;
 import com.caucho.env.thread.ThreadPool;
 import com.caucho.inject.Module;
-import com.caucho.util.L10N;
 
 /**
  * Represents a protocol connection.
@@ -42,10 +39,6 @@ import com.caucho.util.L10N;
 @Module
 class SocketLinkThreadLauncher extends AbstractThreadLauncher
 {
-  private static final L10N L = new L10N(SocketLinkThreadLauncher.class);
-  private static final Logger log 
-    = Logger.getLogger(SocketLinkThreadLauncher.class.getName());
-  
   private ThreadPool _threadPool = ThreadPool.getThreadPool();
   private TcpSocketLinkListener _listener;
 
@@ -74,19 +67,23 @@ class SocketLinkThreadLauncher extends AbstractThreadLauncher
   {
     Thread thread = Thread.currentThread();
     ClassLoader loader = thread.getContextClassLoader();
-    TcpSocketLink startConn;
+    TcpSocketLink startConn = null;
     
     try {
       thread.setContextClassLoader(_listener.getClassLoader());
       
       startConn = _listener.allocateConnection();
 
-      if (! _threadPool.schedule(startConn.getAcceptTask())) {
-        log.severe(L.l("Schedule failed for {0}", startConn));
-      }
+      startConn.requestAccept();
+      
+      startConn = null;
     } catch (Exception e) {
+      e.printStackTrace();
       throw new RuntimeException(e);
     } finally {
+      if (startConn != null)
+        _listener.closeConnection(startConn);
+      
       thread.setContextClassLoader(loader);
     }
   }

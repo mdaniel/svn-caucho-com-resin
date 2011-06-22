@@ -155,11 +155,11 @@ public abstract class AbstractHttpRequest
   private long _startTime;
 
   protected CharSegment _hostHeader;
-  protected boolean _expect100Continue;
+  private boolean _expect100Continue;
 
   private long _contentLength;
   // True if the post stream has been initialized
-  protected boolean _hasReadStream;
+  private boolean _hasReadStream;
   // character incoding for a Post
   private String _readEncoding;
 
@@ -381,8 +381,11 @@ public abstract class AbstractHttpRequest
    */
   public void clientDisconnect()
   {
+    killKeepalive();
+    /*
     if (_tcpConn != null)
       _tcpConn.requestEarlyClose();
+      */
   }
 
   public final HttpServletRequestImpl getRequestFacade()
@@ -1617,12 +1620,6 @@ public abstract class AbstractHttpRequest
     if (conn != null) {
       conn.killKeepalive();
     }
-
-    /*
-    ConnectionController controller = _conn.getController();
-    if (controller != null)
-      controller.close();
-    */
   }
 
   /**
@@ -1630,12 +1627,16 @@ public abstract class AbstractHttpRequest
    */
   protected boolean isKeepalive()
   {
-    return _tcpConn != null && _tcpConn.isKeepaliveAllocated();
+    TcpSocketLink conn = _tcpConn;
+    
+    return conn != null && conn.isKeepaliveAllocated();
   }
 
   public boolean isCometActive()
   {
-    return _tcpConn != null && _tcpConn.isCometActive();
+    TcpSocketLink conn = _tcpConn;
+    
+    return conn != null && conn.isCometActive();
   }
 
   public boolean isSuspend()

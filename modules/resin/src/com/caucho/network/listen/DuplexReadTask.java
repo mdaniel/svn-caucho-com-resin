@@ -30,10 +30,8 @@
 package com.caucho.network.listen;
 
 import java.io.IOException;
-import java.util.logging.Logger;
 
 import com.caucho.inject.Module;
-import com.caucho.vfs.ReadStream;
 
 /**
  * A protocol-independent TcpConnection.  TcpConnection controls the
@@ -42,10 +40,7 @@ import com.caucho.vfs.ReadStream;
  * <p>Each TcpConnection has its own thread.
  */
 @Module
-class DuplexReadTask extends ConnectionReadTask {
-  private static final Logger log
-    = Logger.getLogger(DuplexReadTask.class.getName());
-  
+class DuplexReadTask extends ConnectionTask {
   private final SocketLinkDuplexController _duplex;
 
   DuplexReadTask(TcpSocketLink socketLink,
@@ -57,7 +52,7 @@ class DuplexReadTask extends ConnectionReadTask {
   }
   
   @Override
-  public void run()
+  public final void run()
   {
     Thread thread = Thread.currentThread();
     ClassLoader loader = thread.getContextClassLoader();
@@ -77,31 +72,12 @@ class DuplexReadTask extends ConnectionReadTask {
   }
 
   @Override
-  public RequestState doTask()
+  final RequestState doTask()
     throws IOException
   {
     TcpSocketLink socketLink = getSocketLink();
     
-    socketLink.toDuplexActive();
-
-    RequestState result;
-
-    ReadStream readStream = socketLink.getReadStream();
-
-    while ((result = socketLink.processKeepalive()) == RequestState.REQUEST_COMPLETE) {
-      long position = readStream.getPosition();
-
-      _duplex.serviceRead();
-
-      if (position == readStream.getPosition()) {
-        log.warning(_duplex + " was not processing any data. Shutting down.");
-        socketLink.close();
-
-        return RequestState.EXIT;
-      }
-    }
-
-    return result;
+    return socketLink.handleDuplexRead(_duplex);
   }
   
   void onClose()
