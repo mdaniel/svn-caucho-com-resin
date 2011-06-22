@@ -106,75 +106,72 @@ function display_postmortem_graph($mbean_server)
   $start = $end - $period;
 
   $height = 150;
-  
+  $width = 300;
+    
   $health_system = $mbean_server->lookup("resin:type=HealthSystem");
   if ($health_system) {
 		$status_names = $health_system->HealthStatusNames;
   }
 
-  echo "<table>";
-
-  echo "<tr><th colspan='2' id='health'>Health</th></tr>\n";
-  echo "<tr valign='top'><td colspan='2' headers='health'>";
-  stat_graph_regexp("health", 300, $height, $start, $end,
+  echo "<table summary='Graphs' border='1' cellspacing='0' cellpadding='5'>";
+  
+  echo "<tr valign='top'><td colspan='3' align='center'>";
+  stat_graph_regexp("health", $width, $height, $start, $end,
                   "/^$si\|Resin\|Health/", 
                   "A line graph representing the status of each health check performed in the last 60 minutes before the selected restart.",
-                  "right", $mbean_server, $status_names);
+                  "right", $mbean_server, $status_names, 'Health');
   echo "</td></tr>\n";
 
-  echo "<tr><th id='req_count'>Request Count</th>";
-  echo "<th id='req_time'>Request Time</th>\n";
-  echo "<th id='netstat'>Netstat</th></tr>\n";
-  echo "<tr valign='top'><td headers='req_count'>";
-  stat_graph("request", 300, $height, $start, $end,
+  echo "<tr valign='top'><td>";
+  stat_graph("request", $width, $height, $start, $end,
              array("$si|Resin|Http|Request Count"),
-						 "A line graph representing the number HTTP requests received in the last 60 minutes before the selected restart.");
+						 "A line graph representing the number HTTP requests received in the last 60 minutes before the selected restart.",
+             "bottom", $mbean_server, null, 'Request Count');
              
-  echo "</td><td headers='req_time'>";
-  stat_graph("request_time", 300, $height, $start, $end,
+  echo "</td><td>";
+  stat_graph("request_time", $width, $height, $start, $end,
              array("$si|Resin|Http|Request Time",
                    "$si|Resin|Http|Request Time Max"),
-						 "A line graph representing the amount of time spent processing HTTP requests in the last 60 minutes before the selected restart.");
-                                                 
-  echo "</td><td headers='netstat'>";
+						 "A line graph representing the amount of time spent processing HTTP requests in the last 60 minutes before the selected restart.",
+             "bottom", $mbean_server, null, 'Request Time');
+             
+  echo "</td><td>";
 
   stat_graph_regexp("netstat", $width, $height, $start, $end,
                       "/$si\|OS\|Network\|(?!tcp-time)/",
- 										"A line graph representing network activity over the last 6 hours.");
-             
+ 										"A line graph representing network activity over the last 6 hours.",
+             "bottom", $mbean_server, null, 'Netstat');
+  
   echo "</td></tr>\n";
   
-  echo "<tr><th id='query_active'>Database Connection Active</th>";
-  echo "<th id='query_time'>Database Query Time</th></tr>\n";
-  echo "<tr valign='top'><td headers='query_active'>";
-  stat_graph("database", 300, $height, $start, $end,
+  echo "<tr valign='top'><td>";
+  stat_graph("database", $width, $height, $start, $end,
              array("$si|Resin|Database|Connection Active"),
-               "A line graph representing the amout of time the database connection was active in the last 60 minutes before the selected restart.");
-                          
-  echo "</td><td headers='query_time'>";
-  stat_graph("database_time", 300, $height, $start, $end,
+               "A line graph representing the amout of time the database connection was active in the last 60 minutes before the selected restart.",
+             "bottom", $mbean_server, null, 'Database Connection Active');
+             
+  echo "</td><td>";
+  stat_graph("database_time", $width, $height, $start, $end,
              array("$si|Resin|Database|Query Time",
                    "$si|Resin|Database|Query Time Max"),
-               "A line graph representing the amout of time spent querying the database in the last 60 minutes before the selected restart.");
+               "A line graph representing the amout of time spent querying the database in the last 60 minutes before the selected restart.",
+             "bottom", $mbean_server, null, 'Database Query Time');
              
-  echo "</td></tr>\n";
+  echo "</td><td></td></tr>\n";
              
-  echo "<tr>";
-  echo "<th id='jvm-threads'>JVM Threads</th>";
-  echo "<th id='resin-threads'>Resin Thread</th>";
-  echo "<th id='cpu'>CPU</th></tr>\n";
   echo "<tr valign='top'>";
   
-  echo "<td headers='jvm-threads'>";
+  echo "<td>";
   stat_graph("jvm-thread", 300, $height, $start, $end,
              array("$si|JVM|Thread|JVM Thread Count",
                    "$si|JVM|Thread|JVM Runnable Count",
                    "$si|JVM|Thread|JVM Native Count",
                    "$si|JVM|Thread|JVM Waiting Count",
                    "$si|JVM|Thread|JVM Blocked Count"),
-                    "A line graph representing the number of threads in various thread pools in the last 60 minutes before the selected restart.");
-                    
-  echo "</td><td headers='resin-threads'>";
+                    "A line graph representing the number of threads in various thread pools in the last 60 minutes before the selected restart.",
+             "bottom", $mbean_server, null, 'JVM Threads');
+             
+  echo "</td><td>";
   stat_graph("resin-thread", 300, $height, $start, $end,
              array("$si|JVM|Thread|JVM Thread Count",
                    "$si|Resin|Thread|Thread Count",
@@ -183,34 +180,36 @@ function display_postmortem_graph($mbean_server)
                    "$si|Resin|Thread|Thread Task Queue",
                    "$si|Resin|Thread|Thread Priority Queue",
                    "$si|Resin|Thread|Thread Overflow Count"),
-                    "A line graph representing the number of threads in various thread pools in the last 60 minutes before the selected restart.");
+                    "A line graph representing the number of threads in various thread pools in the last 60 minutes before the selected restart.",
+             "bottom", $mbean_server, null, 'Resin Thread');
              
-  echo "</td><td headers='cpu'>";
+  echo "</td><td>";
   stat_graph_regexp("cpu", 300, $height, $start, $end,
                     "/^$si\|OS\|CPU\|CPU Active/",
-               		  "A line graph representing the active CPU usage in the last 60 minutes before the selected restart.");
+               		  "A line graph representing the active CPU usage in the last 60 minutes before the selected restart.",
+             "bottom", $mbean_server, null, 'CPU');
   
   echo "</td></tr>\n";
   
-  echo "<tr><th id='memory'>Memory</th>";
-  echo "<th id='gc'>GC Time</th>\n";
-  echo "<th id='fdes' scope='col'>File Descriptors</th></tr>\n";
-  echo "<tr valign='top'><td headers='memory'>";
+  echo "<tr valign='top'><td>";
   stat_graph("memory", 300, $height, $start, $end,
              array("$si|JVM|Memory|Heap Memory Free",
                    "$si|JVM|Memory|Tenured Memory Free",
                    "$si|JVM|Memory|PermGen Memory Free"),
-  					 "A line graph representing the amount of time spent perfoming garbage collection in the last 60 minutes before the selected restart.");
+  					 "A line graph representing the amount of time spent perfoming garbage collection in the last 60 minutes before the selected restart.",
+             "bottom", $mbean_server, null, 'Memory');
              
-  echo "</td><td headers='gc'>";
+  echo "</td><td>";
   stat_graph_regexp("memory_gc", 300, $height, $start, $end,
                     "/$si\|JVM\|Memory\|GC Time/",
-  										"A line graph representing network activity in the last 60 minutes before the selected restart.");
-             
-  echo "</td><td headers='fdes'>";
+  										"A line graph representing network activity in the last 60 minutes before the selected restart.",
+             "bottom", $mbean_server, null, 'GC Time');
+  
+  echo "</td><td>";
   stat_graph_regexp("file_descriptors", 300, $height, $start, $end,
                     "/$si\|OS\|Process\|File Descriptor Count/",
-  										"A line graph representing the file descriptor count in the last 60 minutes before the selected restart.");
+  										"A line graph representing the file descriptor count in the last 60 minutes before the selected restart.",
+             "bottom", $mbean_server, null, 'File Descriptors');
   
   echo "</td></tr>\n";
   echo "</table>";

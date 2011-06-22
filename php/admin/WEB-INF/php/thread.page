@@ -178,19 +178,10 @@ function thread_display_summary_graph()
   $end = time();
   $start = $end - 6 * 3600;
 
-  echo "<h3>JVM Threads</h3>\n";
+  echo "<div style='display:inline-block;'>\n"
+  echo " <div style='float:left;padding:.5em;'>\n"
   
-  stat_graph("jvm-threads", 600, 200, $start, $end, 
-               array("$si|JVM|Thread|JVM Thread Count",
-                     "$si|JVM|Thread|JVM Runnable Count",
-                     "$si|JVM|Thread|JVM Blocked Count",
-                     "$si|JVM|Thread|JVM Native Count",
-                     "$si|JVM|Thread|JVM Waiting Count"),
-               "A line graph representing the number of threads in JVM thread states over the last 6 hours.");
-
-  echo "<h3>Resin Thread Pool</h3>\n";
-  
-  stat_graph("resin-threads", 600, 200, $start, $end, 
+  stat_graph("resin-threads", 250, 125, $start, $end, 
                array("$si|JVM|Thread|JVM Thread Count",
                      "$si|Resin|Thread|Thread Count",
                      "$si|Resin|Thread|Thread Active Count",
@@ -198,7 +189,22 @@ function thread_display_summary_graph()
                      "$si|Resin|Thread|Thread Task Queue",
                      "$si|Resin|Thread|Thread Priority Queue",
                      "$si|Resin|Thread|Thread Overflow Count"),
-               "A line graph representing the number of threads in the Resin thread pools over the last 6 hours.");
+               "A line graph representing the number of threads in the Resin thread pools over the last 6 hours.",
+               'bottom', null, null, 'Resin Threads');
+	echo " </div>\n";
+  echo " <div style='float:right;padding:.5em;'>\n"
+
+  stat_graph("jvm-threads", 250, 125, $start, $end, 
+               array("$si|JVM|Thread|JVM Thread Count",
+                     "$si|JVM|Thread|JVM Runnable Count",
+                     "$si|JVM|Thread|JVM Blocked Count",
+                     "$si|JVM|Thread|JVM Native Count",
+                     "$si|JVM|Thread|JVM Waiting Count"),
+               "A line graph representing the number of threads in JVM thread states over the last 6 hours.",
+               'bottom', null, null, 'JVM Threads');
+
+  echo " </div>";
+	echo "</div>";
 }
 
 function thread_display_content($partition, $groups)

@@ -625,6 +625,8 @@ function display_header($script, $title, $server,
   <title><?= $title ?></title>
   <link rel='stylesheet' href='<?= uri("default.css") ?>' type='text/css' />
   <link rel='stylesheet' href='jquery-ui/jquery.ui.all.css' type='text/css' />
+  <link rel="stylesheet" type="text/css" href="colorbox/colorbox.css" media="screen" />
+  
   <meta http-equiv="Content-Type" content="text/html; charset=utf-8"/>
 <?php
 if ($is_refresh) {
@@ -632,6 +634,7 @@ if ($is_refresh) {
 }
 ?>
   <script type="text/javascript" src="jquery.js"></script>
+  <script type="text/javascript" src="colorbox/jquery.colorbox.js"></script>
   <script language='javascript' type='text/javascript'>
     function hide(id) { document.getElementById(id).style.display = 'none'; }
     function show(id) { document.getElementById(id).style.display = 'block'; }
@@ -980,7 +983,8 @@ function display_footer($script, $javascript="")
 <script type="text/javascript" src="pie-chart.js"></script>
 <script type="text/javascript" src="flot/jquery.flot.js"></script>
 <script type="text/javascript" src="flot/jquery.flot.navigate.js"></script>
-<script type="text/javascript" src="flot/jquery.flot.crosshair.js"></script>
+<script type="text/javascript" src="flot/jquery.flot.symbol.js"></script>
+<script type="text/javascript" src="flot/jquery.flot.resize.js"></script> 
 <script type="text/javascript">
 <!--
   $(document).ready(function() {

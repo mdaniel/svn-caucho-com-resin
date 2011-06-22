@@ -30,11 +30,11 @@ echo "<div id='overview-tab'>";
 
 print_overview();
 
-print_overview_graphs();
-
 echo "<h2>Health"; print_Help("Health"); echo "</h2>\n";
 
 display_health_status($g_server->SelfServer);
+
+print_overview_graphs();
 
 echo "</div>";
 
@@ -118,7 +118,6 @@ function print_overview()
       <?= $os->Arch ?>
       <?= $os->Version ?>
     </td>
-  </tr>
   </tr>
 
   <tr class='<?= row_style($row++) ?>'>
@@ -236,23 +235,17 @@ function print_overview_graphs()
   if (! $stat_service)
     return;
 
-    $period = 6 * 60 * 60;
-    $end = time();
-    $start = $end - $period;
+  $period = 6 * 60 * 60;
+  $end = time();
+  $start = $end - $period;
 
-    $height = 150;
-    $width = 240;
+  $height = 150;
+  $width = 240;
 
   echo "<h3>Graphs</h3>\n";
 
-  echo "<table summary='Graphs'>\n";
-  echo "<tr>";
-  echo "<th scope='col'>Threads</th>";
-  echo "<th scope='col'>Memory</th>";
-  echo "<th scope='col'>CPU</th>";
-  echo "</tr>";
-  echo "<tr valign='top'>";
-  echo "<td>";
+  echo "<table summary='Graphs' border='0' cellspacing='0' cellpadding='5'>\n";
+  echo "<tr valign='top'><td>\n";
 
   stat_graph("sum-threads", $width, $height, $start, $end, 
              array("$si|JVM|Thread|JVM Thread Count",
@@ -261,29 +254,29 @@ function print_overview_graphs()
                    "$si|JVM|Thread|JVM Blocked Count",
                    "$si|JVM|Thread|JVM Native Count",
                    "$si|JVM|Thread|JVM Waiting Count"),
-               "A line graph representing the number of threads in various thread pools over the last 6 hours.");
+             "A line graph representing the number of threads in various thread pools over the last 6 hours.",
+               'bottom', null, null, 'Threads');
+             
                
-  echo "</td>";
-  echo "<td>";
+  echo "</td><td>\n";
   
-    stat_graph("sum-memory", $width, $height, $start, $end,
-               array("$si|JVM|Memory|Heap Memory Used",
-                     "$si|JVM|Memory|Heap Memory Free",
-                     "$si|JVM|Memory|Tenured Memory Free",
-                     "$si|JVM|Memory|PermGen Memory Free"),
-              "A line graph representing the amount of free and used memory in each of the heap, tenured, and permgen pools over the last 6 hours.");
+  stat_graph("sum-memory", $width, $height, $start, $end,
+             array("$si|JVM|Memory|Heap Memory Used",
+                   "$si|JVM|Memory|Heap Memory Free",
+                   "$si|JVM|Memory|Tenured Memory Free",
+                   "$si|JVM|Memory|PermGen Memory Free"),
+			       "A line graph representing the amount of free and used memory in each of the heap, tenured, and permgen pools over the last 6 hours.",
+               'bottom', null, null, 'Memory');
                               
-  echo "</td>";
-
-  echo "<td>";
-  
-    stat_graph("sum-cpu", $width, $height, $start, $end,
-               array("$si|OS|CPU|CPU Active"),
-               "A line graph representing the active CPU usage over the last 6 hours.");
+  echo "</td><td>\n";
                
-  echo "</td>";
-  echo "</tr>";
-  echo "</table>";
+  stat_graph("sum-cpu", $width, $height, $start, $end,
+             array("$si|OS|CPU|CPU Active"),
+             "A line graph representing the active CPU usage over the last 6 hours.",
+             'bottom', null, null, 'CPU');
+               
+  echo "</td></tr>\n";
+	echo "</table>\n";
 }
 
 /* graphs */
@@ -309,19 +302,20 @@ function print_graphs()
     $height = 150;
     $width = 240;
 
-    echo "<table summary='Graphs'>";
+    echo "<table summary='Graphs' border='0' cellspacing='0' cellpadding='5'>";
 
-    echo "<tr><th scope='col'>Request Count</th><th scope='col'>Request Time</th><th scope='col'>Threads</th></tr>";
     echo "<tr valign='top'><td>";
     stat_graph("request", $width, $height, $start, $end,
                array("$si|Resin|Http|Request Count"),
-               "A line graph representing the number HTTP requests received over the last 6 hours.");
+               "A line graph representing the number HTTP requests received over the last 6 hours.",
+             'bottom', null, null, 'Request Count');
                
     echo "</td><td>";
     stat_graph("request_time", $width, $height, $start, $end,
                array("$si|Resin|Http|Request Time",
                      "$si|Resin|Http|Request Time Max"),
-               "A line graph representing the amount of time spent processing HTTP requests over the last 6 hours.");
+               "A line graph representing the amount of time spent processing HTTP requests over the last 6 hours.",
+             'bottom', null, null, 'Request Time');
                
     echo "</td><td>";
     stat_graph("threads", $width, $height, $start, $end, 
@@ -332,7 +326,9 @@ function print_graphs()
                      "$si|JVM|Thread|JVM Blocked Count",
                      "$si|JVM|Thread|JVM Native Count",
                      "$si|JVM|Thread|JVM Waiting Count"),
-               "A line graph representing the number of threads in various thread pools over the last 6 hours.");
+               "A line graph representing the number of threads in various thread pools over the last 6 hours.",
+             'bottom', null, null, 'Threads');
+               
 /*
     stat_graph("thread", $width, $height, $start, $end,
                array("$si|JVM|Thread|JVM Thread Count",
@@ -345,43 +341,46 @@ function print_graphs()
 */
                
     echo "</td></tr>";
-    echo "<tr><th scope='col'>Database Connection Active</th><th scope='col'>Database Query Time</th><th scope='col'>CPU</th></tr>";
     echo "<tr valign='top'><td>";
     stat_graph("database", $width, $height, $start, $end,
                array("$si|Resin|Database|Connection Active"),
-               "A line graph representing the amout of time the database connection was active over the last 6 hours.");
+               "A line graph representing the amout of time the database connection was active over the last 6 hours.",
+             'bottom', null, null, 'Database Connection Active');
                
     echo "</td><td>";
     stat_graph("database_time", $width, $height, $start, $end,
                array("$si|Resin|Database|Query Time",
                      "$si|Resin|Database|Query Time Max"),
-               "A line graph representing the amout of time spent querying the database over the last 6 hours.");
+               "A line graph representing the amout of time spent querying the database over the last 6 hours.",
+             'bottom', null, null, 'Database Query Time');
                
     echo "</td><td>";
     stat_graph("cpu", $width, $height, $start, $end,
                array("$si|OS|CPU|CPU Active"),
-               "A line graph representing the active CPU usage over the last 6 hours.");
+               "A line graph representing the active CPU usage over the last 6 hours.",
+             'bottom', null, null, 'CPU');
                
     echo "</td></tr>";
-    echo "<tr><th scope='col'>Memory</th><th scope='col'>GC Time</th><th scope='col'>Netstat</th></tr>";
     echo "<tr valign='top'><td>";
     stat_graph("memory", $width, $height, $start, $end,
                array("$si|JVM|Memory|Heap Memory Used",
                      "$si|JVM|Memory|Heap Memory Free",
                      "$si|JVM|Memory|Tenured Memory Used",
                      "$si|JVM|Memory|PermGen Memory Used"),
-              "A line graph representing the amount of free and used memory in each of the heap, tenured, and permgen pools over the last 6 hours.");
-                              
+              "A line graph representing the amount of free and used memory in each of the heap, tenured, and permgen pools over the last 6 hours.",
+             'bottom', null, null, 'Memory');
+               
     echo "</td><td>";
     stat_graph_regexp("memory_gc", $width, $height, $start, $end,
                       "/$si\|JVM\|Memory\|GC Time/",
-  										"A line graph representing the amount of time spent perfoming garbage collection over the last 6 hours.");
-                         
+  										"A line graph representing the amount of time spent perfoming garbage collection over the last 6 hours.",
+             'bottom', null, null, 'GC Time');
+    
     echo "</td><td>";
     stat_graph_regexp("netstat", $width, $height, $start, $end,
                       "/$si\|OS\|Network\|(?!tcp-time)/",
-  										"A line graph representing network activity over the last 6 hours.");
-    
+  										"A line graph representing network activity over the last 6 hours.",
+             'bottom', null, null, 'Netstat');
                     
     echo "</td></tr>";
     echo "</table>";
