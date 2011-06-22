@@ -76,17 +76,23 @@ public class AddUserCommand extends AbstractManagementCommand
 
     String []roles = args.getTrailingArgs(new HashSet<String>());
 
+    ManagerClient manager = null;
     try {
-      ManagerClient manager = getManagerClient(args, client);
+      manager = getManagerClient(args, client);
 
       String message = manager.addUser(user, password, roles);
 
       System.out.println(message);
+
+
     } catch (Exception e) {
       if (args.isVerbose())
         e.printStackTrace();
       else
         System.out.println(e.toString());
+    } finally {
+      if (manager != null)
+        manager.close();
     }
   }
 

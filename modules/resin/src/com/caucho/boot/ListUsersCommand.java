@@ -40,8 +40,9 @@ public class ListUsersCommand extends AbstractManagementCommand
   @Override
   public void doCommand(WatchdogArgs args, WatchdogClient client)
   {
+    ManagerClient manager = null;
     try {
-      ManagerClient manager = getManagerClient(args, client);
+      manager = getManagerClient(args, client);
 
       String message = manager.listUsers();
 
@@ -51,6 +52,9 @@ public class ListUsersCommand extends AbstractManagementCommand
         e.printStackTrace();
       else
         System.out.println(e.toString());
+    } finally {
+      if (manager != null)
+        manager.close();
     }
   }
 

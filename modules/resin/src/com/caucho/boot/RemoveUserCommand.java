@@ -42,8 +42,9 @@ public class RemoveUserCommand extends AbstractManagementCommand
   {
     String user = args.getDefaultArg();
 
+    ManagerClient manager = null;
     try {
-      ManagerClient manager = getManagerClient(args, client);
+      manager = getManagerClient(args, client);
 
       String message = manager.removeUser(user);
 
@@ -53,6 +54,9 @@ public class RemoveUserCommand extends AbstractManagementCommand
         e.printStackTrace();
       else
         System.out.println(e.toString());
+    } finally {
+      if (manager != null)
+        manager.close();
     }
   }
 
