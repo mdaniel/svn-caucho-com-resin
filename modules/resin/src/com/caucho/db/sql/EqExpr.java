@@ -73,14 +73,14 @@ final class EqExpr extends Expr {
       return new StringEqExpr((ColumnExpr) newRight, newLeft);
     }
 
-    if ((newLeft instanceof ColumnExpr || newLeft instanceof IdExpr)
-        && newLeft.getType().equals(Blob.class)) {
-      return new BlobEqExpr(newLeft, newRight);
-    }
-    else if ((newRight instanceof ColumnExpr || newRight instanceof IdExpr)
-             && newRight.getType().equals(Blob.class)) {
-      return new BlobEqExpr(newRight, newLeft);
-    }
+//    if ((newLeft instanceof ColumnExpr || newLeft instanceof IdExpr)
+//        && newLeft.getType().equals(Blob.class)) {
+//      return new BlobEqExpr(newLeft, newRight);
+//    }
+//    else if ((newRight instanceof ColumnExpr || newRight instanceof IdExpr)
+//             && newRight.getType().equals(Blob.class)) {
+//      return new BlobEqExpr(newRight, newLeft);
+//    }
 
     if (newLeft.isLong() && (newRight.isLong() || newRight.isParam()))
       return new LongEqExpr(newLeft, newRight);
