@@ -70,11 +70,23 @@ public class JmxSetCommand extends JmxCommand
       throw new ConfigException(L.l(
         "jmx-set requires <value> parameter be specified"));
 
-    ManagerClient manager = getManagerClient(args, client);
+    ManagerClient manager = null;
 
-    String result = manager.setJmx(pattern, attribute, value);
+    try {
+      manager = getManagerClient(args, client);
 
-    System.out.println(result);
+      String result = manager.setJmx(pattern, attribute, value);
+
+      System.out.println(result);
+    } catch (Exception e) {
+      if (args.isVerbose())
+        e.printStackTrace();
+      else
+        System.out.println(e.toString());
+    } finally {
+      if (manager != null)
+        manager.close();
+    }
   }
 
 

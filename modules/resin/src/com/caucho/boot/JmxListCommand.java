@@ -70,16 +70,28 @@ public class JmxListCommand extends JmxCommand
     boolean isAll = args.hasOption("-all");
     boolean isPlatform = args.hasOption("-platform");
 
-    ManagerClient manager = getManagerClient(args, client);
+    ManagerClient manager = null;
 
-    String jmxResult = manager.listJmx(pattern,
-                                       isPrintAttributes,
-                                       isPrintValues,
-                                       isPrintOperations,
-                                       isAll,
-                                       isPlatform);
+    try {
+      manager = getManagerClient(args, client);
 
-    System.out.print(jmxResult);
+      String jmxResult = manager.listJmx(pattern,
+                                         isPrintAttributes,
+                                         isPrintValues,
+                                         isPrintOperations,
+                                         isAll,
+                                         isPlatform);
+
+      System.out.print(jmxResult);
+    } catch (Exception e) {
+      if (args.isVerbose())
+        e.printStackTrace();
+      else
+        System.out.println(e.toString());
+    } finally {
+      if (manager != null)
+        manager.close();
+    }
   }
 
   @Override

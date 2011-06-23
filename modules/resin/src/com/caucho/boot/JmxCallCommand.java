@@ -73,13 +73,25 @@ public class JmxCallCommand extends JmxCommand
       operationIndex  = Integer.parseInt(index);
     }
 
-    ManagerClient manager = getManagerClient(args, client);
-    String result = manager.callJmx(pattern,
-                                    operation,
-                                    operationIndex,
-                                    trailingArgs);
+    ManagerClient manager = null;
 
-    System.out.println(result);
+    try {
+      manager = getManagerClient(args, client);
+      String result = manager.callJmx(pattern,
+                                      operation,
+                                      operationIndex,
+                                      trailingArgs);
+
+      System.out.println(result);
+    } catch (Exception e) {
+      if (args.isVerbose())
+        e.printStackTrace();
+      else
+        System.out.println(e.toString());
+    } finally {
+      if (manager != null)
+        manager.close();
+    }
   }
 
   @Override

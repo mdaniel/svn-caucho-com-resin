@@ -536,12 +536,14 @@ class WatchdogArgs
       }
       else if (_isHelp) {
       }
+/*
       else {
         System.out.println(L().l("unknown argument '{0}'", argv[i]));
         System.out.println();
         usage();
         System.exit(1);
       }
+*/  //#4605 (support before / after command option placement)
     }
 
     if (_isHelp
