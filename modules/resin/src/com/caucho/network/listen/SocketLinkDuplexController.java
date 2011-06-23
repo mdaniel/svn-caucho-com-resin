@@ -34,7 +34,6 @@ import java.util.logging.Logger;
 
 import com.caucho.inject.Module;
 import com.caucho.util.Alarm;
-import com.caucho.util.IoUtil;
 import com.caucho.util.L10N;
 import com.caucho.vfs.ReadStream;
 import com.caucho.vfs.WriteStream;
@@ -203,7 +202,7 @@ public class SocketLinkDuplexController extends AsyncController {
   @Override
   public void onClose()
   {
-    ReadStream is = _is;
+    // ReadStream is = _is;
     _is = null;
     
     TcpSocketLink conn = _conn;
@@ -217,11 +216,13 @@ public class SocketLinkDuplexController extends AsyncController {
     
     _os = null;
 
+    /*
     IoUtil.close(is);
+    */
     
     try {
       if (conn != null)
-        conn.close();
+        conn.requestClose();
     } catch (Exception e) {
     }
 

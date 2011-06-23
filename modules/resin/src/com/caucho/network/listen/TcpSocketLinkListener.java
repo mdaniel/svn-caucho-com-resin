@@ -1378,26 +1378,10 @@ public class TcpSocketLinkListener
   /**
    * Remove from suspend list.
    */
+  @Friend(TcpSocketLink.class)
   boolean cometDetach(TcpSocketLink conn)
   {
     return _suspendConnectionSet.remove(conn);
-  }
-
-  /**
-   * Resumes the controller (for comet-style ajax)
-   */
-  boolean cometResume(TcpSocketLink conn)
-  {
-    if (_suspendConnectionSet.remove(conn)) {
-      // conn.toCometResume();
-      
-      conn.requestWakeComet();
-      // _threadPool.schedule(conn.getResumeTask());
-
-      return true;
-    }
-    else
-      return false;
   }
 
   void duplexKeepaliveBegin()
@@ -1547,7 +1531,7 @@ public class TcpSocketLinkListener
     if (_activeConnectionSet.remove(conn)) {
       _activeConnectionCount.decrementAndGet();
     }
-    else {
+    else if (! isClosed()){
       Thread.dumpStack();
     }
 
@@ -1635,7 +1619,7 @@ public class TcpSocketLinkListener
 
     for (TcpSocketLink conn : activeSet) {
       try {
-        conn.destroy();
+        conn.requestDestroy();
       }
       catch (Exception e) {
         log.log(Level.FINEST, e.toString(), e);
@@ -1674,7 +1658,7 @@ public class TcpSocketLinkListener
 
     TcpSocketLink conn;
     while ((conn = _idleConn.allocate()) != null) {
-      conn.destroy();
+      conn.requestDestroy();
     }
 
     log.finest(this + " closed");

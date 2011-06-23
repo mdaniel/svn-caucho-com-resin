@@ -6,7 +6,7 @@
  * Each copy or derived work must preserve the copyright notice and this
  * notice unmodified.
  *
- * Resin Open Source is free software; you can redistribute it and/or modify
+ * Resin Open Source is software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation; either version 2 of the License, or
  * (at your option) any later version.
@@ -33,33 +33,25 @@ import java.io.IOException;
 
 import com.caucho.inject.Module;
 
-
 /**
- * Application handler for a bidirectional tcp stream
+ * A protocol-independent TcpConnection.  TcpConnection controls the
+ * TCP Socket and provides buffered streams.
  *
- * The read stream should only be read by the <code>onRead</code> thread.
- * 
- * The write stream must be synchronized if it's every written by a thread
- * other than the <code>serviceRead</code>
+ * <p>Each TcpConnection has its own thread.
  */
 @Module
-public interface TcpDuplexHandler
-{
-  /**
-   * Called when read data is available
-   */
-  public void onRead(TcpDuplexController controller)
-    throws IOException;
-  
-  /**
-   * Called when the connection closes
-   */
-  public void onComplete(TcpDuplexController controller)
-    throws IOException;
-  
-  /**
-   * Called when the connection times out
-   */
-  public void onTimeout(TcpDuplexController controller)
-    throws IOException;
+class DestroyTask extends ConnectionTask {
+  DestroyTask(TcpSocketLink socketLink)
+  {
+    super(socketLink);
+  }
+
+  @Override
+  final RequestState doTask()
+    throws IOException
+  {
+    TcpSocketLink socketLink = getSocketLink();
+    
+    return socketLink.handleDestroyTask();
+  }
 }

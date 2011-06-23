@@ -43,6 +43,12 @@ enum SocketLinkRequestState {
    */
   INIT {
     @Override
+    public boolean isAllowIdle()
+    {
+      return true;
+    }
+    
+    @Override
     boolean toAccept(AtomicReference<SocketLinkRequestState> stateRef)
     {
       if (! stateRef.compareAndSet(INIT, REQUEST)) {
@@ -57,6 +63,12 @@ enum SocketLinkRequestState {
    * Handling a request
    */
   REQUEST {
+    @Override
+    public boolean isAllowIdle()
+    {
+      return true;
+    }
+    
     @Override
     boolean toIdle(AtomicReference<SocketLinkRequestState> stateRef)
     {
@@ -100,6 +112,15 @@ enum SocketLinkRequestState {
       }
       
       return true;
+    }
+    
+    @Override
+    boolean toDestroy(AtomicReference<SocketLinkRequestState> stateRef)
+    {
+      if (stateRef.compareAndSet(this, DESTROY))
+        return true;
+      else
+        return stateRef.get().toDestroy(stateRef);
     }
   },
   
@@ -154,8 +175,39 @@ enum SocketLinkRequestState {
       
       return true;
     }
+    
+    @Override
+    boolean toDestroy(AtomicReference<SocketLinkRequestState> stateRef)
+    {
+      if (stateRef.compareAndSet(this, DESTROY))
+        return true;
+      else
+        return stateRef.get().toDestroy(stateRef);
+    }
+  },
+  
+  /**
+   * destroyed state
+   */
+  DESTROY {
+    @Override
+    public boolean isDestroyed()
+    {
+      return true;
+    }
+    
+    @Override
+    boolean toDestroy(AtomicReference<SocketLinkRequestState> stateRef)
+    {
+      return false;
+    }
   };
 
+  public boolean isAllowIdle()
+  {
+    return false;
+  }
+  
   boolean toAccept(AtomicReference<SocketLinkRequestState> stateRef)
   {
     throw new IllegalStateException(toString());
@@ -189,5 +241,18 @@ enum SocketLinkRequestState {
   boolean toIdle(AtomicReference<SocketLinkRequestState> stateRef)
   {
     throw new IllegalStateException(toString());
+  }
+  
+  boolean toDestroy(AtomicReference<SocketLinkRequestState> stateRef)
+  {
+    if (stateRef.compareAndSet(this, DESTROY))
+      return false;
+    else
+      return stateRef.get().toDestroy(stateRef);
+  }
+
+  public boolean isDestroyed()
+  {
+    return false;
   }
 }

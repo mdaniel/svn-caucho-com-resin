@@ -210,7 +210,7 @@ public final class HttpServletRequestImpl extends AbstractCauchoRequest
   {
     AbstractHttpRequest request = _request;
 
-    return request != null ? _request.getServerName() : null;
+    return request != null ? request.getServerName() : null;
   }
 
   /**

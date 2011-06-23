@@ -41,9 +41,18 @@ enum SocketLinkState {
    */
   INIT {
     @Override
+    boolean isAllowIdle() { return true; }
+    
+    @Override
     SocketLinkState toInit(TcpSocketLink conn) 
     { 
       return INIT; 
+    }
+    
+    @Override
+    SocketLinkState toIdle()
+    { 
+      return IDLE;
     }
 
     @Override
@@ -458,6 +467,12 @@ enum SocketLinkState {
 
     @Override
     boolean isKeepalive() { return true; }
+
+    @Override
+    SocketLinkState toKeepaliveSelect()
+    {
+      return DUPLEX_KEEPALIVE;
+    }
 
     @Override
     SocketLinkState toDuplexActive(TcpSocketLink conn)

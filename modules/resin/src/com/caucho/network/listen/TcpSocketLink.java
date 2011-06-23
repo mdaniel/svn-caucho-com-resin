@@ -87,6 +87,8 @@ public class TcpSocketLink extends AbstractSocketLink
   private final AcceptTask _acceptTask;
   // HTTP keepalive task
   private final KeepaliveRequestTask _keepaliveTask;
+  // HTTP keepalive timeout
+  private final KeepaliveTimeoutTask _keepaliveTimeoutTask;
   // Comet resume task
   private final CometResumeTask _resumeTask;
   // duplex (websocket) task
@@ -146,6 +148,7 @@ public class TcpSocketLink extends AbstractSocketLink
 
     _acceptTask = new AcceptTask(this);
     _keepaliveTask = new KeepaliveRequestTask(this);
+    _keepaliveTimeoutTask = new KeepaliveTimeoutTask(this);
     _resumeTask = new CometResumeTask(this);
   }
 
@@ -535,6 +538,14 @@ public class TcpSocketLink extends AbstractSocketLink
   }
 
   /**
+   * Returns the current keepalive task (request or duplex)
+   */
+  private ConnectionTask getKeepaliveTimeoutTask()
+  {
+    return _keepaliveTimeoutTask;
+  }
+
+  /**
    * Returns the comet resume task
    */
   private Runnable getResumeTask()
@@ -623,6 +634,20 @@ public class TcpSocketLink extends AbstractSocketLink
   }
   
   /**
+   * Wake a connection from a select/poll keepalive.
+   */
+  void requestTimeoutKeepalive()
+  {
+    if (_requestStateRef.get().toWakeKeepalive(_requestStateRef)) {
+      ThreadPool threadPool = _listener.getThreadPool();
+    
+      if (! threadPool.schedule(getKeepaliveTimeoutTask())) {
+        log.severe(L.l("Schedule failed for {0}", this));
+      }
+    }
+  }
+  
+  /**
    * Wake a connection from a comet suspend.
    */
   void requestWakeComet()
@@ -663,6 +688,41 @@ public class TcpSocketLink extends AbstractSocketLink
 
     requestWakeComet();
   }
+  
+  void requestClose()
+  {
+    // XXX:
+  }
+
+  /**
+   * Destroys the connection()
+   */
+  public final void requestDestroy()
+  {
+    if (_requestStateRef.get().toDestroy(_requestStateRef)) {
+      ThreadPool threadPool = _listener.getThreadPool();
+    
+      if (! threadPool.schedule(new DestroyTask(this))) {
+        destroy();
+      }
+    }
+  }
+  
+  private void destroy()
+  {
+    if (log.isLoggable(Level.FINER))
+      log.finer(this + " destroying connection");
+    
+    try {
+      _socket.forceShutdown();
+    } catch (Throwable e) {
+      
+    }
+
+    closeConnection();
+
+    _state = _state.toDestroy(this);
+  }
 
   @Override
   public void requestShutdownBegin()
@@ -701,6 +761,10 @@ public class TcpSocketLink extends AbstractSocketLink
     
     _thread = null;
     
+    if (_requestStateRef.get().isDestroyed()) {
+      destroy();
+    }
+    
     SocketLinkState state = _state;
 
     if (! (state.isComet() || state.isDuplex())
@@ -718,12 +782,14 @@ public class TcpSocketLink extends AbstractSocketLink
     
     getListener().closeConnection(this);
 
-    if (state.isAllowIdle()) {
+    if (state.isAllowIdle() && _requestStateRef.get().isAllowIdle()) {
       _state = state.toIdle();
       
       _requestStateRef.get().toIdle(_requestStateRef);
         
       _listener.free(this);
+    }
+    else if (state.isDestroyed()) {
     }
     else {
       System.out.println("NOFREE:" + requestState + " " + _requestStateRef.get() + " " + this);
@@ -742,11 +808,13 @@ public class TcpSocketLink extends AbstractSocketLink
     while (result == RequestState.REQUEST_COMPLETE
            && ! listener.isClosed()
            && ! getState().isDestroyed()) {
+      
+      if (launcher.isIdleExpire()) {
+        return RequestState.EXIT;
+      }
+      
       setStatState("accept");
       _state = _state.toAccept();
-      
-      if (launcher.isIdleExpire())
-        return RequestState.EXIT;
 
       if (! accept()) {
         close();
@@ -784,6 +852,24 @@ public class TcpSocketLink extends AbstractSocketLink
     throws IOException
   {
     return handleRequests(Task.KEEPALIVE);
+  }
+
+  @Friend(KeepaliveTimeoutTask.class)
+  RequestState handleKeepaliveTimeoutTask()
+    throws IOException
+  {
+    close();
+    
+    return handleAcceptTask();
+  }
+
+  @Friend(DestroyTask.class)
+  RequestState handleDestroyTask()
+    throws IOException
+  {
+    destroy();
+    
+    return RequestState.EXIT;
   }
 
   /**
@@ -1092,6 +1178,7 @@ public class TcpSocketLink extends AbstractSocketLink
     // use select manager if available
     if (_listener.getSelectManager() != null) {
       _requestStateRef.get().toKeepalive(_requestStateRef);
+      _state = _state.toKeepaliveSelect();
       
       // keepalive to select manager succeeds
       if (_listener.getSelectManager().keepalive(this)) {
@@ -1255,7 +1342,6 @@ public class TcpSocketLink extends AbstractSocketLink
       log.finer(this + " suspending comet");
     
     _state = _state.toCometSuspend();
-    // XXX: request state
     
     _listener.cometSuspend(this);
     
@@ -1267,52 +1353,7 @@ public class TcpSocketLink extends AbstractSocketLink
     
     return false;
   }
-
-  /**
-   * Wakes the connection (comet-style).
-   */
-  private boolean wake()
-  {
-    // _state = _state.toCometWake();
-    
-    // comet
-    if (getListener().cometResume(this)) {
-      log.fine(dbgId() + "wake");
-      return true;
-    }
-    else {
-      return false;
-    }
-  }
   
-  /**
-   * Called to signal a comet suspend timeout by the TcpSocketLinkListener.
-   */
-  private void toCometTimeout()
-  {
-    TcpAsyncController async = _async;
-    
-    if (async != null) {
-      async.setTimeout();
-    }
-
-    wake();
-  }
-
-  /**
-   * Called to request the comet connectin complete.
-   */
-  private void toCometComplete()
-  {
-    TcpAsyncController async = _async;
-    
-    if (async != null) {
-      async.setCompleteRequested();
-    }
-    
-    wake();
-  }
-
   //
   // duplex/websocket
   //
@@ -1358,56 +1399,11 @@ public class TcpSocketLink extends AbstractSocketLink
   // close operations
   //
 
-  /**
-   * Called by HTTP for early close on client disconnect.
-   * 
-   * XXX: may want to revise this logic
-   */
-  /*
-  public void requestEarlyClose()
-  {
-    if (log.isLoggable(Level.FINE))
-      log.fine(this +" early close, most likely from client disconnect.");
-    
-    // close();
-    killKeepalive();
-  }
-  */
-
-  void close()
+  private void close()
   {
     setStatState(null);
     
     closeConnection();
-  }
-
-  /**
-   * Closes on shutdown.
-   */
-  public void closeOnShutdown()
-  {
-    if (log.isLoggable(Level.FINER))
-      log.finer(this + " closeOnShutdown");
-    
-  }
-
-  /**
-   * Destroys the connection()
-   */
-  public final void destroy()
-  {
-    if (log.isLoggable(Level.FINER))
-      log.finer(this + " destroying connection");
-    
-    try {
-      _socket.forceShutdown();
-    } catch (Throwable e) {
-      
-    }
-
-    closeConnection();
-
-    _state = _state.toDestroy(this);
   }
   
   /**
