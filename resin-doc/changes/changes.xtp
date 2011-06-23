@@ -13,6 +13,8 @@
 
 <s2 title="4.0.20 - snapshot">
 <ul>
+<li>resin: options on the command should be global (#4605)</li>
+<li>resin: command line user mgmt (#4603)</li>
 <li>jsf: allow JSF in WEB-INF/lib (will disables CDI) (#4573, rep by cyttesen)</li>
 <li>hessian: debug should not throw illegal state exceptions but should log</li>
 <li>database: allow numeric transaction-isolation values (#4627, rep by mnsh)</li>
