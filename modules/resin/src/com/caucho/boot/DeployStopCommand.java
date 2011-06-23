@@ -49,7 +49,7 @@ public class DeployStopCommand extends WebAppCommand
   @Override
   public void usage()
   {
-    System.err.println(L.l("usage: java -jar resin.jar [-conf <file>] deploy-stop -user <user> -password <password> [options] <name>"));
+    System.err.println(L.l("usage: bin/resin.sh [-conf <file>] deploy-stop -user <user> -password <password> [options] <name>"));
     System.err.println(L.l(""));
     System.err.println(L.l("description:"));
     System.err.println(L.l("   stop application context specified in a <name>"));

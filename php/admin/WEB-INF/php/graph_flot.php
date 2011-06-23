@@ -100,7 +100,7 @@ function stat_graph($canvas, $width, $height, $start, $end, $names, $alt,
   
   #echo "</span>\n";
 
-  echo "<script id='$canvas-script' language='javascript' type='text/javascript'>\n";
+  echo "<script id='${canvas}-script' language='javascript' type='text/javascript'>\n";
   echo "<!-- \n";
   echo '$(function () {' . "\n";
 
@@ -182,9 +182,6 @@ function stat_graph($canvas, $width, $height, $start, $end, $names, $alt,
     echo "\n";
   }
   
-  
-  $ticks_var = str_replace("-", "_", "ticks_$canvas");
-  
   echo "\n";
   
   echo "function tickFormatter(val, axis) {\n";
@@ -227,9 +224,7 @@ function stat_graph($canvas, $width, $height, $start, $end, $names, $alt,
   echo "    tickFormatter: tickFormatter \n";
   echo "  },\n";
   echo "  legend: { container: \"#${canvas}-thumb-legend\" },\n";
-  echo "});\n";
-  
-  echo "\n";
+  echo "});\n\n";
 
   echo "$(function() {\n";
   echo "  $('#${canvas}-link').colorbox({\n"; 
@@ -247,7 +242,7 @@ function stat_graph($canvas, $width, $height, $start, $end, $names, $alt,
   echo "  			grid: { hoverable: true, autoHighlight: true, interactive: true },\n";
   echo "  			pan: { interactive: true },\n";
   echo "  			zoom: { interactive: true },\n";
-  echo "			});\n";
+  echo "			});\n\n";
 	echo "			var previousPoint = null;\n";
 	echo "			$(\"#${canvas}-full-plot\").bind(\"plothover\", function (event, pos, item) {\n";
 	echo "				if (item) {\n";

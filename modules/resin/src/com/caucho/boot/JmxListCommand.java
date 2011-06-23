@@ -85,7 +85,7 @@ public class JmxListCommand extends JmxCommand
   @Override
   public void usage()
   {
-    System.err.println(L.l("usage: java -jar resin.jar [-conf <file>] jmx-list -user <user> -password <password> [-attributes] [-values] [-operations] [-all] [-platform] [<pattern>]"));
+    System.err.println(L.l("usage: bin/resin.sh [-conf <file>] jmx-list -user <user> -password <password> [-attributes] [-values] [-operations] [-all] [-platform] [<pattern>]"));
     System.err.println(L.l(""));
     System.err.println(L.l("description:"));
     System.err.println(L.l("   lists beans registered with JMX and matching <pattern>. <pattern> is optional and adheres\n"

@@ -205,7 +205,7 @@ with the other logging configuration.</p>
 
 </s2>
 
-<s1 title="log-handler timestamp">
+<s2 title="log-handler timestamp">
 
 <p>The <var>timestamp</var> for log tags is a format string which can contain
 percent codes which are substituted with time and date values.</p>
@@ -325,7 +325,7 @@ percent codes which are substituted with time and date values.</p>
 [22:50:11.828] hmux listening to *:6800
 </results>
 
-</s1>
+</s2>
 
 <s2 title='log-handler archiving'>
 

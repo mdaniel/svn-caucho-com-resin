@@ -62,7 +62,7 @@ public class ListUsersCommand extends AbstractManagementCommand
   public void usage()
   {
     System.err.println(L.l(
-      "usage: java -jar resin.jar [-conf <file>] user-list -address <address> -port <port> -user <user> -password <password>"));
+      "usage: bin/resin.sh [-conf <file>] user-list -address <address> -port <port> -user <user> -password <password>"));
     System.err.println(L.l(""));
     System.err.println(L.l("description:"));
     System.err.println(L.l("   lists administrative users\n"));

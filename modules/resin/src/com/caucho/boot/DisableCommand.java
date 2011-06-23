@@ -70,7 +70,7 @@ public class DisableCommand extends AbstractScalingCommand
   @Override
   public void usage()
   {
-    System.err.println(L.l("usage: java -jar resin.jar [-conf <file>] -server <triad-server> disable -address <address> -port <port> -user <user> -password <password> <server>"));
+    System.err.println(L.l("usage: bin/resin.sh [-conf <file>] -server <triad-server> disable -address <address> -port <port> -user <user> -password <password> <server>"));
     System.err.println(L.l(""));
     System.err.println(L.l("description:"));
     System.err.println(L.l("   disables specified in <server> argument server" ));

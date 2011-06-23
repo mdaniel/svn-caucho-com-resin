@@ -82,7 +82,7 @@ public class JmxSetCommand extends JmxCommand
   @Override
   public void usage()
   {
-    System.err.println(L.l("usage: java -jar resin.jar [-conf <file>] jmx-set -user <user> -password <password> -pattern <pattern> -attribute <attribute> value"));
+    System.err.println(L.l("usage: bin/resin.sh [-conf <file>] jmx-set -user <user> -password <password> -pattern <pattern> -attribute <attribute> value"));
     System.err.println(L.l(""));
     System.err.println(L.l("description:"));
     System.err.println(L.l("   sets value on a MBeans attribute to <value>"));

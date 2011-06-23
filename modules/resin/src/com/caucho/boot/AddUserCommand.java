@@ -100,7 +100,7 @@ public class AddUserCommand extends AbstractManagementCommand
   public void usage()
   {
     System.err.println(L.l(
-      "usage: java -jar resin.jar [-conf <file>] user-add -user <user> -password <password> -u <new user name> [-p <new user password>]"));
+      "usage: bin/resin.sh [-conf <file>] user-add -user <user> -password <password> -u <new user name> [-p <new user password>]"));
     System.err.println(L.l(""));
     System.err.println(L.l("description:"));
     System.err.println(L.l("   adds an administrative user\n"));

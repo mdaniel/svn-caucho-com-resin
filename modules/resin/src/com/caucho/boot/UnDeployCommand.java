@@ -96,7 +96,7 @@ public class UnDeployCommand extends AbstractRepositoryCommand
   @Override
   public void usage()
   {
-    System.err.println(L.l("usage: java -jar resin.jar [-conf <file>] undeploy -user <user> -password <password> [options] <name>"));
+    System.err.println(L.l("usage: bin/resin.sh [-conf <file>] undeploy -user <user> -password <password> [options] <name>"));
     System.err.println(L.l(""));
     System.err.println(L.l("description:"));
     System.err.println(L.l("   undeploys application specified in a <name>"));

@@ -32,7 +32,7 @@
         description="ANT and Maven clustered deployment API reference"/>
     </item>
 
-    <item link="resin-admin-command-line.xtp" title="command line"
+    <item link="resin-admin-command-line.xtp" title="Command Line"
           description="The Command Line Resin Administration"/>
     
     <item link="config.xtp" title="Configuration"
@@ -116,7 +116,7 @@
       
     </item>
 
-    <item link="scheduled-tasks.xtp" title="Scheduled tasks"
+    <item link="scheduled-tasks.xtp" title="Scheduled Tasks"
           description="Scheduled tasks"/>
     
     <item link="security.xtp" title="Security"

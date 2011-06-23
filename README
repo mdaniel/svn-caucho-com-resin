@@ -1,4 +1,4 @@
-Copyright (c) 1998-2008 Caucho Technology. All Rights Reserved.
+Copyright (c) 1998-2011 Caucho Technology. All Rights Reserved.
 
 This is the README file for Resin 4.0(tm)
 =========================================
@@ -7,7 +7,7 @@ The documentation included with Resin is in XTP format starting at
 http://localhost:8080/resin-doc/index.xtp.
 
 The full documentation is also available online at
-http://www.caucho.com/resin if you have trouble getting started.
+http://www.caucho.com/resin-4.0/ if you have trouble getting started.
 
 Questions should go to our mailing list or forums.
 
@@ -19,7 +19,7 @@ I) Licensing/Support
 --------------------
 
 For pricing and licensing information for Resin 4.0 Professional,
-see http://www.caucho.com/sales/.  Resin Professional contains additional
+see http://www.caucho.com/resin/sales.  Resin Professional contains additional
 performance and reliability features beyond the Resin Open Source version.
 
 Resin 4.0 Open Source is released under the GPL.
@@ -27,7 +27,7 @@ Resin 4.0 Open Source is released under the GPL.
 Resin licenses do not include technical support. However, we offer several
 technical support options to fit your support and budget needs.
 
-  http://www.caucho.com/sales  -- licenses and support
+  http://www.caucho.com/resin/sales  -- licenses and support
 
 II) Preconditions
 -----------------
@@ -92,8 +92,8 @@ file is found in resin-4.0.x/conf/resin.xml.
    Resin supports the development of applications without requiring a war
    file deployment.  Create a directory resin-4.0.x/webapps/bar to
    correspond to url http://localhost:8080/bar/.  Java source files
-   placed in resin-4.0.x/webapps/bar/classes/ are automatically compiled
-   by Resin.
+   placed in resin-4.0.x/webapps/bar/WEB-INF/classes/ are automatically 
+   compiled by Resin.
 
    resin-4.0.x/webapps/bar/index.jsp
      --> http://localhost:8080/bar/

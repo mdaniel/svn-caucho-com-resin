@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 1998-2010 Caucho Technology -- all rights reserved
+ * Copyright (c) 1998-2011 Caucho Technology -- all rights reserved
  *
  * This file is part of Resin(R) Open Source
  *
@@ -606,11 +606,11 @@ class WatchdogArgs
 
   private static void usage()
   {
-    System.err.println(L().l("usage: java -jar resin.jar [-options] [console | status | start | gui | stop | restart | kill | shutdown | version]"));
-    System.err.println(L().l("       java -jar resin.jar [-options] [deploy | undeploy | deploy-copy | deploy-list | deploy-start | deploy-stop | deploy-restart]"));
-    System.err.println(L().l("       java -jar resin.jar [-options] [thread-dump | heap-dump | log-level | profile | jmx-list | jmx-call | jmx-set]"));
-    System.err.println(L().l("       java -jar resin.jar [-options] [user-add | user-list | user-remove]"));
-    System.err.println(L().l("       java -jar resin.jar help <command>"));
+    System.err.println(L().l("usage: bin/resin.sh [-options] [console | status | start | gui | stop | restart | kill | shutdown | version]"));
+    System.err.println(L().l("       bin/resin.sh [-options] [deploy | undeploy | deploy-copy | deploy-list | deploy-start | deploy-stop | deploy-restart]"));
+    System.err.println(L().l("       bin/resin.sh [-options] [thread-dump | heap-dump | log-level | profile | jmx-list | jmx-call | jmx-set]"));
+    System.err.println(L().l("       bin/resin.sh [-options] [user-add | user-list | user-remove]"));
+    System.err.println(L().l("       bin/resin.sh help <command>"));
     System.err.println(L().l(""));
     System.err.println(L().l("where options include:"));
     System.err.println(L().l("   -conf <file>          : select a configuration file"));

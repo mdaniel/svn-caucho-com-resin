@@ -95,7 +95,7 @@ public class LogLevelCommand extends AbstractManagementCommand
   @Override
   public void usage()
   {
-    System.err.println(L.l("usage: java -jar resin.jar [-conf <file>] log-level -user <user> -password <password> -all|-finest|-finer|-fine|-config|-info|-warning|-severe|-off [-active-time <time-period>] [loggers...]"));
+    System.err.println(L.l("usage: bin/resin.sh [-conf <file>] log-level -user <user> -password <password> -all|-finest|-finer|-fine|-config|-info|-warning|-severe|-off [-active-time <time-period>] [loggers...]"));
     System.err.println(L.l(""));
     System.err.println(L.l("description:"));
     System.err.println(L.l("   sets level for logger(s).  Defaults to root and `com.caucho' loggers."));

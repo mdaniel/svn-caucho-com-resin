@@ -49,7 +49,7 @@ public class DeployStartCommand extends WebAppCommand
   @Override
   public void usage()
   {
-    System.err.println(L.l("usage: java -jar resin.jar [-conf <file>] deploy-start -user <user> -password <password> [options] <name>"));
+    System.err.println(L.l("usage: bin/resin.sh [-conf <file>] deploy-start -user <user> -password <password> [options] <name>"));
     System.err.println(L.l(""));
     System.err.println(L.l("description:"));
     System.err.println(L.l("   starts application context specified in a <name>"));

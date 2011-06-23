@@ -449,7 +449,7 @@ class ResinArgs
 
   private static void usage()
   {
-    System.err.println(L.l("usage: java -jar resin.jar [-options] [start | stop | restart]"));
+    System.err.println(L.l("usage: bin/resin.sh [-options] [start | stop | restart]"));
     System.err.println(L.l(""));
     System.err.println(L.l("where options include:"));
     System.err.println(L.l("   -conf <file>          : select a configuration file"));

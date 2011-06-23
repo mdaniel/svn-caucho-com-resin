@@ -111,7 +111,7 @@ public class DeployCopyCommand extends AbstractRepositoryCommand {
   @Override
   public void usage()
   {
-    System.err.println(L.l("usage: java -jar resin.jar [-conf <file>] deploy-copy -user <user> -password <password> [options]"));
+    System.err.println(L.l("usage: bin/resin.sh [-conf <file>] deploy-copy -user <user> -password <password> [options]"));
     System.err.println(L.l(""));
     System.err.println(L.l("description:"));
     System.err.println(L.l("   copies a deployed application according to the given options"));

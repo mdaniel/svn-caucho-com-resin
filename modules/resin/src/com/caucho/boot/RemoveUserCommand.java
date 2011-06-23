@@ -64,7 +64,7 @@ public class RemoveUserCommand extends AbstractManagementCommand
   public void usage()
   {
     System.err.println(L.l(
-      "usage: java -jar resin.jar [-conf <file>] user-remove -address <address> -port <port> -user <user> -password <password> user"));
+      "usage: bin/resin.sh [-conf <file>] user-remove -address <address> -port <port> -user <user> -password <password> user"));
     System.err.println(L.l(""));
     System.err.println(L.l("description:"));
     System.err.println(L.l("   removes specified administrative user\n"));

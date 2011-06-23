@@ -113,7 +113,7 @@ function display_postmortem_graph($mbean_server)
 		$status_names = $health_system->HealthStatusNames;
   }
 
-  echo "<table summary='Graphs' border='1' cellspacing='0' cellpadding='5'>";
+  echo "<table summary='Graphs' border='0' cellspacing='0' cellpadding='5'>";
   
   echo "<tr valign='top'><td colspan='3' align='center'>";
   stat_graph_regexp("health", $width, $height, $start, $end,
