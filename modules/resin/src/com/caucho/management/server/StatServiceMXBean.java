@@ -74,4 +74,14 @@ public interface StatServiceMXBean extends ManagedObjectMXBean
    * Returns the start times for the given server.
    */
   public long []getStartTimes(int serverIndex, long startTime, long endTime);
+  
+  /**
+   * Returns predefined meter graphs.
+   */
+  public MeterGraphInfo []getMeterGraphs();
+  
+  /**
+   * Returns predefined meter graph pages.
+   */
+  public MeterGraphPageInfo []getMeterGraphPages();
 }

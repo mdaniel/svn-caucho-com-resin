@@ -111,6 +111,13 @@ public interface PortMXBean extends ManagedObjectMXBean {
   public int getKeepaliveSelectMax();
 
   /**
+   * Returns the timeout for a keepalive using its own thread before 
+   * going to the select.
+   */
+  @Description("The timeout for a keepalive to use its own thread")
+  public long getKeepaliveThreadTimeout();
+
+  /**
    * Returns the maximum total time for keepalive connections
    */
   @Description("The maximum total time for keepalive connections")

@@ -768,7 +768,7 @@ public class HttpRequest extends AbstractHttpRequest
 
     try {
       thread.setContextClassLoader(server.getClassLoader());
-
+      
       startRequest(server.allocateHttpBuffer());
 
       if (! parseRequest()) {

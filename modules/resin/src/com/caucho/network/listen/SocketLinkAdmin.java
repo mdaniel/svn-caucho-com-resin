@@ -126,6 +126,12 @@ public class SocketLinkAdmin extends AbstractManagedObject
   {
     return _port.getKeepaliveConnectionTimeMax();
   }
+  
+  @Override
+  public long getKeepaliveThreadTimeout()
+  {
+    return _port.getKeepaliveThreadTimeout();
+  }
 
   @Override
   public long getKeepaliveTimeout()

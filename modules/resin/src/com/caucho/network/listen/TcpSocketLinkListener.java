@@ -725,7 +725,17 @@ public class TcpSocketLinkListener
     return _keepaliveSelectThreadTimeout;
   }
 
+  public long getKeepaliveThreadTimeout()
+  {
+    return _keepaliveSelectThreadTimeout;
+  }
+
   public void setKeepaliveSelectThreadTimeout(Period period)
+  {
+    setKeepaliveSelectThreadTimeoutMillis(period.getPeriod());
+  }
+
+  public void setKeepaliveThreadTimeout(Period period)
   {
     setKeepaliveSelectThreadTimeoutMillis(period.getPeriod());
   }

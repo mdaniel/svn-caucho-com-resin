@@ -1,0 +1,180 @@
+<?php
+/**
+ * Custom meters
+ */
+
+require_once "WEB-INF/php/inc.php";
+
+$javascript = <<<EOF
+  $("#meter-tabs").tabs().find(".ui-tabs-nav").sortable({axis:'x'});
+EOF;
+
+if (! admin_init()) {
+  return;
+}
+
+$server = $g_mbean_server->lookup("resin:type=Server");
+$stat_service = $g_mbean_server->lookup("resin:type=StatService");
+
+$stat_service = $g_mbean_server->lookup("resin:type=StatService");
+$si = sprintf("%02d", $server->SelfServer->ClusterIndex);
+
+if (! $stat_service) {
+  echo "<p>Meters requires Resin Professional and a valid license.</p>";
+  return;
+}
+
+$pages = $stat_service->getMeterGraphPages();
+
+usort($pages, "page_name_compare");
+
+display_tabs($pages);
+
+function page_name_compare($a, $b)
+{
+  return strcmp($a->name, $b->name);
+}
+
+function display_tabs($pages)
+{
+  echo "<div id='meter-tabs'>";
+  echo "<ul>";
+
+  foreach ($pages as $page) {
+    $name = $page->name;
+    
+    $tab_name = $name . "-tab";
+
+    echo "<li><a href='#${tab_name}'>$name</a></li>\n";
+  }
+
+  echo "<li><a href='#new_meter-tab'>+</a></li>\n";
+  echo "</ul>\n";
+
+  foreach ($pages as $page) {
+    $tab_name = $page->name . "-tab";
+
+    echo "<div id='${tab_name}'>\n";
+
+    echo "<h2>" . $page->getName() . "</h2>";
+  
+    meter_display_page($page);
+
+    echo "</div>";
+  }
+
+  echo "<div id='new_meter-tab'>\n";
+  echo "</div>";
+
+  echo "</div>\n";
+}
+
+function meter_display_page($page)
+{
+  global $g_mbean_server;
+
+  $stat_service = $g_mbean_server->lookup("resin:type=StatService");
+
+  if (! $stat_service)
+    return;
+
+  $si = sprintf("%02d", $g_server->Index);
+
+  $page_name = "pg_" . $page->name;
+  $count = 0;
+
+  $period = $page->period / 1000;
+
+  if ($period <= 0) {
+    $period = 6 * 3600;
+  }
+
+  $end = time();
+  $start = $end - $period;
+
+  $columns = $page->columns;
+  $graph_count = count($page->meterGraphs);
+
+  if ($columns > 0) {
+  }
+  else if ($graph_count > 9) {
+    $columns = 4;
+  }
+  else if ($graph_count > 4) {
+    $columns = 3;
+  }
+  else if ($graph_count > 1) {
+    $columns = 2;
+  }
+  else {
+    $columns = 1;
+  }
+
+  $width = 600 / $columns;
+  $height = $width * 0.66;
+
+  $is_column = false;
+
+  echo "<table border='0'>\n";
+
+  foreach ($page->meterGraphs as $graph) {
+    $graph_name = $page_name . "_" . $count;
+
+    if ($count % $columns == 0) {
+      if ($is_column)
+        echo "</tr>";
+        
+      echo "<tr>";
+
+      $is_column = true;
+    }
+
+    if ($graph) {
+      echo "<td valign='top'>";
+      meter_display_graph($graph_name, $graph, $width, $height, $start, $end);
+      echo "</td>";
+    }
+
+    $count++;
+  }
+
+  if ($is_column)
+    echo "</tr>";
+    
+  echo "</table>";
+}  
+
+function meter_display_graph($name, $graph, $width, $height, $start, $end)
+{
+//  echo " <div style='float:top;padding:.5em;'>\n"
+  
+  $si = sprintf("%02d", $g_server->Index);
+
+  $meters = array();
+
+  if ($graph->name)
+    $caption = $graph->name;
+
+  foreach ($graph->meterNames as $meter_name) {
+    $full_name = $si . "|" . $meter_name;
+
+    $meters[] = $full_name;
+
+    if (! $caption)
+      $caption = $full_name;
+  }
+
+  if (! $caption)
+    $caption = $name;
+
+  stat_graph($name, $width, $height, $start, $end, 
+               $meters,
+               "A line graph representing $caption over the last 6 hours.",
+               'bottom', null, null, $caption);
+               
+//  echo " </div>\n";
+}
+
+display_footer($g_page, $javascript);
+
+?>
