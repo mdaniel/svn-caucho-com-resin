@@ -104,18 +104,15 @@ to see the graphs properly.</p></div>\n";
 
 $user_graphs = $user_item['user-graphs'];
 
-echo "<div id='graph-content' style='display:none'>\n";
-
-echo '<div id="new-graph-drawer">';
-echo '<div id="new-graph-form">';
-display_new_graph_form();
-echo '</div>';
-echo '</div>';
-
-echo '<div style="float: left; width: %40;">';
+echo "<div id='graph-content'>\n";
+echo ' <div style="float:left;width:75%;text-align:center;">';
 display_main_graph();
+echo ' </div>';
+echo ' <div style="float:right;width:24%;border:1px solid black">';
+display_new_graph_form();
+echo ' </div>';
+echo ' <div style="clear:both;"></div>';
 echo '</div>';
-echo "</div>";
 
 display_footer($g_page, javascript_main_graph());
 
@@ -129,79 +126,10 @@ function display_graph_selection()
   global $self_index;
 
   echo "<form name='def_graph' method='post' action='" . $g_next_url . "'>";
-  echo "<input type='hidden' name='period' value='$p_period'/>\n";
-  echo "<b><label for='user-meters'>Meters</label>:</b>\n";
+  echo "<table>\n";
 
-  echo "<select name='user-meters' onchange='javascript:document.forms.def_graph.submit();' id='user-meters'>\n";
-
-  $selected = false;
-  foreach ($user_item['user-graphs'] as $name => $hash) {
-    echo "<option ";
-    if ($p_hash == $hash) {
-      $selected = true;
-      echo " selected";
-    }
-    echo " value='{$name}'>{$name}</option>\n";
-  }
-  if (! $selected)
-    echo "<option selected='selected'>--------</option>\n";
-
-  echo "</select>\n";
-
-  $self_index = sprintf("%02d", $g_server->SelfServer->ClusterIndex);
-
-  $cluster_size = count($g_server->Cluster->Servers);
-  for ($i = 0; $i < $cluster_size; $i++) {
-    if ($i > 0)
-      $all .= ' ';
-
-    $all .= sprintf("%02d", $i);
-  }
-
-  echo "<input type='hidden' name='server-self'"
-       . " value='" . $self_index . "' />\n";
-  echo "<input type='hidden' name='server-all'"
-       . " value='" . $all . "' />\n";
-
-  echo "<b><label for='server-set'>Server Set</label>:</b>\n";
-  echo "<select name='server-set' id='server-set'>\n";
-
-  echo "<option value='self'";
-
-  if ($_REQUEST['server-set'] == 'self')
-    echo " selected";
-
-  echo ">This Server</option>\n";
-
-  echo "<option value='cluster'";
-
-  if ($_REQUEST['server-set'] == 'cluster')
-    echo " selected";
-
-  echo ">All servers, multi-graph</option>\n";
-
-  echo "<option value='combined'";
-
-  if ($_REQUEST['server-set'] == 'combined')
-    echo " selected";
-
-  echo ">All servers, single graph</option>\n";
-
-  echo "</select><br/>\n";
-
-  echo "</form>";
-}
-
-function display_period_selection()
-{
-  global $p_period;
-  global $g_next_url;
-
-  echo "<div class='graph-period'>\n";
-
-  echo "<label for='period'>Time</label>: "
-
-  echo "<select name='period' id='period'>\n";
+  echo "<tr><th scope='row' style='text-align:right'><label for='period'>Time</label>: </th>\n "
+  echo "<td><select name='period' id='period'>\n";
 
   echo " <option value='" . (60) . "'";
 
@@ -239,35 +167,76 @@ function display_period_selection()
   echo ">7 days</option>\n";
 
   echo "</select>\n";
-  echo "</div>\n";
+  echo "</td></tr>\n";
+  
+  echo "<tr><th scope='row' style='text-align:right'><label for='user-meters'>Meters</label>: </th>\n";
+  echo "<td><select name='user-meters' onchange='javascript:document.forms.def_graph.submit();' id='user-meters'>\n";
+
+  $selected = false;
+  foreach ($user_item['user-graphs'] as $name => $hash) {
+    echo "<option ";
+    if ($p_hash == $hash) {
+      $selected = true;
+      echo " selected";
+    }
+    echo " value='{$name}'>{$name}</option>\n";
+  }
+  if (! $selected)
+    echo "<option selected='selected'>--------</option>\n";
+
+  echo "</select>\n";
+  echo "</td></tr>\n";
+
+  $self_index = sprintf("%02d", $g_server->SelfServer->ClusterIndex);
+
+  $cluster_size = count($g_server->Cluster->Servers);
+  for ($i = 0; $i < $cluster_size; $i++) {
+    if ($i > 0)
+      $all .= ' ';
+
+    $all .= sprintf("%02d", $i);
+  }
+
+	echo "<input type='hidden' name='server-self'"
+       . " value='" . $self_index . "' />\n";
+  echo "<input type='hidden' name='server-all'"
+       . " value='" . $all . "' />\n";
+  
+	echo "<tr><th scope='row' style='text-align:right'><label for='server-set'>Server Set</label>: </th>\n";
+  echo "<td><select name='server-set' id='server-set'>\n";
+
+  echo "<option value='self'";
+
+  if ($_REQUEST['server-set'] == 'self')
+    echo " selected";
+
+  echo ">This Server</option>\n";
+
+  echo "<option value='cluster'";
+
+  if ($_REQUEST['server-set'] == 'cluster')
+    echo " selected";
+
+  echo ">All servers, multi-graph</option>\n";
+
+  echo "<option value='combined'";
+
+  if ($_REQUEST['server-set'] == 'combined')
+    echo " selected";
+
+  echo ">All servers, single graph</option>\n";
+
+  echo "</select>\n";
+  
+  echo "</td></tr>\n";
+  echo "</table>\n";
+
+  echo "</form>";
 }
 
 function display_main_graph() 
 {
-  global $g_next_url;
-  global $p_name;
-  global $p_graph;
-  global $p_hash;
-  global $p_period;
-
-  display_period_selection();
-
-  echo "<div class='graph'></div>";
-
-  /*
-   * XXX graph now requires flot -- include in rest output?
-  if ($p_graph) {
-    $rest_url = "rest.php?q=graph&graph={$p_graph}&period={$p_period}";
-
-    echo "<div><a href='{$rest_url}'>Embedded graph URL</a></div>";
-  }
-  elseif ($p_hash) {
-    $rest_url = "rest.php?q=graph&hash={$p_hash}&period={$p_period}";
-
-    echo "<div><a href='{$rest_url}'>Embedded graph URL</a></div>";
-  }*/
-
-  echo "<br/>";
+  echo "<div class='graph' style='display:inline-block;'></div>";
 }
 
 function display_new_graph_form() 
@@ -314,9 +283,10 @@ function display_new_graph_form()
   }
 
   // server
-  echo "<form name='name_form' method='post' action='" . $g_next_url . "'>"
+  echo "<div>"
+  echo "<form name='name_form' method='post' action='${g_next_url}'>"
   echo "<input type='hidden' name='submit' value='true'/>\n";
-  echo "<h2><span id='meter-switch' class='switch'></span>Meters</h2>";
+  echo "<h2><span id='meter-switch' class='switch'></span> Meters</h2>";
   echo "<button id='clear-graph' style='margin: 0 1em'>Clear Meters</button>";
 
   $i = 0;
@@ -351,23 +321,23 @@ function display_new_graph_form()
   }
   echo "</ul>";
 
-  echo "<div style='text-align: right'>\n";
+  echo "<div style='text-align:right'>\n";
   echo "<div id='validation-notice' class='ui-state-error ui-corner-all' style='display:none'></div>\n";
   echo "<label for='name'>Meter Set Name: </label>\n";
   echo "<input name='name' style='width: 50%;' id='name'/>"
-
   echo "<input type='submit' value='Save Meters'/><br/>\n";
   echo "</div>\n";
 
   echo "</form>\n";
+  echo "</div>\n";
 }
 
 function javascript_main_graph()
 {
   global $g_next_url;
 
-  $width = 600 - 60;
-  $height = 400 - 40;
+  $width = '800';
+  $height = '600';
 
   $javascript = <<<EOF
 

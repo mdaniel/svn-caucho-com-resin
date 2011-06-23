@@ -122,30 +122,22 @@ function stat_graph($canvas, $width, $height, $start, $end, $names, $alt,
     }
 
     $color = $g_colors[$color_counter++];
-    if ($color_counter > count($g_colors))
+    if ($color_counter == sizeof($g_colors))
     	$color_counter = 0;
     
     echo "values = [\n";
     
-    if (sizeof($values) > 1) {
-    	$skipped_last = false;
-	    $prev_value = null;
-	    foreach ($values as $value) {
-	    	if ($value->value != $prev_value) {
-	      	$time = $value->time + $tz_offset;
-	      	echo "[${time}, ${value->value}],\n";
-	      	$prev_value = $value->value;
-	      	$skipped_last = false;
-	  		} else {
-	  			$skipped_last = true;
-	  		}
-	    }
+    $size = sizeof($values);
+    if ($size > 1) {
+			echo "[" . ($values[0]->time + $tz_offset) . ", " . $values[0]->value . "],\n";
 
-	    if ($skipped_last) {
-		    $last_value = $values[sizeof($values)-1];
-	    	$last_time = $last_value->time + $tz_offset;
-	    	echo "[${last_time}, ${last_value->value}],\n";
-    	}
+			for ($i=1; $i<sizeof($values)-1; $i++) {
+				if ($values[$i]->value != $values[$i-1]->value) {
+					echo "[" . ($values[$i]->time + $tz_offset) . ", " . $values[$i]->value . "],\n";
+				}
+			}
+			
+			echo "[" . ($values[$size-1]->time + $tz_offset) . ", " . $values[$size-1]->value . "]\n";
     }
     
     echo "];\n";
@@ -153,41 +145,35 @@ function stat_graph($canvas, $width, $height, $start, $end, $names, $alt,
 		echo "thumb_graphs[${counter}] = { label : '" . preg_replace("/\s/", "&nbsp;", $name) . "', data : values, color: \"${color}\", lines: { lineWidth: 2 } };\n";
 		echo "full_graphs[${counter*2}] = { label : '" . preg_replace("/\s/", "&nbsp;", $name) . "', data : values, color: \"${color}\", lines: { lineWidth: 2 }, points: { radius: 2, symbol: \"circle\" } };\n";
 		
-    if (sizeof($values) > 1) {
+		$has_baseline = false;
+		if ($size > 1) {
     	# don't generate a baseline unless we have at least half as many historical samples
-      $baseline = $stat->getBaseline($name, $start * 1000, $end * 1000, (sizeof($values)/2));
+      $baseline = $stat->getBaseline($name, $start * 1000, $end * 1000, ($size/2));
       
 	    if ($baseline) {
 	    	$baseline_name = preg_replace("/\s/", "&nbsp;", "${name}|Baseline|${baseline->desc}");
 	    	$baseline_value = round($baseline->value);
 	    	
-    		echo "baseline_values = [\n";
-    		
-    		$skipped_last = false;
-    		$prev_value = null;
-		    foreach ($values as $value) {
-		    	if ($value->value != $prev_value) {
-		      	$time = $value->time + $tz_offset;
-		      	echo "[${time}, ${baseline_value}],\n";
-		      	$prev_value = $value->value;
-	      		$skipped_last = false;
-	  			} else {
-	  				$skipped_last = true;
-	  			}
-		    }
+		    echo "baseline_values = [\n";
+				echo "[" . ($values[0]->time + $tz_offset) . ", " . $baseline_value . "],\n";
 		
-	    	if ($skipped_last) {
-		    	$last_value = $values[sizeof($values)-1];
-	    		$last_time = $last_value->time + $tz_offset;
-	    		echo "[${last_time}, ${baseline_value}],\n";
-	    	}
-				
-    		echo "];\n";
+				for ($i=1; $i<sizeof($values)-1; $i++) {
+					if ($values[$i]->value != $values[$i-1]->value) {
+						echo "[" . ($values[$i]->time + $tz_offset) . ", " . $baseline_value . "],\n";
+					}
+				}
+					
+				echo "[" . ($values[$size-1]->time + $tz_offset) . ", " . $baseline_value . "]\n";
+		    echo "];\n";
+
 		    echo "full_graphs[${counter*2+1}] = { label : '${baseline_name}', data : baseline_values, color: \"${color}\", lines: { lineWidth: 1 }, points: { radius: 1, symbol: \"square\" } };\n";
-			} else {
-				echo "baseline_values = [];\n";
-				echo "full_graphs[${counter*2+1}] = { data : baseline_values, color: \"${color}\", lines: { lineWidth: 1 } };\n";
+		    $has_baseline = true;
 			}
+		}
+		
+		if (! $has_baseline) {
+			echo "baseline_values = [];\n"
+			echo "full_graphs[${counter*2+1}] = { data : baseline_values, color: \"${color}\", lines: { lineWidth: 1 } };\n";
 		}
     
 		$counter++;
@@ -247,11 +233,11 @@ function stat_graph($canvas, $width, $height, $start, $end, $names, $alt,
 
   echo "$(function() {\n";
   echo "  $('#${canvas}-link').colorbox({\n"; 
-  echo "    width:'85%', height:'85%', inline:true, scrolling:true, href:'#${canvas}-full-container', onComplete:function() {\n";
-  echo"				$(\"#${canvas}-full-container\").width('90%');\n";
+  echo "    width:'85%', height:'85%', inline:true, scrolling:false, href:'#${canvas}-full-container', onComplete:function() {\n";
+  echo"				$(\"#${canvas}-full-container\").width('95%');\n";
   echo"				$(\"#${canvas}-full-container\").height('95%');\n";
   echo"				$(\"#${canvas}-full-plot\").width('100%');\n";
-  echo"				$(\"#${canvas}-full-plot\").height('75%');\n";
+  echo"				$(\"#${canvas}-full-plot\").height('70%');\n";
   echo "			$.plot($(\"#${canvas}-full-plot\"), full_graphs, {\n";
   echo "  			xaxis: { mode:\"time\" },\n";
   echo "  			yaxis: {\n";

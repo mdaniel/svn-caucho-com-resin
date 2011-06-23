@@ -118,5 +118,6 @@ $end = $start + $period * 60;
 
 require_once "WEB-INF/php/graph_flot.php";
 
-stat_graph($canvas, $width, $height, $start, $end, $names, "A dynamic line graph representing the selected meters.");
+stat_graph($canvas, $width, $height, $start, $end, $names, "A interactive line graph representing the selected meters.",
+'bottom', null, null, 'Interactive Graph');
 ?>
