@@ -1627,7 +1627,7 @@ public abstract class AbstractHttpRequest
    */
   protected boolean isKeepalive()
   {
-    TcpSocketLink conn = _tcpConn;
+    SocketLink conn = _conn;
     
     return conn != null && conn.isKeepaliveAllocated();
   }

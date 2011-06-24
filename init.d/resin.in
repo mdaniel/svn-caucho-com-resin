@@ -22,7 +22,7 @@
 
 JAVA_HOME="@JAVA_HOME@"
 RESIN_HOME="@resin_home@"
-CONSOLE="/var/log/resin/console.log"
+CONSOLE="@resin_log@/console.log"
 
 # for ubuntu
 if [ ! -d $JAVA_HOME ]; then

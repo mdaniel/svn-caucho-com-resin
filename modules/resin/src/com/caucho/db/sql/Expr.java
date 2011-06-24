@@ -36,6 +36,7 @@ import java.util.ArrayList;
 
 import com.caucho.db.table.Column;
 import com.caucho.db.table.Table;
+import com.caucho.db.table.Column.ColumnType;
 import com.caucho.inject.Module;
 import com.caucho.sql.SQLExceptionWrapper;
 import com.caucho.util.L10N;
@@ -72,6 +73,14 @@ abstract public class Expr {
   public Class<?> getType()
   {
     return Object.class;
+  }
+  
+  /**
+   * Returns the java type code if known.
+   */
+  public ColumnType getTypeCode()
+  {
+    return ColumnType.NONE;
   }
 
   /**
@@ -553,6 +562,12 @@ abstract public class Expr {
   }
 
   public boolean evalEqual(QueryContext context, String evalString)
+    throws SQLException
+  {
+    throw new UnsupportedOperationException(getClass().getName());
+  }
+
+  public boolean evalEqual(QueryContext context, byte []data)
     throws SQLException
   {
     throw new UnsupportedOperationException(getClass().getName());

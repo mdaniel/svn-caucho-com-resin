@@ -420,7 +420,8 @@ class WatchdogArgs
       }
       else if (arg.startsWith("-J")
                || arg.startsWith("-D")
-               || arg.startsWith("-X")) {
+               || arg.startsWith("-X")
+               || arg.equals("-d64")) {
       }
       else if ("-debug-port".equals(arg) || "--debug-port".equals(arg)) {
         i++;

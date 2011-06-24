@@ -34,6 +34,7 @@ import java.util.ArrayList;
 import com.caucho.db.table.Column;
 import com.caucho.db.table.Table;
 import com.caucho.db.table.TableIterator;
+import com.caucho.db.table.Column.ColumnType;
 import com.caucho.db.xa.DbTransaction;
 
 final class IdExpr extends Expr {
@@ -63,6 +64,12 @@ final class IdExpr extends Expr {
   public Column getColumn()
   {
     return _column;
+  }
+  
+  @Override
+  public ColumnType getTypeCode()
+  {
+    return getColumn().getTypeCode();
   }
 
   /**
@@ -333,6 +340,7 @@ final class IdExpr extends Expr {
     return row.isEqual(_column, matchBuffer);
   }
 
+  @Override
   public boolean evalEqual(QueryContext context, String string)
     throws SQLException
   {

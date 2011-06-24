@@ -292,7 +292,7 @@
       
     <graph name="Request Time">
       <meter>Resin|Http|Request Time</meter>
-      <meter>Resin|Http|Request Time MAX</meter>
+      <meter>Resin|Http|Request Time Max</meter>
     </graph>
       
     <graph name="Threads">

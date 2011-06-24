@@ -13,6 +13,10 @@
 
 <s2 title="4.0.20 - snapshot">
 <ul>
+<li>system: &lt;resin:LogService> needs to check for existing log system (rep by Adrian Sutton)</li>
+<li>install: --with-resin-log should update nit.d/resin.in (#4640, rep by K Fetterman)</li>
+<li>health: added graph page configuration to health.xml</li>
+<li>network: refactored networking to split thread-safe/and non-thread-safe state machines</li>
 <li>resin: options on the command should be global (#4605)</li>
 <li>resin: command line user mgmt (#4603)</li>
 <li>jsf: allow JSF in WEB-INF/lib (will disables CDI) (#4573, rep by cyttesen)</li>

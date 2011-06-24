@@ -652,6 +652,9 @@ class WatchdogChildProcess
       else if (arg.startsWith("-J")) {
         jvmArgs.add(arg.substring(2));
       }
+      else if (arg.equals("-d64") || arg.equals("-d32")) {
+        jvmArgs.add(arg);
+      }
       else if ("--debug-port".equals(arg) || "-debug-port".equals(arg)) {
         jvmArgs.add("-Xdebug");
         jvmArgs.add("-Xrunjdwp:transport=dt_socket,server=y,suspend=n,address="
@@ -719,6 +722,10 @@ class WatchdogChildProcess
         jvmArgs.add(argv[i].substring(2));
       }
       else if (argv[i].startsWith("-Djava.class.path")) {
+      }
+      else if (argv[i].startsWith("-D") || argv[i].startsWith("-X")) {
+      }
+      else if (argv[i].equals("-d64") || argv[i].startsWith("-d32")) {
       }
       else
         resinArgs.add(argv[i]);

@@ -31,8 +31,6 @@ package com.caucho.env.meter;
 import java.util.concurrent.ConcurrentHashMap;
 
 import com.caucho.env.service.AbstractResinSubSystem;
-import com.caucho.management.server.MeterGraphInfo;
-import com.caucho.management.server.MeterGraphPageInfo;
 
 //TODO: service cleanup
 public class MeterService extends AbstractResinSubSystem {

@@ -58,7 +58,7 @@ class BigStringColumn extends BlobColumn {
   @Override
   public Class<?> getJavaType()
   {
-    return java.sql.Blob.class;
+    return String.class; // java.sql.Blob.class;
   }
 
   /**
@@ -81,6 +81,6 @@ class BigStringColumn extends BlobColumn {
 
   public String toString()
   {
-    return "BigStringColumn[" + getName() + "]";
+    return getClass().getSimpleName() + "[" + getName() + "]";
   }
 }

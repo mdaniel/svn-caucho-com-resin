@@ -340,7 +340,8 @@ class BlobColumn extends Column {
   }
   
   @Override
-  public boolean isEqual(byte []block, int rowOffset, String value)
+  public boolean isEqual(long blockId,
+                         byte []block, int rowOffset, String value)
   {
     if (value == null)
       return isNull(block, rowOffset);

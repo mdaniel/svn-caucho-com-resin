@@ -487,9 +487,11 @@ abstract public class Column {
   /**
    * Returns true if the string is equal.
    */
-  public boolean isEqual(byte []block, int rowOffset, String string)
+  public boolean isEqual(long blockId, byte []block, 
+                         int rowOffset, String string)
+    throws SQLException
   {
-    return false;
+    return string.equals(getString(blockId, block, rowOffset));
   }
 
   /**

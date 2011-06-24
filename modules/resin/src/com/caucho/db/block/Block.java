@@ -202,8 +202,11 @@ public final class Block implements SyncCacheListener {
     //System.out.println(this + " ALLOCATE " + _useCount);
 
     if (useCount > 32 && log.isLoggable(Level.FINE)) {
-      Thread.dumpStack();
       log.fine("using " + this + " " + useCount + " times");
+      
+      if (log.isLoggable(Level.FINER)) {
+        Thread.dumpStack();
+      }
     }
 
     return true;

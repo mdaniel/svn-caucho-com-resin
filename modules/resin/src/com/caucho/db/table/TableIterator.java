@@ -483,7 +483,8 @@ public class TableIterator {
   public boolean isEqual(Column column, String string)
     throws SQLException
   {
-    return column.isEqual(_buffer, _rowOffset, string);
+    System.out.println("IS_EQ: " + column + " " + string);
+    return column.isEqual(getBlockId(), _buffer, _rowOffset, string);
   }
 
   /**
