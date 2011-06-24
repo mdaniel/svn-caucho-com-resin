@@ -108,7 +108,7 @@ echo "<div id='graph-content'>\n";
 echo ' <div style="float:left;width:75%;text-align:center;">';
 echo "  <div class='graph' style='display:inline-block;text-align:left;'></div>";
 echo ' </div>';
-echo ' <div style="float:right;width:24%;border:1px solid black;">';
+echo ' <div style="float:right;width:24%;border:1px solid black;padding:2px;">';
 display_new_graph_form();
 echo ' </div>';
 echo ' <div style="clear:both;"></div>';
@@ -125,9 +125,43 @@ function display_graph_selection()
   global $g_server;
   global $self_index;
 
-  echo "<form name='def_graph' method='post' action='" . $g_next_url . "'>";
+  echo "<form name='def_graph' method='post' action='${g_next_url}'>";
   echo "<table>\n";
 
+  echo "<tr><th scope='row' style='text-align:right'><label for='user-meters'>Meter Set</label>: </th>\n";
+  echo "<td><select name='user-meters' onchange='javascript:document.forms.def_graph.submit();' id='user-meters'>\n";
+
+  $selected = false;
+  foreach ($user_item['user-graphs'] as $name => $hash) {
+    echo "<option ";
+    if ($p_hash == $hash) {
+      $selected = true;
+      echo " selected";
+    }
+    echo " value='{$name}'>{$name}</option>\n";
+  }
+  if (! $selected)
+    echo "<option selected='selected'>--------</option>\n";
+  else
+  	echo "<option>--------</option>\n";
+  
+
+  echo "</select>\n";
+
+  $self_index = sprintf("%02d", $g_server->SelfServer->ClusterIndex);
+  $cluster_size = count($g_server->Cluster->Servers);
+  for ($i = 0; $i < $cluster_size; $i++) {
+    if ($i > 0)
+      $all .= ' ';
+
+    $all .= sprintf("%02d", $i);
+  }
+  
+	echo "<input type='hidden' name='server-self' value='${self_index}'/>\n";
+  echo "<input type='hidden' name='server-all' value='${all}'/>\n";
+
+  echo "</td></tr>\n";
+  
   echo "<tr><th scope='row' style='text-align:right'><label for='period'>Time</label>: </th>\n "
   echo "<td><select name='period' id='period'>\n";
 
@@ -152,12 +186,12 @@ function display_graph_selection()
 
   echo ">24 hours</option>\n";
 
-  echo " <option value='" . (7 * 24 * 60) . "'";
+  echo " <option value='" . (3 * 24 * 60) . "'";
 
-  if ($p_period == 7 * 24 * 60)
+  if ($p_period == 3 * 24 * 60)
     echo " selected";
 
-  echo ">7 days</option>\n";
+  echo ">3 days</option>\n";
 
   echo " <option value='" . (7 * 24 * 60) . "'";
 
@@ -168,39 +202,6 @@ function display_graph_selection()
 
   echo "</select>\n";
   echo "</td></tr>\n";
-  
-  echo "<tr><th scope='row' style='text-align:right'><label for='user-meters'>Meters</label>: </th>\n";
-  echo "<td><select name='user-meters' onchange='javascript:document.forms.def_graph.submit();' id='user-meters'>\n";
-
-  $selected = false;
-  foreach ($user_item['user-graphs'] as $name => $hash) {
-    echo "<option ";
-    if ($p_hash == $hash) {
-      $selected = true;
-      echo " selected";
-    }
-    echo " value='{$name}'>{$name}</option>\n";
-  }
-  if (! $selected)
-    echo "<option selected='selected'>--------</option>\n";
-
-  echo "</select>\n";
-  echo "</td></tr>\n";
-
-  $self_index = sprintf("%02d", $g_server->SelfServer->ClusterIndex);
-
-  $cluster_size = count($g_server->Cluster->Servers);
-  for ($i = 0; $i < $cluster_size; $i++) {
-    if ($i > 0)
-      $all .= ' ';
-
-    $all .= sprintf("%02d", $i);
-  }
-
-	echo "<input type='hidden' name='server-self'"
-       . " value='" . $self_index . "' />\n";
-  echo "<input type='hidden' name='server-all'"
-       . " value='" . $all . "' />\n";
   
 	echo "<tr><th scope='row' style='text-align:right'><label for='server-set'>Server Set</label>: </th>\n";
   echo "<td><select name='server-set' id='server-set'>\n";
@@ -432,8 +433,8 @@ function GraphManager() {
     }   
   };
 
-  //refresh();
-  //window.setInterval(refresh, 60000);
+  refresh();
+  window.setInterval(refresh, 60000);
 
   $("input.meter:checkbox").change(refresh);
   $("form[name=def_graph] :input:not(input[type=hidden])").change(refresh);
@@ -442,9 +443,8 @@ function GraphManager() {
   $("button#clear-graph").click(function() {
     $("input.meter:checkbox:checked").each(function() {
       $(this).attr("checked", false);
-      $(this).change();
     });
-    
+    refresh();
     return false;
   });
 
