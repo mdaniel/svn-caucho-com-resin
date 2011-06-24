@@ -31,11 +31,11 @@ package com.caucho.db.sql;
 import java.sql.SQLException;
 import java.util.ArrayList;
 
-class BlobEqExpr extends Expr {
+class BinaryColumnEqExpr extends Expr {
   private Expr _column;
   private Expr _right;
 
-  BlobEqExpr(Expr left, Expr right)
+  BinaryColumnEqExpr(Expr left, Expr right)
   {
     _column = left;
     _right = right;
@@ -88,7 +88,7 @@ class BlobEqExpr extends Expr {
     else if (_column.isNull(context))
       return UNKNOWN;
     
-    if (_column.evalEqual(context, _right.evalString(context)))
+    if (_column.evalEqual(context, _right.evalBytes(context)))
       return TRUE;
     else
       return FALSE;
