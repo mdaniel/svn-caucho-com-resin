@@ -33,6 +33,7 @@ import com.caucho.VersionFactory;
 import com.caucho.config.ConfigException;
 import com.caucho.license.*;
 import com.caucho.server.resin.ResinELContext;
+import com.caucho.server.util.CauchoSystem;
 import com.caucho.util.L10N;
 import com.caucho.vfs.Path;
 import com.caucho.vfs.Vfs;
@@ -74,6 +75,8 @@ class WatchdogArgs
   private String _dynamicCluster;
   private String _dynamicAddress;
   private int _dynamicPort;
+  
+  private boolean _is64bit;
 
   WatchdogArgs(String[] argv)
   {
@@ -97,7 +100,9 @@ class WatchdogArgs
     _resinConf = _resinHome.lookup("conf/resin.conf");
     if (! _resinConf.canRead())
       _resinConf = _resinHome.lookup("conf/resin.xml");
-
+    
+    _is64bit = CauchoSystem.is64Bit();
+    
     parseCommandLine(_argv);
   }
 
@@ -198,6 +203,11 @@ class WatchdogArgs
   void setResinHome(Path resinHome)
   {
     _resinHome = resinHome;
+  }
+  
+  boolean is64Bit()
+  {
+    return _is64bit;
   }
 
   boolean isStatus()
@@ -420,8 +430,13 @@ class WatchdogArgs
       }
       else if (arg.startsWith("-J")
                || arg.startsWith("-D")
-               || arg.startsWith("-X")
-               || arg.equals("-d64")) {
+               || arg.startsWith("-X")) {
+      }
+      else if (arg.equals("-d64")) {
+        _is64bit = true;
+      }
+      else if (arg.equals("-d32")) {
+        _is64bit = false;
       }
       else if ("-debug-port".equals(arg) || "--debug-port".equals(arg)) {
         i++;

@@ -30,6 +30,8 @@
 package com.caucho.boot;
 
 import java.util.HashMap;
+import java.util.logging.ConsoleHandler;
+import java.util.logging.Handler;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -352,6 +354,11 @@ public class ResinBoot {
    */
   public static void main(String []argv)
   {
+    for (Handler handler : Logger.getLogger("").getHandlers()) {
+      if (handler instanceof ConsoleHandler)
+        handler.setLevel(Level.FINER);
+    }
+    
     if (System.getProperty("log.level") != null) {
       Logger.getLogger("").setLevel(Level.FINER);
     }

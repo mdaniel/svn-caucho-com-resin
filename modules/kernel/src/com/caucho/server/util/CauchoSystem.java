@@ -29,37 +29,28 @@
 
 package com.caucho.server.util;
 
+import java.io.File;
+import java.io.IOException;
+import java.net.InetAddress;
+import java.util.ArrayList;
+import java.util.regex.Pattern;
+
 import com.caucho.VersionFactory;
-import com.caucho.config.ConfigRuntimeException;
 import com.caucho.java.WorkDir;
 import com.caucho.loader.EnvironmentLocal;
 import com.caucho.util.Alarm;
 import com.caucho.util.CharBuffer;
 import com.caucho.util.Crc64;
-import com.caucho.util.L10N;
 import com.caucho.util.ThreadDump;
 import com.caucho.vfs.CaseInsensitive;
 import com.caucho.vfs.Path;
 import com.caucho.vfs.Vfs;
-
-import java.io.File;
-import java.io.IOException;
-import java.lang.reflect.Method;
-import java.net.InetAddress;
-import java.util.ArrayList;
-import java.util.logging.Level;
-import java.util.logging.Logger;
-import java.util.regex.Pattern;
 
 /**
  * A wrapper for Caucho system variables, allowing tests to override
  * the default variables.
  */
 public class CauchoSystem {
-  private static Logger log
-    = Logger.getLogger("com.caucho.util.CauchoSystem");
-  private static final L10N L = new L10N(CauchoSystem.class);
-
   static EnvironmentLocal<String> _serverIdLocal
     = new EnvironmentLocal<String>("caucho.server-id");
   
@@ -86,7 +77,7 @@ public class CauchoSystem {
   
   private static String []PROPERTIES_64 = {
      "sun.arch.data.model",
-     "com.ibm.vm.bitmode",
+     "com.ibm.vm.bitmodel",
      "os.arch"
   };
 
@@ -96,8 +87,6 @@ public class CauchoSystem {
 
   private static JniCauchoSystem _jniCauchoSystem;
   private static boolean _isDetailedStatistics;
-  private static String _user;
-  private static String _group;
   private static String _classPath;
   private static ArrayList<String> _classPathList;
 
@@ -377,7 +366,7 @@ public class CauchoSystem {
    *
    * @return the loaded class.
    */
-  public static Class loadClass(String name)
+  public static Class<?> loadClass(String name)
     throws ClassNotFoundException
   {
     return loadClass(name, false, null);
@@ -393,7 +382,7 @@ public class CauchoSystem {
    *
    * @return the loaded class.
    */
-  public static Class loadClass(String name, boolean init, ClassLoader loader)
+  public static Class<?> loadClass(String name, boolean init, ClassLoader loader)
     throws ClassNotFoundException
   {
     if (loader == null)
@@ -473,7 +462,7 @@ public class CauchoSystem {
     return _jniCauchoSystem.getLoadAvg();
   }
 
-  public static void exitOom(Class cl, Throwable e)
+  public static void exitOom(Class<?> cl, Throwable e)
   {
     try {
       System.err.println(cl + " Resin restarting due to OutOfMemoryError " + e);

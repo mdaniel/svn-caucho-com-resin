@@ -107,7 +107,7 @@ class WatchdogConfig
     
     _pwd = Vfs.lookup();
 
-    _is64bit = CauchoSystem.is64Bit();
+    _is64bit = args.is64Bit();
   }
 
   public void setId(String id)
