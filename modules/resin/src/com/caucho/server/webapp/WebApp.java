@@ -3531,7 +3531,8 @@ public class WebApp extends ServletContextImpl
 
       clearCache();
       
-      if (! getRootDirectory().canRead()) {
+      if (! getRootDirectory().canRead()
+          && ! getHost().getHostName().equals("admin.resin")) {
         log.warning(this + " cannot read root-directory " + getRootDirectory().getNativePath());
       }
 

@@ -195,6 +195,30 @@ Or install Resin Open Source with this command:
 apt-get install resin
 </example>
 </s3>
+
+<s3 title="Solaris notes">
+
+<p>Depending on your Solaris packaging, you make need to
+give the ./configure script more information to find the openssl libraries
+and make. For example, if you've installed /usr/sfw, the ./configure might
+look like:</p>
+
+<example title="Example: Solaris ./configure">
+unix$ MAKE=gmake ./configure --prefix=`pwd` --with-openssl=/usr/sfw
+</example>
+
+<p>Solaris also defaults to starting in 32-bit mode. To start in 64-bit mode,
+either add a &lt;jvm-arg>-d64&lt;/jvm-arg> (recommended) or start from
+the command-line with -d64:</p>
+
+<example title="Example: Solaris starting in 64-bit mode">
+unix$ bin/resin.sh -d64 start
+</example>
+
+</s3>
+
+</s2>
+
 </s2>
 
 <s2 title="Installing Resin on Windows">
