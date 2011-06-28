@@ -354,13 +354,16 @@ public class ResinBoot {
    */
   public static void main(String []argv)
   {
-    for (Handler handler : Logger.getLogger("").getHandlers()) {
-      if (handler instanceof ConsoleHandler)
-        handler.setLevel(Level.FINER);
-    }
-    
     if (System.getProperty("log.level") != null) {
       Logger.getLogger("").setLevel(Level.FINER);
+    }
+    else {
+      for (Handler handler : Logger.getLogger("").getHandlers()) {
+        if (handler instanceof ConsoleHandler) {
+          handler.setLevel(Level.FINER);
+          Logger.getLogger("").removeHandler(handler);
+        }
+      }
     }
 
     try {

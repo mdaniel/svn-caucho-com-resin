@@ -13,6 +13,7 @@
 
 <s2 title="4.0.20 - snapshot">
 <ul>
+<li>xa: failure during forget should be at finer logging, not warning (#4644, rep by Takahiro Fukuda)</li>
 <li>multipart-form: added parameter-length-max (#4638, rep by Daniel Kador)</li>
 <li>system: &lt;resin:LogService> needs to check for existing log system (rep by Adrian Sutton)</li>
 <li>install: --with-resin-log should update nit.d/resin.in (#4640, rep by K Fetterman)</li>

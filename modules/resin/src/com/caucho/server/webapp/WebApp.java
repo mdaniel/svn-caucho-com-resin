@@ -2775,7 +2775,7 @@ public class WebApp extends ServletContextImpl
   private void initCdiJsfContext()
   {
     try {
-      String handler = "com.caucho.server.webbeans.ConversaionJsfViewHandler";
+      String handler = "com.caucho.server.webbeans.ConversationJsfViewHandler";
       
       Class<?> cl = Class.forName(handler, false, getClassLoader());
       

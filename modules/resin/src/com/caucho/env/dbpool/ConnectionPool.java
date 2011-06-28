@@ -629,7 +629,6 @@ public class ConnectionPool extends AbstractManagedObject
 
         _tm.recover(xa);
       } catch (NotSupportedException e) {
-        _isEnableXA = false;
         log.finer(e.toString());
       } catch (Throwable e) {
         log.log(Level.FINER, e.toString(), e);

@@ -144,14 +144,16 @@ public class JaasAuthenticator extends AbstractAuthenticator {
             && loginPrincipal instanceof Group) {
           roles = (Group) loginPrincipal;
         }
-        else
+        else if (userPrincipal == null)
           userPrincipal = loginPrincipal;
       }
       
       if (userPrincipal == null && roles != null)
         userPrincipal = roles;
 
-      if (userPrincipal != null)
+      if (userPrincipal instanceof RolePrincipal)
+        return userPrincipal;
+      else if (userPrincipal != null)
         return new JaasPrincipal(userPrincipal, roles);
       else
         return null;

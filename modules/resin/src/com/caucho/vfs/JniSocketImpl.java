@@ -353,7 +353,6 @@ public final class JniSocketImpl extends QSocket {
   public boolean readNonBlock(int ms)
   {
     synchronized (_readLock) {
-      System.out.println("RNB: " + ms);
       return nativeReadNonBlock(_fd, ms);
     }
   }

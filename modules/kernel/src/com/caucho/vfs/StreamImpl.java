@@ -116,7 +116,7 @@ public class StreamImpl {
   public int readNonBlock(byte []buffer, int offset, int length)
     throws IOException
   {
-    return 0;
+    return readTimeout(buffer, offset, length, 0);
   }
 
   /**
