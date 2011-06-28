@@ -882,6 +882,39 @@ public class PDF {
   }
 
   /**
+   * open image
+   */
+  public PDFEmbeddedFile fit_embedded_file(Path path,
+                                           double x, double y,
+                                           double width, double height)
+    throws IOException
+  {
+    PDFEmbeddedFile file = new PDFEmbeddedFile(path);
+
+    file.setId(_out.allocateId(1));
+    
+    _out.addPendingObject(file);
+    
+    PDFFileImage img = new PDFFileImage(file.getId(), width, height);
+    img.setId(_out.allocateId(1));
+
+    _out.addPendingObject(img);
+    
+    _page.addResource(img.getResource());
+
+    _stream.save();
+
+    // concat(img.get_width(), 0, 0, img.get_height(), x, y);
+    concat(width, 0, 0, height, x, y);
+
+    _stream.fit_file_image(img);
+
+    _stream.restore();
+
+    return file;
+  }
+
+  /**
    * Skews the coordinates
    *
    * @param a degrees to skew the x axis

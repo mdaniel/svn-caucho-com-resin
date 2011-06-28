@@ -39,6 +39,7 @@ public class MultipartForm {
 
   private boolean _enable = true;
   private long _uploadMax = -1;
+  private long _parameterLengthMax = -1;
 
   public void setEnable(boolean enable)
   {
@@ -58,5 +59,15 @@ public class MultipartForm {
   public long getUploadMax()
   {
     return _uploadMax;
+  }
+  
+  public void setParameterLengthMax(Bytes max)
+  {
+    _parameterLengthMax = max.getBytes();
+  }
+  
+  public long getParameterLengthMax()
+  {
+    return _parameterLengthMax;
   }
 }

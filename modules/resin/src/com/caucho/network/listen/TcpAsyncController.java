@@ -256,11 +256,8 @@ class TcpAsyncController extends AsyncController {
     if (_isTimeout)
       sb.append(",timeout");
 
-    if (tcpConn != null && tcpConn.isCometSuspend())
-      sb.append(",suspended");
-
-    if (tcpConn != null && tcpConn.isWakeRequested())
-      sb.append(",wake");
+    if (tcpConn != null)
+      sb.append("," + tcpConn.getRequestState());
 
     sb.append("]");
 

@@ -30,6 +30,7 @@ package com.caucho.vfs;
 
 import com.caucho.util.ByteBuffer;
 import com.caucho.util.CharBuffer;
+import com.caucho.util.L10N;
 
 import java.io.IOException;
 import java.util.HashMap;
@@ -53,6 +54,7 @@ import java.util.Locale;
  * }
  */
 public class MultipartStream extends StreamImpl {
+  private static final L10N L = new L10N(MultipartStream.class);
   private ByteBuffer _boundary = new ByteBuffer();
   private byte []_boundaryBuffer;
   private int _boundaryLength;
@@ -72,6 +74,7 @@ public class MultipartStream extends StreamImpl {
   private HashMap<String, List<String>> _headers
     = new HashMap<String, List<String>>();
   private CharBuffer _line = new CharBuffer();
+  private long _maxLength = 256 * 1024;
 
   private String _defaultEncoding;
 
@@ -225,6 +228,7 @@ public class MultipartStream extends StreamImpl {
     throws IOException
   {
     int ch = read() ;
+    long length = 0;
 
     _headers.clear();
     while (ch > 0 && ch != '\n' && ch != '\r') {
@@ -235,6 +239,9 @@ public class MultipartStream extends StreamImpl {
            ch >= 0 && ch != '\n' && ch != '\r';
            ch = read()) {
         _line.append((char) ch);
+        
+        if (_maxLength < length++)
+          throw new IOException(L.l("header length {0} exceeded.", _maxLength));
       }
 
       if (ch == '\r') {

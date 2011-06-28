@@ -292,7 +292,7 @@ public class TcpSocketLink extends AbstractSocketLink
 
   public final boolean isDestroyed()
   {
-    return _state.isDestroyed();
+    return _state.isDestroyed() || _requestStateRef.get().isDestroyed();
   }
 
   @Override
@@ -307,7 +307,7 @@ public class TcpSocketLink extends AbstractSocketLink
 
   public boolean isAsyncStarted()
   {
-    return _state.isAsyncStarted();
+    return _requestStateRef.get().isAsyncStarted();
   }
 
   @Override
@@ -318,7 +318,9 @@ public class TcpSocketLink extends AbstractSocketLink
 
   boolean isCometComplete()
   {
-    return _state.isCometComplete();
+    TcpAsyncController async = _async;
+    
+    return async != null && async.isCompleteRequested();
   }
 
   @Override
@@ -329,7 +331,12 @@ public class TcpSocketLink extends AbstractSocketLink
 
   boolean isWakeRequested()
   {
-    return _state.isCometWake();
+    return _requestStateRef.get().isAsyncWake();
+  }
+  
+  SocketLinkRequestState getRequestState()
+  {
+    return _requestStateRef.get();
   }
 
   //
@@ -786,7 +793,7 @@ public class TcpSocketLink extends AbstractSocketLink
         
       _listener.free(this);
     }
-    else if (state.isDestroyed()) {
+    else if (isDestroyed()) {
     }
     else {
       System.out.println("NOFREE:" + requestState + " " + _requestStateRef.get() + " " + this);
@@ -1271,8 +1278,10 @@ public class TcpSocketLink extends AbstractSocketLink
     Thread thread = Thread.currentThread();
     
     if (thread != _thread)
-      throw new IllegalStateException(L.l("{0} killKeepalive called from invalid thread",
-                                          this));
+      throw new IllegalStateException(L.l("{0} killKeepalive called from invalid thread.\n  expected: {1}\n  actual: {2}",
+                                          this,
+                                          _thread,
+                                          thread));
     
     SocketLinkState state = _state;
     
@@ -1302,8 +1311,10 @@ public class TcpSocketLink extends AbstractSocketLink
     Thread thread = Thread.currentThread();
     
     if (thread != _thread)
-      throw new IllegalStateException(L.l("{0} toComet called from invalid thread",
-                                          this));
+      throw new IllegalStateException(L.l("{0} toComet called from invalid thread.\n  expected: {1}\n  actual: {2}",
+                                          this,
+                                          _thread,
+                                          thread));
     
     TcpAsyncController async = _async;
     

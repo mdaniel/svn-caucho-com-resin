@@ -219,8 +219,6 @@ unix$ bin/resin.sh -d64 start
 
 </s2>
 
-</s2>
-
 <s2 title="Installing Resin on Windows">
 <p>
 The native libraries that are included with Resin are precompiled

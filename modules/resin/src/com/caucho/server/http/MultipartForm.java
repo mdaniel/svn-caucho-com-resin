@@ -59,7 +59,8 @@ class MultipartForm {
                             HttpServletRequestImpl request,
                             String javaEncoding,
                             long uploadMax,
-                            long fileUploadMax)
+                            long fileUploadMax,
+                            long lengthMax)
     throws IOException
   {
     MultipartStream ms = new MultipartStream(rawIs, boundary);
@@ -164,9 +165,23 @@ class MultipartForm {
       } else {
         CharBuffer value = new CharBuffer();
         int ch;
+        long totalLength = 0;
 
-        for (ch = is.readChar(); ch >= 0; ch = is.readChar())
+        for (ch = is.readChar(); ch >= 0; ch = is.readChar()) {
           value.append((char) ch);
+          totalLength++;
+          
+          if (lengthMax < totalLength) {
+            String msg = L.l("multipart form upload failed because field '{0}' exceeds max length {1}",
+                             name, totalLength);
+
+            request.setAttribute("caucho.multipart.form.error", msg);
+            request.setAttribute("caucho.multipart.form.error.size",
+                                 new Long(totalLength));
+            
+            throw new IOException(msg);
+          }
+        }
       
         if (log.isLoggable(Level.FINE))
           log.fine("mp-form: " + name + "=" + value);

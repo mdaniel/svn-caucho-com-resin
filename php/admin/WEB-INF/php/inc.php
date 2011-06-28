@@ -12,6 +12,10 @@ global $g_mbean_server;
 global $g_resin;
 global $g_server;
 
+global $g_tail_objects;
+
+$g_tail_objects = array();
+
 // kill the cache, all pages are uncached and private
 header("Expires: 01 Dec 1994 16:00:00 GMT"); 
 header("Cache-Control: max-age=0,private"); 
@@ -623,8 +627,8 @@ function display_header($script, $title, $server,
 <html lang="en" xmlns="http://www.w3.org/1999/xhtml">
 <head>
   <title><?= $title ?></title>
-  <link rel='stylesheet' href='<?= uri("default.css") ?>' type='text/css' />
   <link rel='stylesheet' href='jquery-ui/jquery.ui.all.css' type='text/css' />
+  <link rel='stylesheet' href='<?= uri("default.css") ?>' type='text/css' />
   <link rel="stylesheet" type="text/css" href="colorbox/colorbox.css" media="screen" />
   
   <meta http-equiv="Content-Type" content="text/html; charset=utf-8"/>
@@ -987,45 +991,23 @@ function display_footer($script, $javascript="")
 <script type="text/javascript" src="flot/jquery.flot.resize.js"></script> 
 <script type="text/javascript">
 <!--
-  $(document).ready(function() {
+//  $(document).ready(function() {
     init();
 
     <?= $javascript ?>
 
     $("#busyIndicator").hide();
-  });
+//  });
 -->
 </script>
-
 </body>
 </html>
 <?php
-}
+flush();
+  display_tail();
+  ?>
 
-function print_show_hide($message, $id, $names)
-{
-  $show = "hide('s_${id}');show('h_${id}');";
-  $hide = "hide('h_${id}');show('s_${id}');";
-  
-  foreach ($names as $name) {
-    $show .= "show('${name}');";
-    $hide .= "hide('${name}');";
-  }
-
-  echo "<ul style='list-style-type:none;padding:0;margin:0'>";
-  echo "<li id='s_${id}' onclick=\"${show}\">";
-  echo "<img src='images/close-item.png' alt='closed'/> $message";
-  echo "</li>";
-
-  echo "<li id='h_${id}' style='display:none' onclick=\"${hide}\">";
-  echo "<img src='images/open-item.png' alt='opened'/> $message";
-  echo "</li>";
-  echo "</ul>";
-
-/*
-  echo " <a id='s_${id}' href=\"javascript:$show\">show</a> ";
-  echo "<a id='h_${id}' href=\"javascript:$hide\" style='display:none'>hide</a>";
-*/
+<?php
 }
 
 function display_left_navigation($current_server)
@@ -1265,6 +1247,22 @@ function display_health_status($s)
   }
   
   echo "</table><br/>";
+}
+
+function display_add_tail($tail)
+{
+  global $g_tail_objects;
+
+  $g_tail_objects[] = $tail;
+}
+
+function display_tail()
+{
+  global $g_tail_objects;
+  
+  foreach ($g_tail_objects as $tail) {
+    $tail->execute();
+  }
 }
 
 ?>

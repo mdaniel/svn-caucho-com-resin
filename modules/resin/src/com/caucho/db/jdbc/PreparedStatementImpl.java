@@ -452,12 +452,16 @@ public class PreparedStatementImpl extends StatementImpl
         throw new UnsupportedOperationException("Not supported yet.");
     }
 
-    public void setBinaryStream(int parameterIndex, InputStream x) throws SQLException {
-        throw new UnsupportedOperationException("Not supported yet.");
+    public void setBinaryStream(int parameterIndex, InputStream is)
+      throws SQLException
+    {
+      setBinaryStream(parameterIndex, is, -1);
     }
 
-    public void setCharacterStream(int parameterIndex, Reader reader) throws SQLException {
-        throw new UnsupportedOperationException("Not supported yet.");
+    public void setCharacterStream(int parameterIndex, Reader reader)
+      throws SQLException
+    {
+      throw new UnsupportedOperationException("Not supported yet.");
     }
 
     public void setNCharacterStream(int parameterIndex, Reader value) throws SQLException {

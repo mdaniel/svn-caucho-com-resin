@@ -168,12 +168,12 @@ public class Figure implements ContentItem {
     String pdfName = baseName + ".pdf";
     boolean isPdf = false;
 
-    if (new File(pdfName).exists()) {
-      out.print("image::images/" + pdfName + "[alt=\"" + _source + "\"");
+    if (new File("images/" + pdfName).exists()) {
+      out.print("image:images/" + pdfName + "[alt=\"" + _source + "\"");
       isPdf = true;
     }
     else {
-      out.print("image::images/" + _source + "[alt=\"" + _source + "\"");
+      out.print("image:images/" + _source + "[alt=\"" + _source + "\"");
     }
 
     // int width = getWidth(_source);

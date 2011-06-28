@@ -1091,6 +1091,10 @@ public final class HttpServletRequestImpl extends AbstractCauchoRequest
           return form;
 
         long formUploadMax = getWebApp().getFormUploadMax();
+        long parameterLengthMax = getWebApp().getFormParameterLengthMax();
+        
+        if (parameterLengthMax < 0)
+          parameterLengthMax = Long.MAX_VALUE / 2;
 
         Object uploadMax = getAttribute("caucho.multipart.form.upload-max");
         if (uploadMax instanceof Number)
@@ -1151,7 +1155,8 @@ public final class HttpServletRequestImpl extends AbstractCauchoRequest
                                       this,
                                       javaEncoding,
                                       formUploadMax,
-                                      fileUploadMax);
+                                      fileUploadMax,
+                                      parameterLengthMax);
         } catch (IOException e) {
           log.log(Level.FINE, e.toString(), e);
           setAttribute("caucho.multipart.form.error", e.getMessage());

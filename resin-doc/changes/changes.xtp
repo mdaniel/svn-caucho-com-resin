@@ -13,6 +13,7 @@
 
 <s2 title="4.0.20 - snapshot">
 <ul>
+<li>multipart-form: added parameter-length-max (#4638, rep by Daniel Kador)</li>
 <li>system: &lt;resin:LogService> needs to check for existing log system (rep by Adrian Sutton)</li>
 <li>install: --with-resin-log should update nit.d/resin.in (#4640, rep by K Fetterman)</li>
 <li>health: added graph page configuration to health.xml</li>

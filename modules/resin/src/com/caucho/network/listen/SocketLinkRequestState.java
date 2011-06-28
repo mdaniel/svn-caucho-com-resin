@@ -126,6 +126,12 @@ enum SocketLinkRequestState {
   
   ASYNC_START {
     @Override
+    public boolean isAsyncStarted()
+    {
+      return true;
+    }
+    
+    @Override
     boolean toAsyncSuspend(AtomicReference<SocketLinkRequestState> stateRef)
     {
       if (stateRef.compareAndSet(ASYNC_START, SUSPEND)) {
@@ -152,6 +158,12 @@ enum SocketLinkRequestState {
   
   ASYNC_WAKE {
     @Override
+    public boolean isAsyncWake()
+    {
+      return false;
+    }
+    
+    @Override
     boolean toAsyncSuspend(AtomicReference<SocketLinkRequestState> stateRef)
     {
       if (stateRef.compareAndSet(ASYNC_WAKE, REQUEST)) {
@@ -166,6 +178,12 @@ enum SocketLinkRequestState {
    * Comet suspend
    */
   SUSPEND {
+    @Override
+    public boolean isAsyncStarted()
+    {
+      return true;
+    }
+    
     @Override
     boolean toAsyncWake(AtomicReference<SocketLinkRequestState> stateRef)
     {
@@ -208,6 +226,11 @@ enum SocketLinkRequestState {
     return false;
   }
   
+  public boolean isAsyncWake()
+  {
+    return false;
+  }
+  
   boolean toAccept(AtomicReference<SocketLinkRequestState> stateRef)
   {
     throw new IllegalStateException(toString());
@@ -235,7 +258,7 @@ enum SocketLinkRequestState {
 
   boolean toAsyncWake(AtomicReference<SocketLinkRequestState> stateRef)
   {
-    throw new IllegalStateException(toString());
+    throw new IllegalStateException("async dispatch is not valid outside of an async cycle.  Current state: " + toString());
   }
 
   boolean toIdle(AtomicReference<SocketLinkRequestState> stateRef)
@@ -252,6 +275,11 @@ enum SocketLinkRequestState {
   }
 
   public boolean isDestroyed()
+  {
+    return false;
+  }
+
+  public boolean isAsyncStarted()
   {
     return false;
   }

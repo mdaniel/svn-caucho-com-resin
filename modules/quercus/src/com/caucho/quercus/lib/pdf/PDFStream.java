@@ -353,6 +353,17 @@ public class PDFStream {
     return true;
   }
 
+  public boolean fit_file_image(PDFFileImage img)
+  {
+    _procSet.add("/ImageB");
+    _procSet.add("/ImageC");
+    _procSet.add("/ImageI");
+
+    println("/I" + img.getId() + " Do");
+
+    return true;
+  }
+
   public void flushToGraph()
   {
     try {

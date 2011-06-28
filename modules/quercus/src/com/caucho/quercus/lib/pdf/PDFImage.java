@@ -34,10 +34,15 @@ import com.caucho.vfs.Path;
 import com.caucho.vfs.ReadStream;
 import com.caucho.vfs.TempBuffer;
 import com.caucho.vfs.TempStream;
+import com.caucho.vfs.Vfs;
 import com.caucho.vfs.WriteStream;
 
+import java.awt.image.BufferedImage;
 import java.io.IOException;
+import java.io.InputStream;
 import java.util.logging.Logger;
+
+import javax.imageio.ImageIO;
 
 /**
  * deals with an image
@@ -47,8 +52,11 @@ public class PDFImage extends PDFObject {
     = Logger.getLogger(PDFImage.class.getName());
   private static final L10N L = new L10N(PDFImage.class);
 
+  private Path _path;
   private ReadStream _is;
 
+  private BufferedImage _image;
+  
   private int _id;
 
   private String _type;
@@ -60,6 +68,7 @@ public class PDFImage extends PDFObject {
   public PDFImage(Path path)
     throws IOException
   {
+    _path = path;
     _is = path.openRead();
 
     try {
@@ -98,33 +107,62 @@ public class PDFImage extends PDFObject {
   private boolean parseImage()
     throws IOException
   {
-    int ch = _is.read();
+    _image = ImageIO.read(_is);
+    
+    _width = _image.getWidth();
+    _height = _image.getHeight();
 
-    if (ch == 'G') {
-      if (_is.read() != 'I' ||
-          _is.read() != 'F' ||
-          _is.read() != '8' ||
-          _is.read() != '7' ||
-          _is.read() != 'a')
-        return false;
-
-      return parseGIF();
+    TempStream ts = new TempStream();
+    WriteStream os = new WriteStream(ts);
+    
+    try {
+      ImageIO.write(_image, "jpeg", os);
+    } finally {
+      os.close();
     }
-    else if (ch == 0xff) {
-      if (_is.read() != 0xd8)
-        return false;
+    
+    /*
+    os = Vfs.openWrite("file:/tmp/caucho/qa/test.jpg");
+    try {
+      ImageIO.write(_image, "jpeg", os);
+    } finally {
+      os.close();
+    }
+    
+    os = Vfs.openWrite("file:/tmp/caucho/qa/test.png");
+    try {
+      ImageIO.write(_image, "png", os);
+    } finally {
+      os.close();
+    }
+    */
+
+    return parseImageJpeg(ts.openRead());
+    
+  }
+
+  private boolean parseImageJpeg(ReadStream is)
+    throws IOException
+  {
+    int ch = is.read();
+
+    if (ch != 0xff)
+      return false;
+    
+    if (is.read() != 0xd8)
+      return false;
 
       TempStream ts = new TempStream();
 
       WriteStream ws = new WriteStream(ts);
       ws.write(0xff);
       ws.write(0xd8);
-      _is.writeToStream(ws);
+      is.writeToStream(ws);
       ws.close();
 
       // XXX: issues with _jpegHead vs ts.openReadAndSaveBuffer()
       _jpegHead = ts.getHead();
-      _is.close();
+      is.close();
 
       _is = new ReadStream();
       ts.openRead(_is);
@@ -132,9 +170,6 @@ public class PDFImage extends PDFObject {
       parseJPEG();
 
       return true;
-    }
-
-    return false;
   }
 
   private boolean parseGIF()
@@ -274,6 +309,36 @@ public class PDFImage extends PDFObject {
   /**
    * Writes the object to the stream
    */
+  public void writeObjectNew(PDFWriter out)
+    throws IOException
+  {
+    long length = _path.getLength();
+
+    out.println("<< /Type /XObject");
+    out.println("   /Subtype /Image");
+    out.println("   /Width " + _width);
+    out.println("   /Height " + _height);
+    out.println("   /ColorSpace /DeviceRGB");
+    out.println("   /BitsPerComponent " + _bits);
+    // out.println("   /Filter /DCTDecode");
+    out.println("   /Length " + length);
+    out.println(">>");
+    out.println("stream");
+
+    TempBuffer tb = TempBuffer.allocate();
+    byte []buffer = tb.getBuffer();
+    int sublen;
+    
+    InputStream is = _path.openRead();
+    
+    while ((sublen = is.read(buffer, 0, buffer.length)) > 0) {
+      out.write(buffer, 0, sublen);
+    }
+    
+    out.println();
+    out.println("endstream");
+  }
+
   public void writeObject(PDFWriter out)
     throws IOException
   {

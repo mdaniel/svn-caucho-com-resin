@@ -2184,6 +2184,17 @@ public class WebApp extends ServletContextImpl
   }
 
   /**
+   * Returns the form upload max.
+   */
+  public long getFormParameterLengthMax()
+  {
+    if (_multipartForm != null)
+      return _multipartForm.getParameterLengthMax();
+    else
+      return -1;
+  }
+
+  /**
    * Returns the access log
    */
   public AbstractAccessLog getAccessLog()

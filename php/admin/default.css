@@ -1080,3 +1080,15 @@ div.form-input-help {
 	text-align: right;
 	padding-top: 2em;
 }
+/*
+.ui-tabs .ui-tabs-hide {
+  position: absolute;
+  left: -10000px;
+} 
+*/
+/* override .ui-tabs so hidden will show */
+.ui-tabs .ui-tabs-hide {
+  display:block !important;
+  position: absolute;
+  left: -10000px;
+} 
