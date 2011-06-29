@@ -14,6 +14,7 @@ define("GRAPH_SIZE_6_TO_PAGE", new Size(175, 125));
 define("PERIOD", 3600/2);
 define("X_GRID_MINOR", 300 * 1000);
 define("X_GRID_MAJOR", 600 * 1000);
+define("STEP", 1);
 
 function admin_init_no_output($query="", $is_refresh=false)
 {
@@ -162,7 +163,7 @@ function findStats(String $category, String $subcategory=null) {
     if ($category == $statItem->category) {
       if ($subcategory && $subcategory == $statItem->subcategory) {
 	$map[$statItem->name]= $stat->statisticsData($statItem->fullName, $start * 1000, $end * 1000,
-                                    $step * 1000);
+                                    STEP * 1000);
       }
     }
   }
@@ -176,7 +177,6 @@ function findStatByName(String $name, String $subcategory="Health", String $cate
   global $stat;
   global $statList;
   global $si;
-  global $step;
 
 
   $arr = array();
@@ -187,7 +187,7 @@ function findStatByName(String $name, String $subcategory="Health", String $cate
     }
     if ($name == $statItem->name && $category == $statItem->category) {
 	$arr = $stat->statisticsData($statItem->fullName, $start * 1000, $end * 1000,
-                                    $step * 1000);
+                                    STEP * 1000);
     }
   }
   return $arr;
@@ -222,20 +222,7 @@ class GraphData {
   }
 }
 
-function getStatDataForGraph($name, $subcategory, $color=$blue, $category="Resin", $chunky=true) {
-
-  $data=findStatByName($name, $subcategory, $category);
-  $dataLine = array();
-  $max = -100;
-  foreach($data as $d) {
-    
-    $value = $d->value;
-    $hour = $d->time;
-    array_push($dataLine, new Point($hour, $value));
-    if ($value > $max) $max = $value;
-  }
-
-
+function calcYincrement($max) {
   $yincrement = (int)($max / 3);
 
   $div = 5;
@@ -268,16 +255,76 @@ function getStatDataForGraph($name, $subcategory, $color=$blue, $category="Resin
   if ($yincrement == 0) {
       $yincrement = round($max / 5, 2);
   }
+  return $yincrement;
+}
+
+
+function getStatDataForGraphBySubcategory($subcategory, $category="Resin", $nameMatch=null) {
+  global $blue, $red, $orange, $purple, $green, $cyan, $brown, $black;
+  $cindex = 0;
+  $gds = array();	
+  $map=findStats($category, $subcategory);
+  $colors = array($blue, $red, $orange, $purple, $green, $cyan, $brown, $black, $blue, $red, $orange, $purple, $green, $cyan, $brown, $black);
+
+  foreach ($map as $name => $data) {
+	$dataLine = array();
+  	$max = -100;
+	$process =  true; 
+	if($nameMatch) {
+		if(!strstr($name, $nameMatch)){
+			$process = false;
+		}
+	}
+	if ($process) {
+		debug(" $name -------------------- ");
+  		foreach($data as $d) {  
+    			$value = $d->value;
+    			$time = $d->time;
+			debug(" $time  --- $value  ");
+
+    			array_push($dataLine, new Point($time, $value));
+    			if ($value > $max) $max = $value;
+  		}
+  		$gd = new GraphData();
+  		$gd->name = $name;
+  		$gd->dataLine = $dataLine;
+  		$gd->yincrement = calcYincrement($max);
+  		$gd->max = $max + ($max * 0.05) ;
+  		$gd->color=$colors[$cindex];
+		array_push($gds, $gd);
+		$cindex++;
+
+	}
+  }
+
+
+
+  return $gds;
+}
+
+function getStatDataForGraph($name, $subcategory, $color=$blue, $category="Resin") {
+
+  $data=findStatByName($name, $subcategory, $category);
+  $dataLine = array();
+  $max = -100;
+  foreach($data as $d) {
+    
+    $value = $d->value;
+    $hour = $d->time;
+    array_push($dataLine, new Point($hour, $value));
+    if ($value > $max) $max = $value;
+  }
 
   $gd = new GraphData();
   $gd->name = $name;
   $gd->dataLine = $dataLine;
   $gd->max = $max + ($max * 0.05) ;
-  $gd->yincrement = $yincrement;
+  $gd->yincrement = calcYincrement($max);
   $gd->color=$color;
 
   return $gd;
 }
+
 
 function displayTimeLabel($time){
     return strftime("%H:%M", $time/1000);
@@ -617,11 +664,8 @@ writeFooter();
 
 //--
 debug("--------------------");
-$gd1 = getStatDataForGraph("GC Time MarkSweepCompact", "Memory", $red, "JVM");
-$gd1->name = "ConcurrentMarkSweep";
-$gd2 = getStatDataForGraph("GC Time Copy", "Memory", $blue, "JVM");
-$gd2->name = "ParNew";
-$gds = array($gd1, $gd2);
+
+$gds = getStatDataForGraphBySubcategory("Memory", "JVM", "GC Time");
 
 $gd = getDominantGraphData($gds);
 
@@ -680,15 +724,17 @@ $graph->end();
 
 //--
 
-$gd = getStatDataForGraph("Unix Load Avg", "CPU", $blue, "OS");
 
+$gds = getStatDataForGraphBySubcategory("CPU", "OS", "Active");
+
+$gd = getDominantGraphData($gds);
 
 $graph = createGraph("CPU Load ", $gd, new Point(COL2,ROW2));
 
 $canvas->setColor($gd->color);
-$graph->drawLine($gd->dataLine);
 
-
+drawLines($gds, $graph);
+$graph->drawLegends($gds);
 $graph->end();
 
 
