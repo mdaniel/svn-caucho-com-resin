@@ -255,11 +255,24 @@ class Graph {
     $this->xRange = $args[2];
     $this->yRange = $args[3];
 
+    if ($this->yRange->size()==0.0) {
+       debug("Size was 0.0");
+       $this->valid=false;
+    } else {
+      $this->valid=true;
+    }
+
     $this->pixelPerUnit = new Size();
     $this->pixelPerUnit->width = $this->pixelSize->width / $this->xRange->size();
     $this->pixelPerUnit->height = $this->pixelSize->height / $this->yRange->size();
-    $this->xOffsetPixels = $this->xRange->start * $this->pixelPerUnit->width;
-    $this->yOffsetPixels = $this->yRange->start * $this->pixelPerUnit->height;
+
+    if ($this->pixelPerUnit->width == 0.0 || $this->pixelPerUnit->height == 0.0) {
+       $this->valid=false;
+       
+    } else {
+      $this->xOffsetPixels = $this->xRange->start * $this->pixelPerUnit->width;
+      $this->yOffsetPixels = $this->yRange->start * $this->pixelPerUnit->height;
+    }
 
   }
 
@@ -287,16 +300,32 @@ class Graph {
     $convertedPoint = new Point();
     $convertedPoint->x = ($point->x  * $this->pixelPerUnit->width) - $this->xOffsetPixels;
     $convertedPoint->y = ($point->y  * $this->pixelPerUnit->height) - $this->yOffsetPixels;
+    if ($convertedPoint->x > 1000 || $convertedPoint->x < 0) {
+       debug("Point out of range x axis $convertedPoint->x");
+       $this->valid = false;
+    }
+    if ($convertedPoint->y > 1000 || $convertedPoint->y < 0) {
+       debug("Point out of range y axis $convertedPoint->y");
+       $this->valid = false;
+    }
     return $convertedPoint;
   }
 
   function drawTitle($title) {
     $y = $this->pixelSize->height + 15;
     $x = 0.0;
-    $this->canvas->writeText(new Point($x, $y), $title);
+    if ($this->valid) {
+       $this->canvas->writeText(new Point($x, $y), $title);
+    } else {
+      $this->canvas->writeText(new Point($x, $y), $title . " not valid");
+    }
   }
 
   function drawLegends($legends, $point=new Point(0.0, -20)) {
+    if (!$this->valid) {
+       return;
+    }
+
     $col2 =   (double) $this->pixelSize->width / 2;
     $index = 0;
     $yinc = -7;
@@ -322,6 +351,10 @@ class Graph {
   }
 
   function drawLegend($color, $name, $point=new Point(0.0, -20)) {
+    if (!$this->valid) {
+       return;
+    }
+
  
     global $canvas;
     global $black;
@@ -345,14 +378,19 @@ class Graph {
   }
   
   function drawLine($dataLine) {
+    if (!$this->valid) {
+       return;
+    }
+
 
     $this->canvas->moveTo($this->convertPoint($dataLine[0]));
 
     for ($index = 1; $index < sizeof($dataLine); $index++) {
-      $this->canvas->lineTo($this->convertPoint($dataLine[$index]));
-
-
-
+      $p = $this->convertPoint($dataLine[$index]);
+      if (!$this->valid) {
+      	 break;
+      }
+      $this->canvas->lineTo($p);
     }
 
     $this->canvas->stroke();
@@ -361,6 +399,10 @@ class Graph {
 
 
   function drawGrid() {
+    if (!$this->valid) {
+       return;
+    }
+
 
     $width =   (double) $this->pixelSize->width;
     $height =   (double) $this->pixelSize->height;
@@ -373,11 +415,27 @@ class Graph {
   }
 
   function drawGridLines($xstep, $ystep) {
+  
+   if (!$ystep) {
+      $this->valid = false;
+      debug("No ystep was passed");
+   }
+
+    if (!$this->valid) {
+       return;
+    }
+
     $width =   (double) $this->pixelSize->width;
     $height =   (double) $this->pixelSize->height;
 
     $xstep_width = $xstep * $this->pixelPerUnit->width;
     $ystep_width = $ystep * $this->pixelPerUnit->height;
+
+    if ($xstep_width <= 0.0 || $ystep_width <= 0.0) {
+       debug("Step width was 0 x $step_width y $ystep_width");
+       $this->valid = false;
+    }
+
 
     for ($index = 0; $width >= (($index)*$xstep_width); $index++) {
       $currentX = $index*$xstep_width;
@@ -386,6 +444,7 @@ class Graph {
       $this->canvas->stroke();
     }    
 
+
     for ($index = 0; $height >= ($index*$ystep_width); $index++) {
       $currentY = $index*$ystep_width;
       $this->canvas->moveTo(new Point(0.0, $currentY));
@@ -393,9 +452,14 @@ class Graph {
       $this->canvas->stroke();
     }    
 
+
   }
 
   function drawXGridLabels($xstep) {
+    if (!$this->valid) {
+       return;
+    }
+
     $this->canvas->setFont("Helvetica-Bold", 9);
     $width =   (double) $this->pixelSize->width;
 
@@ -409,24 +473,41 @@ class Graph {
   }
 
   function drawYGridLabels($step, $func=null, $xpos=-24) {
+    if (!$this->valid) {
+       return;
+    }
+
     $this->canvas->setFont("Helvetica-Bold", 9);
     $height =   (double) $this->pixelSize->height;
 
     $step_width = ($step) * $this->pixelPerUnit->height;
 
     for ($index = 0; $height >= ($index*$step_width); $index++) {
-      $currentY = $index*$step_width;
+      $currentYPixel = $index*$step_width;
+      $currentYValue =	($index * $step) + $this->yRange->start;
       if ($func) {
-	$currentLabel = $func(($index * $step) + $this->yRange->start);
+	$currentLabel = $func($currentYValue);
       } else {
-	$currentLabel = ($index * $step) + $this->yRange->start;
+      	if ($currentYValue >      1000000000) {
+	   $currentLabel = "" . $currentYValue / 1000000000 . " G";
+	}elseif ($currentYValue > 1000000) {
+	   $currentLabel = "" . $currentYValue / 1000000 . " M";
+	}elseif ($currentYValue > 1000) {
+	   $currentLabel = "" . $currentYValue / 1000 . " K";
+	} else {
+	  $currentLabel = $currentYValue; 
+	}
       }
-      $this->canvas->writeText(new Point($xpos, $currentY-3), $currentLabel);
+      $this->canvas->writeText(new Point($xpos, $currentYPixel-3), $currentLabel);
     }    
   }
 
 
   function drawXGridTimeLabels($xstep, $startTime) {
+    if (!$this->valid) {
+       return;
+    }
+
     $this->canvas->setFont("Helvetica-Bold", 7);
     $width =   (double) $this->pixelSize->width;
 

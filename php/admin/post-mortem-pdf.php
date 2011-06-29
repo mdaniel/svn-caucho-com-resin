@@ -236,7 +236,7 @@ function getStatDataForGraph($name, $subcategory, $color=$blue, $category="Resin
 
   $data=findStatByName($name, $subcategory, $category);
   $dataLine = array();
-  $max = 0.0;
+  $max = -100;
   foreach($data as $d) {
     
     $value = $d->value;
@@ -246,26 +246,44 @@ function getStatDataForGraph($name, $subcategory, $color=$blue, $category="Resin
     if ($value > $max) $max = $value;
   }
 
-  if ($chunky) {
-    $yincrement = (int)($max / 5);
-  
-    $yincrement = $yincrement - ($yincrement % 5); //make the increment divisible by 5
 
-    if ($yincrement == 0) {
-      $yincrement = 5;
-    }
-  } else {
-    if ($max > 8) {
-      $yincrement = (int)($max / 8);
-    } else {
-      $yincrement = $max / 8.0;
-    }
+  $yincrement = (int)($max / 3);
+
+  $div = 5;
+
+  if ($max > 5000000000) {
+	$div = 1000000000;
+  } elseif ($max > 5000000000) {
+	$div = 1000000000;
+  } elseif ($max > 500000000) {
+	$div = 100000000;
+  } elseif ($max > 50000000) {
+	$div = 10000000;
+  } elseif ($max > 5000000) {
+	$div = 1000000;
+  } elseif ($max > 500000) {
+	$div = 100000;
+  } elseif ($max > 50000) {
+	$div = 10000;
+  } elseif ($max > 5000) {
+	$div = 1000;
+  } elseif ($max > 500) {
+	$div = 100;
+  } elseif ($max > 50) {
+	$div = 10;
+  }
+  
+  $yincrement = $yincrement - ($yincrement % $div); //make the increment divisible by 5
+
+
+  if ($yincrement == 0) {
+      $yincrement = round($max / 5, 2);
   }
 
   $gd = new GraphData();
   $gd->name = $name;
   $gd->dataLine = $dataLine;
-  $gd->max = $max;
+  $gd->max = $max + ($max * 0.05) ;
   $gd->yincrement = $yincrement;
   $gd->color=$color;
 
@@ -672,7 +690,7 @@ $graph->end();
 $gd = getStatDataForGraph("Unix Load Avg", "CPU", $blue, "OS");
 
 
-$graph = createGraph("CPU Load", $gd, new Point(COL2,ROW2));
+$graph = createGraph("CPU Load ", $gd, new Point(COL2,ROW2));
 
 $canvas->setColor($gd->color);
 $graph->drawLine($gd->dataLine);
