@@ -77,8 +77,9 @@ class SocketLinkThreadLauncher extends AbstractThreadLauncher
       startConn.requestAccept();
       
       startConn = null;
+    } catch (RuntimeException e) {
+      throw e;
     } catch (Exception e) {
-      e.printStackTrace();
       throw new RuntimeException(e);
     } finally {
       if (startConn != null)

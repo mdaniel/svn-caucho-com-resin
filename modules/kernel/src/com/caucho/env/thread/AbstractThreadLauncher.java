@@ -279,7 +279,9 @@ abstract public class AbstractThreadLauncher extends AbstractTaskWorker {
     if (_idleMin < idleCount) {
       long nextIdleExpire = now + _idleTimeout;
 
-      if (_idleMax < idleCount && _idleMin < _idleMax) {
+      if (_idleMax < idleCount 
+          && _idleMin < _idleMax
+          && nextIdleExpire - idleExpire > 100) {
         _threadIdleExpireTime.compareAndSet(idleExpire, nextIdleExpire);
         
         return true;

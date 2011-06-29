@@ -129,7 +129,7 @@ ToggleSwitch.prototype.handleExternalToggle = function(caller) {
   var shownCount = 0;
   var hiddenCount = 0;
 
-  this.toggleTargets.each(function() { 
+  this.toggleTargets.each(function() {
     var target = $(this);
 
     if (target.css("display") == "none")
@@ -156,7 +156,7 @@ function initializeToggleSwitches() {
   $(".menu-switch").each(function() {
     var toggleSwitch = new ToggleSwitch($(this));
 
-    toggleSwitch.showTargets = function() { 
+    toggleSwitch.showTargets = function() {
       this.toggleTargets.css('left',  '0px').show();
     };
 
@@ -191,3 +191,21 @@ function init() {
   initializeValidators();
   initializeToggleSwitches();
 }
+
+function color_revscale(o, c, d)
+{
+  for (var i = 0; i < c.length; ++i) {
+    var v = o[c.charAt(i)];
+    var delta = 255 - v;
+    o[c.charAt(i)] = v + delta * d;
+  }
+
+  return o.normalize();
+}
+
+function color_baseline(o)
+{
+  //  return color_revscale(o, "rgb", 0.7).add("a", -0.5);
+  return o.add("a", -0.6);
+}
+

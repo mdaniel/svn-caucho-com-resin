@@ -156,7 +156,7 @@ public class Post
         StringValue bb = env.createBinaryBuilder();
         
         bb.appendReadAll(is, Integer.MAX_VALUE);
-        
+
         if (bb.length() > maxPostSize) {
           env.warning(L.l("POST length of {0} exceeds max size of {1}",
                           bb.length(),

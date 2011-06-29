@@ -312,8 +312,17 @@ public class BlockReadWrite {
           return new RandomAccessWrapper(mmapFile);
         }
         
-        if (_isEnableMmap)
-          file = path.openMemoryMappedFile(_fileSize);
+        if (_isEnableMmap) {
+          long fileSize = _fileSize;
+          
+          if (fileSize == 0)
+            fileSize = FILE_SIZE_INCREMENT;
+          
+          file = path.openMemoryMappedFile(fileSize);
+          
+          if (file != null)
+            _fileSize = fileSize;
+        }
 
         if (file != null) {
           _isMmap = true;
@@ -322,8 +331,10 @@ public class BlockReadWrite {
           if (oldMmap != null)
             oldMmap.close();
         }
-        else 
+        else {
+          _isEnableMmap = false;
           file = path.openRandomAccess();
+        }
         
         wrapper = new RandomAccessWrapper(file);
       }

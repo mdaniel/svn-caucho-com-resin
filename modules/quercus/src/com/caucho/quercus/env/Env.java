@@ -2507,7 +2507,7 @@ public class Env
           .getAsBoolean(this)) {
           String contentType = getContentType();
 
-          if (contentType == null || ! contentType.equals("unknown/type"))
+          if (contentType == null || ! contentType.startsWith("unknown/type"))
             return null;
         }
 

@@ -17,15 +17,17 @@ $g_colors = array("#ff3030", // red
 class GraphTail {
   private $canvas;
   private $names;
+  private $period;
   private $start;
   private $end;
 
-  function GraphTail($canvas, $names, $start, $end)
+  function GraphTail($canvas, $names, $period, $start, $end)
   {
     $this->canvas = $canvas;
-    $this->names  = $names;
-    $this->start  = $start;
-    $this->end  = $end;
+    $this->names = $names;
+    $this->period = $period;
+    $this->start = $start;
+    $this->end = $end;
   }
 
   function execute()
@@ -57,6 +59,7 @@ class GraphTail {
       echo "'${name}',";
     }
     echo "],";
+    echo "period: ${this->period},";
     echo "start: ${this->start},";
     echo "end: ${this->end},";
     echo "});\n";
@@ -84,22 +87,28 @@ function create_graph_timeout()
   echo "  var str = '[';\n";
   echo "  for (i in resin_graphs) {\n";
   echo "    var graph = resin_graphs[i];\n";
-  echo "    str += \"{canvas:'\" + graph.canvas + \"',\";";
+  echo '    str += "{canvas:\\"" + graph.canvas + "\\",";';
   echo "    str += \"names:[\";\n";
   echo "    for (j in graph.names) {\n";
-  echo "      str += '\"' + graph.names[j] + '\",';\n";
+  echo '      str += "\\"" + graph.names[j] + "\\",";';
   echo "    }\n";
   echo "    str += \"],\";\n";
   // period
-  echo "    str += \"start:\" + graph.start + \",\";";
-  echo "    str += \"end:\" + graph.end + \",\";";
+  echo "    str += \"period:\" + graph.period + \",\";";
   echo "    str += \"},\";";
   echo "  }\n";
   echo " str += ']';\n";
-  echo "alert(str);";
+  echo "\n";
+  echo '  $.ajax({type:"POST", url:"rest.php?q=graph_ext", data:str,';
+  echo '      success:function(canvasHtml) {';
+  echo '        $(document).append(canvasHtml);';// updateGraphs(graphDiv, canvasHtml);
+  echo '        setTimeout("resin_graph_update();", 60000);';
+  echo '      },';
+  echo '      contentType:"unknown/type"});';
+
   echo "}\n";
   
-  echo "resin_graph_timeout = setTimeout(\"resin_graph_update();\", 5000);\n";
+  echo "resin_graph_timeout = setTimeout(\"resin_graph_update();\", 60000);\n";
 }
 
 function stat_graph_regexp($canvas, $width, $height,
@@ -131,7 +140,9 @@ function stat_graph_regexp($canvas, $width, $height,
   stat_graph_div($canvas, $width, $height, $start, $end, $names, $alt, 
                  $legend, $mbean_server, $ticks, $title);
 
-  $tail = new GraphTail($canvas, $names, $start, $end);
+  $period = $end - $start;               
+
+  $tail = new GraphTail($canvas, $names, $period, $start, $end);
 
   display_add_tail($tail);
   
@@ -163,7 +174,9 @@ function stat_graph($canvas, $width, $height, $start, $end, $names, $alt,
                  $legend, $mbean_server, $ticks, $title);
                  
 
-  $tail = new GraphTail($canvas, $names, $start, $end);
+  $period = $end - $start;               
+
+  $tail = new GraphTail($canvas, $names, $period, $start, $end);
 
   display_add_tail($tail);
 
@@ -230,6 +243,9 @@ function stat_graph_div($canvas, $width, $height, $start, $end, $names, $alt,
 function stat_graph_script($stat, $canvas, $names, $start, $end)
 {
   global $g_colors;
+
+  $date = new DateTime();
+  $tz_offset = $date->getOffset() * 1000;
 
 //  echo "<script id='${canvas}-script' language='javascript' type='text/javascript'>\n";
   echo "<script language='javascript' type='text/javascript'>\n";
@@ -298,7 +314,7 @@ function stat_graph_script($stat, $canvas, $names, $start, $end)
       echo "[" . ($values[$size-1]->time + $tz_offset) . ", " . $baseline_value . "]\n";
       echo "];\n";
 
-      echo "full_graphs[${counter*2+1}] = { label : '${baseline_name}', data : baseline_values, color: \"${color}\", lines: { lineWidth: 1 }, points: { radius: 1, symbol: \"square\" } };\n";
+      echo "full_graphs[${counter*2+1}] = { label : '${baseline_name}', data : baseline_values, color: color_baseline($.color.parse(\"${color}\")).toString(), lines: { lineWidth: 1 }, points: { radius: 1, symbol: \"square\" } };\n";
       $has_baseline = true;
     }
   }

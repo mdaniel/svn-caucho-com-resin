@@ -342,12 +342,12 @@ class JsonDecoder {
     while (true) {
       skipWhitespace();
 
-      if (_offset >= _len || _str.charAt(_offset) == '}') {
+      if (_len <= _offset || _str.charAt(_offset) == '}') {
         _offset++;
         break;
       }
 
-      Value name = jsonDecodeImpl(env, false);
+      Value name = decodeIdentifier(env);
 
       skipWhitespace();
 
@@ -390,7 +390,7 @@ class JsonDecoder {
         break;
       }
 
-      Value name = jsonDecodeImpl(env, false);
+      Value name = decodeIdentifier(env);
 
       skipWhitespace();
 
@@ -505,6 +505,28 @@ class JsonDecoder {
       return errorReturn(env, "error decoding string");
     else
       return sb;
+  }
+
+  /**
+   * Returns a PHP string.
+   */
+  private Value decodeIdentifier(Env env)
+  {
+    StringValue sb = env.createUnicodeBuilder();
+
+    while (_offset < _len) {
+      char ch = _str.charAt(_offset++);
+
+      if (! Character.isJavaIdentifierPart(ch)) {
+        _offset--;
+        
+        return sb;
+      }
+      
+      sb.append(ch);
+    }
+    
+    return sb;
   }
 
   private Value errorReturn(Env env)
