@@ -720,9 +720,6 @@ $graph->end();
 
 //--
 
-//00|OS|CPU|Unix Load Avg
-
-//--
 
 
 $gds = getStatDataForGraphBySubcategory("CPU", "OS", "Active");
@@ -730,6 +727,22 @@ $gds = getStatDataForGraphBySubcategory("CPU", "OS", "Active");
 $gd = getDominantGraphData($gds);
 
 $graph = createGraph("CPU Load ", $gd, new Point(COL2,ROW2));
+
+$canvas->setColor($gd->color);
+
+drawLines($gds, $graph);
+$graph->drawLegends($gds);
+$graph->end();
+
+
+//--
+
+
+$gds = getStatDataForGraphBySubcategory("Network", "OS", "tcp-");
+
+$gd = getDominantGraphData($gds);
+
+$graph = createGraph("Netstat ", $gd, new Point(60, 720), true, new Size(400, 80));
 
 $canvas->setColor($gd->color);
 
@@ -783,6 +796,8 @@ $graph->drawLegends($gds);
 
 
 $graph->end();
+
+
 
 
 //---
