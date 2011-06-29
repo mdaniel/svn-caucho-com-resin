@@ -4,16 +4,16 @@ require_once "WEB-INF/php/inc.php";
 require_once 'pdfGraph.php';
 
 
-define("ROW1",     "500");
-define("ROW2",     "300");
-define("ROW3",     "100");
-define("COL1",     "50");
-define("COL2",     "305");
-define("MILLION", "1000000");
+define("ROW1",     500);
+define("ROW2",     300);
+define("ROW3",     100);
+define("COL1",     50);
+define("COL2",     305);
+define("MILLION", 1000000);
 define("GRAPH_SIZE_6_TO_PAGE", new Size(175, 125));
 define("PERIOD", 3600/2);
-define("X_GRID_MAJOR", 0.1666666666666666667);
-define("X_GRID_MINOR", 0.0833333333333333333);
+define("X_GRID_MINOR", 300 * 1000);
+define("X_GRID_MAJOR", 600 * 1000);
 
 function admin_init_no_output($query="", $is_refresh=false)
 {
@@ -81,7 +81,7 @@ debug("initialized PDF");
 startDoc();
 debug("Started new document PDF");
 
-$logo = $pdf.load_image("auto", "/Users/rick/tools/resin/resin-pro-4.0.19.1/doc/admin/images/caucho-logo.jpg", ""); 
+$logo = $pdf.load_image("auto", "images/caucho-logo.jpg", ""); 
 if ($logo == -1)
   throw new Exception("Error: " + $pdf.get_errmsg());
 
@@ -138,16 +138,6 @@ if ($_REQUEST['period']) {
 $end = $restart_time;
 $start = $end - $period;
 
-function toHour($t) {
-  $hour =  getdate($t)["hours"];
-  $minute =  getdate($t)["minutes"];
- 
-  $tf = $hour + ($minute / 60);
-  return $tf;
-}
-
-$startHour = toHour($start);
-$endHour = toHour($end);
 
 
 $canvas->setFont("Helvetica-Bold", 16);
@@ -240,8 +230,7 @@ function getStatDataForGraph($name, $subcategory, $color=$blue, $category="Resin
   foreach($data as $d) {
     
     $value = $d->value;
-    $hour = toHour($d->time/1000);
-    //debug("data $hour $value");
+    $hour = $d->time;
     array_push($dataLine, new Point($hour, $value));
     if ($value > $max) $max = $value;
   }
@@ -290,16 +279,20 @@ function getStatDataForGraph($name, $subcategory, $color=$blue, $category="Resin
   return $gd;
 }
 
+function displayTimeLabel($time){
+    return strftime("%H:%M", $time/1000);
+}
+
 function createGraph(String $title, GraphData $gd, Point $origin, boolean $displayYLabels=true, Size $gsize=GRAPH_SIZE_6_TO_PAGE) {
-  global $startHour;
-  global $endHour;
+  global $start;
+  global $end;
   global $canvas;
   global $lightGrey;
   global $grey;
   global $darkGrey;
   global $black;
 
-  $graph = new Graph($origin, $gsize, new Range($startHour,$endHour), new Range(0,$gd->max));
+  $graph = new Graph($origin, $gsize, new Range($start * 1000, $end * 1000), new Range(0,$gd->max));
   $graph->start();
 
 
@@ -322,7 +315,7 @@ function createGraph(String $title, GraphData $gd, Point $origin, boolean $displ
     if ($displayYLabels) {
       $graph->drawYGridLabels($gd->yincrement);
     }
-    $graph->drawXGridTimeLabels(X_GRID_MAJOR, $startTime);
+    $graph->drawXGridLabels(X_GRID_MAJOR, "displayTimeLabel");
   } else {
     $canvas->setColor($black);
     $canvas->setFont("Helvetica-Bold", 12);

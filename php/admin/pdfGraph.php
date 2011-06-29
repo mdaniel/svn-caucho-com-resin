@@ -432,7 +432,10 @@ class Graph {
     $ystep_width = $ystep * $this->pixelPerUnit->height;
 
     if ($xstep_width <= 0.0 || $ystep_width <= 0.0) {
-       debug("Step width was 0 x $step_width y $ystep_width");
+       debug("          ====== Step width was 0 x $xstep_width y $ystep_width");
+       debug("      ppu width    " . $this->pixelPerUnit->width);
+       debug("      xstep     $xstep ");
+
        $this->valid = false;
     }
 
@@ -455,7 +458,7 @@ class Graph {
 
   }
 
-  function drawXGridLabels($xstep) {
+  function drawXGridLabels($xstep, $func) {
     if (!$this->valid) {
        return;
     }
@@ -467,7 +470,16 @@ class Graph {
 
     for ($index = 0; $width >= ($index*$xstep_width); $index++) {
       $currentX = $index*$xstep_width;
-      $currentLabel = ($index * $xstep) + $this->xRange->start;
+      $stepValue = (int) $index * $xstep;
+      $currentValue = $stepValue + (int) $this->xRange->start;
+      $currentValue = intval($currentValue);
+      debug("cv " . $currentValue);
+
+      if (!$func){
+      	$currentLabel = $currentValue;
+      } else {
+	$currentLabel = $func($currentValue);
+      }
       $this->canvas->writeText(new Point($currentX-3, -10), $currentLabel);
     }    
   }
@@ -502,48 +514,6 @@ class Graph {
     }    
   }
 
-
-  function drawXGridTimeLabels($xstep, $startTime) {
-    if (!$this->valid) {
-       return;
-    }
-
-    $this->canvas->setFont("Helvetica-Bold", 7);
-    $width =   (double) $this->pixelSize->width;
-
-    $xstep_width = $xstep * $this->pixelPerUnit->width;
-    $evenHours = false;
-
-    if ($xstep < 1) {
-      $evenHours = false;
-    } else {
-      $evenHours = true;
-    }
-
-    $currentTime = $startTime;
-
-    for ($index = 0; $width >= ($index*$xstep_width); $index++) {
-      $timeMap = getdate($currentTime);
-      $currentX = $index*$xstep_width;
-
-      if ($evenHours) {
-	//debug("EVEN HOURS");
-	$currentTime =  mktime($timeMap["hours"] + $xstep, $timeStamp["minutes"], $timeStamp["seconds"], 
-			       $timeStamp["mon"], $timeStamp["mday"], $timeStamp["year"]);
-	$this->canvas->writeText(new Point($currentX-6, -8), strftime ("%H:%M", $currentTime));
-
-      } else {
-	//debug("FRACTIONAL MINUTES timeMap " . $timeMap["hours"] . "  ");
-	$minutes = $xstep * 60;
-
-	$currentTime =  mktime($timeMap["hours"], $timeMap["minutes"] + $minutes, $timeMap["seconds"], 
-			       $timeMap["mon"], $timeMap["mday"], $timeMap["year"]);
-	//debug("FRACTIONAL MINUTES currentTime " . $currentTime . "  ");
-	$this->canvas->writeText(new Point($currentX-6, -8), strftime ("%H:%M", $currentTime));
-
-      }
-    }    
-  }
 
 
 }
