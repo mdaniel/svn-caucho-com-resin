@@ -43,9 +43,10 @@ import com.caucho.bam.Query;
 import com.caucho.bam.actor.SimpleActor;
 import com.caucho.bam.mailbox.MultiworkerMailbox;
 import com.caucho.cloud.bam.BamSystem;
-import com.caucho.cloud.security.SecurityService;
+import com.caucho.cloud.network.NetworkClusterSystem;
+import com.caucho.cloud.topology.CloudServer;
 import com.caucho.config.ConfigException;
-import com.caucho.hmtp.NonceQuery;
+import com.caucho.env.service.ResinSystem;
 import com.caucho.security.AdminAuthenticator;
 import com.caucho.server.cluster.Server;
 import com.caucho.util.Alarm;
@@ -53,6 +54,7 @@ import com.caucho.util.L10N;
 
 import javax.annotation.PostConstruct;
 import java.io.File;
+import java.util.Date;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -332,6 +334,69 @@ public class ManagerActor extends SimpleActor
       result = e.toString();
     }
     
+    getBroker().queryResult(id, from, to, result);
+
+    return result;
+  }
+
+  @Query
+  public String listRestarts(long id,
+                             String to,
+                             String from,
+                             ListRestartsQuery query)
+  {
+    String result = null;
+
+    try {
+      final long now = Alarm.getCurrentTime();
+
+      NetworkClusterSystem clusterService = NetworkClusterSystem.getCurrent();
+
+      CloudServer cloudServer = clusterService.getSelfServer();
+
+      int index = cloudServer.getIndex();
+
+      StatSystem statSystem = ResinSystem.getCurrentService(StatSystem.class);
+
+      long []restartTimes
+        = statSystem.getStartTimes(index, now - query.getTimeBackSpan(), now);
+
+      Date since = new Date(now - query.getTimeBackSpan());
+
+      if (restartTimes.length == 0) {
+        result = L.l("Server `{0}' hasn't restarted since `{1}'",
+                     cloudServer,
+                     since);
+      }
+      else if (restartTimes.length == 1) {
+        StringBuilder resultBuilder = new StringBuilder(L.l(
+          "Server started 1 time since `{0}'", since));
+
+        resultBuilder.append("\n  ");
+        resultBuilder.append(new Date(restartTimes[0]));
+
+        result = resultBuilder.toString();
+
+      }
+      else {
+        StringBuilder resultBuilder = new StringBuilder(L.l(
+          "Server restarted `{0}' times since `{1}'",
+          restartTimes.length,
+          since));
+
+        for (long restartTime : restartTimes) {
+          resultBuilder.append("\n  ");
+          resultBuilder.append(new Date(restartTime));
+        }
+
+        result = resultBuilder.toString();
+      }
+    } catch (Exception e) {
+      log.log(Level.WARNING, e.getMessage(), e);
+
+      result = e.toString();
+    }
+
     getBroker().queryResult(id, from, to, result);
 
     return result;

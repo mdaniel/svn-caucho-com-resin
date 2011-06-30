@@ -31,14 +31,10 @@ package com.caucho.server.admin;
 import com.caucho.bam.RemoteConnectionFailedException;
 import com.caucho.bam.ServiceUnavailableException;
 import com.caucho.bam.actor.ActorSender;
-import com.caucho.cloud.security.SecurityService;
 import com.caucho.hmtp.HmtpClient;
-import com.caucho.hmtp.NonceQuery;
 import com.caucho.server.cluster.Server;
-import com.caucho.util.Alarm;
 import com.caucho.util.L10N;
 
-import java.io.IOException;
 import java.io.Serializable;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -193,7 +189,14 @@ public class ManagerClient
   public String profile(long activeTime, long period, int depth) {
     ProfileQuery query = new ProfileQuery(activeTime, period, depth);
 
-    return (String)query(query);
+    return (String) query(query);
+  }
+
+  public String listRestarts(long period)
+  {
+     ListRestartsQuery query = new ListRestartsQuery(period);
+
+    return (String) query(query);
   }
 
   protected Serializable query(Serializable query)

@@ -313,6 +313,7 @@ namespace Caucho
                      || "jmx-set".Equals(arguments[argsIdx])
                      || "kill".Equals(arguments[argsIdx])
                      || "list".Equals(arguments[argsIdx])
+                     || "list-restarts".Equals(arguments[argsIdx])
                      || "log-level".Equals(arguments[argsIdx])
                      || "profile".Equals(arguments[argsIdx])
                      || "restart".Equals(arguments[argsIdx])

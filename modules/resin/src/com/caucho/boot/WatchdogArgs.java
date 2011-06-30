@@ -504,6 +504,9 @@ class WatchdogArgs
       else if ("kill".equals(arg)) {
         _startMode = StartMode.KILL;
       }
+      else if ("list-restarts".equals(arg)) {
+        _startMode = StartMode.LIST_RESTARTS;
+      }
       else if ("log-level".equals(arg)) {
         _startMode = StartMode.LOG_LEVEL;
       }
@@ -596,6 +599,7 @@ class WatchdogArgs
                                + "\n  heap-dump - produces a heap dump"
                                + "\n  thread-dump - produces a thread dump"
                                + "\n  profile - profiles the system"
+                               + "\n  list-restarts - lists server restart timestamps"
                                + "\n  log-level - sets a log level"
                                + "\n  jmx-list - lists MBeans, attributes, operations"
                                + "\n  jmx-set - sets value on MBean's attribute"
@@ -941,6 +945,7 @@ class WatchdogArgs
     JMX_SET,
     JSPC,
     KILL,
+    LIST_RESTARTS,
     LOG_LEVEL,
     PROFILE,
     RESTART,

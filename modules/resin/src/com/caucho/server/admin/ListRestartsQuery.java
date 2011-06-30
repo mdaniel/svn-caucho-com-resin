@@ -24,58 +24,29 @@
  *   59 Temple Place, Suite 330
  *   Boston, MA 02111-1307  USA
  *
- * @author Scott Ferguson
+ * @author Alex Rojkov
  */
 
-package com.caucho.management.server;
+package com.caucho.server.admin;
 
-public class BaselineQueryResult implements java.io.Serializable
+@SuppressWarnings("serial")
+public class ListRestartsQuery implements java.io.Serializable
 {
-  private static final long serialVersionUID = -4695711746534650807L;
-  
-  private String _desc;
-  private int _sampleSize;
-  private double _value;
+  private long _timeBackSpan;
 
-  public BaselineQueryResult()
+  public ListRestartsQuery(long timeBackSpan)
   {
-    
-  }
-  
-  public BaselineQueryResult(String desc, int sampleSize, double value)
-  {
-    _desc = desc;
-    _sampleSize = sampleSize;
-    _value = value;
+    _timeBackSpan = timeBackSpan;
   }
 
-  public int getSampleSize()
+  public long getTimeBackSpan()
   {
-    return _sampleSize;
+    return _timeBackSpan;
   }
 
-  public void setSampleSize(int sampleSize)
+  @Override
+  public String toString()
   {
-    _sampleSize = sampleSize;
-  }
-
-  public double getValue()
-  {
-    return _value;
-  }
-
-  public void setValue(double value)
-  {
-    _value = value;
-  }
-
-  public String getDesc()
-  {
-    return _desc;
-  }
-
-  public void setDesc(String desc)
-  {
-    _desc = desc;
+    return getClass().getSimpleName() + "[]";
   }
 }

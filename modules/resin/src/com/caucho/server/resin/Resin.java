@@ -90,6 +90,7 @@ import com.caucho.management.server.ResinMXBean;
 import com.caucho.management.server.ThreadPoolMXBean;
 import com.caucho.naming.Jndi;
 import com.caucho.server.admin.Management;
+import com.caucho.server.admin.StatSystem;
 import com.caucho.server.cache.TempFileService;
 import com.caucho.server.cluster.ClusterPod;
 import com.caucho.server.cluster.Server;
@@ -1364,6 +1365,10 @@ public class Resin
       _management = new Management(this);
 
     return _management;
+  }
+
+  public StatSystem createStatSystem() {
+    throw new ConfigException("StatSystem is available with Resin Professional");
   }
   
   private void addRandom()

@@ -85,11 +85,23 @@ public class LogLevelCommand extends AbstractManagementCommand
       loggers[1] = "com.caucho";
     }
 
-    ManagerClient manager = getManagerClient(args, client);
+    ManagerClient manager = null;
 
-    String message = manager.setLogLevel(loggers, logLevel, period);
+    try {
+      manager = getManagerClient(args, client);
 
-    System.out.println(message);
+      String message = manager.setLogLevel(loggers, logLevel, period);
+
+      System.out.println(message);
+    } catch (Exception e) {
+      if (args.isVerbose())
+        e.printStackTrace();
+      else
+        System.out.println(e.toString());
+    } finally {
+      if (manager != null)
+        manager.close();
+    }
   }
 
   @Override
