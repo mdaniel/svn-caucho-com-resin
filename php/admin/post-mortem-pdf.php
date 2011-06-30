@@ -11,10 +11,19 @@ define("COL1",     50);
 define("COL2",     305);
 define("MILLION", 1000000);
 define("GRAPH_SIZE_6_TO_PAGE", new Size(175, 125));
+define("BIG_GRAPH_SIZE", new Size(400, 300));
+
 define("PERIOD", 3600/2);
 define("X_GRID_MINOR", 300 * 1000);
 define("X_GRID_MAJOR", 600 * 1000);
 define("STEP", 1);
+
+$period = $_REQUEST['period'] ? (int) $_REQUEST['period'] : PERIOD; 
+
+$majorTicks = $_REQUEST['majorTicks'] ? (int) ($_REQUEST['majorTicks'] * 1000) : X_GRID_MAJOR; 
+$minorTicks = $_REQUEST['minorTicks'] ? (int) ($_REQUEST['minorTicks'] * 1000) : X_GRID_MINOR; 
+
+debug("$majorTicks $minorTicks");
 
 function admin_init_no_output($query="", $is_refresh=false)
 {
@@ -40,6 +49,8 @@ function admin_init_no_output($query="", $is_refresh=false)
 }
 
 function getRestartTime($stat) {
+
+  global $g_server;
 
   $index = $g_server->SelfServer->ClusterIndex;
   $now = time();
@@ -76,19 +87,17 @@ if (! admin_init_no_output()) {
 
 
 initPDF();
-debug("initialized PDF");
+//debug("initialized PDF");
 
 
 startDoc();
-debug("Started new document PDF");
+//debug("Started new document PDF");
 
-$logo = $pdf.load_image("auto", "images/caucho-logo.jpg", ""); 
-if ($logo == -1)
-  throw new Exception("Error: " + $pdf.get_errmsg());
-
-$pdf.fit_image($logo, 50.0, 500.0, ""); 
-
-$pdf.close_image($logo);
+//$logo = $pdf.load_image("auto", "images/caucho-logo.jpg", ""); 
+//if ($logo == -1)
+//  throw new Exception("Error: " + $pdf.get_errmsg());
+//$pdf.fit_image($logo, 50.0, 500.0, ""); 
+//$pdf.close_image($logo);
 
 
 $mbean_server = $g_mbean_server;
@@ -131,11 +140,6 @@ $si = sprintf("%02d", $index);
 
 $restart_time = getRestartTime($stat);
 
-if ($_REQUEST['period']) {
-  $period = (int) $_REQUEST['period']; 
-} else {
-  $period = PERIOD;
-}
 $end = $restart_time;
 $start = $end - $period;
 
@@ -183,7 +187,7 @@ function findStatByName(String $name, String $subcategory="Health", String $cate
   foreach ($statList as $statItem) {
     if ($statItem->server != $si) continue;
     if($subcategory==$statItem->subcateogry) {
-      debug(" NAME " . $statItem->name); 
+      //debug(" NAME " . $statItem->name); 
     }
     if ($name == $statItem->name && $category == $statItem->category) {
 	$arr = $stat->statisticsData($statItem->fullName, $start * 1000, $end * 1000,
@@ -221,6 +225,7 @@ class GraphData {
     return true;
   }
 }
+
 
 function calcYincrement($max) {
   $yincrement = (int)($max / 3);
@@ -276,11 +281,11 @@ function getStatDataForGraphBySubcategory($subcategory, $category="Resin", $name
 		}
 	}
 	if ($process) {
-		debug(" $name -------------------- ");
+		//debug(" $name -------------------- ");
   		foreach($data as $d) {  
     			$value = $d->value;
     			$time = $d->time;
-			debug(" $time  --- $value  ");
+			//debug(" $time  --- $value  ");
 
     			array_push($dataLine, new Point($time, $value));
     			if ($value > $max) $max = $value;
@@ -330,7 +335,7 @@ function displayTimeLabel($time){
     return strftime("%H:%M", $time/1000);
 }
 
-function createGraph(String $title, GraphData $gd, Point $origin, boolean $displayYLabels=true, Size $gsize=GRAPH_SIZE_6_TO_PAGE) {
+function createGraph(String $title, GraphData $gd, Point $origin, boolean $displayYLabels=true, Size $gsize=GRAPH_SIZE_6_TO_PAGE, boolean $trace=false) {
   global $start;
   global $end;
   global $canvas;
@@ -338,8 +343,9 @@ function createGraph(String $title, GraphData $gd, Point $origin, boolean $displ
   global $grey;
   global $darkGrey;
   global $black;
+  global $majorTicks, $minorTicks;
 
-  $graph = new Graph($origin, $gsize, new Range($start * 1000, $end * 1000), new Range(0,$gd->max));
+  $graph = new Graph($title, $origin, $gsize, new Range($start * 1000, $end * 1000), new Range(0,$gd->max), $trace);
   $graph->start();
 
 
@@ -351,10 +357,10 @@ function createGraph(String $title, GraphData $gd, Point $origin, boolean $displ
     $graph->drawTitle($title);
 
     $canvas->setColor($lightGrey);
-    $graph->drawGridLines(X_GRID_MINOR, $gd->yincrement/2);
+    $graph->drawGridLines($minorTicks, $gd->yincrement/2);
 
     $canvas->setColor($grey);
-    $graph->drawGridLines(X_GRID_MAJOR, $gd->yincrement);
+    $graph->drawGridLines($majorTicks, $gd->yincrement);
 
     $canvas->setColor($black);
     $graph->drawGrid();
@@ -362,14 +368,14 @@ function createGraph(String $title, GraphData $gd, Point $origin, boolean $displ
     if ($displayYLabels) {
       $graph->drawYGridLabels($gd->yincrement);
     }
-    $graph->drawXGridLabels(X_GRID_MAJOR, "displayTimeLabel");
+    $graph->drawXGridLabels($majorTicks, "displayTimeLabel");
   } else {
+    debug("Not displaying graph $title because the data was not valid");
     $canvas->setColor($black);
     $canvas->setFont("Helvetica-Bold", 12);
-    $graph->drawTitle($title . " NO DATA");
+    $graph->drawTitle($title);
     $canvas->setColor($darkGrey);
     $graph->drawGrid();
-
   }
   return $graph;
 }
@@ -411,7 +417,7 @@ class Stat {
     $arr = array_slice($arr, 3); 
 
     $this->name = implode(" ", $arr);
-    debug("name " . $this->name);
+    //debug("name " . $this->name);
   }
 
   function __get($name) {
@@ -427,7 +433,7 @@ class Stat {
 $statList = array();
 
 foreach ($full_names as $full_name)  {
-  debug($full_name);
+  //debug($full_name);
   $arr = explode("|", $full_name);
   array_push($statList,new Stat($full_name)) 
 }
@@ -581,7 +587,9 @@ function drawLines($gds, $graph) {
   foreach($gds as $gd) {
     if ($gd->validate()) {
       $canvas->setColor($gd->color);
-      $graph->drawLine($gd->dataLine);
+      if (sizeof($gd->dataLine)!=0) {
+      	$graph->drawLine($gd->dataLine);
+      }
     }
   }
 }
@@ -663,51 +671,31 @@ writeFooter();
 //00|JVM|Memory|GC Time|MarkSweepCompact
 
 //--
-debug("--------------------");
+
+//|
+$gds = getStatDataForGraphBySubcategory("Memory", "JVM", "Memory Free");
+
+$gd = getDominantGraphData($gds);
+
+$graph = createGraph("Memory", $gd, new Point(COL1,ROW3), true, BIG_GRAPH_SIZE, true);
+
+
+drawLines($gds, $graph);
+$graph->drawLegends($gds);
+
+
+$graph->end();
+
+
+//--
 
 $gds = getStatDataForGraphBySubcategory("Memory", "JVM", "GC Time");
 
 $gd = getDominantGraphData($gds);
 
-$graph = createGraph("GC Time", $gd, new Point(COL2, ROW1));
+//function createGraph(String $title, GraphData $gd, Point $origin, boolean $displayYLabels=true, Size $gsize=GRAPH_SIZE_6_TO_PAGE, boolean $trace=false) {
 
-drawLines($gds, $graph);
-$graph->drawLegends($gds);
-
-
-$graph->end();
-
-
-debug("--------------------");
-debug("--------------------");
-debug("--------------------");
-debug("--------------------");
-
-//--
-
-$gd3 = getStatDataForGraph("Tenured Memory Free", "Memory", $blue, "JVM");
-$gd1 = getStatDataForGraph("Heap Memory Free", "Memory", $red, "JVM");
-$gd2 = getStatDataForGraph("PermGen Memory Free", "Memory", $purple, "JVM");
-
-$gds = array($gd1, $gd2, $gd3);
-
-$gd = getDominantGraphData($gds);
-
-if( $gd->yincrement > (4 * MILLION)) {
-  $gd->yincrement = round($gd->yincrement/MILLION);
-  $gd->yincrement = $gd->yincrement * MILLION;
-  if($gd->yincrement > (35 * MILLION) && $gd->yincrement < (75 * MILLION)) {
-    $gd->yincrement = 50 * MILLION;
-  }
-}
-
-$graph = createGraph("Memory", $gd, new Point(COL1,ROW1), false);
-
-function displayLabelMeg($value) {
-  return "" . $value / MILLION . " M";
-}
-
-$graph->drawYGridLabels($gd->yincrement, "displayLabelMeg", -28);
+$graph = createGraph("GC Time", $gd, new Point(COL1, ROW1), true, BIG_GRAPH_SIZE);
 
 drawLines($gds, $graph);
 $graph->drawLegends($gds);
@@ -717,16 +705,24 @@ $graph->end();
 
 
 
+//--
+
+
 
 //--
 
+
+$pdf->end_page();
+
+$pdf->begin_page(595, 842);
+writeFooter();
 
 
 $gds = getStatDataForGraphBySubcategory("CPU", "OS", "Active");
 
 $gd = getDominantGraphData($gds);
 
-$graph = createGraph("CPU Load ", $gd, new Point(COL2,ROW2));
+$graph = createGraph("CPU Load ", $gd, new Point(COL1, ROW1), true, BIG_GRAPH_SIZE);
 
 $canvas->setColor($gd->color);
 
@@ -737,18 +733,6 @@ $graph->end();
 
 //--
 
-
-$gds = getStatDataForGraphBySubcategory("Network", "OS", "tcp-");
-
-$gd = getDominantGraphData($gds);
-
-$graph = createGraph("Netstat ", $gd, new Point(60, 720), true, new Size(400, 80));
-
-$canvas->setColor($gd->color);
-
-drawLines($gds, $graph);
-$graph->drawLegends($gds);
-$graph->end();
 
 
 //--
@@ -757,7 +741,7 @@ $graph->end();
 $gd = getStatDataForGraph("File Descriptor Count", "Process", $blue, "OS");
 
 
-$graph = createGraph("File Descriptor", $gd, new Point(COL1,ROW2));
+$graph = createGraph("File Descriptor", $gd, new Point(COL1,ROW3), true, BIG_GRAPH_SIZE);
 
 $canvas->setColor($gd->color);
 $graph->drawLine($gd->dataLine);
@@ -766,15 +750,18 @@ $graph->drawLine($gd->dataLine);
 $graph->end();
 
 
-//--
 
 
 //---
 
+$pdf->end_page();
+
+$pdf->begin_page(595, 842);
+writeFooter();
+
+
 $gd = getStatDataForGraph("Connection Active", "Database", $red);
-
-
-$graph = createGraph("Database Connection Active", $gd, new Point(COL1,ROW3));
+$graph = createGraph("Database Connection Active", $gd, new Point(COL1, ROW1), true, BIG_GRAPH_SIZE);
 
 $canvas->setColor($gd->color);
 $graph->drawLine($gd->dataLine);
@@ -789,7 +776,8 @@ $gd2 = getStatDataForGraph("Query Time Max", "Database", $blue);
 $gds = array($gd1, $gd2);
 $gd = getDominantGraphData($gds);
 
-$graph = createGraph("Database Query Time", $gd, new Point(COL2,ROW3));
+
+$graph = createGraph("Database Query Time", $gd, new Point(COL1, ROW3), true, BIG_GRAPH_SIZE);
 
 drawLines($gds, $graph);
 $graph->drawLegends($gds);
@@ -801,6 +789,24 @@ $graph->end();
 
 
 //---
+
+$pdf->end_page();
+
+$pdf->begin_page(595, 842);
+writeFooter();
+
+
+$gds = getStatDataForGraphBySubcategory("Network", "OS", "tcp-");
+
+$gd = getDominantGraphData($gds);
+
+$graph = createGraph("Netstat ", $gd, new Point(60, 200), true, new Size(400, 400), false);
+
+$canvas->setColor($gd->color);
+
+drawLines($gds, $graph);
+$graph->drawLegends($gds);
+$graph->end();
 
 
 $pdf->end_page();
