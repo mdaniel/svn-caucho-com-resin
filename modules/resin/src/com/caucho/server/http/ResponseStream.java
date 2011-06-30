@@ -902,6 +902,9 @@ abstract public class ResponseStream extends ToByteResponseStream {
     } catch (ClientDisconnectException e) {
       if (! _response.isIgnoreClientDisconnect())
         throw e;
+      else {
+        log.log(Level.FINER, e.toString(), e);
+      }
       
       return getNextBuffer();
     } finally {

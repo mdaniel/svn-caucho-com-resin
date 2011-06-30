@@ -617,8 +617,28 @@ public class TcpSocketLink extends AbstractSocketLink
     if (_requestStateRef.get().toAccept(_requestStateRef)) {
       ThreadPool threadPool = _listener.getThreadPool();
     
-      if (! threadPool.schedule(getAcceptTask())) {
-        log.severe(L.l("Schedule failed for {0}", this));
+      SocketLinkThreadLauncher launcher = _listener.getLauncher();
+      
+      if (log.isLoggable(Level.FINER)) {
+        log.finer(this + " request-accept " + getName()
+                  + " (count=" + _listener.getThreadCount()
+                  + ", idle=" + _listener.getIdleThreadCount() + ")");
+      }
+      
+      
+      boolean isValid = false;
+      
+      launcher.onChildIdleBegin();
+      try {
+        if (threadPool.start(getAcceptTask())) {
+          isValid = true;
+        }
+        else {
+          log.severe(L.l("Start failed for {0}", this));
+        }
+      } finally {
+        if (! isValid)
+          launcher.onChildIdleEnd();
       }
     }
   }
@@ -748,7 +768,9 @@ public class TcpSocketLink extends AbstractSocketLink
   void startThread(Thread thread)
   {
     if (log.isLoggable(Level.FINER)) {
-      log.finer(this + " start thread " + thread.getName());
+      log.finer(this + " start thread " + thread.getName()
+                + " (count=" + _listener.getThreadCount()
+                + ", idle=" + _listener.getIdleThreadCount() + ")");
     }
     
     _thread = thread;
@@ -1289,6 +1311,8 @@ public class TcpSocketLink extends AbstractSocketLink
     
     if (log.isLoggable(Level.FINE))
       log.fine(this + " keepalive disabled from " + state);
+    
+    Thread.dumpStack();
   }
 
   //

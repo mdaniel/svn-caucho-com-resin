@@ -28,28 +28,13 @@
 
 package com.caucho.server.admin;
 
-import com.caucho.bam.*;
-import com.caucho.env.git.*;
-import com.caucho.hmtp.HmtpClient;
-import com.caucho.server.resin.*;
-import com.caucho.util.L10N;
 import com.caucho.util.QDate;
-import com.caucho.vfs.*;
-
-import java.io.*;
-import java.util.HashMap;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 
 /**
  * Deploy Client API
  */
 public class WebAppDeployClient extends DeployClient
 {
-  private static final L10N L = new L10N(WebAppDeployClient.class);
-  private static final Logger log 
-    = Logger.getLogger(WebAppDeployClient.class.getName());
-
   public WebAppDeployClient()
   {
     super();

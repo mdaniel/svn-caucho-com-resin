@@ -13,6 +13,8 @@ $mbean_server = $g_mbean_server;
 $resin = $g_resin;
 $server = $g_server;
 
+$g_static_graphs = true;
+
 if ($g_mbean_server)
   $stat = $g_mbean_server->lookup("resin:type=StatService");
 

@@ -250,4 +250,7 @@ resin_get_byte_array_region(JNIEnv *env,
                             jint sublen,
                             char *buffer);
 
+int poll_read(int fd, int ms);
+int poll_write(int fd, int ms);
+
 #endif /* RESIN_H */

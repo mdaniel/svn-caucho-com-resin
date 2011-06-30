@@ -527,8 +527,10 @@ public class Table extends BlockStore {
     DbTransaction xa = DbTransaction.create();
     xa.setAutoCommit(true);
 
+    TableIterator iter = null;
+    
     try {
-      TableIterator iter = createTableIterator();
+      iter = createTableIterator();
 
       iter.init(xa);
 
@@ -555,7 +557,11 @@ public class Table extends BlockStore {
         }
       }
     } finally {
+      if (iter != null)
+        iter.free();
+      
       xa.commit();
+      
     }
   }
 

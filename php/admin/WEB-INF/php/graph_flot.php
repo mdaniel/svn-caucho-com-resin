@@ -76,7 +76,11 @@ class GraphTail {
 
 function create_graph_timeout()
 {
+  global $g_static_graphs;
   static $is_graph_timeout;
+
+  if ($g_static_graphs)
+   return;
   
   if ($is_graph_timeout)
     return;

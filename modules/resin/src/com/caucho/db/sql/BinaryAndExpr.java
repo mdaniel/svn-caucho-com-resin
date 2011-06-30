@@ -29,11 +29,7 @@
 
 package com.caucho.db.sql;
 
-import com.caucho.util.CharBuffer;
-
 import java.sql.SQLException;
-import java.util.ArrayList;
-import java.util.logging.Logger;
 
 final class BinaryAndExpr extends AbstractBinaryBooleanExpr {
   private final Expr _left;

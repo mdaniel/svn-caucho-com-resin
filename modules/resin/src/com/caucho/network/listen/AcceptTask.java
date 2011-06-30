@@ -30,8 +30,6 @@
 package com.caucho.network.listen;
 
 import java.io.IOException;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 
 import com.caucho.inject.Module;
 
@@ -40,8 +38,6 @@ import com.caucho.inject.Module;
  */
 @Module
 class AcceptTask extends ConnectionTask {
-  private static final Logger log = Logger.getLogger(AcceptTask.class.getName());
-  
   AcceptTask(TcpSocketLink socketLink)
   {
     super(socketLink);
@@ -58,9 +54,7 @@ class AcceptTask extends ConnectionTask {
 
     try {
       launcher.onChildThreadBegin();
-
-      if (log.isLoggable(Level.FINER))
-        log.finer(getSocketLink() + " starting listen thread");
+      launcher.onChildIdleEnd();
       
       super.run();
     } finally {

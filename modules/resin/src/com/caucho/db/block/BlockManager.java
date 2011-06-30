@@ -92,12 +92,22 @@ public final class BlockManager
 
   private static long defaultCapacity()
   {
-    long minSize = 1 * 1024 * 1024;
+    long meg = 1024 * 1024;
+    
+    long minSize = 1 * meg;
+    long maxSize = 128 * meg;
 
-    long memorySize = getMaxMemory() / 64;
+    long maxMemory = getMaxMemory();
+    
+    long memorySize;
+    
+    memorySize = ((maxMemory / meg) / 8) * meg;
 
     if (memorySize < minSize)
       memorySize = minSize;
+    
+    if (maxSize < memorySize)
+      memorySize = maxSize;
 
     return memorySize / BlockStore.BLOCK_SIZE;
   }

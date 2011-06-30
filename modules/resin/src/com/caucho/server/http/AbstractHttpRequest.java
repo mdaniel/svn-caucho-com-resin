@@ -381,6 +381,9 @@ public abstract class AbstractHttpRequest
    */
   public void clientDisconnect()
   {
+    if (log.isLoggable(Level.FINER))
+      log.finer(this + " kill keepalive due to client disconnect");
+    
     killKeepalive();
     /*
     if (_tcpConn != null)

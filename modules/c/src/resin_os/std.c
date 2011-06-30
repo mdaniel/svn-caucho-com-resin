@@ -131,7 +131,7 @@ poll_read(int fd, int ms)
     return result;
 }
 
-static int
+int
 poll_write(int fd, int ms)
 {
   struct pollfd pollfd[1];
@@ -161,7 +161,7 @@ poll_read(int fd, int ms)
   return result;
 }
 
-static int
+int
 poll_write(int fd, int ms)
 {
   fd_set write_set;

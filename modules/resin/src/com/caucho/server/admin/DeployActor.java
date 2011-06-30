@@ -212,11 +212,11 @@ public class DeployActor extends SimpleActor
   }
 
   @Query
-  public void removeTag(long id,
-                        String to,
-                        String from,
-                        RemoveTagQuery query)
+  public Boolean removeTag(RemoveTagQuery query)
   {
+    if (log.isLoggable(Level.FINE))
+      log.fine(this + " query " + query);
+    
     String server = "default";
     
     HashMap<String,String> commitMetaData = new HashMap<String,String>();
@@ -225,11 +225,8 @@ public class DeployActor extends SimpleActor
       commitMetaData.putAll(query.getAttributes());
     
     commitMetaData.put("server", server);
-    
-    boolean result = _repository.removeTag(query.getTag(),
-                                           commitMetaData);
 
-    getBroker().queryResult(id, from, to, result);
+    return _repository.removeTag(query.getTag(), commitMetaData);
   }
 
   @Query

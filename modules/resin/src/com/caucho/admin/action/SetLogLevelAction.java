@@ -76,12 +76,12 @@ public class SetLogLevelAction implements AdminAction
     }
 
     if (time > 0) {
-      return L.l("Log level is set to `{0}', active time {1} seconds: {2}",
+      return L.l("Logger '{2}' level is set to '{0}', active time {1} seconds",
                  newLevel,
                  (time / 1000),
                  sb.toString());
     } else {
-      return L.l("Log level is set to `{0}': {1}",
+      return L.l("Logger '{1}' level is set to '{0}'",
                  newLevel,
                  sb.toString());
     }
