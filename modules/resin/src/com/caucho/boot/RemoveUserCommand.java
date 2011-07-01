@@ -38,26 +38,12 @@ public class RemoveUserCommand extends AbstractManagementCommand
   private static final L10N L = new L10N(RemoveUserCommand.class);
 
   @Override
-  public void doCommand(WatchdogArgs args, WatchdogClient client)
+  public void doCommand(WatchdogArgs args, WatchdogClient client, ManagerClient managerClient)
   {
     String user = args.getDefaultArg();
+    String message = managerClient.removeUser(user);
 
-    ManagerClient manager = null;
-    try {
-      manager = getManagerClient(args, client);
-
-      String message = manager.removeUser(user);
-
-      System.out.println(message);
-    } catch (NotAuthorizedException e) {
-      if (args.isVerbose())
-        e.printStackTrace();
-      else
-        System.out.println(e.toString());
-    } finally {
-      if (manager != null)
-        manager.close();
-    }
+    System.out.println(message);
   }
 
   @Override

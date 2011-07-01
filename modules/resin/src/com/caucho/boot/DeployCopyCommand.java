@@ -39,10 +39,9 @@ public class DeployCopyCommand extends AbstractRepositoryCommand {
   
   @Override
   public void doCommand(WatchdogArgs args,
-                        WatchdogClient client)
+                        WatchdogClient client,
+                        WebAppDeployClient deployClient)
   {
-    WebAppDeployClient deployClient = getDeployClient(args, client);
-
     String sourceContext = args.getArg("-source");
     if (sourceContext == null)
       throw new ConfigException("must specify -source attribute");
@@ -101,12 +100,7 @@ public class DeployCopyCommand extends AbstractRepositoryCommand {
       fillInVersion(target, targetVersion);
 
     deployClient.copyTag(target, source);
-
-    deployClient.close();
-
-    System.out.println("copied " + source.getId() + " to " + target.getId());
   }
-
 
   @Override
   public void usage()

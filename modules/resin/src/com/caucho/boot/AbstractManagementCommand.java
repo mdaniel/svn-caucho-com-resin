@@ -38,8 +38,28 @@ public abstract class AbstractManagementCommand extends AbstractBootCommand {
   private static final L10N L = new L10N(AbstractManagementCommand.class);
   
   @Override
-  public abstract void doCommand(WatchdogArgs args,
-                        WatchdogClient client);
+  public void doCommand(WatchdogArgs args,
+                        WatchdogClient client) {
+    ManagerClient managerClient = null;
+
+    try {
+      managerClient = getManagerClient(args, client);
+
+      doCommand(args, client, managerClient);
+    } catch (Exception e) {
+      if (args.isVerbose())
+        e.printStackTrace();
+      else
+        System.out.println(e.toString());
+    } finally {
+      if (managerClient != null)
+        managerClient.close();
+    }
+  }
+
+  protected abstract void doCommand(WatchdogArgs args,
+                                    WatchdogClient client,
+                                    ManagerClient managerClient);
 
   protected ManagerClient getManagerClient(WatchdogArgs args,
                                            WatchdogClient client)

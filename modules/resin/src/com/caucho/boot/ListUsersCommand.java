@@ -38,24 +38,13 @@ public class ListUsersCommand extends AbstractManagementCommand
   private static final L10N L = new L10N(ListUsersCommand.class);
 
   @Override
-  public void doCommand(WatchdogArgs args, WatchdogClient client)
+  public void doCommand(WatchdogArgs args,
+                        WatchdogClient client,
+                        ManagerClient managerClient)
   {
-    ManagerClient manager = null;
-    try {
-      manager = getManagerClient(args, client);
+    String message = managerClient.listUsers();
 
-      String message = manager.listUsers();
-
-      System.out.println(message);
-    } catch (NotAuthorizedException e) {
-      if (args.isVerbose())
-        e.printStackTrace();
-      else
-        System.out.println(e.toString());
-    } finally {
-      if (manager != null)
-        manager.close();
-    }
+    System.out.println(message);
   }
 
   @Override

@@ -39,18 +39,15 @@ public class DeployListCommand extends AbstractRepositoryCommand
   
   @Override
   public void doCommand(WatchdogArgs args,
-                        WatchdogClient client)
+                        WatchdogClient client,
+                        WebAppDeployClient deployClient)
   {
-    WebAppDeployClient deployClient = getDeployClient(args, client);
-
     String pattern = args.getDefaultArg();
     if (pattern == null)
       pattern = ".*";
 
     TagResult[] tags = deployClient.queryTags(pattern);
 
-    deployClient.close();
-    
     for (TagResult tag : tags) {
       System.out.println(tag.getTag());
     }

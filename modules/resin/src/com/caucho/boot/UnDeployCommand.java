@@ -40,10 +40,9 @@ public class UnDeployCommand extends AbstractRepositoryCommand
   
   @Override
   public void doCommand(WatchdogArgs args,
-                        WatchdogClient client)
+                        WatchdogClient client,
+                        WebAppDeployClient deployClient)
   {
-    WebAppDeployClient deployClient = getDeployClient(args, client);
-    
     String name = args.getDefaultArg();
     
     if (name == null)
@@ -87,8 +86,6 @@ public class UnDeployCommand extends AbstractRepositoryCommand
 
     deployClient.removeTag(commit);
 
-    deployClient.close();
-    
     System.out.println("Undeployed " + name + " from "
                        + deployClient.getUrl());
   }

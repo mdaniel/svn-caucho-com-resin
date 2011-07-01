@@ -41,9 +41,10 @@ public class JmxSetCommand extends JmxCommand
   private static final L10N L = new L10N(JmxSetCommand.class);
 
   @Override
-  public void doCommand(WatchdogArgs args, WatchdogClient client)
+  public void doCommand(WatchdogArgs args,
+                        WatchdogClient client,
+                        ManagerClient managerClient)
   {
-
     String pattern = args.getArg("-pattern");
 
     if (pattern == null)
@@ -70,23 +71,9 @@ public class JmxSetCommand extends JmxCommand
       throw new ConfigException(L.l(
         "jmx-set requires <value> parameter be specified"));
 
-    ManagerClient manager = null;
+    String result = managerClient.setJmx(pattern, attribute, value);
 
-    try {
-      manager = getManagerClient(args, client);
-
-      String result = manager.setJmx(pattern, attribute, value);
-
-      System.out.println(result);
-    } catch (Exception e) {
-      if (args.isVerbose())
-        e.printStackTrace();
-      else
-        System.out.println(e.toString());
-    } finally {
-      if (manager != null)
-        manager.close();
-    }
+    System.out.println(result);
   }
 
 

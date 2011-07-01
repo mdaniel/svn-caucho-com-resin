@@ -41,10 +41,9 @@ public class DeployCommand extends AbstractRepositoryCommand {
   
   @Override
   public void doCommand(WatchdogArgs args,
-                        WatchdogClient client)
+                        WatchdogClient client,
+                        WebAppDeployClient deployClient)
   {
-    WebAppDeployClient deployClient = getDeployClient(args, client);
-    
     String war = args.getDefaultArg();
     
     if (war == null) {
@@ -117,8 +116,6 @@ public class DeployCommand extends AbstractRepositoryCommand {
 
     deployClient.commitArchive(commit, path);
 
-    deployClient.close();
-    
     System.out.println("Deployed " + commit.getId() + " from " + war + " to "
                        + deployClient.getUrl());
   }

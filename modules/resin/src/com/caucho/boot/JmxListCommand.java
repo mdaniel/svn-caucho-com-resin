@@ -44,9 +44,11 @@ public class JmxListCommand extends JmxCommand
   private static final Set<String> options = new HashSet<String>();
 
   @Override
-  public void doCommand(WatchdogArgs args, WatchdogClient client)
+  public void doCommand(WatchdogArgs args,
+                        WatchdogClient client,
+                        ManagerClient managerClient)
   {
-    String[] trailingArgs = args.getTrailingArgs(options);
+    String []trailingArgs = args.getTrailingArgs(options);
 
     String pattern = null;
     if (trailingArgs.length > 0)
@@ -70,28 +72,14 @@ public class JmxListCommand extends JmxCommand
     boolean isAll = args.hasOption("-all");
     boolean isPlatform = args.hasOption("-platform");
 
-    ManagerClient manager = null;
+    String jmxResult = managerClient.listJmx(pattern,
+                                             isPrintAttributes,
+                                             isPrintValues,
+                                             isPrintOperations,
+                                             isAll,
+                                             isPlatform);
 
-    try {
-      manager = getManagerClient(args, client);
-
-      String jmxResult = manager.listJmx(pattern,
-                                         isPrintAttributes,
-                                         isPrintValues,
-                                         isPrintOperations,
-                                         isAll,
-                                         isPlatform);
-
-      System.out.print(jmxResult);
-    } catch (Exception e) {
-      if (args.isVerbose())
-        e.printStackTrace();
-      else
-        System.out.println(e.toString());
-    } finally {
-      if (manager != null)
-        manager.close();
-    }
+    System.out.print(jmxResult);
   }
 
   @Override

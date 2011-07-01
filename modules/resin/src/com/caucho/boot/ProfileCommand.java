@@ -37,7 +37,9 @@ public class ProfileCommand extends AbstractManagementCommand
   private static final L10N L = new L10N(ProfileCommand.class);
 
   @Override
-  public void doCommand(WatchdogArgs args, WatchdogClient client)
+  public void doCommand(WatchdogArgs args,
+                        WatchdogClient client,
+                        ManagerClient managerClient)
   {
     long activeTime = 5 * 1000; // 5 seconds
     String activeTimeArg = args.getArg("-active-time");
@@ -55,8 +57,7 @@ public class ProfileCommand extends AbstractManagementCommand
     if (depthArg != null)
       depth = Integer.parseInt(depthArg);
 
-    ManagerClient manager = getManagerClient(args, client);
-    String result = manager.profile(activeTime, period, depth);
+    String result = managerClient.profile(activeTime, period, depth);
 
     System.out.println(result);
   }

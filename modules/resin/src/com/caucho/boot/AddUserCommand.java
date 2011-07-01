@@ -40,7 +40,9 @@ public class AddUserCommand extends AbstractManagementCommand
   private static final L10N L = new L10N(AddUserCommand.class);
 
   @Override
-  public void doCommand(WatchdogArgs args, WatchdogClient client)
+  public void doCommand(WatchdogArgs args,
+                        WatchdogClient client,
+                        ManagerClient managerClient)
   {
     final String user = args.getArg("-u");
 
@@ -76,24 +78,9 @@ public class AddUserCommand extends AbstractManagementCommand
 
     String []roles = args.getTrailingArgs(new HashSet<String>());
 
-    ManagerClient manager = null;
-    try {
-      manager = getManagerClient(args, client);
+    String message = managerClient.addUser(user, password, roles);
 
-      String message = manager.addUser(user, password, roles);
-
-      System.out.println(message);
-
-
-    } catch (Exception e) {
-      if (args.isVerbose())
-        e.printStackTrace();
-      else
-        System.out.println(e.toString());
-    } finally {
-      if (manager != null)
-        manager.close();
-    }
+    System.out.println(message);
   }
 
   @Override

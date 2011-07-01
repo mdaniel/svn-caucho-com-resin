@@ -43,11 +43,11 @@ public class ThreadDumpCommand extends AbstractManagementCommand
   private static final L10N L = new L10N(ThreadDumpCommand.class);
 
   @Override
-  public void doCommand(WatchdogArgs args, WatchdogClient client)
+  public void doCommand(WatchdogArgs args,
+                        WatchdogClient client,
+                        ManagerClient managerClient)
   {
-    ManagerClient manager = getManagerClient(args, client);
-
-    String dump = manager.doThreadDump();
+    String dump = managerClient.doThreadDump();
 
     String fileName = args.getArg("-file");
 

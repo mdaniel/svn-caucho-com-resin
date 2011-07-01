@@ -55,7 +55,9 @@ public class LogLevelCommand extends AbstractManagementCommand
   }
 
   @Override
-  public void doCommand(WatchdogArgs args, WatchdogClient client)
+  public void doCommand(WatchdogArgs args,
+                        WatchdogClient client,
+                        ManagerClient managerClient)
   {
     Level logLevel = null;
     
@@ -85,23 +87,9 @@ public class LogLevelCommand extends AbstractManagementCommand
       loggers[1] = "com.caucho";
     }
 
-    ManagerClient manager = null;
+    String message = managerClient.setLogLevel(loggers, logLevel, period);
 
-    try {
-      manager = getManagerClient(args, client);
-
-      String message = manager.setLogLevel(loggers, logLevel, period);
-
-      System.out.println(message);
-    } catch (Exception e) {
-      if (args.isVerbose())
-        e.printStackTrace();
-      else
-        System.out.println(e.toString());
-    } finally {
-      if (manager != null)
-        manager.close();
-    }
+    System.out.println(message);
   }
 
   @Override

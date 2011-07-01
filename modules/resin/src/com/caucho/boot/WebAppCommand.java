@@ -39,10 +39,9 @@ public abstract class WebAppCommand extends AbstractRepositoryCommand
 
   @Override
   public final void doCommand(WatchdogArgs args,
-                        WatchdogClient client)
+                        WatchdogClient client,
+                        WebAppDeployClient deployClient)
   {
-    WebAppDeployClient deployClient = getDeployClient(args, client);
-
     String tag = args.getArg("-tag");
 
     if (tag == null) {
@@ -67,8 +66,6 @@ public abstract class WebAppCommand extends AbstractRepositoryCommand
     }
 
     doCommand(deployClient, tag);
-
-    deployClient.close();
   }
 
   protected abstract void doCommand(WebAppDeployClient deployClient,

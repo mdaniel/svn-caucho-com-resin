@@ -39,10 +39,31 @@ import com.caucho.util.L10N;
 
 public abstract class AbstractRepositoryCommand extends AbstractBootCommand {
   private static final L10N L = new L10N(AbstractRepositoryCommand.class);
-  
+
   @Override
-  public abstract void doCommand(WatchdogArgs args,
-                        WatchdogClient client);
+  public final void doCommand(WatchdogArgs args,
+                        WatchdogClient client)
+  {
+    WebAppDeployClient deployClient = null;
+
+    try {
+      deployClient = getDeployClient(args, client);
+
+      doCommand(args, client, deployClient);
+    } catch (Exception e) {
+      if (args.isVerbose())
+        e.printStackTrace();
+      else
+        System.out.println(e.toString());
+    } finally {
+      if (deployClient != null)
+        deployClient.close();
+    }
+  }
+
+  protected abstract void doCommand(WatchdogArgs args,
+                                    WatchdogClient client,
+                                    WebAppDeployClient deployClient);
 
   protected final void fillInVersion(CommitBuilder commit, String version) {
     String []parts = version.split("\\.");

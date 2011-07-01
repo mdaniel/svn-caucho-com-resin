@@ -44,7 +44,9 @@ public class JmxCallCommand extends JmxCommand
   private static final Set<String> options = new HashSet<String>();
 
   @Override
-  public void doCommand(WatchdogArgs args, WatchdogClient client)
+  public void doCommand(WatchdogArgs args,
+                        WatchdogClient client,
+                        ManagerClient managerClient)
   {
     String []trailingArgs = args.getTrailingArgs(options);
 
@@ -73,25 +75,12 @@ public class JmxCallCommand extends JmxCommand
       operationIndex  = Integer.parseInt(index);
     }
 
-    ManagerClient manager = null;
+    String result = managerClient.callJmx(pattern,
+                                          operation,
+                                          operationIndex,
+                                          trailingArgs);
 
-    try {
-      manager = getManagerClient(args, client);
-      String result = manager.callJmx(pattern,
-                                      operation,
-                                      operationIndex,
-                                      trailingArgs);
-
-      System.out.println(result);
-    } catch (Exception e) {
-      if (args.isVerbose())
-        e.printStackTrace();
-      else
-        System.out.println(e.toString());
-    } finally {
-      if (manager != null)
-        manager.close();
-    }
+    System.out.println(result);
   }
 
   @Override

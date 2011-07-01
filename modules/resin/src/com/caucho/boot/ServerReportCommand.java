@@ -38,7 +38,9 @@ public class ServerReportCommand extends AbstractManagementCommand
   private static final L10N L = new L10N(ServerReportCommand.class);
 
   @Override
-  public void doCommand(WatchdogArgs args, WatchdogClient client)
+  public void doCommand(WatchdogArgs args,
+                        WatchdogClient client,
+                        ManagerClient managerClient)
   {
   }
 
