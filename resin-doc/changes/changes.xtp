@@ -14,7 +14,7 @@
 <s2 title="4.0.20 - snapshot">
 <ul>
 <li>db/cache: Table.validateIndexes wasn't freeing its Block/TableIterator (#4624, rep by Michael O'Dea)</li>
-<li>ssl: ssl write needs poll/select on SSL_ERROR_WANT_WRITE (#4582, rep by Mike O'Dead)</li>
+<li>ssl: ssl write needs poll/select on SSL_ERROR_WANT_WRITE (#4582, rep by Mike O'Dea)</li>
 <li>xa: failure during forget should be at finer logging, not warning (#4644, rep by Takahiro Fukuda)</li>
 <li>multipart-form: added parameter-length-max (#4638, rep by Daniel Kador)</li>
 <li>system: &lt;resin:LogService> needs to check for existing log system (rep by Adrian Sutton)</li>
