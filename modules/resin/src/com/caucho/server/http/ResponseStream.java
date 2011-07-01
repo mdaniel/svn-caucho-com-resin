@@ -619,29 +619,6 @@ abstract public class ResponseStream extends ToByteResponseStream {
       closeBuffer();
 
       writeTail(true);
-      
-      /*
-      _isDisableAutoFlush = false;
-
-      flushCharBuffer();
-
-      _isAllowFlush = true;
-
-      flushBuffer();
-      // flushBuffer can force 304 and then a cache write which would
-      // complete the finish.
-      //if (isClosed()) {
-      //  return;
-      //}
-
-      // XXX: this needs to be cleaned up with the above
-      // use of writeHeaders
-      if (! _response.isHeaderWritten()) {
-        writeHeaders(-1);
-      }
-
-      writeTail(true);
-      */
 
       closeCache();
 
@@ -697,7 +674,7 @@ abstract public class ResponseStream extends ToByteResponseStream {
         || res.isDisableCache()) {
       return;
     }
-    
+
     // server/13de
     if (_cacheInvocation != null)
       return;
@@ -754,7 +731,7 @@ abstract public class ResponseStream extends ToByteResponseStream {
   public void killCaching()
   {
     AbstractCacheFilterChain cacheInvocation = _cacheInvocation;
-
+    
     if (cacheInvocation != null) {
       HttpServletResponseImpl res = _response.getRequest().getResponseFacade();
       

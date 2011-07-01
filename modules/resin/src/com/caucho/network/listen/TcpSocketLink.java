@@ -1311,8 +1311,6 @@ public class TcpSocketLink extends AbstractSocketLink
     
     if (log.isLoggable(Level.FINE))
       log.fine(this + " keepalive disabled from " + state);
-    
-    Thread.dumpStack();
   }
 
   //

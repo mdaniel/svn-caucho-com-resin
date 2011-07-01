@@ -775,7 +775,7 @@ abstract public class AbstractHttpResponse {
   {
     if (isHeaderWritten())
       return false;
-
+    
     HttpServletRequestImpl req = _request.getRequestFacade();
     HttpServletResponseImpl res = _request.getResponseFacade();
 

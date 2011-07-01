@@ -78,13 +78,14 @@ public class FileSetType {
   {
     if (_includeList == null)
       _includeList = new ArrayList<PathPatternType>();
-    
+
     _includeList.add(pattern);
   }
   
   public void addText(String text)
   {
-    addInclude(new PathPatternType(text));
+    if (! "".equals(text))
+      addInclude(new PathPatternType(text));
   }
 
   /**

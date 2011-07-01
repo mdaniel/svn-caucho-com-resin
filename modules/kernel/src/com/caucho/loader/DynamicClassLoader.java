@@ -1454,9 +1454,6 @@ public class DynamicClassLoader extends java.net.URLClassLoader
         else
           cl = findSystemClass(name);
       } catch (ClassNotFoundException e) {
-      } catch (Error e) {
-        System.out.println("CLASS: " + name + " " + getParent() + "\n  " + e);
-        e.printStackTrace();
       }
       
 

@@ -195,6 +195,17 @@ public class WebAppVersioningController extends WebAppController {
     */
   }
 
+  /**
+   * Initialize the controller.
+   */
+  @Override
+  protected void initEnd()
+  {
+    /*
+    super.initBegin();
+    */
+  }
+
   @Override
   public boolean isModified()
   {

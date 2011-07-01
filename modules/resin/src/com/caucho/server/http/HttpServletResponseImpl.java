@@ -90,9 +90,6 @@ public final class HttpServletResponseImpl extends AbstractCauchoResponse
 
   private AbstractCacheFilterChain _cacheInvocation;
 
-  // the cache entry for a match/if-modified-since
-  private AbstractCacheEntry _matchCacheEntry;
-
   // send a Cache-Control: no-cache
   private boolean _isNoCache;
   // cache private, e.g. for session cookie
@@ -299,8 +296,9 @@ public final class HttpServletResponseImpl extends AbstractCauchoResponse
   {
     _responseStream.clearBuffer();
 
-    // jsp/15ma
-    _responseStream.killCaching();
+    // jsp/15ma, server/2h7m
+    if (_responseStream.isCommitted())
+      _responseStream.killCaching();
 
     /*
     if (_currentWriter instanceof JspPrintWriter)
@@ -424,23 +422,10 @@ public final class HttpServletResponseImpl extends AbstractCauchoResponse
   }
 
   /**
-   * Sets the cache entry so we can use it if the servlet returns
-   * not_modified response.
-   *
-   * @param entry the saved cache entry
-   */
-  @Override
-  public void setMatchCacheEntry(AbstractCacheEntry entry)
-  {
-    assert(_matchCacheEntry == null);
-    
-    _matchCacheEntry = entry;
-  }
-
-  /**
    * Sets the cache invocation to indicate that the response might be
    * cacheable.
    */
+  @Override
   public void setCacheInvocation(AbstractCacheFilterChain cacheInvocation)
   {
     assert(_cacheInvocation == null || cacheInvocation == null);
@@ -613,7 +598,7 @@ public final class HttpServletResponseImpl extends AbstractCauchoResponse
   public void sendError(int code, String value)
     throws IOException
   {
-    if (code == SC_NOT_MODIFIED && _matchCacheEntry != null) {
+    if (code == SC_NOT_MODIFIED && isProxyCacheFill()) {
       setStatus(code, value);
 
       if (handleNotModified()) {
@@ -720,6 +705,11 @@ public final class HttpServletResponseImpl extends AbstractCauchoResponse
     // close, but don't force a flush
     _response.finishInvocation();
   }
+  
+  private boolean isProxyCacheFill()
+  {
+    return true;
+  }
 
 
   /**
@@ -734,7 +724,11 @@ public final class HttpServletResponseImpl extends AbstractCauchoResponse
     if (_status != SC_NOT_MODIFIED) {
       return false;
     }
-    else if (_matchCacheEntry != null) {
+    else if (isProxyCacheFill()) {
+      return true;
+    }
+    /*
+    else if (isProxyCacheFill()) {
       if (isCommitted()) {
         return false;
       }
@@ -746,10 +740,7 @@ public final class HttpServletResponseImpl extends AbstractCauchoResponse
       AbstractCacheFilterChain cacheInvocation = _cacheInvocation;
       _cacheInvocation = null;
 
-      AbstractCacheEntry matchCacheEntry = _matchCacheEntry;
-      _matchCacheEntry = null;
-
-      /* XXX: complications with filters */
+      // XXX: complications with filters
       if (cacheInvocation != null
           && cacheInvocation.fillFromCache(getRequest(), this,
                                            matchCacheEntry)) {
@@ -759,6 +750,7 @@ public final class HttpServletResponseImpl extends AbstractCauchoResponse
         return true;
       }
     }
+  */
     // server/13dh
     else if (_cacheInvocation != null) {
       WebApp webApp = _request.getWebApp();

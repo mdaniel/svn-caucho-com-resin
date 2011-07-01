@@ -250,7 +250,12 @@ class TcpAsyncController extends AsyncController {
     if (_conn instanceof TcpSocketLink)
       tcpConn = (TcpSocketLink) _conn;
 
+    /*
     if (tcpConn != null && tcpConn.isCometComplete())
+      sb.append(",complete");
+      */
+    
+    if (_isCompleteRequested)
       sb.append(",complete");
 
     if (_isTimeout)

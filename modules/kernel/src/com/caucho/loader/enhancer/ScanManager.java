@@ -171,8 +171,9 @@ public class ScanManager {
                                  ByteCodeClassScanner classScanner,
                                  JarByteCodeMatcher matcher)
   {
-    if (isNullScanPath(path))
+    if (isNullScanPath(path)) {
       return;
+    }
     
     ZipFile zipFile = null;
     Jar jar = JarPath.create(path).getJar();

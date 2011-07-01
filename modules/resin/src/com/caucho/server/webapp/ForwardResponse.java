@@ -34,15 +34,12 @@ import java.io.IOException;
 import javax.servlet.http.HttpServletResponse;
 
 import com.caucho.server.http.CauchoResponseWrapper;
-import com.caucho.util.L10N;
 
 /**
  * Internal response for an include() or forward()
  */
 class ForwardResponse extends CauchoResponseWrapper
 {
-  private static final L10N L = new L10N(ForwardResponse.class);
-
   ForwardResponse(ForwardRequest request)
   {
     super(request);

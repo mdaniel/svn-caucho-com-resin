@@ -253,7 +253,7 @@ public class PageContextImpl extends PageContext
     _responseStream = _response.getResponseStream();
     _topOut = _jspAdapter;
     _responseStream.setAutoFlush(autoFlush);
-    _jspAdapter.init(null, _responseStream);
+    _jspAdapter.init(null, _response, _responseStream);
     _jspAdapter.setPrintNullAsBlank(isPrintNullAsBlank);
 
     if (bufferSize != TempCharBuffer.SIZE) {

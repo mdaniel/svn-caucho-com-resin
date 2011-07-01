@@ -52,7 +52,7 @@ public class WebAppConfig extends DeployConfig {
 
   // The context path
   private String _contextPath;
-
+  
   private WebAppConfig _prologue;
 
   public WebAppConfig()

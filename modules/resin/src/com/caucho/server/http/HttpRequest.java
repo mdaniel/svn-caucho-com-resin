@@ -801,12 +801,15 @@ public class HttpRequest extends AbstractHttpRequest
 
       invocation.service(requestFacade, getResponseFacade());
     } catch (ClientDisconnectException e) {
+      clientDisconnect();
+      /*
       CauchoResponse response = getResponseFacade();
       
       if (response != null)
         response.killCache();
 
       killKeepalive();
+      */
 
       throw e;
     } catch (Throwable e) {

@@ -297,7 +297,8 @@ public class WebAppExpandDeployGenerator
 
     controller.setVersion(version.getVersion());
     
-    controller.init();
+    // server/1h82
+    // controller.init();
 
     return controller;
   }

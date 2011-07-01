@@ -385,6 +385,12 @@ public abstract class AbstractHttpRequest
       log.finer(this + " kill keepalive due to client disconnect");
     
     killKeepalive();
+    
+    CauchoResponse response = getResponseFacade();
+    
+    if (response != null)
+      response.killCache();
+
     /*
     if (_tcpConn != null)
       _tcpConn.requestEarlyClose();

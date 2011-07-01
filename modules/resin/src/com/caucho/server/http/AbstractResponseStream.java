@@ -269,7 +269,7 @@ public abstract class AbstractResponseStream extends OutputStreamWithBuffer {
   {
     clearBuffer();
   }
-
+  
   /**
    * Clears the output buffer.
    */
@@ -443,6 +443,7 @@ public abstract class AbstractResponseStream extends OutputStreamWithBuffer {
       
       State toHead() { return CLOSING_HEAD_COMMITTED; }
       State toCommitted() { return this; }
+      State toClosing() { return CLOSED; }
       State toClose() { return CLOSED; }
     },
     CLOSING_HEAD_COMMITTED {

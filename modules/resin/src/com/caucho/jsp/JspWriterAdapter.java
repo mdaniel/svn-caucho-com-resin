@@ -33,6 +33,7 @@ import java.io.IOException;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
+import javax.servlet.http.HttpServletResponse;
 import javax.servlet.jsp.JspWriter;
 
 import com.caucho.server.http.AbstractResponseStream;
@@ -45,6 +46,7 @@ public class JspWriterAdapter extends AbstractBodyContent {
     = Logger.getLogger(JspWriterAdapter.class.getName());
   // the underlying writer
   private AbstractResponseStream _out;
+  private HttpServletResponse _response;
   
   private boolean _isClosed;
 
@@ -71,9 +73,12 @@ public class JspWriterAdapter extends AbstractBodyContent {
    *
    * @param os the underlying stream
    */
-  void init(JspWriter parent, AbstractResponseStream out)
+  void init(JspWriter parent,
+            HttpServletResponse response,
+            AbstractResponseStream out)
   {
     _out = out;
+    _response = response;
     _isClosed = false;
   }
 
@@ -224,6 +229,7 @@ public class JspWriterAdapter extends AbstractBodyContent {
       // jsp/0504
       closeError("flushBuffer()");
     }
+    
 
     _out.flushBuffer();
   }
@@ -238,6 +244,12 @@ public class JspWriterAdapter extends AbstractBodyContent {
       // jsp/0504
       closeError("flush()");
     }
+    
+    // server/2hf3
+    if (_response != null) {
+      _response.flushBuffer();
+    }
+    
 
     // jsp/01cm
     // _out.flushChar();
