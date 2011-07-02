@@ -58,6 +58,7 @@ class ResinArgs
 
   private Path _resinHome;
   private Path _rootDirectory;
+  private Path _dataDirectory;
 
   private String _resinConf;
   
@@ -126,6 +127,14 @@ class ResinArgs
   public Path getRootDirectory()
   {
     return _rootDirectory;
+  }
+  
+  /**
+   * Gets the root directory.
+   */
+  public Path getDataDirectory()
+  {
+    return _dataDirectory;
   }
   
   public Socket getPingSocket()
@@ -295,12 +304,18 @@ class ResinArgs
         i += 2;
       }
       else if (argv[i].equals("-root-directory")
-               || argv[i].equals("--root-directory")
-               || argv[i].equals("-resin-root")
-               || argv[i].equals("--resin-root")
-               || argv[i].equals("-server-root")
-               || argv[i].equals("--server-root")) {
+          || argv[i].equals("--root-directory")
+          || argv[i].equals("-resin-root")
+          || argv[i].equals("--resin-root")
+          || argv[i].equals("-server-root")
+          || argv[i].equals("--server-root")) {
         _rootDirectory = _resinHome.lookup(argv[i + 1]);
+
+        i += 2;
+      }
+      else if (argv[i].equals("-data-directory")
+            || argv[i].equals("--data-directory")) {
+        _dataDirectory = Vfs.lookup(argv[i + 1]);
 
         i += 2;
       }

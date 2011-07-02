@@ -43,7 +43,9 @@ import com.caucho.config.inject.InjectManager;
 import com.caucho.config.lib.ResinConfigLibrary;
 import com.caucho.env.service.ResinSystem;
 import com.caucho.env.shutdown.ExitCode;
+import com.caucho.loader.DynamicClassLoader;
 import com.caucho.loader.Environment;
+import com.caucho.loader.LibraryLoader;
 import com.caucho.server.resin.ResinELContext;
 import com.caucho.util.L10N;
 import com.caucho.vfs.Path;
@@ -84,6 +86,7 @@ public class ResinBoot {
     Path resinHome = _args.getResinHome();
 
     ClassLoader loader = ProLoader.create(resinHome);
+
     if (loader != null) {
       System.setProperty("resin.home", resinHome.getNativePath());
 
@@ -122,13 +125,18 @@ public class ResinBoot {
     
     Path rootDirectory = _args.getRootDirectory();
     Path dataDirectory = rootDirectory.lookup("watchdog-data");
-    
+
     ResinSystem system = new ResinSystem("watchdog",
                                          rootDirectory,
                                          dataDirectory);
 
     Thread thread = Thread.currentThread();
     thread.setContextClassLoader(system.getClassLoader());
+    
+    DynamicClassLoader resinLoader = system.getClassLoader();
+    LibraryLoader libLoader = new LibraryLoader();
+    libLoader.setPath(rootDirectory.lookup("lib"));
+    libLoader.init();
 
     Config config = new Config();
     BootResinConfig bootManager = new BootResinConfig(system, _args);

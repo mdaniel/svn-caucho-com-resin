@@ -405,6 +405,11 @@ public class Resin
     return _isRestart;
   }
   
+  public void setDataDirectory(Path path)
+  {
+    _resinDataDirectory = path;
+  }
+  
   public String getRestartMessage()
   {
     return _restartMessage;
@@ -466,7 +471,10 @@ public class Resin
 
         if (_args.getRootDirectory() != null)
           setRootDirectory(_args.getRootDirectory());
-        
+
+        if (_args.getDataDirectory() != null)
+          setDataDirectory(_args.getDataDirectory());
+
         _pingSocket = _args.getPingSocket();
         
         setJoinCluster(_args.getJoinCluster());
@@ -811,12 +819,15 @@ public class Resin
   {
     Path path;
 
+    Path root = getRootDirectory();
+    
     if (_resinDataDirectory != null)
-      path = _resinDataDirectory;
-    else if (_isWatchdog)
-      path = getRootDirectory().lookup("watchdog-data");
+      root = _resinDataDirectory;
+
+    if (_isWatchdog)
+      path = root.lookup("watchdog-data");
     else
-      path = getRootDirectory().lookup("resin-data");
+      path = root.lookup("resin-data");
 
     if (path instanceof MemoryPath) { // QA
       path = WorkDir.getTmpWorkDir().lookup("qa/resin-data");
@@ -1204,12 +1215,7 @@ public class Resin
   private void configureRoot(BootResinConfig bootConfig) 
     throws IOException
   {
-    Path dataDirectory;
-  
-    if (isWatchdog())
-      dataDirectory = _rootDirectory.lookup("watchdog-data");
-    else
-      dataDirectory = _rootDirectory.lookup("resin-data");
+    Path dataDirectory = getResinDataDirectory();
   
     String serverName = _serverId;
   
@@ -1217,7 +1223,7 @@ public class Resin
       serverName = "default";
   
     dataDirectory = dataDirectory.lookup("./" + serverName);
-    
+
     RootDirectorySystem.createAndAddService(_rootDirectory, dataDirectory);
   }
   

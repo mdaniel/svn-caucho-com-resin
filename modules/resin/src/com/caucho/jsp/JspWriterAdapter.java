@@ -37,6 +37,7 @@ import javax.servlet.http.HttpServletResponse;
 import javax.servlet.jsp.JspWriter;
 
 import com.caucho.server.http.AbstractResponseStream;
+import com.caucho.server.http.CauchoResponse;
 
 /**
  * A buffered JSP writer encapsulating a Writer.
@@ -78,7 +79,8 @@ public class JspWriterAdapter extends AbstractBodyContent {
             AbstractResponseStream out)
   {
     _out = out;
-    _response = response;
+    if (response instanceof CauchoResponse)
+      _response = (CauchoResponse) response;
     _isClosed = false;
   }
 
@@ -248,12 +250,14 @@ public class JspWriterAdapter extends AbstractBodyContent {
     // server/2hf3
     if (_response != null) {
       _response.flushBuffer();
+      // server/01t1, server/183l
+      _out.flush();
     }
-    
-
-    // jsp/01cm
-    // _out.flushChar();
-    _out.flush();
+    else {
+      // jsp/01cm
+      // _out.flushChar();
+      _out.flush();
+    }
   }
 
   private void closeError(String op)

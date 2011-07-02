@@ -79,10 +79,59 @@ public class ManagerClient
     _managerAddress = "manager@" + serverId + ".resin.caucho";
   }
 
-  public ManagerClient(String host, int port,
+  /*
+  public ManagerClient(String serverId, String userName, String password)
+  {
+    try {
+      _bamClient 
+        = new HmuxClientFactory(serverId, userName, password).create();
+    
+      _managerAddress = "manager@resin.caucho";
+    } catch (RemoteConnectionFailedException e) {
+      throw new RemoteConnectionFailedException(L.l("Connection to '{0}' failed for remote admin. Check the server and make sure <resin:RemoteAdminService> is enabled in the resin.xml.\n  {1}",
+                                                    serverId, e.getMessage()),
+                                                    e);
+    }
+    
+    if (_bamClient == null) {
+      throw new RemoteConnectionFailedException(L.l("Connection to '{0}' failed for remote admin. Check the server and make sure <resin:RemoteAdminService> is enabled in the resin.xml.\n",
+                                                    serverId));
+    }
+  }
+  */
+
+  public ManagerClient(String host, int serverPort, int httpPort,
                        String userName, String password)
   {
-    String url = "http://" + host + ":" + port + "/hmtp";
+    RuntimeException exn = null;
+    
+    try {
+      if (serverPort > 0)
+        _bamClient 
+          = new HmuxClientFactory(host, serverPort, userName, password).create();
+    
+      _managerAddress = "manager@resin.caucho";
+      
+      if (_bamClient != null)
+        return;
+    } catch (RemoteConnectionFailedException e) {
+      exn = new RemoteConnectionFailedException(L.l("Connection to '{0}:{1}' failed for remote admin. Check the server and make sure <resin:RemoteAdminService> is enabled in the resin.xml.\n  {1}",
+                                                    host, serverPort,
+                                                    e.getMessage()),
+                                                    e);
+      
+      if (httpPort == 0)
+        throw exn;
+    }
+    
+    /*
+    if (_bamClient == null) {
+      throw new RemoteConnectionFailedException(L.l("Connection to '{0}:{1}' failed for remote admin. Check the server and make sure <resin:RemoteAdminService> is enabled in the resin.xml.\n",
+                                                    host, serverPort));
+    }
+    */
+    
+    String url = "http://" + host + ":" + httpPort + "/hmtp";
     
     _url = url;
     
@@ -107,6 +156,11 @@ public class ManagerClient
     return _url;
   }
 
+  public ActorSender getSender()
+  {
+    return _bamClient;
+  }
+  
   public String addUser(String user, char []password, String []roles)
   {
     AddUserQuery query = new AddUserQuery(user, password, roles);

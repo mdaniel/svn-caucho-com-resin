@@ -60,6 +60,7 @@ class WatchdogArgs
   private Path _javaHome;
   private Path _resinHome;
   private Path _rootDirectory;
+  private Path _dataDirectory;
   private String[] _argv;
   private Path _resinConf;
   private Path _logDirectory;
@@ -124,6 +125,11 @@ class WatchdogArgs
   Path getRootDirectory()
   {
     return _rootDirectory;
+  }
+
+  Path getDataDirectory()
+  {
+    return _dataDirectory;
   }
 
   Path getLogDirectory()
@@ -406,6 +412,11 @@ class WatchdogArgs
       else if ("-root-directory".equals(arg) || "--root-directory".equals(arg)) {
         _rootDirectory = Vfs.lookup(argv[i + 1]);
         argv[i + 1] = _rootDirectory.getFullPath();
+        i++;
+      }
+      else if ("-data-directory".equals(arg) || "--data-directory".equals(arg)) {
+        _dataDirectory = Vfs.lookup(argv[i + 1]);
+        argv[i + 1] = _dataDirectory.getFullPath();
         i++;
       }
       else if ("-server".equals(arg) || "--server".equals(arg)) {

@@ -74,7 +74,7 @@ public abstract class AbstractManagementCommand extends AbstractBootCommand {
     String portArg = args.getArg("-port");
 
     try {
-      if (portArg != null && !portArg.isEmpty())
+      if (portArg != null && ! portArg.isEmpty())
         port = Integer.parseInt(portArg);
     } catch (NumberFormatException e) {
       NumberFormatException e1 = new NumberFormatException(
@@ -83,14 +83,20 @@ public abstract class AbstractManagementCommand extends AbstractBootCommand {
 
       throw e;
     }
+    
+    int httpPort = port;
+    
+    if (port < 0)
+      port = client.getConfig().getPort();
+    
+    if (httpPort < 0)
+      httpPort = findPort(client);
 
-    if (port == -1)
-      port = findPort(client);
-
+    /*
     if (port == 0) {
       throw new ConfigException(L.l("HTTP listener {0}:{1} was not found",
                                     address, port));
-    }
+    }*/
 
     String user = args.getArg("-user");
     String password = args.getArg("-password");
@@ -99,7 +105,9 @@ public abstract class AbstractManagementCommand extends AbstractBootCommand {
       password = client.getResinSystemAuthKey();
     }
 
-    return new ManagerClient(address, port, user, password);
+    return new ManagerClient(address, port, httpPort, user, password);
+    
+    // return new ManagerClient(address, port, user, password);
   }
   
   private int findPort(WatchdogClient client)

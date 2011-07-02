@@ -155,6 +155,9 @@ class WatchdogManager implements AlarmListener {
     
     Resin resin = Resin.createWatchdog(_system);
     
+    if (_args.getDataDirectory() != null)
+      resin.setDataDirectory(_args.getDataDirectory());
+    
     resin.preConfigureInit();
     
     // XXX: needs to be config
