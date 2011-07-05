@@ -55,15 +55,15 @@ import java.util.logging.Logger;
  */
 public class TransactionManagerImpl
   implements TransactionManager, Serializable,
-	     ClassLoaderListener
+             ClassLoaderListener
 {
   private static L10N L = new L10N(TransactionManagerImpl.class);
   private static Logger log
     = Logger.getLogger(TransactionManagerImpl.class.getName());
-  
+
   private static TransactionManagerImpl _tm = new TransactionManagerImpl();
 
-  private int _serverId;
+  private long _serverId;
 
   private AbstractXALogManager _xaLogManager;
 
@@ -139,7 +139,7 @@ public class TransactionManagerImpl
   XidImpl createXID()
   {
     return new XidImpl(getServerId(),
-		       RandomUtil.getRandomLong());
+                       RandomUtil.getRandomLong());
   }
   /**
    * Creates a new transaction id.
@@ -155,17 +155,20 @@ public class TransactionManagerImpl
   /**
    * Returns the server id.
    */
-  private int getServerId()
+  private long getServerId()
   {
     if (_serverId == 0) {
       String server = (String) Environment.getAttribute("caucho.server-id");
 
+      if ("".equals(server))
+        server = "default";
+
       if (server == null)
-	_serverId = 1;
+        _serverId = 1;
       else
-	_serverId = (int) Crc64.generate(server);
+        _serverId = Crc64.generate(server);
     }
-    
+
     return _serverId;
   }
 
@@ -176,11 +179,11 @@ public class TransactionManagerImpl
     throws SystemException
   {
     TransactionImpl trans = _threadTransaction.get();
-    
+
     if (trans == null
-	|| trans.getStatus() == Status.STATUS_NO_TRANSACTION
-	|| trans.getStatus() == Status.STATUS_UNKNOWN
-	|| trans.isSuspended()) {
+        || trans.getStatus() == Status.STATUS_NO_TRANSACTION
+        || trans.getStatus() == Status.STATUS_UNKNOWN
+        || trans.isSuspended()) {
       return null;
     }
     else {
@@ -201,7 +204,7 @@ public class TransactionManagerImpl
          (trans.getStatus() == Status.STATUS_NO_TRANSACTION ||
           trans.getStatus() == Status.STATUS_UNKNOWN)))
       return null;
-    
+
     _threadTransaction.set(null);
     trans.suspend();
 
@@ -215,7 +218,7 @@ public class TransactionManagerImpl
     throws InvalidTransactionException, SystemException
   {
     Transaction old = _threadTransaction.get();
-    
+
     if (old != null && old.getStatus() != Status.STATUS_NO_TRANSACTION)
       throw new SystemException(L.l("can't resume transaction with active transaction {0}", String.valueOf(old)));
 
@@ -225,7 +228,7 @@ public class TransactionManagerImpl
 
     _threadTransaction.set(impl);
   }
-  
+
   /**
    * Force any completion to be a rollback.
    */
@@ -234,7 +237,7 @@ public class TransactionManagerImpl
   {
     getCurrent().setRollbackOnly();
   }
-  
+
   /**
    * Force any completion to be a rollback.
    */
@@ -288,7 +291,7 @@ public class TransactionManagerImpl
     return this;
   }
   */
-  
+
   /**
    * Returns the current TransactionImpl, creating if necessary.
    *
@@ -298,7 +301,7 @@ public class TransactionManagerImpl
   public TransactionImpl getCurrent()
   {
     TransactionImpl trans = _threadTransaction.get();
-    
+
     if (trans == null || trans.isDead()) {
       trans = new TransactionImpl(this);
       _threadTransaction.set(trans);
@@ -313,10 +316,10 @@ public class TransactionManagerImpl
   {
     synchronized (_transactionList) {
       for (int i = _transactionList.size() - 1; i >= 0; i--) {
-	WeakReference<TransactionImpl> ref = _transactionList.get(i);
+        WeakReference<TransactionImpl> ref = _transactionList.get(i);
 
-	if (ref.get() == null)
-	  _transactionList.remove(i);
+        if (ref.get() == null)
+          _transactionList.remove(i);
       }
 
       _transactionList.add(new WeakReference<TransactionImpl>(trans));
@@ -340,31 +343,34 @@ public class TransactionManagerImpl
       byte []global = xids[i].getGlobalTransactionId();
 
       if (global.length != XidImpl.GLOBAL_LENGTH)
-	continue;
-      
+        continue;
+
       XidImpl xidImpl = new XidImpl(xids[i].getGlobalTransactionId());
 
-      if (_xaLogManager != null
-	  && _xaLogManager.hasCommittedXid(xidImpl)) {
-	log.fine(L.l("XAResource {0} commit xid {1}", xaRes, xidImpl));
+      if (! xidImpl.isSameServer(getServerId()))
+        continue;
 
-	try {
-	  xaRes.commit(xidImpl, false);
-	} catch (Throwable e) {
-	  log.log(Level.WARNING, e.toString(), e);
-	}
+      if (_xaLogManager != null
+          && _xaLogManager.hasCommittedXid(xidImpl)) {
+        log.fine(L.l("XAResource {0} commit xid {1}", xaRes, xidImpl));
+
+        try {
+          xaRes.commit(xidImpl, false);
+        } catch (Throwable e) {
+          log.log(Level.WARNING, e.toString(), e);
+        }
       }
       else {
-	// XXX: need to check if the transaction belongs to this TM
-	// the ownership is encoded in the xid
-	
-	log.fine(L.l("XAResource {0} forget xid {1}", xaRes, xidImpl));
-	
-	try {
-	  xaRes.forget(xidImpl);
-	} catch (Throwable e) {
-	  log.log(Level.WARNING, e.toString(), e);
-	}
+        // XXX: need to check if the transaction belongs to this TM
+        // the ownership is encoded in the xid
+
+        log.fine(L.l("XAResource {0} forget xid {1}", xaRes, xidImpl));
+
+        try {
+          xaRes.forget(xidImpl);
+        } catch (Throwable e) {
+          log.log(Level.FINER, e.toString(), e);
+        }
       }
     }
   }
@@ -377,14 +383,14 @@ public class TransactionManagerImpl
     if (_xaLogManager != null)
       _xaLogManager.flush();
   }
-  
+
   /**
    * Handles the case where a class loader has completed initialization
    */
   public void classLoaderInit(DynamicClassLoader loader)
   {
   }
-  
+
   /**
    * Handles the case where a class loader is dropped.
    */
@@ -392,7 +398,7 @@ public class TransactionManagerImpl
   {
     AbstractXALogManager xaLogManager = _xaLogManager;
     _xaLogManager = null;
-    
+
     if (xaLogManager != null)
       xaLogManager.close();
 
@@ -400,16 +406,16 @@ public class TransactionManagerImpl
 
     synchronized (_transactionList) {
       for (int i = _transactionList.size() - 1; i >= 0; i--) {
-	WeakReference<TransactionImpl> ref = _transactionList.get(i);
-	TransactionImpl xa = ref.get();
+        WeakReference<TransactionImpl> ref = _transactionList.get(i);
+        TransactionImpl xa = ref.get();
 
-	try {
-	  if (xa != null) {
-	    xa.rollback();
-	  }
-	} catch (Throwable e) {
-	  log.log(Level.WARNING, e.toString(), e);
-	}
+        try {
+          if (xa != null) {
+            xa.rollback();
+          }
+        } catch (Throwable e) {
+          log.log(Level.WARNING, e.toString(), e);
+        }
       }
     }
   }

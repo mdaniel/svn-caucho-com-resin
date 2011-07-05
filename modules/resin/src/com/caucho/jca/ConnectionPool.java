@@ -480,16 +480,16 @@ public class ConnectionPool extends AbstractManagedObject
 
     if (_name == null) {
       synchronized (_idGen) {
-	Integer v = _idGen.get();
-	
-	if (v == null)
-	  v = 1;
-	else
-	  v += 1;
-	
-	_idGen.set(v);
-	
-	_name = mcf.getClass().getSimpleName() + "-" + v;
+        Integer v = _idGen.get();
+
+        if (v == null)
+          v = 1;
+        else
+          v += 1;
+
+        _idGen.set(v);
+
+        _name = mcf.getClass().getSimpleName() + "-" + v;
       }
     }
 
@@ -517,7 +517,6 @@ public class ConnectionPool extends AbstractManagedObject
 
         _tm.recover(xa);
       } catch (NotSupportedException e) {
-        _enableXA = false;
         log.finer(e.toString());
       } catch (Throwable e) {
         log.log(Level.FINER, e.toString(), e);
@@ -584,21 +583,21 @@ public class ConnectionPool extends AbstractManagedObject
         try {
           mConn.cleanup();
 
-	  ManagedConnection oldIdleConn = null;
+          ManagedConnection oldIdleConn = null;
 
           synchronized (_idlePool) {
-	    long now = Alarm.getCurrentTime();
-	    
-	    if (_idlePool.size() == 0)
-	      _lastIdlePoolEmptyTime = now;
-	    
-	    if (now - _lastIdlePoolEmptyTime < _maxIdleTime
-		&& _idlePool.add(mConn)) {
-	      return;
-	    }
-	    else {
-	      _lastIdlePoolEmptyTime = now;
-	    }
+            long now = Alarm.getCurrentTime();
+
+            if (_idlePool.size() == 0)
+              _lastIdlePoolEmptyTime = now;
+
+            if (now - _lastIdlePoolEmptyTime < _maxIdleTime
+                && _idlePool.add(mConn)) {
+              return;
+            }
+            else {
+              _lastIdlePoolEmptyTime = now;
+            }
           }
         } catch (Throwable e) {
           log.log(Level.FINE, e.toString(), e);
@@ -606,7 +605,7 @@ public class ConnectionPool extends AbstractManagedObject
           synchronized (_pool) {
             _pool.notifyAll();
           }
-	}
+        }
       }
     }
 
@@ -702,26 +701,26 @@ public class ConnectionPool extends AbstractManagedObject
 
     if (pool == null)
       return;
-    
+
     ArrayList<PoolItem> clearItems = new ArrayList<PoolItem>();
 
     synchronized (_idlePool) {
       _idlePool.clear();
     }
-    
+
     synchronized (pool) {
       clearItems.addAll(pool);
 
       pool.clear();
     }
-    
+
     for (int i = 0; i < clearItems.size(); i++) {
       PoolItem poolItem = clearItems.get(i);
 
       try {
-	poolItem.destroy();
+        poolItem.destroy();
       } catch (Throwable e) {
-	log.log(Level.WARNING, e.toString(), e);
+        log.log(Level.WARNING, e.toString(), e);
       }
     }
   }
@@ -784,7 +783,7 @@ public class ConnectionPool extends AbstractManagedObject
     throws ResourceException
   {
     long timeoutCount = _connectionWaitCount;
-    
+
     long expireTime = Alarm.getCurrentTimeActual() + _connectionWaitTime;
 
     while (_lifecycle.isActive()) {
@@ -800,7 +799,7 @@ public class ConnectionPool extends AbstractManagedObject
         return userPoolItem;
 
       long now = Alarm.getCurrentTimeActual();
-      
+
       if (expireTime < now)
         break;
     }
@@ -906,15 +905,15 @@ public class ConnectionPool extends AbstractManagedObject
       int size = _pool.size();
 
       if (isOverflow
-	  && _maxConnections + _maxOverflowConnections <= _createCount + size) {
+          && _maxConnections + _maxOverflowConnections <= _createCount + size) {
         throw new ResourceException(L.l("Connection pool is full.  Can't allocate connection."));
       }
       // if the pool is full, don't create, and wait
       else if (! isOverflow
-	       && (_maxConnections <= _createCount + size
-		   || _maxCreateConnections <= _createCount)) {
+               && (_maxConnections <= _createCount + size
+                   || _maxCreateConnections <= _createCount)) {
         try {
-	  Thread.interrupted();
+          Thread.interrupted();
           _pool.wait(1000);
         } catch (Exception e) {
           log.log(Level.FINE, e.toString(), e);
@@ -941,10 +940,10 @@ public class ConnectionPool extends AbstractManagedObject
       // Ensure the connection is still valid
       userPoolItem = poolItem.toActive(subject, info, oldUserItem);
       if (userPoolItem != null) {
-	synchronized (this) {
-	  _connectionCreateCountTotal++;
-	}
-	
+        synchronized (this) {
+          _connectionCreateCountTotal++;
+        }
+
         return userPoolItem;
       }
 
@@ -952,17 +951,17 @@ public class ConnectionPool extends AbstractManagedObject
                                           poolItem));
     } catch (RuntimeException e) {
       synchronized (this) {
-	_connectionFailCountTotal++;
-	_lastFailTime = Alarm.getCurrentTime();
+        _connectionFailCountTotal++;
+        _lastFailTime = Alarm.getCurrentTime();
       }
-      
+
       throw e;
     } catch (ResourceException e) {
       synchronized (this) {
-	_connectionFailCountTotal++;
-	_lastFailTime = Alarm.getCurrentTime();
+        _connectionFailCountTotal++;
+        _lastFailTime = Alarm.getCurrentTime();
       }
-      
+
       throw e;
     } finally {
       synchronized (_pool) {
@@ -1033,7 +1032,7 @@ public class ConnectionPool extends AbstractManagedObject
       log.log(Level.WARNING, e.toString(), e);
     }
   }
-  
+
   /*
    * Removes a connection from the pool.
    */

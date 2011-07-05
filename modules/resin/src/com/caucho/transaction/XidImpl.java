@@ -85,7 +85,7 @@ public class XidImpl implements Xid {
     _global[17] = (byte) (timestamp >> 16);
     _global[18] = (byte) (timestamp >> 8);
     _global[19] = (byte) (timestamp);
-    
+
     // next 8 is a 64-bit random long
     _global[20] = (byte) (randomId >> 56);
     _global[21] = (byte) (randomId >> 48);
@@ -148,6 +148,31 @@ public class XidImpl implements Xid {
     return _global;
   }
 
+  boolean isSameServer(long serverId)
+  {
+    // first 4 identify as Resin.
+    if (_global[0] != 'R'
+        || _global[1] != 'e'
+        || _global[2] != 's'
+        || _global[3] != 'n') {
+      return false;
+    }
+
+    // next 8 is the crc64 of the caucho.server-id
+    if (_global[4] != (byte) (serverId >> 56)
+        || _global[5] != (byte) (serverId >> 48)
+        || _global[6] != (byte) (serverId >> 40)
+        || _global[7] != (byte) (serverId >> 32)
+        || _global[8] != (byte) (serverId >> 24)
+        || _global[9] != (byte) (serverId >> 16)
+        || _global[10] != (byte) (serverId >> 8)
+        || _global[11] != (byte) (serverId)) {
+      return false;
+    }
+
+    return true;
+  }
+
   /**
    * Clones the xid.
    */
@@ -164,7 +189,7 @@ public class XidImpl implements Xid {
     byte []global = _global;
 
     int hash = 37;
-    
+
     for (int i = global.length - 1; i >= 0; i--)
       hash = 65521 * hash + global[i];
 
@@ -192,12 +217,12 @@ public class XidImpl implements Xid {
 
     for (int i = global.length - 1; i >= 0; i--) {
       if (global[i] != selfGlobal[i])
-	return false;
+        return false;
     }
 
     for (int i = local.length - 1; i >= 0; i--) {
       if (local[i] != selfLocal[i])
-	return false;
+        return false;
     }
 
     return true;
@@ -217,13 +242,13 @@ public class XidImpl implements Xid {
     addByte(cb, branch[0]);
 
     cb.append(":");
-    
+
     byte []global = getGlobalTransactionId();
     for (int i = 24; i < 28; i++)
       addByte(cb, global[i]);
 
     cb.append("]");
-    
+
     return cb.close();
   }
 
@@ -235,6 +260,8 @@ public class XidImpl implements Xid {
    */
   static private void addByte(CharBuffer cb, int b)
   {
+    b = b & 0xff;
+
     int h = (b / 16) & 0xf;
     int l = b & 0xf;
 
@@ -242,7 +269,7 @@ public class XidImpl implements Xid {
       cb.append((char) ('a' + h - 10));
     else
       cb.append((char) ('0' + h));
-    
+
     if (l >= 10)
       cb.append((char) ('a' + l - 10));
     else

@@ -691,11 +691,12 @@ public class TestLoginModule implements javax.security.auth.spi.LoginModule {
 </s2> <!-- JaasAuthenticator -->
 
 <s2 title="AuthenticationList" version="3.0.9">
+
 <p>AuthenticatorList 
 (<a href="javadoc|com.caucho.server.security.AuthenticatorList|"/>)
 is used to configure more than one authenticator in a list, each
 authenticator is tried in turn and if the authentication fails the next
-authenticator in the list is attempted.
+authenticator in the list is attempted.</p>
 
 <example>
   &lt;authenticator type="com.caucho.server.security.AuthenticatorList"&gt;
@@ -728,7 +729,7 @@ authenticator in the list is attempted.
   &lt;security-constraint url-pattern='/admin/*' role-name='admin'/&gt;
 </example>
 
-</p></s2>
+</s2>
 
 </s1>
 

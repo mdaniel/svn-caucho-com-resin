@@ -132,7 +132,7 @@ threads of processing may be interacting with the database at the same
 time.</p>
 
 <p>For a simple example, imagine a set of operations that reads a value,
-calculates a new value, and then updates the database.
+calculates a new value, and then updates the database.</p>
 
 <example title="Example: simple set of database operations">
 read value A=1 
@@ -145,7 +145,7 @@ update     A=3
 </example>
 
 
-</p><p>Imagine if one thread is performing this operation, and in the middle of
+<p>Imagine if one thread is performing this operation, and in the middle of
 this read/calculate/update, another thread performs an update.  The data that
 the first thread obtained from the read and is using for the calculation and
 update is no longer valid.</p>

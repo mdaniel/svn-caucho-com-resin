@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 1998-2008 Caucho Technology -- all rights reserved
+ * Copyright (c) 1998-2011 Caucho Technology -- all rights reserved
  *
  * This file is part of Resin(R) Open Source
  *
@@ -30,12 +30,16 @@
 package javax.persistence;
 
 import javax.persistence.spi.PersistenceProvider;
+// import javax.persistence.spi.ProviderUtil;
+
 import java.io.InputStream;
 import java.net.URL;
 import java.util.ArrayList;
 import java.util.Enumeration;
+import java.util.List;
 import java.util.Map;
 import java.util.WeakHashMap;
+import java.util.HashSet;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -48,12 +52,21 @@ public class Persistence {
 
   private static final String SERVICE
     = "META-INF/services/javax.persistence.spi.PersistenceProvider";
-  private static WeakHashMap<ClassLoader,PersistenceProvider[]>
-    _providerMap = new WeakHashMap<ClassLoader,PersistenceProvider[]>();
-  
+
+  private static WeakHashMap<ClassLoader,String[]>
+    _providerMap = new WeakHashMap<ClassLoader,String[]>();
+
   private static final String AMBER_PROVIDER
     = "com.caucho.amber.manager.AmberPersistenceProvider";
-  
+
+  @Deprecated
+  protected static final java.util.Set<PersistenceProvider> providers
+    = new HashSet<PersistenceProvider>();
+
+  @Deprecated
+  public static final String PERSISTENCE_PROVIDER
+    = "javax.persistence.spi.PeristenceProvider";
+
   /**
    * Create an return an EntityManagerFactory for the named unit.
    *
@@ -61,18 +74,16 @@ public class Persistence {
    */
   public static EntityManagerFactory createEntityManagerFactory(String name)
   {
-    PersistenceProvider []providers = getProviderList();
-
-    for (int i = 0; i < providers.length; i++) {
+    for (PersistenceProvider provider: getProviderList()) {
       EntityManagerFactory factory;
 
-      factory = providers[i].createEntityManagerFactory(name, null);
+      factory = provider.createEntityManagerFactory(name, null);
 
       if (factory != null)
         return factory;
     }
 
-    return null;
+    throw new PersistenceException("no persistence provider found for `" + name + '\'');
   }
 
   /**
@@ -81,8 +92,9 @@ public class Persistence {
    * @param name - the name of the persistence unit
    * @param props - persistence unit properties
    */
-  public static EntityManagerFactory createEntityManagerFactory(String name,
-                                                                Map props)
+  @SuppressWarnings("unchecked")
+  public static EntityManagerFactory
+  createEntityManagerFactory(String name, Map props)
   {
     for (PersistenceProvider provider : getProviderList()) {
       EntityManagerFactory factory;
@@ -90,58 +102,86 @@ public class Persistence {
       factory = provider.createEntityManagerFactory(name, props);
 
       if (factory != null)
-	return factory;
+        return factory;
     }
 
-    return null;
+    throw new PersistenceException("no persistence provider found for `" + name + '\'');
   }
+
+  /*
+  public static PersistenceUtil getPersistenceUtil()
+  {
+    return new PersistenceUtilImpl(getProviderList());
+  }
+  */
 
   private static PersistenceProvider []getProviderList()
   {
     ClassLoader loader = Thread.currentThread().getContextClassLoader();
 
-    PersistenceProvider []providers = _providerMap.get(loader);
+    String []providerClassNames = _providerMap.get(loader);
 
-    if (providers != null)
-      return providers;
+    if (providerClassNames != null)
+      return loadProviders(providerClassNames);
 
-    ArrayList<PersistenceProvider> list = new ArrayList<PersistenceProvider>();
+    ArrayList<String> list = new ArrayList<String>();
 
     try {
-      Class cl = Class.forName(AMBER_PROVIDER, false, loader);
+      Class<?> cl = Class.forName(AMBER_PROVIDER, false, loader);
 
-      PersistenceProvider provider = (PersistenceProvider) cl.newInstance();
-
-      list.add(provider);
+      list.add(cl.getName());
     } catch (Exception e) {
       log.log(Level.FINE, e.toString(), e);
     }
 
     try {
-      Enumeration e = loader.getResources(SERVICE);
+      Enumeration<URL> e = loader.getResources(SERVICE);
 
       while (e.hasMoreElements()) {
-        URL url = (URL) e.nextElement();
+        URL url = e.nextElement();
 
-        PersistenceProvider provider = loadProvider(url, loader);
-
-        if (provider != null)
-          list.add(provider);
+        list.addAll(loadProviders(url, loader));
       }
     } catch (Exception e) {
       log.log(Level.WARNING, e.toString(), e);
     }
 
-    providers = new PersistenceProvider[list.size()];
-    list.toArray(providers);
+    providerClassNames  = new String[list.size()];
+    list.toArray(providerClassNames);
 
-    _providerMap.put(loader, providers);
+    _providerMap.put(loader, providerClassNames);
+
+    return loadProviders(providerClassNames);
+  }
+
+  private static PersistenceProvider []loadProviders(String []classNames)
+  {
+    int size = classNames.length;
+
+    PersistenceProvider []providers = new PersistenceProvider[size];
+
+    ClassLoader classLoader = Thread.currentThread().getContextClassLoader();
+
+    for (int i = 0; i < size; i++) {
+      try {
+        Class<?> cl = Class.forName(classNames[i], false, classLoader);
+
+        PersistenceProvider provider = (PersistenceProvider) cl.newInstance();
+
+        providers[i] = provider;
+      } catch (Throwable e) {
+        log.log(Level.WARNING, e.toString(), e);
+      }
+    }
 
     return providers;
   }
 
-  private static PersistenceProvider loadProvider(URL url, ClassLoader loader)
+  private static List<String> loadProviders(URL url,
+                                                        ClassLoader loader)
   {
+    List<String> providers = new ArrayList<String>();
+
     InputStream is = null;
     try {
       is = url.openStream();
@@ -165,9 +205,13 @@ public class Persistence {
 
           String className = sb.toString();
 
-          Class cl = Class.forName(className, false, loader);
+          try {
+            Class<?> cl = Class.forName(className, false, loader);
 
-          return (PersistenceProvider) cl.newInstance();
+            providers.add(cl.getName());
+          } catch (Exception e) {
+            log.log(Level.FINER, e.getMessage(), e);
+          }
         }
       }
     } catch (Exception e) {
@@ -180,6 +224,90 @@ public class Persistence {
       }
     }
 
-    return null;
+    return providers;
   }
+  /*
+  private static class PersistenceUtilImpl implements PersistenceUtil {
+    private PersistenceProvider []_providerList;
+
+    PersistenceUtilImpl(PersistenceProvider []providerList)
+    {
+      _providerList = providerList;
+    }
+
+    @Override
+    public boolean isLoaded(Object entity, String attributeName)
+    {
+      for (PersistenceProvider provider : _providerList) {
+        try {
+          ProviderUtil util = provider.getProviderUtil();
+
+          if (util != null) {
+            LoadState state = util.isLoadedWithoutReference(entity, attributeName);
+
+            if (state == LoadState.LOADED)
+              return true;
+            else if (state == LoadState.NOT_LOADED)
+              return false;
+          }
+        } catch (Exception e) {
+          log.log(Level.FINER, provider + ": " + e.toString(), e);
+        } catch (AbstractMethodError e) {
+          log.log(Level.FINER, provider + ": " + e.toString(), e);
+        }
+      }
+
+      for (PersistenceProvider provider : _providerList) {
+        try {
+          ProviderUtil util = provider.getProviderUtil();
+
+          if (util != null) {
+            LoadState state = util.isLoadedWithReference(entity, attributeName);
+
+            if (state == LoadState.LOADED)
+              return true;
+            else if (state == LoadState.NOT_LOADED)
+              return false;
+          }
+        } catch (Exception e) {
+          log.log(Level.FINER, provider + ": " + e.toString(), e);
+        } catch (AbstractMethodError e) {
+          log.log(Level.FINER, provider + ": " + e.toString(), e);
+        }
+      }
+
+      return true;
+    }
+
+    @Override
+    public boolean isLoaded(Object entity)
+    {
+      for (PersistenceProvider provider : _providerList) {
+        try {
+          ProviderUtil util = provider.getProviderUtil();
+
+          if (util != null) {
+            LoadState state = util.isLoaded(entity);
+
+            if (state == LoadState.LOADED)
+              return true;
+            else if (state == LoadState.NOT_LOADED)
+              return false;
+          }
+        } catch (AbstractMethodError e) {
+          log.log(Level.FINER, provider + ": " + e.toString(), e);
+        } catch (Exception e) {
+          log.log(Level.FINER, provider + ": " + e.toString(), e);
+        }
+      }
+
+      return false;
+    }
+
+    public String toString()
+    {
+      return getClass().getSimpleName() + "[]";
+    }
+  }
+  */
 }

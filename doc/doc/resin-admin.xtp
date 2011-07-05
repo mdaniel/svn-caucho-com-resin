@@ -519,6 +519,7 @@ network device (e.g. routers) from an SNMP manager application.
 <p>
 To enable Resin's SNMP service, you'll need to add an SNMP protocol tag
 to your resin.conf under the &lt;server&gt; tag:
+</p>
 
 <example title="resin.conf">
 &lt;resin xmlns="http://caucho.com/ns/resin"&gt;
@@ -535,6 +536,7 @@ to your resin.conf under the &lt;server&gt; tag:
 &lt;resin/&gt;
 </example>
 
+<p>
 This opens up a port that listens for SNMP requests and responds to
 them with an SNMP response.  Currently, Resin can only respond to
 TCP SNMP get-pdu requests.
@@ -680,6 +682,7 @@ mappings are hard-coded in Resin and they are:
 To define your own MIB variables, you'll need to extend the
 <var>com.caucho.server.snmp.SnmpProtocol</var> class and then use that
 class name in the &lt;protocol&gt; tag:
+</p>
 
 <example title="resin.conf">
 &lt;resin xmlns="http://caucho.com/ns/resin"&gt;
@@ -717,7 +720,7 @@ public class MySnmpProtocol extends SnmpProtocol
 
 </example>
 
-<var>"1.2.3.4.5"</var> is the SNMP ID you choose to give to your mapping.
+<p><var>"1.2.3.4.5"</var> is the SNMP ID you choose to give to your mapping.
 It should be in dot notation.  <var>SnmpValue.OCTET_STRING</var> is the
 type Resin should return for that attribute.  An abbreviated list of
 the available types are:
