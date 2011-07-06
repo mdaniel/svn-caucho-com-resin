@@ -774,26 +774,30 @@ public class ResinStatusServlet extends GenericServlet {
       Collections.sort(apps, new AppCompare());
 
       for (int j = 0; j < apps.size(); j++) {
-        WebAppMXBean app = apps.get(j);
-        SessionManagerMXBean session = app.getSessionManager();
+        WebAppMXBean webApp = apps.get(j);
+        SessionManagerMXBean session = webApp.getSessionManager();
 
-        String contextPath = app.getContextPath();
+        String contextPath = webApp.getContextPath();
 
         if (contextPath.equals(""))
           contextPath = "/";
 
         out.print("<tr><td><td>");
         out.print("<a href=\"" + pwd + "?host=" + host.getHostName() +
-                  "&app=" + app.getContextPath() + "\">");
+                  "&app=" + webApp.getContextPath() + "\">");
         out.print(contextPath);
         out.print("</a>");
 
-        String state = app.getState();
+        String state = webApp.getState();
         if (state.equals("active"))
-          out.print("<td bgcolor='#80ff80'>" + app.getState());
+          out.print("<td bgcolor='#80ff80'>" + webApp.getState());
         else
-          out.print("<td>" + app.getState());
-        out.print("<td>" + session.getSessionActiveCount());
+          out.print("<td>" + webApp.getState());
+        
+        if (session != null)
+          out.print("<td>" + session.getSessionActiveCount());
+        else
+          out.print("<td>n/a");
       }
     }
 

@@ -121,11 +121,14 @@ public class WebComponent {
   {
     LinkedHashSet<Bean<?>> beans = null;
 
+    // ioc/0775, #4649
+    /*
     if (_injectionPointEntry != null) {
       beans = new LinkedHashSet<Bean<?>>();
       beans.add(_injectionPointEntry.getBean());
       return beans;
     }
+    */
     
     boolean isVariable = ! type.isGenericRaw();
 

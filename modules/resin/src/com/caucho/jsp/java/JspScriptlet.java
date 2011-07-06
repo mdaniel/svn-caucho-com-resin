@@ -102,9 +102,14 @@ public class JspScriptlet extends JspNode {
    *
    * @param out the output writer for the generated java.
    */
+  @Override
   public void generate(JspJavaWriter out)
     throws Exception
   {
+    // jsp/01h6
+    if (_text == null)
+      return;
+    
     int length = _text.length();
 
     for (int i = 0; i < length; i++) {

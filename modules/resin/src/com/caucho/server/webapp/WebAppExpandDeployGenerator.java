@@ -298,7 +298,7 @@ public class WebAppExpandDeployGenerator
     controller.setVersion(version.getVersion());
     
     // server/1h82 vs server/1h20
-    controller.init();
+    // controller.init();
 
     return controller;
   }

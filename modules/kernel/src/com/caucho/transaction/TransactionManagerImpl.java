@@ -77,7 +77,7 @@ public class TransactionManagerImpl
 
   private static TransactionManagerImpl _tm = new TransactionManagerImpl();
 
-  private int _serverId;
+  private long _serverId;
   
   private long _randomId = RandomUtil.getRandomLong();
   
@@ -209,7 +209,7 @@ public class TransactionManagerImpl
   /**
    * Returns the server id.
    */
-  private int getServerId()
+  private long getServerId()
   {
     if (_serverId == 0) {
       String server = (String) Environment.getAttribute("caucho.server-id");
@@ -217,7 +217,7 @@ public class TransactionManagerImpl
       if (server == null)
         _serverId = 1;
       else
-        _serverId = (int) Crc64.generate(server);
+        _serverId = Crc64.generate(server);
     }
 
     return _serverId;
@@ -393,12 +393,15 @@ public class TransactionManagerImpl
       return;
 
     for (int i = 0; i < xids.length; i++) {
-      byte [] global = xids[i].getGlobalTransactionId();
+      byte []global = xids[i].getGlobalTransactionId();
 
       if (global.length != XidImpl.GLOBAL_LENGTH)
         continue;
 
       XidImpl xidImpl = new XidImpl(xids[i].getGlobalTransactionId());
+      
+      if (! xidImpl.isSameServer(getServerId()))
+        continue;
 
       if (_xaLogManager != null && _xaLogManager.hasCommittedXid(xidImpl)) {
         log.fine(L.l("XAResource {0} commit xid {1}", xaRes, xidImpl));

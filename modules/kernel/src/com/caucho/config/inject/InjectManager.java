@@ -1504,7 +1504,7 @@ public final class InjectManager
                                   InjectionPoint ip)
   {
     WebComponent component = getWebComponent(baseType);
-    
+
     if (component != null) {
       Set<Bean<?>> beans = component.resolve(baseType, qualifiers);
 
@@ -1723,6 +1723,7 @@ public final class InjectManager
     return _specializedMap.get(beanClass) != null;
   }
 
+  @Override
   public <X> Bean<? extends X> resolve(Set<Bean<? extends X>> beans)
   {
     Bean<? extends X> bestBean = null;
@@ -1746,12 +1747,16 @@ public final class InjectManager
           isSpecializes = true;
         }
       }
-      else if (isSpecializes)
+      else if (isSpecializes) {
         continue;
+      }
       
       int priority = getDeploymentPriority(bean);
 
-      if (bestPriority < priority) {
+      if (priority < 0) {
+        // alternatives
+      }
+      else if (bestPriority < priority) {
         bestBean = bean;
         secondBean = null;
         
@@ -1759,7 +1764,7 @@ public final class InjectManager
       }
       else if (bestPriority == priority) {
         secondBean = bean;
-
+System.out.println("SB: " + secondBean + " " + bean);
         // TCK: ProducerFieldDefinitionTest
         boolean isFirstProduces = (bestBean instanceof ProducesMethodBean<?,?>
                                    || bestBean instanceof ProducesFieldBean<?,?>);
@@ -2049,17 +2054,17 @@ public final class InjectManager
   {
     int priority = DEFAULT_PRIORITY;
 
-    Set<Class<? extends Annotation>> stereotypes = bean.getStereotypes();
-    
     if (bean.isAlternative()) {
       priority = -1;
       
-      Integer value = _deploymentMap.get(bean.getBeanClass());
-      
+      Integer value = getPriority(bean.getBeanClass());
+      System.out.println("BEAN: " + value + " " + bean);
       if (value != null)
         priority = value;
     }
 
+    Set<Class<? extends Annotation>> stereotypes = bean.getStereotypes();
+    
     if (stereotypes != null) {
       for (Class<? extends Annotation> annType : stereotypes) {
         Integer value = _deploymentMap.get(annType);
@@ -2088,7 +2093,19 @@ public final class InjectManager
 
     return priority;
   }
-
+  
+  private Integer getPriority(Class<?> cl)
+  {
+    Integer value = _deploymentMap.get(cl);
+    
+    if (value != null)
+      return value;
+    else if (_parent != null)
+      return _parent.getPriority(cl);
+    else
+      return null;
+  }
+  
   private Set<Bean<?>> resolveAllBeans()
   {
     LinkedHashSet<Bean<?>> beans = new LinkedHashSet<Bean<?>>();
@@ -2111,9 +2128,9 @@ public final class InjectManager
   /**
    * Convenience-class for Resin.
    */
-  public <T> T getReference(Class<T> type, Annotation... bindings)
+  public <T> T getReference(Class<T> type, Annotation... qualifiers)
   {
-    Set<Bean<?>> beans = getBeans(type);
+    Set<Bean<?>> beans = getBeans(type, qualifiers);
     Bean<T> bean = (Bean<T>) resolve(beans);
 
     if (bean == null)
@@ -2605,8 +2622,8 @@ public final class InjectManager
       if (priority == bestPriority)
         matchBeans.add(bean);
     }
-
-    return new AmbiguousResolutionException(L.l("Too many beans match, because they all have equal precedence.  See the @Stereotype and <enable> tags to choose a precedence.  Beans:{0}\nfor {1}",
+System.out.println("BS: " + beanSet);
+    return new AmbiguousResolutionException(L.l("Too many beans match, because they all have equal precedence.  See the @Alternative and <alternatives> tags to choose a precedence.  Beans:{0}\nfor {1}",
                                                 listToLines(matchBeans), this));
   }
 
@@ -2772,7 +2789,7 @@ public final class InjectManager
   /**
    * Adds a new interceptor to the manager
    */
-  public <X> InterceptorEntry<X> addInterceptor(Interceptor<X> interceptor)
+  private <X> InterceptorEntry<X> addInterceptor(Interceptor<X> interceptor)
   {
     InterceptorEntry<X> entry = new InterceptorEntry<X>(interceptor);
     

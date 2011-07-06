@@ -254,6 +254,11 @@ public class ServletConfigImpl
       return null;
     }
   }
+  
+  public MultipartConfigImpl createMultipartConfig()
+  {
+    return new MultipartConfigImpl();
+  }
 
   @Override
   public void setMultipartConfig(MultipartConfigElement multipartConfig)

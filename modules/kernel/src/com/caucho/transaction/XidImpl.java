@@ -30,6 +30,8 @@ package com.caucho.transaction;
 
 import javax.transaction.xa.Xid;
 
+import com.caucho.util.Hex;
+
 /**
  * Transaction identifier implementation.
  */
@@ -137,6 +139,32 @@ public class XidImpl implements Xid {
   {
     return _global;
   }
+  
+  boolean isSameServer(long serverId)
+  {
+    // first 4 identify as Resin.
+    if (_global[0] != 'R'
+        || _global[1] != 'e'
+        || _global[2] != 's'
+        || _global[3] != 'n') {
+      return false;
+    }
+
+    // next 8 is the crc64 of the caucho.server-id
+    if (_global[4] != (byte) (serverId >> 56)
+        || _global[5] != (byte) (serverId >> 48)
+        || _global[6] != (byte) (serverId >> 40)
+        || _global[7] != (byte) (serverId >> 32)
+        || _global[8] != (byte) (serverId >> 24)
+        || _global[9] != (byte) (serverId >> 16)
+        || _global[10] != (byte) (serverId >> 8)
+        || _global[11] != (byte) (serverId)) {
+      return false;
+    }
+    
+    return true;
+    
+  }
 
   /**
    * Clones the xid.
@@ -231,6 +259,8 @@ public class XidImpl implements Xid {
    */
   static private void addByte(StringBuilder cb, int b)
   {
+    b = b & 0xff;
+    
     int h = (b / 16) & 0xf;
     int l = b & 0xf;
 

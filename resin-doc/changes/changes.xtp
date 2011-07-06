@@ -13,6 +13,14 @@
 
 <s2 title="4.0.20 - snapshot">
 <ul>
+<li>xa: recover/forget needs to check xid against current server (#4645)</li>
+<li>webapp: multipart-config needed in servlet tag (#4648)</li>
+<li>webapp: multiple-init issue with versioned controllers (#4637, rep by W. Au)</li>
+<li>cdi/ejb: issue with @Alternative working with EJBs (#4636, rep by ChrisC)</li>
+<li>jsp: NPE with trimDirectiveWhitespaces and empty scriptlet (#4651, rep by mnsh)</li>
+<li>resin-admin: added 60s ajax updates to summary graphs (#4577)</li>
+<li>quercus: DateTime NPE (#4596, rep by rmann)</li>
+<li>cdi: InjectionPoint on producer was overriding all other producers (#4649, rep by Max Bureck)</li>
 <li>command-line: add -data-directory to change location of resin-data (#4646, rep by Keith Fetterman)</li>
 <li>command-line: command-line now uses hmux servers when available (#4616)</li>
 <li>db/cache: Table.validateIndexes wasn't freeing its Block/TableIterator (#4624, rep by Michael O'Dea)</li>
@@ -21,7 +29,7 @@
 <li>multipart-form: added parameter-length-max (#4638, rep by Daniel Kador)</li>
 <li>system: &lt;resin:LogService> needs to check for existing log system (rep by Adrian Sutton)</li>
 <li>install: --with-resin-log should update nit.d/resin.in (#4640, rep by K Fetterman)</li>
-<li>health: added graph page configuration to health.xml</li>
+<li>health: added graph page configuration to health.xml (#4577)</li>
 <li>network: refactored networking to split thread-safe/and non-thread-safe state machines (#4633, by Danny Yates)</li>
 <li>resin: options on the command should be global (#4605)</li>
 <li>resin: command line user mgmt (#4603)</li>

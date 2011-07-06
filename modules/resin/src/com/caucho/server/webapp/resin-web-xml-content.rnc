@@ -435,6 +435,20 @@ r_mime-mapping = element mime-mapping {
    | element mime-type { string })
 }
 
+r_multipart-config = element multipart-config {
+  (attribute location { string }
+   | element location { string })?
+
+  & (attribute max-file-size { r_kbytes }
+     | element max-file-size { r_kbytes })?
+
+  & (attribute max-request-size { r_kbytes }
+     | element max-request-size { r_kbytes })?
+
+  & (attribute file-size-threshold { r_kbytes }
+     | element file-size-threshold { r_kbytes })?
+}
+
 r_multipart-form = element multipart-form {
   (attribute enable { r_boolean-Type }
    | element enable { r_boolean-Type })?
@@ -875,6 +889,8 @@ r_servlet-Content =
 
    & (attribute load-on-startup { string }
       | element load-on-startup { string })?
+
+   & r_multipart-config?
 
    & r_protocol-Servlet?
 

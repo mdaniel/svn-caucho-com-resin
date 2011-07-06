@@ -159,6 +159,16 @@ javaee_mime-mapping = element mime-mapping {
   element mime-type { string }
 }
 
+javaee_multipart-config = element multipart-config {
+  element location { string }?,
+
+  element max-file-size { r_kbytes }?,
+
+  element max-request-size { r_kbytes }?,
+
+  element file-size-threshold { r_kbytes }?
+}
+
 javaee_security-constraint = element security-constraint {
   attribute id { string }?,
 
@@ -197,7 +207,9 @@ javaee_servlet = element servlet {
 
   element run-as { string }?,
 
-  javaee_security-role-ref*
+  javaee_security-role-ref*,
+  
+  javaee_multipart-config?
 }
 
 javaee_servlet-name = element servlet-name {

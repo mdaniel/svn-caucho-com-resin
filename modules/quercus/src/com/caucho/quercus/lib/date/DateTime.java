@@ -57,11 +57,14 @@ public class DateTime
   
   protected DateTime(Env env, String timeString)
   {
-    this(env, timeString, new DateTimeZone(env));
+    this(env, timeString, null);
   }
   
   protected DateTime(Env env, String timeString, DateTimeZone dateTimeZone)
   {
+    if (dateTimeZone == null)
+      dateTimeZone = new DateTimeZone(env);
+    
     _qDate = new QDate(dateTimeZone.getTimeZone(), env.getCurrentTime());
     _dateTimeZone = dateTimeZone;
     

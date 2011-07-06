@@ -23,24 +23,49 @@
  *   59 Temple Place, Suite 330
  *   Boston, MA 02111-1307  USA
  *
- * @author Rodrigo Westrupp
+ * @author Scott Ferguson
  */
 
-package com.caucho.ejb.cfg;
+package com.caucho.server.dispatch;
+
+import javax.servlet.MultipartConfigElement;
+
+import com.caucho.config.types.Bytes;
 
 /**
- * Configuration for interceptors.
+ * Configuration for a multipart-config
  */
-public class InterceptorsConfig {
-  private final EjbConfig _config;
-
-  public InterceptorsConfig(EjbConfig config)
+public class MultipartConfigImpl {
+  private String _location;
+  private long _maxFileSize;
+  private long _maxRequestSize;
+  private int _fileSizeThreshold;
+  
+  public void setLocation(String location)
   {
-    _config = config;
+    _location = location;
   }
-
-  public void addInterceptor(Interceptor interceptor)
+  
+  public void setMaxFileSize(Bytes maxSize)
   {
-    _config.addInterceptor(interceptor);
+    _maxFileSize = maxSize.getBytes();
+  }
+  
+  public void setMaxRequestSize(Bytes maxSize)
+  {
+    _maxRequestSize = maxSize.getBytes();
+  }
+  
+  public void setFileSizeThreshold(Bytes maxSize)
+  {
+    _fileSizeThreshold = (int) maxSize.getBytes();
+  }
+  
+  public Object replaceObject()
+  {
+    return new MultipartConfigElement(_location,
+                                      _maxFileSize,
+                                      _maxRequestSize,
+                                      _fileSizeThreshold);
   }
 }

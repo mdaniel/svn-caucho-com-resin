@@ -101,7 +101,7 @@ public class JniTroubleshoot {
         return L.l("Unable to find native library '{0}' for {1}. "
                    + "Resin expects to find this library in:\n"
                    + "  (Mac OS X) {2}\n"
-                   + "On Mac OS X, run ./configure; make; make install.\n"
+                   + "On Mac OS X, run ./configure --prefix=`pwd`; make; make install.\n"
                    + "The JVM exception was: {3}\n",
                    _libraryName, _className, lib.getNativePath(), _cause);
       }
@@ -117,7 +117,7 @@ public class JniTroubleshoot {
         return L.l("Unable to find native library '{0}' for {1}. "
                    + "Resin expects to find this library in:\n"
                    + "  (Unix) {2}\n"
-                   + "On Unix, run ./configure; make; make install.\n\n"
+                   + "On Unix, run ./configure --prefix=`pwd`; make; make install.\n\n"
                    + "The JVM exception was: {3}\n",
                    _libraryName, _className, lib.getNativePath(), _cause);
       }

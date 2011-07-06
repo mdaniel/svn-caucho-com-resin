@@ -45,8 +45,6 @@ import com.caucho.util.L10N;
 public class WebAppAdmin extends DeployControllerAdmin<WebAppController>
   implements WebAppMXBean
 {
-  private static final L10N L = new L10N(WebAppAdmin.class);
-
   public WebAppAdmin(WebAppController controller)
   {
     super(controller);
@@ -59,6 +57,7 @@ public class WebAppAdmin extends DeployControllerAdmin<WebAppController>
   /**
    * Returns the owning host
    */
+  @Override
   public HostMXBean getHost()
   {
     Host host = getController().getHost();
@@ -69,6 +68,7 @@ public class WebAppAdmin extends DeployControllerAdmin<WebAppController>
       return null;
   }
 
+  @Override
   public SessionManagerMXBean getSessionManager()
   {
     WebApp app = getWebApp();
@@ -86,6 +86,7 @@ public class WebAppAdmin extends DeployControllerAdmin<WebAppController>
   /**
    * Returns the context path
    */
+  @Override
   public String getContextPath()
   {
     return getController().getContextPath();
@@ -94,6 +95,7 @@ public class WebAppAdmin extends DeployControllerAdmin<WebAppController>
   /**
    * Returns the web-app version number
    */
+  @Override
   public String getVersion()
   {
     return getController().getVersion();
@@ -102,6 +104,7 @@ public class WebAppAdmin extends DeployControllerAdmin<WebAppController>
   /**
    * Returns the manifest attributes
    */
+  @Override
   public Map<String,String> getManifestAttributes()
   {
     return getController().getManifestAttributes();
@@ -122,6 +125,7 @@ public class WebAppAdmin extends DeployControllerAdmin<WebAppController>
       return 0;
   }
 
+  @Override
   public Date getStatus500LastTime()
   {
     WebApp webApp = getWebApp();

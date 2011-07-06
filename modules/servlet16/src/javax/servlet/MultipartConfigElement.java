@@ -45,8 +45,10 @@ public class MultipartConfigElement {
     _location = location;
   }
 
-  public MultipartConfigElement(String location, long maxFileSize,
-                                long maxRequestSize, int fileSizeThreshold)
+  public MultipartConfigElement(String location, 
+                                long maxFileSize,
+                                long maxRequestSize, 
+                                int fileSizeThreshold)
   {
     _location = location;
     _maxFileSize = maxFileSize;

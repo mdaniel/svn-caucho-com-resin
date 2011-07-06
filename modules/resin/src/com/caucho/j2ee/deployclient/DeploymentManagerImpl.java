@@ -29,20 +29,12 @@
 
 package com.caucho.j2ee.deployclient;
 
-import com.caucho.server.admin.DeployClient;
-import com.caucho.server.admin.HostQuery;
-import com.caucho.server.admin.WebAppQuery;
-import com.caucho.server.admin.TagQuery;
-import com.caucho.server.admin.StatusQuery;
-import com.caucho.util.L10N;
-import com.caucho.vfs.*;
-import com.caucho.xml.*;
-import com.caucho.xpath.XPath;
-import com.caucho.bam.RemoteConnectionFailedException;
-import com.caucho.bam.TimeoutException;
-import com.caucho.env.repository.CommitBuilder;
-
-import org.w3c.dom.*;
+import java.io.File;
+import java.io.InputStream;
+import java.util.ArrayList;
+import java.util.Iterator;
+import java.util.Locale;
+import java.util.logging.Logger;
 
 import javax.enterprise.deploy.model.DeployableObject;
 import javax.enterprise.deploy.shared.DConfigBeanVersionType;
@@ -56,10 +48,24 @@ import javax.enterprise.deploy.spi.exceptions.DeploymentManagerCreationException
 import javax.enterprise.deploy.spi.exceptions.InvalidModuleException;
 import javax.enterprise.deploy.spi.exceptions.TargetException;
 import javax.enterprise.deploy.spi.status.ProgressObject;
-import java.io.File;
-import java.io.InputStream;
-import java.util.*;
-import java.util.logging.Logger;
+
+import org.w3c.dom.Node;
+
+import com.caucho.bam.RemoteConnectionFailedException;
+import com.caucho.bam.TimeoutException;
+import com.caucho.env.repository.CommitBuilder;
+import com.caucho.server.admin.DeployClient;
+import com.caucho.server.admin.HostQuery;
+import com.caucho.server.admin.StatusQuery;
+import com.caucho.server.admin.TagQuery;
+import com.caucho.util.L10N;
+import com.caucho.vfs.TempOutputStream;
+import com.caucho.vfs.Vfs;
+import com.caucho.xml.DOMBuilder;
+import com.caucho.xml.QDocument;
+import com.caucho.xml.Xml;
+import com.caucho.xml.XmlPrinter;
+import com.caucho.xpath.XPath;
 
 /**
  * Manager for the deployments.
