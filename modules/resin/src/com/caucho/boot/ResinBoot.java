@@ -85,7 +85,7 @@ public class ResinBoot {
 
     Path resinHome = _args.getResinHome();
 
-    ClassLoader loader = ProLoader.create(resinHome);
+    ClassLoader loader = ProLoader.create(resinHome, _args.is64Bit());
 
     if (loader != null) {
       System.setProperty("resin.home", resinHome.getNativePath());

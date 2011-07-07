@@ -99,7 +99,7 @@ abstract class ConnectionTask implements Runnable {
     } catch (OutOfMemoryError e) {
       String msg = "TcpSocketLink OutOfMemory";
 
-      ShutdownSystem.shutdownActive(ExitCode.MEMORY, msg); 
+      ShutdownSystem.shutdownOutOfMemory(msg); 
     } catch (Throwable e) {
       log.log(Level.WARNING, e.toString(), e);
     } finally {

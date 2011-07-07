@@ -157,7 +157,7 @@ class ResinWaitForExitService
       } catch (OutOfMemoryError e) {
         String msg = "Resin shutdown from out of memory";
         
-        ShutdownSystem.shutdownActive(ExitCode.MEMORY, msg);
+        ShutdownSystem.shutdownOutOfMemory(msg);
       } catch (Throwable e) {
         log.log(Level.WARNING, e.toString(), e);
         

@@ -40,6 +40,7 @@ import java.security.CodeSource;
 import java.security.Permission;
 import java.security.PermissionCollection;
 import java.security.ProtectionDomain;
+import java.security.SecureClassLoader;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
@@ -136,7 +137,7 @@ public class DynamicClassLoader extends java.net.URLClassLoader
     = new ArrayList<ClassLoaderListener>();
 
   // The security manager for the loader
-  private SecurityManager _securityManager;
+  // private SecurityManager _securityManager;
 
   // List of permissions allowed in this context
   private ArrayList<Permission> _permissions;
@@ -181,7 +182,7 @@ public class DynamicClassLoader extends java.net.URLClassLoader
 
     parent = getParent();
 
-    _securityManager = System.getSecurityManager();
+    // _securityManager = System.getSecurityManager();
 
     _isEnableDependencyCheck = enableDependencyCheck;
 
@@ -192,7 +193,7 @@ public class DynamicClassLoader extends java.net.URLClassLoader
         DynamicClassLoader loader = (DynamicClassLoader) parent;
 
         loader.init();
-
+        
         addPermissions(loader.getPermissions());
 
         // loader.addNotificationListener(this);
@@ -715,10 +716,12 @@ public class DynamicClassLoader extends java.net.URLClassLoader
   /**
    * Returns the security manager.
    */
+  /*
   public SecurityManager getSecurityManager()
   {
     return _securityManager;
   }
+  */
 
   /**
    * Set true if the loader should use the servlet spec's hack.
@@ -921,10 +924,11 @@ public class DynamicClassLoader extends java.net.URLClassLoader
   protected PermissionCollection getPermissions(CodeSource codeSource)
   {
     PermissionCollection perms = super.getPermissions(codeSource);
-
+    
     ArrayList<Permission> permissions = _permissions;
 
-    for (int i = 0; permissions != null && i < permissions.size(); i++) {
+    int size = permissions != null ? permissions.size() : 0;
+    for (int i = 0; i < size; i++) {
       Permission permission = permissions.get(i);
 
       perms.add(permission);
@@ -2156,7 +2160,7 @@ public class DynamicClassLoader extends java.net.URLClassLoader
       _makeList = null;
 
       _listeners = null;
-      _securityManager = null;
+      // _securityManager = null;
       _permissions = null;
       _codeSource = null;
 
@@ -2225,7 +2229,7 @@ public class DynamicClassLoader extends java.net.URLClassLoader
       source._listeners.clear();
     }
 
-    _securityManager = source._securityManager;
+    // _securityManager = source._securityManager;
     if (source._permissions != null) {
       if (_permissions == null)
         _permissions = new ArrayList<Permission>();

@@ -56,6 +56,8 @@ public class ShutdownSystem extends AbstractResinSubSystem
     = new AtomicReference<ShutdownSystem>();
   
   private long _shutdownWaitMax = 120000L;
+  
+  private boolean _isShutdownOnOutOfMemory = true;
 
   private WeakReference<ResinSystem> _resinSystemRef;
   private WarningService _warningService;
@@ -111,6 +113,16 @@ public class ShutdownSystem extends AbstractResinSubSystem
     _shutdownWaitMax = shutdownTime;
   }
 
+  public void setShutdownOnOutOfMemory(boolean isShutdown)
+  {
+    _isShutdownOnOutOfMemory = isShutdown;
+  }
+
+  public boolean isShutdownOnOutOfMemory()
+  {
+    return _isShutdownOnOutOfMemory;
+  }
+  
   /**
    * Returns the current lifecycle state.
    */
@@ -119,6 +131,22 @@ public class ShutdownSystem extends AbstractResinSubSystem
     return _lifecycle.getState();
   }
   
+  /**
+   * Start the server shutdown
+   */
+  public static void shutdownOutOfMemory(String msg)
+  {
+    ShutdownSystem shutdown = _activeService.get();
+    
+    if (shutdown != null && ! shutdown.isShutdownOnOutOfMemory()) {
+      System.err.println(msg);
+      return;
+    }
+    else {
+      shutdownActive(ExitCode.MEMORY, msg);
+    }
+  }
+    
   /**
    * Start the server shutdown
    */

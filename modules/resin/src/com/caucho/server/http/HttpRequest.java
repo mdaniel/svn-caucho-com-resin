@@ -77,8 +77,10 @@ public class HttpRequest extends AbstractHttpRequest
 
   private static final String REQUEST_TIME_PROBE
     = "Resin|Http|Request";
-  private static final String REQUEST_BYTES_PROBE
-    = "Resin|Http|Request Bytes";
+  private static final String REQUEST_READ_BYTES_PROBE
+  = "Resin|Http|Request Read Bytes";
+  private static final String REQUEST_WRITE_BYTES_PROBE
+  = "Resin|Http|Request Write Bytes";
 
   private final CharBuffer _method     // "GET"
     = new CharBuffer();
@@ -106,7 +108,8 @@ public class HttpRequest extends AbstractHttpRequest
   private RawInputStream _rawInputStream = new RawInputStream();
 
   private ActiveTimeMeter _requestTimeProbe;
-  private AverageMeter _requestBytesProbe;
+  private AverageMeter _requestReadBytesProbe;
+  private AverageMeter _requestWriteBytesProbe;
 
   /**
    * Creates a new HttpRequest.  New connections reuse the request.
@@ -120,8 +123,11 @@ public class HttpRequest extends AbstractHttpRequest
     _requestTimeProbe
       = MeterService.createActiveTimeMeter(REQUEST_TIME_PROBE);
 
-    _requestBytesProbe
-      = MeterService.createAverageMeter(REQUEST_BYTES_PROBE, "");
+    _requestReadBytesProbe
+      = MeterService.createAverageMeter(REQUEST_READ_BYTES_PROBE, "");
+
+    _requestWriteBytesProbe
+      = MeterService.createAverageMeter(REQUEST_WRITE_BYTES_PROBE, "");
   }
 
   @Override
@@ -765,6 +771,9 @@ public class HttpRequest extends AbstractHttpRequest
     Thread thread = Thread.currentThread();
     ClassLoader oldLoader = thread.getContextClassLoader();
     long startTime = 0;
+    
+    long startReadBytes = getRawRead().getPosition();
+    long startWriteBytes = getRawWrite().getPosition();
 
     try {
       thread.setContextClassLoader(server.getClassLoader());
@@ -836,7 +845,12 @@ public class HttpRequest extends AbstractHttpRequest
 
       if (startTime > 0) {
         _requestTimeProbe.end(startTime);
-        _requestBytesProbe.add(getResponse().getContentLength());
+        
+        long endReadBytes = getRawRead().getPosition();
+        long endWriteBytes = getRawWrite().getPosition();
+        
+        _requestReadBytesProbe.add(endReadBytes - startReadBytes);
+        _requestWriteBytesProbe.add(endWriteBytes - startWriteBytes);
       }
 
       thread.setContextClassLoader(oldLoader);

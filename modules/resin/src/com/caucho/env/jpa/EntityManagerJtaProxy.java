@@ -30,7 +30,6 @@
 package com.caucho.env.jpa;
 
 import java.util.Map;
-import java.util.logging.Logger;
 
 import javax.persistence.EntityManager;
 import javax.persistence.EntityManagerFactory;
@@ -87,6 +86,11 @@ public class EntityManagerJtaProxy
   {
     _persistenceUnit = pUnit;
     _ut = UserTransactionProxy.getCurrent();
+    
+    if (_persistenceUnit == null)
+      throw new NullPointerException();
+    if (_ut == null)
+      throw new NullPointerException();
   }
   
   void init()
@@ -962,6 +966,10 @@ public class EntityManagerJtaProxy
       if (_emf == null) {
         _emf = _persistenceUnit.getEntityManagerFactoryDelegate();
       }
+      
+      if (_emf == null)
+        throw new IllegalStateException(L.l("{0} does not have a valid delegate.",
+                                            _persistenceUnit));
       
       em = _emf.createEntityManager(_persistenceUnit.getProperties());
     }

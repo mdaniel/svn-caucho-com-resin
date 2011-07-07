@@ -57,14 +57,12 @@ class ProLoader extends SecureClassLoader
    *
    * @param parent parent class loader
    */
-  private ProLoader(Path resinHome)
+  private ProLoader(Path resinHome, boolean is64bit)
   {
     super(ClassLoader.getSystemClassLoader());
 
     _resinHome = resinHome;
 
-    boolean is64bit = CauchoSystem.is64Bit();
-                                 
     if (is64bit)
       _libexec = _resinHome.lookup("libexec64");
     else
@@ -73,10 +71,10 @@ class ProLoader extends SecureClassLoader
     _resinJar = JarPath.create(_resinHome.lookup("lib/resin.jar"));
   }
 
-  static ProLoader create(Path resinHome)
+  static ProLoader create(Path resinHome, boolean is64bit)
   {
     if (resinHome.lookup("lib/resin.jar").canRead())
-      return new ProLoader(resinHome);
+      return new ProLoader(resinHome, is64bit);
     else
       return null;
   }

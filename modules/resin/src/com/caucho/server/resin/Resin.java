@@ -1425,6 +1425,7 @@ public class Resin
    */
   public static void main(String []argv)
   {
+    System.out.println("SM: " + System.getSecurityManager());
     try {
       Environment.init();
 

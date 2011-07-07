@@ -31,6 +31,7 @@ package com.caucho.loader;
 
 import java.io.File;
 import java.io.IOException;
+import java.security.AllPermission;
 import java.util.concurrent.atomic.AtomicBoolean;
 
 import com.caucho.config.Config;
@@ -100,6 +101,8 @@ public class SystemClassLoader
   {
     if (_isInit.getAndSet(true))
       return;
+    
+    initSecurity();
 
     initClasspath();
 
@@ -208,7 +211,8 @@ public class SystemClassLoader
    *
    * @return the loaded classes
    */
-  public Class loadClassImpl(String name, boolean resolve)
+  @Override
+  public Class<?> loadClassImpl(String name, boolean resolve)
     throws ClassNotFoundException
   {
     // The JVM has already cached the classes, so we don't need to
@@ -283,6 +287,11 @@ public class SystemClassLoader
     path = getLibexec().lookup(name + ".dll");
 
     return super.findLibrary(name);
+  }
+  
+  private void initSecurity()
+  {
+    addPermission(new AllPermission());
   }
 }
 

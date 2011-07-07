@@ -13,6 +13,10 @@
 
 <s2 title="4.0.20 - snapshot">
 <ul>
+<li>health: add ShutdownService configuration to not restart on OOM (#4075, rep by Martin Thompson)</li>
+<li>cli: console libexec needs to use same is64Bit as watchdog (#4558)</li>
+<li>stat: add read/write byte statistics for http request (#4126, rep by Martin Thompson)</li>
+<li>jpa: check persistent-unit NPE for EntityManagerJtaProxy (#4564, rep by dicr)</li>
 <li>xa: recover/forget needs to check xid against current server (#4645)</li>
 <li>webapp: multipart-config needed in servlet tag (#4648)</li>
 <li>webapp: multiple-init issue with versioned controllers (#4637, rep by W. Au)</li>

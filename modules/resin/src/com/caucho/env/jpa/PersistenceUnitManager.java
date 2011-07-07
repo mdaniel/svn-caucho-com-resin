@@ -116,6 +116,7 @@ public class PersistenceUnitManager implements PersistenceUnitInfo {
   private final EntityManagerFactoryProxy _entityManagerFactoryProxy;
   private final EntityManagerJtaProxy _entityManagerJtaProxy;
 
+  private RuntimeException _delegateException;
   private EntityManagerFactory _emfDelegate;
 
   PersistenceUnitManager(PersistenceManager manager,
@@ -329,6 +330,10 @@ public class PersistenceUnitManager implements PersistenceUnitInfo {
   {
     start();
     
+    if (_emfDelegate == null)
+      throw new IllegalStateException(L.l("{0} does not have a valid delegate.",
+                                          this));
+    
     return _emfDelegate;
   }
   
@@ -353,27 +358,37 @@ public class PersistenceUnitManager implements PersistenceUnitInfo {
    */
   void start()
   {
-    if (! _lifecycle.toActive())
+    if (! _lifecycle.toActive()) {
+      if (_delegateException != null)
+        throw _delegateException;
+      
       return;
-    
-    // ConfigContext env = new ConfigContext();
-    
-    for (ConfigProgram program
-           : _persistenceManager.getPersistenceUnitDefaults()) {
-      program.configure(this);
     }
     
-    if (_persistenceXmlProgram != null)
-      _persistenceXmlProgram.configure(this);
-    
-    for (ConfigProgram program : _overridePrograms) {
-      program.configure(this);
-    }
-    
-    createDelegate();
+    try {
+      // ConfigContext env = new ConfigContext();
 
-    if (_entityManagerJtaProxy != null)
-      _entityManagerJtaProxy.init();
+      for (ConfigProgram program
+          : _persistenceManager.getPersistenceUnitDefaults()) {
+        program.configure(this);
+      }
+
+      if (_persistenceXmlProgram != null)
+        _persistenceXmlProgram.configure(this);
+
+      for (ConfigProgram program : _overridePrograms) {
+        program.configure(this);
+      }
+
+      createDelegate();
+
+      if (_entityManagerJtaProxy != null)
+        _entityManagerJtaProxy.init();
+    } catch (RuntimeException e) {
+      _delegateException = e;
+      
+      throw e;
+    }
   }
   
   private void addDefaultProperty(String name, String value)
@@ -414,6 +429,8 @@ public class PersistenceUnitManager implements PersistenceUnitInfo {
       if (_emfDelegate == null)
         throw new IllegalStateException(L.l("{0} did not return an EntityManagerFactory",
                                             provider));
+    } catch (RuntimeException e) {
+      throw e;
     } catch (Exception e) {
       throw ConfigException.create(e);
     }

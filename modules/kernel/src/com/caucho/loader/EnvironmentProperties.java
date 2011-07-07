@@ -81,11 +81,13 @@ public class EnvironmentProperties extends Properties {
     _global = global;
   }
 
+  @Override
   public int size()
   {
     return getEnvironmentProperties().size();
   }
 
+  @Override
   public boolean isEmpty()
   {
     return getEnvironmentProperties().isEmpty();
@@ -101,16 +103,19 @@ public class EnvironmentProperties extends Properties {
     return getEnvironmentProperties().elements();
   }
 
+  @Override
   public boolean contains(Object value)
   {
     return getEnvironmentProperties().contains(value);
   }
 
+  @Override
   public boolean containsValue(Object value)
   {
     return getEnvironmentProperties().containsValue(value);
   }
 
+  @Override
   public boolean containsKey(Object value)
   {
     return getEnvironmentProperties().containsKey(value);
@@ -128,11 +133,13 @@ public class EnvironmentProperties extends Properties {
       return _global.get(key);
   }
 
+  @Override
   public Object get(Object key)
   {
     return get((String) key);
   }
 
+  @Override
   public String getProperty(String key)
   {
     Properties props = getEnvironmentProperties();
@@ -145,6 +152,7 @@ public class EnvironmentProperties extends Properties {
       return _global.getProperty(key);
   }
 
+  @Override
   public String getProperty(String key, String defaultValue)
   {
     Properties props = getEnvironmentProperties();
