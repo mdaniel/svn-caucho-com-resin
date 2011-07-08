@@ -407,7 +407,7 @@ public class TransactionManagerImpl
         log.fine(L.l("XAResource {0} commit xid {1}", xaRes, xidImpl));
 
         try {
-          xaRes.commit(xidImpl, false);
+          xaRes.commit(xids[i], false);
         } catch (Throwable e) {
           log.log(Level.WARNING, e.toString(), e);
         }
