@@ -669,13 +669,13 @@ public class PersistenceUnitManager implements PersistenceUnitInfo {
       return (DataSource) beanManager.getReference(beanManager.resolve(beans));
     }
     
-    DataSource ds = (DataSource) Jndi.lookup(name);
+    Object value = Jndi.lookup(name);
+    
+    if (value instanceof DataSource)
+      return (DataSource) value;
 
-    if (ds != null)
-      return ds;
-
-    throw new ConfigException(L.l("'{0}' is an unknown or unconfigured JDBC DataSource.",
-                                  name));
+    throw new ConfigException(L.l("{0}: name '{1}' is an unknown or unconfigured JDBC DataSource with value {2}.",
+                                  this, name, value));
   }
   
   @Override

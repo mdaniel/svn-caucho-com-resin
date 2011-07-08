@@ -28,21 +28,18 @@
  */
 package com.caucho.config.types;
 
+import java.util.Date;
+import java.util.regex.Pattern;
+
 import com.caucho.config.ConfigException;
 import com.caucho.util.L10N;
 import com.caucho.util.QDate;
-
-import java.util.Date;
-import java.util.regex.Pattern;
-import java.util.concurrent.atomic.AtomicReference;
 
 /**
  * Implements a unix cron-style trigger.
  */
 public class CronType implements Trigger {
   private static final L10N L = new L10N(CronType.class);
-
-  private AtomicReference<QDate> _localCalendar = new AtomicReference<QDate>();
 
   private String _text;
 
@@ -204,6 +201,7 @@ public class CronType implements Trigger {
     return values;
   }
 
+  @Override
   public long nextTime(long now)
   {
     QDate cal = allocateCalendar();
@@ -248,11 +246,11 @@ public class CronType implements Trigger {
       int dayOfWeek = nextInterval(_daysOfWeek, oldDayOfWeek);
 
       if (dayOfWeek >= 0) {
-        day += (dayOfWeek - oldDayOfWeek);
+        day += (dayOfWeek - oldDayOfWeek) % 7;
       } else {
         dayOfWeek = nextInterval(_daysOfWeek, 0);
 
-        day += (dayOfWeek - oldDayOfWeek + 7);
+        day += (dayOfWeek - oldDayOfWeek + 7) % 7;
       }
     }
 
@@ -388,17 +386,12 @@ public class CronType implements Trigger {
 
   private QDate allocateCalendar()
   {
-    QDate cal = _localCalendar.getAndSet(null);
-
-    if (cal == null)
-      cal = QDate.createLocal();
-
-    return cal;
+    return QDate.allocateLocalDate();
   }
 
   private void freeCalendar(QDate cal)
   {
-    _localCalendar.set(cal);
+    QDate.freeLocalDate(cal);
   }
 
   @Override

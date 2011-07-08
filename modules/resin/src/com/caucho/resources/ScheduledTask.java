@@ -38,15 +38,14 @@ import javax.annotation.PostConstruct;
 import javax.ejb.Startup;
 import javax.el.ELContext;
 import javax.el.MethodExpression;
+import javax.enterprise.inject.Instance;
 import javax.inject.Inject;
 import javax.inject.Singleton;
-import javax.enterprise.inject.Instance;
 import javax.resource.spi.work.Work;
 import javax.servlet.RequestDispatcher;
 
 import com.caucho.config.ConfigException;
 import com.caucho.config.Configurable;
-import com.caucho.config.Service;
 import com.caucho.config.Unbound;
 import com.caucho.config.inject.CandiELContext;
 import com.caucho.config.inject.InjectManager;
@@ -270,8 +269,12 @@ public class ScheduledTask
       long now = Alarm.getExactTime();
       long nextTime = _trigger.nextTime(now + 500);
 
-      if (_isActive)
+      if (_isActive) {
         alarm.queue(nextTime - now);
+
+        if (log.isLoggable(Level.FINER))
+          log.finer(this + " complete. Next event at " + new Date(nextTime));
+      }
     } catch (Exception e) {
       log.log(Level.WARNING, e.toString(), e);
     } finally {

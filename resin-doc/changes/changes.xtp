@@ -13,6 +13,12 @@
 
 <s2 title="4.0.20 - snapshot">
 <ul>
+<li>network: keepalive housekeeping simplified (#4613, rep by Mark Cleveland)<li>
+<li>session: session timeout needs to be picked up on persistent load (#4473, rep by vicsanca)</li>
+<li>network: issues with too many CLOSE_WAIT connections (#4639, rep by Mark Price)</li>
+<li>jsf: conversation scope issues with classloading (#4656, marcin_gomulkiewicz)</li>
+<li>jpa: data-source lookup needs to check JNDI return type (#4591, rep by paru)</li>
+<li>cron: day-of-week calculation bug (#4560, rep by Tyson Weighs)</li>
 <li>health: add ShutdownService configuration to not restart on OOM (#4075, rep by Martin Thompson)</li>
 <li>cli: console libexec needs to use same is64Bit as watchdog (#4558)</li>
 <li>stat: add read/write byte statistics for http request (#4126, rep by Martin Thompson)</li>

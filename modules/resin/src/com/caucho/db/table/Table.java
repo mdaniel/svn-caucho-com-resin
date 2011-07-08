@@ -321,9 +321,11 @@ public class Table extends BlockStore {
 
         table.init();
 
-        table.clearIndexes();
-        table.initIndexes();
-        table.rebuildIndexes();
+        //if (! table.validateIndexesSafe()) {
+          table.clearIndexes();
+          table.initIndexes();
+          table.rebuildIndexes();
+        //}
 
         return table;
       } catch (Exception e) {
@@ -516,6 +518,19 @@ public class Table extends BlockStore {
     } catch (IOException e) {
       throw new SQLExceptionWrapper(e);
     }
+  }
+  
+  private boolean validateIndexesSafe()
+  {
+    try {
+      validateIndexes();
+      
+      return true;
+    } catch (Exception e) {
+      log.log(Level.WARNING, e.toString(), e);
+    }
+    
+    return false;
   }
 
   /**

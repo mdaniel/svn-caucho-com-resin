@@ -643,6 +643,12 @@ public class SessionImpl implements HttpSession, CacheListener {
 
       ExtCacheEntry entry = cache.getExtCacheEntry(_id);
       ExtCacheEntry cacheEntry = _cacheEntry;
+      
+      if (entry != null) {
+        // server/01a1, #4419
+        _idleTimeout = entry.getIdleTimeout();
+        //_isIdleSet = true;
+      }
 
       if (entry != null && cacheEntry != null
           && cacheEntry.getValueHashKey() != null

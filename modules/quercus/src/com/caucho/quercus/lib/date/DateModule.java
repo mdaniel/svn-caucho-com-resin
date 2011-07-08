@@ -378,6 +378,9 @@ public class DateModule extends AbstractQuercusModule {
 
   private String date(Env env, String format, long time, boolean isGMT)
   {
+    if (format == null)
+      return null;
+    
     if (isGMT) {
       return dateImpl(format, time, env.getGmtDate());
     }

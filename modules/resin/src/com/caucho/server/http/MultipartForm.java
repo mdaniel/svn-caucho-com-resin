@@ -173,7 +173,7 @@ class MultipartForm {
           
           if (lengthMax < totalLength) {
             String msg = L.l("multipart form upload failed because field '{0}' exceeds max length {1}",
-                             name, totalLength);
+                             name, lengthMax);
 
             request.setAttribute("caucho.multipart.form.error", msg);
             request.setAttribute("caucho.multipart.form.error.size",

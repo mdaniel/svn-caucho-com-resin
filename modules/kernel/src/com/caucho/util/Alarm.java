@@ -454,6 +454,7 @@ public class Alarm implements ThreadTask, ClassLoaderListener {
   /**
    * Handles the case where a class loader has completed initialization
    */
+  @Override
   public void classLoaderInit(DynamicClassLoader loader)
   {
   }
@@ -461,6 +462,7 @@ public class Alarm implements ThreadTask, ClassLoaderListener {
   /**
    * Handles the case where a class loader is dropped.
    */
+  @Override
   public void classLoaderDestroy(DynamicClassLoader loader)
   {
     close();
