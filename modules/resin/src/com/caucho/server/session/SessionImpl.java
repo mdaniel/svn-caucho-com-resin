@@ -146,6 +146,7 @@ public class SessionImpl implements HttpSession, CacheListener {
   /**
    * Returns the time the session was created.
    */
+  @Override
   public long getCreationTime()
   {
     // this test forced by TCK
@@ -159,6 +160,7 @@ public class SessionImpl implements HttpSession, CacheListener {
   /**
    * Returns the session identifier.
    */
+  @Override
   public String getId()
   {
     return _id;
@@ -318,6 +320,7 @@ public class SessionImpl implements HttpSession, CacheListener {
   /**
    * Returns the named attribute from the session.
    */
+  @Override
   public Object getAttribute(String name)
   {
     if (! _isValid)
@@ -649,7 +652,7 @@ public class SessionImpl implements HttpSession, CacheListener {
         _idleTimeout = entry.getIdleTimeout();
         //_isIdleSet = true;
       }
-
+      
       if (entry != null && cacheEntry != null
           && cacheEntry.getValueHashKey() != null
           && cacheEntry.getValueHashKey().equals(entry.getValueHashKey())) {

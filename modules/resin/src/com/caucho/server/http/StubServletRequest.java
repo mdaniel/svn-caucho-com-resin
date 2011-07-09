@@ -267,7 +267,7 @@ public class StubServletRequest implements CauchoRequest {
   }
 
   @Override
-  public void killKeepalive()
+  public void killKeepalive(String reason)
   {
   }
 

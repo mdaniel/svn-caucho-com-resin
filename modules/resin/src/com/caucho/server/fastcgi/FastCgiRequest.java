@@ -317,7 +317,7 @@ public class FastCgiRequest extends AbstractHttpRequest
       log.log(Level.FINE, e.toString(), e);
 
       // XXX: _response.killCache();
-      killKeepalive();
+      killKeepalive("request exception: " + e);
 
       /*
       try {
@@ -1114,7 +1114,7 @@ public class FastCgiRequest extends AbstractHttpRequest
     boolean isKeepConn = (flags & FCGI_KEEP_CONN) != 0;
 
     if (! isKeepConn) {
-      killKeepalive();
+      killKeepalive("fcgi request close");
     }
 
     return true;

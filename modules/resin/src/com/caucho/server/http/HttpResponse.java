@@ -188,7 +188,7 @@ public class HttpResponse extends AbstractHttpResponse
     boolean debug = log.isLoggable(Level.FINE);
 
     if (version < HttpRequest.HTTP_1_0) {
-      _request.killKeepalive();
+      _request.killKeepalive("http client version " + version);
       return false;
     }
 
@@ -241,7 +241,7 @@ public class HttpResponse extends AbstractHttpResponse
       }
 
       os.printLatin1("\r\nConnection: Upgrade");
-      _request.killKeepalive();
+      _request.killKeepalive("duplex/upgrade");
 
       if (debug)
         log.fine(_request.dbgId() + "Connection: Upgrade");
@@ -422,7 +422,7 @@ public class HttpResponse extends AbstractHttpResponse
     }
 
     if (version < HttpRequest.HTTP_1_1) {
-      _request.killKeepalive();
+      _request.killKeepalive("http response version: " + version);
     }
     else {
       /* XXX: the request processing already processed this header
@@ -437,11 +437,10 @@ public class HttpResponse extends AbstractHttpResponse
       if (_request.isKeepalive()) {
       }
       else if (isUpgrade) {
-        _request.killKeepalive();
+        _request.killKeepalive("http response upgrade");
       }
       else {
         os.write(_connectionCloseBytes, 0, _connectionCloseBytes.length);
-        _request.killKeepalive();
 
         if (debug)
           log.fine(_request.dbgId() + "Connection: close");

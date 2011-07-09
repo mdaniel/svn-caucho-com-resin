@@ -248,11 +248,11 @@ public class BootResinConfig implements EnvironmentBean
     BootClusterConfig cluster = findCluster(clusterId);
 
     if (cluster == null)
-      throw new ConfigException(L.l("'{0}' is an unknown cluster. -dynamic-server must specify an existing cluster",
+      throw new ConfigException(L.l("'{0}' is an unknown cluster. -join-cluster must specify an existing cluster",
                                     clusterId));
 
     if (! cluster.isDynamicServerEnable()) {
-      throw new ConfigException(L.l("cluster '{0}' does not have <dynamic-server-enable>. -dynamic-server requires a <dynamic-server-enable> tag.",
+      throw new ConfigException(L.l("cluster '{0}' does not have <dynamic-server-enable>. -join-cluster requires a <dynamic-server-enable> tag.",
                                     clusterId));
     }
 

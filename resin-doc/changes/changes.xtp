@@ -13,6 +13,7 @@
 
 <s2 title="4.0.20 - snapshot">
 <ul>
+<li>cloud: heartbeat needs to retry every 5s on connection failure (#4601)</li>
 <li>network: keepalive housekeeping simplified (#4613, rep by Mark Cleveland)<li>
 <li>session: session timeout needs to be picked up on persistent load (#4473, rep by vicsanca)</li>
 <li>network: issues with too many CLOSE_WAIT connections (#4639, rep by Mark Price)</li>

@@ -139,7 +139,7 @@ public interface SocketLink {
 
   public boolean isKeepaliveAllocated();
 
-  public void killKeepalive();
+  public void killKeepalive(String reason);
 
   public void requestShutdownBegin();
 

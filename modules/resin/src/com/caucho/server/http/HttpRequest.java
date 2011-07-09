@@ -829,7 +829,7 @@ public class HttpRequest extends AbstractHttpRequest
       if (response != null)
         response.killCache();
       
-      killKeepalive();
+      killKeepalive("http handleRequest exception: " + e);
 
       sendRequestError(e);
 
@@ -1171,7 +1171,7 @@ public class HttpRequest extends AbstractHttpRequest
     }
 
     if (version < HTTP_1_1)
-      killKeepalive();
+      killKeepalive("http client version less than 1.1: " + version);
 
     byte []readBuffer = s.getBuffer();
     int readOffset = s.getOffset();

@@ -412,9 +412,6 @@ public class TransactionManagerImpl
           log.log(Level.WARNING, e.toString(), e);
         }
       } else {
-        // XXX: need to check if the transaction belongs to this TM
-        // the ownership is encoded in the xid
-
         log.fine(L.l("XAResource {0} forget xid {1}", xaRes, xidImpl));
 
         try {

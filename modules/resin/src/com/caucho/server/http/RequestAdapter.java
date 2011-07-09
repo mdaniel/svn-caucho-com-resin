@@ -540,7 +540,8 @@ public class RequestAdapter extends RequestWrapper
     return false;
   }
   
-  public void killKeepalive()
+  @Override
+  public void killKeepalive(String reason)
   {
   }
 

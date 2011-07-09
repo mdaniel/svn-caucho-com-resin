@@ -346,7 +346,7 @@ public class ErrorPageManager {
       badRequest = true;
 
       if (request instanceof CauchoRequest)
-        ((CauchoRequest) request).killKeepalive();
+        ((CauchoRequest) request).killKeepalive("bad request: " + rootExn);
 
       response.resetBuffer();
 

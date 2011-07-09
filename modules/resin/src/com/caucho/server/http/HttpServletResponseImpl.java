@@ -569,7 +569,7 @@ public final class HttpServletResponseImpl extends AbstractCauchoResponse
       killCache();
     
     if (code == SC_BAD_REQUEST || code == SC_SWITCHING_PROTOCOLS) {
-      _request.killKeepalive();
+      _request.killKeepalive("servletResponse: bad request: " + code + " " + message);
     }
 
     _status = code;
@@ -701,7 +701,7 @@ public final class HttpServletResponseImpl extends AbstractCauchoResponse
       log.log(Level.FINE, e.toString(), e);
     }
 
-    _request.killKeepalive();
+    _request.killKeepalive("servlet error: " + code + " " + value);
     // close, but don't force a flush
     _response.finishInvocation();
   }

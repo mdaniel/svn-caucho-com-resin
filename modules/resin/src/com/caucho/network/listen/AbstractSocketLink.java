@@ -211,7 +211,7 @@ public abstract class AbstractSocketLink
   }
 
   @Override
-  public void killKeepalive()
+  public void killKeepalive(String reason)
   {
   }
 

@@ -133,7 +133,6 @@ public class ResinBoot {
     Thread thread = Thread.currentThread();
     thread.setContextClassLoader(system.getClassLoader());
     
-    DynamicClassLoader resinLoader = system.getClassLoader();
     LibraryLoader libLoader = new LibraryLoader();
     libLoader.setPath(rootDirectory.lookup("lib"));
     libLoader.init();
@@ -169,6 +168,10 @@ public class ResinBoot {
     }
     
     if (_client == null && _args.isShutdown()) {
+      _client = bootManager.findShutdownClient();
+    }
+    
+    if (_client == null && ! (_args.isStart() || _args.isConsole())) {
       _client = bootManager.findShutdownClient();
     }
 

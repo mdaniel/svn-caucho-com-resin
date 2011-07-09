@@ -139,7 +139,7 @@ public class StreamSocketLink extends AbstractSocketLink {
   */
 
   @Override
-  public void killKeepalive()
+  public void killKeepalive(String reason)
   {
     _isKeepalive = false;
   }

@@ -381,10 +381,7 @@ public abstract class AbstractHttpRequest
    */
   public void clientDisconnect()
   {
-    if (log.isLoggable(Level.FINER))
-      log.finer(this + " kill keepalive due to client disconnect");
-    
-    killKeepalive();
+    killKeepalive("client disconnect");
     
     CauchoResponse response = getResponseFacade();
     
@@ -720,7 +717,7 @@ public abstract class AbstractHttpRequest
     SocketLink conn = _conn;
 
     if (conn != null)
-      conn.killKeepalive();
+      conn.killKeepalive("client Connection: close");
   }
 
   /**
@@ -1542,7 +1539,8 @@ public abstract class AbstractHttpRequest
 
       if (_responseFacade != null)
         _responseFacade.killCache();
-      killKeepalive();
+      
+      killKeepalive("resume exception: " + e);
 
       return false;
     } finally {
@@ -1584,7 +1582,7 @@ public abstract class AbstractHttpRequest
   protected void sendRequestError(Throwable e)
     throws IOException
   {
-    killKeepalive();
+    killKeepalive("request error: " + e);
     
     try {
       ErrorPageManager errorManager = getErrorManager();
@@ -1622,12 +1620,12 @@ public abstract class AbstractHttpRequest
   /**
    * Kills the keepalive.
    */
-  public void killKeepalive()
+  public void killKeepalive(String reason)
   {
     SocketLink conn = _conn;
 
     if (conn != null) {
-      conn.killKeepalive();
+      conn.killKeepalive(reason);
     }
   }
 

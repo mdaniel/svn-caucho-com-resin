@@ -1140,7 +1140,7 @@ public class TcpSocketLink extends AbstractSocketLink
       _state = _state.toActive(this, _connectionStartTime);
 
       if (! getRequest().handleRequest()) {
-        killKeepalive();
+        killKeepalive("dispatch handleRequest failed");
         
         if (log.isLoggable(Level.FINE)) {
           log.fine(this + " disabled keepalive because request failed "
@@ -1295,7 +1295,7 @@ public class TcpSocketLink extends AbstractSocketLink
    * connection.
    */
   @Override
-  public void killKeepalive()
+  public void killKeepalive(String reason)
   {
     Thread thread = Thread.currentThread();
     
@@ -1309,8 +1309,10 @@ public class TcpSocketLink extends AbstractSocketLink
     
     _state = state.toKillKeepalive(this);
     
-    if (log.isLoggable(Level.FINE))
-      log.fine(this + " keepalive disabled from " + state);
+    if (log.isLoggable(Level.FINE)) {
+      log.fine(this + " keepalive disabled from "
+               + state +", reason=" + reason);
+    }
   }
 
   //

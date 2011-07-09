@@ -798,12 +798,12 @@ public class CauchoRequestWrapper extends AbstractCauchoRequest {
   }
   
   @Override
-  public void killKeepalive()
+  public void killKeepalive(String reason)
   {
     CauchoRequest cRequest = getCauchoRequest();
 
     if (cRequest != null)
-      cRequest.killKeepalive();
+      cRequest.killKeepalive(reason);
   }
   
   @Override

@@ -1630,9 +1630,10 @@ public final class HttpServletRequestImpl extends AbstractCauchoRequest
     return _request.isDuplex();
   }
 
-  public void killKeepalive()
+  @Override
+  public void killKeepalive(String reason)
   {
-    _request.killKeepalive();
+    _request.killKeepalive(reason);
   }
 
   public boolean isConnectionClosed()

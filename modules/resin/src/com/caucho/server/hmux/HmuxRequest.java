@@ -383,7 +383,8 @@ public class HmuxRequest extends AbstractHttpRequest
       } catch (ClientDisconnectException e) {
         throw e;
       } catch (Exception e) {
-        killKeepalive();
+        killKeepalive("hmux finishRequest exception " + e);
+        
         log.log(Level.FINE, dbgId() + e, e);
       }
 
@@ -395,7 +396,7 @@ public class HmuxRequest extends AbstractHttpRequest
           is.setDisableClose(false);
           is.close();
         } catch (Exception e) {
-          killKeepalive();
+          killKeepalive("hmux close exception: " + e);
           log.log(Level.FINE, dbgId() + e, e);
         }
       }
@@ -410,14 +411,17 @@ public class HmuxRequest extends AbstractHttpRequest
 
       if (! scanHeaders() || ! getConnection().isPortActive()) {
         _hasRequest = false;
-        killKeepalive();
+        
+        killKeepalive("hmux scanHeaders failure");
+        
         return false;
       }
       else if (! _hasRequest) {
         return true;
       }
     } catch (InterruptedIOException e) {
-      killKeepalive();
+      killKeepalive("hmux parse header exception: "+ e);
+      
       log.fine(dbgId() + "interrupted keepalive");
       return false;
     }
@@ -608,7 +612,7 @@ public class HmuxRequest extends AbstractHttpRequest
       Server server = getServer();
       if (server == null || server.isDestroyed()) {
         log.fine(dbgId() + " request after server close");
-        killKeepalive();
+        killKeepalive("after server close");
         return false;
       }
 
@@ -617,7 +621,7 @@ public class HmuxRequest extends AbstractHttpRequest
         if (isLoggable)
           log.fine(dbgId() + "r: end of file");
         _filter.setClientClosed(true);
-        killKeepalive();
+        killKeepalive("hmux end of file");
         return false;
 
       case HMUX_CHANNEL:
@@ -647,7 +651,7 @@ public class HmuxRequest extends AbstractHttpRequest
         if (isLoggable)
           log.fine(dbgId() + (char) code + "-r: end of socket");
 
-        killKeepalive();
+        killKeepalive("hmux exit");
 
         return true;
 
@@ -656,7 +660,7 @@ public class HmuxRequest extends AbstractHttpRequest
 
         if (len != 4) {
           log.fine(dbgId() + (char) code + "-r: protocol length (" + len + ") must be 4.");
-          killKeepalive();
+          killKeepalive("hmux protocol");
           return false;
         }
 
@@ -898,7 +902,7 @@ public class HmuxRequest extends AbstractHttpRequest
             if (isLoggable)
               log.fine(dbgId() + "r: unexpected end of file");
 
-            killKeepalive();
+            killKeepalive("hmux data end of file");
             return false;
           }
 
@@ -965,7 +969,8 @@ public class HmuxRequest extends AbstractHttpRequest
         _rawWrite.flush();
       }
       else {
-        killKeepalive();
+        killKeepalive("hmux failed result: " + (char) result);
+        
         _rawWrite.write(HMUX_EXIT);
         _rawWrite.close();
       }
@@ -1692,7 +1697,7 @@ public class HmuxRequest extends AbstractHttpRequest
           if (log.isLoggable(Level.FINE))
             log.fine(_request.dbgId() + "X-r:exit");
 
-          _request.killKeepalive();
+          _request.killKeepalive("hmux request exit");
           return readLen;
         }
 
@@ -1724,12 +1729,12 @@ public class HmuxRequest extends AbstractHttpRequest
 
         default:
           if (code < 0) {
-            _request.killKeepalive();
+            _request.killKeepalive("hmux request end-of-file");
 
             return readLen;
           }
           else {
-            _request.killKeepalive();
+            _request.killKeepalive("hmux unknown request: " + (char) code);
 
             int len = (is.read() << 8) + is.read();
 

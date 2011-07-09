@@ -1347,7 +1347,7 @@ public class Resin
   
   protected CloudServer joinCluster(CloudSystem system)
   {
-    throw new ConfigException(L().l("-join requires Resin Professional"));
+    throw new ConfigException(L().l("-join-cluster requires Resin Professional"));
   }
   
   public ServletContainerConfig getServletContainerConfig()
@@ -1425,7 +1425,6 @@ public class Resin
    */
   public static void main(String []argv)
   {
-    System.out.println("SM: " + System.getSecurityManager());
     try {
       Environment.init();
 
