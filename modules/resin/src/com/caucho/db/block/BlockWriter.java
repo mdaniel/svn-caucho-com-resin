@@ -116,7 +116,7 @@ public class BlockWriter extends TaskWorker {
         
         long now = Alarm.getCurrentTimeActual();
         
-        long delta = now - expires;
+        long delta = expires - now;
         
         if (delta <= 0)
           return;
