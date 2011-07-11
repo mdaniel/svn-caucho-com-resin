@@ -11,6 +11,7 @@ define("COL1",     50);
 define("COL2",     305);
 define("MILLION", 1000000);
 define("GRAPH_SIZE_6_TO_PAGE", new Size(175, 125));
+define("GRAPH_SIZE", new Size(175, 125));
 define("BIG_GRAPH_SIZE", new Size(400, 300));
 
 define("PERIOD", 3600/2);
@@ -25,57 +26,6 @@ $minorTicks = $_REQUEST['minorTicks'] ? (int) ($_REQUEST['minorTicks'] * 1000) :
 
 debug("$majorTicks $minorTicks");
 
-function admin_init_no_output($query="", $is_refresh=false)
-{
-  global $g_server_id;
-  global $g_server_index;
-  global $g_mbean_server;
-  global $g_resin;
-  global $g_server;
-  global $g_page;
-
-  if (! mbean_init()) {
-    if ($g_server_id)
-      debug( "admin_init_no_output:: Server ID FOUND: Resin: $g_page for server $g_server_id");
-    else
-      debug ("admin_init_no_output:: Resin: $g_page for server default");
-
-    debug("admin_init_no_output:: $page = g_page, server = $g_server, query = $query, refresh = $is_refresh");
-
-    return false;
-  }
-
-  return true;
-}
-
-function getRestartTime($stat) {
-
-  global $g_server;
-
-  $index = $g_server->SelfServer->ClusterIndex;
-  $now = time();
-  $start = $now - 7 * 24 * 3600;
-
-  $restart_list = $stat->getStartTimes($index, $start * 1000, $now * 1000);
-
-  if (empty($restart_list)) {
-    debug( "getRestartTime:: No server restarts have been found in the last 7 days.");
-    return null;
-  }
-
-
-  $form_time = $_REQUEST['time'];
-
-  if (in_array($form_time, $restart_list)) {
-    $restart_ms = $form_time;
-  } else {
-    sort($restart_list);
-    $restart_ms = $restart_list[count($restart_list) - 1];
-  }  
-  $restart_time = floor($restart_ms / 1000);
-
-  return $restart_time;
-}
 
 
 if (! admin_init_no_output()) {
@@ -87,17 +37,8 @@ if (! admin_init_no_output()) {
 
 
 initPDF();
-//debug("initialized PDF");
-
 
 startDoc();
-//debug("Started new document PDF");
-
-//$logo = $pdf.load_image("auto", "images/caucho-logo.jpg", ""); 
-//if ($logo == -1)
-//  throw new Exception("Error: " + $pdf.get_errmsg());
-//$pdf.fit_image($logo, 50.0, 500.0, ""); 
-//$pdf.close_image($logo);
 
 
 $mbean_server = $g_mbean_server;
@@ -124,17 +65,6 @@ $canvas->writeText(new Point(175,800), "Postmortem Analysis ");
 
 $page = 0;
 
-function writeFooter() {
-  global $page;
-  global $canvas;
-  global $serverID;
-  global $restart_time;
-  $time = date("Y-m-d H:i", $restart_time);
-  $page +=1;
-  $canvas->setFont("Helvetica-Bold", 8);
-  $canvas->writeText(new Point(175, 10), "Postmortem Analysis \t\t $time \t\t $serverID \t\t  \t\t\t \t page $page");
-}
-
 $index = $g_server->SelfServer->ClusterIndex;
 $si = sprintf("%02d", $index);
 
@@ -154,281 +84,6 @@ $full_names = $stat->statisticsNames();
 
 
 
-function findStats(String $category, String $subcategory=null) {
-  global $start;
-  global $end;
-  global $stat;
-  global $statList;
-  global $si;
-
-  $map = array();
-  foreach ($statList as $statItem) {
-    if ($statItem->server != $si) continue;
-    if ($category == $statItem->category) {
-      if ($subcategory && $subcategory == $statItem->subcategory) {
-	$map[$statItem->name]= $stat->statisticsData($statItem->fullName, $start * 1000, $end * 1000,
-                                    STEP * 1000);
-      }
-    }
-  }
-  return $map;
-}
-
-
-function findStatByName(String $name, String $subcategory="Health", String $category="Resin") {
-  global $start;
-  global $end;
-  global $stat;
-  global $statList;
-  global $si;
-
-
-  $arr = array();
-  foreach ($statList as $statItem) {
-    if ($statItem->server != $si) continue;
-    if($subcategory==$statItem->subcateogry) {
-      //debug(" NAME " . $statItem->name); 
-    }
-    if ($name == $statItem->name && $category == $statItem->category) {
-	$arr = $stat->statisticsData($statItem->fullName, $start * 1000, $end * 1000,
-                                    STEP * 1000);
-    }
-  }
-  return $arr;
-}
-
-
-class GraphData {
-  public $name;
-  public $dataLine;
-  public $max;
-  public $yincrement;
-  public $color;
-
-  function __toString() {
-    return "GraphData name $this->name dataLine $this->dataLine max $this->max yincrement $this->yincrement";
-  }
-
-  function validate() {
-
-    if (sizeof($this->dataLine)==0) {
-      debug(" no data in " . $this->name);
-      return false;
-    }
-
-    if ($this->max==0) {
-      $this->max=10;
-      $this->yincrement=1;
-    }
-
-    
-    return true;
-  }
-}
-
-
-function calcYincrement($max) {
-  $yincrement = (int)($max / 3);
-
-  $div = 5;
-
-  if ($max > 5000000000) {
-	$div = 1000000000;
-  } elseif ($max > 5000000000) {
-	$div = 1000000000;
-  } elseif ($max > 500000000) {
-	$div = 100000000;
-  } elseif ($max > 50000000) {
-	$div = 10000000;
-  } elseif ($max > 5000000) {
-	$div = 1000000;
-  } elseif ($max > 500000) {
-	$div = 100000;
-  } elseif ($max > 50000) {
-	$div = 10000;
-  } elseif ($max > 5000) {
-	$div = 1000;
-  } elseif ($max > 500) {
-	$div = 100;
-  } elseif ($max > 50) {
-	$div = 10;
-  }
-  
-  $yincrement = $yincrement - ($yincrement % $div); //make the increment divisible by 5
-
-
-  if ($yincrement == 0) {
-      $yincrement = round($max / 5, 2);
-  }
-  return $yincrement;
-}
-
-
-function getStatDataForGraphBySubcategory($subcategory, $category="Resin", $nameMatch=null) {
-  global $blue, $red, $orange, $purple, $green, $cyan, $brown, $black;
-  $cindex = 0;
-  $gds = array();	
-  $map=findStats($category, $subcategory);
-  $colors = array($blue, $red, $orange, $purple, $green, $cyan, $brown, $black, $blue, $red, $orange, $purple, $green, $cyan, $brown, $black);
-
-  foreach ($map as $name => $data) {
-	$dataLine = array();
-  	$max = -100;
-	$process =  true; 
-	if($nameMatch) {
-		if(!strstr($name, $nameMatch)){
-			$process = false;
-		}
-	}
-	if ($process) {
-		//debug(" $name -------------------- ");
-  		foreach($data as $d) {  
-    			$value = $d->value;
-    			$time = $d->time;
-			//debug(" $time  --- $value  ");
-
-    			array_push($dataLine, new Point($time, $value));
-    			if ($value > $max) $max = $value;
-  		}
-  		$gd = new GraphData();
-  		$gd->name = $name;
-  		$gd->dataLine = $dataLine;
-  		$gd->yincrement = calcYincrement($max);
-  		$gd->max = $max + ($max * 0.05) ;
-  		$gd->color=$colors[$cindex];
-		array_push($gds, $gd);
-		$cindex++;
-
-	}
-  }
-
-
-
-  return $gds;
-}
-
-function getStatDataForGraph($name, $subcategory, $color=$blue, $category="Resin") {
-
-  $data=findStatByName($name, $subcategory, $category);
-  $dataLine = array();
-  $max = -100;
-  foreach($data as $d) {
-    
-    $value = $d->value;
-    $hour = $d->time;
-    array_push($dataLine, new Point($hour, $value));
-    if ($value > $max) $max = $value;
-  }
-
-  $gd = new GraphData();
-  $gd->name = $name;
-  $gd->dataLine = $dataLine;
-  $gd->max = $max + ($max * 0.05) ;
-  $gd->yincrement = calcYincrement($max);
-  $gd->color=$color;
-
-  return $gd;
-}
-
-
-function displayTimeLabel($time){
-    return strftime("%H:%M", $time/1000);
-}
-
-function createGraph(String $title, GraphData $gd, Point $origin, boolean $displayYLabels=true, Size $gsize=GRAPH_SIZE_6_TO_PAGE, boolean $trace=false) {
-  global $start;
-  global $end;
-  global $canvas;
-  global $lightGrey;
-  global $grey;
-  global $darkGrey;
-  global $black;
-  global $majorTicks, $minorTicks;
-
-  $graph = new Graph($title, $origin, $gsize, new Range($start * 1000, $end * 1000), new Range(0,$gd->max), $trace);
-  $graph->start();
-
-
-  $valid = $gd->validate();
-
-  if ($valid) {
-    $canvas->setColor($black);
-    $canvas->setFont("Helvetica-Bold", 12);
-    $graph->drawTitle($title);
-
-    $canvas->setColor($lightGrey);
-    $graph->drawGridLines($minorTicks, $gd->yincrement/2);
-
-    $canvas->setColor($grey);
-    $graph->drawGridLines($majorTicks, $gd->yincrement);
-
-    $canvas->setColor($black);
-    $graph->drawGrid();
-
-    if ($displayYLabels) {
-      $graph->drawYGridLabels($gd->yincrement);
-    }
-    $graph->drawXGridLabels($majorTicks, "displayTimeLabel");
-  } else {
-    debug("Not displaying graph $title because the data was not valid");
-    $canvas->setColor($black);
-    $canvas->setFont("Helvetica-Bold", 12);
-    $graph->drawTitle($title);
-    $canvas->setColor($darkGrey);
-    $graph->drawGrid();
-  }
-  return $graph;
-}
-
-
-function getDominantGraphData($gds) {
-  $gdd = $gds[0];
-  foreach($gds as $gd) {
-    if ($gd->max > $gdd->max) {
-      $gdd=$gd;
-    }
-  }
-  return $gdd;
-}
-
-class Stat {
-  private $server;
-  private $category;
-  private $subcategory;
-  private $fullName;
-  private $elements;
-  private $name;
- 
-
-
-  function __construct() {
-    $args = func_get_args();
-    $this->fullName = $args[0];
-    $arr = explode("|", $this->fullName);
-    $this->elements = $arr;
-
-    $this->server = $arr[0];
-
-    $isResin = true;
-    
-    $this->category = $arr[1];
-    $this->subcategory = $arr[2];  
-
-    $arr = array_slice($arr, 3); 
-
-    $this->name = implode(" ", $arr);
-    //debug("name " . $this->name);
-  }
-
-  function __get($name) {
-    return $this->$name;
-  }
-
-
-  function __toString() {
-    return " name=" . $this->name . "\t\t\t\tserver=" . $this->server .  " category=" . $this->category . " subcategory=" . $this->subcategory ;
-  }
-}
 
 $statList = array();
 
@@ -485,10 +140,6 @@ $canvas->writeText(new Point($x,$y), "$ups \t\t state($server->State)");
 $x +=375;
 $y = 750;
 
-function pdf_format_memory($memory)
-{
-  return sprintf("%.2f M", $memory / (1024 * 1024))
-}
 
 $totalHeap = pdf_format_memory($server->RuntimeMemory);
 $freeHeap = pdf_format_memory($server->RuntimeMemoryFree);
@@ -582,17 +233,6 @@ $graph->drawLine($gd->dataLine);
 $graph->end();
 
 
-function drawLines($gds, $graph) {
-  global $canvas;
-  foreach($gds as $gd) {
-    if ($gd->validate()) {
-      $canvas->setColor($gd->color);
-      if (sizeof($gd->dataLine)!=0) {
-      	$graph->drawLine($gd->dataLine);
-      }
-    }
-  }
-}
 
 //--------- Request Time
 

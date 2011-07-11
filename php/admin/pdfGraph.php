@@ -4,156 +4,230 @@
 
 import java.lang.System;
 
-function debug($msg) {
-  System::out->println($msg);
-}
-
-function startsWith($haystack, $needle)
-{
-    $length = strlen($needle);
-    return (substr($haystack, 0, $length) === $needle);
-}
-
-function endsWith($haystack, $needle)
-{
-    $length = strlen($needle);
-    $start  = $length * -1; //negative
-    return (substr($haystack, $start) === $needle);
-}
-
-function  my_error_handler(int $error_type, string $error_msg, string $errfile, int $errline) {
-  if(!startsWith($error_msg,"Can't access private field")) {
-    debug("ERROR HANDLER: type $error_type, msg $error_msg, file $errfile, lineno $errline");
-  }
-} 
-
-set_error_handler('my_error_handler'); 
-
-function initPDF() {
-  global $pdf;
-  $pdf = new PDF();
-
-}
-
-function startDoc() {
-  global $pdf;
-  $pdf->begin_document();
-  $pdf->begin_page(595, 842);
-}
 
 
 
-class Color {
-
-  function doSetColor($canvas) {
+function drawLines($gds, $graph) {
+  global $canvas;
+  foreach($gds as $gd) {
+    if ($gd->validate()) {
+      $canvas->setColor($gd->color);
+      if (sizeof($gd->dataLine)!=0) {
+      	$graph->drawLine($gd->dataLine);
+      }
+    }
   }
 }
 
-class RGBColor {
-  private $red;
-  private $green;
-  private $blue;
+
+class Stat {
+  private $server;
+  private $category;
+  private $subcategory;
+  private $fullName;
+  private $elements;
+  private $name;
+ 
+
+
+  function statFromName($fullName, $server="01") {
+    $this->fullName = $fullName;
+    $arr = explode("|", $this->fullName);
+    $this->elements = $arr;
+
+    
+    $this->category = $arr[0];
+    $this->subcategory = $arr[1];  
+
+    $arr = array_slice($arr, 2); 
+
+    $this->name = implode(" ", $arr);
+
+    $this->server = $server;
+  }
 
   function __construct() {
     $args = func_get_args();
-    $this->red =  $args[0];
-    $this->green =  $args[1];
-    $this->blue =  $args[2];
+    $this->fullName = $args[0];
+    $arr = explode("|", $this->fullName);
+    $this->elements = $arr;
+
+    $this->server = $arr[0];
+
+    $isResin = true;
+    
+    $this->category = $arr[1];
+    $this->subcategory = $arr[2];  
+
+    $arr = array_slice($arr, 3); 
+
+    $this->name = implode(" ", $arr);
+    //debug("name " . $this->name);
   }
-
-
-  function doSetColor($canvas) {
-    $canvas->setRGBColor($this->red, $this->green, $this->blue);
-  } 
-
-}
-
-$black = new RGBColor(0.0, 0.0, 0.0);
-$red = new RGBColor(1.0, 0.0, 0.0);
-$green = new RGBColor(0.0, 1.0, 0.0);
-$blue = new RGBColor(0.0, 0.0, 1.0);
-$darkGrey = new RGBColor(0.2, 0.2, 0.2);
-$lightGrey = new RGBColor(0.9, 0.9, 0.9);
-$grey = new RGBColor(0.45, 0.45, 0.45);
-$purple = new RGBColor(0.45, 0.2, 0.45);
-$orange = new RGBColor(1.0, 0.66, 0.0);
-$cyan = new RGBColor(0.0, 0.66, 1.0);
-$brown = new RGBColor(0.66, 0.20, 0.20);
-
-
-
-
-class Canvas {
-  private $origin;
-  
-  function __construct() {
-    $args = func_get_args();
-    $this->origin =  $args[0];
-    $this->lastTextPos = new Point(0,0); //to fix problem with Resin PDF Lib clone
-  }
-
-  function start() {
-    global $pdf;
-    $pdf->save();
-    $pdf->translate($this->origin->x, $this->origin->y);
-
-  }
-
-  function end() {
-    global $pdf;
-    $pdf->restore();
-  }
-
-  function __toString() {
-    $str = " (CANVAS ORIGIN $origin)";
-    return $str;
-  }
-
-
-  function moveTo($point) {
-    global $pdf;
-    $pdf->moveto($point->x, $point->y);
-  }
-
-  function lineTo($point) {
-    global $pdf;
-    $pdf->lineto($point->x, $point->y);
-  }
-
-  function stroke() {
-    global $pdf;
-    $pdf->stroke();
-  }
-
 
   function __get($name) {
     return $this->$name;
   }
 
-  function writeText($point, $text) {
-    global $pdf;
-    $pdf->set_text_pos($point->x, $point->y);
-    $pdf->show($text);
+
+  function __toString() {
+    return " name=" . $this->name . "\t\t\t\tserver=" . $this->server .  " category=" . $this->category . " subcategory=" . $this->subcategory ;
   }
 
-  function setColor(Color $color) {
-    $color->doSetColor($this);
-  }
-
-  function setRGBColor($red, $green, $blue) {
-    global $pdf;
-    $pdf->setcolor("fillstroke", "rgb", $red, $green, $blue);
-  }
-
-  function setFont($fontName, $fontSize) {
-    global $pdf;
-    $font = $pdf->load_font($fontName, "", "");
-    $pdf->setfont($font, $fontSize);
-  }
-
+   function eq($that) {
+	return $this->name == $that->name && $this->category == $that->category && 
+	$this->subcategory == $that->subcategory;
+   }
 }
 
-$canvas = new Canvas(new Point(0,0));
+
+function getStatDataForGraphByMeterNames($meterNames) {
+
+
+  global $blue, $red, $orange, $purple, $green, $cyan, $brown, $black;
+  $cindex = 0;
+  $colors = array($blue, $red, $orange, $purple, $green, $cyan, $brown, $black, $blue, $red, $orange, $purple, $green, $cyan, $brown, $black);
+
+  $gds = array();   
+  foreach ($meterNames as $name) {
+	$statItem = new Stat();
+	$statItem->statFromName($name);
+	$gd = getStatDataForGraphByStat($statItem);
+	array_push($gds, $gd);
+  	$gd->color=$colors[$cindex];
+	$cindex++;
+  }
+
+  return $gds;
+}
+
+
+function getStatDataForGraphByStat($theStat, $color=$blue) {
+
+  $data=findStatByStat($theStat);
+  debug("DATA " . sizeof($data));
+  $dataLine = array();
+  $max = -100;
+  foreach($data as $d) {
+    
+    $value = $d->value;
+    $hour = $d->time;
+    array_push($dataLine, new Point($hour, $value));
+    if ($value > $max) $max = $value;
+  }
+
+  $gd = new GraphData();
+  $gd->name = $theStat->name;
+  $gd->dataLine = $dataLine;
+  $gd->max = $max + ($max * 0.05) ;
+  $gd->yincrement = calcYincrement($max);
+  $gd->color=$color;
+
+  return $gd;
+}
+
+function findStats(String $category, String $subcategory=null) {
+  global $start;
+  global $end;
+  global $stat;
+  global $statList;
+  global $si;
+
+  $map = array();
+  foreach ($statList as $statItem) {
+    if ($statItem->server != $si) continue;
+    if ($category == $statItem->category) {
+      if ($subcategory && $subcategory == $statItem->subcategory) {
+	$map[$statItem->name]= 
+		$stat->statisticsData($statItem->fullName, $start * 1000, $end * 1000,
+                                    STEP * 1000);
+      }
+    }
+  }
+  return $map;
+}
+
+
+function findStatByStat($theStat) {
+  global $start;
+  global $end;
+  global $stat;
+  global $statList;
+  global $si;
+
+  foreach ($statList as $statItem) {
+    if ($statItem->server != $si) continue;
+    if ($statItem->eq($theStat)) {
+ 	return $stat->statisticsData($statItem->fullName, $start * 1000, $end * 1000,
+                                    STEP * 1000);
+      }
+    
+  }
+}
+
+
+
+function findStatByName(String $name, String $subcategory="Health", String $category="Resin") {
+  global $start;
+  global $end;
+  global $stat;
+  global $statList;
+  global $si;
+
+
+  $arr = array();
+  foreach ($statList as $statItem) {
+    if ($statItem->server != $si) continue;
+    if($subcategory==$statItem->subcateogry) {
+      //debug(" NAME " . $statItem->name); 
+    }
+    if ($name == $statItem->name && $category == $statItem->category) {
+	$arr = $stat->statisticsData($statItem->fullName, $start * 1000, $end * 1000,
+                                    STEP * 1000);
+    }
+  }
+  return $arr;
+}
+
+
+function getMeterGraphPage($pdfName) {
+	global $stat;
+	$mpages = $stat->getMeterGraphPages();
+	foreach($mpages as $mg)	{
+		if ($mg->name == $pdfName){
+			return $mg;
+		}
+	}
+}
+
+
+function debug($msg) {
+  //System::out->println($msg);
+}
+
+
+function admin_init_no_output($query="", $is_refresh=false)
+{
+  global $g_server_id;
+  global $g_server_index;
+  global $g_mbean_server;
+  global $g_resin;
+  global $g_server;
+  global $g_page;
+
+  if (! mbean_init()) {
+    if ($g_server_id)
+      debug( "admin_init_no_output:: Server ID FOUND: Resin: $g_page for server $g_server_id");
+    else
+      debug ("admin_init_no_output:: Resin: $g_page for server default");
+
+    debug("admin_init_no_output:: $page = g_page, server = $g_server, query = $query, refresh = $is_refresh");
+
+    return false;
+  }
+
+  return true;
+}
 
 
 class Range {
@@ -544,5 +618,406 @@ class Graph {
 
 
 }
+
+
+function pdf_format_memory($memory)
+{
+  return sprintf("%.2f M", $memory / (1024 * 1024))
+}
+
+
+
+
+function createGraph(String $title, GraphData $gd, Point $origin, boolean $displayYLabels=true, Size $gsize=GRAPH_SIZE, boolean $trace=false) {
+  global $start;
+  global $end;
+  global $canvas;
+  global $lightGrey;
+  global $grey;
+  global $darkGrey;
+  global $black;
+  global $majorTicks, $minorTicks;
+
+  $graph = new Graph($title, $origin, $gsize, new Range($start * 1000, $end * 1000), new Range(0,$gd->max), $trace);
+  $graph->start();
+
+
+  $valid = $gd->validate();
+
+  if ($valid) {
+    $canvas->setColor($black);
+    $canvas->setFont("Helvetica-Bold", 12);
+    $graph->drawTitle($title);
+
+    $canvas->setColor($lightGrey);
+    $graph->drawGridLines($minorTicks, $gd->yincrement/2);
+
+    $canvas->setColor($grey);
+    $graph->drawGridLines($majorTicks, $gd->yincrement);
+
+    $canvas->setColor($black);
+    $graph->drawGrid();
+
+    if ($displayYLabels) {
+      $graph->drawYGridLabels($gd->yincrement);
+    }
+    $graph->drawXGridLabels($majorTicks, "displayTimeLabel");
+  } else {
+    debug("Not displaying graph $title because the data was not valid");
+    $canvas->setColor($black);
+    $canvas->setFont("Helvetica-Bold", 12);
+    $graph->drawTitle($title);
+    $canvas->setColor($darkGrey);
+    $graph->drawGrid();
+  }
+  return $graph;
+}
+
+
+function getDominantGraphData($gds) {
+  $gdd = $gds[0];
+  foreach($gds as $gd) {
+    if ($gd->max > $gdd->max) {
+      $gdd=$gd;
+    }
+  }
+  return $gdd;
+}
+
+
+
+
+
+class GraphData {
+  public $name;
+  public $dataLine;
+  public $max;
+  public $yincrement;
+  public $color;
+
+  function __toString() {
+    return "GraphData name $this->name dataLine $this->dataLine max $this->max yincrement $this->yincrement";
+  }
+
+  function validate() {
+
+    if (sizeof($this->dataLine)==0) {
+      debug(" no data in " . $this->name);
+      return false;
+    }
+
+    if ($this->max==0) {
+      $this->max=10;
+      $this->yincrement=1;
+    }
+
+    
+    return true;
+  }
+}
+
+
+function calcYincrement($max) {
+  $yincrement = (int)($max / 3);
+
+  $div = 5;
+
+  if ($max > 5000000000) {
+	$div = 1000000000;
+  } elseif ($max > 5000000000) {
+	$div = 1000000000;
+  } elseif ($max > 500000000) {
+	$div = 100000000;
+  } elseif ($max > 50000000) {
+	$div = 10000000;
+  } elseif ($max > 5000000) {
+	$div = 1000000;
+  } elseif ($max > 500000) {
+	$div = 100000;
+  } elseif ($max > 50000) {
+	$div = 10000;
+  } elseif ($max > 5000) {
+	$div = 1000;
+  } elseif ($max > 500) {
+	$div = 100;
+  } elseif ($max > 50) {
+	$div = 10;
+  }
+  
+  $yincrement = $yincrement - ($yincrement % $div); //make the increment divisible by 5
+
+
+  if ($yincrement == 0) {
+      $yincrement = round($max / 5, 2);
+  }
+  return $yincrement;
+}
+
+
+function getStatDataForGraphBySubcategory($subcategory, $category="Resin", $nameMatch=null) {
+  global $blue, $red, $orange, $purple, $green, $cyan, $brown, $black;
+  $cindex = 0;
+  $gds = array();	
+  $map=findStats($category, $subcategory);
+  $colors = array($blue, $red, $orange, $purple, $green, $cyan, $brown, $black, $blue, $red, $orange, $purple, $green, $cyan, $brown, $black);
+
+  foreach ($map as $name => $data) {
+	$dataLine = array();
+  	$max = -100;
+	$process =  true; 
+	if($nameMatch) {
+		if(!strstr($name, $nameMatch)){
+			$process = false;
+		}
+	}
+	if ($process) {
+		//debug(" $name -------------------- ");
+  		foreach($data as $d) {  
+    			$value = $d->value;
+    			$time = $d->time;
+			//debug(" $time  --- $value  ");
+
+    			array_push($dataLine, new Point($time, $value));
+    			if ($value > $max) $max = $value;
+  		}
+  		$gd = new GraphData();
+  		$gd->name = $name;
+  		$gd->dataLine = $dataLine;
+  		$gd->yincrement = calcYincrement($max);
+  		$gd->max = $max + ($max * 0.05) ;
+  		$gd->color=$colors[$cindex];
+		array_push($gds, $gd);
+		$cindex++;
+
+	}
+  }
+
+
+
+  return $gds;
+}
+
+function getStatDataForGraph($name, $subcategory, $color=$blue, $category="Resin") {
+
+  $data=findStatByName($name, $subcategory, $category);
+  $dataLine = array();
+  $max = -100;
+  foreach($data as $d) {
+    
+    $value = $d->value;
+    $hour = $d->time;
+    array_push($dataLine, new Point($hour, $value));
+    if ($value > $max) $max = $value;
+  }
+
+  $gd = new GraphData();
+  $gd->name = $name;
+  $gd->dataLine = $dataLine;
+  $gd->max = $max + ($max * 0.05) ;
+  $gd->yincrement = calcYincrement($max);
+  $gd->color=$color;
+
+  return $gd;
+}
+
+
+
+function displayTimeLabel($time){
+    return strftime("%H:%M", $time/1000);
+}
+
+
+
+function writeFooter() {
+  global $page;
+  global $canvas;
+  global $serverID;
+  global $restart_time;
+  $time = date("Y-m-d H:i", $restart_time);
+  $page +=1;
+  $canvas->setFont("Helvetica-Bold", 8);
+  $canvas->writeText(new Point(175, 10), "Postmortem Analysis \t\t $time \t\t $serverID \t\t  \t\t\t \t page $page");
+}
+
+
+function getRestartTime($stat) {
+
+  global $g_server;
+
+  $index = $g_server->SelfServer->ClusterIndex;
+  $now = time();
+  $start = $now - 7 * 24 * 3600;
+
+  $restart_list = $stat->getStartTimes($index, $start * 1000, $now * 1000);
+
+  if (empty($restart_list)) {
+    debug( "getRestartTime:: No server restarts have been found in the last 7 days.");
+    return null;
+  }
+
+
+  $form_time = $_REQUEST['time'];
+
+  if (in_array($form_time, $restart_list)) {
+    $restart_ms = $form_time;
+  } else {
+    sort($restart_list);
+    $restart_ms = $restart_list[count($restart_list) - 1];
+  }  
+  $restart_time = floor($restart_ms / 1000);
+
+  return $restart_time;
+}
+
+
+
+
+function startsWith($haystack, $needle)
+{
+    $length = strlen($needle);
+    return (substr($haystack, 0, $length) === $needle);
+}
+
+function endsWith($haystack, $needle)
+{
+    $length = strlen($needle);
+    $start  = $length * -1; //negative
+    return (substr($haystack, $start) === $needle);
+}
+
+function  my_error_handler(int $error_type, string $error_msg, string $errfile, int $errline) {
+  if(!startsWith($error_msg,"Can't access private field")) {
+    debug("ERROR HANDLER: type $error_type, msg $error_msg, file $errfile, lineno $errline");
+  }
+} 
+
+set_error_handler('my_error_handler'); 
+
+function initPDF() {
+  global $pdf;
+  $pdf = new PDF();
+
+}
+
+function startDoc() {
+  global $pdf;
+  $pdf->begin_document();
+  $pdf->begin_page(595, 842);
+}
+
+
+
+class Color {
+
+  function doSetColor($canvas) {
+  }
+}
+
+class RGBColor {
+  private $red;
+  private $green;
+  private $blue;
+
+  function __construct() {
+    $args = func_get_args();
+    $this->red =  $args[0];
+    $this->green =  $args[1];
+    $this->blue =  $args[2];
+  }
+
+
+  function doSetColor($canvas) {
+    $canvas->setRGBColor($this->red, $this->green, $this->blue);
+  } 
+
+}
+
+$black = new RGBColor(0.0, 0.0, 0.0);
+$red = new RGBColor(1.0, 0.0, 0.0);
+$green = new RGBColor(0.0, 1.0, 0.0);
+$blue = new RGBColor(0.0, 0.0, 1.0);
+$darkGrey = new RGBColor(0.2, 0.2, 0.2);
+$lightGrey = new RGBColor(0.9, 0.9, 0.9);
+$grey = new RGBColor(0.45, 0.45, 0.45);
+$purple = new RGBColor(0.45, 0.2, 0.45);
+$orange = new RGBColor(1.0, 0.66, 0.0);
+$cyan = new RGBColor(0.0, 0.66, 1.0);
+$brown = new RGBColor(0.66, 0.20, 0.20);
+
+
+
+
+class Canvas {
+  private $origin;
+  
+  function __construct() {
+    $args = func_get_args();
+    $this->origin =  $args[0];
+    $this->lastTextPos = new Point(0,0); //to fix problem with Resin PDF Lib clone
+  }
+
+  function start() {
+    global $pdf;
+    $pdf->save();
+    $pdf->translate($this->origin->x, $this->origin->y);
+
+  }
+
+  function end() {
+    global $pdf;
+    $pdf->restore();
+  }
+
+  function __toString() {
+    $str = " (CANVAS ORIGIN $origin)";
+    return $str;
+  }
+
+
+  function moveTo($point) {
+    global $pdf;
+    $pdf->moveto($point->x, $point->y);
+  }
+
+  function lineTo($point) {
+    global $pdf;
+    $pdf->lineto($point->x, $point->y);
+  }
+
+  function stroke() {
+    global $pdf;
+    $pdf->stroke();
+  }
+
+
+  function __get($name) {
+    return $this->$name;
+  }
+
+  function writeText($point, $text) {
+    global $pdf;
+    $pdf->set_text_pos($point->x, $point->y);
+    $pdf->show($text);
+  }
+
+  function setColor(Color $color) {
+    $color->doSetColor($this);
+  }
+
+  function setRGBColor($red, $green, $blue) {
+    global $pdf;
+    $pdf->setcolor("fillstroke", "rgb", $red, $green, $blue);
+  }
+
+  function setFont($fontName, $fontSize) {
+    global $pdf;
+    $font = $pdf->load_font($fontName, "", "");
+    $pdf->setfont($font, $fontSize);
+  }
+
+}
+
+$canvas = new Canvas(new Point(0,0));
+
 
 ?>
