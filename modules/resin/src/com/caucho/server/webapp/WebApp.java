@@ -2784,10 +2784,11 @@ public class WebApp extends ServletContextImpl
       Class<?> cl = Class.forName(handler, false, getClassLoader());
       
       if (cl != null) {
-        getEnvironmentClassLoader().putResourceAlias("META-INF/faces-config.xml.in",
-                                                     "META-INF/faces-config.xml");
+        getEnvironmentClassLoader().putResourceAlias("META-INF/faces-config.xml",
+                                                     "META-INF/faces-config.xml.in");
       }
     } catch (Throwable e) {
+      e.printStackTrace();
       log.log(Level.FINE, e.toString(), e);
     }
   }

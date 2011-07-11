@@ -29,17 +29,12 @@
 
 package com.caucho.loader;
 
-import java.io.IOException;
-import java.io.InputStream;
 import java.lang.reflect.Constructor;
 import java.net.URL;
 import java.net.URLClassLoader;
 import java.util.ArrayList;
-import java.util.Enumeration;
 import java.util.Map;
-import java.util.Vector;
 import java.util.concurrent.ConcurrentHashMap;
-import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.atomic.AtomicReference;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -335,7 +330,7 @@ public class EnvironmentClassLoader extends DynamicClassLoader
         return actualName;
     }
     
-    return name;
+    return null;
   }
   
   /**

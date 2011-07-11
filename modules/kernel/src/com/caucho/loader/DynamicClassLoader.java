@@ -1807,7 +1807,8 @@ public class DynamicClassLoader extends java.net.URLClassLoader
     if (name.startsWith("/"))
       name = name.substring(1);
 
-    name = getResourceAlias(name);
+    // String alias = getResourceAlias(name);
+
     /*
     if (name.endsWith("/"))
       name = name.substring(0, name.length() - 1);
@@ -1855,7 +1856,7 @@ public class DynamicClassLoader extends java.net.URLClassLoader
   
   protected String getResourceAlias(String name)
   {
-    return name;
+    return null;
   }
 
   /**
@@ -1913,7 +1914,8 @@ public class DynamicClassLoader extends java.net.URLClassLoader
     if (name.endsWith("/"))
       name = name.substring(0, name.length() - 1);
     
-    name = getResourceAlias(name);
+    // String alias = getResourceAlias(name);
+    // System.out.println("GRAS: " + alias + " " + name);
 
     boolean isNormalJdkOrder = isNormalJdkOrder(name);
     InputStream is = null;
@@ -1967,6 +1969,45 @@ public class DynamicClassLoader extends java.net.URLClassLoader
 
     return null;
   }
+  
+  @Override
+  public Enumeration<URL> getResources(String name)
+    throws IOException
+  {
+    Vector<URL> resources = new Vector<URL>();
+    
+    getResources(resources, name);
+    
+    String alias = getResourceAlias(name);
+    
+    if (alias != null)
+      getResources(resources, alias);
+
+    return resources.elements();
+  }
+  
+  private void getResources(Vector<URL> resources, String name)
+    throws IOException
+  {
+    ClassLoader parent = getParent();
+    
+    if (parent == null) {
+    }
+    else if (parent instanceof DynamicClassLoader) {
+      DynamicClassLoader dynParent = (DynamicClassLoader) parent;
+      
+      dynParent.getResources(resources, name);
+    }
+    else {
+      Enumeration<URL> parentResources = parent.getResources(name);
+      
+      while (parentResources.hasMoreElements()) {
+        URL url = parentResources.nextElement();
+        
+        resources.add(url);
+      }
+    }
+  }
 
   /**
    * Returns an enumeration of matching resources.
@@ -1983,10 +2024,20 @@ public class DynamicClassLoader extends java.net.URLClassLoader
       name = name.substring(0, name.length() - 1);
       */
     
-    name = getResourceAlias(name);
-
     Vector<URL> resources = new Vector<URL>();
 
+    fillResources(resources, name);
+    
+    String alias = getResourceAlias(name);
+    
+    if (alias != null)
+      fillResources(resources, alias);
+
+    return resources.elements();
+  }
+  
+  private void fillResources(Vector<URL> resources, String name)
+  {
     ArrayList<Loader> loaders = getLoaders();
     if (loaders != null) {
       for (int i = 0; i < loaders.size(); i++) {
@@ -1995,8 +2046,6 @@ public class DynamicClassLoader extends java.net.URLClassLoader
         loader.getResources(resources, name);
       }
     }
-
-    return resources.elements();
   }
 
   /**
