@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 1998-2008 Caucho Technology -- all rights reserved
+ * Copyright (c) 1998-2011 Caucho Technology -- all rights reserved
  *
  * This file is part of Resin(R) Open Source
  *
@@ -39,6 +39,7 @@ public class MultipartForm {
 
   private boolean _enable = true;
   private long _uploadMax = -1;
+  private long _parameterLengthMax = -1;
 
   public void setEnable(boolean enable)
   {
@@ -49,14 +50,24 @@ public class MultipartForm {
   {
     return _enable;
   }
-  
+
   public void setUploadMax(Bytes max)
   {
     _uploadMax = max.getBytes();
   }
-  
+
   public long getUploadMax()
   {
     return _uploadMax;
+  }
+
+  public void setParameterLengthMax(Bytes max)
+  {
+    _parameterLengthMax = max.getBytes();
+  }
+
+  public long getParameterLengthMax()
+  {
+    return _parameterLengthMax;
   }
 }

@@ -400,6 +400,9 @@ r_multipart-form = element multipart-form {
 
   & (attribute upload-max { r_kbytes }
      | element upload-max { r_kbytes })?
+
+  & (attribute parameter-length-max { r_kbytes }
+     | element parameter-length-max { r_kbytes })?
 }
 
 ## this doesn't exist in servlet spec?

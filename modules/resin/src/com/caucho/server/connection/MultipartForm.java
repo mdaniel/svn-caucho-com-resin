@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 1998-2008 Caucho Technology -- all rights reserved
+ * Copyright (c) 1998-2011 Caucho Technology -- all rights reserved
  *
  * This file is part of Resin(R) Open Source
  *
@@ -28,7 +28,6 @@
 
 package com.caucho.server.connection;
 
-import com.caucho.log.Log;
 import com.caucho.server.util.CauchoSystem;
 import com.caucho.util.CharBuffer;
 import com.caucho.util.HashMapImpl;
@@ -42,19 +41,24 @@ import com.caucho.vfs.WriteStream;
 import java.io.IOException;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+import java.util.List;
+import java.util.HashMap;
 
 /**
  * Multipart form handling.
  */
 class MultipartForm {
-  static final Logger log = Log.open(MultipartForm.class);
+  private static final Logger log
+    = Logger.getLogger(MultipartForm.class.getName());
   static final L10N L = new L10N(MultipartForm.class);
-  
+
   static void parsePostData(HashMapImpl<String,String[]> table,
                             ReadStream rawIs, String boundary,
                             AbstractHttpRequest request,
                             String javaEncoding,
-                            long uploadMax)
+                            long uploadMax,
+                            long fileUploadMax,
+                            long lengthMax)
     throws IOException
   {
     MultipartStream ms = new MultipartStream(rawIs, boundary);
@@ -71,14 +75,16 @@ class MultipartForm {
 
       String name = getAttribute(attr, "name");
       String filename = getAttribute(attr, "filename");
+      String contentType = getAttribute(attr, "content-type");
+
+      if (contentType == null)
+        contentType = (String) ms.getAttribute("content-type");
 
       if (name == null) {
         // XXX: is this an error?
         continue;
       }
       else if (filename != null) {
-        String contentType = (String) ms.getAttribute("content-type");
-
         Path tempDir = CauchoSystem.getWorkPath().lookup("form");
         try {
           tempDir.mkdirs();
@@ -89,22 +95,22 @@ class MultipartForm {
 
         WriteStream os = tempFile.openWrite();
 
-	TempBuffer tempBuffer = TempBuffer.allocate();
-	byte []buf = tempBuffer.getBuffer();
+        TempBuffer tempBuffer = TempBuffer.allocate();
+        byte []buf = tempBuffer.getBuffer();
 
-	int totalLength = 0;
+        int totalLength = 0;
 
         try {
-	  int len;
-	  
-	  while ((len = is.read(buf, 0, buf.length)) > 0) {
-	    os.write(buf, 0, len);
-	    totalLength += len;
-	  }
+          int len;
+
+          while ((len = is.read(buf, 0, buf.length)) > 0) {
+            os.write(buf, 0, len);
+            totalLength += len;
+          }
         } finally {
           os.close();
 
-	  TempBuffer.free(tempBuffer);
+          TempBuffer.free(tempBuffer);
           tempBuffer = null;
         }
 
@@ -113,51 +119,75 @@ class MultipartForm {
                            "" + tempFile.getLength());
           request.setAttribute("caucho.multipart.form.error", msg);
           request.setAttribute("caucho.multipart.form.error.size",
-			       new Long(tempFile.getLength()));
-          
+                               new Long(tempFile.getLength()));
+
           tempFile.remove();
-          
+
           throw new IOException(msg);
+        } else if (fileUploadMax > 0 && fileUploadMax < tempFile.getLength()){
+          String msg = L.l("multipart form data part '{0}':'{1}' is greater then the accepted value of '{2}'",
+                           name, "" + tempFile.getLength(), fileUploadMax);
+
+          tempFile.remove();
+
+          throw new IllegalStateException(msg);
         }
-	else if (tempFile.getLength() != totalLength) {
+        else if (tempFile.getLength() != totalLength) {
           String msg = L.l("multipart form upload failed (possibly due to full disk).");
-	  
+
           request.setAttribute("caucho.multipart.form.error", msg);
           request.setAttribute("caucho.multipart.form.error.size",
-			       new Long(tempFile.getLength()));
-          
-          tempFile.remove();
-          
-          throw new IOException(msg);
-	}
+                               new Long(tempFile.getLength()));
 
-	// server/136u, server/136v, #2578
-	if (table.get(name + ".filename") == null) {
-	  table.put(name, new String[] { tempFile.getNativePath() });
-	  table.put(name + ".file", new String[] { tempFile.getNativePath() });
-	  table.put(name + ".filename", new String[] { filename });
-	  table.put(name + ".content-type", new String[] { contentType });
-	}
-	else {
-	  addTable(table, name, tempFile.getNativePath());
-	  addTable(table, name + ".file", tempFile.getNativePath());
-	  addTable(table, name + ".filename", filename);
-	  addTable(table, name + ".content-type", contentType);
-	}
-        
-        if (log.isLoggable(Level.FINE))
+          tempFile.remove();
+
+          throw new IOException(msg);
+        }
+
+        // server/136u, server/136v, #2578
+        if (table.get(name + ".filename") == null) {
+          table.put(name, new String[] { tempFile.getNativePath() });
+          table.put(name + ".file", new String[] { tempFile.getNativePath() });
+          table.put(name + ".filename", new String[] { filename });
+          table.put(name + ".content-type", new String[] { contentType });
+        }
+        else {
+          addTable(table, name, tempFile.getNativePath());
+          addTable(table, name + ".file", tempFile.getNativePath());
+          addTable(table, name + ".filename", filename);
+          addTable(table, name + ".content-type", contentType);
+        }
+
+      if (log.isLoggable(Level.FINE))
           log.fine("mp-file: " + name + "(filename:" + filename + ")");
       } else {
         CharBuffer value = new CharBuffer();
         int ch;
+        long totalLength = 0;
 
-        for (ch = is.readChar(); ch >= 0; ch = is.readChar())
+        for (ch = is.readChar(); ch >= 0; ch = is.readChar()) {
           value.append((char) ch);
-      
+          totalLength++;
+
+          if (lengthMax < totalLength) {
+            String msg = L.l("multipart form upload failed because field '{0}' exceeds max length {1}",
+                             name, lengthMax);
+
+            request.setAttribute("caucho.multipart.form.error", msg);
+            request.setAttribute("caucho.multipart.form.error.size",
+                                 new Long(totalLength));
+
+            throw new IOException(msg);
+          }
+        }
+
         if (log.isLoggable(Level.FINE))
           log.fine("mp-form: " + name + "=" + value);
 
         addTable(table, name, value.toString());
+
+        if (contentType != null)
+          addTable(table, name + ".content-type", contentType);
       }
     }
 
@@ -184,15 +214,21 @@ class MultipartForm {
   {
     if (attr == null)
       return null;
-    
+
     int length = attr.length();
-    int i = attr.indexOf(name);
+
+    int i = findAttribute(attr, name);
     if (i < 0)
       return null;
 
+    if (length <= i || attr.charAt(i) != '=')
+      return null;
+
+    /*
     for (i += name.length(); i < length && attr.charAt(i) != '='; i++) {
     }
-    
+    */
+
     for (i++; i < length && attr.charAt(i) == ' '; i++) {
     }
 
@@ -212,5 +248,39 @@ class MultipartForm {
     }
 
     return value.close();
+  }
+
+  private static int findAttribute(String attribute, String name)
+  {
+    int length = attribute.length();
+    int nameLength = name.length();
+
+    for (int i = 0; i < length - nameLength; i++) {
+      if (attribute.regionMatches(true, i, name, 0, nameLength)) {
+        char ch;
+
+        if (i > 0
+            && (ch = attribute.charAt(i - 1)) != ' '
+            && ch != ';'
+            && ch != '\t') {
+          continue;
+        }
+
+        int j = i + nameLength;
+
+        for (; j < length; j++) {
+          ch = attribute.charAt(j);
+
+          if (ch == '=')
+            return j;
+          else if (ch == ' ' || ch == '\t')
+            continue;
+          else
+            break;
+        }
+      }
+    }
+
+    return -1;
   }
 }

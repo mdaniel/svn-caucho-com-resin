@@ -2055,10 +2055,18 @@ public abstract class AbstractHttpRequest
           return _form;
 
         long formUploadMax = getWebApp().getFormUploadMax();
+        long parameterLengthMax = getWebApp().getFormParameterLengthMax();
+
+        if (parameterLengthMax < 0)
+          parameterLengthMax = Long.MAX_VALUE / 2;
 
         Object uploadMax = getAttribute("caucho.multipart.form.upload-max");
         if (uploadMax instanceof Number)
           formUploadMax = ((Number) uploadMax).longValue();
+
+        Object paramMax = getAttribute("caucho.multipart.form.parameter-length-max");
+        if (paramMax instanceof Number)
+          parameterLengthMax = ((Number) paramMax).longValue();
 
         // XXX: should this be an error?
         if (formUploadMax >= 0 && formUploadMax < getLongContentLength()) {
@@ -2096,7 +2104,9 @@ public abstract class AbstractHttpRequest
                                       getStream(false), boundary.toString(),
                                       this,
                                       javaEncoding,
-                                      formUploadMax);
+                                      formUploadMax,
+                                      formUploadMax,
+                                      parameterLengthMax);
         } catch (IOException e) {
           log.log(Level.FINE, e.toString(), e);
           setAttribute("caucho.multipart.form.error", e.getMessage());
