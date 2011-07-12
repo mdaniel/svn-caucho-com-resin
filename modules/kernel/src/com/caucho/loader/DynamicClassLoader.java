@@ -2007,6 +2007,8 @@ public class DynamicClassLoader extends java.net.URLClassLoader
         resources.add(url);
       }
     }
+    
+    fillResources(resources, name);
   }
 
   /**
