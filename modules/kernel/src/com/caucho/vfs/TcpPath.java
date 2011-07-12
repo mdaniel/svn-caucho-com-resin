@@ -43,11 +43,11 @@ public class TcpPath extends Path {
   // Attribute name for connection timeouts
   public static final String CONNECT_TIMEOUT = "connect-timeout";
 
-  protected String _host;
-  protected int _port;
-  protected SocketAddress _address;
-  protected long _connectTimeout = 5000L;
-  protected long _socketTimeout = 600000L;
+  private String _host;
+  private int _port;
+  private SocketAddress _address;
+  private long _connectTimeout = 5000L;
+  private long _socketTimeout = 600000L;
   private boolean _noDelay;
 
   public TcpPath(TcpPath root, String userPath,

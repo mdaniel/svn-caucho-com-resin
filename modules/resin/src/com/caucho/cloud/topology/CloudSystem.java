@@ -100,6 +100,26 @@ public class CloudSystem
   }
 
   /**
+   * Finds the server with the unique id.
+   */
+  public CloudServer findServer(String clusterId,
+                                int podIndex,
+                                int serverIndex)
+  {
+    CloudCluster cluster = findCluster(clusterId);
+    
+    if (cluster == null)
+      return null;
+    
+    CloudPod pod = cluster.findPod(podIndex);
+    
+    if (pod == null)
+      return null;
+    
+    return pod.findServer(serverIndex);
+  }
+
+  /**
    * Finds the first server with the given address and port
    */
   public CloudServer findServer(String address, int port)

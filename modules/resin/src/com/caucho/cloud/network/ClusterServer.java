@@ -29,8 +29,6 @@
 
 package com.caucho.cloud.network;
 
-import java.net.InetAddress;
-import java.net.UnknownHostException;
 import java.util.ArrayList;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicLong;
@@ -130,7 +128,7 @@ public final class ClusterServer {
     // XXX: active isn't quite right here
     if (cloudServer.getPod() != networkService.getSelfServer().getPod()) {
       _isRemotePod = true;
-      _isHeartbeatActive.set(true);
+      // _isHeartbeatActive.set(true);
     }
     
     _stateTimestamp.set(Alarm.getCurrentTime());

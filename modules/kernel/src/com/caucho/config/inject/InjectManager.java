@@ -2058,7 +2058,7 @@ System.out.println("SB: " + secondBean + " " + bean);
       priority = -1;
       
       Integer value = getPriority(bean.getBeanClass());
-      System.out.println("BEAN: " + value + " " + bean);
+
       if (value != null)
         priority = value;
     }
