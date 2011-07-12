@@ -146,6 +146,12 @@ enum SocketLinkRequestState {
     }
     
     @Override
+    boolean toAsyncResume(AtomicReference<SocketLinkRequestState> stateRef)
+    {
+      return stateRef.compareAndSet(ASYNC_WAKE, REQUEST);
+    }
+    
+    @Override
     boolean toAsyncWake(AtomicReference<SocketLinkRequestState> stateRef)
     {
       if (stateRef.compareAndSet(ASYNC_START, ASYNC_WAKE)) {
@@ -160,7 +166,7 @@ enum SocketLinkRequestState {
     @Override
     public boolean isAsyncWake()
     {
-      return false;
+      return true;
     }
     
     @Override
@@ -171,6 +177,12 @@ enum SocketLinkRequestState {
       }
 
       throw new IllegalStateException(this + " to " + stateRef.get());
+    }
+    
+    @Override
+    boolean toAsyncResume(AtomicReference<SocketLinkRequestState> stateRef)
+    {
+      return stateRef.compareAndSet(ASYNC_WAKE, REQUEST);
     }
   },
   
@@ -252,6 +264,11 @@ enum SocketLinkRequestState {
   }
 
   boolean toAsyncSuspend(AtomicReference<SocketLinkRequestState> stateRef)
+  {
+    throw new IllegalStateException(toString());
+  }
+
+  boolean toAsyncResume(AtomicReference<SocketLinkRequestState> stateRef)
   {
     throw new IllegalStateException(toString());
   }

@@ -649,7 +649,7 @@ public class SessionImpl implements HttpSession, CacheListener {
       
       if (entry != null) {
         // server/01a1, #4419
-        _idleTimeout = entry.getIdleTimeout();
+        _idleTimeout = entry.getIdleTimeout() * 4 / 5;
         //_isIdleSet = true;
       }
       

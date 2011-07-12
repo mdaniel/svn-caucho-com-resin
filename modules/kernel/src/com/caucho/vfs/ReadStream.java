@@ -60,7 +60,7 @@ public final class ReadStream extends InputStream
     implements LockableStream
 {
   public static int ZERO_COPY_SIZE = 1024;
-  public static int READ_TIMEOUT = -4;
+  public static final int READ_TIMEOUT = -4;
 
   private TempBuffer _tempRead;
   private byte []_readBuffer;

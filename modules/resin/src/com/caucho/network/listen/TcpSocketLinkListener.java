@@ -41,6 +41,7 @@ import java.util.HashSet;
 import java.util.Set;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicInteger;
+import java.util.concurrent.atomic.AtomicLong;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -180,12 +181,12 @@ public class TcpSocketLinkListener
 
   // statistics
 
-  private volatile long _lifetimeRequestCount;
-  private volatile long _lifetimeKeepaliveCount;
-  private volatile long _lifetimeClientDisconnectCount;
-  private volatile long _lifetimeRequestTime;
-  private volatile long _lifetimeReadBytes;
-  private volatile long _lifetimeWriteBytes;
+  private final AtomicLong _lifetimeRequestCount = new AtomicLong();
+  private final AtomicLong _lifetimeKeepaliveCount = new AtomicLong();
+  private final AtomicLong _lifetimeClientDisconnectCount = new AtomicLong();
+  private final AtomicLong _lifetimeRequestTime = new AtomicLong();
+  private final AtomicLong _lifetimeReadBytes = new AtomicLong();
+  private final AtomicLong _lifetimeWriteBytes = new AtomicLong();
 
   // total keepalive
   private AtomicInteger _keepaliveAllocateCount = new AtomicInteger();
@@ -1379,7 +1380,7 @@ public class TcpSocketLinkListener
    *
    * @return true if the connection was added to the suspend list
    */
-  @Friend(TcpSocketLink.class)
+  @Friend(SocketLinkState.class)
   void cometSuspend(TcpSocketLink conn)
   {
     _suspendConnectionSet.add(conn);
@@ -1388,7 +1389,7 @@ public class TcpSocketLinkListener
   /**
    * Remove from suspend list.
    */
-  @Friend(TcpSocketLink.class)
+  @Friend(SocketLinkState.class)
   boolean cometDetach(TcpSocketLink conn)
   {
     return _suspendConnectionSet.remove(conn);
@@ -1440,62 +1441,62 @@ public class TcpSocketLinkListener
 
   void addLifetimeRequestCount()
   {
-    _lifetimeRequestCount++;
+    _lifetimeRequestCount.incrementAndGet();
   }
 
   public long getLifetimeRequestCount()
   {
-    return _lifetimeRequestCount;
+    return _lifetimeRequestCount.get();
   }
 
   void addLifetimeKeepaliveCount()
   {
-    _lifetimeKeepaliveCount++;
+    _lifetimeKeepaliveCount.incrementAndGet();
   }
 
   public long getLifetimeKeepaliveCount()
   {
-    return _lifetimeKeepaliveCount;
+    return _lifetimeKeepaliveCount.get();
   }
 
   void addLifetimeClientDisconnectCount()
   {
-    _lifetimeClientDisconnectCount++;
+    _lifetimeClientDisconnectCount.incrementAndGet();
   }
 
   public long getLifetimeClientDisconnectCount()
   {
-    return _lifetimeClientDisconnectCount;
+    return _lifetimeClientDisconnectCount.get();
   }
 
   void addLifetimeRequestTime(long time)
   {
-    _lifetimeRequestTime += time;
+    _lifetimeRequestTime.addAndGet(time);
   }
 
   public long getLifetimeRequestTime()
   {
-    return _lifetimeRequestTime;
+    return _lifetimeRequestTime.get();
   }
 
   void addLifetimeReadBytes(long bytes)
   {
-    _lifetimeReadBytes += bytes;
+    _lifetimeReadBytes.addAndGet(bytes);
   }
 
   public long getLifetimeReadBytes()
   {
-    return _lifetimeReadBytes;
+    return _lifetimeReadBytes.get();
   }
 
   void addLifetimeWriteBytes(long bytes)
   {
-    _lifetimeWriteBytes += bytes;
+    _lifetimeWriteBytes.addAndGet(bytes);
   }
 
   public long getLifetimeWriteBytes()
   {
-    return _lifetimeWriteBytes;
+    return _lifetimeWriteBytes.get();
   }
 
   /**

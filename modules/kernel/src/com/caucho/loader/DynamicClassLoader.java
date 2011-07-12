@@ -2040,6 +2040,9 @@ public class DynamicClassLoader extends java.net.URLClassLoader
   
   private void fillResources(Vector<URL> resources, String name)
   {
+    if (name.startsWith("/"))
+      name = name.substring(1);
+    
     ArrayList<Loader> loaders = getLoaders();
     if (loaders != null) {
       for (int i = 0; i < loaders.size(); i++) {

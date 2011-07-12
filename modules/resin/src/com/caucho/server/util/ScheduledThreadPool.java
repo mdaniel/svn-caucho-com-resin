@@ -586,29 +586,33 @@ public class ScheduledThreadPool implements ScheduledExecutorService,
 
     public void run()
     {
-      _thread = Thread.currentThread();
-      ClassLoader oldLoader = _thread.getContextClassLoader();
+      Thread thread = Thread.currentThread(); 
+      _thread = thread;
+      ClassLoader oldLoader = thread.getContextClassLoader();
 
       try {
         if (_isCancelled || _isDone || _isShutdown)
           return;
 
-        _thread.setContextClassLoader(_loader);
+        thread.setContextClassLoader(_loader);
 
         if (_callable != null)
           _value = _callable.call();
-        else
+        else if (_runnable != null)
           _runnable.run();
       } catch (RuntimeException e) {
         throw e;
       } catch (Exception e) {
         _exception = e;
       } finally {
-        _thread.setContextClassLoader(oldLoader);
+        thread.setContextClassLoader(oldLoader);
         _thread = null;
         _isDone = true;
 
-        _threadPool.completeExecutorTask();
+        ThreadPool threadPool = _threadPool;
+        
+        if (threadPool != null)
+          threadPool.completeExecutorTask();
 
         // alarm
 

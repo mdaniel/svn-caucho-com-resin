@@ -1764,7 +1764,7 @@ public final class InjectManager
       }
       else if (bestPriority == priority) {
         secondBean = bean;
-System.out.println("SB: " + secondBean + " " + bean);
+
         // TCK: ProducerFieldDefinitionTest
         boolean isFirstProduces = (bestBean instanceof ProducesMethodBean<?,?>
                                    || bestBean instanceof ProducesFieldBean<?,?>);

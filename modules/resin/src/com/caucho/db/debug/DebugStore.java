@@ -49,7 +49,7 @@ public class DebugStore {
   {
     _path = path;
 
-    _store = BlockStore.create(path);
+    _store = BlockStore.createNoMmap(path);
   }
 
   public static void main(String []args)

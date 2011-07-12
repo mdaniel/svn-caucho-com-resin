@@ -189,6 +189,24 @@ public class BlockStore {
                     ReadWriteLock rowLock,
                     Path path)
   {
+    this(database, name, rowLock, path,
+         BlockManager.getBlockManager().isEnableMmap());
+  }
+
+  /**
+   * Creates a new store.
+   *
+   * @param database the owning database.
+   * @param name the store name
+   * @param lock the table lock
+   * @param path the path to the files
+   */
+  public BlockStore(Database database, 
+                    String name,
+                    ReadWriteLock rowLock,
+                    Path path,
+                    boolean isEnableMmap)
+  {
     _database = database;
     _blockManager = _database.getBlockManager();
 
@@ -199,9 +217,8 @@ public class BlockStore {
     if (path == null)
       throw new NullPointerException();
 
-    boolean isEnableMmap = BlockManager.getBlockManager().isEnableMmap();
     _readWrite = new BlockReadWrite(this, path, isEnableMmap);
-    
+
     _writer = new BlockWriter(this);
 
     if (rowLock == null)
@@ -217,11 +234,38 @@ public class BlockStore {
   public static BlockStore create(Path path)
     throws IOException, SQLException
   {
+    return create(path, true);
+  }
+
+  /**
+   * Creates an independent store.
+   */
+  public static BlockStore createNoMmap(Path path)
+    throws IOException, SQLException
+  {
+    return create(path, false);
+  }
+
+  /**
+   * Creates an independent store.
+   */
+  public static BlockStore createMmap(Path path)
+    throws IOException, SQLException
+  {
+    return create(path, true);
+  }
+
+  /**
+   * Creates an independent store.
+   */
+  public static BlockStore create(Path path, boolean isMmap)
+  throws IOException, SQLException
+  {
     Database db = new Database();
     db.init();
 
-    BlockStore store = new BlockStore(db, "temp", null, path);
-    
+    BlockStore store = new BlockStore(db, "temp", null, path, isMmap);
+
     if (path.canRead())
       store.init();
     else
@@ -229,7 +273,7 @@ public class BlockStore {
 
     return store;
   }
-  
+
   public void setEnableMmap(boolean isEnable)
   {
   }

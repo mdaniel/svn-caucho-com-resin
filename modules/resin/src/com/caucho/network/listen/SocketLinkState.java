@@ -254,8 +254,10 @@ enum SocketLinkState {
     boolean isKeepaliveAllocated() { return true; }
 
     @Override
-    SocketLinkState toCometSuspend()
+    SocketLinkState toCometSuspend(TcpSocketLink conn)
     {
+      conn.getListener().cometSuspend(conn);
+      
       return COMET_SUSPEND_KA;
     }
     
@@ -294,8 +296,10 @@ enum SocketLinkState {
     boolean isAsyncStarted() { return true; }
 
     @Override
-    SocketLinkState toCometSuspend()
+    SocketLinkState toCometSuspend(TcpSocketLink conn)
     {
+      conn.getListener().cometSuspend(conn);
+      
       return COMET_SUSPEND_NKA;
     }
 
@@ -328,20 +332,26 @@ enum SocketLinkState {
     }
 
     @Override
-    SocketLinkState toCometResume()
+    SocketLinkState toCometResume(TcpSocketLink conn)
     {
+      conn.getListener().cometDetach(conn);
+      
       return REQUEST_ACTIVE_KA;
     }
         
     @Override
     SocketLinkState toClosed(TcpSocketLink conn)
     {
+      conn.getListener().cometDetach(conn);
+      
       throw new IllegalStateException(this + " " + conn);
     }
 
     @Override
     SocketLinkState toDestroy(TcpSocketLink conn)
     {
+      conn.getListener().cometDetach(conn);
+      
       throw new IllegalStateException(this + " " + conn);
     }
   },
@@ -357,20 +367,26 @@ enum SocketLinkState {
     boolean isAsyncStarted() { return true; }
 
     @Override
-    SocketLinkState toCometResume()
+    SocketLinkState toCometResume(TcpSocketLink conn)
     {
+      conn.getListener().cometDetach(conn);
+      
       return REQUEST_ACTIVE_NKA;
     }
     
     @Override
     SocketLinkState toClosed(TcpSocketLink conn)
     {
+      conn.getListener().cometDetach(conn);
+      
       throw new IllegalStateException(this + " " + conn);
     }
 
     @Override
     SocketLinkState toDestroy(TcpSocketLink conn)
     {
+      conn.getListener().cometDetach(conn);
+      
       throw new IllegalStateException(this + " " + conn);
     }
   },
@@ -730,7 +746,7 @@ enum SocketLinkState {
     throw new IllegalStateException(this + " cannot switch to comet");
   }
 
-  SocketLinkState toCometSuspend()
+  SocketLinkState toCometSuspend(TcpSocketLink conn)
   {
     throw new IllegalStateException(this + " cannot suspend comet");
   }
@@ -742,9 +758,9 @@ enum SocketLinkState {
   }
   */
 
-  SocketLinkState toCometResume()
+  SocketLinkState toCometResume(TcpSocketLink conn)
   {
-    throw new IllegalStateException(this + " cannot resumse comet");
+    throw new IllegalStateException(this + " cannot resume comet");
   }
   
   SocketLinkState toCometDispatch()

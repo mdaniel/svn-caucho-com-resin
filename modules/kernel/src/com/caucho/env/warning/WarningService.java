@@ -46,7 +46,6 @@ public class WarningService extends AbstractResinSubSystem
 
   private static final Logger log = 
     Logger.getLogger(WarningService.class.getName());
-  private static final L10N L = new L10N(WarningService.class);
 
   private final CopyOnWriteArrayList<WarningHandler> _priorityHandlers = 
     new CopyOnWriteArrayList<WarningHandler>();
@@ -89,6 +88,9 @@ public class WarningService extends AbstractResinSubSystem
     
       // if warning is high-priority then send to high priority handlers first
       System.err.println(s);
+      
+      // System.err.println("XXX: DEBUG");
+      // Thread.dumpStack();
       
       for (WarningHandler handler : _priorityHandlers) {
         handler.warning(source, msg);

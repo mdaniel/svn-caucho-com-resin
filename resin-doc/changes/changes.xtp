@@ -13,6 +13,7 @@
 
 <s2 title="4.0.20 - snapshot">
 <ul>
+<li>network: comet/network state maching/timing issues (#4669, rep by Adrian Sutton)</li>
 <li>cloud: heartbeat needed across clusters for global cache (#4657, rep by William Kong)</li>
 <li>cloud: heartbeat needs to retry every 5s on connection failure (#4601)</li>
 <li>network: keepalive housekeeping simplified (#4613, rep by Mark Cleveland)<li>

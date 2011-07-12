@@ -1100,6 +1100,10 @@ public final class HttpServletRequestImpl extends AbstractCauchoRequest
         if (uploadMax instanceof Number)
           formUploadMax = ((Number) uploadMax).longValue();
 
+        Object paramMax = getAttribute("caucho.multipart.form.parameter-length-max");
+        if (paramMax instanceof Number)
+          parameterLengthMax = ((Number) paramMax).longValue();
+
         // XXX: should this be an error?
         if (formUploadMax >= 0 && formUploadMax < contentLength) {
           setAttribute("caucho.multipart.form.error",

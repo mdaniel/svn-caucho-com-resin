@@ -319,7 +319,7 @@ public class BlockReadWrite {
             fileSize = FILE_SIZE_INCREMENT;
           
           file = path.openMemoryMappedFile(fileSize);
-          
+
           if (file != null)
             _fileSize = fileSize;
         }

@@ -2788,7 +2788,6 @@ public class WebApp extends ServletContextImpl
                                                      "META-INF/faces-config.xml.in");
       }
     } catch (Throwable e) {
-      e.printStackTrace();
       log.log(Level.FINE, e.toString(), e);
     }
   }

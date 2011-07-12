@@ -289,7 +289,8 @@ public class ShutdownSystem extends AbstractResinSubSystem
     _lifecycle.toActive();
     
     if (! _isEmbedded) {
-      _activeService.compareAndSet(null, this);
+      // _activeService.compareAndSet(null, this);
+      _activeService.set(this);
     }
     
     if (! Alarm.isTest() && ! _isEmbedded) {
@@ -390,7 +391,9 @@ public class ShutdownSystem extends AbstractResinSubSystem
     @Override
     public void run()
     {
-      while (_shutdownExitCode.get() == null && _lifecycle.isActive()) {
+      while (_shutdownExitCode.get() == null 
+             && _lifecycle.isActive()
+             && _activeService.get() == ShutdownSystem.this) {
         try {
           Thread.interrupted();
           LockSupport.park();
