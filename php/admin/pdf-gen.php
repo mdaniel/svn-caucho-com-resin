@@ -3,56 +3,16 @@
 require_once "WEB-INF/php/inc.php";
 require_once 'pdfGraph.php';
 
-define("ROW1",     100);
-define("ROW2",     500);
-define("ROW3",     100);
+define("ROW1",     450);
+define("ROW2",     100);
 define("COL1",     50);
 define("COL2",     305);
-define("MILLION", 1000000);
-define("GRAPH_SIZE_6_TO_PAGE", new Size(175, 125));
-define("GRAPH_SIZE", new Size(400, 300));
-define("BIG_GRAPH_SIZE", new Size(400, 300));
+define("GRAPH_SIZE", new Size(400, 250));
 
-define("PERIOD", 3600/2);
 define("STEP", 1);
 
-if (! $period) {
-  $period = $_REQUEST['period'] ? (int) $_REQUEST['period'] : PERIOD;
-}  
+define("HOUR", 3600);
 
-$majorTicks = $_REQUEST['majorTicks'];
-$minorTicks = $_REQUEST['minorTicks'];
-
-if (! $majorTicks || ! $minorTicks) {
-  $majorTicks = $period / 5;
-
-  $day = 24 * 3600;
-  $hour = 3600;
-  $minute = 60;
-
-  if ($day <= $majorTicks) {
-    $majorTicks = floor($majorTicks / $day) * $day;
-  }
-  else if (6 * $hour <= $majorTicks) {
-    $majorTicks = ceil($majorTicks / (6 * $hour)) * (6 * $hour);
-  }
-  else if ($hour <= $majorTicks) {
-    $majorTicks = ceil($majorTicks / $hour) * $hour;
-  }
-  else if (15 * $minute <= $majorTicks) {
-    $majorTicks = ceil($majorTicks / (15 * $minute)) * (15 * $minute);
-  }
-
-  if ($majorTicks == 0)
-    $majorTicks = 100;
-  
-  $minorTicks = $majorTicks / 4;
-
-  $majorTicks = 1000 * $majorTicks;
-  $minorTicks = 1000 * $minorTicks;
-}
-
-debug("$majorTicks $minorTicks");
 
 if (! admin_init_no_output()) {
   debug("Failed to load admin, die");
@@ -84,8 +44,29 @@ if (! $pdf_name) {
   $pdf_name = "Summary-PDF";
 }
 
-$mPage = getMeterGraphPage($pdf_name);
+$mPage = getMeterGraphPage("Summary-PDF");
 $pageName = $mPage->name;
+$period = $_REQUEST['period'] ? (int) $_REQUEST['period'] : ($mPage->period/1000); 
+
+if ($period < HOUR) {
+	$majorTicks = HOUR / 6;
+}  elseif ($period >= HOUR && $period < 3 * HOUR) {
+		$majorTicks = HOUR /2;
+} elseif ($period >= 3 * HOUR && $period < 6 * HOUR) {
+		$majorTicks = HOUR;
+} elseif ($period >= 6 * HOUR && $period < 12 * HOUR) {
+		$majorTicks = 2 * HOUR;
+} elseif ($period >= 12 * HOUR && $period < 24 * HOUR) {
+		$majorTicks = 4 * HOUR;
+} else {
+		$majorTicks = 24 * HOUR;
+}
+
+$majorTicks = $majorTicks * 1000;
+
+$minorTicks = $majorTicks/2;
+
+
 
 
 $canvas->setFont("Helvetica-Bold", 26);
@@ -96,28 +77,17 @@ $page = 0;
 $index = $g_server->SelfServer->ClusterIndex;
 $si = sprintf("%02d", $index);
 
-/* XXX: only on postmortem
-if (! $end) {
-  $end = getRestartTime($stat);
-}  
-*/
+$time = (int) (time());
 
-if (! $end) {
-  $end = time();
-  $tz = date_offset_get(new DateTime);
-
-  $ticks_sec = $majorTicks / 1000;
-
-  $end = ceil(($end + $tz) / $ticks_sec) * $ticks_sec - $tz;
-}
+$end = $time;
+$start = $end - $period;
 
 $restart_time = $end;
 
 $start = $end - $period;
 
 $canvas->setFont("Helvetica-Bold", 16);
-// $canvas->writeText(new Point(175,775), "Restart at " . date("Y-m-d H:i", $restart_time));
-$canvas->writeText(new Point(175,775), "End at " . date("Y-m-d H:i", $restart_time));
+$canvas->writeText(new Point(175,775), "Time at " . date("Y-m-d H:i", $time));
 
 
 $full_names = $stat->statisticsNames();

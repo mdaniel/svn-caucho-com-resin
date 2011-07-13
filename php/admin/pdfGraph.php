@@ -202,7 +202,7 @@ function getMeterGraphPage($pdfName) {
 
 
 function debug($msg) {
-  //System::out->println($msg);
+  System::out->println($msg);
 }
 
 
