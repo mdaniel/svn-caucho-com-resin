@@ -3,7 +3,6 @@
 require_once "WEB-INF/php/inc.php";
 require_once 'pdfGraph.php';
 
-
 define("ROW1",     100);
 define("ROW2",     500);
 define("ROW3",     100);
@@ -15,17 +14,45 @@ define("GRAPH_SIZE", new Size(400, 300));
 define("BIG_GRAPH_SIZE", new Size(400, 300));
 
 define("PERIOD", 3600/2);
-define("X_GRID_MINOR", 300 * 1000);
-define("X_GRID_MAJOR", 600 * 1000);
 define("STEP", 1);
 
-$period = $_REQUEST['period'] ? (int) $_REQUEST['period'] : PERIOD; 
+if (! $period) {
+  $period = $_REQUEST['period'] ? (int) $_REQUEST['period'] : PERIOD;
+}  
 
-$majorTicks = $_REQUEST['majorTicks'] ? (int) ($_REQUEST['majorTicks'] * 1000) : X_GRID_MAJOR; 
-$minorTicks = $_REQUEST['minorTicks'] ? (int) ($_REQUEST['minorTicks'] * 1000) : X_GRID_MINOR; 
+$majorTicks = $_REQUEST['majorTicks'];
+$minorTicks = $_REQUEST['minorTicks'];
+
+if (! $majorTicks || ! $minorTicks) {
+  $majorTicks = $period / 5;
+
+  $day = 24 * 3600;
+  $hour = 3600;
+  $minute = 60;
+
+  if ($day <= $majorTicks) {
+    $majorTicks = floor($majorTicks / $day) * $day;
+  }
+  else if (6 * $hour <= $majorTicks) {
+    $majorTicks = ceil($majorTicks / (6 * $hour)) * (6 * $hour);
+  }
+  else if ($hour <= $majorTicks) {
+    $majorTicks = ceil($majorTicks / $hour) * $hour;
+  }
+  else if (15 * $minute <= $majorTicks) {
+    $majorTicks = ceil($majorTicks / (15 * $minute)) * (15 * $minute);
+  }
+
+  if ($majorTicks == 0)
+    $majorTicks = 100;
+  
+  $minorTicks = $majorTicks / 4;
+
+  $majorTicks = 1000 * $majorTicks;
+  $minorTicks = 1000 * $minorTicks;
+}
 
 debug("$majorTicks $minorTicks");
-
 
 if (! admin_init_no_output()) {
   debug("Failed to load admin, die");
@@ -33,7 +60,6 @@ if (! admin_init_no_output()) {
 } else {
     debug("admin_init successful");
 }
-
 
 initPDF();
 startDoc();
@@ -44,9 +70,9 @@ $resin = $g_resin;
 $server = $g_server;
 
 
+
 if ($g_mbean_server)
   $stat = $g_mbean_server->lookup("resin:type=StatService");
-
 
 if (! $stat) {
   debug("Postmortem analysis:: requires Resin Professional and a <resin:StatService/> and <resin:LogService/> defined in
@@ -54,11 +80,11 @@ if (! $stat) {
     return;
 }
 
+if (! $pdf_name) {
+  $pdf_name = "Summary-PDF";
+}
 
-$pdfName = "Summary-PDF";
-
-
-$mPage = getMeterGraphPage($pdfName);
+$mPage = getMeterGraphPage($pdf_name);
 $pageName = $mPage->name;
 
 
@@ -70,15 +96,28 @@ $page = 0;
 $index = $g_server->SelfServer->ClusterIndex;
 $si = sprintf("%02d", $index);
 
-$restart_time = getRestartTime($stat);
+/* XXX: only on postmortem
+if (! $end) {
+  $end = getRestartTime($stat);
+}  
+*/
 
-$end = $restart_time;
+if (! $end) {
+  $end = time();
+  $tz = date_offset_get(new DateTime);
+
+  $ticks_sec = $majorTicks / 1000;
+
+  $end = ceil(($end + $tz) / $ticks_sec) * $ticks_sec - $tz;
+}
+
+$restart_time = $end;
+
 $start = $end - $period;
 
-
-
 $canvas->setFont("Helvetica-Bold", 16);
-$canvas->writeText(new Point(175,775), "Restart at " . date("Y-m-d H:i", $restart_time));
+// $canvas->writeText(new Point(175,775), "Restart at " . date("Y-m-d H:i", $restart_time));
+$canvas->writeText(new Point(175,775), "End at " . date("Y-m-d H:i", $restart_time));
 
 
 $full_names = $stat->statisticsNames();
@@ -101,6 +140,7 @@ writeFooter();
 
 
 $graphs = $mPage->getMeterGraphs();
+
 $index=0;
 foreach ($graphs as $graphData) {
 
@@ -128,8 +168,6 @@ foreach ($graphs as $graphData) {
 
 }
  
-
-
 
 $pdf->end_page();
 $pdf->end_document();
@@ -164,5 +202,8 @@ unset($document);
 
 
 pdf_delete($pdf);
+
+// needed for PdfReport health action
+return "ok";
 
 ?>

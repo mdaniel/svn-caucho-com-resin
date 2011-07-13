@@ -100,6 +100,9 @@ public class DeployCopyCommand extends AbstractRepositoryCommand {
       fillInVersion(target, targetVersion);
 
     deployClient.copyTag(target, source);
+    
+    System.out.println(L.l("copied {0} to {1}", 
+                           source.getId(), target.getId()));
   }
 
   @Override

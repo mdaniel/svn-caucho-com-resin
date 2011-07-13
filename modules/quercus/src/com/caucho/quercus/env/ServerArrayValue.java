@@ -31,6 +31,7 @@ package com.caucho.quercus.env;
 
 import com.caucho.quercus.QuercusRequestAdapter;
 import com.caucho.util.Base64;
+import com.caucho.vfs.Vfs;
 import com.caucho.vfs.WriteStream;
 
 import javax.servlet.http.HttpServletRequest;
@@ -393,6 +394,10 @@ public class ServerArrayValue extends ArrayValueImpl
       // getRealPath() returns a native path
       // need to convert windows paths to resin paths
       String root = request.getRealPath("/");
+      
+      if (root == null)
+        root = _env.getPwd().getFullPath();
+      
       if (root.indexOf('\\') >= 0) {
         root = root.replace('\\', '/');
         root = '/' + root;

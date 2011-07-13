@@ -36,8 +36,8 @@ import java.io.IOException;
 import java.io.UnsupportedEncodingException;
 
 public class StringWriter extends StreamImpl {
-  private WriteStream ws;
-  private CharBuffer cb;
+  private WriteStream _ws;
+  private CharBuffer _cb;
 
   public StringWriter()
   {
@@ -45,7 +45,7 @@ public class StringWriter extends StreamImpl {
   
   public StringWriter(CharBuffer cb)
   {
-    this.cb = cb;
+    this._cb = cb;
   }
 
   /**
@@ -53,34 +53,34 @@ public class StringWriter extends StreamImpl {
    */
   public WriteStream openWrite()
   {
-    if (cb != null)
-      cb.clear();
+    if (_cb != null)
+      _cb.clear();
     else
-      cb = CharBuffer.allocate();
+      _cb = CharBuffer.allocate();
 
-    if (ws == null)
-      ws = new WriteStream(this);
+    if (_ws == null)
+      _ws = new WriteStream(this);
     else
-      ws.init(this);
+      _ws.init(this);
 
     try {
-      ws.setEncoding("utf-8");
+      _ws.setEncoding("utf-8");
     } catch (UnsupportedEncodingException e) {
     }
 
-    return ws;
+    return _ws;
   }
 
   public String getString()
   {
     try {
-      ws.close();
+      _ws.close();
     } catch (IOException e) {
     }
 
-    String str = cb.close();
+    String str = _cb.close();
 
-    cb = null;
+    _cb = null;
 
     return str;
   }
@@ -101,6 +101,7 @@ public class StringWriter extends StreamImpl {
    * @param length number of bytes to write
    * @param isEnd true when the write is flushing a close.
    */
+  @Override
   public void write(byte []buf, int offset, int length, boolean isEnd)
     throws IOException
   {
@@ -109,7 +110,7 @@ public class StringWriter extends StreamImpl {
       int ch1 = buf[offset++] & 0xff;
 
       if (ch1 < 0x80)
-        cb.append((char) ch1);
+        _cb.append((char) ch1);
       else if ((ch1 & 0xe0) == 0xc0) {
         if (offset >= end)
           throw new EOFException("unexpected end of file in utf8 character");
@@ -118,7 +119,7 @@ public class StringWriter extends StreamImpl {
         if ((ch2 & 0xc0) != 0x80)
           throw new CharConversionException("illegal utf8 encoding");
       
-        cb.append((char) (((ch1 & 0x1f) << 6) + (ch2 & 0x3f)));
+        _cb.append((char) (((ch1 & 0x1f) << 6) + (ch2 & 0x3f)));
       }
       else if ((ch1 & 0xf0) == 0xe0) {
         if (offset + 1 >= end)
@@ -133,7 +134,7 @@ public class StringWriter extends StreamImpl {
         if ((ch3 & 0xc0) != 0x80)
           throw new CharConversionException("illegal utf8 encoding");
       
-        cb.append((char) (((ch1 & 0x1f) << 12) + ((ch2 & 0x3f) << 6) + (ch3 & 0x3f)));
+        _cb.append((char) (((ch1 & 0x1f) << 12) + ((ch2 & 0x3f) << 6) + (ch3 & 0x3f)));
       }
       else
         throw new CharConversionException("illegal utf8 encoding at (" +

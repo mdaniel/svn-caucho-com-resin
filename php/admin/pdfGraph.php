@@ -533,8 +533,9 @@ class Graph {
        debug("      xstep     $xstep ");
 
        $this->valid = false;
-    }
 
+       return;
+    }
 
     for ($index = 0; $width >= (($index)*$xstep_width); $index++) {
       $currentX = intval($index*$xstep_width);
@@ -554,7 +555,8 @@ class Graph {
 
   }
 
-  function drawXGridLabels($xstep, $func) {
+  function drawXGridLabels($xstep, $func)
+  {
     if (!$this->valid) {
        return;
     }
@@ -628,7 +630,13 @@ function pdf_format_memory($memory)
 
 
 
-function createGraph(String $title, GraphData $gd, Point $origin, boolean $displayYLabels=true, Size $gsize=GRAPH_SIZE, boolean $trace=false) {
+function createGraph(String $title,
+                     GraphData $gd,
+                     Point $origin,
+                     boolean $displayYLabels=true,
+                     Size $gsize=GRAPH_SIZE,
+                     boolean $trace=false)
+{
   global $start;
   global $end;
   global $canvas;
@@ -640,7 +648,6 @@ function createGraph(String $title, GraphData $gd, Point $origin, boolean $displ
 
   $graph = new Graph($title, $origin, $gsize, new Range($start * 1000, $end * 1000), new Range(0,$gd->max), $trace);
   $graph->start();
-
 
   $valid = $gd->validate();
 
@@ -822,8 +829,15 @@ function getStatDataForGraph($name, $subcategory, $color=$blue, $category="Resin
 
 
 
-function displayTimeLabel($time){
-    return strftime("%H:%M", $time/1000);
+function displayTimeLabel($ms)
+{
+  $time = $ms / 1000;
+
+  if ($time % 3600 == 0) {
+    return strftime("%m-%d", $time);
+  } else {
+    return strftime("%H:%M", $time);
+  }
 }
 
 
@@ -885,7 +899,7 @@ function endsWith($haystack, $needle)
     return (substr($haystack, $start) === $needle);
 }
 
-function  my_error_handler(int $error_type, string $error_msg, string $errfile, int $errline) {
+function  my_error_handler($error_type, $error_msg, $errfile, $errline) {
   if(!startsWith($error_msg,"Can't access private field")) {
     debug("ERROR HANDLER: type $error_type, msg $error_msg, file $errfile, lineno $errline");
   }

@@ -6440,7 +6440,7 @@ public class Env
           location = getLocation();
 
         String fileName = location.getFileName();
-
+        
         if (fileName != null)
           fileNameV = createString(fileName);
 

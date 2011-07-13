@@ -361,7 +361,7 @@ public final class SessionManager implements SessionCookieConfig, AlarmListener
   /**
    * True if sessions should always be loadd.
    */
-  boolean getAlwaysLoadSession()
+  boolean isAlwaysLoadSession()
   {
     return _alwaysLoadSession == SET_TRUE;
   }
@@ -1114,12 +1114,13 @@ public final class SessionManager implements SessionCookieConfig, AlarmListener
       if (sessionCache == null) {
         sessionCache = new ClusterByteStreamCache();
         
-        DistCacheSystem distCacheSystem = DistCacheSystem.getCurrent();
-
         sessionCache.setName("resin:session");
         sessionCache.setBackup(_isSaveBackup);
         sessionCache.setTriplicate(_isSaveTriplicate);
         sessionCache = sessionCache.createIfAbsent();
+        
+        if (isAlwaysLoadSession())
+          sessionCache.setLocalReadTimeoutMillis(20);
       }
 
       _sessionStore = sessionCache;

@@ -145,6 +145,7 @@ public class Resin
   private Path _rootDirectory;
 
   private Path _resinDataDirectory;
+  private Path _logDirectory;
   
   private final ResinSystem _resinSystem;
   
@@ -810,6 +811,14 @@ public class Resin
   public Path getRootDirectory()
   {
     return _rootDirectory;
+  }
+  
+  public Path getLogDirectory()
+  {
+    if (_logDirectory != null)
+      return _logDirectory;
+    else
+      return _rootDirectory.lookup("log");
   }
 
   /**

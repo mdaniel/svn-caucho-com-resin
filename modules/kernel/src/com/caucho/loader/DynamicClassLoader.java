@@ -1807,7 +1807,7 @@ public class DynamicClassLoader extends java.net.URLClassLoader
     if (name.startsWith("/"))
       name = name.substring(1);
 
-    // String alias = getResourceAlias(name);
+    String alias = getResourceAlias(name);
 
     /*
     if (name.endsWith("/"))
@@ -1977,6 +1977,9 @@ public class DynamicClassLoader extends java.net.URLClassLoader
     Vector<URL> resources = new Vector<URL>();
     
     getResources(resources, name);
+    
+    if (name.startsWith("/"))
+      name = name.substring(1);
     
     String alias = getResourceAlias(name);
     
