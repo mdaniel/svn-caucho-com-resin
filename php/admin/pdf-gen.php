@@ -1,6 +1,5 @@
 <?php
 
-require_once "WEB-INF/php/inc.php";
 require_once 'pdfGraph.php';
 
 define("ROW1",     450);
@@ -14,37 +13,17 @@ define("STEP", 1);
 define("HOUR", 3600);
 
 
-if (! admin_init_no_output()) {
-  debug("Failed to load admin, die");
-  return;
-} else {
-    debug("admin_init successful");
-}
 
 initPDF();
 startDoc();
 
 
-$mbean_server = $g_mbean_server;
-$resin = $g_resin;
-$server = $g_server;
-
-
-
-if ($g_mbean_server)
-  $stat = $g_mbean_server->lookup("resin:type=StatService");
-
-if (! $stat) {
-  debug("Postmortem analysis:: requires Resin Professional and a <resin:StatService/> and <resin:LogService/> defined in
-  the resin.xml.");
-    return;
-}
 
 if (! $pdf_name) {
   $pdf_name = "Summary-PDF";
 }
 
-$mPage = getMeterGraphPage("Summary-PDF");
+$mPage = getMeterGraphPage($pdf_name);
 $pageName = $mPage->name;
 $period = $_REQUEST['period'] ? (int) $_REQUEST['period'] : ($mPage->period/1000); 
 

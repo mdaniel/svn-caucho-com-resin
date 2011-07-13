@@ -1,11 +1,109 @@
 <?php
 
+require_once "WEB-INF/php/inc.php";
 
 
 import java.lang.System;
 
+$x = 20;
+$y = 750;
+$yinc = 12;
 
 
+
+if (! admin_init_no_output()) {
+  debug("Failed to load admin, die");
+  return;
+} else {
+    debug("admin_init successful");
+}
+
+
+$mbean_server = $g_mbean_server;
+$resin = $g_resin;
+$server = $g_server;
+
+
+
+if ($g_mbean_server)
+  $stat = $g_mbean_server->lookup("resin:type=StatService");
+
+if (! $stat) {
+  debug("Postmortem analysis:: requires Resin Professional and a <resin:StatService/> and <resin:LogService/> defined in
+  the resin.xml.");
+    return;
+}
+
+
+$mbean_server = $g_mbean_server;
+$resin = $g_resin;
+$server = $g_server;
+$runtime = $g_mbean_server->lookup("java.lang:type=Runtime");
+$os = $g_mbean_server->lookup("java.lang:type=OperatingSystem");
+$log_mbean = $mbean_server->lookup("resin:type=LogService");
+
+
+function drawSummary() {
+	global $x, $y, $yinc, $server, $runtime, $os, $log_mbean, $canvas, $resin;
+
+	$serverID = $server->Id ? $server->Id : '""';
+	$userName = $resin->UserName;
+	$ipAddress = $runtime->Name;
+	$resinVersion = $resin->Version;
+	$jvm = "$runtime->VmName  $runtime->VmVersion";
+	$machine = "$os->AvailableProcessors $os->Name $os->Arch $os->Version";
+
+	$start_time = $server->StartTime->time / 1000;
+	$now = $server->CurrentTime->time / 1000;
+	$uptime = $now - $start_time;
+	$ups = sprintf("%d days %02d:%02d:%02d",
+                   $uptime / (24 * 3600),
+                   $uptime / 3600 % 24,
+                   $uptime / 60 % 60,
+                   $uptime % 60) . " -- " . format_datetime($server->StartTime);
+
+
+	$canvas->setFont("Helvetica-Bold", 9);
+	$canvas->writeText(new Point($x,$y), "$resinVersion ");
+	$y -= $yinc;
+	$canvas->writeText(new Point($x,$y), "$jvm $machine  ");
+	$y -= $yinc;
+	$canvas->writeText(new Point($x,$y), "$serverID at $ipAddress running as $userName ");
+	$y -= $yinc;
+	$y -= $yinc;
+	$canvas->writeText(new Point($x,$y), "$resin->WatchdogStartMessage");
+	$y -= $yinc;
+	$canvas->writeText(new Point($x,$y), "$ups \t\t state($server->State)");
+
+
+	$x +=375;
+	$y = 750;
+
+
+	$totalHeap = pdf_format_memory($server->RuntimeMemory);
+	$freeHeap = pdf_format_memory($server->RuntimeMemoryFree);
+	$osFreeSwap = pdf_format_memory($os->FreeSwapSpaceSize);
+	$osTotalSwap = pdf_format_memory($os->TotalSwapSpaceSize);
+	$osFreePhysical = pdf_format_memory($os->FreePhysicalMemorySize);
+	$osFreeTotal = pdf_format_memory($os->TotalPhysicalMemorySize);
+
+	$canvas->writeText(new Point($x,$y), "JVM Heap:        \t\t\t $totalHeap");
+	$y -= $yinc;
+	$canvas->writeText(new Point($x,$y), "JVM Free Heap: \t\t $freeHeap");
+	$y -= $yinc;
+	$canvas->writeText(new Point($x,$y), "OS Free Swap: \t\t $osFreeSwap");
+	$y -= $yinc;
+	$canvas->writeText(new Point($x,$y), "OS Total Swap: \t\t $osTotalSwap");
+	$y -= $yinc;
+	$canvas->writeText(new Point($x,$y), "OS Physical:    \t\t\t $osFreeTotal");
+	$y -= $yinc;
+
+	$canvas->setColor($black);
+	$canvas->moveTo(new Point(0, 680));
+	$canvas->lineTo(new Point(595, 680));
+	$canvas->stroke();
+
+}
 
 function drawLines($gds, $graph) {
   global $canvas;
