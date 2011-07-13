@@ -13,6 +13,7 @@
 
 <s2 title="4.0.20 - snapshot">
 <ul>
+<li>health: PdfReport added</li>
 <li>session: always-load-session needs to set local-read timeout to 0 (rep by Eric Kreiser)</li>
 <li>network: comet/network state maching/timing issues (#4669, rep by Adrian Sutton)</li>
 <li>cloud: heartbeat needed across clusters for global cache (#4657, rep by William Kong)</li>
