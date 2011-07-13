@@ -76,6 +76,7 @@ public class ShutdownSystem extends AbstractResinSubSystem
     _resinSystemRef = new WeakReference<ResinSystem>(ResinSystem.getCurrent());
     
     _warningService = ResinSystem.getCurrentService(WarningService.class);
+    
     if (_warningService == null) {
       throw new IllegalStateException(L.l("{0} requires an active {1}",
                                            ShutdownSystem.class.getSimpleName(),

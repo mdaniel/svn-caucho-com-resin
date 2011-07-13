@@ -1126,6 +1126,8 @@ public class TcpSocketLink extends AbstractSocketLink
         return result;
       }
 
+      getListener().addLifetimeRequestCount();
+      
       try {
         result = handleRequest(isKeepalive);
       } finally {
@@ -1234,6 +1236,8 @@ public class TcpSocketLink extends AbstractSocketLink
       
       return RequestState.EXIT;
     }
+    
+    getListener().addLifetimeKeepaliveCount();
 
     _idleStartTime = Alarm.getCurrentTime();
     _idleExpireTime = _idleStartTime + _idleTimeout;

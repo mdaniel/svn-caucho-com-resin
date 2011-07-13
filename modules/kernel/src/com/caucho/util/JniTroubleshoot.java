@@ -141,6 +141,14 @@ public class JniTroubleshoot {
 
     return _isValid;
   }
+  
+  public void disable(Throwable cause)
+  {
+    if (_cause == null)
+      _cause = cause;
+    
+    _isValid = false;
+  }
 
   private boolean isMacOSX()
   {
