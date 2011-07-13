@@ -70,6 +70,7 @@ import com.caucho.env.git.GitSystem;
 import com.caucho.env.health.HealthStatusService;
 import com.caucho.env.jpa.ListenerPersistenceEnvironment;
 import com.caucho.env.lock.*;
+import com.caucho.env.log.LogSystem;
 import com.caucho.env.repository.AbstractRepository;
 import com.caucho.env.repository.LocalRepositoryService;
 import com.caucho.env.repository.RepositoryService;
@@ -1386,6 +1387,10 @@ public class Resin
     throw new ConfigException("StatSystem is available with Resin Professional");
   }
   
+  public LogSystem createLogSystem() {
+    throw new ConfigException("LogSystem is available with Resin Professional");
+  }
+
   private void addRandom()
   {
   }

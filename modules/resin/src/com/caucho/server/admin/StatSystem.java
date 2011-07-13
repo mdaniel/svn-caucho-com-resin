@@ -29,6 +29,7 @@
 
 package com.caucho.server.admin;
 
+import com.caucho.config.Service;
 import com.caucho.config.types.Period;
 import com.caucho.env.meter.AbstractMeter;
 import com.caucho.env.service.AbstractResinSubSystem;
@@ -42,6 +43,9 @@ import com.caucho.util.Crc64;
 import java.util.ArrayList;
 import java.util.Set;
 
+import javax.annotation.PostConstruct;
+
+@Service
 public class StatSystem extends AbstractResinSubSystem
 {
   protected StatSystem()
@@ -53,6 +57,7 @@ public class StatSystem extends AbstractResinSubSystem
     return ResinSystem.getCurrentService(StatSystem.class);
   }
 
+  @PostConstruct
   public void init()
   {
   }
@@ -70,7 +75,6 @@ public class StatSystem extends AbstractResinSubSystem
   public Set queryNames(String objectName)
   {
     throw new AbstractMethodError();
-
   }
 
   public void addJmxMeter(String name, String objectName, String attribute)

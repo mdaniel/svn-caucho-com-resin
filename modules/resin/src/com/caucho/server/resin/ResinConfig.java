@@ -73,8 +73,6 @@ public class ResinConfig implements EnvironmentBean
 
   private SecurityManager _securityManager;
 
-  protected Management _management;
-  
   private TempFileManager _tempFileManager;
 
   /**
@@ -335,7 +333,7 @@ public class ResinConfig implements EnvironmentBean
   @Deprecated
   public Management createResinManagement()
   {
-    return new Management();
+    return _resin.createResinManagement();
   }
 
   public String toString()

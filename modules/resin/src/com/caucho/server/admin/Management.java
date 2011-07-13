@@ -74,7 +74,7 @@ public class Management
 
   public Management()
   {
-    _resin = Resin.getCurrent();
+    this(Resin.getCurrent());
   }
 
   public Management(Resin resin)
