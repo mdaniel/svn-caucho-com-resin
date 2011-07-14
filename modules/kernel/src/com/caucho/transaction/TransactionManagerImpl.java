@@ -66,8 +66,8 @@ import com.caucho.util.RandomUtil;
 /**
  * Implementation of the transaction manager.
  */
-public class TransactionManagerImpl 
-  implements TransactionManager, 
+public class TransactionManagerImpl
+  implements TransactionManager,
              Serializable
 {
   private static final long serialVersionUID = 1L;
@@ -78,50 +78,50 @@ public class TransactionManagerImpl
   private static TransactionManagerImpl _tm = new TransactionManagerImpl();
 
   private long _serverId;
-  
+
   private long _randomId = RandomUtil.getRandomLong();
-  
+
   private AtomicLong _sequence = new AtomicLong(Alarm.getCurrentTime());
 
   private AbstractXALogManager _xaLogManager;
-  
+
   private TransactionSynchronizationRegistry _syncRegistry
     = new TransactionSynchronizationRegistryImpl(this);
 
   // Thread local is dependent on the transaction manager.
   private ThreadLocal<TransactionImpl> _threadTransaction = new ThreadLocal<TransactionImpl>();
 
-  private ArrayList<WeakReference<TransactionImpl>> _transactionList 
+  private ArrayList<WeakReference<TransactionImpl>> _transactionList
     = new ArrayList<WeakReference<TransactionImpl>>();
 
   private long _timeout = -1;
-  
+
   // statistics and counters
   // private TransactionManagerAdmin _admin;
-  
+
   private TimeSensor _commitSensor
     = MeterService.createTimeMeter("Resin|XA|Commit");
-  
+
   private TimeSensor _rollbackSensor
     = MeterService.createTimeMeter("Resin|XA|Rollback");
-  
+
   private AtomicInteger _transactionCount
     = new AtomicInteger();
-  
+
   private AtomicLong _commitCount
     = new AtomicLong();
-  
+
   private AtomicLong _commitResourceFailCount
     = new AtomicLong();
-  
+
   private AtomicLong _rollbackCount
     = new AtomicLong();
-  
+
   private AtomicLong _unclosedResourceCount
     = new AtomicLong();
-  
+
   private String _lastUnclosedResourceMessage;
-  
+
   private AtomicLong _unclosedTransactionCount
     = new AtomicLong();
 
@@ -169,7 +169,7 @@ public class TransactionManagerImpl
   {
     _xaLogManager = xaLogManager;
   }
-  
+
   /**
    * Returns the synchronization registry
    */
@@ -334,7 +334,7 @@ public class TransactionManagerImpl
 
   /**
    * Returns the current TransactionImpl, creating if necessary.
-   * 
+   *
    * <p/>
    * The TransactionImpl is not an official externally visible Transaction if
    * the status == NO_TRANSACTION.
@@ -399,7 +399,7 @@ public class TransactionManagerImpl
         continue;
 
       XidImpl xidImpl = new XidImpl(xids[i].getGlobalTransactionId());
-      
+
       if (! xidImpl.isSameServer(getServerId()))
         continue;
 
@@ -421,6 +421,14 @@ public class TransactionManagerImpl
             log.log(Level.FINER, e.toString(), e);
           else
             log.fine(e.toString());
+
+          // Oracle: If forget fails, try committing so we don't stay in a stuck
+          // state
+          try {
+            xaRes.commit(xids[i], false);
+          } catch (Throwable e1) {
+            log.log(Level.WARNING, e.toString(), e1);
+          }
         }
       }
     }
@@ -434,81 +442,81 @@ public class TransactionManagerImpl
     if (_xaLogManager != null)
       _xaLogManager.flush();
   }
-  
+
   /**
    * Statistics
    */
-  
+
   long beginTransactionTime()
   {
     _transactionCount.incrementAndGet();
-    
+
     return Alarm.getCurrentTime();
   }
-  
+
   int getTransactionCount()
   {
     return _transactionCount.get();
   }
-  
+
   void addCommitResourceFail()
   {
     _commitResourceFailCount.incrementAndGet();
   }
-  
+
   long getCommitResourceFailCount()
   {
     return _commitResourceFailCount.get();
   }
-  
+
   long getCommitCount()
   {
     return _commitCount.get();
   }
-  
+
   void endCommitTime(long startTime)
   {
     _transactionCount.decrementAndGet();
-    
+
     _commitCount.incrementAndGet();
     _commitSensor.add(startTime);
   }
-  
+
   long getRollbackCount()
   {
     return _rollbackCount.get();
   }
-  
+
   void endRollbackTime(long startTime)
   {
     _transactionCount.decrementAndGet();
-    
+
     _rollbackCount.incrementAndGet();
     _rollbackSensor.add(startTime);
   }
-  
+
   void addUnclosedResource(String message)
   {
     _unclosedResourceCount.incrementAndGet();
     _lastUnclosedResourceMessage = message;
   }
-  
+
   long getUnclosedResourceCount()
   {
     return _unclosedResourceCount.get();
   }
-  
+
   String getLastUnclosedResourceMessage()
   {
     return _lastUnclosedResourceMessage;
   }
-  
+
   void addUnclosedTransaction(String message)
   {
     _unclosedTransactionCount.incrementAndGet();
     // _lastUnclosedTransactionMessage = message;
   }
-  
+
   long getUnclosedTransactionCount()
   {
     return _unclosedTransactionCount.get();

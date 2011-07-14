@@ -106,7 +106,7 @@ public class TransactionImpl implements Transaction, AlarmListener {
   private int [] _resourceStates;
 
   /**
-   * Transaction resources that a client API such 
+   * Transaction resources that a client API such
    * as JPA may store and retrieve by key.
    */
   private Map<Object, Object> _mappedResources;
@@ -139,14 +139,14 @@ public class TransactionImpl implements Transaction, AlarmListener {
   private AbstractXALogStream _xaLog;
 
   private HashMap<String, Object> _attributes;
-  
+
   private long _beginTime;
 
   private Alarm _alarm;
 
   /**
    * Creates a new transaction.
-   * 
+   *
    * @param manager
    *          the owning transaction manager
    */
@@ -208,7 +208,7 @@ public class TransactionImpl implements Transaction, AlarmListener {
   /**
    * Puts a resource into a map of resources and adds the resource to the
    * transaction.
-   * 
+   *
    * @param key
    *          User defined key for the Resource.
    * @param resource
@@ -241,7 +241,7 @@ public class TransactionImpl implements Transaction, AlarmListener {
 
   /**
    * Gets a Resource from the underlying map.
-   * 
+   *
    * @param key
    *          User defined key for the resource.
    * @return The Resource mapped to the key.
@@ -249,7 +249,7 @@ public class TransactionImpl implements Transaction, AlarmListener {
   public Object getResource(Object key)
   {
     Map<Object, Object> mappedResources = _mappedResources;
-    
+
     if (mappedResources != null)
       return mappedResources.get(key);
     else
@@ -259,7 +259,7 @@ public class TransactionImpl implements Transaction, AlarmListener {
   /**
    * Enlists a resource with the current transaction. Example resources are
    * database or JMS connections.
-   * 
+   *
    * @return true if successful
    */
   @Override
@@ -403,12 +403,12 @@ public class TransactionImpl implements Transaction, AlarmListener {
 
   /**
    * De-lists a resource from the current transaction
-   * 
+   *
    * @param resource
    *          the resource to delist
    * @param flag
    *          XXX: ???
-   * 
+   *
    * @return true if successful
    */
   @Override
@@ -554,7 +554,7 @@ public class TransactionImpl implements Transaction, AlarmListener {
   /**
    * Registers synchronization interposed by container resources such as the JPA
    * persistence provider.
-   * 
+   *
    * @param synchronization
    *          Interposed synchronization.
    */
@@ -577,7 +577,7 @@ public class TransactionImpl implements Transaction, AlarmListener {
       _synchronizations = new ArrayList<Synchronization>();
 
     _synchronizations.add(synchronization);
-    
+
     if (log.isLoggable(Level.FINER))
       log.finer(this + " registerSync " + synchronization);
   }
@@ -594,7 +594,7 @@ public class TransactionImpl implements Transaction, AlarmListener {
   /**
    * Start a transaction.
    */
-  void begin() 
+  void begin()
     throws SystemException, NotSupportedException
   {
     if (_status != Status.STATUS_NO_TRANSACTION) {
@@ -620,7 +620,7 @@ public class TransactionImpl implements Transaction, AlarmListener {
       throw new IllegalStateException(L.l("{0} error trying to use dead transaction."));
 
     _status = Status.STATUS_ACTIVE;
-    
+
     _beginTime = Alarm.getCurrentTime();
 
     _rollbackException = null;
@@ -858,10 +858,10 @@ public class TransactionImpl implements Transaction, AlarmListener {
               }
             } catch (XAException e) {
               _transactionManager.addCommitResourceFail();
-              
+
               heuristicExn = heuristicException(heuristicExn, e);
               rollbackInt();
-              throw new RollbackExceptionWrapper(L.l("all commits rolled back"), 
+              throw new RollbackExceptionWrapper(L.l("all commits rolled back"),
                                                  heuristicExn);
             }
           }
@@ -876,14 +876,14 @@ public class TransactionImpl implements Transaction, AlarmListener {
         _status = Status.STATUS_COMMITTING;
 
         Exception exn = commitResources(allowSinglePhase);
-        
+
         if (heuristicExn == null)
-          heuristicExn = exn; 
+          heuristicExn = exn;
       }
 
       if (heuristicExn != null && log.isLoggable(Level.FINE))
         log.fine(this + " " + heuristicExn);
-      
+
       _status = Status.STATUS_ROLLEDBACK;
 
       if (heuristicExn == null)
@@ -903,7 +903,7 @@ public class TransactionImpl implements Transaction, AlarmListener {
       callAfterCompletion();
     }
   }
-    
+
   private Exception commitResources(boolean allowSinglePhase)
   {
     Exception heuristicExn = null;
@@ -921,7 +921,7 @@ public class TransactionImpl implements Transaction, AlarmListener {
         log.log(Level.FINE, e.toString(), e);
 
         heuristicExn = heuristicException(heuristicExn, e);
-        
+
         _transactionManager.addCommitResourceFail();
       }
     }
@@ -945,7 +945,7 @@ public class TransactionImpl implements Transaction, AlarmListener {
             resource.setTransactionTimeout(0);
         } catch (XAException e) {
           _transactionManager.addCommitResourceFail();
-          
+
           heuristicExn = e;
           log.log(Level.FINE, e.toString(), e);
         }
@@ -960,7 +960,7 @@ public class TransactionImpl implements Transaction, AlarmListener {
         }
       }
     }
-    
+
     return heuristicExn;
   }
 
@@ -1075,7 +1075,7 @@ public class TransactionImpl implements Transaction, AlarmListener {
       // env/06a2
       for (int i = 0; i < _interposedSynchronizations.size(); i++) {
         Synchronization sync = _interposedSynchronizations.get(i);
-        
+
         try {
           sync.beforeCompletion();
         } catch (RuntimeException e) {
@@ -1090,7 +1090,7 @@ public class TransactionImpl implements Transaction, AlarmListener {
         }
       }
     }
-    
+
     // server/16h2
     if (_synchronizations != null) {
       // env/06a2
@@ -1164,9 +1164,9 @@ public class TransactionImpl implements Transaction, AlarmListener {
     // remove the resources which have officially delisted
     for (int i = _resourceCount - 1; i >= 0; i--)
       _resources[i] = null;
-    
+
     _resourceCount = 0;
-    
+
     _mappedResources = null;
 
     AbstractXALogStream xaLog = _xaLog;
@@ -1180,7 +1180,7 @@ public class TransactionImpl implements Transaction, AlarmListener {
       }
     }
 
-    int length = (interposedSynchronizations == null 
+    int length = (interposedSynchronizations == null
                   ? 0
                   : interposedSynchronizations.size());
     for (int i = length - 1; i >= 0; i--) {
@@ -1214,7 +1214,7 @@ public class TransactionImpl implements Transaction, AlarmListener {
 
     if (_attributes != null)
       _attributes.clear();
-    
+
     if (status == Status.STATUS_COMMITTED)
       _transactionManager.endCommitTime(_beginTime);
     else
@@ -1225,11 +1225,11 @@ public class TransactionImpl implements Transaction, AlarmListener {
   public void handleAlarm(Alarm alarm)
   {
     try {
-      String msg = L.l("{0}: timed out after {1} seconds.", this, 
+      String msg = L.l("{0}: timed out after {1} seconds.", this,
                        String.valueOf(getTransactionTimeout()));
-                       
+
       log.warning(msg);
-      
+
       RollbackException exn = new RollbackException(msg);
 
       setRollbackOnly(exn);
@@ -1272,7 +1272,7 @@ public class TransactionImpl implements Transaction, AlarmListener {
 
     Map<Object,Object> mappedResources = _mappedResources;
     _mappedResources = null;
-    
+
     if (mappedResources != null)
       mappedResources.clear();
 

@@ -54,7 +54,7 @@ import java.util.logging.Logger;
 /**
  * Manages a ManagedConnection in the pool. Each ManagedPoolItem corresponds
  * one-to-one to a ManagedConnection.
- * 
+ *
  * The user's view of the pool item is a UserPoolItem. Because of transaction
  * sharing, it's possible for several UserPoolItems to refer to the same
  * ManagedPoolItem.
@@ -65,7 +65,7 @@ class ManagedPoolItem implements ConnectionEventListener, ManagedXAResource {
     = Logger.getLogger(ManagedPoolItem.class.getName());
 
   private ConnectionPool _cm;
-  
+
   private ManagedConnectionFactory _mcf;
   private ManagedConnection _mConn;
 
@@ -82,15 +82,15 @@ class ManagedPoolItem implements ConnectionEventListener, ManagedXAResource {
   private ConnectionRequestInfo _requestInfo;
 
   final Object _shareLock = new Object();
-  
+
   // The head shared connection for transaction
   // The UserPoolItem code is responsible for this field
   UserPoolItem _shareHead;
-  
+
   // The other pool items joined transaction
   private ManagedPoolItem _xaHead;
   private ManagedPoolItem _xaNext;
-  
+
   private boolean _hasConnectionError;
 
   private long _poolStartTime;
@@ -101,7 +101,7 @@ class ManagedPoolItem implements ConnectionEventListener, ManagedXAResource {
 
   // flag forcing an XA transaction (for the local transaction optimization)
   private boolean _isXATransaction = true;
-    
+
   // true if in local transaction
   private boolean _isLocalTransaction;
 
@@ -162,7 +162,7 @@ class ManagedPoolItem implements ConnectionEventListener, ManagedXAResource {
     } catch (Exception e) {
       log.log(Level.FINER, e.toString(), e);
     }
-    
+
     _mConn.addConnectionEventListener(this);
 
     if (log.isLoggable(Level.FINE))
@@ -267,12 +267,12 @@ class ManagedPoolItem implements ConnectionEventListener, ManagedXAResource {
         _mConn.associateConnection(uConn);
 
       oldPoolItem.associatePoolItem(this);
-      
+
       userPoolItem = oldPoolItem;
     }
     else
       userPoolItem = new UserPoolItem(_cm, this);
-    
+
     if (! isValid(subject, info, userPoolItem)) {
       return null;
     }
@@ -335,7 +335,7 @@ class ManagedPoolItem implements ConnectionEventListener, ManagedXAResource {
         return true;
     }
   }
-  
+
   /**
    * Use the item only if it's already been used for the current transaction
    * and is available.  allocateXA returns the same connection for the
@@ -377,7 +377,7 @@ class ManagedPoolItem implements ConnectionEventListener, ManagedXAResource {
     else if (_hasConnectionError) // had a fatal error
       return null;
     */
-    
+
     if (log.isLoggable(Level.FINER))
       log.finer("sharing xa-pool item: " + this);
 
@@ -410,9 +410,9 @@ class ManagedPoolItem implements ConnectionEventListener, ManagedXAResource {
   {
     if (! (resource instanceof UserPoolItem))
       return false;
-    
+
     UserPoolItem userPoolItem = (UserPoolItem) resource;
-    
+
     if (this == userPoolItem.getOwnPoolItem())
       return true;
     else if (_mConn == null)           // already closed
@@ -432,12 +432,12 @@ class ManagedPoolItem implements ConnectionEventListener, ManagedXAResource {
     // skip for now
     if (true)
       return false;
-    
+
     userPoolItem.associate(this, _mcf, _subject, _requestInfo);
 
     return true;
     */
-    
+
     return false;
   }
 
@@ -467,7 +467,7 @@ class ManagedPoolItem implements ConnectionEventListener, ManagedXAResource {
     throws ResourceException
   {
     Object conn = _mConn.getConnection(_subject, _requestInfo);
-    
+
     return conn;
   }
 
@@ -548,7 +548,7 @@ class ManagedPoolItem implements ConnectionEventListener, ManagedXAResource {
 
   /**
    * Notifies that an application has closed the connection.
-   * 
+   *
    * Remove and close the UserPoolItem associated with the PoolItem. If it's
    * the last UserPoolItem, move to the idle state.
    */
@@ -561,9 +561,9 @@ class ManagedPoolItem implements ConnectionEventListener, ManagedXAResource {
       log.fine(L.l("JCA close event '{0}' for {1} did not have a connection handle.  Please notify the JCA resource provider.",
                   event, _mConn));
     }
-   
+
     UserPoolItem ptr = _shareHead;
-    UserPoolItem prev = null; 
+    UserPoolItem prev = null;
 
     while (ptr != null) {
       UserPoolItem next = ptr.getShareNext();
@@ -575,7 +575,7 @@ class ManagedPoolItem implements ConnectionEventListener, ManagedXAResource {
           prev.setShareNext(next);
         else
           _shareHead = next;
-        
+
         ptr.close();
       }
       else
@@ -589,7 +589,7 @@ class ManagedPoolItem implements ConnectionEventListener, ManagedXAResource {
       return;
     }
   }
-  
+
   /**
    * Notifies that a local transaction has started.
    */
@@ -602,7 +602,7 @@ class ManagedPoolItem implements ConnectionEventListener, ManagedXAResource {
     // server/30c4, #2627
     _isLocalTransaction = true;
   }
-  
+
   /**
    * Notifies that a local transaction has committed.
    */
@@ -619,7 +619,7 @@ class ManagedPoolItem implements ConnectionEventListener, ManagedXAResource {
     // #2627, server/30c4
     _isLocalTransaction = false;
   }
-  
+
   /**
    * Notifies that a local transaction has rolled back.
    */
@@ -634,7 +634,7 @@ class ManagedPoolItem implements ConnectionEventListener, ManagedXAResource {
     // #2627, server/30c4
     _isLocalTransaction = false;
   }
-  
+
   /**
    * Notifies that a connection error has occurred.
    */
@@ -643,7 +643,7 @@ class ManagedPoolItem implements ConnectionEventListener, ManagedXAResource {
   {
     _hasConnectionError = true;
   }
-  
+
   /**
    * Notifies that a connection error has occurred.
    */
@@ -673,7 +673,7 @@ class ManagedPoolItem implements ConnectionEventListener, ManagedXAResource {
    */
 
   // XAResource stuff
-  
+
   /**
    * identity of resources
    */
@@ -685,7 +685,7 @@ class ManagedPoolItem implements ConnectionEventListener, ManagedXAResource {
       return false;
 
     ManagedPoolItem poolItem = (ManagedPoolItem) resource;
-    
+
     //if (_cm == poolItem._cm)
     //  return true;
 
@@ -693,13 +693,13 @@ class ManagedPoolItem implements ConnectionEventListener, ManagedXAResource {
       return false;
 
     boolean isSameRM = _xaResource.isSameRM(poolItem._xaResource);
-    
+
     if (log.isLoggable(Level.FINER))
       log.finer("isSameRM->" + isSameRM + " " + _xaResource);
 
     return isSameRM;
   }
-  
+
   /**
    * starts work on a transaction branch
    */
@@ -710,7 +710,7 @@ class ManagedPoolItem implements ConnectionEventListener, ManagedXAResource {
     if (_xid != null) {
       if (log.isLoggable(Level.FINER))
         log.finer("connection pool start XA: rejoin " + this);
-      
+
       return;
     }
 
@@ -720,7 +720,7 @@ class ManagedPoolItem implements ConnectionEventListener, ManagedXAResource {
       // the same resource manager together.
 
       _xid = xid;
-      
+
       UserTransactionImpl trans = _cm.getTransaction();
 
       if (trans != null) {
@@ -763,10 +763,10 @@ class ManagedPoolItem implements ConnectionEventListener, ManagedXAResource {
       if (log.isLoggable(Level.FINER))
         log.finer("start-XA with non XA resource: " + xid + " " + _xaResource);
     }
-    
+
     _xid = xid;
   }
-  
+
   /**
    * Sets the transaction timeout
    */
@@ -778,7 +778,7 @@ class ManagedPoolItem implements ConnectionEventListener, ManagedXAResource {
       return true;
 
     XAResource xaResource = _xaResource;
-    
+
     _transactionTimeout = seconds;
 
     if (xaResource == null)
@@ -839,7 +839,7 @@ class ManagedPoolItem implements ConnectionEventListener, ManagedXAResource {
         if (result == XA_RDONLY) {
           if (_xaResource != null)
             _isXATransaction = true;
-      
+
           clearXid();
         }
 
@@ -867,7 +867,7 @@ class ManagedPoolItem implements ConnectionEventListener, ManagedXAResource {
     else
       return null;
   }
-  
+
   /**
    * Ends work with the resource.  Called before commit/rollback.
    */
@@ -883,7 +883,7 @@ class ManagedPoolItem implements ConnectionEventListener, ManagedXAResource {
     // Don't call the underlying _xaResource.end.  The commit or rollback
     // will handle that automatically.
   }
-  
+
   /**
    * rollback the resource
    */
@@ -897,7 +897,7 @@ class ManagedPoolItem implements ConnectionEventListener, ManagedXAResource {
 
       if (endFlags != -1 && _isXATransaction) {
         boolean isValid = false;
-        
+
         try {
           endResource(xid, endFlags);
           isValid = true;
@@ -906,7 +906,7 @@ class ManagedPoolItem implements ConnectionEventListener, ManagedXAResource {
             _xaResource.rollback(xid);
         }
       }
-    
+
       if (log.isLoggable(Level.FINER))
         log.finer("connection pool rollback XA: " + this);
 
@@ -923,11 +923,11 @@ class ManagedPoolItem implements ConnectionEventListener, ManagedXAResource {
     } finally {
       if (_xaResource != null)
         _isXATransaction = true;
-      
+
       clearXid();
     }
   }
-  
+
   /**
    * commit the resource
    */
@@ -936,14 +936,14 @@ class ManagedPoolItem implements ConnectionEventListener, ManagedXAResource {
     throws XAException
   {
     boolean logFiner = log.isLoggable(Level.FINER);
-    
+
     try {
       int endFlags = _endFlags;
       _endFlags = -1;
-      
+
       if (endFlags != -1 && _isXATransaction) {
         boolean isValid = false;
-        
+
         try {
           endResource(xid, endFlags);
           isValid = true;
@@ -990,7 +990,7 @@ class ManagedPoolItem implements ConnectionEventListener, ManagedXAResource {
     } finally {
       if (_xaResource != null)
         _isXATransaction = true;
-      
+
       clearXid();
     }
   }
@@ -1008,14 +1008,14 @@ class ManagedPoolItem implements ConnectionEventListener, ManagedXAResource {
         xaPtr._xaResource.end(xid, flags);
     }
   }
-  
+
   /**
    * Restores the delegation for the entire chain.
    */
   private void clearXid()
   {
     _xid = null;
-    
+
     UserPoolItem shareHead = _shareHead;
     _shareHead = null;
 
@@ -1030,7 +1030,7 @@ class ManagedPoolItem implements ConnectionEventListener, ManagedXAResource {
         break;
       }
     }
-    
+
     for (UserPoolItem ptr = shareHead; ptr != null; ptr = ptr.getShareNext()) {
       if (assignedUserItem == null && ptr.getOwnPoolItem() == null) {
         ptr.associatePoolItem(this);
@@ -1083,7 +1083,7 @@ class ManagedPoolItem implements ConnectionEventListener, ManagedXAResource {
     /*
     UserTransactionImpl transaction = _transaction;
     _transaction = null;
-      
+
     if (transaction != null) {
       try {
         transaction.delistXaResource(this, XAResource.TMSUCCESS);
@@ -1097,7 +1097,7 @@ class ManagedPoolItem implements ConnectionEventListener, ManagedXAResource {
 
     if (log.isLoggable(Level.FINE))
       log.fine("idle " + this);
-    
+
     _poolEventTime = Alarm.getCurrentTime();
     _cm.toIdle(this);
   }
@@ -1141,7 +1141,7 @@ class ManagedPoolItem implements ConnectionEventListener, ManagedXAResource {
 
         userItem = next;
       }
-      
+
       /*
        * XXX: transaction.delistXaResource()
        */
