@@ -2,11 +2,6 @@
 
 require_once 'pdfGraph.php';
 
-define("ROW1",     450);
-define("ROW2",     100);
-define("COL1",     50);
-define("COL2",     305);
-define("GRAPH_SIZE", new Size(400, 250));
 
 define("STEP", 1);
 
@@ -24,6 +19,23 @@ if (! $pdf_name) {
 }
 
 $mPage = getMeterGraphPage($pdf_name);
+
+if ($mPage->columns==1) {
+	define("ROW1",     450);
+	define("ROW2",     100);
+	define("COL1",     50);
+	define("COL2",     305);
+	define("GRAPH_SIZE", new Size(400, 250));
+} elseif ($mPage->columns==2) {
+	define("ROW1",     600);
+	define("ROW2",     400);
+	define("ROW3",     50);
+
+	define("COL1",     50);
+	define("COL2",     305);
+	define("GRAPH_SIZE", new Size(200, 125));
+}
+
 $pageName = $mPage->name;
 $period = $_REQUEST['period'] ? (int) $_REQUEST['period'] : ($mPage->period/1000); 
 
@@ -95,16 +107,44 @@ writeFooter();
 $graphs = $mPage->getMeterGraphs();
 
 $index=0;
+$gCount=0;
 foreach ($graphs as $graphData) {
 
 	$index++;
-	$x = COL1;
 	
-	if ($index%2==0) {
-		$y = ROW2;
-	} else {
-		$y = ROW1;
+	if($mPage->columns==1) {
+		$x = COL1;
+		if ($index%2==0) {
+			$y = ROW2;
+		} else {
+			$y = ROW1;
+		}
 	}
+
+	if($mPage->columns==2) {
+		if ($gCount <= 1) {
+			$y = ROW1;
+		} elseif ($gCount > 1 && $gCount <= 3) {
+			$y = ROW2;
+		} elseif ($gCount > 3 && $gCount <= 5) {
+			$y = ROW3;
+		}
+
+		if ($index%6==0) {
+			$gCount=0;
+		} else {
+			$gCount++;
+		}
+
+		if ($index%2==0) {
+			$x = COL2;
+		} else {
+			$x = COL1;
+		}
+
+	}
+
+
 	$meterNames = $graphData->getMeterNames();
 	$gds = getStatDataForGraphByMeterNames($meterNames);
 	$gd = getDominantGraphData($gds);
@@ -113,7 +153,11 @@ foreach ($graphs as $graphData) {
 	$graph->drawLegends($gds);
 	$graph->end();
 
-	if ($index%2==0) {
+	if ($index%2==0 && $mPage->columns==1) {
+		$pdf->end_page();
+		$pdf->begin_page(595, 842);
+		writeFooter();
+	} elseif ($index%6==0 && $mPage->columns==2) {
 		$pdf->end_page();
 		$pdf->begin_page(595, 842);
 		writeFooter();
