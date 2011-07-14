@@ -27,9 +27,9 @@ if ($mPage->columns==1) {
 	define("COL2",     305);
 	define("GRAPH_SIZE", new Size(400, 250));
 } elseif ($mPage->columns==2) {
-	define("ROW1",     600);
-	define("ROW2",     400);
-	define("ROW3",     50);
+	define("ROW1",     550);
+	define("ROW2",     325);
+	define("ROW3",     100);
 
 	define("COL1",     50);
 	define("COL2",     305);
@@ -49,6 +49,8 @@ if ($period < HOUR) {
 		$majorTicks = 2 * HOUR;
 } elseif ($period >= 12 * HOUR && $period < 24 * HOUR) {
 		$majorTicks = 4 * HOUR;
+} elseif ($period >= 24 * HOUR && $period <= 48 * HOUR) {
+		$majorTicks = 6 * HOUR;
 } else {
 		$majorTicks = 24 * HOUR;
 }
@@ -66,11 +68,6 @@ $canvas->writeText(new Point(175,800), "$pageName");
 $page = 0;
 
 
-if ($mPage->hasSummary) {
-	drawSummary();
-	newPage();
-}
-
 $index = $g_server->SelfServer->ClusterIndex;
 $si = sprintf("%02d", $index);
 
@@ -83,6 +80,15 @@ $start = $end - $period;
 
 $canvas->setFont("Helvetica-Bold", 16);
 $canvas->writeText(new Point(175,775), "Time at " . date("Y-m-d H:i", $time));
+
+
+writeFooter();
+
+
+if ($mPage->hasSummary) {
+	drawSummary();
+	newPage();
+}
 
 
 $full_names = $stat->statisticsNames();
@@ -100,8 +106,6 @@ $canvas->lineTo(new Point(595, 770));
 $canvas->stroke();
 
 
-
-writeFooter();
 
 
 $graphs = $mPage->getMeterGraphs();
