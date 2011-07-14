@@ -101,11 +101,6 @@
       -->
     <resin:if test="${resin.professional}">
       <resin:import path="${__DIR__}/health.xml" optional="true"/>
-
-      <health:PdfReport>
-        <report>Summary</report>
-        <health:IfCron value="0 0 * * 0"/>
-      </health:PdfReport>
     </resin:if>
 
     <!--
