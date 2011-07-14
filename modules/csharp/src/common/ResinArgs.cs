@@ -328,8 +328,8 @@ namespace Caucho
                      || "undeploy".Equals(arguments[argsIdx])
                      || "user-add".Equals(arguments[argsIdx])
                      || "user-list".Equals(arguments[argsIdx])
-                     || "user-remove".Equals(arguments[argsIdx]))
-                     || "version".Equals(arguments[argsIdx]))
+                     || "user-remove".Equals(arguments[argsIdx])
+                     || "version".Equals(arguments[argsIdx])
                      || "watchdog".Equals(arguments[argsIdx])))
         {
           Command = arguments[argsIdx];
