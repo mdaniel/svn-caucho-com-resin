@@ -89,9 +89,6 @@ public class WarningService extends AbstractResinSubSystem
       // if warning is high-priority then send to high priority handlers first
       System.err.println(s);
       
-       System.err.println("XXX: DEBUG " + _priorityHandlers + " " + _handlers);
-       Thread.dumpStack();
-      
       for (WarningHandler handler : _priorityHandlers) {
         handler.warning(source, msg);
       }
