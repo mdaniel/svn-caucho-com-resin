@@ -415,7 +415,7 @@ public class TransactionManagerImpl
         log.fine(L.l("XAResource {0} forget xid {1}", xaRes, xidImpl));
 
         try {
-          xaRes.forget(xidImpl);
+          xaRes.forget(xids[i]);
         } catch (Throwable e) {
           if (log.isLoggable(Level.FINER))
             log.log(Level.FINER, e.toString(), e);
