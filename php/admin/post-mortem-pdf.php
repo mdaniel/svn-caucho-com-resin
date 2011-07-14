@@ -375,34 +375,8 @@ $pdf->end_page();
 
 $pdf->begin_page(595, 842);
 writeFooter();
+drawLog();
 
-
-$messages = $log_mbean->findMessages("warning",
-                                       ($restart_time - $period) * 1000,
-                                       ($restart_time) * 1000);
-
-
-
-$y = 800;
-
-$canvas->setFont("Helvetica-Bold", 8);
-
-$index=1;
-foreach ($messages as $message) {
-  $ts = strftime("%Y-%m-%d\t%H:%M:%S", $message->timestamp / 1000);
-  $canvas->writeText(new Point(20,$y), "$ts");
-  $canvas->writeText(new Point(110,$y), "$message->level");
-  $canvas->writeText(new Point(150,$y), "$message->message");
-  $y -= $yinc;
-  if ($index % 65 == 0) {
-    $pdf->end_page();
-    $pdf->begin_page(595, 842);
-    $canvas->setFont("Helvetica-Bold", 8);
-    $y=800;
-    writeFooter();
-  }
-  $index++;
-}
 
 //--
 $pdf->end_page();

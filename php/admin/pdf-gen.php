@@ -53,6 +53,12 @@ $canvas->writeText(new Point(175,800), "$pageName");
 
 $page = 0;
 
+
+if ($mPage->hasSummary) {
+	drawSummary();
+	newPage();
+}
+
 $index = $g_server->SelfServer->ClusterIndex;
 $si = sprintf("%02d", $index);
 
@@ -60,8 +66,6 @@ $time = (int) (time());
 
 $end = $time;
 $start = $end - $period;
-
-$restart_time = $end;
 
 $start = $end - $period;
 
@@ -117,6 +121,12 @@ foreach ($graphs as $graphData) {
 
 }
  
+
+
+if ($mPage->hasLog) {
+	newPage();
+	drawLog();
+}
 
 $pdf->end_page();
 $pdf->end_document();

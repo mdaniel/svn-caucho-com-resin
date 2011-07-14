@@ -300,7 +300,7 @@ function getMeterGraphPage($pdfName) {
 
 
 function debug($msg) {
-  System::out->println($msg);
+  //System::out->println($msg);
 }
 
 
@@ -1132,4 +1132,41 @@ class Canvas {
 $canvas = new Canvas(new Point(0,0));
 
 
+function drawLog() {
+	global $log_mbean, $canvas, $yinc, $pdf, $end, $start;
+	debug("DRAW_LOG");
+	$messages = $log_mbean->findMessages("warning",
+                                       ($start) * 1000,
+                                       ($end) * 1000);
+
+	$y = 800;
+
+	$canvas->setFont("Helvetica-Bold", 8);
+
+	$index=1;
+	foreach ($messages as $message) {
+  		$ts = strftime("%Y-%m-%d\t%H:%M:%S", $message->timestamp / 1000);
+  		$canvas->writeText(new Point(20,$y), "$ts");
+  		$canvas->writeText(new Point(110,$y), "$message->level");
+  		$canvas->writeText(new Point(150,$y), "$message->message");
+  		$y -= $yinc;
+  		if ($index % 65 == 0) {
+    			$pdf->end_page();
+    			$pdf->begin_page(595, 842);
+    			$canvas->setFont("Helvetica-Bold", 8);
+    			$y=800;
+    			writeFooter();
+  		}
+  		$index++;
+	}
+
+}
+
+function newPage() {
+	global $pdf;
+	$pdf->end_page();
+	$pdf->begin_page(595, 842);
+	writeFooter();
+
+}
 ?>
