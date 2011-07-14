@@ -299,9 +299,11 @@ public class ShutdownSystem extends AbstractResinSubSystem
       _failSafeHaltThread.start();
     }
 
-    _shutdownThread = new ShutdownThread();
-    _shutdownThread.setDaemon(true);
-    _shutdownThread.start();
+    if (! _isEmbedded) {
+      _shutdownThread = new ShutdownThread();
+      _shutdownThread.setDaemon(true);
+      _shutdownThread.start();
+    }
   }
   
   /**
@@ -312,7 +314,7 @@ public class ShutdownSystem extends AbstractResinSubSystem
   {
     _lifecycle.toDestroy();
     
-    _activeService.compareAndSet(this, null);
+    _activeService.set(null);
     
     FailSafeHaltThread failSafeThread = _failSafeHaltThread;
     

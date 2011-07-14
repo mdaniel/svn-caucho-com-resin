@@ -1288,12 +1288,13 @@ public class Server
       if (isModified()) {
         // XXX: message slightly wrong
         String msg = L.l("Resin restarting due to configuration change");
-
         ShutdownSystem.getCurrent().shutdown(ExitCode.MODIFIED, msg);
         return;
       }
     } finally {
-      alarm.queue(ALARM_INTERVAL);
+      if (_lifecycle.isActive()) {
+        alarm.queue(ALARM_INTERVAL);
+      }
     }
   }
 

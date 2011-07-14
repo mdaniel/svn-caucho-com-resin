@@ -89,7 +89,8 @@ public class BlockReadWrite {
     _blockManager = store.getBlockManager();
     _path = path;
 
-    _isEnableMmap = isEnableMmap;
+    // cache 64k stress test
+    _isEnableMmap = false; // isEnableMmap;
 
     if (path == null)
       throw new NullPointerException();
