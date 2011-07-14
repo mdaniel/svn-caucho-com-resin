@@ -354,7 +354,7 @@ public abstract class AbstractResponseStream extends OutputStreamWithBuffer {
   {
     State state = _state;
     
-    if (state.isClosed())
+    if (state.isClosing())
       return;
     
     _state = state.toClosing();
@@ -362,7 +362,11 @@ public abstract class AbstractResponseStream extends OutputStreamWithBuffer {
     try {
       closeImpl();
     } finally {
-      _state = _state.toClose();
+      try {
+        _state = _state.toClose();
+      } catch (RuntimeException e) {
+        throw new RuntimeException(state + ": " + e, e);
+      }
     }
   }
   
@@ -377,12 +381,7 @@ public abstract class AbstractResponseStream extends OutputStreamWithBuffer {
     
     return true;
   }
-  
-  protected void toClose()
-  {
-    _state = _state.toClose();
-  }
-  
+
   protected void closeImpl()
     throws IOException
   {
@@ -443,7 +442,7 @@ public abstract class AbstractResponseStream extends OutputStreamWithBuffer {
       
       State toHead() { return CLOSING_HEAD_COMMITTED; }
       State toCommitted() { return this; }
-      State toClosing() { return CLOSED; }
+      // State toClosing() { Thread.dumpStack(); return CLOSED; }
       State toClose() { return CLOSED; }
     },
     CLOSING_HEAD_COMMITTED {
@@ -458,6 +457,7 @@ public abstract class AbstractResponseStream extends OutputStreamWithBuffer {
     CLOSED {
       boolean isCommitted() { return true; }
       boolean isClosed() { return true; }
+      boolean isClosing() { return true; }
     };
     
     boolean isHead() { return false; }
@@ -466,6 +466,7 @@ public abstract class AbstractResponseStream extends OutputStreamWithBuffer {
     boolean isClosed() { return false; }
    
     State toStart() { return START; }
+    
     State toHead()
     { 
       throw new IllegalStateException(toString());
