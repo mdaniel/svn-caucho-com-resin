@@ -199,7 +199,7 @@ public class ServerAuthManager {
     String clientSignature = _security.signSystem(uid, clientNonce);
     
     String algorithm = _security.getAlgorithm(uid);
-    
+
     String nonce = String.valueOf(Alarm.getCurrentTime());
     
     return new NonceQuery(algorithm, uid, nonce, clientSignature);

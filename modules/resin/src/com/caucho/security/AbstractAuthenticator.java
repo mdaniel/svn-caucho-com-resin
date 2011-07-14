@@ -432,7 +432,7 @@ public class AbstractAuthenticator
       String signed = new String(user.getPassword());
       
       String algorithm = getAlgorithm(principal);
-      
+
       char []digest = DigestBuilder.getDigest(principal,
                                               "",
                                               user.getPassword(),
@@ -452,6 +452,7 @@ public class AbstractAuthenticator
       md.update(principal.getName().getBytes("UTF-8"));
       md.update(nonce.getBytes("UTF-8"));
       md.update(signed.getBytes("UTF-8"));
+
       byte []serverDigest = md.digest();
 
       if (clientDigest.equals(Base64.encode(serverDigest)))

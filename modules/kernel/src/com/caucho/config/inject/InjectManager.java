@@ -2622,7 +2622,7 @@ public final class InjectManager
       if (priority == bestPriority)
         matchBeans.add(bean);
     }
-System.out.println("BS: " + beanSet);
+
     return new AmbiguousResolutionException(L.l("Too many beans match, because they all have equal precedence.  See the @Alternative and <alternatives> tags to choose a precedence.  Beans:{0}\nfor {1}",
                                                 listToLines(matchBeans), this));
   }

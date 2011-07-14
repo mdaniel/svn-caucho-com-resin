@@ -1021,6 +1021,10 @@ public class Resin
                              port.getServerSocket());
         }
       }
+      
+      if (_management != null)
+        _management.init();
+      
 
       _resinSystem.start();
 
@@ -1030,7 +1034,6 @@ public class Resin
         _serverId));
         }
       */
-      
 
       log().info(this + " started in " + (Alarm.getExactTime() - _startTime) + "ms");
     } finally {

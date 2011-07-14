@@ -227,7 +227,8 @@ public class HmtpClient implements ActorSender {
         */
       }
 
-      AuthResult result = (AuthResult) query(null, new AuthQuery(uid, credentials));
+      AuthResult result = (AuthResult) query(null, 
+                                             new AuthQuery(uid, credentials));
 
       _address = result.getAddress();
 
