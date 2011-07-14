@@ -49,6 +49,27 @@ public interface MeterGraphPageInfo {
   public long getPeriod();
   
   /**
+   * Should we display summary?
+   */
+  public boolean getHasSummary();
+  
+  /**
+   * Should we display log?
+   */
+  public boolean getHasLog();
+
+  /**
+   * Should we display heap dump?
+   */
+  public boolean getHasHeapDump();
+
+  /**
+   * Should we display profile?
+   */
+  public boolean getHasProfile();
+ 
+  
+  /**
    * Returns the graphs on the page.
    */
   public MeterGraphInfo []getMeterGraphs();
