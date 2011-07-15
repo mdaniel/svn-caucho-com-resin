@@ -17,20 +17,22 @@ $server = $g_server;
 
 echo "<h1>Summary</h1>\n";
 
+$report = "Summary";
+$stat = $g_mbean_server->lookup("resin:type=StatService");
 
-echo " <br /> ";
-echo "<a href='pdf-gen.php'>PDF</a> (";
-echo "<a href='pdf-gen.php?period=1800'>1/2 hour</a>, ";
-echo "<a href='pdf-gen.php?period=900'>15 minutes</a>, ";
-echo "<a href='pdf-gen.php?period=3600'>1 hour</a>, ";
-echo "<a href='pdf-gen.php?period=7200'>2 hours</a>, ";
-echo "<a href='pdf-gen.php?period=14400'>4 hours</a>, ";
-echo "<a href='pdf-gen.php?period=28800'>8 hours</a>, ";
-echo "<a href='pdf-gen.php?period=57600'>16 hours</a>, ";
-echo "<a href='pdf-gen.php?period=86400'>1 day</a>, ";
-echo "<a href='pdf-gen.php?period=604800'>1 week</a>)";
+if ($stat) {
+  echo " <br /> ";
+  echo "<a href='pdf-gen.php?report=$report'>PDF</a> (";
+  echo "<a href='pdf-gen.php?report=$report&amp;period=1800'>30 minutes</a>, ";
+  echo "<a href='pdf-gen.php?report=$report&amp;period=3600'>1 hour</a>, ";
+  echo "<a href='pdf-gen.php?report=$report&amp;period=7200'>2 hours</a>, ";
+  echo "<a href='pdf-gen.php?report=$report&amp;period=14400'>4 hours</a>, ";
+  echo "<a href='pdf-gen.php?report=$report&amp;period=28800'>8 hours</a>, ";
+  echo "<a href='pdf-gen.php?report=$report&amp;period=86400'>1 day</a>, ";
+  echo "<a href='pdf-gen.php?report=$report&amp;period=604800'>1 week</a>)";
 
-echo " <br /> ";
+  echo " <br /> ";
+}      
 
 
 

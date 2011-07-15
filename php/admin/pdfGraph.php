@@ -930,8 +930,9 @@ function getStatDataForGraph($name, $subcategory, $color=$blue, $category="Resin
 function displayTimeLabel($ms)
 {
   $time = $ms / 1000;
-
-  if ($time % 3600 == 0) {
+  $tz = date_offset_get(new DateTime);
+ 
+  if (($time + $tz) % (24 * 3600) == 0) {
     return strftime("%m-%d", $time);
   } else {
     return strftime("%H:%M", $time);
@@ -1145,7 +1146,7 @@ function drawLog() {
 
 	$index=1;
 	foreach ($messages as $message) {
-  		$ts = strftime("%Y-%m-%d\t%H:%M:%S", $message->timestamp / 1000);
+  		$ts = strftime("%Y-%m-%d %H:%M:%S", $message->timestamp / 1000);
   		$canvas->writeText(new Point(20,$y), "$ts");
   		$canvas->writeText(new Point(110,$y), "$message->level");
   		$canvas->writeText(new Point(150,$y), "$message->message");

@@ -51,22 +51,22 @@ public interface MeterGraphPageInfo {
   /**
    * Should we display summary?
    */
-  public boolean getHasSummary();
+  public boolean isSummary();
   
   /**
    * Should we display log?
    */
-  public boolean getHasLog();
+  public boolean isLog();
 
   /**
    * Should we display heap dump?
    */
-  public boolean getHasHeapDump();
+  public boolean isHeapDump();
 
   /**
    * Should we display profile?
    */
-  public boolean getHasProfile();
+  public boolean isProfile();
  
   
   /**

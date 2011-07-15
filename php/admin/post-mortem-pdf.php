@@ -357,7 +357,6 @@ $pdf->end_page();
 $pdf->begin_page(595, 842);
 writeFooter();
 
-
 $gds = getStatDataForGraphBySubcategory("Network", "OS", "tcp-");
 
 $gd = getDominantGraphData($gds);

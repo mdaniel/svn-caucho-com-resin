@@ -6,27 +6,36 @@ require_once 'pdfGraph.php';
 define("STEP", 1);
 
 define("HOUR", 3600);
-
-
+define("DAY", 24 * HOUR);
 
 initPDF();
 startDoc();
 
-
-
 if (! $pdf_name) {
-  $pdf_name = "Summary-PDF";
+  $pdf_name = $_REQUEST["report"];
+  
+  if (! $pdf_name) {
+    $pdf_name = "Summary-PDF";
+  }
 }
 
 $mPage = getMeterGraphPage($pdf_name);
 
-if ($mPage->columns==1) {
+$columns = $mPage->columns;
+
+if ($columns > 2)
+  $columns = 2;
+else if ($columns < 1)
+  $columns = 1;
+
+
+if ($columns==1) {
 	define("ROW1",     450);
 	define("ROW2",     100);
 	define("COL1",     50);
 	define("COL2",     305);
 	define("GRAPH_SIZE", new Size(400, 250));
-} elseif ($mPage->columns==2) {
+} elseif ($columns==2) {
 	define("ROW1",     550);
 	define("ROW2",     325);
 	define("ROW3",     100);
@@ -37,30 +46,30 @@ if ($mPage->columns==1) {
 }
 
 $pageName = $mPage->name;
-$period = $_REQUEST['period'] ? (int) $_REQUEST['period'] : ($mPage->period/1000); 
+
+if (! $period) {
+  $period = $_REQUEST['period'] ? (int) $_REQUEST['period'] : ($mPage->period/1000);
+}  
 
 if ($period < HOUR) {
 	$majorTicks = HOUR / 6;
 }  elseif ($period >= HOUR && $period < 3 * HOUR) {
-		$majorTicks = HOUR /2;
+	$majorTicks = HOUR /2;
 } elseif ($period >= 3 * HOUR && $period < 6 * HOUR) {
-		$majorTicks = HOUR;
+	$majorTicks = HOUR;
 } elseif ($period >= 6 * HOUR && $period < 12 * HOUR) {
-		$majorTicks = 2 * HOUR;
+	$majorTicks = 2 * HOUR;
 } elseif ($period >= 12 * HOUR && $period < 24 * HOUR) {
-		$majorTicks = 4 * HOUR;
+	$majorTicks = 4 * HOUR;
 } elseif ($period >= 24 * HOUR && $period <= 48 * HOUR) {
-		$majorTicks = 6 * HOUR;
+	$majorTicks = 6 * HOUR;
 } else {
-		$majorTicks = 24 * HOUR;
+	$majorTicks = 24 * HOUR;
 }
 
 $majorTicks = $majorTicks * 1000;
 
 $minorTicks = $majorTicks/2;
-
-
-
 
 $canvas->setFont("Helvetica-Bold", 26);
 $canvas->writeText(new Point(175,800), "$pageName");
@@ -71,10 +80,17 @@ $page = 0;
 $index = $g_server->SelfServer->ClusterIndex;
 $si = sprintf("%02d", $index);
 
-$time = (int) (time());
+$time = time();
 
 $end = $time;
-$start = $end - $period;
+
+if (2 * DAY <= $period) {
+  $tz = date_offset_get(new DateTime);
+ 
+  $ticks_sec = $majorTicks / 1000;
+
+  $end = ceil(($end + $tz) / $ticks_sec) * $ticks_sec - $tz;
+}
 
 $start = $end - $period;
 
@@ -85,7 +101,7 @@ $canvas->writeText(new Point(175,775), "Time at " . date("Y-m-d H:i", $time));
 writeFooter();
 
 
-if ($mPage->hasSummary) {
+if ($mPage->isSummary()) {
 	drawSummary();
 	newPage();
 }
@@ -116,7 +132,7 @@ foreach ($graphs as $graphData) {
 
 	$index++;
 	
-	if($mPage->columns==1) {
+	if ($columns==1) {
 		$x = COL1;
 		if ($index%2==0) {
 			$y = ROW2;
@@ -125,7 +141,7 @@ foreach ($graphs as $graphData) {
 		}
 	}
 
-	if($mPage->columns==2) {
+	if ($columns==2) {
 		if ($gCount <= 1) {
 			$y = ROW1;
 		} elseif ($gCount > 1 && $gCount <= 3) {
@@ -157,11 +173,11 @@ foreach ($graphs as $graphData) {
 	$graph->drawLegends($gds);
 	$graph->end();
 
-	if ($index%2==0 && $mPage->columns==1) {
+	if ($index%2==0 && $columns==1) {
 		$pdf->end_page();
 		$pdf->begin_page(595, 842);
 		writeFooter();
-	} elseif ($index%6==0 && $mPage->columns==2) {
+	} elseif ($index%6==0 && $columns==2) {
 		$pdf->end_page();
 		$pdf->begin_page(595, 842);
 		writeFooter();
@@ -171,7 +187,7 @@ foreach ($graphs as $graphData) {
  
 
 
-if ($mPage->hasLog) {
+if ($mPage->isLog()) {
 	newPage();
 	drawLog();
 }
