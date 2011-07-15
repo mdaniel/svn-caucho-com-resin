@@ -58,21 +58,8 @@ public class TempFileManager
   {
     try {
       path.getParent().mkdirs();
-      
-      Database database = new Database();
-      database.ensureMemoryCapacity(1024 * 1024);
-      database.init();
 
-      Resin resin = Resin.getCurrent();
-      String serverId = "";
-
-      if (resin != null)
-        serverId = resin.getUniqueServerName();
-
-      if ("".equals(serverId))
-        serverId = "default";
-
-      String name = "temp_file_" + serverId;
+      String name = "temp_file";
 
       Path storePath = path.lookup(name);
 
@@ -80,9 +67,13 @@ public class TempFileManager
 
       if (storePath.exists()) {
         log.warning(L.l("Removal of old temp file '{0}' failed. Please check permissions.",
-                                      storePath.getNativePath()));
+                        storePath.getNativePath()));
       }
       
+      Database database = new Database();
+      database.ensureMemoryCapacity(1024 * 1024);
+      database.init();
+
       _store = new BlockStore(database, name, null, storePath);
       _store.setFlushDirtyBlocksOnCommit(false);
       _store.create();
