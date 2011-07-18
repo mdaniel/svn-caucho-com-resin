@@ -11,6 +11,12 @@
 <li><a href="http://caucho.com/resin-3.1/changes/changes.xtp">Resin 3.1 changes</a></li>
 </ul>
 
+<s2 title="4.0.21 snapshot">
+<ul>
+<li>cache/db: mmap synchronization udpates</li>
+</ul>
+</s2>
+
 <s2 title="4.0.20 - Jul 15, 2011">
 <ul>
 <li>health: PdfReport added</li>

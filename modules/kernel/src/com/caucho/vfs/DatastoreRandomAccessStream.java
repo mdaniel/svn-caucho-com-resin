@@ -193,7 +193,8 @@ public class DatastoreRandomAccessStream extends RandomAccessStream
   /**
    * Closes the stream.
    */
-  public void close()
+  @Override
+  public void closeImpl()
     throws IOException
   {
     unlock();

@@ -167,6 +167,7 @@ public class SpyRandomAccessStream extends RandomAccessStream {
   /**
    * Returns the current position of the file pointer.
    */
+  @Override
   public long getFilePointer()
     throws IOException
   {
@@ -176,7 +177,9 @@ public class SpyRandomAccessStream extends RandomAccessStream {
   /**
    * Closes the stream.
    */
-  public void close() throws IOException
+  @Override
+  public void closeImpl()
+    throws IOException
   {
     _file.close();
   }

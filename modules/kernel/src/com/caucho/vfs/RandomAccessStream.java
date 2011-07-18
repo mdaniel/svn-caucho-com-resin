@@ -32,6 +32,9 @@ package com.caucho.vfs;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
+import java.util.concurrent.atomic.AtomicLong;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 /**
  * Reads from a file in a random-access fashion.
@@ -39,6 +42,11 @@ import java.io.OutputStream;
 abstract public class RandomAccessStream
   implements LockableStream
 {
+  private static final Logger log
+    = Logger.getLogger(RandomAccessStream.class.getName());
+  
+  private final AtomicLong _useCount = new AtomicLong(1);
+  
   /**
    * Returns the length.
    */
@@ -112,10 +120,45 @@ abstract public class RandomAccessStream
   abstract public long getFilePointer()
     throws IOException;
 
+  public final boolean allocate()
+  {
+    long count;
+    
+    do {
+      count = _useCount.get();
+      
+      if (count <= 0)
+        return false;
+    } while (! _useCount.compareAndSet(count, count + 1));
+    
+    return true;
+  }
+  
+  public final void free()
+  {
+    long value = _useCount.getAndDecrement();
+    
+    if (value == 1) {
+      try {
+        closeImpl();
+      } catch (IOException e) {
+        log.log(Level.WARNING, e.toString(), e);
+      }
+    }
+  }
+  
   /**
    * Closes the stream.
    */
-  public void close() throws IOException
+  public final void close()
+  {
+    free();
+  }
+  
+  /**
+   * Closes the stream.
+   */
+  public void closeImpl() throws IOException
   {
   }
 

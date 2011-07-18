@@ -203,7 +203,8 @@ public class FileRandomAccessStream extends RandomAccessStream
   /**
    * Closes the stream.
    */
-  public void close() throws IOException
+  @Override
+  public void closeImpl() throws IOException
   {
     unlock();
 

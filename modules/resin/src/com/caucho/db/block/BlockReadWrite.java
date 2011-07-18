@@ -89,8 +89,8 @@ public class BlockReadWrite {
     _blockManager = store.getBlockManager();
     _path = path;
 
-    // cache 64k stress test
-    _isEnableMmap = false; // isEnableMmap;
+    // XXX: cache 64k stress test
+    _isEnableMmap = isEnableMmap;
 
     if (path == null)
       throw new NullPointerException();
@@ -163,6 +163,23 @@ public class BlockReadWrite {
   public void readBlock(long blockId, byte []buffer, int offset, int length)
     throws IOException
   {
+    int retry = 10;
+    
+    while (retry-- >= 0) {
+      if (readBlockImpl(blockId, buffer, offset, length))
+        return;
+    }
+    
+    throw new IllegalStateException("Error reading for block " + Long.toHexString(blockId));
+  }
+
+  /**
+   * Reads a block into the buffer.
+   */
+  private boolean readBlockImpl(long blockId, 
+                                byte []buffer, int offset, int length)
+      throws IOException
+  {
     boolean isPriority = false;
     RandomAccessWrapper wrapper = openRowFile(isPriority);
 
@@ -182,7 +199,7 @@ public class BlockReadWrite {
       int readLen = is.read(blockAddress, buffer, offset, length);
 
       if (readLen < 0) {
-        throw new IllegalStateException("Error reading " + is + " for block " + Long.toHexString(blockAddress) + " result=" + readLen);
+        return false;
       }
 
       if (readLen < length) {
@@ -198,6 +215,8 @@ public class BlockReadWrite {
 
       freeRowFile(wrapper, isPriority);
       wrapper = null;
+      
+      return true;
     } finally {
       closeRowFile(wrapper, isPriority);
     }
@@ -303,45 +322,73 @@ public class BlockReadWrite {
         file = null;
     }
 
-    if (file == null) {
+    while (file == null || ! file.allocate()) {
       Path path = _path;
+      
+      file = null;
 
       if (path != null) {
-        RandomAccessStream mmapFile = _mmapFile.get();
-        
+        file = streamOpenRead();
+      }
+      
+      if (file == null)
+        throw new IllegalStateException("Cannot open file");
+    }
+    
+    return new RandomAccessWrapper(file);
+  }
+  
+  private RandomAccessStream streamOpenRead()
+    throws IOException
+  {
+    while (true) {
+      RandomAccessStream mmapFile = _mmapFile.get();
+      
+      if (mmapFile != null && mmapFile.getLength() == _fileSize) {
+        return mmapFile;
+      }
+      
+      synchronized (_mmapFile) {
+        mmapFile = _mmapFile.get();
+
         if (mmapFile != null && mmapFile.getLength() == _fileSize) {
-          return new RandomAccessWrapper(mmapFile);
+          return mmapFile;
         }
-        
+
+        RandomAccessStream file = null;
+
         if (_isEnableMmap) {
           long fileSize = _fileSize;
-          
+
           if (fileSize == 0)
             fileSize = FILE_SIZE_INCREMENT;
-          
-          file = path.openMemoryMappedFile(fileSize);
 
-          if (file != null)
+          file = _path.openMemoryMappedFile(fileSize);
+
+          if (file != null) {
             _fileSize = fileSize;
-        }
 
-        if (file != null) {
-          _isMmap = true;
-          RandomAccessStream oldMmap = _mmapFile.getAndSet(file);
-          
-          if (oldMmap != null)
-            oldMmap.close();
+            _isMmap = true;
+
+            if (_mmapFile.compareAndSet(mmapFile, file)) {
+              if (mmapFile != null)
+                mmapFile.close();
+
+              return file;
+            }
+            else {
+              file.close();
+              file = null;
+            }
+          }
         }
         else {
           _isEnableMmap = false;
-          file = path.openRandomAccess();
+
+          return _path.openRandomAccess();
         }
-        
-        wrapper = new RandomAccessWrapper(file);
       }
     }
-
-    return wrapper;
   }
 
   private void freeRowFile(RandomAccessWrapper wrapper, boolean isPriority)
@@ -376,9 +423,10 @@ public class BlockReadWrite {
     if (! isPriority && ! _isMmap)
       _rowFileSemaphore.release();
 
-    if (wrapper.getFile() != _mmapFile.get()) {
-      wrapper.close();
-    }
+    RandomAccessStream file = wrapper.getFile();
+    
+    if (file != null)
+      file.free();
   }
 
   /**
