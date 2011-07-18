@@ -87,8 +87,12 @@ public class CronType implements Trigger {
     if (split.length > 3)
       _months = parseRange(split[3], 1, 12);
 
-    if (split.length > 4)
+    if (split.length > 4) {
       _daysOfWeek = parseRange(split[4], 0, 7);
+
+      if (_daysOfWeek[7])
+        _daysOfWeek[0] = _daysOfWeek[7];
+    }
   }
 
   /**
@@ -163,8 +167,9 @@ public class CronType implements Trigger {
                                       range));
       }
 
-      for (; min <= max; min += step)
+      for (; min <= max; min += step) {
         values[min] = true;
+      }
     }
 
     return values;
@@ -215,12 +220,12 @@ public class CronType implements Trigger {
         int dayOfWeek = nextInterval(_daysOfWeek, oldDayOfWeek);
 
         if (dayOfWeek >= 0) {
-          day += (dayOfWeek - oldDayOfWeek);
+          day += (dayOfWeek - oldDayOfWeek) % 7;
         }
         else {
           dayOfWeek = nextInterval(_daysOfWeek, 0);
 
-          day += (dayOfWeek - oldDayOfWeek + 7);
+          day += (dayOfWeek - oldDayOfWeek + 7) % 7;
         }
       }
 

@@ -33,26 +33,27 @@ import com.caucho.el.*;
 import com.caucho.jsp.el.*;
 
 import javax.el.*;
+import javax.servlet.jsp.tagext.*;
 import java.io.IOException;
 import java.util.ArrayList;
 
 public class JspUtil
 {
   public static ValueExpression createValueExpression(ELContext elContext,
-						      Class type,
-						      String exprString)
+                                                      Class type,
+                                                      String exprString)
   {
     JspELParser parser = new JspELParser(elContext, exprString);
 
     Expr expr = parser.parse();
 
     return JspExpressionFactoryImpl.createValueExpression(expr,
-							  exprString,
-							  type);
+                                                          exprString,
+                                                          type);
   }
 
   public static Expr createExpr(ELContext elContext,
-				      String exprString)
+                                      String exprString)
   {
     JspELParser parser = new JspELParser(elContext, exprString);
 
@@ -60,14 +61,22 @@ public class JspUtil
   }
 
   public static MethodExpression createMethodExpression(ELContext elContext,
-							String exprString,
-							Class type,
-							Class []args)
+                                                        String exprString,
+                                                        Class type,
+                                                        Class []args)
   {
     JspELParser parser = new JspELParser(elContext, exprString);
 
     Expr expr = parser.parse();
 
     return new MethodExpressionImpl(expr, exprString, type, args);
+  }
+
+  public static Tag toTag(JspTag jspTag)
+  {
+    if (jspTag instanceof Tag)
+      return (Tag) jspTag;
+    else
+      return null;
   }
 }

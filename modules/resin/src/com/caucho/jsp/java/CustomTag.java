@@ -43,7 +43,7 @@ import java.util.ArrayList;
 public class CustomTag extends GenericTag
 {
   protected String _bodyContent;
-  
+
   /**
    * Generates the code for a custom tag.
    *
@@ -66,12 +66,12 @@ public class CustomTag extends GenericTag
 
     boolean isEmpty = isEmpty();
     boolean usesTagBody = (isBodyTag && ! isEmpty
-			   && analyzedTag.getStartReturnsBuffered());
+                           && analyzedTag.getStartReturnsBuffered());
     boolean hasEndTag = analyzedTag.getDoEnd();
-    
+
     if ("empty".equalsIgnoreCase(_bodyContent)) {
       if (! isEmpty)
-	throw error(L.l("<{0}> expects an empty body", getTagName()));
+        throw error(L.l("<{0}> expects an empty body", getTagName()));
     }
     if (usesTagBody && hasEndTag)
       out.println("com.caucho.jsp.BodyContentImpl " + tagHackVar + " = null;");
@@ -89,12 +89,12 @@ public class CustomTag extends GenericTag
 
     if (JspIdConsumer.class.isAssignableFrom(_tag.getTagClass())) {
       out.println(name + ".setJspId(\"jsp" + _gen.generateJspId() + "\");");
-      
+
       /*
       String shortName = className;
       int p = shortName.lastIndexOf('.');
       if (p >= 0)
-	shortName = shortName.substring(p + 1);
+        shortName = shortName.substring(p + 1);
 
       out.println(name + ".setJspId(\"" + shortName + "-" + _gen.generateJspId() + "\");");
       */
@@ -105,10 +105,10 @@ public class CustomTag extends GenericTag
     printVarDeclare(out, VariableInfo.AT_BEGIN);
 
     String oldTag = "_jsp_writer" + _gen.uniqueId();
-    
+
     if (analyzedTag.getDoCatch())
       out.println("javax.servlet.jsp.JspWriter " + oldTag + " = out;");
-    
+
     if (analyzedTag.getDoCatch() || analyzedTag.getDoFinally()) {
       out.println("try {");
       out.pushDepth();
@@ -116,9 +116,9 @@ public class CustomTag extends GenericTag
 
     boolean hasStartTag = analyzedTag.getDoStart();
     int startCount = ((analyzedTag.getStartReturnsSkip() ? 1 : 0) +
-		      (analyzedTag.getStartReturnsInclude() ? 1 : 0) + 
-		      (analyzedTag.getStartReturnsBuffered() ? 1 : 0));
-    
+                      (analyzedTag.getStartReturnsInclude() ? 1 : 0) +
+                      (analyzedTag.getStartReturnsBuffered() ? 1 : 0));
+
     int thisId = _gen.uniqueId();
     if (! hasStartTag) {
     }
@@ -131,8 +131,8 @@ public class CustomTag extends GenericTag
     printVarAssign(out, VariableInfo.AT_BEGIN);
 
     if (analyzedTag.getStartReturnsSkip() &&
-	! analyzedTag.getStartReturnsInclude() &&
-	! analyzedTag.getStartReturnsBuffered()) {
+        ! analyzedTag.getStartReturnsInclude() &&
+        ! analyzedTag.getStartReturnsBuffered()) {
       // jsp/18cp
       generateChildrenEmpty();
     }
@@ -140,7 +140,7 @@ public class CustomTag extends GenericTag
       // jsp/18kc
       /*
       if (isBodyTag)
-	out.println("  " + name + ".setBodyContent((javax.servlet.jsp.tagext.BodyContent) null);");
+        out.println("  " + name + ".setBodyContent((javax.servlet.jsp.tagext.BodyContent) null);");
       */
     }
     else {
@@ -149,91 +149,91 @@ public class CustomTag extends GenericTag
         out.pushDepth();
       }
       else if ((hasVarDeclaration(VariableInfo.NESTED) ||
-		childHasScriptlet()) &&
-	       ! (analyzedTag.getDoCatch() ||
-		  analyzedTag.getDoFinally() ||
-		  analyzedTag.getDoAfter() &&
-		  analyzedTag.getAfterReturnsAgain())) {
-	out.println("{");
-	out.pushDepth();
+                childHasScriptlet()) &&
+               ! (analyzedTag.getDoCatch() ||
+                  analyzedTag.getDoFinally() ||
+                  analyzedTag.getDoAfter() &&
+                  analyzedTag.getAfterReturnsAgain())) {
+        out.println("{");
+        out.pushDepth();
       }
 
       if (usesTagBody) {
         if (analyzedTag.getStartReturnsBuffered() &&
-	    analyzedTag.getStartReturnsInclude()) {
+            analyzedTag.getStartReturnsInclude()) {
           out.println("if (_jspEval" + thisId + " == javax.servlet.jsp.tagext.BodyTag.EVAL_BODY_BUFFERED) {");
           out.pushDepth();
         }
-        
+
         out.println("out = pageContext.pushBody();");
 
-	if (hasEndTag) {
-	  out.println(tagHackVar + " = (com.caucho.jsp.BodyContentImpl) out;");
-	  out.println(name + ".setBodyContent(" + tagHackVar + ");");
-	}
-	else
-	  out.println(name + ".setBodyContent((javax.servlet.jsp.tagext.BodyContent) " + tagHackVar + ");");
-        
+        if (hasEndTag) {
+          out.println(tagHackVar + " = (com.caucho.jsp.BodyContentImpl) out;");
+          out.println(name + ".setBodyContent(" + tagHackVar + ");");
+        }
+        else
+          out.println(name + ".setBodyContent((javax.servlet.jsp.tagext.BodyContent) " + tagHackVar + ");");
+
         if (analyzedTag.getDoInit())
           out.println(name + ".doInitBody();");
-        
+
         if (analyzedTag.getStartReturnsBuffered() &&
-	    analyzedTag.getStartReturnsInclude()) {
+            analyzedTag.getStartReturnsInclude()) {
           out.popDepth();
           out.println("}");
 
-	  // jsp/18kf - req by JSP TCK
-	  /*
-	  if (_tag.getBodyContent()) {
-	    out.println("else");
-	    out.println("  " + name + ".setBodyContent((javax.servlet.jsp.tagext.BodyContent) null);");
-	  }
-	  */
+          // jsp/18kf - req by JSP TCK
+          /*
+          if (_tag.getBodyContent()) {
+            out.println("else");
+            out.println("  " + name + ".setBodyContent((javax.servlet.jsp.tagext.BodyContent) null);");
+          }
+          */
         }
       }
       else if (isBodyTag && _tag.getBodyContent())
         out.println(name + ".setBodyContent((javax.servlet.jsp.tagext.BodyContent) null);");
 
       if (analyzedTag.getDoAfter() && analyzedTag.getAfterReturnsAgain()) {
-	out.println("do {");
-	out.pushDepth();
+        out.println("do {");
+        out.pushDepth();
       }
 
       out.setLocation(getFilename(), getStartLine());
 
       if (_children != null)
-	printVarDeclaration(out, VariableInfo.NESTED);
-      
+        printVarDeclaration(out, VariableInfo.NESTED);
+
       out.setLocation(getFilename(), getStartLine());
-      
+
       generateChildren(out);
 
       out.setLocation(getFilename(), getEndLine());
 
       if (analyzedTag.getDoAfter() && analyzedTag.getAfterReturnsAgain()) {
-	out.popDepth();
-	out.println("} while (" + name + ".doAfterBody() == javax.servlet.jsp.tagext.IterationTag.EVAL_BODY_AGAIN);");
+        out.popDepth();
+        out.println("} while (" + name + ".doAfterBody() == javax.servlet.jsp.tagext.IterationTag.EVAL_BODY_AGAIN);");
       }
       else if (analyzedTag.getDoAfter()) {
-	out.println(name + ".doAfterBody();");
+        out.println(name + ".doAfterBody();");
       }
 
       if (usesTagBody) {
         if (analyzedTag.getStartReturnsBuffered() &&
-	    analyzedTag.getStartReturnsInclude()) {
+            analyzedTag.getStartReturnsInclude()) {
           out.println("if (_jspEval" + thisId + " == javax.servlet.jsp.tagext.BodyTag.EVAL_BODY_BUFFERED)");
 
-	  if (hasEndTag)
-	    out.println("  out = pageContext.popBody();");
-	  else
-	    out.println("  out = pageContext.popAndReleaseBody();");
+          if (hasEndTag)
+            out.println("  out = pageContext.popBody();");
+          else
+            out.println("  out = pageContext.popAndReleaseBody();");
         }
         else if (analyzedTag.getStartReturnsBuffered()) {
-	  if (hasEndTag)
-	    out.println("out = pageContext.popBody();");
-	  else
-	    out.println("out = pageContext.popAndReleaseBody();");
-	}
+          if (hasEndTag)
+            out.println("out = pageContext.popBody();");
+          else
+            out.println("out = pageContext.popAndReleaseBody();");
+        }
       }
 
       if (startCount > 1 && analyzedTag.getStartReturnsSkip()) {
@@ -243,21 +243,21 @@ public class CustomTag extends GenericTag
       else if (isEmpty) {
       }
       else if ((hasVarDeclaration(VariableInfo.NESTED) ||
-		childHasScriptlet()) &&
-	       ! (analyzedTag.getDoCatch() ||
-		  analyzedTag.getDoFinally() ||
-		  analyzedTag.getDoAfter() &&
-		  analyzedTag.getAfterReturnsAgain())) {
+                childHasScriptlet()) &&
+               ! (analyzedTag.getDoCatch() ||
+                  analyzedTag.getDoFinally() ||
+                  analyzedTag.getDoAfter() &&
+                  analyzedTag.getAfterReturnsAgain())) {
         out.popDepth();
         out.println("}");
       }
     }
 
     out.setLocation(getFilename(), getEndLine());
-    
+
     int endCount = ((analyzedTag.getEndReturnsSkip() ? 1 : 0)
-		    + (analyzedTag.getEndReturnsEval() ? 1 : 0));
-    
+                    + (analyzedTag.getEndReturnsEval() ? 1 : 0));
+
     String endVar = "_jsp_end_" + _gen.uniqueId();
 
     if (! hasEndTag) {
@@ -270,8 +270,8 @@ public class CustomTag extends GenericTag
     if (! hasEndTag || ! usesTagBody) {
     }
     else if (hasStartTag
-	     && (analyzedTag.getStartReturnsSkip()
-		 || analyzedTag.getStartReturnsInclude())) {
+             && (analyzedTag.getStartReturnsSkip()
+                 || analyzedTag.getStartReturnsInclude())) {
       out.println("if (" + tagHackVar + " != null) {");
       out.println("  pageContext.releaseBody(" + tagHackVar + ");");
       out.println("  " + tagHackVar + " = null;");
@@ -283,19 +283,19 @@ public class CustomTag extends GenericTag
 
     if (analyzedTag.getEndReturnsSkip()) {
       if (hasEndTag && endCount > 1)
-	out.println("if (" + endVar + " == javax.servlet.jsp.tagext.Tag.SKIP_PAGE)");
+        out.println("if (" + endVar + " == javax.servlet.jsp.tagext.Tag.SKIP_PAGE)");
       else
-	out.println("if (true)");
+        out.println("if (true)");
 
       if (_gen.isTag() || isInFragment())
-	out.println("  throw new SkipPageException();");
+        out.println("  throw new SkipPageException();");
       else
-	out.println("  return;");
+        out.println("  return;");
     }
-    
+
     if (analyzedTag.getDoCatch()) {
       String t = "_jsp_exn_" + _gen.uniqueId();
-      
+
       out.popDepth();
       out.println("} catch (Throwable " + t + ") {");
       out.println("  pageContext.setWriter(" + oldTag + ");");
@@ -303,7 +303,7 @@ public class CustomTag extends GenericTag
       out.println("  " + name + ".doCatch(" + t + ");");
       out.pushDepth();
     }
-    
+
     if (analyzedTag.getDoFinally()) {
       out.popDepth();
       out.println("} finally {");
@@ -315,9 +315,9 @@ public class CustomTag extends GenericTag
       out.popDepth();
       out.println("}");
     }
-    
+
     printVarDeclaration(out, VariableInfo.AT_END);
-    
+
     out.setLocation(getFilename(), getEndLine());
   }
 
@@ -358,7 +358,7 @@ public class CustomTag extends GenericTag
 
     String var = _tag.getId();
     String className = _tag.getTagClass().getName();
-      
+
     out.print(var + " = new ");
     out.printClass(_tag.getTagClass());
     out.println("();");
@@ -366,7 +366,7 @@ public class CustomTag extends GenericTag
     if (_tag.getAnalyzedTag().getHasInjection()) {
       out.println("_jsp_inject_" + _tag.getId() + ".configure(" + var + ");");
     }
-    
+
     AnalyzedTag analyzedTag = _tag.getAnalyzedTag();
 
     JspNode parentTagNode = getParent().getParentTagNode();
@@ -377,15 +377,15 @@ public class CustomTag extends GenericTag
     }
     else if (parentTagNode.isSimpleTag()) {
       String parentName = parentTagNode.getCustomTagName();
-      
+
       out.println("if (" + parentName + "_adapter == null)");
       out.println("  " + parentName + "_adapter = new javax.servlet.jsp.tagext.TagAdapter(" + parentName + ");");
       out.println(var + ".setParent(" + parentName + "_adapter);");
     }
     else {
       String parentName = parentTagNode.getCustomTagName();
-      
-      out.println(var + ".setParent((javax.servlet.jsp.tagext.Tag) " + parentName + ");");
+
+      out.println(var + ".setParent(com.caucho.jsp.JspUtil.toTag(" + parentName + "));");
     }
 
     ArrayList<QName> names = _tag.getAttributeNames();
@@ -395,7 +395,7 @@ public class CustomTag extends GenericTag
       String value = _tag.getAttribute(name);
       if (value == null)
         continue;
-      
+
       TagAttributeInfo attrInfo = _tag.getAttributeInfo(name.getLocalName());
 
       boolean isRequestTime = true;
@@ -423,7 +423,7 @@ public class CustomTag extends GenericTag
       JspNode child = children.get(i);
 
       if (child instanceof JspScriptlet || child instanceof JspExpression)
-	return true;
+        return true;
     }
 
     return false;

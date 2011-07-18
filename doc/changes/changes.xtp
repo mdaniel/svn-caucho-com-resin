@@ -12,6 +12,9 @@
 
 <s2 title="3.1.11 snapshot">
 <ul>
+<li>db: index rebuild requires caching of index exception (#4641, rep by N Shinomiya)</li>
+<li>xml: remove Resin's XMLInputStream factory (#4535, rep by bgoykhman)</li>
+<li>jsp: jsp tag case issue (#4571)</li>
 <li>db: set isXAForbidSameRM = true by default (#4608, rep by Takahiro Fukuda)</li>
 <li>db-store: close should not clear _path (#4557, rep by Tyson Weihs)</li>
 <li>isapi_srun: use GetTickCount64 for time (#4203)</li>
