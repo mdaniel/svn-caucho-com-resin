@@ -83,7 +83,7 @@ public interface ByteStreamCache
   /**
    * Removes the entry from the cache
    */
-  public Object remove(Object key);
+  public boolean remove(Object key);
 
   /**
    * Removes the entry from the cache if the current entry matches the hash

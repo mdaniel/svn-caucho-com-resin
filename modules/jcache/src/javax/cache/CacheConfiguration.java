@@ -27,68 +27,11 @@
  * @author Scott Ferguson
  */
 
-package com.caucho.distcache;
-
-import javax.cache.Cache;
-
-import com.caucho.util.HashKey;
+package javax.cache;
 
 /**
- * Provides additional information about an entry in a {@link javax.cache.Cache}.
+ * Configuration for a new Cache.
  */
-public interface ExtCacheEntry<K,V> extends Cache.Entry<K,V>
+public interface CacheConfiguration
 {
-  /**
-   * Returns the key hash for the current entry.
-   */
-  public HashKey getKeyHash();
-  
-  /**
-   * Returns true for a null entry
-   */
-  public boolean isValueNull();
-  
-  /**
-   * Returns the item's value
-   */
-  public V getValue();
-
-  /**
-   * Returns the value key
-   */
-  public HashKey getValueHashKey();
-
-  /**
-   * Returns the idle timeout
-   */
-  public long getIdleTimeout();
-
-  /**
-   * Returns the lease timeout
-   */
-  public long getLeaseTimeout();
-
-  /**
-   * Returns the lease owner
-   */
-  public int getLeaseOwner();
-
-  public boolean isValid();
-  
-  /**
-   * Returns the load count.
-   */
-  public int getLoadCount();
-
-  public long getLastUpdateTime();
-
-  /**
-   * @return
-   */
-  public long getVersion();
-
-  /**
-   * @return
-   */
-  public long getLastAccessTime();
 }

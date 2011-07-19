@@ -1,6 +1,13 @@
 /*
  * Copyright (c) 1998-2011 Caucho Technology -- all rights reserved
  *
+ * This interface is defined in JSR 107.
+ *
+ * It may be used to access both local and cluster caches.
+ *
+ * Some bulk operations will act only upon the local cache, and will not affect a cluster cache, as noted in the
+ * JavaDoc entry for each method.
+ *
  * This file is part of Resin(R) Open Source
  *
  * Each copy or derived work must preserve the copyright notice and this
@@ -27,68 +34,28 @@
  * @author Scott Ferguson
  */
 
-package com.caucho.distcache;
-
-import javax.cache.Cache;
-
-import com.caucho.util.HashKey;
+package javax.cache.event;
 
 /**
- * Provides additional information about an entry in a {@link javax.cache.Cache}.
+ * The scope of an event notification.
  */
-public interface ExtCacheEntry<K,V> extends Cache.Entry<K,V>
-{
-  /**
-   * Returns the key hash for the current entry.
-   */
-  public HashKey getKeyHash();
+public enum NotificationScope {
+  LOCAL(true, false),
+  REMOTE(false, true),
+  ALL(true, true);
   
-  /**
-   * Returns true for a null entry
-   */
-  public boolean isValueNull();
+  private final boolean deliverLocal;
+  private final boolean deliverRemote;
   
-  /**
-   * Returns the item's value
-   */
-  public V getValue();
-
-  /**
-   * Returns the value key
-   */
-  public HashKey getValueHashKey();
-
-  /**
-   * Returns the idle timeout
-   */
-  public long getIdleTimeout();
-
-  /**
-   * Returns the lease timeout
-   */
-  public long getLeaseTimeout();
-
-  /**
-   * Returns the lease owner
-   */
-  public int getLeaseOwner();
-
-  public boolean isValid();
+  private NotificationScope(boolean deliverLocal,
+                            boolean deliverRemote)
+  {
+    this.deliverLocal = deliverLocal;
+    this.deliverRemote = deliverRemote;
+  }
   
-  /**
-   * Returns the load count.
-   */
-  public int getLoadCount();
-
-  public long getLastUpdateTime();
-
-  /**
-   * @return
-   */
-  public long getVersion();
-
-  /**
-   * @return
-   */
-  public long getLastAccessTime();
+  public boolean shouldDeliver(boolean isRemote)
+  {
+    return isRemote ? this.deliverRemote : this.deliverLocal;
+  }
 }

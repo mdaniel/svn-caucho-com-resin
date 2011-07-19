@@ -47,6 +47,8 @@ import java.util.Map;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
+import javax.cache.Cache;
+
 /**
  * Stripped down version of com.caucho.server.session.SessionManager,
  * customized to PHP instead of J2EE sessions.
@@ -96,7 +98,7 @@ public class QuercusSessionManager
 
   //private Alarm _alarm = new Alarm(this);
 
-  private Map _persistentStore;
+  private Cache _persistentStore;
 
   // statistics
   protected Object _statisticsLock = new Object();

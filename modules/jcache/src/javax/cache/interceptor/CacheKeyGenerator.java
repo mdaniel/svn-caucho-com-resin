@@ -27,25 +27,14 @@
  * @author Scott Ferguson
  */
 
-package javax.cache;
+package javax.cache.interceptor;
 
-import java.util.Map;
+import java.io.Serializable;
 
-public interface CacheEntry<K,V> extends Map.Entry<K,V>
+import javax.interceptor.InvocationContext;
+
+public interface CacheKeyGenerator<T extends Serializable>
 {
-  public long getCost();
-  
-  public long getCreationTime();
-  
-  public long getExpirationTime();
-  
-  public int getHits();
-  
-  public long getLastAccessTime();
-  
-  public long getLastUpdateTime();
-  
-  public long getVersion();
-
-  public boolean isValid();
+  T generateKey(InvocationContext invocationContext);
+  T generateKey(Object... parameters);
 }

@@ -29,15 +29,29 @@
 
 package javax.cache;
 
-public interface CacheListener
+public interface CacheStatisticsMBean
 {
-  public void onLoad(Object key);
+  public String getName();
   
-  public void onPut(Object key);
+  public String getStatus();
   
-  public void onEvict(Object key);
+  public void clearStatistics();
   
-  public void onRemove(Object key);
+  public long getEntryCount();
   
-  public void onClear();
+  public long getCacheHits();
+  
+  public float getCacheHitPercentage();
+  
+  public long getCacheMisses();
+  
+  public float getCacheMissPercentage();
+  
+  public long getCacheGets();
+  
+  public long getCachePuts();
+  
+  public long getCacheRemovals();
+  
+  public long getCacheEvictions();
 }

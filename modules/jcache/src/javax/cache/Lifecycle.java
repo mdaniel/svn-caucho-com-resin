@@ -1,6 +1,13 @@
 /*
  * Copyright (c) 1998-2011 Caucho Technology -- all rights reserved
  *
+ * This interface is defined in JSR 107.
+ *
+ * It may be used to access both local and cluster caches.
+ *
+ * Some bulk operations will act only upon the local cache, and will not affect a cluster cache, as noted in the
+ * JavaDoc entry for each method.
+ *
  * This file is part of Resin(R) Open Source
  *
  * Each copy or derived work must preserve the copyright notice and this
@@ -29,12 +36,13 @@
 
 package javax.cache;
 
-import java.io.Serializable;
-
-import javax.interceptor.InvocationContext;
-
-public interface CacheKeyGenerator<T extends Serializable>
-{
-  T generateKey(InvocationContext invocationContext);
-  T generateKey(Object... parameters);
+/**
+ * The lifecycle status of the Cache.
+ */
+public interface Lifecycle {
+  public void start() throws CacheException;
+  
+  public void stop() throws CacheException;
+  
+  public Status getStatus();
 }

@@ -44,6 +44,7 @@ import com.caucho.util.*;
 import com.caucho.vfs.*;
 import com.caucho.java.*;
 
+import javax.cache.Cache;
 import javax.sql.DataSource;
 import java.sql.*;
 import java.util.ArrayList;
@@ -55,10 +56,6 @@ import java.util.logging.Logger;
  */
 public class ResinQuercus extends QuercusContext
 {
-  private static L10N L = new L10N(ResinQuercus.class);
-  private static final Logger log
-    = Logger.getLogger(ResinQuercus.class.getName());
-  
   private static EnvironmentLocal<ModuleContext> _localModuleContext
     = new EnvironmentLocal<ModuleContext>();
 
@@ -163,7 +160,7 @@ public class ResinQuercus extends QuercusContext
   }
 
   @Override
-  public Map getSessionCache()
+  public Cache getSessionCache()
   {
     if (_sessionCache == null && Server.getCurrent() != null) {
       CacheManagerImpl cacheManager = DistCacheSystem.getCurrent().getCacheManager();
@@ -180,8 +177,9 @@ public class ResinQuercus extends QuercusContext
   @Override
   public void setSessionTimeout(long sessionTimeout)
   {
-    if (_sessionCache == null)
+    if (_sessionCache == null) {
       getSessionCache();
+    }
     
     _sessionCache.setIdleTimeoutMillis(sessionTimeout);
   }

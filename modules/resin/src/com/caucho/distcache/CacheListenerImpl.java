@@ -30,12 +30,12 @@
 package com.caucho.distcache;
 
 /**
- * Provides a null implementation of {@link javax.cache.CacheListener}
+ * Provides a null implementation of {@link javax.cache.event.CacheEntryListener}
  *
  * @note This implementation of CacheListne is synchrnoous to the operation being observed.
  */
 public class CacheListenerImpl
   extends AbstractCacheListener
-  implements javax.cache.CacheListener
+  implements javax.cache.event.CacheEntryListener
 {
 }

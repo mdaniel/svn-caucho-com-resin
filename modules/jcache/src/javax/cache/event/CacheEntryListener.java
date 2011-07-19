@@ -27,18 +27,17 @@
  * @author Scott Ferguson
  */
 
-package javax.cache;
+package javax.cache.event;
 
-import java.lang.annotation.ElementType;
-import java.lang.annotation.Retention;
-import java.lang.annotation.RetentionPolicy;
-import java.lang.annotation.Target;
-
-@Target({ElementType.PARAMETER })
-@Retention(RetentionPolicy.RUNTIME)
-public @interface CacheKey
+public interface CacheEntryListener
 {
-  String expression() default "";
-  String propertyName() default "";
-  String name() default "";
+  public void onLoad(Object key);
+  
+  public void onPut(Object key);
+  
+  public void onEvict(Object key);
+  
+  public void onRemove(Object key);
+  
+  public void onClear();
 }

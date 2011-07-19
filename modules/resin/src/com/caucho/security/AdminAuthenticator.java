@@ -35,12 +35,12 @@ import com.caucho.config.Service;
 import com.caucho.config.types.Period;
 import com.caucho.distcache.AbstractCache;
 import com.caucho.distcache.ClusterByteStreamCache;
+import com.caucho.distcache.ExtCacheEntry;
 import com.caucho.util.Alarm;
 import com.caucho.util.Base64;
 import com.caucho.util.Crc64;
 import com.caucho.util.L10N;
 
-import javax.cache.CacheEntry;
 import javax.enterprise.inject.Default;
 import javax.inject.Named;
 import java.util.Hashtable;
@@ -146,7 +146,7 @@ public class AdminAuthenticator extends XmlAuthenticator
     if (lastCheck + UPDATE_CHECK_INTERVAL > now)
       return false;
 
-    CacheEntry entry = _authStore.getCacheEntry(ADMIN_AUTH_MAP_KEY);
+    ExtCacheEntry entry = (ExtCacheEntry) _authStore.getCacheEntry(ADMIN_AUTH_MAP_KEY);
 
     if (entry != null && entry.getLastUpdateTime() > lastCheck)
       return true;

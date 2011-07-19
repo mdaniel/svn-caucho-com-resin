@@ -43,6 +43,7 @@ import java.util.concurrent.locks.LockSupport;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
+import javax.cache.Cache;
 import javax.servlet.ServletContext;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
@@ -1934,7 +1935,7 @@ public class QuercusContext
     return MethodIntern.intern("s" + _staticId++);
   }
 
-  public Map getSessionCache()
+  public Cache getSessionCache()
   {
     return null;
   }

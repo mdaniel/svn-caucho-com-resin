@@ -27,25 +27,22 @@
  * @author Scott Ferguson
  */
 
-package javax.cache;
+package javax.cache.interceptor;
 
-import java.util.Map;
+import java.lang.annotation.ElementType;
+import java.lang.annotation.Retention;
+import java.lang.annotation.RetentionPolicy;
+import java.lang.annotation.Target;
 
-/**
- * This interface is not implemented in this implementation of JSR 107.
- */
-public interface EvictionStrategy<K,V>
+import javax.cache.KeyGeneratorType;
+
+@Target({ElementType.METHOD, ElementType.TYPE })
+@Retention(RetentionPolicy.RUNTIME)
+public @interface CacheResult
 {
-  /**
-   * Use the clear() method in {@link Cache}.
-   */
-  public void clear();
-
-  public CacheEntry<K,V> createEntry(K key, V value, long expireTimeout);
-
-  public void discardEntry(CacheEntry<K,V> entry);
-
-  public Map<K,V> evict(Cache<K,V> cache);
-
-  public void touchEntry(CacheEntry<K,V> entry);
+  String value() default "";
+  String cacheName() default "";
+  Class<? extends CacheKeyGenerator> cacheKeyGenerator()
+    default CacheKeyGenerator.class;
+  KeyGeneratorType keyGeneratorType() default KeyGeneratorType.DEFAULT;
 }

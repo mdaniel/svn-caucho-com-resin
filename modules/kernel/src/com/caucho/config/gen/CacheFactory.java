@@ -29,7 +29,7 @@
 
 package com.caucho.config.gen;
 
-import javax.cache.Cacheable;
+import javax.cache.interceptor.CacheResult;
 import javax.ejb.Remove;
 import javax.ejb.TransactionAttribute;
 import javax.ejb.TransactionAttributeType;
@@ -60,7 +60,7 @@ public class CacheFactory<X>
   public AspectGenerator<X> create(AnnotatedMethod<? super X> method,
                                    boolean isEnhanced)
   {
-    Cacheable cache = method.getAnnotation(Cacheable.class);
+    CacheResult cache = method.getAnnotation(CacheResult.class);
     
     if (cache != null) {
       isEnhanced = true;

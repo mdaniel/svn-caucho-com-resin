@@ -34,6 +34,7 @@ import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
 
+import javax.cache.interceptor.CacheKeyGenerator;
 import javax.interceptor.InterceptorBinding;
 
 @Target({ElementType.METHOD, ElementType.TYPE })

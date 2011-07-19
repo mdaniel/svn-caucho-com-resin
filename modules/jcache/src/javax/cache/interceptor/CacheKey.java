@@ -27,20 +27,18 @@
  * @author Scott Ferguson
  */
 
-package javax.cache;
+package javax.cache.interceptor;
 
 import java.lang.annotation.ElementType;
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
 
-@Target({ElementType.METHOD, ElementType.TYPE })
+@Target({ElementType.PARAMETER })
 @Retention(RetentionPolicy.RUNTIME)
-public @interface Cacheable
+public @interface CacheKey
 {
-  String value() default "";
-  String cacheName() default "";
-  Class<? extends CacheKeyGenerator> cacheKeyGenerator()
-    default CacheKeyGenerator.class;
-  KeyGeneratorType keyGeneratorType() default KeyGeneratorType.DEFAULT;
+  String expression() default "";
+  String propertyName() default "";
+  String name() default "";
 }

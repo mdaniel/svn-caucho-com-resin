@@ -38,52 +38,92 @@ package javax.cache;
 
 import java.util.Collection;
 import java.util.Map;
-import java.util.Set;
+import java.util.concurrent.Future;
+
+import javax.cache.event.CacheEntryListener;
+import javax.cache.event.NotificationScope;
 
 /**
  * The persistent or distributed cache is usable like a normal map, but loads
  * and stores data across the cluster.
  */
-public interface Cache<K,V> extends Map<K,V> {
-    /**
-     * Returns the object specified by the given key.
-     * <p/>
-     * If the item does not exist and a CacheLoader has been specified,
-     * the CacheLoader will be used to create a cache value.
-     */
-    public V get(Object key);
+public interface Cache<K,V> extends Iterable<Cache.Entry<K,V>>, Lifecycle {
+  /**
+   * Returns the object specified by the given key.
+   * <p/>
+   * If the item does not exist and a CacheLoader has been specified,
+   * the CacheLoader will be used to create a cache value.
+   */
+  public V get(Object key)
+    throws CacheException;
 
-    /**
-     * Puts a new item in the cache.
-     *
-     * @param key   the key of the item to put
-     * @param value the value of the item to put
-     */
-    public V put(K key, V value);
+  public Map<K,V> getAll(Collection<? extends K> keys)
+    throws CacheException;
+  
+  public boolean containsKey(Object key)
+    throws CacheException;
+  
+  public Future<V> load(K key, CacheLoader<K,V> loader, Object arg)
+    throws CacheException;
+  
+  public Future<Map<K,V>> loadAll(Collection<? extends K> keys,
+                                  CacheLoader<K,V> loader,
+                                  Object arg)
+    throws CacheException;
+  
+  public CacheStatisticsMBean getCacheStatistics();
+  
+  /**
+   * Puts a new item in the cache.
+   *
+   * @param key   the key of the item to put
+   * @param value the value of the item to put
+   */
+  public void put(K key, V value)
+    throws CacheException;
+  
+  public void putAll(Map<? extends K, ? extends V> map)
+    throws CacheException;
+  
+  public boolean putIfAbsent(K key, V value)
+    throws CacheException;
 
-    /**
-     * Removes the entry from the cache
-     */
-    public V remove(Object key);
-    
-    //
-    // extra operations
-    
-    Map<K,V> getAll(Collection<Object> keys) throws CacheException;
-    
-    void load(Object key) throws CacheException;
-    
-    void loadAll(Collection keys) throws CacheException;
-    
-    V peek(Object key);
-    
-    CacheEntry<K,V> getCacheEntry(Object key);
-    
-    CacheStatistics getCacheStatistics();
-    
-    void evict();
-    
-    void addListener(CacheListener listener);
-    
-    void removeListener(CacheListener listener);
+  /**
+   * Removes the entry from the cache
+   */
+  public boolean remove(Object key)
+    throws CacheException;
+  
+  public V getAndRemove(Object key)
+    throws CacheException;
+  
+  public boolean replace(K key, V oldValue, V newValue)
+    throws CacheException;
+  
+  public boolean replace(K key, V value)
+    throws CacheException;
+  
+  public V getAndReplace(K key, V value)
+    throws CacheException;
+  
+  public void removeAll(Collection<? extends K> keys)
+    throws CacheException;
+  
+  public void removeAll()
+    throws CacheException;
+  
+  public CacheConfiguration getConfiguration();
+  
+  public boolean registerCacheEntryListener(CacheEntryListener listener,
+                                            NotificationScope scope);
+  
+  public boolean unregisterCacheEntryListener(CacheEntryListener listener,
+                                              NotificationScope scope);
+  
+  public String getCacheName();
+
+  public interface Entry<K,V> {
+    public K getKey();
+    public V getValue();      
+  }
 }

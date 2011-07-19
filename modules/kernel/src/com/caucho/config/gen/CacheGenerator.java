@@ -33,7 +33,7 @@ import java.lang.reflect.Method;
 import java.util.HashMap;
 import java.util.List;
 
-import javax.cache.Cacheable;
+import javax.cache.interceptor.CacheResult;
 import javax.ejb.MessageDriven;
 import javax.ejb.SessionSynchronization;
 import javax.ejb.Singleton;
@@ -51,7 +51,7 @@ import com.caucho.java.JavaWriter;
  */
 @Module
 public class CacheGenerator<X> extends AbstractAspectGenerator<X> {
-  private Cacheable _cache;
+  private CacheResult _cache;
   
   private String _cacheName;
   private String _cacheInstance;
@@ -59,7 +59,7 @@ public class CacheGenerator<X> extends AbstractAspectGenerator<X> {
   public CacheGenerator(CacheFactory<X> factory,
                         AnnotatedMethod<? super X> method,
                         AspectGenerator<X> next,
-                        Cacheable cache)
+                        CacheResult cache)
   {
     super(factory, method, next);
     

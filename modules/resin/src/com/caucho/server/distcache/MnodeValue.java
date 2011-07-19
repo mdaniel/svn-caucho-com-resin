@@ -144,7 +144,6 @@ public final class MnodeValue implements ExtCacheEntry {
   /**
    * Returns the last access time.
    */
-  @Override
   public long getLastAccessTime()
   {
     return _lastAccessTime;
@@ -186,7 +185,6 @@ public final class MnodeValue implements ExtCacheEntry {
   /**
    * Returns the expiration time
    */
-  @Override
   public final long getExpirationTime()
   {
     return _lastUpdateTime + _expireTimeout;
@@ -454,13 +452,11 @@ public final class MnodeValue implements ExtCacheEntry {
    * Implements a method required by the interface that should never be
    * called>
    */
-  @Override
   public Object setValue(Object value)
   {
     throw new UnsupportedOperationException(getClass().getName());
   }
 
-  @Override
   public long getCreationTime()
   {
     throw new UnsupportedOperationException(getClass().getName());
@@ -472,13 +468,14 @@ public final class MnodeValue implements ExtCacheEntry {
     return (! isEntryExpired(Alarm.getCurrentTime()));
   }
 
+  /*
   @Override
   public long getCost()
   {
     throw new UnsupportedOperationException(getClass().getName());
   }
+  */
   
-  @Override
   public int getHits()
   {
     return _hits;

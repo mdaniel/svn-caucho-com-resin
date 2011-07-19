@@ -43,12 +43,18 @@ import java.util.Map;
 import java.util.NoSuchElementException;
 import java.util.Set;
 import java.util.concurrent.ConcurrentLinkedQueue;
+import java.util.concurrent.Future;
 
 import javax.annotation.PostConstruct;
-import javax.cache.CacheEntry;
-import javax.cache.CacheListener;
+import javax.cache.Cache;
+import javax.cache.CacheConfiguration;
+import javax.cache.CacheException;
 import javax.cache.CacheLoader;
 import javax.cache.CacheStatistics;
+import javax.cache.CacheStatisticsMBean;
+import javax.cache.Status;
+import javax.cache.event.CacheEntryListener;
+import javax.cache.event.NotificationScope;
 
 import com.caucho.config.ConfigException;
 import com.caucho.config.Configurable;
@@ -72,8 +78,8 @@ import com.caucho.vfs.WriteStream;
  * Implements the distributed cache
  */
 
-abstract public class AbstractCache extends AbstractMap
-  implements ObjectCache, ByteStreamCache, CacheStatistics, Closeable
+public class AbstractCache
+  implements ObjectCache, ByteStreamCache, Closeable
 {
   private static final L10N L = new L10N(AbstractCache.class);
 
@@ -84,8 +90,8 @@ abstract public class AbstractCache extends AbstractMap
 
   private String _guid;
 
-  private Collection<CacheListener> _listeners
-    = new ConcurrentLinkedQueue<CacheListener>();
+  private Collection<CacheEntryListener> _listeners
+    = new ConcurrentLinkedQueue<CacheEntryListener>();
 
   private CacheConfig _config = new CacheConfig();
 
@@ -476,7 +482,6 @@ abstract public class AbstractCache extends AbstractMap
   /**
    * Returns the object with the given key without checking the backing store.
    */
-  @Override
   public Object peek(Object key)
   {
     DistCacheEntry cacheEntry = _entryCache.get(key);
@@ -555,8 +560,7 @@ abstract public class AbstractCache extends AbstractMap
   /**
    * Returns the cache entry for the object with the given key.
    */
-  @Override
-  public CacheEntry getCacheEntry(Object key)
+  public Cache.Entry getCacheEntry(Object key)
   {
     return getExtCacheEntry(key);
   }
@@ -568,12 +572,11 @@ abstract public class AbstractCache extends AbstractMap
    * @param value the value of the item to put
    */
   @Override
-  public Object put(Object key, Object value)
+  public void put(Object key, Object value)
   {
-    Object object = getDistCacheEntry(key).put(value, _config);
+    getDistCacheEntry(key).put(value, _config);
+    
     notifyPut(key);
-
-    return object;
   }
 
   /**
@@ -645,11 +648,13 @@ abstract public class AbstractCache extends AbstractMap
    * @return true if the object existed
    */
   @Override
-  public Object remove(Object key)
+  public boolean remove(Object key)
   {
     notifyRemove(key);
     
-    return getDistCacheEntry(key).remove(_config);
+    getDistCacheEntry(key).remove(_config);
+    
+    return true;
   }
 
   /**
@@ -702,14 +707,6 @@ abstract public class AbstractCache extends AbstractMap
   }
 
   /**
-   * Returns a set containing an entry for each key->value pair in the local cache.
-   */
-  public Set<Map.Entry> entrySet()
-  {
-    return new CacheEntrySet<Entry>(_entryCache);
-  }
-
-  /**
    * Returns a new map of the items found in the central cache.
    *
    * @note If a cacheLoader is configured if an item is not found in the cache.
@@ -734,6 +731,7 @@ abstract public class AbstractCache extends AbstractMap
    *
    * @param key
    */
+  /*
   @Override
   public void load(Object key)
   {
@@ -747,10 +745,12 @@ abstract public class AbstractCache extends AbstractMap
 
     notifyLoad(key);
   }
+  */
 
   /**
    * Implements the loadAll method for a collection of keys.
    */
+  /*
   public void loadAll(Collection keys)
   {
     Map<Object, Object> entries = null;
@@ -772,95 +772,39 @@ abstract public class AbstractCache extends AbstractMap
       }
     }
   }
+  */
 
   /**
    * Adds a listener to the cache.
    */
   @Override
-  public void addListener(CacheListener listener)
+  public boolean registerCacheEntryListener(CacheEntryListener listener,
+                                            NotificationScope scope)
   {
     _listeners.add(listener);
+    
+    return true;
   }
 
   /**
    * Removes a listener from the cache.
    */
   @Override
-  public void removeListener(CacheListener listener)
+  public boolean unregisterCacheEntryListener(CacheEntryListener listener,
+                                              NotificationScope scope)
   {
     _listeners.remove(listener);
+    
+    return true;
   }
 
   /**
    * Returns the CacheStatistics for this cache.
    */
   @Override
-  public CacheStatistics getCacheStatistics()
+  public CacheStatisticsMBean getCacheStatistics()
   {
-    return this;
-  }
-
-  /**
-   * Ignored, since evictions are handled by the container.
-   */
-  @Override
-  public void evict()
-  {
-    notifyEvict(null);
-  }
-
-  /**
-   * Returns a collection of the values in the local cache.
-   */
-  public Collection values()
-  {
-    return new CacheValues(_entryCache);
-  }
-
-  /**
-   * Returns a set of the keys in the local set.
-   */
-  public Set keySet()
-  {
-    return new CacheKeys(_entryCache);
-  }
-
-  /**
-   * Returns true if the value is contained in the local cache.
-   */
-  @Override
-  public boolean containsValue(Object value)
-  {
-    if (value == null)
-      return false;
-
-    Collection values = values();
-
-    for (Object item : values) {
-      if (value.equals(item))
-        return true;
-    }
-
-    return false;
-  }
-
-  /**
-   * Removes all items from the local cache.
-   */
-  @Override
-  public void clear()
-  {
-    _entryCache.clear();
-    notifyClear(null);
-  }
-
-  /**
-   * Returns the number current size of the cache.
-   */
-  @Override
-  public int size()
-  {
-    return _entryCache.size();
+    return null; // this;
   }
 
   /**
@@ -889,65 +833,6 @@ abstract public class AbstractCache extends AbstractMap
   public boolean containsKey(Object key)
   {
     return _entryCache.get(key) != null;
-  }
-
-  /**
-   * Returns true is the local cache is empty
-   *
-   * @return
-   */
-  @Override
-  public boolean isEmpty()
-  {
-    return _entryCache.size() == 0;
-  }
-
-  /**
-   * Returns the number of cache hits that have occured since the cache started or
-   * since the last call to clearStatistics.
-   */
-  @Override
-  public int getCacheHits()
-  {
-    return (int) (_entryCache.getHitCount() - _priorHits);
-  }
-
-  /**
-   * Returns the number of cache misses that have occured since the cache started or
-   * since the last call to clearStatistics.
-   */
-  @Override
-  public int getCacheMisses()
-  {
-    return (int) (_entryCache.getMissCount() - _priorMisses);
-  }
-
-  /**
-   * Returns the number of entries currently in the local cache.
-   */
-  @Override
-  public int getObjectCount()
-  {
-    return _entryCache.size();
-  }
-
-  /**
-   * Simulates a reset of the counters for cache hits and misses.
-   */
-  @Override
-  public void clearStatistics()
-  {
-    _priorHits = _entryCache.getHitCount();
-    _priorMisses = _entryCache.getMissCount();
-  }
-
-  /**
-   * Defines the accuracy of this implementation.
-   */
-  @Override
-  public int getStatisticsAccuracy()
-  {
-    return CacheStatistics.STATISTICS_ACCURACY_BEST_EFFORT;
   }
 
   public boolean isBackup()
@@ -1007,35 +892,35 @@ abstract public class AbstractCache extends AbstractMap
 
   protected void notifyLoad(Object key)
   {
-    for (CacheListener listener : _listeners) {
+    for (CacheEntryListener listener : _listeners) {
       listener.onLoad(key);
     }
   }
 
   protected void notifyEvict(Object key)
   {
-    for (CacheListener listener : _listeners) {
+    for (CacheEntryListener listener : _listeners) {
       listener.onEvict(key);
     }
   }
 
   protected void notifyClear(Object key)
   {
-    for (CacheListener listener : _listeners) {
+    for (CacheEntryListener listener : _listeners) {
       listener.onClear();
     }
   }
 
   protected void notifyPut(Object key)
   {
-    for (CacheListener listener : _listeners) {
+    for (CacheEntryListener listener : _listeners) {
       listener.onPut(key);
     }
   }
 
   protected void notifyRemove(Object key)
   {
-    for (CacheListener listener : _listeners) {
+    for (CacheEntryListener listener : _listeners) {
       listener.onRemove(key);
     }
   }
@@ -1226,36 +1111,10 @@ abstract public class AbstractCache extends AbstractMap
   }
 
   /**
-   * provides the implementation of the set of entries over the
-   * cache,
-   */
-  protected static class CacheEntrySet<E>
-    extends AbstractSet
-  {
-    private LruCache<Object, CacheEntry> _lruCache;
-
-    protected CacheEntrySet(LruCache cache)
-    {
-      super();
-      _lruCache = cache;
-    }
-
-    public Iterator iterator()
-    {
-      return new CacheEntrySetIterator<Object,CacheEntry>(_lruCache);
-    }
-
-    public int size()
-    {
-      return _lruCache.size();
-    }
-  }
-
-  /**
    * Provides an iterator over the entries in the the local cache.
    */
   protected static class CacheEntrySetIterator<K, V>
-    implements Iterator
+    implements Iterator<Cache.Entry<K, V>>
   {
     private Iterator<LruCache.Entry<K, V>> _iterator;
 
@@ -1264,17 +1123,16 @@ abstract public class AbstractCache extends AbstractMap
       _iterator = lruCache.iterator();
     }
 
-    public Object next()
+    public Cache.Entry<K,V> next()
     {
       if (!hasNext())
         throw new NoSuchElementException();
 
       LruCache.Entry<K, V> entry = _iterator.next();
-      CacheEntry cacheEntry = (CacheEntry) entry.getValue();
+      Cache.Entry<K,V> cacheEntry = (Cache.Entry<K, V>) entry.getValue();
 
-      return new AbstractMap.SimpleEntry<Object, Object>(
-        cacheEntry.getKey(),
-        cacheEntry.getValue());
+      return new EntryImpl<K, V>(cacheEntry.getKey(),
+                                 cacheEntry.getValue());
     }
 
     public boolean hasNext()
@@ -1291,72 +1149,186 @@ abstract public class AbstractCache extends AbstractMap
     }
   }
 
-  /**
-   * Provides the values contined in the local cache.
-   */
-  protected static class CacheValues<K,V>
-    extends CacheEntrySet
-  {
-    private LruCache<K, V> _lruCache;
-
-    public CacheValues(LruCache<K,V> lruCache)
-    {
-      super(lruCache);
-      _lruCache = lruCache;
-    }
-
-    /**
-     * Override the entry set iterator to return the value for the entry.
-     *
-     * @return
-     */
-    @Override
-    public Iterator iterator()
-    {
-      return new CacheEntrySetIterator<K,V>(_lruCache) {
-        @Override
-        public Object next()
-        {
-          return ((Entry) super.next()).getValue();
-        }
-      };
-    }
-  }
-
-  /**
-   * Provides access to the keys of the map as a set.
-   */
-  protected static class CacheKeys
-    extends CacheEntrySet
-  {
-    private LruCache _lruCache;
-
-    public CacheKeys(LruCache cache)
-    {
-      super(cache);
-
-      _lruCache = cache;
-    }
-
-    /**
-     * Override the entry set iterator to return the key for the entry.
-     */
-    @Override
-    public Iterator iterator()
-    {
-      return new CacheEntrySetIterator<Object, Object>(_lruCache) {
-        @Override
-        public Object next()
-        {
-          return ((Entry) super.next()).getKey();
-        }
-      };
-    }
-  }
-
   @Override
   public String toString()
   {
     return getClass().getSimpleName() + "[" + _guid + "]";
+  }
+  
+  static class EntryImpl<K,V> implements Cache.Entry<K,V>
+  {
+    private final K _key;
+    private final V _value;
+    
+    EntryImpl(K key, V value)
+    {
+      _key = key;
+      _value = value;
+    }
+
+    @Override
+    public K getKey()
+    {
+      return _key;
+    }
+
+    @Override
+    public V getValue()
+    {
+      return _value;
+    }
+  }
+
+  /* (non-Javadoc)
+   * @see javax.cache.Cache#getAndRemove(java.lang.Object)
+   */
+  @Override
+  public Object getAndRemove(Object key) throws CacheException
+  {
+    // TODO Auto-generated method stub
+    return null;
+  }
+
+  /* (non-Javadoc)
+   * @see javax.cache.Cache#getAndReplace(java.lang.Object, java.lang.Object)
+   */
+  @Override
+  public Object getAndReplace(Object key, Object value) throws CacheException
+  {
+    // TODO Auto-generated method stub
+    return null;
+  }
+
+  /* (non-Javadoc)
+   * @see javax.cache.Cache#getCacheName()
+   */
+  @Override
+  public String getCacheName()
+  {
+    // TODO Auto-generated method stub
+    return null;
+  }
+
+  /* (non-Javadoc)
+   * @see javax.cache.Cache#getConfiguration()
+   */
+  @Override
+  public CacheConfiguration getConfiguration()
+  {
+    // TODO Auto-generated method stub
+    return null;
+  }
+
+  /* (non-Javadoc)
+   * @see javax.cache.Cache#load(java.lang.Object, javax.cache.CacheLoader, java.lang.Object)
+   */
+  @Override
+  public Future load(Object key, CacheLoader loader, Object arg)
+      throws CacheException
+  {
+    // TODO Auto-generated method stub
+    return null;
+  }
+
+  /* (non-Javadoc)
+   * @see javax.cache.Cache#loadAll(java.util.Collection, javax.cache.CacheLoader, java.lang.Object)
+   */
+  @Override
+  public Future loadAll(Collection keys, CacheLoader loader, Object arg)
+      throws CacheException
+  {
+    // TODO Auto-generated method stub
+    return null;
+  }
+
+  /* (non-Javadoc)
+   * @see javax.cache.Cache#putIfAbsent(java.lang.Object, java.lang.Object)
+   */
+  @Override
+  public boolean putIfAbsent(Object key, Object value) throws CacheException
+  {
+    // TODO Auto-generated method stub
+    return false;
+  }
+
+  /* (non-Javadoc)
+   * @see javax.cache.Cache#removeAll(java.util.Collection)
+   */
+  @Override
+  public void removeAll(Collection keys) throws CacheException
+  {
+    // TODO Auto-generated method stub
+    
+  }
+
+  /* (non-Javadoc)
+   * @see javax.cache.Cache#removeAll()
+   */
+  @Override
+  public void removeAll() throws CacheException
+  {
+    // TODO Auto-generated method stub
+    
+  }
+
+  /* (non-Javadoc)
+   * @see javax.cache.Cache#replace(java.lang.Object, java.lang.Object, java.lang.Object)
+   */
+  @Override
+  public boolean replace(Object key, Object oldValue, Object newValue)
+      throws CacheException
+  {
+    // TODO Auto-generated method stub
+    return false;
+  }
+
+  /* (non-Javadoc)
+   * @see javax.cache.Cache#replace(java.lang.Object, java.lang.Object)
+   */
+  @Override
+  public boolean replace(Object key, Object value) throws CacheException
+  {
+    // TODO Auto-generated method stub
+    return false;
+  }
+
+  /* (non-Javadoc)
+   * @see java.lang.Iterable#iterator()
+   */
+  @Override
+  public Iterator iterator()
+  {
+    // TODO Auto-generated method stub
+    return null;
+  }
+
+  /* (non-Javadoc)
+   * @see javax.cache.Lifecycle#getStatus()
+   */
+  @Override
+  public Status getStatus()
+  {
+    // TODO Auto-generated method stub
+    return null;
+  }
+
+  /* (non-Javadoc)
+   * @see javax.cache.Lifecycle#start()
+   */
+  @Override
+  public void start() throws CacheException
+  {
+    // TODO Auto-generated method stub
+    
+  }
+
+  /* (non-Javadoc)
+   * @see javax.cache.Lifecycle#stop()
+   */
+  @Override
+  public void stop() throws CacheException
+  {
+    // TODO Auto-generated method stub
+    
   }
 }
