@@ -155,10 +155,13 @@ class InjectScanClass implements ScanClass
       if (annType == null)
         return;
       
+      if (annType.getType() == Observes.class)
+        setObserves();
+      
+      if (_isRegisterRequired)
+        return;
+      
       if (_registerAnnotationSet.contains(annType.getType())) {
-        if (annType.getType() == Observes.class)
-          setObserves();
-        
         _isRegisterRequired = true;
         return;
       }

@@ -64,6 +64,8 @@ class InjectScanManager implements ScanListener {
 
   private final ConcurrentHashMap<NameKey, AnnType> _annotationMap
     = new ConcurrentHashMap<NameKey, AnnType>();
+  
+  private NameKey _nameKey = new NameKey();
 
   private boolean _isCustomExtension;
 
@@ -243,7 +245,9 @@ class InjectScanManager implements ScanListener {
   public AnnType loadAnnotation(char[] buffer, int offset, int length)
     throws ClassNotFoundException
   {
-    NameKey key = new NameKey(buffer, offset, length);
+    NameKey key = _nameKey;
+    
+    key.init(buffer, offset, length); // new NameKey(buffer, offset, length);
 
     AnnType annType = _annotationMap.get(key);
 
@@ -287,6 +291,15 @@ class InjectScanManager implements ScanListener {
     private int _length;
 
     NameKey(char[] buffer, int offset, int length)
+    {
+      init(buffer, offset, length);
+    }
+    
+    NameKey()
+    {
+    }
+
+    void init(char[] buffer, int offset, int length)
     {
       _buffer = buffer;
       _offset = offset;

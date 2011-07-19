@@ -969,17 +969,34 @@ public class DynamicClassLoader extends java.net.URLClassLoader
 
   public String getHash()
   {
+    return String.valueOf(getHashCrc());
+  }
+
+  public long getHashCrc()
+  {
+    long crc64 = getParentHashCrc();
+    
     ArrayList<String> list = new ArrayList<String>();
     
-    buildClassPath(list);
-
-    long crc64 = 0;
+    buildSelfClassPath(list);
     
     for (int i = 0; i < list.size(); i++) {
       crc64 = Crc64.generate(crc64, list.get(i));
     }
     
-    return String.valueOf(crc64);
+    return crc64;
+  }
+  
+  private long getParentHashCrc()
+  {
+    ClassLoader parent = getParent();
+    
+    if (parent == null)
+      return 0;
+    else if (parent instanceof DynamicClassLoader)
+      return ((DynamicClassLoader) parent).getHashCrc();
+    else
+      return parent.hashCode();
   }
     
   /**
@@ -1000,6 +1017,13 @@ public class DynamicClassLoader extends java.net.URLClassLoader
    * .jar and .zip files in the directory list.
    */
   public final void buildClassPath(ArrayList<String> cp)
+  {
+    buildParentClassPath(cp);
+   
+    buildSelfClassPath(cp);
+  }
+  
+  private void buildParentClassPath(ArrayList<String> cp)
   {
     ClassLoader parent = getParent();
 
@@ -1024,7 +1048,10 @@ public class DynamicClassLoader extends java.net.URLClassLoader
         }
       }
     }
-
+  }
+  
+  private void buildSelfClassPath(ArrayList<String> cp)
+  {
     buildImportClassPath(cp);
 
     ArrayList<Loader> loaders = getLoaders();

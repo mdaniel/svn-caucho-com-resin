@@ -52,6 +52,8 @@ abstract public class BaseType
   
   private LinkedHashSet<Type> _typeSet;
   
+  private LinkedHashSet<BaseType> _typeClosureSet;
+  
   public static BaseType createForTarget(Type type, 
                                          HashMap<String,BaseType> paramMap,
                                          String paramDeclName)
@@ -440,13 +442,17 @@ abstract public class BaseType
    */
   public final Set<BaseType> getBaseTypeClosure(InjectManager manager)
   {
-    LinkedHashSet<BaseType> baseTypeSet = new LinkedHashSet<BaseType>();
+    if (_typeClosureSet == null) {
+      LinkedHashSet<BaseType> baseTypeSet = new LinkedHashSet<BaseType>();
     
-    for (Type type : getTypeClosure(manager)) {
-      baseTypeSet.add(manager.createSourceBaseType(type));
+      for (Type type : getTypeClosure(manager)) {
+        baseTypeSet.add(manager.createSourceBaseType(type));
+      }
+      
+      _typeClosureSet = baseTypeSet;
     }
     
-    return baseTypeSet;
+    return _typeClosureSet;
   }
     
   protected void fillTypeClosure(InjectManager manager, Set<Type> typeSet)
