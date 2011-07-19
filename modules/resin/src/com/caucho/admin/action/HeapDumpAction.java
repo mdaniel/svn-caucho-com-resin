@@ -39,21 +39,23 @@ import com.caucho.config.ConfigException;
 import com.caucho.jmx.Jmx;
 import com.caucho.profile.HeapDump;
 import com.caucho.util.*;
+import com.caucho.vfs.Path;
+import com.caucho.vfs.Vfs;
 
 public class HeapDumpAction implements AdminAction
 {
   private static final L10N L = new L10N(HeapDumpAction.class);
   
-  public String execute(boolean raw, String serverId, File hprofDir)
+  public String execute(boolean raw, String serverId, Path hprofPath)
     throws ConfigException, JMException, IOException
   {
     if (raw)
-      return doRawHeapDump(serverId, hprofDir);
+      return doRawHeapDump(serverId, hprofPath);
     else
       return doProHeapDump();
   }
   
-  private String doRawHeapDump(String serverId, File hprofDir)
+  private String doRawHeapDump(String serverId, Path hprofPath)
     throws ConfigException, JMException, IOException
   {
     ObjectName name = new ObjectName(
@@ -70,16 +72,16 @@ public class HeapDumpAction implements AdminAction
                     f.format(date.get(Calendar.MINUTE)) + "-" +
                     f.format(date.get(Calendar.SECOND));
 
-    if (hprofDir == null)
-      hprofDir = new File(System.getProperty("java.io.tmpdir"));
+    if (hprofPath == null)
+      hprofPath = Vfs.lookup(System.getProperty("java.io.tmpdir"));
 
     final String fileName = base + "-" + suffix + ".hprof";
 
-    MemoryPoolAdapter memoryAdapter = new MemoryPoolAdapter();
-    if (memoryAdapter.getEdenUsed() > hprofDir.getFreeSpace())
-      throw new ConfigException(L.l("Not enough disk space for `{0}'", fileName));
+    //MemoryPoolAdapter memoryAdapter = new MemoryPoolAdapter();
+    //if (memoryAdapter.getEdenUsed() > hprofPath.getDiskSpaceFree())
+    //  throw new ConfigException(L.l("Not enough disk space for `{0}'", fileName));
 
-    File file = new File(hprofDir, fileName);
+    File file = new File(hprofPath.getFullPath(), fileName);
     if (file.exists())
       throw new ConfigException(L.l("File `{0}' exists.", file));
 

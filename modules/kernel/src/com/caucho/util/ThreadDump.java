@@ -35,52 +35,136 @@ import java.lang.management.ThreadMXBean;
 import java.util.Arrays;
 import java.util.Comparator;
 import java.util.concurrent.atomic.AtomicLong;
+import java.util.concurrent.atomic.AtomicReference;
 import java.util.logging.Logger;
 
+import com.caucho.config.ConfigException;
+
 /**
- * Configuration for management.
+ * Generate a thread dump
  */
 public class ThreadDump
 {
   private static Logger log = Logger.getLogger(ThreadDump.class.getName());
 
-  private static final ThreadDump _threadDump = new ThreadDump();
-  private final AtomicLong _lastDump = new AtomicLong();
-
-  private ThreadDump()
+  private static AtomicReference<ThreadDump> _threadDumpRef = 
+    new AtomicReference<ThreadDump>();
+  
+  public static final long CACHE_TIME = 30L * 1000L;
+  
+  /**
+   * Returns the singleton instance, creating if necessary.   An instance of 
+   * com.caucho.server.admin.ProThreadDump will be returned if available and 
+   * licensed.  ProThreadDump includes the URI of the request the thread is
+   * processing, if applicable.
+   */
+  public static ThreadDump create()
   {
+    ThreadDump threadDump = _threadDumpRef.get();
+    
+    if (threadDump == null) {
+      try {
+        ClassLoader loader = Thread.currentThread().getContextClassLoader();
+        Class<?> threadDumpClass = 
+          Class.forName("com.caucho.server.admin.ProThreadDump", false, loader);
+        threadDump = (ThreadDump) threadDumpClass.newInstance();
+      } catch (ClassNotFoundException e) {
+        threadDump = new ThreadDump();
+      } catch (ConfigException e) {
+        threadDump = new ThreadDump();
+      } catch (Exception e) {
+        throw ConfigException.create(e);
+      }
+      
+      _threadDumpRef.compareAndSet(null, threadDump);
+      threadDump = _threadDumpRef.get();
+    }
+    
+    return threadDump;
+  }
+
+  private final AtomicLong _lastDumpTime = new AtomicLong();
+  private String _lastDump;
+
+  protected ThreadDump()
+  {
+    
+  }
+  
+  /**
+   * Log all threads to com.caucho.util.ThreadDump at info level.  Uses cached 
+   * dump if recent (30s).
+   */
+  public void dumpThreads()
+  {
+    log.info(getThreadDump());
+  }
+  
+  /**
+   * Log all threads to com.caucho.util.ThreadDump at info level.  Never
+   * uses cached dump.
+   */
+  public void dumpThreadsNoCache()
+  {
+    log.info(getThreadDump(-1, false));
   }
 
   /**
-   * This method should only be called by a ManagerActor in
-   * response to a remote request for thread dump
-   *
-   * @return String representation of thread dump
+   * Returns dump of all threads.  Uses cached dump if recent (30s).
    */
-  public static String getThreadDump()
+  public String getThreadDump()
   {
-    return _threadDump.threadDumpImpl();
+    return (getThreadDump(CACHE_TIME, false));
   }
 
-  public static void dumpThreads()
+  /**
+   * Log threads to com.caucho.util.ThreadDump at info level.  Uses cached 
+   * dump if recent (30s)
+   * @param onlyActive if true only running threads are logged
+   */
+  public void dumpThreads(boolean onlyActive)
   {
-    long timeout = 3600L * 1000L;
-
-    _threadDump.threadDump(timeout);
+    log.info(getThreadDump(onlyActive));
   }
 
-  private void threadDump(long timeout)
+  /**
+   * Returns dump of threads.  Uses cached dump if recent (30s).
+   * @param onlyActive if true only running threads are logged
+   */
+  public String getThreadDump(boolean onlyActive)
+  {
+    return (getThreadDump(CACHE_TIME, onlyActive));
+  }
+
+  /**
+   * Log threads to com.caucho.util.ThreadDump at info level.  Optionally 
+   * uses cached dump.
+   * @param timeout cache time
+   * @param onlyActive if true only running threads are logged
+   */
+  public void dumpThreads(long timeout, boolean onlyActive)
+  {
+    log.info(getThreadDump(timeout, onlyActive));
+  }
+
+  /**
+   * Returns dump of threads.  Optionally uses cached dump.
+   * @param timeout cache time
+   * @param onlyActive if true only running threads are logged
+   */
+  public String getThreadDump(long timeout, boolean onlyActive)
   {
     long now = Alarm.getCurrentTime();
-    long lastDump = _lastDump.get();
+    long lastDumpTime = _lastDumpTime.get();
 
-    if (lastDump + timeout < now
-        && _lastDump.compareAndSet(lastDump, now)) {
-      threadDumpImpl();
+    if ((lastDumpTime + timeout) < now && _lastDumpTime.compareAndSet(lastDumpTime, now)) {
+      _lastDump = getThreadDumpImpl(onlyActive);
     }
+    
+    return _lastDump;
   }
 
-  private String threadDumpImpl()
+  protected String getThreadDumpImpl(boolean onlyActive)
   {
     ThreadMXBean threadBean = ManagementFactory.getThreadMXBean();
 
@@ -91,24 +175,23 @@ public class ThreadDump
     sb.append("Thread Dump:\n");
 
     Arrays.sort(info, new ThreadCompare());
+    
     buildThreads(sb, info, Thread.State.RUNNABLE, false);
     buildThreads(sb, info, Thread.State.RUNNABLE, true);
-    buildThreads(sb, info, Thread.State.BLOCKED, false);
-    buildThreads(sb, info, Thread.State.WAITING, false);
-    buildThreads(sb, info, Thread.State.TIMED_WAITING, false);
-    buildThreads(sb, info, null, false);
+    if (! onlyActive) {
+      buildThreads(sb, info, Thread.State.BLOCKED, false);
+      buildThreads(sb, info, Thread.State.WAITING, false);
+      buildThreads(sb, info, Thread.State.TIMED_WAITING, false);
+      buildThreads(sb, info, null, false);
+    }
 
-    String threadDump = sb.toString();
-
-    log.info(threadDump);
-
-    return threadDump;
+    return sb.toString();
   }
 
-  private void buildThreads(StringBuilder sb,
-                            ThreadInfo []infoArray,
-                            Thread.State matchState,
-                            boolean isNative)
+  protected void buildThreads(StringBuilder sb,
+                              ThreadInfo []infoArray,
+                              Thread.State matchState,
+                              boolean isNative)
   {
     for (ThreadInfo info : infoArray) {
       if (info == null)
@@ -133,7 +216,7 @@ public class ThreadDump
     }
   }
 
-  private void buildThread(StringBuilder sb, ThreadInfo info)
+  protected void buildThread(StringBuilder sb, ThreadInfo info)
   {
     sb.append("\n\"");
     sb.append(info.getThreadName());
@@ -159,22 +242,6 @@ public class ThreadDump
     }
 
     sb.append("\n");
-
-    /*
-    Server server = Server.getCurrent();
-
-    if (server != null) {
-      TcpConnection conn = server.findConnectionByThreadId(info.getThreadId());
-
-      if (conn != null && conn.getRequest() instanceof AbstractHttpRequest) {
-        AbstractHttpRequest req = (AbstractHttpRequest) conn.getRequest();
-
-        if (req.getRequestURI() != null) {
-          sb.append("   ").append(req.getRequestURI()).append("\n");
-        }
-      }
-    }
-    */
 
     StackTraceElement []stackList = info.getStackTrace();
     if (stackList == null)

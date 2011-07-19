@@ -51,6 +51,8 @@ import com.caucho.security.AdminAuthenticator;
 import com.caucho.server.cluster.Server;
 import com.caucho.util.Alarm;
 import com.caucho.util.L10N;
+import com.caucho.vfs.Path;
+import com.caucho.vfs.Vfs;
 
 import javax.annotation.PostConstruct;
 import java.io.File;
@@ -67,7 +69,7 @@ public class ManagerActor extends SimpleActor
   private static final L10N L = new L10N(ManagerActor.class);
 
   private Server _server;
-  private File _hprofDir;
+  private Path _hprofDir;
 
   private AtomicBoolean _isInit = new AtomicBoolean();
 
@@ -100,7 +102,7 @@ public class ManagerActor extends SimpleActor
     getBroker().addMailbox(mailbox);
   }
 
-  public File getHprofDir()
+  public Path getHprofDir()
   {
     return _hprofDir;
   }
@@ -110,12 +112,9 @@ public class ManagerActor extends SimpleActor
     if (hprofDir.isEmpty())
       throw new ConfigException("hprof-dir can not be set to an emtpy string");
 
-    File file = new File(hprofDir);
+    Path path = Vfs.lookup(hprofDir);
 
-    if (!file.isAbsolute())
-      throw new ConfigException("hprof-dir must be an absolute path");
-
-    _hprofDir = file;
+    _hprofDir = path;
   }
 
   @Query
@@ -186,7 +185,7 @@ public class ManagerActor extends SimpleActor
     String result = null;
     
     try {
-      result = new ThreadDumpAction().execute();
+      result = new ThreadDumpAction().execute(false);
     } catch (ConfigException e) {
       log.log(Level.WARNING, e.getMessage(), e);
       result = e.getMessage();

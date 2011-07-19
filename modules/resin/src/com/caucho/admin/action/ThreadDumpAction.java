@@ -30,6 +30,7 @@ package com.caucho.admin.action;
 
 import java.util.logging.Logger;
 
+import com.caucho.env.log.LogSystem;
 import com.caucho.util.*;
 
 public class ThreadDumpAction implements AdminAction
@@ -39,8 +40,15 @@ public class ThreadDumpAction implements AdminAction
 
   private static final L10N L = new L10N(ThreadDumpAction.class);
   
-  public String execute()
+  private ThreadDump _threadDump;
+  
+  public ThreadDumpAction()
   {
-    return ThreadDump.getThreadDump();
+    _threadDump = ThreadDump.create();
+  }
+  
+  public String execute(boolean onlyActive)
+  {
+    return _threadDump.getThreadDump(onlyActive);
   }
 }

@@ -466,7 +466,7 @@ public class CauchoSystem {
   {
     try {
       System.err.println(cl + " Resin restarting due to OutOfMemoryError " + e);
-      ThreadDump.dumpThreads();
+      ThreadDump.create().dumpThreadsNoCache();
     } finally {
       Runtime.getRuntime().halt(EXIT_OOM);
     }
