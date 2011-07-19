@@ -50,7 +50,6 @@ import javax.cache.Cache;
 import javax.cache.CacheConfiguration;
 import javax.cache.CacheException;
 import javax.cache.CacheLoader;
-import javax.cache.CacheStatistics;
 import javax.cache.CacheStatisticsMBean;
 import javax.cache.Status;
 import javax.cache.event.CacheEntryListener;
@@ -861,8 +860,10 @@ public class AbstractCache
       return value;
 
     CacheLoader loader = _config.getCacheLoader();
+    
+    Object arg = null;
 
-    value = (loader != null) ? loader.load(key) : null;
+    value = (loader != null) ? loader.load(key, arg) : null;
 
     if (value != null)
       put(key, value);

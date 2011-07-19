@@ -29,16 +29,16 @@
 
 package javax.cache;
 
-import java.lang.annotation.ElementType;
-import java.lang.annotation.Retention;
-import java.lang.annotation.RetentionPolicy;
-import java.lang.annotation.Target;
-
-import javax.inject.Qualifier;
-
-@Target({ElementType.TYPE })
-@Retention(RetentionPolicy.RUNTIME)
-@Qualifier
-public @interface StringKeyGen
-{
+/**
+ * Provides the capability of dynamically creating a cache.
+ *
+ * See  the  default implementation of this inteface in {@link com.caucho.cluster.CacheTemplate}
+ * for additional methods.
+ */
+public interface CacheBuilder<K,V> {
+  public Cache<K,V> build();
+  
+  public CacheBuilder<K,V> setCacheConfiguration(CacheConfiguration config);
+  
+  public CacheBuilder<K,V> setCacheLoader(CacheLoader<K,V> cacheLoader);
 }

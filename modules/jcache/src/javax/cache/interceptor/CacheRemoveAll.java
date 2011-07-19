@@ -27,20 +27,19 @@
  * @author Scott Ferguson
  */
 
-package javax.cache;
+package javax.cache.interceptor;
 
 import java.lang.annotation.ElementType;
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
 
-import javax.cache.interceptor.CacheKeyGenerator;
 import javax.interceptor.InterceptorBinding;
 
 @Target({ElementType.METHOD, ElementType.TYPE })
 @Retention(RetentionPolicy.RUNTIME)
 @InterceptorBinding
-public @interface CacheRemoveEntry
+public @interface CacheRemoveAll
 {
   String value() default "";
   String cacheName() default "";

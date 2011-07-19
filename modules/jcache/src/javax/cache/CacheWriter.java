@@ -27,21 +27,21 @@
  * @author Scott Ferguson
  */
 
-package javax.cache.interceptor;
+package javax.cache;
 
-import java.lang.annotation.ElementType;
-import java.lang.annotation.Retention;
-import java.lang.annotation.RetentionPolicy;
-import java.lang.annotation.Target;
+import java.util.Collection;
 
-
-@Target({ElementType.METHOD, ElementType.TYPE })
-@Retention(RetentionPolicy.RUNTIME)
-public @interface CacheResult
+public interface CacheWriter<K,V>
 {
-  String value() default "";
-  String cacheName() default "";
-  Class<? extends CacheKeyGenerator> cacheKeyGenerator()
-    default CacheKeyGenerator.class;
-  KeyGeneratorType keyGeneratorType() default KeyGeneratorType.DEFAULT;
+  public void write(Cache.Entry<K,V> entry)
+    throws CacheException;
+  
+  public void writeAll(Collection<Cache.Entry<? extends K, ? extends V>> entries)
+    throws CacheException;
+  
+  public void delete(Cache.Entry<K,V> entry)
+    throws CacheException;
+  
+  public void deleteAll(Collection<Cache.Entry<? extends K, ? extends V>> entries)
+    throws CacheException;
 }

@@ -27,24 +27,18 @@
  * @author Scott Ferguson
  */
 
-package javax.cache;
+package javax.cache.interceptor;
 
 import java.lang.annotation.ElementType;
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
 
-import javax.cache.interceptor.CacheKeyGenerator;
-import javax.interceptor.InterceptorBinding;
+import javax.inject.Qualifier;
 
-@Target({ElementType.METHOD, ElementType.TYPE })
+@Target({ElementType.TYPE })
 @Retention(RetentionPolicy.RUNTIME)
-@InterceptorBinding
-public @interface CacheRemoveAll
+@Qualifier
+public @interface CustomKeyGen
 {
-  String value() default "";
-  String cacheName() default "";
-  Class<? extends CacheKeyGenerator> cacheKeyGenerator()
-    default CacheKeyGenerator.class;
-  KeyGeneratorType keyGeneratorType() default KeyGeneratorType.DEFAULT;
 }

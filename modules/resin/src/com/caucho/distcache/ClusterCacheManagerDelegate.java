@@ -33,8 +33,9 @@ import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
 import javax.cache.Cache;
+import javax.cache.CacheBuilder;
 import javax.cache.CacheException;
-import javax.cache.CacheFactory;
+import javax.cache.CacheManagerFactory;
 import javax.cache.CacheManager;
 import javax.enterprise.context.ApplicationScoped;
 import javax.transaction.UserTransaction;
@@ -91,7 +92,7 @@ public class ClusterCacheManagerDelegate implements CacheManager
    * @see javax.cache.CacheFactory#createCache(java.util.Map)
    */
   @Override
-  public Cache getCache(String name) throws CacheException
+  public <K,V> Cache<K,V> getCache(String name) throws CacheException
   {
     if (name == null)
       throw new IllegalArgumentException(L.l("Cache 'name' is required."));
@@ -125,5 +126,45 @@ public class ClusterCacheManagerDelegate implements CacheManager
   public String toString()
   {
     return getClass().getSimpleName() + "[" + _contextId + "]";
+  }
+
+  /* (non-Javadoc)
+   * @see javax.cache.CacheManager#createCacheBuilder(java.lang.String)
+   */
+  @Override
+  public <K, V> CacheBuilder<K, V> createCacheBuilder(String cacheName)
+  {
+    // TODO Auto-generated method stub
+    return null;
+  }
+
+  /* (non-Javadoc)
+   * @see javax.cache.CacheManager#getName()
+   */
+  @Override
+  public String getName()
+  {
+    // TODO Auto-generated method stub
+    return null;
+  }
+
+  /* (non-Javadoc)
+   * @see javax.cache.CacheManager#removeCache(java.lang.String)
+   */
+  @Override
+  public boolean removeCache(String cacheName) throws IllegalStateException
+  {
+    // TODO Auto-generated method stub
+    return false;
+  }
+
+  /* (non-Javadoc)
+   * @see javax.cache.CacheManager#shutdown()
+   */
+  @Override
+  public void shutdown()
+  {
+    // TODO Auto-generated method stub
+    
   }
 }

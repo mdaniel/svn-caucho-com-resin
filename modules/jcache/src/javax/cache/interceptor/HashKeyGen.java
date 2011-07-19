@@ -27,25 +27,18 @@
  * @author Scott Ferguson
  */
 
-package javax.cache;
+package javax.cache.interceptor;
 
-import java.util.Map;
+import java.lang.annotation.ElementType;
+import java.lang.annotation.Retention;
+import java.lang.annotation.RetentionPolicy;
+import java.lang.annotation.Target;
 
-/**
- * Provides the capability of dynamically creating a cache.
- *
- * See  the  default implementation of this inteface in {@link com.caucho.cluster.CacheTemplate}
- * for additional methods.
- */
-public interface CacheFactory {
+import javax.inject.Qualifier;
 
-  /**
-   * Provides a means for dynamically obtaining a cache.
-   *
-   * @param env If null, the configured and required cache name is used.
-   * @return  the requested cache.
-   * @throws CacheException if a cache with the name has already been created.
-   */
-  public Cache createCache(Map env)
-    throws CacheException;
+@Target({ElementType.TYPE })
+@Retention(RetentionPolicy.RUNTIME)
+@Qualifier
+public @interface HashKeyGen
+{
 }

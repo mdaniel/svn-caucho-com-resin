@@ -330,7 +330,9 @@ abstract public class AbstractCacheManager<E extends DistCacheEntry>
       CacheLoader loader = config.getCacheLoader();
 
       if (loader != null && entry.getKey() != null) {
-        Object value = loader.load(entry.getKey());
+        Object arg = null;
+        
+        Object value = loader.load(entry.getKey(), arg);
 
         if (value != null) {
           put(entry, value, config, now, mnodeValue);

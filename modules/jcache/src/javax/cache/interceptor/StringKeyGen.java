@@ -27,7 +27,7 @@
  * @author Scott Ferguson
  */
 
-package javax.cache;
+package javax.cache.interceptor;
 
 import java.lang.annotation.ElementType;
 import java.lang.annotation.Retention;
@@ -39,6 +39,6 @@ import javax.inject.Qualifier;
 @Target({ElementType.TYPE })
 @Retention(RetentionPolicy.RUNTIME)
 @Qualifier
-public @interface HashKeyGen
+public @interface StringKeyGen
 {
 }

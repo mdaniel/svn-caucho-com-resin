@@ -37,7 +37,6 @@ import com.caucho.util.Alarm;
 import com.caucho.util.HashKey;
 
 import javax.cache.CacheLoader;
-import javax.cache.CacheStatistics;
 
 /**
  * Manages the distributed cache
@@ -455,7 +454,7 @@ public class CacheConfig
     if (_valueSerializer == null)
       _valueSerializer = new HessianSerializer();
 
-    _accuracy = CacheStatistics.STATISTICS_ACCURACY_BEST_EFFORT;
+    // _accuracy = CacheStatistics.STATISTICS_ACCURACY_BEST_EFFORT;
   }
 
   @Override

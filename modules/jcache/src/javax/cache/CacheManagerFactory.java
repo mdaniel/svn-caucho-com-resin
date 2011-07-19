@@ -29,7 +29,16 @@
 
 package javax.cache;
 
-public enum KeyGeneratorType
-{
-  DEFAULT, HASH_CODE, STRING, CUSTOM;
+import java.util.Map;
+
+/**
+ * Provides the capability of dynamically creating a cache.
+ *
+ * See  the  default implementation of this inteface in {@link com.caucho.cluster.CacheTemplate}
+ * for additional methods.
+ */
+public enum CacheManagerFactory {
+  INSTANCE;
+  
+  public static final String DEFAULT_CACHE_MANAGER_NAME = "default";
 }

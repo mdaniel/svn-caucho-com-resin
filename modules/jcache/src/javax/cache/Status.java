@@ -48,10 +48,11 @@ public enum Status {
   /**
    * The cache is active.
    */
-  ALIVE,
+  STARTING,
   
-  /**
-   * The cache has been shutdown and cannot be used.
-   */
-  SHUTDOWN;
+  STARTED,
+  
+  STOPPING,
+  
+  STOPPED;
 }

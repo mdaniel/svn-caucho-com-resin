@@ -29,11 +29,18 @@
 
 package javax.cache;
 
-import javax.transaction.UserTransaction;
-
 public interface CacheManager
 {
-  public Cache getCache(String name);
+  public String getName();
   
-  public UserTransaction getUserTransaction();
+  public <K,V> CacheBuilder<K,V> createCacheBuilder(String cacheName);
+  
+  public <K,V> Cache<K,V> getCache(String name);
+  
+  public boolean removeCache(String cacheName)
+    throws IllegalStateException;
+  
+  public Object getUserTransaction();
+  
+  public void shutdown();
 }

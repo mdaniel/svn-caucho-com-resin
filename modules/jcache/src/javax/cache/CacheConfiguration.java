@@ -34,4 +34,19 @@ package javax.cache;
  */
 public interface CacheConfiguration
 {
+  public boolean isReadThrough();
+  
+  public void setReadThrough(boolean isReadThrough);
+  
+  public boolean isWriteThrough();
+  
+  public void setWriteThrough(boolean isWriteThrough);
+  
+  public boolean isStoreByValue();
+  
+  public void setStoreByValue(boolean isStoreByValue);
+  
+  public boolean isStatisticsEnabled();
+  
+  public void setStatisticsEnabled(boolean isEnable);
 }
