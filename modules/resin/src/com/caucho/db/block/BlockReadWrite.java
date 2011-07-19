@@ -341,7 +341,9 @@ public class BlockReadWrite {
   private RandomAccessStream streamOpenRead()
     throws IOException
   {
-    while (true) {
+    int retry = 8;
+    
+    while (retry-- >= 0) {
       RandomAccessStream mmapFile = _mmapFile.get();
       
       if (mmapFile != null && mmapFile.getLength() == _fileSize) {
@@ -381,14 +383,17 @@ public class BlockReadWrite {
               file = null;
             }
           }
-        }
-        else {
+          
           _isEnableMmap = false;
-
+        }
+        
+        if (! _isEnableMmap) {
           return _path.openRandomAccess();
         }
       }
     }
+    
+    return null;
   }
 
   private void freeRowFile(RandomAccessWrapper wrapper, boolean isPriority)
