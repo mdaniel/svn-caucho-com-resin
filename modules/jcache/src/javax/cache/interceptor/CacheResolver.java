@@ -29,29 +29,11 @@
 
 package javax.cache.interceptor;
 
-import java.lang.annotation.ElementType;
-import java.lang.annotation.Retention;
-import java.lang.annotation.RetentionPolicy;
-import java.lang.annotation.Target;
+import java.lang.reflect.Method;
 
-import javax.enterprise.util.Nonbinding;
-import javax.interceptor.InterceptorBinding;
+import javax.cache.Cache;
 
-@Target({ElementType.METHOD, ElementType.TYPE })
-@Retention(RetentionPolicy.RUNTIME)
-@InterceptorBinding
-public @interface CacheRemoveEntry
+public interface CacheResolver
 {
-  @Nonbinding
-  String cacheName() default "";
-  
-  @Nonbinding
-  boolean afterInvocation() default true;
-  
-  @Nonbinding
-  Class<? extends CacheResolver> cacheResolver() default CacheResolver.class;
-  
-  @Nonbinding
-  Class<? extends CacheKeyGenerator> cacheKeyGenerator()
-    default DefaultCacheKeyGenerator.class;
+  <K,V> Cache<K,V> resolveCacheManager(String cacheName, Method method);
 }

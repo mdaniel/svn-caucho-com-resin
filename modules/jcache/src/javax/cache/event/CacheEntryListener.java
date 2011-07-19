@@ -29,15 +29,9 @@
 
 package javax.cache.event;
 
-public interface CacheEntryListener
+import java.util.EventListener;
+
+public interface CacheEntryListener extends EventListener
 {
-  public void onLoad(Object key);
-  
-  public void onPut(Object key);
-  
-  public void onEvict(Object key);
-  
-  public void onRemove(Object key);
-  
-  public void onClear();
+  public NotificationScope getNotificationScope();
 }

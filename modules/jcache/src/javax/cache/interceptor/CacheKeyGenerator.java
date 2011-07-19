@@ -29,12 +29,9 @@
 
 package javax.cache.interceptor;
 
-import java.io.Serializable;
-
 import javax.interceptor.InvocationContext;
 
-public interface CacheKeyGenerator<T extends Serializable>
+public interface CacheKeyGenerator
 {
-  T generateKey(InvocationContext invocationContext);
-  T generateKey(Object... parameters);
+  public CacheKey generateCacheKey(InvocationContext invocationContext);
 }

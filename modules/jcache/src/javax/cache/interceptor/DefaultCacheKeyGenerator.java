@@ -29,7 +29,17 @@
 
 package javax.cache.interceptor;
 
-public enum KeyGeneratorType
+import javax.interceptor.InvocationContext;
+
+public class DefaultCacheKeyGenerator implements CacheKeyGenerator
 {
-  DEFAULT, HASH_CODE, STRING, CUSTOM;
+  @Override
+  public CacheKey generateCacheKey(InvocationContext ic)
+  {
+    Object []parameters = ic.getParameters();
+    Object []paramCopy = new Object[parameters.length];
+    System.arraycopy( parameters, 0, paramCopy, 0, parameters.length);
+    
+    return new DefaultCacheKey(paramCopy);
+  }
 }

@@ -34,6 +34,7 @@ import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
 
+import javax.enterprise.util.Nonbinding;
 import javax.interceptor.InterceptorBinding;
 
 @Target({ElementType.METHOD, ElementType.TYPE })
@@ -41,9 +42,12 @@ import javax.interceptor.InterceptorBinding;
 @InterceptorBinding
 public @interface CacheRemoveAll
 {
-  String value() default "";
+  @Nonbinding
   String cacheName() default "";
-  Class<? extends CacheKeyGenerator> cacheKeyGenerator()
-    default CacheKeyGenerator.class;
-  KeyGeneratorType keyGeneratorType() default KeyGeneratorType.DEFAULT;
+  
+  @Nonbinding
+  boolean afterInvocation() default true;
+
+  @Nonbinding
+  Class<? extends CacheResolver> cacheResolver() default CacheResolver.class;
 }

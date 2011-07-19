@@ -27,31 +27,13 @@
  * @author Scott Ferguson
  */
 
-package javax.cache.interceptor;
+package javax.cache.spi;
 
-import java.lang.annotation.ElementType;
-import java.lang.annotation.Retention;
-import java.lang.annotation.RetentionPolicy;
-import java.lang.annotation.Target;
+import javax.cache.CacheManager;
 
-import javax.enterprise.util.Nonbinding;
-import javax.interceptor.InterceptorBinding;
-
-@Target({ElementType.METHOD, ElementType.TYPE })
-@Retention(RetentionPolicy.RUNTIME)
-@InterceptorBinding
-public @interface CacheRemoveEntry
-{
-  @Nonbinding
-  String cacheName() default "";
-  
-  @Nonbinding
-  boolean afterInvocation() default true;
-  
-  @Nonbinding
-  Class<? extends CacheResolver> cacheResolver() default CacheResolver.class;
-  
-  @Nonbinding
-  Class<? extends CacheKeyGenerator> cacheKeyGenerator()
-    default DefaultCacheKeyGenerator.class;
+/**
+ * Creates a new CacheManager.
+ */
+public interface CacheManagerFactoryProvider {
+  public CacheManager createCacheManager(String name);
 }

@@ -27,18 +27,13 @@
  * @author Scott Ferguson
  */
 
-package javax.cache.interceptor;
+package javax.cache.event;
 
-import java.lang.annotation.ElementType;
-import java.lang.annotation.Retention;
-import java.lang.annotation.RetentionPolicy;
-import java.lang.annotation.Target;
+import java.util.EventListener;
 
-import javax.inject.Qualifier;
+import javax.cache.Cache;
 
-@Target({ElementType.TYPE })
-@Retention(RetentionPolicy.RUNTIME)
-@Qualifier
-public @interface StringKeyGen
+public interface CacheEntryExpiredListener<K,V> extends EventListener
 {
+  public void onExpire(Cache.Entry<K,V> entry);
 }

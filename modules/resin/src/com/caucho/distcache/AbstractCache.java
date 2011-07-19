@@ -893,37 +893,47 @@ public class AbstractCache
 
   protected void notifyLoad(Object key)
   {
+    /*
     for (CacheEntryListener listener : _listeners) {
       listener.onLoad(key);
     }
+    */
   }
 
   protected void notifyEvict(Object key)
   {
+    /*
     for (CacheEntryListener listener : _listeners) {
       listener.onEvict(key);
     }
+    */
   }
 
   protected void notifyClear(Object key)
   {
+    /*
     for (CacheEntryListener listener : _listeners) {
       listener.onClear();
     }
+    */
   }
 
   protected void notifyPut(Object key)
   {
+    /*
     for (CacheEntryListener listener : _listeners) {
       listener.onPut(key);
     }
+    */
   }
 
   protected void notifyRemove(Object key)
   {
+    /*
     for (CacheEntryListener listener : _listeners) {
       listener.onRemove(key);
     }
+    */
   }
 
   @Override

@@ -29,16 +29,8 @@
 
 package javax.cache.interceptor;
 
-import java.lang.annotation.ElementType;
-import java.lang.annotation.Retention;
-import java.lang.annotation.RetentionPolicy;
-import java.lang.annotation.Target;
+import java.io.Serializable;
 
-@Target({ElementType.PARAMETER })
-@Retention(RetentionPolicy.RUNTIME)
-public @interface CacheKey
+public interface CacheKey extends Serializable
 {
-  String expression() default "";
-  String propertyName() default "";
-  String name() default "";
 }

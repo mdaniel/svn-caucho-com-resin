@@ -27,31 +27,14 @@
  * @author Scott Ferguson
  */
 
-package javax.cache.interceptor;
+package javax.cache.event;
 
-import java.lang.annotation.ElementType;
-import java.lang.annotation.Retention;
-import java.lang.annotation.RetentionPolicy;
-import java.lang.annotation.Target;
+import java.util.EventListener;
 
-import javax.enterprise.util.Nonbinding;
-import javax.interceptor.InterceptorBinding;
+import javax.cache.Cache;
 
-@Target({ElementType.METHOD, ElementType.TYPE })
-@Retention(RetentionPolicy.RUNTIME)
-@InterceptorBinding
-public @interface CacheRemoveEntry
+public interface CacheEntryReadListener<K,V> extends EventListener
 {
-  @Nonbinding
-  String cacheName() default "";
-  
-  @Nonbinding
-  boolean afterInvocation() default true;
-  
-  @Nonbinding
-  Class<? extends CacheResolver> cacheResolver() default CacheResolver.class;
-  
-  @Nonbinding
-  Class<? extends CacheKeyGenerator> cacheKeyGenerator()
-    default DefaultCacheKeyGenerator.class;
+  public void onRead(Cache.Entry<K,V> entry);
+  public void onReadAll(Iterable<Cache.Entry<K,V>> entry);
 }

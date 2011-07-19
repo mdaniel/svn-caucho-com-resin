@@ -29,29 +29,37 @@
 
 package javax.cache.interceptor;
 
-import java.lang.annotation.ElementType;
-import java.lang.annotation.Retention;
-import java.lang.annotation.RetentionPolicy;
-import java.lang.annotation.Target;
+import java.util.Arrays;
 
-import javax.enterprise.util.Nonbinding;
-import javax.interceptor.InterceptorBinding;
-
-@Target({ElementType.METHOD, ElementType.TYPE })
-@Retention(RetentionPolicy.RUNTIME)
-@InterceptorBinding
-public @interface CacheRemoveEntry
+public class DefaultCacheKey implements CacheKey
 {
-  @Nonbinding
-  String cacheName() default "";
+  private static final long serialVersionUID = 1L;
   
-  @Nonbinding
-  boolean afterInvocation() default true;
+  private final Object []parameters;
+  private final int hashCode;
   
-  @Nonbinding
-  Class<? extends CacheResolver> cacheResolver() default CacheResolver.class;
-  
-  @Nonbinding
-  Class<? extends CacheKeyGenerator> cacheKeyGenerator()
-    default DefaultCacheKeyGenerator.class;
+  public DefaultCacheKey(Object []parameters)
+  {
+    this.parameters = parameters;
+    this.hashCode = Arrays.deepHashCode(parameters);
+  }
+
+  @Override
+  public int hashCode()
+  {
+    return this.hashCode;
+  }
+
+  @Override
+  public boolean equals(Object obj)
+  {
+    if (this == obj)
+      return true;
+    else if (obj == null || getClass() != obj.getClass())
+      return false;
+    
+    DefaultCacheKey key = (DefaultCacheKey) obj;
+    
+    return Arrays.deepEquals(this.parameters, key.parameters);
+  }
 }

@@ -29,19 +29,31 @@
 
 package javax.cache.interceptor;
 
+import java.lang.annotation.Annotation;
 import java.lang.annotation.ElementType;
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
+
+import javax.enterprise.util.Nonbinding;
 
 
 @Target({ElementType.METHOD, ElementType.TYPE })
 @Retention(RetentionPolicy.RUNTIME)
 public @interface CacheResult
 {
-  String value() default "";
+  @Nonbinding
   String cacheName() default "";
-  Class<? extends CacheKeyGenerator> cacheKeyGenerator()
-    default CacheKeyGenerator.class;
-  KeyGeneratorType keyGeneratorType() default KeyGeneratorType.DEFAULT;
+  
+  @Nonbinding
+  boolean skipGet() default false;
+  
+  @Nonbinding
+  Class<? extends CacheResolver> cacheResolver() default CacheResolver.class;
+  
+  @Nonbinding
+  Class<? extends Annotation>[] cacheResolverQualifiers() default {};
+  
+  @Nonbinding
+  Class<? extends Annotation>[] cacheKeyGeneratorQualifiers() default {};
 }

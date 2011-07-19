@@ -29,29 +29,34 @@
 
 package javax.cache.interceptor;
 
-import java.lang.annotation.ElementType;
-import java.lang.annotation.Retention;
-import java.lang.annotation.RetentionPolicy;
-import java.lang.annotation.Target;
+import java.lang.reflect.Method;
 
-import javax.enterprise.util.Nonbinding;
-import javax.interceptor.InterceptorBinding;
+import javax.cache.Cache;
+import javax.cache.CacheBuilder;
+import javax.cache.CacheManager;
 
-@Target({ElementType.METHOD, ElementType.TYPE })
-@Retention(RetentionPolicy.RUNTIME)
-@InterceptorBinding
-public @interface CacheRemoveEntry
+public class DefaultCacheResolver implements CacheResolver
 {
-  @Nonbinding
-  String cacheName() default "";
+  private final CacheManager cacheManager;
   
-  @Nonbinding
-  boolean afterInvocation() default true;
+  public DefaultCacheResolver(CacheManager manager)
+  {
+    this.cacheManager = manager;
+  }
   
-  @Nonbinding
-  Class<? extends CacheResolver> cacheResolver() default CacheResolver.class;
-  
-  @Nonbinding
-  Class<? extends CacheKeyGenerator> cacheKeyGenerator()
-    default DefaultCacheKeyGenerator.class;
+  @Override
+  @SuppressWarnings("unchecked")
+  public <K,V> Cache<K,V> resolveCacheManager(String cacheName,
+                                              Method method)
+ {
+    Cache<K,V> cache = (Cache<K,V>) this.cacheManager.getCache(cacheName);
+    
+    if (cache != null)
+      return cache;
+    else {
+      CacheBuilder<K,V> cb = cacheManager.createCacheBuilder(cacheName);
+      
+      return cb.build();
+    }
+ }
 }

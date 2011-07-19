@@ -44,6 +44,7 @@ public abstract class AbstractCacheListener<K> implements CacheEntryListener {
   {
   }
 
+  /*
   @Override
   public void onLoad(Object key)
   {
@@ -69,4 +70,5 @@ public abstract class AbstractCacheListener<K> implements CacheEntryListener {
   public void onRemove(Object key)
   {
   }
+  */
 }

@@ -67,9 +67,6 @@ public class CacheGenerator<X> extends AbstractAspectGenerator<X> {
     
     _cacheName = _cache.cacheName();
     
-    if ("".equals(_cacheName))
-      _cacheName = _cache.value();
-    
     if ("".equals(_cacheName)) {
       Method javaMethod = method.getJavaMember();
 
