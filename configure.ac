@@ -837,7 +837,9 @@ if test -z "${LD_SHLIB}"; then
     x86_64)
            if test -z "$b64_jni"; then
   	     CFLAGS_JNI="$CFLAGS_JNI -m32"
-  	     LDFLAGS_SHLIB="$LDFLAGS_SHLIB -melf_i386"
+#  	     LDFLAGS_SHLIB="$LDFLAGS_SHLIB -melf_i386"
+  	     LDFLAGS_SHLIB="$LDFLAGS_SHLIB -m32"
+#             target_cpu="i386"
    	   fi
 	;;
   esac	

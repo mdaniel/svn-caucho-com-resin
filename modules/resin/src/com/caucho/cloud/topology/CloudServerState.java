@@ -55,6 +55,26 @@ public enum CloudServerState {
     }
   },
   
+  DISABLED_SOFT {
+    @Override
+    public CloudServerState onHeartbeatStart()
+    {
+      return DISABLED_SOFT;
+    }
+    
+    @Override
+    public CloudServerState onHeartbeatStop()
+    {
+      return DISABLED_SOFT;
+    }
+
+    @Override
+    public boolean isDisableSoft()
+    {
+      return true;
+    }
+  },
+  
   HEARTBEAT_FAILED {
     
   },
@@ -71,5 +91,10 @@ public enum CloudServerState {
   public CloudServerState onHeartbeatStop()
   {
     return CLOSED;
+  }
+
+  public boolean isDisableSoft()
+  {
+    return false;
   }
 }

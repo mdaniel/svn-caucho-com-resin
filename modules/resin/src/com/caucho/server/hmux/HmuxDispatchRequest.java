@@ -415,15 +415,11 @@ public class HmuxDispatchRequest {
       if (server != null) {
         String srunHost = server.getAddress() + ":" + server.getPort();
 
-        /*
+        boolean isSSL = false; // server.isSSL();
+        
         if (server.isBackup())
           writeString(os, HMUX_SRUN_BACKUP, srunHost);
-        else
-        */
-
-        boolean isSSL = false; // server.isSSL();
-
-        if (isSSL)
+        else if (isSSL)
           writeString(os, HMUX_SRUN_SSL, srunHost);
         else
           writeString(os, HMUX_SRUN, srunHost);

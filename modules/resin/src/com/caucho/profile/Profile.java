@@ -39,6 +39,10 @@ public class Profile
   private static final L10N L = new L10N(Profile.class);
   private static final Logger log
     = Logger.getLogger(Profile.class.getName());
+  
+  protected Profile()
+  {
+  }
 
   public static Profile createProfile()
   {
@@ -55,7 +59,7 @@ public class Profile
       log.log(Level.FINEST, e.toString(), e);
 
       throw new ConfigException(L.l("Profile requires Resin Professional"));
-    } catch (Exception e) {
+    } catch (Throwable e) {
       throw ConfigException.create(e);
     }
   }

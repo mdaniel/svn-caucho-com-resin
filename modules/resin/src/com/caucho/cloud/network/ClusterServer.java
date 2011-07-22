@@ -86,6 +86,7 @@ public final class ClusterServer {
   private long _loadBalanceConnectTimeout = 5000L;
 
   private int _loadBalanceWeight = 100;
+  private boolean _isBackup;
   
   private long _clusterIdleTime = 3 * 60000L;
   
@@ -254,8 +255,15 @@ public final class ClusterServer {
    */
   public void setBackup(boolean isBackup)
   {
+    _isBackup = isBackup;
+
     if (isBackup)
       setLoadBalanceWeight(1);
+  }
+  
+  public boolean isBackup()
+  {
+    return _isBackup;
   }
 
   /**
@@ -559,7 +567,16 @@ public final class ClusterServer {
    */
   public final ClientSocketFactory getLoadBalanceSocketPool()
   {
-    return _loadBalanceSocketPool;
+    ClientSocketFactory factory = _loadBalanceSocketPool;
+    
+    if (_cloudServer.getState().isDisableSoft()) {
+      factory.enableSessionOnly();
+    }
+    else {
+      factory.enable();
+    }
+    
+    return factory;
   }
   
   /**

@@ -491,6 +491,9 @@ class WatchdogArgs
       else if ("disable".equals(arg)) {
         _startMode = StartMode.DISABLE;
       }
+      else if ("disable-soft".equals(arg)) {
+        _startMode = StartMode.DISABLE_SOFT;
+      }
       else if ("enable".equals(arg)) {
         _startMode = StartMode.ENABLE;
       }
@@ -647,7 +650,8 @@ class WatchdogArgs
     System.err.println(L().l(""));
     System.err.println(L().l("where options include:"));
     System.err.println(L().l("   -conf <file>          : select a configuration file"));
-    System.err.println(L().l("   -dynamic-server <cluster:address:port> : initialize a dynamic server"));
+    System.err.println(L().l("   -data-directory <dir> : select a resin-data directory"));
+    System.err.println(L().l("   -join <cluster>       : join a cluster as a dynamic server"));
     System.err.println(L().l("   -log-directory <dir>  : select a logging directory"));
     System.err.println(L().l("   -resin-home <dir>     : select a resin home directory"));
     System.err.println(L().l("   -root-directory <dir> : select a root directory"));
@@ -948,6 +952,7 @@ class WatchdogArgs
     DEPLOY_START,
     DEPLOY_STOP,
     DISABLE,
+    DISABLE_SOFT,
     ENABLE,
     GUI,
     HEAP_DUMP,

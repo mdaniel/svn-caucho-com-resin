@@ -42,7 +42,7 @@ public class DisableCommand extends AbstractScalingCommand
   public void doCommand(WatchdogArgs args, WatchdogClient client)
   {
     if (! isPro()) {
-      System.out.println("command `disable' is only available with Resin Pro");
+      System.out.println("command 'disable' is only available with Resin Pro");
 
       return;
     }
@@ -50,6 +50,9 @@ public class DisableCommand extends AbstractScalingCommand
     ResinScalingClient scalingClient = getScalingClient(args, client);
 
     String server = args.getDefaultArg();
+    
+    if (server == null)
+      server = args.getServerId();
 
     if (server == null)
       throw new ConfigException("server is not specified");
@@ -60,9 +63,9 @@ public class DisableCommand extends AbstractScalingCommand
 
     String message;
     if (state == null)
-      message = L.l("server `{0}' is not found", server);
+      message = L.l("server '{0}' is not found", server);
     else
-      message = L.l("server `{0}' state: {1}", server, state);
+      message = L.l("server '{0}' state: {1}", server, state);
 
     System.out.println(message);
   }

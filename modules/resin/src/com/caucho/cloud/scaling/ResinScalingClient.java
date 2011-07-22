@@ -36,6 +36,8 @@ public interface ResinScalingClient
   public CloudServerState enable(String serverId);
 
   public CloudServerState disable(String serverId);
+  
+  public CloudServerState disableSoft(String serverId);
 
   public void close();
 }

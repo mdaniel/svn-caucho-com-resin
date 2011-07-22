@@ -37,7 +37,7 @@ import java.io.IOException;
    * allocation once.
    */
 public class BufferedReaderAdapter extends BufferedReader {
-  private ReadStream rs;
+  private ReadStream _rs;
 
   public BufferedReaderAdapter(ReadStream rs)
   {
@@ -47,39 +47,45 @@ public class BufferedReaderAdapter extends BufferedReader {
 
   public void init(ReadStream rs)
   {
-    this.rs = rs;
+    this._rs = rs;
   }
 
+  @Override
   public int read() throws IOException
   {
-    return rs.readChar();
+    return _rs.readChar();
   }
 
+  @Override
   public int read(char []cbuf, int offset, int length) throws IOException
   {
-    return rs.read(cbuf, offset, length);
+    return _rs.read(cbuf, offset, length);
   }
 
+  @Override
   public String readLine() throws IOException
   {
-    return rs.readln();
+    return _rs.readln();
   }
 
+  @Override
   public long skip(long n) throws IOException
   {
     long count = 0;
 
-    for (; count < n && rs.readChar() >= 0; count++) {
+    for (; count < n && _rs.readChar() >= 0; count++) {
     }
 
     return count;
   }
 
+  @Override
   public boolean ready() throws IOException
   {
-    return rs.available() > 0;
+    return _rs.available() > 0;
   }
 
+  @Override
   public void close() throws IOException
   {
   }

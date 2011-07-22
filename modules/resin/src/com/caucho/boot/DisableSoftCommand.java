@@ -34,15 +34,15 @@ import com.caucho.cloud.topology.CloudServerState;
 import com.caucho.config.ConfigException;
 import com.caucho.util.L10N;
 
-public class EnableCommand extends AbstractScalingCommand
+public class DisableSoftCommand extends AbstractScalingCommand
 {
-  private static final L10N L = new L10N(EnableCommand.class);
+  private static final L10N L = new L10N(DisableSoftCommand.class);
 
   @Override
   public void doCommand(WatchdogArgs args, WatchdogClient client)
   {
     if (! isPro()) {
-      System.out.println("command 'enable' is only available with Resin Pro");
+      System.out.println("command 'disable-soft' is only available with Resin Pro");
 
       return;
     }
@@ -57,7 +57,7 @@ public class EnableCommand extends AbstractScalingCommand
     if (server == null)
       throw new ConfigException("server is not specified");
 
-    CloudServerState state = scalingClient.enable(server);
+    CloudServerState state = scalingClient.disableSoft(server);
 
     scalingClient.close();
 
@@ -73,10 +73,10 @@ public class EnableCommand extends AbstractScalingCommand
   @Override
   public void usage()
   {
-    System.err.println(L.l("usage: bin/resin.sh [-conf <file>] -server <triad-server> enable -address <address> -port <port> -user <user> -password <password> <server>"));
+    System.err.println(L.l("usage: bin/resin.sh [-conf <file>] -server <triad-server> disable -address <address> -port <port> -user <user> -password <password> <server>"));
     System.err.println(L.l(""));
     System.err.println(L.l("description:"));
-    System.err.println(L.l("   enables specified in <server> argument server" ));
+    System.err.println(L.l("   disables specified in <server> argument server" ));
     System.err.println(L.l(""));
     System.err.println(L.l("options:"));
     System.err.println(L.l("   -server <triad-server> : one of the servers in the triad"));

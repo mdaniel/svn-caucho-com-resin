@@ -468,6 +468,7 @@ class ResinArgs
     System.err.println(L.l(""));
     System.err.println(L.l("where options include:"));
     System.err.println(L.l("   -conf <file>          : select a configuration file"));
+    System.err.println(L.l("   -data-directory <dir> : select a resin-data directory"));
     System.err.println(L.l("   -log-directory <dir>  : select a logging directory"));
     System.err.println(L.l("   -resin-home <dir>     : select a resin home directory"));
     System.err.println(L.l("   -root-directory <dir> : select a root directory"));
