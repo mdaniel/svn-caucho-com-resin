@@ -70,6 +70,14 @@ public class LoadBalanceBuilder
   }
   
   /**
+   * The request-sticky generator
+   */
+  public void setStickyRequestHashGenerator(StickyRequestHashGenerator gen)
+  {
+    
+  }
+  
+  /**
    * The statistics meter category.
    */
   public void setMeterCategory(String category)

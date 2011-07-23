@@ -225,7 +225,7 @@ public class FastCGIServlet extends GenericServlet {
 
     String sessionId = null;
 
-    ClientSocket stream = _loadBalancer.openSticky(sessionId, null);
+    ClientSocket stream = _loadBalancer.openSticky(sessionId, request, null);
     boolean isValid = false;
 
     if (stream == null) {

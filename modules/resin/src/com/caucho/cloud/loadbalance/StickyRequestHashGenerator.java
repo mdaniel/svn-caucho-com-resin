@@ -29,35 +29,9 @@
 
 package com.caucho.cloud.loadbalance;
 
-import com.caucho.network.balance.ClientSocket;
-import com.caucho.network.balance.ClientSocketFactory;
-
 /**
- * Manages a load balancer.
+ * Returns a hash from the request info.
  */
-abstract public class LoadBalanceManager {
-  /**
-   * Opens the next available server.
-   */
-  public ClientSocket open()
-  {
-    return openSticky(null, null, null);
-  }
-  
-  /**
-   * Opens the next available server, using a sticky session if available.
-   */
-  abstract public ClientSocket openSticky(String sessionId,
-                                          Object requestInfo,
-                                          ClientSocketFactory oldClient);
-
-  public void close()
-  {
-  }
-  
-  @Override
-  public String toString()
-  {
-    return getClass().getSimpleName() + "[]";
-  }
+public interface StickyRequestHashGenerator {
+  public String getHash(Object requestInfo);
 }

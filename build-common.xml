@@ -775,6 +775,7 @@
       <fileset dir="${dist.build}">
         <include name="configure"/>
         <include name="bin/resin.sh"/>
+        <include name="bin/resinctl.in"/>
         <include name="bin/start.bat"/>
         <include name="bin/stop.bat"/>
         <include name="automake/missing"/>
@@ -1178,10 +1179,6 @@
 	
 	<include name="modules/c/src/Makefile.in"/>
 	
-	<include name="modules/c/src/apache1/*.c"/>
-	<include name="modules/c/src/apache1/*.h"/>
-	<include name="modules/c/src/apache1/Makefile.in"/>
-	
 	<include name="modules/c/src/apache2/*.c"/>
 	<include name="modules/c/src/apache2/*.h"/>
 	<include name="modules/c/src/apache2/Makefile.in"/>
@@ -1317,11 +1314,26 @@
       
       <fileset dir="${resindir}">
         <include name="bin/resin.sh"/>
+        <include name="bin/resinctl.in"/>
         <include name="bin/start.bat"/>
         <include name="bin/stop.bat"/>
       </fileset>
       
       <fileset dir="${dist.build}/libexec">
+        <include name="**"/>
+        <exclude name="aclocal.m4"/>
+        <exclude name="automake"/>
+        <exclude name="automake/**"/>
+        <exclude name="*config*"/>
+        <exclude name="init.d"/>
+        <exclude name="init.d/**"/>
+        <exclude name="libtool"/>
+        <exclude name="Makefile*"/>
+        <exclude name="modules"/>
+        <exclude name="modules/**"/>
+      </fileset>
+      
+      <fileset dir="${dist.build}/libexec64">
         <include name="**"/>
         <exclude name="aclocal.m4"/>
         <exclude name="automake"/>
@@ -1344,6 +1356,7 @@
       <fileset dir="dist-debian/usr/share/${shortproduct}-${version}">
         <include name="configure"/>
         <include name="bin/resin.sh"/>
+        <include name="bin/resinctl.in"/>
       </fileset>
     </chmod>
 

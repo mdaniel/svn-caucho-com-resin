@@ -347,7 +347,8 @@ public class JspCompiler implements EnvironmentBean {
       webAppEmbed.setRootDirectory(rootDirectory.getURL());
       
       _resin.addWebApp(webAppEmbed);
-      _resin.start();
+      // jsp/193h, #4397
+      // _resin.start();
       
       _webApp = webAppEmbed.getWebApp();
     }
@@ -709,11 +710,11 @@ public class JspCompiler implements EnvironmentBean {
           break;
       }
 
-      WebApp app = getWebApp();
-      if (app != null && ! hasConf) {
-        Path appDir = app.getRootDirectory();
+      WebApp webApp = getWebApp();
+      if (webApp != null && ! hasConf) {
+        Path appDir = webApp.getRootDirectory();
 
-        DynamicClassLoader dynLoader = app.getEnvironmentClassLoader();
+        DynamicClassLoader dynLoader = webApp.getEnvironmentClassLoader();
         dynLoader.addLoader(new CompilingLoader(dynLoader, appDir.lookup("WEB-INF/classes")));
         dynLoader.addLoader(new DirectoryLoader(dynLoader, appDir.lookup("WEB-INF/lib")));
 
@@ -721,7 +722,7 @@ public class JspCompiler implements EnvironmentBean {
 
         if (webXml.canRead()) {
           try {
-            new Config().configureBean(app, webXml);
+            new Config().configureBean(webApp, webXml);
           } catch (Exception e) {
             log.log(Level.WARNING, e.toString(), e);
           }
@@ -730,18 +731,18 @@ public class JspCompiler implements EnvironmentBean {
 
       Path appDir = null;
 
-      if (app == null && getAppDir() != null) {
-        app = createWebApp(null);
+      if (webApp == null && getAppDir() != null) {
+        webApp = createWebApp(null);
 
-        if (app != null)
-          app.setRootDirectory(getAppDir());
-        setWebApp(app);
+        if (webApp != null)
+          webApp.setRootDirectory(getAppDir());
+        setWebApp(webApp);
       }
 
-      if (app != null) {
-        app.setCompileContext(true);
+      if (webApp != null) {
+        webApp.setCompileContext(true);
         
-        app.init();
+        webApp.init();
 
         appDir = getWebApp().getRootDirectory();
         setClassLoader(getWebApp().getClassLoader());

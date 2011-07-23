@@ -38,8 +38,6 @@ import javax.cache.CacheManager;
 import javax.enterprise.context.RequestScoped;
 import javax.enterprise.inject.Disposes;
 import javax.enterprise.inject.Produces;
-import javax.enterprise.inject.spi.InjectionPoint;
-import javax.enterprise.inject.spi.Bean;
 import javax.inject.Named;
 import javax.inject.Singleton;
 import javax.management.MBeanServer;
@@ -49,7 +47,6 @@ import javax.transaction.UserTransaction;
 
 import com.caucho.config.CauchoDeployment;
 import com.caucho.config.ContextDependent;
-import com.caucho.config.inject.InjectManager;
 import com.caucho.distcache.ClusterCacheManagerDelegate;
 import com.caucho.jmx.Jmx;
 import com.caucho.security.SecurityContext;

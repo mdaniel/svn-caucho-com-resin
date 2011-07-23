@@ -13,6 +13,12 @@
 
 <s2 title="4.0.21 snapshot">
 <ul>
+<li>jsf: jsf/resin integration when replacing jsf libraries in WEB-INF/lib (#4676, rep by cyttesen)</li>
+<li>ScheduledTask: add validation of ScheduledThreadPool (#4668, rep by Wesley Wu)</li>
+<li>servlet: add ThrottleFilter.getCurrent().addPoisonedIP(addr) (#4133, rep by Aaron Freeman)</li>
+<li>install: add resinctl.in which will be filled in with configured location from ./configure (#4579)</li>
+<li>jsp: JspCompiler should not start the web-app for compilation (#4397)</li>
+<li>load-balance: add StickyHost for sticky load balancing (#2969, rep Daniel Bjuhr)</li>
 <li>mod_caucho: restore 'backup' option for mod_caucho (#4673, rep by Halvor Utby)</li>
 <li>resin-admin: profile needs better message when JNI not compiled (#4652)</li>
 <li>install: ./configure changes for --disable-64bit to compile 32bit on a 64bit system (#4675, rep by nits4resin)</li>

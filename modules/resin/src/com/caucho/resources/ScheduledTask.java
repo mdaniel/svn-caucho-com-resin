@@ -251,6 +251,7 @@ public class ScheduledTask
   /**
    * The runnable.
    */
+  @Override
   public void handleAlarm(Alarm alarm)
   {
     if (! _isActive)

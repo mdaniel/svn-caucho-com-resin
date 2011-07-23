@@ -29,6 +29,7 @@
 package com.caucho.filters;
 
 import com.caucho.config.types.Period;
+import com.caucho.loader.EnvironmentLocal;
 import com.caucho.util.IntMap;
 import com.caucho.util.L10N;
 
@@ -40,6 +41,7 @@ import javax.servlet.ServletRequest;
 import javax.servlet.ServletResponse;
 import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.Semaphore;
 import java.util.concurrent.TimeUnit;
 import java.util.logging.Logger;
@@ -51,8 +53,16 @@ public class ThrottleFilter implements Filter {
   private static final L10N L = new L10N(ThrottleFilter.class);
   private static final Logger log
     = Logger.getLogger(ThrottleFilter.class.getName());
+  
+  private static final EnvironmentLocal<ThrottleFilter> _localRef
+    = new  EnvironmentLocal<ThrottleFilter>();
 
   private IntMap _throttleCache = new IntMap();
+  
+  private ConcurrentHashMap<String,String> _poisonedIpMap
+    = new ConcurrentHashMap<String,String>();
+  
+  private boolean _isPoisonedIp;
 
   private int _maxConcurrentRequests = 2;
   
@@ -60,6 +70,16 @@ public class ThrottleFilter implements Filter {
   private long _timeout = 120 * 1000L;
   private long _requestDelay = 0;
   private Semaphore _requestSemaphore;
+  
+  public ThrottleFilter()
+  {
+    _localRef.set(this);
+  }
+  
+  public static ThrottleFilter getCurrent()
+  {
+    return _localRef.get();
+  }
 
   /**
    * Sets the maximum number of concurrent requests for a single IP.
@@ -83,7 +103,14 @@ public class ThrottleFilter implements Filter {
   {
     _requestDelay = period.getPeriod();
   }
+  
+  public void addPoisonedIp(String address)
+  {
+    _isPoisonedIp = true;
+    _poisonedIpMap.put(address, address);
+  }
 
+  @Override
   public void init(FilterConfig config)
     throws ServletException
   {
@@ -97,6 +124,17 @@ public class ThrottleFilter implements Filter {
     throws ServletException, IOException
   {
     String ip = request.getRemoteAddr();
+    
+    if (_isPoisonedIp && _poisonedIpMap.get(ip) != null) {
+      log.info(L.l("'{0}' is a poisoned address -- throttling.",
+                   ip));
+      
+      if (response instanceof HttpServletResponse)
+        ((HttpServletResponse) response).sendError(503);
+      
+      return;
+    }
+    
     boolean isOverflow;
 
     synchronized (this) {
@@ -122,24 +160,24 @@ public class ThrottleFilter implements Filter {
       return;
     }
 
-    if (_requestSemaphore != null) {
-      boolean isAcquire = false;
-      
-      try {
-        if (_requestSemaphore.tryAcquire(_timeout, TimeUnit.MILLISECONDS))
-          isAcquire = true;
-      } catch (InterruptedException e) {
-      }
-      
-      if (! isAcquire) {
-        if (response instanceof HttpServletResponse)
-          ((HttpServletResponse) response).sendError(503);
-      
-        return;
-      }
-    }
-    
     try {
+      if (_requestSemaphore != null) {
+        boolean isAcquire = false;
+
+        try {
+          if (_requestSemaphore.tryAcquire(_timeout, TimeUnit.MILLISECONDS))
+            isAcquire = true;
+        } catch (InterruptedException e) {
+        }
+
+        if (! isAcquire) {
+          if (response instanceof HttpServletResponse)
+            ((HttpServletResponse) response).sendError(503);
+
+          return;
+        }
+      }
+
       nextFilter.doFilter(request, response);
       
       if (_requestDelay > 0) {

@@ -1412,6 +1412,7 @@ modules/c/src/common/Makefile
 modules/c/src/apache2/Makefile
 modules/c/src/resin_os/Makefile
 init.d/resin
+bin/resinctl
 ], [])
 
 if test -n "${resin_pro_plugins}"; then

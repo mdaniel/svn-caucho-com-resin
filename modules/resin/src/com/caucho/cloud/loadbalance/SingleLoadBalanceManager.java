@@ -64,7 +64,9 @@ public class SingleLoadBalanceManager extends CustomLoadBalanceManager {
   /**
    * Opens the next available server.
    */
-  public ClientSocket openSticky(String sessionId, ClientSocketFactory oldSrun)
+  public ClientSocket openSticky(String sessionId,
+                                 Object requestInfo,
+                                 ClientSocketFactory oldSrun)
   {
     if (_serverPool == oldSrun)
       return null;

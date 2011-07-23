@@ -162,7 +162,7 @@ public class HttpProxyServlet extends GenericServlet {
     if (queryString != null)
       uri += '?' + queryString;
 
-    ClientSocket stream = _loadBalancer.openSticky(sessionId, null);
+    ClientSocket stream = _loadBalancer.openSticky(sessionId, request, null);
 
     try {
       long startRequestTime = Alarm.getCurrentTime();

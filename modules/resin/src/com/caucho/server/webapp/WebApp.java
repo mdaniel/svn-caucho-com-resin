@@ -2783,9 +2783,12 @@ public class WebApp extends ServletContextImpl
       
       Class<?> cl = Class.forName(handler, false, getClassLoader());
       
-      if (cl != null) {
+      if (cl != null && cl.getMethods() != null) {
         getEnvironmentClassLoader().putResourceAlias("META-INF/faces-config.xml",
                                                      "META-INF/faces-config.xml.in");
+        
+        getEnvironmentClassLoader().putResourceAlias("META-INF/services/com.sun.faces.spi.injectionprovider",
+                                                     "META-INF/services/com.sun.faces.spi.injectionprovider.in");
       }
     } catch (Throwable e) {
       log.log(Level.FINE, e.toString(), e);

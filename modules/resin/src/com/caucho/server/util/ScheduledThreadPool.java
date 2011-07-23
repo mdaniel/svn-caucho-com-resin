@@ -83,6 +83,9 @@ public class ScheduledThreadPool implements ScheduledExecutorService,
   {
     _loader = Thread.currentThread().getContextClassLoader();
     _threadPool = ThreadPool.getThreadPool();
+    
+    if (_threadPool == null)
+      throw new NullPointerException();
 
     Environment.addEnvironmentListener(this);
   }
@@ -130,6 +133,7 @@ public class ScheduledThreadPool implements ScheduledExecutorService,
   /**
    * Blocks until the tasks complete.
    */
+  @Override
   public boolean awaitTermination(long timeout, TimeUnit unit)
   {
     throw new UnsupportedOperationException();
@@ -138,6 +142,7 @@ public class ScheduledThreadPool implements ScheduledExecutorService,
   /**
    * Invokes a set of tasks.
    */
+  @Override
   @SuppressWarnings("unchecked")
   public List invokeAll(Collection tasks)
   {
@@ -147,6 +152,7 @@ public class ScheduledThreadPool implements ScheduledExecutorService,
   /**
    * Invokes a set of tasks.
    */
+  @Override
   @SuppressWarnings("unchecked")
   public List invokeAll(Collection tasks, long timeout, TimeUnit unit)
   {
@@ -157,6 +163,7 @@ public class ScheduledThreadPool implements ScheduledExecutorService,
   /**
    * Invokes a set of tasks.
    */
+  @Override
   @SuppressWarnings("unchecked")
   public Object invokeAny(Collection tasks)
   {
@@ -177,6 +184,7 @@ public class ScheduledThreadPool implements ScheduledExecutorService,
   /**
    * Return true if the executor is shut down.
    */
+  @Override
   public boolean isShutdown()
   {
     return _isShutdown;
@@ -185,6 +193,7 @@ public class ScheduledThreadPool implements ScheduledExecutorService,
   /**
    * Return true if the executor has completed shutting down.
    */
+  @Override
   public boolean isTerminated()
   {
     return _isTerminated;
@@ -193,6 +202,7 @@ public class ScheduledThreadPool implements ScheduledExecutorService,
   /**
    * Starts the shutdown.
    */
+  @Override
   public void shutdown()
   {
     throw new UnsupportedOperationException();
@@ -201,6 +211,7 @@ public class ScheduledThreadPool implements ScheduledExecutorService,
   /**
    * Starts the shutdown.
    */
+  @Override
   public List<Runnable> shutdownNow()
   {
     throw new UnsupportedOperationException();
@@ -209,6 +220,7 @@ public class ScheduledThreadPool implements ScheduledExecutorService,
   /**
    * Submits a task for execution.
    */
+  @Override
   public <T> Future<T> submit(Callable<T> task)
   {
     if (_isShutdown)
@@ -228,6 +240,7 @@ public class ScheduledThreadPool implements ScheduledExecutorService,
   /**
    * Submits a task for execution.
    */
+  @Override
   @SuppressWarnings("unchecked")
   public Future<?> submit(Runnable command)
   {
@@ -248,6 +261,7 @@ public class ScheduledThreadPool implements ScheduledExecutorService,
   /**
    * Submits a task for execution.
    */
+  @Override
   public <T> Future<T> submit(Runnable task, T result)
   {
     if (_isShutdown)
@@ -271,6 +285,7 @@ public class ScheduledThreadPool implements ScheduledExecutorService,
   /**
    * Schedules a future task.
    */
+  @Override
   @SuppressWarnings("unchecked")
   public <V> ScheduledFuture<V> schedule(Callable<V> callable,
                                          long delay,
@@ -296,6 +311,7 @@ public class ScheduledThreadPool implements ScheduledExecutorService,
   /**
    * Schedules a future task.
    */
+  @Override
   @SuppressWarnings("unchecked")
   public ScheduledFuture<?> schedule(Runnable command,
                                      long delay,
@@ -320,6 +336,7 @@ public class ScheduledThreadPool implements ScheduledExecutorService,
   /**
    * Schedules a future task.
    */
+  @Override
   @SuppressWarnings("unchecked")
   public ScheduledFuture<?> scheduleAtFixedRate(Runnable command,
                                                 long initialDelay,
@@ -346,6 +363,7 @@ public class ScheduledThreadPool implements ScheduledExecutorService,
   /**
    * Schedules with fixed delay
    */
+  @Override
   @SuppressWarnings("unchecked")
   public ScheduledFuture<?> scheduleWithFixedDelay(Runnable command,
                                                    long initialDelay,
@@ -445,6 +463,7 @@ public class ScheduledThreadPool implements ScheduledExecutorService,
   /**
    * Called when the environment bind phase
    */
+  @Override
   public void environmentBind(EnvironmentClassLoader loader)
   {
   }
@@ -452,6 +471,7 @@ public class ScheduledThreadPool implements ScheduledExecutorService,
   /**
    * Called when the environment starts.
    */
+  @Override
   public void environmentStart(EnvironmentClassLoader loader)
   {
   }
@@ -459,6 +479,7 @@ public class ScheduledThreadPool implements ScheduledExecutorService,
   /**
    * Called when the environment stops.
    */
+  @Override
   public void environmentStop(EnvironmentClassLoader loader)
   {
     stop();
@@ -498,6 +519,9 @@ public class ScheduledThreadPool implements ScheduledExecutorService,
 
     TaskFuture(ClassLoader loader, Callable<T> callable)
     {
+      if (callable == null)
+        throw new NullPointerException();
+      
       _loader = loader;
       _callable = callable;
       _runnable = null;
@@ -505,22 +529,28 @@ public class ScheduledThreadPool implements ScheduledExecutorService,
 
     TaskFuture(ClassLoader loader, Runnable runnable, T result)
     {
+      if (runnable == null)
+        throw new NullPointerException();
+      
       _loader = loader;
       _callable = null;
       _runnable = runnable;
       _value = result;
     }
 
+    @Override
     public boolean isCancelled()
     {
       return _isCancelled;
     }
 
+    @Override
     public boolean isDone()
     {
       return _isDone;
     }
 
+    @Override
     public boolean cancel(boolean mayInterrupt)
     {
       synchronized (this) {
@@ -542,6 +572,7 @@ public class ScheduledThreadPool implements ScheduledExecutorService,
       return true;
     }
 
+    @Override
     public T get()
       throws InterruptedException, ExecutionException
     {
@@ -551,7 +582,8 @@ public class ScheduledThreadPool implements ScheduledExecutorService,
         throw new IllegalStateException(e);
       }
     }
-
+    
+    @Override
     public T get(long timeout, TimeUnit unit)
       throws InterruptedException, ExecutionException, TimeoutException
     {
@@ -706,16 +738,19 @@ public class ScheduledThreadPool implements ScheduledExecutorService,
         _alarm.queueAt(_initialExpires);
     }
 
+    @Override
     public boolean isCancelled()
     {
       return _isCancelled;
     }
 
+    @Override
     public boolean isDone()
     {
       return _isDone;
     }
 
+    @Override
     public long getDelay(TimeUnit unit)
     {
       long delay = _nextTime - Alarm.getCurrentTime();
@@ -723,6 +758,7 @@ public class ScheduledThreadPool implements ScheduledExecutorService,
       return TimeUnit.MILLISECONDS.convert(delay, unit);
     }
 
+    @Override
     public int compareTo(Delayed b)
     {
       long delta = (getDelay(TimeUnit.MILLISECONDS) - b
@@ -736,6 +772,7 @@ public class ScheduledThreadPool implements ScheduledExecutorService,
         return 0;
     }
 
+    @Override
     public boolean cancel(boolean mayInterrupt)
     {
       synchronized (this) {
@@ -765,6 +802,7 @@ public class ScheduledThreadPool implements ScheduledExecutorService,
       _alarm.dequeue();
     }
 
+    @Override
     public T get() throws InterruptedException, ExecutionException
     {
       try {
@@ -774,6 +812,7 @@ public class ScheduledThreadPool implements ScheduledExecutorService,
       }
     }
 
+    @Override
     public T get(long timeout, TimeUnit unit) throws InterruptedException,
         ExecutionException, TimeoutException
     {

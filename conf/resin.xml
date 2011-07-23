@@ -192,7 +192,7 @@
          - configures an explicit root web-app matching the
          - webapp's ROOT
         -->
-      <web-app id="/" root-directory="webapps/ROOT">
+      <web-app id="/" root-directory="webapps/ROOT"/>
       
       <!--
          - Administration application /resin-admin

@@ -47,7 +47,7 @@ public class BufferedReaderAdapter extends BufferedReader {
 
   public void init(ReadStream rs)
   {
-    this._rs = rs;
+    _rs = rs;
   }
 
   @Override
