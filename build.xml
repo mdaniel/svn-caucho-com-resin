@@ -512,9 +512,9 @@
     <!--
     <copy todir="${install}/win32/apache-1.3"
           file="${win32}/resin/modules/c/src/apache1/Apache136/mod_caucho.dll"/>
+	  -->
     <copy todir="${install}/win32/apache-2.0"
           file="${win32}/resin/modules/c/src/apache2/Release/mod_caucho.dll"/>
-	  -->
     <copy todir="${install}/win32/apache-2.2"
           file="${win32}/resin/modules/c/src/apache22/Release/mod_caucho.dll"/>
     <copy todir="${install}/win32"

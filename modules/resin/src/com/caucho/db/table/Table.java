@@ -462,7 +462,8 @@ public class Table extends Store {
             }
           } catch (Exception e) {
             log.log(Level.WARNING, e.toString(), e);
-        }
+	  }
+	}
       }
     } finally {
       xa.commit();
