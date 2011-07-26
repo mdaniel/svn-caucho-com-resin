@@ -132,7 +132,11 @@ AC_ARG_WITH(java-home,
                 [java home])], 
 [JAVA_HOME=${withval}])
 
-if test -z "$JAVA_HOME"; then
+if test -n "$JAVA_HOME"; then
+  a=b
+elif test -x "/usr/libexec/java_home"; then
+  JAVA_HOME=`/usr/libexec/java_home`
+else
   java=`which java 2>/dev/null`
   if test $? = "0"; then
     while test -h "$java"

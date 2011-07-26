@@ -203,6 +203,15 @@ public class SimpleLoader extends Loader {
   {
     super.setLoader(loader);
   }
+  
+  /**
+   * The simple-loader scans class directories.
+   */
+  @Override
+  public boolean isDirectoryLoader()
+  {
+    return true;
+  }
 
   /**
    * Initializes the loader.

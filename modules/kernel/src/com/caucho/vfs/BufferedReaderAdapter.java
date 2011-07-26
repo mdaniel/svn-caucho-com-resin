@@ -38,6 +38,7 @@ import java.io.IOException;
    */
 public class BufferedReaderAdapter extends BufferedReader {
   private ReadStream _rs;
+  private BufferedReader _bufferedReader;
 
   public BufferedReaderAdapter(ReadStream rs)
   {
@@ -48,29 +49,50 @@ public class BufferedReaderAdapter extends BufferedReader {
   public void init(ReadStream rs)
   {
     _rs = rs;
+    _bufferedReader = null;
   }
 
   @Override
   public int read() throws IOException
   {
-    return _rs.readChar();
+    BufferedReader reader = _bufferedReader;
+    
+    if (reader != null)
+      return reader.read();
+    else
+      return _rs.readChar();
   }
 
   @Override
   public int read(char []cbuf, int offset, int length) throws IOException
   {
-    return _rs.read(cbuf, offset, length);
+    BufferedReader reader = _bufferedReader;
+    
+    if (reader != null)
+      return reader.read(cbuf, offset, length);
+    else
+      return _rs.read(cbuf, offset, length);
   }
 
   @Override
   public String readLine() throws IOException
   {
-    return _rs.readln();
+    BufferedReader reader = _bufferedReader;
+    
+    if (reader != null)
+      return reader.readLine();
+    else
+      return _rs.readln();
   }
 
   @Override
   public long skip(long n) throws IOException
   {
+    BufferedReader reader = _bufferedReader;
+    
+    if (reader != null)
+      return reader.skip(n);
+    
     long count = 0;
 
     for (; count < n && _rs.readChar() >= 0; count++) {
@@ -82,11 +104,51 @@ public class BufferedReaderAdapter extends BufferedReader {
   @Override
   public boolean ready() throws IOException
   {
-    return _rs.available() > 0;
+    BufferedReader reader = _bufferedReader;
+    
+    if (reader != null)
+      return reader.ready();
+    else
+      return _rs.available() > 0;
+  }
+  
+  public boolean markSupported()
+  {
+    return true;
+  }
+  
+  @Override
+  public void mark(int readAhead)
+    throws IOException
+  {
+    BufferedReader reader = _bufferedReader;
+    
+    if (reader == null) {
+      reader = new BufferedReader(_rs.getReader());
+      _bufferedReader = reader;
+    }
+    
+    reader.mark(readAhead);
+  }
+  
+  @Override
+  public void reset()
+    throws IOException
+  {
+    BufferedReader reader = _bufferedReader;
+    
+    if (reader != null)
+      reader.reset();
   }
 
   @Override
   public void close() throws IOException
   {
+    BufferedReader reader = _bufferedReader;
+    _bufferedReader = null;
+    
+    if (reader != null)
+      reader.close();
+
   }
 }

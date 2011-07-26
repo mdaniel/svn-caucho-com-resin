@@ -13,6 +13,12 @@
 
 <s2 title="4.0.21 snapshot">
 <ul>
+<li>ejb/cdi: stateless decorators (#4630, rep by Chris)</li>
+<li>install: check for /usr/libexec/java_home in ./configure (#4572)</li>
+<li>servlet: request.getReader() mark/reset support (#3350, rep by karlgold)</li>
+<li>loader: added ClassLoader.getResource and ClassLoader.getResourceAsStream cache (#4082)</li>
+<li>logging: &lt;log-handler> needs to check for missing 'name' attribute (#4682)</li>
+<li>health: PdfReport needs to require the &lt;path> parameter (#4679, rep by Bill Au)</li>
 <li>jsf: jsf/resin integration when replacing jsf libraries in WEB-INF/lib (#4676, rep by cyttesen)</li>
 <li>ScheduledTask: add validation of ScheduledThreadPool (#4668, rep by Wesley Wu)</li>
 <li>servlet: add ThrottleFilter.getCurrent().addPoisonedIP(addr) (#4133, rep by Aaron Freeman)</li>

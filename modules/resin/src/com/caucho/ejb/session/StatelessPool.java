@@ -38,6 +38,7 @@ import java.util.logging.Logger;
 import javax.ejb.SessionBean;
 import javax.enterprise.inject.spi.Interceptor;
 
+import com.caucho.config.gen.CandiUtil;
 import com.caucho.config.inject.CreationalContextImpl;
 import com.caucho.config.inject.OwnerCreationalContext;
 import com.caucho.inject.Module;
@@ -138,7 +139,9 @@ public class StatelessPool<X,T> {
           }
         }
         
-        beanItem = new Item<X>(instance, bindings);
+        Object []delegates = _manager.createDelegates(env);
+
+        beanItem = new Item<X>(instance, bindings, delegates);
         
         Item<X> oldInstance = _lifecycleInstanceLocal.get();
         try {
@@ -246,11 +249,15 @@ public class StatelessPool<X,T> {
   public static class Item<X> {
     private X _value;
     private Object []_interceptorObjects;
+    private Object []_delegates;
     
-    Item(X value, Object []interceptorObjects)
+    Item(X value, 
+         Object []interceptorObjects,
+         Object []delegates)
     {
       _value = value;
       _interceptorObjects = interceptorObjects;
+      _delegates = delegates;
     }
     
     public X getValue()
@@ -261,6 +268,11 @@ public class StatelessPool<X,T> {
     public Object []_caucho_getInterceptorObjects()
     {
       return _interceptorObjects;
+    }
+    
+    public Object []__caucho_getDelegates()
+    {
+      return _delegates;
     }
   }
 }

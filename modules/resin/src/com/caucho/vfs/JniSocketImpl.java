@@ -363,23 +363,31 @@ public final class JniSocketImpl extends QSocket {
   public int read(byte []buffer, int offset, int length, long timeout)
     throws IOException
   {
+    if (length == 0)
+      throw new IllegalArgumentException();
+    
     synchronized (_readLock) {
       long expires;
+      
+      long now = Alarm.getCurrentTimeActual();
       
       // gap is because getCurrentTimeActual() isn't exact
       long gap = 20;
       
       if (timeout >= 0)
-        expires = timeout + Alarm.getCurrentTimeActual() - gap;
+        expires = timeout + now - gap;
       else
-        expires = _socketTimeout + Alarm.getCurrentTimeActual() - gap;
+        expires = _socketTimeout + now - gap;
 
       int result = 0;
 
       do {
         result = readNative(_fd, buffer, offset, length, timeout);
-      } while (result == JniStream.TIMEOUT_EXN
-               && Alarm.getCurrentTimeActual() < expires);
+        
+        now = Alarm.getCurrentTimeActual();
+        
+        timeout = expires - now;
+      } while (result == JniStream.TIMEOUT_EXN && timeout > 0);
       
       return result;
     }

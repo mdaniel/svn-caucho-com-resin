@@ -28,21 +28,32 @@
  */
 package com.caucho.ejb.session;
 
+import java.lang.annotation.Annotation;
+import java.lang.reflect.InvocationTargetException;
+import java.lang.reflect.Method;
 import java.lang.reflect.Type;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Set;
+import java.util.logging.Level;
 import java.util.logging.Logger;
 
 import javax.enterprise.context.spi.CreationalContext;
 import javax.enterprise.inject.spi.AnnotatedType;
 import javax.enterprise.inject.spi.Bean;
+import javax.enterprise.inject.spi.Decorator;
 import javax.enterprise.inject.spi.Interceptor;
 import javax.enterprise.inject.spi.SessionBeanType;
 
+import com.caucho.config.ConfigException;
 import com.caucho.config.gen.BeanGenerator;
+import com.caucho.config.gen.CandiEnhancedBean;
+import com.caucho.config.gen.CandiUtil;
 import com.caucho.config.inject.CreationalContextImpl;
+import com.caucho.config.inject.InjectManager;
 import com.caucho.config.inject.ManagedBeanImpl;
+import com.caucho.config.reflect.BaseType;
+import com.caucho.config.reflect.ReflectionAnnotatedType;
 import com.caucho.ejb.SessionPool;
 import com.caucho.ejb.cfg.EjbLazyGenerator;
 import com.caucho.ejb.gen.StatefulGenerator;
@@ -70,6 +81,9 @@ public class StatelessManager<X> extends AbstractSessionManager<X> {
   
   private ThreadLocal<StatelessPool<X,?>> _localSessionPool
     = new ThreadLocal<StatelessPool<X,?>>();
+  
+  private Object _decoratorClass;
+  private List<Decorator<?>> _decoratorBeans;
 
   /**
    * Creates a new stateless server.
@@ -290,5 +304,57 @@ public class StatelessManager<X> extends AbstractSessionManager<X> {
     }
     
     return interceptors;
+  }
+  
+  @Override
+  public void bind()
+  {
+    super.bind();
+    
+    Class<?> instanceClass = getProxyImplClass();
+
+    if (instanceClass != null) {
+      try {
+        Method method = instanceClass.getMethod("__caucho_decorator_init");
+
+        _decoratorClass = method.invoke(null);
+      
+        Annotation []qualifiers = new Annotation[getBean().getQualifiers().size()];
+        getBean().getQualifiers().toArray(qualifiers);
+        
+        InjectManager moduleBeanManager = InjectManager.create();
+        
+        Class<?> ejbClass = getAnnotatedType().getJavaClass();
+        BaseType type = BaseType.createGenericClass(ejbClass);
+        Set<Type> types = type.getTypeClosure(moduleBeanManager);
+
+        _decoratorBeans = moduleBeanManager.resolveDecorators(types);
+
+        method = instanceClass.getMethod("__caucho_init_decorators",
+                                         List.class);
+        
+      
+        method.invoke(null, _decoratorBeans);
+      } catch (InvocationTargetException e) {
+        throw ConfigException.create(e.getCause());
+      } catch (Exception e) {
+        log.log(Level.FINEST, e.toString(), e);
+      }
+    }
+  }
+
+  Object []createDelegates(CreationalContextImpl<?> env)
+  {
+    if (_decoratorBeans != null) {
+      // if (env != null)
+      //   env.setInjectionPoint(oldPoint);
+      
+      return CandiUtil.generateProxyDelegate(getInjectManager(),
+                                             _decoratorBeans,
+                                             _decoratorClass,
+                                             env);
+    }
+    else
+      return null;
   }
 }

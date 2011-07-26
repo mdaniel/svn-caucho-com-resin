@@ -69,6 +69,12 @@ abstract public class Loader {
     
     _loader = (DynamicClassLoader) loader;
   }
+  
+  public boolean isDirectoryLoader()
+  {
+    return false;
+  }
+  
   /**
    * Sets the owning class loader.
    */

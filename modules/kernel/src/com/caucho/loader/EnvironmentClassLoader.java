@@ -29,6 +29,8 @@
 
 package com.caucho.loader;
 
+import java.io.IOException;
+import java.io.InputStream;
 import java.lang.reflect.Constructor;
 import java.net.URL;
 import java.net.URLClassLoader;
@@ -45,8 +47,12 @@ import com.caucho.loader.enhancer.ScanListener;
 import com.caucho.loader.enhancer.ScanManager;
 import com.caucho.loader.module.ArtifactManager;
 import com.caucho.management.server.EnvironmentMXBean;
+import com.caucho.util.Alarm;
 import com.caucho.util.Crc64;
+import com.caucho.util.LruCache;
 import com.caucho.util.ResinThreadPoolExecutor;
+import com.caucho.vfs.Path;
+import com.caucho.vfs.Vfs;
 
 /**
  * Class loader which checks for changes in class files and automatically
@@ -90,6 +96,9 @@ public class EnvironmentClassLoader extends DynamicClassLoader
     = new ArrayList<EnvironmentListener>();
   
   private Map<String,String> _resourceAliasMap;
+  
+  private LruCache<String,ResourceEntry> _resourceCacheMap
+    = new LruCache<String,ResourceEntry>(256);
 
   private WeakStopListener _stopListener;
 
@@ -306,6 +315,48 @@ public class EnvironmentClassLoader extends DynamicClassLoader
       return null;
     else
       return _attributes.remove(name);
+  }
+  
+  //
+  // resources
+  //
+
+  /**
+   * Overrides getResource to implement caching.
+   */
+  @Override
+  public URL getResource(String name)
+  {
+    ResourceEntry entry = _resourceCacheMap.get(name);
+    
+    if (entry == null || entry.isModified()) {
+      URL resource = super.getResource(name);
+    
+      entry = new ResourceEntry(resource);
+    
+      _resourceCacheMap.put(name, entry);
+    }
+    
+    return entry.getResource();
+  }
+
+  /**
+   * Overrides getResource to implement caching.
+   */
+  @Override
+  public InputStream getResourceAsStream(String name)
+  {
+    ResourceEntry entry = _resourceCacheMap.get(name);
+    
+    if (entry == null || entry.isModified()) {
+      URL resource = super.getResource(name);
+    
+      entry = new ResourceEntry(resource);
+    
+      _resourceCacheMap.put(name, entry);
+    }
+    
+    return entry.getResourceAsStream();
   }
   
   //
@@ -1067,6 +1118,59 @@ public class EnvironmentClassLoader extends DynamicClassLoader
     public String toString()
     {
       return getClass().getSimpleName() + "[" + _url + "," + _pkg + "]";
+    }
+  }
+  
+  class ResourceEntry {
+    private URL _url;
+    private long _expireTime;
+    private Path _path;
+    private boolean _isPathChecked;
+    
+    ResourceEntry(URL url)
+    {
+      _url = url;
+      
+      if (isDirectoryLoader())
+        _expireTime = Alarm.getCurrentTime() + getDependencyCheckInterval();
+      else
+        _expireTime = Long.MAX_VALUE / 2;
+    }
+    
+    public boolean isModified()
+    {
+      return _expireTime < Alarm.getCurrentTime();
+    }
+    
+    public URL getResource()
+    {
+      return _url;
+    }
+    
+    public InputStream getResourceAsStream()
+    {
+      if (_url == null)
+        return null;
+
+      if (! _isPathChecked) {
+        String urlString = _url.toString();
+        
+        if (urlString.startsWith("file:") || urlString.startsWith("jar:"))
+          _path = Vfs.getPwd(EnvironmentClassLoader.this).lookup(urlString);
+
+        _isPathChecked = true;
+      }
+
+      try {
+        if (_path != null)
+          return _path.openRead();
+        else
+          return _url.openStream();
+      } catch (IOException e) {
+        log().log(Level.FINE, e.toString(), e);
+        
+        return null;
+      }
     }
   }
 }

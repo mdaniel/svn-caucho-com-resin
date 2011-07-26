@@ -1472,13 +1472,16 @@ public class InterceptorGenerator<X>
 
     assert(decoratorSetName != null);
 
+    out.println("Object []caucho_delegates = "
+                + getBeanFactory().getBeanInfo() + ".__caucho_getDelegates();");
+    
     out.println();
     out.print(_decoratorClass + " delegate = ");
     out.print("new " + _decoratorClass + "(");
-    out.print(_decoratorIndexVar + ".length, ");
+    out.print("caucho_delegates.length, ");
     out.print(_factory.getAspectBeanFactory().getBeanInstance() + ", ");
     
-    out.print(getBeanFactory().getBeanInfo() + ".__caucho_getDelegates()");
+    out.print("caucho_delegates");
     
     out.println(");");
 

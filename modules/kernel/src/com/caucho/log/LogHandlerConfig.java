@@ -266,7 +266,6 @@ public class LogHandlerConfig extends BeanConfig {
     throws ConfigException
   {
     if (_handler != null) {
-      
     }
     else if (_pathHandler != null) {
     }
@@ -299,6 +298,10 @@ public class LogHandlerConfig extends BeanConfig {
     
     if (_handler == null) {
       throw new ConfigException(L.l("<log-handler> requires a configured log handler"));
+    }
+    
+    if (getName() == null) {
+      throw new ConfigException(L.l("<log-handler> requires a 'name' attribute"));
     }
       
     Logger logger = Logger.getLogger(getName());

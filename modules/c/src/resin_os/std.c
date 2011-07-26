@@ -178,6 +178,17 @@ poll_write(int fd, int ms)
 #endif
 
 static int
+calculate_poll_result(connection_t *conn, int poll_result)
+{
+  if (poll_result == 0) {
+    return TIMEOUT_EXN;
+  }
+  else if (poll_result < 0 && errno != EINTR) {
+    return read_exception_status(conn, errno);
+  }
+}
+
+static int
 std_read(connection_t *conn, char *buf, int len, int timeout)
 {
   int fd;
@@ -194,35 +205,17 @@ std_read(connection_t *conn, char *buf, int len, int timeout)
     return -1;
   }
 
-  if (len == 0) {
-    int result;
-
-#ifdef MSG_DONTWAIT	
-	result = recv(fd, buf, 1, MSG_DONTWAIT);
-#else
-	result = recv(fd, buf, 0, 0);
-#endif
-
-    if (result > 0)
-      return 0;
-    else if (result == 0)
-      return -1;
-    else if (errno == EAGAIN)
-      return TIMEOUT_EXN;
-    else
-      return -1;
-  }
-
   if (timeout >= 0) {
     poll_result = poll_read(fd, timeout);
 
-    if (poll_result <= 0) {
-      return TIMEOUT_EXN;
-    }
+    if (poll_result <= 0)
+      return calculate_poll_result(conn, poll_result);
   }
-  else if (! conn->is_recv_timeout
-           && poll_read(fd, conn->socket_timeout) <= 0) {
-    return TIMEOUT_EXN;
+  else if (! conn->is_recv_timeout) {
+    poll_result = poll_read(fd, conn->socket_timeout);
+
+    if (poll_result <= 0)
+      return calculate_poll_result(conn, poll_result);
   }
 
   do {
@@ -238,12 +231,8 @@ std_read(connection_t *conn, char *buf, int len, int timeout)
       /* EAGAIN is returned by a timeout */
       poll_result = poll_read(fd, conn->socket_timeout);
 
-      if (poll_result == 0) {
-	return TIMEOUT_EXN;
-      }
-      else if (poll_result < 0 && errno != EINTR) {
-        return read_exception_status(conn, errno);
-      }
+      if (poll_result <= 0)
+        return calculate_poll_result(conn, poll_result);
     }
     else {
       return read_exception_status(conn, errno);

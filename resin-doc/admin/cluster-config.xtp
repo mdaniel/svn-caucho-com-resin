@@ -1332,7 +1332,7 @@ because of &lt;thread-idle-max>.</p>
 
 <p>&lt;thread-max> configures the maximum number of threads
 managed by Resin's thread pool.  Resin's thread pool is used
-for connection threads, timers, and Resin worker threads for JMS, JCA
+for connection threads, timers, and Resin worker threads for JMS
 and EJB.  Since Resin's thread pool only manages Resin threads,
 the actual number of threads in the JVM will be higher.</p>
 

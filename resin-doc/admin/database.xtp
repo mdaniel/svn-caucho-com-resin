@@ -358,26 +358,9 @@ your web applications.
 <s2 name="choosing-driver" title="Choosing a driver class for &lt;type&gt;">
 
 <p>Database vendors usually provide many different classes that are potential
-candidates for <var>type</var>.  The JDBC api has developed over time, and is now
-being replaced by the more general JCA architecture.  The driver you choose
+candidates for <var>type</var>.  The JDBC api has developed over time.  The driver you choose
 depends on the options the vendor offers, and whether or not you need
 distributed transactions.</p>
-
-<s3 title="JCA drivers">
-
-<p>JCA is replacing JDBC as the API for database drivers.  JCA is a much more
-flexible approach that defines an API that can be used for any kind of
-connection, not just a connection to a database.  If a database vendor provides
-a JCA interface, it is the best one to use.</p>
-
-<p>A JCA driver implements <code>ManagedConnectionFactory</code>.  When you
-specify such a class for <var>type</var>, Resin will notice that it is a JCA driver
-and take advantage of the added functionality that the JCA interface
-provides.</p>
-
-<p>The same JCA driver is used for both non-distributed and distributed
-transactions</p>
-</s3>
 
 <s3 title="JDBC 2.0 - ConnectionPoolDataSource">
 

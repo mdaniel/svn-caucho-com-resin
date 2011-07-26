@@ -282,6 +282,12 @@ public class CompilingLoader extends Loader implements Make {
   {
     _isBatch = isBatch;
   }
+  
+  @Override
+  public boolean isDirectoryLoader()
+  {
+    return true;
+  }
 
   /**
    * Initialize.
