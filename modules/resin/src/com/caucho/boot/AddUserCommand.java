@@ -40,16 +40,16 @@ public class AddUserCommand extends AbstractManagementCommand
   private static final L10N L = new L10N(AddUserCommand.class);
 
   @Override
-  public void doCommand(WatchdogArgs args,
-                        WatchdogClient client,
-                        ManagerClient managerClient)
+  public int doCommand(WatchdogArgs args,
+                       WatchdogClient client,
+                       ManagerClient managerClient)
   {
     final String user = args.getArg("-u");
 
     if (user == null) {
       usage();
 
-      return;
+      return 3;
     }
 
     String passwordString = args.getArg("-p");
@@ -81,6 +81,8 @@ public class AddUserCommand extends AbstractManagementCommand
     String message = managerClient.addUser(user, password, roles);
 
     System.out.println(message);
+
+    return 0;
   }
 
   @Override

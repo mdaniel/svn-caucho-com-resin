@@ -38,9 +38,9 @@ public class DeployListCommand extends AbstractRepositoryCommand
   private static final L10N L = new L10N(DeployListCommand.class);
   
   @Override
-  public void doCommand(WatchdogArgs args,
-                        WatchdogClient client,
-                        WebAppDeployClient deployClient)
+  public int doCommand(WatchdogArgs args,
+                       WatchdogClient client,
+                       WebAppDeployClient deployClient)
   {
     String pattern = args.getDefaultArg();
     if (pattern == null)
@@ -51,6 +51,8 @@ public class DeployListCommand extends AbstractRepositoryCommand
     for (TagResult tag : tags) {
       System.out.println(tag.getTag());
     }
+
+    return 0;
   }
 
   @Override

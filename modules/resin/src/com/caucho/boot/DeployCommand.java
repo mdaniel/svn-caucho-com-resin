@@ -40,9 +40,9 @@ public class DeployCommand extends AbstractRepositoryCommand {
   private static final L10N L = new L10N(DeployCommand.class);
   
   @Override
-  public void doCommand(WatchdogArgs args,
-                        WatchdogClient client,
-                        WebAppDeployClient deployClient)
+  public int doCommand(WatchdogArgs args,
+                       WatchdogClient client,
+                       WebAppDeployClient deployClient)
   {
     String war = args.getDefaultArg();
     
@@ -118,6 +118,8 @@ public class DeployCommand extends AbstractRepositoryCommand {
 
     System.out.println("Deployed " + commit.getId() + " from " + war + " to "
                        + deployClient.getUrl());
+
+    return 0;
   }
 
   @Override

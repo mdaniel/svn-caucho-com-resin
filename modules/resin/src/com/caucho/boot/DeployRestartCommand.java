@@ -37,13 +37,23 @@ public class DeployRestartCommand extends WebAppCommand
   private static final L10N L = new L10N(DeployRestartCommand.class);
 
   @Override
-  protected void doCommand(WebAppDeployClient deployClient,
-                           String tag)
+  protected int doCommand(WebAppDeployClient deployClient,
+                          String tag)
   {
-    if (deployClient.restart(tag))
+    int code = 0;
+
+    if (deployClient.restart(tag)) {
       System.out.println(L.l("'{0}' is restarted", tag));
-    else
+
+      code = 0;
+    }
+    else {
       System.out.println(L.l("'{0}' failed to restart", tag));
+
+      code = 3;
+    }
+
+    return code;
   }
 
   @Override

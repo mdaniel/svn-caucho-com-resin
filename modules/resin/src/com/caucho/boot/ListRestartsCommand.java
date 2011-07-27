@@ -38,9 +38,9 @@ public class ListRestartsCommand extends AbstractManagementCommand
   private static final L10N L = new L10N(ListRestartsCommand.class);
 
   @Override
-  public void doCommand(WatchdogArgs args,
-                        WatchdogClient client,
-                        ManagerClient managerClient)
+  public int doCommand(WatchdogArgs args,
+                       WatchdogClient client,
+                       ManagerClient managerClient)
   {
     String listPeriod = args.getArg("-period");
 
@@ -52,6 +52,8 @@ public class ListRestartsCommand extends AbstractManagementCommand
     String message = managerClient.listRestarts(period);
 
     System.out.println(message);
+
+    return 0;
   }
 
   @Override

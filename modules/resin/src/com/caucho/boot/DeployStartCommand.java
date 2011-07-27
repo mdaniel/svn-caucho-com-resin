@@ -37,13 +37,23 @@ public class DeployStartCommand extends WebAppCommand
   private static final L10N L = new L10N(DeployStartCommand.class);
 
   @Override
-  protected void doCommand(WebAppDeployClient deployClient,
-                           String tag)
+  protected int doCommand(WebAppDeployClient deployClient,
+                          String tag)
   {
-    if (deployClient.start(tag))
+    int code = 0;
+
+    if (deployClient.start(tag)) {
       System.out.println(L.l("'{0}' is started", tag));
-    else
+
+      code = 0;
+    }
+    else {
       System.out.println(L.l("'{0}' failed to start", tag));
+
+      code = 3;
+    }
+
+    return code;
   }
 
   @Override

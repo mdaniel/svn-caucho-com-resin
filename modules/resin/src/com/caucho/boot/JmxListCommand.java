@@ -44,9 +44,9 @@ public class JmxListCommand extends JmxCommand
   private static final Set<String> options = new HashSet<String>();
 
   @Override
-  public void doCommand(WatchdogArgs args,
-                        WatchdogClient client,
-                        ManagerClient managerClient)
+  public int doCommand(WatchdogArgs args,
+                       WatchdogClient client,
+                       ManagerClient managerClient)
   {
     String []trailingArgs = args.getTrailingArgs(options);
 
@@ -80,6 +80,8 @@ public class JmxListCommand extends JmxCommand
                                              isPlatform);
 
     System.out.print(jmxResult);
+
+    return 0;
   }
 
   @Override

@@ -37,13 +37,23 @@ public class DeployStopCommand extends WebAppCommand
   private static final L10N L = new L10N(DeployStopCommand.class);
 
   @Override
-  protected void doCommand(WebAppDeployClient deployClient,
-                           String tag)
+  protected int doCommand(WebAppDeployClient deployClient,
+                          String tag)
   {
-    if (deployClient.stop(tag))
+    int code = 0;
+
+    if (deployClient.stop(tag)) {
       System.out.println(L.l("'{0}' is stopped", tag));
-    else
+
+      code = 0;
+    }
+    else {
       System.out.println(L.l("'{0}' failed to stop", tag));
+
+      code = 3;
+    }
+
+    return code;
   }
 
   @Override

@@ -30,7 +30,7 @@
 package com.caucho.boot;
 
 public interface BootCommand {
-  public void doCommand(WatchdogArgs args, WatchdogClient client);
+  public int doCommand(WatchdogArgs args, WatchdogClient client);
 
   public void usage();
 }

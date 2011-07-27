@@ -38,9 +38,9 @@ public abstract class WebAppCommand extends AbstractRepositoryCommand
   private static final L10N L = new L10N(WebAppCommand.class);
 
   @Override
-  public final void doCommand(WatchdogArgs args,
-                        WatchdogClient client,
-                        WebAppDeployClient deployClient)
+  public final int doCommand(WatchdogArgs args,
+                             WatchdogClient client,
+                             WebAppDeployClient deployClient)
   {
     String tag = args.getArg("-tag");
 
@@ -65,9 +65,9 @@ public abstract class WebAppCommand extends AbstractRepositoryCommand
         tag = tag + "-" + version;
     }
 
-    doCommand(deployClient, tag);
+    return doCommand(deployClient, tag);
   }
 
-  protected abstract void doCommand(WebAppDeployClient deployClient,
-                                    String tag);
+  protected abstract int doCommand(WebAppDeployClient deployClient,
+                                   String tag);
 }

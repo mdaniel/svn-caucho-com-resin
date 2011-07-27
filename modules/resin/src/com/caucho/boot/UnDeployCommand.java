@@ -39,9 +39,9 @@ public class UnDeployCommand extends AbstractRepositoryCommand
   private static final L10N L = new L10N(UnDeployCommand.class);
   
   @Override
-  public void doCommand(WatchdogArgs args,
-                        WatchdogClient client,
-                        WebAppDeployClient deployClient)
+  public int doCommand(WatchdogArgs args,
+                       WatchdogClient client,
+                       WebAppDeployClient deployClient)
   {
     String name = args.getDefaultArg();
     
@@ -88,6 +88,8 @@ public class UnDeployCommand extends AbstractRepositoryCommand
 
     System.out.println("Undeployed " + name + " from "
                        + deployClient.getUrl());
+
+    return 0;
   }
 
   @Override

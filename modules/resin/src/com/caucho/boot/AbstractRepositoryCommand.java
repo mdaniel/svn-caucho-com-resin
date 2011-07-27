@@ -29,11 +29,10 @@
 
 package com.caucho.boot;
 
+import com.caucho.bam.NotAuthorizedException;
 import com.caucho.config.ConfigException;
 import com.caucho.env.repository.CommitBuilder;
 import com.caucho.network.listen.TcpSocketLinkListener;
-import com.caucho.server.admin.Management;
-import com.caucho.server.admin.ManagerClient;
 import com.caucho.server.admin.WebAppDeployClient;
 import com.caucho.util.L10N;
 
@@ -41,29 +40,34 @@ public abstract class AbstractRepositoryCommand extends AbstractBootCommand {
   private static final L10N L = new L10N(AbstractRepositoryCommand.class);
 
   @Override
-  public final void doCommand(WatchdogArgs args,
-                        WatchdogClient client)
+  public final int doCommand(WatchdogArgs args,
+                             WatchdogClient client)
   {
     WebAppDeployClient deployClient = null;
 
     try {
       deployClient = getDeployClient(args, client);
 
-      doCommand(args, client, deployClient);
+     return doCommand(args, client, deployClient);
     } catch (Exception e) {
       if (args.isVerbose())
         e.printStackTrace();
       else
         System.out.println(e.toString());
+
+      if (e instanceof NotAuthorizedException)
+        return 1;
+      else
+        return 2;
     } finally {
       if (deployClient != null)
         deployClient.close();
     }
   }
 
-  protected abstract void doCommand(WatchdogArgs args,
-                                    WatchdogClient client,
-                                    WebAppDeployClient deployClient);
+  protected abstract int doCommand(WatchdogArgs args,
+                                   WatchdogClient client,
+                                   WebAppDeployClient deployClient);
 
   protected final void fillInVersion(CommitBuilder commit, String version) {
     String []parts = version.split("\\.");

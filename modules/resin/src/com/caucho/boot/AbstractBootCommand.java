@@ -31,9 +31,10 @@ package com.caucho.boot;
 
 public class AbstractBootCommand implements BootCommand {
   @Override
-  public void doCommand(WatchdogArgs args,
-                        WatchdogClient client)
+  public int doCommand(WatchdogArgs args,
+                       WatchdogClient client)
   {
+    return 0;
   }
 
   @Override

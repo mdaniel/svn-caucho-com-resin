@@ -39,12 +39,12 @@ public class DisableCommand extends AbstractScalingCommand
   private static final L10N L = new L10N(DisableCommand.class);
 
   @Override
-  public void doCommand(WatchdogArgs args, WatchdogClient client)
+  public int doCommand(WatchdogArgs args, WatchdogClient client)
   {
     if (! isPro()) {
       System.out.println("command 'disable' is only available with Resin Pro");
 
-      return;
+      return 3;
     }
 
     ResinScalingClient scalingClient = getScalingClient(args, client);
@@ -68,6 +68,8 @@ public class DisableCommand extends AbstractScalingCommand
       message = L.l("server '{0}' state: {1}", server, state);
 
     System.out.println(message);
+
+    return 0;
   }
 
   @Override

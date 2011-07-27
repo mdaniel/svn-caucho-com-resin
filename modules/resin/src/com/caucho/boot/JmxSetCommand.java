@@ -41,9 +41,9 @@ public class JmxSetCommand extends JmxCommand
   private static final L10N L = new L10N(JmxSetCommand.class);
 
   @Override
-  public void doCommand(WatchdogArgs args,
-                        WatchdogClient client,
-                        ManagerClient managerClient)
+  public int doCommand(WatchdogArgs args,
+                       WatchdogClient client,
+                       ManagerClient managerClient)
   {
     String pattern = args.getArg("-pattern");
 
@@ -74,6 +74,8 @@ public class JmxSetCommand extends JmxCommand
     String result = managerClient.setJmx(pattern, attribute, value);
 
     System.out.println(result);
+
+    return 0;
   }
 
 

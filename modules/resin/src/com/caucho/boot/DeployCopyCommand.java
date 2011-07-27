@@ -38,9 +38,9 @@ public class DeployCopyCommand extends AbstractRepositoryCommand {
   private static final L10N L = new L10N(DeployCopyCommand.class);
   
   @Override
-  public void doCommand(WatchdogArgs args,
-                        WatchdogClient client,
-                        WebAppDeployClient deployClient)
+  public int doCommand(WatchdogArgs args,
+                       WatchdogClient client,
+                       WebAppDeployClient deployClient)
   {
     String sourceContext = args.getArg("-source");
     if (sourceContext == null)
@@ -103,6 +103,8 @@ public class DeployCopyCommand extends AbstractRepositoryCommand {
     
     System.out.println(L.l("copied {0} to {1}", 
                            source.getId(), target.getId()));
+
+    return 0;
   }
 
   @Override

@@ -29,7 +29,7 @@
 
 package com.caucho.boot;
 
-import com.caucho.config.ConfigException;
+import com.caucho.bam.NotAuthorizedException;
 import com.caucho.network.listen.TcpSocketLinkListener;
 import com.caucho.server.admin.ManagerClient;
 import com.caucho.util.L10N;
@@ -38,28 +38,33 @@ public abstract class AbstractManagementCommand extends AbstractBootCommand {
   private static final L10N L = new L10N(AbstractManagementCommand.class);
   
   @Override
-  public void doCommand(WatchdogArgs args,
-                        WatchdogClient client) {
+  public int doCommand(WatchdogArgs args,
+                       WatchdogClient client) {
     ManagerClient managerClient = null;
 
     try {
       managerClient = getManagerClient(args, client);
 
-      doCommand(args, client, managerClient);
+      return doCommand(args, client, managerClient);
     } catch (Exception e) {
       if (args.isVerbose())
         e.printStackTrace();
       else
         System.out.println(e.toString());
+
+      if (e instanceof NotAuthorizedException)
+        return 1;
+      else
+        return 2;
     } finally {
       if (managerClient != null)
         managerClient.close();
     }
   }
 
-  protected abstract void doCommand(WatchdogArgs args,
-                                    WatchdogClient client,
-                                    ManagerClient managerClient);
+  protected abstract int doCommand(WatchdogArgs args,
+                                   WatchdogClient client,
+                                   ManagerClient managerClient);
 
   protected ManagerClient getManagerClient(WatchdogArgs args,
                                            WatchdogClient client)

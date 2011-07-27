@@ -347,9 +347,9 @@ public class ResinBoot {
       
       return false;
     } else if (command != null) {
-      command.doCommand(_args, _client);
+      int code = command.doCommand(_args, _client);
 
-      return false;
+      System.exit(code);
     }
     
     throw new IllegalStateException(L().l("Unknown start mode"));

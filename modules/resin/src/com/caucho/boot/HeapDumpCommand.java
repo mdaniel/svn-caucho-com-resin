@@ -41,15 +41,17 @@ public class HeapDumpCommand extends AbstractManagementCommand
   private static final L10N L = new L10N(HeapDumpCommand.class);
 
   @Override
-  public void doCommand(WatchdogArgs args,
-                        WatchdogClient client,
-                        ManagerClient managerClient)
+  public int doCommand(WatchdogArgs args,
+                       WatchdogClient client,
+                       ManagerClient managerClient)
   {
     boolean raw = args.hasOption("-raw");
 
     String data = managerClient.doHeapDump(raw);
 
     System.out.println(data);
+
+    return 0;
   }
 
   @Override

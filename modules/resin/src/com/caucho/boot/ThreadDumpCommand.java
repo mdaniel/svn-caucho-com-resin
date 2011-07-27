@@ -43,9 +43,9 @@ public class ThreadDumpCommand extends AbstractManagementCommand
   private static final L10N L = new L10N(ThreadDumpCommand.class);
 
   @Override
-  public void doCommand(WatchdogArgs args,
-                        WatchdogClient client,
-                        ManagerClient managerClient)
+  public int doCommand(WatchdogArgs args,
+                       WatchdogClient client,
+                       ManagerClient managerClient)
   {
     String dump = managerClient.doThreadDump();
 
@@ -54,7 +54,7 @@ public class ThreadDumpCommand extends AbstractManagementCommand
     if (fileName == null) {
       System.out.println(dump);
 
-      return;
+      return 0;
     }
 
     Writer out = null;
@@ -68,8 +68,12 @@ public class ThreadDumpCommand extends AbstractManagementCommand
       System.out.println("Thread dump was written to `"
                          + file.getCanonicalPath()
                          + "'");
+
+      return 0;
     } catch (IOException e) {
       e.printStackTrace();
+
+      return 4;
     } finally {
       if (out != null)
         IoUtil.close(out);

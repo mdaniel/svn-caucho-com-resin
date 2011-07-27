@@ -44,9 +44,9 @@ public class JmxCallCommand extends JmxCommand
   private static final Set<String> options = new HashSet<String>();
 
   @Override
-  public void doCommand(WatchdogArgs args,
-                        WatchdogClient client,
-                        ManagerClient managerClient)
+  public int doCommand(WatchdogArgs args,
+                       WatchdogClient client,
+                       ManagerClient managerClient)
   {
     String []trailingArgs = args.getTrailingArgs(options);
 
@@ -81,6 +81,8 @@ public class JmxCallCommand extends JmxCommand
                                           trailingArgs);
 
     System.out.println(result);
+
+    return 0;
   }
 
   @Override

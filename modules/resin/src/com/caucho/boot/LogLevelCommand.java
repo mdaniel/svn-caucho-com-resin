@@ -55,9 +55,9 @@ public class LogLevelCommand extends AbstractManagementCommand
   }
 
   @Override
-  public void doCommand(WatchdogArgs args,
-                        WatchdogClient client,
-                        ManagerClient managerClient)
+  public int doCommand(WatchdogArgs args,
+                       WatchdogClient client,
+                       ManagerClient managerClient)
   {
     Level logLevel = null;
     
@@ -70,7 +70,8 @@ public class LogLevelCommand extends AbstractManagementCommand
     
     if (logLevel == null) {
       usage();
-      return;
+
+      return 3;
     }
 
     long period = 0;
@@ -90,6 +91,8 @@ public class LogLevelCommand extends AbstractManagementCommand
     String message = managerClient.setLogLevel(loggers, logLevel, period);
 
     System.out.println(message);
+
+    return 0;
   }
 
   @Override

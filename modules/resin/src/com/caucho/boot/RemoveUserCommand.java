@@ -29,7 +29,6 @@
 
 package com.caucho.boot;
 
-import com.caucho.bam.NotAuthorizedException;
 import com.caucho.server.admin.ManagerClient;
 import com.caucho.util.L10N;
 
@@ -38,12 +37,16 @@ public class RemoveUserCommand extends AbstractManagementCommand
   private static final L10N L = new L10N(RemoveUserCommand.class);
 
   @Override
-  public void doCommand(WatchdogArgs args, WatchdogClient client, ManagerClient managerClient)
+  public int doCommand(WatchdogArgs args,
+                       WatchdogClient client,
+                       ManagerClient managerClient)
   {
     String user = args.getDefaultArg();
     String message = managerClient.removeUser(user);
 
     System.out.println(message);
+
+    return 0;
   }
 
   @Override
