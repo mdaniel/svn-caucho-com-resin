@@ -1332,10 +1332,10 @@ select_host(cluster_t *cluster, time_t now)
 
   for (i = 0; i < size; i++) {
     int index = (i + round_robin) % size;
+	int cost;
     cluster_srun = &cluster->srun_list[index];
     srun = cluster_srun->srun;
     /* int tail; */
-    int cost;
 
     if (! srun)
       continue;
