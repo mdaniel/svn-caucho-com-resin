@@ -29,16 +29,14 @@
 
 package com.caucho.remote.websocket;
 
-import com.caucho.util.*;
-import com.caucho.vfs.*;
-
-import java.io.*;
+import java.io.IOException;
+import java.io.OutputStream;
 
 /**
  * WebSocketOutputStream writes a single WebSocket packet.
  *
  * <code><pre>
- * 0x84 0x8X 0x8X 0x0X binarydata
+ * 0x82 0xNN binarydata
  * </pre></code>
  */
 public class WebSocketOutputStream extends OutputStream 
@@ -51,18 +49,18 @@ public class WebSocketOutputStream extends OutputStream
   private MessageState _state = MessageState.IDLE;
   private boolean _isAutoFlush = true;
 
-  public WebSocketOutputStream(OutputStream os, byte []buffer)
+  public WebSocketOutputStream(OutputStream os, byte []workingBuffer)
     throws IOException
   {
     if (os == null)
       throw new NullPointerException();
     
-    if (buffer == null)
+    if (workingBuffer == null)
       throw new NullPointerException();
     
     _os = os;
 
-    _buffer = buffer;
+    _buffer = workingBuffer;
   }
   
   public void init()

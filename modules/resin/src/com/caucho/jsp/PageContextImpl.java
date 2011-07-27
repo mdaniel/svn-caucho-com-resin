@@ -1012,7 +1012,7 @@ public class PageContextImpl extends PageContext
         sb.append("%25");
         break;
       case '&':
-        sb.append("%3D");
+        sb.append("%26");
         break;
       default:
         sb.append(ch);

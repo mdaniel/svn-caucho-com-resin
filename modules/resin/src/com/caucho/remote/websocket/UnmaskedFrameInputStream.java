@@ -64,6 +64,9 @@ public class UnmaskedFrameInputStream extends FrameInputStream
   @Override
   public void init(InputStream is)
   {
+    if (is == null)
+      throw new NullPointerException();
+    
     _is = is;
   }
 

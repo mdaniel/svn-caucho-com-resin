@@ -38,6 +38,8 @@ package com.caucho.remote.websocket;
  */
 public interface WebSocketConstants {
   public static final int FLAG_FIN = 0x80;
+  public static final int MASK_OPCODE = 0x0f;
+  public static final int FLAG_MASK = 0x80;
   
   public static final int OP_CONT = 0x00;
   public static final int OP_TEXT = 0x01;
@@ -46,6 +48,4 @@ public interface WebSocketConstants {
   public static final int OP_CLOSE = 0x08;
   public static final int OP_PING = 0x09;
   public static final int OP_PONG = 0x0a;
-  
-  public static final int OP_EXT = 0x0E;
 }

@@ -52,6 +52,7 @@ public class JspParam extends JspNode {
   /**
    * Adds an attribute.
    */
+  @Override
   public void addAttribute(QName name, String value)
     throws JspParseException
   {
@@ -101,6 +102,7 @@ public class JspParam extends JspNode {
   /**
    * Returns true if the param has scripting elements.
    */
+  @Override
   public boolean hasScripting()
   {
     try {

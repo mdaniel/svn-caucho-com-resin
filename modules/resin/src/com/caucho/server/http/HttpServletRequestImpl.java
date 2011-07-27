@@ -1849,7 +1849,7 @@ public final class HttpServletRequestImpl extends AbstractCauchoRequest
 
     String version = getHeader("Sec-WebSocket-Version");
 
-    String requiredVersion = "7";
+    String requiredVersion = "8";
     if (! requiredVersion.equals(version)) {
       getResponse().sendError(HttpServletResponse.SC_BAD_REQUEST);
       

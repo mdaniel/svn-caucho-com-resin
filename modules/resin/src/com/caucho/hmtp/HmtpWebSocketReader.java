@@ -96,7 +96,5 @@ public class HmtpWebSocketReader {
    */
   public void close()
   {
-    // TODO Auto-generated method stub
-    
   }
 }

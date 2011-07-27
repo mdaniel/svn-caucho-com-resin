@@ -35,6 +35,7 @@ import java.util.Map;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
+import javax.resource.spi.LocalTransaction;
 import javax.transaction.HeuristicMixedException;
 import javax.transaction.HeuristicRollbackException;
 import javax.transaction.NotSupportedException;
@@ -94,7 +95,13 @@ public class TransactionImpl implements Transaction, AlarmListener {
    * The current resources in the transaction
    */
   private XAResource [] _resources;
+  
+  /**
+   * The first resource can use a local transaction.
+   */
+  private LocalTransaction _localTransaction;
 
+  
   /**
    * The xids for the resources.
    */

@@ -54,8 +54,6 @@ import com.caucho.util.L10N;
 public class WebSocketInputStream extends InputStream 
   implements WebSocketConstants
 {
-  private static final L10N L = new L10N(WebSocketInputStream.class);
-  
   private final FrameInputStream _is;
   private long _length;
   private boolean _isFinal;
@@ -111,5 +109,34 @@ public class WebSocketInputStream extends InputStream
     }
     else
       return -1;
+  }
+
+  @Override
+  public int read(byte []buffer, int offset, int length)
+    throws IOException
+  {
+    while (_length == 0 && ! _isFinal) {
+      if (! _is.readFrameHeader())
+        return -1;
+      
+      _length = _is.getLength();
+      _isFinal = _is.isFinal();
+    }
+
+    if (_length <= 0)
+      return -1;
+    
+    int sublen = (int) _length;
+    if (length < sublen)
+      sublen = length;
+    
+    sublen = _is.read(buffer, offset, length);
+    
+    if (sublen < 0)
+      return -1;
+    
+    _length -= sublen;
+
+    return sublen;
   }
 }

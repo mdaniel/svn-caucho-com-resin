@@ -11,11 +11,13 @@ import java.io.InputStream;
 import java.io.IOException;
 import java.util.*;
 
+@SuppressWarnings("serial")
 public class DeploySendQuery implements java.io.Serializable
 {
   private String _sha1;
   private StreamSource _source;
 
+  @SuppressWarnings("unused")
   private DeploySendQuery()
   {
   }

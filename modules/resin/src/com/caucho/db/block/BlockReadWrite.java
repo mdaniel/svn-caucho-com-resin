@@ -343,6 +343,10 @@ public class BlockReadWrite {
   {
     int retry = 8;
     
+    if (! _isEnableMmap) {
+      return _path.openRandomAccess();
+    }
+    
     while (retry-- >= 0) {
       RandomAccessStream mmapFile = _mmapFile.get();
       
