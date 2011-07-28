@@ -29,16 +29,7 @@
 
 package com.caucho.server.admin;
 
-import com.caucho.admin.action.AddUserAction;
-import com.caucho.admin.action.CallJmxAction;
-import com.caucho.admin.action.HeapDumpAction;
-import com.caucho.admin.action.ListJmxAction;
-import com.caucho.admin.action.ListUsersAction;
-import com.caucho.admin.action.ProfileAction;
-import com.caucho.admin.action.RemoveUserAction;
-import com.caucho.admin.action.SetJmxAction;
-import com.caucho.admin.action.SetLogLevelAction;
-import com.caucho.admin.action.ThreadDumpAction;
+import com.caucho.admin.action.*;
 import com.caucho.bam.Query;
 import com.caucho.bam.actor.SimpleActor;
 import com.caucho.bam.mailbox.MultiworkerMailbox;
@@ -220,7 +211,7 @@ public class ManagerActor extends SimpleActor
 
     return result;
   }
-
+  
   @Query
   public String listJmx(long id, String to, String from, JmxListQuery query)
   {
@@ -245,6 +236,26 @@ public class ManagerActor extends SimpleActor
 
     return result;  
   }
+  
+  @Query
+  public String doJmxDump(long id, String to, String from, JmxDumpQuery query)
+  {
+    String result = null;
+    
+    try {
+      result = new JmxDumpAction().execute();
+    } catch (ConfigException e) {
+      log.log(Level.WARNING, e.getMessage(), e);
+      result = e.getMessage();
+    } catch (Exception e) {
+      log.log(Level.WARNING, e.getMessage(), e);
+      result = e.toString();
+    }
+    
+    getBroker().queryResult(id, from, to, result);
+
+    return result;
+  }  
 
   @Query
   public String setJmx(long id, String to, String from, JmxSetQuery query)

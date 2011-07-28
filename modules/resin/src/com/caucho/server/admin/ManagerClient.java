@@ -196,6 +196,13 @@ public class ManagerClient
     return (String) query(query);
   }
 
+  public String doJmxDump()
+  {
+    JmxDumpQuery query = new JmxDumpQuery();
+
+    return (String) query(query);
+  }
+
   public String setLogLevel(String[] loggers, Level logLevel, long period)
   {
     LogLevelQuery query = new LogLevelQuery(loggers, logLevel, period);

@@ -94,8 +94,12 @@ public class ListJmxAction extends AbstractJmxAction implements AdminAction
 
             if (printValues) {
               resultBuilder.append('=');
-              Object value = server.getAttribute(mbean, attribute.getName());
-              resultBuilder.append('=').append(value);
+              try {
+                Object value = server.getAttribute(mbean, attribute.getName());
+                resultBuilder.append('=').append(value);
+              } catch (Exception e) {
+                resultBuilder.append('=').append(e.getMessage());
+              }
             }
             resultBuilder.append('\n');
           }

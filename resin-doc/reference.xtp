@@ -3155,9 +3155,10 @@ individually.</p>
 <javadoc class="com.caucho.health.action.DumpHeap"/>
 
 <description>
-<p>Create a memory heap dump.  The heap dump will be logged to the resin 
-log file using <code>com.caucho.health.action.DumpHeap</code> as the class, at 
-the <var>info</var> level.</p>
+<p>Create a memory heap dump.  The heap dump will be logged to the internal log 
+database and to the resin log file using 
+<code>com.caucho.health.action.DumpHeap</code> as the class at 
+<var>info</var> level.</p>
 <p>Note: Creating a heap dump can also be performed on-demand using the 
 <var>heap-dump</var> command line, and from /resin-admin.</p>
 </description>
@@ -3187,15 +3188,54 @@ the <var>info</var> level.</p>
 
 </defun>
 
+<defun title="&lt;health:DumpJmx>" name="health:DumpJmx">
+
+<parents>cluster</parents>
+<javadoc class="com.caucho.health.action.DumpJmx"/>
+
+<description>
+<p>Health action to create a dump of all JMX attributes and values.  The JMX 
+dump will be logged to the internal log database and to the resin log file 
+using <code>com.caucho.health.action.DumpJmx</code> as the class at 
+<var>info</var> level.</p>
+<p>Note: Creating a JMX dump can also be performed on-demand using the 
+<var>jmx-dump</var> command line.</p>
+</description>
+
+<attributes>
+  <tr>
+    <th>Attribute</th>
+    <th>Description</th>
+    <th>Type</th>
+    <th>Default</th>
+  </tr>
+  <tr>
+    <td colspan="4">None</td>
+  </tr>
+</attributes>
+
+<example title="Example: &lt;health:DumpJmx> in health.xml">
+&lt;cluster xmlns="http://caucho.com/ns/resin"
+         xmlns:resin="urn:java:com.caucho.resin"
+         xmlns:health="urn:java:com.caucho.health"
+         xmlns:ee="urn:java:ee">
+         
+  &lt;health:DumpJmx/>
+
+&lt;/cluster>
+</example>
+
+</defun>
+
 <defun title="&lt;health:DumpThreads>" name="health:DumpThreads">
 
 <parents>cluster</parents>
 <javadoc class="com.caucho.health.action.DumpThreads"/>
 
 <description>
-<p>Create a thread dump.  The thread dump will be logged to the resin 
-log file using <code>com.caucho.server.admin.AdminThreadDump</code> as the 
-class, at the <var>info</var> level.</p>
+<p>Create a thread dump.  The thread dump will be logged to the internal log 
+database and log file using <code>com.caucho.health.action.DumpThreads</code> 
+as the class at <var>info</var> level.</p>
 <p>Note: Creating a thread dump can also be performed on-demand using the 
 <var>thread-dump</var> command line.</p>
 </description>
@@ -3212,6 +3252,18 @@ class, at the <var>info</var> level.</p>
     <td>Output only currently active threads (<var>RUNNABLE</var> state)</td>
     <td>boolean</td>
     <td>false</td>
+  </tr>
+  <tr>
+    <td>raw</td>
+    <td>Creates an HPROF format dump instead of human readable type.</td>
+    <td>boolean</td>
+    <td>false</td>
+  </tr>
+  <tr>
+    <td>hprofDir</td>
+    <td>Directory to write HPROF files, if raw = true</td>
+    <td>String</td>
+    <td>Current java temp directory</td>
   </tr>
 </attributes>
 
@@ -5038,8 +5090,8 @@ System properties can be used to configure a different SMTP server.</p>
 <javadoc class="com.caucho.health.action.StartProfiler"/>
 
 <description>
-<p>Starts a profiler session.  Results are logged to the server log file 
-at the INFO level.</p>
+<p>Starts a profiler session.  Results are logged to the internal database 
+and the Resin log file at INFO level.</p>
 <p>Note: Starting the profiler can also be performed on-demand using the 
 <var>profile</var> command line, and from /resin-admin.</p>
 </description>

@@ -509,6 +509,9 @@ class WatchdogArgs
       else if ("jmx-list".equals(arg)) {
         _startMode = StartMode.JMX_LIST;
       }
+      else if ("jmx-dump".equals(arg)) {
+        _startMode = StartMode.JMX_DUMP;
+      }
       else if ("jmx-set".equals(arg)) {
         _startMode = StartMode.JMX_SET;
       }
@@ -616,6 +619,7 @@ class WatchdogArgs
                                + "\n  list-restarts - lists server restart timestamps"
                                + "\n  log-level - sets a log level"
                                + "\n  jmx-list - lists MBeans, attributes, operations"
+                               + "\n  jmx-dump - dumps all MBean attributes and values"
                                + "\n  jmx-set - sets value on MBean's attribute"
                                + "\n  jmx-call - invokes a method on MBean"
                                + "\n  user-add - adds an admin user"
@@ -644,7 +648,7 @@ class WatchdogArgs
   {
     System.err.println(L().l("usage: bin/resin.sh [-options] [console | status | start | gui | stop | restart | kill | shutdown | version]"));
     System.err.println(L().l("       bin/resin.sh [-options] [deploy | undeploy | deploy-copy | deploy-list | deploy-start | deploy-stop | deploy-restart]"));
-    System.err.println(L().l("       bin/resin.sh [-options] [thread-dump | heap-dump | log-level | profile | jmx-list | jmx-call | jmx-set]"));
+    System.err.println(L().l("       bin/resin.sh [-options] [thread-dump | heap-dump | log-level | profile | jmx-list | jmx-dump | jmx-call | jmx-set]"));
     System.err.println(L().l("       bin/resin.sh [-options] [user-add | user-list | user-remove]"));
     System.err.println(L().l("       bin/resin.sh help <command>"));
     System.err.println(L().l(""));
@@ -957,6 +961,7 @@ class WatchdogArgs
     GUI,
     HEAP_DUMP,
     JMX_CALL,
+    JMX_DUMP,
     JMX_LIST,
     JMX_SET,
     JSPC,

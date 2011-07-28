@@ -517,9 +517,9 @@ class WatchdogChildProcess
 
     if (_watchdog.getGroupName() != null) {
       if (_watchdog.isConsole())
-        throw new ConfigException(L.l("<group-name> compiled JNI started with 'start'.  Resin cannot use <group-name> when started as a console process."));
+        throw new ConfigException(L.l("<group-name> requires compiled JNI started with 'start'.  Resin cannot use <group-name> when started as a console process."));
       else
-        throw new ConfigException(L.l("<group-name> compiled JNI."));
+        throw new ConfigException(L.l("<group-name> requires compiled JNI."));
     }
 
     ProcessBuilder builder = new ProcessBuilder();

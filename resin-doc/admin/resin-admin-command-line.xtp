@@ -100,6 +100,10 @@ the /resin-admin page.</p>
       <td>lists MBeans, attributes and operations</td>
     </tr>
     <tr>
+      <td>jmx-dump</td>
+      <td>dump all MBean attributes and values</td>
+    </tr>
+    <tr>
       <td>jmx-set</td>
       <td>sets value of a jmx attribute</td>
     </tr>
@@ -399,6 +403,36 @@ com.acme:type=Foo
     javax.management.MBeanAttributeInfo[description=, name=Boolean, type=boolean, read-only, descriptor={}]==false
 
 </example>
+</s1>
+
+<s1 title="jmx-dump: dump all MBean attributes and values">
+<p>Command<code>jmx-dump</code> produces a complete listing of a MBeans with
+current attribute values.  The output is usually lengthy and can be directed to 
+a file rather than stdout using the -file parameter.</p>
+<p><code>bin/resin.sh [-conf &lt;file>] jmx-dump -user &lt;user> -password &lt;password> [-file &lt;file>]</code></p>
+
+<deftable title="jmx-list options">
+  <tr>
+    <th>Argument/Option</th>
+    <th>Meaning</th>
+    <th>Default</th>
+  </tr>
+  <tr>
+    <td>-file</td>
+    <td>if specified, writes output to file</td>
+    <td></td>
+  </tr>
+</deftable>
+
+<example title="Example: dumping JMX">bin/resin.sh -conf conf/resin.conf jmx-dump -user foo -password test
+JMX Dump:
+java.lang:type=MemoryPool,name=CMS Old Gen {
+  Name=CMS Old Gen
+  Type=HEAP
+...
+
+</example>
+
 </s1>
 
 <s1 title="jmx-set: setting attribute value on MBeans">
