@@ -309,6 +309,7 @@ namespace Caucho
                      || "heap-dump".Equals(arguments[argsIdx])
                      || "help".Equals(arguments[argsIdx])
                      || "jmx-call".Equals(arguments[argsIdx])
+                     || "jmx-dump".Equals(arguments[argsIdx])
                      || "jmx-list".Equals(arguments[argsIdx])
                      || "jmx-set".Equals(arguments[argsIdx])
                      || "kill".Equals(arguments[argsIdx])
