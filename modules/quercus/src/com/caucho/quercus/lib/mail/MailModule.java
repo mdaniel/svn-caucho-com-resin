@@ -165,7 +165,7 @@ public class MailModule extends AbstractQuercusModule {
       msg.saveChanges();
 
       from = msg.getFrom();
-      log.fine(L.l("sending mail, From: {0}, To: {1}", from[0], to));
+      log.fine(L.l("sending mail, From: {0}, To: {1}", from[0], addrList));
 
       if (password != null && ! "".equals(password))
         smtp.connect(username, password);
@@ -214,8 +214,8 @@ public class MailModule extends AbstractQuercusModule {
       Throwable cause = e;
       
       log.warning(L.l("Quercus[] mail could not send mail to '{0}'\n{1}",
-                  to,
-                  cause.getMessage()));
+                      to,
+                      e));
 
       log.log(Level.FINE, cause.toString(), cause);
 

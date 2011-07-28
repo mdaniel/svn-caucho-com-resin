@@ -1221,6 +1221,9 @@ public class TcpSocketLink extends AbstractSocketLink
   {
     TcpSocketLinkListener port = _listener;
 
+    _idleStartTime = Alarm.getCurrentTimeActual();
+    _idleExpireTime = _idleStartTime + _idleTimeout;
+    
     // quick timed read to see if data is already available
     int available;
     
@@ -1247,9 +1250,6 @@ public class TcpSocketLink extends AbstractSocketLink
     }
     
     getListener().addLifetimeKeepaliveCount();
-
-    _idleStartTime = Alarm.getCurrentTime();
-    _idleExpireTime = _idleStartTime + _idleTimeout;
 
     _state = _state.toKeepalive(this);
 

@@ -1356,7 +1356,8 @@ public class TcpSocketLinkListener
 
     try {
       int result = is.fillWithTimeout(timeout);
-
+      System.out.println("RESULT: "  + result + " " + timeout);
+      
       if (isClosed()) {
         return -1;
       }
