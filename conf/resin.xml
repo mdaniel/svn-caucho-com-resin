@@ -103,6 +103,7 @@
       <resin:import path="${__DIR__}/health.xml" optional="true"/>
 
       <health:PdfReport>
+        <path>${resin.home}/doc/admin/pdf-gen.php</path>
         <report>Summary</report>
         <health:IfCron value="0 0 * * 0"/>
       </health:PdfReport>

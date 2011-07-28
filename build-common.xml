@@ -115,6 +115,7 @@
     
     <property name="version" value="4.0.s${snapshotdate}"/>
     <property name="dist.name" value="${shortproduct}-${version}"/>
+    <property name="resin.dist.name" value="resin-${version}"/>
     <property name="dist.build" location="${dist}/${dist.name}"/>
 
     <mkdir dir="${build}"/>
@@ -496,7 +497,7 @@
   </target>
 	  
   <target name="resin.dist.jar"
-          depends="compile,junit">
+          depends="init,compile,junit">
     <mkdir dir="${dist.build}/lib"/>
     <mkdir dir="${dist.build}/compat"/>
 
@@ -851,7 +852,9 @@
       <include name="${dist.name}/**/*.dll"/>
       <include name="${dist.name}/**/*.exe"/>
       <include name="${dist.name}/bin/*.sh"/>
+      <include name="${dist.name}/bin/*.in"/>
       <include name="${dist.name}/bin/*.pl"/>
+      <include name="${dist.name}/bin/*.bat"/>
       <include name="${dist.name}/configure"/>
       <include name="${dist.name}/configure.ac"/>
     </patternset>
