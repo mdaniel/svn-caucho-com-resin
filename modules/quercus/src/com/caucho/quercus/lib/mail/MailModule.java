@@ -276,7 +276,7 @@ public class MailModule extends AbstractQuercusModule {
   }
 
   private static void addHeaders(QuercusMimeMessage msg,
-                                 HashMap<String,String> headerMap,
+                                  HashMap<String,String> headerMap,
                                  ArrayList<Address> addrList)
     throws MessagingException
   {

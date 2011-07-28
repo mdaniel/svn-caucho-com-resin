@@ -680,7 +680,7 @@ function print_load_balance()
   <tr class='<?= $count++ % 2 == 0 ? "ra" : "rb" ?>'>
     <td class='item' headers="cluster-server <?=$cluster->Name?>"><?= $client->Name ?></td>
     <td headers="cluster-address <?=$cluster->Name?>"><?= $client->Address ?>:<?= $client->Port ?></td>
-    <td headers="cluster-status <?=$cluster->Name?>" class="<?= $client->State ?>"><?= $client->State ?></td>
+    <td headers="cluster-status <?=$cluster->Name?>" class="<?= $client->ClusterState ?>"><?= $client->ClusterState ?></td>
     <td headers="cluster-active <?=$cluster->Name?>"><?= $client->ConnectionActiveCount ?></td>
     <td headers="cluster-idle <?=$cluster->Name?>"><?= $client->ConnectionIdleCount ?></td>
     <td headers="cluster-conn_miss <?=$cluster->Name?>"><?= format_miss_ratio($client->ConnectionKeepaliveCountTotal,

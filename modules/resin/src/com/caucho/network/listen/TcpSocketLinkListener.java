@@ -1347,8 +1347,14 @@ public class TcpSocketLinkListener
     if (getSocketTimeout() < timeout)
       timeout = getSocketTimeout();
 
+    /*
     if (timeout < 0)
       timeout = 0;
+      */
+    
+    if (timeout <= 0)
+      return 0;
+    
     
     // server/2l02
 
@@ -1356,7 +1362,6 @@ public class TcpSocketLinkListener
 
     try {
       int result = is.fillWithTimeout(timeout);
-      System.out.println("RESULT: "  + result + " " + timeout);
       
       if (isClosed()) {
         return -1;

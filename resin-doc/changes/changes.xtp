@@ -13,6 +13,7 @@
 
 <s2 title="4.0.21 snapshot">
 <ul>
+<li>network: timeout issues with keepalive (#4683, rep by Amir Langer)</li>
 <li>jsp: incorrect jsp:param encoding of '&amp;' (#4685, rep by dicr)</li>
 <li>ejb/cdi: stateless decorators (#4630, rep by Chris)</li>
 <li>install: check for /usr/libexec/java_home in ./configure (#4572)</li>

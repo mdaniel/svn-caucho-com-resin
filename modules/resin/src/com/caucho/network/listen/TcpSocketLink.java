@@ -1244,9 +1244,9 @@ public class TcpSocketLink extends AbstractSocketLink
       killKeepalive("process-keepalive eof");
       
       setStatState(null);
-      close();
+      // close();
       
-      return RequestState.REQUEST_COMPLETE;
+      return RequestState.EXIT;
     }
     
     getListener().addLifetimeKeepaliveCount();
@@ -1301,10 +1301,10 @@ public class TcpSocketLink extends AbstractSocketLink
       }
     } while (Alarm.getCurrentTimeActual() < expires);
 
-    close();
+    // close();
     killKeepalive("thread-keepalive timeout");
     
-    return RequestState.REQUEST_COMPLETE;
+    return RequestState.EXIT;
   }
 
   //
@@ -1365,7 +1365,7 @@ public class TcpSocketLink extends AbstractSocketLink
     
     _state = state.toKillKeepalive(this);
     
-    if (log.isLoggable(Level.FINE)) {
+    if (log.isLoggable(Level.FINE) && state.isKeepaliveAllocated()) {
       log.fine(this + " keepalive disabled from "
                + state +", reason=" + reason);
     }
