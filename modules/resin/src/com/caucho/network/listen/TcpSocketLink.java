@@ -1222,7 +1222,14 @@ public class TcpSocketLink extends AbstractSocketLink
     TcpSocketLinkListener port = _listener;
 
     // quick timed read to see if data is already available
-    int available = port.keepaliveThreadRead(getReadStream());
+    int available;
+    
+    if (_listener.getSelectManager() != null) {
+      available = port.keepaliveThreadRead(getReadStream());
+    }
+    else {
+      available = 0;
+    }
     
     if (available > 0) {
       return RequestState.REQUEST_COMPLETE;
@@ -1231,10 +1238,12 @@ public class TcpSocketLink extends AbstractSocketLink
       if (log.isLoggable(Level.FINER))
         log.finer(this + " keepalive read failed: " + available);
       
+      killKeepalive("process-keepalive eof");
+      
       setStatState(null);
       close();
       
-      return RequestState.EXIT;
+      return RequestState.REQUEST_COMPLETE;
     }
     
     getListener().addLifetimeKeepaliveCount();
@@ -1279,7 +1288,7 @@ public class TcpSocketLink extends AbstractSocketLink
         long delta = expires - Alarm.getCurrentTimeActual();
         if (delta < 0)
           delta = 0;
-        
+
         if (getReadStream().fillWithTimeout(delta) > 0) {
           return RequestState.REQUEST_COMPLETE;
         }
@@ -1293,8 +1302,9 @@ public class TcpSocketLink extends AbstractSocketLink
     } while (Alarm.getCurrentTimeActual() < expires);
 
     close();
-
-    return RequestState.EXIT;
+    killKeepalive("thread-keepalive timeout");
+    
+    return RequestState.REQUEST_COMPLETE;
   }
 
   //
