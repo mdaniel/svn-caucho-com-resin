@@ -874,23 +874,19 @@ public class TcpSocketLink extends AbstractSocketLink
     TcpSocketLinkListener listener = getListener();
     
     RequestState result = RequestState.REQUEST_COMPLETE;
-    SocketLinkThreadLauncher launcher = _listener.getLauncher();
-    
+
     while (result == RequestState.REQUEST_COMPLETE
            && ! listener.isClosed()
            && ! getState().isDestroyed()) {
-      
-      if (launcher.isIdleExpire()) {
-        return RequestState.EXIT;
-      }
       
       setStatState("accept");
       _state = _state.toAccept();
 
       if (! accept()) {
+        setStatState("close");
         close();
 
-        continue;
+        return RequestState.EXIT;
       }
 
       toStartConnection();
@@ -910,7 +906,9 @@ public class TcpSocketLink extends AbstractSocketLink
   {
     SocketLinkThreadLauncher launcher = _listener.getLauncher();
     
-    launcher.onChildIdleBegin();
+    if (! launcher.childIdleBegin())
+      return false;
+    
     try {
       return getListener().accept(getSocket());
     } finally {

@@ -154,7 +154,9 @@ else
     JAVA_HOME=`cd $javabin/..; pwd`
 
     # we're in $JAVA_HOME/jre
-    if test -f "$JAVA_HOME/lib/rt.jar"; then
+    if test -f "$JAVA_HOME/../include/jni.h"; then
+      JAVA_HOME=`cd $JAVA_HOME/..; pwd`
+    elif test -f "$JAVA_HOME/lib/rt.jar"; then
       JAVA_HOME=`cd $JAVA_HOME/..; pwd`
     elif test -d "/usr/java"; then
       JAVA_HOME=/usr/java

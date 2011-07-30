@@ -80,8 +80,11 @@ public class TcpSocketLinkListener
   private static final Logger log
     = Logger.getLogger(TcpSocketLinkListener.class.getName());
   
-  private static final int ACCEPT_IDLE_MIN = 4;
-  private static final int ACCEPT_IDLE_MAX = 16;
+  private static final int ACCEPT_IDLE_MIN = 16;
+  private static final int ACCEPT_IDLE_MAX = 64;
+  
+  private static final int ACCEPT_THROTTLE_LIMIT = 1024;
+  private static final long ACCEPT_THROTTLE_SLEEP_TIME = 0;
   
   private static final int KEEPALIVE_MAX = 65536;
 
@@ -209,6 +212,9 @@ public class TcpSocketLinkListener
     _launcher = new SocketLinkThreadLauncher(this);
     _launcher.setIdleMin(ACCEPT_IDLE_MIN);
     _launcher.setIdleMax(ACCEPT_IDLE_MAX);
+    
+    _launcher.setThrottleLimit(ACCEPT_THROTTLE_LIMIT);
+    _launcher.setThrottleSleepTime(ACCEPT_THROTTLE_SLEEP_TIME);
   }
 
   /**
@@ -497,6 +503,36 @@ public class TcpSocketLinkListener
   {
     return _launcher.getIdleTimeout();
   }
+  
+  //
+  // launcher throttle configuration
+  //
+  
+  
+  /**
+   * Sets the throttle period.
+   */
+  public void setThrottlePeriod(long period)
+  {
+    _launcher.setThrottlePeriod(period);
+  }
+  
+  /**
+   * Sets the throttle limit.
+   */
+  public void setThrottleLimit(int limit)
+  {
+    _launcher.setThrottleLimit(limit);
+  }
+  
+  /**
+   * Sets the throttle sleep time.
+   */
+  public void setThrottleSleepTime(long period)
+  {
+    _launcher.setThrottleSleepTime(period);
+  }
+
 
   /**
    * Sets the operating system listen backlog
@@ -1229,7 +1265,8 @@ public class TcpSocketLinkListener
   /**
    * Accepts a new connection.
    */
-  public boolean accept(QSocket socket)
+  @Friend(TcpSocketLink.class)
+  boolean accept(QSocket socket)
   {
     try {
       while (! isClosed()) {

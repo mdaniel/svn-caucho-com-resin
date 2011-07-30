@@ -31,15 +31,19 @@ package com.caucho.env.thread;
 
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.atomic.AtomicLong;
+import java.util.logging.Logger;
 
 import com.caucho.config.ConfigException;
 import com.caucho.inject.Module;
 import com.caucho.lifecycle.Lifecycle;
+import com.caucho.util.Alarm;
 import com.caucho.util.L10N;
 
 @Module
 abstract public class AbstractThreadLauncher extends AbstractTaskWorker {
   private static final L10N L = new L10N(AbstractThreadLauncher.class);
+  private static final Logger log
+    = Logger.getLogger(AbstractThreadLauncher.class.getName());
   
   private static final long LAUNCHER_TIMEOUT = 60000L;
 
@@ -47,7 +51,7 @@ abstract public class AbstractThreadLauncher extends AbstractTaskWorker {
   private static final int DEFAULT_IDLE_MIN = 2;
   private static final int DEFAULT_IDLE_MAX = Integer.MAX_VALUE / 2;
 
-  private static final long DEFAULT_IDLE_TIMEOUT = 120000L;
+  private static final long DEFAULT_IDLE_TIMEOUT = 60000L;
   
   // configuration items
 
@@ -55,7 +59,11 @@ abstract public class AbstractThreadLauncher extends AbstractTaskWorker {
   private int _idleMin = DEFAULT_IDLE_MIN;
   private int _idleMax = DEFAULT_IDLE_MAX;
   private long _idleTimeout = DEFAULT_IDLE_TIMEOUT;
-
+  
+  private long _throttlePeriod = 1000L;
+  private int _throttleLimit = 100;
+  private long _throttleSleep = 0;
+  
   //
   // thread max and thread lifetime counts
   //
@@ -71,6 +79,12 @@ abstract public class AbstractThreadLauncher extends AbstractTaskWorker {
 
   // next time when an idle thread can expire
   private final AtomicLong _threadIdleExpireTime = new AtomicLong();
+  
+  // throttle/warning counters
+  
+  private long _throttleTimestamp;
+  private long _throttleCount;
+  private boolean _isThrottle;
   
   private final AtomicInteger _gId = new AtomicInteger();
   
@@ -192,6 +206,34 @@ abstract public class AbstractThreadLauncher extends AbstractTaskWorker {
   }
   
   //
+  // Throttle configuration
+  //
+  
+  /**
+   * Sets the throttle period.
+   */
+  public void setThrottlePeriod(long period)
+  {
+    _throttlePeriod = period;
+  }
+  
+  /**
+   * Sets the throttle limit.
+   */
+  public void setThrottleLimit(int limit)
+  {
+    _throttleLimit = limit;
+  }
+  
+  /**
+   * Sets the throttle sleep time.
+   */
+  public void setThrottleSleepTime(long period)
+  {
+    _throttleSleep = period;
+  }
+  
+  //
   // lifecycle method
   //
   
@@ -282,9 +324,13 @@ abstract public class AbstractThreadLauncher extends AbstractTaskWorker {
       long nextIdleExpire = now + _idleTimeout;
 
       if (_idleMax < idleCount 
-          && _idleMin < _idleMax
-          && nextIdleExpire - idleExpire > 100
+          && _idleMin < _idleMax) {
+        /*
+                && nextIdleExpire - idleExpire > 100
           && _threadIdleExpireTime.compareAndSet(idleExpire, nextIdleExpire)) {
+          */
+        _threadIdleExpireTime.compareAndSet(idleExpire, nextIdleExpire);
+        
         return true;
       }
       else if (idleExpire < now
@@ -295,6 +341,24 @@ abstract public class AbstractThreadLauncher extends AbstractTaskWorker {
     }
     
     return false;
+  }
+  
+  /**
+   * Start the idle if the child idle is less than idle max.
+   */
+  
+  public boolean childIdleBegin()
+  {
+    int idleCount;
+    
+    do {
+      idleCount = _idleCount.get();
+      
+      if (isIdleExpire())
+        return false;
+    } while (! _idleCount.compareAndSet(idleCount, idleCount + 1));
+    
+    return true;
   }
   
   /**
@@ -401,12 +465,52 @@ abstract public class AbstractThreadLauncher extends AbstractTaskWorker {
 
         int id = _gId.incrementAndGet();
         
+        updateThrottle();
+        
         launchChildThread(id);
         
         isValid = true;
       } finally {
         if (! isValid)
           onStartFail();
+      }
+    }
+  }
+  
+  /**
+   * Throttle the thread creation, so only 100 threads/sec (default) can
+   * be created.
+   */
+  protected void updateThrottle()
+  {
+    long now = Alarm.getCurrentTimeActual();
+    
+    if (_throttleTimestamp + _throttlePeriod < now) {
+      _throttleTimestamp = now;
+      _throttleCount = 1;
+      _isThrottle = false;
+      
+      return;
+    }
+    
+    _throttleCount++;
+    
+    if (_throttleCount < _throttleLimit) {
+      return;
+    }
+    
+    if (! _isThrottle) {
+      _isThrottle = true;
+      
+      log.warning(this + " " + _throttleCount
+                  + " threads created in " + _throttlePeriod + "ms"
+                  + " sleep=" + _throttleSleep + "ms");
+    }
+    
+    if (_throttleSleep > 0) {
+      try {
+        Thread.sleep(_throttleSleep);
+      } catch (Exception e) {
       }
     }
   }

@@ -56,7 +56,10 @@ public final class ThreadPool {
   private static final long PRIORITY_TIMEOUT = 10L;
   
   private static final int THREAD_IDLE_MIN = 16;
-  private static final int THREAD_IDLE_MAX = 256;
+  private static final int THREAD_IDLE_MAX = 1024;
+  
+  private static final int THREAD_THROTTLE_LIMIT = 100;
+  private static final long THREAD_THROTTLE_SLEEP = 10;
   
   private static final NullRunnable NULL_RUNNABLE = new NullRunnable();
 
@@ -128,7 +131,9 @@ public final class ThreadPool {
     _launcher = new ThreadLauncher(this);
     _launcher.setIdleMin(THREAD_IDLE_MIN);
     _launcher.setIdleMax(THREAD_IDLE_MAX);
-
+    
+    _launcher.setThrottleLimit(THREAD_THROTTLE_LIMIT);
+    _launcher.setThrottleSleepTime(THREAD_THROTTLE_SLEEP);
     // initialize default values
     init();
   }
@@ -236,6 +241,36 @@ public final class ThreadPool {
   {
     return _launcher.getPriorityIdleMin();
   }
+  
+  //
+  // launcher throttle configuration
+  //
+  
+  
+  /**
+   * Sets the throttle period.
+   */
+  public void setThrottlePeriod(long period)
+  {
+    _launcher.setThrottlePeriod(period);
+  }
+  
+  /**
+   * Sets the throttle limit.
+   */
+  public void setThrottleLimit(int limit)
+  {
+    _launcher.setThrottleLimit(limit);
+  }
+  
+  /**
+   * Sets the throttle sleep time.
+   */
+  public void setThrottleSleepTime(long period)
+  {
+    _launcher.setThrottleSleepTime(period);
+  }
+
 
   /**
    * Sets the maximum number of executor threads.
