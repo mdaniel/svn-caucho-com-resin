@@ -651,7 +651,7 @@ class WatchdogArgs
   {
     System.err.println(L().l("usage: bin/resin.sh [-options] [console | status | start | gui | stop | restart | kill | shutdown | version]"));
     System.err.println(L().l("       bin/resin.sh [-options] [deploy | undeploy | deploy-copy | deploy-list | deploy-start | deploy-stop | deploy-restart]"));
-    System.err.println(L().l("       bin/resin.sh [-options] [thread-dump | heap-dump | log-level | profile | jmx-list | jmx-dump | jmx-call | jmx-set]"));
+    System.err.println(L().l("       bin/resin.sh [-options] [thread-dump | heap-dump | pdf-report | log-level | profile | jmx-list | jmx-dump | jmx-call | jmx-set]"));
     System.err.println(L().l("       bin/resin.sh [-options] [user-add | user-list | user-remove]"));
     System.err.println(L().l("       bin/resin.sh help <command>"));
     System.err.println(L().l(""));
