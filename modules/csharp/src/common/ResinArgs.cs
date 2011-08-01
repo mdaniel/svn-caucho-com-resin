@@ -316,6 +316,7 @@ namespace Caucho
                      || "list".Equals(arguments[argsIdx])
                      || "list-restarts".Equals(arguments[argsIdx])
                      || "log-level".Equals(arguments[argsIdx])
+                     || "pdf-report".Equals(arguments[argsIdx])
                      || "profile".Equals(arguments[argsIdx])
                      || "restart".Equals(arguments[argsIdx])
                      || "restart-webapp".Equals(arguments[argsIdx])

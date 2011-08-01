@@ -115,6 +115,10 @@ the /resin-admin page.</p>
       <td>log-level</td>
       <td>changes log-level</td>
     </tr>
+    <tr>
+      <td>pdf-report</td>
+      <td>generates pdf report</td>
+    </tr>
   </deftable>
   <p>
     Since all commands require connecting to Resin server remotely list of
@@ -705,6 +709,40 @@ Undeployed foo from http://127.0.0.1:8080/hmtp</example>
       <td>-version</td>
       <td>version of application formatted as &lt;major.minor.micro.qualifier></td>
       <td>none</td>
+    </tr>
+  </deftable>
+</s1>
+<s1 title="pdf-report: pdf report generation">
+<p>The <code>pdf-report</code> command triggers generation of a PDF report from a .php template.</p>
+<p><code>bin/resin.sh [-conf &lt;file>] pdf-report -user &lt;user> -password &lt;password> [-path &lt;php path>] [-report &lt;report name>] [-period &lt;period>] [-logdir &lt;log path>]</code></p>
+<example title="Example: generate the default post-mortem summary PDF report">bin/resin.sh pdf-report -user admin -password secret
+generated /usr/local/resin/log/default-Summary-20110801T0251.pdf
+</example>
+  <deftable title="pdf-report options">
+    <tr>
+      <th>Argument</th>
+      <th>Meaning</th>
+      <th>Default</th>
+    </tr>
+    <tr>
+      <td>-path</td>
+      <td>Path to a PDF generating .php file</td>
+      <td>${resin.home}/doc/admin/pdf-gen.php</td>
+    </tr>
+    <tr>
+      <td>-report</td>
+      <td>Report type key</td>
+      <td>Summary</td>
+    </tr>
+    <tr>
+      <td>-period</td>
+      <td>Report look back period of time</td>
+      <td>7D</td>
+    </tr>
+    <tr>
+      <td>-logdir</td>
+      <td>PDF output directory</td>
+      <td>Resin log directory</td>
     </tr>
   </deftable>
 </s1>

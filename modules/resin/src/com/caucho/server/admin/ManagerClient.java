@@ -246,8 +246,21 @@ public class ManagerClient
 
     return (String) query(query);
   }
+  
+  public String pdfReport(String path, 
+                          String report, 
+                          long period, 
+                          String logDirectory) 
+  {
+    PdfReportQuery query = new PdfReportQuery(path, 
+                                              report, 
+                                              period, 
+                                              logDirectory);
+    return (String) query(query);
+  } 
 
-  public String profile(long activeTime, long period, int depth) {
+  public String profile(long activeTime, long period, int depth) 
+  {
     ProfileQuery query = new ProfileQuery(activeTime, period, depth);
 
     return (String) query(query);

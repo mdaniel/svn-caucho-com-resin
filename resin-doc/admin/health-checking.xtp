@@ -435,6 +435,8 @@ once per period.</p>
 
 <include-defun name="health:FailSafeRestart"/>
 
+<include-defun name="health:PdfReport"/>
+
 <include-defun name="health:Restart"/>
 
 <include-defun name="health:SendMail"/>

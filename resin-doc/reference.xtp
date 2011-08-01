@@ -4910,6 +4910,66 @@ OnStart</a> will fire during this event also.</p>
 
 </defun>
 
+<defun title="&lt;health:PdfReport>" name="health:PdfReport">
+
+<parents>cluster</parents>
+<javadoc class="com.caucho.health.action.PdfReport"/>
+
+<description>
+<p>Health action to generate a PDF report from a PHP script.</p>
+</description>
+
+<attributes>
+  <tr>
+    <th>Attribute</th>
+    <th>Description</th>
+    <th>Type</th>
+    <th>Default</th>
+  </tr>
+  <tr>
+    <td>path</td>
+    <td>Path to a PDF generating .php file</td>
+    <td>String</td>
+    <td>${resin.home}/doc/admin/pdf-gen.php</td>
+  </tr>
+  <tr>
+    <td>report</td>
+    <td>Report type key</td>
+    <td>String</td>
+    <td>Summary</td>
+  </tr>
+  <tr>
+    <td>period</td>
+    <td>Report look back period of time</td>
+    <td><a javadoc="com.caucho.config.types.Period">Period</a></td>
+    <td>7D</td>
+  </tr>
+  <tr>
+    <td>logDirectory</td>
+    <td>PDF output directory</td>
+    <td>String</td>
+    <td>Resin log directory</td>
+  </tr>
+</attributes>
+
+<example title="Example: &lt;health:PdfReport> in health.xml">
+&lt;cluster xmlns="http://caucho.com/ns/resin"
+         xmlns:resin="urn:java:com.caucho.resin"
+         xmlns:health="urn:java:com.caucho.health"
+         xmlns:ee="urn:java:ee">
+         
+  &lt;health:PdfReport>
+    &lt;path>${resin.home}/doc/admin/pdf-gen.php&lt;/path>
+    &lt;report>Summary&lt;/report>
+    &lt;period>7D&lt;/report>
+    &lt;health:IfCron value="0 0 * * 0"/>
+  &lt;/health:PdfReport>
+
+&lt;/cluster>
+</example>
+
+</defun>
+
 <defun title="&lt;health:Restart>" name="health:Restart">
 
 <parents>cluster</parents>

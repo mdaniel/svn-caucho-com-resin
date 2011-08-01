@@ -527,6 +527,9 @@ class WatchdogArgs
       else if ("log-level".equals(arg)) {
         _startMode = StartMode.LOG_LEVEL;
       }
+      else if ("pdf-report".equals(arg)) {
+        _startMode = StartMode.PDF_REPORT;
+      }
       else if ("profile".equals(arg)) {
         _startMode = StartMode.PROFILE;
       }
@@ -968,6 +971,7 @@ class WatchdogArgs
     KILL,
     LIST_RESTARTS,
     LOG_LEVEL,
+    PDF_REPORT,
     PROFILE,
     RESTART,
     THREAD_DUMP,

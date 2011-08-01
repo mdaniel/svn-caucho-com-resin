@@ -328,6 +328,41 @@ public class ManagerActor extends SimpleActor
   }
 
   @Query
+  public String pdfReport(long id, String to, String from, PdfReportQuery query)
+  {
+    String result = null;
+    
+    PdfReportAction action = new PdfReportAction();
+    
+    if (query.getPath() != null)
+      action.setPath(query.getPath());
+    
+    if (query.getPeriod() > 0)
+      action.setPeriod(query.getPeriod());
+    
+    if (query.getReport() != null)
+      action.setReport(query.getReport());
+    
+    if (query.getLogDirectory() != null)
+      action.setLogDirectory(query.getLogDirectory());
+    
+    try {
+      action.init();
+      result = action.execute();
+    } catch (ConfigException e) {
+      log.log(Level.WARNING, e.getMessage(), e);
+      result = e.getMessage();
+    } catch (Exception e) {
+      log.log(Level.WARNING, e.getMessage(), e);
+      result = e.toString();
+    }
+    
+    getBroker().queryResult(id, from, to, result);
+
+    return result;
+  }
+
+  @Query
   public String profile(long id, String to, String from, ProfileQuery query)
   {
     String result = null;
