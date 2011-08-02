@@ -1499,6 +1499,14 @@ public final class SessionManager implements SessionCookieConfig, AlarmListener
     return session;
   }
 
+  public SessionImpl getSession(String key)
+  {
+    if (_sessions == null)
+      return null;
+
+    return _sessions.get(key);
+  }
+
   /**
    * Create a new session.
    *

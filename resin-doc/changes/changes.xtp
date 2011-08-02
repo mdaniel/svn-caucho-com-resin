@@ -13,6 +13,9 @@
 
 <s2 title="4.0.21 snapshot">
 <ul>
+<li>cdi/ejb: DataSourceDefinition timing with JPA (#4488)</li>
+<li>vhost: i18n/idna parsing issues (#4583, rep by gfranz)</li>
+<li>cdi/servlet: add WebApp.runInSessionContext to support threads using session scope (#4049, rep by sweigersf)</li>
 <li>network: timeout issues with keepalive (#4683, rep by Amir Langer)</li>
 <li>jsp: incorrect jsp:param encoding of '&amp;' (#4685, rep by dicr)</li>
 <li>ejb/cdi: stateless decorators (#4630, rep by Chris)</li>

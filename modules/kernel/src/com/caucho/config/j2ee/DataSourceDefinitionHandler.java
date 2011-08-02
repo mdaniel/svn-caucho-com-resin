@@ -91,6 +91,8 @@ public class DataSourceDefinitionHandler extends JavaeeInjectionHandler {
   @Override
   public ConfigProgram introspectType(AnnotatedType<?> type)
   {
+    System.out.println("TYPE: " + type);
+    Thread.dumpStack();
     // ejb/123j
     for (Class<?> parentClass = type.getJavaClass().getSuperclass();
          parentClass != null;

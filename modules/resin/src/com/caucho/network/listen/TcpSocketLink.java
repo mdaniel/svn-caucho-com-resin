@@ -159,7 +159,7 @@ public class TcpSocketLink extends AbstractSocketLink
   /**
    * For QA only, set the current request.
    */
-  public static void qaSetCurrentRequest(ProtocolConnection request)
+  public static void setCurrentRequest(ProtocolConnection request)
   {
     _currentRequest.set(request);
   }

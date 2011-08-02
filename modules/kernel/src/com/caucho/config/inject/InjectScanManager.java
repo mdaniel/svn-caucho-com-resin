@@ -38,6 +38,13 @@ import java.util.concurrent.ConcurrentHashMap;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
+import javax.enterprise.inject.spi.AnnotatedType;
+
+import com.caucho.config.program.ConfigProgram;
+import com.caucho.config.reflect.AnnotatedTypeImpl;
+import com.caucho.config.reflect.ReflectionAnnotatedFactory;
+import com.caucho.config.type.AnnotationType;
+import com.caucho.loader.DynamicClassLoader;
 import com.caucho.loader.EnvironmentClassLoader;
 import com.caucho.loader.enhancer.ScanClass;
 import com.caucho.loader.enhancer.ScanListener;
@@ -64,6 +71,9 @@ class InjectScanManager implements ScanListener {
 
   private final ConcurrentHashMap<NameKey, AnnType> _annotationMap
     = new ConcurrentHashMap<NameKey, AnnType>();
+  
+  private final ArrayList<InjectScanClass> _immediateResourceList
+    = new ArrayList<InjectScanClass>();
   
   private NameKey _nameKey = new NameKey();
 
@@ -274,9 +284,41 @@ class InjectScanManager implements ScanListener {
   }
 
   @Override
-  public void classMatchEvent(EnvironmentClassLoader loader, Path root,
-      String className)
+  public void classMatchEvent(EnvironmentClassLoader loader, 
+                              Path root,
+                              String className)
   {
+  }
+
+  public void addImmediateResource(InjectScanClass injectScanClass)
+  {
+    ClassLoader classLoader = _injectManager.getClassLoader();
+    System.out.println("IMMED: " + injectScanClass);
+    if (classLoader instanceof DynamicClassLoader) {
+      DynamicClassLoader dynLoader = (DynamicClassLoader) classLoader;
+      ClassLoader tmpLoader = dynLoader.getNewTempClassLoader();
+      
+      try {
+        Class<?> cl = tmpLoader.loadClass(injectScanClass.getClassName());
+        
+        AnnotatedType<?> annType
+          = ReflectionAnnotatedFactory.introspectType(cl);
+
+        for (Annotation ann : cl.getAnnotations()) {
+          InjectionPointHandler handler
+            = _injectManager.getInjectionPointHandler(ann.annotationType());
+
+          if (handler != null) {
+            ConfigProgram program = handler.introspectType(annType);
+            
+            if (program != null)
+              program.inject(null, null);
+          }
+        }
+      } catch (Exception e) {
+        log.log(Level.FINE, e.toString(), e);
+      }
+    }
   }
 
   @Override

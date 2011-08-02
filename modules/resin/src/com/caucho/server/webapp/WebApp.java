@@ -174,6 +174,8 @@ import com.caucho.server.dispatch.SubInvocation;
 import com.caucho.server.dispatch.UrlMap;
 import com.caucho.server.dispatch.VersionInvocation;
 import com.caucho.server.host.Host;
+import com.caucho.server.http.StubServletRequest;
+import com.caucho.server.http.StubSessionContextRequest;
 import com.caucho.server.log.AbstractAccessLog;
 import com.caucho.server.log.AccessLog;
 import com.caucho.server.resin.Resin;
@@ -4580,7 +4582,8 @@ public class WebApp extends ServletContextImpl
       return 0;
   }
 
-  public String generateCookieDomain(HttpServletRequest request) {
+  public String generateCookieDomain(HttpServletRequest request)
+  {
     String serverName = request.getServerName();
 
     if (_cookieDomainPattern == null)
@@ -4605,6 +4608,32 @@ public class WebApp extends ServletContextImpl
                         boolean isClientDisconnect)
   {
     _controller.updateStatistics(time, readBytes, writeBytes, isClientDisconnect);
+  }
+  
+  //
+  // thread/cdi
+  //
+  
+  /**
+   * Runs a thread in a session context
+   */
+  public void runInSessionContext(String sessionId, Runnable task)
+  {
+    Thread thread = Thread.currentThread();
+    ClassLoader oldClassLoader = thread.getContextClassLoader();
+    ProtocolConnection serverRequest = TcpSocketLink.getCurrentRequest();
+    StubSessionContextRequest stubRequest;
+    
+    try {
+      stubRequest = new StubSessionContextRequest(this, sessionId);
+      
+      TcpSocketLink.setCurrentRequest(stubRequest);
+      
+      task.run();
+    } finally {
+      thread.setContextClassLoader(oldClassLoader);
+      TcpSocketLink.setCurrentRequest(serverRequest);
+    }
   }
 
   /**

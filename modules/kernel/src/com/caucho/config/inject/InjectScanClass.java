@@ -35,6 +35,7 @@ import java.util.HashSet;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
+import javax.annotation.sql.DataSourceDefinition;
 import javax.decorator.Delegate;
 import javax.ejb.MessageDriven;
 import javax.ejb.Startup;
@@ -74,6 +75,9 @@ class InjectScanClass implements ScanClass
     = Object.class.getName().toCharArray();
   
   private static final HashSet<Class<?>> _registerAnnotationSet
+    = new HashSet<Class<?>>();
+  
+  private static final HashSet<Class<?>> _immediateResourceSet
     = new HashSet<Class<?>>();
   
   private final String _className;
@@ -158,8 +162,13 @@ class InjectScanClass implements ScanClass
       if (annType.getType() == Observes.class)
         setObserves();
       
-      if (_isRegisterRequired)
+      if (_isRegisterRequired) {
+        if (_immediateResourceSet.contains(annType.getType())) {
+          _scanManager.addImmediateResource(this);
+        }
+        
         return;
+      }
       
       if (_registerAnnotationSet.contains(annType.getType())) {
         _isRegisterRequired = true;
@@ -296,5 +305,8 @@ class InjectScanClass implements ScanClass
     _registerAnnotationSet.add(javax.ejb.Singleton.class);
     _registerAnnotationSet.add(MessageDriven.class);
     _registerAnnotationSet.add(Qualifier.class);
+    _registerAnnotationSet.add(DataSourceDefinition.class);
+    
+    _immediateResourceSet.add(DataSourceDefinition.class);
   }
 }

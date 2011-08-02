@@ -266,6 +266,8 @@ public class ServletInvocation {
 
     if (req instanceof AbstractHttpRequest)
       return ((AbstractHttpRequest) req).getRequestFacade();
+    else if (req instanceof ServletRequest)
+      return (ServletRequest) req;
     else
       return null;
   }

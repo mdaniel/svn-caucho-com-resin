@@ -45,7 +45,7 @@ import com.caucho.server.dispatch.ServletInvocation;
  * The session scope value
  */
 @Module
-public class SessionScope extends AbstractScopeContext {
+public class SessionScopeImpl extends AbstractScopeContext {
   /**
    * Returns true if the scope is currently active.
    */
@@ -53,6 +53,7 @@ public class SessionScope extends AbstractScopeContext {
   public boolean isActive()
   {
     ServletRequest request = ServletInvocation.getContextRequest();
+    System.out.println("ACT: " + request);
 
     if (request != null) {
       HttpSession session = ((HttpServletRequest) request).getSession();
@@ -76,8 +77,10 @@ public class SessionScope extends AbstractScopeContext {
   {
     ServletRequest request = ServletInvocation.getContextRequest();
 
+    System.out.println("REQ: " + request);
     if (request == null)
       return null;
+    
 
     HttpSession session = ((HttpServletRequest) request).getSession();
 

@@ -402,7 +402,7 @@ public final class InjectManager
       _applicationScope = new ApplicationContext();
       
       addContext(new RequestContext());
-      addContext("com.caucho.server.webbeans.SessionScope");
+      addContext("com.caucho.server.webbeans.SessionScopeImpl");
       addContext("com.caucho.server.webbeans.ConversationContext");
       addContext("com.caucho.server.webbeans.TransactionScope");
       addContext(_applicationScope);
@@ -2410,7 +2410,7 @@ public final class InjectManager
 
     return list;
   }
-
+  
   InjectionPointHandler getInjectionPointHandler(AnnotatedField<?> field)
   {
     // InjectIntrospector.introspect(_injectProgramList, field);

@@ -70,11 +70,11 @@ public class DomainName {
       while (index < length) {
         char ch = source.charAt(index + 0);
       
-        if (isFirst && index + 4 < length &&
-            source.charAt(index + 0) == 'x' &&
-            source.charAt(index + 1) == 'n' &&
-            source.charAt(index + 2) == '-' &&
-            source.charAt(index + 3) == '-') {
+        if (isFirst && index + 4 < length
+            && source.charAt(index + 0) == 'x'
+            && source.charAt(index + 1) == 'n'
+            && source.charAt(index + 2) == '-'
+            && source.charAt(index + 3) == '-') {
           int p = source.indexOf('.', index);
           String seq;
 
@@ -177,6 +177,7 @@ public class DomainName {
   {
     int length = seq.length();
     int b = 0;
+    cb.setLength(0);
 
     for (int i = 0; i < length; i++) {
       char ch = seq.charAt(i);

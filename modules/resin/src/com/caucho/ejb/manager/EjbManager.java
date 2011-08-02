@@ -34,6 +34,7 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.HashSet;
+import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -105,6 +106,8 @@ public class EjbManager implements ScanListener, EnvironmentListener {
 
   private final ArrayList<AbstractEjbBeanManager<?>> _serverList 
     = new ArrayList<AbstractEjbBeanManager<?>>();
+  
+  private final AtomicBoolean _isConfig = new AtomicBoolean();
 
   private EjbManager(ClassLoader loader)
   {
@@ -527,6 +530,9 @@ public class EjbManager implements ScanListener, EnvironmentListener {
 
   private void config()
   {
+    if (_isConfig.getAndSet(true))
+      return;
+    
     _configManager.start();
   }
 
