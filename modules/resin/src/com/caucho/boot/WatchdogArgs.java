@@ -127,11 +127,6 @@ class WatchdogArgs
     return _rootDirectory;
   }
 
-  Path getLogDirectory()
-  {
-    return getRootDirectory().lookup("log");
-  }
-
   Path getDataDirectory()
   {
     return _dataDirectory;
@@ -898,6 +893,12 @@ class WatchdogArgs
     public Path getRootDirectory()
     {
       return WatchdogArgs.this.getRootDirectory();
+    }
+
+    @Override
+    public Path getLogDirectory()
+    {
+      return WatchdogArgs.this.getLogDirectory();
     }
 
     @Override
