@@ -1020,6 +1020,8 @@ public class TcpSocketLink extends AbstractSocketLink
     ReadStream readStream = getReadStream();
 
     while ((result = processKeepalive()) == RequestState.REQUEST_COMPLETE) {
+      toDuplexActive();
+      
       long position = readStream.getPosition();
 
       duplex.serviceRead();

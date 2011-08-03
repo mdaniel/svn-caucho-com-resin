@@ -77,7 +77,7 @@
   </health:CpuHealthCheck>
   
   <health:DumpThreads>
-    <health:IfHealthCritical healthCheck="${cpuHealthCheck}"/>
+    <health:IfHealthWarning healthCheck="${cpuHealthCheck}" time="2m"/>
     <health:IfNotRecent time="15m"/>
   </health:DumpThreads>
   
