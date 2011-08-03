@@ -76,7 +76,7 @@ class WatchdogArgs
   private String _dynamicCluster;
   private String _dynamicAddress;
   private int _dynamicPort;
-  
+
   private boolean _is64bit;
 
   WatchdogArgs(String[] argv)
@@ -101,9 +101,9 @@ class WatchdogArgs
     _resinConf = _resinHome.lookup("conf/resin.conf");
     if (! _resinConf.canRead())
       _resinConf = _resinHome.lookup("conf/resin.xml");
-    
+
     _is64bit = CauchoSystem.is64Bit();
-    
+
     parseCommandLine(_argv);
   }
 
@@ -125,6 +125,11 @@ class WatchdogArgs
   Path getRootDirectory()
   {
     return _rootDirectory;
+  }
+
+  Path getLogDirectory()
+  {
+    return getRootDirectory().lookup("log");
   }
 
   Path getDataDirectory()
@@ -210,7 +215,7 @@ class WatchdogArgs
   {
     _resinHome = resinHome;
   }
-  
+
   boolean is64Bit()
   {
     return _is64bit;
