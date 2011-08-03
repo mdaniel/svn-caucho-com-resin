@@ -92,7 +92,7 @@ public class AbstractProxyCache
   {
   }
   
-  public void setMmap(boolean isEnable)
+  public void setEnableMmap(boolean isEnable)
   {
   }
 

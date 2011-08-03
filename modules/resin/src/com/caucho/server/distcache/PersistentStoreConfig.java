@@ -36,6 +36,7 @@ import javax.sql.DataSource;
 
 import com.caucho.config.ConfigException;
 import com.caucho.config.types.Period;
+import com.caucho.db.block.BlockManager;
 import com.caucho.env.distcache.DistCacheSystem;
 import com.caucho.util.L10N;
 import com.caucho.vfs.Path;
@@ -135,6 +136,11 @@ public class PersistentStoreConfig
 
   public void setMaxIdleTime(Period period)
   {
+  }
+  
+  public void setEnableMmap(boolean isEnable)
+  {
+    BlockManager.getBlockManager().setEnableMmap(isEnable);
   }
 
   public PersistentStoreConfig createInit()

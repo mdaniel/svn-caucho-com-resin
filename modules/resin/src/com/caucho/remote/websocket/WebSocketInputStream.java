@@ -130,8 +130,8 @@ public class WebSocketInputStream extends InputStream
     if (length < sublen)
       sublen = length;
     
-    sublen = _is.read(buffer, offset, length);
-    
+    sublen = _is.read(buffer, offset, sublen);
+
     if (sublen < 0)
       return -1;
     

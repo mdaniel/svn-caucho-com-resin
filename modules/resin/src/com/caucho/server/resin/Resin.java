@@ -506,6 +506,7 @@ public class Resin
       ResinVar resinVar = new ResinVar(getServerId(),
                                        getResinHome(),
                                        getRootDirectory(),
+                                       getLogDirectory(),
                                        getResinConf(),
                                        isProfessional(),
                                        null);

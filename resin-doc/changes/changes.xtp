@@ -13,6 +13,9 @@
 
 <s2 title="4.0.21 snapshot">
 <ul>
+<li>debian: updated resin/lib and resin/libexec64 (#4548, rep by dicr)</li>
+<li>health: change health.xml to dump snapshot (rep by Bill Au).</li>
+<li>servlet: added CsrfFilter (#4497, rep by Myeung Kyu Jang)</li>
 <li>cdi/ejb: DataSourceDefinition timing with JPA (#4488)</li>
 <li>vhost: i18n/idna parsing issues (#4583, rep by gfranz)</li>
 <li>cdi/servlet: add WebApp.runInSessionContext to support threads using session scope (#4049, rep by sweigersf)</li>

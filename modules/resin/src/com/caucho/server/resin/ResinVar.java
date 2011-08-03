@@ -44,6 +44,7 @@ public class ResinVar {
   private String _serverId;
   private Path _resinHome;
   private Path _resinRoot;
+  private Path _resinLog;
   private Path _resinConf;
   private boolean _isProfessional;
   private CloudServer _selfServer;
@@ -51,6 +52,7 @@ public class ResinVar {
   ResinVar(String serverId,
            Path resinHome,
            Path resinRoot,
+           Path resinLog,
            Path resinConf,
            boolean isProfessional,
            CloudServer selfServer)
@@ -58,6 +60,7 @@ public class ResinVar {
     _serverId = serverId;
     _resinHome = resinHome;
     _resinRoot = resinRoot;
+    _resinLog = resinLog;
     _resinConf = resinConf;
     _isProfessional = isProfessional;
     _selfServer = selfServer;
@@ -141,6 +144,11 @@ public class ResinVar {
   public Path getRootDirectory()
   {
     return getRoot();
+  }
+  
+  public Path getLogDirectory()
+  {
+    return _resinLog;
   }
 
   /**

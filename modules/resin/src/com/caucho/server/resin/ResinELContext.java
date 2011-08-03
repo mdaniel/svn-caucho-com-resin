@@ -41,6 +41,7 @@ abstract public class ResinELContext
     _resinVar = new ResinVar(getServerId(),
                              getResinHome(),
                              getRootDirectory(),
+                             getLogDirectory(),
                              getResinConf(),
                              isResinProfessional(),
                              null);
@@ -69,6 +70,8 @@ abstract public class ResinELContext
   abstract public Path getResinHome();
 
   abstract public Path getRootDirectory();
+  
+  abstract public Path getLogDirectory();
 
   abstract public Path getResinConf();
 
