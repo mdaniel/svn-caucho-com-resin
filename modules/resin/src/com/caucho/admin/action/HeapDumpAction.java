@@ -35,6 +35,7 @@ import javax.management.*;
 import com.caucho.config.ConfigException;
 import com.caucho.jmx.Jmx;
 import com.caucho.profile.HeapDump;
+import com.caucho.server.resin.Resin;
 import com.caucho.util.L10N;
 import com.caucho.vfs.Path;
 import com.caucho.vfs.Vfs;
@@ -58,21 +59,24 @@ public class HeapDumpAction implements AdminAction
     ObjectName name = new ObjectName(
       "com.sun.management:type=HotSpotDiagnostic");
     
-    if (hprofPath == null)
-      hprofPath = Vfs.lookup(System.getProperty("java.io.tmpdir"));
+    if (hprofPath == null) {
+      Resin resin = Resin.getCurrent();
+      
+      if (resin == null)
+        hprofPath = Vfs.lookup(System.getProperty("java.io.tmpdir"));
+      else
+        hprofPath = resin.getLogDirectory();
+      
+      hprofPath = hprofPath.lookup("heap.hprof");
+    } else if (hprofPath.isDirectory()) {
+      hprofPath = hprofPath.lookup("heap.hprof");
+    }
 
     hprofPath.getParent().mkdirs();
 
     //MemoryPoolAdapter memoryAdapter = new MemoryPoolAdapter();
     //if (memoryAdapter.getEdenUsed() > hprofPath.getDiskSpaceFree())
     //  throw new ConfigException(L.l("Not enough disk space for `{0}'", fileName));
-
-    if (hprofPath.isDirectory()) {
-      String s = hprofPath.getPath() + 
-                  Path.getFileSeparatorChar() + 
-                  "heap.hprof";
-      hprofPath = Vfs.lookup(s);
-    }
 
     // dumpHeap fails if file exists, it will not overwrite, so we have to delete
     if (hprofPath.exists() && hprofPath.isFile())
