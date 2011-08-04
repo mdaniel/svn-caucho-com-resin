@@ -3171,7 +3171,29 @@ database and to the resin log file using
     <th>Default</th>
   </tr>
   <tr>
-    <td colspan="4">None</td>
+    <td>hprof</td>
+    <td>Creates an HPROF format dump instead of human readable type.</td>
+    <td>boolean</td>
+    <td>false</td>
+  </tr>
+  <tr>
+    <td>hprof-path</td>
+    <td>Output path write HPROF files, if hprof = true</td>
+    <td>String</td>
+    <td>log/heap.hprof</td>
+  </tr>
+  <tr>
+    <td>hprof-path-format</td>
+    <td>Selects a format for generating dynamic path names using timestamp tokens.</td>
+    <td>String</td>
+    <td></td>
+  </tr>
+  <tr>
+    <td>log</td>
+    <td>If true, JMX dump is written to the server log in addition to 
+    being stored in the internal Resin database</td> 
+    <td>boolean</td>
+    <td>true</td>
   </tr>
 </attributes>
 
@@ -3185,6 +3207,33 @@ database and to the resin log file using
 
 &lt;/cluster>
 </example>
+
+<example title="Example: &lt;health:DumpHeap> in health.xml with hprof-path-format">
+&lt;cluster xmlns="http://caucho.com/ns/resin"
+         xmlns:resin="urn:java:com.caucho.resin"
+         xmlns:health="urn:java:com.caucho.health"
+         xmlns:ee="urn:java:ee">
+         
+  <health:DumpHeap>
+    <hprof>true</hprof>
+    <hprof-path-format>${resin.home}/log/dump-%H:%M:%S.%s.hprof</hprof-path-format>
+    <health:OnAbnormalStop/>
+  </health:DumpHeap>
+
+&lt;/cluster>
+</example>
+
+
+</defun>
+
+<defun title="&lt;health:DumpHprofHeap>" name="health:DumpHprofHeap">
+
+<parents>cluster</parents>
+<javadoc class="com.caucho.health.action.DumpHprofHeap"/>
+
+<description>
+<p>Shortcut for &lt;health:DumpHeap hprof='true'/></p>
+</description>
 
 </defun>
 
@@ -3210,7 +3259,11 @@ using <code>com.caucho.health.action.DumpJmx</code> as the class at
     <th>Default</th>
   </tr>
   <tr>
-    <td colspan="4">None</td>
+    <td>log</td>
+    <td>If true, JMX dump is written to the server log in addition to 
+    being stored in the internal Resin database</td> 
+    <td>boolean</td>
+    <td>false</td>
   </tr>
 </attributes>
 
@@ -3254,16 +3307,11 @@ as the class at <var>info</var> level.</p>
     <td>false</td>
   </tr>
   <tr>
-    <td>raw</td>
-    <td>Creates an HPROF format dump instead of human readable type.</td>
+    <td>log</td>
+    <td>If true, JMX dump is written to the server log in addition to 
+    being stored in the internal Resin database</td> 
     <td>boolean</td>
-    <td>false</td>
-  </tr>
-  <tr>
-    <td>hprofDir</td>
-    <td>Directory to write HPROF files, if raw = true</td>
-    <td>String</td>
-    <td>Current java temp directory</td>
+    <td>true</td>
   </tr>
 </attributes>
 
@@ -4945,10 +4993,10 @@ OnStart</a> will fire during this event also.</p>
     <td>7D</td>
   </tr>
   <tr>
-    <td>logDirectory</td>
+    <td>log-path</td>
     <td>PDF output directory</td>
     <td>String</td>
-    <td>Resin log directory</td>
+    <td>${resin.logDirectory}</td>
   </tr>
 </attributes>
 

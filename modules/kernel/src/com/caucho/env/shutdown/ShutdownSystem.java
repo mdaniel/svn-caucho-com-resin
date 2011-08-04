@@ -69,6 +69,9 @@ public class ShutdownSystem extends AbstractResinSubSystem
   
   private boolean _isEmbedded;
   
+  private AtomicReference<ExitCode> _exitCode = 
+    new AtomicReference<ExitCode>();
+  
   private ShutdownSystem(boolean isEmbedded)
   {
     _isEmbedded = isEmbedded;
@@ -130,6 +133,11 @@ public class ShutdownSystem extends AbstractResinSubSystem
   public LifecycleState getLifecycleState()
   {
     return _lifecycle.getState();
+  }
+  
+  public ExitCode getExitCode()
+  {
+    return _exitCode.get();
   }
   
   /**
@@ -229,6 +237,8 @@ public class ShutdownSystem extends AbstractResinSubSystem
 
     if (exitCode == null)
       exitCode = ExitCode.FAIL_SAFE_HALT;
+    
+    _exitCode.compareAndSet(null, exitCode);
 
     try {
       try {
@@ -288,6 +298,8 @@ public class ShutdownSystem extends AbstractResinSubSystem
   public void start()
   {
     _lifecycle.toActive();
+    
+    _exitCode.set(null);
     
     if (! _isEmbedded) {
       // _activeService.compareAndSet(null, this);

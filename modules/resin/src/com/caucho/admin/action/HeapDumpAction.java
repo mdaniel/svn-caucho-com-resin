@@ -29,16 +29,13 @@
 package com.caucho.admin.action;
 
 import java.io.*;
-import java.text.DecimalFormat;
-import java.util.*;
-import java.util.logging.*;
 
 import javax.management.*;
 
 import com.caucho.config.ConfigException;
 import com.caucho.jmx.Jmx;
 import com.caucho.profile.HeapDump;
-import com.caucho.util.*;
+import com.caucho.util.L10N;
 import com.caucho.vfs.Path;
 import com.caucho.vfs.Vfs;
 
@@ -60,40 +57,36 @@ public class HeapDumpAction implements AdminAction
   {
     ObjectName name = new ObjectName(
       "com.sun.management:type=HotSpotDiagnostic");
-
-    final String base = "hprof-" + serverId;
-    final Calendar date = new GregorianCalendar();
-    date.setTimeInMillis(Alarm.getCurrentTime());
-    DecimalFormat f = new DecimalFormat("00");
-    String suffix = f.format(date.get(Calendar.YEAR)) + "-" +
-                    f.format(date.get(Calendar.MONTH)) + "-" +
-                    f.format(date.get(Calendar.DAY_OF_MONTH)) + "-" +
-                    f.format(date.get(Calendar.HOUR_OF_DAY)) + "-" +
-                    f.format(date.get(Calendar.MINUTE)) + "-" +
-                    f.format(date.get(Calendar.SECOND));
-
+    
     if (hprofPath == null)
       hprofPath = Vfs.lookup(System.getProperty("java.io.tmpdir"));
 
-    final String fileName = base + "-" + suffix + ".hprof";
+    hprofPath.getParent().mkdirs();
 
     //MemoryPoolAdapter memoryAdapter = new MemoryPoolAdapter();
     //if (memoryAdapter.getEdenUsed() > hprofPath.getDiskSpaceFree())
     //  throw new ConfigException(L.l("Not enough disk space for `{0}'", fileName));
 
-    File file = new File(hprofPath.getFullPath(), fileName);
-    if (file.exists())
-      throw new ConfigException(L.l("File `{0}' exists.", file));
+    if (hprofPath.isDirectory()) {
+      String s = hprofPath.getPath() + 
+                  Path.getFileSeparatorChar() + 
+                  "heap.hprof";
+      hprofPath = Vfs.lookup(s);
+    }
+
+    // dumpHeap fails if file exists, it will not overwrite, so we have to delete
+    if (hprofPath.exists() && hprofPath.isFile())
+      hprofPath.remove();
 
     MBeanServer mBeanServer = Jmx.getGlobalMBeanServer();
     mBeanServer.invoke(name,
                        "dumpHeap",
-                       new Object[]{file.getCanonicalPath(), Boolean.TRUE},
+                       new Object[]{hprofPath.getPath(), Boolean.TRUE},
                        new String[]{String.class.getName(), boolean.class.getName()});
 
     final String result = L.l("Heap dump is written to `{0}'.\n"
                               + "To view the file on the target machine use\n"
-                              + "jvisualvm --openfile {0}", file);
+                              + "jvisualvm --openfile {0}", hprofPath.getPath());
 
     return result;
   }

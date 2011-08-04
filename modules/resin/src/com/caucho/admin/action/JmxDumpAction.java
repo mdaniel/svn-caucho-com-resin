@@ -37,6 +37,7 @@ import javax.management.openmbean.*;
 
 import com.caucho.config.ConfigException;
 import com.caucho.jmx.Jmx;
+import com.caucho.util.Alarm;
 import com.caucho.util.L10N;
 
 public class JmxDumpAction extends AbstractJmxAction implements AdminAction
@@ -60,7 +61,8 @@ public class JmxDumpAction extends AbstractJmxAction implements AdminAction
 
     StringBuilder dump = new StringBuilder();
     
-    dump.append("JMX Dump:\n");
+    dump.append("JMX Dump generated " + new Date(Alarm.getCurrentTime()));
+    dump.append("\n");
     
     if (server == null)
       return dump.toString();

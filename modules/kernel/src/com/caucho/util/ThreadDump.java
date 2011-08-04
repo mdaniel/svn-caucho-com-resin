@@ -29,12 +29,8 @@
 
 package com.caucho.util;
 
-import java.lang.management.ManagementFactory;
-import java.lang.management.ThreadInfo;
-import java.lang.management.ThreadMXBean;
-import java.util.Arrays;
-import java.util.Comparator;
-import java.util.concurrent.atomic.AtomicLong;
+import java.lang.management.*;
+import java.util.*;
 import java.util.concurrent.atomic.AtomicReference;
 import java.util.logging.Logger;
 
@@ -49,8 +45,6 @@ public class ThreadDump
 
   private static AtomicReference<ThreadDump> _threadDumpRef = 
     new AtomicReference<ThreadDump>();
-  
-  public static final long CACHE_TIME = 30L * 1000L;
   
   /**
    * Returns the singleton instance, creating if necessary.   An instance of 
@@ -82,10 +76,7 @@ public class ThreadDump
     
     return threadDump;
   }
-
-  private final AtomicLong _lastDumpTime = new AtomicLong();
-  private String _lastDump;
-
+  
   protected ThreadDump()
   {
     
@@ -101,25 +92,16 @@ public class ThreadDump
   }
   
   /**
-   * Log all threads to com.caucho.util.ThreadDump at info level.  Never
-   * uses cached dump.
-   */
-  public void dumpThreadsNoCache()
-  {
-    log.info(getThreadDump(-1, false));
-  }
-
-  /**
    * Returns dump of all threads.  Uses cached dump if recent (30s).
    */
   public String getThreadDump()
   {
-    return (getThreadDump(CACHE_TIME, false));
+    return getThreadDump(false);
   }
 
   /**
-   * Log threads to com.caucho.util.ThreadDump at info level.  Uses cached 
-   * dump if recent (30s)
+   * Log threads to com.caucho.util.ThreadDump at info level.  Optionally 
+   * uses cached dump.
    * @param onlyActive if true only running threads are logged
    */
   public void dumpThreads(boolean onlyActive)
@@ -128,43 +110,10 @@ public class ThreadDump
   }
 
   /**
-   * Returns dump of threads.  Uses cached dump if recent (30s).
+   * Returns dump of threads.  Optionally uses cached dump.
    * @param onlyActive if true only running threads are logged
    */
   public String getThreadDump(boolean onlyActive)
-  {
-    return (getThreadDump(CACHE_TIME, onlyActive));
-  }
-
-  /**
-   * Log threads to com.caucho.util.ThreadDump at info level.  Optionally 
-   * uses cached dump.
-   * @param timeout cache time
-   * @param onlyActive if true only running threads are logged
-   */
-  public void dumpThreads(long timeout, boolean onlyActive)
-  {
-    log.info(getThreadDump(timeout, onlyActive));
-  }
-
-  /**
-   * Returns dump of threads.  Optionally uses cached dump.
-   * @param timeout cache time
-   * @param onlyActive if true only running threads are logged
-   */
-  public String getThreadDump(long timeout, boolean onlyActive)
-  {
-    long now = Alarm.getCurrentTime();
-    long lastDumpTime = _lastDumpTime.get();
-
-    if ((lastDumpTime + timeout) < now && _lastDumpTime.compareAndSet(lastDumpTime, now)) {
-      _lastDump = getThreadDumpImpl(onlyActive);
-    }
-    
-    return _lastDump;
-  }
-
-  protected String getThreadDumpImpl(boolean onlyActive)
   {
     ThreadMXBean threadBean = ManagementFactory.getThreadMXBean();
 
@@ -172,7 +121,7 @@ public class ThreadDump
     ThreadInfo []info = threadBean.getThreadInfo(ids, 32);
 
     StringBuilder sb = new StringBuilder();
-    sb.append("Thread Dump:\n");
+    sb.append("Thread Dump generated " + new Date(Alarm.getCurrentTime()));
 
     Arrays.sort(info, new ThreadCompare());
     

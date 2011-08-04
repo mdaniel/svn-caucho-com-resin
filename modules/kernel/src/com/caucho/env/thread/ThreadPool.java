@@ -589,7 +589,7 @@ public final class ThreadPool {
                   + " starting=" + getThreadStartingCount()
                   + " max=" + getThreadMax());
 
-      ThreadDump.create().dumpThreadsNoCache();
+      ThreadDump.create().dumpThreads();
 
       OverflowThread item = new OverflowThread(task);
       item.start();

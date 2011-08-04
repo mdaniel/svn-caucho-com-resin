@@ -427,6 +427,8 @@ once per period.</p>
 
 <include-defun name="health:DumpHeap"/>
 
+<include-defun name="health:DumpHprofHeap"/>
+
 <include-defun name="health:DumpJmx"/>
 
 <include-defun name="health:DumpThreads"/>
