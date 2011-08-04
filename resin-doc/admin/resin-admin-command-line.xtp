@@ -162,13 +162,13 @@ the /resin-admin page.</p>
 <s1 title="heap-dump: producing JVM memory heap dump">
 <p>To produce a heap dump resin provides <code>heap-dump</code> command. With
 Resin Open Source, <code>heap-dump</code> will produce a standard heap dump
-file and put it into a temporary directory on a remote machine.</p>
+file and put it into the Resin log directory on the remote machine.</p>
 <p><code>bin/resin.sh [-conf &lt;file>] heap-dump -user &lt;user> -password &lt;password> [-raw]</code></p>
 <example title="Example: producing a heap dump on Resin Open Source">bin/resin.sh -conf conf/resin.conf heap-dump -user foo -password test -raw
 
-Heap dump is written to `/tmp/hprof-default-2011-04-08-02-51-31.hprof'.
+Heap dump is written to `/var/log/resin/heap.hprof'.
 To view the file on the target machine use
-jvisualvm --openfile /tmp/hprof-default-2011-04-08-02-51-31.hprof
+jvisualvm --openfile /var/log/resin/heap.hprof
 
 </example>
 
