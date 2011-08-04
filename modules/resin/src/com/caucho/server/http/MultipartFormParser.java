@@ -48,10 +48,10 @@ import java.util.HashMap;
 /**
  * Multipart form handling.
  */
-class MultipartForm {
+class MultipartFormParser {
   private static final Logger log
-    = Logger.getLogger(MultipartForm.class.getName());
-  static final L10N L = new L10N(MultipartForm.class);
+    = Logger.getLogger(MultipartFormParser.class.getName());
+  static final L10N L = new L10N(MultipartFormParser.class);
   
   static void parsePostData(HashMapImpl<String,String[]> table,
                             List<Part> parts,
