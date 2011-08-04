@@ -3214,11 +3214,11 @@ database and to the resin log file using
          xmlns:health="urn:java:com.caucho.health"
          xmlns:ee="urn:java:ee">
          
-  <health:DumpHeap>
-    <hprof>true</hprof>
-    <hprof-path-format>${resin.home}/log/dump-%H:%M:%S.%s.hprof</hprof-path-format>
-    <health:OnAbnormalStop/>
-  </health:DumpHeap>
+  &lt;health:DumpHeap>
+    &lt;hprof>true&lt;/hprof>
+    &lt;hprof-path-format>${resin.home}/log/dump-%H:%M:%S.%s.hprof&lt;/hprof-path-format>
+    &lt;health:OnAbnormalStop/>
+  &lt;/health:DumpHeap>
 
 &lt;/cluster>
 </example>
@@ -4800,6 +4800,46 @@ heap memory on JVMs where there is no tenured pool.</p>
       &lt;/health:IfCron>
     &lt;/health:Not>
   &lt;/health:Restart> 
+
+&lt;/cluster>
+</example>
+
+</defun>
+
+<defun title="&lt;health:OnAbnormalStop>" name="health:OnAbnormalStop">
+
+<parents>cluster</parents>
+<javadoc class="com.caucho.health.predicate.OnAbnormalStop"/>
+
+<description>
+<p>Qualifies an action to match only when Resin is stopping with an non-OK 
+exit code.</p>
+</description>
+
+<attributes>
+  <tr>
+    <th>Attribute</th>
+    <th>Description</th>
+    <th>Type</th>
+    <th>Default</th>
+  </tr>
+  <tr>
+    <td>normal-exit-code</td>
+    <td>Add an OK exit code; one that will not trigger this condition.</td>
+    <td><a javadoc="com.caucho.env.shutdown.ExitCode"/></td>
+    <td>[OK,MODIFIED,WATCHDOG_EXIT]</td>
+  </tr>
+</attributes>
+
+<example title="Example: &lt;health:OnAbnormalStop> in health.xml">
+&lt;cluster xmlns="http://caucho.com/ns/resin"
+         xmlns:resin="urn:java:com.caucho.resin"
+         xmlns:health="urn:java:com.caucho.health"
+         xmlns:ee="urn:java:ee">
+
+  &lt;health:Snapshot>
+    &lt;health:OnAbnormalStop/>
+  &lt;/health:Snapshot 
 
 &lt;/cluster>
 </example>

@@ -527,6 +527,8 @@ to execute only during a Resin lifecycle state change.</p>
 
 <include-defun name="health:OnStop"/>
 
+<include-defun name="health:OnAbnormalStop"/>
+
 <include-defun name="health:OnRestart"/>
 
 </s2>
