@@ -1153,7 +1153,7 @@ public final class HttpServletRequestImpl extends AbstractCauchoRequest
         _parts = new ArrayList<Part>();
 
         try {
-          MultipartForm.parsePostData(form,
+          MultipartFormParser.parsePostData(form,
                                       _parts,
                                       getStream(false), boundary.toString(),
                                       this,

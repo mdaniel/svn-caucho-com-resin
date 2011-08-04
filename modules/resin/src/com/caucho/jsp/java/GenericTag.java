@@ -348,7 +348,8 @@ abstract public class GenericTag extends JspContainerNode
   {
     super.generateClassEpilogue(out);
     
-    if (_tag.getAnalyzedTag().getHasInjection()) {
+    if (_tag.getAnalyzedTag().getHasInjection()
+        && ! _tag.getAndSetInjectFactory(true)) {
       out.println();
       out.print("static ");
       out.printClass(ReferenceFactory.class);

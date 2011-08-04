@@ -48,8 +48,9 @@ import com.caucho.inject.Module;
 @Module
 public class DisposesProducer<T,X> implements Producer<T>
 {
+  private final InjectManager _manager;
   private final Bean<X> _producerBean;
-  private final ReferenceFactory<X> _referenceFactory;
+  private ReferenceFactory<X> _referenceFactory;
   private final AnnotatedMethod<? super X> _disposesMethod;
 
   private Arg<?> []_disposesArgs;
@@ -59,8 +60,8 @@ public class DisposesProducer<T,X> implements Producer<T>
                    AnnotatedMethod<? super X> disposesMethod,
                    Arg<?> []disposesArgs)
   {
+    _manager = manager;
     _producerBean = producerBean;
-    _referenceFactory = manager.getReferenceFactory(producerBean);
     _disposesMethod = disposesMethod;
     _disposesArgs = disposesArgs;
 
@@ -92,6 +93,9 @@ public class DisposesProducer<T,X> implements Producer<T>
       try {
         ProducesCreationalContext<X> env
           = new ProducesCreationalContext<X>(_producerBean, cxt);
+        
+        if (_referenceFactory == null)
+        _referenceFactory = _manager.getReferenceFactory(_producerBean);
           
         X producer = _referenceFactory.create(env, null, null);
           

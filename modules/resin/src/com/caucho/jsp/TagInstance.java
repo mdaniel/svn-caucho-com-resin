@@ -79,6 +79,7 @@ public class TagInstance {
   private ArrayList<Object> _attributeValues = new ArrayList<Object>();
 
   private boolean _hasBodyContent;
+  private boolean _isInjectFactory;
   
   public TagInstance(ParseTagManager manager)
   {
@@ -483,6 +484,15 @@ public class TagInstance {
     }
 
     return true;
+  }
+
+  public boolean getAndSetInjectFactory(boolean value)
+  {
+    boolean isSet = _isInjectFactory;
+    
+    _isInjectFactory = true;
+    
+    return isSet;
   }
 
   static class Varies {

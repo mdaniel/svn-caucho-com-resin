@@ -13,6 +13,9 @@
 
 <s2 title="4.0.21 snapshot">
 <ul>
+<li>jni: changed crc64/readdir code to user readdir_r (#4698, rep by Peter Mei)</li>
+<li>jsp: tag compilation issues with @Inject (#4690, rep by mnsh)</li>
+<li>cdi: @Disposes introspection needs to be lazy on binding (#4681, rep by Dirk Mahler)</li>
 <li>debian: updated resin/lib and resin/libexec64 (#4548, rep by dicr)</li>
 <li>health: change health.xml to dump snapshot (rep by Bill Au).</li>
 <li>servlet: added CsrfFilter (#4497, rep by Myeung Kyu Jang)</li>
@@ -38,7 +41,7 @@
 <li>install: ./configure changes for --disable-64bit to compile 32bit on a 64bit system (#4675, rep by nits4resin)</li>
 <li>load-balance: add disable-soft to disable round-robin, but not session dispatching (#3365, rep by Cameron Stokes)</li>
 <li>debian: resin-eclipselink was not added to debian files (#4547, rep by dicr)</li>
-<li>cache/db: mmap synchronization udpates</li>
+<li>cache/db: mmap synchronization updates</li>
 </ul>
 </s2>
 

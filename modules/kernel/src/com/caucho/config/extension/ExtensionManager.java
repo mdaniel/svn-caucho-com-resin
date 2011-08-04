@@ -234,7 +234,7 @@ public class ExtensionManager
     for (ExtensionMethod method : item.getExtensionMethods()) {
       Method javaMethod = method.getMethod();
       Class<?> rawType = method.getBaseType().getRawClass();
-      
+
       ExtensionObserver observer;
       observer = new ExtensionObserver(ext,
                                        method.getMethod(),
