@@ -29,12 +29,98 @@
 
 package com.caucho.boot;
 
-public class AbstractBootCommand implements BootCommand {
+import com.caucho.util.L10N;
+
+import java.util.HashSet;
+import java.util.Set;
+
+public abstract class AbstractBootCommand implements BootCommand {
+  private static L10N _L;
+
   @Override
-  public int doCommand(WatchdogArgs args,
-                       WatchdogClient client)
+  public String getName()
   {
-    return 0;
+    return "abstract-boot-command";
+  }
+
+  public void validateArgs(String[] args) throws BootArgumentException
+  {
+    Set<String> options = getOptions();
+    Set<String> valueKeys = getValueKeys();
+    Set<String> intValueKeys = getIntValueKeys();
+
+    for (int i = 0; i < args.length; i++) {
+      final String arg = args[i];
+
+      if (getName().equals(arg)) {
+        continue;
+      }
+
+      if (arg.startsWith("-J")
+          || arg.startsWith("-D")
+          || arg.startsWith("-X")) {
+        continue;
+      }
+
+      if (arg.equals("-d64") || arg.equals("-d32")) {
+        continue;
+      }
+
+      if (options.contains(arg))
+        continue;
+
+      if (! valueKeys.contains(arg))
+        throw new BootArgumentException(L().l("unknown argument `{0}'", arg));
+
+      if (i + 1 == args.length)
+        throw new BootArgumentException(L().l("option `{0}' requires a value",
+                                              arg));
+      String value = args[++i];
+
+      if (valueKeys.contains(value) || options.contains(value))
+        throw new BootArgumentException(L().l("option `{0}' requires a value",
+                                              arg));
+
+      if (intValueKeys.contains(arg)) {
+        try {
+          Long.parseLong(value);
+        } catch (NumberFormatException e) {
+          throw new BootArgumentException(L().l("`{0}' argument must be a number: `{1}'", arg, value));
+        }
+      }
+    }
+  }
+
+  private static L10N L()
+  {
+    if (_L == null)
+      _L = new L10N(AbstractStartCommand.class);
+
+    return _L;
+  }
+
+  @Override
+  public Set<String> getOptions()
+  {
+    return new HashSet<String>();
+  }
+
+  @Override
+  public Set<String> getValueKeys()
+  {
+    return new HashSet<String>();
+  }
+
+  @Override
+  public Set<String> getIntValueKeys()
+  {
+    return new HashSet<String>();
+  }
+
+  @Override
+  public boolean isRetry()
+  {
+    return false;
   }
 
   @Override

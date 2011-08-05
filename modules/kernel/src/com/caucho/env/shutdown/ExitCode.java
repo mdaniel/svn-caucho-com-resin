@@ -48,5 +48,6 @@ public enum ExitCode
   NETWORK,
   WATCHDOG_EXIT,
   CPU,
-  UNKNOWN;
+  UNKNOWN,
+  UNKNOWN_ARGUMENT;
 }

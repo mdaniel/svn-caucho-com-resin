@@ -36,7 +36,7 @@ import com.caucho.util.L10N;
 
 import java.lang.reflect.Constructor;
 
-public class AbstractScalingCommand extends AbstractBootCommand
+public abstract class AbstractScalingCommand extends AbstractBootCommand
 {
   private static final L10N L = new L10N(AbstractScalingCommand.class);
   private static Class scalingClientClass = null;

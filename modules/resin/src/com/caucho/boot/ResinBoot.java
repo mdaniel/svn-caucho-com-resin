@@ -43,7 +43,6 @@ import com.caucho.config.inject.InjectManager;
 import com.caucho.config.lib.ResinConfigLibrary;
 import com.caucho.env.service.ResinSystem;
 import com.caucho.env.shutdown.ExitCode;
-import com.caucho.loader.DynamicClassLoader;
 import com.caucho.loader.Environment;
 import com.caucho.loader.LibraryLoader;
 import com.caucho.server.resin.ResinELContext;
@@ -181,6 +180,10 @@ public class ResinBoot {
     }
   }
 
+  BootCommand getCommand() {
+    return _commandMap.get(_args.getStartMode());
+  }
+
   boolean start()
     throws Exception
   {
@@ -207,6 +210,7 @@ public class ResinBoot {
 
       return false;
     }
+    /*
     else if (_args.isStart()) {
       try {
         _client.startWatchdog(_args.getArgv());
@@ -236,6 +240,7 @@ public class ResinBoot {
 
       return false;
     }
+    */
     else if (_args.isStop()) {
       try {
         _client.stopWatchdog();
@@ -322,9 +327,11 @@ public class ResinBoot {
 
       return false;
     }
+    /*
     else if (_args.isConsole()) {
       return _client.startConsole() != 0;
     }
+    */
     else if (_args.isWatchdogConsole()) {
       WatchdogManager.main(_args.getRawArgv());
     }
@@ -339,14 +346,20 @@ public class ResinBoot {
 
       return true;
     }
-    
+
     BootCommand command = _commandMap.get(_args.getStartMode());
-    
+
     if (command != null && _args.isHelp()) {
       command.usage();
       
       return false;
-    } else if (command != null) {
+    }
+    else if (command != null && command.isRetry()) {
+      int code = command.doCommand(_args, _client);
+
+      return code != 0;
+    }
+    else if (command != null) {
       int code = command.doCommand(_args, _client);
 
       System.exit(code);
@@ -377,8 +390,9 @@ public class ResinBoot {
       }
     }
 
+    ResinBoot boot = null;
     try {
-      ResinBoot boot = new ResinBoot(argv);
+      boot = new ResinBoot(argv);
 
       while (boot.start()) {
         try {
@@ -390,6 +404,13 @@ public class ResinBoot {
       }
       
       System.exit(ExitCode.OK.ordinal());
+    } catch (BootArgumentException e) {
+      System.out.println(e.getMessage());
+
+      if (boot.getCommand() != null)
+        boot.getCommand().usage();
+
+      System.exit(ExitCode.UNKNOWN_ARGUMENT.ordinal());
     } catch (ConfigException e) {
       System.out.println(e.getMessage());
 
@@ -418,6 +439,7 @@ public class ResinBoot {
   }
   
   static {
+    _commandMap.put(StartMode.CONSOLE, new ConsoleCommand());
     _commandMap.put(StartMode.DEPLOY_COPY, new DeployCopyCommand());
     _commandMap.put(StartMode.DEPLOY, new DeployCommand());
     _commandMap.put(StartMode.DEPLOY_LIST, new DeployListCommand());
@@ -438,6 +460,7 @@ public class ResinBoot {
     _commandMap.put(StartMode.LOG_LEVEL, new LogLevelCommand());
     _commandMap.put(StartMode.PDF_REPORT, new PdfReportCommand());
     _commandMap.put(StartMode.PROFILE, new ProfileCommand());
+    _commandMap.put(StartMode.START, new StartCommand());
     _commandMap.put(StartMode.THREAD_DUMP, new ThreadDumpCommand());
 
     _commandMap.put(StartMode.UNDEPLOY, new UnDeployCommand());

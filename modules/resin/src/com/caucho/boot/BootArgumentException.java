@@ -24,26 +24,15 @@
  *   59 Temple Place, Suite 330
  *   Boston, MA 02111-1307  USA
  *
- * @author Scott Ferguson
+ * @author Alex Rojkov
  */
 
 package com.caucho.boot;
 
-import java.util.Set;
-
-public interface BootCommand {
-  public String getName();
-
-  public int doCommand(WatchdogArgs args, WatchdogClient client)
-    throws BootArgumentException;
-
-  public boolean isRetry();
-
-  public Set<String> getOptions();
-
-  public Set<String> getValueKeys();
-
-  public Set<String> getIntValueKeys();
-
-  public void usage();
+public class BootArgumentException extends Exception
+{
+  public BootArgumentException(String message)
+  {
+    super(message);
+  }
 }

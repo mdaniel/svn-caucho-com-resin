@@ -40,6 +40,7 @@ public class EnableCommand extends AbstractScalingCommand
 
   @Override
   public int doCommand(WatchdogArgs args, WatchdogClient client)
+    throws BootArgumentException
   {
     if (! isPro()) {
       System.out.println("command 'enable' is only available with Resin Pro");

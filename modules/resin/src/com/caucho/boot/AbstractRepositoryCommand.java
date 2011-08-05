@@ -42,6 +42,7 @@ public abstract class AbstractRepositoryCommand extends AbstractBootCommand {
   @Override
   public final int doCommand(WatchdogArgs args,
                              WatchdogClient client)
+    throws BootArgumentException
   {
     WebAppDeployClient deployClient = null;
 
