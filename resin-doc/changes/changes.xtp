@@ -13,6 +13,7 @@
 
 <s2 title="4.0.21 snapshot">
 <ul>
+<li>git: corrupted .git on startup (#4701, rep by Bill Au)</li>
 <li>cloud: added deploy-config and cluster-config: scheme (#4604)</li>
 <li>i18n: utf8writer issues with surrogate pairs (#4700, rep by SHinomiya Nobuaki)</li>
 <li>install: ./configure changes for Solaris cc (#4678, rep by nits4resin)</li>

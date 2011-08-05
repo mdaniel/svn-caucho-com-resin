@@ -1059,7 +1059,7 @@ public class Resin
     try {
       RepositoryScheme.create("cluster-config", 
                               getStage() + "/config/resin",
-                              getResinDataDirectory().lookup("config"));
+                              RootDirectorySystem.getCurrentDataDirectory().lookup("config"));
     } catch (Exception e) {
       log().log(Level.WARNING, e.toString(), e);
     }

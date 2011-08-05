@@ -162,8 +162,11 @@ public class GitSystem extends AbstractResinSubSystem
       is = path.openRead();
 
       String hex = is.readLine();
-
-      return hex.trim();
+      
+      if (hex != null)
+        return hex.trim();
+      else
+        return null;
     } catch (IOException e) {
       log.log(Level.FINE, e.toString(), e);
 
