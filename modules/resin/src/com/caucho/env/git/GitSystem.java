@@ -117,18 +117,7 @@ public class GitSystem extends AbstractResinSubSystem
 
   public String getMaster()
   {
-    try {
-      Path path = _root.lookup("refs/heads/master");
-      ReadStream is = path.openRead();
-
-      try {
-        return is.readLine();
-      } finally {
-        is.close();
-      }
-    } catch (IOException e) {
-      throw new RuntimeException(e);
-    }
+    return getTag("heads/master");
   }
 
   /**
@@ -152,34 +141,36 @@ public class GitSystem extends AbstractResinSubSystem
   
   public String getTag(String tag)
   {
-    Path path = _root.lookup("refs").lookup(tag);
+    Path path = getRefPath(tag);
 
-    if (! path.canRead())
-      return null;
-
-    ReadStream is = null;
-    try {
-      is = path.openRead();
-
-      String hex = is.readLine();
-      
-      if (hex != null)
-        return hex.trim();
-      else
+    synchronized (this) {
+      if (! path.canRead())
         return null;
-    } catch (IOException e) {
-      log.log(Level.FINE, e.toString(), e);
 
-      return null;
-    } finally {
-      if (is != null)
-        is.close();
+      ReadStream is = null;
+      try {
+        is = path.openRead();
+
+        String hex = is.readLine();
+
+        if (hex != null)
+          return hex.trim();
+        else
+          return null;
+      } catch (IOException e) {
+        log.log(Level.FINE, e.toString(), e);
+
+        return null;
+      } finally {
+        if (is != null)
+          is.close();
+      }
     }
   }
 
   public void writeTag(String tag, String hex)
   {
-    Path path = _root.lookup("refs").lookup(tag);
+    Path path = getRefPath(tag);
 
     try {
       path.getParent().mkdirs();
@@ -187,19 +178,21 @@ public class GitSystem extends AbstractResinSubSystem
       log.log(Level.FINEST, e.toString(), e);
     }
 
-    WriteStream out = null;
-    try {
-      out = path.openWrite();
-
-      out.println(hex);
-    } catch (IOException e) {
-      log.log(Level.FINE, e.toString(), e);
-    } finally {
+    synchronized (this) {
+      WriteStream out = null;
       try {
-        if (out != null)
-          out.close();
-      } catch (Exception e) {
-        log.log(Level.FINEST, e.toString(), e);
+        out = path.openWrite();
+
+        out.println(hex);
+      } catch (IOException e) {
+        log.log(Level.FINE, e.toString(), e);
+      } finally {
+        try {
+          if (out != null)
+            out.close();
+        } catch (Exception e) {
+          log.log(Level.FINEST, e.toString(), e);
+        }
       }
     }
   }
@@ -207,7 +200,7 @@ public class GitSystem extends AbstractResinSubSystem
   public String []listRefs(String dir)
   {
     try {
-      Path path = _root.lookup("refs").lookup(dir);
+      Path path = getRefPath(dir);
 
       if (path.isDirectory())
         return path.list();
@@ -220,7 +213,7 @@ public class GitSystem extends AbstractResinSubSystem
     }
   }
 
-  public Path getRefPath(String path)
+  private Path getRefPath(String path)
   {
     return _root.lookup("refs").lookup(path);
   }

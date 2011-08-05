@@ -33,6 +33,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.util.Map;
+import java.util.concurrent.atomic.AtomicReference;
 
 import com.caucho.env.git.GitCommit;
 import com.caucho.env.git.GitObjectStream;
@@ -49,6 +50,8 @@ public class FileRepository extends AbstractRepository
   private static final L10N L = new L10N(FileRepository.class);
 
   private GitSystem _git;
+  
+  private AtomicReference<String> _rootHash = new AtomicReference<String>();
   
   public FileRepository()
   {
@@ -126,7 +129,16 @@ public class FileRepository extends AbstractRepository
   @Override
   public String getRepositoryRootHash()
   {
+    String rootHash = _rootHash.get();
+    
+    if (rootHash != null && rootHash.length() > 6)
+      return rootHash;
+    
     String value = _git.getTag(getRepositoryTag());
+    
+    _rootHash.compareAndSet(null, value);
+    
+    value = _rootHash.get();
     
     if (value != null && value.length() > 6)
       return value;
@@ -140,8 +152,11 @@ public class FileRepository extends AbstractRepository
   @Override
   public void setRepositoryRootHash(String sha1)
   {
-    if (sha1 != null)
+    if (sha1 != null) {
+      _rootHash.set(sha1);
+
       _git.writeTag(getRepositoryTag(), sha1);
+    }
   }
 
   /**
