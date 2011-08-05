@@ -41,6 +41,7 @@ import java.net.SocketTimeoutException;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.concurrent.atomic.AtomicReference;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -85,7 +86,8 @@ class WatchdogChildProcess
   private WatchdogActor _watchdogActor;
 
   private Socket _childSocket;
-  private Process _process;
+  private AtomicReference<Process> _processRef
+    = new AtomicReference<Process>();
   private OutputStream _stdOs;
   private int _pid;
 
@@ -168,16 +170,18 @@ class WatchdogChildProcess
 
       jvmOut = createJvmOut();
       
-      _process = createProcess(port, jvmOut);
+      Process process = createProcess(port, jvmOut); 
       
-      if (_process != null) {
-        if (_process instanceof JniProcess)
-          _pid = ((JniProcess) _process).getPid();
+      if (process != null) {
+        _processRef.compareAndSet(null, process);
+        
+        if (process instanceof JniProcess)
+          _pid = ((JniProcess) process).getPid();
         else
           _pid = 0;
 
-        InputStream stdIs = _process.getInputStream();
-        _stdOs = _process.getOutputStream();
+        InputStream stdIs = process.getInputStream();
+        _stdOs = process.getOutputStream();
 
         WatchdogProcessLogThread logThread
           = new WatchdogProcessLogThread(stdIs, jvmOut);
@@ -189,7 +193,7 @@ class WatchdogChildProcess
         message(new StartInfoMessage(_watchdog.isRestart(),
                                      _watchdog.getRestartMessage()));
 
-        _status = _process.waitFor();
+        _status = process.waitFor();
 
         logStatus(_status);
       }
@@ -206,7 +210,7 @@ class WatchdogChildProcess
       if (ss != null) {
         try {
           ss.close();
-        } catch (Exception e) {
+        } catch (Throwable e) {
         }
       }
 
@@ -310,13 +314,23 @@ class WatchdogChildProcess
   {
     _lifecycle.toDestroy();
 
+    Process process = _processRef.getAndSet(null);
+
+    if (process != null) {
+      try {
+        process.destroy();
+      } catch (Exception e) {
+        log.log(Level.FINE, e.toString(), e);
+      }
+    }
+
     OutputStream stdOs = _stdOs;
     _stdOs = null;
 
     if (stdOs != null) {
       try {
         stdOs.close();
-      } catch (Exception e) {
+      } catch (Throwable e) {
         log.log(Level.FINE, e.toString(), e);
       }
     }
@@ -327,21 +341,12 @@ class WatchdogChildProcess
     if (childSocket != null) {
       try {
         childSocket.close();
-      } catch (Exception e) {
+      } catch (Throwable e) {
         log.log(Level.FINE, e.toString(), e);
       }
     }
-
-    Process process = _process;
-    _process = null;
-
+    
     if (process != null) {
-      try {
-        process.destroy();
-      } catch (Exception e) {
-        log.log(Level.FINE, e.toString(), e);
-      }
-
       try {
         process.waitFor();
       } catch (Exception e) {

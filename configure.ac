@@ -760,8 +760,10 @@ if test -z "${LD_SHLIB}"; then
     linux*)
       LD_SHLIB=${CC}
 
+      CFLAGS="$CFLAGS -pthread -fPIC -fno-omit-frame-pointer -O2"
+
       if test -n "$b64"; then
-        CFLAGS="$CFLAGS -m64 -fPIC"
+        CFLAGS="$CFLAGS -m64"
         LDFLAGS_SHLIB="-shared -fPIC"
       fi
       if test -n "$b64_jni"; then
@@ -771,34 +773,37 @@ if test -z "${LD_SHLIB}"; then
       ;;
 
     *solaris*)
+      LDFLAGS_SHLIB=""
       if test -n "$is_gcc"; then
         CFLAGS_SHLIB="-fPIC"
-        CFLAGS="$CFLAGS -fPIC"
-        CFLAGS_JNI="$CFLAGS_JNI -fPIC"
+
+        CFLAGS="$CFLAGS -fPIC -G -fno-omit-frame-pointer"
+        CFLAGS_JNI="$CFLAGS_JNI -fPIC -G -fno-omit-frame-pointer"
 
         if test -n "$b64"; then
-          CFLAGS="$CFLAGS -m64 -G"
-          LDFLAGS_SHLIB="-m64 -R/usr/sfw/lib/64 -R/usr/local/lib/sparcv9"
+          CFLAGS="$CFLAGS -m64"
+          LDFLAGS_SHLIB="-m64 -R /usr/sfw/lib/64 -R /usr/local/lib/sparcv9"
         fi
         if test -n "$b64_jni"; then
-          CFLAGS_JNI="$CFLAGS_JNI -m64 -G"
-          LDFLAGS_SHLIB="-m64 -R/usr/sfw/lib/64 -R/usr/local/lib/sparcv9"
+          CFLAGS_JNI="$CFLAGS_JNI -m64"
+          LDFLAGS_SHLIB="-m64 -R /usr/sfw/lib/64 -R /usr/local/lib/sparcv9"
         fi
-      else
-        CFLAGS_SHLIB="-KPIC"
 
-        if test -n "$b64"; then
-          CFLAGS="$CFLAGS -xarch=v9"
-        fi
-        if test -n "$b64_jni"; then
-          CFLAGS_JNI="$CFLAGS_JNI -xarch=v9"
-        fi
-      fi
-
-      if test -n "$is_gnu_ld"; then
         LDFLAGS_SHLIB="$LDFLAGS_SHLIB -shared"
       else
-        LDFLAGS_SHLIB="$LDFLAGS_SHLIB -shared -fPIC"
+        CFLAGS="-mt -KPIC -xO2"
+        CFLAGS_SHLIB="-mt -KPIC -xO2"
+
+        if test -n "$b64"; then
+          CFLAGS="$CFLAGS -m64"
+        fi
+        if test -n "$b64_jni"; then
+          CFLAGS_JNI="$CFLAGS_JNI -m64"
+          LDFLAGS_SHLIB="$LDFLAGS_SHLIB -m64 -G -mt -z defs -z text"
+          LDFLAGS_SHLIB="$LDFLAGS_SHLIB -R/usr/lib/64:/usr/sfw/lib/64:/usr/local/lib/sparcv9 -YP,/usr/lib/64:/usr/sfw/lib/64:/usr/local/lib/sparcv9"
+        fi
+
+        LDFLAGS_SHLIB="$LDFLAGS_SHLIB -G -mt -z defs -z text"
       fi
       ;;
 
@@ -967,7 +972,7 @@ case "$target_os" in
   *solaris*)
 	jni_os=solaris
 	CFLAGS="$CFLAGS -D__SOLARIS__"
-	PROXY_LIBS='-lnsl -lsocket -lthread'
+	PROXY_LIBS='-lnsl -lsocket -lthread -lc'
 	;;
 
   *freebsd*)

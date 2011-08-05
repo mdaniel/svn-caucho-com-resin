@@ -1445,7 +1445,7 @@ public class Resin
   {
     try {
       Environment.init();
-
+      
       validateEnvironment();
       
       ResinArgs args = new ResinArgs(argv);

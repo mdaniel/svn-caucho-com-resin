@@ -29,8 +29,6 @@
 
 package com.caucho.log;
 
-import com.caucho.loader.EnvironmentLocal;
-
 import java.lang.ref.SoftReference;
 import java.util.Collections;
 import java.util.Enumeration;
@@ -42,15 +40,8 @@ import java.util.logging.Logger;
  * Implementation of the log manager.
  */
 public class LogManagerImpl extends LogManager {
-  private static final String LOG_LOCAL = "caucho.log.manager";
-
   private static final HashMap<String,SoftReference<EnvironmentLogger>> _envLoggers
     = new HashMap<String,SoftReference<EnvironmentLogger>>();
-
-  // custom loggers set by the user.
-  private static final EnvironmentLocal<HashMap<String,Logger>> _localLoggers
-    = new EnvironmentLocal<HashMap<String,Logger>>();
-    
 
   public LogManagerImpl()
   {
@@ -59,10 +50,23 @@ public class LogManagerImpl extends LogManager {
   /**
    * Adds a logger.
    */
+  @Override
   public synchronized boolean addLogger(Logger logger)
   {
-    String name = logger.getName();
+    EnvironmentLogger envLogger = addLogger(logger.getName(),
+                                            logger.getResourceBundleName());
+    
+    // handle custom logger
+    if (! logger.getClass().equals(Logger.class)) {
+      return envLogger.addCustomLogger(logger);
+    }
 
+    return false;
+  }
+  
+  private synchronized EnvironmentLogger addLogger(String name,
+                                                   String resourceBundle)
+  {
     EnvironmentLogger envLogger = null;
 
     SoftReference<EnvironmentLogger> loggerRef = _envLoggers.get(name);
@@ -70,7 +74,7 @@ public class LogManagerImpl extends LogManager {
       envLogger = loggerRef.get();
 
     if (envLogger == null) {
-      envLogger = new EnvironmentLogger(name, logger.getResourceBundleName());
+      envLogger = new EnvironmentLogger(name, resourceBundle);
 
       _envLoggers.put(name, new SoftReference<EnvironmentLogger>(envLogger));
 
@@ -80,12 +84,7 @@ public class LogManagerImpl extends LogManager {
         envLogger.setParent(parent);
     }
 
-    // handle custom logger
-    if (! logger.getClass().equals(Logger.class)) {
-      return envLogger.addCustomLogger(logger);
-    }
-
-    return false;
+    return envLogger;
   }
 
   /**
@@ -129,6 +128,7 @@ public class LogManagerImpl extends LogManager {
   /**
    * Returns the named logger.
    */
+  @Override
   public synchronized Logger getLogger(String name)
   {
     SoftReference<EnvironmentLogger> envLoggerRef = _envLoggers.get(name);
@@ -138,7 +138,7 @@ public class LogManagerImpl extends LogManager {
       envLogger = envLoggerRef.get();
 
     if (envLogger == null)
-      return null;
+      envLogger = addLogger(name, null);
 
     Logger customLogger = envLogger.getLogger();
 

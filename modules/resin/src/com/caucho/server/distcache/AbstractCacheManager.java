@@ -380,7 +380,8 @@ abstract public class AbstractCacheManager<E extends DistCacheEntry>
                              long now,
                              MnodeValue mnodeValue)
   {
-    long idleTimeout = config.getIdleTimeout() * 5L / 4;
+    // long idleTimeout = config.getIdleTimeout() * 5L / 4;
+    long idleTimeout = config.getIdleTimeout();
     HashKey key = entry.getKeyHash();
 
     HashKey oldValueHash = (mnodeValue != null
@@ -437,8 +438,8 @@ abstract public class AbstractCacheManager<E extends DistCacheEntry>
     HashKey cacheHash = config.getCacheKey();
 
     // add 25% window for update efficiency
-    idleTimeout = idleTimeout * 5L / 4;
-
+    // idleTimeout = idleTimeout * 5L / 4;
+    
     int leaseOwner = (mnodeValue != null) ? mnodeValue.getLeaseOwner() : -1;
     
     long newVersion = getNewVersion(version);
@@ -485,7 +486,7 @@ abstract public class AbstractCacheManager<E extends DistCacheEntry>
     long idleTimeout = config.getIdleTimeout();
     
     // add 25% window for update efficiency
-    idleTimeout = idleTimeout * 5L / 4;
+    // idleTimeout = idleTimeout * 5L / 4;
 
     int leaseOwner = (mnodeValue != null) ? mnodeValue.getLeaseOwner() : -1;
     

@@ -86,6 +86,7 @@ abstract public class DistCacheEntry implements ExtCacheEntry {
   /**
    * Returns the keyHash
    */
+  @Override
   public final HashKey getKeyHash()
   {
     return _keyHash;
@@ -94,6 +95,7 @@ abstract public class DistCacheEntry implements ExtCacheEntry {
   /**
    * Returns the value of the cache entry.
    */
+  @Override
   public Object getValue()
   {
     return getMnodeValue().getValue();
@@ -102,6 +104,7 @@ abstract public class DistCacheEntry implements ExtCacheEntry {
   /**
    * Returns true if the value is null.
    */
+  @Override
   public boolean isValueNull()
   {
     return getMnodeValue().isValueNull();
@@ -233,11 +236,13 @@ abstract public class DistCacheEntry implements ExtCacheEntry {
     return getMnodeValue().getValueHash();
   }
 
+  @Override
   public long getIdleTimeout()
   {
     return getMnodeValue().getIdleTimeout();
   }
 
+  @Override
   public long getLeaseTimeout()
   {
     return getMnodeValue().getLeaseTimeout();

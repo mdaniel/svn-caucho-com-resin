@@ -330,7 +330,7 @@ class EnvironmentLogger extends Logger implements ClassLoaderListener {
       return;
     
     Level recordLevel = record.getLevel();
-    
+
     if (! isLoggable(recordLevel))
       return;
 

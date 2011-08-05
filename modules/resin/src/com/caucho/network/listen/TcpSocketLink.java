@@ -969,7 +969,10 @@ public class TcpSocketLink extends AbstractSocketLink
 
         async.toResume();
 
-        getRequest().handleResume();
+        // server/1lb5, #4697
+        if (! async.isCompleteRequested()) {
+          getRequest().handleResume();
+        }
 
         if (_state.isComet()) {
           if (toSuspend())

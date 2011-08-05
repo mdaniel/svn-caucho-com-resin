@@ -318,7 +318,6 @@ public class EjbConfig {
                                    InjectionTarget<X> injectTarget, 
                                    String moduleName)
   {
-    System.out.println("ADD: " + rawAnnType + " " + annType);
     try {
       Class<?> type = annType.getJavaClass();
 

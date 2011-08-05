@@ -969,6 +969,11 @@ public final class HttpServletResponseImpl extends AbstractCauchoResponse
 
     boolean isLatin1 = "iso-8859-1".equals(encoding);
 
+    return escapeUrl(path, isLatin1);
+  }
+  
+  private String escapeUrl(String path, boolean isLatin1)
+  {
     StringBuilder cb = new StringBuilder();
 
     for (int i = 0; i < path.length(); i++) {
@@ -1388,9 +1393,17 @@ public final class HttpServletResponseImpl extends AbstractCauchoResponse
     return cb.toString();
   }
 
+  @Override
   public String encodeRedirectURL(String string)
   {
-    return encodeURL(string);
+    String path = encodeURL(string);
+
+    String encoding = getCharacterEncoding();
+
+    boolean isLatin1 = "iso-8859-1".equals(encoding);
+
+    // server/1u3k, #4699
+    return escapeUrl(path, isLatin1);
   }
 
     /**
@@ -1401,9 +1414,10 @@ public final class HttpServletResponseImpl extends AbstractCauchoResponse
     return encodeRedirectURL(string);
   }
 
-    /**
-     * @deprecated
-     */
+  /**
+   * @deprecated
+   */
+  @Override
   public String encodeUrl(String string)
   {
     return encodeURL(string);
@@ -1413,6 +1427,7 @@ public final class HttpServletResponseImpl extends AbstractCauchoResponse
   // CauchoResponse methods
   //
 
+  @Override
   public AbstractResponseStream getResponseStream()
   {
     // jsp/(1cie, 1civ, 1ciw, 1cir), server/053y

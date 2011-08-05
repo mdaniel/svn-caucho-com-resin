@@ -13,6 +13,11 @@
 
 <s2 title="4.0.21 snapshot">
 <ul>
+<li>install: ./configure changes for Solaris cc (#4678, rep by nits4resin)</li>
+<li>logging: Resin logging was not working properly in IBM JDK (#4695, rep by Steve Francis)</li>
+<li>async: complete() should not dispatch a following GET (#4697, rep by Adrian Sutton)</li>
+<li>servlet: sendRedirect from filter needs to escape redirect URL (#4699, rep by jyung)</li>
+<li>session: maxInactiveInterval issues with persistent sessions and includes (#4692, rep by mnsh)</li>
 <li>jni: changed crc64/readdir code to user readdir_r (#4698, rep by Peter Mei)</li>
 <li>jsp: tag compilation issues with @Inject (#4690, rep by mnsh)</li>
 <li>cdi: @Disposes introspection needs to be lazy on binding (#4681, rep by Dirk Mahler)</li>
