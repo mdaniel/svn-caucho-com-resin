@@ -31,7 +31,7 @@ package com.caucho.env.deploy;
 
 import java.util.logging.Logger;
 
-import com.caucho.env.repository.RepositoryService;
+import com.caucho.env.repository.RepositorySystem;
 import com.caucho.env.repository.RepositorySpi;
 import com.caucho.vfs.PersistentDependency;
 
@@ -54,7 +54,7 @@ public class RepositoryDependency implements PersistentDependency {
     _tag = tag;
     _sha1 = sha1;
 
-    _repository = RepositoryService.getCurrentRepositorySpi();
+    _repository = RepositorySystem.getCurrentRepositorySpi();
   }
 
   /**

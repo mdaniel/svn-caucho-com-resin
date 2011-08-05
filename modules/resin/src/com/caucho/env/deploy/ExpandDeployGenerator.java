@@ -41,7 +41,7 @@ import com.caucho.config.ConfigException;
 import com.caucho.config.types.FileSetType;
 import com.caucho.config.types.Period;
 import com.caucho.env.repository.Repository;
-import com.caucho.env.repository.RepositoryService;
+import com.caucho.env.repository.RepositorySystem;
 import com.caucho.env.repository.RepositoryTagListener;
 import com.caucho.loader.DependencyCheckInterval;
 import com.caucho.loader.Environment;
@@ -139,7 +139,7 @@ abstract public class ExpandDeployGenerator<E extends ExpandDeployController<?>>
     _deployService = DeployControllerService.getCurrent();
     _deployService.addUpdateListener(this);
     
-    _repository = RepositoryService.getCurrentRepository();
+    _repository = RepositorySystem.getCurrentRepository();
     _repository.addListener(id, this);
   }
   

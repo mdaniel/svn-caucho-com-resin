@@ -35,15 +35,15 @@ import com.caucho.util.L10N;
 /**
  * Public API for the persistent .git repository
  */
-public class RepositoryService extends AbstractResinSubSystem
+public class RepositorySystem extends AbstractResinSubSystem
 {
   public static final int START_PRIORITY = START_PRIORITY_CLUSTER_SERVICE;
 
-  private static final L10N L = new L10N(RepositoryService.class);
+  private static final L10N L = new L10N(RepositorySystem.class);
   
   private AbstractRepository _repository;
 
-  public RepositoryService(AbstractRepository repository)
+  public RepositorySystem(AbstractRepository repository)
   {
     if (repository == null)
       throw new NullPointerException();
@@ -51,30 +51,30 @@ public class RepositoryService extends AbstractResinSubSystem
     _repository = repository;
   }
 
-  public static RepositoryService createAndAddService()
+  public static RepositorySystem createAndAddService()
   {
     return createAndAddService(new FileRepository());
   }
   
-  public static RepositoryService createAndAddService(
+  public static RepositorySystem createAndAddService(
       AbstractRepository repository)
   {
-    ResinSystem system = preCreate(RepositoryService.class);
+    ResinSystem system = preCreate(RepositorySystem.class);
 
-    RepositoryService service = new RepositoryService(repository);
-    system.addService(RepositoryService.class, service);
+    RepositorySystem service = new RepositorySystem(repository);
+    system.addService(RepositorySystem.class, service);
 
     return service;
   }
   
-  public static RepositoryService getCurrent()
+  public static RepositorySystem getCurrent()
   {
-    return ResinSystem.getCurrentService(RepositoryService.class);
+    return ResinSystem.getCurrentService(RepositorySystem.class);
   }
   
   public static Repository getCurrentRepository()
   {
-    RepositoryService service = getCurrent();
+    RepositorySystem service = getCurrent();
     
     if (service == null)
       throw new IllegalStateException(L.l("RepositoryService is not available in this context"));
@@ -84,7 +84,7 @@ public class RepositoryService extends AbstractResinSubSystem
   
   public static RepositorySpi getCurrentRepositorySpi()
   {
-    RepositoryService service = getCurrent();
+    RepositorySystem service = getCurrent();
     
     if (service == null)
       throw new IllegalStateException(L.l("RepositoryService is not available in this context"));

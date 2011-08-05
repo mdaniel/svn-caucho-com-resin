@@ -38,7 +38,7 @@ import java.util.logging.Logger;
 
 import com.caucho.config.ConfigException;
 import com.caucho.env.repository.Repository;
-import com.caucho.env.repository.RepositoryService;
+import com.caucho.env.repository.RepositorySystem;
 import com.caucho.env.repository.RepositoryTagEntry;
 import com.caucho.util.Crc64;
 
@@ -62,7 +62,7 @@ class ExpandRepositoryManager
   {
     _tagPrefix = id + "/";
     
-    _repository = RepositoryService.getCurrentRepository();
+    _repository = RepositorySystem.getCurrentRepository();
   }
 
   /**

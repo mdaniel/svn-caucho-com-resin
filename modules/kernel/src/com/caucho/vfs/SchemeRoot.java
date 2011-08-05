@@ -19,7 +19,8 @@
  *
  * You should have received a copy of the GNU General Public License
  * along with Resin Open Source; if not, write to the
- *   Free SoftwareFoundation, Inc.
+ *
+ *   Free Software Foundation, Inc.
  *   59 Temple Place, Suite 330
  *   Boston, MA 02111-1307  USA
  *
@@ -28,53 +29,33 @@
 
 package com.caucho.vfs;
 
-import java.util.Map;
 
 /**
- * JarScheme implements the lookup of the jar scheme.
+ * The root of a scheme.
  */
-public class JarScheme extends FilesystemPath {
-  JarScheme(String path)
-  {
-    super(null, "/", "/");
-  }
+public class SchemeRoot {
+  private Path _root;
 
+  protected SchemeRoot()
+  {
+  }
+  
   /**
-   * Lookup the path, handling windows weirdness
+   * Create an empty SchemeMap.
    */
+  public SchemeRoot(Path root)
+  {
+    _root = root;
+  }
+  
+  public Path getRoot()
+  {
+    return _root;
+  }
+ 
   @Override
-  public Path schemeWalk(String userPath,
-                         Map<String,Object> attributes,
-                         String filePath,
-                         int offset)
+  public String toString()
   {
-    int p = filePath.indexOf('!', offset);
-    String backingPath;
-    String jarPath;
-
-    if (p > 0) {
-      backingPath = filePath.substring(offset, p);
-      jarPath = filePath.substring(p + 1);
-    }
-    else {
-      backingPath = filePath.substring(offset);
-      jarPath = "";
-    }
-
-    Path backing = Vfs.lookup(backingPath);
-
-    return JarPath.create(backing).lookup(jarPath);
-  }
-
-  public Path fsWalk(String userPath,
-                        Map<String,Object> attributes,
-                        String path)
-  {
-    return schemeWalk(userPath, attributes, path, 0);
-  }
-
-  public String getScheme()
-  {
-    return "jar";
+    return getClass().getSimpleName() + "[" + getRoot() + "]";
   }
 }

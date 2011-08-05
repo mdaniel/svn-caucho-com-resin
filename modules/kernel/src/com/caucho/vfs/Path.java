@@ -395,9 +395,9 @@ public abstract class Path {
    *
    * @return the found path
    */
-  abstract protected Path schemeWalk(String userPath,
-                                     Map<String,Object> newAttributes,
-                                     String newPath, int offset);
+  abstract public Path schemeWalk(String userPath,
+                                  Map<String,Object> newAttributes,
+                                  String newPath, int offset);
 
   /**
    * Returns the full url for the given path.
@@ -415,7 +415,7 @@ public abstract class Path {
   /**
    * Returns the schemeMap
    */
-  protected SchemeMap getSchemeMap()
+  public SchemeMap getSchemeMap()
   {
     return _schemeMap;
   }
@@ -654,7 +654,7 @@ public abstract class Path {
   }
 
   /**
-   * Change the executable status of the of the oath.
+   * Change the executable status of the of the path.
    *
    * @throws UnsupportedOperationException
    */
@@ -1442,11 +1442,13 @@ public abstract class Path {
     throw new UnsupportedOperationException(getScheme() + ": doesn't support setObject");
   }
 
+  @Override
   public int hashCode()
   {
     return toString().hashCode();
   }
 
+  @Override
   public boolean equals(Object o)
   {
     if (this == o)

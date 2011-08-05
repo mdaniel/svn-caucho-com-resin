@@ -118,7 +118,7 @@ public class UTF8Writer extends EncodingWriter {
     int tail = off + len;
 
     while (off < tail) {
-      if (capacity - length < 3) {
+      if (capacity - length < 4) {
         buffer = os.nextBuffer(length);
         length = os.getBufferOffset();
       }

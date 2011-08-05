@@ -100,10 +100,11 @@ abstract public class FilesystemPath extends Path {
    * @param filePath the actual lookup() path
    * @param offset offset into filePath
    */
-  protected Path schemeWalk(String userPath,
-                            Map<String,Object> attributes,
-                            String filePath,
-                            int offset)
+  @Override
+  public Path schemeWalk(String userPath,
+                         Map<String,Object> attributes,
+                         String filePath,
+                         int offset)
   {
     String canonicalPath;
 

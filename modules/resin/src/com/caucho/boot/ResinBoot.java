@@ -442,13 +442,14 @@ public class ResinBoot {
     _commandMap.put(StartMode.CONSOLE, new ConsoleCommand());
     _commandMap.put(StartMode.DEPLOY_COPY, new DeployCopyCommand());
     _commandMap.put(StartMode.DEPLOY, new DeployCommand());
+    _commandMap.put(StartMode.DEPLOY_CONFIG, new DeployConfigCommand());
     _commandMap.put(StartMode.DEPLOY_LIST, new DeployListCommand());
     _commandMap.put(StartMode.DEPLOY_RESTART, new DeployRestartCommand());
-    _commandMap.put(StartMode.THREAD_DUMP, new DeployStartCommand());
     _commandMap.put(StartMode.DEPLOY_START, new DeployStartCommand());
     _commandMap.put(StartMode.DEPLOY_STOP, new DeployStopCommand());
     _commandMap.put(StartMode.DISABLE, new DisableCommand());
     _commandMap.put(StartMode.DISABLE_SOFT, new DisableSoftCommand());
+    _commandMap.put(StartMode.THREAD_DUMP, new DeployStartCommand());
     _commandMap.put(StartMode.ENABLE, new EnableCommand());
     _commandMap.put(StartMode.HEAP_DUMP, new HeapDumpCommand());
     _commandMap.put(StartMode.JMX_CALL, new JmxCallCommand());

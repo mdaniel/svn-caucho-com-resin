@@ -306,10 +306,11 @@ public class DatastorePath extends Path
   /**
    * Lookup the path, handling windows weirdness
    */
-  protected Path schemeWalk(String userPath,
-                            Map<String,Object> attributes,
-                            String filePath,
-                            int offset)
+  @Override
+  public Path schemeWalk(String userPath,
+                         Map<String,Object> attributes,
+                         String filePath,
+                         int offset)
   {
     if (! isWindows())
       return schemeWalkImpl(userPath, attributes, filePath, offset);

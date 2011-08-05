@@ -55,7 +55,7 @@ import com.caucho.config.ConfigException;
 import com.caucho.config.Service;
 import com.caucho.env.deploy.DeployControllerService;
 import com.caucho.env.deploy.DeployTagItem;
-import com.caucho.env.repository.RepositoryService;
+import com.caucho.env.repository.RepositorySystem;
 import com.caucho.env.repository.RepositorySpi;
 import com.caucho.env.repository.RepositoryTagEntry;
 import com.caucho.jmx.Jmx;
@@ -111,7 +111,7 @@ public class DeployActor extends SimpleActor
       throw new ConfigException(L.l("resin:DeployService requires an active Server.\n  {0}",
                                     Thread.currentThread().getContextClassLoader()));
 
-    _repository = RepositoryService.getCurrentRepositorySpi();
+    _repository = RepositorySystem.getCurrentRepositorySpi();
 
     setBroker(getBroker());
     MultiworkerMailbox mailbox

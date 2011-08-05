@@ -65,9 +65,10 @@ public class ConfigPath extends Path {
    *
    * @return the found path
    */
-  protected Path schemeWalk(String userPath,
-                            Map<String,Object> newAttributes,
-                            String newPath, int offset)
+  @Override
+  public Path schemeWalk(String userPath,
+                         Map<String,Object> newAttributes,
+                         String newPath, int offset)
   {
     throw new UnsupportedOperationException();
     /*

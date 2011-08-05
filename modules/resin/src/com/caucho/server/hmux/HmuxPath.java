@@ -159,10 +159,11 @@ public class HmuxPath extends FilesystemPath {
    *
    * @return the looked-up path.
    */
-  protected Path schemeWalk(String userPath,
-                            Map<String,Object> attributes,
-                            String uri,
-                            int offset)
+  @Override
+  public Path schemeWalk(String userPath,
+                         Map<String,Object> attributes,
+                         String uri,
+                         int offset)
   {
     int length = uri.length();
 

@@ -51,8 +51,8 @@ public class SchemeMap {
   // Constant null scheme map for protected filesystems.
   public static final SchemeMap NULL_SCHEME_MAP = new SchemeMap();
 
-  private final HashMap<String,Path> _schemeMap
-    = new HashMap<String,Path>();
+  private final HashMap<String,SchemeRoot> _schemeMap
+    = new HashMap<String,SchemeRoot>();
 
   /**
    * Create an empty SchemeMap.
@@ -64,7 +64,7 @@ public class SchemeMap {
   /**
    * Create an empty SchemeMap.
    */
-  private SchemeMap(HashMap<String,Path> map)
+  private SchemeMap(HashMap<String,SchemeRoot> map)
   {
     _schemeMap.putAll(map);
   }
@@ -84,13 +84,23 @@ public class SchemeMap {
    */
   public Path get(String scheme)
   {
-    Path path = _schemeMap.get(scheme);
-
-    if (path != null)
+    SchemeRoot root = _schemeMap.get(scheme);
+    Path path = null;
+    
+    if (root != null)
+      path = root.getRoot();
+    
+    if (path != null) {
       return path;
+    }
     else {
       return new NotFoundPath(this, scheme + ":");
     }
+  }
+  
+  public SchemeRoot getSchemeRoot(String scheme)
+  {
+    return _schemeMap.get(scheme);
   }
 
   /**
@@ -98,7 +108,17 @@ public class SchemeMap {
    */
   public Path put(String scheme, Path path)
   {
-    return _schemeMap.put(scheme, path);
+    SchemeRoot oldRoot = _schemeMap.put(scheme, new SchemeRoot(path));
+    
+    return oldRoot != null ? oldRoot.getRoot() : null;
+  }
+
+  /**
+   * Puts a new value in the schemeMap.
+   */
+  public SchemeRoot put(String scheme, SchemeRoot root)
+  {
+    return _schemeMap.put(scheme, root);
   }
 
   public SchemeMap copy()
@@ -111,6 +131,8 @@ public class SchemeMap {
    */
   public Path remove(String scheme)
   {
-    return _schemeMap.remove(scheme);
+    SchemeRoot oldRoot = _schemeMap.remove(scheme);
+    
+    return oldRoot != null ? oldRoot.getRoot() : null;
   }
 }

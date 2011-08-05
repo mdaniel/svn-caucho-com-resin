@@ -470,6 +470,9 @@ class WatchdogArgs
       else if ("deploy".equals(arg)) {
         _startMode = StartMode.DEPLOY;
       }
+      else if ("deploy-config".equals(arg)) {
+        _startMode = StartMode.DEPLOY_CONFIG;
+      }
       else if ("deploy-copy".equals(arg) || "copy".equals(arg)) {
         _startMode = StartMode.DEPLOY_COPY;
       }
@@ -959,6 +962,7 @@ class WatchdogArgs
   enum StartMode {
     CONSOLE,
     DEPLOY,
+    DEPLOY_CONFIG,
     DEPLOY_COPY,
     DEPLOY_LIST,
     DEPLOY_RESTART,

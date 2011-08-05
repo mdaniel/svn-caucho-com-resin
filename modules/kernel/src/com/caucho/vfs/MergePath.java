@@ -98,10 +98,11 @@ public class MergePath extends FilesystemPath {
    * @param filePath the actual lookup() path
    * @param offset offset into filePath
    */
-  protected Path schemeWalk(String userPath,
-                            Map<String,Object> attributes,
-                            String filePath,
-                            int offset)
+  @Override
+  public Path schemeWalk(String userPath,
+                         Map<String,Object> attributes,
+                         String filePath,
+                         int offset)
   {
     int length = filePath.length();
 

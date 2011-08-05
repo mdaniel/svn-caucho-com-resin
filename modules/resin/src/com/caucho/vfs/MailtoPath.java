@@ -85,8 +85,11 @@ public class MailtoPath extends Path {
   /**
    * Parse the scheme for the recipient and the attributes.
    */
-  protected Path schemeWalk(String userPath, Map<String,Object> attributes,
-                            String uri, int offset)
+  @Override
+  public Path schemeWalk(String userPath, 
+                         Map<String,Object> attributes,
+                         String uri, 
+                         int offset)
   {
     StringCharCursor cursor = new StringCharCursor(uri, offset);
     

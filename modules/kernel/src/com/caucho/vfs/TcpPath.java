@@ -84,10 +84,11 @@ public class TcpPath extends Path {
   /**
    * Lookup the new path assuming we're the scheme root.
    */
-  protected Path schemeWalk(String userPath,
-                            Map<String,Object> newAttributes,
-                            String uri,
-                            int offset)
+  @Override
+  public Path schemeWalk(String userPath,
+                         Map<String,Object> newAttributes,
+                         String uri,
+                         int offset)
   {
     int length = uri.length();
 

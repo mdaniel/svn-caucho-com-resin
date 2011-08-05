@@ -175,10 +175,10 @@ public class HttpPath extends FilesystemPath {
    * @return the looked-up path.
    */
   @Override
-  protected Path schemeWalk(String userPath,
-                            Map<String,Object> attributes,
-                            String uri,
-                            int offset)
+  public Path schemeWalk(String userPath,
+                         Map<String,Object> attributes,
+                         String uri,
+                         int offset)
   {
     int length = uri.length();
 

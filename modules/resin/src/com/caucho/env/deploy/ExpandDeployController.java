@@ -43,7 +43,7 @@ import com.caucho.config.ConfigException;
 import com.caucho.config.types.FileSetType;
 import com.caucho.env.repository.CommitBuilder;
 import com.caucho.env.repository.Repository;
-import com.caucho.env.repository.RepositoryService;
+import com.caucho.env.repository.RepositorySystem;
 import com.caucho.env.repository.RepositorySpi;
 import com.caucho.env.repository.RepositoryTagEntry;
 import com.caucho.env.repository.RepositoryTagListener;
@@ -245,7 +245,7 @@ abstract public class ExpandDeployController<I extends DeployInstance>
     super.initEnd();
     
     if (isAllowRepository()) {
-      RepositoryService repositoryService = RepositoryService.getCurrent();
+      RepositorySystem repositoryService = RepositorySystem.getCurrent();
       _repository = repositoryService.getRepository();
       _repository.addListener(getId(), this);
       _repositorySpi = repositoryService.getRepositorySpi();

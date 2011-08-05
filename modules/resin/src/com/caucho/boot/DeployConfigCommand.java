@@ -36,7 +36,7 @@ import com.caucho.util.L10N;
 import com.caucho.vfs.Path;
 import com.caucho.vfs.Vfs;
 
-public class DeployCommand extends AbstractRepositoryCommand {
+public class DeployConfigCommand extends AbstractRepositoryCommand {
   private static final L10N L = new L10N(DeployConfigCommand.class);
   
   @Override
@@ -44,59 +44,35 @@ public class DeployCommand extends AbstractRepositoryCommand {
                        WatchdogClient client,
                        WebAppDeployClient deployClient)
   {
-    String war = args.getDefaultArg();
+    String jar = args.getDefaultArg();
     
-    if (war == null) {
-      throw new ConfigException(L.l("Cannot find .war argument in command line"));
+    if (jar == null) {
+      throw new ConfigException(L.l("Cannot find .jar argument in command line"));
     }
     
-    if (! war.endsWith(".war")) {
-      throw new ConfigException(L.l("Deploy expects to be used with a *.war file at {0}",
-                                    war));
+    Path jarPath = Vfs.lookup(jar);
+    
+    
+    if (! jar.endsWith(".jar") && ! jarPath.isDirectory()) {
+      throw new ConfigException(L.l("Deploy expects to be used with a *.jar file at {0}",
+                                    jar));
     }
 
     String name = args.getArg("-name");
     
-    String webapp = args.getArg("-web-app");
-    
-    if (webapp != null)
-      name = webapp;
-    
-    String host = args.getArg("-host");
-    
-    if (host == null)
-      host = "default";
-    
     CommitBuilder commit = new CommitBuilder();
-    commit.type("webapp");
+    commit.type("config");
     
     String stage = args.getArg("-stage");
     
     if (stage != null)
       commit.stage(stage);
     
-    Path path = Vfs.lookup(war);
-    
     if (name == null) {
-      String tail = path.getTail();
-      
-      int p = tail.lastIndexOf('.');
-
-      name = tail.substring(0, p);
+      name = "resin";
     }
     
-    commit.tagKey(host + "/" + name);
-
-    /*
-    String tag = args.getArg("-tag");
-    if (tag != null)
-      commit.tagKey(tag);
-      */
-    
-    if (! path.isFile()) {
-      throw new ConfigException(L.l("'{0}' is not a readable file.",
-                                    path.getFullPath()));
-    }
+    commit.tagKey(name);
     
     String message = args.getArg("-m");
     
@@ -104,7 +80,7 @@ public class DeployCommand extends AbstractRepositoryCommand {
       message = args.getArg("-message");
     
     if (message == null)
-      message = "deploy " + war + " from command line";
+      message = "deploy " + jar + " from command line";
     
     commit.message(message);
     
@@ -114,9 +90,12 @@ public class DeployCommand extends AbstractRepositoryCommand {
     if (version != null)
       fillInVersion(commit, version);
 
-    deployClient.commitArchive(commit, path);
+    if (jarPath.isFile())
+      deployClient.commitArchive(commit, jarPath);
+    else
+      deployClient.commitPath(commit, jarPath);
 
-    System.out.println("Deployed " + commit.getId() + " from " + war + " to "
+    System.out.println("Deployed " + commit.getId() + " from " + jar + " to "
                        + deployClient.getUrl());
 
     return 0;
