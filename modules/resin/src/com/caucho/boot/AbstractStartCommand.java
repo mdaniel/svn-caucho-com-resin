@@ -40,6 +40,48 @@ public abstract class AbstractStartCommand extends AbstractBootCommand
   private static Logger _log;
   private static L10N _L;
 
+  private final Set<String> _options = new HashSet<String>();
+  private final Set<String> _valueKeys = new HashSet<String>();
+  private final Set<String> _intValueKeys = new HashSet<String>();
+
+  protected AbstractStartCommand()
+  {
+    _options.add("-verbose");
+    _options.add("--verbose");
+    _options.add("-preview");
+    _options.add("--preview");
+
+    _valueKeys.add("-conf");
+    _valueKeys.add("--conf");
+    _valueKeys.add("-data-directory");
+    _valueKeys.add("--data-directory");
+    _valueKeys.add("-join");
+    _valueKeys.add("--join");
+    _valueKeys.add("-log-directory");
+    _valueKeys.add("--log-directory");
+    _valueKeys.add("-resin-home");
+    _valueKeys.add("--resin-home");
+    _valueKeys.add("-root-directory");
+    _valueKeys.add("--root-directory");
+    _valueKeys.add("-server");
+    _valueKeys.add("--server");
+    _valueKeys.add("-stage");
+    _valueKeys.add("--stage");
+    _valueKeys.add("-watchdog-port");
+    _valueKeys.add("--watchdog-port");
+    _valueKeys.add("-debug-port");
+    _valueKeys.add("--debug-port");
+    _valueKeys.add("-jmx-port");
+    _valueKeys.add("--jmx-port");
+
+    _intValueKeys.add("-watchdog-port");
+    _intValueKeys.add("--watchdog-port");
+    _intValueKeys.add("-debug-port");
+    _intValueKeys.add("--debug-port");
+    _intValueKeys.add("-jmx-port");
+    _intValueKeys.add("--jmx-port");
+  }
+
   @Override
   public boolean isRetry()
   {
@@ -78,48 +120,5 @@ public abstract class AbstractStartCommand extends AbstractBootCommand
   public Set<String> getIntValueKeys()
   {
     return _intValueKeys;
-  }
-
-  private final static Set<String> _options = new HashSet<String>();
-
-  private final static Set<String> _valueKeys = new HashSet<String>();
-
-  private final static Set<String> _intValueKeys = new HashSet<String>();
-
-  static {
-    _options.add("-verbose");
-    _options.add("--verbose");
-    _options.add("-preview");
-    _options.add("--preview");
-
-    _valueKeys.add("-conf");
-    _valueKeys.add("--conf");
-    _valueKeys.add("-data-directory");
-    _valueKeys.add("--data-directory");
-    _valueKeys.add("-join");
-    _valueKeys.add("--join");
-    _valueKeys.add("-log-directory");
-    _valueKeys.add("--log-directory");
-    _valueKeys.add("-resin-home");
-    _valueKeys.add("--resin-home");
-    _valueKeys.add("-root-directory");
-    _valueKeys.add("--root-directory");
-    _valueKeys.add("-server");
-    _valueKeys.add("--server");
-    _valueKeys.add("-stage");
-    _valueKeys.add("--stage");
-    _valueKeys.add("-watchdog-port");
-    _valueKeys.add("--watchdog-port");
-    _valueKeys.add("-debug-port");
-    _valueKeys.add("--debug-port");
-    _valueKeys.add("-jmx-port");
-    _valueKeys.add("--jmx-port");
-
-    _intValueKeys.add("-watchdog-port");
-    _intValueKeys.add("--watchdog-port");
-    _intValueKeys.add("-debug-port");
-    _intValueKeys.add("--debug-port");
-    _intValueKeys.add("-jmx-port");
-    _intValueKeys.add("--jmx-port");
   }
 }

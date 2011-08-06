@@ -30,17 +30,16 @@
 package com.caucho.boot;
 
 import com.caucho.VersionFactory;
-import com.caucho.config.ConfigException;
 import com.caucho.util.L10N;
 
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
 /**
- * Command to start Resin server
- * bin/resin.sh start -server a
+ * Command to shutdown Resin server
+ * bin/resin.sh shutdown -server a
  */
-public class StartCommand extends AbstractStartCommand
+public class ShutdownCommand extends AbstractStartCommand
 {
   private static Logger _log;
   private static L10N _L;
@@ -48,7 +47,7 @@ public class StartCommand extends AbstractStartCommand
   @Override
   public String getName()
   {
-    return "start";
+    return "shutdown";
   }
 
   @Override
@@ -58,29 +57,19 @@ public class StartCommand extends AbstractStartCommand
     validateArgs(args.getArgv());
 
     try {
-      client.startWatchdog(args.getArgv());
+      client.shutdown();
 
-      System.out.println(L().l(
-        "Resin/{0} started -server '{1}' for watchdog at {2}:{3}",
-        VersionFactory.getVersion(),
-        client.getId(),
-        client.getWatchdogAddress(),
-        client.getWatchdogPort()));
+      System.out.println(L().l("Resin/{0} shutdown watchdog at {1}:{2}",
+                               VersionFactory.getVersion(),
+                               client.getWatchdogAddress(),
+                               client.getWatchdogPort()));
     } catch (Exception e) {
-      String eMsg;
-
-      if (e instanceof ConfigException)
-        eMsg = e.getMessage();
-      else
-        eMsg = e.toString();
-
       System.out.println(L().l(
-        "Resin/{0} can't start -server '{1}' for watchdog at {2}:{3}.\n  {4}",
+        "Resin/{0} can't shutdown watchdog at {1}:{2}.\n{3}",
         VersionFactory.getVersion(),
-        client.getId(),
         client.getWatchdogAddress(),
         client.getWatchdogPort(),
-        eMsg));
+        e.toString()));
 
       log().log(Level.FINE, e.toString(), e);
 
@@ -88,8 +77,6 @@ public class StartCommand extends AbstractStartCommand
     }
 
     return 0;
-    //
-    //return false;
   }
 
   @Override
@@ -101,7 +88,7 @@ public class StartCommand extends AbstractStartCommand
   private static Logger log()
   {
     if (_log == null)
-      _log = Logger.getLogger(StartCommand.class.getName());
+      _log = Logger.getLogger(ShutdownCommand.class.getName());
 
     return _log;
   }
@@ -109,7 +96,7 @@ public class StartCommand extends AbstractStartCommand
   private static L10N L()
   {
     if (_L == null)
-      _L = new L10N(StartCommand.class);
+      _L = new L10N(ShutdownCommand.class);
 
     return _L;
   }
@@ -117,19 +104,16 @@ public class StartCommand extends AbstractStartCommand
   @Override
   public void usage()
   {
-    System.out.println("usage: bin/resin.sh [-options] start");
+    System.out.println("usage: bin/resin.sh [-options] shutdown");
     System.out.println();
     System.out.println("where options include:");
     System.out.println("   -conf <file>          : select a configuration file");
     System.out.println("   -data-directory <dir> : select a resin-data directory");
-    System.out.println("   -join <cluster>       : join a cluster as a dynamic server");
     System.out.println("   -log-directory <dir>  : select a logging directory");
     System.out.println("   -resin-home <dir>     : select a resin home directory");
     System.out.println("   -root-directory <dir> : select a root directory");
     System.out.println("   -server <id>          : select a <server> to run");
     System.out.println("   -watchdog-port <port> : override the watchdog-port");
     System.out.println("   -verbose              : print verbose starting information");
-    System.out.println("   -preview              : run as a preview server");
-    System.out.println("   -debug-port <port>    : configure a debug port");
-    System.out.println("   -jmx-port <port>      : configure an unauthenticated jmx port");  }
+  }
 }

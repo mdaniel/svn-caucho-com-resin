@@ -187,6 +187,9 @@ public class ResinBoot {
   boolean start()
     throws Exception
   {
+    if (false) {
+    }
+    /*
     if (_args.isStatus()) {
       try {
         String status = _client.statusWatchdog();
@@ -210,7 +213,6 @@ public class ResinBoot {
 
       return false;
     }
-    /*
     else if (_args.isStart()) {
       try {
         _client.startWatchdog(_args.getArgv());
@@ -240,7 +242,6 @@ public class ResinBoot {
 
       return false;
     }
-    */
     else if (_args.isStop()) {
       try {
         _client.stopWatchdog();
@@ -263,6 +264,8 @@ public class ResinBoot {
 
       return false;
     }
+    */
+    /*
     else if (_args.isKill()) {
       try {
         _client.killWatchdog();
@@ -327,6 +330,7 @@ public class ResinBoot {
 
       return false;
     }
+    */
     /*
     else if (_args.isConsole()) {
       return _client.startConsole() != 0;
@@ -457,11 +461,16 @@ public class ResinBoot {
     _commandMap.put(StartMode.JMX_LIST, new JmxListCommand());
     _commandMap.put(StartMode.JMX_SET, new JmxSetCommand());
     _commandMap.put(StartMode.JSPC, new JspcCommand());
+    _commandMap.put(StartMode.KILL, new KillCommand());
     _commandMap.put(StartMode.LIST_RESTARTS, new ListRestartsCommand());
     _commandMap.put(StartMode.LOG_LEVEL, new LogLevelCommand());
     _commandMap.put(StartMode.PDF_REPORT, new PdfReportCommand());
     _commandMap.put(StartMode.PROFILE, new ProfileCommand());
+    _commandMap.put(StartMode.RESTART, new RestartCommand());
+    _commandMap.put(StartMode.SHUTDOWN, new ShutdownCommand());
     _commandMap.put(StartMode.START, new StartCommand());
+    _commandMap.put(StartMode.STATUS, new StatusCommand());
+    _commandMap.put(StartMode.STOP, new StopCommand());
     _commandMap.put(StartMode.THREAD_DUMP, new ThreadDumpCommand());
 
     _commandMap.put(StartMode.UNDEPLOY, new UnDeployCommand());

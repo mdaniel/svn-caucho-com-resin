@@ -590,14 +590,7 @@ class WatchdogArgs
 
     if (_isHelp
         && (_startMode == null
-            || _startMode == StartMode.CONSOLE
-            || _startMode == StartMode.STATUS
-            || _startMode == StartMode.START
             || _startMode == StartMode.GUI
-            || _startMode == StartMode.STOP
-            || _startMode == StartMode.RESTART
-            || _startMode == StartMode.KILL
-            || _startMode == StartMode.SHUTDOWN
             || _startMode == StartMode.WATCHDOG)) {
       usage();
       System.exit(1);
