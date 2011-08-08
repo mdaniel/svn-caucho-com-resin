@@ -588,11 +588,9 @@ class WatchdogArgs
 */  //#4605 (support before / after command option placement)
     }
 
-    if (_isHelp
-        && (_startMode == null
-            || _startMode == StartMode.GUI
-            || _startMode == StartMode.WATCHDOG)) {
+    if (_isHelp && _startMode == null) {
       usage();
+
       System.exit(1);
     }
     else if (_startMode == null) {

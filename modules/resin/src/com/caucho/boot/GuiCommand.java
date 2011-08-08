@@ -36,10 +36,10 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 
 /**
- * Command to start Resin server in console mode
- * bin/resin.sh console -server a
+ * Command to start Resin server in gui mode
+ * bin/resin.sh gui -server a
  */
-public class ConsoleCommand extends AbstractStartCommand
+public class GuiCommand extends AbstractStartCommand
 {
   private static Logger _log;
   private static L10N _L;
@@ -47,7 +47,7 @@ public class ConsoleCommand extends AbstractStartCommand
   @Override
   public String getName()
   {
-    return "console";
+    return "gui";
   }
 
   @Override
@@ -57,11 +57,9 @@ public class ConsoleCommand extends AbstractStartCommand
     validateArgs(args.getArgv());
 
     try {
-      return client.startConsole();
+      return client.startGui(this);
     } catch (IOException e) {
-      log().log(Level.FINE, e.getMessage(), e);
-
-      return 1;
+      throw new RuntimeException(e);
     }
   }
 
@@ -74,7 +72,7 @@ public class ConsoleCommand extends AbstractStartCommand
   private static Logger log()
   {
     if (_log == null)
-      _log = Logger.getLogger(ConsoleCommand.class.getName());
+      _log = Logger.getLogger(GuiCommand.class.getName());
 
     return _log;
   }
@@ -82,7 +80,7 @@ public class ConsoleCommand extends AbstractStartCommand
   @Override
   public void usage()
   {
-    System.out.println("usage: bin/resin.sh [-options] console");
+    System.out.println("usage: bin/resin.sh [-options] gui");
     System.out.println();
     System.out.println("where options include:");
     System.out.println("   -conf <file>          : select a configuration file");

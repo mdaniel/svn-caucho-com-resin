@@ -73,6 +73,7 @@ class WatchdogClient
   private ActorSender _conn;
 
   private Boot _jniBoot;
+  private ResinGUI _ui;
 
   WatchdogClient(ResinSystem system,
                  BootResinConfig bootManager,
@@ -186,6 +187,19 @@ class WatchdogClient
   public void stopConsole()
   {
     _watchdog.stop();
+  }
+
+  public int startGui(GuiCommand command) throws IOException
+  {
+    if (_ui != null && _ui.isVisible())
+      return 1;
+    else if (_ui != null)
+      return 0;
+
+    _ui = new ResinGUI(command, this);
+    _ui.setVisible(true);
+
+    return 1;
   }
 
   //

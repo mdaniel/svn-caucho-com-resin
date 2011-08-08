@@ -187,175 +187,11 @@ public class ResinBoot {
   boolean start()
     throws Exception
   {
-    if (false) {
-    }
-    /*
-    if (_args.isStatus()) {
-      try {
-        String status = _client.statusWatchdog();
-
-        System.out.println(L().l("Resin/{0} status for watchdog at {1}:{2}",
-                                 VersionFactory.getVersion(),
-                                 _client.getWatchdogAddress(),
-                                 _client.getWatchdogPort()));
-        System.out.println(status);
-      } catch (Exception e) {
-        System.out.println(L().l("Resin/{0} can't retrieve status of -server '{1}' for watchdog at {2}:{3}.\n{4}",
-                                 VersionFactory.getVersion(), _client.getId(),
-                                 _client.getWatchdogAddress(),
-                                 _client.getWatchdogPort(),
-                                 e.toString()));
-
-        log().log(Level.FINE, e.toString(), e);
-
-        System.exit(1);
-      }
-
-      return false;
-    }
-    else if (_args.isStart()) {
-      try {
-        _client.startWatchdog(_args.getArgv());
-
-        System.out.println(L().l("Resin/{0} started -server '{1}' for watchdog at {2}:{3}",
-                                 VersionFactory.getVersion(), _client.getId(),
-                                 _client.getWatchdogAddress(),
-                                 _client.getWatchdogPort()));
-      } catch (Exception e) {
-        String eMsg;
-
-        if (e instanceof ConfigException)
-          eMsg = e.getMessage();
-        else
-          eMsg = e.toString();
-
-        System.out.println(L().l("Resin/{0} can't start -server '{1}' for watchdog at {2}:{3}.\n  {4}",
-                                 VersionFactory.getVersion(), _client.getId(),
-                                 _client.getWatchdogAddress(),
-                                 _client.getWatchdogPort(),
-                                 eMsg));
-
-        log().log(Level.FINE, e.toString(), e);
-
-        System.exit(1);
-      }
-
-      return false;
-    }
-    else if (_args.isStop()) {
-      try {
-        _client.stopWatchdog();
-
-        System.out.println(L().l("Resin/{0} stopped -server '{1}' for watchdog at {2}:{3}",
-                                 VersionFactory.getVersion(), _client.getId(),
-                                 _client.getWatchdogAddress(),
-                                 _client.getWatchdogPort()));
-      } catch (Exception e) {
-        System.out.println(L().l("Resin/{0} can't stop -server '{1}' for watchdog at {2}:{3}.\n{4}",
-                                 VersionFactory.getVersion(), _client.getId(),
-                                 _client.getWatchdogAddress(),
-                                 _client.getWatchdogPort(),
-                                 e.toString()));
-
-        log().log(Level.FINE, e.toString(), e);
-
-        System.exit(1);
-      }
-
-      return false;
-    }
-    */
-    /*
-    else if (_args.isKill()) {
-      try {
-        _client.killWatchdog();
-
-        System.out.println(L().l("Resin/{0} killed -server '{1}' for watchdog at {2}:{3}",
-                                 VersionFactory.getVersion(), _client.getId(),
-                                 _client.getWatchdogAddress(),
-                                 _client.getWatchdogPort()));
-      } catch (Exception e) {
-        System.out.println(L().l("Resin/{0} can't kill -server '{1}' for watchdog at {2}:{3}.\n{4}",
-                                 VersionFactory.getVersion(), _client.getId(),
-                                 _client.getWatchdogAddress(),
-                                 _client.getWatchdogPort(),
-                                 e.toString()));
-
-        log().log(Level.FINE, e.toString(), e);
-
-        System.exit(1);
-      }
-
-      return false;
-    }
-    else if (_args.isRestart()) {
-      try {
-        _client.restartWatchdog(_args.getArgv());
-
-        System.out.println(L().l("Resin/{0} restarted -server '{1}' for watchdog at {2}:{3}",
-                                 VersionFactory.getVersion(), _client.getId(),
-                                 _client.getWatchdogAddress(),
-                                 _client.getWatchdogPort()));
-      } catch (Exception e) {
-        System.out.println(L().l("Resin/{0} can't restart -server '{1}'.\n{2}",
-                                 VersionFactory.getVersion(), _client.getId(),
-                                 e.toString()));
-
-        log().log(Level.FINE, e.toString(), e);
-
-        System.exit(1);
-      }
-
-      return false;
-    }
-    else if (_args.isShutdown()) {
-      try {
-        _client.shutdown();
-
-        System.out.println(L().l("Resin/{0} shutdown watchdog at {1}:{2}",
-                                 VersionFactory.getVersion(),
-                                 _client.getWatchdogAddress(),
-                                 _client.getWatchdogPort()));
-      } catch (Exception e) {
-        System.out.println(L().l("Resin/{0} can't shutdown watchdog at {1}:{2}.\n{3}",
-                                 VersionFactory.getVersion(),
-                                 _client.getWatchdogAddress(),
-                                 _client.getWatchdogPort(),
-                                 e.toString()));
-
-        log().log(Level.FINE, e.toString(), e);
-
-        System.exit(1);
-      }
-
-      return false;
-    }
-    */
-    /*
-    else if (_args.isConsole()) {
-      return _client.startConsole() != 0;
-    }
-    */
-    else if (_args.isWatchdogConsole()) {
-      WatchdogManager.main(_args.getRawArgv());
-    }
-    else if (_args.isGui()) {
-      if (_ui != null && _ui.isVisible())
-        return true;
-      else if (_ui != null)
-        return false;
-
-      _ui = new ResinGUI(this, _client);
-      _ui.setVisible(true);
-
-      return true;
-    }
-
     BootCommand command = _commandMap.get(_args.getStartMode());
 
     if (command != null && _args.isHelp()) {
       command.usage();
-      
+
       return false;
     }
     else if (command != null && command.isRetry()) {
@@ -368,7 +204,7 @@ public class ResinBoot {
 
       System.exit(code);
     }
-    
+
     throw new IllegalStateException(L().l("Unknown start mode"));
   }
 
@@ -395,13 +231,16 @@ public class ResinBoot {
     }
 
     ResinBoot boot = null;
+    BootCommand command = null;
     try {
       boot = new ResinBoot(argv);
 
+      command = boot.getCommand();
+
       while (boot.start()) {
         try {
-          synchronized (boot) {
-            boot.wait(5000);
+          synchronized (command) {
+            command.wait(5000);
           }
         } catch (Exception e) {
         }
@@ -455,6 +294,7 @@ public class ResinBoot {
     _commandMap.put(StartMode.DISABLE_SOFT, new DisableSoftCommand());
     _commandMap.put(StartMode.THREAD_DUMP, new DeployStartCommand());
     _commandMap.put(StartMode.ENABLE, new EnableCommand());
+    _commandMap.put(StartMode.GUI, new GuiCommand());
     _commandMap.put(StartMode.HEAP_DUMP, new HeapDumpCommand());
     _commandMap.put(StartMode.JMX_CALL, new JmxCallCommand());
     _commandMap.put(StartMode.JMX_DUMP, new JmxDumpCommand());
@@ -478,5 +318,7 @@ public class ResinBoot {
     _commandMap.put(StartMode.USER_ADD, new AddUserCommand());
     _commandMap.put(StartMode.USER_LIST, new ListUsersCommand());
     _commandMap.put(StartMode.USER_REMOVE, new RemoveUserCommand());
+
+    _commandMap.put(StartMode.WATCHDOG, new WatchdogCommand());
   }
 }

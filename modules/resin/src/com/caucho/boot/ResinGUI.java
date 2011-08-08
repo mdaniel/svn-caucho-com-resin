@@ -48,20 +48,20 @@ import java.util.concurrent.Executors;
 public class ResinGUI extends JFrame implements WindowListener, ActionListener {
 
   private final WatchdogClient _client;
-  private final ResinBoot _boot;
+  private GuiCommand _command;
   private final ExecutorService _exec = Executors.newSingleThreadExecutor();
 
   private JRadioButton _start;
   private JRadioButton _stop;
   private JButton _quit;
 
-  public ResinGUI(ResinBoot boot, WatchdogClient client)
+  public ResinGUI(GuiCommand command, WatchdogClient client)
     throws HeadlessException, IOException
   {
     super(Version.FULL_VERSION);
 
-    _boot = boot;
     _client = client;
+    _command = command;
 
     try {
       _client.startConsole();
@@ -176,16 +176,16 @@ public class ResinGUI extends JFrame implements WindowListener, ActionListener {
   @Override
   public void windowClosed(WindowEvent e)
   {
-    synchronized (_boot) {
-      _boot.notifyAll();
-    }
+      synchronized (_command) {
+        _command.notifyAll();
+      }
   }
 
   @Override
   public void windowClosing(WindowEvent e)
   {
-    synchronized (_boot) {
-      _boot.notifyAll();
+    synchronized (_command) {
+      _command.notifyAll();
     }
   }
 
