@@ -31,6 +31,7 @@ package com.caucho.admin.action;
 import java.io.*;
 import java.text.*;
 import java.util.*;
+import java.util.concurrent.atomic.AtomicLong;
 import java.util.logging.Logger;
 
 import com.caucho.config.ConfigException;
@@ -43,6 +44,17 @@ public class ProfileAction implements AdminAction
     = Logger.getLogger(ProfileAction.class.getName());
 
   private static final L10N L = new L10N(ProfileAction.class);
+  
+  private AtomicLong _cancelledTime = new AtomicLong(-1);
+  
+  public void cancel()
+  {
+    _cancelledTime.compareAndSet(-1, Alarm.getCurrentTime());
+    
+    synchronized(this) {
+      this.notify();
+    }
+  }
   
   public String execute(long activeTime, long period, int depth)
     throws ConfigException
@@ -59,13 +71,13 @@ public class ProfileAction implements AdminAction
     long startedAt = Alarm.getCurrentTime();
 
     profile.start();
-
-    long interruptedAt = -1;
-
+    
     try {
-      Thread.sleep(activeTime);
+      synchronized (this) {
+        this.wait(activeTime);
+      }
     } catch (InterruptedException e) {
-      interruptedAt = Alarm.getCurrentTime();
+      _cancelledTime.compareAndSet(-1, Alarm.getCurrentTime());
     }
 
     profile.stop();
@@ -80,19 +92,21 @@ public class ProfileAction implements AdminAction
     }
     else {
       DateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss.SSS");
+      
+      long cancelledTime = _cancelledTime.get();
 
-      if (interruptedAt < 0) {
+      if (cancelledTime < 0) {
         out.print(L.l("Profile started at {0}. Active for a total of {1}ms.",
                       dateFormat.format(new Date(startedAt)),
                       activeTime));
       }
       else {
         
-        long et = interruptedAt - startedAt;
+        long et = cancelledTime - startedAt;
         
-        out.print(L.l("Profile started at {0}, interrupted at {1}. Active for a total of {2}ms.",
+        out.print(L.l("Profile started at {0}, cancelled at {1}. Active for a total of {2}ms.",
                       dateFormat.format(new Date(startedAt)),
-                      dateFormat.format(new Date(interruptedAt)),
+                      dateFormat.format(new Date(cancelledTime)),
                       et));
       }
 
