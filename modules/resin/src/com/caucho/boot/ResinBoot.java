@@ -250,8 +250,8 @@ public class ResinBoot {
     } catch (BootArgumentException e) {
       System.out.println(e.getMessage());
 
-      if (boot.getCommand() != null)
-        boot.getCommand().usage();
+      if (command != null)
+        command.usage();
 
       System.exit(ExitCode.UNKNOWN_ARGUMENT.ordinal());
     } catch (ConfigException e) {
