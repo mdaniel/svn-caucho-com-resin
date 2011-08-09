@@ -709,6 +709,10 @@ table.data {
   border-collapse: collapse;
   empty-cells: hide;
 }
+
+table.sortable {
+
+}
 /*
 tr.ra {
   background: #f4f4f4;

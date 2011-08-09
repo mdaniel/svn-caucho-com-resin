@@ -638,6 +638,8 @@ if ($is_refresh) {
 }
 ?>
   <script type="text/javascript" src="jquery.js"></script>
+  <script type="text/javascript" src="jquery.tablesorter.min.js"></script>
+  <script type="text/javascript" src="jquery.metadata.js"></script>
   <script type="text/javascript" src="colorbox/jquery.colorbox.js"></script>
   <script language='javascript' type='text/javascript'>
     function hide(id) { document.getElementById(id).style.display = 'none'; }
