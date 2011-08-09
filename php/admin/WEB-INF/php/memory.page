@@ -148,7 +148,7 @@ function display_heap_dump_subtab($name, $entries)
     echo "<div id='${name}-heap-dump-label' class='chart-label'></div>\n";
     echo "</div>\n";
 
-    echo "<table id='${name}-heap-dump' class='heap-dump data sortable'>";
+    echo "<table id='${name}-heap-dump' class='heap-dump data'>";
     echo "<thead>\n";
     echo "<tr>\n";
     echo "  <th scope='col'>% self</th>\n";
