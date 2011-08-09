@@ -356,49 +356,50 @@ abstract public class AbstractCacheManager<E extends DistCacheEntry>
       mnodeValue.setLastAccessTime(now);
   }
   
-  /**
+  public HashKey getValueHash(Object value, CacheConfig config)
+  {
+    return writeData(null, value, config.getValueSerializer());
+  }
+  
+ /**
    * Sets a cache entry
    */
-  final public Object put(E entry,
-                          Object value,
-                          CacheConfig config)
+  final public void put(E entry,
+                        Object value,
+                        CacheConfig config)
   {
     long now = Alarm.getCurrentTime();
 
     // server/60a0 - on server '4', need to read update from triad
     MnodeValue mnodeValue = getMnodeValue(entry, config, now); // , false);
 
-    return put(entry, value, config, now, mnodeValue);
+    put(entry, value, config, now, mnodeValue);
   }
 
   /**
    * Sets a cache entry
    */
-  protected final Object put(E entry,
-                             Object value,
-                             CacheConfig config,
-                             long now,
-                             MnodeValue mnodeValue)
+  protected final void put(E entry,
+                           Object value,
+                           CacheConfig config,
+                           long now,
+                           MnodeValue mnodeValue)
   {
     // long idleTimeout = config.getIdleTimeout() * 5L / 4;
     long idleTimeout = config.getIdleTimeout();
     HashKey key = entry.getKeyHash();
 
-    HashKey oldValueHash = (mnodeValue != null
-                            ? mnodeValue.getValueHashKey()
-                            : null);
-    Object oldValue = mnodeValue != null ? mnodeValue.getValue() : null;
-    long version = mnodeValue != null ? mnodeValue.getVersion() : 0;
-
-    HashKey valueHash = writeData(oldValueHash, value,
+    HashKey valueHash = writeData(mnodeValue, value,
                                   config.getValueSerializer());
 
     HashKey cacheKey = config.getCacheKey();
 
+    long newVersion = getNewVersion(mnodeValue);
+
     int leaseOwner = mnodeValue != null ? mnodeValue.getLeaseOwner() : -1;
 
     mnodeValue = putLocalValue(entry, 
-                               getNewVersion(version),
+                               newVersion,
                                valueHash, value, cacheKey,
                                config.getFlags(),
                                config.getExpireTimeout(),
@@ -408,11 +409,11 @@ abstract public class AbstractCacheManager<E extends DistCacheEntry>
                                leaseOwner);
 
     if (mnodeValue == null)
-      return oldValue;
+      return;
 
     getClusterBacking().putCluster(key, valueHash, cacheKey, mnodeValue);
 
-    return oldValue;
+    return;
   }
 
   public final ExtCacheEntry putStream(E entry,
@@ -427,7 +428,6 @@ abstract public class AbstractCacheManager<E extends DistCacheEntry>
     HashKey oldValueHash = (mnodeValue != null
                             ? mnodeValue.getValueHashKey()
                             : null);
-    long version = mnodeValue != null ? mnodeValue.getVersion() : 0;
 
     HashKey valueHash = writeData(oldValueHash, is);
 
@@ -442,7 +442,7 @@ abstract public class AbstractCacheManager<E extends DistCacheEntry>
     
     int leaseOwner = (mnodeValue != null) ? mnodeValue.getLeaseOwner() : -1;
     
-    long newVersion = getNewVersion(version);
+    long newVersion = getNewVersion(mnodeValue);
 
     mnodeValue = putLocalValue(entry, newVersion,
                                valueHash, null, cacheHash,
@@ -459,6 +459,183 @@ abstract public class AbstractCacheManager<E extends DistCacheEntry>
     getClusterBacking().putCluster(key, valueHash, cacheHash, mnodeValue);
 
     return mnodeValue;
+  }
+  
+  /**
+   * Sets a cache entry
+   */
+  final public Object getAndPut(E entry,
+                                Object value,
+                                CacheConfig config)
+  {
+    long now = Alarm.getCurrentTime();
+
+    // server/60a0 - on server '4', need to read update from triad
+    MnodeValue mnodeValue = getMnodeValue(entry, config, now); // , false);
+
+    return getAndPut(entry, value, config, now, mnodeValue);
+  }
+
+  /**
+   * Sets a cache entry
+   */
+  protected final Object getAndPut(E entry,
+                                   Object value,
+                                   CacheConfig config,
+                                   long now,
+                                   MnodeValue mnodeValue)
+  {
+    HashKey valueHash = writeData(mnodeValue, value,
+                                  config.getValueSerializer());
+    
+    long idleTimeout = config.getIdleTimeout();
+
+    Object oldValue = mnodeValue != null ? mnodeValue.getValue() : null;
+
+    HashKey cacheKey = config.getCacheKey();
+
+    int leaseOwner = mnodeValue != null ? mnodeValue.getLeaseOwner() : -1;
+
+    HashKey oldHash = getAndPut(entry, 
+                                valueHash, value, cacheKey,
+                                config.getFlags(),
+                                config.getExpireTimeout(),
+                                idleTimeout,
+                                config.getLeaseTimeout(),
+                                config.getLocalReadTimeout(),
+                                leaseOwner);
+
+    if (oldHash == null)
+      return null;
+    
+    if (oldHash.equals(valueHash) && oldValue != null)
+      return oldValue;
+    
+    oldValue = readData(oldHash,
+                        config.getFlags(),
+                        config.getValueSerializer());
+
+    return oldValue;
+  }
+
+  /**
+   * Sets a cache entry
+   */
+  abstract protected HashKey getAndPut(DistCacheEntry entry,
+                                       HashKey valueHash,
+                                       Object value,
+                                       HashKey cacheHash,
+                                       int flags,
+                                       long expireTimeout,
+                                       long idleTimeout,
+                                       long leaseTimeout,
+                                       long localReadTimeout,
+                                       int leaseOwner);
+  
+  /**
+   * Sets a cache entry
+   */
+  public final HashKey getAndPutLocal(DistCacheEntry entry,
+                                      HashKey valueHash,
+                                      Object value,
+                                      HashKey cacheHash,
+                                      int flags,
+                                      long expireTimeout,
+                                      long idleTimeout,
+                                      long leaseTimeout,
+                                      long localReadTimeout,
+                                      int leaseOwner)
+  {
+    long newVersion = getNewVersion(entry.getMnodeValue());
+    
+    HashKey oldValueHash = entry.getValueHashKey();
+    
+    MnodeValue mnodeValue = putLocalValue(entry, 
+                                          newVersion,
+                                          valueHash, 
+                                          value, cacheHash,
+                                          flags,
+                                          expireTimeout,
+                                          idleTimeout,
+                                          leaseTimeout,
+                                          localReadTimeout,
+                                          leaseOwner);
+
+    return oldValueHash;
+  }
+
+  public HashKey compareAndPut(E entry, 
+                               HashKey testValue,
+                               Object value, 
+                               CacheConfig config)
+  {
+    HashKey valueHash = writeData(entry.getMnodeValue(), 
+                                  value,
+                                  config.getValueSerializer());
+    
+    return compareAndPut(entry, testValue, valueHash, value, config);
+  }
+
+  abstract protected HashKey compareAndPut(E entry,
+                                           HashKey testValue,
+                                           HashKey valueHash,
+                                           Object value,
+                                           CacheConfig config);
+  
+  public final HashKey compareAndPutLocal(E entry,
+                                          HashKey testValue,
+                                          HashKey valueHash,
+                                          Object value,
+                                          HashKey cacheKey,
+                                          int flags,
+                                          long expireTimeout,
+                                          long idleTimeout,
+                                          long leaseTimeout,
+                                          long localReadTimeout,
+                                          int leaseOwner)
+  {
+    MnodeValue mnodeValue = loadMnodeValue(entry);
+
+    HashKey oldValueHash = (mnodeValue != null
+                            ? mnodeValue.getValueHashKey()
+                            : null);
+
+    if (testValue == null) {
+    }
+    else if (testValue.equals(oldValueHash)) {
+      
+    }
+    else if (testValue.isNull()) {
+      if (oldValueHash != null && ! oldValueHash.isNull())
+        return null;
+      
+      oldValueHash = MnodeValue.NULL_KEY;
+    }
+    else if (testValue.isAny()) {
+      if (oldValueHash == null || oldValueHash.isNull())
+        return null;
+    }
+    else {
+      return null;
+    }
+    
+    long newVersion = getNewVersion(mnodeValue);
+
+    mnodeValue = putLocalValue(entry, 
+                               newVersion,
+                               valueHash, null, 
+                               cacheKey,
+                               flags,
+                               expireTimeout,
+                               idleTimeout,
+                               leaseTimeout,
+                               localReadTimeout,
+                               leaseOwner);
+
+    if (mnodeValue != null)
+      return oldValueHash;
+    else
+      return null;
   }
 
   public boolean compareAndPut(E entry,
@@ -722,7 +899,7 @@ abstract public class AbstractCacheManager<E extends DistCacheEntry>
     HashKey cacheKey = entry.getCacheHash();
 
     int flags = mnodeValue != null ? mnodeValue.getFlags() : 0;
-    long version = mnodeValue != null ? mnodeValue.getVersion() : 0;
+    long newVersion = getNewVersion(mnodeValue);
 
     long expireTimeout = config.getExpireTimeout();
     long idleTimeout = (mnodeValue != null
@@ -737,7 +914,7 @@ abstract public class AbstractCacheManager<E extends DistCacheEntry>
     int leaseOwner = (mnodeValue != null ? mnodeValue.getLeaseOwner() : -1);
 
     mnodeValue = putLocalValue(entry, 
-                               getNewVersion(version),
+                               newVersion,
                                null, null, cacheKey,
                                flags,
                                expireTimeout, idleTimeout,
@@ -765,7 +942,7 @@ abstract public class AbstractCacheManager<E extends DistCacheEntry>
     HashKey cacheKey = mnodeValue != null ? mnodeValue.getCacheHashKey() : null;
 
     int flags = mnodeValue != null ? mnodeValue.getFlags() : 0;
-    long version = mnodeValue != null ? mnodeValue.getVersion() : 0;
+    long newVersion = getNewVersion(mnodeValue);
 
     long expireTimeout = mnodeValue != null ? mnodeValue.getExpireTimeout() : -1;
     long idleTimeout = mnodeValue != null ? mnodeValue.getIdleTimeout() : -1;
@@ -774,7 +951,7 @@ abstract public class AbstractCacheManager<E extends DistCacheEntry>
     int leaseOwner = mnodeValue != null ? mnodeValue.getLeaseOwner() : -1;
 
     mnodeValue = putLocalValue(entry,
-                               getNewVersion(version),
+                               newVersion,
                                null, 
                                null, 
                                cacheKey,
@@ -806,60 +983,53 @@ abstract public class AbstractCacheManager<E extends DistCacheEntry>
                                         int leaseOwner)
   {
     HashKey key = entry.getKeyHash();
+    
+    MnodeValue oldEntryValue;
+    MnodeValue mnodeValue;
 
-    MnodeValue oldEntryValue = loadMnodeValue(entry);
+    do {
+      oldEntryValue = loadMnodeValue(entry);
+    
+      HashKey oldValueHash
+        = oldEntryValue != null ? oldEntryValue.getValueHashKey() : null;
 
-    HashKey oldValueHash
-      = oldEntryValue != null ? oldEntryValue.getValueHashKey() : null;
+      long oldVersion = oldEntryValue != null ? oldEntryValue.getVersion() : 0;
+      long now = Alarm.getCurrentTime();
 
-    long oldVersion = oldEntryValue != null ? oldEntryValue.getVersion() : 0;
-    long now = Alarm.getCurrentTime();
+      if (version < oldVersion
+          || (version == oldVersion
+              && valueHash != null
+              && valueHash.compareTo(oldValueHash) <= 0)) {
+        // lease ownership updates even if value doesn't
+        if (oldEntryValue != null) {
+          oldEntryValue.setLeaseOwner(leaseOwner, now);
 
-    if (version < oldVersion
-        || (version == oldVersion
-            && valueHash != null
-            && valueHash.compareTo(oldValueHash) <= 0)) {
-      // lease ownership updates even if value doesn't
-      if (oldEntryValue != null) {
-        oldEntryValue.setLeaseOwner(leaseOwner, now);
+          // XXX: access time?
+          oldEntryValue.setLastAccessTime(now);
+        }
 
-        // XXX: access time?
-        oldEntryValue.setLastAccessTime(now);
+        return oldEntryValue;
       }
 
-      return oldEntryValue;
-    }
+      long accessTime = now;
+      long updateTime = accessTime;
 
-    long accessTime = now;
-    long updateTime = accessTime;
-
-    MnodeValue mnodeValue = new MnodeValue(valueHash, value,
-                                           cacheHash,
-                                           flags, version,
-                                           expireTimeout,
-                                           idleTimeout,
-                                           leaseTimeout,
-                                           localReadTimeout,
-                                           accessTime,
-                                           updateTime,
-                                           true,
-                                           false);
+      mnodeValue = new MnodeValue(valueHash, value,
+                                  cacheHash,
+                                  flags, version,
+                                  expireTimeout,
+                                  idleTimeout,
+                                  leaseTimeout,
+                                  localReadTimeout,
+                                  accessTime,
+                                  updateTime,
+                                  true,
+                                  false);
+    } while (! entry.compareAndSet(oldEntryValue, mnodeValue));
     
-    // cloud/60g0
-    // mnodeValue.setLeaseOwner(leaseOwner, now);
-
-    // the failure cases are not errors because this put() could
-    // be immediately followed by an overwriting put()
-
-    if (! entry.compareAndSet(oldEntryValue, mnodeValue)) {
-      log.fine(this + " mnodeValue update failed due to timing conflict"
-               + " (key=" + key + ")");
-
-      return null;
-    }
-    
-    MnodeValue newValue
-      = getDataBacking().putLocalValue(mnodeValue, key, oldEntryValue, version,
+    //MnodeValue newValue
+       getDataBacking().putLocalValue(mnodeValue, key, 
+                                       oldEntryValue, version,
                                        valueHash, value, cacheHash,
                                        flags, expireTimeout, idleTimeout, 
                                        leaseTimeout,
@@ -869,16 +1039,20 @@ abstract public class AbstractCacheManager<E extends DistCacheEntry>
       CacheMnodeListener listener = _cacheListenMap.get(cacheHash);
 
       if (listener != null)
-        listener.onPut(key, newValue);
+        listener.onPut(key, mnodeValue);
     }
     
-    return newValue;
+    return mnodeValue;
   }
 
-  final public HashKey writeData(HashKey oldValueHash,
+  final public HashKey writeData(MnodeValue mnodeValue,
                                  Object value,
                                  CacheSerializer serializer)
   {
+    HashKey oldValueHash = (mnodeValue != null
+                            ? mnodeValue.getValueHashKey()
+                            : null);
+    
     TempOutputStream os = null;
 
     try {
@@ -1083,6 +1257,13 @@ abstract public class AbstractCacheManager<E extends DistCacheEntry>
     } finally {
       out.close();
     }
+  }
+  
+  private long getNewVersion(MnodeValue mnodeValue)
+  {
+    long version = mnodeValue != null ? mnodeValue.getVersion() : 0;
+    
+    return getNewVersion(version);
   }
   
   private long getNewVersion(long version)

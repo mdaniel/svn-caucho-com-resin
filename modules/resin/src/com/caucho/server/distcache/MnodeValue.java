@@ -42,6 +42,9 @@ public final class MnodeValue implements ExtCacheEntry {
   public static final MnodeValue NULL
     = new MnodeValue(null, null, null, 0, 0, 0, 0, 0, 0, 0, 0, false, true);
   
+  public static final HashKey NULL_KEY = new HashKey(new byte[32]);
+  public static final HashKey ANY_KEY = createAnyKey(32);
+  
   private final HashKey _valueHash;
   private final HashKey _cacheHash;
   private final int _flags;
@@ -479,6 +482,17 @@ public final class MnodeValue implements ExtCacheEntry {
   public int getHits()
   {
     return _hits;
+  }
+  
+  private static HashKey createAnyKey(int len)
+  {
+    byte []value = new byte[len];
+    
+    for (int i = 0; i < len; i++) {
+      value[i] = (byte) 0xff;
+    }
+    
+    return new HashKey(value); 
   }
 
   @Override

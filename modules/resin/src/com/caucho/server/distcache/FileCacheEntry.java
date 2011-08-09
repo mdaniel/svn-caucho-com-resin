@@ -95,13 +95,18 @@ public class FileCacheEntry extends DistCacheEntry {
     return _manager.getStream(this, os, config);
   }
 
+  @Override
+  public HashKey getValueHash(Object value, CacheConfig config)
+  {
+    return _manager.getValueHash(value, config);
+  }
   /**
    * Sets the current value
    */
   @Override
-  public Object put(Object value, CacheConfig config)
+  public void put(Object value, CacheConfig config)
   {
-    return _manager.put(this, value, config);
+    _manager.put(this, value, config);
   }
 
   /**
@@ -114,6 +119,26 @@ public class FileCacheEntry extends DistCacheEntry {
     throws IOException
   {
     return _manager.putStream(this, is, config, idleTimeout);
+  }
+
+  /**
+   * Sets the current value
+   */
+  @Override
+  public Object getAndPut(Object value, CacheConfig config)
+  {
+    return _manager.getAndPut(this, value, config);
+  }
+
+  /**
+   * Sets the current value
+   */
+  @Override
+  public HashKey compareAndPut(HashKey oldValue,
+                               Object value,
+                               CacheConfig config)
+  {
+    return _manager.compareAndPut(this, oldValue, value, config);
   }
 
   /**

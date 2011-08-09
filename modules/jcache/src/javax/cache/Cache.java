@@ -85,6 +85,9 @@ public interface Cache<K,V> extends Iterable<Cache.Entry<K,V>>, Lifecycle {
   public void putAll(Map<? extends K, ? extends V> map)
     throws CacheException;
   
+  public V getAndPut(K key, V value)
+    throws CacheException;
+  
   public boolean putIfAbsent(K key, V value)
     throws CacheException;
 

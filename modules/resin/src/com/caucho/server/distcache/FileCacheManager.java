@@ -53,4 +53,54 @@ public class FileCacheManager
     
     return new FileCacheEntry(key, hashKey, owner, this);
   }
+
+  /**
+   * Sets a cache entry
+   */
+  @Override
+  protected HashKey getAndPut(DistCacheEntry entry,
+                              HashKey valueHash,
+                              Object value,
+                              HashKey cacheHash,
+                              int flags,
+                              long expireTimeout,
+                              long idleTimeout,
+                              long leaseTimeout,
+                              long localReadTimeout,
+                              int leaseOwner)
+  {
+    return getAndPutLocal(entry,
+                          valueHash, 
+                          value,
+                          cacheHash,
+                          flags,
+                          expireTimeout,
+                          idleTimeout,
+                          leaseTimeout,
+                          localReadTimeout,
+                          leaseOwner);
+  }
+
+  @Override
+  public HashKey compareAndPut(FileCacheEntry entry,
+                               HashKey testValue,
+                               HashKey valueHash,
+                               Object value,
+                               CacheConfig config)
+  {
+    int leaseOwner = -1;
+    
+    HashKey oldValueKey
+      = compareAndPutLocal(entry, testValue, valueHash, value,
+                           config.getCacheKey(),
+                           config.getFlags(),
+                           config.getExpireTimeout(),
+                           config.getIdleTimeout(),
+                           config.getLeaseTimeout(),
+                           config.getLocalReadTimeout(),
+                           leaseOwner);
+    
+    return oldValueKey;
+  }
+
 }

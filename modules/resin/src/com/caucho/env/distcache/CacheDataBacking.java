@@ -67,19 +67,19 @@ public interface CacheDataBacking {
   /**
    * Sets a cache entry
    */
-  public MnodeValue putLocalValue(MnodeValue mnodeValue,
-                                  HashKey key,
-                                  MnodeValue oldEntryValue,
-                                  long version,
-                                  HashKey valueHash,
-                                  Object value,
-                                  HashKey cacheHash,
-                                  int flags,
-                                  long expireTimeout,
-                                  long idleTimeout,
-                                  long leaseTimeout,
-                                  long localReadTimeout,
-                                  int leaseOwner);
+  public boolean putLocalValue(MnodeValue mnodeValue,
+                               HashKey key,
+                               MnodeValue oldEntryValue,
+                               long version,
+                               HashKey valueHash,
+                               Object value,
+                               HashKey cacheHash,
+                               int flags,
+                               long expireTimeout,
+                               long idleTimeout,
+                               long leaseTimeout,
+                               long localReadTimeout,
+                               int leaseOwner);
   
   public boolean loadData(HashKey valueHash, WriteStream os)
     throws IOException;

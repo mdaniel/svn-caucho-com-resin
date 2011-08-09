@@ -67,6 +67,7 @@ import com.caucho.server.distcache.DataStore;
 import com.caucho.server.distcache.DistCacheEntry;
 import com.caucho.server.distcache.DistributedCacheManager;
 import com.caucho.server.distcache.MnodeStore;
+import com.caucho.server.distcache.MnodeValue;
 import com.caucho.util.HashKey;
 import com.caucho.util.L10N;
 import com.caucho.util.LruCache;
@@ -596,6 +597,20 @@ public class AbstractCache
   }
 
   /**
+   * Puts a new item in the cache.
+   *
+   * @param key   the key of the item to put
+   * @param value the value of the item to put
+   */
+  @Override
+  public Object getAndPut(Object key, Object value)
+  {
+    return getDistCacheEntry(key).getAndPut(value, _config);
+    
+    // notifyPut(key);
+  }
+
+  /**
    * Updates the cache if the old version matches the current version.
    * A zero value for the old value hash only adds the entry if it's new.
    *
@@ -641,6 +656,56 @@ public class AbstractCache
     notifyPut(key);
   }
 
+  @Override
+  public boolean putIfAbsent(Object key, Object value) throws CacheException
+  {
+    HashKey NULL = MnodeValue.NULL_KEY;
+    
+    HashKey result
+      = getDistCacheEntry(key).compareAndPut(NULL, value, _config);
+    
+    return result != null && result.isNull();
+  }
+
+  @Override
+  public boolean replace(Object key, Object oldValue, Object value)
+    throws CacheException
+  {
+    DistCacheEntry entry = getDistCacheEntry(key);
+    
+    HashKey oldHash = entry.getValueHash(oldValue, _config);
+    
+    HashKey result = entry.compareAndPut(oldHash, value, _config);
+    
+    return result != null && result.equals(oldHash);
+  }
+
+  @Override
+  public boolean replace(Object key, Object value) throws CacheException
+  {
+    DistCacheEntry entry = getDistCacheEntry(key);
+    
+    HashKey oldHash = MnodeValue.ANY_KEY;
+    
+    HashKey result = entry.compareAndPut(oldHash, value, _config);
+    
+    return result != null && ! result.isNull();
+  }
+
+  @Override
+  public Object getAndReplace(Object key, Object value) throws CacheException
+  {
+    DistCacheEntry entry = getDistCacheEntry(key);
+    
+    HashKey oldHash = MnodeValue.ANY_KEY;
+    
+    HashKey result = entry.compareAndPut(oldHash, value, _config);
+    
+    // return result != null && ! result.isNull();
+    
+    return null;
+  }
+
   /**
    * Removes the entry from the cache.
    *
@@ -654,6 +719,14 @@ public class AbstractCache
     getDistCacheEntry(key).remove(_config);
     
     return true;
+  }
+
+  @Override
+  public Object getAndRemove(Object key) throws CacheException
+  {
+    notifyRemove(key);
+    
+    return getDistCacheEntry(key).remove(_config);
   }
 
   /**
@@ -1191,26 +1264,6 @@ public class AbstractCache
   }
 
   /* (non-Javadoc)
-   * @see javax.cache.Cache#getAndRemove(java.lang.Object)
-   */
-  @Override
-  public Object getAndRemove(Object key) throws CacheException
-  {
-    // TODO Auto-generated method stub
-    return null;
-  }
-
-  /* (non-Javadoc)
-   * @see javax.cache.Cache#getAndReplace(java.lang.Object, java.lang.Object)
-   */
-  @Override
-  public Object getAndReplace(Object key, Object value) throws CacheException
-  {
-    // TODO Auto-generated method stub
-    return null;
-  }
-
-  /* (non-Javadoc)
    * @see javax.cache.Cache#getCacheName()
    */
   @Override
@@ -1253,16 +1306,6 @@ public class AbstractCache
   }
 
   /* (non-Javadoc)
-   * @see javax.cache.Cache#putIfAbsent(java.lang.Object, java.lang.Object)
-   */
-  @Override
-  public boolean putIfAbsent(Object key, Object value) throws CacheException
-  {
-    // TODO Auto-generated method stub
-    return false;
-  }
-
-  /* (non-Javadoc)
    * @see javax.cache.Cache#removeAll(java.util.Collection)
    */
   @Override
@@ -1280,27 +1323,6 @@ public class AbstractCache
   {
     // TODO Auto-generated method stub
     
-  }
-
-  /* (non-Javadoc)
-   * @see javax.cache.Cache#replace(java.lang.Object, java.lang.Object, java.lang.Object)
-   */
-  @Override
-  public boolean replace(Object key, Object oldValue, Object newValue)
-      throws CacheException
-  {
-    // TODO Auto-generated method stub
-    return false;
-  }
-
-  /* (non-Javadoc)
-   * @see javax.cache.Cache#replace(java.lang.Object, java.lang.Object)
-   */
-  @Override
-  public boolean replace(Object key, Object value) throws CacheException
-  {
-    // TODO Auto-generated method stub
-    return false;
   }
 
   /* (non-Javadoc)

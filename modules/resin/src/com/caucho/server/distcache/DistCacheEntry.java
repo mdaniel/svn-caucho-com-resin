@@ -171,11 +171,21 @@ abstract public class DistCacheEntry implements ExtCacheEntry {
   {
     return getMnodeValue();
   }
+  
+  /**
+   * Returns the hash of a value
+   */
+  abstract public HashKey getValueHash(Object value, CacheConfig config);
 
   /**
    * Sets the value by an input stream
    */
-  abstract public Object put(Object value, CacheConfig config);
+  abstract public void put(Object value, CacheConfig config);
+
+  /**
+   * Sets the value by an input stream
+   */
+  abstract public Object getAndPut(Object value, CacheConfig config);
 
   /**
    * Sets the value by an input stream
@@ -192,6 +202,9 @@ abstract public class DistCacheEntry implements ExtCacheEntry {
                                         HashKey value, 
                                         CacheConfig config);
 
+  abstract public HashKey compareAndPut(HashKey testValueHash,
+                                        Object value,
+                                        CacheConfig config);
   /**
    * Remove the value
    */

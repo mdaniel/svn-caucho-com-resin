@@ -56,7 +56,12 @@ public class HashKey implements Serializable {
     else
       return null;
   }
-  
+
+  public static byte[] getHash(HashKey testValue)
+  {
+    return testValue != null ? testValue.getHash() : null;
+  }
+
   public byte []getHash()
   {
     return _hash;
@@ -69,6 +74,19 @@ public class HashKey implements Serializable {
     
     for (int i = length - 1; i >= 0; i--) {
       if (hash[i] != 0)
+        return false;
+    }
+    
+    return true;
+  }
+  
+  public boolean isAny()
+  {
+    byte []hash = _hash;
+    int length = hash.length;
+    
+    for (int i = length - 1; i >= 0; i--) {
+      if (hash[i] != (byte) 0xff)
         return false;
     }
     
