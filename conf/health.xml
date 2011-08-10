@@ -30,7 +30,7 @@
     <health:DumpThreads/>
     <health:DumpHeap/>
     <health:DumpHeap hprof="true"
-                     hprof-dir="${resin.logDirectory}/heap.hprof"/>
+                     hprof-path="${resin.logDirectory}/heap.hprof"/>
     <health:StartProfiler active-time="2m" wait="true"/> 
     <health:Restart/>
   </health:ActionSequence>
