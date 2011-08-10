@@ -32,15 +32,11 @@ package com.caucho.log;
 import java.io.IOException;
 import java.lang.ref.WeakReference;
 import java.util.HashMap;
-import java.util.logging.Level;
-import java.util.logging.Logger;
+import java.util.concurrent.atomic.AtomicBoolean;
 
 import com.caucho.config.ConfigException;
 import com.caucho.config.types.Bytes;
 import com.caucho.config.types.Period;
-import com.caucho.util.Alarm;
-import com.caucho.util.AlarmListener;
-import com.caucho.util.WeakAlarm;
 import com.caucho.vfs.Path;
 import com.caucho.vfs.StreamImpl;
 import com.caucho.vfs.WriteStream;
@@ -49,10 +45,7 @@ import com.caucho.vfs.WriteStream;
  * Automatically-rotating streams.  Normally, clients will call
  * getStream instead of using the StreamImpl interface.
  */
-public class RotateStream extends StreamImpl implements AlarmListener {
-  private static final Logger log
-    = Logger.getLogger(RotateStream.class.getName());
-  
+public class RotateStream extends StreamImpl {
   private static HashMap<Path,WeakReference<RotateStream>> _streams
     = new HashMap<Path,WeakReference<RotateStream>>();
   
@@ -61,10 +54,7 @@ public class RotateStream extends StreamImpl implements AlarmListener {
 
   private final AbstractRolloverLog _rolloverLog = new AbstractRolloverLog();
 
-  private final Alarm _alarm = new WeakAlarm(this);
-
-  private volatile boolean _isInit;
-  private volatile boolean _isClosed;
+  private volatile AtomicBoolean _isInit = new AtomicBoolean();
 
   /**
    * Create rotate stream.
@@ -211,15 +201,10 @@ public class RotateStream extends StreamImpl implements AlarmListener {
   public void init()
     throws IOException
   {
-    synchronized (this) {
-      if (_isInit)
-        return;
-      _isInit = true;
-    }
+    if (! _isInit.getAndSet(true))
+      return;
 
     _rolloverLog.init();
-
-    _alarm.queueAt(_rolloverLog.getNextRolloverCheckTime());
   }
 
   /**
@@ -271,8 +256,6 @@ public class RotateStream extends StreamImpl implements AlarmListener {
   {
     _rolloverLog.flush();
     _rolloverLog.rollover();
-
-    _alarm.queueAt(_rolloverLog.getNextRolloverCheckTime());
   }
 
   /**
@@ -283,49 +266,21 @@ public class RotateStream extends StreamImpl implements AlarmListener {
   public void close()
   {
   }
-
-  public void handleAlarm(Alarm alarm)
-  {
-    try {
-      _rolloverLog.flush();
-      _rolloverLog.rollover();
-    } catch (Throwable e) {
-      e.printStackTrace();
-      log.log(Level.FINE, e.toString(), e);
-    } finally {
-      if (! _isClosed) {
-        long nextTime = _rolloverLog.getNextRolloverCheckTime();
-        long now = Alarm.getCurrentTime();
-
-        long delta = nextTime - now;
-
-        if (delta < 60000)
-          delta = 60000;
-
-        _alarm.queue(delta);
-      }
-    }
-  }
-
-  /**
-   * Closes the underlying stream.
-   */
+  
   private void closeImpl()
   {
     try {
-      _isClosed = true;
       _rolloverLog.close();
     } catch (Throwable e) {
-      log.log(Level.FINE, e.toString(), e);
     }
   }
-
-  /**
-   * finalize.
-   */
+  
   @Override
   public void finalize()
+    throws Throwable
   {
+    super.finalize();
+    
     closeImpl();
   }
 }

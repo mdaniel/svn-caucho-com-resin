@@ -590,23 +590,22 @@ public class Jar implements CacheListener {
 
     isCacheValid();
 
-    if (_backingIsFile) {
-      try {
-        jarFile = new JarFile(_backing.getNativePath());
+    if (! _backingIsFile)
+      throw new FileNotFoundException(_backing.getNativePath());
+    
+    try {
+      jarFile = new JarFile(_backing.getNativePath());
         
         /*
         if (_backing.getNativePath().indexOf("cssparser.jar") > 0)
           System.out.println("JAR: " + _backing + " " + jarFile);
           */
-      }
-      catch (IOException ex) {
-        if (log.isLoggable(Level.FINE))
-          log.log(Level.FINE, L.l("Error opening jar file '{0}'", _backing.getNativePath()));
+    }
+    catch (IOException ex) {
+      if (log.isLoggable(Level.FINE))
+        log.log(Level.FINE, L.l("Error opening jar file '{0}'", _backing.getNativePath()));
 
-        throw ex;
-      }
-
-      // getLastModifiedImpl();
+      throw ex;
     }
 
     return jarFile;
@@ -644,7 +643,7 @@ public class Jar implements CacheListener {
         return zipFile;
       }
     }
-
+    
     if (_backingIsFile) {
       try {
         zipFile = new ZipFile(_backing.getNativePath());

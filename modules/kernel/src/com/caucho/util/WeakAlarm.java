@@ -89,6 +89,7 @@ public class WeakAlarm extends Alarm {
   /**
    * Return the alarm's listener.
    */
+  @Override
   public AlarmListener getListener()
   {
     return _listenerRef.get();
@@ -97,14 +98,27 @@ public class WeakAlarm extends Alarm {
   /**
    * Sets the alarm's listener.
    */
+  @Override
   public void setListener(AlarmListener listener)
   {
     _listenerRef = new WeakReference<AlarmListener>(listener);
   }
 
+  @Override
+  public ClassLoader getContextLoader()
+  {
+    WeakReference<ClassLoader> loaderRef = _loaderRef;
+    
+    if (loaderRef != null)
+      return loaderRef.get();
+    else
+      return null;
+  }
+  
   /**
    * Sets the class loader.
    */
+  @Override
   public void setContextLoader(ClassLoader loader)
   {
     if (loader != null)

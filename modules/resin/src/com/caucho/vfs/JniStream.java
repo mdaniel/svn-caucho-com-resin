@@ -116,7 +116,10 @@ public class JniStream extends StreamImpl {
   // XXX: needs update
   public int getAvailable() throws IOException
   {
-    return 0;
+    if (_socket.readNonBlock(0))
+      return 1;
+    else
+      return 0;
   }
 
   @Override

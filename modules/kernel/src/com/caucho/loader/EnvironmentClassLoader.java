@@ -34,6 +34,7 @@ import java.io.InputStream;
 import java.lang.reflect.Constructor;
 import java.net.URL;
 import java.net.URLClassLoader;
+import java.net.URLDecoder;
 import java.util.ArrayList;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
@@ -1153,7 +1154,7 @@ public class EnvironmentClassLoader extends DynamicClassLoader
         return null;
 
       if (! _isPathChecked) {
-        String urlString = _url.toString();
+        String urlString = URLDecoder.decode(_url.toString());
         
         if (urlString.startsWith("file:") || urlString.startsWith("jar:"))
           _path = Vfs.getPwd(EnvironmentClassLoader.this).lookup(urlString);

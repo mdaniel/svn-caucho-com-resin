@@ -44,8 +44,6 @@ import java.io.IOException;
 public class RotateLog {
   private final static L10N L = new L10N(RotateLog.class);
   
-  private static final long ROLLOVER_SIZE = Long.MAX_VALUE / 2;
-  
   private Path _path;
   private String _pathFormat;
   private String _archiveFormat;

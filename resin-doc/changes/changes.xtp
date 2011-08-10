@@ -14,6 +14,8 @@
 <s2 title="4.0.21 snapshot">
 <ul>
 <li>resin-cli: unknown argument should fail resin start (#4689, rep alex)</li>
+<li>log: log rotation alarm refactor (#4680, rep by Steve Francis)</li>
+<li>rewrite: added &lt;resin:NotFound> (#4705, rep by Aaron Freeman)</li>
 <li>git: corrupted .git on startup (#4701, rep by Bill Au)</li>
 <li>cloud: added deploy-config and cluster-config: scheme (#4604)</li>
 <li>i18n: utf8writer issues with surrogate pairs (#4700, rep by SHinomiya Nobuaki)</li>

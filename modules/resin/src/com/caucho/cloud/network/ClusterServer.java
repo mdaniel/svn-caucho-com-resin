@@ -569,6 +569,9 @@ public final class ClusterServer {
   {
     ClientSocketFactory factory = _loadBalanceSocketPool;
     
+    if (factory == null)
+      return null;
+    
     if (_cloudServer.getState().isDisableSoft()) {
       factory.enableSessionOnly();
     }

@@ -27,56 +27,37 @@
  * @author Scott Ferguson
  */
 
-package com.caucho.remote.websocket;
+package com.caucho.rewrite;
 
-import java.io.IOException;
+import javax.servlet.DispatcherType;
+import javax.servlet.FilterChain;
+import javax.servlet.http.HttpServletResponse;
+
+import com.caucho.config.Configurable;
+import com.caucho.server.dispatch.ErrorFilterChain;
+import com.caucho.server.dispatch.MovedFilterChain;
 
 /**
- * WebSocketInputStream reads a single WebSocket packet.
+ * Sends a HTTP 404 Not Found response
  *
- * <code><pre>
- * +-+------+---------+-+---------+
- * |F|xxx(3)|opcode(4)|M|len(7)   |
- * +-+------+---------+-+---------+
- * 
- * OPCODES
- *   0 - cont
- *   1 - text
- *   2 - binary
- * </pre></code>
+ * <pre>
+ * &lt;web-app xmlns:resin="urn:java:com.caucho.resin">
+ *
+ *   &lt;resin:NotFound regexp="^/hidden" target="/bar"/>
+ *
+ * &lt;/web-app>
+ * </pre>
  */
-public class WebSocketMaskedInputStream extends WebSocketInputStream 
+@Configurable
+public class NotFound extends AbstractTargetDispatchRule
 {
-  private FrameInputStream _maskIs;
-  
-  public WebSocketMaskedInputStream(FrameInputStream is)
-    throws IOException
-  {
-    super(is);
-    
-    _maskIs = is;
-  }
-
   @Override
-  public boolean startBinaryMessage()
-    throws IOException
+  public FilterChain createDispatch(DispatcherType type,
+                                    String uri,
+                                    String queryString,
+                                    String target,
+                                    FilterChain next)
   {
-    /*
-    if (! _maskIs.readMask())
-      return false;
-    */
-    return super.startBinaryMessage();
-  }
-
-  public boolean readFrameHeader()
-    throws IOException
-  {
-    /*
-    if (! _maskIs.readMask())
-      return false;
-    
-    return super.readFrameHeader();
-    */
-    return false;
+    return new ErrorFilterChain(HttpServletResponse.SC_NOT_FOUND);
   }
 }

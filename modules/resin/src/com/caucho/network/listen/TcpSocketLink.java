@@ -595,7 +595,7 @@ public class TcpSocketLink extends AbstractSocketLink
     try {
       StreamImpl s = socket.getStream();
 
-      int len = s.readNonBlock(_testBuffer, 0, 0);
+      int len = s.getAvailable();
 
       if (len >= 0 || len == ReadStream.READ_TIMEOUT)
         return false;
@@ -956,14 +956,16 @@ public class TcpSocketLink extends AbstractSocketLink
         TcpAsyncController async = getAsyncController();
 
         if (async == null) {
+          // network/0290
+          close();
           return RequestState.EXIT;
         }
         // _state = _state.toCometWake();
         // _state = _state.toCometDispatch();
       
-      
         if (async.isTimeout()) {
           async.timeout();
+          close();
           return RequestState.EXIT;
         }
 
@@ -981,8 +983,8 @@ public class TcpSocketLink extends AbstractSocketLink
             continue;
         }
         else if (isKeepaliveAllocated()) {
-          // server/1l81
-          _state = _state.toKeepalive(this);
+          // server/1l81, network/0291
+          //_state = _state.toKeepalive(this);
           _async = null;
 
           async.onClose();
@@ -1037,6 +1039,9 @@ public class TcpSocketLink extends AbstractSocketLink
         return RequestState.EXIT;
       }
     }
+    
+    if (result == RequestState.EXIT)
+      close();
 
     return result;
   }
@@ -1054,8 +1059,11 @@ public class TcpSocketLink extends AbstractSocketLink
     try {
       // clear the interrupted flag
       Thread.interrupted();
+      
+      // boolean isKeepalive = false; // taskType == Task.KEEPALIVE;
+      boolean isKeepalive = taskType == Task.KEEPALIVE && ! _state.isKeepalive();
 
-      result = handleRequestsImpl(taskType == Task.KEEPALIVE);
+      result = handleRequestsImpl(isKeepalive);
     } catch (ClientDisconnectException e) {
       _listener.addLifetimeClientDisconnectCount();
 
@@ -1162,8 +1170,9 @@ public class TcpSocketLink extends AbstractSocketLink
     if (_state.isCometActive()) {
       if (toSuspend())
         return RequestState.ASYNC;
-      else
+      else {
         return handleResumeTask();
+      }
     }
    
     return RequestState.REQUEST_COMPLETE;

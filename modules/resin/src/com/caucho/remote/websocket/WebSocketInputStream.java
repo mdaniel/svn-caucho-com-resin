@@ -32,8 +32,6 @@ package com.caucho.remote.websocket;
 import java.io.IOException;
 import java.io.InputStream;
 
-import com.caucho.util.L10N;
-
 /**
  * WebSocketInputStream reads a single WebSocket packet.
  *

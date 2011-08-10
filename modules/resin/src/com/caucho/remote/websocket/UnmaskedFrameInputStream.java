@@ -116,10 +116,10 @@ public class UnmaskedFrameInputStream extends FrameInputStream
         return -1;
     }
     
-    int sublen = (int) _length;
+    int sublen = length;
     
-    if (length < sublen)
-      sublen = length;
+    if (_length < sublen)
+      sublen = (int) _length;
     
     sublen = _is.read(buffer, offset, sublen);
     
