@@ -236,7 +236,7 @@ function print_profile_tab($entries, $name, $count, $profile)
     echo "<tr class='toggle-sw_${name} toggle-sw_${name}_${i}'>";
     echo "<td></td>";
     
-    echo "<td colspan='4'>";
+    echo "<td colspan='5'>";
 
     echo "<div class='stack-trace'>";
     echo "<hr/>";
