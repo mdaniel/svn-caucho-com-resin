@@ -38,7 +38,6 @@ $thread_pool = $g_server->ThreadPool;
 
 $threads = array();
 $thread_ids = $jvm_thread->AllThreadIds;
-sort($thread_ids);
 
 $info_list = $jvm_thread->getThreadInfo($thread_ids, true, true);
 
@@ -56,6 +55,8 @@ foreach ($info_list as $info) {
     
   $threads[] = $thread;
 }
+
+usort($threads, "thread_stack_cmp");
 
 echo "<h1>Thread Dump"; print_help("Thread Dump"); echo "</h1>\n";
 
@@ -232,9 +233,6 @@ function thread_display_group($group_name, $threads)
     $name = $group_name;
   }
 
-  //sort by stack trace
-  usort($threads, "thread_stack_cmp");
-
   echo "<table class='threads'>\n";
 
   echo "<thead>\n";
@@ -246,11 +244,10 @@ function thread_display_group($group_name, $threads)
   echo "</th></tr>\n";
 
   echo "<tr>";
-//  echo "<td style='border-width:0'>&nbsp;&nbsp;&nbsp;</td>";
-  echo "<th id='${group_name}_id'>id</th>";
   echo "<th id='${group_name}_name'>name</th>";
   echo "<th id='${group_name}_method'>method</th>";
   echo "<th id='${group_name}_state'>state</th>";
+  echo "<th id='${group_name}_id'>id</th>";
   //echo "<th id='${group_name}_url'>url</th>";
   echo "</tr>\n";
 
@@ -261,15 +258,15 @@ function thread_display_group($group_name, $threads)
 
   echo "<tbody>\n";
   $count = 0;
-  $stackTrace = "";
+  $plainStackTrace = "";
   $stackTraceClass = "rtb";
 
   foreach ($threads as $thread) {
     $info = $thread["info"];
 
     if (is_object($info)) {
-      $newStackTrace = stack_trace_to_html($group_name, $info);
-      $isNewStackTrace = ! ($newStackTrace === $stackTrace);
+      $newPlainStackTrace = stack_trace_to_str($info);
+      $isNewStackTrace = ! ($newPlainStackTrace === $plainStackTrace);
 
       if($isNewStackTrace && "rta" === $stackTraceClass)
         $stackTraceClass = "rtb";
@@ -279,10 +276,10 @@ function thread_display_group($group_name, $threads)
       thread_display_thread($info,
                             $group_name,
                             $count++,
-                            $newStackTrace,
+                            stack_trace_to_html($group_name, $info),
                             $stackTraceClass);
 
-      $stackTrace = $newStackTrace;
+      $plainStackTrace = $newPlainStackTrace;
     }
   }
 
@@ -317,9 +314,7 @@ function thread_display_thread($info, $group_name, $count, $stackTrace,
   $id = $info->threadId;
 
 //    echo "<td style='border-width:0'>&nbsp;&nbsp;&nbsp;</td>";
-  echo "<td headers='${group_name} ${group_name}_id'><a name='th_${id}'></a>";
-  echo "<span id='sw_${group_name}_${id}' class='switch'></span>\n";
-  echo $id . "</td>";
+
   echo "<td headers='${group_name} ${group_name}_name'>" . $info->threadName . "</td>";
 
   $topStack = thread_get_description($info);
@@ -329,8 +324,10 @@ function thread_display_thread($info, $group_name, $count, $stackTrace,
     $tail = strrchr($name, '.');
     if ($tail)
       $name = substr($tail, 1);
-    echo "<td headers='${group_name} ${group_name}_method'>" . $name . "."
-	 . $topStack->methodName . "()</td>";
+    echo "<td headers='${group_name} ${group_name}_method'>";
+    echo "<span id='sw_${group_name}_${id}' class='switch'></span>\n";
+    echo $name . "." . $topStack->methodName . "()";
+    echo "</td>";
   }
   else
     echo "<td headers='${group_name} ${group_name}_id'></td>";
@@ -343,6 +340,9 @@ function thread_display_thread($info, $group_name, $count, $stackTrace,
   else if ($info->getWaitedTime() > 0)
     echo sprintf(" (%dms)", $info->getWaitedTime());
   echo "</td>";
+
+  echo "<td headers='${group_name} ${group_name}_id'><a name='th_${id}'></a>";
+  echo $id . "</td>";
 
   echo "</tr>\n";
 
@@ -381,6 +381,16 @@ function stack_trace_to_html($group, $info) {
     $trace = $trace . " at {$elt->className}.{$elt->methodName} ({$elt->fileName}:{$elt->lineNumber})\n";
 
     $i++;
+  }
+
+  return $trace;
+}
+
+function stack_trace_to_str($info) {
+  $trace = "";
+
+  foreach ($info->stackTrace as $elt) {
+    $trace = $trace . " {$elt->className}.{$elt->methodName} ({$elt->fileName}:{$elt->lineNumber}) ";
   }
 
   return $trace;
@@ -425,8 +435,8 @@ function thread_stack_cmp($thread_a, $thread_b) {
   else if (! is_object($info_b))
     return -1;
 
-  $stack_a = stack_trace_to_html("", $info_a);
-  $stack_b = stack_trace_to_html("", $info_b);
+  $stack_a = stack_trace_to_str($info_a);
+  $stack_b = stack_trace_to_str($info_b);
 
   return strcmp($stack_a, $stack_b);
 }
