@@ -730,6 +730,15 @@ tr.ra {
 tr.rb {
   background: #f0ece0;
 }
+
+tr.rta {
+  background: #f6f2e8;
+}
+
+tr.rtb {
+  background: #f0fce0;;
+}
+
 .data td {
   padding: 3px 4px 3px 4px;
   border: thin solid grey;

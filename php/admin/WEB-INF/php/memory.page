@@ -54,16 +54,16 @@ $memory = array(
 
 echo "<h2>Memory Pools</h2>\n";
 $row = 0;
-echo "<table id='sadf' class='data sortable'>\n";
+echo "<table id='sadf' class='data'>\n";
 
 echo "<thead>";
 echo "<tr>";
 echo "<th class='header' scope='col'>pool</th>\n";
 echo "<th scope='col'>% free</th>\n";
-echo "<th class='{sorter: \"metadata\"}' scope='col'>free";print_help("Memory#free");echo "</th>\n";
-echo "<th class='{sorter: \"metadata\"}' scope='col'>used";print_help("Memory#used");echo "</th>\n";
-echo "<th class='{sorter: \"metadata\"}' scope='col'>max";print_help("Memory#max");echo "</th>\n";
-echo "<th class='{sorter: \"metadata\"}' scope='col'>committed</th>\n";
+echo "<th scope='col'>free";print_help("Memory#free");echo "</th>\n";
+echo "<th scope='col'>used";print_help("Memory#used");echo "</th>\n";
+echo "<th scope='col'>max";print_help("Memory#max");echo "</th>\n";
+echo "<th scope='col'>committed</th>\n";
 echo "</tr>";
 echo "</thead\n>";
 
@@ -75,16 +75,14 @@ foreach ($memory as $m) {
   echo "<td>$m[name]";
   print_help("Memory#$m[name]");
   echo "</td>";
+
   echo"<td align='right'>" . sprintf("%.2f%%", 100 * $m[free] / $m[max])
       . "</td>";
-  echo"<td class='{sortValue: \"{$m[free]}\"}' align='right'>"
-      . sprintf("%.2fM", $m[free] / 1e6) . "</td>";
-  echo"<td class='{sortValue: \"" . $m[used] . "\"}' align='right'>"
-      . sprintf("%.2fM", $m[used] / 1e6) . "</td>";
-  echo"<td class='{sortValue: \"{$m[max]}\"}' align='right'>"
-      . sprintf("%.2fM", $m[max] / 1e6) . "</td>";
-  echo"<td class='{sortValue: \"{$m[committed]}\"}' align='right'>"
-      . sprintf("%.2fM", $m[committed] / 1e6) . "</td>";
+
+  echo"<td align='right'>" . sprintf("%.2fM", $m[free] / 1e6) . "</td>";
+  echo"<td align='right'>" . sprintf("%.2fM", $m[used] / 1e6) . "</td>";
+  echo"<td align='right'>" . sprintf("%.2fM", $m[max] / 1e6) . "</td>";
+  echo"<td align='right'>" . sprintf("%.2fM", $m[committed] / 1e6) . "</td>";
   echo "</tr>\n";
 }
 echo "</tbody>";
@@ -152,11 +150,11 @@ function display_heap_dump_subtab($name, $entries)
     echo "<thead>\n";
     echo "<tr>\n";
     echo "  <th scope='col'>% self</th>\n";
-    echo "  <th class='{sorter: \"metadata\"}' scope='col'>self+desc</th>\n";
-    echo "  <th class='{sorter: \"metadata\"}' scope='col'>self</th>\n";
-    echo "  <th class='{sorter: \"metadata\"}' scope='col'>desc</th>\n";
+    echo "  <th scope='col'>self+desc</th>\n";
+    echo "  <th scope='col'>self</th>\n";
+    echo "  <th scope='col'>desc</th>\n";
     echo "  <th scope='col'>count</th>\n";
-    echo "  <th  scope='col' colspan='2'>class</th>\n";
+    echo "  <th scope='col' colspan='2'>class</th>\n";
     echo "</tr>\n";
     echo "</thead>\n";
 
@@ -169,13 +167,13 @@ function display_heap_dump_subtab($name, $entries)
       echo "<td class='heap-percent-self'>";
       printf("%04.2f%%", 100 * $entry->getTotalSize() / $total_size);
       echo "</td>";
-      echo "<td class='{sortValue: \"{$entry->getTotalSize()}\"} heap-self-plus-desc' align='right'>";
+      echo "<td class='heap-self-plus-desc' align='right'>";
       printf("%.3fM", $entry->getTotalSize() / (1024 * 1024));
       echo "</td>";
-      echo "<td class='{sortValue: \"{$entry->getSelfSize()}\"} heap-self' align='right'>";
+      echo "<td class='heap-self' align='right'>";
       printf("%.3fM", $entry->getSelfSize() / (1024 * 1024));
       echo "</td>";
-      echo "<td class='{sortValue: \"{$entry->getChildSize()}\"} heap-desc' align='right'>";
+      echo "<td class='heap-desc' align='right'>";
       printf("%.3fM", $entry->getChildSize() / (1024 * 1024));
       echo "</td>";
       echo "<td class='heap-count' align='right'>";
@@ -184,7 +182,7 @@ function display_heap_dump_subtab($name, $entries)
       echo "<td class='heap-class'>";
       echo "{$entry->getClassName()}";
       echo "</td>";
-      //a <td> with missing <th> breaks tablesorter
+      //<td> missing a <th>
       /*echo "<td class='heap-legend'></td>";*/
       echo "</tr>\n";
     }
@@ -311,11 +309,3 @@ EOF;
 display_footer($g_page, $javascript);
 
 ?>
-
-<script language="JavaScript">
-$(document).ready(function()
-{
-  $("table.sortable").tablesorter();
-}
-);
-</script>
