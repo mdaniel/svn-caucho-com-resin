@@ -389,9 +389,25 @@ function stack_trace_to_html($group, $info) {
 function stack_trace_to_str($info) {
   $trace = "";
 
-  foreach ($info->stackTrace as $elt) {
+  if ($info->threadState == "RUNNABLE") {
+    if ($info->isInNative())
+      $trace .= "AJ ";
+    else
+      $trace .= "AA ";
+  }
+  else {
+    $trace .= $info->threadState;
+  }
+
+  $size = sizeof($info->stackTrace);
+
+  for ($i = $size - 1; $i >= 0; $i--) {
+    $elt = $info->stackTrace[$i];
+
     $trace = $trace . " {$elt->className}.{$elt->methodName} ({$elt->fileName}:{$elt->lineNumber}) ";
   }
+
+  // $trace = $trace . " " . $info->threadName;
 
   return $trace;
 }
@@ -436,7 +452,10 @@ function thread_stack_cmp($thread_a, $thread_b) {
     return -1;
 
   $stack_a = stack_trace_to_str($info_a);
+  $stack_a .= $info_a->threadName;
+  
   $stack_b = stack_trace_to_str($info_b);
+  $stack_b .= $info_b->threadName;
 
   return strcmp($stack_a, $stack_b);
 }
