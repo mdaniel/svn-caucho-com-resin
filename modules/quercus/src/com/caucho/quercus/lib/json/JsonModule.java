@@ -30,22 +30,15 @@
 package com.caucho.quercus.lib.json;
 
 import com.caucho.quercus.annotation.Optional;
-import com.caucho.quercus.env.*;
-import com.caucho.quercus.lib.simplexml.SimpleXMLElement;
+import com.caucho.quercus.env.ArrayValueImpl;
+import com.caucho.quercus.env.Env;
+import com.caucho.quercus.env.StringValue;
+import com.caucho.quercus.env.Value;
 import com.caucho.quercus.module.AbstractQuercusModule;
-import com.caucho.util.L10N;
-
-import java.util.Iterator;
-import java.util.Map;
-import java.util.logging.Logger;
 
 public class JsonModule
     extends AbstractQuercusModule
 {
-  private static final Logger log
-    = Logger.getLogger(JsonModule.class.getName());
-  private static final L10N L = new L10N(JsonModule.class);
-
   public String []getLoadedExtensions()
   {
     return new String[] { "json" };

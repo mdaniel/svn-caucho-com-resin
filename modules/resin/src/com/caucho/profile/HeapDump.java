@@ -125,5 +125,9 @@ public class HeapDump {
   {
     throw new ConfigException(L.l("HeapDump requires Resin Professional"));
   }
-
+  
+  public String jsonHeapDump()
+  {
+    throw new UnsupportedOperationException(L.l("HeapDump requires Resin Professional"));
+  }
 }

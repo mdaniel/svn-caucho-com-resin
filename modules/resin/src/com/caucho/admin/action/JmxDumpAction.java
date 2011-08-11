@@ -29,24 +29,27 @@
 package com.caucho.admin.action;
 
 import java.lang.management.ManagementFactory;
-import java.util.*;
-import java.util.logging.*;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Date;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
 
-import javax.management.*;
-import javax.management.openmbean.*;
+import javax.management.JMException;
+import javax.management.MBeanAttributeInfo;
+import javax.management.MBeanServer;
+import javax.management.ObjectName;
+import javax.management.openmbean.CompositeData;
+import javax.management.openmbean.CompositeType;
 
 import com.caucho.config.ConfigException;
 import com.caucho.jmx.Jmx;
 import com.caucho.util.Alarm;
-import com.caucho.util.L10N;
 
 public class JmxDumpAction extends AbstractJmxAction implements AdminAction
 {
-  private static final Logger log
-    = Logger.getLogger(JmxDumpAction.class.getName());
-
-  private static final L10N L = new L10N(JmxDumpAction.class);
-  
   public static void main(String args[]) throws Exception
   {
     System.out.println(new JmxDumpAction().execute());
@@ -59,18 +62,37 @@ public class JmxDumpAction extends AbstractJmxAction implements AdminAction
     if (server == null)
       server = ManagementFactory.getPlatformMBeanServer();
 
-    StringBuilder dump = new StringBuilder();
+    StringBuilder sb = new StringBuilder();
     
-    dump.append("JMX Dump generated " + new Date(Alarm.getCurrentTime()));
-    dump.append("\n");
+    sb.append("{");
+    sb.append("\"create_time\": \""
+              + new Date(Alarm.getCurrentTime()) + "\"\n");
     
-    if (server == null)
-      return dump.toString();
-
+    if (server != null) {
+      sb.append(", \"jmx\": {\n");
+      
+      fillServer(sb, server);
+      
+      sb.append("\n}");
+    }
+    
+    sb.append("\n}");
+    
+    return sb.toString();
+  }
+  
+  private void fillServer(StringBuilder sb, MBeanServer server)
+  {
     Set<ObjectName> beans = new HashSet<ObjectName>();
 
     //Set<ObjectName> objectNames = server.queryNames(new ObjectName("java.lang:type=Runtime"), null);
-    Set<ObjectName> objectNames = server.queryNames(ObjectName.WILDCARD, null);
+    ArrayList<ObjectName> objectNames = new ArrayList<ObjectName>();
+    
+    objectNames.addAll(server.queryNames(ObjectName.WILDCARD, null));
+    
+    Collections.sort(objectNames);
+    
+    boolean isFirst = true;
     
     for (ObjectName objectName : objectNames) {
       if (beans.contains(objectName))
@@ -78,31 +100,42 @@ public class JmxDumpAction extends AbstractJmxAction implements AdminAction
 
       beans.add(objectName);
       
-      dump.append(objectName);
-      dump.append(" {\n");
-
-      dumpMBean(server, objectName, dump);
+      if (! isFirst)
+        sb.append(",\n");
       
-      dump.append("}\n");
-    }
+      isFirst = false;
+      
+      sb.append("\"");
+      escapeString(sb, String.valueOf(objectName));
+      sb.append("\" : {\n");
 
-    return dump.toString();
+      dumpMBean(sb, server, objectName);
+      
+      sb.append("\n}");
+    }
   }
   
   
-  private void dumpMBean(MBeanServer server, ObjectName objectName, StringBuilder dump)
+  private void dumpMBean(StringBuilder sb, 
+                         MBeanServer server,
+                         ObjectName objectName)
   {
     MBeanAttributeInfo []attributes = null;
     
     try {
       attributes = server.getMBeanInfo(objectName).getAttributes();
     } catch (Exception e) {
-      dump.append(e.getMessage());
-      dump.append('\n');
+      sb.append("\"mbean_exception\": \"" + e + "\"\n");
       return;
     }
     
+    boolean isFirst = true;
+    
     for (MBeanAttributeInfo attribute : attributes) {
+      if (! isFirst)
+        sb.append(",\n");
+      isFirst = false;
+      
       Object value = null;
       
       try {
@@ -111,42 +144,56 @@ public class JmxDumpAction extends AbstractJmxAction implements AdminAction
         value = e;
       }
       
-      dumpNameValue(attribute.getName(), value, dump, "  ");
+      dumpNameValue(sb, attribute.getName(), value, "  ");
     }
   }
   
-  private void dumpNameValue(String name, Object value, StringBuilder dump, String padding)
+  private void dumpNameValue(StringBuilder sb,
+                             String name,
+                             Object value, String padding)
   {
-    dump.append(padding);
-    dump.append(name);
-    dump.append("=");
+    sb.append(padding);
+    sb.append("\"");
+    escapeString(sb, name);
+    sb.append("\"");
+    sb.append(": ");
     
-    dumpValue(value, dump, padding);
+    dumpValue(sb, value, padding);
   }
   
-  private void dumpValue(Object value, StringBuilder dump, String padding)
+  private void dumpValue(StringBuilder sb, Object value, String padding)
   {
     if (value == null) {
-      dump.append("null");
-      dump.append('\n');
+      sb.append("null");
     } else if (value instanceof Object[]) {
       Object[] values = (Object[]) value;
-      dump.append("[\n");
+      sb.append("[");
+      
+      boolean isFirst = true;
       for (Object v : values) {
-        dump.append(padding + "  ");
-        dumpValue(v, dump, padding + "  ");
+        if (! isFirst)
+          sb.append(",");
+        isFirst = false;
+        
+        sb.append("\n" + padding + "  ");
+        dumpValue(sb, v, padding + "  ");
       }
-      dump.append(padding);
-      dump.append("]\n");
+      
+      sb.append("\n" + padding + "]");
     } else if (value instanceof CompositeData) {
       CompositeData data  = (CompositeData) value;
       CompositeType type = data.getCompositeType();
-      dump.append(type.getTypeName());
-      dump.append(" {\n");
-      for(String key : type.keySet())
-        dumpNameValue(key, data.get(key), dump, padding + "  ");
-      dump.append(padding);
-      dump.append("}\n");
+
+      sb.append(" {\n");
+      sb.append(padding);
+      sb.append("  \"java_class\": \"" + type.getTypeName() + "\"");
+      
+      for (String key : type.keySet()) {
+        sb.append(",\n");
+        dumpNameValue(sb, key, data.get(key), padding + "  ");
+      }
+      
+      sb.append("\n" + padding + "}");
 //    } else if (value instanceof TabularData) {
 //      TabularData data = (TabularData) value;
 //      TabularType type = data.getTabularType();
@@ -161,39 +208,75 @@ public class JmxDumpAction extends AbstractJmxAction implements AdminAction
 //      dump.append("}\n");
     } else if (value instanceof Map) {
       Map<Object, Object> data = (Map<Object, Object>) value;
-      dump.append(value.getClass().getName());
-      dump.append(" {\n");
-      for(Map.Entry<Object, Object> entry : data.entrySet())
-        dumpNameValue(entry.getKey().toString(), entry.getValue(), dump, padding + "  ");
-      dump.append(padding);
-      dump.append("}\n");
+      sb.append("{\n");
+      sb.append(padding);
+      sb.append("  \"java_class\":\"" + value.getClass().getName() + "\"");
+      
+      for(Map.Entry<Object, Object> entry : data.entrySet()) {
+        sb.append(",\n");
+        dumpNameValue(sb, entry.getKey().toString(), entry.getValue(), 
+                      padding + "  ");
+      }
+      sb.append("\n" + padding);
+      sb.append("}");
     } else if (value instanceof List) {
       List<Object> values = (List<Object>) value;
-      dump.append(value.getClass().getName());
-      dump.append(" {\n");
+      sb.append("[\n");
+      
+      boolean isFirst = true;
+      
       for (Object v : values) {
-        dump.append(padding + "  ");
-        dumpValue(v, dump, padding + "  ");
+        if (! isFirst) {
+          sb.append(",\n");
+        }
+        isFirst = false;
+        
+        sb.append(padding + "  ");
+        dumpValue(sb, v, padding + "  ");
       }
-      dump.append(padding);
-      dump.append("}\n");
+      sb.append(padding);
+      sb.append("]");
     } else if (value instanceof Throwable) {
       Throwable e = (Throwable) value;
       if (e instanceof UnsupportedOperationException) {
-        dump.append("Not supported");
-        dump.append('\n');
+        sb.append("\"Not supported\"");
       } else {
         Throwable cause = e.getCause();
         if (cause != null) {
-          dumpValue(cause, dump, padding);
+          dumpValue(sb, cause, padding);
         } else {
-          dump.append(e.getMessage());
-          dump.append('\n');
+          sb.append("\"" + e + "\"");
         }
       }
+    } else if (value instanceof Number) {
+      sb.append(value);
+    } else if (value instanceof Boolean) {
+      sb.append(value);
     } else {
-      dump.append(value);
-      dump.append('\n');
+      sb.append("\"");
+      escapeString(sb, String.valueOf(value));
+      sb.append("\"");
+    }
+  }
+  
+  private void escapeString(StringBuilder sb, String value)
+  {
+    int len = value.length();
+    
+    for (int i = 0; i < len; i++) {
+      char ch = value.charAt(i);
+      
+      switch (ch) {
+      case '"':
+        sb.append("\\\"");
+        break;
+      case '\\':
+        sb.append("\\\\");
+        break;
+      default:
+        sb.append(ch);
+        break;
+      }
     }
   }
   

@@ -29,29 +29,20 @@
 
 package com.caucho.management.server;
 
+import com.caucho.jmx.Description;
+
 /**
- * Interface for the persistent logging.
+ * Interface for taking and retrieving a snapshot.
  *
  * <pre>
- * resin:type=LogServiceManager
+ * resin:type=SnapshotService
  * </pre>
  */
-public interface LogServiceMXBean extends ManagedObjectMXBean
+public interface SnapshotServiceMXBean extends ManagedObjectMXBean
 {
-  public LogMessage []findMessages(String level, long minTime, long maxTime);
+  @Description("take a snapshot of the jmx values")
+  public void snapshotJmx();
   
-  public LogMessage []findMessagesByName(String name,
-                                         String level,
-                                         long minTime, 
-                                         long maxTime);
-  
-  public long []findMessageTimesByType(String type,
-                                       String level,
-                                       long minTime, 
-                                       long maxTime);
-  
-  public LogMessage []findMessagesByType(String type,
-                                         String level,
-                                         long minTime, 
-                                         long maxTime);
+  @Description("take a snapshot of the heap")
+  public void snapshotHeap();
 }

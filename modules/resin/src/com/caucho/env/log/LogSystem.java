@@ -60,22 +60,22 @@ public class LogSystem extends AbstractResinSubSystem
   public void setLevel(Level level) 
     throws ConfigException
   {
-    throw new AbstractMethodError();
+    throw new UnsupportedOperationException(getClass().getName());
   }
   
   public String createFullType(String name)
   {
-    throw new AbstractMethodError();
+    throw new UnsupportedOperationException(getClass().getName());
   }
   
   public void log(String fullType, String message)
   {
-    throw new AbstractMethodError();
+    throw new UnsupportedOperationException(getClass().getName());
   }
   
   public void log(String fullType, String name, Level level, String message)
   {
-    throw new AbstractMethodError();
+    throw new UnsupportedOperationException(getClass().getName());
   }
   
   public void log(long timestamp, 
@@ -84,12 +84,12 @@ public class LogSystem extends AbstractResinSubSystem
                   Level level, 
                   String message)
   {
-    throw new AbstractMethodError();
+    throw new UnsupportedOperationException(getClass().getName());
   }
 
   public void logStream(String fullType, InputStream is)
   {
-    throw new AbstractMethodError();
+    throw new UnsupportedOperationException(getClass().getName());
   }
 
   public void logStream(long timestamp, 
@@ -98,12 +98,12 @@ public class LogSystem extends AbstractResinSubSystem
                         Level level, 
                         InputStream is)
   {
-    throw new AbstractMethodError();
+    throw new UnsupportedOperationException(getClass().getName());
   }
 
   public WriteStream openLogStream(String fullType)
   {
-    throw new AbstractMethodError();
+    throw new UnsupportedOperationException(getClass().getName());
   }
 
 
@@ -112,7 +112,15 @@ public class LogSystem extends AbstractResinSubSystem
                                    String name, 
                                    Level level)
   {
-    throw new AbstractMethodError();
+    throw new UnsupportedOperationException(getClass().getName());
+  }
+
+  public long []findMessageTimes(String fullType, 
+                                 String levelName,
+                                 long minTime, 
+                                 long maxTime)
+  {
+    throw new UnsupportedOperationException(getClass().getName());
   }
 
   public LogMessage []findMessages(String fullType, 
@@ -120,7 +128,7 @@ public class LogSystem extends AbstractResinSubSystem
                                    long minTime, 
                                    long maxTime)
   {
-    throw new AbstractMethodError();
+    throw new UnsupportedOperationException(getClass().getName());
   }
 
   public LogMessage []findMessagesByName(String fullType,
@@ -129,6 +137,6 @@ public class LogSystem extends AbstractResinSubSystem
                                          long minTime, 
                                          long maxTime)
   {
-    throw new AbstractMethodError();
+    throw new UnsupportedOperationException(getClass().getName());
   }
 }

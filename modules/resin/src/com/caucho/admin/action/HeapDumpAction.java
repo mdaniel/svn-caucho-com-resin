@@ -44,16 +44,16 @@ public class HeapDumpAction implements AdminAction
 {
   private static final L10N L = new L10N(HeapDumpAction.class);
   
-  public String execute(boolean raw, String serverId, Path hprofPath)
+  public String execute(boolean isJvmHprof, String serverId, Path hprofPath)
     throws ConfigException, JMException, IOException
   {
-    if (raw)
-      return doRawHeapDump(serverId, hprofPath);
+    if (isJvmHprof)
+      return doJvmHprofHeapDump(serverId, hprofPath);
     else
       return doProHeapDump();
   }
   
-  private String doRawHeapDump(String serverId, Path hprofPath)
+  private String doJvmHprofHeapDump(String serverId, Path hprofPath)
     throws ConfigException, JMException, IOException
   {
     ObjectName name = new ObjectName(
@@ -106,5 +106,13 @@ public class HeapDumpAction implements AdminAction
     writer.flush();
     
     return buffer.toString();
+  }
+  
+  public String executeJson()
+    throws IOException
+  {
+    HeapDump dump = HeapDump.create();
+   
+    return dump.jsonHeapDump();
   }
 }

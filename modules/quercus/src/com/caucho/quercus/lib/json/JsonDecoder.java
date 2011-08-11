@@ -347,7 +347,7 @@ class JsonDecoder {
         break;
       }
 
-      Value name = decodeIdentifier(env);
+      Value name = jsonDecodeImpl(env, false);
 
       skipWhitespace();
 
@@ -390,7 +390,7 @@ class JsonDecoder {
         break;
       }
 
-      Value name = decodeIdentifier(env);
+      Value name = jsonDecodeImpl(env, false);
 
       skipWhitespace();
 
@@ -540,12 +540,35 @@ class JsonDecoder {
 
     String token = _str.substring(_offset, end).toString();
 
-    if (message != null)
-      env.warning(L.l("error parsing '{0}': {1}", token, message));
+    if (message != null) {
+      env.warning(L.l("error parsing '{0}': {1}\n  [{2}]",
+                      token, message,
+                      currentLine()));
+    }
     else
-      env.warning(L.l("error parsing '{0}'", token));
+      env.warning(L.l("error parsing '{0}'\n  [{1}]", token, currentLine()));
 
     return NullValue.NULL;
+  }
+  
+  private String currentLine()
+  {
+    StringValue s = _str;
+    int len = s.length();
+    
+    int head = _offset;
+    
+    for (; head >= 0 && s.charAt(head) != '\n'; head--) {
+    }
+    
+    if (head < 0)
+      head = 0;
+    
+    int tail = _offset;
+    for (; tail < len && s.charAt(tail) != '\n'; tail++) {
+    }
+    
+    return s.substring(head, tail).toString();
   }
 
   private void skipWhitespace()

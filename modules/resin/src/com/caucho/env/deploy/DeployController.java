@@ -496,7 +496,7 @@ abstract public class DeployController<I extends DeployInstance>
     ClassLoader oldLoader = thread.getContextClassLoader();
 
     try {
-      thread.setContextClassLoader(_parentLoader);
+      thread.setContextClassLoader(getParentClassLoader());
 
       return instantiateDeployInstance();
     } finally {
@@ -519,10 +519,19 @@ abstract public class DeployController<I extends DeployInstance>
     if (! _lifecycle.isAfterInit())
       throw new IllegalStateException(L.l("startOnInit must be called after init (in '{0}')",
                                           _lifecycle.getStateName()));
-
-    _strategy.startOnInit(this);
     
-    _alarm = new DeployControllerAlarm<DeployController<I>>(this, _redeployCheckInterval);
+    Thread thread = Thread.currentThread();
+    ClassLoader loader = thread.getContextClassLoader();
+    
+    try {
+      thread.setContextClassLoader(getParentClassLoader());
+      
+      _strategy.startOnInit(this);
+    
+      _alarm = new DeployControllerAlarm<DeployController<I>>(this, _redeployCheckInterval);
+    } finally {
+      thread.setContextClassLoader(loader);
+    }
   }
 
   /**
