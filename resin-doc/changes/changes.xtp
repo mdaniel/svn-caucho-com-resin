@@ -13,6 +13,8 @@
 
 <s2 title="4.0.21 snapshot">
 <ul>
+<li>eclipse-plugin: install resin into version specific directory (#4693, rep by manishdevraj)</li>
+<li>resin-cli: introduced new command start-with-foreground (see launchd restrictions)</li>
 <li>resin-cli: unknown argument should fail resin start (#4689, rep alex)</li>
 <li>log: log rotation alarm refactor (#4680, rep by Steve Francis)</li>
 <li>rewrite: added &lt;resin:NotFound> (#4705, rep by Aaron Freeman)</li>

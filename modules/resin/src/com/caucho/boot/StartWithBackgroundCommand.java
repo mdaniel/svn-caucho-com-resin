@@ -50,7 +50,7 @@ public class StartWithBackgroundCommand extends AbstractStartCommand
   @Override
   public String getName()
   {
-    return "start-with-background";
+    return "start-with-foreground";
   }
 
   @Override
@@ -65,10 +65,10 @@ public class StartWithBackgroundCommand extends AbstractStartCommand
       final String message;
       if (process != null)
         message
-          = "Resin/{0} started -server '{1}' for watchdog at {2}:{3} with background";
+          = "Resin/{0} started -server '{1}' for watchdog at {2}:{3} with foreground";
       else
         message
-          = "Resin/{0} started -server '{1}' for watchdog at {2}:{3} with no background";
+          = "Resin/{0} started -server '{1}' for watchdog at {2}:{3} with no foreground";
 
       System.out.println(L().l(
         message,
@@ -94,7 +94,7 @@ public class StartWithBackgroundCommand extends AbstractStartCommand
         eMsg = e.toString();
 
       System.out.println(L().l(
-        "Resin/{0} can't start-with-background -server '{1}' for watchdog at {2}:{3}.\n  {4}",
+        "Resin/{0} can't start-with-foreground -server '{1}' for watchdog at {2}:{3}.\n  {4}",
         VersionFactory.getVersion(),
         client.getId(),
         client.getWatchdogAddress(),
@@ -134,7 +134,7 @@ public class StartWithBackgroundCommand extends AbstractStartCommand
   @Override
   public void usage()
   {
-    System.out.println("usage: bin/resin.sh [-options] start-with-background");
+    System.out.println("usage: bin/resin.sh [-options] start-with-foreground");
     System.out.println();
     System.out.println("where options include:");
     System.out.println("   -conf <file>          : select a configuration file");

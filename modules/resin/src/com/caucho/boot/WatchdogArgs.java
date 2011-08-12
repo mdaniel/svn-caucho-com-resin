@@ -258,7 +258,7 @@ class WatchdogArgs
 
   boolean isWatchdogConsole()
   {
-    return _startMode == StartMode.START_WITH_BACKGROUND;
+    return _startMode == StartMode.START_WITH_FOREGROUND;
   }
 
   StartMode getStartMode()
@@ -573,8 +573,8 @@ class WatchdogArgs
       else if ("watchdog".equals(arg)) {
         _startMode = StartMode.WATCHDOG;
       }
-      else if ("start-with-background".equals(arg)) {
-        _startMode = StartMode.START_WITH_BACKGROUND;
+      else if ("start-with-foreground".equals(arg)) {
+        _startMode = StartMode.START_WITH_FOREGROUND;
       }
       else if (_startMode != null) {
         _tailArgs.add(arg);
@@ -601,7 +601,7 @@ class WatchdogArgs
                                + "\n  console - start Resin in console mode"
                                + "\n  status - watchdog status"
                                + "\n  start - start a Resin server"
-                               + "\n  start-with-background - start Resin server keeping parent JVM (OSX)"
+                               + "\n  start-with-foreground - start Resin server keeping parent JVM (OSX)"
                                + "\n  gui - start a Resin server with a GUI"
                                + "\n  stop - stop a Resin server"
                                + "\n  restart - restart a Resin server"
@@ -647,7 +647,7 @@ class WatchdogArgs
 
   private static void usage()
   {
-    System.err.println(L().l("usage: bin/resin.sh [-options] [console | status | start | gui | stop | restart | kill | shutdown | version | start-with-background]"));
+    System.err.println(L().l("usage: bin/resin.sh [-options] [console | status | start | gui | stop | restart | kill | shutdown | version | start-with-foreground]"));
     System.err.println(L().l("       bin/resin.sh [-options] [deploy | undeploy | deploy-copy | deploy-list | deploy-start | deploy-stop | deploy-restart]"));
     System.err.println(L().l("       bin/resin.sh [-options] [thread-dump | heap-dump | pdf-report | log-level | profile | jmx-list | jmx-dump | jmx-call | jmx-set]"));
     System.err.println(L().l("       bin/resin.sh [-options] [user-add | user-list | user-remove]"));
@@ -982,7 +982,7 @@ class WatchdogArgs
     THREAD_DUMP,
     SHUTDOWN,
     START,
-    START_WITH_BACKGROUND,
+    START_WITH_FOREGROUND,
     STATUS,
     STOP,
     UNDEPLOY,

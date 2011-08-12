@@ -83,7 +83,7 @@ public final class WatchdogCommand extends AbstractStartCommand
   @Override
   public void usage()
   {
-    System.out.println("note: command watchdog is deprecated. Please use start-with-background command instead.");
+    System.out.println("note: command watchdog is deprecated. Please use start-with-foreground command instead.");
     System.out.println("usage: bin/resin.sh [-options] watchdog");
     System.out.println();
     System.out.println("where options include:");

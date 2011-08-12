@@ -322,7 +322,7 @@ namespace Caucho
                      || "restart-webapp".Equals(arguments[argsIdx])
                      || "shutdown".Equals(arguments[argsIdx])
                      || "start".Equals(arguments[argsIdx])
-                     || "start-with-background".Equals(arguments[argsIdx])
+                     || "start-with-foreground".Equals(arguments[argsIdx])
                      || "start-webapp".Equals(arguments[argsIdx])
                      || "status".Equals(arguments[argsIdx])
                      || "stop".Equals(arguments[argsIdx])
