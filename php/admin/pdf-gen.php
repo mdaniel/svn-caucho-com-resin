@@ -197,13 +197,15 @@ if ($mPage->isLog()) {
   admin_pdf_draw_log();
 }
 
+if ($mPage->isThreadDump()) {
+  admin_pdf_thread_dump();
+}
+
 $g_pdf->end_page();
 $g_pdf->end_document();
 
 $document = $g_pdf->get_buffer();
 $length = strlen($document);
-
-
 
 $filename = "$pageName" . ".pdf";
 

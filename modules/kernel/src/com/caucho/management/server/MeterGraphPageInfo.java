@@ -67,7 +67,17 @@ public interface MeterGraphPageInfo {
    * Should we display profile?
    */
   public boolean isProfile();
- 
+
+  /**
+   * Should we display thread-dump?
+   */
+  public boolean isThreadDump();
+
+  /**
+   * Should we display jmx-dump?
+   */
+  public boolean isJmxDump();
+  
   
   /**
    * Returns the graphs on the page.

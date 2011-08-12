@@ -1430,11 +1430,7 @@ function admin_pdf_profile()
 {
   global $g_canvas;
   
-  resin_var_dump("admin-pdf-profile");
-
   $profile = admin_pdf_snapshot("Resin|Profile");
-
-  resin_var_dump($profile);
 
   if (! $profile) {
     return;
@@ -1510,6 +1506,66 @@ function admin_pdf_stack(&$profile_entry, $max)
   }
 
   return $string;
+}
+
+function admin_pdf_thread_dump()
+{
+  global $g_canvas;
+  
+  resin_var_dump("admin-pdf-thread-dump");
+
+  $dump = admin_pdf_snapshot("Resin|ThreadDump");
+
+  resin_var_dump($dump);
+
+  if (! $dump) {
+    return;
+  }
+  
+  $g_canvas->set_header_right("Thread Dump");
+
+  $g_canvas->newPage();
+
+  $g_canvas->setFont("Helvetica-Bold", 16);
+  $g_canvas->writeTextLine("Thread Dump");
+
+  $g_canvas->setFont("Helvetica-Bold", 8);
+
+  $entries =& $dump["thread_dump"];
+
+  // usort($entries, "thread_dump_cmp");
+
+  $max = 60;
+  $max_stack = 32;
+  $i = 0;
+
+  foreach ($entries as $entry) {
+    if ($g_canvas->isNewline(6)) {
+      $g_canvas->newPage();
+      
+      // admin_pdf_heap_dump_header($g_canvas);
+    }
+
+    resin_var_dump($entry);
+/*
+    $stack = admin_pdf_stack($entry, $max_stack);
+
+    $g_canvas->write_text_ralign_x(40, sprintf("%.2f%%", 
+                                             100 * $entry["ticks"] / $ticks));
+                                             
+    $g_canvas->write_text_ralign_x(90, sprintf("%.2fs", 
+                                             $entry["ticks"] * $period / 1000));
+    $g_canvas->write_text_x(110, $entry["name"]);
+    $g_canvas->write_text_x(440, $entry["state"]);
+
+    $g_canvas->write_text_newline();
+
+    $g_canvas->write_text_block_x(120, $stack);
+    */
+    
+  }
+  
+  $g_canvas->set_header_right(null);
 }
 
 function profile_cmp_ticks($a, $b)
