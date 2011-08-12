@@ -71,8 +71,8 @@ $majorTicks = $majorTicks * 1000;
 
 $minorTicks = $majorTicks/2;
 
-$canvas->setFont("Helvetica-Bold", 26);
-$canvas->writeText(new Point(175,800), "$pageName");
+$g_canvas->setFont("Helvetica-Bold", 26);
+$g_canvas->writeText(new Point(175,800), "$pageName");
 
 $page = 0;
 
@@ -94,8 +94,8 @@ if (2 * DAY <= $period) {
 
 $start = $end - $period;
 
-$canvas->setFont("Helvetica-Bold", 16);
-$canvas->writeText(new Point(175,775), "Time at " . date("Y-m-d H:i", $time));
+$g_canvas->setFont("Helvetica-Bold", 16);
+$g_canvas->writeText(new Point(175,775), "Time at " . date("Y-m-d H:i", $time));
 
 
 writeFooter();
@@ -103,7 +103,7 @@ writeFooter();
 
 if ($mPage->isSummary()) {
 	drawSummary();
-	newPage();
+	admin_pdf_new_page();
 }
 
 
@@ -116,10 +116,10 @@ foreach ($full_names as $full_name)  {
 }
 
 
-$canvas->setColor($black);
-$canvas->moveTo(new Point(0, 770));
-$canvas->lineTo(new Point(595, 770));
-$canvas->stroke();
+$g_canvas->setColor($black);
+$g_canvas->moveTo(new Point(0, 770));
+$g_canvas->lineTo(new Point(595, 770));
+$g_canvas->stroke();
 
 
 
@@ -174,28 +174,33 @@ foreach ($graphs as $graphData) {
 	$graph->end();
 
 	if ($index%2==0 && $columns==1) {
-		$pdf->end_page();
-		$pdf->begin_page(595, 842);
+		$g_pdf->end_page();
+		$g_pdf->begin_page(595, 842);
 		writeFooter();
 	} elseif ($index%6==0 && $columns==2) {
-		$pdf->end_page();
-		$pdf->begin_page(595, 842);
+		$g_pdf->end_page();
+		$g_pdf->begin_page(595, 842);
 		writeFooter();
 	}
 
 }
  
-
-
-if ($mPage->isLog()) {
-	newPage();
-	drawLog();
+if ($mPage->isHeapDump()) {
+  admin_pdf_heap_dump();
+}
+ 
+if ($mPage->isProfile()) {
+  admin_pdf_profile();
 }
 
-$pdf->end_page();
-$pdf->end_document();
+if ($mPage->isLog()) {
+  admin_pdf_draw_log();
+}
 
-$document = $pdf->get_buffer();
+$g_pdf->end_page();
+$g_pdf->end_document();
+
+$document = $g_pdf->get_buffer();
 $length = strlen($document);
 
 
@@ -224,7 +229,7 @@ unset($document);
 
 
 
-pdf_delete($pdf);
+pdf_delete($g_pdf);
 
 // needed for PdfReport health action
 return "ok";

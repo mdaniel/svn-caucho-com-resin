@@ -158,7 +158,7 @@ public class DynamicClassLoader extends java.net.URLClassLoader
   
   // marker for a closed classloader to help heap dumps
   @SuppressWarnings("unused")
-  private ZombieMarker _zombieMarker;
+  private ZombieClassLoaderMarker _zombieMarker;
 
   private boolean _hasNewLoader = true;
 
@@ -2196,7 +2196,7 @@ public class DynamicClassLoader extends java.net.URLClassLoader
    */
   public void destroy()
   {
-    _zombieMarker = new ZombieMarker();
+    _zombieMarker = new ZombieClassLoaderMarker();
     
     try {
       stop();

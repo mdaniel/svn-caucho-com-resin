@@ -35,12 +35,17 @@ public class ProfileEntry
 {
   public String getDescription()
   {
-    throw new AbstractMethodError();
+    throw new UnsupportedOperationException(getClass().getSimpleName());
   }
 
   public long getCount()
   {
-    throw new AbstractMethodError();
+    throw new UnsupportedOperationException(getClass().getSimpleName());
+  }
+  
+  public String getState()
+  {
+    throw new UnsupportedOperationException(getClass().getSimpleName());
   }
 
   public ArrayList<? extends StackEntry> getStackTrace()

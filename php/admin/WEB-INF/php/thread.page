@@ -368,7 +368,13 @@ function stack_trace_to_html($group, $info) {
    if ($info->getLockName()) {
     $trace = "<b> -- waiting on " . $info->getLockName() . " owned by ";
     $trace = $trace . "<a href='#th_{$group}_{$info->getLockOwnerId()}'>"
-         . $info->getLockOwnerId() . "</a></b>\n\n";
+         . $info->getLockOwnerId() . "</a></b>";
+
+    if ($info->getLockOwnerName()) {
+      $trace .= " (" . $info->getLockOwnerName() . ")";
+    }
+
+    $trace .= "\n\n";         
   }
 
   // XXX: need to look at the JDK 1.6 for locks

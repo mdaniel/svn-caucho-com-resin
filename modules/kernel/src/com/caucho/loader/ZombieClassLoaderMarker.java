@@ -33,5 +33,5 @@ package com.caucho.loader;
 /**
  * Marker for an object that should be garbage-collected.
  */
-public class ZombieMarker {
+public class ZombieClassLoaderMarker {
 }

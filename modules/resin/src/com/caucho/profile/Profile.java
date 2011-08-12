@@ -66,47 +66,52 @@ public class Profile
 
   public boolean isActive()
   {
-    throw new AbstractMethodError();
+    throw new UnsupportedOperationException(getClass().getName());
   }
 
   public int getDepth()
   {
-    throw new AbstractMethodError();
+    throw new UnsupportedOperationException(getClass().getName());
   }
 
   public void setDepth(int depth)
   {
-    throw new AbstractMethodError();
+    throw new UnsupportedOperationException(getClass().getName());
   }
 
   public void start()
   {
-    throw new AbstractMethodError();
+    throw new UnsupportedOperationException(getClass().getName());
   }
 
   public void stop()
   {
-    throw new AbstractMethodError();
+    throw new UnsupportedOperationException(getClass().getName());
   }
 
   public long getPeriod()
   {
-    throw new AbstractMethodError();
+    throw new UnsupportedOperationException(getClass().getName());
   }
 
   public void setPeriod(long period)
   {
-    throw new AbstractMethodError();
+    throw new UnsupportedOperationException(getClass().getName());
   }
 
   public long getTicks()
   {
-    throw new AbstractMethodError();
+    throw new UnsupportedOperationException(getClass().getName());
   }
 
   public long getRunTime()
   {
-    throw new AbstractMethodError();
+    throw new UnsupportedOperationException(getClass().getName());
+  }
+  
+  public long getEndTime()
+  {
+    throw new UnsupportedOperationException(getClass().getName());
   }
 
   public ProfileEntry []getResults()

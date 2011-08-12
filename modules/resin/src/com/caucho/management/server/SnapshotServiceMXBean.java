@@ -45,4 +45,16 @@ public interface SnapshotServiceMXBean extends ManagedObjectMXBean
   
   @Description("take a snapshot of the heap")
   public void snapshotHeap();
+  
+  @Description("take a snapshot of the threads")
+  public void snapshotThreadDump();
+  
+  @Description("start CPU profiling")
+  public void startProfile(long period, int stackDepth);
+  
+  @Description("stop CPU profiling")
+  public void stopProfile();
+  
+  @Description("take a snapshot of the profiling information")
+  public void snapshotProfile();
 }

@@ -51,4 +51,9 @@ public class ThreadDumpAction implements AdminAction
   {
     return _threadDump.getThreadDump(onlyActive);
   }
+
+  public String executeJson()
+  {
+    return _threadDump.jsonThreadDump();
+  }
 }

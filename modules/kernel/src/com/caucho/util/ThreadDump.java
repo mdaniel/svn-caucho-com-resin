@@ -219,6 +219,157 @@ public class ThreadDump
     }
   }
 
+  public String jsonThreadDump()
+  {
+    StringBuilder sb = new StringBuilder();
+    
+    sb.append("{");
+    sb.append("\"thread_dump\" : {\n");
+    
+    ThreadMXBean threadBean = ManagementFactory.getThreadMXBean();
+
+    long []ids = threadBean.getAllThreadIds();
+    ThreadInfo []infoList = threadBean.getThreadInfo(ids, 32);
+    
+    boolean isFirst = true;
+
+    for (ThreadInfo threadInfo : infoList) {
+      if (threadInfo == null)
+        continue;
+      
+      if (! isFirst) {
+        sb.append(",\n");
+      }
+      isFirst = false;
+      
+      jsonDumpThread(sb, threadInfo);
+    }
+    
+    sb.append("\n}");
+    sb.append("\n}");
+
+    return sb.toString();
+  }
+  
+  private void jsonDumpThread(StringBuilder sb, ThreadInfo info)
+  {
+    sb.append("\"" + info.getThreadId() + "\" : {");
+    
+    sb.append("\n  \"id\" : " + info.getThreadId());
+    
+    sb.append(",\n  \"name\" : \"");
+    escapeString(sb, info.getThreadName());
+    sb.append("\"");
+    
+    sb.append(",\n  \"state\" : \"" + info.getThreadState() + "\"");
+    
+    if (info.isInNative()) {
+      sb.append(",\n  \"native\" : true");
+    }
+    
+    if (info.getLockName() != null) {
+      sb.append(",\n  \"lock\" : {");
+      
+      sb.append("\n    \"name\" : \"");
+      escapeString(sb, info.getLockName());
+      sb.append("\"");
+      
+      sb.append(",\n    \"owner_id\" : " + info.getLockOwnerId());
+      
+      if (info.getLockOwnerName() != null) {
+        sb.append(",\n    \"owner_name\" : \"");
+        escapeString(sb, info.getLockOwnerName());
+        sb.append("\"");
+      }
+      
+      sb.append("\n  }");
+    }
+    
+    jsonDumpStackTrace(sb, info.getStackTrace());
+    jsonDumpMonitors(sb, info.getLockedMonitors())
+    ;
+    sb.append("\n}");
+  }
+
+  private void jsonDumpStackTrace(StringBuilder sb,
+                                  StackTraceElement []stackTrace)
+  {
+    if (stackTrace == null)
+      return;
+    
+    sb.append(",\n  \"stack\" : [\n");
+    
+    for (int i = 0; i < stackTrace.length; i++) {
+      StackTraceElement elt = stackTrace[i];
+      
+      if (i != 0)
+        sb.append(",\n");
+      
+      sb.append("  {");
+      
+      sb.append("\n    \"class\" : \"" + elt.getClassName() + "\"");
+      sb.append(",\n    \"method\" : \"" + elt.getMethodName() + "\"");
+      
+      if (elt.getFileName() != null) {
+        sb.append(",\n    \"file\" : \"" + elt.getFileName() + "\"");
+        sb.append(",\n    \"line\" : \"" + elt.getLineNumber() + "\"");
+      }
+      
+      if (elt.isNativeMethod())
+        sb.append(",\n    \"native\" : true");
+      
+      sb.append("\n  }");
+    }
+    
+    sb.append("]");
+  }
+  
+  private void jsonDumpMonitors(StringBuilder sb, 
+                                MonitorInfo[] lockedMonitors)
+  {
+    if (lockedMonitors == null || lockedMonitors.length == 0)
+      return;
+    
+    sb.append(",\n  \"monitors\" : [\n");
+    
+    for (int i = 0; i < lockedMonitors.length; i++) {
+      MonitorInfo info = lockedMonitors[i];
+      
+      if (i != 0)
+        sb.append(",\n");
+      
+      sb.append("  {\n");
+      
+      sb.append("    \"depth\" : " + info.getLockedStackDepth());
+      sb.append(",\n    \"class\" : \"" + info.getClassName() + "\"");
+      sb.append(",\n    \"hash\" : \"" + info.getIdentityHashCode() + "\"");
+      
+      sb.append("  }");
+    }
+    
+    sb.append("\n  ]");
+  }
+  
+  private void escapeString(StringBuilder sb, String value)
+  {
+    int len = value.length();
+    
+    for (int i = 0; i < len; i++) {
+      char ch = value.charAt(i);
+      
+      switch (ch) {
+      case '"':
+        sb.append("\\\"");
+        break;
+      case '\\':
+        sb.append("\\\\");
+        break;
+      default:
+        sb.append(ch);
+      }
+    }
+  }
+
   static class ThreadCompare implements Comparator<ThreadInfo> {
     public int compare(ThreadInfo a, ThreadInfo b)
     {
