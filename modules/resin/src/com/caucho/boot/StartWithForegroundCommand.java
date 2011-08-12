@@ -33,8 +33,6 @@ import com.caucho.VersionFactory;
 import com.caucho.config.ConfigException;
 import com.caucho.util.L10N;
 
-import java.io.IOException;
-import java.util.Set;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -42,7 +40,7 @@ import java.util.logging.Logger;
  * Command to start Resin server in gui mode
  * bin/resin.sh start-with-background -server a
  */
-public class StartWithBackgroundCommand extends AbstractStartCommand
+public class StartWithForegroundCommand extends AbstractStartCommand
 {
   private static Logger _log;
   private static L10N _L;
@@ -118,7 +116,7 @@ public class StartWithBackgroundCommand extends AbstractStartCommand
   private static Logger log()
   {
     if (_log == null)
-      _log = Logger.getLogger(StartWithBackgroundCommand.class.getName());
+      _log = Logger.getLogger(StartWithForegroundCommand.class.getName());
 
     return _log;
   }
@@ -126,7 +124,7 @@ public class StartWithBackgroundCommand extends AbstractStartCommand
   private static L10N L()
   {
     if (_L == null)
-      _L = new L10N(StartWithBackgroundCommand.class);
+      _L = new L10N(StartWithForegroundCommand.class);
 
     return _L;
   }
