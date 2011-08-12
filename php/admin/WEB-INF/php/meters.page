@@ -56,8 +56,6 @@ function display_tabs($pages)
 
     echo "<div id='${tab_name}'>\n";
 
-    echo "<h2>" . $page->getName() . "</h2>";
-  
     meter_display_page($page);
 
     echo "</div>";
@@ -72,7 +70,8 @@ function display_tabs($pages)
 function meter_display_page($page)
 {
   global $g_mbean_server;
-
+  global $g_periods;
+  
   $stat_service = $g_mbean_server->lookup("resin:type=StatService");
 
   if (! $stat_service)
@@ -83,14 +82,14 @@ function meter_display_page($page)
   $page_name = "pg_" . $page->name;
   $count = 0;
 
-  $period = $page->period / 1000;
-
-  if ($period <= 0) {
-    $period = 6 * 3600;
+  $period_ms = $page->period;
+  if ($period_ms <= 0) {
+    $period_ms = (6 * 60 * 60 * 1000);
   }
-
+  
+  $period = ($period_ms / 1000);
+  
   $end = time();
-  $start = $end - $period;
 
   $columns = $page->columns;
   $graph_count = count($page->meterGraphs);
@@ -110,11 +109,43 @@ function meter_display_page($page)
     $columns = 1;
   }
 
-  $width = 600 / $columns;
+  $width = 800 / $columns;
   $height = $width * 0.66;
 
   $is_column = false;
-
+  
+  echo "  <div style='text-align:center;display:inline-block;width:800px;'>\n";
+	echo "   <div style='float:left;font-size:1.5em;text-align:left;margin-bottom:.5em;'>" . $page->getName() . "</div>\n";
+	echo "   <div style='float:right;font-size:1em;text-align:right;margin-bottom:.5em;vertical-align:middle;'>\n";
+	echo "    <label for='summary-control-time'>Period</label>: <select name='summary-control-time' id='summary-control-time'>\n";
+	
+	foreach ($g_periods as $select_period => $name) {
+		echo "     <option value='${select_period}'";
+		if ($period == $select_period) {
+			echo "selected='selected'";
+		}
+		echo ">${name}</option>\n";
+	}
+	
+	echo "    </select> \n";
+	echo "   </div>\n";
+	echo "  </div>\n";
+	
+  echo "<script language='javascript' type='text/javascript'>\n";
+  echo "<!-- \n";
+  echo "$(function () {\n";
+	echo "	$(\"#summary-control-time\").change(function () {\n";
+  echo "		period = $(this).val();\n";
+  echo "		if (period > 0) {\n";
+  echo "	    $('div[id$=\"-thumb-plot\"]').each(function () {\n";
+  echo "				$(this).trigger(\"changeperiod\", period);\n";
+  echo "			});\n";
+  echo "		}\n"
+  echo "	});\n"
+  echo "});\n"
+  echo " -->\n";
+  echo "</script>\n\n"; 
+         
   echo "<table border='0'>\n";
 
   foreach ($page->meterGraphs as $graph) {
@@ -131,7 +162,7 @@ function meter_display_page($page)
 
     if ($graph) {
       echo "<td valign='top'>";
-      meter_display_graph($graph_name, $graph, $width, $height, $start, $end);
+      meter_display_graph($graph_name, $graph, $width, $height, $end, $period);
       echo "</td>";
     }
 
@@ -144,7 +175,7 @@ function meter_display_page($page)
   echo "</table>";
 }  
 
-function meter_display_graph($name, $graph, $width, $height, $start, $end)
+function meter_display_graph($name, $graph, $width, $height, $end, $period)
 {
 //  echo " <div style='float:top;padding:.5em;'>\n"
   
@@ -167,10 +198,9 @@ function meter_display_graph($name, $graph, $width, $height, $start, $end)
   if (! $caption)
     $caption = $name;
 
-  stat_graph($name, $width, $height, $start, $end, 
-               $meters,
-               "A line graph representing $caption over the last 6 hours.",
-               'bottom', null, null, $caption);
+  stat_graph($name, $width, $height, $end, $period, $meters,
+             "A line graph representing $caption over the last 6 hours.",
+             'bottom', null, null, $caption);
                
 //  echo " </div>\n";
 }

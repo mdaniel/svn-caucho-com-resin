@@ -176,13 +176,15 @@ function thread_display_summary_graph()
 
   $si = sprintf("%02d", $g_server->Index);
 
-  $end = time();
-  $start = $end - 6 * 3600;
-
+	$width = 250;
+	$height = 150;
+ 	$end = time();
+ 	$period = 6 * 60 * 60;
+  
   echo "<div style='display:inline-block;'>\n";
   echo " <div style='float:left;padding:.5em;'>\n";
   
-  stat_graph("resin-threads", 250, 125, $start, $end, 
+  stat_graph("resin-threads", $width, $height, $end, $period, 
                array("$si|JVM|Thread|JVM Thread Count",
                      "$si|Resin|Thread|Thread Count",
                      "$si|Resin|Thread|Thread Active Count",
@@ -195,7 +197,7 @@ function thread_display_summary_graph()
 	echo " </div>\n";
   echo " <div style='float:right;padding:.5em;'>\n";
 
-  stat_graph("jvm-threads", 250, 125, $start, $end, 
+  stat_graph("jvm-threads", $width, $height, $end, $period, 
                array("$si|JVM|Thread|JVM Thread Count",
                      "$si|JVM|Thread|JVM Runnable Count",
                      "$si|JVM|Thread|JVM Blocked Count",

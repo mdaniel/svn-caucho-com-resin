@@ -70,19 +70,18 @@ function display_health_graph($mbean_server, $s, $si, $label)
 {
   $stat_service = $mbean_server->lookup("resin:type=StatService");
   if ($stat_service) {
-    $period = 24 * 60 * 60;
-    $end = time();
-    $start = $end - $period;
-
-    $width = 600;
-    $height = 200;
     
     $health_system = $mbean_server->lookup("resin:type=HealthSystem");
     if ($health_system) {
 			$status_names = $health_system->HealthStatusNames;
     }
     
-    stat_graph_regexp("health_${si}", $width, $height, $start, $end,
+    $width = 600;
+    $height = 200;
+    $end = time();
+    $period = 6 * 60 * 60;
+        
+    stat_graph_regexp("health_${si}", $width, $height, $end, $period,
                       "/^$si\|Resin\|Health/",
     									"A line graph representing the status of each health check performed on server $label over the last 24 hours.",
                       "bottom", $mbean_server, $status_names, "Server ${label}");

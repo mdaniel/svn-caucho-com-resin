@@ -77,7 +77,7 @@ $full_width = 600;
 $mbean_server = $g_mbean_server;
 
 if (! $p_period) {
-  $p_period = 60;
+  $p_period = (60 * 60);
 }
 
 $self_index = sprintf("%02d", $g_server->SelfServer->ClusterIndex);
@@ -124,6 +124,7 @@ function display_graph_selection()
   global $g_next_url;
   global $g_server;
   global $self_index;
+  global $g_periods;
 
   echo "<form name='def_graph' method='post' action='${g_next_url}'>";
   echo "<table>\n";
@@ -164,41 +165,14 @@ function display_graph_selection()
   
   echo "<tr><th scope='row' style='text-align:right'><label for='period'>Time</label>: </th>\n "
   echo "<td><select name='period' id='period'>\n";
-
-  echo " <option value='" . (60) . "'";
-
-  if ($p_period == 60)
-    echo " selected='selected'";
-
-  echo ">1 hour</option>\n";
-
-  echo " <option value='" . (6 * 60) . "'";
-
-  if ($p_period == 6 * 60)
-    echo " selected";
-
-  echo ">6 hours</option>\n";
-
-  echo " <option value='" . (24 * 60) . "'";
-
-  if ($p_period == 24 * 60)
-    echo " selected";
-
-  echo ">24 hours</option>\n";
-
-  echo " <option value='" . (3 * 24 * 60) . "'";
-
-  if ($p_period == 3 * 24 * 60)
-    echo " selected";
-
-  echo ">3 days</option>\n";
-
-  echo " <option value='" . (7 * 24 * 60) . "'";
-
-  if ($p_period == 7 * 24 * 60)
-    echo " selected";
-
-  echo ">7 days</option>\n";
+  
+	foreach ($g_periods as $select_period => $name) {
+		echo "     <option value='${select_period}'";
+		if ($p_period == $select_period) {
+			echo "selected='selected'";
+		}
+		echo ">${name}</option>\n";
+	}
 
   echo "</select>\n";
   echo "</td></tr>\n";

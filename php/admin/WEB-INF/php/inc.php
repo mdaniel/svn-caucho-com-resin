@@ -986,9 +986,8 @@ function display_footer($script, $javascript="")
 <script type="text/javascript" src="resin-admin.js"></script>
 <script type="text/javascript" src="pie-chart.js"></script>
 <script type="text/javascript" src="flot/jquery.flot.js"></script>
-<script type="text/javascript" src="flot/jquery.flot.navigate.js"></script>
 <script type="text/javascript" src="flot/jquery.flot.symbol.js"></script>
-<script type="text/javascript" src="flot/jquery.flot.resize.js"></script> 
+<script type="text/javascript" src="flot/jquery.flot.selection.js"></script> 
 <script type="text/javascript">
 <!--
 //  $(document).ready(function() {

@@ -24,19 +24,21 @@ $stat_service = $g_mbean_server->lookup("resin:type=StatService");
 $si = sprintf("%02d", $g_server->Index);
 
 if ($stat_service) {
-
+	
+  $width = 600;
+  $height = 200;
   $end = time();
-  $start = $end - 6 * 3600;
-  stat_graph("memory", 600, 200, $start, $end,
+  $period = 6 * 60 * 60;
+	
+  stat_graph("memory", $width, $height, $end, $period,
              array("$si|JVM|Memory|Heap Memory Free",
                    "$si|JVM|Memory|Tenured Memory Free",
                    "$si|JVM|Memory|PermGen Memory Free"),
              "A line graph representing the amount of free memory in each of the heap, tenured, and permgen pools over the last 6 hours.",
              'bottom', null, null, 'Memory Free');
 
-  $end = time();
-  $start = $end - 6 * 3600;
-  stat_graph_regexp("gc", 600, 200, $start, $end, "/^$si\|JVM\|Memory\|GC Time/",
+  stat_graph_regexp("gc", $width, $height, $end, $period, 
+                    "/^$si\|JVM\|Memory\|GC Time/",
   									"A line graph representing the amount of time spent perfoming garbage collection over the last 6 hours.",
              				'bottom', null, null, 'GC Time');
 
