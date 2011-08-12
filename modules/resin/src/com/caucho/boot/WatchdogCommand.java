@@ -38,7 +38,7 @@ import java.util.logging.Logger;
  * Command to start Resin server in gui mode
  * bin/resin.sh watchdog -server a
  */
-public class WatchdogCommand extends AbstractStartCommand
+public final class WatchdogCommand extends AbstractStartCommand
 {
   private static Logger _log;
   private static L10N _L;
@@ -83,6 +83,7 @@ public class WatchdogCommand extends AbstractStartCommand
   @Override
   public void usage()
   {
+    System.out.println("note: command watchdog is deprecated. Please use start-with-background command instead.");
     System.out.println("usage: bin/resin.sh [-options] watchdog");
     System.out.println();
     System.out.println("where options include:");

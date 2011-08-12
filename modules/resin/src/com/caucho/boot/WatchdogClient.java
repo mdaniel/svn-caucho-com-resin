@@ -232,7 +232,7 @@ class WatchdogClient
     }
   }
 
-  public void startWatchdog(String []argv)
+  public Process startWatchdog(String []argv)
     throws ConfigException, IOException
   {
     if (getUserName() != null && ! hasBoot()) {
@@ -262,7 +262,7 @@ class WatchdogClient
         conn.query(WATCHDOG_ADDRESS, new WatchdogStartQuery(argv), BAM_TIMEOUT);
 
       if (status.isSuccess())
-        return;
+        return null;
 
       throw new ConfigException(L.l("{0}: watchdog start failed because of '{1}'",
                                     this, status.getMessage()));
@@ -275,7 +275,7 @@ class WatchdogClient
         conn.close();
     }
 
-    launchManager(argv);
+    return launchManager(argv);
   }
 
   public void stopWatchdog()
@@ -377,7 +377,7 @@ class WatchdogClient
     return _conn;
   }
 
-  public void launchManager(String []argv)
+  public Process launchManager(String []argv)
     throws IOException
   {
     System.out.println(L.l("Resin/{0} launching watchdog at {1}:{2}",
@@ -514,6 +514,8 @@ class WatchdogClient
 
     // stdIs.close();
     stdOs.close();
+
+    return process;
   }
 
   public static void appendEnvPath(Map<String,String> env,

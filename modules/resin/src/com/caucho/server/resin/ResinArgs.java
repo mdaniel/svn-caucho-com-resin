@@ -422,6 +422,9 @@ class ResinArgs
       else if (argv[i].equals("watchdog")) {
         i += 1;
       }
+      else if (argv[i].equals("start-with-background")) {
+        i += 1;
+      }
       else if (argv[i].equals("-fine")
                || argv[i].equals("--fine")) {
         i += 1;

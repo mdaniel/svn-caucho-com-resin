@@ -309,6 +309,7 @@ public class ResinBoot {
     _commandMap.put(StartMode.RESTART, new RestartCommand());
     _commandMap.put(StartMode.SHUTDOWN, new ShutdownCommand());
     _commandMap.put(StartMode.START, new StartCommand());
+    _commandMap.put(StartMode.START_WITH_BACKGROUND, new StartWithBackgroundCommand());
     _commandMap.put(StartMode.STATUS, new StatusCommand());
     _commandMap.put(StartMode.STOP, new StopCommand());
     _commandMap.put(StartMode.THREAD_DUMP, new ThreadDumpCommand());
