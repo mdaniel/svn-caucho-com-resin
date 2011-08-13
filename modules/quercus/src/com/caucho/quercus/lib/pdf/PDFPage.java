@@ -33,6 +33,8 @@ import com.caucho.util.L10N;
 
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.Map;
 import java.util.logging.Logger;
 
 /**
@@ -51,7 +53,7 @@ public class PDFPage {
   private double _width;
   private double _height;
 
-  private ArrayList<String> _resources = new ArrayList<String>();
+  private HashMap<String,String> _resources = new HashMap<String,String>();
 
   PDFPage(PDFWriter out, int parent, double width, double height)
   {
@@ -78,10 +80,42 @@ public class PDFPage {
     return _stream;
   }
 
-  void addResource(String resource)
+  void addResource(String name, String value)
   {
-    if (! _resources.contains(resource))
-      _resources.add(resource);
+    String oldValue = _resources.get(name);
+    
+    if (oldValue == null || oldValue.equals(value)) {
+      _resources.put(name, value);
+      return;
+    }
+    
+    if (oldValue.startsWith("<<")) {
+      String oldValueStrip = oldValue.substring(2, oldValue.length() - 2);
+      String valueStrip = value.substring(2, value.length() - 2);
+      
+      ArrayList<String> oldValueList = new ArrayList<String>();
+      
+      for (String elt : oldValueStrip.split("\n")) {
+        oldValueList.add(elt);
+      }
+      
+      for (String elt : valueStrip.split("\n")) {
+        if (! oldValueList.contains(elt))
+          oldValueList.add(elt);
+      }
+      
+      StringBuilder sb = new StringBuilder();
+      sb.append("<<");
+      for (int i = 0; i < oldValueList.size(); i++) {
+        if (i != 0)
+          sb.append("\n");
+        
+        sb.append(oldValueList.get(i));
+      }
+      sb.append(">>");
+      
+      _resources.put(name, sb.toString());
+    }
   }
 
   void write(PDFWriter out)
@@ -94,8 +128,8 @@ public class PDFPage {
     out.println("     /Contents " + _stream.getId() + " 0 R");
     out.println("     /Resources <<");
 
-    for (int i = 0; i < _resources.size(); i++) {
-      out.println("      " + _resources.get(i));
+    for (Map.Entry<String,String> entry : _resources.entrySet()) {
+      out.println("      " + entry.getKey() + " " + entry.getValue());
     }
 
     out.println("     >>");

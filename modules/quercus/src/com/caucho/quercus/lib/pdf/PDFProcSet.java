@@ -62,9 +62,14 @@ public class PDFProcSet {
       _set = proc;
   }
 
+  String getResourceName()
+  {
+    return "/ProcSet";
+  }
+  
   String getResource()
   {
-    return ("/ProcSet [" + _set + "]");
+    return ("[" + _set + "]");
   }
 
   public int hashCode()

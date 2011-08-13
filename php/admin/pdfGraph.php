@@ -9,8 +9,6 @@ $x = 20;
 $y = 750;
 $yinc = 12;
 
-
-
 if (! admin_init_no_output()) {
   debug("Failed to load admin, die");
   return;
@@ -43,8 +41,10 @@ $os = $g_mbean_server->lookup("java.lang:type=OperatingSystem");
 $log_mbean = $mbean_server->lookup("resin:type=LogService");
 
 
-function drawSummary() {
+function admin_pdf_summary()
+{
   global $x, $y, $yinc, $server, $runtime, $os, $log_mbean, $g_canvas, $resin;
+  global $pageName;
 
   $serverID = $server->Id ? $server->Id : '""';
   $userName = $resin->UserName;
@@ -63,22 +63,6 @@ function drawSummary() {
                  $uptime % 60) . " -- " . format_datetime($server->StartTime);
 
 
-  $g_canvas->setFont("Helvetica-Bold", 9);
-  $g_canvas->writeText(new Point($x,$y), "$resinVersion ");
-  $y -= $yinc;
-  $g_canvas->writeText(new Point($x,$y), "$jvm $machine  ");
-  $y -= $yinc;
-  $g_canvas->writeText(new Point($x,$y), "$serverID at $ipAddress running as $userName ");
-  $y -= $yinc;
-  $y -= $yinc;
-  $g_canvas->writeText(new Point($x,$y), "$resin->WatchdogStartMessage");
-  $y -= $yinc;
-  $g_canvas->writeText(new Point($x,$y), "$ups \t\t state($server->State)");
-
-
-  $x +=375;
-  $y = 750;
-
   $totalHeap = pdf_format_memory($server->RuntimeMemory);
   $freeHeap = pdf_format_memory($server->RuntimeMemoryFree);
   $osFreeSwap = pdf_format_memory($os->FreeSwapSpaceSize);
@@ -86,24 +70,37 @@ function drawSummary() {
   $osFreePhysical = pdf_format_memory($os->FreePhysicalMemorySize);
   $osFreeTotal = pdf_format_memory($os->TotalPhysicalMemorySize);
 
-  $g_canvas->writeText(new Point($x,$y), "JVM Heap:        \t\t\t $totalHeap");
-  $y -= $yinc;
-  $g_canvas->writeText(new Point($x,$y), "JVM Free Heap: \t\t $freeHeap");
-  $y -= $yinc;
-  $g_canvas->writeText(new Point($x,$y), "OS Free Swap: \t\t $osFreeSwap");
-  $y -= $yinc;
-  $g_canvas->writeText(new Point($x,$y), "OS Total Swap: \t\t $osTotalSwap");
-  $y -= $yinc;
-  $g_canvas->writeText(new Point($x,$y), "OS Physical:    \t\t\t $osFreeTotal");
-  $y -= $yinc;
+  $col = 375;
+  
+//  $g_canvas->write_section("Report: $pageName");
 
-  $g_canvas->setColor($black);
-  $g_canvas->moveTo(new Point(0, 680));
-  $g_canvas->lineTo(new Point(595, 680));
-  $g_canvas->stroke();
+  $g_canvas->setDataFontAndSize(9);
+  
+  $g_canvas->write_text_x(20, "$resinVersion");
+  $g_canvas->write_text_x($col, "JVM Heap: $totalHeap");
+  $g_canvas->write_text_newline();
+
+  $g_canvas->write_text_x(20, "$jvm $machine");
+  $g_canvas->write_text_x($col, "JVM Free Heap: $freeHeap");
+  $g_canvas->write_text_newline();
+  
+  $g_canvas->write_text_x(20, "$serverID at $ipAddress running as $userName ");
+  $g_canvas->write_text_x($col, "OS Free Swap: $osFreeSwap");
+  $g_canvas->write_text_newline();
+  
+  $g_canvas->write_text_x(20, "$resin->WatchdogStartMessage");
+  $g_canvas->write_text_x($col, "OS Total Swap: $osTotalSwap");
+  $g_canvas->write_text_newline();
+  
+  $g_canvas->write_text_x(20, "$ups \t\t state($server->State)");
+  $g_canvas->write_text_x($col, "OS Physical: $osFreeTotal");
+  $g_canvas->write_text_newline();
+
+  $g_canvas->write_hrule();
 }
 
-function drawLines($gds, $graph) {
+function drawLines($gds, $graph)
+{
   global $g_canvas;
   
   foreach($gds as $gd) {
@@ -225,8 +222,8 @@ function getStatDataForGraphByStat($theStat, $color=$blue)
 
 function findStats(String $category, String $subcategory=null)
 {
-  global $start;
-  global $end;
+  global $g_start;
+  global $g_end;
   global $stat;
   global $statList;
   global $si;
@@ -236,9 +233,10 @@ function findStats(String $category, String $subcategory=null)
     if ($statItem->server != $si) continue;
     if ($category == $statItem->category) {
       if ($subcategory && $subcategory == $statItem->subcategory) {
-	$map[$statItem->name]= 
-		$stat->statisticsData($statItem->fullName, $start * 1000, $end * 1000,
-                                    STEP * 1000);
+	$map[$statItem->name]
+          = $stat->statisticsData($statItem->fullName,
+                                  $g_start * 1000, $g_end * 1000,
+                                  STEP * 1000);
       }
     }
   }
@@ -247,8 +245,8 @@ function findStats(String $category, String $subcategory=null)
 
 
 function findStatByStat($theStat) {
-  global $start;
-  global $end;
+  global $g_start;
+  global $g_end;
   global $stat;
   global $statList;
   global $si;
@@ -256,7 +254,8 @@ function findStatByStat($theStat) {
   foreach ($statList as $statItem) {
     if ($statItem->server != $si) continue;
     if ($statItem->eq($theStat)) {
- 	return $stat->statisticsData($statItem->fullName, $start * 1000, $end * 1000,
+ 	return $stat->statisticsData($statItem->fullName,
+                                     $g_start * 1000, $g_end * 1000,
                                     STEP * 1000);
       }
     
@@ -269,8 +268,8 @@ function findStatByName(String $name,
                         String $subcategory="Health",
                         String $category="Resin")
 {
-  global $start;
-  global $end;
+  global $g_start;
+  global $g_end;
   global $stat;
   global $statList;
   global $si;
@@ -286,8 +285,9 @@ function findStatByName(String $name,
     }
     
     if ($name == $statItem->name && $category == $statItem->category) {
-	$arr = $stat->statisticsData($statItem->fullName, $start * 1000, $end * 1000,
-                                    STEP * 1000);
+	$arr = $stat->statisticsData($statItem->fullName,
+                                     $g_start * 1000, $g_end * 1000,
+                                     STEP * 1000);
     }
   }
   return $arr;
@@ -757,8 +757,8 @@ function createGraph(String $title,
                      boolean $trace=false)
 {
   global $g_pdf;
-  global $start;
-  global $end;
+  global $g_start;
+  global $g_end;
   global $g_canvas;
   global $lightGrey;
   global $grey;
@@ -766,7 +766,10 @@ function createGraph(String $title,
   global $black;
   global $majorTicks, $minorTicks;
 
-  $graph = new Graph($g_pdf, $title, $origin, $gsize, new Range($start * 1000, $end * 1000), new Range(0,$gd->max), $trace);
+  $graph = new Graph($g_pdf, $title, $origin, $gsize,
+                     new Range($g_start * 1000, $g_end * 1000),
+                     new Range(0, $gd->max),
+                     $trace);
   $graph->start();
 
   $valid = $gd->validate();
@@ -1090,6 +1093,9 @@ class Canvas {
   private $header_center_text;
   private $header_right_text;
 
+  private $footer_left_text;
+  private $footer_right_text;
+
   private $width = 595;
   private $height = 842;
 
@@ -1114,6 +1120,16 @@ class Canvas {
   function set_header_right($text)
   {
     $this->header_right_text = $text;
+  }
+
+  function set_footer_left($text)
+  {
+    $this->footer_left_text = $text;
+  }
+
+  function set_footer_right($text)
+  {
+    $this->footer_right_text = $text;
   }
 
   function start()
@@ -1154,6 +1170,23 @@ class Canvas {
     return $this->$name;
   }
 
+  function write_section($title)
+  {
+    $this->set_header_right($title);
+
+    if ($this->page > 0)
+      $this->newPage();
+    else {
+      $this->writeHeader();
+      $this->writeFooter();
+    }
+    
+    $this->setSectionFontAndSize(16);
+//    $this->write_text_newline();
+    $this->writeTextLine($title);
+    $this->write_text_newline();
+  }
+
   function writeText($point, $text)
   {
     $this->pdf->set_text_pos($point->x, $point->y);
@@ -1168,7 +1201,7 @@ class Canvas {
 
   function write_text_ralign_xy($x, $y, $text)
   {
-    $font_size = $this->pdf->get_value("fontsize");
+    $font_size = $this->fontSize;
     
     $width = $this->pdf->stringwidth($text, $this->font, $font_size);
     
@@ -1178,7 +1211,7 @@ class Canvas {
 
   function write_text_center_xy($x, $y, $text)
   {
-    $font_size = $this->pdf->get_value("fontsize");
+    $font_size = $this->fontSize;
     
     $width = $this->pdf->stringwidth($text, $this->font, $font_size);
     
@@ -1188,12 +1221,12 @@ class Canvas {
 
   function isNewLine($count = 1)
   {
-    return ($this->text_y - $count * $this->text_y_inc < $this->text_y_inc);
+    return ($this->text_y - $count * $this->text_y_inc < 40);
   }
 
   function writeTextLine($text)
   {
-    if ($this->text_y < $this->text_y_inc) {
+    if ($this->isNewLine()) {
       $this->newPage();
     }
     
@@ -1205,7 +1238,7 @@ class Canvas {
 
   function write_text_line_x($x, $text)
   {
-    if ($this->text_y < $this->text_y_inc) {
+    if ($this->isNewLine()) {
       $this->newPage();
     }
     
@@ -1274,10 +1307,34 @@ class Canvas {
     $this->pdf->setcolor("fillstroke", "rgb", $red, $green, $blue);
   }
 
+  function setDataFontAndSize($fontSize)
+  {
+    $this->setFont("Courier", $fontSize);
+  }
+
+  function setSectionFontAndSize($fontSize)
+  {
+    $this->setFont("Times-Bold", $fontSize);
+  }
+
   function setFont($fontName, $fontSize)
   {
-    $this->font = $this->pdf->load_font($fontName, "", "");
+    $font = $this->pdf->load_font($fontName, "", "");
+
+    $this->setFontByObject($font, $fontSize);
+  }
+
+  function setFontByObject($font, $fontSize)
+  {
+    $this->font = $font;
+    $this->fontSize = $fontSize;
+    
     $this->pdf->setfont($this->font, $fontSize);
+
+    $this->ascender = $this->pdf->get_value("ascender") / 72;
+    $this->descender = $this->pdf->get_value("descender") / 72;
+    // $this->text_y_inc = $this->ascender - $this->descender;
+    $this->text_y_inc = $this->fontSize - $this->descender;
   }
 
   function newPage()
@@ -1297,23 +1354,12 @@ class Canvas {
     $this->text_y = 800;
   }
   
-  function writeFooter()
-  {
-    global $page;
-    global $serverID;
-    global $restart_time;
-
-    $time = date("Y-m-d H:i", $restart_time);
-    $page +=1;
-
-    $this->setFont("Helvetica-Bold", 8);
-    $this->write_text_xy(175, 10,
-                         "Postmortem Analysis \t\t $time \t\t $serverID \t\t  \t\t\t \t page $page");
-  }
-  
   function writeHeader()
   {
-    $this->setFont("Helvetica-Bold", 8);
+    $font = $this->font;
+    $fontSize = $this->fontSize;
+    
+    $this->setFont("Times-Roman", 8);
 
     $top = $this->height - 12;
     
@@ -1327,31 +1373,54 @@ class Canvas {
     }
     
     if ($this->header_right_text) {
-      $this->write_text_ralign_xy($this->width - 5, $top,
+      $this->write_text_ralign_xy($this->width - 10, $top,
                                   $this->header_right_text);
     }
+
+    $this->setFontByObject($font, $fontSize);
+  }
+  
+  function writeFooter()
+  {
+    $font = $this->font;
+    $fontSize = $this->fontSize;
+    
+    $this->setFont("Times-Roman", 8);
+
+    $bottom = 10;
+    
+    if ($this->footer_left_text) {
+      $this->write_text_xy(5, $bottom, $this->footer_left_text);
+    }
+    
+    $this->page +=1;
+
+    $this->write_text_center_xy($this->width / 2, $bottom,
+                                "Page $this->page");
+    
+    if ($this->footer_right_text) {
+      $this->write_text_ralign_xy($this->width - 5, $bottom,
+                                  $this->footer_right_text);
+    }
+
+    $this->setFontByObject($font, $fontSize);
   }
 }
 
 function admin_pdf_draw_log()
 {
-  global $log_mbean, $g_canvas, $yinc, $g_pdf, $end, $start;
+  global $log_mbean, $g_canvas, $g_pdf, $g_end, $g_start;
   debug("DRAW_LOG");
   
-  $g_canvas->set_header_right("log[warning]");
-  $g_canvas->newPage();
-
   $messages = $log_mbean->findMessages("warning",
-                                       ($start) * 1000,
-                                       ($end) * 1000);
+                                       $g_start * 1000,
+                                       $g_end * 1000);
                                        
 
-  $g_canvas->setFont("Helvetica-Bold", 12);
-  $g_canvas->writeTextLine("Log[Warning]");
+  $g_canvas->write_section("Log[Warning]");
   
-  $g_canvas->setFont("Helvetica-Bold", 8);
+  $g_canvas->setDataFontAndSize(8);
 
-  $index=1;
   foreach ($messages as $message) {
     $ts = strftime("%Y-%m-%d %H:%M:%S", $message->timestamp / 1000);
     $g_canvas->write_text_x(20, $ts);
@@ -1383,14 +1452,9 @@ function admin_pdf_selected_heap_dump($heap, $title, $max)
 
   uksort($heap, "heap_descendant_cmp");
 
-  $g_canvas->set_header_right("Heap Dump");
+  $g_canvas->write_section("Heap Dump");
 
-  $g_canvas->newPage();
-
-  $g_canvas->setFont("Helvetica-Bold", 16);
-  $g_canvas->writeTextLine($title);
-
-  $g_canvas->setFont("Helvetica-Bold", 8);
+  $g_canvas->setDataFontAndSize(8);
   admin_pdf_heap_dump_header($g_canvas);
 
   $i = 0;
@@ -1436,18 +1500,16 @@ function admin_pdf_profile()
     return;
   }
   
-  $g_canvas->set_header_right("CPU Profile");
+  $g_canvas->write_section("CPU Profile");
 
-  $g_canvas->newPage();
+  $g_canvas->setDataFontAndSize(10);
 
-  $g_canvas->setFont("Helvetica-Bold", 16);
-  $g_canvas->writeTextLine("Profile");
-
-  $g_canvas->setFont("Helvetica-Bold", 8);
-
-  $g_canvas->writeTextLine("Time: " . $profile["total_time"]);
+  $g_canvas->writeTextLine("Time: " . $profile["total_time"] / 1000);
   $g_canvas->writeTextLine("Ticks: " . $profile["ticks"]);
   $g_canvas->writeTextLine("Sample-Period: " . $profile["period"]);
+  $g_canvas->writeTextLine("End: " . date("Y-m-d H:i",
+                           $profile["end_time"] / 1000));
+  $g_canvas->write_text_newline();
 
   $ticks = $profile["ticks"];
   
@@ -1464,6 +1526,8 @@ function admin_pdf_profile()
   $max_stack = 6;
   $i = 0;
 
+  $g_canvas->setDataFontAndSize(8);
+  
   foreach ($profile_entries as $entry) {
     if ($max <= $i++)
       break;
@@ -1487,7 +1551,9 @@ function admin_pdf_profile()
 
     $g_canvas->write_text_newline();
 
+    $g_canvas->setDataFontAndSize(7);
     $g_canvas->write_text_block_x(120, $stack);
+    $g_canvas->setDataFontAndSize(8);
   }
   
   $g_canvas->set_header_right(null);
@@ -1508,79 +1574,306 @@ function admin_pdf_stack(&$profile_entry, $max)
   return $string;
 }
 
+//
+// Thread dump
+//
+
 function admin_pdf_thread_dump()
 {
   global $g_canvas;
-  
-  resin_var_dump("admin-pdf-thread-dump");
 
   $dump = admin_pdf_snapshot("Resin|ThreadDump");
-
-  resin_var_dump($dump);
 
   if (! $dump) {
     return;
   }
   
-  $g_canvas->set_header_right("Thread Dump");
+  $g_canvas->write_section("Thread Dump");
 
-  $g_canvas->newPage();
-
-  $g_canvas->setFont("Helvetica-Bold", 16);
-  $g_canvas->writeTextLine("Thread Dump");
-
-  $g_canvas->setFont("Helvetica-Bold", 8);
+  $g_canvas->setDataFontAndSize(8);
 
   $entries =& $dump["thread_dump"];
 
-  // usort($entries, "thread_dump_cmp");
+  admin_pdf_analyze_thread_dump($entries);
+
+  usort($entries, "thread_dump_cmp");
 
   $max = 60;
   $max_stack = 32;
-  $i = 0;
+  $size = sizeof($entries);
 
-  foreach ($entries as $entry) {
+  $i = 0;
+  while ($i < $size) {
     if ($g_canvas->isNewline(6)) {
       $g_canvas->newPage();
       
       // admin_pdf_heap_dump_header($g_canvas);
     }
 
-    resin_var_dump($entry);
-/*
-    $stack = admin_pdf_stack($entry, $max_stack);
+    $entry =& $entries[$i];
 
-    $g_canvas->write_text_ralign_x(40, sprintf("%.2f%%", 
-                                             100 * $entry["ticks"] / $ticks));
-                                             
-    $g_canvas->write_text_ralign_x(90, sprintf("%.2fs", 
-                                             $entry["ticks"] * $period / 1000));
-    $g_canvas->write_text_x(110, $entry["name"]);
-    $g_canvas->write_text_x(440, $entry["state"]);
-
-    $g_canvas->write_text_newline();
-
-    $g_canvas->write_text_block_x(120, $stack);
-    */
+    $g_canvas->setDataFontAndSize(8);
+    $i = admin_pdf_shared_entries($i, &$entries, $g_canvas);
     
+    $stack = admin_pdf_thread_stack($entry, $max_stack);
+
+    $g_canvas->setDataFontAndSize(7);
+    $g_canvas->write_text_block_x(50, $stack);
   }
   
   $g_canvas->set_header_right(null);
 }
 
+function admin_pdf_analyze_thread_dump(&$entries)
+{
+  foreach ($entries as &$entry) {
+    $lock = $entry["lock"];
+    
+    if (! $lock)
+      continue;
+
+    $owner_id = $lock["owner_id"];
+
+    stack_fill_owner($entries, $owner_id);
+    $lock_owner["is_lock_owner"] = true;
+  }
+}
+
+function stack_fill_owner(&$entries, $id)
+{
+  foreach ($entries as &$entry) {
+    if ($entry["id"] == $id) {
+      $entry["is_lock_owner"] = true;
+      return;
+    }
+  }
+
+  return null;
+}
+
+function admin_pdf_shared_entries($i, &$entries, $canvas)
+{
+  $stack = thread_dump_stack($entries[$i]);
+
+  for (;
+       ($entry =& $entries[$i]) && $stack == thread_dump_stack($entry);
+       $i++) {
+    if ($canvas->isNewline(2)) {
+      $canvas->newPage();
+    }
+    
+    $canvas->write_text_x(10, sprintf("%.40s", $entry["name"]));
+    
+    $state = $entry["state"];
+    if ($state == "RUNNABLE" && $state["native"])
+      $state .= " (JNI)";
+      
+    $canvas->write_text_x(350, $state);
+    $canvas->write_text_x(450, "[" . $entry["id"] . "]");
+    $canvas->write_text_newline();
+
+    $lock = $entry["lock"];
+    if ($lock) {
+      $trace = "waiting on " . $lock["name"];
+
+      if ($lock["owner_name"]) {
+        $trace .= " owned by [" . $lock["owner_id"] . "] " . $lock["owner_name"];
+      }
+
+      $canvas->write_text_x(20, $trace);
+      $canvas->write_text_newline();
+    }
+  }
+
+  return $i;
+}  
+
+function thread_dump_cmp($a, $b)
+{
+  $cmp = strcmp(thread_dump_stack($a), thread_dump_stack($b));
+
+  if ($cmp)
+    return $cmp;
+  else
+    return strcmp($a["name"], $b["name"]);
+}
+
+
+function thread_dump_stack(&$info)
+{
+  $trace = $info["cmp"];
+
+  if ($trace)
+    return $trace;
+
+  if ($info["is_lock_owner"]) {
+    $trace .= "A" . $info["id"] . " ";
+  }
+  else if ($info["lock"]["owner_id"] > 0) {
+    $trace .= "A" . $info["lock"]["owner_id"] . "Z ";
+  }
+  else if ($info["state"] == "RUNNABLE") {
+    if ($info["native"])
+      $trace .= "BB ";
+    else
+      $trace .= "BA ";
+  }
+  else {
+    $trace .= "C " . $info["state"];
+  }
+
+  $stack =& $info["stack"];
+  $size = sizeof($stack);
+
+  for ($i = $size - 1; $i >= 0; $i--) {
+    $elt =& $stack[$i];
+
+    $trace = $trace . " {$elt['class']}.{$elt['method']} ({$elt['file']}:{$elt['line']}) ";
+  }
+
+  $info["cmp"] = $trace;
+
+  return $trace;
+}
+
+
+function admin_pdf_thread_stack(&$thread_entry, $max)
+{
+  $stack =& $thread_entry["stack"];
+  $monitors = $thread_entry["monitors"];
+
+  $string = "";
+
+  for ($i = 0; $i < $max && $stack[$i]; $i++) {
+    $stack_entry = $stack[$i];
+
+    $string .= $stack_entry["class"] . "." . $stack_entry["method"];
+
+    if ($stack_entry["file"]) {
+      $string .= " (" . $stack_entry["file"] . ":" . $stack_entry["line"] . ")\n";
+    }
+
+    $string .= stack_find_monitor($monitors, $i);
+  }
+
+  return $string;
+}
+
+function stack_find_monitor($monitors, $i)
+{
+  foreach ($monitors as $monitor) {
+    if ($monitor["depth"] == $i + 1) {
+      return "-- locked " . $monitor["class"] . "@" . $monitor["hash"] . "\n";
+    }
+  }
+  
+  return "";
+}
+
 function profile_cmp_ticks($a, $b)
 {
   return $a->ticks - $b->ticks;
-}  
+}
+
+//
+// JMX dump
+//
+
+function admin_pdf_jmx_dump()
+{
+  global $g_canvas;
+
+  $dump = admin_pdf_snapshot("Resin|JmxDump");
+
+  if (! $dump) {
+    return;
+  }
+  
+  $g_canvas->write_section("JMX Dump");
+
+  $entries =& $dump["jmx"];
+
+  ksort($entries);
+
+  foreach ($entries as $name => &$values) {
+    if ($g_canvas->isNewline(6)) {
+      $g_canvas->newPage();
+      
+      // admin_pdf_heap_dump_header($g_canvas);
+    }
+
+    $g_canvas->write_text_newline();
+    $g_canvas->setDataFontAndSize(8);
+    $g_canvas->writeTextLine($name);
+
+    $g_canvas->setDataFontAndSize(6);
+    admin_pdf_jmx_attributes($g_canvas, $values);
+  }
+  
+  $g_canvas->set_header_right(null);
+}
+
+function admin_pdf_jmx_attributes($canvas, &$values)
+{
+  ksort($values);
+
+  foreach ($values as $key => $value) {
+    if ($g_canvas->isNewline(3)) {
+      $g_canvas->newPage();
+    }
+    
+    $canvas->write_text_x(20, $key);
+    $canvas->write_text_block_x(150, admin_pdf_attribute_value($value));
+  }
+}
+
+function admin_pdf_attribute_value($value, $depth = 0)
+{
+  if ($value === true)
+    return "true";
+  else if ($value === false)
+    return "false";
+  else if ($value === null)
+    return "null";
+  else if (is_array($value)) {
+    $i = 0;
+
+    $v = "{";
+
+    foreach ($value as $key => $sub_value) {
+      if ($key == "java_class")
+        continue;
+        
+      if ($i++ != 0 || $depth > 0 && sizeof($value) > 1) {
+        $v .= "\n";
+      }
+      
+      for ($j = 0; $j < $depth + 2; $j++)
+        $v .= " ";
+
+      if (is_integer($key)) {
+        $v .= admin_pdf_attribute_value($sub_value, $depth + 2);
+      }
+      else
+        $v .= $key . " => " . admin_pdf_attribute_value($sub_value, $depth + 2);
+    }
+    $v .= "  }";
+    
+    return $v
+  }
+  else {
+    return wordwrap($value, 75, "\n", true);
+  }
+}
 
 function admin_pdf_snapshot($name)
 {
-  global $log_mbean, $start, $end;
+  global $si, $log_mbean, $g_start, $g_end;
   
-  $times = $log_mbean->findMessageTimesByType("00|$name",
+  $times = $log_mbean->findMessageTimesByType("$si|$name",
                                               "info",
-                                              ($start) * 1000,
-                                              ($end) * 1000);
+                                              $g_start * 1000,
+                                              $g_end * 1000);
   if (! $times || sizeof($times) == 0)
     return;
 
@@ -1589,8 +1882,8 @@ function admin_pdf_snapshot($name)
   if (! $time)
     return;
   
-  $msgs = $log_mbean->findMessagesByType("00|$name",
-                                          "info", $time, $time);
+  $msgs = $log_mbean->findMessagesByType("$si|$name",
+                                         "info", $time, $time);
 
   $msg = $msgs[0];
 

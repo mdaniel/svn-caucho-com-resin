@@ -101,9 +101,14 @@ public class PDFFont extends PDFObject {
     return "F" + _id;
   }
 
+  String getResourceName()
+  {
+    return "/Font";
+    
+  }
   String getResource()
   {
-    return("/Font << /F" + _id + " " + _id + " 0 R>>");
+    return "<< /F" + _id + " " + _id + " 0 R >>";
   }
 
   public void writeObject(PDFWriter out)

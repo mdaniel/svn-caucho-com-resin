@@ -35,6 +35,10 @@ public class PdfReportAction implements AdminAction
   private long _period = 7 * 24 * 3600 * 1000L;
   private String _report = "Summary";
   
+  private boolean _isSnapshot;
+  private long _profileTime;
+  private long _profileTick;
+  
   private QuercusContext _quercus;
   
   private Path _phpPath;
@@ -70,6 +74,36 @@ public class PdfReportAction implements AdminAction
     _period = period;
   }
   
+  public boolean isSnapshot()
+  {
+    return _isSnapshot;
+  }
+  
+  public void setSnapshot(boolean isSnapshot)
+  {
+    _isSnapshot = isSnapshot;
+  }
+  
+  public long getProfileTime()
+  {
+    return _profileTime;
+  }
+  
+  public void setProfileTime(long profileTime)
+  {
+    _profileTime = profileTime;
+  }
+  
+  public long getProfileTick()
+  {
+    return _profileTick;
+  }
+  
+  public void setProfileTick(long profileTick)
+  {
+    _profileTick = profileTick;
+  }
+
   public String getLogDirectory()
   {
     return _logDirectory;
@@ -141,6 +175,19 @@ public class PdfReportAction implements AdminAction
       //env.setGlobalValue("health_service", env.wrapJava(healthService));
       env.setGlobalValue("pdf_name", env.wrapJava(_report));
       env.setGlobalValue("period", env.wrapJava(_period / 1000));
+      
+      if (isSnapshot())
+        env.setGlobalValue("g_is_snapshot", env.wrapJava(true));
+      
+      if (getProfileTime() > 0) {
+        env.setGlobalValue("profile_time", 
+                           env.wrapJava(getProfileTime() / 1000));
+      }
+      
+      if (getProfileTick() > 0) {
+        env.setGlobalValue("profile_tick", env.wrapJava(getProfileTick()));
+      }
+      
       env.start();
   
       Value result = env.executeTop();

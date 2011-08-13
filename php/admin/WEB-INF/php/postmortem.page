@@ -60,10 +60,10 @@ $restart_time = floor($restart_ms / 1000);
 echo "<h2>Restart at " . date("Y-m-d H:i", $restart_time) . "</h2>\n";
 
 echo " <br /> ";
-echo "<a href='post-mortem-pdf.php?time=$restart_time'>PDF</a> (";
-echo "<a href='post-mortem-pdf.php?time=$restart_time&period=1800'>1/2 hour</a>, ";
-echo "<a href='post-mortem-pdf.php?time=$restart_time&period=900'>15 minutes</a>, ";
-echo "<a href='post-mortem-pdf.php?time=$restart_time&period=3600'>1 hour</a>)";
+echo "<a href='pdf-gen.php?report=Postmortem&amp;time=$restart_time'>PDF</a> (";
+echo "<a href='pdf-gen?report=Postmortem&amp;time=$restart_time&amp;period=1800'>1/2 hour</a>, ";
+echo "<a href='pdf-gen.php?report=Postmortem&amp;time=$restart_time&amp;period=900'>15 minutes</a>, ";
+echo "<a href='pdf-gen.php?report=Postmortem&amp;time=$restart_time&amp;period=3600'>1 hour</a>)";
 echo " <br /> ";
 
 echo "<form name='restarts' method='post' action='" . $g_next_url . "'>";

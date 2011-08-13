@@ -21,15 +21,25 @@ $report = "Summary";
 $stat = $g_mbean_server->lookup("resin:type=StatService");
 
 if ($stat) {
+  $snapshot = "&amp;snapshot=true";
+  $ss_profile = "&amp;snapshot=true&amp;profile_time=60&amp;profile_tick=10";
+  
   echo " <br /> ";
-  echo "<a href='pdf-gen.php?report=$report'>PDF</a> (";
-  echo "<a href='pdf-gen.php?report=$report&amp;period=1800'>30 minutes</a>, ";
-  echo "<a href='pdf-gen.php?report=$report&amp;period=3600'>1 hour</a>, ";
-  echo "<a href='pdf-gen.php?report=$report&amp;period=7200'>2 hours</a>, ";
-  echo "<a href='pdf-gen.php?report=$report&amp;period=14400'>4 hours</a>, ";
-  echo "<a href='pdf-gen.php?report=$report&amp;period=28800'>8 hours</a>, ";
-  echo "<a href='pdf-gen.php?report=$report&amp;period=86400'>1 day</a>, ";
-  echo "<a href='pdf-gen.php?report=$report&amp;period=604800'>1 week</a>)";
+  echo "PDF (";
+  
+  echo "<a href='pdf-gen.php?report=$report$snapshot&amp;period=1800'>30 minutes</a> ";
+  echo " [<a href='pdf-gen.php?report=$report$ss_profile&amp;period=1800'>profile</a>]";
+  
+  echo ", <a href='pdf-gen.php?report=$report$snapshot&amp;period=3600'>1 hour</a>";
+  echo " [<a href='pdf-gen.php?report=$report$ss_profile&amp;period=3600'>profile</a>]";
+  
+  echo ", <a href='pdf-gen.php?report=$report$snapshot&amp;period=14400'>4 hours</a>";
+  
+  echo ", <a href='pdf-gen.php?report=$report$snapshot&amp;period=28800'>8 hours</a>";
+  
+  echo ", <a href='pdf-gen.php?report=$report$snapshot&amp;period=86400'>1 day</a>";
+  
+  echo ", <a href='pdf-gen.php?report=$report$snapshot&amp;period=604800'>1 week</a>)";
 
   echo " <br /> ";
 }      

@@ -374,7 +374,7 @@ public class PDF {
 
     _stream.setFont(font, size);
 
-    _page.addResource(font.getResource());
+    _page.addResource(font.getResourceName(), font.getResource());
 
     return true;
   }
@@ -868,7 +868,7 @@ public class PDF {
   public boolean fit_image(PDFImage img, double x, double y,
                            @Optional String opt)
   {
-    _page.addResource(img.getResource());
+    _page.addResource(img.getResourceName(), img.getResource());
 
     _stream.save();
 
@@ -900,7 +900,7 @@ public class PDF {
 
     _out.addPendingObject(img);
     
-    _page.addResource(img.getResource());
+    _page.addResource(img.getResourceName(), img.getResource());
 
     _stream.save();
 
@@ -1040,7 +1040,7 @@ public class PDF {
 
     PDFProcSet procSet = _stream.getProcSet();
 
-    _page.addResource(procSet.getResource());
+    _page.addResource(procSet.getResourceName(), procSet.getResource());
 
     _page = null;
     _stream = null;

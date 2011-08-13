@@ -229,7 +229,7 @@ public class ThreadDump
     ThreadMXBean threadBean = ManagementFactory.getThreadMXBean();
 
     long []ids = threadBean.getAllThreadIds();
-    ThreadInfo []infoList = threadBean.getThreadInfo(ids, 32);
+    ThreadInfo []infoList = threadBean.getThreadInfo(ids, true, true);
     
     boolean isFirst = true;
 
@@ -260,6 +260,12 @@ public class ThreadDump
     sb.append(",\n  \"name\" : \"");
     escapeString(sb, info.getThreadName());
     sb.append("\"");
+    
+    /*
+    sb.append(",\n  \"description\" : \"");
+    escapeString(sb, info.getDescription());
+    sb.append("\"");
+    */
     
     sb.append(",\n  \"state\" : \"" + info.getThreadState() + "\"");
     
