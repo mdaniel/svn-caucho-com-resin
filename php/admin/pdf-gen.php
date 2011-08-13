@@ -32,7 +32,7 @@ if ($g_is_snapshot || $_REQUEST["snapshot"]) {
       $snapshot->snapshotProfile();
     }
 
-    sleep(1);
+    sleep(2);
   }
 }
 
@@ -121,7 +121,7 @@ $g_canvas->set_header_left("$si - " . $g_server->SelfServer->Name);
 $time = $_REQUEST["time"];
 
 if (! $time) {
-  $time = time();
+  $time = time() + 5;
 }  
 
 $g_end = $time;

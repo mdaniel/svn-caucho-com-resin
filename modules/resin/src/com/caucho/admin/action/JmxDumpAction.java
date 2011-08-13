@@ -47,6 +47,7 @@ import javax.management.openmbean.CompositeType;
 import com.caucho.config.ConfigException;
 import com.caucho.jmx.Jmx;
 import com.caucho.util.Alarm;
+import com.caucho.util.QDate;
 
 public class JmxDumpAction extends AbstractJmxAction implements AdminAction
 {
@@ -252,6 +253,8 @@ public class JmxDumpAction extends AbstractJmxAction implements AdminAction
       sb.append(value);
     } else if (value instanceof Boolean) {
       sb.append(value);
+    } else if (value instanceof Date) {
+      sb.append("\"" + QDate.formatISO8601(((Date) value).getTime()) + "\"");
     } else {
       sb.append("\"");
       escapeString(sb, String.valueOf(value));

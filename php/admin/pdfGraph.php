@@ -46,6 +46,12 @@ function admin_pdf_summary()
   global $x, $y, $yinc, $server, $runtime, $os, $log_mbean, $g_canvas, $resin;
   global $pageName;
 
+  $summary = admin_pdf_summary_fill();
+
+  if (! $summary)
+    return;
+
+/*
   $serverID = $server->Id ? $server->Id : '""';
   $userName = $resin->UserName;
   $ipAddress = $runtime->Name;
@@ -60,15 +66,16 @@ function admin_pdf_summary()
                  $uptime / (24 * 3600),
                  $uptime / 3600 % 24,
                  $uptime / 60 % 60,
-                 $uptime % 60) . " -- " . format_datetime($server->StartTime);
+                 $uptime % 60) . " -- started " . format_datetime($server->StartTime);
 
 
-  $totalHeap = pdf_format_memory($server->RuntimeMemory);
+  $totalHeap = pdf_format_memory($summary[->RuntimeMemory);
   $freeHeap = pdf_format_memory($server->RuntimeMemoryFree);
   $osFreeSwap = pdf_format_memory($os->FreeSwapSpaceSize);
   $osTotalSwap = pdf_format_memory($os->TotalSwapSpaceSize);
   $osFreePhysical = pdf_format_memory($os->FreePhysicalMemorySize);
   $osFreeTotal = pdf_format_memory($os->TotalPhysicalMemorySize);
+*/
 
   $col = 375;
   
@@ -76,27 +83,78 @@ function admin_pdf_summary()
 
   $g_canvas->setDataFontAndSize(9);
   
-  $g_canvas->write_text_x(20, "$resinVersion");
-  $g_canvas->write_text_x($col, "JVM Heap: $totalHeap");
+  $g_canvas->write_text_x(20, $summary["resinVersion"]);
+  $g_canvas->write_text_x($col, "JVM Heap: " . $summary["totalHeap"]);
   $g_canvas->write_text_newline();
 
-  $g_canvas->write_text_x(20, "$jvm $machine");
-  $g_canvas->write_text_x($col, "JVM Free Heap: $freeHeap");
+  $g_canvas->write_text_x(20, $summary["jvm"] . " " .  $summary['machine']);
+  $g_canvas->write_text_x($col, "JVM Free Heap: " . $summary['freeHeap']);
   $g_canvas->write_text_newline();
   
-  $g_canvas->write_text_x(20, "$serverID at $ipAddress running as $userName ");
-  $g_canvas->write_text_x($col, "OS Free Swap: $osFreeSwap");
+  $g_canvas->write_text_x(20, "{$summary['serverID']} at {$summary['ipAddress']} running as {$summary['userName']} ");
+  $g_canvas->write_text_x($col, "OS Free Swap: {$summary['osFreeSwap']}");
   $g_canvas->write_text_newline();
   
-  $g_canvas->write_text_x(20, "$resin->WatchdogStartMessage");
-  $g_canvas->write_text_x($col, "OS Total Swap: $osTotalSwap");
+  $g_canvas->write_text_x(20, $summary['WatchdogStartMessage']);
+  $g_canvas->write_text_x($col, "OS Total Swap: {$summary['osTotalSwap']}");
   $g_canvas->write_text_newline();
   
-  $g_canvas->write_text_x(20, "$ups \t\t state($server->State)");
-  $g_canvas->write_text_x($col, "OS Physical: $osFreeTotal");
+  $g_canvas->write_text_x(20, "uptime {$summary['ups']} [{$summary['server_state']}]");
+  $g_canvas->write_text_x($col, "OS Physical: {$summary['osFreeTotal']}");
   $g_canvas->write_text_newline();
 
   $g_canvas->write_hrule();
+}
+
+function admin_pdf_summary_fill()
+{
+  $dump = admin_pdf_snapshot("Resin|JmxDump");
+  
+  $jmx =& $dump["jmx"];
+
+  if (! $jmx)
+    return;
+
+  $server = $jmx["resin:type=Server"];
+  $resin = $jmx["resin:type=Resin"];  
+  $runtime = $jmx["java.lang:type=Runtime"];
+  $os = $jmx["java.lang:type=OperatingSystem"];
+
+  $summary = array();
+
+  $summary["serverID"] = $server["Id"] ? $server["Id"] : '""';
+  
+  $summary["userName"] = $resin["UserName"];
+  $summary["ipAddress"] = $runtime["Name"];
+  $summary["resinVersion"] = $resin["Version"];
+  $summary["jvm"] = "{$runtime['VmName']} {$runtime['VmVersion']}";
+  $summary["machine"] = "{$os['AvailableProcessors']} {$os['Name']} {$os['Arch']} {$os['Version']}";
+
+  $q_date = java("com.caucho.util.QDate");
+  $start_time = $q_date->parseDate($server["StartTime"]) / 1000;
+
+  $now = $q_date->parseDate($server["CurrentTime"]) / 1000;
+
+  $uptime = $now - $start_time;
+
+  $summary["ups"] = sprintf("%d days %02d:%02d:%02d",
+                 $uptime / (24 * 3600),
+                 $uptime / 3600 % 24,
+                 $uptime / 60 % 60,
+                 $uptime % 60)
+                 . " -- started " . date("Y-m-i H:i", $start_time);
+
+  $summary["server_state"] = $server["State"];                 
+
+
+  $summary["totalHeap"] = pdf_format_memory($server["RuntimeMemory"]);
+  $summary["freeHeap"] = pdf_format_memory($server["RuntimeMemoryFree"]);
+  $summary["osFreeSwap"] = pdf_format_memory($os["FreeSwapSpaceSize"]);
+  $summary["osTotalSwap"] = pdf_format_memory($os["TotalSwapSpaceSize"]);
+  $summary["osFreePhysical"] = pdf_format_memory($os["FreePhysicalMemorySize"]);
+  $summary["osFreeTotal"] = pdf_format_memory($os["TotalPhysicalMemorySize"]);
+
+  return $summary;
 }
 
 function drawLines($gds, $graph)
