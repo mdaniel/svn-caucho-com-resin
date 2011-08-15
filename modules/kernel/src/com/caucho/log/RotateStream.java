@@ -201,7 +201,7 @@ public class RotateStream extends StreamImpl {
   public void init()
     throws IOException
   {
-    if (! _isInit.getAndSet(true))
+    if (_isInit.getAndSet(true))
       return;
 
     _rolloverLog.init();

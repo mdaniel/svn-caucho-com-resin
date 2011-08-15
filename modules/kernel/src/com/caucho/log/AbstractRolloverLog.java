@@ -109,6 +109,8 @@ public class AbstractRolloverLog {
   protected String _pathFormat;
 
   // private String _format;
+  
+  private volatile boolean _isInit;
 
   // The time of the next period-based rollover
   private long _nextPeriodEnd = -1;
@@ -363,9 +365,10 @@ public class AbstractRolloverLog {
       _archiveFormat = _rolloverPrefix + ".%Y%m%d.%H";
     else
       _archiveFormat = _rolloverPrefix + ".%Y%m%d.%H%M";
+    
+    _isInit = true;
 
     _rolloverListener.requeue(_rolloverAlarm);
-    
     rollover();
   }
 
@@ -453,15 +456,19 @@ public class AbstractRolloverLog {
    */
   private void rolloverLogTask()
   {
+    try {
+      if (_isInit)
+        flush();
+    } catch (Exception e) {
+      log.log(Level.WARNING, e.toString(), e);
+    }
+
     _isRollingOver = true;
     
     try {
-      try {
-        flush();
-      } catch (Exception e) {
-        log.log(Level.WARNING, e.toString(), e);
-      }
-
+      if (! _isInit)
+        return;
+      
       Path savedPath = null;
 
       long now = Alarm.getCurrentTime();
@@ -473,7 +480,8 @@ public class AbstractRolloverLog {
       Path path = getPath();
 
       synchronized (_logLock) {
-        if (lastPeriodEnd <= now) {
+        flushTempStream();
+        if (lastPeriodEnd <= now && lastPeriodEnd > 0) {
           closeLogStream();
 
           savedPath = getSavedPath(lastPeriodEnd - 1);
@@ -898,6 +906,12 @@ public class AbstractRolloverLog {
     } finally {
       _logLock.notifyAll();
     }
+  }
+  
+  @Override
+  public String toString()
+  {
+    return getClass().getSimpleName() + "[" + _path + "]";
   }
 
   class RolloverWorker extends TaskWorker {
