@@ -114,38 +114,8 @@ function meter_display_page($page)
 
   $is_column = false;
   
-  echo "  <div style='text-align:center;display:inline-block;width:800px;'>\n";
-	echo "   <div style='float:left;font-size:1.5em;text-align:left;margin-bottom:.5em;'>" . $page->getName() . "</div>\n";
-	echo "   <div style='float:right;font-size:1em;text-align:right;margin-bottom:.5em;vertical-align:middle;'>\n";
-	echo "    <label for='summary-control-time'>Period</label>: <select name='summary-control-time' id='summary-control-time'>\n";
-	
-	foreach ($g_periods as $select_period => $name) {
-		echo "     <option value='${select_period}'";
-		if ($period == $select_period) {
-			echo "selected='selected'";
-		}
-		echo ">${name}</option>\n";
-	}
-	
-	echo "    </select> \n";
-	echo "   </div>\n";
-	echo "  </div>\n";
-	
-  echo "<script language='javascript' type='text/javascript'>\n";
-  echo "<!-- \n";
-  echo "$(function () {\n";
-	echo "	$(\"#summary-control-time\").change(function () {\n";
-  echo "		period = $(this).val();\n";
-  echo "		if (period > 0) {\n";
-  echo "	    $('div[id$=\"-thumb-plot\"]').each(function () {\n";
-  echo "				$(this).trigger(\"changeperiod\", period);\n";
-  echo "			});\n";
-  echo "		}\n"
-  echo "	});\n"
-  echo "});\n"
-  echo " -->\n";
-  echo "</script>\n\n"; 
-         
+  print_graph_control_header($page->getName(), $end, $period);
+  
   echo "<table border='0'>\n";
 
   foreach ($page->meterGraphs as $graph) {

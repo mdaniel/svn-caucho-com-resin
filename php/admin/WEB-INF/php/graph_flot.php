@@ -26,6 +26,7 @@ $g_periods = array(2 * 7 * 24 * 60 * 60	=> "2 Weeks",
                    3 * 60 * 60 => "3 Hours",
                    1 * 60 * 60 => "1 Hour");
 
+$g_six_hours_ms = 6 * 60 * 60 * 1000;
 $g_two_weeks_ms = 2 * 7 * 24 * 60 * 60 * 1000;
 
 class GraphTail {
@@ -201,8 +202,9 @@ function stat_graph_div($canvas, $width, $height, $alt, $legend, $title)
   echo " <div id='${canvas}-full-container' style='text-align:center;display:inline-block;'>\n";
   echo "  <div style='text-align:center;display:inline-block;width:100%;'>\n";
 	echo "   <div id='${canvas}-full-title' style='float:left;font-size:1.5em;text-align:left;margin-bottom:.5em'>${title}</div>\n";
-	echo "   <div id='${canvas}-full-control' style='float:right;font-size:1em;text-align:right;margin-bottom:.5em;vertical-align:middle;'>\n";
-	echo "    <label for='${canvas}-control-time'>Time</label>: <select name='${canvas}-control-time' id='${canvas}-control-time'>\n";
+	echo "   <div id='${canvas}-full-control' style='float:right;font-size:1em;text-align:right;margin-bottom:.5em;vertical-align:middle;border:1px solid grey;padding:2px;background: #f4f4f4;'>\n";
+
+	echo "    <label for='${canvas}-control-period'>Show</label> <select name='${canvas}-control-period' id='${canvas}-control-period'>\n";
 	
 	foreach ($g_periods as $period => $name) {
 		echo "     <option value='${period}'>${name}</option>\n";
@@ -210,7 +212,18 @@ function stat_graph_div($canvas, $width, $height, $alt, $legend, $title)
 	
 	echo "     	<option value='0'>User Selected</option>\n";
 	
-	echo "    </select> \n";
+	echo "    </select> of data \n";
+	echo "    <label for='${canvas}-control-offset'>starting</label> <select name='${canvas}-control-offset' id='${canvas}-control-offset'>\n";
+	
+	foreach ($g_periods as $period => $name) {
+		echo "     <option value='${period}'>${name}</option>\n";
+	}
+	
+	echo "     	<option value='0'>User Selected</option>\n";
+		
+	echo "    </select> ago.\n";
+	echo "		<input type='button' name='${canvas}-control-refresh' id='${canvas}-control-refresh' value='Update'>\n";
+
 	echo "   </div>\n";
 	echo "  </div>\n";
 	echo "  <div id='${canvas}-full-plot'></div>\n";
@@ -225,6 +238,7 @@ function stat_graph_script($stat, $canvas, $names, $end, $period)
 {
   global $g_colors;
   global $g_two_weeks_ms;
+  global $g_six_hours_ms;
 
   $date = new DateTime();
   $tz_offset_ms = $date->getOffset() * 1000;
@@ -246,13 +260,9 @@ function stat_graph_script($stat, $canvas, $names, $end, $period)
   
   // always get 2 weeks of data regardless of display period
   $data_end_ms = ($end * 1000);
-  $data_start_ms = $data_end_ms - $g_two_weeks_ms + $tz_offset_ms;
+  $data_start_ms = $data_end_ms - $g_two_weeks_ms;
   
-  $x_max_ms = $data_end_ms + $tz_offset_ms;
-  $x_min_ms = $x_max_ms - $period_ms;
-  
-  echo "var x_min_ms = ${x_min_ms}\n";
-  echo "var x_max_ms = ${x_max_ms}\n";
+  $x_max_ms = 0;
   
   foreach ($names as $name) {
     echo "// START $name\n";
@@ -284,45 +294,55 @@ function stat_graph_script($stat, $canvas, $names, $end, $period)
     
     echo "];\n";
     
-  echo "thumb_graphs[${counter}] = { label : '" . preg_replace("/\s/", "&nbsp;", $name) . "', data : values, color: \"${color}\", lines: { lineWidth: 2 } };\n";
-  echo "full_graphs[${counter*2}] = { label : '" . preg_replace("/\s/", "&nbsp;", $name) . "', data : values, color: \"${color}\", lines: { lineWidth: 2 }, points: { radius: 2, symbol: \"circle\" } };\n";
+    echo "thumb_graphs[${counter}] = { label : '" . preg_replace("/\s/", "&nbsp;", $name) . "', data : values, color: \"${color}\", lines: { lineWidth: 2 } };\n";
+    echo "full_graphs[${counter*2}] = { label : '" . preg_replace("/\s/", "&nbsp;", $name) . "', data : values, color: \"${color}\", lines: { lineWidth: 2 }, points: { radius: 2, symbol: \"circle\" } };\n";
 		
-  $has_baseline = false;
-  if ($size > 1) {
-    # don't generate a baseline unless we have at least half as many historical samples
-    $baseline = $stat->getBaseline($name, $data_start_ms, $data_end_ms, ($size/2));
+    $has_baseline = false;
+    if ($size > 1) {
+      # don't generate a baseline unless we have at least half as many historical samples
+      $baseline = $stat->getBaseline($name, $data_start_ms, $data_end_ms, ($size/2));
       
-    if ($baseline) {
-      $baseline_name = preg_replace("/\s/", "&nbsp;", "${name}|Baseline|${baseline->desc}");
-      $baseline_value = round($baseline->value);
+      if ($baseline) {
+        $baseline_name = preg_replace("/\s/", "&nbsp;", "${name}|Baseline|${baseline->desc}");
+        $baseline_value = round($baseline->value);
 	    	
-      echo "baseline_values = [\n";
-      echo "[" . ($values[0]->time + $tz_offset_ms) . ", " . $baseline_value . "],\n";
-
-      for ($i=1; $i<sizeof($values)-1; $i++) {
-        if ($values[$i]->value != $values[$i-1]->value) {
-          echo "[" . ($values[$i]->time + $tz_offset_ms) . ", " . $baseline_value . "],\n";
+        echo "baseline_values = [\n";
+        echo "[" . ($values[0]->time + $tz_offset_ms) . ", " . $baseline_value . "],\n";
+  
+        for ($i=1; $i<sizeof($values)-1; $i++) {
+          if ($values[$i]->value != $values[$i-1]->value) {
+            echo "[" . ($values[$i]->time + $tz_offset_ms) . ", " . $baseline_value . "],\n";
+          }
         }
-      }
 					
-      echo "[" . ($values[$size-1]->time + $tz_offset_ms) . ", " . $baseline_value . "]\n";
-      echo "];\n";
+        echo "[" . ($values[$size-1]->time + $tz_offset_ms) . ", " . $baseline_value . "]\n";
+        echo "];\n";
 
-      echo "full_graphs[${counter*2+1}] = { label : '${baseline_name}', data : baseline_values, color: color_baseline($.color.parse(\"${color}\")).toString(), lines: { lineWidth: 1 }, points: { radius: 1, symbol: \"square\" } };\n";
+        echo "full_graphs[${counter*2+1}] = { label : '${baseline_name}', data : baseline_values, color: color_baseline($.color.parse(\"${color}\")).toString(), lines: { lineWidth: 1 }, points: { radius: 1, symbol: \"square\" } };\n";
       $has_baseline = true;
+      }
     }
-  }
-		
-  if (! $has_baseline) {
-    echo "baseline_values = [];\n"
-    echo "full_graphs[${counter*2+1}] = { data : baseline_values, color: \"${color}\", lines: { lineWidth: 1 } };\n";
-   }
+	 	
+    if (! $has_baseline) {
+      echo "baseline_values = [];\n"
+      echo "full_graphs[${counter*2+1}] = { data : baseline_values, color: \"${color}\", lines: { lineWidth: 1 } };\n";
+    }
     
-   $counter++;
+    if ($values[sizeof($values)-1]->time > $x_max_ms) {
+    	$x_max_ms = $values[sizeof($values)-1]->time;
+    }
+    
+    $counter++;
 		
     echo "// END $name\n";
     echo "\n";
   }
+  
+  $x_max_ms = $x_max_ms + $tz_offset_ms;
+  $x_min_ms = $x_max_ms - $period_ms;
+  
+  echo "var x_min_ms = ${x_min_ms}\n";
+  echo "var x_max_ms = ${x_max_ms}\n";
   
   echo "\n";
   
@@ -361,7 +381,7 @@ function stat_graph_script($stat, $canvas, $names, $end, $period)
   echo "}\n\n";
   
   echo "var thumb_options = {\n";
-  echo "	xaxis: { mode:\"time\", min: x_min_ms },\n";
+  echo "	xaxis: { mode:\"time\", min: x_min_ms, max: x_max_ms },\n";
   echo "  yaxis: {\n";
   echo "		tickFormatter: tickFormatter \n";
   echo "  },\n";
@@ -370,14 +390,14 @@ function stat_graph_script($stat, $canvas, $names, $end, $period)
     
   echo "var thumb_plot = $.plot(\"#${canvas}-thumb-plot\", thumb_graphs, thumb_options);\n\n";
   
-  echo "$(\"#${canvas}-thumb-plot\").bind(\"changeperiod\", function (e, period) {\n";
+  echo "$(\"#${canvas}-thumb-plot\").bind(\"updateRange\", function (e, start, period) {\n";
+  echo "	var start_ms = (start * 1000) + ${tz_offset_ms};\n"
   echo "	var period_ms = period * 1000;\n"
-  echo "	if (period_ms > 0) {\n";
-  echo "		var min_ms = (x_max_ms - period_ms);\n";
-  echo "		thumb_plot = $.plot($(this), thumb_graphs, $.extend(true, {}, thumb_options, {\n"; 
-  echo "			xaxis: { min: min_ms }\n"; 
-  echo "		}))\n";
-  echo "	}\n"
+  echo "	var end_ms = (start_ms + period_ms);\n";
+  #echo "	alert(start_ms + ',' + end_ms + ',' + period_ms);\n";
+  echo "	thumb_plot = $.plot($(this), thumb_graphs, $.extend(true, {}, thumb_options, {\n"; 
+  echo "		xaxis: { min: start_ms, max: end_ms }\n"; 
+  echo "	}))\n";
   echo "});\n\n";
   
   echo "$(function() {\n";
@@ -388,12 +408,13 @@ function stat_graph_script($stat, $canvas, $names, $end, $period)
   echo "			$(\"#${canvas}-full-plot\").width('100%');\n";
   echo "			$(\"#${canvas}-full-plot\").height('70%');\n\n";
   
-  echo "			$(\"#${canvas}-control-time\").val(${period}).attr('selected','selected');\n";
+  echo "			$(\"#${canvas}-control-period\").val(${period}).attr('selected','selected');\n";
+  echo "			$(\"#${canvas}-control-offset\").val(${period}).attr('selected','selected');\n";
     
   echo "			var placeholder = $(\"#${canvas}-full-plot\");\n\n";
   
   echo "			var full_options = {\n";
-  echo "  			xaxis: { mode:\"time\", min: x_min_ms },\n";
+  echo "  			xaxis: { mode:\"time\", min: x_min_ms, max: x_max_ms },\n";
   echo "  			yaxis: {\n";
   echo "    			tickFormatter: tickFormatter \n";
   echo "  			},\n";
@@ -408,7 +429,8 @@ function stat_graph_script($stat, $canvas, $names, $end, $period)
   echo "				plot = $.plot(placeholder, full_graphs, $.extend(true, {}, full_options, {\n"; 
   echo "					xaxis: { min: ranges.xaxis.from, max: ranges.xaxis.to }\n"; 
   echo "				}))\n";
-  echo "				$(\"#${canvas}-control-time\").val('0').attr('selected','selected');\n";
+  echo "				$(\"#${canvas}-control-period\").val('0').attr('selected','selected');\n";
+  echo "				$(\"#${canvas}-control-offset\").val('0').attr('selected','selected');\n";
   echo "			});\n\n";
   
   echo "			var previousPoint = null;\n";
@@ -426,15 +448,19 @@ function stat_graph_script($stat, $canvas, $names, $end, $period)
   echo "				}\n";
   echo "			});\n\n";
   
-  echo "			$(\"#${canvas}-control-time\").change(function () {\n";
-  echo "				var period_ms = $(this).val() * 1000;\n";
-  echo "				if (period_ms > 0) {\n";
-  echo "					var min_ms = (x_max_ms - period_ms);\n";
-  echo "					plot = $.plot(placeholder, full_graphs, $.extend(true, {}, full_options, {\n"; 
-  echo "						xaxis: { min: min_ms }\n"; 
-  echo "					}))\n";
-  echo "				}\n"
-  echo "      });\n\n"
+  echo "			$(\"#${canvas}-control-refresh\").click(function () {\n";
+	echo "				var now_ms = x_max_ms;\n";
+	echo "				var offset_ms = $('#${canvas}-control-offset').val() * 1000;\n";
+	echo "				var period_ms = $('#${canvas}-control-period').val() * 1000;\n";
+	echo "				if (offset_ms <= 0 || period_ms <= 0) {\n";
+	echo "					return;\n";
+	echo "				}\n";
+	echo "				var start_ms = (now_ms - offset_ms);\n";
+	echo "				var end_ms = (start_ms + period_ms);\n";
+	echo "				plot = $.plot(placeholder, full_graphs, $.extend(true, {}, full_options, {\n"; 
+  echo "					xaxis: { min: start_ms, max: end_ms }\n"; 
+  echo "				}))\n";
+	echo "			});\n";
   
   echo "		}\n";
   echo "  })\n"; 
@@ -445,3 +471,54 @@ function stat_graph_script($stat, $canvas, $names, $end, $period)
   echo " -->\n";
   echo "</script>";
 }
+
+function print_graph_control_header($title, $now, $period)
+{
+  global $g_periods;
+
+  echo "<div style='text-align:center;display:inline-block;width:800px;'>\n";
+	echo " <div style='float:left;font-size:1.5em;text-align:left;margin-bottom:.5em;'>${title}</div>\n";
+  echo " <div style='float:right;font-size:1em;text-align:right;margin-bottom:.5em;vertical-align:middle;border:1px solid grey;padding:2px;background: #f4f4f4;'>\n";
+	echo "  <label for='summary-control-period'>Show</label> <select name='summary-control-period' id='summary-control-period'>\n";
+		
+	foreach ($g_periods as $select_period => $name) {
+		echo "   <option value='${select_period}'";
+		if ($period == $select_period) {
+			echo "selected='selected'";
+		}
+		echo ">${name}</option>\n";
+	}
+	
+	echo "  </select> of data \n";
+	echo "  <label for='summary-control-offset'>starting</label> <select name='summary-control-offset' id='summary-control-offset'>\n";
+		
+	foreach ($g_periods as $select_period => $name) {
+		echo "    <option value='${select_period}'";
+		if ($period == $select_period) {
+			echo "   selected='selected'";
+		}
+		echo ">${name}</option>\n";
+	}
+		
+	echo "  </select> ago.\n";
+	echo "  <input type='button' name='summary-control-refresh' id='summary-control-refresh' value='Update'>\n";
+	echo " </div>\n";
+	echo "</div>\n";
+	
+	echo "<script language='javascript' type='text/javascript'>\n";
+ 	echo "<!-- \n";
+ 	echo "$(function () {\n";
+	echo "	$(\"#summary-control-refresh\").click(function () {\n";
+	echo "		var now = ${now};\n"
+	echo "		var offset = $('#summary-control-offset').val();\n";
+	echo "		var period = $('#summary-control-period').val();\n";
+	echo "		var start = (now - offset);\n";
+ 	echo "		$('div[id$=\"-thumb-plot\"]').each(function () {\n";
+ 	echo "			$(this).trigger(\"updateRange\", [start, period]);\n";
+ 	echo "		});\n";
+ 	echo "	});\n"
+ 	echo "});\n"
+ 	echo " -->\n";
+ 	echo "</script>\n\n";
+}
+
