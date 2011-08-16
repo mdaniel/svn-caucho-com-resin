@@ -322,7 +322,7 @@ public class ResinEmbed
         WebAppConfig config = new WebAppConfig();
         config.setContextPath(webApp.getContextPath());
         config.setRootDirectory(new RawString(webApp.getRootDirectory()));
-        
+
         if (webApp.getArchivePath() != null)
           config.setArchivePath(new RawString(webApp.getArchivePath()));
 

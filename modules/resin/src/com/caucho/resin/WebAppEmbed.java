@@ -57,6 +57,8 @@ public class WebAppEmbed
   private String _contextPath = "/";
   private String _rootDirectory = ".";
   private String _archivePath;
+  
+  private boolean _isStartDisabled;
 
   private HashMap<String,String> _contextParamMap
     = new HashMap<String,String>();
@@ -215,6 +217,14 @@ public class WebAppEmbed
     _contextParamMap.put(name, value);
   }
   
+  /**
+   * For cases like JSP compilation, skip the startup step.
+   */
+  public void setDisableStart(boolean isDisable)
+  {
+    _isStartDisabled = isDisable;
+  }
+  
   public WebApp getWebApp()
   {
     return _webApp;
@@ -226,6 +236,8 @@ public class WebAppEmbed
   protected void configure(WebApp webApp)
   {
     _webApp = webApp;
+    
+    webApp.setDisableStart(_isStartDisabled);
     
     try {
       for (Map.Entry<String,String> entry : _contextParamMap.entrySet()) {

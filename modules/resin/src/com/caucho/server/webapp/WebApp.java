@@ -410,6 +410,8 @@ public class WebApp extends ServletContextImpl
   private long _activeWaitTime = 15000L;
 
   private long _idleTime = 2 * 3600 * 1000L;
+  
+  private boolean _isStartDisabled;
 
   private final Lifecycle _lifecycle;
 
@@ -890,6 +892,11 @@ public class WebApp extends ServletContextImpl
    */
   public void setSchemaLocation(String location)
   {
+  }
+  
+  public void setDisableStart(boolean isDisable)
+  {
+    _isStartDisabled = isDisable;
   }
 
   public boolean isMetadataComplete()
@@ -3492,6 +3499,11 @@ public class WebApp extends ServletContextImpl
       
       if (serverId != null)
         setAttribute("caucho.server-id", serverId);
+      
+      if (_isStartDisabled) {
+        isOkay = true;
+        return;
+      }
 
       _classLoader.start();
 

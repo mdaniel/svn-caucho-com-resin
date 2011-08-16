@@ -49,6 +49,7 @@ import com.caucho.resin.WebAppEmbed;
 import com.caucho.server.cluster.Server;
 import com.caucho.server.util.CauchoSystem;
 import com.caucho.server.webapp.WebApp;
+import com.caucho.server.webapp.WebAppContainer;
 import com.caucho.server.webapp.WebAppController;
 import com.caucho.util.L10N;
 import com.caucho.vfs.Path;
@@ -342,13 +343,15 @@ public class JspCompiler implements EnvironmentBean {
         rootDirectory = getAppDir();
 
       _resin = new ResinEmbed();
+      _resin.setRootDirectory(rootDirectory.getURL());
       
       WebAppEmbed webAppEmbed = new WebAppEmbed();
       webAppEmbed.setRootDirectory(rootDirectory.getURL());
+      webAppEmbed.setDisableStart(true);
       
       _resin.addWebApp(webAppEmbed);
       // jsp/193h, #4397
-      // _resin.start();
+      _resin.start();
       
       _webApp = webAppEmbed.getWebApp();
     }
@@ -682,9 +685,11 @@ public class JspCompiler implements EnvironmentBean {
         if (args[i].equals("-app-dir")) {
           Path appDir = Vfs.lookup(args[i + 1]);
 
-          WebApp app = createWebApp(appDir);
+          WebApp webApp = createWebApp(appDir);
 
-          setWebApp(app);
+          if (webApp != null)
+            setWebApp(webApp);
+
           setAppDir(appDir);
 
           i += 2;
@@ -709,7 +714,7 @@ public class JspCompiler implements EnvironmentBean {
         else
           break;
       }
-
+      
       WebApp webApp = getWebApp();
       if (webApp != null && ! hasConf) {
         Path appDir = webApp.getRootDirectory();
