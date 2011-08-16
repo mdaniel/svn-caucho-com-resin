@@ -328,7 +328,7 @@ function print_graphs()
   	$end = time();
   	$period = 6 * 60 * 60;
   	
-		print_graph_control_header("Graphs", $end, $period);
+		print_graph_control_header("Summary Graphs", $end, $period);
   	
     echo "<table summary='Graphs' border='0' cellspacing='0' cellpadding='5'>";
 

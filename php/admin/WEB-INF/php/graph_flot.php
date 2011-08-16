@@ -132,7 +132,8 @@ function create_graph_timeout()
 function stat_graph_regexp($canvas, $width, $height,
                            $end, $period, $pattern, $alt, 
                            $legend = "bottom",
-                           $mbean_server = null, $ticks = null, $title = null)
+                           $mbean_server = null, $ticks = null, 
+                           $title = null, $now_label="Now")
 {
 	$stat = get_stats_service($mbean_server);
 	if (! $stat) {
@@ -144,7 +145,7 @@ function stat_graph_regexp($canvas, $width, $height,
   $names = preg_grep($pattern, $full_names);
   sort($names);
 
-  stat_graph_div($canvas, $width, $height, $alt, $legend, $title);
+  stat_graph_div($canvas, $width, $height, $alt, $legend, $title, $now_label);
 
   $tail = new GraphTail($canvas, $names, $end, $period);
 
@@ -155,14 +156,14 @@ function stat_graph_regexp($canvas, $width, $height,
 
 function stat_graph($canvas, $width, $height, $end, $period, $names, $alt, 
                     $legend = "bottom", $mbean_server = null, $ticks = null,
-                    $title = null)
+                    $title = null, $now_label="Now")
 {
 	$stat = get_stats_service($mbean_server);
 	if (! $stat) {
 		return;
 	}
 		
-  stat_graph_div($canvas, $width, $height, $alt, $legend, $title);
+  stat_graph_div($canvas, $width, $height, $alt, $legend, $title, $now_label);
 
   $tail = new GraphTail($canvas, $names, $end, $period);
 
@@ -171,7 +172,8 @@ function stat_graph($canvas, $width, $height, $end, $period, $names, $alt,
   // stat_graph_script($stat, $canvas, $names, $period);
 }                 
 
-function stat_graph_div($canvas, $width, $height, $alt, $legend, $title)
+function stat_graph_div($canvas, $width, $height, $alt, $legend, $title, 
+												$now_label="Now")
 {
 	global $g_periods;
 	
@@ -210,18 +212,19 @@ function stat_graph_div($canvas, $width, $height, $alt, $legend, $title)
 		echo "     <option value='${period}'>${name}</option>\n";
 	}
 	
-	echo "     	<option value='0'>User Selected</option>\n";
+	echo "     	<option value='-1'>User Selected</option>\n";
 	
 	echo "    </select> of data \n";
-	echo "    <label for='${canvas}-control-offset'>starting</label> <select name='${canvas}-control-offset' id='${canvas}-control-offset'>\n";
+	echo "    <label for='${canvas}-control-offset'>ending</label> <select name='${canvas}-control-offset' id='${canvas}-control-offset'>\n";
 	
 	foreach ($g_periods as $period => $name) {
-		echo "     <option value='${period}'>${name}</option>\n";
+		echo "     <option value='${period}'>${name} ago</option>\n";
 	}
 	
-	echo "     	<option value='0'>User Selected</option>\n";
+	echo "      <option value='0' selected='selected'>${now_label}</option>\n";
+	echo "     	<option value='-1'>User Selected</option>\n";
 		
-	echo "    </select> ago.\n";
+	echo "    </select>.\n";
 	echo "		<input type='button' name='${canvas}-control-refresh' id='${canvas}-control-refresh' value='Update'>\n";
 
 	echo "   </div>\n";
@@ -251,7 +254,7 @@ function stat_graph_script($stat, $canvas, $names, $end, $period)
   echo "\$(function () {\n";
 
   $index = null;
-
+  
   echo "var thumb_graphs = [];\n";
   echo "var full_graphs = [];\n";
 
@@ -337,8 +340,17 @@ function stat_graph_script($stat, $canvas, $names, $end, $period)
     echo "// END $name\n";
     echo "\n";
   }
+
+  # Note: using the max data values makes the graphs look better does not
+  # show missing data which is particularly bad for postmortem graphs
   
-  $x_max_ms = $x_max_ms + $tz_offset_ms;
+  #if ($x_max_ms == 0) {
+  #	$x_max_ms = $data_end_ms;
+  #}
+  	
+  #$x_max_ms = $x_max_ms + $tz_offset_ms;
+  
+  $x_max_ms = $data_end_ms + $tz_offset_ms;
   $x_min_ms = $x_max_ms - $period_ms;
   
   echo "var x_min_ms = ${x_min_ms}\n";
@@ -390,11 +402,9 @@ function stat_graph_script($stat, $canvas, $names, $end, $period)
     
   echo "var thumb_plot = $.plot(\"#${canvas}-thumb-plot\", thumb_graphs, thumb_options);\n\n";
   
-  echo "$(\"#${canvas}-thumb-plot\").bind(\"updateRange\", function (e, start, period) {\n";
+  echo "$(\"#${canvas}-thumb-plot\").bind(\"updateRange\", function (e, start, end) {\n";
+  echo "	var end_ms = (end * 1000) + ${tz_offset_ms};\n"
   echo "	var start_ms = (start * 1000) + ${tz_offset_ms};\n"
-  echo "	var period_ms = period * 1000;\n"
-  echo "	var end_ms = (start_ms + period_ms);\n";
-  #echo "	alert(start_ms + ',' + end_ms + ',' + period_ms);\n";
   echo "	thumb_plot = $.plot($(this), thumb_graphs, $.extend(true, {}, thumb_options, {\n"; 
   echo "		xaxis: { min: start_ms, max: end_ms }\n"; 
   echo "	}))\n";
@@ -409,7 +419,6 @@ function stat_graph_script($stat, $canvas, $names, $end, $period)
   echo "			$(\"#${canvas}-full-plot\").height('70%');\n\n";
   
   echo "			$(\"#${canvas}-control-period\").val(${period}).attr('selected','selected');\n";
-  echo "			$(\"#${canvas}-control-offset\").val(${period}).attr('selected','selected');\n";
     
   echo "			var placeholder = $(\"#${canvas}-full-plot\");\n\n";
   
@@ -429,8 +438,8 @@ function stat_graph_script($stat, $canvas, $names, $end, $period)
   echo "				plot = $.plot(placeholder, full_graphs, $.extend(true, {}, full_options, {\n"; 
   echo "					xaxis: { min: ranges.xaxis.from, max: ranges.xaxis.to }\n"; 
   echo "				}))\n";
-  echo "				$(\"#${canvas}-control-period\").val('0').attr('selected','selected');\n";
-  echo "				$(\"#${canvas}-control-offset\").val('0').attr('selected','selected');\n";
+  echo "				$(\"#${canvas}-control-period\").val('-1').attr('selected','selected');\n";
+  echo "				$(\"#${canvas}-control-offset\").val('-1').attr('selected','selected');\n";
   echo "			});\n\n";
   
   echo "			var previousPoint = null;\n";
@@ -452,11 +461,11 @@ function stat_graph_script($stat, $canvas, $names, $end, $period)
 	echo "				var now_ms = x_max_ms;\n";
 	echo "				var offset_ms = $('#${canvas}-control-offset').val() * 1000;\n";
 	echo "				var period_ms = $('#${canvas}-control-period').val() * 1000;\n";
-	echo "				if (offset_ms <= 0 || period_ms <= 0) {\n";
+	echo "				if (offset_ms < 0 || period_ms < 0) {\n";
 	echo "					return;\n";
 	echo "				}\n";
-	echo "				var start_ms = (now_ms - offset_ms);\n";
-	echo "				var end_ms = (start_ms + period_ms);\n";
+	echo "				var end_ms = (now_ms - offset_ms);\n";
+	echo "				var start_ms = (end_ms - period_ms);\n";
 	echo "				plot = $.plot(placeholder, full_graphs, $.extend(true, {}, full_options, {\n"; 
   echo "					xaxis: { min: start_ms, max: end_ms }\n"; 
   echo "				}))\n";
@@ -472,7 +481,7 @@ function stat_graph_script($stat, $canvas, $names, $end, $period)
   echo "</script>";
 }
 
-function print_graph_control_header($title, $now, $period)
+function print_graph_control_header($title, $now, $period, $now_label="Now")
 {
   global $g_periods;
 
@@ -490,17 +499,14 @@ function print_graph_control_header($title, $now, $period)
 	}
 	
 	echo "  </select> of data \n";
-	echo "  <label for='summary-control-offset'>starting</label> <select name='summary-control-offset' id='summary-control-offset'>\n";
+	echo "  <label for='summary-control-offset'>ending</label> <select name='summary-control-offset' id='summary-control-offset'>\n";
 		
 	foreach ($g_periods as $select_period => $name) {
-		echo "    <option value='${select_period}'";
-		if ($period == $select_period) {
-			echo "   selected='selected'";
-		}
-		echo ">${name}</option>\n";
+		echo "    <option value='${select_period}'>${name} ago</option>\n";
 	}
 		
-	echo "  </select> ago.\n";
+	echo "  <option value='0' selected='selected'>${now_label}</option>\n";
+	echo "  </select>.\n";
 	echo "  <input type='button' name='summary-control-refresh' id='summary-control-refresh' value='Update'>\n";
 	echo " </div>\n";
 	echo "</div>\n";
@@ -512,9 +518,10 @@ function print_graph_control_header($title, $now, $period)
 	echo "		var now = ${now};\n"
 	echo "		var offset = $('#summary-control-offset').val();\n";
 	echo "		var period = $('#summary-control-period').val();\n";
-	echo "		var start = (now - offset);\n";
+	echo "		var end = (now - offset);\n";
+	echo "		var start = (end - period);\n";
  	echo "		$('div[id$=\"-thumb-plot\"]').each(function () {\n";
- 	echo "			$(this).trigger(\"updateRange\", [start, period]);\n";
+ 	echo "			$(this).trigger(\"updateRange\", [start, end]);\n";
  	echo "		});\n";
  	echo "	});\n"
  	echo "});\n"
