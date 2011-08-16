@@ -820,6 +820,7 @@ public class ClientSocketFactory implements ClientSocketFactoryApi
   public void stop()
   {
     _state = _state.toStandby();
+
     _firstSuccessTime = 0;
 
     _startSequenceId.incrementAndGet();
@@ -1424,6 +1425,7 @@ public class ClientSocketFactory implements ClientSocketFactoryApi
       boolean isEnabled() { return false; }
       boolean isSessionEnabled() { return false; }
 
+      State toActive() { return this; }
       State toFail() { return this; }
       State toBusy() { return this; }
       State toSessionOnly() { return this; }

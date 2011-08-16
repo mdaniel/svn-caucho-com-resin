@@ -575,6 +575,10 @@ public final class ClusterServer {
     if (_cloudServer.getState().isDisableSoft()) {
       factory.enableSessionOnly();
     }
+    else if (_cloudServer.getState().isDisabled()){
+      // server/269g
+      factory.disable();
+    }
     else {
       factory.enable();
     }

@@ -13,6 +13,7 @@
 
 <s2 title="4.0.21 snapshot">
 <ul>
+<li>ssl: extra debugging output for openssl with disconnecting client (#4709, rep by Keith Fetterman)</li>
 <li>eclipse-plugin: install resin into version specific directory (#4693, rep by manishdevraj)</li>
 <li>resin-cli: introduced new command start-with-foreground (see launchd restrictions)</li>
 <li>resin-cli: unknown argument should fail resin start (#4689, rep alex)</li>

@@ -381,6 +381,12 @@ public abstract class AbstractHttpRequest
    */
   public void clientDisconnect()
   {
+    SocketLink conn = _conn;
+
+    if (conn != null) {
+      conn.clientDisconnect();
+    }
+    
     killKeepalive("client disconnect");
     
     CauchoResponse response = getResponseFacade();
@@ -1512,6 +1518,9 @@ public abstract class AbstractHttpRequest
 
       ServletContext webApp = asyncContext.getDispatchContext();
       String url = asyncContext.getDispatchPath();
+      
+      if (_tcpConn != null && _tcpConn.isAsyncComplete())
+        return false;
 
       if (url != null) {
         if (webApp == null)

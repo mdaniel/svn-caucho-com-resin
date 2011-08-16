@@ -309,6 +309,13 @@ public class TcpSocketLink extends AbstractSocketLink
     return _requestStateRef.get().isAsyncStarted();
   }
 
+  public boolean isAsyncComplete()
+  {
+    TcpAsyncController async = _async;
+    
+    return async != null && async.isCompleteRequested();
+  }
+
   @Override
   public boolean isCometSuspend()
   {
@@ -784,7 +791,6 @@ public class TcpSocketLink extends AbstractSocketLink
     }
     
     if (_thread != null) {
-      Thread.dumpStack();
       throw new IllegalStateException("old: " + _thread
                                       + " current: " + thread);
     }
@@ -972,9 +978,9 @@ public class TcpSocketLink extends AbstractSocketLink
         async.toResume();
 
         // server/1lb5, #4697
-        if (! async.isCompleteRequested()) {
-          getRequest().handleResume();
-        }
+        // if (! async.isCompleteRequested()) {
+        getRequest().handleResume();
+        // }
 
         if (_state.isComet()) {
           if (toSuspend())
@@ -1358,6 +1364,16 @@ public class TcpSocketLink extends AbstractSocketLink
     }
   }
   
+  @Override
+  public void clientDisconnect()
+  {
+    killKeepalive("client disconnect");
+    
+    TcpAsyncController async = _async;
+    
+    if (async != null)
+      async.complete();
+  }
   /**
    * Kills the keepalive, so the end of the request is the end of the
    * connection.
@@ -1372,7 +1388,6 @@ public class TcpSocketLink extends AbstractSocketLink
                                           this,
                                           _thread,
                                           thread));
-    
     SocketLinkState state = _state;
     
     _state = state.toKillKeepalive(this);

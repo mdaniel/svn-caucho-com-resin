@@ -53,6 +53,12 @@ public enum CloudServerState {
     {
       return DISABLED;
     }
+    
+    @Override
+    public boolean isDisabled()
+    {
+      return true;
+    }
   },
   
   DISABLED_SOFT {
@@ -94,6 +100,11 @@ public enum CloudServerState {
   }
 
   public boolean isDisableSoft()
+  {
+    return false;
+  }
+  
+  public boolean isDisabled()
   {
     return false;
   }

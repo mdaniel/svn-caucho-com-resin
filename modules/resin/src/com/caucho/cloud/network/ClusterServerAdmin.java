@@ -223,7 +223,7 @@ public class ClusterServerAdmin extends AbstractManagedObject
   public String getLoadBalanceState()
   {
     ClientSocketFactory pool = _server.getLoadBalanceSocketPool();
-    
+
     if (pool != null)
       return pool.getState();
     else
@@ -374,6 +374,9 @@ public class ClusterServerAdmin extends AbstractManagedObject
   @Override
   public void start()
   {
+    _server.getCloudServer().enable();
+    //_server.startServer();
+    
     ClientSocketFactory pool = _server.getLoadBalanceSocketPool();
 
     if (pool != null)
@@ -383,6 +386,8 @@ public class ClusterServerAdmin extends AbstractManagedObject
   @Override
   public void stop()
   {
+    _server.getCloudServer().disable();
+
     ClientSocketFactory pool = _server.getLoadBalanceSocketPool();
 
     if (pool != null)
@@ -392,6 +397,8 @@ public class ClusterServerAdmin extends AbstractManagedObject
   @Override
   public void enableSessionOnly()
   {
+    _server.getCloudServer().disableSoft();
+    
     ClientSocketFactory pool = _server.getLoadBalanceSocketPool();
 
     if (pool != null)

@@ -182,4 +182,6 @@ public interface SocketLink {
    * Starts a full duplex (tcp style) request for hmtp/xmpp
    */
   public SocketLinkDuplexController startDuplex(SocketLinkDuplexListener handler);
+
+  public void clientDisconnect();
 }

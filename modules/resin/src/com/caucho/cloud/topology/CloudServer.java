@@ -311,10 +311,26 @@ public class CloudServer {
     _state = state;
   }
 
-  public void overrideState(CloudServerState state) {
+  public void overrideState(CloudServerState state)
+  {
     _state = state;
 
     updateState();
+  }
+  
+  public void disable()
+  {
+    overrideState(CloudServerState.DISABLED);
+  }
+  
+  public void disableSoft()
+  {
+    overrideState(CloudServerState.DISABLED_SOFT);
+  }
+  
+  public void enable()
+  {
+    overrideState(CloudServerState.ACTIVE);
   }
   
   private void updateState()

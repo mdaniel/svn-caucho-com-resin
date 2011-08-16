@@ -177,6 +177,13 @@ public class AsyncContextImpl
     return controller != null && controller.isAsyncStarted();
   }
   
+  public boolean isAsyncComplete()
+  {
+    AsyncController controller = _cometController;
+    
+    return controller != null && controller.isCometComplete();
+  }
+  
   //
   // dispatch values
   //

@@ -753,7 +753,7 @@ public class JspCompiler implements EnvironmentBean {
 
         if (getAppDir() == null && getWebApp() == null) {
           System.err.println(L.l("-app-dir must be specified for JspCompiler"));
-          return -1;
+          return 0;
         }
       }
 
@@ -885,6 +885,10 @@ public class JspCompiler implements EnvironmentBean {
       throws Exception
     {
       WebApp webApp = createWebApp(_rootDir);
+      
+      if (webApp == null)
+        throw new NullPointerException();
+      
       _program.configure(webApp);
       Config.init(webApp);
 

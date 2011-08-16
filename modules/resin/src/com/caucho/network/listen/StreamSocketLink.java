@@ -143,6 +143,10 @@ public class StreamSocketLink extends AbstractSocketLink {
   {
     _isKeepalive = false;
   }
+  
+  public void clientDisconnect()
+  {
+  }
 
   public void setLocalAddress(InetAddress addr)
   {
