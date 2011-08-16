@@ -425,7 +425,7 @@ public class WebApp extends ServletContextImpl
   private long _status500LastTime;
 
   //servlet 3.0
-  private boolean _metadataComplete = false;
+  private boolean _isMetadataComplete = false;
   private List<String> _pendingClasses = new ArrayList<String>();
   private Ordering _absoluteOrdering;
   private List<WebAppFragmentConfig> _webFragments;
@@ -894,12 +894,12 @@ public class WebApp extends ServletContextImpl
 
   public boolean isMetadataComplete()
   {
-    return _metadataComplete;
+    return _isMetadataComplete;
   }
 
   public void setMetadataComplete(boolean metadataComplete)
   {
-    _metadataComplete = metadataComplete;
+    _isMetadataComplete = metadataComplete;
   }
 
   @Configurable
@@ -2726,7 +2726,7 @@ public class WebApp extends ServletContextImpl
                             new AnnotationLiteral<Initialized>() {});
       */
 
-      if (! _metadataComplete)
+      if (! _isMetadataComplete)
         initWebFragments();
 
       WebAppController parent = null;
@@ -3355,8 +3355,13 @@ public class WebApp extends ServletContextImpl
 
     List<Class<?>> filters = new ArrayList<Class<?>>();
 
-    List<String> pendingClasses = new ArrayList<String>(_pendingClasses);
-    _pendingClasses.clear();
+    List<String> pendingClasses = new ArrayList<String>();
+    
+    // server/121e
+    if (! _isMetadataComplete) {
+      pendingClasses = new ArrayList<String>(_pendingClasses);
+      _pendingClasses.clear();
+    }
 
     for (String className : pendingClasses) {
       Class<?> cl = _classLoader.loadClass(className);
