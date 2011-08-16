@@ -32,6 +32,7 @@ package com.caucho.env.git;
 /**
  * Exception for Git processing
  */
+@SuppressWarnings("serial")
 public class GitException extends RuntimeException {
   public GitException()
   {

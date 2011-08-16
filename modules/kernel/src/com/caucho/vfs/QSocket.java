@@ -127,14 +127,6 @@ abstract public class QSocket {
   }
 
   /**
-   * Read non-blocking
-   */
-  public boolean readNonBlock(int ms)
-  {
-    return false;
-  }
-
-  /**
    * Returns the secure cipher algorithm.
    */
   public String getCipherSuite()
@@ -173,6 +165,11 @@ abstract public class QSocket {
       return null;
   }
   
+  public boolean isEof()
+    throws IOException
+  {
+    return true;
+  }
   /**
    * Returns a stream impl for the socket encapsulating the
    * input and output stream.

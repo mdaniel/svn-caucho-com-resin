@@ -350,10 +350,10 @@ public final class JniSocketImpl extends QSocket {
    * Read non-blocking
    */
   @Override
-  public boolean readNonBlock(int ms)
+  public boolean isEof()
   {
     synchronized (_readLock) {
-      return nativeReadNonBlock(_fd, ms);
+      return nativeIsEof(_fd);
     }
   }
 
@@ -615,7 +615,7 @@ public final class JniSocketImpl extends QSocket {
 
   native int getNativeFd(long fd);
 
-  native boolean nativeReadNonBlock(long fd, int ms);
+  native boolean nativeIsEof(long fd);
 
   private native boolean nativeAccept(long serverSocketFd,
                                       long socketfd,

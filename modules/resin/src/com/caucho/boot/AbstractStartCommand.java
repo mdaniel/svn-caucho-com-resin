@@ -57,6 +57,8 @@ public abstract class AbstractStartCommand extends AbstractBootCommand
     _valueKeys.add("--data-directory");
     _valueKeys.add("-join");
     _valueKeys.add("--join");
+    _valueKeys.add("-join-cluster");
+    _valueKeys.add("--join--cluster");
     _valueKeys.add("-log-directory");
     _valueKeys.add("--log-directory");
     _valueKeys.add("-resin-home");

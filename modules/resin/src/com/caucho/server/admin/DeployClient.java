@@ -391,24 +391,6 @@ public class DeployClient implements Repository
     return true;
   }
   
-  private String setTag(String tag,
-                        String contentHash,
-                        HashMap<String,String> attributes)
-  {
-    HashMap<String,String> attributeCopy;
-
-    if (attributes != null)
-      attributeCopy = new HashMap<String,String>(attributes);
-    else
-      attributeCopy = new HashMap<String,String>();
-
-    // server/2o66
-    SetTagQuery query
-      = new SetTagQuery(tag, contentHash, attributeCopy);
-
-    return (String) query(query);
-  }
-  
   public TagResult []queryTags(String pattern)
   {
     QueryTagsQuery query = new QueryTagsQuery(pattern);

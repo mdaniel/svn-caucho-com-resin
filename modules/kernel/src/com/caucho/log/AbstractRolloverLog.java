@@ -481,6 +481,7 @@ public class AbstractRolloverLog {
 
       synchronized (_logLock) {
         flushTempStream();
+
         if (lastPeriodEnd <= now && lastPeriodEnd > 0) {
           closeLogStream();
 

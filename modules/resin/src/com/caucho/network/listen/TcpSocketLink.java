@@ -602,12 +602,15 @@ public class TcpSocketLink extends AbstractSocketLink
     try {
       StreamImpl s = socket.getStream();
 
+      return s.isEof();
+      /*
       int len = s.getAvailable();
 
-      if (len >= 0 || len == ReadStream.READ_TIMEOUT)
+      if (len > 0 || len == ReadStream.READ_TIMEOUT)
         return false;
       else
         return true;
+        */
     } catch (Exception e) {
       log.log(Level.FINE, e.toString(), e);
 

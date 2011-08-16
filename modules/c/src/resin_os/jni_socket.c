@@ -424,63 +424,30 @@ Java_com_caucho_vfs_JniSocketImpl_getCipherBits(JNIEnv *env,
     return conn->ssl_bits;
 }
 
-#ifdef POLL
 JNIEXPORT jboolean JNICALL
-Java_com_caucho_vfs_JniSocketImpl_nativeReadNonBlock(JNIEnv *env,
-                                                     jobject obj,
-                                                     jlong conn_fd,
-                                                     jint ms)
+Java_com_caucho_vfs_JniSocketImpl_nativeIsEof(JNIEnv *env,
+                                              jobject obj,
+                                              jlong conn_fd)
 {
   connection_t *conn = (connection_t *) (PTR) conn_fd;
   struct pollfd poll_item[1];
   int fd;
-
-  if (! conn)
-    return 0;
-
-  fd = conn->fd;
-
-  if (fd < 0)
-    return 0;
-
-  poll_item[0].fd = fd;
-  poll_item[0].events = POLLIN|POLLPRI;
-  poll_item[0].revents = 0;
-
-  return (poll(poll_item, 1, ms) > 0);
-}
-#else /* SELECT */
-JNIEXPORT jboolean JNICALL
-Java_com_caucho_vfs_JniSocketImpl_nativeReadNonBlock(JNIEnv *env,
-                                                  jobject obj,
-                                                  jlong conn_fd,
-						  jint ms)
-{
-  connection_t *conn = (connection_t *) (PTR) conn_fd;
-  fd_set read_set;
-  struct timeval timeout;
   int result;
-  int fd;
+  char buffer[1];
+  int ms = 0;
 
   if (! conn)
-    return 0;
+    return 1;
 
   fd = conn->fd;
 
   if (fd < 0)
-    return 0;
+    return 1;
 
-  FD_ZERO(&read_set);
-  FD_SET((unsigned int) fd, &read_set);
+  result = recv(fd, buffer, 1, MSG_DONTWAIT|MSG_PEEK);
 
-  timeout.tv_sec = ms / 1000;
-  timeout.tv_usec = (ms % 1000) * 1000;
-
-  result = select(fd + 1, &read_set, 0, 0, &timeout);
-
-  return result > 0;
+  return result == 0;
 }
-#endif
 
 #ifdef AI_NUMERICHOST
 

@@ -144,6 +144,11 @@ public class StreamImpl {
   {
     throw new UnsupportedOperationException(String.valueOf(this));
   }
+  
+  public boolean isEof() throws IOException
+  {
+    return false;
+  }
 
   /**
    * Returns the current read position of the underlying file.
