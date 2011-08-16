@@ -250,12 +250,18 @@ public class ManagerClient
   public String pdfReport(String path, 
                           String report, 
                           long period, 
-                          String logDirectory) 
+                          String logDirectory,
+                          long profileTime,
+                          long samplePeriod,
+                          boolean isSnapshot)
   {
     PdfReportQuery query = new PdfReportQuery(path, 
                                               report, 
                                               period, 
-                                              logDirectory);
+                                              logDirectory,
+                                              profileTime,
+                                              samplePeriod,
+                                              isSnapshot);
     return (String) query(query);
   } 
 

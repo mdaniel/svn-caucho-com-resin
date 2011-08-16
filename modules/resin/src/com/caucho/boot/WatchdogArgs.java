@@ -616,6 +616,7 @@ class WatchdogArgs
                                + "\n  undeploy - undeploys an application"
                                + "\n  heap-dump - produces a heap dump"
                                + "\n  thread-dump - produces a thread dump"
+                               + "\n  pdf-report - generates pdf report (Pro version only)"
                                + "\n  profile - profiles the system"
                                + "\n  list-restarts - lists server restart timestamps"
                                + "\n  log-level - sets a log level"

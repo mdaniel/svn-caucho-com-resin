@@ -36,21 +36,30 @@ public class PdfReportQuery implements java.io.Serializable
   private String _report;
   private long _period;
   private String _logDirectory;
+  private long _profileTime;
+  private long _samplePeriod;
+  private boolean _isSnapshot;
   
   public PdfReportQuery()
   {
     
   }
-  
-  public PdfReportQuery(String path, 
-                        String report, 
+
+  public PdfReportQuery(String path,
+                        String report,
                         long period,
-                        String logDirectory)
+                        String logDirectory,
+                        long profileTime,
+                        long samplePeriod,
+                        boolean isSnapshot)
   {
     _path = path;
     _report = report;
     _period = period;
     _logDirectory = logDirectory;
+    _profileTime = profileTime;
+    _samplePeriod = samplePeriod;
+    _isSnapshot = isSnapshot;
   }
   
   public String getPath()
@@ -92,15 +101,48 @@ public class PdfReportQuery implements java.io.Serializable
   {
     _logDirectory = logDirectory;
   }
-  
+
+  public boolean isSnapshot()
+  {
+    return _isSnapshot;
+  }
+
+  public void setSnapshot(boolean snapshot)
+  {
+    _isSnapshot = snapshot;
+  }
+
+  public long getSamplePeriod()
+  {
+    return _samplePeriod;
+  }
+
+  public void setSamplePeriod(long samplePeriod)
+  {
+    _samplePeriod = samplePeriod;
+  }
+
+  public long getProfileTime()
+  {
+    return _profileTime;
+  }
+
+  public void setProfileTime(long profileTime)
+  {
+    _profileTime = profileTime;
+  }
+
   @Override
   public String toString()
   {
-    return String.format("%s[%s,%s,%s,%s]",
+    return String.format("%s[%s,%s,%s,%s,%s,%s,%s]",
                          this.getClass().getSimpleName(),
                          _path,
                          _report,
                          _period,
-                         _logDirectory);
+                         _logDirectory,
+                         _profileTime,
+                         _samplePeriod,
+                         _isSnapshot);
   }
 }

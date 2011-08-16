@@ -175,15 +175,14 @@ public class PdfReportAction implements AdminAction
       //env.setGlobalValue("health_service", env.wrapJava(healthService));
       env.setGlobalValue("pdf_name", env.wrapJava(_report));
       env.setGlobalValue("period", env.wrapJava(_period / 1000));
-      
-      if (isSnapshot())
-        env.setGlobalValue("g_is_snapshot", env.wrapJava(true));
-      
+
+      env.setGlobalValue("g_is_snapshot", env.wrapJava(isSnapshot()));
+
       if (getProfileTime() > 0) {
         env.setGlobalValue("profile_time", 
                            env.wrapJava(getProfileTime() / 1000));
       }
-      
+
       if (getProfileTick() > 0) {
         env.setGlobalValue("profile_tick", env.wrapJava(getProfileTick()));
       }
