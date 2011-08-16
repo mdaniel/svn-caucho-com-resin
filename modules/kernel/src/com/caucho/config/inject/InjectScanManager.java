@@ -293,12 +293,17 @@ class InjectScanManager implements ScanListener {
   public void addImmediateResource(InjectScanClass injectScanClass)
   {
     ClassLoader classLoader = _injectManager.getClassLoader();
-    System.out.println("IMMED: " + injectScanClass);
+
     if (classLoader instanceof DynamicClassLoader) {
       DynamicClassLoader dynLoader = (DynamicClassLoader) classLoader;
       ClassLoader tmpLoader = dynLoader.getNewTempClassLoader();
       
+      Thread thread = Thread.currentThread();
+      ClassLoader oldLoader = thread.getContextClassLoader();
+      
       try {
+        thread.setContextClassLoader(dynLoader);
+        
         Class<?> cl = tmpLoader.loadClass(injectScanClass.getClassName());
         
         AnnotatedType<?> annType
@@ -317,6 +322,8 @@ class InjectScanManager implements ScanListener {
         }
       } catch (Exception e) {
         log.log(Level.FINE, e.toString(), e);
+      } finally {
+        thread.setContextClassLoader(oldLoader);
       }
     }
   }

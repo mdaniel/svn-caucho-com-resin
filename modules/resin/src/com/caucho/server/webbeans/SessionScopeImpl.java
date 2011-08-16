@@ -53,7 +53,6 @@ public class SessionScopeImpl extends AbstractScopeContext {
   public boolean isActive()
   {
     ServletRequest request = ServletInvocation.getContextRequest();
-    System.out.println("ACT: " + request);
 
     if (request != null) {
       HttpSession session = ((HttpServletRequest) request).getSession();

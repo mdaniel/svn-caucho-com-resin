@@ -3071,6 +3071,10 @@ public final class InjectManager
       thread.setContextClassLoader(oldLoader);
     }
   }
+  
+  public void updateResources()
+  {
+  }
 
   public void processPendingAnnotatedTypes()
   {

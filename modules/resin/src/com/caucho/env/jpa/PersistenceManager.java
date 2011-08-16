@@ -350,6 +350,10 @@ public class PersistenceManager
     try {
       // jpa/1630
       thread.setContextClassLoader(_classLoader);
+      
+      InjectManager cdiManager = InjectManager.getCurrent();
+      
+      cdiManager.updateResources();
 
       ArrayList<PersistenceUnitManager> pUnitList
         = new ArrayList<PersistenceUnitManager>();

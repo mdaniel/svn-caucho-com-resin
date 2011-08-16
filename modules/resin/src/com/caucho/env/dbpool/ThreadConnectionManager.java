@@ -28,11 +28,8 @@
 
 package com.caucho.env.dbpool;
 
-import com.caucho.util.L10N;
-
 import java.lang.ref.SoftReference;
 import java.util.ArrayList;
-import java.util.logging.Logger;
 
 
 /**
@@ -40,10 +37,6 @@ import java.util.logging.Logger;
  * "cached" connection, i.e. elisting only when work is actually done.
  */
 public class ThreadConnectionManager {
-  private static final L10N L = new L10N(ThreadConnectionManager.class);
-  private static final Logger log
-    = Logger.getLogger(ThreadConnectionManager.class.getName());
-
   private static final ThreadLocal<ThreadConnectionManager> _threadManager
     = new ThreadLocal<ThreadConnectionManager>();
 

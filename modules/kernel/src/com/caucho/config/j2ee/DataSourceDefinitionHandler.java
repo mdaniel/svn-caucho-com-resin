@@ -91,8 +91,6 @@ public class DataSourceDefinitionHandler extends JavaeeInjectionHandler {
   @Override
   public ConfigProgram introspectType(AnnotatedType<?> type)
   {
-    System.out.println("TYPE: " + type);
-    Thread.dumpStack();
     // ejb/123j
     for (Class<?> parentClass = type.getJavaClass().getSuperclass();
          parentClass != null;
@@ -134,6 +132,7 @@ public class DataSourceDefinitionHandler extends JavaeeInjectionHandler {
     String name = def.name();
     
     ValueGenerator gen = bindGenerator(location, def);
+
     if (name != null && ! "".equals(name)) {
       bindJndi(name, gen, name);
     }

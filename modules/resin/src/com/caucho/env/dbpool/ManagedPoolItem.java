@@ -1120,7 +1120,6 @@ class ManagedPoolItem implements ConnectionEventListener, ManagedXAResource {
     ManagedConnection mConn = _mConn;
     _mConn = null;
 
-    UserTransactionImpl transaction = _transaction;
     _transaction = null;
 
     if (mConn == null)

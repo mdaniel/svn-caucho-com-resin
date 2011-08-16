@@ -212,13 +212,15 @@ public class XidImpl implements Xid {
     byte [] selfLocal = _local;
 
     for (int i = global.length - 1; i >= 0; i--) {
-      if (global[i] != selfGlobal[i])
+      if (global[i] != selfGlobal[i]) {
         return false;
+      }
     }
 
     for (int i = local.length - 1; i >= 0; i--) {
-      if (local[i] != selfLocal[i])
+      if (local[i] != selfLocal[i]) {
         return false;
+      }
     }
 
     return true;
@@ -232,7 +234,9 @@ public class XidImpl implements Xid {
   {
     StringBuilder cb = new StringBuilder();
 
-    cb.append("Xid[");
+    // cb.append(getClass().getSimpleName());
+    cb.append("Xid");
+    cb.append("[");
 
     byte [] branch = getBranchQualifier();
 
