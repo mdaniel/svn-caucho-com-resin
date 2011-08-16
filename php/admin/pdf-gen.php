@@ -88,22 +88,28 @@ $g_canvas->set_header_center("Report: $pageName");
 
 if (! $period) {
   $period = $_REQUEST['period'] ? (int) $_REQUEST['period'] : ($mPage->period/1000);
-}  
+}
 
 if ($period < HOUR) {
-	$majorTicks = HOUR / 6;
-}  elseif ($period >= HOUR && $period < 3 * HOUR) {
-	$majorTicks = HOUR /2;
-} elseif ($period >= 3 * HOUR && $period < 6 * HOUR) {
-	$majorTicks = HOUR;
-} elseif ($period >= 6 * HOUR && $period < 12 * HOUR) {
-	$majorTicks = 2 * HOUR;
-} elseif ($period >= 12 * HOUR && $period < 24 * HOUR) {
-	$majorTicks = 4 * HOUR;
-} elseif ($period >= 24 * HOUR && $period <= 48 * HOUR) {
-	$majorTicks = 6 * HOUR;
-} else {
-	$majorTicks = 24 * HOUR;
+  $majorTicks = HOUR / 6;
+}
+elseif ($period >= HOUR && $period < 3 * HOUR) {
+  $majorTicks = HOUR / 2;
+}
+elseif ($period >= 3 * HOUR && $period < 6 * HOUR) {
+  $majorTicks = HOUR;
+}
+elseif ($period >= 6 * HOUR && $period < 12 * HOUR) {
+  $majorTicks = 2 * HOUR;
+}
+elseif ($period >= 12 * HOUR && $period < 24 * HOUR) {
+  $majorTicks = 4 * HOUR;
+}
+elseif ($period >= 24 * HOUR && $period <= 48 * HOUR) {
+  $majorTicks = 6 * HOUR;
+}
+else {
+  $majorTicks = 24 * HOUR;
 }
 
 $majorTicks = $majorTicks * 1000;
@@ -128,10 +134,10 @@ $g_end = $time;
 
 if (2 * DAY <= $period) {
   $tz = date_offset_get(new DateTime);
- 
+
   $ticks_sec = $majorTicks / 1000;
 
-  $g_end = ceil(($end + $tz) / $ticks_sec) * $ticks_sec - $tz;
+  $g_end = ceil(($g_end + $tz) / $ticks_sec) * $ticks_sec - $tz;
 }
 
 $g_start = $g_end - $period;
@@ -157,7 +163,7 @@ $full_names = $stat->statisticsNames();
 $statList = array();
 
 foreach ($full_names as $full_name)  {
-  array_push($statList, new Stat($full_name)) 
+  array_push($statList, new Stat($full_name));
 }
 
 /*
