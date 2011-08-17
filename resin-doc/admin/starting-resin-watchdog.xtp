@@ -93,6 +93,22 @@ Resin/4.0.x started -server 'a' for watchdog at 127.0.0.1:6700
 
 </s2>
 
+<s2 title="start-with-foreground">
+
+<p>The "start-with-foreground" command starts a new Resin instance with the given server id.
+The command replicates "start" command and adds new behaviour: <code>ResinBoot</code> remains running
+after the command completes. This new command is designed to work with <code>launchd</code>
+which is used to start daemon services on Mac OSX system. The server id
+must be unique for all servers defined in the resin.xml.</p>
+
+<example title="Example: watchdog start-with-foreground">
+resin-4.0.x> bin/resin.sh -conf conf/test.conf -server a start-with-foreground
+
+Resin/4.0.x started -server 'a' for watchdog at 127.0.0.1:6700 with foreground
+</example>
+
+</s2>
+
 <s2 title="stop">
 
 <p>The "stop" command stops the Resin instance with the given server id.
