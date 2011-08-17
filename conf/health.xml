@@ -20,6 +20,13 @@
   </health:Restart>
 
   <!--
+     - save jmx information on start.
+    -->
+  <health:DumpJmx>
+    <health:OnStart/>
+  </health:DumpJmx>
+
+  <!--
      - Restart on critical if the problem persists for 5 min.
     -->
   <health:ActionSequence>
