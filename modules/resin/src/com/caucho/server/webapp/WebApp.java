@@ -4745,7 +4745,11 @@ public class WebApp extends ServletContextImpl
   @Override
   public void destroy()
   {
-    stop();
+    try {
+      stop();
+    } catch (Throwable e) {
+      log.log(Level.WARNING, e.toString(), e);
+    }
     
     if (! _lifecycle.toDestroy()) {
       return;

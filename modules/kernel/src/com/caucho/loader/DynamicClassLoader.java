@@ -700,7 +700,8 @@ public class DynamicClassLoader extends java.net.URLClassLoader
    */
   public void addDependency(Dependency dependency)
   {
-    _dependencies.add(dependency);
+    if (_dependencies != null)
+      _dependencies.add(dependency);
   }
 
   public void addPermission(String path, String actions)
@@ -2189,6 +2190,8 @@ public class DynamicClassLoader extends java.net.URLClassLoader
    */
   public void stop()
   {
+    if (_zombieMarker == null)
+      _zombieMarker = new ZombieClassLoaderMarker();
   }
 
   /**
@@ -2196,8 +2199,6 @@ public class DynamicClassLoader extends java.net.URLClassLoader
    */
   public void destroy()
   {
-    _zombieMarker = new ZombieClassLoaderMarker();
-    
     try {
       stop();
     } catch (Throwable e) {

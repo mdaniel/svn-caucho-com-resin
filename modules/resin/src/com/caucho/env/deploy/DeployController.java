@@ -781,7 +781,8 @@ abstract public class DeployController<I extends DeployInstance>
   
   protected void destroyInstance(I instance)
   {
-    instance.destroy();
+    if (instance != null)
+      instance.destroy();
   }
   
   //

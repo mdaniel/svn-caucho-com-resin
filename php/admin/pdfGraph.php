@@ -1499,6 +1499,24 @@ function admin_pdf_heap_dump()
   $heap =& $heap_dump["heap"];
 
   admin_pdf_selected_heap_dump($heap, "Heap Dump", 100);
+
+  $class_loader_heap = heap_select_classes($heap_dump["heap"]);
+  
+  admin_pdf_selected_heap_dump($class_loader_heap,
+                               "ClassLoader Heap Dump", 100);
+}
+
+function heap_select_classes(&$values)
+{
+  $selected = array();
+
+  foreach ($values as $name => $value) {
+    if (preg_match("/ClassLoader/", $name)) {
+      $selected[$name] = $value;
+    }
+  }
+
+  return $selected;
 }
 
 function admin_pdf_selected_heap_dump($heap, $title, $max)
@@ -1510,7 +1528,7 @@ function admin_pdf_selected_heap_dump($heap, $title, $max)
 
   uksort($heap, "heap_descendant_cmp");
 
-  $g_canvas->write_section("Heap Dump");
+  $g_canvas->write_section($title);
 
   $g_canvas->setDataFontAndSize(8);
   admin_pdf_heap_dump_header($g_canvas);

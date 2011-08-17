@@ -1015,6 +1015,8 @@ public class EnvironmentClassLoader extends DynamicClassLoader
           }
         }
       }
+      
+      super.stop();
     } finally {
       thread.setContextClassLoader(oldLoader);
 
