@@ -1,0 +1,78 @@
+<document>
+<header>
+  <product>resin</product>
+  <title>resin.xml: server instance configuration</title>
+  <version>Resin 4.0</version>
+
+  <description>
+
+    <p>
+      Configuration of JVM, threading, and TCP parameters for a server.
+    </p>
+
+  </description>
+</header>
+<body>
+
+<localtoc/>
+
+<s1 title="Core Configuration">
+
+<p>A cluster server has an "id", a local network "address" and a local
+  network "port". For a standalone server, the address and port can be omitted,
+  but the server cannot participate in a cluster or be managed from
+  a command line.</p>
+
+<p>The following example shows the minimal server for a two-server cluster.
+  These servers do not listen to a HTTP port, so they are either a backend
+  tier with a load-balancer or they are a non-HTTP use of Resin (like
+  a SOA service.)</p>
+
+<example title="Example: minimal server in resin.xml">
+&lt;resin xmlns="http://caucho.com/ns/resin">
+
+&lt;cluster id="">
+
+  &lt;server id="a" address="192.168.1.10" port="6800"/>
+  &lt;server id="b" address="192.168.1.11" port="6800"/>
+
+  ...
+
+&lt;/cluster>
+&lt;/resin>
+</example>
+  
+</s1>
+
+<s1 title="Socket Pooling, Timeouts, and Failover">
+
+<p>For efficiency, Resin's load balancer manages a pool of sockets
+connecting to the app-tier servers.  If Resin forwards a new request to
+an app-tier server and it has an idle socket available, it will reuse that
+socket, improving performance an minimizing network load.  Resin uses a
+set of timeout values to manage those idle sockets and to handle any
+failures or freezes of the backend servers.  The following diagram
+illustrates the main timeout values:</p>
+
+<figure src="load-balance-idle-time.png" alt="web-a:connecty-timeout,app-a:socket-timeout,web-a:recover-time,app-a:keepalive-timeout,web-a:idle-time"/>
+
+<ul>
+<li><b>load-balance-connect-timeout</b>: the load balancer timeout
+for the <code>connect()</code> system call to complete to
+the app-tier (5s).</li>
+<li><b>load-balance-idle-time</b>: load balancer timeout
+for an idle socket before closing it automatically (5s).</li>
+<li><b>load-balance-recover-time</b>: the load balancer connection failure wait
+time before trying a new connection (15s).</li>
+<li><b>load-balance-socket-timeout</b>: the load balancer
+timeout for a valid request to complete (665s).</li>
+<li><b>keepalive-timeout</b>: the app-tier timeout for a keepalive
+connection (15s)</li>
+<li><b>socket-timeout</b>: the app-tier timeout for a read or
+write (65s)</li>
+</ul>
+
+</s1>
+
+</body>
+</document>

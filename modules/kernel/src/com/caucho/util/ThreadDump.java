@@ -142,9 +142,13 @@ public class ThreadDump
                               Thread.State matchState,
                               boolean isNative)
   {
-    for (ThreadInfo info : infoArray) {
+    for (int i = 0; i < infoArray.length; i++) {
+      ThreadInfo info = infoArray[i];
+
       if (info == null)
         continue;
+      
+      ThreadInfo nextInfo = i + 1 < infoArray.length ? infoArray[i + 1] : null;
 
       Thread.State state = info.getThreadState();
 
@@ -153,19 +157,22 @@ public class ThreadDump
         continue;
       }
 
-      if (state == matchState)
-        buildThread(sb, info);
+      if (state == matchState) {
+        buildThread(sb, info, nextInfo);
+      }
       else if (state == null
                && matchState != Thread.State.RUNNABLE
                && matchState != Thread.State.BLOCKED
                && matchState != Thread.State.WAITING
                && matchState != Thread.State.TIMED_WAITING) {
-        buildThread(sb, info);
+        buildThread(sb, info, nextInfo);
       }
     }
   }
 
-  protected void buildThread(StringBuilder sb, ThreadInfo info)
+  protected void buildThread(StringBuilder sb, 
+                             ThreadInfo info,
+                             ThreadInfo nextInfo)
   {
     sb.append("\n\"");
     sb.append(info.getThreadName());
@@ -191,6 +198,10 @@ public class ThreadDump
     }
 
     sb.append("\n");
+    
+    if (nextInfo != null
+        && threadCmpString(info).equals(threadCmpString(nextInfo)))
+      return;
 
     StackTraceElement []stackList = info.getStackTrace();
     if (stackList == null)
@@ -375,6 +386,40 @@ public class ThreadDump
       }
     }
   }
+  
+  static String threadCmpString(ThreadInfo info)
+  {
+    if (info == null)
+      return "";
+    
+    StackTraceElement []stackList = info.getStackTrace();
+    
+    if (stackList == null)
+      return "";
+    
+    StringBuilder sb = new StringBuilder();
+    
+    if (info.getThreadState() == Thread.State.RUNNABLE)
+      sb.append("A-RUNNABLE");
+    else
+      sb.append(info.getThreadState());
+    
+    sb.append(" " + info.isInNative());
+    
+    for (int i = stackList.length - 1; i >= 0; i--) {
+      sb.append("\n").append(stackList[i].getClassName());
+      sb.append(".").append(stackList[i].getMethodName());
+      
+      if (stackList[i].getFileName() != null) {
+        sb.append("(").append(stackList[i].getFileName());
+        sb.append(".").append(stackList[i].getLineNumber());
+        sb.append(")");
+      }
+    }
+    
+    return sb.toString();
+    
+  }
 
   static class ThreadCompare implements Comparator<ThreadInfo> {
     public int compare(ThreadInfo a, ThreadInfo b)
@@ -385,14 +430,16 @@ public class ThreadDump
         return -1;
       else if (b == null)
         return 1;
-      else if (a.getThreadState() != b.getThreadState())
-        return a.getThreadState().ordinal() - b.getThreadState().ordinal();
-      else if (a.isInNative() && ! b.isInNative())
-        return 1;
-      else if (b.isInNative() && ! a.isInNative())
-        return -1;
-      else
-        return a.getThreadName().compareTo(b.getThreadName());
+      
+      String cmpA = threadCmpString(a);
+      String cmpB = threadCmpString(b);
+      
+      int cmp = cmpA.compareTo(cmpB);
+      
+      if (cmp != 0)
+        return cmp;
+      
+      return a.getThreadName().compareTo(b.getThreadName());
     }
   }
 }

@@ -38,6 +38,7 @@ import com.caucho.inject.Module;
 import com.caucho.lifecycle.Lifecycle;
 import com.caucho.util.Alarm;
 import com.caucho.util.L10N;
+import com.caucho.util.ThreadDump;
 
 @Module
 abstract public class AbstractThreadLauncher extends AbstractTaskWorker {
@@ -508,6 +509,10 @@ abstract public class AbstractThreadLauncher extends AbstractTaskWorker {
     }
     
     if (_throttleSleep > 0) {
+      ThreadDump threadDump = ThreadDump.create();
+      if (threadDump != null)
+        threadDump.dumpThreads();
+      
       try {
         Thread.sleep(_throttleSleep);
       } catch (Exception e) {

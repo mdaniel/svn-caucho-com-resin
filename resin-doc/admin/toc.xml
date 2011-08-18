@@ -28,6 +28,10 @@
       <item link="clustering-ref.xtp" title="Clustering Tags Reference"
         description="Resin clustering and load-balancing tags reference"/>
       -->
+
+      <item link="clustering-server.xtp" title="Server"
+            description="Server (JVM) configuration"/>
+      
       <item link="clustering-deployment-ref.xtp" title="Clustered Deployment Reference"
         description="ANT and Maven clustered deployment API reference"/>
     </item>
@@ -39,8 +43,7 @@
         description="Configuration principles for the Resin Server">
 
       <item link="config-overview.xtp" title="Overview"
-            description="Overview of Resin configuration"
-            reference="config-overview-ref.xtp"/>
+            description="Overview of Resin configuration"/>
 
       <item link="config-candi.xtp" title="CanDI"
             description="XML configuration for Dependency Injection services"/>
