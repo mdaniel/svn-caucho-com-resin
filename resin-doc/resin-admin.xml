@@ -16,7 +16,7 @@
 
   <chapter title="Clustering">
     <linked-section link="admin/clustering-overview.xtp" />
-    <linked-section link="admin/clustering-server.xtp" />
+    <linked-section link="admin/cluster-server.xtp" />
   </chapter>
 
   <chapter title="Command-Line">
