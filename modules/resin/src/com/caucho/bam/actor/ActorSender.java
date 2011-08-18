@@ -76,6 +76,7 @@ public interface ActorSender extends QuerySender {
    * @param to the target actor's address
    * @param payload the message payload
    */
+  @Override
   public void message(String to, Serializable payload);
 
   //
@@ -102,6 +103,7 @@ public interface ActorSender extends QuerySender {
    * @param to the target actor's address
    * @param payload the query payload
    */
+  @Override
   public Serializable query(String to,
                             Serializable payload);
 
@@ -121,6 +123,7 @@ public interface ActorSender extends QuerySender {
    * @param payload the query payload
    * @param timeout time spent waiting for the query to return
    */
+  @Override
   public Serializable query(String to,
                             Serializable payload,
                             long timeout);
@@ -141,6 +144,7 @@ public interface ActorSender extends QuerySender {
    * @param payload the query payload
    * @param callback the application's callback for the result
    */
+  @Override
   public void query(String to,
                     Serializable payload,
                     QueryCallback callback);

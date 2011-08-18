@@ -30,6 +30,7 @@
 package com.caucho.quercus.program;
 
 import com.caucho.quercus.Location;
+import com.caucho.quercus.QuercusException;
 import com.caucho.quercus.env.Env;
 import com.caucho.quercus.env.EnvVar;
 import com.caucho.quercus.env.EnvVarImpl;
@@ -406,14 +407,17 @@ public class Function extends AbstractFunction {
 
       Expr defaultExpr = arg.getDefault();
 
-      if (defaultExpr == null)
-        return env.error("expected default expression");
-      else if (arg.isReference())
-        map.put(
-          arg.getName(), new EnvVarImpl(defaultExpr.evalVar(env).toVar()));
-      else {
-        map.put(
-          arg.getName(), new EnvVarImpl(defaultExpr.eval(env).toLocalVar()));
+      try {
+        if (defaultExpr == null)
+          return env.error("expected default expression");
+        else if (arg.isReference())
+          map.put(arg.getName(), new EnvVarImpl(defaultExpr.evalVar(env).toVar()));
+        else {
+          map.put(arg.getName(), new EnvVarImpl(defaultExpr.eval(env).toLocalVar()));
+        }
+      } catch (Exception e) {
+        throw new QuercusException(getName() + ":arg(" + arg.getName() + ") "
+                                   + e.getMessage(), e);
       }
     }
 

@@ -262,7 +262,15 @@ public class ManagerClient
                                               profileTime,
                                               samplePeriod,
                                               isSnapshot);
-    return (String) query(query);
+    
+    long timeout;
+    
+    if (profileTime > 0)
+      timeout = profileTime + 60000L;
+    else
+      timeout = 60000L;
+      
+    return (String) query(query, timeout);
   } 
 
   public String profile(long activeTime, long period, int depth) 
@@ -283,6 +291,16 @@ public class ManagerClient
   {
     try {
       return _bamClient.query(_managerAddress, query);
+    } catch (ServiceUnavailableException e) {
+      throw new ServiceUnavailableException("Manager service is not available, possibly because the resin.xml is missing a <resin:ManagerService> tag\n  " + e.getMessage(),
+                                            e);
+    }
+  }
+
+  protected Serializable query(Serializable query, long timeout)
+  {
+    try {
+      return _bamClient.query(_managerAddress, query, timeout);
     } catch (ServiceUnavailableException e) {
       throw new ServiceUnavailableException("Manager service is not available, possibly because the resin.xml is missing a <resin:ManagerService> tag\n  " + e.getMessage(),
                                             e);

@@ -21,23 +21,34 @@ report 4.0.21 bugs at
 </s1>
 
 <s1 title="Command Line Interface">
-<p>resin cli added error codes for specific failures e.g. authentication error,
-wrong argument, deployment error.</p>
-<p>added a new command that makes resin boot process compatible with requirements of
-launchd (Mac OSX). 'start-with-foreground' command is an extension of 'start' command
+
+<p>Resin cli added error codes for specific failures e.g. authentication
+error, wrong argument, deployment error.</p>
+
+<p>Added a new command that makes resin boot process compatible
+with requirements of launchd (Mac OSX). 'start-with-foreground'
+command is an extension of 'start' command
 that keeps resin boot process running.</p>
-<p>deprecated `watchdog` command. `watchdog` command will still work, however,
+         
+<p>Deprecated `watchdog` command. `watchdog` command will still work, however,
 we recommend that `start-with-foreground` is used instead.</p>
-<p></p>
+
 </s1>
 
 <s1 title="Resin Eclipse Plugin">
-<p>Better error reporting was added to let users know of git deployment failures.</p>
-<p>Download and install functionality updated to install into version specific directory.</p>
+
+<p>Better error reporting was added to let users know of git deployment
+failures.</p>
+
+<p>Download and install functionality updated to install into version
+specific directory.</p>
+
 </s1>
 
 <s1 title="Resin Admin">
+
 <p>Threads page was tweaked to sort threads by stack trace.</p>
+
 </s1>
 
 </body>

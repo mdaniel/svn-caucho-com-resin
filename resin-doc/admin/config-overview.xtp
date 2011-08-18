@@ -25,6 +25,7 @@
 <li><b>environment</b> - isolated class-loader contexts with shared resources:
 server, host and web-app are the main environments.</li>
 <li><b>host</b> - a HTTP virtual host.</li>
+<li><b>proxy cache</b> - HTTP proxy cache.</li>
 <li><b>resource</b> - drivers or services available to the application
 though JNDI or CDI like databases, JMS queues, custom
 CDI-configured service. Resin-specific resources include security,
@@ -126,7 +127,7 @@ health-system configuration across all clusters in the system.</p>
 <s1 title="Server: configuring a JVM instance">
 
 <p web-only='true'>
-See <a href="clustering-server.xtp">server configuration</a> for more
+See <a href="cluster-server.xtp">server configuration</a> for more
 details on configuring the server.
 </p>
 

@@ -430,7 +430,7 @@ class Size {
   private $width;
   private $height;
 
-  function Size($width, $height)
+  function Size($width = 0, $height = 0)
   {
     $this->width = $width;
     $this->height = $height;
@@ -457,7 +457,7 @@ class Point {
   private $x;
   private $y;
 
-  function Point($x, $y)
+  function Point($x = 0, $y = 0)
   {
     $this->x = (float) $x;
     $this->y = (float) $y;

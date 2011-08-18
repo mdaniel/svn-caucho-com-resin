@@ -25,12 +25,17 @@ if ($g_is_snapshot || $_REQUEST["snapshot"]) {
       $profile_tick = 100;
 
     if ($profile_time > 0 && $profile_time <= 120) {
+resin_debug("start $profile_time");
       $snapshot->startProfile($profile_tick, 16);
       sleep($profile_time);
+resin_debug("pre-stop $profile_time");
       $snapshot->stopProfile();
+resin_debug("stop $profile_time");
 
       $snapshot->snapshotProfile();
+resin_debug("snapshot $profile_time");
     }
+resin_debug("dun $profile_time");
 
     sleep(2);
   }

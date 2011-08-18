@@ -29,7 +29,7 @@
         description="Resin clustering and load-balancing tags reference"/>
       -->
 
-      <item link="clustering-server.xtp" title="Server"
+      <item link="cluster-server.xtp" title="Server"
             description="Server (JVM) configuration"/>
       
       <item link="clustering-deployment-ref.xtp" title="Clustered Deployment Reference"

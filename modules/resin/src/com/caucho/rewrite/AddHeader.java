@@ -34,7 +34,6 @@ import javax.servlet.FilterChain;
 import com.caucho.config.ConfigException;
 import com.caucho.config.Configurable;
 import com.caucho.server.rewrite.AddHeaderFilterChain;
-import com.caucho.server.rewrite.SetHeaderFilterChain;
 import com.caucho.util.L10N;
 
 /**

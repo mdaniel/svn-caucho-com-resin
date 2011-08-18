@@ -35,7 +35,6 @@ import javax.servlet.http.HttpServletResponse;
 
 import com.caucho.config.Configurable;
 import com.caucho.server.dispatch.ErrorFilterChain;
-import com.caucho.server.dispatch.MovedFilterChain;
 
 /**
  * Sends a HTTP 404 Not Found response

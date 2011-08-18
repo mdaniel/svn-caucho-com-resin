@@ -105,14 +105,14 @@ function create_graph_timeout()
   echo "  var str = '[';\n";
   echo "  for (i in resin_graphs) {\n";
   echo "    var graph = resin_graphs[i];\n";
-  echo '    str += "{canvas:\\"" + graph.canvas + "\\",";';
-  echo "    str += \"names:[\";\n";
+  echo '    str += "{\\"canvas\\":\\"" + graph.canvas + "\\",";';
+  echo "    str += \"\\\"names\\\":[\";\n";
   echo "    for (j in graph.names) {\n";
   echo '      str += "\\"" + graph.names[j] + "\\",";';
   echo "    }\n";
   echo "    str += \"],\";\n";
-  echo "    str += \"end:\" + graph.end + \",\";";
-  echo "    str += \"period:\" + graph.period + \",\";";
+  echo "    str += \"\\\"end\\\":\" + graph.end + \",\";";
+  echo "    str += \"\\\"period\\\":\" + graph.period + \",\";";
   echo "    str += \"},\";";
   echo "  }\n";
   echo " str += ']';\n";
