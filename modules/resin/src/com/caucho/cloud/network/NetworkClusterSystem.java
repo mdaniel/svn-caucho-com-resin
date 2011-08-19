@@ -33,6 +33,7 @@ import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.logging.*;
 
 import com.caucho.cloud.topology.*;
+import com.caucho.config.ConfigException;
 import com.caucho.env.service.*;
 import com.caucho.network.balance.ClientSocketFactory;
 import com.caucho.network.listen.*;
@@ -338,6 +339,8 @@ public class NetworkClusterSystem extends AbstractResinSubSystem
     if (listener != null) {
       ClusterServer clusterServer = _selfServer.getData(ClusterServer.class);
       
+      validateClusterServer(listener, clusterServer);
+      
       long idleTime = clusterServer.getClusterIdleTime() + CLUSTER_IDLE_PADDING;
       
       listener.setKeepaliveConnectionTimeMaxMillis(CLUSTER_IDLE_TIME_MAX);
@@ -351,6 +354,35 @@ public class NetworkClusterSystem extends AbstractResinSubSystem
       listener.bind();
       listener.start();
       log.info("");
+    }
+  }
+
+  private void validateClusterServer(TcpSocketLinkListener listener,
+                                     ClusterServer server)
+  {
+    if (listener == null || server == null)
+      return;
+    
+
+    if (listener.getSocketTimeout() <= server.getLoadBalanceIdleTime()) {
+      throw new ConfigException(L.l("{0}: load-balance-idle-time {1} must be less than socket-timeout {2}",
+                                    server, 
+                                    server.getLoadBalanceIdleTime(),
+                                    listener.getSocketTimeout()));
+    }
+
+    if (server.getLoadBalanceSocketTimeout() <= listener.getSocketTimeout()) {
+      throw new ConfigException(L.l("{0}: load-balance-socket-timeout {1} must be greater than socket-timeout {2}",
+                                    server, 
+                                    server.getLoadBalanceSocketTimeout(),
+                                    listener.getSocketTimeout()));
+    }
+
+    if (listener.getKeepaliveTimeout() <= server.getLoadBalanceIdleTime()) {
+      throw new ConfigException(L.l("{0}: load-balance-idle-time {1} must be less than keepalive-timeout {2}",
+                                    server, 
+                                    server.getLoadBalanceIdleTime(),
+                                    listener.getKeepaliveTimeout()));
     }
   }
 

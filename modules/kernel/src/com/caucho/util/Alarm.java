@@ -587,6 +587,8 @@ public class Alarm implements ThreadTask, ClassLoaderListener {
   }
 
   static class CoordinatorThread extends TaskWorker {
+    private long _lastTime;
+    
     @Override
     protected boolean isPermanent()
     {
@@ -599,6 +601,8 @@ public class Alarm implements ThreadTask, ClassLoaderListener {
     @Override
     public long runTask()
     {
+      _lastTime = getCurrentTime();
+      
       while (true) {
         dispatchAlarm();
 
@@ -617,7 +621,7 @@ public class Alarm implements ThreadTask, ClassLoaderListener {
     {
       try {
         Alarm alarm;
-
+        
         if ((alarm = _heap.extractAlarm(getCurrentTime())) != null) {
           _runningAlarmCount.incrementAndGet();
 
@@ -631,11 +635,14 @@ public class Alarm implements ThreadTask, ClassLoaderListener {
           long delta = now - alarm._wakeTime;
 
           if (delta > 10000) {
-            log.warning(this + " slow alarm " + alarm + " " + delta + "ms");
+            log.warning(this + " slow alarm " + alarm + " " + delta + "ms"
+                        + " coordinator-delta " + (now - _lastTime) + "ms");
           }
           else if (_isStressTest && delta > 100) {
             System.out.println(this + " slow alarm " + alarm + " " + delta);
           }
+          
+          _lastTime = now;
 
           if (alarm.isPriority())
             ThreadPool.getThreadPool().schedulePriority(alarm);

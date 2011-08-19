@@ -19,6 +19,9 @@
 
 <s1 title="Overview">
 
+<p web-only='true'>The reference for the &lt;server> tag and its
+schema are at <a href="reference.xtp#server">&lt;server></a>.</p>
+
 <ul>
 <li><b>Core configuration:</b> the server's id, local TCP address and port
 which configure it in the cluster.</li>
@@ -417,144 +420,6 @@ user-name and group-name tags in the &lt;server> set the user to run as.</p>
 </example>
 
 </s2>
-
-</s1>
-
-<s1 title="XML schema">
-
-<def title="server xml schema">
-r_server-Content =
-  (attribute backup { r_boolean-Type }
-   | element backup { r_boolean-Type })?
-
-  &amp; r_bean-Custom*
-
-  &amp; (attribute bind-ports-after-start { r_boolean-Type }
-     | element bind-ports-after-start { r_boolean-Type })?
-
-  &amp; r_cluster-port*
-
-  &amp; (attribute cluster-idle-time { r_period-Type }
-     | element cluster-idle-time { r_period-Type })?
-
-  &amp; (attribute cluster-socket-timeout { r_period-Type }
-     | element cluster-socket-timeout { r_period-Type })?
-
-  &amp; (attribute connection-max { r_int-Type }
-     | element connection-max { r_int-Type })?
-
-  &amp; r_group-name?
-
-  &amp; r_http*
-
-  &amp; (attribute jvm-arg { string }
-     | element jvm-arg { string })*
-
-  &amp; (attribute jvm-arg-line { string }
-     | element jvm-arg-line { string })*
-
-  &amp; (attribute jvm-classpath { string }
-     | element jvm-classpath { string })*
-
-  &amp; (attribute java-exe { string }
-     | element java-exe { string })?
-
-  &amp; r_keepalive-connection-time-max?
-
-  &amp; r_keepalive-max?
-
-  &amp; r_keepalive-select-enable?
-
-  &amp; r_keepalive-select-max?
-
-  &amp; r_keepalive-select-thread-timeout?
-
-  &amp; r_keepalive-thread-timeout?
-
-  &amp; r_keepalive-timeout?
-  
-  &amp; r_listen*
-
-  &amp; (attribute load-balance-connect-timeout { r_period-Type }
-     | element load-balance-connect-timeout { r_period-Type })?
-
-  &amp; (attribute load-balance-connection-min { r_period-Type }
-     | element load-balance-connection-min { r_period-Type })?
-
-  &amp; (attribute load-balance-idle-time { r_period-Type }
-     | element load-balance-idle-time { r_period-Type })?
-
-  &amp; (attribute load-balance-recover-time { r_period-Type }
-     | element load-balance-recover-time { r_period-Type })?
-
-  &amp; (attribute load-balance-socket-timeout { r_period-Type }
-     | element load-balance-socket-timeout { r_period-Type })?
-
-  &amp; (attribute load-balance-warmup-time { r_period-Type }
-     | element load-balance-warmup-time { r_period-Type })?
-
-  &amp; (attribute load-balance-weight { r_int-Type }
-     | element load-balance-weight { r_int-Type })?
-
-  &amp; r_memory-free-min?
-
-  &amp; (attribute ping-url { string }
-     | element ping-url { string })*
-
-  &amp; r_port-default*
-
-  &amp; r_protocol*
-
-  &amp; (attribute shutdown-wait-max { r_period-Type }
-     | element shutdown-wait-max { r_period-Type })?
-
-  &amp; (attribute socket-timeout { r_period-Type }
-     | element socket-timeout { r_period-Type })?
-
-  &amp; (attribute stage { string }
-     | element stage { string })?
-
-  &amp; (attribute system-class-loader { r_class-Type }
-     | element system-class-loader { r_class-Type })?
-
-  &amp; r_thread-max?
-
-  &amp; r_thread-executor-task-max?
-
-  &amp; r_thread-idle-max?
-
-  &amp; r_thread-idle-min?
-
-  &amp; r_thread-idle-timeout?
-
-  &amp; r_user-name?
-
-  &amp; (attribute watchdog-address { string }
-     | element watchdog-address { string })?
-
-  &amp; (attribute watchdog-arg { string }
-     | element watchdog-arg { string })*
-
-  &amp; (attribute watchdog-jvm-arg { string }
-     | element watchdog-jvm-arg { string })*
-
-  &amp; r_watchdog-log?
-
-  &amp; (attribute watchdog-password { string }
-     | element watchdog-password { string })?
-
-  &amp; (attribute watchdog-port { r_int-Type }
-     | element watchdog-port { r_int-Type })?
-
-  &amp; element rcore:if|r:if { rcore_if-Args, r_server-Content }*
-
-  &amp; rcore_import*
-
-  &amp; element rcore:choose|r:choose {
-      element rcore:when|r:when { rcore_when-Args, r_server-Content }+,
-      element rcore:otherwise|r:otherwise { r_server-Content }?
-    }*
-</def>
 
 </s1>
 

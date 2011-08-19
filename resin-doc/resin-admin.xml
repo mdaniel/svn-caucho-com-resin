@@ -16,6 +16,9 @@
 
   <chapter title="Clustering">
     <linked-section link="admin/clustering-overview.xtp" />
+  </chapter>
+
+  <chapter title="Clustering: Server Config">
     <linked-section link="admin/cluster-server.xtp" />
   </chapter>
 
@@ -25,6 +28,9 @@
 
   <chapter title="Configuration">
     <linked-section link="admin/config-overview.xtp" />
+  </chapter>
+    
+  <chapter title="Configuration: CDI and XML">
     <linked-section link="admin/config-candi.xtp" />
     <linked-section link="admin/config-el.xtp" />
   </chapter>
@@ -67,9 +73,15 @@
     <linked-section link="admin/scheduled-tasks.xtp" />
   </chapter>
 
-  <chapter title="Web Server">
+  <chapter title="Web Server: HTTP Server">
     <linked-section link="admin/http-server.xtp" />
+  </chapter>
+  
+  <chapter title="Web Server: Virtual Hosts">
     <linked-section link="admin/http-virtual-hosts.xtp" />
+  </chapter>
+  
+  <chapter title="Web Server: HTTP Proxy Cache">
     <linked-section link="admin/http-proxy-cache.xtp" />
   </chapter>
 
