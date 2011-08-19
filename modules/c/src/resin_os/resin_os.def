@@ -40,7 +40,7 @@ EXPORTS
 	Java_com_caucho_vfs_JniSocketImpl_getCipher
 	Java_com_caucho_vfs_JniSocketImpl_getCipherBits
 	Java_com_caucho_vfs_JniSocketImpl_getNativeFd
-	Java_com_caucho_vfs_JniSocketImpl_nativeReadNonBlock
+	Java_com_caucho_vfs_JniSocketImpl_nativeIsEof
 	Java_com_caucho_vfs_JniSocketImpl_nativeAllocate;
 	Java_com_caucho_vfs_JniSocketImpl_nativeFree;
 	

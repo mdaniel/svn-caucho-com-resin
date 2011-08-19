@@ -444,7 +444,11 @@ Java_com_caucho_vfs_JniSocketImpl_nativeIsEof(JNIEnv *env,
   if (fd < 0)
     return 1;
 
+#ifdef MSG_DONTWAIT
   result = recv(fd, buffer, 1, MSG_DONTWAIT|MSG_PEEK);
+#else
+  result = 1;
+#endif
 
   return result == 0;
 }
