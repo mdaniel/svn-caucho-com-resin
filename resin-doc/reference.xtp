@@ -4837,9 +4837,9 @@ exit code.</p>
          xmlns:health="urn:java:com.caucho.health"
          xmlns:ee="urn:java:ee">
 
-  &lt;health:Snapshot>
+  &lt;health:PdfReport snapshot='true'>
     &lt;health:OnAbnormalStop/>
-  &lt;/health:Snapshot 
+  &lt;/health:PdfReport 
 
 &lt;/cluster>
 </example>
@@ -5227,6 +5227,67 @@ System properties can be used to configure a different SMTP server.</p>
     &lt;health:OnStart/>
   &lt;/health:SetJmxAttribute>
 
+&lt;/cluster>
+</example>
+
+</defun>
+
+<defun title="&lt;health:Snapshot>" name="health:Snapshot">
+
+<parents>cluster</parents>
+<javadoc class="com.caucho.health.action.Snapshot"/>
+
+<description>
+<p>A specific sequence of health actions: thread dump, heap dump, jmx dump, 
+and pdf report.  This is intended to generate a permanent representation, or 
+"snapshot" of the system at a point in time that includes all the 
+information necessary to debug server issues.  It is usually intended to run 
+in response to a unexpected issue.</p>
+</description>
+
+<attributes>
+  <tr>
+    <th>Attribute</th>
+    <th>Description</th>
+    <th>Type</th>
+    <th>Default</th>
+  </tr>
+  <tr>
+    <td>log</td>
+    <td>Output to server log in addition to pdf report</td>
+    <td>Boolean</td>
+    <td>false</td>
+  </tr>
+  <tr>
+    <td>path</td>
+    <td>Path to a PDF generating .php file</td>
+    <td>String</td>
+    <td>${resin.home}/doc/admin/pdf-gen.php</td>
+  </tr>
+  <tr>
+    <td>report</td>
+    <td>Report type key</td>
+    <td>String</td>
+    <td>Summary</td>
+  </tr>
+  <tr>
+    <td>period</td>
+    <td>Report look back period of time</td>
+    <td><a javadoc="com.caucho.config.types.Period">Period</a></td>
+    <td>7D</td>
+  </tr>
+</attributes>
+
+<example title="Example: &lt;health:Snapshot> in health.xml">
+&lt;cluster xmlns="http://caucho.com/ns/resin"
+         xmlns:resin="urn:java:com.caucho.resin"
+         xmlns:health="urn:java:com.caucho.health"
+         xmlns:ee="urn:java:ee">
+         
+  &lt;health:Snapshot>
+    &lt;health:OnAbnormalStop/>
+  &lt;/health:Snapshot>
+  
 &lt;/cluster>
 </example>
 

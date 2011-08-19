@@ -445,6 +445,8 @@ once per period.</p>
 
 <include-defun name="health:SetJmxAttribute"/>
 
+<include-defun name="health:Snapshot"/>
+
 <include-defun name="health:StartProfiler"/>
 
 </s1>
