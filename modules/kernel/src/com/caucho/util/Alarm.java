@@ -639,7 +639,8 @@ public class Alarm implements ThreadTask, ClassLoaderListener {
                         + " coordinator-delta " + (now - _lastTime) + "ms");
           }
           else if (_isStressTest && delta > 100) {
-            System.out.println(this + " slow alarm " + alarm + " " + delta);
+            System.out.println(this + " slow alarm " + alarm + " " + delta
+                               + " coordinator-delta " + (now - _lastTime) + "ms");
           }
           
           _lastTime = now;
