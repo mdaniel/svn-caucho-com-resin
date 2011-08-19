@@ -51,5 +51,53 @@ specific directory.</p>
 
 </s1>
 
+<s1 title="PDF Snapshot">
+
+<p>The PDF has been expanded to include heap, cpu profile, thread dump, and
+JMX data. This additional data gives a fuller snapshot of the JVM's state.</p>
+
+</s1>
+
+<s1 title="WebSocket">
+
+<p>The WebSocket implementation has been updated to the latest
+draft specification.</p>
+
+<p>Resin's WebSocket implementation is stream based, meaning
+arbitrary-length messages are supported.</p>
+
+<p>Messages are read in an application callback implementing
+WebSocketListener. The listener reads the InputStream until end of file
+which is the end of message, and then returns to allow the next message
+to be read.</p>
+
+<example title="WebSocketListener.java">
+package com.caucho.websocket;
+
+public interface WebSocketListener {
+  public void onReadBinary(WebSocketContext, InputStream is)
+    throws IOException;
+    
+  public void onReadText(WebSocketContext, Reader is)
+    throws IOException;
+}
+</example>
+
+<p>Messages are written using the WebSocketContext. The application starts
+new message with startBinaryMessage() or startTextMessage(), writes to
+the OutputStream and closes it on message end.</p>
+
+<example title="WebSocketContext.java">
+package com.caucho.websocket;
+
+public interface WebSocketContext {
+  public OutputStream startBinaryMessage()
+    throws IOException;
+    
+  public PrintWriter startTextMessage()
+    throws IOException;
+}
+</example>
+
 </body>
 </document>

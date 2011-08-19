@@ -27,7 +27,7 @@ foreach ($graphs as $graph) {
     
   stat_graph_script($stat,
                     $graph->canvas, $graph->names,
-                    $now - $graph->period, $now);
+                    $now, $graph->period);
 }
 
 ?>

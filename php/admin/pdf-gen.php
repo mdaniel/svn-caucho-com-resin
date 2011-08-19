@@ -188,12 +188,12 @@ if ($mPage->isProfile()) {
   admin_pdf_profile();
 }
 
-if ($mPage->isLog()) {
-  admin_pdf_draw_log();
-}
-
 if ($mPage->isThreadDump()) {
   admin_pdf_thread_dump();
+}
+
+if ($mPage->isLog()) {
+  admin_pdf_draw_log();
 }
 
 if ($mPage->isJmxDump()) {

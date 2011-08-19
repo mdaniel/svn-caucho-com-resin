@@ -239,7 +239,7 @@ function stat_graph_script($stat, $canvas, $names, $end, $period)
   
   foreach ($names as $name) {
     echo "// START $name\n";
-  	
+    
     $values = $stat->statisticsData($name, $data_start_ms, $data_end_ms, 1);
     
     if ($index === null && preg_match("/^(\d+)\|/", $name, $name_values)) {
