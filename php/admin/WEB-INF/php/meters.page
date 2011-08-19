@@ -114,7 +114,7 @@ function meter_display_page($page)
 
   $is_column = false;
   
-  print_graph_control_header($page->getName(), $end, $period);
+  echo "<h2>" . $page->getName() . "</h2>\n";
   
   echo "<table border='0'>\n";
 

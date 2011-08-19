@@ -26,9 +26,6 @@ $g_periods = array(2 * 7 * 24 * 60 * 60	=> "2 Weeks",
                    3 * 60 * 60 => "3 Hours",
                    1 * 60 * 60 => "1 Hour");
 
-$g_six_hours_ms = 6 * 60 * 60 * 1000;
-$g_two_weeks_ms = 2 * 7 * 24 * 60 * 60 * 1000;
-
 class GraphTail {
   private $canvas;
   private $names;
@@ -203,31 +200,7 @@ function stat_graph_div($canvas, $width, $height, $alt, $legend, $title,
   echo "<div style='display:none'>\n";
   echo " <div id='${canvas}-full-container' style='text-align:center;display:inline-block;'>\n";
   echo "  <div style='text-align:center;display:inline-block;width:100%;'>\n";
-	echo "   <div id='${canvas}-full-title' style='float:left;font-size:1.5em;text-align:left;margin-bottom:.5em'>${title}</div>\n";
-	echo "   <div id='${canvas}-full-control' style='float:right;font-size:1em;text-align:right;margin-bottom:.5em;vertical-align:middle;border:1px solid grey;padding:2px;background: #f4f4f4;'>\n";
-
-	echo "    <label for='${canvas}-control-period'>Show</label> <select name='${canvas}-control-period' id='${canvas}-control-period'>\n";
-	
-	foreach ($g_periods as $period => $name) {
-		echo "     <option value='${period}'>${name}</option>\n";
-	}
-	
-	echo "     	<option value='-1'>User Selected</option>\n";
-	
-	echo "    </select> of data \n";
-	echo "    <label for='${canvas}-control-offset'>ending</label> <select name='${canvas}-control-offset' id='${canvas}-control-offset'>\n";
-	
-	foreach ($g_periods as $period => $name) {
-		echo "     <option value='${period}'>${name} ago</option>\n";
-	}
-	
-	echo "      <option value='0' selected='selected'>${now_label}</option>\n";
-	echo "     	<option value='-1'>User Selected</option>\n";
-		
-	echo "    </select>.\n";
-	echo "		<input type='button' name='${canvas}-control-refresh' id='${canvas}-control-refresh' value='Update'>\n";
-
-	echo "   </div>\n";
+	echo "   <div id='${canvas}-full-title' style='float:center;font-size:1.5em;text-align:center;margin-bottom:.5em;'>${title}</div>\n";
 	echo "  </div>\n";
 	echo "  <div id='${canvas}-full-plot'></div>\n";
   echo "  <div id='${canvas}-full-legend' style='display:inline-block;text-align:left;font-size:1.25em;margin-top:1em;'></div>\n";
@@ -240,8 +213,6 @@ function stat_graph_div($canvas, $width, $height, $alt, $legend, $title,
 function stat_graph_script($stat, $canvas, $names, $end, $period)
 {
   global $g_colors;
-  global $g_two_weeks_ms;
-  global $g_six_hours_ms;
 
   $date = new DateTime();
   $tz_offset_ms = $date->getOffset() * 1000;
@@ -261,9 +232,8 @@ function stat_graph_script($stat, $canvas, $names, $end, $period)
   $color_counter = 0;
   $counter = 0;
   
-  // always get 2 weeks of data regardless of display period
   $data_end_ms = ($end * 1000);
-  $data_start_ms = $data_end_ms - $g_two_weeks_ms;
+  $data_start_ms = $data_end_ms - $period_ms;
   
   $x_max_ms = 0;
   
@@ -418,8 +388,6 @@ function stat_graph_script($stat, $canvas, $names, $end, $period)
   echo "			$(\"#${canvas}-full-plot\").width('100%');\n";
   echo "			$(\"#${canvas}-full-plot\").height('70%');\n\n";
   
-  echo "			$(\"#${canvas}-control-period\").val(${period}).attr('selected','selected');\n";
-    
   echo "			var placeholder = $(\"#${canvas}-full-plot\");\n\n";
   
   echo "			var full_options = {\n";
@@ -438,8 +406,6 @@ function stat_graph_script($stat, $canvas, $names, $end, $period)
   echo "				plot = $.plot(placeholder, full_graphs, $.extend(true, {}, full_options, {\n"; 
   echo "					xaxis: { min: ranges.xaxis.from, max: ranges.xaxis.to }\n"; 
   echo "				}))\n";
-  echo "				$(\"#${canvas}-control-period\").val('-1').attr('selected','selected');\n";
-  echo "				$(\"#${canvas}-control-offset\").val('-1').attr('selected','selected');\n";
   echo "			});\n\n";
   
   echo "			var previousPoint = null;\n";
@@ -456,21 +422,6 @@ function stat_graph_script($stat, $canvas, $names, $end, $period)
   echo "					previousPoint = null;\n";            
   echo "				}\n";
   echo "			});\n\n";
-  
-  echo "			$(\"#${canvas}-control-refresh\").click(function () {\n";
-	echo "				var now_ms = x_max_ms;\n";
-	echo "				var offset_ms = $('#${canvas}-control-offset').val() * 1000;\n";
-	echo "				var period_ms = $('#${canvas}-control-period').val() * 1000;\n";
-	echo "				if (offset_ms < 0 || period_ms < 0) {\n";
-	echo "					return;\n";
-	echo "				}\n";
-	echo "				var end_ms = (now_ms - offset_ms);\n";
-	echo "				var start_ms = (end_ms - period_ms);\n";
-	echo "				plot = $.plot(placeholder, full_graphs, $.extend(true, {}, full_options, {\n"; 
-  echo "					xaxis: { min: start_ms, max: end_ms }\n"; 
-  echo "				}))\n";
-	echo "			});\n";
-  
   echo "		}\n";
   echo "  })\n"; 
   echo "});\n";
@@ -480,52 +431,3 @@ function stat_graph_script($stat, $canvas, $names, $end, $period)
   echo " -->\n";
   echo "</script>";
 }
-
-function print_graph_control_header($title, $now, $period, $now_label="Now")
-{
-  global $g_periods;
-
-  echo "<div style='text-align:center;display:inline-block;width:800px;'>\n";
-	echo " <div style='float:left;font-size:1.5em;text-align:left;margin-bottom:.5em;'>${title}</div>\n";
-  echo " <div style='float:right;font-size:1em;text-align:right;margin-bottom:.5em;vertical-align:middle;border:1px solid grey;padding:2px;background: #f4f4f4;'>\n";
-	echo "  <label for='summary-control-period'>Show</label> <select name='summary-control-period' id='summary-control-period'>\n";
-		
-	foreach ($g_periods as $select_period => $name) {
-		echo "   <option value='${select_period}'";
-		if ($period == $select_period) {
-			echo "selected='selected'";
-		}
-		echo ">${name}</option>\n";
-	}
-	
-	echo "  </select> of data \n";
-	echo "  <label for='summary-control-offset'>ending</label> <select name='summary-control-offset' id='summary-control-offset'>\n";
-		
-	foreach ($g_periods as $select_period => $name) {
-		echo "    <option value='${select_period}'>${name} ago</option>\n";
-	}
-		
-	echo "  <option value='0' selected='selected'>${now_label}</option>\n";
-	echo "  </select>.\n";
-	echo "  <input type='button' name='summary-control-refresh' id='summary-control-refresh' value='Update'>\n";
-	echo " </div>\n";
-	echo "</div>\n";
-	
-	echo "<script language='javascript' type='text/javascript'>\n";
- 	echo "<!-- \n";
- 	echo "$(function () {\n";
-	echo "	$(\"#summary-control-refresh\").click(function () {\n";
-	echo "		var now = ${now};\n"
-	echo "		var offset = $('#summary-control-offset').val();\n";
-	echo "		var period = $('#summary-control-period').val();\n";
-	echo "		var end = (now - offset);\n";
-	echo "		var start = (end - period);\n";
- 	echo "		$('div[id$=\"-thumb-plot\"]').each(function () {\n";
- 	echo "			$(this).trigger(\"updateRange\", [start, end]);\n";
- 	echo "		});\n";
- 	echo "	});\n"
- 	echo "});\n"
- 	echo " -->\n";
- 	echo "</script>\n\n";
-}
-

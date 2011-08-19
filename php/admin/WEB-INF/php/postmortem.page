@@ -116,7 +116,7 @@ function display_postmortem_graph($mbean_server)
   
   $restart_str = date("Y-m-d H:i", $restart_time);
   
-	print_graph_control_header("Postmortem Graphs", $end, $period, $restart_str);
+  echo "<h2>Postmortem Graphs</h2>\n";
   
   $health_system = $mbean_server->lookup("resin:type=HealthSystem");
   if ($health_system) {
