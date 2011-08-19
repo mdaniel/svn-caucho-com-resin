@@ -30,8 +30,8 @@ with requirements of launchd (Mac OSX). 'start-with-foreground'
 command is an extension of 'start' command
 that keeps resin boot process running.</p>
          
-<p>Deprecated `watchdog` command. `watchdog` command will still work, however,
-we recommend that `start-with-foreground` is used instead.</p>
+<p>Deprecated 'watchdog' command. 'watchdog' command will still work, however,
+we recommend that 'start-with-foreground' is used instead.</p>
 
 </s1>
 
@@ -86,6 +86,20 @@ JMX data. This additional data gives a fuller snapshot of the JVM's state.</p>
 
 </s1>
 
+<s1 title="command-line pdf-report">
+
+<example title="Example: generating a pdf report">
+unix> bin/resin.sh pdf-report
+generated /usr/local/home/ferg/test/resin-pro-4.0.21/log/default-Summary-20110819T1434.pdf
+</example>
+
+<example title="Example: generating a pdf report with CPU profile">
+unix> bin/resin.sh pdf-report -profile-time 60
+generated /usr/local/home/ferg/test/resin-pro-4.0.21/log/default-Summary-20110819T1434.pdf
+</example>
+
+</s1>
+
 <s1 title="WebSocket">
 
 <p>The WebSocket implementation has been updated to the latest
@@ -126,6 +140,13 @@ public interface WebSocketContext {
     throws IOException;
 }
 </example>
+
+</s1>
+
+<s1 title="jcache">
+
+<p>We've been tracking the jcache specification updates. Jcache will provide
+a standard caching API. The latest changes include compare-and-set operations</p>
 
 </s1>
 

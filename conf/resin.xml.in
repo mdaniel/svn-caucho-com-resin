@@ -102,9 +102,12 @@
     <resin:if test="${resin.professional}">
       <resin:import path="${__DIR__}/health.xml" optional="true"/>
 
+      <!-- generate a weekly pdf report -->
       <health:PdfReport>
         <path>${resin.home}/doc/admin/pdf-gen.php</path>
         <report>Summary</report>
+        <summary/>
+        <!-- <profile-time>60s</profile-time> -->
         <health:IfCron value="0 0 * * 0"/>
       </health:PdfReport>
     </resin:if>
