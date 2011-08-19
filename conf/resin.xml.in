@@ -106,7 +106,7 @@
       <health:PdfReport>
         <path>${resin.home}/doc/admin/pdf-gen.php</path>
         <report>Summary</report>
-        <summary/>
+        <snapshot/>
         <!-- <profile-time>60s</profile-time> -->
         <health:IfCron value="0 0 * * 0"/>
       </health:PdfReport>
