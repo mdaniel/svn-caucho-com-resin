@@ -158,6 +158,9 @@
        <item link="http-virtual-hosts.xtp" title="Virtual Hosts"
              description="HTTP Virtual Host configuration for multi-host sites"/>
 
+       <item link="http-web-apps.xtp" title="Web Applications"
+             description="HTTP servlet container for web applications"/>
+
        <item link="http-proxy-cache.xtp" title="Proxy Cache"
              description="Resin's built-in proxy cache"/>
 
