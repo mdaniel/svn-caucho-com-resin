@@ -185,5 +185,21 @@ running until told to stop.</p>
 
 </s1>
 
+<s1 title="Resin IDE Support">
+
+<p>Resin includes excellent support for Eclipse. In fact, using the Eclipse support 
+may be the easiest way get started with Resin.</p>
+<p>Resin plugin support is included in 
+Indigo (Eclipse 3.7) and above (you can install the Resin plugin manually for earlier
+Eclipse versions). The Resin plugin allows you to create new server instances, 
+configure servers, start servers, stop servers, restart instances, deploy/undeploy 
+applications, debug on the server and so on. You can even automatically download and 
+install the latest version of Resin using the plugin or apply for a development license 
+for Resin Pro.</p>
+<p>Further details on the Resin Eclipse plugin is available 
+<a href="http://wiki.caucho.com/Eclipse">here</a>.</p>
+
+</s1>
+
 </body>
 </document>
