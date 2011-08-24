@@ -116,17 +116,13 @@ public class Form {
       
       if (key == null || key.equals("")) {
       }
-      else if (oldValue == null)
+      else if (oldValue == null) {
         table.put(key, new String[] { value });
-      else if (isTop) {
+      }
+      else { // jsp/15n4
         String []newValue = new String[oldValue.length + 1];
         System.arraycopy(oldValue, 0, newValue, 0, oldValue.length);
         newValue[oldValue.length] = value;
-        table.put(key, newValue);
-      } else {
-        String []newValue = new String[oldValue.length + 1];
-        System.arraycopy(oldValue, 0, newValue, 1, oldValue.length);
-        newValue[0] = value;
         table.put(key, newValue);
       }
     }

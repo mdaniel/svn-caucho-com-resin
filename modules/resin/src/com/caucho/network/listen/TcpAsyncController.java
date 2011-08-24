@@ -222,10 +222,11 @@ class TcpAsyncController extends AsyncController {
     }
   }
   
+  @Override
   public void close()
   {
     super.close();
-    
+
     _conn = null;
   }
 

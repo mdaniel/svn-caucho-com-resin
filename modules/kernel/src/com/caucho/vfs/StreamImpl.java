@@ -142,7 +142,7 @@ public class StreamImpl {
    */
   public int getAvailable() throws IOException
   {
-    throw new UnsupportedOperationException(String.valueOf(this));
+    return 0;
   }
   
   public boolean isEof() throws IOException

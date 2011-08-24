@@ -118,6 +118,8 @@ public final class ThreadPool {
   // queue for waiting executor tasks
   private ExecutorQueueItem _executorQueueHead;
   private ExecutorQueueItem _executorQueueTail;
+  
+  private ThreadRing _ring = new ThreadRing(this);
 
   public ThreadPool()
   {
@@ -388,6 +390,11 @@ public final class ThreadPool {
   {
     return _taskQueue.size();
   }
+  
+  public ThreadRing getRing()
+  {
+    return _ring;
+  }
 
   //
   // initialization
@@ -419,6 +426,17 @@ public final class ThreadPool {
   {
     ClassLoader loader = Thread.currentThread().getContextClassLoader();
 
+    boolean isPriority = false;
+    boolean isQueue = true;
+
+    return scheduleImpl(task, loader, MAX_EXPIRE, isPriority, isQueue);
+  }
+
+  /**
+   * Schedules a new task.
+   */
+  public boolean schedule(Runnable task, ClassLoader loader)
+  {
     boolean isPriority = false;
     boolean isQueue = true;
 

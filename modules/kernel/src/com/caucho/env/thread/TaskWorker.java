@@ -35,17 +35,25 @@ package com.caucho.env.thread;
  */
 abstract public class TaskWorker extends AbstractTaskWorker {
   private final ThreadPool _threadPool;
+  // private final ThreadRing _threadRing;
 
   protected TaskWorker()
   {
     super(Thread.currentThread().getContextClassLoader());
     
     _threadPool = ThreadPool.getCurrent();
+    // _threadRing = _threadPool.getRing();
+    
+    // setWorkerIdleTimeout(0);
+    
+    // setLoopCount(1024);
   }
 
   @Override
   protected void startWorkerThread()
   {
     _threadPool.schedulePriority(this);
+    
+    // _threadRing.schedule(this);
   }
 }

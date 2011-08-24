@@ -37,6 +37,8 @@ import javax.enterprise.inject.spi.AnnotatedMethod;
 
 import com.caucho.inject.Module;
 import com.caucho.java.JavaWriter;
+import com.caucho.network.listen.ProtocolConnection;
+import com.caucho.network.listen.TcpSocketLink;
 
 /**
  * Represents the @Asynchronous interception
@@ -110,9 +112,30 @@ public class AsynchronousGenerator<X> extends NullGenerator<X> {
     out.println("task = new com.caucho.config.async.AsyncItem() {");
     out.pushDepth();
     
+    out.print("private ");
+    out.print(ProtocolConnection.class.getName());
+    out.println(" _requestContext");
+    out.print("  = ");
+    out.print(CandiUtil.class.getName());
+    out.println(".createRequestContext();");
+    
+    out.println();
     out.println("public java.util.concurrent.Future runTask() throws Exception");
     out.println("{");
     out.pushDepth();
+    
+    out.println();
+    out.print(ProtocolConnection.class.getName());
+    out.print(" oldContext = ");
+    out.print(TcpSocketLink.class.getName());
+    out.println(".getCurrentRequest();");
+    out.println();
+    
+    out.println("try {");
+    out.pushDepth();
+    out.print(TcpSocketLink.class.getName());
+    out.println(".setCurrentRequest(_requestContext);");
+    out.println();
     
     if (! void.class.equals(javaApiMethod.getReturnType()))
       out.print("return ");
@@ -132,6 +155,16 @@ public class AsynchronousGenerator<X> extends NullGenerator<X> {
       out.println();
       out.println("return null;");
     }
+
+    out.popDepth();
+    out.println("} finally {");
+    out.pushDepth();
+    
+    out.print(TcpSocketLink.class.getName());
+    out.println(".setCurrentRequest(oldContext);");
+    
+    out.popDepth();
+    out.println("}");
     
     out.popDepth();
     out.println("}");

@@ -113,7 +113,15 @@ public class JniStream extends StreamImpl {
       return -1;
   }
 
+  @Override
+  public int getAvailable()
+    throws IOException
+  {
+    return isEof() ? -1 : 1;
+  }
+  
   // XXX: needs update
+  @Override
   public boolean isEof() throws IOException
   {
     return _socket.isEof();

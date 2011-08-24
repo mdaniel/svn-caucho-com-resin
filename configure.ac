@@ -761,14 +761,20 @@ if test -z "${LD_SHLIB}"; then
       LD_SHLIB=${CC}
 
       CFLAGS="$CFLAGS -pthread -fPIC -fno-omit-frame-pointer -O2"
+      CFLAGS_JNI="$CFLAGS_JNI -fPIC"
+      LDFLAGS_SHLIB="-shared -fPIC"
 
       if test -n "$b64"; then
         CFLAGS="$CFLAGS -m64"
-        LDFLAGS_SHLIB="-shared -fPIC"
+      else
+        CFLAGS="$CFLAGS -m32"
       fi
       if test -n "$b64_jni"; then
         CFLAGS_JNI="$CFLAGS_JNI -m64 -fPIC"
-        LDFLAGS_SHLIB="-shared -fPIC"
+        LDFLAGS_SHLIB="$LDFLAGS_SHLIB -m64"
+      else
+        CFLAGS_JNI="$CFLAGS_JNI -m32"
+        LDFLAGS_SHLIB="$LDFLAGS_SHLIB -m32"
       fi
       ;;
 
@@ -844,16 +850,14 @@ if test -z "${LD_SHLIB}"; then
       ;;
   esac
 
-  case "$target_cpu" in
-    x86_64)
-           if test -z "$b64_jni"; then
-  	     CFLAGS_JNI="$CFLAGS_JNI -m32"
-#  	     LDFLAGS_SHLIB="$LDFLAGS_SHLIB -melf_i386"
-  	     LDFLAGS_SHLIB="$LDFLAGS_SHLIB -m32"
-#             target_cpu="i386"
-   	   fi
-	;;
-  esac	
+#  case "$target_cpu" in
+#    x86_64)
+#           if test -z "$b64_jni"; then
+#  	     CFLAGS_JNI="$CFLAGS_JNI -m32"
+#  	     LDFLAGS_SHLIB="$LDFLAGS_SHLIB -m32"
+#   	   fi
+#	;;
+#  esac	
 fi
 
 case "$target_os" in

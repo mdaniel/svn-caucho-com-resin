@@ -117,7 +117,20 @@ class WatchdogChildTask implements Runnable
 
     return 0;
   }
-  
+
+  /**
+   * Returns the uptime of the current Resin process.
+   */
+  long getUptime()
+  {
+    WatchdogChildProcess process = _process;
+    
+    if (process == null)
+      return 0;
+    
+    return process.getUptime();
+  }
+
   boolean isRestart()
   {
     return _isRestart;

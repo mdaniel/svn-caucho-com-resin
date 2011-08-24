@@ -121,7 +121,7 @@ class WatchdogService extends SimpleActor
                        this, e.toString());
     
       getBroker().queryResult(id, from, to,
-                                    new ResultStatus(false, msg));
+                              new ResultStatus(false, msg));
     }
     
     return true;

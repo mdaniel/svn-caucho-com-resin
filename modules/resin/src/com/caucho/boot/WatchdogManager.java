@@ -401,6 +401,8 @@ class WatchdogManager implements AlarmListener {
 
         if (child.getPid() > 0)
           sb.append("  pid: " + child.getPid());
+        
+        sb.append("  uptime: " + child.getUptimeString() + "\n");
       }
     }
 

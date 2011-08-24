@@ -58,6 +58,8 @@ abstract public class AbstractTaskWorker implements Runnable {
   private final ClassLoader _classLoader;
   private long _workerIdleTimeout = 30000L;
   private boolean _isClosed;
+  
+  private int _loopCount = 0;
 
   private volatile Thread _thread;
 
@@ -77,6 +79,11 @@ abstract public class AbstractTaskWorker implements Runnable {
       throw new IllegalArgumentException();
     
     _workerIdleTimeout = timeout;
+  }
+  
+  protected void setLoopCount(int count)
+  {
+    _loopCount = count;
   }
   
   public boolean isTaskActive()
@@ -151,7 +158,12 @@ abstract public class AbstractTaskWorker implements Runnable {
 
       long now = getCurrentTimeActual();
       
-      long expires = now + _workerIdleTimeout;
+      long expires;
+      
+      if (_workerIdleTimeout > 0)
+        expires = now + _workerIdleTimeout;
+      else
+        expires = 0;
       
       do {
         while (_taskState.getAndSet(TASK_SLEEP) == TASK_READY) {
@@ -161,24 +173,35 @@ abstract public class AbstractTaskWorker implements Runnable {
           
           now = getCurrentTimeActual();
           
-          if (delta < 0) {
+          if (delta > 0) {
+            expires = now + delta;
+          }
+          else if (delta == 0) {
+            expires = 0;
+          }
+          else if (_workerIdleTimeout > 0) {
             expires = now + _workerIdleTimeout;
           }
           else {
-            expires = now + delta;
+            expires = 0;
           }
         }
 
         if (isClosed())
           return;
         
-        if (_taskState.compareAndSet(TASK_SLEEP, TASK_PARK)) {
+        for (int i = _loopCount; i >= 0; i--) {
+          if (_taskState.get() == TASK_READY)
+            break;
+        }
+        
+        if (expires > 0 && _taskState.compareAndSet(TASK_SLEEP, TASK_PARK)) {
           Thread.interrupted();
           LockSupport.parkUntil(expires);
-          
-          if (isPermanent())
-            _taskState.set(TASK_READY);
         }
+        
+        if (isPermanent())
+          _taskState.set(TASK_READY);
       } while (_taskState.get() == TASK_READY
                || isPermanent()
                || getCurrentTimeActual() < expires);

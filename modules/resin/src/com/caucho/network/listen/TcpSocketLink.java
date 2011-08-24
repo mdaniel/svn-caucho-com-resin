@@ -849,7 +849,7 @@ public class TcpSocketLink extends AbstractSocketLink
     if (! (state.isComet() || state.isDuplex())
         && ! requestState.isAsyncOrDuplex()) {
       try {
-        closeAsync();
+        closeAsyncIfNotAsync();
       } catch (Throwable e) {
         log.log(Level.FINE, e.toString(), e);
       }
@@ -994,16 +994,13 @@ public class TcpSocketLink extends AbstractSocketLink
         else if (isKeepaliveAllocated()) {
           // server/1l81, network/0291
           //_state = _state.toKeepalive(this);
-          _async = null;
-
-          async.onClose();
+          
+          closeAsync();
         
           return getKeepaliveTask().doTask();
         }
         else {
-          _async = null;
-
-          async.onClose();
+          closeAsync();
           
           close();
         
@@ -1152,7 +1149,7 @@ public class TcpSocketLink extends AbstractSocketLink
         result = handleRequest(isKeepalive);
       } finally {
         if (! result.isAsyncOrDuplex()) {
-          closeAsync();
+          closeAsyncIfNotAsync();
         }
       }
       
@@ -1571,25 +1568,31 @@ public class TcpSocketLink extends AbstractSocketLink
     }
   }
 
-  private void closeAsync()
+  private void closeAsyncIfNotAsync()
   {
     SocketLinkState state = _state;
     
     if (state.isComet() || state.isDuplex())
       return;
     
+    closeAsync();
+  }
+  
+  private void closeAsync()
+  {
     DuplexReadTask duplexTask = _duplexReadTask;
     _duplexReadTask = null;
 
     AsyncController async = _async;
     _async = null;
 
-    if (async != null)
+    if (async != null) {
       async.onClose();
+      async.close();
+    }
     
     if (duplexTask != null)
       duplexTask.onClose();
-    
   }
 
   private String dbgId()

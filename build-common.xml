@@ -583,11 +583,11 @@
       <fileset dir="${resin.modules}/junit/classes">
         <exclude name="**/.*"/>
       </fileset>
-    	
+    <!--	    	
       <fileset dir="${resin.modules}/eclipselink/classes">
         <exclude name="**/.*"/>
       </fileset>    	
-    <!--	
+
       <fileset dir="${resin.artifacts}/ant/classes">
         <exclude name="**/.*"/>
       </fileset>
@@ -706,6 +706,7 @@
         <include name="lib/activation.jar"/>
         <include name="lib/activation.LICENSE"/>
         <include name="lib/eclipselink.jar"/>
+        <include name="lib/resin-eclipselink.jar"/>
         <include name="lib/javamail-141.jar"/>
         <include name="lib/javamail-14.LICENSE"/>
         <!--

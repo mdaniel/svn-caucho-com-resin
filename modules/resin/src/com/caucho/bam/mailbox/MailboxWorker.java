@@ -44,12 +44,17 @@ public class MailboxWorker extends TaskWorker
     = Logger.getLogger(MailboxWorker.class.getName());
 
   private final MultiworkerMailbox _queue;
+  private final String _toString;
   
   private volatile boolean _isRunning;
 
   public MailboxWorker(MultiworkerMailbox queue)
   {
     _queue = queue;
+    
+    setWorkerIdleTimeout(5000);
+    
+    _toString = getClass().getSimpleName() + "[" + _queue.getAddress() + "]";
   }
   
   boolean isRunning()
@@ -85,6 +90,6 @@ public class MailboxWorker extends TaskWorker
   @Override
   public String toString()
   {
-    return getClass().getSimpleName() + "[" + _queue.getAddress() + "]";
+    return _toString;
   }
 }

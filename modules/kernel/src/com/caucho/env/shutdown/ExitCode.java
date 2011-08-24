@@ -31,12 +31,13 @@ package com.caucho.env.shutdown;
 
 
 /**
- * The Resin class represents the top-level container for Resin.
- * It exactly matches the &lt;resin> tag in the resin.xml
+ * The ExitCode communicates from Resin to the Watchdog the reason for
+ * the shutdown.
  */
 public enum ExitCode
 {
   OK,
+  EXIT_1,
   FAIL_SAFE_HALT,
   BAD_CONFIG,
   BIND,

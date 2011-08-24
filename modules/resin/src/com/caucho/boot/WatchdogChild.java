@@ -301,6 +301,21 @@ class WatchdogChild
       return 0;
   }
   
+  String getUptimeString()
+  {
+    long uptime = 0;
+    
+    WatchdogChildTask task = _taskRef.get();
+    
+    if (task != null)
+      uptime = task.getUptime();
+    
+    if (uptime <= 0)
+      return "--";
+    
+    return "--";
+  }
+  
   boolean isRestart()
   {
     WatchdogChildTask task = _taskRef.get();

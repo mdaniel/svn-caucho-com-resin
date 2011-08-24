@@ -37,6 +37,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map.Entry;
+import java.util.concurrent.ConcurrentHashMap;
 
 /**
  * Environment based model for JNDI.
@@ -48,8 +49,8 @@ public class EnvironmentModel extends AbstractModel
   private final EnvironmentModelRoot _root;
   private String _name;
   
-  private HashMap<String,Object> _children
-    = new HashMap<String,Object>(8);
+  private ConcurrentHashMap<String,Object> _children
+    = new ConcurrentHashMap<String,Object>(8);
 
   /**
    * Creates a new instance of the environment model.
@@ -98,7 +99,7 @@ public class EnvironmentModel extends AbstractModel
         value = parentModel.lookup(name);
 
         if (value instanceof EnvironmentModel) {
-          value = createSubcontext(name);
+          value = createSubcontextImpl(name);
         }
       }
     }
@@ -132,6 +133,7 @@ public class EnvironmentModel extends AbstractModel
   /**
    * Creates a subcontext.
    */
+  @Override
   public AbstractModel createSubcontext(String name)
     throws NamingException
   {
@@ -139,7 +141,12 @@ public class EnvironmentModel extends AbstractModel
       throw new NamingException(L.l("can't create subcontext: {0} {1}",
                                     name, _children.get(name)));
     }
-
+    
+    return createSubcontextImpl(name);
+  }
+  
+  private AbstractModel createSubcontextImpl(String name)
+  {
     String childName;
 
     if (_name.equals(""))
@@ -149,7 +156,9 @@ public class EnvironmentModel extends AbstractModel
     
     EnvironmentModel model = new EnvironmentModel(_root, childName);
     
-    _children.put(name, model);
+    _children.putIfAbsent(name, model);
+    
+    model = (EnvironmentModel) _children.get(name);
 
     _root.put(childName, model);
 
@@ -159,11 +168,13 @@ public class EnvironmentModel extends AbstractModel
   /**
    * Renames a child.
    */
+  @Override
   public void rename(String newName)
     throws NamingException
   {
     _name = newName;
-    HashMap<String,Object> newChildren = new HashMap<String,Object>();
+    ConcurrentHashMap<String,Object> newChildren
+      = new ConcurrentHashMap<String,Object>();
     
     for (Entry<String,Object> entry : _children.entrySet()) {
       String key = entry.getKey();

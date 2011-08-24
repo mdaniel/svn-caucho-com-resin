@@ -57,6 +57,7 @@ import com.caucho.log.RotateLog;
 import com.caucho.log.RotateStream;
 import com.caucho.network.listen.TcpSocketLinkListener;
 import com.caucho.server.util.CauchoSystem;
+import com.caucho.util.Alarm;
 import com.caucho.util.L10N;
 import com.caucho.vfs.Path;
 import com.caucho.vfs.QServerSocket;
@@ -91,6 +92,7 @@ class WatchdogChildProcess
   private OutputStream _stdOs;
   private int _pid;
 
+  private long _startTime;
   private int _status = -1;
   private String _exitMessage;
 
@@ -143,6 +145,17 @@ class WatchdogChildProcess
   {
     return _exitMessage;
   }
+  
+  public long getUptime()
+  {
+    long now = Alarm.getCurrentTime();
+    long start = _startTime;
+    
+    if (_startTime > 0)
+      return now - start;
+    else
+      return 0;
+  }
 
   public void run()
   {
@@ -159,6 +172,8 @@ class WatchdogChildProcess
     Socket s = null;
 
     try {
+      _startTime = Alarm.getCurrentTime();
+      
       thread.setContextClassLoader(envLoader);
       envLoader.start();
 
@@ -207,6 +222,8 @@ class WatchdogChildProcess
     } catch (Throwable e) {
       log.log(Level.WARNING, e.toString(), e);
     } finally {
+      _startTime = 0;
+      
       if (ss != null) {
         try {
           ss.close();
