@@ -37,8 +37,6 @@ import javax.enterprise.inject.spi.AnnotatedMethod;
 
 import com.caucho.inject.Module;
 import com.caucho.java.JavaWriter;
-import com.caucho.network.listen.ProtocolConnection;
-import com.caucho.network.listen.TcpSocketLink;
 
 /**
  * Represents the @Asynchronous interception
@@ -113,10 +111,12 @@ public class AsynchronousGenerator<X> extends NullGenerator<X> {
     out.pushDepth();
     
     out.print("private ");
-    out.print(ProtocolConnection.class.getName());
+    // out.print(ProtocolConnection.class.getName());
+    out.print("com.caucho.network.listen.ProtocolConnection");
     out.println(" _requestContext");
     out.print("  = ");
-    out.print(CandiUtil.class.getName());
+    // out.print(CandiUtil.class.getName());
+    out.print("com.caucho.ejb.util.EjbUtil");
     out.println(".createRequestContext();");
     
     out.println();
@@ -125,15 +125,18 @@ public class AsynchronousGenerator<X> extends NullGenerator<X> {
     out.pushDepth();
     
     out.println();
-    out.print(ProtocolConnection.class.getName());
+    // out.print(ProtocolConnection.class.getName());
+    out.print("com.caucho.network.listen.ProtocolConnection");
     out.print(" oldContext = ");
-    out.print(TcpSocketLink.class.getName());
+    // out.print(TcpSocketLink.class.getName());
+    out.print("com.caucho.network.listen.TcpSocketLink");
     out.println(".getCurrentRequest();");
     out.println();
     
     out.println("try {");
     out.pushDepth();
-    out.print(TcpSocketLink.class.getName());
+    // out.print(TcpSocketLink.class.getName());
+    out.print("com.caucho.network.connection.TcpSocketLink");
     out.println(".setCurrentRequest(_requestContext);");
     out.println();
     
@@ -160,7 +163,8 @@ public class AsynchronousGenerator<X> extends NullGenerator<X> {
     out.println("} finally {");
     out.pushDepth();
     
-    out.print(TcpSocketLink.class.getName());
+    // out.print(TcpSocketLink.class.getName());
+    out.print("com.caucho.network.connection.TcpSocketLink");
     out.println(".setCurrentRequest(oldContext);");
     
     out.popDepth();

@@ -29,7 +29,6 @@
 
 package com.caucho.config.gen;
 
-import java.io.IOException;
 import java.io.Serializable;
 import java.lang.annotation.Annotation;
 import java.lang.reflect.Field;
@@ -37,7 +36,6 @@ import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.lang.reflect.ParameterizedType;
 import java.lang.reflect.Type;
-import java.security.Principal;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.logging.Level;
@@ -58,10 +56,6 @@ import com.caucho.config.inject.DependentCreationalContext;
 import com.caucho.config.inject.InjectManager;
 import com.caucho.config.inject.InterceptorRuntimeBean;
 import com.caucho.config.reflect.AnnotatedTypeUtil;
-import com.caucho.network.listen.ProtocolConnection;
-import com.caucho.security.SecurityContext;
-import com.caucho.security.SecurityContextException;
-import com.caucho.security.SecurityContextProvider;
 import com.caucho.util.L10N;
 
 /**
@@ -354,16 +348,6 @@ public class CandiUtil {
     
     return method;
   }
-  
-  public static ProtocolConnection createRequestContext()
-  {
-    Principal user = SecurityContext.getUserPrincipal();
-    
-    if (user != null)
-      return new AsyncProtocolConnection(user);
-    else
-      return null;
-  }
     
   public static Object []generateProxyDelegate(InjectManager manager,
                                                List<Decorator<?>> beans,
@@ -480,94 +464,6 @@ public class CandiUtil {
   
   public static void dummyPreDestroy()
   {
-  }
-  
-  static class AsyncProtocolConnection
-    implements ProtocolConnection, SecurityContextProvider {
-    private Principal _principal;
-    
-    AsyncProtocolConnection(Principal principal)
-    {
-      _principal = principal;
-    }
-
-    @Override
-    public Principal getUserPrincipal() throws SecurityContextException
-    {
-      return _principal;
-    }
-
-    @Override
-    public String getProtocolRequestURL()
-    {
-      return null;
-    }
-
-    @Override
-    public boolean handleRequest() throws IOException
-    {
-      return false;
-    }
-
-    @Override
-    public boolean handleResume() throws IOException
-    {
-      return false;
-    }
-
-    @Override
-    public void init()
-    {
-    }
-
-    @Override
-    public boolean isWaitForRead()
-    {
-      return false;
-    }
-
-    @Override
-    public void onCloseConnection()
-    {
-    }
-
-    /* (non-Javadoc)
-     * @see com.caucho.network.listen.ProtocolConnection#onStartConnection()
-     */
-    @Override
-    public void onStartConnection()
-    {
-      // TODO Auto-generated method stub
-      
-    }
-
-    @Override
-    public boolean isTransportSecure() throws SecurityContextException
-    {
-      // TODO Auto-generated method stub
-      return false;
-    }
-
-    /* (non-Javadoc)
-     * @see com.caucho.security.SecurityContextProvider#isUserInRole(java.lang.String)
-     */
-    @Override
-    public boolean isUserInRole(String permission)
-    {
-      // TODO Auto-generated method stub
-      return false;
-    }
-
-    /* (non-Javadoc)
-     * @see com.caucho.security.SecurityContextProvider#runAs(java.lang.String)
-     */
-    @Override
-    public String runAs(String roleName)
-    {
-      // TODO Auto-generated method stub
-      return null;
-    }
-    
   }
   
   static {
