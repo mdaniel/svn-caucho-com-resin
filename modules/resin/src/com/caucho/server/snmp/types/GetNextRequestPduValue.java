@@ -38,7 +38,12 @@ public class GetNextRequestPduValue extends RequestPduValue
   {
     super();
   }
-  
+
+  public GetNextRequestPduValue(int requestId, int error, int errorIndex)
+  {
+    super(requestId, error, errorIndex);
+  }
+
   public GetNextRequestPduValue(IntegerValue requestId,
                                 IntegerValue error,
                                 IntegerValue errorIndex,

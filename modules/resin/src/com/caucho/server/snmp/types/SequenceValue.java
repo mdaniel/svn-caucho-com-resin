@@ -96,7 +96,7 @@ public class SequenceValue<T extends SnmpValue> extends SnmpValue
       if (i != 0)
         s += ",";
       
-      s += _list.get(i).toString();
+      s += String.valueOf(_list.get(i));
     }
     
     s += "]";

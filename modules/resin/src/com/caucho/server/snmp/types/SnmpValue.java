@@ -88,20 +88,23 @@ abstract public class SnmpValue
 
   public static SnmpValue create(Object obj, int type)
   {
-    if (obj instanceof Number) {
+    if (obj == null) {
+      return new NullValue();
+    }
+    else if (obj instanceof Number) {
       switch (type) {
-        case INTEGER:
-          return new IntegerValue(((Number) obj).intValue());
-        case COUNTER:
-          return new CounterValue(((Number) obj).longValue());
-        case GAUGE:
-          return new GaugeValue(((Number) obj).longValue());
-        case TIME_TICKS:
-          // time ticks are in hundredths of a second
-          return new TimeTicksValue(((Number) obj).longValue() / 10);
+      case INTEGER:
+        return new IntegerValue(((Number) obj).intValue());
+      case COUNTER:
+        return new CounterValue(((Number) obj).longValue());
+      case GAUGE:
+        return new GaugeValue(((Number) obj).longValue());
+      case TIME_TICKS:
+        // time ticks are in hundredths of a second
+        return new TimeTicksValue(((Number) obj).longValue() / 10);
       }
     }
-    
+
     switch (type) {
       case OBJECT_IDENTIFIER:
         return new ObjectIdentifierValue(obj.toString());

@@ -29,13 +29,13 @@
 
 package com.caucho.server.snmp;
 
-import java.util.HashMap;
-
 import com.caucho.network.listen.AbstractProtocol;
 import com.caucho.network.listen.ProtocolConnection;
 import com.caucho.network.listen.SocketLink;
 import com.caucho.server.snmp.types.OctetStringValue;
 import com.caucho.server.snmp.types.SnmpValue;
+
+import java.util.TreeMap;
 
 /*
  * SNMP v1 protocol.
@@ -43,8 +43,8 @@ import com.caucho.server.snmp.types.SnmpValue;
 public class SnmpProtocol extends AbstractProtocol
 {
   //holds the mappings from SNMP oids to MBeans
-  private HashMap<String, Oid> _mibMap
-    = new HashMap<String, Oid>();
+  private TreeMap<String, Oid> _mibMap
+    = new TreeMap<String, Oid>();
   
   //specially reserved for Caucho by iana.org
   private final int PRIVATE_ENTERPRISE_NUMBER = 30350;
@@ -62,7 +62,7 @@ public class SnmpProtocol extends AbstractProtocol
 
     addOid("1.3.6.1.2.1.1.3",
            "java.lang:type=Runtime",
-           "UpTime",
+           "Uptime",
            SnmpValue.TIME_TICKS);
 
     addOid("1.3.6.1.2.1.1.5",
@@ -177,7 +177,7 @@ public class SnmpProtocol extends AbstractProtocol
     _mibMap.put(name, oid);
   }
   
-  public HashMap<String, Oid> getMib()
+  public TreeMap<String, Oid> getMib()
   {
     return _mibMap;
   }

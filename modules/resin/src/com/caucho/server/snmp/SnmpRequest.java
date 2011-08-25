@@ -29,19 +29,6 @@
 
 package com.caucho.server.snmp;
 
-import java.io.IOException;
-import java.io.OutputStream;
-import java.util.HashMap;
-import java.util.logging.Logger;
-
-import javax.management.AttributeNotFoundException;
-import javax.management.InstanceNotFoundException;
-import javax.management.MBeanException;
-import javax.management.MBeanServer;
-import javax.management.MalformedObjectNameException;
-import javax.management.ObjectName;
-import javax.management.ReflectionException;
-
 import com.caucho.jmx.Jmx;
 import com.caucho.network.listen.AbstractProtocolConnection;
 import com.caucho.network.listen.SocketLink;
@@ -56,6 +43,18 @@ import com.caucho.server.snmp.types.VarBindListValue;
 import com.caucho.server.snmp.types.VarBindValue;
 import com.caucho.util.L10N;
 import com.caucho.vfs.ReadStream;
+
+import javax.management.AttributeNotFoundException;
+import javax.management.InstanceNotFoundException;
+import javax.management.MBeanException;
+import javax.management.MBeanServer;
+import javax.management.MalformedObjectNameException;
+import javax.management.ObjectName;
+import javax.management.ReflectionException;
+import java.io.IOException;
+import java.io.OutputStream;
+import java.util.TreeMap;
+import java.util.logging.Logger;
 
 /*
  * Responds to SNMP requests.
@@ -79,10 +78,10 @@ public class SnmpRequest extends AbstractProtocolConnection
   private IntegerValue _version = IntegerValue.ZERO;
   private final OctetStringValue _communityString;
   
-  private HashMap<String, Oid> _mibMap;
+  private TreeMap<String, Oid> _mibMap;
   
   public SnmpRequest(SocketLink connection,
-                     HashMap<String, Oid> mibMap,
+                     TreeMap<String, Oid> mibMap,
                      OctetStringValue community)
   {
     _connection = connection;
@@ -205,11 +204,39 @@ public class SnmpRequest extends AbstractProtocolConnection
 
           break;
         }
-        case SnmpValue.GET_NEXT_REQUEST_PDU:
-        {
-          break;
+      case SnmpValue.GET_NEXT_REQUEST_PDU: {
+        ObjectIdentifierValue[] oids = req.getVarBindList().getNames();
+
+        for (ObjectIdentifierValue oid : oids) {
+          String key = _mibMap.higherKey(oid.getString());
+
+          if (key == null)
+            key = _mibMap.ceilingKey(oid.toString());
+
+          VarBindValue varBind;
+          if (key != null) {
+            ObjectIdentifierValue nextObjIdVal
+              = new ObjectIdentifierValue(key);
+
+            SnmpValue value = getMBean(nextObjIdVal);
+
+            varBind = new VarBindValue(nextObjIdVal, value);
+          }
+          else {
+            varBind = new VarBindValue(oid, NullValue.NULL);
+
+            if (error.getLong() == 0) {
+              error = new IntegerValue(NO_SUCH_NAME);
+              errorIndex = new IntegerValue(i + 1);
+            }
+          }
+
+          varBindList.add(varBind);
         }
-        case SnmpValue.SET_REQUEST_PDU:
+
+        break;
+      }
+      case SnmpValue.SET_REQUEST_PDU:
         {
           break;
         }
@@ -328,7 +355,7 @@ public class SnmpRequest extends AbstractProtocolConnection
     _version = new IntegerValue(version);
   }
   
-  public HashMap<String, Oid> getMib()
+  public TreeMap<String, Oid> getMib()
   {
     return _mibMap;
   }

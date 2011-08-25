@@ -13,6 +13,7 @@
 
 <s2 title="4.0.22 - snapshot">
 <ul>
+<li>snmp: added snmpwalk support (#3721, rep by D. Devota)</li>
 <li>jndi: EnvironmentModel dynamic copy needs ConcurrentHashMap (#4721)</li>
 <li>servlet: getAvailable() issue with POST (#4726, rep by Olaf Krische)</li>
 <li>install: --disable-64bit changes to ./configure and CFLAGS (#4714, rep by S. Patil)</li>
