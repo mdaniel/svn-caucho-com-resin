@@ -178,13 +178,6 @@ running until told to stop.</p>
 
 </s1>
 
-<s1 title="More Installation Options">
-
-<p>More installation and configuration are available at
-<a href="install.xtp">installation options</a>.</p>
-
-</s1>
-
 <s1 title="Resin IDE Support">
 
 <p>Resin includes excellent support for Eclipse. In fact, using the Eclipse support 
@@ -197,7 +190,14 @@ applications, debug on the server and so on. You can even automatically download
 install the latest version of Resin using the plugin or apply for a development license 
 for Resin Pro.</p>
 <p>Further details on the Resin Eclipse plugin is available 
-<a href="http://wiki.caucho.com/Eclipse">here</a>.</p>
+<a href="resin-eclipse-support.xtp">here</a>.</p>
+
+</s1>
+
+<s1 title="More Installation Options">
+
+<p>More installation and configuration are available at
+<a href="install.xtp">installation options</a>.</p>
 
 </s1>
 
