@@ -94,23 +94,18 @@ $end = time();
 
 require_once "WEB-INF/php/graph_flot.php";
 
-stat_graph_div($canvas, $width, $height, 
-          "A interactive line graph representing the selected meters.",
-          'bottom', 'Interactive Graph');
+$params = new GraphParams($canvas, $width, $height);
+$params->period = $period;
+$params->title = "Interactive Graph";
+$params->alt = "A interactive line graph representing the selected meters.";
 
-  if (! $mbean_server) {
-    $mbean_server = $g_mbean_server;
-  }
+stat_graph_div($params);
 
-  if (! $mbean_server) {
-    return;
-  }
+$stat = get_stats_service();
+if (! $stat) {
+  return;
+}
 
-  $stat = $mbean_server->lookup("resin:type=StatService");
+stat_graph_script($stat, $canvas, $names, null, 0, $period);
 
-  if (! $stat) {
-    return;
-  }
-
-stat_graph_script($stat, $canvas, $names, $end, $period);
 ?>

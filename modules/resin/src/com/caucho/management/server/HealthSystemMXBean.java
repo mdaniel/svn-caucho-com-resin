@@ -68,6 +68,9 @@ public interface HealthSystemMXBean extends ManagedObjectMXBean
   @Description("Health status emumeration")
   public String[] getHealthStatusNames();
   
+  @Description("Health status emumeration")
+  public String[] getLabels();
+
   @Description("The lifecycle of the service")
   public String getState();
 }

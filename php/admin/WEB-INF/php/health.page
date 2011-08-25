@@ -6,6 +6,8 @@ if (! admin_init()) {
   return;
 }
 
+enable_graph_controls();
+
 echo "<h1>Health"; print_help("Health"); echo "</h1>\n";
 
 echo "<div id='health-tabs'>\n";
@@ -68,24 +70,13 @@ function display_health_status_graph($s)
 
 function display_health_graph($mbean_server, $s, $si, $label)
 {
-  $stat_service = $mbean_server->lookup("resin:type=StatService");
-  if ($stat_service) {
-    
-    $health_system = $mbean_server->lookup("resin:type=HealthSystem");
-    if ($health_system) {
-			$status_names = $health_system->HealthStatusNames;
-    }
-    
-    $width = 600;
-    $height = 200;
-    $end = time();
-    $period = 6 * 60 * 60;
-        
-    stat_graph_regexp("health_${si}", $width, $height, $end, $period,
-                      "/^$si\|Resin\|Health/",
-    									"A line graph representing the status of each health check performed on server $label over the last 24 hours.",
-                      "bottom", $mbean_server, $status_names, "Server ${label}");
-  }
+  $params = new GraphParams("health_${si}", 600, 200);
+	$params->title = "Server ${label}";
+	$params->alt = "A line graph representing the status of each health check performed on server $label over the last 24 hours.";
+	$params->labels_mbean = "resin:type=HealthSystem";
+	$params->mbean_server = $mbean_server;
+  
+	stat_graph_regexp($params, "/^${si}\|Resin\|Health/");
 }
 
 function display_heartbeat()
@@ -314,6 +305,6 @@ function display_health_logs()
   }
 }
 
-display_footer($g_page, $javascript . javascript_create_tab("health-tabs"));
+display_footer($g_page, javascript_create_tab("health-tabs"));
 
 ?>

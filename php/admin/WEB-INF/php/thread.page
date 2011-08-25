@@ -13,6 +13,8 @@ if (! admin_init()) {
   return;
 }
 
+enable_graph_controls();
+
 $jvm_thread = $g_mbean_server->lookup("java.lang:type=Threading");
 $server = $g_mbean_server->lookup("resin:type=Server");
 
@@ -167,44 +169,47 @@ function thread_display_summary_table()
 
 function thread_display_summary_graph()
 {
-  global $g_mbean_server;
-
-  $stat_service = $g_mbean_server->lookup("resin:type=StatService");
-
-  if (! $stat_service)
+  global $g_server;
+  
+  $stat = get_stats_service();
+  if (! $stat) {
     return;
-
+  }
+  
   $si = sprintf("%02d", $g_server->Index);
 
-	$width = 250;
-	$height = 150;
- 	$end = time();
- 	$period = 6 * 60 * 60;
-  
+  $width = 250;
+  $height = 150;
+ 
   echo "<div style='display:inline-block;'>\n";
   echo " <div style='float:left;padding:.5em;'>\n";
   
-  stat_graph("resin-threads", $width, $height, $end, $period, 
+	$resin_threads_params = new GraphParams("resin-threads", $width, $height);
+	$resin_threads_params->title = "Resin Threads";
+	$resin_threads_params->alt = "A line graph representing the number of threads in the Resin thread pools over the last 6 hours.";
+  
+	stat_graph($resin_threads_params, 
                array("$si|JVM|Thread|JVM Thread Count",
                      "$si|Resin|Thread|Thread Count",
                      "$si|Resin|Thread|Thread Active Count",
                      "$si|Resin|Thread|Thread Idle Count",
                      "$si|Resin|Thread|Thread Task Queue",
                      "$si|Resin|Thread|Thread Priority Queue",
-                     "$si|Resin|Thread|Thread Overflow Count"),
-               "A line graph representing the number of threads in the Resin thread pools over the last 6 hours.",
-               'bottom', null, null, 'Resin Threads');
+                     "$si|Resin|Thread|Thread Overflow Count"));
+               
 	echo " </div>\n";
   echo " <div style='float:right;padding:.5em;'>\n";
 
-  stat_graph("jvm-threads", $width, $height, $end, $period, 
+	$jvm_threads_params = new GraphParams("jvm-threads", $width, $height);
+	$jvm_threads_params->title = "JVM Threads";
+	$jvm_threads_params->alt = "A line graph representing the number of threads in JVM thread states over the last 6 hours.";
+  
+  stat_graph($jvm_threads_params, 
                array("$si|JVM|Thread|JVM Thread Count",
                      "$si|JVM|Thread|JVM Runnable Count",
                      "$si|JVM|Thread|JVM Blocked Count",
                      "$si|JVM|Thread|JVM Native Count",
-                     "$si|JVM|Thread|JVM Waiting Count"),
-               "A line graph representing the number of threads in JVM thread states over the last 6 hours.",
-               'bottom', null, null, 'JVM Threads');
+                     "$si|JVM|Thread|JVM Waiting Count"));
 
   echo " </div>";
 	echo "</div>";

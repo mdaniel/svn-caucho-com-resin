@@ -13,6 +13,8 @@ if (! admin_init()) {
   return;
 }
 
+enable_graph_controls();
+
 $server = $g_mbean_server->lookup("resin:type=Server");
 $stat_service = $g_mbean_server->lookup("resin:type=StatService");
 
@@ -69,28 +71,43 @@ function display_tabs($pages)
 
 function meter_display_page($page)
 {
-  global $g_mbean_server;
   global $g_periods;
+  global $g_server;
+  global $g_period;
   
-  $stat_service = $g_mbean_server->lookup("resin:type=StatService");
-
-  if (! $stat_service)
-    return;
-
+	$stat = get_stats_service($params->mbean_server);
+	if (! $stat) {
+		return;
+	}
+  
   $si = sprintf("%02d", $g_server->Index);
 
   $page_name = "pg_" . $page->name;
   $count = 0;
-
+  
   $period_ms = $page->period;
-  if ($period_ms <= 0) {
-    $period_ms = (6 * 60 * 60 * 1000);
+  if ($period_ms > 0) {
+    $period = ($period_ms / 1000);
+  
+    if (! array_key_exists($period, $g_periods)) {
+      echo "<script language='javascript' type='text/javascript'>\n";
+      echo "<!-- \n";
+      echo "	$(\"#graph-control-period\").append($('<option>', {value : ${period}}).text('Other (${period}s)'));\n"
+      echo " -->\n";
+      echo "</script>";
+    }
   }
   
-  $period = ($period_ms / 1000);
+  if (isset($_REQUEST["p"]) || $period_ms <= 0) {
+    $period = $g_period;
+  } 
   
-  $end = time();
-
+  echo "<script language='javascript' type='text/javascript'>\n";
+  echo "<!-- \n";
+  echo "	option = $(\"#graph-control-period\").val('${period}').attr('selected','selected');\n";
+  echo " -->\n";
+  echo "</script>";
+  
   $columns = $page->columns;
   $graph_count = count($page->meterGraphs);
 
@@ -132,7 +149,7 @@ function meter_display_page($page)
 
     if ($graph) {
       echo "<td valign='top'>";
-      meter_display_graph($graph_name, $graph, $width, $height, $end, $period);
+      meter_display_graph($graph_name, $graph, $width, $height, $period);
       echo "</td>";
     }
 
@@ -145,7 +162,7 @@ function meter_display_page($page)
   echo "</table>";
 }  
 
-function meter_display_graph($name, $graph, $width, $height, $end, $period)
+function meter_display_graph($name, $graph, $width, $height, $period)
 {
 //  echo " <div style='float:top;padding:.5em;'>\n"
   
@@ -168,10 +185,13 @@ function meter_display_graph($name, $graph, $width, $height, $end, $period)
   if (! $caption)
     $caption = $name;
 
-  stat_graph($name, $width, $height, $end, $period, $meters,
-             "A line graph representing $caption over the last 6 hours.",
-             'bottom', null, null, $caption);
-               
+	$params = new GraphParams($name, $width, $height);
+	$params->period = $period;
+	$params->title = $caption;
+	$params->alt = "A line graph representing $caption over the last 6 hours. ";
+
+  stat_graph($params, $meters);
+                 
 //  echo " </div>\n";
 }
 

@@ -9,6 +9,8 @@ if (! admin_init()) {
   return;
 }
 
+enable_graph_controls();
+
 echo "<h1>JVM Memory"; print_help("Memory"); echo "</h1>";
 
 echo "<div id='memory-tabs'>";
@@ -23,26 +25,19 @@ $stat_service = $g_mbean_server->lookup("resin:type=StatService");
 
 $si = sprintf("%02d", $g_server->Index);
 
-if ($stat_service) {
+$memory_params = new GraphParams("memory", 600, 200);
+$memory_params->title = "Memory Free";
+$memory_params->alt = "A line graph representing the amount of free memory in each of the heap, tenured, and permgen pools over the last 6 hours.";
 	
-  $width = 600;
-  $height = 200;
-  $end = time();
-  $period = 6 * 60 * 60;
-	
-  stat_graph("memory", $width, $height, $end, $period,
-             array("$si|JVM|Memory|Heap Memory Free",
-                   "$si|JVM|Memory|Tenured Memory Free",
-                   "$si|JVM|Memory|PermGen Memory Free"),
-             "A line graph representing the amount of free memory in each of the heap, tenured, and permgen pools over the last 6 hours.",
-             'bottom', null, null, 'Memory Free');
+stat_graph($memory_params, array("$si|JVM|Memory|Heap Memory Free",
+																 "$si|JVM|Memory|Tenured Memory Free",
+															   "$si|JVM|Memory|PermGen Memory Free"));
+  	
+$gc_params = new GraphParams("gc", 600, 200);
+$gc_params->title = "GC Time";
+$gc_params->alt = "A line graph representing the amount of time spent perfoming garbage collection over the last 6 hours.";
 
-  stat_graph_regexp("gc", $width, $height, $end, $period, 
-                    "/^$si\|JVM\|Memory\|GC Time/",
-  									"A line graph representing the amount of time spent perfoming garbage collection over the last 6 hours.",
-             				'bottom', null, null, 'GC Time');
-
-}
+stat_graph_regexp($gc_params, "/^$si\|JVM\|Memory\|GC Time/");
 
 $memoryBean = $g_mbean_server->lookup("resin:type=Memory");
 

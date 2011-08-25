@@ -60,7 +60,7 @@ else if ($p_submit) {
   }
 }
 
-$query = "&amp;h=" . $p_hash . "&amp;p=" . $p_period;
+$query = "&h=${p_hash}&p=${p_period}";
 
 require_once "WEB-INF/php/inc.php";
 
@@ -348,7 +348,7 @@ function GraphManager() {
     var server_type = $("select[name=server-set] option:selected")
                         .attr("value");
 
-    var servers;                        
+    var servers;
 
     if (server_type == "self") {                     
       servers = [$("input[name=server-self]")
@@ -359,7 +359,7 @@ function GraphManager() {
                 .attr("value")
                 .split(" ");
     }
-
+    
     var checks = $("input.meter:checkbox:checked").map(function() {
       return $(this).attr("value");
     });
@@ -381,7 +381,7 @@ function GraphManager() {
 
         $.post("rest.php?q=graph",
                { canvas : "graph-" + server,
-                 servers: [ server ],
+                 servers : [ server ],
                  checks : checks,
                  period : period,
                  width : "${width}",
@@ -395,7 +395,7 @@ function GraphManager() {
     else {
       $.post("rest.php?q=graph",
              { canvas : "graph-" + servers.join("-"),
-               servers: servers,
+               servers : servers,
                checks : checks,
                period : period,
                width : "${width}",

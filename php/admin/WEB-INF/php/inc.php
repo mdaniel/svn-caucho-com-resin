@@ -11,6 +11,7 @@ global $g_server_id;
 global $g_mbean_server;
 global $g_resin;
 global $g_server;
+global $g_has_graphs;
 
 global $g_tail_objects;
 
@@ -48,8 +49,7 @@ function admin_init($query="", $is_refresh=false)
   else
     $title = "Resin: $g_page";
 
-  return display_header($g_page, $title, $g_server, $query,
-                        $is_refresh, true);
+  return display_header($g_page, $title, $g_server, $query, $is_refresh, true);
 }  
 
 function mbean_init()
@@ -601,20 +601,32 @@ function display_header($script, $title, $server,
   global $g_server_index;
   global $g_page;
   global $g_next_url;
+  global $g_next_url_params;
   global $user_principal;
 
+  global $display_header_script;
+  global $display_header_title;
+
+  if (! empty($display_header_script)) {
+    return;
+  }
+  
   $title = $title . " for server " . $g_server_id;
 
   $server_id = $server->Id;
-
-  global $display_header_script, $display_header_title;
-
-  if (! empty($display_header_script))
-    return;
-
-  $g_next_url = "?q=" . $g_page . "&amp;s=" . $g_server_index . $query;
+  
+  $next_url = "?q=${g_page}&s=${g_server_index}${query}";
+  
+  foreach ($_GET as $key => $value) {
+    if (! preg_match("/^[sq]{1}$/", $key)) {
+      $next_url .= "&${key}=${value}";
+    }
+  }
+  
+  $g_next_url = str_replace('&', '&amp;', $next_url); 
+  
   if (isset($_REQUEST["new_s"]) && $_REQUEST["new_s"] != $_GET["s"]) {
-    header("Location: " . "?q=" . $g_page . "&s=" . $g_server_index . $query);
+    header("Location: ${next_url}");
     return false;
   }
 
@@ -668,9 +680,7 @@ if ($is_refresh) {
 </head>
 
 <body>
-
 <?
-  
 if ($user_principal) {
 ?>
 <div id="status-bar">
@@ -682,27 +692,21 @@ if (! empty($server)) {
 else {
   $server_name = "default";
 }
-
 ?>
 <ul class='status'>
-   <li class="server status-item"><?php display_servers($server); ?></li>
-<!--
-   <li>Last Refreshed: <?= strftime("%Y-%m-%d %H:%M:%S", time()) ?></li>
-   -->
-   <li class="status-item"><?php display_health(); ?></li>
-   <li class="status-item status-log"><?php display_status_log($server); ?></li>
+	<li class="server status-item"><?php display_servers($server); ?></li>
+  <li class="status-item"><?php display_health(); ?></li>
+  <li class="status-item status-log"><?php display_status_log($server); ?></li>
+  <li class="status-item status-log"><?php display_graph_control(); ?></li>
 </ul>
 </div>
-
 <div style='float: right; width: 20%; text-align: right;'>
- <span class='status-item'><a target="caucho-wiki" href="http://wiki.caucho.com/Admin: <?= ucfirst($g_page) ?>">help</a></span>
- <span class='status-item'><a href="<?= $g_next_url ?>">refresh</a></span>
- <span class='status-item logout'><a href="?q=index.php&amp;logout=true">logout</a></span>
+  <span class='status-item'><a target="caucho-wiki" href="http://wiki.caucho.com/Admin: <?= ucfirst($g_page) ?>">help</a></span>
+  <span class='status-item'><a href="<?= $g_next_url ?>">refresh</a></span>
+  <span class='status-item logout'><a href="?q=index.php&amp;logout=true">logout</a></span>
 </div>
 </div>
-<?php
-}
-?>
+<? } ?>
 
 <div class="top-header">
 	<img src='<?= uri("images/caucho-logo.png") ?>' width='300' alt="Caucho Technology"/>
@@ -818,6 +822,8 @@ function display_status_log($server)
 
       echo "</tbody>\n";
       echo "</table>\n";
+    } else {
+      echo "&nbsp;\n";
     }
   }
 }
@@ -917,9 +923,9 @@ function display_servers($server)
     $server = $g_server;
   }
 
-  echo "<form class='status-item' name='servers' method='post' action='" . $g_next_url . "'>";
+  echo "<form class='status-item' name='servers' method='post' action='${g_next_url}'>";
   echo "<label for='new_s'>Server</label>: "; 
-  echo "<select id='new_s' name='new_s' onchange='document.forms.servers.submit();'>\n";
+  echo "<select id='new_s' name='new_s' onchange='document.forms.servers.submit();' class='status-item'>\n";
 
   $self_server = $server->SelfServer;
 

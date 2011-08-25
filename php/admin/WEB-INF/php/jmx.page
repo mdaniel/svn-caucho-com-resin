@@ -5,7 +5,7 @@
 
 require_once "WEB-INF/php/inc.php";
 
-if (! admin_init($query)) {
+if (! admin_init()) {
   return;
 }
 

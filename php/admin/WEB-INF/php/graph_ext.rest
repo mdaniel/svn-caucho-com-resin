@@ -3,31 +3,20 @@
 include("graph_flot.php");
 
 $graphs = json_decode($HTTP_RAW_POST_DATA);
-
 if (! $graphs) {
   return;
 }  
 
-$now = time();
-
 $mbean_server = new MBeanServer();
-
 if (! $mbean_server) {
   return;
 }
 
 $stat = $mbean_server->lookup("resin:type=StatService");
 
-if (! $stat) {
-  return;
-}
-
 foreach ($graphs as $graph) {
-//  var_dump($graph);
-    
-  stat_graph_script($stat,
-                    $graph->canvas, $graph->names,
-                    $now, $graph->period);
+  stat_graph_script($stat, $graph->canvas, $graph->names, 
+                    $graph->time, $graph->offset, $graph->period);
 }
 
 ?>
