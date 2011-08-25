@@ -92,7 +92,6 @@ public class ResinEmbed
   private String _configFile = EMBED_CONF;
 
   private CloudCluster _cluster;
-  // private ClusterServer _clusterServer;
   
   private Host _host;
   private Server _server;
@@ -193,12 +192,19 @@ public class ResinEmbed
   /**
    * Adds a web-app to the server.
    */
-  public void addWebApp(WebAppEmbed webApp)
+  public void addWebApp(WebAppEmbed webApplication)
   {
-    if (webApp == null)
+    if (webApplication == null) {
       throw new NullPointerException();
+    }
 
-    _webAppList.add(webApp);
+    _webAppList.add(webApplication);
+
+    // If the server has already been started, the web application will need to
+    // be explicitly deployed.
+    if (_lifecycle.isActive()) {
+      deployWebApplication(webApplication);
+    }
   }
 
   /**
@@ -254,11 +260,6 @@ public class ResinEmbed
   public void resetLogManager()
   {
     LogManager.getLogManager().reset();
-
-    /*
-    Logger log = Logger.getLogger("");
-    log.addHandler(new PathHandler(Vfs.lookup(path)));
-    */
   }
 
   public void addScanRoot() {
@@ -316,19 +317,8 @@ public class ResinEmbed
         throw new ConfigException(L.l("ResinEmbed requires a <host> to be configured in the resin.xml, because the webapps must belong to a host."));
       }
 
-      thread.setContextClassLoader(_host.getClassLoader());
-
-      for (WebAppEmbed webApp : _webAppList) {
-        WebAppConfig config = new WebAppConfig();
-        config.setContextPath(webApp.getContextPath());
-        config.setRootDirectory(new RawString(webApp.getRootDirectory()));
-
-        if (webApp.getArchivePath() != null)
-          config.setArchivePath(new RawString(webApp.getArchivePath()));
-
-        config.addBuilderProgram(new WebAppProgram(webApp));
-
-        _host.getWebAppContainer().addWebApp(config);
+      for (WebAppEmbed webApplication : _webAppList) {
+        deployWebApplication(webApplication);
       }
     } catch (Exception e) {
       throw ConfigException.create(e);
@@ -485,6 +475,35 @@ public class ResinEmbed
       _resin.setServerId(cloudServer.getId());
   }
 
+  private void deployWebApplication(WebAppEmbed webApplication)
+  {
+    Thread thread = Thread.currentThread();
+    ClassLoader oldLoader = thread.getContextClassLoader();
+
+    try {
+      // Web applications need to be loaded under the host class-loader.
+      thread.setContextClassLoader(_host.getClassLoader());
+
+      WebAppConfig configuration = new WebAppConfig();
+      configuration.setContextPath(webApplication.getContextPath());
+      configuration.setRootDirectory(new RawString(webApplication
+          .getRootDirectory()));
+
+      if (webApplication.getArchivePath() != null) {
+        configuration.setArchivePath(new RawString(webApplication
+            .getArchivePath()));
+      }
+
+      configuration.addBuilderProgram(new WebAppProgram(webApplication));
+
+      _host.getWebAppContainer().addWebApp(configuration);
+    } catch (Exception e) {
+      throw ConfigException.create(e);
+    } finally {
+      thread.setContextClassLoader(oldLoader);
+    }
+  }
+  
   protected void finalize()
     throws Throwable
   {
