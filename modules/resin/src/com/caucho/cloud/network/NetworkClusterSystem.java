@@ -339,8 +339,6 @@ public class NetworkClusterSystem extends AbstractResinSubSystem
     if (listener != null) {
       ClusterServer clusterServer = _selfServer.getData(ClusterServer.class);
       
-      validateClusterServer(listener, clusterServer);
-      
       long idleTime = clusterServer.getClusterIdleTime() + CLUSTER_IDLE_PADDING;
       
       listener.setKeepaliveConnectionTimeMaxMillis(CLUSTER_IDLE_TIME_MAX);
@@ -349,6 +347,8 @@ public class NetworkClusterSystem extends AbstractResinSubSystem
       
       listener.setProtocol(new HmuxProtocol());
       listener.init();
+      
+      validateClusterServer(listener, clusterServer);
       
       log.info("");
       listener.bind();

@@ -89,9 +89,21 @@ public class Form {
     } catch (UnsupportedEncodingException e) {
       log.log(Level.FINE, e.toString(), e);
     }
-
-    int ch = is.current();
-    while (ch != CharacterIterator.DONE) {
+    
+    parseQueryString(is, table, query, javaEncoding, isTop);
+  }
+  
+  private void parseQueryString(CharCursor is,
+                                HashMapImpl<String,String[]> table,
+                                String query,
+                                String javaEncoding,
+                                boolean isTop)
+    throws IOException
+  {
+    ByteToChar converter = _converter;
+    int ch;
+    
+    while ((ch = is.current()) != CharacterIterator.DONE) {
       for (; Character.isWhitespace((char) ch) || ch == '&'; ch = is.next()) {
       }
 
@@ -108,7 +120,12 @@ public class Form {
         readChar(converter, is, ch, isTop);
       
       String value = converter.getConvertedString();
-
+      
+      // jsp/15n4, server/10yl
+      if (! isTop) {
+        parseQueryString(is, table, query, javaEncoding, isTop);
+      }
+      
       if (log.isLoggable(Level.FINE))
         log.fine("query: " + key + "=" + value);
       
@@ -119,7 +136,13 @@ public class Form {
       else if (oldValue == null) {
         table.put(key, new String[] { value });
       }
-      else { // jsp/15n4
+      else if (! isTop) {
+        String []newValue = new String[oldValue.length + 1];
+        System.arraycopy(oldValue, 0, newValue, 1, oldValue.length);
+        newValue[0] = value;
+        table.put(key, newValue);
+      }
+      else {
         String []newValue = new String[oldValue.length + 1];
         System.arraycopy(oldValue, 0, newValue, 0, oldValue.length);
         newValue[oldValue.length] = value;

@@ -29,22 +29,37 @@
 package com.caucho.server.http;
 
 import javax.servlet.ServletInputStream;
+
+import com.caucho.util.Alarm;
+import com.caucho.util.L10N;
+import com.caucho.vfs.ClientDisconnectException;
+
 import java.io.IOException;
 import java.io.InputStream;
 
 public class ServletInputStreamImpl extends ServletInputStream  {
+  private static final L10N L = new L10N(ServletInputStreamImpl.class);
+  
   private InputStream _is;
+  private long _requestExpireTime;
 
   public ServletInputStreamImpl()
   {
   }
 
-  public void init(InputStream is)
+  public void init(InputStream is, long requestExpireTime)
   {
     _is = is;
+    
+    if (requestExpireTime <= 0)
+      requestExpireTime = Long.MAX_VALUE / 2;
+    
+    _requestExpireTime = requestExpireTime;
   }
 
-  public int available() throws IOException
+  @Override
+  public int available() 
+    throws IOException
   {
     if (_is == null)
       return -1;
@@ -57,10 +72,14 @@ public class ServletInputStreamImpl extends ServletInputStream  {
    *
    * @return the next byte or -1 on end of file.
    */
-  public int read() throws IOException
+  @Override
+  public int read() 
+    throws IOException
   {
     if (_is == null)
       return -1;
+    else if (_requestExpireTime < Alarm.getCurrentTime())
+      throw new ClientDisconnectException(L.l("request-timeout expired"));
     else
       return _is.read();
   }
@@ -70,24 +89,38 @@ public class ServletInputStreamImpl extends ServletInputStream  {
   {
     if (_is == null)
       return -1;
+    else if (_requestExpireTime < Alarm.getCurrentTime())
+      throw new ClientDisconnectException(L.l("request-timeout expired"));
     else
       return _is.read(buf, offset, len);
   }
 
-  public long skip(long n) throws IOException
+  @Override
+  public long skip(long n) 
+    throws IOException
   {
     if (_is == null)
       return -1;
+    else if (_requestExpireTime < Alarm.getCurrentTime())
+      throw new ClientDisconnectException(L.l("request-timeout expired"));
     else
       return _is.skip(n);
   }
 
-  public void close() throws IOException
+  @Override
+  public void close() 
+    throws IOException
   {
   }
 
   public void free()
   {
     _is = null;
+  }
+  
+  @Override
+  public String toString()
+  {
+    return getClass().getSimpleName() + "[" + _is + "]";
   }
 }

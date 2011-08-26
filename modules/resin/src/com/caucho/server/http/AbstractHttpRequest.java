@@ -153,6 +153,7 @@ public abstract class AbstractHttpRequest
   private HttpServletResponseImpl _responseFacade;
 
   private long _startTime;
+  private long _expireTime;
 
   protected CharSegment _hostHeader;
   private boolean _expect100Continue;
@@ -278,6 +279,7 @@ public abstract class AbstractHttpRequest
     _response.startRequest(httpBuffer);
 
     _startTime = -1;
+    _expireTime = -1;
   }
 
   protected void clearRequest()
@@ -1256,7 +1258,7 @@ public abstract class AbstractHttpRequest
   {
     ReadStream stream = getStream(false);
 
-    _is.init(stream);
+    _is.init(stream, _expireTime);
 
     return _is;
   }
@@ -1693,6 +1695,17 @@ public abstract class AbstractHttpRequest
     throws IOException
   {
     _startTime = Alarm.getCurrentTime();
+    
+    TcpSocketLink tcpConn = _tcpConn;
+    
+    if (tcpConn != null) {
+      long requestTimeout = tcpConn.getListener().getRequestTimeout();
+    
+      if (requestTimeout > 0)
+        _expireTime = _startTime + requestTimeout;
+      else
+        _expireTime = Long.MAX_VALUE / 2;
+    }
 
     _response.startInvocation();
   }

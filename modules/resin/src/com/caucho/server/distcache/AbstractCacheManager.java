@@ -1332,8 +1332,9 @@ abstract public class AbstractCacheManager<E extends DistCacheEntry>
   public void close()
   {
     _isClosed = true;
-    
-    getDataBacking().close();
+
+    if (getDataBacking() != null)
+      getDataBacking().close();
   }
   
   public boolean isClosed()

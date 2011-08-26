@@ -95,4 +95,9 @@ public class ContentLengthStream extends StreamImpl {
     else
       return available;
   }
+  
+  public String toString()
+  {
+    return getClass().getSimpleName() + "[" + _next + "]";
+  }
 }

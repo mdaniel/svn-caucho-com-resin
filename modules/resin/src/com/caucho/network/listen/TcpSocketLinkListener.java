@@ -146,6 +146,8 @@ public class TcpSocketLinkListener
   private long _suspendTimeMax = 600 * 1000L;
   // after for 120s start checking for EOF on comet requests
   private long _suspendCloseTimeMax = 120 * 1000L;
+  
+  private long _requestTimeout = -1;
 
   private boolean _tcpNoDelay = true;
   
@@ -595,6 +597,19 @@ public class TcpSocketLinkListener
   public long getSocketTimeout()
   {
     return _socketTimeout;
+  }
+  
+  public void setRequestTimeout(Period period)
+  {
+    _requestTimeout = period.getPeriod();
+  }
+  
+  /**
+   * Returns the max time for a request.
+   */
+  public long getRequestTimeout()
+  {
+    return _requestTimeout;
   }
 
   /**

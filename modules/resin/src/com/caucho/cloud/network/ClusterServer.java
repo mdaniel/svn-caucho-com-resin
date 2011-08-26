@@ -78,7 +78,7 @@ public final class ClusterServer {
   //
 
   private int _loadBalanceConnectionMin = 0;
-  private long _loadBalanceIdleTime = 30000L;
+  private long _loadBalanceIdleTime = 60000L;
   private long _loadBalanceRecoverTime = 15000L;
   private long _loadBalanceSocketTimeout = 600000L;
   private long _loadBalanceWarmupTime = 60000L;

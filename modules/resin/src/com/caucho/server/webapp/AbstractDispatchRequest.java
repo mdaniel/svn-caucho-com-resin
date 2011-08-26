@@ -393,6 +393,7 @@ class AbstractDispatchRequest extends RequestAdapter {
       return _readStream;
   }
 
+  @Override
   public ServletInputStream getInputStream()
     throws IOException
   {
@@ -401,11 +402,13 @@ class AbstractDispatchRequest extends RequestAdapter {
 
     if (_is == null)
       _is = new ServletInputStreamImpl();
-    _is.init(_readStream);
+    
+    _is.init(_readStream, 0);
 
     return _is;
   }
 
+  @Override
   public BufferedReader getReader()
     throws IOException
   {

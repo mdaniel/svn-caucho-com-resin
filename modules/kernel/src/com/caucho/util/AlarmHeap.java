@@ -99,7 +99,7 @@ public class AlarmHeap {
         dequeueImpl(alarm);
 
       // #3548 - getCurrentTime for consistency
-      alarm.setWakeTime(wakeTime);
+      // XXX: alarm.setWakeTime(wakeTime);
 
       return insertImpl(alarm);
     }

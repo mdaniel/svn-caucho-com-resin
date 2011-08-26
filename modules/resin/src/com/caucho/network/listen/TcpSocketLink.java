@@ -81,7 +81,6 @@ public class TcpSocketLink extends AbstractSocketLink
   private final QSocket _socket;
   private final ProtocolConnection _request;
   private final ClassLoader _loader;
-  private final byte []_testBuffer = new byte[1];
 
   private final AcceptTask _acceptTask;
   // HTTP keepalive task

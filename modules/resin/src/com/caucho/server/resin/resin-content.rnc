@@ -716,6 +716,9 @@ r_server-Content =
 
   & r_protocol*
 
+  & (attribute request-timeout { r_period-Type }
+     | element request-timeout { r_period-Type })?
+
   & (attribute shutdown-wait-max { r_period-Type }
      | element shutdown-wait-max { r_period-Type })?
 

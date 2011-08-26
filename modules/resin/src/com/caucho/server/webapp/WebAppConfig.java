@@ -36,6 +36,7 @@ import com.caucho.env.deploy.DeployMode;
 import com.caucho.server.util.CauchoSystem;
 import com.caucho.util.L10N;
 
+import java.util.ArrayList;
 import java.util.logging.Logger;
 import java.util.regex.Pattern;
 
@@ -49,6 +50,8 @@ public class WebAppConfig extends DeployConfig {
 
   // Any regexp
   private Pattern _urlRegexp;
+  
+  private ArrayList<Pattern> _aliasUrlRegexpList = new ArrayList<Pattern>();
 
   // The context path
   private String _contextPath;
@@ -113,6 +116,40 @@ public class WebAppConfig extends DeployConfig {
   public Pattern getURLRegexp()
   {
     return _urlRegexp;
+  }
+
+  /**
+   * Sets the url-regexp
+   */
+  public void addAliasUrlRegexp(String pattern)
+  {
+    if (! pattern.endsWith("$"))
+      pattern = pattern + "$";
+    if (! pattern.startsWith("^"))
+      pattern = "^" + pattern;
+
+    Pattern urlRegexp;
+    
+    if (CauchoSystem.isCaseInsensitive())
+      urlRegexp = Pattern.compile(pattern, Pattern.CASE_INSENSITIVE);
+    else
+      urlRegexp = Pattern.compile(pattern);
+    
+    _aliasUrlRegexpList.add(urlRegexp);
+    
+  }
+  
+  boolean isUrlMatch(String url)
+  {
+    for (int i = _aliasUrlRegexpList.size() - 1; i >= 0; i--) {
+      Pattern regexp = _aliasUrlRegexpList.get(i);
+      
+      if (regexp.matcher(url).matches()) {
+        return true;
+      }
+    }
+
+    return false;
   }
 
   /**

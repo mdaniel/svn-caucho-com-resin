@@ -400,7 +400,7 @@ class WatchdogManager implements AlarmListener {
         sb.append("  conf: " + child.getResinConf() + "\n");
 
         if (child.getPid() > 0)
-          sb.append("  pid: " + child.getPid());
+          sb.append("  pid: " + child.getPid() + "\n");
         
         sb.append("  uptime: " + child.getUptimeString() + "\n");
       }

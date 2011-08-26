@@ -206,5 +206,11 @@ public class JniStream extends StreamImpl {
     close();
   }
   */
+  
+  @Override
+  public String toString()
+  {
+    return getClass().getSimpleName() + "[" + _socket + "]";
+  }
 }
 

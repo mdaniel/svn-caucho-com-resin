@@ -123,8 +123,8 @@ public class WebAppContainer
   private static final int URI_CACHE_SIZE = 8192;
   
   // LRU cache for the webApp lookup
-  private LruCache<String,WebAppController> _uriToAppCache
-  = new LruCache<String,WebAppController>(URI_CACHE_SIZE);
+  private LruCache<String,WebAppUriMap> _uriToAppCache
+    = new LruCache<String,WebAppUriMap>(URI_CACHE_SIZE);
 
   // List of default webApp configurations
   private ArrayList<WebAppConfig> _webAppDefaultList
@@ -721,7 +721,7 @@ public class WebAppContainer
    */
   public void clearCache()
   {
-    _uriToAppCache = new LruCache<String,WebAppController>(URI_CACHE_SIZE);
+    _uriToAppCache = new LruCache<String,WebAppUriMap>(URI_CACHE_SIZE);
     
     _server.clearCache();
   }
@@ -1021,13 +1021,16 @@ public class WebAppContainer
    */
   protected WebAppController getWebAppController(Invocation invocation)
   {
-    WebAppController controller = findByURI(invocation.getURI());
-    if (controller == null)
+    WebAppUriMap entry = findEntryByURI(invocation.getURI());
+
+    if (entry == null)
       return null;
 
     String invocationURI = invocation.getURI();
 
-    String contextPath = controller.getContextPath(invocationURI);
+    // server/1hb1
+    // String contextPath = controller.getContextPath(invocationURI);
+    String contextPath = entry.getContextPath();
 
     // invocation.setContextPath(invocationURI.substring(0, contextPath.length()));
     invocation.setContextPath(contextPath);
@@ -1035,7 +1038,7 @@ public class WebAppContainer
     String uri = invocationURI.substring(contextPath.length());
     invocation.setContextURI(uri);
 
-    return controller;
+    return entry.getController();
   }
 
   /**
@@ -1043,10 +1046,10 @@ public class WebAppContainer
    */
   public WebApp findWebAppByURI(String uri)
   {
-    WebAppController controller = findByURI(uri);
+    WebAppUriMap entry = findEntryByURI(uri);
 
-    if (controller != null)
-      return controller.request();
+    if (entry != null)
+      return entry.getController().request();
     else
       return null;
   }
@@ -1069,13 +1072,26 @@ public class WebAppContainer
    */
   public WebAppController findByURI(String uri)
   {
+    WebAppUriMap entry = findEntryByURI(uri);
+    
+    if (entry != null)
+      return entry.getController();
+    else
+      return null;
+  }
+  
+  /**
+   * Finds the web-app matching the current entry.
+   */
+  public WebAppUriMap findEntryByURI(String uri)
+  {
     if (_appDeploy.isModified())
       _uriToAppCache.clear();
 
-    WebAppController controller = _uriToAppCache.get(uri);
+    WebAppUriMap entry = _uriToAppCache.get(uri);
 
-    if (controller != null)
-      return controller;
+    if (entry != null)
+      return entry;
 
     String cleanUri = uri;
     if (CauchoSystem.isCaseInsensitive())
@@ -1088,45 +1104,47 @@ public class WebAppContainer
       log.log(Level.FINER, e.toString(), e);
     }
 
-    controller = findByURIImpl(cleanUri);
+    entry = findByURIImpl(cleanUri);
 
-    _uriToAppCache.put(uri, controller);
+    _uriToAppCache.put(uri, entry);
 
-    return controller;
+    return entry;
   }
 
   /**
    * Finds the web-app for the entry.
    */
-  private WebAppController findByURIImpl(String subURI)
+  private WebAppUriMap findByURIImpl(String subURI)
   {
-    WebAppController controller = _uriToAppCache.get(subURI);
+    WebAppUriMap entry = _uriToAppCache.get(subURI);
 
-    if (controller != null) {
-      return controller;
+    if (entry != null) {
+      return entry ;
     }
 
     int length = subURI.length();
     int p = subURI.lastIndexOf('/');
 
     if (p < 0 || p < length - 1) { // server/26cf
-      controller = _appDeploy.findController(subURI);
+      WebAppController controller = _appDeploy.findController(subURI);
 
       if (controller != null) {
-        _uriToAppCache.put(subURI, controller);
+        entry = new WebAppUriMap(subURI, controller);
+        
+        _uriToAppCache.put(subURI, entry);
 
-        return controller;
+        return entry;
       }
     }
 
     if (p >= 0) {
-      controller = findByURIImpl(subURI.substring(0, p));
+      entry = findByURIImpl(subURI.substring(0, p));
 
-      if (controller != null)
-        _uriToAppCache.put(subURI, controller);
+      if (entry != null)
+        _uriToAppCache.put(subURI, entry);
     }
 
-    return controller;
+    return entry;
   }
 
   public DeployContainerApi<WebAppController> getWebAppDeployContainer()
@@ -1303,5 +1321,26 @@ public class WebAppContainer
   public String toString()
   {
     return getClass().getSimpleName() + "[" + _classLoader.getId() + "]";
+  }
+  
+  static class WebAppUriMap {
+    private final String _contextPath;
+    private final WebAppController _webAppController;
+    
+    WebAppUriMap(String contextPath, WebAppController webAppController)
+    {
+      _contextPath = contextPath;
+      _webAppController = webAppController;
+    }
+    
+    String getContextPath()
+    {
+      return _contextPath;
+    }
+    
+    WebAppController getController()
+    {
+      return _webAppController;
+    }
   }
 }

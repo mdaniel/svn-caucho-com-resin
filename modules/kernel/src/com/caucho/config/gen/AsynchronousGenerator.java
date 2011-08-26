@@ -136,7 +136,7 @@ public class AsynchronousGenerator<X> extends NullGenerator<X> {
     out.println("try {");
     out.pushDepth();
     // out.print(TcpSocketLink.class.getName());
-    out.print("com.caucho.network.connection.TcpSocketLink");
+    out.print("com.caucho.network.listen.TcpSocketLink");
     out.println(".setCurrentRequest(_requestContext);");
     out.println();
     
@@ -164,7 +164,7 @@ public class AsynchronousGenerator<X> extends NullGenerator<X> {
     out.pushDepth();
     
     // out.print(TcpSocketLink.class.getName());
-    out.print("com.caucho.network.connection.TcpSocketLink");
+    out.print("com.caucho.network.listen.TcpSocketLink");
     out.println(".setCurrentRequest(oldContext);");
     
     out.popDepth();

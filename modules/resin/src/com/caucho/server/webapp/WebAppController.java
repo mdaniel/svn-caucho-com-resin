@@ -459,10 +459,19 @@ public class WebAppController
   @Override
   public boolean isNameMatch(String url)
   {
-    if (CauchoSystem.isCaseInsensitive())
-      return url.equalsIgnoreCase(_contextPath);
+    if (CauchoSystem.isCaseInsensitive()) {
+      if (url.equalsIgnoreCase(_contextPath))
+        return true;
+    }
+    else {
+      if (url.equals(_contextPath))
+        return true;
+    }
+
+    if (getConfig() != null)
+      return getConfig().isUrlMatch(url);
     else
-      return url.equals(_contextPath);
+      return false;
   }
 
   /**

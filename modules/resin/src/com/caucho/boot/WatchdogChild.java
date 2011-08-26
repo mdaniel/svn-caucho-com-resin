@@ -49,6 +49,11 @@ import com.caucho.vfs.Path;
 class WatchdogChild
 {
   private static final L10N L = new L10N(WatchdogChild.class);
+  
+  private static final long MINUTE = 60 * 1000L;
+  private static final long HOUR = 60 * MINUTE;
+  private static final long DAY = 24 * HOUR;
+  
   private final String _id;
 
   private final ResinSystem _system;
@@ -313,7 +318,21 @@ class WatchdogChild
     if (uptime <= 0)
       return "--";
     
-    return "--";
+    long d = uptime / DAY;
+    
+    StringBuilder sb = new StringBuilder();
+    
+    sb.append(d + " day" + (d == 1 ? "" : "s"));
+    
+    long h = uptime % DAY / HOUR;
+    
+    sb.append(" ").append(h / 10).append(h % 10).append("h");
+    
+    long m = uptime % HOUR / MINUTE;
+    
+    sb.append(m / 10).append(m % 10);
+    
+    return sb.toString();
   }
   
   boolean isRestart()
