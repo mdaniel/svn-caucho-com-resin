@@ -206,6 +206,21 @@ public class ResinEmbed
       deployWebApplication(webApplication);
     }
   }
+  
+  public void removeWebApp(WebAppEmbed webApplication)
+  {
+    if (webApplication == null) {
+      throw new NullPointerException();
+    }
+
+    _webAppList.remove(webApplication);
+
+    // If the server has already been started, the web application will need
+    // to be undeployed.
+    if (_lifecycle.isActive()) {
+      undeployWebApplication(webApplication);
+    }
+  }
 
   /**
    * Sets a list of webapps
@@ -504,6 +519,11 @@ public class ResinEmbed
     }
   }
   
+  private void undeployWebApplication(WebAppEmbed webApplication)
+  {
+    webApplication.getWebApp().destroy();
+  }
+
   protected void finalize()
     throws Throwable
   {
