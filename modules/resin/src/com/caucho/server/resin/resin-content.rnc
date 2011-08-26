@@ -484,6 +484,9 @@ r_port-Content =
 
    & (attribute port { string } | element port { string })
 
+   & (attribute request-timeout { r_period-Type }
+      | element request-timeout { r_period-Type })?
+
    & (attribute secure { r_boolean-Type }
       | element secure { r_boolean-Type })?
 
@@ -648,6 +651,9 @@ r_server-Basis =
      | element load-balance-weight { r_int-Type })?
 
   & r_memory-free-min?
+
+  & (attribute request-timeout { r_period-Type }
+     | element request-timeout { r_period-Type })?
 
   & (attribute shutdown-wait-max { r_period-Type }
      | element shutdown-wait-max { r_period-Type })?

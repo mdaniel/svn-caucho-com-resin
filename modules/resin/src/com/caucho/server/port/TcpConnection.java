@@ -404,6 +404,11 @@ public class TcpConnection extends PortConnection implements ThreadTask
     return getPort().allowKeepalive(_connectionStartTime);
   }
 
+  public long getRequestTimeout()
+  {
+    return getPort().getRequestTimeout();
+  }
+
   /**
    * Tries to mark the connection as a keepalive connection
    *

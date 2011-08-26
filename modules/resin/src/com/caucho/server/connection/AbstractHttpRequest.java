@@ -184,6 +184,8 @@ public abstract class AbstractHttpRequest
   private ArrayList<Locale> _locales = new ArrayList<Locale>();
 
   private long _startTime;
+  private long _requestExpireTime;
+
   private ArrayList<Path> _closeOnExit = new ArrayList<Path>();
 
   // Efficient date class for printing date headers
@@ -307,8 +309,18 @@ public abstract class AbstractHttpRequest
     _oldProvider = SecurityContext.setProvider(this);
     _startTime = Alarm.getCurrentTime();
 
-    if (_tcpConn != null)
-      _tcpConn.beginActive();
+    TcpConnection tcpConn = _tcpConn;
+
+    _requestExpireTime = Long.MAX_VALUE / 2;
+    if (tcpConn != null) {
+      long timeout = tcpConn.getRequestTimeout();
+
+      if (timeout > 0)
+        _requestExpireTime = _startTime + timeout;
+    }
+
+    if (tcpConn != null)
+      tcpConn.beginActive();
   }
 
   /**
@@ -1912,7 +1924,7 @@ public abstract class AbstractHttpRequest
 
     ReadStream stream = getStream(false);
 
-    _is.init(stream);
+    _is.init(stream, _requestExpireTime);
 
     return _is;
   }
@@ -2351,6 +2363,16 @@ public abstract class AbstractHttpRequest
   protected final void setStartTime()
   {
     _startTime = Alarm.getExactTime();
+
+    TcpConnection tcpConn = _tcpConn;
+
+    _requestExpireTime = Long.MAX_VALUE / 2;
+    if (tcpConn != null) {
+      long timeout = tcpConn.getRequestTimeout();
+
+      if (timeout > 0)
+        _requestExpireTime = _startTime + timeout;
+    }
   }
 
   /**

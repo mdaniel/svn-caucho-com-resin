@@ -544,6 +544,22 @@ public class Server extends ProtocolDispatchServer
   }
 
   /**
+   * Sets the default read/write timeout for the request sockets.
+   */
+  public void setRequestTimeout(Period period)
+  {
+    _clusterServer.setRequestTimeout(period);
+  }
+
+  /**
+   * Gets the request timeout for the request sockets.
+   */
+  public long getRequestTimeout()
+  {
+    return _clusterServer.getRequestTimeout();
+  }
+
+  /**
    * Sets the maximum thread-based keepalive
    */
   public void setThreadMax(int max)

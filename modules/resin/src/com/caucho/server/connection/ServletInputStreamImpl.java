@@ -31,23 +31,32 @@ package com.caucho.server.connection;
 import javax.servlet.ServletInputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import com.caucho.util.Alarm;
+import com.caucho.util.L10N;
+import com.caucho.vfs.ClientDisconnectException;
 
 public class ServletInputStreamImpl extends ServletInputStream  {
+  private static final L10N L = new L10N(ServletInputStreamImpl.class);
+
   private InputStream _is;
+  private long _requestExpireTime;
 
   public ServletInputStreamImpl()
   {
   }
 
-  public void init(InputStream is)
+  public void init(InputStream is, long expireTime)
   {
     _is = is;
+    _requestExpireTime = expireTime;
   }
 
   public int available() throws IOException
   {
     if (_is == null)
       return -1;
+    else if (_requestExpireTime < Alarm.getCurrentTime())
+      throw new ClientDisconnectException(L.l("request-timeout expired"));
     else
       return _is.available();
   }
@@ -61,6 +70,8 @@ public class ServletInputStreamImpl extends ServletInputStream  {
   {
     if (_is == null)
       return -1;
+    else if (_requestExpireTime < Alarm.getCurrentTime())
+      throw new ClientDisconnectException(L.l("request-timeout expired"));
     else
       return _is.read();
   }
@@ -69,6 +80,8 @@ public class ServletInputStreamImpl extends ServletInputStream  {
   {
     if (_is == null)
       return -1;
+    else if (_requestExpireTime < Alarm.getCurrentTime())
+      throw new ClientDisconnectException(L.l("request-timeout expired"));
     else
       return _is.read(buf, offset, len);
   }
@@ -77,6 +90,8 @@ public class ServletInputStreamImpl extends ServletInputStream  {
   {
     if (_is == null)
       return -1;
+    else if (_requestExpireTime < Alarm.getCurrentTime())
+      throw new ClientDisconnectException(L.l("request-timeout expired"));
     else
       return _is.skip(n);
   }

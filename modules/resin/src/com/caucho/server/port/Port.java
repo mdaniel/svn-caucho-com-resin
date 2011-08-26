@@ -119,6 +119,8 @@ public class Port
   // default timeout
   private long _socketTimeout = DEFAULT;
 
+  private long _requestTimeout = DEFAULT;
+
   private long _suspendTimeMax = DEFAULT;
 
   private boolean _tcpNoDelay = true;
@@ -236,6 +238,9 @@ public class Port
 
       if (_socketTimeout == DEFAULT)
         _socketTimeout = server.getSocketTimeout();
+
+      if (_requestTimeout == DEFAULT)
+        _requestTimeout = server.getRequestTimeout();
     }
   }
 
@@ -562,6 +567,16 @@ public class Port
   public void setSocketTimeout(Period period)
   {
     _socketTimeout = period.getPeriod();
+  }
+
+  public void setRequestTimeout(Period period)
+  {
+    _requestTimeout = period.getPeriod();
+  }
+
+  public long getRequestTimeout()
+  {
+    return _requestTimeout;
   }
 
   /**

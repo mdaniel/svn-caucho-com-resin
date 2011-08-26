@@ -68,15 +68,16 @@ public class ClusterServer {
   private ServerConnector _serverConnector;
 
   private long _socketTimeout = 65000L;
+  private long _requestTimeout = Long.MAX_VALUE / 2;
   private long _keepaliveTimeout = 15000L;
-  
+
   private long _loadBalanceIdleTime = DEFAULT;
   private long _loadBalanceRecoverTime = 15000L;
   private long _loadBalanceSocketTimeout = DEFAULT;
   private long _loadBalanceWarmupTime = 60000L;
-  
+
   private long _loadBalanceConnectTimeout = 5000L;
-  
+
   private int _loadBalanceWeight = 100;
 
   private ContainerProgram _serverProgram
@@ -92,12 +93,12 @@ public class ClusterServer {
   public ClusterServer(Machine machine)
   {
     _machine = machine;
-    
+
     _cluster = machine.getCluster();
 
     _clusterPort = new ClusterPort(this);
     _ports.add(_clusterPort);
-    
+
     _serverConnector = new ServerConnector(this);
   }
 
@@ -279,6 +280,22 @@ public class ClusterServer {
   }
 
   /**
+   * Sets the loadBalance read/write timeout
+   */
+  public void setRequestTimeout(Period period)
+  {
+    _requestTimeout = period.getPeriod();
+  }
+
+  /**
+   * Gets the loadBalance read/write timeout
+   */
+  public long getRequestTimeout()
+  {
+    return _requestTimeout;
+  }
+
+  /**
    * Sets the loadBalance warmup time
    */
   public void setLoadBalanceWarmupTime(Period period)
@@ -390,7 +407,7 @@ public class ClusterServer {
     throws ConfigException
   {
     Port port = new Port(this);
-    
+
     HttpProtocol protocol = new HttpProtocol();
     protocol.setParent(port);
     port.setProtocol(protocol);
@@ -431,19 +448,19 @@ public class ClusterServer {
       Port serverPort = _ports.get(i);
 
       if (port != serverPort.getPort())
-	continue;
+        continue;
 
       if ((address == null) != (serverPort.getAddress() == null))
-	continue;
+        continue;
       else if (address == null || address.equals(serverPort.getAddress())) {
-	serverPort.bind(ss);
+        serverPort.bind(ss);
 
-	return;
+        return;
       }
     }
 
     throw new IllegalStateException(L.l("No matching port for {0}:{1}",
-					address, port));
+                                        address, port));
   }
 
   /**
@@ -518,7 +535,7 @@ public class ClusterServer {
   {
     return _serverProgram;
   }
-  
+
   /**
    * Initialize
    */
