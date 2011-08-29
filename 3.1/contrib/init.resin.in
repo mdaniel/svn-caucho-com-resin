@@ -1,0 +1,89 @@
+#!/bin/sh
+#
+# Linux startup script for Resin
+# chkconfig: 345 85 15
+# description: Resin is a Java Web server.
+# processname: wrapper.pl
+#
+# To install, configure this file as needed and copy init.resin
+# to /etc/rc.d/init.d as resin.  Then use "# /sbin/chkconfig resin reset"
+#
+JAVA_HOME=@JAVA_HOME@
+RESIN_HOME=@resin_home@
+
+export JAVA_HOME RESIN_HOME
+
+JAVA=$JAVA_HOME/bin/java
+#
+# If you want to start the entire Resin process as a different user,
+# set this to the user name.  If you need to bind to a protected port,
+# e.g. port 80, you can't use USER, but will need to use bin/resin.
+#
+USER=
+#
+# Set to the server id to start
+#
+#SERVER="-server app-a"
+#
+ARGS="-resin-home $RESIN_HOME $SERVER"
+
+if test -r /lib/lsb/init-functions; then
+  . /lib/lsb/init-functions
+else
+
+  log_daemon_msg () {
+      if [ -z "$1" ]; then
+          return 1
+      fi
+
+      if [ -z "$2" ]; then
+          echo -n "$1:"
+          return
+      fi
+    
+      echo -n "$1: $2"
+  }
+  
+  log_end_msg () {
+      [ -z "$1" ] && return 1
+
+      if [ $1 -eq 0 ]; then
+        echo " ."
+      else
+        echo " failed!"
+      fi
+    
+    return $1
+  }
+
+fi
+
+case "$1" in
+  start)
+	log_daemon_msg "Starting resin"
+	if test -n "$USER"; then
+  	  su $USER -c "$JAVA -jar $RESIN_HOME/lib/resin.jar $ARGS start" 1>/dev/null 2>/dev/null
+	else
+  	  $JAVA -jar $RESIN_HOME/lib/resin.jar $ARGS start 1>/dev/null 2>/dev/null
+        fi
+	log_end_msg $?
+	;;
+  stop)
+	log_daemon_msg "Stopping resin"
+	if test -n "$USER"; then
+  	  su $USER -c "$JAVA -jar $RESIN_HOME/lib/resin.jar $ARGS stop" 1>/dev/null 2>/dev/null
+	else
+  	  $JAVA -jar $RESIN_HOME/lib/resin.jar $ARGS stop 1>/dev/null 2>/dev/null
+        fi
+	log_end_msg $?
+	;;
+  restart)
+	$0 stop
+	$0 start
+	;;
+  *)
+	echo "Usage: $0 {start|stop|restart}"
+	exit 1
+esac
+
+exit 0

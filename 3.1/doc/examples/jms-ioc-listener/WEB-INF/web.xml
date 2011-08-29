@@ -1,0 +1,20 @@
+<web-app xmlns="http://caucho.com/ns/resin">
+  <!--
+     - Configures the JDBC-backed Queue.
+    -->
+  <jms-queue name="my_queue" uri="file:path=WEB-INF/db"/>
+
+  <!--
+     - Configures the JMS connection factory
+    -->
+  <jms-connection-factory uri="resin:"/>
+
+  <ejb-message-bean class="example.MyListener">
+    <destination>${my_queue}</destination>
+  </ejb-message-bean>
+
+  <!--
+     - The test servlet uses will use injection to get the Queue
+    -->
+  <servlet-mapping url-pattern="/send" servlet-class="example.MessageServlet"/>
+</web-app>

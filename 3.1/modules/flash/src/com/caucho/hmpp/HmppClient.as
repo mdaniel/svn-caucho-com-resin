@@ -1,0 +1,402 @@
+/*
+ * Copyright (c) 2001-2008 Caucho Technology, Inc.  All rights reserved.
+ *
+ * The Apache Software License, Version 1.1
+ *
+ * Redistribution and use in source and binary forms, with or without
+ * modification, are permitted provided that the following conditions
+ * are met:
+ *
+ * 1. Redistributions of source code must retain the above copyright
+ *    notice, this list of conditions and the following disclaimer.
+ *
+ * 2. Redistributions in binary form must reproduce the above copyright
+ *    notice, this list of conditions and the following disclaimer in
+ *    the documentation and/or other materials provided with the
+ *    distribution.
+ *
+ * 3. The end-user documentation included with the redistribution, if
+ *    any, must include the following acknowlegement:
+ *       "This product includes software developed by the
+ *        Caucho Technology (http://www.caucho.com/)."
+ *    Alternately, this acknowlegement may appear in the software itself,
+ *    if and wherever such third-party acknowlegements normally appear.
+ *
+ * 4. The names "Burlap", "Resin", and "Caucho" must not be used to
+ *    endorse or promote products derived from this software without prior
+ *    written permission. For written permission, please contact
+ *    info@caucho.com.
+ *
+ * 5. Products derived from this software may not be called "Resin"
+ *    nor may "Resin" appear in their names without prior written
+ *    permission of Caucho Technology.
+ *
+ * THIS SOFTWARE IS PROVIDED ``AS IS'' AND ANY EXPRESSED OR IMPLIED
+ * WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES
+ * OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
+ * DISCLAIMED.  IN NO EVENT SHALL CAUCHO TECHNOLOGY OR ITS CONTRIBUTORS
+ * BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY,
+ * OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT
+ * OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR
+ * BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY,
+ * WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE
+ * OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN
+ * IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+ *
+ * @author Emil Ong
+ * 
+ */
+
+package com.caucho.hmpp
+{
+  import flash.events.Event;
+  import flash.events.EventDispatcher;
+  import flash.events.ProgressEvent;
+  import flash.events.TimerEvent;
+  import flash.net.URLRequest;
+  import flash.net.URLStream;
+  import flash.net.Socket;
+  import flash.system.Security;
+  import flash.utils.describeType;
+  import flash.utils.Timer;
+
+  import hessian.io.Hessian2StreamingInput;
+  import hessian.util.URL;
+
+  import com.caucho.hmpp.auth.*;
+  import com.caucho.hmpp.packet.*;
+
+  import mx.core.Application;
+  import mx.utils.URLUtil;
+
+  public class HmppClient extends EventDispatcher 
+                          implements HmppConnection 
+  {
+    public static const MESSAGE:String = "message";
+    public static const QUERY:String = "query";
+    public static const PRESENCE:String = "presence";
+    public static const LOGIN:String = "login";
+
+    private var _url:String;
+    private var _scheme:String;
+    private var _host:String;
+    private var _port:int;
+    private var _path:String;
+
+    private var _to:String;
+
+    private var _jid:String;
+
+    private var _policyPort:int = -1;
+    private var _socket:Socket = new Socket();
+
+    private var _readHTTPHeader:Boolean = false;
+    private var _readHTTPStatus:Boolean = false;
+    private var _headerHistory:Array = new Array(4);
+    private var _httpStatus:String = "";
+
+    private var _stream:HmppClientStream;
+
+    private var _queryId:int = 0;
+    private var _outstandingQueries:Object = new Object();
+
+    /**
+     * Constructor.
+     *
+     * @param url  The URL of the destination service.
+     *
+     */
+    public function HmppClient(url:String):void
+    {
+      _url = url;
+      parseURL(url);
+    }
+
+    protected function parseURL(url:String):void
+    {
+      var p:int = url.indexOf("://");
+
+      if (p < 0)
+        throw new ArgumentError("URL '" + url + "' is not well-formed");
+
+      _scheme = url.substring(0, p);
+
+      url = url.substring(p + 3);
+
+      p = url.indexOf("/");
+      if (p >= 0) {
+        _path = url.substring(p);
+        url = url.substring(0, p);
+      }
+      else {
+        _path = "/";
+      }
+
+      p = url.indexOf(':');
+      if (p > 0) {
+        _host = url.substring(0, p);
+        _port = parseInt(url.substring(p + 1));
+      }
+      else {
+        _host = url;
+
+        if ("https" == _scheme)
+          _port = 443;
+        else
+          _port = 80;
+      }
+    }
+
+    public function get host():String
+    {
+      return _host;
+    }
+
+    public function get port():int
+    {
+      return _port;
+    }
+
+    public function connect():void
+    {
+      /* TODO
+      var policyUrl:URL = 
+        new URL(URLUtil.getFullURL(Application.application.url, destination));
+
+      var policy:String = "xmlsocket://" + policyUrl.host + ":" + 
+                          (_policyPort < 0 ? policyUrl.port : _policyPort);
+
+      Security.loadPolicyFile(policy);
+      */
+
+      _socket = new Socket(_host, _port);
+      _socket.addEventListener(Event.CONNECT, handleConnect);
+
+      _stream = new HmppClientStream(_socket);
+    }
+    
+    private function handleConnect(event:Event):void
+    {
+      _socket.writeUTFBytes("POST " + _path + "/hemp HTTP/1.1\r\n");
+      _socket.writeUTFBytes("Host: " + _to + ":" + _port + "\r\n");
+      _socket.writeUTFBytes("Upgrade: HMPP/0.9\r\n");
+      _socket.writeUTFBytes("Content-Length: 0\r\n");
+      _socket.writeUTFBytes("\r\n");
+      _socket.addEventListener(ProgressEvent.SOCKET_DATA, handleData);
+    }
+
+    private function handleData(event:Event):void
+    {
+      if (_socket.bytesAvailable <= 0)
+        return;
+
+      if (! _readHTTPHeader) {
+        do {
+          var char:String = _socket.readUTFBytes(1);
+
+          if (_readHTTPStatus == false) {
+            _httpStatus += char;
+            //trace("updated status: '" + _httpStatus + "'");
+
+            if (_httpStatus.indexOf("\r\n") >= 0) {
+              _readHTTPStatus = true;
+            }
+          }
+
+          _headerHistory.push(char);
+          _headerHistory.shift();
+
+          if (_headerHistory[0] == '\r' && _headerHistory[1] == '\n' &&
+              _headerHistory[2] == '\r' && _headerHistory[3] == '\n') {
+            _headerHistory = null;
+            _readHTTPHeader = true;
+
+            if (_httpStatus.indexOf("HTTP/1.1 101") != 0) {
+              trace("unexpected HTTP status");
+            }
+            else {
+              dispatchEvent(new Event(Event.CONNECT));
+            }
+
+            break;
+          }
+        }
+        while (_socket.bytesAvailable > 0);
+      }
+
+      _stream.input.read(_socket);
+
+      while (_stream.input.hasMoreObjects()) {
+        handlePacket(Packet(_stream.input.nextObject()));
+      }
+    }
+
+    private function handlePacket(packet:Packet):void
+    {
+      var bundle:QueryCallbackBundle = null;
+
+      trace("got packet: " + packet);
+
+      if (packet is QueryResult) {
+        var queryResult:QueryResult = QueryResult(packet);
+
+        if (_outstandingQueries.hasOwnProperty(queryResult.id)) {
+          bundle = 
+            QueryCallbackBundle(_outstandingQueries[queryResult.id.toString()]);
+
+          bundle.callback.onQueryResult(queryResult.to, queryResult.from,
+                                        queryResult.value, bundle.handback);
+        }
+        else {
+          trace("Recieved unknown QueryResult: " + queryResult.id);
+        }
+      }
+      else if (packet is QueryError) {
+        var queryError:QueryError = QueryError(packet);
+
+        if (_outstandingQueries.hasOwnProperty(queryError.id)) {
+          bundle = 
+            QueryCallbackBundle(_outstandingQueries[queryError.id.toString()]);
+
+          bundle.callback.onQueryError(queryError.to, queryError.from,
+                                       queryError.value, queryError.error,
+                                       bundle.handback);
+        }
+        else {
+          trace("Recieved unknown QueryError: " + queryError.id);
+        }
+      }
+      else {
+        dispatchEvent(packet);
+      }
+
+      /*
+      else if (packet is Message) {
+        if (messageHandler != null) {
+          var msg:Message = Message(packet);
+
+          messageHandler.sendMessage(msg.to, msg.from, msg.value);
+        }
+      }
+      else if (packet is MessageError) {
+        if (messageHandler != null) {
+          var msg:MessageError = MessageError(packet);
+
+          messageHandler.sendMessageError(msg.to, msg.from, 
+                                          msg.value, msg.error);
+        }
+      }*/
+    }
+
+    /**
+     * Sets the port on which the XMLSocket server is listening to serve
+     * the policy file.
+     */
+    public function get policyPort():int
+    {
+      return _policyPort;
+    }
+
+    public function set policyPort(policyPort:int):void
+    {
+      _policyPort = policyPort;
+    }
+
+    public function login(uid:String, password:String):void
+    {
+      var callback:LoginCallback = new LoginCallback();
+      querySet("", new AuthQuery(uid, password), callback, this);
+    }
+
+    public function get jid():String
+    {
+      return _jid;
+    }
+
+    public function set jid(value:String):void
+    {
+      _jid = value;
+    }
+
+    public function isClosed():Boolean
+    {
+      return _stream == null;
+    }
+
+    public function close():void
+    {
+      _stream.close();
+      _stream = null;
+    }
+
+    public function sendMessage(to:String, value:Object):void
+    {
+      stream.sendMessage(to, null, value);
+    }
+
+    public function queryGet(to:String, value:Object, 
+                             callback:QueryCallback, handback:Object):void
+    {
+      var queryId:int = _queryId++;
+      _outstandingQueries[queryId.toString()] = 
+        new QueryCallbackBundle(callback, handback);
+
+      stream.sendQueryGet(queryId, to, null, value);
+    }
+
+    public function querySet(to:String, value:Object,
+                             callback:QueryCallback, handback:Object):void
+    {
+      var queryId:int = _queryId++;
+      _outstandingQueries[queryId.toString()] = 
+        new QueryCallbackBundle(callback, handback);
+
+      stream.sendQuerySet(queryId, to, null, value);
+    }
+
+    public function get stream():HmppStream
+    {
+      return _stream;
+    }
+  }
+}
+
+class QueryCallbackBundle {
+  private var _callback:com.caucho.hmpp.QueryCallback;
+  private var _handback:Object;
+
+  public function QueryCallbackBundle(callback:com.caucho.hmpp.QueryCallback, 
+                                      handback:Object):void
+  {
+    _callback = callback;
+    _handback = handback;
+  }
+
+  public function get callback():com.caucho.hmpp.QueryCallback
+  {
+    return _callback;
+  }
+
+  public function get handback():Object
+  {
+    return _handback;
+  }
+}
+
+class LoginCallback implements com.caucho.hmpp.QueryCallback {
+  public function onQueryResult(to:String, from:String,
+                                value:Object, handback:Object):void
+  {
+    var result:com.caucho.hmpp.auth.AuthResult = 
+      com.caucho.hmpp.auth.AuthResult(value);
+    handback.jid = result.jid;
+    handback.dispatchEvent(new com.caucho.hmpp.auth.LoginSuccessEvent());
+  }
+
+  public function onQueryError(to:String, from:String,
+                               value:Object, error:com.caucho.hmpp.HmppError,
+                               handback:Object):void
+  {
+    handback.dispatchEvent(new com.caucho.hmpp.auth.LoginFailureEvent());
+  }
+}

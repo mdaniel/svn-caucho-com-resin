@@ -1,0 +1,825 @@
+<document>
+  <header>
+    <product>resin</product>
+    <title>HMTP</title>
+    <type>contents</type>
+
+    <description>
+      <p>
+      HMTP (Hessian Message Transport Protocol) is an asynchronous,
+      object-oriented messaging framework, designed around small, interactive
+      message packets, a brokered-agent topology and based on the <a href="http://hessian.caucho.com/">Hessian</a> protocol and <a href="http://xmpp.org">XMPP</a> (Jabber).
+      </p>
+    </description>
+  </header>
+
+<body>
+
+<localtoc/>
+
+<s1 title="Quick Start">
+
+<s2 title="Server sendMessage example">
+
+<p>Sending a message from one agent to another is a basic HMTP use case.
+Typical applications include chat text, game updates, Atom/RSS updates,
+pub/sub messaging, and event notification for administration consoles.
+In this example, a servlet send a message to an internal logging service.</p>
+
+<p>The sending agent sends a message using <code>sendMessage</code> with
+the jid address of the target agent (to), and a message payload.
+The receiving agent implements the <code>sendMessage</code> method to
+receive messages.  Since HMTP is a streaming API like
+<code>java.io.OutputStream</code>, the sending method is the same as
+the receiving method, <code>sendMessage</code>.</p>
+
+<p>HMTP messages use a JID (Jabber ID) for addressing, which looks like
+<code>user@domain</code> or <code>user@domain/resource</code>.  The
+second <code>user@domain/resource</code> is used for dynamic
+agent, e.g. a user logged into messaging with a cellphone.</p>
+
+<p>The message payload can be any serializable object.  Because Hessian
+is available for many languages, the message can easily interoperate with
+RIA platforms like Flash.</p>
+
+<p>Since HMTP uses a broker/agent or hub-and-spoke messaging model, all
+messages go through the broker to be routed to the target agent.  Each
+service and client will register an agent with the broker and receive
+a unique JID for the routing.</p>
+
+<figure src="hmtp-log.png"/>
+
+<p>Writing a HMTP client involves the following steps:</p>
+
+<ol>
+<li>Obtaining the <code>HmtpConnectionFactory</code> (usually with @In)</li>
+<li>Creating a <code>HmtpConnection</code> (which automatically registers an agent)</li>
+<li>Optionally: setting message handlers to receive messages</li>
+<li>Sending messages</li>
+<li>Close the connection</li>
+</ol>
+
+<p>In the example, the servlet creates a <code>HmtpConnection</code> from
+a <code>HmtpConnectionFactory</code> and sends the message.  Opening
+a connection registers an agent with the broker.  When the connection
+closes, it will unregister the agent.  The Web Beans
+<code>@javax.webbeans.In</code> injection annotation provides access
+to the <code>HmtpConnectionFactory</code>.</p>
+
+<example title="TestServlet.java">
+package example;
+
+import javax.servlet.*;
+import javax.webbeans.In;
+import com.caucho.hmtp.HmtpConnectionFactory;
+import com.caucho.hmtp.HmtpConnection;
+
+public class TestServlet extends GenericServlet
+{
+  @In HmtpConnectionFactory _factory;
+
+  public void service(ServletRequest req, ServletResponse response)
+  {
+    HmtpConnection conn = _factory.getConnection("demo@localhost", null);
+
+    try {
+      conn.sendMessage("test@localhost", "Hello, world!");
+    } finally {
+      conn.close();
+    }
+  }
+}
+</example>
+
+<p>Writing a HMTP Service involves the following steps:</p>
+
+<ol>
+<li>Implementing <code>HmtpService</code> (usually by extending <code>GenericService</code>)</li>
+<li>Getting the <code>HmtpBroker</code> (either with <code>@In</code> or done by <code>GenericService</code> automatically)</li>
+<li>Registering the <code>HmtpService</code> with <code>HmtpBroker</code> using <code>addService</code> (done by <code>GenericService</code> automatically)</li>
+<li>Receiving messages to the implemented <code>HmtpAgentStream</code> (or overriding <code>HmtpStream</code> methods in <code>GenericService</code>)</li>
+<li>Sending messages to other agents using the
+broker's <code>getBrokerStream</code>.</li>
+</ol>
+
+<p>By extending <code>GenericService</code>, the service automatically gains
+a queuing ability.  The broker will queue the message and spawn a new thread
+before calling the service's <code>sendMessage</code>, in order to isolate
+the receiver from the sender.  Advanced applications can disable the
+queue if appropriate.</p>
+
+<example title="LogService.java">
+package example;
+
+import com.caucho.hemp.broker.GenericService;
+import java.io.Serializable;
+import java.util.logging.*;
+
+public class LogService extends GenericService
+{
+  private static final Logger log
+    = Logger.getLogger(LogService.class.getName());
+
+  @Override
+  public void sendMessage(String to, String from, Serializable value)
+  {
+    log.info(this + " sendMessage from=" + from + " value=" + value);
+  }
+}
+</example>
+
+<p>The HMTP configuration consists of the broker and the service
+configured with <a href="resin-ioc.xtp">Resin IoC</a>.  Because
+the <code>LogService</code> extends <code>GenericService</code>, it
+will automatically register itself with the broker.</p>
+
+<example title="WEB-INF/resin-web.xml">
+&lt;web-app xmlns="http://caucho.com/ns/resin">
+
+    &lt;bean class="com.caucho.hemp.broker.HempBroker"/>
+
+    &lt;bean name="test@localhost" class="example.LogService"/>
+
+&lt;/web-app>
+</example>
+
+</s2>
+
+<s2 title="Client queryGet (RPC) example">
+
+<p>Remote calls are another primary use for HMTP.  In this example, we
+just query a service for some basic information.  In HMTP, queries
+are bidirectional: the server can also query the client.  And the application
+can also use the messaging in the previous example.</p>
+
+<figure src="hmtp-client.png"/>
+
+<p>To implement the server side of an RPC call, the service implements
+<code>sendQueryGet</code> or <code>sendQuerySet</code>, and examines the
+query to see if it understands the query class.  If the service does not
+understand the query, it will return false (or call the super
+method for <code>GenericService</code>).  If a query returns true, it
+must either send a query response or query error with
+the same <code>id</code>, so the waiting client will always receive a
+response.</p>
+
+<p>The type-based query system gives enormous flexibility in creating services.
+Services can be mash-ups of capabilities just by adding new query types.</p>
+
+<example title="TestService.java">
+package example;
+
+import com.caucho.hemp.broker.GenericService;
+import java.io.Serializable;
+import java.util.logging.*;
+
+public class TestService extends GenericService
+{
+  private static final Logger log
+    = Logger.getLogger(LogService.class.getName());
+
+  @Override
+  public boolean sendQueryGet(long id, String to, String from,
+                              Serializable query)
+  {
+    if (query instanceof TestQuery) {
+      getBrokerStream().sendQueryResult(id, to, from, "hello response");
+
+      return true;
+    }
+    else {
+      return super.sendQueryGet(id, to, from, query);
+    }
+  }
+}
+</example>
+
+<p>The remote client, <code>HmtpClient</code>, extends
+the <code>HmtpConnection</code> API to provide extra calls for connecting
+and logging on to the server.  The message passing calls are identical.</p>
+
+<p>When you create a <code>HmtpClient</code>, you'll send it the URL
+of the HMTP service, then call <code>connect()</code> and <code>login</code>
+to authenticate.  The <code>login()</code> method will register an
+agent with the broker, letting the client send and receive messages.</p>
+
+<p>This example sends a RPC query to <var>test@localhost</var>.
+RPC calls in HMTP are typed.  Each query class might execute a different
+query on the server.  In this case we create a trivial <code>TestQuery</code>.
+</p>
+
+<example title="TestClient.java">
+package example;
+
+import com.caucho.hmtp.client.HmtpClient;
+
+public class TestClient
+{
+  public static void main(String []args)
+    throws Exception
+  {
+    HmtpClient client = new HmtpClient("http://localhost:8080/hmtp");
+    client.connect();
+    client.login("user@localhost", null);
+
+    Object value = client.queryGet("test@localhost", new TestQuery());
+
+    System.out.println(value);
+
+    client.close();
+  }
+}
+</example>
+
+<p>The configuration for a remote service now has three components:</p>
+
+<ol>
+<li>The <code>HmtpBroker</code>, implemented by HempBroker</li>
+<li>Any registered <code>HmtpService</code>, e.g. the TestService</li>
+<li>The exposed HMTP service, implemented with <code>HempServlet</code></li>
+</ol>
+
+<example title="WEB-INF/resin-web.xml">
+&lt;web-app xmlns="http://caucho.com/ns/resin">
+
+    &lt;bean class="com.caucho.hemp.broker.HempBroker"/>
+
+    &lt;bean name="test@localhost" class="example.TestService"/>
+
+    &lt;servlet-mapping url-pattern="/hmtp"
+                     servlet-class="com.caucho.hemp.servlet.HempServlet"/>
+
+&lt;/web-app>
+</example>
+
+</s2>
+
+</s1>
+
+<s1 title="Brokered Agent Messaging (BAM)">
+
+<p>Applications using HMTP will generally follow a Brokered Agent
+Messaging pattern, which is basically a hub-and-spoke messaging topology where
+the agents act as dynamic services: joining and detaching from the broker
+as the application progresses.</p>
+
+<p>Services and clients register one or more agents with the HmtpBroker and
+then send messages between the agents.  Each remote client will register
+a local agent with the local HMTP broker.  Services will register one or
+more agents with the broker.   In a tic-tac-toe game, the game
+instance might register two agents: one for each player in a particular
+game.</p>
+
+<figure title="Tic-Tac-Toe Agents" src="tictactoe-game.png"/>
+
+<p>The diagram above has four agents: two agents for the game's players, and
+one agent for each logged-in user.  <var>tictactoe@host.com/1</var> is the game's agent
+for player #1, and <var>harry@host.com/x</var> is Harry's agent for his
+flash client.  In the tic-tac-toe game, each user's agent talks to the
+matching game player, so <var>harry@host.com/x</var> always
+talks to <var>tictactoe@host.com/1</var>, and <var>draco@host.com/y</var>
+always talks to <var>tictactoe@host.com/1</var>.</p>
+
+<p>The game's agents are ephemeral.  When a new game begins, a 
+<code>TicTacTocGame</code> instance registers two new agents for the
+new game, with unique names, e.g. <var>tictactoe@host.com/3</var> and
+<var>tictactoe@host.com/4</var>.  When the game ends, the instance will
+unregister its agents.</p>
+
+<p>Because the game's agents are only created when a game begins, the
+tic-tac-toe game has a persistent agent for registration,
+<var>tictactoe@host.com</var>.  When Harry logs on, the client will
+send a query to <var>tictactoe@host.com</var> asking for a new game.  As soon
+as Draco asks for a match, the registration server will create a new
+game instance and tell Harry's client the name of his
+player agent, <var>tictactoe@host.com/1</var>.</p>
+
+<figure title="Tic-Tac-Toe Registration" src="tictactoe-registration.png"/>
+
+</s1>
+
+<s1 title="XMPP (Jabber)">
+
+<p>HMTP is an adaptation of the <a href="http://xmpp.org">XMPP</a> (Jabber)
+instant messaging protocol.  Where XMPP (Xml Messaging and Presence Protocol)
+is based on XML, HMTP (Hessian Message Transport Protocol) is
+based on Hessian.  Because HMTP is designed to follow XMPP, its
+architecture and protocols are essentially identical until the very
+lowest layer, where HMTP substitutes Hessian for XML.</p>
+
+<p>Because of the close relationship to XMPP, you may want to browse the
+XMPP specifications for a deeper understanding of how HMTP works.  Since
+XMPP is only a wire protocol, not an API, it does not include all of the
+HMTP classes, but the architecture remains the same.</p>
+
+<p>The primary advantages HMTP offers over XMPP include the performance
+advantages of Hessian over XML, and more importantly a more strict layering
+than XMPP provides.  Because the payloads of the HMTP messages are all
+<code>Serializable</code>, applications have enormous flexibility in
+developing their own messages using application objects.  In contrast,
+XMPP messages are always XML, so applications are not only restricted to
+XML data, but also must create their own XML parsers and formatters.</p>
+
+</s1>
+
+<s1 title="Packet types">
+
+<p>HMTP provides three categories of packets: messages, queries (rpc), and
+presence announcements.  Messages and queries are typically the bulk of the
+packets, while presence announcements are used rarely.</p>
+
+<p>Messages are unidirectional fire-and-forget packets.</p>
+
+<p>Queries are request-response pairs.  Each request must have a corresponding
+response or error.</p>
+
+<p>Presence announcements are used to organize subscriptions.  There are
+presence announcements to subscribe and unsubscribe, and presence notifications
+that a user has logged on, sent to all other users subscribed to
+his presence.</p>
+
+<s2 title="Message Packets">
+
+<p>The main Message packet contains a target ("to"), a sender ("from"),
+and a payload ("value").  In HMTP, the payload can be any serializable
+value.  Example messages could be IM text messages, administration console
+graph, game updates, or updated stock quotes.  Since HMTP is bidirectional,
+messages can flow to and from any client.</p>
+
+<ul>
+<li>Message - sends a message to a resource</li>
+<li>MessageError - sends a message error to a resource</li>
+</ul>
+
+</s2>
+
+<s2 title="Query Packets">
+
+<p>Query packages are RPC get and set packets with a matching response
+or error.  Because the query will always have a matching response packet
+or an error packet, clients can either block for the result or
+attach a callback.</p>
+
+<p>Like the other packets, queries are bidirectional, so a service can query
+a client as well as the usual client querying the server.</p>
+
+<p>Query packets have an associated <var>id</var> field to match requests
+with responses.  The client will increment the <var>id</var> for each
+new query.</p>
+
+<ul>
+<li>QueryGet - sends an information request</li>
+<li>QuerySet - sends an action query </li>
+<li>QueryResponse - returns a response</li>
+<li>QueryError - returns an error</li>
+</ul>
+
+</s2>
+
+<s2 title="Presence Packets">
+
+<p>Presence packets send specialized information for subscription
+notification.  Many applications will not need to use any presence
+packets at all.</p>
+
+<ul>
+<li>Presense - sends a presence (login) notification</li>
+<li>PresenseUnavailable - sends unavailable (logout) notification</li>
+<li>PresenseProbe - query probe for IM clients</li>
+<li>PresenseSubscribe - request to subscribe to a service</li>
+<li>PresenseSubscribed - acknowledgement of a subscription</li>
+<li>PresenseUnsubscribe - notification of an unsubscription</li>
+<li>PresenseUnsubscribed - notification of an unsubscription</li>
+<li>PresenseError - error message</li>
+</ul>
+
+
+</s2>
+
+</s1>
+
+<s1 title="Addressing (JIDs)">
+
+<p>HMTP resources all have unique identifiers called JIDs (Jabber IDs).
+The id looks like:</p>
+
+<def title="JID format">
+<var>user</var>@<var>domain</var>/<var>resource</var>
+</def>
+
+<p>The <var>resource</var> and <var>user</var> are optional.</p>
+
+<deftable title="example jids">
+<tr>
+  <th>jid</th>
+  <th>description</th>
+</tr>
+<tr>
+  <td>ferg@foo.com</td>
+  <td>IM user resource</td>
+</tr>
+<tr>
+  <td>ferg@foo.com/xB8</td>
+  <td>User login agent, i.e. the HMTP address corresponding to a logged
+in IM session.</td>
+</tr>
+<tr>
+  <td>tictactoe@foo.com</td>
+  <td>tic-tac-toc game manager resource</td>
+</tr>
+<tr>
+  <td>tictactoe@foo.com/1</td>
+  <td>player #1 agent of a tic-tac-toe game</td>
+</tr>
+<tr>
+  <td>tictactoe@foo.com/2</td>
+  <td>player #2 agent of a tic-tac-toe game</td>
+</tr>
+<tr>
+  <td>tictactoe@foo.com/3</td>
+  <td>player #1 agent of a tic-tac-toe game #2</td>
+</tr>
+<tr>
+  <td>tictactoe@foo.com/4</td>
+  <td>player #2 agent of a tic-tac-toe game #2</td>
+</tr>
+<tr>
+  <td>myroom@foo.com</td>
+  <td>chatroom instance</td>
+</tr>
+<tr>
+  <td>myroom@foo.com/harry</td>
+  <td>chatroom nickname for user #1</td>
+</tr>
+<tr>
+  <td>myroom@foo.com/draco</td>
+  <td>chatroom nickname for user #2</td>
+</tr>
+<tr>
+  <td>announcements@foo.com</td>
+  <td>publish/subscribe resource</td>
+</tr>
+</deftable>
+
+</s1>
+
+<s1 title="API">
+
+<s2 title="Client API">
+
+<s3 title="HmtpConnection">
+
+<p><code>HmtpConnection</code> is the primary client interface for both
+local and remote clients.  Messages are sent using the
+<code>HmtpConnection</code> methods.  Messages are received by
+setting a handler: HmtpMessageStream, HmtpQueryStream, or HmtpPresenceStream.</p>
+
+<p>An active <code>HmtpConnection</code> has an associated agent registered
+with the broker.  The agent's jid is available with the <code>getJid()</code>
+call.</p>
+
+<p>For clients that need low-level access to the broker stream, e.g. to
+implement an RPC/Query handler, <code>getBrokerStream()</code> returns
+the underlying stream.</p>
+
+<def title="HmtpConnection">
+package com.caucho.hmtp;
+
+public interface HmtpConnection
+{
+  String getJid();
+
+  boolean isClosed();
+  void close();
+  
+  void setMessageHandler(HmtpMessageStream handler);
+  void setQueryHandler(HmtpQueryStream handler);
+  void setPresenceHandler(HmtpPresenceStream handler);
+
+  void sendMessage(String to, Serializable value);
+
+  Serializable queryGet(String to, Serializable query);
+  Serializable querySet(String to, Serializable query);
+
+  void queryGet(String to, Serializable query, HmtpQueryCallback callback);
+  void querySet(String to, Serializable query, HmtpQueryCallback callback);
+
+  void presence(Serializable []data);
+  void presence(String to, Serializable []data);
+  void presenceUnavailable(Serializable []data);
+  void presenceUnavailable(String to, Serializable []data);
+  void presenceProbe(String to, Serializable []data);
+  void presenceSubscribe(String to, Serializable []data);
+  void presenceSubscribed(String to, Serializable []data);
+  void presenceUnsubscribe(String to, Serializable []data);
+  void presenceUnsubscribed(String to, Serializable []data);
+  void presenceError(String to, Serializable []data, HmtpError error);
+  
+  HmtpStream getBrokerStream();
+}
+</def>
+
+</s3>
+
+<s3 title="HmtpConnectionFactory">
+
+<p>The <code>HmtpConnectionFactory</code> produces <code>HmtpConnection</code>
+agents for client code.  Typically, the factory implementation will be
+a <code>HmtpBroker</code>, although that is not required by the clients.</p>
+
+<def title="HmtpConnectionFactory">
+package com.caucho.hmtp;
+
+public interface HmtpConnectionFactory
+{
+  HmtpConnection getConnection(String uid, String password);
+}
+</def>
+
+</s3>
+
+<s3 title="HmtpQueryCallback">
+
+<p><code>HmtpQueryCallback</code> is used for callback-style RPC.  When
+the query response completes, the agent will call
+the <code>HmtpQueryCallback</code> with the query's response.</p>
+
+<def title="QueryCallback">
+package com.caucho.hmtp;
+
+public interface HmtpQueryCallback
+{
+  void onQueryResult(String to, String from, Serializable value);
+  
+  void onQueryError(String to, String from, Serializable value,
+                    HmtpError error);
+}
+</def>
+</s3>
+
+</s2>
+
+<s2 title="Remote Client API">
+
+<p><code>HmtpClient</code> is the remote client API for Java clients.  Most
+of the methods are extended from <code>HmtpConnection</code>.  The additional
+method provide some control for connection and login.  Once the client
+is logged in, applications will typically use
+<code>HmtpConnection</code> methods to send messages and set handlers
+to receive messages.</p>
+
+<s3 title="HmtpClient">
+
+<def title="HmtpClient">
+package com.caucho.hmtp;
+
+public class HmtpClient implements HmtpConnection
+{
+  public HmtpClient(String url);
+
+  public void connect() throws IOException;
+
+  public void login(String uid, String password);
+
+  // HmtpConnection methods
+  String getJid();
+
+  boolean isClosed();
+  void close();
+  
+  void setMessageHandler(HmtpMessageStream handler);
+  void setQueryHandler(HmtpQueryStream handler);
+  void setPresenceHandler(HmtpPresenceStream handler);
+
+  void sendMessage(String to, Serializable value);
+
+  Serializable queryGet(String to, Serializable query);
+  Serializable querySet(String to, Serializable query);
+
+  void queryGet(String to, Serializable query, HmtpQueryCallback callback);
+  void querySet(String to, Serializable query, HmtpQueryCallback callback);
+
+  void presence(Serializable []data);
+  void presence(String to, Serializable []data);
+  void presenceUnavailable(Serializable []data);
+  void presenceUnavailable(String to, Serializable []data);
+  void presenceProbe(String to, Serializable []data);
+  void presenceSubscribe(String to, Serializable []data);
+  void presenceSubscribed(String to, Serializable []data);
+  void presenceUnsubscribe(String to, Serializable []data);
+  void presenceUnsubscribed(String to, Serializable []data);
+  void presenceError(String to, Serializable []data, HmtpError error);
+  
+  HmtpStream getBrokerStream();
+}
+</def>
+</s3>
+
+</s2>
+
+<s2 title="Protocol(Packet) API">
+
+<s3 title="HmtpMessageStream">
+
+<p>Applications will implement <code>HmtpMessageStream</code> to receive
+unidirectional messages from the agent.  Typically, applications will extends
+<code>AbstractHmtpMessageStream</code> instead of implementing
+<code>HmtpMessageStream</code> directly.</p>
+
+<def title="HmtpMessageStream">
+package com.caucho.hmtp;
+
+public interface HmtpMessageStream
+{
+  public void sendMessage(String to, String from, Serializable value);
+  
+  public void sendMessageError(String to, String from, Serializable value,
+			       HmtpError error);
+}
+</def>
+
+</s3>
+
+<s3 title="HmtpQueryStream">
+
+<p>Applications will implement <code>HmtpQueryStream</code> to receive
+RPC calls and responses from the agent.  If the application implements
+<code>sendQueryGet</code>, it must either send a <code>QueryResponse</code>
+to the sender, or send a <code>QueryError</code> or return false from
+the method.  Queries will always have a response or an error.</p>
+
+<def title="HmtpQueryStream">
+package com.caucho.hmtp;
+
+public interface HmtpQueryStream
+{
+  boolean sendQueryGet(long id, String to, String from, Serializable query);
+  boolean sendQuerySet(long id, String to, String from, Serializable query);
+
+  void sendQueryResult(long id, String to, String from, Serializable value);
+  void sendQueryError(long id, String to, String from, Serializable query,
+                      HmtpError error);
+}
+</def>
+
+</s3>
+
+<s3 title="HmtpPresenceStream">
+
+<p>The presence methods implement the specialized subscription and
+presence messages.  IM applications use presence messages
+to announce availability to people in a buddy list (roster).</p>
+
+<p>Publish/Subscribe applications can also use subscription packets
+to subscribe and unsubscribe from the publishing service.</p>
+
+<def title="HmtpPresenceStream">
+package com.caucho.hmtp;
+
+public interface HmtpPresenceStream
+{
+  void sendPresence(String to, String from, Serializable []data);
+  void sendPresenceUnavailable(String to, String from, Serializable []data);
+  void sendPresenceProbe(String to, String from, Serializable []data);
+  void sendPresenceSubscribe(String to, String from, Serializable []data);
+  void sendPresenceSubscribed(String to, String from, Serializable []data);
+  void sendPresenceUnsubscribe(String to, String from, Serializable []data);
+  void sendPresenceUnsubscribed(String to, String from, Serializable []data);
+  void sendPresenceError(String to, String from, Serializable []data,
+                         HmtpError error);
+}
+</def>
+
+</s3>
+
+<s3 title="HmtpStream">
+
+<p><code>HmtpStream</code> is the core streaming API for the broker and
+its registered agents.  It is simply a combination of all the message,
+query and presence packets.</p>
+
+<def title="HmtpStream">
+package com.caucho.hmtp;
+
+public interface HmtpStream
+  extends HmtpMessageStream, HmtpQueryStream, HmtpPresenceStream
+{
+}
+</def>
+
+</s3>
+
+<s3 title="HmtpAgentStream">
+
+<p><code>HmtpAgentStream</code> marks a stream toward an agent, extending
+<code>HmtpStream</code> and returning the agent's jid.</p>
+
+<def title="HmtpAgentStream">
+package com.caucho.hmtp;
+
+public interface HmtpAgentStream extends HmtpStream
+{
+  Strin getJid();
+}
+</def>
+
+</s3>
+
+</s2>
+
+<s2 title="Service APIs">
+
+<s3 title="HmtpBroker">
+
+<p><code>HmtpBroker</code> is the central player in the HMTP server.
+It's responsible for routing messages between the agents, for any
+forwarding to remote servers, and managing dynamic agents and services.
+</p>
+
+<p>For all that responsibility, the API is fairly simple.  The
+<code>HmtpBroker</code> extends <code>HmtpConnectionFactory</code>,
+enabling client agents, and allows custom <code>HmtpService</code>
+services to be implemented.  Most importantly, it implements a
+broker stream (<code>HmtpStream</code>) which serves as the destination
+for all inbound messages.</p>
+
+<def title="HmtpBroker">
+package com.caucho.hmtp;
+
+public interface HmtpBroker extends HmtpConnectionFactory
+{
+  HmtpStream getBrokerStream();
+
+  void addService(HmtpService service);
+  void removeService(HmtpService service);
+
+  void addServiceManager(ServiceManager manager);
+}
+</def>
+
+</s3>
+
+<s3 title="HmtpService">
+
+<p><code>HmtpService</code> represents a registered, persistent
+service with a known jid address.  Typically the services will be
+registered in a configuration file, although they can also be
+created dynamically using the <code>HmtpServiceManager</code>.
+Most applications will extend the <code>GenericService</code>
+instead of implementing <code>HmtpService</code> directly.</p>
+
+<p>The key methods are <code>getJid</code> and <code>getAgentStream</code>.
+The jid is used for registration with the <code>HmtpBroker</code> and
+<code>getAgentStream</code> is used to receive any messages.</p>
+
+<p>The additional methods are used for specialized applications like
+instant messaging and multiuser-chat, to manage clients logging in.</p>
+
+
+
+<def title="HmtpService">
+package com.caucho.hmtp;
+
+public interface HmtpService
+{
+  public String getJid();
+  
+  public HmtpAgentStream getAgentStream();
+  
+  public HmtpAgentStream findAgent(String jid);
+
+  public void onAgentStart(String jid);
+  public void onAgentStop(String jid);
+
+  public HmtpAgentStream getAgentFilter(HmtpAgentStream stream);
+  public HmtpStream getBrokerFilter(HmtpStream stream);
+}
+</def>
+
+</s3>
+
+<s3 title="HmtpServiceManager">
+
+<p><code>HmtpServiceManager</code> is a specialized manager for finding
+persistent sessions.  In instant messaging, for example, the registered
+users might be stored in a database.  When a message goes to
+harry@host.com, the <code>HmtpServiceManager</code> will lookup the
+appropriate user.</p>
+
+<def title="HmtpServiceManager">
+package com.caucho.hmtp;
+
+public interface HmtpServiceManager
+{
+  public HmtpService findService(String jid);
+}
+</def>
+
+</s3>
+
+</s2>
+
+</s1>
+
+  </body>
+</document>

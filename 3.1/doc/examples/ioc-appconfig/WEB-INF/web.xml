@@ -1,0 +1,26 @@
+<web-app xmlns="http://caucho.com/ns/resin">
+  <!-- make an example.AppConfig object, available with the
+     - @In AppConfig
+    -->
+  <bean class="example.AppConfig">
+
+    <!-- config-files-location
+       -
+       - set's the base for subsequent config file lookups.
+       -
+       - EL variables are very useful here, such as 
+       - app.appDir, server.rootDir, host.rootDir
+       -
+       - You can also use an http url, although you will not be able
+       - to write files then.
+      -->
+    <init>
+      <config-files-location>${webApp.root}/WEB-INF/config</config-files-location>
+    </init>
+  </bean>
+
+  <servlet-mapping>
+    <url-pattern>/test</url-pattern>
+    <servlet-class>example.TestServlet</servlet-class>
+  </servlet-mapping>
+</web-app>

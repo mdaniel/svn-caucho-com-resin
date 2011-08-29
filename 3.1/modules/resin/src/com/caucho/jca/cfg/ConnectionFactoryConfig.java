@@ -1,0 +1,228 @@
+/*
+ * Copyright (c) 1998-2008 Caucho Technology -- all rights reserved
+ *
+ * This file is part of Resin(R) Open Source
+ *
+ * Each copy or derived work must preserve the copyright notice and this
+ * notice unmodified.
+ *
+ * Resin Open Source is free software; you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation; either version 2 of the License, or
+ * (at your option) any later version.
+ *
+ * Resin Open Source is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE, or any warranty
+ * of NON-INFRINGEMENT.  See the GNU General Public License for more
+ * details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with Resin Open Source; if not, write to the
+ *
+ *   Free Software Foundation, Inc.
+ *   59 Temple Place, Suite 330
+ *   Boston, MA 02111-1307  USA
+ *
+ * @author Scott Ferguson
+ */
+
+package com.caucho.jca.cfg;
+
+import com.caucho.config.program.ConfigProgram;
+import com.caucho.config.Config;
+import com.caucho.config.ConfigException;
+import com.caucho.config.program.ContainerProgram;
+import com.caucho.config.types.*;
+import com.caucho.jca.*;
+import com.caucho.jca.cfg.JavaMailConfig;
+import com.caucho.jmx.IntrospectionMBean;
+import com.caucho.jmx.Jmx;
+import com.caucho.loader.ClassLoaderListener;
+import com.caucho.loader.CloseListener;
+import com.caucho.loader.Environment;
+import com.caucho.loader.EnvironmentListener;
+import com.caucho.loader.StartListener;
+import com.caucho.naming.Jndi;
+import com.caucho.util.CharBuffer;
+import com.caucho.util.L10N;
+import com.caucho.webbeans.*;
+import com.caucho.webbeans.component.*;
+import com.caucho.webbeans.manager.*;
+
+import javax.annotation.PostConstruct;
+import javax.management.Attribute;
+import javax.management.MBeanAttributeInfo;
+import javax.management.MBeanInfo;
+import javax.management.MBeanServer;
+import javax.management.NotificationFilter;
+import javax.management.ObjectName;
+import javax.naming.Context;
+import javax.naming.InitialContext;
+import javax.resource.spi.*;
+import javax.webbeans.*;
+import java.lang.reflect.Constructor;
+import java.lang.reflect.Method;
+import java.util.ArrayList;
+import java.util.logging.Level;
+import java.util.logging.Logger;
+
+/**
+ * Configuration for the connection-factory pattern.
+ */
+public class ConnectionFactoryConfig extends BeanConfig {
+  private static final Logger log
+    = Logger.getLogger(ConnectionFactoryConfig.class.getName());
+  
+  private static L10N L = new L10N(ConnectionFactoryConfig.class);
+
+  private ResourceAdapter _ra;
+
+  private int _maxConnections = 1024;
+  private long _maxActiveTime = Integer.MAX_VALUE;
+
+  public ConnectionFactoryConfig()
+  {
+    setBeanConfigClass(ManagedConnectionFactory.class);
+  }
+
+  @Override
+  protected String getDefaultScope()
+  {
+    return null;
+  }
+
+  public void setResourceAdapter(ResourceAdapter ra)
+  {
+    _ra = ra;
+  }
+
+  public void setMaxConnections(int max)
+  {
+    _maxConnections = max;
+  }
+
+  public void setMaxActiveTime(Period period)
+  {
+    _maxActiveTime = period.getPeriod();
+  }
+
+  public void init()
+  {
+    super.init();
+
+    ComponentImpl comp = getComponent();
+    
+    ManagedConnectionFactory managedFactory
+      = (ManagedConnectionFactory) comp.get();
+    
+    if (managedFactory instanceof ResourceAdapterAssociation) {
+      Class cl = managedFactory.getClass();
+
+      ResourceAdapter ra = findResourceAdapter(cl);
+
+      ResourceAdapterAssociation factoryAssoc
+	= (ResourceAdapterAssociation) managedFactory;
+
+      try {
+	factoryAssoc.setResourceAdapter(ra);
+      } catch (Exception e) {
+	throw ConfigException.create(e);
+      }
+    }
+
+    ResourceManagerImpl rm = ResourceManagerImpl.create();
+	
+    ConnectionPool cm = rm.createConnectionPool();
+
+    if (getName() != null)
+      cm.setName(getName());
+
+    cm.setMaxConnections(_maxConnections);
+    cm.setMaxActiveTime(_maxActiveTime);
+
+    ResourceArchive rar = null;
+
+    if (rar != null) {
+      String trans = rar.getTransactionSupport();
+
+      if (trans == null) { // guess XA
+	cm.setXATransaction(true);
+	cm.setLocalTransaction(true);
+      }
+      else if (trans.equals("XATransaction")) {
+	cm.setXATransaction(true);
+	cm.setLocalTransaction(true);
+      }
+      else if (trans.equals("NoTransaction")) {
+	cm.setXATransaction(false);
+	cm.setLocalTransaction(false);
+      }
+      else if (trans.equals("LocalTransaction")) {
+	cm.setXATransaction(false);
+	cm.setLocalTransaction(true);
+      }
+    }
+    /*
+    cm.setLocalTransactionOptimization(getLocalTransactionOptimization());
+    cm.setShareable(getShareable());
+    */
+
+    Object connectionFactory;
+
+    try {
+      connectionFactory = cm.init(managedFactory);
+      cm.start();
+
+      WebBeansContainer webBeans = WebBeansContainer.create();
+      
+      if (getName() != null) {
+	Jndi.bindDeepShort(getName(), connectionFactory);
+
+	webBeans.addSingleton(connectionFactory, getName());
+      }
+      else
+	webBeans.addSingleton(connectionFactory);
+    } catch (Exception e) {
+      throw ConfigException.create(e);
+    }
+  }
+
+  private ResourceAdapter findResourceAdapter(Class cl)
+  {
+    if (_ra != null)
+      return _ra;
+    
+    ResourceArchive ra
+      = ResourceArchiveManager.findResourceArchive(cl.getName());
+
+    if (ra == null) {
+      throw new ConfigException(L.l("'{0}' does not have a defined resource-adapter.  Either define it in a &lt;resource-adapter> property or check the rar or META-INF/resin-ra.xml files",
+				    cl.getName()));
+    }
+      
+    WebBeansContainer webBeans = WebBeansContainer.create();
+    
+    ComponentFactory<ResourceAdapterController> raComp
+      = webBeans.resolveByType(ResourceAdapterController.class,
+			       Names.create(ra.getResourceAdapterClass().getName()));
+
+    if (raComp == null) {
+      throw new ConfigException(L.l("'{0}' does not have a configured resource-adapter for '{1}'.",
+				    ra.getResourceAdapterClass().getName(),
+				    cl.getName()));
+    }
+
+    ResourceAdapterController raController
+      = (ResourceAdapterController) raComp.get();
+
+    return raController.getResourceAdapter();
+  }
+
+  @Override
+  public void deploy()
+  {
+  }
+}
+
+  

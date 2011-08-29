@@ -1,0 +1,13 @@
+<document>
+  <header>
+    <product>resin</product>
+    <title>Configuration</title>
+    <type>contents</type>
+    <description><p>Resin is a powerful, customizable application server. This section
+      discusses how to configure Resin.</p></description>
+  </header>
+
+  <body>
+    <summary/>
+  </body>
+</document>

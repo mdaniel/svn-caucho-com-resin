@@ -1,0 +1,33 @@
+<web-app xmlns="http://caucho.com/ns/resin">
+  <servlet servlet-name="resin-php"
+           servlet-class="com.caucho.quercus.servlet.QuercusServlet" />
+
+  <servlet-mapping url-pattern="*.php" servlet-name="resin-php" />
+
+  <!--
+     - JMS
+    -->
+  <jms-connection-factory uri="resin:"/>
+
+  <jms-queue name="Queue" uri="memory:"/>
+
+  <!--
+     - storage service
+    -->
+
+  <bean class="example.MessageStoreService"/>
+
+  <!--
+     - defines the message listener JMSLogger and attaches it to
+     - the queue named "Queue"
+    -->
+  <ejb-message-bean class="example.MyListener">
+    <destination>#{Queue}</destination>
+  </ejb-message-bean>
+
+  <!--
+     - viewing servlet
+    -->
+  <servlet-mapping url-pattern="/view-log"
+                   servlet-class="example.ViewLogServlet" />
+</web-app>

@@ -1,0 +1,24 @@
+<namespace xmlns="http://caucho.com/ns/resin">
+
+  <bean name="choose"
+        class="com.caucho.config.core.ResinChoose"/>
+
+  <bean name="if"
+        class="com.caucho.config.core.ResinIf"/>
+
+  <bean name="import"
+        class="com.caucho.config.core.ResinImport"/>
+
+  <bean name="include"
+        class="com.caucho.config.core.ResinInclude"/>
+
+  <bean name="log"
+        class="com.caucho.config.core.ResinLog"/>
+
+  <bean name="message"
+        class="com.caucho.config.core.ResinLog"/>
+    
+  <bean name="set"
+        class="com.caucho.config.core.ResinSet"/>
+	
+</namespace>

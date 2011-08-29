@@ -1,0 +1,285 @@
+- PortletWindow.getLastModified()
+
+- PortletWindow.prepare(PortletRequest,PortletResponse)
+
+- PortletResponseImpl etc. should be child of WindowContext, not
+  ConenctionContext.  WindowContext should then be more than just something
+  holding state, many of the methods currently in ConnectionContext should move
+  to WindowContext
+
+- exception in window with no buffer not coming through
+
+caching not implemented right, see CachKey.java and ConnectionContext.getCacheKey()
+
+getRoleRefMap not currenlty used?
+
+various additions to PortletServlet to make it more configurable 
+(see XXX: in PortletServlet.java)
+
+much of the configuration possibilities in PortletServlet has not been tested
+
+qa constraints
+
+qa Renderer.isAlwaysWrite(), Renderer.isAlwaysStream() 
+
+jsp taglib are letting body content through to the out
+
+qa Window.handleConstraint
+
+qa ResourceBundle
+
+qa response.setSecure, PortletURL.setSecure
+
+generally review the way that the url is resolved by HttpPortletConnection
+
+HttpPortletConnection should be pooled.  A review of the start and finish code of involved object should done before pooling is done.
+
+integrity/confidential will require Constraints in ManagedPortlet (see below)
+
+qa isPortletModeAllowed isWindowStateAllowed
+
+the use of these is not implemented:
+   Window.handlePortletMode(RenderRequest, PortletMode notAllowed)
+   Window.handleWindowState(RenderRequest, WindowState notAllowed)
+
+buffering - if Renderer.getBufferSize() is -1, then a buffer size should be
+determined based on the window.getBufferSize().  if window.getBufferSize() is
+not 0, then the renderer should have a fairly large buffer size.
+The current impl always passes Integer.MAX_VALUE as the buffer size requested
+for a Renderer.
+
+qa getResponseLocales, getResponseContentTypes
+
+qa/document PortalRequest/PortalResponse functionality
+   i.e. PortalRequest portalRequest = (PortalRequest) portletRequest;
+   portalRequest.setParameter("othernamespace", "name", "value");
+   also window states used
+   portalRequest.getPortletMode("namespace"), setPortletMode("namespace")
+   etc.
+
+qa createXXURL().setParameter("othernamespace", "name", "value");
+ 
+for portlets.xml:
+
+interface PortletManager
+  getManagedPortlet(String name, PortletContext context)
+
+interface ManagedPortlet
+  Portlet getPortlet()
+  Window getWindow()
+  void destroy()
+
+ManagedPortletServlet
+  similar in functionality to PortletServlet, but all configuration
+  comes from the ManagedPortletServlet:
+
+  <servlet servlet-class="com.caucho.portal.generic.ManagedPortletServlet">
+    <init>
+      <portal> or <portal-ref>
+      <portlet-manager> or <portlet-manager-ref>
+      <portlet-name>  <!-- used for name in getManagedPortlet() -->
+
+  both portal-ref and portlet-manager-ref should first look for an
+  object in application.getAttribute(), and then in JNDI
+
+
+com/caucho/server/portlet/PortletManagerImpl
+com/caucho/server/portlet/ManagedPortletImpl
+
+============================================
+
+com/caucho/portal/
+
+rough ideas (OLD):
+
+com/caucho/portal/ResinPortal
+com/caucho/portal/PortalServlet
+com/caucho/portal/JdbcPreferencesStore
+com/caucho/portal/JdbcUserAttributeStore
+com/caucho/portal/CacheImpl
+
+xml layout (bean-style init), jsp layouts and groovy layouts
+scripting variables:
+  portletConnection
+  portalRequest
+  portalResponse
+
+  in action stage:
+
+  action   (com.caucho.portal.generic.Action)
+  actionRequest
+  actionResponse
+
+  in render stage:
+
+  render   (com.caucho.portal.generic.Render)
+  renderRequest
+  renderResponse
+
+<section title="Windows and Layouts">
+
+<section name="xml" title="XML layout configuration">
+
+<p>
+As child of &lt;portal&gt;
+</p>
+
+</section>
+
+<section name="dynamic" title="Dynamic Layouts">
+
+<p>
+The following example modifies the layout if the "content" window is maximized.
+If the body window is maximized, the window state of the "navbar" window is set
+to "minimized" and given a smaller css size value.
+<p>
+<example>
+
+<window>
+  <default-renderer>example.MarkupRenderer</default-renderer>
+
+  <window namespace="header" portlet-class"example.HeaderPortlet"/>
+
+  <window namespace="body"/>
+    <preference name="render.css.border-width" value="0"/>
+
+    <window namespace="navbar" portlet-class"example.FooterPortlet">
+
+      <!-- minimize the navbar if any window is maximized -->
+
+      <window-state>
+        ${render.windowState['content'] eq 'maximized' ? 'minimized' : 'normal'}
+      </window-state>
+
+      <preference>
+        <name>render.css.width</name>
+        <value>
+          ${render.windowState['content'] eq 'maximized' ? 20em : 40em }
+        </value>
+      </preference>
+    </window>
+
+    <window namespace="content" portlet-class"example.ContentPortlet">
+      ...
+    </window>
+  </window>
+
+  <window namespace="footer" portlet-class"example.FooterPortlet"/>
+</window>
+
+</example>
+
+<p>
+The following example modifies the layout if <i>any</i> window is maximized.
+If any window is maximized, the "news" window is not shown.
+</p>
+
+<example>
+<window default-renderer="example.MarkupRenderer">
+  <window namespace="header" portlet-class"example.HeaderPortlet"/>
+
+  <window namespace="body"/>
+    <window namespace="content" portlet-class"example.ContentPortlet">
+      ...
+    </window>
+  </window>
+
+  <window namespace="newsbriefs" portlet-class="example.NewsBriefsPortlet"/>
+    <!-- do not show the news if any window is maximized -->
+    <condition>${not render.windowStatesUsed['maximized']}</condition>
+
+  </window>
+
+  <window namespace="footer" portlet-class"example.FooterPortlet">
+
+    <!-- if any window is maximized, minimize this window -->
+    <window-state>
+      ${render.windowStatesUsed['maximized'] ? 'minimized' : 'normal'}
+    </window-state>
+  </window>
+</window>
+</example>
+
+</section> <!-- dynamic -->
+
+<section name="jsp" title="Jsp Layouts">
+<p>
+The most sophisticated control over layouts can be obtained using JSP.
+The use of jsp is a small amount slower, but provides a great deal of 
+flexibility.
+</p>
+
+<p>
+In this example, the "newsbrief" window is layout implemented in a jsp.
+The flexibility of jsp allows for an arbitrary number of news items to be
+contained in the "newsbriefs" window.
+</p>
+
+<example>
+<portlet-defaults>
+  <shared-cache>true</shared-cache>
+</portlet-defaults>
+
+<window default-renderer="example.MarkupRenderer">
+  <window namespace="header" portlet-class"example.HeaderPortlet"/>
+
+  <window namespace="body"/>
+    
+    <window namespace="content" jsp="/layouts/content.jsp"/>
+  </window>
+
+  <window namespace="newsbriefs" jsp="/layouts/newsbriefs.jsp"/>
+
+  <window namespace="footer" portlet-class"example.FooterPortlet"/>
+</window>
+</example>
+
+<example file="layouts/newsbriefs.jsp">
+
+<portal:window>
+  <portal:init>
+  </portal:init>
+
+    <!-- 
+      for each news item, show a brief description then 
+      make a link that causes it to be displayed
+      in the content window
+    -->
+
+    <c:forEach var="newsItem" items="${newsItems}">
+      <portal:window>
+        <portal:render>
+
+<portal:actionUrl var="showUrl" namespace="content" portletMode="news">
+  <portal:param name="newsItemId" value="${newsItem.id}"/>
+</portal:actionUrl>
+
+// XXX: check setTitle syntax
+<portlet:setTitle title="${newsItem.title}"/>
+<p>
+<c:out value="${newsItem.abstract}"/>
+</p>
+<p>
+<a href="${showUrl}">More ...</a>
+</p>
+
+        </portal:render>
+      </portal:window>
+    </c:forEach>
+
+</portal:window>
+
+</example>
+
+</section> <!-- jsp -->
+
+<section name="groovy" title="Groovy Layouts">
+</section> <!-- groovy -->
+
+</body>
+</document>
+
+
+
+
+
