@@ -22,6 +22,10 @@ if test -n "${JAVA_HOME}"; then
   fi
 fi  
 
+if test -z "${JAVA_EXE}"; then
+  JAVA_EXE=java
+fi  
+
 #
 # trace script and simlinks to find the wrapper
 #

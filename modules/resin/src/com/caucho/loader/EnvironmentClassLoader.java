@@ -184,7 +184,7 @@ public class EnvironmentClassLoader extends DynamicClassLoader
   public void init()
   {
     super.init();
-    
+
     initEnvironment();
   }
 
@@ -238,13 +238,18 @@ public class EnvironmentClassLoader extends DynamicClassLoader
    */
   public void addListener(EnvironmentListener listener)
   {
+    boolean isInit = false;
+
     synchronized (this) {
       if (_listeners == null) {
         _listeners = new ArrayList<EnvironmentListener>();
 
-        initListeners();
+        isInit = true;
       }
     }
+
+    if (isInit)
+      initListeners();
 
     synchronized (_listeners) {
       for (int i = _listeners.size() - 1; i >= 0; i--) {
@@ -407,7 +412,7 @@ public class EnvironmentClassLoader extends DynamicClassLoader
       }
 
       if (! listeners.contains(listener))
-	listeners.add(listener);
+        listeners.add(listener);
     }
 
     listener.addLoader(this);
@@ -446,10 +451,10 @@ public class EnvironmentClassLoader extends DynamicClassLoader
   protected void configureEnhancerEvent()
   {
     ArrayList<AddLoaderListener> listeners = getLoaderListeners();
-    
+
     for (int i = 0;
-	 listeners != null && i < listeners.size();
-	 i++) {
+         listeners != null && i < listeners.size();
+         i++) {
       listeners.get(i).addLoader(this);
     }
   }
@@ -474,29 +479,29 @@ public class EnvironmentClassLoader extends DynamicClassLoader
       _scanListeners = new ArrayList<ScanListener>();
 
     _scanListeners.add(listener);
-    
+
     ArrayList<URL> urlList = new ArrayList<URL>();
     for (URL url : getURLs()) {
       if (! _pendingScanUrls.contains(url))
-	urlList.add(url);
+        urlList.add(url);
     }
 
     if (urlList.size() > 0) {
       try {
-	make();
+        make();
       } catch (Exception e) {
-	log().log(Level.WARNING, e.toString(), e);
-	
-	if (_configException == null)
-	  _configException = e;
+        log().log(Level.WARNING, e.toString(), e);
+
+        if (_configException == null)
+          _configException = e;
       }
-      
+
       ArrayList<ScanListener> selfList = new ArrayList<ScanListener>();
       selfList.add(listener);
       ScanManager scanManager = new ScanManager(selfList);
 
       for (URL url : urlList) {
-	scanManager.scan(this, url);
+        scanManager.scan(this, url);
       }
     }
   }
@@ -517,28 +522,28 @@ public class EnvironmentClassLoader extends DynamicClassLoader
 
     try {
       if (_scanListeners != null && urlList.size() > 0) {
-	try {
-	  make();
-	} catch (Exception e) {
-	  log().log(Level.WARNING, e.toString(), e);
-	
-	  if (_configException == null)
-	    _configException = e;
-	}
-      
-	ScanManager scanManager = new ScanManager(_scanListeners);
-      
-	for (URL url : urlList) {
-	  scanManager.scan(this, url);
-	}
+        try {
+          make();
+        } catch (Exception e) {
+          log().log(Level.WARNING, e.toString(), e);
+
+          if (_configException == null)
+            _configException = e;
+        }
+
+        ScanManager scanManager = new ScanManager(_scanListeners);
+
+        for (URL url : urlList) {
+          scanManager.scan(this, url);
+        }
       }
 
       configureEnhancerEvent();
     } catch (Exception e) {
       log().log(Level.WARNING, e.toString(), e);
-	
+
       if (_configException == null)
-	_configException = e;
+        _configException = e;
     }
   }
 
@@ -548,7 +553,7 @@ public class EnvironmentClassLoader extends DynamicClassLoader
   private void config()
   {
     sendAddLoaderEvent();
-      
+
     ArrayList<EnvironmentListener> listeners = getEnvironmentListeners();
 
     int size = listeners.size();
@@ -557,7 +562,7 @@ public class EnvironmentClassLoader extends DynamicClassLoader
 
       listener.environmentBind(this);
     }
-    
+
     _isConfigComplete = true;
   }
 
@@ -571,9 +576,9 @@ public class EnvironmentClassLoader extends DynamicClassLoader
       return;
 
     sendAddLoaderEvent();
-    
+
     config();
-      
+
     ArrayList<EnvironmentListener> listeners = getEnvironmentListeners();
 
     int size = listeners.size();
@@ -609,7 +614,7 @@ public class EnvironmentClassLoader extends DynamicClassLoader
           EnvironmentListener listener = listeners.get(i);
 
           try {
-	    listener.environmentStop(this);
+            listener.environmentStop(this);
           } catch (Throwable e) {
             log().log(Level.WARNING, e.toString(), e);
           }
@@ -619,7 +624,7 @@ public class EnvironmentClassLoader extends DynamicClassLoader
       thread.setContextClassLoader(oldLoader);
 
       // drain the thread pool for GC
-      ResinThreadPoolExecutor.getThreadPool().stopEnvironment(this); 
+      ResinThreadPoolExecutor.getThreadPool().stopEnvironment(this);
     }
   }
 
@@ -727,48 +732,48 @@ public class EnvironmentClassLoader extends DynamicClassLoader
                   "com.caucho.log.LogManagerImpl");
       }
       */
-      
+
       ClassLoader envClassLoader
-	= EnvironmentClassLoader.class.getClassLoader();
+        = EnvironmentClassLoader.class.getClassLoader();
 
       boolean isGlobalLoadable = false;
       try {
-	Class cl = Class.forName("com.caucho.naming.InitialContextFactoryImpl",
-				 false,
-				 systemLoader);
+        Class cl = Class.forName("com.caucho.naming.InitialContextFactoryImpl",
+                                 false,
+                                 systemLoader);
 
-	isGlobalLoadable = (cl != null);
+        isGlobalLoadable = (cl != null);
       } catch (Exception e) {
-	log().log(Level.FINER, e.toString(), e);
+        log().log(Level.FINER, e.toString(), e);
       }
-	
+
       if (isGlobalLoadable) {
-	// These properties require Resin to be at the system loader
-	
-	if (props.get("java.naming.factory.initial") == null) {
-	  props.put("java.naming.factory.initial",
-		    "com.caucho.naming.InitialContextFactoryImpl");
-	}
+        // These properties require Resin to be at the system loader
 
-	props.put("java.naming.factory.url.pkgs", "com.caucho.naming");
+        if (props.get("java.naming.factory.initial") == null) {
+          props.put("java.naming.factory.initial",
+                    "com.caucho.naming.InitialContextFactoryImpl");
+        }
 
-	EnvironmentProperties.enableEnvironmentSystemProperties(true);
+        props.put("java.naming.factory.url.pkgs", "com.caucho.naming");
 
-	String oldBuilder = props.getProperty("javax.management.builder.initial");
-	if (oldBuilder == null) {
-	  oldBuilder = "com.caucho.jmx.MBeanServerBuilderImpl";
-	  props.put("javax.management.builder.initial", oldBuilder);
-	}
+        EnvironmentProperties.enableEnvironmentSystemProperties(true);
 
-	/*
-	  props.put("javax.management.builder.initial",
-	  "com.caucho.jmx.EnvironmentMBeanServerBuilder");
-	*/
+        String oldBuilder = props.getProperty("javax.management.builder.initial");
+        if (oldBuilder == null) {
+          oldBuilder = "com.caucho.jmx.MBeanServerBuilderImpl";
+          props.put("javax.management.builder.initial", oldBuilder);
+        }
 
-	if (MBeanServerFactory.findMBeanServer(null).size() == 0)
-	  MBeanServerFactory.createMBeanServer("Resin");
-	
-	ManagementFactory.getPlatformMBeanServer();
+        /*
+          props.put("javax.management.builder.initial",
+          "com.caucho.jmx.EnvironmentMBeanServerBuilder");
+        */
+
+        if (MBeanServerFactory.findMBeanServer(null).size() == 0)
+          MBeanServerFactory.createMBeanServer("Resin");
+
+        ManagementFactory.getPlatformMBeanServer();
       }
 
       TransactionManagerImpl tm = TransactionManagerImpl.getInstance();
@@ -781,7 +786,7 @@ public class EnvironmentClassLoader extends DynamicClassLoader
                     Jmx.getGlobalMBeanServer());
       Jndi.bindDeep("java:comp/env/jmx/GlobalMBeanServer",
                     Jmx.getGlobalMBeanServer());
-      
+
       Jndi.bindDeep("java:comp/UserTransaction", ut);
 
       // server/16g0
@@ -789,9 +794,9 @@ public class EnvironmentClassLoader extends DynamicClassLoader
       // as an extended UserTransaction
       Jndi.bindDeep("java:comp/TransactionManager", tm);
       Jndi.bindDeep("java:/TransactionManager", tm);
-      
+
       Jndi.bindDeep("java:comp/ThreadPool",
-		    ResinThreadPoolExecutor.getThreadPool());
+                    ResinThreadPoolExecutor.getThreadPool());
 
       /*
       try {

@@ -12,6 +12,7 @@
 
 <s2 title="3.1.11 snapshot">
 <ul>
+<li>loader: classloader lock contention on addListener (#4667, rep by hsim Xest)</li>
 <li>db: index rebuild requires caching of index exception (#4641, rep by N Shinomiya)</li>
 <li>xml: remove Resin's XMLInputStream factory (#4535, rep by bgoykhman)</li>
 <li>jsp: jsp tag case issue (#4571)</li>
