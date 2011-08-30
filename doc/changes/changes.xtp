@@ -23,6 +23,7 @@
 <li>servlet: include/forward should not call servlet request.init (#4305, rep by ladlestein)</li>
 <li>ssl: backpatch ssl locking from 4.0 (#4256, rep by dkelly)</li>
 </ul>
+</s2>
 
 <s2 title="3.1.11">
 <ul>
