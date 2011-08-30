@@ -27,10 +27,7 @@
 
     <item link="change-logs.xtp" title="Change Logs">
       <item link="changes.xtp" title="Resin 4.0 Changes"/>
-      <item link="changes-3.xtp" title="Resin 3.0 Changes"/>
-      <item link="changes-2.xtp" title="Resin-2.1 Changes"/>
-      <item link="changes-ee.xtp" title="Resin-EE Changes"/>
-      <item link="changes-1.xtp" title="Old Changes"/>
+      <item link="http://caucho.com/resin-3.1/changes/changes.xtp" title="Resin 3.1 Changes"/>
     </item>
   </item>
 </navigation>
