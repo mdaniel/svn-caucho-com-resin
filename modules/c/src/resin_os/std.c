@@ -213,8 +213,6 @@ std_read(connection_t *conn, char *buf, int len, int timeout)
   }
   else if (! conn->is_recv_timeout) {
     poll_result = poll_read(fd, conn->socket_timeout);
-    fprintf(stdout, "poll2 %d\n", timeout);
-    fflush(stdout);
 
     if (poll_result <= 0)
       return calculate_poll_result(conn, poll_result);
