@@ -255,12 +255,6 @@ public class AlarmClock {
     _lastTime = now;
   }
   
-  private void extractCurrentAlarms(long now, boolean isTest)
-  {
-    Alarm alarm;
-    
-  }
-  
   private Alarm extractNextCurrentAlarm()
   {
     if (_currentAlarms.size() == 0)
@@ -283,16 +277,18 @@ public class AlarmClock {
     long delta = nextTime - now;
     
     for (int i = 0; i < delta; i++) {
-      long time = nextTime + i;
+      long time = now + i;
       
       int bucket = (int) (time % CLOCK_PERIOD);
       
       if (_clockArray[bucket] != null) {
         long wakeTime = time;
           
-        if (wakeTime < nextTime) {
-          _nextAlarmTime.compareAndSet(nextTime, wakeTime);
-          return;
+        while (wakeTime < nextTime) {
+          if (_nextAlarmTime.compareAndSet(nextTime, wakeTime))
+            return;
+          
+          nextTime = _nextAlarmTime.get();
         }
       }
     }
