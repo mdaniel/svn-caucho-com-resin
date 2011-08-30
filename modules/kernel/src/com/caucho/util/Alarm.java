@@ -84,7 +84,8 @@ public class Alarm implements ThreadTask, ClassLoaderListener {
 
   private boolean _isPriority = true;
 
-  private int _heapIndex = 0;
+  // private int _heapIndex = 0;
+  private int _bucket = -1;
 
   private volatile boolean _isRunning;
   
@@ -304,12 +305,23 @@ public class Alarm implements ThreadTask, ClassLoaderListener {
   
   int getHeapIndex()
   {
-    return _heapIndex;
+    // return _heapIndex;
+    return 0;
+  }
+  
+  int getBucket()
+  {
+    return _bucket;
+  }
+  
+  void setBucket(int bucket)
+  {
+    _bucket = bucket;
   }
   
   void setHeapIndex(int index)
   {
-    _heapIndex = index;
+    // _heapIndex = index;
   }
   
   Alarm getNext()
@@ -364,7 +376,9 @@ public class Alarm implements ThreadTask, ClassLoaderListener {
    */
   public boolean isQueued()
   {
-    return _heapIndex != 0;
+    // return _heapIndex != 0;
+    // return _wakeTime != 0;
+    return _bucket != 0;
   }
 
   /**
@@ -540,7 +554,7 @@ public class Alarm implements ThreadTask, ClassLoaderListener {
       _currentTime = System.currentTimeMillis();
     }
 
-    Alarm alarm;
+    // Alarm alarm;
 
     Thread thread = Thread.currentThread();
     ClassLoader oldLoader = thread.getContextClassLoader();

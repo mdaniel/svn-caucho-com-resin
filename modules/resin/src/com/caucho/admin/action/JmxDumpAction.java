@@ -141,7 +141,7 @@ public class JmxDumpAction extends AbstractJmxAction implements AdminAction
       
       try {
         value = server.getAttribute(objectName, attribute.getName());
-      } catch (Exception e) {
+      } catch (Throwable e) {
         value = e;
       }
       

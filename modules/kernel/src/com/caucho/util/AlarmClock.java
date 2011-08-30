@@ -48,18 +48,19 @@ public class AlarmClock {
     = Logger.getLogger(AlarmClock.class.getName());
   private static final int CLOCK_PERIOD = 60 * 1000;
   
-  private AtomicReferenceArray<Alarm> _clockArray
-    = new AtomicReferenceArray<Alarm>(CLOCK_PERIOD);
+  private Alarm []_clockArray = new Alarm[CLOCK_PERIOD];
   
   private AtomicLong _now = new AtomicLong();
   private AtomicLong _nextAlarmTime = new AtomicLong();
   
-  private AtomicReference<Alarm> _currentAlarms = new AtomicReference<Alarm>();
+  private final ArrayList<Alarm> _currentAlarms = new ArrayList<Alarm>();
   
   private long _lastTime;
   
   private ArrayList<Alarm> _overflow
     = new ArrayList<Alarm>();
+  
+  private Object _lock = new Object();
 
   /**
    * Queue the alarm for wakeup.
@@ -68,16 +69,13 @@ public class AlarmClock {
    */
   boolean queueAt(Alarm alarm, long wakeTime)
   {
-    if (wakeTime <= 0)
-      return false;
-    
     boolean isEarliest = false;
     
     long prevNextAlarmTime;
     
     do {
       prevNextAlarmTime = _nextAlarmTime.get();
-    } while (wakeTime < prevNextAlarmTime 
+    } while (wakeTime > 0 && wakeTime < prevNextAlarmTime 
              && ! _nextAlarmTime.compareAndSet(prevNextAlarmTime, wakeTime));
     
     if (wakeTime < prevNextAlarmTime)
@@ -85,27 +83,46 @@ public class AlarmClock {
     
     long oldWakeTime = alarm.getAndSetWakeTime(wakeTime);
     
-    dequeueImpl(alarm, oldWakeTime);
+    if (oldWakeTime == wakeTime)
+      return false;
+    
+    if (oldWakeTime > 0) {
+      if (! dequeueImpl(alarm)) {
+        /*
+        System.out.println("FAIL: " + oldWakeTime + " " + wakeTime
+                           + " " + alarm);
+                           */
+      }
+    }
+    
+    if (wakeTime <= 0)
+      return false;
     
     long now = _now.get();
     
     if (wakeTime <= now) {
       queueCurrent(alarm);
+      return true;
     }
     
-    int bucket = (int) (wakeTime % CLOCK_PERIOD);
+    synchronized (_lock) {
+      if (alarm.getBucket() >= 0)
+        return false;
+      
+      int bucket = (int) (wakeTime % CLOCK_PERIOD);
+      alarm.setBucket(bucket);
     
-    Alarm top;
-    do {
-      top = _clockArray.get(bucket);
+      Alarm top = _clockArray[bucket];
       alarm.setNext(top);
-    } while (! _clockArray.compareAndSet(bucket, top, alarm));
+      _clockArray[bucket] = alarm;
+    }
     
     now = _now.get();
-    wakeTime = alarm.getWakeTime();
     
-    if (wakeTime > 0 && wakeTime < now) {
-      dequeueImpl(alarm, wakeTime);
+    long nextWakeTime = alarm.getWakeTime();
+    
+    if (nextWakeTime != wakeTime || wakeTime < now) {
+      dequeueImpl(alarm);
       queueCurrent(alarm);
     }
     
@@ -114,69 +131,92 @@ public class AlarmClock {
   
   private void queueCurrent(Alarm alarm)
   {
-    Alarm top;
-    
-    do {
-      top = _currentAlarms.get();
-      alarm.setNext(top);
-    } while (! _currentAlarms.compareAndSet(top, alarm));
+    synchronized (_currentAlarms) {
+      _currentAlarms.add(alarm);
+    }
   }
   
   void dequeue(Alarm alarm)
   {
     long oldWakeTime = alarm.getAndSetWakeTime(0);
     
-    dequeueImpl(alarm, oldWakeTime);
+    if (alarm.getBucket() >= 0)
+      dequeueImpl(alarm);
   }
   
-  private boolean dequeueImpl(Alarm alarm, long wakeTime)
+  private boolean dequeueImpl(Alarm alarm)
   {
-    if (wakeTime == 0)
-      return false;
-    
-    int bucket = (int) (wakeTime % CLOCK_PERIOD);
-    
-    Alarm head;
-    
-    head_loop:
-    while ((head = _clockArray.get(bucket)) != null) {
-      Alarm next = head.getNext();
+     synchronized (_lock) {
+      int bucket = alarm.getBucket();
+      Alarm next = alarm.getNext();
+      
+      alarm.setBucket(-1);
+      alarm.setNext(null);
+      
+      if (bucket < 0)
+        return false;
+      
+      Alarm head = _clockArray[bucket];
+      
+      if (head == null)
+        return false;
       
       if (head == alarm) {
-        if (_clockArray.compareAndSet(bucket, alarm, next)) {
-          head.setNext(next, null);
-        
+        _clockArray[bucket] = next;
+        return true;
+      }
+      
+      Alarm prev = head;
+      Alarm ptr = prev.getNext();
+
+      while (ptr != null) {
+        if (ptr == alarm) {
+          prev.setNext(next);
           return true;
         }
-        else {
-          continue head_loop;
-        }
-      }
-      
-      Alarm ptr = head;
-      Alarm prev;
-      while (next != null) {
+        
         prev = ptr;
-        ptr = next;
-        
-        next = ptr.getNext();
-        
-        if (ptr == alarm) {
-          if (prev.setNext(ptr, next)) {
-            ptr.setNext(next, null);
-            
-            return true;
-          }
-          else {
-            continue head_loop;
-          }
-        }
+        ptr = ptr.getNext();
       }
-      
-      return false;
     }
     
     return false;
+  }
+  
+  private Alarm extractNextAlarm(int bucket, long time, boolean isTest)
+  {
+    if (_clockArray[bucket] == null)
+      return null;
+    
+    synchronized (_lock) {
+      Alarm ptr = _clockArray[bucket];
+      Alarm prev = null;
+      
+      while (ptr != null) {
+        Alarm next = ptr.getNext();
+        
+        long wakeTime = ptr.getWakeTime();
+        
+        if (wakeTime <= time) {
+          ptr.setNext(null);
+          ptr.setBucket(-1);
+          
+          if (prev != null) {
+            prev.setNext(next);
+          }
+          else {
+            _clockArray[bucket] = next;
+          }
+          
+          return ptr;
+        }
+        
+        prev = ptr;
+        ptr = next;
+      }
+    }
+    
+    return null;
   }
 
   /**
@@ -194,56 +234,21 @@ public class AlarmClock {
       delta = CLOCK_PERIOD;
     else
       delta = (int) (now - lastTime);
+
+    Alarm alarm;
     
     for (int i = 0; i <= delta; i++) {
       long time = lastTime + i;
       int bucket = (int) (time % CLOCK_PERIOD);
 
-      Alarm alarm;
-      
-      while ((alarm = _clockArray.get(bucket)) != null) {
-        Alarm next = alarm.getNext();
-        
-        boolean isReady = false;
-        
-        for (Alarm ptr = alarm; ptr != null; ptr = ptr.getNext()) {
-          if (ptr.getWakeTime() <= now) {
-            isReady = true;
-            break;
-          }
-        }
-        
-        if (! isReady)
-          break;
-        
-        if (_clockArray.compareAndSet(bucket, alarm, next)) {
-          if (next != null)
-            alarm.setNext(next, null);
-          
-          if (alarm.getWakeTime() <= now)
-            dispatch(alarm, now, isTest);
-          else {
-            synchronized (_overflow) {
-              _overflow.add(alarm);
-            }
-          }
-        }
-      }
-      
-      if (_overflow.size() > 0) {
-        synchronized (_overflow) {
-          for (int j = _overflow.size() - 1; j >= 0; j--) {
-            Alarm overflowAlarm = _overflow.get(j);
-        
-            queueAt(overflowAlarm, overflowAlarm.getWakeTime());
-          }
-          
-          _overflow.clear();
-        }
+      while ((alarm = extractNextAlarm(bucket, now, isTest)) != null) {
+        dispatch(alarm, now, isTest);
       }
     }
     
-    extractCurrentAlarms(now, isTest);
+    while ((alarm = extractNextCurrentAlarm()) != null) {
+      dispatch(alarm, now, isTest);
+    }
     
     updateNextAlarmTime(now);
     
@@ -253,14 +258,21 @@ public class AlarmClock {
   private void extractCurrentAlarms(long now, boolean isTest)
   {
     Alarm alarm;
-    while ((alarm = _currentAlarms.get()) != null) {
-      Alarm next = alarm.getNext();
-      
-      if (_currentAlarms.compareAndSet(alarm, next)) {
-        alarm.setNext(next, null);
-        
-        dispatch(alarm, now, isTest);
+    
+  }
+  
+  private Alarm extractNextCurrentAlarm()
+  {
+    if (_currentAlarms.size() == 0)
+      return null;
+    
+    synchronized (_currentAlarms) {
+      if (_currentAlarms.size() > 0) {
+        Alarm alarm = _currentAlarms.remove(_currentAlarms.size() - 1);
+        return alarm;
       }
+      
+      return null;
     }
   }
   
@@ -275,15 +287,12 @@ public class AlarmClock {
       
       int bucket = (int) (time % CLOCK_PERIOD);
       
-      Alarm head;
-      if ((head = _clockArray.get(bucket)) != null) {
-        for (; head != null; head = head.getNext()) {
-          long wakeTime = head.getWakeTime();
+      if (_clockArray[bucket] != null) {
+        long wakeTime = time;
           
-          if (wakeTime > 0 && wakeTime < nextTime) {
-            _nextAlarmTime.compareAndSet(nextTime, wakeTime);
-            return;
-          }
+        if (wakeTime < nextTime) {
+          _nextAlarmTime.compareAndSet(nextTime, wakeTime);
+          return;
         }
       }
     }
@@ -299,13 +308,7 @@ public class AlarmClock {
     else
       now = Alarm.getCurrentTime();
     
-    long wakeTime = alarm.getWakeTime();
-    
-    if (wakeTime <= 0 
-        || now < wakeTime
-        || ! alarm.setWakeTime(wakeTime, 0)) {
-      return;
-    }
+    long wakeTime = alarm.getAndSetWakeTime(0);
 
     long delta = now - wakeTime;
 
@@ -331,11 +334,6 @@ public class AlarmClock {
       ThreadPool.getThreadPool().schedule(alarm);
 
   }
-  
-  private void dispatchHead(Alarm alarm, long now)
-  {
-    Alarm next = null;
-  }
 
   /**
    * Returns the next alarm ready to run
@@ -351,10 +349,22 @@ public class AlarmClock {
   {
     _now.set(0);
     _nextAlarmTime.set(0);
-    _currentAlarms.set(null);
     
-    for (int i = CLOCK_PERIOD - 1; i >= 0; i--) {
-      _clockArray.set(i, null);
+    synchronized (_lock) {
+      _currentAlarms.clear();
+    
+      for (int i = CLOCK_PERIOD - 1; i >= 0; i--) {
+        Alarm alarm = _clockArray[i];
+        _clockArray[i] = null;
+      
+        while (alarm != null) {
+          Alarm next = alarm.getNext();
+          alarm.setNext(null);
+          alarm.setBucket(-1);
+          alarm.setWakeTime(alarm.getWakeTime(), 0);
+          alarm = next;
+        }
+      }
     }
   }
 

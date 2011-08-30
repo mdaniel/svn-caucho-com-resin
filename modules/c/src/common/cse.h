@@ -228,6 +228,7 @@ typedef struct config_t {
   int is_updating;
 } config_t;
 
+/* windows needs this smaller than 64k */
 #define BUF_LENGTH (16 * 1024)
 
 struct stream_t {
