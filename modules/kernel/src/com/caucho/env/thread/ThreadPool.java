@@ -119,7 +119,7 @@ public final class ThreadPool {
   private ExecutorQueueItem _executorQueueHead;
   private ExecutorQueueItem _executorQueueTail;
   
-  private ThreadRing _ring = new ThreadRing(this);
+  private ThreadRing _ring = null;// new ThreadRing(this);
 
   public ThreadPool()
   {

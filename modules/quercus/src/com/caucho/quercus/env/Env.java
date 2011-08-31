@@ -4424,7 +4424,7 @@ public class Env
     }
     else if (_isUnicodeSemantics)
       return new UnicodeBuilderValue(s);
-    else {
+    else if (s.length() < 256) {
       StringValue stringValue = _internStringMap.get(s);
 
       if (stringValue == null) {
@@ -4435,6 +4435,9 @@ public class Env
       return stringValue;
 
       // return new ConstStringValue(s);
+    }
+    else {
+      return new ConstStringValue(s);
     }
   }
 

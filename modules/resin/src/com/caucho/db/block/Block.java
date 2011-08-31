@@ -57,9 +57,13 @@ public final class Block implements SyncCacheListener {
   private static final FreeList<byte[]> _freeBuffers
     = new FreeList<byte[]>(256);
     
+  private static final FreeList<ReentrantReadWriteLock> _freeLocks
+    = new FreeList<ReentrantReadWriteLock>(256);
+    
   private final BlockStore _store;
   private final long _blockId;
 
+  private ReentrantReadWriteLock _rwLock;
   private final Lock _readLock;
   private final Lock _writeLock;
   
@@ -85,10 +89,11 @@ public final class Block implements SyncCacheListener {
 
     // _lock = new Lock("block:" + store.getName() + ":" + Long.toHexString(_blockId));
     // ReadWriteLock rwLock = new ReentrantReadWriteLock();
-    ReadWriteLock rwLock = new ReentrantReadWriteLock();
     
-    _readLock = rwLock.readLock();
-    _writeLock = rwLock.writeLock();
+    _rwLock = allocateReadWriteLock();
+    
+    _readLock = _rwLock.readLock();
+    _writeLock = _rwLock.writeLock();
 
     _isFlushDirtyOnCommit = _store.isFlushDirtyBlocksOnCommit();
 
@@ -97,7 +102,17 @@ public final class Block implements SyncCacheListener {
     if (log.isLoggable(Level.ALL))
       log.log(Level.ALL, this + " create");
   }
-
+  
+  private static ReentrantReadWriteLock allocateReadWriteLock()
+  {
+    ReentrantReadWriteLock lock = _freeLocks.allocate();
+    
+    if (lock == null)
+      lock = new ReentrantReadWriteLock();
+    
+    return lock;
+  }
+  
   /**
    * Returns true if the block should be flushed on a commit.
    */
@@ -480,6 +495,17 @@ public final class Block implements SyncCacheListener {
       
       if (buffer != null) {
         _freeBuffers.free(buffer);
+      }
+      
+      ReentrantReadWriteLock lock = _rwLock;
+      _rwLock = null;
+      
+      if (lock != null) {
+        if (lock.getReadLockCount() == 0
+            && lock.getReadHoldCount() == 0
+            && ! lock.isWriteLocked()) {
+          _freeLocks.free(lock);
+        }
       }
     }
   }
