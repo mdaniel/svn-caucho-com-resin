@@ -12,6 +12,7 @@
 
 <s2 title="4.0.22 - snapshot">
 <ul>
+<li>servlet/cache: added range limits</li>
 <li>webapp: add alias-url-regexp to match multiple context-paths to a web-app (#4720, rep by Sachidanand Shukla)</li>
 <li>command-line: added uptime to "status" command"
 <li>alarm: Alarm's base classloader needs to be Alarm not system classloader (#4707, rep by M Schmidt)</li>

@@ -95,7 +95,6 @@ public final class MnodeValue implements ExtCacheEntry {
     _idleTimeout = idleTimeout;
     _leaseTimeout = leaseTimeout;
     _localReadTimeout = localReadTimeout;
-    
     _lastRemoteAccessTime = lastAccessTime;
     _lastUpdateTime = lastUpdateTime;
     

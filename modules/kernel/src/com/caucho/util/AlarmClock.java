@@ -109,7 +109,7 @@ public class AlarmClock {
       if (alarm.getBucket() >= 0)
         return false;
       
-      int bucket = (int) (wakeTime % CLOCK_PERIOD);
+      int bucket = getBucket(wakeTime);
       alarm.setBucket(bucket);
     
       Alarm top = _clockArray[bucket];
@@ -239,7 +239,7 @@ public class AlarmClock {
     
     for (int i = 0; i <= delta; i++) {
       long time = lastTime + i;
-      int bucket = (int) (time % CLOCK_PERIOD);
+      int bucket = getBucket(time);
 
       while ((alarm = extractNextAlarm(bucket, now, isTest)) != null) {
         dispatch(alarm, now, isTest);
@@ -279,7 +279,7 @@ public class AlarmClock {
     for (int i = 0; i < delta; i++) {
       long time = now + i;
       
-      int bucket = (int) (time % CLOCK_PERIOD);
+      int bucket = getBucket(time);
       
       if (_clockArray[bucket] != null) {
         long wakeTime = time;
@@ -329,6 +329,11 @@ public class AlarmClock {
     else
       ThreadPool.getThreadPool().schedule(alarm);
 
+  }
+  
+  private int getBucket(long time)
+  {
+    return (int) (time % CLOCK_PERIOD);
   }
 
   /**

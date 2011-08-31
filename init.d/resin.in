@@ -39,6 +39,11 @@ fi
 export JAVA_HOME RESIN_HOME
 
 JAVA="@JAVA_EXE@"
+
+if test -z "${JAVA_EXE}"; then
+  JAVA_EXE=java
+fi
+
 #
 # Set to the server id to start
 #

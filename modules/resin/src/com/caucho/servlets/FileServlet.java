@@ -58,6 +58,7 @@ import com.caucho.server.util.CauchoSystem;
 import com.caucho.server.webapp.WebApp;
 import com.caucho.util.Base64;
 import com.caucho.util.CharBuffer;
+import com.caucho.util.L10N;
 import com.caucho.util.LruCache;
 import com.caucho.util.QDate;
 import com.caucho.util.RandomUtil;
@@ -72,6 +73,7 @@ import com.caucho.vfs.Vfs;
  */
 @SuppressWarnings("serial")
 public class FileServlet extends GenericServlet {
+  private static final L10N L = new L10N(FileServlet.class);
   private static final Logger log
     = Logger.getLogger(FileServlet.class.getName());
   
@@ -504,13 +506,17 @@ public class FileServlet extends GenericServlet {
     int length = range.length();
 
     boolean hasMore = range.indexOf(',') > 0;
+    
+    long cacheLength = cache.getLength();
+    long bytesMax = 2 * cacheLength;
+    long bytesWritten = 0;
 
     int head = 0;
     boolean isFirstChunk = true;
     String boundary = null;
     int off = range.indexOf("bytes=", head);
     ServletOutputStream os = null;
-
+    
     if (off < 0)
       return false;
 
@@ -557,7 +563,6 @@ public class FileServlet extends GenericServlet {
       }
 
       head = off;
-      long cacheLength = cache.getLength();
       if (! hasLast) {
         if (first == 0)
           return false;
@@ -587,6 +592,23 @@ public class FileServlet extends GenericServlet {
       cb.append('/');
       cb.append(cacheLength);
       String chunkRange = cb.toString();
+      
+      bytesWritten += last - first + 1;
+      if (bytesMax <= bytesWritten) {
+        String msg;
+        
+        msg = L.l("{0} too many range bytes requested {1} for uri={2} IP={3}",
+                  this,
+                  bytesWritten,
+                  req.getRequestURL(),
+                  req.getRemoteAddr());
+        
+        log.warning(msg);
+        
+        if (msg != null)
+          throw new IOException(msg);
+        
+      }
 
       if (hasMore) {
         if (isFirstChunk) {

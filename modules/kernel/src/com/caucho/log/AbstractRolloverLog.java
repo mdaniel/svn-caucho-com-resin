@@ -393,6 +393,15 @@ public class AbstractRolloverLog {
   protected void write(byte []buffer, int offset, int length)
     throws IOException
   {
+    /*
+    String s = new String(buffer, offset, length);
+    if (s.startsWith("127")) {
+      System.out.println("WRITE: " + s);
+      Thread.dumpStack();
+      
+    }
+    */
+    
     synchronized (_logLock) {
       if (_isRollingOver && getTempStreamMax() < _tempStreamSize) {
         try {

@@ -179,8 +179,8 @@ public class CacheConfig
   {
     if (expireTimeout < 0 || TIME_INFINITY <= expireTimeout)
       expireTimeout = TIME_INFINITY;
-    else
-      _expireTimeout = expireTimeout;
+
+    _expireTimeout = expireTimeout;
   }
 
   /**
@@ -238,8 +238,8 @@ public class CacheConfig
   {
     if (idleTimeout < 0 || TIME_INFINITY <= idleTimeout)
       idleTimeout = TIME_INFINITY;
-    else
-      _idleTimeout = idleTimeout;
+
+    _idleTimeout = idleTimeout;
   }
 
   /**

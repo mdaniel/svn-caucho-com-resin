@@ -134,6 +134,14 @@ public class AccessLogWriter extends AbstractRolloverLog
   {
     // server/021g
     _logWriterTask.wake();
+    
+    waitForFlush(10);
+    
+    try {
+      super.flush();
+    } catch (IOException e) {
+      log.log(Level.FINER, e.toString(), e);
+    }
   }
 
   protected void waitForFlush(long timeout)

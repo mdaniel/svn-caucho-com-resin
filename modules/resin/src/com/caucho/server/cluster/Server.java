@@ -78,6 +78,7 @@ import com.caucho.server.dispatch.InvocationBuilder;
 import com.caucho.server.dispatch.InvocationDecoder;
 import com.caucho.server.dispatch.InvocationMatcher;
 import com.caucho.server.dispatch.InvocationServer;
+import com.caucho.server.distcache.CacheConfig;
 import com.caucho.server.distcache.PersistentStoreConfig;
 import com.caucho.server.e_app.EarConfig;
 import com.caucho.server.host.Host;
@@ -1049,6 +1050,8 @@ public class Server
       if (_systemStore == null) {
         _systemStore = new ClusterCache("resin:system");
         _systemStore.setGuid("resin:system");
+        _systemStore.setExpireTimeoutMillis(CacheConfig.TIME_INFINITY);
+        _systemStore.setIdleTimeoutMillis(CacheConfig.TIME_INFINITY);
         // XXX: need to set reliability values
       }
     }

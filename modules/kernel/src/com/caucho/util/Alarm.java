@@ -654,13 +654,16 @@ public class Alarm implements ThreadTask, ClassLoaderListener {
     @Override
     public long runTask()
     {
+      if (isTest())
+        return -1;
+      
       _lastTime = getCurrentTime();
       
       while (true) {
         long now = getCurrentTime();
         
         _clock.extractAlarm(now, false);
-
+        
         long next = _clock.getNextAlarmTime();
         
         // long next = _heap.nextAlarmTime();
