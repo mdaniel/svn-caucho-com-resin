@@ -116,6 +116,25 @@ minutes expire, the triad will automatically remove the server.</p>
 <s1 title="Application Deployment">
 
 <p>
+Cloud deployments should generally use the cluster command-line (or browser)
+deployment instead of dropping a .war in the webapps directory because
+the cluster deployment automatically pushes deployment to new
+servers.</p>
+
+<p>With a cluster command-line deployment, the new server will check
+with the triad hub for the latest deployment. If there's a new
+version, the elastic server will download the updates from the triad
+hub. The cluster deployment ensures all servers are running the same
+.war deployment. You don't need external scripts to copy versions to
+each server; that's taken care of by a core Resin capability.</p>
+
+<example title="Example: command-line deployment">
+unix> bin/resin.sh deploy test.war
+</example>
+
+<p>If you don't have a &lt;resin-system-auth-key> and do have
+administrator users configured, you will also need to pass the -user
+and -password parameters.</p>
 
 </s1>
 
