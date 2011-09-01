@@ -33,6 +33,8 @@ load-balancing recognize the new server and automatically add it to
 the service. When you delete a server, the services will adapt to the
 smaller network.</p>
 
+<figure src="cloud-hub.png" alt="Resin's hub-and-spoke cloud model"/>
+
 </s1>
 
 <s1 title="Basic Configuration">
@@ -135,6 +137,40 @@ unix> bin/resin.sh deploy test.war
 <p>If you don't have a &lt;resin-system-auth-key> and do have
 administrator users configured, you will also need to pass the -user
 and -password parameters.</p>
+
+<s2 title="Configuration for cluster deployment">
+
+<p>The basic configuration for cluster deployment is the same as
+for single-server deployment. Resin uses the same &lt;web-app-deploy>
+tag to specify where cluster deployment should be expanded. If for
+some reason you deploy a .war in the webapps directory and deploy one
+on the clustered command-line, the cluster will take priority.</p>
+
+<p>In the following example, a test.war deployed in the command-line
+will be expanded to the webapps/test/ directory. The example uses
+&lt;cluster-default> and &lt;host-default> so every cluster and every
+virtual host can use the webapps deployment.</p>
+
+<example title="Example: resin.xml cluster deployment">
+&lt;resin xmlns="http://caucho.com/ns/resin">
+...
+&lt;cluster-default>
+&lt;host-default>
+
+  <b>&lt;web-app-deploy path="webapps"/></b>
+
+&lt;/host-default>
+&lt;/cluster-default>
+
+&lt;cluster id="app-tier">
+  ...
+&lt;/cluster>
+...
+&lt;/resin>
+</example>
+
+
+</s2>
 
 </s1>
 
