@@ -35,6 +35,9 @@
 
       <item link="cluster-server.xtp" title="Server"
             description="Server (JVM) configuration"/>
+
+      <item link="cluster-cloud.xtp" title="Cloud"
+            description="Elastic Server (Cloud) configuration"/>
       
       <item link="clustering-deployment-ref.xtp" title="Clustered Deployment Reference"
         description="ANT and Maven clustered deployment API reference"/>

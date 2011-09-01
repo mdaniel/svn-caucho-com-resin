@@ -49,9 +49,9 @@ basic resin.xml example that uses three servers.</p>
 ...
 &lt;cluster id="my-cluster">
 
-  <b>&lt;server id="a" address="192.168.1.10" port="6800"/></b>
-  <b>&lt;server id="b" address="192.168.1.11" port="6800"/></b>
-  <b>&lt;server id="c" address="192.168.1.12" port="6800"/></b>
+  <b>&lt;server id="a" address="192.168.1.10" port="6800"/>
+  &lt;server id="b" address="192.168.1.11" port="6800"/>
+  &lt;server id="c" address="192.168.1.12" port="6800"/></b><br/>
 
   ...
 &lt;/cluster>
@@ -135,6 +135,62 @@ unix> bin/resin.sh deploy test.war
 <p>If you don't have a &lt;resin-system-auth-key> and do have
 administrator users configured, you will also need to pass the -user
 and -password parameters.</p>
+
+</s1>
+
+<s1 title="Cluster Resources: Cache, Queues, Load-Balance">
+
+<p>Resin's cluster-aware resources adapt to the added and removed
+servers automatically. A new server can participate in the same clustered
+cache as the cluster, see the same cache values, and update the cache
+with entries visible to all the servers.</p>
+
+<p>The Resin resources that are automatically cache-aware are:</p>
+
+<ul>
+<li>jcache: clustered caching</li>
+<li>distributed sessions</li>
+<li>JMS queues</li>
+<li>load-balancing</li>
+<li>administration</li>
+<li>deployment</li>
+</ul>
+
+<s2 title="Clustered Caching configuration">
+
+<p>Resin's clustered caching uses the jcache API, configured using
+CDI XML syntax and injected with CDI. (It's also possible to use
+JNDI.)</p>
+
+<example title="Example: resin-web.xml Cluster cache configuration">
+&lt;web-app xmlns="http://caucho.com/ns/resin"
+            xmlns:resin="urn:java:com.caucho.resin">
+
+  &lt;resin:ClusterCache name="my-cache"/>
+
+&lt;/web-app>
+</example>
+
+<p>The cache can be used with CDI and standard injection:</p>
+
+<example title="Example: using jcache">
+package mypkg;
+
+import javax.inject.*;
+import javax.cache.*;
+
+public class MyClass {
+  @Inject
+  private Cache&lt;String,String> _myCache;
+
+  public void doStuff()
+  {
+    String value = _myCache.get("mykey");
+  }
+}  
+</example>
+
+</s2>
 
 </s1>
 
