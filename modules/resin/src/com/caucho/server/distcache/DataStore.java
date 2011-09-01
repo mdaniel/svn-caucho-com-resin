@@ -573,6 +573,8 @@ public class DataStore {
   {
     DataConnection conn = null;
 
+    boolean isValid = false;
+    
     try {
       conn = getConnection();
 
@@ -601,6 +603,8 @@ public class DataStore {
       } finally {
         rs.close();
       }
+      
+      isValid = true;
     } catch (SQLException e) {
       e.printStackTrace();
       log.log(Level.FINE, e.toString(), e);
@@ -608,7 +612,10 @@ public class DataStore {
       e.printStackTrace();
       log.log(Level.FINE, e.toString(), e);
     } finally {
-      conn.close();
+      if (isValid)
+        conn.close();
+      else
+        conn.destroy();
     }
   }
   
@@ -869,10 +876,15 @@ public class DataStore {
     void close()
     {
       if (_freeConn == null || ! _freeConn.freeCareful(this)) {
-        try {
-          _conn.close();
-        } catch (SQLException e) {
-        }
+        destroy();
+      }
+    }
+
+    void destroy()
+    {
+      try {
+        _conn.close();
+      } catch (SQLException e) {
       }
     }
   }
