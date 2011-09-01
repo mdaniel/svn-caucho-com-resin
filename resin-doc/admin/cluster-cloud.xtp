@@ -1,0 +1,123 @@
+<document>
+<header>
+  <product>resin</product>
+  <title>Cluster: Elastic Server (Cloud) configuration</title>
+  <version>Resin 4.0</version>
+
+  <description>
+
+    <p>
+      Configuration and deployment of an elastic-server Resin cluster.
+    </p>
+
+  </description>
+</header>
+<body>
+
+<localtoc/>
+
+<s1 title="Overview">
+
+<p>Resin's cloud support is an extension of its clustering. It is the
+third generation of Resin clustering, designed for elastic clusters:
+adding and removing servers from a live cluster.</p>
+
+<p>A triple-redundant hub-and-spoke network is the heart of
+a Resin cluster. The three servers that form the hub are called the
+'triad' and are responsible for reliability and for load-balancing
+clustered services like caching. All other servers can be added or
+removed without affecting the shared data.</p>
+
+<p>Services like clustered deployment, caching, JMS, and
+load-balancing recognize the new server and automatically add it to
+the service. When you delete a server, the services will adapt to the
+smaller network.</p>
+
+</s1>
+
+<s1 title="Basic Configuration">
+
+<p>The basic cloud configuration is like a normal Resin configuration:
+define the three triad servers in your resin.xml, and copy the resin.xml
+across all servers. You will attach new servers to the cluster when
+you start it on the command-line. You can still define more servers in
+the resin.xml, or fewer if you have a small deployment; it's just the
+basic resin.xml example that uses three servers.</p>
+
+<example title="Example: basic resin.xml for a 3-server hub">
+&lt;resin xmlns="http://caucho.com/ns/resin">
+...
+&lt;cluster id="my-cluster">
+
+  <b>&lt;server id="a" address="192.168.1.10" port="6800"/></b>
+  <b>&lt;server id="b" address="192.168.1.11" port="6800"/></b>
+  <b>&lt;server id="c" address="192.168.1.12" port="6800"/></b>
+
+  ...
+&lt;/cluster>
+...
+&lt;/resin>
+</example>
+
+<p>The first three &lt;server> tags in a cluster always form the
+triad. If you have one or two servers, they will still form the
+hub. One server acts like a Resin standalone; two servers back each
+other up. More than three &lt;server> tags form static servers acting
+as spoke servers in the hub-and-spoke model. The static servers are
+identical to any elastic servers, but are predefined in the
+resin.xml</p>
+
+<s2 title="command-line: adding an elastic server">
+
+<p>Before starting a server, your new machine needs the following to
+be installed:</p>
+
+<ol>
+<li>The Java JDK</li>
+<li>Resin and your licenses</li>
+<li>Your resin.xml which defines the three triad servers</li>
+</ol>
+
+<p>Since these three items are the same for each new server, you can
+make a virtual machine image with these already saved, use the VM
+image for the new machine and start it.</p>
+
+<p>To start a new server, you'll add a '--join-cluster' option with
+the name of the cluster you want to join.</p>
+
+<example title="Example: command-line starting an elastic server">
+unix> bin/resin.sh --join-cluster my-cluster start
+</example>
+
+<p>If you don't have a &lt;resin-system-auth-key> in the resin.xml,
+and you do have admin users defined in the AdminAuthenticator, you
+will also need to pass a -user and -password arguments.</p>
+
+<p>The new server will join the cluster by contacting the triad. It
+will then download any deployed applications or data, and then start
+serving pages.</p>
+
+<p>The triad will inform cluster services about the load balancer,
+services like caching, admin, JMS, and load-balancer.</p>
+
+</s2>
+
+<s2 title="Removing an elastic server">
+
+<p>To remove an elastic server, just stop the server instance. The
+triad will keep its place in the topology reserved for another 15
+minutes to handle restarts, maintenance and outages. After the 15
+minutes expire, the triad will automatically remove the server.</p>
+
+</s2>
+
+</s1>
+
+<s1 title="Application Deployment">
+
+<p>
+
+</s1>
+
+</body>
+</document>

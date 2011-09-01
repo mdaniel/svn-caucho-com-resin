@@ -22,6 +22,10 @@
     <linked-section link="admin/cluster-server.xtp" />
   </chapter>
 
+  <chapter title="Clustering: Elastic Server (Cloud)">
+    <linked-section link="admin/cluster-cloud.xtp" />
+  </chapter>
+
   <chapter title="Command-Line">
     <linked-section link="admin/resin-admin-command-line.xtp" />
   </chapter>
@@ -79,6 +83,10 @@
   
   <chapter title="Web Server: Virtual Hosts">
     <linked-section link="admin/http-virtual-hosts.xtp" />
+  </chapter>
+  
+  <chapter title="Web Server: Web Apps">
+    <linked-section link="admin/http-web-apps.xtp" />
   </chapter>
   
   <chapter title="Web Server: HTTP Proxy Cache">

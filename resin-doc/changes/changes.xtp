@@ -12,6 +12,7 @@
 
 <s2 title="4.0.22 - Sep 1, 2011">
 <ul>
+<li>cluster deploy: .war issue on non-triad servers (#4743, rep by James Meyer)</li>
 <li>servlet/cache: added range limits</li>
 <li>webapp: add alias-url-regexp to match multiple context-paths to a web-app (#4720, rep by Sachidanand Shukla)</li>
 <li>command-line: added uptime to "status" command"
