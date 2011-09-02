@@ -29,9 +29,13 @@
 
 package com.caucho.db.lock;
 
+import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicLongFieldUpdater;
 import java.util.concurrent.atomic.AtomicReferenceFieldUpdater;
+import java.util.concurrent.locks.Condition;
+import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.LockSupport;
+import java.util.concurrent.locks.ReadWriteLock;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -41,15 +45,15 @@ import com.caucho.util.L10N;
 /**
  * Locking for tables/etc.
  */
-public final class Lock {
-  private final static L10N L = new L10N(Lock.class);
+public final class DatabaseLock implements ReadWriteLock {
+  private final static L10N L = new L10N(DatabaseLock.class);
   private final static Logger log
-    = Logger.getLogger(Lock.class.getName());
+    = Logger.getLogger(DatabaseLock.class.getName());
   
   private final static 
-  AtomicLongFieldUpdater<Lock> _lockCountUpdater;
+  AtomicLongFieldUpdater<DatabaseLock> _lockCountUpdater;
   private final static 
-  AtomicReferenceFieldUpdater<Lock,LockNode> _headUpdater;
+  AtomicReferenceFieldUpdater<DatabaseLock,LockNode> _headUpdater;
   private final static 
   AtomicReferenceFieldUpdater<LockNode,LockNode> _nextUpdater;
 
@@ -59,12 +63,15 @@ public final class Lock {
   private static final long READ_MASK = 0xffffffffL;
 
   private final String _id;
+  
+  private final Lock _readLock = new ReadLockImpl();
+  private final Lock _writeLock = new WriteLockImpl();
 
   private volatile long _lockCount;
   
   private volatile LockNode _lockHead;
 
-  public Lock(String id)
+  public DatabaseLock(String id)
   {
     _id = id;
   }
@@ -75,6 +82,18 @@ public final class Lock {
   public String getId()
   {
     return _id;
+  }
+  
+  @Override
+  public Lock readLock()
+  {
+    return _readLock;
+  }
+  
+  @Override
+  public Lock writeLock()
+  {
+    return _writeLock;
   }
 
   /**
@@ -166,6 +185,16 @@ public final class Lock {
   {
     long expires = Alarm.getCurrentTimeActual() + timeout;
 
+    long lock;
+
+    do {
+      lock = _lockCount;
+    } while (! _lockCountUpdater.compareAndSet(this, lock, lock + NODE_LOCK));
+    
+    if (lock == 0) {
+      return;
+    }
+
     LockNode node = new LockNode(false);
     LockNode head;
     
@@ -174,14 +203,10 @@ public final class Lock {
       
       node.setNext(head);
     } while (! _headUpdater.compareAndSet(this, head, node));
-
-    long lock;
-
-    do {
-      lock = _lockCount;
-    } while (! _lockCountUpdater.compareAndSet(this, lock, lock + NODE_LOCK));
     
-    if (lock == 0) {
+    long currentLock = _lockCount;
+    
+    if ((lock & NODE_LOCK_MASK) == 0 && (currentLock & READ_MASK) == 0) {
       LockNode popNode = popNextNode();
       
       assert(node == popNode);
@@ -351,12 +376,122 @@ public final class Lock {
     }
   }
   
+  class ReadLockImpl implements Lock {
+    @Override
+    public boolean tryLock(long timeout, TimeUnit unit)
+        throws InterruptedException
+    {
+      lockRead(unit.toMillis(timeout));
+      
+      return true;
+    }
+
+    @Override
+    public void unlock()
+    {
+      unlockRead();
+    }
+    
+    @Override
+    public void lock()
+    {
+      try {
+        if (! tryLock(Long.MAX_VALUE / 2, TimeUnit.MILLISECONDS)) {
+          throw new IllegalStateException();
+        }
+      } catch (RuntimeException e) {
+        throw e;
+      } catch (Exception e) {
+        throw new IllegalStateException(e);
+      }
+    }
+
+    @Override
+    public boolean tryLock()
+    {
+      try {
+        return tryLock(Long.MAX_VALUE / 2, TimeUnit.MILLISECONDS);
+      } catch (RuntimeException e) {
+        throw e;
+      } catch (Exception e) {
+        throw new IllegalStateException(e);
+      }
+    }
+
+    @Override
+    public void lockInterruptibly() throws InterruptedException
+    {
+      throw new UnsupportedOperationException(getClass().getName());
+    }
+
+    @Override
+    public Condition newCondition()
+    {
+      throw new UnsupportedOperationException(getClass().getName());
+    }
+  }
+  
+  class WriteLockImpl implements Lock {
+    @Override
+    public boolean tryLock(long time, TimeUnit unit)
+        throws InterruptedException
+    {
+      lockReadAndWrite(unit.toMillis(time));
+      
+      return true;
+    }
+
+    @Override
+    public void unlock()
+    {
+      unlockReadAndWrite();
+    }
+    
+    @Override
+    public void lock()
+    {
+      try {
+        if (! tryLock(Long.MAX_VALUE / 2, TimeUnit.MILLISECONDS)) {
+          throw new IllegalStateException();
+        }
+      } catch (RuntimeException e) {
+        throw e;
+      } catch (Exception e) {
+        throw new IllegalStateException(e);
+      }
+    }
+
+    @Override
+    public boolean tryLock()
+    {
+      try {
+        return tryLock(Long.MAX_VALUE / 2, TimeUnit.MILLISECONDS);
+      } catch (RuntimeException e) {
+        throw e;
+      } catch (Exception e) {
+        throw new IllegalStateException(e);
+      }
+    }
+
+    @Override
+    public void lockInterruptibly() throws InterruptedException
+    {
+      throw new UnsupportedOperationException(getClass().getName());
+    }
+
+    @Override
+    public Condition newCondition()
+    {
+      throw new UnsupportedOperationException(getClass().getName());
+    }
+  }
+  
   static {
     _lockCountUpdater
-      = AtomicLongFieldUpdater.newUpdater(Lock.class, "_lockCount");
+      = AtomicLongFieldUpdater.newUpdater(DatabaseLock.class, "_lockCount");
     
     _headUpdater
-      = AtomicReferenceFieldUpdater.newUpdater(Lock.class, 
+      = AtomicReferenceFieldUpdater.newUpdater(DatabaseLock.class, 
                                                LockNode.class, 
                                                "_lockHead");
     
