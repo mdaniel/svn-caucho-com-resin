@@ -39,7 +39,7 @@ import javax.annotation.PostConstruct;
 
 import com.caucho.db.block.BlockManager;
 import com.caucho.db.block.BlockStore;
-import com.caucho.db.lock.Lock;
+import com.caucho.db.lock.DatabaseLock;
 import com.caucho.db.sql.Parser;
 import com.caucho.db.sql.Query;
 import com.caucho.db.table.Table;
@@ -67,7 +67,7 @@ public class Database
 
   private LruCache<String,Query> _cachedQueries = new LruCache<String,Query>(128);
 
-  private Lock _databaseLock = new Lock("db");
+  private DatabaseLock _databaseLock = new DatabaseLock("db");
 
   private boolean _removeOnError;
   private boolean _isFlushDirtyBlocksOnCommit = true;
@@ -167,7 +167,7 @@ public class Database
   /**
    * Returns the database lock.
    */
-  public Lock getDatabaseLock()
+  public DatabaseLock getDatabaseLock()
   {
     return _databaseLock;
   }

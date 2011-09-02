@@ -35,6 +35,35 @@ smaller network.</p>
 
 <figure src="cloud-hub.png" alt="Resin's hub-and-spoke cloud model"/>
 
+<p>The triad hub-and-spoke model solves several clustering issues
+we've discovered over the years. The three primary issues are the need
+for triple redundancy, managing elastic servers (particularly removing
+servers), and giving an understandable user model for persistent
+storage.</p>
+
+<p>Triple redundancy is needed because of server maintenance
+and load-balancing. When you take down a server for scheduled
+maintenance, the remaining servers have extra load and they are more
+vulnerable to a server failure. A triple-redundant hub with one
+server down for maintenance can survive a crash of one of the two
+remaining servers. The load is less, too. When one server is down for
+maintenance, the other two servers share an extra 50% load each. With
+only a backup system, the extra server would double its load.</p>
+
+<p>Elastic servers benefit from the hub-and-spoke model because the
+'spoke' servers are not needed for reliability. Because they don't store the
+primary cache values, the primary application deployment repository,
+or the queue store, it's possible to add and remove them without
+affecting the primary system. With other network configurations,
+removing a server forces a shuffling around backup data to the
+remaining servers.</p>
+
+<p>The triad also gives a simpler user model for understanding where
+things are stored: data is stored in the triad. Other servers just use
+the data. Understanding the triad means you can feel confident about
+removing non-triad servers, and also know that the three triad servers
+are worth additional reliability attention.</p>
+
 </s1>
 
 <s1 title="Basic Configuration">

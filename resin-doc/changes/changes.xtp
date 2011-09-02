@@ -15,7 +15,7 @@
 <li>cluster deploy: .war issue on non-triad servers (#4743, rep by James Meyer)</li>
 <li>servlet/cache: added range limits</li>
 <li>webapp: add alias-url-regexp to match multiple context-paths to a web-app (#4720, rep by Sachidanand Shukla)</li>
-<li>command-line: added uptime to "status" command"
+<li>command-line: added uptime to "status" command"</li>
 <li>alarm: Alarm's base classloader needs to be Alarm not system classloader (#4707, rep by M Schmidt)</li>
 <li>snmp: added snmpwalk support (#3721, rep by D. Devota)</li>
 <li>jndi: EnvironmentModel dynamic copy needs ConcurrentHashMap (#4721)</li>

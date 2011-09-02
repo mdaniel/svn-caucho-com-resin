@@ -39,7 +39,7 @@ import com.caucho.db.blob.Inode;
 import com.caucho.db.block.Block;
 import com.caucho.db.block.BlockStore;
 import com.caucho.db.jdbc.ConnectionImpl;
-import com.caucho.db.lock.Lock;
+import com.caucho.db.lock.DatabaseLock;
 import com.caucho.sql.SQLExceptionWrapper;
 import com.caucho.util.L10N;
 
@@ -56,8 +56,8 @@ public class DbTransaction extends StoreTransaction {
   private boolean _isAutoCommit = true;
   private ConnectionImpl _conn;
   
-  private ArrayList<Lock> _readLocks;
-  private ArrayList<Lock> _writeLocks;
+  private ArrayList<DatabaseLock> _readLocks;
+  private ArrayList<DatabaseLock> _writeLocks;
   
   private ArrayList<Block> _updateBlocks;
 
@@ -129,7 +129,7 @@ public class DbTransaction extends StoreTransaction {
   /**
    * Acquires a new read lock.
    */
-  public boolean hasReadLock(Lock lock)
+  public boolean hasReadLock(DatabaseLock lock)
   {
     return _readLocks.contains(lock);
   }
@@ -153,7 +153,7 @@ public class DbTransaction extends StoreTransaction {
   /**
    * Acquires a new write lock.
    */
-  public void lockRead(Lock lock)
+  public void lockRead(DatabaseLock lock)
     throws SQLException
   {
     if (_isRollbackOnly) {
@@ -165,7 +165,7 @@ public class DbTransaction extends StoreTransaction {
 
     try {
       if (_readLocks == null)
-        _readLocks = new ArrayList<Lock>();
+        _readLocks = new ArrayList<DatabaseLock>();
       
       if (_readLocks.contains(lock))
         throw new SQLException(L.l("lockRead must not already have a read lock"));
@@ -182,7 +182,7 @@ public class DbTransaction extends StoreTransaction {
   /**
    * Acquires a new write lock.
    */
-  public void lockReadAndWrite(Lock lock)
+  public void lockReadAndWrite(DatabaseLock lock)
     throws SQLException
   {
     if (_isRollbackOnly) {
@@ -194,9 +194,9 @@ public class DbTransaction extends StoreTransaction {
 
     try {
       if (_readLocks == null)
-        _readLocks = new ArrayList<Lock>();
+        _readLocks = new ArrayList<DatabaseLock>();
       if (_writeLocks == null)
-        _writeLocks = new ArrayList<Lock>();
+        _writeLocks = new ArrayList<DatabaseLock>();
 
       if (_readLocks.contains(lock))
         throw new SQLException(L.l("lockReadAndWrite cannot already have a read lock"));
@@ -217,7 +217,7 @@ public class DbTransaction extends StoreTransaction {
   /**
    * Conditionally a new write lock, if no contention exists.
    */
-  public boolean lockReadAndWriteNoWait(Lock lock)
+  public boolean lockReadAndWriteNoWait(DatabaseLock lock)
     throws SQLException
   {
     if (_isRollbackOnly) {
@@ -229,9 +229,9 @@ public class DbTransaction extends StoreTransaction {
 
     try {
       if (_readLocks == null)
-        _readLocks = new ArrayList<Lock>();
+        _readLocks = new ArrayList<DatabaseLock>();
       if (_writeLocks == null)
-        _writeLocks = new ArrayList<Lock>();
+        _writeLocks = new ArrayList<DatabaseLock>();
 
       if (_readLocks.contains(lock))
         throw new SQLException(L.l("lockReadAndWrite cannot already have a read lock"));
@@ -273,13 +273,13 @@ public class DbTransaction extends StoreTransaction {
   /**
    * If auto-commit, commit the read
    */
-  public void autoCommitRead(Lock lock)
+  public void autoCommitRead(DatabaseLock lock)
     throws SQLException
   {
     unlockRead(lock);
   }
   
-  public void unlockRead(Lock lock)
+  public void unlockRead(DatabaseLock lock)
     throws SQLException
   {
     if (_readLocks.remove(lock))
@@ -289,7 +289,7 @@ public class DbTransaction extends StoreTransaction {
   /**
    * If auto-commit, commit the write
    */
-  public void autoCommitWrite(Lock lock)
+  public void autoCommitWrite(DatabaseLock lock)
     throws SQLException
   {
     _readLocks.remove(lock);
@@ -304,7 +304,7 @@ public class DbTransaction extends StoreTransaction {
     }
   }
   
-  public void unlockReadAndWrite(Lock lock)
+  public void unlockReadAndWrite(DatabaseLock lock)
     throws SQLException
   {
     _readLocks.remove(lock);
@@ -491,7 +491,7 @@ public class DbTransaction extends StoreTransaction {
     // need to unlock write before upgrade to block other threads
     if (_writeLocks != null) {
       for (int i = 0; i < _writeLocks.size(); i++) {
-        Lock lock = _writeLocks.get(i);
+        DatabaseLock lock = _writeLocks.get(i);
 
         if (_readLocks != null)
           _readLocks.remove(lock);
@@ -508,7 +508,7 @@ public class DbTransaction extends StoreTransaction {
     
     if (_readLocks != null) {
       for (int i = 0; i < _readLocks.size(); i++) {
-        Lock lock = _readLocks.get(i);
+        DatabaseLock lock = _readLocks.get(i);
 
         try {
           lock.unlockRead();
