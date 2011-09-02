@@ -337,11 +337,36 @@ with entries visible to all the servers.</p>
 <li>deployment</li>
 </ul>
 
-<s2 title="Clustered Caching configuration">
+<s2 title="Clustered Caching">
 
-<p>Resin's clustered caching uses the jcache API, configured using
-CDI XML syntax and injected with CDI. (It's also possible to use
-JNDI.)</p>
+<p>Resin's clustered caching uses the jcache API which can either use
+a jcache method annotation to cache method results or an explicit
+Cache object injected CDI or JNDI. By minimizing the configuration and API
+complexities, Resin makes it straightforward to improve your
+performance through caching.</p>
+
+<p>The jcache method annotation lets you cache a method's results by
+adding a @CacheResult annotation to a CDI bean (or servlet or
+EJB.) The following example caches the result of a long computation,
+keyed by an argument. Because the cache is clustered, all the servers
+can take advantage of the cached value.</p>
+
+<example title="Example: method caching with @CacheResult">
+import javax.cache.CacheResult;
+
+public class MyBean {
+
+  @CacheResult
+  public Object doSomething(String arg)
+  {
+    ...
+  }
+}
+</example>
+
+<p>When using cached injection, you'll need to configure a cache
+instance in the resin-web.xml. Your code and its injection
+are still standards-based because it's using the CDI and jcache standards.</p>
 
 <example title="Example: resin-web.xml Cluster cache configuration">
 &lt;web-app xmlns="http://caucho.com/ns/resin"
