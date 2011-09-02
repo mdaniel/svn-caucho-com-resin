@@ -165,6 +165,10 @@ abstract public class QSocket {
       return null;
   }
   
+  public void setRequestExpireTime(long expireTime)
+  {
+  }
+  
   public boolean isEof()
     throws IOException
   {

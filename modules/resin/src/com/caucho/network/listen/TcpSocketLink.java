@@ -978,6 +978,11 @@ public class TcpSocketLink extends AbstractSocketLink
         }
 
         async.toResume();
+        
+        long requestTimeout = getListener().getRequestTimeout();
+        
+        if (requestTimeout > 0)
+          _socket.setRequestExpireTime(Alarm.getCurrentTime() + requestTimeout);
 
         // server/1lb5, #4697
         // if (! async.isCompleteRequested()) {
@@ -1014,6 +1019,8 @@ public class TcpSocketLink extends AbstractSocketLink
       ShutdownSystem.shutdownOutOfMemory(msg);
     } catch (Throwable e) {
       log.log(Level.WARNING, e.toString(), e);
+    } finally {
+      _socket.setRequestExpireTime(0);
     }
     
     return RequestState.EXIT;
@@ -1195,6 +1202,11 @@ public class TcpSocketLink extends AbstractSocketLink
       RequestContext.begin();
       _requestStartTime = Alarm.getCurrentTime();
       
+      long requestTimeout = getListener().getRequestTimeout();
+      
+      if (requestTimeout > 0)
+        _socket.setRequestExpireTime(_requestStartTime + requestTimeout);
+      
       long readBytes = _socket.getTotalReadBytes();
       long writeBytes = _socket.getTotalWriteBytes();
 
@@ -1222,6 +1234,8 @@ public class TcpSocketLink extends AbstractSocketLink
 
       _currentRequest.set(null);
       RequestContext.end();
+      
+      _socket.setRequestExpireTime(0);
     }
   }
 

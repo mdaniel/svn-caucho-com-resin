@@ -1258,7 +1258,7 @@ public abstract class AbstractHttpRequest
   {
     ReadStream stream = getStream(false);
 
-    _is.init(stream, _expireTime);
+    _is.init(stream);
 
     return _is;
   }

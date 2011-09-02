@@ -403,7 +403,7 @@ class AbstractDispatchRequest extends RequestAdapter {
     if (_is == null)
       _is = new ServletInputStreamImpl();
     
-    _is.init(_readStream, 0);
+    _is.init(_readStream);
 
     return _is;
   }

@@ -19,16 +19,18 @@ import java.util.logging.Logger;
 import com.caucho.inject.Module;
 import com.caucho.util.Alarm;
 import com.caucho.util.JniTroubleshoot;
+import com.caucho.util.L10N;
 
 /**
  * Abstract socket to handle both normal sockets and bin/resin sockets.
  */
 @Module
 public final class JniSocketImpl extends QSocket {
-  private final static Logger log
+  private static final L10N L = new L10N(JniSocketImpl.class);
+  
+  private static final Logger log
     = Logger.getLogger(JniSocketImpl.class.getName());
 
-  private static boolean _hasJni;
   private static final JniTroubleshoot _jniTroubleshoot;
 
   private long _fd;
@@ -58,6 +60,7 @@ public final class JniSocketImpl extends QSocket {
   private Object _writeLock = new Object();
   
   private long _socketTimeout;
+  private long _requestExpireTime;
   
   private final AtomicBoolean _isClosed = new AtomicBoolean();
 
@@ -119,6 +122,7 @@ public final class JniSocketImpl extends QSocket {
     _remoteAddrLength = 0;
     
     _socketTimeout = socketTimeout;
+    _requestExpireTime = 0;
 
     _isSecure = false;
     _isClosed.set(false);
@@ -345,6 +349,15 @@ public final class JniSocketImpl extends QSocket {
 
     return cert;
   }
+  
+  /**
+   * Sets the expire time
+   */
+  @Override
+  public void setRequestExpireTime(long expireTime)
+  {
+    _requestExpireTime = expireTime;
+  }
 
   /**
    * Read non-blocking
@@ -366,10 +379,17 @@ public final class JniSocketImpl extends QSocket {
     if (length == 0)
       throw new IllegalArgumentException();
     
+    long requestExpireTime = _requestExpireTime;
+    
+    if (requestExpireTime > 0 && requestExpireTime < Alarm.getCurrentTime()) {
+      throw new ClientDisconnectException(L.l("{0}: request-timeout read",
+                                              getRemoteAddress()));
+    }
+    
     synchronized (_readLock) {
-      long expires;
-      
       long now = Alarm.getCurrentTimeActual();
+      
+      long expires;
       
       // gap is because getCurrentTimeActual() isn't exact
       long gap = 20;
@@ -401,8 +421,16 @@ public final class JniSocketImpl extends QSocket {
   {
     int result;
     
+    long requestExpireTime = _requestExpireTime;
+    
+    if (requestExpireTime > 0 && requestExpireTime < Alarm.getCurrentTime()) {
+      throw new ClientDisconnectException(L.l("{0}: request-timeout write",
+                                              getRemoteAddress()));
+    }
+    
     synchronized (_writeLock) {
-      long expires = _socketTimeout + Alarm.getCurrentTimeActual();
+      long now = Alarm.getCurrentTimeActual();
+      long expires = _socketTimeout + now;
       
       do {
         result = writeNative(_fd, buffer, offset, length);
