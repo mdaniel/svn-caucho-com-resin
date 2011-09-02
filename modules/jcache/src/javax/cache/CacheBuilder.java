@@ -29,6 +29,9 @@
 
 package javax.cache;
 
+import javax.cache.event.CacheEntryListener;
+import javax.cache.event.NotificationScope;
+
 /**
  * Provides the capability of dynamically creating a cache.
  *
@@ -38,7 +41,20 @@ package javax.cache;
 public interface CacheBuilder<K,V> {
   public Cache<K,V> build();
   
-  public CacheBuilder<K,V> setCacheConfiguration(CacheConfiguration config);
-  
   public CacheBuilder<K,V> setCacheLoader(CacheLoader<K,V> cacheLoader);
+  
+  public CacheBuilder<K,V> 
+  registerCacheEntryListener(CacheEntryListener<K,V> listener,
+                             NotificationScope scope,
+                             boolean synchronous);
+  
+  public CacheBuilder<K,V> setStoreByValue(boolean storeByValue);
+  
+  public CacheBuilder<K,V> setTransactionEnabled(boolean enableTransactions);
+  
+  public CacheBuilder<K,V> setStatisticsEnabled(boolean isEnable);
+  
+  public CacheBuilder<K,V> setReadThrough(boolean readThrough);
+  
+  public CacheBuilder<K,V> setWriteThrough(boolean writeThrough);
 }

@@ -47,7 +47,7 @@ import javax.cache.event.NotificationScope;
  * The persistent or distributed cache is usable like a normal map, but loads
  * and stores data across the cluster.
  */
-public interface Cache<K,V> extends Iterable<Cache.Entry<K,V>>, Lifecycle {
+public interface Cache<K,V> extends Iterable<Cache.Entry<K,V>>, CacheLifecycle {
   /**
    * Returns the object specified by the given key.
    * <p/>
@@ -63,15 +63,13 @@ public interface Cache<K,V> extends Iterable<Cache.Entry<K,V>>, Lifecycle {
   public boolean containsKey(Object key)
     throws CacheException;
   
-  public Future<V> load(K key, CacheLoader<K,V> loader, Object arg)
+  public Future<V> load(K key)
     throws CacheException;
   
-  public Future<Map<K,V>> loadAll(Collection<? extends K> keys,
-                                  CacheLoader<K,V> loader,
-                                  Object arg)
+  public Future<Map<K,V>> loadAll(Collection<? extends K> keys)
     throws CacheException;
   
-  public CacheStatisticsMBean getCacheStatistics();
+  public CacheStatistics getCacheStatistics();
   
   /**
    * Puts a new item in the cache.
@@ -82,19 +80,19 @@ public interface Cache<K,V> extends Iterable<Cache.Entry<K,V>>, Lifecycle {
   public void put(K key, V value)
     throws CacheException;
   
-  public void putAll(Map<? extends K, ? extends V> map)
+  public V getAndPut(K key, V value)
     throws CacheException;
   
-  public V getAndPut(K key, V value)
+  public void putAll(Map<? extends K, ? extends V> map)
     throws CacheException;
   
   public boolean putIfAbsent(K key, V value)
     throws CacheException;
 
-  /**
-   * Removes the entry from the cache
-   */
   public boolean remove(Object key)
+    throws CacheException;
+
+  public boolean remove(Object key, V oldValue)
     throws CacheException;
   
   public V getAndRemove(Object key)
@@ -117,13 +115,15 @@ public interface Cache<K,V> extends Iterable<Cache.Entry<K,V>>, Lifecycle {
   
   public CacheConfiguration getConfiguration();
   
-  public boolean registerCacheEntryListener(CacheEntryListener listener,
-                                            NotificationScope scope);
+  public boolean registerCacheEntryListener(CacheEntryListener<?,?> listener,
+                                            NotificationScope scope,
+                                            boolean synchronous);
   
-  public boolean unregisterCacheEntryListener(CacheEntryListener listener,
-                                              NotificationScope scope);
+  public boolean unregisterCacheEntryListener(CacheEntryListener<?,?> listener);
   
-  public String getCacheName();
+  public String getName();
+  
+  public CacheManager getCacheManager();
 
   public interface Entry<K,V> {
     public K getKey();

@@ -30,13 +30,17 @@
 package com.caucho.distcache;
 
 import java.util.Map;
+import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 
 import javax.cache.Cache;
 import javax.cache.CacheBuilder;
+import javax.cache.CacheConfiguration;
 import javax.cache.CacheException;
 import javax.cache.CacheManagerFactory;
 import javax.cache.CacheManager;
+import javax.cache.OptionalFeature;
+import javax.cache.Status;
 import javax.enterprise.context.ApplicationScoped;
 import javax.transaction.UserTransaction;
 
@@ -166,5 +170,55 @@ public class ClusterCacheManagerDelegate implements CacheManager
   {
     // TODO Auto-generated method stub
     
+  }
+
+  /* (non-Javadoc)
+   * @see javax.cache.CacheManager#addImmutableClass(java.lang.Class)
+   */
+  @Override
+  public void addImmutableClass(Class<?> immutableClass)
+  {
+    // TODO Auto-generated method stub
+    
+  }
+
+  /* (non-Javadoc)
+   * @see javax.cache.CacheManager#createCacheConfiguration()
+   */
+  @Override
+  public CacheConfiguration createCacheConfiguration()
+  {
+    // TODO Auto-generated method stub
+    return null;
+  }
+
+  /* (non-Javadoc)
+   * @see javax.cache.CacheManager#getCaches()
+   */
+  @Override
+  public <K, V> Set<Cache<K, V>> getCaches()
+  {
+    // TODO Auto-generated method stub
+    return null;
+  }
+
+  /* (non-Javadoc)
+   * @see javax.cache.CacheManager#getStatus()
+   */
+  @Override
+  public Status getStatus()
+  {
+    // TODO Auto-generated method stub
+    return null;
+  }
+
+  /* (non-Javadoc)
+   * @see javax.cache.CacheManager#isSupported(javax.cache.OptionalFeature)
+   */
+  @Override
+  public boolean isSupported(OptionalFeature optionalFeature)
+  {
+    // TODO Auto-generated method stub
+    return false;
   }
 }

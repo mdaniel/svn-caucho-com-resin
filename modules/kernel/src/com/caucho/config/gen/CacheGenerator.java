@@ -33,7 +33,7 @@ import java.lang.reflect.Method;
 import java.util.HashMap;
 import java.util.List;
 
-import javax.cache.interceptor.CacheResult;
+import javax.cache.annotation.CacheResult;
 import javax.ejb.MessageDriven;
 import javax.ejb.SessionSynchronization;
 import javax.ejb.Singleton;

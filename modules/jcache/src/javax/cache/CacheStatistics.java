@@ -27,19 +27,31 @@
  * @author Scott Ferguson
  */
 
-package javax.cache.interceptor;
+package javax.cache;
 
-import javax.interceptor.InvocationContext;
-
-public class DefaultCacheKeyGenerator implements CacheKeyGenerator
+public interface CacheStatistics
 {
-  @Override
-  public CacheKey generateCacheKey(InvocationContext ic)
-  {
-    Object []parameters = ic.getParameters();
-    Object []paramCopy = new Object[parameters.length];
-    System.arraycopy( parameters, 0, paramCopy, 0, parameters.length);
-    
-    return new DefaultCacheKey(paramCopy);
-  }
+  public String getName();
+  
+  public String getStatus();
+  
+  public void clearStatistics();
+  
+  public long getEntryCount();
+  
+  public long getCacheHits();
+  
+  public float getCacheHitPercentage();
+  
+  public long getCacheMisses();
+  
+  public float getCacheMissPercentage();
+  
+  public long getCacheGets();
+  
+  public long getCachePuts();
+  
+  public long getCacheRemovals();
+  
+  public long getCacheEvictions();
 }

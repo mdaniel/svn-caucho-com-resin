@@ -31,7 +31,7 @@ package javax.cache.event;
 
 import java.util.EventListener;
 
-public interface CacheEntryListener extends EventListener
+public interface CacheEntryListener<K,V> extends EventListener
 {
   public NotificationScope getNotificationScope();
 }

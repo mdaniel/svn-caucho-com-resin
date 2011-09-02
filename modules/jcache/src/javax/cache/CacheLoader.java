@@ -49,4 +49,6 @@ public interface CacheLoader<K,V>
    * @throws CacheException
    */
   public Map<K,V> loadAll(Collection<? extends K> keys, Object arg);
+  
+  public boolean canLoad(Object key);
 }

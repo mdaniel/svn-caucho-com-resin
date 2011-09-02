@@ -1,13 +1,6 @@
 /*
  * Copyright (c) 1998-2011 Caucho Technology -- all rights reserved
  *
- * This interface is defined in JSR 107.
- *
- * It may be used to access both local and cluster caches.
- *
- * Some bulk operations will act only upon the local cache, and will not affect a cluster cache, as noted in the
- * JavaDoc entry for each method.
- *
  * This file is part of Resin(R) Open Source
  *
  * Each copy or derived work must preserve the copyright notice and this
@@ -34,15 +27,18 @@
  * @author Scott Ferguson
  */
 
-package javax.cache;
+package javax.cache.spi;
+
+import javax.cache.CacheManager;
+import javax.cache.OptionalFeature;
 
 /**
- * The lifecycle status of the Cache.
+ * Creates a new CacheManager.
  */
-public interface Lifecycle {
-  public void start() throws CacheException;
+public interface CachingProvider {
+  public CacheManager createCacheManager(String name);
   
-  public void stop() throws CacheException;
+  public ClassLoader getDefaultClassLoader();
   
-  public Status getStatus();
+  public boolean isSupported(OptionalFeature feature);
 }

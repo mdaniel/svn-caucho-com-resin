@@ -49,4 +49,6 @@ public interface CacheConfiguration
   public boolean isStatisticsEnabled();
   
   public void setStatisticsEnabled(boolean isEnable);
+  
+  public boolean isTransactionEnabled();
 }

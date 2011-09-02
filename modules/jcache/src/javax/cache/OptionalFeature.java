@@ -1,6 +1,13 @@
 /*
  * Copyright (c) 1998-2011 Caucho Technology -- all rights reserved
  *
+ * This interface is defined in JSR 107.
+ *
+ * It may be used to access both local and cluster caches.
+ *
+ * Some bulk operations will act only upon the local cache, and will not affect a cluster cache, as noted in the
+ * JavaDoc entry for each method.
+ *
  * This file is part of Resin(R) Open Source
  *
  * Each copy or derived work must preserve the copyright notice and this
@@ -27,31 +34,13 @@
  * @author Scott Ferguson
  */
 
-package javax.cache.interceptor;
+package javax.cache;
 
-import java.lang.annotation.ElementType;
-import java.lang.annotation.Retention;
-import java.lang.annotation.RetentionPolicy;
-import java.lang.annotation.Target;
-
-import javax.enterprise.util.Nonbinding;
-import javax.interceptor.InterceptorBinding;
-
-@Target({ElementType.METHOD, ElementType.TYPE })
-@Retention(RetentionPolicy.RUNTIME)
-@InterceptorBinding
-public @interface CacheRemoveEntry
-{
-  @Nonbinding
-  String cacheName() default "";
-  
-  @Nonbinding
-  boolean afterInvocation() default true;
-  
-  @Nonbinding
-  Class<? extends CacheResolver> cacheResolver() default CacheResolver.class;
-  
-  @Nonbinding
-  Class<? extends CacheKeyGenerator> cacheKeyGenerator()
-    default DefaultCacheKeyGenerator.class;
+/**
+ * The lifecycle status of the Cache.
+ */
+public enum OptionalFeature {
+    JTA,
+    ANNOTATIONS,
+    STORE_BY_REFERENCE;
 }

@@ -50,7 +50,8 @@ import javax.cache.Cache;
 import javax.cache.CacheConfiguration;
 import javax.cache.CacheException;
 import javax.cache.CacheLoader;
-import javax.cache.CacheStatisticsMBean;
+import javax.cache.CacheManager;
+import javax.cache.CacheStatistics;
 import javax.cache.Status;
 import javax.cache.event.CacheEntryListener;
 import javax.cache.event.NotificationScope;
@@ -721,6 +722,21 @@ public class AbstractCache
     return true;
   }
 
+  /**
+   * Removes the entry from the cache.
+   *
+   * @return true if the object existed
+   */
+  @Override
+  public boolean remove(Object key, Object oldValue)
+  {
+    notifyRemove(key);
+    
+    getDistCacheEntry(key).remove(_config);
+    
+    return true;
+  }
+
   @Override
   public Object getAndRemove(Object key) throws CacheException
   {
@@ -851,7 +867,8 @@ public class AbstractCache
    */
   @Override
   public boolean registerCacheEntryListener(CacheEntryListener listener,
-                                            NotificationScope scope)
+                                            NotificationScope scope,
+                                            boolean synchronous)
   {
     _listeners.add(listener);
     
@@ -862,8 +879,7 @@ public class AbstractCache
    * Removes a listener from the cache.
    */
   @Override
-  public boolean unregisterCacheEntryListener(CacheEntryListener listener,
-                                              NotificationScope scope)
+  public boolean unregisterCacheEntryListener(CacheEntryListener listener)
   {
     _listeners.remove(listener);
     
@@ -874,7 +890,7 @@ public class AbstractCache
    * Returns the CacheStatistics for this cache.
    */
   @Override
-  public CacheStatisticsMBean getCacheStatistics()
+  public CacheStatistics getCacheStatistics()
   {
     return null; // this;
   }
@@ -1264,16 +1280,6 @@ public class AbstractCache
   }
 
   /* (non-Javadoc)
-   * @see javax.cache.Cache#getCacheName()
-   */
-  @Override
-  public String getCacheName()
-  {
-    // TODO Auto-generated method stub
-    return null;
-  }
-
-  /* (non-Javadoc)
    * @see javax.cache.Cache#getConfiguration()
    */
   @Override
@@ -1282,12 +1288,18 @@ public class AbstractCache
     // TODO Auto-generated method stub
     return null;
   }
+  
+  @Override
+  public CacheManager getCacheManager()
+  {
+    return null;
+  }
 
   /* (non-Javadoc)
    * @see javax.cache.Cache#load(java.lang.Object, javax.cache.CacheLoader, java.lang.Object)
    */
   @Override
-  public Future load(Object key, CacheLoader loader, Object arg)
+  public Future load(Object key)
       throws CacheException
   {
     // TODO Auto-generated method stub
@@ -1298,7 +1310,7 @@ public class AbstractCache
    * @see javax.cache.Cache#loadAll(java.util.Collection, javax.cache.CacheLoader, java.lang.Object)
    */
   @Override
-  public Future loadAll(Collection keys, CacheLoader loader, Object arg)
+  public Future loadAll(Collection keys)
       throws CacheException
   {
     // TODO Auto-generated method stub

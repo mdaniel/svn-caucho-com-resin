@@ -29,18 +29,30 @@
 
 package javax.cache;
 
+import java.util.Set;
+
 public interface CacheManager
 {
   public String getName();
+  
+  public Status getStatus();
   
   public <K,V> CacheBuilder<K,V> createCacheBuilder(String cacheName);
   
   public <K,V> Cache<K,V> getCache(String name);
   
+  public <K,V> Set<Cache<K,V>> getCaches();
+  
   public boolean removeCache(String cacheName)
     throws IllegalStateException;
   
+  public CacheConfiguration createCacheConfiguration();
+  
   public Object getUserTransaction();
+  
+  public boolean isSupported(OptionalFeature optionalFeature);
+  
+  public void addImmutableClass(Class<?> immutableClass);
   
   public void shutdown();
 }

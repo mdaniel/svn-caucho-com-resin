@@ -29,7 +29,7 @@
 
 package com.caucho.config.gen;
 
-import javax.cache.interceptor.CacheResult;
+import javax.cache.annotation.CacheResult;
 import javax.ejb.Remove;
 import javax.ejb.TransactionAttribute;
 import javax.ejb.TransactionAttributeType;

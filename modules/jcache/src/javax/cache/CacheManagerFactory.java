@@ -29,8 +29,6 @@
 
 package javax.cache;
 
-import java.util.Map;
-
 /**
  * Provides the capability of dynamically creating a cache.
  *
