@@ -605,7 +605,7 @@ public class EjbManager implements ScanListener, EnvironmentListener {
         }
       }
 
-      AmberContainer.create().start();
+      // AmberContainer.create().start();
     } catch (RuntimeException e) {
       throw e;
     } catch (Exception e) {

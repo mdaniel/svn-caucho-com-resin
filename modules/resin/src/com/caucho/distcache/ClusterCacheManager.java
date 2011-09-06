@@ -29,7 +29,6 @@
 
 package com.caucho.distcache;
 
-import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 
@@ -37,7 +36,6 @@ import javax.cache.Cache;
 import javax.cache.CacheBuilder;
 import javax.cache.CacheConfiguration;
 import javax.cache.CacheException;
-import javax.cache.CacheManagerFactory;
 import javax.cache.CacheManager;
 import javax.cache.OptionalFeature;
 import javax.cache.Status;

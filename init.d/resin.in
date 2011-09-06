@@ -24,18 +24,6 @@ JAVA_HOME="@JAVA_HOME@"
 RESIN_HOME="@resin_home@"
 CONSOLE="@resin_log@/console.log"
 
-# for ubuntu
-if [ ! -d $JAVA_HOME ]; then
-  _JAVA_HOMES="/usr/lib/jvm/java-6-sun /usr/lib/jvm/java-6-openjdk"
-
-  for _java_home in $_JAVA_HOMES; do
-    if [ -d $_java_home ]; then
-      JAVA_HOME=$_java_home
-      break
-    fi
-  done
-fi
-
 export JAVA_HOME RESIN_HOME
 
 JAVA="@JAVA_EXE@"
@@ -60,8 +48,12 @@ RESIN_CONF="-conf @resin_conf@/resin.xml"
 # -log-directory /var/log/resin -- the main log directory
 #
 RESIN_LOG="-log-directory @resin_log@"
+#
+# -join-cluster app-tier        -- elastic servers
+#
+#JOIN_CLUSTER="-join-cluster app-tier"
 
-ARGS="$RESIN_CONF $RESIN_LOG $RESIN_ROOT $SERVER"
+ARGS="$RESIN_CONF $RESIN_LOG $RESIN_ROOT $JOIN_CLUSTER $SERVER"
 
 if test -r /lib/lsb/init-functions; then
   . /lib/lsb/init-functions

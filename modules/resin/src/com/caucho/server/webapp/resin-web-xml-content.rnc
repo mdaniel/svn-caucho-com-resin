@@ -962,6 +962,9 @@ r_session-config = element session-config {
      (attribute cookie-domain-regexp { string }
       | element cookie-domain-regexp { string }))?
 
+  & (attribute cookie-http-only { r_boolean-Type }
+     | element cookie-http-only { r_boolean-Type })?
+
   & (attribute cookie-length { r_int }
      | element cookie-length { r_int })?
 

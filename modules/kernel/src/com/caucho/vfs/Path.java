@@ -1516,6 +1516,14 @@ public abstract class Path {
         }
         cb.append("%25");
         break;
+        
+      case '+':
+        if (cb == null) {
+          cb = new CharBuffer();
+          cb.append(rawURL, 0, i);
+        }
+        cb.append("%2B");
+        break;
 
       default:
         if (cb != null)

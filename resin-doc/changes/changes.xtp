@@ -10,6 +10,15 @@
 <li><a href="http://caucho.com/resin-3.1/changes/changes.xtp">Resin 3.1 changes</a></li>
 </ul>
 
+<s2 title="4.0.23 - snapshot">
+<ul>
+<li>cdi: scanning issues with directories with '+' in name (#4739)</li>
+<li>init.d: changed init.d/resin to use "java" as backup Resin, also added $JOIN_CLUSTER (#4738)</li>
+<li>server: changed Alarm timing algorithm (#4730)</li>
+<li>session: add cookie-http-only to session-config (#4737, rep by L. Kaminsky)</li>
+</ul>
+</s2>
+
 <s2 title="4.0.22 - Sep 1, 2011">
 <ul>
 <li>cluster deploy: .war issue on non-triad servers (#4743, rep by James Meyer)</li>
