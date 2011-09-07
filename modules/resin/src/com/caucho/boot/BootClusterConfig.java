@@ -29,12 +29,15 @@
 
 package com.caucho.boot;
 
+import com.caucho.admin.ElasticCloudServiceMarker;
 import com.caucho.config.ConfigException;
 import com.caucho.config.program.ConfigProgram;
 import com.caucho.config.program.ContainerProgram;
 import com.caucho.env.service.ResinSystem;
 
 import com.caucho.util.L10N;
+import com.caucho.xml.QName;
+
 import java.util.ArrayList;
 
 public class BootClusterConfig {
@@ -72,7 +75,7 @@ public class BootClusterConfig {
   {
     _isDynamicServerEnable = isEnabled;
   }
-
+  
   public boolean isDynamicServerEnable()
   {
     return _isDynamicServerEnable;
@@ -131,5 +134,9 @@ public class BootClusterConfig {
    */
   public void addContentProgram(ConfigProgram program)
   {
+    QName qName = program.getQName();
+    
+    if (qName != null && qName.getLocalName().equals("ElasticCloudService"))
+      _isDynamicServerEnable = true;
   }
 }

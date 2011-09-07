@@ -252,7 +252,7 @@ public class BootResinConfig implements EnvironmentBean
                                     clusterId));
 
     if (! cluster.isDynamicServerEnable()) {
-      throw new ConfigException(L.l("cluster '{0}' does not have <dynamic-server-enable>. -join-cluster requires a <dynamic-server-enable> tag.",
+      throw new ConfigException(L.l("cluster '{0}' does not have <resin:ElasticCloudService>. -join-cluster requires a <resin:ElasticCloudService> tag.",
                                     clusterId));
     }
 
