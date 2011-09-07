@@ -12,6 +12,7 @@
 
 <s2 title="4.0.23 - snapshot">
 <ul>
+<li>resin: JMX issue with not reporting correct request time and request count (#4660, rep by Rick Hightower)</li>
 <li>cdi: scanning issues with directories with '+' in name (#4739)</li>
 <li>init.d: changed init.d/resin to use "java" as backup Resin, also added $JOIN_CLUSTER (#4738)</li>
 <li>server: changed Alarm timing algorithm (#4730)</li>

@@ -46,7 +46,6 @@ import com.caucho.vfs.Path;
 import com.caucho.vfs.Vfs;
 
 import javax.annotation.PostConstruct;
-import java.io.File;
 import java.util.Date;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.logging.Level;

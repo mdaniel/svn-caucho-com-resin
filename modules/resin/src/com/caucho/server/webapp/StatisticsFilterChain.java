@@ -32,8 +32,7 @@ package com.caucho.server.webapp;
 
 import com.caucho.network.listen.TcpSocketLink;
 import com.caucho.network.listen.SocketLink;
-import com.caucho.server.dispatch.*;
-import com.caucho.server.http.AbstractHttpRequest;
+import com.caucho.server.http.HttpServletRequestImpl;
 import com.caucho.util.Alarm;
 import com.caucho.vfs.ClientDisconnectException;
 
@@ -57,8 +56,9 @@ public class StatisticsFilterChain implements FilterChain
   public void doFilter(ServletRequest request, ServletResponse response)
     throws ServletException, IOException
   {
-    if (request instanceof AbstractHttpRequest) {
-      AbstractHttpRequest httpRequest = (AbstractHttpRequest) request;
+    //XXX: async, etc. support?
+    if (request instanceof HttpServletRequestImpl) {
+      HttpServletRequestImpl httpRequest = (HttpServletRequestImpl) request;
 
       SocketLink connection = httpRequest.getConnection();
 
