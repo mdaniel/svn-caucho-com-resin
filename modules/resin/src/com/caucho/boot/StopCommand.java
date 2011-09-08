@@ -51,25 +51,26 @@ public class StopCommand extends AbstractStartCommand
   }
 
   @Override
-  public int doCommand(WatchdogArgs args, WatchdogClient client)
+  public int doCommand(WatchdogArgs args,
+                       WatchdogClient client)
     throws BootArgumentException
   {
     validateArgs(args.getArgv());
 
     try {
-      client.stopWatchdog();
+      client.stopWatchdog(args.getServerId());
 
       System.out.println(L().l(
         "Resin/{0} stopped -server '{1}' for watchdog at {2}:{3}",
         VersionFactory.getVersion(),
-        client.getId(),
+        args.getServerId(),
         client.getWatchdogAddress(),
         client.getWatchdogPort()));
     } catch (Exception e) {
       System.out.println(L().l(
         "Resin/{0} can't stop -server '{1}' for watchdog at {2}:{3}.\n{4}",
         VersionFactory.getVersion(),
-        client.getId(),
+        args.getServerId(),
         client.getWatchdogAddress(),
         client.getWatchdogPort(),
         e.toString()));

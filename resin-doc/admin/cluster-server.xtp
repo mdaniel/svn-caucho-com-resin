@@ -106,7 +106,7 @@ the triad even if one is down for maintenance or a restart.</p>
 &lt;/resin>
 </example>
 
-<s2 title="elastic servers and --join-cluster">
+<s2 title="dynamic servers and --join-cluster">
 
 <p web-only='true'>For more details see the <a
 href="clustering-overview.xtp">clustering overview</a>.</p>

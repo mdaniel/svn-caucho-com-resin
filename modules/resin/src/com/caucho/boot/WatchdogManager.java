@@ -451,14 +451,24 @@ class WatchdogManager implements AlarmListener {
   void stopServer(String serverId)
   {
     synchronized (_watchdogMap) {
-      WatchdogChild watchdog = _watchdogMap.get(serverId);
-
+      WatchdogChild watchdog = getWatchdog(serverId); 
       if (watchdog == null)
         throw new ConfigException(L().l("No matching <server> found for -server '{0}' in {1}",
                                         serverId, _args.getResinConf()));
 
       watchdog.stop();
     }
+  }
+  
+  private WatchdogChild getWatchdog(String serverId)
+  {
+    WatchdogChild watchdog = _watchdogMap.get(serverId);
+  
+    if (watchdog == null && "".equals(serverId) && _watchdogMap.size() == 1) {
+      watchdog = _watchdogMap.values().iterator().next();
+    }
+    
+    return watchdog;
   }
 
   /**

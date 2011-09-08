@@ -19,7 +19,7 @@ following when servers are added and removed:</p>
 repository.</li>
 <li>Distributed caching and store for both servlet sessions and jCache
 caching.</li>
-<li>Load balancing to the elastic servers.</li>
+<li>Load balancing to the dynamic servers.</li>
 <li>Distributed management, sensing, and health checks.</li>
 <li>Elastic JMS message queues.</li>
 </ul>
@@ -141,7 +141,7 @@ automatically adjusts the cluster to manage those servers.</p>
 <li>Administration updates to the new server.</li>
 </ul>
 
-<s2 title="Starting an elastic server">
+<s2 title="Starting an dynamic server">
 
 <p>The new server requires a copy of the site's resin.xml, which must have
 at least one server configured, because the server needs the IP address of

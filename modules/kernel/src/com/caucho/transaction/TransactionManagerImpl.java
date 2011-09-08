@@ -412,22 +412,43 @@ public class TransactionManagerImpl
           log.log(Level.WARNING, e.toString(), e);
         }
       } else {
-        log.fine(L.l("XAResource {0} forget xid {1}", xaRes, xidImpl));
+        log.fine(L.l("XAResource {0} rollback/forget xid {1}", xaRes, xidImpl));
 
+        boolean isValid = false;
+        
         try {
-          xaRes.forget(xids[i]);
+          // #4748
+          xaRes.rollback(xids[i]);
+          // xaRes.forget(xids[i]);
+          isValid = true;
         } catch (Throwable e) {
           if (log.isLoggable(Level.FINER))
             log.log(Level.FINER, e.toString(), e);
           else
             log.fine(e.toString());
-
+        }
+        
+        if (! isValid) {
+          try {
+            // #4748
+            xaRes.forget(xids[i]);
+            isValid = true;
+          } catch (Throwable e) {
+            if (log.isLoggable(Level.FINER))
+              log.log(Level.FINER, e.toString(), e);
+            else
+              log.fine(e.toString());
+          }
+        }
+        
+        if (! isValid) {
           // Oracle: If forget fails, try committing so we don't stay in a stuck
           // state
           try {
             xaRes.commit(xids[i], false);
+            isValid = true;
           } catch (Throwable e1) {
-            log.log(Level.WARNING, e.toString(), e1);
+            log.log(Level.WARNING, e1.toString(), e1);
           }
         }
       }

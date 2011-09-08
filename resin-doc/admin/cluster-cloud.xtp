@@ -1,13 +1,13 @@
 <document>
 <header>
   <product>resin</product>
-  <title>Cluster: Elastic Server (Cloud) configuration</title>
+  <title>Cluster: Dynamic Server (Elastic Cloud) configuration</title>
   <version>Resin 4.0</version>
 
   <description>
 
     <p>
-      Configuration and deployment of an elastic-server Resin cluster.
+      Configuration and deployment of an dynamic-server Resin cluster.
     </p>
 
   </description>
@@ -37,7 +37,7 @@ smaller network.</p>
 
 <p>The triad hub-and-spoke model solves several clustering issues
 we've discovered over the years. The three primary issues are the need
-for triple redundancy, managing elastic servers (particularly removing
+for triple redundancy, managing dynamic servers (particularly removing
 servers), and giving an understandable user model for persistent
 storage.</p>
 
@@ -50,7 +50,7 @@ remaining servers. The load is less, too. When one server is down for
 maintenance, the other two servers share an extra 50% load each. With
 only a backup system, the extra server would double its load.</p>
 
-<p>Elastic servers benefit from the hub-and-spoke model because the
+<p>Dynamic servers benefit from the hub-and-spoke model because the
 'spoke' servers are not needed for reliability. Because they don't store the
 primary cache values, the primary application deployment repository,
 or the queue store, it's possible to add and remove them without
@@ -111,10 +111,10 @@ triad. If you have one or two servers, they will still form the
 hub. One server acts like a Resin standalone; two servers back each
 other up. More than three &lt;server> tags form static servers acting
 as spoke servers in the hub-and-spoke model. The static servers are
-identical to any elastic servers, but are predefined in the
+identical to any dynamic servers, but are predefined in the
 resin.xml</p>
 
-<s2 title="command-line: adding an elastic server">
+<s2 title="command-line: adding a dynamic server">
 
 <p>Before starting a server, your new machine needs the following to
 be installed:</p>
@@ -132,7 +132,7 @@ image for the new machine and start it.</p>
 <p>To start a new server, you'll add a '--join-cluster' option with
 the name of the cluster you want to join.</p>
 
-<example title="Example: command-line starting an elastic server">
+<example title="Example: command-line starting a dynamic server">
 unix> bin/resin.sh --join-cluster my-cluster start
 </example>
 
@@ -149,9 +149,9 @@ services like caching, admin, JMS, and load-balancer.</p>
 
 </s2>
 
-<s2 title="Removing an elastic server">
+<s2 title="Removing a dynamic server">
 
-<p>To remove an elastic server, just stop the server instance. The
+<p>To remove a dynamic server, just stop the server instance. The
 triad will keep its place in the topology reserved for another 15
 minutes to handle restarts, maintenance and outages. After the 15
 minutes expire, the triad will automatically remove the server.</p>
@@ -178,7 +178,7 @@ in the resin.xml ensures that you can connect to at least one in case
 of a failure. In other words, it's more reliable.</p>
 
 <p>With more static servers than three, you can also add them
-to the resin.xml. You can also define elastic servers in the resin.xml
+to the resin.xml. You can also define dynamic servers in the resin.xml
 if their IP addresses are fixed, because Resin will dynamically adapt
 to stopped servers. If you use the static/elastic technique, you
 still need to keep the triad servers up. In other words, you'll adjust
@@ -192,9 +192,9 @@ keeping servers "a", "b", and "c".</p>
 <s1 title="Application Deployment">
 
 <p>
-Cluster deployment works with elastic servers to ensure each server
+Cluster deployment works with dynamic servers to ensure each server
 is running the same application, including the newly spun-up
-elastic servers. The new server will ask the triad servers for the
+dynamic servers. The new server will ask the triad servers for the
 most recent application code and deploy it. While it's nice for the
 convenience (skipping the copy step), it's more important for the
 extra reliability.
@@ -208,7 +208,7 @@ servers.</p>
 
 <p>With a cluster command-line deployment, the new server will check
 with the triad hub for the latest deployment. If there's a new
-version, the elastic server will download the updates from the triad
+version, the dynamic server will download the updates from the triad
 hub. The cluster deployment ensures all servers are running the same
 .war deployment. You don't need external scripts to copy versions to
 each server; that's taken care of by a core Resin capability.</p>
@@ -304,7 +304,7 @@ rule</a> dispatching to the app-tier cluster.
 </example>
 
 <p>With the example configuration, Resin will distribute HTTP requests
-to all static and elastic servers in the app-tier. Because the HTTP
+to all static and dynamic servers in the app-tier. Because the HTTP
 proxy-cache is enabled, Resin will also cache on the web-tier.</p>
 
 <figure src="cluster-load-balance.png" alt="web-tier(80:web-a) -> app-tier(6800:app-a(foo.com,bar.com), 6801:app-b(foo.com,bar.com))" />
