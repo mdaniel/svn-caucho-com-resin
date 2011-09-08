@@ -28,6 +28,8 @@
 
 package com.caucho.sql;
 
+import com.caucho.util.L10N;
+
 import java.io.PrintWriter;
 import java.sql.Connection;
 import java.sql.SQLException;
@@ -41,6 +43,7 @@ import javax.sql.DataSource;
  * The User DataSource returned from Resin's pool.
  */
 public class UserDataSource implements DataSource {
+  private static final L10N L = new L10N(UserDataSource.class);
   protected static final Logger log
     = Logger.getLogger(UserDataSource.class.getName());
   private final ManagedFactoryImpl _managedFactory;
@@ -152,17 +155,29 @@ public class UserDataSource implements DataSource {
   }
 
   @Override
-  public <T> T unwrap(Class<T> iface) 
+  public <T> T unwrap(Class<T> iface)
     throws SQLException
   {
-    throw new UnsupportedOperationException("Not supported yet.");
+    if (iface.isAssignableFrom(this.getClass()))
+      return (T) this;
+
+    throw new SQLException(L.l("Can't unwrap `{0}' to `{1}'", this, iface));
   }
 
   @Override
   public boolean isWrapperFor(Class<?> iface)
     throws SQLException
   {
-    throw new UnsupportedOperationException("Not supported yet.");
+    if (iface.isAssignableFrom(this.getClass()))
+      return true;
+    else
+      return false;
+  }
+
+  @Override
+  public String toString()
+  {
+    return "UserDataSource[" + _managedFactory + "]";
   }
 }
 

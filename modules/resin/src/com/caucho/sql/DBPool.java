@@ -891,12 +891,21 @@ public class DBPool
 
   public <T> T unwrap(Class<T> iface) throws SQLException
   {
-    throw new UnsupportedOperationException("Not supported yet.");
+    if (iface.isAssignableFrom(this.getClass()))
+      return (T) this;
+    else if (_dataSource == null)
+      throw new SQLException(L.l("`{0}' is not a wrapper for `{1}'"));
+    else
+      return _dataSource.unwrap(iface);
   }
 
   public boolean isWrapperFor(Class<?> iface) throws SQLException
   {
-    throw new UnsupportedOperationException("Not supported yet.");
+    if (iface.isAssignableFrom(this.getClass()))
+      return true;
+    else if (_dataSource == null)
+      return false;
+    else return _dataSource.isWrapperFor(iface);
   }
 
   /**

@@ -262,5 +262,11 @@ public class ManagedFactoryImpl
   public void setResourceAdapter(ResourceAdapter adapter)
   {
   }
+
+  @Override
+  public String toString()
+  {
+    return "ManagedFactoryImpl[" + _dbPool + "]";
+  }
 }
 
