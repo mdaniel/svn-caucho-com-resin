@@ -396,14 +396,29 @@ public class WebAppContainer
     }
     */
 
-    WebAppSingleDeployGenerator deploy
-      = new WebAppSingleDeployGenerator(_appDeploySpi, this, config);
-
-    deploy.deploy();
-
-    _appDeploy.add(deploy);
+    WebAppSingleDeployGenerator deployGenerator = createDeployGenerator(config);
+      
+    addWebApp(deployGenerator);
+  }
+  
+  public WebAppSingleDeployGenerator createDeployGenerator(WebAppConfig config)
+  {
+    return new WebAppSingleDeployGenerator(_appDeploySpi, this, config);
+  }
+  
+  public void addWebApp(WebAppSingleDeployGenerator deployGenerator)
+  {
+    deployGenerator.deploy();
+    
+    _appDeploy.add(deployGenerator);
 
     clearCache();
+  }
+  
+  public void removeWebApp(WebAppSingleDeployGenerator deployGenerator)
+  {
+    _appDeploy.remove(deployGenerator);
+    deployGenerator.destroy();
   }
 
   /**

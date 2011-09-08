@@ -40,6 +40,7 @@ import com.caucho.server.dispatch.FilterMapping;
 import com.caucho.server.dispatch.ServletConfigImpl;
 import com.caucho.server.dispatch.ServletMapping;
 import com.caucho.server.webapp.WebApp;
+import com.caucho.server.webapp.WebAppSingleDeployGenerator;
 
 /**
  * Embeddable version of a Resin web-app.
@@ -79,6 +80,8 @@ public class WebAppEmbed
     = new ArrayList<FilterMappingEmbed>();
   
   private WebApp _webApp;
+  
+  private WebAppSingleDeployGenerator _deployGenerator;
   
   /**
    * Creates a new embedded webapp
@@ -155,6 +158,16 @@ public class WebAppEmbed
   public String getArchivePath()
   {
     return _archivePath;
+  }
+  
+  public void setDeployGenerator(WebAppSingleDeployGenerator deployGenerator)
+  {
+    _deployGenerator = deployGenerator;
+  }
+  
+  public WebAppSingleDeployGenerator getDeployGenerator()
+  {
+    return _deployGenerator;
   }
 
   /**

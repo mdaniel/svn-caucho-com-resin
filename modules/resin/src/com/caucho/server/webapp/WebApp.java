@@ -674,6 +674,11 @@ public class WebApp extends ServletContextImpl
     return _server;
   }
   
+  public WebAppController getController()
+  {
+    return _controller;
+  }
+  
   public String getModuleName()
   {
     return _moduleName;

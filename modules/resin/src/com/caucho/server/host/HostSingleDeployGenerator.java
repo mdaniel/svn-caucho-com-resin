@@ -110,6 +110,9 @@ public class HostSingleDeployGenerator
   public void initImpl()
   {
     super.initImpl();
+    
+    if (_controller != null)
+      return;
 
     String hostName = "";
     String hostId = null;

@@ -56,8 +56,7 @@ import com.caucho.server.host.Host;
 import com.caucho.server.host.HostConfig;
 import com.caucho.server.http.HttpRequest;
 import com.caucho.server.resin.Resin;
-import com.caucho.server.webapp.WebApp;
-import com.caucho.server.webapp.WebAppConfig;
+import com.caucho.server.webapp.*;
 import com.caucho.util.L10N;
 import com.caucho.vfs.Vfs;
 import com.caucho.vfs.VfsStream;
@@ -323,10 +322,13 @@ public class ResinEmbed
       }
 
       _resin.start();
-      
-      HostConfig hostConfig = new HostConfig();
-      _server.addHost(hostConfig);
+
       _host = _server.getHost("", 0);
+      if (_host == null) {
+        HostConfig hostConfig = new HostConfig();
+        _server.addHost(hostConfig);
+        _host = _server.getHost("", 0);
+      }
 
       if (_host == null) {
         throw new ConfigException(L.l("ResinEmbed requires a <host> to be configured in the resin.xml, because the webapps must belong to a host."));
@@ -511,7 +513,15 @@ public class ResinEmbed
 
       configuration.addBuilderProgram(new WebAppProgram(webApplication));
 
-      _host.getWebAppContainer().addWebApp(configuration);
+      //_host.getWebAppContainer().addWebApp(configuration);
+      
+      WebAppContainer container = _host.getWebAppContainer();
+      
+      WebAppSingleDeployGenerator deployGenerator = container.createDeployGenerator(configuration);
+      webApplication.setDeployGenerator(deployGenerator);
+      
+      container.addWebApp(deployGenerator);
+      
     } catch (Exception e) {
       throw ConfigException.create(e);
     } finally {
@@ -521,7 +531,9 @@ public class ResinEmbed
   
   private void undeployWebApplication(WebAppEmbed webApplication)
   {
-    webApplication.getWebApp().destroy();
+    //webApplication.getWebApp().getController().destroy();
+    //webApplication.getWebApp().destroy();
+    _host.getWebAppContainer().removeWebApp(webApplication.getDeployGenerator());
   }
 
   protected void finalize()
