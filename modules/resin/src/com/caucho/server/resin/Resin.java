@@ -109,7 +109,6 @@ import com.caucho.util.QDate;
 import com.caucho.vfs.MemoryPath;
 import com.caucho.vfs.Path;
 import com.caucho.vfs.Vfs;
-import org.apache.tools.ant.taskdefs.Classloader;
 
 /**
  * The Resin class represents the top-level container for Resin.
