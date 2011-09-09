@@ -109,6 +109,7 @@ import com.caucho.util.QDate;
 import com.caucho.vfs.MemoryPath;
 import com.caucho.vfs.Path;
 import com.caucho.vfs.Vfs;
+import org.apache.tools.ant.taskdefs.Classloader;
 
 /**
  * The Resin class represents the top-level container for Resin.
@@ -645,7 +646,9 @@ public class Resin
     if ("".equals(serverId))
       serverId = "default";
     
-    Config.setProperty("serverId", serverId);
+    //Config.setProperty("serverId", serverId);
+    ClassLoader classLoader = ClassLoader.getSystemClassLoader();
+    Config.setProperty("serverId", serverId, classLoader);
 
     _serverId = serverId;
     _serverIdLocal.set(serverId);

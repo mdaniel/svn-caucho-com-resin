@@ -12,6 +12,7 @@
 
 <s2 title="4.0.23 - snapshot">
 <ul>
+<li>logging: log-handler el resolution fix (#4753)</li>
 <li>xa: use rollback instead of forget in XA recover (#4748)</li>
 <li>resin: JMX issue with not reporting correct request time and request count (#4660, rep by Rick Hightower)</li>
 <li>cdi: scanning issues with directories with '+' in name (#4739)</li>
