@@ -130,13 +130,8 @@ public final class DatabaseLock implements ReadWriteLock {
     long expires = Alarm.getCurrentTimeActual() + timeout;
 
     LockNode node = new LockNode(true);
-    LockNode head;
     
-    do {
-      head = _lockHead;
-      
-      node.setNext(head);
-    } while (! _headUpdater.compareAndSet(this, head, node));
+    pushNode(node);
 
     long lock;
 
@@ -154,11 +149,6 @@ public final class DatabaseLock implements ReadWriteLock {
       
         nextLock = lock - NODE_LOCK + READ;
       } while (! _lockCountUpdater.compareAndSet(this, lock, nextLock));
-    
-      LockNode next = node.getNext();
-    
-      if (next != null)
-        next.unpark();
     }
   }
 
@@ -174,10 +164,7 @@ public final class DatabaseLock implements ReadWriteLock {
     } while (! _lockCountUpdater.compareAndSet(this, lock, lock - READ));
 
     if ((lock & READ_MASK) == 1 && (lock & NODE_LOCK_MASK) != 0) {
-      LockNode node = popNextNode();
-      
-      if (node != null)
-        node.unpark();
+      wakeNextNodes();
     }
   }
   
@@ -196,20 +183,13 @@ public final class DatabaseLock implements ReadWriteLock {
     }
 
     LockNode node = new LockNode(false);
-    LockNode head;
     
-    do {
-      head = _lockHead;
-      
-      node.setNext(head);
-    } while (! _headUpdater.compareAndSet(this, head, node));
+    pushNode(node);
     
     long currentLock = _lockCount;
     
     if ((lock & NODE_LOCK_MASK) == 0 && (currentLock & READ_MASK) == 0) {
-      LockNode popNode = popNextNode();
-      
-      assert(node == popNode);
+      wakeNextNodes();
       return;
     }
 
@@ -242,73 +222,62 @@ public final class DatabaseLock implements ReadWriteLock {
       lock = _lockCount;
     } while (! _lockCountUpdater.compareAndSet(this, lock, lock - NODE_LOCK));
     
-    LockNode node = popNextNode();
-
-    if (node != null)
-      node.unpark();
-  }
-
-  /**
-   * Tries to get a write lock, but does not wait if other threads are
-   * reading or writing.  insert() uses this call to avoid blocking when
-   * allocating a new row.
-   *
-   * @return true if the write was successful
-   */
-  public boolean lockReadAndWriteNoWait()
-  {
-    if (log.isLoggable(Level.FINEST)) {
-      log.finest(this + " lockReadAndWriteNoWait "
-                 + "0x" + Long.toHexString(_lockCount));
-    }
-
-    if (_lockCountUpdater.compareAndSet(this, 0, NODE_LOCK))
-      return true;
-    else
-      return false;
-  }
-
-  /**
-   * Waits until all the writers drain before committing, see Block.commit()
-   */
-  void waitForCommit()
-  {
+    wakeNextNodes();
   }
   
-  private LockNode popNextNode()
+  private void pushNode(LockNode node)
   {
     LockNode head;
-    
-    while (true) {
+    synchronized (this) {
       head = _lockHead;
-      
-      if (head == null)
-        return null;
-      
-      LockNode first = null;
-      LockNode firstPrev = null;
-      
-      LockNode ptrPrev = null;
-      
-      LockNode ptr = head;
-      for (; ptr != null; ptr = ptr.getNext()) {
 
-        if (first == null || ! ptr.isRead() || ! first.isRead()) {
-          first = ptr;
-          firstPrev = ptrPrev;
-        }
-        
-        ptrPrev = ptr;
-      }
-      
-      if (head == first) {
-        if (_headUpdater.compareAndSet(this, head, null)) {
-          return first;
-        }
+      if (head == null) {
+        _lockHead = node;
       }
       else {
-        if (_nextUpdater.compareAndSet(firstPrev, first, null))
-          return first;
+        LockNode ptr = head;
+        LockNode next = head;
+
+        while (next != null) {
+          ptr = next;
+          next = ptr.getNext();
+        }
+
+        ptr.setNext(node);
+      }
+    }
+  }
+ 
+  private void wakeNextNodes()
+  {
+    LockNode node = popNextNode(false);
+    
+    if (node == null)
+      return;
+    
+    node.unpark();
+    
+    if (node.isRead()) {
+      while ((node = popNextNode(true)) != null) {
+        node.unpark();
+      }
+    }
+  }
+  
+  private LockNode popNextNode(boolean isReadOnly)
+  {
+    synchronized (this) {
+      LockNode head = _lockHead;
+
+      if (head == null)
+        return null;
+      else if (! isReadOnly || head.isRead()) {
+        _lockHead = head.getNext();
+        head.setNext(null);
+        return head;
+      }
+      else {
+        return null;
       }
     } 
   }

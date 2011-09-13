@@ -60,6 +60,7 @@ public class FileCacheManager
   @Override
   protected HashKey getAndPut(DistCacheEntry entry,
                               HashKey valueHash,
+                              long valueLength,
                               Object value,
                               HashKey cacheHash,
                               int flags,
@@ -70,7 +71,7 @@ public class FileCacheManager
                               int leaseOwner)
   {
     return getAndPutLocal(entry,
-                          valueHash, 
+                          valueHash, valueLength, 
                           value,
                           cacheHash,
                           flags,
@@ -85,13 +86,14 @@ public class FileCacheManager
   public HashKey compareAndPut(FileCacheEntry entry,
                                HashKey testValue,
                                HashKey valueHash,
+                               long valueLength,
                                Object value,
                                CacheConfig config)
   {
     int leaseOwner = -1;
     
     HashKey oldValueKey
-      = compareAndPutLocal(entry, testValue, valueHash, value,
+      = compareAndPutLocal(entry, testValue, valueHash, valueLength, value,
                            config.getCacheKey(),
                            config.getFlags(),
                            config.getExpireTimeout(),

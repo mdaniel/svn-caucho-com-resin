@@ -34,18 +34,20 @@ import com.caucho.util.Alarm;
 import com.caucho.util.HashKey;
 
 import java.lang.ref.SoftReference;
+import java.sql.Blob;
 
 /**
  * An entry in the cache map
  */
 public final class MnodeValue implements ExtCacheEntry {
   public static final MnodeValue NULL
-    = new MnodeValue(null, null, null, 0, 0, 0, 0, 0, 0, 0, 0, false, true);
+    = new MnodeValue(null, 0, null, null, 0, 0, 0, 0, 0, 0, 0, 0, false, true);
   
   public static final HashKey NULL_KEY = new HashKey(new byte[32]);
   public static final HashKey ANY_KEY = createAnyKey(32);
   
   private final HashKey _valueHash;
+  private final long _valueLength;
   private final HashKey _cacheHash;
   private final int _flags;
   private final long _version;
@@ -71,8 +73,10 @@ public final class MnodeValue implements ExtCacheEntry {
   private int _hits = 0;
 
   private SoftReference<Object> _valueRef;
+  private volatile Blob _blob;
 
   public MnodeValue(HashKey valueHash,
+                    long valueLength,
                     Object value,
                     HashKey cacheHash,
                     int flags,
@@ -87,6 +91,7 @@ public final class MnodeValue implements ExtCacheEntry {
                     boolean isImplicitNull)
   {
     _valueHash = valueHash;
+    _valueLength = valueLength;
     _cacheHash = cacheHash;
     _flags = flags;
     _version = version;
@@ -112,6 +117,7 @@ public final class MnodeValue implements ExtCacheEntry {
                     long lastUpdateTime)
   {
     _valueHash = oldMnodeValue.getValueHashKey();
+    _valueLength = oldMnodeValue.getValueLength();
     _cacheHash = oldMnodeValue.getCacheHashKey();
     _flags = oldMnodeValue.getFlags();
     _version = oldMnodeValue.getVersion();
@@ -370,10 +376,27 @@ public final class MnodeValue implements ExtCacheEntry {
     else
       return null;
   }
+  
+  public Blob getBlob()
+  {
+    return _blob;
+  }
+  
+  public void setBlob(Blob blob)
+  {
+    _blob = blob;
+  }
 
+  @Override
   public HashKey getValueHashKey()
   {
     return _valueHash;
+  }
+  
+  @Override
+  public long getValueLength()
+  {
+    return _valueLength;
   }
 
   public byte []getCacheHash()

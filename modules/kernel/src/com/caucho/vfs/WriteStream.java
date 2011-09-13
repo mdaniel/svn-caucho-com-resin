@@ -262,6 +262,7 @@ public class WriteStream extends OutputStreamWithBuffer
   /**
    * Writes a byte.
    */
+  @Override
   public void write(int ch) throws IOException
   {
     int len = _writeLength;
@@ -300,6 +301,7 @@ public class WriteStream extends OutputStreamWithBuffer
     if (source == null)
       return;
 
+    /*
     if (bufferLength <= length) {
       if (source.write(buffer, 0, writeLength,
                        buf, offset, length, false)) {
@@ -307,6 +309,7 @@ public class WriteStream extends OutputStreamWithBuffer
         return;
       }
     }
+    */
     
     while (length > 0) {
       int sublen = bufferLength - writeLength;
@@ -1266,7 +1269,7 @@ public class WriteStream extends OutputStreamWithBuffer
         _writeLength = 0;
 
         if (s != null)
-          s.write(_writeBuffer, 0, len, true);
+          s.write(_writeBuffer, 0, len, ! _disableClose);
       }
     } finally {
       if (_disableClose) {

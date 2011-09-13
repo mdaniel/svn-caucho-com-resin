@@ -191,6 +191,7 @@ public class ProfileAction implements AdminAction
     sb.append(",\n  \"depth\" : " + profile.getDepth());
     sb.append(",\n  \"period\" : " + profile.getPeriod());
     sb.append(",\n  \"end_time\" : " + profile.getEndTime());
+    sb.append(",\n  \"gc_time\" : " + profile.getGcTime());
     
     sb.append(",\n  \"profile\" :  [\n");
     
@@ -200,6 +201,18 @@ public class ProfileAction implements AdminAction
      
       jsonEntry(sb, entries[i]);
     }
+    
+    /*
+    long gcTicks = (profile.getGcTime() + profile.getPeriod() - 1)
+      / profile.getPeriod();
+    
+    
+    if (entries.length > 0)
+      sb.append(",\n");
+    
+    jsonGc(sb, gcTicks);
+    */
+    
     sb.append("\n]");
     
     sb.append("}");
@@ -209,8 +222,7 @@ public class ProfileAction implements AdminAction
   
   private void jsonEntry(StringBuilder sb, ProfileEntry entry)
   {
-    sb.append("{"
-              );
+    sb.append("{");
     sb.append("\n  \"name\" : \"");
     escapeString(sb, entry.getDescription());
     sb.append("\"");
@@ -221,6 +233,17 @@ public class ProfileAction implements AdminAction
     if (entry.getStackTrace() != null && entry.getStackTrace().size() > 0) {
       jsonStackTrace(sb, entry.getStackTrace());
     }
+
+    sb.append("\n}");
+  }
+  
+  private void jsonGc(StringBuilder sb, long ticks)
+  {
+    sb.append("{");
+    sb.append("\n  \"name\" : \"HeapMemory.gc\"");
+    
+    sb.append(",\n  \"ticks\" : " + ticks);
+    sb.append(",\n  \"state\" : \"RUNNABLE\"");
 
     sb.append("\n}");
   }

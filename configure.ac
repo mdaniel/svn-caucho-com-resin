@@ -626,7 +626,7 @@ tmpname="/tmp/java$$.out"
 	       	
 $JAVA_EXE -version 2> $tmpname
 
-grep "1\.6" $tmpname 1> /dev/null
+grep "1\.[678]" $tmpname 1> /dev/null
 if test "$?" != "0"; then
   echo "no"
   java_version=`cat $tmpname`

@@ -98,8 +98,9 @@ public class FileCacheEntry extends DistCacheEntry {
   @Override
   public HashKey getValueHash(Object value, CacheConfig config)
   {
-    return _manager.getValueHash(value, config);
+    return _manager.getValueHash(value, config).getValue();
   }
+  
   /**
    * Sets the current value
    */
@@ -145,9 +146,12 @@ public class FileCacheEntry extends DistCacheEntry {
    * Sets the current value
    */
   @Override
-  public boolean compareAndPut(long version, HashKey value, CacheConfig config)
+  public boolean compareAndPut(long version, 
+                               HashKey valueHash, 
+                               long valueLength,
+                               CacheConfig config)
   {
-    return _manager.compareAndPut(this, version, value, config);
+    return _manager.compareAndPut(this, version, valueHash, valueLength, config);
   }
 
   /**

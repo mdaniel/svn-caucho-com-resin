@@ -1580,7 +1580,8 @@ function admin_pdf_profile()
 
   $g_canvas->setDataFontAndSize(10);
 
-  $g_canvas->writeTextLine("Time: " . $profile["total_time"] / 1000);
+  $g_canvas->writeTextLine("Time: " . $profile["total_time"] / 1000 . "s");
+  $g_canvas->writeTextLine("GC-Time: " . $profile["gc_time"] / 1000 . "s");
   $g_canvas->writeTextLine("Ticks: " . $profile["ticks"]);
   $g_canvas->writeTextLine("Sample-Period: " . $profile["period"]);
   $g_canvas->writeTextLine("End: " . date("Y-m-d H:i",
@@ -1627,9 +1628,14 @@ function admin_pdf_profile()
 
     $g_canvas->write_text_newline();
 
-    $g_canvas->setDataFontAndSize(7);
-    $g_canvas->write_text_block_x(120, $stack);
-    $g_canvas->setDataFontAndSize(8);
+    if ($stack) {
+      $g_canvas->setDataFontAndSize(7);
+      $g_canvas->write_text_block_x(120, $stack);
+      $g_canvas->setDataFontAndSize(8);
+    }
+    else {
+      $g_canvas->write_text_newline();
+    }
   }
   
   $g_canvas->set_header_right(null);
@@ -1640,6 +1646,9 @@ function admin_pdf_stack(&$profile_entry, $max)
   $stack =& $profile_entry["stack"];
 
   $string = "";
+
+  if (! $stack)
+    return $string;
 
   for ($i = 0; $i < $max && $stack[$i]; $i++) {
     $stack_entry = $stack[$i];
@@ -1848,7 +1857,7 @@ function stack_find_monitor($monitors, $i)
 
 function profile_cmp_ticks($a, $b)
 {
-  return $a->ticks - $b->ticks;
+  return $b["ticks"] - $a["ticks"];
 }
 
 //

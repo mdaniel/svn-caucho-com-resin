@@ -61,6 +61,8 @@ public class AlarmClock {
     = new ArrayList<Alarm>();
   
   private Object _lock = new Object();
+  
+  private ThreadPool _threadPool = ThreadPool.getThreadPool();
 
   /**
    * Queue the alarm for wakeup.
@@ -325,10 +327,9 @@ public class AlarmClock {
       }
     }
     else if (alarm.isPriority())
-      ThreadPool.getThreadPool().schedulePriority(alarm);
+      _threadPool.schedulePriority(alarm);
     else
-      ThreadPool.getThreadPool().schedule(alarm);
-
+      _threadPool.schedule(alarm);
   }
   
   private int getBucket(long time)

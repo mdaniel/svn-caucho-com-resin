@@ -12,6 +12,7 @@
 
 <s2 title="4.0.23 - snapshot">
 <ul>
+<li>cli/watchdog: stop and kill with no -server should stop the unique server (#4732)</li>
 <li>logging: log-handler el resolution fix (#4753)</li>
 <li>xa: use rollback instead of forget in XA recover (#4748)</li>
 <li>resin: JMX issue with not reporting correct request time and request count (#4660, rep by Rick Hightower)</li>

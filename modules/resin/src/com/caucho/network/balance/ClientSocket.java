@@ -72,14 +72,16 @@ public class ClientSocket implements ClientSocketApi {
 
   private String _debugId;
 
-  ClientSocket(ClientSocketFactory pool, int count,
-                ReadStream is, WriteStream os)
+  ClientSocket(ClientSocketFactory pool, 
+               int count,
+               ReadStream is,
+               WriteStream os)
   {
     _pool = pool;
     _poolSequenceId = pool.getStartSequenceId();
     _is = is;
     _os = os;
-
+    
     _debugId = "[" + pool.getDebugId() + ":" + count + "]";
 
     _connProbe = pool.getConnectionProbe();

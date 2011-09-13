@@ -1414,7 +1414,7 @@ public class TcpSocketLinkListener
 
     try {
       int result = is.fillWithTimeout(timeout);
-      
+
       if (isClosed()) {
         return -1;
       }

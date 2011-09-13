@@ -103,6 +103,7 @@ public class CacheDataBackingImpl implements CacheDataBacking {
         || oldEntryValue.isImplicitNull()
         || oldEntryValue == MnodeValue.NULL) {
       if (_mnodeStore.insert(key, mnodeValue.getValueHashKey(),
+                             mnodeValue.getValueLength(),
                              mnodeValue.getCacheHashKey(),
                              mnodeValue.getFlags(),
                              mnodeValue.getVersion(),
@@ -119,10 +120,12 @@ public class CacheDataBackingImpl implements CacheDataBacking {
       }
     } else {
       if (_mnodeStore.updateSave(key, mnodeValue.getValueHashKey(),
-                                      mnodeValue.getVersion(), timeout)) {
+                                 mnodeValue.getValueLength(),
+                                 mnodeValue.getVersion(), timeout)) {
         return mnodeValue;
       }
       else if (_mnodeStore.insert(key, mnodeValue.getValueHashKey(),
+                                  mnodeValue.getValueLength(),
                                   mnodeValue.getCacheHashKey(),
                                   mnodeValue.getFlags(),
                                   mnodeValue.getVersion(),
@@ -146,6 +149,7 @@ public class CacheDataBackingImpl implements CacheDataBacking {
                                MnodeValue oldEntryValue,
                                long version,
                                HashKey valueHash,
+                               long valueLength,
                                Object value,
                                HashKey cacheHash,
                                int flags,
@@ -158,7 +162,8 @@ public class CacheDataBackingImpl implements CacheDataBacking {
     if (oldEntryValue == null
         || oldEntryValue.isImplicitNull()
         || oldEntryValue == MnodeValue.NULL) {
-      if (_mnodeStore.insert(key, valueHash, cacheHash,
+      if (_mnodeStore.insert(key, valueHash, valueLength, 
+                             cacheHash,
                              flags, version,
                              expireTimeout,
                              idleTimeout,
@@ -170,10 +175,10 @@ public class CacheDataBackingImpl implements CacheDataBacking {
                  + "(key=" + key + ", version=" + version + ")");
       }
     } else {
-      if (_mnodeStore.updateSave(key, valueHash, version, idleTimeout)) {
+      if (_mnodeStore.updateSave(key, valueHash, valueLength, version, idleTimeout)) {
         return true;
       }
-      else if (_mnodeStore.insert(key, valueHash, cacheHash,
+      else if (_mnodeStore.insert(key, valueHash, valueLength, cacheHash,
                                   flags, version,
                                   expireTimeout,
                                   idleTimeout,
@@ -213,6 +218,12 @@ public class CacheDataBackingImpl implements CacheDataBacking {
     throws IOException
   {
     return _dataStore.load(valueHash, os);
+  }
+
+  @Override
+  public java.sql.Blob loadBlob(HashKey valueHash)
+  {
+    return _dataStore.loadBlob(valueHash);
   }
   
   @Override

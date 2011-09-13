@@ -1000,7 +1000,7 @@ public class HttpRequest extends AbstractHttpRequest
     // skip 'http:'
     if (ch != '/') {
       while (ch > ' ' && ch != '/') {
-        if (readOffset >= readLength) {
+        if (readLength <= readOffset) {
           if ((readLength = s.fillBuffer()) < 0)
             return false;
           readOffset = 0;
@@ -1009,7 +1009,7 @@ public class HttpRequest extends AbstractHttpRequest
       }
       
       if (ch != '/') {
-        log.warning("Invalid Request (method=" + _method + " url ch=0x" + Integer.toHexString(ch) + ") (IP=" + getRemoteHost() + ")");
+        log.warning("Invalid Request (method='" + _method + "' url ch=0x" + Integer.toHexString(ch & 0xff) + ") (IP=" + getRemoteHost() + ")");
         
         throw new BadRequestException("Invalid Request(Remote IP=" + getRemoteHost() + ")");
       }

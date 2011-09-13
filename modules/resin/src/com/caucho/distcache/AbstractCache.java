@@ -650,9 +650,12 @@ public class AbstractCache
     return true;
   }
 
-  public void compareAndPut(HashKey key, HashKey value, long version)
+  public void compareAndPut(HashKey key, 
+                            HashKey value,
+                            long valueLength,
+                            long version)
   {
-    getDistCacheEntry(key).compareAndPut(version, value, _config);
+    getDistCacheEntry(key).compareAndPut(version, value, valueLength, _config);
     
     notifyPut(key);
   }

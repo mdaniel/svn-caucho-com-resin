@@ -10,6 +10,7 @@ import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.net.InetAddress;
+import java.nio.ByteBuffer;
 import java.security.cert.CertificateFactory;
 import java.security.cert.X509Certificate;
 import java.util.concurrent.atomic.AtomicBoolean;
@@ -63,6 +64,10 @@ public final class JniSocketImpl extends QSocket {
   private long _requestExpireTime;
   
   private final AtomicBoolean _isClosed = new AtomicBoolean();
+  
+  // private ByteBuffer _byteBuffer = ByteBuffer.allocate(TempBuffer.SIZE);
+  // private ByteBuffer _byteBuffer = ByteBuffer.wrap(new byte[TempBuffer.SIZE]);
+  // private ByteBuffer _byteBuffer = createByteBuffer(TempBuffer.SIZE);
 
   public JniSocketImpl()
   {
@@ -434,6 +439,13 @@ public final class JniSocketImpl extends QSocket {
       
       do {
         result = writeNative(_fd, buffer, offset, length);
+        
+        //byte []tempBuffer = _byteBuffer.array();
+        //System.out.println("TEMP: " + tempBuffer);
+        //System.arraycopy(buffer, offset, tempBuffer, 0, length);
+        //_byteBuffer.position(0);
+        //_byteBuffer.put(buffer, offset, length);
+        //result = writeNativeNio(_fd, _byteBuffer, 0, length);
       } while (result == JniStream.TIMEOUT_EXN
                && Alarm.getCurrentTimeActual() < expires);
     }
@@ -667,7 +679,7 @@ public final class JniSocketImpl extends QSocket {
                         long timeout)
     throws IOException;
 
-  private native int writeNative(long fd, byte []buf, int offset, int length)
+  private static native int writeNative(long fd, byte []buf, int offset, int length)
     throws IOException;
 
   /*
@@ -675,11 +687,17 @@ public final class JniSocketImpl extends QSocket {
                                       byte []buf, int offset, int length)
     throws IOException;
     */
-
   native int writeNative2(long fd,
                           byte []buf1, int off1, int len1,
                           byte []buf2, int off2, int len2)
     throws IOException;
+
+  /*
+  native int writeNativeNio(long fd,
+                            ByteBuffer byteBuffer, int offset, int length)
+    throws IOException;
+  native ByteBuffer createByteBuffer(int length);
+*/
 
   native int flushNative(long fd) throws IOException;
 

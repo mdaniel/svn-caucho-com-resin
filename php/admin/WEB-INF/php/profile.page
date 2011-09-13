@@ -120,6 +120,22 @@ if ($profile) {
 
   echo "<h3>Run Time: " . ($sample_ticks * $period / 1000) . "s</h3>\n";
 
+  $gc_time = $profile->getGcTime();
+
+  if ($gc_time > 0) {
+    echo "<h3>GC Time: " . ($gc_time / 1000) . "s</h3>\n";
+
+    /*
+    $gc_ticks = ($gc_time + $period - 1) / $period;
+    $gc_entry = java("com.caucho.profile.ProProfileEntry",
+                     0x0004, $gc_ticks, $gc_time);
+    $gc_entry->addStack("jvm.HeapMemory", "gc", "");
+    $results = array_merge(array($gc_entry), $results);
+
+    usort($results, "gc_entry_cmp");
+    */
+  }
+
   $partition = do_partition_profile($results);
   $groups = array("active", "block", "jni", "resin", "keepalive", "wait",
                   "accept", "single", "all");
@@ -134,6 +150,11 @@ else {
   echo "<h2>Profiling is not available</h2>";
 
   echo "<p>Profiling requires Resin Professional and compiled JNI</p>";
+}
+
+function gc_entry_cmp($a, $b)
+{
+  return $b->getCount() - $a->getCount();
 }
 
 function display_profile_results($partition, $groups, $profile)

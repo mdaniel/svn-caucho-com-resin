@@ -22,7 +22,7 @@
   <!--
      - save jmx information on start.
     -->
-  <health:DumpJmx>
+  <health:DumpJmx async="true">
     <health:OnStart/>
   </health:DumpJmx>
 

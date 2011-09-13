@@ -37,6 +37,7 @@ import com.caucho.util.HashKey;
 public final class CacheData {
   private final HashKey _key;
   private final HashKey _value;
+  private final long _valueLength;
   private final HashKey _cacheKey;
   private final int _flags;
   private final long _version;
@@ -48,6 +49,7 @@ public final class CacheData {
 
   public CacheData(HashKey key,
                    HashKey value,
+                   long valueLength,
                    HashKey cacheKey,
                    int flags,
                    long version,
@@ -59,6 +61,7 @@ public final class CacheData {
   {
     _key = key;
     _value = value;
+    _valueLength = valueLength;
     _cacheKey = cacheKey;
     _flags = flags;
     _version = version;
@@ -79,6 +82,11 @@ public final class CacheData {
   public HashKey getValue()
   {
     return _value;
+  }
+  
+  public long getValueLength()
+  {
+    return _valueLength;
   }
 
   public HashKey getCacheKey()

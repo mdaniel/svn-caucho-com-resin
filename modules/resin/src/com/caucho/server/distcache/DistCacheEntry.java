@@ -199,7 +199,8 @@ abstract public class DistCacheEntry implements ExtCacheEntry {
    * Sets the value by an input stream
    */
   abstract public boolean compareAndPut(long version, 
-                                        HashKey value, 
+                                        HashKey value,
+                                        long valueLength,
                                         CacheConfig config);
 
   abstract public HashKey compareAndPut(HashKey testValueHash,
@@ -247,6 +248,12 @@ abstract public class DistCacheEntry implements ExtCacheEntry {
   public byte []getValueHashArray()
   {
     return getMnodeValue().getValueHash();
+  }
+
+  @Override
+  public long getValueLength()
+  {
+    return getMnodeValue().getValueLength();
   }
 
   @Override

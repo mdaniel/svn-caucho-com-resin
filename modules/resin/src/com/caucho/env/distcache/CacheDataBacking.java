@@ -72,6 +72,7 @@ public interface CacheDataBacking {
                                MnodeValue oldEntryValue,
                                long version,
                                HashKey valueHash,
+                               long valueLength,
                                Object value,
                                HashKey cacheHash,
                                int flags,
@@ -83,6 +84,8 @@ public interface CacheDataBacking {
   
   public boolean loadData(HashKey valueHash, WriteStream os)
     throws IOException;
+
+  public java.sql.Blob loadBlob(HashKey valueHash);
 
   public boolean saveData(HashKey valueHash, StreamSource source, int length)
     throws IOException;

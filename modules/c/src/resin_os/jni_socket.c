@@ -180,6 +180,8 @@ Java_com_caucho_vfs_JniSocketImpl_writeNative(JNIEnv *env,
   char buffer[STACK_BUFFER_SIZE];
   int sublen;
   int write_length = 0;
+  int result;
+    
 
   if (! conn || conn->fd < 0 || ! buf) {
     return -1;
@@ -188,18 +190,104 @@ Java_com_caucho_vfs_JniSocketImpl_writeNative(JNIEnv *env,
   conn->jni_env = env;
 
   while (length > 0) {
-    int result;
-    
     if (length < sizeof(buffer))
       sublen = length;
     else
       sublen = sizeof(buffer);
 
     resin_get_byte_array_region(env, buf, offset, sublen, buffer);
-    
+
     result = conn->ops->write(conn, buffer, sublen);
+
+    /*
+    ptr = (*env)->GetByteArrayElements(env, buf, &is_copy);
+
+    if (ptr) {
+      result = conn->ops->write(conn, ptr + offset, sublen);
+
+      (*env)->ReleaseByteArrayElements(env, buf, ptr, is_copy);
+    }
+    */
     
-    if (result < 0) {
+    if (result == length)
+      return result + write_length;
+    else if (result < 0) {
+      /*
+      fprintf(stdout, "write-ops: write result=%d errno=%d\n", 
+              result, errno);
+      fflush(stdout);
+      */
+      return result;
+    }
+
+    length -= result;
+    offset += result;
+    write_length += result;
+  }
+
+  return write_length;
+}
+
+JNIEXPORT jobject JNICALL
+Java_com_caucho_vfs_JniSocketImpl_createByteBuffer(JNIEnv *env,
+                                                   jobject this,
+                                                   jint length)
+{
+  char *buffer = malloc(length);
+
+  return (*env)->NewDirectByteBuffer(env, buffer, length);
+}
+
+JNIEXPORT jint JNICALL
+Java_com_caucho_vfs_JniSocketImpl_writeNativeNio(JNIEnv *env,
+                                                 jobject obj,
+                                                 jlong conn_fd,
+                                                 jobject byte_buffer,
+                                                 jint offset,
+                                                 jint length)
+{
+  connection_t *conn = (connection_t *) (PTR) conn_fd;
+  char *ptr;
+  int sublen;
+  int write_length = 0;
+  int result;
+
+  if (! conn || conn->fd < 0 || ! byte_buffer) {
+    return -1;
+  }
+  
+  conn->jni_env = env;
+
+  ptr = (*env)->GetDirectBufferAddress(env, byte_buffer);
+
+  if (! ptr)
+    return -1;
+
+  while (length > 0) {
+    /*
+    if (length < sizeof(buffer))
+      sublen = length;
+    else
+      sublen = sizeof(buffer);
+    */
+
+    sublen = length;
+
+    result = conn->ops->write(conn, ptr + offset, sublen);
+
+    /*
+    ptr = (*env)->GetByteArrayElements(env, buf, &is_copy);
+
+    if (ptr) {
+      result = conn->ops->write(conn, ptr + offset, sublen);
+
+      (*env)->ReleaseByteArrayElements(env, buf, ptr, is_copy);
+    }
+    */
+    
+    if (result == length)
+      return result + write_length;
+    else if (result < 0) {
       /*
       fprintf(stdout, "write-ops: write result=%d errno=%d\n", 
               result, errno);

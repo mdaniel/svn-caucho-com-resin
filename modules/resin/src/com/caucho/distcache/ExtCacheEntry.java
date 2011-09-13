@@ -57,6 +57,11 @@ public interface ExtCacheEntry<K,V> extends Cache.Entry<K,V>
    * Returns the value key
    */
   public HashKey getValueHashKey();
+  
+  /**
+   * Returns the value length
+   */
+  public long getValueLength();
 
   /**
    * Returns the idle timeout

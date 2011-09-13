@@ -211,11 +211,12 @@ class TcpStream extends StreamImpl {
       return -1;
   }
 
+  @Override
   public void closeWrite() throws IOException
   {
     OutputStream os = _os;
     _os = null;
-
+    
     try {
       if (os != null)
         _s.shutdownOutput();
@@ -230,6 +231,7 @@ class TcpStream extends StreamImpl {
     }
   }
 
+  @Override
   public void close() throws IOException
   {
     InputStream is = _is;

@@ -164,6 +164,15 @@ minutes expire, the triad will automatically remove the server.</p>
 for understanding Resin's clustering, you can configure fewer or more
 static servers in the resin.xml.</p>
 
+<p>Defining fewer servers than three in the resin.xml is only
+recommended if you actually have fewer than three servers.
+Defining more servers than three in the resin.xml depends on your own
+preference. Having only three servers in the resin.xml means you don't
+need to change the resin.xml when you add new servers, but listing all
+servers in the resin.xml makes your servers explicit - you can look in
+the resin.xml to know exactly what you've configured. It's a
+site preference.</p>
+
 <p>If you have fewer than three servers, you can define only the
 servers you need in the resin.xml. You won't get the triple
 redundancy, but you will still get a backup in the two-server

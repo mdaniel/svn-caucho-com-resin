@@ -246,24 +246,28 @@ abstract public class AbstractResultSet implements java.sql.ResultSet {
     }
   }
 
+  @Override
   public byte []getBytes(String columnName)
     throws SQLException
   {
     return getBytes(findColumn(columnName));
   }
 
+  @Override
   public Reader getCharacterStream(int columnIndex)
     throws SQLException
   {
     throw new UnsupportedOperationException();
   }
 
+  @Override
   public Reader getCharacterStream(String columnName)
     throws SQLException
   {
     return getCharacterStream(findColumn(columnName));
   }
 
+  @Override
   public java.sql.Date getDate(int columnIndex)
     throws SQLException
   {

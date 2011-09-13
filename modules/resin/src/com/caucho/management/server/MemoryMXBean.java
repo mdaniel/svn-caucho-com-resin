@@ -99,4 +99,10 @@ public interface MemoryMXBean extends ManagedObjectMXBean {
   
   @Description("Current free Tenured memory")
   public long getTenuredFree();
+  
+  @Description("Current total GC time")
+  public long getGarbageCollectionTime();
+  
+  @Description("Current total GC count")
+  public long getGarbageCollectionCount();
 }

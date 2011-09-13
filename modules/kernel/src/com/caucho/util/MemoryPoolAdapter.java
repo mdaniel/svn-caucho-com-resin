@@ -29,6 +29,8 @@ package com.caucho.util;
 
 import java.lang.management.MemoryUsage;
 import java.util.*;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 import javax.management.*;
 import javax.management.openmbean.CompositeData;
@@ -37,57 +39,11 @@ import com.caucho.jmx.Jmx;
 
 public class MemoryPoolAdapter
 {
-  private final MBeanServer _mbeanServer;
+  private static final Logger log
+    = Logger.getLogger(MemoryPoolAdapter.class.getName());
   
-  public static enum PoolType 
-  {
-    CODE_CACHE ("java.lang:type=MemoryPool,name=Code Cache", 
-                "class storage","class memory","code cache","class","code"),
-    EDEN ("java.lang:type=MemoryPool,name=Eden Space", 
-          "eden"),
-    PERM_GEN("java.lang:type=MemoryPool,name=Perm Gen", 
-             "perm gen","perm"),
-    SURVIVOR ("java.lang:type=MemoryPool,name=Survivor Space", 
-              "survivor"),
-    TENURED ("java.lang:type=MemoryPool,name=Tenured Gen", 
-             "tenured","old gen","java heap","old space","old","heap");
-
-    private final String _defaultName;
-    private final String[] _keywords;
-    
-    PoolType(String defaultName, String... keywords) 
-    {
-      _defaultName = defaultName;
-      _keywords = keywords;
-    }
-	  
-    public String defaultName()
-    {
-      return _defaultName;
-    }
-	  
-    public String[] keywords()
-    {
-      return _keywords;
-    }
-
-    // this does a breadth first search for the 1st objectName that matches a keyword
-    // keywords are ordered  most specific to least specific
-    public ObjectName find(Set<ObjectName> objectNames) 
-      throws MalformedObjectNameException
-    {
-      for (String keyword : _keywords) {
-        for (ObjectName objectName : objectNames) {
-          String name = objectName.getKeyProperty("name").toLowerCase();
-          if (name.contains(keyword)) {
-            return objectName;
-          }
-        }
-      }
-      
-      return new ObjectName(_defaultName);
-    }
-  }
+  private final MBeanServer _mbeanServer;
+  private final ObjectName []_gcObjectNames;
   
   private Map<PoolType, ObjectName> _poolNamesMap = 
     new HashMap<MemoryPoolAdapter.PoolType, ObjectName>();
@@ -103,6 +59,21 @@ public class MemoryPoolAdapter
       for (PoolType poolType : PoolType.values()) {
         ObjectName objectName = poolType.find(objectNames);
         _poolNamesMap.put(poolType, objectName);
+      }
+    } catch (Exception e) {
+      throw new IllegalStateException(e);
+    }
+
+    try {
+      ObjectName query = new ObjectName("java.lang:type=GarbageCollector,*");
+      Set<ObjectName> objectNames = _mbeanServer.queryNames(query, null);
+      
+      _gcObjectNames = new ObjectName[objectNames.size()];
+      
+      int i = 0;
+      
+      for (ObjectName name : objectNames) {
+        _gcObjectNames[i++] = name;
       }
     } catch (Exception e) {
       throw new IllegalStateException(e);
@@ -262,7 +233,7 @@ public class MemoryPoolAdapter
     throws JMException
   {
     CompositeData data
-      = (CompositeData) _mbeanServer.getAttribute(getPermGenName(), "Usage");
+    = (CompositeData) _mbeanServer.getAttribute(getPermGenName(), "Usage");
 
     MemoryUsage usage = MemoryUsage.from(data);
 
@@ -403,6 +374,44 @@ public class MemoryPoolAdapter
                         usage.getUsed());
   }
 
+  public long getGarbageCollectionTime()
+    throws JMException
+  {
+    long gcTime = 0;
+    
+    for (ObjectName name : _gcObjectNames) {
+      try {
+        Object value = _mbeanServer.getAttribute(name, "CollectionTime");
+        
+        if (value instanceof Number)
+          gcTime += ((Number) value).longValue();
+      } catch (Exception e) {
+        log.log(Level.FINER, e.toString(), e);
+      }
+    }
+    
+    return gcTime;
+  }
+
+  public long getGarbageCollectionCount()
+    throws JMException
+  {
+    long gcCount = 0;
+    
+    for (ObjectName name : _gcObjectNames) {
+      try {
+        Object value = _mbeanServer.getAttribute(name, "CollectionCount");
+        
+        if (value instanceof Number)
+          gcCount += ((Number) value).longValue();
+      } catch (Exception e) {
+        log.log(Level.FINER, e.toString(), e);
+      }
+    }
+    
+    return gcCount;
+  }
+
   public static class MemUsage
   {
     private long _max;
@@ -433,6 +442,56 @@ public class MemoryPoolAdapter
     public long getFree()
     {
       return getMax() - getUsed();
+    }
+  }
+  
+  public static enum PoolType 
+  {
+    CODE_CACHE ("java.lang:type=MemoryPool,name=Code Cache", 
+                "class storage","class memory","code cache","class","code"),
+    EDEN ("java.lang:type=MemoryPool,name=Eden Space", 
+          "eden"),
+    PERM_GEN("java.lang:type=MemoryPool,name=Perm Gen", 
+             "perm gen","perm"),
+    SURVIVOR ("java.lang:type=MemoryPool,name=Survivor Space", 
+              "survivor"),
+    TENURED ("java.lang:type=MemoryPool,name=Tenured Gen", 
+             "tenured","old gen","java heap","old space","old","heap");
+
+    private final String _defaultName;
+    private final String[] _keywords;
+    
+    PoolType(String defaultName, String... keywords) 
+    {
+      _defaultName = defaultName;
+      _keywords = keywords;
+    }
+  
+    public String defaultName()
+    {
+      return _defaultName;
+    }
+  
+    public String[] keywords()
+    {
+      return _keywords;
+    }
+
+    // this does a breadth first search for the 1st objectName that matches a keyword
+    // keywords are ordered  most specific to least specific
+    public ObjectName find(Set<ObjectName> objectNames) 
+      throws MalformedObjectNameException
+    {
+      for (String keyword : _keywords) {
+        for (ObjectName objectName : objectNames) {
+          String name = objectName.getKeyProperty("name").toLowerCase();
+          if (name.contains(keyword)) {
+            return objectName;
+          }
+        }
+      }
+      
+      return new ObjectName(_defaultName);
     }
   }
 }

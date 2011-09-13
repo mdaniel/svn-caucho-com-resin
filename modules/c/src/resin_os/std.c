@@ -108,6 +108,7 @@ std_read_nonblock(connection_t *conn, char *buf, int len)
     return -1;
 
   result = recv(fd, buf, len, 0);
+  fprintf(stderr, "RECV1 %d\n", result);
 
   return result;
 }
@@ -276,6 +277,7 @@ std_write(connection_t *conn, char *buf, int len)
 
   do {
     result = send(fd, buf, len, 0);
+    
     if (result >= 0)
       return result;
 
@@ -404,6 +406,7 @@ std_accept(server_socket_t *ss, connection_t *conn)
 
     timeout.tv_sec = ss->conn_socket_timeout / 1000;
     timeout.tv_usec = ss->conn_socket_timeout % 1000 * 1000;
+
     setsockopt(sock, SOL_SOCKET, SO_SNDTIMEO,
                (char *) &timeout, sizeof(timeout));
   }

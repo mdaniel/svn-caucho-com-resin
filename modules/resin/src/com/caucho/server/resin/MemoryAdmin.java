@@ -235,4 +235,22 @@ public class MemoryAdmin extends AbstractManagedObject
       throw new RuntimeException(e);
     }
   }
+
+  public long getGarbageCollectionTime()
+  {
+    try {
+      return _memoryPoolAdapter.getGarbageCollectionTime();
+    } catch (JMException e) {
+      throw new RuntimeException(e);
+    }
+  }
+
+  public long getGarbageCollectionCount()
+  {
+    try {
+      return _memoryPoolAdapter.getGarbageCollectionCount();
+    } catch (JMException e) {
+      throw new RuntimeException(e);
+    }
+  }
 }

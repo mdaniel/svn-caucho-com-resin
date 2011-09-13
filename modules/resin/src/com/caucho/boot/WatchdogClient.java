@@ -298,14 +298,14 @@ class WatchdogClient
     }
   }
 
-  public void killWatchdog()
+  public void killWatchdog(String serverId)
     throws IOException
   {
     ActorSender conn = getConnection();
 
     try {
       ResultStatus status = (ResultStatus)
-        conn.query(WATCHDOG_ADDRESS, new WatchdogKillQuery(getId()), BAM_TIMEOUT);
+        conn.query(WATCHDOG_ADDRESS, new WatchdogKillQuery(serverId), BAM_TIMEOUT);
 
       if (! status.isSuccess())
         throw new RuntimeException(L.l("{0}: watchdog kill failed because of '{1}'",

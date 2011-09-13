@@ -64,11 +64,11 @@ if (! admin_init(false)) {
 		</td>
 	</tr>
 	<tr>
-	<!-- Postmortem -->
+	<!-- Watchdog -->
 		<td>
-			<h2><a href="?q=postmortem">Postmortem</a></h2>
-			<p>A report to aid in debugging failures in which the server died or
-			restarted.</p>
+			<h2><a href="?q=watchdog">Watchdog</a></h2>
+			<p>A report to aid in debugging server restarts.
+			</p>
 		</td>
 		<!-- Profile -->
 		<td>

@@ -239,12 +239,14 @@ public class DbTransaction extends StoreTransaction {
       if (_writeLocks.contains(lock))
         throw new SQLException(L.l("lockReadAndWrite cannot already have a write lock"));
       
+      /*
       if (lock.lockReadAndWriteNoWait()) {
         _readLocks.add(lock);
         _writeLocks.add(lock);
 
         return true;
       }
+      */
     } catch (SQLException e) {
       setRollbackOnly(e);
       

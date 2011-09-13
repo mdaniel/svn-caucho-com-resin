@@ -480,7 +480,7 @@ class WatchdogManager implements AlarmListener {
   {
     // no synchronization because kill must avoid blocking
 
-    WatchdogChild watchdog = _watchdogMap.get(serverId);
+    WatchdogChild watchdog = getWatchdog(serverId);
 
     if (watchdog == null)
       throw new ConfigException(L().l("No matching <server> found for -server '{0}' in {1}",

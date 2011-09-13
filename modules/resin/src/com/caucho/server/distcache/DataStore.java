@@ -34,6 +34,7 @@ import static java.sql.ResultSet.TYPE_FORWARD_ONLY;
 
 import java.io.IOException;
 import java.io.InputStream;
+import java.sql.Blob;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
@@ -225,18 +226,11 @@ public class DataStore {
    */
   public boolean load(HashKey id, WriteStream os)
   {
-    DataConnection conn = null;
-
     try {
-      conn = getConnection();
-
-      PreparedStatement pstmt = conn.prepareLoad();
-      pstmt.setBytes(1, id.getHash());
-
-      ResultSet rs = pstmt.executeQuery();
-
-      if (rs.next()) {
-        InputStream is = rs.getBinaryStream(1);
+      Blob blob = loadBlob(id);
+      
+      if (blob != null) {
+        InputStream is = blob.getBinaryStream();
 
         if (is == null)
           return false;
@@ -259,12 +253,49 @@ public class DataStore {
       log.log(Level.FINE, e.toString(), e);
     } catch (IOException e) {
       log.log(Level.FINE, e.toString(), e);
+    }
+
+    return false;
+  }
+
+  /**
+   * Reads the object from the data store.
+   *
+   * @param id the hash identifier for the data
+   * @param os the WriteStream to hold the data
+   *
+   * @return true on successful load
+   */
+  public Blob loadBlob(HashKey id)
+  {
+    DataConnection conn = null;
+
+    try {
+      conn = getConnection();
+
+      PreparedStatement pstmt = conn.prepareLoad();
+      pstmt.setBytes(1, id.getHash());
+
+      ResultSet rs = pstmt.executeQuery();
+
+      if (rs.next()) {
+        Blob blob = rs.getBlob(1);
+        
+        rs.close();
+        
+        return blob;
+      }
+
+      if (log.isLoggable(Level.FINER))
+        log.finer(this + " no data loaded for " + id);
+    } catch (SQLException e) {
+      log.log(Level.FINE, e.toString(), e);
     } finally {
       if (conn != null)
         conn.close();
     }
 
-    return false;
+    return null;
   }
 
   /**

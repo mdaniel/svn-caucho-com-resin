@@ -113,6 +113,11 @@ public class Profile
   {
     throw new UnsupportedOperationException(getClass().getName());
   }
+  
+  public long getGcTime()
+  {
+    throw new UnsupportedOperationException(getClass().getName());
+  }
 
   public ProfileEntry []getResults()
   {
