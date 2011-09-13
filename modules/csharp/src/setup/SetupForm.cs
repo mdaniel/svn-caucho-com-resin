@@ -124,7 +124,6 @@ namespace Caucho
     private void UpdateServices(ResinService newResinService)
     {
       _resin = (Resin)_resinCmbBox.SelectedItem;
-
       if (_resin != null) {
         IList<ResinService> services = _setup.GetResinServices(_resin);
         ArrayList items = new ArrayList();
@@ -390,8 +389,9 @@ namespace Caucho
         jdks.Add("Default: [" + foundJdks[0] + "]");
 
       foreach (String jdk in foundJdks) {
-        if (!jdks.Contains(jdk)) {
-          jdks.Add(jdk);
+        if (!jdks.Contains(javaHome))
+        {
+          jdks.Add(javaHome);
         }
       }
 

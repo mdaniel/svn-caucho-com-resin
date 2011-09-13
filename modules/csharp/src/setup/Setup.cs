@@ -616,6 +616,9 @@ namespace Caucho
       if (Conf != null)
         sb.Append(" -conf ").Append('"').Append(Conf).Append('"');
 
+      if (JavaHome != null)
+        sb.Append(" -java-home ").Append('"').Append(JavaHome).Append('"');
+
       sb.Append(" -resin-home ").Append('"').Append(Home).Append('"');
 
       if (Root != null)

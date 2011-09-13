@@ -60,6 +60,7 @@ namespace Caucho
 
       _resinHome = ResinArgs.ResinHome;
       _rootDirectory = ResinArgs.ResinRoot;
+      _javaHome = ResinArgs.JavaHome;
     }
 
     public bool StartResin()
