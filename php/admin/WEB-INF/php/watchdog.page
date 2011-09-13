@@ -70,7 +70,7 @@ echo "<h2>Restart at " . date("Y-m-d H:i", $restart_time) . "</h2>\n";
 
 echo " <br /> ";
 echo "<a href='pdf-gen.php?report=Watchdog&amp;time=$restart_time'>PDF</a> (";
-echo "<a href='pdf-gen?report=Watchdog&amp;time=$restart_time&amp;period=1800'>1/2 hour</a>, ";
+echo "<a href='pdf-gen.php?report=Watchdog&amp;time=$restart_time&amp;period=1800'>1/2 hour</a>, ";
 echo "<a href='pdf-gen.php?report=Watchdog&amp;time=$restart_time&amp;period=900'>15 minutes</a>, ";
 echo "<a href='pdf-gen.php?report=Watchdog&amp;time=$restart_time&amp;period=3600'>1 hour</a>)";
 echo " <br /> ";

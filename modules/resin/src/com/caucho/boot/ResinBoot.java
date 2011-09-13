@@ -159,17 +159,22 @@ public class ResinBoot {
     config.configure(bootManager, _args.getResinConf(),
                      "com/caucho/server/resin/resin.rnc");
 
+    if (! _args.isHelp())
+      initClient(bootManager);
+  }
+
+  private void initClient(BootResinConfig bootManager) {
     if (_args.isDynamicServer()) {
       _client = bootManager.addDynamicClient(_args);
     }
     else {
       _client = bootManager.findClient(_args.getServerId());
     }
-    
+
     if (_client == null && _args.isShutdown()) {
       _client = bootManager.findShutdownClient();
     }
-    
+
     if (_client == null && ! (_args.isStart() || _args.isConsole())) {
       _client = bootManager.findShutdownClient();
     }

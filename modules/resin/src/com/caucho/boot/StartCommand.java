@@ -120,7 +120,7 @@ public class StartCommand extends AbstractStartCommand
     System.out.println("where options include:");
     System.out.println("   -conf <file>          : select a configuration file");
     System.out.println("   -data-directory <dir> : select a resin-data directory");
-    System.out.println("   -join <cluster>       : join a cluster as a dynamic server");
+    System.out.println("   -join-cluster <cluster>       : join a cluster as a dynamic server");
     System.out.println("   -log-directory <dir>  : select a logging directory");
     System.out.println("   -resin-home <dir>     : select a resin home directory");
     System.out.println("   -root-directory <dir> : select a root directory");
