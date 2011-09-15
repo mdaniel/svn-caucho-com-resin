@@ -29,502 +29,173 @@
 
 package com.caucho.server.distcache;
 
-import com.caucho.distcache.ExtCacheEntry;
-import com.caucho.util.Alarm;
 import com.caucho.util.HashKey;
-
-import java.lang.ref.SoftReference;
-import java.sql.Blob;
+import com.caucho.util.Hex;
 
 /**
  * An entry in the cache map
  */
-public final class MnodeValue implements ExtCacheEntry {
-  public static final MnodeValue NULL
-    = new MnodeValue(null, 0, null, null, 0, 0, 0, 0, 0, 0, 0, 0, false, true);
-  
-  public static final HashKey NULL_KEY = new HashKey(new byte[32]);
-  public static final HashKey ANY_KEY = createAnyKey(32);
-  
-  private final HashKey _valueHash;
+@SuppressWarnings("serial")
+public class MnodeValue implements java.io.Serializable {
+  private final byte[] _valueHash;
   private final long _valueLength;
-  private final HashKey _cacheHash;
+  
+  private final byte[] _cacheHash;
+  
   private final int _flags;
-  private final long _version;
   
   private final long _expireTimeout;
   private final long _idleTimeout;
-  private final long _leaseTimeout;
-  private final long _localReadTimeout;
-
-  private final long _lastUpdateTime;
-
-  private final boolean _isServerVersionValid;
-
-  private final boolean _isImplicitNull;
   
-  private volatile long _lastAccessTime;
+  private final long _version;
   
-  private int _leaseOwner = -1;
-  private long _leaseExpireTime;
-  
-  private long _lastRemoteAccessTime;
-
-  private int _hits = 0;
-
-  private SoftReference<Object> _valueRef;
-  private volatile Blob _blob;
-
-  public MnodeValue(HashKey valueHash,
+  public MnodeValue(byte []valueHash,
                     long valueLength,
-                    Object value,
-                    HashKey cacheHash,
-                    int flags,
                     long version,
+                    byte []cacheHash,
+                    int flags,
                     long expireTimeout,
-                    long idleTimeout,
-                    long leaseTimeout,
-                    long localReadTimeout,
-                    long lastAccessTime,
-                    long lastUpdateTime,
-                    boolean isServerVersionValid,
-                    boolean isImplicitNull)
+                    long idleTimeout)
   {
     _valueHash = valueHash;
     _valueLength = valueLength;
+    
     _cacheHash = cacheHash;
+    
     _flags = flags;
-    _version = version;
     
     _expireTimeout = expireTimeout;
     _idleTimeout = idleTimeout;
-    _leaseTimeout = leaseTimeout;
-    _localReadTimeout = localReadTimeout;
-    _lastRemoteAccessTime = lastAccessTime;
-    _lastUpdateTime = lastUpdateTime;
     
-    _lastAccessTime = Alarm.getExactTime();
-
-    _isImplicitNull = isImplicitNull;
-    _isServerVersionValid = isServerVersionValid;
-
-    if (value != null)
-      _valueRef = new SoftReference<Object>(value);
+    _version = version;
   }
-
-  public MnodeValue(MnodeValue oldMnodeValue,
-                    long idleTimeout,
-                    long lastUpdateTime)
+  
+  public MnodeValue(byte []valueHash, 
+                    long valueLength,
+                    long version)
   {
-    _valueHash = oldMnodeValue.getValueHashKey();
-    _valueLength = oldMnodeValue.getValueLength();
-    _cacheHash = oldMnodeValue.getCacheHashKey();
-    _flags = oldMnodeValue.getFlags();
-    _version = oldMnodeValue.getVersion();
+    this(valueHash, valueLength, version, null, 0, 0, 0);
+  }
+  
+  public MnodeValue(MnodeValue mnodeValue)
+  {
+    _valueHash = mnodeValue._valueHash;
+    _valueLength = mnodeValue._valueLength;
     
-    _expireTimeout = oldMnodeValue.getExpireTimeout();
-    _idleTimeout = idleTimeout;
-    _leaseTimeout = oldMnodeValue.getLeaseTimeout();
-    _localReadTimeout = oldMnodeValue.getLocalReadTimeout();
+    _cacheHash = mnodeValue._cacheHash;
     
-    _lastRemoteAccessTime = lastUpdateTime;
-    _lastUpdateTime = lastUpdateTime;
+    _flags = mnodeValue._flags;
     
-    _lastAccessTime = Alarm.getExactTime();
-
-    _leaseExpireTime = oldMnodeValue._leaseExpireTime;
-    _leaseOwner = oldMnodeValue._leaseOwner;
-
-    _isImplicitNull = oldMnodeValue.isImplicitNull();
-    _isServerVersionValid = oldMnodeValue.isServerVersionValid();
-
-    Object value = oldMnodeValue.getValue();
+    _expireTimeout = mnodeValue._expireTimeout;
+    _idleTimeout = mnodeValue._idleTimeout;
     
-    if (value != null)
-      _valueRef = new SoftReference<Object>(value);
+    _version = mnodeValue._version;
   }
-
-  @Override
-  public HashKey getKeyHash()
+  
+  public MnodeValue(byte []valueHash,
+                    long valueLength,
+                    long version,
+                    MnodeValue oldValue)
   {
-    throw new UnsupportedOperationException(getClass().getName());
-  }
-  /**
-   * Returns the last access time.
-   */
-  public long getLastAccessTime()
-  {
-    return _lastAccessTime;
-  }
-
-  /**
-   * Sets the last access time.
-   */
-  public void setLastAccessTime(long accessTime)
-  {
-    _lastAccessTime = accessTime;
-  }
-
-  /**
-   * Returns the last remote access time.
-   */
-  public long getLastRemoteAccessTime()
-  {
-    return _lastRemoteAccessTime;
-  }
-
-  /**
-   * Sets the last remote access time.
-   */
-  public void setLastRemoteAccessTime(long accessTime)
-  {
-    _lastRemoteAccessTime = accessTime;
-  }
-
-  /**
-   * Returns the last update time.
-   */
-  @Override
-  public long getLastUpdateTime()
-  {
-    return _lastUpdateTime;
-  }
-
-  /**
-   * Returns the expiration time
-   */
-  public final long getExpirationTime()
-  {
-    return _lastUpdateTime + _expireTimeout;
-  }
-
-  public final boolean isLocalReadValid(int serverIndex, long now)
-  {
-    if (! _isServerVersionValid)
-      return false;
-    else if (now <= _lastAccessTime + _localReadTimeout)
-      return true;
-    else if (_leaseOwner == serverIndex && now <= _leaseExpireTime)
-      return true;
-    else
-      return false;
-  }
-
-  public final boolean isLeaseExpired(long now)
-  {
-    return _leaseExpireTime <= now;
-  }
-
-  /**
-   * Returns true is the entry has expired for being idle or having
-   * expired.
-   */
-  public final boolean isEntryExpired(long now)
-  {
-    return isIdleExpired(now) || isValueExpired(now);
-  }
-
-   /**
-   * Returns true if the value of the entry has expired.
-   */
-  public final boolean isValueExpired(long now)
-  {
-    return _lastUpdateTime + _expireTimeout < now;
-  }
-
-  /**
-   * Returns true is the entry has remained idle  too long.
-   */
-  public final boolean isIdleExpired(long now)
-  {
-    return _lastAccessTime + _idleTimeout < now;
-  }
-
-  /**
-   * Returns the lease owner
-   */
-  @Override
-  public final int getLeaseOwner()
-  {
-    return _leaseOwner;
-  }
-
-  /**
-   * Sets the owner
-   */
-  public final void setLeaseOwner(int leaseOwner, long now)
-  {
-    if (leaseOwner > 2) {
-      _leaseOwner = leaseOwner;
-
-      _leaseExpireTime = now + _leaseTimeout;
+    _valueHash = valueHash;
+    _valueLength = valueLength;
+    
+    _version = version;
+    
+    if (oldValue != null) {
+      _cacheHash = oldValue._cacheHash;
+      _flags = oldValue._flags;
+      _expireTimeout = oldValue._expireTimeout;
+      _idleTimeout = oldValue._idleTimeout;
     }
     else {
-      _leaseOwner = -1;
-
-      _leaseExpireTime = 0;
+      _cacheHash = null;
+      _flags = 0;
+      _expireTimeout = -1;
+      _idleTimeout = -1;
     }
   }
 
-  /**
-   * Sets the owner
-   */
-  public final void clearLease()
+  public MnodeValue(byte []valueHash,
+                    long valueLength,
+                    long version,
+                    CacheConfig config)
   {
-    _leaseOwner = -1;
-
-    _leaseExpireTime = 0;
-  }
-
-  public int getFlags()
-  {
-    return _flags;
-  }
-
-  /**
-   * Returns the expire timeout for this entry.
-   */
-  public long getExpireTimeout()
-  {
-    return _expireTimeout;
-  }
-
-  /**
-   * Returns the idle timeout for this entry.
-   */
-  @Override
-  public long getIdleTimeout()
-  {
-    return _idleTimeout;
-  }
-
-  /**
-   * Returns the idle window to avoid too many updates
-   */
-  public long getIdleWindow()
-  {
-    long window = _idleTimeout / 4;
-    long windowMax = 15 * 60 * 1000L;
-
-    if (window < windowMax)
-      return window;
-    else
-      return windowMax;
-  }
-
-  /**
-   * Returns the read timeout for a local cached entry
-   */
-  public long getLocalReadTimeout()
-  {
-    return _localReadTimeout;
-  }
-
-  /**
-   * Returns the timeout for a lease of the cache entry
-   */
-  @Override
-  public long getLeaseTimeout()
-  {
-    return _leaseTimeout;
-  }
-
-  public long getVersion()
-  {
-    return _version;
-  }
-
-  /**
-   * Sets the deserialized value for the entry.
-   */
-  public final void setObjectValue(Object value)
-  {
-    if (value != null && (_valueRef == null || _valueRef.get() == null))
-      _valueRef = new SoftReference<Object>(value);
-  }
-
-  /**
-   * Returns true if the value is null
-   */
-  @Override
-  public boolean isValueNull()
-  {
-    return _valueHash == null;
-  }
-
-  /**
-   * Returns the deserialized value for the entry.
-   */
-  @Override
-  public final Object getValue()
-  {
-    SoftReference<Object> valueRef = _valueRef;
-
-    if (valueRef != null)
-    {
-      _hits++;
-      return valueRef.get();
-    }
-    else
-      return null;
-  }
-
-  public byte []getValueHash()
-  {
-    if (_valueHash != null)
-      return _valueHash.getHash();
-    else
-      return null;
+    _valueHash = valueHash;
+    _valueLength = valueLength;
+    
+    _version = version;
+    
+    _cacheHash = HashKey.getHash(config.getCacheKey());
+    
+    _flags = config.getFlags();
+    
+    _expireTimeout = config.getExpireTimeout();
+    _idleTimeout = config.getIdleTimeout();
   }
   
-  public Blob getBlob()
+  public MnodeValue(HashKey valueHash,
+                    long valueLength,
+                    long version,
+                    CacheConfig config)
   {
-    return _blob;
+    this(HashKey.getHash(valueHash),
+         valueLength,
+         version,
+         config);
   }
   
-  public void setBlob(Blob blob)
+  /*
+  public MnodeValue(MnodeEntry mnodeValue)
   {
-    _blob = blob;
+    _valueHash = mnodeValue.getValueHash();
+    _valueLength = mnodeValue.getValueLength();
   }
-
-  @Override
-  public HashKey getValueHashKey()
+  */
+  
+  public final byte []getValueHash()
   {
     return _valueHash;
   }
   
-  @Override
-  public long getValueLength()
+  public final long getValueLength()
   {
     return _valueLength;
   }
-
-  public byte []getCacheHash()
+  
+  public final long getVersion()
   {
-    if (_cacheHash != null)
-      return _cacheHash.getHash();
-    else
-      return null;
+    return _version;
   }
-
-  public HashKey getCacheHashKey()
+  
+  public final byte []getCacheHash()
   {
     return _cacheHash;
   }
-
-  /**
-   * Returns true if the server version (startup count) matches
-   * the database.
-   */
-  public boolean isServerVersionValid()
+  
+  public final int getFlags()
   {
-    return _isServerVersionValid;
-  }
-
-  /**
-   * If the null value is due to a missing item in the database.
-   */
-  public boolean isImplicitNull()
-  {
-    return _isImplicitNull;
+    return _flags;
   }
   
-  public boolean isUnloadedValue()
+  public final long getExpireTimeout()
   {
-    return this == NULL;
-  }
-
-  /**
-   * Compares values
-   */
-  public int compareTo(MnodeValue mnode)
-  {
-    if (getVersion() < mnode.getVersion())
-      return -1;
-    else if (mnode.getVersion() < getVersion())
-      return 1;
-    else if (getValueHashKey() == null)
-      return -1;
-    else
-      return getValueHashKey().compareTo(mnode.getValueHashKey());
+    return _expireTimeout;
   }
   
-  //
-  // statistics
-  //
-  
-  @Override
-  public int getLoadCount()
+  public final long getIdleTimeout()
   {
-    return 0;
-  }
-
-  //
-  // jcache stubs
-  //
-
-  /**
-   * Implements a method required by the interface that should never be
-   * called>
-   */
-  @Override
-  public Object getKey()
-  {
-    throw new UnsupportedOperationException(getClass().getName());
-  }
-  
-   /**
-   * Implements a method required by the interface that should never be
-   * called>
-   */
-  public Object setValue(Object value)
-  {
-    throw new UnsupportedOperationException(getClass().getName());
-  }
-
-  public long getCreationTime()
-  {
-    throw new UnsupportedOperationException(getClass().getName());
-  }
-  
-  @Override
-  public boolean isValid()
-  {
-    return (! isEntryExpired(Alarm.getCurrentTime()));
-  }
-
-  /*
-  @Override
-  public long getCost()
-  {
-    throw new UnsupportedOperationException(getClass().getName());
-  }
-  */
-  
-  public int getHits()
-  {
-    return _hits;
-  }
-  
-  private static HashKey createAnyKey(int len)
-  {
-    byte []value = new byte[len];
-    
-    for (int i = 0; i < len; i++) {
-      value[i] = (byte) 0xff;
-    }
-    
-    return new HashKey(value); 
+    return _idleTimeout;
   }
 
   @Override
   public String toString()
   {
     return (getClass().getSimpleName()
-            + "[value=" + _valueHash
-            + ",flags=0x" + Integer.toHexString(_flags)
-            + ",version=" + _version
-            + ",lease=" + _leaseOwner
+            + "["
+            + ",value=" + Hex.toHex(getValueHash(), 0, 4)
+            + ",flags=" + Integer.toHexString(getFlags())
+            + ",version=" + Long.toHexString(getVersion())
             + "]");
   }
 }

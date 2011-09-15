@@ -30,48 +30,35 @@
 package com.caucho.server.distcache;
 
 import com.caucho.util.HashKey;
+import com.caucho.util.Hex;
 
 /**
- * Full data from the dat map
+ * Full data from the data map
  */
-public final class CacheData {
+@SuppressWarnings("serial")
+public final class CacheData extends MnodeValue {
   private final HashKey _key;
-  private final HashKey _value;
-  private final long _valueLength;
-  private final HashKey _cacheKey;
-  private final int _flags;
-  private final long _version;
+
   private final long _accessTime;
-  private final long _expireTimeout;
-  private final long _idleTimeout;
-  private final long _leaseTimeout;
-  private final long _localReadTimeout;
 
   public CacheData(HashKey key,
                    HashKey value,
                    long valueLength,
+                   long version,
                    HashKey cacheKey,
                    int flags,
-                   long version,
                    long accessTime,
                    long expireTimeout,
-                   long idleTimeout,
-                   long leaseTimeout,
-                   long localReadTimeout)
+                   long idleTimeout)
   {
+    super(HashKey.getHash(value), valueLength, version,
+          HashKey.getHash(cacheKey),
+          flags,
+          expireTimeout, idleTimeout);
+    
     _key = key;
-    _value = value;
-    _valueLength = valueLength;
-    _cacheKey = cacheKey;
-    _flags = flags;
-    _version = version;
     
     _accessTime = accessTime;
-
-    _expireTimeout = expireTimeout;
-    _idleTimeout = idleTimeout;
-    _leaseTimeout = leaseTimeout;
-    _localReadTimeout = localReadTimeout;
   }
 
   public HashKey getKey()
@@ -79,63 +66,8 @@ public final class CacheData {
     return _key;
   }
 
-  public HashKey getValue()
-  {
-    return _value;
-  }
-  
-  public long getValueLength()
-  {
-    return _valueLength;
-  }
-
-  public HashKey getCacheKey()
-  {
-    return _cacheKey;
-  }
-
-  public int getFlags()
-  {
-    return _flags;
-  }
-
-  public long getVersion()
-  {
-    return _version;
-  }
-
   public long getAccessTime()
   {
     return _accessTime;
-  }
-
-  public long getExpireTimeout()
-  {
-    return _expireTimeout;
-  }
-
-  public long getIdleTimeout()
-  {
-    return _idleTimeout;
-  }
-
-  public long getLeaseTimeout()
-  {
-    return _leaseTimeout;
-  }
-
-  public long getLocalReadTimeout()
-  {
-    return _localReadTimeout;
-  }
-
-  public String toString()
-  {
-    return (getClass().getSimpleName()
-            + "[key=" + _key
-            + ",value=" + _value
-            + ",flags=" + Integer.toHexString(_flags)
-            + ",version=" + _version
-            + "]");
   }
 }

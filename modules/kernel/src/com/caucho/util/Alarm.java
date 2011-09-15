@@ -218,7 +218,11 @@ public class Alarm implements ThreadTask, ClassLoaderListener {
         return System.currentTimeMillis();
       
       if (_isSlowTime) {
-        return System.currentTimeMillis();
+        _isSlowTime = false;
+        _currentTime = System.currentTimeMillis();
+        _isCurrentTimeUsed = true;
+        
+        LockSupport.unpark(_alarmThread);
       }
       else {
         _isCurrentTimeUsed = true;
@@ -293,6 +297,10 @@ public class Alarm implements ThreadTask, ClassLoaderListener {
     return _wakeTime;
   }
   
+  public void setWakeTime(long wakeTime)
+  {
+    _wakeTime = wakeTime;
+  }
   boolean setWakeTime(long prevWakeTime, long wakeTime)
   {
     return _wakeTimeUpdater.compareAndSet(this, prevWakeTime, wakeTime);
@@ -620,20 +628,27 @@ public class Alarm implements ThreadTask, ClassLoaderListener {
           _isCurrentTimeUsed = false;
           
           if (isCurrentTimeUsed) {
+            idleCount = 0;
             _isSlowTime = false;
           }
           else {
             idleCount++;
 
-            if (idleCount == 10) {
+            if (idleCount >= 10) {
               _isSlowTime = true;
             }
           }
 
-          long sleepTime = _isSlowTime ? 1000L : 5L;
+          if (_isSlowTime) {
+            long sleepTime = 1000L;
               
-          LockSupport.parkNanos(sleepTime * 1000000L);
+            LockSupport.parkNanos(sleepTime * 1000000L);
+          }
+          else {
+            Thread.sleep(20);
+          }
         } catch (Throwable e) {
+          e.printStackTrace();
         }
       }
     }
@@ -662,9 +677,7 @@ public class Alarm implements ThreadTask, ClassLoaderListener {
       while (true) {
         long now = getCurrentTime();
         
-        _clock.extractAlarm(now, false);
-        
-        long next = _clock.getNextAlarmTime();
+        long next = _clock.extractAlarm(now, false);
         
         // long next = _heap.nextAlarmTime();
         // #3548 - getCurrentTime for consistency

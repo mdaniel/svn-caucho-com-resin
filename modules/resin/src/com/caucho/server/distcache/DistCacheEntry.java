@@ -52,8 +52,8 @@ abstract public class DistCacheEntry implements ExtCacheEntry {
 
   private final AtomicBoolean _isReadUpdate = new AtomicBoolean();
 
-  private final AtomicReference<MnodeValue> _mnodeValue
-    = new AtomicReference<MnodeValue>(MnodeValue.NULL);
+  private final AtomicReference<MnodeEntry> _mnodeValue
+    = new AtomicReference<MnodeEntry>(MnodeEntry.NULL);
 
   public DistCacheEntry(Object key,
                         HashKey keyHash,
@@ -98,7 +98,7 @@ abstract public class DistCacheEntry implements ExtCacheEntry {
   @Override
   public Object getValue()
   {
-    return getMnodeValue().getValue();
+    return getMnodeEntry().getValue();
   }
 
   /**
@@ -107,7 +107,7 @@ abstract public class DistCacheEntry implements ExtCacheEntry {
   @Override
   public boolean isValueNull()
   {
-    return getMnodeValue().isValueNull();
+    return getMnodeEntry().isValueNull();
   }
 
   /**
@@ -115,7 +115,7 @@ abstract public class DistCacheEntry implements ExtCacheEntry {
    */
   public final HashKey getCacheHash()
   {
-    return getMnodeValue().getCacheHashKey();
+    return getMnodeEntry().getCacheHashKey();
   }
 
   /**
@@ -129,7 +129,7 @@ abstract public class DistCacheEntry implements ExtCacheEntry {
   /**
    * Returns the value section of the entry.
    */
-  public final MnodeValue getMnodeValue()
+  public final MnodeEntry getMnodeEntry()
   {
     return _mnodeValue.get();
   }
@@ -139,7 +139,7 @@ abstract public class DistCacheEntry implements ExtCacheEntry {
    */
   public Object peek()
   {
-    return getMnodeValue().getValue();
+    return getMnodeEntry().getValue();
   }
 
   /**
@@ -167,9 +167,9 @@ abstract public class DistCacheEntry implements ExtCacheEntry {
   /**
    * Returns the current value.
    */
-  public MnodeValue getMnodeValue(CacheConfig config)
+  public MnodeEntry getMnodeValue(CacheConfig config)
   {
-    return getMnodeValue();
+    return getMnodeEntry();
   }
   
   /**
@@ -233,8 +233,8 @@ abstract public class DistCacheEntry implements ExtCacheEntry {
   /**
    * Sets the current value.
    */
-  public final boolean compareAndSet(MnodeValue oldMnodeValue,
-                                     MnodeValue mnodeValue)
+  public final boolean compareAndSet(MnodeEntry oldMnodeValue,
+                                     MnodeEntry mnodeValue)
   {
     return _mnodeValue.compareAndSet(oldMnodeValue, mnodeValue);
   }
@@ -242,41 +242,41 @@ abstract public class DistCacheEntry implements ExtCacheEntry {
   @Override
   public HashKey getValueHashKey()
   {
-    return getMnodeValue().getValueHashKey();
+    return getMnodeEntry().getValueHashKey();
   }
 
   public byte []getValueHashArray()
   {
-    return getMnodeValue().getValueHash();
+    return getMnodeEntry().getValueHash();
   }
 
   @Override
   public long getValueLength()
   {
-    return getMnodeValue().getValueLength();
+    return getMnodeEntry().getValueLength();
   }
 
   @Override
   public long getIdleTimeout()
   {
-    return getMnodeValue().getIdleTimeout();
+    return getMnodeEntry().getIdleTimeout();
   }
 
   @Override
   public long getLeaseTimeout()
   {
-    return getMnodeValue().getLeaseTimeout();
+    return getMnodeEntry().getLeaseTimeout();
   }
 
   @Override
   public int getLeaseOwner()
   {
-    return getMnodeValue().getLeaseOwner();
+    return getMnodeEntry().getLeaseOwner();
   }
 
   public void clearLease()
   {
-    MnodeValue mnodeValue = getMnodeValue();
+    MnodeEntry mnodeValue = getMnodeEntry();
 
     if (mnodeValue != null)
       mnodeValue.clearLease();
@@ -289,43 +289,43 @@ abstract public class DistCacheEntry implements ExtCacheEntry {
 
   public long getCreationTime()
   {
-    return getMnodeValue().getCreationTime();
+    return getMnodeEntry().getCreationTime();
   }
 
   public long getExpirationTime()
   {
-    return getMnodeValue().getExpirationTime();
+    return getMnodeEntry().getExpirationTime();
   }
 
   public int getHits()
   {
-    return getMnodeValue().getHits();
+    return getMnodeEntry().getHits();
   }
 
   public long getLastAccessTime()
   {
-    return getMnodeValue().getLastAccessTime();
+    return getMnodeEntry().getLastAccessTime();
   }
 
   public long getLastUpdateTime()
   {
-    return getMnodeValue().getLastUpdateTime();
+    return getMnodeEntry().getLastUpdateTime();
   }
 
   public long getVersion()
   {
-    return getMnodeValue().getVersion();
+    return getMnodeEntry().getVersion();
   }
 
   public boolean isValid()
   {
-    return getMnodeValue().isValid();
+    return getMnodeEntry().isValid();
   }
 
 
   public Object setValue(Object value)
   {
-    return getMnodeValue().setValue(value);
+    return getMnodeEntry().setValue(value);
   }
   
   //

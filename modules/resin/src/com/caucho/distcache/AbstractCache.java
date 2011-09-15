@@ -68,7 +68,7 @@ import com.caucho.server.distcache.DataStore;
 import com.caucho.server.distcache.DistCacheEntry;
 import com.caucho.server.distcache.DistributedCacheManager;
 import com.caucho.server.distcache.MnodeStore;
-import com.caucho.server.distcache.MnodeValue;
+import com.caucho.server.distcache.MnodeEntry;
 import com.caucho.util.HashKey;
 import com.caucho.util.L10N;
 import com.caucho.util.LruCache;
@@ -550,7 +550,7 @@ public class AbstractCache
   @Override
   public ExtCacheEntry peekExtCacheEntry(Object key)
   {
-    return getDistCacheEntry(key).getMnodeValue();
+    return getDistCacheEntry(key).getMnodeEntry();
   }
   
   public ExtCacheEntry getStatCacheEntry(Object key)
@@ -663,7 +663,7 @@ public class AbstractCache
   @Override
   public boolean putIfAbsent(Object key, Object value) throws CacheException
   {
-    HashKey NULL = MnodeValue.NULL_KEY;
+    HashKey NULL = MnodeEntry.NULL_KEY;
     
     HashKey result
       = getDistCacheEntry(key).compareAndPut(NULL, value, _config);
@@ -689,7 +689,7 @@ public class AbstractCache
   {
     DistCacheEntry entry = getDistCacheEntry(key);
     
-    HashKey oldHash = MnodeValue.ANY_KEY;
+    HashKey oldHash = MnodeEntry.ANY_KEY;
     
     HashKey result = entry.compareAndPut(oldHash, value, _config);
     
@@ -701,7 +701,7 @@ public class AbstractCache
   {
     DistCacheEntry entry = getDistCacheEntry(key);
     
-    HashKey oldHash = MnodeValue.ANY_KEY;
+    HashKey oldHash = MnodeEntry.ANY_KEY;
     
     HashKey result = entry.compareAndPut(oldHash, value, _config);
     

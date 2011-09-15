@@ -59,47 +59,30 @@ public class FileCacheManager
    */
   @Override
   protected HashKey getAndPut(DistCacheEntry entry,
-                              HashKey valueHash,
-                              long valueLength,
+                              MnodeUpdate mnodeUpdate,
                               Object value,
-                              HashKey cacheHash,
-                              int flags,
-                              long expireTimeout,
-                              long idleTimeout,
                               long leaseTimeout,
-                              long localReadTimeout,
                               int leaseOwner)
   {
     return getAndPutLocal(entry,
-                          valueHash, valueLength, 
+                          mnodeUpdate,
                           value,
-                          cacheHash,
-                          flags,
-                          expireTimeout,
-                          idleTimeout,
                           leaseTimeout,
-                          localReadTimeout,
                           leaseOwner);
   }
 
   @Override
   public HashKey compareAndPut(FileCacheEntry entry,
                                HashKey testValue,
-                               HashKey valueHash,
-                               long valueLength,
+                               MnodeUpdate mnodeUpdate,
                                Object value,
                                CacheConfig config)
   {
     int leaseOwner = -1;
     
     HashKey oldValueKey
-      = compareAndPutLocal(entry, testValue, valueHash, valueLength, value,
-                           config.getCacheKey(),
-                           config.getFlags(),
-                           config.getExpireTimeout(),
-                           config.getIdleTimeout(),
+      = compareAndPutLocal(entry, testValue, mnodeUpdate, value,
                            config.getLeaseTimeout(),
-                           config.getLocalReadTimeout(),
                            leaseOwner);
     
     return oldValueKey;

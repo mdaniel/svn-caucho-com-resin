@@ -65,6 +65,7 @@ public class BlobImpl implements java.sql.Blob {
   /**
    * Returns the blob as a stream.
    */
+  @Override
   public InputStream getBinaryStream()
     throws SQLException
   {

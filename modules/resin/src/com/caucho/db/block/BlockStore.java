@@ -987,6 +987,42 @@ public class BlockStore {
   }
 
   /**
+   * Reads a block to an output stream.
+   *
+   * @param blockAddress the address of the block
+   * @param blockOffset the offset inside the block to start reading
+   * @param os the result output stream
+   * @param length the number of bytes to read
+   *
+   * @return the number of bytes read
+   */
+  public void readBlockNoLock(long blockId, int blockOffset,
+                              OutputStream os, int length)
+    throws IOException
+  {
+    if (blockId <= 0) {
+      log.warning(this + " illegal block read with block-id=0");
+      return;
+    }
+
+    if (BLOCK_SIZE - blockOffset < length) {
+      // server/13df
+      throw new IllegalArgumentException(L.l("read offset {0} length {1} too long",
+                                             blockOffset, length));
+    }
+
+    Block block = readBlock(blockId);
+
+    try {
+      byte []blockBuffer = block.getBuffer();
+
+      os.write(blockBuffer, blockOffset, length);
+    } finally {
+      block.free();
+    }
+  }
+
+  /**
    * Reads a block.
    *
    * @param blockAddress the address of the block
@@ -1279,6 +1315,43 @@ public class BlockStore {
       }
     } catch (InterruptedException e) {
       throw new IllegalStateException(e);
+    } finally {
+      block.free();
+    }
+  }
+
+  /**
+   * Reads a fragment.
+   *
+   * @param fragmentAddress the address of the fragment
+   * @param fragmentOffset the offset inside the fragment to start reading
+   * @param buffer the result buffer
+   * @param offset offset into the result buffer
+   * @param length the number of bytes to read
+   *
+   * @return the number of bytes read
+   */
+  public int readMiniFragmentNoLock(long fragmentAddress,
+                                    int fragmentOffset,
+                                    int length,
+                                    OutputStream os)
+    throws IOException
+  {
+    if (MINI_FRAG_SIZE - fragmentOffset < length) {
+      throw new IllegalArgumentException(L.l("read offset {0} length {1} too long",
+                                             fragmentOffset, length));
+    }
+
+    Block block = readBlock(addressToBlockId(fragmentAddress));
+
+    try {
+      int blockOffset = getMiniFragmentOffset(fragmentAddress);
+
+      byte []blockBuffer = block.getBuffer();
+
+      os.write(blockBuffer, blockOffset + fragmentOffset, length);
+
+      return length;
     } finally {
       block.free();
     }

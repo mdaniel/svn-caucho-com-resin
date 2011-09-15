@@ -42,6 +42,7 @@ import com.caucho.db.table.Column.ColumnType;
 import com.caucho.sql.SQLExceptionWrapper;
 import com.caucho.util.CharBuffer;
 import com.caucho.util.FreeList;
+import com.caucho.util.Hex;
 import com.caucho.util.IntArray;
 import com.caucho.util.L10N;
 import com.caucho.util.QDate;

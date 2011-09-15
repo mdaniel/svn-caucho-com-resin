@@ -31,6 +31,7 @@ package com.caucho.db.blob;
 
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.OutputStream;
 
 import com.caucho.db.block.BlockStore;
 
@@ -84,6 +85,7 @@ public class BlobInputStream extends InputStream {
   /**
    * Reads a byte.
    */
+  @Override
   public int read()
     throws IOException
   {
@@ -101,6 +103,7 @@ public class BlobInputStream extends InputStream {
   /**
    * Reads a buffer.
    */
+  @Override
   public int read(byte []buf, int offset, int length)
     throws IOException
   {
@@ -112,6 +115,13 @@ public class BlobInputStream extends InputStream {
       _offset += sublen;
 
     return sublen;
+  }
+  
+  public int readToOutput(OutputStream os)
+    throws IOException
+  {
+    return Inode.writeToStream(_inode, _inodeOffset,
+                               _store, os, 0, Integer.MAX_VALUE / 2);
   }
 
   /**

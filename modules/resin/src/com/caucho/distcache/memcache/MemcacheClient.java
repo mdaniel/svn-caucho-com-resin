@@ -134,6 +134,12 @@ public class MemcacheClient implements Cache
       hIn.init(gis);
       
       Object value = hIn.readObject();
+
+      /*
+      _cb.clear();
+      is.readAll(_cb, (int) length);
+      Object value = _cb.toString();
+      */
       
       skipToEndOfLine(is);
       
@@ -335,7 +341,9 @@ public class MemcacheClient implements Cache
       WriteStream out = client.getOutputStream();
       ReadStream is = client.getInputStream();
       
-      TempStream ts = serialize(value);
+      //TempStream ts = serialize(value);
+      // long length = ts.getLength();
+      long length = ((String) value).length();
       
       out.print("set ");
       out.print(key);
@@ -346,12 +354,14 @@ public class MemcacheClient implements Cache
       long expTime = 0;
       out.print(expTime);
       out.print(" ");
-      out.print(ts.getLength());
+      // out.print(ts.getLength());
+      out.print(length);
       out.print("\r\n");
       
-      ts.writeToStream(out);
+      out.print(value);
+      // ts.writeToStream(out);
       
-      System.out.println("SET-LEN: " + ts.getLength());
+      System.out.println("SET-LEN: " + length);
       
       out.print("\r\n");
       out.flush();

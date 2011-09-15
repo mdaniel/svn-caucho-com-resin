@@ -65,6 +65,9 @@ public class BinaryKeyCompare extends KeyCompare {
   {
     StringBuilder sb = new StringBuilder();
     
+    sb.append(getClass().getSimpleName());
+    sb.append('[');
+    
     int keyLen = _length;
 
     for (int j = 0; j < keyLen; j++) {
@@ -83,6 +86,7 @@ public class BinaryKeyCompare extends KeyCompare {
       else
         sb.append((char) ('a' + d2 - 10));
     }
+    sb.append(']');
 
     return sb.toString();
   }

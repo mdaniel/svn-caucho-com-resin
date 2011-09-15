@@ -85,7 +85,7 @@ public class CacheDataBackingImpl implements CacheDataBacking {
    * Returns the local value from the database
    */
   @Override
-  public MnodeValue loadLocalEntryValue(HashKey key)
+  public MnodeEntry loadLocalEntryValue(HashKey key)
   {
     return _mnodeStore.load(key);
   }
@@ -94,24 +94,17 @@ public class CacheDataBackingImpl implements CacheDataBacking {
    * Sets a cache entry
    */
   @Override
-  public MnodeValue insertLocalValue(HashKey key, 
-                                     MnodeValue mnodeValue,
-                                     MnodeValue oldEntryValue,
-                                     long timeout)
+  public MnodeEntry insertLocalValue(HashKey key, 
+                                     MnodeEntry mnodeUpdate,
+                                     MnodeEntry oldEntryValue)
   {
+    // MnodeUpdate mnodeUpdate = new MnodeUpdate(mnodeValue);
+    
     if (oldEntryValue == null
         || oldEntryValue.isImplicitNull()
-        || oldEntryValue == MnodeValue.NULL) {
-      if (_mnodeStore.insert(key, mnodeValue.getValueHashKey(),
-                             mnodeValue.getValueLength(),
-                             mnodeValue.getCacheHashKey(),
-                             mnodeValue.getFlags(),
-                             mnodeValue.getVersion(),
-                             mnodeValue.getExpireTimeout(),
-                             mnodeValue.getIdleTimeout(),
-                             mnodeValue.getLeaseTimeout(),
-                             mnodeValue.getLocalReadTimeout())) {
-        return mnodeValue;
+        || oldEntryValue == MnodeEntry.NULL) {
+      if (_mnodeStore.insert(key, mnodeUpdate)) {
+        return mnodeUpdate;
       } else {
         log.fine(this + " db insert failed due to timing conflict"
                  + "(key=" + key + ")");
@@ -119,21 +112,11 @@ public class CacheDataBackingImpl implements CacheDataBacking {
         return oldEntryValue;
       }
     } else {
-      if (_mnodeStore.updateSave(key, mnodeValue.getValueHashKey(),
-                                 mnodeValue.getValueLength(),
-                                 mnodeValue.getVersion(), timeout)) {
-        return mnodeValue;
+      if (_mnodeStore.updateSave(key.getHash(), mnodeUpdate)) {
+        return mnodeUpdate;
       }
-      else if (_mnodeStore.insert(key, mnodeValue.getValueHashKey(),
-                                  mnodeValue.getValueLength(),
-                                  mnodeValue.getCacheHashKey(),
-                                  mnodeValue.getFlags(),
-                                  mnodeValue.getVersion(),
-                                  mnodeValue.getExpireTimeout(),
-                                  mnodeValue.getIdleTimeout(),
-                                  mnodeValue.getLeaseTimeout(),
-                                  mnodeValue.getLocalReadTimeout())) {
-        return mnodeValue;
+      else if (_mnodeStore.insert(key, mnodeUpdate)) {
+        return mnodeUpdate;
       }
       else {
         log.fine(this + " db update failed due to timing conflict"
@@ -144,51 +127,31 @@ public class CacheDataBackingImpl implements CacheDataBacking {
     }
   }
 
-  public boolean putLocalValue(MnodeValue mnodeValue,
+  @Override
+  public boolean putLocalValue(MnodeEntry mnodeValue,
                                HashKey key,
-                               MnodeValue oldEntryValue,
-                               long version,
-                               HashKey valueHash,
-                               long valueLength,
-                               Object value,
-                               HashKey cacheHash,
-                               int flags,
-                               long expireTimeout,
-                               long idleTimeout,
-                               long leaseTimeout,
-                               long localReadTimeout,
-                               int leaseOwner)
+                               MnodeEntry oldEntryValue,
+                               MnodeUpdate mnodeUpdate)
   {
     if (oldEntryValue == null
         || oldEntryValue.isImplicitNull()
-        || oldEntryValue == MnodeValue.NULL) {
-      if (_mnodeStore.insert(key, valueHash, valueLength, 
-                             cacheHash,
-                             flags, version,
-                             expireTimeout,
-                             idleTimeout,
-                             leaseTimeout,
-                             localReadTimeout)) {
+        || oldEntryValue == MnodeEntry.NULL) {
+      if (_mnodeStore.insert(key, mnodeUpdate)) {
         return true;
       } else {
         log.fine(this + " db insert failed due to timing conflict"
-                 + "(key=" + key + ", version=" + version + ")");
+                 + "(key=" + key + ", version=" + mnodeUpdate.getVersion() + ")");
       }
     } else {
-      if (_mnodeStore.updateSave(key, valueHash, valueLength, version, idleTimeout)) {
+      if (_mnodeStore.updateSave(key.getHash(), mnodeUpdate)) {
         return true;
       }
-      else if (_mnodeStore.insert(key, valueHash, valueLength, cacheHash,
-                                  flags, version,
-                                  expireTimeout,
-                                  idleTimeout,
-                                  leaseTimeout,
-                                  localReadTimeout)) {
+      else if (_mnodeStore.insert(key, mnodeUpdate)) {
         return true;
       }
       else {
         log.fine(this + " db update failed due to timing conflict"
-                 + "(key=" + key + ", version=" + version + ")");
+                 + "(key=" + key + ", version=" + mnodeUpdate.getVersion() + ")");
       }
     }
 
@@ -196,9 +159,9 @@ public class CacheDataBackingImpl implements CacheDataBacking {
   }
   
   @Override
-  public  MnodeValue saveLocalUpdateTime(HashKey keyHash,
-                                         MnodeValue mnodeValue,
-                                         MnodeValue oldMnodeValue)
+  public  MnodeEntry saveLocalUpdateTime(HashKey keyHash,
+                                         MnodeEntry mnodeValue,
+                                         MnodeEntry oldMnodeValue)
   {
     if (_mnodeStore.updateUpdateTime(keyHash,
                                      mnodeValue.getVersion(),
@@ -280,15 +243,6 @@ public class CacheDataBackingImpl implements CacheDataBacking {
     return _mnodeStore.getUpdates(cacheKey, accessTime, offset);
   }
 
-  /**
-   * Returns a set of entries since an access time.
-   */
-  @Override
-  public ArrayList<CacheData> getGlobalUpdates(long accessTime, int offset)
-  {
-    return _mnodeStore.getGlobalUpdates(accessTime, offset);
-  }
-  
   public void start()
   {
     try {

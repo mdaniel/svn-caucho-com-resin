@@ -144,9 +144,11 @@ public class QuercusTimer
             }
           }
 
-          long sleepTime = _isSlowTime ? 1000L : 5L;
+          // long sleepTime = _isSlowTime ? 1000L : 5L;
+          //long sleepTime = _isSlowTime ? 1000L : 25L;
+          long sleepTime = 100L;
               
-          LockSupport.parkNanos(sleepTime * 1000000L);
+          Thread.sleep(sleepTime);
         } catch (Throwable e) {
         }
       }

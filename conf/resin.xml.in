@@ -104,7 +104,7 @@
 
       <!-- generate a weekly pdf report -->
       <health:PdfReport>
-        <path>${resin.home}/doc/admin/pdf-gen.php</path>
+        <path>${resin.root}/doc/admin/pdf-gen.php</path>
         <report>Summary</report>
         <snapshot/>
         <!-- <profile-time>60s</profile-time> -->

@@ -343,6 +343,7 @@ public class MemcacheConnection implements ProtocolConnection
 
       gOut.init(out);
       cache.get(key, gOut);
+
       out.print("\r\n");
       
       out.print("END\r\n");

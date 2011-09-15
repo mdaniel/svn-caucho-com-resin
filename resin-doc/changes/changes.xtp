@@ -12,6 +12,8 @@
 
 <s2 title="4.0.23 - snapshot">
 <ul>
+<li>jni: mmap file loading issue in win32 - disabled but shouldn't be throwing exception (#4758, rep by Mathias Langerwall)</li>
+<li>health: PdfReport in resin.xml needs to use resin.root, not resin.home for pdf-gen.php (#4760)</li>
 <li>resin: fixed bug preventing setup.exe and resin.exe support -java-home (#4763, rep by Brian Deng)</li>
 <li>cli/watchdog: stop and kill with no -server should stop the unique server (#4732)</li>
 <li>logging: log-handler el resolution fix (#4753)</li>

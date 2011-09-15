@@ -30,20 +30,22 @@
 package com.caucho.env.distcache;
 
 import com.caucho.server.distcache.CacheConfig;
-import com.caucho.server.distcache.MnodeValue;
+import com.caucho.server.distcache.MnodeUpdate;
+import com.caucho.server.distcache.MnodeEntry;
 import com.caucho.util.HashKey;
 
 /**
  * The local cache repository.
  */
 public interface CacheClusterBacking {
-  public <E> MnodeValue loadClusterValue(E entry, CacheConfig config);
+  public <E> MnodeEntry loadClusterValue(E entry, CacheConfig config);
   
-  public void putCluster(HashKey key, HashKey value, HashKey cacheKey,
-                         MnodeValue mnodeValue);
+  public void putCluster(HashKey key, 
+                         MnodeUpdate mnodeUpdate,
+                         MnodeEntry mnodeValue);
 
   public void removeCluster(HashKey key,
-                            HashKey cacheKey,
-                            MnodeValue mnodeValue);
+                            MnodeUpdate mnodeUpdate,
+                            MnodeEntry mnodeValue);
 
 }

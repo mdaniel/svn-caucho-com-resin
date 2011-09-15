@@ -54,6 +54,9 @@ public class KeyCompare {
   public String toString(byte []buffer, int offset, int length)
   {
     StringBuilder sb = new StringBuilder();
+    
+    sb.append(getClass().getSimpleName());
+    sb.append('[');
 
     for (int j = 0; j < length; j++) {
       int ch = buffer[offset + j];
@@ -63,6 +66,8 @@ public class KeyCompare {
       
       sb.append((char) ch);
     }
+    
+    sb.append(']');
 
     return sb.toString();
   }

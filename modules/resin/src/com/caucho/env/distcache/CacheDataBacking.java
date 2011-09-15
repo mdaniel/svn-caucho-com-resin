@@ -35,7 +35,8 @@ import java.util.ArrayList;
 import com.caucho.server.distcache.CacheData;
 import com.caucho.server.distcache.DataStore;
 import com.caucho.server.distcache.MnodeStore;
-import com.caucho.server.distcache.MnodeValue;
+import com.caucho.server.distcache.MnodeUpdate;
+import com.caucho.server.distcache.MnodeEntry;
 import com.caucho.util.HashKey;
 import com.caucho.vfs.StreamSource;
 import com.caucho.vfs.WriteStream;
@@ -53,34 +54,23 @@ public interface CacheDataBacking {
   
   public void start();
   
-  public MnodeValue loadLocalEntryValue(HashKey key);
+  public MnodeEntry loadLocalEntryValue(HashKey key);
   
-  public MnodeValue insertLocalValue(HashKey key, 
-                                     MnodeValue mnodeValue,
-                                     MnodeValue oldEntryValue,
-                                     long timeout);
+  public MnodeEntry insertLocalValue(HashKey key, 
+                                     MnodeEntry mnodeValue,
+                                     MnodeEntry oldMnodeValue);
   
-  public MnodeValue saveLocalUpdateTime(HashKey keyHash,
-                                        MnodeValue mnodeValue,
-                                        MnodeValue oldMnodeValue);
+  public MnodeEntry saveLocalUpdateTime(HashKey keyHash,
+                                        MnodeEntry mnodeValue,
+                                        MnodeEntry oldMnodeValue);
 
   /**
    * Sets a cache entry
    */
-  public boolean putLocalValue(MnodeValue mnodeValue,
+  public boolean putLocalValue(MnodeEntry mnodeValue,
                                HashKey key,
-                               MnodeValue oldEntryValue,
-                               long version,
-                               HashKey valueHash,
-                               long valueLength,
-                               Object value,
-                               HashKey cacheHash,
-                               int flags,
-                               long expireTimeout,
-                               long idleTimeout,
-                               long leaseTimeout,
-                               long localReadTimeout,
-                               int leaseOwner);
+                               MnodeEntry oldEntryValue,
+                               MnodeUpdate mnodeUpdate);
   
   public boolean loadData(HashKey valueHash, WriteStream os)
     throws IOException;
@@ -113,11 +103,6 @@ public interface CacheDataBacking {
   public ArrayList<CacheData> getUpdates(HashKey cacheKey,
                                          long accessTime, 
                                          int offset);
-
-  /**
-   * Returns a set of entries since an access time.
-   */
-  public ArrayList<CacheData> getGlobalUpdates(long accessTime, int offset);
 
   /**
    * Close the backing.

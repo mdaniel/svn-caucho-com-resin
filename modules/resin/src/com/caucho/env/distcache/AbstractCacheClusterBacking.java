@@ -30,7 +30,8 @@
 package com.caucho.env.distcache;
 
 import com.caucho.server.distcache.CacheConfig;
-import com.caucho.server.distcache.MnodeValue;
+import com.caucho.server.distcache.MnodeUpdate;
+import com.caucho.server.distcache.MnodeEntry;
 import com.caucho.util.HashKey;
 
 /**
@@ -38,21 +39,22 @@ import com.caucho.util.HashKey;
  */
 public class AbstractCacheClusterBacking implements CacheClusterBacking {
   @Override
-  public <E> MnodeValue loadClusterValue(E entry, CacheConfig config)
+  public <E> MnodeEntry loadClusterValue(E entry, CacheConfig config)
   {
     return null;
   }
   
   @Override
-  public void putCluster(HashKey key, HashKey value, HashKey cacheKey,
-                         MnodeValue mnodeValue)
+  public void putCluster(HashKey key, 
+                         MnodeUpdate mnodeUpdate,
+                         MnodeEntry mnodeValue)
   {
   }
 
   @Override
   public void removeCluster(HashKey key,
-                            HashKey cacheKey,
-                            MnodeValue mnodeValue)
+                            MnodeUpdate mnodeUpdate,
+                            MnodeEntry mnodeValue)
   {
   }
 }

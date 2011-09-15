@@ -192,8 +192,8 @@ public class Inode {
   /**
    * Writes the inode value to a stream.
    */
-  public void writeToStream(OutputStreamWithBuffer os,
-                            long offset, long length)
+  public void writeToStreamOld(OutputStreamWithBuffer os,
+                               long offset, long length)
     throws IOException
   {
     byte []buffer = os.getBuffer();
@@ -225,6 +225,55 @@ public class Inode {
     }
 
     os.setBufferOffset(writeOffset);
+  }
+
+  /**
+   * Writes the inode value to a stream.
+   */
+  public void writeToStream(OutputStream os,
+                            long offset, long length)
+    throws IOException
+  {
+    while (length > 0) {
+      int sublen = (int) length;
+
+      int len = readToOutput(_bytes, 0, _store,
+                             offset, sublen, os);
+      
+      if (len <= 0)
+        break;
+
+      offset += len;
+      length -= len;
+    }
+  }
+
+  /**
+   * Writes the inode value to a stream.
+   */
+  public static int writeToStream(byte []inode, int inodeOffset,
+                                  BlockStore store,
+                                  OutputStream os,
+                                  long offset, long length)
+    throws IOException
+  {
+    int readLength = 0;
+    
+    while (length > 0) {
+      int sublen = (int) length;
+
+      int len = readToOutput(inode, inodeOffset, store,
+                             offset, sublen, os);
+      
+      if (len <= 0)
+        return readLength;
+
+      offset += len;
+      length -= len;
+      readLength += len;
+    }
+    
+    return readLength;
   }
 
   /**
@@ -311,6 +360,63 @@ public class Inode {
         sublen = BLOCK_SIZE - offset;
 
       store.readBlock(addr, offset, buffer, bufferOffset, sublen);
+
+      return sublen;
+    }
+  }
+
+  /**
+   * Reads into an output stream.
+   *
+   * @param inode the inode buffer
+   * @param inodeOffset the offset of the inode data in the buffer
+   * @param store the owning store
+   * @param fileOffset the offset into the file to read
+   * @param buffer the buffer receiving the data
+   * @param bufferOffset the offset into the receiving buffer
+   * @param bufferLength the maximum number of bytes to read
+   *
+   * @return the number of bytes read
+   */
+  static int readToOutput(byte []inode, int inodeOffset,
+                          BlockStore store,
+                          long fileOffset,
+                          int sublen,
+                          OutputStream os)
+    throws IOException
+  {
+    long fileLength = readLong(inode, inodeOffset);
+
+    if (fileLength - fileOffset < sublen)
+      sublen = (int) (fileLength - fileOffset);
+    
+    if (sublen <= 0)
+      return -1;
+
+    if (fileLength <= INLINE_MAX) {
+      os.write(inode, inodeOffset + 8 + (int) fileOffset, sublen);
+
+      return sublen;
+    }
+    else if (fileLength <= MINI_FRAG_MAX) {
+      long fragAddr = readMiniFragAddr(inode, inodeOffset, store, fileOffset);
+      int fragOffset = (int) (fileOffset % MINI_FRAG_SIZE);
+
+      if (MINI_FRAG_SIZE - fragOffset < sublen)
+        sublen = MINI_FRAG_SIZE - fragOffset;
+
+      store.readMiniFragmentNoLock(fragAddr, fragOffset, sublen, os);
+
+      return sublen;
+    }
+    else {
+      long addr = readBlockAddr(inode, inodeOffset, store, fileOffset);
+      int offset = (int) (fileOffset % BLOCK_SIZE);
+
+      if (BLOCK_SIZE - offset < sublen)
+        sublen = BLOCK_SIZE - offset;
+
+      store.readBlockNoLock(addr, offset, os, sublen);
 
       return sublen;
     }

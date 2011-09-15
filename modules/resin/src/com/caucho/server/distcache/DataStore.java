@@ -673,8 +673,11 @@ public class DataStore {
       PreparedStatement pstmt = conn.prepareValidate();
 
       pstmt.executeUpdate();
-    } catch (SQLException e) {
-      log.log(Level.FINE, e.toString(), e);
+    } catch (Exception e) {
+      if (log.isLoggable(Level.FINE))
+        log.log(Level.FINE, e.toString(), e);
+      else
+        log.warning(this + " " + e);
     } finally {
       if (conn != null)
         conn.close();

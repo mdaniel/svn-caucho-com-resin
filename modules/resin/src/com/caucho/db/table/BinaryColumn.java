@@ -390,11 +390,12 @@ class BinaryColumn extends Column {
                      rowAddr,
                      false);
       } catch (SqlIndexAlreadyExistsException e) {
-        throw new SqlIndexAlreadyExistsException(L.l("StringColumn '{0}.{1}' unique index set failed for {2}\n{3}",
-                                          getTable().getName(),
-                                          getName(),
-                                          getDebugString(block, rowOffset),
-                                          e.toString()),
+        throw new SqlIndexAlreadyExistsException(L.l("{0} '{1}.{2}' unique index set failed for {3}\n{4}",
+                                                     getClass().getSimpleName(),
+                                                     getTable().getName(),
+                                                     getName(),
+                                                     getDebugString(block, rowOffset),
+                                                     e.toString()),
                                       e);
       }
     }
