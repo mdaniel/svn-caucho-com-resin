@@ -647,7 +647,7 @@ abstract public class AbstractCacheManager<E extends DistCacheEntry>
       return true;
     }
     
-    long newVersion = getNewVersion(mnodeValue);
+    long newVersion = version;
     
     MnodeUpdate mnodeUpdate = new MnodeUpdate(key, valueHash, valueLength,
                                               newVersion,
@@ -1227,7 +1227,8 @@ abstract public class AbstractCacheManager<E extends DistCacheEntry>
 
         // XXX: error?  since we have the value key, it should exist
 
-        return false;
+        // server/0180
+        // return false;
       }
 
       if (getDataBacking().loadData(valueKey, out)) {

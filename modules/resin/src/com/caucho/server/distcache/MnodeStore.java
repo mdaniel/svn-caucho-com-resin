@@ -40,6 +40,7 @@ import java.util.logging.Logger;
 
 import javax.sql.DataSource;
 
+import com.caucho.db.jdbc.DataSourceImpl;
 import com.caucho.util.Alarm;
 import com.caucho.util.AlarmListener;
 import com.caucho.util.FreeList;
@@ -62,6 +63,7 @@ public class MnodeStore implements AlarmListener {
   private final String _tableName;
 
   private DataSource _dataSource;
+  private boolean _isLocalDataSource;
 
   private String _loadQuery;
 
@@ -91,6 +93,9 @@ public class MnodeStore implements AlarmListener {
     throws Exception
   {
     _dataSource = dataSource;
+    
+    _isLocalDataSource = dataSource instanceof DataSourceImpl;
+    
     _serverName = serverName;
     _tableName = tableName;
 
@@ -859,7 +864,9 @@ public class MnodeStore implements AlarmListener {
 
     void close()
     {
-      if (_freeConn == null || ! _freeConn.freeCareful(this)) {
+      if (! _isLocalDataSource
+          || _freeConn == null
+          || ! _freeConn.freeCareful(this)) {
         try {
           _conn.close();
         } catch (SQLException e) {

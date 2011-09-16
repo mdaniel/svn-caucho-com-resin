@@ -296,8 +296,13 @@ public class CacheDataBackingImpl implements CacheDataBacking {
     MnodeStore mnodeStore = _mnodeStore;
     _mnodeStore = null;
     
+    DataStore dataStore = _dataStore;
+    _dataStore = null;
+    
     if (mnodeStore != null)
       mnodeStore.close();
-    // _dataStore.close();
+    
+    if (dataStore != null)
+      dataStore.destroy();
   }
 }

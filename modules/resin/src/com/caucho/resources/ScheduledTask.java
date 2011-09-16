@@ -213,7 +213,7 @@ public class ScheduledTask
       _timerTrigger.setFirstTime(Long.MAX_VALUE / 2);
       _trigger = _timerTrigger;
     }
-
+    
     Environment.addEnvironmentListener(this);
   }
 
@@ -259,6 +259,7 @@ public class ScheduledTask
 
     Thread thread = Thread.currentThread();
     ClassLoader oldLoader = thread.getContextClassLoader();
+    
     try {
       thread.setContextClassLoader(_loader);
       
@@ -271,7 +272,7 @@ public class ScheduledTask
       long nextTime = _trigger.nextTime(now + 500);
 
       if (_isActive) {
-        alarm.queue(nextTime - now);
+        alarm.queueAt(nextTime);
 
         if (log.isLoggable(Level.FINER))
           log.finer(this + " complete. Next event at " + new Date(nextTime));

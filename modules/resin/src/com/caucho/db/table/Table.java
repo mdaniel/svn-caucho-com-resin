@@ -1152,7 +1152,6 @@ public class Table extends BlockStore {
   @Override
   public void close()
   {
-
     _row.close();
 
     super.close();

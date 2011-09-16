@@ -48,7 +48,7 @@ public class AlarmClock {
     = Logger.getLogger(AlarmClock.class.getName());
   private static final int CLOCK_PERIOD = 60 * 1000;
   private static final int CLOCK_NEXT = 5 * 1000;
-  private static final int CLOCK_INTERVAL = 10;
+  private static final int CLOCK_INTERVAL = 1;
   
   private Alarm []_clockArray = new Alarm[CLOCK_PERIOD];
   
@@ -236,10 +236,10 @@ public class AlarmClock {
     
     int delta;
     
-    if (CLOCK_NEXT <= now - lastTime)
-      delta = CLOCK_NEXT / CLOCK_INTERVAL;
-    else
-      delta = (int) (now - lastTime) / CLOCK_INTERVAL;
+    delta = (int) (now - lastTime) / CLOCK_INTERVAL;
+    
+    if (CLOCK_PERIOD <= delta)
+      delta = CLOCK_PERIOD;
 
     Alarm alarm;
     

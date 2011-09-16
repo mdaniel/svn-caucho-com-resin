@@ -12,6 +12,7 @@
 
 <s2 title="4.0.23 - snapshot">
 <ul>
+<li>cloud: cross-cluster server topology updates (#4764, rep by Alan Wright)</li>
 <li>  embed: WebAppEmbed undeploy was not cleaning up fully (#4749, rep by A. Knutsen)</li>
 <li>jni: mmap file loading issue in win32 - disabled but shouldn't be throwing exception (#4758, rep by Mathias Langerwall)</li>
 <li>health: PdfReport in resin.xml needs to use resin.root, not resin.home for pdf-gen.php (#4760)</li>

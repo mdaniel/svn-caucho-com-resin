@@ -71,8 +71,9 @@ public class DataStore {
   private final String _mnodeTableName;
 
   // remove unused data after 15 minutes
+  // server/60i0
   // private long _expireTimeout = 60 * 60L * 1000L;
-  private long _expireTimeout = 15 * 60L * 1000L;
+  private long _expireTimeout = 60 * 60L * 1000L;
 
   private DataSource _dataSource;
 
@@ -287,7 +288,7 @@ public class DataStore {
       }
 
       if (log.isLoggable(Level.FINER))
-        log.finer(this + " no data loaded for " + id);
+        log.finer(this + " no blob data loaded for " + id);
     } catch (SQLException e) {
       log.log(Level.FINE, e.toString(), e);
     } finally {
@@ -337,7 +338,7 @@ public class DataStore {
       }
 
       if (log.isLoggable(Level.FINER))
-        log.finer(this + " no data loaded for " + id);
+        log.finer(this + " no callback data loaded for " + id);
     } catch (SQLException e) {
       log.log(Level.FINE, e.toString(), e);
     } catch (IOException e) {
@@ -721,10 +722,10 @@ public class DataStore {
   {
     _dataSource = null;
     _freeConn = null;
-
+    
     Alarm alarm = _alarm;
     _alarm = null;
-
+    
     if (alarm != null)
       alarm.dequeue();
   }
@@ -785,6 +786,7 @@ public class DataStore {
       return _is.read(buffer, offset, length);
     }
 
+    @Override
     public void close()
     {
       DataConnection conn = _conn;
