@@ -61,21 +61,26 @@ public class ProfileAction implements AdminAction
       profile.stop();
   }
   
-  public void start(long period, int depth)
+  public void start(long samplingRate, int depth)
   {
     Profile profile = Profile.createProfile();
 
     profile.stop();
 
-    profile.setPeriod(period);
+    profile.setPeriod(samplingRate);
     profile.setDepth(depth);
 
     profile.start();
   }
   
-  public String execute(long activeTime, long period, int depth)
+  public String execute(long activeTime, long samplingRate, int depth)
     throws ConfigException
   {
+    if (activeTime <= 0) {
+      throw new IllegalArgumentException(L.l("Profile activeTime '{0}': must be > 0.",
+                                             activeTime));
+    }
+    
     Profile profile = Profile.createProfile();
 
     if (profile.isActive()) {
@@ -84,7 +89,7 @@ public class ProfileAction implements AdminAction
     
     long startedAt = Alarm.getCurrentTime();
     
-    start(period, depth);
+    start(samplingRate, depth);
     
     try {
       synchronized (this) {
@@ -125,7 +130,7 @@ public class ProfileAction implements AdminAction
       }
 
       out.println(L.l(" Sampling rate {0}ms. Depth {1}.",
-                      period,
+                      samplingRate,
                       String.valueOf(depth)));
 
       double totalTicks = 0;
@@ -147,7 +152,7 @@ public class ProfileAction implements AdminAction
 
         out.println(String.format("%10.3f | %10.3f | %10.3f | %s",
                                   timePercent,
-                                  (float) entry.getCount() * period * 0.001,
+                                  (float) entry.getCount() * samplingRate * 0.001,
                                   totalPercent,
                                   entry.getDescription()));
 

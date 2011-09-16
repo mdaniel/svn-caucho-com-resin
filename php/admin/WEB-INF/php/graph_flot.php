@@ -24,8 +24,10 @@ $g_periods = array(2 * 7 * 24 * 60 * 60	=> "2 Weeks",
                    12 * 60 * 60 => "12 Hours",
                    6 * 60 * 60 => "6 Hours",
                    3 * 60 * 60 => "3 Hours",
-                   1 * 60 * 60 => "1 Hour");
-
+                   1 * 60 * 60 => "1 Hour",
+                   30 * 60 => "30 Minutes",
+                   15 * 60 => "15 Minutes");
+                   
 $g_time = 0;
 $g_offset = 0;
 $g_period = (6 * 60 * 60);
@@ -121,21 +123,6 @@ class GraphTail {
     stat_graph_script($stat, $this->params->canvas, $this->names, 
       $this->params->time, $this->params->offset, $this->params->period);
   }
-}
-
-function get_stats_service($mbean_server = null)
-{
-  global $g_mbean_server;
-
-  if (! $mbean_server) {
-    $mbean_server = $g_mbean_server;
-  }
-
-  if (! $mbean_server) {
-    return;
-  }
-
-  return $mbean_server->lookup("resin:type=StatService");
 }
 
 function create_graph_timeout()

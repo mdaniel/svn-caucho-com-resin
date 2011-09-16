@@ -15,21 +15,24 @@ if ($g_is_snapshot || $_REQUEST["snapshot"]) {
     $snapshot->snapshotHeap();
     $snapshot->snapshotThreadDump();
 
-    if (! $profile_time)
-      $profile_time = $_REQUEST["profile_time"];
+    if ($profile_time || $_REQUEST["profile_time"]) {
+      
+      if (! $profile_time)
+        $profile_time = $_REQUEST["profile_time"];
+      
+      if (! $profile_depth)
+        $profile_depth = $_REQUEST["profile_depth"];
+      
+      if (! $profile_tick)
+        $profile_tick = $_REQUEST["profile_tick"];
 
-    if (! $profile_tick)
-      $profile_tick = $_REQUEST["profile_tick"];
+      if (! $profile_depth)
+        $profile_depth = 16;
+      
+      if (! $profile_tick)
+        $profile_tick = 100;
 
-    if (! $profile_tick)
-      $profile_tick = 100;
-
-    if ($profile_time > 0 && $profile_time <= 120) {
-      $snapshot->startProfile($profile_tick, 16);
-      sleep($profile_time);
-      $snapshot->stopProfile();
-
-      $snapshot->snapshotProfile();
+      $snapshot->snapshotProfile(($profile_time*1000), $profile_tick, $profile_depth);
     }
 
     sleep(2);

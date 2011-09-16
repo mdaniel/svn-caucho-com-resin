@@ -20,33 +20,6 @@ $server = $g_server;
 echo "<h1>Summary</h1>\n";
 
 $report = "Summary";
-$stat = $g_mbean_server->lookup("resin:type=StatService");
-
-if ($stat) {
-  $snapshot = "&amp;snapshot=true";
-  $ss_profile = "&amp;snapshot=true&amp;profile_time=60&amp;profile_tick=10";
-  
-  echo " <br /> ";
-  echo "PDF (";
-  
-  echo "<a href='pdf-gen.php?report=$report$snapshot&amp;period=1800'>30 minutes</a> ";
-  echo " [<a href='pdf-gen.php?report=$report$ss_profile&amp;period=1800'>profile</a>]";
-  
-  echo ", <a href='pdf-gen.php?report=$report$snapshot&amp;period=3600'>1 hour</a>";
-  echo " [<a href='pdf-gen.php?report=$report$ss_profile&amp;period=3600'>profile</a>]";
-  
-  echo ", <a href='pdf-gen.php?report=$report$snapshot&amp;period=14400'>4 hours</a>";
-  
-  echo ", <a href='pdf-gen.php?report=$report$snapshot&amp;period=28800'>8 hours</a>";
-  
-  echo ", <a href='pdf-gen.php?report=$report$snapshot&amp;period=86400'>1 day</a>";
-  
-  echo ", <a href='pdf-gen.php?report=$report$snapshot&amp;period=604800'>1 week</a>)";
-
-  echo " <br /> ";
-}      
-
-
 
 echo "<div id='summary-tabs'>\n";
 echo "<ul>\n";
@@ -55,6 +28,7 @@ echo "<li><a href='#overview-tab'>Overview</a></li>\n";
 echo "<li><a href='#meter-tab'>Meters</a></li>\n";
 echo "<li><a href='#table-tab'>Tables</a></li>\n";
 echo "<li><a href='#log-tab'>Logs</a></li>\n";
+echo "<li><a href='#pdf-tab'>PDF</a></li>\n";
 echo "</ul>";
 
 echo "<div id='overview-tab'>";
@@ -90,6 +64,11 @@ recent_messages();
 
 echo "</div>";
 
+echo "<div id='pdf-tab'>";
+
+print_pdf_select();
+
+echo "</div>";
 
 echo "</div>";
 
@@ -521,6 +500,124 @@ function recent_messages()
       echo "</table>\n";
     }
   }
+}
+
+function print_pdf_select()
+{
+  global $g_periods;
+  global $g_period;
+  
+  $stat = get_stats_service();
+  if (! $stat) {
+    return;
+  }
+
+	echo "<h2>Summary PDF Report</h2>\n";
+	
+	echo "<form action='pdf-gen.php' method='get' style='display:inline;'>";
+  echo "<input type='hidden' name='snapshot' value='true'/>\n";
+  echo "<input type='hidden' name='report' value='Summary'/>\n";
+  echo "<div>\n";
+  echo "<div style='display:inline-block;float:left;padding-right:0.5em;'>\n";
+  echo "<input type='checkbox' id='profiling_enabled' value='true'/> ";
+  echo "</div>\n";
+  echo "<div style='display:inline-block'>\n";
+  echo "<label for='profiling_enabled'>Enable Profiling (Optional) </label><br/><br/>\n";
+  echo "<script language='javascript' type='text/javascript'>\n";
+  echo "<!-- \n";
+  echo "$('#profiling_enabled').change(function() {\n";
+  echo "  if ($('#profiling_enabled').attr('checked')) {\n";
+  echo "		$(\"#profile_tick\").removeAttr('disabled');\n";
+  echo "		$(\"#profile_depth\").removeAttr('disabled');\n";
+  echo "		$(\"#profile_time\").removeAttr('disabled');\n";
+  echo "		alert('Warning: The PDF report will be display after profiling data is gathered for the selected active time period.');\n";
+  echo "	} else {\n";
+  echo "		$(\"#profile_tick\").attr('disabled','disabled');\n";
+  echo "		$(\"#profile_depth\").attr('disabled','disabled');\n";
+  echo "		$(\"#profile_time\").attr('disabled','disabled');\n";
+  echo "	}\n";
+  echo "});\n";
+  echo " -->\n";
+  echo "</script>";
+    
+  echo "<label for='profile_tick'>Sampling Rate</label>: <select name='profile_tick' id='profile_tick' disabled='disabled'>";
+
+  $RATES = Array(10, 25, 100, 250, 1000, 2500, 10000);
+
+  if (!isset($_POST['profile_tick']) || !is_numeric($_POST['profile_tick']) || !in_array($_POST['profile_tick'], $RATES))
+    $postedRate = 100;
+  else
+    $postedRate = $_POST['profile_tick'];
+
+  foreach ($RATES as $rate) {
+    if ($rate == $postedRate) 
+      echo "  <option selected='selected' value='${rate}'>${rate}ms</option>";  
+    else
+      echo "  <option value='${rate}'>${rate}ms</option>";
+  }
+
+  echo "</select>";
+
+  echo " &nbsp;<label for='profile_depth'>Depth</label>: <select name='profile_depth' id='profile_depth' disabled='disabled'>";
+
+  $DEPTHS = Array(1, 2, 4, 8, 12, 16, 20, 32, 250);
+
+  if (!isset($_POST['profile_depth']) || !is_numeric($_POST['profile_depth']) || !in_array(intval($_POST['profile_depth']), $DEPTHS))
+    $postedDepth = 16;
+  else
+    $postedDepth = $_POST['profile_depth'];
+
+  foreach ($DEPTHS as $depth) {
+    if ($depth == $postedDepth) 
+      echo "  <option selected='selected' value='${depth}'>${depth}</option>";
+    else
+      echo "  <option value='${depth}'>${depth}</option>";
+  }
+
+  echo "</select>";
+  
+  echo " &nbsp;<label for='profile_time'>Active Time</label>: <select name='profile_time' id='profile_time' disabled='disabled'>";
+
+  $PROFILE_TIMES = Array(60 => '1m',
+                         120 => '2m',
+                         300 => '5m');
+
+  if (!isset($_POST['profile_time']) || !is_numeric($_POST['profile_time']) || !in_array(intval($_POST['profile_time']), $PROFILE_TIMES))
+    $postedProfileTime = 1;
+  else
+    $postedProfileTime = $_POST['profile_time'];
+
+  foreach ($PROFILE_TIMES as $profileTime => $name) {
+    if ($profileTime == $postedProfileTime) 
+      echo "  <option selected='selected' value='${profileTime}'>${name}</option>";
+    else
+      echo "  <option value='${profileTime}'>${name}</option>";
+  }
+
+  echo "</select>\n";
+  echo "</div>\n";
+  echo "</div><br/>\n";
+  
+  echo "<label for='period'>Report Period</label>: "; 
+  echo "<select name='period' id='period'>\n";
+  
+  if (!isset($_POST['period']) || !is_numeric($_POST['period']) || !in_array(intval($_POST['period']), $g_periods))
+    $postedPeriod = $g_period;
+  else
+    $postedPeriod = $_POST['period'];
+		
+	foreach ($g_periods as $period => $name) {
+    if ($period == $postedPeriod) 
+      echo "  <option selected='selected' value='${period}'>${name}</option>";
+    else
+      echo "  <option value='${period}'>${name}</option>";
+  }
+	
+	echo "</select>\n";
+	
+	echo " &nbsp;<input type='submit' value='Generate PDF'/>\n";
+  
+  echo "</form>";
 }
 
 function print_tcp_ports()

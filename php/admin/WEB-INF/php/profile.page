@@ -17,6 +17,7 @@ try {
 if ($profile) {
   if ($_POST['action'] == 'stop') {
     $profile->stop();
+    sleep(2);
   }
   else if ($_POST['action'] == 'start') {
     if ($_POST['period'] >= 10) {
@@ -28,16 +29,18 @@ if ($profile) {
     }
     
     $profile->start();
+    sleep(2);
   }
+  
+  $active = $profile->active;
 
-  if ($profile->active) {
+  if ($active) {
     echo "<h2>Profile";
     print_help("Profile");
     echo " Active for Server " . $g_server->Id;
     echo "</h2>";
-    echo "Period: {$profile->period}ms Depth: {$profile->depth}";
-
     echo "<form action='?q=profile' method='post' style='display:inline'>";
+    echo "Sampling Rate: <strong>{$profile->period}ms</strong> Depth: <strong>{$profile->depth}</strong>";
     echo "<input type='hidden' name='period' ";
     echo        "value='" . $_POST['period'] . "'/>";
     echo "<input type='hidden' name='depth' ";
@@ -48,13 +51,10 @@ if ($profile) {
       echo        "value='profile_quercus'/>";
     }
 
-    echo "<input type='submit' name='action' value='stop'/>";
+    echo " <input type='submit' name='action' value='stop' style='vertical-align:middle'/>";
 
-    echo "</form>";
-
-    echo "</h2>\n";
-  }
-  else {
+    echo "</form><br/>";
+  } else {
     echo "<h2>";
     echo "Profile";
     print_help("Profile");
@@ -62,7 +62,7 @@ if ($profile) {
     echo "</h2>";
 
     echo "<form action='?q=profile' method='post' style='display:inline'>";
-    echo "<label for='period'>Period</label>: <select name='period' id='period'>";
+    echo "<label for='period'>Sampling Rate</label>: <select name='period' id='period'>";
 
     $PERIODS = Array(10, 25, 100, 250, 1000, 2500, 10000);
 
@@ -82,7 +82,7 @@ if ($profile) {
 
     echo "</select>";
 
-    echo " <label for='depth'>Depth</label>: <select name='depth' id='depth'>";
+    echo " &nbsp;<label for='depth'>Depth</label>: <select name='depth' id='depth'>";
 
     $DEPTHS = Array(1, 2, 4, 8, 12, 16, 20, 32, 250);
 
@@ -102,7 +102,7 @@ if ($profile) {
 
     echo "</select>";
 
-    echo "<input type='submit' name='action' value='start'/><br/>";
+    echo " &nbsp;<input type='submit' name='action' value='start'/><br/>";
 
     echo "<span title='Highlight Quercus function names in stacks and ";
     echo              "decode Quercus-generated Java class names and ";
@@ -114,35 +114,63 @@ if ($profile) {
       echo "<br/>* indicates stack trace contains PHP function calls";
   }
 
+  $status = $active ? "Active" : "Stopped";
   $period = $profile->getPeriod();
   $sample_ticks = $profile->getTicks();
   $results = $profile->getResults();
-
-  echo "<h3>Run Time: " . ($sample_ticks * $period / 1000) . "s</h3>\n";
-
-  $gc_time = $profile->getGcTime();
-
-  if ($gc_time > 0) {
-    echo "<h3>GC Time: " . ($gc_time / 1000) . "s</h3>\n";
-
-    /*
-    $gc_ticks = ($gc_time + $period - 1) / $period;
-    $gc_entry = java("com.caucho.profile.ProProfileEntry",
-                     0x0004, $gc_ticks, $gc_time);
-    $gc_entry->addStack("jvm.HeapMemory", "gc", "");
-    $results = array_merge(array($gc_entry), $results);
-
-    usort($results, "gc_entry_cmp");
-    */
-  }
-
-  $partition = do_partition_profile($results);
-  $groups = array("active", "block", "jni", "resin", "keepalive", "wait",
-                  "accept", "single", "all");
-
-//  echo "<table class='threads'>\n";
-
+  
   if ($results) {
+  
+    $run_time = $profile->getRunTime()/1000;
+    $end_time = $profile->getEndTime()/1000;
+    $start_time = $end_time - $run_time;
+    $depth = $profile->getDepth();
+    
+    $start_time_s = date("Y-m-d H:i:s", $start_time);
+    $end_time_s = date("Y-m-d H:i:s", $end_time);
+    
+    if ($active) 
+      $end_time_s = "";
+      
+    $gc_time = $profile->getGcTime();
+    
+    echo "<br/><hr/>\n";
+    
+    if ($active) {
+      echo "<h2>Current Results</h2>\n";
+    } else {
+      echo "<h2>Last Results</h2>\n";
+    }
+    
+    echo "<table class='threads' summary='Profile Results'><tr class='chart-data'>\n";
+  
+    echo " <th scope='col'>Status</th>\n";
+    echo " <th scope='col'>Start Time</th>\n";
+    echo " <th scope='col'>End Time</th>\n";
+    echo " <th scope='col'>Run Time</th>\n";
+    echo " <th scope='col'>Sampling Rate</th>\n";
+    echo " <th scope='col'>Total Samples</th>\n";
+    echo " <th scope='col'>GC Time</th>\n";
+    echo " <th scope='col'>Depth</th>\n";
+    
+    echo " </tr><tr class='chart-data'>\n";
+    
+    echo " <td>${status}</td>\n";
+    echo " <td>${start_time_s}</td>\n";
+    echo " <td>${end_time_s}</td>\n";
+    echo " <td>${run_time}s</td>\n";
+    echo " <td>${period}ms</td>\n";
+    echo " <td>${sample_ticks}</td>\n";
+    echo " <td>${gc_time}s</td>\n";
+    echo " <td>${depth}</td>\n";
+    
+    echo "</tr></table>\n";
+    echo "&nbsp;<br/>\n";
+  
+    $partition = do_partition_profile($results);
+    $groups = array("active", "block", "jni", "resin", "keepalive", "wait",
+                    "accept", "single", "all");
+  
     display_profile_results($partition, $groups, $profile);
   }
 }

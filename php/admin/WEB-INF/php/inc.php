@@ -1254,6 +1254,21 @@ function display_health_status($s)
   echo "</table><br/>";
 }
 
+function get_stats_service($mbean_server = null)
+{
+  global $g_mbean_server;
+
+  if (! $mbean_server) {
+    $mbean_server = $g_mbean_server;
+  }
+
+  if (! $mbean_server) {
+    return;
+  }
+
+  return $mbean_server->lookup("resin:type=StatService");
+}
+
 function display_add_tail($tail)
 {
   global $g_tail_objects;
