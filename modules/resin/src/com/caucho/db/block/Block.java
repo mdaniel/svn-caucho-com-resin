@@ -35,7 +35,6 @@ import java.util.concurrent.atomic.AtomicLong;
 import java.util.concurrent.atomic.AtomicReference;
 import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReadWriteLock;
-import java.util.concurrent.locks.ReentrantReadWriteLock;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -77,6 +76,8 @@ public final class Block implements SyncCacheListener {
 
   private final AtomicLong _dirtyRange = new AtomicLong(INIT_DIRTY);
   
+  private volatile boolean _isFreeBuffer = true;
+  
   private boolean _isFlushDirtyOnCommit;
   
   private byte []_buffer;
@@ -109,8 +110,8 @@ public final class Block implements SyncCacheListener {
     ReadWriteLock lock = _freeLocks.allocate();
     
     if (lock == null) {
-      lock = new ReentrantReadWriteLock();
-      // lock = new DatabaseLock("block"); 
+      //lock = new ReentrantReadWriteLock();
+      lock = new DatabaseLock("block"); 
     }
     
     return lock;
@@ -381,7 +382,7 @@ public final class Block implements SyncCacheListener {
   @Override
   public final void syncLruRemoveEvent()
   {
-    releaseUse();
+    syncRemoveEvent();
   }
   
   /**
@@ -390,6 +391,11 @@ public final class Block implements SyncCacheListener {
   @Override
   public final void syncRemoveEvent()
   {
+    if ((_useCount.get() > 1 || _dirtyRange.get() == INIT_DIRTY)
+        && toWriteQueued()) {
+      _store.getWriter().addDirtyBlock(this);
+    }
+    
     releaseUse();
   }
 
@@ -461,6 +467,10 @@ public final class Block implements SyncCacheListener {
   {
     if (block == this)
       return true;
+    
+    // For timing reasons, the buffer cannot be freed if it's also
+    // copied.
+    _isFreeBuffer = false;
       
     byte []buffer = _buffer;
 
@@ -496,7 +506,7 @@ public final class Block implements SyncCacheListener {
       byte []buffer = _buffer;
       _buffer = null;
       
-      if (buffer != null) {
+      if (buffer != null && _isFreeBuffer) {
         _freeBuffers.free(buffer);
       }
       

@@ -72,8 +72,6 @@ public class EjbTimeout {
   {
     long value = _unit.toMillis(_timeout);
     
-    System.out.println("VALUE: " + value + " " + _unit);
-    
     return value;
   }
 }

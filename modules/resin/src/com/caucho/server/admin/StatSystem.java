@@ -228,7 +228,12 @@ public class StatSystem extends AbstractResinSubSystem
     {
       return _name;
     }
-
+    
+    final AbstractMeter getMeter()
+    {
+      return _probe;
+    }
+    
     double sample()
     {
       return _probe.sample();

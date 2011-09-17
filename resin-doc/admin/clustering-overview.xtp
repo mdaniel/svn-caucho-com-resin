@@ -131,14 +131,16 @@ administering the cluster.</p>
 <s1 title="Elastic Servers">
 
 <p>Resin lets you add and remove servers dynamically to the system, and
-automatically adjusts the cluster to manage those servers.</p>
+automatically adjusts the cluster to manage those servers. When you add
+a new server, Resin:
+</p>
 
 <ul>
-<li>Deployed applications pushed to the new server automatically.</li>
-<li>Distributed caching updates replicated data with server adds and removes.</li>
-<li>Load balancing updates to include the new server or remove the old one.</li>
-<li>JMS queues update with the new server.</li>
-<li>Administration updates to the new server.</li>
+<li>Pushes the latest deployed applications to the new server.</li>
+<li>Replicates distributed caching data if the new server is a triad.</li>
+<li>Updates the load balancer to send requests to the new server.</li>
+<li>Creates clients for the JMS queues.</li>
+<li>Updates the health system to monitor and administer the new server.</li>
 </ul>
 
 <s2 title="Starting an dynamic server">

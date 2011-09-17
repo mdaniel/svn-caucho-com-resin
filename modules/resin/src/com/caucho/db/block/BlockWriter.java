@@ -48,6 +48,8 @@ public class BlockWriter extends TaskWorker {
   private int _writeQueueMax = 256;
   private final ArrayList<Block> _writeQueue = new ArrayList<Block>();
   
+  private final BlockWriteQueue _blockWriteQueue = new BlockWriteQueue();
+  
   BlockWriter(BlockStore store)
   {
     _store = store;
@@ -72,8 +74,14 @@ public class BlockWriter extends TaskWorker {
 
       _writeQueue.add(block);
     }
-
     wake();
+    
+    /*
+    if (! _blockWriteQueue.isEmpty())
+      wake();
+    
+    _blockWriteQueue.addDirtyBlock(block);
+    */
   }
 
   boolean copyDirtyBlock(long blockId, Block block)
@@ -104,10 +112,14 @@ public class BlockWriter extends TaskWorker {
   public boolean isClosed()
   {
     return super.isClosed() && _writeQueue.size() == 0;
+    
+    // return super.isClosed() && _blockWriteQueue.isEmpty();
   }
   
   void waitForComplete(long timeout)
   {
+    // _blockWriteQueue.waitForComplete(timeout);
+
     long expires = Alarm.getCurrentTimeActual() + timeout;
     
     synchronized (_writeQueue) {
@@ -139,6 +151,8 @@ public class BlockWriter extends TaskWorker {
 
       while (true) {
         Block block = peekFirstBlock();
+        
+        // Block block = _blockWriteQueue.peekFirstBlock();
 
         if (block != null) {
           retry = retryMax;
@@ -147,6 +161,7 @@ public class BlockWriter extends TaskWorker {
             block.writeFromBlockWriter();
           } finally {
             removeFirstBlock();
+            // _blockWriteQueue.removeFirstBlock();
           }
         }
         else if (retry-- <= 0) {

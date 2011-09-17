@@ -152,6 +152,10 @@
     <objectName>java.lang:type=OperatingSystem</objectName>
     <attribute>OpenFileDescriptorCount</attribute>
   </health:JmxMeter>
+
+  <health:AnomalyAnalyzer>
+    <meter>OS|Process|File Descriptor Count</meter>
+  </health:AnomalyAnalyzer>
    
   <health:JmxMeter>
     <name>JVM|Memory|Heap Memory Used</name>
@@ -206,12 +210,20 @@
     <objectName>java.lang:type=Threading</objectName>
     <attribute>ThreadCount</attribute>
   </health:JmxMeter>
+
+  <health:AnomalyAnalyzer>
+    <meter>JVM|Thread|JVM Thread Count</meter>
+  </health:AnomalyAnalyzer>
   
   <health:JmxMeter>
     <name>JVM|Thread|JVM Runnable Count</name>
     <objectName>resin:type=JvmThreads</objectName>
     <attribute>RunnableCount</attribute>
   </health:JmxMeter>
+
+  <health:AnomalyAnalyzer>
+    <meter>JVM|Thread|JVM Runnable Count</meter>
+  </health:AnomalyAnalyzer>
   
   <health:JmxMeter>
     <name>JVM|Thread|JVM Native Count</name>
@@ -224,12 +236,20 @@
     <objectName>resin:type=JvmThreads</objectName>
     <attribute>WaitingCount</attribute>
   </health:JmxMeter>
+
+  <health:AnomalyAnalyzer>
+    <meter>JVM|Thread|JVM Waiting Count</meter>
+  </health:AnomalyAnalyzer>
   
   <health:JmxMeter>
     <name>JVM|Thread|JVM Blocked Count</name>
     <objectName>resin:type=JvmThreads</objectName>
     <attribute>BlockedCount</attribute>
   </health:JmxMeter>
+
+  <health:AnomalyAnalyzer>
+    <meter>JVM|Thread|JVM Blocked Count</meter>
+  </health:AnomalyAnalyzer>
 
   <health:JmxMeter>
     <name>Resin|Thread|Thread Count</name>
@@ -242,6 +262,10 @@
     <objectName>resin:type=ThreadPool</objectName>
     <attribute>ThreadActiveCount</attribute>
   </health:JmxMeter>
+
+  <health:AnomalyAnalyzer>
+    <meter>Resin|Thread|Thread Active Count</meter>
+  </health:AnomalyAnalyzer>
 
   <health:JmxMeter>
     <name>Resin|Thread|Thread Idle Count</name>
@@ -302,6 +326,16 @@
     <objectName>resin:type=BlockManager</objectName>
     <attribute>MissCountTotal</attribute>
   </health:JmxDeltaMeter>
+
+  <!--
+  <health:AnomalyAnalyzer>
+    <meter>Resin|Database|Connection Active</meter>
+  </health:AnomalyAnalyzer>
+
+  <health:AnomalyAnalyzer>
+    <meter>Resin|Http|Request Time</meter>
+  </health:AnomalyAnalyzer>
+  -->
 
   <!-- meter graphs -->
   

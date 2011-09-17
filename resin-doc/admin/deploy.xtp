@@ -17,6 +17,10 @@ webapps directory filesystem deployment.
 
 <s1 title="Overview">
 
+<p>Resin's .war application deployment can be as simple as copying a .war
+file to a webapps/ directory on a local machine, and as powerful as cloud
+deployment, archiving, staging, rollback.</p>
+
 <ul>
 <li><b>cloud deployment:</b> Resin's cloud deployment will distribute a
 new web-application to all servers in the cloud, using a transactional
@@ -43,6 +47,84 @@ from the command-line for scriptable deployment.</li>
 from a browser using the /resin-admin site.</li>
 
 </ul>
+
+</s1>
+
+<s1 title="Basic Deployent Methods">
+
+<s2 title="Webapps Directory Deployment">
+
+<p>For a simple deployment, you can copy a .war archive file containing
+your application to a webapps directory. Resin will detect the .war archive,
+expand it, and start serving requests.</p>
+
+<p>The webapps directory is configured and enabled by the &lt;web-app-deploy/>
+tag in the resin.xml.</p>
+
+<example title="Example: web-app-deploy in resin.xml">
+&lt;resin xmlns="http://caucho.com/ns/resin">
+
+&lt;cluster id="">
+  ...
+  &lt;host id="">
+  
+    <b>&lt;web-app-deploy path="webapps"
+                      expand-preserve-fileset="WEB-INF/work/**"/></b>
+    
+  &lt;/host>
+&lt;/cluster>
+&lt;/resin>
+</example>
+
+<p>The <em>expand-preserve-fileset</em> attribute lets you keep files
+for a redeployment which can improve restart times.
+Normally, Resin will delete all files for an update,
+including the compiled files like JSP, which forces Resin to recompile JSP
+files, even if they haven't changed in the update.</p>
+
+</s2>
+
+<s2 title="Command-Line Deployment">
+
+<p>Command-line deployment uses the same resin.xml &lt;web-app-deploy>
+configuration as a webapps deployment and expands the archive to the
+same directory. Instead of looking for the .war file in a directory,
+Resin will look in an internal repository using the web-app's identifier.</p>
+
+<example title="Example: command-line deployment">
+unix> bin/resin.sh deploy test.war
+</example>
+
+<p>The default deployment is to the default host with the war's name as
+a prefix. Both can be changed with deploy options.</p>
+
+</s2>
+
+<s2 title="Deployment Expansion">
+
+<p>The &lt;web-app-deploy> controls the expansion based on web-app ids
+like "production/webapps/default/test" which is the same as the web-app
+identifier. The deployment expansion process looks like the following:</p>
+
+<ol>
+<li>Look in the internal repository for "production/webapps/default/test" (uploaded by command-line)</li>
+<li>Look for webapps/test.war if the internal repository is missing.</li>
+<ol>
+<li>Copy the test.war into the internal repository as "server/[server-id]/webapps/default/test" (so the following steps are identical no matter how it's deployed.)</li>
+</ol>
+<li>Delete the old webapps/test directory (saving some directories when expand-preserve-fileset is configured.)</li>
+<li>Expand the repository files into the webapps/test directory.</li>
+<li>Restart the webapp</li>
+</ol>
+
+<p>The deployment identifier matches the web-app id that Resin logs at
+startup time. The identifier a repository tag that lets Resin have a general
+cloud repository system and also handle web-app deployments, versioning,
+and staging.</p>
+
+<p>For the example web-app tag "production/webapp/default/test", the "production" is the deployment stage, "webapp" is
+because it's a webapp deployment, "default" is the virtual-host name
+and "test" is the web-app name.</p>
 
 </s1>
 

@@ -136,7 +136,7 @@ public class MeterService extends AbstractResinSubSystem {
     AbstractMeter meter = _meterMap.get(name);
 
     if (meter == null) {
-        meter = createMeter(new JmxAttributeMeter(name, objectName, attribute));
+      meter = createMeter(new JmxAttributeMeter(name, objectName, attribute));
     }
 
     return meter;

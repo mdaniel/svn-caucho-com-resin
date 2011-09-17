@@ -38,12 +38,14 @@ import com.caucho.config.ConfigException;
 import com.caucho.jmx.Jmx;
 
 public final class JmxAttributeMeter extends AbstractMeter {
-    private static final Logger log
-        = Logger.getLogger(JmxAttributeMeter.class.getName());
+  private static final Logger log
+    = Logger.getLogger(JmxAttributeMeter.class.getName());
 
   private MBeanServer _server;
   private ObjectName _objectName;
   private String _attribute;
+  
+  private double _lastSample;
 
   public JmxAttributeMeter(String name, String objectName, String attribute)
   {
@@ -62,6 +64,7 @@ public final class JmxAttributeMeter extends AbstractMeter {
   /**
    * Polls the statistics attribute.
    */
+  @Override
   public double sample()
   {
     try {
@@ -70,11 +73,19 @@ public final class JmxAttributeMeter extends AbstractMeter {
       if (value == null)
         return 0;
       
-      return ((Number) value).doubleValue();
+      _lastSample = ((Number) value).doubleValue();
+
+      return _lastSample;
     } catch (Exception e) {
       log.log(Level.FINE, e.toString(), e);
 
       return 0;
     }
+  }
+  
+  @Override
+  public double peek()
+  {
+    return _lastSample;
   }
 }

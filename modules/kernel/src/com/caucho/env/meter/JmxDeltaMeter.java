@@ -46,6 +46,7 @@ public final class JmxDeltaMeter extends AbstractMeter {
   private String _attribute;
 
   private double _lastValue;
+  private double _lastSample;
 
   public JmxDeltaMeter(String name, String objectName, String attribute)
   {
@@ -77,12 +78,18 @@ public final class JmxDeltaMeter extends AbstractMeter {
       _lastValue = lastValue;
       double value = ((Number) objValue).doubleValue();
       
-      return value - lastValue;
+      _lastSample = value - lastValue;
       
+      return _lastSample;
     } catch (Exception e) {
       log.log(Level.FINE, e.toString(), e);
 
       return 0;
     }
+  }
+  
+  public double peek()
+  {
+    return _lastSample;
   }
 }
