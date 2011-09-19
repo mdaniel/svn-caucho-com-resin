@@ -1248,6 +1248,13 @@ public class WebAppContainer
    */
   public WebApp getErrorWebApp()
   {
+    if (_errorWebApp == null) {
+      WebApp defaultWebApp = findWebAppByURI("/");
+      
+      if (defaultWebApp != null)
+        return defaultWebApp;
+    }
+    
     synchronized (this) {
       if (_errorWebApp == null) {
         _errorWebApp = createErrorWebApp();
@@ -1259,12 +1266,6 @@ public class WebAppContainer
   
   private WebApp createErrorWebApp()
   {
-    WebApp defaultWebApp = findWebAppByURI("/");
-      
-    if (defaultWebApp != null) {
-      return defaultWebApp;
-    }
-      
     Thread thread = Thread.currentThread();
     ClassLoader loader = thread.getContextClassLoader();
     try {

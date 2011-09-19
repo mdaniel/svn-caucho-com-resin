@@ -171,7 +171,8 @@ classloaders a web-app-default. Each web-app will then use the same
       
 &lt;host id="">
 
-  &lt;web-app-deploy path="webapps"/>
+  &lt;web-app-deploy path="webapps"
+           expand-preserve-fileset="WEB-INF/work/**"/>
   
 &lt;/host>
 

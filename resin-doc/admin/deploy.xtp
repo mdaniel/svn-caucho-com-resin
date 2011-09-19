@@ -69,7 +69,7 @@ tag in the resin.xml.</p>
   &lt;host id="">
   
     <b>&lt;web-app-deploy path="webapps"
-                      expand-preserve-fileset="WEB-INF/work/**"/></b>
+                    expand-preserve-fileset="WEB-INF/work/**"/></b>
     
   &lt;/host>
 &lt;/cluster>
@@ -77,10 +77,11 @@ tag in the resin.xml.</p>
 </example>
 
 <p>The <em>expand-preserve-fileset</em> attribute lets you keep files
-for a redeployment which can improve restart times.
+for a redeployment, which can improve restart times.
 Normally, Resin will delete all files for an update,
-including the compiled files like JSP, which forces Resin to recompile JSP
-files, even if they haven't changed in the update.</p>
+including the compiled files for JSP, which forces Resin
+to recompile JSP files, even if they haven't changed in the update.
+If you add the <em>expand-preserve-fileset</em>, Resin will only recompile the JSP files that have changed.</p>
 
 </s2>
 
@@ -109,9 +110,7 @@ identifier. The deployment expansion process looks like the following:</p>
 <ol>
 <li>Look in the internal repository for "production/webapps/default/test" (uploaded by command-line)</li>
 <li>Look for webapps/test.war if the internal repository is missing.</li>
-<ol>
 <li>Copy the test.war into the internal repository as "server/[server-id]/webapps/default/test" (so the following steps are identical no matter how it's deployed.)</li>
-</ol>
 <li>Delete the old webapps/test directory (saving some directories when expand-preserve-fileset is configured.)</li>
 <li>Expand the repository files into the webapps/test directory.</li>
 <li>Restart the webapp</li>
@@ -126,6 +125,7 @@ and staging.</p>
 because it's a webapp deployment, "default" is the virtual-host name
 and "test" is the web-app name.</p>
 
+</s2>
 </s1>
 
 <s1 title="Cloud Deployment">
@@ -185,6 +185,26 @@ unix> bin/resin.sh deploy-copy \
   -target foo
 </example>
 
+<p>Internally, the archived war files are stored with a different tag name.
+In the previous example, the repository might contain three tags: the
+archive foo-1.2.12, the archive foo-1.2.13, and the production webapp,
+which is a copy of foo-1.2.13.</p>
+
+<example title="Example: repository tags for archive">
+archive/webapp/default/foo-1.2.12   -- archived foo.war contents
+archive/webapp/default/foo-1.2.13   -- archived foo.war contents
+production/webapp/default/foo       -- production foo.war (a copy of 1.2.13)
+</example>
+
+<p>The current web-app <em>production/webapp-default/foo</em> can be
+rolled-back by copying it from a previous version.</p>
+
+<example title="Example: rolling back to foo.1.2.12">
+unix> bin/resin.sh deploy-copy \
+  -source-stage archive -source-version 1.2.12 -source foo \
+  -target foo
+</example>
+
 </s1>
 
 <s1 title="Staging">
@@ -198,6 +218,17 @@ until you copy it to a live machine.</p>
 unix> bin/resin.sh deploy -stage preview foo.war
 
 unix> bin/resin.sh -stage preview -server dyn1 -join-cluster app-tier start
+</example>
+
+<p>Internally, Resin stores the preview stage as a repository tag
+<em>preview/webapp/default/foo</em>. When you deploy the .war with
+<em>-stage preview</em>, Resin save the deploy under the
+preview tag name.  When you start Resin with <em>-stage preview</em>,
+you ask it to look in the preview tag for the web-app.</p>
+
+<example title="Example: repository tags for staging">
+preview/webapp/default/foo        -- preview foo.war contents
+production/webapp/default/foo     -- production foo.war contents
 </example>
 
 <p>After you've verified that the previewed application works, you can
@@ -310,7 +341,8 @@ enables versioning:</p>
 &lt;cluster id="">
 &lt;host id="">
 
-  <b>&lt;web-app-deploy path="webapps" versioning="true"/></b>
+  <b>&lt;web-app-deploy path="webapps" versioning="true"
+           expand-preserve-fileset="WEB-INF/work/**"/></b>
 
 &lt;/host>
 &lt;/cluster>
@@ -350,6 +382,11 @@ archive files should be placed, beyond the standard webapps directory.</p>
   <td>2s</td>
 </tr>
 <tr>
+  <td>expand-preserve-fileset</td>
+  <td>a set of files/directories Resin should preserve on a redeploy when it deletes the expanded directory</td>
+  <td></td>
+</tr>
+<tr>
   <td>id</td>
   <td>unique identifier for the web-app and the default context-path value</td>
   <td></td>
@@ -377,6 +414,7 @@ archive files should be placed, beyond the standard webapps directory.</p>
   &lt;host id="">
 
     <b>&lt;web-app id="/foo" root-directory="/var/www/foo"
+             expand-preserve-fileset="WEB-INF/work/**"
              archive-path="/usr/local/stage/foo.war"/></b>
 
   &lt;/host>
@@ -389,8 +427,9 @@ archive files should be placed, beyond the standard webapps directory.</p>
 <s2 title="Command-Line Remote Deployment">
 
 <p>The "deploy" command deploys a .war file to the default virtual
-host. Since the AdminAuthenticator requires a user and password, you'll
-need to pass those arguments as well.</p>
+host. In a cloud environment, Resin will copy the deployed .war
+to all servers in the cluster. Since the AdminAuthenticator requires a user
+and password, you'll need to pass those arguments.</p>
 
 <example title="Example: deploy hello.war">
 unix> bin/resin.sh deploy hello.war \
@@ -431,7 +470,7 @@ all the servers in the cluster will have the webapp.
 <s2 title="ant/maven Remote Deployment">
 
 <p>Deployment may be interegrated with ant/maven using the command-line
-interface or with ant/maven plugins. See the deploy-ant-maven page for
+interface or with ant/maven plugins. See the <a href="deploy-ant-maven.xtp">deploy-ant-maven</a> page for
 more information.</p>
 
 </s2>

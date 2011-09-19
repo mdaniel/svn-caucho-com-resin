@@ -249,7 +249,8 @@ virtual host can use the webapps deployment.</p>
 &lt;cluster-default>
 &lt;host-default>
 
-  <b>&lt;web-app-deploy path="webapps"/></b>
+  <b>&lt;web-app-deploy path="webapps"
+           expand-preserve-fileset="WEB-INF/work/**"/></b>
 
 &lt;/host-default>
 &lt;/cluster-default>

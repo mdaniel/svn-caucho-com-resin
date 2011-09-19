@@ -38,7 +38,8 @@ sharing distributed sessions.</p>
     &lt;server id="b" address="192.168.0.2"/>
 
     &lt;host id="">
-      &lt;web-app-deploy path="webapps"/>
+      &lt;web-app-deploy path="webapps"
+           expand-preserve-fileset="WEB-INF/work/**"/>
     &lt;/host>
   &lt;/cluster&gt;
 &lt;/resin&gt;

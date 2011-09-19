@@ -43,7 +43,8 @@ enabled in the resin.xml. The default behavior is to disable deployment.</p>
     &lt;/server>
 
     &lt;host id="">
-      &lt;web-app-deploy path="webapps"/>
+      &lt;web-app-deploy path="webapps"
+           expand-preserve-fileset="WEB-INF/work/**"/>
     &lt;/host>
   &lt;/cluster>
 &lt;/resin>

@@ -323,7 +323,8 @@ might configure as follows:</p>
         &lt;resin:user name="dmalfoy" password="yI2uN1l97Rv5E6mdRnDFDB" group="user,slytherin"/>
       &lt;/resin:XmlAuthenticator&gt;
 
-      &lt;web-app-deploy path="webapps"/&gt;
+      &lt;web-app-deploy path="webapps"
+           expand-preserve-fileset="WEB-INF/work/**"/>
     &lt;/host&gt;
   &lt;/cluster&gt;
 &lt;/resin&gt;

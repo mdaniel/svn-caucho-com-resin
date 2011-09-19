@@ -70,7 +70,8 @@ and restarts the server if necessary.</li>
 
       &lt;resin:MovedPermanently regexp="/old-file" target="/new-path"/>
     
-      &lt;web-app-deploy path="webapps"/>
+      &lt;web-app-deploy path="webapps"
+           expand-preserve-fileset="WEB-INF/work/**"/>
 
       &lt;web-app id="/custom">
       &lt;/web-app>
@@ -196,7 +197,8 @@ resources can use CanDI-style configuration for their services.</p>
     &lt;/server>
 
     &lt;host id="">
-      &lt;web-app-deploy path="webapps"/>
+      &lt;web-app-deploy path="webapps"
+           expand-preserve-fileset="WEB-INF/work/**"/>
     &lt;/host>
   &lt;/cluster>
 &lt;/resin>

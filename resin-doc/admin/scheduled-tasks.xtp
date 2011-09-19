@@ -32,20 +32,12 @@ including injection, @TransactionAttribute aspects, interception and
   <th>Description</th>
 </tr>
 <tr>
-  <td>class</td>
-  <td>the classname of the singleton bean to create</td>
-</tr>
-<tr>
   <td>cron</td>
   <td>a cron-style scheduling description</td>
 </tr>
 <tr>
   <td>delay</td>
   <td>a simple delay-based execution</td>
-</tr>
-<tr>
-  <td>init</td>
-  <td>IoC initialization for the bean</td>
 </tr>
 <tr>
   <td>mbean-name</td>
@@ -83,9 +75,8 @@ in <a href="candi.xtp">Java Injection</a> configuration.</p>
 
   &lt;resin:ScheduledTask>
     &lt;cron>*/5&lt;/cron>
-    &lt;task>
-      &lt;qa:MyTask xmlns:qa="urn:java:com.caucho.resin"/>
-    &lt;/task>
+
+    &lt;qa:MyTask xmlns:qa="urn:java:com.caucho.resin"/>
   &lt;/ScheduledTask>
 
 &lt;/web-app>

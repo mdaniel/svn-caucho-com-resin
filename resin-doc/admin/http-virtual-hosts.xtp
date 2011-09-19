@@ -183,7 +183,8 @@ hide configuration details in case an error occurs on a live site.</p>
 
     &lt;access-log path="log/access.log"/>
 	
-    &lt;web-app-deploy path="webapps"/&gt;
+    &lt;web-app-deploy path="webapps"
+           expand-preserve-fileset="WEB-INF/work/**"/>
   &lt;/host-default&gt;
 
   <b>&lt;host-deploy path="hosts"&gt;
@@ -340,7 +341,8 @@ to ensure consistency.</p>
     &lt;resin:import path="${resin.home}/conf/app-default.xml"/>
     
     &lt;host-default>
-      &lt;web-app-deploy path="webapps"/>
+      &lt;web-app-deploy path="webapps"
+           expand-preserve-fileset="WEB-INF/work/**"/>
     &lt;/host-default>
   &lt;/cluster-default>
 

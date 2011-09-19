@@ -71,11 +71,13 @@
     
       <item link="deploy-command-line.xtp" title="command-line"
             description="deploying .wars using the Resin command line"/>
+
+      <!--
+      <item link="deploy-git-architecture.xtp" title=".git architecture"
+            description="Architecture of the clustered .git deployment"/>
+      -->
     
-      <item link="deploy-git-overview.xtp" title=".git overview"
-            description="Overview of the clustered .git deployment"/>
-    
-      <item link="deploy-tool-reference.xtp" title="ant/maven"
+      <item link="deploy-ant-maven.xtp" title="ant/maven"
             description="ant and maven deployment reference"/>
     </item>
     
