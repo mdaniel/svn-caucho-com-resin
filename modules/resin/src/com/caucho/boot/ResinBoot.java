@@ -163,7 +163,8 @@ public class ResinBoot {
       initClient(bootManager);
   }
 
-  private void initClient(BootResinConfig bootManager) {
+  private void initClient(BootResinConfig bootManager)
+  {
     if (_args.isDynamicServer()) {
       _client = bootManager.addDynamicClient(_args);
     }

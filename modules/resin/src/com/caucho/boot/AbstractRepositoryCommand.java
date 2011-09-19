@@ -93,7 +93,7 @@ public abstract class AbstractRepositoryCommand extends AbstractBootCommand {
   }
   
   protected WebAppDeployClient getDeployClient(WatchdogArgs args,
-                                             WatchdogClient client)
+                                               WatchdogClient client)
   {
     String address = args.getArg("-address");
 
