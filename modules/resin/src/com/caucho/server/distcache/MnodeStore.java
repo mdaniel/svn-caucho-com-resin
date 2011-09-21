@@ -138,6 +138,7 @@ public class MnodeStore implements AlarmListener {
   public long getStartupLastUpdateTime(HashKey cacheKey)
   {
     Connection conn = null;
+    ResultSet rs = null;
 
     try {
       conn = _dataSource.getConnection();
@@ -150,7 +151,7 @@ public class MnodeStore implements AlarmListener {
       
       pStmt.setBytes(1, cacheKey.getHash());
 
-      ResultSet rs = pStmt.executeQuery(sql);
+      rs = pStmt.executeQuery(sql);
       
       if (rs.next()) {
         return rs.getLong(1);
@@ -162,6 +163,7 @@ public class MnodeStore implements AlarmListener {
       
       return 0;
     } finally {
+      JdbcUtil.close(rs);
       JdbcUtil.close(conn);
     }
   }
@@ -287,6 +289,7 @@ public class MnodeStore implements AlarmListener {
     throws Exception
   {
     Connection conn = _dataSource.getConnection();
+    ResultSet rs = null;
 
     try {
       Statement stmt = conn.createStatement();
@@ -294,10 +297,12 @@ public class MnodeStore implements AlarmListener {
       String sql = ("SELECT MAX(server_version)"
                     + " FROM " + _tableName);
 
-      ResultSet rs = stmt.executeQuery(sql);
+      rs = stmt.executeQuery(sql);
+      
       if (rs.next())
         return rs.getInt(1) + 1;
     } finally {
+      JdbcUtil.close(rs);
       conn.close();
     }
 
@@ -311,6 +316,7 @@ public class MnodeStore implements AlarmListener {
     throws Exception
   {
     Connection conn = _dataSource.getConnection();
+    ResultSet rs = null;
 
     try {
       Statement stmt = conn.createStatement();
@@ -318,10 +324,12 @@ public class MnodeStore implements AlarmListener {
       String sql = ("SELECT MAX(update_time)"
                     + " FROM " + _tableName);
 
-      ResultSet rs = stmt.executeQuery(sql);
+      rs = stmt.executeQuery(sql);
       if (rs.next())
         return rs.getLong(1);
     } finally {
+      JdbcUtil.close(rs);
+      
       conn.close();
     }
 
@@ -344,6 +352,7 @@ public class MnodeStore implements AlarmListener {
                                           int offset)
   {
     Connection conn = null;
+    ResultSet rs = null;
 
     try {
       conn = _dataSource.getConnection();
@@ -364,7 +373,7 @@ public class MnodeStore implements AlarmListener {
 
       ArrayList<CacheData> entryList = new ArrayList<CacheData>();
 
-      ResultSet rs = pstmt.executeQuery();
+      rs = pstmt.executeQuery();
 
       rs.relative(offset);
       while (rs.next()) {
@@ -400,6 +409,7 @@ public class MnodeStore implements AlarmListener {
     } catch (SQLException e) {
       log.log(Level.WARNING, e.toString(), e);
     } finally {
+      JdbcUtil.close(rs);
       JdbcUtil.close(conn);
     }
 
@@ -414,6 +424,7 @@ public class MnodeStore implements AlarmListener {
                                          int offset)
   {
     Connection conn = null;
+    ResultSet rs = null;
 
     try {
       conn = _dataSource.getConnection();
@@ -429,7 +440,7 @@ public class MnodeStore implements AlarmListener {
 
       ArrayList<CacheData> entryList = new ArrayList<CacheData>();
 
-      ResultSet rs = pstmt.executeQuery();
+      rs = pstmt.executeQuery();
 
       rs.relative(offset);
       while (rs.next()) {
@@ -470,6 +481,7 @@ public class MnodeStore implements AlarmListener {
     } catch (SQLException e) {
       log.log(Level.WARNING, e.toString(), e);
     } finally {
+      JdbcUtil.close(rs);
       JdbcUtil.close(conn);
     }
 
@@ -485,6 +497,7 @@ public class MnodeStore implements AlarmListener {
   public MnodeEntry load(HashKey id)
   {
     CacheMapConnection conn = null;
+    ResultSet rs = null;
 
     try {
       conn = getConnection();
@@ -492,7 +505,7 @@ public class MnodeStore implements AlarmListener {
       PreparedStatement pstmt = conn.prepareLoad();
       pstmt.setBytes(1, id.getHash());
 
-      ResultSet rs = pstmt.executeQuery();
+      rs = pstmt.executeQuery();
 
       if (rs.next()) {
         byte []valueHash = rs.getBytes(1);
@@ -538,6 +551,8 @@ public class MnodeStore implements AlarmListener {
     } catch (SQLException e) {
       log.log(Level.FINE, e.toString(), e);
     } finally {
+      JdbcUtil.close(rs);
+      
       if (conn != null)
         conn.close();
     }
@@ -710,12 +725,13 @@ public class MnodeStore implements AlarmListener {
   public long getCount()
   {
     CacheMapConnection conn = null;
+    ResultSet rs = null;
 
     try {
       conn = getConnection();
       PreparedStatement stmt = conn.prepareCount();
 
-      ResultSet rs = stmt.executeQuery();
+      rs = stmt.executeQuery();
 
       if (rs != null && rs.next()) {
         long value = rs.getLong(1);
@@ -729,6 +745,8 @@ public class MnodeStore implements AlarmListener {
     } catch (SQLException e) {
       log.log(Level.FINE, e.toString(), e);
     } finally {
+      JdbcUtil.close(rs);
+      
       conn.close();
     }
 

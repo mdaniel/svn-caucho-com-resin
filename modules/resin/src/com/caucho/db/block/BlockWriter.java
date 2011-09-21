@@ -48,7 +48,7 @@ public class BlockWriter extends TaskWorker {
   private int _writeQueueMax = 256;
   private final ArrayList<Block> _writeQueue = new ArrayList<Block>();
   
-  private final BlockWriteQueue _blockWriteQueue = new BlockWriteQueue();
+  //private final BlockWriteQueue _blockWriteQueue = new BlockWriteQueue();
   
   BlockWriter(BlockStore store)
   {
@@ -57,10 +57,16 @@ public class BlockWriter extends TaskWorker {
     store.getReadWrite();
   }
 
+  void addDirtyBlock(Block block)
+  {
+    addDirtyBlockNoWake(block);
+    
+    wake();
+  }
   /**
    * Adds a block that's needs to be flushed.
    */
-  void addDirtyBlock(Block block)
+  void addDirtyBlockNoWake(Block block)
   {
     synchronized (_writeQueue) {
       if (_writeQueueMax < _writeQueue.size()) {
@@ -74,13 +80,14 @@ public class BlockWriter extends TaskWorker {
 
       _writeQueue.add(block);
     }
-    wake();
-    
+
     /*
-    if (! _blockWriteQueue.isEmpty())
-      wake();
+    synchronized (_blockWriteQueue) {
+      if (! _blockWriteQueue.isEmpty())
+        wake();
     
-    _blockWriteQueue.addDirtyBlock(block);
+      _blockWriteQueue.addDirtyBlock(block);
+    }
     */
   }
 
@@ -101,6 +108,12 @@ public class BlockWriter extends TaskWorker {
         }
       }
     }
+
+    /*
+    synchronized (_blockWriteQueue) {
+      writeBlock = _blockWriteQueue.findBlock(blockId);
+    }
+    */
     
     if (writeBlock != null)
       return writeBlock.copyToBlock(block);

@@ -9,12 +9,19 @@
 
   <chapter title="Deployment">
     <linked-section link="admin/deploy.xtp" />
+  </chapter>
+  
+  <chapter title="Deployment: Cloud">
+    <linked-section link="admin/deploy-cloud.xtp" />
+  </chapter>
+
+  <chapter title="Deployment: Command-Line">
     <linked-section link="admin/deploy-command-line.xtp" />
+  </chapter>
     <!--
     <linked-section link="admin/deploy-git-architecture.xtp" />
-    -->
     <linked-section link="admin/deploy-ant-maven.xtp" />
-  </chapter>
+    -->
 
   <chapter title="Clustering">
     <linked-section link="admin/clustering-overview.xtp" />

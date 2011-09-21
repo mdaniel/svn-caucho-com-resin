@@ -33,6 +33,7 @@ import com.caucho.hessian.io.Hessian2Input;
 import com.caucho.hessian.io.Hessian2Output;
 import com.caucho.hessian.io.HessianDebugInputStream;
 import com.caucho.hessian.io.HessianDebugOutputStream;
+import com.caucho.util.FreeList;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -48,6 +49,9 @@ public class HessianSerializer implements CacheSerializer
   private static final Logger log
     = Logger.getLogger(HessianSerializer.class.getName());
   
+  private FreeList<Hessian2Output> _hessianFreeList
+    = new FreeList<Hessian2Output>(32);
+  
   /**
    * Serialize the data
    */
@@ -58,11 +62,20 @@ public class HessianSerializer implements CacheSerializer
     if (log.isLoggable(Level.FINEST))
       os = new HessianDebugOutputStream(os, log, Level.FINEST);
 
-    Hessian2Output hOut = new Hessian2Output(os);
+    Hessian2Output hOut;
+    
+    hOut = _hessianFreeList.allocate();
+    
+    if (hOut == null)
+      hOut = new Hessian2Output();
+    
+    hOut.init(os);
 
     hOut.writeObject(value);
 
     hOut.close();
+    
+    _hessianFreeList.free(hOut);
   }
   
   /**

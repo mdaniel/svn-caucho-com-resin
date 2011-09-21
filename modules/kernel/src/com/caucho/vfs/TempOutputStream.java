@@ -90,6 +90,7 @@ public class TempOutputStream extends OutputStream
     }
   }
 
+  @Override
   public void write(byte []buffer)
   {
     write(buffer, 0, buffer.length);
@@ -198,9 +199,14 @@ public class TempOutputStream extends OutputStream
   public void writeToStream(OutputStream os)
     throws IOException
   {
-    for (TempBuffer ptr = _head; ptr != null; ptr = ptr._next) {
+    TempBuffer head = _head;
+    _head = null;
+    
+    for (TempBuffer ptr = head; ptr != null; ptr = ptr._next) {
       os.write(ptr.getBuffer(), 0, ptr.getLength());
     }
+    
+    TempBuffer.freeAll(head);
   }
 
   /**

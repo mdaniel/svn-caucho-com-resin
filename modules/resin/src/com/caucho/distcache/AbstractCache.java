@@ -778,12 +778,14 @@ public class AbstractCache
    */
   protected DistCacheEntry getDistCacheEntry(Object key)
   {
-    DistCacheEntry cacheEntry = _entryCache.get(key);
+    DistCacheEntry cacheEntry = null;
+    
+    // cacheEntry = _entryCache.get(key);
 
     if (cacheEntry == null) {
       cacheEntry = _manager.getCacheEntry(key, _config);
 
-      _entryCache.put(key, cacheEntry);
+      // _entryCache.put(key, cacheEntry);
     }
 
     return cacheEntry;
@@ -1040,6 +1042,8 @@ public class AbstractCache
     _isClosed = true;
     
     _localManager.remove(_guid);
+    
+    _manager.closeCache(_guid);
   }
 
   private void initName(String name)
@@ -1161,7 +1165,7 @@ public class AbstractCache
     DistCacheSystem cacheService = DistCacheSystem.getCurrent();
 
     if (cacheService == null)
-      throw new ConfigException(L.l("'{0}' cannot be initialized because it is not in a clustered environment",
+      throw new ConfigException(L.l("'{0}' cannot be initialized because it is not in a Resin environment",
                                     getClass().getSimpleName()));
 
     _manager = cacheService.getDistCacheManager();

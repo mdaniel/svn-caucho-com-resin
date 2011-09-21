@@ -19,51 +19,46 @@
  *
  * You should have received a copy of the GNU General Public License
  * along with Resin Open Source; if not, write to the
- *   Free SoftwareFoundation, Inc.
+ *
+ *   Free Software Foundation, Inc.
  *   59 Temple Place, Suite 330
  *   Boston, MA 02111-1307  USA
  *
- * @author Emil Ong
+ * @author Scott Ferguson
  */
 
-package com.caucho.util;
+package com.caucho.distcache;
 
-import java.io.IOException;
-import java.io.OutputStream;
+import javax.ejb.Startup;
+import javax.inject.Singleton;
+
+import com.caucho.config.Configurable;
 
 /**
- * An OutputStream that writes to nothing.
+ * Cache which stores consistent copies on the cluster segment.
+ *
+ * Using the cache is like using java.util.Map.  To add a new entry,
+ * call <code>cache.put(key, value)</code>.  To get the entry, call
+ * <code>cache.get(key)</code>.
+ *
+ * The cache configuration affects the lifetime, local caching timeouts
+ * and consistency.
  */
-public final class NullOutputStream extends OutputStream {
-  public static final NullOutputStream NULL = new NullOutputStream();
-  
-  @Override
-  public void write(int b)
-    throws IOException
+
+@Singleton
+@Configurable
+@Startup
+public class FileCache extends AbstractCache
+{
+  public FileCache()
   {
+    setScope("local");
   }
 
-  @Override
-  public void write(byte[] buffer)
-    throws IOException
+  public FileCache(String name)
   {
-  }
-
-  @Override
-  public void write(byte[] buffer, int offset, int length)
-    throws IOException
-  {
-  }
-
-  @Override
-  public void flush()
-    throws IOException
-  {
-  }
-
-  @Override
-  public void close()
-    throws IOException
-  {
+    setScope("local");
+    setName(name);
+    init();
   }
 }

@@ -115,7 +115,8 @@ public class GitWorkingTree {
                                            out.openRead());
 
     out = new TempOutputStream();
-    DeflaterOutputStream zipOut = new DeflaterOutputStream(out);
+    // DeflaterOutputStream zipOut = new DeflaterOutputStream(out);
+    ResinDeflaterOutputStream zipOut = new ResinDeflaterOutputStream(out);
 
     TempBuffer tBuf = TempBuffer.allocate();
     byte []buffer = tBuf.getBuffer();

@@ -65,6 +65,7 @@ public class Sha256OutputStream extends OutputStream {
     return _hash;
   }
 
+  @Override
   public void write(int value)
     throws IOException
   {
@@ -73,6 +74,7 @@ public class Sha256OutputStream extends OutputStream {
     _digest.update((byte) value);
   }
 
+  @Override
   public void write(byte []buffer, int offset, int length)
     throws IOException
   {

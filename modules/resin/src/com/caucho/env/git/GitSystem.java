@@ -733,7 +733,8 @@ public class GitSystem extends AbstractResinSubSystem
     TempBuffer buf = TempBuffer.allocate();
 
     try {
-      DeflaterOutputStream out = new DeflaterOutputStream(os);
+      // DeflaterOutputStream out = new DeflaterOutputStream(os);
+      ResinDeflaterOutputStream out = new ResinDeflaterOutputStream(os);
 
       MessageDigest md = MessageDigest.getInstance("SHA-1");
 

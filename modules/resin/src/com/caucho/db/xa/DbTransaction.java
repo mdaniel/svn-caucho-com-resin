@@ -447,7 +447,6 @@ public class DbTransaction extends StoreTransaction {
     }
 
     ArrayList<Block> updateBlocks = _updateBlocks;
-    _updateBlocks = null;
     
     if (updateBlocks != null) {
       while (updateBlocks.size() > 0) {

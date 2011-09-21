@@ -126,16 +126,12 @@ public class HashKey implements Serializable {
   @Override
   public int hashCode()
   {
-    int hash = 37;
-
     byte []buf = _hash;
-    int len = buf.length;
     
-    for (int i = 0; i < len; i++) {
-      hash = 65521 * hash + buf[i];
-    }
-
-    return hash;
+    return ((buf[0] << 24)
+           + (buf[1] << 16)
+           + (buf[2] << 8)
+           + (buf[3]));
   }
 
   /**
@@ -160,6 +156,29 @@ public class HashKey implements Serializable {
       return false;
 
     for (int i = 0; i < len; i++) {
+      if (hashA[i] != hashB[i])
+        return false;
+    }
+
+    return true;
+  }
+
+  /**
+   * Check for equality
+   */
+  public static boolean equals(byte []hashA, byte []hashB)
+  {
+    if (hashA == hashB)
+      return true;
+    else if (hashA == null || hashB == null)
+      return false;
+
+    int len = hashA.length;
+
+    if (len != hashB.length)
+      return false;
+
+    for (int i = len - 1; i >= 0; i--) {
       if (hashA[i] != hashB[i])
         return false;
     }

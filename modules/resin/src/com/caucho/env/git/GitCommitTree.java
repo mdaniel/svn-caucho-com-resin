@@ -164,7 +164,8 @@ public class GitCommitTree {
     throws IOException
   {
     TempOutputStream os = new TempOutputStream();
-    DeflaterOutputStream out = new DeflaterOutputStream(os);
+    // DeflaterOutputStream out = new DeflaterOutputStream(os);
+    ResinDeflaterOutputStream out = new ResinDeflaterOutputStream(os);
     TempBuffer tBuf = TempBuffer.allocate();
 
     try {

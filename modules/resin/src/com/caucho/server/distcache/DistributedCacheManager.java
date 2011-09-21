@@ -38,18 +38,26 @@ import com.caucho.distcache.AbstractCache;
 import com.caucho.distcache.CacheSerializer;
 import com.caucho.distcache.ExtCacheEntry;
 import com.caucho.env.distcache.CacheDataBacking;
+import com.caucho.util.FreeList;
 import com.caucho.util.HashKey;
+import com.caucho.util.LruCache;
 
 /**
  * Manages the distributed cache
  */
 abstract public class DistributedCacheManager
 {
+  private FreeList<KeyHashStream> _keyStreamFreeList
+    = new FreeList<KeyHashStream>(32);
+  
+  private LruCache<Object,HashKey> _keyCache;
+  
   /**
    * Starts the service
    */
   public void start()
   {
+    _keyCache = new LruCache<Object,HashKey>(64 * 1024);
   }
 
   /**
@@ -121,22 +129,50 @@ abstract public class DistributedCacheManager
   {
   }
 
+  public void closeCache(String guid)
+  {
+    _keyCache.clear();
+  }
+
+  protected HashKey createHashKey(Object key, CacheConfig config)
+  {
+    HashKey hashKey = _keyCache.get(key);
+    
+    if (hashKey == null) {
+      hashKey = createHashKeyImpl(key, config);
+      
+      _keyCache.put(key, hashKey);
+    }
+    
+    return hashKey;
+  }
+  
   /**
    * Returns the key hash
    */
-  protected HashKey createHashKey(Object key, CacheConfig config)
+  protected HashKey createHashKeyImpl(Object key, CacheConfig config)
   {
     try {
-      MessageDigest digest
-        = MessageDigest.getInstance(HashManager.HASH_ALGORITHM);
 
-      NullDigestOutputStream dOut = new NullDigestOutputStream(digest);
-
-      Object []fullKey = new Object[] { config.getGuid(), key };
+      KeyHashStream dOut = _keyStreamFreeList.allocate();
       
-      config.getKeySerializer().serialize(fullKey, dOut);
+      if (dOut == null) {
+        MessageDigest digest
+          = MessageDigest.getInstance(HashManager.HASH_ALGORITHM);
+      
+        dOut = new KeyHashStream(digest);
+      }
+      
+      dOut.init();
+
+      CacheSerializer keySerializer = config.getKeySerializer();
+      
+      keySerializer.serialize(config.getGuid(), dOut);
+      keySerializer.serialize(key, dOut);
 
       HashKey hashKey = new HashKey(dOut.digest());
+      
+      _keyStreamFreeList.free(dOut);
 
       return hashKey;
     } catch (Exception e) {
@@ -153,7 +189,7 @@ abstract public class DistributedCacheManager
       MessageDigest digest
         = MessageDigest.getInstance(HashManager.HASH_ALGORITHM);
 
-      NullDigestOutputStream dOut = new NullDigestOutputStream(digest);
+      KeyHashStream dOut = new KeyHashStream(digest);
 
       keySerializer.serialize(key, dOut);
 
@@ -171,19 +207,26 @@ abstract public class DistributedCacheManager
     return getClass().getSimpleName() + "[]";
   }
 
-  static class NullDigestOutputStream extends OutputStream {
+  static class KeyHashStream extends OutputStream {
     private MessageDigest _digest;
 
-    NullDigestOutputStream(MessageDigest digest)
+    KeyHashStream(MessageDigest digest)
     {
       _digest = digest;
     }
+    
+    void init()
+    {
+      _digest.reset();
+    }
 
+    @Override
     public void write(int value)
     {
       _digest.update((byte) value);
     }
 
+    @Override
     public void write(byte []buffer, int offset, int length)
     {
       _digest.update(buffer, offset, length);

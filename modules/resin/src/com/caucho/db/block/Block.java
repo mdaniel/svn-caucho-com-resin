@@ -394,7 +394,7 @@ public final class Block implements SyncCacheListener {
   {
     if ((_useCount.get() > 1 || _dirtyRange.get() == INIT_DIRTY)
         && toWriteQueued()) {
-      _store.getWriter().addDirtyBlock(this);
+      _store.getWriter().addDirtyBlockNoWake(this);
     }
     
     releaseUse();

@@ -46,7 +46,9 @@ public class BlockWriteQueue {
   private final static Logger log
     = Logger.getLogger(BlockWriteQueue.class.getName());
   
-  private final int _queueSize = 256;
+  private final int _queueSize = 1024;
+  
+  // private final Block []_writeQueue;
   private final AtomicReferenceArray<Block> _writeQueue
     = new AtomicReferenceArray<Block>(_queueSize);
   
@@ -102,7 +104,23 @@ public class BlockWriteQueue {
     
     return false;
   }
-  
+
+  Block findBlock(long blockId)
+  {
+    int head = _head.get();
+    int tail = _tail.get();
+    
+    for (; head != tail; head = (head + _queueSize - 1) % _queueSize) {
+      Block testBlock = _writeQueue.get(head);
+      
+      if (testBlock != null && testBlock.getBlockId() == blockId) {
+        return testBlock;
+      }
+    }
+    
+    return null;
+  }
+ 
   void waitForComplete(long timeout)
   {
     long expireTime = Alarm.getCurrentTimeActual() + timeout;

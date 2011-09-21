@@ -198,6 +198,18 @@ class IntColumn extends Column {
   }
   
   /**
+   * Returns a long value from the column.
+   *
+   * @param block the block's buffer
+   * @param rowOffset the offset of the row in the block
+   */
+  @Override
+  public double getDouble(long blockId, byte []block, int rowOffset)
+  {
+    return getInteger(blockId, block, rowOffset);
+  }
+  
+  /**
    * Sets the column based on an expression.
    *
    * @param block the block's buffer

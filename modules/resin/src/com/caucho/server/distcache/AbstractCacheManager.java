@@ -52,6 +52,8 @@ import com.caucho.env.distcache.CacheDataBacking;
 import com.caucho.env.service.ResinSystem;
 import com.caucho.inject.Module;
 import com.caucho.util.Alarm;
+import com.caucho.util.NullOutputStream;
+import com.caucho.util.ResinDeflaterOutputStream;
 import com.caucho.util.HashKey;
 import com.caucho.util.L10N;
 import com.caucho.util.LruCache;
@@ -80,6 +82,8 @@ abstract public class AbstractCacheManager<E extends DistCacheEntry>
   
   private ConcurrentHashMap<HashKey,CacheMnodeListener> _cacheListenMap
     = new ConcurrentHashMap<HashKey,CacheMnodeListener>();
+  
+  private boolean _isCacheListen;
   
   private final LruCache<HashKey, E> _entryCache
     = new LruCache<HashKey, E>(64 * 1024);
@@ -117,6 +121,7 @@ abstract public class AbstractCacheManager<E extends DistCacheEntry>
   public void addCacheListener(HashKey cacheKey, CacheMnodeListener listener)
   {
     _cacheListenMap.put(cacheKey, listener);
+    _isCacheListen = true;
   }
 
   /**
@@ -1003,7 +1008,7 @@ abstract public class AbstractCacheManager<E extends DistCacheEntry>
                                    oldEntryValue,
                                    mnodeUpdate);
 
-    if (mnodeValue.getCacheHash() != null && _cacheListenMap.size() > 0) {
+    if (mnodeValue.getCacheHash() != null && _isCacheListen) {
       HashKey cacheKey = HashKey.create(mnodeValue.getCacheHash());
       
       CacheMnodeListener listener = _cacheListenMap.get(cacheKey);
@@ -1019,8 +1024,8 @@ abstract public class AbstractCacheManager<E extends DistCacheEntry>
                                   Object value,
                                   CacheSerializer serializer)
   {
-    HashKey oldValueHash = (mnodeValue != null
-                            ? mnodeValue.getValueHashKey()
+    byte [] oldValueHash = (mnodeValue != null
+                            ? mnodeValue.getValueHash()
                             : null);
     
     TempOutputStream os = null;
@@ -1029,11 +1034,14 @@ abstract public class AbstractCacheManager<E extends DistCacheEntry>
       os = new TempOutputStream();
 
       Sha256OutputStream mOut = new Sha256OutputStream(os);
-      DeflaterOutputStream gzOut = new DeflaterOutputStream(mOut);
+      //DeflaterOutputStream gzOut = new DeflaterOutputStream(mOut);
+      //ResinDeflaterOutputStream gzOut = new ResinDeflaterOutputStream(mOut);
 
-      serializer.serialize(value, gzOut);
+      //serializer.serialize(value, gzOut);
+      serializer.serialize(value, mOut);
 
-      gzOut.finish();
+      // gzOut.finish();
+      // gzOut.close();
       mOut.close();
 
       byte[] hash = mOut.getDigest();
@@ -1042,7 +1050,7 @@ abstract public class AbstractCacheManager<E extends DistCacheEntry>
 
       int length = os.getLength();
 
-      if (valueHash.equals(oldValueHash))
+      if (HashKey.equals(hash, oldValueHash))
         return new DataItem(valueHash, length);
 
       StreamSource source = new StreamSource(os);
@@ -1056,7 +1064,7 @@ abstract public class AbstractCacheManager<E extends DistCacheEntry>
       throw new RuntimeException(e);
     } finally {
       if (os != null)
-        os.close();
+        os.destroy();
     }
   }
 
@@ -1065,30 +1073,31 @@ abstract public class AbstractCacheManager<E extends DistCacheEntry>
    */
   @Override
   final public byte[] calculateValueHash(Object value,
-                                          CacheConfig config)
+                                         CacheConfig config)
   {
     CacheSerializer serializer = config.getValueSerializer();
-    TempOutputStream os = null;
+    // TempOutputStream os = null;
     
     try {
-      os = new TempOutputStream();
+      NullOutputStream os = NullOutputStream.NULL;
 
       Sha256OutputStream mOut = new Sha256OutputStream(os);
-      DeflaterOutputStream gzOut = new DeflaterOutputStream(mOut);
+      // DeflaterOutputStream gzOut = new DeflaterOutputStream(mOut);
+      ResinDeflaterOutputStream gzOut = new ResinDeflaterOutputStream(mOut);
 
       serializer.serialize(value, gzOut);
 
-      gzOut.finish();
+      // gzOut.finish();
+      gzOut.close();
       mOut.close();
+      
+      os.close();
 
       byte[] hash = mOut.getDigest();
 
       return hash;
     } catch (Exception e) {
       throw new RuntimeException(e);
-    } finally {
-      if (os != null)
-        os.close();
     }
   }
 
@@ -1118,16 +1127,15 @@ abstract public class AbstractCacheManager<E extends DistCacheEntry>
       int length = os.getLength();
       
       if (valueHash.equals(oldValueHash)) {
-        os.destroy();
         return new DataItem(valueHash, length);
       }
-
+      
       StreamSource source = new StreamSource(os);
 
       if (! getDataBacking().saveData(valueHash, source, length))
         throw new RuntimeException(L.l("Can't save the data '{0}'",
                                        valueHash));
-
+      
       return new DataItem(valueHash, length);
     } catch (RuntimeException e) {
       throw e;
@@ -1135,7 +1143,7 @@ abstract public class AbstractCacheManager<E extends DistCacheEntry>
       throw new RuntimeException(e);
     } finally {
       if (os != null)
-        os.close();
+        os.destroy();
     }
   }
 
@@ -1174,11 +1182,12 @@ abstract public class AbstractCacheManager<E extends DistCacheEntry>
       InputStream is = os.openInputStream();
 
       try {
-        InflaterInputStream gzIn = new InflaterInputStream(is);
+        // InflaterInputStream gzIn = new InflaterInputStream(is);
 
-        Object value = serializer.deserialize(gzIn);
+        // Object value = serializer.deserialize(gzIn);
+        Object value = serializer.deserialize(is);
 
-        gzIn.close();
+        // gzIn.close();
 
         return value;
       } finally {
@@ -1190,7 +1199,7 @@ abstract public class AbstractCacheManager<E extends DistCacheEntry>
       return null;
     } finally {
       if (os != null)
-        os.close();
+        os.destroy();
     }
   }
 

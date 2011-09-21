@@ -103,25 +103,27 @@ public class ConnectionImpl implements java.sql.Connection {
 
   public DbTransaction getTransaction()
   {
-    if (_isAutoCommit) {
-      DbTransaction xa = DbTransaction.create(this);
-      // XXX: value?
-      // xa.setTransactionTimeout(15000);
-      xa.setAutoCommit(true);
-      return xa;
-    }
-    else if (_xa == null) {
+    if (_xa == null) {
       _xa = DbTransaction.create(this);
-      
-      if (log.isLoggable(Level.FINER))
-        log.finer("start transaction " + this + " " + _xa);
     }
-
+    
+    if (_isAutoCommit) {
+            // XXX: value?
+      // xa.setTransactionTimeout(15000);
+      _xa.setAutoCommit(true);
+      
+      return _xa;
+    }
+      
+    if (log.isLoggable(Level.FINER))
+      log.finer("start transaction " + this + " " + _xa);
+    
     _xa.setAutoCommit(false);
 
     return _xa;
   }
   
+  @Override
   public void commit()
     throws SQLException
   {
@@ -129,12 +131,12 @@ public class ConnectionImpl implements java.sql.Connection {
       log.finer("commit " + this + " " + _xa);
     
     DbTransaction xa = _xa;
-    _xa = null;
     
     if (xa != null)
       xa.commit();
   }
 
+  @Override
   public void rollback()
     throws SQLException
   {
