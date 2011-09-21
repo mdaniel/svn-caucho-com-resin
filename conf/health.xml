@@ -340,7 +340,7 @@
   <!-- meter graphs -->
   
   <health:MeterGraphPage>
-    <name>Summary</name>
+    <name>Snapshot</name>
     <period>6h</period>
     <columns>3</columns>
       

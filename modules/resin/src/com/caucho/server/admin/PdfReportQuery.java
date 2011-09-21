@@ -39,10 +39,10 @@ public class PdfReportQuery implements java.io.Serializable
   private long _profileTime;
   private long _samplePeriod;
   private boolean _isSnapshot;
+  private boolean _isWatchdog;
   
   public PdfReportQuery()
   {
-    
   }
 
   public PdfReportQuery(String path,
@@ -51,7 +51,8 @@ public class PdfReportQuery implements java.io.Serializable
                         String logDirectory,
                         long profileTime,
                         long samplePeriod,
-                        boolean isSnapshot)
+                        boolean isSnapshot,
+                        boolean isWatchdog)
   {
     _path = path;
     _report = report;
@@ -60,6 +61,7 @@ public class PdfReportQuery implements java.io.Serializable
     _profileTime = profileTime;
     _samplePeriod = samplePeriod;
     _isSnapshot = isSnapshot;
+    _isWatchdog = isWatchdog;
   }
   
   public String getPath()
@@ -130,6 +132,11 @@ public class PdfReportQuery implements java.io.Serializable
   public void setProfileTime(long profileTime)
   {
     _profileTime = profileTime;
+  }
+  
+  public boolean isWatchdog()
+  {
+    return _isWatchdog;
   }
 
   @Override

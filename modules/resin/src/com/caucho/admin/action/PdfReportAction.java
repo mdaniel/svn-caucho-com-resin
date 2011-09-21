@@ -6,12 +6,15 @@
 
 package com.caucho.admin.action;
 
+import java.io.IOException;
 import java.util.logging.Logger;
 
+import javax.mail.internet.InternetAddress;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
 import com.caucho.config.ConfigException;
+import com.caucho.hemp.services.MailService;
 import com.caucho.quercus.QuercusContext;
 import com.caucho.quercus.env.Env;
 import com.caucho.quercus.env.Value;
@@ -19,25 +22,34 @@ import com.caucho.quercus.page.QuercusPage;
 import com.caucho.server.http.StubServletRequest;
 import com.caucho.server.http.StubServletResponse;
 import com.caucho.server.resin.Resin;
-import com.caucho.util.*;
-import com.caucho.vfs.*;
+import com.caucho.util.Alarm;
+import com.caucho.util.IoUtil;
+import com.caucho.util.L10N;
+import com.caucho.util.QDate;
+import com.caucho.vfs.Path;
+import com.caucho.vfs.TempStream;
+import com.caucho.vfs.Vfs;
+import com.caucho.vfs.WriteStream;
 
 public class PdfReportAction implements AdminAction
 {
   private static final L10N L = new L10N(PdfReportAction.class);
-  private static final Logger log
-    = Logger.getLogger(PdfReportAction.class.getName());
-
   private String _serverId;
   private String _logDirectory;
   
   private String _path;
   private long _period = 7 * 24 * 3600 * 1000L;
-  private String _report = "Summary";
+  private String _report;
+  private String _title;
+
+  private MailService _mailService = new MailService();
+  private String _mailTo;
   
   private boolean _isSnapshot;
   private long _profileTime;
   private long _profileTick;
+  
+  private boolean _isWatchdog;
   
   private QuercusContext _quercus;
   
@@ -64,6 +76,16 @@ public class PdfReportAction implements AdminAction
     _report = report;
   }
   
+  public String getTitle()
+  {
+    return _title;
+  }
+  
+  public void setTitle(String title)
+  {
+    _title = title;
+  }
+  
   public long getPeriod()
   {
     return _period;
@@ -82,6 +104,16 @@ public class PdfReportAction implements AdminAction
   public void setSnapshot(boolean isSnapshot)
   {
     _isSnapshot = isSnapshot;
+  }
+  
+  public void setWatchdog(boolean isWatchdog)
+  {
+    _isWatchdog = isWatchdog;
+  }
+  
+  public boolean isWatchdog()
+  {
+    return _isWatchdog;
   }
   
   public long getProfileTime()
@@ -114,6 +146,30 @@ public class PdfReportAction implements AdminAction
     _logDirectory = logDirectory;
   }
   
+  public void setMailTo(String mailTo)
+  {
+    _mailTo = mailTo;
+  }
+  
+  private String calculateReport()
+  {
+    if (_report != null)
+      return _report;
+    else if (isWatchdog())
+      return "Watchdog";
+    else
+      return "Snapshot";
+  }
+  
+  private String calculateTitle()
+  {
+    if (_title != null)
+      return _title;
+    else
+      return calculateReport();
+  }
+
+  
   public void init()
   {
     Resin resin = Resin.getCurrent();
@@ -137,9 +193,10 @@ public class PdfReportAction implements AdminAction
     if (resin != null) {
       if (_path == null)
         _path = resin.getResinHome() + "/doc/admin/pdf-gen.php";
+      
       _phpPath = Vfs.lookup(_path);
     } else if (_path != null) {
-        _phpPath = Vfs.lookup(_path);
+      _phpPath = Vfs.lookup(_path);
     }
     
     if (_phpPath == null) {
@@ -154,13 +211,22 @@ public class PdfReportAction implements AdminAction
     _quercus.setPwd(_phpPath.getParent());
     _quercus.init();
     _quercus.start();
-  }
 
+    if (_mailTo != null) {
+      try {
+        _mailService.addTo(new InternetAddress(_mailTo));
+        _mailService.init();
+      } catch (Exception e) {
+        throw ConfigException.create(e);
+      }
+    }
+  }
+  
   public String execute()
     throws Exception
   {
     Env env = null;
-    
+
     try {
       QuercusPage page = _quercus.parse(_phpPath);
   
@@ -173,10 +239,12 @@ public class PdfReportAction implements AdminAction
       
       env = _quercus.createEnv(page, ws, request, response);
       //env.setGlobalValue("health_service", env.wrapJava(healthService));
-      env.setGlobalValue("pdf_name", env.wrapJava(_report));
+      env.setGlobalValue("g_report", env.wrapJava(calculateReport()));
+      env.setGlobalValue("g_title", env.wrapJava(calculateTitle()));
       env.setGlobalValue("period", env.wrapJava(_period / 1000));
 
       env.setGlobalValue("g_is_snapshot", env.wrapJava(isSnapshot()));
+      env.setGlobalValue("g_is_watchdog", env.wrapJava(isWatchdog()));
 
       if (getProfileTime() > 0) {
         env.setGlobalValue("profile_time", 
@@ -193,29 +261,74 @@ public class PdfReportAction implements AdminAction
   
       ws.close();
         
-      if (result.toString().equals("ok")) {
-        String date = QDate.formatLocal(Alarm.getCurrentTime(), "%Y%m%dT%H%M");
-        Path path = _logPath.lookup(String.format("%s-%s-%s.pdf",
-                                                  _serverId,
-                                                  _report,
-                                                  date));
-        path.getParent().mkdirs();
-        
-        WriteStream os = path.openWrite();
-        try {
-          ts.writeToStream(os);
-        } finally {
-          IoUtil.close(os);
-        }
-        
-        return(L.l("generated {0}", path));
-      }
-      else {
+      if (! result.toString().equals("ok")) {
         throw new Exception(L.l("generation failed: {0}", result.toString()));
       }
+      
+      if (_mailTo != null && ! "".equals(_mailTo)) {
+        mailPdf(ts);
+        
+        return(L.l("mailed to {0}", _mailTo));
+        
+      }
+        
+      Path path = writePdfToFile(ts);
+        
+      return(L.l("generated {0}", path));
     } finally {
       if (env != null)
         env.close();
     }
+  }
+  
+  private void mailPdf(TempStream ts)
+    throws IOException
+  {
+    String date = QDate.formatLocal(Alarm.getCurrentTime(), "%Y%m%dT%H%M");
+    
+    String fileName = String.format("%s-%s-%s.pdf",
+                                    _serverId,
+                                    calculateTitle(),
+                                    date);
+    
+    String userDate = QDate.formatLocal(Alarm.getCurrentTime(),
+                                        "%Y-%m-%d %H:%M");
+    
+    String subject = "[Resin] PDF Report: " + calculateTitle() + "@" + _serverId
+                     + " " + userDate;
+    
+    StringBuilder text = new StringBuilder();
+    
+    text.append("Resin generated PDF Report");
+    text.append("\n");
+    text.append("\nReport: ").append(calculateReport());
+    text.append("\nGenerated: ").append(userDate);
+    text.append("\nServer: ").append(_serverId);
+    
+    _mailService.sendWithAttachment(subject,
+                                    text.toString(),
+                                    "application/pdf",
+                                    fileName,
+                                    ts.openInputStream());
+  }
+  
+  private Path writePdfToFile(TempStream ts)
+    throws IOException
+  {
+    String date = QDate.formatLocal(Alarm.getCurrentTime(), "%Y%m%dT%H%M");
+    Path path = _logPath.lookup(String.format("%s-%s-%s.pdf",
+                                              _serverId,
+                                              calculateTitle(),
+                                              date));
+    path.getParent().mkdirs();
+    
+    WriteStream os = path.openWrite();
+    try {
+      ts.writeToStream(os);
+    } finally {
+      IoUtil.close(os);
+    }
+    
+    return path;
   }
 }

@@ -89,8 +89,12 @@
     
       <item link="health-checking.xtp" title="Health Checking"
             description="Health checks, conditions, and remediation actions"/>
+      
       <item link="health-meters.xtp" title="Meters"
             description="Statistic graphing with meters"/>
+      
+      <item link="health-report.xtp" title="Report"
+            description="Health Reporting"/>
             
     </item>
     

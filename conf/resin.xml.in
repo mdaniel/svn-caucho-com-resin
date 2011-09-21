@@ -107,6 +107,7 @@
         <path>${resin.root}/doc/admin/pdf-gen.php</path>
         <report>Summary</report>
         <snapshot/>
+        <!-- <mailto>nobody@example.com</mailto> -->
         <!-- <profile-time>60s</profile-time> -->
         <health:IfCron value="0 0 * * 0"/>
       </health:PdfReport>

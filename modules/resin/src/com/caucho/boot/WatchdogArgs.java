@@ -280,6 +280,19 @@ class WatchdogArgs
 
     return null;
   }
+  
+  public boolean getArgBoolean(String arg, boolean defaultValue)
+  {
+    String value = getArg(arg);
+    
+    if (value == null)
+      return defaultValue;
+    
+    if ("no".equals(value) || "false".equals(value))
+      return false;
+    else
+      return true;
+  }
 
   public boolean hasOption(String option)
   {

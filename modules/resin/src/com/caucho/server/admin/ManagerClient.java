@@ -253,7 +253,8 @@ public class ManagerClient
                           String logDirectory,
                           long profileTime,
                           long samplePeriod,
-                          boolean isSnapshot)
+                          boolean isSnapshot,
+                          boolean isWatchdog)
   {
     PdfReportQuery query = new PdfReportQuery(path, 
                                               report, 
@@ -261,7 +262,8 @@ public class ManagerClient
                                               logDirectory,
                                               profileTime,
                                               samplePeriod,
-                                              isSnapshot);
+                                              isSnapshot,
+                                              isWatchdog);
     
     long timeout;
     

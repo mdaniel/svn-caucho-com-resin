@@ -64,12 +64,8 @@ public class PdfReportCommand extends AbstractManagementCommand
     if (samplePeriodArg != null)
       samplePeriod = Period.toPeriod(samplePeriodArg, 1);
 
-    boolean isSnapshot = true;
-
-    String snapshotArg = args.getArg("-snapshot");
-
-    if ("no".equals(snapshotArg) || "false".equals(snapshotArg))
-      isSnapshot = false;
+    boolean isSnapshot = args.getArgBoolean("-snapshot", true);
+    boolean isWatchdog = args.getArgBoolean("-watchdog", false);
 
     String result = managerClient.pdfReport(path,
                                             report,
@@ -77,7 +73,8 @@ public class PdfReportCommand extends AbstractManagementCommand
                                             logDirectory,
                                             profileTime,
                                             samplePeriod,
-                                            isSnapshot);
+                                            isSnapshot,
+                                            isWatchdog);
 
     System.out.println(result);
 

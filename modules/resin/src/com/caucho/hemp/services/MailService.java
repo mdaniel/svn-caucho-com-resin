@@ -29,15 +29,24 @@
 
 package com.caucho.hemp.services;
 
+import java.io.ByteArrayOutputStream;
+import java.io.InputStream;
 import java.util.*;
 import java.util.logging.*;
 
+import javax.activation.DataHandler;
+import javax.activation.DataSource;
 import javax.mail.*;
 import javax.mail.Message.RecipientType;
+import javax.mail.internet.InternetHeaders;
+import javax.mail.internet.MimeBodyPart;
 import javax.mail.internet.MimeMessage;
+import javax.mail.internet.MimeMultipart;
+import javax.mail.util.ByteArrayDataSource;
 
 import com.caucho.config.ConfigException;
 import com.caucho.util.L10N;
+import com.caucho.vfs.TempBuffer;
 
 /**
  * mail service
@@ -140,6 +149,62 @@ public class MailService
       if(subject != null)
         msg.setSubject(subject);
       msg.setContent(body, "text/plain");
+
+      send(msg);
+    } catch (RuntimeException e) {
+      throw e;
+    } catch (Exception e) {
+      throw new RuntimeException(e);
+    }
+  }
+
+  /**
+   * Sends to a mailbox
+   */
+  public void sendWithAttachment(String subject, 
+                                 String textBody,
+                                 String attachmentType,
+                                 String attachmentName,
+                                 InputStream is)
+  {
+    try {
+      MimeMessage msg = new MimeMessage(getSession());
+
+      if(_from.length > 0)
+        msg.addFrom(_from);
+      msg.addRecipients(RecipientType.TO, _to);
+      if(subject != null)
+        msg.setSubject(subject);
+      
+      // msg.setContent(textBody, "multipart/mime");
+      
+      MimeMultipart multipart = new MimeMultipart();
+      
+      MimeBodyPart textBodyPart = new MimeBodyPart();
+      textBodyPart.setText(textBody);
+      multipart.addBodyPart(textBodyPart);
+      
+      ByteArrayOutputStream bos = new ByteArrayOutputStream();
+      TempBuffer tb = TempBuffer.allocate();
+      byte []buffer = tb.getBuffer();
+      int len;
+      
+      while ((len = is.read(buffer, 0, buffer.length)) >= 0) {
+        bos.write(buffer, 0, len);
+      }
+      bos.close();
+      byte []content = bos.toByteArray();
+      TempBuffer.free(tb);
+      
+      DataSource dataSource
+        = new ByteArrayDataSource(content, attachmentType);
+      
+      MimeBodyPart pdfBodyPart = new MimeBodyPart();
+      pdfBodyPart.setDataHandler(new DataHandler(dataSource));
+      pdfBodyPart.setFileName(attachmentName);
+      multipart.addBodyPart(pdfBodyPart);
+      
+      msg.setContent(multipart);
 
       send(msg);
     } catch (RuntimeException e) {

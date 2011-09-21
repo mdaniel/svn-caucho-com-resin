@@ -7,6 +7,13 @@ define("STEP", 1);
 define("HOUR", 3600);
 define("DAY", 24 * HOUR);
 
+if (! $g_report)
+  $g_report = $_REQUEST["report"];
+
+if (! $g_title)
+  $g_title = $_REQUEST["title"];
+
+
 if ($g_is_snapshot || $_REQUEST["snapshot"]) {
   $snapshot = $g_mbean_server->lookup("resin:type=SnapshotService");
 
@@ -42,26 +49,32 @@ if ($g_is_snapshot || $_REQUEST["snapshot"]) {
 initPDF();
 startDoc();
 
+$pdf_name = $g_report;
+
 if (! $pdf_name) {
   $pdf_name = $_REQUEST["report"];
   
   if (! $pdf_name) {
-    $pdf_name = "Summary";
+    $pdf_name = "Snapshot";
   }
 }
 
 $mPage = getMeterGraphPage($pdf_name);
 
 if (! $mPage) {
-  $mPage = getMeterGraphPage("Summary");
-  $pageName = $pdf_name;
+  $mPage = getMeterGraphPage("Snapshot");
 }
-else {
-  $pageName = $mPage->name;
 
-  if (! $pageName)
-    $pageName = $pdf_name;
-}    
+$title = $g_title;
+
+if (! $title && $mPage)
+  $title = $mPage->name;
+
+if (! $title)
+  $title = $pdf_name;
+
+if (! $title)
+  $title = "Snapshot";
 
 $columns = $mPage->columns;
 
@@ -130,7 +143,12 @@ $g_canvas->set_header_left("$si - " . $g_server->SelfServer->Name);
 $time = $_REQUEST["time"];
 
 if (! $time) {
-  $time = time() + 5;
+  if ($g_is_watchdog) {
+    $time = $g_server->StartTime->Time / 1000 + 5;
+  }
+  else {
+    $time = time() + 5;
+  }
 }  
 
 $g_end = $time;
