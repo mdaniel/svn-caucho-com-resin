@@ -17,10 +17,12 @@ global $g_tail_objects;
 
 $g_tail_objects = array();
 
-// kill the cache, all pages are uncached and private
-header("Expires: 01 Dec 1994 16:00:00 GMT"); 
-header("Cache-Control: max-age=0,private"); 
-header("Pragma: No-Cache");
+if (function_exists('header')) {
+  // kill the cache, all pages are uncached and private
+  header("Expires: 01 Dec 1994 16:00:00 GMT"); 
+  header("Cache-Control: max-age=0,private"); 
+  header("Pragma: No-Cache");
+}  
 
 function admin_init($query="", $is_refresh=false)
 {

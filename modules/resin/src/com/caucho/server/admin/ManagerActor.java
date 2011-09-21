@@ -340,6 +340,7 @@ public class ManagerActor extends SimpleActor
       action.setPeriod(query.getPeriod());
 
     action.setSnapshot(query.isSnapshot());
+    action.setWatchdog(query.isWatchdog());
 
     if (query.getProfileTime() > 0)
       action.setProfileTime(query.getProfileTime());
