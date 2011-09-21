@@ -84,7 +84,7 @@ public class PdfReportCommand extends AbstractManagementCommand
   @Override
   public void usage()
   {
-    System.err.println(L.l("usage: bin/resin.sh [-conf <file>] pdf-report -user <user> -password <password> [-path <php path>] [-report <report name>] [-period <period>] [-logdir <log path>] [-snapshot <snapshot>] [-profile-time <profile time>] [-sample-period <sample-period>]"));
+    System.err.println(L.l("usage: bin/resin.sh [-conf <file>] pdf-report -user <user> -password <password> [-path <php path>] [-report <report name>] [-period <period>] [-logdir <log path>] [-snapshot] [-profile-time <profile time>] [-sample-period <sample-period>]"));
     System.err.println(L.l(""));
     System.err.println(L.l("description:"));
     System.err.println(L.l("   generates pdf report (Pro version only)"));

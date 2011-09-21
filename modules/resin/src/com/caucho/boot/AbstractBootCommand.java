@@ -36,6 +36,8 @@ import java.util.Set;
 
 public abstract class AbstractBootCommand implements BootCommand {
   private static L10N _L;
+  
+  private HashSet<String> _optionSet = new HashSet<String>();
 
   @Override
   public String getName()
@@ -45,8 +47,6 @@ public abstract class AbstractBootCommand implements BootCommand {
 
   public void validateArgs(String[] args) throws BootArgumentException
   {
-    Set<String> options = getOptions();
-    Set<String> valueKeys = getValueKeys();
     Set<String> intValueKeys = getIntValueKeys();
 
     for (int i = 0; i < args.length; i++) {
@@ -66,29 +66,39 @@ public abstract class AbstractBootCommand implements BootCommand {
         continue;
       }
 
-      if (options.contains(arg))
+      if (isOptionArg(arg))
         continue;
 
-      if (! valueKeys.contains(arg))
-        throw new BootArgumentException(L().l("unknown argument `{0}'", arg));
+      if (! isValueArg(arg))
+        throw new BootArgumentException(L().l("unknown argument '{0}'", arg));
 
       if (i + 1 == args.length)
-        throw new BootArgumentException(L().l("option `{0}' requires a value",
+        throw new BootArgumentException(L().l("option '{0}' requires a value",
                                               arg));
       String value = args[++i];
 
-      if (valueKeys.contains(value) || options.contains(value))
-        throw new BootArgumentException(L().l("option `{0}' requires a value",
+      if (isValueArg(value) || isOptionArg(value))
+        throw new BootArgumentException(L().l("option '{0}' requires a value",
                                               arg));
 
       if (intValueKeys.contains(arg)) {
         try {
           Long.parseLong(value);
         } catch (NumberFormatException e) {
-          throw new BootArgumentException(L().l("`{0}' argument must be a number: `{1}'", arg, value));
+          throw new BootArgumentException(L().l("'{0}' argument must be a number: `{1}'", arg, value));
         }
       }
     }
+  }
+  
+  protected boolean isOptionArg(String arg)
+  {
+    return getOptions().contains(arg);
+  }
+  
+  protected boolean isValueArg(String arg)
+  {
+    return getValueKeys().contains(arg);
   }
 
   private static L10N L()
@@ -102,7 +112,7 @@ public abstract class AbstractBootCommand implements BootCommand {
   @Override
   public Set<String> getOptions()
   {
-    return new HashSet<String>();
+    return _optionSet;
   }
 
   @Override

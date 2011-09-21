@@ -284,7 +284,7 @@ class WatchdogArgs
 
   public String getArgFlag(String arg)
   {
-    for (int i = 0; i + 1 < _argv.length; i++) {
+    for (int i = 0; i < _argv.length; i++) {
       if (_argv[i].equals(arg)
           || _argv[i].equals("-" + arg))
         return _argv[i];
@@ -303,7 +303,7 @@ class WatchdogArgs
   public boolean getArgBoolean(String arg, boolean defaultValue)
   {
     String value = getArgFlag(arg);
-    
+
     if (value == null)
       return defaultValue;
     
