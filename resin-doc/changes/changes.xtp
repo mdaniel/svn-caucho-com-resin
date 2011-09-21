@@ -12,8 +12,9 @@
 
 <s2 title="4.0.23 - snapshot">
 <ul>
+<li>websocket: connection: upgrade may exist with other tokens (#4771, rep by RLM)</li>
 <li>cloud: cross-cluster server topology updates (#4764, rep by Alan Wright)</li>
-<li>  embed: WebAppEmbed undeploy was not cleaning up fully (#4749, rep by A. Knutsen)</li>
+<li>embed: WebAppEmbed undeploy was not cleaning up fully (#4749, rep by A. Knutsen)</li>
 <li>jni: mmap file loading issue in win32 - disabled but shouldn't be throwing exception (#4758, rep by Mathias Langerwall)</li>
 <li>health: PdfReport in resin.xml needs to use resin.root, not resin.home for pdf-gen.php (#4760)</li>
 <li>resin: fixed bug preventing setup.exe and resin.exe support -java-home (#4763, rep by Brian Deng)</li>

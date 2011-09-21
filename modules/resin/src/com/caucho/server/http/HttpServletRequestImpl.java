@@ -1823,7 +1823,8 @@ public final class HttpServletRequestImpl extends AbstractCauchoRequest
                                           getRemoteAddr()));
     }
 
-    if (! "Upgrade".equalsIgnoreCase(connection)) {
+    if (connection == null 
+        || connection.toLowerCase().indexOf("upgrade") < 0) {
       getResponse().sendError(HttpServletResponse.SC_BAD_REQUEST);
       
       throw new IllegalStateException(L.l("HTTP Connection header '{0}' must be 'Upgrade', because the WebSocket protocol requires a Connection: Upgrade header.\n  remote-IP: {1}",
