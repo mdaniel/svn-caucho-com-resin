@@ -144,7 +144,7 @@ $time = $_REQUEST["time"];
 
 if (! $time) {
   if ($g_is_watchdog) {
-    $time = $g_server->StartTime->Time / 1000 + 5;
+    $time = $g_server->StartTime->getTime() / 1000;
   }
   else {
     $time = time() + 5;

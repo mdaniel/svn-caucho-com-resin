@@ -34,11 +34,14 @@ import com.caucho.vfs.WriteStream;
 public class PdfReportAction implements AdminAction
 {
   private static final L10N L = new L10N(PdfReportAction.class);
+  private static final long HOUR = 3600 * 1000L;
+  private static final long DAY = 24 * 3600 * 1000L;
+  
   private String _serverId;
   private String _logDirectory;
   
   private String _path;
-  private long _period = 7 * 24 * 3600 * 1000L;
+  private long _period;
   private String _report;
   private String _title;
 
@@ -168,6 +171,16 @@ public class PdfReportAction implements AdminAction
     else
       return calculateReport();
   }
+  
+  private long calculatePeriod()
+  {
+    if (_period != 0)
+      return _period;
+    else if (isWatchdog())
+      return 2 * HOUR;
+    else
+      return DAY;
+  }
 
   
   public void init()
@@ -241,7 +254,7 @@ public class PdfReportAction implements AdminAction
       //env.setGlobalValue("health_service", env.wrapJava(healthService));
       env.setGlobalValue("g_report", env.wrapJava(calculateReport()));
       env.setGlobalValue("g_title", env.wrapJava(calculateTitle()));
-      env.setGlobalValue("period", env.wrapJava(_period / 1000));
+      env.setGlobalValue("period", env.wrapJava(calculatePeriod() / 1000));
 
       env.setGlobalValue("g_is_snapshot", env.wrapJava(isSnapshot()));
       env.setGlobalValue("g_is_watchdog", env.wrapJava(isWatchdog()));
@@ -268,8 +281,7 @@ public class PdfReportAction implements AdminAction
       if (_mailTo != null && ! "".equals(_mailTo)) {
         mailPdf(ts);
         
-        return(L.l("mailed to {0}", _mailTo));
-        
+        return(L.l("{0} mailed to {1}", calculateTitle(), _mailTo));
       }
         
       Path path = writePdfToFile(ts);

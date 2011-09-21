@@ -106,10 +106,19 @@
       <health:PdfReport>
         <path>${resin.root}/doc/admin/pdf-gen.php</path>
         <report>Summary</report>
+        <period>7d</period>
         <snapshot/>
         <!-- <mailto>nobody@example.com</mailto> -->
         <!-- <profile-time>60s</profile-time> -->
         <health:IfCron value="0 0 * * 0"/>
+      </health:PdfReport>
+
+      <health:PdfReport>
+        <path>${resin.root}/doc/admin/pdf-gen.php</path>
+        <report>Restart</report>
+        <period>2h</period>
+        <!-- <mailto>nobody@example.com</mailto> -->
+        <health:OnRestart/>
       </health:PdfReport>
     </resin:if>
 

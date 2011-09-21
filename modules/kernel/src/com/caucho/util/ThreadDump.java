@@ -235,6 +235,7 @@ public class ThreadDump
     StringBuilder sb = new StringBuilder();
     
     sb.append("{");
+    sb.append("\"create_time\" : \"" + new Date(Alarm.getCurrentTime()) + "\",\n");
     sb.append("\"thread_dump\" : {\n");
     
     ThreadMXBean threadBean = ManagementFactory.getThreadMXBean();

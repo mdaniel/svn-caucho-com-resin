@@ -1677,6 +1677,10 @@ function admin_pdf_thread_dump()
 
   $g_canvas->setDataFontAndSize(8);
 
+  $create_time = $dump["create_time"];
+
+  $g_canvas->writeTextLine("Created at: " . $create_time);
+
   $entries =& $dump["thread_dump"];
 
   admin_pdf_analyze_thread_dump($entries);

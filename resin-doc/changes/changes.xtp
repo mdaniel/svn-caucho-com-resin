@@ -12,6 +12,7 @@
 
 <s2 title="4.0.23 - snapshot">
 <ul>
+<li>hessian: ServiceContext.end wasn't clearing _response pointer (rep by Mattias Jiderhamn)</li>
 <li>health: added mail-to to PdfReport</li>
 <li>websocket: connection: upgrade may exist with other tokens (#4771, rep by RLM)</li>
 <li>cloud: cross-cluster server topology updates (#4764, rep by Alan Wright)</li>
