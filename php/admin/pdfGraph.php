@@ -1489,6 +1489,28 @@ function admin_pdf_draw_log()
   $g_canvas->set_header_right(null);
 }
 
+function admin_pdf_log_messages($canvas, $start, $end)
+{
+  global $log_mbean;
+  
+  $messages = $log_mbean->findMessages("warning",
+                                       $start * 1000,
+                                       $end * 1000);
+
+  if (! $messages || is_empty($message))
+    return;
+
+  $canvas->write_text_newline();
+  $canvas->writeTextLine("Log Messages");  
+  
+  foreach ($messages as $message) {
+    $ts = strftime("%Y-%m-%d %H:%M:%S", $message->timestamp / 1000);
+    $canvas->write_text_x(20, $ts);
+    $canvas->write_text_x(110, $message->level);
+    $canvas->write_text_block_x(150, $message->message);
+  }
+}
+
 function admin_pdf_heap_dump()
 {
   $heap_dump = admin_pdf_snapshot("Resin|HeapDump");

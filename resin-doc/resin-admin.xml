@@ -52,9 +52,13 @@
     <linked-section link="admin/database.xtp" />
   </chapter>
 
-  <chapter title="Health Checks and Meters">
+  <chapter title="Health: Checks and Meters">
     <linked-section link="admin/health-checking.xtp" />
     <linked-section link="admin/health-meters.xtp" />
+  </chapter>
+  
+  <chapter title="Health: Report">
+    <linked-section link="admin/health-report.xtp" />
   </chapter>
 
   <chapter title="Installation">

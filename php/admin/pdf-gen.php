@@ -179,6 +179,13 @@ $g_canvas->write_text_newline();
 $g_canvas->writeTextLine("Data from " . date("Y-m-d H:i", $g_start)
                          . " to " . date("Y-m-d H:i", $g_end));
 
+$start_message = $g_resin->getWatchdogStartMessage();
+
+$g_canvas->write_text_newline();
+$g_canvas->writeTextLine("Start message: " . $start_message);
+
+admin_pdf_log_messages($g_canvas, $g_end - 30 * 60, $g_end);
+
 $full_names = $stat->statisticsNames();
 
 $statList = array();
