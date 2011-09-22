@@ -31,6 +31,9 @@ package com.caucho.xtpdoc;
 
 import javax.xml.stream.XMLStreamException;
 import javax.xml.stream.XMLStreamWriter;
+
+import com.caucho.config.types.RawString;
+
 import java.io.IOException;
 import java.io.PrintWriter;
 import java.util.logging.Logger;
