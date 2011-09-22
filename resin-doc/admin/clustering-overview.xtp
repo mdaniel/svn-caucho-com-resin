@@ -41,7 +41,7 @@ management, triple redundancy, and distributed deployment.</p>
 
 <ul>
 <li>HTTP Load balancing and failover.</li>
-<li>Elastic servers: adding and removing servers dynamically.</li>
+<li>Dynamic servers: adding and removing servers dynamically.</li>
 <li>Distributed deployment and versioning of applications.</li>
 <li>A triple-redundant triad as the reliable cluster hub.</li>
 <li>Heartbeat monitoring of all servers in the cluster.</li>
@@ -128,7 +128,7 @@ administering the cluster.</p>
 
 </s1>
 
-<s1 title="Elastic Servers">
+<s1 title="Dynamic Servers">
 
 <p>Resin lets you add and remove servers dynamically to the system, and
 automatically adjusts the cluster to manage those servers. When you add
@@ -680,7 +680,7 @@ new server only needs to speak to the triad, not all servers.</li>
 than 64-servers to maintain scalability.</li>
 </ul>
 
-<figure src="resin-cloud.jpg" alt="resin triad -> cloud(resin servers)"/>
+<figure src="resin-cloud.png" alt="resin triad -> cloud(resin servers)"/>
 
 <s2 title="Cluster Heartbeat">
 

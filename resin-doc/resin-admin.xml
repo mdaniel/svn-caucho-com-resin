@@ -31,7 +31,7 @@
     <linked-section link="admin/cluster-server.xtp" />
   </chapter>
 
-  <chapter title="Clustering: Elastic Server (Cloud)">
+  <chapter title="Clustering: Dynamic Server (Cloud)">
     <linked-section link="admin/cluster-cloud.xtp" />
   </chapter>
 
