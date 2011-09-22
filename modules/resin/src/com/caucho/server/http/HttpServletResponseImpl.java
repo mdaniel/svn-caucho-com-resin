@@ -1112,6 +1112,7 @@ public final class HttpServletResponseImpl extends AbstractCauchoResponse
    * @param name the header name
    * @param value the header value
    */
+  @Override
   public void setHeader(String name, String value)
   {
     _response.setHeader(name, value);

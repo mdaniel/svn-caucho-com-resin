@@ -1,7 +1,7 @@
 <document>
   <header>
     <product>resin</product>
-    <title>Resin Watchdog</title>
+    <title>Resin Watchdog System</title>
     <type>contents</type>
 
     <description>
@@ -37,6 +37,8 @@ the watchdog is shutting it down if something is severely wrong with
 the machine, and checking the watchdog logs for Resin restart
 events.</p>
 
+<figure src="watchdog-launch.png" alt="java resin.jar start: ResinBoot -> ResinWatchdog -> Resin"/>
+
 <p>The watchdog automatically restarts Resin if the Resin JVM ever
 crashes or exits.  So if you want to stop Resin, you need to tell the
 watchdog to stop the instance, or you can stop the watchdog entirely.
@@ -45,7 +47,7 @@ program (<code>ResinBoot</code>), which has commands to start, stop,
 and restart Resin instances as well as reporting the watchdog
 status.</p>
 
-<figure src="startup-watchdog.png" alt="java resin.jar start: ResinBoot -> ResinWatchdog -> Resin"/>
+<figure src="watchdog-restart.png" alt="watchdog restarting Resin"/>
 
 <p>While most users will use the watchdog automatically with no extra
 configuration, ISPs and larger and complicated sites can create a
@@ -145,6 +147,26 @@ server '' : active
 
 </s1>
 
+<s1 title="Watchdog Health System">
+
+<p>The watchdog system is responsible for monitoring the health of a
+Resin instance, restarting it if necessary, and reporting on the error
+conditions on any restart.</p>
+
+<ul>
+<li><b>start</b> - the watchdog is responsible for keeping Resin
+running.</li>
+<li><b>security</b> - on Unix systems the watchdog can bind to port 80
+as root while Resin runs as a non-root user.</li>
+<li><b>report</b> - the watchdog is responsible for collecting
+reports on the reasons for Resin restarts and providing that information
+to the health reporting system.</li>
+<li><b>restart</b> - the watchdog works with the health system to allow
+graceful restarts if anomalies are detected in the Resin JVM.</li>
+</ul>
+
+</s1>
+
 <s1 title="Single Resin instance">
 
 <p>This example shows a single-server site listening to the
@@ -152,7 +174,7 @@ standard HTTP port 80 and running the server as the "resin" user.  In this
 example, the watchdog typically runs as root so it can bind to the
 protected port 80, while the Resin instance runs as "resin" for security.</p>
 
-<figure src="watchdog-single.png" alt="ResinBoot <-> Watchdog <-> Resin"/>
+<figure src="watchdog-launch.png" alt="ResinBoot <-> Watchdog <-> Resin"/>
 
 <p>Since this configuration uses the default, the watchdog listens to
 port 6600 for commands.</p>

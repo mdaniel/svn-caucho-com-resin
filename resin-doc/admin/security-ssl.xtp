@@ -361,7 +361,8 @@ unix$ openssl s_client -connect www.some.host:443 -prexit
 <p>A <var>certificate chain</var> is used when the signing authority is not an
 authority trusted by the browser.  In this case, the signing authority uses a
 certificate which is in turn signed by a trusted authority, giving a chain of
-<code>[your certificate] &lt;--- signed by ---- [untrusted signer] &lt;---- signed by ---- [trusted signer]</code>.
+
+<code>[your certificate] &lt;-- signed by -- [untrusted signer] &lt;-- signed by -- [trusted signer]</code>.
 
 </p><p>
 The Resin config parameter <a config-tag="certificate-chain-file"/> is used to

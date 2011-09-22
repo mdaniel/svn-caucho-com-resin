@@ -36,12 +36,18 @@ import java.io.PrintWriter;
 import java.util.logging.Logger;
 
 public class Paragraph extends FormattedTextWithAnchors {
-  
+
   private static Logger log = Logger.getLogger(Paragraph.class.getName());
-  
+
   public Paragraph(Document document)
   {
     super(document);
+  }
+
+  @Override
+  public void addText(RawString text)
+  {
+    addItem(new Text(text.getValue().trim()));
   }
 
   public void writeHtml(XMLStreamWriter out)
@@ -73,8 +79,8 @@ public class Paragraph extends FormattedTextWithAnchors {
 
     super.writeAsciiDoc(out);
   }
-  
-  
+
+
   @Override
   public Example createExample()
   {

@@ -239,7 +239,7 @@
         the source can be created manually be adding a key 'Resin IIS Handler' to
         log sources collection in the registry at </p>
       <p>
-        <code>[HKEY_LOCAL_MACHINE\SYSTEM\CurrentControlSet\Services\Eventlog\Application\Resin IIS Handler]</code>
+        <code>HKEY_LOCAL_MACHINE\SYSTEM\CurrentControlSet\Services\Eventlog\Application\Resin IIS Handler</code>
         </p>
 
         <p>
@@ -250,7 +250,7 @@
         <example title="Resin IIS Handler Logging Source">
 Windows Registry Editor Version 5.00
 
-[HKEY_LOCAL_MACHINE\SYSTEM\CurrentControlSet\Services\Eventlog\Application\Resin IIS Handler]
+HKEY_LOCAL_MACHINE\SYSTEM\CurrentControlSet\Services\Eventlog\Application\Resin IIS Handler
         </example>
       </s2>
     </s1>

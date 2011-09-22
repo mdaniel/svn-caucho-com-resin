@@ -188,8 +188,14 @@ deployed on the server and controlling application lifecycle.</p>
 
 <s3 title="deploying application">
 <p>Deploying an application is done with a <code>deploy</code> command</p>
-<p><code>bin/resin.sh [-conf &lt;file>] deploy -user &lt;user> -password &lt;password> [options] &lt;war-file></code></p>
-<example title="deploying an application from a hello-world.war archive">bin/resin.sh deploy -user admin -password secret /projects/hello-world/hello-world.war
+
+<def>
+bin/resin.sh [-conf &lt;file>] deploy [options] &lt;war-file>
+</def>
+
+<example title="deploying an application from a hello-world.war archive">
+unix> bin/resin.sh deploy -user admin -password secret /projects/hello-world/hello-world.war
+
 Deployed production/webapp/default/hello-world as hello-world.war to http://127.0.0.1:8080/hmtp</example>
 <deftable title="deploy options">
   <tr>
@@ -221,18 +227,33 @@ Deployed production/webapp/default/hello-world as hello-world.war to http://127.
 </s3>
 
 <s3 title="listing deployed applications">
-  <p>Listing deployed applications is done with a <code>deploy-list</code> command</p>
-  <p><code>bin/resin.sh [-conf &lt;file>] deploy-list -user &lt;user> -password &lt;password></code></p>
-  <example title="">bin/resin.sh deploy-list -user admin -password secret
-                    production/webapp/default/hello-world</example>
+  
+<p>Listing deployed applications is done with a <code>deploy-list</code> command</p>
+
+<def>
+bin/resin.sh [-conf &lt;file>] deploy-list [options]
+</def>
+
+<example title="">
+unix> bin/resin.sh deploy-list -user admin -password secret
+
+production/webapp/default/hello-world
+</example>
 </s3>
 
 <s3 title="copy application from context '/hello-world' to context '/foo'">
 <p>Copying an applicaiton is done with a <code>deploy-copy</code> command</p>
-<p><code>bin/resin.sh [-conf &lt;file>] deploy-copy -user &lt;user> -password &lt;password> [options]</code></p>
-<example title="">bin/resin.sh deploy-copy -user admin -password secret -source hello-world -target foo
+
+<def>
+bin/resin.sh [-conf &lt;file>] deploy-copy [options]
+</def>
+
+<example title="">
+bin/resin.sh deploy-copy -user admin -password secret -source hello-world -target foo
+
 copied production/webapp/default/hello-world to production/webapp/default/foo
 </example>
+
 <deftable title="deploy-copy options">
   <tr>
     <th>Argument</th>
@@ -283,9 +304,16 @@ copied production/webapp/default/hello-world to production/webapp/default/foo
 </s3>
 <s3 title="undeploying application">
 <p>Undeploying an application is done with an <code>undeploy</code> command</p>
-<p><code>bin/resin.sh [-conf &lt;file>] undeploy -user &lt;user> -password &lt;password> [options] &lt;name></code></p>
-<example title="">bin/resin.sh undeploy -user admin -password secret undeploy foo
-Undeployed foo from http://127.0.0.1:8080/hmtp</example>
+
+<def>
+bin/resin.sh [-conf &lt;file>] undeploy [options] &lt;name></def>
+
+<example title="">
+unix> bin/resin.sh undeploy -user admin -password secret undeploy foo
+
+Undeployed foo from http://127.0.0.1:8080/hmtp
+</example>
+
   <deftable title="undeploy options">
     <tr>
       <th>Argument</th>
@@ -310,10 +338,18 @@ Undeployed foo from http://127.0.0.1:8080/hmtp</example>
   </deftable>
 </s3>
 <s3 title="starting application">
-<p>Starting an application is done with an <code>start-webapp</code> command</p>
-<p><code>bin/resin.sh [-conf &lt;file>] start-webapp -user &lt;user> -password &lt;password> [options] &lt;name></code></p>
-<example title="start web application deployed at context '/foo'">bin/resin.sh start-webapp -user admin -password secret foo
-'production/webapp/default/foo' is started</example>
+<p>Starting an application is done with a <code>start-webapp</code> command</p>
+
+<def>
+unix> bin/resin.sh [-conf &lt;file>] start-webapp [options] &lt;name>
+</def>
+
+<example title="start web application deployed at context '/foo'">
+unix> bin/resin.sh start-webapp -user admin -password secret foo
+
+'production/webapp/default/foo' is started
+</example>
+
   <deftable title="start-webapp options">
     <tr>
       <th>Argument</th>
@@ -339,9 +375,17 @@ Undeployed foo from http://127.0.0.1:8080/hmtp</example>
 </s3>
 <s3 title="stopping application">
 <p>Stopping an application is done with an <code>stop-webapp</code> command</p>
-<p><code>bin/resin.sh [-conf &lt;file>] stop-webapp -user &lt;user> -password &lt;password> [options] &lt;name></code></p>
-<example title="stop web application deployed at context '/foo'">bin/resin.sh stop-webapp -user admin -password secret foo
-'production/webapp/default/foo' is stopped</example>
+
+<def>
+bin/resin.sh [-conf &lt;file>] stop-webapp [options] &lt;name>
+</def>
+
+<example title="stop web application deployed at context '/foo'">
+unix> bin/resin.sh stop-webapp -user admin -password secret foo
+ 
+'production/webapp/default/foo' is stopped
+</example>
+
   <deftable title="stop-webapp options">
     <tr>
       <th>Argument</th>
@@ -367,9 +411,16 @@ Undeployed foo from http://127.0.0.1:8080/hmtp</example>
 </s3>
 <s3 title="restarting application">
 <p>Restarting an application is done with an <code>restart-webapp</code> command</p>
-<p><code>bin/resin.sh [-conf &lt;file>] restart-webapp -user &lt;user> -password &lt;password> [options] &lt;name></code></p>
-<example title="stop web application deployed at context '/foo'">bin/resin.sh restart-webapp -user admin -password secret foo
-'production/webapp/default/foo' is restarted</example>
+
+<def>bin/resin.sh [-conf &lt;file>] restart-webapp [options] &lt;name>
+</def>
+
+<example title="stop web application deployed at context '/foo'">
+unix> bin/resin.sh restart-webapp -user admin -password secret foo
+
+'production/webapp/default/foo' is restarted
+</example>
+
   <deftable title="restart-webapp options">
     <tr>
       <th>Argument</th>

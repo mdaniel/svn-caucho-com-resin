@@ -40,6 +40,7 @@ import com.caucho.distcache.ExtCacheEntry;
 import com.caucho.env.distcache.CacheDataBacking;
 import com.caucho.util.FreeList;
 import com.caucho.util.HashKey;
+import com.caucho.util.Hex;
 import com.caucho.util.LruCache;
 
 /**
@@ -47,17 +48,19 @@ import com.caucho.util.LruCache;
  */
 abstract public class DistributedCacheManager
 {
+  private static final Object NULL_OBJECT = new Object();
+  
   private FreeList<KeyHashStream> _keyStreamFreeList
     = new FreeList<KeyHashStream>(32);
   
-  private LruCache<Object,HashKey> _keyCache;
+  private LruCache<CacheKey,HashKey> _keyCache;
   
   /**
    * Starts the service
    */
   public void start()
   {
-    _keyCache = new LruCache<Object,HashKey>(64 * 1024);
+    _keyCache = new LruCache<CacheKey,HashKey>(64 * 1024);
   }
 
   /**
@@ -136,12 +139,14 @@ abstract public class DistributedCacheManager
 
   protected HashKey createHashKey(Object key, CacheConfig config)
   {
-    HashKey hashKey = _keyCache.get(key);
+    CacheKey cacheKey = new CacheKey(config.getGuid(), key);
+    
+    HashKey hashKey = _keyCache.get(cacheKey);
     
     if (hashKey == null) {
       hashKey = createHashKeyImpl(key, config);
       
-      _keyCache.put(key, hashKey);
+      _keyCache.put(cacheKey, hashKey);
     }
     
     return hashKey;
@@ -153,7 +158,6 @@ abstract public class DistributedCacheManager
   protected HashKey createHashKeyImpl(Object key, CacheConfig config)
   {
     try {
-
       KeyHashStream dOut = _keyStreamFreeList.allocate();
       
       if (dOut == null) {
@@ -234,15 +238,62 @@ abstract public class DistributedCacheManager
 
     public byte []digest()
     {
-      return _digest.digest();
+      byte []digest = _digest.digest();
+      
+      return digest;
     }
 
+    @Override
     public void flush()
     {
     }
 
+    @Override
     public void close()
     {
+    }
+  }
+  
+  static class CacheKey {
+    private String _guid;
+    private Object _key;
+    
+    CacheKey(String guid, Object key)
+    {
+      init(guid, key);
+    }
+    
+    void init(String guid, Object key)
+    {
+      _guid = guid;
+      
+      if (key == null)
+        key = NULL_OBJECT;
+      
+      _key = key;
+    }
+    
+    @Override
+    public int hashCode()
+    {
+      int hash = 17;
+      
+      hash += _guid.hashCode();
+      
+      hash = 65521 * hash + _key.hashCode();
+      
+      return hash;
+    }
+    
+    @Override
+    public boolean equals(Object o)
+    {
+      CacheKey key = (CacheKey) o;
+      
+      if (! key._key.equals(_key))
+        return false;
+      
+      return key._guid.equals(_guid);
     }
   }
 }

@@ -144,6 +144,8 @@ will also need to pass a -user and -password arguments.</p>
 will then download any deployed applications or data, and then start
 serving pages.</p>
 
+<figure src="cloud-add-server.png" alt="Adding a new server to the cloud"/>
+
 <p>The triad will inform cluster services about the load balancer,
 services like caching, admin, JMS, and load-balancer.</p>
 

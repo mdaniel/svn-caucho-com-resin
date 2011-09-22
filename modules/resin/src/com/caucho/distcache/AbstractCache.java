@@ -505,7 +505,9 @@ public class AbstractCache
   @Override
   public Object get(Object key)
   {
-    return getDistCacheEntry(key).get(_config);
+    Object value = getDistCacheEntry(key).get(_config);
+    
+    return value;
   }
 
   /**
@@ -576,7 +578,7 @@ public class AbstractCache
   public void put(Object key, Object value)
   {
     getDistCacheEntry(key).put(value, _config);
-    
+
     notifyPut(key);
   }
 

@@ -65,7 +65,7 @@ physical hardware limits of a server usually manifest themselves as
 chronic high CPU and memory usage despite reasonable performance
 tuning and hardware upgrades.</p>
 
-<p> Server <em>load-balancing</em> solves the scaling problem by letting you
+<p>Server <em>load-balancing</em> solves the scaling problem by letting you
 deploy a single web application to more than one physical
 machine. These machines can then be used to share the web application
 traffic, reducing the total workload on a single machine and providing
@@ -92,7 +92,7 @@ or a failed server restarts, it checks with the redundant triad for
 the latest application version, copying it as necessary and deploying it.
 </p>
 
-<p> If web applications were entirely stateless, load-balancing alone
+<p>If web applications were entirely stateless, load-balancing alone
 would be sufficient in meeting all application server scalability
 needs. In reality, most web applications are relatively heavily
 stateful. Even very simple web applications use the HTTP session to
@@ -120,7 +120,7 @@ including persistent sessions, distributed sessions and dynamically
 adding/removing servers from a cluster (elastic/cloud computing).
 </p>
 
-<p> Based on the infrastructure required to support load-balancing,
+<p>Based on the infrastructure required to support load-balancing,
 fail-over and clustering, Resin also has support for a distributed
 caching API, clustered application deployment as well as tools for
 administering the cluster.</p>
@@ -217,7 +217,7 @@ Deployed production/webapp/default/test from /home/caucho/ws/test.war
   to http://192.168.1.10:8080/hmtp
 </example>
 
-<p> In order to use Resin clustered deployment, you must first enable
+<p>In order to use Resin clustered deployment, you must first enable
 remote deployment on the server, which is disabled by default for security.
 You do this using the following Resin configuration: </p>
 
@@ -243,7 +243,7 @@ enabled for any remote administration and deployment for obvious
 security reasons. To keep things simple, we used a clear-text password
 above, but you should likely use a password hash instead.  </p>
 
-<p> The output exposes a few important details about the underlying
+<p>The output exposes a few important details about the underlying
 remote deployment implementation for Resin that you should
 understand. Remote deployment for Resin uses Git under the hood. In
 case you are not familiar with it, Git is a newish version control
@@ -258,7 +258,7 @@ is this: </p>
 stage/type/host/webapp[-version]
 </example>
 
-<p> In the example, all web applications are stored under
+<p>In the example, all web applications are stored under
 <var>webapp</var>, we didn't specify a stage or virtual host in the
 Ant task so <var>default</var> is used, the web application root is
 foo and no version is used since one was not specified.  This format
@@ -286,7 +286,7 @@ marked with a red 'x'.</p>
 
 <figure src="webapp-deploy.png" alt="/foo,Active,Red X,Timestamp  /hello1,Active,Red X,Timestamp  Deploy server list"/>
 
-<p> The details for each Ant and Maven based clustered deployment API
+<p>The details for each Ant and Maven based clustered deployment API
 is outlined <a href="clustering-deployment-ref.xtp">here</a>.  </p>
 
 </s1>
@@ -327,7 +327,7 @@ applications and a web/HTTP server tier talking to end-point browsers,
 caching static/non-static content, and distributing load across
 servers in the application server tier.  </p>
 
-<p> The best way to understand how this works is through a simple
+<p>The best way to understand how this works is through a simple
 example configuration.  The following resin.xml configuration shows
 servers split into two clusters: a web-tier for load balancing and
 HTTP, and an app-tier to process the application:</p>
@@ -366,7 +366,7 @@ HTTP, and an app-tier to process the application:</p>
 &lt;/resin&gt;
 </example>
 
-<p> In the configuration above, the <var>web-tier</var> cluster server
+<p>In the configuration above, the <var>web-tier</var> cluster server
 load balances across the <var>app-tier</var> cluster servers because
 of the <var>cluster</var> attribute specified in the
 &lt;resin:LoadBalance> tag.  The &lt;cache> tag enables proxy caching
@@ -376,7 +376,7 @@ to a crash. The load balancer also steers traffic from a single
 session to the same app-tier server (a.k.a sticky sessions), improving
 caching and session performance.  </p>
 
-<p> Each app-tier server produces the same application because they
+<p>Each app-tier server produces the same application because they
 have the same virtual hosts, web-applications and Servlets, and use
 the same resin.xml.  Adding a new machine just requires adding a new
 &lt;server> tag to the cluster. Each server has a unique name like
@@ -391,7 +391,7 @@ like 192.168.1.10 and not public IP addresses. In particular, the load
 balancer on the web-tier uses the cluster-port of the app-tier to
 forward HTTP requests.</p>
 
-<p> All three servers will use the same resin.xml, which makes
+<p>All three servers will use the same resin.xml, which makes
 managing multiple server configurations pretty easy. The servers are
 named by the server <var>id</var> attribute, which must be unique,
 just as the &lt;IP,port>. When you start a Resin instance, you'll use
@@ -404,7 +404,7 @@ the server-id as part of the command line: </p>
 192.168.0.1> bin/resin.sh -server web-a start
 </example>
 
-<p> Since Resin lets you start multiple servers on the same machine, a
+<p>Since Resin lets you start multiple servers on the same machine, a
 small site might start the web-tier server and one of the app-tier
 servers on one machine, and start the second server on a second
 machine. You can even start all three servers on the same machine,
@@ -414,7 +414,7 @@ machine itself and not just the JVM crashes). If you do put multiple
 servers on the same machine, remember to change the <var>port</var> to
 something like 6801, etc so the TCP binds do not conflict.  </p>
 
-<p> In the <a href="resin-admin.xtp">/resin-admin</a> management page,
+<p>In the <a href="resin-admin.xtp">/resin-admin</a> management page,
 you can manage all three servers at once, gathering statistics/load
 and watching for any errors.  When setting up /resin-admin on a
 web-tier server, you'll want to remember to add a separate
@@ -424,7 +424,7 @@ doesn't inadvertantly send the management request to the app-tier.
 
 <s2 title="Sticky/Persistent Sessions">
 
-<p> To understand what sticky sessions are and why they are important,
+<p>To understand what sticky sessions are and why they are important,
 it is easiest to see what will happen without them. Let us take our
 previous example and assume that the web tier distributes sessions
 across the application tier in a totally random fashion. Recall that
@@ -440,7 +440,7 @@ continues to use the application from in what their view should be a
 single session with well-defined state, making for a pretty confusing
 experience with application state randomly getting lost!  </p>
 
-<p> One way to solve this issue would be to fully synchronize the
+<p>One way to solve this issue would be to fully synchronize the
 session across the load-balanced servers. Resin does support this
 through its clustering features (which is discussed in detail in the
 following sections). The problem is that the cost of continuously
@@ -452,7 +452,7 @@ where the session resides. By default, the Resin load-balancer
 enforces sticky sessions, so you don't really need to do anything to
 enable it.  </p>
 
-<p> Resin accomplishes this by encoding the session cookie with the
+<p>Resin accomplishes this by encoding the session cookie with the
 host name that started the session. Using our example, the hosts would
 generate cookies like this: </p>
 
@@ -484,13 +484,13 @@ clustering).  </p>
 
 <s2 title="Manually Choosing a Server">
 
-<p> For testing purposes you might want to send requests to a specific
+<p>For testing purposes you might want to send requests to a specific
 servers in the app-tier manually. You can easily do this since the
 web-tier uses the value of the <var>jsessionid</var> to maintain
 sticky sessions. You can include an explicit <var>jsessionid</var> to
 force the web-tier to use a particular server in the app-tier.  </p>
 
-<p> Since Resin uses the first character of the <var>jsessionid</var>
+<p>Since Resin uses the first character of the <var>jsessionid</var>
 to identify the server to use, starting with 'a' will resolve the
 request to app-a.  If www.example.com resolves to your web-tier, then
 you can use values like this for testing: </p>
@@ -504,7 +504,7 @@ you can use values like this for testing: </p>
 <li>etc.</li>
 </ol>
 
-<p> You can also use this fact to configure an external sticky
+<p>You can also use this fact to configure an external sticky
 load-balancer (likely a high-performance hardware load-balancer) and
 eliminate the web tier altogether. In this case, this is how the Resin
 configuration might look like: </p>
@@ -524,7 +524,7 @@ configuration might look like: </p>
 &lt;/resin&gt;
 </example>
 
-<p> Each server will be started as <var>-server a</var>, <var>-server
+<p>Each server will be started as <var>-server a</var>, <var>-server
 b</var>, etc to grab its specific configuration.  </p>
 
 </s2>
@@ -724,7 +724,7 @@ The following is a simple example of how to enable clustering on Resin:
 &lt;/web-app&gt;
 </example>
 
-<p> The <a
+<p>The <a
 href="deploy-ref.xtp#session-config">&lt;use-persistent-store&gt;</a>
 tag under <a
 href="deploy-ref.xtp#session-config">&lt;session-config&gt;</a> is
@@ -748,7 +748,7 @@ following example shows how you can do this: </p>
 &lt;/resin&gt;
 </example>
 
-<p> The above example also shows how you can override the clustering
+<p>The above example also shows how you can override the clustering
 behaviour for Resin.  By default, Resin uses a triad based replication
 with all three triad servers backing up the data server. THe
 &lt;persistent-store type="cluster"&gt; has a number of other
@@ -847,7 +847,7 @@ For details on the tags used for clustering, please refer to
 
 <s1 title="Distributed Caching">
 
-<p> Distributed caching is a very useful technique for reducing
+<p>Distributed caching is a very useful technique for reducing
 database load and increasing application performance. Resin provides a
 very simple JSR-107 JCache based distributed caching API. Distributed
 caching in Resin basically leverages the underlying infrastructure

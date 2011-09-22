@@ -307,7 +307,7 @@ each &lt;host> belongs to its own &lt;cluster> and has a dedicated
 so the load-balance server will dispatch requests as appropriate.</p>
 
 <p>For further security restrictions, see
-the <a href="starting-resin-watchdog.xtp">watchdog</a> section.  ISPs can also
+the <a href="health-watchdog.xtp">watchdog</a> section.  ISPs can also
 use the watchdog to assign different &lt;user-name> values for each
 host and can even create chroot directories for each JVM.</p>
 

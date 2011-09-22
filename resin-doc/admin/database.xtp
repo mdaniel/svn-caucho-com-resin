@@ -153,12 +153,12 @@ the first thread obtained from the read and is using for the calculation and
 update is no longer valid.</p>
 
 <example title="Example: 2 Threads with database race condition">
-Thread 1                 Thread 2
---------                 --------
-read value A=1           read value A=1
-calculate  A=A+1         calculate A=A+1
+ Thread 1                 Thread 2
+ --------                 --------
+ read value A=1           read value A=1
+ calculate  A=A+1         calculate A=A+1
                          update A=2
-update     A=2
+ update     A=2
 </example>
 
 <p>Placing the read/calculate/update operations in a transactions guarantees

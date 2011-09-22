@@ -33,6 +33,8 @@ Resin will copy the application to both. Once all three triad hub servers
 have the deployed .war, Resin will update all the spoke servers
 in the cluster.</p>
 
+<figure src="deploy-triad-a.png" alt="deployment replicates to triad"/>
+
 <p>The cluster command-line deployment uses the &lt;web-app-deploy>
 tag in the resin.xml to configure and control where the
 deployed application should be expanded. Typically, the deployment
@@ -195,6 +197,8 @@ deployment system. It's not necessary to understand or even read any of
 this section to use Resin's deployment. But for those who are curious,
 some details might be interesting.</p>
 
+<s2 title=".git control system architecture">
+
 <p>The main repository is based on the distributed version control
 system .git, which is used for large programming projects like
 the Linux kernel. The .git format gives Resin the key transactional
@@ -238,6 +242,8 @@ continue the repository update. Only the repository system itself knows
 that an update is in process; the rest of Resin continues to use the old
 repository files.</p>
 
+</s2>
+
 <s2 title="Repository tag system">
 
 <p>Internally, the repository is organized by tags where each
@@ -262,6 +268,32 @@ familiar with subversions tags and branches, this is a similar system.</p>
 archived tag to the current production tag. Resin will run through the
 repository update system and ensure that all servers in the cloud
 see the updates.</p>
+
+</s2>
+
+<s2 title="Cloud Deployment">
+
+<p>Deploying to a cloud extends the transactional
+repository to all the servers in a cluster. In Resin's replicated
+hub-and-spoke model, a deployment copies the archive first to all three
+servers in the triad. (If you have two servers, it will copy to the
+second server.) Since all three servers have a copy of the
+entire repository, your system keeps it reliability even if one server
+is down for maintenance and a second server restarts for an unexpected
+reason.</p>
+
+<figure src="deploy-triad-a.png" alt="deployment replicates to triad"/>
+
+<p>After all three servers in the hub have received and verified the
+deployment update, the triad hub can send the changes to all of the spoke
+servers.</p>
+
+<figure src="deploy-cloud.png" alt="triad updates spoke servers"/>
+
+<p>If a spoke server restarts or a new spoke server is added to the cloud
+dynamically, it will contacts the hub for the most recent repository version.
+So even a new virtual-machine image can receive the most recent deployments
+without intervention.</p>
 
 </s2>
 

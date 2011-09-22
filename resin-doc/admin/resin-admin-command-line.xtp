@@ -163,13 +163,17 @@ the /resin-admin page.</p>
 <p>To produce a heap dump resin provides <code>heap-dump</code> command. With
 Resin Open Source, <code>heap-dump</code> will produce a standard heap dump
 file and put it into the Resin log directory on the remote machine.</p>
-<p><code>bin/resin.sh [-conf &lt;file>] heap-dump -user &lt;user> -password &lt;password> [-raw]</code></p>
-<example title="Example: producing a heap dump on Resin Open Source">bin/resin.sh -conf conf/resin.conf heap-dump -user foo -password test -raw
+
+<def>
+bin/resin.sh [-conf &lt;file>] heap-dump [options] [-raw]
+</def>
+
+<example title="Example: producing a heap dump on Resin Open Source">
+unix> bin/resin.sh -conf conf/resin.conf heap-dump -user foo -password test -raw
 
 Heap dump is written to `/var/log/resin/heap.hprof'.
 To view the file on the target machine use
 jvisualvm --openfile /var/log/resin/heap.hprof
-
 </example>
 
 <p>
@@ -178,7 +182,7 @@ producing a readable summary report.
 </p>
 
 <example title="Example: heap-dump">
-bin/resin.sh -conf conf/resin.conf heap-dump -user foo -password test
+unix: bin/resin.sh -conf conf/resin.conf heap-dump -user foo -password test
 
 Heap Dump generated Fri May 08 02:51:31 PDT 1998
    count   |  self size | child size | class name
@@ -217,8 +221,13 @@ Heap Dump generated Fri May 08 02:51:31 PDT 1998
 <s1 title="thread-dump: producing a thread dump">
 <p>To produce a thread dump resin provides <code>thread-dump</code> command.
 The thread dump is produced on a remote sever and printed out locally.</p>
-<p><code>bin/resin.sh [-conf &lt;file>] thread-dump -user &lt;user> -password &lt;password> [-raw]</code></p>
-<example title="Example: producing a thread dump">bin/resin.sh -conf conf/resin.conf thread-dump -user foo -password test -raw
+
+<def>
+bin/resin.sh [-conf &lt;file>] thread-dump [options] [-raw]
+</def>
+
+<example title="Example: producing a thread dump">
+unix> bin/resin.sh -conf conf/resin.conf thread-dump -user foo -password test -raw
 
   Thread Dump:
 
@@ -271,10 +280,16 @@ The thread dump is produced on a remote sever and printed out locally.</p>
     command turn on sampling for requested period of time and prints out
     profiling resutls.
   </p>
-  <p><code>bin/resin.sh [-conf &lt;file>] profile -user &lt;user> -password &lt;password> [-active-time &lt;time>] [-sampling-rate &lt;rate>] [-depth &lt;depth>]</code></p>
-<example title="Example: profiling an application">bin/resin.sh -conf conf/resin.conf profile -user foo -password test
+  
+<def>
+bin/resin.sh [-conf &lt;file>] profile [options]
+</def>
 
-Profile started at 1998-05-08 02:51:31.001. Active for a total of 5000ms. Sampling rate 10ms. Depth 16.
+<example title="Example: profiling an application">
+unix> bin/resin.sh -conf conf/resin.conf profile -user foo -password test
+
+Profile started at 1998-05-08 02:51:31.001. Active for a total of 5000ms.
+Sampling rate 10ms. Depth 16.
    % time  |time self(s)|   % sum    | Method Call
    800.000 |     40.080 |     28.407 | com.caucho.env.thread.AbstractTaskWorker.run()
    300.000 |     15.030 |     39.060 | com.caucho.env.thread.ResinThread.waitForTask()
@@ -326,8 +341,15 @@ com.caucho.env.thread.AbstractTaskWorker.run()
 <s1 title="log-level: setting log level">
   <p>Command <code>log-level</code> changes a log level, optionally 
   temporarily.</p>
-  <p><code>bin/resin.sh [-conf &lt;file>] log-level -user &lt;user> -password &lt;password> -all|-finest|-finer|-fine|-config|-info|-warning|-severe|-off [-active-time &lt;time-period>] [loggers...]</code></p>
-<example title="Example: setting log level">bin/resin.sh -conf conf/resin.conf log-level -user foo -password test -active-time 5s -finer
+  
+<def>
+bin/resin.sh [-conf &lt;file>] log-level [options] \
+            -all|-finest|-finer|-fine|-config|-info|-warning|-severe|-off \
+            [-active-time &lt;time-period>] [loggers...]
+</def>
+
+<example title="Example: setting log level">
+unix> bin/resin.sh -conf conf/resin.conf log-level -user foo -password test -active-time 5s -finer
 
 Log level is set to `FINER', active time 5 seconds: {root}, com.caucho
 </example>
@@ -362,12 +384,16 @@ registered in a JVM that is running Resin. As its last argument the command
 accepts &lt;pattern>. The &lt;pattern> follows convention defined for
 <code>javax.management.ObjectName</code>, defaulting to resin:*, which matches any
 MBean in resin domain.</p>
-<p><code>bin/resin.sh [-conf &lt;file>] jmx-list -user &lt;user> -password &lt;password> [-attributes] [-values] [-operations] [-all] [-platform] [&lt;pattern>]</code></p>
-<example title="Example: listing MBeans">bin/resin.sh -conf conf/resin.conf jmx-list -user foo -password test com.acme:*
+
+<def>
+bin/resin.sh [-conf &lt;file>] jmx-list [options] [&lt;pattern>]
+</def>
+
+<example title="Example: listing MBeans">
+unix> bin/resin.sh -conf conf/resin.conf jmx-list -user foo -password test com.acme:*
 
 com.acme:type=Foo
 com.acme:type=Bar
-
 </example>
 
 <deftable title="jmx-list options">
@@ -404,7 +430,8 @@ com.acme:type=Bar
 
 com.acme:type=Foo
   attributes:
-    javax.management.MBeanAttributeInfo[description=, name=Boolean, type=boolean, read-only, descriptor={}]==false
+    javax.management.MBeanAttributeInfo[description=,
+            name=Boolean, type=boolean, read-only, descriptor={}]==false
 
 </example>
 </s1>
@@ -413,7 +440,10 @@ com.acme:type=Foo
 <p>Command<code>jmx-dump</code> produces a complete listing of a MBeans with
 current attribute values.  The output is usually lengthy and can be directed to 
 a file rather than stdout using the -file parameter.</p>
-<p><code>bin/resin.sh [-conf &lt;file>] jmx-dump -user &lt;user> -password &lt;password> [-file &lt;file>]</code></p>
+
+<def>
+bin/resin.sh [-conf &lt;file>] jmx-dump [options] [-file &lt;file>]
+</def>
 
 <deftable title="jmx-list options">
   <tr>
@@ -442,11 +472,16 @@ java.lang:type=MemoryPool,name=CMS Old Gen {
 <s1 title="jmx-set: setting attribute value on MBeans">
 <p>Command<code>jmx-set</code> sets a value on an attribute belonging to a particular
 JMX MBean.</p>
-<p><code>bin/resin.sh [-conf &lt;file>] jmx-set -user &lt;user> -password &lt;password> -pattern &lt;pattern> -attribute &lt;attribute> value</code></p>
-<example title="Example: setting attribute value">bin/resin.sh -conf conf/resin.conf jmx-set -user foo -password test -pattern com.acme:type=Foo -attribute Foo foo-value
+
+<def>
+bin/resin.sh [-conf &lt;file>] jmx-set [options] -pattern &lt;pattern> -attribute &lt;attribute> value
+</def>
+
+<example title="Example: setting attribute value">
+unix> bin/resin.sh -conf conf/resin.conf jmx-set -user foo -password test \
+                   -pattern com.acme:type=Foo -attribute Foo foo-value
 
 value for attribute `Foo' on bean `com.acme:type=Foo' is changed from `null' to `foo-value'
-
 </example>
 
 <deftable title="jmx-set options">
@@ -473,8 +508,16 @@ value for attribute `Foo' on bean `com.acme:type=Foo' is changed from `null' to 
 
 <s1 title="jmx-call: invoking method on a MBean">
 <p>Command<code>jmx-call</code> calls a method on a specified with &lt; pattern> MBean.</p>
-<p><code>bin/resin.sh [-conf &lt;file>] jmx-call -user &lt;user> -password &lt;password> -pattern &lt;pattern> -operation &lt;operation> value...</code></p>
-<example title="Example: invoking method on MBean">bin/resin.sh -conf conf/resin.conf jmx-call -user foo -password test -pattern com.acme:type=Foo -pattern com.acme:type=Foo -operation echo hello
+
+<def>
+bin/resin.sh [-conf &lt;file>] jmx-call [options] -pattern &lt;pattern> -operation &lt;operation> value...
+</def>
+
+<example title="Example: invoking method on MBean">
+unix> bin/resin.sh -conf conf/resin.conf jmx-call \
+                   -user foo -password test \
+                   -pattern com.acme:type=Foo -pattern com.acme:type=Foo \
+                   -operation echo hello
 
 method `echo(java.lang.String)' called on `com.acme:type=Foo' returned `hello'.
 
@@ -504,9 +547,17 @@ method `echo(java.lang.String)' called on `com.acme:type=Foo' returned `hello'.
 
 <s1 title="deploy: deploying a web application">
 <p>Deploying an application is done with a <code>deploy</code> command</p>
-<p><code>bin/resin.sh [-conf &lt;file>] deploy -user &lt;user> -password &lt;password> [options] &lt;war-file></code></p>
-<example title="Example: deploying an application from a hello-world.war archive">bin/resin.sh deploy -user admin -password secret /projects/hello-world/hello-world.war
-Deployed production/webapp/default/hello-world as hello-world.war to http://127.0.0.1:8080/hmtp</example>
+
+<def>
+bin/resin.sh [-conf &lt;file>] deploy [options] &lt;war-file>
+</def>
+
+<example title="Example: deploying an application from a hello-world.war archive">
+unix> bin/resin.sh deploy -user admin -password secret /projects/hello-world/hello-world.war
+
+Deployed production/webapp/default/hello-world as hello-world.war to http://127.0.0.1:8080/hmtp
+</example>
+
 <deftable title="deploy options">
   <tr>
     <th>Argument</th>
@@ -538,17 +589,32 @@ Deployed production/webapp/default/hello-world as hello-world.war to http://127.
 
 <s1 title="deploy-list: listing deployed applications">
   <p>Listing deployed applications is done with a <code>deploy-list</code> command</p>
-  <p><code>bin/resin.sh [-conf &lt;file>] deploy-list -user &lt;user> -password &lt;password></code></p>
-  <example title="Example: deploy-list">bin/resin.sh deploy-list -user admin -password secret
-                    production/webapp/default/hello-world</example>
+  
+<def>
+bin/resin.sh [-conf &lt;file>] deploy-list [options]
+</def>
+
+<example title="Example: deploy-list">
+unix> bin/resin.sh deploy-list -user admin -password secret
+
+production/webapp/default/hello-world
+</example>
+
 </s1>
 
 <s1 title="deploy-copy: copy application from context '/hello-world' to context '/foo'">
-<p>Copying an applicaiton is done with a <code>deploy-copy</code> command</p>
-<p><code>bin/resin.sh [-conf &lt;file>] deploy-copy -user &lt;user> -password &lt;password> [options]</code></p>
-<example title="Example: deploy-copy">bin/resin.sh deploy-copy -user admin -password secret -source hello-world -target foo
+<p>Copying an application is done with a <code>deploy-copy</code> command</p>
+
+<def>
+bin/resin.sh [-conf &lt;file>] deploy-copy [options]
+</def>
+
+<example title="Example: deploy-copy">
+unix> bin/resin.sh deploy-copy -user admin -password secret -source hello-world -target foo
+
 copied production/webapp/default/hello-world to production/webapp/default/foo
 </example>
+
 <deftable title="deploy-copy options">
   <tr>
     <th>Argument</th>
@@ -600,9 +666,17 @@ copied production/webapp/default/hello-world to production/webapp/default/foo
 
 <s1 title="undeploy: undeploying application">
 <p>Undeploying an application is done with an <code>undeploy</code> command</p>
-<p><code>bin/resin.sh [-conf &lt;file>] undeploy -user &lt;user> -password &lt;password> [options] &lt;name></code></p>
-<example title="Example: undeploy">bin/resin.sh undeploy -user admin -password secret undeploy foo
-Undeployed foo from http://127.0.0.1:8080/hmtp</example>
+
+<def>
+bin/resin.sh [-conf &lt;file>] undeploy [options] &lt;name>
+</def>
+
+<example title="Example: undeploy">
+unix> bin/resin.sh undeploy -user admin -password secret undeploy foo
+
+Undeployed foo from http://127.0.0.1:8080/hmtp
+</example>
+
   <deftable title="undeploy options">
     <tr>
       <th>Argument</th>
@@ -629,9 +703,16 @@ Undeployed foo from http://127.0.0.1:8080/hmtp</example>
 
 <s1 title="start-webapp: starting application">
 <p>Starting an application is done with an <code>start-webapp</code> command</p>
-<p><code>bin/resin.sh [-conf &lt;file>] start-webapp -user &lt;user> -password &lt;password> [options] &lt;name></code></p>
-<example title="Example: start web application deployed at context '/foo'">bin/resin.sh start-webapp -user admin -password secret foo
-'production/webapp/default/foo' is started</example>
+<def>
+bin/resin.sh [-conf &lt;file>] start-webapp [options] &lt;name>
+</def>
+
+<example title="Example: start web application deployed at context '/foo'">
+unix> bin/resin.sh start-webapp -user admin -password secret foo
+
+'production/webapp/default/foo' is started
+</example>
+
   <deftable title="start-webapp options">
     <tr>
       <th>Argument</th>
@@ -658,9 +739,17 @@ Undeployed foo from http://127.0.0.1:8080/hmtp</example>
 
 <s1 title="stop-webapp: stopping application">
 <p>Stopping an application is done with an <code>stop-webapp</code> command</p>
-<p><code>bin/resin.sh [-conf &lt;file>] stop-webapp -user &lt;user> -password &lt;password> [options] &lt;name></code></p>
-<example title="Example: stop web application deployed at context '/foo'">bin/resin.sh stop-webapp -user admin -password secret foo
-'production/webapp/default/foo' is stopped</example>
+
+<def>
+bin/resin.sh [-conf &lt;file>] stop-webapp [options] &lt;name>
+</def>
+
+<example title="Example: stop web application deployed at context '/foo'">
+unix> bin/resin.sh stop-webapp -user admin -password secret foo
+
+'production/webapp/default/foo' is stopped
+</example>
+
   <deftable title="stop-webapp options">
     <tr>
       <th>Argument</th>
@@ -685,10 +774,18 @@ Undeployed foo from http://127.0.0.1:8080/hmtp</example>
   </deftable>
 </s1>
 <s1 title="restart-webapp: restarting application">
+
 <p>Restarting an application is done with an <code>restart-webapp</code> command</p>
-<p><code>bin/resin.sh [-conf &lt;file>] restart-webapp -user &lt;user> -password &lt;password> [options] &lt;name></code></p>
-<example title="Example: stop web application deployed at context '/foo'">bin/resin.sh restart-webapp -user admin -password secret foo
-'production/webapp/default/foo' is restarted</example>
+
+<def>
+bin/resin.sh [-conf &lt;file>] restart-webapp [options] &lt;name>
+</def>
+
+<example title="Example: stop web application deployed at context '/foo'">
+unix> bin/resin.sh restart-webapp -user admin -password secret foo
+
+'production/webapp/default/foo' is restarted
+</example>
   <deftable title="restart-webapp options">
     <tr>
       <th>Argument</th>
@@ -714,10 +811,17 @@ Undeployed foo from http://127.0.0.1:8080/hmtp</example>
 </s1>
 <s1 title="pdf-report: pdf report generation">
 <p>The <code>pdf-report</code> command triggers generation of a PDF report from a .php template.</p>
-<p><code>bin/resin.sh [-conf &lt;file>] pdf-report -user &lt;user> -password &lt;password> [-path &lt;php path>] [-report &lt;report name>] [-period &lt;period>] [-logdir &lt;log path>]</code></p>
-<example title="Example: generate the default post-mortem summary PDF report">bin/resin.sh pdf-report -user admin -password secret
-generated /usr/local/resin/log/default-Summary-20110801T0251.pdf
+
+<def>
+bin/resin.sh [-conf &lt;file>] pdf-report [options]
+</def>
+
+<example title="Example: generate the default watchdog PDF report">
+unix> bin/resin.sh pdf-report -user admin -password secret -watchdog
+
+generated /usr/local/resin/log/default-Watchdog-20110801T0251.pdf
 </example>
+
   <deftable title="pdf-report options">
     <tr>
       <th>Argument</th>
@@ -725,14 +829,14 @@ generated /usr/local/resin/log/default-Summary-20110801T0251.pdf
       <th>Default</th>
     </tr>
     <tr>
+      <td>-logdir</td>
+      <td>PDF output directory</td>
+      <td>Resin log directory</td>
+    </tr>
+    <tr>
       <td>-path</td>
       <td>Path to a PDF generating .php file</td>
       <td>${resin.home}/doc/admin/pdf-gen.php</td>
-    </tr>
-    <tr>
-      <td>-report</td>
-      <td>Report type key</td>
-      <td>Summary</td>
     </tr>
     <tr>
       <td>-period</td>
@@ -740,9 +844,14 @@ generated /usr/local/resin/log/default-Summary-20110801T0251.pdf
       <td>7D</td>
     </tr>
     <tr>
-      <td>-logdir</td>
-      <td>PDF output directory</td>
-      <td>Resin log directory</td>
+      <td>-snapshot</td>
+      <td>Take a snapshot of the server before reporting</td>
+      <td>false</td>
+    </tr>
+    <tr>
+      <td>-watchdog</td>
+      <td>Report on server period to the last restart</td>
+      <td>false</td>
     </tr>
   </deftable>
 </s1>

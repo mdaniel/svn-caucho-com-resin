@@ -7,6 +7,9 @@
 </header>
 
 <body>
+<s1 title="Getting a Health Report">
+<p>test</p>
+</s1>
 
 <localtoc/>
 
@@ -122,14 +125,14 @@ include the <em>char[]</em> as part of its "self+desc".</p>
 <p>The following is an example of a basic idle Resin heap dump.</p>
 
 <example title="Example: Heap Dump">
-Class Name                                self+desc  self  count
-------------------------------------------------------------------
-byte[]                                     22.23M  22.23M   14741
-com.caucho.db.block.Block                  20.28M  134.9K    2410
-char[]                                     13.89M  13.89M  122606
-com.caucho.util.LruCache                    7.52M   30.4K     317
-java.lang.String                            7.15M   1.97M   61426
-...
+ Class Name                                self+desc  self  count
+
+ byte[]                                     22.23M  22.23M   14741
+ com.caucho.db.block.Block                  20.28M  134.9K    2410
+ char[]                                     13.89M  13.89M  122606
+ com.caucho.util.LruCache                    7.52M   30.4K     317
+ java.lang.String                            7.15M   1.97M   61426
+ ...
 </example>
 
 <p>The first items, the <em>byte[]</em> and <em>Block</em> are
@@ -242,7 +245,7 @@ End: 2011-09-21 16:33
 <p>The most recent warning logs are reported as part of the heap dump.</p>
 
 <example title="Example: Warning Logs">
-Log[Warning]
+Log(Warning)
 
 2011-09-21 11:06:07 warning  WarningService: Resin restarting due to
                                     configuration change

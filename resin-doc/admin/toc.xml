@@ -95,6 +95,9 @@
       
       <item link="health-report.xtp" title="Report"
             description="Health Reporting"/>
+      
+      <item link="health-watchdog.xtp" title="Watchdog"
+            description="Resin's watchdog process manages Resin servers and checks status for reliability."/>
             
     </item>
     
@@ -109,9 +112,6 @@
       <!--
       <item link="starting-resin-server-stages.xtp" title="Server Stages"/>
       -->
-      
-      <item link="starting-resin-watchdog.xtp" title="Watchdog"
-            description="Resin's watchdog process manages Resin servers and checks status for reliability."/>
 
       <item link="starting-resin-apache.xtp" title="Apache HTTPd"
             description="Using Apache HTTPd with Resin"/>
