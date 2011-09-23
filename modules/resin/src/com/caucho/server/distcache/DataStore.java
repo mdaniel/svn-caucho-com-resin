@@ -372,9 +372,8 @@ public class DataStore {
 
       PreparedStatement pstmt = conn.prepareLoad();
       pstmt.setBytes(1, id.getHash());
-
       rs = pstmt.executeQuery();
-
+      
       if (rs.next()) {
         return true;
       }

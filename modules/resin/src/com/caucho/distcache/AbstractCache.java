@@ -70,6 +70,7 @@ import com.caucho.server.distcache.DistributedCacheManager;
 import com.caucho.server.distcache.MnodeStore;
 import com.caucho.server.distcache.MnodeEntry;
 import com.caucho.util.HashKey;
+import com.caucho.util.Hex;
 import com.caucho.util.L10N;
 import com.caucho.util.LruCache;
 import com.caucho.vfs.StreamSource;
@@ -505,7 +506,9 @@ public class AbstractCache
   @Override
   public Object get(Object key)
   {
-    Object value = getDistCacheEntry(key).get(_config);
+    DistCacheEntry entry = getDistCacheEntry(key);
+    
+    Object value = entry.get(_config);
     
     return value;
   }

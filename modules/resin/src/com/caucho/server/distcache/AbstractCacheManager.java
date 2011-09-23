@@ -1033,18 +1033,7 @@ abstract public class AbstractCacheManager<E extends DistCacheEntry>
     try {
       os = new TempOutputStream();
 
-      Sha256OutputStream mOut = new Sha256OutputStream(os);
-      //DeflaterOutputStream gzOut = new DeflaterOutputStream(mOut);
-      //ResinDeflaterOutputStream gzOut = new ResinDeflaterOutputStream(mOut);
-
-      //serializer.serialize(value, gzOut);
-      serializer.serialize(value, mOut);
-
-      // gzOut.finish();
-      // gzOut.close();
-      mOut.close();
-
-      byte[] hash = mOut.getDigest();
+      byte[] hash = writeDataStream(os, value, serializer);
 
       HashKey valueHash = new HashKey(hash);
 
@@ -1075,30 +1064,36 @@ abstract public class AbstractCacheManager<E extends DistCacheEntry>
   final public byte[] calculateValueHash(Object value,
                                          CacheConfig config)
   {
-    CacheSerializer serializer = config.getValueSerializer();
     // TempOutputStream os = null;
     
     try {
       NullOutputStream os = NullOutputStream.NULL;
 
-      Sha256OutputStream mOut = new Sha256OutputStream(os);
-      // DeflaterOutputStream gzOut = new DeflaterOutputStream(mOut);
-      ResinDeflaterOutputStream gzOut = new ResinDeflaterOutputStream(mOut);
-
-      serializer.serialize(value, gzOut);
-
-      // gzOut.finish();
-      gzOut.close();
-      mOut.close();
-      
-      os.close();
-
-      byte[] hash = mOut.getDigest();
-
-      return hash;
+      return writeDataStream(os, value, config.getValueSerializer());
     } catch (Exception e) {
       throw new RuntimeException(e);
     }
+  }
+  
+  private byte []writeDataStream(OutputStream os, 
+                                 Object value, 
+                                 CacheSerializer serializer)
+    throws IOException
+  {
+    Sha256OutputStream mOut = new Sha256OutputStream(os);
+    //DeflaterOutputStream gzOut = new DeflaterOutputStream(mOut);
+    ResinDeflaterOutputStream gzOut = new ResinDeflaterOutputStream(mOut);
+
+    serializer.serialize(value, gzOut);
+    //serializer.serialize(value, mOut);
+
+    //gzOut.finish();
+    gzOut.close();
+    mOut.close();
+    
+    byte []hash = mOut.getDigest();
+    
+    return hash;
   }
 
   final protected DataItem writeData(HashKey oldValueHash,
@@ -1182,12 +1177,12 @@ abstract public class AbstractCacheManager<E extends DistCacheEntry>
       InputStream is = os.openInputStream();
 
       try {
-        // InflaterInputStream gzIn = new InflaterInputStream(is);
+        InflaterInputStream gzIn = new InflaterInputStream(is);
 
-        // Object value = serializer.deserialize(gzIn);
-        Object value = serializer.deserialize(is);
+        Object value = serializer.deserialize(gzIn);
+        // Object value = serializer.deserialize(is);
 
-        // gzIn.close();
+        gzIn.close();
 
         return value;
       } finally {
