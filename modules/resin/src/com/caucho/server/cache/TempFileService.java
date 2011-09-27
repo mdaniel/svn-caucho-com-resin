@@ -80,4 +80,14 @@ public class TempFileService extends AbstractResinSubSystem
   {
     return _manager;
   }
+  
+  @Override
+  public void stop()
+    throws Exception
+  {
+    super.stop();
+    
+    _manager.close();
+    
+  }
 }

@@ -1772,6 +1772,7 @@ public class BlockStore {
     }
   }
   
+  /*
   @Override
   public void finalize()
     throws Throwable
@@ -1780,6 +1781,7 @@ public class BlockStore {
     
     close();
   }
+  */
 
   // debugging stuff.
   /**

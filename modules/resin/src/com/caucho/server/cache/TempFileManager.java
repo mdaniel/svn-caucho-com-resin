@@ -81,6 +81,11 @@ public class TempFileManager
       throw ConfigException.create(e);
     }
   }
+  
+  public void close()
+  {
+    _store.close();
+  }
 
   public TempFileInode createInode()
   {
