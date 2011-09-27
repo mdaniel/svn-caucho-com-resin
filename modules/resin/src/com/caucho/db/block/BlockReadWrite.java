@@ -413,13 +413,18 @@ public class BlockReadWrite {
     SoftReference<RandomAccessWrapper> fileRef
       = new SoftReference<RandomAccessWrapper>(wrapper);
       */
-
+    
+    
     if (! _store.isClosed() && _cachedRowFile.free(wrapper)) {
+      wrapper.free();
       return;
     }
 
     if (wrapper.getFile() != _mmapFile.get()) {
       wrapper.close();
+    }
+    else {
+      wrapper.free();
     }
   }
 
@@ -488,6 +493,15 @@ public class BlockReadWrite {
     {
       return _file;
     }
+    
+    void free()
+    {
+      RandomAccessStream file = _file;
+      // _file = null;
+
+      if (file != null)
+        file.free();
+    }
 
     void close()
       throws IOException
@@ -495,8 +509,10 @@ public class BlockReadWrite {
       RandomAccessStream file = _file;
       _file = null;
 
-      if (file != null)
+      if (file != null) {
+        file.free();
         file.close();
+      }
     }
   }
 }

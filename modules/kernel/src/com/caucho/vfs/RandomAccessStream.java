@@ -137,7 +137,7 @@ abstract public class RandomAccessStream
   public final void free()
   {
     long value = _useCount.getAndDecrement();
-    
+
     if (value == 1) {
       try {
         closeImpl();

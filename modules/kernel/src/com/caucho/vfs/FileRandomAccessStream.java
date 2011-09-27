@@ -256,5 +256,11 @@ public class FileRandomAccessStream extends RandomAccessStream
       return false;
     }
   }
-
+ 
+  @Override
+  public String toString()
+  {
+    return (getClass().getSimpleName() + "[" + _file
+            + "," +System.identityHashCode(this) + "]");
+  }
 }
