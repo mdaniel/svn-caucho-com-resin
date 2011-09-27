@@ -47,7 +47,7 @@ public class WebSocketClient implements WebSocketContext, WebSocketConstants {
   private static final Logger log
     = Logger.getLogger(WebSocketClient.class.getName());
   private static final L10N L = new L10N(WebSocketClient.class);
-
+  
   private String _url;
 
   private String _scheme;
@@ -175,7 +175,7 @@ public class WebSocketClient implements WebSocketContext, WebSocketConstants {
     
     _os.print("Sec-WebSocket-Key: " + key + "\r\n");
     
-    String version = "8";
+    String version = WebSocketConstants.VERSION;
     
     _os.print("Sec-WebSocket-Version: " + version + "\r\n");
       

@@ -405,7 +405,7 @@ public class BlockReadWrite {
   {
     if (wrapper == null)
       return;
-
+    
     if (! isPriority && ! _isMmap)
       _rowFileSemaphore.release();
 
@@ -414,7 +414,7 @@ public class BlockReadWrite {
       = new SoftReference<RandomAccessWrapper>(wrapper);
       */
 
-    if (_cachedRowFile.free(wrapper)) {
+    if (! _store.isClosed() && _cachedRowFile.free(wrapper)) {
       return;
     }
 

@@ -108,12 +108,23 @@ like "production/webapps/default/test" which is the same as the web-app
 identifier. The deployment expansion process looks like the following:</p>
 
 <ol>
-<li>Look in the internal repository for "production/webapps/default/test" (uploaded by command-line)</li>
-<li>Look for webapps/test.war if the internal repository is missing.</li>
-<li>Copy the test.war into the internal repository as "server/[server-id]/webapps/default/test" (so the following steps are identical no matter how it's deployed.)</li>
+<li>Look in the internal repository for "production/webapps/default/test" (uploaded by command-line). If an archive exists in the internal repository,
+skip to step #4.</li>
+
+<li>If that fails, look for a webapps/test.war</li>
+
+<li>If the webapps/test.war exists, copy the test.war into the internal repository as "server/[server-id]/webapps/default/test"</li>
+
+<li>Use the archive in "production/webapps/default/test"
+(or "server/[server-id]/webapps/default/test") as the repository
+source archive.</li>
+
 <li>Delete the old webapps/test directory (saving some directories when expand-preserve-fileset is configured.)</li>
-<li>Expand the repository files into the webapps/test directory.</li>
+
+<li>Expand the repository source archive files into the webapps/test directory.</li>
+
 <li>Restart the webapp</li>
+
 </ol>
 
 <p>The deployment identifier matches the web-app id that Resin logs at
@@ -467,6 +478,7 @@ all the servers in the cluster will have the webapp.
 </ol>
 </s2>
 
+<!--
 <s2 title="ant/maven Remote Deployment">
 
 <p>Deployment may be interegrated with ant/maven using the command-line
@@ -474,6 +486,7 @@ interface or with ant/maven plugins. See the <a href="deploy-ant-maven.xtp">depl
 more information.</p>
 
 </s2>
+-->
 
 </s1>
 

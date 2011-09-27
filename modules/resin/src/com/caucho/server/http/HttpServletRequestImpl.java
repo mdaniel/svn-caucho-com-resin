@@ -69,6 +69,7 @@ import com.caucho.network.listen.SocketLink;
 import com.caucho.network.listen.SocketLinkDuplexController;
 import com.caucho.remote.websocket.MaskedFrameInputStream;
 import com.caucho.remote.websocket.UnmaskedFrameInputStream;
+import com.caucho.remote.websocket.WebSocketConstants;
 import com.caucho.security.AbstractLogin;
 import com.caucho.security.Login;
 import com.caucho.server.cluster.Server;
@@ -1850,7 +1851,7 @@ public final class HttpServletRequestImpl extends AbstractCauchoRequest
 
     String version = getHeader("Sec-WebSocket-Version");
 
-    String requiredVersion = "8";
+    String requiredVersion = WebSocketConstants.VERSION;
     if (! requiredVersion.equals(version)) {
       getResponse().sendError(HttpServletResponse.SC_BAD_REQUEST);
       

@@ -524,6 +524,10 @@ public class TableIterator {
   {
     Block block = _block;
     _block = null;
+    
+    _table = null;
+    _queryContext = null;
+    _xa = null;
 
     if (block != null)
       block.free();

@@ -223,7 +223,8 @@ and then verifies the repository itself before making any changes visible.</p>
 
 <ol>
 <li>Resin detects that a new repository version
-is available (it continues to use the old repository).</li>
+is available (it continues to use the old repository) by
+checking with the triad.</li>
 <li>It checks for any new file updates and copies the new files from
 the triad (Resin continues to use the old files and repository.)</li>
 <li>When all the new files are verified, it copies and verifies the
