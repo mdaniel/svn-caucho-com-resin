@@ -494,11 +494,13 @@ public final class LruCache<K,V> {
 
   private void removeLru()
   {
-    if (_capacity <= _size1 + _size2) {
+    int overflow = _size1 + _size2 - _capacity;
+    
+    if (overflow > 0) {
       if (_isLruTailRemove.compareAndSet(false, true)) {
         try {
           // remove LRU items until we're below capacity
-          while (_capacity <= _size1 + _size2 && removeTail()) {
+          for (; overflow > 0 && removeTail(); overflow--) {
           }
         } finally {
           _isLruTailRemove.set(false);

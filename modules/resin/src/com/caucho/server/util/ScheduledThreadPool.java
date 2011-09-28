@@ -845,7 +845,7 @@ public class ScheduledThreadPool implements ScheduledExecutorService,
     {
       if (_isCancelled || _isDone || _isShutdown)
         return;
-
+      
       _thread = Thread.currentThread();
       ClassLoader oldLoader = _thread.getContextClassLoader();
       String oldName = _thread.getName();
@@ -890,7 +890,7 @@ public class ScheduledThreadPool implements ScheduledExecutorService,
               if (next < now)
                 _alarmCount++;
             } while (next < now);
-
+            
             _alarm.queueAt(next);
           }
           else {

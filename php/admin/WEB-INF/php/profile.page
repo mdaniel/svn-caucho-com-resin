@@ -161,7 +161,7 @@ if ($profile) {
     echo " <td>${run_time}s</td>\n";
     echo " <td>${period}ms</td>\n";
     echo " <td>${sample_ticks}</td>\n";
-    echo " <td>${gc_time}s</td>\n";
+    echo " <td>${gc_time}ms</td>\n";
     echo " <td>${depth}</td>\n";
     
     echo "</tr></table>\n";

@@ -31,8 +31,6 @@ package com.caucho.util;
 
 import java.util.ArrayList;
 import java.util.concurrent.atomic.AtomicLong;
-import java.util.concurrent.atomic.AtomicReference;
-import java.util.concurrent.atomic.AtomicReferenceArray;
 import java.util.logging.Logger;
 
 import com.caucho.env.thread.ThreadPool;
@@ -232,6 +230,11 @@ public class AlarmClock {
   {
     long lastTime = _now.getAndSet(now);
     
+    long nextTime = _nextAlarmTime.get();
+    
+    if (now < nextTime)
+      return nextTime;
+    
     _nextAlarmTime.set(now + CLOCK_NEXT);
     
     int delta;
@@ -290,15 +293,17 @@ public class AlarmClock {
     for (int i = 0; i < delta; i++) {
       long time = now + i;
       
+      if (nextTime < time)
+        return nextTime;
+      
       int bucket = getBucket(time);
       
       if (_clockArray[bucket] != null) {
-        long wakeTime = time;
         // Alarm alarm = _clockArray[bucket];
         
-        while (wakeTime < nextTime) {
-          if (_nextAlarmTime.compareAndSet(nextTime, wakeTime))
-            return nextTime;
+        while (time < nextTime) {
+          if (_nextAlarmTime.compareAndSet(nextTime, time))
+            return time;
           
           nextTime = _nextAlarmTime.get();
         }

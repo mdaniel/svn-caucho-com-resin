@@ -392,7 +392,7 @@ public final class Block implements SyncCacheListener {
   @Override
   public final void syncRemoveEvent()
   {
-    if ((_useCount.get() > 1 || _dirtyRange.get() == INIT_DIRTY)
+    if ((_useCount.get() > 1 || _dirtyRange.get() != INIT_DIRTY)
         && toWriteQueued()) {
       _store.getWriter().addDirtyBlockNoWake(this);
     }
