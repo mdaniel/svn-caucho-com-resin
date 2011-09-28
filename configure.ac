@@ -94,6 +94,8 @@ if test -d "/etc/init.d/rc.d"; then
   resin_init_d="/etc/init.d/rc.d/resin"
 elif test -d "/etc/init.d"; then
   resin_init_d="/etc/init.d/resin"
+elif test -d "/etc/rc.d"; then
+  resin_init_d="/etc/rc.d"
 fi
 
 AC_ARG_WITH(resin-init.d,
@@ -921,6 +923,12 @@ else
   echo "no"
 fi
 rm -f /tmp/cp.test.$$.src /tmp/cp.test.$$.dest
+
+#
+# Find bash. FreeBSD has bash in /usr/loca/bin
+#
+BASH=`which bash`
+AC_SUBST(BASH)
 
 #if test -z "${LD_SHLIB}"; then
 #  AC_MSG_ERROR([Can't determine compilation flags.]);

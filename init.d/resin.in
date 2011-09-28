@@ -1,4 +1,4 @@
-#!/bin/bash
+#!@BASH@
 
 ### BEGIN INIT INFO
 # Provides:          resin
