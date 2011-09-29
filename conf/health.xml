@@ -154,7 +154,7 @@
   </health:JmxMeter>
 
   <health:AnomalyAnalyzer>
-    <meter>OS|Process|File Descriptor Count</meter>
+    <meter-name>OS|Process|File Descriptor Count</meter-name>
   </health:AnomalyAnalyzer>
    
   <health:JmxMeter>
@@ -212,7 +212,7 @@
   </health:JmxMeter>
 
   <health:AnomalyAnalyzer>
-    <meter>JVM|Thread|JVM Thread Count</meter>
+    <meter-name>JVM|Thread|JVM Thread Count</meter-name>
   </health:AnomalyAnalyzer>
   
   <health:JmxMeter>
@@ -222,7 +222,7 @@
   </health:JmxMeter>
 
   <health:AnomalyAnalyzer>
-    <meter>JVM|Thread|JVM Runnable Count</meter>
+    <meter-name>JVM|Thread|JVM Runnable Count</meter-name>
   </health:AnomalyAnalyzer>
   
   <health:JmxMeter>
@@ -238,7 +238,7 @@
   </health:JmxMeter>
 
   <health:AnomalyAnalyzer>
-    <meter>JVM|Thread|JVM Waiting Count</meter>
+    <meter-name>JVM|Thread|JVM Waiting Count</meter-name>
   </health:AnomalyAnalyzer>
   
   <health:JmxMeter>
@@ -248,7 +248,7 @@
   </health:JmxMeter>
 
   <health:AnomalyAnalyzer>
-    <meter>JVM|Thread|JVM Blocked Count</meter>
+    <meter-name>JVM|Thread|JVM Blocked Count</meter-name>
   </health:AnomalyAnalyzer>
 
   <health:JmxMeter>
@@ -264,7 +264,7 @@
   </health:JmxMeter>
 
   <health:AnomalyAnalyzer>
-    <meter>Resin|Thread|Thread Active Count</meter>
+    <meter-name>Resin|Thread|Thread Active Count</meter-name>
   </health:AnomalyAnalyzer>
 
   <health:JmxMeter>
