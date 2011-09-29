@@ -1,0 +1,205 @@
+<document>
+  <header>
+    <product>resin</product>
+    <version>Resin 4.0</version>
+    <title>Resin Installation Quick Start</title>
+
+    <description>
+<p>You can start using Resin by simply expanding the archive and
+starting Resin with a Java command line. You can also start Resin directly 
+from an IDE.</p>
+    </description>
+  </header>
+
+  <body>
+    <localtoc/>
+
+<s1 title="Preconditions">
+
+<p>Resin 4.0 needs Java before it can run.  You will need JDK 1.6 or later.</p>
+
+<p>Oracle's JDK for Windows, Solaris, and Linux can be found at
+<a href="http://www.oracle.com/technetwork/java/javase/overview/index.html">http://www.oracle.com/technetwork/java/javase/overview/index.html</a>.
+Oracle also has links to some other ports of the JDK.</p>
+
+</s1>
+
+<s1 title="Resin as a Web Server">
+
+<p>Resin comes with a built-in high-performance production-ready HTTP server.
+The easiest and fastest Resin configuration uses Resin as the web server as well as 
+the application server. We highly recommend you start with this configuration 
+although you are free to use other web servers like Apache or IIS with Resin.</p>
+
+<figure src="httpd.gif" alt="browser <-> Resin httpd/servlets,beans <- html,jsp"/>
+
+<p>The built-in HTTP server listens on port 8080 in the default configuration and
+can be changed to listen on the HTTP port 80 instead during deployment.</p>
+
+<p>For more details, see the <a href="http-server.xtp">Resin Web Server</a>
+configuration page.</p>
+
+</s1>
+
+<s1 name="quickstart" title="Installing Resin">
+
+<p>While the Resin web server starts listening to HTTP requests on port 8080, it also
+listens on port 6800 for <a href="clustering-overview.xtp">load balancer and cluster</a>
+messages. Keep in mind, Resin can be used for development or evaluation 
+in addition to using it in production. If desired, you can easily apply for a 
+development license to enable Resin Pro features. You can also simply use Resin Open
+Source to start development.</p>
+
+<p>Installation steps for the major operating systems are outlined below:</p>
+
+<s2 title="Windows">
+
+<ol>
+<li>Install JDK 1.6 or later.</li>
+<li>Check that the environment variable <var>JAVA_HOME</var> is set to the JDK 
+location, e.g. <code>c:\java\jdk1.6.0_14</code></li>
+<li>Unzip resin-4.0.x.zip</li>
+<li>Define the environment variable <var>RESIN_HOME</var> to the location of
+Resin, for example <code>c:\resin-4.0.x</code></li>
+<li>Execute <code>resin.exe</code>
+  <ul><li>or run <code>java -jar lib/resin.jar console</code></li></ul>
+</li>
+<li>Browse to <a href="http://localhost:8080">http://localhost:8080</a></li>
+</ol>
+</s2>
+
+<s2 title="Unix, Linux, and Mac OS X">
+
+<ol>
+<li>Install JDK 1.6 or later and link /usr/java to the Java home or define the 
+environment variable <var>JAVA_HOME</var>.</li>
+<li><code>tar -vzxf resin-4.0.x.tar.gz</code></li>
+<li><code>cd resin-4.0.x</code></li>
+<li><code>./configure --prefix=`pwd`</code>
+  <ul><li>some details on the <a href="starting-resin-command-line.xtp">./configure options</a>.</li></ul>
+</li>
+<li><code>make</code></li>
+<li><code>make install</code></li>
+<li>Execute <code>bin/resin.sh console</code>
+  <ul><li>or run <code>java -jar lib/resin.jar console</code></li></ul>
+</li>
+<li>Browse to <a href="http://localhost:8080">http://localhost:8080</a></li>
+</ol>
+
+</s2>
+
+<s2 title="Debian Unix apt-get">
+<p>
+We provide a Debian packaged version of Resin that Debian and Ubuntu
+users can take advantage of.  It performs all of the installation
+steps above for you and creates all the recommended server and
+content directories.  Simply download from the <a
+href="http://caucho.com/download">Resin download page</a> and install
+using dpkg.
+</p>
+<p>
+Alternatively, you can add Caucho's Debian repository to your system's
+repositories to use automated update tools like Synaptic and apt-get.
+To do this, add the following line to your <var>/etc/apt/sources.list</var>
+</p>
+<example>
+deb http://caucho.com/download/debian unstable multiverse
+</example>
+<p>
+After adding this line, update your local repository cache by running:
+</p>
+<example>
+apt-get update
+</example>
+<p>
+Finally, install Resin Professional using the following:
+</p>
+<example>
+apt-get install resin-pro
+</example>
+<p>
+If you have a license file for Resin, save it in <var>/usr/local/resin/licenses</var>
+</p>
+<p>
+Or install Resin Open Source with this command:
+</p>
+<example>
+apt-get install resin
+</example>
+
+</s2>
+</s1>
+
+<s1 title="Running Applications">
+
+<p>Once you've made sure Resin is working, you can start to run
+applications/add content:</p>
+
+<ol>
+<li>You can deploy .war files by copying them
+to the webapps directory like this: <code>resin-4.0.x/webapps/hello.war</code>.
+
+<ul><li>The URL for the application would be: 
+<a href="http://localhost:8080/hello">http://localhost:8080/hello</a>.</li>
+</ul></li>
+
+<li>You can deploy using the command-line like this: <code>bin/resin.sh deploy hello.war</code>.
+
+<ul><li>The URL for the application would be:
+<a href="http://localhost:8080/hello">http://localhost:8080/hello</a>.</li>
+</ul></li>
+
+<li>You can also deploy .wars in exploded form like: <code>resin-4.0.x/webapps/hello/index.php</code>.
+
+<ul><li>The URL for the application would be:
+<a href="http://localhost:8080/hello">http://localhost:8080/hello</a>.</li></ul>
+
+You can use a web.xml file to configure the 'hello' web application:
+<code>resin-4.0.x/webapps/hello/WEB-INF/web.xml</code>.</li>
+</ol>
+
+<p>For more information on deployment, see the <a href="deploy.xtp">deployment documentation</a>.</p>
+
+</s1>
+
+<s1 title="Running Resin as a Daemon">
+
+<p>In most production environments, Resin will run as a background daemon.
+The previous steps ran Resin in the foreground, which is convenient
+for development since the logging output goes to the console.
+When running as a daemon, Resin detaches from the console and continues
+running until told to stop.</p>
+<p>The following are the basic steps to running Resin as a daemon:</p>
+<ol>
+<li>Start resin with <code>bin/resin.sh start</code></li>
+<li>Stop resin with <code>bin/resin.sh stop</code></li>
+<li>Restart resin with <code>bin/resin.sh restart</code></li>
+</ol>
+
+</s1>
+
+<s1 title="Resin IDE Support">
+
+<p>Resin includes excellent support for Eclipse. In fact, using the Eclipse support 
+may be the easiest way get started with Resin.</p>
+<p>Resin plugin support is included in 
+Indigo (Eclipse 3.7) and above (you can install the Resin plugin manually for earlier
+Eclipse versions). The Resin plugin allows you to create new server instances, 
+configure servers, start servers, stop servers, restart instances, deploy/undeploy 
+applications, debug on the server and so on. You can even automatically download and 
+install the latest version of Resin using the plugin or apply for a development license 
+for Resin Pro.</p>
+<p>Further details on the Resin Eclipse plugin is available 
+<a href="resin-eclipse-support.xtp">here</a>.</p>
+
+</s1>
+
+<s1 title="More Installation Options">
+
+<p>More installation and configuration are available at
+<a href="install.xtp">installation options</a>.</p>
+
+</s1>
+
+</body>
+</document>

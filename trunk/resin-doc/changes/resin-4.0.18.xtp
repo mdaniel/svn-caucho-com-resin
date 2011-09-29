@@ -1,0 +1,85 @@
+<document>
+  <header>
+    <product>resin</product>
+    <title>Resin 4.0.18 Release Notes</title>
+  </header>
+
+<body>
+
+<localtoc/>
+
+<s1 title="Summary">
+
+<p>4.0.18 is primarily a bug fix release.</p>
+
+</s1>
+
+<s1 title="(CLI) Resin command line updates">
+  <p>Resin 4.0.18 introduces commands to manage jmx objects. New set of JMX
+    Commands consists of jmx-list, jmx-set and jmx-call commands.
+    Documentation
+    for an updated CLI interface can be viewed with<code>java -jar
+      lib/resin.jar
+      help</code>. Documentation for a particular command can be viewed with
+    <code>java -jar lib/resin.jar help &lt;command></code>
+  </p>
+</s1>
+
+<s1 title="Resin Ant Plugin">
+<p>Resin Ant Plugin has been moved to a new home at github:
+  <a href="https://github.com/caucho/ant-plugin">https://github.com/caucho/ant-plugin</a>.
+</p>
+</s1>
+
+<s1 title="Health Check Updates">
+
+<p>Changes to the health system this release include improved stability, 
+logging, documentation, and lifecycle conditions.</p>
+
+<ul>
+ <li>Parameter checking and error reporting - All health checks, actions, and 
+ conditions were updated to check for missing or invalid attributes and 
+ report clearer error logs.</li>
+ 
+ <li>Documentation - Full documentation of the health checking system is now 
+ present at <a href="../admin/health.xtp">/resin-doc/admin/health.xtp</a>.</li>
+
+ <li>Lifecycle conditions - Resin can now be configured to execute health 
+ actions on startup, shutdown, and restart.</li>
+</ul>
+
+<example title="Example: Sending an email on startup in health.xml">
+&lt;cluster xmlns="http://caucho.com/ns/resin"
+         xmlns:health="urn:java:com.caucho.health">
+
+  &lt;health:SendMail>
+    &lt;to>admin@yourdomain.com&lt;/to>
+    &lt;health:OnStartup/>
+  &lt;/health:SendMail>
+ 
+&lt;/cluster>
+</example>
+
+</s1>
+
+<s1 title="maven/junit embedding/integration with JPA/data sources">
+
+<p>When embedded Resin is launched inside a maven/junit task, the default
+behavior is to disable Resin's Alarm, which manages timeouts. To re-enable
+the alarm, use a '-Dcaucho.alarm-enable' on the command-line when launching
+Java.</p>
+
+<p>The alarm is disabled in embedded cases to handle of embedded
+Quercus in a non-Resin container.</p>
+
+</s1>
+
+<s1 title="WebSocket draft v7">
+
+<p>Resin's WebSocket support has been upgraded to the test v7 draft of the
+IETF specification.</p>
+
+</s1>
+
+</body>
+</document>

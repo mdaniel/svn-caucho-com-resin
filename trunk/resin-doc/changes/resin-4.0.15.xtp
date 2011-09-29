@@ -1,0 +1,53 @@
+<document>
+  <header>
+    <product>resin</product>
+    <title>Resin 4.0.15 Release Notes</title>
+  </header>
+
+<body>
+
+<localtoc/>
+
+<s1 title="Summary">
+
+<p>4.0.15 has primarily been a bug-fix and Web Profile TCK release. It also
+encludes several extensions and enhancements to the HealthCheck system.</p>
+
+</s1>
+
+<s1 title="Web Profile TCK">
+
+<ul>
+<li>EL - pass</li>
+<li>EJB - 1 fail (timing, possible TCK bug)</li>
+<li>JDBC - pass</li>
+<li>JPA - 8 fail (exception)</li>
+<li>JSF - pass</li>
+<li>JSP - pass</li>
+<li>JSR-299 (CDI) - pass</li>
+<li>JSR-330 (javax.inject) - pass</li>
+<li>JSTL - pass</li>
+<li>JTA - pass</li>
+<li>Servlet - pass</li>
+</ul>
+
+</s1>
+
+<s1 title="Resin Eclipse plugin update">
+
+<p>The Resin eclipse plugin has been updated at
+<a href="http://caucho.com/eclipse">http://caucho.com/eclipse</a>.</p>
+
+<p>The plugin allows automatic download of Resin Professional.</p>
+
+</s1>
+
+<s1 title="Health Check Updates">
+
+<p>The health check system has been enhanced, allowing for more control of
+Resin restarts and logging.</p>
+
+</s1>
+
+</body>
+</document>
