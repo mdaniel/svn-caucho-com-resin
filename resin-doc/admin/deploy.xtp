@@ -101,6 +101,21 @@ a prefix. Both can be changed with deploy options.</p>
 
 </s2>
 
+<s2 title="Command-Line vs Directory Priority">
+
+<p>The command-line deployment takes priority over the
+directory deployement, because a deployment to a cluster ensures that all
+servers have the same version of the application. This means you must
+undeploy a web-app from the command-line if you decide to switch from
+command-line deployment to directory deployment.</p>
+
+<example title="Example: command-line undeployment">
+unix> bin/resin.sh undeploy test.war
+unix> cp test.war webapps
+</example>
+
+</s2>
+
 <s2 title="Deployment Expansion">
 
 <p>The &lt;web-app-deploy> controls the expansion based on web-app ids

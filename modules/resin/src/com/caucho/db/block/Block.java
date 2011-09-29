@@ -243,7 +243,8 @@ public final class Block implements SyncCacheListener {
 
     synchronized (this) {
       if (_state.get().isValid()) {
-      } else if (_store.getBlockManager().copyDirtyBlock(this)) {
+      } 
+      else if (_store.getBlockManager().copyDirtyBlock(this)) {
         clearDirty();
         toValid();
       } else {
@@ -474,10 +475,11 @@ public final class Block implements SyncCacheListener {
     _isFreeBuffer = false;
       
     byte []buffer = _buffer;
+    byte []targetBuffer = block.getBuffer();
 
     // XXX: need to allocate state
-    boolean isValid = isValid();
-
+    boolean isValid = isValid() && buffer != null && targetBuffer != null;
+    
     if (isValid) {
       System.arraycopy(buffer, 0, block.getBuffer(), 0, buffer.length);
       block.toValid();
