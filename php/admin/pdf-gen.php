@@ -10,9 +10,13 @@ define("DAY", 24 * HOUR);
 if (! $g_report)
   $g_report = $_REQUEST["report"];
 
-if (! $g_title)
+if (! $g_title) {
   $g_title = $_REQUEST["title"];
+}
 
+if (! $g_title) {
+  $g_title = $g_report;
+}  
 
 if ($g_is_snapshot || $_REQUEST["snapshot"]) {
   $snapshot = $g_mbean_server->lookup("resin:type=SnapshotService");
@@ -100,7 +104,7 @@ if ($columns==1) {
 	define("GRAPH_SIZE", new Size(200, 125));
 }
 
-$g_canvas->set_header_center("Report: $pageName");
+$g_canvas->set_header_center("Report: $g_title");
 
 if (! $period) {
   $period = $_REQUEST['period'] ? (int) $_REQUEST['period'] : ($mPage->period/1000);
@@ -168,7 +172,7 @@ $g_canvas->set_footer_left(date("Y-m-d H:i", $g_end));
 // $g_canvas->writeText(new Point(175,775), "Time at " . date("Y-m-d H:i", $time));
 
 
-$g_canvas->write_section("Report: $pageName");
+$g_canvas->write_section("Report: $g_title");
 
 if ($mPage->isSummary()) {
   admin_pdf_summary();
@@ -184,7 +188,16 @@ $start_message = $g_resin->getWatchdogStartMessage();
 $g_canvas->write_text_newline();
 $g_canvas->writeTextLine("Start message: " . $start_message);
 
-admin_pdf_log_messages($g_canvas, $g_end - 30 * 60, $g_end);
+admin_pdf_log_messages($g_canvas,
+                       "Anomalies",
+                       "/^com.caucho.health.analysis/",
+                       $g_start, $g_end);
+
+admin_pdf_log_messages($g_canvas,
+                       "Log Messages",
+                       "//",
+                       $g_end - 30 * 60, $g_end,
+                       15);
 
 $full_names = $stat->statisticsNames();
 
@@ -229,27 +242,15 @@ $g_pdf->end_document();
 $document = $g_pdf->get_buffer();
 $length = strlen($document);
 
-$filename = "$pageName" . "_" . date("Ymd_Hi", $g_end) . ".pdf";
+$filename = "$g_title" . "_" . date("Ymd_Hi", $g_end) . ".pdf";
 
 header("Content-Type:application/pdf");
-
-
-
 header("Content-Length:" . $length);
-
-
-
 header("Content-Disposition:inline; filename=" . $filename);
-
-
 
 echo($document);
 
-
-
 unset($document);
-
-
 
 pdf_delete($g_pdf);
 

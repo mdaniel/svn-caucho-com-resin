@@ -18,7 +18,7 @@ report 4.0.23 bugs at
 
 </s1>
 
-<s1 title="PdfReport">
+<s1 title="Health: PdfReport">
 
 <p>The PdfReport now has a mail-to attribute which can be used to send the
 pdf report as an email attachment.</p>
@@ -35,6 +35,23 @@ pdf report as an email attachment.</p>
         &lt;health:OnRestart/>
       &lt;/health:PdfReport>
 </example>
+
+</s1>
+
+<s1 title="Health: AnomalyAnalysis">
+
+<p>The health check system has some early anomaly analysis. The analyzer will
+look at a meter value, checking for deviations from the average value.
+So unusual changes like a spike in blocked threads can be detected.</p>
+
+</s1>
+
+<s1 title="Health: Watchdog and Postmortem">
+
+<p>The Postmortem report has been renamed to be the
+watchdog restart report, primarily for translation purposes. We're now
+describing the watchdog as the entire check/restart/report system, where the
+watchdog process is only a part.</p>
 
 </s1>
 

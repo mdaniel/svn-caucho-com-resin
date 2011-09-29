@@ -512,11 +512,10 @@ function print_pdf_select()
     return;
   }
 
-	echo "<h2>Summary PDF Report</h2>\n";
-	
-	echo "<form action='pdf-gen.php' method='get' style='display:inline;'>";
+ echo "<h2>Summary PDF Report</h2>\n";
+ echo "<form action='pdf-gen.php' method='get' style='display:inline;'>";
   echo "<input type='hidden' name='snapshot' value='true'/>\n";
-  echo "<input type='hidden' name='report' value='Summary'/>\n";
+  echo "<input type='hidden' name='report' value='Snapshot'/>\n";
   echo "<div>\n";
   echo "<div style='display:inline-block;float:left;padding-right:0.5em;'>\n";
   echo "<input type='checkbox' id='profiling_enabled' value='true'/> ";

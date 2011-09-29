@@ -1483,13 +1483,20 @@ function admin_pdf_draw_log()
     $ts = strftime("%Y-%m-%d %H:%M:%S", $message->timestamp / 1000);
     $g_canvas->write_text_x(20, $ts);
     $g_canvas->write_text_x(110, $message->level);
-    $g_canvas->write_text_block_x(150, $message->message);
+    
+    $msg = wordwrap($message->message, 75, "\n", true);
+    
+    $g_canvas->write_text_block_x(150, $msg);
   }
   
   $g_canvas->set_header_right(null);
 }
 
-function admin_pdf_log_messages($canvas, $start, $end)
+function admin_pdf_log_messages($canvas,
+                                $title,
+                                $regexp,
+                                $start, $end,
+                                $max=-1)
 {
   global $log_mbean;
   
@@ -1500,14 +1507,28 @@ function admin_pdf_log_messages($canvas, $start, $end)
   if (! $messages || is_empty($message))
     return;
 
-  $canvas->write_text_newline();
-  $canvas->writeTextLine("Log Messages");  
+  array_reverse($messages);
+
+  $i = 0;
   
   foreach ($messages as $message) {
+    if (! preg_match($regexp, $message->name))
+      continue;
+  
+    if ($max < $i++ && $max >= 0)
+      break;
+
+    if ($i == 1) {
+      $canvas->write_text_newline();
+      $canvas->writeTextLine($title);
+    }
+      
     $ts = strftime("%Y-%m-%d %H:%M:%S", $message->timestamp / 1000);
     $canvas->write_text_x(20, $ts);
-    $canvas->write_text_x(110, $message->level);
-    $canvas->write_text_block_x(150, $message->message);
+
+    $msg = wordwrap($message->message, 75, "\n", true);
+    
+    $canvas->write_text_block_x(110, $msg);
   }
 }
 
@@ -1590,15 +1611,24 @@ function admin_pdf_heap_dump_header($canvas)
 
 function admin_pdf_profile()
 {
-  global $g_canvas;
-  
   $profile = admin_pdf_snapshot("Resin|Profile");
 
   if (! $profile) {
     return;
   }
+
+  admin_pdf_profile_section("CPU Profile: Active",
+                            $profile,
+                            "admin_thread_active");
+                            
+  admin_pdf_profile_section("CPU Profile: Full", $profile);
+}
+
+function admin_pdf_profile_section($name, $profile, $filter)
+{
+  global $g_canvas;
   
-  $g_canvas->write_section("CPU Profile");
+  $g_canvas->write_section($name);
 
   $g_canvas->setDataFontAndSize(10);
 
@@ -1617,7 +1647,10 @@ function admin_pdf_profile()
     
   $period = $profile["period"];
 
-  $profile_entries =& $profile["profile"];
+  $profile_entries = $profile["profile"];
+
+  if ($filter)
+    $profile_entries = array_filter($profile_entries, $filter);
 
   usort($profile_entries, "profile_cmp_ticks");
 
@@ -1679,6 +1712,36 @@ function admin_pdf_stack(&$profile_entry, $max)
   }
 
   return $string;
+}
+
+function admin_thread_active($item)
+{
+  $state = $item["state"];
+
+  if ($state == "WAITING")
+    return false;
+
+  $name = $item["name"];
+
+  if ($name == "com.caucho.vfs.JniSocketImpl.nativeAccept()")
+    return false;
+
+  if ($name == "com.caucho.network.listen.JniSelectManager.selectNative()")
+    return false;
+
+  if ($name == "com.caucho.profile.ProProfile.nativeProfile()")
+    return false;
+
+  if ($name == "java.net.PlainSocketImpl.accept()")
+    return false;
+
+  if ($name == "java.net.PlainSocketImpl.socketAccept()")
+    return false;
+
+  if ($name == "unknown")
+    return false;
+  
+  return true;
 }
 
 //

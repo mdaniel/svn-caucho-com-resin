@@ -390,11 +390,16 @@ function display_jmx($mbean_server, $group_mbeans)
 
   $javascript = "";
 
+  $row = 0;
+
   echo "<div class='jmx'>";
   
   foreach ($type_partition as $type_name => $type_mbeans) {
     echo "<div id='jmx-${group_id}-type-${type_name}'";
-    echo " class='ui-widget-header ui-corner-all switch jmx-header'>\n";
+    // echo " class='ui-widget-header ui-corner-all switch jmx-header'>\n";
+    // echo " class='switch jmx-header'>\n";
+    echo " class='switch jmx-header " . row_style($row++) . "'>\n";
+
     echo "$type_name";
     echo "</div>\n";
 
@@ -414,13 +419,16 @@ function display_jmx($mbean_server, $group_mbeans)
       $start_id = ++$data_id;
 
       echo "<div id='jmx-${start_id}' ";
-      echo " class='switch ui-widget-header ui-corner-all jmx-header'>";
+      // echo " class='switch ui-widget-header ui-corner-all jmx-header'>";
+      //echo " class='switch jmx-header " . row_style($row++) . "'>";
+      //echo " class='switch jmx-header " . row_style($row++) . "'>";
+      echo " class='switch jmx-header'>";
       echo jmx_short_name($mbean->mbean_name, $group_array);
       echo "</div>\n";
 
-      echo "<div class='jmx-data-table ui-widget-content toggle-jmx-${start_id}'>";
+//      echo "<div class='jmx-data-table ui-widget-content toggle-jmx-${start_id}'>";
+      echo "<div class='jmx-data-table toggle-jmx-${start_id}'>";
       echo "<table class='jmx-data'>\n";
-      $row = 0;
 
       foreach ($attr_names as $attr_name) {
         echo "<tr>";

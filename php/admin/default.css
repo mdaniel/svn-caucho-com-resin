@@ -660,8 +660,8 @@ a.hideOptional {
 .jmx {
   font-size: 100%;
   color: black;
-  background: #f4f4f4;
 }
+/*  background: #f4f4f4; */
 
 .jmx-header {
   margin: 2px;
@@ -696,7 +696,6 @@ a.hideOptional {
 
 .jmx-data th {
   text-align: left;
-  background: #f4f4f4;
   margin: 0px;
   padding: 0px;
   border: 0px;
@@ -723,6 +722,7 @@ tr.rb {
 }
 */
 
+/*
 tr.ra {
   background: #f6f2e8;
 }
@@ -730,6 +730,31 @@ tr.ra {
 tr.rb {
   background: #f0ece0;
 }
+*/
+tr.ra {
+  background: #f6f2e8;
+}
+
+tr.rb {
+  background: #f0ece0;
+}
+
+.ra {
+  background: #f6f2e8;
+}
+
+.rb {
+  background: #f0ece0;
+}
+/*
+div.ra {
+  background: #f6f2e8;
+}
+
+div.rb {
+  background: #f0ece0;
+}
+*/
 /*
 tr.rta {
   background: #b9b9b9;
