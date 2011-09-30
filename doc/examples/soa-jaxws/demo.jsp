@@ -1,9 +1,10 @@
-<%@ page import="java.util.List" %>
-<%@ page import="javax.naming.*" %>
-<%@ page import="javax.xml.ws.Holder" %>
-<%@ page import="example.UserService" %>
-<%@ page import="example.User" %>
-<%
+<pre>
+&lt;%@ page import="java.util.List" %>
+&lt;%@ page import="javax.naming.*" %>
+&lt;%@ page import="javax.xml.ws.Holder" %>
+&lt;%@ page import="example.UserService" %>
+&lt;%@ page import="example.User" %>
+&lt;%
 Context context = (Context) new InitialContext().lookup("java:comp/env");
 
 UserService service = (UserService) context.lookup("soap/UserService");
@@ -18,7 +19,7 @@ catch (Exception e) {
   invalid = e;
 }
 %>
-<pre>
-UserService.getUsers(1): <%= users %>
-UserService.getUsers(0): <%= invalid %>
-</pre>
+&lt;pre>
+UserService.getUsers(1): &lt;%= users %>
+UserService.getUsers(0): &lt;%= invalid %>
+&lt;/pre>

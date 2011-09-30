@@ -146,7 +146,7 @@ for ear expansion.</p>
 
 </s2>
 
-<s2 title="multipart-form" version="Resin 1.2" localtoc-indent="1" type="defun">
+<s2 title="multipart-form" version="Resin 1.2" type="defun">
 <parents>web-app-default, web-app</parents>
 
 <p>Enables multipart-mime for forms and file uploads.  multipart-mime
@@ -905,11 +905,11 @@ not use any security constraints.</p>
 </example>
 </s2>
 
-<s2 title="display-name" localtoc-indent="1" version="Servlet" type="defun">
+<s2 title="display-name" version="Servlet" type="defun">
 <parents>security-constraint</parents>
 </s2>
 
-<s2 title="web-resource-collection" localtoc-indent="1" version="Servlet" type="defun">
+<s2 title="web-resource-collection" version="Servlet" type="defun">
 <parents>security-constraint</parents>
 
 <p>Specifies a collection of areas of the web site.</p>
@@ -923,7 +923,7 @@ not use any security constraints.</p>
 </td></tr></deftable-childtags>
 </s2>
 
-<s2 title="auth-constraint" localtoc-indent="1" version="Servlet" type="defun">
+<s2 title="auth-constraint" version="Servlet" type="defun">
 <parents>security-constraint</parents>
 
 <p>Requires that authenticated users fill the specified role.
@@ -936,7 +936,7 @@ Think of a role as a group of users.</p>
 
 </s2>
 
-<s2 title="user-data-constraint" localtoc-indent="1" version="Servlet" type="defun">
+<s2 title="user-data-constraint" version="Servlet" type="defun">
 <parents>security-constraint</parents>
 
 <p>Restricts access to secure transports, such as SSL</p>
@@ -948,7 +948,7 @@ INTEGRAL, and CONFIDENTIAL are allowed values.
 
 </s2>
 
-<s2 title="constraint" localtoc-indent="1" version="Resin" type="defun">
+<s2 title="constraint" version="Resin" type="defun">
 <parents>security-constraint</parents>
 
 <p>
@@ -986,7 +986,7 @@ Digest</a>.</p>
 </p></s2>
 
 
-<s2 title="form-login-config" localtoc-indent="1" version="Servlet" type="defun">
+<s2 title="form-login-config" version="Servlet" type="defun">
 <parents>login-config</parents>
 
 <p>Configures authentication using forms.  The login form has

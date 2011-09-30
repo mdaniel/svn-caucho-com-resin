@@ -1,63 +1,64 @@
-<%@ taglib prefix='c' uri='http://java.sun.com/jsp/jstl/core' %>
+<pre>
+&lt;%@ taglib prefix='c' uri='http://java.sun.com/jsp/jstl/core' %>
 
-<%@ include file="/inc/nobrowsercache.jspf" %>
+&lt;%@ include file="/inc/nobrowsercache.jspf" %>
 
-<%-- /index.jsp - default page for website. --%>
+&lt;%-- /index.jsp - default page for website. --%>
 
 
-<html>
-  <head>
-    <title>Hogwart's</title>
-  </head>
+&lt;html>
+  &lt;head>
+    &lt;title>Hogwart's&lt;/title>
+  &lt;/head>
 
-  <body>
-    <%@ include file="/inc/buttonbar.jspf" %>
+  &lt;body>
+    &lt;%@ include file="/inc/buttonbar.jspf" %>
 
-    <h1>Welcome to Hogwart's!</h1>
+    &lt;h1>Welcome to Hogwart's!&lt;/h1>
 
     This is a Defense Against the Dark Arts example of using
     JSP/Servlet security. 
-    <a href="<c:url value='index.xtp'/>">Tutorial documentation</a> is 
+    &lt;a href="&lt;c:url value='index.xtp'/>">Tutorial documentation&lt;/a> is 
     available.
-    <p>
+    &lt;p>
 
     Try doing a 
-    <c:choose>
-      <c:when test="${empty pageContext.request.userPrincipal}">
-        <a href="<c:url value='home.jsp'/>">login</a>
-      </c:when>
-      <c:otherwise>
-        <a href="<c:url value='logout.jsp'/>">logout</a>
-      </c:otherwise>
-    </c:choose>
+    &lt;c:choose>
+      &lt;c:when test="${empty pageContext.request.userPrincipal}">
+        &lt;a href="&lt;c:url value='home.jsp'/>">login&lt;/a>
+      &lt;/c:when>
+      &lt;c:otherwise>
+        &lt;a href="&lt;c:url value='logout.jsp'/>">logout&lt;/a>
+      &lt;/c:otherwise>
+    &lt;/c:choose>
 
-    <p>
+    &lt;p>
     To get a better understanding of how security works, try using
     the following links both when you are logged in and when you are
     not.
-    <p>
+    &lt;p>
     All of the links are in secure areas.  If you are not
     logged in a login procedure is put in by Resin before you get
     to the pages.  If you are logged in, you may be able to see them 
     or you may get a 'Forbidden' error.
-    <p>
+    &lt;p>
     Links to different areas:
-    <ul>
-      <li><a href="<c:url value='students/'/>">
+    &lt;ul>
+      &lt;li>&lt;a href="&lt;c:url value='students/'/>">
 	    Students (available to 'students' and 'professors')
-	  </a>
-      <li><a href="<c:url value='professors/'/>">
+	  &lt;/a>
+      &lt;li>&lt;a href="&lt;c:url value='professors/'/>">
 	    Professors (available to 'professors')
-	  </a>
-      <li><a href="<c:url value='staff/'/>">
+	  &lt;/a>
+      &lt;li>&lt;a href="&lt;c:url value='staff/'/>">
 	    Staff (available to 'staff' and 'professors')
-	  </a>
-    </ul>
+	  &lt;/a>
+    &lt;/ul>
 
     In a real application, you wouldn't show links like this -- you
     would get the user to login first and then only display the links
     that are available for their role.
 
-    <%@ include file="/inc/footer.jspf" %>
-  </body>
-</html>
+    &lt;%@ include file="/inc/footer.jspf" %>
+  &lt;/body>
+&lt;/html>

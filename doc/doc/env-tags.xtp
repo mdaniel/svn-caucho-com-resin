@@ -855,7 +855,7 @@ element database-default {
 <p>&lt;dependency> adds dependent files which should force a
 reload when changed, like web.xml and resin-web.xml.</p>
 
-<deftable title="&lt;dependency> attributes">>
+<deftable title="&lt;dependency> attributes">
 <tr>
   <th>Attribute</th>
   <th>Description</th>
@@ -2817,7 +2817,7 @@ element resource-ref {
 
 </defun>
 
-<defun title="&lt;scheduled-task>"> version="Resin 3.1.6">
+<defun title="&lt;scheduled-task>">
 
 <p>&lt;scheduled-task> schedules a job to be executed at specific times
 or after specific delays.  The times can be specified by a cron syntax or

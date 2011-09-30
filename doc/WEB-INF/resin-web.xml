@@ -23,7 +23,9 @@
     <system-property javax.xml.stream.XMLOutputFactory="com.caucho.xml.stream.XMLOutputFactoryImpl"/>
 
     <servlet servlet-name="xtp-doc" 
-             servlet-class="com.caucho.xtpdoc.ResinDocServlet"/>
+             servlet-class="com.caucho.xtpdoc.ResinDocServlet">
+      <init disable-action='true'/>
+    </servlet>
     <servlet-mapping url-pattern="*.xtp" servlet-name="xtp-doc"/>
 		   
     <welcome-file-list>
@@ -65,13 +67,14 @@
     <redirect regexp="/doc/quercus-java-interface.xtp" target="${app.contextPath}/doc/quercus-java-integration.xtp"/>
     <redirect regexp="/doc/quercus-getting-started.xtp" target="${app.contextPath}/doc/quercus-overview.xtp"/>
   </rewrite-dispatch>
-
+<!--
   <resin:if test="${not caucho_site}">
   <web-app-deploy url-prefix="/examples"
                   path="examples"
                   startup-mode="lazy">
   </web-app-deploy>
   </resin:if>
+-->
 
   <servlet servlet-name="javadoc" 
            servlet-class="com.caucho.doc.JavadocRedirectServlet"/>
