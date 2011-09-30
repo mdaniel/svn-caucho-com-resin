@@ -289,8 +289,9 @@ function stat_graph_script($stat, $canvas, $names,
     if ($size > 1) {
       echo "[" . ($values[0]->time + $tz_offset_ms) . ", " . $values[0]->value . "],\n";
 
-      for ($i=1; $i<sizeof($values)-1; $i++) {
-        if ($values[$i]->value != $values[$i-1]->value) {
+      for ($i=1; $i< sizeof($values)-1; $i++) {
+        if ($values[$i]->value != $values[$i-1]->value
+            && $values[$i]->value != $values[$i + 1]->value) {
           echo "[" . ($values[$i]->time + $tz_offset_ms) . ", " . $values[$i]->value . "],\n";
         }
       }
