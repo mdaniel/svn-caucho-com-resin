@@ -1128,15 +1128,10 @@ div.form-input-help {
 	text-align: right;
 	padding-top: 2em;
 }
-/*
+
+/* revert to default style for .ui-tabs .ui-tabs-hide */
 .ui-tabs .ui-tabs-hide {
+  display:none !important;
   position: absolute;
   left: -10000px;
-} 
-*/
-/* override .ui-tabs so hidden will show */
-.ui-tabs .ui-tabs-hide {
-  display:block !important;
-  position: absolute;
-  left: -10000px;
-} 
+}

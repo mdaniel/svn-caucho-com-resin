@@ -318,6 +318,8 @@ function display_watchdog_logs($log_mbean)
 
     echo "</tbody>\n";
     echo "</table>\n";
+  } else {
+    echo "<h2> There are no warnings to show</h2>";
   }
 }
 
