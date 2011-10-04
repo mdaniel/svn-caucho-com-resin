@@ -204,7 +204,7 @@ public class DbTransaction extends StoreTransaction {
       if (_writeLocks.contains(lock))
         throw new SQLException(L.l("lockReadAndWrite cannot already have a write lock"));
       
-      lock.lockReadAndWrite(_timeout);
+      lock.lockWrite(_timeout);
       _readLocks.add(lock);
       _writeLocks.add(lock);
     } catch (SQLException e) {
@@ -301,7 +301,7 @@ public class DbTransaction extends StoreTransaction {
         commit();
       } finally {
         // lock.unlockWrite();
-        lock.unlockReadAndWrite();
+        lock.unlockWrite();
       }
     }
   }
@@ -312,7 +312,7 @@ public class DbTransaction extends StoreTransaction {
     _readLocks.remove(lock);
     
     if (_writeLocks.remove(lock)) {
-      lock.unlockReadAndWrite();
+      lock.unlockWrite();
     }
   }
 
@@ -498,7 +498,7 @@ public class DbTransaction extends StoreTransaction {
           _readLocks.remove(lock);
 
         try {
-          lock.unlockReadAndWrite();
+          lock.unlockWrite();
         } catch (Throwable e) {
           log.log(Level.WARNING, e.toString(), e);
         }

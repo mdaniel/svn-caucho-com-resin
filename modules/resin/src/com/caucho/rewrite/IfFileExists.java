@@ -48,7 +48,7 @@ import com.caucho.vfs.Vfs;
  * <p>RequestPredicates may be used for security and rewrite actions.
  */
 @Configurable
-public class IfFileExists implements RequestPredicate
+public class IfFileExists implements RequestPredicate, CacheablePredicate
 {
   /**
    * True if the predicate matches.

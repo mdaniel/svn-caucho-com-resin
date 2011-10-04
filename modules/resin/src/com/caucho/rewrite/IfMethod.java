@@ -49,7 +49,7 @@ import com.caucho.util.L10N;
  * <p>RequestPredicates may be used for security and rewrite actions.
  */
 @Configurable
-public class IfMethod implements RequestPredicate
+public class IfMethod implements RequestPredicate, CacheablePredicate
 {
   private static final L10N L = new L10N(IfMethod.class);
   
@@ -90,5 +90,11 @@ public class IfMethod implements RequestPredicate
   public boolean isMatch(HttpServletRequest request)
   {
     return _method.equals(request.getMethod());
+  }
+  
+  @Override
+  public String toString()
+  {
+    return getClass().getSimpleName() + "[" + _method + "]";
   }
 }

@@ -31,57 +31,38 @@ package com.caucho.db.lock;
 
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicLongFieldUpdater;
-import java.util.concurrent.atomic.AtomicReferenceFieldUpdater;
 import java.util.concurrent.locks.Condition;
 import java.util.concurrent.locks.Lock;
-import java.util.concurrent.locks.LockSupport;
 import java.util.concurrent.locks.ReadWriteLock;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 
 import com.caucho.util.Alarm;
-import com.caucho.util.L10N;
 
 /**
  * Locking for tables/etc.
  */
 public final class DatabaseLock implements ReadWriteLock {
-  private final static L10N L = new L10N(DatabaseLock.class);
-  private final static Logger log
-    = Logger.getLogger(DatabaseLock.class.getName());
+  private final static 
+    AtomicLongFieldUpdater<DatabaseLock> _lockCountUpdater;
+
+  private static final long LOCK_WAIT = 1L << 32;
+  private static final long LOCK_WAIT_MASK = 0xffffffffL << 32;
   
-  private final static 
-  AtomicLongFieldUpdater<DatabaseLock> _lockCountUpdater;
-  private final static 
-  AtomicReferenceFieldUpdater<DatabaseLock,LockNode> _headUpdater;
-  private final static 
-  AtomicReferenceFieldUpdater<LockNode,LockNode> _nextUpdater;
-
-  private static final long NODE_LOCK = 1L << 32;
-  private static final long NODE_LOCK_MASK = 0xffffffffL << 32;
-  private static final long READ = 1L;
-  private static final long READ_MASK = 0xffffffffL;
-
-  private final String _id;
+  private static final long LOCK_WRITE = 1L << 31;
+  private static final long LOCK_WRITE_MASK = 1L << 31;
+  
+  private static final long LOCK_READ = 1L;
+  private static final long LOCK_READ_MASK = 0x7fffffffL;
+  
+  private static final long LOCK_MASK = LOCK_WRITE_MASK | LOCK_READ_MASK;
+  private static final long LOCK_CAN_READ_MASK = LOCK_WRITE_MASK | LOCK_WAIT_MASK;
   
   private final Lock _readLock = new ReadLockImpl();
   private final Lock _writeLock = new WriteLockImpl();
-
-  private volatile long _lockCount;
   
-  private volatile LockNode _lockHead;
+  private volatile long _lockCount;
 
   public DatabaseLock(String id)
   {
-    _id = id;
-  }
-
-  /**
-   * Returns the lock identifier.
-   */
-  public String getId()
-  {
-    return _id;
   }
   
   @Override
@@ -101,6 +82,7 @@ public final class DatabaseLock implements ReadWriteLock {
    *
    * @param timeout how long to wait for a timeout
    */
+  /*
   public void lockRead(long timeout)
     throws LockTimeoutException
   {
@@ -124,230 +106,236 @@ public final class DatabaseLock implements ReadWriteLock {
       }
     }
   }
-   
-  private void addReadLock(long timeout)
-  {
-    long expires = Alarm.getCurrentTimeActual() + timeout;
-
-    LockNode node = new LockNode(true);
-    
-    pushNode(node);
-
-    long lock;
-
-    do {
-      lock = _lockCount;
-    } while (! _lockCountUpdater.compareAndSet(this, lock, lock + NODE_LOCK));
-
-    try {
-      node.park(expires);
-    } finally {
-      long nextLock;
-    
-      do {
-        lock = _lockCount;
-      
-        nextLock = lock - NODE_LOCK + READ;
-      } while (! _lockCountUpdater.compareAndSet(this, lock, nextLock));
-    }
-  }
-
-  /**
-   * Clears a read lock.
-   */
-  public void unlockRead()
-  {
-    long lock;
-
-    do {
-      lock = _lockCount;
-    } while (! _lockCountUpdater.compareAndSet(this, lock, lock - READ));
-
-    if ((lock & READ_MASK) == 1 && (lock & NODE_LOCK_MASK) != 0) {
-      wakeNextNodes();
-    }
-  }
+  */
   
-  public void lockReadAndWrite(long timeout)
+  public void lockRead(long timeout)
+    throws LockTimeoutException
   {
+    if (lockReadCounter())
+      return;
+    
     long expires = Alarm.getCurrentTimeActual() + timeout;
-
-    long lock;
-
-    do {
-      lock = _lockCount;
-    } while (! _lockCountUpdater.compareAndSet(this, lock, lock + NODE_LOCK));
     
-    if (lock == 0) {
-      return;
-    }
-
-    LockNode node = new LockNode(false);
-    
-    pushNode(node);
-    
-    long currentLock = _lockCount;
-    
-    if ((lock & NODE_LOCK_MASK) == 0 && (currentLock & READ_MASK) == 0) {
-      wakeNextNodes();
-      return;
-    }
-
     boolean isValid = false;
     
     try {
-      node.park(expires);
+      lockReadWait(expires);
       isValid = true;
     } finally {
-      if (! isValid) {
-        long nextLock;
-    
-        do {
-          lock = _lockCount;
-      
-          nextLock = lock - NODE_LOCK;
-        } while (! _lockCountUpdater.compareAndSet(this, lock, nextLock));
-      }
+      if (! isValid)
+        unlockWait();
     }
   }
-
-  /**
-   * Clears a read and write lock.
-   */
-  public void unlockReadAndWrite()
-  {
-    long lock;
-
-    do {
-      lock = _lockCount;
-    } while (! _lockCountUpdater.compareAndSet(this, lock, lock - NODE_LOCK));
-    
-    wakeNextNodes();
-  }
   
-  private void pushNode(LockNode node)
+  /**
+   * Attempts to get an exclusive write lock.
+   */
+  public void lockWrite(long timeout)
   {
-    LockNode head;
-    synchronized (this) {
-      head = _lockHead;
-
-      if (head == null) {
-        _lockHead = node;
-      }
-      else {
-        LockNode ptr = head;
-        LockNode next = head;
-
-        while (next != null) {
-          ptr = next;
-          next = ptr.getNext();
-        }
-
-        ptr.setNext(node);
-      }
+    if (lockWriteCounter())
+      return;
+    
+    long expires = Alarm.getCurrentTimeActual() + timeout;
+    
+    boolean isValid = false;
+    
+    try {
+      lockWriteWait(expires);
+      isValid = true;
+    } finally {
+      if (! isValid)
+        unlockWait();
     }
   }
  
-  private void wakeNextNodes()
+  public void unlockRead()
   {
-    LockNode node = popNextNode(false);
+    unlockReadCounter();
+  }
+
+  /**
+   * Unlocks the write
+   */
+  public void unlockWrite()
+  {
+    unlockWriteCounter();
+  }
+  
+  private boolean lockReadCounter()
+  {
+    long lock;
+    long newLock;
+    boolean isQuickLock;
     
-    if (node == null)
-      return;
+    do {
+      lock = _lockCount;
+      
+      isQuickLock = isLockCanRead(lock);
+      
+      if (isQuickLock)
+        newLock = lock + LOCK_READ;
+      else
+        newLock = lock + LOCK_WAIT;
+    } while (! _lockCountUpdater.compareAndSet(this, lock, newLock));
     
-    node.unpark();
+    return isQuickLock;
+  }
+  
+  private boolean lockWriteCounter()
+  {
+    long lock;
+    long newLock;
+    boolean isQuickLock;
     
-    if (node.isRead()) {
-      while ((node = popNextNode(true)) != null) {
-        node.unpark();
+    do {
+      lock = _lockCount;
+      
+      isQuickLock = isLockCanWrite(lock);
+      
+      if (isQuickLock)
+        newLock = lock + LOCK_WRITE;
+      else
+        newLock = lock + LOCK_WAIT;
+    } while (! _lockCountUpdater.compareAndSet(this, lock, newLock));
+    
+    return isQuickLock;
+  }
+  
+  private void unlockWait()
+  {
+    long lock;
+    long newLock;
+    
+    do {
+      lock = _lockCount;
+      newLock = lock - LOCK_WAIT;
+    } while (! _lockCountUpdater.compareAndSet(this, lock, newLock));
+  }
+  
+  private void unlockReadCounter()
+  {
+    long lock;
+    long newLock;
+    
+    boolean isWaiter;
+    
+    do {
+      lock = _lockCount;
+      
+      isWaiter = ((lock & LOCK_WAIT_MASK) != 0);
+      
+      newLock = lock - LOCK_READ;
+    } while (! _lockCountUpdater.compareAndSet(this, lock, newLock));
+
+    if (isWaiter) {
+      synchronized (this) {
+        this.notify();
       }
     }
   }
   
-  private LockNode popNextNode(boolean isReadOnly)
+  private void unlockWriteCounter()
+  {
+    long lock;
+    long newLock;
+    
+    boolean isWaiter;
+    
+    do {
+      lock = _lockCount;
+      
+      isWaiter = ((lock & LOCK_WAIT_MASK) != 0);
+      
+      newLock = lock - LOCK_WRITE;
+    } while (! _lockCountUpdater.compareAndSet(this, lock, newLock));
+
+    if (isWaiter) {
+      synchronized (this) {
+        this.notify();
+      }
+    }
+  }
+  
+  private void lockReadWait(long expires)
   {
     synchronized (this) {
-      LockNode head = _lockHead;
+      while (true) {
+        long lock;
 
-      if (head == null)
-        return null;
-      else if (! isReadOnly || head.isRead()) {
-        _lockHead = head.getNext();
-        head.setNext(null);
-        return head;
+        while (isLockCanRead(lock = _lockCount)) {
+          long newLock = lock + LOCK_READ - LOCK_WAIT;
+          
+          if (_lockCountUpdater.compareAndSet(this, lock, newLock)) {
+            return;
+          }
+        }
+
+        long delta = expires - Alarm.getCurrentTimeActual();
+        
+        if (delta <= 0) {
+          throw new LockTimeoutException();
+        }
+        
+        try {
+          this.wait(delta);
+        } catch (Exception e) {
+        }
       }
-      else {
-        return null;
+    }
+  }
+  
+  private void lockWriteWait(long expires)
+  {
+    synchronized (this) {
+      while (true) {
+        long lock;
+
+        while (isLockCanWrite(lock = _lockCount)) {
+          long newLock = lock + LOCK_WRITE - LOCK_WAIT;
+          
+          if (_lockCountUpdater.compareAndSet(this, lock, newLock)) {
+            return;
+          }
+        }
+
+        long delta = expires - Alarm.getCurrentTimeActual();
+        
+        if (delta <= 0) {
+          throw new LockTimeoutException();
+        }
+        
+        try {
+          this.wait(delta);
+        } catch (Exception e) {
+        }
       }
-    } 
+    }
+  }
+  
+  private static boolean isLockCanRead(long lock)
+  {
+    return (lock & LOCK_CAN_READ_MASK) == 0 || (lock & LOCK_MASK) == 0;
+  }
+  
+  private static boolean isLockCanWrite(long lock)
+  {
+    return (lock & LOCK_MASK) == 0;
   }
 
   @Override
   public String toString()
   {
-    return getClass().getSimpleName() + "[" + _id + "]";
-  }
-
-  static final class LockNode {
-    private final Thread _thread;
-    private final boolean _isRead;
-
-    public volatile LockNode _next;
-
-    private volatile boolean _isDead;
-    private volatile boolean _isWake;
-
-    LockNode(boolean isRead)
-    {
-      _thread = Thread.currentThread();
-      _isRead = isRead;
-    }
-
-    LockNode getNext()
-    {
-      return _next;
-    }
-
-    void setNext(LockNode next)
-    {
-      _next = next;
-    }
-
-    boolean isRead()
-    {
-      return _isRead;
-    }
-
-    public void park(long expires)
-    {
-      while (! _isWake) {
-        try {
-          Thread.interrupted();
-
-          LockSupport.parkUntil(expires);
-          
-          if (! _isWake && expires < Alarm.getCurrentTimeActual()) {
-            _isDead = true;
-            throw new LockTimeoutException();
-          }
-        } catch (RuntimeException e) {
-          throw e;
-        } catch (Exception e) {
-          e.printStackTrace();
-        }
-      }
-    }
-
-    public void unpark()
-    {
-      _isWake = true;
-      LockSupport.unpark(_thread);
-    }
+    return getClass().getSimpleName() + "[]";
   }
   
-  class ReadLockImpl implements Lock {
+  enum LockType {
+    READ,
+    WRITE
+  };
+  
+  final class ReadLockImpl implements Lock {
     @Override
-    public boolean tryLock(long timeout, TimeUnit unit)
+    public final boolean tryLock(long timeout, TimeUnit unit)
         throws InterruptedException
     {
       lockRead(unit.toMillis(timeout));
@@ -356,13 +344,13 @@ public final class DatabaseLock implements ReadWriteLock {
     }
 
     @Override
-    public void unlock()
+    public final void unlock()
     {
       unlockRead();
     }
     
     @Override
-    public void lock()
+    public final void lock()
     {
       try {
         if (! tryLock(Long.MAX_VALUE / 2, TimeUnit.MILLISECONDS)) {
@@ -405,7 +393,7 @@ public final class DatabaseLock implements ReadWriteLock {
     public boolean tryLock(long time, TimeUnit unit)
         throws InterruptedException
     {
-      lockReadAndWrite(unit.toMillis(time));
+      lockWrite(unit.toMillis(time));
       
       return true;
     }
@@ -413,7 +401,7 @@ public final class DatabaseLock implements ReadWriteLock {
     @Override
     public void unlock()
     {
-      unlockReadAndWrite();
+      unlockWrite();
     }
     
     @Override
@@ -458,15 +446,5 @@ public final class DatabaseLock implements ReadWriteLock {
   static {
     _lockCountUpdater
       = AtomicLongFieldUpdater.newUpdater(DatabaseLock.class, "_lockCount");
-    
-    _headUpdater
-      = AtomicReferenceFieldUpdater.newUpdater(DatabaseLock.class, 
-                                               LockNode.class, 
-                                               "_lockHead");
-    
-    _nextUpdater
-      = AtomicReferenceFieldUpdater.newUpdater(LockNode.class, 
-                                               LockNode.class, 
-                                               "_next");
   }
 }

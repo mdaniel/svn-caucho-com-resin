@@ -55,7 +55,7 @@ import com.caucho.util.L10N;
  * <p>RequestPredicates may be used for both security and rewrite conditions.
  */
 @Configurable
-public class IfQueryParam implements RequestPredicate
+public class IfQueryParam implements RequestPredicate, CacheablePredicate
 {
   private static final L10N L = new L10N(IfQueryParam.class);
   

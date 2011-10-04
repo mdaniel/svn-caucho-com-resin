@@ -111,8 +111,8 @@ public final class Block implements SyncCacheListener {
     ReadWriteLock lock = _freeLocks.allocate();
     
     if (lock == null) {
-      lock = new ReentrantReadWriteLock();
-      // lock = new DatabaseLock("block"); 
+      // lock = new ReentrantReadWriteLock();
+      lock = new DatabaseLock("block"); 
     }
     
     return lock;

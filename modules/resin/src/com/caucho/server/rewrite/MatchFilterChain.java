@@ -29,19 +29,20 @@
 
 package com.caucho.server.rewrite;
 
-import com.caucho.rewrite.RequestPredicate;
-import com.caucho.server.http.CauchoResponse;
-import com.caucho.server.http.HttpServletResponseImpl;
+import java.io.IOException;
+import java.util.Arrays;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 import javax.servlet.FilterChain;
 import javax.servlet.ServletException;
 import javax.servlet.ServletRequest;
 import javax.servlet.ServletResponse;
-import javax.servlet.http.*;
-import java.io.IOException;
-import java.util.Arrays;
-import java.util.logging.Level;
-import java.util.logging.Logger;
+import javax.servlet.http.HttpServletRequest;
+
+import com.caucho.rewrite.CacheablePredicate;
+import com.caucho.rewrite.RequestPredicate;
+import com.caucho.server.http.HttpServletResponseImpl;
 
 public class MatchFilterChain
   implements FilterChain
@@ -52,6 +53,8 @@ public class MatchFilterChain
   private final RequestPredicate []_predicates;
   private final FilterChain _passChain;
   private final FilterChain _failChain;
+  
+  private final boolean _isNoCacheUnlessVary;
 
   public MatchFilterChain(RequestPredicate []predicates,
                           FilterChain passChain,
@@ -60,8 +63,19 @@ public class MatchFilterChain
     _predicates = predicates;
     _passChain = passChain;
     _failChain = failChain;
+    
+    boolean isNoCacheUnlessVary = false;
+    
+    for (RequestPredicate pred : predicates) {
+      if (! (pred instanceof CacheablePredicate)) {
+        isNoCacheUnlessVary = true;
+      }
+    }
+    
+    _isNoCacheUnlessVary = isNoCacheUnlessVary;
   }
 
+  @Override
   public void doFilter(ServletRequest request, ServletResponse response)
     throws ServletException, IOException
   {
@@ -72,7 +86,8 @@ public class MatchFilterChain
         = (HttpServletResponseImpl) response;
 
       // server/1k67
-      res.setNoCacheUnlessVary(true);
+      if (_isNoCacheUnlessVary)
+        res.setNoCacheUnlessVary(true);
     }
 
     for (RequestPredicate predicate : _predicates) {
