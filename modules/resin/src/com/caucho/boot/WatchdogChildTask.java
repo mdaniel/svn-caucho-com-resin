@@ -59,8 +59,10 @@ class WatchdogChildTask implements Runnable
   private final Lifecycle _lifecycle = new Lifecycle();
 
   private WatchdogChildProcess _process;
+  
   private boolean _isRestart;
   private String _restartMessage;
+  private ExitCode _previousExitCode;
 
   WatchdogChildTask(ResinSystem system,
                     WatchdogChild watchdog)
@@ -141,6 +143,11 @@ class WatchdogChildTask implements Runnable
     return _restartMessage;
   }
   
+  ExitCode getPreviousExitCode()
+  {
+    return _previousExitCode;
+  }
+  
   Serializable queryGet(Serializable payload)
   {
     WatchdogChildProcess process = _process;
@@ -198,7 +205,7 @@ class WatchdogChildTask implements Runnable
       long retry = Long.MAX_VALUE;
     
       while (_lifecycle.isActive() && i++ < retry) {
-        String id = String.valueOf(i);
+        String id = String.valueOf(_watchdog.getId());
         WatchdogChildProcess process;
 
         _watchdog.notifyTaskStarted();

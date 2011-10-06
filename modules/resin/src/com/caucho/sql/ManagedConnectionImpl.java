@@ -767,8 +767,11 @@ public class ManagedConnectionImpl
       }
       _isolation = _oldIsolation;
 
+      // #4663
+      /*
       if (needsRollback)
         conn.rollback();
+        */
       
       if (! _autoCommit) {
         conn.setAutoCommit(true);

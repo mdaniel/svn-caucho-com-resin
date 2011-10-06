@@ -212,17 +212,27 @@ public class ResinConfig implements EnvironmentBean
    * system-class-loader.
    */
   @Configurable
-  public void addLogHandler(ConfigProgram program)
+  public LogHandlerConfig createLogHandler()
   {
+    return new LogHandlerConfig(true);
+  }
+
+  /**
+   * Overrides standard <log-handler> configuration to change to 
+   * system-class-loader.
+   */
+  @Configurable
+  public void addLogHandler(LogHandlerConfig log)
+  {
+    // env/02sf
     Thread thread = Thread.currentThread();
     ClassLoader loader = thread.getContextClassLoader();
-    
+
     try {
       if (! Alarm.isTest())
         thread.setContextClassLoader(ClassLoader.getSystemClassLoader());
-      
-      LogHandlerConfig log = new LogHandlerConfig();
-      program.configure(log);
+
+      log.initImpl();
     } finally {
       thread.setContextClassLoader(loader);
     }

@@ -36,6 +36,7 @@ import java.util.concurrent.atomic.AtomicReference;
 
 import com.caucho.config.program.ConfigProgram;
 import com.caucho.env.service.ResinSystem;
+import com.caucho.env.shutdown.ExitCode;
 import com.caucho.management.server.AbstractManagedObject;
 import com.caucho.management.server.WatchdogMXBean;
 import com.caucho.network.listen.TcpSocketLinkListener;
@@ -351,6 +352,16 @@ class WatchdogChild
     
     if (task != null)
       return task.getRestartMessage();
+    else
+      return null;
+  }
+  
+  ExitCode getPreviousExitCode()
+  {
+    WatchdogChildTask task = _taskRef.get();
+    
+    if (task != null)
+      return task.getPreviousExitCode();
     else
       return null;
   }

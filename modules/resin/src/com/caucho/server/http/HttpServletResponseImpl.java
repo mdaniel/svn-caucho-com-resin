@@ -862,10 +862,19 @@ public final class HttpServletResponseImpl extends AbstractCauchoResponse
   public String getCharacterEncodingImpl()
   {
     // server/172d
-    // XXX:
-    // return _setCharEncoding;
     // server/2u00
-    return getCharacterEncoding();
+    
+    if (_setCharEncoding != null)
+      return _setCharEncoding;
+    
+    String contentType = getContentType();
+    
+    if (contentType == null || getContentType().startsWith("text/")) {
+      // server/1b5a, #4778
+      return getCharacterEncoding();
+    }
+    else
+      return null;
   }
 
   /**

@@ -10,6 +10,19 @@
 <li><a href="http://caucho.com/resin-3.1/changes/changes.xtp">Resin 3.1 changes</a></li>
 </ul>
 
+<s2 title="4.0.24 - snapshot">
+<ul>
+<li>log: log-handler config wasn't in proper class loader context (#4784, rep by chris214)</li>
+<li>log: flush logs in separate thread so writers don't need to be bottlenecked (#4765, apleshi)</li>
+<li>servlet: allow null to getRealPath(null) which returns null (#4761, rep by stbu)</li>
+<li>db-pool: on close connection, if auto-commit is false, do not automatically call rollback() (#4663)</li>
+<li>jsf: updated to mojarra-2.1.3 (#4746, rep by cyttesen)</li>
+<li>servlet: character-encoding should not be defaulted for images (#4778, rep by fesse)</li>
+<li>webapp: detailed web-app statistics gathering needs flush (#4750)</li>
+</ul>
+</s2>
+
+
 <s2 title="4.0.23 - Sep 30, 2011">
 <ul>
 <li>hessian: ServiceContext.end wasn't clearing _response pointer (rep by Mattias Jiderhamn)</li>

@@ -480,9 +480,10 @@ public class BeanConfig {
       return;
     }
 
-    if (_cl == null)
+    if (_cl == null) {
       throw new ConfigException(L.l("<{0}> requires a class attribute",
                                     getTagName()));
+    }
 
     introspect();
 

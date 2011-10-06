@@ -30,6 +30,8 @@ package com.caucho.boot;
 
 import java.io.Serializable;
 
+import com.caucho.env.shutdown.ExitCode;
+
 /**
  * Queries the Resin instance for its pid.
  */
@@ -37,15 +39,19 @@ import java.io.Serializable;
 public class StartInfoMessage implements Serializable {
   private boolean _isRestart;
   private String _restartMessage;
+  private ExitCode _previousExitCode;
   
   public StartInfoMessage()
   {
   }
   
-  public StartInfoMessage(boolean isRestart, String message)
+  public StartInfoMessage(boolean isRestart, 
+                          String message,
+                          ExitCode previousExitCode)
   {
     _isRestart = isRestart;
     _restartMessage = message;
+    _previousExitCode = previousExitCode;
   }
   
   /**
@@ -62,6 +68,11 @@ public class StartInfoMessage implements Serializable {
   public String getRestartMessage()
   {
     return _restartMessage;
+  }
+  
+  public ExitCode getPreviousExitCode()
+  {
+    return _previousExitCode;
   }
 
   @Override

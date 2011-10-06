@@ -352,7 +352,8 @@ public class HttpResponse extends AbstractHttpResponse
     }
 
     if (contentType != null) {
-      if (charEncoding == null) {
+      // server/1b5a
+      if (charEncoding == null && contentType.startsWith("text/")) {
         if (webApp != null)
           charEncoding = webApp.getCharacterEncoding();
 
@@ -363,8 +364,11 @@ public class HttpResponse extends AbstractHttpResponse
 
       os.write(_contentTypeBytes, 0, _contentTypeBytes.length);
       os.printLatin1(contentType);
-      os.write(_charsetBytes, 0, _charsetBytes.length);
-      os.printLatin1(charEncoding);
+      
+      if (charEncoding != null) {
+        os.write(_charsetBytes, 0, _charsetBytes.length);
+        os.printLatin1(charEncoding);
+      }
 
       if (debug) {
         log.fine(_request.dbgId() + "Content-Type: " + contentType

@@ -3894,9 +3894,6 @@ public class WebApp extends ServletContextImpl
     // the cache must be outside of the WebAppFilterChain because
     // the CacheListener in ServletInvocation needs the top to
     // be a CacheListener.  Otherwise, the cache won't get lru.
-
-    if (_isStatisticsEnabled)
-      chain = new StatisticsFilterChain(chain, this);
     
     if (getRequestListeners() != null && getRequestListeners().length > 0)
       chain = new WebAppListenerFilterChain(chain, this, getRequestListeners());
@@ -3913,6 +3910,9 @@ public class WebApp extends ServletContextImpl
 
     // webAppChain.setSecurityRoleMap(invocation.getSecurityRoleMap());
     chain = webAppChain;
+
+    if (_isStatisticsEnabled)
+      chain = new StatisticsFilterChain(chain, this);
 
     if (getAccessLog() != null && isTop)
       chain = new AccessLogFilterChain(chain, this);
@@ -4319,8 +4319,9 @@ public class WebApp extends ServletContextImpl
   @Override
   public String getRealPath(String uri)
   {
+    // server/10m7
     if (uri == null)
-      throw new NullPointerException();
+      return null;
 
     String realPath = _realPathCache.get(uri);
 

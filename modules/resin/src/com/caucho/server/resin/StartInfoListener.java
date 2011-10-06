@@ -28,7 +28,11 @@
 
 package com.caucho.server.resin;
 
+import com.caucho.env.shutdown.ExitCode;
+
 public interface StartInfoListener
 {
-  public void setStartInfo(boolean isRestart, String startMessage);
+  public void setStartInfo(boolean isRestart, 
+                           String startMessage,
+                           ExitCode exitCode);
 }

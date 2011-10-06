@@ -35,6 +35,7 @@ import com.caucho.network.listen.SocketLink;
 import com.caucho.server.http.HttpServletRequestImpl;
 import com.caucho.util.Alarm;
 import com.caucho.vfs.ClientDisconnectException;
+import com.caucho.vfs.QSocket;
 
 import javax.servlet.FilterChain;
 import javax.servlet.ServletException;
@@ -69,24 +70,30 @@ public class StatisticsFilterChain implements FilterChain
 
         long readBytes = -1;
         long writeBytes = -1;
+        
+        QSocket socket = tcpConnection.getSocket();
 
-        readBytes = tcpConnection.getSocket().getTotalReadBytes();
-        writeBytes = tcpConnection.getSocket().getTotalWriteBytes();
+        readBytes = socket.getTotalReadBytes();
+        writeBytes = socket.getTotalWriteBytes();
 
         ClientDisconnectException clientDisconnectException = null;
 
         try {
           _next.doFilter(request, response);
+
+          // server/272a/*
+          if (httpRequest.getResponse() != null)
+            httpRequest.getResponse().flushBuffer();
         } catch (ClientDisconnectException ex) {
           clientDisconnectException = ex;
+        } finally {
+          time = Alarm.getExactTime() - time;
+
+          readBytes = socket.getTotalReadBytes() - readBytes;
+          writeBytes = socket.getTotalWriteBytes() - writeBytes;
+
+          _webApp.updateStatistics(time, (int) readBytes, (int) writeBytes, clientDisconnectException != null);
         }
-
-        time = Alarm.getExactTime() - time;
-
-        readBytes = tcpConnection.getSocket().getTotalReadBytes() - readBytes;
-        writeBytes = tcpConnection.getSocket().getTotalReadBytes() - writeBytes;
-
-        _webApp.updateStatistics(time, (int) readBytes, (int) writeBytes, clientDisconnectException != null);
 
         if (clientDisconnectException != null)
           throw clientDisconnectException;

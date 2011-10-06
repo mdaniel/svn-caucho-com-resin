@@ -95,6 +95,7 @@ class WatchdogChildProcess
   private long _startTime;
   private int _status = -1;
   private String _exitMessage;
+  private ExitCode _exitCode;
 
   WatchdogChildProcess(String id,
                        ResinSystem system,
@@ -206,7 +207,8 @@ class WatchdogChildProcess
         s = connectToChild(ss);
         
         message(new StartInfoMessage(_watchdog.isRestart(),
-                                     _watchdog.getRestartMessage()));
+                                     _watchdog.getRestartMessage(),
+                                     _watchdog.getPreviousExitCode()));
 
         _status = process.waitFor();
 
@@ -265,12 +267,21 @@ class WatchdogChildProcess
     String type = "unknown";
     String code = " (exit code=" + status + ")";
     
-    if (status == 0)
+    _exitCode = ExitCode.UNKNOWN;
+    
+    if (status == 0) {
       type = "normal exit";
+      
+      _exitCode = ExitCode.OK;
+    }
     else if (status >= 0 && status < ExitCode.values().length) {
-      type = ExitCode.values()[status].toString();
+      _exitCode = ExitCode.values()[status];
+      
+      type = _exitCode.toString();
     }
     else if (status >= 128 && status < 128 + 32) {
+      _exitCode = ExitCode.SIGNAL;
+      
       switch (status - 128) {
       case 1:
         type = "SIGHUP";

@@ -119,6 +119,7 @@ public class AbstractRolloverLog {
   // private long _lastTime;
 
   private final RolloverWorker _rolloverWorker = new RolloverWorker();
+  private final FlushWorker _flushWorker = new FlushWorker();
   private final Object _logLock = new Object();
 
   private volatile boolean _isRollingOver;
@@ -445,7 +446,7 @@ public class AbstractRolloverLog {
   protected void flush()
     throws IOException
   {
-    flushStream();
+    _flushWorker.wake();
   }
 
   protected void flushStream()
@@ -929,6 +930,20 @@ public class AbstractRolloverLog {
     public long runTask()
     {
       rolloverLogTask();
+      
+      return -1;
+    }
+  }
+
+  class FlushWorker extends TaskWorker {
+    @Override
+    public long runTask()
+    {
+      try {
+        flushStream();
+      } catch (IOException e) {
+        log.log(Level.FINER, e.toString(), e);
+      }
       
       return -1;
     }

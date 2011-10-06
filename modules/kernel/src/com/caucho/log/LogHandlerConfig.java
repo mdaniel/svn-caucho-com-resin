@@ -65,10 +65,19 @@ public class LogHandlerConfig extends BeanConfig {
   
   private String _timestamp = "[%Y/%m/%d %H:%M:%S.%s] {%{thread}} ";
   private PathHandler _pathHandler;
+  
+  private boolean _isSkipInit;
 
   public LogHandlerConfig()
   {
     setBeanConfigClass(Handler.class);
+  }
+
+  public LogHandlerConfig(boolean isSkipInit)
+  {
+    this();
+    
+    _isSkipInit = isSkipInit;
   }
   
   @Override
@@ -106,7 +115,7 @@ public class LogHandlerConfig extends BeanConfig {
   {
     if (_pathHandler == null)
       _pathHandler = new PathHandler();
-
+    
     _pathHandler.setPath(path);
   }
 
@@ -262,7 +271,14 @@ public class LogHandlerConfig extends BeanConfig {
    * Initialize the log.
    */
   @PostConstruct
+  @Override
   public void init()
+  {
+    if (! _isSkipInit)
+      initImpl();
+  }
+  
+  public void initImpl()
     throws ConfigException
   {
     if (_handler != null) {

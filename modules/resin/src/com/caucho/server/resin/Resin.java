@@ -393,13 +393,15 @@ public class Resin
     _startInfoListeners.add(listener);
   }
   
-  void setStartInfo(boolean isRestart, String startMessage)
+  void setStartInfo(boolean isRestart, 
+                    String startMessage,
+                    ExitCode exitCode)
   {
     _isRestart = isRestart;
     _restartMessage = startMessage;
     
     for (StartInfoListener listener : _startInfoListeners) {
-      listener.setStartInfo(isRestart, startMessage);
+      listener.setStartInfo(isRestart, startMessage, exitCode);
     }
   }
   
