@@ -12,6 +12,9 @@
 
 <s2 title="4.0.24 - snapshot">
 <ul>
+<li>health: added health events and anomaly events (#4724)</li>
+<li>db-pool: reduced default max-create-connections back to 5 (#4734)</li>
+<li>db-pool: add min-idle-count to &lt;database> configuration (#4664)</li>
 <li>log: log-handler config wasn't in proper class loader context (#4784, rep by chris214)</li>
 <li>log: flush logs in separate thread so writers don't need to be bottlenecked (#4765, apleshi)</li>
 <li>servlet: allow null to getRealPath(null) which returns null (#4761, rep by stbu)</li>

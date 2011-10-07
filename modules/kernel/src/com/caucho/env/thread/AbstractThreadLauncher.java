@@ -415,6 +415,8 @@ abstract public class AbstractThreadLauncher extends AbstractTaskWorker {
     if (_threadMax < threadCount) {
       _startingCount.decrementAndGet();
       
+      onThreadMax();
+      
       return false;
     }
     else if (isIdleTooLow(startingCount)) {
@@ -503,9 +505,11 @@ abstract public class AbstractThreadLauncher extends AbstractTaskWorker {
     if (! _isThrottle) {
       _isThrottle = true;
       
-      log.warning(this + " " + _throttleCount
-                  + " threads created in " + _throttlePeriod + "ms"
-                  + " sleep=" + _throttleSleep + "ms");
+      String msg = (this + " " + _throttleCount
+                    + " threads created in " + _throttlePeriod + "ms"
+                    + " sleep=" + _throttleSleep + "ms");
+      
+      onThrottle(msg);
     }
     
     if (_throttleSleep > 0) {
@@ -518,6 +522,15 @@ abstract public class AbstractThreadLauncher extends AbstractTaskWorker {
       } catch (Exception e) {
       }
     }
+  }
+  
+  protected void onThreadMax()
+  {
+  }
+  
+  protected void onThrottle(String msg)
+  {
+    log.warning(msg);
   }
   
   //

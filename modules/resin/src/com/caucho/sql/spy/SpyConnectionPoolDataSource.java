@@ -46,8 +46,7 @@ public class SpyConnectionPoolDataSource implements ConnectionPoolDataSource {
     = Logger.getLogger(SpyConnectionPoolDataSource.class.getName());
   protected final static L10N L = new L10N(SpyConnectionPoolDataSource.class);
 
-  private static int _staticId;
-  private int _id;
+  private String _id;
   private AtomicInteger _connCount = new AtomicInteger();
 
   // The underlying data source
@@ -56,10 +55,11 @@ public class SpyConnectionPoolDataSource implements ConnectionPoolDataSource {
   /**
    * Creates a new SpyDriver.
    */
-  public SpyConnectionPoolDataSource(ConnectionPoolDataSource dataSource)
+  public SpyConnectionPoolDataSource(ConnectionPoolDataSource dataSource,
+                                     String id)
   {
     _dataSource = dataSource;
-    _id = _staticId++;
+    _id = id;
   }
 
   /**
@@ -164,6 +164,6 @@ public class SpyConnectionPoolDataSource implements ConnectionPoolDataSource {
 
   public String toString()
   {
-    return "SpyConnectionPoolDataSource[id=" + _id + ",data-source=" + _dataSource + "]";
+    return getClass().getSimpleName() + "[id=" + _id + ",data-source=" + _dataSource + "]";
   }
 }

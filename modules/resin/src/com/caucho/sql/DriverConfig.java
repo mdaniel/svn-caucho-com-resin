@@ -62,6 +62,7 @@ import com.caucho.config.types.InitParam;
 import com.caucho.lifecycle.Lifecycle;
 import com.caucho.management.server.JdbcDriverMXBean;
 import com.caucho.naming.Jndi;
+import com.caucho.sql.spy.SpyConnectionPoolDataSource;
 import com.caucho.tools.profiler.ConnectionPoolDataSourceWrapper;
 import com.caucho.tools.profiler.DriverWrapper;
 import com.caucho.tools.profiler.ProfilerPoint;
@@ -503,12 +504,14 @@ public class DriverConfig
    * <li>Else create wrappers.
    * </ul>
    */
-  synchronized void initDataSource(boolean isTransactional, boolean isSpy)
+  synchronized void initDataSource(boolean isTransactional,
+                                   String spyId,
+                                   boolean isSpy)
     throws SQLException
   {
     if (! _lifecycle.toActive())
       return;
-
+    
     if (_xaDataSource == null && _poolDataSource == null) {
       initDriver();
 
@@ -545,6 +548,15 @@ public class DriverConfig
                                           _xaDataSource));
       }
       */
+    }
+    
+    spyId = spyId + ".d" + _index;
+
+    if (! isSpy) {
+    }
+    else if (_poolDataSource != null) {
+      _poolDataSource = new SpyConnectionPoolDataSource(_poolDataSource,
+                                                        spyId);
     }
 
     _admin.register();

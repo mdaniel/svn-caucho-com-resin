@@ -85,10 +85,13 @@ public class ConnectionPool extends AbstractManagedObject
   private int _maxOverflowConnections = 1024;
 
   // the maximum number of connections in the process of creation
-  private int _maxCreateConnections = 20;
+  private int _maxCreateConnections = 5;
 
   // max idle size
   private int _maxIdleCount = 1024;
+  
+  // min idle size
+  private int _minIdleCount = 0;
 
   // time before an idle connection is closed (60s default)
   private long _idleTimeout = 60000L;
@@ -120,6 +123,8 @@ public class ConnectionPool extends AbstractManagedObject
   // If true, close dangling connections
   private boolean _isCloseDanglingConnections = true;
 
+  private ManagedConnectionFactory _mcf;
+  
   private final ArrayList<ManagedPoolItem> _connectionPool
     = new ArrayList<ManagedPoolItem>();
 
@@ -343,6 +348,26 @@ public class ConnectionPool extends AbstractManagedObject
       _maxIdleCount = 0;
     else
       _maxIdleCount = maxIdleCount;
+  }
+
+  /**
+   * Returns the min idle count.
+   */
+  @Override
+  public int getMinIdleCount()
+  {
+    return _minIdleCount;
+  }
+
+  /**
+   * Sets the max idle count.
+   */
+  public void setMinIdleCount(int minIdleCount)
+  {
+    if (minIdleCount < 0)
+      _minIdleCount = 0;
+    else
+      _minIdleCount = minIdleCount;
   }
 
   /**
@@ -594,6 +619,8 @@ public class ConnectionPool extends AbstractManagedObject
   {
     if (! _lifecycle.toInit())
       return null;
+    
+    _mcf = mcf;
 
     if (_name == null) {
       int v = _idGen.incrementAndGet();
@@ -702,7 +729,7 @@ public class ConnectionPool extends AbstractManagedObject
     UserPoolItem userPoolItem = null;
 
     try {
-      while(true){
+      while (true){
         userPoolItem = null;
         UserTransactionImpl transaction = _tm.getUserTransaction();
 
@@ -1251,6 +1278,7 @@ public class ConnectionPool extends AbstractManagedObject
   /**
    * Alarm listener.
    */
+  @Override
   public void handleAlarm(Alarm alarm)
   {
     if (! _lifecycle.isActive())
@@ -1271,6 +1299,8 @@ public class ConnectionPool extends AbstractManagedObject
       }
 
       _alarmConnections.clear();
+
+      fillIdlePool();
     } finally {
       if (! _lifecycle.isActive()) {
       }
@@ -1280,6 +1310,31 @@ public class ConnectionPool extends AbstractManagedObject
         _alarm.queue(_idleTimeout);
       else
         _alarm.queue(60000);
+    }
+  }
+  
+  private void fillIdlePool()
+  {
+    int count = _minIdleCount;
+  
+    try {
+      while (_connectionPool.size() < _minIdleCount
+             && count-- >= 0
+             && _lifecycle.isActive()) {
+        Subject subject = null;
+        ConnectionRequestInfo info = null;
+        
+        UserPoolItem userPoolItem;
+
+        userPoolItem = createConnection(_mcf, subject, info, null);
+        
+        if (userPoolItem != null)
+          userPoolItem.toIdle();
+      }
+    } catch (Exception e) {
+      e.printStackTrace();
+      
+      log.log(Level.FINE, e.toString(), e);
     }
   }
 

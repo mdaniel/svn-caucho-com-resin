@@ -36,18 +36,21 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 
 import com.caucho.config.ConfigException;
+import com.caucho.env.health.HealthSystemFacade;
 import com.caucho.lifecycle.Lifecycle;
 import com.caucho.util.Alarm;
 import com.caucho.util.L10N;
-import com.caucho.util.ThreadDump;
 
 /**
  * A generic pool of threads available for Alarms and Work tasks.
  */
 public final class ThreadPool {
   private static final L10N L = new L10N(ThreadPool.class);
+  
   private static final Logger log
     = Logger.getLogger(ThreadPool.class.getName());
+  
+  public static final String THREAD_FULL_EVENT = "caucho.thread.schedule.full";
 
   private static final long MAX_EXPIRE = Long.MAX_VALUE / 2;
   
@@ -476,16 +479,20 @@ public final class ThreadPool {
     boolean isQueue = true;
 
     if (! scheduleImpl(task, loader, expire, isPriority, isQueue)) {
-      log.warning(this + " unable to schedule priority thread " + task
-                  + " pri-min=" + getPriorityIdleMin()
-                  + " thread=" + getThreadCount()
-                  + " idle=" + getThreadIdleCount()
-                  + " pri-idle=" + getPriorityIdleCount()
-                  + " starting=" + getThreadStartingCount()
-                  + " max=" + getThreadMax());
+      String msg = (this + " unable to schedule priority thread " + task
+                    + " pri-min=" + getPriorityIdleMin()
+                    + " thread=" + getThreadCount()
+                    + " idle=" + getThreadIdleCount()
+                    + " pri-idle=" + getPriorityIdleCount()
+                    + " starting=" + getThreadStartingCount()
+                    + " max=" + getThreadMax());
+      
+      log.warning(msg);
 
       OverflowThread item = new OverflowThread(task);
       item.start();
+      
+      HealthSystemFacade.fireEvent(THREAD_FULL_EVENT, msg);
     }
   }
 
@@ -599,18 +606,21 @@ public final class ThreadPool {
     boolean isQueue = true;
 
     if (! scheduleImpl(task, loader, expire, isPriority, isQueue)) {
-      log.warning(this + " unable to start priority thread " + task
-                  + " pri-min=" + getPriorityIdleMin()
-                  + " thread=" + getThreadCount()
-                  + " idle=" + getThreadIdleCount()
-                  + " pri-idle=" + getPriorityIdleCount()
-                  + " starting=" + getThreadStartingCount()
-                  + " max=" + getThreadMax());
+      String msg = (this + " unable to start priority thread " + task
+                    + " pri-min=" + getPriorityIdleMin()
+                    + " thread=" + getThreadCount()
+                    + " idle=" + getThreadIdleCount()
+                    + " pri-idle=" + getPriorityIdleCount()
+                    + " starting=" + getThreadStartingCount()
+                    + " max=" + getThreadMax());
+      
+      log.warning(msg);
 
-      ThreadDump.create().dumpThreads();
-
+      HealthSystemFacade.fireEvent(THREAD_FULL_EVENT, msg);
+      
       OverflowThread item = new OverflowThread(task);
       item.start();
+ 
     }
   }
 

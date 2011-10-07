@@ -477,6 +477,23 @@ public class DBPool
   }
 
   /**
+   * Get the minimum number of connections in the idle pool.
+   */
+  public int getMinIdleCount()
+  {
+    return _connectionPool.getMinIdleCount();
+  }
+
+  /**
+   * Set the minimum number of connections in the idle pool.
+   * being closed.
+   */
+  public void setMinIdleCount(int count)
+  {
+    _connectionPool.setMinIdleCount(count);
+  }
+
+  /**
    * Get the time in milliseconds a connection will remain in the pool before
    * being closed.
    */

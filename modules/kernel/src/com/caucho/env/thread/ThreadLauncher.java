@@ -30,13 +30,23 @@
 package com.caucho.env.thread;
 
 import java.util.concurrent.atomic.AtomicInteger;
+import java.util.logging.Logger;
 
+import com.caucho.env.health.HealthSystemFacade;
 import com.caucho.env.shutdown.ExitCode;
 import com.caucho.env.shutdown.ShutdownSystem;
 import com.caucho.inject.Module;
 
 @Module
 class ThreadLauncher extends AbstractThreadLauncher {
+  private static final Logger log
+    = Logger.getLogger(ThreadLauncher.class.getName());
+  
+  public static final String THREAD_FULL_EVENT
+    = "caucho.thread.pool.full";
+  public static final String THREAD_CREATE_THROTTLE_EVENT
+    = "caucho.thread.pool.throttle";
+  
   private static final int DEFAULT_PRIORITY_IDLE_MIN = 2;
   
   private final ThreadPool _pool;
@@ -147,6 +157,24 @@ class ThreadLauncher extends AbstractThreadLauncher {
     }
   }
   
+  //
+  // event handling
+  
+  @Override
+  protected void onThreadMax()
+  {
+    HealthSystemFacade.fireEvent(THREAD_FULL_EVENT, 
+                                 "threads=" + getThreadCount());
+  }
+  
+  protected void onThrottle(String msg)
+  {
+    log.warning(msg);
+    
+    HealthSystemFacade.fireEvent(THREAD_CREATE_THROTTLE_EVENT, 
+                                 msg);
+  }
+ 
   //
   // statistics
   //

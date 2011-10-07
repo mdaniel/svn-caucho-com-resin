@@ -69,8 +69,6 @@ class ManagedPoolItem implements ConnectionEventListener, ManagedXAResource {
   private ManagedConnectionFactory _mcf;
   private ManagedConnection _mConn;
 
-  private UserTransactionImpl _transaction;
-
   private String _id;
 
   private XAResource _xaResource;
@@ -114,8 +112,8 @@ class ManagedPoolItem implements ConnectionEventListener, ManagedXAResource {
   private long _connectionStartTime;
 
   public ManagedPoolItem(ConnectionPool cm,
-                  ManagedConnectionFactory mcf,
-                  ManagedConnection conn)
+                         ManagedConnectionFactory mcf,
+                         ManagedConnection conn)
   {
     _cm = cm;
 
@@ -225,7 +223,7 @@ class ManagedPoolItem implements ConnectionEventListener, ManagedXAResource {
   @Override
   public void setTransaction(UserTransactionImpl transaction)
   {
-    _transaction = transaction;
+    // _transaction = transaction;
   }
 
   /**
@@ -1120,7 +1118,7 @@ class ManagedPoolItem implements ConnectionEventListener, ManagedXAResource {
     ManagedConnection mConn = _mConn;
     _mConn = null;
 
-    _transaction = null;
+    // _transaction = null;
 
     if (mConn == null)
       return;

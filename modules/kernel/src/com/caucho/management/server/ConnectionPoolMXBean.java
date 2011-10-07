@@ -79,6 +79,12 @@ public interface ConnectionPoolMXBean extends ManagedObjectMXBean {
   public int getMaxIdleCount();
   
   /**
+   * Returns the minimum number of idle connections
+   */
+  @Description("The configured minimum number of idle connections")
+  public int getMinIdleCount();
+  
+  /**
    * Returns the pool active time in milliseconds.
    */
   @Description("The configured maximum time in milliseconds that a connection is allowed to be active")

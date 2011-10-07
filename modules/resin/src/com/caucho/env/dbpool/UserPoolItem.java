@@ -369,6 +369,20 @@ class UserPoolItem implements ManagedResource {
     if (poolItem != null)
       poolItem.abortConnection();
   }
+  
+  /**
+   * Change to the idle state
+   */
+  void toIdle()
+  {
+    ManagedPoolItem poolItem = _ownPoolItem;
+    _ownPoolItem = null;
+
+    removeFromShareList();
+
+    if (poolItem != null)
+      poolItem.toIdle();
+  }
 
   /**
    * Closes the item.
@@ -444,8 +458,9 @@ class UserPoolItem implements ManagedResource {
 
   // XAResource stuff
 
+  @Override
   public String toString()
   {
-    return "UserPoolItem[" + _cm.getName() + "," + _id + "]";
+    return getClass().getSimpleName() + "[" + _cm.getName() + "," + _id + "]";
   }
 }

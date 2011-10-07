@@ -92,7 +92,11 @@
   </health:CpuHealthCheck>
   
   <health:DumpThreads>
-    <health:IfHealthWarning healthCheck="${cpuHealthCheck}" time="2m"/>
+    <health:Or>
+      <health:IfHealthWarning healthCheck="${cpuHealthCheck}" time="2m"/>
+      <health:IfHealthEvent regexp="caucho.thread"/>
+    </health:Or>
+    
     <health:IfNotRecent time="15m"/>
   </health:DumpThreads>
   
@@ -213,6 +217,8 @@
 
   <health:AnomalyAnalyzer>
     <meter-name>JVM|Thread|JVM Thread Count</meter-name>
+
+    <health-event>caucho.thread.anomaly.jvm-thread</health-event>
   </health:AnomalyAnalyzer>
   
   <health:JmxMeter>
@@ -223,6 +229,8 @@
 
   <health:AnomalyAnalyzer>
     <meter-name>JVM|Thread|JVM Runnable Count</meter-name>
+
+    <health-event>caucho.thread.anomaly.jvm-runnable</health-event>
   </health:AnomalyAnalyzer>
   
   <health:JmxMeter>
@@ -239,6 +247,8 @@
 
   <health:AnomalyAnalyzer>
     <meter-name>JVM|Thread|JVM Waiting Count</meter-name>
+
+    <health-event>caucho.thread.anomaly.jvm-waiting</health-event>
   </health:AnomalyAnalyzer>
   
   <health:JmxMeter>
@@ -249,6 +259,8 @@
 
   <health:AnomalyAnalyzer>
     <meter-name>JVM|Thread|JVM Blocked Count</meter-name>
+    
+    <health-event>caucho.thread.anomaly.jvm-blocked</health-event>
   </health:AnomalyAnalyzer>
 
   <health:JmxMeter>
@@ -265,6 +277,8 @@
 
   <health:AnomalyAnalyzer>
     <meter-name>Resin|Thread|Thread Active Count</meter-name>
+
+    <health-event>caucho.thread.anomaly.resin-active</health-event>
   </health:AnomalyAnalyzer>
 
   <health:JmxMeter>

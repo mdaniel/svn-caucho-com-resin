@@ -869,7 +869,9 @@ public final class HttpServletResponseImpl extends AbstractCauchoResponse
     
     String contentType = getContentType();
     
-    if (contentType == null || getContentType().startsWith("text/")) {
+    if (contentType == null
+        || getContentType().startsWith("text/")
+        || getContentType().startsWith("multipart/")) {
       // server/1b5a, #4778
       return getCharacterEncoding();
     }

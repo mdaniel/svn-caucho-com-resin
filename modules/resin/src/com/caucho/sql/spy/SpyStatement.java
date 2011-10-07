@@ -181,7 +181,7 @@ public class SpyStatement implements java.sql.Statement {
         stmt.close();
       
       if (log.isLoggable(Level.FINE))
-        log(start, "close()");
+        log(start, "stmt-close()");
       
     } catch (RuntimeException e) {
       if (log.isLoggable(Level.FINE))
