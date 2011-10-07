@@ -129,6 +129,15 @@ public class DatabaseAdmin extends AbstractManagedObject
   }
   
   /**
+   * Returns the maximum number of idle connections
+   */
+  @Override
+  public int getMinIdleCount()
+  {
+    return _jcaPool.getMinIdleCount();
+  }
+  
+  /**
    * Returns the pool active time in milliseconds.
    */
   @Override

@@ -341,7 +341,6 @@
     <attribute>MissCountTotal</attribute>
   </health:JmxDeltaMeter>
 
-  <!--
   <health:AnomalyAnalyzer>
     <meter>Resin|Database|Connection Active</meter>
   </health:AnomalyAnalyzer>
@@ -349,7 +348,6 @@
   <health:AnomalyAnalyzer>
     <meter>Resin|Http|Request Time</meter>
   </health:AnomalyAnalyzer>
-  -->
 
   <!-- meter graphs -->
   
