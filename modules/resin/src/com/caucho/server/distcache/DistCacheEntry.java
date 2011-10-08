@@ -117,6 +117,11 @@ abstract public class DistCacheEntry implements ExtCacheEntry {
   {
     return getMnodeEntry().getCacheHashKey();
   }
+  
+  public final int getUserFlags()
+  {
+    return getMnodeEntry().getUserFlags();
+  }
 
   /**
    * Returns the owner
@@ -193,6 +198,15 @@ abstract public class DistCacheEntry implements ExtCacheEntry {
   abstract public ExtCacheEntry put(InputStream is,
                                     CacheConfig config,
                                     long idleTimeout)
+    throws IOException;
+
+  /**
+   * Sets the value by an input stream
+   */
+  abstract public ExtCacheEntry put(InputStream is,
+                                    CacheConfig config,
+                                    long idleTimeout,
+                                    int flags)
     throws IOException;
 
   /**

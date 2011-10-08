@@ -1709,6 +1709,9 @@ public class TcpSocketLinkListener
 
       for (int i = 0; i < idleCount + 10; i++) {
         InetSocketAddress addr;
+        
+        if (getIdleThreadCount() == 0)
+          break;
 
         if (localAddress == null ||
             localAddress.getHostAddress().startsWith("0.")) {
@@ -1721,6 +1724,11 @@ public class TcpSocketLinkListener
         else {
           addr = new InetSocketAddress(localAddress, localPort);
           connectAndClose(addr);
+        }
+        
+        try {
+          Thread.sleep(10);
+        } catch (Exception e) {
         }
       }
     }

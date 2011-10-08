@@ -72,7 +72,7 @@ public final class MnodeEntry extends MnodeValue implements ExtCacheEntry {
                     long version,
                     Object value,
                     HashKey cacheHash,
-                    int flags,
+                    long flags,
                     long expireTimeout,
                     long idleTimeout,
                     long leaseTimeout,
@@ -475,7 +475,7 @@ public final class MnodeEntry extends MnodeValue implements ExtCacheEntry {
   {
     return (getClass().getSimpleName()
             + "[value=" + Hex.toHex(getValueHash(), 0, 4)
-            + ",flags=0x" + Integer.toHexString(getFlags())
+            + ",flags=0x" + Long.toHexString(getFlags())
             + ",version=" + getVersion()
             + ",lease=" + _leaseOwner
             + "]");

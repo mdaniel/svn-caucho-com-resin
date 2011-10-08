@@ -42,7 +42,7 @@ public class MnodeValue implements java.io.Serializable {
   
   private final byte[] _cacheHash;
   
-  private final int _flags;
+  private final long _flags;
   
   private final long _expireTimeout;
   private final long _idleTimeout;
@@ -53,7 +53,7 @@ public class MnodeValue implements java.io.Serializable {
                     long valueLength,
                     long version,
                     byte []cacheHash,
-                    int flags,
+                    long flags,
                     long expireTimeout,
                     long idleTimeout)
   {
@@ -173,9 +173,14 @@ public class MnodeValue implements java.io.Serializable {
     return _cacheHash;
   }
   
-  public final int getFlags()
+  public final long getFlags()
   {
     return _flags;
+  }
+  
+  public final int getUserFlags()
+  {
+    return (int) (getFlags() >> 32);
   }
   
   public final long getExpireTimeout()
@@ -194,7 +199,7 @@ public class MnodeValue implements java.io.Serializable {
     return (getClass().getSimpleName()
             + "["
             + ",value=" + Hex.toHex(getValueHash(), 0, 4)
-            + ",flags=" + Integer.toHexString(getFlags())
+            + ",flags=" + Long.toHexString(getFlags())
             + ",version=" + Long.toHexString(getVersion())
             + "]");
   }

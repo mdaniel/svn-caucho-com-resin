@@ -61,8 +61,21 @@ public interface ByteStreamCache
    * @param key the key of the item to put
    * @param is stream to contain the value
    */
-  public ExtCacheEntry put(Object key, InputStream is,
+  public ExtCacheEntry put(Object key,
+                           InputStream is,
                            long idleTimeout)
+    throws IOException;
+  
+  /**
+   * Puts a new item in the cache.
+   *
+   * @param key the key of the item to put
+   * @param is stream to contain the value
+   */
+  public ExtCacheEntry put(Object key,
+                           InputStream is,
+                           long idleTimeout,
+                           int flags)
     throws IOException;
   
   /**

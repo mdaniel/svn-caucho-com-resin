@@ -86,6 +86,8 @@ public interface ExtCacheEntry<K,V> extends Cache.Entry<K,V>
   public int getLoadCount();
 
   public long getLastUpdateTime();
+  
+  public int getUserFlags();
 
   /**
    * @return

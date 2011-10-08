@@ -592,6 +592,25 @@ public class AbstractCache
    * @param key         the key of the item to put
    * @param is          the value of the item to put
    * @param idleTimeout the idle timeout for the item
+   * @param flags       the flags value (for memcache)
+   */
+  @Override
+  public ExtCacheEntry put(Object key,
+                           InputStream is,
+                           long idleTimeout,
+                           int flags)
+    throws IOException
+  {
+    return getDistCacheEntry(key).put(is, _config, idleTimeout, flags);
+  }
+
+  /**
+   * Puts a new item in the cache with a custom idle
+   * timeout (used for sessions).
+   *
+   * @param key         the key of the item to put
+   * @param is          the value of the item to put
+   * @param idleTimeout the idle timeout for the item
    */
   @Override
   public ExtCacheEntry put(Object key,

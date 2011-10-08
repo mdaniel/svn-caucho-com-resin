@@ -119,7 +119,20 @@ public class FileCacheEntry extends DistCacheEntry {
                            long idleTimeout)
     throws IOException
   {
-    return _manager.putStream(this, is, config, idleTimeout);
+    return _manager.putStream(this, is, config, idleTimeout, 0);
+  }
+
+  /**
+   * Sets the value by an input stream
+   */
+  @Override
+  public ExtCacheEntry put(InputStream is,
+                           CacheConfig config,
+                           long idleTimeout,
+                           int flags)
+    throws IOException
+  {
+    return _manager.putStream(this, is, config, idleTimeout, flags);
   }
 
   /**

@@ -424,7 +424,8 @@ abstract public class AbstractCacheManager<E extends DistCacheEntry>
   public final ExtCacheEntry putStream(E entry,
                                        InputStream is,
                                        CacheConfig config,
-                                       long idleTimeout)
+                                       long idleTimeout,
+                                       int userFlags)
     throws IOException
   {
     HashKey key = entry.getKeyHash();
@@ -444,13 +445,15 @@ abstract public class AbstractCacheManager<E extends DistCacheEntry>
     
     long valueLength = valueItem.getLength();
     long newVersion = getNewVersion(mnodeValue);
+    
+    long flags = config.getFlags() | ((long) userFlags) << 32;
 
     MnodeUpdate mnodeUpdate = new MnodeUpdate(key.getHash(),
                                               valueHash.getHash(),
                                               valueLength,
                                               newVersion,
                                               HashKey.getHash(config.getCacheKey()),
-                                              config.getFlags(),
+                                              flags,
                                               config.getExpireTimeout(),
                                               idleTimeout);
 

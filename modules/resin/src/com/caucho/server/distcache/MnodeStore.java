@@ -271,7 +271,7 @@ public class MnodeStore implements AlarmListener {
                     + "  idle_timeout BIGINT,\n"
                     + "  update_time BIGINT,\n"
                     + "  item_version BIGINT,\n"
-                    + "  flags INTEGER,\n"
+                    + "  flags BIGINT,\n"
                     + "  server_version INTEGER)");
 
       log.fine(sql);
@@ -381,7 +381,7 @@ public class MnodeStore implements AlarmListener {
         byte []valueHash = rs.getBytes(2);
         long valueLength = rs.getLong(3);
         byte []cacheHash = rs.getBytes(4);
-        int flags = rs.getInt(5);
+        long flags = rs.getLong(5);
         long version = rs.getLong(6);
         long itemUpdateTime = rs.getLong(7);
         long expireTimeout = rs.getLong(8);
@@ -449,7 +449,7 @@ public class MnodeStore implements AlarmListener {
         byte []valueHash = rs.getBytes(2);
         long valueLength = rs.getLong(3);
         byte []cacheHash = rs.getBytes(4);
-        int flags = rs.getInt(5);
+        long flags = rs.getLong(5);
         long version = rs.getLong(6);
         long itemUpdateTime = rs.getLong(7);
         long expireTimeout = rs.getLong(8);
@@ -512,7 +512,7 @@ public class MnodeStore implements AlarmListener {
         long valueLength = rs.getLong(2);
 
         byte []cacheHash = rs.getBytes(3);
-        int flags = rs.getInt(4);
+        long flags = rs.getLong(4);
         long serverVersion = rs.getLong(5);
         long itemVersion = rs.getLong(6);
         long expireTimeout = rs.getLong(7);

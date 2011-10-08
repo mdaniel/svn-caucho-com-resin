@@ -46,7 +46,7 @@ public final class CacheData extends MnodeValue {
                    long valueLength,
                    long version,
                    HashKey cacheKey,
-                   int flags,
+                   long flags,
                    long accessTime,
                    long expireTimeout,
                    long idleTimeout)

@@ -513,10 +513,6 @@ abstract public class AbstractThreadLauncher extends AbstractTaskWorker {
     }
     
     if (_throttleSleep > 0) {
-      ThreadDump threadDump = ThreadDump.create();
-      if (threadDump != null)
-        threadDump.dumpThreads();
-      
       try {
         Thread.sleep(_throttleSleep);
       } catch (Exception e) {
