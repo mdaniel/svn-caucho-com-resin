@@ -1130,8 +1130,11 @@ div.form-input-help {
 }
 
 /* revert to default style for .ui-tabs .ui-tabs-hide */
+/*setting display to none, brekas summary/meters*/
+/*leaving it as block; breaks formmating when of summary page in presence
+of log entries*/
 .ui-tabs .ui-tabs-hide {
-  display:none !important;
+  display:block !important;
   position: absolute;
   left: -10000px;
 }
