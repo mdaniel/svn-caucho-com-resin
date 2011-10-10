@@ -43,7 +43,6 @@ import javax.enterprise.context.ApplicationScoped;
 import javax.enterprise.context.Dependent;
 import javax.enterprise.context.NormalScope;
 import javax.enterprise.context.spi.CreationalContext;
-import javax.enterprise.inject.Specializes;
 import javax.enterprise.inject.spi.AnnotatedMethod;
 import javax.enterprise.inject.spi.AnnotatedType;
 import javax.enterprise.inject.spi.Bean;
@@ -99,7 +98,7 @@ public class ManagedBeanImpl<X> extends AbstractIntrospectedBean<X>
     if (isSessionBean)
       target.setGenerateInterception(false);
     
-    _injectionTarget = target; 
+    _injectionTarget = target;
   }
 
   public ManagedBeanImpl(InjectManager webBeans,

@@ -269,6 +269,7 @@ public class XmlBeanConfig<T> {
   {
     if (program instanceof NodeBuilderChildProgram)
       return ((NodeBuilderChildProgram) program).getNode();
+    
     return null;
   }
 
@@ -458,9 +459,10 @@ public class XmlBeanConfig<T> {
     
     _annotatedType.addAnnotation(xmlCookie);
     
-    ManagedBeanImpl<T> managedBean
-      = new ManagedBeanImpl<T>(_cdiManager, _annotatedType, false);
-    
+    XmlManagedBeanImpl<T> managedBean
+      = new XmlManagedBeanImpl<T>(_cdiManager, _annotatedType, false,
+                                   _name, _filename, _line);
+
     managedBean.introspect();
     
     XmlInjectionTarget<T> injectionTarget

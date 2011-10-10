@@ -2389,7 +2389,9 @@ public final class InjectManager
     Collections.sort(lines);
 
     for (String line : lines) {
-      sb.append("\n    ").append(line);
+      for (String split : line.split("\n")) {
+        sb.append("\n    ").append(split);
+      }
     }
 
     return sb.toString();
@@ -2612,19 +2614,32 @@ public final class InjectManager
   }
 
   private <X> AmbiguousResolutionException
-    ambiguousException(Set<Bean<? extends X>> beanSet, int bestPriority)
+    ambiguousException(Set<Bean<? extends X>> beanSet, 
+                       int bestPriority)
   {
-    ArrayList<Bean<?>> matchBeans = new ArrayList<Bean<?>>();
+    // ArrayList<Bean<?>> matchBeans = new ArrayList<Bean<?>>();
+    ArrayList<String> matchBeans = new ArrayList<String>();
 
     for (Bean<?> bean : beanSet) {
       int priority = getDeploymentPriority(bean);
 
       if (priority == bestPriority)
-        matchBeans.add(bean);
+        matchBeans.add(toDisplayString(bean));
     }
 
-    return new AmbiguousResolutionException(L.l("Too many beans match, because they all have equal precedence.  See the @Alternative and <alternatives> tags to choose a precedence.  Beans:{0}\nfor {1}",
+    return new AmbiguousResolutionException(L.l("Too many beans match, because they all have equal precedence.  Beans:{0}\nfor {1}. You may need to use the @Alternative or <alternatives> to select one.",
                                                 listToLines(matchBeans), this));
+  }
+  
+  private String toDisplayString(Bean<?> bean)
+  {
+    if (bean instanceof AbstractBean<?>) {
+      AbstractBean<?> absBean = (AbstractBean<?>) bean;
+      
+      return absBean.toDisplayString();
+    }
+    else
+      return String.valueOf(bean);
   }
 
   @Override

@@ -35,6 +35,7 @@ import java.io.PrintWriter;
 import java.lang.annotation.Annotation;
 import java.lang.reflect.Method;
 import java.lang.reflect.Type;
+import java.net.URL;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashSet;
@@ -282,6 +283,68 @@ abstract public class AbstractBean<T>
   public Object createObject(Hashtable env)
   {
     return _beanManager.getReference(this);
+  }
+
+  public String toDisplayString()
+  {
+    if (getInjectionTarget() instanceof DisplayableInjectionTarget)
+      return ((DisplayableInjectionTarget) getInjectionTarget()).toDisplayString();
+    
+    if (getBeanClass() == null)
+      return toString();
+    
+    String display = toDisplayStringImpl();
+    
+    Class<?> beanClass = getBeanClass();
+    
+    if (beanClass.getClassLoader() != null) {
+      URL url = beanClass.getResource("");
+      
+      if (url != null)
+        return display + "\n  in " + url;
+    }
+    
+    return display;
+    
+  }
+  
+  protected String toDisplayStringImpl()
+  {
+    StringBuilder sb = new StringBuilder();
+    
+    Class<?> beanClass = getBeanClass();
+
+    sb.append(beanClass.getName());
+    sb.append("[");
+
+    ArrayList<Annotation> bindings
+      = new ArrayList<Annotation>(getQualifiers());
+
+    for (int i = 0; i < bindings.size(); i++) {
+      Annotation ann = bindings.get(i);
+
+      if (i != 0)
+        sb.append(", ");
+
+      sb.append(ann);
+    }
+
+    if (getName() != null) {
+      sb.append(", ");
+      sb.append("@Named=");
+      sb.append(getName());
+    }
+
+    if (getScope() != null && getScope() != Dependent.class) {
+      sb.append(", @");
+      sb.append(getScope().getSimpleName());
+    }
+    
+    sb.append(", " + getClass().getSimpleName());
+
+    sb.append("]");
+
+    return sb.toString();
   }
 
   @Override

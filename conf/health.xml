@@ -158,7 +158,7 @@
   </health:JmxMeter>
 
   <health:AnomalyAnalyzer>
-    <meter-name>OS|Process|File Descriptor Count</meter-name>
+    <meter>OS|Process|File Descriptor Count</meter>
   </health:AnomalyAnalyzer>
    
   <health:JmxMeter>
@@ -216,7 +216,7 @@
   </health:JmxMeter>
 
   <health:AnomalyAnalyzer>
-    <meter-name>JVM|Thread|JVM Thread Count</meter-name>
+    <meter>JVM|Thread|JVM Thread Count</meter>
 
     <health-event>caucho.thread.anomaly.jvm-thread</health-event>
   </health:AnomalyAnalyzer>
@@ -228,7 +228,7 @@
   </health:JmxMeter>
 
   <health:AnomalyAnalyzer>
-    <meter-name>JVM|Thread|JVM Runnable Count</meter-name>
+    <meter>JVM|Thread|JVM Runnable Count</meter>
 
     <health-event>caucho.thread.anomaly.jvm-runnable</health-event>
   </health:AnomalyAnalyzer>
@@ -246,7 +246,7 @@
   </health:JmxMeter>
 
   <health:AnomalyAnalyzer>
-    <meter-name>JVM|Thread|JVM Waiting Count</meter-name>
+    <meter>JVM|Thread|JVM Waiting Count</meter>
 
     <health-event>caucho.thread.anomaly.jvm-waiting</health-event>
   </health:AnomalyAnalyzer>
@@ -258,7 +258,7 @@
   </health:JmxMeter>
 
   <health:AnomalyAnalyzer>
-    <meter-name>JVM|Thread|JVM Blocked Count</meter-name>
+    <meter>JVM|Thread|JVM Blocked Count</meter>
     
     <health-event>caucho.thread.anomaly.jvm-blocked</health-event>
   </health:AnomalyAnalyzer>
@@ -276,7 +276,7 @@
   </health:JmxMeter>
 
   <health:AnomalyAnalyzer>
-    <meter-name>Resin|Thread|Thread Active Count</meter-name>
+    <meter>Resin|Thread|Thread Active Count</meter>
 
     <health-event>caucho.thread.anomaly.resin-active</health-event>
   </health:AnomalyAnalyzer>

@@ -172,7 +172,7 @@ public class ServletConfigImpl
   /**
    * Sets the config location.
    */
-  public void setConfigLocation(String location, int line)
+  public void setConfigUriLocation(String location, int line)
   {
     _location = location + ":" + line + ": ";
   }

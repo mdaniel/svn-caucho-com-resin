@@ -16,39 +16,18 @@ from an IDE.</p>
 
 <s1 title="Preconditions">
 
-<p>Resin 4.0 needs Java before it can run.  You will need JDK 1.6 or later.</p>
-
+<ul>
+<li>Resin requires JDK 6.0 or later</li>
+<li>An HTML 5 browser for some /resin-admin features.</li>
+</ul>
+ 
 <p>Oracle's JDK for Windows, Solaris, and Linux can be found at
 <a href="http://www.oracle.com/technetwork/java/javase/overview/index.html">http://www.oracle.com/technetwork/java/javase/overview/index.html</a>.
 Oracle also has links to some other ports of the JDK.</p>
 
 </s1>
 
-<s1 title="Resin as a Web Server">
-
-<p>Resin comes with a built-in high-performance production-ready HTTP server.
-The easiest and fastest Resin configuration uses Resin as the web server as well as 
-the application server. We highly recommend you start with this configuration 
-although you are free to use other web servers like Apache or IIS with Resin.</p>
-
-<figure src="httpd.gif" alt="browser <-> Resin httpd/servlets,beans <- html,jsp"/>
-
-<p>The built-in HTTP server listens on port 8080 in the default configuration and
-can be changed to listen on the HTTP port 80 instead during deployment.</p>
-
-<p>For more details, see the <a href="http-server.xtp">Resin Web Server</a>
-configuration page.</p>
-
-</s1>
-
 <s1 name="quickstart" title="Installing Resin">
-
-<p>While the Resin web server starts listening to HTTP requests on port 8080, it also
-listens on port 6800 for <a href="clustering-overview.xtp">load balancer and cluster</a>
-messages. Keep in mind, Resin can be used for development or evaluation 
-in addition to using it in production. If desired, you can easily apply for a 
-development license to enable Resin Pro features. You can also simply use Resin Open
-Source to start development.</p>
 
 <p>Installation steps for the major operating systems are outlined below:</p>
 
@@ -62,7 +41,7 @@ location, e.g. <code>c:\java\jdk1.6.0_14</code></li>
 <li>Define the environment variable <var>RESIN_HOME</var> to the location of
 Resin, for example <code>c:\resin-4.0.x</code></li>
 <li>Execute <code>resin.exe</code>
-  <ul><li>or run <code>java -jar lib/resin.jar console</code></li></ul>
+  <ul><li>or run <code>bin/resin.sh start</code></li></ul>
 </li>
 <li>Browse to <a href="http://localhost:8080">http://localhost:8080</a></li>
 </ol>
@@ -130,36 +109,103 @@ apt-get install resin
 </s2>
 </s1>
 
-<s1 title="Running Applications">
+<s1 title="Resin as a Web Server">
 
-<p>Once you've made sure Resin is working, you can start to run
-applications/add content:</p>
+<p>Resin includes a high-performance HTTP server. The easiest and fastest
+Resin configuration uses Resin as the web server as well as 
+the application server. We highly recommend you start with this configuration 
+although you are free to use other web servers like Apache or IIS
+with Resin.</p>
+
+<p>Keep in mind, Resin can be used for
+development or evaluation in addition to using it in production. If desired,
+you can easily apply for a development license to enable Resin Pro features.
+You can also simply use Resin Open Source to start development.</p>
+
+<figure src="httpd.gif" alt="browser <-> Resin httpd/servlets,beans <- html,jsp"/>
+
+<p>The built-in HTTP server listens on port 8080 in the default
+configuration and can be changed to listen on the HTTP port 80 instead during
+deployment.</p>
+
+<example title="Example: Starting Resin">
+unix> bin/resin.sh start
+
+c:\windows> resin start
+</example>
+
+<p>For troubleshooting your installation, you can also run Resin
+in "console" mode, which will let you see the logging messages
+in your console.</p>
+
+<example title="Example: Starting Resin in console mode">
+unix> bin/resin.sh console
+</example>
+
+<p>For more details, see the <a href="http-server.xtp">Resin Web Server</a>
+configuration page.</p>
+
+</s1>
+
+<s1 title="Browser-Based Administration (/resin-admin)">
+
+<p>To enable the /resin-admin, you'll need to create an admin user and
+password.</p>
 
 <ol>
-<li>You can deploy .war files by copying them
-to the webapps directory like this: <code>resin-4.0.x/webapps/hello.war</code>.
-
-<ul><li>The URL for the application would be: 
-<a href="http://localhost:8080/hello">http://localhost:8080/hello</a>.</li>
-</ul></li>
-
-<li>You can deploy using the command-line like this: <code>bin/resin.sh deploy hello.war</code>.
-
-<ul><li>The URL for the application would be:
-<a href="http://localhost:8080/hello">http://localhost:8080/hello</a>.</li>
-</ul></li>
-
-<li>You can also deploy .wars in exploded form like: <code>resin-4.0.x/webapps/hello/index.php</code>.
-
-<ul><li>The URL for the application would be:
-<a href="http://localhost:8080/hello">http://localhost:8080/hello</a>.</li></ul>
-
-You can use a web.xml file to configure the 'hello' web application:
-<code>resin-4.0.x/webapps/hello/WEB-INF/web.xml</code>.</li>
+<li>Create an admin user following the prompt at /resin-admin.</li>
+<li>Copy the <em>conf/admin-users.xml.generated</em> to <em>conf/admin-users.xml</em>.</li>
+<li>Change the resin_admin_external to true in the resin.xml if you need access from a non-local IP address.</li>
+<li>Browse /resin-admin with an HTML 5 browser.</li>
 </ol>
+
+<p>The steps are for security reasons. Copying the admin-users.xml
+verifies that you have access to the server. And the default
+resin_admin_external=false makes sure you're not exposing the /resin-admin
+to the internet.</p>
+
+<p>For more information, see the <a href="resin-admin-console.xtp">/resin-admin
+documentation</a>.</p>
+
+</s1>
+
+<s1 title="Deploying Applications">
+
+<p>Once you've made sure Resin is working, you can start to run
+applications/add content</p>
+
+<s2 title="Command-line deployment">
+
+<p>Command-line deployment looks like the following example.</p>
+
+<example title="Example: command-line deployment">
+bin/resin.sh deploy hello.war
+
+bin/resin.sh undeploy hello.war
+</example>
+
+<p>The URL for the application would be: <em>http://localhost:8080/hello</em>.</p>
+
+</s2>
+
+<s2 title="webapps directory deployment">
+
+<p>You can deploy .war files by copying them
+to the webapps directory like this: <code>resin-4.0.x/webapps/hello.war</code>.
+The URL for the application would be: 
+<a href="http://localhost:8080/hello">http://localhost:8080/hello</a>.
+</p>
+
+<p>You can also deploy .wars in exploded form like: <code>resin-4.0.x/webapps/hello/index.php</code>.
+The URL for the application would be:
+<a href="http://localhost:8080/hello">http://localhost:8080/hello</a>.</p>
+
+<p>You can use a web.xml file to configure the 'hello' web application:
+<code>resin-4.0.x/webapps/hello/WEB-INF/web.xml</code>.</p>
 
 <p>For more information on deployment, see the <a href="deploy.xtp">deployment documentation</a>.</p>
 
+</s2>
 </s1>
 
 <s1 title="Running Resin as a Daemon">
@@ -175,6 +221,32 @@ running until told to stop.</p>
 <li>Stop resin with <code>bin/resin.sh stop</code></li>
 <li>Restart resin with <code>bin/resin.sh restart</code></li>
 </ol>
+
+</s1>
+
+<s1 title="Command-Line PDF Reports">
+
+<p>PDF reports about the Resin running status are available from the
+command-line, from /resin-admin browser-based GUI, and as automatic health
+system tasks.</p>
+
+<p>From the command-line you can generate a pdf-report with the following:</p>
+
+<example title="Example: generating a PDF snapshot report">
+unix> bin/resin.sh pdf-report
+
+<em>generated /var/www/log/default-Watchdog-20111010T1426.pdf</em>
+</example>
+
+<p>You can also generate a report for the most recent restart event saved by
+the watchdog. The watchdog report will give information about why Resin was
+last stopped.</p>
+
+<example title="Example: generating a PDF watchdog report">
+unix> bin/resin.sh pdf-report -watchdog
+
+<em>generated /var/www/log/default-Watchdog-20111010T1426.pdf</em>
+</example>
 
 </s1>
 

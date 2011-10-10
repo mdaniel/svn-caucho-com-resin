@@ -50,7 +50,9 @@ public class Paragraph extends FormattedTextWithAnchors {
   @Override
   public void addText(RawString text)
   {
-    addItem(new Text(text.getValue().trim()));
+    // Cannot use trim because that will break anchor formatting like <a>.
+    // addItem(new Text(text.getValue().trim()));
+    addItem(new Text(text.getValue()));
   }
 
   public void writeHtml(XMLStreamWriter out)

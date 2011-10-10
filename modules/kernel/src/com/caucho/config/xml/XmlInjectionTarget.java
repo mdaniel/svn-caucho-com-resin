@@ -36,6 +36,7 @@ import javax.enterprise.context.spi.CreationalContext;
 import javax.enterprise.inject.spi.InjectionPoint;
 import javax.enterprise.inject.spi.InjectionTarget;
 
+import com.caucho.config.inject.DisplayableInjectionTarget;
 import com.caucho.config.inject.ManagedBeanImpl;
 import com.caucho.config.program.Arg;
 import com.caucho.config.program.ConfigProgram;
@@ -45,8 +46,11 @@ import com.caucho.inject.Module;
  * Internal implementation for a Bean
  */
 @Module
-public class XmlInjectionTarget<X> implements InjectionTarget<X>
+public class XmlInjectionTarget<X> 
+  implements InjectionTarget<X>,
+             DisplayableInjectionTarget
 {
+  private ManagedBeanImpl<X> _xmlBean;
   private InjectionTarget<X> _nextInjectionTarget;
   private Constructor<X> _ctor;
   private Arg<X> []_newProgram;
@@ -57,6 +61,7 @@ public class XmlInjectionTarget<X> implements InjectionTarget<X>
                             Arg<X> []newProgram,
                             ConfigProgram []injectProgram)
   {
+    _xmlBean = bean;
     _nextInjectionTarget = bean.getInjectionTarget();
     _ctor = ctor;
     _newProgram = newProgram;
@@ -139,5 +144,10 @@ public class XmlInjectionTarget<X> implements InjectionTarget<X>
   public Set<InjectionPoint> getInjectionPoints()
   {
     return _nextInjectionTarget.getInjectionPoints();
+  }
+  
+  public String toDisplayString()
+  {
+    return _xmlBean.toDisplayString();
   }
 }

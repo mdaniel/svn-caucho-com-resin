@@ -35,6 +35,8 @@ import java.lang.reflect.Method;
 import java.util.HashMap;
 import java.util.logging.Logger;
 
+import org.w3c.dom.Node;
+
 import com.caucho.config.ConfigException;
 import com.caucho.config.attribute.AddAttribute;
 import com.caucho.config.attribute.Attribute;
@@ -43,6 +45,7 @@ import com.caucho.config.type.ConfigType;
 import com.caucho.config.type.TypeFactory;
 import com.caucho.util.L10N;
 import com.caucho.xml.QName;
+import com.caucho.xml.QNode;
 
 /**
  * Represents a CanDI-style introspected bean type for configuration.
@@ -278,6 +281,29 @@ public class XmlBeanType<T> extends ConfigType<T>
     Class<?> cl = TypeFactory.loadClass("ee", name);
 
     return cl;
+  }
+
+  /**
+   * Called before the children are configured.  Also called for
+   * attribute configuration, e.g. for macros and web-app-default.
+   */
+  @Override
+  public void beforeConfigure(XmlConfigContext builder, Object bean, Node node)
+  {
+    super.beforeConfigure(builder, bean, node);
+    
+    if (bean instanceof XmlBeanConfig) {
+      XmlBeanConfig xmlBean = (XmlBeanConfig) bean;
+      
+      if (node instanceof QNode) {
+        QNode qNode = (QNode) node;
+
+        String uri = qNode.getBaseURI();
+        int line = qNode.getLine();
+        
+        xmlBean.setConfigLocation(uri, line);
+      }
+    }
   }
 
   /**

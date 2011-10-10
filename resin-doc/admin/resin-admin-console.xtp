@@ -32,29 +32,52 @@ heap dumps.</p>
 <p>Since /resin-admin is just a web-app implemented with Quercus/PHP,
 enabling it is just adding an appropriate &lt;web-app> tag.</p>
 
-<p>For security, you will also need to add a &lt;user> to
-the &lt;resin:AdminAuthenticator> section of the resin.xml.
-The password will be
-a MD5 hash.  By default, the /resin-admin web-app provides a form
-for generating the hash codes.  You will need to copy the generated
-password into the resin.xml.  This guarantees that you have access
-to the resin.xml itself to add any users.  In other words, the configuration
-is very cautious about security issues to enable the administration.</p>
+<p>To enable the /resin-admin, you'll need to create an admin user and
+password.</p>
 
-<example title="resin.xml /resin-admin configuration">
+<ol>
+<li>Create an admin user following the prompt at /resin-admin.</li>
+<li>Copy the <em>conf/admin-users.xml.generated</em> to <em>conf/admin-users.xml</em>.</li>
+<li>Change the resin_admin_external to true if you need access from a non-local IP address.</li>
+<li>Browse /resin-admin with an HTML 5 browser.</li>
+</ol>
+
+<p>The steps are for security reasons. Copying the admin-users.xml
+verifies that you have access to the server. And the default
+resin_admin_external=false makes sure you're not exposing the /resin-admin
+to the internet.</p>
+
+<s3 title="Adding /resin-admin users">
+
+<p>The admin-users.xml contains the admin users and passwords who are allowed
+access to /resin-admin. The format is an XML file where each user has
+a <em>&lt;user></em> tag. The password is encoded with the standard {SSHA}
+password scheme used by LDAP. Since the /resin-admin login page includes an
+automatic {SSHA} generator, you can use that page to generate additional
+passwords.</p>
+
+<example title="Example: sample admin-users.xml">
+&lt;resin:AdminAuthenticator xmlns="http://caucho.com/ns/resin"
+                          xmlns:resin="urn:java:com.caucho.resin">
+  &lt;user name="admin" password="{SSHA}h5QdSulQyqIgYo7BIJ3YfnRSY56kD847"/>
+  &lt;user name="resin" password="{SSHA}J0y0dlG2uRKT83g3OfzEjFNTIaTHVsA9"/>
+&lt;/resin:AdminAuthenticator>
+</example>
+
+</s3>
+
+<s3 title="Allowing external internal access">
+
+<example title="Example: exposing /resin-admin to the internet">
 &lt;resin xmlns="http://caucho.com/ns/resin"
        xmlns:resin="urn:java:com.caucho.resin"&gt;
 
-  &lt;resin:AdminAuthenticator>
-     &lt;user name="harry" password="MD5HASH=="/>
-  &lt;/resin:AdminAuthenticator>
+  ...
 
-&lt;cluster id="">
-&lt;host id="">
-
-  &lt;web-app id="/resin-admin" root-directory="${resin.home}/doc/admin">
+  &lt;web-app id="/resin-admin" root-directory="${resin.root}/doc/admin">
      &lt;prologue>
-        &lt;resin:set var="resin_admin_external" value="false"/>
+        &lt;!-- allow access from any IP address -->
+        &lt;resin:set var="resin_admin_external" value="true"/>
         &lt;resin:set var="resin_admin_insecure" value="true"/>
      &lt;/prologue>
   &lt;/web-app>
@@ -63,6 +86,9 @@ is very cautious about security issues to enable the administration.</p>
 &lt;/cluster>
 &lt;/resin>
 </example>
+
+</s3>
+
 </s2>
 
 <s2 title="/resin-admin summary tab">
@@ -162,6 +188,44 @@ a dedicated profiler available.</p>
 </s2>
 
 
+</s1>
+
+<s1 title="/resin-admin Custom Configuration">
+
+<p>For security, you will also need to add a &lt;user> to
+the &lt;resin:AdminAuthenticator> section of the resin.xml.
+The password will be
+a MD5 hash.  By default, the /resin-admin web-app provides a form
+for generating the hash codes.  You will need to copy the generated
+password into the resin.xml.  This guarantees that you have access
+to the resin.xml itself to add any users.  In other words, the configuration
+is very cautious about security issues to enable the administration.</p>
+
+<example title="resin.xml /resin-admin configuration">
+&lt;resin xmlns="http://caucho.com/ns/resin"
+       xmlns:resin="urn:java:com.caucho.resin"&gt;
+
+  &lt;resin:AdminAuthenticator>
+     &lt;resin:import path="${__DIR__}/admin-users.xml" optional="true"/>
+  &lt;/resin:AdminAuthenticator>
+
+&lt;cluster id="">
+&lt;host id="">
+
+  ...
+
+  &lt;web-app id="/resin-admin" root-directory="${resin.root}/doc/admin">
+     &lt;prologue>
+        &lt;!-- only allow access from internal IP (10.*,192.168.*,127.*) -->
+        &lt;resin:set var="resin_admin_external" value="false"/>
+        &lt;resin:set var="resin_admin_insecure" value="true"/>
+     &lt;/prologue>
+  &lt;/web-app>
+
+&lt;/host>
+&lt;/cluster>
+&lt;/resin>
+</example>
 </s1>
 
 <s1 title="Admin topics">

@@ -105,6 +105,7 @@ public class InlineBeanType<T> extends ConfigType<T>
   private Method _setParent;
   private Method _replaceObject;
   private Method _setConfigLocation;
+  private Method _setConfigUriLocation;
   private Method _setConfigNode;
   
   private Attribute _addText;
@@ -266,7 +267,19 @@ public class InlineBeanType<T> extends ConfigType<T>
       int line = ((QNode) node).getLine();
 
       try {
+        // _setConfigLocation.invoke(bean, filename, line);
         _setConfigLocation.invoke(bean, filename, line);
+      } catch (Exception e) {
+        throw ConfigException.create(e);
+      }
+    }
+
+    if (_setConfigUriLocation != null && node instanceof QNode) {
+      String uri = ((QNode) node).getBaseURI();
+      int line = ((QNode) node).getLine();
+
+      try {
+        _setConfigUriLocation.invoke(bean, uri, line);
       } catch (Exception e) {
         throw ConfigException.create(e);
       }
@@ -663,6 +676,9 @@ public class InlineBeanType<T> extends ConfigType<T>
         if (_setConfigLocation == null)
           _setConfigLocation = parentBean._setConfigLocation;
 
+        if (_setConfigUriLocation == null)
+          _setConfigUriLocation = parentBean._setConfigUriLocation;
+
         if (_setConfigNode == null)
           _setConfigNode = parentBean._setConfigNode;
 
@@ -759,6 +775,12 @@ public class InlineBeanType<T> extends ConfigType<T>
           && paramTypes[0].equals(String.class)
           && paramTypes[1].equals(int.class))) {
         _setConfigLocation = method;
+      }
+      else if ((name.equals("setConfigUriLocation")
+          && paramTypes.length == 2
+          && paramTypes[0].equals(String.class)
+          && paramTypes[1].equals(int.class))) {
+        _setConfigUriLocation = method;
       }
       else if ((name.equals("setConfigNode")
           && paramTypes.length == 1
