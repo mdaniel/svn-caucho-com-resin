@@ -1120,7 +1120,12 @@ public class QuercusClass extends NullValue {
   public Value issetField(Env env, Value qThis, StringValue name)
   {
     if(issetField(name) && _fieldMap.get(name).isPublic())
-      return BooleanValue.TRUE;    // TODO: move to ObjectExtValue if possible
+    {
+        // php/09c3
+        Value v_current = this.get(name); // TODO: move to ObjectExtValue if possible
+        if(v_current != NullValue.NULL && v_current != UnsetValue.UNSET)
+            return BooleanValue.TRUE;
+    }
 
     // basically a copy of the __get code with slightly different semantics
     if (_isset != null) {
