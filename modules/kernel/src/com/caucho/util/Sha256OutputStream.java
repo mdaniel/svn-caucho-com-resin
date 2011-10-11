@@ -83,6 +83,7 @@ public class Sha256OutputStream extends OutputStream {
     _digest.update(buffer, offset, length);
   }
 
+  @Override
   public void flush()
     throws IOException
   {

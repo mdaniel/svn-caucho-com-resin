@@ -1085,13 +1085,13 @@ abstract public class AbstractCacheManager<E extends DistCacheEntry>
   {
     Sha256OutputStream mOut = new Sha256OutputStream(os);
     //DeflaterOutputStream gzOut = new DeflaterOutputStream(mOut);
-    ResinDeflaterOutputStream gzOut = new ResinDeflaterOutputStream(mOut);
+    //ResinDeflaterOutputStream gzOut = new ResinDeflaterOutputStream(mOut);
 
-    serializer.serialize(value, gzOut);
-    //serializer.serialize(value, mOut);
+    //serializer.serialize(value, gzOut);
+    serializer.serialize(value, mOut);
 
     //gzOut.finish();
-    gzOut.close();
+    //gzOut.close();
     mOut.close();
     
     byte []hash = mOut.getDigest();
@@ -1180,12 +1180,12 @@ abstract public class AbstractCacheManager<E extends DistCacheEntry>
       InputStream is = os.openInputStream();
 
       try {
-        InflaterInputStream gzIn = new InflaterInputStream(is);
+        // InflaterInputStream gzIn = new InflaterInputStream(is);
 
-        Object value = serializer.deserialize(gzIn);
-        // Object value = serializer.deserialize(is);
+        // Object value = serializer.deserialize(gzIn);
+        Object value = serializer.deserialize(is);
 
-        gzIn.close();
+        // gzIn.close();
 
         return value;
       } finally {
