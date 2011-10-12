@@ -385,8 +385,9 @@ public final class JniSocketImpl extends QSocket {
       throw new IllegalArgumentException();
     
     long requestExpireTime = _requestExpireTime;
-    
+
     if (requestExpireTime > 0 && requestExpireTime < Alarm.getCurrentTime()) {
+      close();
       throw new ClientDisconnectException(L.l("{0}: request-timeout read",
                                               getRemoteAddress()));
     }
@@ -429,6 +430,7 @@ public final class JniSocketImpl extends QSocket {
     long requestExpireTime = _requestExpireTime;
     
     if (requestExpireTime > 0 && requestExpireTime < Alarm.getCurrentTime()) {
+      close();
       throw new ClientDisconnectException(L.l("{0}: request-timeout write",
                                               getRemoteAddress()));
     }

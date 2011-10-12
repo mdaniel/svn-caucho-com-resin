@@ -40,6 +40,9 @@
 #include <winsock2.h>
 #include <fcntl.h>
 #else
+/* defined for Solaris ctime_r */
+#define _POSIX_PTHREAD_SEMANTICS
+
 #include <sys/types.h>
 #include <sys/socket.h>
 #include <netinet/in.h>

@@ -1234,7 +1234,7 @@ public class TcpSocketLink extends AbstractSocketLink
 
       _currentRequest.set(null);
       RequestContext.end();
-      
+
       _socket.setRequestExpireTime(0);
     }
   }
