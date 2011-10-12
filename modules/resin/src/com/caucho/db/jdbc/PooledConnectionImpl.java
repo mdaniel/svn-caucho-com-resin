@@ -110,6 +110,11 @@ class PooledConnectionImpl implements PooledConnection {
       listener.connectionClosed(event);
     }
   }
+  
+  public String toString()
+  {
+    return getClass().getSimpleName() + "[" + _db + "]";
+  }
 
   public void close()
     throws SQLException

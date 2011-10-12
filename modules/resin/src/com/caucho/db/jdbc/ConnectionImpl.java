@@ -429,7 +429,7 @@ public class ConnectionImpl implements java.sql.Connection {
     if (_statements != null)
       _statements.remove(stmt);
   }
-
+  
   public void close()
     throws SQLException
   {
@@ -510,4 +510,10 @@ public class ConnectionImpl implements java.sql.Connection {
     public boolean isWrapperFor(Class<?> iface) throws SQLException {
         throw new UnsupportedOperationException("Not supported yet.");
     }
+
+  @Override
+  public String toString()
+  {
+    return getClass().getSimpleName() + "[" +  _db + "]";
+  }
 }

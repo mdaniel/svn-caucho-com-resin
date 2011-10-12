@@ -137,5 +137,11 @@ public class ConnectionPoolAdapter implements ConnectionPoolDataSource {
       if (conn != null)
         conn.close();
     }
+    
+    @Override
+    public String toString()
+    {
+      return getClass().getSimpleName() + "[" + _conn + "]";
+    }
   }
 }
