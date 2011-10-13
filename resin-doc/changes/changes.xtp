@@ -12,6 +12,7 @@
 
 <s2 title="4.0.24 - snapshot">
 <ul>
+<li>solaris: solaris needs #define _POSIX_PTHREAD_SEMANTICS for proper ctime_r behavior (#4791, rep by Alan Wright)</li>
 <li>health: added health events and anomaly events (#4724)</li>
 <li>db-pool: reduced default max-create-connections back to 5 (#4734)</li>
 <li>db-pool: add min-idle-count to &lt;database> configuration (#4664)</li>

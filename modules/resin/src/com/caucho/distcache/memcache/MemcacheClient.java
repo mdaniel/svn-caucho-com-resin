@@ -341,9 +341,9 @@ public class MemcacheClient implements Cache
       WriteStream out = client.getOutputStream();
       ReadStream is = client.getInputStream();
       
-      //TempStream ts = serialize(value);
-      // long length = ts.getLength();
-      long length = ((String) value).length();
+      TempStream ts = serialize(value);
+      long length = ts.getLength();
+      // long length = ((String) value).length();
       
       out.print("set ");
       out.print(key);
@@ -358,10 +358,10 @@ public class MemcacheClient implements Cache
       out.print(length);
       out.print("\r\n");
       
-      out.print(value);
-      // ts.writeToStream(out);
+      //out.print(value);
+      ts.writeToStream(out);
       
-      System.out.println("SET-LEN: " + length);
+      // System.out.println("SET-LEN: " + length);
       
       out.print("\r\n");
       out.flush();

@@ -29,6 +29,7 @@
 
 package com.caucho.distcache.memcache;
 
+import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
@@ -42,6 +43,7 @@ import com.caucho.util.Alarm;
 import com.caucho.util.CharBuffer;
 import com.caucho.util.HashKey;
 import com.caucho.vfs.ReadStream;
+import com.caucho.vfs.TempStream;
 import com.caucho.vfs.WriteStream;
 
 /**
@@ -130,8 +132,11 @@ public class MemcacheConnection implements ProtocolConnection
     Command command = _commandMap.get(_method);
     
     if (command == null) {
-      System.out.println("unknown command: '" + _method + "' " + command);
-      return false;
+      WriteStream out = getWriteStream();
+      
+      out.print("ERROR\r\n");
+
+      return true;
     }
     
     //return command.execute(this);
@@ -420,6 +425,97 @@ public class MemcacheConnection implements ProtocolConnection
     }
   }
   
+  static class AppendCommand extends StoreCommand {
+    @Override
+    public boolean doCommand(MemcacheConnection conn,
+                             String key,
+                             long bytes,
+                             long timeout,
+                             int flags)
+      throws IOException
+    {
+      ClusterCache cache = conn.getCache();
+      
+      ExtCacheEntry entry = cache.getExtCacheEntry(key);
+      
+      ReadStream rs = conn.getReadStream();
+      
+      if (entry == null || entry.isValueNull()) {
+        rs.skip(bytes);
+        
+        return false;
+      }
+      
+      TempStream ts = new TempStream();
+      
+      WriteStream os = new WriteStream(ts);
+      os.setDisableClose(true);
+      
+      cache.get(key, os);
+      
+      SetInputStream setIs = conn.getSetInputStream();
+
+      setIs.init(rs, bytes);
+      
+      os.writeStream(setIs);
+      os.setDisableClose(false);
+      os.close();
+      
+      cache.put(key, 
+                ts.openRead(), 
+                entry.getIdleTimeout(), 
+                entry.getUserFlags());
+
+      return true;
+    }
+  }
+  
+  static class PrependCommand extends StoreCommand {
+    @Override
+    public boolean doCommand(MemcacheConnection conn,
+                             String key,
+                             long bytes,
+                             long timeout,
+                             int flags)
+      throws IOException
+    {
+      ClusterCache cache = conn.getCache();
+      
+      ExtCacheEntry entry = cache.getExtCacheEntry(key);
+      
+      ReadStream rs = conn.getReadStream();
+      
+      if (entry == null || entry.isValueNull()) {
+        rs.skip(bytes);
+        
+        return false;
+      }
+      
+      TempStream ts = new TempStream();
+      
+      WriteStream os = new WriteStream(ts);
+      os.setDisableClose(true);
+      
+      SetInputStream setIs = conn.getSetInputStream();
+
+      setIs.init(rs, bytes);
+      
+      os.writeStream(setIs);
+      
+      cache.get(key, os);
+      
+      os.setDisableClose(false);
+      os.close();
+      
+      cache.put(key, 
+                ts.openRead(), 
+                entry.getIdleTimeout(), 
+                entry.getUserFlags());
+
+      return true;
+    }
+  }
+  
   static class GetCommand extends Command {
     @Override
     public boolean execute(MemcacheConnection conn)
@@ -432,7 +528,7 @@ public class MemcacheConnection implements ProtocolConnection
       CharBuffer cb = new CharBuffer();
       
       while (readKey(rs, cb)) {
-        getCache(out, conn.getCache(), cb.toString(), conn);
+        getCache(out, conn.getCache(), cb.toString(), conn, 0);
       }
 
       int ch = rs.read();
@@ -477,10 +573,11 @@ public class MemcacheConnection implements ProtocolConnection
       return true;
     }
     
-    private void getCache(WriteStream out,
-                          ClusterCache cache,
-                          String key,
-                          MemcacheConnection conn)
+    protected void getCache(WriteStream out,
+                            ClusterCache cache,
+                            String key,
+                            MemcacheConnection conn,
+                            long hash)
       throws IOException
     {
       ExtCacheEntry entry = cache.getExtCacheEntry(key);
@@ -497,6 +594,14 @@ public class MemcacheConnection implements ProtocolConnection
         return;
       }
       
+      HashKey valueKey = entry.getValueHashKey();
+      long unique = getCasKey(valueKey);
+      
+      if (hash != 0 && hash == unique) {
+        // get-if-modified
+        return;
+      }
+      
       out.print("VALUE ");
       out.print(key);
       out.print(" ");
@@ -505,13 +610,6 @@ public class MemcacheConnection implements ProtocolConnection
       long bytes = entry.getValueLength();
       out.print(" ");
       out.print(bytes);
-      
-      HashKey valueKey = entry.getValueHashKey();
-      
-      long unique = 0;
-      
-      unique = getCasKey(valueKey);
-
       out.print(" ");
       out.print(unique);
       out.print("\r\n");
@@ -525,6 +623,251 @@ public class MemcacheConnection implements ProtocolConnection
     }
   }
   
+  static class GetIfModifiedCommand extends GetCommand {
+    @Override
+    public boolean execute(MemcacheConnection conn)
+      throws IOException
+    {
+      ReadStream rs = conn.getReadStream();
+      WriteStream out = conn.getWriteStream();
+      out.setDisableClose(true);
+      
+      CharBuffer cb = new CharBuffer();
+      
+      int ch = 0;
+      
+      for (ch = rs.read(); ch >= 0 && ch == ' '; ch = rs.read()) {
+      }
+      
+      for (; ch >= 0 && ch != ' ' && ch != '\n'; ch = rs.read()) {
+        cb.append((char) ch);
+      }
+      
+      for (; ch == ' '; ch = rs.read()) {
+      }
+      
+      long hash = 0;
+      
+      for (; '0' <= ch && ch <= '9'; ch = rs.read()) {
+        hash = 10 * hash + ch - '0';
+      }
+      
+      getCache(out, conn.getCache(), cb.toString(), conn, hash);
+
+      for (; ch >= 0 && ch != '\r' && ch != '\n'; ch = rs.read()) {
+      }
+      
+      if (ch == '\r') {
+        ch = rs.read();
+        if (ch != '\n') {
+          System.out.println("PROTOL: " + ch);
+          throw new IOException("PROTOCOL: " + ch);
+        }
+      }
+
+      out.print("END\r\n");
+      out.flush();
+      
+      return true;
+    }
+  }
+  
+  static class DeleteCommand extends Command {
+    @Override
+    public boolean execute(MemcacheConnection conn)
+      throws IOException
+    {
+      ReadStream rs = conn.getReadStream();
+      WriteStream out = conn.getWriteStream();
+      out.setDisableClose(true);
+      
+      boolean isNoReply = false;
+      
+      CharBuffer cb = new CharBuffer();
+      
+      int ch = 0;
+      
+      for (ch = rs.read(); ch >= 0 && ch == ' '; ch = rs.read()) {
+      }
+      
+      for (; ch >= 0 && ch != ' ' && ch != '\n'; ch = rs.read()) {
+        cb.append((char) ch);
+      }
+      
+      String key = cb.toString();
+      
+      for (; ch == ' '; ch = rs.read()) {
+      }
+      
+      long time = 0;
+      
+      for (; '0' <= ch && ch <= '9'; ch = rs.read()) {
+        time = 10 * time + ch - '0';
+      }
+      
+      for (; ch == ' '; ch = rs.read()) {
+      }
+      
+      cb.clear();
+      for (; ch >= 0 && ch != ' ' && ch != '\r' && ch != '\n'; ch = rs.read()) {
+        cb.append((char) ch);
+      }
+      
+      if (cb.length() > 0 && cb.matches("noreply"))
+        isNoReply = true;
+
+      for (; ch >= 0 && ch != '\r' && ch != '\n'; ch = rs.read()) {
+      }
+      
+      if (ch == '\r') {
+        ch = rs.read();
+        if (ch != '\n') {
+          System.out.println("PROTOL: " + ch);
+          throw new IOException("PROTOCOL: " + ch);
+        }
+      }
+      
+      if (deleteCache(conn.getCache(), time, key)) {
+        if (! isNoReply)
+          out.print("DELETED\r\n");
+      }
+      else {
+        if (! isNoReply)
+          out.print("NOT_FOUND\r\n");
+      }
+
+      out.flush();
+      
+      return true;
+    }
+    
+    protected boolean deleteCache(ClusterCache cache,
+                                  long time,
+                                  String key)
+      throws IOException
+    {
+      ExtCacheEntry entry = cache.getExtCacheEntry(key);
+      
+      cache.remove(key);
+      
+      return (entry != null && ! entry.isValueNull());
+    }
+  }
+  
+  static class IncrementCommand extends Command {
+    @Override
+    public boolean execute(MemcacheConnection conn)
+      throws IOException
+    {
+      ReadStream rs = conn.getReadStream();
+      WriteStream out = conn.getWriteStream();
+      out.setDisableClose(true);
+      
+      boolean isNoReply = false;
+      
+      CharBuffer cb = new CharBuffer();
+      
+      int ch = 0;
+      
+      for (ch = rs.read(); ch >= 0 && ch == ' '; ch = rs.read()) {
+      }
+      
+      for (; ch >= 0 && ch != ' ' && ch != '\n'; ch = rs.read()) {
+        cb.append((char) ch);
+      }
+      
+      String key = cb.toString();
+      
+      for (; ch == ' '; ch = rs.read()) {
+      }
+      
+      long delta = 0;
+      
+      for (; '0' <= ch && ch <= '9'; ch = rs.read()) {
+        delta = 10 * delta + ch - '0';
+      }
+      
+      for (; ch == ' '; ch = rs.read()) {
+      }
+      
+      cb.clear();
+      for (; ch >= 0 && ch != ' ' && ch != '\r' && ch != '\n'; ch = rs.read()) {
+        cb.append((char) ch);
+      }
+      
+      if (cb.length() > 0 && cb.matches("noreply"))
+        isNoReply = true;
+
+      for (; ch >= 0 && ch != '\r' && ch != '\n'; ch = rs.read()) {
+      }
+      
+      if (ch == '\r') {
+        ch = rs.read();
+        if (ch != '\n') {
+          System.out.println("PROTOL: " + ch);
+          throw new IOException("PROTOCOL: " + ch);
+        }
+      }
+      
+      long value = changeCache(conn.getCache(), key, delta);
+
+      if (isNoReply) {
+        
+      }
+      else if (value == Long.MIN_VALUE) { 
+        out.print("NOT_FOUND\r\n");
+      }
+      else {
+        out.print("VALUE " + value + "\r\n");
+      }
+      
+      return true;
+    }
+    
+    protected long changeCache(ClusterCache cache,
+                               String key,
+                               long delta)
+      throws IOException
+    {
+      return incrementCache(cache, key, delta);
+    }
+    
+    protected long incrementCache(ClusterCache cache,
+                                  String key,
+                                  long delta)
+        throws IOException
+      {
+      ExtCacheEntry entry = cache.getExtCacheEntry(key);
+      
+      if (entry == null || entry.isValueNull())
+        return Long.MIN_VALUE;
+      
+      CounterStream os = new CounterStream();
+      
+      cache.get(key, os);
+      
+      long newValue = os.getValue() + delta;
+      
+      byte []values = String.valueOf(newValue).getBytes();
+      
+      ByteArrayInputStream bis = new ByteArrayInputStream(values);
+      
+      cache.put(key, bis, entry.getIdleTimeout());
+      
+      return newValue;
+    }
+  }
+  
+  static class DecrementCommand extends IncrementCommand {
+    protected long changeCache(ClusterCache cache,
+                               String key,
+                               long delta)
+      throws IOException
+    {
+      return incrementCache(cache, key, -delta);
+    }
+  }
+
   static class QuitCommand extends Command {
     @Override
     public boolean execute(MemcacheConnection conn)
@@ -551,6 +894,26 @@ public class MemcacheConnection implements ProtocolConnection
       WriteStream out = conn.getWriteStream();
       
       out.print("VERSION 1.4.0\r\n");
+      
+      return true;
+    }
+  }
+  
+  static class VerbosityCommand extends Command {
+    @Override
+    public boolean execute(MemcacheConnection conn)
+      throws IOException
+    {
+      ReadStream rs = conn.getReadStream();
+      
+      int ch;
+      
+      while ((ch = rs.read()) >= 0 && ch != '\n') {
+      }
+      
+      WriteStream out = conn.getWriteStream();
+      
+      out.print("OK\r\n");
       
       return true;
     }
@@ -584,11 +947,21 @@ public class MemcacheConnection implements ProtocolConnection
       if ("".equals(key)) {
         out.print("END\r\n");
       }
+      else if ("resin".equals(key)) {
+        printResinStats(out);
+        out.print("END\r\n");
+      }
       else {
         out.print("ERROR\r\n");
       }
       
       return true;
+    }
+    
+    private void printResinStats(WriteStream out)
+      throws IOException
+    {
+      out.print("STAT enable_get_if_modified 1\r\n");
     }
   }
 
@@ -660,14 +1033,43 @@ public class MemcacheConnection implements ProtocolConnection
     }
   }
   
+  static class CounterStream extends OutputStream {
+    private int _sign = 1;
+    private long _value;
+    
+    public void write(int ch)
+    {
+      if (ch == '-')
+        _sign = -1;
+      
+      if ('0' <= ch && ch <= '9')
+        _value = 10 * _value + ch - '0';
+    }
+    
+    public long getValue()
+    {
+      return _sign * _value;
+    }
+    
+    public void flush() {}
+    public void close() {}
+  }
+  
   static {
     addCommand("add", new AddCommand());
+    addCommand("append", new AppendCommand());
     addCommand("get", new GetCommand());
     addCommand("gets", new GetCommand());
+    addCommand("get_if_modified", new GetIfModifiedCommand());
+    addCommand("decr", new DecrementCommand());
+    addCommand("delete", new DeleteCommand());
+    addCommand("incr", new IncrementCommand());
+    addCommand("prepend", new PrependCommand());
     addCommand("quit", new QuitCommand());
     addCommand("replace", new ReplaceCommand());
     addCommand("set", new SetCommand());
     addCommand("stats", new StatsCommand());
     addCommand("version", new VersionCommand());
+    addCommand("verbosity", new VerbosityCommand());
   }
 }

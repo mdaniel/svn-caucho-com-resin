@@ -3,7 +3,8 @@
   <item link="index.xtp" title="admin/configuration">
 
     <item link="starting-resin.xtp" title="Starting"
-          description="Install Resin for Development">
+          description="Getting Started with Resin">
+      
       <item link="resin-eclipse-support.xtp"
             title="Eclipse"
             description="Resin Eclipse Support"/>
