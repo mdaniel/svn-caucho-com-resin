@@ -29,6 +29,8 @@
 
 package javax.cache;
 
+import java.util.Date;
+
 public interface CacheStatistics
 {
   public String getName();
@@ -36,6 +38,8 @@ public interface CacheStatistics
   public String getStatus();
   
   public void clearStatistics();
+  
+  public Date statsAccumulatingFrom();
   
   public long getEntryCount();
   
@@ -54,4 +58,10 @@ public interface CacheStatistics
   public long getCacheRemovals();
   
   public long getCacheEvictions();
+  
+  public long getAverageGetMillis();
+  
+  public long getAveragePutMillis();
+  
+  public long getAverageRemoveMillis();
 }

@@ -31,6 +31,8 @@ package javax.cache;
 
 import java.util.Set;
 
+import javax.transaction.UserTransaction;
+
 public interface CacheManager
 {
   public String getName();
@@ -46,13 +48,13 @@ public interface CacheManager
   public boolean removeCache(String cacheName)
     throws IllegalStateException;
   
-  public CacheConfiguration createCacheConfiguration();
-  
-  public Object getUserTransaction();
+  public UserTransaction getUserTransaction();
   
   public boolean isSupported(OptionalFeature optionalFeature);
   
   public void addImmutableClass(Class<?> immutableClass);
   
   public void shutdown();
+  
+  public <T> T unwrap(Class<T> cl);
 }

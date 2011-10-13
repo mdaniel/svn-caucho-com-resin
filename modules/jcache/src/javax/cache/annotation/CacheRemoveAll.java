@@ -49,5 +49,6 @@ public @interface CacheRemoveAll
   boolean afterInvocation() default true;
 
   @Nonbinding
-  Class<? extends CacheResolver> cacheResolver() default CacheResolver.class;
+  Class<? extends CacheResolverFactory> cacheResolverFactory()
+    default CacheResolverFactory.class;
 }

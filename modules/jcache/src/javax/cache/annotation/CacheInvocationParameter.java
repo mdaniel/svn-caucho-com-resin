@@ -29,13 +29,19 @@
 
 package javax.cache.annotation;
 
-import java.io.Serializable;
+import java.lang.annotation.Annotation;
+import java.lang.reflect.Type;
+import java.util.Set;
 
-public interface CacheKey extends Serializable
+public interface CacheInvocationParameter
 {
-  @Override
-  int hashCode();
+  public Type getBaseType();
   
-  @Override
-  boolean equals(Object o);
+  public Class<?> getRawType();
+  
+  public Object getValue();
+  
+  public Set<Annotation> getAnnotations();
+  
+  public int getParameterPosition();
 }

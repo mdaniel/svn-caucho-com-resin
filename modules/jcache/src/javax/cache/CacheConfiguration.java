@@ -29,6 +29,11 @@
 
 package javax.cache;
 
+import java.util.concurrent.TimeUnit;
+
+import javax.cache.transaction.IsolationLevel;
+import javax.cache.transaction.Mode;
+
 /**
  * Configuration for a new Cache.
  */
@@ -51,4 +56,55 @@ public interface CacheConfiguration
   public void setStatisticsEnabled(boolean isEnable);
   
   public boolean isTransactionEnabled();
+  
+  public IsolationLevel getTransactionIsolationLevel();
+  
+  public Mode getTransactionMode();
+  
+  public void setExpiry(ExpiryType type, Duration duration);
+  
+  public Duration getExpiry(ExpiryType type);
+  
+  public static class Duration {
+    public static final Duration ETERNAL = new Duration(TimeUnit.SECONDS, 0);
+    
+    private final TimeUnit timeUnit;
+    
+    private final long timeToLive;
+    
+    public Duration(TimeUnit timeUnit, long timeToLive)
+    {
+      if (timeUnit == null)
+        throw new NullPointerException();
+      
+      switch (timeUnit) {
+      case NANOSECONDS:
+      case MICROSECONDS:
+        throw new InvalidConfigurationException();
+      default:
+        this.timeUnit = timeUnit;
+        break;
+      }
+      
+      if (timeToLive < 0)
+        throw new IllegalArgumentException();
+      
+      this.timeToLive = timeToLive;
+    }
+    
+    public TimeUnit getTimeUnit()
+    {
+      return this.timeUnit;
+    }
+    
+    public long getTimeToLive()
+    {
+      return this.timeToLive;
+    }
+  }
+  
+  public enum ExpiryType {
+    MODIFIED,
+    ACCESSED;
+  }
 }

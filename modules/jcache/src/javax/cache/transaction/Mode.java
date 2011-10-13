@@ -27,32 +27,12 @@
  * @author Scott Ferguson
  */
 
-package javax.cache.annotation;
+package javax.cache.transaction;
 
-import java.lang.annotation.Annotation;
-import java.lang.reflect.Method;
-
-import javax.cache.Cache;
-import javax.cache.CacheBuilder;
-import javax.cache.CacheManager;
-
-public class DefaultCacheResolver implements CacheResolver
-{
-  private final CacheManager cacheManager;
-  
-  public DefaultCacheResolver(CacheManager manager)
-  {
-    this.cacheManager = manager;
-  }
-
-  /* (non-Javadoc)
-   * @see javax.cache.annotation.CacheResolver#resolveCache(javax.cache.annotation.CacheInvocationContext)
-   */
-  @Override
-  public <K, V> Cache<K, V> resolveCache(
-                                         CacheInvocationContext<Annotation> cacheInvocationContext)
-  {
-    // TODO Auto-generated method stub
-    return null;
-  }
+/**
+ * Transaction modes.
+ */
+public enum Mode {
+  LOCAL,
+  XA;
 }

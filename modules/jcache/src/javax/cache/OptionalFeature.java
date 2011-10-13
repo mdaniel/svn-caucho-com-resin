@@ -40,7 +40,7 @@ package javax.cache;
  * The lifecycle status of the Cache.
  */
 public enum OptionalFeature {
-    JTA,
+    TRANSACTIONS,
     ANNOTATIONS,
     STORE_BY_REFERENCE;
 }

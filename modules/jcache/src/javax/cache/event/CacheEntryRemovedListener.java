@@ -29,11 +29,9 @@
 
 package javax.cache.event;
 
-import java.util.EventListener;
-
 import javax.cache.Cache;
 
-public interface CacheEntryRemovedListener<K,V> extends EventListener
+public interface CacheEntryRemovedListener<K,V> extends CacheEntryListener<K,V>
 {
   public void onRemove(Cache.Entry<K,V> entry);
   public void onRemoveAll(Iterable<Cache.Entry<K,V>> entry);

@@ -27,15 +27,33 @@
  * @author Scott Ferguson
  */
 
-package javax.cache.annotation;
+package javax.cache.transaction;
 
-import java.io.Serializable;
+import static java.sql.Connection.TRANSACTION_NONE;
+import static java.sql.Connection.TRANSACTION_READ_UNCOMMITTED;
+import static java.sql.Connection.TRANSACTION_READ_COMMITTED;
+import static java.sql.Connection.TRANSACTION_REPEATABLE_READ;
+import static java.sql.Connection.TRANSACTION_SERIALIZABLE;
 
-public interface CacheKey extends Serializable
-{
-  @Override
-  int hashCode();
+/**
+ * Transaction modes.
+ */
+public enum IsolationLevel {
+  TX_NONE(TRANSACTION_NONE),
+  TX_READ_UNCOMMITTED(TRANSACTION_READ_UNCOMMITTED),
+  TX_READ_COMMITTED(TRANSACTION_READ_COMMITTED),
+  TX_READ_REPEATABLE(TRANSACTION_REPEATABLE_READ),
+  TX_READ_SERIALIZABLE(TRANSACTION_SERIALIZABLE);
   
-  @Override
-  boolean equals(Object o);
+  private final int value;
+  
+  private IsolationLevel(int value)
+  {
+    this.value = value;
+  }
+  
+  public int getValue()
+  {
+    return this.value;
+  }
 }

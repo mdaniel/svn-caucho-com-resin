@@ -29,10 +29,6 @@
 
 package javax.cache;
 
-import javax.cache.event.CacheEntryListener;
-import javax.cache.event.NotificationScope;
-import javax.cache.transaction.IsolationLevel;
-import javax.cache.transaction.Mode;
 
 /**
  * Provides the capability of dynamically creating a cache.
@@ -40,29 +36,46 @@ import javax.cache.transaction.Mode;
  * See  the  default implementation of this interface in {@link com.caucho.cluster.CacheTemplate}
  * for additional methods.
  */
-public interface CacheBuilder<K,V> {
-  public Cache<K,V> build();
+public final class Caching {
+  public static final String DEFAULT_CACHE_MANAGER_NAME = "__default__";
   
-  public CacheBuilder<K,V> setCacheLoader(CacheLoader<K,V> cacheLoader);
+  private Caching()
+  {
+  }
   
-  public CacheBuilder<K,V> setCacheWriter(CacheWriter<K,V> cacheWriter);
+  public static CacheManager getCacheManager()
+  {
+    return getCacheManager(DEFAULT_CACHE_MANAGER_NAME);
+  }
   
-  public CacheBuilder<K,V> 
-  registerCacheEntryListener(CacheEntryListener<K,V> listener,
-                             NotificationScope scope,
-                             boolean synchronous);
+  public static CacheManager getCacheManager(ClassLoader classLoader)
+  {
+    return getCacheManager(classLoader, DEFAULT_CACHE_MANAGER_NAME);
+  }
   
-  public CacheBuilder<K,V> setStoreByValue(boolean storeByValue);
+  public static CacheManager getCacheManager(String name)
+  {
+    return CachingSingleton.INSTANCE.getCacheManager(name);
+  }
   
-  public CacheBuilder<K,V> setTransactionEnabled(IsolationLevel isolationLevel,
-                                                 Mode mode);
+  public static CacheManager getCacheManager(ClassLoader classLoader,
+                                             String name)
+  {
+    return CachingSingleton.INSTANCE.getCacheManager(classLoader, name);
+  }
   
-  public CacheBuilder<K,V> setStatisticsEnabled(boolean isEnable);
-  
-  public CacheBuilder<K,V> setReadThrough(boolean readThrough);
-  
-  public CacheBuilder<K,V> setWriteThrough(boolean writeThrough);
-  
-  public CacheBuilder<K,V> setExpiry(CacheConfiguration.ExpiryType type,
-                                     CacheConfiguration.Duration timeToLive);
+  private static final class CachingSingleton {
+    private static CachingSingleton INSTANCE = new CachingSingleton();
+    
+    public CacheManager getCacheManager(String name)
+    {
+      throw new UnsupportedOperationException();
+    }
+    
+    public CacheManager getCacheManager(ClassLoader classLoader,
+                                        String name)
+    {
+      throw new UnsupportedOperationException();
+    }
+  }
 }

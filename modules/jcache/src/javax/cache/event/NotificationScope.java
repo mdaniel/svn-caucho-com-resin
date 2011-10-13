@@ -41,8 +41,7 @@ package javax.cache.event;
  */
 public enum NotificationScope {
   LOCAL(true, false),
-  REMOTE(false, true),
-  ALL(true, true);
+  REMOTE(false, true);
   
   private final boolean deliverLocal;
   private final boolean deliverRemote;

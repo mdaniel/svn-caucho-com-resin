@@ -27,19 +27,14 @@
  * @author Scott Ferguson
  */
 
-package javax.cache.annotation;
+package javax.cache.spi;
 
-import javax.interceptor.InvocationContext;
+import javax.cache.OptionalFeature;
 
-public class DefaultCacheKeyGenerator implements CacheKeyGenerator
+/**
+ * Infomation about supported options.
+ */
+public interface AnnotationProvider
 {
-  @Override
-  public CacheKey generateCacheKey(InvocationContext ic)
-  {
-    Object []parameters = ic.getParameters();
-    Object []paramCopy = new Object[parameters.length];
-    System.arraycopy( parameters, 0, paramCopy, 0, parameters.length);
-    
-    return new DefaultCacheKey(paramCopy);
-  }
+  public boolean isSupported(OptionalFeature feature);
 }

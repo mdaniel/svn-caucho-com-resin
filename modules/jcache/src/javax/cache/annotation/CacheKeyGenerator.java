@@ -29,9 +29,9 @@
 
 package javax.cache.annotation;
 
-import javax.interceptor.InvocationContext;
+import java.lang.annotation.Annotation;
 
 public interface CacheKeyGenerator
 {
-  public CacheKey generateCacheKey(InvocationContext invocationContext);
+  public CacheKey generateCacheKey(CacheKeyInvocationContext<? extends Annotation> invocationContext);
 }

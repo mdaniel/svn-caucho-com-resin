@@ -40,7 +40,7 @@ public interface CacheLoader<K,V>
    * @return the value returned from the CacheLoader
    * @throws CacheException
    */
-  public V load(K key, Object arg);
+  public Cache.Entry<K, V> load(Object key);
 
   /**
    * Creates a set of entries that will be loaded into the cache.
@@ -48,7 +48,7 @@ public interface CacheLoader<K,V>
    * @return a map of key-value pairs that will be loaded into the cache.
    * @throws CacheException
    */
-  public Map<K,V> loadAll(Collection<? extends K> keys, Object arg);
+  public Map<K,V> loadAll(Collection<? extends K> keys);
   
   public boolean canLoad(Object key);
 }

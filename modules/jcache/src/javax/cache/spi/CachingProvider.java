@@ -36,7 +36,7 @@ import javax.cache.OptionalFeature;
  * Creates a new CacheManager.
  */
 public interface CachingProvider {
-  public CacheManager createCacheManager(String name);
+  public CacheManager createCacheManager(ClassLoader classLoader, String name);
   
   public ClassLoader getDefaultClassLoader();
   

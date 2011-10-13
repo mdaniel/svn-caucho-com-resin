@@ -29,37 +29,12 @@
 
 package javax.cache.annotation;
 
-import java.util.Arrays;
+import java.lang.annotation.Annotation;
 
-public class DefaultCacheKey implements CacheKey
+public interface CacheKeyInvocationContext<A extends Annotation>
+  extends CacheInvocationContext<A>
 {
-  private static final long serialVersionUID = 1L;
+  public CacheInvocationParameter []getKeyParameters();
   
-  private final Object []parameters;
-  private final int hashCode;
-  
-  public DefaultCacheKey(Object []parameters)
-  {
-    this.parameters = parameters;
-    this.hashCode = Arrays.deepHashCode(parameters);
-  }
-
-  @Override
-  public int hashCode()
-  {
-    return this.hashCode;
-  }
-
-  @Override
-  public boolean equals(Object obj)
-  {
-    if (this == obj)
-      return true;
-    else if (obj == null || getClass() != obj.getClass())
-      return false;
-    
-    DefaultCacheKey key = (DefaultCacheKey) obj;
-    
-    return Arrays.deepEquals(this.parameters, key.parameters);
-  }
+  public CacheInvocationParameter getValueParameter();
 }

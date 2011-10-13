@@ -29,11 +29,11 @@
 
 package javax.cache.annotation;
 
-import java.lang.reflect.Method;
+import java.lang.annotation.Annotation;
 
 import javax.cache.Cache;
 
 public interface CacheResolverFactory
 {
-  <K,V> Cache<K,V> resolveCacheManager(String cacheName, Method method);
+  <K,V> Cache<K,V> getCacheManager(CacheMethodDetails<? extends Annotation> cacheMethodDetails);
 }

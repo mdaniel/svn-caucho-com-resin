@@ -35,6 +35,7 @@ import java.util.Collection;
 import java.util.Iterator;
 import java.util.Map;
 import java.util.concurrent.Future;
+import java.util.concurrent.atomic.AtomicReference;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -48,12 +49,16 @@ import javax.cache.Status;
 import javax.cache.event.CacheEntryListener;
 import javax.cache.event.NotificationScope;
 
+import com.caucho.distcache.ExtCacheEntry;
+import com.caucho.distcache.FileCache;
+import com.caucho.env.distcache.DistCacheSystem;
 import com.caucho.hessian.io.Hessian2Input;
 import com.caucho.hessian.io.Hessian2Output;
 import com.caucho.network.balance.ClientSocket;
 import com.caucho.network.balance.ClientSocketFactory;
 import com.caucho.util.Alarm;
 import com.caucho.util.CharBuffer;
+import com.caucho.util.HashKey;
 import com.caucho.vfs.ReadStream;
 import com.caucho.vfs.WriteStream;
 import com.caucho.vfs.TempStream;
@@ -71,6 +76,10 @@ public class MemcacheClient implements Cache
   private CharBuffer _cb = new CharBuffer();
   private Hessian2Input _hIn = new Hessian2Input();
   
+  private Boolean _isResin;
+  private AtomicReference<FileCache> _localCache
+    = new AtomicReference<FileCache>();
+  
   public void addServer(String address, int port)
   {
     _factory = new ClientSocketFactory(address, port);
@@ -85,12 +94,53 @@ public class MemcacheClient implements Cache
   @Override
   public boolean containsKey(Object key) throws CacheException
   {
-    // TODO Auto-generated method stub
-    return false;
+    return get(key) != null;
   }
 
   @Override
   public Object get(Object key) throws CacheException
+  {
+    if (_isResin == null)
+      initResin();
+    
+    boolean isResin = _isResin != null && _isResin;
+    
+    if (! isResin)
+      return getImpl(key);
+    
+    Object value;
+    
+    FileCache cache = getLocalCache();
+    ExtCacheEntry extValue = cache.getExtCacheEntry(key);
+    
+    if (extValue == null || extValue.isValueNull()) {
+      value = getImpl(key);
+      
+      cache.put(key, value);
+      
+      return value;
+    }
+    
+    long lastUpdateTime = extValue.getLastUpdateTime();
+    long now = Alarm.getCurrentTime();
+    
+    value = cache.get(key);
+    
+    if (now < lastUpdateTime + 1000) {
+      return value;
+    }
+    
+    long casKey = getCasKey(extValue.getValueHashKey());
+    
+    value = getResinImpl(key, casKey, value);
+    
+    cache.put(key, value);
+    
+    return value;
+  }
+    
+  private Object getImpl(Object key) 
+    throws CacheException
   {
     ClientSocket client = _factory.open();
     
@@ -111,6 +161,13 @@ public class MemcacheClient implements Cache
       
       // ts.writeToStream(out);
       readString(is, _cb);
+      
+      if (_cb.matches("END")) {
+        if (skipToEndOfLine(is))
+          isValid = true;
+        
+        return null;
+      }
       
       if (! _cb.matches("VALUE")) {
         System.out.println("V: " + _cb);
@@ -146,10 +203,10 @@ public class MemcacheClient implements Cache
       readString(is, _cb);
       
       if (! _cb.matches("END"))
-        return false;
+        return null;
       
       if (! skipToEndOfLine(is))
-        return false;
+        return null;
       
       isValid = true;
       
@@ -166,6 +223,197 @@ public class MemcacheClient implements Cache
     }
 
     return null;
+  }
+  
+  private Object getResinImpl(Object key, 
+                              long hash,
+                              Object oldValue) 
+    throws CacheException
+  {
+    ClientSocket client = _factory.open();
+    
+    if (client == null)
+      throw new CacheException("Cannot open client");
+
+    boolean isValid = false;
+    long idleStartTime = Alarm.getCurrentTime();
+    
+    try {
+      WriteStream out = client.getOutputStream();
+      ReadStream is = client.getInputStream();
+      
+      out.print("get_if_modified ");
+      out.print(key);
+      out.print(" ");
+      out.print(hash);
+      out.print("\r\n");
+      out.flush();
+      
+      // ts.writeToStream(out);
+      readString(is, _cb);
+
+      if (_cb.matches("END")) {
+        skipToEndOfLine(is);
+        isValid = true;
+        
+        return null;
+      }
+      else if (_cb.matches("NOT_MODIFIED")) {
+        if (skipToEndOfLine(is))
+          isValid = true;
+        
+        return oldValue;
+      }
+      else if (! _cb.matches("VALUE")) {
+        System.out.println("VALUE: " + _cb);
+        return null;
+      }
+
+      readString(is, _cb);
+
+      long flags = readInt(is);
+      long length = readInt(is);
+      long serverHash = readInt(is);
+      
+      if (! skipToEndOfLine(is)) {
+        System.out.println("EOLF:");
+        return null;
+      }
+      
+      GetInputStream gis = new GetInputStream(is, length);
+      
+      Hessian2Input hIn = _hIn;
+      hIn.init(gis);
+      
+      Object value = hIn.readObject();
+
+      /*
+      _cb.clear();
+      is.readAll(_cb, (int) length);
+      Object value = _cb.toString();
+      */
+      
+      skipToEndOfLine(is);
+      
+      readString(is, _cb);
+      
+      if (! _cb.matches("END"))
+        return null;
+      
+      if (! skipToEndOfLine(is))
+        return null;
+      
+      isValid = true;
+      
+      return value;
+    } catch (IOException e) {
+      e.printStackTrace();
+      log.log(Level.FINER, e.toString(), e);
+    } finally {
+      if (isValid) {
+        client.free(idleStartTime);
+      }
+      else
+        client.close();
+    }
+
+    return null;
+  }
+  
+  private static long getCasKey(HashKey valueKey)
+  {
+    if (valueKey == null)
+      return 0;
+    
+    byte []valueHash = valueKey.getHash();
+    
+    return (((valueHash[0] & 0x7fL) << 56)
+        | ((valueHash[1] & 0xffL) << 48)
+        | ((valueHash[2] & 0xffL) << 40)
+        | ((valueHash[3] & 0xffL) << 32)
+        | ((valueHash[4] & 0xffL) << 24)
+        | ((valueHash[5] & 0xffL) << 16)
+        | ((valueHash[6] & 0xffL) << 8)
+        | ((valueHash[7] & 0xffL)));
+  }
+  
+  private FileCache getLocalCache()
+  {
+    FileCache cache = _localCache.get();
+    
+    if (cache == null) {
+      cache = (FileCache) FileCache.getMatchingCache("memcache-client");
+      
+      if (cache == null) {
+        cache = new FileCache();
+        cache.setName("memcache-client");
+        cache.setExpireTimeoutMillis(3600 * 1000);
+        cache.init();
+      }
+      
+      _localCache.compareAndSet(null, cache);
+    }
+    
+    return _localCache.get();
+  }
+
+  private void initResin()
+  {
+    if (_isResin != null)
+      return;
+    
+    DistCacheSystem cacheSystem = DistCacheSystem.getCurrent();
+    
+    if (cacheSystem == null) {
+      _isResin = false;
+      return;
+    }
+    
+    ClientSocket client = _factory.open();
+    
+    if (client == null)
+      return;
+
+    long idleStartTime = Alarm.getCurrentTime();
+    boolean isValid = false;
+    
+    try {
+      WriteStream out = client.getOutputStream();
+      ReadStream is = client.getInputStream();
+      
+      out.print("stats resin\r\n");
+      out.flush();
+      
+      while (true) {
+        String line = is.readLine();
+        
+        if (line == null)
+          break;
+        
+        line = line.trim();
+        
+        if (line.equals("END") || line.indexOf("ERROR") >= 0) {
+          break;
+        }
+        
+        if (line.equals("STAT enable_get_if_modified 1"))
+          _isResin = true;
+      }
+      
+      isValid = true;
+      
+      if (_isResin == null)
+        _isResin = false;
+    } catch (IOException e) {
+      e.printStackTrace();
+      log.log(Level.FINER, e.toString(), e);
+    } finally {
+      if (isValid) {
+        client.free(idleStartTime);
+      }
+      else
+        client.close();
+    }
   }
   
   private long readInt(ReadStream is)
@@ -277,7 +525,7 @@ public class MemcacheClient implements Cache
    * @see javax.cache.Cache#getCacheStatistics()
    */
   @Override
-  public CacheStatistics getCacheStatistics()
+  public CacheStatistics getStatistics()
   {
     // TODO Auto-generated method stub
     return null;
@@ -325,6 +573,22 @@ public class MemcacheClient implements Cache
 
   @Override
   public void put(Object key, Object value) throws CacheException
+  {
+    if (_isResin == null)
+      initResin();
+    
+    boolean isResin = _isResin != null && _isResin;
+    
+    putImpl(key, value);
+    
+    if (isResin) {
+      FileCache cache = getLocalCache();
+      
+      cache.put(key, value);
+    }
+  }
+  
+  private void putImpl(Object key, Object value) throws CacheException
   {
     ClientSocket client = null;
     long idleStartTime = Alarm.getCurrentTime();
@@ -374,6 +638,74 @@ public class MemcacheClient implements Cache
       }
       
       isValid = true;
+    } catch (IOException e) {
+      log.log(Level.FINER, e.toString(), e);
+    } finally {
+      if (client == null) {
+      }
+      else if (isValid)
+        client.free(idleStartTime);
+      else
+        client.close();
+    }
+  }
+
+  @Override
+  public boolean remove(Object key) throws CacheException
+  {
+    if (_isResin == null)
+      initResin();
+    
+    boolean isResin = _isResin != null && _isResin;
+    
+    if (isResin) {
+      FileCache cache = getLocalCache();
+      
+      cache.remove(key);
+    }
+    
+    removeImpl(key);
+    
+    return true;
+  }
+  
+  private void removeImpl(Object key) throws CacheException
+  {
+    ClientSocket client = null;
+    long idleStartTime = Alarm.getCurrentTime();
+    
+    
+    boolean isValid = false;
+    
+    try {
+      client = _factory.open();
+      
+      if (client == null)
+        throw new CacheException("Cannot put memcache");
+      
+      WriteStream out = client.getOutputStream();
+      ReadStream is = client.getInputStream();
+      
+      out.print("delete ");
+      out.print(key);
+      long timeout = 0;
+      out.print(" ");
+      out.print(timeout);
+      //out.print(" noreply\r\n");
+      out.print("\r\n");
+      out.flush();
+      
+      String line = is.readLine();
+      
+      if (line.equals("DELETED")) {
+        isValid = true;
+      }
+      else if (line.equals("NOT_FOUND")) {
+        isValid = true;
+      }
+      else {
+        System.out.println("UKNOWNK :" + line);
+      }
     } catch (IOException e) {
       log.log(Level.FINER, e.toString(), e);
     } finally {
@@ -436,16 +768,6 @@ public class MemcacheClient implements Cache
   }
 
   /* (non-Javadoc)
-   * @see javax.cache.Cache#remove(java.lang.Object)
-   */
-  @Override
-  public boolean remove(Object key) throws CacheException
-  {
-    // TODO Auto-generated method stub
-    return false;
-  }
-
-  /* (non-Javadoc)
    * @see javax.cache.Cache#remove(java.lang.Object, java.lang.Object)
    */
   @Override
@@ -461,8 +783,9 @@ public class MemcacheClient implements Cache
   @Override
   public void removeAll(Collection keys) throws CacheException
   {
-    // TODO Auto-generated method stub
-    
+    for (Object key : keys) {
+      remove(key);
+    }
   }
 
   /* (non-Javadoc)
@@ -592,5 +915,15 @@ public class MemcacheClient implements Cache
       
       return sublen;
     }
+  }
+
+  /* (non-Javadoc)
+   * @see javax.cache.Cache#unwrap(java.lang.Class)
+   */
+  @Override
+  public Object unwrap(Class cl)
+  {
+    // TODO Auto-generated method stub
+    return null;
   }
 }

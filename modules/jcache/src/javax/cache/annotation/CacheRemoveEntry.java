@@ -35,11 +35,9 @@ import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
 
 import javax.enterprise.util.Nonbinding;
-import javax.interceptor.InterceptorBinding;
 
 @Target({ElementType.METHOD, ElementType.TYPE })
 @Retention(RetentionPolicy.RUNTIME)
-@InterceptorBinding
 public @interface CacheRemoveEntry
 {
   @Nonbinding
@@ -54,5 +52,5 @@ public @interface CacheRemoveEntry
   
   @Nonbinding
   Class<? extends CacheKeyGenerator> cacheKeyGenerator()
-    default DefaultCacheKeyGenerator.class;
+    default CacheKeyGenerator.class;
 }

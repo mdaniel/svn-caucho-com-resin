@@ -409,6 +409,9 @@ public class AbstractCache
   {
     DistCacheSystem cacheService = DistCacheSystem.getCurrent();
     
+    if (cacheService == null)
+      return null;
+    
     CacheManagerImpl localManager = cacheService.getCacheManager();
 
     String contextId = Environment.getEnvironmentName();
@@ -919,7 +922,7 @@ public class AbstractCache
    * Returns the CacheStatistics for this cache.
    */
   @Override
-  public CacheStatistics getCacheStatistics()
+  public CacheStatistics getStatistics()
   {
     return null; // this;
   }
@@ -981,7 +984,7 @@ public class AbstractCache
     
     Object arg = null;
 
-    value = (loader != null) ? loader.load(key, arg) : null;
+    value = (loader != null) ? loader.load(key) : null;
 
     if (value != null)
       put(key, value);
@@ -1406,5 +1409,15 @@ public class AbstractCache
   {
     // TODO Auto-generated method stub
     
+  }
+
+  /* (non-Javadoc)
+   * @see javax.cache.Cache#unwrap(java.lang.Class)
+   */
+  @Override
+  public Object unwrap(Class cl)
+  {
+    // TODO Auto-generated method stub
+    return null;
   }
 }

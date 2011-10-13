@@ -30,14 +30,13 @@
 package javax.cache.annotation;
 
 import java.lang.annotation.Annotation;
-import java.lang.annotation.ElementType;
-import java.lang.annotation.Retention;
-import java.lang.annotation.RetentionPolicy;
-import java.lang.annotation.Target;
-
-import javax.enterprise.util.Nonbinding;
 
 public interface CacheInvocationContext<A extends Annotation>
   extends CacheMethodDetails<A>
 {
+  public Object getTarget();
+  
+  public CacheInvocationParameter []getAllParameters();
+  
+  public <T> T unwrap(Class<T> cl);
 }

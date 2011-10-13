@@ -48,11 +48,7 @@ public enum Status {
   /**
    * The cache is active.
    */
-  STARTING,
-  
   STARTED,
-  
-  STOPPING,
   
   STOPPED;
 }

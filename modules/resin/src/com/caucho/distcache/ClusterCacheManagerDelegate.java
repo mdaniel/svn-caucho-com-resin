@@ -183,16 +183,6 @@ public class ClusterCacheManagerDelegate implements CacheManager
   }
 
   /* (non-Javadoc)
-   * @see javax.cache.CacheManager#createCacheConfiguration()
-   */
-  @Override
-  public CacheConfiguration createCacheConfiguration()
-  {
-    // TODO Auto-generated method stub
-    return null;
-  }
-
-  /* (non-Javadoc)
    * @see javax.cache.CacheManager#getCaches()
    */
   @Override
@@ -220,5 +210,15 @@ public class ClusterCacheManagerDelegate implements CacheManager
   {
     // TODO Auto-generated method stub
     return false;
+  }
+
+  /* (non-Javadoc)
+   * @see javax.cache.CacheManager#unwrap(java.lang.Class)
+   */
+  @Override
+  public <T> T unwrap(Class<T> cl)
+  {
+    // TODO Auto-generated method stub
+    return null;
   }
 }

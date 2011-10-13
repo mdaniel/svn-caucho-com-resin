@@ -29,11 +29,9 @@
 
 package javax.cache.event;
 
-import java.util.EventListener;
-
 import javax.cache.Cache;
 
-public interface CacheEntryReadListener<K,V> extends EventListener
+public interface CacheEntryReadListener<K,V> extends CacheEntryListener<K,V>
 {
   public void onRead(Cache.Entry<K,V> entry);
   public void onReadAll(Iterable<Cache.Entry<K,V>> entry);

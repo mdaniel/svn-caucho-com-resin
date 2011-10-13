@@ -69,7 +69,7 @@ public interface Cache<K,V> extends Iterable<Cache.Entry<K,V>>, CacheLifecycle {
   public Future<Map<K,V>> loadAll(Collection<? extends K> keys)
     throws CacheException;
   
-  public CacheStatistics getCacheStatistics();
+  public CacheStatistics getStatistics();
   
   /**
    * Puts a new item in the cache.
@@ -124,6 +124,8 @@ public interface Cache<K,V> extends Iterable<Cache.Entry<K,V>>, CacheLifecycle {
   public String getName();
   
   public CacheManager getCacheManager();
+  
+  public <T> T unwrap(Class<T> cl);
 
   public interface Entry<K,V> {
     public K getKey();

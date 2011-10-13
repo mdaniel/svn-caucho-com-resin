@@ -27,18 +27,30 @@
  * @author Scott Ferguson
  */
 
-package javax.cache.annotation;
+package javax.cache.transaction;
 
-import java.lang.annotation.ElementType;
-import java.lang.annotation.Retention;
-import java.lang.annotation.RetentionPolicy;
-import java.lang.annotation.Target;
+import javax.cache.CacheException;
 
-import javax.inject.Qualifier;
-
-@Target({ElementType.TYPE })
-@Retention(RetentionPolicy.RUNTIME)
-@Qualifier
-public @interface CustomKeyGen
+public class TransactionException extends CacheException
 {
+  private static final long serialVersionUID = 1L;
+
+  public TransactionException()
+  {
+  }
+  
+  public TransactionException(String msg)
+  {
+    super(msg);
+  }
+  
+  public TransactionException(String msg, Throwable e)
+  {
+    super(msg, e);
+  }
+  
+  public TransactionException(Throwable e)
+  {
+    super(e);
+  }
 }

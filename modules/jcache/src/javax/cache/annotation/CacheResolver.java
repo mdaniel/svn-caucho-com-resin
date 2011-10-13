@@ -30,7 +30,6 @@
 package javax.cache.annotation;
 
 import java.lang.annotation.Annotation;
-import java.lang.reflect.Method;
 
 import javax.cache.Cache;
 
