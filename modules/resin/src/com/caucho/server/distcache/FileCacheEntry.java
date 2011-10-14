@@ -42,12 +42,12 @@ import com.caucho.util.HashKey;
  * An entry in the cache map
  */
 public class FileCacheEntry extends DistCacheEntry {
-  private final FileCacheManager _manager;
+  private final FileCacheEngine _manager;
 
   public FileCacheEntry(Object key,
                         HashKey keyHash,
                         TriadOwner owner,
-                        FileCacheManager manager)
+                        FileCacheEngine manager)
   {
     super(key, keyHash, owner);
 
@@ -57,7 +57,7 @@ public class FileCacheEntry extends DistCacheEntry {
   public FileCacheEntry(Object key,
                         HashKey keyHash,
                         TriadOwner owner,
-                        FileCacheManager manager,
+                        FileCacheEngine manager,
                         CacheConfig config)
   {
     super(key, keyHash, owner, config);

@@ -52,12 +52,12 @@ public class FileCache extends AbstractCache
 {
   public FileCache()
   {
-    setScope("local");
+    // setScope("local");
   }
 
   public FileCache(String name)
   {
-    setScope("local");
+    // setScope("local");
     setName(name);
     init();
   }

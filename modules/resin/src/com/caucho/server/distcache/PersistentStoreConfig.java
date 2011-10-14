@@ -37,7 +37,6 @@ import javax.sql.DataSource;
 import com.caucho.config.ConfigException;
 import com.caucho.config.types.Period;
 import com.caucho.db.block.BlockManager;
-import com.caucho.env.distcache.DistCacheSystem;
 import com.caucho.util.L10N;
 import com.caucho.vfs.Path;
 

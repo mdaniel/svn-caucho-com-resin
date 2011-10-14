@@ -29,6 +29,13 @@
 
 package javax.cache;
 
+import java.util.Iterator;
+import java.util.ServiceLoader;
+import java.util.HashMap;
+import java.util.WeakHashMap;
+
+import javax.cache.spi.CachingProvider;
+
 
 /**
  * Provides the capability of dynamically creating a cache.
@@ -67,15 +74,61 @@ public final class Caching {
   private static final class CachingSingleton {
     private static CachingSingleton INSTANCE = new CachingSingleton();
     
+    private final CachingProvider _cachingProvider;
+    
+    private final WeakHashMap<ClassLoader,HashMap<String,CacheManager>> _managerMap
+      = new WeakHashMap<ClassLoader,HashMap<String,CacheManager>>();
+    
+    
+    private CachingSingleton()
+    {
+      ServiceLoader<CachingProvider> serviceLoader
+        = ServiceLoader.load(CachingProvider.class);
+      
+      Iterator<CachingProvider> iter = serviceLoader.iterator();
+      
+      _cachingProvider = iter.hasNext() ? iter.next() : null;
+    }
+    
     public CacheManager getCacheManager(String name)
     {
-      throw new UnsupportedOperationException();
+      if (_cachingProvider == null)
+        throw new IllegalStateException("Cannot find a CachingProvider");
+      
+      return getCacheManager(_cachingProvider.getDefaultClassLoader(), name);
     }
     
     public CacheManager getCacheManager(ClassLoader classLoader,
                                         String name)
     {
-      throw new UnsupportedOperationException();
+      if (classLoader == null)
+        throw new NullPointerException();
+      
+      if (name == null)
+        throw new NullPointerException();
+      
+      if (_cachingProvider == null)
+        throw new IllegalStateException("Cannot find a CachingProvider"); 
+    
+      synchronized (_managerMap) {
+        HashMap<String,CacheManager> map = _managerMap.get(classLoader);
+        
+        if (map == null) {
+          map = new HashMap<String,CacheManager>();
+          
+          _managerMap.put(classLoader, map);
+        }
+        
+        CacheManager manager = map.get(name);
+        
+        if (manager == null) {
+          manager = _cachingProvider.createCacheManager(classLoader, name);
+          
+          map.put(name, manager);
+        }
+        
+        return manager;
+      }
     }
   }
 }

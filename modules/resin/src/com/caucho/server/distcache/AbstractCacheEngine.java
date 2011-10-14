@@ -32,6 +32,7 @@ package com.caucho.server.distcache;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
+import java.security.MessageDigest;
 import java.sql.Blob;
 import java.sql.SQLException;
 import java.util.Iterator;
@@ -52,6 +53,7 @@ import com.caucho.env.distcache.CacheDataBacking;
 import com.caucho.env.service.ResinSystem;
 import com.caucho.inject.Module;
 import com.caucho.util.Alarm;
+import com.caucho.util.FreeList;
 import com.caucho.util.NullOutputStream;
 import com.caucho.util.ResinDeflaterOutputStream;
 import com.caucho.util.HashKey;
@@ -67,15 +69,21 @@ import com.caucho.vfs.WriteStream;
  * Manages the distributed cache
  */
 @Module
-abstract public class AbstractCacheManager<E extends DistCacheEntry>
-  extends DistributedCacheManager
+abstract public class AbstractCacheEngine<E extends DistCacheEntry>
+  implements CacheEngine
 {
   private static final Logger log
-    = Logger.getLogger(AbstractCacheManager.class.getName());
+    = Logger.getLogger(AbstractCacheEngine.class.getName());
 
-  private static final L10N L = new L10N(AbstractCacheManager.class);
+  private static final L10N L = new L10N(AbstractCacheEngine.class);
   
   private final ResinSystem _resinSystem;
+  private static final Object NULL_OBJECT = new Object();
+  
+  private FreeList<KeyHashStream> _keyStreamFreeList
+    = new FreeList<KeyHashStream>(32);
+  
+  private LruCache<CacheKey,HashKey> _keyCache;
   
   private CacheDataBacking _dataBacking;
   private CacheClusterBacking _clusterBacking;
@@ -90,7 +98,7 @@ abstract public class AbstractCacheManager<E extends DistCacheEntry>
   
   private boolean _isClosed;
   
-  public AbstractCacheManager(ResinSystem resinSystem)
+  public AbstractCacheEngine(ResinSystem resinSystem)
   {
     _resinSystem = resinSystem;
     // new AdminPersistentStore(this);
@@ -1323,7 +1331,7 @@ abstract public class AbstractCacheManager<E extends DistCacheEntry>
   @Override
   public void start()
   {
-    super.start();
+    _keyCache = new LruCache<CacheKey,HashKey>(64 * 1024);
     
     if (_dataBacking == null)
       _dataBacking = createDataBacking();
@@ -1335,6 +1343,120 @@ abstract public class AbstractCacheManager<E extends DistCacheEntry>
       throw new NullPointerException();
     
     _dataBacking.start();
+  }
+
+  public void closeCache(String guid)
+  {
+    _keyCache.clear();
+  }
+
+  protected HashKey createHashKey(Object key, CacheConfig config)
+  {
+    CacheKey cacheKey = new CacheKey(config.getGuid(), key);
+    
+    HashKey hashKey = _keyCache.get(cacheKey);
+    
+    if (hashKey == null) {
+      hashKey = createHashKeyImpl(key, config);
+      
+      _keyCache.put(cacheKey, hashKey);
+    }
+    
+    return hashKey;
+  }
+
+  /**
+   * Sets a cache entry
+   */
+  public void put(HashKey hashKey,
+                  Object value,
+                  CacheConfig config)
+  {
+    throw new UnsupportedOperationException(getClass().getName());
+  }
+
+  /**
+   * Sets a cache entry
+   */
+  public ExtCacheEntry put(HashKey hashKey,
+                           InputStream is,
+                           CacheConfig config,
+                           long idleTimeout)
+    throws IOException
+  {
+    throw new UnsupportedOperationException(getClass().getName());
+  }
+
+  /**
+   * Called when a cache initializes.
+   */
+  @Override
+  public void initCache(CacheImpl cache)
+  {
+    throw new UnsupportedOperationException(getClass().getSimpleName());
+  }
+
+  /**
+   * Called when a cache is removed.
+   */
+  @Override
+  public void destroyCache(CacheImpl cache)
+  {
+    throw new UnsupportedOperationException(getClass().getSimpleName());
+  }
+
+  /**
+   * Returns the key hash
+   */
+  protected HashKey createHashKeyImpl(Object key, CacheConfig config)
+  {
+    try {
+      KeyHashStream dOut = _keyStreamFreeList.allocate();
+      
+      if (dOut == null) {
+        MessageDigest digest
+          = MessageDigest.getInstance(HashManager.HASH_ALGORITHM);
+      
+        dOut = new KeyHashStream(digest);
+      }
+      
+      dOut.init();
+
+      CacheSerializer keySerializer = config.getKeySerializer();
+      
+      keySerializer.serialize(config.getGuid(), dOut);
+      keySerializer.serialize(key, dOut);
+
+      HashKey hashKey = new HashKey(dOut.digest());
+      
+      _keyStreamFreeList.free(dOut);
+
+      return hashKey;
+    } catch (Exception e) {
+      throw new RuntimeException(e);
+    }
+  }
+
+  /**
+   * Returns the key hash
+   */
+  @Override
+  public HashKey createSelfHashKey(Object key, CacheSerializer keySerializer)
+  {
+    try {
+      MessageDigest digest
+        = MessageDigest.getInstance(HashManager.HASH_ALGORITHM);
+
+      KeyHashStream dOut = new KeyHashStream(digest);
+
+      keySerializer.serialize(key, dOut);
+
+      HashKey hashKey = new HashKey(dOut.digest());
+
+      return hashKey;
+    } catch (Exception e) {
+      throw new RuntimeException(e);
+    }
   }
 
   /**
@@ -1392,6 +1514,92 @@ abstract public class AbstractCacheManager<E extends DistCacheEntry>
     public long getLength()
     {
       return _length;
+    }
+  }
+  
+  static class CacheKey {
+    private String _guid;
+    private Object _key;
+    
+    CacheKey(String guid, Object key)
+    {
+      init(guid, key);
+    }
+    
+    void init(String guid, Object key)
+    {
+      _guid = guid;
+      
+      if (key == null)
+        key = NULL_OBJECT;
+      
+      _key = key;
+    }
+    
+    @Override
+    public int hashCode()
+    {
+      int hash = 17;
+      
+      hash += _guid.hashCode();
+      
+      hash = 65521 * hash + _key.hashCode();
+      
+      return hash;
+    }
+    
+    @Override
+    public boolean equals(Object o)
+    {
+      CacheKey key = (CacheKey) o;
+      
+      if (! key._key.equals(_key))
+        return false;
+      
+      return key._guid.equals(_guid);
+    }
+  }
+
+  static class KeyHashStream extends OutputStream {
+    private MessageDigest _digest;
+
+    KeyHashStream(MessageDigest digest)
+    {
+      _digest = digest;
+    }
+    
+    void init()
+    {
+      _digest.reset();
+    }
+
+    @Override
+    public void write(int value)
+    {
+      _digest.update((byte) value);
+    }
+
+    @Override
+    public void write(byte []buffer, int offset, int length)
+    {
+      _digest.update(buffer, offset, length);
+    }
+
+    public byte []digest()
+    {
+      byte []digest = _digest.digest();
+      
+      return digest;
+    }
+
+    @Override
+    public void flush()
+    {
+    }
+
+    @Override
+    public void close()
+    {
     }
   }
 }

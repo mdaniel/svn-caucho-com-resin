@@ -32,12 +32,14 @@ package com.caucho.quercus;
 import com.caucho.VersionFactory;
 import com.caucho.loader.*;
 import com.caucho.distcache.*;
-import com.caucho.env.distcache.DistCacheSystem;
 import com.caucho.quercus.env.Env;
 import com.caucho.quercus.module.ModuleContext;
 import com.caucho.quercus.module.ResinModuleContext;
 import com.caucho.server.webapp.*;
 import com.caucho.server.cluster.Server;
+import com.caucho.server.distcache.CacheImpl;
+import com.caucho.server.distcache.CacheManagerImpl;
+import com.caucho.server.distcache.DistCacheSystem;
 import com.caucho.server.session.*;
 import com.caucho.sql.*;
 import com.caucho.util.*;
@@ -45,6 +47,7 @@ import com.caucho.vfs.*;
 import com.caucho.java.*;
 
 import javax.cache.Cache;
+import javax.cache.CacheManager;
 import javax.sql.DataSource;
 import java.sql.*;
 import java.util.ArrayList;
@@ -59,7 +62,7 @@ public class ResinQuercus extends QuercusContext
   private static EnvironmentLocal<ModuleContext> _localModuleContext
     = new EnvironmentLocal<ModuleContext>();
 
-  private AbstractCache _sessionCache;
+  private CacheImpl _sessionCache;
 
   private WebApp _webApp;
   private long _dependencyCheckInterval = 2000L;
@@ -163,12 +166,12 @@ public class ResinQuercus extends QuercusContext
   public Cache getSessionCache()
   {
     if (_sessionCache == null && Server.getCurrent() != null) {
-      CacheManagerImpl cacheManager = DistCacheSystem.getCurrent().getCacheManager();
-      AbstractCache cache = cacheManager.create("resin:quercus:session");
+      ClusterCache cache = new ClusterCache();
+      cache.setName("resin:quercus:session");
 
       cache.setIdleTimeoutMillis(3600 * 1000L);
 
-      _sessionCache = cache;
+      _sessionCache = cache.createIfAbsent();
     }
     
     return _sessionCache;
@@ -181,7 +184,7 @@ public class ResinQuercus extends QuercusContext
       getSessionCache();
     }
     
-    _sessionCache.setIdleTimeoutMillis(sessionTimeout);
+    // XXX: _sessionCache.setIdleTimeoutMillis(sessionTimeout);
   }
 
   public SessionManager getSessionManager()

@@ -30,26 +30,51 @@
 package com.caucho.distcache;
 
 /**
- * General exception for caches
+ * Implements the distributed cache
  */
-public class CacheException extends RuntimeException
+
+public interface ResinCacheBuilder
 {
-  public CacheException()
-  {
+
+  /**
+   * Defines the scope options for a cache.
+   */
+  public enum Scope {
+
+    /** Not distributed, no persistence.*/
+    LOCAL,
+
+    /** Not distributed, single or no persistence */
+    SERVER,
+
+    /** Distributed across a pod, persistence required.*/
+    POD,
+
+    /** Accessible across a multi-pod cluster*/
+    CLUSTER,
+
+    /** Support CRUD operation with basic access control*/
+    GLOBAL
   }
 
-  public CacheException(String msg)
-  {
-    super(msg);
-  }
+  /**
+   * Defines the persistence options for a cache.
+   */
+  public enum Persistence {
 
-  public CacheException(String msg, Throwable cause)
-  {
-    super(msg, cause);
-  }
+    /**
+     * No persistence.
+     */
+    NONE,
 
-  public CacheException(Throwable cause)
-  {
-    super(cause);
+    /**
+     * A single copy of the cache is persisted on one server in the cluster.
+     */
+    SINGLE,
+
+    /**
+     * Three copies of the cache and its entrys are saved on three servers.
+     */
+    TRIPLE
   }
 }

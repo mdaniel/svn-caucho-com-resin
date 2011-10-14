@@ -27,13 +27,17 @@
  * @author Scott Ferguson
  */
 
-package com.caucho.distcache;
+package com.caucho.server.distcache;
 
+import java.io.Closeable;
 import java.util.concurrent.ConcurrentHashMap;
 
 import javax.enterprise.context.ApplicationScoped;
 
 import com.caucho.config.Configurable;
+import com.caucho.distcache.AbstractCache;
+import com.caucho.distcache.ClusterCache;
+import com.caucho.loader.Environment;
 
 /**
  * Cache which stores consistent copies on the cluster segment.
@@ -46,42 +50,54 @@ import com.caucho.config.Configurable;
  * and consistency.
  */
 
-@ApplicationScoped
-@Configurable
-public class CacheManagerImpl
+public class CacheManagerImpl implements Closeable
 {
-  private ConcurrentHashMap<String,AbstractCache> _cacheMap;
+  private DistCacheSystem _cacheSystem;
+  private String _guid;
+  private ConcurrentHashMap<String,CacheImpl> _cacheMap;
 
-  public CacheManagerImpl()
+  public CacheManagerImpl(DistCacheSystem cacheSystem,
+                          String guid, 
+                          ClassLoader loader)
   {
-    _cacheMap = new ConcurrentHashMap<String,AbstractCache>();
+    _cacheSystem = cacheSystem;
+    _guid = guid;
+    
+    _cacheMap = new ConcurrentHashMap<String,CacheImpl>();
+    
+    Environment.addCloseListener(this, loader);
   }
 
-  public AbstractCache get(String name)
+  public CacheImpl getCache(String name)
   {
     return _cacheMap.get(name);
   }
 
-  public AbstractCache create(String name)
+  public CacheImpl createIfAbsent(String name, CacheConfig config)
   {
-    AbstractCache cache = _cacheMap.get(name);
-
+    CacheImpl cache = _cacheMap.get(name);
+    
     if (cache == null) {
-      cache = new ClusterCache(name);
-      cache.init();
+      String guid = _guid + ":" + name;
+      
+      cache = new CacheImpl(this, name, guid, config);
+
       _cacheMap.putIfAbsent(name, cache);
     }
-
+    
     return _cacheMap.get(name);
-  }
-
-  public AbstractCache putIfAbsent(String name, AbstractCache cache)
-  {
-    return _cacheMap.putIfAbsent(name, cache);
   }
   
   public void remove(String name)
   {
     _cacheMap.remove(name);
+  }
+  
+  @Override
+  public void close()
+  {
+    _cacheMap.clear();
+    
+    _cacheSystem.removeCacheManager(_guid);
   }
 }

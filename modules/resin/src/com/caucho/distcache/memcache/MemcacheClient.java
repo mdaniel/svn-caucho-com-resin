@@ -51,11 +51,12 @@ import javax.cache.event.NotificationScope;
 
 import com.caucho.distcache.ExtCacheEntry;
 import com.caucho.distcache.FileCache;
-import com.caucho.env.distcache.DistCacheSystem;
 import com.caucho.hessian.io.Hessian2Input;
 import com.caucho.hessian.io.Hessian2Output;
 import com.caucho.network.balance.ClientSocket;
 import com.caucho.network.balance.ClientSocketFactory;
+import com.caucho.server.distcache.CacheImpl;
+import com.caucho.server.distcache.DistCacheSystem;
 import com.caucho.util.Alarm;
 import com.caucho.util.CharBuffer;
 import com.caucho.util.HashKey;
@@ -77,8 +78,8 @@ public class MemcacheClient implements Cache
   private Hessian2Input _hIn = new Hessian2Input();
   
   private Boolean _isResin;
-  private AtomicReference<FileCache> _localCache
-    = new AtomicReference<FileCache>();
+  private AtomicReference<CacheImpl> _localCache
+    = new AtomicReference<CacheImpl>();
   
   public void addServer(String address, int port)
   {
@@ -110,7 +111,7 @@ public class MemcacheClient implements Cache
     
     Object value;
     
-    FileCache cache = getLocalCache();
+    CacheImpl cache = getLocalCache();
     ExtCacheEntry extValue = cache.getExtCacheEntry(key);
     
     if (extValue == null || extValue.isValueNull()) {
@@ -337,18 +338,20 @@ public class MemcacheClient implements Cache
         | ((valueHash[7] & 0xffL)));
   }
   
-  private FileCache getLocalCache()
+  private CacheImpl getLocalCache()
   {
-    FileCache cache = _localCache.get();
+    CacheImpl cache = _localCache.get();
     
     if (cache == null) {
-      cache = (FileCache) FileCache.getMatchingCache("memcache-client");
+      cache = (CacheImpl) DistCacheSystem.getMatchingCache("memcache-client");
       
       if (cache == null) {
-        cache = new FileCache();
-        cache.setName("memcache-client");
-        cache.setExpireTimeoutMillis(3600 * 1000);
-        cache.init();
+        FileCache fileCache = new FileCache();
+        fileCache.setName("memcache-client");
+        fileCache.setExpireTimeoutMillis(3600 * 1000);
+        fileCache.init();
+        
+        cache = (CacheImpl) DistCacheSystem.getMatchingCache("memcache-client");
       }
       
       _localCache.compareAndSet(null, cache);
@@ -582,7 +585,7 @@ public class MemcacheClient implements Cache
     putImpl(key, value);
     
     if (isResin) {
-      FileCache cache = getLocalCache();
+      CacheImpl cache = getLocalCache();
       
       cache.put(key, value);
     }
@@ -659,7 +662,7 @@ public class MemcacheClient implements Cache
     boolean isResin = _isResin != null && _isResin;
     
     if (isResin) {
-      FileCache cache = getLocalCache();
+      CacheImpl cache = getLocalCache();
       
       cache.remove(key);
     }

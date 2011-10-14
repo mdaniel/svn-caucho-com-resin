@@ -27,13 +27,16 @@
  * @author Scott Ferguson
  */
 
-package com.caucho.env.distcache;
+package com.caucho.server.distcache;
 
+import java.util.concurrent.ConcurrentHashMap;
+
+import javax.cache.CacheManager;
+import javax.cache.Caching;
 import javax.sql.DataSource;
 
-import com.caucho.distcache.CacheManagerImpl;
 import com.caucho.env.service.*;
-import com.caucho.server.distcache.AbstractCacheManager;
+import com.caucho.loader.Environment;
 
 /**
  * The local cache repository.
@@ -42,23 +45,23 @@ public class DistCacheSystem extends AbstractResinSubSystem
 {
   public static final int START_PRIORITY = START_PRIORITY_CACHE_SERVICE;
 
-  private CacheManagerImpl _cacheManager;
+  private ConcurrentHashMap<String,CacheManagerImpl> _managerMap
+    = new ConcurrentHashMap<String,CacheManagerImpl>(); 
   
-  private AbstractCacheManager<?> _distCacheManager;
+  private AbstractCacheEngine<?> _distCacheManager;
   
   private DataSource _jdbcDataSource;
   
-  public DistCacheSystem(AbstractCacheManager<?> distCacheManager)
+  public DistCacheSystem(AbstractCacheEngine<?> distCacheManager)
   {
     if (distCacheManager == null)
       throw new NullPointerException();
 
-    _cacheManager = new CacheManagerImpl();
     _distCacheManager = distCacheManager;
   }
   
   public static DistCacheSystem 
-    createAndAddService(AbstractCacheManager<?> distCacheManager)
+    createAndAddService(AbstractCacheEngine<?> distCacheManager)
   {
     ResinSystem system = preCreate(DistCacheSystem.class);
 
@@ -72,15 +75,55 @@ public class DistCacheSystem extends AbstractResinSubSystem
   {
     return ResinSystem.getCurrentService(DistCacheSystem.class);
   }
-  
-  public AbstractCacheManager<?> getDistCacheManager()
+
+  public static CacheImpl getMatchingCache(String name)
+  {
+    DistCacheSystem cacheService = getCurrent();
+    
+    if (cacheService == null)
+      return null;
+    
+    CacheManagerImpl localManager = cacheService.getCacheManager();
+
+    String contextId = Environment.getEnvironmentName();
+
+    String guid = contextId + ":" + name;
+
+    return (CacheImpl) localManager.getCache(guid);
+  }
+
+  public AbstractCacheEngine<?> getDistCacheManager()
   {
     return _distCacheManager;
   }
   
   public CacheManagerImpl getCacheManager()
   {
-    return _cacheManager;
+    ClassLoader loader = Thread.currentThread().getContextClassLoader();
+    
+    String name = "Resin";
+    
+    return getCacheManager(name, loader);
+  }
+  
+  public CacheManagerImpl getCacheManager(String name, ClassLoader loader)
+  {
+    String guid = Environment.getEnvironmentName(loader) + ":" + name;
+    
+    CacheManagerImpl cacheManager = _managerMap.get(guid);
+    
+    if (cacheManager == null) {
+      cacheManager = new CacheManagerImpl(this, guid, loader);
+      
+      _managerMap.putIfAbsent(guid, cacheManager);
+    }
+    
+    return _managerMap.get(guid);
+  }
+  
+  void removeCacheManager(String guid)
+  {
+    _managerMap.remove(guid);
   }
   
   public DataSource getJdbcDataSource()
@@ -92,11 +135,13 @@ public class DistCacheSystem extends AbstractResinSubSystem
   {
     _jdbcDataSource = dataSource;
   }
-  
+
+  /*
   public CacheBuilder createBuilder(String name)
   {
     return new CacheBuilder(name, _cacheManager, _distCacheManager);
   }
+  */
   
   @Override
   public int getStartPriority()

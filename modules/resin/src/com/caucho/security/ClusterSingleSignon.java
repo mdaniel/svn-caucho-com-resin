@@ -32,9 +32,11 @@ package com.caucho.security;
 import java.security.Principal;
 
 import javax.annotation.PostConstruct;
+import javax.cache.Cache;
 
 import com.caucho.distcache.AbstractCache;
 import com.caucho.distcache.ClusterCache;
+import com.caucho.server.distcache.CacheImpl;
 
 /**
  * Cluster-based cache for single-signon.
@@ -43,7 +45,8 @@ import com.caucho.distcache.ClusterCache;
  */
 @com.caucho.config.Service
 public class ClusterSingleSignon implements SingleSignon {
-  private AbstractCache _cache;
+  private AbstractCache _cacheConfig;
+  private Cache _cache;
 
   public ClusterSingleSignon()
   {
@@ -52,20 +55,16 @@ public class ClusterSingleSignon implements SingleSignon {
 
   public ClusterSingleSignon(String name)
   {
-    _cache = AbstractCache.getMatchingCache("resin:single-signon:" + name);
+    _cacheConfig = new ClusterCache();
     
-    if (_cache == null) {
-      _cache = new ClusterCache();
-      _cache.setExpireTimeoutMillis(24 * 3600 * 1000L);
-      _cache.setName("resin:single-signon:" + name);
-    
-      _cache.init();
-    }
+    _cacheConfig.setName("resin:single-signon:" + name);
+    _cacheConfig.setExpireTimeoutMillis(24 * 3600 * 1000L);
+    _cacheConfig.setName("resin:single-signon:" + name);
   }
 
   public void setName(String name)
   {
-    _cache.setName("resin:single-signon:" + name);
+    _cacheConfig.setName("resin:single-signon:" + name);
   }
 
   /**
@@ -74,7 +73,7 @@ public class ClusterSingleSignon implements SingleSignon {
   @PostConstruct
   public void init()
   {
-    _cache.init();
+    _cache = _cacheConfig.createIfAbsent();
   }
 
   /**

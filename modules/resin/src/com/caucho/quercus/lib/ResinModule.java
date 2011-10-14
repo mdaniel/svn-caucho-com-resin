@@ -41,6 +41,9 @@ import java.util.WeakHashMap;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
+import javax.cache.CacheBuilder;
+import javax.cache.CacheManager;
+import javax.cache.Caching;
 import javax.enterprise.context.spi.CreationalContext;
 import javax.enterprise.inject.spi.Bean;
 import javax.enterprise.inject.spi.BeanManager;
@@ -54,8 +57,6 @@ import javax.transaction.UserTransaction;
 import com.caucho.VersionFactory;
 import com.caucho.config.inject.InjectManager;
 import com.caucho.distcache.AbstractCache;
-import com.caucho.distcache.CacheManagerImpl;
-import com.caucho.env.distcache.DistCacheSystem;
 import com.caucho.naming.Jndi;
 import com.caucho.quercus.QuercusModuleException;
 import com.caucho.quercus.annotation.NotNull;
@@ -71,6 +72,9 @@ import com.caucho.quercus.env.StringBuilderValue;
 import com.caucho.quercus.env.StringValue;
 import com.caucho.quercus.env.Value;
 import com.caucho.quercus.module.AbstractQuercusModule;
+import com.caucho.server.distcache.CacheImpl;
+import com.caucho.server.distcache.CacheManagerImpl;
+import com.caucho.server.distcache.DistCacheSystem;
 import com.caucho.util.L10N;
 import com.caucho.util.LruCache;
 import com.caucho.vfs.Vfs;
@@ -500,15 +504,17 @@ public class ResinModule
   //
   public static QuercusDistcache resin_create_distcache(Env env, String name)
   {
-    CacheManagerImpl manager = DistCacheSystem.getCurrent().getCacheManager();
+    CacheManager manager = Caching.getCacheManager();
+    
+    CacheBuilder builder = manager.createCacheBuilder(name);
 
-    return new QuercusDistcache(manager.create(name));
+    return new QuercusDistcache((CacheImpl) builder.build());
   }
 
   public static class QuercusDistcache {
-    private final AbstractCache _cache;
+    private final CacheImpl _cache;
 
-    QuercusDistcache(AbstractCache cache)
+    QuercusDistcache(CacheImpl cache)
     {
       _cache = cache;
     }

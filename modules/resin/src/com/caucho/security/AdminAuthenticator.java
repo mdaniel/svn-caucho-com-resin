@@ -34,8 +34,10 @@ import com.caucho.config.CauchoDeployment;
 import com.caucho.config.Service;
 import com.caucho.config.types.Period;
 import com.caucho.distcache.AbstractCache;
-import com.caucho.distcache.ClusterByteStreamCache;
+import com.caucho.distcache.ClusterCache;
 import com.caucho.distcache.ExtCacheEntry;
+import com.caucho.server.distcache.CacheImpl;
+import com.caucho.server.distcache.DistCacheSystem;
 import com.caucho.util.Alarm;
 import com.caucho.util.Base64;
 import com.caucho.util.Crc64;
@@ -85,7 +87,7 @@ public class AdminAuthenticator extends XmlAuthenticator
   private Hashtable<String, PasswordUser> _userMap
     = new Hashtable<String, PasswordUser>();
 
-  private AbstractCache _authStore;
+  private CacheImpl _authStore;
   private long _lastCheck = -1;
 
   public AdminAuthenticator()
@@ -97,11 +99,10 @@ public class AdminAuthenticator extends XmlAuthenticator
     if (_authStore != null)
       return;
 
-    AbstractCache authStore = AbstractCache.getMatchingCache(
-      "resin:authenticator");
+    CacheImpl authStoreImpl = DistCacheSystem.getMatchingCache("resin:authenticator");
 
-    if (authStore == null) {
-      authStore = new ClusterByteStreamCache();
+    if (authStoreImpl == null) {
+      AbstractCache authStore = new ClusterCache();
 
       authStore.setIdleTimeoutMillis(Period.FOREVER);
       authStore.setExpireTimeoutMillis(Period.FOREVER);
@@ -111,10 +112,10 @@ public class AdminAuthenticator extends XmlAuthenticator
       authStore.setBackup(true);
       authStore.setTriplicate(true);
 
-      authStore = authStore.createIfAbsent();
+      authStore.createIfAbsent();
     }
 
-    _authStore = authStore;
+    _authStore = DistCacheSystem.getMatchingCache("resin:authenticator");
   }
 
   private synchronized void reloadFromStore()

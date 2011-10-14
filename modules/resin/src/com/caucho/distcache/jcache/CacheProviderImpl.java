@@ -27,29 +27,32 @@
  * @author Scott Ferguson
  */
 
-package com.caucho.env.distcache;
+package com.caucho.distcache.jcache;
 
-import com.caucho.distcache.CacheManagerImpl;
-import com.caucho.distcache.ObjectCache;
-import com.caucho.server.distcache.AbstractCacheManager;
+import javax.cache.CacheManager;
+import javax.cache.OptionalFeature;
+import javax.cache.spi.CachingProvider;
 
 /**
- * Builds a local cache.
+ * Caching Provider for jcache
  */
-public class CacheBuilder {
-  private final DistCache _cache;
-  
-  CacheBuilder(String name,
-               CacheManagerImpl cacheManager,
-               AbstractCacheManager<?> backingManager)
+public class CacheProviderImpl implements CachingProvider
+{
+  @Override
+  public CacheManager createCacheManager(ClassLoader classLoader, String name)
   {
-    _cache = new DistCache(name, cacheManager, backingManager);
+    return new CacheManagerFacade(name, classLoader);
   }
-  
-  public ObjectCache createObjectCache()
+
+  @Override
+  public ClassLoader getDefaultClassLoader()
   {
-    _cache.init();
-    
-    return _cache;
+    return Thread.currentThread().getContextClassLoader();
+  }
+
+  @Override
+  public boolean isSupported(OptionalFeature feature)
+  {
+    return false;
   }
 }

@@ -65,7 +65,6 @@ import com.caucho.config.lib.ResinConfigLibrary;
 import com.caucho.config.program.ConfigProgram;
 import com.caucho.ejb.manager.EjbEnvironmentListener;
 import com.caucho.env.deploy.DeployControllerService;
-import com.caucho.env.distcache.DistCacheSystem;
 import com.caucho.env.git.GitSystem;
 import com.caucho.env.health.HealthStatusService;
 import com.caucho.env.jpa.ListenerPersistenceEnvironment;
@@ -99,7 +98,8 @@ import com.caucho.server.cluster.Server;
 import com.caucho.server.cluster.ServerConfig;
 import com.caucho.server.cluster.ServletContainerConfig;
 import com.caucho.server.cluster.ServletSystem;
-import com.caucho.server.distcache.FileCacheManager;
+import com.caucho.server.distcache.DistCacheSystem;
+import com.caucho.server.distcache.FileCacheEngine;
 import com.caucho.server.resin.ResinArgs.BoundPort;
 import com.caucho.server.webbeans.ResinCdiProducer;
 import com.caucho.util.Alarm;
@@ -585,7 +585,7 @@ public class Resin
   protected DistCacheSystem createDistCacheService()
   {
     return DistCacheSystem.
-      createAndAddService(new FileCacheManager(getResinSystem()));
+      createAndAddService(new FileCacheEngine(getResinSystem()));
   }
   
   protected AbstractLockManager createLockManager()

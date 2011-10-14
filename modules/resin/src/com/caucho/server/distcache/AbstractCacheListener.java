@@ -1,4 +1,4 @@
-/*
+/**
  * Copyright (c) 1998-2011 Caucho Technology -- all rights reserved
  *
  * This file is part of Resin(R) Open Source
@@ -24,43 +24,51 @@
  *   59 Temple Place, Suite 330
  *   Boston, MA 02111-1307  USA
  *
- * @author Scott Ferguson
+ * @author Fred Zappert (fred@caucho.com)
  */
 
-package com.caucho.env.distcache;
+package com.caucho.server.distcache;
 
-import com.caucho.distcache.AbstractCache;
-import com.caucho.distcache.CacheManagerImpl;
-import com.caucho.server.distcache.AbstractCacheManager;
+import javax.cache.event.CacheEntryListener;
 
 /**
- * Cache which stores consistent copies on all clusters.
- *
- * Using the cache is like using java.util.Map.  To add a new entry,
- * call <code>cache.put(key, value)</code>.  To get the entry, call
- * <code>cache.get(key)</code>.
- *
- * The cache configuration affects the lifetime, local caching timeouts
- * and consistency.
+ * Provides a base class that can extended to override the method or methods of
+ * interest.
+ * 
+ * @note The listener is only when events occur on an entry that has been
+ *       leased.
  */
 
-class DistCache extends AbstractCache
-{
-  DistCache(String name,
-            CacheManagerImpl cacheManager,
-            AbstractCacheManager<?> manager)
+public abstract class AbstractCacheListener<K> implements CacheEntryListener {
+  protected AbstractCacheListener()
   {
-    if (name == null)
-      throw new NullPointerException();
-    
-    if (cacheManager == null)
-      throw new NullPointerException();
-    
-    if (manager == null)
-      throw new NullPointerException();
-    
-    setName(name);
-    setCacheManager(cacheManager);
-    setManager(manager);
   }
+
+  /*
+  @Override
+  public void onLoad(Object key)
+  {
+  }
+
+  @Override
+  public void onEvict(Object key)
+  {
+
+  }
+
+  @Override
+  public void onClear()
+  {
+  }
+
+  @Override
+  public void onPut(Object key)
+  {
+  }
+
+  @Override
+  public void onRemove(Object key)
+  {
+  }
+  */
 }

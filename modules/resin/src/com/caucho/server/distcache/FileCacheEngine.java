@@ -36,9 +36,9 @@ import com.caucho.util.HashKey;
 /**
  * Manages the distributed cache
  */
-public class FileCacheManager
-  extends AbstractDataCacheManager<FileCacheEntry> {
-  public FileCacheManager(ResinSystem resinSystem)
+public class FileCacheEngine
+  extends AbstractCacheEngine<FileCacheEntry> {
+  public FileCacheEngine(ResinSystem resinSystem)
   {
     super(resinSystem);
   }
@@ -58,7 +58,7 @@ public class FileCacheManager
    * Sets a cache entry
    */
   @Override
-  protected HashKey getAndPut(DistCacheEntry entry,
+  public HashKey getAndPut(DistCacheEntry entry,
                               MnodeUpdate mnodeUpdate,
                               Object value,
                               long leaseTimeout,
