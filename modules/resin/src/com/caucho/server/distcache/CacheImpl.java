@@ -79,7 +79,7 @@ public class CacheImpl
   private static final L10N L = new L10N(CacheImpl.class);
 
   private CacheManagerImpl _localManager;
-  private CacheEngine _manager;
+  private CacheService _manager;
 
   private final String _name;
   private final String _guid;
@@ -822,22 +822,22 @@ public class CacheImpl
   @SuppressWarnings("unchecked")
   public MnodeStore getMnodeStore()
   {
-    return ((AbstractCacheEngine) _manager).getMnodeStore();
+    return ((CacheService) _manager).getMnodeStore();
   }
   
   @SuppressWarnings("unchecked")
   public DataStore getDataStore()
   {
-    return ((AbstractCacheEngine) _manager).getDataStore();
+    return ((CacheService) _manager).getDataStore();
   }
   
   public void saveData(Object value)
   {
-    ((AbstractCacheEngine) _manager).writeData(null, value, 
+    ((CacheService) _manager).writeData(null, value, 
                                                 _config.getValueSerializer());
   }
 
-  public void setManager(CacheEngine manager)
+  public void setManager(CacheService manager)
   {
     if (_manager != null)
       throw new IllegalStateException();

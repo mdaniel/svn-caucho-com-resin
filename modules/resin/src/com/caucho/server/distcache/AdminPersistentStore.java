@@ -38,9 +38,9 @@ import com.caucho.management.server.PersistentStoreMXBean;
 public class AdminPersistentStore extends AbstractManagedObject 
   implements PersistentStoreMXBean
 {
-  private AbstractCacheEngine<?> _manager;
+  private CacheService _manager;
   
-  AdminPersistentStore(AbstractCacheEngine<?> manager)
+  AdminPersistentStore(CacheService manager)
   {
     _manager = manager;
     

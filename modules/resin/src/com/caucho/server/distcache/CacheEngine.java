@@ -103,4 +103,96 @@ public interface CacheEngine
    * Closes the manager
    */
   public void close();
+
+  /**
+   * @param mnodeUpdate
+   * @param value
+   * @param leaseTimeout
+   * @param leaseOwner
+   * @return
+   */
+  public HashKey getAndPut(MnodeUpdate mnodeUpdate, Object value,
+                           long leaseTimeout, int leaseOwner);
+
+  /**
+   * @param testValue
+   * @param mnodeUpdate
+   * @param value
+   * @param config
+   * @return
+   */
+  public HashKey compareAndPut(HashKey testValue, MnodeUpdate mnodeUpdate,
+                               Object value, CacheConfig config);
+
+  /**
+   * @param config
+   * @param mnodeEntry
+   * @param now
+   * @return
+   */
+  boolean isLocalReadValid(CacheConfig config, MnodeEntry mnodeEntry, long now);
+
+  /**
+   * @param key
+   * @param mnodeValue
+   */
+  void updateCacheTime(HashKey key, MnodeEntry mnodeValue);
+
+  /**
+   * @param valueKey
+   * @param flags
+   * @return
+   */
+  boolean loadClusterData(HashKey valueKey, int flags);
+
+  /**
+   * @param entry
+   * @param mnodeUpdate
+   * @param value
+   * @param leaseTimeout
+   * @param leaseOwner
+   * @return
+   */
+  HashKey getAndPut(DistCacheEntry entry, MnodeUpdate mnodeUpdate,
+                    Object value, long leaseTimeout, int leaseOwner);
+
+  /**
+   * @param entry
+   * @param testValue
+   * @param mnodeUpdate
+   * @param value
+   * @param config
+   * @return
+   */
+  HashKey compareAndPut(DistCacheEntry entry, HashKey testValue,
+                        MnodeUpdate mnodeUpdate, Object value,
+                        CacheConfig config);
+
+  /**
+   * @return
+   */
+  CacheDataBacking createDataBacking();
+
+  /**
+   * @param entry
+   * @param config
+   * @return
+   */
+  public MnodeEntry loadClusterValue(DistCacheEntry entry, CacheConfig config);
+
+  /**
+   * @param key
+   * @param mnodeUpdate
+   * @param mnodeValue
+   */
+  public void putCluster(HashKey key, MnodeUpdate mnodeUpdate,
+                         MnodeEntry mnodeValue);
+
+  /**
+   * @param key
+   * @param mnodeUpdate
+   * @param mnodeEntry
+   */
+  public void removeCluster(HashKey key, MnodeUpdate mnodeUpdate,
+                            MnodeEntry mnodeEntry);
 }

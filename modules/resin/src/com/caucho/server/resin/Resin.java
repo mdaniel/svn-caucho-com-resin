@@ -98,8 +98,8 @@ import com.caucho.server.cluster.Server;
 import com.caucho.server.cluster.ServerConfig;
 import com.caucho.server.cluster.ServletContainerConfig;
 import com.caucho.server.cluster.ServletSystem;
+import com.caucho.server.distcache.CacheService;
 import com.caucho.server.distcache.DistCacheSystem;
-import com.caucho.server.distcache.FileCacheEngine;
 import com.caucho.server.resin.ResinArgs.BoundPort;
 import com.caucho.server.webbeans.ResinCdiProducer;
 import com.caucho.util.Alarm;
@@ -585,7 +585,7 @@ public class Resin
   protected DistCacheSystem createDistCacheService()
   {
     return DistCacheSystem.
-      createAndAddService(new FileCacheEngine(getResinSystem()));
+      createAndAddService(new CacheService(getResinSystem()));
   }
   
   protected AbstractLockManager createLockManager()

@@ -44,6 +44,7 @@ import java.util.zip.InflaterInputStream;
 
 import javax.cache.CacheLoader;
 
+import com.caucho.cloud.topology.TriadOwner;
 import com.caucho.db.blob.BlobInputStream;
 import com.caucho.distcache.CacheSerializer;
 import com.caucho.distcache.ExtCacheEntry;
@@ -69,13 +70,12 @@ import com.caucho.vfs.WriteStream;
  * Manages the distributed cache
  */
 @Module
-abstract public class AbstractCacheEngine<E extends DistCacheEntry>
-  implements CacheEngine
+public final class CacheService
 {
   private static final Logger log
-    = Logger.getLogger(AbstractCacheEngine.class.getName());
+    = Logger.getLogger(CacheService.class.getName());
 
-  private static final L10N L = new L10N(AbstractCacheEngine.class);
+  private static final L10N L = new L10N(CacheService.class);
   
   private final ResinSystem _resinSystem;
   private static final Object NULL_OBJECT = new Object();
@@ -86,42 +86,36 @@ abstract public class AbstractCacheEngine<E extends DistCacheEntry>
   private LruCache<CacheKey,HashKey> _keyCache;
   
   private CacheDataBacking _dataBacking;
-  private CacheClusterBacking _clusterBacking;
   
   private ConcurrentHashMap<HashKey,CacheMnodeListener> _cacheListenMap
     = new ConcurrentHashMap<HashKey,CacheMnodeListener>();
   
   private boolean _isCacheListen;
   
-  private final LruCache<HashKey, E> _entryCache
-    = new LruCache<HashKey, E>(64 * 1024);
+  private final LruCache<HashKey, DistCacheEntry> _entryCache
+    = new LruCache<HashKey, DistCacheEntry>(64 * 1024);
   
   private boolean _isClosed;
   
-  public AbstractCacheEngine(ResinSystem resinSystem)
+  private CacheEngine _cacheEngine;
+  
+  public CacheService(ResinSystem resinSystem)
   {
     _resinSystem = resinSystem;
     // new AdminPersistentStore(this);
-    _clusterBacking = new AbstractCacheClusterBacking();
+  }
+
+  public void setCacheEngine(CacheEngine cacheEngine)
+  {
+    _cacheEngine = cacheEngine;
   }
   
-  @Override
   public CacheDataBacking getDataBacking()
   {
     return _dataBacking;
   }
   
-  protected void setClusterBacking(CacheClusterBacking clusterBacking)
-  {
-    _clusterBacking = clusterBacking;
-  }
-  
-  protected CacheClusterBacking getClusterBacking()
-  {
-    return _clusterBacking;
-  }
-  
-  protected CacheDataBacking createDataBacking()
+  public CacheDataBacking createDataBacking()
   {
     return new CacheDataBackingImpl();
   }
@@ -135,12 +129,11 @@ abstract public class AbstractCacheEngine<E extends DistCacheEntry>
   /**
    * Returns the key entry.
    */
-  @Override
-  public final E getCacheEntry(Object key, CacheConfig config)
+  public final DistCacheEntry getCacheEntry(Object key, CacheConfig config)
   {
     HashKey hashKey = createHashKey(key, config);
 
-    E cacheEntry = _entryCache.get(hashKey);
+    DistCacheEntry cacheEntry = _entryCache.get(hashKey);
 
     while (cacheEntry == null) {
       cacheEntry = createCacheEntry(key, hashKey);
@@ -154,10 +147,10 @@ abstract public class AbstractCacheEngine<E extends DistCacheEntry>
   /**
    * Returns the key entry.
    */
-  @Override
-  public final E getCacheEntry(HashKey hashKey, CacheConfig config)
+  public final DistCacheEntry getCacheEntry(HashKey hashKey, 
+                                            CacheConfig config)
   {
-    E cacheEntry = _entryCache.get(hashKey);
+    DistCacheEntry cacheEntry = _entryCache.get(hashKey);
 
     while (cacheEntry == null) {
       cacheEntry = createCacheEntry(null, hashKey);
@@ -168,14 +161,22 @@ abstract public class AbstractCacheEngine<E extends DistCacheEntry>
     return cacheEntry;
   }
 
-  abstract protected E createCacheEntry(Object key, HashKey hashKey);
+  /**
+   * Returns the key entry.
+   */
+  public DistCacheEntry createCacheEntry(Object key, HashKey hashKey)
+  {
+    TriadOwner owner = TriadOwner.getHashOwner(hashKey.getHash());
+
+    return new DistCacheEntry(this, key, hashKey, owner);
+  }
 
   /**
    * Returns the key entry.
    */
-  final public E getCacheEntry(HashKey hashKey)
+  final public DistCacheEntry getCacheEntry(HashKey hashKey)
   {
-    E cacheEntry = _entryCache.get(hashKey);
+    DistCacheEntry cacheEntry = _entryCache.get(hashKey);
 
     while (cacheEntry == null) {
       cacheEntry = createCacheEntry(null, hashKey);
@@ -190,7 +191,7 @@ abstract public class AbstractCacheEngine<E extends DistCacheEntry>
     return cacheEntry;
   }
 
-  final public Object get(E entry,
+  final public Object get(DistCacheEntry entry,
                           CacheConfig config,
                           long now)
   {
@@ -230,7 +231,7 @@ abstract public class AbstractCacheEngine<E extends DistCacheEntry>
   /**
    * Gets a cache entry as a stream
    */
-  final public boolean getStream(E entry,
+  final public boolean getStream(DistCacheEntry entry,
                                  OutputStream os,
                                  CacheConfig config)
     throws IOException
@@ -261,7 +262,7 @@ abstract public class AbstractCacheEngine<E extends DistCacheEntry>
     return isData;
   }
 
-  final public MnodeEntry getMnodeValue(E entry,
+  final public MnodeEntry getMnodeValue(DistCacheEntry entry,
                                         CacheConfig config,
                                         long now)
                                         // boolean isLazy)
@@ -291,7 +292,7 @@ abstract public class AbstractCacheEngine<E extends DistCacheEntry>
     return entry.getMnodeEntry();
   }
 
-  private void reloadValue(E entry,
+  private void reloadValue(DistCacheEntry entry,
                            CacheConfig config,
                            long now)
   {
@@ -306,7 +307,7 @@ abstract public class AbstractCacheEngine<E extends DistCacheEntry>
   }
   
   // XXX: needs to be moved
-  protected void lazyValueUpdate(E entry, CacheConfig config)
+  protected void lazyValueUpdate(DistCacheEntry entry, CacheConfig config)
   {
     reloadValue(entry, config, Alarm.getCurrentTime());
   }
@@ -318,7 +319,7 @@ abstract public class AbstractCacheEngine<E extends DistCacheEntry>
     return ! mnodeValue.isEntryExpired(now);
   }
 
-  private void updateAccessTime(E entry,
+  private void updateAccessTime(DistCacheEntry entry,
                                 MnodeEntry mnodeValue,
                                 long now)
   {
@@ -336,11 +337,18 @@ abstract public class AbstractCacheEngine<E extends DistCacheEntry>
     }
   }
 
-  private void loadExpiredValue(E entry,
+  private void loadExpiredValue(DistCacheEntry entry,
                                 CacheConfig config,
                                 long now)
   {
-    MnodeEntry mnodeValue = getClusterBacking().loadClusterValue(entry, config);
+    MnodeEntry mnodeValue;
+    
+    CacheEngine engine = _cacheEngine;
+    
+    if (engine != null)
+      mnodeValue = engine.loadClusterValue(entry, config);
+    else
+      mnodeValue = null;
     
     if (mnodeValue == null || mnodeValue.isEntryExpired(now)) {
       CacheLoader loader = config.getCacheLoader();
@@ -379,7 +387,7 @@ abstract public class AbstractCacheEngine<E extends DistCacheEntry>
  /**
    * Sets a cache entry
    */
-  final public void put(E entry,
+  final public void put(DistCacheEntry entry,
                         Object value,
                         CacheConfig config)
   {
@@ -394,7 +402,7 @@ abstract public class AbstractCacheEngine<E extends DistCacheEntry>
   /**
    * Sets a cache entry
    */
-  protected final void put(E entry,
+  protected final void put(DistCacheEntry entry,
                            Object value,
                            CacheConfig config,
                            long now,
@@ -424,12 +432,15 @@ abstract public class AbstractCacheEngine<E extends DistCacheEntry>
     if (mnodeValue == null)
       return;
 
-    getClusterBacking().putCluster(key, mnodeUpdate, mnodeValue);
+    CacheEngine engine = _cacheEngine;
+    
+    if (engine != null)
+      engine.putCluster(key, mnodeUpdate, mnodeValue);
 
     return;
   }
 
-  public final ExtCacheEntry putStream(E entry,
+  public final ExtCacheEntry putStream(DistCacheEntry entry,
                                        InputStream is,
                                        CacheConfig config,
                                        long idleTimeout,
@@ -476,8 +487,11 @@ abstract public class AbstractCacheEngine<E extends DistCacheEntry>
 
     if (mnodeValue == null)
       return null;
+    
+    CacheEngine engine = _cacheEngine;
 
-    getClusterBacking().putCluster(key, mnodeUpdate, mnodeValue);
+    if (engine != null)
+      engine.putCluster(key, mnodeUpdate, mnodeValue);
 
     return mnodeValue;
   }
@@ -485,7 +499,7 @@ abstract public class AbstractCacheEngine<E extends DistCacheEntry>
   /**
    * Sets a cache entry
    */
-  final public Object getAndPut(E entry,
+  final public Object getAndPut(DistCacheEntry entry,
                                 Object value,
                                 CacheConfig config)
   {
@@ -500,7 +514,7 @@ abstract public class AbstractCacheEngine<E extends DistCacheEntry>
   /**
    * Sets a cache entry
    */
-  protected final Object getAndPut(E entry,
+  protected final Object getAndPut(DistCacheEntry entry,
                                    Object value,
                                    CacheConfig config,
                                    long now,
@@ -543,23 +557,23 @@ abstract public class AbstractCacheEngine<E extends DistCacheEntry>
   /**
    * Sets a cache entry
    */
-  abstract protected HashKey getAndPut(DistCacheEntry entry,
-                                       MnodeUpdate mnodeUpdate,
-                                       Object value,
-                                       long leaseTimeout,
-                                       int leaseOwner);
+  protected HashKey getAndPut(DistCacheEntry entry,
+                              MnodeUpdate mnodeUpdate,
+                              Object value,
+                              long leaseTimeout,
+                              int leaseOwner)
+  {
+    return _cacheEngine.getAndPut(mnodeUpdate, value, leaseTimeout, leaseOwner);
+  }
   
-  /**
-   * Sets a cache entry
-   */
-  public final HashKey getAndPutLocal(DistCacheEntry entry,
-                                      MnodeUpdate mnodeUpdate,
-                                      Object value,
-                                      long leaseTimeout,
-                                      int leaseOwner)
+  public HashKey getAndPutLocal(DistCacheEntry entry,
+                                MnodeUpdate mnodeUpdate,
+                                Object value,
+                                long leaseTimeout,
+                                int leaseOwner)
   {
     HashKey oldValueHash = entry.getValueHashKey();
-    
+
     MnodeEntry mnodeValue = putLocalValue(entry, 
                                           mnodeUpdate, value,
                                           leaseTimeout,
@@ -568,7 +582,8 @@ abstract public class AbstractCacheEngine<E extends DistCacheEntry>
     return oldValueHash;
   }
 
-  public HashKey compareAndPut(E entry, 
+
+  public HashKey compareAndPut(DistCacheEntry entry, 
                                HashKey testValue,
                                Object value, 
                                CacheConfig config)
@@ -591,13 +606,16 @@ abstract public class AbstractCacheEngine<E extends DistCacheEntry>
     return compareAndPut(entry, testValue, mnodeUpdate, value, config);
   }
 
-  abstract protected HashKey compareAndPut(E entry,
-                                           HashKey testValue,
-                                           MnodeUpdate mnodeUpdate,
-                                           Object value,
-                                           CacheConfig config);
+  protected HashKey compareAndPut(DistCacheEntry entry,
+                                  HashKey testValue,
+                                  MnodeUpdate mnodeUpdate,
+                                  Object value,
+                                  CacheConfig config)
+  {
+    return _cacheEngine.compareAndPut(testValue, mnodeUpdate, value, config);
+  }
   
-  public final HashKey compareAndPutLocal(E entry,
+  public final HashKey compareAndPutLocal(DistCacheEntry entry,
                                           HashKey testValue,
                                           MnodeUpdate mnodeUpdate,
                                           Object value,
@@ -642,7 +660,7 @@ abstract public class AbstractCacheEngine<E extends DistCacheEntry>
       return null;
   }
 
-  public boolean compareAndPut(E entry,
+  public boolean compareAndPut(DistCacheEntry entry,
                                long version,
                                HashKey valueHash, 
                                long valueLength,
@@ -681,28 +699,31 @@ abstract public class AbstractCacheEngine<E extends DistCacheEntry>
     
     if (mnodeValue == null)
       return false;
+    
+    CacheEngine engine = _cacheEngine;
 
-    getClusterBacking().putCluster(key, mnodeUpdate, mnodeValue);
+    if (engine != null)
+      engine.putCluster(key, mnodeUpdate, mnodeValue);
 
     return true;
   }
 
-  final E getLocalEntry(HashKey key)
+  final DistCacheEntry getLocalEntry(HashKey key)
   {
     if (key == null)
       throw new NullPointerException();
 
-    E entry = getCacheEntry(key);
+    DistCacheEntry entry = getCacheEntry(key);
 
     return entry;
   }
 
-  public final E loadLocalEntry(HashKey key)
+  public final DistCacheEntry loadLocalEntry(HashKey key)
   {
     if (key == null)
       throw new NullPointerException();
 
-    E entry = getCacheEntry(key);
+    DistCacheEntry entry = getCacheEntry(key);
 
     long now = Alarm.getCurrentTime();
 
@@ -714,9 +735,9 @@ abstract public class AbstractCacheEngine<E extends DistCacheEntry>
     return entry;
   }
 
-  public final E getLocalEntryAndUpdateIdle(HashKey key)
+  public final DistCacheEntry getLocalEntryAndUpdateIdle(HashKey key)
   {
-    E entry = getLocalEntry(key);
+    DistCacheEntry entry = getLocalEntry(key);
 
     MnodeEntry mnodeValue = entry.getMnodeEntry();
 
@@ -727,7 +748,8 @@ abstract public class AbstractCacheEngine<E extends DistCacheEntry>
     return entry;
   }
 
-  final protected void updateIdleTime(E entry, MnodeEntry mnodeValue)
+  final protected void updateIdleTime(DistCacheEntry entry,
+                                      MnodeEntry mnodeValue)
   {
     long idleTimeout = mnodeValue.getIdleTimeout();
     long updateTime = mnodeValue.getLastUpdateTime();
@@ -784,7 +806,7 @@ abstract public class AbstractCacheEngine<E extends DistCacheEntry>
    */
   final MnodeEntry putLocalValue(HashKey key, MnodeEntry mnodeValue)
   {
-    E entry = getCacheEntry(key);
+    DistCacheEntry entry = getCacheEntry(key);
 
     long timeout = 60000L;
 
@@ -811,7 +833,7 @@ abstract public class AbstractCacheEngine<E extends DistCacheEntry>
   /**
    * Sets a cache entry
    */
-  final MnodeEntry saveUpdateTime(E entryKey,
+  final MnodeEntry saveUpdateTime(DistCacheEntry entryKey,
                                   MnodeEntry mnodeValue)
   {
     MnodeEntry newEntryValue = saveLocalUpdateTime(entryKey, mnodeValue);
@@ -891,7 +913,7 @@ abstract public class AbstractCacheEngine<E extends DistCacheEntry>
   /**
    * Sets a cache entry
    */
-  public final boolean remove(E entry, CacheConfig config)
+  public final boolean remove(DistCacheEntry entry, CacheConfig config)
   {
     HashKey key = entry.getKeyHash();
 
@@ -921,7 +943,10 @@ abstract public class AbstractCacheEngine<E extends DistCacheEntry>
     if (mnodeEntry == null)
       return oldValueHash != null;
 
-    getClusterBacking().removeCluster(key, mnodeUpdate, mnodeEntry);
+    CacheEngine engine = _cacheEngine;
+    
+    if (engine != null)
+      engine.removeCluster(key, mnodeUpdate, mnodeEntry);
 
     return oldValueHash != null;
   }
@@ -929,10 +954,9 @@ abstract public class AbstractCacheEngine<E extends DistCacheEntry>
   /**
    * Sets a cache entry
    */
-  @Override
   public final boolean remove(HashKey key)
   {
-    E entry = getCacheEntry(key);
+    DistCacheEntry entry = getCacheEntry(key);
     MnodeEntry mnodeValue = entry.getMnodeEntry();
 
     HashKey oldValueHash = mnodeValue != null ? mnodeValue.getValueHashKey() : null;
@@ -955,8 +979,11 @@ abstract public class AbstractCacheEngine<E extends DistCacheEntry>
 
     if (mnodeValue == null)
       return oldValueHash != null;
+    
+    CacheEngine engine = _cacheEngine;
 
-    getClusterBacking().putCluster(key, null, mnodeValue);
+    if (engine != null)
+      engine.putCluster(key, null, mnodeValue);
 
     return oldValueHash != null;
   }
@@ -1071,7 +1098,6 @@ abstract public class AbstractCacheEngine<E extends DistCacheEntry>
   /**
    * Used by QA
    */
-  @Override
   final public byte[] calculateValueHash(Object value,
                                          CacheConfig config)
   {
@@ -1312,10 +1338,10 @@ abstract public class AbstractCacheEngine<E extends DistCacheEntry>
    */
   final public void clearLeases()
   {
-    Iterator<E> iter = _entryCache.values();
+    Iterator<DistCacheEntry> iter = _entryCache.values();
 
     while (iter.hasNext()) {
-      E entry = iter.next();
+      DistCacheEntry entry = iter.next();
 
       entry.clearLease();
     }
@@ -1328,7 +1354,6 @@ abstract public class AbstractCacheEngine<E extends DistCacheEntry>
   {
   }
   
-  @Override
   public void start()
   {
     _keyCache = new LruCache<CacheKey,HashKey>(64 * 1024);
@@ -1339,10 +1364,10 @@ abstract public class AbstractCacheEngine<E extends DistCacheEntry>
     if (getDataBacking() == null)
       throw new NullPointerException();
     
-    if (getClusterBacking() == null)
-      throw new NullPointerException();
-    
     _dataBacking.start();
+    
+    if (_cacheEngine != null)
+      _cacheEngine.start();
   }
 
   public void closeCache(String guid)
@@ -1390,19 +1415,17 @@ abstract public class AbstractCacheEngine<E extends DistCacheEntry>
   /**
    * Called when a cache initializes.
    */
-  @Override
   public void initCache(CacheImpl cache)
   {
-    throw new UnsupportedOperationException(getClass().getSimpleName());
+    // XXX: engine.initCache
   }
 
   /**
    * Called when a cache is removed.
    */
-  @Override
   public void destroyCache(CacheImpl cache)
   {
-    throw new UnsupportedOperationException(getClass().getSimpleName());
+    
   }
 
   /**
@@ -1440,7 +1463,6 @@ abstract public class AbstractCacheEngine<E extends DistCacheEntry>
   /**
    * Returns the key hash
    */
-  @Override
   public HashKey createSelfHashKey(Object key, CacheSerializer keySerializer)
   {
     try {
@@ -1462,7 +1484,6 @@ abstract public class AbstractCacheEngine<E extends DistCacheEntry>
   /**
    * Closes the manager.
    */
-  @Override
   public void close()
   {
     _isClosed = true;

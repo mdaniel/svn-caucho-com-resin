@@ -37,13 +37,15 @@ import java.util.concurrent.atomic.AtomicReference;
 
 import com.caucho.cloud.topology.TriadOwner;
 import com.caucho.distcache.ExtCacheEntry;
+import com.caucho.util.Alarm;
 import com.caucho.util.HashKey;
 import com.caucho.util.Hex;
 
 /**
  * An entry in the cache map
  */
-abstract public class DistCacheEntry implements ExtCacheEntry {
+public class DistCacheEntry implements ExtCacheEntry {
+  private final CacheService _engine;
   private final HashKey _keyHash;
 
   private final TriadOwner _owner;
@@ -55,20 +57,24 @@ abstract public class DistCacheEntry implements ExtCacheEntry {
   private final AtomicReference<MnodeEntry> _mnodeValue
     = new AtomicReference<MnodeEntry>(MnodeEntry.NULL);
 
-  public DistCacheEntry(Object key,
+  public DistCacheEntry(CacheService engine,
+                        Object key,
                         HashKey keyHash,
                         TriadOwner owner)
   {
+    _engine = engine;
     _key = key;
     _keyHash = keyHash;
     _owner = owner;
   }
 
-  public DistCacheEntry(Object key,
+  public DistCacheEntry(CacheService engine,
+                        Object key,
                         HashKey keyHash,
                         TriadOwner owner,
                         CacheConfig config)
   {
+    _engine = engine;
     _key = key;
     _keyHash = keyHash;
     _owner = owner;
@@ -144,86 +150,116 @@ abstract public class DistCacheEntry implements ExtCacheEntry {
    */
   public Object peek()
   {
-    return getMnodeEntry().getValue();
+    MnodeEntry entry = getMnodeEntry();
+    
+    if (entry != null)
+      return entry.getValue();
+    else
+      return null;
   }
 
   /**
-   * Returns the object, checking the backing store if necessary.
+   * Returns the object for the given key, checking the backing if necessary.
+   * If it is not found, the optional cacheLoader is invoked, if present.
    */
-  abstract public Object get(CacheConfig config);
-
-  /**
-   * Returns the object, updating the backing store if necessary.
-   */
-  /*
-  public Object getLazy(CacheConfig config)
+  public Object get(CacheConfig config)
   {
-    return get(config);
+    long now = Alarm.getCurrentTime();
+
+    return _engine.get(this, config, now);
   }
-  */
+
+  /**
+   * Returns the object for the given key, checking the backing if necessary
+   */
+  public MnodeEntry getMnodeValue(CacheConfig config)
+  {
+    long now = Alarm.getCurrentTime();
+
+    return _engine.getMnodeValue(this, config, now); // , false);
+  }
 
   /**
    * Fills the value with a stream
    */
-  abstract public boolean getStream(OutputStream os, CacheConfig config)
-    throws IOException;
-
-
-  /**
-   * Returns the current value.
-   */
-  public MnodeEntry getMnodeValue(CacheConfig config)
+  public boolean getStream(OutputStream os, CacheConfig config)
+    throws IOException
   {
-    return getMnodeEntry();
+    return _engine.getStream(this, os, config);
   }
-  
+
+  public HashKey getValueHash(Object value, CacheConfig config)
+  {
+    return _engine.getValueHash(value, config).getValue();
+  }
+ 
   /**
-   * Returns the hash of a value
+   * Sets the current value
    */
-  abstract public HashKey getValueHash(Object value, CacheConfig config);
+  public void put(Object value, CacheConfig config)
+  {
+    _engine.put(this, value, config);
+  }
 
   /**
    * Sets the value by an input stream
    */
-  abstract public void put(Object value, CacheConfig config);
+  public ExtCacheEntry put(InputStream is,
+                           CacheConfig config,
+                           long idleTimeout)
+    throws IOException
+  {
+    return _engine.putStream(this, is, config, idleTimeout, 0);
+  }
 
   /**
    * Sets the value by an input stream
    */
-  abstract public Object getAndPut(Object value, CacheConfig config);
+  public ExtCacheEntry put(InputStream is,
+                           CacheConfig config,
+                           long idleTimeout,
+                           int flags)
+    throws IOException
+  {
+    return _engine.putStream(this, is, config, idleTimeout, flags);
+  }
 
   /**
-   * Sets the value by an input stream
+   * Sets the current value
    */
-  abstract public ExtCacheEntry put(InputStream is,
-                                    CacheConfig config,
-                                    long idleTimeout)
-    throws IOException;
+  public Object getAndPut(Object value, CacheConfig config)
+  {
+    return _engine.getAndPut(this, value, config);
+  }
 
   /**
-   * Sets the value by an input stream
+   * Sets the current value
    */
-  abstract public ExtCacheEntry put(InputStream is,
-                                    CacheConfig config,
-                                    long idleTimeout,
-                                    int flags)
-    throws IOException;
+  public HashKey compareAndPut(HashKey testValue, 
+                               Object value, 
+                               CacheConfig config)
+  {
+    return _engine.compareAndPut(this, testValue, value, config);
+  }
 
   /**
-   * Sets the value by an input stream
+   * Sets the current value
    */
-  abstract public boolean compareAndPut(long version, 
-                                        HashKey value,
-                                        long valueLength,
-                                        CacheConfig config);
+  public boolean compareAndPut(long version,
+                               HashKey value,
+                               long valueLength,
+                               CacheConfig config)
+  {
+    return _engine.compareAndPut(this, version, value, valueLength, config);
+  }
 
-  abstract public HashKey compareAndPut(HashKey testValueHash,
-                                        Object value,
-                                        CacheConfig config);
   /**
    * Remove the value
    */
-  abstract public boolean remove(CacheConfig config);
+  public boolean remove(CacheConfig config)
+  {
+    return _engine.remove(this, config);
+  }
 
   /**
    * Conditionally starts an update of a cache item, allowing only a
@@ -352,6 +388,7 @@ abstract public class DistCacheEntry implements ExtCacheEntry {
     return 0;
   }
 
+  @Override
   public String toString()
   {
     return (getClass().getSimpleName()
