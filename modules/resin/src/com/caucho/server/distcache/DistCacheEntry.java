@@ -33,6 +33,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.util.concurrent.atomic.AtomicBoolean;
+import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.atomic.AtomicReference;
 
 import com.caucho.cloud.topology.TriadOwner;
@@ -56,6 +57,8 @@ public class DistCacheEntry implements ExtCacheEntry {
 
   private final AtomicReference<MnodeEntry> _mnodeValue
     = new AtomicReference<MnodeEntry>(MnodeEntry.NULL);
+  
+  private final AtomicInteger _loadCount = new AtomicInteger();
 
   public DistCacheEntry(CacheService engine,
                         Object key,
@@ -382,10 +385,15 @@ public class DistCacheEntry implements ExtCacheEntry {
   // statistics
   //
   
+  public void addLoadCount()
+  {
+    _loadCount.incrementAndGet();
+  }
+  
   @Override
   public int getLoadCount()
   {
-    return 0;
+    return _loadCount.get();
   }
 
   @Override

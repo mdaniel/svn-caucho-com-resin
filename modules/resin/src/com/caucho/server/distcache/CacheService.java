@@ -97,7 +97,7 @@ public final class CacheService
   
   private boolean _isClosed;
   
-  private CacheEngine _cacheEngine;
+  private CacheEngine _cacheEngine = new AbstractCacheEngine();
   
   public CacheService(ResinSystem resinSystem)
   {
@@ -316,7 +316,7 @@ public final class CacheService
                                      MnodeEntry mnodeValue,
                                      long now)
   {
-    return ! mnodeValue.isEntryExpired(now);
+    return _cacheEngine.isLocalReadValid(config, mnodeValue, now);
   }
 
   private void updateAccessTime(DistCacheEntry entry,
@@ -343,12 +343,11 @@ public final class CacheService
   {
     MnodeEntry mnodeValue;
     
-    CacheEngine engine = _cacheEngine;
+    mnodeValue = _cacheEngine.loadClusterValue(entry, config);
     
-    if (engine != null)
-      mnodeValue = engine.loadClusterValue(entry, config);
-    else
-      mnodeValue = null;
+    if (mnodeValue != null) {
+      entry.addLoadCount();
+    }
     
     if (mnodeValue == null || mnodeValue.isEntryExpired(now)) {
       CacheLoader loader = config.getCacheLoader();
@@ -432,10 +431,7 @@ public final class CacheService
     if (mnodeValue == null)
       return;
 
-    CacheEngine engine = _cacheEngine;
-    
-    if (engine != null)
-      engine.putCluster(key, mnodeUpdate, mnodeValue);
+    _cacheEngine.putCluster(key, mnodeUpdate, mnodeValue);
 
     return;
   }
@@ -488,10 +484,7 @@ public final class CacheService
     if (mnodeValue == null)
       return null;
     
-    CacheEngine engine = _cacheEngine;
-
-    if (engine != null)
-      engine.putCluster(key, mnodeUpdate, mnodeValue);
+    _cacheEngine.putCluster(key, mnodeUpdate, mnodeValue);
 
     return mnodeValue;
   }
@@ -563,7 +556,8 @@ public final class CacheService
                               long leaseTimeout,
                               int leaseOwner)
   {
-    return _cacheEngine.getAndPut(mnodeUpdate, value, leaseTimeout, leaseOwner);
+    return _cacheEngine.getAndPut(entry, mnodeUpdate, value,
+                                  leaseTimeout, leaseOwner);
   }
   
   public HashKey getAndPutLocal(DistCacheEntry entry,
@@ -612,7 +606,7 @@ public final class CacheService
                                   Object value,
                                   CacheConfig config)
   {
-    return _cacheEngine.compareAndPut(testValue, mnodeUpdate, value, config);
+    return _cacheEngine.compareAndPut(entry, testValue, mnodeUpdate, value, config);
   }
   
   public final HashKey compareAndPutLocal(DistCacheEntry entry,
@@ -700,10 +694,7 @@ public final class CacheService
     if (mnodeValue == null)
       return false;
     
-    CacheEngine engine = _cacheEngine;
-
-    if (engine != null)
-      engine.putCluster(key, mnodeUpdate, mnodeValue);
+    _cacheEngine.putCluster(key, mnodeUpdate, mnodeValue);
 
     return true;
   }
@@ -943,10 +934,7 @@ public final class CacheService
     if (mnodeEntry == null)
       return oldValueHash != null;
 
-    CacheEngine engine = _cacheEngine;
-    
-    if (engine != null)
-      engine.removeCluster(key, mnodeUpdate, mnodeEntry);
+    _cacheEngine.removeCluster(key, mnodeUpdate, mnodeEntry);
 
     return oldValueHash != null;
   }
@@ -980,10 +968,7 @@ public final class CacheService
     if (mnodeValue == null)
       return oldValueHash != null;
     
-    CacheEngine engine = _cacheEngine;
-
-    if (engine != null)
-      engine.putCluster(key, null, mnodeValue);
+    _cacheEngine.putCluster(key, null, mnodeValue);
 
     return oldValueHash != null;
   }
@@ -1329,8 +1314,7 @@ public final class CacheService
    */
   protected boolean loadClusterData(HashKey valueKey, int flags)
   {
-    // _cacheService.requestData(valueKey, flags);
-    return true;
+    return _cacheEngine.loadClusterData(valueKey, flags);
   }
 
   /**
@@ -1366,8 +1350,7 @@ public final class CacheService
     
     _dataBacking.start();
     
-    if (_cacheEngine != null)
-      _cacheEngine.start();
+    _cacheEngine.start();
   }
 
   public void closeCache(String guid)

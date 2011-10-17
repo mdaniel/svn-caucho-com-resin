@@ -212,8 +212,15 @@ public class TcpSocketLinkListener
     }
     
     _launcher = new SocketLinkThreadLauncher(this);
-    _launcher.setIdleMin(ACCEPT_IDLE_MIN);
-    _launcher.setIdleMax(ACCEPT_IDLE_MAX);
+    
+    if (Alarm.isTest()) {
+      _launcher.setIdleMin(2);
+      _launcher.setIdleMax(ACCEPT_IDLE_MAX);
+    }
+    else {
+      _launcher.setIdleMin(ACCEPT_IDLE_MIN);
+      _launcher.setIdleMax(ACCEPT_IDLE_MAX);
+    }
     
     _launcher.setThrottleLimit(ACCEPT_THROTTLE_LIMIT);
     _launcher.setThrottleSleepTime(ACCEPT_THROTTLE_SLEEP_TIME);

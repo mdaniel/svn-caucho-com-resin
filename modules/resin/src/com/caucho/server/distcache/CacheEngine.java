@@ -64,7 +64,7 @@ public interface CacheEngine
   /**
    * Gets a cache key entry
    */
-  public DistCacheEntry getCacheEntry(Object key, CacheConfig config);
+  // public DistCacheEntry getCacheEntry(Object key, CacheConfig config);
 
   /**
    * Gets a cache key entry
@@ -103,26 +103,6 @@ public interface CacheEngine
    * Closes the manager
    */
   public void close();
-
-  /**
-   * @param mnodeUpdate
-   * @param value
-   * @param leaseTimeout
-   * @param leaseOwner
-   * @return
-   */
-  public HashKey getAndPut(MnodeUpdate mnodeUpdate, Object value,
-                           long leaseTimeout, int leaseOwner);
-
-  /**
-   * @param testValue
-   * @param mnodeUpdate
-   * @param value
-   * @param config
-   * @return
-   */
-  public HashKey compareAndPut(HashKey testValue, MnodeUpdate mnodeUpdate,
-                               Object value, CacheConfig config);
 
   /**
    * @param config
