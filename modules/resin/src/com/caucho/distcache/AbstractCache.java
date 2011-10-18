@@ -146,41 +146,10 @@ public class AbstractCache
   {
     _config.setValueSerializer(serializer);
   }
-
-  /**
-   * Sets the backup mode.  If backups are enabled, copies of the
-   * cache item will be sent to the owning triad server.
-   * <p/>
-   * Defaults to true.
-   */
-  @Configurable
-  public void setBackup(boolean isBackup)
+  
+  public void setEngine(CacheEngine engine)
   {
-    _config.setBackup(isBackup);
-  }
-
-  /**
-   * Sets the global mode.  If global is enabled, copies of the
-   * cache item will be sent to all clusters
-   * <p/>
-   * Defaults to false.
-   */
-  @Configurable
-  public void setGlobal(boolean isGlobal)
-  {
-    _config.setGlobal(isGlobal);
-  }
-
-  /**
-   * Sets the triplicate backup mode.  If triplicate backups is set,
-   * all triad servers have a copy of the cache item.
-   * <p/>
-   * Defaults to true.
-   */
-  @Configurable
-  public void setTriplicate(boolean isTriplicate)
-  {
-    _config.setTriplicate(isTriplicate);
+    _config.setEngine(engine);
   }
 
   /**

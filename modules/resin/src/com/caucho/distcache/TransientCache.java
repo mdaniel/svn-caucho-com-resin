@@ -41,8 +41,7 @@ public class TransientCache extends AbstractCache
 {
   public TransientCache()
   {
-    setPersistenceMode(Persistence.NONE);
-    setScopeMode(Scope.SERVER);
+    setScopeMode(Scope.TRANSIENT);
   }
 
   public TransientCache(String name)

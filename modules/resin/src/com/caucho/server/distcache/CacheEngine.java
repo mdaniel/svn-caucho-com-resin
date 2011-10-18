@@ -29,12 +29,6 @@
 
 package com.caucho.server.distcache;
 
-import java.io.IOException;
-import java.io.InputStream;
-
-import com.caucho.distcache.CacheSerializer;
-import com.caucho.distcache.ExtCacheEntry;
-import com.caucho.env.distcache.CacheDataBacking;
 import com.caucho.util.HashKey;
 
 /**
@@ -47,132 +41,36 @@ public interface CacheEngine
    */
   public void start();
 
-  /**
-   * Called when a cache initializes.
-   */
   public void initCache(CacheImpl cache);
 
-  /**
-   * Called when a cache is removed.
-   */
-  public void destroyCache(CacheImpl cache);
-
-  public void closeCache(String name);
+  public boolean isLocalReadValid(CacheConfig config,
+                                  HashKey key,
+                                  MnodeEntry mnodeEntry, 
+                                  long now);
   
-  public HashKey createSelfHashKey(Object key, CacheSerializer keySerializer);
-
-  /**
-   * Gets a cache key entry
-   */
-  // public DistCacheEntry getCacheEntry(Object key, CacheConfig config);
-
-  /**
-   * Gets a cache key entry
-   */
-  public DistCacheEntry getCacheEntry(HashKey key, CacheConfig config);
-
-  /**
-   * Sets a cache entry
-   */
-  public void put(HashKey hashKey,
-                  Object value,
-                  CacheConfig config);
-
-  /**
-   * Sets a cache entry
-   */
-  public ExtCacheEntry put(HashKey hashKey,
-                           InputStream is,
-                           CacheConfig config,
-                           long idleTimeout)
-    throws IOException;
-
-  /**
-   * Removes a cache entry
-   */
-  public boolean remove(HashKey hashKey);
-
-  public CacheDataBacking getDataBacking();
+  public MnodeEntry get(DistCacheEntry entry, CacheConfig config);
   
-  /**
-   * For QA
-   */
-  public byte[] calculateValueHash(Object value, CacheConfig config);
-  
-  /**
-   * Closes the manager
-   */
-  public void close();
+  public boolean loadData(HashKey valueKey, int flags);
 
-  /**
-   * @param config
-   * @param mnodeEntry
-   * @param now
-   * @return
-   */
-  boolean isLocalReadValid(CacheConfig config, MnodeEntry mnodeEntry, long now);
+  public void put(HashKey key, 
+                  MnodeUpdate mnodeUpdate,
+                  MnodeEntry mnodeValue);
 
-  /**
-   * @param key
-   * @param mnodeValue
-   */
-  void updateCacheTime(HashKey key, MnodeEntry mnodeValue);
+  public void updateTime(HashKey key, MnodeEntry mnodeValue);
 
-  /**
-   * @param valueKey
-   * @param flags
-   * @return
-   */
-  boolean loadClusterData(HashKey valueKey, int flags);
+  public void remove(HashKey key, 
+                     MnodeUpdate mnodeUpdate,
+                     MnodeEntry mnodeEntry);
 
-  /**
-   * @param entry
-   * @param mnodeUpdate
-   * @param value
-   * @param leaseTimeout
-   * @param leaseOwner
-   * @return
-   */
-  HashKey getAndPut(DistCacheEntry entry, MnodeUpdate mnodeUpdate,
-                    Object value, long leaseTimeout, int leaseOwner);
+  public HashKey getAndPut(DistCacheEntry entry, 
+                           MnodeUpdate mnodeUpdate,
+                           Object value, 
+                           long leaseTimeout, 
+                           int leaseOwner);
 
-  /**
-   * @param entry
-   * @param testValue
-   * @param mnodeUpdate
-   * @param value
-   * @param config
-   * @return
-   */
-  HashKey compareAndPut(DistCacheEntry entry, HashKey testValue,
-                        MnodeUpdate mnodeUpdate, Object value,
-                        CacheConfig config);
-
-  /**
-   * @return
-   */
-  CacheDataBacking createDataBacking();
-
-  /**
-   * @param entry
-   * @param config
-   * @return
-   */
-  public MnodeEntry loadClusterValue(DistCacheEntry entry, CacheConfig config);
-
-  /**
-   * @param key
-   * @param mnodeUpdate
-   * @param mnodeValue
-   */
-  public void putCluster(HashKey key, MnodeUpdate mnodeUpdate,
-                         MnodeEntry mnodeValue);
-
-  /**
-   * @param key
-   * @param mnodeUpdate
-   * @param mnodeEntry
-   */
-  public void removeCluster(HashKey key, MnodeUpdate mnodeUpdate,
-                            MnodeEntry mnodeEntry);
+  public HashKey compareAndPut(DistCacheEntry entry, 
+                               HashKey testValue,
+                               MnodeUpdate mnodeUpdate, 
+                               Object value,
+                               CacheConfig config);
 }

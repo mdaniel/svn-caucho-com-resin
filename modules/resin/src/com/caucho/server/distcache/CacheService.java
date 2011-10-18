@@ -39,8 +39,6 @@ import java.util.Iterator;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.logging.Level;
 import java.util.logging.Logger;
-import java.util.zip.DeflaterOutputStream;
-import java.util.zip.InflaterInputStream;
 
 import javax.cache.CacheLoader;
 
@@ -48,18 +46,15 @@ import com.caucho.cloud.topology.TriadOwner;
 import com.caucho.db.blob.BlobInputStream;
 import com.caucho.distcache.CacheSerializer;
 import com.caucho.distcache.ExtCacheEntry;
-import com.caucho.env.distcache.AbstractCacheClusterBacking;
-import com.caucho.env.distcache.CacheClusterBacking;
 import com.caucho.env.distcache.CacheDataBacking;
 import com.caucho.env.service.ResinSystem;
 import com.caucho.inject.Module;
 import com.caucho.util.Alarm;
 import com.caucho.util.FreeList;
-import com.caucho.util.NullOutputStream;
-import com.caucho.util.ResinDeflaterOutputStream;
 import com.caucho.util.HashKey;
 import com.caucho.util.L10N;
 import com.caucho.util.LruCache;
+import com.caucho.util.NullOutputStream;
 import com.caucho.util.Sha256OutputStream;
 import com.caucho.vfs.StreamSource;
 import com.caucho.vfs.TempOutputStream;
@@ -85,7 +80,7 @@ public final class CacheService
   
   private LruCache<CacheKey,HashKey> _keyCache;
   
-  private CacheDataBacking _dataBacking;
+  private CacheDataBackingImpl _dataBacking;
   
   private ConcurrentHashMap<HashKey,CacheMnodeListener> _cacheListenMap
     = new ConcurrentHashMap<HashKey,CacheMnodeListener>();
@@ -107,17 +102,20 @@ public final class CacheService
 
   public void setCacheEngine(CacheEngine cacheEngine)
   {
+    if (cacheEngine == null)
+      throw new NullPointerException();
+    
     _cacheEngine = cacheEngine;
+  }
+  
+  public CacheEngine getCacheEngine()
+  {
+    return _cacheEngine;
   }
   
   public CacheDataBacking getDataBacking()
   {
     return _dataBacking;
-  }
-  
-  public CacheDataBacking createDataBacking()
-  {
-    return new CacheDataBackingImpl();
   }
   
   public void addCacheListener(HashKey cacheKey, CacheMnodeListener listener)
@@ -213,8 +211,8 @@ public final class CacheService
     updateAccessTime(entry, mnodeValue, now);
 
     value = readData(valueHash,
-                     config.getFlags(),
-                     config.getValueSerializer());
+                     config.getValueSerializer(),
+                     config);
     
     if (value == null) {
       // Recovery from dropped or corrupted data
@@ -250,7 +248,7 @@ public final class CacheService
     if (valueHash == null || valueHash == HashManager.NULL)
       return false;
 
-    boolean isData = readData(mnodeValue, config.getFlags(), os);
+    boolean isData = readData(mnodeValue, os, config);
     
     if (! isData) {
       log.warning("Missing or corrupted data for getStream " + mnodeValue
@@ -272,7 +270,7 @@ public final class CacheService
     if (mnodeValue == null) {
       reloadValue(entry, config, now);
     }
-    else if (isLocalReadValid(config, mnodeValue, now)) {
+    else if (isLocalReadValid(config, entry.getKeyHash(), mnodeValue, now)) {
     }
     else { // if (! isLazy) {
       reloadValue(entry, config, now);
@@ -313,10 +311,11 @@ public final class CacheService
   }
 
   protected boolean isLocalReadValid(CacheConfig config,
+                                     HashKey key,
                                      MnodeEntry mnodeValue,
                                      long now)
   {
-    return _cacheEngine.isLocalReadValid(config, mnodeValue, now);
+    return config.getEngine().isLocalReadValid(config, key, mnodeValue, now);
   }
 
   private void updateAccessTime(DistCacheEntry entry,
@@ -343,7 +342,7 @@ public final class CacheService
   {
     MnodeEntry mnodeValue;
     
-    mnodeValue = _cacheEngine.loadClusterValue(entry, config);
+    mnodeValue = config.getEngine().get(entry, config);
     
     if (mnodeValue != null) {
       entry.addLoadCount();
@@ -431,7 +430,7 @@ public final class CacheService
     if (mnodeValue == null)
       return;
 
-    _cacheEngine.putCluster(key, mnodeUpdate, mnodeValue);
+    config.getEngine().put(key, mnodeUpdate, mnodeValue);
 
     return;
   }
@@ -484,7 +483,7 @@ public final class CacheService
     if (mnodeValue == null)
       return null;
     
-    _cacheEngine.putCluster(key, mnodeUpdate, mnodeValue);
+    config.getEngine().put(key, mnodeUpdate, mnodeValue);
 
     return mnodeValue;
   }
@@ -532,7 +531,8 @@ public final class CacheService
     HashKey oldHash = getAndPut(entry, 
                                 mnodeUpdate, value,
                                 config.getLeaseTimeout(),
-                                leaseOwner);
+                                leaseOwner,
+                                config);
 
     if (oldHash == null)
       return null;
@@ -541,8 +541,8 @@ public final class CacheService
       return oldValue;
     
     oldValue = readData(oldHash,
-                        config.getFlags(),
-                        config.getValueSerializer());
+                        config.getValueSerializer(),
+                        config);
 
     return oldValue;
   }
@@ -554,10 +554,11 @@ public final class CacheService
                               MnodeUpdate mnodeUpdate,
                               Object value,
                               long leaseTimeout,
-                              int leaseOwner)
+                              int leaseOwner,
+                              CacheConfig config)
   {
-    return _cacheEngine.getAndPut(entry, mnodeUpdate, value,
-                                  leaseTimeout, leaseOwner);
+    return config.getEngine().getAndPut(entry, mnodeUpdate, value,
+                                        leaseTimeout, leaseOwner);
   }
   
   public HashKey getAndPutLocal(DistCacheEntry entry,
@@ -606,7 +607,9 @@ public final class CacheService
                                   Object value,
                                   CacheConfig config)
   {
-    return _cacheEngine.compareAndPut(entry, testValue, mnodeUpdate, value, config);
+    CacheEngine engine = config.getEngine();
+    
+    return engine.compareAndPut(entry, testValue, mnodeUpdate, value, config);
   }
   
   public final HashKey compareAndPutLocal(DistCacheEntry entry,
@@ -694,7 +697,7 @@ public final class CacheService
     if (mnodeValue == null)
       return false;
     
-    _cacheEngine.putCluster(key, mnodeUpdate, mnodeValue);
+    config.getEngine().put(key, mnodeUpdate, mnodeValue);
 
     return true;
   }
@@ -809,7 +812,6 @@ public final class CacheService
 
     // the failure cases are not errors because this put() could
     // be immediately followed by an overwriting put()
-
     if (! entry.compareAndSet(oldEntryValue, mnodeValue)) {
       log.fine(this + " mnodeValue update failed due to timing conflict"
         + " (key=" + key + ")");
@@ -934,7 +936,7 @@ public final class CacheService
     if (mnodeEntry == null)
       return oldValueHash != null;
 
-    _cacheEngine.removeCluster(key, mnodeUpdate, mnodeEntry);
+    config.getEngine().remove(key, mnodeUpdate, mnodeEntry);
 
     return oldValueHash != null;
   }
@@ -942,7 +944,7 @@ public final class CacheService
   /**
    * Sets a cache entry
    */
-  public final boolean remove(HashKey key)
+  public final boolean remove(HashKey key, CacheConfig config)
   {
     DistCacheEntry entry = getCacheEntry(key);
     MnodeEntry mnodeValue = entry.getMnodeEntry();
@@ -968,7 +970,7 @@ public final class CacheService
     if (mnodeValue == null)
       return oldValueHash != null;
     
-    _cacheEngine.putCluster(key, null, mnodeValue);
+    config.getEngine().put(key, null, mnodeValue);
 
     return oldValueHash != null;
   }
@@ -1025,7 +1027,7 @@ public final class CacheService
                                   true,
                                   false);
     } while (! entry.compareAndSet(oldEntryValue, mnodeValue));
-    
+
     //MnodeValue newValue
     getDataBacking().putLocalValue(mnodeValue, key,  
                                    oldEntryValue,
@@ -1118,8 +1120,8 @@ public final class CacheService
     return hash;
   }
 
-  final protected DataItem writeData(HashKey oldValueHash,
-                                     InputStream is)
+  final public DataItem writeData(HashKey oldValueHash,
+                                  InputStream is)
     throws IOException
   {
     TempOutputStream os = null;
@@ -1165,8 +1167,8 @@ public final class CacheService
   }
 
   final protected Object readData(HashKey valueKey,
-                                  int flags,
-                                  CacheSerializer serializer)
+                                  CacheSerializer serializer,
+                                  CacheConfig config)
   {
     if (valueKey == null || valueKey == HashManager.NULL)
       return null;
@@ -1179,7 +1181,7 @@ public final class CacheService
       WriteStream out = Vfs.openWrite(os);
 
       if (! getDataBacking().loadData(valueKey, out)) {
-        if (! loadClusterData(valueKey, flags)) {
+        if (! loadClusterData(valueKey, config)) {
           log.warning(this + " cannot load data for " + valueKey + " from triad");
           
           out.close();
@@ -1221,8 +1223,8 @@ public final class CacheService
   }
 
   final protected boolean readData(MnodeEntry mnodeValue,
-                                   int flags,
-                                   OutputStream os)
+                                   OutputStream os,
+                                   CacheConfig config)
     throws IOException
   {
     HashKey valueKey = mnodeValue.getValueHashKey();
@@ -1248,7 +1250,7 @@ public final class CacheService
         return true;
       }
 
-      if (! loadClusterData(valueKey, flags)) {
+      if (! loadClusterData(valueKey, config)) {
         log.warning(this + " cannot load cluster value " + valueKey);
 
         // XXX: error?  since we have the value key, it should exist
@@ -1312,9 +1314,10 @@ public final class CacheService
   /**
    * Load the cluster data from the triad.
    */
-  protected boolean loadClusterData(HashKey valueKey, int flags)
+  protected boolean loadClusterData(HashKey valueKey, 
+                                    CacheConfig config)
   {
-    return _cacheEngine.loadClusterData(valueKey, flags);
+    return config.getEngine().loadData(valueKey, config.getFlags());
   }
 
   /**
@@ -1343,7 +1346,7 @@ public final class CacheService
     _keyCache = new LruCache<CacheKey,HashKey>(64 * 1024);
     
     if (_dataBacking == null)
-      _dataBacking = createDataBacking();
+      _dataBacking = new CacheDataBackingImpl();
     
     if (getDataBacking() == null)
       throw new NullPointerException();

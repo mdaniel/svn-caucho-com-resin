@@ -211,6 +211,7 @@ public class MnodeStore implements AlarmListener {
     _updatesSinceQuery = ("SELECT id,value,value_length,cache_id,flags,item_version,update_time,expire_timeout,idle_timeout"
                           + " FROM " + _tableName
                           + " WHERE ? <= update_time"
+                          + "   AND bitand(flags, " + CacheConfig.FLAG_TRIPLICATE + ") <> 0"
                           + " LIMIT 1024");
 
     _remoteUpdatesSinceQuery = ("SELECT id,value,value_length,cache_id,flags,item_version,update_time,expire_timeout,idle_timeout"

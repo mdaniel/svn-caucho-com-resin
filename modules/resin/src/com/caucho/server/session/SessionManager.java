@@ -54,6 +54,7 @@ import com.caucho.distcache.AbstractCache;
 import com.caucho.distcache.ByteStreamCache;
 import com.caucho.distcache.ClusterCache;
 import com.caucho.distcache.ExtCacheEntry;
+import com.caucho.distcache.ResinCacheBuilder.Scope;
 import com.caucho.env.meter.AverageSensor;
 import com.caucho.env.meter.MeterService;
 import com.caucho.hessian.io.HessianDebugInputStream;
@@ -1108,8 +1109,16 @@ public final class SessionManager implements SessionCookieConfig, AlarmListener
       AbstractCache cacheBuilder = new ClusterCache();
 
       cacheBuilder.setName("resin:session");
-      cacheBuilder.setBackup(_isSaveBackup);
-      cacheBuilder.setTriplicate(_isSaveTriplicate);
+      if (_isSaveTriplicate)
+        cacheBuilder.setScopeMode(Scope.CLUSTER);
+      else
+        cacheBuilder.setScopeMode(Scope.LOCAL);
+      /*
+      else if (_isSaveBackup)
+        cacheBuilder.setScopeMode(Scope.CLUSTER_BACKUP);
+      else
+        cacheBuilder.setScopeMode(Scope.CLUSTER_SINGLE);
+        */
         
       if (isAlwaysLoadSession())
         cacheBuilder.setLocalReadTimeoutMillis(20);

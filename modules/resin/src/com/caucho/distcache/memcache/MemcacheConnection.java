@@ -346,8 +346,7 @@ public class MemcacheConnection implements ProtocolConnection
       
       cache.put(key, setIs, timeout, flags);
       
-      WriteStream out = conn.getWriteStream();
-      out.setDisableClose(true);
+      ExtCacheEntry entry = cache.peekExtCacheEntry(key);
 
       return true;
     }
@@ -581,16 +580,8 @@ public class MemcacheConnection implements ProtocolConnection
       throws IOException
     {
       ExtCacheEntry entry = cache.getExtCacheEntry(key);
-      
-      if (entry == null || entry.isValueNull()) {
-        return;
-      }
-      
-      long lastUpdateTime = entry.getLastUpdateTime();
-      long idleTimeout = entry.getIdleTimeout();
-      long now = Alarm.getCurrentTime();
 
-      if (lastUpdateTime + idleTimeout < now) {
+      if (entry == null || entry.isValueNull()) {
         return;
       }
       
@@ -615,12 +606,10 @@ public class MemcacheConnection implements ProtocolConnection
       out.print(unique);
       out.print("\r\n");
 
-      GetOutputStream gOut = conn.getGetOutputStream();
-
-      gOut.init(out);
-      cache.get(key, gOut);
+      cache.loadData(valueKey, out);
 
       out.print("\r\n");
+      out.flush();
     }
   }
   

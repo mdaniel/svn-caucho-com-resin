@@ -235,15 +235,19 @@ public class DataStore {
 
         if (is == null)
           return false;
-
+        
+        long startPosition = os.getPosition();
+        
         try {
           os.writeStream(is);
         } finally {
           is.close();
         }
 
-        if (log.isLoggable(Level.FINER))
-          log.finer(this + " load " + id + " length:" + os.getPosition());
+        if (log.isLoggable(Level.FINER)) {
+          log.finer(this + " load " + id
+                    + " length:" + (os.getPosition() - startPosition));
+        }
 
         return true;
       }

@@ -50,13 +50,16 @@ import javax.cache.event.CacheEntryListener;
 import javax.cache.event.NotificationScope;
 
 import com.caucho.distcache.ExtCacheEntry;
-import com.caucho.distcache.FileCache;
+import com.caucho.distcache.LocalCache;
 import com.caucho.hessian.io.Hessian2Input;
 import com.caucho.hessian.io.Hessian2Output;
 import com.caucho.network.balance.ClientSocket;
 import com.caucho.network.balance.ClientSocketFactory;
+import com.caucho.server.distcache.CacheConfig;
 import com.caucho.server.distcache.CacheImpl;
+import com.caucho.server.distcache.DistCacheEntry;
 import com.caucho.server.distcache.DistCacheSystem;
+import com.caucho.server.distcache.MnodeUpdate;
 import com.caucho.util.Alarm;
 import com.caucho.util.CharBuffer;
 import com.caucho.util.HashKey;
@@ -74,12 +77,36 @@ public class MemcacheClient implements Cache
   
   private ClientSocketFactory _factory;
   
+  private String _name;
+  
   private CharBuffer _cb = new CharBuffer();
   private Hessian2Input _hIn = new Hessian2Input();
   
   private Boolean _isResin;
+  
   private AtomicReference<CacheImpl> _localCache
     = new AtomicReference<CacheImpl>();
+  
+  private MemcacheCacheEngine _cacheEngine;
+  
+  public MemcacheClient()
+  {
+    _name = "default";
+    
+    DistCacheSystem cacheSystem = DistCacheSystem.getCurrent();
+    
+    if (cacheSystem != null) {
+      _cacheEngine = new MemcacheCacheEngine(cacheSystem.getDistCacheManager(),
+                                             this);
+    }
+  }
+  
+  public MemcacheClient(String name)
+  {
+    this();
+    
+    _name = name;
+  }
   
   public void addServer(String address, int port)
   {
@@ -89,9 +116,6 @@ public class MemcacheClient implements Cache
     _factory.init();
   }
 
-  /* (non-Javadoc)
-   * @see javax.cache.Cache#containsKey(java.lang.Object)
-   */
   @Override
   public boolean containsKey(Object key) throws CacheException
   {
@@ -107,15 +131,21 @@ public class MemcacheClient implements Cache
     boolean isResin = _isResin != null && _isResin;
     
     if (! isResin)
-      return getImpl(key);
-    
-    Object value;
+      return getImpl(String.valueOf(key));
     
     CacheImpl cache = getLocalCache();
+    
+    return cache.get(key);
+  }
+  
+  private Object foo(CacheImpl cache, Object key)
+  {
+    Object value;
+    
     ExtCacheEntry extValue = cache.getExtCacheEntry(key);
     
     if (extValue == null || extValue.isValueNull()) {
-      value = getImpl(key);
+      value = getImpl(String.valueOf(key));
       
       cache.put(key, value);
       
@@ -133,14 +163,14 @@ public class MemcacheClient implements Cache
     
     long casKey = getCasKey(extValue.getValueHashKey());
     
-    value = getResinImpl(key, casKey, value);
+    // value = getResinImpl(key, casKey, value);
     
     cache.put(key, value);
     
     return value;
   }
     
-  private Object getImpl(Object key) 
+  Object getImpl(String key) 
     throws CacheException
   {
     ClientSocket client = _factory.open();
@@ -226,13 +256,16 @@ public class MemcacheClient implements Cache
     return null;
   }
   
-  private Object getResinImpl(Object key, 
-                              long hash,
-                              Object oldValue) 
+  MnodeUpdate getResinIfModified(String key, 
+                                 HashKey oldValue,
+                                 DistCacheEntry entry,
+                                 CacheConfig config)
     throws CacheException
   {
-    ClientSocket client = _factory.open();
+    CacheImpl cache = getLocalCache();
     
+    ClientSocket client = _factory.open();
+
     if (client == null)
       throw new CacheException("Cannot open client");
 
@@ -242,6 +275,8 @@ public class MemcacheClient implements Cache
     try {
       WriteStream out = client.getOutputStream();
       ReadStream is = client.getInputStream();
+      
+      long hash = getCasKey(oldValue);
       
       out.print("get_if_modified ");
       out.print(key);
@@ -263,7 +298,7 @@ public class MemcacheClient implements Cache
         if (skipToEndOfLine(is))
           isValid = true;
         
-        return oldValue;
+        return null;
       }
       else if (! _cb.matches("VALUE")) {
         System.out.println("VALUE: " + _cb);
@@ -280,13 +315,25 @@ public class MemcacheClient implements Cache
         System.out.println("EOLF:");
         return null;
       }
-      
+
       GetInputStream gis = new GetInputStream(is, length);
       
-      Hessian2Input hIn = _hIn;
-      hIn.init(gis);
+      HashKey valueKey = cache.saveData(gis);
       
-      Object value = hIn.readObject();
+      long version = entry.getVersion();
+      
+      long now = Alarm.getCurrentTime();
+      
+      if (version < now)
+        version = now;
+      else
+        version = version + 1;
+
+      MnodeUpdate update = new MnodeUpdate(entry.getKeyHash().getHash(),
+                                           valueKey.getHash(),
+                                           length,
+                                           version,
+                                           config);
 
       /*
       _cb.clear();
@@ -306,7 +353,7 @@ public class MemcacheClient implements Cache
       
       isValid = true;
       
-      return value;
+      return update;
     } catch (IOException e) {
       e.printStackTrace();
       log.log(Level.FINER, e.toString(), e);
@@ -320,7 +367,221 @@ public class MemcacheClient implements Cache
 
     return null;
   }
+
+  @Override
+  public void put(Object key, Object value) throws CacheException
+  {
+    if (_isResin == null)
+      initResin();
+    
+    boolean isResin = _isResin != null && _isResin;
+    
+    if (isResin) {
+      CacheImpl cache = getLocalCache();
+      
+      cache.put(key, value);
+    }
+    else {
+      putImpl(key, value);
+    }
+  }
   
+  private void putImpl(Object key, Object value) throws CacheException
+  {
+    ClientSocket client = null;
+    long idleStartTime = Alarm.getCurrentTime();
+    
+    
+    boolean isValid = false;
+    
+    try {
+      client = _factory.open();
+      
+      if (client == null)
+        throw new CacheException("Cannot put memcache");
+      
+      WriteStream out = client.getOutputStream();
+      ReadStream is = client.getInputStream();
+      
+      TempStream ts = serialize(value);
+      long length = ts.getLength();
+      // long length = ((String) value).length();
+      
+      out.print("set ");
+      out.print(key);
+      long flags = 0;
+      out.print(" ");
+      out.print(flags);
+      out.print(" ");
+      long expTime = 0;
+      out.print(expTime);
+      out.print(" ");
+      // out.print(ts.getLength());
+      out.print(length);
+      out.print("\r\n");
+      
+      //out.print(value);
+      ts.writeToStream(out);
+      
+      // System.out.println("SET-LEN: " + length);
+      
+      out.print("\r\n");
+      out.flush();
+      
+      String line = is.readLine();
+      
+      if (! "STORED".equals(line)) {
+        System.out.println("BAD: " + line);
+        throw new IllegalStateException("Expected 'STORED' at " + line);
+      }
+      
+      isValid = true;
+    } catch (IOException e) {
+      log.log(Level.FINER, e.toString(), e);
+    } finally {
+      if (client == null) {
+      }
+      else if (isValid)
+        client.free(idleStartTime);
+      else
+        client.close();
+    }
+  }
+  
+  void putResin(String key, MnodeUpdate update) throws CacheException
+  {
+    ClientSocket client = null;
+    long idleStartTime = Alarm.getCurrentTime();
+    
+    CacheImpl cache = getLocalCache();
+    
+    boolean isValid = false;
+    
+    try {
+      client = _factory.open();
+      
+      if (client == null)
+        throw new CacheException("Cannot put memcache");
+      
+      WriteStream out = client.getOutputStream();
+      ReadStream is = client.getInputStream();
+      
+      long length = update.getValueLength();
+      // long length = ((String) value).length();
+      
+      out.print("set ");
+      out.print(key);
+      long flags = update.getUserFlags();
+      out.print(" ");
+      out.print(flags);
+      out.print(" ");
+      long expTime = update.getExpireTimeout();
+      out.print(expTime);
+      out.print(" ");
+      // out.print(ts.getLength());
+      out.print(length);
+      out.print("\r\n");
+      
+      out.setDisableClose(true);
+      
+      //out.print(value);
+      boolean v = cache.loadData(HashKey.create(update.getValueHash()), out);
+      
+      out.setDisableClose(false);
+      
+      // System.out.println("SET-LEN: " + length);
+      
+      out.print("\r\n");
+      out.flush();
+      
+      String line = is.readLine();
+      
+      if (! "STORED".equals(line)) {
+        System.out.println("BAD: " + line);
+        throw new IllegalStateException("Expected 'STORED' at " + line);
+      }
+      
+      isValid = true;
+    } catch (IOException e) {
+      log.log(Level.FINER, e.toString(), e);
+    } finally {
+      if (client == null) {
+      }
+      else if (isValid)
+        client.free(idleStartTime);
+      else
+        client.close();
+    }
+  }
+
+  @Override
+  public boolean remove(Object key) throws CacheException
+  {
+    if (_isResin == null)
+      initResin();
+    
+    boolean isResin = _isResin != null && _isResin;
+    
+    if (isResin) {
+      CacheImpl cache = getLocalCache();
+      
+      cache.remove(key);
+    }
+    
+    removeImpl(key);
+    
+    return true;
+  }
+  
+  private void removeImpl(Object key) throws CacheException
+  {
+    ClientSocket client = null;
+    long idleStartTime = Alarm.getCurrentTime();
+    
+    
+    boolean isValid = false;
+    
+    try {
+      client = _factory.open();
+      
+      if (client == null)
+        throw new CacheException("Cannot put memcache");
+      
+      WriteStream out = client.getOutputStream();
+      ReadStream is = client.getInputStream();
+      
+      out.print("delete ");
+      out.print(key);
+      long timeout = 0;
+      out.print(" ");
+      out.print(timeout);
+      //out.print(" noreply\r\n");
+      out.print("\r\n");
+      out.flush();
+      
+      String line = is.readLine();
+      
+      if (line.equals("DELETED")) {
+        isValid = true;
+      }
+      else if (line.equals("NOT_FOUND")) {
+        isValid = true;
+      }
+      else {
+        System.out.println("UKNOWNK :" + line);
+      }
+    } catch (IOException e) {
+      log.log(Level.FINER, e.toString(), e);
+    } finally {
+      if (client == null) {
+      }
+      else if (isValid)
+        client.free(idleStartTime);
+      else
+        client.close();
+    }
+  }
+
   private static long getCasKey(HashKey valueKey)
   {
     if (valueKey == null)
@@ -343,16 +604,12 @@ public class MemcacheClient implements Cache
     CacheImpl cache = _localCache.get();
     
     if (cache == null) {
-      cache = (CacheImpl) DistCacheSystem.getMatchingCache("memcache-client");
+      LocalCache localCache = new LocalCache();
+      localCache.setName("memcache:" + _name);
+      localCache.setExpireTimeoutMillis(3600 * 1000);
+      localCache.setEngine(_cacheEngine);
       
-      if (cache == null) {
-        FileCache fileCache = new FileCache();
-        fileCache.setName("memcache-client");
-        fileCache.setExpireTimeoutMillis(3600 * 1000);
-        fileCache.init();
-        
-        cache = (CacheImpl) DistCacheSystem.getMatchingCache("memcache-client");
-      }
+      cache = localCache.createIfAbsent();
       
       _localCache.compareAndSet(null, cache);
     }
@@ -371,6 +628,7 @@ public class MemcacheClient implements Cache
       _isResin = false;
       return;
     }
+    
     
     ClientSocket client = _factory.open();
     
@@ -573,153 +831,6 @@ public class MemcacheClient implements Cache
     // TODO Auto-generated method stub
     return null;
   }
-
-  @Override
-  public void put(Object key, Object value) throws CacheException
-  {
-    if (_isResin == null)
-      initResin();
-    
-    boolean isResin = _isResin != null && _isResin;
-    
-    putImpl(key, value);
-    
-    if (isResin) {
-      CacheImpl cache = getLocalCache();
-      
-      cache.put(key, value);
-    }
-  }
-  
-  private void putImpl(Object key, Object value) throws CacheException
-  {
-    ClientSocket client = null;
-    long idleStartTime = Alarm.getCurrentTime();
-    
-    
-    boolean isValid = false;
-    
-    try {
-      client = _factory.open();
-      
-      if (client == null)
-        throw new CacheException("Cannot put memcache");
-      
-      WriteStream out = client.getOutputStream();
-      ReadStream is = client.getInputStream();
-      
-      TempStream ts = serialize(value);
-      long length = ts.getLength();
-      // long length = ((String) value).length();
-      
-      out.print("set ");
-      out.print(key);
-      long flags = 0;
-      out.print(" ");
-      out.print(flags);
-      out.print(" ");
-      long expTime = 0;
-      out.print(expTime);
-      out.print(" ");
-      // out.print(ts.getLength());
-      out.print(length);
-      out.print("\r\n");
-      
-      //out.print(value);
-      ts.writeToStream(out);
-      
-      // System.out.println("SET-LEN: " + length);
-      
-      out.print("\r\n");
-      out.flush();
-      
-      String line = is.readLine();
-      
-      if (! "STORED".equals(line)) {
-        System.out.println("BAD: " + line);
-        throw new IllegalStateException("Expected 'STORED' at " + line);
-      }
-      
-      isValid = true;
-    } catch (IOException e) {
-      log.log(Level.FINER, e.toString(), e);
-    } finally {
-      if (client == null) {
-      }
-      else if (isValid)
-        client.free(idleStartTime);
-      else
-        client.close();
-    }
-  }
-
-  @Override
-  public boolean remove(Object key) throws CacheException
-  {
-    if (_isResin == null)
-      initResin();
-    
-    boolean isResin = _isResin != null && _isResin;
-    
-    if (isResin) {
-      CacheImpl cache = getLocalCache();
-      
-      cache.remove(key);
-    }
-    
-    removeImpl(key);
-    
-    return true;
-  }
-  
-  private void removeImpl(Object key) throws CacheException
-  {
-    ClientSocket client = null;
-    long idleStartTime = Alarm.getCurrentTime();
-    
-    
-    boolean isValid = false;
-    
-    try {
-      client = _factory.open();
-      
-      if (client == null)
-        throw new CacheException("Cannot put memcache");
-      
-      WriteStream out = client.getOutputStream();
-      ReadStream is = client.getInputStream();
-      
-      out.print("delete ");
-      out.print(key);
-      long timeout = 0;
-      out.print(" ");
-      out.print(timeout);
-      //out.print(" noreply\r\n");
-      out.print("\r\n");
-      out.flush();
-      
-      String line = is.readLine();
-      
-      if (line.equals("DELETED")) {
-        isValid = true;
-      }
-      else if (line.equals("NOT_FOUND")) {
-        isValid = true;
-      }
-      else {
-        System.out.println("UKNOWNK :" + line);
-      }
-    } catch (IOException e) {
-      log.log(Level.FINER, e.toString(), e);
-    } finally {
-      if (client == null) {
-      }
-      else if (isValid)
-        client.free(idleStartTime);
-      else
-        client.close();
-    }
-  }
   
   private TempStream serialize(Object value)
     throws IOException
@@ -896,17 +1007,19 @@ public class MemcacheClient implements Cache
         return -1;
       
       int ch = _is.read();
-      
       _length -= 1;
       
       return ch;
     }
-    
+
     @Override
     public int read(byte []buffer, int offset, int length)
       throws IOException
     {
       int sublen = (int) _length;
+      
+      if (sublen <= 0)
+        return -1;
       
       if (length < sublen)
         sublen = length;

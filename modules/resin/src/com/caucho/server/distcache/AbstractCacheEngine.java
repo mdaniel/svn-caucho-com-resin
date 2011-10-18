@@ -29,12 +29,6 @@
 
 package com.caucho.server.distcache;
 
-import java.io.IOException;
-import java.io.InputStream;
-
-import com.caucho.distcache.CacheSerializer;
-import com.caucho.distcache.ExtCacheEntry;
-import com.caucho.env.distcache.CacheDataBacking;
 import com.caucho.util.HashKey;
 
 /**
@@ -42,208 +36,66 @@ import com.caucho.util.HashKey;
  */
 public class AbstractCacheEngine implements CacheEngine
 {
-  /* (non-Javadoc)
-   * @see com.caucho.server.distcache.CacheEngine#calculateValueHash(java.lang.Object, com.caucho.server.distcache.CacheConfig)
-   */
   @Override
-  public byte[] calculateValueHash(Object value, CacheConfig config)
+  public void start()
   {
-    // TODO Auto-generated method stub
-    return null;
   }
-
-  /* (non-Javadoc)
-   * @see com.caucho.server.distcache.CacheEngine#close()
-   */
-  @Override
-  public void close()
-  {
-    // TODO Auto-generated method stub
-    
-  }
-
-  /* (non-Javadoc)
-   * @see com.caucho.server.distcache.CacheEngine#closeCache(java.lang.String)
-   */
-  @Override
-  public void closeCache(String name)
-  {
-    // TODO Auto-generated method stub
-    
-  }
-
-  /* (non-Javadoc)
-   * @see com.caucho.server.distcache.CacheEngine#compareAndPut(com.caucho.server.distcache.DistCacheEntry, com.caucho.util.HashKey, com.caucho.server.distcache.MnodeUpdate, java.lang.Object, com.caucho.server.distcache.CacheConfig)
-   */
-  @Override
-  public HashKey compareAndPut(DistCacheEntry entry, HashKey testValue,
-                               MnodeUpdate mnodeUpdate, Object value,
-                               CacheConfig config)
-  {
-    // TODO Auto-generated method stub
-    return null;
-  }
-
-  /* (non-Javadoc)
-   * @see com.caucho.server.distcache.CacheEngine#createDataBacking()
-   */
-  @Override
-  public CacheDataBacking createDataBacking()
-  {
-    // TODO Auto-generated method stub
-    return null;
-  }
-
-  /* (non-Javadoc)
-   * @see com.caucho.server.distcache.CacheEngine#createSelfHashKey(java.lang.Object, com.caucho.distcache.CacheSerializer)
-   */
-  @Override
-  public HashKey createSelfHashKey(Object key, CacheSerializer keySerializer)
-  {
-    // TODO Auto-generated method stub
-    return null;
-  }
-
-  /* (non-Javadoc)
-   * @see com.caucho.server.distcache.CacheEngine#destroyCache(com.caucho.server.distcache.CacheImpl)
-   */
-  @Override
-  public void destroyCache(CacheImpl cache)
-  {
-    // TODO Auto-generated method stub
-    
-  }
-
-  /* (non-Javadoc)
-   * @see com.caucho.server.distcache.CacheEngine#getAndPut(com.caucho.server.distcache.DistCacheEntry, com.caucho.server.distcache.MnodeUpdate, java.lang.Object, long, int)
-   */
-  @Override
-  public HashKey getAndPut(DistCacheEntry entry, MnodeUpdate mnodeUpdate,
-                           Object value, long leaseTimeout, int leaseOwner)
-  {
-    // TODO Auto-generated method stub
-    return null;
-  }
-
-  /* (non-Javadoc)
-   * @see com.caucho.server.distcache.CacheEngine#getCacheEntry(com.caucho.util.HashKey, com.caucho.server.distcache.CacheConfig)
-   */
-  @Override
-  public DistCacheEntry getCacheEntry(HashKey key, CacheConfig config)
-  {
-    // TODO Auto-generated method stub
-    return null;
-  }
-
-  /* (non-Javadoc)
-   * @see com.caucho.server.distcache.CacheEngine#getDataBacking()
-   */
-  @Override
-  public CacheDataBacking getDataBacking()
-  {
-    // TODO Auto-generated method stub
-    return null;
-  }
-
-  /* (non-Javadoc)
-   * @see com.caucho.server.distcache.CacheEngine#initCache(com.caucho.server.distcache.CacheImpl)
-   */
+  
   @Override
   public void initCache(CacheImpl cache)
   {
-    // TODO Auto-generated method stub
-    
   }
 
   @Override
-  public boolean isLocalReadValid(CacheConfig config, MnodeEntry mnodeEntry,
+  public boolean isLocalReadValid(CacheConfig config,
+                                  HashKey key,
+                                  MnodeEntry mnodeEntry,
                                   long now)
   {
     return ! mnodeEntry.isEntryExpired(now);
   }
 
   @Override
-  public boolean loadClusterData(HashKey valueKey, int flags)
+  public boolean loadData(HashKey valueKey, int flags)
   {
     return true;
   }
 
   @Override
-  public MnodeEntry loadClusterValue(DistCacheEntry entry, CacheConfig config)
+  public MnodeEntry get(DistCacheEntry entry, CacheConfig config)
   {
     return null;
   }
 
-  /* (non-Javadoc)
-   * @see com.caucho.server.distcache.CacheEngine#put(com.caucho.util.HashKey, java.lang.Object, com.caucho.server.distcache.CacheConfig)
-   */
   @Override
-  public void put(HashKey hashKey, Object value, CacheConfig config)
-  {
-    // TODO Auto-generated method stub
-    
-  }
-
-  /* (non-Javadoc)
-   * @see com.caucho.server.distcache.CacheEngine#put(com.caucho.util.HashKey, java.io.InputStream, com.caucho.server.distcache.CacheConfig, long)
-   */
-  @Override
-  public ExtCacheEntry put(HashKey hashKey, InputStream is, CacheConfig config,
-                           long idleTimeout) throws IOException
-  {
-    // TODO Auto-generated method stub
-    return null;
-  }
-
-  /* (non-Javadoc)
-   * @see com.caucho.server.distcache.CacheEngine#putCluster(com.caucho.util.HashKey, com.caucho.server.distcache.MnodeUpdate, com.caucho.server.distcache.MnodeEntry)
-   */
-  @Override
-  public void putCluster(HashKey key, MnodeUpdate mnodeUpdate,
+  public void put(HashKey key, MnodeUpdate mnodeUpdate,
                          MnodeEntry mnodeValue)
   {
-    // TODO Auto-generated method stub
-    
   }
 
-  /* (non-Javadoc)
-   * @see com.caucho.server.distcache.CacheEngine#remove(com.caucho.util.HashKey)
-   */
   @Override
-  public boolean remove(HashKey hashKey)
-  {
-    // TODO Auto-generated method stub
-    return false;
-  }
-
-  /* (non-Javadoc)
-   * @see com.caucho.server.distcache.CacheEngine#removeCluster(com.caucho.util.HashKey, com.caucho.server.distcache.MnodeUpdate, com.caucho.server.distcache.MnodeEntry)
-   */
-  @Override
-  public void removeCluster(HashKey key, MnodeUpdate mnodeUpdate,
+  public void remove(HashKey key, MnodeUpdate mnodeUpdate,
                             MnodeEntry mnodeEntry)
   {
-    // TODO Auto-generated method stub
-    
   }
 
-  /* (non-Javadoc)
-   * @see com.caucho.server.distcache.CacheEngine#start()
-   */
   @Override
-  public void start()
+  public void updateTime(HashKey key, MnodeEntry mnodeValue)
   {
-    // TODO Auto-generated method stub
-    
+  }
+  @Override
+  public HashKey compareAndPut(DistCacheEntry entry, HashKey testValue,
+                               MnodeUpdate mnodeUpdate, Object value,
+                               CacheConfig config)
+  {
+    return null;
   }
 
-  /* (non-Javadoc)
-   * @see com.caucho.server.distcache.CacheEngine#updateCacheTime(com.caucho.util.HashKey, com.caucho.server.distcache.MnodeEntry)
-   */
   @Override
-  public void updateCacheTime(HashKey key, MnodeEntry mnodeValue)
+  public HashKey getAndPut(DistCacheEntry entry, MnodeUpdate mnodeUpdate,
+                           Object value, long leaseTimeout, int leaseOwner)
   {
-    // TODO Auto-generated method stub
-    
+    return null;
   }
+
 }

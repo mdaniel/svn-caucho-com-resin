@@ -108,9 +108,7 @@ public class AdminAuthenticator extends XmlAuthenticator
       authStore.setExpireTimeoutMillis(Period.FOREVER);
 
       authStore.setName("resin:authenticator");
-      authStore.setScopeMode(AbstractCache.Scope.POD);
-      authStore.setBackup(true);
-      authStore.setTriplicate(true);
+      authStore.setScopeMode(AbstractCache.Scope.CLUSTER);
 
       authStore.createIfAbsent();
     }

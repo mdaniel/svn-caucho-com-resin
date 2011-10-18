@@ -33,6 +33,7 @@ import com.caucho.config.Configurable;
 import com.caucho.distcache.AbstractCache;
 import com.caucho.distcache.CacheSerializer;
 import com.caucho.distcache.HessianSerializer;
+import com.caucho.distcache.ResinCacheBuilder.Scope;
 import com.caucho.util.Alarm;
 import com.caucho.util.HashKey;
 
@@ -45,7 +46,7 @@ public class CacheConfig
 {
   public static final long TIME_INFINITY  = Long.MAX_VALUE / 2;
   public static final long TIME_HOUR  = 3600 * 1000L;
-  public static final int FLAG_EPHEMERAL  = 0x01;
+  public static final int FLAG_TRANSIENT  = 0x01;
   public static final int FLAG_BACKUP = 0x02;
   public static final int FLAG_TRIPLICATE = 0x04;
   
@@ -69,6 +70,8 @@ public class CacheConfig
 
   private long _leaseTimeout = 5 * 60 * 1000; // 5 min lease timeout
 
+  private AbstractCache.Scope _scope = Scope.CLUSTER;
+  
   private CacheLoader _cacheLoader;
 
   private CacheSerializer _keySerializer;
@@ -76,7 +79,7 @@ public class CacheConfig
 
   private int _accuracy;
 
-  private AbstractCache.Scope _scope;
+  private CacheEngine _engine;
 
   /**
    * The Cache will use a CacheLoader to populate cache misses.
@@ -350,7 +353,7 @@ public class CacheConfig
    * <p/>
    * Defaults to true.
    */
-  public void setBackup(boolean isBackup)
+  private void setBackup(boolean isBackup)
   {
     if (isBackup)
       setFlags(getFlags() | CacheConfig.FLAG_BACKUP);
@@ -405,12 +408,23 @@ public class CacheConfig
   }
 
   /**
+   * Sets the transient mode.
+   */
+  private void setTransient(boolean isTransient)
+  {
+    if (isTransient)
+      setFlags(getFlags() | CacheConfig.FLAG_TRANSIENT);
+    else
+      setFlags(getFlags() & ~CacheConfig.FLAG_TRANSIENT);
+  }
+
+  /**
    * Sets the triplicate backup mode.  If triplicate backups is set,
    * all triad servers have a copy of each cached item.
    * <p/>
    * Defaults to true.
    */
-  public void setTriplicate(boolean isTriplicate)
+  private void setTriplicate(boolean isTriplicate)
   {
     if (isTriplicate)
       setFlags(getFlags() | CacheConfig.FLAG_TRIPLICATE);
@@ -442,6 +456,19 @@ public class CacheConfig
   {
     return _scope;
   }
+  
+  public void setEngine(CacheEngine engine)
+  {
+    if (engine == null)
+      throw new NullPointerException();
+    
+    _engine = engine;
+  }
+  
+  public CacheEngine getEngine()
+  {
+    return _engine;
+  }
 
   /**
    * Initializes the CacheConfig.
@@ -454,6 +481,39 @@ public class CacheConfig
     if (_valueSerializer == null)
       _valueSerializer = new HessianSerializer();
 
+    switch (_scope) {
+    case TRANSIENT:
+      setTransient(true);
+      setTriplicate(false);
+      setBackup(false);
+      if (getEngine() == null)
+        setEngine(new AbstractCacheEngine());
+      break;
+      
+    case LOCAL:
+      setTriplicate(false);
+      setBackup(false);
+      if (getEngine() == null)
+        setEngine(new AbstractCacheEngine());
+      break;
+      
+    case CLUSTER:
+      setTriplicate(true);
+      setBackup(true);
+      break;
+      
+      /*
+    case CLUSTER_SINGLE:
+      setTriplicate(false);
+      setBackup(false);
+      break;
+      
+    case CLUSTER_BACKUP:
+      setTriplicate(false);
+      setBackup(true);
+      break;
+      */
+    }
     // _accuracy = CacheStatistics.STATISTICS_ACCURACY_BEST_EFFORT;
   }
 

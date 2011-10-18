@@ -48,6 +48,8 @@ public class MemcacheProtocol implements Protocol
   {
     ClusterCache cache = new ClusterCache();
     cache.setName("memcache");
+    cache.setLocalReadTimeoutMillis(1000);
+    cache.setLeaseTimeoutMillis(60 * 60 * 1000);
     cache.init();
     
     _cache = cache;

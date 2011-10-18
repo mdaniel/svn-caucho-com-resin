@@ -46,7 +46,7 @@ import com.caucho.util.Hex;
  * An entry in the cache map
  */
 public class DistCacheEntry implements ExtCacheEntry {
-  private final CacheService _engine;
+  private final CacheService _cacheService;
   private final HashKey _keyHash;
 
   private final TriadOwner _owner;
@@ -55,7 +55,7 @@ public class DistCacheEntry implements ExtCacheEntry {
 
   private final AtomicBoolean _isReadUpdate = new AtomicBoolean();
 
-  private final AtomicReference<MnodeEntry> _mnodeValue
+  private final AtomicReference<MnodeEntry> _mnodeEntry
     = new AtomicReference<MnodeEntry>(MnodeEntry.NULL);
   
   private final AtomicInteger _loadCount = new AtomicInteger();
@@ -65,7 +65,7 @@ public class DistCacheEntry implements ExtCacheEntry {
                         HashKey keyHash,
                         TriadOwner owner)
   {
-    _engine = engine;
+    _cacheService = engine;
     _key = key;
     _keyHash = keyHash;
     _owner = owner;
@@ -77,7 +77,7 @@ public class DistCacheEntry implements ExtCacheEntry {
                         TriadOwner owner,
                         CacheConfig config)
   {
-    _engine = engine;
+    _cacheService = engine;
     _key = key;
     _keyHash = keyHash;
     _owner = owner;
@@ -145,7 +145,7 @@ public class DistCacheEntry implements ExtCacheEntry {
    */
   public final MnodeEntry getMnodeEntry()
   {
-    return _mnodeValue.get();
+    return _mnodeEntry.get();
   }
 
   /**
@@ -169,7 +169,7 @@ public class DistCacheEntry implements ExtCacheEntry {
   {
     long now = Alarm.getCurrentTime();
 
-    return _engine.get(this, config, now);
+    return _cacheService.get(this, config, now);
   }
 
   /**
@@ -179,7 +179,7 @@ public class DistCacheEntry implements ExtCacheEntry {
   {
     long now = Alarm.getCurrentTime();
 
-    return _engine.getMnodeValue(this, config, now); // , false);
+    return _cacheService.getMnodeValue(this, config, now); // , false);
   }
 
   /**
@@ -188,12 +188,12 @@ public class DistCacheEntry implements ExtCacheEntry {
   public boolean getStream(OutputStream os, CacheConfig config)
     throws IOException
   {
-    return _engine.getStream(this, os, config);
+    return _cacheService.getStream(this, os, config);
   }
 
   public HashKey getValueHash(Object value, CacheConfig config)
   {
-    return _engine.getValueHash(value, config).getValue();
+    return _cacheService.getValueHash(value, config).getValue();
   }
  
   /**
@@ -201,7 +201,7 @@ public class DistCacheEntry implements ExtCacheEntry {
    */
   public void put(Object value, CacheConfig config)
   {
-    _engine.put(this, value, config);
+    _cacheService.put(this, value, config);
   }
 
   /**
@@ -212,7 +212,7 @@ public class DistCacheEntry implements ExtCacheEntry {
                            long idleTimeout)
     throws IOException
   {
-    return _engine.putStream(this, is, config, idleTimeout, 0);
+    return _cacheService.putStream(this, is, config, idleTimeout, 0);
   }
 
   /**
@@ -224,7 +224,7 @@ public class DistCacheEntry implements ExtCacheEntry {
                            int flags)
     throws IOException
   {
-    return _engine.putStream(this, is, config, idleTimeout, flags);
+    return _cacheService.putStream(this, is, config, idleTimeout, flags);
   }
 
   /**
@@ -232,7 +232,7 @@ public class DistCacheEntry implements ExtCacheEntry {
    */
   public Object getAndPut(Object value, CacheConfig config)
   {
-    return _engine.getAndPut(this, value, config);
+    return _cacheService.getAndPut(this, value, config);
   }
 
   /**
@@ -242,7 +242,7 @@ public class DistCacheEntry implements ExtCacheEntry {
                                Object value, 
                                CacheConfig config)
   {
-    return _engine.compareAndPut(this, testValue, value, config);
+    return _cacheService.compareAndPut(this, testValue, value, config);
   }
 
   /**
@@ -253,7 +253,7 @@ public class DistCacheEntry implements ExtCacheEntry {
                                long valueLength,
                                CacheConfig config)
   {
-    return _engine.compareAndPut(this, version, value, valueLength, config);
+    return _cacheService.compareAndPut(this, version, value, valueLength, config);
   }
 
   /**
@@ -261,7 +261,7 @@ public class DistCacheEntry implements ExtCacheEntry {
    */
   public boolean remove(CacheConfig config)
   {
-    return _engine.remove(this, config);
+    return _cacheService.remove(this, config);
   }
 
   /**
@@ -289,13 +289,18 @@ public class DistCacheEntry implements ExtCacheEntry {
   public final boolean compareAndSet(MnodeEntry oldMnodeValue,
                                      MnodeEntry mnodeValue)
   {
-    return _mnodeValue.compareAndSet(oldMnodeValue, mnodeValue);
+    return _mnodeEntry.compareAndSet(oldMnodeValue, mnodeValue);
   }
 
   @Override
   public HashKey getValueHashKey()
   {
-    return getMnodeEntry().getValueHashKey();
+    MnodeEntry entry = getMnodeEntry();
+    
+    if (entry != null)
+      return entry.getValueHashKey();
+    else
+      return null;
   }
 
   public byte []getValueHashArray()
@@ -367,7 +372,12 @@ public class DistCacheEntry implements ExtCacheEntry {
 
   public long getVersion()
   {
-    return getMnodeEntry().getVersion();
+    MnodeEntry entry = getMnodeEntry();
+    
+    if (entry != null)
+      return entry.getVersion();
+    else
+      return 0;
   }
 
   public boolean isValid()

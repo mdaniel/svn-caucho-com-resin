@@ -63,6 +63,7 @@ import com.caucho.distcache.ExtCacheEntry;
 import com.caucho.distcache.ObjectCache;
 import com.caucho.env.distcache.CacheDataBacking;
 import com.caucho.loader.Environment;
+import com.caucho.server.distcache.CacheService.DataItem;
 import com.caucho.util.HashKey;
 import com.caucho.util.L10N;
 import com.caucho.util.LruCache;
@@ -201,6 +202,9 @@ public class CacheImpl
       _config.init();
 
       initServer();
+      
+      if (_config.getEngine() == null)
+        _config.setEngine(_manager.getCacheEngine());
 
       _config.setCacheKey(_manager.createSelfHashKey(_config.getGuid(),
                                                      _config.getKeySerializer()));
@@ -835,6 +839,14 @@ public class CacheImpl
   {
     ((CacheService) _manager).writeData(null, value, 
                                                 _config.getValueSerializer());
+  }
+  
+  public HashKey saveData(InputStream is)
+    throws IOException
+  {
+    DataItem dataItem = ((CacheService) _manager).writeData(null, is);
+    
+    return dataItem.getValue();
   }
 
   public void setManager(CacheService manager)

@@ -42,19 +42,13 @@ public interface ResinCacheBuilder
   public enum Scope {
 
     /** Not distributed, no persistence.*/
-    LOCAL,
+    TRANSIENT,
 
     /** Not distributed, single or no persistence */
-    SERVER,
+    LOCAL,
 
-    /** Distributed across a pod, persistence required.*/
-    POD,
-
-    /** Accessible across a multi-pod cluster*/
-    CLUSTER,
-
-    /** Support CRUD operation with basic access control*/
-    GLOBAL
+    /** Distributed across a cluster, persistence required.*/
+    CLUSTER;
   }
 
   /**

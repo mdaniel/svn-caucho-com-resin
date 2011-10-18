@@ -48,15 +48,17 @@ import com.caucho.config.Configurable;
 @Singleton
 @Configurable
 @Startup
-public class FileCache extends AbstractCache
+public class LocalCache extends AbstractCache
 {
-  public FileCache()
+  public LocalCache()
   {
-    // setScope("local");
+    setScopeMode(Scope.LOCAL);
   }
 
-  public FileCache(String name)
+  public LocalCache(String name)
   {
+    this();
+    
     // setScope("local");
     setName(name);
     init();
