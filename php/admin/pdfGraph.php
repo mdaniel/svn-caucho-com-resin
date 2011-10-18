@@ -95,14 +95,20 @@ function admin_pdf_summary()
   $g_canvas->write_text_x($col, "OS Free Swap: {$summary['osFreeSwap']}");
   $g_canvas->write_text_newline();
   
-  $g_canvas->write_text_x(20, $summary['WatchdogStartMessage']);
+  $g_canvas->write_text_x(20, $summary['watchdogStartMessage']);
   $g_canvas->write_text_x($col, "OS Total Swap: {$summary['osTotalSwap']}");
   $g_canvas->write_text_newline();
   
   $g_canvas->write_text_x(20, "uptime {$summary['ups']} [{$summary['server_state']}]");
   $g_canvas->write_text_x($col, "OS Physical: {$summary['osFreeTotal']}");
   $g_canvas->write_text_newline();
-
+  
+  $license_array = $summary["licenses"];
+  foreach($license_array as $license_msg) {
+    $g_canvas->write_text_x(20, $license_msg);
+    $g_canvas->write_text_newline();
+  }
+  
   $g_canvas->write_hrule();
 }
 
@@ -119,6 +125,7 @@ function admin_pdf_summary_fill()
   $resin = $jmx["resin:type=Resin"];  
   $runtime = $jmx["java.lang:type=Runtime"];
   $os = $jmx["java.lang:type=OperatingSystem"];
+  $licenseStore = $jmx["resin:type=LicenseStore"];
 
   $summary = array();
 
@@ -129,6 +136,7 @@ function admin_pdf_summary_fill()
   $summary["resinVersion"] = $resin["Version"];
   $summary["jvm"] = "{$runtime['VmName']} {$runtime['VmVersion']}";
   $summary["machine"] = "{$os['AvailableProcessors']} {$os['Name']} {$os['Arch']} {$os['Version']}";
+  $summary["watchdogStartMessage"] = $resin["WatchdogStartMessage"];
 
   $q_date = java("com.caucho.util.QDate");
   $start_time = $q_date->parseDate($server["StartTime"]) / 1000;
@@ -142,7 +150,7 @@ function admin_pdf_summary_fill()
                  $uptime / 3600 % 24,
                  $uptime / 60 % 60,
                  $uptime % 60)
-                 . " -- started " . date("Y-m-i H:i", $start_time);
+                 . " -- started " . date("Y-m-d H:i", $start_time);
 
   $summary["server_state"] = $server["State"];                 
 
@@ -153,7 +161,17 @@ function admin_pdf_summary_fill()
   $summary["osTotalSwap"] = pdf_format_memory($os["TotalSwapSpaceSize"]);
   $summary["osFreePhysical"] = pdf_format_memory($os["FreePhysicalMemorySize"]);
   $summary["osFreeTotal"] = pdf_format_memory($os["TotalPhysicalMemorySize"]);
-
+  
+  $licenses = array();
+  
+  $license_names = $licenseStore["ValidLicenses"];
+  foreach($license_names as $license_name) {
+    $license = $jmx[$license_name];
+    array_push($licenses, $license["ExpireMessage"]);
+  }
+  
+  $summary["licenses"] = $licenses;
+    
   return $summary;
 }
 
