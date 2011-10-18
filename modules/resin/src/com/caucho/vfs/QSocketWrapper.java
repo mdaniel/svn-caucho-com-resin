@@ -52,11 +52,13 @@ public class QSocketWrapper extends QSocket {
   private static final Logger log = Log.open(QSocketWrapper.class);
   private static Class sslSocketClass;
   private static IntMap sslKeySizes;
-  
+
   private Socket _s;
   private InputStream _is;
   private OutputStream _os;
   private SocketStream _streamImpl;
+
+  private long _requestExpireTime;
 
   public QSocketWrapper()
   {
@@ -73,7 +75,7 @@ public class QSocketWrapper extends QSocket {
     _is = null;
     _os = null;
   }
-  
+
   public Socket getSocket()
   {
     return _s;
@@ -88,6 +90,15 @@ public class QSocketWrapper extends QSocket {
     _s.setSoTimeout(ms);
   }
 
+  @Override
+  public void setRequestExpireTime(long ms)
+  {
+    _requestExpireTime = ms;
+
+    if (_streamImpl != null)
+      _streamImpl.setRequestExpireTime(ms);
+  }
+
   /**
    * Returns the server inet address that accepted the request.
    */
@@ -95,7 +106,7 @@ public class QSocketWrapper extends QSocket {
   {
     return _s.getLocalAddress();
   }
-  
+
   /**
    * Returns the server port that accepted the request.
    */
@@ -114,7 +125,7 @@ public class QSocketWrapper extends QSocket {
     else
       return null;
   }
-  
+
   /**
    * Returns the remote client's port.
    */
@@ -145,9 +156,9 @@ public class QSocketWrapper extends QSocket {
       return super.getCipherSuite();
 
     SSLSocket sslSocket = (SSLSocket) _s;
-    
+
     SSLSession sslSession = sslSocket.getSession();
-    
+
     if (sslSession != null)
       return sslSession.getCipherSuite();
     else
@@ -161,17 +172,17 @@ public class QSocketWrapper extends QSocket {
   {
     if (! (_s instanceof SSLSocket))
       return super.getCipherBits();
-    
+
     SSLSocket sslSocket = (SSLSocket) _s;
-    
+
     SSLSession sslSession = sslSocket.getSession();
-    
+
     if (sslSession != null)
       return sslKeySizes.get(sslSession.getCipherSuite());
     else
       return 0;
   }
-  
+
   /**
    * Returns the client certificate.
    */
@@ -197,7 +208,7 @@ public class QSocketWrapper extends QSocket {
     else
       return getClientCertificatesImpl();
   }
-  
+
   /**
    * Returns the client certificate.
    */
@@ -206,7 +217,7 @@ public class QSocketWrapper extends QSocket {
   {
     if (! (_s instanceof SSLSocket))
       return null;
-    
+
     SSLSocket sslSocket = (SSLSocket) _s;
 
     SSLSession sslSession = sslSocket.getSession();
@@ -219,13 +230,13 @@ public class QSocketWrapper extends QSocket {
       return (X509Certificate []) sslSession.getPeerCertificates();
     } catch (SSLPeerUnverifiedException e) {
       if (log.isLoggable(Level.FINEST))
-	log.log(Level.FINEST, e.toString(), e);
-      
+        log.log(Level.FINEST, e.toString(), e);
+
       return null;
     } catch (Throwable e) {
       log.log(Level.FINER, e.toString(), e);
     }
-    
+
     return null;
   }
 
@@ -239,7 +250,7 @@ public class QSocketWrapper extends QSocket {
     else
       return null;
   }
-  
+
   /**
    * Returns the socket's input stream.
    */
@@ -249,11 +260,17 @@ public class QSocketWrapper extends QSocket {
     if (_streamImpl == null)
       _streamImpl = new SocketStream();
 
+    long requestExpireTime = _requestExpireTime;
+
+    if (requestExpireTime > 0) {
+      _streamImpl.setRequestExpireTime(requestExpireTime);
+    }
+
     _streamImpl.init(getInputStream(), getOutputStream());
 
     return _streamImpl;
   }
-  
+
   /**
    * Returns the socket's input stream.
    */
@@ -265,7 +282,7 @@ public class QSocketWrapper extends QSocket {
 
     return _is;
   }
-  
+
   /**
    * Returns the socket's output stream.
    */
@@ -310,10 +327,10 @@ public class QSocketWrapper extends QSocket {
   {
     Socket s = _s;
     _s = null;
-    
+
     InputStream is = _is;
     _is = null;
-    
+
     OutputStream os = _os;
     _os = null;
 
@@ -373,6 +390,6 @@ public class QSocketWrapper extends QSocket {
     sslKeySizes.put("SSL_DSA_EXPORT_WITH_RC4_40_MD5", 40);
     sslKeySizes.put("SSL_DSA_WITH_NULL_MD5", 0);
     sslKeySizes.put("SSL_DSA_WITH_NULL_SHA", 0);
-  } 
+  }
 }
 

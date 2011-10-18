@@ -53,7 +53,7 @@ public class WatchdogConfig
     = Logger.getLogger(WatchdogConfig.class.getName());
 
   private static final int WATCHDOG_PORT_DEFAULT = 6600;
-  
+
   private String _id = "";
 
   private WatchdogArgs _args;
@@ -82,7 +82,7 @@ public class WatchdogConfig
   private String _groupName;
 
   private ArrayList<Port> _ports = new ArrayList<Port>();
-  
+
   private long _shutdownWaitTime = 60000L;
 
   private boolean _isVerbose;
@@ -93,7 +93,7 @@ public class WatchdogConfig
   WatchdogConfig(WatchdogArgs args)
   {
     _args = args;
-    
+
     _pwd = Vfs.getPwd();
 
     _is64bit = "64".equals(System.getProperty("sun.arch.data.model"));
@@ -108,7 +108,7 @@ public class WatchdogConfig
   {
     return _id;
   }
-  
+
   String []getArgv()
   {
     return _args.getArgv();
@@ -118,17 +118,17 @@ public class WatchdogConfig
   {
     _isVerbose = isVerbose;
   }
-  
+
   public void setJavaExe(Path javaExe)
   {
     _javaExe = javaExe;
   }
-  
+
   public void setJavaHome(Path javaHome)
   {
     _javaHome = javaHome;
   }
-  
+
   public Path getJavaHome()
   {
     if (_javaHome != null)
@@ -136,7 +136,7 @@ public class WatchdogConfig
     else
       return _args.getJavaHome();
   }
-  
+
   public void addJvmArg(String arg)
   {
     _jvmArgs.add(arg);
@@ -148,13 +148,13 @@ public class WatchdogConfig
     else if (arg.startsWith("-Xmx"))
       _hasXmx = true;
   }
-  
+
   public ArrayList<String> getJvmArgs()
   {
     return _jvmArgs;
   }
 
-  
+
   public void addJvmClasspath(String item)
   {
     if (item == null)
@@ -162,16 +162,16 @@ public class WatchdogConfig
 
     for (String cp : item.split("[" + File.pathSeparatorChar + "]")) {
       if (! _jvmClasspath.contains(cp))
-	_jvmClasspath.add(cp);
+        _jvmClasspath.add(cp);
     }
   }
-  
+
   public ArrayList<String> getJvmClasspath()
   {
     return _jvmClasspath;
   }
 
-  
+
   public void addWatchdogJvmArg(String arg)
   {
     _watchdogJvmArgs.add(arg);
@@ -183,7 +183,7 @@ public class WatchdogConfig
     else if (arg.startsWith("-Xmx"))
       _hasWatchdogXmx = true;
   }
-  
+
   public ArrayList<String> getWatchdogJvmArgs()
   {
     return _watchdogJvmArgs;
@@ -206,7 +206,7 @@ public class WatchdogConfig
   {
     _ports.add(port);
   }
-  
+
   /**
    * Adds a watchdog managed port
    */
@@ -234,14 +234,14 @@ public class WatchdogConfig
   {
     return _groupName;
   }
-  
+
   public Path getLogPath()
   {
     if (_logPath != null)
       return _logPath;
-    
+
     String name;
-    
+
     if ("".equals(_id))
       name = "jvm-default.log";
     else
@@ -264,12 +264,12 @@ public class WatchdogConfig
     else
       return getRootDirectory().lookup("log");
   }
-  
+
   public long getShutdownWaitTime()
   {
     return _shutdownWaitTime;
   }
-  
+
   public int getWatchdogPort()
   {
     if (_args.getWatchdogPort() > 0)
@@ -279,12 +279,12 @@ public class WatchdogConfig
     else
       return WATCHDOG_PORT_DEFAULT;
   }
-  
+
   public void setWatchdogPort(int port)
   {
     _watchdogPort = port;
   }
-  
+
   public String getWatchdogAddress()
   {
     if (_watchdogAddress != null)
@@ -292,7 +292,7 @@ public class WatchdogConfig
     else
       return "127.0.0.1";
   }
-  
+
   public void setWatchdogAddress(String addr)
   {
     _watchdogAddress = addr;
@@ -433,7 +433,11 @@ public class WatchdogConfig
   public void setWatchdogArg(ConfigProgram program)
   {
   }
-  
+
+  public void setRequestTimeout(ConfigProgram program)
+  {
+  }
+
   /**
    * Ignore items we can't understand.
    */
@@ -462,7 +466,7 @@ public class WatchdogConfig
   {
     _chroot = chroot;
   }
-  
+
   Path getPwd()
   {
     return _pwd;
@@ -483,7 +487,7 @@ public class WatchdogConfig
     else
       return _args.getRootDirectory();
   }
-  
+
   /**
    * Sets the resin.conf
    */
@@ -491,7 +495,7 @@ public class WatchdogConfig
   {
     _resinConf = resinConf;
   }
-   
+
   /**
    * Returns the resin.conf
    */
@@ -564,7 +568,7 @@ public class WatchdogConfig
 
     return "java";
   }
-  
+
   @Override
   public String toString()
   {

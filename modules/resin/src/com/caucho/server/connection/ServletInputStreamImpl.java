@@ -55,8 +55,6 @@ public class ServletInputStreamImpl extends ServletInputStream  {
   {
     if (_is == null)
       return -1;
-    else if (_requestExpireTime < Alarm.getCurrentTime())
-      throw new ClientDisconnectException(L.l("request-timeout expired"));
     else
       return _is.available();
   }
@@ -70,8 +68,6 @@ public class ServletInputStreamImpl extends ServletInputStream  {
   {
     if (_is == null)
       return -1;
-    else if (_requestExpireTime < Alarm.getCurrentTime())
-      throw new ClientDisconnectException(L.l("request-timeout expired"));
     else
       return _is.read();
   }
@@ -80,8 +76,6 @@ public class ServletInputStreamImpl extends ServletInputStream  {
   {
     if (_is == null)
       return -1;
-    else if (_requestExpireTime < Alarm.getCurrentTime())
-      throw new ClientDisconnectException(L.l("request-timeout expired"));
     else
       return _is.read(buf, offset, len);
   }
@@ -90,8 +84,6 @@ public class ServletInputStreamImpl extends ServletInputStream  {
   {
     if (_is == null)
       return -1;
-    else if (_requestExpireTime < Alarm.getCurrentTime())
-      throw new ClientDisconnectException(L.l("request-timeout expired"));
     else
       return _is.skip(n);
   }

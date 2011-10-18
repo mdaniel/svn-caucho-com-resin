@@ -32,6 +32,8 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.net.Socket;
+import com.caucho.util.Alarm;
+import com.caucho.util.L10N;
 
 /**
  * Specialized stream to handle sockets.
@@ -40,6 +42,8 @@ import java.net.Socket;
  * a SocketException, SocketStream will throw a ClientDisconnectException.
  */
 public class SocketStream extends StreamImpl {
+  private static final L10N L = new L10N(SocketStream.class);
+
   private static byte []UNIX_NEWLINE = new byte[] { (byte) '\n' };
 
   private Socket _s;
@@ -50,6 +54,7 @@ public class SocketStream extends StreamImpl {
 
   private boolean _throwReadInterrupts = false;
   private int _socketTimeout;
+  private long _requestExpireTime;
 
   private long _totalReadBytes;
   private long _totalWriteBytes;
@@ -71,7 +76,7 @@ public class SocketStream extends StreamImpl {
   public void init(Socket s)
   {
     _s = s;
-    
+
     _is = null;
     _os = null;
     _needsFlush = false;
@@ -87,6 +92,11 @@ public class SocketStream extends StreamImpl {
     _is = is;
     _os = os;
     _needsFlush = false;
+  }
+
+  public void setRequestExpireTime(long expireTime)
+  {
+    _requestExpireTime = expireTime;
   }
 
   /**
@@ -168,9 +178,18 @@ public class SocketStream extends StreamImpl {
       if (_is == null) {
         if (_s == null)
           return -1;
-        
+
         _is = _s.getInputStream();
       }
+
+      long requestExpireTime = _requestExpireTime;
+
+      if (requestExpireTime > 0
+          && requestExpireTime < Alarm.getCurrentTime()) {
+        throw new ClientDisconnectException(L.l("{0}: request-timeout read",
+                                                _s));
+      }
+
 
       int readLength = _is.read(buf, offset, length);
 
@@ -207,9 +226,17 @@ public class SocketStream extends StreamImpl {
     throws IOException
   {
     Socket s = _s;
-      
+
     if (s == null)
       return -1;
+
+    long requestExpireTime = _requestExpireTime;
+
+    if (requestExpireTime > 0 && requestExpireTime < Alarm.getCurrentTime()) {
+      throw new ClientDisconnectException(L.l("{0}: request-timeout read",
+                                              _s));
+    }
+
 
     int oldTimeout = s.getSoTimeout();;
 
@@ -230,7 +257,7 @@ public class SocketStream extends StreamImpl {
     if (_is == null) {
       if (_s == null)
         return -1;
-    
+
       _is = _s.getInputStream();
     }
 
@@ -258,10 +285,17 @@ public class SocketStream extends StreamImpl {
     if (_os == null) {
       if (_s == null)
         return;
-      
+
       _os = _s.getOutputStream();
     }
-    
+
+    long requestExpireTime = _requestExpireTime;
+
+    if (requestExpireTime > 0 && requestExpireTime < Alarm.getCurrentTime()) {
+      throw new ClientDisconnectException(L.l("{0}: request-timeout write",
+                                              _s));
+    }
+
     try {
       _needsFlush = true;
       _os.write(buf, offset, length);
@@ -292,7 +326,7 @@ public class SocketStream extends StreamImpl {
         close();
       } catch (IOException e1) {
       }
-      
+
       throw ClientDisconnectException.create(e);
     }
   }
@@ -348,7 +382,7 @@ public class SocketStream extends StreamImpl {
     try {
       if (os != null)
         os.close();
-      
+
       if (is != null)
         is.close();
     } finally {

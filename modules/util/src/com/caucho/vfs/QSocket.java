@@ -41,7 +41,7 @@ abstract public class QSocket {
    * Returns the server inet address that accepted the request.
    */
   abstract public InetAddress getLocalAddress();
-  
+
   /**
    * Returns the server port that accepted the request.
    */
@@ -85,10 +85,10 @@ abstract public class QSocket {
     long address = 0;
     for (int i = 0; i < bytes.length; i++)
       address = 256 * address + (bytes[i] & 0xff);
-    
+
     return address;
   }
-  
+
   /**
    * Returns the remote client's port.
    */
@@ -108,6 +108,10 @@ abstract public class QSocket {
   public SelectableChannel getSelectableChannel()
   {
     return null;
+  }
+
+  public void setRequestExpireTime(long expireTime)
+  {
   }
 
   /**
@@ -156,7 +160,7 @@ abstract public class QSocket {
     else
       return null;
   }
-  
+
   /**
    * Returns a stream impl for the socket encapsulating the
    * input and output stream.
@@ -179,7 +183,7 @@ abstract public class QSocket {
    * returns true if it's closed.
    */
   abstract public boolean isClosed();
-  
+
   abstract public void close()
     throws IOException;
 

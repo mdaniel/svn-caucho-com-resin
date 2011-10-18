@@ -639,16 +639,26 @@ public class TcpConnection extends PortConnection implements ThreadTask
             readTask.run();
           }
         }
-        else if (request.handleResume()) {
-          isKeepalive = true;
-        }
         else {
-          if (controller != null)
-            controller.close();
+          long requestStartTime = Alarm.getCurrentTime();
+          long requestTimeout = getPort().getRequestTimeout();
 
-          isKeepalive = false;
+          if (requestTimeout > 0)
+            _socket.setRequestExpireTime(requestStartTime + requestTimeout);
 
-          closeImpl();
+          if (request.handleResume()) {
+            isKeepalive = true;
+          }
+          else {
+            if (controller != null)
+              controller.close();
+
+            isKeepalive = false;
+
+            closeImpl();
+          }
+
+          _socket.setRequestExpireTime(0);
         }
 
         return;
@@ -676,12 +686,20 @@ public class TcpConnection extends PortConnection implements ThreadTask
 
             isKeepalive = false;
 
+            long requestStartTime = Alarm.getCurrentTime();
+            long requestTimeout = getPort().getRequestTimeout();
+
+            if (requestTimeout > 0)
+              _socket.setRequestExpireTime(requestStartTime + requestTimeout);
+
             if (! port.isClosed()
                 && (! isWaitForRead || getReadStream().waitForRead())) {
 
               synchronized (_requestLock) {
                 isKeepalive = request.handleRequest();
               }
+
+              _socket.setRequestExpireTime(0);
 
               controller = getController();
               if (controller != null && controller.isActive()) {
