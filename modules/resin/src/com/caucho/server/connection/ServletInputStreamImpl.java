@@ -39,16 +39,14 @@ public class ServletInputStreamImpl extends ServletInputStream  {
   private static final L10N L = new L10N(ServletInputStreamImpl.class);
 
   private InputStream _is;
-  private long _requestExpireTime;
 
   public ServletInputStreamImpl()
   {
   }
 
-  public void init(InputStream is, long expireTime)
+  public void init(InputStream is)
   {
     _is = is;
-    _requestExpireTime = expireTime;
   }
 
   public int available() throws IOException
