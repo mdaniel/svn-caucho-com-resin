@@ -66,12 +66,32 @@ public interface ExtCacheEntry<K,V> extends Cache.Entry<K,V>
   /**
    * Returns the idle timeout
    */
-  public long getIdleTimeout();
+  public long getAccessedExpireTimeout();
+  
+  /**
+   * Returns the expire timeout.
+   */
+  public long getModifiedExpireTimeout();
 
   /**
    * Returns the lease timeout
    */
   public long getLeaseTimeout();
+
+  /**
+   * @return
+   */
+  public long getLastAccessedTime();
+
+  /**
+   * Returns the last update time.
+   */
+  public long getLastModifiedTime();
+  
+  /**
+   * Returns true when the entry is expired.
+   */
+  public boolean isExpired(long now);
 
   /**
    * Returns the lease owner
@@ -84,8 +104,6 @@ public interface ExtCacheEntry<K,V> extends Cache.Entry<K,V>
    * Returns the load count.
    */
   public int getLoadCount();
-
-  public long getLastUpdateTime();
   
   public int getUserFlags();
 
@@ -93,9 +111,4 @@ public interface ExtCacheEntry<K,V> extends Cache.Entry<K,V>
    * @return
    */
   public long getVersion();
-
-  /**
-   * @return
-   */
-  public long getLastAccessTime();
 }

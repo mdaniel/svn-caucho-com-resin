@@ -63,7 +63,8 @@ public interface ByteStreamCache
    */
   public ExtCacheEntry<?,?> put(Object key,
                                 InputStream is,
-                                long idleTimeout)
+                                long accessedExpireTimeout,
+                                long modifiedExpireTimeout)
     throws IOException;
   
   /**
@@ -74,7 +75,8 @@ public interface ByteStreamCache
    */
   public ExtCacheEntry<?,?> put(Object key,
                                 InputStream is,
-                                long idleTimeout,
+                                long accessedExpireTimeout,
+                                long modifiedExpireTimeout,
                                 int flags)
     throws IOException;
   

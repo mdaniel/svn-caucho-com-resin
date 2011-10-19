@@ -56,6 +56,7 @@ import javax.cache.event.NotificationScope;
 import com.caucho.config.ConfigException;
 import com.caucho.config.Configurable;
 import com.caucho.config.types.Period;
+import com.caucho.distcache.jcache.CacheManagerFacade;
 import com.caucho.env.distcache.CacheDataBacking;
 import com.caucho.loader.Environment;
 import com.caucho.server.distcache.CacheConfig;
@@ -80,12 +81,12 @@ public class AbstractCache
 {
   private static final L10N L = new L10N(AbstractCache.class);
 
-  private String _name = null;
+  private String _name;
+  
+  private String _managerName;
+  private CacheManagerFacade _cacheManager;
 
   private String _guid;
-
-  private Collection<CacheEntryListener> _listeners
-    = new ConcurrentLinkedQueue<CacheEntryListener>();
 
   private CacheConfig _config = new CacheConfig();
 
@@ -114,17 +115,18 @@ public class AbstractCache
   {
     _name = name;
   }
-
-  public void setGuid(String guid)
+  
+  @Configurable
+  public void setManagerName(String managerName)
   {
-    _guid = guid;
+    _managerName = managerName;
   }
   
-  public String getGuid()
+  public void setCacheManager(CacheManagerFacade cacheManager)
   {
-    return _guid;
+    _cacheManager = cacheManager;
   }
-
+  
   /**
    * Sets the CacheLoader that the Cache can then use to populate
    * cache misses from a reference store (database).
@@ -153,15 +155,78 @@ public class AbstractCache
   }
 
   /**
+   * The maximum idle time for an item, which is typically used for
+   * temporary data like sessions.  For example, session
+   * data might be removed if idle over 30 minutes.
+   * <p/>
+   * Cached data would have infinite idle time because
+   * it doesn't depend on how often it's accessed.
+   * <p/>
+   * Default is infinite.
+   */
+  @Configurable
+  public void setAccessedExpireTimeout(Period period)
+  {
+    setAccessedExpireTimeoutMillis(period.getPeriod());
+  }
+  
+  @Configurable
+  public void setIdleTimeout(Period period)
+  {
+    setAccessedExpireTimeout(period);
+  }
+
+  /**
+   * The maximum idle time for an item, which is typically used for
+   * temporary data like sessions.  For example, session
+   * data might be removed if idle over 30 minutes.
+   * <p/>
+   * Cached data would have infinite idle time because
+   * it doesn't depend on how often it's accessed.
+   * <p/>
+   * Default is infinite.
+   */
+  public long getAccessedExpireTimeout()
+  {
+    return _config.getAccessedExpireTimeout();
+  }
+
+  /**
+   * Sets the idle timeout in milliseconds
+   */
+  @Configurable
+  public void setAccessedExpireTimeoutMillis(long timeout)
+  {
+    _config.setAccessedExpireTimeout(timeout);
+  }
+
+  /**
+   * Returns the idle check window, used to minimize traffic when
+   * updating access times.
+   */
+  public long getAccessedExpireTimeoutWindow()
+  {
+    return _config.getAccessedExpireTimeoutWindow();
+  }
+
+  /**
+   * Sets the idle timeout windows
+   */
+  public void setAccessedExpireTimeoutWindow(Period period)
+  {
+    _config.setAccessedExpireTimeoutWindow(period.getPeriod());
+  }
+
+  /**
    * The maximum valid time for an item.  Items stored in the cache
    * for longer than the expire time are no longer valid and z null value
    * will be returned for a get.
    * <p/>
    * Default is infinite.
    */
-  public long getExpireTimeout()
+  public long getModifiedExpireTimeout()
   {
-    return _config.getExpireTimeout();
+    return _config.getModifiedExpireTimeout();
   }
 
   /**
@@ -172,9 +237,18 @@ public class AbstractCache
    * Default is infinite.
    */
   @Configurable
+  public void setModifiedExpireTimeout(Period expireTimeout)
+  {
+    setModifiedExpireTimeoutMillis(expireTimeout.getPeriod());
+  }
+  
+  /**
+   * Backwards compat.
+   */
+  @Configurable
   public void setExpireTimeout(Period expireTimeout)
   {
-    setExpireTimeoutMillis(expireTimeout.getPeriod());
+    setModifiedExpireTimeout(expireTimeout);
   }
 
   /**
@@ -185,75 +259,18 @@ public class AbstractCache
    * Default is infinite.
    */
   @Configurable
-  public void setExpireTimeoutMillis(long expireTimeout)
+  public void setModifiedExpireTimeoutMillis(long expireTimeout)
   {
-    _config.setExpireTimeout(expireTimeout);
-  }
-
-  /**
-   * The maximum idle time for an item, which is typically used for
-   * temporary data like sessions.  For example, session
-   * data might be removed if idle over 30 minutes.
-   * <p/>
-   * Cached data would have infinite idle time because
-   * it doesn't depend on how often it's accessed.
-   * <p/>
-   * Default is infinite.
-   */
-  @Configurable
-  public void setIdleTimeout(Period period)
-  {
-    setIdleTimeoutMillis(period.getPeriod());
-  }
-
-  /**
-   * The maximum idle time for an item, which is typically used for
-   * temporary data like sessions.  For example, session
-   * data might be removed if idle over 30 minutes.
-   * <p/>
-   * Cached data would have infinite idle time because
-   * it doesn't depend on how often it's accessed.
-   * <p/>
-   * Default is infinite.
-   */
-  public long getIdleTimeout()
-  {
-    return _config.getIdleTimeout();
-  }
-
-  /**
-   * Sets the idle timeout in milliseconds
-   */
-  @Configurable
-  public void setIdleTimeoutMillis(long timeout)
-  {
-    _config.setIdleTimeout(timeout);
-  }
-
-  /**
-   * Returns the idle check window, used to minimize traffic when
-   * updating access times.
-   */
-  public long getIdleTimeoutWindow()
-  {
-    return _config.getIdleTimeoutWindow();
-  }
-
-  /**
-   * Sets the idle timeout windows
-   */
-  public void setIdleTimeoutWindow(Period period)
-  {
-    _config.setIdleTimeoutWindow(period.getPeriod());
+    _config.setModifiedExpireTimeout(expireTimeout);
   }
 
   /**
    * The lease timeout is the time a server can use the local version
    * if it owns it, before a timeout.
    */
-  public long getLeaseTimeout()
+  public long getLeaseExpireTimeout()
   {
-    return _config.getLeaseTimeout();
+    return _config.getLeaseExpireTimeout();
   }
 
   /**
@@ -261,9 +278,9 @@ public class AbstractCache
    * if it owns it, before a timeout.
    */
   @Configurable
-  public void setLeaseTimeout(Period period)
+  public void setLeaseExpireTimeout(Period period)
   {
-    setLeaseTimeoutMillis(period.getPeriod());
+    setLeaseExpireTimeoutMillis(period.getPeriod());
   }
 
   /**
@@ -271,9 +288,9 @@ public class AbstractCache
    * if it owns it, before a timeout.
    */
   @Configurable
-  public void setLeaseTimeoutMillis(long timeout)
+  public void setLeaseExpireTimeoutMillis(long timeout)
   {
-    _config.setLeaseTimeout(timeout);
+    _config.setLeaseExpireTimeout(timeout);
   }
 
   /**
@@ -286,9 +303,9 @@ public class AbstractCache
    * <p/>
    * The default is 10ms
    */
-  public long getLocalReadTimeout()
+  public long getLocalExpireTimeout()
   {
-    return _config.getLocalReadTimeout();
+    return _config.getLocalExpireTimeout();
   }
 
   /**
@@ -302,9 +319,9 @@ public class AbstractCache
    * The default is 10ms
    */
   @Configurable
-  public void setLocalReadTimeout(Period period)
+  public void setLocalExpireTimeout(Period period)
   {
-    setLocalReadTimeoutMillis(period.getPeriod());
+    setLocalExpireTimeoutMillis(period.getPeriod());
   }
 
   /**
@@ -318,9 +335,9 @@ public class AbstractCache
    * The default is 10ms
    */
   @Configurable
-  public void setLocalReadTimeoutMillis(long period)
+  public void setLocalExpireTimeoutMillis(long period)
   {
-    _config.setLocalReadTimeout(period);
+    _config.setLocalExpireTimeout(period);
   }
 
   public void setScopeMode(Scope scope)
@@ -563,11 +580,15 @@ public class AbstractCache
   @Override
   public ExtCacheEntry put(Object key,
                            InputStream is,
-                           long idleTimeout,
-                           int flags)
+                           long accessedExpireTimeout,
+                           long modifiedExpireTimeout,
+                           int userFlags)
     throws IOException
   {
-    return _delegate.put(key, is, idleTimeout, flags);
+    return _delegate.put(key, is, 
+                         accessedExpireTimeout, 
+                         modifiedExpireTimeout,
+                         userFlags);
   }
 
   /**
@@ -581,10 +602,13 @@ public class AbstractCache
   @Override
   public ExtCacheEntry put(Object key,
                            InputStream is,
-                           long idleTimeout)
+                           long accessedExpireTimeout,
+                           long modifiedExpireTimeout)
     throws IOException
   {
-    return _delegate.put(key, is, idleTimeout);
+    return _delegate.put(key, is, 
+                         accessedExpireTimeout, 
+                         modifiedExpireTimeout);
   }
 
   /**
@@ -750,9 +774,7 @@ public class AbstractCache
                                             NotificationScope scope,
                                             boolean synchronous)
   {
-    _listeners.add(listener);
-    
-    return true;
+    return _delegate.registerCacheEntryListener(listener, scope, synchronous);
   }
 
   /**
@@ -761,9 +783,7 @@ public class AbstractCache
   @Override
   public boolean unregisterCacheEntryListener(CacheEntryListener listener)
   {
-    _listeners.remove(listener);
-    
-    return true;
+    return _delegate.unregisterCacheEntryListener(listener);
   }
 
   /**

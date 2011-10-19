@@ -61,7 +61,7 @@ public class CacheBuilderImpl<K,V> implements CacheBuilder<K,V>
     
     _cache = new ClusterCache();
     _cache.setName(name);
-    _cache.setGuid(_guid);
+    _cache.setCacheManager(manager);
     
   }
 
