@@ -169,7 +169,7 @@ public class ResinQuercus extends QuercusContext
       ClusterCache cache = new ClusterCache();
       cache.setName("resin:quercus:session");
 
-      cache.setIdleTimeoutMillis(3600 * 1000L);
+      cache.setAccessedExpireTimeoutMillis(3600 * 1000L);
 
       _sessionCache = cache.createIfAbsent();
     }

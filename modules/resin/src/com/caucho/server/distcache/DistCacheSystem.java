@@ -48,11 +48,11 @@ public class DistCacheSystem extends AbstractResinSubSystem
   private ConcurrentHashMap<String,CacheManagerImpl> _managerMap
     = new ConcurrentHashMap<String,CacheManagerImpl>(); 
   
-  private CacheService _distCacheManager;
+  private CacheStoreManager _distCacheManager;
   
   private DataSource _jdbcDataSource;
   
-  public DistCacheSystem(CacheService distCacheManager)
+  public DistCacheSystem(CacheStoreManager distCacheManager)
   {
     if (distCacheManager == null)
       throw new NullPointerException();
@@ -61,7 +61,7 @@ public class DistCacheSystem extends AbstractResinSubSystem
   }
   
   public static DistCacheSystem 
-    createAndAddService(CacheService distCacheManager)
+    createAndAddService(CacheStoreManager distCacheManager)
   {
     ResinSystem system = preCreate(DistCacheSystem.class);
 
@@ -92,7 +92,7 @@ public class DistCacheSystem extends AbstractResinSubSystem
     return (CacheImpl) localManager.getCache(guid);
   }
 
-  public CacheService getDistCacheManager()
+  public CacheStoreManager getDistCacheManager()
   {
     return _distCacheManager;
   }

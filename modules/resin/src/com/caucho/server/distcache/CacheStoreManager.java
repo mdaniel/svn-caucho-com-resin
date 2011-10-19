@@ -65,12 +65,12 @@ import com.caucho.vfs.WriteStream;
  * Manages the distributed cache
  */
 @Module
-public final class CacheService
+public final class CacheStoreManager
 {
   private static final Logger log
-    = Logger.getLogger(CacheService.class.getName());
+    = Logger.getLogger(CacheStoreManager.class.getName());
 
-  private static final L10N L = new L10N(CacheService.class);
+  private static final L10N L = new L10N(CacheStoreManager.class);
   
   private final ResinSystem _resinSystem;
   private static final Object NULL_OBJECT = new Object();
@@ -94,7 +94,7 @@ public final class CacheService
   
   private CacheEngine _cacheEngine = new AbstractCacheEngine();
   
-  public CacheService(ResinSystem resinSystem)
+  public CacheStoreManager(ResinSystem resinSystem)
   {
     _resinSystem = resinSystem;
     // new AdminPersistentStore(this);
@@ -270,7 +270,7 @@ public final class CacheService
     if (mnodeValue == null) {
       reloadValue(entry, config, now);
     }
-    else if (isLocalReadValid(config, entry.getKeyHash(), mnodeValue, now)) {
+    else if (! isLocalExpired(config, entry.getKeyHash(), mnodeValue, now)) {
     }
     else { // if (! isLazy) {
       reloadValue(entry, config, now);
@@ -284,10 +284,13 @@ public final class CacheService
 
     // server/016q
     if (mnodeValue != null) {
-      updateIdleTime(entry, mnodeValue);
+      updateAccessTime(entry, mnodeValue);
     }
 
-    return entry.getMnodeEntry();
+    mnodeValue = entry.getMnodeEntry();
+    
+
+    return mnodeValue;
   }
 
   private void reloadValue(DistCacheEntry entry,
@@ -310,12 +313,12 @@ public final class CacheService
     reloadValue(entry, config, Alarm.getCurrentTime());
   }
 
-  protected boolean isLocalReadValid(CacheConfig config,
-                                     HashKey key,
-                                     MnodeEntry mnodeValue,
-                                     long now)
+  protected boolean isLocalExpired(CacheConfig config,
+                                  HashKey key,
+                                  MnodeEntry mnodeValue,
+                                  long now)
   {
-    return config.getEngine().isLocalReadValid(config, key, mnodeValue, now);
+    return config.getEngine().isLocalExpired(config, key, mnodeValue, now);
   }
 
   private void updateAccessTime(DistCacheEntry entry,
@@ -323,11 +326,11 @@ public final class CacheService
                                 long now)
   {
     if (mnodeValue != null) {
-      long idleTimeout = mnodeValue.getIdleTimeout();
-      long updateTime = mnodeValue.getLastUpdateTime();
+      long idleTimeout = mnodeValue.getAccessedExpireTimeout();
+      long updateTime = mnodeValue.getLastModifiedTime();
 
       if (idleTimeout < CacheConfig.TIME_INFINITY
-          && updateTime + mnodeValue.getIdleWindow() < now) {
+          && updateTime + mnodeValue.getAccessExpireTimeoutWindow() < now) {
         // XXX:
         mnodeValue.setLastAccessTime(now);
 
@@ -348,7 +351,7 @@ public final class CacheService
       entry.addLoadCount();
     }
     
-    if (mnodeValue == null || mnodeValue.isEntryExpired(now)) {
+    if (mnodeValue == null || mnodeValue.isExpired(now)) {
       CacheLoader loader = config.getCacheLoader();
 
       if (loader != null && entry.getKey() != null) {
@@ -365,9 +368,9 @@ public final class CacheService
 
       MnodeEntry nullMnodeValue = new MnodeEntry(null, 0, 0, null, null,
                                                  0,
-                                                 config.getExpireTimeout(),
-                                                 config.getIdleTimeout(),
-                                                 config.getLeaseTimeout(),
+                                                 config.getModifiedExpireTimeout(),
+                                                 config.getAccessedExpireTimeout(),
+                                                 config.getLeaseExpireTimeout(),
                                                  now, now,
                                                  true, true);
 
@@ -424,7 +427,7 @@ public final class CacheService
     
     mnodeValue = putLocalValue(entry, 
                                mnodeUpdate, value,
-                               config.getLeaseTimeout(),
+                               config.getLeaseExpireTimeout(),
                                leaseOwner);
 
     if (mnodeValue == null)
@@ -438,7 +441,8 @@ public final class CacheService
   public final ExtCacheEntry putStream(DistCacheEntry entry,
                                        InputStream is,
                                        CacheConfig config,
-                                       long idleTimeout,
+                                       long accessedExpireTime,
+                                       long modifiedExpireTime,
                                        int userFlags)
     throws IOException
   {
@@ -461,6 +465,12 @@ public final class CacheService
     long newVersion = getNewVersion(mnodeValue);
     
     long flags = config.getFlags() | ((long) userFlags) << 32;
+    
+    if (accessedExpireTime < 0)
+      accessedExpireTime = config.getAccessedExpireTimeout();
+    
+    if (modifiedExpireTime < 0)
+      modifiedExpireTime = config.getModifiedExpireTimeout();
 
     MnodeUpdate mnodeUpdate = new MnodeUpdate(key.getHash(),
                                               valueHash.getHash(),
@@ -468,8 +478,8 @@ public final class CacheService
                                               newVersion,
                                               HashKey.getHash(config.getCacheKey()),
                                               flags,
-                                              config.getExpireTimeout(),
-                                              idleTimeout);
+                                              modifiedExpireTime,
+                                              accessedExpireTime);
 
     // add 25% window for update efficiency
     // idleTimeout = idleTimeout * 5L / 4;
@@ -477,7 +487,7 @@ public final class CacheService
     int leaseOwner = (mnodeValue != null) ? mnodeValue.getLeaseOwner() : -1;
     
     mnodeValue = putLocalValue(entry, mnodeUpdate, null,
-                               config.getLeaseTimeout(),
+                               config.getLeaseExpireTimeout(),
                                leaseOwner);
 
     if (mnodeValue == null)
@@ -530,7 +540,7 @@ public final class CacheService
 
     HashKey oldHash = getAndPut(entry, 
                                 mnodeUpdate, value,
-                                config.getLeaseTimeout(),
+                                config.getLeaseExpireTimeout(),
                                 leaseOwner,
                                 config);
 
@@ -691,7 +701,7 @@ public final class CacheService
     
     mnodeValue = putLocalValue(entry,
                                mnodeUpdate, null,
-                               config.getLeaseTimeout(),
+                               config.getLeaseExpireTimeout(),
                                leaseOwner);
     
     if (mnodeValue == null)
@@ -722,7 +732,7 @@ public final class CacheService
     long now = Alarm.getCurrentTime();
 
     if (entry.getMnodeEntry() == null
-        || entry.getMnodeEntry().isEntryExpired(now)) {
+        || entry.getMnodeEntry().isExpired(now)) {
       forceLoadMnodeValue(entry);
     }
 
@@ -736,22 +746,22 @@ public final class CacheService
     MnodeEntry mnodeValue = entry.getMnodeEntry();
 
     if (mnodeValue != null) {
-      updateIdleTime(entry, mnodeValue);
+      updateAccessTime(entry, mnodeValue);
     }
 
     return entry;
   }
 
-  final protected void updateIdleTime(DistCacheEntry entry,
-                                      MnodeEntry mnodeValue)
+  final protected void updateAccessTime(DistCacheEntry entry,
+                                        MnodeEntry mnodeValue)
   {
-    long idleTimeout = mnodeValue.getIdleTimeout();
-    long updateTime = mnodeValue.getLastUpdateTime();
+    long accessedExpireTimeout = mnodeValue.getAccessedExpireTimeout();
+    long accessedTime = mnodeValue.getLastAccessedTime();
 
     long now = Alarm.getCurrentTime();
 
-    if (idleTimeout < CacheConfig.TIME_INFINITY
-        && updateTime + mnodeValue.getIdleWindow() < now) {
+    if (accessedExpireTimeout < CacheConfig.TIME_INFINITY
+        && accessedTime + mnodeValue.getAccessExpireTimeoutWindow() < now) {
       mnodeValue.setLastAccessTime(now);
 
       saveUpdateTime(entry, mnodeValue);
@@ -883,8 +893,8 @@ public final class CacheService
     }
     
     if (oldEntryValue != null
-        && mnodeValue.getLastAccessTime() == oldEntryValue.getLastAccessTime()
-        && mnodeValue.getLastUpdateTime() == oldEntryValue.getLastUpdateTime()) {
+        && mnodeValue.getLastAccessedTime() == oldEntryValue.getLastAccessedTime()
+        && mnodeValue.getLastModifiedTime() == oldEntryValue.getLastModifiedTime()) {
       return oldEntryValue;
     }
 
@@ -917,7 +927,7 @@ public final class CacheService
 
     long leaseTimeout = (mnodeEntry != null
                          ? mnodeEntry.getLeaseTimeout()
-                         : config.getLeaseTimeout());
+                         : config.getLeaseExpireTimeout());
     int leaseOwner = (mnodeEntry != null ? mnodeEntry.getLeaseOwner() : -1);
     
     MnodeUpdate mnodeUpdate;
@@ -953,8 +963,8 @@ public final class CacheService
 
     long newVersion = getNewVersion(mnodeValue);
 
-    long expireTimeout = mnodeValue != null ? mnodeValue.getExpireTimeout() : -1;
-    long idleTimeout = mnodeValue != null ? mnodeValue.getIdleTimeout() : -1;
+    long expireTimeout = mnodeValue != null ? mnodeValue.getModifiedExpireTimeout() : -1;
+    long idleTimeout = mnodeValue != null ? mnodeValue.getAccessedExpireTimeout() : -1;
     long leaseTimeout = mnodeValue != null ? mnodeValue.getLeaseTimeout() : -1;
     int leaseOwner = mnodeValue != null ? mnodeValue.getLeaseOwner() : -1;
 

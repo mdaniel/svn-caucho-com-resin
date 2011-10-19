@@ -46,7 +46,7 @@ import com.caucho.util.Hex;
  * An entry in the cache map
  */
 public class DistCacheEntry implements ExtCacheEntry {
-  private final CacheService _cacheService;
+  private final CacheStoreManager _cacheService;
   private final HashKey _keyHash;
 
   private final TriadOwner _owner;
@@ -60,7 +60,7 @@ public class DistCacheEntry implements ExtCacheEntry {
   
   private final AtomicInteger _loadCount = new AtomicInteger();
 
-  public DistCacheEntry(CacheService engine,
+  public DistCacheEntry(CacheStoreManager engine,
                         Object key,
                         HashKey keyHash,
                         TriadOwner owner)
@@ -71,7 +71,7 @@ public class DistCacheEntry implements ExtCacheEntry {
     _owner = owner;
   }
 
-  public DistCacheEntry(CacheService engine,
+  public DistCacheEntry(CacheStoreManager engine,
                         Object key,
                         HashKey keyHash,
                         TriadOwner owner,
@@ -209,10 +209,14 @@ public class DistCacheEntry implements ExtCacheEntry {
    */
   public ExtCacheEntry put(InputStream is,
                            CacheConfig config,
-                           long idleTimeout)
+                           long accessedExpireTimeout,
+                           long modifiedExpireTimeout)
     throws IOException
   {
-    return _cacheService.putStream(this, is, config, idleTimeout, 0);
+    return _cacheService.putStream(this, is, config, 
+                                   accessedExpireTimeout,
+                                   modifiedExpireTimeout, 
+                                   0);
   }
 
   /**
@@ -220,11 +224,15 @@ public class DistCacheEntry implements ExtCacheEntry {
    */
   public ExtCacheEntry put(InputStream is,
                            CacheConfig config,
-                           long idleTimeout,
+                           long accessedExpireTimeout,
+                           long modifiedExpireTimeout,
                            int flags)
     throws IOException
   {
-    return _cacheService.putStream(this, is, config, idleTimeout, flags);
+    return _cacheService.putStream(this, is, config, 
+                                   accessedExpireTimeout, 
+                                   modifiedExpireTimeout,
+                                   flags);
   }
 
   /**
@@ -315,9 +323,26 @@ public class DistCacheEntry implements ExtCacheEntry {
   }
 
   @Override
-  public long getIdleTimeout()
+  public long getAccessedExpireTimeout()
   {
-    return getMnodeEntry().getIdleTimeout();
+    return getMnodeEntry().getAccessedExpireTimeout();
+  }
+
+  @Override
+  public long getModifiedExpireTimeout()
+  {
+    return getMnodeEntry().getModifiedExpireTimeout();
+  }
+  
+  @Override
+  public boolean isExpired(long now)
+  {
+    MnodeEntry entry = getMnodeEntry();
+    
+    if (entry != null)
+      return entry.isExpired(now);
+    else
+      return false;
   }
 
   @Override
@@ -360,14 +385,14 @@ public class DistCacheEntry implements ExtCacheEntry {
     return getMnodeEntry().getHits();
   }
 
-  public long getLastAccessTime()
+  public long getLastAccessedTime()
   {
-    return getMnodeEntry().getLastAccessTime();
+    return getMnodeEntry().getLastAccessedTime();
   }
 
-  public long getLastUpdateTime()
+  public long getLastModifiedTime()
   {
-    return getMnodeEntry().getLastUpdateTime();
+    return getMnodeEntry().getLastModifiedTime();
   }
 
   public long getVersion()

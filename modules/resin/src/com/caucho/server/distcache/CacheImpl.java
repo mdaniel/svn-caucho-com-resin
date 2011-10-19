@@ -63,7 +63,7 @@ import com.caucho.distcache.ExtCacheEntry;
 import com.caucho.distcache.ObjectCache;
 import com.caucho.env.distcache.CacheDataBacking;
 import com.caucho.loader.Environment;
-import com.caucho.server.distcache.CacheService.DataItem;
+import com.caucho.server.distcache.CacheStoreManager.DataItem;
 import com.caucho.util.HashKey;
 import com.caucho.util.L10N;
 import com.caucho.util.LruCache;
@@ -80,7 +80,7 @@ public class CacheImpl
   private static final L10N L = new L10N(CacheImpl.class);
 
   private CacheManagerImpl _localManager;
-  private CacheService _manager;
+  private CacheStoreManager _manager;
 
   private final String _name;
   private final String _guid;
@@ -133,7 +133,7 @@ public class CacheImpl
    */
   public long getExpireTimeout()
   {
-    return _config.getExpireTimeout();
+    return _config.getModifiedExpireTimeout();
   }
 
   /**
@@ -148,7 +148,7 @@ public class CacheImpl
    */
   public long getIdleTimeout()
   {
-    return _config.getIdleTimeout();
+    return _config.getAccessedExpireTimeout();
   }
 
   /**
@@ -157,7 +157,7 @@ public class CacheImpl
    */
   public long getIdleTimeoutWindow()
   {
-    return _config.getIdleTimeoutWindow();
+    return _config.getAccessedExpireTimeoutWindow();
   }
 
   /**
@@ -166,7 +166,7 @@ public class CacheImpl
    */
   public long getLeaseTimeout()
   {
-    return _config.getLeaseTimeout();
+    return _config.getLeaseExpireTimeout();
   }
 
   /**
@@ -181,7 +181,7 @@ public class CacheImpl
    */
   public long getLocalReadTimeout()
   {
-    return _config.getLocalReadTimeout();
+    return _config.getLocalExpireTimeout();
   }
   
   public CacheImpl createIfAbsent()
@@ -333,11 +333,15 @@ public class CacheImpl
   @Override
   public ExtCacheEntry put(Object key,
                            InputStream is,
-                           long idleTimeout,
+                           long accessedExpireTimeout,
+                           long modifiedExpireTimeout,
                            int flags)
     throws IOException
   {
-    return getDistCacheEntry(key).put(is, _config, idleTimeout, flags);
+    return getDistCacheEntry(key).put(is, _config, 
+                                      accessedExpireTimeout,
+                                      modifiedExpireTimeout,
+                                      flags);
   }
 
   /**
@@ -351,10 +355,13 @@ public class CacheImpl
   @Override
   public ExtCacheEntry put(Object key,
                            InputStream is,
-                           long idleTimeout)
+                           long accessedExpireTimeout,
+                           long modifiedExpireTimeout)
     throws IOException
   {
-    return getDistCacheEntry(key).put(is, _config, idleTimeout);
+    return getDistCacheEntry(key).put(is, _config, 
+                                      accessedExpireTimeout,
+                                      modifiedExpireTimeout);
   }
 
   /**
@@ -826,30 +833,30 @@ public class CacheImpl
   @SuppressWarnings("unchecked")
   public MnodeStore getMnodeStore()
   {
-    return ((CacheService) _manager).getMnodeStore();
+    return ((CacheStoreManager) _manager).getMnodeStore();
   }
   
   @SuppressWarnings("unchecked")
   public DataStore getDataStore()
   {
-    return ((CacheService) _manager).getDataStore();
+    return ((CacheStoreManager) _manager).getDataStore();
   }
   
   public void saveData(Object value)
   {
-    ((CacheService) _manager).writeData(null, value, 
+    ((CacheStoreManager) _manager).writeData(null, value, 
                                                 _config.getValueSerializer());
   }
   
   public HashKey saveData(InputStream is)
     throws IOException
   {
-    DataItem dataItem = ((CacheService) _manager).writeData(null, is);
+    DataItem dataItem = ((CacheStoreManager) _manager).writeData(null, is);
     
     return dataItem.getValue();
   }
 
-  public void setManager(CacheService manager)
+  public void setManager(CacheStoreManager manager)
   {
     if (_manager != null)
       throw new IllegalStateException();

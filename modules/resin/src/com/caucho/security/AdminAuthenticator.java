@@ -104,8 +104,8 @@ public class AdminAuthenticator extends XmlAuthenticator
     if (authStoreImpl == null) {
       AbstractCache authStore = new ClusterCache();
 
-      authStore.setIdleTimeoutMillis(Period.FOREVER);
-      authStore.setExpireTimeoutMillis(Period.FOREVER);
+      authStore.setAccessedExpireTimeoutMillis(Period.FOREVER);
+      authStore.setModifiedExpireTimeoutMillis(Period.FOREVER);
 
       authStore.setName("resin:authenticator");
       authStore.setScopeMode(AbstractCache.Scope.CLUSTER);
@@ -147,7 +147,7 @@ public class AdminAuthenticator extends XmlAuthenticator
 
     ExtCacheEntry entry = (ExtCacheEntry) _authStore.getCacheEntry(ADMIN_AUTH_MAP_KEY);
 
-    if (entry != null && entry.getLastUpdateTime() > lastCheck)
+    if (entry != null && entry.getLastModifiedTime() > lastCheck)
       return true;
 
     return false;

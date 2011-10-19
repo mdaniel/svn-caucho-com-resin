@@ -288,7 +288,7 @@ public class SessionImpl implements HttpSession, CacheListener {
     if (entry == null)
       return _lastUseTime;
     else
-      return entry.getLastAccessTime();
+      return entry.getLastAccessedTime();
   }
 
   boolean isClosing()
@@ -649,7 +649,7 @@ public class SessionImpl implements HttpSession, CacheListener {
       if (entry != null && ! entry.isValueNull()) {
         // server/01a1, #4419
         
-        _idleTimeout = entry.getIdleTimeout();
+        _idleTimeout = entry.getAccessedExpireTimeout();
         // _idleTimeout = entry.getIdleTimeout() * 4 / 5;
         //_isIdleSet = true;
       }
@@ -847,6 +847,7 @@ public class SessionImpl implements HttpSession, CacheListener {
       _manager.addSessionSaveSample(os.getLength());
 
       _cacheEntry = _manager.getCache().put(_id, os.getInputStream(),
+                                            _idleTimeout,
                                             _idleTimeout);
 
       if (log.isLoggable(Level.FINE)) {

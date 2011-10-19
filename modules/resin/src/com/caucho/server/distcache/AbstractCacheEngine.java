@@ -47,12 +47,12 @@ public class AbstractCacheEngine implements CacheEngine
   }
 
   @Override
-  public boolean isLocalReadValid(CacheConfig config,
+  public boolean isLocalExpired(CacheConfig config,
                                   HashKey key,
                                   MnodeEntry mnodeEntry,
                                   long now)
   {
-    return ! mnodeEntry.isEntryExpired(now);
+    return mnodeEntry.isExpired(now);
   }
 
   @Override

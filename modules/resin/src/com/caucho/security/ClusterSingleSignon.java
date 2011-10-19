@@ -58,7 +58,7 @@ public class ClusterSingleSignon implements SingleSignon {
     _cacheConfig = new ClusterCache();
     
     _cacheConfig.setName("resin:single-signon:" + name);
-    _cacheConfig.setExpireTimeoutMillis(24 * 3600 * 1000L);
+    _cacheConfig.setModifiedExpireTimeoutMillis(24 * 3600 * 1000L);
     _cacheConfig.setName("resin:single-signon:" + name);
   }
 

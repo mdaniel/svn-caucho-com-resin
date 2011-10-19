@@ -44,8 +44,8 @@ public class MnodeValue implements java.io.Serializable {
   
   private final long _flags;
   
-  private final long _expireTimeout;
-  private final long _idleTimeout;
+  private final long _accessedExpireTimeout;
+  private final long _modifiedExpireTimeout;
   
   private final long _version;
   
@@ -54,8 +54,8 @@ public class MnodeValue implements java.io.Serializable {
                     long version,
                     byte []cacheHash,
                     long flags,
-                    long expireTimeout,
-                    long idleTimeout)
+                    long accessedExpireTimeout,
+                    long modifiedExpireTimeout)
   {
     _valueHash = valueHash;
     _valueLength = valueLength;
@@ -64,8 +64,8 @@ public class MnodeValue implements java.io.Serializable {
     
     _flags = flags;
     
-    _expireTimeout = expireTimeout;
-    _idleTimeout = idleTimeout;
+    _modifiedExpireTimeout = modifiedExpireTimeout;
+    _accessedExpireTimeout = accessedExpireTimeout;
     
     _version = version;
   }
@@ -86,8 +86,8 @@ public class MnodeValue implements java.io.Serializable {
     
     _flags = mnodeValue._flags;
     
-    _expireTimeout = mnodeValue._expireTimeout;
-    _idleTimeout = mnodeValue._idleTimeout;
+    _modifiedExpireTimeout = mnodeValue._modifiedExpireTimeout;
+    _accessedExpireTimeout = mnodeValue._accessedExpireTimeout;
     
     _version = mnodeValue._version;
   }
@@ -105,14 +105,14 @@ public class MnodeValue implements java.io.Serializable {
     if (oldValue != null) {
       _cacheHash = oldValue._cacheHash;
       _flags = oldValue._flags;
-      _expireTimeout = oldValue._expireTimeout;
-      _idleTimeout = oldValue._idleTimeout;
+      _modifiedExpireTimeout = oldValue._modifiedExpireTimeout;
+      _accessedExpireTimeout = oldValue._accessedExpireTimeout;
     }
     else {
       _cacheHash = null;
       _flags = 0;
-      _expireTimeout = -1;
-      _idleTimeout = -1;
+      _modifiedExpireTimeout = -1;
+      _accessedExpireTimeout = -1;
     }
   }
 
@@ -130,8 +130,8 @@ public class MnodeValue implements java.io.Serializable {
     
     _flags = config.getFlags();
     
-    _expireTimeout = config.getExpireTimeout();
-    _idleTimeout = config.getIdleTimeout();
+    _modifiedExpireTimeout = config.getModifiedExpireTimeout();
+    _accessedExpireTimeout = config.getAccessedExpireTimeout();
   }
   
   public MnodeValue(HashKey valueHash,
@@ -183,14 +183,14 @@ public class MnodeValue implements java.io.Serializable {
     return (int) (getFlags() >> 32);
   }
   
-  public final long getExpireTimeout()
+  public final long getModifiedExpireTimeout()
   {
-    return _expireTimeout;
+    return _modifiedExpireTimeout;
   }
   
-  public final long getIdleTimeout()
+  public final long getAccessedExpireTimeout()
   {
-    return _idleTimeout;
+    return _accessedExpireTimeout;
   }
 
   @Override

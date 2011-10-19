@@ -45,13 +45,13 @@ public class MnodeUpdate extends MnodeValue {
                      long version,
                      byte []cacheHash,
                      long flags,
-                     long expireTimeout,
-                     long idleTimeout)
+                     long accessedExpireTime,
+                     long modifiedExpireTime)
   {
     super(valueHash, valueLength, version,
           cacheHash, 
           flags, 
-          expireTimeout, idleTimeout);
+          accessedExpireTime, modifiedExpireTime);
     
     _keyHash = keyHash;
   }

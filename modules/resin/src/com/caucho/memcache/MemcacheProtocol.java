@@ -27,77 +27,56 @@
  * @author Scott Ferguson
  */
 
-package com.caucho.server.distcache;
+package com.caucho.memcache;
 
-import com.caucho.management.server.AbstractManagedObject;
-import com.caucho.management.server.PersistentStoreMXBean;
+import javax.annotation.PostConstruct;
+
+import com.caucho.distcache.ClusterCache;
+import com.caucho.distcache.ResinCacheBuilder;
+import com.caucho.network.listen.Protocol;
+import com.caucho.network.listen.ProtocolConnection;
+import com.caucho.network.listen.SocketLink;
 
 /**
- * Manages the distributed cache
+ * Custom serialization for the cache
  */
-public class AdminPersistentStore extends AbstractManagedObject 
-  implements PersistentStoreMXBean
+public class MemcacheProtocol implements Protocol
 {
-  private CacheStoreManager _manager;
+  private ClusterCache _cache;
   
-  AdminPersistentStore(CacheStoreManager manager)
+  public MemcacheProtocol()
   {
-    _manager = manager;
-    
-    registerSelf();
+    _cache = new ClusterCache();
+    _cache.setName("memcache");
+    _cache.setLocalExpireTimeoutMillis(1000);
+    _cache.setLeaseExpireTimeoutMillis(60 * 60 * 1000);
+  }
+  
+  public void setMode(ResinCacheBuilder.Scope scope)
+  {
+    _cache.setScopeMode(scope);
+  }
+  
+  @PostConstruct
+  public void init()
+  {
+    _cache.init();
+  }
+  
+  ClusterCache getCache()
+  {
+    return _cache;
   }
   
   @Override
-  public String getName()
+  public ProtocolConnection createConnection(SocketLink link)
   {
-    return null;
+    return new MemcacheConnection(this, link);
   }
 
   @Override
-  public long getObjectCount()
+  public String getProtocolName()
   {
-    return 0;
-  }
-
-  @Override
-  public long getMnodeCount()
-  {
-    return _manager.getDataBacking().getMnodeStore().getCount();
-  }
-
-  @Override
-  public long getDataCount()
-  {
-    return _manager.getDataBacking().getDataStore().getCount();
-  }
-
-  @Override
-  public long getLoadCountTotal()
-  {
-    return 0;
-  }
-
-  @Override
-  public long getLoadFailCountTotal()
-  {
-    return 0;
-  }
-
-  @Override
-  public long getSaveCountTotal()
-  {
-    return 0;
-  }
-
-  @Override
-  public long getSaveFailCountTotal()
-  {
-    return 0;
-  }
-
-  @Override
-  public String getStoreType()
-  {
-    return null;
+    return "memcache";
   }
 }

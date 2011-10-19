@@ -586,8 +586,8 @@ public class MnodeStore implements AlarmListener {
       stmt.setLong(5, mnodeUpdate.getFlags());
       stmt.setLong(6, mnodeUpdate.getVersion());
       stmt.setLong(7, _serverVersion);
-      stmt.setLong(8, mnodeUpdate.getExpireTimeout());
-      stmt.setLong(9, mnodeUpdate.getIdleTimeout());
+      stmt.setLong(8, mnodeUpdate.getModifiedExpireTimeout());
+      stmt.setLong(9, mnodeUpdate.getAccessedExpireTimeout());
       stmt.setLong(10, Alarm.getCurrentTime());
 
       int count = stmt.executeUpdate();
@@ -628,7 +628,7 @@ public class MnodeStore implements AlarmListener {
       
       stmt.setLong(3, _serverVersion);
       stmt.setLong(4, mnodeUpdate.getVersion());
-      stmt.setLong(5, mnodeUpdate.getIdleTimeout());
+      stmt.setLong(5, mnodeUpdate.getAccessedExpireTimeout());
       stmt.setLong(6, Alarm.getCurrentTime());
 
       stmt.setBytes(7, key);

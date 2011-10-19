@@ -43,10 +43,10 @@ public interface CacheEngine
 
   public void initCache(CacheImpl cache);
 
-  public boolean isLocalReadValid(CacheConfig config,
-                                  HashKey key,
-                                  MnodeEntry mnodeEntry, 
-                                  long now);
+  public boolean isLocalExpired(CacheConfig config,
+                                HashKey key,
+                                MnodeEntry mnodeEntry, 
+                                long now);
   
   public MnodeEntry get(DistCacheEntry entry, CacheConfig config);
   

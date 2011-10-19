@@ -165,8 +165,8 @@ public class CacheDataBackingImpl implements CacheDataBacking {
   {
     if (_mnodeStore.updateUpdateTime(keyHash,
                                      mnodeValue.getVersion(),
-                                     mnodeValue.getIdleTimeout(),
-                                     mnodeValue.getLastUpdateTime())) {
+                                     mnodeValue.getAccessedExpireTimeout(),
+                                     mnodeValue.getLastModifiedTime())) {
       return mnodeValue;
     } else {
       log.fine(this + " db updateTime failed due to timing conflict"
