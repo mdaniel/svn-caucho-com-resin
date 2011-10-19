@@ -42,6 +42,8 @@ import javax.servlet.http.Cookie;
 import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
 
+import com.caucho.env.meter.CountSensor;
+import com.caucho.env.meter.MeterService;
 import com.caucho.server.dispatch.BadRequestException;
 import com.caucho.server.session.CookieImpl;
 import com.caucho.server.session.SessionImpl;
@@ -58,9 +60,32 @@ import com.caucho.vfs.TempBuffer;
  * response stream.
  */
 abstract public class AbstractHttpResponse {
-  static final protected Logger log
+  private static final Logger log
     = Logger.getLogger(AbstractHttpResponse.class.getName());
-  static final L10N L = new L10N(AbstractHttpResponse.class);
+  private static final L10N L = new L10N(AbstractHttpResponse.class);
+  
+  private static final CountSensor _statusXxxSensor
+    = MeterService.createCountMeter("Resin|HTTP|xxx");
+  private static final CountSensor _status2xxSensor
+    = MeterService.createCountMeter("Resin|HTTP|2xx");
+  private static final CountSensor _status200Sensor
+    = MeterService.createCountMeter("Resin|HTTP|200");
+  private static final CountSensor _status3xxSensor
+    = MeterService.createCountMeter("Resin|HTTP|3xx");
+  private static final CountSensor _status304Sensor
+    = MeterService.createCountMeter("Resin|HTTP|304");
+  private static final CountSensor _status4xxSensor
+    = MeterService.createCountMeter("Resin|HTTP|4xx");
+  private static final CountSensor _status400Sensor
+    = MeterService.createCountMeter("Resin|HTTP|400");
+  private static final CountSensor _status404Sensor
+    = MeterService.createCountMeter("Resin|HTTP|404");
+  private static final CountSensor _status5xxSensor
+    = MeterService.createCountMeter("Resin|HTTP|5xx");
+  private static final CountSensor _status500Sensor
+    = MeterService.createCountMeter("Resin|HTTP|500");
+  private static final CountSensor _status503Sensor
+    = MeterService.createCountMeter("Resin|HTTP|503");
 
   protected static final CaseInsensitiveIntMap _headerCodes;
   protected static final int HEADER_CACHE_CONTROL = 1;
@@ -799,12 +824,7 @@ abstract public class AbstractHttpResponse {
 
     int statusCode = res.getStatus();
 
-    int majorCode = statusCode / 100;
-
-    if (webApp != null) {
-      if (majorCode == 5)
-        webApp.addStatus500();
-    }
+    addSensorCount(statusCode, webApp);
 
     if (req != null) {
       HttpSession session = req.getMemorySession();
@@ -816,7 +836,67 @@ abstract public class AbstractHttpResponse {
 
     return writeHeadersInt(length, isHead);
   }
+  
+  private void addSensorCount(int statusCode, WebApp webApp)
+  {
+    int majorCode = statusCode / 100;
 
+    switch (majorCode) {
+    case 2:
+      switch (statusCode) {
+      case 200:
+        _status200Sensor.start();
+        break;
+      default:
+        _status2xxSensor.start();
+        break;
+      }
+      break;
+    case 3:
+      switch (statusCode) {
+      case 304:
+        _status304Sensor.start();
+        break;
+      default:
+        _status3xxSensor.start();
+        break;
+      }
+      break;
+    case 4:
+      switch (statusCode) {
+      case 400:
+        _status400Sensor.start();
+        break;
+      case 404:
+        _status404Sensor.start();
+        break;
+      default:
+        _status4xxSensor.start();
+        break;
+      }
+      break;
+    case 5:
+      if (webApp != null)
+        webApp.addStatus500();
+      
+      switch (statusCode) {
+      case 500:
+        _status500Sensor.start();
+        break;
+      case 503:
+        _status503Sensor.start();
+        break;
+      default:
+        _status5xxSensor.start();
+        break;
+      }
+      break;
+    default:
+      _statusXxxSensor.start();
+      break;
+    }
+  }
+    
   abstract protected boolean writeHeadersInt(int length,
                                              boolean isHead)
     throws IOException;

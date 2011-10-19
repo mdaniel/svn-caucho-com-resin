@@ -32,10 +32,13 @@ package com.caucho.server.http;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.logging.Level;
+import java.util.logging.Logger;
 
 import javax.servlet.http.Cookie;
 import javax.servlet.http.HttpServletResponse;
 
+import com.caucho.env.meter.CountSensor;
+import com.caucho.env.meter.MeterService;
 import com.caucho.network.listen.TcpSocketLink;
 import com.caucho.server.cluster.Server;
 import com.caucho.server.webapp.WebApp;
@@ -45,20 +48,23 @@ import com.caucho.vfs.WriteStream;
 
 public class HttpResponse extends AbstractHttpResponse
 {
-  static final byte []_http10ok = "HTTP/1.0 200 OK".getBytes();
-  static final byte []_http11ok = "HTTP/1.1 200 OK".getBytes();
-  static final byte []_contentLengthBytes = "\r\nContent-Length: ".getBytes();
-  static final byte []_contentTypeBytes = "\r\nContent-Type: ".getBytes();
-  static final byte []_textHtmlBytes = "\r\nContent-Type: text/html".getBytes();
-  static final byte []_charsetBytes = "; charset=".getBytes();
-  static final byte []_textHtmlLatin1Bytes = "\r\nContent-Type: text/html; charset=iso-8859-1".getBytes();
+  private static final Logger log
+    = Logger.getLogger(HttpResponse.class.getName());
+  
+  private static final byte []_http10ok = "HTTP/1.0 200 OK".getBytes();
+  private static final byte []_http11ok = "HTTP/1.1 200 OK".getBytes();
+  private static final byte []_contentLengthBytes = "\r\nContent-Length: ".getBytes();
+  private static final byte []_contentTypeBytes = "\r\nContent-Type: ".getBytes();
+  private static final byte []_textHtmlBytes = "\r\nContent-Type: text/html".getBytes();
+  private static final byte []_charsetBytes = "; charset=".getBytes();
+  private static final byte []_textHtmlLatin1Bytes = "\r\nContent-Type: text/html; charset=iso-8859-1".getBytes();
 
-  static final byte []_connectionCloseBytes = "\r\nConnection: close".getBytes();
+  private static final byte []_connectionCloseBytes = "\r\nConnection: close".getBytes();
 
-  final byte []_resinServerBytes;
+  private static final char []_connectionCb = "Connection".toCharArray();
+  private static final CharBuffer _closeCb = new CharBuffer("Close");
 
-  static final char []_connectionCb = "Connection".toCharArray();
-  static final CharBuffer _closeCb = new CharBuffer("Close");
+  private final byte []_resinServerBytes;
 
   private final HttpRequest _request;
 

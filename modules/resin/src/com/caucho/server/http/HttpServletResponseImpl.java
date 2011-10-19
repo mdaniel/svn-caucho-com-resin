@@ -1584,6 +1584,7 @@ public final class HttpServletResponseImpl extends AbstractCauchoResponse
     return _response;
   }
 
+  @Override
   public int getStatus()
   {
     return _status;
