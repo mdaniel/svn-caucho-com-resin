@@ -62,7 +62,7 @@ public class CacheManagerImpl implements Closeable
   {
     _cacheSystem = cacheSystem;
     _guid = guid;
-    
+
     _cacheMap = new ConcurrentHashMap<String,CacheImpl>();
     
     Environment.addCloseListener(this, loader);

@@ -216,9 +216,9 @@ public final class MnodeEntry extends MnodeValue implements ExtCacheEntry {
     else if (now <= _lastAccessTime + localExpireTimeout)
       return false;
     else if (_leaseOwner == serverIndex && now <= _leaseExpireTime)
-      return true;
-    else
       return false;
+    else
+      return true;
   }
 
   public final boolean isLeaseExpired(long now)

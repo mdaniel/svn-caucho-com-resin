@@ -347,9 +347,7 @@ public final class CacheStoreManager
     
     mnodeValue = config.getEngine().get(entry, config);
     
-    if (mnodeValue != null) {
-      entry.addLoadCount();
-    }
+    entry.addLoadCount();
     
     if (mnodeValue == null || mnodeValue.isExpired(now)) {
       CacheLoader loader = config.getCacheLoader();

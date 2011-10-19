@@ -282,6 +282,12 @@ public class AbstractCache
   {
     setLeaseExpireTimeoutMillis(period.getPeriod());
   }
+  
+  @Configurable
+  public void setLeaseTimeout(Period period)
+  {
+    setLeaseExpireTimeout(period);
+  }
 
   /**
    * The lease timeout is the time a server can use the local version
@@ -322,6 +328,15 @@ public class AbstractCache
   public void setLocalExpireTimeout(Period period)
   {
     setLocalExpireTimeoutMillis(period.getPeriod());
+  }
+  
+  /**
+   * Backwards compat.
+   */
+  @Configurable
+  public void setLocalReadTimeout(Period period)
+  {
+    setLocalExpireTimeout(period);
   }
 
   /**
@@ -914,6 +929,10 @@ public class AbstractCache
       throw new ConfigException(L.l("Each Cache must have a name."));
 
     String contextId = Environment.getEnvironmentName();
+    
+    if (_cacheManager != null)
+      contextId = _cacheManager.getGuid();
+      
 
     if (_guid == null)
       _guid = contextId + ":" + _name;
@@ -992,8 +1011,18 @@ public class AbstractCache
     if (cacheService == null)
       throw new ConfigException(L.l("'{0}' cannot be initialized because it is not in a Resin environment",
                                     getClass().getSimpleName()));
+    
+    String managerName = _managerName;
+    
+    if (managerName == null && _cacheManager != null)
+      managerName = _cacheManager.getName();
 
-    CacheManagerImpl manager = cacheService.getCacheManager();
+    CacheManagerImpl manager;
+    
+    if (managerName != null)
+      manager = cacheService.getCacheManager(managerName);
+    else
+      manager = cacheService.getCacheManager();
     
     _delegate = manager.createIfAbsent(_name, _config);
   }

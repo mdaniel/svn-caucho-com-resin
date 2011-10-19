@@ -1156,6 +1156,7 @@ public class PageContextImpl extends PageContext
    *
    * @param e the caught exception
    */
+  @Override
   public void handlePageException(Exception e)
     throws ServletException, IOException
   {

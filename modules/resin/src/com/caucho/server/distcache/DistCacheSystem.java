@@ -99,9 +99,14 @@ public class DistCacheSystem extends AbstractResinSubSystem
   
   public CacheManagerImpl getCacheManager()
   {
-    ClassLoader loader = Thread.currentThread().getContextClassLoader();
-    
     String name = "Resin";
+    
+    return getCacheManager(name);
+  }
+  
+  public CacheManagerImpl getCacheManager(String name)
+  {
+    ClassLoader loader = Thread.currentThread().getContextClassLoader();
     
     return getCacheManager(name, loader);
   }

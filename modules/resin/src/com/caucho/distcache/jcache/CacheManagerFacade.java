@@ -63,7 +63,7 @@ public class CacheManagerFacade implements CacheManager
     return _name;
   }
   
-  String getGuid()
+  public String getGuid()
   {
     return _guid;
   }
