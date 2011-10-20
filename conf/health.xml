@@ -124,6 +124,12 @@
     
   <health:HealthSystemHealthCheck/>
   
+  <!--
+    - Warning about an expiring Resin Pro License 
+   -->
+  <health:LicenseHealthCheck>
+    <warning-period>30D</warning-period>
+  </health:LicenseHealthCheck>
   
   <!-- JMX Meters - for graphing in resin-admin -->
   

@@ -12,6 +12,8 @@
 
 <s2 title="4.0.24 - snapshot">
 <ul>
+<li>health: added LicenseHealthCheck</li>
+<li>health pdf: added license info to PDF report</li>
 <li>health pdf: add cluster summary section to PDF report</li>
 <li>health pdf: add http error codes to PDF report</li>
 <li>health pdf: add log warning counts to PDF report</li>

@@ -354,6 +354,8 @@ overrided to 99.</p>
 
 <include-defun name="health:JvmDeadlockHealthCheck"/>
 
+<include-defun name="health:LicenseHealthCheck"/>
+
 <include-defun name="health:MemoryPermGenHealthCheck"/>
 
 <include-defun name="health:MemoryTenuredHealthCheck"/>

@@ -4519,6 +4519,62 @@ attribute.</p>
 
 </defun>
 
+<defun title="&lt;health:LicenseHealthCheck>" name="health:LicenseHealthCheck">
+
+<parents>cluster</parents>
+<javadoc class="com.caucho.health.check.LicenseHealthCheck"/>
+
+<description>
+<p>Checks for expiring Resin Pro license.</p>
+</description>
+
+<attributes>
+  <tr>
+    <th>Attribute</th>
+    <th>Description</th>
+    <th>Type</th>
+    <th>Default</th>
+  </tr>
+  <tr>
+    <td>enabled</td>
+    <td>Check is enabled or disabled</td>
+    <td>boolean</td>
+    <td>true</td>
+  </tr>
+  <tr>
+    <td>warning-period</td>
+    <td>License check warning period</td>
+    <td><a javadoc="com.caucho.config.types.Period">Period</a></td>
+    <td>30D</td>
+  </tr>
+</attributes>
+
+<deftable title="&lt;health:LicenseHealthCheck> Conditions">
+  <tr>
+    <th>HealthStatus</th>
+    <th>condition</th>
+  </tr>
+  <tr>
+    <td>WARNING</td>
+    <td>If license expires in less than warning-period.</td>
+  </tr>
+</deftable>
+
+<example title="Example: &lt;health:LicenseHealthCheck> in health.xml">
+&lt;cluster xmlns="http://caucho.com/ns/resin"
+         xmlns:resin="urn:java:com.caucho.resin"
+         xmlns:health="urn:java:com.caucho.health"
+         xmlns:ee="urn:java:ee">
+
+  &lt;health:LicenseHealthCheck>
+    &lt;warning-period>30D&lt;/warning-period>
+  &lt;/health:LicenseHealthCheck>
+
+&lt;/cluster>
+</example>
+
+</defun>
+
 <defun title="&lt;health:MemoryPermGenHealthCheck>" name="health:MemoryPermGenHealthCheck">
 
 <parents>cluster</parents>

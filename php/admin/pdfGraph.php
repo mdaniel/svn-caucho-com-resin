@@ -210,7 +210,7 @@ function admin_pdf_summary_fill()
   $license_names = $licenseStore["ValidLicenses"];
   foreach($license_names as $license_name) {
     $license = $jmx[$license_name];
-    array_push($licenses, $license["ExpireMessage"]);
+    array_push($licenses, "{$license['Description']}, {$license['ExpireMessage']}");
   }
   
   $summary["licenses"] = $licenses;
