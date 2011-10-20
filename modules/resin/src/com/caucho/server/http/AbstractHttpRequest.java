@@ -702,7 +702,7 @@ public abstract class AbstractHttpRequest
 
   protected void setContentLength(CharSegment value)
   {
-    int contentLength = 0;
+    long contentLength = 0;
     int ch;
     int i = 0;
 
