@@ -41,6 +41,7 @@ import java.util.WeakHashMap;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
+import javax.cache.Cache;
 import javax.cache.CacheBuilder;
 import javax.cache.CacheManager;
 import javax.cache.Caching;
@@ -508,13 +509,13 @@ public class ResinModule
     
     CacheBuilder builder = manager.createCacheBuilder(name);
 
-    return new QuercusDistcache((CacheImpl) builder.build());
+    return new QuercusDistcache(builder.build());
   }
 
   public static class QuercusDistcache {
-    private final CacheImpl _cache;
+    private final Cache _cache;
 
-    QuercusDistcache(CacheImpl cache)
+    QuercusDistcache(Cache cache)
     {
       _cache = cache;
     }

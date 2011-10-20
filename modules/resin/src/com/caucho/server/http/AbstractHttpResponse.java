@@ -65,23 +65,23 @@ abstract public class AbstractHttpResponse {
   private static final L10N L = new L10N(AbstractHttpResponse.class);
   
   private static final CountSensor _statusXxxSensor
-    = MeterService.createCountMeter("Resin|HTTP|xxx");
+    = MeterService.createCountMeter("Resin|Http|xxx");
   private static final CountSensor _status2xxSensor
-    = MeterService.createCountMeter("Resin|HTTP|2xx");
+    = MeterService.createCountMeter("Resin|Http|2xx");
   private static final CountSensor _status200Sensor
-    = MeterService.createCountMeter("Resin|HTTP|200");
+    = MeterService.createCountMeter("Resin|Http|200");
   private static final CountSensor _status3xxSensor
-    = MeterService.createCountMeter("Resin|HTTP|3xx");
+    = MeterService.createCountMeter("Resin|Http|3xx");
   private static final CountSensor _status304Sensor
-    = MeterService.createCountMeter("Resin|HTTP|304");
+    = MeterService.createCountMeter("Resin|Http|304");
   private static final CountSensor _status4xxSensor
-    = MeterService.createCountMeter("Resin|HTTP|4xx");
+    = MeterService.createCountMeter("Resin|Http|4xx");
   private static final CountSensor _status400Sensor
-    = MeterService.createCountMeter("Resin|HTTP|400");
+    = MeterService.createCountMeter("Resin|Http|400");
   private static final CountSensor _status404Sensor
-    = MeterService.createCountMeter("Resin|HTTP|404");
+    = MeterService.createCountMeter("Resin|Http|404");
   private static final CountSensor _status5xxSensor
-    = MeterService.createCountMeter("Resin|HTTP|5xx");
+    = MeterService.createCountMeter("Resin|Http|5xx");
   private static final CountSensor _status500Sensor
     = MeterService.createCountMeter("Resin|HTTP|500");
   private static final CountSensor _status503Sensor
@@ -843,26 +843,27 @@ abstract public class AbstractHttpResponse {
 
     switch (majorCode) {
     case 2:
+      _status2xxSensor.start();
       switch (statusCode) {
       case 200:
         _status200Sensor.start();
         break;
       default:
-        _status2xxSensor.start();
         break;
       }
       break;
     case 3:
+      _status3xxSensor.start();
       switch (statusCode) {
       case 304:
         _status304Sensor.start();
         break;
       default:
-        _status3xxSensor.start();
         break;
       }
       break;
     case 4:
+      _status4xxSensor.start();
       switch (statusCode) {
       case 400:
         _status400Sensor.start();
@@ -871,13 +872,14 @@ abstract public class AbstractHttpResponse {
         _status404Sensor.start();
         break;
       default:
-        _status4xxSensor.start();
         break;
       }
       break;
     case 5:
       if (webApp != null)
         webApp.addStatus500();
+      
+      _status5xxSensor.start();
       
       switch (statusCode) {
       case 500:
@@ -887,7 +889,6 @@ abstract public class AbstractHttpResponse {
         _status503Sensor.start();
         break;
       default:
-        _status5xxSensor.start();
         break;
       }
       break;

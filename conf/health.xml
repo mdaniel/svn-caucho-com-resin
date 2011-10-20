@@ -349,6 +349,14 @@
     <meter>Resin|Http|Request Time</meter>
   </health:AnomalyAnalyzer>
 
+  <health:AnomalyAnalyzer>
+    <meter>Resin|Http|400</meter>
+  </health:AnomalyAnalyzer>
+
+  <health:AnomalyAnalyzer>
+    <meter>Resin|Http|5xx</meter>
+  </health:AnomalyAnalyzer>
+
   <!-- meter graphs -->
   
   <health:MeterGraphPage>
@@ -377,6 +385,26 @@
 
     <!-- row 2 -->
       
+    <graph name="HTTP Request Errors">
+      <meter>Resin|Http|500</meter>
+      <meter>Resin|Http|503</meter>
+      <meter>Resin|Http|400</meter>
+      <meter>Resin|Http|404</meter>
+      <meter>Resin|Http|5xx</meter>
+      <meter>Resin|Http|4xx</meter>
+    </graph>
+      
+    <graph name="Log Warnings">
+      <meter>Resin|Log|Critical</meter>
+      <meter>Resin|Log|Warning</meter>
+    </graph>
+      
+    <graph name="CPU">
+      <meter>OS|CPU|CPU Active</meter>
+    </graph>
+
+    <!-- row 2 -->
+      
     <graph name="Database Connection Active">
       <meter>Resin|Database|Connection Active</meter>
     </graph>
@@ -386,8 +414,16 @@
       <meter>Resin|Database|Query Time Max</meter>
     </graph>
       
-    <graph name="CPU">
-      <meter>OS|CPU|CPU Active</meter>
+    <graph name="Netstat">
+      <meter>OS|Network|tcp-established</meter>
+      <meter>OS|Network|tcp-listen</meter>
+      <meter>OS|Network|tcp-close</meter>
+      <meter>OS|Network|tcp-close-wait</meter>
+      <meter>OS|Network|tcp-fin-wait1</meter>
+      <meter>OS|Network|tcp-fin-wait2</meter>
+      <meter>OS|Network|tcp-last-ack</meter>
+      <meter>OS|Network|tcp-syn-recv</meter>
+      <meter>OS|Network|tcp-syn-sent</meter>
     </graph>
 
     <!-- row 3 -->
@@ -402,18 +438,6 @@
     <graph name="GC Time">
       <meter>JVM|Memory|GC Time|PS MarkSweep</meter>
       <meter>JVM|Memory|GC Time|PS Scavenge</meter>
-    </graph>
-      
-    <graph name="Netstat">
-      <meter>OS|Network|tcp-established</meter>
-      <meter>OS|Network|tcp-listen</meter>
-      <meter>OS|Network|tcp-close</meter>
-      <meter>OS|Network|tcp-close-wait</meter>
-      <meter>OS|Network|tcp-fin-wait1</meter>
-      <meter>OS|Network|tcp-fin-wait2</meter>
-      <meter>OS|Network|tcp-last-ack</meter>
-      <meter>OS|Network|tcp-syn-recv</meter>
-      <meter>OS|Network|tcp-syn-sent</meter>
     </graph>
   </health:MeterGraphPage>
 

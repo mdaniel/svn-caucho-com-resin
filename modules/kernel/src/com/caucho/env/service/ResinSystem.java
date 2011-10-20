@@ -40,6 +40,8 @@ import java.util.logging.Logger;
 import com.caucho.config.ConfigException;
 import com.caucho.config.inject.BeanBuilder;
 import com.caucho.config.inject.InjectManager;
+import com.caucho.env.meter.CountSensor;
+import com.caucho.env.meter.MeterService;
 import com.caucho.lifecycle.*;
 import com.caucho.loader.DynamicClassLoader;
 import com.caucho.loader.Environment;

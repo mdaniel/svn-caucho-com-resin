@@ -4,6 +4,49 @@ require_once "WEB-INF/php/inc.php";
 
 
 import java.lang.System;
+/*
+$g_colors = array("#ff3030", // red
+                  "#30b0ff", // azure
+                  "#906000", // brown
+                  "#ff9030", // orange
+                  "#3030ff", // blue
+                  "#000000", // black
+                  "#50b000", // green
+                  "#d030d0", // magenta
+                  "#008080", // cyan
+                  "#b03060", // rose
+                  "#e090ff", // indigo
+                  "#c0c0c0", // gray
+                  "#408040"); // forest green
+*/
+
+$g_pdf_colors = array(
+                  new RGBColor(0xff, 0x30, 0x30), // red
+                  new RGBColor(0x30, 0xb0, 0xff), // azure
+                  new RGBColor(0x90, 0x60, 0x00), // brown
+                  new RGBColor(0xff, 0x90, 0x30), // orange
+                  new RGBColor(0x30, 0x30, 0xff), // blue
+                  new RGBColor(0x00, 0x00, 0x00), // black
+                  new RGBColor(0x50, 0xb0, 0x00), // green
+                  new RGBColor(0xd0, 0x30, 0xd0), // magenta
+                  new RGBColor(0x00, 0x80, 0x80), // cyan
+                  new RGBColor(0xb0, 0x30, 0x60), // rose
+                  new RGBColor(0xe0, 0x90, 0xff), // indigo
+                  new RGBColor(0xc0, 0xc0, 0xc0), // gray
+                  new RGBColor(0x40, 0x80, 0x40)); // forest green
+
+$black = new RGBColor(0.0, 0.0, 0.0);
+$red = new RGBColor(1.0, 0.0, 0.0);
+$green = new RGBColor(0.0, 1.0, 0.0);
+$blue = new RGBColor(0.0, 0.0, 1.0);
+$darkGrey = new RGBColor(0.2, 0.2, 0.2);
+$lightGrey = new RGBColor(0.9, 0.9, 0.9);
+$grey = new RGBColor(0.45, 0.45, 0.45);
+$medGrey = new RGBColor(0.6, 0.6, 0.6);
+$purple = new RGBColor(0.45, 0.2, 0.45);
+$orange = new RGBColor(1.0, 0.66, 0.0);
+$cyan = new RGBColor(0.0, 0.66, 1.0);
+$brown = new RGBColor(0.66, 0.20, 0.20);
 
 $x = 20;
 $y = 750;
@@ -175,15 +218,20 @@ function admin_pdf_summary_fill()
   return $summary;
 }
 
-function drawLines($gds, $graph)
+function pdf_graph_draw_lines($gds, $graph)
 {
   global $g_canvas;
-  
+
+  $g_canvas->set_line_width(1);
+
+  $gds = array_reverse($gds);
+
   foreach($gds as $gd) {
     if ($gd->validate()) {
       $g_canvas->setColor($gd->color);
-      if (sizeof($gd->dataLine)!=0) {
-      	$graph->drawLine($gd->dataLine);
+      
+      if (sizeof($gd->dataLine) != 0) {
+      	$graph->draw_line_graph($gd->dataLine);
       }
     }
   }
@@ -246,7 +294,8 @@ class Stat {
 
   function eq($that)
   {
-    return $this->name == $that->name && $this->category == $that->category
+    return $this->name == $that->name
+           && $this->category == $that->category
            && $this->subcategory == $that->subcategory;
   }
 }
@@ -254,40 +303,63 @@ class Stat {
 
 function getStatDataForGraphByMeterNames($meterNames)
 {
-  global $blue, $red, $orange, $purple, $green, $cyan, $brown, $black;
+  // global $blue, $red, $orange, $purple, $green, $cyan, $brown, $black;
+  global $g_pdf_colors;
   $cindex = 0;
-  $colors = array($blue, $red, $orange, $purple, $green, $cyan, $brown, $black, $blue, $red, $orange, $purple, $green, $cyan, $brown, $black);
+  $colors = $g_pdf_colors;
+  // array($blue, $red, $orange, $purple, $green, $cyan, $brown, $black, $blue, $red, $orange, $purple, $green, $cyan, $brown, $black);
 
   $gds = array();   
   foreach ($meterNames as $name) {
-	$statItem = new Stat();
-	$statItem->statFromName($name);
-	$gd = getStatDataForGraphByStat($statItem);
-	array_push($gds, $gd);
-  	$gd->color=$colors[$cindex];
-	$cindex++;
+    $statItem = new Stat();
+    $statItem->statFromName($name);
+    $gd = getStatDataForGraphByStat($statItem);
+    $gd->color = $colors[$cindex];
+        
+    array_push($gds, $gd);
+        
+    $cindex++;
   }
 
   return $gds;
 }
 
-
 function getStatDataForGraphByStat($theStat, $color=$blue)
 {
-  $data=findStatByStat($theStat);
+  $data = findStatByStat($theStat);
+
+  return admin_pdf_create_graph_data($theStat->name, $data, $blue)  
+}
+
+function admin_pdf_create_graph_data($name, $data, $color=$blue)
+{
   debug("DATA " . sizeof($data));
   $dataLine = array();
   $max = -100;
+  
   foreach($data as $d) {
+    $time = $d->time;
     
-    $value = $d->value;
-    $hour = $d->time;
-    array_push($dataLine, new Point($hour, $value));
-    if ($value > $max) $max = $value;
+    $value_avg = $d->value;
+    $value_min = $d->min;
+    $value_max = $d->max;
+
+    if ($value_min < $value_max) {
+      array_push($dataLine, new Point($time, $value_avg));
+      array_push($dataLine, new Point($time + 0, $value_max));
+      array_push($dataLine, new Point($time + 0, $value_min));
+      array_push($dataLine, new Point($time + 0, $value_avg));
+    }
+    else {
+      array_push($dataLine, new Point($time + 0, $value_max));
+    }
+
+    if ($max < $value_max)
+      $max = $value_max;
   }
 
   $gd = new GraphData();
-  $gd->name = $theStat->name;
+  $gd->name = $name;
   $gd->dataLine = $dataLine;
   $gd->max = $max + ($max * 0.05) ;
   $gd->yincrement = calcYincrement($max);
@@ -310,15 +382,28 @@ function findStats(String $category, String $subcategory=null)
     if ($category == $statItem->category) {
       if ($subcategory && $subcategory == $statItem->subcategory) {
 	$map[$statItem->name]
-          = $stat->statisticsData($statItem->fullName,
-                                  $g_start * 1000, $g_end * 1000,
-                                  STEP * 1000);
+          = admin_pdf_get_stat_item($stat, $statItem->fullName);
       }
     }
   }
   return $map;
 }
 
+function admin_pdf_get_stat_item($stat_mbean, $full_name)
+{
+  global $g_start, $g_end;
+  
+  $step = ($g_end - $g_start) / 500;
+  
+  if ($step < 120)
+    $step = 1;
+  
+  $data = $stat_mbean->statisticsData($full_name,
+                                      $g_start * 1000, $g_end * 1000,
+                                      $step * 1000);
+
+  return $data;                                      
+}
 
 function findStatByStat($theStat) {
   global $g_start;
@@ -327,12 +412,18 @@ function findStatByStat($theStat) {
   global $statList;
   global $si;
 
+  //$step = ($g_end - $g_start) / 1000;
+  $step = ($g_end - $g_start) / 500;
+
+  if ($step < 120)
+    $step = 1;
+
   foreach ($statList as $statItem) {
     if ($statItem->server != $si) continue;
     if ($statItem->eq($theStat)) {
  	return $stat->statisticsData($statItem->fullName,
                                      $g_start * 1000, $g_end * 1000,
-                                    STEP * 1000);
+                                     $step * 1000);
       }
     
   }
@@ -509,13 +600,13 @@ class Graph {
   private $title;
   private $pixelPerUnit;
 
-  function __construct($pdf,
-                       string $title,
-                       Point $origin,
-                       Size $pixelSize,
-                       Range $xRange,
-                       Range $yRange,
-                       boolean $trace=false)
+  function Graph($pdf,
+                 string $title,
+                 Point $origin,
+                 Size $pixelSize,
+                 Range $xRange,
+                 Range $yRange,
+                 boolean $trace=false)
   {
     $this->title = $title;
     $this->canvas = new Canvas($pdf, $origin);
@@ -599,8 +690,8 @@ class Graph {
        $this->trace("drawTitle valid" );
        $this->canvas->writeText(new Point($x, $y), $title);
     } else {
-      $this->trace("drawTitle NOT VALID" );
-      $this->canvas->writeText(new Point($x, $y), $title . " not valid");
+      $this->trace("drawTitle no data" );
+      $this->canvas->writeText(new Point($x, $y), $title . " no data");
     }
   }
 
@@ -666,12 +757,13 @@ class Graph {
 
   }
   
-  function drawLine($dataLine) {
+  function draw_line_graph($dataLine)
+  {
     if (!$this->valid) {
        return;
     }
+    
     $this->trace("drawLine ");
-
 
     $this->canvas->moveTo($this->convertPoint($dataLine[0]));
 
@@ -680,20 +772,21 @@ class Graph {
       if (!$this->valid) {
       	 break;
       }
+      
       $this->canvas->lineTo($p);
     }
 
     $this->canvas->stroke();
   }
 
+  function drawGrid()
+  {
+    $this->canvas->set_line_width(1.5);
 
-
-  function drawGrid() {
     $this->trace("drawGrid ");
 
-
-    $width =   (double) $this->pixelSize->width;
-    $height =   (double) $this->pixelSize->height;
+    $width = (double) $this->pixelSize->width;
+    $height = (double) $this->pixelSize->height;
     $this->canvas->moveTo(new Point(0.0, 0.0));
     $this->canvas->lineTo(new Point($width, 0.0));
     $this->canvas->lineTo(new Point($width, $height));
@@ -702,13 +795,14 @@ class Graph {
     $this->canvas->stroke();
   }
 
-  function drawGridLines($xstep, $ystep) {
+  function drawGridLines($xstep, $ystep)
+  {
+    $this->canvas->set_line_width(0.5);
 
-  
-   if (!$ystep) {
+    if (!$ystep) {
       $this->valid = false;
       debug("No ystep was passed " .  $this->title);
-   }
+    }
 
     if (!$this->valid) {
        return;
@@ -716,8 +810,8 @@ class Graph {
 
     $this->trace("drawGridLines ");
 
-    $width =   intval($this->pixelSize->width);
-    $height =   intval($this->pixelSize->height);
+    $width = intval($this->pixelSize->width);
+    $height = intval($this->pixelSize->height);
 
     $xstep_width = $xstep * $this->pixelPerUnit->width;
     $ystep_width = $ystep * $this->pixelPerUnit->height;
@@ -788,32 +882,37 @@ class Graph {
 
 
     $this->canvas->setFont("Helvetica-Bold", 9);
-    $height =   (double) $this->pixelSize->height;
+    $height = (double) $this->pixelSize->height;
 
     $step_width = ($step) * $this->pixelPerUnit->height;
 
     for ($index = 0; $height >= ($index*$step_width); $index++) {
       $currentYPixel = $index*$step_width;
       $currentYValue =	($index * $step) + $this->yRange->start;
+      
       if ($func) {
 	$currentLabel = $func($currentYValue);
       } else {
       	if ($currentYValue >      1000000000) {
-	   $currentLabel = "" . $currentYValue / 1000000000 . " G";
-	}elseif ($currentYValue > 1000000) {
-	   $currentLabel = "" . $currentYValue / 1000000 . " M";
-	}elseif ($currentYValue > 1000) {
-	   $currentLabel = "" . $currentYValue / 1000 . " K";
-	} else {
+	   $currentLabel = "" . $currentYValue / 1000000000 . "G";
+	}
+        elseif ($currentYValue > 1000000) {
+	   $currentLabel = "" . $currentYValue / 1000000 . "M";
+	}
+        elseif ($currentYValue > 1000) {
+	   $currentLabel = "" . $currentYValue / 1000 . "K";
+	}
+        else {
 	  $currentLabel = $currentYValue; 
 	}
       }
-      $this->canvas->writeText(new Point($xpos, $currentYPixel-3), $currentLabel);
+
+      $x = -5;
+      
+      $this->canvas->write_text_ralign_xy($x, $currentYPixel - 3,
+                                          $currentLabel);
     }    
   }
-
-
-
 }
 
 
@@ -822,27 +921,27 @@ function pdf_format_memory($memory)
   return sprintf("%.2f M", $memory / (1024 * 1024))
 }
 
-
-
-
-function createGraph(String $title,
-                     GraphData $gd,
-                     Point $origin,
-                     boolean $displayYLabels=true,
-                     Size $gsize=GRAPH_SIZE,
-                     boolean $trace=false)
+function admin_pdf_create_graph(Canvas $canvas,
+                                $x, $y,
+                                $width, $height,
+                                String $title,
+                                GraphData $gd,
+                                boolean $displayYLabels=true,
+                                boolean $trace=false)
 {
   global $g_pdf;
   global $g_start;
   global $g_end;
-  global $g_canvas;
-  global $lightGrey;
   global $grey;
+  global $lightGrey;
+  global $medGrey;
   global $darkGrey;
   global $black;
   global $majorTicks, $minorTicks;
 
-  $graph = new Graph($g_pdf, $title, $origin, $gsize,
+  $graph = new Graph($g_pdf, $title,
+                     new Point($x, $y),
+                     new Size($width, $height),
                      new Range($g_start * 1000, $g_end * 1000),
                      new Range(0, $gd->max),
                      $trace);
@@ -851,36 +950,38 @@ function createGraph(String $title,
   $valid = $gd->validate();
 
   if ($valid) {
-    $g_canvas->setColor($black);
-    $g_canvas->setFont("Helvetica-Bold", 12);
+    $graph->canvas->setColor($black);
+    $graph->canvas->setFont("Helvetica-Bold", 12);
     $graph->drawTitle($title);
 
-    $g_canvas->setColor($lightGrey);
+    $graph->canvas->setColor($lightGrey);
     $graph->drawGridLines($minorTicks, $gd->yincrement/2);
 
-    $g_canvas->setColor($grey);
+    $graph->canvas->setColor($medGrey);
     $graph->drawGridLines($majorTicks, $gd->yincrement);
 
-    $g_canvas->setColor($black);
+    $canvas->setColor($darkGrey);
     $graph->drawGrid();
 
     if ($displayYLabels) {
       $graph->drawYGridLabels($gd->yincrement);
     }
+
     $graph->drawXGridLabels($majorTicks, "displayTimeLabel");
   } else {
     debug("Not displaying graph $title because the data was not valid");
-    $g_canvas->setColor($black);
-    $g_canvas->setFont("Helvetica-Bold", 12);
+    $canvas->setColor($black);
+    $canvas->setFont("Helvetica-Bold", 12);
     $graph->drawTitle($title);
-    $g_canvas->setColor($darkGrey);
+    $canvas->setColor($darkGrey);
     $graph->drawGrid();
   }
+  
   return $graph;
 }
 
 
-function getDominantGraphData($gds)
+function admin_pdf_get_dominant_graph_data($gds)
 {
   $gdd = $gds[0];
   foreach($gds as $gd) {
@@ -961,12 +1062,13 @@ function calcYincrement($max) {
 }
 
 
-function getStatDataForGraphBySubcategory($subcategory, $category="Resin", $nameMatch=null) {
-  global $blue, $red, $orange, $purple, $green, $cyan, $brown, $black;
+function getStatDataForGraphBySubcategory($subcategory,
+                                          $category="Resin",
+                                          $nameMatch=null) {
+  global $g_colors;
   $cindex = 0;
   $gds = array();	
-  $map=findStats($category, $subcategory);
-  $colors = array($blue, $red, $orange, $purple, $green, $cyan, $brown, $black, $blue, $red, $orange, $purple, $green, $cyan, $brown, $black);
+  $map = findStats($category, $subcategory);
 
   foreach ($map as $name => $data) {
 	$dataLine = array();
@@ -992,7 +1094,7 @@ function getStatDataForGraphBySubcategory($subcategory, $category="Resin", $name
   		$gd->dataLine = $dataLine;
   		$gd->yincrement = calcYincrement($max);
   		$gd->max = $max + ($max * 0.05) ;
-  		$gd->color=$colors[$cindex];
+  		$gd->color=$g_colors[$cindex];
 		array_push($gds, $gd);
 		$cindex++;
 
@@ -1131,32 +1233,25 @@ class RGBColor {
   private $green;
   private $blue;
 
-  function __construct() {
-    $args = func_get_args();
-    $this->red =  $args[0];
-    $this->green =  $args[1];
-    $this->blue =  $args[2];
+  function RGBColor($red, $green, $blue)
+  {
+    if ($red > 1)
+      $red = $red / 255;
+    if ($green > 1)
+      $green = $green / 255;
+    if ($blue > 1)
+      $blue = $blue / 255;
+      
+    $this->red = $red;
+    $this->green = $green;
+    $this->blue = $blue;
   }
 
-
-  function doSetColor($canvas) {
+  function doSetColor($canvas)
+  {
     $canvas->setRGBColor($this->red, $this->green, $this->blue);
   } 
-
 }
-
-$black = new RGBColor(0.0, 0.0, 0.0);
-$red = new RGBColor(1.0, 0.0, 0.0);
-$green = new RGBColor(0.0, 1.0, 0.0);
-$blue = new RGBColor(0.0, 0.0, 1.0);
-$darkGrey = new RGBColor(0.2, 0.2, 0.2);
-$lightGrey = new RGBColor(0.9, 0.9, 0.9);
-$grey = new RGBColor(0.45, 0.45, 0.45);
-$purple = new RGBColor(0.45, 0.2, 0.45);
-$orange = new RGBColor(1.0, 0.66, 0.0);
-$cyan = new RGBColor(0.0, 0.66, 1.0);
-$brown = new RGBColor(0.66, 0.20, 0.20);
-
 
 class Canvas {
   private $origin;
@@ -1174,6 +1269,13 @@ class Canvas {
 
   private $width = 595;
   private $height = 842;
+
+  private $graph_cols = 2;
+  private $graph_rows = 3;
+
+  private $graph_x;
+  private $graph_y;
+  private $graph_index;
 
   function Canvas($pdf, $origin)
   {
@@ -1278,7 +1380,6 @@ class Canvas {
   function write_text_ralign_xy($x, $y, $text)
   {
     $font_size = $this->fontSize;
-    
     $width = $this->pdf->stringwidth($text, $this->font, $font_size);
     
     $this->pdf->set_text_pos($x - $width, $y);
@@ -1383,6 +1484,11 @@ class Canvas {
     $this->pdf->setcolor("fillstroke", "rgb", $red, $green, $blue);
   }
 
+  function set_line_width($width)
+  {
+    $this->pdf->setlinewidth($width);
+  }
+
   function setDataFontAndSize($fontSize)
   {
     $this->setFont("Courier", $fontSize);
@@ -1428,6 +1534,10 @@ class Canvas {
   {
     $this->text_x = 20;
     $this->text_y = 800;
+
+    $this->graph_x = 0;
+    $this->graph_y = 0;
+    $this->graph_index = 0;
   }
   
   function writeHeader()
@@ -1480,6 +1590,51 @@ class Canvas {
     }
 
     $this->setFontByObject($font, $fontSize);
+  }
+
+  function set_graph_rows($rows)
+  {
+    $this->graph_rows = $rows;
+  }
+
+  function set_graph_columns($cols)
+  {
+    $this->graph_cols = $cols;
+  }
+
+  function graph_next_xy()
+  {
+    if ($this->graph_index == 6) {
+      $this->newPage();
+    }
+
+    $this->graph_width = (500) / $this->graph_cols;
+    $this->graph_height = (660) / $this->graph_rows;
+
+    $x_index = (int) ($this->graph_index % $this->graph_cols);
+    $y_index = (int) ($this->graph_index / $this->graph_cols);
+
+    $this->graph_x = 50 + $x_index * $this->graph_width;
+    $this->graph_y = 820 - ($y_index + 1) * $this->graph_height;
+
+    $this->graph_index++;
+  }
+
+  // graphs
+
+  function draw_graph($name, $gds)
+  {
+    $this->graph_next_xy();
+    
+    $gd = admin_pdf_get_dominant_graph_data($gds);
+    $graph = admin_pdf_create_graph($this,
+                                    $this->graph_x, $this->graph_y,
+                                    $this->graph_width - 60,
+                                    $this->graph_height - 100,
+                                    $name, $gd);
+    pdf_graph_draw_lines($gds, $graph);
+    $graph->drawLegends($gds);
+    $graph->end();
   }
 }
 

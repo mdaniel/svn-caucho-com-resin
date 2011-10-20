@@ -35,7 +35,10 @@ package com.caucho.management.server;
 public class StatServiceValue implements java.io.Serializable
 {
   private final long _time;
-  private final double _value;
+  private final int _count;
+  private final double _sum;
+  private final double _min;
+  private final double _max;
 
   /**
    * Null constructor for Hessian
@@ -43,16 +46,26 @@ public class StatServiceValue implements java.io.Serializable
   private StatServiceValue()
   {
     _time = 0;
-    _value = 0;
+    _count = 0;
+    _sum = 0;
+    _min = 0;
+    _max = 0;
   }
 
   /**
    * Standard constructor
    */
-  public StatServiceValue(long time, double value)
+  public StatServiceValue(long time, 
+                          int count,
+                          double sum,
+                          double min,
+                          double max)
   {
     _time = time;
-    _value = value;
+    _count = count;
+    _sum = sum;
+    _min = min;
+    _max = max;
   }
 
   /**
@@ -66,14 +79,57 @@ public class StatServiceValue implements java.io.Serializable
   /**
    * Returns the value's value
    */
+  public int getCount()
+  {
+    return _count;
+  }
+
+  /**
+   * Returns the value's value
+   */
+  public double getSum()
+  {
+    return _sum;
+  }
+
+  /**
+   * Returns the value's value
+   */
+  public double getAverage()
+  {
+    if (_count > 0)
+      return _sum / _count;
+    else
+      return _sum;
+  }
+
+  /**
+   * Returns the value's minimum
+   */
+  public double getMin()
+  {
+    return _min;
+  }
+
+  /**
+   * Returns the value's maximum
+   */
+  public double getMax()
+  {
+    return _max;
+  }
+
+  /**
+   * Returns the value's average
+   */
   public double getValue()
   {
-    return _value;
+    return getAverage();
   }
 
   @Override
   public String toString()
   {
-    return getClass().getSimpleName() + "[" + _time + "," + _value + "]";
+    return getClass().getSimpleName() + "[" + _time + "," + getValue() + "]";
   }
 }

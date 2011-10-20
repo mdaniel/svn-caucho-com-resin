@@ -214,6 +214,8 @@ $g_canvas->lineTo(new Point(595, 770));
 $g_canvas->stroke();
 */
 
+draw_cluster_graphs($mPage);
+
 draw_graphs($mPage);
  
 if ($mPage->isHeapDump()) {
@@ -257,65 +259,79 @@ pdf_delete($g_pdf);
 // needed for PdfReport health action
 return "ok";
 
+function draw_cluster_graphs($mPage)
+{
+  global $g_canvas;
+  global $g_server;
+  
+  $g_canvas->set_graph_rows(4);
+  $g_canvas->set_graph_columns(2);
+  
+  $cluster = $g_server->getCluster();
+
+  $triad_a = $cluster->getServers()[0];
+
+  $mbean_server = new MBeanServer($triad_a->getName());
+  $stat = $mbean_server->lookup("resin:type=StatService");
+  if (! $stat) {
+    $mbean_server = $g_mbean_server;
+    $stat = $mbean_server->lookup("resin:type=StatService");
+  }
+
+  if (! $stat)
+    return;
+
+  $g_canvas->write_section("Cluster Graphs");
+
+  foreach ($cluster->getServers() as $server) {
+    $items = array();
+
+    pdf_cluster_item($items, $stat, $server, "Uptime|Start Count", 0);
+    pdf_cluster_item($items, $stat, $server, "Log|Critical", 1);
+    pdf_cluster_item($items, $stat, $server, "Log|Warning", 2);
+
+    $graph_name = sprintf("Server %02d - %s",
+                          $server->getClusterIndex(),
+                          $server->getName());
+
+    $g_canvas->draw_graph($graph_name, $items);
+  }
+}
+
+function pdf_cluster_item(&$items, $stat_mbean, $server, $name, $index)
+{
+  global $g_pdf_colors;
+  
+  $full_name = sprintf("%02d|Resin|%s", $server->getClusterIndex(), $name);
+
+  // $items[$name] = admin_pdf_get_stat_item($stat_mbean, $full_name);
+  $data = admin_pdf_get_stat_item($stat_mbean, $full_name);
+  
+  $gd = admin_pdf_create_graph_data($name, $data, $g_pdf_colors[$index]);
+
+  $items[] = $gd;
+}
+
 function draw_graphs($mPage)
 {
-  global $g_canvas, $x, $y, $columns;
-  
-  $g_canvas->write_section("Graphs");
+  global $g_canvas;
+  global $g_server;
+
+  $title = sprintf("Server Graphs: %02d - %s",
+                   $g_server->getClusterIndex(), $g_server->getId());
+                   
+  $g_canvas->write_section($title);
+
+  $g_canvas->set_graph_rows(3);
+  $g_canvas->set_graph_columns(2);
 
   $graphs = $mPage->getMeterGraphs();
 
-  $index = 0;
-  $gCount = 0;
-
   foreach ($graphs as $graphData) {
-    $index++;
-	
-    if ($columns == 1) {
-      $x = COL1;
-    
-      if ($index % 2 == 0) {
-        $y = ROW2;
-      } else {
-        $y = ROW1;
-      }
-    }
-
-    if ($columns == 2) {
-      if ($gCount <= 1) {
-        $y = ROW1;
-      } elseif ($gCount > 1 && $gCount <= 3) {
-        $y = ROW2;
-      } elseif ($gCount > 3 && $gCount <= 5) {
-        $y = ROW3;
-      }
-
-      if ($index%6==0) {
-        $gCount=0;
-      } else {
-        $gCount++;
-      }
-
-      if ($index % 2 == 0) {
-        $x = COL2;
-      } else {
-        $x = COL1;
-      }
-    }
-
     $meterNames = $graphData->getMeterNames();
     $gds = getStatDataForGraphByMeterNames($meterNames);
-    $gd = getDominantGraphData($gds);
-    $graph = createGraph($graphData->getName(), $gd, new Point($x,$y));
-    drawLines($gds, $graph);
-    $graph->drawLegends($gds);
-    $graph->end();
-
-    if ($index % 2 == 0 && $columns == 1) {
-      $g_canvas->newPage();
-    } elseif ($index % 6 == 0 && $columns == 2) {
-      $g_canvas->newPage();
-    }
+    
+    $g_canvas->draw_graph($graphData->getName(), $gds);
   }
 }
 
