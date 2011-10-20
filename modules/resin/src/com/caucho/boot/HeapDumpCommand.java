@@ -57,12 +57,18 @@ public class HeapDumpCommand extends AbstractManagementCommand
   @Override
   public void usage()
   {
-    System.err.println(L.l("usage: bin/resin.sh [-conf <file>] heap-dump -user <user> -password <password> [-raw]"));
+    System.err.println(L.l("usage: bin/resin.sh [-conf <file>] [-server <id>] heap-dump [-address <address>] [-port <port>] -user <user> -password <password> [-raw]"));
     System.err.println(L.l(""));
     System.err.println(L.l("description:"));
     System.err.println(L.l("   prints heap summary taken on remote server"));
     System.err.println(L.l(""));
     System.err.println(L.l("options:"));
-    System.err.println(L.l("   -raw            : creates an hprof file"));
+    System.err.println(L.l("   -conf <file>          : resin configuration file"));
+    System.err.println(L.l("   -server <id>          : id of a server"));
+    System.err.println(L.l("   -address <address>    : ip or host name of the server"));
+    System.err.println(L.l("   -port <port>          : server http port"));
+    System.err.println(L.l("   -user <user>          : user name used for authentication to the server"));
+    System.err.println(L.l("   -password <password>  : password used for authentication to the server"));
+    System.err.println(L.l("   -raw                  : creates an hprof file"));
   }
 }

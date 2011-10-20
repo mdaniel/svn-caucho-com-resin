@@ -95,12 +95,14 @@ public class UnDeployCommand extends AbstractRepositoryCommand
   @Override
   public void usage()
   {
-    System.err.println(L.l("usage: bin/resin.sh [-conf <file>] undeploy -user <user> -password <password> [options] <name>"));
+    System.err.println(L.l("usage: bin/resin.sh [-conf <file>] [-server <id>] undeploy -user <user> -password <password> [options] <name>"));
     System.err.println(L.l(""));
     System.err.println(L.l("description:"));
     System.err.println(L.l("   undeploys application specified in a <name>"));
     System.err.println(L.l(""));
     System.err.println(L.l("options:"));
+    System.err.println(L.l("   -conf <file>          : resin configuration file"));
+    System.err.println(L.l("   -server <id>          : id of a server"));
     System.err.println(L.l("   -address <address>    : ip or host name of the server"));
     System.err.println(L.l("   -port <port>          : server http port"));
     System.err.println(L.l("   -host <host>          : virtual host to make application available on"));

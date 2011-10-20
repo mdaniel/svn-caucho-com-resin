@@ -112,7 +112,6 @@ public class ShutdownCommand extends AbstractStartCommand
     System.out.println("   -log-directory <dir>  : select a logging directory");
     System.out.println("   -resin-home <dir>     : select a resin home directory");
     System.out.println("   -root-directory <dir> : select a root directory");
-    System.out.println("   -server <id>          : select a <server> to run");
     System.out.println("   -watchdog-port <port> : override the watchdog-port");
     System.out.println("   -verbose              : print verbose starting information");
   }

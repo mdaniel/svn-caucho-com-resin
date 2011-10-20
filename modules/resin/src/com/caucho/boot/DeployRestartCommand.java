@@ -59,12 +59,14 @@ public class DeployRestartCommand extends WebAppCommand
   @Override
   public void usage()
   {
-    System.err.println(L.l("usage: bin/resin.sh [-conf <file>] deploy-restart -user <user> -password <password> [options] <name>"));
+    System.err.println(L.l("usage: bin/resin.sh [-conf <file>] [-server <id>] deploy-restart -user <user> -password <password> [options] <name>"));
     System.err.println(L.l(""));
     System.err.println(L.l("description:"));
     System.err.println(L.l("   restarts application context specified in a <name>"));
     System.err.println(L.l(""));
     System.err.println(L.l("options:"));
+    System.err.println(L.l("   -conf <file>          : resin configuration file"));
+    System.err.println(L.l("   -server <id>          : id of a server"));
     System.err.println(L.l("   -address <address>    : ip or host name of the server"));
     System.err.println(L.l("   -port <port>          : server http port"));
     System.err.println(L.l("   -user <user>          : user name used for authentication to the server"));

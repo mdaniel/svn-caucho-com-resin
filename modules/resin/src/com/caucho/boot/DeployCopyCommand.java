@@ -110,12 +110,14 @@ public class DeployCopyCommand extends AbstractRepositoryCommand {
   @Override
   public void usage()
   {
-    System.err.println(L.l("usage: bin/resin.sh [-conf <file>] deploy-copy -user <user> -password <password> [options]"));
+    System.err.println(L.l("usage: bin/resin.sh [-conf <file>] [-server <id>] deploy-copy -user <user> -password <password> [options]"));
     System.err.println(L.l(""));
     System.err.println(L.l("description:"));
     System.err.println(L.l("   copies a deployed application according to the given options"));
     System.err.println(L.l(""));
     System.err.println(L.l("options:"));
+    System.err.println(L.l("   -conf <file>                     : resin configuration file"));
+    System.err.println(L.l("   -server <id>                     : id of a server"));
     System.err.println(L.l("   -address <address>               : ip or host name of the server"));
     System.err.println(L.l("   -port <port>                     : server http port"));
     System.err.println(L.l("   -user <user>                     : user name used for authentication to the server"));
@@ -128,6 +130,6 @@ public class DeployCopyCommand extends AbstractRepositoryCommand {
     System.err.println(L.l("   -target-host <target-host>       : target host"));
     System.err.println(L.l("   -target-stage <target-stage>     : target stage"));
     System.err.println(L.l("   -target-version <target-version> : target version"));
-    System.err.println(L.l("   -m <message>          : commit message"));
+    System.err.println(L.l("   -m <message>                     : commit message"));
   }
 }

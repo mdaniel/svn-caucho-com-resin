@@ -125,12 +125,14 @@ public class DeployCommand extends AbstractRepositoryCommand {
   @Override
   public void usage()
   {
-    System.err.println(L.l("usage: bin/resin.sh [-conf <file>] deploy -user <user> -password <password> [options] <war-file>"));
+    System.err.println(L.l("usage: bin/resin.sh [-conf <file>] [-server <id>] deploy -user <user> -password <password> [options] <war-file>"));
     System.err.println(L.l(""));
     System.err.println(L.l("description:"));
     System.err.println(L.l("   deploys application specified in a <war-file> to resin server"));
     System.err.println(L.l(""));
     System.err.println(L.l("options:"));
+    System.err.println(L.l("   -conf <file>          : resin configuration file"));
+    System.err.println(L.l("   -server <id>          : id of a server"));
     System.err.println(L.l("   -address <address>    : ip or host name of the server"));
     System.err.println(L.l("   -port <port>          : server http port"));
     System.err.println(L.l("   -user <user>          : user name used for authentication to the server"));

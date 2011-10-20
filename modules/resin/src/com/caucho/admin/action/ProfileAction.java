@@ -141,16 +141,17 @@ public class ProfileAction implements AdminAction
       final double sampleTicks = profile.getTicks();
       double totalPercent = 0d;
 
-      out.println("   % time  |time self(s)|   % sum    | Method Call");
-
-      for (ProfileEntry entry : entries) {
+      out.println(" ref# |   % time   |time self(s)|   % sum    | Method Call");
+      for (int i = 0; i < entries.length; i++) {
+        ProfileEntry entry = entries[i];
         double timePercent = (double) 100 * (double) entry.getCount()
                              / sampleTicks;
         double selfPercent = (double) 100 * (double) entry.getCount()
                              / totalTicks;
         totalPercent += selfPercent;
 
-        out.println(String.format("%10.3f | %10.3f | %10.3f | %s",
+        out.println(String.format(" %4d | %10.3f | %10.3f | %10.3f | %s",
+                                  i,
                                   timePercent,
                                   (float) entry.getCount() * samplingRate * 0.001,
                                   totalPercent,
@@ -158,11 +159,13 @@ public class ProfileAction implements AdminAction
 
       }
 
-      for (ProfileEntry entry : entries) {
-        out.println(entry.getDescription());
+      for (int i = 0; i < entries.length; i++) {
+        ProfileEntry entry = entries[i];
+        out.print(String.format(" %4d ", i));
+        out.println(" " + entry.getDescription());
         ArrayList<? extends StackEntry> stackEntries = entry.getStackTrace();
         for (StackEntry stackEntry : stackEntries) {
-          out.println("  " + stackEntry.getDescription());
+          out.println("         " + stackEntry.getDescription());
         }
       }
     }

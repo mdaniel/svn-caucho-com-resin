@@ -58,12 +58,14 @@ public class DeployListCommand extends AbstractRepositoryCommand
   @Override
   public void usage()
   {
-    System.err.println(L.l("usage: bin/resin.sh [-conf <file>] deploy-list -user <user> -password <password> [options] [pattern]"));
+    System.err.println(L.l("usage: bin/resin.sh [-conf <file>] [-server <id>] deploy-list -user <user> -password <password> [options] [pattern]"));
     System.err.println(L.l(""));
     System.err.println(L.l("description:"));
     System.err.println(L.l("   lists all applications deployed on the server or those that match the [pattern]"));
     System.err.println(L.l(""));
     System.err.println(L.l("options:"));
+    System.err.println(L.l("   -conf <file>          : resin configuration file"));
+    System.err.println(L.l("   -server <id>          : id of a server"));
     System.err.println(L.l("   -address <address>    : ip or host name of the server"));
     System.err.println(L.l("   -port <port>          : server http port"));
   }

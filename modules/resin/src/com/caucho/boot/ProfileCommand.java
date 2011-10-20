@@ -67,14 +67,20 @@ public class ProfileCommand extends AbstractManagementCommand
   @Override
   public void usage()
   {
-    System.err.println(L.l("usage: bin/resin.sh [-conf <file>] profile -user <user> -password <password> [-active-time <time>] [-sampling-rate <rate>] [-depth <depth>]"));
+    System.err.println(L.l("usage: bin/resin.sh [-conf <file>] [-server <id>] profile [-address <address>] [-port <port>] -user <user> -password <password> [-active-time <time>] [-sampling-rate <rate>] [-depth <depth>]"));
     System.err.println(L.l(""));
     System.err.println(L.l("description:"));
-    System.err.println(L.l("   activates resin internal provider (Pro version only)"));
+    System.err.println(L.l("   activates resin internal profiler (Pro version only)"));
     System.err.println(L.l(""));
     System.err.println(L.l("options:"));
-    System.err.println(L.l("   -active-time    : specifies profiling time span in ms (defaults to 5000 - 5 sec.)" ));
-    System.err.println(L.l("   -sampling-rate  : specifies sampling rate (defaults to 10ms)"));
-    System.err.println(L.l("   -depth          : specifies stack trace depth (use smaller number (8) for smaller impact, larger – for more information). Defauts to 16."));
+    System.err.println(L.l("   -conf <file>          : resin configuration file"));
+    System.err.println(L.l("   -server <id>          : id of a server"));
+    System.err.println(L.l("   -address <address>    : ip or host name of the server"));
+    System.err.println(L.l("   -port <port>          : server http port"));
+    System.err.println(L.l("   -user <user>          : user name used for authentication to the server"));
+    System.err.println(L.l("   -password <password>  : password used for authentication to the server"));
+    System.err.println(L.l("   -active-time          : specifies profiling time span in ms (defaults to 5000 - 5 sec.)" ));
+    System.err.println(L.l("   -sampling-rate        : specifies sampling rate (defaults to 10ms)"));
+    System.err.println(L.l("   -depth                : specifies stack trace depth (use smaller number (8) for smaller impact, larger – for more information). Defauts to 16."));
   }
 }
