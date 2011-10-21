@@ -52,6 +52,7 @@ class WatchdogConfig
   private static final int WATCHDOG_PORT_DEFAULT = 6600;
   
   private String _id = "";
+  private int _index;
   
   private final BootClusterConfig _cluster;
 
@@ -98,7 +99,8 @@ class WatchdogConfig
 
   WatchdogConfig(BootClusterConfig cluster,
                  WatchdogArgs args,
-                 Path rootDirectory)
+                 Path rootDirectory,
+                 int index)
   {
     _cluster = cluster;
     
@@ -118,6 +120,11 @@ class WatchdogConfig
   public String getId()
   {
     return _id;
+  }
+  
+  public int getIndex()
+  {
+    return _index;
   }
   
   String []getArgv()

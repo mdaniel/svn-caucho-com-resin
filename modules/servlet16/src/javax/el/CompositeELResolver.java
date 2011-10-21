@@ -177,4 +177,26 @@ public class CompositeELResolver extends ELResolver {
         return;
     }
   }
+
+  @Override
+  public java.lang.Object invoke(ELContext context,
+                                 java.lang.Object base,
+                                 java.lang.Object method,
+                                 java.lang.Class<?> []paramTypes,
+                                 java.lang.Object []params)
+  {
+    context.setPropertyResolved(false);
+
+    int size = _resolvers.size();
+    for (int i = 0; i < size; i++) {
+      ELResolver resolver = _resolvers.get(i);
+
+      Object value = resolver.invoke(context, base, method, paramTypes, params);
+
+      if (context.isPropertyResolved())
+        return value;
+    }
+    
+    return null;
+  }
 }

@@ -98,10 +98,27 @@ public class WebSocketReader extends Reader
   {
     int i = 0;
     
-    int ch;
+    int d1;
     
-    while (length-- > 0 && (ch = readByte()) >= 0) {
-      buffer[offset + i++] = (char) ch;
+    while (length-- > 0 && (d1 = readByte()) >= 0) {
+      char ch;
+      
+      if (d1 < 0x80) {
+        ch = (char) d1;
+      }
+      else if ((d1 & 0xe0) == 0xc0) {
+        int d2 = readByte();
+        
+        ch = (char) (((d1 & 0x1f) << 6) + (d2 & 0x3f));
+      }
+      else {
+        int d2 = readByte();
+        int d3 = readByte();
+        
+        ch = (char) (((d2 & 0xf) << 12) + ((d2 & 0x3f) << 6) + (d3 & 0x3f));
+      }
+      
+      buffer[offset + i++] = ch;
     }
     
     if (i == 0)

@@ -199,14 +199,27 @@ public class BootResinConfig implements EnvironmentBean
   /**
    * Finds a server.
    */
-  public WatchdogClient findShutdownClient()
+  public WatchdogClient findShutdownClient(String clusterId)
   {
+    WatchdogClient bestClient = null;
+    
     for (WatchdogClient client : _watchdogMap.values()) {
-      if (client != null)
-        return client;
+      if (client == null)
+        continue;
+      
+      if (clusterId != null && ! clusterId.equals(client.getClusterId()))
+        continue;
+      
+      if (bestClient == null || client.getIndex() < bestClient.getIndex())
+        bestClient = client;
     }
     
-    return null;
+    return bestClient;
+  }
+  
+  public int getNextIndex()
+  {
+    return _watchdogMap.size();
   }
 
   /**

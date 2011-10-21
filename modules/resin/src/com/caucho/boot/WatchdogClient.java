@@ -94,6 +94,16 @@ class WatchdogClient
   {
     return _id;
   }
+  
+  public String getClusterId()
+  {
+    return _config.getCluster().getId();
+  }
+  
+  public int getIndex()
+  {
+    return _config.getIndex();
+  }
 
   public String getWatchdogAddress()
   {
@@ -317,22 +327,26 @@ class WatchdogClient
     }
   }
 
-  public void restartWatchdog(String []argv)
+  public void restartWatchdog(String id, String []argv)
     throws IOException
   {
+    // cloud/1295
+    ActorSender conn = getConnection();
+
     try {
-      stopWatchdog(getId());
+      ResultStatus status = (ResultStatus)
+      conn.query(WATCHDOG_ADDRESS, 
+                 new WatchdogRestartQuery(id, argv),
+                 BAM_TIMEOUT);
+
+      if (! status.isSuccess())
+        throw new RuntimeException(L.l("{0}: watchdog restartfailed because of '{1}'",
+                                       this, status.getMessage()));
+    } catch (RuntimeException e) {
+      throw e;
     } catch (Exception e) {
       log.log(Level.FINE, e.toString(), e);
     }
-
-    try {
-      Thread.sleep(5000);
-    } catch (Exception e) {
-      log.log(Level.FINE, e.toString(), e);
-    }
-
-    startWatchdog(argv);
   }
 
   public boolean shutdown()

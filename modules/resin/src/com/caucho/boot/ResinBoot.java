@@ -173,11 +173,11 @@ public class ResinBoot {
     }
 
     if (_client == null && _args.isShutdown()) {
-      _client = bootManager.findShutdownClient();
+      _client = bootManager.findShutdownClient(_args.getClusterId());
     }
 
     if (_client == null && ! (_args.isStart() || _args.isConsole())) {
-      _client = bootManager.findShutdownClient();
+      _client = bootManager.findShutdownClient(_args.getClusterId());
     }
 
     if (_client == null) {
@@ -186,7 +186,8 @@ public class ResinBoot {
     }
   }
 
-  BootCommand getCommand() {
+  BootCommand getCommand()
+  {
     return _commandMap.get(_args.getStartMode());
   }
 

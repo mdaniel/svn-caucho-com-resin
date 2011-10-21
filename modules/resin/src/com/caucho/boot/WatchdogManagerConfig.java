@@ -72,7 +72,8 @@ class WatchdogManagerConfig {
     WatchdogConfig config
       = new WatchdogConfig(cluster,
                            _resin.getArgs(), 
-                           _resin.getRootDirectory());
+                           _resin.getRootDirectory(),
+                           _resin.getNextIndex());
 
     for (int i = 0; i < _watchdogDefaultList.size(); i++)
       _watchdogDefaultList.get(i).configure(config);

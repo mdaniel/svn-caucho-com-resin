@@ -75,12 +75,13 @@ class WatchdogChild
                 ResinSystem system,
                 WatchdogArgs args, 
                 Path rootDirectory,
-                BootClusterConfig cluster)
+                BootClusterConfig cluster,
+                int index)
   {
     _id = id;
     
     _system = system;
-    _config = new WatchdogConfig(cluster, args, rootDirectory);
+    _config = new WatchdogConfig(cluster, args, rootDirectory, index);
 
     _admin = new WatchdogAdmin();
   }
@@ -89,6 +90,7 @@ class WatchdogChild
                 WatchdogConfig config)
   {
     _id = config.getId();
+    
     _config = config;
     
     _admin = new WatchdogAdmin();
@@ -432,6 +434,16 @@ class WatchdogChild
     
     if (task != null)
       task.stop();
+  }
+
+  /**
+   * Stops the watchdog instance
+   */
+  public void restart()
+  {
+    stop();
+    
+    start();
   }
 
   /**

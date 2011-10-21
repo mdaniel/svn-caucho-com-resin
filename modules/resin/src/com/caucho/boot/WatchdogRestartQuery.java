@@ -33,21 +33,30 @@ import java.io.Serializable;
 @SuppressWarnings("serial")
 public class WatchdogRestartQuery implements Serializable {
   private final String _serverId;
+  private final String []_argv;
 
   @SuppressWarnings("unused")
   private WatchdogRestartQuery()
   {
     _serverId = null;
+    _argv = null;
   }
 
-  public WatchdogRestartQuery(String serverId)
+  public WatchdogRestartQuery(String serverId,
+                              String []argv)
   {
     _serverId = serverId;
+    _argv = argv;
   }
 
   public String getServerId()
   {
     return _serverId;
+  }
+  
+  public String []getArgv()
+  {
+    return _argv;
   }
 
   @Override

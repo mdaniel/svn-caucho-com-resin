@@ -65,6 +65,7 @@ class WatchdogArgs
   private Path _resinConf;
   private Path _logDirectory;
   private String _serverId = "";
+  private String _clusterId;
   private int _watchdogPort;
   private boolean _isVerbose;
   private boolean _isHelp;
@@ -145,6 +146,11 @@ class WatchdogArgs
   String getServerId()
   {
     return _serverId;
+  }
+
+  String getClusterId()
+  {
+    return _clusterId;
   }
 
   String[] getArgv()
@@ -453,6 +459,10 @@ class WatchdogArgs
       }
       else if ("-server".equals(arg) || "--server".equals(arg)) {
         _serverId = argv[i + 1];
+        i++;
+      }
+      else if ("-cluster".equals(arg) || "--cluster".equals(arg)) {
+        _clusterId = argv[i + 1];
         i++;
       }
       else if ("-server-root".equals(arg) || "--server-root".equals(arg)) {

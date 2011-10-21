@@ -516,9 +516,9 @@ class WatchdogManager implements AlarmListener {
       WatchdogChild server = _watchdogMap.get(serverId);
 
       if (server != null)
-        server.stop();
-
-      startServer(argv);
+        server.restart();
+      else
+        startServer(argv);
     }
   }
 
@@ -552,7 +552,7 @@ class WatchdogManager implements AlarmListener {
     */
 
     String serverId = args.getServerId();
-    WatchdogConfig server = null;
+    WatchdogConfig serverConfig = null;
 
     if (args.isDynamicServer()) {
       String clusterId = args.getDynamicCluster();
@@ -566,39 +566,44 @@ class WatchdogManager implements AlarmListener {
                                       clusterId));
       }
 
-      server = cluster.createServer();
+      serverConfig = cluster.createServer();
       serverId = args.getDynamicServerId();
-      server.setId(serverId);
-      server.setAddress(address);
-      server.setPort(port);
-      cluster.addServer(server);
+      serverConfig.setId(serverId);
+      serverConfig.setAddress(address);
+      serverConfig.setPort(port);
+      cluster.addServer(serverConfig);
     }
     else {
       WatchdogClient client = resin.findClient(serverId);
 
       if (client != null)
-        server = client.getConfig();
+        serverConfig = client.getConfig();
       else
-        server = resin.findServer(serverId);
+        serverConfig = resin.findServer(serverId);
     }
 
-    WatchdogChild watchdog = _watchdogMap.get(server.getId());
+    WatchdogChild watchdog = _watchdogMap.get(serverId);
 
     if (watchdog != null) {
       if (watchdog.isActive()) {
         throw new ConfigException(L().l("server '{0}' cannot be started because a running instance already exists.  stop or restart the old server first.",
-                                        server.getId()));
+                                        serverId));
       }
 
-      watchdog = _watchdogMap.remove(server.getId());
+      watchdog = _watchdogMap.remove(serverId);
 
       if (watchdog != null)
         watchdog.close();
     }
+    
+    if (serverConfig == null) {
+      throw new ConfigException(L().l("server '{0}' cannot be started because no configuration has been found.",
+                                      serverId));
+    }
 
-    watchdog = new WatchdogChild(_system, server);
+    watchdog = new WatchdogChild(_system, serverConfig);
 
-    _watchdogMap.put(server.getId(), watchdog);
+    _watchdogMap.put(serverId, watchdog);
 
     return watchdog;
   }

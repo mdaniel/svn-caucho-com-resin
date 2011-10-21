@@ -29,6 +29,11 @@
 
 package com.caucho.boot;
 
+import java.io.IOException;
+import java.net.Socket;
+import java.util.logging.Level;
+import java.util.logging.Logger;
+
 import com.caucho.bam.NotAuthorizedException;
 import com.caucho.config.ConfigException;
 import com.caucho.env.repository.CommitBuilder;
@@ -38,6 +43,8 @@ import com.caucho.util.L10N;
 
 public abstract class AbstractRepositoryCommand extends AbstractBootCommand {
   private static final L10N L = new L10N(AbstractRepositoryCommand.class);
+  private static final Logger log
+    = Logger.getLogger(AbstractRepositoryCommand.class.getName());
 
   @Override
   public final int doCommand(WatchdogArgs args,
@@ -49,7 +56,7 @@ public abstract class AbstractRepositoryCommand extends AbstractBootCommand {
     try {
       deployClient = getDeployClient(args, client);
 
-     return doCommand(args, client, deployClient);
+      return doCommand(args, client, deployClient);
     } catch (Exception e) {
       if (args.isVerbose())
         e.printStackTrace();
@@ -97,9 +104,6 @@ public abstract class AbstractRepositoryCommand extends AbstractBootCommand {
   {
     String address = args.getArg("-address");
 
-    if (address == null || address.isEmpty())
-      address = client.getConfig().getAddress();
-
     int port = -1;
 
     String portArg = args.getArg("-port");
@@ -113,9 +117,17 @@ public abstract class AbstractRepositoryCommand extends AbstractBootCommand {
 
       throw e;
     }
+    
+    WatchdogClient liveClient = client;
+
+    if (address == null || address.isEmpty()) {
+      liveClient = findLiveClient(client, port);
+      
+      address = liveClient.getConfig().getAddress();
+    }
 
     if (port == -1)
-      port = findPort(client);
+      port = findPort(liveClient);
 
     if (port == 0) {
       throw new ConfigException(L.l("HTTP listener {0}:{1} was not found",
@@ -131,6 +143,43 @@ public abstract class AbstractRepositoryCommand extends AbstractBootCommand {
     }
     
     return new WebAppDeployClient(address, port, user, password);
+  }
+  
+  private WatchdogClient findLiveClient(WatchdogClient client, int port)
+  {
+    for (WatchdogClient triad : client.getConfig().getCluster().getClients()) {
+      int triadPort = port;
+      
+      if (triadPort <= 0)
+        triadPort = findPort(triad);
+      
+      if (clientCanConnect(triad, triadPort)) {
+        return triad;
+      }
+      
+      if (triad.getIndex() > 2)
+        break;
+    }
+    
+    return client;
+  }
+  
+  private boolean clientCanConnect(WatchdogClient client, int port)
+  {
+    String address = client.getConfig().getAddress();
+    int clusterPort = client.getConfig().getPort();
+    
+    try {
+      Socket s = new Socket(address, clusterPort);
+      
+      s.close();
+      
+      return true;
+    } catch (IOException e) {
+      log.log(Level.FINER, e.toString(), e);
+      
+      return false;
+    }
   }
   
   private int findPort(WatchdogClient client)

@@ -80,7 +80,7 @@ public class ReaderStream extends StreamImpl {
         break;
 
       if (ch < 0x80)
-            buf[i++] = (byte) ch;
+        buf[i++] = (byte) ch;
       else if (ch < 0x800) {
         if (i + 1 < end) {
         }

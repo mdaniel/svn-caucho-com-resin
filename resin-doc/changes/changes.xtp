@@ -12,6 +12,9 @@
 
 <s2 title="4.0.24 - snapshot">
 <ul>
+<li>cli: "restart" command needs to handle dynamic servers (#4801)</li>
+<li>jsp-el: CompositeELResolver wasn't implementing invoke properly (#4820, rep by Wesley Wu)</li>
+<li>websocket: WebSocketReader.read(char[]) was using iso-8859-1 instead of utf-8 (#4818, rep by ihristov)</li>
 <li>hessian: add setUnshared and HessianUnshared for serialization performance</li>
 <li>health: added LicenseHealthCheck</li>
 <li>health pdf: added license info to PDF report</li>

@@ -161,6 +161,40 @@ class WatchdogService extends SimpleActor
   }
 
   /**
+   * Handles stop queries
+   */
+  @Query
+  public boolean watchdogRestart(long id, String to, String from,
+                                 WatchdogRestartQuery restart)
+  {
+    String serverId = restart.getServerId();
+    String []argv = restart.getArgv();
+
+    try {
+      _manager.restartServer(serverId, argv);
+
+      String msg = L.l("{0}: restarted server='{1}'", this, serverId);
+    
+      getBroker().queryResult(id, from, to,
+                                    new ResultStatus(true, msg));
+    } catch (Exception e) {
+      log.log(Level.WARNING, e.toString(), e);
+      
+      String msg = L.l("{0}: restart server='{1}' failed because of exception\n{2}'",
+                       this, serverId, e.toString());
+    
+      getBroker().queryResult(id, from, to,
+                                    new ResultStatus(false, msg));
+    }
+    
+    if (_manager.isEmpty()) {
+      new Thread(new Shutdown()).start();
+    }
+    
+    return true;
+  }
+
+  /**
    * Handles kill queries
    */
   @Query
