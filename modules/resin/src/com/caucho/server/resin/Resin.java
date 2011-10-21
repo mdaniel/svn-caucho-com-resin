@@ -706,6 +706,7 @@ public class Resin
   public void setJoinCluster(String clusterId)
   {
     _dynamicJoinCluster = clusterId;
+    System.out.println("JC: " + _dynamicJoinCluster);
   }
   
   /**
@@ -1271,8 +1272,10 @@ public class Resin
     String clusterId = "";
     
     if (_dynamicJoinCluster != null) {
+      clusterId = _dynamicJoinCluster;
+      
       CloudServer cloudServer = joinCluster(bootResin.getCloudSystem());
-
+      System.out.println("JOIN: " + cloudServer);
       if (cloudServer != null)
         clusterId = cloudServer.getCluster().getId(); 
     }
@@ -1292,8 +1295,8 @@ public class Resin
         clusterConfig.init();
       }
       else {
-        throw new ConfigException(L().l("'{0}' is an unknown server in the configuration file.",
-                                        _serverId));
+        throw new ConfigException(L().l("'{0}' is an unknown cluster in the configuration file.",
+                                        clusterId));
       }
       
       /*

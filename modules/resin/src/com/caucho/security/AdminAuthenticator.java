@@ -99,27 +99,23 @@ public class AdminAuthenticator extends XmlAuthenticator
     if (_authStore != null)
       return;
 
-    CacheImpl authStoreImpl = DistCacheSystem.getMatchingCache("resin:authenticator");
+    AbstractCache authStore = new ClusterCache();
 
-    if (authStoreImpl == null) {
-      AbstractCache authStore = new ClusterCache();
+    authStore.setAccessedExpireTimeoutMillis(Period.FOREVER);
+    authStore.setModifiedExpireTimeoutMillis(Period.FOREVER);
 
-      authStore.setAccessedExpireTimeoutMillis(Period.FOREVER);
-      authStore.setModifiedExpireTimeoutMillis(Period.FOREVER);
+    authStore.setName("resin:authenticator");
+    authStore.setScopeMode(AbstractCache.Scope.CLUSTER);
 
-      authStore.setName("resin:authenticator");
-      authStore.setScopeMode(AbstractCache.Scope.CLUSTER);
-
-      authStore.createIfAbsent();
-    }
-
-    _authStore = DistCacheSystem.getMatchingCache("resin:authenticator");
+    _authStore = authStore.createIfAbsent();
   }
 
   private synchronized void reloadFromStore()
   {
-    Hashtable<String, PasswordUser> userMap
-      = (Hashtable<String, PasswordUser>) _authStore.get(ADMIN_AUTH_MAP_KEY);
+    Hashtable<String, PasswordUser> userMap = null;
+    
+    if (_authStore != null)
+      userMap = (Hashtable<String, PasswordUser>) _authStore.get(ADMIN_AUTH_MAP_KEY);
 
     if (userMap != null)
       _userMap = userMap;
