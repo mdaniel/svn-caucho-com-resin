@@ -35,9 +35,11 @@ import java.security.Principal;
 import java.util.logging.Logger;
 
 import javax.crypto.Cipher;
+import javax.enterprise.util.AnnotationLiteral;
 
 import com.caucho.bam.NotAuthorizedException;
 import com.caucho.cloud.security.SecurityService;
+import com.caucho.config.Admin;
 import com.caucho.config.inject.InjectManager;
 import com.caucho.hmtp.NonceQuery;
 import com.caucho.hmtp.SignedCredentials;
@@ -73,7 +75,10 @@ public class ServerAuthManager {
     
     InjectManager cdiManager = InjectManager.getCurrent();
     
-    _auth = cdiManager.getReference(Authenticator.class);
+    _auth = cdiManager.getReference(Authenticator.class,
+                                    new AnnotationLiteral<Admin>() {});
+    
+    System.out.println("AUTH: " + _auth);
   }
   
   public void setAuthenticationRequired(boolean isAuthenticationRequired)
@@ -140,6 +145,8 @@ public class ServerAuthManager {
         throw new NotAuthorizedException(L.l("'{0}' has invalid credentials",
                                              uid));
       }
+      
+      System.out.println("SS: " + serverSignature + " " + uid + " " + signature);
       
       if (! serverSignature.equals(signature)) {
         throw new NotAuthorizedException(L.l("'{0}' has invalid credentials",

@@ -706,7 +706,6 @@ public class Resin
   public void setJoinCluster(String clusterId)
   {
     _dynamicJoinCluster = clusterId;
-    System.out.println("JC: " + _dynamicJoinCluster);
   }
   
   /**

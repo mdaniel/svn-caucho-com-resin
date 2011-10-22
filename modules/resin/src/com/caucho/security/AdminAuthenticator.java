@@ -43,6 +43,7 @@ import com.caucho.util.Base64;
 import com.caucho.util.Crc64;
 import com.caucho.util.L10N;
 
+import javax.cache.Cache;
 import javax.enterprise.inject.Default;
 import javax.inject.Named;
 import java.util.Hashtable;
@@ -94,11 +95,11 @@ public class AdminAuthenticator extends XmlAuthenticator
   {
   }
 
-  public final void initStore()
+  public final CacheImpl getAuthStore()
   {
     if (_authStore != null)
-      return;
-
+      return _authStore;
+    
     AbstractCache authStore = new ClusterCache();
 
     authStore.setAccessedExpireTimeoutMillis(Period.FOREVER);
@@ -108,14 +109,15 @@ public class AdminAuthenticator extends XmlAuthenticator
     authStore.setScopeMode(AbstractCache.Scope.CLUSTER);
 
     _authStore = authStore.createIfAbsent();
+    
+    return _authStore;
   }
 
   private synchronized void reloadFromStore()
   {
     Hashtable<String, PasswordUser> userMap = null;
     
-    if (_authStore != null)
-      userMap = (Hashtable<String, PasswordUser>) _authStore.get(ADMIN_AUTH_MAP_KEY);
+    userMap = (Hashtable<String, PasswordUser>) getAuthStore().get(ADMIN_AUTH_MAP_KEY);
 
     if (userMap != null)
       _userMap = userMap;
@@ -124,9 +126,10 @@ public class AdminAuthenticator extends XmlAuthenticator
       log.log(Level.FINEST, "admin authenticator loaded " + userMap);
   }
 
-  private synchronized void updateStore() {
+  private synchronized void updateStore()
+  {
     //XXX: compareAndPut
-    _authStore.put(ADMIN_AUTH_MAP_KEY, _userMap);
+    getAuthStore().put(ADMIN_AUTH_MAP_KEY, _userMap);
   }
 
   private boolean isModified()
@@ -141,7 +144,7 @@ public class AdminAuthenticator extends XmlAuthenticator
     if (lastCheck + UPDATE_CHECK_INTERVAL > now)
       return false;
 
-    ExtCacheEntry entry = (ExtCacheEntry) _authStore.getCacheEntry(ADMIN_AUTH_MAP_KEY);
+    ExtCacheEntry entry = (ExtCacheEntry) getAuthStore().getCacheEntry(ADMIN_AUTH_MAP_KEY);
 
     if (entry != null && entry.getLastModifiedTime() > lastCheck)
       return true;

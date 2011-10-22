@@ -29,8 +29,10 @@
 
 package com.caucho.cloud.topology;
 
+import java.net.InetAddress;
 import java.util.concurrent.ConcurrentHashMap;
 
+import com.caucho.config.ConfigException;
 import com.caucho.util.L10N;
 
 /**
@@ -125,6 +127,54 @@ public class CloudServer {
       clusterId = "default";
 
     _uniqueDomainId = _uniqueClusterId + "." + clusterId.replace('.', '_');
+    
+    if (! isValidAddress(_address)) {
+      throw new ConfigException(L.l("'{0}' is not a valid cluster IP address because it is not a private network IP address.",
+                                    _address));
+    }
+  }
+  
+  private boolean isValidAddress(String address)
+  {
+    try {
+      InetAddress addr = InetAddress.getByName(address);
+      
+      byte []ipAddress = addr.getAddress();
+      
+      if (ipAddress.length == 6)
+        return true;
+      
+      if (ipAddress.length != 4)
+        return false;
+      
+      if (ipAddress[0] == 0)
+        return true;
+      
+      if (ipAddress[0] == 127)
+        return true;
+      
+      if (ipAddress[0] == 10)
+        return true;
+      
+      if ((ipAddress[0] & 0xff) == 192
+          && (ipAddress[1] & 0xff) == 168) {
+        return true;
+      }
+      
+      if ((ipAddress[0] & 0xff) == 169
+          && (ipAddress[1] & 0xff) == 254) {
+        return true;
+      }
+      
+      if ((ipAddress[0] & 0xff) == 172
+          && (ipAddress[1] & 0xf0) == 0x10) {
+        return true;
+      }
+       
+      return false;
+    } catch (Exception e) {
+      return false;
+    }
   }
 
   /**

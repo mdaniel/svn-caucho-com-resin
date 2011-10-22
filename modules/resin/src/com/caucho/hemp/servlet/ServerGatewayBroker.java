@@ -50,8 +50,8 @@ public class ServerGatewayBroker extends AbstractBroker {
   private final MessageStream _linkActor;
 
   public ServerGatewayBroker(Broker broker,
-                               ClientStubManager clientManager,
-                               MessageStream linkActor)
+                             ClientStubManager clientManager,
+                             MessageStream linkActor)
   {
     _broker = broker;
     _clientManager = clientManager;
@@ -115,10 +115,11 @@ public class ServerGatewayBroker extends AbstractBroker {
    */
   @Override
   public void query(long id,
-                       String to,
-                       String from,
-                       Serializable payload)
+                    String to,
+                    String from,
+                    Serializable payload)
   {
+    System.out.println("GATEWAY: '" + to + "' " + payload);
     if (to == null)
       _linkActor.query(id, to, from, payload);
     else if (isActive())
