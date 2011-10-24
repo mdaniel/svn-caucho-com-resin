@@ -54,6 +54,7 @@ import com.caucho.cloud.deploy.SetTagQuery;
 import com.caucho.config.ConfigException;
 import com.caucho.config.Service;
 import com.caucho.env.deploy.DeployControllerService;
+import com.caucho.env.deploy.DeployException;
 import com.caucho.env.deploy.DeployTagItem;
 import com.caucho.env.repository.RepositorySystem;
 import com.caucho.env.repository.RepositorySpi;
@@ -156,11 +157,15 @@ public class DeployActor extends SimpleActor
     if (entry == null) {
       log.fine(this + " copyError dst='" + query.getTag() + "' src='" + query.getSourceTag() + "'");
 
+      throw new DeployException(L.l("deploy-copy: '{0}' is an unknown source tag.",
+                                    query.getSourceTag()));
+      /*
       getBroker().queryError(id, from, to, query,
-                                   new BamError(BamError.TYPE_CANCEL,
-                                                  BamError.ITEM_NOT_FOUND,
-                                                  "unknown tag"));
+                             new BamError(BamError.TYPE_CANCEL,
+                                          BamError.ITEM_NOT_FOUND,
+                             "unknown tag"));
       return;
+      */
     }
 
     log.fine(this + " copy dst='" + query.getTag() + "' src='" + query.getSourceTag() + "'");

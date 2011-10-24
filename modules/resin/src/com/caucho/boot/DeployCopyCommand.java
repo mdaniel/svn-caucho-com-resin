@@ -43,9 +43,15 @@ public class DeployCopyCommand extends AbstractRepositoryCommand {
                        WebAppDeployClient deployClient)
   {
     String sourceContext = args.getArg("-source");
-    if (sourceContext == null)
+    
+    if (sourceContext != null) {
+    }
+    else if (args.getTailArgs().size() == 2) {
+      sourceContext = args.getTailArgs().get(0);
+    }
+    else {
       throw new ConfigException("must specify -source attribute");
-
+    }
 
     String sourceHost = args.getArg("-source-host");
     
@@ -67,6 +73,15 @@ public class DeployCopyCommand extends AbstractRepositoryCommand {
       fillInVersion(source, version);
 
     String targetContext = args.getArg("-target");
+    
+    if (targetContext != null) {
+    }
+    else if (args.getTailArgs().size() == 2) {
+      targetContext = args.getTailArgs().get(1);
+    }
+    else {
+      throw new ConfigException("must specify -target attribute");
+    }
 
     String targetHost = args.getArg("-target-host");
 

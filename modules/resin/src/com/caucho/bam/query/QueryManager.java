@@ -36,6 +36,7 @@ import java.util.concurrent.locks.LockSupport;
 
 import com.caucho.bam.BamError;
 import com.caucho.bam.BamException;
+import com.caucho.bam.ErrorPacketException;
 import com.caucho.bam.TimeoutException;
 import com.caucho.util.Alarm;
 import com.caucho.util.AlarmListener;
@@ -373,8 +374,14 @@ public class QueryManager {
         throw new TimeoutException(this + " query timeout " + _payload
                                    + " {to:" + _to + "}");
       }
-      else if (getError() != null)
-        throw getError().createException();
+      else if (getError() != null) {
+        ErrorPacketException exn = getError().createException();
+        
+        if (exn.getSourceException() instanceof RuntimeException)
+          throw (RuntimeException) exn.getSourceException();
+        else
+          throw exn;
+      }
       else
         return getResult();
     }

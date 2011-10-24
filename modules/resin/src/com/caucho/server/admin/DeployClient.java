@@ -103,6 +103,14 @@ public class DeployClient implements Repository
     _deployAddress = "deploy@" + serverId + ".resin.caucho";
   }
   
+  public DeployClient(ActorSender client)
+  {
+    _bamClient = client;
+    
+    _url = client.getAddress();
+    _deployAddress = "deploy@resin.caucho";
+  }
+  
   public DeployClient(String host, int port,
                       String userName, String password)
   {
@@ -128,7 +136,12 @@ public class DeployClient implements Repository
   
   public String getUrl()
   {
-    return _url;
+    if (_url != null)
+      return _url;
+    else if (_bamClient != null)
+      return _bamClient.getAddress();
+    else
+      return null;
   }
 
   /**

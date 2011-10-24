@@ -28,6 +28,7 @@
 
 package com.caucho.server.admin;
 
+import com.caucho.bam.actor.ActorSender;
 import com.caucho.util.QDate;
 
 /**
@@ -43,6 +44,11 @@ public class WebAppDeployClient extends DeployClient
   public WebAppDeployClient(String serverId)
   {
     super(serverId);
+  }
+
+  public WebAppDeployClient(ActorSender sender)
+  {
+    super(sender);
   }
 
   public WebAppDeployClient(String host, int port,

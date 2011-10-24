@@ -293,6 +293,25 @@ public class BamError implements Serializable {
   }
 
   /**
+   * An error response
+   *
+   * @param type the error type
+   * @param group the error group
+   * @param text the error text
+   */
+  public BamError(String type,
+                  String group,
+                  String text,
+                  Serializable data)
+  {
+    this.type = type;
+    this.group = group;
+    this.text = text;
+    this.data = data;
+  }
+
+
+  /**
    * Creates an ActorError based on an exception
    */
   public static BamError create(Throwable e)
@@ -304,8 +323,9 @@ public class BamError implements Serializable {
       return ((BamException) e).createActorError();
     else {
       return new BamError(BamError.TYPE_CANCEL,
-                            BamError.INTERNAL_SERVER_ERROR,
-                            e.toString());
+                          BamError.INTERNAL_SERVER_ERROR,
+                          e.toString(),
+                          e);
     }
   }
 

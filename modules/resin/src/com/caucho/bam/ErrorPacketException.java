@@ -90,4 +90,12 @@ public class ErrorPacketException extends BamException {
       return super.createActorError();
     }
   }
+  
+  public Throwable getSourceException()
+  {
+    if (_error != null && (_error.getData() instanceof Throwable))
+      return (Throwable) _error.getData();
+    else
+      return null;
+  }
 }
