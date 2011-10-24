@@ -1244,7 +1244,7 @@ public class Server
 
       AdminAuthenticator adminAuth = getAdminAuthenticator();
       if (adminAuth != null)
-        adminAuth.initStore();
+        adminAuth.init();
     } catch (RuntimeException e) {
       log.log(Level.WARNING, e.toString(), e);
 
