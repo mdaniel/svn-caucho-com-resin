@@ -996,7 +996,7 @@ public final class CacheStoreManager
     
     HashKey valueHash = HashKey.create(mnodeUpdate.getValueHash());
     long version = mnodeUpdate.getVersion();
-    
+
     MnodeEntry oldEntryValue;
     MnodeEntry mnodeValue;
 

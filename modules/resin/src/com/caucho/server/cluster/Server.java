@@ -1053,6 +1053,7 @@ public class Server
         _systemStore.setManagerName("resin");
         _systemStore.setModifiedExpireTimeoutMillis(CacheConfig.TIME_INFINITY);
         _systemStore.setAccessedExpireTimeoutMillis(CacheConfig.TIME_INFINITY);
+        _systemStore.setLocalExpireTimeoutMillis(10);
         // XXX: need to set reliability values
       }
     }

@@ -306,7 +306,7 @@ public class HempBroker extends AbstractManagedBroker
   public void message(String to, String from, Serializable payload)
   {
     Mailbox mailbox = getMailbox(to);
-    
+
     if (mailbox != null) {
       mailbox.message(to, from, payload);
       return;
