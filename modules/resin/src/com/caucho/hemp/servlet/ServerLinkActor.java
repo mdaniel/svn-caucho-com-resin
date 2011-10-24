@@ -102,7 +102,6 @@ public class ServerLinkActor extends SimpleActor
     Object credentials = query.getCredentials();
 
     try {
-      System.out.println("AUTHME:" + query + " " + credentials + " " + _authManager);
       _authManager.authenticate(query.getUid(), credentials, ipAddress);
     } catch (BamException e) {
       log.log(Level.FINE, e.toString(), e);

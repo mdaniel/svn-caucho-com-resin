@@ -175,7 +175,7 @@ public class HmtpRequest extends AbstractProtocolConnection
                                    _clientManager,
                                    _bamService.getLinkManager(),
                                    _conn.getRemoteHost());
-    System.out.println("UNIDIR: " +isUnidir);
+
     if (isUnidir) {
       _proxyBroker = new ServerGatewayBroker(broker,
                                              _clientManager, 

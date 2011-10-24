@@ -50,6 +50,11 @@ public class ClientStubManager {
     _broker = broker;
     _toLinkMailbox = toLinkMailbox;
   }
+  
+  public Mailbox getToLinkMailbox()
+  {
+    return _toLinkMailbox;
+  }
 
   public String getAddress()
   {
@@ -59,7 +64,7 @@ public class ClientStubManager {
       throw new IllegalStateException(L.l("{0}: Client stub has not been registered",
                                           this));
   }
-
+  
   public boolean isActive()
   {
     return _clientStub != null;

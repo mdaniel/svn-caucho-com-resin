@@ -119,7 +119,6 @@ public class ServerGatewayBroker extends AbstractBroker {
                     String from,
                     Serializable payload)
   {
-    System.out.println("GATEWAY: '" + to + "' " + payload);
     if (to == null)
       _linkActor.query(id, to, from, payload);
     else if (isActive())

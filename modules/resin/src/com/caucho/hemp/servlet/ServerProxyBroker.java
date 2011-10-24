@@ -45,6 +45,7 @@ import com.caucho.bam.stream.MessageStream;
 public class ServerProxyBroker extends AbstractBroker {
   private final Broker _broker;
   private final ClientStubManager _clientManager;
+  private final Mailbox _toLinkMailbox;
   private final MessageStream _linkActor;
 
   public ServerProxyBroker(Broker broker,
@@ -54,6 +55,12 @@ public class ServerProxyBroker extends AbstractBroker {
     _broker = broker;
     _clientManager = clientManager;
     _linkActor = linkActor;
+    _toLinkMailbox = _clientManager.getToLinkMailbox();
+  }
+  
+  private Mailbox getLinkMailbox()
+  {
+    return _toLinkMailbox;
   }
 
   @Override
@@ -86,12 +93,16 @@ public class ServerProxyBroker extends AbstractBroker {
                       String from,
                       Serializable payload)
   {
-    if (to == null)
-      _linkActor.message(to, from, payload);
-    else if (isActive())
-      _broker.message(to, getClientAddress(), payload);
-    else
-      super.message(to, from, payload);
+    try {
+      if (to == null)
+        _linkActor.message(to, from, payload);
+      else if (isActive())
+        _broker.message(to, getClientAddress(), payload);
+      else
+        super.message(to, from, payload);
+    } catch (Throwable e) {
+      getLinkMailbox().messageError(from, to, payload, BamError.create(e));
+    }
   }
 
   /**
@@ -123,13 +134,17 @@ public class ServerProxyBroker extends AbstractBroker {
                        String from,
                        Serializable payload)
   {
-    if (to == null)
-      _linkActor.query(id, to, from, payload);
-    else if (isActive()) {
-      _broker.query(id, to, getClientAddress(), payload);
-    }
-    else {
-      super.query(id, to, from, payload);
+    try {
+      if (to == null)
+        _linkActor.query(id, to, from, payload);
+      else if (isActive()) {
+        _broker.query(id, to, getClientAddress(), payload);
+      }
+      else {
+        super.query(id, to, from, payload);
+      }
+    } catch (Throwable e) {
+     getLinkMailbox().queryError(id, from, to, payload, BamError.create(e));
     }
   }
 
