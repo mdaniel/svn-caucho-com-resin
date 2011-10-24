@@ -366,10 +366,25 @@ public class TransactionManagerImpl
 
         log.fine(L.l("XAResource {0} forget xid {1}", xaRes, xidImpl));
 
+        boolean isValid = false;
+
         try {
-          xaRes.forget(xidImpl);
+          xaRes.rollback(xidImpl);
+          isValid = true;
+          // #4748
+          // xaRes.forget(xidImpl);
         } catch (Throwable e) {
           log.log(Level.FINER, e.toString(), e);
+        }
+
+        if (! isValid) {
+          try {
+            // #4748
+            xaRes.forget(xidImpl);
+            isValid = true;
+          } catch (Throwable e) {
+            log.log(Level.FINER, e.toString(), e);
+          }
         }
       }
     }
