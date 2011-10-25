@@ -28,18 +28,10 @@
 
 package com.caucho.server.admin;
 
-import com.caucho.bam.RemoteConnectionFailedException;
-import com.caucho.bam.ServiceUnavailableException;
 import com.caucho.bam.actor.ActorSender;
-import com.caucho.hmtp.HmtpClient;
-import com.caucho.server.cluster.Server;
-import com.caucho.util.L10N;
 
-import java.io.Serializable;
 import java.lang.reflect.Constructor;
 import java.lang.reflect.InvocationTargetException;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 
 /**
  * Deploy Client API
@@ -62,6 +54,8 @@ public class HmuxClientFactory
 
   public ActorSender create()
   {
+    ActorSender sender;
+
     try {
       ClassLoader loader = Thread.currentThread().getContextClassLoader();
       
@@ -72,12 +66,11 @@ public class HmuxClientFactory
                                                            int.class,
                                                            String.class,
                                                            String.class);
-      
-      ActorSender sender
-        = (ActorSender) ctor.newInstance(_address, _port,
-                                         _userName, _password);
-      
-      return sender;
+
+      sender = (ActorSender) ctor.newInstance(_address, _port,
+                                              _userName, _password);
+    } catch (ClassNotFoundException e) {
+      sender = null;
     } catch (InvocationTargetException e) {
       if (e.getTargetException() instanceof RuntimeException)
         throw (RuntimeException) e.getTargetException();
@@ -88,6 +81,8 @@ public class HmuxClientFactory
     } catch (Exception e) {
       throw new RuntimeException(e);
     }
+
+    return sender;
   }
 
   @Override
