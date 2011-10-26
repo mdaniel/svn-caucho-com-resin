@@ -565,10 +565,16 @@ public class CauchoRequestWrapper extends AbstractCauchoRequest {
   }
   */
 
+  /**
   @Override
   public Part getPart(String name)
     throws IOException, ServletException
   {
+    Part part = super.getPart(name);
+
+    if (part != null)
+      return part;
+
     return _request.getPart(name);
   }
 
@@ -576,9 +582,14 @@ public class CauchoRequestWrapper extends AbstractCauchoRequest {
   public Collection<Part> getParts()
     throws IOException, ServletException
   {
+    Collection<Part> parts = super.getParts();
+
+    if (parts != null)
+      return parts;
+
     return _request.getParts();
   }
-  
+  */
   /*
   public void login(String username, String password)
     throws ServletException

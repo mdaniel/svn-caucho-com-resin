@@ -29,7 +29,11 @@
 
 package com.caucho.server.http;
 
+import com.caucho.i18n.CharacterEncoding;
+import com.caucho.server.cluster.Server;
 import com.caucho.util.CharBuffer;
+import com.caucho.util.CharSegment;
+import com.caucho.util.HashMapImpl;
 import com.caucho.util.L10N;
 import com.caucho.vfs.*;
 import com.caucho.network.listen.SocketLink;
@@ -44,6 +48,7 @@ import com.caucho.security.Login;
 import com.caucho.util.Alarm;
 
 import java.io.*;
+import java.nio.charset.Charset;
 import java.util.*;
 import java.util.logging.*;
 import java.security.*;
@@ -56,10 +61,22 @@ abstract public class AbstractCauchoRequest implements CauchoRequest {
   private static final Logger log
     = Logger.getLogger(AbstractCauchoRequest.class.getName());
 
+  static final String CHAR_ENCODING = "resin.form.character.encoding";
+  static final String FORM_LOCALE = "resin.form.local";
+  static final String CAUCHO_CHAR_ENCODING = "caucho.form.character.encoding";
+
+  static final Charset UTF8 = Charset.forName("UTF-8");
+
   private int _sessionGroup = -1;
 
   private boolean _sessionIsLoaded;
   private SessionImpl _session;
+
+  private ArrayList<Path> _removeOnExit;
+
+  // form
+  private HashMapImpl<String,String[]> _filledForm;
+  private List<Part> _parts;
 
   abstract public CauchoResponse getResponse();
 
@@ -92,6 +109,221 @@ abstract public class AbstractCauchoRequest implements CauchoRequest {
 
       return null;
     }
+  }
+
+  @Override
+  public final Collection<Part> getParts()
+    throws IOException, ServletException
+  {
+    ServletInvocation invocation = getInvocation();
+
+    MultipartConfigElement multipartConfig
+      = invocation.getMultipartConfig();
+
+    if (multipartConfig == null)
+      throw new ServletException(L.l("multipart-form is disabled; check @MultipartConfig annotation on '{0}'.", invocation.getServletName()));
+
+    /*
+    if (! getWebApp().doMultipartForm())
+      throw new ServletException("multipart-form is disabled; check <multipart-form> configuration tag.");
+      */
+
+    if (! getContentType().startsWith("multipart/form-data"))
+      throw new ServletException("Content-Type must be of 'multipart/form-data'.");
+
+    if (_filledForm == null)
+      _filledForm = parseQuery();
+
+    return _parts;
+  }
+
+  /**
+   * @since Servlet 3.0
+   */
+  @Override
+  public final Part getPart(String name)
+    throws IOException, ServletException
+  {
+    for (Part part : getParts()) {
+      if (name.equals(part.getName()))
+        return part;
+    }
+
+    return null;
+  }
+
+  public abstract AbstractHttpRequest getAbstractHttpRequest();
+
+  public Server getServer() {
+    return getAbstractHttpRequest().getServer();
+  }
+
+  private HashMapImpl<String,String[]> parseQuery()
+  {
+    AbstractHttpRequest request = getAbstractHttpRequest();
+
+    HashMapImpl<String,String[]> form = request.getForm();
+
+    try {
+      String query = getQueryString();
+      CharSegment contentType = request.getContentTypeBuffer();
+
+      if (query == null && contentType == null)
+        return form;
+
+      Form formParser = request.getFormParser();
+      long contentLength = request.getLongContentLength();
+
+      String charEncoding = getCharacterEncoding();
+      if (charEncoding == null) {
+        charEncoding = (String) getAttribute(CAUCHO_CHAR_ENCODING);
+        if (charEncoding == null)
+          charEncoding = (String) getAttribute(CHAR_ENCODING);
+        if (charEncoding == null) {
+          Locale locale = (Locale) getAttribute(FORM_LOCALE);
+          if (locale != null)
+            charEncoding = Encoding.getMimeName(locale);
+        }
+      }
+
+      if (query != null) {
+        String queryEncoding = charEncoding;
+
+        if (queryEncoding == null && getServer() != null)
+          queryEncoding = getServer().getURLCharacterEncoding();
+
+        if (queryEncoding == null)
+          queryEncoding = CharacterEncoding.getLocalEncoding();
+
+        String javaEncoding = Encoding.getJavaName(queryEncoding);
+
+        formParser.parseQueryString(form, query, javaEncoding, true);
+      }
+
+      if (charEncoding == null)
+        charEncoding = CharacterEncoding.getLocalEncoding();
+
+      String javaEncoding = Encoding.getJavaName(charEncoding);
+
+      ServletInvocation invocation = getInvocation();
+
+      MultipartConfigElement multipartConfig = invocation.getMultipartConfig();
+
+      if (contentType == null || ! "POST".equalsIgnoreCase(getMethod())) {
+      }
+
+      else if (contentType.startsWith("application/x-www-form-urlencoded")) {
+        formParser.parsePostData(form, getInputStream(), javaEncoding);
+      }
+
+      else if ((getWebApp().doMultipartForm() || multipartConfig != null)
+               && contentType.startsWith("multipart/form-data")) {
+        int length = contentType.length();
+        int i = contentType.indexOf("boundary=");
+
+        if (i < 0)
+          return form;
+
+        long formUploadMax = getWebApp().getFormUploadMax();
+        long parameterLengthMax = getWebApp().getFormParameterLengthMax();
+
+        if (parameterLengthMax < 0)
+          parameterLengthMax = Long.MAX_VALUE / 2;
+
+        Object uploadMax = getAttribute("caucho.multipart.form.upload-max");
+        if (uploadMax instanceof Number)
+          formUploadMax = ((Number) uploadMax).longValue();
+
+        Object paramMax = getAttribute("caucho.multipart.form.parameter-length-max");
+        if (paramMax instanceof Number)
+          parameterLengthMax = ((Number) paramMax).longValue();
+
+        // XXX: should this be an error?
+        if (formUploadMax >= 0 && formUploadMax < contentLength) {
+          setAttribute("caucho.multipart.form.error",
+                       L.l("Multipart form upload of '{0}' bytes was too large.",
+                           String.valueOf(contentLength)));
+          setAttribute("caucho.multipart.form.error.size",
+                       new Long(contentLength));
+
+          return form;
+        }
+
+        long fileUploadMax = -1;
+
+        if (multipartConfig != null) {
+          formUploadMax = multipartConfig.getMaxRequestSize();
+          fileUploadMax = multipartConfig.getMaxFileSize();
+        }
+
+        if (multipartConfig != null
+            && formUploadMax > 0
+            && formUploadMax < contentLength)
+          throw new IllegalStateException(L.l(
+            "multipart form data request's Content-Length '{0}' is greater then configured in @MultipartConfig.maxRequestSize value: '{1}'",
+            contentLength,
+            formUploadMax));
+
+        i += "boundary=".length();
+        char ch = contentType.charAt(i);
+        CharBuffer boundary = new CharBuffer();
+        if (ch == '\'') {
+          for (i++; i < length && contentType.charAt(i) != '\''; i++)
+            boundary.append(contentType.charAt(i));
+        }
+        else if (ch == '\"') {
+          for (i++; i < length && contentType.charAt(i) != '\"'; i++)
+            boundary.append(contentType.charAt(i));
+        }
+        else {
+          for (;
+               i < length && (ch = contentType.charAt(i)) != ' ' &&
+                 ch != ';';
+               i++) {
+            boundary.append(ch);
+          }
+        }
+
+        _parts = new ArrayList<Part>();
+
+        try {
+          MultipartFormParser.parsePostData(form,
+                                      _parts,
+                                      getStream(false),
+                                      boundary.toString(),
+                                      this,
+                                      javaEncoding,
+                                      formUploadMax,
+                                      fileUploadMax,
+                                      parameterLengthMax);
+        } catch (IOException e) {
+          log.log(Level.FINE, e.toString(), e);
+          setAttribute("caucho.multipart.form.error", e.getMessage());
+        }
+      }
+    } catch (IOException e) {
+      log.log(Level.FINE, e.toString(), e);
+    }
+
+    return form;
+  }
+
+  Part createPart(String name, Map<String, List<String>> headers)
+  {
+    return new PartImpl(name, headers);
+  }
+
+  public void addCloseOnExit(Path path)
+  {
+    if (_removeOnExit == null)
+      _removeOnExit = new ArrayList<Path>();
+
+    _removeOnExit.add(path);
+  }
+
+  public ReadStream getStream(boolean isFlush) throws IOException
+  {
+    return getAbstractHttpRequest().getStream();
   }
 
   public String getRealPath(String uri)
@@ -619,11 +851,208 @@ abstract public class AbstractCauchoRequest implements CauchoRequest {
 
     if (session != null)
       session.finishRequest();
+
+    if (_removeOnExit != null) {
+      for (int i = _removeOnExit.size() - 1; i >= 0; i--) {
+        Path path = _removeOnExit.get(i);
+
+        try {
+          path.remove();
+        } catch (Throwable e) {
+          log.log(Level.FINE, e.toString(), e);
+        }
+      }
+    }
   }
 
   @Override
   public String toString()
   {
     return getClass().getSimpleName() + "[" + getRequestURL() + "]";
+  }
+
+    public class PartImpl implements Part {
+    private String _name;
+    private Map<String, List<String>> _headers;
+    private Object _value;
+    private Path _newPath;
+
+    private PartImpl(String name, Map<String, List<String>> headers)
+    {
+      _name = name;
+      _headers = headers;
+    }
+
+    public void delete()
+      throws IOException
+    {
+      if (_newPath != null)
+        _newPath.remove();
+
+      Object value = getValue();
+
+      if (! (value instanceof FilePath))
+        throw new IOException(L.l("Part.delete() is not applicable to part '{0}':'{1}'", _name, value));
+
+      ((FilePath)value).remove();
+    }
+
+    public String getContentType()
+    {
+      String[] value = _filledForm.get(_name + ".content-type");
+
+      if (value != null && value.length > 0)
+        return value[0];
+
+      return null;
+    }
+
+    public String getHeader(String name)
+    {
+      List<String> values = _headers.get(name);
+
+      if (values != null && values.size() > 0)
+        return values.get(0);
+
+      return null;
+    }
+
+    public Collection<String> getHeaderNames()
+    {
+      return _headers.keySet();
+    }
+
+    public Collection<String> getHeaders(String name)
+    {
+      return _headers.get(name);
+    }
+
+    public InputStream getInputStream()
+      throws IOException
+    {
+      Object value = getValue();
+
+      if (value instanceof FilePath)
+        return ((FilePath) value).openRead();
+
+      ByteArrayInputStream is
+        = new ByteArrayInputStream(value.toString().getBytes(UTF8));
+
+      return is;
+    }
+
+
+    public String getName()
+    {
+      return _name;
+    }
+
+    public long getSize()
+    {
+      Object value = getValue();
+
+      if (value instanceof FilePath) {
+        return ((Path) value).getLength();
+      }
+      else if (value instanceof String) {
+        return -1;
+      }
+      else if (value == null) {
+        return -1;
+      }
+      else {
+        log.finest(L.l("Part.getSize() is not applicable to part'{0}':'{1}'",
+                       _name, value));
+
+        return -1;
+      }
+    }
+
+    @Override
+    public void write(String fileName)
+      throws IOException
+    {
+      if (_newPath != null)
+        throw new IOException(L.l(
+          "Contents of part '{0}' has already been written to '{1}'",
+          _name,
+          _newPath));
+
+      Path path;
+
+      Object value = getValue();
+
+      if (! (value instanceof FilePath))
+        throw new IOException(L.l(
+          "Part.write() is not applicable to part '{0}':'{1}'",
+          _name,
+          value));
+      else
+        path = (Path) value;
+
+      ServletInvocation invocation = getInvocation();
+
+      MultipartConfigElement mc = invocation.getMultipartConfig();
+      String location = mc.getLocation().replace('\\', '/');
+      fileName = fileName.replace('\\', '/');
+
+      String file;
+
+      if (location.charAt(location.length() -1) != '/' && fileName.charAt(fileName.length() -1) != '/')
+        file = location + '/' + fileName;
+      else
+        file = location + fileName;
+
+      _newPath = Vfs.lookup(file);
+
+      if (_newPath.exists())
+        throw new IOException(L.l("File '{0}' already exists.", _newPath));
+
+      Path parent = _newPath.getParent();
+
+      if (! parent.exists())
+        if (! parent.mkdirs())
+          throw new IOException(L.l("Unable to create path '{0}'. Check permissions.", parent));
+
+      if (! path.renameTo(_newPath)) {
+        WriteStream out = null;
+
+        try {
+          out = _newPath.openWrite();
+
+          path.writeToStream(out);
+
+          out.flush();
+
+          out.close();
+        } catch (IOException e) {
+          log.log(Level.SEVERE, L.l("Cannot write contents of '{0}' to '{1}'", path, _newPath), e);
+
+          throw e;
+        } finally {
+          if (out != null)
+            out.close();
+        }
+      }
+    }
+
+    public Object getValue()
+    {
+      if (_value != null)
+        return _value;
+
+      String []values = _filledForm.get(_name + ".file");
+
+      if (values != null && values.length > 0) {
+        _value = Vfs.lookup(values[0]);
+      } else {
+        values = _filledForm.get(_name);
+
+        if (values != null && values.length > 0)
+          _value = values[0];
+      }
+
+      return _value;
+    }
   }
 }
