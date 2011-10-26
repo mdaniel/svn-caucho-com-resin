@@ -72,6 +72,7 @@ import com.caucho.config.core.ResinChoose;
 import com.caucho.config.core.ResinIf;
 import com.caucho.config.core.ResinImport;
 import com.caucho.config.core.ResinLog;
+import com.caucho.config.core.ResinProperties;
 import com.caucho.config.core.ResinSet;
 import com.caucho.config.core.ResinSystemConfig;
 import com.caucho.config.program.ConfigProgram;
@@ -230,6 +231,7 @@ class NamespaceConfig {
   {
     addFlow("choose", ResinChoose.class);
     addFlow("if", ResinIf.class);
+    addFlow("properties", ResinProperties.class);
     
     addBean("import", ResinImport.class);
     addBean("log", ResinLog.class);

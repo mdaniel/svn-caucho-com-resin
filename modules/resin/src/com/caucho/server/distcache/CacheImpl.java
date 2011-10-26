@@ -448,7 +448,11 @@ public class CacheImpl
     
     HashKey result = entry.compareAndPut(oldHash, value, _config);
     
-    return result != null && result.equals(oldHash);
+    if (oldHash == null || oldHash.isNull()) {
+      return result == null || result.isNull();
+    }
+    else
+      return oldHash.equals(result);
   }
 
   @Override

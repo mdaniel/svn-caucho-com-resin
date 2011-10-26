@@ -193,7 +193,10 @@ public class DistCacheEntry implements ExtCacheEntry {
 
   public HashKey getValueHash(Object value, CacheConfig config)
   {
-    return _cacheService.getValueHash(value, config).getValue();
+    if (value == null)
+      return null;
+    else
+      return _cacheService.getValueHash(value, config).getValue();
   }
  
   /**
