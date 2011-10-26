@@ -12,6 +12,7 @@
 
 <s2 title="4.0.24 - snapshot">
 <ul>
+<li>servlet: fixed bug failing @MultipartConfig when used with resin:Forward(#4777)</li>
 <li>config: add resin:properties</li>
 <li>cli: "restart" command needs to handle dynamic servers (#4801)</li>
 <li>jsp-el: CompositeELResolver wasn't implementing invoke properly (#4820, rep by Wesley Wu)</li>
