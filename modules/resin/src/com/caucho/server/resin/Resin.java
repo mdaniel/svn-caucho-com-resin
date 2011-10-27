@@ -1283,11 +1283,15 @@ public class Resin
       }
     }
     
-    BootServerConfig bootServer = bootResin.findServer(_serverId);
+    
+    String serverId = _serverId;
+    
+    BootServerConfig bootServer = bootResin.findServer(serverId);
     
     if (bootServer == null) {
       if (_serverId != null 
           && ! "".equals(_serverId)
+          && ! "default".equals(_serverId)
           && ! isWatchdog()
           && _dynamicJoinCluster == null)
         throw new ConfigException(L().l("-server '{0}' is an unknown server in the configuration file.",
