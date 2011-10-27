@@ -152,18 +152,21 @@ else
       fi
     done
 
-    javabin=`dirname $java`
-    JAVA_HOME=`cd $javabin/..; pwd`
+    JAVA_HOME=`dirname $java`
 
     # we're in $JAVA_HOME/jre
-    if test -f "$JAVA_HOME/../include/jni.h"; then
+    if test -f "$JAVA_HOME/include/jni.h"; then
+      JAVA_HOME=$JAVA_HOME
+    elif test -f "/System/Library/Frameworks/JavaVM.framework"; then
+      JAVA_HOME="/System/Library/Frameworks/JavaVM.framework"
+    elif test -d "/etc/alternatives/java_sdk"; then
+      JAVA_HOME="/etc/alternatives/java_sdk"
+    elif test -f "$JAVA_HOME/../include/jni.h"; then
       JAVA_HOME=`cd $JAVA_HOME/..; pwd`
     elif test -f "$JAVA_HOME/lib/rt.jar"; then
       JAVA_HOME=`cd $JAVA_HOME/..; pwd`
     elif test -d "/usr/java"; then
       JAVA_HOME=/usr/java
-    elif test -f "/System/Library/Frameworks/JavaVM.framework"; then
-      JAVA_HOME="/System/Library/Frameworks/JavaVM.framework"
     fi
   elif test -d "/usr/java"; then
     JAVA_HOME=/usr/java
@@ -180,7 +183,8 @@ fi
 
 AC_SUBST(JAVA_HOME)
 
-JAVA_EXE="$JAVA_HOME/bin/java"
+#JAVA_EXE="$JAVA_HOME/bin/java"
+JAVA_EXE=`which java`
 
 $JAVA_EXE -d64 -version 1>/dev/null 2>/dev/null
 
@@ -766,11 +770,6 @@ if test -z "${LD_SHLIB}"; then
       CFLAGS_JNI="$CFLAGS_JNI -fPIC"
       LDFLAGS_SHLIB="-shared -fPIC"
 
-      if test -n "$b64"; then
-        CFLAGS="$CFLAGS -m64"
-      else
-        CFLAGS="$CFLAGS -m32"
-      fi
       if test -n "$b64_jni"; then
         CFLAGS_JNI="$CFLAGS_JNI -m64 -fPIC"
         LDFLAGS_SHLIB="$LDFLAGS_SHLIB -m64"
@@ -792,7 +791,7 @@ if test -z "${LD_SHLIB}"; then
           CFLAGS="$CFLAGS -m64"
           LDFLAGS_SHLIB="-m64 -R /usr/sfw/lib/64 -R /usr/local/lib/sparcv9"
         fi
-        if test -n "$b64_jni"; then
+        if test -n "${b64_jni}"; then
           CFLAGS_JNI="$CFLAGS_JNI -m64"
           LDFLAGS_SHLIB="-m64 -R /usr/sfw/lib/64 -R /usr/local/lib/sparcv9"
         fi
@@ -1471,13 +1470,13 @@ else
   echo "  JAVA_HOME: ${JAVA_HOME}"
   echo ""
 
-  if test -n "$b64_jni"; then
+  if test -n "${b64_jni}"; then
     echo "    + 64-bit JNI in ${JNI_INCLUDE}"
   else  
     echo "    + 32-bit JNI in ${JNI_INCLUDE}"
   fi
 
-  echo "    + JNI CFLAGS: ${CFLAGS}"
+  echo "    + JNI CFLAGS: ${JNI_CFLAGS}"
 
   if test -n "$epoll"; then
     echo "    + epoll() for keepalives"
