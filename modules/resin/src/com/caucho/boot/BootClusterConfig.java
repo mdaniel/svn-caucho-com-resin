@@ -35,6 +35,7 @@ import com.caucho.config.ConfigException;
 import com.caucho.config.program.ConfigProgram;
 import com.caucho.config.program.ContainerProgram;
 import com.caucho.env.service.ResinSystem;
+import com.caucho.server.resin.BootServerMultiConfig;
 import com.caucho.util.L10N;
 import com.caucho.xml.QName;
 
@@ -124,6 +125,28 @@ public class BootClusterConfig {
     _resin.addClient(client);
     
     _serverList.add(client);
+  }
+  
+  public void addServerMulti(BootServerMultiConfig multiServer)
+  {
+    int index = 0;
+
+    for (String address : multiServer.getAddressList()) {
+      WatchdogConfig server = createServer();
+      
+      server.setId(multiServer.getIdPrefix() + index++);
+      
+      int p = address.lastIndexOf(':');
+      int port = Integer.parseInt(address.substring(p + 1));
+      address = address.substring(0, p);
+      
+      server.setAddress(address);
+      server.setPort(port);
+      
+      multiServer.getServerProgram().configure(server);
+      
+      addServer(server);
+    }
   }
   
   public ArrayList<WatchdogClient> getClients()

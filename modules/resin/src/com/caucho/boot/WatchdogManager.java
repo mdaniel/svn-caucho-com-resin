@@ -175,17 +175,19 @@ class WatchdogManager implements AlarmListener {
 
     _watchdogPort = _args.getWatchdogPort();
     
-    readConfig(_args);
-    
-    WatchdogChild server = null;
-    
     String serverId = _args.getServerId();
 
     if (_args.isDynamicServer()) {
       serverId = _args.getDynamicServerId();
     }
+    
+    resin.setServerId(serverId);
+    
+    readConfig(serverId, _args);
+    
+    WatchdogChild server = null;
       
-    server = _watchdogMap.get(_args.getServerId());
+    server = _watchdogMap.get(serverId);
 
     if (server == null)
       throw new IllegalStateException(L().l("'{0}' is an unknown server",
@@ -414,21 +416,25 @@ class WatchdogManager implements AlarmListener {
    *
    * @param argv the command-line arguments to start the server
    */
-  void startServer(String []argv)
+  void startServer(String serverId, String []argv)
     throws ConfigException
   {
     synchronized (_watchdogMap) {
       WatchdogArgs args = new WatchdogArgs(argv, false);
 
       Vfs.setPwd(_args.getRootDirectory());
+      
+      if (serverId == null)
+        serverId = args.getServerId();
 
       try {
-        readConfig(args);
+        readConfig(serverId, args);
       } catch (Exception e) {
         throw ConfigException.create(e);
       }
 
-      String serverId = args.getServerId();
+      if (serverId == null)
+        serverId = args.getServerId();
 
       if (args.isDynamicServer())
         serverId = args.getDynamicServerId();
@@ -518,7 +524,7 @@ class WatchdogManager implements AlarmListener {
       if (server != null)
         server.restart();
       else
-        startServer(argv);
+        startServer(serverId, argv);
     }
   }
 
@@ -527,7 +533,7 @@ class WatchdogManager implements AlarmListener {
     return _server != null && _server.isActive();
   }
 
-  private WatchdogChild readConfig(WatchdogArgs args)
+  private WatchdogChild readConfig(String serverId, WatchdogArgs args)
     throws Exception
   {
     Config config = new Config();
@@ -551,7 +557,9 @@ class WatchdogManager implements AlarmListener {
                      args.getResinConf());
     */
 
-    String serverId = args.getServerId();
+    if (serverId == null)
+      serverId = args.getServerId();
+    
     WatchdogConfig serverConfig = null;
 
     if (args.isDynamicServer()) {
@@ -678,7 +686,7 @@ class WatchdogManager implements AlarmListener {
       JniCauchoSystem.create().initJniBackground();
 
       WatchdogManager manager = new WatchdogManager(argv);
-      manager.startServer(argv);
+      manager.startServer(null, argv);
 
       isValid = manager.isActive() && manager.isValid();
 

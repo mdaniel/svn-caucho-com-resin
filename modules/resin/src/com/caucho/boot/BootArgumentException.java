@@ -29,7 +29,7 @@
 
 package com.caucho.boot;
 
-public class BootArgumentException extends Exception
+public class BootArgumentException extends RuntimeException
 {
   public BootArgumentException(String message)
   {

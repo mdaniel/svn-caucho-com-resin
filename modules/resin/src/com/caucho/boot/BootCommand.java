@@ -34,7 +34,7 @@ import java.util.Set;
 public interface BootCommand {
   public String getName();
 
-  public int doCommand(WatchdogArgs args, WatchdogClient client)
+  public int doCommand(ResinBoot resinBoot, WatchdogArgs args)
     throws BootArgumentException;
 
   public boolean isRetry();

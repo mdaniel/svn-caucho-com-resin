@@ -29,6 +29,7 @@
 
 package com.caucho.boot;
 
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.logging.ConsoleHandler;
 import java.util.logging.Handler;
@@ -73,8 +74,8 @@ public class ResinBoot {
     = new HashMap<StartMode,BootCommand>();
 
   private WatchdogArgs _args;
+  private BootResinConfig _resinConfig;
 
-  private WatchdogClient _client;
   private ResinGUI _ui;
 
   ResinBoot(String []argv)
@@ -137,7 +138,7 @@ public class ResinBoot {
     libLoader.init();
 
     Config config = new Config();
-    BootResinConfig bootManager = new BootResinConfig(system, _args);
+    _resinConfig = new BootResinConfig(system, _args);
 
     ResinELContext elContext = _args.getELContext();
 
@@ -156,34 +157,50 @@ public class ResinBoot {
 
     ResinConfigLibrary.configure(beanManager);
 
-    config.configure(bootManager, _args.getResinConf(),
+    config.configure(_resinConfig, _args.getResinConf(),
                      "com/caucho/server/resin/resin.rnc");
 
     if (! _args.isHelp())
-      initClient(bootManager);
+      initClient();
+  }
+  
+  private void initClient()
+  {
+    if (_args.isDynamicServer())
+      _resinConfig.addDynamicClient(_args);
   }
 
-  private void initClient(BootResinConfig bootManager)
+  WatchdogClient findClient(String serverId, WatchdogArgs args)
   {
-    if (_args.isDynamicServer()) {
-      _client = bootManager.addDynamicClient(_args);
-    }
-    else {
-      _client = bootManager.findClient(_args.getServerId());
-    }
-
-    if (_client == null && _args.isShutdown()) {
-      _client = bootManager.findShutdownClient(_args.getClusterId());
+    WatchdogClient client = null;
+    
+    if (serverId != null) {
+      client = _resinConfig.findClient(serverId);
     }
 
-    if (_client == null && ! (_args.isStart() || _args.isConsole())) {
-      _client = bootManager.findShutdownClient(_args.getClusterId());
+    if (client == null && _args.isShutdown()) {
+      client = _resinConfig.findShutdownClient(_args.getClusterId());
     }
 
-    if (_client == null) {
+    if (client == null && ! (_args.isStart() || _args.isConsole())) {
+      client = _resinConfig.findShutdownClient(_args.getClusterId());
+    }
+
+    if (client == null) {
       throw new ConfigException(L().l("Resin/{0}: -server '{1}' does not match any defined <server>\nin {2}.",
                                       VersionFactory.getVersion(), _args.getServerId(), _args.getResinConf()));
     }
+    
+    return client;
+  }
+
+  public ArrayList<WatchdogClient> findLocalClients()
+  {
+    ArrayList<WatchdogClient> clientList = new ArrayList<WatchdogClient>();
+    
+    _resinConfig.fillLocalClients(clientList);
+    
+    return clientList;
   }
 
   BootCommand getCommand()
@@ -202,12 +219,12 @@ public class ResinBoot {
       return false;
     }
     else if (command != null && command.isRetry()) {
-      int code = command.doCommand(_args, _client);
+      int code = command.doCommand(this, _args);
 
       return code != 0;
     }
     else if (command != null) {
-      int code = command.doCommand(_args, _client);
+      int code = command.doCommand(this, _args);
 
       System.exit(code);
     }
@@ -316,6 +333,7 @@ public class ResinBoot {
     _commandMap.put(StartMode.RESTART, new RestartCommand());
     _commandMap.put(StartMode.SHUTDOWN, new ShutdownCommand());
     _commandMap.put(StartMode.START, new StartCommand());
+    _commandMap.put(StartMode.START_ALL, new StartAllCommand());
     _commandMap.put(StartMode.START_WITH_FOREGROUND, new StartWithForegroundCommand());
     _commandMap.put(StartMode.STATUS, new StatusCommand());
     _commandMap.put(StartMode.STOP, new StopCommand());

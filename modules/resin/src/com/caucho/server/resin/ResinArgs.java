@@ -405,6 +405,7 @@ class ResinArgs
         i += 4;
       }
       else if ("start".equals(argv[i])
+               || "start-all".equals(argv[i])
                || "restart".equals(argv[i])) {
         JniCauchoSystem.create().initJniBackground();
         i++;

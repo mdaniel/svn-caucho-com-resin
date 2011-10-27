@@ -1274,7 +1274,7 @@ public class Resin
       clusterId = _dynamicJoinCluster;
       
       CloudServer cloudServer = joinCluster(bootResin.getCloudSystem());
-      System.out.println("JOIN: " + cloudServer);
+
       if (cloudServer != null)
         clusterId = cloudServer.getCluster().getId(); 
     }
@@ -1282,6 +1282,12 @@ public class Resin
     BootServerConfig bootServer = bootResin.findServer(_serverId);
     
     if (bootServer == null) {
+      if (_serverId != null 
+          && ! "".equals(_serverId)
+          && ! isWatchdog())
+        throw new ConfigException(L().l("-server '{0}' is an unknown server in the configuration file.",
+                                        _serverId));
+      
       BootClusterConfig clusterConfig;
       
       clusterConfig = bootResin.findCluster(clusterId);

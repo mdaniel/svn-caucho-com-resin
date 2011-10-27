@@ -1111,19 +1111,18 @@ public final class SessionManager implements SessionCookieConfig, AlarmListener
       cacheBuilder.setName("resin:session");
       if (_isSaveTriplicate)
         cacheBuilder.setScopeMode(Scope.CLUSTER);
+      else if (_isSaveBackup)
+        cacheBuilder.setScopeMode(Scope.CLUSTER);
       else
         cacheBuilder.setScopeMode(Scope.LOCAL);
-      /*
-      else if (_isSaveBackup)
-        cacheBuilder.setScopeMode(Scope.CLUSTER_BACKUP);
-      else
-        cacheBuilder.setScopeMode(Scope.CLUSTER_SINGLE);
-        */
         
       if (isAlwaysLoadSession())
         cacheBuilder.setLocalExpireTimeoutMillis(20);
+      else
+        cacheBuilder.setLocalExpireTimeoutMillis(1000);
       
       cacheBuilder.setAccessedExpireTimeoutMillis(_sessionTimeout);
+      cacheBuilder.setLeaseExpireTimeoutMillis(5 * 60 * 1000);
 
       _sessionStore = cacheBuilder.createIfAbsent();
     }

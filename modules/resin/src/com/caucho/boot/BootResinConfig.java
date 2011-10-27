@@ -29,8 +29,14 @@
 
 package com.caucho.boot;
 
+import java.io.IOException;
+import java.net.InetAddress;
+import java.net.NetworkInterface;
 import java.util.ArrayList;
+import java.util.Enumeration;
 import java.util.HashMap;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 import com.caucho.cloud.security.SecurityService;
 import com.caucho.config.ConfigException;
@@ -45,6 +51,8 @@ import com.caucho.vfs.Path;
 public class BootResinConfig implements EnvironmentBean
 {
   private static final L10N L = new L10N(BootResinConfig.class);
+  private static final Logger log
+    = Logger.getLogger(BootResinConfig.class.getName());
 
   private boolean _isWatchdogManagerConfig;
   
@@ -215,6 +223,67 @@ public class BootResinConfig implements EnvironmentBean
     }
     
     return bestClient;
+  }
+  
+  public void fillLocalClients(ArrayList<WatchdogClient> clientList)
+  {
+    ArrayList<InetAddress> localAddresses = getLocalAddresses();
+
+    for (WatchdogClient client : _watchdogMap.values()) {
+      if (client == null)
+        continue;
+      
+      String address = client.getConfig().getAddress();
+      
+      if (isLocalAddress(localAddresses, address))
+        clientList.add(client);
+    }
+  }
+  
+  private ArrayList<InetAddress> getLocalAddresses()
+  {
+    ArrayList<InetAddress> localAddresses = new ArrayList<InetAddress>();
+    
+    try {
+      Enumeration<NetworkInterface> ifaceEnum
+        = NetworkInterface.getNetworkInterfaces();
+    
+      while (ifaceEnum.hasMoreElements()) {
+        NetworkInterface iface = ifaceEnum.nextElement();
+
+        Enumeration<InetAddress> addrEnum = iface.getInetAddresses();
+      
+        while (addrEnum.hasMoreElements()) {
+          InetAddress addr = addrEnum.nextElement();
+        
+          localAddresses.add(addr);
+        }
+      }
+    } catch (Exception e) {
+      log.log(Level.WARNING, e.toString(), e);
+    }
+    
+    return localAddresses;
+  }
+  
+  private boolean isLocalAddress(ArrayList<InetAddress> localAddresses,
+                                 String address)
+  {
+    if (address == null || "".equals(address))
+      return false;
+    
+    try {
+      InetAddress addr = InetAddress.getByName(address);
+      
+      if (localAddresses.contains(addr))
+        return true;
+    } catch (Exception e) {
+      log.log(Level.FINER, e.toString(), e);
+      
+      return false;
+    }
+    
+    return false;
   }
   
   public int getNextIndex()

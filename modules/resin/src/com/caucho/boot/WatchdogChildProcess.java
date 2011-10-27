@@ -732,6 +732,11 @@ class WatchdogChildProcess
       resinArgs.add("-conf");
       resinArgs.add(_watchdog.getResinConf().getNativePath());
     }
+    
+    if (_watchdog.getId() != null) {
+      resinArgs.add("-server");
+      resinArgs.add(_watchdog.getId());
+    }
 
     resinArgs.add("-socketwait");
     resinArgs.add(String.valueOf(socketPort));

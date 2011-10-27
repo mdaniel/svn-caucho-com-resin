@@ -30,6 +30,7 @@
 package com.caucho.server.resin;
 
 import java.util.ArrayList;
+import java.util.logging.Logger;
 
 import com.caucho.cloud.security.SecurityService;
 import com.caucho.cloud.topology.CloudSystem;
@@ -50,6 +51,8 @@ import com.caucho.vfs.Vfs;
  */
 public class BootResinConfig implements SchemaBean, DependencyBean, EnvironmentBean
 {
+  private static final Logger log
+    = Logger.getLogger(BootResinConfig.class.getName());
   private Resin _resin;
 
   private ContainerProgram _resinProgram

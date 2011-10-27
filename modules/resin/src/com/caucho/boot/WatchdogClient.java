@@ -46,6 +46,7 @@ import com.caucho.config.ConfigException;
 import com.caucho.env.service.ResinSystem;
 import com.caucho.hmtp.HmtpClient;
 import com.caucho.server.util.CauchoSystem;
+import com.caucho.util.Alarm;
 import com.caucho.util.L10N;
 import com.caucho.vfs.Path;
 
@@ -267,9 +268,13 @@ class WatchdogClient
 
     try {
       conn = getConnection();
+      
+      String serverId = getId();
 
       ResultStatus status = (ResultStatus)
-        conn.query(WATCHDOG_ADDRESS, new WatchdogStartQuery(argv), BAM_TIMEOUT);
+        conn.query(WATCHDOG_ADDRESS,
+                   new WatchdogStartQuery(serverId, argv),
+                   BAM_TIMEOUT);
 
       if (status.isSuccess())
         return null;
@@ -285,7 +290,36 @@ class WatchdogClient
         conn.close();
     }
 
-    return launchManager(argv);
+    Process process = launchManager(argv);
+    
+    long timeout = 15 * 1000L;
+    long expireTime = Alarm.getCurrentTimeActual() + timeout;
+    
+    while (Alarm.getCurrentTimeActual() <= expireTime) {
+      if (pingWatchdog())
+        return process;
+    }
+    
+    return null;
+  }
+  
+  private boolean pingWatchdog()
+  {
+    ActorSender conn = null;
+
+    try {
+      conn = getConnection();
+
+      
+      return true;
+    } catch (Exception e) {
+      log.log(Level.FINER, e.toString(), e);
+    } finally {
+      if (conn != null)
+        conn.close();
+    }
+    
+    return false;
   }
 
   public void stopWatchdog(String serverId)
@@ -481,8 +515,17 @@ class WatchdogClient
       // #3331, windows can't add -server automatically
       list.add("-server");
     }
+    
+    WatchdogArgs args = _bootManager.getArgs();
 
     list.add("com.caucho.boot.WatchdogManager");
+
+    if ("".equals(args.getServerId())
+        && ! args.isDynamicServer()
+        && ! "".equals(getId())) {
+      list.add("-server");
+      list.add(getId());
+    }
 
     for (int i = 0; i < argv.length; i++) {
       if (argv[i].equals("-conf")

@@ -99,6 +99,8 @@ r_cluster-Content =
   & r_root-directory?
 
   & r_server*
+  
+  & r_server-multi*
 
   & r_server-default*
 
@@ -623,6 +625,19 @@ r_server = element server {
 
   & (attribute address { string }
      | element address { string })?
+
+  & (attribute port { string }
+     | element port { string })?
+
+  & r_server-Content
+}
+
+r_server-multi = element server-multi {
+  (attribute id-prefix { string }
+   | element id-prefix { string })
+   
+  & (attribute address-list { string }
+     | element address-list { string })?
 
   & (attribute port { string }
      | element port { string })?

@@ -39,7 +39,8 @@ public abstract class AbstractManagementCommand extends AbstractBootCommand {
   
   @Override
   public int doCommand(WatchdogArgs args,
-                       WatchdogClient client) throws BootArgumentException
+                       WatchdogClient client)
+    throws BootArgumentException
   {
     ManagerClient managerClient = null;
 

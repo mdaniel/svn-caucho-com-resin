@@ -44,6 +44,18 @@ public abstract class AbstractBootCommand implements BootCommand {
   {
     return "abstract-boot-command";
   }
+  
+  public int doCommand(ResinBoot boot, WatchdogArgs args)
+  {
+    WatchdogClient client = boot.findClient(args.getServerId(), args);
+    
+    return doCommand(args, client);
+  }
+  
+  protected int doCommand(WatchdogArgs args, WatchdogClient client)
+  {
+    throw new UnsupportedOperationException(getClass().getSimpleName());
+  }
 
   public void validateArgs(String[] args) throws BootArgumentException
   {

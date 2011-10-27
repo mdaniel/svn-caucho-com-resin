@@ -30,6 +30,7 @@
 package com.caucho.server.resin;
 
 import java.util.ArrayList;
+import java.util.logging.Logger;
 
 import javax.annotation.PostConstruct;
 
@@ -50,6 +51,8 @@ import com.caucho.util.L10N;
  */
 public class BootClusterConfig implements SchemaBean
 {
+  private static final Logger log = Logger.getLogger(BootClusterConfig.class.getName());
+  
   private static final L10N L = new L10N(BootClusterConfig.class);
   
   private BootResinConfig _resinConfig;
@@ -159,6 +162,28 @@ public class BootClusterConfig implements SchemaBean
     BootPodConfig pod = _pods.get(0);
 
     pod.addServer(server);
+  }
+  
+  public void addServerMulti(BootServerMultiConfig multiServer)
+  {
+    int index = 0;
+
+    for (String address : multiServer.getAddressList()) {
+      int p = address.lastIndexOf(':');
+      
+      int port = Integer.parseInt(address.substring(p + 1));
+      address = address.substring(0, p);
+      
+      BootServerConfig server = createServer();
+      
+      server.setId(multiServer.getIdPrefix() + index++);
+      server.setAddress(address);
+      server.setPort(port);
+      server.addBuilderProgram(multiServer.getServerProgram());
+      server.init();
+      
+      addServer(server);
+    }
   }
 
   public ArrayList<BootPodConfig> getPodList()

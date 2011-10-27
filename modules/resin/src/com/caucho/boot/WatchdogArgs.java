@@ -46,6 +46,7 @@ import java.lang.management.ManagementFactory;
 import java.net.InetAddress;
 import java.net.URL;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.Set;
 import java.util.logging.Level;
@@ -56,6 +57,9 @@ class WatchdogArgs
   private static L10N _L;
   private static final Logger log
     = Logger.getLogger(WatchdogArgs.class.getName());
+  
+  private static final HashMap<String,StartMode> _commandMap
+    = new HashMap<String,StartMode>();
 
   private Path _javaHome;
   private Path _resinHome;
@@ -459,6 +463,7 @@ class WatchdogArgs
       }
       else if ("-server".equals(arg) || "--server".equals(arg)) {
         _serverId = argv[i + 1];
+
         i++;
       }
       else if ("-cluster".equals(arg) || "--cluster".equals(arg)) {
@@ -617,6 +622,9 @@ class WatchdogArgs
       }
       else if ("start-with-foreground".equals(arg)) {
         _startMode = StartMode.START_WITH_FOREGROUND;
+      }
+      else if (_commandMap.get(arg) != null) {
+        _startMode = _commandMap.get(arg);
       }
       else if (_startMode != null) {
         _tailArgs.add(arg);
@@ -1025,6 +1033,7 @@ class WatchdogArgs
     THREAD_DUMP,
     SHUTDOWN,
     START,
+    START_ALL,
     START_WITH_FOREGROUND,
     STATUS,
     STOP,
@@ -1034,4 +1043,8 @@ class WatchdogArgs
     USER_REMOVE,
     WATCHDOG,
   };
+  
+  static {
+    _commandMap.put("start-all", StartMode.START_ALL);
+  }
 }
