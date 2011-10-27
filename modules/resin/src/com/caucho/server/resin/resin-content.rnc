@@ -579,6 +579,9 @@ r_resin-Content =
   & (attribute environment-system-properties { r_boolean-Type }
      | element environment-system-properties { r_boolean-Type })?
 
+  & (attribute join-cluster { string }
+     | element join-cluster { string })?
+
   & r_management?
 
   & r_module-repository?

@@ -273,6 +273,11 @@ class WatchdogChild
     else
       return null;
   }
+  
+  boolean isDynamicServer()
+  {
+    return _config.isDynamic();
+  }
 
   boolean hasXmx()
   {

@@ -165,6 +165,11 @@ public class ResinConfig implements EnvironmentBean
     _resin.setShutdownWaitTime(shutdownWaitMax.getPeriod());
   }
   
+  @Configurable
+  public void setJoinCluster(String joinCluster)
+  {
+  }
+  
   /**
    * Overrides standard <logger> configuration to change to 
    * system-class-loader.

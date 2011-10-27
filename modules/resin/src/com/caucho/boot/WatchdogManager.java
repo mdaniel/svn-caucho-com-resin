@@ -562,8 +562,12 @@ class WatchdogManager implements AlarmListener {
     
     WatchdogConfig serverConfig = null;
 
-    if (args.isDynamicServer()) {
-      String clusterId = args.getDynamicCluster();
+    if (args.isDynamicServer() || resin.isJoinCluster()) {
+      String clusterId = resin.getJoinCluster();
+      
+      if (args.isDynamicServer())
+        clusterId = args.getDynamicCluster();
+      
       String address = args.getDynamicAddress();
       int port = args.getDynamicPort();
 

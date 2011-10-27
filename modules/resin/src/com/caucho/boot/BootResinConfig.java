@@ -40,6 +40,7 @@ import java.util.logging.Logger;
 
 import com.caucho.cloud.security.SecurityService;
 import com.caucho.config.ConfigException;
+import com.caucho.config.Configurable;
 import com.caucho.config.program.ConfigProgram;
 import com.caucho.config.program.ContainerProgram;
 import com.caucho.env.service.ResinSystem;
@@ -79,6 +80,7 @@ public class BootResinConfig implements EnvironmentBean
   
   private BootManagementConfig _management;
   private String _resinSystemKey;
+  private String _joinCluster;
   
   BootResinConfig(ResinSystem system,
                   WatchdogArgs args)
@@ -151,6 +153,22 @@ public class BootResinConfig implements EnvironmentBean
   public String getResinSystemAuthKey()
   {
     return _resinSystemKey;
+  }
+  
+  @Configurable
+  public void setJoinCluster(String joinCluster)
+  {
+    _joinCluster = joinCluster;
+  }
+  
+  public String getJoinCluster()
+  {
+    return _joinCluster;
+  }
+  
+  public boolean isJoinCluster()
+  {
+    return _joinCluster != null && ! "".equals(_joinCluster);
   }
 
   @Override
@@ -320,13 +338,17 @@ public class BootResinConfig implements EnvironmentBean
    */
   WatchdogClient addDynamicClient(WatchdogArgs args)
   {
-    if (! args.isDynamicServer())
+    if (! args.isDynamicServer() && ! isJoinCluster())
       throw new IllegalStateException();
 
-    String clusterId = args.getDynamicCluster();
+    String clusterId = getJoinCluster();
+    
+    if (args.isDynamicServer())
+      clusterId = args.getDynamicCluster();
+    
     String address = args.getDynamicAddress();
     int port = args.getDynamicPort();
-
+    
     BootClusterConfig cluster = findCluster(clusterId);
 
     if (cluster == null)

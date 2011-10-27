@@ -96,6 +96,8 @@ class WatchdogConfig
   private boolean _isVerbose;
   private boolean _hasWatchdogXss;
   private boolean _hasWatchdogXmx;
+  
+  private boolean _isDynamic;
 
   WatchdogConfig(BootClusterConfig cluster,
                  WatchdogArgs args,
@@ -134,6 +136,12 @@ class WatchdogConfig
 
   public void setDynamic(boolean isDynamic)
   {
+    _isDynamic = isDynamic;
+  }
+  
+  public boolean isDynamic()
+  {
+    return _isDynamic;
   }
 
   public void setVerbose(boolean isVerbose)

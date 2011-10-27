@@ -166,7 +166,7 @@ public class ResinBoot {
   
   private void initClient()
   {
-    if (_args.isDynamicServer())
+    if (_args.isDynamicServer() || _resinConfig.isJoinCluster())
       _resinConfig.addDynamicClient(_args);
   }
 

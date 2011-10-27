@@ -54,7 +54,7 @@ public class BootResinConfig implements SchemaBean, DependencyBean, EnvironmentB
   private static final Logger log
     = Logger.getLogger(BootResinConfig.class.getName());
   private Resin _resin;
-
+  
   private ContainerProgram _resinProgram
     = new ContainerProgram();
 
@@ -107,6 +107,12 @@ public class BootResinConfig implements SchemaBean, DependencyBean, EnvironmentB
     _resin.setRootDirectory(rootDirectory);
     
     Vfs.setPwd(rootDirectory);
+  }
+  
+  public void setJoinCluster(String joinCluster)
+  {
+    if (! "".equals(joinCluster))
+      _resin.setJoinCluster(joinCluster);
   }
   
   /**

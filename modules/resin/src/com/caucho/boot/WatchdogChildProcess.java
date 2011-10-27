@@ -733,7 +733,8 @@ class WatchdogChildProcess
       resinArgs.add(_watchdog.getResinConf().getNativePath());
     }
     
-    if (_watchdog.getId() != null) {
+    if (_watchdog.getId() != null
+        && ! _watchdog.isDynamicServer()) {
       resinArgs.add("-server");
       resinArgs.add(_watchdog.getId());
     }

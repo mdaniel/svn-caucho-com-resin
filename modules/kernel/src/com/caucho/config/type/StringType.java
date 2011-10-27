@@ -62,8 +62,14 @@ public final class StringType extends ConfigType
   /**
    * Converts the string to a value of the type.
    */
+  @Override
   public Object valueOf(Object value)
   {
-    return String.valueOf(value);
+    if (value != null)
+      return value.toString();
+    else {
+      // server/6e11
+      return "";
+    }
   }
 }
