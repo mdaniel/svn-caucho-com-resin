@@ -317,7 +317,7 @@ public class ForwardRequest extends CauchoRequestWrapper {
     if (_filledForm == null)
       _filledForm = parseQuery();
 
-    return (String []) _filledForm.get(name);
+    return _filledForm.get(name);
   }
 
   /**
@@ -339,8 +339,12 @@ public class ForwardRequest extends CauchoRequestWrapper {
 
     HashMapImpl<String,String[]> form = new HashMapImpl<String,String[]>();
 
+    //server/162r
+    form.putAll(parseQueryImpl());
+
     form.putAll(getRequest().getParameterMap());
-    
+
+    /*
     Form formParser = Form.allocate();
 
     try {
@@ -353,6 +357,7 @@ public class ForwardRequest extends CauchoRequestWrapper {
     } catch (Exception e) {
       throw new RuntimeException(e);
     }
+    */
 
     return form;
   }

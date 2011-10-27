@@ -37,7 +37,6 @@ import java.security.cert.X509Certificate;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Enumeration;
-import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 import java.util.logging.Level;
@@ -45,7 +44,6 @@ import java.util.logging.Logger;
 
 import javax.servlet.AsyncContext;
 import javax.servlet.DispatcherType;
-import javax.servlet.MultipartConfigElement;
 import javax.servlet.RequestDispatcher;
 import javax.servlet.ServletContext;
 import javax.servlet.ServletInputStream;
@@ -56,10 +54,8 @@ import javax.servlet.ServletResponse;
 import javax.servlet.http.Cookie;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
-import javax.servlet.http.Part;
 
 import com.caucho.config.scope.ScopeRemoveListener;
-import com.caucho.i18n.CharacterEncoding;
 import com.caucho.network.listen.SocketLink;
 import com.caucho.network.listen.SocketLinkDuplexController;
 import com.caucho.remote.websocket.MaskedFrameInputStream;
@@ -73,11 +69,9 @@ import com.caucho.server.session.SessionManager;
 import com.caucho.server.webapp.WebApp;
 import com.caucho.util.Base64;
 import com.caucho.util.CharBuffer;
-import com.caucho.util.CharSegment;
 import com.caucho.util.HashMapImpl;
 import com.caucho.util.L10N;
 import com.caucho.util.NullEnumeration;
-import com.caucho.vfs.Encoding;
 import com.caucho.vfs.Path;
 import com.caucho.vfs.ReadStream;
 import com.caucho.websocket.WebSocketContext;
@@ -102,10 +96,6 @@ public final class HttpServletRequestImpl extends AbstractCauchoRequest
   private Boolean _isSecure;
 
   private Invocation _invocation;
-
-  // form
-  private HashMapImpl<String,String[]> _filledForm;
-  private List<Part> _parts;
 
   // session/cookies
   private Cookie []_cookiesIn;
@@ -909,7 +899,7 @@ public final class HttpServletRequestImpl extends AbstractCauchoRequest
   public Enumeration<String> getParameterNames()
   {
     if (_filledForm == null)
-      _filledForm = parseQuery();
+      _filledForm = parseQueryImpl();
 
     return Collections.enumeration(_filledForm.keySet());
   }
@@ -921,7 +911,7 @@ public final class HttpServletRequestImpl extends AbstractCauchoRequest
   public Map<String,String[]> getParameterMap()
   {
     if (_filledForm == null)
-      _filledForm = parseQuery();
+      _filledForm = parseQueryImpl();
 
     return Collections.unmodifiableMap(_filledForm);
   }
@@ -936,7 +926,7 @@ public final class HttpServletRequestImpl extends AbstractCauchoRequest
   public String []getParameterValues(String name)
   {
     if (_filledForm == null)
-      _filledForm = parseQuery();
+      _filledForm = parseQueryImpl();
 
     return (String []) _filledForm.get(name);
   }
@@ -953,164 +943,6 @@ public final class HttpServletRequestImpl extends AbstractCauchoRequest
       return values[0];
     else
       return null;
-  }
-
-  /**
-   * Parses the query, either from the GET or the post.
-   *
-   * <p/>The character encoding is somewhat tricky.  If it's a post, then
-   * assume the encoded form uses the same encoding as
-   * getCharacterEncoding().
-   *
-   * <p/>If the request doesn't provide the encoding, use the
-   * character-encoding parameter from the webApp.
-   *
-   * <p/>Otherwise use the default system encoding.
-   */
-  private HashMapImpl<String,String[]> parseQuery()
-  {
-    HashMapImpl<String,String[]> form = _request.getForm();
-
-    try {
-      String query = getQueryString();
-      CharSegment contentType = _request.getContentTypeBuffer();
-
-      if (query == null && contentType == null)
-        return form;
-
-      Form formParser = _request.getFormParser();
-      long contentLength = _request.getLongContentLength();
-
-      String charEncoding = getCharacterEncoding();
-      if (charEncoding == null) {
-        charEncoding = (String) getAttribute(CAUCHO_CHAR_ENCODING);
-        if (charEncoding == null)
-          charEncoding = (String) getAttribute(CHAR_ENCODING);
-        if (charEncoding == null) {
-          Locale locale = (Locale) getAttribute(FORM_LOCALE);
-          if (locale != null)
-            charEncoding = Encoding.getMimeName(locale);
-        }
-      }
-
-      if (query != null) {
-        String queryEncoding = charEncoding;
-
-        if (queryEncoding == null && getServer() != null)
-          queryEncoding = getServer().getURLCharacterEncoding();
-
-        if (queryEncoding == null)
-          queryEncoding = CharacterEncoding.getLocalEncoding();
-
-        String javaEncoding = Encoding.getJavaName(queryEncoding);
-
-        formParser.parseQueryString(form, query, javaEncoding, true);
-      }
-
-      if (charEncoding == null)
-        charEncoding = CharacterEncoding.getLocalEncoding();
-
-      String javaEncoding = Encoding.getJavaName(charEncoding);
-
-      MultipartConfigElement multipartConfig
-        = _invocation.getMultipartConfig();
-
-      if (contentType == null || ! "POST".equalsIgnoreCase(getMethod())) {
-      }
-
-      else if (contentType.startsWith("application/x-www-form-urlencoded")) {
-        formParser.parsePostData(form, getInputStream(), javaEncoding);
-      }
-
-      else if ((getWebApp().doMultipartForm() || multipartConfig != null)
-               && contentType.startsWith("multipart/form-data")) {
-        int length = contentType.length();
-        int i = contentType.indexOf("boundary=");
-
-        if (i < 0)
-          return form;
-
-        long formUploadMax = getWebApp().getFormUploadMax();
-        long parameterLengthMax = getWebApp().getFormParameterLengthMax();
-        
-        if (parameterLengthMax < 0)
-          parameterLengthMax = Long.MAX_VALUE / 2;
-
-        Object uploadMax = getAttribute("caucho.multipart.form.upload-max");
-        if (uploadMax instanceof Number)
-          formUploadMax = ((Number) uploadMax).longValue();
-
-        Object paramMax = getAttribute("caucho.multipart.form.parameter-length-max");
-        if (paramMax instanceof Number)
-          parameterLengthMax = ((Number) paramMax).longValue();
-
-        // XXX: should this be an error?
-        if (formUploadMax >= 0 && formUploadMax < contentLength) {
-          setAttribute("caucho.multipart.form.error",
-                       L.l("Multipart form upload of '{0}' bytes was too large.",
-                           String.valueOf(contentLength)));
-          setAttribute("caucho.multipart.form.error.size",
-                       new Long(contentLength));
-
-          return form;
-        }
-
-        long fileUploadMax = -1;
-
-        if (multipartConfig != null) {
-          formUploadMax = multipartConfig.getMaxRequestSize();
-          fileUploadMax = multipartConfig.getMaxFileSize();
-        }
-
-        if (multipartConfig != null
-            && formUploadMax > 0
-            && formUploadMax < contentLength)
-          throw new IllegalStateException(L.l(
-            "multipart form data request's Content-Length '{0}' is greater then configured in @MultipartConfig.maxRequestSize value: '{1}'",
-            contentLength,
-            formUploadMax));
-
-        i += "boundary=".length();
-        char ch = contentType.charAt(i);
-        CharBuffer boundary = new CharBuffer();
-        if (ch == '\'') {
-          for (i++; i < length && contentType.charAt(i) != '\''; i++)
-            boundary.append(contentType.charAt(i));
-        }
-        else if (ch == '\"') {
-          for (i++; i < length && contentType.charAt(i) != '\"'; i++)
-            boundary.append(contentType.charAt(i));
-        }
-        else {
-          for (;
-               i < length && (ch = contentType.charAt(i)) != ' ' &&
-                 ch != ';';
-               i++) {
-            boundary.append(ch);
-          }
-        }
-
-        _parts = new ArrayList<Part>();
-
-        try {
-          MultipartFormParser.parsePostData(form,
-                                      _parts,
-                                      getStream(false), boundary.toString(),
-                                      this,
-                                      javaEncoding,
-                                      formUploadMax,
-                                      fileUploadMax,
-                                      parameterLengthMax);
-        } catch (IOException e) {
-          log.log(Level.FINE, e.toString(), e);
-          setAttribute("caucho.multipart.form.error", e.getMessage());
-        }
-      }
-    } catch (IOException e) {
-      log.log(Level.FINE, e.toString(), e);
-    }
-
-    return form;
   }
 
   //

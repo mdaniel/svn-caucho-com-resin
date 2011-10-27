@@ -75,8 +75,8 @@ abstract public class AbstractCauchoRequest implements CauchoRequest {
   private ArrayList<Path> _removeOnExit;
 
   // form
-  private HashMapImpl<String,String[]> _filledForm;
-  private List<Part> _parts;
+  protected HashMapImpl<String,String[]> _filledForm;
+  protected List<Part> _parts;
 
   abstract public CauchoResponse getResponse();
 
@@ -132,10 +132,11 @@ abstract public class AbstractCauchoRequest implements CauchoRequest {
       throw new ServletException("Content-Type must be of 'multipart/form-data'.");
 
     if (_filledForm == null)
-      _filledForm = parseQuery();
+      _filledForm = parseQueryImpl();
 
     return _parts;
   }
+
 
   /**
    * @since Servlet 3.0
@@ -158,7 +159,7 @@ abstract public class AbstractCauchoRequest implements CauchoRequest {
     return getAbstractHttpRequest().getServer();
   }
 
-  private HashMapImpl<String,String[]> parseQuery()
+  protected HashMapImpl<String,String[]> parseQueryImpl()
   {
     AbstractHttpRequest request = getAbstractHttpRequest();
 
