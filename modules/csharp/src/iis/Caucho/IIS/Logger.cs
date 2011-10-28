@@ -94,7 +94,8 @@ namespace Caucho.IIS
           Trace.TraceInformation(message);
 
           _logger = new Logger(log, logLevel);
-        } catch (Exception) {
+        } catch (Exception e) {
+          Trace.TraceError(e.Message + '\n' + e.StackTrace);
           //security does not allow to write create source or use EventLog
         }
       }

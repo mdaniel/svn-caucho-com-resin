@@ -12,6 +12,7 @@
 
 <s2 title="4.0.24 - snapshot">
 <ul>
+<li>iis: add suport for windows authentiation(#4826, rep by Urs Kehrli)</li>
 <li>centos: update ./configure for centos (#4803)</li>
 <li>servlet: fixed bug failing @MultipartConfig when used with resin:Forward(#4777)</li>
 <li>config: add resin:properties</li>

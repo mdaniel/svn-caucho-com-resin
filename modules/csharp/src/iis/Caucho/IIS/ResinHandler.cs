@@ -400,7 +400,7 @@ namespace Caucho.IIS
     {
       Trace.TraceInformation("Handle request: length: {0}, complete: {1}, allowBusy {2}", length, isComplete, allowBusy);
       String traceId = hmuxChannel.GetTraceId();
-
+      
       StringBuilder cb = new StringBuilder();
 
       bool isDebugFiner = true;
@@ -466,6 +466,10 @@ namespace Caucho.IIS
         ws.Write(clientCertificate.Certificate, 0, clientCertificate.Certificate.Length);
       }
 
+      if (request.IsAuthenticated) {
+        String remoteUser = request.LogonUserIdentity.Name;
+        WriteRequestString(ws, HmuxConnection.CSE_REMOTE_USER, remoteUser, traceId);
+      }
 
       NameValueCollection headers = request.Headers;
       foreach (String key in headers.AllKeys) {
