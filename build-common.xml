@@ -61,6 +61,7 @@
 
   <target name="update">
     <!-- <mkdir dir="${maven.lib}"/>-->
+    <!-- XXX: temp build issues
     <artifact:dependencies filesetId="dependency.classpath">
       <pom file="maven.xml"/>
     </artifact:dependencies>
@@ -70,6 +71,7 @@
       <fileset refid="dependency.classpath"/>
       <mapper type="flatten"/>
     </copy>
+    -->
 
     <delete file="${maven.lib}/ant-1.6.5.jar" failonerror="false"/>
   </target>
@@ -620,15 +622,18 @@
     </antcall>
     -->
 
+    <!-- XXX: temp
     <antcall target="artifact.dist.macro" inheritRefs="true">
       <param name="artifact.name" value="spring"/>
       <param name="artifacts" value="${resin.artifacts}"/>
     </antcall>
-    
+    -->
+    <!-- XXX: temp
     <antcall target="artifact.dist.macro" inheritRefs="true">
       <param name="artifact.name" value="wicket"/>
       <param name="artifacts" value="${resin.artifacts}"/>
     </antcall>
+    -->
 <!--    
     <antcall target="artifact.dist.macro" inheritRefs="true">
       <param name="artifact.name" value="xfire"/>
@@ -1127,7 +1132,8 @@
       <param name="artifact.name" value="mule"/>
     </antcall>
     -->
-
+    
+<!-- XXX: temp
     <antcall target="artifact.dist.macro" inheritRefs="true">
       <param name="artifact.name" value="spring"/>
     </antcall>
@@ -1143,6 +1149,7 @@
     <antcall target="artifact.dist.macro" inheritRefs="true">
       <param name="artifact.name" value="xwork2"/>
     </antcall>
+  -->
   </target>
 
   <target name="dist.configure.make" depends="dist">

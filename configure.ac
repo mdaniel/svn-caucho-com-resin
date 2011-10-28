@@ -1,15 +1,16 @@
-AC_INIT(modules/c/src/resin_os/boot.c)
-AC_PREFIX_DEFAULT(/usr/local/resin)
-AC_CONFIG_AUX_DIR(automake)	
+AC_INIT([resin],4.0.24)
+AC_CONFIG_AUX_DIR(automake)
+AC_CONFIG_MACRO_DIR([m4])
 
-FULL_VERSION="Resin $VERSION -- `date`"
-AC_SUBST(FULL_VERSION)
 
 dnl Get os info
 AC_CANONICAL_SYSTEM
 
-AC_CONFIG_MACRO_DIR([m4])
-AM_INIT_AUTOMAKE(resin, 4.0.11)
+AM_INIT_AUTOMAKE
+AC_PREFIX_DEFAULT(/usr/local/share)
+
+FULL_VERSION="Resin $PACKAGE_VERSION -- `date`"
+AC_SUBST(FULL_VERSION)
 
 dnl Checks for programs.
 AC_PROG_CC
@@ -26,7 +27,7 @@ AC_CHECK_HEADER(sys/epoll.h, [ CFLAGS="$CFLAGS -DEPOLL"; epoll=1 ])
 #
 
 if test "$prefix" == "NONE"; then
-  resin_home="$ac_default_prefix"
+  resin_home="$ac_default_prefix/resin-$PACKAGE_VERSION"
 else
   resin_home="$prefix"
 fi  
