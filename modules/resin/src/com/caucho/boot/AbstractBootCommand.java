@@ -37,6 +37,7 @@ import java.util.Set;
 public abstract class AbstractBootCommand implements BootCommand {
   private static L10N _L;
   
+  private HashSet<String> _valueKeySet = new HashSet<String>();
   private HashSet<String> _optionSet = new HashSet<String>();
 
   @Override
@@ -126,11 +127,16 @@ public abstract class AbstractBootCommand implements BootCommand {
   {
     return _optionSet;
   }
+  
+  protected void addValueKey(String key)
+  {
+    _valueKeySet.add(key);
+  }
 
   @Override
   public Set<String> getValueKeys()
   {
-    return new HashSet<String>();
+    return _valueKeySet;
   }
 
   @Override

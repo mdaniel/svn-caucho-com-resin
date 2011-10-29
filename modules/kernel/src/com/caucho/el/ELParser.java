@@ -250,13 +250,24 @@ public class ELParser
       switch (token) {
       case '?':
       {
-        Expr trueExpr = parseExpr();
         token = scanToken();
-        if (token != ':')
-          throw error(L.l("Expected ':' at {0}.  Conditional syntax is 'expr ? expr : expr'.", badChar(token)));
-        Expr falseExpr = parseExpr();
+        
+        if (token == ':') {
+          Expr defaultExpr = parseExpr();
+          
+          left = new ConditionalNullExpr(left, defaultExpr);
+        }
+        else {
+          _peek = token;
+          
+          Expr trueExpr = parseExpr();
+          token = scanToken();
+          if (token != ':')
+            throw error(L.l("Expected ':' at {0}.  Conditional syntax is 'expr ? expr : expr'.", badChar(token)));
+          Expr falseExpr = parseExpr();
 
-        left = new ConditionalExpr(left, trueExpr, falseExpr);
+          left = new ConditionalExpr(left, trueExpr, falseExpr);
+        }
       }
       break;
 

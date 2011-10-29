@@ -8,6 +8,8 @@
        xmlns:resin="urn:java:com.caucho.resin"
        xmlns:health="urn:java:com.caucho.health">
 
+  <resin:properties path="${__DIR__}/resin.properties" optional="true"/>
+  
   <!--
      - Logging configuration for the JDK logging API.
     -->
@@ -34,6 +36,8 @@
      - Remote management requires at least one enabled admin user.
     -->
   <resin:AdminAuthenticator>
+    <user name="${admin_user}" password="${admin_password}"/>
+    
     <resin:import path="${__DIR__}/admin-users.xml" optional="true"/>
   </resin:AdminAuthenticator>
 

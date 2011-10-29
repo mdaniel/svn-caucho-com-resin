@@ -49,6 +49,8 @@ install	:
 	  mkdir -p $(resin_home)/$(LIBEXEC); \
 	  cp bin/* $(resin_home)/bin; \
 	  cp lib/*.jar $(resin_home)/lib; \
+	  ln -sf $(resin_home) $(resin_home)/../resin; \
+	  ln -sf $(resin_home)/bin/resinctl $(DESTDIR)/usr/bin/resinctl; \
 	fi
 	@ if test "$(resin_conf)" != $(abs_builddir)/conf; then \
 	  mkdir -p $(resin_conf); \
@@ -58,6 +60,13 @@ install	:
 			echo "-------------------------------------------------------";\
 		else\
 			cp conf/resin.xml $(resin_conf)/resin.xml; \
+		fi;\
+		if test -f "$(resin_conf)/resin.properties"; then\
+			echo "-------------------------------------------------------";\
+			echo "Will not overwrite $(resin_conf)/resin.properties";\
+			echo "-------------------------------------------------------";\
+		else\
+			cp conf/resin.properties $(resin_conf)/resin.properties; \
 		fi;\
 		if test -f "$(resin_conf)/app-default.xml"; then\
 			echo "-------------------------------------------------------";\

@@ -1315,11 +1315,12 @@ public class Resin
                                         clusterId));
       }
       
-
+      /*
       if (clusterConfig.getPodList().size() > 0) {
         throw new ConfigException(L().l("'{0}' is an unknown server in the configuration file.",
                                         _serverId));
       }
+      */
       
       bootServer = clusterConfig.createServer();
       bootServer.setId(getServerId());

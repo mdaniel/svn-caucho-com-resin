@@ -1018,6 +1018,7 @@ class WatchdogArgs
     DISABLE_SOFT,
     ENABLE,
     GUI,
+    GENERATE_PASSWORD,
     HEAP_DUMP,
     JMX_CALL,
     JMX_DUMP,
@@ -1045,6 +1046,7 @@ class WatchdogArgs
   };
   
   static {
+    _commandMap.put("generate-password", StartMode.GENERATE_PASSWORD);
     _commandMap.put("start-all", StartMode.START_ALL);
   }
 }

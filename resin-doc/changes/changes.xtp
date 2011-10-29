@@ -12,6 +12,7 @@
 
 <s2 title="4.0.24 - snapshot">
 <ul>
+<li>el: added "?:" operator ("x ?: 80" is "x != null ? x : 80")</li>
 <li>iis: add suport for windows authentiation(#4826, rep by Urs Kehrli)</li>
 <li>centos: update ./configure for centos (#4803)</li>
 <li>servlet: fixed bug failing @MultipartConfig when used with resin:Forward(#4777)</li>

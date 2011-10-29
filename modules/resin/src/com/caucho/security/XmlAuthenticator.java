@@ -127,7 +127,8 @@ public class XmlAuthenticator extends AbstractAuthenticator
    */
   public void addUser(User user)
   {
-    _userMap.put(user.getName(), user.getPasswordUser());
+    if (user.getName() != null && ! "".equals(user.getName()))
+      _userMap.put(user.getName(), user.getPasswordUser());
   }
 
   /**

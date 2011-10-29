@@ -318,7 +318,10 @@ public class ResinBoot {
     _commandMap.put(StartMode.DISABLE_SOFT, new DisableSoftCommand());
     _commandMap.put(StartMode.THREAD_DUMP, new DeployStartCommand());
     _commandMap.put(StartMode.ENABLE, new EnableCommand());
+    
     _commandMap.put(StartMode.GUI, new GuiCommand());
+    _commandMap.put(StartMode.GENERATE_PASSWORD, new GeneratePasswordCommand());
+    
     _commandMap.put(StartMode.HEAP_DUMP, new HeapDumpCommand());
     _commandMap.put(StartMode.JMX_CALL, new JmxCallCommand());
     _commandMap.put(StartMode.JMX_DUMP, new JmxDumpCommand());
@@ -328,19 +331,22 @@ public class ResinBoot {
     _commandMap.put(StartMode.KILL, new KillCommand());
     _commandMap.put(StartMode.LIST_RESTARTS, new ListRestartsCommand());
     _commandMap.put(StartMode.LOG_LEVEL, new LogLevelCommand());
+    
     _commandMap.put(StartMode.PDF_REPORT, new PdfReportCommand());
     _commandMap.put(StartMode.PROFILE, new ProfileCommand());
+    
     _commandMap.put(StartMode.RESTART, new RestartCommand());
+    
     _commandMap.put(StartMode.SHUTDOWN, new ShutdownCommand());
     _commandMap.put(StartMode.START, new StartCommand());
     _commandMap.put(StartMode.START_ALL, new StartAllCommand());
     _commandMap.put(StartMode.START_WITH_FOREGROUND, new StartWithForegroundCommand());
     _commandMap.put(StartMode.STATUS, new StatusCommand());
     _commandMap.put(StartMode.STOP, new StopCommand());
+    
     _commandMap.put(StartMode.THREAD_DUMP, new ThreadDumpCommand());
-
+    
     _commandMap.put(StartMode.UNDEPLOY, new UnDeployCommand());
-
     _commandMap.put(StartMode.USER_ADD, new AddUserCommand());
     _commandMap.put(StartMode.USER_LIST, new ListUsersCommand());
     _commandMap.put(StartMode.USER_REMOVE, new RemoveUserCommand());

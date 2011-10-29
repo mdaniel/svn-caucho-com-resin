@@ -43,6 +43,7 @@ import com.caucho.vfs.ReadStream;
 
 import javax.annotation.PostConstruct;
 
+import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.logging.Level;
@@ -96,18 +97,6 @@ public class ResinProperties extends ResinControl implements FlowBean
       if (_fileSet == null)
         throw new ConfigException(L.l("'path' attribute missing from resin:properties."));
     }
-    else if (_path.canRead() && ! _path.isDirectory()) {
-    }
-    else if (_isOptional && ! _path.exists()) {
-      log.finer(L.l("resin:properties '{0}' is not readable.", _path));
-
-      Environment.addDependency(new Depend(_path));
-      return;
-    }
-    else {
-      throw new ConfigException(L.l("Required file '{0}' can not be read for resin:import.",
-                                    _path.getNativePath()));
-    }
 
     ArrayList<Path> paths;
 
@@ -121,15 +110,25 @@ public class ResinProperties extends ResinControl implements FlowBean
     for (int i = 0; i < paths.size(); i++) {
       Path path = paths.get(i);
 
-      log.config(L.l("resin:properties '{0}'", path.getNativePath()));
+      try {
+        log.config(L.l("resin:properties '{0}'", path.getNativePath()));
 
-      Environment.addDependency(new Depend(path));
+        Environment.addDependency(new Depend(path));
 
-      readProperties(path);
+        readProperties(path);
+      } catch (FileNotFoundException e) {
+        if (! _isOptional)
+          throw new ConfigException(L.l("Required file '{0}' can not be read for resin:import.",
+                                        path.getNativePath()));
+        
+      } catch (IOException e) {
+        log.log(Level.FINER, e.toString(), e);
+      }
     }
   }
   
   private void readProperties(Path path)
+    throws IOException
   {
     ReadStream is = null;
     
@@ -137,6 +136,12 @@ public class ResinProperties extends ResinControl implements FlowBean
       is = path.openRead();
       
       String line;
+      
+      ClassLoader loader = Thread.currentThread().getContextClassLoader();
+      ClassLoader systemLoader = ClassLoader.getSystemClassLoader();
+      
+      if (loader.getParent().equals(systemLoader))
+        loader = systemLoader;
       
       while ((line = is.readLine()) != null) {
         line = line.trim();
@@ -152,10 +157,8 @@ public class ResinProperties extends ResinControl implements FlowBean
         String key = line.substring(0, p).trim();
         String value = line.substring(p + 1).trim();
         
-        Config.setProperty(key, value);
+        Config.setProperty(key, value, loader);
       }
-    } catch (IOException e) {
-      log.log(Level.WARNING, e.toString(), e);
     } finally {
       IoUtil.close(is);
     }

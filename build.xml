@@ -371,6 +371,16 @@
       </filterset>
     </copy>
     
+    <copy tofile="conf/resin.properties"
+          file="conf/resin.properties.in"
+          preservelastmodified="true"
+          overwrite="true">
+      <filterset>
+        <filter token="HTTP_PORT" value="${resin.http}"/>
+        <filter token="HTTPS_PORT" value="${resin.https}"/>
+      </filterset>
+    </copy>
+    
     <copy tofile="modules/resin/src/manifest"
           file="modules/resin/src/manifest.in"
           preservelastmodified="true"

@@ -653,6 +653,9 @@
     
     <copy tofile="${install}/conf/resin.xml.orig"
           file="${resindir}/conf/resin.xml"/>
+    
+    <copy tofile="${install}/conf/resin.properties.orig"
+          file="${resindir}/conf/resin.properties"/>
 
     <copy todir="${dist.build}"
           preservelastmodified="true"
@@ -1270,6 +1273,16 @@
     
     <copy tofile="dist-debian/etc/resin/resin.xml"
           file="${resindir}/conf/resin.xml.in"
+          preservelastmodified="true"
+          overwrite="true">
+      <filterset>
+        <filter token="HTTP_PORT" value="80"/>
+        <filter token="HTTPS_PORT" value="8443"/>
+      </filterset>
+    </copy>
+    
+    <copy tofile="dist-debian/etc/resin/resin.properties"
+          file="${resindir}/conf/resin.properties.in"
           preservelastmodified="true"
           overwrite="true">
       <filterset>

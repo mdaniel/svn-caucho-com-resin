@@ -71,6 +71,9 @@ public class SystemPropertiesResolver extends AbstractVariableResolver {
     else
       return null;
     
+    if (var == null || "".equals(var))
+      return null;
+    
     Object value = System.getProperty(var);
 
     if (value != null) {
