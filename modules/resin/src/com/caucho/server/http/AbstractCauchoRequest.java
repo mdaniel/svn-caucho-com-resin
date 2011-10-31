@@ -394,6 +394,38 @@ abstract public class AbstractCauchoRequest implements CauchoRequest {
     return new PartImpl(name, headers, tempFile, value);
   }
 
+  public final void mergeParameters(Map<String, String[]> source,
+                              Map<String, String[]> target)
+  {
+    Set<Map.Entry<String, String[]>> sourceEntries = source.entrySet();
+
+    for (Map.Entry<String, String[]> sourceEntry : sourceEntries) {
+      String key = sourceEntry.getKey();
+
+      String []sourceValues = sourceEntry.getValue();
+      String []targetValues = target.get(key);
+      String []newTargetValues;
+
+      if (targetValues == null) {
+        newTargetValues = sourceValues;
+      } else {
+        newTargetValues = new String[targetValues.length + sourceValues.length];
+        System.arraycopy(targetValues,
+                         0,
+                         newTargetValues,
+                         0,
+                         targetValues.length);
+        System.arraycopy(sourceValues,
+                         0,
+                         newTargetValues,
+                         targetValues.length,
+                         sourceValues.length);
+      }
+
+      target.put(key, newTargetValues);
+    }
+  }
+
   public void addCloseOnExit(Path path)
   {
     if (_removeOnExit == null)

@@ -29,12 +29,11 @@
 
 package com.caucho.server.webapp;
 
-import java.io.IOException;
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.Enumeration;
-import java.util.Map;
-import java.util.Set;
+import com.caucho.server.dispatch.Invocation;
+import com.caucho.server.http.CauchoRequestWrapper;
+import com.caucho.util.HashMapImpl;
+import com.caucho.util.IntMap;
+import com.caucho.util.L10N;
 
 import javax.servlet.AsyncContext;
 import javax.servlet.DispatcherType;
@@ -42,14 +41,10 @@ import javax.servlet.RequestDispatcher;
 import javax.servlet.ServletContext;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
-
-import com.caucho.server.dispatch.Invocation;
-import com.caucho.server.http.CauchoRequestWrapper;
-import com.caucho.server.http.Form;
-import com.caucho.util.HashMapImpl;
-import com.caucho.util.IntMap;
-import com.caucho.util.L10N;
-import com.caucho.vfs.Encoding;
+import java.io.IOException;
+import java.util.Collections;
+import java.util.Enumeration;
+import java.util.Map;
 
 public class ForwardRequest extends CauchoRequestWrapper {
   private static final IntMap _forwardAttributeMap = new IntMap();
@@ -346,7 +341,7 @@ public class ForwardRequest extends CauchoRequestWrapper {
 
     map = getRequest().getParameterMap();
 
-    merge(map, form);
+    mergeParameters(map, form);
 
     /*
     String javaEncoding = Encoding.getJavaName(getCharacterEncoding());
@@ -366,38 +361,6 @@ public class ForwardRequest extends CauchoRequestWrapper {
     */
 
     return form;
-  }
-
-  public void merge(Map<String, String[]> source,
-                    Map<String, String[]> target)
-  {
-    Set<Map.Entry<String, String[]>> sourceEntries = source.entrySet();
-
-    for (Map.Entry<String, String[]> sourceEntry : sourceEntries) {
-      String key = sourceEntry.getKey();
-
-      String []sourceValues = sourceEntry.getValue();
-      String []targetValues = target.get(key);
-      String []newTargetValues;
-
-      if (targetValues == null) {
-        newTargetValues = sourceValues;
-      } else {
-        newTargetValues = new String[targetValues.length + sourceValues.length];
-        System.arraycopy(targetValues,
-                         0,
-                         newTargetValues,
-                         0,
-                         targetValues.length);
-        System.arraycopy(sourceValues,
-                         0,
-                         newTargetValues,
-                         targetValues.length,
-                         sourceValues.length);
-      }
-
-      target.put(key, newTargetValues);
-    }
   }
 
   static {

@@ -29,26 +29,23 @@
 
 package com.caucho.server.webapp;
 
-import java.io.IOException;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.Enumeration;
-import java.util.Map;
-import java.util.NoSuchElementException;
+import com.caucho.inject.Module;
+import com.caucho.server.dispatch.Invocation;
+import com.caucho.server.http.CauchoRequestWrapper;
+import com.caucho.util.HashMapImpl;
+import com.caucho.util.IntMap;
 
 import javax.servlet.DispatcherType;
 import javax.servlet.RequestDispatcher;
 import javax.servlet.ServletContext;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
-
-import com.caucho.inject.Module;
-import com.caucho.server.dispatch.Invocation;
-import com.caucho.server.http.CauchoRequestWrapper;
-import com.caucho.server.http.Form;
-import com.caucho.util.HashMapImpl;
-import com.caucho.util.IntMap;
-import com.caucho.vfs.Encoding;
+import java.io.IOException;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Enumeration;
+import java.util.Map;
+import java.util.NoSuchElementException;
 
 @Module
 public class IncludeRequest extends CauchoRequestWrapper {
@@ -85,6 +82,12 @@ public class IncludeRequest extends CauchoRequestWrapper {
     setResponse(_response);
 
     _invocation = invocation;
+  }
+
+  @Override
+  protected Invocation getInvocation()
+  {
+    return _invocation;
   }
 
   public IncludeResponse getResponse()
@@ -135,6 +138,22 @@ public class IncludeRequest extends CauchoRequestWrapper {
   public String getPageQueryString()
   {
     return _invocation.getQueryString();
+  }
+
+  @Override
+  public String getQueryString()
+  {
+    return calculateQueryString();
+  }
+
+  protected String calculateQueryString()
+  {
+    String queryString = _invocation.getQueryString();
+
+    if (queryString != null)
+      return queryString;
+
+    return getRequest().getQueryString();
   }
 
   public String getMethod()
@@ -257,7 +276,7 @@ public class IncludeRequest extends CauchoRequestWrapper {
     if (_filledForm == null)
       _filledForm = parseQuery();
 
-    return (String []) _filledForm.get(name);
+    return _filledForm.get(name);
   }
 
   /**
@@ -275,12 +294,19 @@ public class IncludeRequest extends CauchoRequestWrapper {
 
   private HashMapImpl<String,String[]> parseQuery()
   {
-    String javaEncoding = Encoding.getJavaName(getCharacterEncoding());
-
     HashMapImpl<String,String[]> form = new HashMapImpl<String,String[]>();
 
-    form.putAll(getRequest().getParameterMap());
-    
+    Map<String, String[]> map = getParameterMapImpl();
+
+    form.putAll(map);
+
+    map = getRequest().getParameterMap();
+
+    mergeParameters(map, form);
+
+    /**
+    String javaEncoding = Encoding.getJavaName(getCharacterEncoding());
+
     Form formParser = Form.allocate();
 
     try {
@@ -292,7 +318,7 @@ public class IncludeRequest extends CauchoRequestWrapper {
     } catch (Exception e) {
       throw new RuntimeException(e);
     }
-
+*/
     return form;
   }
   
