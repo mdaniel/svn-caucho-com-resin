@@ -32,22 +32,28 @@ if test -z "${JAVA_EXE}"; then
   JAVA_EXE=java
 fi
 
+RESIN_EXE="/usr/bin/resinctl"
+
+if ! test -f "${RESIN_EXE}"; then
+  RESIN_EXE="${JAVA_EXE} -jar ${RESIN_HOME}/lib/resin.jar"
+fi
+
 #
 # Set to the server id to start
 #
 #SERVER="-server app-a"
 #
-# -resin-root /var/resin        -- the main data directory
+# -resin-root /var/www         -- the main data directory
 #
-RESIN_ROOT="-root-directory @resin_root@"
+#RESIN_ROOT="-root-directory @resin_root@"
 #
 # -conf /etc/resin/resin.xml   -- the main configuration file
 #
-RESIN_CONF="-conf @resin_conf@/resin.xml"
+#RESIN_CONF="-conf @resin_conf@/resin.xml"
 #
 # -log-directory /var/log/resin -- the main log directory
 #
-RESIN_LOG="-log-directory @resin_log@"
+#RESIN_LOG="-log-directory @resin_log@"
 #
 # -join-cluster app-tier        -- elastic servers
 #
@@ -95,9 +101,9 @@ case "$1" in
   start)
 	log_daemon_msg "Starting resin"
 	if test -n "$USER"; then
-  	  su $USER -c """$JAVA -jar $RESIN_HOME/lib/resin.jar $ARGS start""" 1>> $CONSOLE 2>> $CONSOLE
+  	  su $USER -c """$RESIN_EXE $ARGS start-all""" 1>> $CONSOLE 2>> $CONSOLE
 	else
-	    errors=`$JAVA -jar $RESIN_HOME/lib/resin.jar $ARGS start 2>&1`
+	    errors=`$RESIN_EXE $ARGS start-all 2>&1`
 	    if [ $? != 0 ]; then
 		log_daemon_msg $errors
 	    fi
@@ -108,9 +114,9 @@ case "$1" in
   stop)
 	log_daemon_msg "Stopping resin"
 	if test -n "$USER"; then
-  	  su $USER -c """$JAVA -jar $RESIN_HOME/lib/resin.jar $ARGS shutdown""" 1>> $CONSOLE 2>> $CONSOLE
+  	  su $USER -c """$RESIN_EXE $ARGS shutdown""" 1>> $CONSOLE 2>> $CONSOLE
 	else
-	    errors=`$JAVA -jar $RESIN_HOME/lib/resin.jar $ARGS shutdown 2>&1`
+	    errors=`$RESIN_EXE $ARGS shutdown 2>&1`
 	    if [ $? != 0 ]; then
 		log_daemon_msg $errors
 	    fi
@@ -119,7 +125,7 @@ case "$1" in
 	log_end_msg $?
 	;;
   status)
-        $JAVA -jar $RESIN_HOME/lib/resin.jar $ARGS status
+        $RESIN_EXE $ARGS status
 	;;
   restart)
 	$0 stop

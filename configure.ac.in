@@ -1,4 +1,4 @@
-AC_INIT([resin],4.0.24)
+AC_INIT([resin],@RESIN_VERSION@)
 AC_CONFIG_AUX_DIR(automake)
 AC_CONFIG_MACRO_DIR([m4])
 
@@ -26,12 +26,17 @@ AC_CHECK_HEADER(sys/epoll.h, [ CFLAGS="$CFLAGS -DEPOLL"; epoll=1 ])
 # Resin home
 #
 
+resin_version="resin-$PACKAGE_VERSION"
+
 if test "$prefix" == "NONE"; then
-  resin_home="$ac_default_prefix/resin-$PACKAGE_VERSION"
+  usr_share="$ac_default_prefix"
+  resin_home="$ac_default_prefix/$resin_version"
 else
   resin_home="$prefix"
 fi  
 AC_SUBST(resin_home)
+AC_SUBST(resin_version)
+AC_SUBST(usr_share)
 
 #
 # --with-resin-root

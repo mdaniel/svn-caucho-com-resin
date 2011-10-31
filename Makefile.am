@@ -4,6 +4,8 @@ resin_conf=$(DESTDIR)@resin_conf@
 resin_root=$(DESTDIR)@resin_root@
 resin_log=$(DESTDIR)@resin_log@
 resin_init_d=$(DESTDIR)@resin_init_d@
+usr_share=$(DESTDIR)@usr_share@
+resin_version=@resin_version@
 resin_pro=@resin_pro@
 LIBEXEC=@LIBEXEC@
 
@@ -43,14 +45,15 @@ install	:
 	@ echo "Installing Resin home directory $(resin_root)"
 	@ if test "$(resin_home)" != $(abs_builddir); then \
 	  mkdir -p $(resin_home)/bin; \
-	  mkdir -p $(resin_home)/keys; \
-	  mkdir -p $(resin_home)/licenses; \
+	  mkdir -p $(resin_root)/keys; \
+	  mkdir -p $(resin_root)/licenses; \
 	  mkdir -p $(resin_home)/lib; \
 	  mkdir -p $(resin_home)/$(LIBEXEC); \
 	  cp bin/* $(resin_home)/bin; \
 	  cp lib/*.jar $(resin_home)/lib; \
-	  ln -sf $(resin_home) $(resin_home)/../resin; \
-	  ln -sf $(resin_home)/bin/resinctl $(DESTDIR)/usr/bin/resinctl; \
+	  ln -sf $(resin_version) $(usr_share)/resin; \
+	  mkdir -p $(DESTDIR)/usr/bin; \
+	  ln -sf @usr_share@/resin/bin/resinctl $(DESTDIR)/usr/bin/resinctl; \
 	fi
 	@ if test "$(resin_conf)" != $(abs_builddir)/conf; then \
 	  mkdir -p $(resin_conf); \
