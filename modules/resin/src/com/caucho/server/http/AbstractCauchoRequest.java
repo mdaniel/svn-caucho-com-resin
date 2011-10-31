@@ -48,10 +48,12 @@ import com.caucho.security.Login;
 import com.caucho.util.Alarm;
 
 import java.io.*;
+import java.lang.IllegalStateException;
 import java.nio.charset.Charset;
 import java.util.*;
 import java.util.logging.*;
 import java.security.*;
+
 
 import javax.servlet.*;
 import javax.servlet.http.*;
@@ -111,8 +113,84 @@ abstract public class AbstractCauchoRequest implements CauchoRequest {
     }
   }
 
+  //
+  // parameter/form
+  //
+
+  /**
+   * Returns an enumeration of the form names.
+   */
   @Override
-  public final Collection<Part> getParts()
+  public Enumeration<String> getParameterNames()
+  {
+    return getParameterNamesImpl();
+  }
+
+  public final Enumeration<String> getParameterNamesImpl()
+  {
+    if (_filledForm == null)
+      _filledForm = parseQueryImpl();
+
+    return Collections.enumeration(_filledForm.keySet());
+  }
+
+  /**
+   * Returns a map of the form.
+   */
+  @Override
+  public Map<String,String[]> getParameterMap()
+  {
+    return getParameterMapImpl();
+  }
+
+  public final Map<String,String[]> getParameterMapImpl()
+  {
+    if (_filledForm == null)
+      _filledForm = parseQueryImpl();
+
+    return Collections.unmodifiableMap(_filledForm);
+  }
+
+  /**
+   * Returns the form's values for the given name.
+   *
+   * @param name key in the form
+   * @return value matching the key
+   */
+  @Override
+  public String []getParameterValues(String name)
+  {
+    return getParameterValuesImpl(name);
+  }
+
+  public final String []getParameterValuesImpl(String name)
+  {
+    if (_filledForm == null)
+      _filledForm = parseQueryImpl();
+
+    return _filledForm.get(name);
+  }
+
+  /**
+   * Returns the form primary value for the given name.
+   */
+  @Override
+  public String getParameter(String name) {
+    return getParameterImpl(name);
+  }
+
+  public final String getParameterImpl(String name)
+  {
+    String []values = getParameterValues(name);
+
+    if (values != null && values.length > 0)
+      return values[0];
+    else
+      return null;
+  }
+
+  @Override
+  public Collection<Part> getParts()
     throws IOException, ServletException
   {
     ServletInvocation invocation = getInvocation();
@@ -137,12 +215,11 @@ abstract public class AbstractCauchoRequest implements CauchoRequest {
     return _parts;
   }
 
-
   /**
    * @since Servlet 3.0
    */
   @Override
-  public final Part getPart(String name)
+  public Part getPart(String name)
     throws IOException, ServletException
   {
     for (Part part : getParts()) {
@@ -217,7 +294,7 @@ abstract public class AbstractCauchoRequest implements CauchoRequest {
         formParser.parsePostData(form, getInputStream(), javaEncoding);
       }
 
-      else if ((getWebApp().doMultipartForm() || multipartConfig != null)
+      else if ((getWebApp().isMultipartFormEnabled() || multipartConfig != null)
                && contentType.startsWith("multipart/form-data")) {
         int length = contentType.length();
         int i = contentType.indexOf("boundary=");
@@ -309,9 +386,12 @@ abstract public class AbstractCauchoRequest implements CauchoRequest {
     return form;
   }
 
-  Part createPart(String name, Map<String, List<String>> headers)
+  Part createPart(String name,
+                  Map<String, List<String>> headers,
+                  Path tempFile,
+                  String value)
   {
-    return new PartImpl(name, headers);
+    return new PartImpl(name, headers, tempFile, value);
   }
 
   public void addCloseOnExit(Path path)
@@ -872,30 +952,35 @@ abstract public class AbstractCauchoRequest implements CauchoRequest {
     return getClass().getSimpleName() + "[" + getRequestURL() + "]";
   }
 
-    public class PartImpl implements Part {
+  public class PartImpl implements Part
+  {
     private String _name;
     private Map<String, List<String>> _headers;
-    private Object _value;
+    private Path _tempFile;
+    private String _value;
     private Path _newPath;
 
-    private PartImpl(String name, Map<String, List<String>> headers)
+    private PartImpl(String name,
+                     Map<String, List<String>> headers,
+                     Path tempFile,
+                     String value)
     {
       _name = name;
       _headers = headers;
+      _tempFile = tempFile;
+      _value = value;
     }
 
     public void delete()
       throws IOException
     {
+      if (_tempFile == null)
+        throw new IOException(L.l("Part.delete() is not applicable to part '{0}':'{1}'", _name, _value));
+
       if (_newPath != null)
         _newPath.remove();
 
-      Object value = getValue();
-
-      if (! (value instanceof FilePath))
-        throw new IOException(L.l("Part.delete() is not applicable to part '{0}':'{1}'", _name, value));
-
-      ((FilePath)value).remove();
+      _tempFile.remove();
     }
 
     public String getContentType()
@@ -931,15 +1016,16 @@ abstract public class AbstractCauchoRequest implements CauchoRequest {
     public InputStream getInputStream()
       throws IOException
     {
-      Object value = getValue();
+      if (_value != null) {
+        ByteArrayInputStream is
+          = new ByteArrayInputStream(_value.getBytes(UTF8));
 
-      if (value instanceof FilePath)
-        return ((FilePath) value).openRead();
-
-      ByteArrayInputStream is
-        = new ByteArrayInputStream(value.toString().getBytes(UTF8));
-
-      return is;
+        return is;
+      } else if (_tempFile != null) {
+        return _tempFile.openRead();
+      } else {
+        throw new java.lang.IllegalStateException();
+      }
     }
 
 
@@ -950,23 +1036,10 @@ abstract public class AbstractCauchoRequest implements CauchoRequest {
 
     public long getSize()
     {
-      Object value = getValue();
-
-      if (value instanceof FilePath) {
-        return ((Path) value).getLength();
-      }
-      else if (value instanceof String) {
+      if (_tempFile != null)
+        return _tempFile.getLength();
+      else
         return -1;
-      }
-      else if (value == null) {
-        return -1;
-      }
-      else {
-        log.finest(L.l("Part.getSize() is not applicable to part'{0}':'{1}'",
-                       _name, value));
-
-        return -1;
-      }
     }
 
     @Override
@@ -979,17 +1052,11 @@ abstract public class AbstractCauchoRequest implements CauchoRequest {
           _name,
           _newPath));
 
-      Path path;
-
-      Object value = getValue();
-
-      if (! (value instanceof FilePath))
+      if (_tempFile == null)
         throw new IOException(L.l(
           "Part.write() is not applicable to part '{0}':'{1}'",
           _name,
-          value));
-      else
-        path = (Path) value;
+          _value));
 
       ServletInvocation invocation = getInvocation();
 
@@ -1015,19 +1082,19 @@ abstract public class AbstractCauchoRequest implements CauchoRequest {
         if (! parent.mkdirs())
           throw new IOException(L.l("Unable to create path '{0}'. Check permissions.", parent));
 
-      if (! path.renameTo(_newPath)) {
+      if (! _tempFile.renameTo(_newPath)) {
         WriteStream out = null;
 
         try {
           out = _newPath.openWrite();
 
-          path.writeToStream(out);
+          _tempFile.writeToStream(out);
 
           out.flush();
 
           out.close();
         } catch (IOException e) {
-          log.log(Level.SEVERE, L.l("Cannot write contents of '{0}' to '{1}'", path, _newPath), e);
+          log.log(Level.SEVERE, L.l("Cannot write contents of '{0}' to '{1}'", _tempFile, _newPath), e);
 
           throw e;
         } finally {
@@ -1042,18 +1109,10 @@ abstract public class AbstractCauchoRequest implements CauchoRequest {
       if (_value != null)
         return _value;
 
-      String []values = _filledForm.get(_name + ".file");
+      if (_tempFile != null)
+        return _tempFile;
 
-      if (values != null && values.length > 0) {
-        _value = Vfs.lookup(values[0]);
-      } else {
-        values = _filledForm.get(_name);
-
-        if (values != null && values.length > 0)
-          _value = values[0];
-      }
-
-      return _value;
+      throw new IllegalStateException();
     }
   }
 }

@@ -889,63 +889,6 @@ public final class HttpServletRequestImpl extends AbstractCauchoRequest
   }
 
   //
-  // parameter/form
-  //
-
-  /**
-   * Returns an enumeration of the form names.
-   */
-  @Override
-  public Enumeration<String> getParameterNames()
-  {
-    if (_filledForm == null)
-      _filledForm = parseQueryImpl();
-
-    return Collections.enumeration(_filledForm.keySet());
-  }
-
-  /**
-   * Returns a map of the form.
-   */
-  @Override
-  public Map<String,String[]> getParameterMap()
-  {
-    if (_filledForm == null)
-      _filledForm = parseQueryImpl();
-
-    return Collections.unmodifiableMap(_filledForm);
-  }
-
-  /**
-   * Returns the form's values for the given name.
-   *
-   * @param name key in the form
-   * @return value matching the key
-   */
-  @Override
-  public String []getParameterValues(String name)
-  {
-    if (_filledForm == null)
-      _filledForm = parseQueryImpl();
-
-    return (String []) _filledForm.get(name);
-  }
-
-  /**
-   * Returns the form primary value for the given name.
-   */
-  @Override
-  public String getParameter(String name)
-  {
-    String []values = getParameterValues(name);
-
-    if (values != null && values.length > 0)
-      return values[0];
-    else
-      return null;
-  }
-
-  //
   // session/cookie management
   //
 

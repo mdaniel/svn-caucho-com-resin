@@ -30,9 +30,11 @@
 package com.caucho.server.webapp;
 
 import java.io.IOException;
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.Enumeration;
 import java.util.Map;
+import java.util.Set;
 
 import javax.servlet.AsyncContext;
 import javax.servlet.DispatcherType;
@@ -335,16 +337,20 @@ public class ForwardRequest extends CauchoRequestWrapper {
 
   private HashMapImpl<String,String[]> parseQuery()
   {
-    String javaEncoding = Encoding.getJavaName(getCharacterEncoding());
-
     HashMapImpl<String,String[]> form = new HashMapImpl<String,String[]>();
 
-    //server/162r
-    form.putAll(parseQueryImpl());
+    Map <String,String[]> map = getParameterMapImpl();
 
-    form.putAll(getRequest().getParameterMap());
+    //server/162r
+    form.putAll(map);
+
+    map = getRequest().getParameterMap();
+
+    merge(map, form);
 
     /*
+    String javaEncoding = Encoding.getJavaName(getCharacterEncoding());
+
     Form formParser = Form.allocate();
 
     try {
@@ -360,6 +366,38 @@ public class ForwardRequest extends CauchoRequestWrapper {
     */
 
     return form;
+  }
+
+  public void merge(Map<String, String[]> source,
+                    Map<String, String[]> target)
+  {
+    Set<Map.Entry<String, String[]>> sourceEntries = source.entrySet();
+
+    for (Map.Entry<String, String[]> sourceEntry : sourceEntries) {
+      String key = sourceEntry.getKey();
+
+      String []sourceValues = sourceEntry.getValue();
+      String []targetValues = target.get(key);
+      String []newTargetValues;
+
+      if (targetValues == null) {
+        newTargetValues = sourceValues;
+      } else {
+        newTargetValues = new String[targetValues.length + sourceValues.length];
+        System.arraycopy(targetValues,
+                         0,
+                         newTargetValues,
+                         0,
+                         targetValues.length);
+        System.arraycopy(sourceValues,
+                         0,
+                         newTargetValues,
+                         targetValues.length,
+                         sourceValues.length);
+      }
+
+      target.put(key, newTargetValues);
+    }
   }
 
   static {

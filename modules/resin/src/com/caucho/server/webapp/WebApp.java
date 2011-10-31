@@ -2180,7 +2180,7 @@ public class WebApp extends ServletContextImpl
   /**
    * Returns true if multipart forms are enabled.
    */
-  public boolean doMultipartForm()
+  public boolean isMultipartFormEnabled()
   {
     return _multipartForm != null && _multipartForm.isEnable();
   }

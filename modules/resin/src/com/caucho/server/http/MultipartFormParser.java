@@ -29,9 +29,11 @@
 package com.caucho.server.http;
 
 import com.caucho.server.util.CauchoSystem;
+import com.caucho.server.webapp.WebApp;
 import com.caucho.util.CharBuffer;
 import com.caucho.util.HashMapImpl;
 import com.caucho.util.L10N;
+import com.caucho.vfs.FilePath;
 import com.caucho.vfs.MultipartStream;
 import com.caucho.vfs.Path;
 import com.caucho.vfs.ReadStream;
@@ -78,6 +80,8 @@ class MultipartFormParser {
       String name = getAttribute(attr, "name");
       String filename = getAttribute(attr, "filename");
       String contentType = getAttribute(attr, "content-type");
+      String value = null;
+      Path tempFile = null;
       
       if (contentType == null)
         contentType = ms.getAttribute("content-type");
@@ -92,7 +96,7 @@ class MultipartFormParser {
           tempDir.mkdirs();
         } catch (IOException e) {
         }
-        Path tempFile = tempDir.createTempFile("form", ".tmp");
+        tempFile = tempDir.createTempFile("form", ".tmp");
         request.addCloseOnExit(tempFile);
 
         WriteStream os = tempFile.openWrite();
@@ -146,29 +150,32 @@ class MultipartFormParser {
           throw new IOException(msg);
         }
 
-        // server/136u, server/136v, #2578
-        if (table.get(name + ".filename") == null) {
-          table.put(name, new String[] { tempFile.getNativePath() });
-          table.put(name + ".file", new String[] { tempFile.getNativePath() });
-          table.put(name + ".filename", new String[] { filename });
-          table.put(name + ".content-type", new String[] { contentType });
-        }
-        else {
-          addTable(table, name, tempFile.getNativePath());
-          addTable(table, name + ".file", tempFile.getNativePath());
-          addTable(table, name + ".filename", filename);
-          addTable(table, name + ".content-type", contentType);
+        WebApp webapp = request.getWebApp();
+        if (webapp != null && webapp.isMultipartFormEnabled()) {
+          // server/136u, server/136v, #2578
+          if (table.get(name + ".filename") == null) {
+            table.put(name, new String[] { tempFile.getNativePath() });
+            table.put(name + ".file", new String[] { tempFile.getNativePath() });
+            table.put(name + ".filename", new String[] { filename });
+            table.put(name + ".content-type", new String[] { contentType });
+          }
+          else {
+            addTable(table, name, tempFile.getNativePath());
+            addTable(table, name + ".file", tempFile.getNativePath());
+            addTable(table, name + ".filename", filename);
+            addTable(table, name + ".content-type", contentType);
+          }
         }
 
       if (log.isLoggable(Level.FINE))
           log.fine("mp-file: " + name + "(filename:" + filename + ")");
       } else {
-        CharBuffer value = new CharBuffer();
+        CharBuffer valueBuffer = new CharBuffer();
         int ch;
         long totalLength = 0;
 
         for (ch = is.readChar(); ch >= 0; ch = is.readChar()) {
-          value.append((char) ch);
+          valueBuffer.append((char) ch);
           totalLength++;
           
           if (lengthMax < totalLength) {
@@ -182,18 +189,22 @@ class MultipartFormParser {
             throw new IOException(msg);
           }
         }
-      
+
+        value = valueBuffer.toString();
+
         if (log.isLoggable(Level.FINE))
           log.fine("mp-form: " + name + "=" + value);
 
-        addTable(table, name, value.toString());
+        addTable(table, name, value);
         
         if (contentType != null)
           addTable(table, name + ".content-type", contentType);
       }
 
       parts.add(request.createPart(name,
-                                   new HashMap<String, List<String>>(ms.getHeaders())));
+                                   new HashMap<String, List<String>>(ms.getHeaders()),
+                                   tempFile,
+                                   value));
     }
 
     if (! ms.isComplete()) {
