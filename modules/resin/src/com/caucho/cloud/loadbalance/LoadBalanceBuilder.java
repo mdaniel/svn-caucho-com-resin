@@ -52,6 +52,9 @@ public class LoadBalanceBuilder
   private ArrayList<ClientSocketFactory> _clientList 
     = new ArrayList<ClientSocketFactory>();
   
+  private String _cluster;
+  private int _port;
+  
   /**
    * Sets the load balance strategy.
    */
@@ -135,6 +138,14 @@ public class LoadBalanceBuilder
   public void setTargetCluster(String clusterId)
   {
     throw new IllegalStateException(L.l("{0}: setTargetCluster is invalid here",
+                                        this));
+  }
+  /**
+   * Sets the target cluster by id.
+   */
+  public void setTargetPort(int port)
+  {
+    throw new IllegalStateException(L.l("{0}: setTargetPort is invalid here",
                                         this));
   }
   

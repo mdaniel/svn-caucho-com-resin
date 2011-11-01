@@ -138,6 +138,16 @@ public class MemcacheClient implements Cache
   {
     _loadBalanceBuilder.addAddress(address);
   }
+  
+  public void setCluster(String cluster)
+  {
+    _loadBalanceBuilder.setTargetCluster(cluster);
+  }
+  
+  public void setPort(int port)
+  {
+    _loadBalanceBuilder.setTargetPort(port);
+  }
 
   @Override
   public boolean containsKey(Object key) throws CacheException
