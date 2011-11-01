@@ -48,6 +48,8 @@ import com.caucho.loader.Environment;
 import com.caucho.loader.LibraryLoader;
 import com.caucho.server.resin.ResinELContext;
 import com.caucho.util.L10N;
+import com.caucho.vfs.MemoryPath;
+import com.caucho.vfs.NullPath;
 import com.caucho.vfs.Path;
 import com.caucho.vfs.Vfs;
 
@@ -126,9 +128,20 @@ public class ResinBoot {
     Path rootDirectory = _args.getRootDirectory();
     Path dataDirectory = rootDirectory.lookup("watchdog-data");
 
-    ResinSystem system = new ResinSystem("watchdog",
-                                         rootDirectory,
-                                         dataDirectory);
+    ResinSystem system;
+    
+    if (_args.isConsole()) {
+      system = new ResinSystem("watchdog",
+                               rootDirectory,
+                               dataDirectory);
+    }
+    else {
+      String userName = System.getProperty("user.name");
+      
+      system = new ResinSystem("watchdog", 
+                               rootDirectory,
+                               new NullPath("boot-temp"));
+    }
 
     Thread thread = Thread.currentThread();
     thread.setContextClassLoader(system.getClassLoader());
