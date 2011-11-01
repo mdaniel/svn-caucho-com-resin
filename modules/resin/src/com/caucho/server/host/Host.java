@@ -72,6 +72,7 @@ import com.caucho.server.webapp.ErrorPageManager;
 import com.caucho.server.webapp.WebAppConfig;
 import com.caucho.server.webapp.WebAppContainer;
 import com.caucho.server.webapp.WebAppExpandDeployGenerator;
+import com.caucho.util.HostUtil;
 import com.caucho.util.L10N;
 import com.caucho.vfs.Dependency;
 import com.caucho.vfs.Path;
@@ -692,11 +693,7 @@ public class Host
     String hostName = _hostName;
 
     if ("".equals(hostName)) {
-      try {
-        hostName = InetAddress.getLocalHost().getCanonicalHostName();
-      } catch (Exception e) {
-        throw ConfigException.create(e);
-      }
+      hostName = HostUtil.getLocalHostName();
     }
 
     HempBrokerManager brokerManager = HempBrokerManager.getCurrent();

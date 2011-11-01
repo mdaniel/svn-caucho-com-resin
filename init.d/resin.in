@@ -28,7 +28,7 @@ export JAVA_HOME RESIN_HOME
 
 JAVA="@JAVA_EXE@"
 
-if test -z "${JAVA_EXE}"; then
+if test ! -x "${JAVA_EXE}"; then
   JAVA_EXE=java
 fi
 
