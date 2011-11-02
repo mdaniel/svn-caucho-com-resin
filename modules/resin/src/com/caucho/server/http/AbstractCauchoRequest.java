@@ -243,7 +243,7 @@ abstract public class AbstractCauchoRequest implements CauchoRequest {
     HashMapImpl<String,String[]> form = request.getForm();
 
     try {
-      String query = getQueryString();
+      String query = getInvocation().getQueryString();//getQueryString();
       CharSegment contentType = request.getContentTypeBuffer();
 
       if (query == null && contentType == null)
@@ -387,11 +387,12 @@ abstract public class AbstractCauchoRequest implements CauchoRequest {
   }
 
   Part createPart(String name,
+                  String contentType,
                   Map<String, List<String>> headers,
                   Path tempFile,
                   String value)
   {
-    return new PartImpl(name, headers, tempFile, value);
+    return new PartImpl(name, contentType, headers, tempFile, value);
   }
 
   public final void mergeParameters(Map<String, String[]> source,
@@ -991,13 +992,16 @@ abstract public class AbstractCauchoRequest implements CauchoRequest {
     private Path _tempFile;
     private String _value;
     private Path _newPath;
+    private String _contentType;
 
     private PartImpl(String name,
+                     String contentType,
                      Map<String, List<String>> headers,
                      Path tempFile,
                      String value)
     {
       _name = name;
+      _contentType = contentType;
       _headers = headers;
       _tempFile = tempFile;
       _value = value;
@@ -1017,12 +1021,7 @@ abstract public class AbstractCauchoRequest implements CauchoRequest {
 
     public String getContentType()
     {
-      String[] value = _filledForm.get(_name + ".content-type");
-
-      if (value != null && value.length > 0)
-        return value[0];
-
-      return null;
+      return _contentType;
     }
 
     public String getHeader(String name)

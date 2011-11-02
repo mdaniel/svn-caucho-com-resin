@@ -202,6 +202,7 @@ class MultipartFormParser {
       }
 
       parts.add(request.createPart(name,
+                                   contentType,
                                    new HashMap<String, List<String>>(ms.getHeaders()),
                                    tempFile,
                                    value));
