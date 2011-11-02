@@ -288,6 +288,18 @@ public class ManagerClient
 
     return (String) query(query);
   }
+  
+  public String addLicense(String licenseContent, 
+                           String fileName,
+                           boolean overwrite,
+                           boolean restart)
+  {
+    LicenseAddQuery query = new LicenseAddQuery(licenseContent, 
+                                                fileName,
+                                                overwrite, 
+                                                restart);
+    return (String) query(query);
+  }
 
   protected Serializable query(Serializable query)
   {

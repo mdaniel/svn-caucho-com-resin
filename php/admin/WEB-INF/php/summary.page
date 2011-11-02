@@ -82,6 +82,8 @@ function print_overview()
 
   $runtime = $g_mbean_server->lookup("java.lang:type=Runtime");
   $os = $g_mbean_server->lookup("java.lang:type=OperatingSystem");
+  $license_store = $g_mbean_server->lookup("resin:type=LicenseStore");
+  
   $row = 0;
 ?>
 
@@ -138,6 +140,24 @@ function print_overview()
     Message:</th>
     <td headers="start" colspan='5'>
       <?= $resin->WatchdogStartMessage ?>
+    </td>
+  </tr>
+
+  <tr class='<?= row_style($row++) ?>'>
+    <th id="start" class='item'
+        title="The license message.">
+    License:</th>
+    <td headers="start" colspan='5'>
+    <? if ($license_store) {
+         $licenses = $license_store->ValidLicenses;
+         foreach($licenses as $license) {
+           $license_msg = $license->Description . ", " . $license->ExpireMessage;
+           echo "${license_msg}<br>\n";
+         }
+       } else {
+         echo "GNU GPL";
+       }
+     ?>
     </td>
   </tr>
 

@@ -571,6 +571,9 @@ class WatchdogArgs
       else if ("kill".equals(arg)) {
         _startMode = StartMode.KILL;
       }
+      else if ("license-add".equals(arg)) {
+        _startMode = StartMode.LICENSE_ADD;
+      }
       else if ("list-restarts".equals(arg)) {
         _startMode = StartMode.LIST_RESTARTS;
       }
@@ -668,6 +671,7 @@ class WatchdogArgs
                                + "\n  thread-dump - produces a thread dump"
                                + "\n  pdf-report - generates pdf report (Pro version only)"
                                + "\n  profile - profiles the system"
+                               + "\n  license-add - add a license file to the license directory"
                                + "\n  list-restarts - lists server restart timestamps"
                                + "\n  log-level - sets a log level"
                                + "\n  jmx-list - lists MBeans, attributes, operations"
@@ -1026,6 +1030,7 @@ class WatchdogArgs
     JMX_SET,
     JSPC,
     KILL,
+    LICENSE_ADD,
     LIST_RESTARTS,
     LOG_LEVEL,
     PDF_REPORT,

@@ -343,6 +343,7 @@ public class ResinBoot
     _commandMap.put(StartMode.JMX_SET, new JmxSetCommand());
     _commandMap.put(StartMode.JSPC, new JspcCommand());
     _commandMap.put(StartMode.KILL, new KillCommand());
+    _commandMap.put(StartMode.LICENSE_ADD, new LicenseAddCommand());
     _commandMap.put(StartMode.LIST_RESTARTS, new ListRestartsCommand());
     _commandMap.put(StartMode.LOG_LEVEL, new LogLevelCommand());
     

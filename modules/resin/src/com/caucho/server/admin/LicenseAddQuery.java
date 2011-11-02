@@ -19,33 +19,57 @@
  *
  * You should have received a copy of the GNU General Public License
  * along with Resin Open Source; if not, write to the
- *   Free SoftwareFoundation, Inc.
+ *
+ *   Free Software Foundation, Inc.
  *   59 Temple Place, Suite 330
  *   Boston, MA 02111-1307  USA
  *
- * @author Sam 
  */
 
-package com.caucho.license;
+package com.caucho.server.admin;
 
-import com.caucho.config.ConfigException;
-
-import java.io.IOException;
-
-public interface LicenseCheck
+@SuppressWarnings("serial")
+public class LicenseAddQuery implements java.io.Serializable
 {
-  public void requirePersonal(int personalCount)
-    throws ConfigException, IOException;
-  
-  public void requireProfessional(int professionalCount)
-    throws ConfigException, IOException;
-  
-  public String doLogging();
+  private String _licenseContent;
+  private String _fileName;
+  private boolean _overwrite = false;
+  private boolean _restart = false;
 
-  public String getDescription()
-    throws ConfigException, IOException;
+  public LicenseAddQuery(String licenseContent, 
+                         String fileName,
+                         boolean overwrite,
+                         boolean restart)
+  {
+    _licenseContent = licenseContent;
+    _fileName = fileName;
+    _overwrite = overwrite;
+    _restart = restart;
+  }
+
+  public String getLicenseContent()
+  {
+    return _licenseContent;
+  }
   
-  public String getLicenseDirectory()
-    throws ConfigException, IOException;
+  public String getFileName()
+  {
+    return _fileName;
+  }
+  
+  public boolean isOverwrite()
+  {
+    return _overwrite;
+  }
+  
+  public boolean isRestart()
+  {
+    return _restart;
+  }
+
+  @Override
+  public String toString()
+  {
+    return getClass().getSimpleName() + "[]";
+  }
 }
-

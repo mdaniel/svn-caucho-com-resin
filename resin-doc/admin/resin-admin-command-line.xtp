@@ -856,5 +856,48 @@ generated /usr/local/resin/log/default-Watchdog-20110801T0251.pdf
   </deftable>
 </s1>
 
+<s1 title="license-add: copy a license to the license directory">
+<p>The <code>license-add</code> is a convenient way to remotely add a license 
+to the correct license directory</p>
+
+<def>
+bin/resin.sh [-conf &lt;file>] license-add -license &lt;license file> [options]
+</def>
+
+<example title="Example: copy test.license to the license directory as test.license, overwrite if exists">
+unix> bin/resin.sh license-add -user admin -password secret -license test.license -overwrite
+
+add-license wrote test.license successfully
+</example>
+
+  <deftable title="license-add options">
+    <tr>
+      <th>Argument</th>
+      <th>Meaning</th>
+      <th>Default</th>
+    </tr>
+    <tr>
+      <td>-license</td>
+      <td>Path to license file to add</td>
+      <td>none, required</td>
+    </tr>
+    <tr>
+      <td>-to</td>
+      <td>File name license will be written to</td>
+      <td>name of license file</td>
+    </tr>
+    <tr>
+      <td>-overwrite</td>
+      <td>Overwrite existing license file if exists</td>
+      <td>false, true if set</td>
+    </tr>
+    <tr>
+      <td>-restart</td>
+      <td>Restart Resin after license is added</td>
+      <td>false, true if set</td>
+    </tr>
+  </deftable>
+</s1>
+
   </body>
 </document>

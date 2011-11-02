@@ -52,5 +52,7 @@ public interface LicenseStoreMXBean extends ManagedObjectMXBean
   
   @Description("The last license to expire")
   public LicenseMXBean getLongestLicense();
-  
+
+  @Description("The directory where licenses should go")
+  public String getLicenseDirectory();
 }

@@ -454,4 +454,31 @@ public class ManagerActor extends SimpleActor
 
     return result;
   }
+  
+  @Query
+  public String addLicense(long id, 
+                           String to, 
+                           String from, 
+                           LicenseAddQuery query)
+  {
+    String result = null;
+    
+    try {
+      result = new AddLicenseAction().execute(query.getLicenseContent(), 
+                                              query.getFileName(),
+                                              query.isOverwrite(),
+                                              query.isRestart());
+    } catch (ConfigException e) {
+      log.log(Level.WARNING, e.getMessage(), e);
+      result = e.getMessage();
+    } catch (Exception e) {
+      log.log(Level.WARNING, e.getMessage(), e);
+      result = e.toString();
+    }
+    
+    getBroker().queryResult(id, from, to, result);
+
+    return result;
+  }  
+  
 }
