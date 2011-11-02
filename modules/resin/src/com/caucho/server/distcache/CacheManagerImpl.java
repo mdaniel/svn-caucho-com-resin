@@ -32,11 +32,13 @@ package com.caucho.server.distcache;
 import java.io.Closeable;
 import java.util.concurrent.ConcurrentHashMap;
 
+import javax.cache.CacheBuilder;
 import javax.enterprise.context.ApplicationScoped;
 
 import com.caucho.config.Configurable;
 import com.caucho.distcache.AbstractCache;
 import com.caucho.distcache.ClusterCache;
+import com.caucho.distcache.jcache.CacheManagerFacade;
 import com.caucho.loader.Environment;
 
 /**
@@ -53,21 +55,32 @@ import com.caucho.loader.Environment;
 public class CacheManagerImpl implements Closeable
 {
   private DistCacheSystem _cacheSystem;
+  private String _name;
   private String _guid;
   private ConcurrentHashMap<String,CacheImpl> _cacheMap;
+  private CacheManagerFacade _facade;
 
   public CacheManagerImpl(DistCacheSystem cacheSystem,
+                          String name,
                           String guid, 
                           ClassLoader loader)
   {
     _cacheSystem = cacheSystem;
+    _name = name;
     _guid = guid;
 
     _cacheMap = new ConcurrentHashMap<String,CacheImpl>();
     
     Environment.addCloseListener(this, loader);
+    
+    _facade = new CacheManagerFacade(_name, loader);
   }
-
+  
+  public CacheBuilder<?,?> createBuilder(String name)
+  {
+    return _facade.createCacheBuilder(name);
+  }
+  
   public CacheImpl getCache(String name)
   {
     return _cacheMap.get(name);

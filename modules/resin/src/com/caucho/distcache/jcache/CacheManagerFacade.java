@@ -47,12 +47,10 @@ public class CacheManagerFacade implements CacheManager
 {
   private String _name;
   private String _guid;
-  private ClassLoader _loader;
   
-  CacheManagerFacade(String name, ClassLoader loader)
+  public CacheManagerFacade(String name, ClassLoader loader)
   {
     _name = name;
-    _loader = loader;
 
     _guid = Environment.getEnvironmentName(loader) + ":" + name;
   }

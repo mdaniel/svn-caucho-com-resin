@@ -67,6 +67,15 @@ public class StatServiceValue implements java.io.Serializable
     _min = min;
     _max = max;
   }
+  
+  public StatServiceValue(long time, double value)
+  {
+    _time = time;
+    _count = 1;
+    _sum = value;
+    _min = value;
+    _max = value;
+  }
 
   /**
    * Returns the value's time

@@ -35,6 +35,7 @@ import javax.cache.CacheManager;
 import javax.cache.Caching;
 import javax.sql.DataSource;
 
+import com.caucho.distcache.jcache.CacheBuilderImpl;
 import com.caucho.env.service.*;
 import com.caucho.loader.Environment;
 
@@ -118,7 +119,7 @@ public class DistCacheSystem extends AbstractResinSubSystem
     CacheManagerImpl cacheManager = _managerMap.get(guid);
     
     if (cacheManager == null) {
-      cacheManager = new CacheManagerImpl(this, guid, loader);
+      cacheManager = new CacheManagerImpl(this, name, guid, loader);
       
       _managerMap.putIfAbsent(guid, cacheManager);
     }
@@ -142,9 +143,9 @@ public class DistCacheSystem extends AbstractResinSubSystem
   }
 
   /*
-  public CacheBuilder createBuilder(String name)
+  public CacheBuilderImpl createBuilder(String name)
   {
-    return new CacheBuilder(name, _cacheManager, _distCacheManager);
+    return getCacheManager()new CacheBuilderImpl(name, _cacheManager, _distCacheManager);
   }
   */
   
