@@ -55,10 +55,10 @@ import java.util.regex.Pattern;
 /**
  * Compiles Java source, returning the loaded class.
  */
-public class JavaCompiler {
-  static final L10N L = new L10N(JavaCompiler.class);
+public class JavaCompilerUtil {
+  static final L10N L = new L10N(JavaCompilerUtil.class);
   static final Logger log
-    = Logger.getLogger(JavaCompiler.class.getName());
+    = Logger.getLogger(JavaCompilerUtil.class.getName());
 
   private static final Object LOCK = new Object();
 
@@ -84,7 +84,7 @@ public class JavaCompiler {
   private int _maxBatch = 64;
   protected long _maxCompileTime = 120 * 1000L;
 
-  private JavaCompiler()
+  private JavaCompilerUtil()
   {
     String encoding = CharacterEncoding.getLocalEncoding();
     String javaEncoding = Encoding.getJavaName(encoding);
@@ -98,7 +98,7 @@ public class JavaCompiler {
   /**
    * Creates a new compiler.
    */
-  public static JavaCompiler create()
+  public static JavaCompilerUtil create()
   {
     return create(Thread.currentThread().getContextClassLoader());
   }
@@ -108,13 +108,13 @@ public class JavaCompiler {
    *
    * @param loader the parent class loader for the compiler.
    */
-  public static JavaCompiler create(ClassLoader loader)
+  public static JavaCompilerUtil create(ClassLoader loader)
   {
     JavacConfig config = JavacConfig.getLocalConfig();
 
     String javac = config.getCompiler();
 
-    JavaCompiler javaCompiler = new JavaCompiler();
+    JavaCompilerUtil javaCompiler = new JavaCompilerUtil();
 
     if (loader == null)
       loader = Thread.currentThread().getContextClassLoader();
@@ -664,10 +664,18 @@ public class JavaCompiler {
     for (int i = 0; i < path.length; i++)
       log.config("Compiling " + path[i]);
 
+    /*
     if (_compiler.equals("internal"))
       compiler = new InternalCompiler(this);
     else if (_compiler.equals("internal2"))
       compiler = new InternalCompiler2(this);
+      */
+    if (_compiler.equals("internal")) {
+      compiler = new InternalCompilerTools(this);
+    }
+    else if (_compiler.equals("internal2")) {
+      compiler = new InternalCompilerTools(this);
+    }
     else if (_compiler.equals("eclipse"))
       compiler = new EclipseCompiler(this);
     else if (_compiler.equals("groovyc"))
