@@ -208,24 +208,6 @@ public class IncludeRequest extends CauchoRequestWrapper {
     return Collections.enumeration(_headerNames);
   }
   
-  // XXX: restored for now, since it's a major change
-  
-  @Override
-  public String getQueryString()
-  {
-    return calculateQueryString();
-  }
-  
-  protected String calculateQueryString()
-  {
-    String queryString = _invocation.getQueryString();
-  
-    if (queryString != null)
-      return queryString;
-  
-    return getRequest().getQueryString();
-  }
-  
   /*
   public ServletResponse getServletResponse()
   {
