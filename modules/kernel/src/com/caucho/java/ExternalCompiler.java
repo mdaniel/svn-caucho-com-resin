@@ -53,7 +53,7 @@ public class ExternalCompiler extends AbstractJavaCompiler {
   
   boolean _isDead;
   
-  public ExternalCompiler(JavaCompiler compiler)
+  public ExternalCompiler(JavaCompilerUtil compiler)
   {
     super(compiler);
   }

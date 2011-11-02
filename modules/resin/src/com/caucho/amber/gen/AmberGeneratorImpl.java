@@ -34,7 +34,7 @@ import com.caucho.amber.entity.Entity;
 import com.caucho.amber.entity.Listener;
 import com.caucho.amber.manager.AmberPersistenceUnit;
 import com.caucho.amber.type.*;
-import com.caucho.java.JavaCompiler;
+import com.caucho.java.JavaCompilerUtil;
 import com.caucho.java.gen.DependencyComponent;
 import com.caucho.java.gen.GenClass;
 import com.caucho.java.gen.JavaClassGenerator;
@@ -186,7 +186,7 @@ public class AmberGeneratorImpl implements AmberGenerator {
     _pendingClassNames.clear();
 
     EntityGenerator gen = new EntityGenerator();
-    JavaCompiler compiler = gen.getCompiler();
+    JavaCompilerUtil compiler = gen.getCompiler();
 
     compiler.compileBatch(javaFiles);
   }

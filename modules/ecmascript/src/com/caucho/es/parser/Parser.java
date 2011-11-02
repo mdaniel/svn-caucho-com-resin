@@ -33,7 +33,7 @@ import com.caucho.es.ESException;
 import com.caucho.es.ESId;
 import com.caucho.es.ESParseException;
 import com.caucho.es.Script;
-import com.caucho.java.JavaCompiler;
+import com.caucho.java.JavaCompilerUtil;
 import com.caucho.java.LineMap;
 import com.caucho.loader.SimpleLoader;
 
@@ -316,7 +316,7 @@ public class Parser {
       if (this.className != null)
         className = this.className;
       else
-        className = "_js." + JavaCompiler.mangleName(name);
+        className = "_js." + JavaCompilerUtil.mangleName(name);
       
       if (scriptPath == null) {
         MergePath mergePath = new MergePath();
@@ -434,7 +434,7 @@ public class Parser {
       lexer.setLineMap(lineMap);
     
     if (className == null)
-      className = "_js." + JavaCompiler.mangleName(name);
+      className = "_js." + JavaCompilerUtil.mangleName(name);
       
     if (scriptPath == null) {
       MergePath mergePath = new MergePath();
@@ -452,7 +452,7 @@ public class Parser {
     
     block = null;
 
-    JavaCompiler compiler = JavaCompiler.create(getClassLoader());
+    JavaCompilerUtil compiler = JavaCompilerUtil.create(getClassLoader());
     compiler.setClassDir(workPath);
 
     parseClass = new ParseClass(name, className);

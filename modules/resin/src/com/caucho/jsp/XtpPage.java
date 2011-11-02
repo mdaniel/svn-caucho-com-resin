@@ -29,7 +29,7 @@
 
 package com.caucho.jsp;
 
-import com.caucho.java.JavaCompiler;
+import com.caucho.java.JavaCompilerUtil;
 import com.caucho.java.LineMap;
 import com.caucho.server.dispatch.ServletConfigImpl;
 import com.caucho.server.http.CauchoRequest;
@@ -510,7 +510,7 @@ class XtpPage extends Page {
     if (varyName == null)
       return _className;
     else
-      return _className + JavaCompiler.mangleName("?" + varyName);
+      return _className + JavaCompilerUtil.mangleName("?" + varyName);
   }
 
   /**

@@ -41,7 +41,7 @@ import com.caucho.bytecode.JavaClass;
 import com.caucho.bytecode.JavaMethod;
 import com.caucho.bytecode.MethodRefConstant;
 import com.caucho.config.ConfigException;
-import com.caucho.java.JavaCompiler;
+import com.caucho.java.JavaCompilerUtil;
 import com.caucho.java.WorkDir;
 import com.caucho.java.gen.ClassComponent;
 import com.caucho.java.gen.DependencyComponent;
@@ -537,7 +537,7 @@ public class AmberEnhancer implements AmberGenerator, ClassEnhancer {
     // XXX:
     // gen.setClassDir(getPath());
 
-    JavaCompiler compiler = gen.getCompiler();
+    JavaCompilerUtil compiler = gen.getCompiler();
 
     compiler.setClassDir(getWorkDir());
     compiler.compileBatch(javaFiles);

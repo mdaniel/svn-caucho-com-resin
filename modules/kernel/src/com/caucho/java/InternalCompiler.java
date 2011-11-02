@@ -59,7 +59,7 @@ public class InternalCompiler extends AbstractJavaCompiler {
   
   boolean _isDead;
   
-  public InternalCompiler(JavaCompiler compiler)
+  public InternalCompiler(JavaCompilerUtil compiler)
   {
     super(compiler);
   }

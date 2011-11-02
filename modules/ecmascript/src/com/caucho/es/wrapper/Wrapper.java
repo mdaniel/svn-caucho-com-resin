@@ -32,7 +32,7 @@ import com.caucho.es.ESArrayWrapper;
 import com.caucho.es.ESBase;
 import com.caucho.es.ESBeanWrapper;
 import com.caucho.es.Global;
-import com.caucho.java.JavaCompiler;
+import com.caucho.java.JavaCompilerUtil;
 import com.caucho.loader.SimpleLoader;
 import com.caucho.server.util.CauchoSystem;
 import com.caucho.util.CharBuffer;
@@ -68,7 +68,7 @@ public class Wrapper {
   private Path dest;
   private WriteStream os;
   private ClassLoader loader;
-  private JavaCompiler compiler;
+  private JavaCompilerUtil compiler;
 
   private ESBeanInfo beanInfo;
   private IntMap hasDispatch;
@@ -128,7 +128,7 @@ public class Wrapper {
     //this.loader = resin.getParentLoader();
     loader = cl.getClassLoader();
 
-    compiler = JavaCompiler.create(loader);
+    compiler = JavaCompilerUtil.create(loader);
     //compiler.setEncoding("utf8");
     Path workPath = CauchoSystem.getWorkPath();
     

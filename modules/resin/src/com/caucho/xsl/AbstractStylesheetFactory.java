@@ -29,7 +29,7 @@
 
 package com.caucho.xsl;
 
-import com.caucho.java.JavaCompiler;
+import com.caucho.java.JavaCompilerUtil;
 import com.caucho.loader.DynamicClassLoader;
 import com.caucho.loader.EnvironmentLocal;
 import com.caucho.loader.SimpleLoader;
@@ -1123,7 +1123,7 @@ abstract public class AbstractStylesheetFactory
     else
       name = "xsl/" + name;
     
-    return JavaCompiler.mangleName(name);
+    return JavaCompilerUtil.mangleName(name);
   }
   
   /**

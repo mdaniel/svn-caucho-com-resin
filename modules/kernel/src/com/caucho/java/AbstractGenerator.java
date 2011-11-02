@@ -383,14 +383,14 @@ public abstract class AbstractGenerator {
   public void compileJava()
     throws IOException, ClassNotFoundException
   {
-    JavaCompiler compiler = getCompiler();
+    JavaCompilerUtil compiler = getCompiler();
     
     compiler.compile(getFullClassName().replace('.', '/') + ".java", null);
   }
 
-  public JavaCompiler getCompiler()
+  public JavaCompilerUtil getCompiler()
   {
-    JavaCompiler compiler = JavaCompiler.create(getParentLoader());
+    JavaCompilerUtil compiler = JavaCompilerUtil.create(getParentLoader());
 
     compiler.setClassLoader(getParentLoader());
     compiler.setClassDir(getClassDir());

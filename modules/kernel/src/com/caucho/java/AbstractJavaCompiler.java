@@ -47,7 +47,7 @@ abstract public class AbstractJavaCompiler implements Runnable {
 
   private ClassLoader _loader;
   
-  protected JavaCompiler _compiler;
+  protected JavaCompilerUtil _compiler;
   private final AtomicBoolean _isDone = new AtomicBoolean();
 
   // path of source files
@@ -58,7 +58,7 @@ abstract public class AbstractJavaCompiler implements Runnable {
   private Thread _waitThread;
   private Throwable _exception;
   
-  public AbstractJavaCompiler(JavaCompiler compiler)
+  public AbstractJavaCompiler(JavaCompilerUtil compiler)
   {
     _loader = Thread.currentThread().getContextClassLoader();
     

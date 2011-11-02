@@ -62,7 +62,7 @@ public class InternalCompiler2 extends AbstractJavaCompiler {
     = new FreeList<JavaFileManager>(4);
 
 
-  public InternalCompiler2(JavaCompiler compiler)
+  public InternalCompiler2(JavaCompilerUtil compiler)
   {
     super(compiler);
   }

@@ -29,7 +29,7 @@
 
 package com.caucho.java.gen;
 
-import com.caucho.java.JavaCompiler;
+import com.caucho.java.JavaCompilerUtil;
 import com.caucho.java.JavaWriter;
 import com.caucho.loader.DynamicClassLoader;
 import com.caucho.loader.SimpleLoader;
@@ -341,7 +341,7 @@ public class JavaClassGenerator {
   public void compileJava(String fullClassName)
     throws IOException, ClassNotFoundException
   {
-    JavaCompiler compiler = JavaCompiler.create(getPreloadLoader());
+    JavaCompilerUtil compiler = JavaCompilerUtil.create(getPreloadLoader());
 
     compiler.setClassLoader(getPreloadLoader());
     compiler.setClassDir(getWorkDir());
@@ -377,7 +377,7 @@ public class JavaClassGenerator {
   public void compilePendingJava()
     throws IOException, ClassNotFoundException
   {
-    JavaCompiler compiler = JavaCompiler.create(getPreloadLoader());
+    JavaCompilerUtil compiler = JavaCompilerUtil.create(getPreloadLoader());
 
     compiler.setClassLoader(getPreloadLoader());
     compiler.setClassDir(getWorkDir());

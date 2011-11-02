@@ -61,7 +61,7 @@ public class EclipseCompiler extends AbstractJavaCompiler {
   
   boolean _isDead;
   
-  public EclipseCompiler(JavaCompiler compiler)
+  public EclipseCompiler(JavaCompilerUtil compiler)
   {
     super(compiler);
   }

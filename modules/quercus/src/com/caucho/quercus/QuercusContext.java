@@ -50,7 +50,7 @@ import javax.servlet.http.HttpServletResponse;
 import javax.sql.DataSource;
 
 import com.caucho.config.ConfigException;
-import com.caucho.java.JavaCompiler;
+import com.caucho.java.JavaCompilerUtil;
 import com.caucho.quercus.annotation.ClassImplementation;
 import com.caucho.quercus.env.ArrayValue;
 import com.caucho.quercus.env.ArrayValueImpl;
@@ -1065,7 +1065,7 @@ public class QuercusContext
     else
       relPath = pathName;
 
-    return "_quercus." + JavaCompiler.mangleName(relPath);
+    return "_quercus." + JavaCompilerUtil.mangleName(relPath);
   }
 
   /**

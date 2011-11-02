@@ -31,7 +31,7 @@ package com.caucho.loader;
 
 import com.caucho.config.ConfigException;
 import com.caucho.java.CompileClassNotFound;
-import com.caucho.java.JavaCompiler;
+import com.caucho.java.JavaCompilerUtil;
 import com.caucho.make.AlwaysModified;
 import com.caucho.make.Make;
 import com.caucho.server.util.CauchoSystem;
@@ -601,7 +601,7 @@ public class CompilingLoader extends Loader implements Make {
     throws ClassNotFoundException
   {
     try {
-      JavaCompiler compiler = JavaCompiler.create(getClassLoader());
+      JavaCompilerUtil compiler = JavaCompilerUtil.create(getClassLoader());
       compiler.setClassDir(_classDir);
       compiler.setSourceDir(_sourceDir);
       if (_encoding != null)
@@ -654,7 +654,7 @@ public class CompilingLoader extends Loader implements Make {
     throws ClassNotFoundException
   {
     try {
-      JavaCompiler compiler = JavaCompiler.create(getClassLoader());
+      JavaCompilerUtil compiler = JavaCompilerUtil.create(getClassLoader());
       compiler.setClassDir(_classDir);
       compiler.setSourceDir(_sourceDir);
       if (_encoding != null)

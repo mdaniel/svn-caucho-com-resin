@@ -31,7 +31,7 @@ package com.caucho.jsp;
 
 import com.caucho.config.Config;
 import com.caucho.config.ConfigException;
-import com.caucho.java.JavaCompiler;
+import com.caucho.java.JavaCompilerUtil;
 import com.caucho.java.LineMap;
 import com.caucho.jsp.cfg.JspConfig;
 import com.caucho.jsp.cfg.JspPropertyGroup;
@@ -241,7 +241,7 @@ public class JspCompilerInstance {
     _parseState.setUriPwd(uriPwd);
 
     if (_className == null)
-      _className = JavaCompiler.mangleName("jsp/" + _uri);
+      _className = JavaCompilerUtil.mangleName("jsp/" + _uri);
 
     // default to true if ends with x
     if (_uri.endsWith("x"))
@@ -747,7 +747,7 @@ public class JspCompilerInstance {
                            LineMap lineMap, String charEncoding)
     throws Exception
   {
-    JavaCompiler compiler = JavaCompiler.create(null);
+    JavaCompilerUtil compiler = JavaCompilerUtil.create(null);
     compiler.setClassDir(_jspCompiler.getClassDir());
     // compiler.setEncoding(charEncoding);
     String fileName = className.replace('.', '/') + ".java";

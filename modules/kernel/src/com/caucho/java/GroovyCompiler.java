@@ -56,7 +56,7 @@ public class GroovyCompiler extends AbstractJavaCompiler {
   
   String _userPrefix;
   
-  public GroovyCompiler(JavaCompiler compiler)
+  public GroovyCompiler(JavaCompilerUtil compiler)
   {
     super(compiler);
   }

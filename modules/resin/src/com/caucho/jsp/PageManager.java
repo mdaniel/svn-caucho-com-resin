@@ -54,7 +54,7 @@ import com.caucho.config.inject.CreationalContextImpl;
 import com.caucho.config.inject.InjectManager;
 import com.caucho.config.inject.OwnerCreationalContext;
 import com.caucho.config.xml.XmlConfigContext;
-import com.caucho.java.JavaCompiler;
+import com.caucho.java.JavaCompilerUtil;
 import com.caucho.jsp.cfg.JspPropertyGroup;
 import com.caucho.loader.Environment;
 import com.caucho.server.util.CauchoSystem;
@@ -334,7 +334,7 @@ abstract public class PageManager {
       if (path.getPath().startsWith(rootDir.getPath()))
         rawClassName = path.getPath().substring(rootDir.getPath().length());
 
-      String className = JavaCompiler.mangleName("jsp/" + rawClassName);
+      String className = JavaCompilerUtil.mangleName("jsp/" + rawClassName);
 
       page = createPage(path, pageURI, className, config, dependList);
 

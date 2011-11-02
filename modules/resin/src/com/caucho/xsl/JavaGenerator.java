@@ -29,7 +29,7 @@
 package com.caucho.xsl;
 
 import com.caucho.VersionFactory;
-import com.caucho.java.JavaCompiler;
+import com.caucho.java.JavaCompilerUtil;
 import com.caucho.java.JavaWriter;
 import com.caucho.loader.DynamicClassLoader;
 import com.caucho.server.util.CauchoSystem;
@@ -127,7 +127,7 @@ public class JavaGenerator extends Generator {
   private String _currentPos;
   
   private ClassLoader _parentLoader;
-  private JavaCompiler _compiler;
+  private JavaCompilerUtil _compiler;
   private boolean _disableEscaping;
   private boolean _printLocation = true;
 
@@ -153,7 +153,7 @@ public class JavaGenerator extends Generator {
 
     ArrayList pathDepends = new ArrayList();
 
-    _compiler = JavaCompiler.create(_parentLoader);
+    _compiler = JavaCompilerUtil.create(_parentLoader);
     _compiler.setClassDir(_workPath);
 
     if (encoding == null) {

@@ -33,7 +33,7 @@ import com.caucho.config.ConfigException;
 import com.caucho.config.types.FileSetType;
 import com.caucho.config.types.PathPatternType;
 import com.caucho.env.thread.ThreadPool;
-import com.caucho.java.JavaCompiler;
+import com.caucho.java.JavaCompilerUtil;
 import com.caucho.java.LineMap;
 import com.caucho.lifecycle.Lifecycle;
 import com.caucho.server.webapp.WebApp;
@@ -282,7 +282,7 @@ public class JspPrecompileResource {
       }
 
       try {
-        JavaCompiler javaCompiler = JavaCompiler.create(null);
+        JavaCompilerUtil javaCompiler = JavaCompilerUtil.create(null);
         javaCompiler.setClassDir(_compiler.getClassDir());
 
         javaCompiler.compileBatch(files);

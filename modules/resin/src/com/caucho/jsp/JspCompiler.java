@@ -416,7 +416,7 @@ public class JspCompiler implements EnvironmentBean {
    */
   public static String urlToClassName(String name)
   {
-    return JavaCompiler.mangleName("jsp/" + name);
+    return JavaCompilerUtil.mangleName("jsp/" + name);
   }
 
   /**
@@ -799,7 +799,7 @@ public class JspCompiler implements EnvironmentBean {
     try {
       thread.setContextClassLoader(getClassLoader());
     
-      JavaCompiler javaCompiler = JavaCompiler.create(getClassLoader());
+      JavaCompilerUtil javaCompiler = JavaCompilerUtil.create(getClassLoader());
       javaCompiler.setClassDir(getClassDir());
 
       javaCompiler.compileBatch(pendingClasses);
