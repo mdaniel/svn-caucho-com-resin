@@ -35,12 +35,15 @@ import java.io.PrintWriter;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.util.ArrayList;
+import java.util.Iterator;
+import java.util.ServiceLoader;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
 import javax.tools.JavaCompiler;
 import javax.tools.ToolProvider;
 
+import com.caucho.config.ConfigException;
 import com.caucho.loader.DynamicClassLoader;
 import com.caucho.loader.NonScanDynamicClassLoader;
 import com.caucho.util.CharBuffer;
@@ -156,7 +159,20 @@ public class InternalCompilerTools extends AbstractJavaCompiler {
         thread.setContextClassLoader(env);
 
         JavaCompiler javac = ToolProvider.getSystemJavaCompiler();
+        
+        if (javac == null) {
+          Iterator<JavaCompiler> iter
+            = ServiceLoader.load(JavaCompiler.class).iterator();
           
+          if (iter.hasNext())
+            javac = iter.next();
+        }
+        
+        if (javac == null)
+          throw new ConfigException(L.l("javac compiler is not available in {0}. Check that you are using the JDK, not the JRE.",
+                                        System.getProperty("java.runtime.name")
+                                        + " " + System.getProperty("java.runtime.version")));
+        
         status = javac.run(null, error, error, argArray);
       
         error.close();

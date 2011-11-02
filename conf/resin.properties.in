@@ -1,2 +1,10 @@
-app_tier  : 127.0.0.1
-http_port : 8080
+log_level     : info
+
+app_tier      : 127.0.0.1
+app_tier_http : @HTTP_PORT@
+
+web_tier      :
+web_tier_http : @HTTP_PORT@
+
+setuid_user   : @SETUID_USER@
+setuid_group  : @SETUID_GROUP@

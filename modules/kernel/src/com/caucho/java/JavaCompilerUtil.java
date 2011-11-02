@@ -664,18 +664,12 @@ public class JavaCompilerUtil {
     for (int i = 0; i < path.length; i++)
       log.config("Compiling " + path[i]);
 
-    /*
     if (_compiler.equals("internal"))
       compiler = new InternalCompiler(this);
     else if (_compiler.equals("internal2"))
       compiler = new InternalCompiler2(this);
-      */
-    if (_compiler.equals("internal")) {
+    else if (_compiler.equals("tools"))
       compiler = new InternalCompilerTools(this);
-    }
-    else if (_compiler.equals("internal2")) {
-      compiler = new InternalCompilerTools(this);
-    }
     else if (_compiler.equals("eclipse"))
       compiler = new EclipseCompiler(this);
     else if (_compiler.equals("groovyc"))
