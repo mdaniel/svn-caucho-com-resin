@@ -140,22 +140,6 @@ public class IncludeRequest extends CauchoRequestWrapper {
     return _invocation.getQueryString();
   }
 
-  @Override
-  public String getQueryString()
-  {
-    return calculateQueryString();
-  }
-
-  protected String calculateQueryString()
-  {
-    String queryString = _invocation.getQueryString();
-
-    if (queryString != null)
-      return queryString;
-
-    return getRequest().getQueryString();
-  }
-
   public String getMethod()
   {
     String method = getRequest().getMethod();
@@ -318,7 +302,7 @@ public class IncludeRequest extends CauchoRequestWrapper {
     } catch (Exception e) {
       throw new RuntimeException(e);
     }
-*/
+   */
     return form;
   }
   

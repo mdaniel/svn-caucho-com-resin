@@ -77,8 +77,8 @@ abstract public class AbstractCauchoRequest implements CauchoRequest {
   private ArrayList<Path> _removeOnExit;
 
   // form
-  protected HashMapImpl<String,String[]> _filledForm;
-  protected List<Part> _parts;
+  private HashMapImpl<String,String[]> _filledForm;
+  private List<Part> _parts;
 
   abstract public CauchoResponse getResponse();
 
@@ -240,7 +240,8 @@ abstract public class AbstractCauchoRequest implements CauchoRequest {
   {
     AbstractHttpRequest request = getAbstractHttpRequest();
 
-    HashMapImpl<String,String[]> form = request.getForm();
+    //HashMapImpl<String, String[]> form = request.getForm();
+    HashMapImpl<String, String[]> form = new HashMapImpl<String, String[]>();
 
     try {
       String query = getInvocation().getQueryString();//getQueryString();
