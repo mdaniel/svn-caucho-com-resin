@@ -33,6 +33,7 @@ import java.net.InetAddress;
 import java.util.concurrent.ConcurrentHashMap;
 
 import com.caucho.config.ConfigException;
+import com.caucho.util.Hex;
 import com.caucho.util.L10N;
 
 /**
@@ -140,8 +141,8 @@ public class CloudServer {
       InetAddress addr = InetAddress.getByName(address);
       
       byte []ipAddress = addr.getAddress();
-      
-      if (ipAddress.length == 6)
+
+      if (ipAddress.length == 16)
         return true;
       
       if (ipAddress.length != 4)

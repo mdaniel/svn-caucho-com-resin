@@ -31,7 +31,7 @@ package com.caucho.db.sql;
 import com.caucho.db.Database;
 import com.caucho.db.table.TableFactory;
 import com.caucho.db.xa.DbTransaction;
-import com.caucho.sql.SQLExceptionWrapper;
+import com.caucho.util.SQLExceptionWrapper;
 
 import java.sql.SQLException;
 import java.util.logging.Logger;

@@ -41,9 +41,9 @@ import com.caucho.db.table.Table;
 import com.caucho.db.table.TableIterator;
 import com.caucho.db.xa.DbTransaction;
 import com.caucho.inject.Module;
-import com.caucho.sql.SQLExceptionWrapper;
 import com.caucho.util.CharBuffer;
 import com.caucho.util.L10N;
+import com.caucho.util.SQLExceptionWrapper;
 
 @Module
 abstract public class Query {

@@ -33,8 +33,8 @@ import com.caucho.db.block.BlockStore;
 import com.caucho.db.index.BTree;
 import com.caucho.db.sql.QueryContext;
 import com.caucho.db.xa.DbTransaction;
-import com.caucho.sql.SQLExceptionWrapper;
 import com.caucho.util.L10N;
+import com.caucho.util.SQLExceptionWrapper;
 
 import java.io.IOException;
 import java.sql.SQLException;

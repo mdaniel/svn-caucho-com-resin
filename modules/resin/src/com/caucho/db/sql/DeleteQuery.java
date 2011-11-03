@@ -33,8 +33,8 @@ import com.caucho.db.Database;
 import com.caucho.db.table.Table;
 import com.caucho.db.table.TableIterator;
 import com.caucho.db.xa.DbTransaction;
-import com.caucho.quercus.lib.db.SQLExceptionWrapper;
 import com.caucho.util.CharBuffer;
+import com.caucho.util.SQLExceptionWrapper;
 
 import java.io.IOException;
 import java.sql.SQLException;

@@ -28,10 +28,10 @@
  */
 package com.caucho.quercus.mysql;
 
-import com.caucho.sql.SQLExceptionWrapper;
 import com.caucho.util.FreeList;
 import com.caucho.util.QDate;
 import com.caucho.util.L10N;
+import com.caucho.util.SQLExceptionWrapper;
 
 import java.io.IOException;
 import java.io.InputStream;

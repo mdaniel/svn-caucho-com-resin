@@ -42,6 +42,7 @@ import com.caucho.quercus.env.StringValue;
 import com.caucho.quercus.env.UnicodeValueImpl;
 import com.caucho.quercus.env.Value;
 import com.caucho.util.L10N;
+import com.caucho.util.SQLExceptionWrapper;
 
 import java.io.UnsupportedEncodingException;
 import java.lang.reflect.InvocationTargetException;

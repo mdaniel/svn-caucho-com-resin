@@ -36,9 +36,9 @@ import java.util.concurrent.atomic.AtomicReference;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
-import com.caucho.sql.SQLExceptionWrapper;
 import com.caucho.util.FreeList;
 import com.caucho.util.L10N;
+import com.caucho.util.SQLExceptionWrapper;
 import com.caucho.vfs.Path;
 import com.caucho.vfs.RandomAccessStream;
 import com.caucho.vfs.WriteStream;

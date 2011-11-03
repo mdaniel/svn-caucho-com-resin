@@ -19,8 +19,9 @@
   <!--
      - level='info' for production
      - 'fine' or 'finer' for development and troubleshooting
-    -->
   <logger name="" level="${log_level?:'info'}"/>
+    -->
+  <logger name="com.caucho" level="info"/>
 
   <logger name="com.caucho.java" level="config"/>
   <logger name="com.caucho.loader" level="config"/>
@@ -195,13 +196,16 @@
       <!--
          - If starting Resin as root on Unix, specify the user name
          - and group name for the web server user.
-        -->
        <user-name>${setuid_user}</user-name>
        <group-name>${setuid_group}</group-name>
+        -->
     </server-default>
 
     <!-- define the servers in the cluster -->
-    <multi-server prefix="app-" address-list="${app_tier}" port="6800"/>
+    <!--
+    <server-multi id-prefix="app-" address-list="${app_tier}" port="6800"/>
+    -->
+    <server id="" address="127.0.0.1" port="6800"/>
 
     <!-- the default host, matching any host name -->
     <host id="" root-directory=".">

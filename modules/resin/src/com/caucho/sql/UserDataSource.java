@@ -29,6 +29,7 @@
 package com.caucho.sql;
 
 import com.caucho.util.L10N;
+import com.caucho.util.SQLExceptionWrapper;
 
 import java.io.PrintWriter;
 import java.sql.Connection;

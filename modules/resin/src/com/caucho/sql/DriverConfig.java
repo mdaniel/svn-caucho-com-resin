@@ -71,6 +71,7 @@ import com.caucho.tools.profiler.XADataSourceWrapper;
 import com.caucho.util.Alarm;
 import com.caucho.util.IoUtil;
 import com.caucho.util.L10N;
+import com.caucho.util.SQLExceptionWrapper;
 import com.caucho.vfs.ReadStream;
 import com.caucho.vfs.Vfs;
 import com.caucho.xml.QName;

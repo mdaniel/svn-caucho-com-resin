@@ -28,8 +28,8 @@
  */
 package com.caucho.db.jdbc;
 
-import com.caucho.sql.SQLExceptionWrapper;
 import com.caucho.util.L10N;
+import com.caucho.util.SQLExceptionWrapper;
 
 import java.io.IOException;
 import java.io.InputStream;

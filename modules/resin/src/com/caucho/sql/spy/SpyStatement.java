@@ -38,9 +38,9 @@ import java.util.List;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
-import com.caucho.sql.SQLExceptionWrapper;
 import com.caucho.util.Alarm;
 import com.caucho.util.L10N;
+import com.caucho.util.SQLExceptionWrapper;
 
 /**
  * Spying on a statement;

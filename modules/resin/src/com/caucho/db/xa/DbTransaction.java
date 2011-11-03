@@ -40,8 +40,8 @@ import com.caucho.db.block.Block;
 import com.caucho.db.block.BlockStore;
 import com.caucho.db.jdbc.ConnectionImpl;
 import com.caucho.db.lock.DatabaseLock;
-import com.caucho.sql.SQLExceptionWrapper;
 import com.caucho.util.L10N;
+import com.caucho.util.SQLExceptionWrapper;
 
 /**
  * Represents a single transaction.

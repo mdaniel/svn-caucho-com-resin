@@ -38,7 +38,7 @@ import com.caucho.db.table.Table;
 import com.caucho.db.table.TableIterator;
 import com.caucho.db.table.Column.ColumnType;
 import com.caucho.db.xa.DbTransaction;
-import com.caucho.sql.SQLExceptionWrapper;
+import com.caucho.util.SQLExceptionWrapper;
 
 class InsertQuery extends Query {
   private Table _table;

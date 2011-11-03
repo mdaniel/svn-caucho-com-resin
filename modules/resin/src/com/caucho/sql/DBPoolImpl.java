@@ -41,6 +41,7 @@ import com.caucho.management.server.JdbcDriverMXBean;
 import com.caucho.util.Alarm;
 import com.caucho.util.AlarmListener;
 import com.caucho.util.L10N;
+import com.caucho.util.SQLExceptionWrapper;
 import com.caucho.sql.spy.*;
 
 import javax.naming.InitialContext;

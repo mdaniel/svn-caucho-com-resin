@@ -39,6 +39,7 @@ import com.caucho.quercus.env.Value;
 import com.caucho.util.L10N;
 import com.caucho.util.LruCache;
 import com.caucho.util.JdbcUtil;
+import com.caucho.util.SQLExceptionWrapper;
 
 import java.sql.*;
 import java.util.logging.Level;

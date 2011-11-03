@@ -39,12 +39,12 @@ import com.caucho.db.blob.BlobInputStream;
 import com.caucho.db.block.BlockStore;
 import com.caucho.db.table.TableIterator;
 import com.caucho.db.table.Column.ColumnType;
-import com.caucho.sql.SQLExceptionWrapper;
 import com.caucho.util.CharBuffer;
 import com.caucho.util.FreeList;
 import com.caucho.util.IntArray;
 import com.caucho.util.L10N;
 import com.caucho.util.QDate;
+import com.caucho.util.SQLExceptionWrapper;
 import com.caucho.vfs.TempBuffer;
 
 public class SelectCursor {
