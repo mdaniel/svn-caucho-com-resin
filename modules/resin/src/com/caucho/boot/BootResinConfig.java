@@ -258,7 +258,7 @@ public class BootResinConfig implements EnvironmentBean
     }
 
     if (client == null) {
-      throw new ConfigException(L.l("Resin/{0}: default server annot find a unique <server> or <server-multi>\nin {2}.",
+      throw new ConfigException(L.l("Resin/{0}: default server cannot find a unique <server> or <server-multi>\nin {2}.",
                                     VersionFactory.getVersion(), _args.getServerId(), _args.getResinConf()));
     }
     
