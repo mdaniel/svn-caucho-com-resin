@@ -1323,7 +1323,7 @@ public class Resin
       */
       
       bootServer = clusterConfig.createServer();
-      bootServer.setId(getServerId());
+      bootServer.setId(serverId); // getServerId());
       
       if (_dynamicJoinCluster != null)
         bootServer.setDynamic(true);

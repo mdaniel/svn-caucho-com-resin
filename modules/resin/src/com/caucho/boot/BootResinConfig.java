@@ -38,6 +38,7 @@ import java.util.HashMap;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
+import com.caucho.VersionFactory;
 import com.caucho.cloud.security.SecurityService;
 import com.caucho.config.ConfigException;
 import com.caucho.config.Configurable;
@@ -220,6 +221,57 @@ public class BootResinConfig implements EnvironmentBean
   public WatchdogClient findClient(String id)
   {
     return _watchdogMap.get(id);
+  }
+  
+  
+  WatchdogClient findClient(String serverId, WatchdogArgs args)
+  {
+    WatchdogClient client = null;
+    
+    if (serverId != null) {
+      client = findClient(serverId);
+      
+      if (client != null)
+        return client;
+      
+      throw new ConfigException(L.l("Resin/{0}: -server '{1}' does not match any defined <server>\nin {2}.",
+                                    VersionFactory.getVersion(), _args.getServerId(), _args.getResinConf()));
+    }
+    
+    // backward-compat default behavior
+    client = findClient("");
+    
+    if (client != null)
+      return client;
+    
+    ArrayList<WatchdogClient> clientList = findLocalClients();
+    
+    if (clientList.size() == 1)
+      return clientList.get(0);
+
+    if (client == null && _args.isShutdown()) {
+      client = findShutdownClient(_args.getClusterId());
+    }
+
+    if (client == null && ! (_args.isStart() || _args.isConsole())) {
+      client = findShutdownClient(_args.getClusterId());
+    }
+
+    if (client == null) {
+      throw new ConfigException(L.l("Resin/{0}: default server annot find a unique <server> or <server-multi>\nin {2}.",
+                                    VersionFactory.getVersion(), _args.getServerId(), _args.getResinConf()));
+    }
+    
+    return client;
+  }
+
+  public ArrayList<WatchdogClient> findLocalClients()
+  {
+    ArrayList<WatchdogClient> clientList = new ArrayList<WatchdogClient>();
+    
+    fillLocalClients(clientList);
+    
+    return clientList;
   }
 
   /**

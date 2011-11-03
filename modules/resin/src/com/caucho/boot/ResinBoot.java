@@ -186,35 +186,12 @@ public class ResinBoot
 
   WatchdogClient findClient(String serverId, WatchdogArgs args)
   {
-    WatchdogClient client = null;
-    
-    if (serverId != null) {
-      client = _resinConfig.findClient(serverId);
-    }
-
-    if (client == null && _args.isShutdown()) {
-      client = _resinConfig.findShutdownClient(_args.getClusterId());
-    }
-
-    if (client == null && ! (_args.isStart() || _args.isConsole())) {
-      client = _resinConfig.findShutdownClient(_args.getClusterId());
-    }
-
-    if (client == null) {
-      throw new ConfigException(L().l("Resin/{0}: -server '{1}' does not match any defined <server>\nin {2}.",
-                                      VersionFactory.getVersion(), _args.getServerId(), _args.getResinConf()));
-    }
-    
-    return client;
+    return _resinConfig.findClient(serverId, args);
   }
-
-  public ArrayList<WatchdogClient> findLocalClients()
+  
+  ArrayList<WatchdogClient> findLocalClients()
   {
-    ArrayList<WatchdogClient> clientList = new ArrayList<WatchdogClient>();
-    
-    _resinConfig.fillLocalClients(clientList);
-    
-    return clientList;
+    return _resinConfig.findLocalClients();
   }
 
   BootCommand getCommand()

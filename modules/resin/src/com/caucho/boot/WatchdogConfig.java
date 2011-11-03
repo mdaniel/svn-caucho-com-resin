@@ -249,6 +249,9 @@ class WatchdogConfig
 
   public void setUserName(String user)
   {
+    if ("".equals(user))
+      user = null;
+    
     _userName = user;
   }
 
@@ -259,6 +262,9 @@ class WatchdogConfig
 
   public void setGroupName(String group)
   {
+    if ("".equals(group))
+      group = null;
+    
     _groupName = group;
   }
 

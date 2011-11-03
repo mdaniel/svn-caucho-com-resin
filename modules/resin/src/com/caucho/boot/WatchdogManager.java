@@ -586,7 +586,9 @@ class WatchdogManager implements AlarmListener {
       cluster.addServer(serverConfig);
     }
     else {
-      WatchdogClient client = resin.findClient(serverId);
+      WatchdogClient client = resin.findClient(serverId, args); 
+        
+        //resin.findClient(serverId);
 
       if (client != null)
         serverConfig = client.getConfig();

@@ -68,7 +68,7 @@ class WatchdogArgs
   private String[] _argv;
   private Path _resinConf;
   private Path _logDirectory;
-  private String _serverId = "";
+  private String _serverId = null;
   private String _clusterId;
   private int _watchdogPort;
   private boolean _isVerbose;

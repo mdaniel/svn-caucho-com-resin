@@ -102,7 +102,7 @@ public class BootServerConfig implements SchemaBean
   @Configurable
   public void setId(String id)
   {
-    if (id.equals(""))
+    if (id == null || id.equals(""))
       id = "default";
     
     _id = id;
