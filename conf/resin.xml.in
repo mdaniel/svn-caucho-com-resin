@@ -112,7 +112,7 @@
         <report>Summary</report>
         <period>7D</period>
         <snapshot/>
-        <!-- <mailto>nobody@example.com</mailto> -->
+        <!-- <mail-to>nobody@example.com</mail-to> -->
         <!-- <profile-time>60s</profile-time> -->
         <health:IfCron value="0 0 * * 0"/>
       </health:PdfReport>
@@ -121,7 +121,7 @@
         <path>${resin.root}/doc/admin/pdf-gen.php</path>
         <report>Restart</report>
         <period>2h</period>
-        <!-- <mailto>nobody@example.com</mailto> -->
+        <!-- <mail-to>nobody@example.com</mail-to> -->
         <health:OnRestart/>
       </health:PdfReport>
     </resin:if>
