@@ -171,6 +171,10 @@ else
       JAVA_HOME=`cd $JAVA_HOME/..; pwd`
     elif test -f "$JAVA_HOME/lib/rt.jar"; then
       JAVA_HOME=`cd $JAVA_HOME/..; pwd`
+    elif test -f "/usr/lib/jvm/java-6-openjdk/include/jni.h"; then
+      JAVA_HOME="/usr/lib/jvm/java-6-openjdk"
+    elif test -f "/usr/lib/jvm/java-6-sun/include/jni.h"; then
+      JAVA_HOME="/usr/lib/jvm/java-6-sun"
     elif test -d "/usr/java"; then
       JAVA_HOME=/usr/java
     fi
