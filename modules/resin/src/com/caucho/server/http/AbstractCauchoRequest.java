@@ -214,7 +214,17 @@ abstract public class AbstractCauchoRequest implements CauchoRequest {
 
     return _parts;
   }
+  
+  @Override
+  public boolean isMultipartEnabled()
+  {
+    ServletInvocation invocation = getInvocation();
 
+    MultipartConfigElement multipartConfig
+      = invocation.getMultipartConfig();
+    
+    return multipartConfig != null;
+  }
   /**
    * @since Servlet 3.0
    */

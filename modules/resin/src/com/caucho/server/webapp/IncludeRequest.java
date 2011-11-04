@@ -322,6 +322,10 @@ public class IncludeRequest extends CauchoRequestWrapper {
   @Override
   protected void parsePostQueryImpl(HashMapImpl<String,String[]> form)
   {
+    if (isMultipartEnabled() && ! isDelegateMultipartEnabled()) {
+      // server/1650
+      super.parsePostQueryImpl(form);
+    }
   }
 
   //

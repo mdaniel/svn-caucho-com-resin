@@ -353,6 +353,12 @@ public class StubServletRequest implements CauchoRequest {
   {
     throw new UnsupportedOperationException(getClass().getName());
   }
+  
+  @Override
+  public boolean isMultipartEnabled()
+  {
+    return false;
+  }
 
   @Override
   public boolean authenticate(HttpServletResponse response)

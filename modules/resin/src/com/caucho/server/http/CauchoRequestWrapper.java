@@ -32,6 +32,7 @@ package com.caucho.server.http;
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.UnsupportedEncodingException;
+import java.util.Collection;
 import java.util.Enumeration;
 import java.util.Locale;
 import java.util.Map;
@@ -48,6 +49,7 @@ import javax.servlet.ServletResponse;
 import javax.servlet.http.Cookie;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpSession;
+import javax.servlet.http.Part;
 
 import com.caucho.server.webapp.WebApp;
 import com.caucho.util.CharBuffer;
@@ -563,11 +565,13 @@ public class CauchoRequestWrapper extends AbstractCauchoRequest {
   }
   */
 
-  /**
   @Override
   public Part getPart(String name)
     throws IOException, ServletException
   {
+    if (isDelegateMultipartEnabled())
+      return _request.getPart(name);
+    
     Part part = super.getPart(name);
 
     if (part != null)
@@ -580,6 +584,9 @@ public class CauchoRequestWrapper extends AbstractCauchoRequest {
   public Collection<Part> getParts()
     throws IOException, ServletException
   {
+    if (isDelegateMultipartEnabled())
+      return _request.getParts();
+    
     Collection<Part> parts = super.getParts();
 
     if (parts != null)
@@ -587,7 +594,24 @@ public class CauchoRequestWrapper extends AbstractCauchoRequest {
 
     return _request.getParts();
   }
-  */
+  
+  protected boolean isDelegateMultipartEnabled()
+  {
+    if (_request instanceof CauchoRequest) {
+      boolean isEnabled = ((CauchoRequest) _request).isMultipartEnabled();
+      
+      return isEnabled;
+    }
+    
+    return false;
+  }
+  
+  @Override
+  public boolean isMultipartEnabled()
+  {
+    return isDelegateMultipartEnabled() || super.isMultipartEnabled();
+  }
+  
   /*
   public void login(String username, String password)
     throws ServletException

@@ -80,6 +80,8 @@ public interface CauchoRequest extends HttpServletRequest {
   public boolean login(boolean isFail);
 
   // public HashMap<String,String> setRoleMap(HashMap<String,String> roleMap);
+  
+  public boolean isMultipartEnabled();
 
   public ServletResponse getServletResponse();
   public AbstractHttpRequest getAbstractHttpRequest();

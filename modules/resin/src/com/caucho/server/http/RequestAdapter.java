@@ -628,6 +628,7 @@ public class RequestAdapter extends RequestWrapper
   /**
    * @since Servlet 3.0
    */
+  @Override
   public Part getPart(String name)
     throws IOException, ServletException
   {
@@ -637,10 +638,17 @@ public class RequestAdapter extends RequestWrapper
   /**
    * @since Servlet 3.0
    */
+  @Override
   public Collection<Part> getParts()
     throws IOException, ServletException
   {
     return getRequest().getParts();
+  }
+  
+  @Override
+  public boolean isMultipartEnabled()
+  {
+    return false;
   }
 
   /**
