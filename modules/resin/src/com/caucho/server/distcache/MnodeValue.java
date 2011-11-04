@@ -64,8 +64,8 @@ public class MnodeValue implements java.io.Serializable {
     
     _flags = flags;
     
-    _modifiedExpireTimeout = modifiedExpireTimeout;
     _accessedExpireTimeout = accessedExpireTimeout;
+    _modifiedExpireTimeout = modifiedExpireTimeout;
     
     _version = version;
   }

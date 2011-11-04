@@ -67,7 +67,7 @@ public class RestartCommand extends AbstractStartCommand
       System.out.println(L().l(
         "Resin/{0} restarted -server '{1}' for watchdog at {2}:{3}",
         VersionFactory.getVersion(),
-        args.getServerId(),
+        _client.getId(),
         _client.getWatchdogAddress(),
         _client.getWatchdogPort()));
     } catch (Exception e) {

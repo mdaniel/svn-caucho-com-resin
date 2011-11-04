@@ -73,8 +73,8 @@ public final class MnodeEntry extends MnodeValue implements ExtCacheEntry {
                     Object value,
                     HashKey cacheHash,
                     long flags,
-                    long expireTimeout,
-                    long idleTimeout,
+                    long accessedExpireTimeout,
+                    long modifiedExpireTimeout,
                     long leaseTimeout,
                     long lastAccessTime,
                     long lastUpdateTime,
@@ -84,7 +84,7 @@ public final class MnodeEntry extends MnodeValue implements ExtCacheEntry {
     super(HashKey.getHash(valueHash), valueLength, version,
           HashKey.getHash(cacheHash),
           flags,
-          expireTimeout, idleTimeout);
+          accessedExpireTimeout, modifiedExpireTimeout);
     
     _leaseTimeout = leaseTimeout;
     _lastRemoteAccessTime = lastAccessTime;
@@ -243,6 +243,7 @@ public final class MnodeEntry extends MnodeValue implements ExtCacheEntry {
    * Returns true is the entry has expired for being idle or having
    * expired.
    */
+  @Override
   public final boolean isExpired(long now)
   {
     return isIdleExpired(now) || isValueExpired(now);

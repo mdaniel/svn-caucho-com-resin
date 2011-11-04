@@ -62,14 +62,14 @@ public class KillCommand extends AbstractStartCommand
       System.out.println(L().l(
         "Resin/{0} killed -server '{1}' for watchdog at {2}:{3}",
         VersionFactory.getVersion(),
-        args.getServerId(),
+        client.getId(),
         client.getWatchdogAddress(),
         client.getWatchdogPort()));
     } catch (Exception e) {
       System.out.println(L().l(
         "Resin/{0} can't kill -server '{1}' for watchdog at {2}:{3}.\n{4}",
         VersionFactory.getVersion(),
-        args.getServerId(),
+        client.getId(),
         client.getWatchdogAddress(),
         client.getWatchdogPort(),
         e.toString()));

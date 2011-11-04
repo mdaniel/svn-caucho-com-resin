@@ -350,7 +350,7 @@ public final class CacheStoreManager
     mnodeValue = config.getEngine().get(entry, config);
     
     entry.addLoadCount();
-    
+
     if (mnodeValue == null || mnodeValue.isExpired(now)) {
       CacheLoader loader = config.getCacheLoader();
 
@@ -368,16 +368,17 @@ public final class CacheStoreManager
 
       MnodeEntry nullMnodeValue = new MnodeEntry(null, 0, 0, null, null,
                                                  0,
-                                                 config.getModifiedExpireTimeout(),
                                                  config.getAccessedExpireTimeout(),
+                                                 config.getModifiedExpireTimeout(),
                                                  config.getLeaseExpireTimeout(),
                                                  now, now,
                                                  true, true);
 
       entry.compareAndSet(mnodeValue, nullMnodeValue);
     }
-    else
+    else {
       mnodeValue.setLastAccessTime(now);
+    }
   }
   
   public DataItem getValueHash(Object value, CacheConfig config)

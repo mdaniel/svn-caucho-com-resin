@@ -175,14 +175,14 @@ public class MnodeStore implements AlarmListener {
   protected void init()
     throws Exception
   {
-    _loadQuery = ("SELECT value,value_length,cache_id,flags,server_version,item_version,expire_timeout,idle_timeout,update_time"
+    _loadQuery = ("SELECT value,value_length,cache_id,flags,server_version,item_version,access_timeout,update_timeout,update_time"
                   + " FROM " + _tableName
                   + " WHERE id=?");
 
     _insertQuery = ("INSERT into " + _tableName
                     + " (id,value,value_length,cache_id,flags,"
                     + "  item_version,server_version,"
-                    + "  expire_timeout,idle_timeout,"
+                    + "  access_timeout,update_timeout,"
                     + "  update_time)"
                     + " VALUES (?,?,?,?,?,?,?,?,?,?)");
 
@@ -190,12 +190,12 @@ public class MnodeStore implements AlarmListener {
       = ("UPDATE " + _tableName
          + " SET value=?,value_length=?,"
          + "     server_version=?,item_version=?,"
-         + "     idle_timeout=?,update_time=?"
+         + "     access_timeout=?,update_time=?"
          + " WHERE id=? AND item_version<=?");
 
     _updateUpdateTimeQuery
       = ("UPDATE " + _tableName
-         + " SET idle_timeout=?,update_time=?"
+         + " SET access_timeout=?,update_time=?"
          + " WHERE id=? AND item_version=?");
 
     _updateVersionQuery = ("UPDATE " + _tableName
@@ -203,18 +203,18 @@ public class MnodeStore implements AlarmListener {
                            + " WHERE id=? AND value=?");
 
     _expireQuery = ("DELETE FROM " + _tableName
-                     + " WHERE update_time + 5 * idle_timeout / 4 < ?"
-                     + " OR update_time + expire_timeout < ?");
+                     + " WHERE update_time + 5 * access_timeout / 4 < ?"
+                     + " OR update_time + update_timeout < ?");
 
     _countQuery = "SELECT count(*) FROM " + _tableName;
 
-    _updatesSinceQuery = ("SELECT id,value,value_length,cache_id,flags,item_version,update_time,expire_timeout,idle_timeout"
+    _updatesSinceQuery = ("SELECT id,value,value_length,cache_id,flags,item_version,update_time,access_timeout,update_timeout"
                           + " FROM " + _tableName
                           + " WHERE ? <= update_time"
                           + "   AND bitand(flags, " + CacheConfig.FLAG_TRIPLICATE + ") <> 0"
                           + " LIMIT 1024");
 
-    _remoteUpdatesSinceQuery = ("SELECT id,value,value_length,cache_id,flags,item_version,update_time,expire_timeout,idle_timeout"
+    _remoteUpdatesSinceQuery = ("SELECT id,value,value_length,cache_id,flags,item_version,update_time,access_timeout,update_timeout"
                                 + " FROM " + _tableName
                                 + " WHERE ? = cache_id AND ? <= update_time"
                                 + " LIMIT 1024");
@@ -241,7 +241,7 @@ public class MnodeStore implements AlarmListener {
 
       try {
         String sql = ("SELECT id, value, value_length, cache_id, flags,"
-                      + "     expire_timeout, idle_timeout,"
+                      + "     access_timeout, update_timeout,"
                       + "     update_time,"
                       + "     server_version, item_version"
                       + " FROM " + _tableName + " WHERE 1=0");
@@ -268,8 +268,8 @@ public class MnodeStore implements AlarmListener {
                     + "  value BINARY(32),\n"
                     + "  value_length BIGINT,\n"
                     + "  cache_id BINARY(32),\n"
-                    + "  expire_timeout BIGINT,\n"
-                    + "  idle_timeout BIGINT,\n"
+                    + "  access_timeout BIGINT,\n"
+                    + "  update_timeout BIGINT,\n"
                     + "  update_time BIGINT,\n"
                     + "  item_version BIGINT,\n"
                     + "  flags BIGINT,\n"
@@ -385,8 +385,8 @@ public class MnodeStore implements AlarmListener {
         long flags = rs.getLong(5);
         long version = rs.getLong(6);
         long itemUpdateTime = rs.getLong(7);
-        long expireTimeout = rs.getLong(8);
-        long idleTimeout = rs.getLong(9);
+        long accessTimeout = rs.getLong(8);
+        long updateTimeout = rs.getLong(9);
 
         HashKey value = valueHash != null ? new HashKey(valueHash) : null;
         HashKey cacheKey = cacheHash != null ? new HashKey(cacheHash) : null;
@@ -399,8 +399,8 @@ public class MnodeStore implements AlarmListener {
                                     cacheKey,
                                     flags,
                                     itemUpdateTime,
-                                    expireTimeout,
-                                    idleTimeout));
+                                    accessTimeout,
+                                    updateTimeout));
       }
 
       if (entryList.size() > 0)
@@ -453,8 +453,8 @@ public class MnodeStore implements AlarmListener {
         long flags = rs.getLong(5);
         long version = rs.getLong(6);
         long itemUpdateTime = rs.getLong(7);
-        long expireTimeout = rs.getLong(8);
-        long idleTimeout = rs.getLong(9);
+        long accessTimeout = rs.getLong(8);
+        long updateTimeout = rs.getLong(9);
         
         HashKey value = valueHash != null ? new HashKey(valueHash) : null;
         /*
@@ -471,8 +471,8 @@ public class MnodeStore implements AlarmListener {
                                     HashKey.create(cacheHash),
                                     flags,
                                     itemUpdateTime,
-                                    expireTimeout,
-                                    idleTimeout));
+                                    accessTimeout,
+                                    updateTimeout));
       }
 
       if (entryList.size() > 0)
@@ -516,8 +516,8 @@ public class MnodeStore implements AlarmListener {
         long flags = rs.getLong(4);
         long serverVersion = rs.getLong(5);
         long itemVersion = rs.getLong(6);
-        long expireTimeout = rs.getLong(7);
-        long idleTimeout = rs.getLong(8);
+        long accessedExpireTimeout = rs.getLong(7);
+        long modifiedExpireTimeout = rs.getLong(8);
         long updateTime = rs.getLong(9);
         long accessTime = Alarm.getExactTime();
         
@@ -533,7 +533,7 @@ public class MnodeStore implements AlarmListener {
         entry = new MnodeEntry(valueHashKey, valueLength, itemVersion, null,
                                cacheHashKey,
                                flags,
-                               expireTimeout, idleTimeout,
+                               accessedExpireTimeout, modifiedExpireTimeout,
                                leaseTimeout,
                                accessTime, updateTime,
                                serverVersion == _serverVersion,
@@ -586,8 +586,8 @@ public class MnodeStore implements AlarmListener {
       stmt.setLong(5, mnodeUpdate.getFlags());
       stmt.setLong(6, mnodeUpdate.getVersion());
       stmt.setLong(7, _serverVersion);
-      stmt.setLong(8, mnodeUpdate.getModifiedExpireTimeout());
-      stmt.setLong(9, mnodeUpdate.getAccessedExpireTimeout());
+      stmt.setLong(8, mnodeUpdate.getAccessedExpireTimeout());
+      stmt.setLong(9, mnodeUpdate.getModifiedExpireTimeout());
       stmt.setLong(10, Alarm.getCurrentTime());
 
       int count = stmt.executeUpdate();
@@ -660,7 +660,7 @@ public class MnodeStore implements AlarmListener {
    */
   public boolean updateUpdateTime(HashKey id,
                                   long itemVersion,
-                                  long idleTimeout,
+                                  long accessTimeout,
                                   long updateTime)
   {
     CacheMapConnection conn = null;
@@ -669,7 +669,7 @@ public class MnodeStore implements AlarmListener {
       conn = getConnection();
 
       PreparedStatement stmt = conn.prepareUpdateUpdateTime();
-      stmt.setLong(1, idleTimeout);
+      stmt.setLong(1, accessTimeout);
       stmt.setLong(2, updateTime);
 
       stmt.setBytes(3, id.getHash());
