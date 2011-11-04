@@ -202,6 +202,14 @@ public class SecurityConstraint {
   }
 
   /**
+   * Sets a custom constraint
+   */
+  public void add(AbstractConstraint constraint)
+  {
+    addConstraint(constraint);
+  }
+
+  /**
    * initialize
    */
   @PostConstruct
