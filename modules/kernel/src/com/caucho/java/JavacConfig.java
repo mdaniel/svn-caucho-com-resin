@@ -37,7 +37,7 @@ public class JavacConfig {
   new EnvironmentLocal<JavacConfig>();
 
   // private String _compiler = "internal";
-  private String _compiler = "internal2";
+  private String _compiler = "tools";
   private String _args;
   private String _encoding;
   private int _maxBatch = 64;

@@ -234,8 +234,13 @@ public class BootResinConfig implements EnvironmentBean
       if (client != null)
         return client;
       
-      throw new ConfigException(L.l("Resin/{0}: -server '{1}' does not match any defined <server>\nin {2}.",
-                                    VersionFactory.getVersion(), _args.getServerId(), _args.getResinConf()));
+      // cloud/1292
+      if (args.isDynamicServer())
+        return null;
+      
+      if (! args.isStart() && ! args.isConsole())
+        throw new ConfigException(L.l("Resin/{0}: -server '{1}' does not match any defined <server>\nin {2}.",
+                                      VersionFactory.getVersion(), _args.getServerId(), _args.getResinConf()));
     }
     
     // backward-compat default behavior

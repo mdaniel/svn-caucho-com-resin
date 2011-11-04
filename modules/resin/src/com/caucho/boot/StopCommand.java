@@ -63,14 +63,14 @@ public class StopCommand extends AbstractStartCommand
       System.out.println(L().l(
         "Resin/{0} stopped -server '{1}' for watchdog at {2}:{3}",
         VersionFactory.getVersion(),
-        args.getServerId(),
+        client.getId(),
         client.getWatchdogAddress(),
         client.getWatchdogPort()));
     } catch (Exception e) {
       System.out.println(L().l(
         "Resin/{0} can't stop -server '{1}' for watchdog at {2}:{3}.\n{4}",
         VersionFactory.getVersion(),
-        args.getServerId(),
+        client.getId(),
         client.getWatchdogAddress(),
         client.getWatchdogPort(),
         e.toString()));

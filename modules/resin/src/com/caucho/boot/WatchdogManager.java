@@ -379,7 +379,7 @@ class WatchdogManager implements AlarmListener {
         WatchdogChild child = _watchdogMap.get(key);
 
         sb.append("\n\n");
-        sb.append("server '" + key + "' : " + child.getState() + "\n");
+        sb.append("server '" + child.getId() + "' : " + child.getState() + "\n");
 
         if (getAdminCookie() == null)
           sb.append("  password: missing\n");
