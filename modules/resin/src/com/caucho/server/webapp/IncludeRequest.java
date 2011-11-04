@@ -90,16 +90,19 @@ public class IncludeRequest extends CauchoRequestWrapper {
     return _invocation;
   }
 
+  @Override
   public IncludeResponse getResponse()
   {
     return _response;
   }
 
+  @Override
   public ServletContext getServletContext()
   {
     return _invocation.getWebApp();
   }
 
+  @Override
   public DispatcherType getDispatcherType()
   {
     return DispatcherType.INCLUDE;
@@ -109,6 +112,7 @@ public class IncludeRequest extends CauchoRequestWrapper {
   // CauchoRequest
   //
   
+  @Override
   public String getPageURI()
   {
     return _invocation.getURI();
@@ -120,26 +124,31 @@ public class IncludeRequest extends CauchoRequestWrapper {
     return _invocation.getContextPath();
   }
 
+  @Override
   public String getPageContextPath()
   {
     return _invocation.getContextPath();
   }
   
+  @Override
   public String getPageServletPath()
   {
     return _invocation.getServletPath();
   }
   
+  @Override
   public String getPagePathInfo()
   {
     return _invocation.getPathInfo();
   }
   
+  @Override
   public String getPageQueryString()
   {
     return _invocation.getQueryString();
   }
 
+  @Override
   public String getMethod()
   {
     String method = getRequest().getMethod();
@@ -151,6 +160,7 @@ public class IncludeRequest extends CauchoRequestWrapper {
       return "GET";
   }
   
+  @Override
   public WebApp getWebApp()
   {
     return _invocation.getWebApp();
@@ -241,6 +251,7 @@ public class IncludeRequest extends CauchoRequestWrapper {
   /**
    * Returns a map of the form.
    */
+  @Override
   public Map<String,String[]> getParameterMap()
   {
     if (_filledForm == null)
@@ -255,6 +266,7 @@ public class IncludeRequest extends CauchoRequestWrapper {
    * @param name key in the form
    * @return value matching the key
    */
+  @Override
   public String []getParameterValues(String name)
   {
     if (_filledForm == null)
@@ -266,6 +278,7 @@ public class IncludeRequest extends CauchoRequestWrapper {
   /**
    * Returns the form primary value for the given name.
    */
+  @Override
   public String getParameter(String name)
   {
     String []values = getParameterValues(name);
@@ -305,12 +318,17 @@ public class IncludeRequest extends CauchoRequestWrapper {
    */
     return form;
   }
-  
+
+  @Override
+  protected void parsePostQueryImpl(HashMapImpl<String,String[]> form)
+  {
+  }
 
   //
   // attributes
   //
 
+  @Override
   public Object getAttribute(String name)
   {
     switch (_includeAttributeMap.get(name)) {

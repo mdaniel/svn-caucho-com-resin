@@ -77,6 +77,10 @@ public class ServerAuthManager {
     
     _auth = cdiManager.getReference(Authenticator.class,
                                     new AnnotationLiteral<Admin>() {});
+    
+    if (_auth == null) {
+      _auth = cdiManager.getReference(Authenticator.class);
+    }
   }
   
   public void setAuthenticationRequired(boolean isAuthenticationRequired)

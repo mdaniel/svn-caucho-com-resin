@@ -94,6 +94,8 @@ public final class CacheStoreManager
   
   private CacheEngine _cacheEngine = new AbstractCacheEngine();
   
+  private AdminCacheStore _admin = new AdminCacheStore(this);
+  
   public CacheStoreManager(ResinSystem resinSystem)
   {
     _resinSystem = resinSystem;

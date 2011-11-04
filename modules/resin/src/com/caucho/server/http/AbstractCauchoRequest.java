@@ -238,17 +238,63 @@ abstract public class AbstractCauchoRequest implements CauchoRequest {
 
   protected HashMapImpl<String,String[]> parseQueryImpl()
   {
-    AbstractHttpRequest request = getAbstractHttpRequest();
-
-    //HashMapImpl<String, String[]> form = request.getForm();
     HashMapImpl<String, String[]> form = new HashMapImpl<String, String[]>();
+    
+    parseGetQueryImpl(form);
+    parsePostQueryImpl(form);
+    
+    return form;
+  }
+
+  protected void parseGetQueryImpl(HashMapImpl<String,String[]> form)
+  {
+    AbstractHttpRequest request = getAbstractHttpRequest();
 
     try {
       String query = getInvocation().getQueryString();//getQueryString();
+
+      if (query == null)
+        return;
+
+      Form formParser = request.getFormParser();
+
+      String charEncoding = getCharacterEncoding();
+      if (charEncoding == null) {
+        charEncoding = (String) getAttribute(CAUCHO_CHAR_ENCODING);
+        if (charEncoding == null)
+          charEncoding = (String) getAttribute(CHAR_ENCODING);
+        if (charEncoding == null) {
+          Locale locale = (Locale) getAttribute(FORM_LOCALE);
+          if (locale != null)
+            charEncoding = Encoding.getMimeName(locale);
+        }
+      }
+
+      String queryEncoding = charEncoding;
+
+      if (queryEncoding == null && getServer() != null)
+        queryEncoding = getServer().getURLCharacterEncoding();
+
+      if (queryEncoding == null)
+        queryEncoding = CharacterEncoding.getLocalEncoding();
+
+      String javaEncoding = Encoding.getJavaName(queryEncoding);
+
+      formParser.parseQueryString(form, query, javaEncoding, true);
+    } catch (IOException e) {
+      log.log(Level.FINE, e.toString(), e);
+    }
+  }
+
+  protected void parsePostQueryImpl(HashMapImpl<String,String[]> form)
+  {
+    AbstractHttpRequest request = getAbstractHttpRequest();
+
+    try {
       CharSegment contentType = request.getContentTypeBuffer();
 
-      if (query == null && contentType == null)
-        return form;
+      if (contentType == null)
+        return;
 
       Form formParser = request.getFormParser();
       long contentLength = request.getLongContentLength();
@@ -263,20 +309,6 @@ abstract public class AbstractCauchoRequest implements CauchoRequest {
           if (locale != null)
             charEncoding = Encoding.getMimeName(locale);
         }
-      }
-
-      if (query != null) {
-        String queryEncoding = charEncoding;
-
-        if (queryEncoding == null && getServer() != null)
-          queryEncoding = getServer().getURLCharacterEncoding();
-
-        if (queryEncoding == null)
-          queryEncoding = CharacterEncoding.getLocalEncoding();
-
-        String javaEncoding = Encoding.getJavaName(queryEncoding);
-
-        formParser.parseQueryString(form, query, javaEncoding, true);
       }
 
       if (charEncoding == null)
@@ -301,7 +333,7 @@ abstract public class AbstractCauchoRequest implements CauchoRequest {
         int i = contentType.indexOf("boundary=");
 
         if (i < 0)
-          return form;
+          return;
 
         long formUploadMax = getWebApp().getFormUploadMax();
         long parameterLengthMax = getWebApp().getFormParameterLengthMax();
@@ -325,7 +357,7 @@ abstract public class AbstractCauchoRequest implements CauchoRequest {
           setAttribute("caucho.multipart.form.error.size",
                        new Long(contentLength));
 
-          return form;
+          return;
         }
 
         long fileUploadMax = -1;
@@ -383,8 +415,6 @@ abstract public class AbstractCauchoRequest implements CauchoRequest {
     } catch (IOException e) {
       log.log(Level.FINE, e.toString(), e);
     }
-
-    return form;
   }
 
   Part createPart(String name,

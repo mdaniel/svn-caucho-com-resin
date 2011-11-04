@@ -579,7 +579,7 @@ public class Resin
   {
     TempFileService.createAndAddService();
     
-    LockService.createAndAddService(createLockManager());
+    // LockService.createAndAddService(createLockManager());
   }
   
   protected DistCacheSystem createDistCacheService()
@@ -588,10 +588,12 @@ public class Resin
       createAndAddService(new CacheStoreManager(getResinSystem()));
   }
   
+  /*
   protected AbstractLockManager createLockManager()
   {
     return new SingleLockManager();
   }
+  */
   
   private void setArgs(ResinArgs args)
   {
