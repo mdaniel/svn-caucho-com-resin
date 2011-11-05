@@ -284,7 +284,7 @@ public class SessionImpl implements HttpSession, CacheListener {
 
     ExtCacheEntry entry = cache.peekExtCacheEntry(_id);
     // server/01ke
-    
+
     if (entry == null)
       return _lastUseTime;
     else

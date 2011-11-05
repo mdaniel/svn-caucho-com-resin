@@ -760,7 +760,7 @@ public final class CacheStoreManager
     long accessedTime = mnodeValue.getLastAccessedTime();
 
     long now = Alarm.getCurrentTime();
-
+                       
     if (accessedExpireTimeout < CacheConfig.TIME_INFINITY
         && accessedTime + mnodeValue.getAccessExpireTimeoutWindow() < now) {
       mnodeValue.setLastAccessTime(now);
@@ -845,15 +845,9 @@ public final class CacheStoreManager
     if (newEntryValue.getVersion() != mnodeValue.getVersion())
       return newEntryValue;
 
-    updateCacheTime(entryKey.getKeyHash(), mnodeValue);
+    getCacheEngine().updateTime(entryKey.getKeyHash(), mnodeValue);
 
     return mnodeValue;
-  }
-
-  // XXX:
-  protected void updateCacheTime(HashKey key, MnodeEntry mnodeValue)
-  {
-    // _cacheService.updateTime(entryKey.getKeyHash(), mnodeValue);
   }
 
   /**
@@ -964,8 +958,6 @@ public final class CacheStoreManager
 
     long newVersion = getNewVersion(mnodeValue);
 
-    long expireTimeout = mnodeValue != null ? mnodeValue.getModifiedExpireTimeout() : -1;
-    long idleTimeout = mnodeValue != null ? mnodeValue.getAccessedExpireTimeout() : -1;
     long leaseTimeout = mnodeValue != null ? mnodeValue.getLeaseTimeout() : -1;
     int leaseOwner = mnodeValue != null ? mnodeValue.getLeaseOwner() : -1;
 
