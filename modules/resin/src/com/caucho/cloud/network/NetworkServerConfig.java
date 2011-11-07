@@ -29,6 +29,8 @@
 
 package com.caucho.cloud.network;
 
+import java.util.logging.Logger;
+
 import com.caucho.config.ConfigException;
 import com.caucho.config.Configurable;
 import com.caucho.config.program.ConfigProgram;
@@ -41,6 +43,9 @@ import com.caucho.server.cluster.ProtocolPortConfig;
 import com.caucho.server.http.HttpProtocol;
 
 public class NetworkServerConfig {
+  private static final Logger log
+    = Logger.getLogger(NetworkServerConfig.class.getName());
+  
   private NetworkListenSystem _listenService;
   
   private ContainerProgram _listenerDefaults = new ContainerProgram();
@@ -109,9 +114,19 @@ public class NetworkServerConfig {
     HttpProtocol protocol = new HttpProtocol();
     listener.setProtocol(protocol);
 
-    getListenService().addListener(listener);
+    // getListenService().addListener(listener);
 
     return listener;
+  }
+  
+  public void addHttp(TcpSocketLinkListener listener)
+  {
+    if (listener.getPort() <= 0) {
+      log.fine(listener + " skipping because port is 0.");
+      return;
+    }
+    
+    getListenService().addListener(listener);
   }
 
   @Configurable
@@ -129,9 +144,17 @@ public class NetworkServerConfig {
   {
     ProtocolPortConfig listener = new ProtocolPortConfig();
 
-    getListenService().addListener(listener);
-
     return listener;
+  }
+  
+  public void addListen(TcpSocketLinkListener listener)
+  {
+    if (listener.getPort() <= 0) {
+      log.fine(listener + " skipping because port is 0.");
+      return;
+    }
+    
+    getListenService().addListener(listener);
   }
 
   @Configurable

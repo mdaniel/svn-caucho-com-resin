@@ -19,9 +19,8 @@
   <!--
      - level='info' for production
      - 'fine' or 'finer' for development and troubleshooting
-  <logger name="" level="${log_level?:'info'}"/>
     -->
-  <logger name="com.caucho" level="info"/>
+  <logger name="" level="${rvar('log_level')?:'info'}"/>
 
   <logger name="com.caucho.java" level="config"/>
   <logger name="com.caucho.loader" level="config"/>
@@ -43,11 +42,9 @@
   </resin:AdminAuthenticator>
 
   <!--
-     - For clustered systems, create a password in place of "changeme"
-     - and uncomment the <resin-system-auth-key>.
-     -
-     - <resin-system-auth-key>changeme</resin-system-auth-key>
+     - For clustered systems, create a password in as system_key
     -->
+  <resin-system-auth-key>${system_key}</resin-system-auth-key>
 
   <!--
      - For production sites, change dependency-check-interval to something
@@ -56,8 +53,8 @@
   <dependency-check-interval>2s</dependency-check-interval>
 
   <!-- Java system-properties -->
-  <system-property mail.smtp.host="127.0.0.1"/>
-  <system-property mail.smtp.port="25"/>
+  <system-property mail.smtp.host="${smtp_host?:'127.0.0.1'}"/>
+  <system-property mail.smtp.port="${smtp_port?:25}"/>
 
   <!--
      - default configuration applied to all clusters
@@ -74,7 +71,9 @@
     <resin:import path="classpath:META-INF/caucho/app-default.xml"/>
 
     <!-- enables development error pages -->
-    <development-mode-error-page/>
+    <resin:if test="${rvar('dev_mode')}">
+      <development-mode-error-page/>
+    </resin:if>
 
     <!--
        - Enables the proxy cache (available in Resin Professional) 
@@ -113,7 +112,7 @@
         <report>Summary</report>
         <period>7D</period>
         <snapshot/>
-        <!-- <mail-to>nobody@example.com</mail-to> -->
+        <mail-to>${rvar('email')}</mail-to>
         <!-- <profile-time>60s</profile-time> -->
         <health:IfCron value="0 0 * * 0"/>
       </health:PdfReport>
@@ -122,10 +121,101 @@
         <path>${resin.root}/doc/admin/pdf-gen.php</path>
         <report>Restart</report>
         <period>2h</period>
-        <!-- <mail-to>nobody@example.com</mail-to> -->
+        <mail-to>${rvar('email')}</mail-to>
         <health:OnRestart/>
       </health:PdfReport>
     </resin:if>
+
+    <!-- defaults for each server, i.e. JVM -->
+    <server-default>
+      <jvm-arg-line>${rvar('jvm_args')}</jvm-arg-line>
+
+      <!--
+         - If starting Resin as root on Unix, specify the user name
+         - and group name for the web server user.
+       -->
+      <user-name>${rvar('setuid_user')}</user-name>
+      <group-name>${rvar('setuid_group')}</group-name>
+
+      <!-- The http port -->
+      <http address="*" port="${rvar('http')}"/>
+
+      <!-- SSL port configuration: -->
+      <resin:choose>
+      <resin:when test="${rvar('openssl_file')}">
+        <http port="${rvar('https')}">
+          <openssl>
+            <certificate-file>${rvar('openssl_file')}</certificate-file>
+            <certificate-key-file>${rvar('openssl_key')}</certificate-key-file>
+            <password>${rvar('openssl_password')}</password>
+          </openssl>
+        </http>
+      </resin:when>
+      <resin:when test="class_exists('sun.X509Certificate')">
+        <http address="*" port="${rvar('https')}">
+          <jsse-ssl self-signed-certificate-name="resin@localhost"/>
+        </http>
+      </resin:when>
+      </resin:choose>
+    </server-default>
+
+    <!--
+       - Default host configuration applied to all virtual hosts.
+      -->
+    <host-default>
+      <access-log path="log/access.log" 
+                 format='%h %l %u %t "%r" %s %b "%{Referer}i" "%{User-Agent}i"'
+                 rollover-period="1W"/>
+
+      <!--
+         - Defaults applied to each web-app.
+        -->
+      <web-app-default>
+        <prologue>
+          <allow-servlet-el/>
+        </prologue>
+     
+        <!--
+           - Sets max-age for cacheable pages, e.g. static pages.
+          -->
+        <resin:if test="${resin.professional}">
+          <cache-mapping url-pattern="/" max-age="5s"/>
+          <cache-mapping url-pattern="*.gif" max-age="60s"/>
+          <cache-mapping url-pattern="*.jpg" max-age="60s"/>
+          <cache-mapping url-pattern="*.png" max-age="60s"/>
+          <cache-mapping url-pattern="*.css" max-age="60s"/>
+          <cache-mapping url-pattern="*.js" max-age="60s"/>
+         </resin:if>
+      </web-app-default>
+      
+      <!--
+         - Administration application /resin-admin
+        -->
+      <resin:if test="${! rvar('admin_disable')}">
+        <web-app id="/resin-admin" root-directory="${resin.root}/doc/admin">
+          <prologue>
+            <!-- only allow access from internal IP (10.*,192.168.*,127.*) -->
+            <resin:set var="resin_admin_external" value="false"/>
+            <resin:set var="resin_admin_insecure" value="true"/>
+          </prologue>
+        </web-app>
+      </resin:if>
+    </host-default>
+  </cluster-default>
+
+  <!--
+     - Configures the main appliction cluster.  Load-balancing configurations
+     - will also have a load-balance-tier cluster.
+    -->
+  <cluster id="app_tier">
+    <!-- sets the content root for the cluster, relative to resin.root -->
+    <root-directory>.</root-directory>
+
+    <!-- define the servers in the cluster -->
+    <server-multi id-prefix="app-" address-list="${app_tier}" port="6800"/>
+
+    <!-- include resources config files in resources/ -->
+    <resin:import fileset="resources/**/*.xml"/>
 
     <!--
        - Default host configuration applied to all virtual hosts.
@@ -150,59 +240,13 @@
         <session-config>
 	  <!--
 	     - enable persistent sessions
-             - <use-persistent-store/>
 	    -->
+          <use-persistent-store>${rvar('session_store')}</use-persistent-store>
+          
           <enable-url-rewriting>false</enable-url-rewriting>
         </session-config>
-     
-        <!--
-           - Sets max-age for cacheable pages, e.g. static pages.
-          -->
-        <resin:if test="${resin.professional}">
-          <cache-mapping url-pattern="/" max-age="5s"/>
-          <cache-mapping url-pattern="*.gif" max-age="60s"/>
-          <cache-mapping url-pattern="*.jpg" max-age="60s"/>
-          <cache-mapping url-pattern="*.png" max-age="60s"/>
-          <cache-mapping url-pattern="*.css" max-age="60s"/>
-          <cache-mapping url-pattern="*.js" max-age="60s"/>
-         </resin:if>
       </web-app-default>
     </host-default>
-  </cluster-default>
-
-  <!--
-     - Configures the main appliction cluster.  Load-balancing configurations
-     - will also have a load-balance-tier cluster.
-    -->
-  <cluster id="app-tier">
-    <!-- sets the content root for the cluster, relative to resin.root -->
-    <root-directory>.</root-directory>
-
-    <!-- defaults for each server, i.e. JVM -->
-    <server-default>
-      <!-- The http port -->
-      <http address="*" port="${app_tier_http}"/>
-
-      <!-- SSL port configuration: -->
-      <http address="*" port="@HTTPS_PORT@">
-        <jsse-ssl self-signed-certificate-name="resin@localhost"/>
-      </http>
-
-      <!--
-         - <jvm-arg>-Xmx512m</jvm-arg>
-         - <jvm-arg>-agentlib:resin</jvm-arg>
-        -->
-
-      <!--
-         - If starting Resin as root on Unix, specify the user name
-         - and group name for the web server user.
-        -->
-       <user-name>${setuid_user}</user-name>
-       <group-name>${setuid_group}</group-name>
-    </server-default>
-
-    <!-- define the servers in the cluster -->
-    <server-multi id-prefix="app-" address-list="${app_tier}" port="6800"/>
 
     <!-- the default host, matching any host name -->
     <host id="" root-directory=".">
@@ -211,29 +255,36 @@
          - webapp's ROOT
         -->
       <web-app id="/" root-directory="webapps/ROOT"/>
-      
-      <!--
-         - Administration application /resin-admin
-        -->
-      <web-app id="/resin-admin" root-directory="${resin.root}/doc/admin">
-        <prologue>
-          <!-- only allow access from internal IP (10.*,192.168.*,127.*) -->
-          <resin:set var="resin_admin_external" value="false"/>
-          <resin:set var="resin_admin_insecure" value="true"/>
-        </prologue>
-      </web-app>
 
       <!--
 	 - Resin documentation - remove for a live site
 	-->
       <web-app id="/resin-doc" root-directory="${resin.root}/doc/resin-doc"/>
-
-      <!--
-	 - <resin:LoadBalance regexp="^/load" cluster="backend-tier"/>
-	 - <resin:HttpProxy regexp="^/http" address="localhost:9000"/>
-	 - <resin:FastCgiProxy regexp="^/fcgi" address="localhost:9001"/>
-	-->
     </host>
+  </cluster>
+
+  <cluster id="web_tier">
+    <!-- define the servers in the cluster -->
+    <server-multi id-prefix="web-" address-list="${web_tier}" port="6800"/>
+
+    <host id="">
+      <web-app id="">
+        <resin:LoadBalance regexp="" cluster="app_tier"/>
+      </web-app>
+    </host>
+  </cluster>
+
+  <cluster id="memcache_tier">
+    <!-- define the servers in the cluster -->
+    <server-multi id-prefix="memcache-"
+                  address-list="${memcache_tier}"
+                  port="6810">
+      <!-- listen for the memcache protocol -->
+      <listen port="${rdev('memcache_port')?:11212"
+              keepalive-timeout="600s" socket-timeout="600s">
+        <memcache:MemcacheProtocol/>
+      </listen>
+    </server-multi>
   </cluster>
 </resin>
 

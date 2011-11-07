@@ -151,7 +151,8 @@ public class PdfReportAction implements AdminAction
   
   public void setMailTo(String mailTo)
   {
-    _mailTo = mailTo;
+    if (! "".equals(mailTo))
+      _mailTo = mailTo;
   }
   
   private String calculateReport()

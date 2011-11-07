@@ -102,6 +102,7 @@ import com.caucho.server.distcache.CacheStoreManager;
 import com.caucho.server.distcache.DistCacheSystem;
 import com.caucho.server.resin.ResinArgs.BoundPort;
 import com.caucho.server.webbeans.ResinCdiProducer;
+import com.caucho.server.webbeans.ResinServerConfigLibrary;
 import com.caucho.util.Alarm;
 import com.caucho.util.CompileException;
 import com.caucho.util.L10N;
@@ -520,6 +521,8 @@ public class Resin
       Config.setProperty("java", new JavaVar());
       Config.setProperty("system", System.getProperties());
       Config.setProperty("getenv", System.getenv());
+      // server/4342
+      Config.setProperty("server_id", getServerId());
 
       // _management = createResinManagement();
 
@@ -527,6 +530,7 @@ public class Resin
         Config.setProperty("fmt", new FmtFunctions());
 
         ResinConfigLibrary.configure(cdiManager);
+        ResinServerConfigLibrary.configure(cdiManager);
 
         try {
           Method method = Jndi.class.getMethod("lookup", new Class[] { String.class });
@@ -646,12 +650,13 @@ public class Resin
    */
   public void setServerId(String serverId)
   {
-    if ("".equals(serverId))
+    if (serverId == null || "".equals(serverId))
       serverId = "default";
     
     //Config.setProperty("serverId", serverId);
     ClassLoader classLoader = ClassLoader.getSystemClassLoader();
     Config.setProperty("serverId", serverId, classLoader);
+    Config.setProperty("server_id", serverId, classLoader);
 
     _serverId = serverId;
     _serverIdLocal.set(serverId);
@@ -1312,9 +1317,13 @@ public class Resin
         clusterConfig.setId(clusterId);
         clusterConfig.init();
       }
+      else if (serverId != null) {
+        throw new ConfigException(L().l("'{0}' is an unknown server in the configuration file.",
+                                        serverId));
+      }
       else {
-        throw new ConfigException(L().l("'{0}' is an unknown cluster in the configuration file.",
-                                        clusterId));
+          throw new ConfigException(L().l("'{0}' is an unknown cluster in the configuration file.",
+                                          clusterId));
       }
       
       /*

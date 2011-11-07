@@ -1,10 +1,11 @@
 log_level     : info
+dev_mode      : true
 
 app_tier      : 127.0.0.1
-app_tier_http : @HTTP_PORT@
-
 web_tier      :
-web_tier_http : @HTTP_PORT@
+
+http          : @HTTP_PORT@
+https         : @HTTPS_PORT@
 
 setuid_user   : @SETUID_USER@
 setuid_group  : @SETUID_GROUP@

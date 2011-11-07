@@ -47,6 +47,7 @@ import com.caucho.env.shutdown.ExitCode;
 import com.caucho.loader.Environment;
 import com.caucho.loader.LibraryLoader;
 import com.caucho.server.resin.ResinELContext;
+import com.caucho.server.webbeans.ResinServerConfigLibrary;
 import com.caucho.util.L10N;
 import com.caucho.vfs.MemoryPath;
 import com.caucho.vfs.NullPath;
@@ -168,8 +169,11 @@ public class ResinBoot
     Config.setProperty("server", elContext.getServerVar());
     Config.setProperty("system", System.getProperties());
     Config.setProperty("getenv", System.getenv());
+    // server/4342
+    Config.setProperty("server_id", _args.getServerId());
 
     ResinConfigLibrary.configure(beanManager);
+    ResinServerConfigLibrary.configure(beanManager);
 
     config.configure(_resinConfig, _args.getResinConf(),
                      "com/caucho/server/resin/resin.rnc");

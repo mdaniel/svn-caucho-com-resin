@@ -48,6 +48,7 @@ public class HttpProtocol extends AbstractHttpProtocol {
  /**
    * Create a HttpRequest object for the new thread.
    */
+  @Override
   public ProtocolConnection createConnection(SocketLink conn)
   {
     return new HttpRequest(getServer(), conn);

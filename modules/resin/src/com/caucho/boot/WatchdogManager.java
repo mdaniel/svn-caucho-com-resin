@@ -69,6 +69,7 @@ import com.caucho.server.http.HttpProtocol;
 import com.caucho.server.resin.Resin;
 import com.caucho.server.resin.ResinELContext;
 import com.caucho.server.util.JniCauchoSystem;
+import com.caucho.server.webbeans.ResinServerConfigLibrary;
 import com.caucho.util.Alarm;
 import com.caucho.util.AlarmListener;
 import com.caucho.util.L10N;
@@ -172,6 +173,7 @@ class WatchdogManager implements AlarmListener {
     Config.setProperty("getenv", System.getenv());
 
     ResinConfigLibrary.configure(cdiManager);
+    ResinServerConfigLibrary.configure(cdiManager);
 
     _watchdogPort = _args.getWatchdogPort();
     

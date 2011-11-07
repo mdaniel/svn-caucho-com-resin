@@ -27,67 +27,76 @@
  * @author Scott Ferguson
  */
 
-package com.caucho.config.lib;
+package com.caucho.server.webbeans;
 
 import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
-import javax.management.MalformedObjectNameException;
-import javax.management.ObjectName;
-
+import com.caucho.cloud.network.NetworkClusterSystem;
+import com.caucho.cloud.topology.CloudServer;
 import com.caucho.config.Config;
 import com.caucho.config.inject.InjectManager;
-import com.caucho.jmx.Jmx;
-import com.caucho.naming.Jndi;
+import com.caucho.env.service.ResinSystem;
 
 /**
  * Library of static config functions.
  */
-public class ResinConfigLibrary {
-  private static Logger _log;
+public class ResinServerConfigLibrary {
+  private static final Logger log
+    = Logger.getLogger(ResinServerConfigLibrary.class.getName());
   
-  public static boolean class_exists(String className)
+  public static Object rvar(String name)
   {
-    try {
-      Thread thread = Thread.currentThread();
-      ClassLoader loader = thread.getContextClassLoader();
+    Object value = null;
+    
+    ResinSystem resinSystem = ResinSystem.getCurrent();
+    
+    if (resinSystem != null) {
+      value = Config.getProperty(name + "." + resinSystem.getId());
       
-      Class<?> cl = Class.forName(className, false, loader);
-
-      return cl != null;
-    } catch (Throwable e) {
-      log().log(Level.FINEST, e.toString(), e);
+      if (value != null)
+        return value;
     }
-
-    return false;
-  }
-  
-  public static Object jndi(String jndiName)
-  {
-    return jndi_lookup(jndiName);
-  }
-  
-  public static Object jndi_lookup(String jndiName)
-  {
-    return Jndi.lookup(jndiName);
-  }
-  
-  public static ObjectName mbean(String name)
-  {
-    try {
-      return Jmx.getObjectName(name);
-    } catch (MalformedObjectNameException e) {
-      log().log(Level.FINEST, e.toString(), e);
-      return null;
+    
+    String serverId = (String) Config.getProperty("server_id");
+    if (serverId != null) {
+      value = Config.getProperty(name + "." + serverId);
+      
+      if (value != null)
+        return value;
     }
+    
+    NetworkClusterSystem networkSystem = NetworkClusterSystem.getCurrent();
+    
+    CloudServer selfServer = null;
+    
+    if (networkSystem != null)
+      selfServer = networkSystem.getSelfServer();
+    
+    if (selfServer != null) {
+      value = Config.getProperty(name + "." + selfServer.getId());
+      
+      if (value != null)
+        return value;
+      
+      value = Config.getProperty(name + "." + selfServer.getCluster().getId());
+      
+      if (value != null)
+        return value;
+    }
+    
+    
+    return Config.getProperty(name);
   }
   
   public static void configure(InjectManager webBeans)
   {
     try {
-      for (Method m : ResinConfigLibrary.class.getMethods()) {
+      ClassLoader loader = ClassLoader.getSystemClassLoader();
+      
+      for (Method m : ResinServerConfigLibrary.class.getMethods()) {
         if (! Modifier.isStatic(m.getModifiers()))
           continue;
         if (! Modifier.isPublic(m.getModifiers()))
@@ -98,18 +107,10 @@ public class ResinConfigLibrary {
         //BeanFactory factory = webBeans.createBeanFactory(m.getClass());
 
         // webBeans.addBean(factory.name(m.getName()).singleton(m));
-        Config.setProperty(m.getName(), m);
+        Config.setProperty(m.getName(), m, loader);
       }
     } catch (Exception e) {
-      log().log(Level.FINE, e.toString(), e);
+      log.log(Level.FINE, e.toString(), e);
     }
-  }
-
-  private static Logger log()
-  {
-    if (_log == null)
-      _log = Logger.getLogger(ResinConfigLibrary.class.getName());
-
-    return _log;
   }
 }
