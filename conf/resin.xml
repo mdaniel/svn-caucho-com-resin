@@ -7,14 +7,16 @@
 <resin xmlns="http://caucho.com/ns/resin"
        xmlns:resin="urn:java:com.caucho.resin"
        xmlns:health="urn:java:com.caucho.health">
-
-  <resin:properties path="${__DIR__}/resin.properties" optional="true"/>
   
-  <!--
-     - Logging configuration for the JDK logging API.
-    -->
+  <!-- Logging configuration for the JDK logging API. -->
   <log-handler name="" level="all" path="stdout:"
                timestamp="[%y-%m-%d %H:%M:%S.%s] {%{thread}} "/>
+
+  <!-- property-based Resin configuration -->
+  <resin:properties path="${__DIR__}/resin.properties" optional="true"/>
+
+  <!-- local configuration files -->
+  <resin:import fileset="${__DIR__}/local.d/*.xml"/>
 
   <!--
      - level='info' for production
@@ -151,8 +153,8 @@
           </openssl>
         </http>
       </resin:when>
-      <resin:when test="class_exists('sun.X509Certificate')">
-        <http port="${rvar('https')}">
+      <resin:when test="${class_exists('sun.security.x509.CertAndKeyGen')}">
+        <http address="*" port="${rvar('https')}">
           <jsse-ssl self-signed-certificate-name="resin@localhost"/>
         </http>
       </resin:when>

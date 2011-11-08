@@ -44,6 +44,9 @@ import java.util.logging.Logger;
 import javax.net.ssl.KeyManager;
 import javax.net.ssl.KeyManagerFactory;
 
+import com.caucho.config.ConfigException;
+import com.caucho.util.L10N;
+
 import sun.security.x509.CertAndKeyGen;
 import sun.security.x509.X500Name;
 
@@ -51,6 +54,7 @@ import sun.security.x509.X500Name;
  * Abstract socket to handle both normal sockets and bin/resin sockets.
  */
 public class SelfSignedCert implements Serializable {
+  private static final L10N L = new L10N(SelfSignedCert.class);
   private static final Logger log
     = Logger.getLogger(SelfSignedCert.class.getName());
 
@@ -117,6 +121,10 @@ public class SelfSignedCert implements Serializable {
         = keypair.getSelfCertificate(x500name, days * 24 * 3600);
 
       return new SelfSignedCert(cert, privKey);
+    } catch (ClassNotFoundException e) {
+      throw ConfigException.create(L.l("SelfSigned certificates require Sun JDK\n  {0}",
+                                       e),
+                                   e);
     } catch (Exception e) {
       log.log(Level.FINE, e.toString(), e);
 

@@ -153,7 +153,7 @@
           </openssl>
         </http>
       </resin:when>
-      <resin:when test="${class_exists('sun.X509Certificate')}">
+      <resin:when test="${class_exists('sun.security.x509.CertAndKeyGen')}">
         <http address="*" port="${rvar('https')}">
           <jsse-ssl self-signed-certificate-name="resin@localhost"/>
         </http>

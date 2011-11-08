@@ -88,19 +88,11 @@ public class CacheGenerator<X> extends AbstractAspectGenerator<X> {
   {
     super.generateMethodPrologue(out, map);
     
-    if (map.get("caucho.candi.cachemanager") == null) {
-      map.put("caucho.candi.cachemanager", "done");
-
-      out.println();
-      out.println("private static final com.caucho.distcache.ClusterCacheManagerDelegate _cacheManager");
-      out.println("  = com.caucho.distcache.ClusterCacheManagerDelegate.create();");
-    }
-    
     _cacheInstance = "__caucho_cache_" + out.generateId();
     
     out.println();
     out.println("private static final javax.cache.Cache " + _cacheInstance);
-    out.print("  = _cacheManager.getCache(\"");
+    out.print("  = com.caucho.config.util.CacheUtil.getCache(\"");
     out.printJavaString(_cacheName);
     out.print("\");");
   }
