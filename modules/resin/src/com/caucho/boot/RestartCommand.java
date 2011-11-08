@@ -59,8 +59,8 @@ public class RestartCommand extends AbstractStartCommand
     try {
       String id = args.getServerId();
       
-      if (id == null)
-        id = _client.getId();
+//      if (id == null)
+//        id = _client.getId();
       
       _client.restartWatchdog(id, args.getArgv());
 
