@@ -250,6 +250,19 @@ public class CacheImpl
   }
 
   /**
+   * Returns the object with the given key always checking the backing
+   * store .
+   */
+  public Object getExact(Object key)
+  {
+    DistCacheEntry entry = getDistCacheEntry(key);
+    
+    Object value = entry.getExact(_config);
+    
+    return value;
+  }
+
+  /**
    * Returns the object with the given key, updating the backing
    * store if necessary.
    */

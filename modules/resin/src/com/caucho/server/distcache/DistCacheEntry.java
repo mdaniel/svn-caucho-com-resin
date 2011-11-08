@@ -173,6 +173,17 @@ public class DistCacheEntry implements ExtCacheEntry {
   }
 
   /**
+   * Returns the object for the given key, checking the backing if necessary.
+   * If it is not found, the optional cacheLoader is invoked, if present.
+   */
+  public Object getExact(CacheConfig config)
+  {
+    long now = Alarm.getCurrentTime();
+
+    return _cacheService.getExact(this, config, now);
+  }
+
+  /**
    * Returns the object for the given key, checking the backing if necessary
    */
   public MnodeEntry getMnodeValue(CacheConfig config)

@@ -175,7 +175,8 @@ abstract public class AbstractCauchoRequest implements CauchoRequest {
    * Returns the form primary value for the given name.
    */
   @Override
-  public String getParameter(String name) {
+  public String getParameter(String name) 
+  {
     return getParameterImpl(name);
   }
 

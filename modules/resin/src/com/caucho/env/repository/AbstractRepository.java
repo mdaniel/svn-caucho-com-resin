@@ -100,8 +100,16 @@ abstract public class AbstractRepository implements Repository, RepositorySpi
   /**
    * Updates the repository
    */
+  public final void checkForUpdate()
+  {
+    checkForUpdate(false);
+  }
+
+  /**
+   * Updates the repository
+   */
   @Override
-  public void checkForUpdate()
+  public void checkForUpdate(boolean isExact)
   {
     loadLocalRoot();
   }

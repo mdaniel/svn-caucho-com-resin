@@ -12,6 +12,7 @@
 
 <s2 title="4.0.24 - snapshot">
 <ul>
+<li>config: added rvar() method to properties-based config</li>
 <li>access-log: use Alarm.getExactTime() for '%D' formatting in access log (#4842, rep by William Au)</li>
 <li>servlet: transport constraint priority(#4843, rep by Keith Fetterman)</li>
 <li>ssl: jsse self-signed certificates are only possible with Sun/Oracle JDK (#4829)</li>

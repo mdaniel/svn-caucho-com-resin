@@ -76,7 +76,10 @@ public class ListJmxAction extends AbstractJmxAction implements AdminAction
       nameQuery = ObjectName.getInstance("resin:*");
 
     for (final MBeanServer server : servers) {
-      Set<ObjectName> mbeans = server.queryNames(nameQuery, null);
+      Set<ObjectName> mbeanSet = server.queryNames(nameQuery, null);
+      
+      ArrayList<ObjectName> mbeans = new ArrayList<ObjectName>(mbeanSet);
+      Collections.sort(mbeans);
 
       for (final ObjectName mbean : mbeans) {
         if (beans.contains(mbean))

@@ -40,6 +40,8 @@ public interface ObjectCache<K,V> extends Cache<K,V>
    * Returns the extended entry
    */
   public ExtCacheEntry<K,V> getExtCacheEntry(K key);
+  
+  public V getExact(K key);
 
   /**
    * Updates the cache if the old value hash matches the current value.

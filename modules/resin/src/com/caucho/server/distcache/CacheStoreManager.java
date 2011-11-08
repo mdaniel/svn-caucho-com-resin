@@ -195,7 +195,22 @@ public final class CacheStoreManager
                           CacheConfig config,
                           long now)
   {
-    MnodeEntry mnodeValue = getMnodeValue(entry, config, now);//, isLazy);
+    return get(entry, config, now, false);
+  }
+
+  final public Object getExact(DistCacheEntry entry,
+                               CacheConfig config,
+                               long now)
+  {
+    return get(entry, config, now, true);
+  }
+
+  final public Object get(DistCacheEntry entry,
+                          CacheConfig config,
+                          long now,
+                          boolean isExact)
+    {
+    MnodeEntry mnodeValue = getMnodeValue(entry, config, now, isExact);
 
     if (mnodeValue == null)
       return null;
@@ -265,14 +280,22 @@ public final class CacheStoreManager
   final public MnodeEntry getMnodeValue(DistCacheEntry entry,
                                         CacheConfig config,
                                         long now)
-                                        // boolean isLazy)
+  {
+    return getMnodeValue(entry, config, now, false);
+  }
+
+  final public MnodeEntry getMnodeValue(DistCacheEntry entry,
+                                        CacheConfig config,
+                                        long now,
+                                        boolean isExact)
   {
     MnodeEntry mnodeValue = loadMnodeValue(entry);
 
     if (mnodeValue == null) {
       reloadValue(entry, config, now);
     }
-    else if (! isLocalExpired(config, entry.getKeyHash(), mnodeValue, now)) {
+    else if (! isExact 
+             && ! isLocalExpired(config, entry.getKeyHash(), mnodeValue, now)) {
     }
     else { // if (! isLazy) {
       reloadValue(entry, config, now);

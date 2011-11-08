@@ -406,6 +406,16 @@ public class AbstractCache
   }
 
   /**
+   * Returns the object with the given key, checking the backing
+   * store if necessary.
+   */
+  @Override
+  public Object getExact(Object key)
+  {
+    return _delegate.getExact(key);
+  }
+
+  /**
    * Fills an output stream with the value for a key.
    */
   @Override

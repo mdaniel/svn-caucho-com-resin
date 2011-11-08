@@ -1123,6 +1123,8 @@ public final class SessionManager implements SessionCookieConfig, AlarmListener
       
       cacheBuilder.setAccessedExpireTimeoutMillis(_sessionTimeout);
       cacheBuilder.setLeaseExpireTimeoutMillis(5 * 60 * 1000);
+      // server/0b12
+      cacheBuilder.setLocalExpireTimeoutMillis(100);
 
       _sessionStore = cacheBuilder.createIfAbsent();
     }

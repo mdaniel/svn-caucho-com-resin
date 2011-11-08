@@ -288,6 +288,9 @@ public final class MnodeEntry extends MnodeValue implements ExtCacheEntry {
       _leaseOwner = -1;
 
       _leaseExpireTime = 0;
+      
+      // server/0b10
+      _lastAccessTime = 0;
     }
   }
 

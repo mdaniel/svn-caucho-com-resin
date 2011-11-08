@@ -190,7 +190,7 @@ public interface RepositorySpi
   /**
    * Updates the repository, checking for any changes across the cluster.
    */
-  public void checkForUpdate();
+  public void checkForUpdate(boolean isExact);
   
   /**
    * Returns the current read-only tag map.
