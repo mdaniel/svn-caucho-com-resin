@@ -208,7 +208,8 @@ public class StubServletRequest implements CauchoRequest {
 
   public AbstractHttpRequest getAbstractHttpRequest()
   {
-    throw new UnsupportedOperationException(getClass().getName());
+    // throw new UnsupportedOperationException(getClass().getName());
+    return null;
   }
   
   public ServletRequest getRequest()

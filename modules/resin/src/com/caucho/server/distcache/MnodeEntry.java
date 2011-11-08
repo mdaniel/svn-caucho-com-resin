@@ -123,7 +123,7 @@ public final class MnodeEntry extends MnodeValue implements ExtCacheEntry {
   }
 
   public MnodeEntry(MnodeEntry oldMnodeValue,
-                    long idleTimeout,
+                    long accessTimeout,
                     long lastUpdateTime)
   {
     super(oldMnodeValue.getValueHash(),
@@ -131,8 +131,8 @@ public final class MnodeEntry extends MnodeValue implements ExtCacheEntry {
           oldMnodeValue.getVersion(),
           oldMnodeValue.getCacheHash(),
           oldMnodeValue.getFlags(),
-          oldMnodeValue.getModifiedExpireTimeout(),
-          idleTimeout);
+          accessTimeout,
+          oldMnodeValue.getModifiedExpireTimeout());
     
     _leaseTimeout = oldMnodeValue.getLeaseTimeout();
     

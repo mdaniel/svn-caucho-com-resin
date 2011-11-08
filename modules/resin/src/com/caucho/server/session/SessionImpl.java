@@ -848,7 +848,7 @@ public class SessionImpl implements HttpSession, CacheListener {
 
       _cacheEntry = _manager.getCache().put(_id, os.getInputStream(),
                                             _idleTimeout,
-                                            _idleTimeout);
+                                            -1);
 
       if (log.isLoggable(Level.FINE)) {
         log.fine(this + " session save valueHash="

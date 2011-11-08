@@ -266,7 +266,12 @@ abstract public class AbstractCauchoRequest implements CauchoRequest {
       if (query == null)
         return;
 
-      Form formParser = request.getFormParser();
+      Form formParser;
+      
+      if (request != null)
+        formParser = request.getFormParser();
+      else
+        formParser = new Form();
 
       String charEncoding = getCharacterEncoding();
       if (charEncoding == null) {
@@ -299,6 +304,9 @@ abstract public class AbstractCauchoRequest implements CauchoRequest {
   protected void parsePostQueryImpl(HashMapImpl<String,String[]> form)
   {
     AbstractHttpRequest request = getAbstractHttpRequest();
+    
+    if (request == null)
+      return;
 
     try {
       CharSegment contentType = request.getContentTypeBuffer();

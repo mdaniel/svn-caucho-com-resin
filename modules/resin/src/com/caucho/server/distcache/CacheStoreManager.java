@@ -479,8 +479,8 @@ public final class CacheStoreManager
                                               newVersion,
                                               HashKey.getHash(config.getCacheKey()),
                                               flags,
-                                              modifiedExpireTime,
-                                              accessedExpireTime);
+                                              accessedExpireTime,
+                                              modifiedExpireTime);
 
     // add 25% window for update efficiency
     // idleTimeout = idleTimeout * 5L / 4;
@@ -855,7 +855,7 @@ public final class CacheStoreManager
    */
   public final void saveLocalUpdateTime(HashKey key,
                                         long version,
-                                        long idleTimeout,
+                                        long accessTimeout,
                                         long updateTime)
   {
     DistCacheEntry entry = _entryCache.get(key);
@@ -869,7 +869,7 @@ public final class CacheStoreManager
       return;
 
     MnodeEntry mnodeValue
-      = new MnodeEntry(oldEntryValue, idleTimeout, updateTime);
+      = new MnodeEntry(oldEntryValue, accessTimeout, updateTime);
 
     saveLocalUpdateTime(entry, mnodeValue);
   }
