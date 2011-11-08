@@ -32,8 +32,10 @@ package com.caucho.server.webapp;
 import com.caucho.inject.Module;
 import com.caucho.server.dispatch.Invocation;
 import com.caucho.server.http.CauchoRequestWrapper;
+import com.caucho.server.http.Form;
 import com.caucho.util.HashMapImpl;
 import com.caucho.util.IntMap;
+import com.caucho.vfs.Encoding;
 
 import javax.servlet.DispatcherType;
 import javax.servlet.RequestDispatcher;
@@ -300,8 +302,33 @@ public class IncludeRequest extends CauchoRequestWrapper {
     map = getRequest().getParameterMap();
 
     mergeParameters(map, form);
+    
+    return form;
 
-    /**
+    /*
+    String javaEncoding = Encoding.getJavaName(getCharacterEncoding());
+
+    HashMapImpl<String,String[]> form = new HashMapImpl<String,String[]>();
+    Form formParser = Form.allocate();
+
+    try {
+      String queryString = _invocation.getQueryString();
+      
+      if (queryString != null) {
+        formParser.parseQueryString(form, queryString, javaEncoding, false);
+      }
+    } catch (Exception e) {
+      throw new RuntimeException(e);
+    }
+
+    return form;
+    */
+  }
+
+  @Override
+  protected void parseGetQueryImpl(HashMapImpl<String,String[]> form)
+  {
+    // server/053n
     String javaEncoding = Encoding.getJavaName(getCharacterEncoding());
 
     Form formParser = Form.allocate();
@@ -315,8 +342,6 @@ public class IncludeRequest extends CauchoRequestWrapper {
     } catch (Exception e) {
       throw new RuntimeException(e);
     }
-   */
-    return form;
   }
 
   @Override
