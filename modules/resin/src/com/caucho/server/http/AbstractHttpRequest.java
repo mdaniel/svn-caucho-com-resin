@@ -1694,7 +1694,7 @@ public abstract class AbstractHttpRequest
   protected void startInvocation()
     throws IOException
   {
-    _startTime = Alarm.getCurrentTime();
+    _startTime = Alarm.getExactTime();
     
     TcpSocketLink tcpConn = _tcpConn;
     
