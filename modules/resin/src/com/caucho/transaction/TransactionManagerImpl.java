@@ -369,7 +369,7 @@ public class TransactionManagerImpl
         boolean isValid = false;
 
         try {
-          xaRes.rollback(xidImpl);
+          xaRes.rollback(xids[i]);
           isValid = true;
           // #4748
           // xaRes.forget(xidImpl);
@@ -380,7 +380,7 @@ public class TransactionManagerImpl
         if (! isValid) {
           try {
             // #4748
-            xaRes.forget(xidImpl);
+            xaRes.forget(xids[i]);
             isValid = true;
           } catch (Throwable e) {
             log.log(Level.FINER, e.toString(), e);
