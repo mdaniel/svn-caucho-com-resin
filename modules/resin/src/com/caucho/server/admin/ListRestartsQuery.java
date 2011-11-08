@@ -33,6 +33,11 @@ package com.caucho.server.admin;
 public class ListRestartsQuery implements java.io.Serializable
 {
   private long _timeBackSpan;
+  
+  @SuppressWarnings("unused")
+  private ListRestartsQuery()
+  {
+  }
 
   public ListRestartsQuery(long timeBackSpan)
   {

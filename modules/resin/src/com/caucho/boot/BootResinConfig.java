@@ -254,6 +254,14 @@ public class BootResinConfig implements EnvironmentBean
     if (clientList.size() == 1)
       return clientList.get(0);
 
+    System.out.println("SL: " + serverId + " " + clientList);
+    Thread.dumpStack();
+    /*
+    // server/6e10
+    if (args.isDynamicServer())
+      return null;
+      */
+
     if (client == null && _args.isShutdown()) {
       client = findShutdownClient(_args.getClusterId());
     }
@@ -264,7 +272,8 @@ public class BootResinConfig implements EnvironmentBean
 
     if (client == null) {
       throw new ConfigException(L.l("Resin/{0}: default server cannot find a unique <server> or <server-multi>\nin {2}.",
-                                    VersionFactory.getVersion(), _args.getServerId(), _args.getResinConf()));
+                                    VersionFactory.getVersion(), 
+                                    _args.getServerId(), _args.getResinConf()));
     }
     
     return client;

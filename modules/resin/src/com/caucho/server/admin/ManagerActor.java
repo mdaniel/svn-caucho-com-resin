@@ -417,13 +417,13 @@ public class ManagerActor extends SimpleActor
       Date since = new Date(now - query.getTimeBackSpan());
 
       if (restartTimes.length == 0) {
-        result = L.l("Server `{0}' hasn't restarted since `{1}'",
+        result = L.l("Server '{0}' hasn't restarted since '{1}'",
                      cloudServer,
                      since);
       }
       else if (restartTimes.length == 1) {
         StringBuilder resultBuilder = new StringBuilder(L.l(
-          "Server started 1 time since `{0}'", since));
+          "Server started 1 time since '{0}'", since));
 
         resultBuilder.append("\n  ");
         resultBuilder.append(new Date(restartTimes[0]));
@@ -433,7 +433,7 @@ public class ManagerActor extends SimpleActor
       }
       else {
         StringBuilder resultBuilder = new StringBuilder(L.l(
-          "Server restarted `{0}' times since `{1}'",
+          "Server restarted {0} times since '{1}'",
           restartTimes.length,
           since));
 

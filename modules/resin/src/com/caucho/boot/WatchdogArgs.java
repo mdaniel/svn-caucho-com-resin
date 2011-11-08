@@ -151,6 +151,12 @@ class WatchdogArgs
   {
     return _serverId;
   }
+  
+  void setDynamicServerId(String serverId)
+  {
+    if (serverId != null)
+      _serverId = serverId;
+  }
 
   String getClusterId()
   {
@@ -198,7 +204,7 @@ class WatchdogArgs
     if (_serverId != null)
       return _serverId;
     else
-      return "dyn-" + getDynamicAddress() + "-" + getDynamicPort();
+      return "dyn-" + getDynamicAddress() + ":" + getDynamicPort();
   }
 
   boolean isVerbose()

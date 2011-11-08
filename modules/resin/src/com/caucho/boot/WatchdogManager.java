@@ -618,7 +618,8 @@ class WatchdogManager implements AlarmListener {
     }
 
     watchdog = new WatchdogChild(_system, serverConfig);
-
+    System.out.println("PUT: " + serverId);
+    Thread.dumpStack();
     _watchdogMap.put(serverId, watchdog);
 
     return watchdog;

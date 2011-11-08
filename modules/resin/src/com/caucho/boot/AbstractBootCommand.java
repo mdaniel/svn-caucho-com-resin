@@ -46,6 +46,7 @@ public abstract class AbstractBootCommand implements BootCommand {
     return "abstract-boot-command";
   }
   
+  @Override
   public int doCommand(ResinBoot boot, WatchdogArgs args)
   {
     WatchdogClient client = findClient(boot, args);

@@ -184,8 +184,12 @@ public class ResinBoot
   
   private void initClient()
   {
-    if (_args.isDynamicServer() || _resinConfig.isJoinCluster())
-      _resinConfig.addDynamicClient(_args);
+    if (_args.isDynamicServer() || _resinConfig.isJoinCluster()) {
+      WatchdogClient client = _resinConfig.addDynamicClient(_args);
+      
+      if (client != null)
+        _args.setDynamicServerId(client.getId());
+    }
   }
 
   WatchdogClient findClient(String serverId, WatchdogArgs args)
