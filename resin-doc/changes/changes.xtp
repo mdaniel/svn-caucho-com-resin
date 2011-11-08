@@ -12,6 +12,7 @@
 
 <s2 title="4.0.24 - snapshot">
 <ul>
+<li>servlet: transport constraint priority(#4843, rep by Keith Fetterman)</li>
 <li>ssl: jsse self-signed certificates are only possible with Sun/Oracle JDK (#4829)</li>
 <li>el: added "?:" operator ("x ?: 80" is "x != null ? x : 80")</li>
 <li>iis: add suport for windows authentiation(#4826, rep by Urs Kehrli)</li>

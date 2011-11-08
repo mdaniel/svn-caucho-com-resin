@@ -215,6 +215,8 @@ public class SecurityConstraint {
   @PostConstruct
   public void init()
   {
+    if (_containerConstraint != null)
+      _containerConstraint.init();
   }
 
   /**

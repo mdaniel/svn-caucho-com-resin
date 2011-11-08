@@ -41,6 +41,23 @@ public class ContainerConstraint extends AbstractConstraint {
   private ArrayList<AbstractConstraint> _constraints =
     new ArrayList<AbstractConstraint>();
 
+  public void init() {
+    ArrayList<AbstractConstraint> constraints
+      = new ArrayList<AbstractConstraint>(_constraints.size());
+
+    for (AbstractConstraint constraint : _constraints) {
+      if (constraint instanceof TransportConstraint)
+        constraints.add(constraint);
+    }
+
+    for (AbstractConstraint constraint : _constraints) {
+      if (! (constraint instanceof TransportConstraint))
+        constraints.add(constraint);
+    }
+
+    _constraints = constraints;
+  }
+
   /**
    * Adds a constraint.
    */
