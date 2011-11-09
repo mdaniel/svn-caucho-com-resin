@@ -1266,6 +1266,7 @@
         <!--
         <include name="admin-users.xml"/>
         -->
+        <include name="resin.xml"/>
         <include name="app-default.xml"/>
         <include name="health.xml"/>
       </fileset>
