@@ -12,6 +12,10 @@
 
 <s2 title="4.0.24 - snapshot">
 <ul>
+<li>quercus: isset returning true for null values in compiled mode (Wordpress fix) (#4477, rep by mhixson)</li>
+<li>health pdf: mailto config should be mail-to (rep by Keith Fetterman)</li>
+<li>security: custom constraints could not be added to resin:security-constraint (#4835, rep by K. Ding)</li>
+<li>cli: new "license-add" command</li>
 <li>config: added rvar() method to properties-based config</li>
 <li>access-log: use Alarm.getExactTime() for '%D' formatting in access log (#4842, rep by William Au)</li>
 <li>servlet: transport constraint priority(#4843, rep by Keith Fetterman)</li>
