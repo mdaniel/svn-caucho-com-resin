@@ -6,6 +6,7 @@
   -->
 <resin xmlns="http://caucho.com/ns/resin"
        xmlns:resin="urn:java:com.caucho.resin"
+       xmlns:memcache="urn:java:com.caucho.memcache"
        xmlns:health="urn:java:com.caucho.health">
   
   <!-- Logging configuration for the JDK logging API. -->
@@ -206,7 +207,7 @@
   </cluster-default>
 
   <!--
-     - Configures the main appliction cluster.  Load-balancing configurations
+     - Configures the main application cluster.  Load-balancing configurations
      - will also have a load-balance-tier cluster.
     -->
   <cluster id="app_tier">
@@ -282,7 +283,7 @@
                   address-list="${memcache_tier}"
                   port="6810">
       <!-- listen for the memcache protocol -->
-      <listen port="${rdev('memcache_port')?:11212"
+      <listen port="${rvar('memcache_port')?:11212}"
               keepalive-timeout="600s" socket-timeout="600s">
         <memcache:MemcacheProtocol/>
       </listen>
