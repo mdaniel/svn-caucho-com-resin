@@ -1299,7 +1299,22 @@
         <filter token="BASH" value="/bin/sh"/>
         <filter token="JAVA_HOME" value=""/>
         <filter token="JAVA_EXE" value="/usr/bin/java"/>
-        <filter token="resin_home" value="/usr/share/resin"/>
+        <filter token="resin_home" value="/usr/local/share/resin"/>
+        <filter token="resin_root" value="/var/www"/>
+        <filter token="resin_log" value="/var/log/resin"/>
+        <filter token="resin_conf" value="/etc/resin"/>
+      </filterset>
+    </copy>
+    
+    <copy tofile="dist-debian/usr/local/share/resin/bin/resinctl"
+          file="${resindir}/bin/resinctl.in"
+          preservelastmodified="true"
+          overwrite="true">
+      <filterset>
+        <filter token="BASH" value="/bin/sh"/>
+        <filter token="JAVA_HOME" value=""/>
+        <filter token="JAVA_EXE" value="/usr/bin/java"/>
+        <filter token="resin_home" value="/usr/local/share/resin"/>
         <filter token="resin_root" value="/var/www"/>
         <filter token="resin_log" value="/var/log/resin"/>
         <filter token="resin_conf" value="/etc/resin"/>
