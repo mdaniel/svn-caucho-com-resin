@@ -143,6 +143,9 @@ public class BootResinConfig implements EnvironmentBean
   
   public void setResinSystemAuthKey(String digest)
   {
+    if (digest == null || "".equals(digest))
+      return;
+    
     _resinSystemKey = digest;
     
     SecurityService security = SecurityService.getCurrent();

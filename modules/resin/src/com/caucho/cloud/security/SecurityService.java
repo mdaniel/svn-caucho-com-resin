@@ -69,6 +69,9 @@ public class SecurityService extends AbstractResinSubSystem
   
   public void setSignatureSecret(String secret)
   {
+    if ("".equals(secret))
+      secret = null;
+    
     _signatureSecret = secret;
   }
   

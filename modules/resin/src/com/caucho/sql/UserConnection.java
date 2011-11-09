@@ -1355,7 +1355,6 @@ public class UserConnection implements java.sql.Connection {
    */
   private void onSqlException(SQLException e)
   {
-    System.out.println("SQL-MCONN: " + e);
     ManagedConnectionImpl mConn = _mConn;
 
     if (mConn != null)
@@ -1367,7 +1366,6 @@ public class UserConnection implements java.sql.Connection {
    */
   private void onRuntimeException(RuntimeException e)
   {
-    System.out.println("RTE-MCONN: " + e);
     ManagedConnectionImpl mConn = _mConn;
 
     if (mConn != null)

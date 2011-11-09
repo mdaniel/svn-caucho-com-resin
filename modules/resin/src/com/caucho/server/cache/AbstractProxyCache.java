@@ -110,6 +110,15 @@ public class AbstractProxyCache
   {
   }
   
+  public void setMemorySize(Bytes bytes)
+  {
+  }
+  
+  public void setRewriteVaryAsPrivate(boolean isEnable)
+  {
+    
+  }
+  
   /**
    * Creates the filter.
    */

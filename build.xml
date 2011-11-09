@@ -361,6 +361,7 @@
   </target>
 
   <target name="resin-xml" depends="init">
+    <!--
     <copy tofile="conf/resin.xml"
           file="conf/resin.xml.in"
           preservelastmodified="true"
@@ -370,6 +371,7 @@
         <filter token="HTTPS_PORT" value="${resin.https}"/>
       </filterset>
     </copy>
+    -->
     
     <copy tofile="conf/resin.properties"
           file="conf/resin.properties.in"

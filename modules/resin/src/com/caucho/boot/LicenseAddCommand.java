@@ -29,15 +29,14 @@
 package com.caucho.boot;
 
 import java.io.IOException;
-import java.util.HashSet;
-import java.util.Set;
-import java.util.logging.Level;
 
-import com.caucho.VersionFactory;
 import com.caucho.config.ConfigException;
 import com.caucho.server.admin.ManagerClient;
-import com.caucho.util.*;
-import com.caucho.vfs.*;
+import com.caucho.util.CharBuffer;
+import com.caucho.util.L10N;
+import com.caucho.vfs.Path;
+import com.caucho.vfs.ReadStream;
+import com.caucho.vfs.Vfs;
 
 public class LicenseAddCommand extends AbstractManagementCommand
 {
@@ -49,6 +48,11 @@ public class LicenseAddCommand extends AbstractManagementCommand
                        ManagerClient managerClient)
   {
     String licensePath = args.getArg("-license");
+    
+    if (licensePath == null && args.getTailArgs().size() == 1) {
+      licensePath = args.getTailArgs().get(0);
+    }
+    
     if (licensePath == null) {
       System.err.println(L.l("-license is required"));
       usage();

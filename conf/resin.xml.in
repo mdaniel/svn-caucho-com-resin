@@ -8,16 +8,13 @@
        xmlns:resin="urn:java:com.caucho.resin"
        xmlns:memcache="urn:java:com.caucho.memcache"
        xmlns:health="urn:java:com.caucho.health">
+
+  <!-- property-based Resin configuration -->
+  <resin:properties path="${__DIR__}/resin.properties" optional="true"/>
   
   <!-- Logging configuration for the JDK logging API. -->
   <log-handler name="" level="all" path="stdout:"
                timestamp="[%y-%m-%d %H:%M:%S.%s] {%{thread}} "/>
-
-  <!-- property-based Resin configuration -->
-  <resin:properties path="${__DIR__}/resin.properties" optional="true"/>
-
-  <!-- local configuration files -->
-  <resin:import fileset="${__DIR__}/local.d/*.xml"/>
 
   <!--
      - level='info' for production
@@ -27,6 +24,9 @@
 
   <logger name="com.caucho.java" level="config"/>
   <logger name="com.caucho.loader" level="config"/>
+
+  <!-- local configuration files -->
+  <resin:import fileset="${__DIR__}/local.d/*.xml"/>
 
   <!--
      - driver .jar files can be placed in ${resin.root}/ext-lib
@@ -53,7 +53,7 @@
      - For production sites, change dependency-check-interval to something
      - like 600s, so it only checks for updates every 10 minutes.
     -->
-  <dependency-check-interval>2s</dependency-check-interval>
+  <dependency-check-interval>${dependency_check_interval?:'2s'}</dependency-check-interval>
 
   <!-- Java system-properties -->
   <system-property mail.smtp.host="${smtp_host?:'127.0.0.1'}"/>
@@ -81,27 +81,20 @@
     <!--
        - Enables the proxy cache (available in Resin Professional) 
       -->
-    <resin:if test="${resin.professional}">
-      <proxy-cache memory-size="64M">
-       <!-- Vary header rewriting for IE -->
-        <rewrite-vary-as-private/>
-      </proxy-cache>
-    </resin:if>
+    <proxy-cache memory-size="${rdev('proxy_cache_size')?:'64M'">
+     <!-- Vary header rewriting for IE -->
+      <rewrite-vary-as-private/>
+    </proxy-cache>
     
     <!--
        - Admin services
       -->
-    <resin:DeployService/>
 
-    <!--
-       - Uncomment to allow remote administration services
-       -
-       - <resin:RemoteAdminService/>
-      -->
-    
-    <resin:if test="${resin.professional}">
-      <resin:AdminServices/>
+    <resin:if test="${admin_remote_enable}">
+      <resin:RemoteAdminService/>
     </resin:if>
+    
+    <resin:AdminServices/>
 
     <!--
        - Configuration for the health monitoring system
@@ -218,7 +211,7 @@
     <server-multi id-prefix="app-" address-list="${app_tier}" port="6800"/>
 
     <!-- include resources config files in resources/ -->
-    <resin:import fileset="resources/**/*.xml"/>
+    <resin:import fileset="app_tier.d/**/*.xml"/>
 
     <!--
        - Default host configuration applied to all virtual hosts.
@@ -241,9 +234,6 @@
         </prologue>
 
         <session-config>
-	  <!--
-	     - enable persistent sessions
-	    -->
           <use-persistent-store>${rvar('session_store')}</use-persistent-store>
           
           <enable-url-rewriting>false</enable-url-rewriting>
@@ -254,21 +244,23 @@
     <!-- the default host, matching any host name -->
     <host id="" root-directory=".">
       <!--
-         - configures an explicit root web-app matching the
-         - webapp's ROOT
+         - webapps can be overridden/extended in the resin.xml
+         -
+         - <web-app id="/" root-directory="webapps/ROOT"/>
         -->
-      <web-app id="/" root-directory="webapps/ROOT"/>
-
+      
       <!--
 	 - Resin documentation - remove for a live site
 	-->
-      <web-app id="/resin-doc" root-directory="${resin.root}/doc/resin-doc"/>
+      <resin:if test="${rvar('resin_doc')}">
+        <web-app id="/resin-doc" root-directory="${resin.root}/doc/resin-doc"/>
+      </resin:if>
     </host>
   </cluster>
 
   <cluster id="web_tier">
     <!-- define the servers in the cluster -->
-    <server-multi id-prefix="web-" address-list="${web_tier}" port="6800"/>
+    <server-multi id-prefix="web-" address-list="${web_tier}" port="6810"/>
 
     <host id="">
       <web-app id="">
@@ -277,11 +269,11 @@
     </host>
   </cluster>
 
-  <cluster id="memcache_tier">
+  <cluster id="cache_tier">
     <!-- define the servers in the cluster -->
-    <server-multi id-prefix="memcache-"
-                  address-list="${memcache_tier}"
-                  port="6810">
+    <server-multi id-prefix="cache-"
+                  address-list="${cache_tier}"
+                  port="6820">
       <!-- listen for the memcache protocol -->
       <listen port="${rvar('memcache_port')?:11212}"
               keepalive-timeout="600s" socket-timeout="600s">

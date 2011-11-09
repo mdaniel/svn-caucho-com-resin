@@ -55,6 +55,7 @@ install	:
 	  mkdir -p $(DESTDIR)/usr/bin; \
 	  ln -sf @usr_share@/resin/bin/resinctl $(DESTDIR)/usr/bin/resinctl; \
 	fi
+	@ chmod +x $(resin_home)/bin/resinctl
 	@ if test "$(resin_conf)" != $(abs_builddir)/conf; then \
 	  mkdir -p $(resin_conf); \
 		if test -f "$(resin_conf)/resin.xml"; then\

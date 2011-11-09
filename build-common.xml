@@ -1270,7 +1270,8 @@
         <include name="health.xml"/>
       </fileset>
     </copy>
-    
+
+    <!--
     <copy tofile="dist-debian/etc/resin/resin.xml"
           file="${resindir}/conf/resin.xml.in"
           preservelastmodified="true"
@@ -1280,6 +1281,7 @@
         <filter token="HTTPS_PORT" value="8443"/>
       </filterset>
     </copy>
+    -->
     
     <copy tofile="dist-debian/etc/resin/resin.properties"
           file="${resindir}/conf/resin.properties.in"
