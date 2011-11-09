@@ -1288,26 +1288,14 @@
       <filterset>
         <filter token="HTTP_PORT" value="80"/>
         <filter token="HTTPS_PORT" value="8443"/>
+    
+        <filter token="SETUID_USER" value="www-data"/>
+        <filter token="SETUID_GROUP" value="www-data"/>
       </filterset>
     </copy>
     
     <copy tofile="dist-debian/etc/init.d/resin"
           file="${resindir}/init.d/resin.in"
-          preservelastmodified="true"
-          overwrite="true">
-      <filterset>
-        <filter token="BASH" value="/bin/sh"/>
-        <filter token="JAVA_HOME" value=""/>
-        <filter token="JAVA_EXE" value="/usr/bin/java"/>
-        <filter token="resin_home" value="/usr/local/share/resin"/>
-        <filter token="resin_root" value="/var/www"/>
-        <filter token="resin_log" value="/var/log/resin"/>
-        <filter token="resin_conf" value="/etc/resin"/>
-      </filterset>
-    </copy>
-    
-    <copy tofile="dist-debian/usr/local/share/resin/bin/resinctl"
-          file="${resindir}/bin/resinctl.in"
           preservelastmodified="true"
           overwrite="true">
       <filterset>
@@ -1405,19 +1393,26 @@
       </fileset>
     </copy>
 
-    <chmod perm="ugo+rx">
-      <fileset dir="dist-debian/usr/local/share/${shortproduct}-${version}">
-        <include name="configure"/>
-        <include name="bin/resin.sh"/>
-        <include name="bin/resinctl"/>
-      </fileset>
-    </chmod>
-
     <exec executable="ln">
       <arg value="-s"/>
       <arg value="${shortproduct}-${version}"/>
       <arg value="dist-debian/usr/local/share/resin"/>
     </exec>
+    
+    <copy tofile="dist-debian/usr/local/share/resin/bin/resinctl"
+          file="${resindir}/bin/resinctl.in"
+          preservelastmodified="true"
+          overwrite="true">
+      <filterset>
+        <filter token="BASH" value="/bin/sh"/>
+        <filter token="JAVA_HOME" value=""/>
+        <filter token="JAVA_EXE" value="/usr/bin/java"/>
+        <filter token="resin_home" value="/usr/local/share/resin"/>
+        <filter token="resin_root" value="/var/www"/>
+        <filter token="resin_log" value="/var/log/resin"/>
+        <filter token="resin_conf" value="/etc/resin"/>
+      </filterset>
+    </copy>
 
     <exec executable="ln">
       <arg value="-s"/>
@@ -1441,6 +1436,14 @@
         <include name="favicon.ico"/>
       </fileset>
     </copy>
+
+    <chmod perm="ugo+rx">
+      <fileset dir="dist-debian/usr/local/share/${shortproduct}-${version}">
+        <include name="configure"/>
+        <include name="bin/resin.sh"/>
+        <include name="bin/resinctl"/>
+      </fileset>
+    </chmod>
 
     <exec executable="uname" outputproperty="debian.architecture">
       <arg value="-m"/>
