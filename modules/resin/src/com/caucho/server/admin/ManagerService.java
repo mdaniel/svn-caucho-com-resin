@@ -46,7 +46,8 @@ public class ManagerService
       _localManagerActor.set(new ManagerActor());
   }
 
-  public void setHprofDir(String dir) {
+  public void setHprofDir(String dir)
+  {
     getCurrentManagerActor().setHprofDir(dir);
   }
   
