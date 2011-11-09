@@ -790,7 +790,7 @@
       <fileset dir="${dist.build}">
         <include name="configure"/>
         <include name="bin/resin.sh"/>
-        <include name="bin/resinctl.in"/>
+        <include name="bin/resinctl"/>
         <include name="bin/start.bat"/>
         <include name="bin/stop.bat"/>
         <include name="automake/missing"/>
@@ -1312,11 +1312,13 @@
       </fileset>
     </chmod>
 
-    <mkdir dir="dist-debian/usr/share/${shortproduct}-${version}/lib"/>
-    <mkdir dir="dist-debian/usr/share/${shortproduct}-${version}/keys"/>
-    <mkdir dir="dist-debian/usr/share/${shortproduct}-${version}/licenses"/>
+    <mkdir dir="dist-debian/usr/local/share/${shortproduct}-${version}/lib"/>
+    <mkdir dir="dist-debian/usr/local/share/${shortproduct}-${version}/keys"/>
+    <mkdir dir="dist-debian/usr/local/share/${shortproduct}-${version}/licenses"/>
+    <mkdir dir="dist-debian/var/www/licenses"/>
+    <mkdir dir="dist-debian/usr/bin"/>
     
-    <copy todir="dist-debian/usr/share/${shortproduct}-${version}"
+    <copy todir="dist-debian/usr/local/share/${shortproduct}-${version}"
           preservelastmodified="true"
           overwrite="true">
       <fileset dir="${dist.build}">
@@ -1352,7 +1354,7 @@
       
       <fileset dir="${resindir}">
         <include name="bin/resin.sh"/>
-        <include name="bin/resinctl.in"/>
+        <include name="bin/resinctl"/>
       </fileset>
       
       <fileset dir="${dist.build}/libexec${bits}">
@@ -1389,17 +1391,23 @@
     </copy>
 
     <chmod perm="ugo+rx">
-      <fileset dir="dist-debian/usr/share/${shortproduct}-${version}">
+      <fileset dir="dist-debian/usr/local/share/${shortproduct}-${version}">
         <include name="configure"/>
         <include name="bin/resin.sh"/>
-        <include name="bin/resinctl.in"/>
+        <include name="bin/resinctl"/>
       </fileset>
     </chmod>
 
     <exec executable="ln">
       <arg value="-s"/>
       <arg value="${shortproduct}-${version}"/>
-      <arg value="dist-debian/usr/share/resin"/>
+      <arg value="dist-debian/usr/local/share/resin"/>
+    </exec>
+
+    <exec executable="ln">
+      <arg value="-s"/>
+      <arg value="/usr/local/share/resin/bin/resinctl"/>
+      <arg value="dist-debian/usr/bin/resinctl"/>
     </exec>
     
     <copy todir="dist-debian/var/www"
