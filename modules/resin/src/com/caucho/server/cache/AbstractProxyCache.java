@@ -125,7 +125,7 @@ public class AbstractProxyCache
   public FilterChain createFilterChain(FilterChain next,
                                        WebApp app)
   {
-    throw new UnsupportedOperationException(getClass().getName());
+    return next;
   }
 
   /**
@@ -133,7 +133,6 @@ public class AbstractProxyCache
    */
   public void clear()
   {
-    throw new UnsupportedOperationException(getClass().getName());
   }
 
   /**
