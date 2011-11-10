@@ -236,6 +236,7 @@ public class ELParser
       if (_isMethodExpr) {
         switch (token) {
         case '?':
+        case Expr.COND_BINARY:
         case Expr.OR: case Expr.AND:
         case Expr.EQ: case Expr.NE: case Expr.LT:
         case Expr.LE: case Expr.GT: case Expr.GE:
@@ -249,17 +250,7 @@ public class ELParser
 
       switch (token) {
       case '?':
-      {
-        token = scanToken();
-        
-        if (token == ':') {
-          Expr defaultExpr = parseExpr();
-          
-          left = new ConditionalNullExpr(left, defaultExpr);
-        }
-        else {
-          _peek = token;
-          
+        {
           Expr trueExpr = parseExpr();
           token = scanToken();
           if (token != ':')
@@ -268,8 +259,15 @@ public class ELParser
 
           left = new ConditionalExpr(left, trueExpr, falseExpr);
         }
-      }
-      break;
+        break;
+      
+      case Expr.COND_BINARY:
+        {
+          Expr defaultExpr = parseExpr();
+        
+          left = new ConditionalNullExpr(left, defaultExpr);
+        }
+        break;
 
       case Expr.OR:
         left = parseOrExpr(token, left, parseTerm());
@@ -865,6 +863,14 @@ public class ELParser
       return ',';
       
     case '?':
+      ch = read();
+      if (ch == ':')
+        return Expr.COND_BINARY;
+      else {
+        unread();
+        return '?';
+      }
+      
     case ':':
       return ch;
 
@@ -895,7 +901,7 @@ public class ELParser
         else if (name.equals("matches"))
           return Expr.MATCHES;
         else
-          throw error(L.l("expected binary operation at `{0}'", name));
+          throw error(L.l("expected binary operation at '{0}'", name));
       }
 
       unread();

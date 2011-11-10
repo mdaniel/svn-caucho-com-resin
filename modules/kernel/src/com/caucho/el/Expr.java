@@ -89,6 +89,7 @@ public abstract class Expr extends ValueExpression {
   final static int NOT = OR + 1;
   final static int MINUS = NOT + 1;
   final static int EMPTY = MINUS + 1;
+  final static int COND_BINARY = EMPTY + 1;
 
   final static int OBJECT = 0;
   final static int BOOLEAN = OBJECT + 1;
