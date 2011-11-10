@@ -442,7 +442,11 @@ public class DbTransaction extends StoreTransaction {
         Inode inode = _deleteInodes.remove(0);
 
         // XXX: should be allocating based on auto-commit
-        inode.remove();
+        try {
+          inode.remove();
+        } catch (Exception e) {
+          log.log(Level.WARNING, e.toString(), e);
+        }
       }
     }
 
@@ -454,13 +458,13 @@ public class DbTransaction extends StoreTransaction {
 
         try {
           block.getStore().saveAllocation();
-        } catch (IOException e) {
+        } catch (Exception e) {
           log.log(Level.WARNING, e.toString(), e);
         }
         
         try {
           block.commit();
-        } catch (IOException e) {
+        } catch (Exception e) {
           log.log(Level.WARNING, e.toString(), e);
         }
       }

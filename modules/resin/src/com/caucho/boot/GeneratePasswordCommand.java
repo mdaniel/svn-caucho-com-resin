@@ -73,6 +73,13 @@ public class GeneratePasswordCommand extends AbstractBootCommand
       password = args.getTailArgs().get(1);
     }
     
+    if (user == null)
+      throw new ConfigException(L().l("generate-password requires a -user argument"));
+    
+    if (password == null)
+      throw new ConfigException(L().l("generate-password requires a -password argument"));
+    
+    
     byte []salt = new byte[] { (byte) RandomUtil.getRandomLong(),
                                (byte) RandomUtil.getRandomLong(),
                                (byte) RandomUtil.getRandomLong(),

@@ -83,6 +83,17 @@ EOF
 <?php
 if ($file) {?>
 <li>
+To add the admin user, you can add the user and password to
+your resin.properties file as follows:
+
+<div class="example">
+admin_user     : <?= $digest_username ?><br />
+admin_password : <?= $digest ?>
+</div>
+
+<li>
+Or you can update the admin-users.xml as follows.
+
 A login configuration file has been written under the name 
 <code>admin-users.xml.generated</code> in the same directory as your
 resin.xml file. Simply rename this file to <code>admin-users.xml</code>
@@ -94,22 +105,30 @@ to install your login.
 <li>Cut and paste the following into the <code>admin-users.xml</code>
 <?php}?>
 
-<pre>
+<div class="example">
   &lt;resin:AdminAuthenticator xmlns="http://caucho.com/ns/resin"
                             xmlns:resin="urn:java:com.caucho.resin">
       &lt;user name="<?= $digest_username ?>" password="<?= $digest ?>"/>
   &lt;/resin:AdminAuthenticator>
-</pre>
+</div>
 </li>
 
 <li>
 By default, access to the administration application is limited
-to the localhost.  The default behaviour can be changed in the 
-resin.xml file.  To enable access to clients other than localhost:
+to the local network.  The default behaviour can be changed in the 
+resin.xml file.  To enable access to clients other than local
+net work, add to the resin.properties:
 
-<pre>
+<div class="example">
+admin_external : true
+admin_secure   : true
+</div>
+
+Or modify the resin.xml directly with:
+
+<div class="example">
   &lt;resin:set var="resin_admin_external" value="true"/&gt;
-</pre>
+</div>
 </li>
 
 <li>

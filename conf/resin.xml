@@ -191,8 +191,10 @@
         <web-app id="/resin-admin" root-directory="${resin.root}/doc/admin">
           <prologue>
             <!-- only allow access from internal IP (10.*,192.168.*,127.*) -->
-            <resin:set var="resin_admin_external" value="false"/>
-            <resin:set var="resin_admin_insecure" value="true"/>
+            <resin:set var="resin_admin_external"
+                       value="${rvar('admin_external')}"/>
+            <resin:set var="resin_admin_insecure"
+                       value="${! rvar('admin_ssl')}"/>
           </prologue>
         </web-app>
       </resin:if>
