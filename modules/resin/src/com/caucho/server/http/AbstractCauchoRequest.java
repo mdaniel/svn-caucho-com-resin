@@ -653,8 +653,7 @@ abstract public class AbstractCauchoRequest implements CauchoRequest {
                               isSessionIdFromCookie());
 
     if (session != null
-        && (id == null || ! session.getId().equals(id))
-        && manager.enableSessionCookies()) {
+        && (id == null || ! session.getId().equals(id))) {
       setSessionId(session.getId());
     }
 

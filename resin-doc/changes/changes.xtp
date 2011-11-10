@@ -12,6 +12,7 @@
 
 <s2 title="4.0.24 - snapshot">
 <ul>
+<li>servlet: session creation with enable-cookies=false (#4775, rep by jkeays)</li>
 <li>quercus: isset returning true for null values in compiled mode (Wordpress fix) (#4477, rep by mhixson)</li>
 <li>health pdf: mailto config should be mail-to (rep by Keith Fetterman)</li>
 <li>security: custom constraints could not be added to resin:security-constraint (#4835, rep by K. Ding)</li>
