@@ -213,7 +213,7 @@
     <server-multi id-prefix="app-" address-list="${app_tier}" port="6800"/>
 
     <!-- include resources config files in resources/ -->
-    <resin:import fileset="app_tier.d/**/*.xml"/>
+    <resin:import fileset="${__DIR__}/app.d/**/*.xml"/>
 
     <!--
        - Default host configuration applied to all virtual hosts.

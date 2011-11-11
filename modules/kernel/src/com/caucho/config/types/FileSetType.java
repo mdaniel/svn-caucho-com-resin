@@ -50,6 +50,8 @@ public class FileSetType {
   private Path _dir;
   private String _userPathPrefix = "";
   
+  private String _valuePath;
+  
   private ArrayList<PathPatternType> _includeList;
   
   private ArrayList<PathPatternType> _excludeList
@@ -84,8 +86,27 @@ public class FileSetType {
   
   public void addText(String text)
   {
-    if (! "".equals(text))
-      addInclude(new PathPatternType(text));
+    if ("".equals(text))
+      return;
+
+    // for fileset="foo/**/*.xml" find the prefix to minimize the search
+    int starP = text.indexOf('*');
+    
+    if (starP > 0) {
+      int slashP = text.lastIndexOf('/', starP);
+      
+      if (slashP >= 0) {
+        _dir = Vfs.lookup(text.substring(0, slashP));
+        
+        addInclude(new PathPatternType(text.substring(slashP + 1)));
+        System.out.println("DIR: " + _dir.getNativePath() + "\n  " 
+                           + text.substring(slashP + 1));
+        Thread.dumpStack();
+        return;
+      }
+    }
+    
+    addInclude(new PathPatternType(text));
   }
 
   /**
@@ -149,6 +170,7 @@ public class FileSetType {
   {
     if (_dir == null)
       _dir = Vfs.lookup();
+    
   }
 
   /**
@@ -179,12 +201,23 @@ public class FileSetType {
    */
   public void getPaths(ArrayList<Path> paths, Path path, String prefix)
   {
-    if (path.isDirectory()) {
+    if (! path.exists() || ! path.canRead()) {
+      return;
+    }
+    else if (path.isDirectory()) {
       try {
         String []list = path.list();
 
-        for (int i = 0; i < list.length; i++)
-          getPaths(paths, path.lookup(list[i]), prefix);
+        for (int i = 0; i < list.length; i++) {
+          String name = list[i];
+          
+          if (".".equals(name) || "..".equals(name))
+            continue;
+          
+          Path subpath = path.lookup(name);
+          
+          getPaths(paths, subpath, prefix);
+        }
       } catch (IOException e) {
         log.log(Level.WARNING, e.toString(), e);
       }
