@@ -58,6 +58,7 @@
   <!-- Java system-properties -->
   <system-property mail.smtp.host="${smtp_host?:'127.0.0.1'}"/>
   <system-property mail.smtp.port="${smtp_port?:25}"/>
+  <system-property mail.smtp.from="${smtp_from}"/>
 
   <!--
      - default configuration applied to all clusters
@@ -109,6 +110,7 @@
         <period>7D</period>
         <snapshot/>
         <mail-to>${rvar('email')}</mail-to>
+        <mail-from>${rvar('email_from')}</mail-from>
         <!-- <profile-time>60s</profile-time> -->
         <health:IfCron value="0 0 * * 0"/>
       </health:PdfReport>
@@ -118,6 +120,7 @@
         <report>Restart</report>
         <period>2h</period>
         <mail-to>${rvar('email')}</mail-to>
+        <mail-from>${rvar('email_from')}</mail-from>
         <health:OnRestart/>
       </health:PdfReport>
     </resin:if>

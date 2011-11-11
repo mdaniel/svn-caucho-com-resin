@@ -99,9 +99,6 @@ public class FileSetType {
         _dir = Vfs.lookup(text.substring(0, slashP));
         
         addInclude(new PathPatternType(text.substring(slashP + 1)));
-        System.out.println("DIR: " + _dir.getNativePath() + "\n  " 
-                           + text.substring(slashP + 1));
-        Thread.dumpStack();
         return;
       }
     }

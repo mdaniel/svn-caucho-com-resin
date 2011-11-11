@@ -47,6 +47,7 @@ public class PdfReportAction implements AdminAction
 
   private MailService _mailService = new MailService();
   private String _mailTo;
+  private String _mailFrom;
   
   private boolean _isSnapshot;
   private long _profileTime;
@@ -155,6 +156,12 @@ public class PdfReportAction implements AdminAction
       _mailTo = mailTo;
   }
   
+  public void setMailFrom(String mailFrom)
+  {
+    if (! "".equals(mailFrom))
+      _mailFrom = mailFrom;
+  }
+  
   private String calculateReport()
   {
     if (_report != null)
@@ -229,6 +236,15 @@ public class PdfReportAction implements AdminAction
     if (_mailTo != null) {
       try {
         _mailService.addTo(new InternetAddress(_mailTo));
+        _mailService.init();
+      } catch (Exception e) {
+        throw ConfigException.create(e);
+      }
+    }
+
+    if (_mailFrom != null) {
+      try {
+        _mailService.addFrom(new InternetAddress(_mailFrom));
         _mailService.init();
       } catch (Exception e) {
         throw ConfigException.create(e);
