@@ -51,9 +51,11 @@ install	:
 	  mkdir -p $(resin_home)/$(LIBEXEC); \
 	  cp bin/* $(resin_home)/bin; \
 	  cp lib/*.jar $(resin_home)/lib; \
-	  ln -sf $(resin_version) $(usr_share)/resin; \
-	  mkdir -p $(DESTDIR)/usr/bin; \
-	  ln -sf @usr_share@/resin/bin/resinctl $(DESTDIR)/usr/bin/resinctl; \
+	  if test -w "$(usr_share)"; then \
+	    ln -sf $(resin_version) $(usr_share)/resin; \
+	    mkdir -p $(DESTDIR)/usr/bin; \
+	    ln -sf @usr_share@/resin/bin/resinctl $(DESTDIR)/usr/bin/resinctl; \
+	  fi \
 	fi
 	@ chmod +x $(resin_home)/bin/resinctl
 	@ if test "$(resin_conf)" != $(abs_builddir)/conf; then \
@@ -79,13 +81,8 @@ install	:
 		else\
 			cp conf/app-default.xml $(resin_conf)/app-default.xml; \
 		fi;\
-		if test -f "$(resin_conf)/health.xml"; then\
-			echo "-------------------------------------------------------";\
-			echo "Will not overwrite $(resin_conf)/health.xml";\
-			echo "-------------------------------------------------------";\
-		else\
-			cp conf/health.xml $(resin_conf)/health.xml; \
-		fi;\
+		mkdir "$(resin_conf)/local.d"; \
+		install -b -t "$(resin_conf)/local.d" conf/local.d/*; \
 	fi
 	(cd modules/c/src; $(MAKE) install)
 	if test -r $(resin_pro)/modules/c/src/Makefile; then \
