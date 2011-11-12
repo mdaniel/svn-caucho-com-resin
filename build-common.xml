@@ -1268,7 +1268,7 @@
         -->
         <include name="resin.xml"/>
         <include name="app-default.xml"/>
-        <include name="health.xml"/>
+        <include name="local.d/**.xml"/>
       </fileset>
     </copy>
 
