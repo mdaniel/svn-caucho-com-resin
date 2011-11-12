@@ -67,7 +67,7 @@ import java.util.concurrent.atomic.AtomicReference;
  * <dt>null:<dd>The equivalent of /dev/null
  * </dl>
  */
-public abstract class Path {
+public abstract class Path implements Comparable<Path> {
   protected final static L10N L = new L10N(Path.class);
 
   private static final Integer LOCK = new Integer(0);
@@ -1549,6 +1549,12 @@ public abstract class Path {
   protected Path cacheCopy()
   {
     return this;
+  }
+  
+  @Override
+  public int compareTo(Path path)
+  {
+    return getURL().compareTo(path.getURL());
   }
 
   public static final void setDefaultSchemeMap(SchemeMap schemeMap)

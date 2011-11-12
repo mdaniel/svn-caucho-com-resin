@@ -37,6 +37,7 @@ import com.caucho.vfs.Vfs;
 import javax.annotation.PostConstruct;
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -189,6 +190,8 @@ public class FileSetType {
       dirPath += "/";
 
     getPaths(paths, _dir, dirPath);
+    
+    Collections.sort(paths);
 
     return paths;
   }

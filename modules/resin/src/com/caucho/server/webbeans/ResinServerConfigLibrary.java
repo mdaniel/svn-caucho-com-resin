@@ -54,7 +54,7 @@ public class ResinServerConfigLibrary {
     ResinSystem resinSystem = ResinSystem.getCurrent();
     
     if (resinSystem != null) {
-      value = Config.getProperty(name + "." + resinSystem.getId());
+      value = Config.getProperty(resinSystem.getId() + "." + name);
       
       if (value != null)
         return value;
@@ -62,7 +62,7 @@ public class ResinServerConfigLibrary {
     
     String serverId = (String) Config.getProperty("server_id");
     if (serverId != null) {
-      value = Config.getProperty(name + "." + serverId);
+      value = Config.getProperty(serverId + "." + name);
       
       if (value != null)
         return value;
@@ -76,12 +76,12 @@ public class ResinServerConfigLibrary {
       selfServer = networkSystem.getSelfServer();
     
     if (selfServer != null) {
-      value = Config.getProperty(name + "." + selfServer.getId());
+      value = Config.getProperty(selfServer.getId() + "." + name);
       
       if (value != null)
         return value;
       
-      value = Config.getProperty(name + "." + selfServer.getCluster().getId());
+      value = Config.getProperty(selfServer.getCluster().getId() + "." + name);
       
       if (value != null)
         return value;
