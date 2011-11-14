@@ -115,7 +115,7 @@ public abstract class AbstractScalingCommand extends AbstractBootCommand
   static {
     try {
       scalingClientClass = Class.forName(
-        "com.caucho.cloud.scaling.ScalingClient");
+        "com.caucho.cloud.elastic.ElasticCloudClient");
     } catch (ClassNotFoundException e) {
     }
   }
