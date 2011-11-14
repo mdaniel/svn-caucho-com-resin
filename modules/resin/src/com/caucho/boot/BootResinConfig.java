@@ -257,8 +257,6 @@ public class BootResinConfig implements EnvironmentBean
     if (clientList.size() == 1)
       return clientList.get(0);
 
-    System.out.println("SL: " + serverId + " " + clientList);
-    Thread.dumpStack();
     /*
     // server/6e10
     if (args.isDynamicServer())

@@ -16,12 +16,13 @@ all	:
 	fi
 
 rpm-dist:
+	@ cp conf/resin.properties conf/resin.properties.orig
 	@ awk '/setuid_user/ { print "setuid_user : resin"; next; } \
 	       /setuid_group/ { print "setuid_group : resin"; next; } \
 	       /https/ { print "http : 443"; next; } \
 	       /http/ { print "http : 80"; next; } \
                { print $0; }' \
-	conf/resin.properties
+	conf/resin.properties.orig > conf/resin.properties
 
 install	:
 	@ if test "$(resin_root)" != $(abs_builddir); then \
