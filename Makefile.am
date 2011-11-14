@@ -15,12 +15,13 @@ all	:
 	  cd $(resin_pro)/modules/c/src; $(MAKE); \
 	fi
 
-clean	:
-	(cd modules/c/src; $(MAKE) clean)
-	if test -r $(resin_pro)/modules/c/src/Makefile; then \
-	  cd $(resin_pro)/modules/c/src; $(MAKE) clean; \
-	fi
-	- rm -r $(LIBEXEC)
+rpm-dist:
+	@ awk '/setuid_user/ { print "setuid_user : resin"; next; } \
+	       /setuid_group/ { print "setuid_group : resin"; next; } \
+	       /https/ { print "http : 443"; next; } \
+	       /http/ { print "http : 80"; next; } \
+               { print $0; }' \
+	conf/resin.properties
 
 install	:
 	@ if test "$(resin_root)" != $(abs_builddir); then \
@@ -99,3 +100,10 @@ install	:
 			chmod +x $(resin_init_d) && echo "$(resin_init_d) installed."; \
 		fi; \
 	fi
+
+clean	:
+	(cd modules/c/src; $(MAKE) clean)
+	if test -r $(resin_pro)/modules/c/src/Makefile; then \
+	  cd $(resin_pro)/modules/c/src; $(MAKE) clean; \
+	fi
+	- rm -r $(LIBEXEC)
