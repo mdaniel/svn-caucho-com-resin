@@ -1,7 +1,7 @@
-<cluster xmlns="http://caucho.com/ns/resin"
-         xmlns:resin="urn:java:com.caucho.resin"
-         xmlns:health="urn:java:com.caucho.health"
-         xmlns:ee="urn:java:ee">
+<resin xmlns="http://caucho.com/ns/resin"
+       xmlns:resin="urn:java:com.caucho.resin"
+       xmlns:health="urn:java:com.caucho.health"
+       xmlns:ee="urn:java:ee">
 
   <resin:if test="${resin.professional}">
 
@@ -474,4 +474,4 @@
 
   </resin:if>
 
-</cluster>
+</resin>
