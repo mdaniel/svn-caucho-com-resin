@@ -113,7 +113,7 @@
 
       <!-- SSL port configuration: -->
       <resin:choose>
-      <resin:when test="${rvar('openssl_file')}">
+      <resin:when test="${rvar('openssl_file') != null}">
         <http port="${rvar('https')}">
           <openssl>
             <certificate-file>${rvar('openssl_file')}</certificate-file>
