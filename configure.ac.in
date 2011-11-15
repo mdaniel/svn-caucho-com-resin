@@ -1,6 +1,6 @@
 AC_INIT([resin],@RESIN_VERSION@)
 AC_CONFIG_AUX_DIR(automake)
-AC_CONFIG_MACRO_DIR([m4])
+#AC_CONFIG_MACRO_DIR([m4])
 
 
 dnl Get os info
@@ -34,10 +34,17 @@ if test "$prefix" == "NONE"; then
 else
   resin_home="$prefix"
 fi  
+
+build_dir="${abs_builddir}"
+
+if test -z "${build_dir}"; then
+  build_dir=`pwd`
+fi
+  
 AC_SUBST(resin_home)
 AC_SUBST(resin_version)
 AC_SUBST(usr_share)
-
+AC_SUBST(build_dir)
 #
 # --with-resin-root
 #
