@@ -1161,8 +1161,8 @@ public class BaseConfigIntrospector extends AbstractConfigIntrospector {
    * Introspects the methods.
    */
   void introspectMethods(AmberPersistenceUnit persistenceUnit,
-                         BeanType entityType,
-                         BeanType parentType,
+                         AmberBeanType entityType,
+                         AmberBeanType parentType,
                          Class type,
                          AbstractEnhancedConfig typeConfig)
     throws ConfigException
@@ -1284,8 +1284,8 @@ public class BaseConfigIntrospector extends AbstractConfigIntrospector {
    * Introspects the fields.
    */
   void introspectFields(AmberPersistenceUnit persistenceUnit,
-                        BeanType entityType,
-                        BeanType parentType,
+                        AmberBeanType entityType,
+                        AmberBeanType parentType,
                         Class type,
                         AbstractEnhancedConfig typeConfig,
                         boolean isEmbeddable)
@@ -1312,7 +1312,7 @@ public class BaseConfigIntrospector extends AbstractConfigIntrospector {
   }
 
   void introspectField(AmberPersistenceUnit persistenceUnit,
-                       BeanType sourceType,
+                       AmberBeanType sourceType,
                        AccessibleObject field,
                        String fieldName,
                        Class fieldType,
@@ -1342,7 +1342,7 @@ public class BaseConfigIntrospector extends AbstractConfigIntrospector {
     // jpa/0r37: fields declared in non-entity superclasses
     // must not be considered.
 
-    BeanType declaringType;
+    AmberBeanType declaringType;
 
     declaringType = _persistenceUnit.getEntityType(jClass.getName());
 
@@ -1599,7 +1599,7 @@ public class BaseConfigIntrospector extends AbstractConfigIntrospector {
     sourceType.setVersionField(version);
   }
 
-  private AmberColumn createColumn(BeanType beanType,
+  private AmberColumn createColumn(AmberBeanType beanType,
                               AccessibleObject field,
                               String fieldName,
                               Column columnAnn,

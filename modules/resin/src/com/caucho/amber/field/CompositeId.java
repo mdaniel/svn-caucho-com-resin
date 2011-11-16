@@ -31,7 +31,7 @@ package com.caucho.amber.field;
 
 import com.caucho.amber.manager.AmberPersistenceUnit;
 import com.caucho.amber.table.AmberColumn;
-import com.caucho.amber.type.BeanType;
+import com.caucho.amber.type.AmberBeanType;
 import com.caucho.amber.type.EmbeddableType;
 import com.caucho.amber.type.EntityType;
 import com.caucho.amber.type.AmberType;
@@ -195,7 +195,7 @@ public class CompositeId extends Id {
         else
           name = "get" + ch + key.getName().substring(1);
 
-        Method method = BeanType.getGetter(_tKeyClass, name);
+        Method method = AmberBeanType.getGetter(_tKeyClass, name);
 
         if (key.isKeyField() || (method != null)) {
           out.println(key.generateSetKeyProperty("key", "a" + i) + ";");
@@ -315,7 +315,7 @@ public class CompositeId extends Id {
         else
           name = "get" + ch + key.getName().substring(1);
 
-        Method method = BeanType.getGetter(_tKeyClass, name);
+        Method method = AmberBeanType.getGetter(_tKeyClass, name);
 
         if (key.isKeyField() || (method != null)) {
           if (i == 0)

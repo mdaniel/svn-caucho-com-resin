@@ -66,7 +66,7 @@ import java.util.logging.Logger;
 /**
  * Base for entity or mapped-superclass types.
  */
-public class EntityType extends BeanType {
+public class EntityType extends AmberBeanType {
   private static final Logger log = Logger.getLogger(EntityType.class.getName());
   private static final L10N L = new L10N(EntityType.class);
 

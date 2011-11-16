@@ -442,7 +442,7 @@ public class XmlConfigContext {
 
    try {
       attrStrategy = getAttribute(parentType, qName, childNode);
-      
+
       if (attrStrategy == null) {
         if (qName.equals(TEXT)) {
           validateEmptyText(parentBean, childNode);

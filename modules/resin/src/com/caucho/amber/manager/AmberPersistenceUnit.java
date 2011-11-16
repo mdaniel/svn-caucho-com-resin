@@ -529,7 +529,7 @@ public class AmberPersistenceUnit {
       }
     }
 
-    BeanType beanType = _configManager.introspect(type);
+    AmberBeanType beanType = _configManager.introspect(type);
 
     if (beanType instanceof EntityType)
       _amberContainer.addEntity(className, (EntityType) beanType);

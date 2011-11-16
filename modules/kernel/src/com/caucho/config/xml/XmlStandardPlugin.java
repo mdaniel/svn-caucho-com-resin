@@ -272,8 +272,8 @@ public class XmlStandardPlugin implements Extension {
 
   public void processAfterValidation(@Observes AfterDeploymentValidation event)
   {
-    ArrayList<StartupItem> startupBeans = new ArrayList<StartupItem>(
-        _pendingService);
+    ArrayList<StartupItem> startupBeans
+      = new ArrayList<StartupItem>(_pendingService);
 
     _pendingService.clear();
 

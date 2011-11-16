@@ -47,7 +47,7 @@ class TypeConfig {
     _name = name;
   }
 
-  BeanType getType()
+  AmberBeanType getType()
   {
     return getEntityType();
   }

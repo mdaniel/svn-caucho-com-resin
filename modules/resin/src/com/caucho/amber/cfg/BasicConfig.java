@@ -34,7 +34,7 @@ import com.caucho.amber.manager.AmberPersistenceUnit;
 import com.caucho.amber.table.AmberColumn;
 import com.caucho.amber.table.AmberTable;
 import com.caucho.amber.type.AmberType;
-import com.caucho.amber.type.BeanType;
+import com.caucho.amber.type.AmberBeanType;
 import com.caucho.amber.type.EntityType;
 import com.caucho.config.ConfigException;
 import com.caucho.util.L10N;
@@ -61,7 +61,7 @@ class BasicConfig extends AbstractConfig
   
   private BaseConfigIntrospector _introspector;
 
-  private BeanType _sourceType;
+  private AmberBeanType _sourceType;
   private AccessibleObject _field;
   private String _fieldName;
   private Class _fieldType;
@@ -80,7 +80,7 @@ class BasicConfig extends AbstractConfig
   private EnumType _enumerated;
 
   BasicConfig(BaseConfigIntrospector introspector,
-              BeanType sourceType,
+              AmberBeanType sourceType,
               AccessibleObject field,
               String fieldName,
               Class fieldType)

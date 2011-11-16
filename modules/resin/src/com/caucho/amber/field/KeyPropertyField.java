@@ -33,7 +33,7 @@ import com.caucho.amber.expr.KeyColumnExpr;
 import com.caucho.amber.expr.PathExpr;
 import com.caucho.amber.query.QueryParser;
 import com.caucho.amber.table.AmberColumn;
-import com.caucho.amber.type.BeanType;
+import com.caucho.amber.type.AmberBeanType;
 import com.caucho.amber.type.EntityType;
 import com.caucho.amber.type.AmberType;
 import com.caucho.config.ConfigException;
@@ -289,7 +289,7 @@ public class KeyPropertyField extends PropertyField implements IdField {
    * Creates a copy of the field for a parent
    */
   @Override
-  public AmberField override(BeanType type)
+  public AmberField override(AmberBeanType type)
   {
     KeyPropertyField field
       = new KeyPropertyField((EntityType) getSourceType(), getName());

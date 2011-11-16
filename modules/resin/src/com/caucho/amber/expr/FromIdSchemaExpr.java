@@ -32,7 +32,7 @@ import com.caucho.amber.field.AmberField;
 import com.caucho.amber.query.FromItem;
 import com.caucho.amber.query.QueryParseException;
 import com.caucho.amber.query.QueryParser;
-import com.caucho.amber.type.BeanType;
+import com.caucho.amber.type.AmberBeanType;
 import com.caucho.amber.type.EntityType;
 import com.caucho.util.L10N;
 
@@ -66,7 +66,7 @@ public class FromIdSchemaExpr extends SchemaExpr {
   public SchemaExpr createField(QueryParser parser, String name)
     throws QueryParseException
   {
-    BeanType type = _id.getTargetType();
+    AmberBeanType type = _id.getTargetType();
 
     AmberField field = type.getField(name);
 

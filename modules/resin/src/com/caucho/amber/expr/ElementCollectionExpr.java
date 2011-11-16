@@ -35,7 +35,7 @@ import com.caucho.amber.query.QueryParser;
 import com.caucho.amber.table.LinkColumns;
 import com.caucho.amber.table.AmberTable;
 import com.caucho.amber.type.AmberType;
-import com.caucho.amber.type.BeanType;
+import com.caucho.amber.type.AmberBeanType;
 import com.caucho.amber.type.ElementType;
 import com.caucho.amber.type.EntityType;
 import com.caucho.util.CharBuffer;
@@ -98,7 +98,7 @@ public class ElementCollectionExpr extends AbstractPathExpr {
   /**
    * Returns the expr type.
    */
-  public BeanType getTargetType()
+  public AmberBeanType getTargetType()
   {
     return _targetType;
   }

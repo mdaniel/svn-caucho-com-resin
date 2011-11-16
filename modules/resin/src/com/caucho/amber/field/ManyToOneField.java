@@ -259,7 +259,7 @@ public class ManyToOneField extends CascadableField {
    * Creates a copy of the field for a parent
    */
   @Override
-  public AmberField override(BeanType type)
+  public AmberField override(AmberBeanType type)
   {
     ManyToOneField field
       = new ManyToOneField((EntityType) getSourceType(), getName(),

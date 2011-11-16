@@ -47,7 +47,7 @@ import java.util.logging.Logger;
 /**
  * Represents an embeddable type
  */
-public class EmbeddableType extends BeanType {
+public class EmbeddableType extends AmberBeanType {
   private static final Logger log
     = Logger.getLogger(EmbeddableType.class.getName());
   private static final L10N L = new L10N(EmbeddableType.class);

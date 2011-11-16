@@ -92,10 +92,10 @@ public class EntityIntrospector extends BaseConfigIntrospector {
   /**
    * Introspects.
    */
-  public BeanType introspect(Class type)
+  public AmberBeanType introspect(Class type)
     throws ConfigException, SQLException
   {
-    BeanType beanType = null;
+    AmberBeanType beanType = null;
     
     try {
       EntityType entityType = null;

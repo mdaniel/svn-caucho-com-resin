@@ -81,7 +81,7 @@ public class EmbeddableConfig extends AbstractEnhancedConfig {
   }
 
   @Override
-  BeanType getType()
+  AmberBeanType getType()
   {
     return _embeddableType;
   }

@@ -47,7 +47,7 @@ import java.util.logging.Logger;
 /**
  * Represents an element-map value
  */
-public class ElementType extends BeanType {
+public class ElementType extends AmberBeanType {
   private static final Logger log
     = Logger.getLogger(ElementType.class.getName());
   private static final L10N L = new L10N(ElementType.class);

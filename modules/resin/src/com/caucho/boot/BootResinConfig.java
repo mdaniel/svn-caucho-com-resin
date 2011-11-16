@@ -50,7 +50,7 @@ import com.caucho.security.AdminAuthenticator;
 import com.caucho.util.L10N;
 import com.caucho.vfs.Path;
 
-public class BootResinConfig implements EnvironmentBean
+public class BootResinConfig // implements EnvironmentBean
 {
   private static final L10N L = new L10N(BootResinConfig.class);
   private static final Logger log
@@ -175,11 +175,13 @@ public class BootResinConfig implements EnvironmentBean
     return _joinCluster != null && ! "".equals(_joinCluster);
   }
 
+  /*
   @Override
   public ClassLoader getClassLoader()
   {
     return _classLoader;
   }
+  */
 
   public void add(AdminAuthenticator auth)
   {

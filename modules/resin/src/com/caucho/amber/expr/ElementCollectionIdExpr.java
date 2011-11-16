@@ -30,7 +30,7 @@ package com.caucho.amber.expr;
 
 import com.caucho.amber.query.FromItem;
 import com.caucho.amber.type.AmberType;
-import com.caucho.amber.type.BeanType;
+import com.caucho.amber.type.AmberBeanType;
 import com.caucho.util.CharBuffer;
 
 
@@ -53,7 +53,7 @@ public class ElementCollectionIdExpr extends CollectionIdExpr {
   /**
    * Returns the entity class.
    */
-  public BeanType getTargetType()
+  public AmberBeanType getTargetType()
   {
     return _path.getTargetType();
   }

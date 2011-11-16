@@ -98,7 +98,7 @@ public class EmbeddedSubField implements AmberField {
   /**
    * Returns the owning entity class.
    */
-  public BeanType getSourceType()
+  public AmberBeanType getSourceType()
   {
     return _embeddedField.getSourceType();
   }
@@ -453,7 +453,7 @@ public class EmbeddedSubField implements AmberField {
   /**
    * Override the field
    */
-  public AmberField override(BeanType entityType)
+  public AmberField override(AmberBeanType entityType)
   {
     throw new UnsupportedOperationException(getClass().getName());
   }

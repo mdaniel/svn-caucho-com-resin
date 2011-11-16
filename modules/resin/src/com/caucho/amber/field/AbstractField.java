@@ -36,7 +36,7 @@ import com.caucho.amber.manager.AmberPersistenceUnit;
 import com.caucho.amber.query.QueryParser;
 import com.caucho.amber.table.AmberTable;
 import com.caucho.amber.table.AmberColumn;
-import com.caucho.amber.type.BeanType;
+import com.caucho.amber.type.AmberBeanType;
 import com.caucho.amber.type.EntityType;
 import com.caucho.bytecode.JType;
 import com.caucho.bytecode.JTypeWrapper;
@@ -64,7 +64,7 @@ abstract public class AbstractField implements AmberField {
   private static final Logger log
     = Logger.getLogger(AbstractField.class.getName());
 
-  final BeanType _sourceType;
+  final AmberBeanType _sourceType;
 
   private String _name;
 
@@ -79,12 +79,12 @@ abstract public class AbstractField implements AmberField {
   private int _updateIndex;
   private int _loadGroupIndex = -1;
 
-  AbstractField(BeanType sourceType)
+  AbstractField(AmberBeanType sourceType)
   {
     _sourceType = sourceType;
   }
 
-  AbstractField(BeanType sourceType, String name)
+  AbstractField(AmberBeanType sourceType, String name)
     throws ConfigException
   {
     this(sourceType);
@@ -114,11 +114,11 @@ abstract public class AbstractField implements AmberField {
       String getter = "get" + name;
       String setter = "set" + name;
 
-      _getterMethod = BeanType.getGetter(getBeanClass(), getter);
+      _getterMethod = AmberBeanType.getGetter(getBeanClass(), getter);
 
       if (_getterMethod == null) {
         getter = "is" + name;
-        _getterMethod = BeanType.getGetter(getBeanClass(), getter);
+        _getterMethod = AmberBeanType.getGetter(getBeanClass(), getter);
       }
 
       /* jpa/0u21
@@ -128,7 +128,7 @@ abstract public class AbstractField implements AmberField {
       */
     
       if (_getterMethod == null) {
-        Field field = BeanType.getField(getBeanClass(), _name);
+        Field field = AmberBeanType.getField(getBeanClass(), _name);
 
         if (field == null)
           throw new ConfigException(L.l("{0}: {1} has no matching field.",
@@ -140,11 +140,11 @@ abstract public class AbstractField implements AmberField {
         _type = JTypeWrapper.create(_getterMethod.getGenericReturnType(),
                                     loader);
 
-        _setterMethod = BeanType.getSetter(getBeanClass(), setter);
+        _setterMethod = AmberBeanType.getSetter(getBeanClass(), setter);
       }
     }
     else {
-      Field field = BeanType.getField(getBeanClass(), name);
+      Field field = AmberBeanType.getField(getBeanClass(), name);
 
       if (field == null)
         throw new ConfigException(L.l("{0}: {1} has no matching field.",
@@ -179,7 +179,7 @@ abstract public class AbstractField implements AmberField {
   /**
    * Returns the owning entity class.
    */
-  public BeanType getSourceType()
+  public AmberBeanType getSourceType()
   {
     return _sourceType;
   }
@@ -389,7 +389,7 @@ abstract public class AbstractField implements AmberField {
   /**
    * Creates a copy of the field for a parent
    */
-  public AmberField override(BeanType table)
+  public AmberField override(AmberBeanType table)
   {
     throw new UnsupportedOperationException(getClass().getName());
   }

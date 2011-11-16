@@ -572,7 +572,7 @@ public class AmberEnhancer implements AmberGenerator, ClassEnhancer {
 
     // Field-based fixup.
     do {
-      BeanType type;
+      AmberBeanType type;
 
       type = _amberContainer.getEntity(thisClass.getName());
 

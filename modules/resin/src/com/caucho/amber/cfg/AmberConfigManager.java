@@ -71,7 +71,7 @@ public class AmberConfigManager {
   /**
    * Introspects the type
    */
-  public BeanType introspect(Class type)
+  public AmberBeanType introspect(Class type)
   {
     TypeConfig typeConfig = _typeMap.get(type.getName());
 
