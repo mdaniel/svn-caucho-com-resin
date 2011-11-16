@@ -253,7 +253,7 @@ abstract public class ConfigType<T>
       return envStrategy;
     else if (attrStrategy != null)
       return attrStrategy;
-System.out.println("HZO: " + attrStrategy + " " + this + " " + qName);
+
     if (qName.getNamespaceURI() != null
         && qName.getNamespaceURI().startsWith("urn:java:"))
       return getAddBeanAttribute(qName);

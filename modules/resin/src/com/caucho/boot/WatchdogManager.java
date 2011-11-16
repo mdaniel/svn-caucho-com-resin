@@ -444,7 +444,7 @@ class WatchdogManager implements AlarmListener {
       WatchdogChild watchdog = _watchdogMap.get(serverId);
 
       if (watchdog == null)
-        throw new ConfigException(L().l("No matching <server> found for -server '{0}' in '{1}'",
+        throw new ConfigException(L().l("No matching <server> found for start -server '{0}' in '{1}'",
                                         serverId, _args.getResinConf()));
 
       watchdog.start();
@@ -459,9 +459,10 @@ class WatchdogManager implements AlarmListener {
   void stopServer(String serverId)
   {
     synchronized (_watchdogMap) {
-      WatchdogChild watchdog = getWatchdog(serverId); 
-      if (watchdog == null)
-        throw new ConfigException(L().l("No matching <server> found for -server '{0}' in {1}",
+      WatchdogChild watchdog = getWatchdog(serverId);
+      
+            if (watchdog == null)
+        throw new ConfigException(L().l("No matching <server> found for stop -server '{0}' in {1}",
                                         serverId, _args.getResinConf()));
 
       watchdog.stop();
@@ -472,7 +473,9 @@ class WatchdogManager implements AlarmListener {
   {
     WatchdogChild watchdog = _watchdogMap.get(serverId);
   
-    if (watchdog == null && "".equals(serverId) && _watchdogMap.size() == 1) {
+    if (watchdog == null 
+        && (serverId == null || "".equals(serverId))
+        && _watchdogMap.size() == 1) {
       watchdog = _watchdogMap.values().iterator().next();
     }
     

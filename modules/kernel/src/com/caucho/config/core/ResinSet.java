@@ -33,12 +33,13 @@ import javax.annotation.PostConstruct;
 
 import com.caucho.config.Config;
 import com.caucho.config.type.EnvBean;
+import com.caucho.config.type.FlowBean;
 import com.caucho.naming.Jndi;
 
 /**
  * Sets an EL value.
  */
-public class ResinSet implements EnvBean {
+public class ResinSet implements EnvBean, FlowBean {
   private String _jndiName;
   private String _var;
   

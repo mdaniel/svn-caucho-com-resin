@@ -27,7 +27,7 @@ https         : @HTTPS_PORT@
 # admin_password : {SSHA}xxxxxxxx
 # admin_external : false
 # admin_insecure : true
-# admin_disable : false
+admin_enable : true
 
 admin_remote_enable : false
 

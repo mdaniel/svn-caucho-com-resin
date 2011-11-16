@@ -55,7 +55,7 @@ public class ResinServerConfigLibrary {
     
     if (resinSystem != null) {
       value = Config.getProperty(resinSystem.getId() + "." + name);
-      
+
       if (value != null)
         return value;
     }
