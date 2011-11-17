@@ -18,7 +18,11 @@ https         : @HTTPS_PORT@
 # openssl_key : keys/test.key
 # openssl_password : changeme
 
+# setting the system-key is recommended for security
 # system-key : changeme
+
+# the email is used for pdf report generation
+# email : admin@example.com
 
 #
 # use resinctl generate-password to generate the user/password file
@@ -29,6 +33,7 @@ https         : @HTTPS_PORT@
 # admin_insecure : true
 admin_enable : true
 
+# set true to enable deployment outside of the local network
 admin_remote_enable : false
 
 session_store : true

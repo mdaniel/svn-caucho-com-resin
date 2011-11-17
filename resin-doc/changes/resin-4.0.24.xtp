@@ -1,0 +1,68 @@
+<document>
+  <header>
+    <product>resin</product>
+    <title>Resin 4.0.24 Release Notes</title>
+  </header>
+
+<body>
+
+<localtoc/>
+
+<s1 title="Summary">
+
+<p>4.0.24 continues focus on bug fixes and stability</p>
+
+<p>Thanks to everyone who reported bugs in 4.0.23. We encourage people to
+report 4.0.24 bugs at
+<a href="http://bugs.caucho.com">http://bugs.caucho.com</a>.</p>
+
+</s1>
+
+<s1 title="RPM">
+
+<p>RPMs are now available for Resin-Pro</p>
+
+<example title="installing RPM">
+unix> sudo rpm --import http://caucho.com/download/rpm/RPM-GPG-KEY-caucho
+unix> sudo yum install http://caucho.com/download/rpm/4.0.24/x86_64/resin-pro-4.0.24-1.x86_64.rpm
+</example>
+
+</s1>
+
+<s1 title="resin.properties">
+
+<p>The configuration for common deployments has been simplified,
+moving the most often changed values into a separate
+resin.properties file. While Resin's resin.xml is still the basis for the
+configuration, it now includes the resin.properties
+with a &lt;resin:properties> tag.</p>
+
+<example title="Example: sample /etc/resin/resin.properties">
+log_level     : info
+dev_mode      : true
+resin_doc     : true
+
+app_tier      : 192.168.1.10 192.168.1.11
+web_tier      : 192.168.1.20
+
+http          : 8080
+
+setuid_user   : resin
+setuid_group  : resin
+
+jvm_args      : -Xmx2048m
+
+system_key    : changeme
+admin_enable  : true
+admin_user    : admin
+admin_password: {SSHA}xxxxxxx
+</example>
+
+<p>The variables are all defined and controlled by
+the /etc/resin/resin.xml file. If you are already modifying the resin.xml,
+you can use this technique for your own properties.</p>
+
+</s1>
+
+</body>
+</document>

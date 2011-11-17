@@ -210,13 +210,27 @@ public class PdfReportAction implements AdminAction
     // to ${resin.home}/doc/admin/pdf-gen.php
     //
     // If Resin is not running, then path is required
-    
-    if (resin != null) {
-      if (_path == null)
-        _path = resin.getResinHome() + "/doc/admin/pdf-gen.php";
-      
+
+    if (_path != null) {
       _phpPath = Vfs.lookup(_path);
-    } else if (_path != null) {
+    }
+    else if (resin != null) {
+      if (_path == null) {
+        Path path = resin.getRootDirectory().lookup("doc/admin/pdf-gen.php");
+
+        if (path.canRead()) {
+          _path = path.getNativePath();
+        }
+      }
+      
+      if (_path == null) {
+        Path path = resin.getResinHome().lookup("doc/admin/pdf-gen.php");
+
+        if (path.canRead()) {
+          _path = path.getNativePath();
+        }
+      }
+      
       _phpPath = Vfs.lookup(_path);
     }
     
