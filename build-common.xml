@@ -1278,7 +1278,7 @@
           preservelastmodified="true"
           overwrite="true">
       <filterset>
-        <filter token="HTTP_PORT" value="80"/>
+        <filter token="HTTP_PORT" value="8080"/>
         <filter token="HTTPS_PORT" value="8443"/>
       </filterset>
     </copy>
@@ -1289,7 +1289,7 @@
           preservelastmodified="true"
           overwrite="true">
       <filterset>
-        <filter token="HTTP_PORT" value="80"/>
+        <filter token="HTTP_PORT" value="8080"/>
         <filter token="HTTPS_PORT" value="8443"/>
     
         <filter token="SETUID_USER" value="www-data"/>
