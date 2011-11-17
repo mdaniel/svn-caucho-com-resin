@@ -47,27 +47,7 @@ Resin, for example <code>c:\resin-4.0.x</code></li>
 </ol>
 </s2>
 
-<s2 title="Unix, Linux, and Mac OS X">
-
-<ol>
-<li>Install JDK 1.6 or later and link /usr/java to the Java home or define the 
-environment variable <var>JAVA_HOME</var>.</li>
-<li><code>tar -vzxf resin-4.0.x.tar.gz</code></li>
-<li><code>cd resin-4.0.x</code></li>
-<li><code>./configure --prefix=`pwd`</code>
-  <ul><li>some details on the <a href="starting-resin-command-line.xtp">./configure options</a>.</li></ul>
-</li>
-<li><code>make</code></li>
-<li><code>make install</code></li>
-<li>Execute <code>bin/resin.sh console</code>
-  <ul><li>or run <code>java -jar lib/resin.jar console</code></li></ul>
-</li>
-<li>Browse to <a href="http://localhost:8080">http://localhost:8080</a></li>
-</ol>
-
-</s2>
-
-<s2 title="Debian Unix apt-get">
+<s2 title="Debian Unix .deb and apt-get">
 <p>
 We provide a Debian packaged version of Resin that Debian and Ubuntu
 users can take advantage of.  It performs all of the installation
@@ -97,7 +77,7 @@ Finally, install Resin Professional using the following:
 apt-get install resin-pro
 </example>
 <p>
-If you have a license file for Resin, save it in <var>/usr/local/resin/licenses</var>
+If you have a license file for Resin, save it in <var>/var/www/licenses</var>
 </p>
 <p>
 Or install Resin Open Source with this command:
@@ -105,6 +85,41 @@ Or install Resin Open Source with this command:
 <example>
 apt-get install resin
 </example>
+
+</s2>
+
+<s2 title="RedHat and CentOS .rpm files">
+<p>
+RPM files are available at <a href="http://caucho.com/download">
+http://caucho.com/download</a>. The RPM public key is at
+<a href="http://caucho.com/download/rpm/RPM-GPG-KEY-caucho">
+http://caucho.com/download/rpm/RPM-GPG-KEY-caucho</a>.
+</p>
+
+<example title="RPM/yum install">
+unix> sudo rpm --import http://caucho.com/download/rpm/RPM-GPG-KEY-caucho
+unix> sudo yum install http://caucho.com/download/rpm/4.0.24/x86_64/resin-pro-4.0.24-1.x86_64.rpm
+</example>
+
+</s2>
+
+<s2 title="Other Unix, Linux, and Mac OS X">
+
+<ol>
+<li>Install JDK 1.6 or later and link /usr/java to the Java home or define the 
+environment variable <var>JAVA_HOME</var>.</li>
+<li><code>tar -vzxf resin-4.0.x.tar.gz</code></li>
+<li><code>cd resin-4.0.x</code></li>
+<li><code>./configure --prefix=`pwd`</code>
+  <ul><li>some details on the <a href="starting-resin-command-line.xtp">./configure options</a>.</li></ul>
+</li>
+<li><code>make</code></li>
+<li><code>make install</code></li>
+<li>Execute <code>bin/resin.sh console</code>
+  <ul><li>or run <code>java -jar lib/resin.jar console</code></li></ul>
+</li>
+<li>Browse to <a href="http://localhost:8080">http://localhost:8080</a></li>
+</ol>
 
 </s2>
 </s1>
@@ -150,7 +165,26 @@ configuration page.</p>
 <s1 title="Browser-Based Administration (/resin-admin)">
 
 <p>To enable the /resin-admin, you'll need to create an admin user and
-password.</p>
+password. You can either create the user in resin-admin itself, or
+if you are using the standard resin.xml and resin.properties you can
+generate the key from the command line resinctl</p>
+
+
+<s2 title="Installation with resin.properties and generate-password">
+
+<example title="Example: generate-password">
+unix> resinctl generate-password my-user my-password
+admin_user : my-user
+admin_password : {SSHA}HTfP60Ceq0K0IAUNc1wQtBQtql0D+8Wo
+</example>
+
+<p>Add the admin_user and admin_password lines to
+the end of the /etc/resin/resin.properties file. You may also use
+those values to change your admin-users.xml file.</p>
+
+</s2>
+
+<s2 title="Installation with /resin-admin">
 
 <ol>
 <li>Create an admin user following the prompt at /resin-admin.</li>
@@ -163,6 +197,8 @@ password.</p>
 verifies that you have access to the server. And the default
 resin_admin_external=false makes sure you're not exposing the /resin-admin
 to the internet.</p>
+
+</s2>
 
 <p>For more information, see the <a href="resin-admin-console.xtp">/resin-admin
 documentation</a>.</p>
