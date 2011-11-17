@@ -80,8 +80,6 @@ public class ResinBoot
   private WatchdogArgs _args;
   private BootResinConfig _resinConfig;
 
-  private ResinGUI _ui;
-
   ResinBoot(String []argv)
     throws Exception
   {
@@ -129,6 +127,9 @@ public class ResinBoot
     
     Path rootDirectory = _args.getRootDirectory();
     Path dataDirectory = rootDirectory.lookup("watchdog-data");
+    
+    // required for license check
+    System.setProperty("resin.root", rootDirectory.getNativePath());
 
     ResinSystem system;
     
