@@ -50,7 +50,6 @@ namespace Caucho
     public String ResinDataDir { get; private set; }
     public String Exe { get; private set; }
     public String Server { get; private set; }
-    public String DynamicServer { get; private set; }
     public String Conf { get; private set; }
     public String Log { get; private set; }
     public String JmxPort { get; private set; }
@@ -58,6 +57,8 @@ namespace Caucho
     public String WatchDogPort { get; private set; }
     public bool IsPreview { get; private set; }
     public StringCollection RawArgs { get; private set; }
+    public bool DynamicServer { get; private set; }
+    public String Cluster { get; private set; }
 
     public ResinArgs(String cmd)
     {
@@ -228,7 +229,12 @@ namespace Caucho
         else if ("-dynamic-server".Equals(arguments[argsIdx])
                  || "--dynamic-server".Equals(arguments[argsIdx]))
         {
-          DynamicServer = arguments[argsIdx + 1];
+          argsIdx += 2;
+        }
+        else if ("-join-cluster".Equals(arguments[argsIdx])) {
+          DynamicServer = true;
+          Cluster = arguments[argsIdx + 1];
+          resinArgs.Append("-join-cluster ").Append(Cluster).Append(' ');
 
           argsIdx += 2;
         }

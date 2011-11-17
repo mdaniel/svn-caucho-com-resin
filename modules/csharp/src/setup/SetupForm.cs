@@ -266,8 +266,8 @@ namespace Caucho
         foreach (Object o in servers) {
           ResinConfServer server = (ResinConfServer)o;
           if (_resinConf.IsDynamicServerEnabled(server.Cluster)) {
-            String dynamic = "dynamic:" + server.Cluster + ":127.0.0.1:6811";
-            if (!dynamicServers.Contains(dynamic))
+            String dynamic = "dynamic:" + server.Cluster + ":dyn-0";
+            if (! dynamicServers.Contains(dynamic))
               dynamicServers.Add(dynamic);
           }
         }
@@ -288,8 +288,8 @@ namespace Caucho
         _serviceUserCmbBox.DataSource = _setup.GetUsers();
       } else {
         _serviceNameTxtBox.Text = _resinService.Name;
-        if (_resinService.DynamicServer != null)
-          _serverCmbBox.Text = "dynamic:" + _resinService.DynamicServer;
+        if (_resinService.DynamicServer)
+          _serverCmbBox.Text = "dynamic:" + _resinService.Server;
         else if (_resinService.Server == null)
           _serverCmbBox.Text = "default";
         else
@@ -714,32 +714,41 @@ namespace Caucho
       if (_serverCmbBox.SelectedItem is ResinConfServer)
         server = (ResinConfServer)_serverCmbBox.SelectedItem;
 
-      String cluster = "";
-      String serverId = "";
-      if (server != null) {
-        cluster = server.Cluster;
-        serverId = server.ID;
-        resinService.Server = server.ID;
-      } else {
-        ResinConfServer dynamicServer = ResinConf.ParseDynamic(_serverCmbBox.Text);
-
-        resinService.DynamicServer = dynamicServer.Cluster + ":" + dynamicServer.Address + ":" + dynamicServer.Port;
+      if (isNew)
+      {
+        if (server != null)
+        {
+          resinService.Server = server.ID;
+        }
+        else
+        {
+          ResinConfServer dynamicServer = ResinConf.ParseDynamic(_serverCmbBox.Text);
+          resinService.Cluster = dynamicServer.Cluster;
+          resinService.Server = dynamicServer.ID;
+          resinService.DynamicServer = true;
+        }
+      }
+      else
+      {
+        resinService.Cluster = _resinService.Cluster;
+        resinService.Server = _resinService.Server;
+        resinService.DynamicServer = _resinService.DynamicServer;
       }
 
       if (!"Not Specified".Equals(_jmxPortTxtBox.Text)) {
-        String jmxPort = _resinConf.GetJmxPort(cluster, serverId);
+        String jmxPort = _resinConf.GetJmxPort(resinService.Cluster, resinService.Server);
         if (!_jmxPortTxtBox.Text.Equals(jmxPort))
           resinService.JmxPort = int.Parse(_jmxPortTxtBox.Text);
       }
 
       if (!"Not Specified".Equals(_debugPortTxtBox.Text)) {
-        String debugPort = _resinConf.GetDebugPort(cluster, serverId);
+        String debugPort = _resinConf.GetDebugPort(resinService.Cluster, resinService.Server);
         if (!_debugPortTxtBox.Text.Equals(debugPort))
           resinService.DebugPort = int.Parse(_debugPortTxtBox.Text);
       }
 
       if (!"Not Specified".Equals(_watchdogPortTxtBox.Text)) {
-        String watchDogPort = _resinConf.GetWatchDogPort(cluster, serverId);
+        String watchDogPort = _resinConf.GetWatchDogPort(resinService.Cluster, resinService.Server);
         if (!_watchdogPortTxtBox.Text.Equals(watchDogPort))
           resinService.WatchdogPort = int.Parse(_watchdogPortTxtBox.Text);
       }

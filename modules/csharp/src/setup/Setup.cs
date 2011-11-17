@@ -163,7 +163,7 @@ namespace Caucho
               resin = new Resin(home);
           }
 
-          if (resin != null && !HasResin(resin))
+          if (resin != null && ! HasResin(resin))
             AddResin(resin);
         }
 
@@ -172,21 +172,20 @@ namespace Caucho
 
       services.Close();
 
-      String path = Util.Canonicalize(System.Reflection.Assembly.GetExecutingAssembly().Location);
-      while (path.LastIndexOf('\\') > 0) {
-        path = path.Substring(0, path.LastIndexOf('\\'));
-        if (Util.IsResinHome(path)) {
-          Resin resin = new Resin(path);
-          if (Resin == null) {
-            Resin = resin;
-          }
+      String resinHome = Util.GetResinHome(null, System.Reflection.Assembly.GetExecutingAssembly().Location);
 
-          if (!HasResin(resin)) {
-            AddResin(resin);
-          }
+      foreach (Resin resin in _resinList) {
+        if (resin.Home.Equals(resinHome))
+        {
+          Resin = resin;
 
           break;
-        };
+        }          
+      }
+
+      if (Resin == null){
+        Resin = new Resin(resinHome);
+        AddResin(Resin);
       }
     }
 
@@ -228,6 +227,7 @@ namespace Caucho
           resin.Name = name;
           resin.Server = resinArgs.Server;
           resin.DynamicServer = resinArgs.DynamicServer;
+          resin.Cluster = resinArgs.Cluster;
           resin.Root = resinArgs.ResinRoot;
           resin.Conf = resinArgs.Conf;
           resin.Log = resinArgs.Log;
@@ -593,7 +593,8 @@ namespace Caucho
     public bool IsPreview { get; set; }
     public String JavaHome { get; set; }
     public String Server { get; set; }
-    public String DynamicServer { get; set; }
+    public bool DynamicServer { get; set; }
+    public String Cluster { get; set; } 
     public int DebugPort { get; set; }
     public int JmxPort { get; set; }
     public int WatchdogPort { get; set; }
@@ -627,10 +628,11 @@ namespace Caucho
       if (Log != null)
         sb.Append(" -log-directory ").Append('"').Append(Log).Append('"');
 
+      if (DynamicServer)
+        sb.Append(" -join-cluster ").Append(Cluster);
+
       if (Server != null && !"".Equals(Server))
         sb.Append(" -server ").Append(Server);
-      else if (DynamicServer != null)
-        sb.Append(" -dynamic-server ").Append(DynamicServer);
 
       if (IsPreview)
         sb.Append(" -preview");

@@ -112,6 +112,12 @@ namespace Caucho
       if (resinHome != null && !"".Equals(resinHome))
         return Canonicalize(resinHome);
 
+      if (File.Exists(Environment.CurrentDirectory + "\\lib\\resin.jar"))
+        resinHome = Environment.CurrentDirectory;
+
+      if (resinHome != null)
+        return resinHome;
+
       resinHome = GetParent(GetCanonicalPath(path), 1);
 
       if (File.Exists(resinHome + "\\lib\\resin.jar"))

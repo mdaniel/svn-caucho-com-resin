@@ -4,14 +4,17 @@ using System.Collections.Generic;
 using System.Text;
 using System.Xml;
 using System.Xml.XPath;
+using System.IO;
 
 namespace Caucho
 {
   public class ResinConf
   {
+    private String _resinConf;
     private XPathDocument _xPathDoc;
     private XPathNavigator _docNavigator;
     private XmlNamespaceManager _xmlnsMgr;
+    private Hashtable _properties;
 
     public ResinConf(String file)
     {
@@ -19,6 +22,8 @@ namespace Caucho
       _docNavigator = _xPathDoc.CreateNavigator();
       _xmlnsMgr = new XmlNamespaceManager(_docNavigator.NameTable);
       _xmlnsMgr.AddNamespace("caucho", "http://caucho.com/ns/resin");
+      _xmlnsMgr.AddNamespace("resin", "urn:java:com.caucho.resin");
+      _resinConf = file;
     }
 
     public IList getServers()
@@ -37,6 +42,36 @@ namespace Caucho
         result.Add(server);
       }
 
+      XPathNodeIterator multi = _docNavigator.Select("caucho:resin/caucho:cluster/caucho:server-multi", _xmlnsMgr);
+
+      while (multi.MoveNext())
+      {
+        String idPrefix = multi.Current.GetAttribute("id-prefix", "");
+        String addressList = multi.Current.GetAttribute("address-list", "");
+
+        XPathNodeIterator it = multi.Current.SelectAncestors("cluster", "http://caucho.com/ns/resin", false);
+        it.MoveNext();
+        String cluster = it.Current.GetAttribute("id", "");
+
+        String[] addresses = null;
+
+        if (addressList.StartsWith("${"))
+        {
+          String addressListKey = addressList.Substring(2, addressList.Length - 3);
+          addressList = (String)getProperties()[addressListKey];
+        }
+
+        addresses = addressList.Split(';');
+
+        for (int i = 0; i < addresses.Length; i++)
+        {
+          ResinConfServer server = new ResinConfServer();
+          server.ID = idPrefix + i;
+          server.Cluster = cluster;
+
+          result.Add(server);
+        }
+      }
 
       return result;
     }
@@ -101,21 +136,29 @@ namespace Caucho
 
     public bool IsDynamicServerEnabled(String cluster)
     {
-      XPathNavigator nav = _docNavigator.SelectSingleNode("caucho:resin/caucho:cluster[@id='" + cluster + "']/@dynamic-server-enable", _xmlnsMgr);
-      if (nav != null)
-        return !"false".Equals(nav.Value);
-      
-      nav = _docNavigator.SelectSingleNode("caucho:resin/caucho:cluster[@id='" + cluster + "']/caucho:dynamic-server-enable/text()", _xmlnsMgr);
-      if (nav != null)
-        return !"false".Equals(nav.Value);
+      XPathNavigator navigator = _docNavigator.SelectSingleNode("caucho:resin/caucho:cluster[@id='" + cluster + "']", _xmlnsMgr);
 
-      nav = _docNavigator.SelectSingleNode("caucho:resin/caucho:cluster-default/@dynamic-server-enable", _xmlnsMgr);
-      if (nav != null)
-        return !"false".Equals(nav.Value);
+      if (navigator != null && navigator.MoveToFirstChild())
+      {
+        if ("ElasticCloudService".Equals(navigator.LocalName))
+          return true;
 
-      nav = _docNavigator.SelectSingleNode("caucho:resin/caucho:cluster-default/caucho:dynamic-server-enable/text()", _xmlnsMgr);
-      if (nav != null)
-        return !"false".Equals(nav.Value);
+        while (navigator.MoveToFollowing(XPathNodeType.Element))
+          if ("ElasticCloudService".Equals(navigator.LocalName))
+            return true;
+      }
+
+      navigator = _docNavigator.SelectSingleNode("caucho:resin/caucho:cluster-default", _xmlnsMgr);
+
+      if (navigator != null && navigator.MoveToFirstChild())
+      {
+        if ("ElasticCloudService".Equals(navigator.LocalName))
+          return true;
+
+        while (navigator.MoveToFollowing(XPathNodeType.Element))
+          if ("ElasticCloudService".Equals(navigator.LocalName))
+            return true;
+      }
 
       return false;
     }
@@ -159,18 +202,79 @@ namespace Caucho
         return null;
     }
 
+    private Hashtable getProperties()
+    {
+      if (_properties != null)
+        return _properties;
+
+      _properties = new Hashtable();
+
+      String propertiesFile;
+      XPathNavigator nav = _docNavigator.SelectSingleNode("caucho:resin", _xmlnsMgr);
+      if (nav.MoveToFirstChild())
+      {
+        do
+        {
+          if ("properties".Equals(nav.LocalName)) {
+            String path = nav.GetAttribute("path", "");
+            parse(path, _resinConf, _properties);
+          }
+        } while (nav.MoveToFollowing(XPathNodeType.Element));
+      }
+
+      return _properties;
+    }
+
+    private static void parse(String path, String resinConf, Hashtable properties)
+    {
+      String file;
+      if (path.StartsWith("${__DIR__}/")) {
+        file = resinConf.Substring(0, resinConf.LastIndexOf('\\')) + '\\' + path.Substring(11, path.Length - 11);
+      } else {
+        file = path;
+      }
+
+      TextReader reader = null;
+
+      try
+      {
+        reader = File.OpenText(file);
+        String line;
+        while ((line = reader.ReadLine()) != null)
+        {
+          if (line.StartsWith("#"))
+            continue;
+
+          int sepIdx = line.IndexOf(':');
+
+          if (sepIdx == -1)
+            continue;
+
+          String key = line.Substring(0, sepIdx);
+          String value = line.Substring(sepIdx + 1, line.Length - sepIdx - 1);
+
+          properties.Add(key.Trim(), value.Trim());
+        }
+      } finally
+      {
+        if (file != null)
+          reader.Close();
+      }
+    }
+
     static public ResinConfServer ParseDynamic(String value)
-    { //dynamic:app-tier:ip:port
-      int lastColumn = value.LastIndexOf(':');
-      int port = int.Parse(value.Substring(lastColumn + 1));
-      int clusterEnd = value.IndexOf(':', 8);
-      String cluster = value.Substring(8, clusterEnd - 8);
-      String address = value.Substring(clusterEnd + 1, lastColumn - clusterEnd - 1);
+    { //dynamic:app-tier:name
+      String []values = value.Split(':');
+      String cluster = values[1];
+      String id = values[2];
+      if (values.Length == 4)
+        id = id + values[3];
+
       ResinConfServer server = new ResinConfServer();
       server.IsDynamic = true;
       server.Cluster = cluster;
-      server.Address = address;
-      server.Port = port;
+      server.ID = id;
+
       return server;
     }
   }
@@ -180,8 +284,6 @@ namespace Caucho
     public String ID { get; set; }
     public String Cluster { get; set; }
     public Boolean IsDynamic { get; set; }
-    public String Address { get; set; }
-    public int Port { get; set; }
 
     public ResinConfServer()
     {
@@ -191,7 +293,7 @@ namespace Caucho
     public override string ToString()
     {
       if (IsDynamic) {
-        return "-dynamic " + Address + ":" + Port;
+        return "dynamic:" + Cluster + ":" + ID;
       } else {
 
         String id = "".Equals(ID) ? "'default'" : ID;
