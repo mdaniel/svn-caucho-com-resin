@@ -1,0 +1,313 @@
+<document>
+  <header>
+    <product>resin</product>
+    <version>Resin 4.0</version>
+    <title>Resin Installation Quick Start</title>
+
+    <description>
+<p>You can start using Resin by simply expanding the archive and
+starting Resin with a Java command line. You can also start Resin directly 
+from an IDE.</p>
+    </description>
+  </header>
+
+  <body>
+    <localtoc/>
+
+<s1 title="Preconditions">
+
+<ul>
+<li>Resin requires JDK 6.0 or later</li>
+<li>An HTML 5 browser for some /resin-admin features.</li>
+</ul>
+ 
+<p>Oracle's JDK for Windows, Solaris, and Linux can be found at
+<a href="http://www.oracle.com/technetwork/java/javase/overview/index.html">http://www.oracle.com/technetwork/java/javase/overview/index.html</a>.
+Oracle also has links to some other ports of the JDK.</p>
+
+</s1>
+
+<s1 name="quickstart" title="Installing Resin">
+
+<p>Installation steps for the major operating systems are outlined below:</p>
+
+<s2 title="Windows">
+
+<ol>
+<li>Install JDK 1.6 or later.</li>
+<li>Check that the environment variable <var>JAVA_HOME</var> is set to the JDK 
+location, e.g. <code>c:\java\jdk1.6.0_14</code></li>
+<li>Unzip resin-4.0.x.zip</li>
+<li>Define the environment variable <var>RESIN_HOME</var> to the location of
+Resin, for example <code>c:\resin-4.0.x</code></li>
+<li>Execute <code>resin.exe</code>
+  <ul><li>or run <code>bin/resin.sh start</code></li></ul>
+</li>
+<li>Browse to <a href="http://localhost:8080">http://localhost:8080</a></li>
+</ol>
+</s2>
+
+<s2 title="Debian Unix .deb and apt-get">
+<p>
+We provide a Debian packaged version of Resin that Debian and Ubuntu
+users can take advantage of.  It performs all of the installation
+steps above for you and creates all the recommended server and
+content directories.  Simply download from the <a
+href="http://caucho.com/download">Resin download page</a> and install
+using dpkg.
+</p>
+<p>
+Alternatively, you can add Caucho's Debian repository to your system's
+repositories to use automated update tools like Synaptic and apt-get.
+To do this, add the following line to your <var>/etc/apt/sources.list</var>
+</p>
+<example>
+unix> add-apt-repository http://caucho.com/download/debian unstable multiverse
+</example>
+<p>
+After adding this line, update your local repository cache by running:
+</p>
+<example>
+apt-get update
+</example>
+<p>
+Finally, install Resin Professional using the following:
+</p>
+<example>
+apt-get install resin-pro
+</example>
+<p>
+If you have a license file for Resin, save it in <var>/var/www/licenses</var>
+</p>
+<p>
+Or install Resin Open Source with this command:
+</p>
+<example>
+apt-get install resin
+</example>
+
+</s2>
+
+<s2 title="RedHat and CentOS .rpm files">
+<p>
+RPM files are available at <a href="http://caucho.com/download">
+http://caucho.com/download</a>. The RPM public key is at
+<a href="http://caucho.com/download/rpm/RPM-GPG-KEY-caucho">
+http://caucho.com/download/rpm/RPM-GPG-KEY-caucho</a>.
+</p>
+
+<example title="RPM/yum install">
+unix> sudo rpm --import http://caucho.com/download/rpm/RPM-GPG-KEY-caucho
+unix> sudo yum install http://caucho.com/download/rpm/4.0.24/x86_64/resin-pro-4.0.24-1.x86_64.rpm
+</example>
+
+</s2>
+
+<s2 title="Other Unix, Linux, and Mac OS X">
+
+<ol>
+<li>Install JDK 1.6 or later and link /usr/java to the Java home or define the 
+environment variable <var>JAVA_HOME</var>.</li>
+<li><code>tar -vzxf resin-4.0.x.tar.gz</code></li>
+<li><code>cd resin-4.0.x</code></li>
+<li><code>./configure --prefix=`pwd`</code>
+  <ul><li>some details on the <a href="starting-resin-command-line.xtp">./configure options</a>.</li></ul>
+</li>
+<li><code>make</code></li>
+<li><code>make install</code></li>
+<li>Execute <code>bin/resin.sh console</code>
+  <ul><li>or run <code>java -jar lib/resin.jar console</code></li></ul>
+</li>
+<li>Browse to <a href="http://localhost:8080">http://localhost:8080</a></li>
+</ol>
+
+</s2>
+</s1>
+
+<s1 title="Resin as a Web Server">
+
+<p>Resin includes a high-performance HTTP server. The easiest and fastest
+Resin configuration uses Resin as the web server as well as 
+the application server. We highly recommend you start with this configuration 
+although you are free to use other web servers like Apache or IIS
+with Resin.</p>
+
+<p>Keep in mind, Resin can be used for
+development or evaluation in addition to using it in production. If desired,
+you can easily apply for a development license to enable Resin Pro features.
+You can also simply use Resin Open Source to start development.</p>
+
+<figure src="httpd.gif" alt="browser <-> Resin httpd/servlets,beans <- html,jsp"/>
+
+<p>The built-in HTTP server listens on port 8080 in the default
+configuration and can be changed to listen on the HTTP port 80 instead during
+deployment.</p>
+
+<example title="Example: Starting Resin">
+unix> bin/resin.sh start
+
+c:\windows> resin start
+</example>
+
+<p>For troubleshooting your installation, you can also run Resin
+in "console" mode, which will let you see the logging messages
+in your console.</p>
+
+<example title="Example: Starting Resin in console mode">
+unix> bin/resin.sh console
+</example>
+
+<p>For more details, see the <a href="http-server.xtp">Resin Web Server</a>
+configuration page.</p>
+
+</s1>
+
+<s1 title="Browser-Based Administration (/resin-admin)">
+
+<p>To enable the /resin-admin, you'll need to create an admin user and
+password. You can either create the user in resin-admin itself, or
+if you are using the standard resin.xml and resin.properties you can
+generate the key from the command line resinctl</p>
+
+
+<s2 title="Installation with resin.properties and generate-password">
+
+<example title="Example: generate-password">
+unix> resinctl generate-password my-user my-password
+admin_user : my-user
+admin_password : {SSHA}HTfP60Ceq0K0IAUNc1wQtBQtql0D+8Wo
+</example>
+
+<p>Add the admin_user and admin_password lines to
+the end of the /etc/resin/resin.properties file. You may also use
+those values to change your admin-users.xml file.</p>
+
+</s2>
+
+<s2 title="Installation with /resin-admin">
+
+<ol>
+<li>Create an admin user following the prompt at /resin-admin.</li>
+<li>Copy the <em>conf/admin-users.xml.generated</em> to <em>conf/admin-users.xml</em>.</li>
+<li>Change the resin_admin_external to true in the resin.xml if you need access from a non-local IP address.</li>
+<li>Browse /resin-admin with an HTML 5 browser.</li>
+</ol>
+
+<p>The steps are for security reasons. Copying the admin-users.xml
+verifies that you have access to the server. And the default
+resin_admin_external=false makes sure you're not exposing the /resin-admin
+to the internet.</p>
+
+</s2>
+
+<p>For more information, see the <a href="resin-admin-console.xtp">/resin-admin
+documentation</a>.</p>
+
+</s1>
+
+<s1 title="Deploying Applications">
+
+<p>Once you've made sure Resin is working, you can start to run
+applications/add content</p>
+
+<s2 title="Command-line deployment">
+
+<p>Command-line deployment looks like the following example.</p>
+
+<example title="Example: command-line deployment">
+bin/resin.sh deploy hello.war
+
+bin/resin.sh undeploy hello.war
+</example>
+
+<p>The URL for the application would be: <em>http://localhost:8080/hello</em>.</p>
+
+</s2>
+
+<s2 title="webapps directory deployment">
+
+<p>You can deploy .war files by copying them
+to the webapps directory like this: <code>resin-4.0.x/webapps/hello.war</code>.
+The URL for the application would be: 
+<a href="http://localhost:8080/hello">http://localhost:8080/hello</a>.
+</p>
+
+<p>You can also deploy .wars in exploded form like: <code>resin-4.0.x/webapps/hello/index.php</code>.
+The URL for the application would be:
+<a href="http://localhost:8080/hello">http://localhost:8080/hello</a>.</p>
+
+<p>You can use a web.xml file to configure the 'hello' web application:
+<code>resin-4.0.x/webapps/hello/WEB-INF/web.xml</code>.</p>
+
+<p>For more information on deployment, see the <a href="deploy.xtp">deployment documentation</a>.</p>
+
+</s2>
+</s1>
+
+<s1 title="Running Resin as a Daemon">
+
+<p>In most production environments, Resin will run as a background daemon.
+The previous steps ran Resin in the foreground, which is convenient
+for development since the logging output goes to the console.
+When running as a daemon, Resin detaches from the console and continues
+running until told to stop.</p>
+<p>The following are the basic steps to running Resin as a daemon:</p>
+<ol>
+<li>Start resin with <code>bin/resin.sh start</code></li>
+<li>Stop resin with <code>bin/resin.sh stop</code></li>
+<li>Restart resin with <code>bin/resin.sh restart</code></li>
+</ol>
+
+</s1>
+
+<s1 title="Command-Line PDF Reports">
+
+<p>PDF reports about the Resin running status are available from the
+command-line, from /resin-admin browser-based GUI, and as automatic health
+system tasks.</p>
+
+<p>From the command-line you can generate a pdf-report with the following:</p>
+
+<example title="Example: generating a PDF snapshot report">
+unix> bin/resin.sh pdf-report
+
+<em>generated /var/www/log/default-Watchdog-20111010T1426.pdf</em>
+</example>
+
+<p>You can also generate a report for the most recent restart event saved by
+the watchdog. The watchdog report will give information about why Resin was
+last stopped.</p>
+
+<example title="Example: generating a PDF watchdog report">
+unix> bin/resin.sh pdf-report -watchdog
+
+<em>generated /var/www/log/default-Watchdog-20111010T1426.pdf</em>
+</example>
+
+</s1>
+
+<s1 title="Resin IDE Support">
+
+<p>Resin includes excellent support for Eclipse. In fact, using the Eclipse support 
+may be the easiest way get started with Resin.</p>
+<p>Resin plugin support is included in 
+Indigo (Eclipse 3.7) and above (you can install the Resin plugin manually for earlier
+Eclipse versions). The Resin plugin allows you to create new server instances, 
+configure servers, start servers, stop servers, restart instances, deploy/undeploy 
+applications, debug on the server and so on. You can even automatically download and 
+install the latest version of Resin using the plugin or apply for a development license 
+for Resin Pro.</p>
+<p>Further details on the Resin Eclipse plugin is available 
+<a href="resin-eclipse-support.xtp">here</a>.</p>
+
+</s1>
+
+<s1 title="More Installation Options">
+
+<p>More installation and configuration are available at
+<a href="install.xtp">installation options</a>.</p>
+
+</s1>
+
+</body>
+</document>

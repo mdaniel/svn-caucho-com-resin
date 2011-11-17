@@ -1,0 +1,477 @@
+<resin xmlns="http://caucho.com/ns/resin"
+       xmlns:resin="urn:java:com.caucho.resin"
+       xmlns:health="urn:java:com.caucho.health"
+       xmlns:ee="urn:java:ee">
+
+  <resin:if test="${resin.professional}">
+
+  <!--
+     - Health monitoring system default configuration
+    -->
+         
+  <health:HealthSystem>
+    <enabled>true</enabled>
+    <startup-delay>15m</startup-delay>
+    <period>5m</period>
+    <recheck-period>30s</recheck-period>
+    <recheck-max>5</recheck-max>
+  </health:HealthSystem>
+  
+  <health:Restart>
+    <health:IfHealthFatal/>
+  </health:Restart>
+
+  <!--
+     - save jmx information on start.
+    -->
+  <health:DumpJmx async="true">
+    <health:OnStart/>
+  </health:DumpJmx>
+
+  <!--
+     - take snapshot on abnormal stop
+    -->
+  <health:Snapshot>
+    <health:OnAbnormalStop/>
+  </health:Snapshot>
+    
+
+  <!--
+     - Restart on critical if the problem persists for 5 min.
+    -->
+  <health:ActionSequence>
+    <health:IfHealthCritical time="2m"/>
+
+    <health:FailSafeRestart timeout="10m"/>
+    <health:DumpJmx/>
+    <health:DumpThreads/>
+    <health:DumpHeap/>
+    <health:DumpHeap hprof="true"
+                     hprof-path="${resin.logDirectory}/heap.hprof"/>
+    <health:StartProfiler active-time="2m" wait="true"/>
+    <health:Restart/>
+  </health:ActionSequence>
+
+  <!--
+     - Checks for JVM-detected deadlocks.
+    -->
+  
+  <health:JvmDeadlockHealthCheck/>
+
+  <!--
+     - heap memory checks
+    -->
+  
+  <health:MemoryTenuredHealthCheck>
+    <memory-free-min>1m</memory-free-min>
+  </health:MemoryTenuredHealthCheck>
+  
+  <health:MemoryPermGenHealthCheck>
+    <memory-free-min>1m</memory-free-min>
+  </health:MemoryPermGenHealthCheck>
+
+  <!--
+     - Dump heap if memory pools are critically low 
+    -->
+  
+  <health:DumpHeap>
+    <health:Or>
+      <health:IfHealthCritical healthCheck="${memoryTenuredHealthCheck}"/>
+      <health:IfHealthCritical healthCheck="${memoryPermGenHealthCheck}"/>
+    </health:Or>
+    <health:IfNotRecent time="30m"/>
+  </health:DumpHeap>
+  
+  <!--
+     - Dump active threads if cpu usage is critically high
+    -->
+
+  <health:CpuHealthCheck>
+    <warning-threshold>95</warning-threshold>
+    <!--
+       - <critical-threshold>99</critical-threshold>
+      -->
+  </health:CpuHealthCheck>
+  
+  <health:DumpThreads>
+    <health:Or>
+      <health:IfHealthWarning healthCheck="${cpuHealthCheck}" time="2m"/>
+      <health:IfHealthEvent regexp="caucho.thread"/>
+    </health:Or>
+    
+    <health:IfNotRecent time="15m"/>
+  </health:DumpThreads>
+  
+  <!--
+     - Check cluster heartbeats
+    -->
+
+  <health:HeartbeatHealthCheck/>
+
+  <!--
+     - Log connection pool limits reached
+    -->
+
+  <health:ConnectionPoolHealthCheck/>
+  
+  <!--
+     - Log transaction manager commit failures 
+    -->
+
+  <health:TransactionHealthCheck/>
+  
+  <!--
+     - Restart if any health checks are frozen or threads are hung 
+    -->
+    
+  <health:HealthSystemHealthCheck/>
+  
+  <!--
+    - Warning about an expiring Resin Pro License 
+   -->
+  <health:LicenseHealthCheck>
+    <warning-period>30D</warning-period>
+  </health:LicenseHealthCheck>
+  
+  <!-- JMX Meters - for graphing in resin-admin -->
+  
+  <health:JmxMeter>
+    <name>Resin|Uptime|Uptime</name>
+    <objectName>resin:type=Server</objectName>
+    <attribute>Uptime</attribute>
+  </health:JmxMeter>
+   
+  <health:JmxMeter>
+    <name>OS|CPU|Unix Load Avg</name>
+    <objectName>resin:type=Server</objectName>
+    <attribute>CpuLoadAvg</attribute>
+  </health:JmxMeter>
+
+  <health:JmxMeter>
+    <name>OS|Memory|Physical Memory Free</name>
+    <objectName>java.lang:type=OperatingSystem</objectName>
+    <attribute>FreePhysicalMemorySize</attribute>
+  </health:JmxMeter>
+
+  <health:JmxMeter>
+    <name>OS|Memory|Swap Free</name>
+    <objectName>java.lang:type=OperatingSystem</objectName>
+    <attribute>FreeSwapSpaceSize</attribute>
+  </health:JmxMeter>
+
+  <health:JmxMeter>
+    <name>OS|Process|File Descriptor Count</name>
+    <objectName>java.lang:type=OperatingSystem</objectName>
+    <attribute>OpenFileDescriptorCount</attribute>
+  </health:JmxMeter>
+
+  <health:AnomalyAnalyzer>
+    <meter>OS|Process|File Descriptor Count</meter>
+  </health:AnomalyAnalyzer>
+   
+  <health:JmxMeter>
+    <name>JVM|Memory|Heap Memory Used</name>
+    <objectName>resin:type=Server</objectName>
+    <attribute>RuntimeMemory</attribute>
+  </health:JmxMeter>
+   
+  <health:JmxMeter>
+    <name>JVM|Memory|Heap Memory Free</name>
+    <objectName>resin:type=Server</objectName>
+    <attribute>RuntimeMemoryFree</attribute>
+  </health:JmxMeter>
+
+  <health:JmxMeter>
+    <name>JVM|Memory|PermGen Memory Used</name>
+    <objectName>resin:type=Memory</objectName>
+    <attribute>PermGenUsed</attribute>
+  </health:JmxMeter>
+
+  <health:JmxMeter>
+    <name>JVM|Memory|PermGen Memory Free</name>
+    <objectName>resin:type=Memory</objectName>
+    <attribute>PermGenFree</attribute>
+  </health:JmxMeter>
+
+  <health:JmxMeter>
+    <name>JVM|Memory|Tenured Memory Used</name>
+    <objectName>resin:type=Memory</objectName>
+    <attribute>TenuredUsed</attribute>
+  </health:JmxMeter>
+
+  <health:JmxMeter>
+    <name>JVM|Memory|Tenured Memory Free</name>
+    <objectName>resin:type=Memory</objectName>
+    <attribute>TenuredFree</attribute>
+  </health:JmxMeter>
+
+  <health:JmxMeter>
+    <name>JVM|Memory|Loaded Classes</name>
+    <objectName>java.lang:type=ClassLoading</objectName>
+    <attribute>LoadedClassCount</attribute>
+  </health:JmxMeter>
+  
+  <health:JmxDeltaMeter>
+    <name>JVM|Compilation|Compilation Time</name>
+    <objectName>java.lang:type=Compilation</objectName>
+    <attribute>TotalCompilationTime</attribute>
+  </health:JmxDeltaMeter>
+  
+  <health:JmxMeter>
+    <name>JVM|Thread|JVM Thread Count</name>
+    <objectName>java.lang:type=Threading</objectName>
+    <attribute>ThreadCount</attribute>
+  </health:JmxMeter>
+
+  <health:AnomalyAnalyzer>
+    <meter>JVM|Thread|JVM Thread Count</meter>
+
+    <health-event>caucho.thread.anomaly.jvm-thread</health-event>
+  </health:AnomalyAnalyzer>
+  
+  <health:JmxMeter>
+    <name>JVM|Thread|JVM Runnable Count</name>
+    <objectName>resin:type=JvmThreads</objectName>
+    <attribute>RunnableCount</attribute>
+  </health:JmxMeter>
+
+  <health:AnomalyAnalyzer>
+    <meter>JVM|Thread|JVM Runnable Count</meter>
+
+    <health-event>caucho.thread.anomaly.jvm-runnable</health-event>
+  </health:AnomalyAnalyzer>
+  
+  <health:JmxMeter>
+    <name>JVM|Thread|JVM Native Count</name>
+    <objectName>resin:type=JvmThreads</objectName>
+    <attribute>NativeCount</attribute>
+  </health:JmxMeter>
+  
+  <health:JmxMeter>
+    <name>JVM|Thread|JVM Waiting Count</name>
+    <objectName>resin:type=JvmThreads</objectName>
+    <attribute>WaitingCount</attribute>
+  </health:JmxMeter>
+
+  <health:AnomalyAnalyzer>
+    <meter>JVM|Thread|JVM Waiting Count</meter>
+
+    <health-event>caucho.thread.anomaly.jvm-waiting</health-event>
+  </health:AnomalyAnalyzer>
+  
+  <health:JmxMeter>
+    <name>JVM|Thread|JVM Blocked Count</name>
+    <objectName>resin:type=JvmThreads</objectName>
+    <attribute>BlockedCount</attribute>
+  </health:JmxMeter>
+
+  <health:AnomalyAnalyzer>
+    <meter>JVM|Thread|JVM Blocked Count</meter>
+    
+    <health-event>caucho.thread.anomaly.jvm-blocked</health-event>
+  </health:AnomalyAnalyzer>
+
+  <health:JmxMeter>
+    <name>Resin|Thread|Thread Count</name>
+    <objectName>resin:type=ThreadPool</objectName>
+    <attribute>ThreadCount</attribute>
+  </health:JmxMeter>
+
+  <health:JmxMeter>
+    <name>Resin|Thread|Thread Active Count</name>
+    <objectName>resin:type=ThreadPool</objectName>
+    <attribute>ThreadActiveCount</attribute>
+  </health:JmxMeter>
+
+  <health:AnomalyAnalyzer>
+    <meter>Resin|Thread|Thread Active Count</meter>
+
+    <health-event>caucho.thread.anomaly.resin-active</health-event>
+  </health:AnomalyAnalyzer>
+
+  <health:JmxMeter>
+    <name>Resin|Thread|Thread Idle Count</name>
+    <objectName>resin:type=ThreadPool</objectName>
+    <attribute>ThreadIdleCount</attribute>
+  </health:JmxMeter>
+
+  <health:JmxMeter>
+    <name>Resin|Thread|Thread Starting Count</name>
+    <objectName>resin:type=ThreadPool</objectName>
+    <attribute>ThreadStartingCount</attribute>
+  </health:JmxMeter>
+
+  <health:JmxMeter>
+    <name>Resin|Thread|Thread Wait Count</name>
+    <objectName>resin:type=ThreadPool</objectName>
+    <attribute>ThreadWaitCount</attribute>
+  </health:JmxMeter>
+
+  <health:JmxMeter>
+    <name>Resin|Thread|Thread Task Queue</name>
+    <objectName>resin:type=ThreadPool</objectName>
+    <attribute>ThreadTaskQueueSize</attribute>
+  </health:JmxMeter>
+
+  <health:JmxMeter>
+    <name>Resin|Thread|Thread Priority Queue</name>
+    <objectName>resin:type=ThreadPool</objectName>
+    <attribute>ThreadPriorityQueueSize</attribute>
+  </health:JmxMeter>
+  
+  <health:JmxDeltaMeter>
+    <name>Resin|Thread|Thread Create Count</name>
+    <objectName>resin:type=ThreadPool</objectName>
+    <attribute>ThreadCreateCountTotal</attribute>
+  </health:JmxDeltaMeter>
+  
+  <health:JmxDeltaMeter>
+    <name>Resin|Thread|Thread Overflow Count</name>
+    <objectName>resin:type=ThreadPool</objectName>
+    <attribute>ThreadOverflowCountTotal</attribute>
+  </health:JmxDeltaMeter>
+  
+  <health:JmxDeltaMeter>
+    <name>Resin|Cache|Block Read Count</name>
+    <objectName>resin:type=BlockManager</objectName>
+    <attribute>BlockReadCountTotal</attribute>
+  </health:JmxDeltaMeter>
+
+  <health:JmxDeltaMeter>
+    <name>Resin|Cache|Block Write Count</name>
+    <objectName>resin:type=BlockManager</objectName>
+    <attribute>BlockWriteCountTotal</attribute>
+  </health:JmxDeltaMeter>
+
+  <health:JmxDeltaMeter>
+    <name>Resin|Cache|Block Miss Count</name>
+    <objectName>resin:type=BlockManager</objectName>
+    <attribute>MissCountTotal</attribute>
+  </health:JmxDeltaMeter>
+
+  <health:AnomalyAnalyzer>
+    <meter>Resin|Database|Connection Active</meter>
+  </health:AnomalyAnalyzer>
+
+  <health:AnomalyAnalyzer>
+    <meter>Resin|Http|Request Time</meter>
+  </health:AnomalyAnalyzer>
+
+  <health:AnomalyAnalyzer>
+    <meter>Resin|Http|400</meter>
+  </health:AnomalyAnalyzer>
+
+  <health:AnomalyAnalyzer>
+    <meter>Resin|Http|5xx</meter>
+  </health:AnomalyAnalyzer>
+
+  <!-- meter graphs -->
+  
+  <health:MeterGraphPage>
+    <name>Snapshot</name>
+    <period>6h</period>
+    <columns>3</columns>
+      
+    <graph name="Request Count">
+      <meter>Resin|Http|Request Count</meter>
+    </graph>
+      
+    <graph name="Request Time">
+      <meter>Resin|Http|Request Time</meter>
+      <meter>Resin|Http|Request Time Max</meter>
+    </graph>
+      
+    <graph name="Threads">
+      <meter>JVM|Thread|JVM Thread Count</meter>
+      <meter>Resin|Thread|Thread Count</meter>
+      <meter>Resin|Thread|Thread Idle Count</meter>
+      <meter>JVM|Thread|JVM Runnable Count</meter>
+      <meter>JVM|Thread|JVM Blocked Count</meter>
+      <meter>JVM|Thread|JVM Native Count</meter>
+      <meter>JVM|Thread|JVM Waiting Count</meter>
+    </graph>
+
+    <!-- row 2 -->
+      
+    <graph name="HTTP Request Errors">
+      <meter>Resin|Http|500</meter>
+      <meter>Resin|Http|503</meter>
+      <meter>Resin|Http|400</meter>
+      <meter>Resin|Http|404</meter>
+      <meter>Resin|Http|5xx</meter>
+      <meter>Resin|Http|4xx</meter>
+    </graph>
+      
+    <graph name="Log Warnings">
+      <meter>Resin|Log|Critical</meter>
+      <meter>Resin|Log|Warning</meter>
+    </graph>
+      
+    <graph name="CPU">
+      <meter>OS|CPU|CPU Active</meter>
+    </graph>
+
+    <!-- row 2 -->
+      
+    <graph name="Database Connection Active">
+      <meter>Resin|Database|Connection Active</meter>
+    </graph>
+      
+    <graph name="Database Query Time">
+      <meter>Resin|Database|Query Time</meter>
+      <meter>Resin|Database|Query Time Max</meter>
+    </graph>
+      
+    <graph name="Netstat">
+      <meter>OS|Network|tcp-established</meter>
+      <meter>OS|Network|tcp-listen</meter>
+      <meter>OS|Network|tcp-close</meter>
+      <meter>OS|Network|tcp-close-wait</meter>
+      <meter>OS|Network|tcp-fin-wait1</meter>
+      <meter>OS|Network|tcp-fin-wait2</meter>
+      <meter>OS|Network|tcp-last-ack</meter>
+      <meter>OS|Network|tcp-syn-recv</meter>
+      <meter>OS|Network|tcp-syn-sent</meter>
+    </graph>
+
+    <!-- row 3 -->
+      
+    <graph name="Memory">
+      <meter>JVM|Memory|Heap Memory Used</meter>
+      <meter>JVM|Memory|Heap Memory Free</meter>
+      <meter>JVM|Memory|Tenured Memory Used</meter>
+      <meter>JVM|Memory|PermGen Memory Used</meter>
+    </graph>
+      
+    <graph name="GC Time">
+      <meter>JVM|Memory|GC Time|PS MarkSweep</meter>
+      <meter>JVM|Memory|GC Time|PS Scavenge</meter>
+    </graph>
+  </health:MeterGraphPage>
+
+  <!--
+     - automatic pdf reports
+    -->
+    <health:PdfReport>
+      <path>${resin.root}/doc/admin/pdf-gen.php</path>
+      <report>Summary</report>
+      <period>7D</period>
+      <snapshot/>
+      <mail-to>${rvar('email')}</mail-to>
+      <mail-from>${rvar('email_from')}</mail-from>
+      <!-- <profile-time>60s</profile-time> -->
+      <health:IfCron value="0 0 * * 0"/>
+    </health:PdfReport>
+
+    <health:PdfReport>
+      <path>${resin.root}/doc/admin/pdf-gen.php</path>
+      <report>Restart</report>
+      <period>2h</period>
+      <mail-to>${rvar('email')}</mail-to>
+      <mail-from>${rvar('email_from')}</mail-from>
+      <health:OnRestart/>
+    </health:PdfReport>
+
+  </resin:if>
+
+</resin>

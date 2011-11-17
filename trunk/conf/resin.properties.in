@@ -1,0 +1,40 @@
+log_level     : info
+dev_mode      : true
+resin_doc     : true
+
+app_tier      : 127.0.0.1
+web_tier      :
+cache_tier    :
+
+setuid_user   : @SETUID_USER@
+setuid_group  : @SETUID_GROUP@
+
+# jvm_args  : -Xmx2048m
+
+http          : @HTTP_PORT@
+https         : @HTTPS_PORT@
+
+# openssl_file : keys/test.crt
+# openssl_key : keys/test.key
+# openssl_password : changeme
+
+# setting the system-key is recommended for security
+# system-key : changeme
+
+# the email is used for pdf report generation
+# email : admin@example.com
+
+#
+# use resinctl generate-password to generate the user/password file
+#
+# admin_user : admin
+# admin_password : {SSHA}xxxxxxxx
+# admin_external : false
+# admin_insecure : true
+admin_enable : true
+
+# set true to enable deployment outside of the local network
+admin_remote_enable : false
+
+session_store : true
+

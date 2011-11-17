@@ -1,0 +1,27 @@
+<document>
+  <header>
+    <product>resin</product>
+    <title>Resin 4.0.12 Release Notes</title>
+  </header>
+
+<body>
+
+<localtoc/>
+
+<s1 title="Resin 4.0.12">
+
+<p>Resin 4.0.12 is a bug fix release.</p>
+
+<ul>
+<li>Fixes to remote deployment and .git for performance and stability.</li>
+<li>Database pool refactoring for monitoring and overflow conditions.</li>
+<li>Database pool refactoring for ping updates</li>
+<li>Persistent logging updated for administration</li>
+<li>XA detach pooling from user transaction</li>
+<li>HTTP Proxy Cache fixes for deployment and restart</li>
+</ul>
+
+</s1>
+
+</body>
+</document>

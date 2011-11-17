@@ -1,0 +1,111 @@
+<?php
+
+mbean_init();
+
+#
+# load graph
+# 
+$hash = htmlspecialchars($_REQUEST['hash']);
+$graph = $_REQUEST['graph'];
+$checks = $_REQUEST['checks'];
+$servers = $_REQUEST['servers'];
+
+if (isset($_REQUEST["width"])) {
+  $width = htmlspecialchars($_REQUEST["width"]);
+}
+
+if (isset($_REQUEST["height"])) {
+  $height = htmlspecialchars($_REQUEST["height"]);
+}
+
+if (! $hash && ! $graph && ! $checks) {
+  $style .= "text-align: center;";
+  $style .= "border: 1px solid black;";
+  if ($width)
+    $style .= "width: {$width}px;";
+
+  if ($height)
+    $style .= "height: {$height}px;";
+
+  echo "<div style='$style'><strong>No meters specified</strong></div>";
+  return;
+}
+else {
+  if (! $checks) {
+    $cache = resin_create_distcache("resin:admin:graph");
+
+    if (! $hash) {
+      $user = quercus_servlet_request()->getRemoteUser();
+      $user_item = $cache->get($user);
+
+      $hash = $user_item['user-graphs'][$graph];
+    }
+
+    $item = $cache->get($hash);
+
+    if (! $item) {
+    ?>
+    <b>Graph unavailable (Hash: <?= $hash ?></b>
+    <?php
+      return;
+    }
+
+    $name = $item['name'];
+    $checks = $item['checks'];
+    $servers = $item['servers'];
+  }
+
+  if ($servers == null) {
+    $self_index = sprintf("%02d", $g_server->SelfServer->ClusterIndex);
+    $servers = array($self_index);
+  }
+
+  foreach ($checks as $check) {
+    foreach ($servers as $server) {
+      $names[] = htmlspecialchars("$server|$check");
+    }
+  }
+}
+
+#
+# formatting parameters
+# 
+
+$canvas = "graph-{$hash}";
+$period = 60;
+
+if (isset($_REQUEST["canvas"])) {
+  $canvas = htmlspecialchars($_REQUEST["canvas"]);
+}
+
+if (isset($_REQUEST["period"])) {
+  $period = htmlspecialchars($_REQUEST["period"]);
+}
+
+# 
+# compute time bounds
+# 
+
+$end = time();
+
+# 
+# output graph
+# 
+
+require_once "WEB-INF/php/graph_flot.php";
+
+$params = new GraphParams($canvas, $width, $height);
+$params->period = $period;
+$params->title = "Interactive Graph";
+$params->alt = "A interactive line graph representing the selected meters.";
+
+stat_graph_div($params);
+
+$stat = get_stats_service();
+if (! $stat) {
+  return;
+}
+
+stat_graph_script($stat, $canvas, $names, null, 0, $period);
+
+?>

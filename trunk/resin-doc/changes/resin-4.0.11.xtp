@@ -1,0 +1,52 @@
+<document>
+  <header>
+    <product>resin</product>
+    <title>Resin 4.0.11 Release Notes</title>
+  </header>
+
+<body>
+
+<localtoc/>
+
+<s1 title="Resin 4.0.11 Overview">
+
+<p>Remote deployment has been revised and improved to increase reliability
+and improve clustering performance.</p>
+
+<p>Deployment of .war files is now integrated with remote deployment
+so Resin now uses one unified mechanism. Checking of .war versions is
+now available across the cluster in the webapps tab.</p>
+
+<p>Remote deployment is now available in /resin-admin, from
+the command-line, and from ant. Remote deployment in /resin-admin is
+in the web-apps tab.</p>
+
+<p>The HealthCheck is now integrated with JMX and with the
+statistics generation. The HealthCheck is now displayed in /resin-admin
+in the health tab.</p>
+
+<p>The Heartbeat timings have been improved. The current heartbeat status
+is now available in /resin-admin in the health tab.</p>
+
+<p>The /resin-admin Thread dump has been revised, adding locking information
+from the JDK 6 thread dump.</p>
+
+<p>Locking groups of the thread dump are now displayed in the lock tab
+of the thread dump.</p>
+
+<p>The postmortem tab in the /resin-admin now includes statistics on the
+health services.</p>
+
+<p>The CPU profile and heap dump tabs now have pie charts to better display
+the total memory use.</p>
+
+<p>The Graphs tab of /resin-admin has been revised to dynamically 
+update the graph based on the meter choices.</p>
+
+<p>The Graphs tab now included new display modes to improve cross-cluster
+graph displays.</p>
+
+</s1>
+
+</body>
+</document>

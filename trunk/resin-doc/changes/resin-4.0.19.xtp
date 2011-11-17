@@ -1,0 +1,82 @@
+<document>
+  <header>
+    <product>resin</product>
+    <title>Resin 4.0.19 Release Notes</title>
+  </header>
+
+<body>
+
+<localtoc/>
+
+<s1 title="Summary">
+
+<p>4.0.19 is primarily a bug fix release, including several
+important fixes in the networking code for timeouts.</p>
+
+<p>Thanks to everyone who reported bugs in 4.0.18. We encourage people to
+report 4.0.19 bugs at
+<a href="http://bugs.caucho.com">http://bugs.caucho.com</a>.</p>
+
+</s1>
+
+<s1 title="Resin Eclipse Plugin">
+<p>Resin Eclipse Plugin is updated to publish and reload applications instantly.
+  These settings can be overridden in the Properties dialog (press F3 on the selected server).<br/>
+  Fixed bugs: http://bugs.caucho.com/view.php?id=4589.
+</p>
+<p>Resin Eclispe Snapshot and Release update sites are:
+</p>
+<ul>
+  <li><a href="http://www.caucho.com/eclipse">Eclipse Plugin Release Update Site</a></li>
+  <li><a href="http://www.caucho.com/eclipse-snapshot">Eclipse Plugin Snapshot Update Site</a></li>
+</ul>
+</s1>
+
+<s1 title="Resin Admin Web Console">
+<ul>
+  <li>All style and content was updated to pass W3C HTML validation and follow W3C accessibility guidelines.</li>   
+  <li>The Web Applications page was updated to include an option to undeploy an application.</li>
+  <li>Graphs now allow pan and zoom.</li>
+</ul>
+</s1>
+
+<s1 title="Health Check Updates">
+<p>In addition a few new health conditions and actions, all applicable <a href="../admin/resin-admin-command-line.xtp">command line actions</a> are now also available as health actions.</p>
+<ul>
+  <li><a href="../admin/health-checking.xtp#healthIfNotRecent">&lt;health:IfNotRecent></a> - Condition that throttles actions to execute no more than once per period.</li>
+  <li><a href="../admin/health-checking.xtp#healthActionSequence">&lt;health:ActionSequence></a> - An action that executes a series of child actions in sequence.</li>
+  <li><a href="../admin/health-checking.xtp#healthFailSafeRestart">&lt;health:FailSafeRestart></a> - Initiates a delayed guaranteed restart of Resin.</li>
+  <li><a href="../admin/health-checking.xtp#healthStartProfiler">&lt;health:StartProfiler></a> - Starts a performance profiling session.</li>
+  <li><a href="../admin/health-checking.xtp#healthCallJmxOperation">&lt;health:CallJmxOperation></a> - Calls a JMX MBean operation.</li>
+  <li><a href="../admin/health-checking.xtp#healthSetJmxAttribute">&lt;health:SetJmxAttribute></a> - Sets a JMX MBean attribute.</li>
+</ul>
+
+<p>The new actions and predicates can be combined to initiate an intelligent diagnostic gathering 
+restart sequence.  In the following example, upon detecting a critical health condition, Resin 
+registers a 10 minute delayed fail-safe restart, dumps diagnostic information, and then profiles 
+the system for 5 minutes.  Finally it attempts to restart cleanly, although if that is not 
+possible due to system instability, the earlier fail-safe restart will trigger.</p>
+
+<example title="Example: &lt;health:FailSafeRestart> in health.xml">
+&lt;cluster xmlns="http://caucho.com/ns/resin"
+         xmlns:resin="urn:java:com.caucho.resin"
+         xmlns:health="urn:java:com.caucho.health"
+         xmlns:ee="urn:java:ee">
+         
+  &lt;health:ActionSequence>
+    &lt;health:FailSafeRestart timeout="10m"/>
+    &lt;health:DumpThreads/>
+    &lt;health:DumpHeap/>
+    &lt;health:StartProfiler active-time="5m"/>
+    &lt;health:Restart/>
+    &lt;health:IfHealthCritical time="5m"/>
+    &lt;health:IfNotRecent time="10m"/>
+  &lt;/health:ActionSequence>
+
+&lt;/cluster>
+</example>
+
+</s1>
+
+</body>
+</document>
