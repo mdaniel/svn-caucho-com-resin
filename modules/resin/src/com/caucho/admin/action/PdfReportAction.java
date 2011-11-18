@@ -231,7 +231,8 @@ public class PdfReportAction implements AdminAction
         }
       }
       
-      _phpPath = Vfs.lookup(_path);
+      if (_path != null)
+        _phpPath = Vfs.lookup(_path);
     }
     
     if (_phpPath == null) {
