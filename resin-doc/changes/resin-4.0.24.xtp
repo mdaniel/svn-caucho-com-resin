@@ -273,5 +273,12 @@ public class MyBean {
 </example>
 </s1>
 
+<s1 title="IIS .NET Plugin: added support for Windows Authentication">
+
+<p>User credentials established with Windows Authentication are made available
+  in Resin's HttpServletRequest.getRemoteUser() and
+  HttpServletRequest.getUserPrincipal()</p>
+</s1>
+
 </body>
 </document>
