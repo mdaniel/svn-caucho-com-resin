@@ -31,6 +31,7 @@ package com.caucho.loader;
 
 import com.caucho.management.server.AbstractManagedObject;
 import com.caucho.management.server.EnvironmentMXBean;
+import com.caucho.util.Alarm;
 
 import java.io.File;
 import java.lang.ref.*;
@@ -65,12 +66,14 @@ public class EnvironmentAdmin extends AbstractManagedObject
 
   void register()
   {
-    //registerSelf();
+    if (! Alarm.isTest())
+      registerSelf();
   }
 
   void unregister()
   {
-    //unregisterSelf();
+    if (! Alarm.isTest())
+      unregisterSelf();
   }
 
   @Override
