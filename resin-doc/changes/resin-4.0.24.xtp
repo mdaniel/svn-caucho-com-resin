@@ -95,7 +95,7 @@ is named "app-0".</p>
 
 </s1>
 
-<s1 title="Local Config files: /etc/resin/local.d/*.xml">
+<s1 title="resin.xml Local Config files: /etc/resin/local.d/*.xml">
 
 <p>Resin's default /etc/resin/resin.xml now imports files from
 /etc/resin/local.d/*.xml as local additions to the resin configuration.
@@ -120,6 +120,19 @@ level.</p>
 
   ...
 &lt;/resin>
+</example>
+
+</s1>
+
+<s1 title="resin.properties openssl configuration">
+
+<p>The standard resin.xml now includes openssl configuration. To enable
+openssl, upload the certificate files and update the resin.properties.</p>
+
+<example title="Example: resin.properties with openssl">
+openssl_file : keys/gryffindor.crt
+openssl_key : keys/gryffindor.key
+openssl_password : changeme
 </example>
 
 </s1>

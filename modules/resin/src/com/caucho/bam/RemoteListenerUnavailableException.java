@@ -31,32 +31,44 @@ package com.caucho.bam;
 
 
 /**
- * HMPP wrapper
+ * Exception when the remote server can by contacted by TCP but is
+ * not running the BAM/HMTP protocol.
  */
 @SuppressWarnings("serial")
-public class NotAuthorizedException
+public class RemoteListenerUnavailableException
   extends ErrorPacketException
 {
-  public NotAuthorizedException()
+  public RemoteListenerUnavailableException()
   {
   }
 
-  public NotAuthorizedException(String msg)
+  public RemoteListenerUnavailableException(String msg)
   {
     super(msg);
   }
 
-  public NotAuthorizedException(String msg, Throwable e)
+  public RemoteListenerUnavailableException(Throwable e)
+  {
+    super(e.toString(), e);
+    Thread.dumpStack();
+  }
+
+  public RemoteListenerUnavailableException(String msg, Throwable e)
   {
     super(msg, e);
   }
 
-  public NotAuthorizedException(String msg, BamError error)
+  public RemoteListenerUnavailableException(String msg, BamError error)
   {
     super(msg, error);
   }
 
-  public NotAuthorizedException(BamError error)
+  public RemoteListenerUnavailableException(String msg, ErrorPacketException e)
+  {
+    super(msg, e);
+  }
+
+  public RemoteListenerUnavailableException(BamError error)
   {
     super(error);
   }
@@ -69,8 +81,8 @@ public class NotAuthorizedException
     if (error != null)
       return error;
 
-    return new BamError(BamError.TYPE_AUTH,
-                          BamError.NOT_AUTHORIZED,
-                          getMessage());
+    return new BamError(BamError.TYPE_CANCEL,
+                        BamError.REMOTE_LISTENER_UNAVAILABLE,
+                        getMessage());
   }
 }

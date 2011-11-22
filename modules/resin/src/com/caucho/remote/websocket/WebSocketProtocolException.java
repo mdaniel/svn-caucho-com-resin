@@ -27,50 +27,25 @@
  * @author Scott Ferguson
  */
 
-package com.caucho.bam;
+package com.caucho.remote.websocket;
 
+import java.io.IOException;
 
 /**
- * HMPP wrapper
+ * WebSocketOutputStream writes a single WebSocket packet.
+ *
+ * <code><pre>
+ * </pre></code>
  */
 @SuppressWarnings("serial")
-public class NotAuthorizedException
-  extends ErrorPacketException
+public class WebSocketProtocolException extends IOException
 {
-  public NotAuthorizedException()
+  public WebSocketProtocolException()
   {
   }
-
-  public NotAuthorizedException(String msg)
+  
+  public WebSocketProtocolException(String msg)
   {
     super(msg);
-  }
-
-  public NotAuthorizedException(String msg, Throwable e)
-  {
-    super(msg, e);
-  }
-
-  public NotAuthorizedException(String msg, BamError error)
-  {
-    super(msg, error);
-  }
-
-  public NotAuthorizedException(BamError error)
-  {
-    super(error);
-  }
-
-  @Override
-  public BamError createActorError()
-  {
-    BamError error = getActorError();
-
-    if (error != null)
-      return error;
-
-    return new BamError(BamError.TYPE_AUTH,
-                          BamError.NOT_AUTHORIZED,
-                          getMessage());
   }
 }

@@ -10,7 +10,7 @@
 <li><a href="http://caucho.com/resin-3.1/changes/changes.xtp">Resin 3.1 changes</a></li>
 </ul>
 
-<s2 title="4.0.24 - snapshot">
+<s2 title="4.0.24 - Nov 17, 2011">
 <ul>
 <li>servlet: session creation with enable-cookies=false (#4775, rep by jkeays)</li>
 <li>quercus: isset returning true for null values in compiled mode (Wordpress fix) (#4477, rep by mhixson)</li>

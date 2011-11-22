@@ -128,7 +128,7 @@ public class DeployClient implements Repository
     
       _deployAddress = "deploy@resin.caucho";
     } catch (RemoteConnectionFailedException e) {
-      throw new RemoteConnectionFailedException(L.l("Connection to '{0}' failed for remote deploy. Check the server and make sure <resin:RemoteAdminService> is enabled in the resin.xml.\n  {1}",
+      throw new RemoteConnectionFailedException(L.l("Connection to '{0}' failed for remote deploy. Check the server and make sure the server has started and that <resin:RemoteAdminService> is enabled in the resin.xml.\n  {1}",
                                                     url, e.getMessage()),
                                                 e);
     }
@@ -517,7 +517,7 @@ public class DeployClient implements Repository
     try {
       return (Serializable) _bamClient.query(_deployAddress, query);
     } catch (ServiceUnavailableException e) {
-      throw new ServiceUnavailableException("Deploy service is not available, possibly because the resin.xml is missing a <resin:DeployService> tag\n  " + e.getMessage(),
+      throw new ServiceUnavailableException("Deploy service is not available, possibly because the resin.xml is missing a <resin:AdminServices> or a <resin:DeployService> tag\n  " + e.getMessage(),
                                             e);
     }
   }

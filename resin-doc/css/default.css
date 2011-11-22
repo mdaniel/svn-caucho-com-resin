@@ -120,7 +120,8 @@ h2 {
   font-family : Helvetica, Arial, sans-serif;
   font-weight : normal;
 
-  color : #4c2004;
+  color : #333;
+/*  color : #4c2004; */
 /*  color : #003366; */
 }
 
@@ -133,10 +134,15 @@ h2.section {
   padding : 2px;
 }
 
+.s2 {
+  margin-left : 10px;
+}  
+
 h3 {
   font-family : Helvetical, Arial, sans-serif;
 /*  color : #6699cc; */
   color : #333;
+  border-bottom : 1px solid #999;
 }
 
 h4 {
@@ -276,7 +282,8 @@ div.definition-body {
   font-weight : bold;
   font-family : Helvetica, Arial, sans-serif;
 /*  color : #990033; */
-  color : #4c2004;
+/*  color : #4c2004; */
+  color : #555;
   text-align : left;
   font-size : 120%
 }

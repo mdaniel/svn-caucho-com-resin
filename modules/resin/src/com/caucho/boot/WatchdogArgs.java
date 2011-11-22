@@ -328,6 +328,25 @@ class WatchdogArgs
     else
       return true;
   }
+  
+  public int getArgInt(String arg, int defaultValue)
+  {
+    String value = getArg(arg);
+
+    if (value == null)
+      return defaultValue;
+    
+    try {
+      return Integer.parseInt(value);
+    } catch (NumberFormatException e) {
+      NumberFormatException e1
+        = new NumberFormatException(L().l("{0} argument is not a number '{1}'",
+                                        arg, value));
+      e1.setStackTrace(e.getStackTrace());
+
+      throw e;
+    }
+  }
 
   public boolean hasOption(String option)
   {

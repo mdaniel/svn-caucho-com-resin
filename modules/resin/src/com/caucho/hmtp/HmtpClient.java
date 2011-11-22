@@ -35,6 +35,7 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 
 import com.caucho.bam.BamException;
+import com.caucho.bam.NotAuthorizedException;
 import com.caucho.bam.actor.ActorHolder;
 import com.caucho.bam.actor.ActorSender;
 import com.caucho.bam.broker.Broker;
@@ -234,6 +235,14 @@ public class HmtpClient implements ActorSender {
 
       if (log.isLoggable(Level.FINE))
         log.fine(this + " login");
+    } catch (NotAuthorizedException e) {
+      if (uid == null || "".equals(uid) )
+        throw new NotAuthorizedException(L.l("A user and password are required to access the remote service. Please check the user and password."),
+                                         e);
+      else
+        throw new NotAuthorizedException(L.l("The user '{0}' was not authorized to access the remote service. Please check the password.",
+                                             uid),
+                                             e);
     } catch (RuntimeException e) {
       throw e;
     } catch (Exception e) {

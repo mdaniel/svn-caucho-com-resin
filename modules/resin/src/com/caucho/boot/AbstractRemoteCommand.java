@@ -46,75 +46,12 @@ import com.caucho.server.admin.HmuxClientFactory;
 import com.caucho.server.admin.WebAppDeployClient;
 import com.caucho.util.L10N;
 
-public abstract class AbstractRepositoryCommand extends AbstractRemoteCommand {
-  private static final L10N L = new L10N(AbstractRepositoryCommand.class);
+public abstract class AbstractRemoteCommand extends AbstractBootCommand {
+  private static final L10N L = new L10N(AbstractRemoteCommand.class);
   private static final Logger log
-    = Logger.getLogger(AbstractRepositoryCommand.class.getName());
-
-  @Override
-  public final int doCommand(WatchdogArgs args,
-                             WatchdogClient client)
-    throws BootArgumentException
-  {
-    WebAppDeployClient deployClient = null;
-
-    try {
-      deployClient = getDeployClient(args, client);
-
-      return doCommand(args, client, deployClient);
-    } catch (Exception e) {
-      if (args.isVerbose())
-        e.printStackTrace();
-      else
-        System.out.println(e.toString());
-
-      if (e instanceof NotAuthorizedException)
-        return 1;
-      else
-        return 2;
-    } finally {
-      if (deployClient != null)
-        deployClient.close();
-    }
-  }
-
-  protected abstract int doCommand(WatchdogArgs args,
-                                   WatchdogClient client,
-                                   WebAppDeployClient deployClient);
-
-  protected final void fillInVersion(CommitBuilder commit, String version) {
-    String []parts = version.split("\\.");
-    if (parts.length < 2)
-      throw new ConfigException(L.l(
-        "erroneous version '{0}'. Version expected in format %d.%d[.%d[.%s]]",
-        version));
-
-    int major = Integer.parseInt(parts[0]);
-    int minor = Integer.parseInt(parts[1]);
-    int micro = 0;
-
-    if (parts.length > 2)
-      micro = Integer.parseInt(parts[2]);
-
-    String qualifier = null;
-
-    if (parts.length == 4)
-      qualifier = parts[3];
-
-    commit.version(major, minor, micro, qualifier);
-  }
+    = Logger.getLogger(AbstractRemoteCommand.class.getName());
   
-  protected WebAppDeployClient getDeployClient(WatchdogArgs args,
-                                               WatchdogClient client)
-  {
-    ActorSender sender = createBamClient(args, client);
-    
-    // return new WebAppDeployClient(address, port, user, password);
-    
-    return new WebAppDeployClient(sender);
-  }
-  
-  private ActorSender createBamzClient(WatchdogArgs args,
+  protected ActorSender createBamClient(WatchdogArgs args,
                                         WatchdogClient client)
   {
     String address = args.getArg("-address");

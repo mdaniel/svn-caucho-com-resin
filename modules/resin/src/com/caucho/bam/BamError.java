@@ -101,6 +101,13 @@ public class BamError implements Serializable {
   public static final String REMOTE_CONNECTION_FAILED
     = "remote-connection-failed";
   
+  /**
+   * Error if the target server does not have a bam protocol 
+   * listener available.
+   */
+  public static final String REMOTE_LISTENER_UNAVAILABLE
+    = "remote-listener-unavailable";
+  
   /*
   public static final String RESOURCE_CONSTRAINT = "resource-constraint";
   public static final String RESTRICTED_XML = "restricted-xml";
@@ -405,6 +412,9 @@ public class BamError implements Serializable {
     case REMOTE_CONNECTION_FAILED:
       return new RemoteConnectionFailedException(this);
       
+    case REMOTE_LISTENER_UNAVAILABLE:
+      return new RemoteListenerUnavailableException(this);
+      
     case SERVICE_UNAVAILABLE:
       return new ServiceUnavailableException(this);
 
@@ -456,6 +466,7 @@ public class BamError implements Serializable {
       NOT_AUTHORIZED,
       POLICY_VIOLATION,
       REMOTE_CONNECTION_FAILED,
+      REMOTE_LISTENER_UNAVAILABLE,
       RESOURCE_CONSTRAINT,
       RESTRICTED_XML,
       SEE_OTHER_HOST,
@@ -479,6 +490,8 @@ public class BamError implements Serializable {
                   ErrorGroup.FORBIDDEN);
     _errorMap.put(REMOTE_CONNECTION_FAILED,
                   ErrorGroup.REMOTE_CONNECTION_FAILED);
+    _errorMap.put(REMOTE_LISTENER_UNAVAILABLE,
+                  ErrorGroup.REMOTE_LISTENER_UNAVAILABLE);
     _errorMap.put(SERVICE_UNAVAILABLE,
                   ErrorGroup.SERVICE_UNAVAILABLE);
     _errorMap.put(ITEM_NOT_FOUND,

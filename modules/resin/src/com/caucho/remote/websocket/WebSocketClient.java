@@ -214,7 +214,7 @@ public class WebSocketClient implements WebSocketContext, WebSocketConstants {
     String status = in.readln();
 
     if (! status.startsWith("HTTP")) {
-      throw new IOException(L.l("Unexpected response {0}", status));
+      throw new WebSocketProtocolException(L.l("Unexpected response {0}", status));
     }
     
     String line;
@@ -236,20 +236,10 @@ public class WebSocketClient implements WebSocketContext, WebSocketConstants {
         sb.append((char) ch);
       }
       
-      throw new IOException(L.l("Unexpected response {0}\n\n{1}",
-                                status, sb));
+      throw new WebSocketProtocolException(L.l("Unexpected response {0}\n\n{1}",
+                                               status, sb));
       
     }
-  }
- 
-  private int scanToLf(byte []data)
-  {
-    for (int i = 0; i < data.length; i++) {
-      if (data[i] == '\n')
-        return i;
-    }
-    
-    return -1;
   }
   
   @Override

@@ -31,11 +31,13 @@ package com.caucho.hmtp;
 
 import java.io.IOException;
 import java.io.Serializable;
+import java.net.ConnectException;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
 import com.caucho.bam.BamException;
 import com.caucho.bam.RemoteConnectionFailedException;
+import com.caucho.bam.RemoteListenerUnavailableException;
 import com.caucho.bam.actor.AbstractActorSender;
 import com.caucho.bam.actor.ActorHolder;
 import com.caucho.bam.actor.SimpleActorSender;
@@ -137,10 +139,14 @@ class HmtpLinkFactory implements LinkConnectionFactory {
       return new HmtpLinkConnection(_webSocketClient, webSocketHandler);
     } catch (RuntimeException e) {
       throw e;
-    } catch (IOException e) {
+    } catch (ConnectException e) {
       String msg = "Cannot connect to " + _url + "\n  " + e;
       
       throw new RemoteConnectionFailedException(msg, e);
+    } catch (IOException e) {
+      String msg = "Cannot establish HTTP protocol connection to " + _url + "\n  " + e;
+      
+      throw new RemoteListenerUnavailableException(msg, e);
     }
   }
       

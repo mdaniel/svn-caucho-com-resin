@@ -41,7 +41,7 @@ location, e.g. <code>c:\java\jdk1.6.0_14</code></li>
 <li>Define the environment variable <var>RESIN_HOME</var> to the location of
 Resin, for example <code>c:\resin-4.0.x</code></li>
 <li>Execute <code>resin.exe</code>
-  <ul><li>or run <code>bin/resin.sh start</code></li></ul>
+  <ul><li>or run <code>java -jar lib/resin.jar start</code></li></ul>
 </li>
 <li>Browse to <a href="http://localhost:8080">http://localhost:8080</a></li>
 </ol>
@@ -49,10 +49,10 @@ Resin, for example <code>c:\resin-4.0.x</code></li>
 
 <s2 title="Debian Unix .deb and apt-get">
 <p>
-We provide a Debian packaged version of Resin that Debian and Ubuntu
-users can take advantage of.  It performs all of the installation
-steps above for you and creates all the recommended server and
-content directories.  Simply download from the <a
+Debian users can download a .deb packagated version of Resin
+or use apt-get to install Resin. The Debian package performs all
+of the installation steps above for you and creates all
+the recommended server and content directories.  Simply download from the <a
 href="http://caucho.com/download">Resin download page</a> and install
 using dpkg.
 </p>
@@ -62,19 +62,19 @@ repositories to use automated update tools like Synaptic and apt-get.
 To do this, add the following line to your <var>/etc/apt/sources.list</var>
 </p>
 <example>
-unix> add-apt-repository http://caucho.com/download/debian unstable multiverse
+unix# add-apt-repository http://caucho.com/download/debian unstable multiverse
 </example>
 <p>
 After adding this line, update your local repository cache by running:
 </p>
 <example>
-apt-get update
+unix# apt-get update
 </example>
 <p>
 Finally, install Resin Professional using the following:
 </p>
 <example>
-apt-get install resin-pro
+unix# apt-get install resin-pro
 </example>
 <p>
 If you have a license file for Resin, save it in <var>/var/www/licenses</var>
@@ -83,7 +83,7 @@ If you have a license file for Resin, save it in <var>/var/www/licenses</var>
 Or install Resin Open Source with this command:
 </p>
 <example>
-apt-get install resin
+unix# apt-get install resin
 </example>
 
 </s2>
@@ -97,8 +97,8 @@ http://caucho.com/download/rpm/RPM-GPG-KEY-caucho</a>.
 </p>
 
 <example title="RPM/yum install">
-unix> sudo rpm --import http://caucho.com/download/rpm/RPM-GPG-KEY-caucho
-unix> sudo yum install http://caucho.com/download/rpm/4.0.24/x86_64/resin-pro-4.0.24-1.x86_64.rpm
+unix# rpm --import http://caucho.com/download/rpm/RPM-GPG-KEY-caucho
+unix# yum install http://caucho.com/download/rpm/4.0.24/x86_64/resin-pro-4.0.24-1.x86_64.rpm
 </example>
 
 </s2>
@@ -115,7 +115,7 @@ environment variable <var>JAVA_HOME</var>.</li>
 </li>
 <li><code>make</code></li>
 <li><code>make install</code></li>
-<li>Execute <code>bin/resin.sh console</code>
+<li>Execute <code>resinctl console</code>
   <ul><li>or run <code>java -jar lib/resin.jar console</code></li></ul>
 </li>
 <li>Browse to <a href="http://localhost:8080">http://localhost:8080</a></li>
@@ -144,7 +144,7 @@ configuration and can be changed to listen on the HTTP port 80 instead during
 deployment.</p>
 
 <example title="Example: Starting Resin">
-unix> bin/resin.sh start
+unix> resinctl start
 
 c:\windows> resin start
 </example>
@@ -154,7 +154,7 @@ in "console" mode, which will let you see the logging messages
 in your console.</p>
 
 <example title="Example: Starting Resin in console mode">
-unix> bin/resin.sh console
+unix> resinctl console
 </example>
 
 <p>For more details, see the <a href="http-server.xtp">Resin Web Server</a>
@@ -172,15 +172,26 @@ generate the key from the command line resinctl</p>
 
 <s2 title="Installation with resin.properties and generate-password">
 
+<p>You can generate the user and password properties
+from the command-line. Resin's password must be hashed for security.</p>
+
 <example title="Example: generate-password">
 unix> resinctl generate-password my-user my-password
-admin_user : my-user
-admin_password : {SSHA}HTfP60Ceq0K0IAUNc1wQtBQtql0D+8Wo
+<em>admin_user : my-user
+admin_password : {SSHA}HTfP60Ceq0K0IAvN31wQtBxtql9D+8Wo
+</em>
 </example>
 
 <p>Add the admin_user and admin_password lines to
 the end of the /etc/resin/resin.properties file. You may also use
 those values to change your admin-users.xml file.</p>
+
+<p>You can update the resin.properties in one step on unix
+by using a pipe:</p>
+
+<example title="Example: generate-password for resin.properties">
+unix# resinctl generate-password my-user my-password >> /etc/resin/resin.properties
+</example>
 
 </s2>
 
@@ -208,19 +219,54 @@ documentation</a>.</p>
 <s1 title="Deploying Applications">
 
 <p>Once you've made sure Resin is working, you can start to run
-applications/add content</p>
+applications and add content</p>
 
-<s2 title="Command-line deployment">
+<s2 title="Local network command-line deployment">
 
-<p>Command-line deployment looks like the following example.</p>
+<p>Command-line deployment on a local network deploys a .war file to
+a running Resin server, using the .war file's name as the context-path.
+It looks like the following example.</p>
 
 <example title="Example: command-line deployment">
-bin/resin.sh deploy hello.war
+resinctl deploy hello.war
 
-bin/resin.sh undeploy hello.war
+resinctl undeploy hello.war
 </example>
 
 <p>The URL for the application would be: <em>http://localhost:8080/hello</em>.</p>
+
+<p>To deploy to the root context-path, use a file name ROOT.war.</p>
+
+</s2>
+
+<s2 title="Remote network command-line deployment">
+
+<p>Deploying to a remote network requires some more configuration for
+security reasons:</p>
+
+<ol>
+<li>enable remote administration (disabled by default)</li>
+<li>configure an admin user and password</li>
+</ol>
+
+<p>After the changes, resin.properties will look something like:</p>
+
+<example title="Example: resin.properties for remote deployment">
+...
+
+admin_user          : my-user
+admin_password      : {SSHA}HTfP60Ceq0K0IAvN31wQtBxtql0D+8Wo
+admin_remote_enable : true
+</example>
+
+<p>When you deploy, you will need to give the user and password:</p>
+
+<example title="Example: remote deploy">
+unix> resinctl deploy --user my-user --password my-password hello.war
+</example>
+
+<p>(In 4.0.24, you will need to modify the local resin.properties to
+point to the app server.)</p>
 
 </s2>
 
@@ -251,12 +297,16 @@ The previous steps ran Resin in the foreground, which is convenient
 for development since the logging output goes to the console.
 When running as a daemon, Resin detaches from the console and continues
 running until told to stop.</p>
+
 <p>The following are the basic steps to running Resin as a daemon:</p>
 <ol>
-<li>Start resin with <code>bin/resin.sh start</code></li>
-<li>Stop resin with <code>bin/resin.sh stop</code></li>
-<li>Restart resin with <code>bin/resin.sh restart</code></li>
+<li>Start resin with <code>resinctl start</code></li>
+<li>Stop resin with <code>resinctl stop</code></li>
+<li>Restart resin with <code>resinctl restart</code></li>
 </ol>
+
+<p>The .rpm and .deb files install Resin in /etc/init.d/resin, which will
+start Resin when the system boots.</p>
 
 </s1>
 
@@ -269,7 +319,7 @@ system tasks.</p>
 <p>From the command-line you can generate a pdf-report with the following:</p>
 
 <example title="Example: generating a PDF snapshot report">
-unix> bin/resin.sh pdf-report
+unix> resinctl pdf-report
 
 <em>generated /var/www/log/default-Watchdog-20111010T1426.pdf</em>
 </example>
@@ -279,7 +329,7 @@ the watchdog. The watchdog report will give information about why Resin was
 last stopped.</p>
 
 <example title="Example: generating a PDF watchdog report">
-unix> bin/resin.sh pdf-report -watchdog
+unix> resinctl pdf-report -watchdog
 
 <em>generated /var/www/log/default-Watchdog-20111010T1426.pdf</em>
 </example>

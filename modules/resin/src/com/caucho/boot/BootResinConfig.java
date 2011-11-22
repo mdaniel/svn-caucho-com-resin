@@ -29,7 +29,6 @@
 
 package com.caucho.boot;
 
-import java.io.IOException;
 import java.net.InetAddress;
 import java.net.NetworkInterface;
 import java.util.ArrayList;
@@ -45,7 +44,6 @@ import com.caucho.config.Configurable;
 import com.caucho.config.program.ConfigProgram;
 import com.caucho.config.program.ContainerProgram;
 import com.caucho.env.service.ResinSystem;
-import com.caucho.loader.EnvironmentBean;
 import com.caucho.security.AdminAuthenticator;
 import com.caucho.util.L10N;
 import com.caucho.vfs.Path;
