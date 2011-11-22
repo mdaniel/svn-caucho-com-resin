@@ -14,7 +14,12 @@ try {
 } catch (Exception $e) {
 }
 
-if ($profile) {
+if (! require_professional()) {
+  return;
+} else if (! isset($profile)) {
+  echo "<div class=\"req-pro-message\">This feature compiles JNI.</div>\n";
+}
+else  {
   if ($_POST['action'] == 'stop') {
     $profile->stop();
     sleep(2);
@@ -173,11 +178,6 @@ if ($profile) {
   
     display_profile_results($partition, $groups, $profile);
   }
-}
-else {
-  echo "<h2>Profiling is not available</h2>";
-
-  echo "<p>Profiling requires Resin Professional and compiled JNI</p>";
 }
 
 function gc_entry_cmp($a, $b)

@@ -11,8 +11,6 @@ if (! admin_init()) {
   return;
 }
 
-enable_graph_controls();
-
 $mbean_server = $g_mbean_server;
 $resin = $g_resin;
 $server = $g_server;
@@ -47,7 +45,7 @@ echo "<div id='meter-tab'>\n";
 
 print_graphs();
 
-echo "</div>\n";
+echo "</div><!-- meter-tab -->\n";
 
 echo "<div id='table-tab'>\n";
 
@@ -264,6 +262,8 @@ function print_overview_graphs()
   if (! $stat) {
     return;
   }
+  
+  enable_graph_controls();
     
   $width = 250;
   $height = 150;
@@ -317,9 +317,15 @@ function print_graphs()
   $si = sprintf("%02d", $server->ServerIndex);
   
   $stat = get_stats_service();
-  if (! $stat) {
+  
+  if (! require_professional()) {
+    return;
+  } else if (! $stat) {
+    echo "<div class=\"req-pro-message\">This feature requires &lt;resin:AdminServices/> in resin.xml</div>\n";
     return;
   }
+  
+  enable_graph_controls();
   
 	$width = 250;
 	$height = 150;
@@ -436,6 +442,13 @@ function recent_messages()
   if ($mbean_server) {
     $mbean = $mbean_server->lookup("resin:type=LogService");
   }
+  
+  if (! require_professional()) {
+    return;
+  } else if (! $mbean) {
+    echo "<div class=\"req-pro-message\">This feature requires &lt;resin:AdminServices/> in resin.xml</div>\n";
+    return;
+  }
 
   //
   // recent messages
@@ -448,19 +461,21 @@ function recent_messages()
                                      ($now - 24 * 3600) * 1000,
                                      $now * 1000);
 
+    echo "<h2>Recent Warnings</h2>\n";
+
+    echo "<table class='data'>\n";
+    echo "<thead>\n";
+    echo "<tr><th scope='col' class='date'>Date</th>";
+    echo "    <th scope='col' class='level'>Level</th>";
+    echo "    <th scope='col' class='message'>Message</th></tr>\n";
+    echo "</thead>\n";
+
     if (! empty($messages)) {
-      echo "<h2>Recent Messages</h2>\n";
-
-      echo "<table class='data'>\n";
-      echo "<thead>\n";
-      echo "<tr><th scope='col' class='date'>Date</th>";
-      echo "    <th scope='col' class='level'>Level</th>";
-      echo "    <th scope='col' class='message'>Message</th></tr>\n";
-      echo "</thead>\n";
-
+      
       $messages = array_reverse($messages);
 
       echo "<tbody class='scroll'>\n";
+      
       foreach ($messages as $message) {
         echo "<tr class='{$message->level}'>";
         echo "  <td class='date'>";
@@ -471,11 +486,16 @@ function recent_messages()
         echo "  </td>";
         echo "</tr>";
       }
-
+      
       echo "</tbody>\n";
-      echo "</table>\n";
+    } else {
+      echo "<tbody>\n";
+      echo "<tr><td colspan='3'>No recent warnings</td></tr>\n";
+      echo "</tbody>\n";
     }
-
+      
+    echo "</table>\n";
+    
     //
     // startup
     //
@@ -483,15 +503,16 @@ function recent_messages()
 
     $messages = $mbean->findMessages(($start_time - 15 * 60) * 1000, ($start_time - 2) * 1000);
 
-    if (! empty($messages)) {
-      echo "<h2>Shutdown Messages</h2>\n";
+    echo "<h2>Recent Shutdown Messages</h2>\n";
 
-      echo "<table class='data'>\n";
-      echo "<thead>\n";
-      echo "<tr><th scope='col' class='date'>Date</th>";
-      echo "    <th scope='col' class='level'>Level</th>";
-      echo "    <th scope='col' class='message'>Message</th></tr>\n";
-      echo "</thead>\n";
+    echo "<table class='data'>\n";
+    echo "<thead>\n";
+    echo "<tr><th scope='col' class='date'>Date</th>";
+    echo "    <th scope='col' class='level'>Level</th>";
+    echo "    <th scope='col' class='message'>Message</th></tr>\n";
+    echo "</thead>\n";
+    
+    if (! empty($messages)) {
       
       $messages = array_reverse($messages);
 
@@ -517,8 +538,13 @@ function recent_messages()
       }
 
       echo "</tbody>\n";
-      echo "</table>\n";
+    } else {
+      echo "<tbody>\n";
+      echo "<tr><td colspan='3'>No recent shutdown messages</td></tr>\n";
+      echo "</tbody>\n";
     }
+    
+    echo "</table>\n";
   }
 }
 
@@ -528,10 +554,14 @@ function print_pdf_select()
   global $g_period;
   
   $stat = get_stats_service();
-  if (! $stat) {
+  
+  if (! require_professional()) {
+    return;
+  } else if (! $stat) {
+    echo "<div class=\"req-pro-message\">This feature requires &lt;resin:AdminServices/> in resin.xml</div>\n";
     return;
   }
-
+  
  echo "<h2>Summary PDF Report</h2>\n";
  echo "<form action='pdf-gen.php' method='get' style='display:inline;'>";
   echo "<input type='hidden' name='snapshot' value='true'/>\n";

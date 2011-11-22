@@ -12,6 +12,7 @@ global $g_mbean_server;
 global $g_resin;
 global $g_server;
 global $g_has_graphs;
+global $g_is_professional;
 
 global $g_tail_objects;
 
@@ -61,7 +62,8 @@ function mbean_init()
   global $g_mbean_server;
   global $g_resin;
   global $g_server;
-
+  global $g_is_professional;
+  
   $is_valid = 1;
 
   $g_server_index = $_GET["s"];
@@ -105,6 +107,8 @@ function mbean_init()
   if ($g_mbean_server) {
     $g_resin = $g_mbean_server->lookup("resin:type=Resin");
     $g_server = $g_mbean_server->lookup("resin:type=Server");
+    
+    $g_is_professional = $g_resin->Professional;
 
     return $is_valid;
   }
@@ -1293,6 +1297,33 @@ function display_tail()
   foreach ($g_tail_objects as $tail) {
     $tail->execute();
   }
+}
+
+function require_professional($msg = "This feature requires Resin Professional and a valid license.")
+{
+  global $g_is_professional;
+  
+  if (! $g_is_professional) {
+    echo "<div style=\"display:inline-block;margin:.5em;\">\n";
+    echo "<div class=\"req-pro-title\"><span style=\"color: red\">&#x2717;&nbsp;&nbsp;</span>";
+    echo "Resin Professional Feature</div>\n";
+    
+    if (isset($msg)) {
+      echo "<div class=\"req-pro-message\">${msg}</div>\n";
+    }
+    
+    echo "<div class=\"req-pro-link\">Please download  
+    <a href='http://www.caucho.com/download'> 
+    Resin Professional</a> and request a free 
+    <a href='http://www.caucho.com/evaluation-license/'>evaluation license</a>.
+    </div>\n";
+    
+    echo "</div>\n";
+    
+    return false;
+  }
+  
+  return true;
 }
 
 ?>

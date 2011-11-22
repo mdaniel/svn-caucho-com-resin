@@ -6,6 +6,10 @@ if (! admin_init()) {
   return;
 }
 
+if (! require_professional()) {
+  return;
+}
+
 enable_graph_controls();
 
 echo "<h1>Health"; print_help("Health"); echo "</h1>\n";
@@ -276,14 +280,14 @@ function display_health_logs()
                                            "warning",
                                            ($now - 24 * 3600) * 1000,
                                            $now * 1000);
+    echo "<table class='data'>\n";
+    echo "<thead>\n";
+    echo "<tr><th scope='col' class='date'>Date</th>";
+    echo "    <th scope='col' class='level'>Level</th>";
+    echo "    <th scope='col' class='message'>Message</th></tr>\n";
+    echo "</thead>\n";
+                                           
     if (! empty($messages)) {
-
-      echo "<table class='data'>\n";
-      echo "<thead>\n";
-      echo "<tr><th scope='col' class='date'>Date</th>";
-      echo "    <th scope='col' class='level'>Level</th>";
-      echo "    <th scope='col' class='message'>Message</th></tr>\n";
-      echo "</thead>\n";
     	
       $messages = array_reverse($messages);
 
@@ -300,8 +304,13 @@ function display_health_logs()
       }
 
       echo "</tbody>\n";
-      echo "</table>\n";
+    } else {
+      echo "<tbody>\n";
+      echo "<tr><td colspan='3'>No recent health logs</td></tr>\n";
+      echo "</tbody>\n";
     }
+    
+    echo "</table>\n";
   }
 }
 

@@ -1138,3 +1138,27 @@ of log entries*/
   position: absolute;
   left: -10000px;
 }
+
+.req-pro-title {
+	color : black;
+	font-family: Arial,Helvetica,sans-serif;
+  font-style : italic;
+  font-weight : bold;
+  border-bottom : 1px solid black;
+}
+
+.req-pro-message {
+	margin-top : .75em;
+	margin-left : 1.25em;
+  font-family: Arial,Helvetica,sans-serif;
+	font-style : italic;
+  color : black;
+}
+
+.req-pro-link {
+  margin-top : .75em;
+  margin-left : 1.25em;
+  font-family: Arial,Helvetica,sans-serif;
+  font-style : italic;
+  color : gray;
+}

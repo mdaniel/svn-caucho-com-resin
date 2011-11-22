@@ -12,6 +12,13 @@ if (! admin_init()) {
 $block_cache = $g_mbean_server->lookup("resin:type=BlockManager");
 $proxy_cache = $g_mbean_server->lookup("resin:type=ProxyCache");
 
+if (! require_professional()) {
+  return;
+} else if (! $proxy_cache) {
+  echo "<div class=\"req-pro-message\">This feature requires &lt;proxy-cache> in resin.xml</div>\n";
+  return;
+}
+
 echo "<h1>Proxy Cache";
 print_help("Proxy Cache");
 echo "</h1>";

@@ -13,8 +13,6 @@ if (! admin_init()) {
   return;
 }
 
-enable_graph_controls();
-
 $jvm_thread = $g_mbean_server->lookup("java.lang:type=Threading");
 $server = $g_mbean_server->lookup("resin:type=Server");
 
@@ -175,6 +173,8 @@ function thread_display_summary_graph()
   if (! $stat) {
     return;
   }
+  
+  enable_graph_controls();
   
   $si = sprintf("%02d", $g_server->Index);
 

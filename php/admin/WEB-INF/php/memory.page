@@ -9,8 +9,6 @@ if (! admin_init()) {
   return;
 }
 
-enable_graph_controls();
-
 echo "<h1>JVM Memory"; print_help("Memory"); echo "</h1>";
 
 echo "<div id='memory-tabs'>";
@@ -23,21 +21,26 @@ echo "<div id='graphs'>\n";
 
 $stat_service = $g_mbean_server->lookup("resin:type=StatService");
 
-$si = sprintf("%02d", $g_server->Index);
+if ($stat_service) {
 
-$memory_params = new GraphParams("memory", 600, 200);
-$memory_params->title = "Memory Free";
-$memory_params->alt = "A line graph representing the amount of free memory in each of the heap, tenured, and permgen pools over the last 6 hours.";
-	
-stat_graph($memory_params, array("$si|JVM|Memory|Heap Memory Free",
-																 "$si|JVM|Memory|Tenured Memory Free",
-															   "$si|JVM|Memory|PermGen Memory Free"));
+  enable_graph_controls();
+  
+  $si = sprintf("%02d", $g_server->Index);
+  
+  $memory_params = new GraphParams("memory", 600, 200);
+  $memory_params->title = "Memory Free";
+  $memory_params->alt = "A line graph representing the amount of free memory in each of the heap, tenured, and permgen pools over the last 6 hours.";
   	
-$gc_params = new GraphParams("gc", 600, 200);
-$gc_params->title = "GC Time";
-$gc_params->alt = "A line graph representing the amount of time spent perfoming garbage collection over the last 6 hours.";
-
-stat_graph_regexp($gc_params, "/^$si\|JVM\|Memory\|GC Time/");
+  stat_graph($memory_params, array("$si|JVM|Memory|Heap Memory Free",
+  																 "$si|JVM|Memory|Tenured Memory Free",
+  															   "$si|JVM|Memory|PermGen Memory Free"));
+    	
+  $gc_params = new GraphParams("gc", 600, 200);
+  $gc_params->title = "GC Time";
+  $gc_params->alt = "A line graph representing the amount of time spent perfoming garbage collection over the last 6 hours.";
+  
+  stat_graph_regexp($gc_params, "/^$si\|JVM\|Memory\|GC Time/");
+}
 
 $memoryBean = $g_mbean_server->lookup("resin:type=Memory");
 
@@ -89,8 +92,6 @@ echo "</table>";
 echo "</div>\n";
 echo "<div id='dump'>\n";
 
-echo "<h2>Heap Dump</h2>";
-
 $heap_dump_cl = java_class("com.caucho.profile.HeapDump");
 
 if ($heap_dump_cl->isAvailable()) {
@@ -102,6 +103,8 @@ $is_heap_available_heap = false;
 $heap_file = "/tmp/java.hprof";
 
 if ($heap) {
+  echo "<h2>Heap Dump</h2>";
+  
   echo "<form action='?q=memory' method='post'>";
   echo "Resin Heap Dump: <input type='submit' name='action' value='dump heap'/><br/>";
   echo "JVM Heap Dump: <input type='submit' name='action' value='jvm heap dump'/> (saves JVM binary heap to $heap_file)";
@@ -236,20 +239,22 @@ if (sizeof($entries) > 0) {
     display_heap_dump_subtab("All", $entries);
 }
 else if (! $is_heap_available) {
-  echo "<h2>Heap dump is not available</h2>\n";
-  echo "<p>The heap dump requires Resin Professional and compiled JNI. It\n";
-  echo "also requires an '-agentlib:resin' JVM argument:</p>\n";
+  if (! require_professional()) {
+    
+  } else {
+    echo "<div class=\"req-pro-message\">This feature requires compiled JNI an '-agentlib:resin' JVM argument in resin.xml</div>\n";
 
-  echo "<pre>\n";
-  echo "&lt;resin ...>\n";
-  echo "  &lt;cluster id='...'>\n";
-  echo "    &lt;server id='...'>\n";
-  echo "       ...\n";
-  echo "       &lt;jvm-arg>-agentlib:resin&lt;/jvm-arg>\n";
-  echo "    &lt;/server>\n";
-  echo "  &lt;/cluster>\n";
-  echo "&lt;/resin>\n";
-  echo "</pre>\n";
+    echo "<pre>\n";
+    echo "&lt;resin ...>\n";
+    echo "  &lt;cluster id='...'>\n";
+    echo "    &lt;server id='...'>\n";
+    echo "       ...\n";
+    echo "       &lt;jvm-arg>-agentlib:resin&lt;/jvm-arg>\n";
+    echo "    &lt;/server>\n";
+    echo "  &lt;/cluster>\n";
+    echo "&lt;/resin>\n";
+    echo "</pre>\n";
+  }
 }
 
 echo "</div>\n";

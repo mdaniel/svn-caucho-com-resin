@@ -9,8 +9,6 @@ if (! admin_init()) {
   return;
 }
 
-enable_graph_controls();
-
 global $g_server_index;
 
 global $g_page;
@@ -24,19 +22,18 @@ $server = $g_server;
 
 $stat = get_stats_service();
 
+if (! require_professional()) {
+  return;
+} else if (! $stat) {
+  echo "<div class=\"req-pro-message\">This feature requires &lt;resin:AdminServices/> in resin.xml</div>\n";
+  return;
+}
+
+enable_graph_controls();
+
 echo "<h1>Watchdog";
 print_help("Watchdog");
 echo " Analysis</h1>\n";
-  
-if (! $stat) {
-  ?>
-  <p>Watchdog analysis requires Resin Professional and
-  a &lt;resin:StatService/> and &lt;resin:LogService/> defined in
-  the resin.xml.</p>
-  <?php
-  
-    return;
-}
 
 $index = $g_server->SelfServer->ClusterIndex;
 $si = sprintf("%02d", $index);
@@ -283,15 +280,16 @@ function display_watchdog_logs($log_mbean)
                                        ($restart_time - 60 * 60) * 1000,
                                        ($restart_time) * 1000);
 
-  if (! empty($messages)) {
-    echo "<h2>Log Messages</h2>\n";
+  echo "<h2>Log Messages</h2>\n";
 
-    echo "<table class='data'>\n";
-    echo "<thead>\n";
-    echo "<tr><th scope='col' class='date'>Date</th>";
-    echo "    <th scope='col' class='level'>Level</th>";
-    echo "    <th scope='col' class='message'>Message</th></tr>\n";
-    echo "</thead>\n";
+  echo "<table class='data'>\n";
+  echo "<thead>\n";
+  echo "<tr><th scope='col' class='date'>Date</th>";
+  echo "    <th scope='col' class='level'>Level</th>";
+  echo "    <th scope='col' class='message'>Message</th></tr>\n";
+  echo "</thead>\n";
+    
+  if (! empty($messages)) {
     
     $messages = array_reverse($messages);
 
@@ -317,10 +315,13 @@ function display_watchdog_logs($log_mbean)
     }
 
     echo "</tbody>\n";
-    echo "</table>\n";
   } else {
-    echo "<h2> There are no warnings to show</h2>";
+    echo "<tbody>\n";
+    echo "<tr><td colspan='3'>No log messages</td></tr>\n";
+    echo "</tbody>\n";
   }
+    
+  echo "</table>\n";
 }
 
 function print_pdf_select()
