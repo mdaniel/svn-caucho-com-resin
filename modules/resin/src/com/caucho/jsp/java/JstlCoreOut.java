@@ -52,6 +52,7 @@ public class JstlCoreOut extends JstlNode {
   /**
    * Adds an attribute.
    */
+  @Override
   public void addAttribute(QName name, String value)
     throws JspParseException
   {
@@ -69,6 +70,7 @@ public class JstlCoreOut extends JstlNode {
   /**
    * Adds an attribute.
    */
+  @Override
   public void addAttribute(QName name, JspAttribute value)
     throws JspParseException
   {
@@ -109,17 +111,11 @@ public class JstlCoreOut extends JstlNode {
    *
    * @param os write stream to the generated XML.
    */
+  @Override
   public void printXml(WriteStream os)
     throws IOException
   {
-    String prefix = getNamespacePrefix("http://java.sun.com/jsp/jstl/core");
-
-    if (prefix == null) {
-      prefix = "c";
-      os.print("<c:out xmlns:c='http://java.sun.com/jsp/jstl/core'");
-    }
-    else
-      os.print("<" + prefix + ":out");
+    String prefix = printXmlOpen(os, JSTL_CORE_NS, "out");
 
     if (_value != null) {
       os.print(" value=\"");

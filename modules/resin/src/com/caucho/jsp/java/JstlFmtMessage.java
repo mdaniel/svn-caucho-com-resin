@@ -120,7 +120,7 @@ public class JstlFmtMessage extends JstlNode {
   public void printXml(WriteStream os)
     throws IOException
   {
-    os.print("<fmt:message");
+    String prefix = printXmlOpen(os, JSTL_FMT_NS, "message");
 
     if (_key != null) {
       os.print(" key=\"" + xmlText(_key) + "\"");
@@ -142,7 +142,7 @@ public class JstlFmtMessage extends JstlNode {
 
     printXmlChildren(os);
 
-    os.print("</fmt:message>");
+    os.print("</" + prefix + ":message>");
   }
 
   /**

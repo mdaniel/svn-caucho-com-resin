@@ -86,13 +86,15 @@ public class JstlXmlWhen extends JstlNode {
   public void printXml(WriteStream os)
     throws IOException
   {
-    os.print("<x:when select=\"");
+    String prefix = printXmlOpen(os, JSTL_XML_NS, "when");
+
+    os.print(" select=\"");
     printXmlText(os, _select);
     os.print("\">");
 
     printXmlChildren(os);
 
-    os.print("</x:when>");
+    os.print("</" + prefix + ":when>");
   }
   
   /**

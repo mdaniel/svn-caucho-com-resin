@@ -58,11 +58,13 @@ public class JstlCoreOtherwise extends JstlNode {
   public void printXml(WriteStream os)
     throws IOException
   {
-    os.print("<c:otherwise>");
+    String prefix = printXmlOpen(os, JSTL_CORE_NS, "otherwise");
+    
+    os.print(">");
 
     printXmlChildren(os);
 
-    os.print("</c:otherwise>");
+    os.print("</" + prefix + ":otherwise>");
   }
   
   /**

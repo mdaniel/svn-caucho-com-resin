@@ -252,8 +252,13 @@ public class HostConfig extends DeployConfig {
   {
     String value = regexp.getValue();
 
+    /*
     if (! value.endsWith("$"))
       value = value + "$";
+    
+    if (! value.startsWith("^"))
+      value = "^" + value;
+      */
     
     _regexp = Pattern.compile(value, Pattern.CASE_INSENSITIVE);
   }

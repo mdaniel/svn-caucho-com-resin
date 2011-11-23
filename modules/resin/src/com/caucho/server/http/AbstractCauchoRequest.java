@@ -876,6 +876,7 @@ abstract public class AbstractCauchoRequest implements CauchoRequest {
   /**
    * Returns the Principal representing the logged in user.
    */
+  @Override
   public Principal getUserPrincipal()
   {
     requestLogin();
@@ -897,7 +898,10 @@ abstract public class AbstractCauchoRequest implements CauchoRequest {
       user = login.getUserPrincipal(this);
 
       if (user != null) {
-        getResponse().setPrivateCache(true);
+        CauchoResponse response = getResponse();
+        
+        if (response != null)
+          response.setPrivateCache(true);
       }
       else {
         // server/123h, server/1920

@@ -362,7 +362,8 @@ public class HostController
     for (int i = _hostAliasRegexps.size() - 1; i >= 0; i--) {
       Pattern alias = _hostAliasRegexps.get(i);
 
-      if (alias.matcher(name).find())
+      // server/1f60
+      if (alias.matcher(name).matches())
         return true;
     }
 

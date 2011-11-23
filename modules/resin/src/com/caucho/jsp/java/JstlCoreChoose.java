@@ -83,11 +83,13 @@ public class JstlCoreChoose extends JstlNode {
   public void printXml(WriteStream os)
     throws IOException
   {
-    os.print("<c:choose>");
+    String prefix = printXmlOpen(os, JSTL_CORE_NS, "choose");
+    
+    os.print(">");
 
     printXmlChildren(os);
 
-    os.print("</c:choose>");
+    os.print("</" + prefix + ":choose>");
   }
 
   /**

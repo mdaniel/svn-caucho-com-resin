@@ -96,10 +96,11 @@ public class JstlCoreIf extends JstlNode {
    *
    * @param os write stream to the generated XML.
    */
+  @Override
   public void printXml(WriteStream os)
     throws IOException
   {
-    os.print("<c:if");
+    String prefix = printXmlOpen(os, JSTL_CORE_NS, "if");
     
     os.print(" test=\"");
     if (_testAttr != null)
@@ -110,7 +111,7 @@ public class JstlCoreIf extends JstlNode {
 
     printXmlChildren(os);
 
-    os.print("</c:if>");
+    os.print("</" + prefix + ":if>");
   }
   
   /**

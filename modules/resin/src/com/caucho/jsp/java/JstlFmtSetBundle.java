@@ -87,10 +87,11 @@ public class JstlFmtSetBundle extends JstlNode {
    *
    * @param os write stream to the generated XML.
    */
+  @Override
   public void printXml(WriteStream os)
     throws IOException
   {
-    os.print("<fmt:bundle");
+    String prefix = printXmlOpen(os, JSTL_FMT_NS, "setBundle");
 
     if (_basename != null)
       os.print(" basename=\"" + xmlText(_basename) + "\"");
@@ -105,7 +106,7 @@ public class JstlFmtSetBundle extends JstlNode {
 
     printXmlChildren(os);
 
-    os.print("</fmt:bundle>");
+    os.print("</" + prefix + ":setBundle>");
   }
 
   /**

@@ -76,10 +76,11 @@ public class JstlXmlOut extends JstlNode {
    *
    * @param os write stream to the generated XML.
    */
+  @Override
   public void printXml(WriteStream os)
     throws IOException
   {
-    os.print("<x:out");
+    String prefix = printXmlOpen(os, JSTL_XML_NS, "out");
 
     if (_select != null) {
       os.print(" select=\"");
@@ -92,6 +93,7 @@ public class JstlXmlOut extends JstlNode {
   /**
    * Generates the code for the c:out tag.
    */
+  @Override
   public void generate(JspJavaWriter out)
     throws Exception
   {

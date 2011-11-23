@@ -112,14 +112,7 @@ public class JstlCoreSet extends JstlNode {
   public void printXml(WriteStream os)
     throws IOException
   {
-    String prefix = getNamespacePrefix("http://java.sun.com/jsp/jstl/core");
-
-    if (prefix == null) {
-      prefix = "c";
-      os.print("<c:set xmlns:c='http://java.sun.com/jsp/jstl/core'");
-    }
-    else
-      os.print("<" + prefix + ":set");
+    String prefix = printXmlOpen(os, JSTL_CORE_NS, "set");
 
     if (_value != null) {
       os.print(" value=\"");

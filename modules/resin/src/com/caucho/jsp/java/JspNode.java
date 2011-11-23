@@ -557,6 +557,24 @@ public abstract class JspNode {
    */
   abstract public void printXml(WriteStream os)
     throws IOException;
+  
+  protected String printXmlOpen(WriteStream os,
+                                String ns,
+                                String localName)
+    throws IOException
+  {
+    String prefix = getNamespacePrefix(ns);
+
+    if (prefix == null) {
+      prefix = "c";
+      os.print("<c:" + localName + " xmlns:c='" + ns + "'");
+    }
+    else {
+      os.print("<" + prefix + ":" + localName);
+    }
+    
+    return prefix;
+  }
 
   /**
    * Prints the jsp:id

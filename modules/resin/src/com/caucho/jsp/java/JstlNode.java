@@ -32,6 +32,15 @@ import com.caucho.jsp.JspParseException;
 import com.caucho.xml.QName;
 
 abstract public class JstlNode extends JspContainerNode {
+  protected static final String JSTL_CORE_NS
+    = "http://java.sun.com/jsp/jstl/core";
+  
+  protected static final String JSTL_FMT_NS
+    = "http://java.sun.com/jsp/jstl/fmt";
+  
+  protected static final String JSTL_XML_NS
+    = "http://java.sun.com/jsp/jstl/xml";
+
   /**
    * True if this is a jstl node.
    */
