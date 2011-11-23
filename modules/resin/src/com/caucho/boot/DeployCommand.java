@@ -127,7 +127,14 @@ public class DeployCommand extends AbstractRepositoryCommand {
 
     return 0;
   }
-
+  
+  @Override
+  public String getUsageArgs()
+  {
+    return " <war-file>";
+  }
+  
+  /*
   @Override
   public void usage()
   {
@@ -149,4 +156,5 @@ public class DeployCommand extends AbstractRepositoryCommand {
     System.err.println(L.l("   -version <version>    : version of application formatted as <major.minor.micro.qualifier>"));
     System.err.println(L.l("   -m <message>          : commit message"));
   }
+  */
 }

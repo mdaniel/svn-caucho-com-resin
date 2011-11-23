@@ -34,22 +34,29 @@ import java.net.Socket;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
-import com.caucho.bam.NotAuthorizedException;
 import com.caucho.bam.RemoteConnectionFailedException;
 import com.caucho.bam.RemoteListenerUnavailableException;
 import com.caucho.bam.actor.ActorSender;
 import com.caucho.config.ConfigException;
-import com.caucho.env.repository.CommitBuilder;
 import com.caucho.hmtp.HmtpClient;
 import com.caucho.network.listen.TcpSocketLinkListener;
 import com.caucho.server.admin.HmuxClientFactory;
-import com.caucho.server.admin.WebAppDeployClient;
 import com.caucho.util.L10N;
 
 public abstract class AbstractRemoteCommand extends AbstractBootCommand {
   private static final L10N L = new L10N(AbstractRemoteCommand.class);
   private static final Logger log
     = Logger.getLogger(AbstractRemoteCommand.class.getName());
+  
+  protected AbstractRemoteCommand()
+  {
+    addValueOption("server", "id", "id of a server in the config file");
+    addValueOption("address", "ip", "IP address or host name of (triad) server");
+    addIntValueOption("port", "port", "IP port of (triad) server ");
+    
+    addValueOption("user", "user", "admin user name for authentication");
+    addValueOption("password", "password", "admin password for authentication");
+  }
   
   protected ActorSender createBamClient(WatchdogArgs args,
                                         WatchdogClient client)

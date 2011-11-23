@@ -46,6 +46,19 @@ public abstract class AbstractStartCommand extends AbstractBootCommand
 
   protected AbstractStartCommand()
   {
+    addFlagOption("verbose", "log command-line and environment information");
+    addFlagOption("preview", "run as a preview (staging) server");
+    
+    addValueOption("data-directory", "dir", "override the working directory");
+    addValueOption("join-cluster", "id", "join a cluster as a dynamic server (pro)");
+    addValueOption("root-directory", "dir", "set the root directory");
+    addValueOption("log-directory", "dir", "set the log directory");
+    addValueOption("server", "id", "select a configured server");
+    
+    addIntValueOption("watchdog-port", "port", "set watchdog port to listen to");
+    addIntValueOption("debug-port", "port", "listen to a JVM debug port");
+    addIntValueOption("jmx-port", "port", "listen to an unauthenticated JMX port");
+    
     _options.add("-verbose");
     _options.add("--verbose");
     _options.add("-preview");
