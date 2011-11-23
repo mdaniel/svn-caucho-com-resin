@@ -42,6 +42,12 @@ public class JmxListCommand extends JmxCommand
 {
   private static final L10N L = new L10N(JmxListCommand.class);
   private static final Set<String> options = new HashSet<String>();
+  
+  @Override
+  public String getDescription()
+  {
+    return "lists the JMX MBeans in a Resin server";
+  }
 
   @Override
   public int doCommand(WatchdogArgs args,

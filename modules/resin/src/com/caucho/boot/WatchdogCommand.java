@@ -44,9 +44,9 @@ public final class WatchdogCommand extends AbstractStartCommand
   private static L10N _L;
 
   @Override
-  public String getName()
+  public String getDescription()
   {
-    return "watchdog";
+    return "starts the watchdog in foreground mode (for MacOS-X)";
   }
 
   @Override

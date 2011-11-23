@@ -41,6 +41,12 @@ import com.caucho.vfs.Vfs;
 public class LicenseAddCommand extends AbstractManagementCommand
 {
   private static final L10N L = new L10N(LicenseAddCommand.class);
+  
+  @Override
+  public String getDescription()
+  {
+    return "adds a Resin-Professional license to an installation";
+  }
 
   @Override
   public int doCommand(WatchdogArgs args,

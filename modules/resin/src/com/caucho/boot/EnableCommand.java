@@ -37,6 +37,12 @@ import com.caucho.util.L10N;
 public class EnableCommand extends AbstractScalingCommand
 {
   private static final L10N L = new L10N(EnableCommand.class);
+  
+  @Override
+  public String getDescription()
+  {
+    return "enable a Resin server to receive load-balance requests";
+  }
 
   @Override
   public int doCommand(WatchdogArgs args, WatchdogClient client)

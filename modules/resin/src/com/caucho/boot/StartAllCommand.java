@@ -47,9 +47,9 @@ public class StartAllCommand extends AbstractStartCommand
   private static L10N _L;
 
   @Override
-  public String getName()
+  public String getDescription()
   {
-    return "start-all";
+    return "starts all servers listening to the machine's IP interfaces";
   }
 
   @Override

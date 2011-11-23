@@ -32,53 +32,23 @@ package com.caucho.boot;
 import com.caucho.server.admin.ManagerClient;
 import com.caucho.util.L10N;
 
-import java.util.Arrays;
-import java.util.HashSet;
-
-public class AddUserCommand extends AbstractManagementCommand
+public class UserRemoveCommand extends AbstractManagementCommand
 {
-  private static final L10N L = new L10N(AddUserCommand.class);
+  private static final L10N L = new L10N(UserRemoveCommand.class);
+  
+  @Override
+  public String getDescription()
+  {
+    return "removes an administration user";
+  }
 
   @Override
   public int doCommand(WatchdogArgs args,
                        WatchdogClient client,
                        ManagerClient managerClient)
   {
-    final String user = args.getArg("-u");
-
-    if (user == null) {
-      usage();
-
-      return 3;
-    }
-
-    String passwordString = args.getArg("-p");
-    char []password = null;
-
-    if (passwordString != null)
-      password = passwordString.toCharArray();
-
-    while (password == null) {
-      char []passwordEntry = System.console().readPassword("%s",
-                                                           "enter password:");
-      if (passwordEntry.length <= 8) {
-        System.out.println("password must be greater then 8 characters");
-
-        continue;
-      }
-
-      char []passwordConfirm = System.console().readPassword("%s",
-                                                             "re-enter password:");
-
-      if (Arrays.equals(passwordEntry, passwordConfirm))
-        password = passwordEntry;
-      else
-        System.out.println("passwords do not match");
-    }
-
-    String []roles = args.getTrailingArgs(new HashSet<String>());
-
-    String message = managerClient.addUser(user, password, roles);
+    String user = args.getDefaultArg();
+    String message = managerClient.removeUser(user);
 
     System.out.println(message);
 
@@ -89,17 +59,15 @@ public class AddUserCommand extends AbstractManagementCommand
   public void usage()
   {
     System.err.println(L.l(
-      "usage: bin/resin.sh [-conf <file>] user-add -user <user> -password <password> -u <new user name> [-p <new user password>]"));
+      "usage: bin/resin.sh [-conf <file>] user-remove -address <address> -port <port> -user <user> -password <password> user"));
     System.err.println(L.l(""));
     System.err.println(L.l("description:"));
-    System.err.println(L.l("   adds an administrative user\n"));
+    System.err.println(L.l("   removes specified administrative user\n"));
     System.err.println(L.l(""));
     System.err.println(L.l("options:"));
     System.err.println(L.l("   -address <address>      : ip or host name of the server"));
     System.err.println(L.l("   -port <port>            : server http port"));
     System.err.println(L.l("   -user <user>            : specifies name to use for authorising the request."));
     System.err.println(L.l("   -password <password>    : specifies password to use for authorising the request."));
-    System.err.println(L.l("   -u <new user name>      : specifies name for a new user."));
-    System.err.println(L.l("   -p <new user password>  : specifies password for a new user."));
   }
 }

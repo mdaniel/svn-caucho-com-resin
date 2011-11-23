@@ -33,6 +33,8 @@ import java.util.Set;
 
 public interface BootCommand {
   public String getName();
+  
+  public String getDescription();
 
   public int doCommand(ResinBoot resinBoot, WatchdogArgs args)
     throws BootArgumentException;
@@ -46,4 +48,8 @@ public interface BootCommand {
   public Set<String> getIntValueKeys();
 
   public void usage();
+  
+  public boolean isStart();
+  public boolean isShutdown();
+  public boolean isConsole();
 }

@@ -45,9 +45,9 @@ public class StatusCommand extends AbstractStartCommand
   private static L10N _L;
 
   @Override
-  public String getName()
+  public String getDescription()
   {
-    return "status";
+    return "watchdog and server status";
   }
 
   @Override

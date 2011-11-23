@@ -36,6 +36,12 @@ import com.caucho.util.L10N;
 public class PdfReportCommand extends AbstractManagementCommand
 {
   private static final L10N L = new L10N(PdfReportCommand.class);
+  
+  @Override
+  public String getDescription()
+  {
+    return "creates a PDF report of a Resin server (pro)";
+  }
 
   @Override
   public int doCommand(WatchdogArgs args,

@@ -43,7 +43,35 @@ public abstract class AbstractBootCommand implements BootCommand {
   @Override
   public String getName()
   {
-    return "abstract-boot-command";
+    String name = getClass().getSimpleName();
+    
+    int p = name.indexOf("Command");
+    if (p >= 0)
+      name = name.substring(0, p);
+    
+    StringBuilder sb = new StringBuilder();
+    
+    for (int i = 0; i < name.length(); i++) {
+      char ch = name.charAt(i);
+      
+      if (Character.isUpperCase(ch)) {
+        if (i > 0)
+          sb.append('-');
+        
+        sb.append(Character.toLowerCase(ch));
+      }
+      else {
+        sb.append(ch);
+      }
+    }
+    
+    return sb.toString();
+  }
+  
+  @Override
+  public String getDescription()
+  {
+    return "";
   }
   
   @Override
@@ -161,5 +189,23 @@ public abstract class AbstractBootCommand implements BootCommand {
 
   @Override
   public void usage() {
+  }
+  
+  @Override
+  public boolean isStart()
+  {
+    return false;
+  }
+  
+  @Override
+  public boolean isConsole()
+  {
+    return false;
+  }
+  
+  @Override
+  public boolean isShutdown()
+  {
+    return false;
   }
 }

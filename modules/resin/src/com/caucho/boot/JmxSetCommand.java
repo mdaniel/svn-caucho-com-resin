@@ -39,6 +39,12 @@ import javax.management.ObjectName;
 public class JmxSetCommand extends JmxCommand
 {
   private static final L10N L = new L10N(JmxSetCommand.class);
+  
+  @Override
+  public String getDescription()
+  {
+    return "sets a JMX value for a server MBean";
+  }
 
   @Override
   public int doCommand(WatchdogArgs args,

@@ -45,9 +45,9 @@ public class StopCommand extends AbstractStartCommand
   private static L10N _L;
 
   @Override
-  public String getName()
+  public String getDescription()
   {
-    return "stop";
+    return "stop a Resin server";
   }
 
   @Override

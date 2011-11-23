@@ -41,6 +41,12 @@ import java.io.Writer;
 public class JmxDumpCommand extends JmxCommand
 {
   private static final L10N L = new L10N(JmxDumpCommand.class);
+  
+  @Override
+  public String getDescription()
+  {
+    return "dumps all JMX values from a Resin server";
+  }
 
   @Override
   public int doCommand(WatchdogArgs args,

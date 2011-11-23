@@ -35,6 +35,12 @@ import com.caucho.util.L10N;
 public class DeployStartCommand extends WebAppCommand
 {
   private static final L10N L = new L10N(DeployStartCommand.class);
+  
+  @Override
+  public String getDescription()
+  {
+    return "starts a deployed application";
+  }
 
   @Override
   protected int doCommand(WebAppDeployClient deployClient,

@@ -32,17 +32,22 @@ package com.caucho.boot;
 import com.caucho.server.admin.ManagerClient;
 import com.caucho.util.L10N;
 
-public class RemoveUserCommand extends AbstractManagementCommand
+public class UserListCommand extends AbstractManagementCommand
 {
-  private static final L10N L = new L10N(RemoveUserCommand.class);
+  private static final L10N L = new L10N(UserListCommand.class);
 
+  @Override
+  public String getDescription()
+  {
+    return "lists the administration users";
+  }
+  
   @Override
   public int doCommand(WatchdogArgs args,
                        WatchdogClient client,
                        ManagerClient managerClient)
   {
-    String user = args.getDefaultArg();
-    String message = managerClient.removeUser(user);
+    String message = managerClient.listUsers();
 
     System.out.println(message);
 
@@ -53,10 +58,10 @@ public class RemoveUserCommand extends AbstractManagementCommand
   public void usage()
   {
     System.err.println(L.l(
-      "usage: bin/resin.sh [-conf <file>] user-remove -address <address> -port <port> -user <user> -password <password> user"));
+      "usage: bin/resin.sh [-conf <file>] user-list -address <address> -port <port> -user <user> -password <password>"));
     System.err.println(L.l(""));
     System.err.println(L.l("description:"));
-    System.err.println(L.l("   removes specified administrative user\n"));
+    System.err.println(L.l("   lists administrative users\n"));
     System.err.println(L.l(""));
     System.err.println(L.l("options:"));
     System.err.println(L.l("   -address <address>      : ip or host name of the server"));

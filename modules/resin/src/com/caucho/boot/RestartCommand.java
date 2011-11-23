@@ -45,9 +45,9 @@ public class RestartCommand extends AbstractStartCommand
   private static L10N _L;
 
   @Override
-  public String getName()
+  public String getDescription()
   {
-    return "restart";
+    return "restarts a Resin server";
   }
 
   @Override

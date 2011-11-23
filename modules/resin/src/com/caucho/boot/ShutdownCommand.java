@@ -45,9 +45,9 @@ public class ShutdownCommand extends AbstractStartCommand
   private static L10N _L;
 
   @Override
-  public String getName()
+  public String getDescription()
   {
-    return "shutdown";
+    return "shuts down the watchdog and all its managed Resin servers";
   }
 
   @Override

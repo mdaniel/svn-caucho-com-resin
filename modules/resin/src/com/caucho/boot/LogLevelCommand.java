@@ -42,18 +42,12 @@ public class LogLevelCommand extends AbstractManagementCommand
   
   private static final Map<String, Level> _options = new LinkedHashMap<String, Level>();
   
-  static {
-    _options.put("-all", Level.ALL);
-    _options.put("-finest", Level.FINEST);
-    _options.put("-finer", Level.FINER);
-    _options.put("-fine", Level.FINE);
-    _options.put("-config", Level.CONFIG);
-    _options.put("-info", Level.INFO);
-    _options.put("-warning", Level.WARNING);
-    _options.put("-severe", Level.SEVERE);
-    _options.put("-off", Level.OFF);
+  @Override
+  public String getDescription()
+  {
+    return "sets the java.util.logging level for debugging";
   }
-
+ 
   @Override
   public int doCommand(WatchdogArgs args,
                        WatchdogClient client,
@@ -106,5 +100,17 @@ public class LogLevelCommand extends AbstractManagementCommand
     System.err.println(L.l("options:"));
     System.err.println(L.l("   -<level>             : specifies new log level"));
     System.err.println(L.l("   -active-time         : specifies temporary level active time (default permanent). e.g. 5s"));
+  }
+  
+  static {
+    _options.put("-all", Level.ALL);
+    _options.put("-finest", Level.FINEST);
+    _options.put("-finer", Level.FINER);
+    _options.put("-fine", Level.FINE);
+    _options.put("-config", Level.CONFIG);
+    _options.put("-info", Level.INFO);
+    _options.put("-warning", Level.WARNING);
+    _options.put("-severe", Level.SEVERE);
+    _options.put("-off", Level.OFF);
   }
 }

@@ -34,9 +34,15 @@ import com.caucho.env.repository.CommitBuilder;
 import com.caucho.server.admin.WebAppDeployClient;
 import com.caucho.util.L10N;
 
-public class UnDeployCommand extends AbstractRepositoryCommand
+public class UndeployCommand extends AbstractRepositoryCommand
 {
-  private static final L10N L = new L10N(UnDeployCommand.class);
+  private static final L10N L = new L10N(UndeployCommand.class);
+  
+  @Override
+  public String getDescription()
+  {
+    return "undeploys an application";
+  }
   
   @Override
   public int doCommand(WatchdogArgs args,

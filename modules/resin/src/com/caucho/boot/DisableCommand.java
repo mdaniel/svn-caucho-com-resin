@@ -37,6 +37,12 @@ import com.caucho.util.L10N;
 public class DisableCommand extends AbstractScalingCommand
 {
   private static final L10N L = new L10N(DisableCommand.class);
+  
+  @Override
+  public String getDescription()
+  {
+    return "disables a server for load-balancing";
+  }
 
   @Override
   public int doCommand(WatchdogArgs args, WatchdogClient client)

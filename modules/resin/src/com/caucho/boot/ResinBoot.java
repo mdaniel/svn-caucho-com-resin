@@ -49,7 +49,6 @@ import com.caucho.loader.LibraryLoader;
 import com.caucho.server.resin.ResinELContext;
 import com.caucho.server.webbeans.ResinServerConfigLibrary;
 import com.caucho.util.L10N;
-import com.caucho.vfs.MemoryPath;
 import com.caucho.vfs.NullPath;
 import com.caucho.vfs.Path;
 import com.caucho.vfs.Vfs;
@@ -74,8 +73,8 @@ public class ResinBoot
   private static L10N _L;
   private static Logger _log;
   
-  private static HashMap<StartMode,BootCommand> _commandMap
-    = new HashMap<StartMode,BootCommand>();
+  private static final HashMap<String,BootCommand> _commandMap
+    = new HashMap<String,BootCommand>();
 
   private WatchdogArgs _args;
   private BootResinConfig _resinConfig;
@@ -133,7 +132,7 @@ public class ResinBoot
 
     ResinSystem system;
     
-    if (_args.isConsole()) {
+    if (_args.getCommand().isConsole()) {
       system = new ResinSystem("watchdog",
                                rootDirectory,
                                dataDirectory);
@@ -205,13 +204,13 @@ public class ResinBoot
 
   BootCommand getCommand()
   {
-    return _commandMap.get(_args.getStartMode());
+    return _args.getCommand();
   }
 
   boolean start()
     throws Exception
   {
-    BootCommand command = _commandMap.get(_args.getStartMode());
+    BootCommand command = getCommand();
 
     if (command != null && _args.isHelp()) {
       command.usage();
@@ -303,55 +302,5 @@ public class ResinBoot
       _log = Logger.getLogger(ResinBoot.class.getName());
 
     return _log;
-  }
-  
-  static {
-    _commandMap.put(StartMode.CONSOLE, new ConsoleCommand());
-    _commandMap.put(StartMode.DEPLOY_COPY, new DeployCopyCommand());
-    _commandMap.put(StartMode.DEPLOY, new DeployCommand());
-    _commandMap.put(StartMode.DEPLOY_CONFIG, new DeployConfigCommand());
-    _commandMap.put(StartMode.DEPLOY_LIST, new DeployListCommand());
-    _commandMap.put(StartMode.DEPLOY_RESTART, new DeployRestartCommand());
-    _commandMap.put(StartMode.DEPLOY_START, new DeployStartCommand());
-    _commandMap.put(StartMode.DEPLOY_STOP, new DeployStopCommand());
-    _commandMap.put(StartMode.DISABLE, new DisableCommand());
-    _commandMap.put(StartMode.DISABLE_SOFT, new DisableSoftCommand());
-    _commandMap.put(StartMode.THREAD_DUMP, new DeployStartCommand());
-    _commandMap.put(StartMode.ENABLE, new EnableCommand());
-    
-    _commandMap.put(StartMode.GUI, new GuiCommand());
-    _commandMap.put(StartMode.GENERATE_PASSWORD, new GeneratePasswordCommand());
-    
-    _commandMap.put(StartMode.HEAP_DUMP, new HeapDumpCommand());
-    _commandMap.put(StartMode.JMX_CALL, new JmxCallCommand());
-    _commandMap.put(StartMode.JMX_DUMP, new JmxDumpCommand());
-    _commandMap.put(StartMode.JMX_LIST, new JmxListCommand());
-    _commandMap.put(StartMode.JMX_SET, new JmxSetCommand());
-    _commandMap.put(StartMode.JSPC, new JspcCommand());
-    _commandMap.put(StartMode.KILL, new KillCommand());
-    _commandMap.put(StartMode.LICENSE_ADD, new LicenseAddCommand());
-    _commandMap.put(StartMode.LIST_RESTARTS, new ListRestartsCommand());
-    _commandMap.put(StartMode.LOG_LEVEL, new LogLevelCommand());
-    
-    _commandMap.put(StartMode.PDF_REPORT, new PdfReportCommand());
-    _commandMap.put(StartMode.PROFILE, new ProfileCommand());
-    
-    _commandMap.put(StartMode.RESTART, new RestartCommand());
-    
-    _commandMap.put(StartMode.SHUTDOWN, new ShutdownCommand());
-    _commandMap.put(StartMode.START, new StartCommand());
-    _commandMap.put(StartMode.START_ALL, new StartAllCommand());
-    _commandMap.put(StartMode.START_WITH_FOREGROUND, new StartWithForegroundCommand());
-    _commandMap.put(StartMode.STATUS, new StatusCommand());
-    _commandMap.put(StartMode.STOP, new StopCommand());
-    
-    _commandMap.put(StartMode.THREAD_DUMP, new ThreadDumpCommand());
-    
-    _commandMap.put(StartMode.UNDEPLOY, new UnDeployCommand());
-    _commandMap.put(StartMode.USER_ADD, new AddUserCommand());
-    _commandMap.put(StartMode.USER_LIST, new ListUsersCommand());
-    _commandMap.put(StartMode.USER_REMOVE, new RemoveUserCommand());
-
-    _commandMap.put(StartMode.WATCHDOG, new WatchdogCommand());
   }
 }

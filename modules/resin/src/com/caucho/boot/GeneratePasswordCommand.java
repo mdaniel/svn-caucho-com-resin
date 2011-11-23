@@ -54,9 +54,9 @@ public class GeneratePasswordCommand extends AbstractBootCommand
   }
 
   @Override
-  public String getName()
+  public String getDescription()
   {
-    return "generate-password";
+    return "generates an administrator user and password";
   }
 
   @Override

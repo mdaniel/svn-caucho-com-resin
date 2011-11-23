@@ -42,6 +42,12 @@ public class JmxCallCommand extends JmxCommand
 {
   private static final L10N L = new L10N(JmxCallCommand.class);
   private static final Set<String> options = new HashSet<String>();
+  
+  @Override
+  public String getDescription()
+  {
+    return "calls a JMX operation on a server MBean";
+  }
 
   @Override
   public int doCommand(WatchdogArgs args,

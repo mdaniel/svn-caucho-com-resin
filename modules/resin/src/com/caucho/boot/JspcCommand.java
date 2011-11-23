@@ -40,6 +40,12 @@ public class JspcCommand extends AbstractBootCommand
 {
   private final static Logger log
     = Logger.getLogger(JspcCommand.class.getName());
+  
+  @Override
+  public String getDescription()
+  {
+    return "pre-compiles JSP files";
+  }
 
   @Override
   public int doCommand(WatchdogArgs args, WatchdogClient client)

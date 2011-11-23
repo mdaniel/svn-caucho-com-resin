@@ -39,6 +39,12 @@ import com.caucho.util.L10N;
 public class HeapDumpCommand extends AbstractManagementCommand
 {
   private static final L10N L = new L10N(HeapDumpCommand.class);
+  
+  @Override
+  public String getDescription()
+  {
+    return "produces a JVM memory heap dump";
+  }
 
   @Override
   public int doCommand(WatchdogArgs args,

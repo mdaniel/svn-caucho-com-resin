@@ -46,9 +46,9 @@ public class StartCommand extends AbstractStartCommand
   private static L10N _L;
 
   @Override
-  public String getName()
+  public String getDescription()
   {
-    return "start";
+    return "starts a Resin server";
   }
 
   @Override

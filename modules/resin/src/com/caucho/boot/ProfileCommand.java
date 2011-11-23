@@ -35,6 +35,12 @@ import com.caucho.util.L10N;
 public class ProfileCommand extends AbstractManagementCommand
 {
   private static final L10N L = new L10N(ProfileCommand.class);
+  
+  @Override
+  public String getDescription()
+  {
+    return "gathers a CPU profile of a running server";
+  }
 
   @Override
   public int doCommand(WatchdogArgs args,

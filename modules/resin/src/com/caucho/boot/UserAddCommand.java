@@ -32,16 +32,59 @@ package com.caucho.boot;
 import com.caucho.server.admin.ManagerClient;
 import com.caucho.util.L10N;
 
-public class ListUsersCommand extends AbstractManagementCommand
+import java.util.Arrays;
+import java.util.HashSet;
+
+public class UserAddCommand extends AbstractManagementCommand
 {
-  private static final L10N L = new L10N(ListUsersCommand.class);
+  private static final L10N L = new L10N(UserAddCommand.class);
+  
+  @Override
+  public String getDescription()
+  {
+    return "adds an administration user and password";
+  }
 
   @Override
   public int doCommand(WatchdogArgs args,
                        WatchdogClient client,
                        ManagerClient managerClient)
   {
-    String message = managerClient.listUsers();
+    final String user = args.getArg("-u");
+
+    if (user == null) {
+      usage();
+
+      return 3;
+    }
+
+    String passwordString = args.getArg("-p");
+    char []password = null;
+
+    if (passwordString != null)
+      password = passwordString.toCharArray();
+
+    while (password == null) {
+      char []passwordEntry = System.console().readPassword("%s",
+                                                           "enter password:");
+      if (passwordEntry.length <= 8) {
+        System.out.println("password must be greater then 8 characters");
+
+        continue;
+      }
+
+      char []passwordConfirm = System.console().readPassword("%s",
+                                                             "re-enter password:");
+
+      if (Arrays.equals(passwordEntry, passwordConfirm))
+        password = passwordEntry;
+      else
+        System.out.println("passwords do not match");
+    }
+
+    String []roles = args.getTrailingArgs(new HashSet<String>());
+
+    String message = managerClient.addUser(user, password, roles);
 
     System.out.println(message);
 
@@ -52,15 +95,17 @@ public class ListUsersCommand extends AbstractManagementCommand
   public void usage()
   {
     System.err.println(L.l(
-      "usage: bin/resin.sh [-conf <file>] user-list -address <address> -port <port> -user <user> -password <password>"));
+      "usage: bin/resin.sh [-conf <file>] user-add -user <user> -password <password> -u <new user name> [-p <new user password>]"));
     System.err.println(L.l(""));
     System.err.println(L.l("description:"));
-    System.err.println(L.l("   lists administrative users\n"));
+    System.err.println(L.l("   adds an administrative user\n"));
     System.err.println(L.l(""));
     System.err.println(L.l("options:"));
     System.err.println(L.l("   -address <address>      : ip or host name of the server"));
     System.err.println(L.l("   -port <port>            : server http port"));
     System.err.println(L.l("   -user <user>            : specifies name to use for authorising the request."));
     System.err.println(L.l("   -password <password>    : specifies password to use for authorising the request."));
+    System.err.println(L.l("   -u <new user name>      : specifies name for a new user."));
+    System.err.println(L.l("   -p <new user password>  : specifies password for a new user."));
   }
 }

@@ -38,6 +38,12 @@ public class DeployCopyCommand extends AbstractRepositoryCommand {
   private static final L10N L = new L10N(DeployCopyCommand.class);
   
   @Override
+  public String getDescription()
+  {
+    return "copies a deployment to a new tag name";
+  }
+   
+  @Override
   public int doCommand(WatchdogArgs args,
                        WatchdogClient client,
                        WebAppDeployClient deployClient)

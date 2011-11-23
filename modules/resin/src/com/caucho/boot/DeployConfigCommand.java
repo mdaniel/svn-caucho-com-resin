@@ -40,6 +40,12 @@ public class DeployConfigCommand extends AbstractRepositoryCommand {
   private static final L10N L = new L10N(DeployConfigCommand.class);
   
   @Override
+  public String getDescription()
+  {
+    return "deploys a configuration file or directory";
+  }
+  
+  @Override
   public int doCommand(WatchdogArgs args,
                        WatchdogClient client,
                        WebAppDeployClient deployClient)

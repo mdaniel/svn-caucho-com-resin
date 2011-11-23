@@ -41,6 +41,12 @@ import java.io.Writer;
 public class ThreadDumpCommand extends AbstractManagementCommand
 {
   private static final L10N L = new L10N(ThreadDumpCommand.class);
+  
+  @Override
+  public String getDescription()
+  {
+    return "displays a JVM thread dump summary";
+  }
 
   @Override
   public int doCommand(WatchdogArgs args,

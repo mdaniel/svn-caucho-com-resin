@@ -43,11 +43,11 @@ public class GuiCommand extends AbstractStartCommand
 {
   private static Logger _log;
   private static L10N _L;
-
+  
   @Override
-  public String getName()
+  public String getDescription()
   {
-    return "gui";
+    return "starts a Resin server with a GUI control";
   }
 
   @Override

@@ -35,6 +35,13 @@ import com.caucho.util.L10N;
 public class DeployRestartCommand extends WebAppCommand
 {
   private static final L10N L = new L10N(DeployRestartCommand.class);
+  
+  @Override
+  public String getDescription()
+  {
+    return "restarts a deployed application";
+  }
+  
 
   @Override
   protected int doCommand(WebAppDeployClient deployClient,

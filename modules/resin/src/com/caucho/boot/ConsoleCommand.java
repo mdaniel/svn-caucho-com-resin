@@ -29,8 +29,6 @@
 
 package com.caucho.boot;
 
-import com.caucho.util.L10N;
-
 import java.io.IOException;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -41,13 +39,25 @@ import java.util.logging.Logger;
  */
 public class ConsoleCommand extends AbstractStartCommand
 {
-  private static Logger _log;
-  private static L10N _L;
+  private static final Logger log
+    = Logger.getLogger(ConsoleCommand.class.getName());
+  
+  @Override
+  public String getDescription()
+  {
+    return "start Resin in console mode";
+  }
+  
+  @Override
+  public boolean isConsole()
+  {
+    return true;
+  }
 
   @Override
-  public String getName()
+  public boolean isRetry()
   {
-    return "console";
+    return true;
   }
 
   @Override
@@ -59,24 +69,10 @@ public class ConsoleCommand extends AbstractStartCommand
     try {
       return client.startConsole();
     } catch (IOException e) {
-      log().log(Level.FINE, e.getMessage(), e);
+      log.log(Level.FINE, e.getMessage(), e);
 
       return 1;
     }
-  }
-
-  @Override
-  public boolean isRetry()
-  {
-    return true;
-  }
-
-  private static Logger log()
-  {
-    if (_log == null)
-      _log = Logger.getLogger(ConsoleCommand.class.getName());
-
-    return _log;
   }
 
   @Override

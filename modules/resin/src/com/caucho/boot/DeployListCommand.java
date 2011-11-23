@@ -38,6 +38,12 @@ public class DeployListCommand extends AbstractRepositoryCommand
   private static final L10N L = new L10N(DeployListCommand.class);
   
   @Override
+  public String getDescription()
+  {
+    return "lists all deployed applications";
+  }
+  
+  @Override
   public int doCommand(WatchdogArgs args,
                        WatchdogClient client,
                        WebAppDeployClient deployClient)

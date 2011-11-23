@@ -36,6 +36,12 @@ import com.caucho.util.L10N;
 public class ListRestartsCommand extends AbstractManagementCommand
 {
   private static final L10N L = new L10N(ListRestartsCommand.class);
+  
+  @Override
+  public String getDescription()
+  {
+    return "lists the most recent Resin server restart times";
+  }
 
   @Override
   public int doCommand(WatchdogArgs args,
