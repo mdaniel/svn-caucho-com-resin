@@ -504,15 +504,22 @@ public class Resin
       configureBoot();
 
       if (_serverId == null) {
-        BootClusterConfig cluster = _bootResinConfig.getClusterList().get(0);
-        CloudServer[] servers = cluster.getCloudPod().getServerList();
-        for (CloudServer server : servers) {
-          InetAddress address = InetAddress.getByName(server.getAddress());
-          if (address.isAnyLocalAddress()
-              || address.isLinkLocalAddress())
-            _serverId = server.getId();
+        List<BootClusterConfig> clusters = _bootResinConfig.getClusterList();
+        loop:
+        for (BootClusterConfig cluster : clusters) {
+          CloudServer[] servers = cluster.getCloudPod().getServerList();
+          for (CloudServer server : servers) {
+            InetAddress address = InetAddress.getByName(server.getAddress());
+
+            if (address.isAnyLocalAddress()
+                || address.isLinkLocalAddress()
+                || address.isLoopbackAddress()) {
+              _serverId = server.getId();
+
+              break loop;
+            }
+          }
         }
-        _serverId = cluster.getCloudPod().getServer(0).getId();
       }
 
       if (_serverId == null)
