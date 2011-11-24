@@ -35,6 +35,7 @@ import java.lang.reflect.Constructor;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.net.BindException;
+import java.net.InetAddress;
 import java.net.Socket;
 import java.net.URL;
 import java.util.*;
@@ -130,7 +131,7 @@ public class Resin
 
   private boolean _isEmbedded;
 
-  private String _serverId = "default";
+  private String _serverId = null;
   private final boolean _isWatchdog;
   
   private String _stage = "production";
@@ -473,7 +474,7 @@ public class Resin
 
       // default server id
       if (_args != null) {
-        setServerId(_args.getServerId());
+        //setServerId(_args.getServerId());
 
         if (_args.getRootDirectory() != null)
           setRootDirectory(_args.getRootDirectory());
@@ -495,8 +496,29 @@ public class Resin
         throw new NullPointerException();
       
       addPreTopologyServices();
-      
+
+      ResinServerConfigLibrary.configure(null);
+
       _bootResinConfig = new BootResinConfig(this);
+
+      configureBoot();
+
+      if (_serverId == null) {
+        BootClusterConfig cluster = _bootResinConfig.getClusterList().get(0);
+        CloudServer[] servers = cluster.getCloudPod().getServerList();
+        for (CloudServer server : servers) {
+          InetAddress address = InetAddress.getByName(server.getAddress());
+          if (address.isAnyLocalAddress()
+              || address.isLinkLocalAddress())
+            _serverId = server.getId();
+        }
+        _serverId = cluster.getCloudPod().getServer(0).getId();
+      }
+
+      if (_serverId == null)
+        _serverId = "default";
+
+      _resinSystem.setId(_serverId);
 
       // watchdog/0212
       // else
@@ -506,7 +528,7 @@ public class Resin
       Environment.addChildLoaderListener(new WebBeansAddLoaderListener());
       Environment.addChildLoaderListener(new EjbEnvironmentListener());
       InjectManager cdiManager = InjectManager.create();
-      
+
       ResinVar resinVar = new ResinVar(getServerId(),
                                        getResinHome(),
                                        getRootDirectory(),
@@ -530,7 +552,7 @@ public class Resin
         Config.setProperty("fmt", new FmtFunctions());
 
         ResinConfigLibrary.configure(cdiManager);
-        ResinServerConfigLibrary.configure(cdiManager);
+        //ResinServerConfigLibrary.configure(cdiManager);
 
         try {
           Method method = Jndi.class.getMethod("lookup", new Class[] { String.class });
@@ -651,7 +673,7 @@ public class Resin
   public void setServerId(String serverId)
   {
     if (serverId == null || "".equals(serverId))
-      serverId = "default";
+      return;//      serverId = "default";
     
     //Config.setProperty("serverId", serverId);
     ClassLoader classLoader = ClassLoader.getSystemClassLoader();
@@ -1190,7 +1212,7 @@ public class Resin
       thread.setContextClassLoader(_resinSystem.getClassLoader());
       
       if (_servletContainer == null) {
-        BootResinConfig bootResin = configureBoot();
+        BootResinConfig bootResin = _bootResinConfig;//configureBoot();
   
         _rootDirectory = bootResin.getRootDirectory();
   

@@ -60,7 +60,7 @@ public class ResinSystem
   private static final EnvironmentLocal<ResinSystem> _serverLocal
     = new EnvironmentLocal<ResinSystem>();
 
-  private final String _id;
+  private String _id;
   private EnvironmentClassLoader _classLoader;
   
   private final ConcurrentHashMap<Class<?>,ResinSubSystem> _serviceMap
@@ -99,9 +99,6 @@ public class ResinSystem
    */
   public ResinSystem(String id, ClassLoader loader)
   {
-    if (id == null || id.isEmpty())
-      id = "default";
-    
     _id = id;
 
     if (loader instanceof EnvironmentClassLoader) {
@@ -157,7 +154,7 @@ public class ResinSystem
       throws IOException
   {
     this(id);
-    
+
     configureRoot(rootDirectory, dataDirectory);
   }
 
@@ -176,7 +173,12 @@ public class ResinSystem
       thread.setContextClassLoader(oldLoader);
     }
   }
- 
+
+  public void setId(String id)
+  {
+    _id = id;
+  }
+
   /**
    * Returns the current server
    */
