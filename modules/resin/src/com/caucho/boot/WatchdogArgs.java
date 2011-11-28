@@ -568,6 +568,8 @@ class WatchdogArgs
       sb.append(command.getName());
       sb.append(" - ");
       sb.append(command.getDescription());
+      if (command.isProOnly())
+        sb.append(" (Resin-Pro)");
       
       lastCommand = command;
     }

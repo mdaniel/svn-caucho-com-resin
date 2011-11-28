@@ -222,12 +222,34 @@ public class ResinBoot
       return code != 0;
     }
     else if (command != null) {
-      int code = command.doCommand(this, _args);
+      if (! command.isProOnly() || (command.isProOnly() && isPro())) {
+        int code = command.doCommand(this, _args);
 
-      System.exit(code);
+        System.exit(code);
+      }
+      else {
+        System.err.println(L().l(
+          "command '{0}' is only available with Resin Pro",
+          command.getName()));
+
+        System.exit(ExitCode.UNKNOWN.ordinal());
+      }
     }
 
     throw new IllegalStateException(L().l("Unknown start mode"));
+  }
+
+  private boolean isPro() {
+    boolean isPro = false;
+
+    try {
+      Class resinPro = Class.forName("com.caucho.server.resin.ProResin");
+
+      isPro = true;
+    } catch (ClassNotFoundException e) {
+    }
+
+    return isPro;
   }
 
   /**

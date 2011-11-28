@@ -87,6 +87,12 @@ public class ThreadDumpCommand extends AbstractManagementCommand
   }
 
   @Override
+  public boolean isProOnly()
+  {
+    return false;
+  }
+
+  @Override
   public void usage()
   {
     System.err.println(L.l(

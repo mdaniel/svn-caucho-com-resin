@@ -61,6 +61,12 @@ public class HeapDumpCommand extends AbstractManagementCommand
   }
 
   @Override
+  public boolean isProOnly()
+  {
+    return false;
+  }
+
+  @Override
   public void usage()
   {
     System.err.println(L.l("usage: bin/resin.sh [-conf <file>] [-server <id>] heap-dump [-address <address>] [-port <port>] -user <user> -password <password> [-raw]"));

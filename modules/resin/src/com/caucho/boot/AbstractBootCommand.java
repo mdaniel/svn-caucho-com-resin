@@ -87,7 +87,13 @@ public abstract class AbstractBootCommand implements BootCommand {
   {
     return "";
   }
-  
+
+  @Override
+  public boolean isProOnly()
+  {
+    return false;
+  }
+
   @Override
   public int doCommand(ResinBoot boot, WatchdogArgs args)
   {

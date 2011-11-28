@@ -32,6 +32,8 @@ package com.caucho.boot;
 import java.util.Set;
 
 public interface BootCommand {
+  public boolean isProOnly();
+
   public String getName();
   
   public String getDescription();

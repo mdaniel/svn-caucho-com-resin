@@ -52,6 +52,12 @@ public class StartWithForegroundCommand extends AbstractStartCommand
   }
 
   @Override
+  public String getDescription()
+  {
+    return "starts the watchdog in foreground mode (for MacOS-X)";
+  }
+
+  @Override
   public int doCommand(WatchdogArgs args, WatchdogClient client)
     throws BootArgumentException
   {

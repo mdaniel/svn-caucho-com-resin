@@ -64,6 +64,12 @@ public abstract class AbstractManagementCommand extends AbstractBootCommand {
     }
   }
 
+  @Override
+  public boolean isProOnly()
+  {
+    return true;
+  }
+
   protected abstract int doCommand(WatchdogArgs args,
                                    WatchdogClient client,
                                    ManagerClient managerClient);

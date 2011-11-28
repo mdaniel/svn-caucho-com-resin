@@ -107,6 +107,12 @@ public abstract class AbstractScalingCommand extends AbstractBootCommand
     return 0;
   }
 
+  @Override
+  public boolean isProOnly()
+  {
+    return true;
+  }
+
   public boolean isPro()
   {
     return (scalingClientClass != null);

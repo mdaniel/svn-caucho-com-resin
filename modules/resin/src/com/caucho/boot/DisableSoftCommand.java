@@ -39,6 +39,12 @@ public class DisableSoftCommand extends AbstractScalingCommand
   private static final L10N L = new L10N(DisableSoftCommand.class);
 
   @Override
+  public String getDescription()
+  {
+    return "allows existing sessions to finish and disables the server";
+  }
+
+  @Override
   public int doCommand(WatchdogArgs args, WatchdogClient client)
     throws BootArgumentException
   {
