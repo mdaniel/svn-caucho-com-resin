@@ -54,7 +54,7 @@ public class ResinServerConfigLibrary {
     ResinSystem resinSystem = ResinSystem.getCurrent();
     
     if (resinSystem != null) {
-      value = Config.getProperty(resinSystem.getId() + "." + name);
+      value = getProperty(resinSystem.getId() + "." + name);
 
       if (value != null)
         return value;
@@ -62,7 +62,7 @@ public class ResinServerConfigLibrary {
     
     String serverId = (String) Config.getProperty("server_id");
     if (serverId != null) {
-      value = Config.getProperty(serverId + "." + name);
+      value = getProperty(serverId + "." + name);
       
       if (value != null)
         return value;
@@ -76,19 +76,24 @@ public class ResinServerConfigLibrary {
       selfServer = networkSystem.getSelfServer();
     
     if (selfServer != null) {
-      value = Config.getProperty(selfServer.getId() + "." + name);
+      value = getProperty(selfServer.getId() + "." + name);
       
       if (value != null)
         return value;
       
-      value = Config.getProperty(selfServer.getCluster().getId() + "." + name);
+      value = getProperty(selfServer.getCluster().getId() + "." + name);
       
       if (value != null)
         return value;
     }
     
     
-    return Config.getProperty(name);
+    return getProperty(name);
+  }
+  
+  private static Object getProperty(String name)
+  {
+    return Config.getElVar(name);
   }
   
   public static void configure(InjectManager webBeans)

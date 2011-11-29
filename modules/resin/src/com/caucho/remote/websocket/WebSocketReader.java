@@ -30,10 +30,7 @@
 package com.caucho.remote.websocket;
 
 import java.io.IOException;
-import java.io.InputStream;
 import java.io.Reader;
-
-import com.caucho.util.L10N;
 
 /**
  * WebSocketReader reads a single WebSocket packet.
@@ -45,8 +42,6 @@ import com.caucho.util.L10N;
 public class WebSocketReader extends Reader
   implements WebSocketConstants
 {
-  private static final L10N L = new L10N(WebSocketReader.class);
-
   private FrameInputStream _is;
 
   private boolean _isFinal;
@@ -147,51 +142,6 @@ public class WebSocketReader extends Reader
     }
     else
       return -1;
-  }
-
-  private void readFrameHeader()
-    throws IOException
-  {
-    FrameInputStream is = _is;
-
-    if (_isFinal || _length > 0)
-      throw new IllegalStateException();
-
-    while (! _isFinal && _length == 0) {
-      int frame1 = is.read();
-      int frame2 = is.read();
-
-      boolean isFinal = (frame1 & FLAG_FIN) == FLAG_FIN;
-      int op = frame1 & 0xf;
-
-      if (op != OP_CONT) {
-        throw new IOException(L.l("{0}: expected op=CONT '0x{1}' because WebSocket binary protocol expects 0x80 at beginning",
-                                  this, Integer.toHexString(frame1 & 0xffff)));
-      }
-
-      _isFinal = isFinal;
-
-      long length = frame2 & 0x7f;
-
-      if (length < 0x7e) {
-      }
-      else if (length == 0x7e) {
-        length = ((((long) is.read()) << 8)
-            + (((long) is.read())));
-      }
-      else {
-        length = ((((long) is.read()) << 56)
-            + (((long) is.read()) << 48)
-            + (((long) is.read()) << 40)
-            + (((long) is.read()) << 32)
-            + (((long) is.read()) << 24)
-            + (((long) is.read()) << 16)
-            + (((long) is.read()) << 8)
-            + (((long) is.read())));
-      }
-
-      _length = length;
-    }
   }
 
   @Override

@@ -149,7 +149,12 @@ public abstract class AbstractRemoteCommand extends AbstractBootCommand {
                                        String userName,
                                        String password)
   {
-    WatchdogClient triad = findLiveTriad(client);
+    WatchdogClient triad;
+    
+    if (address != null && ! "".equals(address) && port > 0)
+      triad = findTriad(client, address, port);
+    else
+      triad = findLiveTriad(client);
 
     if (triad == null)
       return null;
@@ -184,6 +189,23 @@ public abstract class AbstractRemoteCommand extends AbstractBootCommand {
       
       if (triad.getIndex() > 2)
         break;
+    }
+    
+    return null;
+  }
+  
+  private WatchdogClient findTriad(WatchdogClient client,
+                                   String address,
+                                   int port)
+  {
+    for (WatchdogClient server : client.getConfig().getCluster().getClients()) {
+      if (! address.equals(server.getConfig().getAddress()))
+        continue;
+      
+      if (port != server.getConfig().getPort())
+        continue;
+      
+      return server;
     }
     
     return null;

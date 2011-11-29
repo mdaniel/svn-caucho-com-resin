@@ -747,6 +747,16 @@ public class Config {
     else
       return null;
   }
+  
+  public static Object getElVar(String var)
+  {
+    ELContext context = getEnvironment();
+    
+    if (context != null)
+      return context.getELResolver().getValue(context, null, var);
+    
+    return getProperty(var);
+  }
 
   /**
    * Sets an EL configuration variable.

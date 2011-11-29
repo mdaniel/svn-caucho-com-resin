@@ -35,18 +35,46 @@ import com.caucho.util.L10N;
 
 import javax.management.MalformedObjectNameException;
 import javax.management.ObjectName;
-import java.util.HashSet;
-import java.util.Set;
+
+import java.util.ArrayList;
 
 public class JmxListCommand extends JmxCommand
 {
   private static final L10N L = new L10N(JmxListCommand.class);
-  private static final Set<String> options = new HashSet<String>();
+  
+  // private static final Set<String> options = new HashSet<String>();
+  
+  public JmxListCommand()
+  {
+    addFlagOption("attributes", "prints MBean's attributes");
+    addFlagOption("values", "prints attribute values");
+    addFlagOption("operations", "prints operations");
+    addFlagOption("all", "when <pattern> not specified sets the wildcard pattern (*:*)");
+    addFlagOption("platform", "when <pattern> not specified sets the pattern to (java.lang:*)");
+    
+    /*
+    options.add("-attributes");
+    options.add("-values");
+    options.add("-operations");
+    options.add("-all");
+    options.add("-platform");
+    System.err.println(L.l("   -attributes            : prints MBean's attributes"));
+    System.err.println(L.l("   -values                : prints attribute values"));
+    System.err.println(L.l("   -operations            : prints operations"));
+    System.err.println(L.l("   -all                   : when <pattern> not specified sets the wildcard pattern (*:*)"));
+    System.err.println(L.l("   -platform              : when <pattern> not specified sets the pattern to (java.lang:*)"));
+    */
+  }
   
   @Override
   public String getDescription()
   {
     return "lists the JMX MBeans in a Resin server";
+  }
+  
+  public String getUsageArgs()
+  {
+    return " [<pattern>]";
   }
 
   @Override
@@ -54,11 +82,12 @@ public class JmxListCommand extends JmxCommand
                        WatchdogClient client,
                        ManagerClient managerClient)
   {
-    String []trailingArgs = args.getTrailingArgs(options);
+    // String []trailingArgs = args.getTrailingArgs(options);
+    ArrayList<String> trailingArgs = args.getTailArgs();
 
     String pattern = null;
-    if (trailingArgs.length > 0)
-      pattern = trailingArgs[0];
+    if (trailingArgs.size() > 0)
+      pattern = trailingArgs.get(0);
 
     if (pattern != null) {
       try {
@@ -90,6 +119,7 @@ public class JmxListCommand extends JmxCommand
     return 0;
   }
 
+  /*
   @Override
   public void usage()
   {
@@ -100,19 +130,9 @@ public class JmxListCommand extends JmxCommand
                            + "to the rules defined for javax.management.ObjectName (default resin:*)"));
     System.err.println(L.l(""));
     System.err.println(L.l("options:"));
-    System.err.println(L.l("   -attributes            : prints MBean's attributes"));
-    System.err.println(L.l("   -values                : prints attribute values"));
-    System.err.println(L.l("   -operations            : prints operations"));
-    System.err.println(L.l("   -all                   : when <pattern> not specified sets the wildcard pattern (*:*)"));
-    System.err.println(L.l("   -platform              : when <pattern> not specified sets the pattern to (java.lang:*)"));
   }
 
   static {
-    options.add("-attributes");
-    options.add("-values");
-    options.add("-operations");
-    options.add("-all");
-    options.add("-platform");
   }
-
+  */
 }

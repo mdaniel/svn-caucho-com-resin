@@ -40,10 +40,25 @@ public class JmxSetCommand extends JmxCommand
 {
   private static final L10N L = new L10N(JmxSetCommand.class);
   
+  public JmxSetCommand()
+  {
+    addValueOption("pattern", "pattern",
+      "pattern to match MBean, adheres to the rules defined for javax.managment.ObjectName e.g. qa:type=Foo");
+    
+    addValueOption("attribute", "attribute",
+                   "name of the attribute");
+  }
+  
   @Override
   public String getDescription()
   {
     return "sets a JMX value for a server MBean";
+  }
+  
+  @Override
+  public String getUsageArgs()
+  {
+    return " value";
   }
 
   @Override
@@ -84,8 +99,7 @@ public class JmxSetCommand extends JmxCommand
     return 0;
   }
 
-
-
+  /*
   @Override
   public void usage()
   {
@@ -98,4 +112,5 @@ public class JmxSetCommand extends JmxCommand
     System.err.println(L.l("   -pattern               : pattern to match MBean, adheres to the rules defined for javax.managment.ObjectName e.g. qa:type=Foo"));
     System.err.println(L.l("   -attribute             : name of the attribute"));
   }
+  */
 }

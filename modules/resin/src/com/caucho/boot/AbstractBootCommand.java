@@ -245,7 +245,8 @@ public abstract class AbstractBootCommand implements BootCommand {
     System.err.println("usage: resinctl [--options] " + getName()
                        + getUsageArgs());
     System.err.println();
-    System.err.println("  " + getDescription());
+    System.err.println("  " + getDescription()
+                       + (isProOnly() ? " (Resin Pro)" : ""));
     System.err.println();
     System.err.println("where options include:");
     System.err.print(getOptionUsage());

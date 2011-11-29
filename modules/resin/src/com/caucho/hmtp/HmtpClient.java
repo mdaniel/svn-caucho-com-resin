@@ -202,9 +202,9 @@ public class HmtpClient implements ActorSender {
 
         if (testSignature.equals(serverSignature)) {
         }
-        else if ("".equals(uid)) {
-          throw new BamException(L.l("{0} resin-system-auth-key does not match the server's value",
-                                      this));
+        else if ("".equals(uid) && ! "".equals(password)) {
+          throw new NotAuthorizedException(L.l("{0} resin-system-auth-key does not match the server's value",
+                                               this));
         }
 
         String signature = _authManager.sign(serverAlgorithm, 

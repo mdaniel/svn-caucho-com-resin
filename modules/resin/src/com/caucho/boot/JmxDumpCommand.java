@@ -42,6 +42,11 @@ public class JmxDumpCommand extends JmxCommand
 {
   private static final L10N L = new L10N(JmxDumpCommand.class);
   
+  public JmxDumpCommand()
+  {
+    addValueOption("file", "file", "file where the JMX dump will be saved");
+  }
+  
   @Override
   public String getDescription()
   {
@@ -82,6 +87,7 @@ public class JmxDumpCommand extends JmxCommand
     }
   }
 
+  /*
   @Override
   public void usage()
   {
@@ -94,4 +100,5 @@ public class JmxDumpCommand extends JmxCommand
     System.err.println(L.l("options:"));
     System.err.println(L.l("   -file <file>          : file name where jmx dump will be stored"));
   }
+  */
 }

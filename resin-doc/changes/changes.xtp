@@ -12,6 +12,12 @@
 
 <s2 title="4.0.25 - snapshot">
 <ul>
+<li>config: rvar should work like an EL var lookup (#4879)</li>
+<li>debian: change /var/www ownership to 'resin' for rpm consistency</li>
+<li>cli/deploy: deploy with --address when local machine has resinctl (#4868)</li>
+<li>jsp: pageContext.errorData.throwable could grab the wrong exception attribute (#4874, rep by mate)</li>
+<li>cli: update/normalization of usage messages</li>
+<li>jstl: validation of JSTL fast-mode c:if, etc. (#4866)</li>
 <li>vhosts: host-alias-regexp needs to have implicit anchors for the pattern (#4859, rep by Rick Mann)</li>
 <li>server: NPE on getUserPrincipal() (#4862, rep by wtao)</li>
 </ul>

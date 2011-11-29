@@ -78,6 +78,14 @@ public class ManagerClient
 
     _managerAddress = "manager@" + serverId + ".resin.caucho";
   }
+  
+  public ManagerClient(ActorSender bamClient)
+  {
+    _bamClient = bamClient;
+
+    // _managerAddress = "manager@" + serverId + ".resin.caucho";
+    _managerAddress = bamClient.getAddress();
+  }
 
   /*
   public ManagerClient(String serverId, String userName, String password)

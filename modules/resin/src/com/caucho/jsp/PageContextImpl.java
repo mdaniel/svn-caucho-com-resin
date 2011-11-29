@@ -931,6 +931,7 @@ public class PageContextImpl extends PageContext
     _errorPage = errorPage;
   }
 
+  @Override
   public Exception getException()
   {
     return (Exception) getThrowable();
@@ -944,7 +945,7 @@ public class PageContextImpl extends PageContext
     Throwable exn = (Throwable) getCauchoRequest().getAttribute(EXCEPTION);
 
     if (exn == null)
-      exn = (Throwable) getCauchoRequest().getAttribute(RequestDispatcher.ERROR_EXCEPTION_TYPE);
+      exn = (Throwable) getCauchoRequest().getAttribute(RequestDispatcher.ERROR_EXCEPTION);
     if (exn == null)
       exn = (Throwable) getCauchoRequest().getAttribute("javax.servlet.jsp:jspException");
 

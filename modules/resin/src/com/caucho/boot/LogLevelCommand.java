@@ -42,6 +42,27 @@ public class LogLevelCommand extends AbstractManagementCommand
   
   private static final Map<String, Level> _options = new LinkedHashMap<String, Level>();
   
+  public LogLevelCommand()
+  {
+    addFlagOption("all", "all logs (rare to use)");
+    addFlagOption("finest", "finest debugging log");
+    addFlagOption("finer", "finer debugging logs (developer-level)");
+    addFlagOption("fine", "finer debugging logs (admin/user-level)");
+    addFlagOption("config", "configuration debugging logs");
+    addFlagOption("info", "default logging level");
+    addFlagOption("warning", "non-fatal warnings");
+    addFlagOption("severe", "severe, typically fatal warnings");
+    addFlagOption("off", "disable logging");
+    
+    addValueOption("active-time", "time", "specifies temporary level active time (default permanent). e.g. 5s");
+  }
+  
+  @Override
+  public String getUsageArgs()
+  {
+    return " loggers...";
+  }
+  
   @Override
   public String getDescription()
   {
@@ -89,6 +110,7 @@ public class LogLevelCommand extends AbstractManagementCommand
     return 0;
   }
 
+  /*
   @Override
   public void usage()
   {
@@ -101,6 +123,7 @@ public class LogLevelCommand extends AbstractManagementCommand
     System.err.println(L.l("   -<level>             : specifies new log level"));
     System.err.println(L.l("   -active-time         : specifies temporary level active time (default permanent). e.g. 5s"));
   }
+  */
   
   static {
     _options.put("-all", Level.ALL);

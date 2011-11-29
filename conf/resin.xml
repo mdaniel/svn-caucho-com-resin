@@ -152,14 +152,12 @@
         <!--
            - Sets max-age for cacheable pages, e.g. static pages.
           -->
-        <resin:if test="${resin.professional}">
-          <cache-mapping url-pattern="/" max-age="5s"/>
-          <cache-mapping url-pattern="*.gif" max-age="60s"/>
-          <cache-mapping url-pattern="*.jpg" max-age="60s"/>
-          <cache-mapping url-pattern="*.png" max-age="60s"/>
-          <cache-mapping url-pattern="*.css" max-age="60s"/>
-          <cache-mapping url-pattern="*.js" max-age="60s"/>
-         </resin:if>
+        <cache-mapping url-pattern="/" max-age="5s"/>
+        <cache-mapping url-pattern="*.gif" max-age="60s"/>
+        <cache-mapping url-pattern="*.jpg" max-age="60s"/>
+        <cache-mapping url-pattern="*.png" max-age="60s"/>
+        <cache-mapping url-pattern="*.css" max-age="60s"/>
+        <cache-mapping url-pattern="*.js" max-age="60s"/>
       </web-app-default>
       
       <!--

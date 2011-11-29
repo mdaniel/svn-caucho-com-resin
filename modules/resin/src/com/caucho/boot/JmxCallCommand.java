@@ -43,10 +43,22 @@ public class JmxCallCommand extends JmxCommand
   private static final L10N L = new L10N(JmxCallCommand.class);
   private static final Set<String> options = new HashSet<String>();
   
+  public JmxCallCommand()
+  {
+    addValueOption("pattern", "pattern", "pattern to match MBean");
+    addValueOption("operation", "operation", "operation to invoke");
+  }
+  
   @Override
   public String getDescription()
   {
     return "calls a JMX operation on a server MBean";
+  }
+  
+  @Override
+  public String getUsageArgs()
+  {
+    return " value...";
   }
 
   @Override
@@ -91,6 +103,7 @@ public class JmxCallCommand extends JmxCommand
     return 0;
   }
 
+  /*
   @Override
   public void usage()
   {
@@ -103,4 +116,5 @@ public class JmxCallCommand extends JmxCommand
     System.err.println(L.l("   -pattern               : pattern to match MBean, adheres to the rules defined for javax.managment.ObjectName e.g. qa:type=Foo"));
     System.err.println(L.l("   -operation             : operation to invoke"));
   }
+  */
 }
