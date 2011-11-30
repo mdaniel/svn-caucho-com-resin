@@ -592,8 +592,11 @@ abstract public class Column {
       = index.lookup(block, rowOffset + getColumnOffset(), getLength());
 
     if (value != rowAddr)
-      throw new IllegalStateException(L.l("invalid index '{0}' at {1}",
-                                          value, Long.toHexString(rowAddr)));
+      throw new IllegalStateException(L.l("{0}: invalid index (key={1}, index value={2}, row addr={3})",
+                                          this, 
+                                          getIndexKeyCompare().toString(block, rowOffset + getColumnOffset(), getLength()),
+                                          Long.toHexString(value), 
+                                          Long.toHexString(rowAddr)));
   }
   
   /**

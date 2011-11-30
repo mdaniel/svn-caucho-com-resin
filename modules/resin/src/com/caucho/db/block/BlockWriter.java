@@ -34,7 +34,6 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 
 import com.caucho.env.thread.TaskWorker;
-import com.caucho.util.Alarm;
 
 /**
  * Writer thread serializing dirty blocks.
@@ -45,10 +44,11 @@ public class BlockWriter extends TaskWorker {
   
   private final BlockStore _store;
   
-  private int _writeQueueMax = 256;
+  // private int _writeQueueMax = 256;
   private final ArrayList<Block> _writeQueue = new ArrayList<Block>();
   
-  //private final BlockWriteQueue _blockWriteQueue = new BlockWriteQueue();
+  private final BlockWriteQueue _blockWriteQueue
+    = new BlockWriteQueue(this);
   
   BlockWriter(BlockStore store)
   {
@@ -68,6 +68,8 @@ public class BlockWriter extends TaskWorker {
    */
   void addDirtyBlockNoWake(Block block)
   {
+    boolean isWake = false;
+/*
     synchronized (_writeQueue) {
       if (_writeQueueMax < _writeQueue.size()) {
         wake();
@@ -80,21 +82,24 @@ public class BlockWriter extends TaskWorker {
 
       _writeQueue.add(block);
     }
+    */
 
-    /*
     synchronized (_blockWriteQueue) {
-      if (! _blockWriteQueue.isEmpty())
-        wake();
+      if (_blockWriteQueue.isFilled())
+        isWake = true;
     
       _blockWriteQueue.addDirtyBlock(block);
     }
-    */
+    
+    if (isWake)
+      wake();
   }
 
   boolean copyDirtyBlock(long blockId, Block block)
   {
     Block writeBlock = null;
-    
+
+    /*
     synchronized (_writeQueue) {
       int size = _writeQueue.size();
 
@@ -108,12 +113,12 @@ public class BlockWriter extends TaskWorker {
         }
       }
     }
+    */
 
-    /*
     synchronized (_blockWriteQueue) {
       writeBlock = _blockWriteQueue.findBlock(blockId);
     }
-    */
+
     
     if (writeBlock != null)
       return writeBlock.copyToBlock(block);
@@ -131,8 +136,10 @@ public class BlockWriter extends TaskWorker {
   
   void waitForComplete(long timeout)
   {
-    // _blockWriteQueue.waitForComplete(timeout);
-
+    wake();
+    
+    _blockWriteQueue.waitForComplete(timeout);
+/*
     long expires = Alarm.getCurrentTimeActual() + timeout;
     
     synchronized (_writeQueue) {
@@ -153,6 +160,7 @@ public class BlockWriter extends TaskWorker {
         }
       }
     }
+      */
   }
   
   @Override
@@ -164,8 +172,6 @@ public class BlockWriter extends TaskWorker {
 
       while (true) {
         Block block = peekFirstBlock();
-        
-        // Block block = _blockWriteQueue.peekFirstBlock();
 
         if (block != null) {
           retry = retryMax;
@@ -174,7 +180,6 @@ public class BlockWriter extends TaskWorker {
             block.writeFromBlockWriter();
           } finally {
             removeFirstBlock();
-            // _blockWriteQueue.removeFirstBlock();
           }
         }
         else if (retry-- <= 0) {
@@ -200,6 +205,7 @@ public class BlockWriter extends TaskWorker {
 
   private Block peekFirstBlock()
   {
+    /*
     synchronized (_writeQueue) {
       if (_writeQueue.size() > 0) {
         Block block = _writeQueue.get(0);
@@ -209,16 +215,27 @@ public class BlockWriter extends TaskWorker {
     }
     
     return null;
+    */
+    
+    synchronized (_blockWriteQueue) {
+      return _blockWriteQueue.peekFirstBlock();
+    }
   }
 
   private void removeFirstBlock()
   {
+    /*
     synchronized (_writeQueue) {
       if (_writeQueue.size() > 0) {
         _writeQueue.remove(0);
         
         _writeQueue.notifyAll();
       }
+    }
+    */
+    
+    synchronized (_blockWriteQueue) {
+      _blockWriteQueue.removeFirstBlock();
     }
   }
   

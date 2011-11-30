@@ -747,8 +747,10 @@ public class BlockStore {
       _blockCount = newBlockCount;
       _freeAllocIndex = 0;
 
-      if (getAllocation(newBlockCount) != ALLOC_FREE)
-        System.out.println("BAD_BLOCK: " + newBlockCount);
+      if (getAllocation(newBlockCount) != ALLOC_FREE) {
+        System.out.println(this + " BAD_BLOCK: " + newBlockCount
+                           + " " + getAllocation(newBlockCount));
+      }
 
       setAllocation(newBlockCount, ALLOC_USED);
     }

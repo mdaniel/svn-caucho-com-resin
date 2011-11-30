@@ -536,9 +536,11 @@ public class Table extends BlockStore {
   /**
    * Rebuilds the indexes
    */
-  public void validateIndexes()
+  private boolean validateIndexes()
     throws IOException, SQLException
   {
+    boolean isValid = false;
+    
     DbTransaction xa = DbTransaction.create();
     xa.setAutoCommit(true);
 
@@ -557,20 +559,20 @@ public class Table extends BlockStore {
         byte []blockBuffer = iter.getBuffer();
 
         while (iter.nextRow()) {
-          try {
-            long rowAddress = iter.getRowAddress();
-            int rowOffset = iter.getRowOffset();
+          long rowAddress = iter.getRowAddress();
+          int rowOffset = iter.getRowOffset();
 
-            for (int i = 0; i < columns.length; i++) {
-              Column column = columns[i];
+          for (int i = 0; i < columns.length; i++) {
+            Column column = columns[i];
 
-              column.validateIndex(xa, blockBuffer, rowOffset, rowAddress);
-            }
-          } catch (Exception e) {
-            log.log(Level.WARNING, e.toString(), e);
+            column.validateIndex(xa, blockBuffer, rowOffset, rowAddress);
           }
         }
       }
+      
+      isValid = true;
+    } catch (Exception e) {
+      log.log(Level.WARNING, e.toString(), e);
     } finally {
       if (iter != null)
         iter.free();
@@ -578,6 +580,8 @@ public class Table extends BlockStore {
       xa.commit();
       
     }
+    
+    return isValid;
   }
 
   private void writeTableHeader(WriteStream os)

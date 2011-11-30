@@ -52,6 +52,7 @@ public class BlockReadWrite {
   private final static L10N L = new L10N(BlockReadWrite.class);
   
   private final static long FILE_SIZE_INCREMENT = 32L * 1024 * 1024; 
+  // private final static long FILE_SIZE_INCREMENT = 64 * 1024; 
 
   private final BlockStore _store;
   private final BlockManager _blockManager;
@@ -129,7 +130,7 @@ public class BlockReadWrite {
   void init()
     throws IOException
   {
-    RandomAccessWrapper wrapper = openRowFile(true);
+    RandomAccessWrapper wrapper = openRowFile(true, FILE_SIZE_INCREMENT);
     boolean isPriority = true;
 
     try {
@@ -180,19 +181,21 @@ public class BlockReadWrite {
                                 byte []buffer, int offset, int length)
       throws IOException
   {
+    long blockAddress = blockId & BlockStore.BLOCK_MASK;
+    
     boolean isPriority = false;
-    RandomAccessWrapper wrapper = openRowFile(isPriority);
+    RandomAccessWrapper wrapper = openRowFile(isPriority, 
+                                              blockAddress + length);
 
     try {
       RandomAccessStream is = wrapper.getFile();
 
-      long blockAddress = blockId & BlockStore.BLOCK_MASK;
-
-      if (blockAddress < 0 || _fileSize < blockAddress + length) {
+      long fileSize = is.getLength();
+      if (blockAddress < 0 || fileSize < blockAddress + length) {
         throw new IllegalStateException(L.l("block at 0x{0} is invalid for file {1} (length 0x{2})",
                                             Long.toHexString(blockAddress),
                                             _path,
-                                            Long.toHexString(_fileSize)));
+                                            Long.toHexString(fileSize)));
       }
 
       // System.out.println("READ: " + Long.toHexString(blockAddress));
@@ -232,13 +235,7 @@ public class BlockReadWrite {
   {
     RandomAccessWrapper wrapper;
     
-    synchronized (_fileLock) {
-      while (_fileSize < blockAddress + length) {
-        _fileSize += FILE_SIZE_INCREMENT;
-      }
-    }
-
-    wrapper = openRowFile(isPriority);
+    wrapper = openRowFile(isPriority, blockAddress + length);
 
     try {
       RandomAccessStream os = wrapper.getFile();
@@ -264,9 +261,12 @@ public class BlockReadWrite {
   /**
    * Opens the underlying file to the database.
    */
-  private RandomAccessWrapper openRowFile(boolean isPriority)
+  private RandomAccessWrapper openRowFile(boolean isPriority,
+                                          long addressMax)
     throws IOException
   {
+    long fileSize = extendFile(addressMax);
+    
     // limit number of active row files
 
     if (! isPriority && ! _isMmap) {
@@ -282,7 +282,7 @@ public class BlockReadWrite {
 
     RandomAccessWrapper wrapper = null;
     try {
-      wrapper = openRowFileImpl();
+      wrapper = openRowFileImpl(fileSize);
 
       return wrapper;
     } catch (RuntimeException e) {
@@ -296,11 +296,62 @@ public class BlockReadWrite {
         _rowFileSemaphore.release();
     }
   }
+  
+  private long extendFile(long addressMax)
+    throws IOException
+  {
+    long fileSize = _fileSize;
+    
+    if (addressMax <= fileSize)
+      return fileSize;
+  
+    long newFileSize = fileSize;
+    
+    while (newFileSize < addressMax) {
+      newFileSize += FILE_SIZE_INCREMENT;
+    }
+    
+    synchronized (_fileLock) {
+      if (_fileSize < newFileSize) {
+        RandomAccessWrapper wrapper = openRowFileImpl(newFileSize);
+        
+        RandomAccessStream stream = null;
+        
+        try {
+          if (wrapper != null)
+            stream = wrapper.getFile();
+          
+          if (stream == null)
+            throw new IllegalStateException(this + " cannot open");
+          
+          long fileLength = stream.getLength();
+            
+          if (fileLength < newFileSize) {
+            stream.write(newFileSize - 1, new byte[1], 0, 1);
+          }
+          
+          fileLength = stream.getLength();
+          
+          if (newFileSize < fileLength)
+            newFileSize = fileLength;
+        } finally {
+          closeRowFile(wrapper, true);
+        }
+        
+        if (stream.getLength() < newFileSize)
+          throw new IllegalStateException("bad file length: " + stream + " " + stream.getLength());
+        
+        _fileSize = newFileSize;
+      }
+      
+      return _fileSize;
+    }
+  }
 
   /**
    * Opens the underlying file to the database.
    */
-  private RandomAccessWrapper openRowFileImpl()
+  private RandomAccessWrapper openRowFileImpl(long fileSize)
     throws IOException
   {
     RandomAccessStream file = null;
@@ -318,7 +369,7 @@ public class BlockReadWrite {
     if (wrapper != null) {
       file = wrapper.getFile();
       
-      if (_mmapFile.get() != null && file.getLength() != _fileSize)
+      if (_mmapFile.get() != null && file.getLength() != fileSize)
         file = null;
     }
 
@@ -328,7 +379,7 @@ public class BlockReadWrite {
       file = null;
 
       if (path != null) {
-        file = streamOpenRead();
+        file = streamOpen(fileSize);
       }
       
       if (file == null)
@@ -338,7 +389,7 @@ public class BlockReadWrite {
     return new RandomAccessWrapper(file);
   }
   
-  private RandomAccessStream streamOpenRead()
+  private RandomAccessStream streamOpen(long fileSize)
     throws IOException
   {
     int retry = 8;
@@ -350,30 +401,23 @@ public class BlockReadWrite {
     while (retry-- >= 0) {
       RandomAccessStream mmapFile = _mmapFile.get();
       
-      if (mmapFile != null && mmapFile.getLength() == _fileSize) {
+      if (mmapFile != null && mmapFile.getLength() == fileSize) {
         return mmapFile;
       }
       
       synchronized (_mmapFile) {
         mmapFile = _mmapFile.get();
 
-        if (mmapFile != null && mmapFile.getLength() == _fileSize) {
+        if (mmapFile != null && mmapFile.getLength() == fileSize) {
           return mmapFile;
         }
 
         RandomAccessStream file = null;
 
         if (_isEnableMmap) {
-          long fileSize = _fileSize;
-
-          if (fileSize == 0)
-            fileSize = FILE_SIZE_INCREMENT;
-
           file = _path.openMemoryMappedFile(fileSize);
 
           if (file != null) {
-            _fileSize = fileSize;
-
             _isMmap = true;
 
             if (_mmapFile.compareAndSet(mmapFile, file)) {

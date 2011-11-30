@@ -44,17 +44,21 @@ public final class DatabaseLock implements ReadWriteLock {
   private final static 
     AtomicLongFieldUpdater<DatabaseLock> _lockCountUpdater;
 
-  private static final long LOCK_WAIT = 1L << 32;
-  private static final long LOCK_WAIT_MASK = 0xffffffffL << 32;
+  private static final long LOCK_WRITE = 1L << 60;
+  private static final long LOCK_WRITE_MASK = 1L << 60;
   
-  private static final long LOCK_WRITE = 1L << 31;
-  private static final long LOCK_WRITE_MASK = 1L << 31;
+  private static final long LOCK_WRITE_WAIT = 1L << 40;
+  private static final long LOCK_WRITE_WAIT_MASK = 0xfffffL << 40;
+  
+  private static final long LOCK_READ_WAIT = 1L << 20;
+  private static final long LOCK_READ_WAIT_MASK = 0xfffffL << 20;
   
   private static final long LOCK_READ = 1L;
-  private static final long LOCK_READ_MASK = 0x7fffffffL;
+  private static final long LOCK_READ_MASK = 0xfffffL;
   
   private static final long LOCK_MASK = LOCK_WRITE_MASK | LOCK_READ_MASK;
-  private static final long LOCK_CAN_READ_MASK = LOCK_WRITE_MASK | LOCK_WAIT_MASK;
+  private static final long LOCK_WAIT_MASK
+    = LOCK_READ_WAIT_MASK|LOCK_WRITE_WAIT_MASK;
   
   private final Lock _readLock = new ReadLockImpl();
   private final Lock _writeLock = new WriteLockImpl();
@@ -123,7 +127,7 @@ public final class DatabaseLock implements ReadWriteLock {
       isValid = true;
     } finally {
       if (! isValid)
-        unlockWait();
+        unlockReadWait();
     }
   }
   
@@ -144,7 +148,7 @@ public final class DatabaseLock implements ReadWriteLock {
       isValid = true;
     } finally {
       if (! isValid)
-        unlockWait();
+        unlockWriteWait();
     }
   }
  
@@ -170,12 +174,12 @@ public final class DatabaseLock implements ReadWriteLock {
     do {
       lock = _lockCount;
       
-      isQuickLock = isLockCanRead(lock);
+      isQuickLock = isLockCanReadQuick(lock);
       
       if (isQuickLock)
         newLock = lock + LOCK_READ;
       else
-        newLock = lock + LOCK_WAIT;
+        newLock = lock + LOCK_READ_WAIT;
     } while (! _lockCountUpdater.compareAndSet(this, lock, newLock));
     
     return isQuickLock;
@@ -190,25 +194,36 @@ public final class DatabaseLock implements ReadWriteLock {
     do {
       lock = _lockCount;
       
-      isQuickLock = isLockCanWrite(lock);
+      isQuickLock = isLockCanWriteQuick(lock);
       
       if (isQuickLock)
         newLock = lock + LOCK_WRITE;
       else
-        newLock = lock + LOCK_WAIT;
+        newLock = lock + LOCK_WRITE_WAIT;
     } while (! _lockCountUpdater.compareAndSet(this, lock, newLock));
     
     return isQuickLock;
   }
   
-  private void unlockWait()
+  private void unlockReadWait()
   {
     long lock;
     long newLock;
     
     do {
       lock = _lockCount;
-      newLock = lock - LOCK_WAIT;
+      newLock = lock - LOCK_READ_WAIT;
+    } while (! _lockCountUpdater.compareAndSet(this, lock, newLock));
+  }
+  
+  private void unlockWriteWait()
+  {
+    long lock;
+    long newLock;
+    
+    do {
+      lock = _lockCount;
+      newLock = lock - LOCK_WRITE_WAIT;
     } while (! _lockCountUpdater.compareAndSet(this, lock, newLock));
   }
   
@@ -229,7 +244,7 @@ public final class DatabaseLock implements ReadWriteLock {
 
     if (isWaiter) {
       synchronized (this) {
-        this.notify();
+        notify();
       }
     }
   }
@@ -251,7 +266,7 @@ public final class DatabaseLock implements ReadWriteLock {
 
     if (isWaiter) {
       synchronized (this) {
-        this.notify();
+        notify();
       }
     }
   }
@@ -263,7 +278,7 @@ public final class DatabaseLock implements ReadWriteLock {
         long lock;
 
         while (isLockCanRead(lock = _lockCount)) {
-          long newLock = lock + LOCK_READ - LOCK_WAIT;
+          long newLock = lock + LOCK_READ - LOCK_READ_WAIT;
           
           if (_lockCountUpdater.compareAndSet(this, lock, newLock)) {
             return;
@@ -277,7 +292,7 @@ public final class DatabaseLock implements ReadWriteLock {
         }
         
         try {
-          this.wait(delta);
+          wait(delta);
         } catch (Exception e) {
         }
       }
@@ -291,7 +306,7 @@ public final class DatabaseLock implements ReadWriteLock {
         long lock;
 
         while (isLockCanWrite(lock = _lockCount)) {
-          long newLock = lock + LOCK_WRITE - LOCK_WAIT;
+          long newLock = lock + LOCK_WRITE - LOCK_WRITE_WAIT;
           
           if (_lockCountUpdater.compareAndSet(this, lock, newLock)) {
             return;
@@ -301,11 +316,11 @@ public final class DatabaseLock implements ReadWriteLock {
         long delta = expires - Alarm.getCurrentTimeActual();
         
         if (delta <= 0) {
-          throw new LockTimeoutException();
+          throw new LockTimeoutException("write timeout 0x" + Long.toHexString(lock));
         }
         
         try {
-          this.wait(delta);
+          wait(delta);
         } catch (Exception e) {
         }
       }
@@ -314,12 +329,24 @@ public final class DatabaseLock implements ReadWriteLock {
   
   private static boolean isLockCanRead(long lock)
   {
-    return (lock & LOCK_CAN_READ_MASK) == 0 || (lock & LOCK_MASK) == 0;
+    return ((lock & LOCK_MASK) == 0)
+            || (lock & (LOCK_WRITE_MASK|LOCK_WRITE_WAIT_MASK)) == 0;
   }
   
   private static boolean isLockCanWrite(long lock)
   {
     return (lock & LOCK_MASK) == 0;
+  }
+  
+  private static boolean isLockCanReadQuick(long lock)
+  {
+    return ((lock & LOCK_MASK) == 0)
+            || (lock & (LOCK_WRITE_MASK|LOCK_WRITE_WAIT_MASK)) == 0;
+  }
+  
+  private static boolean isLockCanWriteQuick(long lock)
+  {
+    return lock == 0;
   }
 
   @Override

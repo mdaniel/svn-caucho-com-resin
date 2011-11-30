@@ -29,14 +29,9 @@
 
 package com.caucho.db.block;
 
-import java.util.ArrayList;
-import java.util.concurrent.atomic.AtomicBoolean;
-import java.util.concurrent.atomic.AtomicInteger;
-import java.util.concurrent.atomic.AtomicReferenceArray;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
-import com.caucho.env.thread.TaskWorker;
 import com.caucho.util.Alarm;
 
 /**
@@ -46,72 +41,88 @@ public class BlockWriteQueue {
   private final static Logger log
     = Logger.getLogger(BlockWriteQueue.class.getName());
   
+  private final BlockWriter _writer;
+  
   private final int _queueSize = 1024;
   
   // private final Block []_writeQueue;
-  private final AtomicReferenceArray<Block> _writeQueue
-    = new AtomicReferenceArray<Block>(_queueSize);
+  private final Block []_writeQueue = new Block[_queueSize];
   
-  private final AtomicInteger _head = new AtomicInteger();
-  private final AtomicInteger _tail = new AtomicInteger();
+  private int _head;
+  private int _tail;
   
-  private final AtomicBoolean _isWait = new AtomicBoolean();
+  private boolean _isWait;
+  
+  BlockWriteQueue(BlockWriter writer)
+  {
+    _writer = writer;
+  }
 
   /**
-   * Adds a block that's needs to be flushed.
+   * Adds a block that needs to be flushed.
    */
   void addDirtyBlock(Block block)
   {
     int head;
-    int tail;
     int nextHead;
+
+    Block foundBlock = findBlock(block.getBlockId());
     
-    do {
-      head = _head.get();
+    if (foundBlock == block)
+      return;
+
+    while (true) {
+      head = _head;
       nextHead = (head + 1) % _queueSize;
       
-      tail = _tail.get();
-      
-      if (nextHead == tail) {
-        synchronized (_isWait) {
-          try {
-            _isWait.set(true);
-            _isWait.wait(100); 
-          } catch (Exception e) {
-            log.log(Level.FINER, e.toString(), e);
-          }
-        }
+      if (nextHead != _tail) {
+        _writeQueue[head] = block;
+        _head = nextHead;
+        return;
       }
-    } while (! _head.compareAndSet(head, nextHead));
-    
-    _writeQueue.set(head, block);
-  }
-
-  boolean copyDirtyBlock(long blockId, Block block)
-  {
-    Block writeBlock = null;
-    
-    int head = _head.get();
-    int tail = _tail.get();
-    
-    for (; head != tail; head = (head + _queueSize - 1) % _queueSize) {
-      Block testBlock = _writeQueue.get(head);
       
-      if (testBlock != null && testBlock.getBlockId() == block.getBlockId()) {
-        return testBlock.copyToBlock(block);
+      _writer.wake();
+        
+      try {
+        _isWait = true;
+        wait(100); 
+      } catch (Exception e) {
+        log.log(Level.FINER, e.toString(), e);
       }
     }
-    
-    return false;
   }
+
+  Block peekFirstBlock()
+  {
+    Block block = _writeQueue[_tail];
+    
+    return block;
+  }
+  
+  void removeFirstBlock()
+  {
+    int tail = _tail;
+    int head = _head;
+    
+    if (head == tail)
+      throw new IllegalStateException();
+
+    _writeQueue[tail] = null;
+    _tail = (tail + 1) % _queueSize;
+    
+    wake();
+  }
+  
 
   Block findBlock(long blockId)
   {
-    int head = _head.get();
-    int tail = _tail.get();
+    int m1 = _queueSize - 1;
     
-    for (; head != tail; head = (head + _queueSize - 1) % _queueSize) {
-      Block testBlock = _writeQueue.get(head);
+    int ptr = (_head + m1) % _queueSize;;
+    int prevTail = (_tail + m1) % _queueSize;
+    
+    for (; ptr != prevTail; ptr = (ptr + m1) % _queueSize) {
+      Block testBlock = _writeQueue[ptr];
       
       if (testBlock != null && testBlock.getBlockId() == blockId) {
         return testBlock;
@@ -126,64 +137,37 @@ public class BlockWriteQueue {
     long expireTime = Alarm.getCurrentTimeActual() + timeout;
     
     while (Alarm.getCurrentTimeActual() < expireTime) {
-      int head = _head.get();
-      int tail = _tail.get();
-      
-      if (head == tail)
+      if (isEmpty())
         return;
       
-      synchronized (_isWait) {
-        _isWait.set(true);
+      _isWait = true;
         
-        try {
-          _isWait.wait(100);
-        } catch (Exception e) {
-          
-        }
+      try {
+        wait(100);
+      } catch (Exception e) {
       }
     }
-  }
-
-  Block peekFirstBlock()
-  {
-    int tail = _tail.get();
-    
-    Block block = _writeQueue.get(tail);
-    
-    return block;
   }
   
   boolean isEmpty()
   {
-    return _head.get() == _tail.get();
-  }
-
-  void removeFirstBlock()
-  {
-    int head;
-    int tail;
-    
-    do {
-      tail = _tail.get();
-      head = _head.get();
-      
-      if (head == tail)
-        return;
-      
-      // Block block = _writeQueue.get(tail);
-      
-      _writeQueue.set(tail, null);
-    } while (! _tail.compareAndSet(tail, (tail + 1) % _queueSize));
-    
-    wake();
+    return _head == _tail;
   }
   
+  boolean isFilled()
+  {
+    int length = (_head - _tail + _queueSize) % _queueSize;
+    
+    return _queueSize <= 2 * length;
+  }
+
   private void wake()
   {
-    synchronized (_isWait) {
-      if (_isWait.getAndSet(false)) {
-        _isWait.notifyAll();
-      }
+    boolean isWait = _isWait;
+    _isWait = false;
+    
+    if (isWait) {
+      notifyAll();
     }
   }
   

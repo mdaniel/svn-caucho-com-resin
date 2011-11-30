@@ -127,8 +127,9 @@ abstract public class RandomAccessStream
     do {
       count = _useCount.get();
       
-      if (count <= 0)
+      if (count <= 0) {
         return false;
+      }
     } while (! _useCount.compareAndSet(count, count + 1));
     
     return true;
