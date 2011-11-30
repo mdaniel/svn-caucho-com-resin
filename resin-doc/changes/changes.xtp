@@ -12,6 +12,7 @@
 
 <s2 title="4.0.25 - snapshot">
 <ul>
+<li>cache: timing in mmap file extension could truncate (#4854, rep by georgbuschbeck)</li>
 <li>config: rvar should work like an EL var lookup (#4879)</li>
 <li>debian: change /var/www ownership to 'resin' for rpm consistency</li>
 <li>cli/deploy: deploy with --address when local machine has resinctl (#4868)</li>

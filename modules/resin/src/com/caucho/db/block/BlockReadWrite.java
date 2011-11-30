@@ -331,7 +331,7 @@ public class BlockReadWrite {
           }
           
           fileLength = stream.getLength();
-          
+
           if (newFileSize < fileLength)
             newFileSize = fileLength;
         } finally {
@@ -480,7 +480,9 @@ public class BlockReadWrite {
 
     if (! isPriority && ! _isMmap)
       _rowFileSemaphore.release();
-
+    
+    // wrapper.close();
+    
     RandomAccessStream file = wrapper.getFile();
     
     if (file != null)
