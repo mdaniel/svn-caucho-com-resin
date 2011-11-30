@@ -66,7 +66,7 @@ public class Environment {
 
   private static boolean _isInitComplete;
   
-  // private static EnvironmentClassLoader _envSystemClassLoader;
+  private static ClassLoader _systemClassLoader;
 
   /**
    * Returns the local environment.
@@ -79,6 +79,11 @@ public class Environment {
       if (loader instanceof EnvironmentClassLoader)
         return (EnvironmentClassLoader) loader;
     }
+    
+    loader = getSystemClassLoader();
+    
+    if (loader instanceof EnvironmentClassLoader)
+      return (EnvironmentClassLoader) loader;
 
     return null;
   }
@@ -972,18 +977,17 @@ public class Environment {
 
     return _log;
   }
-
-  /*
-  static {
+  
+  private static ClassLoader getSystemClassLoader()
+  {
     try {
-      ClassLoader systemClassLoader = ClassLoader.getSystemClassLoader();
-      
-      if (systemClassLoader instanceof EnvironmentClassLoader)
-        _envSystemClassLoader
-          = (EnvironmentClassLoader) systemClassLoader;
+      if (_systemClassLoader == null)
+        _systemClassLoader = ClassLoader.getSystemClassLoader();
     } catch (Exception e) {
       // can't log this early in startup
+      _systemClassLoader = Environment.class.getClassLoader();
     }
+    
+    return _systemClassLoader;
   }
-  */
 }

@@ -83,8 +83,8 @@ public class ManagerClient
   {
     _bamClient = bamClient;
 
-    // _managerAddress = "manager@" + serverId + ".resin.caucho";
-    _managerAddress = bamClient.getAddress();
+    _managerAddress = "manager@resin.caucho";
+    // _managerAddress = bamClient.getAddress();
   }
 
   /*
