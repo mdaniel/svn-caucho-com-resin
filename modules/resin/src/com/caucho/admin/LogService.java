@@ -13,6 +13,7 @@ import javax.ejb.Startup;
 import javax.inject.Singleton;
 
 import com.caucho.config.*;
+import com.caucho.config.types.Period;
 import com.caucho.env.log.LogSystem;
 import com.caucho.server.resin.Resin;
 import com.caucho.util.L10N;
@@ -70,5 +71,15 @@ public class LogService
       throw new ConfigException(L.l("'{0}' is an unknown log level.  Log levels are:\noff - disable logging\nsevere - severe errors only\nwarning - warnings\ninfo - information\nconfig - configuration\nfine - fine debugging\nfiner - finer debugging\nfinest - finest debugging\nall - all debugging",
                                     level));
     }
-  }  
+  }
+  
+  /**
+   * Sets the length of time the log entries will be saved before being
+   * removed. 
+   */
+  @Configurable
+  public void setExpireTimeout(Period period)
+  {
+    _logSystem.setExpireTimeout(period.getPeriod());
+  }
 }

@@ -29,18 +29,20 @@
 
 package com.caucho.boot;
 
-import com.caucho.server.admin.ManagerClient;
-import com.caucho.util.IoUtil;
-import com.caucho.util.L10N;
-
 import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.io.Writer;
 
+import com.caucho.server.admin.ManagerClient;
+import com.caucho.util.IoUtil;
+
 public class ThreadDumpCommand extends AbstractManagementCommand
 {
-  private static final L10N L = new L10N(ThreadDumpCommand.class);
+  public ThreadDumpCommand()
+  {
+    addValueOption("file", "file", "file name where thread dump will be stored");
+  }
   
   @Override
   public String getDescription()
@@ -92,6 +94,7 @@ public class ThreadDumpCommand extends AbstractManagementCommand
     return false;
   }
 
+  /*
   @Override
   public void usage()
   {
@@ -110,4 +113,5 @@ public class ThreadDumpCommand extends AbstractManagementCommand
     System.err.println(L.l("   -password <password>  : password used for authentication to the server"));
     System.err.println(L.l("   -file <file>          : file name where thread dump will be stored"));
   }
+  */
 }

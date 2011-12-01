@@ -135,6 +135,7 @@ public class StartWithForegroundCommand extends AbstractStartCommand
     return _L;
   }
 
+  /*
   @Override
   public void usage()
   {
@@ -154,4 +155,5 @@ public class StartWithForegroundCommand extends AbstractStartCommand
     System.out.println("   -debug-port <port>    : configure a debug port");
     System.out.println("   -jmx-port <port>      : configure an unauthenticated jmx port");
   }
+  */
 }

@@ -37,10 +37,21 @@ public class PdfReportCommand extends AbstractManagementCommand
 {
   private static final L10N L = new L10N(PdfReportCommand.class);
   
+  public PdfReportCommand()
+  {
+    addValueOption("path", "file", "path to a PDF-generating .php file");
+    addValueOption("period", "time", "specifies look-back period of time (default 7D)");
+    addValueOption("report", "value", "specifies the report-type key (default Snapshot)");
+    addValueOption("logdir", "dir", "PDF output directory (default to resin log)");
+    addFlagOption("snapshot", "saves heap-dump, thread-dump, jmx-dump before generating report");
+    addValueOption("profile-time", "time", "turns code profiling on for a time before generating report");
+    addValueOption("profile-sample", "time", "specifies profiling sampling frequency (100ms)");
+  }
+  
   @Override
   public String getDescription()
   {
-    return "creates a PDF report of a Resin server (pro)";
+    return "creates a PDF report of a Resin server";
   }
 
   @Override
@@ -66,7 +77,12 @@ public class PdfReportCommand extends AbstractManagementCommand
       profileTime = Period.toPeriod(profileTimeArg);
 
     long samplePeriod = -1;
-    String samplePeriodArg = args.getArg("-sample-period");
+    String samplePeriodArg = null;
+    
+    if (samplePeriodArg == null)
+      samplePeriodArg = args.getArg("-profile-sample");
+    if (samplePeriodArg == null)
+      samplePeriodArg = args.getArg("-sample-period");
     if (samplePeriodArg != null)
       samplePeriod = Period.toPeriod(samplePeriodArg, 1);
 
@@ -87,6 +103,7 @@ public class PdfReportCommand extends AbstractManagementCommand
     return 0;
   }
 
+  /*
   @Override
   public void usage()
   {
@@ -104,4 +121,5 @@ public class PdfReportCommand extends AbstractManagementCommand
     System.err.println(L.l("   -profile-time    : turns code profiling on for specified time (2 min - max) and includes profiling data into report e.g. '-profile-time 30s'" ));
     System.err.println(L.l("   -sample-period   : specifies sampling frequency for the profiler in milliseconds: e.g. '-sample-period 50' (default 100ms)" ));
   }
+  */
 }

@@ -63,6 +63,15 @@ public class LogSystem extends AbstractResinSubSystem
     throw new UnsupportedOperationException(getClass().getName());
   }
   
+  public void setExpireTimeout(long timeout)
+  {
+  }
+  
+  public long getExpireTimeout()
+  {
+    return -1;
+  }
+  
   public String createFullType(String name)
   {
     throw new UnsupportedOperationException(getClass().getName());

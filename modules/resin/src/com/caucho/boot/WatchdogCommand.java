@@ -46,7 +46,7 @@ public final class WatchdogCommand extends AbstractStartCommand
   @Override
   public String getDescription()
   {
-    return "starts the watchdog in foreground mode (for MacOS-X)";
+    return "(deprecated) starts the watchdog in foreground mode (MacOS-X)";
   }
 
   @Override
@@ -80,6 +80,7 @@ public final class WatchdogCommand extends AbstractStartCommand
     return _log;
   }
 
+  /*
   @Override
   public void usage()
   {
@@ -100,4 +101,5 @@ public final class WatchdogCommand extends AbstractStartCommand
     System.out.println("   -debug-port <port>    : configure a debug port");
     System.out.println("   -jmx-port <port>      : configure an unauthenticated jmx port");
   }
+  */
 }

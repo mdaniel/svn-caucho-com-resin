@@ -38,6 +38,9 @@ package com.caucho.management.server;
  */
 public interface LogServiceMXBean extends ManagedObjectMXBean
 {
+  public long getExpireTimeout();
+  public void setExpireTimeout(long timeout);
+  
   public LogMessage []findMessages(String level, long minTime, long maxTime);
   
   public LogMessage []findMessagesByName(String name,

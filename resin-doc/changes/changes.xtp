@@ -12,6 +12,8 @@
 
 <s2 title="4.0.25 - snapshot">
 <ul>
+<li>cdi: interceptor and InterceptorBinding with enum array (#4883, rep by andreaskaltenbach)</li>
+<li>health: add expire-timeout to LogService (#4848, rep by C. Moran)</li>
 <li>health: HealthSystem event as a classloader context (#4861)</li>
 <li>cache: timing in mmap file extension could truncate (#4854, rep by georgbuschbeck)</li>
 <li>config: rvar should work like an EL var lookup (#4879)</li>

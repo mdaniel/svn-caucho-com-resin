@@ -77,6 +77,7 @@ public class GuiCommand extends AbstractStartCommand
     return _log;
   }
 
+  /*
   @Override
   public void usage()
   {
@@ -96,4 +97,5 @@ public class GuiCommand extends AbstractStartCommand
     System.out.println("   -debug-port <port>    : configure a debug port");
     System.out.println("   -jmx-port <port>      : configure an unauthenticated jmx port");
   }
+  */
 }

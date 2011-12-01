@@ -51,6 +51,9 @@ public class GeneratePasswordCommand extends AbstractBootCommand
   {
     addValueKey("-user");
     addValueKey("-password");
+    
+    addValueOption("user", "user", "the user name to generate a password hash");
+    addValueOption("password", "password", "the password for the password hash");
   }
 
   @Override
@@ -135,7 +138,14 @@ public class GeneratePasswordCommand extends AbstractBootCommand
 
     return _L;
   }
+  
+  @Override
+  public String getUsageArgs()
+  {
+    return " [user] [password]";
+  }
 
+  /*
   @Override
   public void usage()
   {
@@ -145,4 +155,5 @@ public class GeneratePasswordCommand extends AbstractBootCommand
     System.out.println("   -user <name>         : the user name");
     System.out.println("   -password <password> : the password");
   }
+  */
 }

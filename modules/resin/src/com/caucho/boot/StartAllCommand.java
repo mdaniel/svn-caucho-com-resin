@@ -120,6 +120,7 @@ public class StartAllCommand extends AbstractStartCommand
     return _L;
   }
 
+  /*
   @Override
   public void usage()
   {
@@ -137,5 +138,7 @@ public class StartAllCommand extends AbstractStartCommand
     System.out.println("   -verbose              : print verbose starting information");
     System.out.println("   -preview              : run as a preview server");
     System.out.println("   -debug-port <port>    : configure a debug port");
-    System.out.println("   -jmx-port <port>      : configure an unauthenticated jmx port");  }
+    System.out.println("   -jmx-port <port>      : configure an unauthenticated jmx port");  
+  }
+  */
 }

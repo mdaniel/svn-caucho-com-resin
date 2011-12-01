@@ -105,6 +105,7 @@ public class StopCommand extends AbstractStartCommand
     return _L;
   }
 
+  /*
   @Override
   public void usage()
   {
@@ -120,4 +121,5 @@ public class StopCommand extends AbstractStartCommand
     System.out.println("   -watchdog-port <port> : override the watchdog-port");
     System.out.println("   -verbose              : print verbose starting information");
   }
+  */
 }

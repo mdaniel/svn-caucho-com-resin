@@ -106,6 +106,7 @@ public class RestartCommand extends AbstractStartCommand
     return _L;
   }
 
+  /*
   @Override
   public void usage()
   {
@@ -125,4 +126,5 @@ public class RestartCommand extends AbstractStartCommand
     System.out.println("   -debug-port <port>    : configure a debug port");
     System.out.println("   -jmx-port <port>      : configure an unauthenticated jmx port");
   }
+  */
 }

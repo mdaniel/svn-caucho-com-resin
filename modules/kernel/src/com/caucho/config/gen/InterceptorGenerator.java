@@ -1654,6 +1654,19 @@ public class InterceptorGenerator<X>
       out.printClass((Class<?>) value);
       out.print(".class");
     }
+    else if (value.getClass().isArray()) {
+      out.print("new ");
+      out.printClass(value.getClass().getComponentType());
+      out.print("[] {");
+      
+      Object []v = (Object []) value;
+      for (int i = 0; i < v.length; i++) {
+        printValue(out, v[i]);
+        out.print(", ");
+      }
+      
+      out.print("}");
+    }
     else
       out.print(value);
   }

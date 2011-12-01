@@ -40,6 +40,11 @@ public class HeapDumpCommand extends AbstractManagementCommand
 {
   private static final L10N L = new L10N(HeapDumpCommand.class);
   
+  public HeapDumpCommand()
+  {
+    addFlagOption("raw", "creates a JVM hprof file");
+  }
+  
   @Override
   public String getDescription()
   {
@@ -66,6 +71,7 @@ public class HeapDumpCommand extends AbstractManagementCommand
     return false;
   }
 
+  /*
   @Override
   public void usage()
   {
@@ -83,4 +89,5 @@ public class HeapDumpCommand extends AbstractManagementCommand
     System.err.println(L.l("   -password <password>  : password used for authentication to the server"));
     System.err.println(L.l("   -raw                  : creates an hprof file"));
   }
+  */
 }
