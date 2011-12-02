@@ -11,6 +11,7 @@
 
   <!-- property-based Resin configuration -->
   <resin:properties path="${__DIR__}/resin.properties" optional="true"/>
+  <resin:properties path="config:/resin.properties" optional="true"/>
   
   <!-- Logging configuration for the JDK logging API. -->
   <log-handler name="" level="all" path="stdout:"
@@ -25,15 +26,18 @@
   <logger name="com.caucho.java" level="config"/>
   <logger name="com.caucho.loader" level="config"/>
 
-  <!-- local configuration files -->
-  <resin:import fileset="${__DIR__}/local.d/*.xml"/>
-
   <!--
-     - driver .jar files can be placed in ${resin.root}/ext-lib
+     - driver .jar files can be placed in ${resin.root}/resin.d/lib
      -->
   <class-loader>
     <tree-loader path="${resin.root}/ext-lib"/>
+    <tree-loader path="${resin.root}/resin.d/lib"/>
+    <tree-loader path="config:/resin.d/lib"/>
   </class-loader>
+
+  <!-- local configuration files -->
+  <resin:import fileset="${__DIR__}/resin.d/*.xml"/>
+  <resin:import fileset="config:/resin.d/*.xml"/>
   
   <!--
      - Remote management requires at least one enabled admin user.
@@ -42,6 +46,7 @@
     <user name="${admin_user}" password="${admin_password}"/>
     
     <resin:import path="${__DIR__}/admin-users.xml" optional="true"/>
+    <resin:import path="config:/admin-users.xml" optional="true"/>
   </resin:AdminAuthenticator>
 
   <!--
@@ -71,6 +76,8 @@
     <web-app-default>
       <class-loader>
         <library-loader path="${resin.home}/webapp-jars"/>
+        <library-loader path="${resin.root}/webapp.d/lib"/>
+        <library-loader path="config:/webapp.d/lib"/>
       </class-loader>
     </web-app-default>
 
@@ -188,8 +195,15 @@
     <!-- define the servers in the cluster -->
     <server-multi id-prefix="app-" address-list="${app_tier}" port="6800"/>
 
+    <!-- shared jars and drivers for the app-tier -->
+    <class-loader>
+      <tree-loader path="${resin.root}/app_tier.d/lib"/>
+      <tree-loader path="config:/app_tier.d/lib"/>
+    </class-loader>
+
     <!-- include resources config files in resources/ -->
-    <resin:import fileset="${__DIR__}/app.d/**/*.xml"/>
+    <resin:import fileset="${__DIR__}/app_tier.d/**/*.xml"/>
+    <resin:import fileset="config:/app_tier.d/**/*.xml"/>
 
     <!--
        - Default host configuration applied to all virtual hosts.
@@ -253,9 +267,9 @@
                   address-list="${cache_tier}"
                   port="6820">
       <!-- listen for the memcache protocol -->
-      <listen port="${rvar('memcache_port')?:11212}"
+      <listen port="${rvar('memcached_port')?:11212}"
               keepalive-timeout="600s" socket-timeout="600s">
-        <memcache:MemcacheProtocol/>
+        <memcache:MemcachedProtocol/>
       </listen>
     </server-multi>
   </cluster>

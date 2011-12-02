@@ -29,9 +29,6 @@
 
 package com.caucho.servlet;
 
-import java.util.logging.Level;
-import java.util.logging.Logger;
-
 import javax.servlet.ServletRequest;
 import javax.servlet.ServletResponse;
 
