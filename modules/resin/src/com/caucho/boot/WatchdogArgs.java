@@ -874,7 +874,7 @@ class WatchdogArgs
     addCommand(new ConsoleCommand());
     addCommand(new DeployCopyCommand());
     addCommand(new DeployCommand());
-    addCommand(new DeployConfigCommand());
+    addCommand(new ConfigDeployCommand());
     addCommand(new DeployListCommand());
     addCommand(new DeployRestartCommand());
     addCommand(new DeployStartCommand());

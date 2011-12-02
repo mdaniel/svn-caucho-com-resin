@@ -36,8 +36,8 @@ import com.caucho.util.L10N;
 import com.caucho.vfs.Path;
 import com.caucho.vfs.Vfs;
 
-public class DeployConfigCommand extends AbstractRepositoryCommand {
-  private static final L10N L = new L10N(DeployConfigCommand.class);
+public class ConfigDeployCommand extends AbstractRepositoryCommand {
+  private static final L10N L = new L10N(ConfigDeployCommand.class);
   
   @Override
   public String getDescription()
@@ -107,6 +107,7 @@ public class DeployConfigCommand extends AbstractRepositoryCommand {
     return 0;
   }
 
+  /*
   @Override
   public void usage()
   {
@@ -126,4 +127,5 @@ public class DeployConfigCommand extends AbstractRepositoryCommand {
     System.err.println(L.l("   -version <version>    : version of application formatted as <major.minor.micro.qualifier>"));
     System.err.println(L.l("   -m <message>          : commit message"));
   }
+  */
 }

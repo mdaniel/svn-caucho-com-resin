@@ -115,8 +115,11 @@ public class ResinImport extends ResinControl implements FlowBean
 
     ArrayList<Path> paths;
 
-    if (_fileSet != null)
+    if (_fileSet != null) {
       paths = _fileSet.getPaths();
+
+      Environment.addDependency(new Depend(_fileSet.getDir()));
+    }
     else {
       paths = new ArrayList<Path>();
       paths.add(_path);

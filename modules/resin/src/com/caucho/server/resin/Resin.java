@@ -498,6 +498,9 @@ public class Resin
         throw new NullPointerException();
       
       addPreTopologyServices();
+      
+      // server/p603
+      initRepository();
 
       ResinServerConfigLibrary.configure(null);
 
@@ -1104,8 +1107,9 @@ public class Resin
     try {
       RepositoryScheme.create("cluster-config", 
                               getStage() + "/config/resin",
-                              RootDirectorySystem.getCurrentDataDirectory().lookup("config"));
+                              getServerDataDirectory().lookup("config"));
     } catch (Exception e) {
+      e.printStackTrace();
       log().log(Level.WARNING, e.toString(), e);
     }
   }
@@ -1284,8 +1288,15 @@ public class Resin
   private void configureRoot(BootResinConfig bootConfig) 
     throws IOException
   {
-    Path dataDirectory = getResinDataDirectory();
+    Path dataDirectory = getServerDataDirectory();
+
+    RootDirectorySystem.createAndAddService(_rootDirectory, dataDirectory);
+  }
   
+  private Path getServerDataDirectory()
+  {
+    Path dataDirectory = getResinDataDirectory();
+    
     String serverName = _serverId;
   
     if (serverName == null || serverName.isEmpty())
@@ -1293,7 +1304,7 @@ public class Resin
   
     dataDirectory = dataDirectory.lookup("./" + serverName);
 
-    RootDirectorySystem.createAndAddService(_rootDirectory, dataDirectory);
+    return dataDirectory;
   }
   
   /**
@@ -1384,13 +1395,13 @@ public class Resin
     
     ClusterServer server = _selfServer.getData(ClusterServer.class);
     
+    // initRepository();
+    
     LoadBalanceService.createAndAddService(createLoadBalanceFactory());
     
     BamSystem.createAndAddService(server.getBamAdminName());
     
     DeployControllerService.createAndAddService();
-    
-    initRepository();
    
     _servletContainer = createServer(networkService);
 

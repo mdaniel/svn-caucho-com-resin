@@ -31,43 +31,42 @@ package com.caucho.env.vfs;
 
 import java.io.IOException;
 
-import com.caucho.loader.EnvironmentLocal;
+import com.caucho.vfs.Path;
 import com.caucho.vfs.SchemeMap;
 import com.caucho.vfs.SchemeRoot;
-import com.caucho.vfs.Path;
 
 /**
  * Virtual path based on an expansion repository
  */
 public class RepositoryScheme extends SchemeRoot
 {
-  private final EnvironmentLocal<Path> _localRoot
-    = new EnvironmentLocal<Path>();
+  private final Path _root;
+  
+  private RepositoryScheme(Path root)
+  {
+    _root = root;
+  }
   
   public static Path create(String scheme, 
-                            String id,
+                            String tagId,
                             Path physicalRoot)
     throws IOException
   {
     SchemeMap map = physicalRoot.getSchemeMap();
     
-    RepositoryScheme root = (RepositoryScheme) map.getSchemeRoot(scheme);
-    
-    if (root == null) {
-      root = new RepositoryScheme();
-      map.put(scheme, root);
-    }
-    
     physicalRoot = physicalRoot.createRoot();
     
-    root._localRoot.set(new RepositoryPath(id, physicalRoot));
+    Path root = new RepositoryPath(tagId, physicalRoot);
     
-    return root.getRoot();
+    RepositoryScheme schemeRoot = new RepositoryScheme(root);
+    map.put(scheme, schemeRoot);
+    
+    return schemeRoot.getRoot();
   }
   
   @Override
   public Path getRoot()
   {
-    return _localRoot.get();
+    return _root;
   }
 }

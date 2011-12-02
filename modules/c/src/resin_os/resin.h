@@ -137,6 +137,8 @@ struct server_socket_t {
   ssl_config_t *ssl_config;
   
   int conn_socket_timeout;
+  int tcp_no_delay;
+  int tcp_keepalive;
   
   int fd;
 

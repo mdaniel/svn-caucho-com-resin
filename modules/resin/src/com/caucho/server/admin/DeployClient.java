@@ -228,13 +228,14 @@ public class DeployClient implements Repository
     GitCommitJar gitCommit = null;
 
     try {
-      gitCommit = new GitCommitJar(path);
+      gitCommit = GitCommitJar.createDirectory(path);
       
       String tag = commit.getId();
       
       return deployJar(tag, gitCommit, commit.getAttributes());
     }
     catch (IOException e) {
+      e.printStackTrace();
       throw new RepositoryException(e);
     }
     finally {

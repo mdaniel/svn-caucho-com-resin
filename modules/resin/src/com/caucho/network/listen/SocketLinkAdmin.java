@@ -144,6 +144,18 @@ public class SocketLinkAdmin extends AbstractManagedObject
   {
     return _port.getSocketTimeout();
   }
+  
+  @Override
+  public boolean isTcpKeepalive()
+  {
+    return _port.isTcpKeepalive();
+  }
+  
+  @Override
+  public boolean isTcpNoDelay()
+  {
+    return _port.isTcpNoDelay();
+  }
 
   @Override
   public long getSuspendTimeMax()

@@ -792,6 +792,7 @@ Java_com_caucho_vfs_JniServerSocketImpl_bindPort(JNIEnv *env,
   ss->port = ntohs(sin->sin_port);
 
   ss->conn_socket_timeout = 65000;
+  ss->tcp_no_delay = 1;
 
   ss->accept = &std_accept;
   ss->close = &std_close_ss;
@@ -867,6 +868,34 @@ Java_com_caucho_vfs_JniServerSocketImpl_nativeSetConnectionSocketTimeout(JNIEnv 
     timeout = 500;
   
   ss->conn_socket_timeout = timeout;
+}
+
+JNIEXPORT void JNICALL
+Java_com_caucho_vfs_JniServerSocketImpl_nativeSetTcpNoDelay(JNIEnv *env,
+                                                            jobject obj,
+                                                            jlong ss_fd,
+                                                            jboolean enable)
+{
+  server_socket_t *ss = (server_socket_t *) (PTR) ss_fd;
+
+  if (! ss)
+    return;
+  
+  ss->tcp_no_delay = enable;
+}
+
+JNIEXPORT void JNICALL
+Java_com_caucho_vfs_JniServerSocketImpl_nativeSetTcpKeepalive(JNIEnv *env,
+                                                              jobject obj,
+                                                              jlong ss_fd,
+                                                              jboolean enable)
+{
+  server_socket_t *ss = (server_socket_t *) (PTR) ss_fd;
+
+  if (! ss)
+    return;
+  
+  ss->tcp_keepalive = enable;
 }
 
 JNIEXPORT void JNICALL

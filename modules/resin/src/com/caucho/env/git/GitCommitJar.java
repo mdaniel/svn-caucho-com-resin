@@ -31,14 +31,17 @@ package com.caucho.env.git;
 
 import java.io.IOException;
 import java.io.InputStream;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipInputStream;
+import java.util.zip.ZipOutputStream;
 
 import com.caucho.java.WorkDir;
 import com.caucho.util.IoUtil;
+import com.caucho.util.L10N;
 import com.caucho.vfs.JarPath;
 import com.caucho.vfs.Path;
 import com.caucho.vfs.ReadStream;
@@ -49,6 +52,8 @@ import com.caucho.vfs.Jar.ZipStreamImpl;
  * Tree structure from a jar
  */
 public class GitCommitJar {
+  private static final L10N L = new L10N(GitCommitJar.class);
+  
   private static final Logger log
     = Logger.getLogger(GitCommitJar.class.getName());
   
@@ -75,15 +80,94 @@ public class GitCommitJar {
     }
   }
 
+  private GitCommitJar(Path jar, boolean isTemp)
+    throws IOException
+  {
+    init(jar);
+    
+    _tempJar = jar;
+  }
+
   public GitCommitJar(InputStream is)
     throws IOException
   {
     init(is);
   }
   
+  public static GitCommitJar createDirectory(Path dir)
+    throws IOException
+  {
+    if (! dir.isDirectory())
+      throw new IOException(L.l("'{0}' must be a directory", dir));
+    
+    Path workDir = WorkDir.getLocalWorkDir();
+    workDir.mkdirs();
+    
+    Path tmpPath = workDir.createTempFile("git", "tmp");
+    WriteStream os = null;
+    
+    try {
+      os = tmpPath.openWrite();
+      
+      ZipOutputStream zos = new ZipOutputStream(os);
+      
+      fillDirectory(zos, dir, "");
+      
+      zos.close();
+      os.close();
+      
+      GitCommitJar gitCommitJar = new GitCommitJar(tmpPath, true);
+      
+      tmpPath = null;
+      
+      return gitCommitJar;
+    } finally {
+      IoUtil.close(os);
+      
+      if (tmpPath != null)
+        tmpPath.remove();
+    }
+  }
+  
+  private static void fillDirectory(ZipOutputStream zos, 
+                                    Path dir, 
+                                    String pathName)
+    throws IOException
+  {
+    String []list = dir.list();
+    Arrays.sort(list);
+    
+    for (String name : list) {
+      if (name.startsWith("."))
+        continue;
+      
+      String subPath;
+      
+      if ("".equals(pathName))
+        subPath = name;
+      else
+        subPath = pathName + "/" + name;
+      
+      Path path = dir.lookup(name);
+     
+      if (path.isFile()) {
+        ZipEntry entry = new ZipEntry(subPath);
+
+        zos.putNextEntry(entry);
+        
+        path.writeToStream(zos);
+        
+        zos.closeEntry();
+      }
+      else if (path.isDirectory()) {
+        fillDirectory(zos, path, subPath);
+      }
+    }
+  }
+  
   private void init(InputStream is)
     throws IOException
-    {
+  {
     Path dir = WorkDir.getLocalWorkDir();
     dir.mkdirs();
     

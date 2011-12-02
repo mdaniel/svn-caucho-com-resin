@@ -621,6 +621,9 @@ class WatchdogManager implements AlarmListener {
     }
 
     watchdog = new WatchdogChild(_system, serverConfig);
+    
+    if (serverId == null)
+      serverId = "default";
 
     _watchdogMap.put(serverId, watchdog);
 

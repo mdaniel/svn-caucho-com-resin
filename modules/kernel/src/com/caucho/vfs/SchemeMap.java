@@ -31,6 +31,8 @@ package com.caucho.vfs;
 
 import java.util.HashMap;
 
+import com.caucho.loader.EnvironmentLocal;
+
 /**
  * The top-level filesystem schemes are collected into a single map.
  *
@@ -51,14 +53,15 @@ public class SchemeMap {
   // Constant null scheme map for protected filesystems.
   public static final SchemeMap NULL_SCHEME_MAP = new SchemeMap();
 
-  private final HashMap<String,SchemeRoot> _schemeMap
-    = new HashMap<String,SchemeRoot>();
+  private final EnvironmentLocal<HashMap<String,SchemeRoot>> _schemeMap
+    = new EnvironmentLocal<HashMap<String,SchemeRoot>>();
 
   /**
    * Create an empty SchemeMap.
    */
   public SchemeMap()
   {
+    _schemeMap.set(new HashMap<String,SchemeRoot>(), null);
   }
 
   /**
@@ -66,7 +69,7 @@ public class SchemeMap {
    */
   private SchemeMap(HashMap<String,SchemeRoot> map)
   {
-    _schemeMap.putAll(map);
+    getUpdateMap().putAll(map);
   }
 
   /**
@@ -84,7 +87,8 @@ public class SchemeMap {
    */
   public Path get(String scheme)
   {
-    SchemeRoot root = _schemeMap.get(scheme);
+    SchemeRoot root = getMap().get(scheme);
+    
     Path path = null;
     
     if (root != null)
@@ -100,7 +104,7 @@ public class SchemeMap {
   
   public SchemeRoot getSchemeRoot(String scheme)
   {
-    return _schemeMap.get(scheme);
+    return getMap().get(scheme);
   }
 
   /**
@@ -108,7 +112,7 @@ public class SchemeMap {
    */
   public Path put(String scheme, Path path)
   {
-    SchemeRoot oldRoot = _schemeMap.put(scheme, new SchemeRoot(path));
+    SchemeRoot oldRoot = getUpdateMap().put(scheme, new SchemeRoot(path));
     
     return oldRoot != null ? oldRoot.getRoot() : null;
   }
@@ -118,12 +122,12 @@ public class SchemeMap {
    */
   public SchemeRoot put(String scheme, SchemeRoot root)
   {
-    return _schemeMap.put(scheme, root);
+    return getUpdateMap().put(scheme, root);
   }
 
   public SchemeMap copy()
   {
-    return new SchemeMap(_schemeMap);
+    return new SchemeMap(getMap());
   }
 
   /**
@@ -131,8 +135,33 @@ public class SchemeMap {
    */
   public Path remove(String scheme)
   {
-    SchemeRoot oldRoot = _schemeMap.remove(scheme);
+    SchemeRoot oldRoot = getUpdateMap().remove(scheme);
     
     return oldRoot != null ? oldRoot.getRoot() : null;
+  }
+  
+  private HashMap<String,SchemeRoot> getMap()
+  {
+    HashMap<String,SchemeRoot> map = _schemeMap.get();
+    
+    return map;
+  }
+  
+  private HashMap<String,SchemeRoot> getUpdateMap()
+  {
+    HashMap<String,SchemeRoot> map = _schemeMap.getLevel();
+    
+    if (map == null) {
+      HashMap<String,SchemeRoot> oldMap = getMap();
+      
+      if (oldMap != null)
+        map = new HashMap<String,SchemeRoot>(oldMap);
+      else
+        map = new HashMap<String,SchemeRoot>();
+      
+      _schemeMap.set(map);
+    }
+    
+    return map;
   }
 }

@@ -524,8 +524,11 @@ r_port-Parameters =
    & (attribute suspend-reaper-timeout { r_period-Type }
       | element suspend-reaper-timeout { r_period-Type })?
 
-   & (attribute tcp-no-delay { string }
-      | element tcp-no-delay { string })?
+   & (attribute tcp-keepalive { r_boolean-Type }
+      | element tcp-keepalive { r_boolean-Type })?
+
+   & (attribute tcp-no-delay { r_boolean-Type }
+      | element tcp-no-delay { r_boolean-Type })?
 
    & (attribute throttle-concurrent-max { r_int-Type }
       | element throttle-concurrent-max { r_int-Type })?

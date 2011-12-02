@@ -47,7 +47,8 @@ public class QServerSocketWrapper extends QServerSocket {
     = Logger.getLogger(QServerSocketWrapper.class.getName());
   
   private ServerSocket _ss;
-  private boolean _tcpNoDelay = true;
+  private boolean _isTcpNoDelay = true;
+  private boolean _isTcpKeepalive;
   private int _connectionSocketTimeout = 65000;
   
   public QServerSocketWrapper()
@@ -64,14 +65,28 @@ public class QServerSocketWrapper extends QServerSocket {
     _ss = ss;
   }
 
+  @Override
   public void setTcpNoDelay(boolean delay)
   {
-    _tcpNoDelay = delay;
+    _isTcpNoDelay = delay;
   }
 
-  public boolean getTcpNoDelay()
+  @Override
+  public boolean isTcpNoDelay()
   {
-    return _tcpNoDelay;
+    return _isTcpNoDelay;
+  }
+
+  @Override
+  public void setTcpKeepalive(boolean isEnable)
+  {
+    _isTcpKeepalive = isEnable;
+  }
+
+  @Override
+  public boolean isTcpKeepalive()
+  {
+    return _isTcpKeepalive;
   }
 
   public void setConnectionSocketTimeout(int socketTimeout)
@@ -93,8 +108,11 @@ public class QServerSocketWrapper extends QServerSocket {
       return false;
 
     // XXX:
-    if (_tcpNoDelay)
+    if (isTcpNoDelay())
       socket.setTcpNoDelay(true);
+    
+    if (isTcpKeepalive())
+      socket.setKeepAlive(true);
 
     if (_connectionSocketTimeout > 0)
       socket.setSoTimeout(_connectionSocketTimeout);

@@ -146,6 +146,18 @@ public interface PortMXBean extends ManagedObjectMXBean {
   @Description("The maximum suspend/comet time")
   @Units("milliseconds")    
   public long getSuspendTimeMax();
+  
+  /**
+   * Returns true if tcp-no-delay is enabled.
+   */
+  @Description("The TCP no-delay (Nagle) socket option")
+  public boolean isTcpNoDelay();
+  
+  /**
+   * Returns true if tcp-keepalive is enabled.
+   */
+  @Description("The TCP keepalive socket option")
+  public boolean isTcpKeepalive();
 
   //
   // State attributes

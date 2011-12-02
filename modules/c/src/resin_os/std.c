@@ -108,7 +108,6 @@ std_read_nonblock(connection_t *conn, char *buf, int len)
     return -1;
 
   result = recv(fd, buf, len, 0);
-  fprintf(stderr, "RECV1 %d\n", result);
 
   return result;
 }
@@ -351,7 +350,6 @@ std_accept(server_socket_t *ss, connection_t *conn)
   char sin_data[256];
   struct sockaddr *sin = (struct sockaddr *) &sin_data;
   unsigned int sin_len;
-  int tcp_no_delay = 1;
   int poll_result;
   struct timeval timeout;
   int result;
@@ -388,11 +386,20 @@ std_accept(server_socket_t *ss, connection_t *conn)
   if (sock < 0)
     return 0;
 
-  if (tcp_no_delay) {
+  if (ss->tcp_no_delay) {
     int flag = 1;
 
     setsockopt(sock, IPPROTO_TCP, TCP_NODELAY, (char *) &flag, sizeof(int));
   }
+
+#ifdef SO_KEEPALIVE
+  if (ss->tcp_keepalive) {
+    int flag = 1;
+
+    setsockopt(sock, SOL_SOCKET, SO_KEEPALIVE,
+               (char *) &flag, sizeof(int));
+  }
+#endif
 
   conn->is_recv_timeout = 0;
 

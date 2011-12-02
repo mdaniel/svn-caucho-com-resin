@@ -102,7 +102,7 @@ public class RepositoryPath extends Path
                                                  newAttributes, 
                                                  newPath, 
                                                  offset);
-    
+
     return new RepositoryPath(_repository, _root, physicalPath);
   }
   

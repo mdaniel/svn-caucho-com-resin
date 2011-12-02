@@ -37,7 +37,7 @@ import com.caucho.vfs.Path;
 import com.caucho.vfs.Vfs;
 
 public class DeployCommand extends AbstractRepositoryCommand {
-  private static final L10N L = new L10N(DeployConfigCommand.class);
+  private static final L10N L = new L10N(ConfigDeployCommand.class);
   
   @Override
   public String getDescription()

@@ -46,6 +46,15 @@ abstract public class QServerSocket {
     return false;
   }
   
+  public void setTcpKeepalive(boolean isKeepalive)
+  {
+  }
+  
+  public boolean isTcpKeepalive()
+  {
+    return false;
+  }
+  
   public boolean isJni()
   {
     return false;

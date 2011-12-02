@@ -167,6 +167,24 @@ public class JniServerSocketImpl extends QServerSocket {
   }
 
   /**
+   * Sets the connection tcp-no-delay.
+   */
+  @Override
+  public void setTcpNoDelay(boolean isEnable)
+  {
+    nativeSetTcpNoDelay(_fd, isEnable);
+  }
+
+  /**
+   * Sets the connection tcp-keepalivedelay.
+   */
+  @Override
+  public void setTcpKeepalive(boolean isEnable)
+  {
+    nativeSetTcpKeepalive(_fd, isEnable);
+  }
+
+  /**
    * Accepts a new connection from the socket.
    *
    * @param socket the socket connection structure
@@ -269,6 +287,16 @@ public class JniServerSocketImpl extends QServerSocket {
    */
   native void nativeSetConnectionSocketTimeout(long fd, int timeout);
 
+  /**
+   * Sets the connection tcp-no-delay
+   */
+  native void nativeSetTcpNoDelay(long fd, boolean isEnable);
+
+  /**
+   * Sets the connection tcp-keepalive
+   */
+  native void nativeSetTcpKeepalive(long fd, boolean isEnable);
+  
   /**
    * Sets the listen backlog
    */

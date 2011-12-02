@@ -149,7 +149,8 @@ public class TcpSocketLinkListener
   
   private long _requestTimeout = -1;
 
-  private boolean _tcpNoDelay = true;
+  private boolean _isTcpNoDelay = true;
+  private boolean _isTcpKeepalive;
   
   private boolean _isEnableJni = true;
 
@@ -622,9 +623,9 @@ public class TcpSocketLinkListener
   /**
    * Gets the tcp-no-delay property
    */
-  public boolean getTcpNoDelay()
+  public boolean isTcpNoDelay()
   {
-    return _tcpNoDelay;
+    return _isTcpNoDelay;
   }
 
   /**
@@ -633,7 +634,21 @@ public class TcpSocketLinkListener
   @Configurable
   public void setTcpNoDelay(boolean tcpNoDelay)
   {
-    _tcpNoDelay = tcpNoDelay;
+    _isTcpNoDelay = tcpNoDelay;
+  }
+
+  /**
+   * Sets the tcp-keepalive property
+   */
+  @Configurable
+  public void setTcpKeepalive(boolean tcpKeepalive)
+  {
+    _isTcpKeepalive = tcpKeepalive;
+  }
+  
+  public boolean isTcpKeepalive()
+  {
+    return _isTcpKeepalive;
   }
 
   /**
@@ -1098,8 +1113,8 @@ public class TcpSocketLinkListener
     if (_serverSocket == null)
       return;
 
-    if (_tcpNoDelay)
-      _serverSocket.setTcpNoDelay(_tcpNoDelay);
+    _serverSocket.setTcpNoDelay(_isTcpNoDelay);
+    _serverSocket.setTcpKeepalive(_isTcpKeepalive);
 
     _serverSocket.setConnectionSocketTimeout((int) getSocketTimeout());
 
@@ -1166,8 +1181,8 @@ public class TcpSocketLinkListener
       return ss;
     }
 
-    if (_tcpNoDelay)
-      ss.setTcpNoDelay(_tcpNoDelay);
+    if (_isTcpNoDelay)
+      ss.setTcpNoDelay(_isTcpNoDelay);
 
     ss.setConnectionSocketTimeout((int) getSocketTimeout());
 
