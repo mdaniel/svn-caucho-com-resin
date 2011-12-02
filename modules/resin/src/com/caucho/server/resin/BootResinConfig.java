@@ -136,16 +136,31 @@ public class BootResinConfig implements SchemaBean, DependencyBean, EnvironmentB
   }
 
   @Configurable
-  public BootClusterConfig createCluster()
+  public void addCluster(BootClusterProxy clusterProxy)
     throws ConfigException
   {
-    BootClusterConfig cluster = new BootClusterConfig(this);
+    BootClusterConfig cluster = addClusterById(clusterProxy.getId());
     
-    _clusters.add(cluster);
+    clusterProxy.getProgram().configure(cluster);
+  }
 
-    for (int i = 0; i < _clusterDefaults.size(); i++)
-      _clusterDefaults.get(i).configure(cluster);
+  BootClusterConfig addClusterById(String id)
+    throws ConfigException
+  {
+    BootClusterConfig cluster = findCluster(id);
 
+    if (cluster == null) {
+      cluster = new BootClusterConfig(this);
+      cluster.setId(id);
+    
+      _clusters.add(cluster);
+
+      for (int i = 0; i < _clusterDefaults.size(); i++)
+        _clusterDefaults.get(i).configure(cluster);
+      
+      cluster.init();
+    }
+    
     return cluster;
   }
 

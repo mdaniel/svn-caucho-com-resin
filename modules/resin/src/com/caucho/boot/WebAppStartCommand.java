@@ -32,9 +32,9 @@ package com.caucho.boot;
 import com.caucho.server.admin.WebAppDeployClient;
 import com.caucho.util.L10N;
 
-public class DeployStartCommand extends WebAppCommand
+public class WebAppStartCommand extends WebAppCommand
 {
-  private static final L10N L = new L10N(DeployStartCommand.class);
+  private static final L10N L = new L10N(WebAppStartCommand.class);
   
   @Override
   public String getDescription()

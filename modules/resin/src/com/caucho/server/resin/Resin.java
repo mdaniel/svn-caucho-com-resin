@@ -1105,7 +1105,7 @@ public class Resin
     
     // add the cluster repository
     try {
-      RepositoryScheme.create("cluster-config", 
+      RepositoryScheme.create("config", 
                               getStage() + "/config/resin",
                               getServerDataDirectory().lookup("config"));
     } catch (Exception e) {
@@ -1355,9 +1355,7 @@ public class Resin
       if (clusterConfig != null) {
       }
       else if (bootResin.getClusterList().size() == 0) {
-        clusterConfig = bootResin.createCluster();
-        clusterConfig.setId(clusterId);
-        clusterConfig.init();
+        clusterConfig = bootResin.addClusterById(clusterId);
       }
       else if (serverId != null) {
         throw new ConfigException(L().l("'{0}' is an unknown server in the configuration file.",

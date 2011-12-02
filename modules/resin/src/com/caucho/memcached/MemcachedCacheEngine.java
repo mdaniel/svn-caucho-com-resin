@@ -27,7 +27,7 @@
  * @author Scott Ferguson
  */
 
-package com.caucho.memcache;
+package com.caucho.memcached;
 
 import com.caucho.server.distcache.AbstractCacheEngine;
 import com.caucho.server.distcache.CacheConfig;
@@ -35,22 +35,20 @@ import com.caucho.server.distcache.CacheStoreManager;
 import com.caucho.server.distcache.DistCacheEntry;
 import com.caucho.server.distcache.MnodeEntry;
 import com.caucho.server.distcache.MnodeUpdate;
-import com.caucho.server.distcache.MnodeValue;
-import com.caucho.util.Alarm;
-import com.caucho.util.CharBuffer;
 import com.caucho.util.Base64;
+import com.caucho.util.CharBuffer;
 import com.caucho.util.HashKey;
 
 /**
  * Custom serialization for the cache
  */
-public class MemcacheCacheEngine extends AbstractCacheEngine
+public class MemcachedCacheEngine extends AbstractCacheEngine
 {
   private CacheStoreManager _cacheService;
-  private MemcacheClient _client;
+  private MemcachedClient _client;
   
-  MemcacheCacheEngine(CacheStoreManager cacheService,
-                      MemcacheClient client)
+  MemcachedCacheEngine(CacheStoreManager cacheService,
+                      MemcachedClient client)
   {
     _cacheService = cacheService;
     _client = client;

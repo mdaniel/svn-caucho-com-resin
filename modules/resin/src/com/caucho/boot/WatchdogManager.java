@@ -184,13 +184,17 @@ class WatchdogManager implements AlarmListener {
     }
     
     resin.setServerId(serverId);
-    
+    System.out.println("PREPREAD: " + serverId);
     readConfig(serverId, _args);
     
     WatchdogChild server = null;
+    
+    if (serverId == null)
+      serverId = "default";
       
     server = _watchdogMap.get(serverId);
-
+    System.out.println("SERVER: " + server);
+    
     if (server == null)
       throw new IllegalStateException(L().l("'{0}' is an unknown server",
                                             serverId));
@@ -221,6 +225,7 @@ class WatchdogManager implements AlarmListener {
     pod.createStaticServer("default", "localhost", -1, false);
 
     _server = resin.createServer();
+    System.out.println("CREATE: " + _server);
     
     thread.setContextClassLoader(_server.getClassLoader());
     
@@ -440,6 +445,9 @@ class WatchdogManager implements AlarmListener {
 
       if (args.isDynamicServer())
         serverId = args.getDynamicServerId();
+      
+      if (serverId == null)
+        serverId = "default";
 
       WatchdogChild watchdog = _watchdogMap.get(serverId);
 

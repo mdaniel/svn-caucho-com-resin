@@ -29,18 +29,19 @@
 
 package com.caucho.boot;
 
-import com.caucho.server.admin.TagResult;
+import com.caucho.config.ConfigException;
+import com.caucho.env.repository.CommitBuilder;
 import com.caucho.server.admin.WebAppDeployClient;
 import com.caucho.util.L10N;
 
-public class DeployListCommand extends AbstractRepositoryCommand
+public class WebAppUndeployCommand extends AbstractRepositoryCommand
 {
-  private static final L10N L = new L10N(DeployListCommand.class);
+  private static final L10N L = new L10N(WebAppUndeployCommand.class);
   
   @Override
   public String getDescription()
   {
-    return "lists all deployed applications";
+    return "undeploys an application";
   }
   
   @Override
@@ -48,33 +49,52 @@ public class DeployListCommand extends AbstractRepositoryCommand
                        WatchdogClient client,
                        WebAppDeployClient deployClient)
   {
-    String pattern = args.getDefaultArg();
-    if (pattern == null)
-      pattern = ".*";
+    String name = args.getDefaultArg();
+    
+    if (name == null)
+      name = args.getArg("-name");
 
-    TagResult[] tags = deployClient.queryTags(pattern);
-
-    for (TagResult tag : tags) {
-      System.out.println(tag.getTag());
+    if (name == null) {
+      throw new ConfigException(L.l("Cannot find context argument in command line"));
     }
+    
+    String host = args.getArg("-host");
+    
+    if (host == null)
+      host = "default";
+
+    CommitBuilder commit = new CommitBuilder();
+    commit.type("webapp");
+    
+    String stage = args.getArg("-stage");
+    
+    if (stage != null)
+      commit.stage(stage);
+
+
+    commit.tagKey(host + "/" + name);
+
+    String message = args.getArg("-m");
+    
+    if (message == null)
+      message = args.getArg("-message");
+    
+    if (message == null)
+      message = "undeploy " + name + " from command line";
+    
+    commit.message(message);
+    
+    commit.attribute("user", System.getProperty("user.name"));
+
+    String version = args.getArg("-version");
+    if (version != null)
+      fillInVersion(commit, version);
+
+    deployClient.removeTag(commit);
+
+    System.out.println("Undeployed " + name + " from "
+                       + deployClient.getUrl());
 
     return 0;
   }
-
-  /*
-  @Override
-  public void usage()
-  {
-    System.err.println(L.l("usage: bin/resin.sh [-conf <file>] [-server <id>] deploy-list -user <user> -password <password> [options] [pattern]"));
-    System.err.println(L.l(""));
-    System.err.println(L.l("description:"));
-    System.err.println(L.l("   lists all applications deployed on the server or those that match the [pattern]"));
-    System.err.println(L.l(""));
-    System.err.println(L.l("options:"));
-    System.err.println(L.l("   -conf <file>          : resin configuration file"));
-    System.err.println(L.l("   -server <id>          : id of a server"));
-    System.err.println(L.l("   -address <address>    : ip or host name of the server"));
-    System.err.println(L.l("   -port <port>          : server http port"));
-  }
-  */
 }

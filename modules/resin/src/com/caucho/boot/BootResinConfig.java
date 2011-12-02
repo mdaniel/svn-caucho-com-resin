@@ -463,16 +463,20 @@ public class BootResinConfig // implements EnvironmentBean
     _clusterDefaultList.add(program);
   }
 
-  public BootClusterConfig createCluster()
+  public void addCluster(BootClusterProxy proxy)
   {
-    BootClusterConfig cluster = new BootClusterConfig(_system, this);
-
-    for (int i = 0; i < _clusterDefaultList.size(); i++)
-      _clusterDefaultList.get(i).configure(cluster);
-
-    _clusterList.add(cluster);
+    BootClusterConfig cluster = findCluster(proxy.getId());
     
-    return cluster;
+    if (cluster == null) {
+      cluster = new BootClusterConfig(_system, this);
+
+      for (int i = 0; i < _clusterDefaultList.size(); i++)
+        _clusterDefaultList.get(i).configure(cluster);
+
+      _clusterList.add(cluster);
+    }
+    
+    proxy.getProgram().configure(cluster);
   }
 
   BootClusterConfig findCluster(String id)

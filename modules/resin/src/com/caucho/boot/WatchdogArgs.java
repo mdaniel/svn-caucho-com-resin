@@ -876,12 +876,8 @@ class WatchdogArgs
     addCommand(new DeployCommand());
     addCommand(new ConfigDeployCommand());
     addCommand(new DeployListCommand());
-    addCommand(new DeployRestartCommand());
-    addCommand(new DeployStartCommand());
-    addCommand(new DeployStopCommand());
     addCommand(new DisableCommand());
     addCommand(new DisableSoftCommand());
-    addCommand(new DeployStartCommand());
     addCommand(new EnableCommand());
     
     addCommand(new GuiCommand());
@@ -919,12 +915,22 @@ class WatchdogArgs
 
     addCommand(new WatchdogCommand());
     
+    addCommand(new WebAppDeployCommand());
+    addCommand(new WebAppRestartCommand());
+    addCommand(new WebAppStartCommand());
+    addCommand(new WebAppStopCommand());
+    addCommand(new WebAppUndeployCommand());
+    
     _commandMap.put("copy", new DeployCopyCommand());
     _commandMap.put("list", new DeployListCommand());
     
-    _commandMap.put("start-webapp", new DeployStartCommand());
-    _commandMap.put("stop-webapp", new DeployStopCommand());
-    _commandMap.put("restart-webapp", new DeployRestartCommand());
+    _commandMap.put("deploy-start", new WebAppStartCommand());
+    _commandMap.put("deploy-stop", new WebAppStopCommand());
+    _commandMap.put("deploy-restart", new WebAppRestartCommand());
+    
+    _commandMap.put("start-webapp", new WebAppStartCommand());
+    _commandMap.put("stop-webapp", new WebAppStopCommand());
+    _commandMap.put("restart-webapp", new WebAppRestartCommand());
   }
   
   static class CommandNameComparator implements Comparator<BootCommand> {

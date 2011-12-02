@@ -51,8 +51,6 @@ import com.caucho.util.L10N;
  */
 public class BootClusterConfig implements SchemaBean
 {
-  private static final Logger log = Logger.getLogger(BootClusterConfig.class.getName());
-  
   private static final L10N L = new L10N(BootClusterConfig.class);
   
   private BootResinConfig _resinConfig;

@@ -27,7 +27,7 @@
  * @author Scott Ferguson
  */
 
-package com.caucho.memcache;
+package com.caucho.memcached;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -75,11 +75,11 @@ import com.caucho.vfs.TempStream;
 /**
  * Custom serialization for the cache
  */
-public class MemcacheClient implements Cache
+public class MemcachedClient implements Cache
 {
-  private static final L10N L = new L10N(MemcacheClient.class);
+  private static final L10N L = new L10N(MemcachedClient.class);
   private static final Logger log
-    = Logger.getLogger(MemcacheClient.class.getName());
+    = Logger.getLogger(MemcachedClient.class.getName());
   
   private LoadBalanceBuilder _loadBalanceBuilder;
   private LoadBalanceManager _loadBalancer;
@@ -94,16 +94,16 @@ public class MemcacheClient implements Cache
   private AtomicReference<CacheImpl> _localCache
     = new AtomicReference<CacheImpl>();
   
-  private MemcacheCacheEngine _cacheEngine;
+  private MemcachedCacheEngine _cacheEngine;
   
-  public MemcacheClient()
+  public MemcachedClient()
   {
     _name = "default";
     
     DistCacheSystem cacheSystem = DistCacheSystem.getCurrent();
     
     if (cacheSystem != null) {
-      _cacheEngine = new MemcacheCacheEngine(cacheSystem.getDistCacheManager(),
+      _cacheEngine = new MemcachedCacheEngine(cacheSystem.getDistCacheManager(),
                                              this);
     }
     
@@ -122,7 +122,7 @@ public class MemcacheClient implements Cache
     // _loadBalancer = builder.create();
   }
   
-  public MemcacheClient(String name)
+  public MemcachedClient(String name)
   {
     this();
     

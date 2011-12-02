@@ -27,7 +27,7 @@
  * @author Scott Ferguson
  */
 
-package com.caucho.memcache;
+package com.caucho.memcached;
 
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
@@ -49,19 +49,19 @@ import com.caucho.vfs.WriteStream;
 /**
  * Custom serialization for the cache
  */
-public class MemcacheConnection implements ProtocolConnection
+public class MemcachedConnection implements ProtocolConnection
 {
   private static final HashMap<CharBuffer,Command> _commandMap
     = new HashMap<CharBuffer,Command>();
   
-  private MemcacheProtocol _memcache;
+  private MemcachedProtocol _memcache;
   private ClusterCache _cache;
   private SocketLink _link;
   private CharBuffer _method = new CharBuffer();
   private SetInputStream _setInputStream = new SetInputStream();
   private GetOutputStream _getOutputStream = new GetOutputStream();
   
-  MemcacheConnection(MemcacheProtocol memcache, SocketLink link)
+  MemcachedConnection(MemcachedProtocol memcache, SocketLink link)
   {
     _memcache = memcache;
     _link = link;
@@ -203,7 +203,7 @@ public class MemcacheConnection implements ProtocolConnection
   }
   
   abstract static class Command {
-    abstract public boolean execute(MemcacheConnection conn)
+    abstract public boolean execute(MemcachedConnection conn)
       throws IOException;
     
     @Override
@@ -215,7 +215,7 @@ public class MemcacheConnection implements ProtocolConnection
   
   static abstract class StoreCommand extends Command {
     @Override
-    public boolean execute(MemcacheConnection conn)
+    public boolean execute(MemcachedConnection conn)
       throws IOException
     {
       ReadStream rs = conn.getReadStream();
@@ -319,7 +319,7 @@ public class MemcacheConnection implements ProtocolConnection
       return true;
     }
     
-    abstract protected boolean doCommand(MemcacheConnection conn,
+    abstract protected boolean doCommand(MemcachedConnection conn,
                                          String key,
                                          long bytes,
                                          long timeout,
@@ -329,7 +329,7 @@ public class MemcacheConnection implements ProtocolConnection
   
   static class SetCommand extends StoreCommand {
     @Override
-    public boolean doCommand(MemcacheConnection conn,
+    public boolean doCommand(MemcachedConnection conn,
                              String key,
                              long bytes,
                              long expireTimeout,
@@ -354,7 +354,7 @@ public class MemcacheConnection implements ProtocolConnection
   
   static class AddCommand extends StoreCommand {
     @Override
-    public boolean doCommand(MemcacheConnection conn,
+    public boolean doCommand(MemcachedConnection conn,
                              String key,
                              long bytes,
                              long timeout,
@@ -390,7 +390,7 @@ public class MemcacheConnection implements ProtocolConnection
   
   static class ReplaceCommand extends StoreCommand {
     @Override
-    public boolean doCommand(MemcacheConnection conn,
+    public boolean doCommand(MemcachedConnection conn,
                              String key,
                              long bytes,
                              long timeout,
@@ -426,7 +426,7 @@ public class MemcacheConnection implements ProtocolConnection
   
   static class AppendCommand extends StoreCommand {
     @Override
-    public boolean doCommand(MemcacheConnection conn,
+    public boolean doCommand(MemcachedConnection conn,
                              String key,
                              long bytes,
                              long timeout,
@@ -471,7 +471,7 @@ public class MemcacheConnection implements ProtocolConnection
   
   static class PrependCommand extends StoreCommand {
     @Override
-    public boolean doCommand(MemcacheConnection conn,
+    public boolean doCommand(MemcachedConnection conn,
                              String key,
                              long bytes,
                              long timeout,
@@ -517,7 +517,7 @@ public class MemcacheConnection implements ProtocolConnection
   
   static class GetCommand extends Command {
     @Override
-    public boolean execute(MemcacheConnection conn)
+    public boolean execute(MemcachedConnection conn)
       throws IOException
     {
       ReadStream rs = conn.getReadStream();
@@ -575,7 +575,7 @@ public class MemcacheConnection implements ProtocolConnection
     protected void getCache(WriteStream out,
                             ClusterCache cache,
                             String key,
-                            MemcacheConnection conn,
+                            MemcachedConnection conn,
                             long hash)
       throws IOException
     {
@@ -620,7 +620,7 @@ public class MemcacheConnection implements ProtocolConnection
   
   static class GetIfModifiedCommand extends GetCommand {
     @Override
-    public boolean execute(MemcacheConnection conn)
+    public boolean execute(MemcachedConnection conn)
       throws IOException
     {
       ReadStream rs = conn.getReadStream();
@@ -669,7 +669,7 @@ public class MemcacheConnection implements ProtocolConnection
   
   static class DeleteCommand extends Command {
     @Override
-    public boolean execute(MemcacheConnection conn)
+    public boolean execute(MemcachedConnection conn)
       throws IOException
     {
       ReadStream rs = conn.getReadStream();
@@ -751,7 +751,7 @@ public class MemcacheConnection implements ProtocolConnection
   
   static class IncrementCommand extends Command {
     @Override
-    public boolean execute(MemcacheConnection conn)
+    public boolean execute(MemcachedConnection conn)
       throws IOException
     {
       ReadStream rs = conn.getReadStream();
@@ -867,7 +867,7 @@ public class MemcacheConnection implements ProtocolConnection
 
   static class QuitCommand extends Command {
     @Override
-    public boolean execute(MemcacheConnection conn)
+    public boolean execute(MemcachedConnection conn)
       throws IOException
     {
       WriteStream out = conn.getWriteStream();
@@ -878,7 +878,7 @@ public class MemcacheConnection implements ProtocolConnection
   
   static class VersionCommand extends Command {
     @Override
-    public boolean execute(MemcacheConnection conn)
+    public boolean execute(MemcachedConnection conn)
       throws IOException
     {
       ReadStream rs = conn.getReadStream();
@@ -898,7 +898,7 @@ public class MemcacheConnection implements ProtocolConnection
   
   static class VerbosityCommand extends Command {
     @Override
-    public boolean execute(MemcacheConnection conn)
+    public boolean execute(MemcachedConnection conn)
       throws IOException
     {
       ReadStream rs = conn.getReadStream();
@@ -918,7 +918,7 @@ public class MemcacheConnection implements ProtocolConnection
   
   static class StatsCommand extends Command {
     @Override
-    public boolean execute(MemcacheConnection conn)
+    public boolean execute(MemcachedConnection conn)
       throws IOException
     {
       ReadStream rs = conn.getReadStream();

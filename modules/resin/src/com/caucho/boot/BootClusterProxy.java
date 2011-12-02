@@ -27,56 +27,36 @@
  * @author Scott Ferguson
  */
 
-package com.caucho.memcache;
+package com.caucho.boot;
 
-import javax.annotation.PostConstruct;
+import com.caucho.config.program.ConfigProgram;
+import com.caucho.config.program.ContainerProgram;
 
-import com.caucho.distcache.ClusterCache;
-import com.caucho.distcache.ResinCacheBuilder;
-import com.caucho.network.listen.Protocol;
-import com.caucho.network.listen.ProtocolConnection;
-import com.caucho.network.listen.SocketLink;
+public class BootClusterProxy {
+  private String _id = "";
+  
+  private ContainerProgram _program = new ContainerProgram();
 
-/**
- * Custom serialization for the cache
- */
-public class MemcacheProtocol implements Protocol
-{
-  private ClusterCache _cache;
-  
-  public MemcacheProtocol()
+  public void setId(String id)
   {
-    _cache = new ClusterCache();
-    _cache.setName("memcache");
-    _cache.setLocalExpireTimeoutMillis(1000);
-    _cache.setLeaseExpireTimeoutMillis(60 * 60 * 1000);
-  }
-  
-  public void setMode(ResinCacheBuilder.Scope scope)
-  {
-    _cache.setScopeMode(scope);
-  }
-  
-  @PostConstruct
-  public void init()
-  {
-    _cache.init();
-  }
-  
-  ClusterCache getCache()
-  {
-    return _cache;
-  }
-  
-  @Override
-  public ProtocolConnection createConnection(SocketLink link)
-  {
-    return new MemcacheConnection(this, link);
+    _id = id;
   }
 
-  @Override
-  public String getProtocolName()
+  public String getId()
   {
-    return "memcache";
+    return _id;
+  }
+  
+  /**
+   * Ignore items we can't understand.
+   */
+  public void addContentProgram(ConfigProgram program)
+  {
+    _program.addProgram(program);
+  }
+  
+  public ConfigProgram getProgram()
+  {
+    return _program;
   }
 }

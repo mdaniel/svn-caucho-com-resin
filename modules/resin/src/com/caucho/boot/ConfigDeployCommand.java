@@ -42,7 +42,7 @@ public class ConfigDeployCommand extends AbstractRepositoryCommand {
   @Override
   public String getDescription()
   {
-    return "deploys a configuration file or directory";
+    return "deploys a configuration directory or jar file";
   }
   
   @Override
@@ -60,7 +60,7 @@ public class ConfigDeployCommand extends AbstractRepositoryCommand {
     
     
     if (! jar.endsWith(".jar") && ! jarPath.isDirectory()) {
-      throw new ConfigException(L.l("Deploy expects to be used with a *.jar file at {0}",
+      throw new ConfigException(L.l("Deploy expects to be used with a *.jar file or directory at {0}",
                                     jar));
     }
 
