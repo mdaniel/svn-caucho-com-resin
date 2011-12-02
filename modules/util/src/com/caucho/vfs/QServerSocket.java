@@ -40,12 +40,21 @@ abstract public class QServerSocket {
   public void setTcpNoDelay(boolean delay)
   {
   }
-  
+
   public boolean isTcpNoDelay()
   {
     return false;
   }
-  
+
+  public void setTcpKeepalive(boolean isEnable)
+  {
+  }
+
+  public boolean isTcpKeepalive()
+  {
+    return false;
+  }
+
   public boolean isJNI()
   {
     return false;
@@ -72,10 +81,10 @@ abstract public class QServerSocket {
    * Sets the connection read timeout.
    */
   abstract public void setConnectionSocketTimeout(int ms);
-  
+
   abstract public boolean accept(QSocket socket)
     throws IOException;
-  
+
   abstract public QSocket createSocket()
     throws IOException;
 
@@ -92,7 +101,7 @@ abstract public class QServerSocket {
   {
     return false;
   }
-  
+
   abstract public void close()
     throws IOException;
 }

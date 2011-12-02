@@ -124,6 +124,7 @@ public class Port
   private long _suspendTimeMax = DEFAULT;
 
   private boolean _tcpNoDelay = true;
+  private boolean _isTcpKeepalive;
 
   // The virtual host name
   private String _virtualHost;
@@ -614,6 +615,22 @@ public class Port
   }
 
   /**
+   * Gets the tcp-no-delay property
+   */
+  public boolean getTcpKeepalive()
+  {
+    return _isTcpKeepalive;
+  }
+
+  /**
+   * Sets the tcp-no-delay property
+   */
+  public void setTcpKeepalive(boolean isEnable)
+  {
+    _isTcpKeepalive = isEnable;
+  }
+
+  /**
    * Configures the throttle.
    */
   public void setThrottleConcurrentMax(int max)
@@ -1027,8 +1044,8 @@ public class Port
       _isPostBind = true;
     }
 
-    if (_tcpNoDelay)
-      _serverSocket.setTcpNoDelay(_tcpNoDelay);
+    _serverSocket.setTcpNoDelay(_tcpNoDelay);
+    _serverSocket.setTcpKeepalive(_isTcpKeepalive);
 
     _serverSocket.setConnectionSocketTimeout((int) getSocketTimeout());
 
