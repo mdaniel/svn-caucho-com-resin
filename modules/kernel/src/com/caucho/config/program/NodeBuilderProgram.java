@@ -51,7 +51,7 @@ public class NodeBuilderProgram extends FlowProgram {
 
   private final Node _node;
 
-  public NodeBuilderProgram(Node node)
+  private NodeBuilderProgram(Node node)
   {
     _node = node;
   }

@@ -81,6 +81,11 @@ public class GitObjectStream extends InputStream {
   {
     return _type;
   }
+  
+  public long getLength()
+  {
+    return _length;
+  }
 
   public GitCommit parseCommit()
     throws IOException

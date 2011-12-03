@@ -1109,7 +1109,6 @@ public class Resin
                               getStage() + "/config/resin",
                               getServerDataDirectory().lookup("config"));
     } catch (Exception e) {
-      e.printStackTrace();
       log().log(Level.WARNING, e.toString(), e);
     }
   }
@@ -1425,7 +1424,7 @@ public class Resin
     BootClusterConfig cluster = bootServer.getPod().getCluster();
 
     cluster.getProgram().configure(_servletContainerConfig);
-    
+      
     ServerConfig config = new ServerConfig(_servletContainerConfig);
     cluster.getServerDefault().configure(config);
     bootServer.getServerProgram().configure(config);
@@ -1553,6 +1552,8 @@ public class Resin
     } catch (Throwable e) {
       Throwable cause;
 
+      e.printStackTrace();
+      
       for (cause = e;
            cause != null && cause.getCause() != null;
            cause = cause.getCause()) {

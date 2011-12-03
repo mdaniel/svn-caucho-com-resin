@@ -61,6 +61,7 @@ public class ResinProperties extends ResinControl implements FlowBean
   private Path _path;
   private FileSetType _fileSet;
   private boolean _isOptional;
+  private boolean _isRecover;
 
   /**
    * Sets the resin:properties.
@@ -87,6 +88,11 @@ public class ResinProperties extends ResinControl implements FlowBean
   public void setOptional(boolean optional)
   {
     _isOptional = optional;
+  }
+  
+  public void setRecover(boolean isRecover)
+  {
+    _isRecover = isRecover;
   }
 
   @PostConstruct

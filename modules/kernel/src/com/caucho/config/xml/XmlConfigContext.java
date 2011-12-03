@@ -58,6 +58,7 @@ import com.caucho.config.inject.CreationalContextImpl;
 import com.caucho.config.inject.InjectManager;
 import com.caucho.config.program.ConfigProgram;
 import com.caucho.config.program.NodeBuilderChildProgram;
+import com.caucho.config.program.RecoverableProgram;
 import com.caucho.config.type.ConfigType;
 import com.caucho.config.type.StringType;
 import com.caucho.config.type.TypeFactory;
@@ -893,7 +894,18 @@ public class XmlConfigContext {
 
   private ConfigProgram buildProgram(Attribute attr, Node node)
   {
-    return new NodeBuilderChildProgram(node);
+    ConfigProgram program = new NodeBuilderChildProgram(node);
+    
+    if ("TestBean".equals(node.getLocalName())) {
+      System.out.println("PROP: " + Config.getProperty(RecoverableProgram.ATTR)
+                         + " " + node);
+      Thread.dumpStack();
+    }
+    if (Boolean.TRUE.equals(Config.getProperty(RecoverableProgram.ATTR))) {
+      program = new RecoverableProgram(program);
+    }
+    
+    return program;
   }
 
   //

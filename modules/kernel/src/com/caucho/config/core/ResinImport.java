@@ -32,6 +32,7 @@ package com.caucho.config.core;
 import com.caucho.config.Config;
 import com.caucho.config.ConfigException;
 import com.caucho.config.SchemaBean;
+import com.caucho.config.program.RecoverableProgram;
 import com.caucho.config.type.FlowBean;
 import com.caucho.config.types.FileSetType;
 import com.caucho.loader.Environment;
@@ -41,6 +42,7 @@ import com.caucho.vfs.Path;
 
 import javax.annotation.PostConstruct;
 import java.util.ArrayList;
+import java.util.logging.Level;
 import java.util.logging.Logger;
 
 /**
@@ -56,6 +58,7 @@ public class ResinImport extends ResinControl implements FlowBean
   private Path _path;
   private FileSetType _fileSet;
   private boolean _isOptional;
+  private boolean _isRecover;
 
   /**
    * Sets the resin:import path.
@@ -82,6 +85,14 @@ public class ResinImport extends ResinControl implements FlowBean
   public void setOptional(boolean optional)
   {
     _isOptional = optional;
+  }
+  
+  /**
+   * Sets true if the resin:import should recover from errors.
+   */
+  public void setRecover(boolean isRecover)
+  {
+    _isRecover = isRecover;
   }
 
   @PostConstruct
@@ -131,12 +142,27 @@ public class ResinImport extends ResinControl implements FlowBean
       log.config(L.l("resin:import '{0}'", path.getNativePath()));
 
       Environment.addDependency(new Depend(path));
+      
+      String recoverAttr = RecoverableProgram.ATTR;
+      Object oldRecover = Config.getCurrentVar(recoverAttr);
 
-      Config config = new Config();
-      // server/10hc
-      // config.setResinInclude(true);
+      try {
+        Config.setProperty(recoverAttr, _isRecover);
+        
+        Config config = new Config();
+        // server/10hc
+        // config.setResinInclude(true);
 
-      config.configureBean(object, path, schema);
+        config.configureBean(object, path, schema);
+      } catch (RuntimeException e) {
+        if (! _isRecover)
+          throw e;
+
+        log.log(Level.WARNING, e.toString(), e);
+        Environment.setConfigException(e);
+      } finally {
+        Config.setProperty(recoverAttr, oldRecover);
+      }
     }
   }
 }

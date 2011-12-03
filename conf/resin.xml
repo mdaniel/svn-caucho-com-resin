@@ -11,7 +11,7 @@
 
   <!-- property-based Resin configuration -->
   <resin:properties path="${__DIR__}/resin.properties" optional="true"/>
-  <resin:properties path="config:/resin.properties" optional="true"/>
+  <resin:properties path="config:/resin.properties" optional="true" recover="true"/>
   
   <!-- Logging configuration for the JDK logging API. -->
   <log-handler name="" level="all" path="stdout:"
@@ -37,7 +37,7 @@
 
   <!-- local configuration files -->
   <resin:import fileset="${__DIR__}/resin.d/*.xml"/>
-  <resin:import fileset="config:/resin.d/*.xml"/>
+  <resin:import fileset="config:/resin.d/*.xml" recover="true"/>
   
   <!--
      - Remote management requires at least one enabled admin user.
@@ -46,7 +46,7 @@
     <user name="${admin_user}" password="${admin_password}"/>
     
     <resin:import path="${__DIR__}/admin-users.xml" optional="true"/>
-    <resin:import path="config:/admin-users.xml" optional="true"/>
+    <resin:import path="config:/admin-users.xml" optional="true" recover="true"/>
   </resin:AdminAuthenticator>
 
   <!--
@@ -203,7 +203,7 @@
 
     <!-- include resources config files in resources/ -->
     <resin:import fileset="${__DIR__}/app_tier.d/**/*.xml"/>
-    <resin:import fileset="config:/app_tier.d/**/*.xml"/>
+    <resin:import fileset="config:/app_tier.d/**/*.xml" recover="true"/>
 
     <!--
        - Default host configuration applied to all virtual hosts.
