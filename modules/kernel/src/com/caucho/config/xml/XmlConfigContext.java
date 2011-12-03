@@ -896,11 +896,6 @@ public class XmlConfigContext {
   {
     ConfigProgram program = new NodeBuilderChildProgram(node);
     
-    if ("TestBean".equals(node.getLocalName())) {
-      System.out.println("PROP: " + Config.getProperty(RecoverableProgram.ATTR)
-                         + " " + node);
-      Thread.dumpStack();
-    }
     if (Boolean.TRUE.equals(Config.getProperty(RecoverableProgram.ATTR))) {
       program = new RecoverableProgram(program);
     }
