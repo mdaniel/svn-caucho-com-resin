@@ -29,7 +29,9 @@
 
 package com.caucho.boot;
 
+import java.io.Console;
 import java.security.MessageDigest;
+import java.util.List;
 import java.util.logging.Logger;
 
 import com.caucho.config.ConfigException;
@@ -53,7 +55,7 @@ public class GeneratePasswordCommand extends AbstractBootCommand
     addValueKey("-password");
     
     addValueOption("user", "user", "the user name to generate a password hash");
-    addValueOption("password", "password", "the password for the password hash");
+    addValueOption("password", "password", "the password for the password hash (leave empty for prompt)");
   }
 
   @Override
@@ -71,14 +73,21 @@ public class GeneratePasswordCommand extends AbstractBootCommand
     String user = args.getArg("user");
     String password = args.getArg("password");
     
-    if (args.getTailArgs().size() == 2) {
-      user = args.getTailArgs().get(0);
-      password = args.getTailArgs().get(1);
+    List<String> tailArgs = args.getTailArgs();
+    
+    if (tailArgs.size() == 2 && 
+        ! tailArgs.get(0).startsWith("-") && 
+        ! tailArgs.get(1).startsWith("-")) {
+      user = tailArgs.get(0);
+      password = tailArgs.get(1);
     }
     
     if (user == null)
       throw new ConfigException(L().l("generate-password requires a -user argument"));
     
+    if (password == null)
+      password = readPasswordFromConsole();
+      
     if (password == null)
       throw new ConfigException(L().l("generate-password requires a -password argument"));
     
@@ -104,6 +113,28 @@ public class GeneratePasswordCommand extends AbstractBootCommand
     System.out.println("admin_password : " + sshaPassword);
 
     return 0;
+  }
+  
+  private static String readPasswordFromConsole()
+  {
+    try {
+      
+      Console console = System.console();
+      if (console == null) {
+        System.out.println(L().l("Warning: interactive console is not available"));
+        return null;
+      }
+      
+      char[] passwordChars = console.readPassword("Enter password: ");
+      
+      if (passwordChars == null || passwordChars.length == 0)
+        return null;
+      
+      return new String(passwordChars);
+    } catch (Exception e) {
+      e.printStackTrace();
+      return null;
+    }
   }
   
   private byte []sha1(String password, byte []salt)
