@@ -29,10 +29,7 @@
 package com.caucho.cloud.license;
 
 import com.caucho.cloud.topology.CloudPod;
-import com.caucho.config.ConfigException;
 import com.caucho.vfs.Path;
-
-import java.io.IOException;
 
 public interface LicenseClient
 {
