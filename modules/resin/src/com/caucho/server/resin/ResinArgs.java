@@ -54,7 +54,7 @@ class ResinArgs
   private static final Logger log = Logger.getLogger(ResinArgs.class.getName());
   private static final L10N L = new L10N(ResinArgs.class);
 
-  private String _serverId = "default";
+  private String _serverId;
 
   private Path _resinHome;
   private Path _rootDirectory;

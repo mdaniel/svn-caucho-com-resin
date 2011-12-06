@@ -50,6 +50,7 @@ import javax.management.ObjectName;
 import com.caucho.VersionFactory;
 import com.caucho.bam.broker.Broker;
 import com.caucho.cloud.bam.BamSystem;
+import com.caucho.cloud.license.LicenseClient;
 import com.caucho.cloud.loadbalance.LoadBalanceFactory;
 import com.caucho.cloud.loadbalance.LoadBalanceService;
 import com.caucho.cloud.network.ClusterServer;
@@ -507,8 +508,13 @@ public class Resin
       _bootResinConfig = new BootResinConfig(this);
 
       configureBoot();
+      
+      String id = null;
+      
+      if (_args != null)
+        id = _args.getServerId();
 
-      if (_serverId == null) {
+      if (id == null) {
         List<BootClusterConfig> clusters = _bootResinConfig.getClusterList();
         loop:
         for (BootClusterConfig cluster : clusters) {
@@ -519,7 +525,7 @@ public class Resin
             if (address.isAnyLocalAddress()
                 || address.isLinkLocalAddress()
                 || address.isLoopbackAddress()) {
-              _serverId = server.getId();
+              id = server.getId();
 
               break loop;
             }
@@ -527,8 +533,10 @@ public class Resin
         }
       }
 
-      if (_serverId == null)
-        _serverId = "default";
+      if (id == null)
+        id = "default";
+      
+      setServerId(id);
 
       _resinSystem.setId(_serverId);
 
@@ -1436,10 +1444,32 @@ public class Resin
   
   protected void validateServerCluster()
   {
-    if (_selfServer.getPod().getServerLength() != 1) {
-      throw new ConfigException(L().l("{0} does not support multiple <server> instances in a cluster.\nFor clustered servers, please use Resin Professional with a valid license.",
+    if (_selfServer.getPod().getServerLength() <= 1)
+      return;
+    
+    if (loadCloudLicenses())
+      return;
+    
+    throw new ConfigException(L().l("{0} does not support multiple <server> instances in a cluster.\nFor clustered servers, please use Resin Professional with a valid license.",
                                     this));
+  }
+  
+  protected boolean loadCloudLicenses()
+  {
+    try {
+      Class<?> cl = Class.forName("com.caucho.cloud.license.LicenseClientImpl");
+      LicenseClient client = (LicenseClient) cl.newInstance();
+      
+      Path licenses = getResinDataDirectory().lookup("licenses");
+      
+      return client.loadLicenses(licenses, _selfServer.getPod());
+    } catch (ClassNotFoundException e) {
+      log().log(Level.ALL, e.toString(), e);
+    } catch (Exception e) {
+      log().log(Level.FINER, e.toString(), e);
     }
+    
+    return false;
   }
   
   protected CloudServer joinCluster(CloudSystem system)
