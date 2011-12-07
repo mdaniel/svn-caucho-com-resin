@@ -39,10 +39,19 @@ import java.util.logging.Logger;
  * Command to stop Resin server
  * bin/resin.sh status -server a
  */
-public class StatusCommand extends AbstractStartCommand
+public class StatusCommand extends AbstractBootCommand
 {
   private static Logger _log;
   private static L10N _L;
+
+  public StatusCommand()
+  {
+    addFlagOption("verbose", "log command-line and environment information");
+    addValueOption("root-directory", "dir", "set the root directory");
+    addValueOption("log-directory", "dir", "set the log directory");
+    addValueOption("server", "id", "select a configured server");
+    addIntValueOption("debug-port", "port", "listen to a JVM debug port");
+  }
 
   @Override
   public String getDescription()
