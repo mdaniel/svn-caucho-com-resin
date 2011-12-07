@@ -34,6 +34,7 @@ import java.lang.reflect.InvocationTargetException;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
+import com.caucho.cloud.license.LicenseClient;
 import com.caucho.cloud.loadbalance.LoadBalanceFactory;
 import com.caucho.cloud.network.ClusterServer;
 import com.caucho.cloud.network.NetworkClusterSystem;
@@ -46,6 +47,7 @@ import com.caucho.env.health.HealthStatusService;
 import com.caucho.env.log.LogSystem;
 import com.caucho.env.repository.AbstractRepository;
 import com.caucho.env.repository.RepositorySpi;
+import com.caucho.env.shutdown.ExitCode;
 import com.caucho.env.shutdown.ShutdownSystem;
 import com.caucho.env.warning.WarningService;
 import com.caucho.license.LicenseCheck;
@@ -57,6 +59,7 @@ import com.caucho.server.cluster.Server;
 import com.caucho.server.distcache.CacheStoreManager;
 import com.caucho.server.distcache.DistCacheSystem;
 import com.caucho.util.L10N;
+import com.caucho.vfs.Path;
 
 /**
  * The Resin class represents the top-level container for Resin.
@@ -80,7 +83,7 @@ public class ResinDelegate
   /**
    * Creates a new Resin instance
    */
-  public static ResinDelegate create(Resin resin )
+  public static ResinDelegate create(Resin resin)
   {
     String licenseErrorMessage = null;
 
@@ -257,13 +260,32 @@ public class ResinDelegate
     if (getResin().getSelfServer().getPod().getServerLength() <= 1)
       return;
       
-    /*
-    if (loadCloudLicenses())
-      return;
-      */
+    if (loadCloudLicenses()) {
+      ShutdownSystem.shutdownActive(ExitCode.MODIFIED,
+                                    L.l("{0} has loaded new licenses, and requires a restart.",
+                                        getResin()));
+    }
       
     throw new ConfigException(L.l("{0} does not support multiple <server> instances in a cluster.\nFor clustered servers, please use Resin Professional with a valid license.",
-                                    this));
+                                  getResin()));
+  }
+  
+  protected boolean loadCloudLicenses()
+  {
+    try {
+      Class<?> cl = Class.forName("com.caucho.cloud.license.LicenseClientImpl");
+      LicenseClient client = (LicenseClient) cl.newInstance();
+      
+      Path licenses = getResin().getServerDataDirectory().lookup("licenses");
+      
+      return client.loadLicenses(licenses, getResin().getSelfServer().getPod());
+    } catch (ClassNotFoundException e) {
+      log.log(Level.ALL, e.toString(), e);
+    } catch (Exception e) {
+      log.log(Level.FINER, e.toString(), e);
+    }
+    
+    return false;
   }
 
   /**
@@ -303,5 +325,11 @@ public class ResinDelegate
     SecurityService.createAndAddService();
 
     createDistCacheService();
+  }
+
+  @Override
+  public String toString()
+  {
+    return getClass().getSimpleName() + "[]";
   }
 }

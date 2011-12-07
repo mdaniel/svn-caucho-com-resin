@@ -120,8 +120,8 @@ public class Resin
   private Path _resinConf;
   
   private Path _rootDirectory;
-
   private Path _resinDataDirectory;
+  
   private Path _logDirectory;
   
   private String _dynamicJoinCluster;
@@ -374,7 +374,7 @@ public class Resin
   {
     return _rootDirectory;
   }
-      
+  
   public void setRootDirectory(Path path)
   {
     _rootDirectory = path;
@@ -673,7 +673,7 @@ public class Resin
 
       if (getRootDirectory() == null)
         throw new NullPointerException();
-      
+
       _resinDelegate = ResinDelegate.create(this);
       
       getDelegate().addPreTopologyServices();
@@ -1142,7 +1142,7 @@ public class Resin
       Class<?> cl = Class.forName("com.caucho.cloud.license.LicenseClientImpl");
       LicenseClient client = (LicenseClient) cl.newInstance();
       
-      Path licenses = getResinDataDirectory().lookup("licenses");
+      Path licenses = getServerDataDirectory().lookup("licenses");
       
       return client.loadLicenses(licenses, _selfServer.getPod());
     } catch (ClassNotFoundException e) {

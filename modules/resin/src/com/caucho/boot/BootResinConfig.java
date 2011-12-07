@@ -233,7 +233,7 @@ public class BootResinConfig // implements EnvironmentBean
     
     if (serverId != null) {
       client = findClient(serverId);
-      
+
       if (client != null)
         return client;
       
