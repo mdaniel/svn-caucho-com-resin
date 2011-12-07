@@ -42,6 +42,8 @@ import com.caucho.server.cluster.Server;
 import com.caucho.server.host.Host;
 import com.caucho.server.host.HostConfig;
 import com.caucho.server.resin.Resin;
+import com.caucho.server.resin.ResinArgs;
+import com.caucho.server.resin.ResinEmbedded;
 import com.caucho.server.webapp.WebAppConfig;
 
 /**
@@ -52,7 +54,7 @@ public class ResinEmbed
   private static final String EMBED_CONF
     = "com/caucho/server/embed/resin-embed.xml";
   
-  private Resin _resin = Resin.create("embed");
+  private Resin _resin;
   private Host _host;
   private Server _server;
   
@@ -67,6 +69,11 @@ public class ResinEmbed
   {
     InputStream is = null;
     try {
+      ResinArgs args = new ResinArgs();
+      args.setServerId("embed");
+      
+      _resin = new ResinEmbedded(args);
+      
       Config config = new Config();
       
       is = _resin.getClassLoader().getResourceAsStream(EMBED_CONF);

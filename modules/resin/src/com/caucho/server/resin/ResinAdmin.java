@@ -37,6 +37,7 @@ import com.caucho.management.server.AbstractManagedObject;
 import com.caucho.management.server.ClusterMXBean;
 import com.caucho.management.server.ResinMXBean;
 import com.caucho.management.server.ServerMXBean;
+import com.caucho.management.server.ThreadPoolMXBean;
 import com.caucho.server.cluster.Server;
 import com.caucho.server.util.CauchoSystem;
 
@@ -44,6 +45,7 @@ public class ResinAdmin extends AbstractManagedObject
   implements ResinMXBean
 {
   private final Resin _resin;
+  private ThreadPoolAdmin _threadPoolAdmin;
 
   /**
    * Creates the admin object and registers with JMX.
@@ -53,6 +55,11 @@ public class ResinAdmin extends AbstractManagedObject
     _resin = resin;
 
     registerSelf();
+    
+    _threadPoolAdmin = ThreadPoolAdmin.create();
+    _threadPoolAdmin.register();
+    
+    MemoryAdmin.create();
   }
 
   @Override
@@ -82,6 +89,11 @@ public class ResinAdmin extends AbstractManagedObject
     }
     
     return mxClusters;
+  }
+
+  public ThreadPoolMXBean getThreadPoolAdmin()
+  {
+    return _threadPoolAdmin;
   }
 
   //

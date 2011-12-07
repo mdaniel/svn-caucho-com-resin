@@ -56,6 +56,8 @@ import com.caucho.server.host.Host;
 import com.caucho.server.host.HostConfig;
 import com.caucho.server.http.HttpRequest;
 import com.caucho.server.resin.Resin;
+import com.caucho.server.resin.ResinArgs;
+import com.caucho.server.resin.ResinEmbedded;
 import com.caucho.server.webapp.*;
 import com.caucho.util.L10N;
 import com.caucho.vfs.Vfs;
@@ -115,9 +117,11 @@ public class ResinEmbed
    */
   public ResinEmbed()
   {
-    _resin = Resin.create("embed");
-    _resin.setEmbedded(true);
-    _resin.setRootDirectory(Vfs.lookup());
+    ResinArgs args = new ResinArgs();
+    args.setServerId("embed");
+    args.setRootDirectory(Vfs.lookup());
+    
+    _resin = new ResinEmbedded(args);
   }
 
   /**
@@ -276,7 +280,8 @@ public class ResinEmbed
     LogManager.getLogManager().reset();
   }
 
-  public void addScanRoot() {
+  public void addScanRoot()
+  {
     _resin.getClassLoader().addScanRoot();
   }
 
@@ -488,8 +493,10 @@ public class ResinEmbed
     CloudServer cloudServer = _cluster.getPodList()[0].getServerList()[0]; 
     // _clusterServer = cloudServer.getData(ClusterServer.class);
     
+    /*
     if (cloudServer != null)
       _resin.setServerId(cloudServer.getId());
+      */
   }
 
   private void deployWebApplication(WebAppEmbed webApplication)

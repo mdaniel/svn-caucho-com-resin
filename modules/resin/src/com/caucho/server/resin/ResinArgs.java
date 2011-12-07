@@ -30,12 +30,14 @@
 package com.caucho.server.resin;
 
 import java.net.Socket;
+import java.net.URL;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
 import com.caucho.VersionFactory;
+import com.caucho.config.ConfigException;
 import com.caucho.log.EnvironmentStream;
 import com.caucho.log.RotateStream;
 import com.caucho.server.util.JniCauchoSystem;
@@ -49,7 +51,7 @@ import com.caucho.vfs.WriteStream;
 /**
  * The parsed Resin command-line arguments
  */
-class ResinArgs
+public class ResinArgs
 {
   private static final Logger log = Logger.getLogger(ResinArgs.class.getName());
   private static final L10N L = new L10N(ResinArgs.class);
@@ -68,26 +70,30 @@ class ResinArgs
   private String _serverAddress;
   private int _serverPort;
   
-  private boolean _isRestart;
-
   private ArrayList<BoundPort> _boundPortList
     = new ArrayList<BoundPort>();
 
   private String _stage = null;
   private boolean _isDumpHeapOnExit;
   
-  public ResinArgs(String []args)
-    throws Exception
+  public ResinArgs()
   {
-    preConfigureInit();
+    this(new String[0]);
+  }
+  
+  public ResinArgs(String []args)
+    throws ConfigException
+  {
+    try {
+      initEnvironmentDefaults();
     
-    parseCommandLine(args);
+      parseCommandLine(args);
+    } catch (Exception e) {
+      throw ConfigException.create(e);
+    }
   }
 
-  /**
-   * Must be called after the Resin.create()
-   */
-  private void preConfigureInit()
+  private void initEnvironmentDefaults()
   {
     String resinHome = System.getProperty("resin.home");
 
@@ -109,8 +115,19 @@ class ResinArgs
 
     if (resinRoot != null)
       _rootDirectory = Vfs.lookup(resinRoot);
+
+    try {
+      URL.setURLStreamHandlerFactory(ResinURLStreamHandlerFactory.create());
+    } catch (java.lang.Error e) {
+      //operation permitted once per jvm; catching for harness.
+    }
   }
   
+  public void setServerId(String serverId)
+  {
+    _serverId = serverId;
+  }
+
   public String getServerId()
   {
     return _serverId;
@@ -129,12 +146,25 @@ class ResinArgs
     return _rootDirectory;
   }
   
+  public void setRootDirectory(Path root)
+  {
+    _rootDirectory = root;
+  }
+  
   /**
    * Gets the root directory.
    */
   public Path getDataDirectory()
   {
     return _dataDirectory;
+  }
+  
+  /**
+   * Sets the root directory.
+   */
+  public void setDataDirectory(Path path)
+  {
+    _dataDirectory = path;
   }
   
   public Socket getPingSocket()
@@ -148,6 +178,11 @@ class ResinArgs
   public String getResinConf()
   {
     return _resinConf;
+  }
+  
+  public void setResinConf(String resinConf)
+  {
+    _resinConf = resinConf;
   }
 
   public Path getResinConfPath()
@@ -211,6 +246,16 @@ class ResinArgs
     return _stage;
   }
   
+  public void setStage(String stage)
+  {
+    _stage = stage;
+  }
+  
+  public void setJoinCluster(String joinCluster)
+  {
+    _joinCluster = joinCluster;
+  }
+  
   public String getJoinCluster()
   {
     return _joinCluster;
@@ -221,9 +266,29 @@ class ResinArgs
     return _serverAddress;
   }
   
+  public void setServerAddress(String address)
+  {
+    _serverAddress = address;
+  }
+  
   public int getServerPort()
   {
     return _serverPort;
+  }
+  
+  public void setServerPort(int port)
+  {
+    _serverPort = port;
+  }
+  
+  public String getUser()
+  {
+    return null;
+  }
+  
+  public String getPassword()
+  {
+    return null;
   }
   
   public boolean isDumpHeapOnExit()

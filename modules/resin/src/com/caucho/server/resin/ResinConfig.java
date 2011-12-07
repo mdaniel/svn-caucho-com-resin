@@ -348,7 +348,7 @@ public class ResinConfig implements EnvironmentBean
   @Deprecated
   public Management createResinManagement()
   {
-    return _resin.createResinManagement();
+    return _resin.getDelegate().createResinManagement();
   }
 
   public String toString()

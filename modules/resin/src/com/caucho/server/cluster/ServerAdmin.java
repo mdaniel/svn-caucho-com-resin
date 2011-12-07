@@ -152,7 +152,7 @@ public class ServerAdmin extends AbstractEmitterObject
   @Override
   public ThreadPoolMXBean getThreadPool()
   {
-    return _server.getResin().getThreadPoolAdmin();
+    return _server.getResin().getAdmin().getThreadPoolAdmin();
   }
 
   /**

@@ -834,7 +834,7 @@ public class ServletContainerConfig implements EnvironmentBean, SchemaBean
      */
     public Path getRoot()
     {
-      Resin resin =  Resin.getLocal();
+      Resin resin =  Resin.getCurrent();
 
       return resin == null ? Vfs.getPwd() : resin.getRootDirectory();
     }

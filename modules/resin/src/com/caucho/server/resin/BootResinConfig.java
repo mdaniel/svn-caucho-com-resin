@@ -34,12 +34,14 @@ import java.util.logging.Logger;
 
 import com.caucho.cloud.security.SecurityService;
 import com.caucho.cloud.topology.CloudSystem;
+import com.caucho.cloud.topology.TopologyService;
 import com.caucho.config.ConfigException;
 import com.caucho.config.Configurable;
 import com.caucho.config.DependencyBean;
 import com.caucho.config.SchemaBean;
 import com.caucho.config.program.ConfigProgram;
 import com.caucho.config.program.ContainerProgram;
+import com.caucho.env.service.ResinSystem;
 import com.caucho.loader.EnvironmentBean;
 import com.caucho.vfs.Path;
 import com.caucho.vfs.PersistentDependency;
@@ -74,7 +76,12 @@ public class BootResinConfig implements SchemaBean, DependencyBean, EnvironmentB
   
   public CloudSystem getCloudSystem()
   {
-    return _resin.getCloudSystem();
+    ResinSystem resinSystem = _resin.getResinSystem();
+    
+    if (resinSystem != null)
+      return resinSystem.getService(TopologyService.class).getSystem();
+    else
+      return null;
   }
   
   public ClassLoader getClassLoader()
@@ -106,7 +113,7 @@ public class BootResinConfig implements SchemaBean, DependencyBean, EnvironmentB
   {
     _resin.setRootDirectory(rootDirectory);
     
-    Vfs.setPwd(rootDirectory);
+    Vfs.setPwd(rootDirectory, getClassLoader());
   }
   
   public void setJoinCluster(String joinCluster)
@@ -208,16 +215,5 @@ public class BootResinConfig implements SchemaBean, DependencyBean, EnvironmentB
   public void addDependency(PersistentDependency dependency)
   {
     _resin.getClassLoader().addDependency(dependency);
-  }
-  
-  void configureServers()
-  {
-    /*
-    for (BootClusterConfig cluster : getClusterList()) {
-      for (BootServerConfig server : cluster.getServerList()) {
-        server.configureServer();
-      }
-    }
-    */
   }
 }

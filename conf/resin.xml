@@ -215,7 +215,8 @@
 
       <!-- creates the webapps directory for .war expansion -->
       <web-app-deploy path="webapps"
-                      expand-preserve-fileset="WEB-INF/work/**"/>
+                      expand-preserve-fileset="WEB-INF/work/**"
+                      versioning="${webapp_versioning}"/>
 
       <!--
          - Defaults applied to each web-app.

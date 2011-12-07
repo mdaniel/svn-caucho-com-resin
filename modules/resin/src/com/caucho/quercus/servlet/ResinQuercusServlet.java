@@ -79,7 +79,7 @@ public class ResinQuercusServlet extends QuercusServletImpl
     quercus.setWebApp(_webApp);
     getQuercus().setPwd(Vfs.lookup());
 
-    quercus.setIni("caucho.server_id", Resin.getLocal().getServerId());
+    quercus.setIni("caucho.server_id", Resin.getCurrent().getServerId());
   }
 
   @Override

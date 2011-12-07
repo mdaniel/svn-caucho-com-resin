@@ -183,12 +183,16 @@ public class Server
   /**
    * Creates a new servlet server.
    */
-  public Server(Resin resin,
-                ResinSystem resinSystem,
-                NetworkClusterSystem clusterService)
+  public Server(Resin resin)
   {
     if (resin == null)
       throw new NullPointerException();
+    
+    ResinSystem resinSystem = resin.getResinSystem();
+    
+    NetworkClusterSystem clusterService;
+    
+    clusterService = ResinSystem.getCurrentService(NetworkClusterSystem.class);
     
     if (resinSystem == null)
       throw new NullPointerException();

@@ -2563,7 +2563,7 @@ public class WebApp extends ServletContextImpl
   {
     _shutdownWaitTime = wait.getPeriod();
 
-    Resin resin = Resin.getLocal();
+    Resin resin = Resin.getCurrent();
     if (resin != null &&
         resin.getShutdownWaitMax() < _shutdownWaitTime) {
       log.warning(L.l("web-app shutdown-wait-max '{0}' is longer than resin shutdown-wait-max '{1}'.",

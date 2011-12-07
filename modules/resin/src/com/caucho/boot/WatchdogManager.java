@@ -67,7 +67,9 @@ import com.caucho.security.Authenticator;
 import com.caucho.server.cluster.Server;
 import com.caucho.server.http.HttpProtocol;
 import com.caucho.server.resin.Resin;
+import com.caucho.server.resin.ResinArgs;
 import com.caucho.server.resin.ResinELContext;
+import com.caucho.server.resin.ResinWatchdog;
 import com.caucho.server.util.JniCauchoSystem;
 import com.caucho.server.webbeans.ResinServerConfigLibrary;
 import com.caucho.util.Alarm;
@@ -109,7 +111,22 @@ class WatchdogManager implements AlarmListener {
 
     _args = new WatchdogArgs(argv);
     
-    _system = new ResinSystem("watchdog");
+    String serverId = _args.getServerId();
+
+    if (_args.isDynamicServer()) {
+      serverId = _args.getDynamicServerId();
+    }
+    
+    ResinArgs resinArgs = new ResinArgs();
+    resinArgs.setRootDirectory(_args.getRootDirectory());
+    resinArgs.setServerId(serverId);
+    
+    if (_args.getDataDirectory() != null)
+      resinArgs.setDataDirectory(_args.getDataDirectory());
+    
+    Resin resin = new ResinWatchdog(resinArgs);
+    
+    _system = resin.getResinSystem();
 
     Vfs.setPwd(_args.getRootDirectory());
     
@@ -154,11 +171,6 @@ class WatchdogManager implements AlarmListener {
 
     ResinELContext elContext = _args.getELContext();
     
-    Resin resin = Resin.createWatchdog(_system);
-    
-    if (_args.getDataDirectory() != null)
-      resin.setDataDirectory(_args.getDataDirectory());
-    
     resin.preConfigureInit();
     
     // XXX: needs to be config
@@ -177,14 +189,6 @@ class WatchdogManager implements AlarmListener {
 
     _watchdogPort = _args.getWatchdogPort();
     
-    String serverId = _args.getServerId();
-
-    if (_args.isDynamicServer()) {
-      serverId = _args.getDynamicServerId();
-    }
-    
-    resin.setServerId(serverId);
-    System.out.println("PREPREAD: " + serverId);
     readConfig(serverId, _args);
     
     WatchdogChild server = null;
@@ -213,7 +217,7 @@ class WatchdogManager implements AlarmListener {
     server.getConfig().logInit(logStream);
 
     resin.preConfigureInit();
-    resin.setConfigFile(_args.getResinConf().getNativePath());
+    // resin.setConfigFile(_args.getResinConf().getNativePath());
 
     thread = Thread.currentThread();
     thread.setContextClassLoader(resin.getClassLoader());
@@ -225,7 +229,6 @@ class WatchdogManager implements AlarmListener {
     pod.createStaticServer("default", "localhost", -1, false);
 
     _server = resin.createServer();
-    System.out.println("CREATE: " + _server);
     
     thread.setContextClassLoader(_server.getClassLoader());
     
