@@ -51,9 +51,6 @@ public class GeneratePasswordCommand extends AbstractBootCommand
   
   public GeneratePasswordCommand()
   {
-    addValueKey("-user");
-    addValueKey("-password");
-    
     addValueOption("user", "user", "the user name to generate a password hash");
     addValueOption("password", "password", "the password for the password hash (leave empty for prompt)");
   }
@@ -173,7 +170,7 @@ public class GeneratePasswordCommand extends AbstractBootCommand
   @Override
   public String getUsageArgs()
   {
-    return " [user] [password]";
+    return " [<user>] [<password>]";
   }
 
   /*

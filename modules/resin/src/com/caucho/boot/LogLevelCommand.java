@@ -39,9 +39,9 @@ import java.util.logging.Level;
 public class LogLevelCommand extends AbstractManagementCommand
 {
   private static final L10N L = new L10N(LogLevelCommand.class);
-  
+
   private static final Map<String, Level> _options = new LinkedHashMap<String, Level>();
-  
+
   public LogLevelCommand()
   {
     addFlagOption("all", "all logs (rare to use)");
@@ -124,7 +124,7 @@ public class LogLevelCommand extends AbstractManagementCommand
     System.err.println(L.l("   -active-time         : specifies temporary level active time (default permanent). e.g. 5s"));
   }
   */
-  
+
   static {
     _options.put("-all", Level.ALL);
     _options.put("-finest", Level.FINEST);

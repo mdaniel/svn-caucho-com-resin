@@ -36,20 +36,34 @@ import com.caucho.util.L10N;
 
 public class DeployCopyCommand extends AbstractRepositoryCommand {
   private static final L10N L = new L10N(DeployCopyCommand.class);
-  
+
+  public DeployCopyCommand()
+  {
+    addValueOption("conf", "conf", "resin configuration file");
+    addValueOption("source", "source", "source context");
+    addValueOption("source-host", "source-host", "source host");
+    addValueOption("source-stage", "source-stage", "source stage");
+    addValueOption("source-version", "source-version", "source version");
+    addValueOption("target", "target", "target context");
+    addValueOption("target-host", "target-host", "target host");
+    addValueOption("target-stage", "target-stage", "target stage");
+    addValueOption("target-version", "target-version", "target version");
+    addValueOption("m", "message", "commit message");
+  }
+
   @Override
   public String getDescription()
   {
     return "copies a deployment to a new tag name";
   }
-   
+
   @Override
   public int doCommand(WatchdogArgs args,
                        WatchdogClient client,
                        WebAppDeployClient deployClient)
   {
     String sourceContext = args.getArg("-source");
-    
+
     if (sourceContext != null) {
     }
     else if (args.getTailArgs().size() == 2) {
@@ -60,7 +74,7 @@ public class DeployCopyCommand extends AbstractRepositoryCommand {
     }
 
     String sourceHost = args.getArg("-source-host");
-    
+
     if (sourceHost == null)
       sourceHost = "default";
 
@@ -79,7 +93,7 @@ public class DeployCopyCommand extends AbstractRepositoryCommand {
       fillInVersion(source, version);
 
     String targetContext = args.getArg("-target");
-    
+
     if (targetContext != null) {
     }
     else if (args.getTailArgs().size() == 2) {
@@ -121,13 +135,14 @@ public class DeployCopyCommand extends AbstractRepositoryCommand {
       fillInVersion(target, targetVersion);
 
     deployClient.copyTag(target, source);
-    
-    System.out.println(L.l("copied {0} to {1}", 
+
+    System.out.println(L.l("copied {0} to {1}",
                            source.getId(), target.getId()));
 
     return 0;
   }
 
+  /*
   @Override
   public void usage()
   {
@@ -153,4 +168,5 @@ public class DeployCopyCommand extends AbstractRepositoryCommand {
     System.err.println(L.l("   -target-version <target-version> : target version"));
     System.err.println(L.l("   -m <message>                     : commit message"));
   }
+  */
 }

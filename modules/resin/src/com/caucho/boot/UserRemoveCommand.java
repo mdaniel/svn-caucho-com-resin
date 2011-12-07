@@ -35,7 +35,7 @@ import com.caucho.util.L10N;
 public class UserRemoveCommand extends AbstractManagementCommand
 {
   private static final L10N L = new L10N(UserRemoveCommand.class);
-  
+
   @Override
   public String getDescription()
   {
@@ -56,6 +56,13 @@ public class UserRemoveCommand extends AbstractManagementCommand
   }
 
   @Override
+  public String getUsageArgs()
+  {
+     return " <user>";
+  }
+
+  /*
+   @Override
   public void usage()
   {
     System.err.println(L.l(
@@ -70,4 +77,5 @@ public class UserRemoveCommand extends AbstractManagementCommand
     System.err.println(L.l("   -user <user>            : specifies name to use for authorising the request."));
     System.err.println(L.l("   -password <password>    : specifies password to use for authorising the request."));
   }
+   */
 }

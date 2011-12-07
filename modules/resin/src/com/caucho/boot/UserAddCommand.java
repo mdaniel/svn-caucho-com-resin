@@ -38,7 +38,13 @@ import java.util.HashSet;
 public class UserAddCommand extends AbstractManagementCommand
 {
   private static final L10N L = new L10N(UserAddCommand.class);
-  
+
+  public UserAddCommand()
+  {
+    addValueOption("u", "<new user name>", "specifies name for a new user.");
+    addValueOption("p", "<new user password>", "specifies password for a new user.");
+  }
+
   @Override
   public String getDescription()
   {
@@ -90,8 +96,8 @@ public class UserAddCommand extends AbstractManagementCommand
 
     return 0;
   }
-
-  @Override
+  /*
+   @Override
   public void usage()
   {
     System.err.println(L.l(
@@ -108,4 +114,5 @@ public class UserAddCommand extends AbstractManagementCommand
     System.err.println(L.l("   -u <new user name>      : specifies name for a new user."));
     System.err.println(L.l("   -p <new user password>  : specifies password for a new user."));
   }
+   */
 }

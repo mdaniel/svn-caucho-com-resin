@@ -54,6 +54,7 @@ public class UserListCommand extends AbstractManagementCommand
     return 0;
   }
 
+  /*
   @Override
   public void usage()
   {
@@ -69,4 +70,5 @@ public class UserListCommand extends AbstractManagementCommand
     System.err.println(L.l("   -user <user>            : specifies name to use for authorising the request."));
     System.err.println(L.l("   -password <password>    : specifies password to use for authorising the request."));
   }
+  */
 }

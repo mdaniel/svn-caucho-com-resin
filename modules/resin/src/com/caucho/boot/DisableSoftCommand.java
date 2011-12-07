@@ -80,12 +80,19 @@ public class DisableSoftCommand extends AbstractScalingCommand
   }
 
   @Override
+  public String getUsageArgs()
+  {
+    return " <server>";
+  }
+
+  /*
+  @Override
   public void usage()
   {
-    System.err.println(L.l("usage: bin/resin.sh [-conf <file>] -server <triad-server> disable -address <address> -port <port> -user <user> -password <password> <server>"));
+    System.err.println(L.l("usage: bin/resin.sh [-conf <file>] -server <triad-server> disable-soft -address <address> -port <port> -user <user> -password <password> <server>"));
     System.err.println(L.l(""));
     System.err.println(L.l("description:"));
-    System.err.println(L.l("   disables specified in <server> argument server" ));
+    System.err.println(L.l("   disables specified in <server> argument server after existing user sessions complete" ));
     System.err.println(L.l(""));
     System.err.println(L.l("options:"));
     System.err.println(L.l("   -server <triad-server> : one of the servers in the triad"));
@@ -93,6 +100,6 @@ public class DisableSoftCommand extends AbstractScalingCommand
     System.err.println(L.l("   -port <port>           : server http port"));
     System.err.println(L.l("   -user <user>           : user name used for authentication to the server"));
     System.err.println(L.l("   -password <password>   : password used for authentication to the server"));
-    System.err.println(L.l("   <server>               : virtual host to make application available on"));
   }
+  */
 }

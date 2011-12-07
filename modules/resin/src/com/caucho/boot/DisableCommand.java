@@ -37,7 +37,7 @@ import com.caucho.util.L10N;
 public class DisableCommand extends AbstractScalingCommand
 {
   private static final L10N L = new L10N(DisableCommand.class);
-  
+
   @Override
   public String getDescription()
   {
@@ -80,6 +80,13 @@ public class DisableCommand extends AbstractScalingCommand
   }
 
   @Override
+  public String getUsageArgs()
+  {
+    return " <server>";
+  }
+
+  /*
+  @Override
   public void usage()
   {
     System.err.println(L.l("usage: bin/resin.sh [-conf <file>] -server <triad-server> disable -address <address> -port <port> -user <user> -password <password> <server>"));
@@ -93,6 +100,6 @@ public class DisableCommand extends AbstractScalingCommand
     System.err.println(L.l("   -port <port>           : server http port"));
     System.err.println(L.l("   -user <user>           : user name used for authentication to the server"));
     System.err.println(L.l("   -password <password>   : password used for authentication to the server"));
-    System.err.println(L.l("   <server>               : virtual host to make application available on"));
   }
+  */
 }

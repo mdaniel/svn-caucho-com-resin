@@ -36,7 +36,7 @@ public class FlagBootOption extends AbstractBootOption {
   }
   
   @Override
-  public boolean isOption()
+  public boolean isFlag()
   {
     return true;
   }

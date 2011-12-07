@@ -79,6 +79,7 @@ public class EnableCommand extends AbstractScalingCommand
     return 0;
   }
 
+  /*
   @Override
   public void usage()
   {
@@ -93,6 +94,6 @@ public class EnableCommand extends AbstractScalingCommand
     System.err.println(L.l("   -port <port>           : server http port"));
     System.err.println(L.l("   -user <user>           : user name used for authentication to the server"));
     System.err.println(L.l("   -password <password>   : password used for authentication to the server"));
-    System.err.println(L.l("   <server>               : virtual host to make application available on"));
   }
+  */
 }

@@ -37,7 +37,15 @@ import com.caucho.util.L10N;
 public class UndeployCommand extends AbstractRepositoryCommand
 {
   private static final L10N L = new L10N(UndeployCommand.class);
-  
+
+  public UndeployCommand()
+  {
+    addValueOption("host", "host", "virtual host to make application available on");
+    addValueOption("stage", "stage", "tage to deploy application to, defaults to production");
+    addValueOption("version", "version", "version of application formatted as <major.minor.micro.qualifier>");
+    addValueOption("m", "message", "commit message");
+  }
+
   @Override
   public String getDescription()
   {
@@ -99,6 +107,13 @@ public class UndeployCommand extends AbstractRepositoryCommand
   }
 
   @Override
+  public String getUsageArgs()
+  {
+    return " <name>";
+  }
+
+  /*
+  @Override
   public void usage()
   {
     System.err.println(L.l("usage: bin/resin.sh [-conf <file>] [-server <id>] undeploy -user <user> -password <password> [options] <name>"));
@@ -116,4 +131,5 @@ public class UndeployCommand extends AbstractRepositoryCommand
     System.err.println(L.l("   -version <version>    : version of application formatted as <major.minor.micro.qualifier>"));
     System.err.println(L.l("   -m <message>          : commit message"));
   }
+   */
 }

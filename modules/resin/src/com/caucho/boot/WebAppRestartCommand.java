@@ -35,13 +35,19 @@ import com.caucho.util.L10N;
 public class WebAppRestartCommand extends WebAppCommand
 {
   private static final L10N L = new L10N(WebAppRestartCommand.class);
-  
+
+  public WebAppRestartCommand()
+  {
+    addValueOption("host", "host", "virtual host to make application available on");
+    addValueOption("stage", "stage", "tage to deploy application to, defaults to production");
+    addValueOption("version", "version", "version of application formatted as <major.minor.micro.qualifier>");
+  }
+
   @Override
   public String getDescription()
   {
     return "restarts a deployed application";
   }
-  
 
   @Override
   protected int doCommand(WebAppDeployClient deployClient,
@@ -64,6 +70,13 @@ public class WebAppRestartCommand extends WebAppCommand
   }
 
   @Override
+  public String getUsageArgs()
+  {
+    return "<name>";
+  }
+
+  /*
+   @Override
   public void usage()
   {
     System.err.println(L.l("usage: bin/resin.sh [-conf <file>] [-server <id>] deploy-restart -user <user> -password <password> [options] <name>"));
@@ -82,4 +95,5 @@ public class WebAppRestartCommand extends WebAppCommand
     System.err.println(L.l("   -stage <stage>        : name of the stage, for servers running in staging mode"));
     System.err.println(L.l("   -version <version>    : version of application formatted as <major.minor.micro.qualifier>"));
   }
+   */
 }

@@ -39,14 +39,13 @@ import javax.management.ObjectName;
 public class JmxSetCommand extends JmxCommand
 {
   private static final L10N L = new L10N(JmxSetCommand.class);
-  
+
   public JmxSetCommand()
   {
     addValueOption("pattern", "pattern",
       "pattern to match MBean, adheres to the rules defined for javax.managment.ObjectName e.g. qa:type=Foo");
-    
-    addValueOption("attribute", "attribute",
-                   "name of the attribute");
+
+    addValueOption("attribute", "attribute", "name of the attribute");
   }
   
   @Override

@@ -24,19 +24,45 @@
  *   59 Temple Place, Suite 330
  *   Boston, MA 02111-1307  USA
  *
- * @author Scott Ferguson
+ * @author Alex Rojkov
  */
 
 package com.caucho.boot;
 
-public interface BootOption {
-  public String getName();
-  
-  public String getDescription();
-  
-  public String getUsage();
+import com.caucho.util.L10N;
 
-  public boolean isFlag();
-  public boolean isValue();
-  public boolean isIntValue();
+import java.util.logging.Logger;
+
+public abstract class AbstractStopCommand extends AbstractBootCommand
+{
+  private static Logger _log;
+  private static L10N _L;
+
+  protected AbstractStopCommand()
+  {
+    addFlagOption("verbose", "log command-line and environment information");
+    addValueOption("server", "id", "select a configured server");
+  }
+
+  @Override
+  public boolean isRetry()
+  {
+    return true;
+  }
+
+  private static Logger log()
+  {
+    if (_log == null)
+      _log = Logger.getLogger(AbstractStopCommand.class.getName());
+
+    return _log;
+  }
+
+  private static L10N L()
+  {
+    if (_L == null)
+      _L = new L10N(AbstractStopCommand.class);
+
+    return _L;
+  }
 }

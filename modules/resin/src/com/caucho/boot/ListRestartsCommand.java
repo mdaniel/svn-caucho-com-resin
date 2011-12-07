@@ -36,7 +36,12 @@ import com.caucho.util.L10N;
 public class ListRestartsCommand extends AbstractManagementCommand
 {
   private static final L10N L = new L10N(ListRestartsCommand.class);
-  
+
+  public ListRestartsCommand()
+  {
+    addValueOption("period", "period", "specifies look back period of time. e.g. '-period 1D' will list restarts since same time yesterday.");
+  }
+
   @Override
   public String getDescription()
   {
@@ -62,6 +67,7 @@ public class ListRestartsCommand extends AbstractManagementCommand
     return 0;
   }
 
+  /*
   @Override
   public void usage()
   {
@@ -74,4 +80,5 @@ public class ListRestartsCommand extends AbstractManagementCommand
     System.err.println(L.l("options:"));
     System.err.println(L.l("   -period             : specifies look back period of time. e.g. '-period 1D' will list restarts since same time yesterday."));
   }
+  */
 }

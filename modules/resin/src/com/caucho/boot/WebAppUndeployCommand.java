@@ -97,4 +97,10 @@ public class WebAppUndeployCommand extends AbstractRepositoryCommand
 
     return 0;
   }
+
+  @Override
+  public String getUsageArgs()
+  {
+    return " <name>";
+  }
 }

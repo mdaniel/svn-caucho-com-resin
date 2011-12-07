@@ -38,7 +38,16 @@ import com.caucho.vfs.Vfs;
 
 public class DeployCommand extends AbstractRepositoryCommand {
   private static final L10N L = new L10N(ConfigDeployCommand.class);
-  
+
+  public DeployCommand()
+  {
+    addValueOption("host", "host", "virtual host to make application available on");
+    addValueOption("name", "name", "name of the context to deploy to, defaults to war-file name");
+    addValueOption("stage", "stage", "tage to deploy application to, defaults to production");
+    addValueOption("version", "version", "version of application formatted as <major.minor.micro.qualifier>");
+    addValueOption("m", "message", "commit message");
+  }
+
   @Override
   public String getDescription()
   {

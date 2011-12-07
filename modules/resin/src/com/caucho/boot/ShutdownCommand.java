@@ -39,7 +39,7 @@ import java.util.logging.Logger;
  * Command to shutdown Resin server
  * bin/resin.sh shutdown -server a
  */
-public class ShutdownCommand extends AbstractStartCommand
+public class ShutdownCommand extends AbstractStopCommand
 {
   private static Logger _log;
   private static L10N _L;

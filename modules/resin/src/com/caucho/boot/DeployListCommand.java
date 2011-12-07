@@ -40,7 +40,7 @@ public class DeployListCommand extends AbstractRepositoryCommand
   @Override
   public String getDescription()
   {
-    return "lists all deployed applications";
+    return "lists deployed applications";
   }
   
   @Override
@@ -59,6 +59,12 @@ public class DeployListCommand extends AbstractRepositoryCommand
     }
 
     return 0;
+  }
+
+  @Override
+  public String getUsageArgs()
+  {
+    return " [<pattern>]";
   }
 
   /*

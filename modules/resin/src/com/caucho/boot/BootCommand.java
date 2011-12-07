@@ -43,11 +43,11 @@ public interface BootCommand {
 
   public boolean isRetry();
 
-  public Set<String> getOptions();
+  public boolean isValueOption(String key);
 
-  public Set<String> getValueKeys();
+  public boolean isIntValueOption(String key);
 
-  public Set<String> getIntValueKeys();
+  public boolean isFlag(String key);
 
   public void usage();
   

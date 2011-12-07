@@ -39,7 +39,7 @@ import java.util.logging.Logger;
  * Command to stop Resin server
  * bin/resin.sh kill -server a
  */
-public class KillCommand extends AbstractStartCommand
+public class KillCommand extends AbstractStopCommand
 {
   private static Logger _log;
   private static L10N _L;

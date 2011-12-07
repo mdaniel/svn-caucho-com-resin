@@ -51,6 +51,10 @@ public abstract class AbstractRepositoryCommand extends AbstractRemoteCommand {
   private static final Logger log
     = Logger.getLogger(AbstractRepositoryCommand.class.getName());
 
+  protected AbstractRepositoryCommand()
+  {
+  }
+
   @Override
   public final int doCommand(WatchdogArgs args,
                              WatchdogClient client)

@@ -80,7 +80,7 @@ public abstract class AbstractBootOption implements BootOption {
   }
   
   @Override
-  public boolean isOption()
+  public boolean isFlag()
   {
     return false;
   }
@@ -95,5 +95,11 @@ public abstract class AbstractBootOption implements BootOption {
   public boolean isIntValue()
   {
     return false;
+  }
+
+  @Override
+  public String toString()
+  {
+    return getClass().getSimpleName() + "[" + _name + "]";
   }
 }

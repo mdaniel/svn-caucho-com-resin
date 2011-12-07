@@ -40,10 +40,6 @@ public abstract class AbstractStartCommand extends AbstractBootCommand
   private static Logger _log;
   private static L10N _L;
 
-  private final Set<String> _options = new HashSet<String>();
-  private final Set<String> _valueKeys = new HashSet<String>();
-  private final Set<String> _intValueKeys = new HashSet<String>();
-
   protected AbstractStartCommand()
   {
     addFlagOption("verbose", "log command-line and environment information");
@@ -54,11 +50,13 @@ public abstract class AbstractStartCommand extends AbstractBootCommand
     addValueOption("root-directory", "dir", "set the root directory");
     addValueOption("log-directory", "dir", "set the log directory");
     addValueOption("server", "id", "select a configured server");
-    
+    addValueOption("stage", "stage", "select a configured server");
+
     addIntValueOption("watchdog-port", "port", "set watchdog port to listen to");
     addIntValueOption("debug-port", "port", "listen to a JVM debug port");
     addIntValueOption("jmx-port", "port", "listen to an unauthenticated JMX port");
-    
+
+    /*
     _options.add("-verbose");
     _options.add("--verbose");
     _options.add("-preview");
@@ -95,6 +93,7 @@ public abstract class AbstractStartCommand extends AbstractBootCommand
     _intValueKeys.add("--debug-port");
     _intValueKeys.add("-jmx-port");
     _intValueKeys.add("--jmx-port");
+    */
   }
 
   @Override
@@ -117,23 +116,5 @@ public abstract class AbstractStartCommand extends AbstractBootCommand
       _L = new L10N(AbstractStartCommand.class);
 
     return _L;
-  }
-
-  @Override
-  public Set<String> getOptions()
-  {
-    return _options;
-  }
-
-  @Override
-  public Set<String> getValueKeys()
-  {
-    return _valueKeys;
-  }
-
-  @Override
-  public Set<String> getIntValueKeys()
-  {
-    return _intValueKeys;
   }
 }
