@@ -169,9 +169,11 @@ function stat_graph_regexp($params, $pattern)
   $full_names = $stat->statisticsNames();
 
   $names = preg_grep($pattern, $full_names);
-  sort($names);
   
-  stat_graph($params, $names);
+  if (count($names) > 0) {
+    sort($names);
+    stat_graph($params, $names);
+  }
 }
 
 function stat_graph($params, $names)
@@ -193,21 +195,21 @@ function stat_graph_div($params)
   
 	#echo "<span title='${params->alt}'>\n";
   if ($params->legend == "none") {
-    echo "<div id='${params->canvas}-link' style='width:${params->width}px;cursor:pointer'>\n";
+    echo "<div id='${params->canvas}-link' style='width:${params->width}px;'>\n";
     echo " <div id='${params->canvas}-thumb-title' style='width:100%;font-size:1em;text-align:center'>${params->title} <img src='images/maximize.png' alt='maximize'/></div>\n";
     echo " <div id='${params->canvas}-thumb-plot' style='width:${params->width}px;height:${params->height}px;'></div>\n";
     echo "</div>\n";
   }
   else if ($params->legend == "right") {
-    echo "<div id='${params->canvas}-link' style='cursor:pointer;display:inline-block;'>\n";
+    echo "<div id='${params->canvas}-link' style='display:inline-block;'>\n";
     echo " <div id='${params->canvas}-thumb-title' style='width:100%;font-size:1em;text-align:center'>${params->title} <img src='images/maximize.png' alt='maximize'/></div>\n";
     echo " <div id='${params->canvas}-thumb-plot' style='float:left;width:${params->width}px;height:${params->height}px;'></div>\n";
     echo " <div id='${params->canvas}-thumb-legend' style='float:right;font-size:.75em;'></div>\n";
     echo "</div>\n";
   }
   else {
-    echo "<div id='${params->canvas}-link' style='width:${params->width}px;cursor:pointer'>\n";
-    echo " <div id='${params->canvas}-thumb-title' style='width:100%;font-size:1em;text-align:center'>${params->title} <img src='images/maximize.png' alt='maximize'/></div>\n";
+    echo "<div id='${params->canvas}-link' style='width:${params->width}px;'>\n";
+    echo " <div id='${params->canvas}-thumb-title' style='width:100%;font-size:1em;text-align:center;'>${params->title} <img src='images/maximize.png' alt='maximize'/></div>\n";
     echo " <div id='${params->canvas}-thumb-plot' style='width:${params->width}px;height:${params->height}px;'></div>\n";
     echo " <div id='${params->canvas}-thumb-legend' style='width:100%;font-size:.75em;'></div>\n";
     echo "</div>\n";
@@ -270,6 +272,8 @@ function stat_graph_script($stat, $canvas, $names,
   $data_end_ms = ($end * 1000);
   $data_start_ms = $data_end_ms - $period_ms;
   
+  $has_data = false;
+  
   foreach ($names as $name) {
     echo "// START $name\n";
     
@@ -297,6 +301,8 @@ function stat_graph_script($stat, $canvas, $names,
       }
 			
       echo "[" . ($values[$size-1]->time + $tz_offset_ms) . ", " . $values[$size-1]->value . "]\n";
+      
+      $has_data = true;
     }
     
     echo "];\n";
@@ -341,7 +347,7 @@ function stat_graph_script($stat, $canvas, $names,
     echo "// END $name\n";
     echo "\n";
   }
-
+  
   $x_max_ms = $data_end_ms + $tz_offset_ms;
   $x_min_ms = $x_max_ms - $period_ms;
   
@@ -372,6 +378,7 @@ function stat_graph_script($stat, $canvas, $names,
     echo "    return (val / 1e3).toFixed(1) + 'k';\n";
     echo "  return val.toFixed(axis.tickDecimals);\n";
   }
+  
   echo "}\n\n";  
 	
   echo "function showTooltip(item, contents) {\n";
@@ -397,51 +404,58 @@ function stat_graph_script($stat, $canvas, $names,
     
   echo "var thumb_plot = $.plot(\"#${canvas}-thumb-plot\", thumb_graphs, thumb_options);\n\n";
   
-  echo "$(function() {\n";
-  echo "  $('#${canvas}-link').colorbox({\n"; 
-  echo "    width:'85%', height:'85%', inline:true, scrolling:false, href:'#${canvas}-full-container', onComplete:function() {\n";
-  echo "			$(\"#${canvas}-full-container\").width('95%');\n";
-  echo "			$(\"#${canvas}-full-container\").height('95%');\n";
-  echo "			$(\"#${canvas}-full-plot\").width('100%');\n";
-  echo "			$(\"#${canvas}-full-plot\").height('70%');\n\n";
+  if (! $has_data) {
+    echo "  $('<div class=\"no-data\">No data available</div>').appendTo(\"#${canvas}-thumb-plot\");\n";
+  } else {
   
-  echo "			var placeholder = $(\"#${canvas}-full-plot\");\n\n";
+    echo "$(\"#${canvas}-thumb-plot\").css('cursor','pointer');\n";
+    
+    echo "$(function() {\n";
+    echo "  $('#${canvas}-link').colorbox({\n"; 
+    echo "    width:'85%', height:'85%', inline:true, scrolling:false, href:'#${canvas}-full-container', onComplete:function() {\n";
+    echo "			$(\"#${canvas}-full-container\").width('95%');\n";
+    echo "			$(\"#${canvas}-full-container\").height('95%');\n";
+    echo "			$(\"#${canvas}-full-plot\").width('100%');\n";
+    echo "			$(\"#${canvas}-full-plot\").height('70%');\n\n";
+    
+    echo "			var placeholder = $(\"#${canvas}-full-plot\");\n\n";
+    
+    echo "			var full_options = {\n";
+    echo "  			xaxis: { mode:\"time\", min: x_min_ms, max: x_max_ms },\n";
+    echo "  			yaxis: {\n";
+    echo "    			tickFormatter: tickFormatter \n";
+    echo "  			},\n";
+    echo "  			legend: { container: \"#${canvas}-full-legend\", noColumns: 2 },\n";
+    echo "				grid: { hoverable: true, autoHighlight: true, interactive: true },\n";
+    echo "				selection: { mode: \"x\" }\n"
+    echo "			};\n\n";
   
-  echo "			var full_options = {\n";
-  echo "  			xaxis: { mode:\"time\", min: x_min_ms, max: x_max_ms },\n";
-  echo "  			yaxis: {\n";
-  echo "    			tickFormatter: tickFormatter \n";
-  echo "  			},\n";
-  echo "  			legend: { container: \"#${canvas}-full-legend\", noColumns: 2 },\n";
-  echo "				grid: { hoverable: true, autoHighlight: true, interactive: true },\n";
-  echo "				selection: { mode: \"x\" }\n"
-  echo "			};\n\n";
-
-  echo "			var plot = $.plot(placeholder, full_graphs, full_options);\n\n";
-  
-  echo "			placeholder.bind(\"plotselected\", function (event, ranges) {\n"; 
-  echo "				plot = $.plot(placeholder, full_graphs, $.extend(true, {}, full_options, {\n"; 
-  echo "					xaxis: { min: ranges.xaxis.from, max: ranges.xaxis.to }\n"; 
-  echo "				}))\n";
-  echo "			});\n\n";
-  
-  echo "			var previousPoint = null;\n";
-  echo "			placeholder.bind(\"plothover\", function (event, pos, item) {\n";
-  echo "				if (item) {\n";
-  echo "					if (previousPoint != item.dataIndex) {\n";
-  echo "						previousPoint = item.dataIndex;\n";
-  echo "						$(\"#tooltip\").remove();\n";
-  echo "						showTooltip(item, item.series.label + \": \" + item.series.yaxis.tickFormatter(item.datapoint[1], item.series.yaxis) + \" at \" + item.series.xaxis.tickFormatter(item.datapoint[0], item.series.xaxis));\n";
-  echo "					}\n";
-  echo "				}\n";
-  echo "				else {\n";
-  echo "					$(\"#tooltip\").remove();\n";
-  echo "					previousPoint = null;\n";            
-  echo "				}\n";
-  echo "			});\n\n";
-  echo "		}\n";
-  echo "  })\n"; 
-  echo "});\n";
+    echo "			var plot = $.plot(placeholder, full_graphs, full_options);\n\n";
+    
+    echo "			placeholder.bind(\"plotselected\", function (event, ranges) {\n"; 
+    echo "				plot = $.plot(placeholder, full_graphs, $.extend(true, {}, full_options, {\n"; 
+    echo "					xaxis: { min: ranges.xaxis.from, max: ranges.xaxis.to }\n"; 
+    echo "				}))\n";
+    echo "			});\n\n";
+    
+    echo "			var previousPoint = null;\n";
+    echo "			placeholder.bind(\"plothover\", function (event, pos, item) {\n";
+    echo "				if (item) {\n";
+    echo "					if (previousPoint != item.dataIndex) {\n";
+    echo "						previousPoint = item.dataIndex;\n";
+    echo "						$(\"#tooltip\").remove();\n";
+    echo "						showTooltip(item, item.series.label + \": \" + item.series.yaxis.tickFormatter(item.datapoint[1], item.series.yaxis) + \" at \" + item.series.xaxis.tickFormatter(item.datapoint[0], item.series.xaxis));\n";
+    echo "					}\n";
+    echo "				}\n";
+    echo "				else {\n";
+    echo "					$(\"#tooltip\").remove();\n";
+    echo "					previousPoint = null;\n";            
+    echo "				}\n";
+    echo "			});\n\n";
+    echo "		}\n";
+    echo "  })\n"; 
+    echo "});\n";
+  }
   
   echo "});\n";
   
