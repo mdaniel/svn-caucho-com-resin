@@ -29,6 +29,7 @@
 package com.caucho.server.admin;
 
 import com.caucho.bam.RemoteConnectionFailedException;
+import com.caucho.bam.RemoteListenerUnavailableException;
 import com.caucho.bam.ServiceUnavailableException;
 import com.caucho.bam.actor.ActorSender;
 import com.caucho.hmtp.HmtpClient;
@@ -87,27 +88,6 @@ public class ManagerClient
     // _managerAddress = bamClient.getAddress();
   }
 
-  /*
-  public ManagerClient(String serverId, String userName, String password)
-  {
-    try {
-      _bamClient 
-        = new HmuxClientFactory(serverId, userName, password).create();
-    
-      _managerAddress = "manager@resin.caucho";
-    } catch (RemoteConnectionFailedException e) {
-      throw new RemoteConnectionFailedException(L.l("Connection to '{0}' failed for remote admin. Check the server and make sure <resin:RemoteAdminService> is enabled in the resin.xml.\n  {1}",
-                                                    serverId, e.getMessage()),
-                                                    e);
-    }
-    
-    if (_bamClient == null) {
-      throw new RemoteConnectionFailedException(L.l("Connection to '{0}' failed for remote admin. Check the server and make sure <resin:RemoteAdminService> is enabled in the resin.xml.\n",
-                                                    serverId));
-    }
-  }
-  */
-
   public ManagerClient(String host, int serverPort, int httpPort,
                        String userName, String password)
   {
@@ -130,14 +110,15 @@ public class ManagerClient
       
       if (httpPort == 0)
         throw exn;
+    } catch (RemoteListenerUnavailableException e) {
+      exn = new RemoteListenerUnavailableException(L.l("HMTP request to '{0}:{1}' failed for remote admin, because remote administration was not enabled. Check that <resin:RemoteAdminService> is enabled in the resin.xml.\n  {1}",
+                                                       host, serverPort,
+                                                       e.getMessage()),
+                                                       e);
+      
+      if (httpPort == 0)
+        throw exn;
     }
-    
-    /*
-    if (_bamClient == null) {
-      throw new RemoteConnectionFailedException(L.l("Connection to '{0}:{1}' failed for remote admin. Check the server and make sure <resin:RemoteAdminService> is enabled in the resin.xml.\n",
-                                                    host, serverPort));
-    }
-    */
     
     String url = "http://" + host + ":" + httpPort + "/hmtp";
     
@@ -154,6 +135,10 @@ public class ManagerClient
       _managerAddress = "manager@resin.caucho";
     } catch (RemoteConnectionFailedException e) {
       throw new RemoteConnectionFailedException(L.l("Connection to '{0}' failed for remote admin. Check the server and make sure <resin:RemoteAdminService> is enabled in the resin.xml.\n  {1}",
+                                                    url, e.getMessage()),
+                                                e);
+    } catch (RemoteListenerUnavailableException e) {
+      throw new RemoteListenerUnavailableException(L.l("Remote admin request to '{0}' failed because remote administration has not been abled. Check the server and make sure <resin:RemoteAdminService> is enabled in the resin.xml.\n  {1}",
                                                     url, e.getMessage()),
                                                 e);
     }

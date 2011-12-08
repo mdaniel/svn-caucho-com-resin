@@ -38,6 +38,7 @@ import java.util.concurrent.atomic.AtomicInteger;
 
 import com.caucho.bam.BamError;
 import com.caucho.bam.RemoteConnectionFailedException;
+import com.caucho.bam.RemoteListenerUnavailableException;
 import com.caucho.bam.ServiceUnavailableException;
 import com.caucho.bam.actor.ActorSender;
 import com.caucho.bam.broker.Broker;
@@ -129,6 +130,10 @@ public class DeployClient implements Repository
       _deployAddress = "deploy@resin.caucho";
     } catch (RemoteConnectionFailedException e) {
       throw new RemoteConnectionFailedException(L.l("Connection to '{0}' failed for remote deploy. Check the server and make sure the server has started and that <resin:RemoteAdminService> is enabled in the resin.xml.\n  {1}",
+                                                    url, e.getMessage()),
+                                                e);
+    } catch (RemoteListenerUnavailableException e) {
+      throw new RemoteListenerUnavailableException(L.l("Connection to '{0}' failed for remote deploy. Check the server and make sure <resin:RemoteAdminService> is enabled in the resin.xml.\n  {1}",
                                                     url, e.getMessage()),
                                                 e);
     }

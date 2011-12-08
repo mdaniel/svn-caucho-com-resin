@@ -1031,6 +1031,9 @@ public class Resin
     
     String serverId = _serverId;
     
+    if ("".equals(serverId))
+      serverId = "default";
+    
     BootServerConfig bootServer = bootResin.findServer(serverId);
     
     if (bootServer == null) {
@@ -1084,8 +1087,7 @@ public class Resin
     
     getDelegate().validateServerCluster();
     
-    NetworkClusterSystem networkService = 
-      NetworkClusterSystem.createAndAddService(_selfServer);
+    NetworkClusterSystem.createAndAddService(_selfServer);
     
     ClusterServer server = _selfServer.getData(ClusterServer.class);
     

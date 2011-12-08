@@ -237,11 +237,12 @@ public class HmtpClient implements ActorSender {
         log.fine(this + " login");
     } catch (NotAuthorizedException e) {
       if (uid == null || "".equals(uid) )
-        throw new NotAuthorizedException(L.l("A user and password are required to access the remote service. Please check the user and password."),
+        throw new NotAuthorizedException(L.l("A user and password are required to access the remote service. Please check the user and password.\n  {0}",
+                                             e.getMessage()),
                                          e);
       else
-        throw new NotAuthorizedException(L.l("The user '{0}' was not authorized to access the remote service. Please check the password.",
-                                             uid),
+        throw new NotAuthorizedException(L.l("The user '{0}' was not authorized to access the remote service. Please check the password.\n  {1}",
+                                             uid, e.getMessage()),
                                              e);
     } catch (RuntimeException e) {
       throw e;
