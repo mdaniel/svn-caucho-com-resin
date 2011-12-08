@@ -50,7 +50,7 @@ public abstract class AbstractStartCommand extends AbstractBootCommand
     addValueOption("root-directory", "dir", "set the root directory");
     addValueOption("log-directory", "dir", "set the log directory");
     addValueOption("server", "id", "select a configured server");
-    addValueOption("stage", "stage", "select a configured server");
+    addValueOption("stage", "stage", "select a configuration stage (production, preview)");
 
     addIntValueOption("watchdog-port", "port", "set watchdog port to listen to");
     addIntValueOption("debug-port", "port", "listen to a JVM debug port");

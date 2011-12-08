@@ -881,7 +881,6 @@ class WatchdogArgs
     addCommand(new EnableCommand());
     
     addCommand(new GuiCommand());
-    addCommand(new GeneratePasswordCommand());
     
     addCommand(new HeapDumpCommand());
     addCommand(new JmxCallCommand());
@@ -894,6 +893,8 @@ class WatchdogArgs
     addCommand(new ListRestartsCommand());
     addCommand(new LogLevelCommand());
     
+    addCommand(new PasswordEncryptCommand());
+    addCommand(new PasswordGenerateCommand());
     addCommand(new PdfReportCommand());
     addCommand(new ProfileCommand());
     
@@ -927,6 +928,8 @@ class WatchdogArgs
     _commandMap.put("deploy-start", new WebAppStartCommand());
     _commandMap.put("deploy-stop", new WebAppStopCommand());
     _commandMap.put("deploy-restart", new WebAppRestartCommand());
+    
+    _commandMap.put("generate-password", new PasswordGenerateCommand());
     
     _commandMap.put("start-webapp", new WebAppStartCommand());
     _commandMap.put("stop-webapp", new WebAppStopCommand());

@@ -44,12 +44,12 @@ import com.caucho.util.RandomUtil;
  * Command to stop Resin server
  * bin/resin.sh status -server a
  */
-public class GeneratePasswordCommand extends AbstractBootCommand
+public class PasswordGenerateCommand extends AbstractBootCommand
 {
   private static Logger _log;
   private static L10N _L;
   
-  public GeneratePasswordCommand()
+  public PasswordGenerateCommand()
   {
     addValueOption("user", "user", "the user name to generate a password hash");
     addValueOption("password", "password", "the password for the password hash (leave empty for prompt)");
@@ -154,7 +154,7 @@ public class GeneratePasswordCommand extends AbstractBootCommand
   private static Logger log()
   {
     if (_log == null)
-      _log = Logger.getLogger(GeneratePasswordCommand.class.getName());
+      _log = Logger.getLogger(PasswordGenerateCommand.class.getName());
 
     return _log;
   }
@@ -162,7 +162,7 @@ public class GeneratePasswordCommand extends AbstractBootCommand
   private static L10N L()
   {
     if (_L == null)
-      _L = new L10N(GeneratePasswordCommand.class);
+      _L = new L10N(PasswordGenerateCommand.class);
 
     return _L;
   }

@@ -12,6 +12,9 @@
 
 <s2 title="4.0.25 - snapshot">
 <ul>
+<li>config: add password-encrypt and &lt;resin:Password> (#4810, Leonid Kaminsky)</li>
+<li>health: stat gathering limited to 14 days for baseline (#4893)</li>
+<li>config: server should start but not serve pages for certain config errors (#4891)</li>
 <li>config: cluster merging, used by local.d (#4882)</li>
 <li>http: add &lt;tcp-keepalive> to enable TCP keepalive for a socket (#4886, rep by Hal Hildebrand)</li>
 <li>cdi: interceptor and InterceptorBinding with enum array (#4883, rep by andreaskaltenbach)</li>
