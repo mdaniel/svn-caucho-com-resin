@@ -52,7 +52,7 @@ public abstract class AbstractRemoteCommand extends AbstractBootCommand {
   {
     addValueOption("server", "id", "id of a server in the config file");
     addValueOption("address", "ip", "IP address or host name of (triad) server");
-    addIntValueOption("port", "port", "IP port of (triad) server ");
+    addIntValueOption("port", "port", "IP port of (triad) server");
     
     addValueOption("user", "user", "admin user name for authentication");
     addValueOption("password", "password", "admin password for authentication");

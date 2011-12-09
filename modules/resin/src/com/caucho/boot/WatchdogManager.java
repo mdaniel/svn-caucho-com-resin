@@ -739,7 +739,7 @@ class WatchdogManager implements AlarmListener {
   private static L10N L()
   {
     if (_L == null)
-      _L = new L10N(ResinBoot.class);
+      _L = new L10N(WatchdogManager.class);
 
     return _L;
   }
@@ -747,7 +747,7 @@ class WatchdogManager implements AlarmListener {
   private static Logger log()
   {
     if (_log == null)
-      _log = Logger.getLogger(ResinBoot.class.getName());
+      _log = Logger.getLogger(WatchdogManager.class.getName());
 
     return _log;
   }

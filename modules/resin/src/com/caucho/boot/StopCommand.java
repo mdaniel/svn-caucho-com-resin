@@ -55,8 +55,6 @@ public class StopCommand extends AbstractStopCommand
                        WatchdogClient client)
     throws BootArgumentException
   {
-    validateArgs(args.getArgv());
-
     try {
       client.stopWatchdog(args.getServerId());
 

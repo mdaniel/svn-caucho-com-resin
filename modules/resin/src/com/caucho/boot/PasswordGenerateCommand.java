@@ -173,6 +173,12 @@ public class PasswordGenerateCommand extends AbstractBootCommand
     return " [<user>] [<password>]";
   }
 
+  @Override
+  public boolean isDefaultArgsAccepted()
+  {
+    return true;
+  }
+
   /*
   @Override
   public void usage()

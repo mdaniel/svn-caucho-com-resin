@@ -54,8 +54,6 @@ public class KillCommand extends AbstractStopCommand
   public int doCommand(WatchdogArgs args, WatchdogClient client)
     throws BootArgumentException
   {
-    validateArgs(args.getArgv());
-
     try {
       client.killWatchdog(args.getServerId());
 

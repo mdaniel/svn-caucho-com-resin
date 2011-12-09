@@ -29,7 +29,6 @@
 
 package com.caucho.boot;
 
-import java.util.Set;
 
 public interface BootCommand {
   public boolean isProOnly();
@@ -49,8 +48,9 @@ public interface BootCommand {
 
   public boolean isFlag(String key);
 
+  public boolean isDefaultArgsAccepted();
+
   public void usage();
-  
   public boolean isStart();
   public boolean isShutdown();
   public boolean isConsole();

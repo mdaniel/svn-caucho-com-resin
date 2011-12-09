@@ -92,6 +92,12 @@ public abstract class AbstractBootCommand implements BootCommand {
   }
 
   @Override
+  public boolean isDefaultArgsAccepted()
+  {
+    return false;
+  }
+
+  @Override
   public int doCommand(ResinBoot boot, WatchdogArgs args)
   {
     WatchdogClient client = findClient(boot, args);
@@ -151,7 +157,8 @@ public abstract class AbstractBootCommand implements BootCommand {
     return sb.toString();
   }
 
-  public void validateArgs(String[] args) throws BootArgumentException
+
+/*  public void validateArgs(String[] args) throws BootArgumentException
   {
     for (int i = 0; i < args.length; i++) {
       final String arg = args[i];
@@ -198,8 +205,8 @@ public abstract class AbstractBootCommand implements BootCommand {
         }
       }
     }
-  }
-  
+  }*/
+
   @Override
   public boolean isValueOption(String key)
   {

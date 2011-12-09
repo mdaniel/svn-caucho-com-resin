@@ -112,6 +112,12 @@ public class UndeployCommand extends AbstractRepositoryCommand
     return " <name>";
   }
 
+  @Override
+  public boolean isDefaultArgsAccepted()
+  {
+    return true;
+  }
+
   /*
   @Override
   public void usage()

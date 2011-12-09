@@ -64,8 +64,6 @@ public class ConsoleCommand extends AbstractStartCommand
   public int doCommand(WatchdogArgs args, WatchdogClient client)
     throws BootArgumentException
   {
-    validateArgs(args.getArgv());
-
     try {
       return client.startConsole();
     } catch (IOException e) {

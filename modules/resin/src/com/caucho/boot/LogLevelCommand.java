@@ -62,7 +62,13 @@ public class LogLevelCommand extends AbstractManagementCommand
   {
     return " loggers...";
   }
-  
+
+  @Override
+  public boolean isDefaultArgsAccepted()
+  {
+    return true;
+  }
+
   @Override
   public String getDescription()
   {

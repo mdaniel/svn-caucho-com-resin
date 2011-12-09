@@ -85,6 +85,12 @@ public class DisableSoftCommand extends AbstractScalingCommand
     return " <server>";
   }
 
+  @Override
+  public boolean isDefaultArgsAccepted()
+  {
+    return true;
+  }
+
   /*
   @Override
   public void usage()

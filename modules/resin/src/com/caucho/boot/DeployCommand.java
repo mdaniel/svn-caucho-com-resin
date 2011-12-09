@@ -142,7 +142,13 @@ public class DeployCommand extends AbstractRepositoryCommand {
   {
     return " <war-file>";
   }
-  
+
+  @Override
+  public boolean isDefaultArgsAccepted()
+  {
+    return true;
+  }
+
   /*
   @Override
   public void usage()

@@ -61,6 +61,12 @@ public class JmxSetCommand extends JmxCommand
   }
 
   @Override
+  public boolean isDefaultArgsAccepted()
+  {
+    return true;
+  }
+
+  @Override
   public int doCommand(WatchdogArgs args,
                        WatchdogClient client,
                        ManagerClient managerClient)

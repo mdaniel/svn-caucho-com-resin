@@ -61,6 +61,12 @@ public class JspcCommand extends AbstractBootCommand
   }
 
   @Override
+  public boolean isDefaultArgsAccepted()
+  {
+    return true;
+  }
+
+  @Override
   public int doCommand(WatchdogArgs args, WatchdogClient client)
     throws BootArgumentException
   {

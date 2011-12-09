@@ -103,4 +103,10 @@ public class WebAppUndeployCommand extends AbstractRepositoryCommand
   {
     return " <name>";
   }
+
+  @Override
+   public boolean isDefaultArgsAccepted()
+   {
+     return true;
+   }
 }

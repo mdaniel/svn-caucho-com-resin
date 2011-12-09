@@ -66,4 +66,10 @@ public class DeployListCommand extends AbstractRepositoryCommand
   {
     return " [<pattern>]";
   }
+
+  @Override
+  public boolean isDefaultArgsAccepted()
+  {
+    return true;
+  }
 }

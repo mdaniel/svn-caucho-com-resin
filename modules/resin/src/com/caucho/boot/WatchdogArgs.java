@@ -50,16 +50,19 @@ import java.util.Collections;
 import java.util.Comparator;
 import java.util.HashMap;
 import java.util.LinkedList;
+import java.util.List;
+import java.util.Map;
 import java.util.Set;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
 class WatchdogArgs
 {
-  private static L10N _L;
+  private static L10N L = new L10N(WatchdogArgs.class);
+
   private static final Logger log
     = Logger.getLogger(WatchdogArgs.class.getName());
-  
+
   private static final HashMap<String,BootCommand> _commandMap
     = new HashMap<String,BootCommand>();
 
@@ -78,11 +81,13 @@ class WatchdogArgs
   private BootCommand _command;
 
   private ArrayList<String> _tailArgs = new ArrayList<String>();
+  private String []_defaultArgs;
 
   private boolean _isDynamicServer;
   private String _dynamicCluster;
   private String _dynamicAddress;
   private int _dynamicPort;
+  private ResinBootELContext _resinBootELContext = null;
 
   private boolean _is64bit;
 
@@ -153,7 +158,7 @@ class WatchdogArgs
   {
     return _serverId;
   }
-  
+
   void setDynamicServerId(String serverId)
   {
     if (serverId != null)
@@ -261,7 +266,7 @@ class WatchdogArgs
       if (_argv[i].equals(arg)
           || _argv[i].equals("-" + arg))
         return _argv[i];
-      
+
       else if (_argv[i].startsWith(arg + "=")) {
         return _argv[i].substring(arg.length() + 1);
       }
@@ -272,27 +277,27 @@ class WatchdogArgs
 
     return null;
   }
-  
+
   public boolean getArgBoolean(String arg, boolean defaultValue)
   {
     String value = getArgFlag(arg);
 
     if (value == null)
       return defaultValue;
-    
+
     if ("no".equals(value) || "false".equals(value))
       return false;
     else
       return true;
   }
-  
+
   public int getArgInt(String arg, int defaultValue)
   {
     String value = getArg(arg);
 
     if (value == null)
       return defaultValue;
-    
+
     try {
       return Integer.parseInt(value);
     } catch (NumberFormatException e) {
@@ -315,9 +320,17 @@ class WatchdogArgs
     return false;
   }
 
+  public boolean isResinProfessional()
+  {
+    return getELContext().isResinProfessional();
+  }
+
   public ResinELContext getELContext()
   {
-    return new ResinBootELContext();
+    if (_resinBootELContext == null)
+      _resinBootELContext = new ResinBootELContext();
+
+    return _resinBootELContext;
   }
 
   /**
@@ -326,6 +339,14 @@ class WatchdogArgs
    */
   public String getDefaultArg()
   {
+    String defaultArg = null;
+
+    if (_defaultArgs.length > 0)
+      defaultArg = _defaultArgs[0];
+
+    return defaultArg;
+
+/*
     ArrayList<String> tailArgs = getTailArgs();
 
     for (int i = 0; i < tailArgs.size(); i++) {
@@ -340,6 +361,7 @@ class WatchdogArgs
     }
 
     return null;
+*/
   }
 
   /**
@@ -365,6 +387,10 @@ class WatchdogArgs
     }
 
     return result.toArray(new String[result.size()]);
+  }
+
+  public String []getDefaultArgs() {
+    return _defaultArgs;
   }
 
   public boolean isHelp()
@@ -398,7 +424,7 @@ class WatchdogArgs
     Logger.getLogger("").setLevel(level);
   }
 
-  private void parseCommandLine(String[] argv)
+  private void parseCommandLine(final String[] argv)
   {
     String resinConf = null;
 
@@ -524,7 +550,21 @@ class WatchdogArgs
       System.out.println(L().l("Resin requires a command:{0}",
                                getCommandList()));
       System.exit(1);
+    } else if (! _isHelp) {
+      try {
+        validateArgs(argv);
+      } catch (BootArgumentException e) {
+        System.out.println(e.getMessage());
+
+        _command.usage();
+
+        System.exit(14);
+      }
     }
+
+    List<String> defaultArgs = parseDefaultArgs();
+
+    _defaultArgs = defaultArgs.toArray(new String[defaultArgs.size()]);
 
     if (resinConf != null) {
       _resinConf = Vfs.getPwd().lookup(resinConf);
@@ -540,6 +580,111 @@ class WatchdogArgs
     }
   }
 
+  private List<String> parseDefaultArgs() {
+    LinkedList<String> defaultArgs = new LinkedList<String>();
+
+    for (int i = _tailArgs.size() - 1; i >= 0; i--) {
+      String arg = _tailArgs.get(i);
+
+      if (_command.isFlag(arg))
+        break;
+
+      String xarg = null;
+
+      if (i > 0)
+        xarg = _tailArgs.get(i - 1);
+
+      if (_command.isValueOption(xarg))
+        break;
+
+      if (_command.isIntValueOption(xarg))
+        break;
+
+      defaultArgs.addFirst(arg);
+    }
+
+    return defaultArgs;
+  }
+
+  private boolean matchName(BootCommand command, String name) {
+    Set<Map.Entry<String,BootCommand>> entries = _commandMap.entrySet();
+
+    for (Map.Entry<String,BootCommand> entry : entries) {
+      if(! command.getClass().equals(entry.getValue().getClass()))
+        continue;
+
+      if (name.equals(entry.getKey()))
+        return true;
+    }
+
+    return false;
+  }
+
+  private void validateArgs(String []argv) throws BootArgumentException
+  {
+    boolean defaultArgEncountered = false;
+
+    for (int i = 0; i < argv.length; i++) {
+      final String arg = argv[i];
+
+      if (matchName(_command, arg))
+        continue;
+
+      if (arg.charAt(0) != '-' && _command.isDefaultArgsAccepted()) {
+        defaultArgEncountered = true;
+
+        continue;
+      }
+
+      if (defaultArgEncountered && arg.charAt(0) == '-') {
+        throw new BootArgumentException(L.l(
+          "Only default arguments are expected at '{0}'",
+          arg));
+      }
+
+      if (arg.startsWith("-J")
+          || arg.startsWith("-D")
+          || arg.startsWith("-X")) {
+        continue;
+      }
+
+      if (arg.equals("-d64") || arg.equals("-d32")) {
+        continue;
+      }
+
+      if (_command.isFlag(arg)) {
+        continue;
+      }
+      else if (_command.isValueOption(arg)) {
+      }
+      else if (_command.isIntValueOption(arg)) {
+      }
+      else {
+        throw new BootArgumentException(L.l("unknown argument '{0}'", arg));
+      }
+
+      if (i + 1 == argv.length)
+        throw new BootArgumentException(L.l("option '{0}' requires a value",
+                                              arg));
+      String value = argv[++i];
+
+      if (_command.isFlag(value)
+          || _command.isValueOption(value)
+          || _command.isIntValueOption(
+        value))
+        throw new BootArgumentException(L.l("option '{0}' requires a value",
+                                            arg));
+
+      if (_command.isIntValueOption(arg)) {
+        try {
+          Long.parseLong(value);
+        } catch (NumberFormatException e) {
+          throw new BootArgumentException(L.l("'{0}' argument must be a number: `{1}'", arg, value));
+        }
+      }
+    }
+  }
+
   private static void usage()
   {
     System.err.println(L().l("usage: bin/resin.sh [-options] <command> [values]"));
@@ -552,31 +697,31 @@ class WatchdogArgs
   private static String getCommandList()
   {
     StringBuilder sb = new StringBuilder();
-    
+
     ArrayList<BootCommand> commands = new ArrayList<BootCommand>();
     commands.addAll(_commandMap.values());
-    
+
     Collections.sort(commands, new CommandNameComparator());
-    
+
     BootCommand lastCommand = null;
-    
+
     for (BootCommand command : commands) {
       if (lastCommand != null && lastCommand.getClass() == command.getClass())
         continue;
-      
+
       sb.append("\n  ");
       sb.append(command.getName());
       sb.append(" - ");
       sb.append(command.getDescription());
       if (command.isProOnly())
         sb.append(" (Resin-Pro)");
-      
+
       lastCommand = command;
     }
-    
+
     sb.append("\n  help <command> - prints command usage message");
     sb.append("\n  version - prints version");
-    
+
     return sb.toString();
   }
 
@@ -633,10 +778,10 @@ class WatchdogArgs
 
   private static L10N L()
   {
-    if (_L == null)
-      _L = new L10N(WatchdogArgs.class);
+    if (L == null)
+      L = new L10N(WatchdogArgs.class);
 
-    return _L;
+    return L;
   }
 
   //
@@ -864,12 +1009,12 @@ class WatchdogArgs
       }
     }
   }
-  
+
   private static void addCommand(BootCommand command)
   {
     _commandMap.put(command.getName(), command);
   }
-  
+
   static {
     addCommand(new ConsoleCommand());
     addCommand(new DeployCopyCommand());
@@ -879,9 +1024,9 @@ class WatchdogArgs
     addCommand(new DisableCommand());
     addCommand(new DisableSoftCommand());
     addCommand(new EnableCommand());
-    
+
     addCommand(new GuiCommand());
-    
+
     addCommand(new HeapDumpCommand());
     addCommand(new JmxCallCommand());
     addCommand(new JmxDumpCommand());
@@ -892,50 +1037,50 @@ class WatchdogArgs
     addCommand(new LicenseAddCommand());
     addCommand(new ListRestartsCommand());
     addCommand(new LogLevelCommand());
-    
+
     addCommand(new PasswordEncryptCommand());
     addCommand(new PasswordGenerateCommand());
     addCommand(new PdfReportCommand());
     addCommand(new ProfileCommand());
-    
+
     addCommand(new RestartCommand());
-    
+
     addCommand(new ShutdownCommand());
     addCommand(new StartCommand());
     addCommand(new StartAllCommand());
     addCommand(new StartWithForegroundCommand());
     addCommand(new StatusCommand());
     addCommand(new StopCommand());
-    
+
     addCommand(new ThreadDumpCommand());
-    
+
     addCommand(new UndeployCommand());
     addCommand(new UserAddCommand());
     addCommand(new UserListCommand());
     addCommand(new UserRemoveCommand());
 
     addCommand(new WatchdogCommand());
-    
+
     addCommand(new WebAppDeployCommand());
     addCommand(new WebAppRestartCommand());
     addCommand(new WebAppStartCommand());
     addCommand(new WebAppStopCommand());
     addCommand(new WebAppUndeployCommand());
-    
+
     _commandMap.put("copy", new DeployCopyCommand());
     _commandMap.put("list", new DeployListCommand());
-    
+
     _commandMap.put("deploy-start", new WebAppStartCommand());
     _commandMap.put("deploy-stop", new WebAppStopCommand());
     _commandMap.put("deploy-restart", new WebAppRestartCommand());
-    
+
     _commandMap.put("generate-password", new PasswordGenerateCommand());
-    
+
     _commandMap.put("start-webapp", new WebAppStartCommand());
     _commandMap.put("stop-webapp", new WebAppStopCommand());
     _commandMap.put("restart-webapp", new WebAppRestartCommand());
   }
-  
+
   static class CommandNameComparator implements Comparator<BootCommand> {
     public int compare(BootCommand a, BootCommand b)
     {

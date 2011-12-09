@@ -36,8 +36,6 @@ import com.caucho.util.L10N;
 import javax.management.MalformedObjectNameException;
 import javax.management.ObjectName;
 
-import java.util.ArrayList;
-
 public class JmxListCommand extends JmxCommand
 {
   private static final L10N L = new L10N(JmxListCommand.class);
@@ -51,19 +49,6 @@ public class JmxListCommand extends JmxCommand
     addFlagOption("operations", "prints operations");
     addFlagOption("all", "when <pattern> not specified sets the wildcard pattern (*:*)");
     addFlagOption("platform", "when <pattern> not specified sets the pattern to (java.lang:*)");
-    
-    /*
-    options.add("-attributes");
-    options.add("-values");
-    options.add("-operations");
-    options.add("-all");
-    options.add("-platform");
-    System.err.println(L.l("   -attributes            : prints MBean's attributes"));
-    System.err.println(L.l("   -values                : prints attribute values"));
-    System.err.println(L.l("   -operations            : prints operations"));
-    System.err.println(L.l("   -all                   : when <pattern> not specified sets the wildcard pattern (*:*)"));
-    System.err.println(L.l("   -platform              : when <pattern> not specified sets the pattern to (java.lang:*)"));
-    */
   }
   
   @Override
@@ -78,16 +63,17 @@ public class JmxListCommand extends JmxCommand
   }
 
   @Override
+  public boolean isDefaultArgsAccepted()
+  {
+    return true;
+  }
+
+  @Override
   public int doCommand(WatchdogArgs args,
                        WatchdogClient client,
                        ManagerClient managerClient)
   {
-    // String []trailingArgs = args.getTrailingArgs(options);
-    ArrayList<String> trailingArgs = args.getTailArgs();
-
-    String pattern = null;
-    if (trailingArgs.size() > 0)
-      pattern = trailingArgs.get(0);
+    String pattern = args.getDefaultArg();
 
     if (pattern != null) {
       try {
@@ -118,21 +104,4 @@ public class JmxListCommand extends JmxCommand
 
     return 0;
   }
-
-  /*
-  @Override
-  public void usage()
-  {
-    System.err.println(L.l("usage: bin/resin.sh [-conf <file>] jmx-list -user <user> -password <password> [-attributes] [-values] [-operations] [-all] [-platform] [<pattern>]"));
-    System.err.println(L.l(""));
-    System.err.println(L.l("description:"));
-    System.err.println(L.l("   lists beans registered with JMX and matching <pattern>. <pattern> is optional and adheres\n"
-                           + "to the rules defined for javax.management.ObjectName (default resin:*)"));
-    System.err.println(L.l(""));
-    System.err.println(L.l("options:"));
-  }
-
-  static {
-  }
-  */
 }

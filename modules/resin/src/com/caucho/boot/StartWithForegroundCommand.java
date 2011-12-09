@@ -61,8 +61,6 @@ public class StartWithForegroundCommand extends AbstractStartCommand
   public int doCommand(WatchdogArgs args, WatchdogClient client)
     throws BootArgumentException
   {
-    validateArgs(args.getArgv());
-
     try {
       Process process = client.startWatchdog(args.getArgv());
 

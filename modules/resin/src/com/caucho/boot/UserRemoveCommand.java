@@ -61,6 +61,12 @@ public class UserRemoveCommand extends AbstractManagementCommand
      return " <user>";
   }
 
+  @Override
+  public boolean isDefaultArgsAccepted()
+  {
+    return true;
+  }
+
   /*
    @Override
   public void usage()

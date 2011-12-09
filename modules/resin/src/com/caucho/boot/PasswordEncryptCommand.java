@@ -121,4 +121,10 @@ public class PasswordEncryptCommand extends AbstractBootCommand
   {
     return " [<password>]";
   }
+
+  @Override
+  public boolean isDefaultArgsAccepted()
+  {
+    return true;
+  }
 }

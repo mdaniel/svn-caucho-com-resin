@@ -56,8 +56,6 @@ public class StartAllCommand extends AbstractStartCommand
   public int doCommand(ResinBoot boot, WatchdogArgs args)
     throws BootArgumentException
   {
-    validateArgs(args.getArgv());
-    
     ArrayList<WatchdogClient> clientList = boot.findLocalClients();
     
     if (clientList.size() == 0) {

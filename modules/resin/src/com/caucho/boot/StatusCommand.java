@@ -63,8 +63,6 @@ public class StatusCommand extends AbstractBootCommand
   public int doCommand(WatchdogArgs args, WatchdogClient client)
     throws BootArgumentException
   {
-    validateArgs(args.getArgv());
-
     try {
       String status = client.statusWatchdog();
 

@@ -53,8 +53,6 @@ public final class WatchdogCommand extends AbstractStartCommand
   public int doCommand(WatchdogArgs args, WatchdogClient client)
     throws BootArgumentException
   {
-    validateArgs(args.getArgv());
-
     try {
       WatchdogManager.main(args.getRawArgv());
 

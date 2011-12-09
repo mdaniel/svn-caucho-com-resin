@@ -239,17 +239,9 @@ public class ResinBoot
     throw new IllegalStateException(L().l("Unknown start mode"));
   }
 
-  private boolean isPro() {
-    boolean isPro = false;
-
-    try {
-      Class resinPro = Class.forName("com.caucho.server.resin.ProResin");
-
-      isPro = true;
-    } catch (ClassNotFoundException e) {
-    }
-
-    return isPro;
+  private boolean isPro()
+  {
+    return _args.isResinProfessional();
   }
 
   /**

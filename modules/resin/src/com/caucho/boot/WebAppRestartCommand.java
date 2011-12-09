@@ -75,6 +75,12 @@ public class WebAppRestartCommand extends WebAppCommand
     return "<name>";
   }
 
+  @Override
+  public boolean isDefaultArgsAccepted()
+  {
+    return true;
+  }
+
   /*
    @Override
   public void usage()
