@@ -595,11 +595,12 @@ class WatchdogArgs
       if (i > 0)
         xarg = _tailArgs.get(i - 1);
 
-      if (_command.isValueOption(xarg))
+      if (xarg == null) {
+      } else if (_command.isValueOption(xarg)) {
         break;
-
-      if (_command.isIntValueOption(xarg))
+      } else if (_command.isIntValueOption(xarg)){
         break;
+      }
 
       defaultArgs.addFirst(arg);
     }
