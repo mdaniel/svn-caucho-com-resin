@@ -241,14 +241,15 @@ public abstract class AbstractBootCommand implements BootCommand {
   }
 
   private BootOption getBootOption(String key) {
+    if (key.charAt(0) != '-')
+      return null;
+
     String cleanKey;
 
     if (key.charAt(0) == '-' && key.charAt(1) == '-')
       cleanKey = key.substring(2);
-    else if (key.charAt(0) == '-')
-      cleanKey = key.substring(1);
     else
-      cleanKey = key;
+      cleanKey = key.substring(1);
 
     BootOption option = _optionMap.get(cleanKey);
 

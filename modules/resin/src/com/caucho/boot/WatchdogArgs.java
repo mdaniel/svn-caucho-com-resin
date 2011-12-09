@@ -551,6 +551,7 @@ class WatchdogArgs
                                getCommandList()));
       System.exit(1);
     } else if (! _isHelp) {
+
       try {
         validateArgs(argv);
       } catch (BootArgumentException e) {
@@ -670,8 +671,7 @@ class WatchdogArgs
 
       if (_command.isFlag(value)
           || _command.isValueOption(value)
-          || _command.isIntValueOption(
-        value))
+          || _command.isIntValueOption(value))
         throw new BootArgumentException(L.l("option '{0}' requires a value",
                                             arg));
 
