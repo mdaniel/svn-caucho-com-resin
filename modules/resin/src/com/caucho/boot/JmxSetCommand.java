@@ -103,19 +103,4 @@ public class JmxSetCommand extends JmxCommand
 
     return 0;
   }
-
-  /*
-  @Override
-  public void usage()
-  {
-    System.err.println(L.l("usage: bin/resin.sh [-conf <file>] jmx-set -user <user> -password <password> -pattern <pattern> -attribute <attribute> value"));
-    System.err.println(L.l(""));
-    System.err.println(L.l("description:"));
-    System.err.println(L.l("   sets value on a MBeans attribute to <value>"));
-    System.err.println(L.l(""));
-    System.err.println(L.l("options:"));
-    System.err.println(L.l("   -pattern               : pattern to match MBean, adheres to the rules defined for javax.managment.ObjectName e.g. qa:type=Foo"));
-    System.err.println(L.l("   -attribute             : name of the attribute"));
-  }
-  */
 }

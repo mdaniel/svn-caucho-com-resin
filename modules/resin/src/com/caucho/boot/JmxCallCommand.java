@@ -108,19 +108,4 @@ public class JmxCallCommand extends JmxCommand
 
     return 0;
   }
-
-  /*
-  @Override
-  public void usage()
-  {
-    System.err.println(L.l("usage: bin/resin.sh [-conf <file>] jmx-call -user <user> -password <password> -pattern <pattern> -operation <operation> value..."));
-    System.err.println(L.l(""));
-    System.err.println(L.l("description:"));
-    System.err.println(L.l("   calls method defined with option -operation on MBean using parameters specified at value..."));
-    System.err.println(L.l(""));
-    System.err.println(L.l("options:"));
-    System.err.println(L.l("   -pattern               : pattern to match MBean, adheres to the rules defined for javax.managment.ObjectName e.g. qa:type=Foo"));
-    System.err.println(L.l("   -operation             : operation to invoke"));
-  }
-  */
 }

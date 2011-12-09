@@ -39,9 +39,7 @@ import javax.management.ObjectName;
 public class JmxListCommand extends JmxCommand
 {
   private static final L10N L = new L10N(JmxListCommand.class);
-  
-  // private static final Set<String> options = new HashSet<String>();
-  
+
   public JmxListCommand()
   {
     addFlagOption("attributes", "prints MBean's attributes");

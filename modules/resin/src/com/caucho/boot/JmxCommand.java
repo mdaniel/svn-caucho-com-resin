@@ -34,10 +34,5 @@ import com.caucho.util.L10N;
 public abstract class JmxCommand extends AbstractManagementCommand
 {
   private static final L10N L = new L10N(JmxCommand.class);
-
-  /*
-  @Override
-  public abstract void usage();
-  */
 }
 
