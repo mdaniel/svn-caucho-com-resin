@@ -30,8 +30,7 @@
 package com.caucho.jsp;
 
 import com.caucho.config.ConfigException;
-import com.caucho.config.types.FileSetType;
-import com.caucho.config.types.PathPatternType;
+import com.caucho.config.types.*;
 import com.caucho.env.thread.ThreadPool;
 import com.caucho.java.JavaCompilerUtil;
 import com.caucho.java.LineMap;
@@ -66,6 +65,8 @@ public class JspPrecompileResource {
   private int _threadCount = 2;
 
   private int _completeCount;
+  
+  private long _timeout = 60000L;
 
   /**
    * Sets the webApp.
@@ -105,6 +106,14 @@ public class JspPrecompileResource {
       count = 1;
     
     _threadCount = count;
+  }
+  
+  /**
+   * Set the time to wait for compilation to complete
+   */
+  public void setTimeoutMs(long timeout)
+  {
+    _timeout = timeout;
   }
 
   /**
@@ -152,14 +161,16 @@ public class JspPrecompileResource {
       ThreadPool.getThreadPool().schedule(task);
     }
 
-    long expire = Alarm.getCurrentTime() + 60000;
+    long expire = Alarm.getCurrentTime() + _timeout;
     synchronized (this) {
       while (_completeCount < _threadCount) {
         try {
           long timeout = expire - Alarm.getCurrentTime();
 
-          if (timeout <= 0)
+          if (timeout <= 0) {
+            log.fine(this.getClass().getSimpleName() + " timeout occured");
             return;
+          }
 
           wait(timeout);
         } catch (Exception e) {
