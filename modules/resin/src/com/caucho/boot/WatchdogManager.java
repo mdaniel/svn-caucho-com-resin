@@ -442,15 +442,8 @@ class WatchdogManager implements AlarmListener {
       } catch (Exception e) {
         throw ConfigException.create(e);
       }
-
-      if (serverId == null)
-        serverId = args.getServerId();
-
-      if (args.isDynamicServer())
-        serverId = args.getDynamicServerId();
       
-      if (serverId == null)
-        serverId = "default";
+      serverId = getServerId(serverId, args);
 
       WatchdogChild watchdog = _watchdogMap.get(serverId);
 
@@ -469,15 +462,31 @@ class WatchdogManager implements AlarmListener {
    */
   void stopServer(String serverId)
   {
+    serverId = getServerId(serverId, _args);
+    
     synchronized (_watchdogMap) {
       WatchdogChild watchdog = getWatchdog(serverId);
       
-            if (watchdog == null)
+      if (watchdog == null)
         throw new ConfigException(L().l("No matching <server> found for stop -server '{0}' in {1}",
                                         serverId, _args.getResinConf()));
 
       watchdog.stop();
     }
+  }
+  
+  private String getServerId(String serverId, WatchdogArgs args)
+  {
+    if (serverId == null)
+      serverId = args.getServerId();
+
+    if (args.isDynamicServer())
+      serverId = args.getDynamicServerId();
+    
+    if (serverId == null)
+      serverId = "default";
+
+    return serverId;
   }
   
   private WatchdogChild getWatchdog(String serverId)
@@ -633,7 +642,7 @@ class WatchdogManager implements AlarmListener {
 
     watchdog = new WatchdogChild(_system, serverConfig);
     
-    if (serverId == null)
+    if (serverId == null || "".equals(serverId))
       serverId = "default";
 
     _watchdogMap.put(serverId, watchdog);

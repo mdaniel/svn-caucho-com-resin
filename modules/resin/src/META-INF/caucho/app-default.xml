@@ -8,10 +8,20 @@
 
 <web-app-default>
   <!-- configures the default class loader -->
-  <class-loader>
-    <compiling-loader path="WEB-INF/classes"/>
-    <library-loader path="WEB-INF/lib"/>
-  </class-loader>
+  <resin:choose> 
+  <resin:when test="${rvar('disable_compiling_loader')}">
+    <class-loader>
+      <simple-loader path="WEB-INF/classes"/>
+      <library-loader path="WEB-INF/lib"/>
+    </class-loader>
+  </resin:when>
+  <resin:otherwise>
+    <class-loader>
+      <compiling-loader path="WEB-INF/classes"/>
+      <library-loader path="WEB-INF/lib"/>
+    </class-loader>
+  </resin:otherwise>
+  </resin:choose> 
 
   <servlet servlet-name="resin-file"
            servlet-class="com.caucho.servlets.FileServlet"/>

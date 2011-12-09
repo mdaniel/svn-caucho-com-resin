@@ -292,14 +292,14 @@ public class ResinBoot
       
       System.exit(ExitCode.OK.ordinal());
     } catch (BootArgumentException e) {
-      System.out.println(e.getMessage());
+      System.err.println(e.getMessage());
 
       if (command != null)
         command.usage();
 
       System.exit(ExitCode.UNKNOWN_ARGUMENT.ordinal());
     } catch (ConfigException e) {
-      System.out.println(e.getMessage());
+      System.err.println(e.getMessage());
 
       System.exit(ExitCode.BAD_CONFIG.ordinal());
     } catch (Exception e) {

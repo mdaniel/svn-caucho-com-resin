@@ -12,6 +12,9 @@
 
 <s2 title="4.0.25 - snapshot">
 <ul>
+<li>config: added $disable_compiling_loader to properties (#4787, rep by systhemes)</li>
+<li>cli: made web-app-deploy, web-app-restart, etc. primary cli (#4885)</li>
+<li>servlet: web-app root url /foo now automatically redirects to /foo/ (#4884)</li>
 <li>config: add password-encrypt and &lt;resin:Password> (#4810, Leonid Kaminsky)</li>
 <li>health: stat gathering limited to 14 days for baseline (#4893)</li>
 <li>config: server should start but not serve pages for certain config errors (#4891)</li>

@@ -257,7 +257,7 @@ public abstract class AbstractBootCommand implements BootCommand {
   @Override
   public final void usage()
   {
-    System.err.println("usage: resinctl [--options] " + getName()
+    System.err.println("usage: resinctl " + getName() + " [--options]"
                        + getUsageArgs());
     System.err.println();
     System.err.println("  " + getDescription()

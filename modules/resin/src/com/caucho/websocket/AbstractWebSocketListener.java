@@ -60,7 +60,7 @@ abstract public class AbstractWebSocketListener implements WebSocketListener
   public void onReadBinary(WebSocketContext context, InputStream is)
     throws IOException
   {
-      throw new UnsupportedOperationException(getClass().getName());
+    throw new UnsupportedOperationException(getClass().getName());
   }
 
   /**

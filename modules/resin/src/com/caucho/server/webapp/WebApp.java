@@ -161,6 +161,7 @@ import com.caucho.server.dispatch.FilterMapping;
 import com.caucho.server.dispatch.Invocation;
 import com.caucho.server.dispatch.InvocationBuilder;
 import com.caucho.server.dispatch.InvocationDecoder;
+import com.caucho.server.dispatch.RedirectFilterChain;
 import com.caucho.server.dispatch.ServletConfigImpl;
 import com.caucho.server.dispatch.ServletManager;
 import com.caucho.server.dispatch.ServletMapper;
@@ -2079,7 +2080,7 @@ public class WebApp extends ServletContextImpl
   /**
    * Returns true if a listener with the given type exists.
    */
-  public boolean hasListener(Class listenerClass)
+  public boolean hasListener(Class<?> listenerClass)
   {
     for (int i = 0; i < _listeners.size(); i++) {
       ListenerConfig listener = _listeners.get(i);
@@ -3870,8 +3871,13 @@ public class WebApp extends ServletContextImpl
   private FilterChain applyWelcomeFile(DispatcherType type,
                                        Invocation invocation, 
                                        FilterChain chain)
-  throws ServletException
-{
+    throws ServletException
+  {
+    if ("".equals(invocation.getContextURI())) {
+      // server/1u3l
+      return new RedirectFilterChain(getContextPath() + "/");
+    }
+
     if (_welcomeFile != null) {
       chain = _welcomeFile.map(type,
                                invocation.getContextURI(),
