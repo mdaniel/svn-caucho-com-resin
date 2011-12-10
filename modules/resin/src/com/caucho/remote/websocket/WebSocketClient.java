@@ -191,7 +191,7 @@ public class WebSocketClient implements WebSocketContext, WebSocketConstants {
     parseHeaders(_is);
 
     _frameIs = new UnmaskedFrameInputStream();
-    _frameIs.init(_is);
+    _frameIs.init(this, _is);
     
     // _wsOut = new WebSocketOutputStream(_out);
     // _wsIn = new WebSocketInputStream(_is);
@@ -260,7 +260,8 @@ public class WebSocketClient implements WebSocketContext, WebSocketConstants {
     return _isClosed;
   }
 
-  public void close()
+  @Override
+  public void close(int code, String msg)
   {
     _isClosed = true;
     
@@ -360,7 +361,7 @@ public class WebSocketClient implements WebSocketContext, WebSocketConstants {
           log.log(Level.WARNING, e.toString(), e);
         }
         
-        close();
+        close(1000, "");
         
         thread.setName(name);
       }

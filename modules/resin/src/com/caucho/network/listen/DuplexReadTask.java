@@ -42,7 +42,7 @@ import com.caucho.inject.Module;
 @Module
 class DuplexReadTask extends ConnectionTask {
   private final SocketLinkDuplexController _duplex;
-
+  
   DuplexReadTask(TcpSocketLink socketLink,
                  SocketLinkDuplexController duplex)
   {
@@ -60,6 +60,7 @@ class DuplexReadTask extends ConnectionTask {
     SocketLinkThreadLauncher launcher = getLauncher();
     
     launcher.onChildThreadResume();
+    
     try {
       thread.setContextClassLoader(getSocketLink().getListener().getClassLoader());
       

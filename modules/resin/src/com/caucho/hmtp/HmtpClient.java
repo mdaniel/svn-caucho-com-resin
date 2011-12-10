@@ -307,7 +307,7 @@ public class HmtpClient implements ActorSender {
       linkFactory.close();
 
     if (_webSocketClient != null)
-      _webSocketClient.close();
+      _webSocketClient.close(1000, "ok");
    }
 
   /* (non-Javadoc)

@@ -46,6 +46,10 @@ public class WebSocketReader extends Reader
 
   private boolean _isFinal;
   private long _length;
+  
+  private final char []_buffer = new char[256 + 1];
+  private int _charOffset;
+  private int _charLength;
 
   public WebSocketReader(FrameInputStream is)
     throws IOException
@@ -69,33 +73,67 @@ public class WebSocketReader extends Reader
   public int read()
     throws IOException
   {
-    int d1 = readByte();
+    int offset = _charOffset;
+    int length = _charLength;
     
-    if (d1 < 0x80)
-      return d1;
+    if (length <= offset) {
+      if (! fillBuffer())
+        return -1;
+      
+      offset = _charOffset;
+      length = _charLength;
+    }
     
-    if ((d1 & 0xe0) == 0xc0) {
-      int d2 = readByte();
-      
-      return ((d1 & 0x1f) << 6) + (d2 & 0x3f);
-    }
-    else {
-      int d2 = readByte();
-      int d3 = readByte();
-      
-      return ((d2 & 0xf) << 12) + ((d2 & 0x3f) << 6) + (d3 & 0x3f);
-    }
+    _charOffset = offset + 1;
+
+    return _buffer[offset];
   }
   
   @Override
   public int read(char []buffer, int offset, int length)
     throws IOException
   {
-    int i = 0;
+    int charOffset = _charOffset;
+    int charLength = _charLength;
     
-    int d1;
+    if (charLength <= charOffset) {
+      if (! fillBuffer()) {
+        return -1;
+      }
+      
+      charOffset = _charOffset;
+      charLength = _charLength;
+    }
     
-    while (length-- > 0 && (d1 = readByte()) >= 0) {
+    int sublen = charLength - charOffset;
+    
+    if (length < sublen)
+      sublen = length;
+    
+    System.arraycopy(_buffer, charOffset, buffer, offset, sublen);
+    
+    _charOffset = charOffset + sublen;
+    
+    return sublen;
+  }
+  
+  private boolean fillBuffer()
+    throws IOException
+  {
+    _charOffset = 0;
+    
+    int charLength = 0;
+    char []charBuffer = _buffer;
+    int length = charBuffer.length - 1;
+    
+    while (charLength < length) {
+      int d1 = readByte();
+    
+      if (d1 < 0) {
+        _charLength = charLength;
+        return charLength > 0;
+      }
+      
       char ch;
       
       if (d1 < 0x80) {
@@ -103,23 +141,81 @@ public class WebSocketReader extends Reader
       }
       else if ((d1 & 0xe0) == 0xc0) {
         int d2 = readByte();
-        
+      
         ch = (char) (((d1 & 0x1f) << 6) + (d2 & 0x3f));
+        
+        if (d2 < 0) {
+          _is.closeError(1002, "illegal utf-8");
+          ch = 0xdeff;
+        }
+        else if ((d2 & 0xc0) != 0x80) {
+          _is.closeError(1002, "illegal utf-8");
+          ch = 0xdeff;
+        }
       }
-      else {
+      else if ((d1 & 0xf0) == 0xe0){
         int d2 = readByte();
         int d3 = readByte();
         
-        ch = (char) (((d2 & 0xf) << 12) + ((d2 & 0x3f) << 6) + (d3 & 0x3f));
+        ch = (char) (((d1 & 0x0f) << 12) + ((d2 & 0x3f) << 6) + (d3 & 0x3f)); 
+
+        if (d3 < 0) {
+          _is.closeError(1002, "illegal utf-8");
+          ch = 0xdeff;
+        }
+        else if ((d2 & 0xc0) != 0x80) {
+          _is.closeError(1002, "illegal utf-8");
+          ch = 0xdeff;
+        }
+        else if ((d3 & 0xc0) != 0x80) {
+          _is.closeError(1002, "illegal utf-8");
+          ch = 0xdeff;
+        }
+      }
+      else if ((d1 & 0xf8) == 0xf0){
+        int d2 = readByte();
+        int d3 = readByte();
+        int d4 = readByte();
+        
+        int cp = (((d1 & 0x7) << 18)
+                   + ((d2 & 0x3f) << 12)
+                   + ((d3 & 0x3f) << 6)
+                   + ((d4 & 0x3f)));
+        
+        cp -= 0x10000;
+        
+        char h = (char) (0xd800 + ((cp >> 10) & 0x3ff));
+        
+        charBuffer[charLength++] = h;
+        
+        ch = (char) (0xdc00 + (cp & 0x3ff));
+        
+        if (d3 < 0) {
+          _is.closeError(1002, "illegal utf-8");
+          ch = 0xdeff;
+        }
+        else if ((d2 & 0xc0) != 0x80) {
+          _is.closeError(1002, "illegal utf-8");
+          ch = 0xdeff;
+        }
+        else if ((d3 & 0xc0) != 0x80) {
+          _is.closeError(1002, "illegal utf-8");
+          ch = 0xdeff;
+        }
+      }
+      else {
+        _is.closeError(1002, "illegal utf-8");
+        
+        // XXX: other char
+        ch = 0xdeff;
       }
       
-      buffer[offset + i++] = ch;
+      charBuffer[charLength++] = ch;
     }
     
-    if (i == 0)
-      return -1;
-    else
-      return i;
+    _charLength = charLength;
+    
+    return true;
   }
   
   private int readByte()

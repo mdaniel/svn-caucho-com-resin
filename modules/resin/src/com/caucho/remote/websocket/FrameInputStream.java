@@ -32,6 +32,8 @@ package com.caucho.remote.websocket;
 import java.io.IOException;
 import java.io.InputStream;
 
+import com.caucho.websocket.WebSocketContext;
+
 /**
  * WebSocketInputStream reads a single WebSocket packet.
  *
@@ -52,7 +54,12 @@ import java.io.InputStream;
 abstract public class FrameInputStream extends InputStream 
   implements WebSocketConstants
 {
-  abstract public void init(InputStream is);
+  private WebSocketContext _cxt;
+  
+  public void init(WebSocketContext cxt, InputStream is)
+  {
+    _cxt = cxt;
+  }
   
   abstract public int getOpcode();
 
@@ -80,5 +87,10 @@ abstract public class FrameInputStream extends InputStream
     while (getLength() > 0 && ! isFinal()) {
       skip(getLength());
     }
+  }
+
+  public void closeError(int i, String msg)
+  {
+    _cxt.close(i, msg);
   }
 }

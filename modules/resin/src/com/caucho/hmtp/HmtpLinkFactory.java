@@ -126,7 +126,7 @@ class HmtpLinkFactory implements LinkConnectionFactory {
       _webSocketClient = new WebSocketClient(_url, webSocketHandler);
       
       if (oldClient != null) {
-        oldClient.close();
+        oldClient.close(1000, "ok");
       }
       
       if (_virtualHost != null)
@@ -259,7 +259,7 @@ class HmtpLinkFactory implements LinkConnectionFactory {
 
     // super.close();
     
-    _webSocketClient.close();
+    _webSocketClient.close(1000, "ok");
    }
 
   /* (non-Javadoc)

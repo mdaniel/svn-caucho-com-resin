@@ -94,7 +94,7 @@ class WebSocketContextImpl
   {
     _controller = controller;
     
-    _is.init(controller.getReadStream());
+    _is.init(this, controller.getReadStream());
   }
 
   @Override
@@ -151,7 +151,7 @@ class WebSocketContextImpl
   }
   
   @Override
-  public void close()
+  public void close(int code, String message)
   {
     if (_isWriteClosed.getAndSet(true))
       return;
@@ -159,8 +159,19 @@ class WebSocketContextImpl
     try {
       WriteStream out = _controller.getWriteStream();
     
-      out.write(0x81);
-      out.write(0x00);
+      if (code <= 0) {
+        out.write(0x88);
+        out.write(0x00);
+      }
+      else {
+        byte []bytes = message.getBytes("utf-8");
+        
+        out.write(0x88);
+        out.write(0x02 + bytes.length);
+        out.write((code >> 8) & 0xff);
+        out.write(code & 0xff);
+        out.write(bytes);
+      }
       out.flush();
     } catch (IOException e) {
       log.log(Level.WARNING, e.toString(), e);
@@ -236,20 +247,51 @@ class WebSocketContextImpl
 
       _listener.onReadText(this, _textIn);
       break;
+
+    case OP_PING:
+      {
+        if (! _is.isFinal()) {
+          close(1002, "ping must be final");
+          return false;
+        }
+        
+        long length = _is.getLength();
+        WriteStream out = _controller.getWriteStream();
+        
+        out.write(0x80 | OP_PONG);
+        out.write((byte) length);
+        for (int i = 0; i < length; i++) {
+          int ch = _is.read();
+          out.write(ch);
+        }
+        out.flush();
+        break;
+      }
       
     case OP_CLOSE:
       _isReadClosed = true;
       try {
+        long length = _is.getLength();
+        if (length > 0) {
+          int d1 = _is.read();
+          int d2 = _is.read();
+          
+          int code = ((d1 & 0xff) << 8) + (d2 & 0xff);
+          length -= 2;
+          _is.skip(length);
+        }
+        
         _listener.onClose(this);
+        
+        return false;
       } finally {
-        close();
+        close(1000, "ok");
       }
-      break;
 
     default:
       // XXX:
       disconnect();
-      break;
+      return false;
     }
     
     return true;

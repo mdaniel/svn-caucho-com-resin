@@ -56,6 +56,8 @@ public class SocketLinkDuplexController extends AsyncController {
 
   private SocketLinkDuplexListener _listener;
   private String _readThreadName;
+  
+  private boolean _isCompleteRequested;
 
   public SocketLinkDuplexController(TcpSocketLink conn,
                                     SocketLinkDuplexListener handler)
@@ -134,6 +136,16 @@ public class SocketLinkDuplexController extends AsyncController {
   {
     return _os;
   }
+  
+  public boolean isCompleteRequested()
+  {
+    return _isCompleteRequested;
+  }
+  
+  public void requestComplete()
+  {
+    _isCompleteRequested = true;
+  }
 
   /**
    * Returns the handler
@@ -202,6 +214,8 @@ public class SocketLinkDuplexController extends AsyncController {
   @Override
   public void onClose()
   {
+    _isCompleteRequested = true;
+    
     // ReadStream is = _is;
     _is = null;
     
@@ -223,6 +237,11 @@ public class SocketLinkDuplexController extends AsyncController {
     try {
       if (conn != null)
         conn.requestClose();
+
+      /*
+      if (conn != null)
+        conn.killKeepalive("duplex close");
+        */
     } catch (Exception e) {
     }
 

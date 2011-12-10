@@ -35,6 +35,7 @@ import java.io.InputStream;
 import com.caucho.bam.stream.MessageStream;
 import com.caucho.remote.websocket.UnmaskedFrameInputStream;
 import com.caucho.remote.websocket.WebSocketInputStream;
+import com.caucho.websocket.WebSocketContext;
 
 /**
  * HmtpReader stream handles client packets received from the server.
@@ -49,7 +50,10 @@ public class HmtpWebSocketReader {
   {
     _hIn = new HmtpReader();
     UnmaskedFrameInputStream fIs = new UnmaskedFrameInputStream();
-    fIs.init(is);
+    
+    WebSocketContext cxt = null;
+    
+    fIs.init(cxt, is);
     _wsIs = new WebSocketInputStream(fIs);
   }
 

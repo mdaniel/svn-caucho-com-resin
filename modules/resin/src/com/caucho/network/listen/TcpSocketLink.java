@@ -1032,7 +1032,7 @@ public class TcpSocketLink extends AbstractSocketLink
   {
     toDuplexActive();
 
-    RequestState result;
+    RequestState result = RequestState.EXIT;
 
     ReadStream readStream = getReadStream();
 
@@ -1048,6 +1048,12 @@ public class TcpSocketLink extends AbstractSocketLink
         
         close();
 
+        return RequestState.EXIT;
+      }
+      
+      if (duplex.isCompleteRequested()) {
+        close();
+        
         return RequestState.EXIT;
       }
     }

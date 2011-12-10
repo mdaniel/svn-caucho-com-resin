@@ -118,7 +118,7 @@ public class WebSocketContextStreamImpl
   }
   
   @Override
-  public void close()
+  public void close(int code, String msg)
   {
     if (_isWriteClosed.getAndSet(true))
       return;
@@ -126,7 +126,7 @@ public class WebSocketContextStreamImpl
     try {
       WriteStream out = getWriteStream();
     
-      out.write(0x81);
+      out.write(0x88);
       out.write(0x00);
       out.flush();
     } catch (IOException e) {
