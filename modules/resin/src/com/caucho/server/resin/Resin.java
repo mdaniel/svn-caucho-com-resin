@@ -839,7 +839,7 @@ public class Resin
     
     // add the cluster repository
     try {
-      RepositoryScheme.create("config", 
+      RepositoryScheme.create("cloud", 
                               getStage() + "/config/resin",
                               getServerDataDirectory().lookup("config"));
     } catch (Exception e) {

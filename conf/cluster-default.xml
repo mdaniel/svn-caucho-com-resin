@@ -1,0 +1,149 @@
+<!--
+   - Resin 4.0 configuration file.
+   -
+   - See conf/full.xml for more sample configuration, including load
+   - balancing and database configuration.
+  -->
+<resin xmlns="http://caucho.com/ns/resin"
+       xmlns:resin="urn:java:com.caucho.resin"
+       xmlns:health="urn:java:com.caucho.health">
+
+  <!--
+     - default configuration applied to all clusters
+    -->
+  <cluster-default>
+    <!-- shared webapp jars for non-classloader-aware libraries -->
+    <web-app-default>
+      <class-loader>
+        <library-loader path="${resin.home}/webapp-jars"/>
+        <library-loader path="${resin.root}/webapp.d/lib"/>
+        <library-loader path="config:/webapp.d/lib"/>
+      </class-loader>
+    </web-app-default>
+
+    <!-- define the servers in the cluster -->
+    <server-multi id-prefix="${cluster.id}-"
+                  address-list="${rdev(cluster.id + '_tier'}"
+                  port="6800"/>
+
+    <!-- shared jars and drivers for the app-tier -->
+    <class-loader>
+      <tree-loader path="${resin.root}/resin-inf/${cluster.id}-inf"/>
+      <tree-loader path="cloud:/resin-inf/{cluster.id}-inf"/>
+    </class-loader>
+
+    <!-- include resources config files in resources/ -->
+    <resin:import fileset="${__DIR__}/${cluster.id}-inf/**/*.xml"/>
+    <resin:import fileset="cloud:/${cluster.id}-inf/**/*.xml"
+                  recover="true"/>
+
+    <!-- standard servlet behavior, including .jsp, .php, and WEB-INF -->
+    <resin:import path="classpath:META-INF/caucho/app-default.xml"/>
+
+    <!-- enables development error pages -->
+    <resin:if test="${rvar('dev_mode')}">
+      <development-mode-error-page/>
+    </resin:if>
+
+    <!--
+       - Enables the proxy cache (available in Resin Professional) 
+      -->
+    <proxy-cache memory-size="${rvar('proxy_cache_size')?:'64M'}">
+     <!-- Vary header rewriting for IE -->
+      <rewrite-vary-as-private/>
+    </proxy-cache>
+    
+    <!--
+       - Admin services
+      -->
+
+    <resin:if test="${admin_remote_enable}">
+      <resin:RemoteAdminService/>
+    </resin:if>
+    
+    <resin:AdminServices/>
+
+    <!-- defaults for each server, i.e. JVM -->
+    <server-default>
+      <jvm-arg-line>${rvar('jvm_args')}</jvm-arg-line>
+
+      <!--
+         - If starting Resin as root on Unix, specify the user name
+         - and group name for the web server user.
+       -->
+      <user-name>${rvar('setuid_user')}</user-name>
+      <group-name>${rvar('setuid_group')}</group-name>
+
+      <!-- The http port -->
+      <http address="*" port="${rvar('http')}"/>
+
+      <!-- SSL port configuration: -->
+      <resin:choose>
+      <resin:when test="${rvar('openssl_file') != null}">
+        <http port="${rvar('https')}">
+          <openssl>
+            <certificate-file>${rvar('openssl_file')}</certificate-file>
+            <certificate-key-file>${rvar('openssl_key')}</certificate-key-file>
+            <password>${rvar('openssl_password')}</password>
+          </openssl>
+        </http>
+      </resin:when>
+      <resin:when test="${class_exists('sun.security.x509.CertAndKeyGen')}">
+        <http address="*" port="${rvar('https')}">
+          <jsse-ssl self-signed-certificate-name="resin@localhost"/>
+        </http>
+      </resin:when>
+      </resin:choose>
+    </server-default>
+
+    <!--
+       - Default host configuration applied to all virtual hosts.
+      -->
+    <host-default>
+      <access-log path="log/access.log" 
+                 format='%h %l %u %t "%r" %s %b "%{Referer}i" "%{User-Agent}i"'
+                 rollover-period="1W"/>
+
+      <!--
+         - Defaults applied to each web-app.
+        -->
+      <web-app-default>
+        <prologue>
+          <allow-servlet-el/>
+        </prologue>
+     
+        <!--
+           - Sets max-age for cacheable pages, e.g. static pages.
+          -->
+        <cache-mapping url-pattern="/" max-age="5s"/>
+        <cache-mapping url-pattern="*.gif" max-age="60s"/>
+        <cache-mapping url-pattern="*.jpg" max-age="60s"/>
+        <cache-mapping url-pattern="*.png" max-age="60s"/>
+        <cache-mapping url-pattern="*.css" max-age="60s"/>
+        <cache-mapping url-pattern="*.js" max-age="60s"/>
+
+        <session-config>
+          <use-persistent-store>${rvar('session_store')}</use-persistent-store>
+          
+          <enable-url-rewriting>false</enable-url-rewriting>
+        </session-config>
+      </web-app-default>
+      
+      <!--
+         - Administration application /resin-admin
+        -->
+      <resin:if test="${rvar('admin_enable')}">
+        <web-app id="/resin-admin" root-directory="${resin.root}/doc/admin">
+          <prologue>
+            <!-- only allow access from internal IP (10.*,192.168.*,127.*) -->
+            <resin:set var="resin_admin_external"
+                       value="${rvar('admin_external')}"/>
+            <resin:set var="resin_admin_insecure"
+                       value="${! rvar('admin_ssl')}"/>
+          </prologue>
+        </web-app>
+      </resin:if>
+    </host-default>
+  </cluster-default>
+</resin>
+
