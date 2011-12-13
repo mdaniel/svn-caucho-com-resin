@@ -682,10 +682,6 @@ public class Resin
       initRepository();
 
       ResinServerConfigLibrary.configure(null);
-
-      _bootResinConfig = new BootResinConfig(this);
-
-      configureBoot();
       
       String id = _serverId;
 
@@ -725,7 +721,7 @@ public class Resin
       Config.setProperty("serverId", getServerId());
 
       // _management = createResinManagement();
-
+      
       if (cdiManager.getBeans(ResinCdiProducer.class).size() == 0) {
         Config.setProperty("fmt", new FmtFunctions());
 
@@ -748,6 +744,10 @@ public class Resin
 
         cdiManager.update();
       }
+      
+      _bootResinConfig = new BootResinConfig(this);
+
+      configureBoot();
 
       _resinAdmin = new ResinAdmin(this);
     } catch (RuntimeException e) {
