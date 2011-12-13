@@ -42,6 +42,8 @@ import java.io.Reader;
 public class WebSocketReader extends Reader
   implements WebSocketConstants
 {
+  private static final char UTF8_ERROR = 0xfeff;
+  
   private FrameInputStream _is;
 
   private boolean _isFinal;
@@ -146,11 +148,15 @@ public class WebSocketReader extends Reader
         
         if (d2 < 0) {
           _is.closeError(1002, "illegal utf-8");
-          ch = 0xdeff;
+          ch = UTF8_ERROR;
         }
         else if ((d2 & 0xc0) != 0x80) {
           _is.closeError(1002, "illegal utf-8");
-          ch = 0xdeff;
+          ch = UTF8_ERROR;
+        }
+        else if (ch < 0x80) {
+          _is.closeError(1002, "illegal utf-8");
+          ch = UTF8_ERROR;
         }
       }
       else if ((d1 & 0xf0) == 0xe0){
@@ -161,15 +167,23 @@ public class WebSocketReader extends Reader
 
         if (d3 < 0) {
           _is.closeError(1002, "illegal utf-8");
-          ch = 0xdeff;
+          ch = UTF8_ERROR;
         }
         else if ((d2 & 0xc0) != 0x80) {
           _is.closeError(1002, "illegal utf-8");
-          ch = 0xdeff;
+          ch = UTF8_ERROR;
         }
         else if ((d3 & 0xc0) != 0x80) {
           _is.closeError(1002, "illegal utf-8");
-          ch = 0xdeff;
+          ch = UTF8_ERROR;
+        }
+        else if (ch < 0x800) {
+          _is.closeError(1002, "illegal utf-8");
+          ch = UTF8_ERROR;
+        }
+        else if (0xd800 <= ch && ch <= 0xdfff) {
+          _is.closeError(1002, "illegal utf-8");
+          ch = UTF8_ERROR;
         }
       }
       else if ((d1 & 0xf8) == 0xf0){
@@ -190,24 +204,31 @@ public class WebSocketReader extends Reader
         
         ch = (char) (0xdc00 + (cp & 0x3ff));
         
-        if (d3 < 0) {
+        if (d4 < 0) {
           _is.closeError(1002, "illegal utf-8");
-          ch = 0xdeff;
+          ch = UTF8_ERROR;
         }
         else if ((d2 & 0xc0) != 0x80) {
           _is.closeError(1002, "illegal utf-8");
-          ch = 0xdeff;
+          ch = UTF8_ERROR;
         }
         else if ((d3 & 0xc0) != 0x80) {
           _is.closeError(1002, "illegal utf-8");
-          ch = 0xdeff;
+          ch = UTF8_ERROR;
+        }
+        else if ((d4 & 0xc0) != 0x80) {
+          _is.closeError(1002, "illegal utf-8");
+          ch = UTF8_ERROR;
+        }
+        else if (cp < 0x0) {
+          _is.closeError(1002, "illegal utf-8");
+          ch = UTF8_ERROR;
         }
       }
       else {
         _is.closeError(1002, "illegal utf-8");
         
-        // XXX: other char
-        ch = 0xdeff;
+        ch = UTF8_ERROR;
       }
       
       charBuffer[charLength++] = ch;

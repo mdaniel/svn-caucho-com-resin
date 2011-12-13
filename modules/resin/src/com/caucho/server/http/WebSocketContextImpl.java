@@ -46,6 +46,7 @@ import com.caucho.remote.websocket.WebSocketPrintWriter;
 import com.caucho.remote.websocket.WebSocketReader;
 import com.caucho.remote.websocket.WebSocketWriter;
 import com.caucho.remote.websocket.FrameInputStream;
+import com.caucho.util.IoUtil;
 import com.caucho.util.L10N;
 import com.caucho.vfs.ReadStream;
 import com.caucho.vfs.TempBuffer;
@@ -156,9 +157,9 @@ class WebSocketContextImpl
     if (_isWriteClosed.getAndSet(true))
       return;
 
-    try {
-      WriteStream out = _controller.getWriteStream();
+    WriteStream out = _controller.getWriteStream();
     
+    try {
       if (code <= 0) {
         out.write(0x88);
         out.write(0x00);
@@ -172,10 +173,10 @@ class WebSocketContextImpl
         out.write(code & 0xff);
         out.write(bytes);
       }
-      out.flush();
     } catch (IOException e) {
       log.log(Level.WARNING, e.toString(), e);
     } finally {
+      IoUtil.close(out);
       disconnect();
     }
   }
