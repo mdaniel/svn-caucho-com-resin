@@ -37,6 +37,7 @@ import java.util.concurrent.ConcurrentHashMap;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
+import com.caucho.VersionFactory;
 import com.caucho.config.ConfigException;
 import com.caucho.config.inject.BeanBuilder;
 import com.caucho.config.inject.InjectManager;
@@ -467,6 +468,10 @@ public class ResinSystem
       if (! Alarm.isTest()) {
         log.info("");
 
+        log.info(VersionFactory.getFullVersion());
+        
+        log.info("");
+
         log.info(System.getProperty("os.name")
                  + " " + System.getProperty("os.version")
                  + " " + System.getProperty("os.arch"));
@@ -481,7 +486,7 @@ public class ResinSystem
                  + ", " + System.getProperty("sun.arch.data.model")
                  + ", " + System.getProperty("java.vm.info")
                  + ", " + System.getProperty("java.vm.vendor"));
-
+        
         log.info("");
 
         log.info("user.name  = " + System.getProperty("user.name"));
