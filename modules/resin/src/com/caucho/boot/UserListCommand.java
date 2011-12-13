@@ -53,22 +53,4 @@ public class UserListCommand extends AbstractManagementCommand
 
     return 0;
   }
-
-  /*
-  @Override
-  public void usage()
-  {
-    System.err.println(L.l(
-      "usage: bin/resin.sh [-conf <file>] user-list -address <address> -port <port> -user <user> -password <password>"));
-    System.err.println(L.l(""));
-    System.err.println(L.l("description:"));
-    System.err.println(L.l("   lists administrative users\n"));
-    System.err.println(L.l(""));
-    System.err.println(L.l("options:"));
-    System.err.println(L.l("   -address <address>      : ip or host name of the server"));
-    System.err.println(L.l("   -port <port>            : server http port"));
-    System.err.println(L.l("   -user <user>            : specifies name to use for authorising the request."));
-    System.err.println(L.l("   -password <password>    : specifies password to use for authorising the request."));
-  }
-  */
 }

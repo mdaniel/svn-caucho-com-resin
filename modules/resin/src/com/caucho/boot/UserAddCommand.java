@@ -41,8 +41,8 @@ public class UserAddCommand extends AbstractManagementCommand
 
   public UserAddCommand()
   {
-    addValueOption("u", "<new user name>", "specifies name for a new user.");
-    addValueOption("p", "<new user password>", "specifies password for a new user.");
+    addValueOption("u", "new user name", "specifies name for a new user.");
+    addValueOption("p", "new user password", "specifies password for a new user.");
   }
 
   @Override
@@ -88,7 +88,7 @@ public class UserAddCommand extends AbstractManagementCommand
         System.out.println("passwords do not match");
     }
 
-    String []roles = args.getTrailingArgs(new HashSet<String>());
+    String []roles = args.getDefaultArgs();
 
     String message = managerClient.addUser(user, password, roles);
 
@@ -96,23 +96,16 @@ public class UserAddCommand extends AbstractManagementCommand
 
     return 0;
   }
-  /*
-   @Override
-  public void usage()
+
+  @Override
+  public boolean isDefaultArgsAccepted()
   {
-    System.err.println(L.l(
-      "usage: bin/resin.sh [-conf <file>] user-add -user <user> -password <password> -u <new user name> [-p <new user password>]"));
-    System.err.println(L.l(""));
-    System.err.println(L.l("description:"));
-    System.err.println(L.l("   adds an administrative user\n"));
-    System.err.println(L.l(""));
-    System.err.println(L.l("options:"));
-    System.err.println(L.l("   -address <address>      : ip or host name of the server"));
-    System.err.println(L.l("   -port <port>            : server http port"));
-    System.err.println(L.l("   -user <user>            : specifies name to use for authorising the request."));
-    System.err.println(L.l("   -password <password>    : specifies password to use for authorising the request."));
-    System.err.println(L.l("   -u <new user name>      : specifies name for a new user."));
-    System.err.println(L.l("   -p <new user password>  : specifies password for a new user."));
+    return true;
   }
-   */
+
+  @Override
+  public String getUsageArgs()
+  {
+    return " role ...";
+  }
 }
