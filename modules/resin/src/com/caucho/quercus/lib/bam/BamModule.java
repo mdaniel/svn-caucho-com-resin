@@ -155,7 +155,7 @@ public class BamModule extends AbstractQuercusModule
     if (actor != null)
       return env.error("bam_login not available from actor script");
 
-    HmtpClient client = null;//new HmtpClient(url);
+    HmtpClient client = new HmtpClient(url);
 
     BamConnectionResource resource = new BamConnectionResource(client);
     env.addCleanup(resource);
