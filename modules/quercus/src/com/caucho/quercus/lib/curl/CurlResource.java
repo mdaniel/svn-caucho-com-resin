@@ -30,6 +30,7 @@
 package com.caucho.quercus.lib.curl;
 
 import com.caucho.quercus.QuercusModuleException;
+import com.caucho.quercus.annotation.ResourceType;
 import com.caucho.quercus.env.*;
 import com.caucho.quercus.lib.file.BinaryInput;
 import com.caucho.quercus.lib.file.BinaryOutput;
@@ -44,7 +45,8 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.logging.Logger;
 
-public class CurlResource
+@ResourceType("curl")
+public class CurlResource extends ResourceValue
 {
   private static final Logger log
     = Logger.getLogger(CurlResource.class.getName());
@@ -922,4 +924,9 @@ public class CurlResource
     return "CurlResource[" + _requestMethod + "]";
   }
 
+
+  @Override
+  public boolean isResource() {
+      return true;
+  }
 }
