@@ -116,21 +116,6 @@ public class LogLevelCommand extends AbstractManagementCommand
     return 0;
   }
 
-  /*
-  @Override
-  public void usage()
-  {
-    System.err.println(L.l("usage: bin/resin.sh [-conf <file>] log-level -user <user> -password <password> -all|-finest|-finer|-fine|-config|-info|-warning|-severe|-off [-active-time <time-period>] [loggers...]"));
-    System.err.println(L.l(""));
-    System.err.println(L.l("description:"));
-    System.err.println(L.l("   sets level for logger(s).  Defaults to root and `com.caucho' loggers."));
-    System.err.println(L.l(""));
-    System.err.println(L.l("options:"));
-    System.err.println(L.l("   -<level>             : specifies new log level"));
-    System.err.println(L.l("   -active-time         : specifies temporary level active time (default permanent). e.g. 5s"));
-  }
-  */
-
   static {
     _options.put("-all", Level.ALL);
     _options.put("-finest", Level.FINEST);
