@@ -6,7 +6,8 @@
 
   <!-- property-based Resin configuration -->
   <resin:properties path="${__DIR__}/resin.properties" optional="true"/>
-  <resin:properties path="cloud:/resin.properties" optional="true" recover="true"/>
+  <resin:properties path="cloud:/resin.properties"
+                    optional="true" recover="true"/>
   
   <!-- Logging configuration for the JDK logging API. -->
   <log-handler name="" level="all" path="stdout:"
@@ -22,16 +23,8 @@
   <logger name="com.caucho.loader" level="config"/>
 
   <!--
-     - driver .jar files can be placed in ${resin.root}/resin.d/lib
-     -->
-  <class-loader>
-    <tree-loader path="${resin.root}/ext-lib"/>
-    <tree-loader path="${resin.root}/resin.d/lib"/>
-    <tree-loader path="cloud:/resin.d/lib"/>
-  </class-loader>
-
-  <!--
-     - default configuration applied to all clusters
+     - Default configuration applied to all clusters, including
+     - HTTP, HTTPS, and /resin-admin configuration.
     -->
   <resin:import path="${__DIR__}/cluster-default.xml"/>
   
@@ -40,7 +33,9 @@
     -->
   <resin:import path="${__DIR__}/health.xml"/>
 
-  <!-- local configuration files -->
+  <!--
+     - local configuration files
+    -->
   <resin:import fileset="${__DIR__}/resin-inf/*.xml"/>
   <resin:import fileset="cloud:/resin-inf/*.xml" recover="true"/>
   
@@ -65,11 +60,6 @@
     -->
   <dependency-check-interval>${dependency_check_interval?:'2s'}</dependency-check-interval>
 
-  <!-- Java system-properties -->
-  <system-property mail.smtp.host="${smtp_host?:'127.0.0.1'}"/>
-  <system-property mail.smtp.port="${smtp_port?:25}"/>
-  <system-property mail.smtp.from="${smtp_from}"/>
-
   <!-- For resin.properties dynamic cluster joining -->
   <join-cluster>${join_cluster}</join-cluster>
 
@@ -78,11 +68,11 @@
      - will also have a web cluster.
     -->
   <cluster id="app">
-    <!-- define the servers in the cluster -->
-    <server-multi id-prefix="app-" address-list="${app_servers}" port="6800"/>
-
     <!-- sets the content root for the cluster, relative to resin.root -->
     <root-directory>.</root-directory>
+    
+    <!-- define the servers in the cluster -->
+    <server-multi id-prefix="app-" address-list="${app_servers}" port="6800"/>
 
     <host-default>
       <!-- creates the webapps directory for .war expansion -->
@@ -100,8 +90,8 @@
         -->
       
       <!--
-	       - Resin documentation - remove for a live site
-	      -->
+         - Resin documentation - remove for a live site
+        -->
       <resin:if test="${rvar('resin_doc')}">
         <web-app id="/resin-doc" root-directory="${resin.root}/doc/resin-doc"/>
       </resin:if>

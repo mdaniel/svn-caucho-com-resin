@@ -2,6 +2,20 @@
        xmlns:resin="urn:java:com.caucho.resin">
 
   <!--
+     - driver .jar files can be placed in ${resin.root}/resin.d/lib
+     -->
+  <class-loader>
+    <tree-loader path="${resin.root}/ext-lib"/>
+    <tree-loader path="${resin.root}/resin-inf/resin-inf"/>
+    <tree-loader path="cloud:/resin-inf/resin-inf"/>
+  </class-loader>
+
+  <!-- Java system-properties -->
+  <system-property mail.smtp.host="${smtp_host?:'127.0.0.1'}"/>
+  <system-property mail.smtp.port="${smtp_port?:25}"/>
+  <system-property mail.smtp.from="${smtp_from}"/>
+
+  <!--
      - default configuration applied to all clusters
     -->
   <cluster-default>

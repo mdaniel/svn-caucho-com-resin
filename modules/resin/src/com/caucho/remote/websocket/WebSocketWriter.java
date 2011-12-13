@@ -48,6 +48,8 @@ public class WebSocketWriter extends Writer
   
   private MessageState _state = MessageState.IDLE;
   private boolean _isAutoFlush = true;
+  
+  private char _savedPair;
 
   public WebSocketWriter(OutputStream os, byte []buffer)
     throws IOException
@@ -63,6 +65,8 @@ public class WebSocketWriter extends Writer
       throw new IllegalStateException(String.valueOf(_state));
     
     _state = MessageState.FIRST;
+    
+    _savedPair = 0;
     
     if (_buffer.length <= _offset) {
       _os.flush();
@@ -92,6 +96,22 @@ public class WebSocketWriter extends Writer
       
       buffer[_offset++] = (byte) (0xc0 + (ch >> 6)); 
       buffer[_offset++] = (byte) (0x80 + (ch & 0x3f));
+    }
+    else if (0xd800 <= ch && ch <= 0xdbff) {
+      _savedPair = (char) ch;
+    }
+    else if (0xdc00 <= ch && ch <= 0xdfff) {
+      int value = ((_savedPair & 0x3ff) << 10) + (ch & 0x3ff);
+      _savedPair = 0;
+      
+      if (buffer.length <= _offset + 4) { 
+        complete(false);
+      }
+      
+      buffer[_offset++] = (byte) (0xf0 + (value >> 18));
+      buffer[_offset++] = (byte) (0x80 + ((value >> 12) & 0x3f));
+      buffer[_offset++] = (byte) (0x80 + ((value >> 6) & 0x3f));
+      buffer[_offset++] = (byte) (0x80 + (value & 0x3f));
     }
     else {
       if (buffer.length <= _offset + 2) { 
@@ -127,6 +147,19 @@ public class WebSocketWriter extends Writer
       else if (ch < 0x800) {
         wsBuffer[wsOffset++] = (byte) (0xc0 + (ch >> 6)); 
         wsBuffer[wsOffset++] = (byte) (0x80 + (ch & 0x3f));
+      }
+      else if (0xdc00 <= ch && ch <= 0xdfff) {
+        int value = ((_savedPair & 0x3ff) << 10) + (ch & 0x3ff);
+        _savedPair = 0;
+        
+        if (buffer.length <= _offset + 4) { 
+          complete(false);
+        }
+        
+        wsBuffer[wsOffset++] = (byte) (0xf0 + (value >> 18));
+        wsBuffer[wsOffset++] = (byte) (0x80 + ((value >> 12) & 0x3f));
+        wsBuffer[wsOffset++] = (byte) (0x80 + ((value >> 6) & 0x3f));
+        wsBuffer[wsOffset++] = (byte) (0x80 + (value & 0x3f));
       }
       else {
         wsBuffer[wsOffset++] = (byte) (0xe0 + (ch >> 12)); 
