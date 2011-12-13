@@ -2,9 +2,9 @@ log_level     : info
 dev_mode      : true
 resin_doc     : true
 
-app_tier      : 127.0.0.1
-web_tier      :
-cache_tier    :
+app_servers      : 127.0.0.1
+web_servers      :
+cache_servers    :
 
 setuid_user   : @SETUID_USER@
 setuid_group  : @SETUID_GROUP@

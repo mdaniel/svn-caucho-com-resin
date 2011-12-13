@@ -1,12 +1,5 @@
-<!--
-   - Resin 4.0 configuration file.
-   -
-   - See conf/full.xml for more sample configuration, including load
-   - balancing and database configuration.
-  -->
 <resin xmlns="http://caucho.com/ns/resin"
-       xmlns:resin="urn:java:com.caucho.resin"
-       xmlns:health="urn:java:com.caucho.health">
+       xmlns:resin="urn:java:com.caucho.resin">
 
   <!--
      - default configuration applied to all clusters
@@ -20,11 +13,6 @@
         <library-loader path="config:/webapp.d/lib"/>
       </class-loader>
     </web-app-default>
-
-    <!-- define the servers in the cluster -->
-    <server-multi id-prefix="${cluster.id}-"
-                  address-list="${rdev(cluster.id + '_tier'}"
-                  port="6800"/>
 
     <!-- shared jars and drivers for the app-tier -->
     <class-loader>
