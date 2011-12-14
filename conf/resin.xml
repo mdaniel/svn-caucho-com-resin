@@ -8,11 +8,20 @@
   <resin:properties path="${__DIR__}/resin.properties" optional="true"/>
   <resin:properties path="cloud:/resin.properties"
                     optional="true" recover="true"/>
-  
-  <!-- Logging configuration for the JDK logging API. -->
-  <log-handler name="" level="all" path="stdout:"
-               timestamp="[%y-%m-%d %H:%M:%S.%s] {%{thread}} "/>
 
+  <!-- Logging configuration for the JDK logging API -->
+  <log-handler name="" level="all" path="stdout:"
+               timestamp="[%y-%m-%d %H:%M:%S.%s]"
+               format=" {${thread}} ${log.message}"/>
+               
+  <!-- 
+     - Alternative pseudo-TTCC log format
+     -
+     - <log-handler name="" level="all" path="stdout:"
+     -           timestamp="%y-%m-%d %H:%M:%S.%s"
+     -           format=" [${thread}] ${log.level} ${log.shortName} - ${log.message}"/>
+    -->
+   
   <!--
      - level='info' for production
      - 'fine' or 'finer' for development and troubleshooting
@@ -89,9 +98,6 @@
          - <web-app id="/" root-directory="webapps/ROOT"/>
         -->
       
-      <!--
-         - Resin documentation - remove for a live site
-        -->
       <resin:if test="${rvar('resin_doc')}">
         <web-app id="/resin-doc" root-directory="${resin.root}/doc/resin-doc"/>
       </resin:if>
@@ -102,9 +108,9 @@
     <!-- define the servers in the cluster -->
     <server-multi id-prefix="web-" address-list="${web_servers}" port="6810"/>
 
-    <host id="" root-directory="web-tier">
+    <host id="" root-directory="web">
       <web-app id="">
-        <resin:LoadBalance regexp="" cluster="app_tier"/>
+        <resin:LoadBalance regexp="" cluster="app"/>
       </web-app>
     </host>
   </cluster>

@@ -1,40 +1,70 @@
+# resin.properties - configuration variable values
+# 
+# See resin.xml, cluster-default.xml, and health.xml for full configuration.
+# Any variable defined by ${...} can be set as a property in this file.
+# 
+# Individual server overrides can be specified by prepending the server.id.
+# For example, increasing the log level for an individual server:
+#
+# log_level : info
+# app-0.log_level : finest
+#
+# Like Resin XML configuration, modification of this file will trigger a restart.
+#
+
+# General log level (modify resin.xml for more granular log level adjustments)
 log_level     : info
+
+# Enable verbose browser error reporting
 dev_mode      : true
+
+# Enable /resin-doc Resin documentation
 resin_doc     : true
 
+# List cluster server ip-addresses, space separated
 app_servers      : 127.0.0.1
-web_servers      :
-cache_servers    :
+# web_servers      : 
+# cache_servers    : 
 
-setuid_user   : @SETUID_USER@
-setuid_group  : @SETUID_GROUP@
+# For security, Resin can switch to a non-root user after binding to port 80
+# setuid_user   : @SETUID_USER@
+# setuid_group  : @SETUID_GROUP@
 
+# Arg passed directly to the JVM
 # jvm_args  : -Xmx2048m
 
+# Set HTTP and HTTPS ports
 http          : @HTTP_PORT@
 https         : @HTTPS_PORT@
 
+# OpenSSL certificate configuration
+# Resin will fallback to using JSSE for HTTPS in absence of a certificate file
 # openssl_file : keys/test.crt
 # openssl_key : keys/test.key
 # openssl_password : changeme
 
-# setting the system-key is recommended for security
-# system-key : changeme
-
-# the email is used for pdf report generation
-# email : admin@example.com
-
-#
-# use resinctl generate-password to generate the user/password file
-#
-# admin_user : admin
-# admin_password : {SSHA}xxxxxxxx
-# admin_external : false
-# admin_insecure : true
-admin_enable : true
-
-# set true to enable deployment outside of the local network
-admin_remote_enable : false
-
+# Enable clustered persistent sessions
 session_store : true
 
+# Set the email address to receive weekly and restart PDF reports
+# email : admin@example.com
+
+# Set system authentication key to prevent foreign nodes from joining a cluster
+# system-key : changeme
+
+# Enable command-line remote admin (required for elastic servers, remote deploy)
+admin_remote_enable : false
+
+# Enable /resin-admin web administration console
+admin_enable : true
+
+# Access to /resin-admin is password restricted
+# Use "resinctl generate-password" and copy/paste here, 
+# admin_user : admin
+# admin_password : {SSHA}xxxxxxxx
+
+# Permit access to /resin-admin from non-local network ip-addresses
+# admin_external : false
+
+# Require HTTPS to access /resin-admin
+# admin_ssl : true
