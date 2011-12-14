@@ -46,6 +46,7 @@ public class PdfReportCommand extends AbstractManagementCommand
     addFlagOption("snapshot", "saves heap-dump, thread-dump, jmx-dump before generating report");
     addValueOption("profile-time", "time", "turns code profiling on for a time before generating report");
     addValueOption("profile-sample", "time", "specifies profiling sampling frequency (100ms)");
+    addFlagOption("watchdog", "specifies look-back period starting at last Resin start");
   }
   
   @Override
@@ -102,24 +103,4 @@ public class PdfReportCommand extends AbstractManagementCommand
 
     return 0;
   }
-
-  /*
-  @Override
-  public void usage()
-  {
-    System.err.println(L.l("usage: bin/resin.sh [-conf <file>] pdf-report -user <user> -password <password> [-path <php path>] [-report <report name>] [-period <period>] [-logdir <log path>] [-snapshot] [-profile-time <profile time>] [-sample-period <sample-period>]"));
-    System.err.println(L.l(""));
-    System.err.println(L.l("description:"));
-    System.err.println(L.l("   generates pdf report (Pro version only)"));
-    System.err.println(L.l(""));
-    System.err.println(L.l("options:"));
-    System.err.println(L.l("   -path            : path to a PDF generating .php file (defaults to ${resin.home}/doc/admin/pdf-gen.php)" ));
-    System.err.println(L.l("   -period          : specifies look back period of time. e.g. '-period 1D' create the report since the same time yesterday (default 7D)"));
-    System.err.println(L.l("   -report          : report type key (default Summary)" ));
-    System.err.println(L.l("   -logdir          : PDF output directory  (defaults to resin log directory)" ));
-    System.err.println(L.l("   -snapshot        : includes heap-dump, thread-dump and a snapshot of JMX beans and attributes into report e.g. -snapshot false" ));
-    System.err.println(L.l("   -profile-time    : turns code profiling on for specified time (2 min - max) and includes profiling data into report e.g. '-profile-time 30s'" ));
-    System.err.println(L.l("   -sample-period   : specifies sampling frequency for the profiler in milliseconds: e.g. '-sample-period 50' (default 100ms)" ));
-  }
-  */
 }
