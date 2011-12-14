@@ -70,6 +70,12 @@ public interface WebSocketContext {
   public void close(int code, String message);
 
   /**
+   * sends a pong message
+   */
+  public void pong(byte[] value)
+    throws IOException;
+
+  /**
    * Disconnect the connection.
    */
   public void disconnect();

@@ -416,10 +416,6 @@ public final class JniSocketImpl extends QSocket {
       } while (result == JniStream.TIMEOUT_EXN && timeout > 0);
     }
     
-    if (result == JniStream.TIMEOUT_EXN) {
-      close();
-    }
-    
     return result;
   }
 
@@ -621,6 +617,7 @@ public final class JniSocketImpl extends QSocket {
   @Override
   public void forceShutdown()
   {
+    System.out.println("SHUTDOWN: " + this);
     // can't be locked because of shutdown
     nativeCloseFd(_fd);
   }

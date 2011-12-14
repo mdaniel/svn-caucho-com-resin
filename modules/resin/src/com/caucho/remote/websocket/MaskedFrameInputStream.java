@@ -32,6 +32,7 @@ package com.caucho.remote.websocket;
 import java.io.IOException;
 import java.io.InputStream;
 
+import com.caucho.vfs.WriteStream;
 import com.caucho.websocket.WebSocketContext;
 
 /**
@@ -170,6 +171,13 @@ public class MaskedFrameInputStream extends FrameInputStream
 
       boolean isFinal = (frame1 & FLAG_FIN) == FLAG_FIN;
       _op = frame1 & 0xf;
+      
+      int rsv = frame1 & 0x70;
+      
+      if (rsv != 0) {
+        getContext().close(CLOSE_ERROR, "illegal request");
+        return false;
+      }
 
       _isFinal = isFinal;
 
@@ -193,7 +201,7 @@ public class MaskedFrameInputStream extends FrameInputStream
       }
 
       _length = length;
-    
+      
       byte []mask = getMask();
       if ((frame2 & 0x80) != 0) {
         mask[0] = (byte) is.read();
@@ -210,10 +218,59 @@ public class MaskedFrameInputStream extends FrameInputStream
         _maskOffset = 0;
       }
       
-      // ping/pong close
-      break;
+      if (handleFrame())
+        return true;
     }
+  }
+  
+  protected boolean handleFrame()
+    throws IOException
+  {
+    switch (getOpcode()) {
+    case OP_PING:
+      {
+        if (! isFinal()) {
+          close(1002, "ping must be final");
+          return true;
+        }
+      
+        long length = getLength();
+        byte []value = new byte[(int) length];
+      
+        for (int i = 0; i < length; i++) {
+          value[i] = (byte) read();
+        }
 
+        getContext().pong(value);
+        
+        return false;
+      }
+    
+    case OP_CLOSE:
+      try {
+        if (true) return true;
+        long length = getLength();
+        
+        if (length > 0) {
+          int d1 = _is.read();
+          int d2 = _is.read();
+        
+          int code = ((d1 & 0xff) << 8) + (d2 & 0xff);
+          length -= 2;
+          _is.skip(length);
+        }
+      
+        return false;
+      } finally {
+        close(1000, "ok");
+      }
+    }
+      
     return true;
+  }
+    
+  protected void close(int code, String msg)
+  {
+      
   }
 }

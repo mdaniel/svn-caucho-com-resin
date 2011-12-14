@@ -152,6 +152,20 @@ class WebSocketContextImpl
   }
   
   @Override
+  public void pong(byte []value)
+    throws IOException
+  {
+    WriteStream out = _controller.getWriteStream();
+    
+    byte []bytes = value;
+        
+    out.write(0x8a);
+    out.write(bytes.length);
+    out.write(bytes);
+    out.flush();
+  }
+  
+  @Override
   public void close(int code, String message)
   {
     if (_isWriteClosed.getAndSet(true))
@@ -270,23 +284,53 @@ class WebSocketContextImpl
       }
       
     case OP_CLOSE:
-      _isReadClosed = true;
-      try {
-        long length = _is.getLength();
-        if (length > 0) {
-          int d1 = _is.read();
-          int d2 = _is.read();
+      { 
+        _isReadClosed = true;
+        int closeCode = 1002;
+        String closeMessage = "error";
+        
+        try {
+          long length = _is.getLength();
           
-          int code = ((d1 & 0xff) << 8) + (d2 & 0xff);
-          length -= 2;
-          _is.skip(length);
+          if (length > 0) {
+            int d1 = _is.read();
+            int d2 = _is.read();
+          
+            int code = ((d1 & 0xff) << 8) + (d2 & 0xff);
+            length -= 2;
+            _is.skip(length);
+            
+            switch (code) {
+            case 1000:
+            case 1001:
+            case 1003:
+            case 1007:
+            case 1008:
+            case 1009:
+            case 1010:
+              closeCode = 1000;
+              closeMessage = "ok";
+              break;
+              
+            default:
+              if (3000 <= code && code <= 4999) {
+                closeCode = 1000;
+                closeMessage = "ok";
+              }
+              break;
+            }
+          }
+          else {
+            closeCode = 1000;
+            closeMessage = "ok";
+          }
+        
+          _listener.onClose(this);
+        
+          return false;
+        } finally {
+          close(closeCode, closeMessage);
         }
-        
-        _listener.onClose(this);
-        
-        return false;
-      } finally {
-        close(1000, "ok");
       }
 
     default:

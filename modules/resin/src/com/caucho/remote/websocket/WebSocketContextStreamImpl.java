@@ -118,6 +118,12 @@ public class WebSocketContextStreamImpl
   }
   
   @Override
+  public void pong(byte []bytes)
+  {
+    throw new UnsupportedOperationException(getClass().getName());
+  }
+  
+  @Override
   public void close(int code, String msg)
   {
     if (_isWriteClosed.getAndSet(true))

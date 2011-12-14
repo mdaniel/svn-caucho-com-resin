@@ -78,6 +78,8 @@ public class JniStream extends StreamImpl {
       return result;
     }
     else if (result < -1) {
+      if (result == TIMEOUT_EXN)
+        _socket.close();
       _readException = exception(result);
       
       throw _readException;

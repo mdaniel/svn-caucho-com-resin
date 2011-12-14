@@ -61,6 +61,11 @@ abstract public class FrameInputStream extends InputStream
     _cxt = cxt;
   }
   
+  public WebSocketContext getContext()
+  {
+    return _cxt;
+  }
+  
   abstract public int getOpcode();
 
   abstract public long getLength();

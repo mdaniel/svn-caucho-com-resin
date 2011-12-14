@@ -147,6 +147,13 @@ public class UnmaskedFrameInputStream extends FrameInputStream
 
     boolean isFinal = (frame1 & FLAG_FIN) == FLAG_FIN;
     _op = frame1 & 0xf;
+    
+    int rsv = frame1 & 0x70;
+    
+    if (rsv != 0) {
+      getContext().close(CLOSE_ERROR, "illegal request");
+      return false;
+    }
 
     _isFinal = isFinal;
 

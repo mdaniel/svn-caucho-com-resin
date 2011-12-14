@@ -147,15 +147,15 @@ public class WebSocketReader extends Reader
         ch = (char) (((d1 & 0x1f) << 6) + (d2 & 0x3f));
         
         if (d2 < 0) {
-          _is.closeError(1002, "illegal utf-8");
+          _is.closeError(CLOSE_UTF8, "illegal utf-8");
           ch = UTF8_ERROR;
         }
         else if ((d2 & 0xc0) != 0x80) {
-          _is.closeError(1002, "illegal utf-8");
+          _is.closeError(CLOSE_UTF8, "illegal utf-8");
           ch = UTF8_ERROR;
         }
         else if (ch < 0x80) {
-          _is.closeError(1002, "illegal utf-8");
+          _is.closeError(CLOSE_UTF8, "illegal utf-8");
           ch = UTF8_ERROR;
         }
       }
@@ -166,23 +166,23 @@ public class WebSocketReader extends Reader
         ch = (char) (((d1 & 0x0f) << 12) + ((d2 & 0x3f) << 6) + (d3 & 0x3f)); 
 
         if (d3 < 0) {
-          _is.closeError(1002, "illegal utf-8");
+          _is.closeError(CLOSE_UTF8, "illegal utf-8");
           ch = UTF8_ERROR;
         }
         else if ((d2 & 0xc0) != 0x80) {
-          _is.closeError(1002, "illegal utf-8");
+          _is.closeError(CLOSE_UTF8, "illegal utf-8");
           ch = UTF8_ERROR;
         }
         else if ((d3 & 0xc0) != 0x80) {
-          _is.closeError(1002, "illegal utf-8");
+          _is.closeError(CLOSE_UTF8, "illegal utf-8");
           ch = UTF8_ERROR;
         }
         else if (ch < 0x800) {
-          _is.closeError(1002, "illegal utf-8");
+          _is.closeError(CLOSE_UTF8, "illegal utf-8");
           ch = UTF8_ERROR;
         }
         else if (0xd800 <= ch && ch <= 0xdfff) {
-          _is.closeError(1002, "illegal utf-8");
+          _is.closeError(CLOSE_UTF8, "illegal utf-8");
           ch = UTF8_ERROR;
         }
       }
@@ -205,28 +205,32 @@ public class WebSocketReader extends Reader
         ch = (char) (0xdc00 + (cp & 0x3ff));
         
         if (d4 < 0) {
-          _is.closeError(1002, "illegal utf-8");
+          _is.closeError(CLOSE_UTF8, "illegal utf-8");
           ch = UTF8_ERROR;
         }
         else if ((d2 & 0xc0) != 0x80) {
-          _is.closeError(1002, "illegal utf-8");
+          _is.closeError(CLOSE_UTF8, "illegal utf-8");
           ch = UTF8_ERROR;
         }
         else if ((d3 & 0xc0) != 0x80) {
-          _is.closeError(1002, "illegal utf-8");
+          _is.closeError(CLOSE_UTF8, "illegal utf-8");
           ch = UTF8_ERROR;
         }
         else if ((d4 & 0xc0) != 0x80) {
-          _is.closeError(1002, "illegal utf-8");
+          _is.closeError(CLOSE_UTF8, "illegal utf-8");
           ch = UTF8_ERROR;
         }
         else if (cp < 0x0) {
-          _is.closeError(1002, "illegal utf-8");
+          _is.closeError(CLOSE_UTF8, "illegal utf-8");
+          ch = UTF8_ERROR;
+        }
+        else if (cp >= 0x100000) {
+          _is.closeError(CLOSE_UTF8, "illegal utf-8");
           ch = UTF8_ERROR;
         }
       }
       else {
-        _is.closeError(1002, "illegal utf-8");
+        _is.closeError(CLOSE_UTF8, "illegal utf-8");
         
         ch = UTF8_ERROR;
       }
@@ -250,6 +254,11 @@ public class WebSocketReader extends Reader
       
       _isFinal = is.isFinal();
       _length = is.getLength();
+      
+      if (is.getOpcode() != OP_CONT) {
+        _is.closeError(CLOSE_ERROR, "illegal fragment");
+        return -1;
+      }
     }
 
     if (_length > 0) {

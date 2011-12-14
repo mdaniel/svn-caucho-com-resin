@@ -330,8 +330,13 @@ public class WebSocketClient implements WebSocketContext, WebSocketConstants {
   public void setTimeout(long timeout)
   {
   }
-
-
+  
+  public void pong(byte []message)
+    throws IOException
+  {
+    throw new UnsupportedOperationException(getClass().getName());
+  }
+  
   @Override
   public String toString()
   {
