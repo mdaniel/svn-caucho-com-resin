@@ -13,7 +13,7 @@
 #
 
 # General log level (modify resin.xml for more granular log level adjustments)
-log_level     : info
+# log_level     : finer
 
 # Enable verbose browser error reporting
 dev_mode      : true
@@ -21,14 +21,19 @@ dev_mode      : true
 # Enable /resin-doc Resin documentation
 resin_doc     : true
 
-# List cluster server ip-addresses, space separated
-app_servers      : 127.0.0.1
+# The cluster that elastic nodes should join.  
+# Use a separate resin.properties file for each cluster.
+home_cluster : app
+
+# List cluster Triad server ip-addresses, space separated.
+# notes; triad servers, must be listed for web to find app
 # web_servers      : 
+app_servers      : 127.0.0.1
 # cache_servers    : 
 
 # For security, Resin can switch to a non-root user after binding to port 80
-# setuid_user   : @SETUID_USER@
-# setuid_group  : @SETUID_GROUP@
+setuid_user   : @SETUID_USER@
+setuid_group  : @SETUID_GROUP@
 
 # Arg passed directly to the JVM
 # jvm_args  : -Xmx2048m
@@ -38,33 +43,47 @@ http          : @HTTP_PORT@
 https         : @HTTPS_PORT@
 
 # OpenSSL certificate configuration
-# Resin will fallback to using JSSE for HTTPS in absence of a certificate file
 # openssl_file : keys/test.crt
 # openssl_key : keys/test.key
 # openssl_password : changeme
 
+# JSSE certificate configuration
+# jsse_keystore_type : jks
+# jsse_keystore_file : keys/server.keystore
+# jsse_keystore_password : changeme
+
+# Resin will fallback to using a self-signed dev certificate for HTTPS
+
 # Enable clustered persistent sessions
 session_store : true
+
+# Web-apps named with numeric suffixes, e.g. foo-10.0.war and can be browsed as 
+# /foo. When a new version of the web-app is deployed, Resin continues to route 
+# active session requests to the previous web-app version while new sessions 
+# go to the new version, so users will not be aware of the application upgrade.
+# webapp_multiversion_routing : true
 
 # Set the email address to receive weekly and restart PDF reports
 # email : admin@example.com
 
-# Set system authentication key to prevent foreign nodes from joining a cluster
-# system-key : changeme
+# Set a global password to prevent foreign Resin instances from connecting.
+# Must be identical between web, app, and cache clusters.
+# system_key : changeme
 
-# Enable command-line remote admin (required for elastic servers, remote deploy)
-admin_remote_enable : false
+# Enable command-line remote admin (required for remote deploy)
+# remote_cli_enable : true
 
 # Enable /resin-admin web administration console
-admin_enable : true
+web_admin_enable : true
 
-# Access to /resin-admin is password restricted
-# Use "resinctl generate-password" and copy/paste here, 
+# Permit access to /resin-admin from non-local network ip-addresses
+# web_admin_external : true
+
+# Require HTTPS to access /resin-admin
+# web_admin_ssl : true
+#
+# Access to /resin-admin and remote CLI is password restricted.
+# Use "resinctl generate-password" and copy/paste here to set the admin
 # admin_user : admin
 # admin_password : {SSHA}xxxxxxxx
 
-# Permit access to /resin-admin from non-local network ip-addresses
-# admin_external : false
-
-# Require HTTPS to access /resin-admin
-# admin_ssl : true

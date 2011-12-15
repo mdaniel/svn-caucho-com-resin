@@ -59,7 +59,7 @@
        - Admin services
       -->
 
-    <resin:if test="${admin_remote_enable}">
+    <resin:if test="${remote_cli_enable}">
       <resin:RemoteAdminService/>
     </resin:if>
     
@@ -86,8 +86,21 @@
           <openssl>
             <certificate-file>${rvar('openssl_file')}</certificate-file>
             <certificate-key-file>${rvar('openssl_key')}</certificate-key-file>
-            <password>${rvar('openssl_password')}</password>
+            <password>
+              <resin:Password>${rvar('openssl_password')}</resin:Password>
+            </password>
           </openssl>
+        </http>
+      </resin:when>
+      <resin:when test="${rvar('jsse_keystore_file') != null}">
+        <http address="*" port="${rvar('https')}">
+          <jsse-ssl>
+            <key-store-type>${jsse_keystore_type?:'jks'}</key-store-type>
+            <key-store-file>${jsse_keystore_file}</key-store-file>
+            <password>
+              <resin:Password>${jsse_keystore_password}</resin:Password>
+            </password>
+          </jsse-ssl>
         </http>
       </resin:when>
       <resin:when test="${class_exists('sun.security.x509.CertAndKeyGen')}">
@@ -134,14 +147,14 @@
       <!--
          - Administration application /resin-admin
         -->
-      <resin:if test="${rvar('admin_enable')}">
+      <resin:if test="${rvar('web_admin_enable')}">
         <web-app id="/resin-admin" root-directory="${resin.root}/doc/admin">
           <prologue>
             <!-- only allow access from internal IP (10.*,192.168.*,127.*) -->
             <resin:set var="resin_admin_external"
-                       value="${rvar('admin_external')}"/>
+                       value="${rvar('web_admin_external')}"/>
             <resin:set var="resin_admin_insecure"
-                       value="${! rvar('admin_ssl')}"/>
+                       value="${! rvar('web_admin_ssl')}"/>
           </prologue>
         </web-app>
       </resin:if>

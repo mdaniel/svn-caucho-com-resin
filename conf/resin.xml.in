@@ -1,21 +1,27 @@
 <!--
    - Resin 4.0 configuration file.
-   -
-   - See conf/full.xml for more sample configuration, including load
-   - balancing and database configuration.
   -->
 <resin xmlns="http://caucho.com/ns/resin"
-       xmlns:resin="urn:java:com.caucho.resin"
-       xmlns:memcache="urn:java:com.caucho.memcache"
-       xmlns:health="urn:java:com.caucho.health">
+       xmlns:resin="urn:java:com.caucho.resin">
 
   <!-- property-based Resin configuration -->
   <resin:properties path="${__DIR__}/resin.properties" optional="true"/>
-  
-  <!-- Logging configuration for the JDK logging API. -->
-  <log-handler name="" level="all" path="stdout:"
-               timestamp="[%y-%m-%d %H:%M:%S.%s] {%{thread}} "/>
+  <resin:properties path="cloud:/resin.properties"
+                    optional="true" recover="true"/>
 
+  <!-- Logging configuration for the JDK logging API -->
+  <log-handler name="" level="all" path="stdout:"
+               timestamp="[%y-%m-%d %H:%M:%S.%s]"
+               format=" {${thread}} ${log.message}"/>
+               
+  <!-- 
+     - Alternative pseudo-TTCC log format
+     -
+     - <log-handler name="" level="all" path="stdout:"
+     -           timestamp="%y-%m-%d %H:%M:%S.%s"
+     -           format=" [${thread}] ${log.level} ${log.shortName} - ${log.message}"/>
+    -->
+   
   <!--
      - level='info' for production
      - 'fine' or 'finer' for development and troubleshooting
@@ -25,15 +31,22 @@
   <logger name="com.caucho.java" level="config"/>
   <logger name="com.caucho.loader" level="config"/>
 
-  <!-- local configuration files -->
-  <resin:import fileset="${__DIR__}/local.d/*.xml"/>
+  <!--
+     - Default configuration applied to all clusters, including
+     - HTTP, HTTPS, and /resin-admin configuration.
+    -->
+  <resin:import path="${__DIR__}/cluster-default.xml"/>
+  
+  <!--
+     - health configuration
+    -->
+  <resin:import path="${__DIR__}/health.xml"/>
 
   <!--
-     - driver .jar files can be placed in ${resin.root}/ext-lib
-     -->
-  <class-loader>
-    <tree-loader path="${resin.root}/ext-lib"/>
-  </class-loader>
+     - local configuration files
+    -->
+  <resin:import fileset="${__DIR__}/resin-inf/*.xml"/>
+  <resin:import fileset="cloud:/resin-inf/*.xml" recover="true"/>
   
   <!--
      - Remote management requires at least one enabled admin user.
@@ -42,6 +55,7 @@
     <user name="${admin_user}" password="${admin_password}"/>
     
     <resin:import path="${__DIR__}/admin-users.xml" optional="true"/>
+    <resin:import path="cloud:/admin-users.xml" optional="true" recover="true"/>
   </resin:AdminAuthenticator>
 
   <!--
@@ -55,190 +69,22 @@
     -->
   <dependency-check-interval>${dependency_check_interval?:'2s'}</dependency-check-interval>
 
-  <!-- Java system-properties -->
-  <system-property mail.smtp.host="${smtp_host?:'127.0.0.1'}"/>
-  <system-property mail.smtp.port="${smtp_port?:25}"/>
-
-  <!--
-     - default configuration applied to all clusters
-    -->
-  <cluster-default>
-    <!-- shared webapp jars for non-classloader-aware libraries -->
-    <web-app-default>
-      <class-loader>
-        <library-loader path="${resin.home}/webapp-jars"/>
-      </class-loader>
-    </web-app-default>
-
-    <!-- standard servlet behavior, including .jsp, .php, and WEB-INF -->
-    <resin:import path="classpath:META-INF/caucho/app-default.xml"/>
-
-    <!-- enables development error pages -->
-    <resin:if test="${rvar('dev_mode')}">
-      <development-mode-error-page/>
-    </resin:if>
-
-    <!--
-       - Enables the proxy cache (available in Resin Professional) 
-      -->
-    <proxy-cache memory-size="${rdev('proxy_cache_size')?:'64M'">
-     <!-- Vary header rewriting for IE -->
-      <rewrite-vary-as-private/>
-    </proxy-cache>
-    
-    <!--
-       - Admin services
-      -->
-
-    <resin:if test="${admin_remote_enable}">
-      <resin:RemoteAdminService/>
-    </resin:if>
-    
-    <resin:AdminServices/>
-
-    <!--
-       - Configuration for the health monitoring system
-      -->
-    <resin:if test="${resin.professional}">
-      <resin:import path="${__DIR__}/health.xml" optional="true"/>
-
-      <!-- generate a weekly pdf report -->
-      <health:PdfReport>
-        <path>${resin.root}/doc/admin/pdf-gen.php</path>
-        <report>Summary</report>
-        <period>7D</period>
-        <snapshot/>
-        <mail-to>${rvar('email')}</mail-to>
-        <!-- <profile-time>60s</profile-time> -->
-        <health:IfCron value="0 0 * * 0"/>
-      </health:PdfReport>
-
-      <health:PdfReport>
-        <path>${resin.root}/doc/admin/pdf-gen.php</path>
-        <report>Restart</report>
-        <period>2h</period>
-        <mail-to>${rvar('email')}</mail-to>
-        <health:OnRestart/>
-      </health:PdfReport>
-    </resin:if>
-
-    <!-- defaults for each server, i.e. JVM -->
-    <server-default>
-      <jvm-arg-line>${rvar('jvm_args')}</jvm-arg-line>
-
-      <!--
-         - If starting Resin as root on Unix, specify the user name
-         - and group name for the web server user.
-       -->
-      <user-name>${rvar('setuid_user')}</user-name>
-      <group-name>${rvar('setuid_group')}</group-name>
-
-      <!-- The http port -->
-      <http address="*" port="${rvar('http')}"/>
-
-      <!-- SSL port configuration: -->
-      <resin:choose>
-      <resin:when test="${rvar('openssl_file')}">
-        <http port="${rvar('https')}">
-          <openssl>
-            <certificate-file>${rvar('openssl_file')}</certificate-file>
-            <certificate-key-file>${rvar('openssl_key')}</certificate-key-file>
-            <password>${rvar('openssl_password')}</password>
-          </openssl>
-        </http>
-      </resin:when>
-      <resin:when test="${class_exists('sun.security.x509.CertAndKeyGen')}">
-        <http address="*" port="${rvar('https')}">
-          <jsse-ssl self-signed-certificate-name="resin@localhost"/>
-        </http>
-      </resin:when>
-      </resin:choose>
-    </server-default>
-
-    <!--
-       - Default host configuration applied to all virtual hosts.
-      -->
-    <host-default>
-      <access-log path="log/access.log" 
-                 format='%h %l %u %t "%r" %s %b "%{Referer}i" "%{User-Agent}i"'
-                 rollover-period="1W"/>
-
-      <!--
-         - Defaults applied to each web-app.
-        -->
-      <web-app-default>
-        <prologue>
-          <allow-servlet-el/>
-        </prologue>
-     
-        <!--
-           - Sets max-age for cacheable pages, e.g. static pages.
-          -->
-        <resin:if test="${resin.professional}">
-          <cache-mapping url-pattern="/" max-age="5s"/>
-          <cache-mapping url-pattern="*.gif" max-age="60s"/>
-          <cache-mapping url-pattern="*.jpg" max-age="60s"/>
-          <cache-mapping url-pattern="*.png" max-age="60s"/>
-          <cache-mapping url-pattern="*.css" max-age="60s"/>
-          <cache-mapping url-pattern="*.js" max-age="60s"/>
-         </resin:if>
-      </web-app-default>
-      
-      <!--
-         - Administration application /resin-admin
-        -->
-      <resin:if test="${! rvar('admin_disable')}">
-        <web-app id="/resin-admin" root-directory="${resin.root}/doc/admin">
-          <prologue>
-            <!-- only allow access from internal IP (10.*,192.168.*,127.*) -->
-            <resin:set var="resin_admin_external" value="false"/>
-            <resin:set var="resin_admin_insecure" value="true"/>
-          </prologue>
-        </web-app>
-      </resin:if>
-    </host-default>
-  </cluster-default>
+  <!-- For resin.properties dynamic cluster joining -->
+  <home-cluster>${home_cluster}</home-cluster>
 
   <!--
      - Configures the main application cluster.  Load-balancing configurations
-     - will also have a load-balance-tier cluster.
+     - will also have a web cluster.
     -->
-  <cluster id="app_tier">
-    <!-- sets the content root for the cluster, relative to resin.root -->
-    <root-directory>.</root-directory>
-
+  <cluster id="app">
     <!-- define the servers in the cluster -->
-    <server-multi id-prefix="app-" address-list="${app_tier}" port="6800"/>
+    <server-multi id-prefix="app-" address-list="${app_servers}" port="6800"/>
 
-    <!-- include resources config files in resources/ -->
-    <resin:import fileset="app_tier.d/**/*.xml"/>
-
-    <!--
-       - Default host configuration applied to all virtual hosts.
-      -->
     <host-default>
-      <access-log path="log/access.log" 
-                 format='%h %l %u %t "%r" %s %b "%{Referer}i" "%{User-Agent}i"'
-                 rollover-period="1W"/>
-
       <!-- creates the webapps directory for .war expansion -->
       <web-app-deploy path="webapps"
-                      expand-preserve-fileset="WEB-INF/work/**"/>
-
-      <!--
-         - Defaults applied to each web-app.
-        -->
-      <web-app-default>
-        <prologue>
-          <allow-servlet-el/>
-        </prologue>
-
-        <session-config>
-          <use-persistent-store>${rvar('session_store')}</use-persistent-store>
-          
-          <enable-url-rewriting>false</enable-url-rewriting>
-        </session-config>
-      </web-app-default>
+                      expand-preserve-fileset="WEB-INF/work/**"
+                      multiversion-routing="${webapp_multiversion_routing}"/>
     </host-default>
 
     <!-- the default host, matching any host name -->
@@ -248,38 +94,32 @@
          -
          - <web-app id="/" root-directory="webapps/ROOT"/>
         -->
-      
-      <!--
-	 - Resin documentation - remove for a live site
-	-->
       <resin:if test="${rvar('resin_doc')}">
         <web-app id="/resin-doc" root-directory="${resin.root}/doc/resin-doc"/>
       </resin:if>
     </host>
   </cluster>
 
-  <cluster id="web_tier">
+  <cluster id="web">
     <!-- define the servers in the cluster -->
-    <server-multi id-prefix="web-" address-list="${web_tier}" port="6810"/>
+    <server-multi id-prefix="web-" address-list="${web_servers}" port="6810"/>
 
-    <host id="">
+    <host id="" root-directory="web">
       <web-app id="">
-        <resin:LoadBalance regexp="" cluster="app_tier"/>
+        <resin:LoadBalance regexp="" cluster="app"/>
       </web-app>
     </host>
   </cluster>
 
-  <cluster id="cache_tier">
+  <cluster id="cache" xmlns:memcache="urn:java:com.caucho.memcache">
     <!-- define the servers in the cluster -->
-    <server-multi id-prefix="cache-"
-                  address-list="${cache_tier}"
-                  port="6820">
+    <server-multi id-prefix="cache-" address-list="${cache_servers}" port="6820">
       <!-- listen for the memcache protocol -->
-      <listen port="${rvar('memcache_port')?:11212}"
+      <listen port="${rvar('memcached_port')?:11212}"
               keepalive-timeout="600s" socket-timeout="600s">
-        <memcache:MemcacheProtocol/>
+        <memcache:MemcachedProtocol/>
       </listen>
     </server-multi>
   </cluster>
+  
 </resin>
-

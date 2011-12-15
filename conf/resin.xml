@@ -70,16 +70,13 @@
   <dependency-check-interval>${dependency_check_interval?:'2s'}</dependency-check-interval>
 
   <!-- For resin.properties dynamic cluster joining -->
-  <join-cluster>${join_cluster}</join-cluster>
+  <home-cluster>${home_cluster}</home-cluster>
 
   <!--
      - Configures the main application cluster.  Load-balancing configurations
      - will also have a web cluster.
     -->
   <cluster id="app">
-    <!-- sets the content root for the cluster, relative to resin.root -->
-    <root-directory>.</root-directory>
-    
     <!-- define the servers in the cluster -->
     <server-multi id-prefix="app-" address-list="${app_servers}" port="6800"/>
 
@@ -87,7 +84,7 @@
       <!-- creates the webapps directory for .war expansion -->
       <web-app-deploy path="webapps"
                       expand-preserve-fileset="WEB-INF/work/**"
-                      versioning="${webapp_versioning}"/>
+                      multiversion-routing="${webapp_multiversion_routing}"/>
     </host-default>
 
     <!-- the default host, matching any host name -->
@@ -97,7 +94,6 @@
          -
          - <web-app id="/" root-directory="webapps/ROOT"/>
         -->
-      
       <resin:if test="${rvar('resin_doc')}">
         <web-app id="/resin-doc" root-directory="${resin.root}/doc/resin-doc"/>
       </resin:if>
@@ -127,4 +123,3 @@
   </cluster>
   
 </resin>
-
