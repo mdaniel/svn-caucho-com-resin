@@ -76,7 +76,7 @@ class WebSocketContextImpl
   
   private WebSocketWriter _textOut;
   private PrintWriter _textWriter;
-  private WebSocketReader _textIn;
+  // private WebSocketReader _textIn;
   
   private boolean _isReadClosed;
   private AtomicBoolean _isWriteClosed = new AtomicBoolean();
@@ -170,6 +170,8 @@ class WebSocketContextImpl
   {
     if (_isWriteClosed.getAndSet(true))
       return;
+    
+    Thread.dumpStack();
 
     WriteStream out = _controller.getWriteStream();
     
@@ -199,6 +201,8 @@ class WebSocketContextImpl
   public void disconnect()
   {
     _controller.complete();
+    
+    IoUtil.close(_is);
   }
   
   //
@@ -255,18 +259,20 @@ class WebSocketContextImpl
       break;
 
     case OP_TEXT:
-      if (_textIn == null)
-        _textIn = new WebSocketReader(_is);
+      WebSocketReader textIn = _is.initReader(_is.getLength(), _is.isFinal());
 
-      _textIn.init();
-
-      _listener.onReadText(this, _textIn);
+      _listener.onReadText(this, textIn);
       break;
 
+      /*
     case OP_PING:
       {
         if (! _is.isFinal()) {
           close(1002, "ping must be final");
+          return false;
+        }
+        else if (_is.getLength() > 125) {
+          close(1002, "ping must be less than 125 in length");
           return false;
         }
         
@@ -282,6 +288,23 @@ class WebSocketContextImpl
         out.flush();
         break;
       }
+
+    case OP_PONG:
+      {
+        if (! _is.isFinal()) {
+          close(1002, "pong must be final");
+          return false;
+        }
+        else if (_is.getLength() > 125) {
+          close(1002, "pong must be less than 125 in length");
+          return false;
+        }
+        
+        long length = _is.getLength();
+        
+        _is.skip(length);
+        break;
+      }
       
     case OP_CLOSE:
       { 
@@ -292,13 +315,28 @@ class WebSocketContextImpl
         try {
           long length = _is.getLength();
           
-          if (length > 0) {
+          if (length > 125) {
+            closeCode = 1002;
+            closeMessage = "close must be less than 125 in length";
+          }
+          else if (! _is.isFinal()) {
+            closeCode = 1002;
+            closeMessage = "close final";
+          }
+          else if (length > 1) {
             int d1 = _is.read();
             int d2 = _is.read();
           
             int code = ((d1 & 0xff) << 8) + (d2 & 0xff);
             length -= 2;
-            _is.skip(length);
+            
+            textIn = _is.initReader(length, true);
+
+            StringBuilder sb = new StringBuilder();
+            int ch;
+            while ((ch = textIn.read()) >= 0) {
+              sb.append(ch);
+            }
             
             switch (code) {
             case 1000:
@@ -332,6 +370,7 @@ class WebSocketContextImpl
           close(closeCode, closeMessage);
         }
       }
+      */
 
     default:
       // XXX:

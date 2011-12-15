@@ -617,7 +617,6 @@ public final class JniSocketImpl extends QSocket {
   @Override
   public void forceShutdown()
   {
-    System.out.println("SHUTDOWN: " + this);
     // can't be locked because of shutdown
     nativeCloseFd(_fd);
   }

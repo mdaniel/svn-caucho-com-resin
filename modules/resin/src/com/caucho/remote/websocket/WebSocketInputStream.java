@@ -97,7 +97,10 @@ public class WebSocketInputStream extends InputStream
         return -1;
       }
       
-      if (_is.getOpcode() != OP_CONT) {
+      if (_is.getOpcode() == OP_CLOSE) {
+        return -1;
+      }
+      else if (_is.getOpcode() != OP_CONT) {
         _is.closeError(1002, "illegal fragment");
         return -1;
       }
@@ -123,6 +126,14 @@ public class WebSocketInputStream extends InputStream
     while (_length == 0 && ! _isFinal) {
       if (! _is.readFrameHeader())
         return -1;
+      
+      if (_is.getOpcode() == OP_CLOSE) {
+        return -1;
+      }
+      else if (_is.getOpcode() != OP_CONT) {
+        _is.closeError(1002, "illegal fragment");
+        return -1;
+      }
       
       _length = _is.getLength();
       _isFinal = _is.isFinal();

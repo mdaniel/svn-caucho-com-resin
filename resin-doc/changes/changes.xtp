@@ -12,6 +12,7 @@
 
 <s2 title="4.0.25 - snapshot">
 <ul>
+<li>websocket: pass autobahn test suite</li>
 <li>config: added $disable_compiling_loader to properties (#4787, rep by systhemes)</li>
 <li>cli: made web-app-deploy, web-app-restart, etc. primary cli (#4885)</li>
 <li>servlet: web-app root url /foo now automatically redirects to /foo/ (#4884)</li>

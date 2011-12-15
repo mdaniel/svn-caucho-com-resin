@@ -55,6 +55,7 @@ abstract public class FrameInputStream extends InputStream
   implements WebSocketConstants
 {
   private WebSocketContext _cxt;
+  private WebSocketReader _textIn;
   
   public void init(WebSocketContext cxt, InputStream is)
   {
@@ -71,6 +72,17 @@ abstract public class FrameInputStream extends InputStream
   abstract public long getLength();
   
   abstract public boolean isFinal();
+  
+  public WebSocketReader initReader(long length, boolean isFinal)
+    throws IOException
+  {
+    if (_textIn == null)
+      _textIn = new WebSocketReader(this);
+
+    _textIn.init(length, isFinal);
+    
+    return _textIn;
+  }
 
   public boolean readFrameHeader()
     throws IOException
@@ -80,11 +92,139 @@ abstract public class FrameInputStream extends InputStream
     if (length > 0)
       skip(length);
 
-    return readFrameHeaderImpl();
+    while (true) {
+      if (! readFrameHeaderImpl())
+        return false;
+      
+      if (handleFrame()) {
+        return true;
+      }
+    }
   }
 
   abstract protected boolean readFrameHeaderImpl()
     throws IOException;
+  
+  protected boolean handleFrame()
+    throws IOException
+  {
+    switch (getOpcode()) {
+    case OP_PING:
+    {
+      long length = getLength();
+      
+      if (! isFinal()) {
+        closeError(1002, "ping must be final");
+        return true;
+      }
+      else if (length > 125) {
+        closeError(1002, "ping length must be less than 125");
+        return true;
+      }
+    
+      byte []value = new byte[(int) length];
+    
+      for (int i = 0; i < length; i++) {
+        value[i] = (byte) read();
+      }
+
+      getContext().pong(value);
+      
+      return false;
+    }
+  
+    case OP_PONG:
+    {
+      if (! isFinal()) {
+        closeError(1002, "pong must be final");
+        return true;
+      }
+      else if (getLength() > 125) {
+        closeError(1002, "pong must be less than 125");
+        return true;
+      }
+    
+      long length = getLength();
+      byte []value = new byte[(int) length];
+    
+      for (int i = 0; i < length; i++) {
+        value[i] = (byte) read();
+      }
+      
+      return false;
+    }
+  
+    case OP_CLOSE:
+    {
+      int closeCode = 1002;
+      String closeMessage = "error";
+      
+      try {
+        // if (true) return true;
+        
+        long length = getLength();
+
+        if (length > 125) {
+          closeCode = 1002;
+          closeMessage = "close must be less than 125 in length";
+        }
+        else if (! isFinal()) {
+          closeCode = 1002;
+          closeMessage = "close final";
+        }
+        else if (length > 0) {
+          int d1 = read();
+          int d2 = read();
+
+          int code = ((d1 & 0xff) << 8) + (d2 & 0xff);
+          
+          if (d2 < 0)
+            code = 1002;
+          
+          length -= 2;
+
+          WebSocketReader textIn = initReader(length, true);
+
+          StringBuilder sb = new StringBuilder();
+          int ch;
+          while ((ch = textIn.read()) >= 0) {
+            sb.append(ch);
+          }
+
+          switch (code) {
+          case 1000:
+          case 1001:
+          case 1003:
+          case 1007:
+          case 1008:
+          case 1009:
+          case 1010:
+            closeCode = 1000;
+            closeMessage = "ok";
+            break;
+
+          default:
+            if (3000 <= code && code <= 4999) {
+              closeCode = 1000;
+              closeMessage = "ok";
+            }
+            break;
+          }
+        }
+        else {
+          closeCode = 1000;
+          closeMessage = "ok";
+        }
+
+        return false;
+      } finally {
+        closeError(closeCode, closeMessage);
+      }
+    }
+    }
+
+    return true;
+  }
 
   public void skipToFrameEnd()
     throws IOException

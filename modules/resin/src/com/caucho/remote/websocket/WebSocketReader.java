@@ -62,8 +62,13 @@ public class WebSocketReader extends Reader
   public void init()
     throws IOException
   {
-    _isFinal = _is.isFinal();
-    _length = _is.getLength();
+    init(_is.getLength(), _is.isFinal());
+  }
+
+  public void init(long length, boolean isFinal)
+  {
+    _isFinal = isFinal;
+    _length = length;
   }
 
   public long getLength()
@@ -249,16 +254,20 @@ public class WebSocketReader extends Reader
     FrameInputStream is = _is;
 
     while (_length == 0 && ! _isFinal) {
-      if (! is.readFrameHeader())
+      if (! is.readFrameHeader()) {
         return -1;
+      }
       
-      _isFinal = is.isFinal();
-      _length = is.getLength();
-      
-      if (is.getOpcode() != OP_CONT) {
+      if (is.getOpcode() == OP_CLOSE) {
+        return -1;
+      }
+      else if (is.getOpcode() != OP_CONT) {
         _is.closeError(CLOSE_ERROR, "illegal fragment");
         return -1;
       }
+      
+      _isFinal = is.isFinal();
+      _length = is.getLength();
     }
 
     if (_length > 0) {
