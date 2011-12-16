@@ -585,6 +585,9 @@ r_resin-Content =
   & (attribute join-cluster { string }
      | element join-cluster { string })?
 
+  & (attribute home-cluster { string }
+     | element home-cluster { string })?
+
   & r_management?
 
   & r_module-repository?
