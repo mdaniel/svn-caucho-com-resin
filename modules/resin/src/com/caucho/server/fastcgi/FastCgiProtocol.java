@@ -49,6 +49,6 @@ public class FastCgiProtocol extends AbstractHttpProtocol {
    */
   public ProtocolConnection createConnection(SocketLink conn)
   {
-    return new FastCgiRequest(getServer(), conn);
+    return new FastCgiRequest(getServletSystem(), conn);
   }
 }

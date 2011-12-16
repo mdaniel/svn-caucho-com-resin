@@ -36,6 +36,7 @@ import javax.annotation.PostConstruct;
 import com.caucho.cloud.network.ClusterServerProgram;
 import com.caucho.cloud.topology.CloudCluster;
 import com.caucho.cloud.topology.CloudPod;
+import com.caucho.cloud.topology.CloudServer;
 import com.caucho.config.ConfigException;
 import com.caucho.config.Configurable;
 import com.caucho.config.program.ConfigProgram;
@@ -49,7 +50,6 @@ import com.caucho.config.program.ContainerProgram;
 public class BootPodConfig
 {
   private BootClusterConfig _clusterConfig;
-  private CloudPod _cloudPod;
   
   private String _id;
 
@@ -112,7 +112,7 @@ public class BootPodConfig
   {
     BootServerConfig server = new BootServerConfig(this);
     
-    _servers.add(server);
+    // _servers.add(server);
 
     return server;
   }
@@ -145,14 +145,24 @@ public class BootPodConfig
     if (_id == null)
       throw new ConfigException(L.l("'id' is a required attribute for <pod>"));
       */
-    
-    CloudPod pod = getCloudPod();
-    
-    pod.putData(new ClusterServerProgram(_serverDefaultProgram));
-
-    getCloudPod();
   }
   
+  void initTopology(CloudPod cloudPod)
+  {
+    cloudPod.putData(new ClusterServerProgram(_serverDefaultProgram));
+
+    for (BootServerConfig bootServer : _servers) {
+      CloudServer cloudServer
+        = cloudPod.createStaticServer(bootServer.getId(),
+                                      bootServer.getAddress(),
+                                      bootServer.getPort(),
+                                      bootServer.isSecure());
+      
+      bootServer.initTopology(cloudServer);
+    }
+  }
+  
+  /*
   CloudPod getCloudPod()
   {
     if (_cloudPod == null) {
@@ -163,6 +173,7 @@ public class BootPodConfig
     
     return _cloudPod;
   }
+  */
   
   @Override
   public String toString()

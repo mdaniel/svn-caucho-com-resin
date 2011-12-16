@@ -79,7 +79,7 @@ public class BootResinConfig // implements EnvironmentBean
   
   private BootManagementConfig _management;
   private String _resinSystemKey;
-  private String _joinCluster;
+  private String _homeCluster;
   
   BootResinConfig(ResinSystem system,
                   WatchdogArgs args)
@@ -160,17 +160,23 @@ public class BootResinConfig // implements EnvironmentBean
   @Configurable
   public void setJoinCluster(String joinCluster)
   {
-    _joinCluster = joinCluster;
+    setHomeCluster(joinCluster);
   }
   
-  public String getJoinCluster()
+  @Configurable
+  public void setHomeCluster(String homeCluster)
   {
-    return _joinCluster;
+    _homeCluster = homeCluster;
   }
   
-  public boolean isJoinCluster()
+  public String getHomeCluster()
   {
-    return _joinCluster != null && ! "".equals(_joinCluster);
+    return _homeCluster;
+  }
+  
+  public boolean isHomeCluster()
+  {
+    return _homeCluster != null && ! "".equals(_homeCluster);
   }
 
   /*
@@ -407,10 +413,10 @@ public class BootResinConfig // implements EnvironmentBean
    */
   WatchdogClient addDynamicClient(WatchdogArgs args)
   {
-    if (! args.isDynamicServer() && ! isJoinCluster())
+    if (! args.isDynamicServer() && ! isHomeCluster())
       throw new IllegalStateException();
 
-    String clusterId = getJoinCluster();
+    String clusterId = getHomeCluster();
     
     if (args.isDynamicServer())
       clusterId = args.getDynamicCluster();

@@ -171,7 +171,7 @@ class WatchdogManager implements AlarmListener {
 
     ResinELContext elContext = _args.getELContext();
     
-    resin.preConfigureInit();
+    // resin.preConfigureInit();
     
     // XXX: needs to be config
 
@@ -216,17 +216,19 @@ class WatchdogManager implements AlarmListener {
 
     server.getConfig().logInit(logStream);
 
-    resin.preConfigureInit();
+    // resin.preConfigureInit();
     // resin.setConfigFile(_args.getResinConf().getNativePath());
 
     thread = Thread.currentThread();
     thread.setContextClassLoader(resin.getClassLoader());
 
+    /*
     CloudSystem cloudSystem = TopologyService.getCurrent().getSystem();
     
     CloudCluster cluster = cloudSystem.createCluster("watchdog");
     CloudPod pod = cluster.createPod();
     pod.createStaticServer("default", "localhost", -1, false);
+    */
 
     _server = resin.createServer();
     
@@ -587,8 +589,8 @@ class WatchdogManager implements AlarmListener {
     
     WatchdogConfig serverConfig = null;
 
-    if (args.isDynamicServer() || resin.isJoinCluster()) {
-      String clusterId = resin.getJoinCluster();
+    if (args.isDynamicServer() || resin.isHomeCluster()) {
+      String clusterId = resin.getHomeCluster();
       
       if (args.isDynamicServer())
         clusterId = args.getDynamicCluster();

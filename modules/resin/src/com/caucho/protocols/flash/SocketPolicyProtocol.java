@@ -48,6 +48,6 @@ public class SocketPolicyProtocol extends AbstractHttpProtocol
 
   public ProtocolConnection createConnection(SocketLink conn)
   {
-    return new SocketPolicyRequest(getServer(), conn, _policy);
+    return new SocketPolicyRequest(getServletSystem(), conn, _policy);
   }
 }

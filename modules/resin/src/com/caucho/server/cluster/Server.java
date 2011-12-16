@@ -48,6 +48,7 @@ import com.caucho.cloud.network.ClusterServer;
 import com.caucho.cloud.network.NetworkClusterSystem;
 import com.caucho.cloud.topology.CloudCluster;
 import com.caucho.cloud.topology.CloudPod;
+import com.caucho.cloud.topology.CloudServer;
 import com.caucho.config.ConfigException;
 import com.caucho.config.inject.InjectManager;
 import com.caucho.config.types.Period;
@@ -119,8 +120,7 @@ public class Server
 
   private final Resin _resin;
   private final ResinSystem _resinSystem;
-  private final NetworkClusterSystem _clusterService;
-  private final ClusterServer _selfServer;
+  private final CloudServer _selfServer;
 
   private Throwable _configException;
 
@@ -190,23 +190,15 @@ public class Server
     
     ResinSystem resinSystem = resin.getResinSystem();
     
-    NetworkClusterSystem clusterService;
-    
-    clusterService = ResinSystem.getCurrentService(NetworkClusterSystem.class);
-    
     if (resinSystem == null)
-      throw new NullPointerException();
-    
-    if (clusterService == null)
       throw new NullPointerException();
     
     _resin = resin;
     _resinSystem = resinSystem;
-    _clusterService = clusterService;
     
     _invocationServer = new InvocationServer(this);
     
-    _selfServer = _clusterService.getSelfServer().getData(ClusterServer.class);
+    _selfServer = resin.getSelfServer();
 
     // pod id can't include the server since it's used as part of
     // cache ids
@@ -358,11 +350,6 @@ public class Server
   {
     return _selfServer.getCluster().getSystem().getClusterList();
   }
-  
-  public NetworkClusterSystem getClusterService()
-  {
-    return _clusterService;
-  }
 
   /**
    * Returns the admin path
@@ -393,7 +380,7 @@ public class Server
    */
   public ClusterServer getSelfServer()
   {
-    return _selfServer;
+    return _selfServer.getData(ClusterServer.class);
   }
 
   /**
@@ -401,7 +388,7 @@ public class Server
    */
   public CloudPod getPod()
   {
-    return _selfServer.getCloudServer().getPod();
+    return _selfServer.getPod();
   }
 
   /**
@@ -1152,10 +1139,10 @@ public class Server
       createManagement().setServer(this);
       createManagement().init();
     }
-    */
     
     if (_selfServer.getStage() != null)
       setStage(_selfServer.getStage());
+    */
   }
   
   protected ServerAdmin createAdmin()

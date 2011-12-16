@@ -303,7 +303,7 @@ public class ResinEmbed
     try {
       Environment.initializeEnvironment();
 
-      _resin.preConfigureInit();
+      // _resin.preConfigureInit();
       
       thread.setContextClassLoader(_resin.getClassLoader());
 

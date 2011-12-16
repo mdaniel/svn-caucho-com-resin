@@ -66,7 +66,7 @@ public class ResinArgs
   
   private Socket _pingSocket;
   
-  private String _joinCluster;
+  private String _homeCluster;
   private String _serverAddress;
   private int _serverPort;
   
@@ -251,14 +251,14 @@ public class ResinArgs
     _stage = stage;
   }
   
-  public void setJoinCluster(String joinCluster)
+  public void setHomeCluster(String homeCluster)
   {
-    _joinCluster = joinCluster;
+    _homeCluster = homeCluster;
   }
   
-  public String getJoinCluster()
+  public String getHomeCluster()
   {
-    return _joinCluster;
+    return _homeCluster;
   }
   
   public String getServerAddress()
@@ -390,9 +390,9 @@ public class ResinArgs
         i += 1;
       }
       else if (i + 1 < len
-          && (argv[i].equals("-join-cluster")
-              || argv[i].equals("--join-cluster"))) {
-        _joinCluster = argv[i + 1];
+          && (argv[i].equals("-cluster")
+              || argv[i].equals("--cluster"))) {
+        _homeCluster = argv[i + 1];
    
         i += 2;
       }

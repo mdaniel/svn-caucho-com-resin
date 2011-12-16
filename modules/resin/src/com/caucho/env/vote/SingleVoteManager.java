@@ -37,6 +37,11 @@ import com.caucho.server.cluster.Server;
  */
 public class SingleVoteManager extends AbstractVoteManager {
   private Server _server;
+
+  public SingleVoteManager(Server server)
+  {
+    _server = server;
+  }
   
   /**
    * Selects a cluster owner
@@ -44,10 +49,5 @@ public class SingleVoteManager extends AbstractVoteManager {
   public ClusterServer electServer(String guid, String name)
   {
     return _server.getSelfServer();
-  }
-
-  public SingleVoteManager(Server server)
-  {
-    _server = server;
   }
 }

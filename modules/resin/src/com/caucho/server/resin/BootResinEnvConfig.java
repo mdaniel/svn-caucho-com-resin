@@ -19,38 +19,31 @@
  *
  * You should have received a copy of the GNU General Public License
  * along with Resin Open Source; if not, write to the
- *   Free SoftwareFoundation, Inc.
+ *
+ *   Free Software Foundation, Inc.
  *   59 Temple Place, Suite 330
  *   Boston, MA 02111-1307  USA
  *
  * @author Scott Ferguson
  */
 
-package com.caucho.server.http;
+package com.caucho.server.resin;
 
-import com.caucho.network.listen.ProtocolConnection;
-import com.caucho.network.listen.SocketLink;
+import com.caucho.env.service.ResinSystem;
+import com.caucho.loader.EnvironmentBean;
 
 /**
- * The main class for the HTTP server.
- *
- * <p>TcpServer handles the main thread control.  HttpServer just needs
- * to create the right kind of request when a new thread is spawned.
- *
- * @see com.caucho.server.TcpServer
+ * The Resin class represents the top-level container for Resin.
+ * It exactly matches the &lt;resin> tag in the resin.xml
  */
-public class HttpProtocol extends AbstractHttpProtocol {
-  public HttpProtocol()
-  {
-    setProtocolName("http");
-  }
-
- /**
-   * Create a HttpRequest object for the new thread.
+public class BootResinEnvConfig extends BootResinConfig
+  implements EnvironmentBean
+{
+  /**
+   * Creates a new resin config.
    */
-  @Override
-  public ProtocolConnection createConnection(SocketLink conn)
+  public BootResinEnvConfig(ResinSystem resinSystem)
   {
-    return new HttpRequest(getServletSystem(), conn);
+    super(resinSystem);
   }
 }

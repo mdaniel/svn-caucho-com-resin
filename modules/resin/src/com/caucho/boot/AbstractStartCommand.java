@@ -46,7 +46,7 @@ public abstract class AbstractStartCommand extends AbstractBootCommand
     addFlagOption("preview", "run as a preview (staging) server");
     
     addValueOption("data-directory", "dir", "override the working directory");
-    addValueOption("join-cluster", "id", "join a cluster as a dynamic server (pro)");
+    addValueOption("cluster", "id", "join a cluster as a dynamic server (pro)");
     addValueOption("root-directory", "dir", "set the root directory");
     addValueOption("log-directory", "dir", "set the log directory");
     addValueOption("server", "id", "select a configured server");

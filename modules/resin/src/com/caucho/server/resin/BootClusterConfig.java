@@ -37,6 +37,7 @@ import javax.annotation.PostConstruct;
 import com.caucho.cloud.network.ClusterServerProgram;
 import com.caucho.cloud.topology.CloudCluster;
 import com.caucho.cloud.topology.CloudPod;
+import com.caucho.cloud.topology.CloudServer;
 import com.caucho.config.ConfigException;
 import com.caucho.config.Configurable;
 import com.caucho.config.SchemaBean;
@@ -54,7 +55,6 @@ public class BootClusterConfig implements SchemaBean
   private static final L10N L = new L10N(BootClusterConfig.class);
   
   private BootResinConfig _resinConfig;
-  private CloudCluster _cloudCluster;
   
   private String _id;
 
@@ -178,7 +178,7 @@ public class BootClusterConfig implements SchemaBean
       server.setAddress(address);
       server.setPort(port);
       server.addBuilderProgram(multiServer.getServerProgram());
-      server.init();
+      // server.init();
       
       addServer(server);
     }
@@ -210,37 +210,38 @@ public class BootClusterConfig implements SchemaBean
   public void init()
   {
     if (_id == null)
-      throw new ConfigException(L.l("'id' is a require attribute for <cluster>"));
-    
+      throw new ConfigException(L.l("'id' is a required attribute for <cluster>"));
+
+    /*
     CloudCluster cluster = getCloudCluster();
     
     cluster.putData(new ClusterServerProgram(_serverDefaultProgram));
 
     getCloudPod();
+    */
   }
   
-  CloudCluster getCloudCluster()
+  void initTopology(CloudCluster cluster)
   {
-    if (_id == null)
-      throw new ConfigException(L.l("'id' is a require attribute for <cluster>"));
-    
-    if (_cloudCluster == null) {
-      _cloudCluster = _resinConfig.getCloudSystem().findCluster(_id);
+    cluster.putData(new ClusterServerProgram(_serverDefaultProgram));
+
+    for (BootPodConfig bootPod : _pods) {
+      CloudPod pod = cluster.createPod();
       
-      if (_cloudCluster == null)
-        _cloudCluster = _resinConfig.getCloudSystem().createCluster(_id);
+      bootPod.initTopology(pod);
     }
-    
-    return _cloudCluster;
   }
-  
-  CloudPod getCloudPod()
+
+  public BootServerConfig addDynamicServer(CloudServer cloudServer)
   {
-    if (_pods.size() == 0) {
-      addPod(createPod());
-    }
+    BootServerConfig bootServer = createServer();
+    bootServer.setId(cloudServer.getId());
+    // bootServer.setDynamic(true);
     
-    return _pods.get(0).getCloudPod();
+    addServer(bootServer);
+    bootServer.initTopology(cloudServer);
+    
+    return bootServer;
   }
   
   @Override

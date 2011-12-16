@@ -29,18 +29,12 @@
 
 package com.caucho.server.resin;
 
-import javax.annotation.PostConstruct;
-
-import com.caucho.cloud.network.ClusterServer;
 import com.caucho.cloud.network.ClusterServerProgram;
-import com.caucho.cloud.topology.CloudPod;
 import com.caucho.cloud.topology.CloudServer;
-import com.caucho.config.ConfigException;
 import com.caucho.config.Configurable;
 import com.caucho.config.SchemaBean;
 import com.caucho.config.program.ConfigProgram;
 import com.caucho.config.program.ContainerProgram;
-import com.caucho.util.L10N;
 
 /**
  * The BootServerConfig is the first-pass configuration of the server.
@@ -49,8 +43,6 @@ import com.caucho.util.L10N;
  */
 public class BootServerConfig implements SchemaBean
 {
-  private static final L10N L = new L10N(BootServerConfig.class);
-  
   private final BootPodConfig _pod;
   
   private String _id = "default";
@@ -59,12 +51,10 @@ public class BootServerConfig implements SchemaBean
   private int _port = -1;
   private boolean _isSecure;
   
-  private boolean _isDynamic;
+  // private boolean _isDynamic;
 
   private ContainerProgram _serverProgram
     = new ContainerProgram();
-  
-  private CloudServer _cloudServer;
 
   /**
    * Creates a new resin server.
@@ -138,6 +128,7 @@ public class BootServerConfig implements SchemaBean
   /**
    * Marks the server as a dynamic server
    */
+  /*
   public void setDynamic(boolean isDynamic)
   {
     _isDynamic = isDynamic;
@@ -147,6 +138,7 @@ public class BootServerConfig implements SchemaBean
   {
     return _isDynamic;
   }
+  */
   
   public void addBuilderProgram(ConfigProgram program)
   {
@@ -157,12 +149,15 @@ public class BootServerConfig implements SchemaBean
   {
     return _serverProgram;
   }
-  
+
+  /*
   public CloudServer getCloudServer()
   {
     return _cloudServer;
   }
+  */
 
+  /*
   @PostConstruct
   public void init()
   {
@@ -187,11 +182,19 @@ public class BootServerConfig implements SchemaBean
     
     _cloudServer.putData(new ClusterServerProgram(_serverProgram));
   }
+  */
   
+  void initTopology(CloudServer cloudServer)
+  {
+    cloudServer.putData(new ClusterServerProgram(_serverProgram));
+  }
+  
+  /*
   ClusterServer getClusterServer()
   {
     return _cloudServer.getData(ClusterServer.class);
   }
+  */
 
   @Override
   public String toString()

@@ -69,7 +69,7 @@ public class HmuxProtocol extends AbstractHttpProtocol {
   @Override
   public ProtocolConnection createConnection(SocketLink conn)
   {
-    return new HmuxRequest(getServer(), conn, this);
+    return new HmuxRequest(getServletSystem(), conn, this);
   }
 
   public HmuxExtension getExtension(Integer id)
