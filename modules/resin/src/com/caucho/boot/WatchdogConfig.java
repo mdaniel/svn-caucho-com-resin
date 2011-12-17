@@ -82,6 +82,7 @@ class WatchdogConfig
   
   private String _serverAddress = "127.0.0.1";
   private int _serverPort;
+  private boolean _isRequireExplicitId;
 
   private WatchdogLog _watchdogLog;
   private Path _logPath;
@@ -396,6 +397,16 @@ class WatchdogConfig
   public int getPort()
   {
     return _serverPort;
+  }
+  
+  public void setRequireExplicitId(boolean isRequire)
+  {
+    _isRequireExplicitId = isRequire;
+  }
+  
+  public boolean isRequireExplicitId()
+  {
+    return _isRequireExplicitId;
   }
   
   /**

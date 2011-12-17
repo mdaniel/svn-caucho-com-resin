@@ -51,6 +51,8 @@ public class BootServerConfig implements SchemaBean
   private int _port = -1;
   private boolean _isSecure;
   
+  private boolean _isRequireExplicitId;
+  
   // private boolean _isDynamic;
 
   private ContainerProgram _serverProgram
@@ -123,6 +125,18 @@ public class BootServerConfig implements SchemaBean
   public boolean isSecure()
   {
     return _isSecure;
+  }
+  
+  @Configurable
+  public void setRequireExplicitId(boolean isRequire)
+  {
+    _isRequireExplicitId = isRequire;
+  }
+  
+  @Configurable
+  public boolean isRequireExplicitId()
+  {
+    return _isRequireExplicitId;
   }
 
   /**

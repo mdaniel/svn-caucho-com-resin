@@ -170,7 +170,7 @@ class WatchdogManager implements AlarmListener {
     ThreadPool.getThreadPool().setPriorityIdleMin(4);
 
     ResinELContext elContext = _args.getELContext();
-    
+    System.out.println("XXX-A:");    
     // resin.preConfigureInit();
     
     // XXX: needs to be config
@@ -187,9 +187,12 @@ class WatchdogManager implements AlarmListener {
     ResinConfigLibrary.configure(cdiManager);
     ResinServerConfigLibrary.configure(cdiManager);
 
+    System.out.println("XXX-B:");    
     _watchdogPort = _args.getWatchdogPort();
     
+    System.out.println("XXX-C:");    
     readConfig(serverId, _args);
+    System.out.println("XXX-D:");    
     
     WatchdogChild server = null;
     
@@ -593,7 +596,7 @@ class WatchdogManager implements AlarmListener {
       String clusterId = resin.getHomeCluster();
       
       if (args.isDynamicServer())
-        clusterId = args.getDynamicCluster();
+        clusterId = args.getClusterId();
       
       String address = args.getDynamicAddress();
       int port = args.getDynamicPort();

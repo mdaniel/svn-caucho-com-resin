@@ -176,7 +176,7 @@ public class ResinBoot
 
     config.configure(_resinConfig, _args.getResinConf(),
                      "com/caucho/server/resin/resin.rnc");
-
+    
     if (! _args.isHelp())
       initClient();
   }

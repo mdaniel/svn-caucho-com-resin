@@ -236,7 +236,7 @@ public class BootResinConfig // implements EnvironmentBean
   WatchdogClient findClient(String serverId, WatchdogArgs args)
   {
     WatchdogClient client = null;
-    
+
     if (serverId != null) {
       client = findClient(serverId);
 
@@ -260,14 +260,17 @@ public class BootResinConfig // implements EnvironmentBean
     
     ArrayList<WatchdogClient> clientList = findLocalClients();
     
-    if (clientList.size() == 1)
-      return clientList.get(0);
+    if (clientList.size() == 1) {
+      client = clientList.get(0);
+      
+      // server/6e10
+      if (client.getConfig().isRequireExplicitId())
+        client = null;
+    }
 
-    /*
     // server/6e10
     if (args.isDynamicServer())
       return null;
-      */
 
     if (client == null && _args.getCommand().isShutdown()) {
       client = findShutdownClient(_args.getClusterId());
@@ -416,19 +419,21 @@ public class BootResinConfig // implements EnvironmentBean
     if (! args.isDynamicServer() && ! isHomeCluster())
       throw new IllegalStateException();
 
-    String clusterId = getHomeCluster();
+    String clusterId = args.getClusterId();
     
-    if (args.isDynamicServer())
-      clusterId = args.getDynamicCluster();
+    if (clusterId == null)
+      clusterId = getHomeCluster();
     
     String address = args.getDynamicAddress();
     int port = args.getDynamicPort();
     
     BootClusterConfig cluster = findCluster(clusterId);
 
-    if (cluster == null)
-      throw new ConfigException(L.l("'{0}' is an unknown cluster. -join-cluster must specify an existing cluster",
+    if (cluster == null) {
+      Thread.dumpStack();
+      throw new ConfigException(L.l("'{0}' is an unknown cluster. -cluster must specify an existing cluster",
                                     clusterId));
+    }
 
     if (! cluster.isDynamicServerEnable()) {
       throw new ConfigException(L.l("cluster '{0}' does not have <resin:ElasticCloudService>. -join-cluster requires a <resin:ElasticCloudService> tag.",
@@ -475,9 +480,11 @@ public class BootResinConfig // implements EnvironmentBean
     
     if (cluster == null) {
       cluster = new BootClusterConfig(_system, this);
+      cluster.setId(proxy.getId());
 
-      for (int i = 0; i < _clusterDefaultList.size(); i++)
+      for (int i = 0; i < _clusterDefaultList.size(); i++) {
         _clusterDefaultList.get(i).configure(cluster);
+      }
 
       _clusterList.add(cluster);
     }
@@ -487,6 +494,9 @@ public class BootResinConfig // implements EnvironmentBean
 
   BootClusterConfig findCluster(String id)
   {
+    if (id == null)
+      return null;
+
     for (int i = 0; i < _clusterList.size(); i++) {
       BootClusterConfig cluster = _clusterList.get(i);
 

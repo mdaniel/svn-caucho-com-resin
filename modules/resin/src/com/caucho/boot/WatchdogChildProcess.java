@@ -738,7 +738,14 @@ class WatchdogChildProcess
       resinArgs.add("-server");
       resinArgs.add(_watchdog.getId());
     }
-
+    
+    /*
+    if (_watchdog.getArgs().getClusterId() != null) {
+      resinArgs.add("-cluster");
+      resinArgs.add(_watchdog.getArgs().getClusterId());
+    }
+    */
+    
     resinArgs.add("-socketwait");
     resinArgs.add(String.valueOf(socketPort));
 

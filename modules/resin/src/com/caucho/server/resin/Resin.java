@@ -119,6 +119,8 @@ public class Resin
   private String _dynamicAddress;
   private int _dynamicPort;
   
+  private String _resinSystemAuthKey;
+  
   private String _stage = "production";
 
   private Socket _pingSocket;
@@ -367,6 +369,16 @@ public class Resin
   public String getHomeCluster()
   {
     return _homeCluster;
+  }
+  
+  String getResinSystemAuthKey()
+  {
+    return _resinSystemAuthKey;
+  }
+  
+  void setResinSystemAuthKey(String key)
+  {
+    _resinSystemAuthKey = key;
   }
   
   /**
@@ -635,7 +647,7 @@ public class Resin
                          isWatchdog() ? BootType.WATCHDOG : BootType.RESIN);
 
      _bootResinConfig = _bootConfig.getBootResin();
-      
+     
       _resinAdmin = new ResinAdmin(this);
     } catch (RuntimeException e) {
       throw e;
@@ -846,6 +858,8 @@ public class Resin
     
     BootResinConfig bootResin = _bootResinConfig;
     
+    _resinSystemAuthKey = bootResin.getResinSystemAuthKey();
+    
     String serverId = _serverId;
     
     if ("".equals(serverId))
@@ -854,7 +868,6 @@ public class Resin
     if (serverId != null)
       _bootServerConfig = bootResin.findServer(serverId);
     
-    
     CloudSystem cloudSystem = bootResin.initTopology();
     
     if (_bootServerConfig != null) {
@@ -862,12 +875,13 @@ public class Resin
     else if (Alarm.isTest()) {
       _bootServerConfig = joinTest();
     }
-    else if (_serverId != null) {
-      throw new ConfigException(L().l("-server '{0}' is an unknown server in the configuration file.",
-                                      _serverId));
-    }
     else if (isWatchdog()) {
       _bootServerConfig = joinWatchdog();
+    }
+    else if (_serverId != null && getHomeCluster() == null) {
+      throw new ConfigException(L().l("-server '{0}' is an unknown server in the configuration file.",
+                                      _serverId));
+      
     }
     else if ((_bootServerConfig = bootResin.findLocalServer()) != null) {
     }
@@ -904,6 +918,8 @@ public class Resin
     }
     
     CloudServer cloudServer = getDelegate().joinCluster(cloudSystem);
+    
+    System.out.println("JOIN: " + cloudServer);
 
     if (cloudServer == null) {
       throw new ConfigException(L().l("unable to join cluster {0}",

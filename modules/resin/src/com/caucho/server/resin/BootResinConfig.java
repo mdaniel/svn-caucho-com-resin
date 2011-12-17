@@ -58,6 +58,8 @@ public class BootResinConfig implements SchemaBean, DependencyBean
   
   private ResinSystem _resinSystem;
   
+  private String _resinSystemAuthKey;
+  
   private ContainerProgram _resinProgram
     = new ContainerProgram();
 
@@ -87,6 +89,17 @@ public class BootResinConfig implements SchemaBean, DependencyBean
   public String getSchema()
   {
     return "com/caucho/server/resin/resin.rnc";
+  }
+  
+  @Configurable
+  public void setResinSystemAuthKey(String key)
+  {
+    _resinSystemAuthKey = key;
+  }
+  
+  public String getResinSystemAuthKey()
+  {
+    return _resinSystemAuthKey;
   }
   
   /**
@@ -211,12 +224,16 @@ public class BootResinConfig implements SchemaBean, DependencyBean
     for (BootClusterConfig cluster : getClusterList()) {
       for (BootPodConfig pod : cluster.getPodList()) {
         for (BootServerConfig  server : pod.getServerList()) {
+          if (server.isRequireExplicitId())
+            continue;
+          
           try {
             InetAddress address = InetAddress.getByName(server.getAddress());
 
             if (address.isAnyLocalAddress()
                 || address.isLinkLocalAddress()
                 || address.isLoopbackAddress()) {
+              System.out.println("FIND: " + server);
               return server;
             }
           } catch (Exception e) {

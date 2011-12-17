@@ -32,6 +32,7 @@ package com.caucho.boot;
 import java.util.ArrayList;
 
 import com.caucho.config.ConfigException;
+import com.caucho.config.Configurable;
 import com.caucho.config.program.ConfigProgram;
 import com.caucho.config.program.ContainerProgram;
 import com.caucho.env.service.ResinSystem;
@@ -63,6 +64,7 @@ public class BootClusterConfig {
     _resin = resin;
   }
 
+  @Configurable
   public void setId(String id)
   {
     _id = id;
@@ -173,5 +175,11 @@ public class BootClusterConfig {
     
     if (qName != null && qName.getLocalName().equals("ElasticCloudService"))
       _isDynamicServerEnable = true;
+  }
+  
+  @Override
+  public String toString()
+  {
+    return getClass().getSimpleName() + "[" + _id + "]";
   }
 }

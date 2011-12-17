@@ -84,7 +84,6 @@ class WatchdogArgs
   private String []_defaultArgs;
 
   private boolean _isDynamicServer;
-  private String _dynamicCluster;
   private String _dynamicAddress;
   private int _dynamicPort;
   private ResinBootELContext _resinBootELContext = null;
@@ -178,11 +177,6 @@ class WatchdogArgs
   boolean isDynamicServer()
   {
     return _isDynamicServer;
-  }
-
-  String getDynamicCluster()
-  {
-    return _dynamicCluster;
   }
 
   String getDynamicAddress()
@@ -436,9 +430,11 @@ class WatchdogArgs
         i++;
       }
       else if ("-join-cluster".equals(arg)
-               || "--join-cluster".equals(arg)) {
+               || "--join-cluster".equals(arg)
+               || "-cluster".equals(arg)
+               || "--cluster".equals(arg)) {
         _isDynamicServer = true;
-        _dynamicCluster = argv[i + 1];
+        _clusterId = argv[i + 1];
 
         i++;
       }

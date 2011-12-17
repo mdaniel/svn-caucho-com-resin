@@ -82,6 +82,9 @@ public class ResinConfig implements EnvironmentBean
   {
     _resin = resin;
     _system = resin.getResinSystem();
+    
+    if (resin.getResinSystemAuthKey() != null)
+      setResinSystemAuthKey(resin.getResinSystemAuthKey());
   }
 
   /**

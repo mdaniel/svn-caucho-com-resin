@@ -29,8 +29,6 @@
 
 package com.caucho.boot;
 
-import com.caucho.util.L10N;
-
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
@@ -38,8 +36,6 @@ import java.util.HashMap;
 import java.util.Map;
 
 public abstract class AbstractBootCommand implements BootCommand {
-  private static final L10N L = new L10N(AbstractBootCommand.class);
-
   private final Map<String,BootOption> _optionMap
     = new HashMap<String,BootOption>();
 

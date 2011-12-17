@@ -638,6 +638,9 @@ r_server = element server {
   & (attribute port { string }
      | element port { string })?
 
+  & (attribute require-explicit-id { r_boolean-Type }
+     | element require-explicit-id { r_boolean-Type })?
+
   & r_server-Content
 }
 

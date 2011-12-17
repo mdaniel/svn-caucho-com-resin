@@ -390,8 +390,10 @@ public class ResinArgs
         i += 1;
       }
       else if (i + 1 < len
-          && (argv[i].equals("-cluster")
-              || argv[i].equals("--cluster"))) {
+               && (argv[i].equals("-cluster")
+                   || argv[i].equals("--cluster")
+                   || argv[i].equals("-join-cluster")
+                   || argv[i].equals("--join-cluster"))) {
         _homeCluster = argv[i + 1];
    
         i += 2;
