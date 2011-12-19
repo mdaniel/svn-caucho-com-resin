@@ -337,9 +337,11 @@ public class BlockReadWrite {
         } finally {
           closeRowFile(wrapper, true);
         }
-        
+
+        /* XXX: stream is closed
         if (stream.getLength() < newFileSize)
           throw new IllegalStateException("bad file length: " + stream + " " + stream.getLength());
+          */
         
         _fileSize = newFileSize;
       }
@@ -369,8 +371,10 @@ public class BlockReadWrite {
     if (wrapper != null) {
       file = wrapper.getFile();
       
-      if (_mmapFile.get() != null && file.getLength() != fileSize)
+      if (_mmapFile.get() != null && file.getLength() != fileSize) {
         file = null;
+        // _cachedRowFile.free(wrapper);
+      }
     }
 
     while (file == null || ! file.allocate()) {
@@ -395,7 +399,9 @@ public class BlockReadWrite {
     int retry = 8;
     
     if (! _isEnableMmap) {
-      return _path.openRandomAccess();
+      RandomAccessStream file = _path.openRandomAccess();
+      
+      return file;
     }
     
     while (retry-- >= 0) {
@@ -419,7 +425,10 @@ public class BlockReadWrite {
 
           if (file != null) {
             _isMmap = true;
-
+            
+            // mmap has extra allocation because it's not automatically closed
+            file.allocate();
+            
             if (_mmapFile.compareAndSet(mmapFile, file)) {
               if (mmapFile != null)
                 mmapFile.close();
@@ -481,12 +490,14 @@ public class BlockReadWrite {
     if (! isPriority && ! _isMmap)
       _rowFileSemaphore.release();
     
-    // wrapper.close();
+    wrapper.close();
     
+    /*
     RandomAccessStream file = wrapper.getFile();
-    
+
     if (file != null)
       file.free();
+      */
   }
 
   /**
@@ -559,6 +570,11 @@ public class BlockReadWrite {
         file.free();
         file.close();
       }
+    }
+    
+    public String toString()
+    {
+      return getClass().getSimpleName() + "[" + _file + "]";
     }
   }
 }

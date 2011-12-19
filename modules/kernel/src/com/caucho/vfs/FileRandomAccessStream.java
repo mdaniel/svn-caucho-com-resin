@@ -217,6 +217,7 @@ public class FileRandomAccessStream extends RandomAccessStream
       file.close();
   }
 
+  @Override
   public boolean lock(boolean shared, boolean block)
   {
     unlock();
@@ -238,6 +239,7 @@ public class FileRandomAccessStream extends RandomAccessStream
     }
   }
 
+  @Override
   public boolean unlock()
   {
     try {
