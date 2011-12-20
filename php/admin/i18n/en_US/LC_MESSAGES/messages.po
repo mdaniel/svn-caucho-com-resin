@@ -7,7 +7,7 @@ msgid "Summary"
 msgstr "Summary"
 
 msgid "Overview"
-msgstr "Summary"
+msgstr "Overview"
 
 msgid "A summary of the server's state."
 msgstr "A summary of the server's state."
