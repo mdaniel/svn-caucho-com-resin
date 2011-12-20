@@ -18,6 +18,8 @@ global $g_tail_objects;
 
 $g_tail_objects = array();
 
+bindtextdomain("messages", "i18n");
+
 if (function_exists('header')) {
   // kill the cache, all pages are uncached and private
   header("Expires: 01 Dec 1994 16:00:00 GMT"); 
@@ -715,9 +717,9 @@ else {
 </ul>
 </div>
 <div style='float: right; width: 20%; text-align: right;'>
-  <span class='status-item'><a target="caucho-wiki" href="http://wiki.caucho.com/Admin: <?= ucfirst($g_page) ?>">help</a></span>
-  <span class='status-item'><a href="<?= $g_next_url ?>">refresh</a></span>
-  <span class='status-item logout'><a href="?q=index.php&amp;logout=true">logout</a></span>
+  <span class='status-item'><a target="caucho-wiki" href="http://wiki.caucho.com/Admin: <?= ucfirst($g_page) ?>"><?= gettext('help')?></a></span>
+  <span class='status-item'><a href="<?= $g_next_url ?>"><?= gettext('refresh')?></a></span>
+  <span class='status-item logout'><a href="?q=index.php&amp;logout=true"><?= gettext('logout')?></a></span>
 </div>
 </div>
 <? } ?>
@@ -771,10 +773,11 @@ function display_pages()
   array_unshift($names, 'index');
 
   foreach ($names as $name) {
+    $page_name = gettext($name);
     if ($g_page == $name) {
-      echo "<li class='selected'>$name</li>";
+      echo "<li class='selected'>$page_name</li>";
     } else {
-      echo "<li><a href='?q=$name&amp;s=$g_server_index'>$name</a></li>";
+      echo "<li><a href='?q=$name&amp;s=$g_server_index'>$page_name</a></li>";
     }
   }
 }
@@ -1225,9 +1228,9 @@ function display_health_status($s)
   echo "<h2>Server: $label</h2>\n"; 
   
   echo "<table class='data'>\n";
-  echo "<tr><th scope='col' class='item'>Status</th>";
-  echo "<th scope='col' class='item'>Check <span id='sw_health_status_${si}' class='switch'></span></th>";
-  echo "<th scope='col' class='item'>Message</th></tr>\n";
+  echo "<tr><th scope='col' class='item'>" . gettext('Status') . "</th>";
+  echo "<th scope='col' class='item'>" . gettext('Check') . "<span id='sw_health_status_${si}' class='switch'></span></th>";
+  echo "<th scope='col' class='item'>" . gettext('Message') . "</th></tr>\n";
   
   echo "<tr><td>";
 
@@ -1237,14 +1240,14 @@ function display_health_status($s)
   
   if (! $health) {
     print_health("CRITICAL");
-    $message = "cannot connect to server $label";
+    $message = gettext('cannot connect to server ') . $label;
   }
   else {
     print_health($health->Status);
     $message = $health->Message;
   }
 	
-  echo "</td><td>Overall</td><td>$message</td></tr>\n";
+  echo "</td><td>" . gettext('Overall') . "</td><td>$message</td></tr>\n";
 
   if ($mbean_server && $health) {
     $health_list = $mbean_server->query("resin:type=HealthCheck,*");

@@ -13,11 +13,11 @@ function print_db_pools($db_pools)
     <th colspan='2' id='config'><?= info("Config", "Database_Connections") ?></th>
   </tr>
   <tr>
-    <th id='name'>Name</th>
-    <th id='active'>Active</th>
-    <th id='idle'>Idle</th>
-    <th id='created'>Created</th>
-    <th id='failed' colspan='2'>Failed</th>
+    <th id='name'><?= gettext('Name') ?></th>
+    <th id='active'><?= gettext('Active')?></th>
+    <th id='idle'><?= gettext('Idle')?></th>
+    <th id='created'><?= gettext('Created')?></th>
+    <th id='failed' colspan='2'><?= gettext('Failed')?></th>
     <th id='max-connections'>max-connections</th>
     <th id='idle-time'>idle-time</th>
   </tr>
