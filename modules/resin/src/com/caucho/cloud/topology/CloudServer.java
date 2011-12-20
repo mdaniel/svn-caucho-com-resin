@@ -33,7 +33,6 @@ import java.net.InetAddress;
 import java.util.concurrent.ConcurrentHashMap;
 
 import com.caucho.config.ConfigException;
-import com.caucho.util.Hex;
 import com.caucho.util.L10N;
 
 /**
@@ -61,23 +60,23 @@ public class CloudServer {
   private final CloudPod _pod;
   private final int _index;
   
-  private final boolean _isStatic;
+  private final ServerType _isStatic;
   
   // unique identifier for the server within the cluster
-  private String _uniqueClusterId;
+  private final String _uniqueClusterId;
   // unique identifier for the server within all Resin clusters
-  private String _uniqueDomainId;
+  private final String _uniqueDomainId;
   
-  private String _address;
-  private int _port;
-  private boolean _isSSL;
+  private final String _address;
+  private final int _port;
+  private final boolean _isSSL;
   
   private boolean _isSelf;
   
-  private CloudServerState _state = CloudServerState.UNKNOWN;
-  
   private final ConcurrentHashMap<Class<?>,Object> _dataMap
     = new ConcurrentHashMap<Class<?>,Object>();
+  
+  private CloudServerState _state = CloudServerState.UNKNOWN;
 
   public CloudServer(String id,
                      CloudPod pod, 
@@ -85,7 +84,7 @@ public class CloudServer {
                      String address,
                      int port,
                      boolean isSSL,
-                     boolean isStatic)
+                     ServerType isStatic)
   {
     if (id.equals(""))
       throw new IllegalArgumentException();
@@ -99,7 +98,7 @@ public class CloudServer {
       throw new IllegalArgumentException(L.l("'{0}' is an invalid server index because it must be between 0 and 64",
                                             index));
     
-    if (! isStatic && index == 0)
+    if (! isStatic.isStatic() && index == 0)
       throw new IllegalArgumentException(L.l("The first server must be static."));
     
     if (id == null)
@@ -129,13 +128,13 @@ public class CloudServer {
 
     _uniqueDomainId = _uniqueClusterId + "." + clusterId.replace('.', '_');
     
-    if (! isValidAddress(_address)) {
+    if (! isLocalAddress(getAddress()) && ! isExternal()) {
       throw new ConfigException(L.l("'{0}' is not a valid cluster IP address because it is not a private network IP address.",
-                                    _address));
+                                    getAddress()));
     }
   }
   
-  private boolean isValidAddress(String address)
+  private boolean isLocalAddress(String address)
   {
     try {
       InetAddress addr = InetAddress.getByName(address);
@@ -231,7 +230,15 @@ public class CloudServer {
    */
   public boolean isStatic()
   {
-    return _isStatic;
+    return _isStatic.isStatic();
+  }
+
+  /**
+   * True for external-address configured servers.
+   */
+  public boolean isExternal()
+  {
+    return _isStatic.isExternal();
   }
   
   /**
@@ -444,6 +451,34 @@ public class CloudServer {
   public static int decode(int code)
   {
     return DECODE[code & 0x7f];
+  }
+  
+  public enum ServerType {
+    STATIC {
+      @Override
+      public boolean isStatic() { return true; }
+    },
+    
+    EXTERNAL {
+      @Override
+      public boolean isStatic() { return true; }
+      
+      @Override
+      public boolean isExternal() { return true; }
+    },
+    
+    DYNAMIC {
+    };
+    
+    public boolean isStatic()
+    {
+      return false;
+    }
+    
+    public boolean isExternal()
+    {
+      return false;
+    }
   }
 
   static {

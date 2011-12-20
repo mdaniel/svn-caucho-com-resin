@@ -29,6 +29,10 @@
 
 package com.caucho.cloud.network;
 
+import java.net.InetAddress;
+import java.net.NetworkInterface;
+import java.util.ArrayList;
+import java.util.Enumeration;
 import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.logging.*;
 
@@ -65,22 +69,24 @@ public class NetworkClusterSystem extends AbstractResinSubSystem
   private CopyOnWriteArrayList<ClusterLinkListener> _linkListeners
     = new CopyOnWriteArrayList<ClusterLinkListener>();
 
-  private NetworkClusterSystem(CloudServer selfServer)
+  public NetworkClusterSystem(CloudServer selfServer)
   {
     _selfServer = selfServer;
     _selfServer.setSelf(true);
     
     _selfServer.getSystem().addClusterListener(new NetworkClusterListener());
     
-    if (_selfServer.getPort() >= 0) {
-      _clusterListener = new ClusterListener(_selfServer.getAddress(), 
-                                             _selfServer.getPort());
+    ClusterServer clusterServer = selfServer.getData(ClusterServer.class);
+    
+    if (clusterServer.getPort() >= 0) {
+      _clusterListener = new ClusterListener(clusterServer);
      }
   }
 
   /**
    * Creates a new network cluster service.
    */
+  /*
   public static NetworkClusterSystem
   createAndAddService(CloudServer selfServer)
   {
@@ -90,6 +96,14 @@ public class NetworkClusterSystem extends AbstractResinSubSystem
     system.addService(NetworkClusterSystem.class, service);
 
     return service;
+  }
+  */
+  public static void
+  createAndAddService(NetworkClusterSystem clusterSystem)
+  {
+    ResinSystem resinSystem = preCreate(NetworkClusterSystem.class);
+
+    resinSystem.addService(NetworkClusterSystem.class, clusterSystem);
   }
 
   /**
@@ -293,6 +307,15 @@ public class NetworkClusterSystem extends AbstractResinSubSystem
   }
 
   /**
+   * Returns the local ip address for a server configured with
+   * external-address.
+   */
+  public String getLocalSocketAddress(ClusterServer clusterServer)
+  {
+    return null;
+  }
+
+  /**
    * Configures the server.
    */
   private void configureServer(CloudServer cloudServer)
@@ -384,6 +407,32 @@ public class NetworkClusterSystem extends AbstractResinSubSystem
                                     server.getLoadBalanceIdleTime(),
                                     listener.getKeepaliveTimeout()));
     }
+  }
+  
+  public static ArrayList<InetAddress> getLocalAddresses()
+  {
+    ArrayList<InetAddress> localAddresses = new ArrayList<InetAddress>();
+    
+    try {
+      Enumeration<NetworkInterface> ifaceEnum
+        = NetworkInterface.getNetworkInterfaces();
+    
+      while (ifaceEnum.hasMoreElements()) {
+        NetworkInterface iface = ifaceEnum.nextElement();
+
+        Enumeration<InetAddress> addrEnum = iface.getInetAddresses();
+      
+        while (addrEnum.hasMoreElements()) {
+          InetAddress addr = addrEnum.nextElement();
+        
+          localAddresses.add(addr);
+        }
+      }
+    } catch (Exception e) {
+      log.log(Level.WARNING, e.toString(), e);
+    }
+    
+    return localAddresses;
   }
 
   @Override

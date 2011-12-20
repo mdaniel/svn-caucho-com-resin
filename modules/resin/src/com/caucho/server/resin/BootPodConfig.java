@@ -152,11 +152,21 @@ public class BootPodConfig
     cloudPod.putData(new ClusterServerProgram(_serverDefaultProgram));
 
     for (BootServerConfig bootServer : _servers) {
-      CloudServer cloudServer
-        = cloudPod.createStaticServer(bootServer.getId(),
-                                      bootServer.getAddress(),
-                                      bootServer.getPort(),
-                                      bootServer.isSecure());
+      CloudServer cloudServer;
+      
+      String id = bootServer.getId();
+      String address = bootServer.getAddress();
+      int port = bootServer.getPort();
+      boolean isSecure = bootServer.isSecure();
+      
+      if (bootServer.isExternalAddress()) {
+        cloudServer = cloudPod.createExternalStaticServer(id,
+                                                          address,
+                                                          port,
+                                                          isSecure);
+      } else {
+        cloudServer = cloudPod.createStaticServer(id, address, port, isSecure);
+      }
       
       bootServer.initTopology(cloudServer);
     }

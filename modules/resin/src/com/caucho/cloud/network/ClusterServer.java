@@ -29,9 +29,12 @@
 
 package com.caucho.cloud.network;
 
+import java.net.InetAddress;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicLong;
+import java.util.concurrent.atomic.AtomicReference;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -47,6 +50,7 @@ import com.caucho.config.types.Period;
 import com.caucho.management.server.ClusterServerMXBean;
 import com.caucho.network.balance.ClientSocketFactory;
 import com.caucho.util.Alarm;
+import com.caucho.util.L10N;
 
 /**
  * Defines a member of the cluster, corresponds to <server> in the conf file.
@@ -56,12 +60,13 @@ import com.caucho.util.Alarm;
  * Resin .
  */
 public final class ClusterServer {
+  private static final L10N L = new L10N(ClusterServer.class);
   private static final Logger log
     = Logger.getLogger(ClusterServer.class.getName());
 
   private static final int DECODE[];
 
-  private final NetworkClusterSystem _clusterService;
+  private final NetworkClusterSystem _clusterSystem;
   private final CloudServer _cloudServer;
 
   // unique identifier for the server within the cluster
@@ -99,9 +104,14 @@ public final class ClusterServer {
   private ArrayList<String> _pingUrls = new ArrayList<String>();
 
   // runtime
+  
+  private String _address;
 
-  private ClientSocketFactory _clusterSocketPool;
-  private ClientSocketFactory _loadBalanceSocketPool;
+  private AtomicReference<SocketPool> _clusterSocketPool
+    = new AtomicReference<SocketPool>();
+  
+  private AtomicReference<SocketPool> _loadBalanceSocketPool
+    = new AtomicReference<SocketPool>();
 
   private AtomicBoolean _isHeartbeatActive = new AtomicBoolean();
   private AtomicLong _stateTimestamp = new AtomicLong();
@@ -114,7 +124,7 @@ public final class ClusterServer {
   ClusterServer(NetworkClusterSystem networkService,
                 CloudServer cloudServer)
   {
-    _clusterService = networkService;
+    _clusterSystem = networkService;
     
     if (networkService == null)
       throw new NullPointerException();
@@ -123,7 +133,7 @@ public final class ClusterServer {
     cloudServer.getIndex();
 
     
-    if (_clusterService == null)
+    if (_clusterSystem == null)
       throw new NullPointerException();
     
     // XXX: active isn't quite right here
@@ -149,6 +159,23 @@ public final class ClusterServer {
     _serverDomainId = _serverClusterId + "." + clusterId.replace('.', '_');
 
     _bamAddress = _serverDomainId + ".admin.resin";
+    
+    if (! cloudServer.isExternal()) {
+      _address = cloudServer.getAddress();
+    }
+    else if (cloudServer.isSelf()) {
+      _address = lookupLocalAddress();
+    }
+    else {
+      _address = "127.0.0.2";
+    }
+  }
+  
+  public static ClusterServer getCurrent()
+  {
+    CloudServer cloudServer = NetworkClusterSystem.getCurrentSelfServer();
+    
+    return cloudServer.getData(ClusterServer.class);
   }
 
   /**
@@ -242,7 +269,7 @@ public final class ClusterServer {
    */
   public String getAddress()
   {
-    return _cloudServer.getAddress();
+    return _address;
   }
   
   public boolean isSSL()
@@ -553,13 +580,101 @@ public final class ClusterServer {
   {
     return ! isSelf();
   }
+  
+  /**
+   * Looks up the local address when given an external address, e.g. for
+   * cloud systems that dynamically allocate local addresses.
+   */
+  private String lookupLocalAddress()
+  {
+    long timeout = 120 * 1000L;
+    
+    long expireTime = Alarm.getCurrentTime() + timeout;
+    
+    String address;
+    
+    while ((address = allocateLocalAddress()) == null
+           && Alarm.getCurrentTime() < expireTime) {
+      try {
+        Thread.sleep(1000);
+      } catch (Exception e) {
+      }
+    }
+    
+    if (address == null)
+      throw new ConfigException(L.l("Cannot find an internal local IP address within 120s"));
+    
+    return address;
+  }
+  
+  private String allocateLocalAddress()
+  {
+    ArrayList<String> addressNames = new ArrayList<String>();
+
+    for (InetAddress addr : NetworkClusterSystem.getLocalAddresses()) {
+      String localAddress = getLocalAddress(addr);
+      
+      if (localAddress != null)
+        addressNames.add(localAddress);
+    }
+      
+    Collections.sort(addressNames);
+    
+    String address = null;
+    
+    if (addressNames.size() > 0)
+      address = addressNames.get(0);
+
+    return address;
+  }
+  
+  private String getLocalAddress(InetAddress addr)
+  {
+    String address = addr.getHostAddress();
+    
+    byte []bytes = addr.getAddress();
+    
+    if (address.equals(_cloudServer.getAddress())) {
+      // the external address cannot be the local address
+      return null;
+    }
+    
+    if (bytes[0] == 127) {
+      // loopback isn't valid
+      return null;
+    }
+    
+    if (isLocal(bytes))
+      return address;
+    else
+      return null;
+  }
+  
+  private boolean isLocal(byte []bytes)
+  {
+    if (bytes.length != 4) {
+      return false;
+    }
+    else if (bytes[0] == 10) {
+      return true;
+    }
+    else if ((bytes[0] & 0xff) == 192 && (bytes[1] & 0xff) == 168) {
+      return true;
+    }
+    else if ((bytes[0] & 0xff) == 172 && (bytes[1] & 0xf0) == 0x10) {
+      return true;
+    }
+    else {
+      return false;
+    }
+  }
 
   /**
    * Returns the socket pool as a pod cluster connector.
    */
   public final ClientSocketFactory getClusterSocketPool()
   {
-    return _clusterSocketPool;
+    return getClusterSocketFactory();
   }
 
   /**
@@ -567,7 +682,7 @@ public final class ClusterServer {
    */
   public final ClientSocketFactory getLoadBalanceSocketPool()
   {
-    ClientSocketFactory factory = _loadBalanceSocketPool;
+    ClientSocketFactory factory = getLoadBalanceSocketFactory();
     
     if (factory == null)
       return null;
@@ -586,12 +701,55 @@ public final class ClusterServer {
     return factory;
   }
   
+  private ClientSocketFactory getClusterSocketFactory()
+  {
+    SocketPool socketPool = _clusterSocketPool.get();
+    
+    if (socketPool != null)
+      return socketPool.getFactory();
+    
+    if (! _cloudServer.isExternal())
+      return null;
+    
+    String address = _clusterSystem.getLocalSocketAddress(this);
+    
+    if (address == null)
+      return null;
+    
+    ClientSocketFactory factory
+      = createClusterPool(getId(), address);
+    
+    socketPool = new SocketPool(factory);
+    
+    if (! _clusterSocketPool.compareAndSet(null, socketPool))
+      socketPool = _clusterSocketPool.get();
+    
+    if (socketPool != null)
+      return socketPool.getFactory();
+    else
+      return null;
+  }
+  
+  private ClientSocketFactory getLoadBalanceSocketFactory()
+  {
+    SocketPool socketPool = _loadBalanceSocketPool.get();
+    
+    if (socketPool != null)
+      return socketPool.getFactory();
+    
+    if (! _cloudServer.isExternal())
+      return null;
+    
+    return null;
+  }
+  
+  
   /**
    * Returns true if the server is remote and active.
    */
   public final boolean isActiveRemote()
   {
-    ClientSocketFactory pool = _clusterSocketPool;
+    ClientSocketFactory pool = getClusterSocketPool();
 
     return pool != null && pool.isActive();
   }
@@ -637,12 +795,20 @@ public final class ClusterServer {
     _clusterPort.init();
     */
 
-    if (! isSelf() && getCloudServer().getPort() >= 0) {
-      _clusterSocketPool = createClusterPool(_clusterService.getServerId());
-      _clusterSocketPool.init();
+    if (! isSelf()
+        && getCloudServer().getPort() >= 0
+        && ! getCloudServer().isExternal()) {
+      ClientSocketFactory clusterFactory
+        = createClusterPool(_clusterSystem.getServerId(), getAddress());
+      clusterFactory.init();
       
-      _loadBalanceSocketPool = createLoadBalancePool(_clusterService.getServerId());
-      _loadBalanceSocketPool.init();
+      _clusterSocketPool.set(new SocketPool(clusterFactory));
+      
+      ClientSocketFactory loadBalanceFactory
+        = createLoadBalancePool(_clusterSystem.getServerId());
+      loadBalanceFactory.init();
+      
+      _loadBalanceSocketPool.set(new SocketPool(loadBalanceFactory));
     }
 
     _admin.register();
@@ -669,20 +835,21 @@ public final class ClusterServer {
     return pool;
   }
 
-  private ClientSocketFactory createClusterPool(String serverId)
+  private ClientSocketFactory createClusterPool(String serverId,
+                                                String address)
   {
     ClientSocketFactory pool = new ClientSocketFactory(serverId,
                                                        getId(),
                                                        "Resin|ClusterSocket",
                                                        getStatId(),
-                                                       getAddress(),
+                                                       address,
                                                        getPort(),
                                                        isSSL());
-
+    
     pool.setLoadBalanceSocketTimeout(getClusterIdleTime());
     pool.setLoadBalanceIdleTime(getClusterIdleTime());
     
-    if (getCloudServer().getPod() == _clusterService.getSelfServer().getPod())
+    if (getCloudServer().getPod() == _clusterSystem.getSelfServer().getPod())
       pool.setHeartbeatServer(true);
     
     return pool;
@@ -744,13 +911,14 @@ public final class ClusterServer {
     
     _cloudServer.onHeartbeatStart();
 
-    if (_clusterSocketPool != null)
-      _clusterSocketPool.notifyHeartbeatStart();
+    ClientSocketFactory clusterSocketPool = getClusterSocketPool();
+    if (clusterSocketPool != null)
+      clusterSocketPool.notifyHeartbeatStart();
 
     if (log.isLoggable(Level.FINER))
       log.finer(this + " notify-heartbeat-start");
 
-    _clusterService.notifyHeartbeatStart(this);
+    _clusterSystem.notifyHeartbeatStart(this);
 
     return true;
   }
@@ -772,11 +940,16 @@ public final class ClusterServer {
     log.warning(this + " notify-heartbeat-stop");
     
     _cloudServer.onHeartbeatStop();
+    
+    SocketPool clusterSocketPool = _clusterSocketPool.get();
 
-    if (_clusterSocketPool != null)
-      _clusterSocketPool.notifyHeartbeatStop();
+    if (clusterSocketPool != null)
+      clusterSocketPool.getFactory().notifyHeartbeatStop();
 
-    _clusterService.notifyHeartbeatStop(this);
+    _clusterSystem.notifyHeartbeatStop(this);
+    
+    if (_cloudServer.isExternal())
+      _clusterSocketPool.compareAndSet(clusterSocketPool, null);
 
     return true;
   }
@@ -789,8 +962,11 @@ public final class ClusterServer {
     _isHeartbeatActive.set(false);
     _stateTimestamp.set(Alarm.getCurrentTime());
 
-    if (_clusterSocketPool != null)
-      _clusterSocketPool.notifyHeartbeatStop();
+    SocketPool pool = _clusterSocketPool.get();
+    
+    if (pool != null) {
+      pool.getFactory().notifyHeartbeatStop();
+    }
   }
 
   /**
@@ -818,17 +994,22 @@ public final class ClusterServer {
    */
   public void close()
   {
-    if (_loadBalanceSocketPool != null)
-      _loadBalanceSocketPool.close();
+    SocketPool loadBalancePool = _loadBalanceSocketPool.get();
     
-    if (_clusterSocketPool != null)
-      _clusterSocketPool.close();
+    if (loadBalancePool != null)
+      loadBalancePool.getFactory().close();
+    
+    SocketPool clusterPool = _clusterSocketPool.get();
+    
+    if (clusterPool != null)
+      clusterPool.getFactory().close();
   }
 
   @Override
   public String toString()
   {
-    return getClass().getSimpleName() + "[id=" + getId() + "]";
+    return (getClass().getSimpleName() + "[id=" + getId()
+            + "," + getAddress() + ":" + getPort() + "]");
   }
 
   private static char convert(long code)
@@ -850,6 +1031,20 @@ public final class ClusterServer {
   public static int decode(int code)
   {
     return DECODE[code & 0x7f];
+  }
+  
+  static class SocketPool {
+    private final ClientSocketFactory _factory;
+    
+    SocketPool(ClientSocketFactory factory)
+    {
+      _factory = factory;
+    }
+    
+    ClientSocketFactory getFactory()
+    {
+      return _factory;
+    }
   }
 
   static {

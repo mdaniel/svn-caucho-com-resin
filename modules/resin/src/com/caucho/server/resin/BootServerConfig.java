@@ -52,6 +52,7 @@ public class BootServerConfig implements SchemaBean
   private boolean _isSecure;
   
   private boolean _isRequireExplicitId;
+  private boolean _isExternalAddress;
   
   // private boolean _isDynamic;
 
@@ -137,6 +138,18 @@ public class BootServerConfig implements SchemaBean
   public boolean isRequireExplicitId()
   {
     return _isRequireExplicitId;
+  }
+  
+  @Configurable
+  public void setExternalAddress(boolean isExternal)
+  {
+    _isExternalAddress = isExternal;
+  }
+  
+  @Configurable
+  public boolean isExternalAddress()
+  {
+    return _isExternalAddress;
   }
 
   /**

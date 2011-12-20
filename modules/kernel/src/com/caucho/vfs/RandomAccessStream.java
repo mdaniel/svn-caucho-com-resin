@@ -119,6 +119,16 @@ abstract public class RandomAccessStream
    */
   abstract public long getFilePointer()
     throws IOException;
+  
+  public final boolean isOpen()
+  {
+    return _useCount.get() > 0;
+  }
+  
+  public final long getUseCount()
+  {
+    return _useCount.get();
+  }
 
   public final boolean allocate()
   {

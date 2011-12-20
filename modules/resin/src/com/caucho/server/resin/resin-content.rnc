@@ -635,6 +635,9 @@ r_server = element server {
   & (attribute address { string }
      | element address { string })?
 
+  & (attribute external-address { r_boolean-Type }
+     | element external-address { r_boolean-Type })?
+
   & (attribute port { string }
      | element port { string })?
 

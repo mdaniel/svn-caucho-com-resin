@@ -304,6 +304,11 @@ public class ResinDelegate
   {
   }
 
+  protected NetworkClusterSystem createNetworkSystem(CloudServer server)
+  {
+    return new NetworkClusterSystem(server);
+  }
+
   protected LoadBalanceFactory createLoadBalanceFactory()
   {
     return new LoadBalanceFactory();

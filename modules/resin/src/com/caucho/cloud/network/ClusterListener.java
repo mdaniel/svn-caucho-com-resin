@@ -36,12 +36,12 @@ import com.caucho.network.listen.TcpSocketLinkListener;
  * Represents a protocol connection.
  */
 public class ClusterListener extends TcpSocketLinkListener {
-  public ClusterListener(String address, int port)
+  public ClusterListener(ClusterServer server)
   {
     try {
-      setAddress(address);
+      setAddress(server.getAddress());
       
-      setPort(port);
+      setPort(server.getPort());
     } catch (Exception e) {
       throw ConfigException.create(e);
     }

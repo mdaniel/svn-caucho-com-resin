@@ -963,7 +963,10 @@ public class Resin
 
   private void initClusterNetwork()
   {
-    NetworkClusterSystem.createAndAddService(_selfServer);
+    NetworkClusterSystem clusterSystem
+      = getDelegate().createNetworkSystem(_selfServer);
+    
+    NetworkClusterSystem.createAndAddService(clusterSystem);
     
     ClusterServer server = _selfServer.getData(ClusterServer.class);
     

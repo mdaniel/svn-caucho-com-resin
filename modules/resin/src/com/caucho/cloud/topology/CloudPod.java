@@ -32,6 +32,7 @@ package com.caucho.cloud.topology;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.CopyOnWriteArrayList;
 
+import com.caucho.cloud.topology.CloudServer.ServerType;
 import com.caucho.util.ConcurrentArrayList;
 import com.caucho.util.L10N;
 
@@ -284,7 +285,18 @@ public class CloudPod
                                         int port,
                                         boolean isSecure)
   {
-    return createServer(id, address, port, isSecure, true);
+    return createServer(id, address, port, isSecure, ServerType.STATIC);
+  }
+  
+  /**
+   * Creates a new externa static server
+   */
+  public CloudServer createExternalStaticServer(String id,
+                                                String address,
+                                                int port,
+                                                boolean isSecure)
+  {
+    return createServer(id, address, port, isSecure, ServerType.EXTERNAL);
   }
   
   /**
@@ -296,7 +308,8 @@ public class CloudPod
                                          int port,
                                          boolean isSecure)
   {
-    return createServer(index, id, address, port, isSecure, false);
+    return createServer(index, id, address, port, isSecure, 
+                        ServerType.DYNAMIC);
   }
   
   /**
@@ -307,7 +320,8 @@ public class CloudPod
                                          int port,
                                          boolean isSecure)
   {
-    return createServer(id, address, port, isSecure, false);
+    return createServer(id, address, port, isSecure, 
+                        CloudServer.ServerType.DYNAMIC);
   }
   
   /**
@@ -317,7 +331,7 @@ public class CloudPod
                                    String address,
                                    int port,
                                    boolean isSecure,
-                                   boolean isStatic)
+                                   ServerType isStatic)
   {
     int index;
     CloudServer server;
@@ -349,7 +363,7 @@ public class CloudPod
                                    String address,
                                    int port,
                                    boolean isSecure,
-                                   boolean isStatic)
+                                   CloudServer.ServerType isStatic)
   {
     CloudServer server;
     boolean isSSL = false;

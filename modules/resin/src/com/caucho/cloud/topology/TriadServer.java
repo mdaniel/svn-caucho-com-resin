@@ -43,7 +43,7 @@ public class TriadServer extends CloudServer {
                      String address,
                      int port,
                      boolean isSSL,
-                     boolean isStatic)
+                     CloudServer.ServerType isStatic)
   {
     super(id, pod, index, address, port, isSSL, isStatic);
     

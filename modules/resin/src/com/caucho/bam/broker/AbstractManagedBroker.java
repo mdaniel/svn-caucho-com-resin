@@ -90,7 +90,7 @@ abstract public class AbstractManagedBroker
     Agent agent = new AbstractAgent(actorStream.getAddress(),
                                     mailbox,
                                     this);
-    
+
     addMailbox(mailbox);
     
     return agent;
