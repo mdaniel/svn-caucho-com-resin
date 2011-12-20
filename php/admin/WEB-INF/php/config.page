@@ -11,7 +11,7 @@ if (! admin_init()) {
   return;
 }
 
-echo "<h1>Configuration</h1>";
+echo "<h1>" . gettext('Configuration') . "</h1>";
 
 echo "<div id='config-tabs'>";
 echo "<ul>";
@@ -21,48 +21,48 @@ $sections = array('environment', 'cluster', 'webapps', 'database');
 foreach ($sections as $name) {
   $count++;
 
-  echo "<li><a href='#$name'>$name</a></li>";
+  echo "<li><a href='#$name'>" . gettext($name) . "</a></li>";
 }
 echo "</ul>\n";
 
 ?>
 
 <div id='environment'>
-<h2>Server: <?= $g_server->Id ? $g_server->Id : "default" ?></h2>
+<h2><?= gettext('Server')?>: <?= $g_server->Id ? $g_server->Id : "default" ?></h2>
 <div class='section'>
 <table class="data">
-  <tr title="The server id used when starting this instance of Resin, the value of '-server'.">
-    <th scope="row">Server id:</th>
+  <tr title="<?= gettext('The server id used when starting this instance of Resin, the value of \'-server\'.')?>">
+    <th scope="row"><?= gettext('Server id:')?></th>
     <td><?= $g_server->Id ? $g_server->Id : '""' ?></td>
   </tr>
 
-  <tr title="The configuration file used when starting this instance of Resin, the value of '-conf'.">
-    <th scope="row">Version:</th>
+  <tr title="<?= gettext('The configuration file used when starting this instance of Resin, the value of \'-conf\'.')?>">
+    <th scope="row"><?= gettext('Version:')?></th>
     <td><?= $g_resin->Version ?></td>
   </tr>
 
-  <tr title="The configuration file used when starting this instance of Resin, the value of '-conf'.">
-    <th scope="row">Config file:</th>
+  <tr title="<?= gettext('The configuration file used when starting this instance of Resin, the value of \'-conf\'.')?>">
+    <th scope="row"><?= gettext('Config file:')?></th>
     <td><?= $g_resin->ConfigFile ?></td>
   </tr>
 
-  <tr title="The Resin home directory used when starting this instance of Resin. This is the location of the Resin program files.">
-   <th scope="row">Resin home:</th>
+  <tr title="<?= gettext('The Resin home directory used when starting this instance of Resin. This is the location of the Resin program files.')?>">
+   <th scope="row"><?= gettext('Resin home:')?></th>
     <td><?= $g_resin->ResinHome ?></td>
   </tr>
 
-  <tr title="The resin root directory used when starting this instance of Resin. This is the root directory of the web server files.">
-    <th scope="row">Resin root:</th>
+  <tr title="<?= gettext('The resin root directory used when starting this instance of Resin. This is the root directory of the web server files.')?>">
+    <th scope="row"><?= gettext('Resin root:')?></th>
     <td><?= $g_resin->RootDirectory ?></td>
   </tr>
   </table>
 <?php
 
-   echo "<h3>Environment</h3>\n";
+   echo "<h3>" . gettext('Environment') . "</h3>\n";
 
    $env = $g_server->Environment;
 
-   echo "<table class='data'>\n"
+   echo "<table class='data'>\n";
    echo "<tr><th scope='col' class='item' valign='top'>classpath ";
    echo "<a id='s_classpath' href=\"javascript:show('classpath');show('h_classpath');hide('s_classpath')\">[show]</a> ";
    echo "<a id='h_classpath' href=\"javascript:hide('classpath');show('s_classpath');hide('h_classpath');\" style='display:none'>[hide]</a>";
@@ -83,7 +83,7 @@ echo "</ul>\n";
   -->
   
 <div id='cluster'>
-<h2>Cluster/Server</h2>
+<h2><?= gettext('Cluster/Server')?></h2>
 
 <!-- XML config -->
 <?php
@@ -112,7 +112,7 @@ $cluster = $g_server->Cluster;
 
 $cluster_name = empty($cluster->Name) ? "default" : $cluster->Name;
 
-echo "<h1>Cluster: $cluster_name</h1>";
+echo "<h1>" . gettext('Cluster:') . " $cluster_name</h1>";
 echo "<div class='section'>";
 
 $servers = $cluster->Servers;
@@ -131,7 +131,7 @@ foreach ($hosts as $host) {
   $hostName = empty($host->HostName) ? "default" : $host->HostName;
 ?>
 
-  <h2>Host <?= $host->URL ?></h2>
+  <h2><?= gettext('Host')?> <?= $host->URL ?></h2>
   <div class='section'>
 
   <table class='data' width='100%'>
@@ -143,7 +143,7 @@ foreach ($hosts as $host) {
 
 <?php
 
-echo "<h3>WebApps</h3>\n";
+echo "<h3>" . gettext('WebApps') . "</h3>\n";
 
 $webapps = $host->WebApps;
 
@@ -449,7 +449,7 @@ function print_database_config($db)
   echo "&lt;database name=\"" . $db->Name . "\">\n";
 
   foreach ($db->Drivers as $driver) {
-    echo "  &lt;driver"
+    echo "  &lt;driver";
     echo " url=\"";
     echo $driver->getUrl();
     echo "\"\n";

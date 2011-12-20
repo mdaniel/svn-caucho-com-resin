@@ -18,18 +18,18 @@ if (! require_professional()) {
   echo "<div class=\"req-pro-message\">This feature requires &lt;proxy-cache> in resin.xml</div>\n";
   return;
 }
-
-echo "<h1>Proxy Cache";
+echo "<h1>";
+echo gettext('Proxy Cache');
 print_help("Proxy Cache");
 echo "</h1>";
 
 echo "<div id='cache-tabs' style='display: none'>\n";
 echo "<ul>\n";
-echo "<li><a href='#overview'>Overview</a></li>\n";
+echo "<li><a href='#overview'>" . gettext('Overview') . "</a></li>\n";
 
 if ($proxy_cache) {
-  echo "<li><a href='#cached'>Cached</a></li>\n";
-  echo "<li><a href='#uncached'>Uncached</a></li>\n";
+  echo "<li><a href='#cached'>" . gettext('Cached') . "</a></li>\n";
+  echo "<li><a href='#uncached'>" . gettext('Uncached') . "</a></li>\n";
 }  
 
 echo "</ul>";
@@ -37,16 +37,16 @@ echo "</ul>";
 ?>
 
 <div id="overview">
-<h2>Overview</h2>
-<table class="data" summary="Proxy Cache Overview">
-  <tr title="Percentage of requests that have been served from the proxy cache:">
-    <th scope="row">Proxy cache miss ratio:<?php print_help("Proxy Cache#miss ratio"); ?></th>
+<h2><?= gettext('Overview')?></h2>
+<table class="data" summary="<?= gettext('Proxy Cache Overview')?>">
+  <tr title="<?= gettext('Percentage of requests that have been served from the proxy cache:')?>">
+    <th scope="row"><?= gettext('Proxy cache miss ratio:')?><?php print_help("Proxy Cache#miss ratio"); ?></th>
     <td><?= format_miss_ratio($proxy_cache->HitCountTotal,
                               $proxy_cache->MissCountTotal) ?></td>
   </tr>
 
-  <tr title="Percentage of requests that have been served from the proxy cache:">
-    <th scope="row"><?= info("Block cache miss ratio") ?>:</th>
+  <tr title="<?= gettext('Percentage of requests that have been served from the proxy cache:')?>">
+    <th scope="row"><?= gettext('Block cache miss ratio:') ?><?php print_help("Block cache miss ratio"); ?></th>
     <td><?= format_miss_ratio($block_cache->HitCountTotal,
                               $block_cache->MissCountTotal) ?></td>
   </tr>
@@ -54,7 +54,7 @@ echo "</ul>";
 <!-- XXX: show how cacheable apps are: cacheable/non-cacheable -->
 
   <tr>
-    <th scope="row">Invocation miss ratio:<?php print_help("Proxy Cache#invocation"); ?></th>
+    <th scope="row"><?= gettext('Invocation miss ratio:')?><?php print_help("Proxy Cache#invocation"); ?></th>
     <td><?= format_miss_ratio($g_server->InvocationCacheHitCountTotal,
                               $g_server->InvocationCacheMissCountTotal) ?></td>
   </tr>
@@ -68,10 +68,10 @@ if ($proxy_cache) {
   $cacheable = $proxy_cache->getCachedEntries(20);
 
   echo "<div id='cached'>";
-  echo "<h2>Cached Pages</h2>";
+  echo "<h2>" . gettext('Cached Pages') . "</h2>";
 
   echo "<table class='data'>";
-  echo "<tr><th>Miss Ratio</th><th>url</th></tr>\n";
+  echo "<tr><th>" . gettext('Miss Ratio') ."</th><th>url</th></tr>\n";
   foreach ($cacheable as $item) {
     echo "<tr>";
     echo "<td>";
@@ -92,10 +92,10 @@ if ($proxy_cache) {
   $uncacheable = $proxy_cache->getUncachedEntries(20);
 
   echo "<div id='uncached'>";
-  echo "<h3>Uncached Pages</h3>";
+  echo "<h3>" . gettext('Uncached Pages') . "</h3>";
 
   echo "<table class='data'>";
-  echo "<tr><th>Count</th><th>url</th></tr>\n";
+  echo "<tr><th>" . gettext('Count') . "</th><th>url</th></tr>\n";
   foreach ($uncacheable as $item) {
     echo "<tr>";
     echo "<td>{$item->missCount}</td><td>{$item->url}</td>";

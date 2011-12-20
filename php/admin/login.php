@@ -11,25 +11,25 @@ if ($GLOBAL["error"]) {
 }
 
 ?>
-<h2>Login</h2>
+<h2><?= gettext('Login')?></h2>
 
 <form method="POST" action="j_security_check?j_uri=index.php">
 <table border='0'>
 <tr>
-  <th><label for="j_username">Username</label>: </th>
+  <th><label for="j_username"><?= gettext('Username')?></label>: </th>
   <td>
-    <input id="j_username" name="j_username" width="40"></input>
+    <input id="j_username" name="j_username" width="40"/>
   </td>
 </tr>
 <tr>
-  <th><label for="j_password">Password</label>: </th>
+  <th><label for="j_password"><?= gettext('Password')?></label>: </th>
   <td>
-    <input id="j_password" name="j_password" width="40" type="password"></input>
+    <input id="j_password" name="j_password" width="40" type="password"/>
   </td>
 </tr>
 <tr>
   <td>
-    <input type="submit"></input>
+    <input type="submit" value="<?= gettext('Submit')?>"/>
   </td>
   <td></td>
 </tr>
@@ -83,8 +83,7 @@ EOF
 <?php
 if ($file) {?>
 <li>
-To add the admin user, you can add the user and password to
-your resin.properties file as follows:
+<?= gettext('To add the admin user, you can add the user and password to your resin.properties file as follows:')?>
 
 <div class="example">
 admin_user     : <?= $digest_username ?><br />
@@ -92,18 +91,15 @@ admin_password : <?= $digest ?>
 </div>
 
 <li>
-Or you can update the admin-users.xml as follows.
+<?= gettext('Or you can update the admin-users.xml as follows.')?>
 
-A login configuration file has been written under the name 
-<code>admin-users.xml.generated</code> in the same directory as your
-resin.xml file. Simply rename this file to <code>admin-users.xml</code>
-to install your login.
+<?= gettext('A login configuration file has been written under the name <code>admin-users.xml.generated</code> in the same directory as your resin.xml file. Simply rename this file to <code>admin-users.xml</code> to install your login.')?>
 </li>
-<li>Or cut and paste the following into the <code>admin-users.xml</code>
+<li><?= gettext('Or cut and paste the following into the <code>admin-users.xml</code>')?>
 <?php } else {
 ?>
-<li>Cut and paste the following into the <code>admin-users.xml</code>
-<?php}?>
+<li><?= gettext('Cut and paste the following into the <code>admin-users.xml</code>')?>
+<?php }?>
 
 <div class="example">
   &lt;resin:AdminAuthenticator xmlns="http://caucho.com/ns/resin"
@@ -114,17 +110,14 @@ to install your login.
 </li>
 
 <li>
-By default, access to the administration application is limited
-to the local network.  The default behaviour can be changed in the 
-resin.xml file.  To enable access to clients other than local
-net work, add to the resin.properties:
+<?= gettext('By default, access to the administration application is limited to the local network. The default behaviour can be changed in the resin.xml file. To enable access to clients other than local net work, add to the resin.properties:') ?>
 
 <div class="example">
 admin_external : true
 admin_secure   : true
 </div>
 
-Or modify the resin.xml directly with:
+<?= gettext('Or modify the resin.xml directly with:')?>
 
 <div class="example">
   &lt;resin:set var="resin_admin_external" value="true"/&gt;
@@ -132,14 +125,18 @@ Or modify the resin.xml directly with:
 </li>
 
 <li>
-Once the file has been saved, you can
-<a href="<?= $login_uri ?>">continue to the administration area</a>.
-This will trigger a server restart, so just refresh your browser
-until you see the login page again.
+<?php
+$prompt = gettext('Once the file has been saved, you can <a href=\'$login_uri\'>continue to the administration area</a>. This will trigger a server restart, so just refresh your browser until you see the login page again.');
+
+$prompt = preg_replace('/\$login_uri/', $login_uri, $prompt);
+
+echo $prompt;
+?>
+
 </li>
 
 <li>
-When prompted, use the username and password you provided.
+<?= gettext('When prompted, use the username and password you provided.')?>
 </li>
 </ol>
 
@@ -148,3 +145,4 @@ When prompted, use the username and password you provided.
 
   display_footer("login.php");
 ?>
+

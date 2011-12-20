@@ -8,7 +8,7 @@
 
 require_once "WEB-INF/php/inc.php";
 
-display_header("digest.php", "Calculate a password digest", "");
+display_header("digest.php", gettext('Calculate a password digest'), "");
 
 $digest = NULL;
 $validation_error = NULL;
@@ -78,13 +78,9 @@ is <b><i><?= $digest ?></i></b>
     if (empty($validation_error) ) {
 ?>
 
-<h3>Don't have a login yet?</h3>
+<h3><?= gettext('Don\'t have a login yet?')?></h3>
 <p>
-To access the Resin administration console, you'll need to generate
-a configuration file containing your username and password.  Complete
-the form below to create a configuration file automatically with
-your login information.  The next page will provide you instructions 
-to install the configuration file.
+<?= gettext('To access the Resin administration console, you\'ll need to generate a configuration file containing your username and password. Complete the form below to create a configuration file automatically with your login information. The next page will provide you instructions to install the configuration file.')?>
 </p>
 
 <?php
@@ -104,26 +100,26 @@ to install the configuration file.
 ?>
 
 <tr>
-<th><label for="digest_username">Username</label>:</th>
+<th><label for="digest_username"><?= gettext('Username')?></label>:</th>
 <td><input id="digest_username" name="digest_username" size="50" value="<?= $digest_username ?>"></td>
 </tr>
 
 <tr>
-<th><label for="digest_password1">Password</label>:</th>
+<th><label for="digest_password1"><?= gettext('Password')?></label>:</th>
 <td><input id="digest_password1" name="digest_password1" type="password" size="50" value=""></td>
 </tr>
 
 <tr>
-<th><label for="digest_password2">Re-enter password</label>:</th>
+<th><label for="digest_password2"><?= gettext('Re-enter password')?></label>:</th>
 <td><input id="digest_password2" name="digest_password2" type="password" size="50" value=""></td>
 </tr>
 
 <tr>
-<th><label for="digest_realm">Realm</label>:</th>
+<th><label for="digest_realm"><?= gettext('Realm')?></label>:</th>
 <td><input id="digest_realm" name="digest_realm" size="50" value="<?= $digest_realm ?>"></td>
 </tr>
 
-<tr><td colspan='2' class='buttons'><input type="submit" value="Create Configuration File"></td></tr>
+<tr><td colspan='2' class='buttons'><input type="submit" value="<?= gettext('Create Configuration File')?>"></td></tr>
 </table>
 
   <input name="digest_attempt" type="hidden" value="true">
