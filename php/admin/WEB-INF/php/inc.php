@@ -158,7 +158,7 @@ function format_datetime($date)
 
 function format_memory($memory)
 {
-  return sprintf("%.2fMeg", $memory / (1024 * 1024))
+  return sprintf("%.2fMeg", $memory / (1024 * 1024));
 }
 
 function format_hit_ratio($hit, $miss)
@@ -914,7 +914,7 @@ function display_health()
     echo "System Health: ";
     print_check_or_x($health);
     echo " (" . count($down_servers) . ") ";
-    echo "<span class='menu-switch' id='down-servers'>"
+    echo "<span class='menu-switch' id='down-servers'>";
     echo "<ul class='toggle-down-servers' style='display: none'>";
   	foreach ($down_servers as $down_server) {
       list($display_name, $error) = $down_server;

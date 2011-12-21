@@ -22,7 +22,7 @@ $si = sprintf("%02d", $server->SelfServer->ClusterIndex);
 if (! require_professional()) {
   return;
 } else if (! $stat_service) {
-  echo "<div class=\"req-pro-message\">This feature requires &lt;resin:AdminServices/> in resin.xml</div>\n";
+  echo "<div class=\"req-pro-message\">" . gettext('This feature requires &lt;resin:AdminServices/> in resin.xml') . "</div>\n";
   return;
 }
 
@@ -49,7 +49,7 @@ function display_tabs($pages)
     
     $tab_name = $name . "-tab";
 
-    echo "<li><a href='#${tab_name}'>$name</a></li>\n";
+    echo "<li><a href='#${tab_name}'>" . gettext($name) . "</a></li>\n";
   }
 
   echo "<li><a href='#new_meter-tab'>+</a></li>\n";
@@ -76,12 +76,12 @@ function meter_display_page($page)
   global $g_periods;
   global $g_server;
   global $g_period;
-  
-	$stat = get_stats_service($params->mbean_server);
-	if (! $stat) {
-		return;
-	}
-  
+
+  $stat = get_stats_service($params->mbean_server);
+  if (!$stat) {
+    return;
+  }
+
   $si = sprintf("%02d", $g_server->Index);
 
   $page_name = "pg_" . $page->name;
@@ -133,7 +133,7 @@ function meter_display_page($page)
 
   $is_column = false;
   
-  echo "<h2>" . $page->getName() . "</h2>\n";
+  echo "<h2>" . gettext($page->getName()) . "</h2>\n";
   
   echo "<table border='0'>\n";
 
@@ -167,13 +167,14 @@ function meter_display_page($page)
 function meter_display_graph($name, $graph, $width, $height, $period)
 {
 //  echo " <div style='float:top;padding:.5em;'>\n"
-  
+
+  global $g_server;
   $si = sprintf("%02d", $g_server->Index);
 
   $meters = array();
 
   if ($graph->name)
-    $caption = $graph->name;
+    $caption = gettext($graph->name);
 
   foreach ($graph->meterNames as $meter_name) {
     $full_name = $si . "|" . $meter_name;

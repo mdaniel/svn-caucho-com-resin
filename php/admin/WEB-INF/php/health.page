@@ -82,7 +82,7 @@ function display_health_graph($mbean_server, $s, $si, $label)
 
   $params->alt
     = gettext("A line graph representing the status of each health check performed on server $label over the last 24 hours.");
-  $params->alt = preg_replace("/\$label/", $label, $params->alt);
+  $params->alt = preg_replace('/\$label/', $label, $params->alt);
 
   $params->labels_mbean = "resin:type=HealthSystem";
   $params->mbean_server = $mbean_server;

@@ -58,7 +58,10 @@ foreach ($info_list as $info) {
 
 usort($threads, "thread_stack_cmp");
 
-echo "<h1>Thread Dump"; print_help("Thread Dump"); echo "</h1>\n";
+echo "<h1>";
+echo gettext('Thread Dump');
+echo print_help("Thread Dump");
+echo "</h1>\n";
 
 $thread_group = partition_threads($threads);
 $groups = array("active", "blocked", "jni", "locking",

@@ -9,12 +9,15 @@ if (! admin_init()) {
   return;
 }
 
-echo "<h1>JVM Memory"; print_help("Memory"); echo "</h1>";
+echo "<h1>";
+echo gettext('JVM Memory');
+echo print_help("Memory");
+echo "</h1>";
 
 echo "<div id='memory-tabs'>";
 echo "<ul>";
-echo "<li><a href='#graphs'>Graphs</a></li>\n";
-echo "<li><a href='#dump'>Heap Dump</a></li>\n";
+echo "<li><a href='#graphs'>" . gettext('Graphs') . "</a></li>\n";
+echo "<li><a href='#dump'>" . gettext('Heap Dump') . "</a></li>\n";
 echo "</ul>";
 
 echo "<div id='graphs'>\n";
@@ -28,16 +31,16 @@ if ($stat_service) {
   $si = sprintf("%02d", $g_server->Index);
   
   $memory_params = new GraphParams("memory", 600, 200);
-  $memory_params->title = "Memory Free";
-  $memory_params->alt = "A line graph representing the amount of free memory in each of the heap, tenured, and permgen pools over the last 6 hours.";
-  	
+  $memory_params->title = gettext("Memory Free");
+  $memory_params->alt = gettext('A line graph representing the amount of free memory in each of the heap, tenured, and permgen pools over the last 6 hours.');
+
   stat_graph($memory_params, array("$si|JVM|Memory|Heap Memory Free",
-  																 "$si|JVM|Memory|Tenured Memory Free",
-  															   "$si|JVM|Memory|PermGen Memory Free"));
-    	
+                                  "$si|JVM|Memory|Tenured Memory Free",
+                                  "$si|JVM|Memory|PermGen Memory Free"));
+
   $gc_params = new GraphParams("gc", 600, 200);
-  $gc_params->title = "GC Time";
-  $gc_params->alt = "A line graph representing the amount of time spent perfoming garbage collection over the last 6 hours.";
+  $gc_params->title = gettext('GC Time');
+  $gc_params->alt = gettext('A line graph representing the amount of time spent perfoming garbage collection over the last 6 hours.');
   
   stat_graph_regexp($gc_params, "/^$si\|JVM\|Memory\|GC Time/");
 }
@@ -52,7 +55,9 @@ $memory = array(
   array(name => "Tenured", free => $memoryBean->TenuredFree, used => $memoryBean->TenuredUsed, max => $memoryBean->TenuredMax, committed => $memoryBean->TenuredCommitted)
 );
 
-echo "<h2>Memory Pools</h2>\n";
+echo "<h2>";
+echo gettext('Memory Pools');
+echo "</h2>\n";
 $row = 0;
 echo "<table id='sadf' class='data'>\n";
 
@@ -103,11 +108,14 @@ $is_heap_available_heap = false;
 $heap_file = "/tmp/java.hprof";
 
 if ($heap) {
-  echo "<h2>Heap Dump</h2>";
+  echo "<h2>";
+  echo gettext('Heap Dump');
+  echo "</h2>";
   
   echo "<form action='?q=memory' method='post'>";
-  echo "Resin Heap Dump: <input type='submit' name='action' value='dump heap'/><br/>";
-  echo "JVM Heap Dump: <input type='submit' name='action' value='jvm heap dump'/> (saves JVM binary heap to $heap_file)";
+  echo gettext('Resin Heap Dump') . ": <input type='submit' name='action' value='dump heap'/><br/>";
+  echo gettext ('JVM Heap Dump') . ": <input type='submit' name='action' value='jvm heap dump'/> ";
+  echo preg_replace('/\$heap_file/', $heap_file, gettext('(saves JVM binary heap to $heap_file)'));
   echo "</form>";
 
   if ($_POST['action'] == 'jvm heap dump') {
