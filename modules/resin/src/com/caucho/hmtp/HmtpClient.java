@@ -293,6 +293,7 @@ public class HmtpClient implements ActorSender {
       */
   }
 
+  @Override
   public void close()
   {
     if (log.isLoggable(Level.FINE))

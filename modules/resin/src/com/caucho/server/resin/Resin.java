@@ -371,7 +371,7 @@ public class Resin
     return _homeCluster;
   }
   
-  String getResinSystemAuthKey()
+  public String getResinSystemAuthKey()
   {
     return _resinSystemAuthKey;
   }

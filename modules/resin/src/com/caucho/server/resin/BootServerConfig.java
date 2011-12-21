@@ -151,21 +151,6 @@ public class BootServerConfig implements SchemaBean
   {
     return _isExternalAddress;
   }
-
-  /**
-   * Marks the server as a dynamic server
-   */
-  /*
-  public void setDynamic(boolean isDynamic)
-  {
-    _isDynamic = isDynamic;
-  }
-  
-  public boolean isDynamic()
-  {
-    return _isDynamic;
-  }
-  */
   
   public void addBuilderProgram(ConfigProgram program)
   {
@@ -176,52 +161,11 @@ public class BootServerConfig implements SchemaBean
   {
     return _serverProgram;
   }
-
-  /*
-  public CloudServer getCloudServer()
-  {
-    return _cloudServer;
-  }
-  */
-
-  /*
-  @PostConstruct
-  public void init()
-  {
-    CloudPod pod = _pod.getCloudPod();
-    
-    if (pod.getServerLength() >= 64) {
-      throw new ConfigException(L.l("The server cannot be added to the current pod because it would be more than 64 servers to the pod."));
-    }
-
-    if (isDynamic()) {
-      _cloudServer = pod.findServer(getId());
-      
-      if (_cloudServer == null)
-        throw new IllegalStateException(L.l("Dynamic server '{0}' is expected to exist here.",
-                                            getId()));
-    } else {
-      _cloudServer = pod.createStaticServer(getId(), 
-                                            getAddress(),
-                                            getPort(),
-                                            isSecure());
-    }
-    
-    _cloudServer.putData(new ClusterServerProgram(_serverProgram));
-  }
-  */
   
   void initTopology(CloudServer cloudServer)
   {
     cloudServer.putData(new ClusterServerProgram(_serverProgram));
   }
-  
-  /*
-  ClusterServer getClusterServer()
-  {
-    return _cloudServer.getData(ClusterServer.class);
-  }
-  */
 
   @Override
   public String toString()

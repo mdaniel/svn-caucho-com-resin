@@ -49,6 +49,11 @@ import com.caucho.config.program.ContainerProgram;
 import com.caucho.config.types.Period;
 import com.caucho.management.server.ClusterServerMXBean;
 import com.caucho.network.balance.ClientSocketFactory;
+import com.caucho.network.listen.AbstractProtocol;
+import com.caucho.network.listen.TcpSocketLinkListener;
+import com.caucho.server.cluster.ProtocolPort;
+import com.caucho.server.cluster.ProtocolPortConfig;
+import com.caucho.server.http.HttpProtocol;
 import com.caucho.util.Alarm;
 import com.caucho.util.L10N;
 
@@ -102,6 +107,9 @@ public final class ClusterServer {
 
   private String _stage;
   private ArrayList<String> _pingUrls = new ArrayList<String>();
+  
+  private ArrayList<TcpSocketLinkListener> _listeners
+    = new ArrayList<TcpSocketLinkListener>();
 
   // runtime
   
@@ -149,7 +157,7 @@ public final class ClusterServer {
     sb.append(convert(getIndex()));
     sb.append(convert(getCloudPod().getIndex()));
     sb.append(convert(getCloudPod().getIndex() / 64));
-
+    
     _serverClusterId = sb.toString();
 
     String clusterId = cloudServer.getCluster().getId();
@@ -399,6 +407,106 @@ public final class ClusterServer {
   // port defaults
   //
   
+  
+  @Configurable
+  public TcpSocketLinkListener createHttp()
+    throws ConfigException
+  {
+    TcpSocketLinkListener listener = new TcpSocketLinkListener();
+    
+    applyPortDefaults(listener);
+
+    HttpProtocol protocol = new HttpProtocol();
+    listener.setProtocol(protocol);
+
+    // getListenService().addListener(listener);
+
+    return listener;
+  }
+  
+  public void addHttp(TcpSocketLinkListener listener)
+  {
+    if (listener.getPort() <= 0) {
+      log.fine(listener + " skipping because port is 0.");
+      return;
+    }
+    
+    _listeners.add(listener);
+  }
+
+  @Configurable
+  public TcpSocketLinkListener createProtocol()
+  {
+    ProtocolPortConfig port = new ProtocolPortConfig();
+
+    _listeners.add(port);
+
+    return port;
+  }
+
+  @Configurable
+  public TcpSocketLinkListener createListen()
+  {
+    ProtocolPortConfig listener = new ProtocolPortConfig();
+
+    return listener;
+  }
+  
+  public void addListen(TcpSocketLinkListener listener)
+  {
+    if (listener.getPort() <= 0) {
+      log.fine(listener + " skipping because port is 0.");
+      return;
+    }
+    
+    _listeners.add(listener);
+  }
+
+  @Configurable
+  public void add(ProtocolPort protocolPort)
+  {
+    TcpSocketLinkListener listener = new TcpSocketLinkListener();
+
+    AbstractProtocol protocol = protocolPort.getProtocol();
+    listener.setProtocol(protocol);
+
+    applyPortDefaults(listener);
+
+    protocolPort.getConfigProgram().configure(listener);
+
+    _listeners.add(listener);
+  }
+  
+  public ArrayList<TcpSocketLinkListener> getListeners()
+  {
+    return _listeners;
+  }
+
+  /**
+   * Adds a port-default
+   */
+  @Configurable
+  public void addPortDefault(ContainerProgram program)
+  {
+    addListenDefault(program);
+  }
+
+  /**
+   * Adds a listen-default
+   */
+  @Configurable
+  public void addListenDefault(ConfigProgram program)
+  {
+    _portDefaults.addProgram(program);
+  }
+
+  private void applyPortDefaults(TcpSocketLinkListener port)
+  {
+    _portDefaults.configure(port);
+    
+    // port.setKeepaliveSelectEnable(isKeepaliveSelectEnable());
+  }
+
 
   //
   // Configuration from <server>
@@ -717,12 +825,18 @@ public final class ClusterServer {
       return null;
     
     ClientSocketFactory factory
-      = createClusterPool(getId(), address);
+      = createClusterPool(_clusterSystem.getServerId(), address);
+    
+    factory.init();
+    factory.start();
     
     socketPool = new SocketPool(factory);
     
-    if (! _clusterSocketPool.compareAndSet(null, socketPool))
+    if (! _clusterSocketPool.compareAndSet(null, socketPool)) {
+      factory.stop();
+      
       socketPool = _clusterSocketPool.get();
+    }
     
     if (socketPool != null)
       return socketPool.getFactory();
@@ -754,14 +868,10 @@ public final class ClusterServer {
     return pool != null && pool.isActive();
   }
   
-  public void addPortDefault(ContainerProgram program)
-  {
-    _portDefaults.addProgram(program);
-  }
-
   /**
    * Adds a program.
    */
+  @Configurable
   public void addContentProgram(ConfigProgram program)
   {
     _serverProgram.addProgram(program);
@@ -799,7 +909,7 @@ public final class ClusterServer {
         && getCloudServer().getPort() >= 0
         && ! getCloudServer().isExternal()) {
       ClientSocketFactory clusterFactory
-        = createClusterPool(_clusterSystem.getServerId(), getAddress());
+      = createClusterPool(_clusterSystem.getServerId(), getAddress());
       clusterFactory.init();
       
       _clusterSocketPool.set(new SocketPool(clusterFactory));

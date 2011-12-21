@@ -39,24 +39,19 @@ import com.caucho.util.L10N;
  */
 abstract public class AbstractHttpProtocol extends AbstractProtocol {
   private static final L10N L = new L10N(AbstractHttpProtocol.class);
-  
-  private Server _server;
-  
-  protected AbstractHttpProtocol()
-  {
-    _server = Server.getCurrent();
-    
-    if (_server == null) {
-      throw new ConfigException(L.l("{0} needs an active Resin Servlet System.",
-                                    getClass().getName()));
-    }
-  }
 
   /**
    * Returns the active server.
    */
   public Server getServletSystem()
   {
-    return _server;
+    Server servletSystem = Server.getCurrent();
+    
+    if (servletSystem == null) {
+      throw new ConfigException(L.l("{0} needs an active Resin Servlet System.",
+                                    getClass().getName()));
+    }
+    
+    return servletSystem;
   }
 }

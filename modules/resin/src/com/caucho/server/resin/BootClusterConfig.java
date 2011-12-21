@@ -126,7 +126,7 @@ public class BootClusterConfig implements SchemaBean
   {
     BootPodConfig pod = new BootPodConfig(this);
     
-    _pods.add(pod);
+    // _pods.add(pod);
 
     return pod;
   }

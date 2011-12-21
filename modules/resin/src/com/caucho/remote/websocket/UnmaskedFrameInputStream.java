@@ -141,7 +141,7 @@ public class UnmaskedFrameInputStream extends FrameInputStream
     
     int frame1 = is.read();
     int frame2 = is.read();
-
+    
     if (frame2 < 0)
       return false;
 

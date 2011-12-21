@@ -228,6 +228,7 @@ public class NetworkClusterSystem extends AbstractResinSubSystem
     
     selfServer.notifyHeartbeatStart();
 
+    /*
     CloudSystem cloudSystem = TopologyService.getCurrent().getSystem();
     
     for (CloudCluster cluster : cloudSystem.getClusterList()) {
@@ -251,6 +252,7 @@ public class NetworkClusterSystem extends AbstractResinSubSystem
         }
       }
     }
+      */
     
     validateTriad(_selfServer.getPod());
   }
