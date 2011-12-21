@@ -63,6 +63,7 @@ public class ConfigContextResolver extends ELResolver {
     return list.iterator();
   }
 
+  @Override
   public Class<?> getType(ELContext context,
                           Object base,
                           Object property)
@@ -75,6 +76,7 @@ public class ConfigContextResolver extends ELResolver {
       return value.getClass();
   }
 
+  @Override
   public Object getValue(ELContext context,
                          Object base,
                          Object property)
@@ -102,6 +104,7 @@ public class ConfigContextResolver extends ELResolver {
       return null;
   }
 
+  @Override
   public boolean isReadOnly(ELContext context,
                             Object base,
                             Object property)

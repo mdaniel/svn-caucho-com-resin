@@ -62,6 +62,7 @@ public class ResinProperties extends ResinControl implements FlowBean
   private FileSetType _fileSet;
   private boolean _isOptional;
   private boolean _isRecover;
+  private String _mode = "[default]";
 
   /**
    * Sets the resin:properties.
@@ -94,6 +95,19 @@ public class ResinProperties extends ResinControl implements FlowBean
   {
     _isRecover = isRecover;
   }
+  
+  public void setMode(String mode)
+  {
+    if (mode == null || "".equals(mode)) {
+      _mode = "[default]";
+    }
+    else if (mode.startsWith("[")) {
+      _mode = mode;
+    }
+    else {
+      _mode = "[" + mode + "]";
+    }
+  }
 
   @PostConstruct
   public void init()
@@ -120,7 +134,7 @@ public class ResinProperties extends ResinControl implements FlowBean
         log.config(L.l("resin:properties '{0}'", path.getNativePath()));
 
         Environment.addDependency(new Depend(path));
-
+        
         readProperties(path);
       } catch (FileNotFoundException e) {
         if (! _isOptional)
@@ -137,6 +151,7 @@ public class ResinProperties extends ResinControl implements FlowBean
     throws IOException
   {
     ReadStream is = null;
+    String mode = "";
     
     try {
       is = path.openRead();
@@ -157,8 +172,14 @@ public class ResinProperties extends ResinControl implements FlowBean
         if (p >= 0)
           line = line.substring(0, p);
         
-        if (line.startsWith("#") || line.equals(""))
+        if (line.startsWith("#") || line.equals("")) {
           continue;
+        }
+        
+        if (line.startsWith("[")) {
+          mode = line;
+          continue;
+        }
         
         p = line.indexOf(':');
         int q = line.indexOf('=');
@@ -170,10 +191,12 @@ public class ResinProperties extends ResinControl implements FlowBean
           throw new ConfigException(L.l("invalid line in {0}\n  {1}",
                                         path, line));
         
-        String key = line.substring(0, p).trim();
-        String value = line.substring(p + 1).trim();
+        if ("".equals(mode) || mode.equals(_mode)) {
+          String key = line.substring(0, p).trim();
+          String value = line.substring(p + 1).trim();
         
-        Config.setProperty(key, value, loader);
+          Config.setProperty(key, value, loader);
+        }
       }
     } finally {
       IoUtil.close(is);

@@ -304,6 +304,11 @@ public class ResinArgs
 
     while (i < len) {
       // RandomUtil.addRandom(argv[i]);
+      
+      String arg = argv[i];
+      
+      if (! arg.startsWith("--") || arg.startsWith("-"))
+        arg = "-" + arg;
 
       if (i + 1 < len
           && (argv[i].equals("-stdout")
@@ -522,6 +527,16 @@ public class ResinArgs
       }
       else if ("-jmx-port".equals(argv[i])
                || "--jmx-port".equals(argv[i])) {
+        i += 2;
+      }
+      else if ("-jmx-port".equals(argv[i])
+               || "--jmx-port".equals(argv[i])) {
+        i += 2;
+      }
+      else if ("--user-properties".equals(arg)) {
+        i += 2;
+      }
+      else if ("--mode".equals(arg)) {
         i += 2;
       }
       else {

@@ -46,6 +46,7 @@ import com.caucho.cloud.topology.CloudSystem;
 import com.caucho.cloud.topology.TopologyService;
 import com.caucho.config.Config;
 import com.caucho.config.ConfigException;
+import com.caucho.config.core.ResinProperties;
 import com.caucho.config.inject.BeanBuilder;
 import com.caucho.config.inject.DefaultLiteral;
 import com.caucho.config.inject.InjectManager;
@@ -170,7 +171,7 @@ class WatchdogManager implements AlarmListener {
     ThreadPool.getThreadPool().setPriorityIdleMin(4);
 
     ResinELContext elContext = _args.getELContext();
-    System.out.println("XXX-A:");    
+
     // resin.preConfigureInit();
     
     // XXX: needs to be config
@@ -187,12 +188,18 @@ class WatchdogManager implements AlarmListener {
     ResinConfigLibrary.configure(cdiManager);
     ResinServerConfigLibrary.configure(cdiManager);
 
-    System.out.println("XXX-B:");    
+    // read $HOME/.resin
+    if (_args.getUserProperties() != null && _args.getUserProperties().canRead()) {
+      ResinProperties properties = new ResinProperties();
+      properties.setPath(_args.getUserProperties());
+      properties.setMode(_args.getMode());
+      
+      properties.init();
+    }
+    
     _watchdogPort = _args.getWatchdogPort();
     
-    System.out.println("XXX-C:");    
     readConfig(serverId, _args);
-    System.out.println("XXX-D:");    
     
     WatchdogChild server = null;
     
@@ -200,7 +207,6 @@ class WatchdogManager implements AlarmListener {
       serverId = "default";
       
     server = _watchdogMap.get(serverId);
-    System.out.println("SERVER: " + server);
     
     if (server == null)
       throw new IllegalStateException(L().l("'{0}' is an unknown server",

@@ -39,6 +39,7 @@ import java.util.logging.Logger;
 import com.caucho.VersionFactory;
 import com.caucho.config.Config;
 import com.caucho.config.ConfigException;
+import com.caucho.config.core.ResinProperties;
 import com.caucho.config.inject.InjectManager;
 import com.caucho.config.lib.ResinConfigLibrary;
 import com.caucho.env.service.ResinSystem;
@@ -71,9 +72,6 @@ public class ResinBoot
 {
   private static L10N _L;
   private static Logger _log;
-  
-  private static final HashMap<String,BootCommand> _commandMap
-    = new HashMap<String,BootCommand>();
 
   private WatchdogArgs _args;
   private BootResinConfig _resinConfig;
@@ -137,8 +135,6 @@ public class ResinBoot
                                dataDirectory);
     }
     else {
-      String userName = System.getProperty("user.name");
-      
       system = new ResinSystem("watchdog", 
                                rootDirectory,
                                new NullPath("boot-temp"));
@@ -173,6 +169,15 @@ public class ResinBoot
 
     ResinConfigLibrary.configure(beanManager);
     ResinServerConfigLibrary.configure(beanManager);
+    
+    // read $HOME/.resin
+    if (_args.getUserProperties() != null && _args.getUserProperties().canRead()) {
+      ResinProperties properties = new ResinProperties();
+      properties.setPath(_args.getUserProperties());
+      properties.setMode(_args.getMode());
+      
+      properties.init();
+    }
 
     config.configure(_resinConfig, _args.getResinConf(),
                      "com/caucho/server/resin/resin.rnc");

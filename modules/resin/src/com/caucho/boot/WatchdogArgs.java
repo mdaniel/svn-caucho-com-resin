@@ -71,7 +71,12 @@ class WatchdogArgs
   private Path _rootDirectory;
   private Path _dataDirectory;
   private String[] _argv;
+  
   private Path _resinConf;
+  
+  private Path _userProperties;
+  private String _mode;
+  
   private Path _logDirectory;
   private String _serverId = null;
   private String _clusterId;
@@ -114,6 +119,8 @@ class WatchdogArgs
       _resinConf = _resinHome.lookup("conf/resin.xml");
 
     _is64bit = CauchoSystem.is64Bit();
+    
+    _userProperties = Vfs.lookup(System.getProperty("user.home") + "/.resin");
 
     parseCommandLine(_argv);
   }
@@ -151,6 +158,16 @@ class WatchdogArgs
   Path getResinConf()
   {
     return _resinConf;
+  }
+
+  Path getUserProperties()
+  {
+    return _userProperties;
+  }
+
+  String getMode()
+  {
+    return _mode;
   }
 
   String getServerId()
@@ -424,9 +441,21 @@ class WatchdogArgs
 
     for (int i = 0; i < argv.length; i++) {
       String arg = argv[i];
+      
+      if (! arg.startsWith("--") && arg.startsWith("-")) {
+        arg = "-" + arg;
+      }
 
       if ("-conf".equals(arg) || "--conf".equals(arg)) {
         resinConf = argv[i + 1];
+        i++;
+      }
+      else if ("--user-properties".equals(arg)) {
+        _userProperties = Vfs.lookup(argv[i + 1]);
+        i++;
+      }
+      else if ("--mode".equals(arg)) {
+        _mode = argv[i + 1];
         i++;
       }
       else if ("-join-cluster".equals(arg)

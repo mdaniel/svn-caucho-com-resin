@@ -29,12 +29,10 @@
 
 package com.caucho.config;
 
-import com.caucho.el.AbstractVariableResolver;
-
 import javax.el.ELContext;
 import javax.el.ELResolver;
 
-import java.util.*;
+import com.caucho.el.AbstractVariableResolver;
 
 /**
  * Variable resolver for Resin config properties.
