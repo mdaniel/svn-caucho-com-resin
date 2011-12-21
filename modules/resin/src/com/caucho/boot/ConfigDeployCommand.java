@@ -40,6 +40,12 @@ public class ConfigDeployCommand extends AbstractRepositoryCommand {
   private static final L10N L = new L10N(ConfigDeployCommand.class);
   
   @Override
+  public boolean isDefaultArgsAccepted()
+  {
+    return true;
+  }
+  
+  @Override
   public String getDescription()
   {
     return "deploys a configuration directory or jar file";

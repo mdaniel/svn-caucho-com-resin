@@ -30,6 +30,7 @@ package com.caucho.server.admin;
 
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.OutputStream;
 import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -48,6 +49,7 @@ import com.caucho.cloud.deploy.RemoveTagQuery;
 import com.caucho.cloud.deploy.SetTagQuery;
 import com.caucho.env.git.GitCommitJar;
 import com.caucho.env.git.GitCommitTree;
+import com.caucho.env.git.GitObjectStream;
 import com.caucho.env.repository.CommitBuilder;
 import com.caucho.env.repository.Repository;
 import com.caucho.env.repository.RepositoryException;
@@ -56,10 +58,13 @@ import com.caucho.env.repository.RepositoryTagListener;
 import com.caucho.hmtp.HmtpClient;
 import com.caucho.server.cluster.Server;
 import com.caucho.util.Alarm;
+import com.caucho.util.IoUtil;
 import com.caucho.util.L10N;
 import com.caucho.vfs.InputStreamSource;
 import com.caucho.vfs.Path;
+import com.caucho.vfs.ReadStream;
 import com.caucho.vfs.StreamSource;
+import com.caucho.vfs.Vfs;
 
 /**
  * Deploy Client API
@@ -370,6 +375,46 @@ public class DeployClient implements Repository
     DeployCommitListQuery result = (DeployCommitListQuery) query(query);
 
     return result.getCommitList();
+  }
+
+  public boolean getFile(String tagName, String fileName, OutputStream os)
+    throws IOException
+  {
+    DeployGetFileQuery query = new DeployGetFileQuery(tagName, fileName);
+    
+    DeployGetFileQuery result = (DeployGetFileQuery) query(query);
+
+    if (result.isValid()) {
+      StreamSource source = result.getStream();
+      
+      ReadStream is = null;
+      GitObjectStream gitIs = new GitObjectStream(source.getInputStream());
+      
+      try {
+        is = Vfs.openRead(gitIs);
+        
+        is.writeToStream(os);
+      } finally {
+        gitIs.close();
+        
+        IoUtil.close(is);
+      }
+      
+      return true;
+    }
+    else {
+      return false;
+    }
+  }
+
+  public String []listFiles(String tagName, String fileName)
+    throws IOException
+  {
+    DeployListFilesQuery query = new DeployListFilesQuery(tagName, fileName);
+    
+    DeployListFilesQuery result = (DeployListFilesQuery) query(query);
+    
+    return result.getFileList();
   }
 
   public String calculateFileDigest(InputStream is, long length)

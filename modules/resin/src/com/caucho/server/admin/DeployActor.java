@@ -29,8 +29,10 @@
 
 package com.caucho.server.admin;
 
+import java.io.IOException;
 import java.io.InputStream;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -41,9 +43,7 @@ import java.util.logging.Logger;
 import java.util.regex.Pattern;
 
 import javax.annotation.PostConstruct;
-import javax.management.ObjectName;
 
-import com.caucho.bam.BamError;
 import com.caucho.bam.Query;
 import com.caucho.bam.actor.SimpleActor;
 import com.caucho.bam.mailbox.MultiworkerMailbox;
@@ -52,18 +52,16 @@ import com.caucho.cloud.deploy.CopyTagQuery;
 import com.caucho.cloud.deploy.RemoveTagQuery;
 import com.caucho.cloud.deploy.SetTagQuery;
 import com.caucho.config.ConfigException;
-import com.caucho.config.Service;
 import com.caucho.env.deploy.DeployControllerService;
 import com.caucho.env.deploy.DeployException;
 import com.caucho.env.deploy.DeployTagItem;
-import com.caucho.env.repository.RepositorySystem;
+import com.caucho.env.git.GitTree;
 import com.caucho.env.repository.RepositorySpi;
+import com.caucho.env.repository.RepositorySystem;
 import com.caucho.env.repository.RepositoryTagEntry;
 import com.caucho.jmx.Jmx;
 import com.caucho.management.server.DeployControllerMXBean;
 import com.caucho.management.server.EAppMXBean;
-import com.caucho.management.server.EarDeployMXBean;
-import com.caucho.management.server.WebAppDeployMXBean;
 import com.caucho.management.server.WebAppMXBean;
 import com.caucho.server.cluster.Server;
 import com.caucho.server.host.HostController;
@@ -72,6 +70,7 @@ import com.caucho.server.webapp.WebAppController;
 import com.caucho.util.IoUtil;
 import com.caucho.util.L10N;
 import com.caucho.vfs.Path;
+import com.caucho.vfs.StreamSource;
 import com.caucho.vfs.Vfs;
 
 public class DeployActor extends SimpleActor
@@ -143,6 +142,140 @@ public class DeployActor extends SimpleActor
     return true;
   }
 
+  @Query
+  public void getFile(long id, String to, String from,
+                         DeployGetFileQuery getFile)
+    throws IOException
+  {
+    String tag = getFile.getTag();
+    String fileName = getFile.getFileName();
+    
+    if (log.isLoggable(Level.FINER))
+      log.finer(this + " query " + getFile + "\n  to:" + to + " from:" + from);
+    
+    while (fileName.startsWith("/")) {
+      fileName = fileName.substring(1);
+    }
+    
+    RepositoryTagEntry entry = _repository.getTagMap().get(tag);
+    
+    if (entry == null) {
+      throw new ConfigException(L.l("'{0}' is an unknown repository tag",
+                                    tag));
+    }
+    
+    String sha1 = entry.getRoot();
+    
+    String fileSha = findFile(sha1, fileName, fileName);
+
+    BlobStreamSource iss = new BlobStreamSource(_repository, fileSha);
+    
+    StreamSource source = new StreamSource(iss);
+    
+    DeployGetFileQuery resultFile = new DeployGetFileQuery(tag, sha1, source);
+    
+    getBroker().queryResult(id, from, to, resultFile);
+  }
+  
+  private String findFile(String sha1, String fullFilename, String fileName)
+    throws IOException
+  {
+    if (fileName.equals("")) {
+      if (_repository.isBlob(sha1))
+        return sha1;
+      else {
+        throw new ConfigException(L.l("'{0}' is not a file", fullFilename));
+      }
+    }
+    
+    int p = fileName.indexOf('/');
+    String tail = "";
+    
+    if (p > 0) {
+      tail = fileName.substring(p + 1);
+      fileName = fileName.substring(0, p);
+    }
+    
+    if (! _repository.isTree(sha1))
+      throw new ConfigException(L.l("'{0}' is an invalid path", fullFilename));
+    
+    GitTree tree = _repository.readTree(sha1);
+    
+    String childSha1 = tree.getHash(fileName);
+    
+    if (childSha1 == null)
+      throw new ConfigException(L.l("'{0}' is an unknown file",
+                                    fullFilename));
+   
+    return findFile(childSha1, fullFilename, tail);
+  }
+
+  @Query
+  public void getFileList(long id, String to, String from,
+                      DeployListFilesQuery listFile)
+    throws IOException
+  {
+    String tag = listFile.getTag();
+    String fileName = listFile.getFileName();
+    
+    if (log.isLoggable(Level.FINER))
+      log.finer(this + " query " + listFile + "\n  to:" + to + " from:" + from);
+    
+    RepositoryTagEntry entry = _repository.getTagMap().get(tag);
+    
+    if (entry == null) {
+      throw new ConfigException(L.l("'{0}' is an unknown repository tag",
+                                    tag));
+    }
+    
+    String sha1 = entry.getRoot();
+    
+    ArrayList<String> fileList = new ArrayList<String>();
+    
+    listFiles(fileList, sha1, "");
+    
+    Collections.sort(fileList);
+    
+    String []files = new String[fileList.size()];
+    
+    fileList.toArray(files);
+    
+    DeployListFilesQuery result
+      = new DeployListFilesQuery(tag, fileName, files);
+    
+    getBroker().queryResult(id, from, to, result);
+  }
+  
+  private void listFiles(ArrayList<String> files, 
+                         String sha1,
+                         String prefix)
+    throws IOException
+  {
+    if (sha1 == null)
+      return;
+    
+    if (_repository.isBlob(sha1)) {
+      files.add(prefix);
+      return;
+    }
+    
+    if (! _repository.isTree(sha1))
+      throw new ConfigException(L.l("'{0}' is an invalid path", prefix));
+    
+    GitTree tree = _repository.readTree(sha1);
+    
+    for (String key : tree.getMap().keySet()) {
+      String name;
+      
+      if ("".equals(prefix))
+        name = key;
+      else
+        name = prefix + "/" + key;
+      
+      listFiles(files, tree.getHash(key), name);
+    }
+  }
+  
   @Query
   public void tagCopy(long id,
                       String to,
@@ -825,5 +958,36 @@ public class DeployActor extends SimpleActor
     }
 
     return null;
+  }
+  
+  static class BlobStreamSource extends StreamSource {
+    private RepositorySpi _repository;
+    private String _sha1;
+    
+    BlobStreamSource(RepositorySpi repository, String sha1)
+    {
+      _repository = repository;
+      _sha1 = sha1;
+    }
+    
+    /**
+     * Returns an input stream, freeing the results
+     */
+    @Override
+    public InputStream getInputStream()
+      throws IOException
+    {
+        return _repository.openRawGitFile(_sha1);
+    }
+
+    /**
+     * Returns an input stream, without freeing the results
+     */
+    @Override
+    public InputStream openInputStream()
+      throws IOException
+    {
+      return _repository.openRawGitFile(_sha1);
+    }
   }
 }

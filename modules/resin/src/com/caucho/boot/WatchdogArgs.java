@@ -1013,10 +1013,13 @@ class WatchdogArgs
   }
 
   static {
+    addCommand(new ConfigCatCommand());
+    addCommand(new ConfigDeployCommand());
+    addCommand(new ConfigLsCommand());
+    
     addCommand(new ConsoleCommand());
     addCommand(new DeployCopyCommand());
     addCommand(new DeployCommand());
-    addCommand(new ConfigDeployCommand());
     addCommand(new DeployListCommand());
     addCommand(new DisableCommand());
     addCommand(new DisableSoftCommand());

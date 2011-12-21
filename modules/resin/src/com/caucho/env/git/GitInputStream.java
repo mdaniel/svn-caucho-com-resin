@@ -106,6 +106,7 @@ public class GitInputStream extends InputStream {
       return sublen;
   }
 
+  @Override
   public void close()
     throws IOException
   {

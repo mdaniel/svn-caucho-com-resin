@@ -29,13 +29,19 @@
 
 package com.caucho.env.git;
 
-import com.caucho.util.*;
-import com.caucho.vfs.*;
+import java.io.IOException;
+import java.io.InputStream;
+import java.security.MessageDigest;
+import java.security.NoSuchAlgorithmException;
+import java.util.Arrays;
+import java.util.HashMap;
 
-import java.io.*;
-import java.security.*;
-import java.util.*;
-import java.util.zip.*;
+import com.caucho.util.Hex;
+import com.caucho.util.ResinDeflaterOutputStream;
+import com.caucho.vfs.Path;
+import com.caucho.vfs.ReadStream;
+import com.caucho.vfs.TempBuffer;
+import com.caucho.vfs.TempOutputStream;
 
 /**
  * Tree structure
