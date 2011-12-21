@@ -12,14 +12,17 @@ if (! require_professional()) {
 
 enable_graph_controls();
 
-echo "<h1>Health"; print_help("Health"); echo "</h1>\n";
+echo "<h1>";
+echo gettext('Health');
+echo print_help("Health");
+echo "</h1>\n";
 
 echo "<div id='health-tabs'>\n";
 echo "<ul>";
-echo "<li><a href='#health'>Health</a></li>\n";
-echo "<li><a href='#health-graph'>Graphs</a></li>\n";
-echo "<li><a href='#heartbeat'>Heartbeat</a></li>\n";
-echo "<li><a href='#health-logs'>Health Logs</a></li>\n";
+echo "<li><a href='#health'>" . gettext('Health') . "</a></li>\n";
+echo "<li><a href='#health-graph'>" . gettext('Graphs') . "</a></li>\n";
+echo "<li><a href='#heartbeat'>" . gettext('Heartbeat') . "</a></li>\n";
+echo "<li><a href='#health-logs'>" . gettext('Health Logs') . "</a></li>\n";
 echo "</ul>";
 
 echo "<div id='health'>\n";
@@ -75,12 +78,16 @@ function display_health_status_graph($s)
 function display_health_graph($mbean_server, $s, $si, $label)
 {
   $params = new GraphParams("health_${si}", 600, 200);
-	$params->title = "Server ${label}";
-	$params->alt = "A line graph representing the status of each health check performed on server $label over the last 24 hours.";
-	$params->labels_mbean = "resin:type=HealthSystem";
-	$params->mbean_server = $mbean_server;
-  
-	stat_graph_regexp($params, "/^${si}\|Resin\|Health/");
+  $params->title = gettext('Server') . "${label}";
+
+  $params->alt
+    = gettext("A line graph representing the status of each health check performed on server $label over the last 24 hours.");
+  $params->alt = preg_replace("/\$label/", $label, $params->alt);
+
+  $params->labels_mbean = "resin:type=HealthSystem";
+  $params->mbean_server = $mbean_server;
+
+  stat_graph_regexp($params, "/^${si}\|Resin\|Health/");
 }
 
 function display_heartbeat()
@@ -95,7 +102,7 @@ function display_heartbeat()
   echo "<tr>";
 
   foreach ($clusters as $c) {
-    echo "<th>" . $c->Name . "</th>\n"
+    echo "<th>" . $c->Name . "</th>\n";
   }
 
   echo "</tr>";
@@ -149,13 +156,13 @@ function display_heartbeat()
         echo "<table style='$style' width='100%'>\n";
 
         echo "<tr>";
-        echo "<td>"
+        echo "<td>";
       
         $is_health = $s_server;
       
         print_check_or_x($is_health);
       
-        echo "</td>"
+        echo "</td>";
         echo "<td width='5em'>";
   
       $name = $s->Name;
@@ -282,9 +289,11 @@ function display_health_logs()
                                            $now * 1000);
     echo "<table class='data'>\n";
     echo "<thead>\n";
-    echo "<tr><th scope='col' class='date'>Date</th>";
-    echo "    <th scope='col' class='level'>Level</th>";
-    echo "    <th scope='col' class='message'>Message</th></tr>\n";
+    echo "<tr>\n";
+    echo "  <th scope='col' class='date'>" . gettext('Date') . "</th>\n";
+    echo "  <th scope='col' class='level'>" . gettext('Level') . "</th>\n";
+    echo "  <th scope='col' class='message'>" . gettext('Message') . "</th>\n";
+    echo "</tr>\n";
     echo "</thead>\n";
                                            
     if (! empty($messages)) {
@@ -306,7 +315,9 @@ function display_health_logs()
       echo "</tbody>\n";
     } else {
       echo "<tbody>\n";
-      echo "<tr><td colspan='3'>No recent health logs</td></tr>\n";
+      echo "<tr><td colspan='3'>";
+      echo gettext('No recent health logs');
+      echo "</td></tr>\n";
       echo "</tbody>\n";
     }
     

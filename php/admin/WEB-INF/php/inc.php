@@ -1225,7 +1225,7 @@ function display_health_status($s)
   $mbean_server = new MBeanServer($server_id);
 
   $label = $si . " - " . $server_id;
-  echo "<h2>Server: $label</h2>\n"; 
+  echo "<h2>" . gettext('Server') . ": $label</h2>\n";
   
   echo "<table class='data'>\n";
   echo "<tr><th scope='col' class='item'>" . gettext('Status') . "</th>";
