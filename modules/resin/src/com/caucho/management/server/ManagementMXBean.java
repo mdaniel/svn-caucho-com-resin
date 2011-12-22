@@ -48,7 +48,7 @@ public interface ManagementMXBean extends ManagedObjectMXBean {
   public String hello();
   
   // XXX: temporary example until we have a real one
-  public InputStream test(@MXName("value") String value,
+  public InputStream test(@MXName("test-param") String value,
                           InputStream is)
     throws IOException;
 }
