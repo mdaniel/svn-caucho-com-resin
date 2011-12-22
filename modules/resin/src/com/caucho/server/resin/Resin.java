@@ -889,8 +889,10 @@ public class Resin
     else if (getHomeCluster() != null) {
       _bootServerConfig = joinCluster(cloudSystem);
     }
-    else {
-      throw new ConfigException(L().l("unknown server in unknown cluster"));
+    
+    if (_bootServerConfig == null) {
+      throw new ConfigException(L().l("unknown server {0} in unknown cluster",
+                                      _serverId));
     }
     
     _selfServer = cloudSystem.findServer(_bootServerConfig.getId());
@@ -952,6 +954,12 @@ public class Resin
     BootResinConfig bootResin = _bootResinConfig;
     
     BootClusterConfig bootCluster = bootResin.findCluster("");
+    
+    if (bootCluster.getPodList().size() > 0
+        && bootCluster.getPodList().get(0).getServerList().size() > 0) {
+      // server/0342
+      return null;
+    }
     
     BootServerConfig bootServer = bootCluster.createServer();
     bootServer.setId("default");

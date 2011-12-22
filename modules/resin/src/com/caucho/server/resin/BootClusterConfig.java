@@ -167,16 +167,32 @@ public class BootClusterConfig implements SchemaBean
     int index = 0;
 
     for (String address : multiServer.getAddressList()) {
-      int p = address.lastIndexOf(':');
+      boolean isExt = false;
       
-      int port = Integer.parseInt(address.substring(p + 1));
-      address = address.substring(0, p);
+      if (address.startsWith("ext:")) {
+        isExt = true;
+        
+        address = address.substring("ext:".length());
+      }
+        
+      int port = multiServer.getPort();
+      
+      int p = address.lastIndexOf(':');
+
+      if (p > 0) {
+        port = Integer.parseInt(address.substring(p + 1));
+        address = address.substring(0, p);
+      }
       
       BootServerConfig server = createServer();
       
       server.setId(multiServer.getIdPrefix() + index++);
       server.setAddress(address);
       server.setPort(port);
+      
+      if (isExt)
+        server.setExternalAddress(true);
+      
       server.addBuilderProgram(multiServer.getServerProgram());
       // server.init();
       

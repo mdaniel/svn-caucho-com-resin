@@ -105,7 +105,7 @@ public class CloudServer {
       throw new NullPointerException();
     if (pod == null)
       throw new NullPointerException();
-    
+
     _address = address;
     _port = port;
     _isSSL = isSSL;

@@ -138,12 +138,24 @@ public class BootClusterConfig {
       
       server.setId(multiServer.getIdPrefix() + index++);
       
+      boolean isExternal = false;
+      
+      if (address.startsWith("ext:")) {
+        isExternal = true;
+        address = address.substring("ext:".length());
+      }
+      
       int p = address.lastIndexOf(':');
-      int port = Integer.parseInt(address.substring(p + 1));
-      address = address.substring(0, p);
+      int port = multiServer.getPort();
+      
+      if (p > 0) {
+        port = Integer.parseInt(address.substring(p + 1));
+        address = address.substring(0, p);
+      }
       
       server.setAddress(address);
       server.setPort(port);
+      // server.setExternalAddress(isExternal);
       
       multiServer.getServerProgram().configure(server);
       

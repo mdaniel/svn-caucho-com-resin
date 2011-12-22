@@ -34,7 +34,6 @@ import java.util.ArrayList;
 import javax.annotation.PostConstruct;
 
 import com.caucho.cloud.network.ClusterServerProgram;
-import com.caucho.cloud.topology.CloudCluster;
 import com.caucho.cloud.topology.CloudPod;
 import com.caucho.cloud.topology.CloudServer;
 import com.caucho.config.ConfigException;
