@@ -43,14 +43,14 @@
     <resin:import path="classpath:META-INF/caucho/app-default.xml"/>
 
     <!-- enables development error pages -->
-    <resin:if test="${rvar('dev_mode')}">
+    <resin:if test="${dev_mode}">
       <development-mode-error-page/>
     </resin:if>
 
     <!--
        - Enables the proxy cache (available in Resin Professional) 
       -->
-    <proxy-cache memory-size="${rvar('proxy_cache_size')?:'64M'}">
+    <proxy-cache memory-size="${proxy_cache_size?:'64M'}">
      <!-- Vary header rewriting for IE -->
       <rewrite-vary-as-private/>
     </proxy-cache>
@@ -67,33 +67,33 @@
 
     <!-- defaults for each server, i.e. JVM -->
     <server-default>
-      <jvm-arg-line>${rvar('jvm_args')}</jvm-arg-line>
+      <jvm-arg-line>${jvm_args}</jvm-arg-line>
 
       <!--
          - If starting Resin as root on Unix, specify the user name
          - and group name for the web server user.
        -->
-      <user-name>${rvar('setuid_user')}</user-name>
-      <group-name>${rvar('setuid_group')}</group-name>
+      <user-name>${setuid_user}</user-name>
+      <group-name>${setuid_group}</group-name>
 
       <!-- The http port -->
-      <http address="*" port="${rvar('http')}"/>
+      <http address="*" port="${http}"/>
 
       <!-- SSL port configuration: -->
       <resin:choose>
-      <resin:when test="${rvar('openssl_file') != null}">
-        <http port="${rvar('https')}">
+      <resin:when test="${openssl_file != null}">
+        <http port="${https}">
           <openssl>
-            <certificate-file>${rvar('openssl_file')}</certificate-file>
-            <certificate-key-file>${rvar('openssl_key')}</certificate-key-file>
+            <certificate-file>${openssl_file}</certificate-file>
+            <certificate-key-file>${openssl_key}</certificate-key-file>
             <password>
-              <resin:Password>${rvar('openssl_password')}</resin:Password>
+              <resin:Password>${openssl_password}</resin:Password>
             </password>
           </openssl>
         </http>
       </resin:when>
-      <resin:when test="${rvar('jsse_keystore_file') != null}">
-        <http address="*" port="${rvar('https')}">
+      <resin:when test="${jsse_keystore_file != null}">
+        <http address="*" port="${https}">
           <jsse-ssl>
             <key-store-type>${jsse_keystore_type?:'jks'}</key-store-type>
             <key-store-file>${jsse_keystore_file}</key-store-file>
@@ -104,7 +104,7 @@
         </http>
       </resin:when>
       <resin:when test="${class_exists('sun.security.x509.CertAndKeyGen')}">
-        <http address="*" port="${rvar('https')}">
+        <http address="*" port="${https}">
           <jsse-ssl self-signed-certificate-name="resin@localhost"/>
         </http>
       </resin:when>
@@ -138,7 +138,7 @@
         <cache-mapping url-pattern="*.js" max-age="60s"/>
 
         <session-config>
-          <use-persistent-store>${rvar('session_store')}</use-persistent-store>
+          <use-persistent-store>${session_store}</use-persistent-store>
           
           <enable-url-rewriting>false</enable-url-rewriting>
         </session-config>
@@ -147,14 +147,14 @@
       <!--
          - Administration application /resin-admin
         -->
-      <resin:if test="${rvar('web_admin_enable')}">
+      <resin:if test="${web_admin_enable}">
         <web-app id="/resin-admin" root-directory="${resin.root}/doc/admin">
           <prologue>
             <!-- only allow access from internal IP (10.*,192.168.*,127.*) -->
             <resin:set var="resin_admin_external"
-                       value="${rvar('web_admin_external')}"/>
+                       value="${web_admin_external}"/>
             <resin:set var="resin_admin_insecure"
-                       value="${! rvar('web_admin_ssl')}"/>
+                       value="${! web_admin_ssl}"/>
           </prologue>
         </web-app>
       </resin:if>
