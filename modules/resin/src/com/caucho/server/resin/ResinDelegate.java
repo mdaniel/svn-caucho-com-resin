@@ -186,6 +186,13 @@ public class ResinDelegate
   protected void addServices()
   {
     TempFileService.createAndAddService();
+    
+    createManagementMBean();
+  }
+  
+  protected ManagementAdmin createManagementMBean()
+  {
+    return new ManagementAdmin(_resin);
   }
 
   /**
