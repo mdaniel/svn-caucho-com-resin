@@ -29,6 +29,11 @@
 
 package com.caucho.server.resin;
 
+import java.io.ByteArrayInputStream;
+import java.io.ByteArrayOutputStream;
+import java.io.IOException;
+import java.io.InputStream;
+
 import com.caucho.management.server.AbstractManagedObject;
 import com.caucho.management.server.ManagementMXBean;
 
@@ -60,5 +65,22 @@ public class ManagementAdmin extends AbstractManagedObject
   public String hello()
   {
     return "hello, world";
+  }
+  
+  public InputStream test(String value, InputStream is)
+    throws IOException
+  {
+    ByteArrayOutputStream out = new ByteArrayOutputStream();
+    
+    out.write(value.getBytes());
+    out.write('\n');
+    
+    int ch;
+    
+    while ((ch = is.read()) >= 0) {
+      out.write(ch);
+    }
+    
+    return new ByteArrayInputStream(out.toByteArray());
   }
 }

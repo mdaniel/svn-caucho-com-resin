@@ -32,6 +32,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.io.PrintWriter;
+import java.lang.annotation.Annotation;
 import java.lang.reflect.Method;
 import java.security.Principal;
 import java.util.HashMap;
@@ -43,6 +44,7 @@ import javax.servlet.http.HttpServletResponse;
 
 import com.caucho.config.ConfigException;
 import com.caucho.jmx.Jmx;
+import com.caucho.jmx.MXName;
 import com.caucho.management.server.ManagementMXBean;
 import com.caucho.util.L10N;
 import com.caucho.vfs.Vfs;
@@ -69,25 +71,26 @@ public class AdminRestServlet extends HttpServlet {
                       HttpServletResponse res)
     throws IOException, ServletException
   {
-    PrintWriter out = res.getWriter();
-    
     Principal user = req.getUserPrincipal();
     
     if (user == null) {
       res.setStatus(HttpServletResponse.SC_FORBIDDEN);
       
+      PrintWriter out = res.getWriter();
       out.println(L.l("admin requires a valid user"));
       return;
     }
     else if (! req.isUserInRole("resin-admin")) {
       res.setStatus(HttpServletResponse.SC_FORBIDDEN);
       
+      PrintWriter out = res.getWriter();
       out.println(L.l("admin requires a user in the resin-admin role"));
       return;
     }
     else if (_isRequireSecure && ! req.isSecure()) {
       res.setStatus(HttpServletResponse.SC_FORBIDDEN);
       
+      PrintWriter out = res.getWriter();
       out.println(L.l("admin requires a secure connection"));
       return;
     }
@@ -98,6 +101,7 @@ public class AdminRestServlet extends HttpServlet {
       res.setStatus(500);
       res.setContentType("text/plain");
       
+      PrintWriter out = res.getWriter();
       out.println(L.l("action parameter is required"));
       return;
     }
@@ -108,6 +112,7 @@ public class AdminRestServlet extends HttpServlet {
       res.setStatus(500);
       res.setContentType("text/plain");
       
+      PrintWriter out = res.getWriter();
       out.println(L.l("'{0}' is an unknown action", actionName));
       return;
     }
@@ -150,8 +155,10 @@ public class AdminRestServlet extends HttpServlet {
       
       _parameterNames = new String[parameterTypes.length];
       
+      Annotation [][]paramAnn = method.getParameterAnnotations();
+      
       for (int i = 0; i < _parameterNames.length; i++) {
-        _parameterNames[i] = "p" + i;
+        _parameterNames[i] = getParamName(paramAnn, i);
       }
       
       _parameterMarshal = new Marshal[parameterTypes.length];
@@ -179,6 +186,22 @@ public class AdminRestServlet extends HttpServlet {
       if (InputStream.class.equals(method.getReturnType())) {
         _isGetStream = true;
       }
+    }
+    
+    private String getParamName(Annotation [][]paramAnn, int i)
+    {
+      if (paramAnn == null)
+        return "p" + i;
+      
+      for (Annotation ann : paramAnn[i]) {
+        if (ann.annotationType().equals(MXName.class)){
+          MXName name = (MXName) ann;
+          
+          return name.value();
+        }
+      }
+      
+      return "p" + 1;
     }
     
     String []getParameterNames()
@@ -286,7 +309,11 @@ public class AdminRestServlet extends HttpServlet {
       
       WriteStream out = Vfs.openWrite(os);
       
-      out.writeStream(is);
+      try {
+        out.writeStream(is);
+      } finally {
+        out.close();
+      }
     }
   }
   

@@ -27,28 +27,15 @@
  * @author Scott Ferguson
  */
 
-package com.caucho.management.server;
+package com.caucho.jmx;
 
-import java.io.IOException;
-import java.io.InputStream;
+import java.lang.annotation.ElementType;
+import java.lang.annotation.Retention;
+import java.lang.annotation.RetentionPolicy;
+import java.lang.annotation.Target;
 
-import com.caucho.jmx.Description;
-import com.caucho.jmx.MXName;
-
-/**
- * Management facade for Resin, used for REST.
- *
- * <pre>
- * resin:type=Management
- * </pre>
- */
-@Description("Management Facade for Resin")
-public interface ManagementMXBean extends ManagedObjectMXBean {
-  @Description("hello, world test interface")
-  public String hello();
-  
-  // XXX: temporary example until we have a real one
-  public InputStream test(@MXName("value") String value,
-                          InputStream is)
-    throws IOException;
+@Target({ElementType.PARAMETER})
+@Retention(RetentionPolicy.RUNTIME)
+public @interface MXName {
+  public String value();
 }
