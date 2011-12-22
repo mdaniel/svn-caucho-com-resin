@@ -8,7 +8,7 @@ if (!admin_init()) {
 
 $client = @new Java("com.caucho.server.admin.WebAppDeployClient");
 
-echo "<h1>WebApps</h1>\n";
+echo "<h1>" . gettext('WebApps') . "</h1>\n";
 
 $request = quercus_servlet_request();
 $is_secure = 1; //$request->isSecure();
@@ -41,8 +41,8 @@ function display_webapp_summary_page($g_mbean_server)
   echo "<div id='webapp-tabs' style='display: none'>\n";
 
   echo "<ul>\n";
-  echo " <li><a href='#webapp-active'>Active</a></li>\n";
-  echo " <li><a href='#webapp-idle'>Idle</a></li>\n";
+  echo " <li><a href='#webapp-active'>" . gettext('Active') . "</a></li>\n";
+  echo " <li><a href='#webapp-idle'>" . gettext('Idle') . "</a></li>\n";
   echo "</ul>\n";
 
   echo "<div id='webapp-active'>\n";
@@ -66,7 +66,7 @@ function display_webapp_summary($g_mbean_server, $is_idle)
   $cluster = $g_mbean_server->Cluster;
   $cluster_name = empty($cluster->Name) ? "default" : $cluster->Name;
 
-  echo "<h1>Cluster: $cluster_name</h1>";
+  echo "<h1>" . gettext('Cluster') . ": $cluster_name</h1>";
   echo "<div class='section'>\n";
 
   $servers = $cluster->Servers;
@@ -79,7 +79,7 @@ function display_webapp_summary($g_mbean_server, $is_idle)
 
     $hostName = empty($host->HostName) ? "default" : $host->HostName;
 
-    echo "<h2>Host: $hostName</h2>\n";
+    echo "<h2>" . gettext('Host') . ": $hostName</h2>\n";
     echo "<div class='section'>\n";
 
     $webapps = $host->WebApps;
@@ -98,17 +98,35 @@ function display_webapp_summary($g_mbean_server, $is_idle)
 
       $id = "sw_webapp_" . ($is_idle ? "idle" : "") . $webapp_id;
 
-      echo "<h3>WebApp: $webapp_name</h3>\n";
+      echo "<h3>" . gettext('WebApp') . " : $webapp_name</h3>\n";
 
       echo "<table class='data webapp-data'>\n";
       echo " <tr>\n";
       echo "	<th scope='col' title='Expand'></th>\n";
-      echo "  <th scope='col' title='The context root of the application'>Path</th>\n";
-      echo "  <th scope='col' title='The current status of the application'>State</th>\n";
-      echo "  <th scope='col' title='How long the application has been running'>Uptime</th>\n";
-      echo "	<th scope='col' colspan='2' title='The number of HTTP 5xx errors the application has experienced and the time of the most recent 5xx error'>500</th>\n";
-      echo "	<th scope='col' title='Version of cluster-wide deployment, where applicable'>Deploy</th>\n";
-      echo "  <th scope='col' title='Start, stop, and restart the application on the current server'>Actions</th>\n";
+
+      echo "  <th scope='col' title='" . gettext('The context root of the application') . "'>";
+      echo gettext('Path');
+      echo "  </th>\n";
+
+      echo "  <th scope='col' title='" . gettext('The current status of the application') . "'>";
+      echo gettext('State');
+      echo "  </th>\n";
+
+      echo "  <th scope='col' title='" . gettext('How long the application has been running') . "'>";
+      echo gettext('Uptime');
+      echo "  </th>\n";
+
+      echo "  <th scope='col' colspan='2' title='" . gettext('The number of HTTP 5xx errors the application has experienced and the time of the most recent 5xx error') . "'>";
+      echo gettext('500 errors');
+      echo "  </th>\n";
+
+      echo "  <th scope='col' title='" . gettext('Version of cluster-wide deployment, where applicable') . "'>";
+      echo gettext('Deploy');
+      echo "  </th>\n";
+
+      echo "  <th scope='col' title='" . gettext('Start, stop, and restart the application on the current server') . "'>";
+      echo gettext('Actions');
+      echo "  </th>\n";
       echo " </tr>\n";
 
       echo " <tr class='" . row_style($count++) . "'>";
@@ -162,10 +180,12 @@ function display_webapp($webapp, &$is_deploy_valid)
   echo " </td>\n";
 
   echo "<td class='" . format_ago_class($webapp->StartTime) . "'>";
+
   if ($webapp->State == "ACTIVE")
-		echo format_ago($webapp->StartTime)
-	else
-          echo "&nbsp;";
+    echo format_ago($webapp->StartTime);
+  else
+    echo "&nbsp;";
+
   echo "</td>\n";
 
   format_ago_td_pair($webapp->Status500CountTotal, $webapp->Status500LastTime);

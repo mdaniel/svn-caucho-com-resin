@@ -40,12 +40,16 @@ else  {
   $active = $profile->active;
 
   if ($active) {
-    echo "<h2>Profile";
+    echo "<h2>";
+    echo gettext('Profile');
     print_help("Profile");
-    echo " Active for Server " . $g_server->Id;
+    echo " " . gettext('Active for Server') . $g_server->Id;
     echo "</h2>";
     echo "<form action='?q=profile' method='post' style='display:inline'>";
-    echo "Sampling Rate: <strong>{$profile->period}ms</strong> Depth: <strong>{$profile->depth}</strong>";
+    echo gettext('Sampling Rate');
+    echo ": <strong>{$profile->period}ms</strong>";
+    echo gettext('Depth');
+    echo ": <strong>{$profile->depth}</strong>";
     echo "<input type='hidden' name='period' ";
     echo        "value='" . $_POST['period'] . "'/>";
     echo "<input type='hidden' name='depth' ";
@@ -61,13 +65,15 @@ else  {
     echo "</form><br/>";
   } else {
     echo "<h2>";
-    echo "Profile";
+    echo gettext('Profile');
     print_help("Profile");
-    echo " Stopped";
+    echo " " . gettext('Stopped');
     echo "</h2>";
 
     echo "<form action='?q=profile' method='post' style='display:inline'>";
-    echo "<label for='period'>Sampling Rate</label>: <select name='period' id='period'>";
+    echo "<label for='period'>";
+    echo gettext('Sampling Rate');
+    echo "</label>: <select name='period' id='period'>";
 
     $PERIODS = Array(10, 25, 100, 250, 1000, 2500, 10000);
 
@@ -87,7 +93,9 @@ else  {
 
     echo "</select>";
 
-    echo " &nbsp;<label for='depth'>Depth</label>: <select name='depth' id='depth'>";
+    echo " &nbsp;<label for='depth'>";
+    echo gettext('Depth');
+    echo "</label>: <select name='depth' id='depth'>";
 
     $DEPTHS = Array(1, 2, 4, 8, 12, 16, 20, 32, 250);
 
@@ -107,7 +115,9 @@ else  {
 
     echo "</select>";
 
-    echo " &nbsp;<input type='submit' name='action' value='start'/><br/>";
+    echo " &nbsp;<input type='submit' name='action' value='";
+    echo gettext('start');
+    echo "'/><br/>";
 
     echo "<span title='Highlight Quercus function names in stacks and ";
     echo              "decode Quercus-generated Java class names and ";
@@ -213,7 +223,7 @@ function display_profile_results($partition, $groups, $profile)
 
     $count++;
 
-    echo "<div id='${name}-tab' class='profile-tab'>"
+    echo "<div id='${name}-tab' class='profile-tab'>";
     print_profile_tab($entries, $name, $count, $profile);
     echo "</div>\n";
   }
@@ -237,8 +247,8 @@ function print_profile_tab($entries, $name, $count, $profile)
     $total_ticks += $entries[$i]->getCount();
   }
 
-  echo "<tr class='head'>"
-  echo "<th colspan='5' align='left'>"
+  echo "<tr class='head'>";
+  echo "<th colspan='5' align='left'>";
   echo "<span id='sw_$name' class='switch'></span>";
   echo "$name (" . sizeof($entries) . ")";
 
