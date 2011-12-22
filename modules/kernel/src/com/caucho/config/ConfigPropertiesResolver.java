@@ -32,6 +32,7 @@ package com.caucho.config;
 import javax.el.ELContext;
 import javax.el.ELResolver;
 
+import com.caucho.config.Config.ConfigProperties;
 import com.caucho.el.AbstractVariableResolver;
 
 /**
@@ -39,6 +40,10 @@ import com.caucho.el.AbstractVariableResolver;
  *
  */
 public class ConfigPropertiesResolver extends AbstractVariableResolver {
+  public static final String []RESIN_PROPERTIES = new String[] {
+    "rvar0", "rvar1", "rvar2", "rvar3", "rvar4"
+  };
+  
   /**
    * Creates the resolver
    */
@@ -71,7 +76,27 @@ public class ConfigPropertiesResolver extends AbstractVariableResolver {
     else
       return null;
     
-    Object value = Config.getProperty(var);
+    ConfigProperties properties = Config.getConfigProperties();
+    
+    if (properties == null)
+      return null;
+    
+    Object value = null;
+    
+    for (String resinProp: RESIN_PROPERTIES) {
+      String resinKey = (String) properties.get(resinProp);
+      
+      if (resinKey == null)
+        break;
+      
+      value = properties.get(resinKey + '.' + var);
+      
+      if (value != null)
+        break;
+    }
+    
+    if (value == null)
+      value = Config.getProperty(var);
 
     if (value != null) {
       env.setPropertyResolved(true);

@@ -296,6 +296,12 @@ public abstract class AbstractBootCommand implements BootCommand {
     return false;
   }
   
+  @Override
+  public boolean isRemote(WatchdogArgs args)
+  {
+    return args.getArg("address") != null;
+  }
+  
   static class BootOptionComparator implements Comparator<BootOption> {
     public int compare(BootOption a, BootOption b)
     {

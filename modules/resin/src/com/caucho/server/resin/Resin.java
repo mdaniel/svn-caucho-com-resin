@@ -48,6 +48,7 @@ import com.caucho.cloud.network.NetworkClusterSystem;
 import com.caucho.cloud.network.NetworkListenSystem;
 import com.caucho.cloud.topology.CloudServer;
 import com.caucho.cloud.topology.CloudSystem;
+import com.caucho.config.Config;
 import com.caucho.config.ConfigException;
 import com.caucho.config.inject.WebBeansAddLoaderListener;
 import com.caucho.config.program.ConfigProgram;
@@ -897,6 +898,9 @@ public class Resin
     if (_selfServer ==  null)
       throw new ConfigException(L().l("unexpected empty server"));
     
+    Config.setProperty("rvar0", _selfServer.getId());
+    Config.setProperty("rvar1", _selfServer.getCluster().getId());
+
     getDelegate().validateServerCluster();
     
     // NetworkClusterSystem.createAndAddService(_selfServer);
@@ -918,8 +922,6 @@ public class Resin
     }
     
     CloudServer cloudServer = getDelegate().joinCluster(cloudSystem);
-    
-    System.out.println("JOIN: " + cloudServer);
 
     if (cloudServer == null) {
       throw new ConfigException(L().l("unable to join cluster {0}",

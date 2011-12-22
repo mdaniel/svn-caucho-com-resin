@@ -12,6 +12,9 @@
 
 <s2 title="4.0.25 - snapshot">
 <ul>
+<li>config: rvar app-0.http when read in watchdog needs current server-id (#4900)</li>
+<li>config:  ${foo} now uses rvar search path automatically</li>
+<li>cli: add $HOME/.resin and --mode</li>
 <li>cli: add config-cat and config-ls for debugging</li>
 <li>websocket: pass autobahn test suite</li>
 <li>config: added $disable_compiling_loader to properties (#4787, rep by systhemes)</li>

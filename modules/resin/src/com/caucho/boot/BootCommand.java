@@ -54,4 +54,6 @@ public interface BootCommand {
   public boolean isStart();
   public boolean isShutdown();
   public boolean isConsole();
+
+  public boolean isRemote(WatchdogArgs args);
 }

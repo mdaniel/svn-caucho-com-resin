@@ -155,6 +155,7 @@ public class BootConfig
     // server/4342
     Config.setProperty("server_id", _serverId);
     Config.setProperty("serverId", _serverId);
+    Config.setProperty("rvar0", _serverId);
 
     InjectManager cdiManager = InjectManager.create();
     

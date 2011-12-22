@@ -184,6 +184,8 @@ class WatchdogManager implements AlarmListener {
     Config.setProperty("java", elContext.getJavaVar());
     Config.setProperty("system", System.getProperties());
     Config.setProperty("getenv", System.getenv());
+    
+    Config.setProperty("rvar0", _args.getServerId());
 
     ResinConfigLibrary.configure(cdiManager);
     ResinServerConfigLibrary.configure(cdiManager);
@@ -578,6 +580,8 @@ class WatchdogManager implements AlarmListener {
 
     Vfs.setPwd(args.getRootDirectory());
     BootResinConfig resin = new BootResinConfig(_system, args);
+    
+    Config.setProperty("rvar0", args.getServerId());
 
     config.configure(resin,
                      args.getResinConf(),

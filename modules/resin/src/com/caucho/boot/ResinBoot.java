@@ -166,7 +166,8 @@ public class ResinBoot
     Config.setProperty("getenv", System.getenv());
     // server/4342
     Config.setProperty("server_id", _args.getServerId());
-
+    Config.setProperty("rvar0", _args.getServerId());
+    
     ResinConfigLibrary.configure(beanManager);
     ResinServerConfigLibrary.configure(beanManager);
     
@@ -174,6 +175,11 @@ public class ResinBoot
     if (_args.getUserProperties() != null && _args.getUserProperties().canRead()) {
       ResinProperties properties = new ResinProperties();
       properties.setPath(_args.getUserProperties());
+      
+      String mode = _args.getMode();
+      if (mode == null && _args.getCommand().isRemote(_args)) {
+        mode = "remote";
+      }
       properties.setMode(_args.getMode());
       
       properties.init();

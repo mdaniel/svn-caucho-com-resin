@@ -159,6 +159,11 @@ public class Config {
     else
       return null;
   }
+  
+  public static ConfigProperties getConfigProperties()
+  {
+    return _envProperties.get();
+  }
 
   /**
    * Sets a environment property

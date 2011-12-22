@@ -77,7 +77,7 @@ public class PasswordEncryptCommand extends AbstractBootCommand
     if (password == null)
       throw new ConfigException(L.l("password-encrypt requires a -password argument"));
     
-    System.out.println("password: " + encrypt(password, salt));
+    System.out.println("password: {RESIN}" + encrypt(password, salt));
 
     return 0;
   }
