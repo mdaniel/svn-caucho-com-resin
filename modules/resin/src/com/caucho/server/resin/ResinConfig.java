@@ -173,6 +173,11 @@ public class ResinConfig implements EnvironmentBean
   {
   }
   
+  @Configurable
+  public void setHomeCluster(String homeCluster)
+  {
+  }
+  
   /**
    * Overrides standard <logger> configuration to change to 
    * system-class-loader.

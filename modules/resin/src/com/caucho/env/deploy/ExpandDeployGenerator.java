@@ -361,6 +361,14 @@ abstract public class ExpandDeployGenerator<E extends ExpandDeployController<?>>
   /**
    * Sets true to enable versioning
    */
+  public void setMultiversionRouting(boolean isVersioning)
+  {
+    _isVersioning = isVersioning;
+  }
+
+  /**
+   * Sets true to enable versioning
+   */
   public boolean isVersioning()
   {
     return _isVersioning;
