@@ -63,7 +63,7 @@ public class HttpPostRequest
     if (_body == null)
       return false;
     
-    HttpConnection conn = getHttpConnection();
+    CurlHttpConnection conn = getHttpConnection();
     
     conn.setRequestProperty("Content-Type",
                             _body.getContentType());
@@ -84,7 +84,7 @@ public class HttpPostRequest
   {
     super.transfer(env);
 
-    HttpConnection conn = getHttpConnection();
+    CurlHttpConnection conn = getHttpConnection();
     OutputStream out = conn.getOutputStream();
     
     //out = new TestOutputStream(out);

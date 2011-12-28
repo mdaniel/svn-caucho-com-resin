@@ -63,7 +63,7 @@ public class CurlHttpRequest
   private static final L10N L = new L10N(CurlHttpRequest.class);
 
   private CurlResource _curl;
-  private HttpConnection _conn;
+  private CurlHttpConnection _conn;
 
   public CurlHttpRequest(CurlResource curlResource)
   {
@@ -101,7 +101,7 @@ public class CurlHttpRequest
     if (_curl.getIsProxying()) {
       URL proxyURL = getURL(env, _curl.getProxyURL(), _curl.getProxyPort());
 
-      _conn = HttpConnection.createConnection(url,
+      _conn = CurlHttpConnection.createConnection(url,
                                               _curl.getUsername(),
                                               _curl.getPassword(),
                                               _curl,
@@ -111,7 +111,7 @@ public class CurlHttpRequest
                                               _curl.getProxyType());
     }
     else {
-      _conn = HttpConnection.createConnection(url,
+      _conn = CurlHttpConnection.createConnection(url,
                                               _curl.getUsername(),
                                               _curl.getPassword(),
                                               _curl);
@@ -257,7 +257,7 @@ public class CurlHttpRequest
     return _curl;
   }
 
-  protected final HttpConnection getHttpConnection()
+  protected final CurlHttpConnection getHttpConnection()
   {
     return _conn;
   }

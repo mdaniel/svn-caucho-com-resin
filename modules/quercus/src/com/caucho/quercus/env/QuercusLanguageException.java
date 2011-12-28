@@ -45,6 +45,11 @@ public class QuercusLanguageException extends QuercusException
   
   private Value _value;
   
+  protected QuercusLanguageException()
+  {
+    _value = Env.getCurrent().wrapJava(this);
+  }
+  
   public QuercusLanguageException(Value value)
   {
     super(value.toString());
@@ -57,6 +62,7 @@ public class QuercusLanguageException extends QuercusException
    */
   public Value getValue()
   {
+    System.out.println("GETV: " + _value + " " + _value.getClass());
     return _value;
   }
   

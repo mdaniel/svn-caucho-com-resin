@@ -293,7 +293,7 @@ public class JavaClassDef extends ClassDef {
   }
 
   protected void addInterfaces(HashSet<String> interfaceSet,
-                               Class type,
+                               Class<?> type,
                                boolean isTop)
   {
     if (type == null)
@@ -303,7 +303,7 @@ public class JavaClassDef extends ClassDef {
     interfaceSet.add(type.getSimpleName().toLowerCase(Locale.ENGLISH));
 
     if (type.getInterfaces() != null) {
-      for (Class iface : type.getInterfaces()) {
+      for (Class<?> iface : type.getInterfaces()) {
         addInterfaces(interfaceSet, iface, false);
       }
     }
@@ -314,10 +314,10 @@ public class JavaClassDef extends ClassDef {
 
   private boolean hasInterface(String name, Class type)
   {
-    Class[] interfaces = type.getInterfaces();
+    Class<?>[] interfaces = type.getInterfaces();
 
     if (interfaces != null) {
-      for (Class intfc : interfaces) {
+      for (Class<?> intfc : interfaces) {
         if (intfc.getSimpleName().equalsIgnoreCase(name))
           return true;
 
@@ -524,7 +524,7 @@ public class JavaClassDef extends ClassDef {
 
     if (fieldPair != null) {
       try {
-        Class type = fieldPair._field.getType();
+        Class<?> type = fieldPair._field.getType();
         Object marshaledValue = fieldPair._marshal.marshal(env, value, type);
         fieldPair._field.set(qThis.toJavaObject(), marshaledValue);
 
@@ -1304,6 +1304,7 @@ public class JavaClassDef extends ClassDef {
         __call = new JavaMethod(moduleContext, method);
       } else if ("__toString".equals(method.getName())) {
         __toString = new JavaMethod(moduleContext, method);
+        _functionMap.put(method.getName(), __toString);
       } else {
         if (method.getName().startsWith("quercus_"))
           throw new UnsupportedOperationException(

@@ -168,7 +168,7 @@ public final class ClusterServer {
 
     _bamAddress = _serverDomainId + ".admin.resin";
     
-    if (! cloudServer.isExternal()) {
+    if (! isExternal()) {
       _address = cloudServer.getAddress();
     }
     else if (cloudServer.isSelf()) {
@@ -278,6 +278,11 @@ public final class ClusterServer {
   public String getAddress()
   {
     return _address;
+  }
+  
+  private boolean isExternal()
+  {
+    return _cloudServer.isExternal();
   }
   
   public boolean isSSL()
@@ -816,7 +821,7 @@ public final class ClusterServer {
     if (socketPool != null)
       return socketPool.getFactory();
     
-    if (! _cloudServer.isExternal())
+    if (! isExternal())
       return null;
     
     String address = _clusterSystem.getLocalSocketAddress(this);
@@ -851,7 +856,7 @@ public final class ClusterServer {
     if (socketPool != null)
       return socketPool.getFactory();
     
-    if (! _cloudServer.isExternal())
+    if (! isExternal())
       return null;
     
     return null;
@@ -907,7 +912,7 @@ public final class ClusterServer {
 
     if (! isSelf()
         && getCloudServer().getPort() >= 0
-        && ! getCloudServer().isExternal()) {
+        && ! isExternal()) {
       ClientSocketFactory clusterFactory
       = createClusterPool(_clusterSystem.getServerId(), getAddress());
       clusterFactory.init();
@@ -1042,6 +1047,16 @@ public final class ClusterServer {
     
     boolean isActive = _isHeartbeatActive.getAndSet(false);
     
+    SocketPool clusterSocketPool;
+    
+    if (isExternal())
+      clusterSocketPool = _clusterSocketPool.getAndSet(null);
+    else
+      clusterSocketPool = _clusterSocketPool.get();
+
+    if (clusterSocketPool != null)
+      clusterSocketPool.getFactory().notifyHeartbeatStop();
+
     if (! isActive)
       return false;
     
@@ -1050,16 +1065,8 @@ public final class ClusterServer {
     log.warning(this + " notify-heartbeat-stop");
     
     _cloudServer.onHeartbeatStop();
-    
-    SocketPool clusterSocketPool = _clusterSocketPool.get();
-
-    if (clusterSocketPool != null)
-      clusterSocketPool.getFactory().notifyHeartbeatStop();
 
     _clusterSystem.notifyHeartbeatStop(this);
-    
-    if (_cloudServer.isExternal())
-      _clusterSocketPool.compareAndSet(clusterSocketPool, null);
 
     return true;
   }

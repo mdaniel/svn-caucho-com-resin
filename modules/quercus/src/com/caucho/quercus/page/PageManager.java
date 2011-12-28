@@ -39,6 +39,7 @@ import com.caucho.vfs.IOExceptionWrapper;
 import com.caucho.vfs.Path;
 
 import java.io.IOException;
+import java.lang.ref.SoftReference;
 import java.util.logging.*;
 
 /**
@@ -60,8 +61,8 @@ public class PageManager
 
   private boolean _isRequireSource = true;
 
-  protected LruCache<Path,QuercusProgram> _programCache
-    = new LruCache<Path,QuercusProgram>(1024);
+  protected LruCache<Path,SoftReference<QuercusProgram>> _programCache
+    = new LruCache<Path,SoftReference<QuercusProgram>>(1024);
 
   private boolean _isClosed;
   
@@ -164,7 +165,7 @@ public class PageManager
   public void setPageCacheSize(int size)
   {
     if (size >= 0 && size != _programCache.getCapacity())
-      _programCache = new LruCache<Path,QuercusProgram>(size);
+      _programCache = new LruCache<Path,SoftReference<QuercusProgram>>(size);
   }
 
   /**
@@ -226,9 +227,11 @@ public class PageManager
     throws IOException
   {
     try {
-      QuercusProgram program;
+      SoftReference<QuercusProgram> programRef;
 
-      program = _programCache.get(path);
+      programRef = _programCache.get(path);
+      
+      QuercusProgram  program = programRef != null ? programRef.get() : null;
 
       boolean isModified = false;
       
@@ -263,7 +266,7 @@ public class PageManager
                                         line);
         }
 
-        _programCache.put(path, program);
+        _programCache.put(path, new SoftReference<QuercusProgram>(program));
       }
 
       if (program.getCompiledPage() != null)

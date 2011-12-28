@@ -35,6 +35,8 @@ import com.caucho.quercus.env.Env;
 import com.caucho.quercus.env.StringValue;
 import com.caucho.quercus.env.StringBuilderValue;
 import com.caucho.quercus.env.SessionArrayValue;
+import com.caucho.quercus.env.Value;
+import com.caucho.quercus.lib.ResinModule;
 import com.caucho.util.*;
 
 import java.io.IOException;
@@ -405,6 +407,7 @@ public class QuercusSessionManager
 
     if (session != null) {
       if (session.inUse()) {
+        System.out.println("USE:" + isNew);
         return (SessionArrayValue)session.copy(env);
       }
     }
@@ -414,12 +417,17 @@ public class QuercusSessionManager
 
     if (isNew) {
       isNew = ! load(env, session, now);
+      System.out.println("LOAD:" + isNew);
     }
     else if (! getSaveOnlyOnShutdown() && ! session.load()) {
       // if the load failed, then the session died out from underneath
       session.reset(now);
+      System.out.println("SESSION-RESET:");
       isNew = true;
     }
+    
+    System.out.println("VALUE: " + session);
+    ResinModule.resin_var_dump(env, new Value[] { session });
 
     if (! isNew)
       session.setAccess(now);

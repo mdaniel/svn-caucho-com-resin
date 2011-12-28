@@ -44,7 +44,7 @@ import javax.net.ssl.SSLPeerUnverifiedException;
  * Represents a HttpURLConnection wrapper.
  */
 public class HttpsConnection
-  extends HttpConnection
+  extends CurlHttpConnection
 {
   protected HttpsConnection(URL url,
                             String username,

@@ -1700,7 +1700,11 @@ public final class HttpServletRequestImpl extends AbstractCauchoRequest
       }
     }
     
+    _cookiesIn = null;
     _request = null;
+
+    // server/1lg0
+    _response.closeImpl();
   }
 
   public void cleanup()

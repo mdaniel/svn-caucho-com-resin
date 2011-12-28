@@ -260,7 +260,7 @@ public class Regexp {
   }
   
   public boolean isGlobal() { return _isGlobal; }
-  public boolean ignoreCase() { return _ignoreCase; }
+  public boolean isIgnoreCase() { return _ignoreCase; }
 
   static StringValue fromUtf8(StringValue source)
   {
@@ -280,7 +280,7 @@ public class Regexp {
         }
         
         char ch2 = source.charAt(++i);
-
+        
         target.append((char) (((ch & 0x1f) << 6)
                               + (ch2 & 0x3f)));
       }

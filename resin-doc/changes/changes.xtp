@@ -12,6 +12,7 @@
 
 <s2 title="4.0.25 - snapshot">
 <ul>
+<li>async: comet memory retention of HttpResponse needs unlink (#4907, rep by Richard Mccluskey)</li>
 <li>config: rvar app-0.http when read in watchdog needs current server-id (#4900)</li>
 <li>config:  ${foo} now uses rvar search path automatically</li>
 <li>cli: add $HOME/.resin and --mode</li>

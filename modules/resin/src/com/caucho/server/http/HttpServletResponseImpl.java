@@ -1613,7 +1613,8 @@ public final class HttpServletResponseImpl extends AbstractCauchoResponse
   public void setForwardEnclosed(boolean isForwardEnclosed) {
   }
 
-  public boolean isForwardEnclosed() {
+  public boolean isForwardEnclosed()
+  {
     return false;
   }
 

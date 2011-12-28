@@ -33,6 +33,7 @@ import com.caucho.java.WorkDir;
 import com.caucho.quercus.*;
 import com.caucho.quercus.expr.Expr;
 import com.caucho.quercus.lib.ErrorModule;
+import com.caucho.quercus.lib.ResinModule;
 import com.caucho.quercus.lib.VariableModule;
 import com.caucho.quercus.lib.OptionsModule;
 import com.caucho.quercus.lib.file.FileModule;
@@ -1667,9 +1668,11 @@ public class Env
 
     _javaSession = _request.getSession(true);
 
-    if (create && _javaSession.getId().length() >= 3
-               && sessionId.length() >= 3)
+    if (create 
+        && _javaSession.getId().length() >= 3
+        && sessionId.length() >= 3) {
       sessionId = _javaSession.getId().substring(0, 3) + sessionId.substring(3);
+    }
 
     SessionArrayValue session = _quercus.loadSession(this, sessionId);
 
@@ -2606,7 +2609,16 @@ public class Env
       }
 
       case _SESSION: {
-        return _globalMap.get("_SESSION");
+        envVar = _globalMap.get("_SESSION");
+
+        if (envVar == null) {
+          var = new SessionVar();
+          envVar = new EnvVarImpl(var);
+
+          _globalMap.put(name, envVar);
+        }
+        
+        return envVar;
       }
 
       case PHP_SELF: {
@@ -2811,7 +2823,7 @@ public class Env
   public Var getGlobalVar(StringValue name)
   {
     EnvVar envVar = getGlobalEnvVar(name);
-
+    
     return envVar.getVar();
   }
 

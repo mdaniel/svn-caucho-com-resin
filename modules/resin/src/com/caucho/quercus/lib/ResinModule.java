@@ -400,7 +400,21 @@ public class ResinModule
       throw new QuercusModuleException(e);
     }
   }
-
+  
+  /**
+   * Prints a debug version of the variable
+   *
+   * @param env the quercus calling environment
+   * @param v the variable to print
+   * @return the escaped stringPhp
+   */
+  public static boolean resin_dump_stack(Env env)
+  {
+    Thread.dumpStack();
+    
+    return true;
+  }
+  
   /**
    * Prints a debug version of the variable
    *
@@ -432,6 +446,7 @@ public class ResinModule
       throw new QuercusModuleException(e);
     }
   }
+  
 
   /**
    * Restore the current state

@@ -78,6 +78,7 @@ public class QuercusException extends RuntimeException
     return qExn;
   }
 
+  @Override
   public String getMessage()
   {
     String msg = super.getMessage();
@@ -105,5 +106,10 @@ public class QuercusException extends RuntimeException
   public void setQuercusStackTrace(ArrayList<String> stackTrace)
   {
     _quercusStackTrace = stackTrace;
+  }
+  
+  public String __toString()
+  {
+    return toString();
   }
 }

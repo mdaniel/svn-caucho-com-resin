@@ -636,7 +636,7 @@ class Regcomp {
 
   private IllegalRegexpException error(String msg)
   {
-    return new IllegalRegexpException(msg + " " + _pattern.getPattern());
+    return new IllegalRegexpException(msg + "\n  in " + _pattern.getPattern());
   }
 
   /**
@@ -966,12 +966,50 @@ class Regcomp {
   {
     set.setRange(a, b);
     
-    if (isIgnoreCase()) {
-      if (Character.isLowerCase(a) && Character.isLowerCase(b)) {
+    if (! isIgnoreCase())
+      return;
+   
+    if (Character.isLowerCase(a)) {
+      if (Character.isLowerCase(b)) {
         set.setRange(Character.toUpperCase(a), Character.toUpperCase(b));
       }
+      else {
+        // php/4et0
+        int min = -1;
+        int max = -1;
+          
+        for (int i = a; i < b; i++) {
+          if (Character.isLowerCase(i)) {
+            int uc = Character.toUpperCase(i);
+            
+            if (min < 0) {
+              min = uc;
+              max = uc;
+            }
+            else if (uc < min) {
+              set.setRange(min, max);
+              min = uc;
+              max = uc;
+            }
+            else {
+              max = uc;
+            }
+          }
+          else {
+            if (min > 0) {
+              set.setRange(min, max);
+              min = -1;
+            }
+          }
+        }
+          
+        if (min > 0)
+          set.setRange(min, max);
+      }
+    }
 
-      if (Character.isUpperCase(a) && Character.isUpperCase(b)) {
+    if (Character.isUpperCase(a)) {
+      if (Character.isUpperCase(b)) {
         set.setRange(Character.toLowerCase(a), Character.toLowerCase(b));
       }
     }
@@ -1182,8 +1220,7 @@ class Regcomp {
       else if ('A' <= ch && ch <= 'F')
         hex = hex * 16 + ch - 'A' + 10;
       else
-        throw new IllegalRegexpException("expected hex digit at "
-            + badChar(ch));
+        error(L.l("expected hex digit at {0}", badChar(ch)));
     }
     
     return hex;

@@ -301,15 +301,21 @@ public class WriteStream extends OutputStreamWithBuffer
     if (source == null)
       return;
 
-    /*
     if (bufferLength <= length) {
+      /*
       if (source.write(buffer, 0, writeLength,
                        buf, offset, length, false)) {
         _position += (writeLength + length);
         return;
       }
+      */
+      if (writeLength > 0)
+        source.write(buffer, 0, writeLength, false);
+      source.write(buf, offset, length, false);
+      _writeLength = 0;
+      _position += length;
+      return;
     }
-    */
     
     while (length > 0) {
       int sublen = bufferLength - writeLength;

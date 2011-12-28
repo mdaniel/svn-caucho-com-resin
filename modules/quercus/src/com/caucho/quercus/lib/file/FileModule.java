@@ -86,6 +86,8 @@ public class FileModule extends AbstractQuercusModule {
   public static final int UPLOAD_ERR_EXTENSION = 8;
 
   public static final int FILE_USE_INCLUDE_PATH = 1;
+  public static final int FILE_IGNORE_NEW_LINES = 2;
+  public static final int FILE_SKIP_EMPTY_LINES = 4;
   public static final int FILE_APPEND = 8;
 
   public static final int LOCK_SH = 1;
@@ -697,13 +699,18 @@ public class FileModule extends AbstractQuercusModule {
    */
   public static Value file(Env env,
                            StringValue filename,
-                           @Optional boolean useIncludePath,
+                           @Optional int flags,
                            @Optional Value context)
   {
     if (filename.length() == 0)
       return BooleanValue.FALSE;
 
+    boolean useIncludePath = (flags | FILE_USE_INCLUDE_PATH) != 0;
+    boolean ignoreNewLines = (flags | FILE_IGNORE_NEW_LINES) != 0;
+    boolean skipEmptyLines = (flags | FILE_SKIP_EMPTY_LINES) != 0;
+    
     try {
+      
       BinaryStream stream = fopen(env, filename, "r", useIncludePath, context);
 
       if (stream == null)
@@ -717,31 +724,41 @@ public class FileModule extends AbstractQuercusModule {
         while (true) {
           StringValue bb = env.createBinaryBuilder();
 
-          for (int ch = is.read(); ch >= 0; ch = is.read()) {
+          int ch;
+          
+          for (ch = is.read(); ch >= 0; ch = is.read()) {
             if (ch == '\n') {
-              bb.appendByte(ch);
+              if (! ignoreNewLines)
+                bb.appendByte(ch);
               break;
             }
             else if (ch == '\r') {
-              bb.appendByte('\r');
+              if (! ignoreNewLines)
+                bb.appendByte('\r');
 
               int ch2 = is.read();
 
-              if (ch2 == '\n')
-                bb.appendByte('\n');
+              if (ch2 == '\n') {
+                if (! ignoreNewLines)
+                  bb.appendByte('\n');
+              }
               else
                 is.unread();
 
               break;
             }
-            else
+            else {
               bb.appendByte(ch);
+            }
           }
 
-          if (bb.length() > 0)
-            result.append(bb);
-          else
+          if (ch < 0)
             return result;
+          else if (bb.length() > 0)
+            result.append(bb);
+          else if (! skipEmptyLines) {
+            result.append(bb);
+          }
         }
       } finally {
         is.close();

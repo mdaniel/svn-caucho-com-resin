@@ -40,21 +40,20 @@ public class ReflectionException extends QuercusLanguageException
   
   public ReflectionException()
   {
-    super(NullValue.NULL);
   }
 
   public ReflectionException(String msg)
   {
-    super(NullValue.NULL);
-    
     _message = msg;
   }
-  
+
+  @Override
   public String getMessage()
   {
     return _message;
   }
 
+  @Override
   public String getMessage(Env env)
   {
     return getMessage();

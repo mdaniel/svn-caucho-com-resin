@@ -32,6 +32,8 @@ package com.caucho.remote.websocket;
 import java.io.IOException;
 import java.io.OutputStream;
 
+import com.caucho.vfs.TempBuffer;
+
 /**
  * WebSocketOutputStream writes a single WebSocket packet.
  *
@@ -42,6 +44,8 @@ import java.io.OutputStream;
 public class WebSocketOutputStream extends OutputStream 
   implements WebSocketConstants
 {
+  private static final int BINARY_PASSTHROUGH_SIZE = 2048;
+  
   private OutputStream _os;
   private byte []_buffer;
   private int _offset;
@@ -61,6 +65,12 @@ public class WebSocketOutputStream extends OutputStream
     _os = os;
 
     _buffer = workingBuffer;
+  }
+
+  public WebSocketOutputStream(OutputStream os)
+    throws IOException
+  {
+    this(os, TempBuffer.allocate().getBuffer());
   }
   
   public void init()
@@ -97,6 +107,27 @@ public class WebSocketOutputStream extends OutputStream
     
     byte []wsBuffer = _buffer;
 
+    if (length >= BINARY_PASSTHROUGH_SIZE) {
+      complete(false);
+      
+      while (length > 0) {
+        int sublen = length;
+        
+        if (sublen >= 0x10000)
+          sublen = 0x10000;
+        
+        int writeOffset = fillHeader(false, sublen + 4);
+        
+        _os.write(wsBuffer, writeOffset, 4 - writeOffset);
+        _os.write(buffer, offset, sublen);
+        
+        offset += sublen;
+        length -= sublen;
+      }
+      
+      return;
+    }
+      
     while (length > 0) {
       if (_offset == wsBuffer.length)
         complete(false);
@@ -141,15 +172,29 @@ public class WebSocketOutputStream extends OutputStream
     throws IOException
   {
     byte []buffer = _buffer;
-
+    
     int offset = _offset;
     _offset = 4;
+    
+    int writeOffset = fillHeader(isFinal, offset); 
 
     // don't flush empty chunk
-    if (offset == 4 && ! isFinal)
+    if (writeOffset < 0)
       return;
+    
+    _os.write(buffer, writeOffset, offset - writeOffset);
+  }
 
-    int length = offset - 4;
+  private int fillHeader(boolean isFinal, int tailOffset)
+    throws IOException
+  {
+    byte []buffer = _buffer;
+
+    // don't flush empty chunk
+    if (tailOffset == 4 && ! isFinal)
+      return -1;
+
+    int length = tailOffset - 4;
     
     int code1;
     
@@ -166,16 +211,19 @@ public class WebSocketOutputStream extends OutputStream
     if (length < 0x7e) {
       buffer[2] = (byte) code1;
       buffer[3] = (byte) (length);
-      
-      _os.write(buffer, 2, offset - 2);
+    
+      return 2;
     }
-    else if (length >= 0x7e) {
+    else if (length <= 0xffff) {
       buffer[0] = (byte) code1;
       buffer[1] = (byte) 0x7e;
       buffer[2] = (byte) (length >> 8);
       buffer[3] = (byte) (length);
       
-      _os.write(buffer, 0, offset);
+      return 0;
+    }
+    else {
+      throw new IllegalStateException();
     }
   }
   

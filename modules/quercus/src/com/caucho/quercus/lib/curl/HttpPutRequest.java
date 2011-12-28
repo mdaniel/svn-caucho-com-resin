@@ -69,7 +69,7 @@ public class HttpPutRequest
   {
     super.transfer(env);
 
-    HttpConnection conn = getHttpConnection();
+    CurlHttpConnection conn = getHttpConnection();
     OutputStream out = conn.getOutputStream();
 
     CurlResource curl = getCurlResource();

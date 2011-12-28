@@ -39,7 +39,7 @@ import java.net.*;
 /**
  * Represents a HttpURLConnection wrapper.
  */
-public class HttpConnection
+public class CurlHttpConnection
 {
   private HttpURLConnection _conn;
 
@@ -59,7 +59,7 @@ public class HttpConnection
   private String _authorization;
   private String _proxyAuthorization;
 
-  protected HttpConnection(URL url,
+  protected CurlHttpConnection(URL url,
                            String username,
                            String password)
     throws IOException
@@ -69,7 +69,7 @@ public class HttpConnection
     _password = password;
   }
 
-  public HttpConnection(URL url,
+  public CurlHttpConnection(URL url,
                               String username,
                               String password,
                               URL proxyURL,
@@ -100,7 +100,7 @@ public class HttpConnection
     
   }
   
-  public final static HttpConnection createConnection(URL url,
+  public final static CurlHttpConnection createConnection(URL url,
                                                       String username,
                                                       String password,
                                                       CurlResource curl,
@@ -110,7 +110,7 @@ public class HttpConnection
                                                       String proxyType)
     throws IOException
   {
-    HttpConnection conn;
+    CurlHttpConnection conn;
 
     if (url.getProtocol().equals("https")) {
       HttpsConnection secureConn
@@ -119,7 +119,7 @@ public class HttpConnection
       conn = secureConn;
     }
     else {
-      conn = new HttpConnection(url, username, password);
+      conn = new CurlHttpConnection(url, username, password);
     }
 
     conn._proxyURL = proxyURL;
@@ -132,13 +132,13 @@ public class HttpConnection
     return conn;
   }
   
-  public final static HttpConnection createConnection(URL url,
+  public final static CurlHttpConnection createConnection(URL url,
                                                       String username,
                                                       String password,
                                                       CurlResource curl)
     throws IOException
   {
-    HttpConnection conn;
+    CurlHttpConnection conn;
 
     if (url.getProtocol().equals("https")) {
       HttpsConnection secureConn
@@ -147,7 +147,7 @@ public class HttpConnection
       conn = secureConn;
     }
     else {
-      conn = new HttpConnection(url, username, password);
+      conn = new CurlHttpConnection(url, username, password);
     }
 
     conn.init(curl);
@@ -188,7 +188,7 @@ public class HttpConnection
   
   protected final Proxy getProxy()
   {
-    if (_proxyURL == null)
+    if (_proxyURL == null || _proxyURL.getPort() < 0)
       return null;
 
     InetSocketAddress address
