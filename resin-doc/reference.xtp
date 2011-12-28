@@ -10734,7 +10734,7 @@ interception and @Observes.</p>
 
 <schema>
 element set {
-  name
+  var
   &amp; value
   &amp; default
   &amp; attribute * { string }
@@ -10744,7 +10744,7 @@ element set {
 <example title="Example: resin:set in resin.xml">
 &lt;resin xmlns="http://caucho.com/ns/resin"
           xmlns:resin="http://caucho.com/ns/resin/core">
-  &lt;resin:set name="root" value="/var/www"/>
+  &lt;resin:set var="root" value="/var/www"/>
 
   &lt;cluster id="app-tier">
     &lt;root-directory>${root}&lt;/root-directory>

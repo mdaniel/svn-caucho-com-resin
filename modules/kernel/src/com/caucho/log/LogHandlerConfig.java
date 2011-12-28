@@ -268,7 +268,7 @@ public class LogHandlerConfig extends BeanConfig {
   }
 
   /**
-   * Initialize the log.
+   * Initialize the log-handler
    */
   @PostConstruct
   @Override
@@ -278,6 +278,9 @@ public class LogHandlerConfig extends BeanConfig {
       initImpl();
   }
   
+  /**
+   * Should be run with system classloader
+   */
   public void initImpl()
     throws ConfigException
   {
@@ -351,30 +354,11 @@ public class LogHandlerConfig extends BeanConfig {
   static Level toLevel(String level)
     throws ConfigException
   {
-    if (level.equals("off"))
-      return Level.OFF;
-    else if (level.equals("severe"))
-      return Level.SEVERE;
-    else if (level.equals("warning"))
-      return Level.WARNING;
-    else if (level.equals("info"))
-      return Level.INFO;
-    else if (level.equals("config"))
-      return Level.CONFIG;
-    else if (level.equals("fine"))
-      return Level.FINE;
-    else if (level.equals("finer"))
-      return Level.FINER;
-    else if (level.equals("finest"))
-      return Level.FINEST;
-    else if (level.equals("all"))
-      return Level.ALL;
-    else {
-      try {
-        return Level.parse(level);
-      } catch (IllegalArgumentException e) {
-        throw new ConfigException(L.l("`{0}' is an unknown log level.  Log levels are:\noff - disable logging\nsevere - severe errors only\nwarning - warnings\ninfo - information\nconfig - configuration\nfine - fine debugging\nfiner - finer debugging\nfinest - finest debugging\nall - all debugging\n[-]?[0-9]+ - custom level", level));
-      }
+    try {
+      return Level.parse(level.toUpperCase());
+    } catch (Exception e) {
+      throw new ConfigException(L.l("'{0}' is an unknown log level.  Log levels are:\noff - disable logging\nsevere - severe errors only\nwarning - warnings\ninfo - information\nconfig - configuration\nfine - fine debugging\nfiner - finer debugging\nfinest - finest debugging\nall - all debugging",
+                                    level));
     }
   }
 }

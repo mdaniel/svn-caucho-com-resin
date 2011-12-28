@@ -29,6 +29,7 @@
 
 package com.caucho.log;
 
+import com.caucho.config.ConfigException;
 import com.caucho.management.server.AbstractManagedObject;
 import com.caucho.management.server.LoggerMXBean;
 import com.caucho.util.L10N;
@@ -45,12 +46,10 @@ public class LoggerAdmin extends AbstractManagedObject implements LoggerMXBean
 
   private final Logger _logger;
   private final ClassLoader _loader;
-  private Level _level;
 
   LoggerAdmin(Logger logger)
   {
     _logger = logger;
-
     _loader = Thread.currentThread().getContextClassLoader();
   }
   
@@ -65,35 +64,19 @@ public class LoggerAdmin extends AbstractManagedObject implements LoggerMXBean
   /**
    * Sets the output level.
    */
-  public void setLevel(String levelName)
+  public void setLevel(String level)
   {
-    Level level;
-    
-    if (levelName.equals("off"))
-      level = Level.OFF;
-    else if (levelName.equals("severe"))
-      level = Level.SEVERE;
-    else if (levelName.equals("warning"))
-      level = Level.WARNING;
-    else if (levelName.equals("info"))
-      level = Level.INFO;
-    else if (levelName.equals("config"))
-      level = Level.CONFIG;
-    else if (levelName.equals("fine"))
-      level = Level.FINE;
-    else if (levelName.equals("finer"))
-      level = Level.FINER;
-    else if (levelName.equals("finest"))
-      level = Level.FINEST;
-    else if (levelName.equals("all"))
-      level = Level.ALL;
-    else
-      throw new IllegalArgumentException(L.l("`{0}' is an unknown log level.  Log levels are:\noff - disable logging\nsevere - severe errors only\nwarning - warnings\ninfo - information\nconfig - configuration\nfine - fine debugging\nfiner - finer debugging\nfinest - finest debugging\nall - all debugging",
-                                             levelName));
+    try {
+      _logger.setLevel(Level.parse(level.toUpperCase()));
+    } catch (Exception e) {
+      throw new IllegalArgumentException(L.l("'{0}' is an unknown log level.  Log levels are:\noff - disable logging\nsevere - severe errors only\nwarning - warnings\ninfo - information\nconfig - configuration\nfine - fine debugging\nfiner - finer debugging\nfinest - finest debugging\nall - all debugging",
+                                             level));
+    }
+
   }
 
   public String getLevel()
   {
-    return null;
+    return _logger.getLevel().toString();
   }
 }

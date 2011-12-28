@@ -47,6 +47,8 @@ public class LoggerConfig {
   private static final L10N L = new L10N(LoggerConfig.class);
 
   private Logger _logger;
+  
+  private String _name;
   private Level _level = Level.INFO;
   private Boolean _useParentHandlers;
   
@@ -55,8 +57,17 @@ public class LoggerConfig {
   private ArrayList<Handler> _handlerList
     = new ArrayList<Handler>();
   
+  private boolean _isSkipInit;  
+  
   public LoggerConfig()
   {
+  }
+  
+  public LoggerConfig(boolean isSkipInit)
+  {
+    this();
+    
+    _isSkipInit = isSkipInit;
   }
 
   /**
@@ -64,7 +75,7 @@ public class LoggerConfig {
    */
   public void setName(String name)
   {
-    _logger = Logger.getLogger(name);
+    _name = name;
   }
 
   /**
@@ -81,30 +92,11 @@ public class LoggerConfig {
   public void setLevel(String level)
     throws ConfigException
   {
-    if (level.equals("off"))
-      _level = Level.OFF;
-    else if (level.equals("severe"))
-      _level = Level.SEVERE;
-    else if (level.equals("warning"))
-      _level = Level.WARNING;
-    else if (level.equals("info"))
-      _level = Level.INFO;
-    else if (level.equals("config"))
-      _level = Level.CONFIG;
-    else if (level.equals("fine"))
-      _level = Level.FINE;
-    else if (level.equals("finer"))
-      _level = Level.FINER;
-    else if (level.equals("finest"))
-      _level = Level.FINEST;
-    else if (level.equals("all"))
-      _level = Level.ALL;
-    else {
-      try {
-        _level = Level.parse(level);
-      } catch (IllegalArgumentException e) {
-        throw new ConfigException(L.l("`{0}' is an unknown log level.  Log levels are:\noff - disable logging\nsevere - severe errors only\nwarning - warnings\ninfo - information\nconfig - configuration\nfine - fine debugging\nfiner - finer debugging\nfinest - finest debugging\nall - all debugging\n[-]?[0-9]+ - custom level", level));
-      }
+    try {
+      _level = Level.parse(level.toUpperCase());
+    } catch (Exception e) {
+      throw new ConfigException(L.l("'{0}' is an unknown log level.  Log levels are:\noff - disable logging\nsevere - severe errors only\nwarning - warnings\ninfo - information\nconfig - configuration\nfine - fine debugging\nfiner - finer debugging\nfinest - finest debugging\nall - all debugging",
+                                    level));
     }
   }
   
@@ -119,13 +111,24 @@ public class LoggerConfig {
   }
 
   /**
-   * Initialize the logger.
+   * Initialize the logger
    */
   @PostConstruct
   public void init()
   {
-    if (_logger == null)
+    if (! _isSkipInit)
+      initImpl();
+  }
+  
+  /**
+   * Should be run with system classloader
+   */
+  public void initImpl()
+  {
+    if (_name == null) 
       throw new ConfigException(L.l("<logger> requires a 'name' attribute."));
+    
+    _logger = Logger.getLogger(_name);
     
     if (_level != null)
       _logger.setLevel(_level);
