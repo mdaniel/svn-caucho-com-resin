@@ -29,23 +29,15 @@
 
 package com.caucho.config.reflect;
 
-import java.lang.annotation.Annotation;
-import java.lang.annotation.Inherited;
-import java.lang.reflect.Constructor;
 import java.lang.reflect.Method;
-import java.lang.reflect.Type;
 import java.util.HashMap;
 import java.util.Set;
 import java.util.concurrent.CopyOnWriteArraySet;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 
-import javax.enterprise.context.NormalScope;
 import javax.enterprise.inject.spi.AnnotatedConstructor;
 import javax.enterprise.inject.spi.AnnotatedField;
 import javax.enterprise.inject.spi.AnnotatedMethod;
 import javax.enterprise.inject.spi.AnnotatedType;
-import javax.inject.Scope;
 
 
 /**
@@ -54,86 +46,38 @@ import javax.inject.Scope;
 public class AnnotatedTypeImpl<X> extends AnnotatedElementImpl
   implements AnnotatedType<X>
 {
-  private static final Logger log
-    = Logger.getLogger(AnnotatedTypeImpl.class.getName());
-
   private Class<X> _javaClass;
   
-  private HashMap<String,BaseType> _paramMap = new HashMap<String,BaseType>();
+  // private HashMap<String,BaseType> _paramMap = new HashMap<String,BaseType>();
   
-  private AnnotatedTypeImpl<?> _parentType;
+  private AnnotatedType<X> _parentType;
   
+  /*
   private Set<AnnotatedConstructor<X>> _constructorSet
     = new CopyOnWriteArraySet<AnnotatedConstructor<X>>();
 
   private Set<AnnotatedField<? super X>> _fieldSet
     = new CopyOnWriteArraySet<AnnotatedField<? super X>>();
+    */
 
-  private Set<AnnotatedMethod<? super X>> _methodSet
-    = new CopyOnWriteArraySet<AnnotatedMethod<? super X>>();
+  private Set<AnnotatedMethod<? super X>> _methodSet;
 
-  public AnnotatedTypeImpl(Class<X> javaClass)
-  {
-    this(createBaseType(javaClass), javaClass);
-  }
-
-  public AnnotatedTypeImpl(BaseType type, Class<X> javaClass)
-  {
-    super(type, null, javaClass.getDeclaredAnnotations());
-
-    _javaClass = javaClass;
-    
-    if (getBaseTypeImpl().getParamMap() != null)
-      _paramMap.putAll(getBaseTypeImpl().getParamMap());
-    
-    introspect(javaClass);
-  }
-  
   public AnnotatedTypeImpl(AnnotatedType<X> annType)
   {
     super(annType);
+   
+    _parentType = annType;
     
     _javaClass = annType.getJavaClass();
-    
+  
+    /*
     if (getBaseTypeImpl().getParamMap() != null)
       _paramMap.putAll(getBaseTypeImpl().getParamMap());
+      */
   
-    _constructorSet.addAll(annType.getConstructors());
-    _fieldSet.addAll(annType.getFields());
-    
-    for (AnnotatedMethod<? super X> annMethod : annType.getMethods()) {
-      if (annMethod.getDeclaringType() == annType)
-        _methodSet.add(new AnnotatedMethodImpl(this, annMethod, 
-                                               annMethod.getJavaMember()));
-      else {
-        _methodSet.add(annMethod);
-      }
-    }
-  }
-  
-  public AnnotatedTypeImpl(AnnotatedType<X> annType,
-                           AnnotatedTypeImpl<?> parentType)
-  {
-    super(annType);
-    
-    _javaClass = annType.getJavaClass();
-    
-    if (getBaseTypeImpl().getParamMap() != null)
-      _paramMap.putAll(getBaseTypeImpl().getParamMap());
-    
-    _parentType = parentType;
-  
-    _constructorSet.addAll(annType.getConstructors());
-    _fieldSet.addAll(annType.getFields());
-    
-    for (AnnotatedMethod<? super X> annMethod : annType.getMethods()) {
-      if (annMethod.getDeclaringType() == annType)
-        _methodSet.add(new AnnotatedMethodImpl(this, annMethod, 
-                                               annMethod.getJavaMember()));
-      else
-        _methodSet.add(annMethod);
-    }
-    System.out.println("AT2: " + this + "\n  " + _methodSet);
+    // _constructorSet.addAll(annType.getConstructors());
+    // _fieldSet.addAll(annType.getFields());
+    // initMethodSet()
   }
   
   public static <X> AnnotatedTypeImpl<X> create(AnnotatedType<X> annType)
@@ -142,15 +86,6 @@ public class AnnotatedTypeImpl<X> extends AnnotatedElementImpl
       return (AnnotatedTypeImpl<X>) annType;
     else
       return new AnnotatedTypeImpl<X>(annType);
-  }
-  
-  public static <X> AnnotatedTypeImpl<X> create(AnnotatedType<X> annType,
-                                                AnnotatedTypeImpl<?> parentType)
-  {
-    if (annType instanceof AnnotatedTypeImpl<?>)
-      return (AnnotatedTypeImpl<X>) annType;
-    else
-      return new AnnotatedTypeImpl<X>(annType, parentType);
   }
 
   /**
@@ -165,10 +100,11 @@ public class AnnotatedTypeImpl<X> extends AnnotatedElementImpl
   @Override
   public HashMap<String,BaseType> getBaseTypeParamMap()
   {
-    return _paramMap;
+    // return _paramMap;
+    return getBaseTypeImpl().getParamMap();
   }
   
-  public AnnotatedTypeImpl<?> getParentType()
+  private AnnotatedType<?> getParentType()
   {
     return _parentType;
   }
@@ -179,7 +115,9 @@ public class AnnotatedTypeImpl<X> extends AnnotatedElementImpl
   @Override
   public Set<AnnotatedConstructor<X>> getConstructors()
   {
-    return _constructorSet;
+    // return _constructorSet;
+    
+    return (Set<AnnotatedConstructor<X>>) (Set) getParentType().getConstructors();
   }
 
   /**
@@ -188,7 +126,10 @@ public class AnnotatedTypeImpl<X> extends AnnotatedElementImpl
   @Override
   public Set<AnnotatedMethod<? super X>> getMethods()
   {
-    return _methodSet;
+    if (_methodSet != null)
+      return _methodSet;
+    else
+      return (Set<AnnotatedMethod<? super X>>) (Set) getParentType().getMethods();
   }
   
   /**
@@ -196,6 +137,10 @@ public class AnnotatedTypeImpl<X> extends AnnotatedElementImpl
    */
   public AnnotatedMethod<? super X> createMethod(Method method)
   {
+    if (_methodSet == null) {
+      initMethodSet();
+    }
+    
     for (AnnotatedMethod<? super X> annMethod : _methodSet) {
       if (AnnotatedMethodImpl.isMatch(annMethod.getJavaMember(), method)) {
         return annMethod;
@@ -215,83 +160,27 @@ public class AnnotatedTypeImpl<X> extends AnnotatedElementImpl
   @Override
   public Set<AnnotatedField<? super X>> getFields()
   {
-    return _fieldSet;
+    // return _fieldSet;
+    
+    return (Set<AnnotatedField<? super X>>) (Set) getParentType().getFields();
   }
-
-  private void introspect(Class<X> cl)
+  
+  private void initMethodSet()
   {
-    introspectInheritedAnnotations(cl.getSuperclass());
+    synchronized (this) {
+      if (_methodSet != null)
+        return;
+      
+      _methodSet = new CopyOnWriteArraySet<AnnotatedMethod<? super X>>();
 
-    introspectFields(cl);
-
-    introspectMethods(cl);
-
-    if (! cl.isInterface()) {
-      for (Constructor<?> ctor : cl.getDeclaredConstructors()) {
-        _constructorSet.add(new AnnotatedConstructorImpl(this, ctor));
-      }
-
-      if (_constructorSet.size() == 0) {
-        try {
-          Constructor ctor = cl.getConstructor(new Class[0]);
-          _constructorSet.add(new AnnotatedConstructorImpl(this, ctor));
-        } catch (NoSuchMethodException e) {
-          log.log(Level.FINE, e.toString(), e);
+      for (AnnotatedMethod<?> annMethod : getParentType().getMethods()) {
+        if (annMethod.getDeclaringType() == getParentType())
+          _methodSet.add(new AnnotatedMethodImpl(this, annMethod, 
+                                                 annMethod.getJavaMember()));
+        else {
+          _methodSet.add((AnnotatedMethod<? super X>) annMethod);
         }
       }
     }
-  }
-
-  private void introspectFields(Class<?> cl)
-  {
-    throw new UnsupportedOperationException();
-  }
-
-  private void introspectMethods(Class<?> cl)
-  {
-    throw new UnsupportedOperationException();
-  }
-
-  private void introspectInheritedAnnotations(Class<?> cl)
-  {
-    introspectInheritedAnnotations(cl, false);
-  }
-  
-  private void introspectInheritedAnnotations(Class<?> cl,
-                                              boolean isScope)
-  {
-    if (cl == null)
-      return;
-
-    for (Annotation ann : cl.getDeclaredAnnotations()) {
-      Class<? extends Annotation> annType = ann.annotationType();
-
-      if (! annType.isAnnotationPresent(Inherited.class)) {
-        continue;
-      }
-
-      if (isAnnotationPresent(annType)) {
-        continue;
-      }
-
-      if ((ann.annotationType().isAnnotationPresent(Scope.class)
-           || ann.annotationType().isAnnotationPresent(NormalScope.class))) {
-        if (isScope)
-          continue;
-        
-        isScope = true;
-      }
-
-      /*
-      if (ann.annotationType().isAnnotationPresent(DeploymentType.class)
-          && hasMetaAnnotation(getAnnotations(), DeploymentType.class)) {
-        continue;
-      }
-      */
-
-      addAnnotation(ann);
-    }
-
-    introspectInheritedAnnotations(cl.getSuperclass(), isScope);
   }
 }

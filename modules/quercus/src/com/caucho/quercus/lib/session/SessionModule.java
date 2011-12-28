@@ -403,7 +403,7 @@ public class SessionModule extends AbstractQuercusModule
     String cookieName = env.getIni("session.name").toString();
     boolean generateCookie = true;
     boolean create = false;
-    System.out.println("SESSION_CB: " + callback);
+
     if (callback != null) {
       String savePath = env.getIni("session.save_path").toString();
 
@@ -517,7 +517,6 @@ public class SessionModule extends AbstractQuercusModule
 
     SessionArrayValue session = env.createSession(sessionId, create);
     sessionId = session.getId();
-    System.out.println("SESSION_V: " + session + " " + sessionId);
 
     if (env.getIni("session.use_cookies").toBoolean() && generateCookie) {
       generateSessionCookie(env, sessionId);

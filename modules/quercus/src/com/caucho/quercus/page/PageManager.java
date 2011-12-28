@@ -40,6 +40,7 @@ import com.caucho.vfs.Path;
 
 import java.io.IOException;
 import java.lang.ref.SoftReference;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.logging.*;
 
 /**
@@ -60,6 +61,9 @@ public class PageManager
   private boolean _isCompileFailover = Alarm.isActive();
 
   private boolean _isRequireSource = true;
+  
+  private ConcurrentHashMap<String,Object> _programLockMap
+    = new ConcurrentHashMap<String,Object>();
 
   protected LruCache<Path,SoftReference<QuercusProgram>> _programCache
     = new LruCache<Path,SoftReference<QuercusProgram>>(1024);
@@ -224,9 +228,33 @@ public class PageManager
    * @throws IOException
    */
   public QuercusPage parse(Path path, String fileName, int line)
+  throws IOException
+  {
+    String fullName = path.getFullPath();
+    
+    try {
+      Object lock = _programLockMap.get(fullName);
+      
+      while (lock == null) {
+        lock = new Object();
+        _programLockMap.putIfAbsent(fullName, lock);
+        
+        lock = _programLockMap.get(fullName);
+      }
+
+      synchronized (lock) {
+        return parseImpl(path, fileName, line);
+      }
+    } finally {
+      _programLockMap.remove(fullName);
+    }
+  }
+  
+  public QuercusPage parseImpl(Path path, String fileName, int line)
     throws IOException
   {
     try {
+      
       SoftReference<QuercusProgram> programRef;
 
       programRef = _programCache.get(path);

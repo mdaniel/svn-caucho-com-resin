@@ -40,22 +40,24 @@ import com.caucho.quercus.parser.QuercusParser;
 import com.caucho.util.L10N;
 
 import java.lang.annotation.Annotation;
+import java.lang.reflect.Method;
 
 /**
  * Represents the introspected static function information.
  */
+@SuppressWarnings("serial")
 abstract public class JavaInvoker
   extends AbstractJavaMethod
 {
   private static final L10N L = new L10N(JavaInvoker.class);
 
-  private static final Object []NULL_ARGS = new Object[0];
   private static final Value []NULL_VALUES = new Value[0];
 
   private final ModuleContext _moduleContext;
   private final String _name;
-  private final Class [] _param;
-  private final Class _retType;
+  private final Method _method;
+  private final Class<?> [] _param;
+  private final Class<?> _retType;
   private final Annotation [][] _paramAnn;
   private final Annotation []_methodAnn;
 
@@ -76,16 +78,15 @@ abstract public class JavaInvoker
   private boolean _isCallUsesVariableArgs;
   private boolean _isCallUsesSymbolTable;
 
-
   /**
    * Creates the statically introspected function.
    */
   public JavaInvoker(ModuleContext moduleContext,
                      String name,
-                     Class []param,
+                     Class<?> []param,
                      Annotation [][]paramAnn,
                      Annotation []methodAnn,
-                     Class retType)
+                     Class<?> retType)
   {
     _moduleContext = moduleContext;
     _name = name;
@@ -93,6 +94,24 @@ abstract public class JavaInvoker
     _paramAnn = paramAnn;
     _methodAnn = methodAnn;
     _retType = retType;
+    _method = null;
+
+    // init();
+  }
+
+  /**
+   * Creates the statically introspected function.
+   */
+  public JavaInvoker(ModuleContext moduleContext,
+                     Method method)
+  {
+    _moduleContext = moduleContext;
+    _method = method;
+    _name = method.getName();
+    _param = method.getParameterTypes();
+    _paramAnn = null;
+    _methodAnn = null;
+    _retType = method.getReturnType();
 
     // init();
   }
@@ -108,13 +127,16 @@ abstract public class JavaInvoker
 
       MarshalFactory marshalFactory = _moduleContext.getMarshalFactory();
       ExprFactory exprFactory = _moduleContext.getExprFactory();
+      
+      Annotation [][]paramAnn = getParamAnnImpl();
+      Annotation []methodAnn = getMethodAnn();
 
       try {
         boolean callUsesVariableArgs = false;
         boolean callUsesSymbolTable = false;
         boolean returnNullAsFalse = false;
 
-        for (Annotation ann : _methodAnn) {
+        for (Annotation ann : methodAnn) {
           if (VariableArguments.class.isAssignableFrom(ann.annotationType()))
             callUsesVariableArgs = true;
 
@@ -132,7 +154,7 @@ abstract public class JavaInvoker
         int envOffset = _hasEnv ? 1 : 0;
 
         if (envOffset < _param.length)
-          _hasThis = hasThis(_param[envOffset], _paramAnn[envOffset]);
+          _hasThis = hasThis(_param[envOffset], paramAnn[envOffset]);
         else
           _hasThis = false;
 
@@ -147,7 +169,7 @@ abstract public class JavaInvoker
                 || _param[_param.length - 1].equals(Object[].class))) {
           hasRestArgs = true;
 
-          for (Annotation ann : _paramAnn[_param.length - 1]) {
+          for (Annotation ann : paramAnn[_param.length - 1]) {
             if (Reference.class.isAssignableFrom(ann.annotationType()))
               isRestReference = true;
           }
@@ -179,7 +201,7 @@ abstract public class JavaInvoker
 
           Class<?> argType = _param[i + envOffset];
           
-          for (Annotation ann : _paramAnn[i + envOffset]) {
+          for (Annotation ann : paramAnn[i + envOffset]) {
             if (Optional.class.isAssignableFrom(ann.annotationType())) {
               _minArgumentLength--;
 
@@ -420,8 +442,27 @@ abstract public class JavaInvoker
   {
     if (! _isInit)
       init();
+    
+    return getParamAnnImpl();
+  }
+  
+  private Annotation [][]getParamAnnImpl()
+  {
+    if (_paramAnn != null)
+      return _paramAnn;
+    else
+      return _method.getParameterAnnotations();
+  }
 
-    return _paramAnn;
+  /**
+   * Returns the parameter annotations.
+   */
+  protected Annotation []getMethodAnn()
+  {
+    if (_methodAnn != null)
+      return _methodAnn;
+    else
+      return _method.getAnnotations();
   }
 
   /**
@@ -476,6 +517,7 @@ abstract public class JavaInvoker
   /**
    * Returns the cost of marshaling for this method.
    */
+  @Override
   public int getMarshalingCost(Value []args)
   {
     if (! _isInit)
@@ -523,6 +565,7 @@ abstract public class JavaInvoker
     return cost;
   }
 
+  @Override
   public int getMarshalingCost(Expr []args)
   {
     if (! _isInit)
@@ -568,74 +611,6 @@ abstract public class JavaInvoker
 
     return cost;
   }
-
-  /*
-  public Value callMethod(Env env, Value qThis, Expr []exprs)
-  {
-    if (! _isInit)
-      init();
-
-    int len = (_defaultExprs.length +
-               (_hasEnv ? 1 : 0) +
-               (_hasThis ? 1 : 0) +
-               (_hasRestArgs ? 1 : 0));
-
-    Object []values = new Object[len];
-
-    int k = 0;
-
-    if (_hasEnv)
-      values[k++] = env;
-    Object obj = null;
-    if (_hasThis) {
-      values[k++] = qThis;
-    }
-    else if (qThis != null)
-      obj = qThis.toJavaObject();
-
-    for (int i = 0; i < _marshalArgs.length; i++) {
-      Expr expr;
-
-      if (i < exprs.length && exprs[i] != null)
-        expr = exprs[i];
-      else {
-        expr = _defaultExprs[i];
-
-        if (expr == null)
-          expr = _moduleContext.getExprFactory().createRequired();
-      }
-
-      values[k] = _marshalArgs[i].marshal(env, expr, _param[k]);
-
-      k++;
-    }
-
-    if (_hasRestArgs) {
-      Value []rest;
-
-      int restLen = exprs.length - _marshalArgs.length;
-
-      if (restLen <= 0)
-        rest = NULL_VALUES;
-      else {
-        rest = new Value[restLen];
-
-        for (int i = _marshalArgs.length; i < exprs.length; i++) {
-          if (_isRestReference)
-            rest[i - _marshalArgs.length] = exprs[i].evalRef(env);
-          else
-            rest[i - _marshalArgs.length] = exprs[i].eval(env);
-        }
-      }
-
-      values[values.length - 1] = rest;
-    }
-
-    Object result = invoke(obj, values);
-
-    return _unmarshalReturn.unmarshal(env, result);
-  }
-  */
 
   @Override
   public Value call(Env env, Value []args)
@@ -746,7 +721,7 @@ abstract public class JavaInvoker
   //
   // Utility methods
   //
-  private boolean hasThis(Class param, Annotation[]ann)
+  private boolean hasThis(Class<?> param, Annotation[]ann)
   {
     if (! param.isAssignableFrom(ObjectValue.class))
       return false;

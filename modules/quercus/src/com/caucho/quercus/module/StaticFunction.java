@@ -42,11 +42,8 @@ import java.util.logging.Logger;
 /**
  * Represents the introspected static function information.
  */
+@SuppressWarnings("serial")
 public class StaticFunction extends JavaInvoker {
-  private static final L10N L = new L10N(StaticFunction.class);
-  private static final Logger log =
-    Logger.getLogger(StaticFunction.class.getName());
-
   protected final QuercusModule _quercusModule;
   protected final Method _method;
   private final int _argLength;
@@ -60,12 +57,7 @@ public class StaticFunction extends JavaInvoker {
                         QuercusModule quercusModule,
                         Method method)
   {
-    super(moduleContext,
-          getName(method),
-          method.getParameterTypes(),
-          method.getParameterAnnotations(),
-          method.getAnnotations(),
-          method.getReturnType());
+    super(moduleContext, method);
 
     _method = method;
     _argLength = method.getParameterTypes().length;
@@ -75,23 +67,10 @@ public class StaticFunction extends JavaInvoker {
   /*
    * Returns true for a static function.
    */
+  @Override
   public boolean isStatic()
   {
     return true;
-  }
-
-  private static String getName(Method method)
-  {
-    String name;
-
-    Name nameAnn = method.getAnnotation(Name.class);
-
-    if (nameAnn != null)
-      name = nameAnn.value();
-    else
-      name = method.getName();
-
-    return name;
   }
   
   @Override
@@ -176,6 +155,7 @@ public class StaticFunction extends JavaInvoker {
     return sb.toString();
   }
 
+  @Override
   public String toString()
   {
     return getClass().getSimpleName() + "[" + _method + "]";

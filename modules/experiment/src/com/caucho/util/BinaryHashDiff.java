@@ -441,11 +441,6 @@ public class BinaryHashDiff {
       for (int i = 0; i < size; i++) {
         hash = hash(hash, data[i], 0, factor);
       }
-      
-      long newHash = hash;
-
-      if (oldHash != newHash)
-        System.out.println("OLD: " + oldHash + " " + newHash);
     }
   }
   

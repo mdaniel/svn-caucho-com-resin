@@ -246,7 +246,7 @@ public class QuercusContext
     _loader = Thread.currentThread().getContextClassLoader();
 
     _moduleContext = getLocalContext();
-
+    
     _pageManager = createPageManager();
 
     _sessionManager = createSessionManager();
@@ -1954,7 +1954,6 @@ public class QuercusContext
     SessionArrayValue session
       = _sessionManager.getSession(env, sessionId, now);
 
-    System.out.println("OLD: " + session);
     if (session == null)
       session = _sessionManager.createSession(env, sessionId, now);
 

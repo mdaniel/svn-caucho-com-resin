@@ -62,7 +62,6 @@ public class QuercusLanguageException extends QuercusException
    */
   public Value getValue()
   {
-    System.out.println("GETV: " + _value + " " + _value.getClass());
     return _value;
   }
   
