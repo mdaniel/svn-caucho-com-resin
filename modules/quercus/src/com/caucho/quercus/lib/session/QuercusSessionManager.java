@@ -29,27 +29,28 @@
 
 package com.caucho.quercus.lib.session;
 
-import com.caucho.config.ConfigException;
-import com.caucho.quercus.QuercusContext;
-import com.caucho.quercus.env.Env;
-import com.caucho.quercus.env.StringValue;
-import com.caucho.quercus.env.StringBuilderValue;
-import com.caucho.quercus.env.SessionArrayValue;
-import com.caucho.quercus.env.Value;
-import com.caucho.quercus.lib.ResinModule;
-import com.caucho.util.*;
-
 import java.io.IOException;
 import java.io.ObjectInputStream;
-import java.io.ObjectOutputStream;
 import java.io.OutputStream;
 import java.util.ArrayList;
 import java.util.Iterator;
-import java.util.Map;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
 import javax.cache.Cache;
+
+import com.caucho.config.ConfigException;
+import com.caucho.quercus.QuercusContext;
+import com.caucho.quercus.env.Env;
+import com.caucho.quercus.env.SessionArrayValue;
+import com.caucho.quercus.env.StringBuilderValue;
+import com.caucho.util.Alarm;
+import com.caucho.util.AlarmListener;
+import com.caucho.util.Base64;
+import com.caucho.util.CharBuffer;
+import com.caucho.util.L10N;
+import com.caucho.util.LruCache;
+import com.caucho.util.RandomUtil;
 
 /**
  * Stripped down version of com.caucho.server.session.SessionManager,
@@ -422,13 +423,9 @@ public class QuercusSessionManager
     else if (! getSaveOnlyOnShutdown() && ! session.load()) {
       // if the load failed, then the session died out from underneath
       session.reset(now);
-      System.out.println("SESSION-RESET:");
       isNew = true;
     }
     
-    System.out.println("VALUE: " + session);
-    ResinModule.resin_var_dump(env, new Value[] { session });
-
     if (! isNew)
       session.setAccess(now);
     
