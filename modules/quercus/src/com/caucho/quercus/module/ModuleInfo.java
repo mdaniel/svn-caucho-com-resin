@@ -214,7 +214,7 @@ public class ModuleInfo {
         continue;
        */
 
-      Class []params = method.getParameterTypes();
+      Class<?> []params = method.getParameterTypes();
 
       // php/1a10
       if ("getLoadedExtensions".equals(method.getName()))

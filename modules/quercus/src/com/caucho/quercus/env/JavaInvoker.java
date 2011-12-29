@@ -105,9 +105,15 @@ abstract public class JavaInvoker
   public JavaInvoker(ModuleContext moduleContext,
                      Method method)
   {
+    Name nameAnn = method.getAnnotation(Name.class);
+    
+    if (nameAnn != null)
+      _name = nameAnn.value();
+    else
+      _name = method.getName();
+    
     _moduleContext = moduleContext;
     _method = method;
-    _name = method.getName();
     _param = method.getParameterTypes();
     _paramAnn = null;
     _methodAnn = null;
