@@ -430,13 +430,12 @@ public class BootResinConfig // implements EnvironmentBean
     BootClusterConfig cluster = findCluster(clusterId);
 
     if (cluster == null) {
-      Thread.dumpStack();
-      throw new ConfigException(L.l("'{0}' is an unknown cluster. -cluster must specify an existing cluster",
+      throw new ConfigException(L.l("'{0}' is an unknown cluster. --cluster must specify an existing cluster",
                                     clusterId));
     }
 
     if (! cluster.isDynamicServerEnable()) {
-      throw new ConfigException(L.l("cluster '{0}' does not have <resin:ElasticCloudService>. -join-cluster requires a <resin:ElasticCloudService> tag.",
+      throw new ConfigException(L.l("cluster '{0}' does not have <resin:ElasticCloudService>. --home-cluster requires a <resin:ElasticCloudService> tag.",
                                     clusterId));
     }
 

@@ -1259,6 +1259,7 @@
     <mkdir dir="dist-debian/var/www/webapps/ROOT"/>
     
     <mkdir dir="dist-debian/etc/resin"/>
+    <mkdir dir="dist-debian/etc/resin/resin-inf"/>
     <copy todir="dist-debian/etc/resin"
           preservelastmodified="true"
           overwrite="true">
@@ -1268,7 +1269,11 @@
         -->
         <include name="resin.xml"/>
         <include name="app-default.xml"/>
+        <include name="cluster-default.xml"/>
+        <include name="health.xml"/>
+        <!--
         <include name="local.d/**.xml"/>
+        -->
       </fileset>
     </copy>
 
