@@ -102,7 +102,7 @@ public class LogLevelCommand extends AbstractManagementCommand
     if (time != null)
       period = Period.toPeriod(time);
 
-    String[] loggers = args.getTrailingArgs(_options.keySet());
+    String[] loggers = args.getDefaultArgs();
     if (loggers == null || loggers.length == 0) {
       loggers = new String[2];
       loggers[0] = "";

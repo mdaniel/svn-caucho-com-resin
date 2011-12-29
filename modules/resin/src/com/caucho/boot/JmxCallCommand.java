@@ -72,7 +72,7 @@ public class JmxCallCommand extends JmxCommand
                        WatchdogClient client,
                        ManagerClient managerClient)
   {
-    String []trailingArgs = args.getTrailingArgs(options);
+    String []trailingArgs = args.getDefaultArgs();
 
     String pattern = args.getArg("-pattern");
     if (pattern == null)

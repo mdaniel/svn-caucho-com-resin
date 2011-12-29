@@ -375,31 +375,6 @@ class WatchdogArgs
 */
   }
 
-  /**
-   * returns all trailing following no dash prefixed token args
-   */
-  public String []getTrailingArgs(Set<String> options)
-  {
-    LinkedList<String> result = new LinkedList<String>();
-    ArrayList<String> tailArgs = getTailArgs();
-
-    for (int i = tailArgs.size() - 1; i >= 0; i--) {
-      String arg = tailArgs.get(i);
-
-      if (! arg.startsWith("-")) {
-        result.addFirst(arg);
-      }
-      else if (options.contains(arg)) {
-        break;
-      }
-      else if (! result.isEmpty()) {
-        result.removeFirst();
-      }
-    }
-
-    return result.toArray(new String[result.size()]);
-  }
-
   public String []getDefaultArgs() {
     return _defaultArgs;
   }
