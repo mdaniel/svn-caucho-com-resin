@@ -67,6 +67,11 @@ public interface WebSocketContext {
   /**
    * gracefully close the connection, waiting for unread messages.
    */
+  public void close();
+
+  /**
+   * gracefully close the connection, waiting for unread messages.
+   */
   public void close(int code, String message);
 
   /**

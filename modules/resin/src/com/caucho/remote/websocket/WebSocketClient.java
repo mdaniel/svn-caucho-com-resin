@@ -259,6 +259,11 @@ public class WebSocketClient implements WebSocketContext, WebSocketConstants {
   {
     return _isClosed;
   }
+  
+  public void close()
+  {
+    close(1000, "ok");
+  }
 
   @Override
   public void close(int code, String msg)

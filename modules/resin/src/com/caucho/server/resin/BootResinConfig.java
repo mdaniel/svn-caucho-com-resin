@@ -233,7 +233,6 @@ public class BootResinConfig implements SchemaBean, DependencyBean
             if (address.isAnyLocalAddress()
                 || address.isLinkLocalAddress()
                 || address.isLoopbackAddress()) {
-              System.out.println("FIND: " + server);
               return server;
             }
           } catch (Exception e) {

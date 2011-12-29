@@ -471,6 +471,8 @@ public class ResinEmbed
       _isConfig = true;
 
       _resin.configureFile(Vfs.lookup(configFile));
+      
+      // _resin.createServer();
     } catch (Exception e) {
       throw ConfigException.create(e);
     }

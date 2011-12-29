@@ -863,11 +863,13 @@ public class Resin
     
     String serverId = _serverId;
     
-    if ("".equals(serverId))
+    if ("".equals(serverId)) {
       serverId = "default";
+    }
 
-    if (serverId != null)
+    if (serverId != null) {
       _bootServerConfig = bootResin.findServer(serverId);
+    }
     
     CloudSystem cloudSystem = bootResin.initTopology();
     
@@ -954,6 +956,9 @@ public class Resin
     BootResinConfig bootResin = _bootResinConfig;
     
     BootClusterConfig bootCluster = bootResin.findCluster("");
+    
+    if (bootCluster == null)
+      return null;
     
     if (bootCluster.getPodList().size() > 0
         && bootCluster.getPodList().get(0).getServerList().size() > 0) {
@@ -1117,9 +1122,19 @@ public class Resin
     _resinSystem.destroy();
   }
 
+  @Override
   public String toString()
   {
-    return getClass().getSimpleName() + "[id=" + _serverId + "]";
+    StringBuilder sb = new StringBuilder();
+    
+    if (isProfessional())
+      sb.append("Pro");
+
+    sb.append(getClass().getSimpleName());
+    
+    sb.append("[id=" + _serverId + "]");
+    
+    return sb.toString();
   }
 
   /**

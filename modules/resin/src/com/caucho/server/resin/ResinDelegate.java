@@ -85,6 +85,9 @@ public class ResinDelegate
    */
   public static ResinDelegate create(Resin resin)
   {
+    if (resin.getArgs().isOpenSource())
+      return new ResinDelegate(resin);
+    
     String licenseErrorMessage = null;
 
     ResinDelegate delegate = null;

@@ -73,6 +73,8 @@ public class ResinArgs
   private ArrayList<BoundPort> _boundPortList
     = new ArrayList<BoundPort>();
 
+  private boolean _isOpenSource;
+  
   private String _stage = null;
   private boolean _isDumpHeapOnExit;
   
@@ -170,6 +172,16 @@ public class ResinArgs
   public Socket getPingSocket()
   {
     return _pingSocket;
+  }
+  
+  public void setOpenSource(boolean isOpenSource)
+  {
+    _isOpenSource = isOpenSource;
+  }
+  
+  public boolean isOpenSource()
+  {
+    return _isOpenSource;
   }
 
   /**
