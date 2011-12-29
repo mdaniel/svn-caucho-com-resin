@@ -118,7 +118,8 @@ public class ResinEmbed
   public ResinEmbed()
   {
     ResinArgs args = new ResinArgs();
-    args.setServerId("embed");
+    // args.setServerId("embed");
+    args.setServerId("default");
     args.setRootDirectory(Vfs.lookup());
     
     _resin = new ResinEmbedded(args);
@@ -310,6 +311,8 @@ public class ResinEmbed
       initConfig(_configFile);
 
       _server = _resin.createServer();
+      
+      _cluster = _server.getCluster();
 
       thread.setContextClassLoader(_server.getClassLoader());
 
@@ -476,7 +479,8 @@ public class ResinEmbed
     } catch (Exception e) {
       throw ConfigException.create(e);
     }
-    
+
+    /*
     CloudSystem cloudSystem = TopologyService.getCurrent().getSystem();
 
     if (cloudSystem.getClusterList().length == 0)
@@ -492,7 +496,8 @@ public class ResinEmbed
     if (_cluster.getPodList()[0].getServerList().length == 0)
       throw new ConfigException(L.l("Resin needs at least one defined <server>"));
 
-    CloudServer cloudServer = _cluster.getPodList()[0].getServerList()[0]; 
+    CloudServer cloudServer = _cluster.getPodList()[0].getServerList()[0];
+    */ 
     // _clusterServer = cloudServer.getData(ClusterServer.class);
     
     /*

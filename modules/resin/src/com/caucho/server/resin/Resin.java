@@ -878,6 +878,9 @@ public class Resin
     else if (Alarm.isTest()) {
       _bootServerConfig = joinTest();
     }
+    else if (isEmbedded()) { 
+      _bootServerConfig = joinEmbed();
+    }
     else if (isWatchdog()) {
       _bootServerConfig = joinWatchdog();
     }
@@ -957,6 +960,31 @@ public class Resin
     
     BootClusterConfig bootCluster = bootResin.findCluster("");
     
+    if (bootCluster == null)
+      return null;
+    
+    if (bootCluster.getPodList().size() > 0
+        && bootCluster.getPodList().get(0).getServerList().size() > 0) {
+      // server/0342
+      return null;
+    }
+    
+    BootServerConfig bootServer = bootCluster.createServer();
+    bootServer.setId("default");
+    bootServer.setAddress("127.0.0.1");
+    bootCluster.addServer(bootServer);
+    
+    bootResin.initTopology();
+    
+    return bootServer;
+  }
+  
+  private BootServerConfig joinEmbed()
+  {
+    BootResinConfig bootResin = _bootResinConfig;
+    
+    BootClusterConfig bootCluster = bootResin.findCluster("");
+    System.out.println("CLUSTER: " + bootCluster);
     if (bootCluster == null)
       return null;
     
