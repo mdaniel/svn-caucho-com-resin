@@ -84,7 +84,7 @@ public class MatchesExpr extends AbstractBooleanExpr {
     String b = toString(bObj, env);
     
     try {
-      return Pattern.matches(b, a);
+      return Pattern.compile(b).matcher(a).find();
     } catch (PatternSyntaxException e) {
       throw new ELException(e);
     }
