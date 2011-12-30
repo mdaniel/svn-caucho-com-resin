@@ -34,6 +34,7 @@ import java.io.InputStream;
 import java.util.Collection;
 import java.util.Iterator;
 import java.util.Map;
+import java.util.Set;
 import java.util.concurrent.Future;
 import java.util.concurrent.atomic.AtomicReference;
 import java.util.logging.Level;
@@ -47,7 +48,6 @@ import javax.cache.CacheManager;
 import javax.cache.CacheStatistics;
 import javax.cache.Status;
 import javax.cache.event.CacheEntryListener;
-import javax.cache.event.NotificationScope;
 
 import com.caucho.cloud.loadbalance.LoadBalanceBuilder;
 import com.caucho.cloud.loadbalance.LoadBalanceManager;
@@ -801,16 +801,6 @@ public class MemcachedClient implements Cache
   }
 
   /* (non-Javadoc)
-   * @see javax.cache.Cache#getAll(java.util.Collection)
-   */
-  @Override
-  public Map getAll(Collection keys) throws CacheException
-  {
-    // TODO Auto-generated method stub
-    return null;
-  }
-
-  /* (non-Javadoc)
    * @see javax.cache.Cache#getAndPut(java.lang.Object, java.lang.Object)
    */
   @Override
@@ -835,16 +825,6 @@ public class MemcachedClient implements Cache
    */
   @Override
   public Object getAndReplace(Object key, Object value) throws CacheException
-  {
-    // TODO Auto-generated method stub
-    return null;
-  }
-
-  /* (non-Javadoc)
-   * @see javax.cache.Cache#getCacheManager()
-   */
-  @Override
-  public CacheManager getCacheManager()
   {
     // TODO Auto-generated method stub
     return null;
@@ -942,7 +922,6 @@ public class MemcachedClient implements Cache
    */
   @Override
   public boolean registerCacheEntryListener(CacheEntryListener listener,
-                                            NotificationScope scope,
                                             boolean synchronous)
   {
     // TODO Auto-generated method stub
@@ -957,17 +936,6 @@ public class MemcachedClient implements Cache
   {
     // TODO Auto-generated method stub
     return false;
-  }
-
-  /* (non-Javadoc)
-   * @see javax.cache.Cache#removeAll(java.util.Collection)
-   */
-  @Override
-  public void removeAll(Collection keys) throws CacheException
-  {
-    for (Object key : keys) {
-      remove(key);
-    }
   }
 
   /* (non-Javadoc)
@@ -1117,6 +1085,36 @@ public class MemcachedClient implements Cache
     {
       return (String) requestInfo;
     }
+    
+  }
+
+  /* (non-Javadoc)
+   * @see javax.cache.Cache#getAll(java.util.Set)
+   */
+  @Override
+  public Map getAll(Set keys)
+  {
+    // TODO Auto-generated method stub
+    return null;
+  }
+
+  /* (non-Javadoc)
+   * @see javax.cache.Cache#invokeEntryProcessor(java.lang.Object, javax.cache.Cache.EntryProcessor)
+   */
+  @Override
+  public Object invokeEntryProcessor(Object key, EntryProcessor entryProcessor)
+  {
+    // TODO Auto-generated method stub
+    return null;
+  }
+
+  /* (non-Javadoc)
+   * @see javax.cache.Cache#removeAll(java.util.Set)
+   */
+  @Override
+  public void removeAll(Set keys)
+  {
+    // TODO Auto-generated method stub
     
   }
 }

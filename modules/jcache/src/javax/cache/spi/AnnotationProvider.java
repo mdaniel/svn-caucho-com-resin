@@ -36,5 +36,5 @@ import javax.cache.OptionalFeature;
  */
 public interface AnnotationProvider
 {
-  public boolean isSupported(OptionalFeature feature);
+  public boolean isSupported();
 }

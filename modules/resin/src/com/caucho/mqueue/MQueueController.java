@@ -27,25 +27,61 @@
  * @author Scott Ferguson
  */
 
-package javax.cache;
+package com.caucho.mqueue;
 
-import java.util.Map;
+import com.caucho.env.thread.TaskWorker;
+import com.caucho.vfs.TempBuffer;
 
-public interface CacheLoader<K,V>
+/**
+ * Interface for the transaction log.
+ */
+public final class MQueueController extends TaskWorker
 {
-  /**
-   * Obtains the value associated with the key, which will be loaded into the Cache
-   * @param key associated with the value.
-   * @return the value returned from the CacheLoader
-   * @throws CacheException
-   */
-  public Cache.Entry<K, V> load(Object key);
+  private final MQueueDisruptor _disruptor;
+  private final MQueueItem []_ring;
+  
+  private final int _controllerId;
+  
+  private final MQueueController _prev;
+  private MQueueController _next;
+  
+  private MQueueTask _task;
+  
+  private volatile int _index;
+  
+  MQueueController(MQueueDisruptor disruptor,
+                   MQueueController prev)
+  {
+    _disruptor = disruptor;
+    _ring = null;
+    _controllerId = 0;
+    _prev = prev;
+  }
+  
+  private int getIndex()
+  {
+    return _index;
+  }
+  
+  private boolean doStuff()
+  {
+    int tail = _index;
+   
+    int head = _prev.getIndex();
+    
+    if (head != tail) {
+      MQueueItem item = _ring[tail];
+    }
+    
+    return false;
+  }
 
-  /**
-   * Creates a set of entries that will be loaded into the cache.
-   * @param keys the collection of keys
-   * @return a map of key-value pairs that will be loaded into the cache.
-   * @throws CacheException
-   */
-  public Map<K,V> loadAll(Iterable<? extends K> keys);
+  @Override
+  public long runTask()
+  {
+    while (doStuff()) {
+    }
+    
+    return 0;
+  }
 }

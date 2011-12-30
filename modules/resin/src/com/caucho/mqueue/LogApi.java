@@ -27,25 +27,15 @@
  * @author Scott Ferguson
  */
 
-package javax.cache;
+package com.caucho.mqueue;
 
-import java.util.Map;
-
-public interface CacheLoader<K,V>
+/**
+ * Interface for the transaction log.
+ */
+public interface LogApi
 {
-  /**
-   * Obtains the value associated with the key, which will be loaded into the Cache
-   * @param key associated with the value.
-   * @return the value returned from the CacheLoader
-   * @throws CacheException
-   */
-  public Cache.Entry<K, V> load(Object key);
-
-  /**
-   * Creates a set of entries that will be loaded into the cache.
-   * @param keys the collection of keys
-   * @return a map of key-value pairs that will be loaded into the cache.
-   * @throws CacheException
-   */
-  public Map<K,V> loadAll(Iterable<? extends K> keys);
+  public void log(int code, long sequence, long xa, 
+                  byte []buffer, int offset, int length);
+  
+  public void syncDisk();
 }

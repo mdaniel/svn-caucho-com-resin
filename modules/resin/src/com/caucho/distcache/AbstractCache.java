@@ -51,7 +51,6 @@ import javax.cache.CacheManager;
 import javax.cache.CacheStatistics;
 import javax.cache.Status;
 import javax.cache.event.CacheEntryListener;
-import javax.cache.event.NotificationScope;
 
 import com.caucho.config.ConfigException;
 import com.caucho.config.Configurable;
@@ -550,12 +549,6 @@ public class AbstractCache
   }
 
   @Override
-  public void removeAll(Collection keys) throws CacheException
-  {
-    _delegate.removeAll(keys);
-  }
-
-  @Override
   public void removeAll() throws CacheException
   {
     _delegate.removeAll();
@@ -796,10 +789,9 @@ public class AbstractCache
    */
   @Override
   public boolean registerCacheEntryListener(CacheEntryListener listener,
-                                            NotificationScope scope,
                                             boolean synchronous)
   {
-    return _delegate.registerCacheEntryListener(listener, scope, synchronous);
+    return _delegate.registerCacheEntryListener(listener, synchronous);
   }
 
   /**
@@ -1042,12 +1034,34 @@ public class AbstractCache
   {
     return _delegate.getConfiguration();
   }
-  
+
+  /* (non-Javadoc)
+   * @see javax.cache.Cache#getAll(java.util.Set)
+   */
   @Override
-  public CacheManager getCacheManager()
+  public Map getAll(Set keys)
   {
-    return _delegate.getCacheManager();
+    return _delegate.getAll(keys);
   }
+
+  /* (non-Javadoc)
+   * @see javax.cache.Cache#invokeEntryProcessor(java.lang.Object, javax.cache.Cache.EntryProcessor)
+   */
+  @Override
+  public Object invokeEntryProcessor(Object key, EntryProcessor entryProcessor)
+  {
+    return _delegate.invokeEntryProcessor(key, entryProcessor);
+  }
+
+  /* (non-Javadoc)
+   * @see javax.cache.Cache#removeAll(java.util.Set)
+   */
+  @Override
+  public void removeAll(Set keys)
+  {
+    _delegate.removeAll(keys);
+  }
+  
 
   @Override
   public String toString()

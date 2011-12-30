@@ -30,7 +30,6 @@
 package javax.cache;
 
 import javax.cache.event.CacheEntryListener;
-import javax.cache.event.NotificationScope;
 import javax.cache.transaction.IsolationLevel;
 import javax.cache.transaction.Mode;
 
@@ -43,13 +42,12 @@ import javax.cache.transaction.Mode;
 public interface CacheBuilder<K,V> {
   public Cache<K,V> build();
   
-  public CacheBuilder<K,V> setCacheLoader(CacheLoader<K,V> cacheLoader);
+  public CacheBuilder<K,V> setCacheLoader(CacheLoader<K,? extends V> cacheLoader);
   
-  public CacheBuilder<K,V> setCacheWriter(CacheWriter<K,V> cacheWriter);
+  public CacheBuilder<K,V> setCacheWriter(CacheWriter<? super K,? super V> cacheWriter);
   
   public CacheBuilder<K,V> 
   registerCacheEntryListener(CacheEntryListener<K,V> listener,
-                             NotificationScope scope,
                              boolean synchronous);
   
   public CacheBuilder<K,V> setStoreByValue(boolean storeByValue);

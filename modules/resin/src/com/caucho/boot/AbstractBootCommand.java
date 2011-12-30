@@ -46,6 +46,10 @@ public abstract class AbstractBootCommand implements BootCommand {
     addValueOption("resin-home", "dir", "alternate resin home");
     addValueOption("server", "id", "select Resin server from config");
     addValueOption("user-properties", "file", "select an alternate $HOME/.resin file");
+    
+    addValueOption("root-directory", "file", "alternate root directory");
+    addValueOption("log-directory", "file", "alternate log directory");
+    
     addFlagOption("verbose", "produce verbose output");
   }
 

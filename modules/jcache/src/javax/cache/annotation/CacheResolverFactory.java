@@ -31,9 +31,7 @@ package javax.cache.annotation;
 
 import java.lang.annotation.Annotation;
 
-import javax.cache.Cache;
-
 public interface CacheResolverFactory
 {
-  <K,V> Cache<K,V> getCacheManager(CacheMethodDetails<? extends Annotation> cacheMethodDetails);
+  CacheResolver getCacheResolver(CacheMethodDetails<? extends Annotation> cacheMethodDetails);
 }

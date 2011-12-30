@@ -37,29 +37,25 @@ import javax.cache.transaction.Mode;
 /**
  * Configuration for a new Cache.
  */
-public interface CacheConfiguration
+public interface CacheConfiguration<K,V>
 {
   public boolean isReadThrough();
   
-  public void setReadThrough(boolean isReadThrough);
-  
   public boolean isWriteThrough();
-  
-  public void setWriteThrough(boolean isWriteThrough);
   
   public boolean isStoreByValue();
   
-  public void setStoreByValue(boolean isStoreByValue);
-  
   public boolean isStatisticsEnabled();
-  
-  public void setStatisticsEnabled(boolean isEnable);
   
   public boolean isTransactionEnabled();
   
   public IsolationLevel getTransactionIsolationLevel();
   
   public Mode getTransactionMode();
+  
+  public CacheLoader<K, ? extends V> getCacheLoader();
+  
+  public CacheWriter<? super K, ? super V> getCacheWriter();
   
   public void setExpiry(ExpiryType type, Duration duration);
   

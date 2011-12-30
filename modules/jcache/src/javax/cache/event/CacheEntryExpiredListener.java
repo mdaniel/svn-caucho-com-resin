@@ -29,9 +29,7 @@
 
 package javax.cache.event;
 
-import javax.cache.Cache;
-
 public interface CacheEntryExpiredListener<K,V> extends CacheEntryListener<K,V>
 {
-  public void onExpire(Cache.Entry<K,V> entry);
+  public void entryExpired(CacheEntryEvent<? extends K,? extends V> entry);
 }

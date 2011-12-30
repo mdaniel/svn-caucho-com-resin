@@ -27,16 +27,12 @@
  * @author Scott Ferguson
  */
 
-package javax.cache;
+package com.caucho.mqueue;
 
 /**
- * Provides the capability of dynamically creating a cache.
- *
- * See  the  default implementation of this inteface in {@link com.caucho.cluster.CacheTemplate}
- * for additional methods.
+ * Interface for the transaction log.
  */
-public enum CacheManagerFactory {
-  INSTANCE;
-  
-  public static final String DEFAULT_CACHE_MANAGER_NAME = "default";
+public interface MQueueTask
+{
+  void doAction(MQueueItem item);
 }

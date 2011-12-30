@@ -33,6 +33,7 @@ package javax.cache.transaction;
  * Transaction modes.
  */
 public enum Mode {
+  NONE,
   LOCAL,
   XA;
 }

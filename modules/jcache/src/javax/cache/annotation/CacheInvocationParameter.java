@@ -30,13 +30,11 @@
 package javax.cache.annotation;
 
 import java.lang.annotation.Annotation;
-import java.lang.reflect.Type;
 import java.util.Set;
 
 public interface CacheInvocationParameter
 {
-  public Type getBaseType();
-  
+
   public Class<?> getRawType();
   
   public Object getValue();

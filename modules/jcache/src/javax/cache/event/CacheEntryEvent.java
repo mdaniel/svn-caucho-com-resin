@@ -27,25 +27,25 @@
  * @author Scott Ferguson
  */
 
-package javax.cache;
+package javax.cache.event;
 
-import java.util.Map;
+import java.util.EventObject;
 
-public interface CacheLoader<K,V>
+import javax.cache.Cache;
+
+public abstract class CacheEntryEvent<K,V> extends EventObject
 {
-  /**
-   * Obtains the value associated with the key, which will be loaded into the Cache
-   * @param key associated with the value.
-   * @return the value returned from the CacheLoader
-   * @throws CacheException
-   */
-  public Cache.Entry<K, V> load(Object key);
-
-  /**
-   * Creates a set of entries that will be loaded into the cache.
-   * @param keys the collection of keys
-   * @return a map of key-value pairs that will be loaded into the cache.
-   * @throws CacheException
-   */
-  public Map<K,V> loadAll(Iterable<? extends K> keys);
+  public CacheEntryEvent(Cache source)
+  {
+    super(source);
+  }
+  
+  public final Cache getSource()
+  {
+    return (Cache) super.getSource();
+  }
+  
+  public abstract K getKey();
+  
+  public abstract V getValue();
 }

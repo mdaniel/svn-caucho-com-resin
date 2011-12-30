@@ -67,11 +67,6 @@ public class CacheManagerFacade implements CacheManager
   }
 
   @Override
-  public void addImmutableClass(Class<?> immutableClass)
-  {
-  }
-
-  @Override
   public <K, V> CacheBuilder<K, V> createCacheBuilder(String cacheName)
   {
     return new CacheBuilderImpl<K,V>(cacheName, this);

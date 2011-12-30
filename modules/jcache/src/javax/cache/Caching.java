@@ -34,6 +34,7 @@ import java.util.ServiceLoader;
 import java.util.HashMap;
 import java.util.WeakHashMap;
 
+import javax.cache.spi.CacheManagerFactory;
 import javax.cache.spi.CachingProvider;
 
 
@@ -48,6 +49,11 @@ public final class Caching {
   
   private Caching()
   {
+  }
+  
+  public static CacheManagerFactory getCacheManagerFactory()
+  {
+    throw new UnsupportedOperationException();
   }
   
   public static CacheManager getCacheManager()
@@ -71,14 +77,38 @@ public final class Caching {
     return CachingSingleton.INSTANCE.getCacheManager(classLoader, name);
   }
   
+  public static void close()
+    throws CachingShutdownException
+  {
+    throw new UnsupportedOperationException();
+  }
+  
+  public static void close(ClassLoader classLoader)
+    throws CachingShutdownException
+  {
+    throw new UnsupportedOperationException();
+  }
+  
+  public static void close(ClassLoader classLoader, String name)
+    throws CachingShutdownException
+  {
+      throw new UnsupportedOperationException();
+  }
+  
+  public static boolean isSupported(OptionalFeature optionalFeature)
+  {
+    throw new UnsupportedOperationException();
+  }
+  
+  public static boolean isAnnotationsSupported()
+  {
+    throw new UnsupportedOperationException();
+  }
+
   private static final class CachingSingleton {
     private static CachingSingleton INSTANCE = new CachingSingleton();
     
     private final CachingProvider _cachingProvider;
-    
-    private final WeakHashMap<ClassLoader,HashMap<String,CacheManager>> _managerMap
-      = new WeakHashMap<ClassLoader,HashMap<String,CacheManager>>();
-    
     
     private CachingSingleton()
     {
@@ -92,10 +122,9 @@ public final class Caching {
     
     public CacheManager getCacheManager(String name)
     {
-      if (_cachingProvider == null)
-        throw new IllegalStateException("Cannot find a CachingProvider");
+      ClassLoader loader = Thread.currentThread().getContextClassLoader();
       
-      return getCacheManager(_cachingProvider.getDefaultClassLoader(), name);
+      return getCacheManager(loader, name);
     }
     
     public CacheManager getCacheManager(ClassLoader classLoader,
@@ -110,25 +139,11 @@ public final class Caching {
       if (_cachingProvider == null)
         throw new IllegalStateException("Cannot find a CachingProvider"); 
     
-      synchronized (_managerMap) {
-        HashMap<String,CacheManager> map = _managerMap.get(classLoader);
-        
-        if (map == null) {
-          map = new HashMap<String,CacheManager>();
-          
-          _managerMap.put(classLoader, map);
-        }
-        
-        CacheManager manager = map.get(name);
-        
-        if (manager == null) {
-          manager = _cachingProvider.createCacheManager(classLoader, name);
-          
-          map.put(name, manager);
-        }
-        
-        return manager;
-      }
+      CacheManagerFactory factory;
+      
+      factory = _cachingProvider.getCacheManagerFactory();
+      
+      return factory.getCacheManager(classLoader, name);
     }
   }
 }

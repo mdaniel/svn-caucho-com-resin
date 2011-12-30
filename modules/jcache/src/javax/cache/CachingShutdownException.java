@@ -1,13 +1,6 @@
 /*
  * Copyright (c) 1998-2011 Caucho Technology -- all rights reserved
  *
- * This interface is defined in JSR 107.
- *
- * It may be used to access both local and cluster caches.
- *
- * Some bulk operations will act only upon the local cache, and will not affect a cluster cache, as noted in the
- * JavaDoc entry for each method.
- *
  * This file is part of Resin(R) Open Source
  *
  * Each copy or derived work must preserve the copyright notice and this
@@ -34,27 +27,28 @@
  * @author Scott Ferguson
  */
 
-package javax.cache.event;
+package javax.cache;
 
-/**
- * The scope of an event notification.
- */
-public enum NotificationScope {
-  LOCAL(true, false),
-  REMOTE(false, true);
-  
-  private final boolean deliverLocal;
-  private final boolean deliverRemote;
-  
-  private NotificationScope(boolean deliverLocal,
-                            boolean deliverRemote)
+public class CachingShutdownException extends CacheException
+{
+  private static final long serialVersionUID = 1L;
+
+  public CachingShutdownException()
   {
-    this.deliverLocal = deliverLocal;
-    this.deliverRemote = deliverRemote;
   }
   
-  public boolean shouldDeliver(boolean isRemote)
+  public CachingShutdownException(String msg)
   {
-    return isRemote ? this.deliverRemote : this.deliverLocal;
+    super(msg);
+  }
+  
+  public CachingShutdownException(String msg, Throwable e)
+  {
+    super(msg, e);
+  }
+  
+  public CachingShutdownException(Throwable e)
+  {
+    super(e);
   }
 }

@@ -35,5 +35,5 @@ import javax.cache.Cache;
 
 public interface CacheResolver
 {
-  <K,V> Cache<K,V> resolveCache(CacheInvocationContext<Annotation> cacheInvocationContext);
+  <K,V> Cache<K,V> resolveCache(CacheInvocationContext<? extends Annotation> cacheInvocationContext);
 }

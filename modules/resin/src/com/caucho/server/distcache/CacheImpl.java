@@ -52,7 +52,6 @@ import javax.cache.CacheManager;
 import javax.cache.CacheStatistics;
 import javax.cache.Status;
 import javax.cache.event.CacheEntryListener;
-import javax.cache.event.NotificationScope;
 
 import com.caucho.config.ConfigException;
 import com.caucho.config.Configurable;
@@ -656,7 +655,6 @@ public class CacheImpl
    */
   @Override
   public boolean registerCacheEntryListener(CacheEntryListener listener,
-                                            NotificationScope scope,
                                             boolean synchronous)
   {
     _listeners.add(listener);
@@ -977,12 +975,6 @@ public class CacheImpl
     // TODO Auto-generated method stub
     return null;
   }
-  
-  @Override
-  public CacheManager getCacheManager()
-  {
-    return null;
-  }
 
   /* (non-Javadoc)
    * @see javax.cache.Cache#load(java.lang.Object, javax.cache.CacheLoader, java.lang.Object)
@@ -1004,16 +996,6 @@ public class CacheImpl
   {
     // TODO Auto-generated method stub
     return null;
-  }
-
-  /* (non-Javadoc)
-   * @see javax.cache.Cache#removeAll(java.util.Collection)
-   */
-  @Override
-  public void removeAll(Collection keys) throws CacheException
-  {
-    // TODO Auto-generated method stub
-    
   }
 
   /* (non-Javadoc)
@@ -1074,5 +1056,35 @@ public class CacheImpl
   {
     // TODO Auto-generated method stub
     return null;
+  }
+
+  /* (non-Javadoc)
+   * @see javax.cache.Cache#getAll(java.util.Set)
+   */
+  @Override
+  public Map getAll(Set keys)
+  {
+    // TODO Auto-generated method stub
+    return null;
+  }
+
+  /* (non-Javadoc)
+   * @see javax.cache.Cache#invokeEntryProcessor(java.lang.Object, javax.cache.Cache.EntryProcessor)
+   */
+  @Override
+  public Object invokeEntryProcessor(Object key, EntryProcessor entryProcessor)
+  {
+    // TODO Auto-generated method stub
+    return null;
+  }
+
+  /* (non-Javadoc)
+   * @see javax.cache.Cache#removeAll(java.util.Set)
+   */
+  @Override
+  public void removeAll(Set keys)
+  {
+    // TODO Auto-generated method stub
+    
   }
 }

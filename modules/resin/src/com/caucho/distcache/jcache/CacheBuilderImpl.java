@@ -36,7 +36,6 @@ import javax.cache.CacheWriter;
 import javax.cache.CacheConfiguration.Duration;
 import javax.cache.CacheConfiguration.ExpiryType;
 import javax.cache.event.CacheEntryListener;
-import javax.cache.event.NotificationScope;
 import javax.cache.transaction.IsolationLevel;
 import javax.cache.transaction.Mode;
 
@@ -75,20 +74,19 @@ public class CacheBuilderImpl<K,V> implements CacheBuilder<K,V>
 
   @Override
   public CacheBuilder<K,V> registerCacheEntryListener(CacheEntryListener<K,V> listener,
-                                                 NotificationScope scope,
-                                                 boolean synchronous)
+                                                      boolean synchronous)
   {
     return this;
   }
 
   @Override
-  public CacheBuilder<K,V> setCacheLoader(CacheLoader<K,V> cacheLoader)
+  public CacheBuilder<K,V> setCacheLoader(CacheLoader<K,? extends V> cacheLoader)
   {
     return this;
   }
 
   @Override
-  public CacheBuilder<K,V> setCacheWriter(CacheWriter<K,V> cacheWriter)
+  public CacheBuilder<K,V> setCacheWriter(CacheWriter<? super K,? super V> cacheWriter)
   {
     return this;
   }

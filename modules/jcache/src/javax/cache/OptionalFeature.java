@@ -41,6 +41,5 @@ package javax.cache;
  */
 public enum OptionalFeature {
     TRANSACTIONS,
-    ANNOTATIONS,
     STORE_BY_REFERENCE;
 }

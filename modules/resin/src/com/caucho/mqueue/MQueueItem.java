@@ -27,26 +27,72 @@
  * @author Scott Ferguson
  */
 
-package com.caucho.distcache.jcache;
+package com.caucho.mqueue;
 
-import javax.cache.OptionalFeature;
-import javax.cache.spi.CacheManagerFactory;
-import javax.cache.spi.CachingProvider;
+import com.caucho.vfs.TempBuffer;
 
 /**
- * Caching Provider for jcache
+ * Interface for the transaction log.
  */
-public class CacheProviderImpl implements CachingProvider
+public final class MQueueItem
 {
-  @Override
-  public CacheManagerFactory getCacheManagerFactory()
+  private int _code;
+  
+  // XXX: to, from, queryId
+  private String _to;
+  private String _from;
+  private long _queryId;
+  
+  private long _sequence;
+  private long _xid;
+  private TempBuffer _buffer;
+  private int _offset;
+  private int _length;
+  
+  public void init(int code, long sequence, long xa, 
+                   TempBuffer buffer, int offset, int length)
   {
-    return null;
+    _code = code;
+    _sequence = sequence;
+    _xid = xa;
+    _buffer = buffer;
+    _offset = offset;
+    _length = length;
   }
   
-  @Override
-  public boolean isSupported(OptionalFeature feature)
+  public int getCode()
   {
-    return false;
+    return _code;
+  }
+  
+  public long getSequence()
+  {
+    return _sequence;
+  }
+  
+  public long getXid()
+  {
+    return _xid;
+  }
+  
+  public TempBuffer getBuffer()
+  {
+    return _buffer;
+  }
+  
+  public int getOffset()
+  {
+    return _offset;
+  }
+  
+  public int getLength()
+  {
+    return _length;
+  }
+
+  @Override
+  public String toString()
+  {
+    return getClass().getSimpleName() + "[]";
   }
 }

@@ -33,15 +33,9 @@ import java.util.Date;
 
 public interface CacheStatistics
 {
-  public String getName();
-  
-  public String getStatus();
-  
   public void clearStatistics();
   
-  public Date statsAccumulatingFrom();
-  
-  public long getEntryCount();
+  public Date getStartAccumulationDate();
   
   public long getCacheHits();
   
@@ -59,9 +53,9 @@ public interface CacheStatistics
   
   public long getCacheEvictions();
   
-  public long getAverageGetMillis();
+  public float getAverageGetMillis();
   
-  public long getAveragePutMillis();
+  public float getAveragePutMillis();
   
-  public long getAverageRemoveMillis();
+  public float getAverageRemoveMillis();
 }

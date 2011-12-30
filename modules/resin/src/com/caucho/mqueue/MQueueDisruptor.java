@@ -27,25 +27,34 @@
  * @author Scott Ferguson
  */
 
-package javax.cache;
+package com.caucho.mqueue;
 
-import java.util.Map;
+import com.caucho.vfs.TempBuffer;
 
-public interface CacheLoader<K,V>
+/**
+ * Interface for the transaction log.
+ */
+public final class MQueueDisruptor
 {
-  /**
-   * Obtains the value associated with the key, which will be loaded into the Cache
-   * @param key associated with the value.
-   * @return the value returned from the CacheLoader
-   * @throws CacheException
-   */
-  public Cache.Entry<K, V> load(Object key);
-
-  /**
-   * Creates a set of entries that will be loaded into the cache.
-   * @param keys the collection of keys
-   * @return a map of key-value pairs that will be loaded into the cache.
-   * @throws CacheException
-   */
-  public Map<K,V> loadAll(Iterable<? extends K> keys);
+  private final int _size;
+  private final int _mask;
+  private final MQueueItem []_itemRing;
+ 
+  public MQueueDisruptor(int capacity, int consumers)
+  {
+    int size = 1;
+    
+    for (; size < capacity; size *= 2) {
+    }
+    
+    _size = size;
+    
+    _mask = size - 1;
+    
+    _itemRing = new MQueueItem[size];
+    
+    for (int i = 0; i < _size; i++) {
+      _itemRing[i] = new MQueueItem();
+    }
+  }
 }

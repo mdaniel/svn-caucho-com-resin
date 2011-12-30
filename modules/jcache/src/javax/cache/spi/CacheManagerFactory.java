@@ -27,25 +27,26 @@
  * @author Scott Ferguson
  */
 
-package javax.cache;
+package javax.cache.spi;
 
-import java.util.Map;
+import javax.cache.CacheManager;
+import javax.cache.CachingShutdownException;
 
-public interface CacheLoader<K,V>
-{
-  /**
-   * Obtains the value associated with the key, which will be loaded into the Cache
-   * @param key associated with the value.
-   * @return the value returned from the CacheLoader
-   * @throws CacheException
-   */
-  public Cache.Entry<K, V> load(Object key);
-
-  /**
-   * Creates a set of entries that will be loaded into the cache.
-   * @param keys the collection of keys
-   * @return a map of key-value pairs that will be loaded into the cache.
-   * @throws CacheException
-   */
-  public Map<K,V> loadAll(Iterable<? extends K> keys);
+/**
+ * Provides the capability of dynamically creating a cache.
+ *
+ * See  the  default implementation of this inteface in {@link com.caucho.cluster.CacheTemplate}
+ * for additional methods.
+ */
+public interface CacheManagerFactory {
+  public CacheManager getCacheManager(String name);
+  
+  public CacheManager getCacheManager(ClassLoader classLoader, String name);
+  
+  public void close() throws CachingShutdownException;
+  
+  public void close(ClassLoader classLoader) throws CachingShutdownException;
+  
+  public void close(ClassLoader classLoader, String name)
+    throws CachingShutdownException;
 }

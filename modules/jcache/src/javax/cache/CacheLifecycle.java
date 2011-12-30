@@ -40,9 +40,9 @@ package javax.cache;
  * The lifecycle status of the Cache.
  */
 public interface CacheLifecycle {
-  public void start() throws CacheException;
+  public void start();
   
-  public void stop() throws CacheException;
+  public void stop();
   
   public Status getStatus();
 }

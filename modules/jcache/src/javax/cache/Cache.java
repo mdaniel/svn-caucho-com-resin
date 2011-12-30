@@ -37,11 +37,12 @@
 package javax.cache;
 
 import java.util.Collection;
+import java.util.Iterator;
 import java.util.Map;
+import java.util.Set;
 import java.util.concurrent.Future;
 
 import javax.cache.event.CacheEntryListener;
-import javax.cache.event.NotificationScope;
 
 /**
  * The persistent or distributed cache is usable like a normal map, but loads
@@ -54,20 +55,15 @@ public interface Cache<K,V> extends Iterable<Cache.Entry<K,V>>, CacheLifecycle {
    * If the item does not exist and a CacheLoader has been specified,
    * the CacheLoader will be used to create a cache value.
    */
-  public V get(Object key)
-    throws CacheException;
+  public V get(Object key);
 
-  public Map<K,V> getAll(Collection<? extends K> keys)
-    throws CacheException;
+  public Map<K,V> getAll(Set<? extends K> keys);
   
-  public boolean containsKey(Object key)
-    throws CacheException;
+  public boolean containsKey(K key);
   
-  public Future<V> load(K key)
-    throws CacheException;
+  public Future<V> load(K key);
   
-  public Future<Map<K,V>> loadAll(Collection<? extends K> keys)
-    throws CacheException;
+  public Future<Map<K,? extends V>> loadAll(Collection<? extends K> keys);
   
   public CacheStatistics getStatistics();
   
@@ -77,58 +73,59 @@ public interface Cache<K,V> extends Iterable<Cache.Entry<K,V>>, CacheLifecycle {
    * @param key   the key of the item to put
    * @param value the value of the item to put
    */
-  public void put(K key, V value)
-    throws CacheException;
+  public void put(K key, V value);
   
-  public V getAndPut(K key, V value)
-    throws CacheException;
+  public V getAndPut(K key, V value);
   
-  public void putAll(Map<? extends K, ? extends V> map)
-    throws CacheException;
+  public void putAll(Map<? extends K, ? extends V> map);
   
-  public boolean putIfAbsent(K key, V value)
-    throws CacheException;
+  public boolean putIfAbsent(K key, V value);
 
-  public boolean remove(Object key)
-    throws CacheException;
+  public boolean remove(K key);
 
-  public boolean remove(Object key, V oldValue)
-    throws CacheException;
+  public boolean remove(K key, V oldValue);
   
-  public V getAndRemove(Object key)
-    throws CacheException;
+  public V getAndRemove(K key);
   
-  public boolean replace(K key, V oldValue, V newValue)
-    throws CacheException;
+  public boolean replace(K key, V oldValue, V newValue);
   
-  public boolean replace(K key, V value)
-    throws CacheException;
+  public boolean replace(K key, V value);
   
-  public V getAndReplace(K key, V value)
-    throws CacheException;
+  public V getAndReplace(K key, V value);
   
-  public void removeAll(Collection<? extends K> keys)
-    throws CacheException;
+  public void removeAll(Set<? extends K> keys);
   
-  public void removeAll()
-    throws CacheException;
+  public void removeAll();
   
-  public CacheConfiguration getConfiguration();
+  public CacheConfiguration<K,V> getConfiguration();
   
-  public boolean registerCacheEntryListener(CacheEntryListener<?,?> listener,
-                                            NotificationScope scope,
+  public boolean registerCacheEntryListener(CacheEntryListener<? super K,? super V> listener,
                                             boolean synchronous);
   
   public boolean unregisterCacheEntryListener(CacheEntryListener<?,?> listener);
   
+  public Object invokeEntryProcessor(K key, EntryProcessor<K, V> entryProcessor);
+  
   public String getName();
   
-  public CacheManager getCacheManager();
-  
   public <T> T unwrap(Class<T> cl);
+  
+  Iterator<Cache.Entry<K,V>> iterator();
+  
+  // CacheMXBean getMBean();
 
   public interface Entry<K,V> {
     public K getKey();
     public V getValue();      
+  }
+  
+  public interface MutableEntry<K,V> extends Entry<K,V> {
+    public boolean exists();
+    public void remove();
+    public void setValue(V value);
+  }
+  
+  public interface EntryProcessor<K,V> {
+    public Object process(Cache.MutableEntry<K,V> entry);
   }
 }

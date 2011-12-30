@@ -33,15 +33,11 @@ import java.util.Collection;
 
 public interface CacheWriter<K,V>
 {
-  public void write(Cache.Entry<K,V> entry)
-    throws CacheException;
+  public void write(Cache.Entry<K,V> entry);
   
-  public void writeAll(Collection<Cache.Entry<? extends K, ? extends V>> entries)
-    throws CacheException;
+  public void writeAll(Collection<Cache.Entry<? extends K, ? extends V>> entries);
   
-  public void delete(Cache.Entry<K,V> entry)
-    throws CacheException;
+  public void delete(Object key);
   
-  public void deleteAll(Collection<Cache.Entry<? extends K, ? extends V>> entries)
-    throws CacheException;
+  public void deleteAll(Collection<?> entries);
 }
