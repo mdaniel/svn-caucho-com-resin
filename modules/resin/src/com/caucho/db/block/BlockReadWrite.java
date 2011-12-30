@@ -192,10 +192,11 @@ public class BlockReadWrite {
 
       long fileSize = is.getLength();
       if (blockAddress < 0 || fileSize < blockAddress + length) {
-        throw new IllegalStateException(L.l("block at 0x{0} is invalid for file {1} (length 0x{2})",
+        throw new IllegalStateException(L.l("block at 0x{0} is invalid for file {1} (length 0x{2})\n  {3}",
                                             Long.toHexString(blockAddress),
                                             _path,
-                                            Long.toHexString(fileSize)));
+                                            Long.toHexString(fileSize),
+                                            is + ":" + is.getClass()));
       }
 
       // System.out.println("READ: " + Long.toHexString(blockAddress));

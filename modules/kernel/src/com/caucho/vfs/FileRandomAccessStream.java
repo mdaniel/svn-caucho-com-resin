@@ -71,6 +71,7 @@ public class FileRandomAccessStream extends RandomAccessStream
   /**
    * Returns the length.
    */
+  @Override
   public long getLength()
     throws IOException
   {
