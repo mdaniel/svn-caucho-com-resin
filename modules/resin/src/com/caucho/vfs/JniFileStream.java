@@ -30,9 +30,7 @@
 package com.caucho.vfs;
 
 import java.io.IOException;
-import java.util.logging.*;
 
-import com.caucho.server.util.CauchoSystem;
 import com.caucho.util.JniTroubleshoot;
 
 /**
@@ -41,9 +39,6 @@ import com.caucho.util.JniTroubleshoot;
 public class JniFileStream extends StreamImpl
     implements LockableStream
 {
-  private static final Logger log
-    = Logger.getLogger(JniFileStream.class.getName());
-
   private static final JniTroubleshoot _jniTroubleshoot;
   
   private int _fd;
@@ -75,6 +70,11 @@ public class JniFileStream extends StreamImpl
   {
     return _jniTroubleshoot.isEnabled();
   }
+  
+  public static Throwable getDisableCause()
+  {
+    return _jniTroubleshoot.getCause();
+  }
 
   public static JniFileStream openRead(byte []name, int length)
   {
@@ -98,11 +98,13 @@ public class JniFileStream extends StreamImpl
       return null;
   }
 
+  @Override
   public boolean canRead()
   {
     return _canRead && _fd >= 0;
   }
 
+  @Override
   public boolean hasSkip()
   {
     return _fd >= 0;
@@ -314,6 +316,7 @@ public class JniFileStream extends StreamImpl
   /**
    * Returns the debug name for the stream.
    */
+  @Override
   public String toString()
   {
     return "JniFileStream[" + getPath().getNativePath() + "]";

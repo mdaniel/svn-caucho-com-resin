@@ -149,6 +149,11 @@ public class JniTroubleshoot {
     
     _isValid = false;
   }
+  
+  public Throwable getCause()
+  {
+    return _cause;
+  }
 
   private boolean isMacOSX()
   {

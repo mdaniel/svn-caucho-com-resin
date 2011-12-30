@@ -84,7 +84,7 @@ install	:
 			cp conf/cluster-default.xml $(resin_conf)/cluster-default.xml; \
 		fi;\
 		mkdir "$(resin_conf)/resin-inf"; \
-		install -b -t "$(resin_conf)/resin-inf" conf/resin-inf/*; \
+		# install -b -t "$(resin_conf)/resin-inf" conf/resin-inf/*; \
 	fi
 	(cd modules/c/src; $(MAKE) install)
 	if test -r $(resin_pro)/modules/c/src/Makefile; then \
