@@ -82,6 +82,7 @@ install	:
 		else\
 			cp conf/app-default.xml $(resin_conf)/app-default.xml; \
 			cp conf/cluster-default.xml $(resin_conf)/cluster-default.xml; \
+			cp conf/health.xml $(resin_conf)/health.xml; \
 		fi;\
 		mkdir "$(resin_conf)/resin-inf"; \
 		# install -b -t "$(resin_conf)/resin-inf" conf/resin-inf/*; \
