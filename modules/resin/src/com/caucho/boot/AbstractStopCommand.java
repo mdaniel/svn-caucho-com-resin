@@ -29,15 +29,8 @@
 
 package com.caucho.boot;
 
-import com.caucho.util.L10N;
-
-import java.util.logging.Logger;
-
 public abstract class AbstractStopCommand extends AbstractBootCommand
 {
-  private static Logger _log;
-  private static L10N _L;
-
   protected AbstractStopCommand()
   {
     addFlagOption("verbose", "log command-line and environment information");
@@ -48,21 +41,5 @@ public abstract class AbstractStopCommand extends AbstractBootCommand
   public boolean isRetry()
   {
     return true;
-  }
-
-  private static Logger log()
-  {
-    if (_log == null)
-      _log = Logger.getLogger(AbstractStopCommand.class.getName());
-
-    return _log;
-  }
-
-  private static L10N L()
-  {
-    if (_L == null)
-      _L = new L10N(AbstractStopCommand.class);
-
-    return _L;
   }
 }

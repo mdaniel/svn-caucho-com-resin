@@ -555,7 +555,14 @@ class WatchdogArgs
       try {
         validateArgs(argv);
       } catch (BootArgumentException e) {
-        System.out.println(e.getMessage());
+        if (_command != null) {
+          System.err.println(_command.getName() + ": " + e.getMessage());
+        }
+        else {
+          System.err.println("unknown: " + e.getMessage());
+        }
+        
+        System.err.println();
 
         _command.usage();
 

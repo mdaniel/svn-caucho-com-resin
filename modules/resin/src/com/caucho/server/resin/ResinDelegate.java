@@ -71,6 +71,7 @@ public class ResinDelegate
   private static L10N L = new L10N(ResinDelegate.class);
 
   private final Resin _resin;
+  private String _licenseErrorMessage;
 
   /**
    * Creates a new resin server.
@@ -149,6 +150,7 @@ public class ResinDelegate
       }
 
       delegate = new ResinDelegate(resin);
+      delegate.setLicenseErrorMessage(licenseErrorMessage);
     }
 
     return delegate;
@@ -172,9 +174,14 @@ public class ResinDelegate
     return null;
   }
   
+  protected void setLicenseErrorMessage(String msg)
+  {
+    _licenseErrorMessage = msg;
+  }
+  
   protected String getLicenseErrorMessage()
   {
-    return null;
+    return _licenseErrorMessage;
   }
   
   protected DistCacheSystem createDistCacheService()
