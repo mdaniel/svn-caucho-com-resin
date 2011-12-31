@@ -328,6 +328,9 @@ public class BootResinConfig // implements EnvironmentBean
     for (WatchdogClient client : _watchdogMap.values()) {
       if (client == null)
         continue;
+
+      if (client.getConfig().isRequireExplicitId())
+        continue;
       
       String address = client.getConfig().getAddress();
       

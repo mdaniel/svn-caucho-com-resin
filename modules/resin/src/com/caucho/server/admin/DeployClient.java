@@ -520,7 +520,7 @@ public class DeployClient implements Repository
   /**
    * Undeploy a controller based on a deployment tag: wars/foo.com/my-war
    *
-   * @param tag the encoded controller name
+   * @param commit the encoded controller name
    */
   public boolean undeploy(CommitBuilder commit)
   {
@@ -566,7 +566,7 @@ public class DeployClient implements Repository
   protected Serializable query(Serializable query)
   {
     try {
-      return (Serializable) _bamClient.query(_deployAddress, query);
+      return _bamClient.query(_deployAddress, query);
     } catch (ServiceUnavailableException e) {
       throw new ServiceUnavailableException("Deploy service is not available, possibly because the resin.xml is missing a <resin:AdminServices> or a <resin:DeployService> tag\n  " + e.getMessage(),
                                             e);
