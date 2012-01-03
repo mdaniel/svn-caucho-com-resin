@@ -384,7 +384,7 @@ public class SocketModule extends AbstractQuercusModule {
    */
   public boolean socket_shutdown(Env env,
                                  @NotNull SocketInputOutput file,
-                                 int how)
+                                 @Optional("2") int how)
   {
     if (file == null)
       return false;
