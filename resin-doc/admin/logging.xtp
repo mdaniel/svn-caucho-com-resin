@@ -482,7 +482,7 @@ space pad the values and make the results look a little nicer:</p>
 
 <example title="fmt.sprintf() in log format string">
 &lt;log name='' level='all' path='stderr:' timestamp="[%H:%M:%S.%s]"
-     format=" ${fmt.sprintf('%-7s %45s %s',log.level,log.loggerName,log.message)}"/&gt;
+     format=" ${fmt.sprintf('%-7s %45s %s',log.level,log.loggerName,log.message)}">
 </example>
 
 <results>
