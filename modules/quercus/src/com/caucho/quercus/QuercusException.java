@@ -35,6 +35,7 @@ import java.lang.reflect.*;
 /**
  * Parent of PHP exceptions
  */
+@SuppressWarnings("serial")
 public class QuercusException extends RuntimeException
 {
   private ArrayList<String> _quercusStackTrace;

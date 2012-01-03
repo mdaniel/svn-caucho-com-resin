@@ -63,7 +63,10 @@ public class ExceptionClass
                                   @Optional("0") int code)
   {
     value.putField(env, "message", message);
-    value.putField(env, "code", LongValue.create(code));
+    
+    if (! value.issetField(env.createString("code"))) {
+      value.putField(env, "code", LongValue.create(code));
+    }
 
     Location location = env.getLocation();
 
