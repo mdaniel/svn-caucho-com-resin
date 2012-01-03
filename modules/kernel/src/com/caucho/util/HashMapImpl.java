@@ -85,6 +85,7 @@ public class HashMapImpl<K,V> extends AbstractMap<K,V> {
   /**
    * Returns the current number of entries in the cache.
    */
+  @Override
   public int size()
   {
     return _size;
@@ -93,6 +94,7 @@ public class HashMapImpl<K,V> extends AbstractMap<K,V> {
   /**
    * Clears the cache
    */
+  @Override
   public void clear()
   {
     if (_size > 0) {
@@ -117,6 +119,7 @@ public class HashMapImpl<K,V> extends AbstractMap<K,V> {
    * @param key key to lookup the item
    * @return the matching object in the cache
    */
+  @Override
   public V get(Object key)
   {
     if (key == null)
@@ -150,6 +153,7 @@ public class HashMapImpl<K,V> extends AbstractMap<K,V> {
    *
    * @return old value stored under the key
    */
+  @Override
   public V put(K key, V value)
   {
     if (key == null) {
@@ -227,6 +231,7 @@ public class HashMapImpl<K,V> extends AbstractMap<K,V> {
    *
    * @return the value removed
    */
+  @Override
   public V remove(Object key)
   {
     if (key == null) {
@@ -306,6 +311,7 @@ public class HashMapImpl<K,V> extends AbstractMap<K,V> {
   /**
    * Returns the entry set of the cache
    */
+  @Override
   public Set<K> keySet()
   {
     return new KeySet(this);
@@ -333,6 +339,7 @@ public class HashMapImpl<K,V> extends AbstractMap<K,V> {
     /**
      * Returns true if the map contains the value.
      */
+    @Override
     public boolean contains(Object key)
     {
       if (key == null)
@@ -353,6 +360,7 @@ public class HashMapImpl<K,V> extends AbstractMap<K,V> {
     /**
      * Returns the iterator.
      */
+    @Override
     public boolean removeAll(Collection<?> keys)
     {
       if (keys == null)
@@ -395,6 +403,7 @@ public class HashMapImpl<K,V> extends AbstractMap<K,V> {
       _i = 0;
     }
 
+    @Override
     public boolean hasNext()
     {
       K1 []keys = _map._keys;
@@ -408,6 +417,7 @@ public class HashMapImpl<K,V> extends AbstractMap<K,V> {
       return false;
     }
 
+    @Override
     public K1 next()
     {
       K1 []keys = _map._keys;
@@ -426,6 +436,7 @@ public class HashMapImpl<K,V> extends AbstractMap<K,V> {
       return null;
     }
 
+    @Override
     public void remove()
     {
       if (_i > 0)
@@ -436,6 +447,7 @@ public class HashMapImpl<K,V> extends AbstractMap<K,V> {
   /**
    * Returns the entry set of the cache
    */
+  @Override
   public Set<Map.Entry<K,V>> entrySet()
   {
     return new EntrySet(this);
@@ -455,6 +467,7 @@ public class HashMapImpl<K,V> extends AbstractMap<K,V> {
     /**
      * Returns the size.
      */
+    @Override
     public int size()
     {
       return _map.size();
@@ -463,6 +476,7 @@ public class HashMapImpl<K,V> extends AbstractMap<K,V> {
     /**
      * Returns the iterator.
      */
+    @Override
     public Iterator<Map.Entry<K1,V1>> iterator()
     {
       return new EntryIterator(_map);
@@ -489,6 +503,7 @@ public class HashMapImpl<K,V> extends AbstractMap<K,V> {
       _i = 0;
     }
 
+    @Override
     public boolean hasNext()
     {
       K1 []keys = _map._keys;
@@ -502,6 +517,7 @@ public class HashMapImpl<K,V> extends AbstractMap<K,V> {
       return false;
     }
 
+    @Override
     public Map.Entry<K1,V1> next()
     {
       K1 []keys = _map._keys;
@@ -518,6 +534,7 @@ public class HashMapImpl<K,V> extends AbstractMap<K,V> {
       return null;
     }
 
+    @Override
     public void remove()
     {
       if (_i > 0)

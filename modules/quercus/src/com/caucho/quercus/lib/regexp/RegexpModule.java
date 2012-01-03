@@ -1186,15 +1186,20 @@ public class RegexpModule
 
       ArrayValue regs = new ArrayValueImpl();
 
+      int lastGroup = 0;
       for (int i = 0; i < regexpState.groupCount(); i++) {
         StringValue group = regexpState.group(env, i);
 
-        if (group != null && !group.isEmpty()) // php/154b
+        if (group != null && ! group.isEmpty()) {
+          /* PHP's preg_replace_callback does not return empty groups */
+          // php/154b, c
+          
+          for (int j = lastGroup + 1; j < i; j++) {
+            regs.put(empty);
+          }
+
           regs.put(group);
-        /* PHP's preg_replace_callback does not return empty groups
-        else
-          regs.put(empty);
-*/
+        }
       }
 
       Value replacement = fun.call(env, regs);

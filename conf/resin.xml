@@ -111,9 +111,9 @@
     </host>
   </cluster>
 
-  <cluster id="cache" xmlns:memcache="urn:java:com.caucho.memcache">
+  <cluster id="memcached" xmlns:memcache="urn:java:com.caucho.memcache">
     <!-- define the servers in the cluster -->
-    <server-multi id-prefix="cache-" address-list="${cache_servers}" port="6820">
+    <server-multi id-prefix="memcached-" address-list="${memcached_servers}" port="6820">
       <!-- listen for the memcache protocol -->
       <listen port="${memcached_port?:11212}"
               keepalive-timeout="600s" socket-timeout="600s">

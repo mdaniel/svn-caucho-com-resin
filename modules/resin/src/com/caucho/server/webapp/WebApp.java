@@ -300,6 +300,7 @@ public class WebApp extends ServletContextImpl
   private boolean _isInheritSession;
 
   private String _characterEncoding;
+  private int _formParameterMax = 10000;
 
   // The cache
   private AbstractProxyCache _cache;
@@ -1808,6 +1809,20 @@ public class WebApp extends ServletContextImpl
     _accessLog = log;
 
     _accessLogLocal.set(log);
+  }
+  
+  /**
+   * Sets the maximum number of form parameters
+   */
+  @Configurable
+  public void setFormParameterMax(int max)
+  {
+    _formParameterMax = max;
+  }
+  
+  public int getFormParameterMax()
+  {
+    return _formParameterMax;
   }
 
   /**

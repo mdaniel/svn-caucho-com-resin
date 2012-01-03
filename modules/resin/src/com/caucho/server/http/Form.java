@@ -29,9 +29,11 @@
 
 package com.caucho.server.http;
 
+import com.caucho.server.dispatch.BadRequestException;
 import com.caucho.util.CharCursor;
 import com.caucho.util.FreeList;
 import com.caucho.util.HashMapImpl;
+import com.caucho.util.L10N;
 import com.caucho.util.StringCharCursor;
 import com.caucho.vfs.ByteToChar;
 
@@ -46,6 +48,7 @@ import java.util.logging.Logger;
  * Form handling.
  */
 public class Form {
+  private static final L10N L = new L10N(Form.class);
   private static final Logger log = Logger.getLogger(Form.class.getName());
 
   private static final FreeList<Form> _freeList = new FreeList<Form>(32);
@@ -202,16 +205,21 @@ public class Form {
    * @param is an input stream containing the data
    * @param javaEncoding the Java name for the charset
    */
-  void parsePostData(HashMapImpl<String,String[]> table, InputStream is,
-                     String javaEncoding)
+  void parsePostData(HashMapImpl<String,String[]> table, 
+                     InputStream is,
+                     String javaEncoding,
+                     int paramMax)
     throws IOException
   {
     ByteToChar converter = _converter;
+    
     try {
       converter.setEncoding(javaEncoding);
     } catch (UnsupportedEncodingException e) {
       log.log(Level.FINE, e.toString(), e);
     }
+    
+    int paramCount = 0;
 
     int ch = is.read();
     while (ch >= 0) {
@@ -242,6 +250,13 @@ public class Form {
         readChar(converter, is, ch);
       
       String value = converter.getConvertedString();
+      
+      if (paramMax < paramCount) {
+        throw new BadRequestException(L.l("Too many request parameters: '{0}'",
+                                          paramCount));
+      }
+      
+      paramCount++;
 
       /* Could show passwords
       if (log.isLoggable(Level.FINE))

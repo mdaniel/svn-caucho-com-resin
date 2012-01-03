@@ -343,7 +343,8 @@ abstract public class AbstractCauchoRequest implements CauchoRequest {
       }
 
       else if (contentType.startsWith("application/x-www-form-urlencoded")) {
-        formParser.parsePostData(form, getInputStream(), javaEncoding);
+        formParser.parsePostData(form, getInputStream(), javaEncoding,
+                                 getWebApp().getFormParameterMax());
       }
 
       else if ((getWebApp().isMultipartFormEnabled() || multipartConfig != null)
