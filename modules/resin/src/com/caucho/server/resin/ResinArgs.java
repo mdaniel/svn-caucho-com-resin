@@ -61,6 +61,7 @@ public class ResinArgs
   private Path _resinHome;
   private Path _rootDirectory;
   private Path _dataDirectory;
+  private Path _licenseDirectory;
 
   private String _resinConf;
   
@@ -152,7 +153,17 @@ public class ResinArgs
   {
     _rootDirectory = root;
   }
-  
+
+  public Path getLicenseDirectory()
+  {
+    return _licenseDirectory;
+  }
+
+  public void setLicenseDirectory(Path licenseDirectory)
+  {
+    _licenseDirectory = licenseDirectory;
+  }
+
   /**
    * Gets the root directory.
    */

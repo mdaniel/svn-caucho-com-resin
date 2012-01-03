@@ -36,6 +36,7 @@ import com.caucho.config.ConfigException;
 import com.caucho.env.shutdown.ExitCode;
 import com.caucho.env.shutdown.ShutdownSystem;
 import com.caucho.license.LicenseCheck;
+import com.caucho.server.resin.Resin;
 import com.caucho.util.*;
 
 public class AddLicenseAction implements AdminAction
@@ -62,7 +63,7 @@ public class AddLicenseAction implements AdminAction
     String licenseDirStr = null;
     
     try {
-      LicenseCheck licenseCheck = (LicenseCheck) cl.newInstance();
+      LicenseCheck licenseCheck = Resin.getCurrent().getLicenseCheck();
       licenseDirStr = licenseCheck.getLicenseDirectory();
     } catch (Exception e) {
       throw new ConfigException(L.l("add-license could not lookup the Resin license directory"), e);
@@ -76,9 +77,9 @@ public class AddLicenseAction implements AdminAction
     if (licenseFile.exists() && ! overwrite) {
       log.log(Level.FINE, 
               L.l("add-license will not overwrite {0} (use -overwrite)", 
-                  fileName));
+                  licenseFile));
       return L.l("add-license will not overwrite {0} (use -overwrite)", 
-                 fileName);
+                 licenseFile);
     }
     
     

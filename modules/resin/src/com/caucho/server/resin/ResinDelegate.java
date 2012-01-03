@@ -206,7 +206,6 @@ public class ResinDelegate
   }
 
   /**
-   * @param clusterService
    * @return
    */
   protected Server createServer()
@@ -353,5 +352,10 @@ public class ResinDelegate
   public String toString()
   {
     return getClass().getSimpleName() + "[]";
+  }
+
+  public LicenseCheck getLicenseCheck()
+  {
+    return null;
   }
 }

@@ -31,6 +31,7 @@ package com.caucho.license;
 import com.caucho.config.ConfigException;
 
 import java.io.IOException;
+import java.util.Collection;
 
 public interface LicenseCheck
 {

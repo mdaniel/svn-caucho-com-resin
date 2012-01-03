@@ -67,6 +67,7 @@ import com.caucho.env.shutdown.ExitCode;
 import com.caucho.env.shutdown.ShutdownSystem;
 import com.caucho.env.vfs.RepositoryScheme;
 import com.caucho.java.WorkDir;
+import com.caucho.license.LicenseCheck;
 import com.caucho.lifecycle.Lifecycle;
 import com.caucho.lifecycle.LifecycleState;
 import com.caucho.loader.Environment;
@@ -156,6 +157,7 @@ public class Resin
   
   private boolean _isRestart;
   private String _restartMessage;
+  private Path _licenseDirectory;
   
   private ResinWaitForExitService _waitForExitService;
   
@@ -195,6 +197,8 @@ public class Resin
     
     _rootDirectory = args.getRootDirectory();
     _resinDataDirectory = args.getDataDirectory();
+
+    _licenseDirectory = args.getLicenseDirectory();
     
     _homeCluster = args.getHomeCluster();
     _dynamicAddress = args.getServerAddress();
@@ -354,6 +358,16 @@ public class Resin
   public void setRootDirectory(Path path)
   {
     _rootDirectory = path;
+  }
+
+  public Path getLicenseDirectory()
+  {
+    return _licenseDirectory;
+  }
+
+  public void setLicenseDirectory(Path licenseDirectory)
+  {
+    _licenseDirectory = licenseDirectory;
   }
 
   /**
@@ -1074,6 +1088,10 @@ public class Resin
   ResinDelegate getDelegate()
   {
     return _resinDelegate;
+  }
+
+  public LicenseCheck getLicenseCheck() {
+    return _resinDelegate.getLicenseCheck();
   }
   
   protected boolean loadCloudLicenses()
