@@ -325,8 +325,7 @@ public class XmlModule extends AbstractQuercusModule {
     if (parser == null)
       return false;
 
-    return parser.xml_set_element_handler(env,
-        startElementHandler, endElementHandler);
+    return parser.xml_set_element_handler(env, startElementHandler, endElementHandler);
   }
 
   /**

@@ -161,9 +161,15 @@ public class Xml {
                                          Value endElementHandler)
   {
     if (_obj == null) {
-      _startElementHandler = startElementHandler.toCallable(env);
-      _endElementHandler = endElementHandler.toCallable(env);
-    } else {
+      if (! startElementHandler.isEmpty()) {
+        _startElementHandler = startElementHandler.toCallable(env);
+      }
+      
+      if (! endElementHandler.isEmpty()) {
+        _endElementHandler = endElementHandler.toCallable(env);
+      }
+    } 
+    else {
       if (! startElementHandler.isEmpty()) {
         Value value = new ArrayValueImpl();
         value.put(_obj);
@@ -171,13 +177,14 @@ public class Xml {
         _startElementHandler = value.toCallable(env);
       }
 
-      if (! endElementHandler.isEmpty()) {
+      if (! endElementHandler.isEmpty() && ! endElementHandler.toBoolean()) {
         Value value = new ArrayValueImpl();
         value.put(_obj);
         value.put(endElementHandler);
         _endElementHandler = value.toCallable(env);
       }
     }
+    
     return true;
   }
 
@@ -852,8 +859,12 @@ public class Xml {
     {
       try {
         String eName = sName; // element name
-        if ("".equals(eName)) eName = qName;
-        if (_xmlOptionCaseFolding) eName = eName.toUpperCase(Locale.ENGLISH);
+        
+        if ("".equals(eName))
+          eName = qName;
+        
+        if (_xmlOptionCaseFolding)
+            eName = eName.toUpperCase(Locale.ENGLISH);
 
         if (_endElementHandler != null)
           _endElementHandler.call(_env, _parser, _env.createString(eName));
