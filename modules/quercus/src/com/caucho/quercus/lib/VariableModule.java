@@ -396,6 +396,7 @@ public class VariableModule extends AbstractQuercusModule {
         return (cl.findFunction(name.toString()) != null);
       }
       else if (obj.isObject()) {
+        System.out.println("OBJ: " + obj.findFunction(name.toString()) + " " + isSyntaxOnly);
         if (isSyntaxOnly)
           return true;
 

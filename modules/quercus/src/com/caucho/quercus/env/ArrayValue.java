@@ -376,7 +376,8 @@ abstract public class ArrayValue extends Value {
         }
       }
 
-      return true;
+      // php/1270
+      return obj.findFunction(name) != null;
     }
     else {
       QuercusClass cl = env.findClass(obj.toString());
