@@ -30,7 +30,9 @@
 package com.caucho.boot;
 
 import java.io.IOException;
+import java.net.InetAddress;
 import java.net.Socket;
+import java.net.UnknownHostException;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -164,7 +166,7 @@ public abstract class AbstractRemoteCommand extends AbstractBootCommand {
 
     HmuxClientFactory hmuxFactory
       = new HmuxClientFactory(address, port, userName, password);
-                                                          
+
     try {
       return hmuxFactory.create();
     } catch (RemoteConnectionFailedException e) {
@@ -182,7 +184,7 @@ public abstract class AbstractRemoteCommand extends AbstractBootCommand {
   {
     for (WatchdogClient triad : client.getConfig().getCluster().getClients()) {
       int port = triad.getConfig().getPort();
-      
+
       if (clientCanConnect(triad, port)) {
         return triad;
       }
@@ -199,7 +201,7 @@ public abstract class AbstractRemoteCommand extends AbstractBootCommand {
                                    int port)
   {
     for (WatchdogClient server : client.getConfig().getCluster().getClients()) {
-      if (! address.equals(server.getConfig().getAddress()))
+      if (! isEqual(address, server.getConfig().getAddress()))
         continue;
       
       if (port != server.getConfig().getPort())
@@ -209,6 +211,21 @@ public abstract class AbstractRemoteCommand extends AbstractBootCommand {
     }
     
     return null;
+  }
+
+  private boolean isEqual(String address1, String address2)
+  {
+    if (address1.equals(address2))
+      return true;
+
+    try {
+      InetAddress inetAddress1 = InetAddress.getByName(address1);
+      InetAddress inetAddress2 = InetAddress.getByName(address2);
+
+      return inetAddress1.equals(inetAddress2);
+    } catch (UnknownHostException e) {
+      throw new RuntimeException(e);
+    }
   }
 
   private WatchdogClient findLiveClient(WatchdogClient client, int port)
