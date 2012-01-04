@@ -37,13 +37,12 @@ import com.caucho.distcache.AbstractCache;
 import com.caucho.distcache.ClusterCache;
 import com.caucho.distcache.ExtCacheEntry;
 import com.caucho.server.distcache.CacheImpl;
-import com.caucho.server.distcache.DistCacheSystem;
 import com.caucho.util.Alarm;
 import com.caucho.util.Base64;
 import com.caucho.util.Crc64;
 import com.caucho.util.L10N;
 
-import javax.cache.Cache;
+import javax.annotation.PostConstruct;
 import javax.enterprise.inject.Default;
 import javax.inject.Named;
 import java.util.Hashtable;
@@ -95,11 +94,8 @@ public class AdminAuthenticator extends XmlAuthenticator
   {
   }
 
-  public final CacheImpl getAuthStore()
-  {
-    if (_authStore != null)
-      return _authStore;
-    
+  @PostConstruct
+  public final void initCache() {
     AbstractCache authStore = new ClusterCache();
 
     authStore.setAccessedExpireTimeoutMillis(Period.FOREVER);
@@ -109,15 +105,14 @@ public class AdminAuthenticator extends XmlAuthenticator
     authStore.setScopeMode(AbstractCache.Scope.CLUSTER);
 
     _authStore = authStore.createIfAbsent();
-    
-    return _authStore;
   }
 
   private synchronized void reloadFromStore()
   {
     Hashtable<String, PasswordUser> userMap = null;
-    
-    userMap = (Hashtable<String, PasswordUser>) getAuthStore().get(ADMIN_AUTH_MAP_KEY);
+
+    userMap
+      = (Hashtable<String,PasswordUser>) _authStore.get(ADMIN_AUTH_MAP_KEY);
 
     if (userMap != null)
       _userMap = userMap;
@@ -129,7 +124,7 @@ public class AdminAuthenticator extends XmlAuthenticator
   private synchronized void updateStore()
   {
     //XXX: compareAndPut
-    getAuthStore().put(ADMIN_AUTH_MAP_KEY, _userMap);
+    _authStore.put(ADMIN_AUTH_MAP_KEY, _userMap);
   }
 
   private boolean isModified()
@@ -144,7 +139,8 @@ public class AdminAuthenticator extends XmlAuthenticator
     if (lastCheck + UPDATE_CHECK_INTERVAL > now)
       return false;
 
-    ExtCacheEntry entry = (ExtCacheEntry) getAuthStore().getCacheEntry(ADMIN_AUTH_MAP_KEY);
+    ExtCacheEntry entry = (ExtCacheEntry) _authStore.getCacheEntry(
+      ADMIN_AUTH_MAP_KEY);
 
     if (entry != null && entry.getLastModifiedTime() > lastCheck)
       return true;
