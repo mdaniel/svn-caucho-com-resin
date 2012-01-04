@@ -42,7 +42,6 @@ import com.caucho.util.Base64;
 import com.caucho.util.Crc64;
 import com.caucho.util.L10N;
 
-import javax.annotation.PostConstruct;
 import javax.enterprise.inject.Default;
 import javax.inject.Named;
 import java.util.Hashtable;
@@ -94,8 +93,10 @@ public class AdminAuthenticator extends XmlAuthenticator
   {
   }
 
-  @PostConstruct
   public final void initCache() {
+    if (_authStore != null)
+      return;
+
     AbstractCache authStore = new ClusterCache();
 
     authStore.setAccessedExpireTimeoutMillis(Period.FOREVER);

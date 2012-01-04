@@ -457,6 +457,7 @@ public class Server
         thread.setContextClassLoader(getClassLoader());
 
         _adminAuth = _cdiManager.getReference(AdminAuthenticator.class);
+        _adminAuth.initCache();
       } catch (Exception e) {
         if (log.isLoggable(Level.FINEST))
           log.log(Level.FINEST, e.toString(), e);
@@ -464,6 +465,7 @@ public class Server
           log.finer(e.toString());
 
         _adminAuth = new AdminAuthenticator();
+        _adminAuth.initCache();
       } finally {
         thread.setContextClassLoader(oldLoader);
       }
