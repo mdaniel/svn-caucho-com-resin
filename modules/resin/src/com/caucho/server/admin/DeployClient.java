@@ -37,11 +37,13 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.concurrent.atomic.AtomicInteger;
 
+import com.caucho.admin.RemoteAdminService;
 import com.caucho.bam.BamError;
 import com.caucho.bam.RemoteConnectionFailedException;
 import com.caucho.bam.RemoteListenerUnavailableException;
 import com.caucho.bam.ServiceUnavailableException;
 import com.caucho.bam.actor.ActorSender;
+import com.caucho.bam.actor.RemoteActorSender;
 import com.caucho.bam.broker.Broker;
 import com.caucho.bam.query.QueryCallback;
 import com.caucho.cloud.deploy.CopyTagQuery;
@@ -84,18 +86,6 @@ public class DeployClient implements Repository
   private String _deployAddress;
   
   private String _url;
-  
-  public DeployClient()
-  {
-    Server server = Server.getCurrent();
-
-    if (server == null)
-      throw new IllegalStateException(L.l("DeployClient was not called in a Resin context. For external clients, use the DeployClient constructor with host,port arguments."));
-    
-    _bamClient = server.createAdminClient(getClass().getSimpleName());
-
-    _deployAddress = "deploy@resin.caucho";
-  }
 
   public DeployClient(String serverId)
   {
@@ -109,11 +99,12 @@ public class DeployClient implements Repository
     _deployAddress = "deploy@" + serverId + ".resin.caucho";
   }
   
-  public DeployClient(ActorSender client)
+  public DeployClient(RemoteActorSender client)
   {
     _bamClient = client;
     
-    _url = client.getAddress();
+    _url = client.getUrl();
+
     _deployAddress = "deploy@resin.caucho";
   }
   

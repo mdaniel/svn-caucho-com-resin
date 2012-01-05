@@ -38,7 +38,7 @@ import java.util.logging.Logger;
 
 import com.caucho.bam.RemoteConnectionFailedException;
 import com.caucho.bam.RemoteListenerUnavailableException;
-import com.caucho.bam.actor.ActorSender;
+import com.caucho.bam.actor.RemoteActorSender;
 import com.caucho.config.ConfigException;
 import com.caucho.hmtp.HmtpClient;
 import com.caucho.network.listen.TcpSocketLinkListener;
@@ -60,7 +60,7 @@ public abstract class AbstractRemoteCommand extends AbstractBootCommand {
     addValueOption("password", "password", "admin password for authentication");
   }
   
-  protected ActorSender createBamClient(WatchdogArgs args,
+  protected RemoteActorSender createBamClient(WatchdogArgs args,
                                         WatchdogClient client)
   {
     String address = args.getArg("-address");
@@ -89,7 +89,7 @@ public abstract class AbstractRemoteCommand extends AbstractBootCommand {
     return createBamClient(client, address, port, user, password);
   }
   
-  private ActorSender createBamClient(WatchdogClient client,
+  private RemoteActorSender createBamClient(WatchdogClient client,
                                       String address,
                                       int port,
                                       String userName,
@@ -97,7 +97,7 @@ public abstract class AbstractRemoteCommand extends AbstractBootCommand {
   {
     WatchdogClient liveClient = client;
     
-    ActorSender hmuxClient
+    RemoteActorSender hmuxClient
       = createHmuxClient(client, address, port, userName, password);
     
     if (hmuxClient != null)
@@ -120,7 +120,7 @@ public abstract class AbstractRemoteCommand extends AbstractBootCommand {
     return createHmtpClient(address, port, userName, password);
   }
   
-  private ActorSender createHmtpClient(String address, 
+  private RemoteActorSender createHmtpClient(String address,
                                        int port,
                                        String userName,
                                        String password)
@@ -146,7 +146,7 @@ public abstract class AbstractRemoteCommand extends AbstractBootCommand {
   }
   
   
-  private ActorSender createHmuxClient(WatchdogClient client,
+  private RemoteActorSender createHmuxClient(WatchdogClient client,
                                        String address, int port,
                                        String userName,
                                        String password)

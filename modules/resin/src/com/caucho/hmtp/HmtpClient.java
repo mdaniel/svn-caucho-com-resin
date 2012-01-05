@@ -37,7 +37,7 @@ import java.util.logging.Logger;
 import com.caucho.bam.BamException;
 import com.caucho.bam.NotAuthorizedException;
 import com.caucho.bam.actor.ActorHolder;
-import com.caucho.bam.actor.ActorSender;
+import com.caucho.bam.actor.RemoteActorSender;
 import com.caucho.bam.broker.Broker;
 import com.caucho.bam.client.LinkClient;
 import com.caucho.bam.query.QueryCallback;
@@ -53,7 +53,8 @@ import com.caucho.websocket.WebSocketListener;
 /**
  * HMTP client protocol
  */
-public class HmtpClient implements ActorSender {
+public class HmtpClient implements RemoteActorSender
+{
   private static final L10N L = new L10N(HmtpClient.class);
   
   private static final Logger log
@@ -129,6 +130,12 @@ public class HmtpClient implements ActorSender {
     _linkFactory.connect();
     
     loginImpl(user, credentials);
+  }
+
+  @Override
+  public String getUrl()
+  {
+    return _url;
   }
 
   private void init()

@@ -107,6 +107,12 @@ public class ResinConfig implements EnvironmentBean
     security.setSignatureSecret(key);
   }
 
+  @Configurable
+  public void setRootDirectory(Path root)
+  {
+    _resin.setRootDirectory(root);
+  }
+
   /**
    * Set true if the server should enable environment-based
    * system properties.

@@ -29,6 +29,7 @@
 package com.caucho.server.admin;
 
 import com.caucho.bam.actor.ActorSender;
+import com.caucho.bam.actor.RemoteActorSender;
 
 import java.lang.reflect.Constructor;
 import java.lang.reflect.InvocationTargetException;
@@ -52,9 +53,9 @@ public class HmuxClientFactory
     _password = password;
   }
 
-  public ActorSender create()
+  public RemoteActorSender create()
   {
-    ActorSender sender;
+    RemoteActorSender sender;
 
     try {
       ClassLoader loader = Thread.currentThread().getContextClassLoader();
@@ -67,8 +68,8 @@ public class HmuxClientFactory
                                                            String.class,
                                                            String.class);
 
-      sender = (ActorSender) ctor.newInstance(_address, _port,
-                                              _userName, _password);
+      sender = (RemoteActorSender) ctor.newInstance(_address, _port,
+                                                    _userName, _password);
     } catch (ClassNotFoundException e) {
       sender = null;
     } catch (InvocationTargetException e) {

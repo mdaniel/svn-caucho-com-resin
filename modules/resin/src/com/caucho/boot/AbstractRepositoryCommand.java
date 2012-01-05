@@ -38,6 +38,7 @@ import com.caucho.bam.NotAuthorizedException;
 import com.caucho.bam.RemoteConnectionFailedException;
 import com.caucho.bam.RemoteListenerUnavailableException;
 import com.caucho.bam.actor.ActorSender;
+import com.caucho.bam.actor.RemoteActorSender;
 import com.caucho.config.ConfigException;
 import com.caucho.env.repository.CommitBuilder;
 import com.caucho.hmtp.HmtpClient;
@@ -111,7 +112,7 @@ public abstract class AbstractRepositoryCommand extends AbstractRemoteCommand {
   protected WebAppDeployClient getDeployClient(WatchdogArgs args,
                                                WatchdogClient client)
   {
-    ActorSender sender = createBamClient(args, client);
+    RemoteActorSender sender = createBamClient(args, client);
     
     // return new WebAppDeployClient(address, port, user, password);
     
