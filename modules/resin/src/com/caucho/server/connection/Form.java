@@ -38,6 +38,7 @@ import javax.servlet.http.*;
 
 import com.caucho.util.*;
 import com.caucho.vfs.*;
+import com.caucho.server.dispatch.*;
 
 import com.caucho.log.Log;
 
@@ -45,10 +46,11 @@ import com.caucho.log.Log;
  * Form handling.
  */
 public class Form {
+  private static final L10N L = new L10N(Form.class);
   static final Logger log = Log.open(Form.class);
 
   private final ByteToChar _converter = ByteToChar.create();
-  
+
   /**
    * Parses the values from a query string.
    *
@@ -57,9 +59,9 @@ public class Form {
    * @param javaEncoding the Java name for the charset
    */
   public void parseQueryString(HashMapImpl<String,String[]> table,
-			       String query,
-			       String javaEncoding,
-			       boolean isTop)
+                               String query,
+                               String javaEncoding,
+                               boolean isTop)
     throws IOException
   {
     CharCursor is = new StringCharCursor(query);
@@ -87,23 +89,23 @@ public class Form {
         ch = is.next();
       for (; ch != is.DONE && ch != '&'; ch = is.next())
         readChar(converter, is, ch, isTop);
-      
+
       String value = converter.getConvertedString();
 
       if (log.isLoggable(Level.FINE))
         log.fine("query: " + key + "=" + value);
-      
+
       String []oldValue = table.get(key);
-      
+
       if (key == null || key.equals("")) {
       }
       else if (oldValue == null)
-	table.put(key, new String[] { value });
+        table.put(key, new String[] { value });
       else {
-	String []newValue = new String[oldValue.length + 1];
-	System.arraycopy(oldValue, 0, newValue, 0, oldValue.length);
-	newValue[oldValue.length] = value;
-	table.put(key, newValue);
+        String []newValue = new String[oldValue.length + 1];
+        System.arraycopy(oldValue, 0, newValue, 0, oldValue.length);
+        newValue[oldValue.length] = value;
+        table.put(key, newValue);
       }
     }
   }
@@ -117,7 +119,7 @@ public class Form {
    * @param ch the next character
    */
   private static void readChar(ByteToChar converter, CharCursor is,
-			       int ch, boolean isTop)
+                               int ch, boolean isTop)
     throws IOException
   {
     if (ch == '+')
@@ -132,13 +134,13 @@ public class Form {
         int ch4 = is.next();
 
         converter.addChar((char) ((toHex(ch1) << 12) +
-                                  (toHex(ch2) << 8) + 
-                                  (toHex(ch3) << 4) + 
+                                  (toHex(ch2) << 8) +
+                                  (toHex(ch3) << 4) +
                                   (toHex(ch4))));
       }
       else {
         int ch2 = is.next();
-        
+
         converter.addByte(((toHex(ch1) << 4) + toHex(ch2)));
       }
     }
@@ -156,7 +158,8 @@ public class Form {
    * @param javaEncoding the Java name for the charset
    */
   void parsePostData(HashMapImpl<String,String[]> table, InputStream is,
-		     String javaEncoding)
+                     String javaEncoding,
+                     int paramMax)
     throws IOException
   {
     ByteToChar converter = _converter;
@@ -165,6 +168,8 @@ public class Form {
     } catch (UnsupportedEncodingException e) {
       log.log(Level.FINE, e.toString(), e);
     }
+
+    int paramCount = 0;
 
     int ch = is.read();
     while (ch >= 0) {
@@ -183,35 +188,45 @@ public class Form {
 
       for (; Character.isWhitespace((char) ch); ch = is.read()) {
       }
-      
-      converter.clear(); 
+
+      converter.clear();
       if (ch == '=') {
         ch = is.read();
-	for (; Character.isWhitespace((char) ch); ch = is.read()) {
-	}
+        for (; Character.isWhitespace((char) ch); ch = is.read()) {
+        }
       }
-      
+
       for (; ch >= 0 && ch != '&'; ch = is.read())
         readChar(converter, is, ch);
-      
+
       String value = converter.getConvertedString();
+
+      if (paramMax < paramCount) {
+        String msg = L.l("Form parameter-count '{0}' exceeded parameter-max '{1}'",
+                         paramCount, paramMax);
+        log.warning(msg);
+
+        throw new BadRequestRuntimeException(msg);
+      }
+
+      paramCount++;
 
       /* Could show passwords
       if (log.isLoggable(Level.FINE))
         log.fine("post: " + key + "=" + value);
       */
-      
+
       String []oldValue = table.get(key);
-      
+
       if (key == null || key.equals("")) {
       }
       else if (oldValue == null)
-	table.put(key, new String[] { value });
+        table.put(key, new String[] { value });
       else {
-	String []newValue = new String[oldValue.length + 1];
-	System.arraycopy(oldValue, 0, newValue, 0, oldValue.length);
-	newValue[oldValue.length] = value;
-	table.put(key, newValue);
+        String []newValue = new String[oldValue.length + 1];
+        System.arraycopy(oldValue, 0, newValue, 0, oldValue.length);
+        newValue[oldValue.length] = value;
+        table.put(key, newValue);
       }
     }
   }
@@ -239,8 +254,8 @@ public class Form {
         int ch4 = is.read();
 
         converter.addChar((char) ((toHex(ch1) << 12) +
-                                  (toHex(ch2) << 8) + 
-                                  (toHex(ch3) << 4) + 
+                                  (toHex(ch2) << 8) +
+                                  (toHex(ch3) << 4) +
                                   (toHex(ch4))));
       }
       else {
