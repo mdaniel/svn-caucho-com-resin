@@ -116,7 +116,6 @@ public class JmxDumpAction extends AbstractJmxAction implements AdminAction
     }
   }
   
-  
   private void dumpMBean(StringBuilder sb, 
                          MBeanServer server,
                          ObjectName objectName)

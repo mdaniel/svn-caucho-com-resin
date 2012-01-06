@@ -87,6 +87,19 @@ public interface ResinMXBean extends ManagedObjectMXBean {
   public String getConfigFile();
   
   /**
+   * Returns the log directory, the value of "-log-directory"
+   */
+  @Description("The log directory used when starting this"
+               + " instance of Resin, the value of `-log-directory'")
+  public String getLogDirectory();
+  
+  /**
+   * Returns the resin-data directory
+   */
+  @Description("The resin-data directory")
+  public String getDataDirectory();
+  
+  /**
    * Returns the version.
    */
   @Description("The Resin Version")

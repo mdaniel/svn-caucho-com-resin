@@ -117,6 +117,18 @@ public class ResinAdmin extends AbstractManagedObject
   {
     return _resin.getRootDirectory().getNativePath();
   }
+  
+  @Override
+  public String getLogDirectory()
+  {
+    return _resin.getLogDirectory().getNativePath();
+  }
+
+  @Override
+  public String getDataDirectory()
+  {
+    return _resin.getResinDataDirectory().getNativePath();
+  }
 
   @Override
   public ServerMXBean getServer()
