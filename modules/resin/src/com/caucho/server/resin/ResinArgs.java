@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 1998-2011 Caucho Technology -- all rights reserved
+ * Copyright (c) 1998-2012 Caucho Technology -- all rights reserved
  *
  * This file is part of Resin(R) Open Source
  *
@@ -76,7 +76,7 @@ public class ResinArgs
 
   private boolean _isOpenSource;
   
-  private String _stage = null;
+  private String _stage = "production";
   private boolean _isDumpHeapOnExit;
   
   public ResinArgs()

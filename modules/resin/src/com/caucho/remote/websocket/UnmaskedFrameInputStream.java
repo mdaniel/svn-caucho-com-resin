@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 1998-2011 Caucho Technology -- all rights reserved
+ * Copyright (c) 1998-2012 Caucho Technology -- all rights reserved
  *
  * This file is part of Resin(R) Open Source
  *
@@ -141,7 +141,7 @@ public class UnmaskedFrameInputStream extends FrameInputStream
     
     int frame1 = is.read();
     int frame2 = is.read();
-    
+
     if (frame2 < 0)
       return false;
 

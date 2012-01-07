@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 1998-2011 Caucho Technology -- all rights reserved
+ * Copyright (c) 1998-2012 Caucho Technology -- all rights reserved
  *
  * This file is part of Resin(R) Open Source
  *
@@ -116,7 +116,7 @@ public abstract class AbstractRepositoryCommand extends AbstractRemoteCommand {
     
     // return new WebAppDeployClient(address, port, user, password);
     
-    return new WebAppDeployClient(sender);
+    return new WebAppDeployClient(sender.getUrl(), sender);
   }
   
   private ActorSender createBamzClient(WatchdogArgs args,
@@ -179,7 +179,7 @@ public abstract class AbstractRepositoryCommand extends AbstractRemoteCommand {
     return createHmtpClient(address, port, userName, password);
   }
   
-  private ActorSender createHmtpClient(String address, 
+  private RemoteActorSender createHmtpClient(String address, 
                                        int port,
                                        String userName,
                                        String password)

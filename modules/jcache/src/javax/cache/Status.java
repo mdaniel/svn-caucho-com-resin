@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 1998-2011 Caucho Technology -- all rights reserved
+ * Copyright (c) 1998-2012 Caucho Technology -- all rights reserved
  *
  * This interface is defined in JSR 107.
  *

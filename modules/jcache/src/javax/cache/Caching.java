@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 1998-2011 Caucho Technology -- all rights reserved
+ * Copyright (c) 1998-2012 Caucho Technology -- all rights reserved
  *
  * This file is part of Resin(R) Open Source
  *
@@ -142,7 +142,7 @@ public final class Caching {
       CacheManagerFactory factory;
       
       factory = _cachingProvider.getCacheManagerFactory();
-      
+      System.out.println("FACTOR: " + factory);
       return factory.getCacheManager(classLoader, name);
     }
   }

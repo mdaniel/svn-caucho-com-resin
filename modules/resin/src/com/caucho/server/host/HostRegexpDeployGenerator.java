@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 1998-2011 Caucho Technology -- all rights reserved
+ * Copyright (c) 1998-2012 Caucho Technology -- all rights reserved
  *
  * This file is part of Resin(R) Open Source
  *
@@ -105,7 +105,7 @@ public class HostRegexpDeployGenerator extends DeployGenerator<HostController> {
     Pattern regexp = _config.getRegexp();
     Matcher matcher = regexp.matcher(name);
 
-    if (! matcher.find() || matcher.start() != 0) {
+    if (! matcher.matches()) {
       return;
     }
 
@@ -115,10 +115,8 @@ public class HostRegexpDeployGenerator extends DeployGenerator<HostController> {
     try {
       thread.setContextClassLoader(getParentClassLoader());
       
-      int length = matcher.end() - matcher.start();
-
       String hostName = matcher.group();
-        
+
       ArrayList<String> vars = new ArrayList<String>();
 
       HashMap<String,Object> varMap = new HashMap<String,Object>();

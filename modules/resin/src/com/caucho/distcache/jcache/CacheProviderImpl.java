@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 1998-2011 Caucho Technology -- all rights reserved
+ * Copyright (c) 1998-2012 Caucho Technology -- all rights reserved
  *
  * This file is part of Resin(R) Open Source
  *
@@ -38,10 +38,12 @@ import javax.cache.spi.CachingProvider;
  */
 public class CacheProviderImpl implements CachingProvider
 {
+  private CacheManagerFactory _factory = new CacheManagerFactoryImpl();
+  
   @Override
   public CacheManagerFactory getCacheManagerFactory()
   {
-    return null;
+    return _factory;
   }
   
   @Override

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 1998-2011 Caucho Technology -- all rights reserved
+ * Copyright (c) 1998-2012 Caucho Technology -- all rights reserved
  *
  * This file is part of Resin(R) Open Source
  *
@@ -1178,7 +1178,7 @@ public class Resin
 
     sb.append(getClass().getSimpleName());
     
-    sb.append("[id=" + _serverId + "]");
+    sb.append("[id=" + getDisplayServerId() + "]");
     
     return sb.toString();
   }

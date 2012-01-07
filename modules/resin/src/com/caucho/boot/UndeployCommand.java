@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 1998-2011 Caucho Technology -- all rights reserved
+ * Copyright (c) 1998-2012 Caucho Technology -- all rights reserved
  *
  * This file is part of Resin(R) Open Source
  *
@@ -43,6 +43,7 @@ public class UndeployCommand extends AbstractRepositoryCommand
     addValueOption("host", "host", "virtual host to make application available on");
     addValueOption("stage", "stage", "tage to deploy application to, defaults to production");
     addValueOption("version", "version", "version of application formatted as <major.minor.micro.qualifier>");
+    addValueOption("name", "name", "name of application");
     addValueOption("m", "message", "commit message");
   }
 

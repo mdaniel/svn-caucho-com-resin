@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 1998-2011 Caucho Technology -- all rights reserved
+ * Copyright (c) 1998-2012 Caucho Technology -- all rights reserved
  *
  * This file is part of Resin(R) Open Source
  *
@@ -28,6 +28,7 @@
 
 package com.caucho.server.admin;
 
+import com.caucho.bam.actor.ActorSender;
 import com.caucho.bam.actor.RemoteActorSender;
 import com.caucho.util.QDate;
 
@@ -41,9 +42,9 @@ public class WebAppDeployClient extends DeployClient
     super(serverId);
   }
 
-  public WebAppDeployClient(RemoteActorSender sender)
+  public WebAppDeployClient(String url, ActorSender sender)
   {
-    super(sender);
+    super(url, sender);
   }
 
   public WebAppDeployClient(String host, int port,

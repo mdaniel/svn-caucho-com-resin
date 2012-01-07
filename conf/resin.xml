@@ -87,6 +87,9 @@
                       multiversion-routing="${webapp_multiversion_routing}"/>
     </host-default>
 
+    <!-- auto virtual host deployment in hosts/foo.example.com/webapps -->
+    <host-deploy path="hosts"/>
+
     <!-- the default host, matching any host name -->
     <host id="" root-directory=".">
       <!--

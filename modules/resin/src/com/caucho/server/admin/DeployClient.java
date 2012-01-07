@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 1998-2011 Caucho Technology -- all rights reserved
+ * Copyright (c) 1998-2012 Caucho Technology -- all rights reserved
  *
  * This file is part of Resin(R) Open Source
  *
@@ -96,14 +96,15 @@ public class DeployClient implements Repository
     
     _bamClient = server.createAdminClient(getClass().getSimpleName());
 
-    _deployAddress = "deploy@" + serverId + ".resin.caucho";
+    //_deployAddress = "deploy@" + serverId + ".resin.caucho";
+    _deployAddress = "deploy@resin.caucho";
   }
   
-  public DeployClient(RemoteActorSender client)
+  public DeployClient(String url, ActorSender client)
   {
     _bamClient = client;
     
-    _url = client.getUrl();
+    _url = url;
 
     _deployAddress = "deploy@resin.caucho";
   }

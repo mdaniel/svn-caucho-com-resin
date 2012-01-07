@@ -38,6 +38,7 @@ import java.util.logging.Logger;
 
 import com.caucho.bam.RemoteConnectionFailedException;
 import com.caucho.bam.RemoteListenerUnavailableException;
+import com.caucho.bam.actor.ActorSender;
 import com.caucho.bam.actor.RemoteActorSender;
 import com.caucho.config.ConfigException;
 import com.caucho.hmtp.HmtpClient;
