@@ -251,7 +251,7 @@ public class Resin
   /**
    * Sets the server id.
    */
-  private void setServerId(String serverId)
+  void setServerId(String serverId)
   {
     if (serverId == null || "".equals(serverId))
       return;//      serverId = "default";
@@ -905,7 +905,8 @@ public class Resin
     }
     else if ((_bootServerConfig = bootResin.findLocalServer()) != null) {
     }
-    else if (getHomeCluster() != null) {
+    
+    if (_bootServerConfig == null && getHomeCluster() != null) {
       _bootServerConfig = joinCluster(cloudSystem);
     }
     
@@ -998,7 +999,7 @@ public class Resin
     BootResinConfig bootResin = _bootResinConfig;
     
     BootClusterConfig bootCluster = bootResin.findCluster("");
-    System.out.println("CLUSTER: " + bootCluster);
+
     if (bootCluster == null)
       return null;
     
