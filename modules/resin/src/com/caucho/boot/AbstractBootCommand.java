@@ -102,16 +102,9 @@ public abstract class AbstractBootCommand implements BootCommand {
   @Override
   public int doCommand(ResinBoot boot, WatchdogArgs args)
   {
-    WatchdogClient client = findClient(boot, args);
+    WatchdogClient client = boot.findClient(args.getServerId(), args);
     
     return doCommand(args, client);
-  }
-  
-  protected WatchdogClient findClient(ResinBoot boot, WatchdogArgs args)
-  {
-    WatchdogClient client = boot.findClient(args.getServerId(), args);
-
-    return client;
   }
   
   protected int doCommand(WatchdogArgs args, WatchdogClient client)

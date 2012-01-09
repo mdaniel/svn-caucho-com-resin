@@ -59,9 +59,9 @@ public class StopCommand extends AbstractStopCommand
       client.stopWatchdog(args.getServerId());
 
       System.out.println(L().l(
-        "Resin/{0} stopped -server '{1}' for watchdog at {2}:{3}",
+        "Resin/{0} stopped{1} for watchdog at {2}:{3}",
         VersionFactory.getVersion(),
-        client.getId(),
+        getServerUsageArg(args.getServerId(), client.getId()),
         client.getWatchdogAddress(),
         client.getWatchdogPort()));
     } catch (Exception e) {

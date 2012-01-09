@@ -30,6 +30,7 @@ package com.caucho.server.admin;
 
 import com.caucho.bam.actor.ActorSender;
 import com.caucho.bam.actor.RemoteActorSender;
+import com.caucho.server.resin.Resin;
 import com.caucho.util.QDate;
 
 /**
@@ -37,6 +38,11 @@ import com.caucho.util.QDate;
  */
 public class WebAppDeployClient extends DeployClient
 {
+  public WebAppDeployClient()
+  {
+    super(Resin.getCurrentServerId());
+  }
+  
   public WebAppDeployClient(String serverId)
   {
     super(serverId);

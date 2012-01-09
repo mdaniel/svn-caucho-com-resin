@@ -35,11 +35,20 @@ public abstract class AbstractStopCommand extends AbstractBootCommand
   {
     addFlagOption("verbose", "log command-line and environment information");
     addValueOption("server", "id", "select a configured server");
+    addIntValueOption("watchdog-port", "port", "set watchdog port to listen to");
   }
 
   @Override
   public boolean isRetry()
   {
     return true;
+  }
+  
+  protected String getServerUsageArg(String serverId, String clientId)
+  {
+    if (serverId != null)
+      return " -server '" + serverId + "'"; 
+    else
+      return "";
   }
 }

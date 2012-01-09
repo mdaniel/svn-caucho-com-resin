@@ -243,9 +243,11 @@ public class BootResinConfig // implements EnvironmentBean
       if (client != null)
         return client;
       
-      // cloud/1292
+      // cloud/1292, server/6e11
+      /*
       if (args.isDynamicServer())
         return null;
+        */
       
       if (! args.getCommand().isStart() && ! args.getCommand().isConsole())
         throw new ConfigException(L.l("Resin/{0}: -server '{1}' does not match any defined <server>\nin {2}.",
@@ -253,7 +255,8 @@ public class BootResinConfig // implements EnvironmentBean
     }
     
     // backward-compat default behavior
-    client = findClient("");
+    if (serverId == null)
+      client = findClient("");
     
     if (client != null)
       return client;
@@ -269,8 +272,10 @@ public class BootResinConfig // implements EnvironmentBean
     }
 
     // server/6e10
+    /*
     if (args.isDynamicServer())
       return null;
+      */
 
     if (client == null && _args.getCommand().isShutdown()) {
       client = findShutdownClient(_args.getClusterId());

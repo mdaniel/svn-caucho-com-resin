@@ -58,12 +58,20 @@ public class StartCommand extends AbstractStartCommand
     try {
       client.startWatchdog(args.getArgv());
 
-      System.out.println(L().l(
-        "Resin/{0} started -server '{1}' for watchdog at {2}:{3}",
-        VersionFactory.getVersion(),
-        client.getId(),
-        client.getWatchdogAddress(),
-        client.getWatchdogPort()));
+      if (args.getServerId() != null) {
+        System.out.println(L().l("Resin/{0} started -server '{1}' for watchdog at {2}:{3}",
+                                 VersionFactory.getVersion(),
+                                 client.getId(),
+                                 client.getWatchdogAddress(),
+                                 client.getWatchdogPort()));
+      }
+      else {
+        System.out.println(L().l("Resin/{0} started with watchdog at {2}:{3}",
+                                 VersionFactory.getVersion(),
+                                 client.getId(),
+                                 client.getWatchdogAddress(),
+                                 client.getWatchdogPort()));
+      }
     } catch (Exception e) {
       String eMsg;
 
