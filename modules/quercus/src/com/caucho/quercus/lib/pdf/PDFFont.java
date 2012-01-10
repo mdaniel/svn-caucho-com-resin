@@ -106,6 +106,7 @@ public class PDFFont extends PDFObject {
     return "/Font";
     
   }
+  
   String getResource()
   {
     return "<< /F" + _id + " " + _id + " 0 R >>";
@@ -116,8 +117,7 @@ public class PDFFont extends PDFObject {
   {
     out.println("<< /Type /Font");
     out.println("   /Subtype /Type1");
-    out.println("   /Name /" + _face.getFontName());
-    out.println("   /BaseFont /Helvetica");
+    out.println("   /BaseFont /" + _face.getFontName());
     out.println("   /Encoding /MacRomanEncoding");
     out.println(">>");
   }
