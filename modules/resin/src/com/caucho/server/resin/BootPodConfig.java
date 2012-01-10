@@ -158,7 +158,12 @@ public class BootPodConfig
       int port = bootServer.getPort();
       boolean isSecure = bootServer.isSecure();
       
-      if (bootServer.isExternalAddress()) {
+      cloudServer = cloudPod.findServer(id);
+      
+      if (cloudServer != null) {
+        
+      }
+      else if (bootServer.isExternalAddress()) {
         cloudServer = cloudPod.createExternalStaticServer(id,
                                                           address,
                                                           port,

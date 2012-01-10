@@ -264,11 +264,13 @@ public class Resin
   public String getUniqueServerName()
   {
     String name;
+    
+    String serverId = getDisplayServerId();
 
     if (isWatchdog())
-      name = _serverId + "_watchdog";
+      name = serverId + "_watchdog";
     else
-      name = _serverId;
+      name = serverId;
 
     name = name.replace('-', '_');
 
@@ -885,15 +887,19 @@ public class Resin
       _bootServerConfig = bootResin.findServer(serverId);
     }
     
+    if (serverId == null) {
+      _bootServerConfig = bootResin.findServer("default");
+    }
+
     CloudSystem cloudSystem = bootResin.initTopology();
     
     if (_bootServerConfig != null) {
     }
-    else if (Alarm.isTest()) {
-      _bootServerConfig = joinTest();
-    }
     else if (isEmbedded()) { 
       _bootServerConfig = joinEmbed();
+    }
+    else if (Alarm.isTest()) {
+      _bootServerConfig = joinTest();
     }
     else if (isWatchdog()) {
       _bootServerConfig = joinWatchdog();
@@ -973,15 +979,17 @@ public class Resin
   {
     BootResinConfig bootResin = _bootResinConfig;
     
-    BootClusterConfig bootCluster = bootResin.findCluster("");
+    BootClusterConfig bootCluster = findDefaultCluster();
     
-    if (bootCluster == null)
-      return null;
-    
-    if (bootCluster.getPodList().size() > 0
-        && bootCluster.getPodList().get(0).getServerList().size() > 0) {
-      // server/0342
-      return null;
+    if (bootCluster.getPodList().size() == 0) {
+    }
+    else if (bootCluster.getPodList().get(0).getServerList().size() == 1) {
+      // server/6b07
+      return bootCluster.getPodList().get(0).getServerList().get(0);
+    }
+    else if (bootCluster.getPodList().get(0).getServerList().size() > 0) {
+        // server/0342
+        return null;
     }
     
     BootServerConfig bootServer = bootCluster.createServer();
@@ -994,17 +1002,39 @@ public class Resin
     return bootServer;
   }
   
+  private BootClusterConfig findDefaultCluster()
+  {
+    BootResinConfig bootResin = _bootResinConfig;
+    
+    if (bootResin.getClusterList().size() == 1)
+      return bootResin.getClusterList().get(0);
+    
+    return bootResin.findCluster("");
+  }
+  
   private BootServerConfig joinEmbed()
   {
     BootResinConfig bootResin = _bootResinConfig;
     
-    BootClusterConfig bootCluster = bootResin.findCluster("");
+    BootClusterConfig bootCluster = null;
+    
+    if (bootResin.getClusterList().size() == 1)
+      bootCluster = bootResin.getClusterList().get(0);
+    
+    if (bootCluster == null)
+      bootCluster = bootResin.findCluster("");
 
     if (bootCluster == null)
       return null;
     
-    if (bootCluster.getPodList().size() > 0
-        && bootCluster.getPodList().get(0).getServerList().size() > 0) {
+    if (bootCluster.getPodList().size() == 0) {
+      
+    }
+    else if (bootCluster.getPodList().get(0).getServerList().size() == 1) {
+      // server/1e06
+      return bootCluster.getPodList().get(0).getServerList().get(0);
+    }
+    else if (bootCluster.getPodList().get(0).getServerList().size() > 0) {
       // server/0342
       return null;
     }

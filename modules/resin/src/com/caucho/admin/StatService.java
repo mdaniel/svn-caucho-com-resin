@@ -44,8 +44,6 @@ import com.caucho.util.L10N;
 @Configurable
 public class StatService
 {
-  private static final L10N L = new L10N(StatService.class);
-  
   private StatSystem _statSystem;
   
   public StatService()
