@@ -112,6 +112,7 @@ public class PDFFont extends PDFObject {
     return "<< /F" + _id + " " + _id + " 0 R >>";
   }
 
+  @Override
   public void writeObject(PDFWriter out)
     throws IOException
   {

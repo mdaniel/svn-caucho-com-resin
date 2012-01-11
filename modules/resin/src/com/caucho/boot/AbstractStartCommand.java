@@ -87,6 +87,16 @@ public abstract class AbstractStartCommand extends AbstractBootCommand
     _intValueKeys.add("--jmx-port");
     */
   }
+  
+  protected String getServerUsageArg(WatchdogArgs args, String clientId)
+  {
+    if (args.getServerId() != null)
+      return " -server '" + args.getServerId() + "'";
+    else if (! args.isDynamicServer())
+      return " -server '" + clientId + "'";
+    else
+      return "";
+  }
 
   @Override
   public boolean isRetry()
