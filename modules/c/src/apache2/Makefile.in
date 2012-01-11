@@ -27,7 +27,7 @@ all	: mod_caucho.la
 #	mv mod_caucho.la mod_caucho.so
 
 mod_caucho.la	: $(OBJ_PICS)
-	$(LIBTOOL) --mode=link $(LD_SHLIB) -module -o $@ -avoid-version -rpath $(apache_libexec) $(OBJ_PICS) $(LIBS_SHLIB)
+	$(LIBTOOL) --mode=link $(LD_SHLIB) $(LDFLAGS_SHLIB) -module -o $@ -avoid-version -rpath $(apache_libexec) $(OBJ_PICS) $(LIBS_SHLIB)
 
 .c.lo	:
 	$(LIBTOOL) --mode=compile $(CC) -o $@ -c $(INCLUDES) $(CFLAGS) $<

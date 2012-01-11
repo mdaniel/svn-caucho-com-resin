@@ -251,7 +251,7 @@ AC_SUBST(AUTOMAKE)
 # additional CFLAGS
 #
 # for solaris        
-CFLAGS="$CFLAGS -D_POSIX_PTHREAD_SEMANTICS"                          
+CFLAGS="$CFLAGS -D_POSIX_PTHREAD_SEMANTICS"
 
 #
 # --with-apache-src
@@ -801,8 +801,8 @@ if test -z "${LD_SHLIB}"; then
       if test -n "$is_gcc"; then
         CFLAGS_SHLIB="-fPIC"
 
-        CFLAGS="$CFLAGS -fPIC -G -fno-omit-frame-pointer"
-        CFLAGS_JNI="$CFLAGS_JNI -fPIC -G -fno-omit-frame-pointer"
+        CFLAGS="$CFLAGS -fPIC -fno-omit-frame-pointer"
+        CFLAGS_JNI="$CFLAGS_JNI -fPIC -fno-omit-frame-pointer"
 
         if test -n "$b64"; then
           CFLAGS="$CFLAGS -m64"
