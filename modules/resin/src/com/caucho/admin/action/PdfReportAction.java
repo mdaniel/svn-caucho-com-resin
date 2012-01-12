@@ -360,8 +360,13 @@ public class PdfReportAction implements AdminAction
     throws IOException
   {
     String date = QDate.formatLocal(Alarm.getCurrentTime(), "%Y%m%dT%H%M");
+
+    String serverId = _serverId;
+    if (serverId == null || serverId.isEmpty())
+      serverId = "default";
+
     Path path = _logPath.lookup(String.format("%s-%s-%s.pdf",
-                                              _serverId,
+                                              serverId,
                                               calculateTitle(),
                                               date));
     path.getParent().mkdirs();
