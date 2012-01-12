@@ -34,6 +34,7 @@ import com.caucho.config.ConfigException;
 import com.caucho.license.*;
 import com.caucho.server.resin.ResinELContext;
 import com.caucho.server.util.CauchoSystem;
+import com.caucho.util.Alarm;
 import com.caucho.util.L10N;
 import com.caucho.vfs.Path;
 import com.caucho.vfs.Vfs;
@@ -209,6 +210,21 @@ class WatchdogArgs
     }
   }
 
+  String getDynamicDisplayAddress()
+  {
+    if (_dynamicAddress != null)
+      return _dynamicAddress;
+    else if (Alarm.isTest())
+      return "192.168.1.x";
+    else {
+      try {
+        return InetAddress.getLocalHost().getHostAddress();
+      } catch (Exception e) {
+        return null;
+      }
+    }
+  }
+
   int getDynamicPort()
   {
     if (_dynamicPort > 0)
@@ -222,7 +238,7 @@ class WatchdogArgs
     if (_serverId != null)
       return _serverId;
     else
-      return "dyn-" + getDynamicAddress() + ":" + getDynamicPort();
+      return "dyn-" + getDynamicDisplayAddress() + ":" + getDynamicPort();
   }
 
   boolean isVerbose()

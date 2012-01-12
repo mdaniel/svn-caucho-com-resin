@@ -322,12 +322,4 @@ public class ResinBoot
 
     return _L;
   }
-
-  private static Logger log()
-  {
-    if (_log == null)
-      _log = Logger.getLogger(ResinBoot.class.getName());
-
-    return _log;
-  }
 }
