@@ -244,14 +244,28 @@ public class BootResinConfig // implements EnvironmentBean
         return client;
       
       // cloud/1292, server/6e11
-      /*
-      if (args.isDynamicServer())
+      if (args.isDynamicServer()) {
         return null;
+        /*
+        client = findShutdownClient(_args.getClusterId());
+        
+        if (client == null) {
+          throw new ConfigException(L.l("Resin/{0}: {1} -cluster '{2}' does not match any defined <server>\nin {3}.",
+                                        VersionFactory.getVersion(),
+                                        _args.getCommand(),
+                                        _args.getClusterId(), 
+                                        _args.getResinConf()));
+        }
         */
+      }
       
-      if (! args.getCommand().isStart() && ! args.getCommand().isConsole())
-        throw new ConfigException(L.l("Resin/{0}: -server '{1}' does not match any defined <server>\nin {2}.",
-                                      VersionFactory.getVersion(), _args.getServerId(), _args.getResinConf()));
+      if (! args.getCommand().isStart() && ! args.getCommand().isConsole()) {
+        throw new ConfigException(L.l("Resin/{0}: {1} -server '{2}' does not match any defined <server>\nin {3}.",
+                                      VersionFactory.getVersion(),
+                                      _args.getCommand(),
+                                      _args.getServerId(), 
+                                      _args.getResinConf()));
+      }
     }
     
     // backward-compat default behavior
@@ -290,7 +304,8 @@ public class BootResinConfig // implements EnvironmentBean
     if (client == null) {
       throw new ConfigException(L.l("Resin/{0}: default server cannot find a unique <server> or <server-multi>\nin {2}.",
                                     VersionFactory.getVersion(), 
-                                    _args.getServerId(), _args.getResinConf()));
+                                    _args.getServerId(), 
+                                    _args.getResinConf()));
     }
     
     return client;

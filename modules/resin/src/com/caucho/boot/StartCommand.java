@@ -50,6 +50,12 @@ public class StartCommand extends AbstractStartCommand
   {
     return "starts a Resin server";
   }
+  
+  @Override
+  public boolean isStart()
+  {
+    return true;
+  }
 
   @Override
   public int doCommand(WatchdogArgs args, WatchdogClient client)

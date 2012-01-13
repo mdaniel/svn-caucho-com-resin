@@ -29,26 +29,30 @@
 
 package com.caucho.jms.resource;
 
+import java.util.HashMap;
+
+import javax.annotation.PostConstruct;
+import javax.jms.Connection;
+import javax.jms.ConnectionFactory;
+import javax.jms.Destination;
+import javax.jms.JMSException;
+import javax.jms.Message;
+import javax.jms.MessageProducer;
+import javax.jms.ObjectMessage;
+import javax.jms.Session;
+
 import com.caucho.config.ConfigException;
-import com.caucho.jms.queue.AbstractDestination;
 import com.caucho.jms.JmsConnectionFactory;
+import com.caucho.jms.queue.AbstractDestination;
 import com.caucho.services.message.MessageSender;
 import com.caucho.services.message.MessageServiceException;
 import com.caucho.util.L10N;
-import com.caucho.util.Log;
-
-import javax.annotation.*;
-import javax.jms.*;
-import java.util.HashMap;
-import java.util.logging.Logger;
 
 /**
  * Configures message senders, avoiding JCA.
  */
 public class MessageSenderResource implements MessageSender {
   private static final L10N L = new L10N(MessageSenderResource.class);
-  private static final Logger log
-    = Logger.getLogger(MessageSenderResource.class.getName());
 
   private ConnectionFactory _connFactory;
   private Connection _conn;
@@ -90,7 +94,7 @@ public class MessageSenderResource implements MessageSender {
     if (_destination == null)
       throw new ConfigException(L.l("'destination' required for message sender."));
 
-    if (_connFactory == null && _destination instanceof AbstractDestination)
+    if (_connFactory == null && _destination instanceof AbstractDestination<?>)
       _connFactory = new JmsConnectionFactory();
 
     if (_connFactory == null)
@@ -119,7 +123,7 @@ public class MessageSenderResource implements MessageSender {
         Message message;
 
         if (value == null) {
-            message = session.createMessage();
+          message = session.createMessage();
         }
         else if (value instanceof String) {
           message = session.createTextMessage((String) value);
@@ -155,6 +159,12 @@ public class MessageSenderResource implements MessageSender {
   private Session getSession() throws JMSException
   {
     return _conn.createSession(false, Session.AUTO_ACKNOWLEDGE);
+  }
+ 
+  @Override
+  public String toString()
+  {
+    return getClass().getSimpleName() + "[" + _destination + "]";
   }
 }
 

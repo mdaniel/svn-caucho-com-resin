@@ -51,6 +51,12 @@ public class StartAllCommand extends AbstractStartCommand
   {
     return "starts all servers listening to the machine's IP interfaces";
   }
+  
+  @Override
+  public boolean isStart()
+  {
+    return true;
+  }
 
   @Override
   public int doCommand(ResinBoot boot, WatchdogArgs args)

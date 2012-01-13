@@ -53,6 +53,12 @@ public class ConsoleCommand extends AbstractStartCommand
   {
     return true;
   }
+  
+  @Override
+  public boolean isStart()
+  {
+    return true;
+  }
 
   @Override
   public boolean isRetry()

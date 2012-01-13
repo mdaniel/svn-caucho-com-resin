@@ -299,6 +299,12 @@ public abstract class AbstractBootCommand implements BootCommand {
     return args.getArg("address") != null;
   }
   
+  @Override
+  public String toString()
+  {
+    return getClass().getSimpleName() + "[]";
+  }
+  
   static class BootOptionComparator implements Comparator<BootOption> {
     public int compare(BootOption a, BootOption b)
     {
