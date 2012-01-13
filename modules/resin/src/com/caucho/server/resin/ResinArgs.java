@@ -333,7 +333,7 @@ public class ResinArgs
       
       String arg = argv[i];
       
-      if (! arg.startsWith("--") || arg.startsWith("-"))
+      if (arg.startsWith("-") && ! arg.startsWith("--"))
         arg = "-" + arg;
 
       if (i + 1 < len
@@ -559,8 +559,7 @@ public class ResinArgs
                || "--jmx-port".equals(argv[i])) {
         i += 2;
       }
-      else if ("-user-properties".equals(argv[i])
-               || "--user-properties".equals(argv[i])) {
+      else if ("--user-properties".equals(arg)) {
         i += 2;
       }
       else if ("--mode".equals(arg)) {
