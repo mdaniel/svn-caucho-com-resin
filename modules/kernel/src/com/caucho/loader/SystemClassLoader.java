@@ -75,8 +75,9 @@ public class SystemClassLoader
     // #4420 - major performance for Spring-like startup if preScan is disabled
     // preScan = "false";
     
-    if ("false".equals(preScan))
+    if ("false".equals(preScan)) {
       DynamicClassLoader.setJarCacheEnabled(false);
+    }
 
     String smallmem = System.getProperty("caucho.smallmem");
     
@@ -105,6 +106,9 @@ public class SystemClassLoader
     initSecurity();
 
     initClasspath();
+    
+    // This causes problems with JCE
+    _hasBootClassPath = false;
 
     super.init();
 
@@ -224,15 +228,12 @@ public class SystemClassLoader
       return cl;
     }
 
-    /*
-    // This causes problems with JCE
     if (_hasBootClassPath) {
       String className = name.replace('.', '/') + ".class";
 
       if (findPath(className) == null)
         return null;
     }
-    */
 
     return super.loadClassImpl(name, resolve);
   }

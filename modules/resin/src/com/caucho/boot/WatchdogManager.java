@@ -29,6 +29,7 @@
 
 package com.caucho.boot;
 
+import java.net.InetAddress;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
@@ -206,9 +207,10 @@ class WatchdogManager implements AlarmListener {
     WatchdogChild server = null;
     
     if (serverId == null)
-      serverId = "default";
+      server = findLocalServer();
       
-    server = _watchdogMap.get(serverId);
+    if (server == null)
+      server = _watchdogMap.get(serverId);
     
     if (server == null)
       throw new IllegalStateException(L().l("'{0}' is an unknown server",
@@ -601,8 +603,18 @@ class WatchdogManager implements AlarmListener {
       serverId = args.getServerId();
     
     WatchdogConfig serverConfig = null;
+    
+    WatchdogClient client = resin.findClient(serverId, args); 
+    
+    //resin.findClient(serverId);
 
-    if (args.isDynamicServer() || resin.isHomeCluster()) {
+    if (client != null)
+      serverConfig = client.getConfig();
+    else
+      serverConfig = resin.findServer(serverId);
+
+    if (serverConfig == null 
+        && (args.isDynamicServer() || resin.isHomeCluster())) {
       String clusterId = resin.getHomeCluster();
       
       if (args.isDynamicServer())
@@ -624,16 +636,6 @@ class WatchdogManager implements AlarmListener {
       serverConfig.setAddress(address);
       serverConfig.setPort(port);
       cluster.addServer(serverConfig);
-    }
-    else {
-      WatchdogClient client = resin.findClient(serverId, args); 
-        
-        //resin.findClient(serverId);
-
-      if (client != null)
-        serverConfig = client.getConfig();
-      else
-        serverConfig = resin.findServer(serverId);
     }
 
     WatchdogChild watchdog = _watchdogMap.get(serverId);
@@ -705,7 +707,21 @@ class WatchdogManager implements AlarmListener {
       }
     }
   }
+  
+  private WatchdogChild findLocalServer()
+  {
+    ArrayList<InetAddress> localAddresses = BootResinConfig.getLocalAddresses();
+    
+    for (WatchdogChild child : _watchdogMap.values()) {
+      if (BootResinConfig.isLocalClient(localAddresses, child.getConfig())) {
+        return child;
+      }
+    }
+    
+    return null;
+  }
 
+  @Override
   public void handleAlarm(Alarm alarm)
   {
     try {

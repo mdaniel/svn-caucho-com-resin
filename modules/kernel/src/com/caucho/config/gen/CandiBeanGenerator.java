@@ -79,7 +79,7 @@ public class CandiBeanGenerator<X> extends BeanGenerator<X> {
                             AnnotatedType<X> beanClass)
   {
     super(beanClass.getJavaClass().getName() + "__ResinWebBean", beanClass);
-    
+
     setSuperClassName(beanClass.getJavaClass().getName());
 
     if (beanClass.isAnnotationPresent(SerializeHandle.class)) {

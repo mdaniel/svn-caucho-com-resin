@@ -56,12 +56,10 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 import java.util.regex.Pattern;
 
-import javax.annotation.PostConstruct;
 import javax.el.MethodExpression;
 
 import org.w3c.dom.Node;
 
-import com.caucho.config.Config;
 import com.caucho.config.ConfigException;
 import com.caucho.config.attribute.Attribute;
 import com.caucho.config.attribute.EnvironmentAttribute;
@@ -73,7 +71,6 @@ import com.caucho.config.program.ContainerProgram;
 import com.caucho.config.program.PropertyStringProgram;
 import com.caucho.config.types.AnnotationConfig;
 import com.caucho.config.types.RawString;
-import com.caucho.config.xml.XmlBeanAttribute;
 import com.caucho.config.xml.XmlBeanConfig;
 import com.caucho.config.xml.XmlBeanType;
 import com.caucho.el.Expr;
@@ -110,8 +107,6 @@ public class TypeFactory implements AddLoaderListener
 
   private static final ClassLoader _systemClassLoader;
 
-  private static final Object _introspectLock = new Object();
-
   private final EnvironmentClassLoader _loader;
   private final TypeFactory _parent;
 
@@ -132,6 +127,9 @@ public class TypeFactory implements AddLoaderListener
   
   private final ConcurrentHashMap<QName,Class<?>> _customClassMap
     = new ConcurrentHashMap<QName,Class<?>>();
+  
+  private final ConcurrentHashMap<String,Class<?>> _urnClassMap
+    = new ConcurrentHashMap<String,Class<?>>();
 
   private final HashMap<QName,Attribute> _listAttrMap
     = new HashMap<QName,Attribute>();
@@ -441,7 +439,55 @@ public class TypeFactory implements AddLoaderListener
 
     if (_loader == null)
       loader = _systemClassLoader;
+    
+    TypeFactory rootFactory = TypeFactory.getFactory(_systemClassLoader);
+    
+    NamespaceConfig nsConfig = rootFactory._nsMap.get("urn:java:" + pkg);
+    
+    if (nsConfig != null) {
+      ConfigType<?> configType = nsConfig.getBean(name);
+      
+      if (configType != null)
+        return configType.getType();
+    }
+    
+    String urnName = "urn:" + pkg + '.' + name;
+    
+    Class<?> cl = findUrnClass(urnName, loader);
+    
+    if (cl == null) {
+      cl = loadClassImpl(pkg, name, loader);
+      
+      if (cl != null)
+        putUrnClass(urnName, cl, cl.getClassLoader());
+    }
+    
+    return cl;
+  }
+  
+  private Class<?> findUrnClass(String urnName, ClassLoader loader)
+  {
+    for (; loader != null; loader = loader.getParent()) {
+      TypeFactory factory = TypeFactory.getFactory(loader);
+      
+      Class<?> cl = factory._urnClassMap.get(urnName);
+      
+      if (cl != null)
+        return cl;
+    }
+    
+    return null;
+  }
+  
+  private void putUrnClass(String urnName, Class<?> cl, ClassLoader loader)
+  {
+    TypeFactory factory = TypeFactory.getFactory(loader);
+    
+    factory._urnClassMap.put(urnName, cl);
+  }
 
+  private Class<?> loadClassImpl(String pkg, String name, ClassLoader loader)
+  {
     ArrayList<String> pkgList = loadPackageList(pkg);
     
     DynamicClassLoader dynLoader = null;
@@ -452,7 +498,7 @@ public class TypeFactory implements AddLoaderListener
     for (String pkgName : pkgList) {
       try {
         Class<?> cl;
-        
+
         if (dynLoader != null)
           cl = dynLoader.loadClassImpl(pkgName + '.' + name, false);
         else
@@ -512,7 +558,7 @@ public class TypeFactory implements AddLoaderListener
     }
   }
 
-  private ConfigType getConfigTypeImpl(Class type)
+  private ConfigType getConfigTypeImpl(Class<?> type)
   {
     ConfigType strategy = _typeMap.get(type.getName());
     

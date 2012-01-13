@@ -49,6 +49,8 @@ public class ByteCodeClassScanner {
   
   private static final char []RUNTIME_VISIBLE_ANNOTATIONS
     = "RuntimeVisibleAnnotations".toCharArray();
+  
+  private static final boolean []IS_JAVA_IDENTIFIER;
 
   private String _className;
 
@@ -308,6 +310,7 @@ public class ByteCodeClassScanner {
     }
     
     char []buffer = _charBuffer;
+    boolean []isJavaIdentifier = IS_JAVA_IDENTIFIER;
     boolean isIdentifier = true;
     
     while (length > 0) {
@@ -343,9 +346,7 @@ public class ByteCodeClassScanner {
       else
         throw new IllegalStateException();
       
-      if (isIdentifier
-          && (Character.isJavaIdentifierPart(ch)
-              || ch == '.' || ch == ';')) {
+      if (isIdentifier && isJavaIdentifier[ch]) {
         buffer[offset++] = ch;
       }
       else {
@@ -366,25 +367,6 @@ public class ByteCodeClassScanner {
   /**
    * Parses a field entry.
    */
-  private void skipField(InputStream is)
-    throws IOException
-  {
-    // int accessFlags = readShort();
-    // int nameIndex = readShort();
-    // int descriptorIndex = readShort();
-    
-    is.skip(6);
-
-    int attributesCount = readShort(is);
-
-    for (int i = 0; i < attributesCount; i++) {
-      skipAttribute(is);
-    }
-  }
-
-  /**
-   * Parses a field entry.
-   */
   private void scanField(InputStream is)
     throws IOException
   {
@@ -398,27 +380,6 @@ public class ByteCodeClassScanner {
 
     for (int i = 0; i < attributesCount; i++) {
       scanAttributeForAnnotation(is);
-    }
-  }
-
-  /**
-   * Parses a method entry.
-   */
-  private void skipMethod(InputStream is)
-    throws IOException
-  {
-    /*
-    int accessFlags = readShort();
-    int nameIndex = readShort();
-    int descriptorIndex = readShort();
-    */
-    
-    is.skip(6);
-
-    int attributesCount = readShort(is);
-    
-    for (int i = 0; i < attributesCount; i++) {
-      skipAttribute(is);
     }
   }
 
@@ -570,21 +531,6 @@ public class ByteCodeClassScanner {
   }
 
   /**
-   * Parses an attribute.
-   */
-  private void skipAttribute(InputStream is)
-    throws IOException
-  {
-    int nameIndex = readShort(is);
-
-    // String name = _cp.getUtf8(nameIndex).getValue();
-    
-    int length = readInt(is);
-    
-    is.skip(length);
-  }
-
-  /**
    * Parses a 32-bit int.
    */
   private int readInt(InputStream is)
@@ -614,5 +560,14 @@ public class ByteCodeClassScanner {
   private IllegalStateException error(String message)
   {
     return new IllegalStateException(_className + ": " + message);
+  }
+  
+  static {
+    IS_JAVA_IDENTIFIER = new boolean[65536];
+    
+    for (int i = 0; i < 65536; i++) {
+      if (Character.isJavaIdentifierPart(i) || i == '.' || i == ';')
+        IS_JAVA_IDENTIFIER[i] = true;
+    }
   }
 }

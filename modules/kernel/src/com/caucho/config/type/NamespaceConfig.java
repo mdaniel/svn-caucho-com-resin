@@ -29,45 +29,8 @@
 
 package com.caucho.config.type;
 
-import java.beans.PropertyEditor;
-import java.beans.PropertyEditorManager;
-import java.io.File;
-import java.io.IOException;
-import java.io.InputStream;
-import java.lang.annotation.Annotation;
-import java.lang.reflect.Modifier;
-import java.lang.reflect.Type;
-import java.net.URL;
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.Collections;
-import java.util.Date;
-import java.util.Enumeration;
 import java.util.HashMap;
-import java.util.HashSet;
-import java.util.Locale;
-import java.util.Map;
-import java.util.Properties;
-import java.util.Queue;
-import java.util.Set;
-import java.util.concurrent.ConcurrentHashMap;
-import java.util.concurrent.atomic.AtomicBoolean;
-import java.util.logging.Level;
-import java.util.logging.Logger;
-import java.util.regex.Pattern;
 
-import javax.annotation.PostConstruct;
-import javax.el.MethodExpression;
-
-import org.w3c.dom.Node;
-
-import com.caucho.config.Config;
-import com.caucho.config.ConfigException;
-import com.caucho.config.attribute.Attribute;
-import com.caucho.config.attribute.EnvironmentAttribute;
-import com.caucho.config.attribute.FlowAttribute;
-import com.caucho.config.attribute.ListValueAttribute;
-import com.caucho.config.attribute.SetValueAttribute;
 import com.caucho.config.core.ResinChoose;
 import com.caucho.config.core.ResinIf;
 import com.caucho.config.core.ResinImport;
@@ -75,27 +38,8 @@ import com.caucho.config.core.ResinLog;
 import com.caucho.config.core.ResinProperties;
 import com.caucho.config.core.ResinSet;
 import com.caucho.config.core.ResinSystemConfig;
-import com.caucho.config.program.ConfigProgram;
-import com.caucho.config.program.ContainerProgram;
-import com.caucho.config.program.PropertyStringProgram;
-import com.caucho.config.types.AnnotationConfig;
-import com.caucho.config.types.RawString;
-import com.caucho.config.xml.XmlBeanConfig;
-import com.caucho.config.xml.XmlBeanType;
-import com.caucho.el.Expr;
-import com.caucho.loader.AddLoaderListener;
-import com.caucho.loader.DynamicClassLoader;
-import com.caucho.loader.Environment;
-import com.caucho.loader.EnvironmentBean;
-import com.caucho.loader.EnvironmentClassLoader;
-import com.caucho.loader.EnvironmentLocal;
-import com.caucho.util.IoUtil;
-import com.caucho.util.L10N;
-import com.caucho.util.QDate;
 import com.caucho.vfs.Path;
-import com.caucho.vfs.ReadStream;
 import com.caucho.vfs.Vfs;
-import com.caucho.xml.QName;
 
 // configuration types
 class NamespaceConfig {

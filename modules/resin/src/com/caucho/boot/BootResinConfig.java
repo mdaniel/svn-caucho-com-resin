@@ -334,17 +334,24 @@ public class BootResinConfig // implements EnvironmentBean
       if (client == null)
         continue;
 
-      if (client.getConfig().isRequireExplicitId())
-        continue;
-      
-      String address = client.getConfig().getAddress();
-      
-      if (isLocalAddress(localAddresses, address))
+      if (isLocalClient(localAddresses, client.getConfig())) {
         clientList.add(client);
+      }
     }
   }
   
-  private ArrayList<InetAddress> getLocalAddresses()
+  public static boolean isLocalClient(ArrayList<InetAddress> localAddresses,
+                                      WatchdogConfig config)
+  {
+    if (config.isRequireExplicitId())
+      return false;
+    
+    String address = config.getAddress();
+    
+    return isLocalAddress(localAddresses, address);
+  }
+  
+  static ArrayList<InetAddress> getLocalAddresses()
   {
     ArrayList<InetAddress> localAddresses = new ArrayList<InetAddress>();
     
@@ -370,7 +377,7 @@ public class BootResinConfig // implements EnvironmentBean
     return localAddresses;
   }
   
-  private boolean isLocalAddress(ArrayList<InetAddress> localAddresses,
+  private static boolean isLocalAddress(ArrayList<InetAddress> localAddresses,
                                  String address)
   {
     if (address == null || "".equals(address))

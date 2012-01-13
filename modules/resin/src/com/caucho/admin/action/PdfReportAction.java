@@ -243,11 +243,6 @@ public class PdfReportAction implements AdminAction
     if (_logPath == null)
       _logPath = Vfs.lookup(_logDirectory);
     
-    _quercus = new QuercusContext();
-    _quercus.setPwd(_phpPath.getParent());
-    _quercus.init();
-    _quercus.start();
-
     if (_mailTo != null) {
       try {
         _mailService.addTo(new InternetAddress(_mailTo));
@@ -273,7 +268,7 @@ public class PdfReportAction implements AdminAction
     Env env = null;
 
     try {
-      QuercusPage page = _quercus.parse(_phpPath);
+      QuercusPage page = getQuercusContext().parse(_phpPath);
   
       TempStream ts = new TempStream();
       ts.openWrite();
@@ -323,6 +318,20 @@ public class PdfReportAction implements AdminAction
       if (env != null)
         env.close();
     }
+  }
+  
+  private QuercusContext getQuercusContext()
+  {
+    synchronized (this) {
+      if (_quercus == null) {
+        _quercus = new QuercusContext();
+        _quercus.setPwd(_phpPath.getParent());
+        _quercus.init();
+        _quercus.start();
+      }
+    }
+    
+    return _quercus;
   }
   
   private void mailPdf(TempStream ts)

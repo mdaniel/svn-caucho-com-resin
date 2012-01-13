@@ -71,7 +71,6 @@ import com.caucho.vfs.Vfs;
 public class ResinBoot
 {
   private static L10N _L;
-  private static Logger _log;
 
   private WatchdogArgs _args;
   private BootResinConfig _resinConfig;

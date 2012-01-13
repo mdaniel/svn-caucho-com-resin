@@ -1225,7 +1225,7 @@ public class Server
       // initialize the system distributed store
       if (isResinServer())
         getSystemStore();
-
+      
       _hostContainer.start();
 
       // getCluster().startRemote();

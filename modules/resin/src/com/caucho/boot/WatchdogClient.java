@@ -520,7 +520,7 @@ class WatchdogClient
 
     list.add("com.caucho.boot.WatchdogManager");
 
-    if ("".equals(args.getServerId())
+    if (("".equals(args.getServerId()) || args.getServerId() == null)
         && ! args.isDynamicServer()
         && ! "".equals(getId())) {
       list.add("-server");

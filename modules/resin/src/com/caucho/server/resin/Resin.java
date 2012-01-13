@@ -188,7 +188,7 @@ public class Resin
     _resinLocal.set(this, _resinSystem.getClassLoader());
 
     Environment.init();
-    
+ 
     _serverId = args.getServerId();
     
     _resinHome = args.getResinHome();
@@ -635,9 +635,9 @@ public class Resin
 
       if (getRootDirectory() == null)
         throw new NullPointerException();
-
-      _resinDelegate = ResinDelegate.create(this);
       
+      _resinDelegate = ResinDelegate.create(this);
+
       getDelegate().addPreTopologyServices();
 
       // server/p603
@@ -717,7 +717,7 @@ public class Resin
                              port.getServerSocket());
         }
       }
-
+      
       _resinSystem.start();
 
       log().info(this + " started in " + (Alarm.getExactTime() - _startTime) + "ms");
@@ -778,7 +778,7 @@ public class Resin
   {
     _mainThread = Thread.currentThread();
     _mainThread.setContextClassLoader(_systemClassLoader);
-
+    
     // preConfigureInit();
 
     System.out.println(VersionFactory.getFullVersion());
