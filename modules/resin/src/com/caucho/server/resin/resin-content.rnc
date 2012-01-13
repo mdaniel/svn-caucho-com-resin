@@ -654,6 +654,9 @@ r_server-multi = element server-multi {
   & (attribute address-list { string }
      | element address-list { string })?
 
+  & (attribute require-explicit-id { r_boolean-Type }
+     | element require-explicit-id { r_boolean-Type })?
+
   & (attribute port { string }
      | element port { string })?
 
