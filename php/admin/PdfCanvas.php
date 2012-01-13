@@ -20,21 +20,6 @@ class PdfCanvas
   public $orange = new RGBColor(1.0, 0.66, 0.0);
   public $cyan = new RGBColor(0.0, 0.66, 1.0);
   public $brown = new RGBColor(0.66, 0.20, 0.20);
-  
-  public $pdf_colors = array(
-      new RGBColor(0xff, 0x30, 0x30), // red
-      new RGBColor(0x30, 0xb0, 0xff), // azure
-      new RGBColor(0x90, 0x60, 0x00), // brown
-      new RGBColor(0xff, 0x90, 0x30), // orange
-      new RGBColor(0x30, 0x30, 0xff), // blue
-      new RGBColor(0x00, 0x00, 0x00), // black
-      new RGBColor(0x50, 0xb0, 0x00), // green
-      new RGBColor(0xd0, 0x30, 0xd0), // magenta
-      new RGBColor(0x00, 0x80, 0x80), // cyan
-      new RGBColor(0xb0, 0x30, 0x60), // rose
-      new RGBColor(0xe0, 0x90, 0xff), // indigo
-      new RGBColor(0xc0, 0xc0, 0xc0), // gray
-      new RGBColor(0x40, 0x80, 0x40)); // forest green
       
   private $pdf;
   
@@ -82,34 +67,35 @@ class PdfCanvas
   
   private $column_spacing = 5;
   private $column_x;
-
+  
   private $graph_rows = 3;
-  private $graph_cols = 2;
+  private $graph_columns = 3;
   
+  private $graph_padding_x = 10;
+  private $graph_padding_y = 20;
+  private $legend_size = 30;
+  
+  private $in_graph = false;
+  
+  private $graph;
   private $graph_index;
-  
-  private $graph_x;
-  private $graph_y;
-  
-  private $graph_width;
-  private $graph_height;
+  private $graph_origin;
+  private $graph_size;
   
   private $is_debug = false; 
   
-  function PdfCanvas()
+  public function PdfCanvas()
   {
     $this->pdf = new PDF();
-
+    
     //$this->lastTextPos = new Point(0,0); //to fix problem with Resin PDF Lib clone
     
     $this->pdf->begin_document();
     
     $this->newPage(false);
-    
-    //$this->pdf->save();
   }
   
-  function newPage($end_page = true)
+  public function newPage($end_page = true)
   {
     $this->debug("newPage");
     
@@ -131,12 +117,12 @@ class PdfCanvas
     
     $this->text_y = $this->getTopMargin() + $this->font_size;
     
+    $this->graph_index = 0;
     $this->graph_x = 0;
     $this->graph_y = 0;
-    $this->graph_index = 0;
   }
 
-  function end()
+  public function end()
   {
     $this->debug("end");
     
@@ -148,10 +134,9 @@ class PdfCanvas
     
     $this->debug("end_document");
     $this->pdf->end_document();
-    //$this->pdf->restore();
   }
   
-  function writeSelfHttp($file_name)
+  public function writeSelfHttp($file_name)
   {
     $buffer = $this->pdf->get_buffer();
     $length = strlen($buffer);
@@ -163,24 +148,29 @@ class PdfCanvas
     echo($buffer);
   }
   
-  function writeSelf()
+  public function writeSelf()
   {
     echo($this->pdf->get_buffer());
   }
   
-  function __get($name)
+  public function __get($name)
   {
     return $this->$name;
-  }  
-  
-  function __toString()
-  {
-    return "PdfCanvas";
   }
   
-  function debug($text) 
+  public function __set($name, $value)
   {
-    if ($is_debug)
+    $this->$name = $value;
+  }
+  
+  public function __toString()
+  {
+    return "PdfCanvas()";
+  }
+  
+  public function debug($text) 
+  {
+    //if ($is_debug)
       System::out->println($text);
   }
   
@@ -188,19 +178,19 @@ class PdfCanvas
   // lines
   //
   
-  function setRGBColor($red, $green, $blue)
+  public function setLineWidth($width)
   {
-    $this->pdf->setcolor("fillstroke", "rgb", $red, $green, $blue);
+    $this->pdf->setlinewidth($width);
   }
   
-  function drawLine($p1, $p2)
+  public function drawLine($p1, $p2)
   {
     $this->pdf->moveto($p1->x, $this->translateY($p1->y));
     $this->pdf->lineto($p2->x, $this->translateY($p2->y));
     $this->pdf->stroke();
   }
   
-  function writeHrule($indent = 0)
+  public function writeHrule($indent = 0)
   {
     $height = $this->getLineHeight()/2;
     $this->drawLine(new Point($this->getLeftMargin() + $indent, $this->text_y - $height),
@@ -208,11 +198,63 @@ class PdfCanvas
     $this->newLine();
   }
   
+  // raw graphics
+  
+  public function setColor($name)
+  {
+    $this->setRGBColor($this->getRGBColor($name));
+  }  
+  
+  public function setRGBColor(RGBColor $color)
+  {
+    $this->pdf->setrgbcolor($color->red, $color->green, $color->blue);
+  } 
+
+  public function getRGBColor($name)
+  {
+    $s = strtolower($name);
+    $color = $this->$s;
+    
+    if (! $color) {
+      $this->debug("color not found: $name");
+      return $this->black;
+    } else {
+      return $color;
+    }
+  }
+  
+  public function moveToPoint($p)
+  {
+    $this->moveToXY($p->x, $p->y);
+  }
+  
+  public function moveToXY($x, $y)
+  {
+    $this->debug("moveToXY($x,$y)");
+    $this->pdf->moveto($x, $this->translateY($y));
+  }
+  
+  public function lineToPoint($p)
+  {
+    $this->lineToXY($p->x, $p->y);
+  }
+  
+  public function lineToXY($x, $y)
+  {
+    $this->debug("lineToXY($x,$y)");
+    $this->pdf->lineto($x, $this->translateY($y));
+  }
+  
+  public function stroke()
+  {
+    $this->pdf->stroke();
+  }
+  
   //
   // text positioning
   //
   
-  function newLine($count = 1)
+  public function newLine($count = 1)
   {
     for($i=0;$i<$count;$i++) {
       $this->text_y += $this->getLineHeight();
@@ -226,13 +268,13 @@ class PdfCanvas
     return 0;
   }
   
-  function willOverflowY($count = 1)
+  public function willOverflowY($count = 1)
   {
     $size = $count * $this->getLineHeight();
     return ($this->text_y + $size) > $this->getBottomMargin();
   }
   
-  function getLineHeight()
+  public function getLineHeight()
   {
     //$ascender = $this->pdf->get_value("ascender") / 72;
     //$descender = $this->descender = $this->pdf->get_value("descender") / 72;
@@ -241,16 +283,19 @@ class PdfCanvas
     return $this->font_size + $this->line_spacing;
   }
   
-  function translateY($y)
+  public function translateY($y)
   {
-    return $this->page_height - $y; 
+    // Note:
+    // Graphs are drawn bottom to top (0,0 is bottom-left corner)
+    // Text is written top to bottom, like a normal word processor
+    return ($this->in_graph ? $y : ($this->page_height - $y));
   }
   
   //
   // boundaries
   //
   
-  function setMargins($top, $right, $bottom, $left)
+  public function setMargins($top, $right, $bottom, $left)
   {
     $this->top_margin_width = $top;
     $this->right_margin_width = $right;
@@ -258,81 +303,87 @@ class PdfCanvas
     $this->left_margin_width = $left;
   }
   
-  function getLeftMargin()
+  public function getLeftMargin()
   {
     return $this->left_margin_width;
   }
 
-  function getRightMargin()
+  public function getRightMargin()
   {
     return $this->getPageWidth() - $this->left_margin_width;
   }
   
-  function getTopMargin()
+  public function getTopMargin()
   {
     return $this->top_margin_width;
   }
   
-  function getBottomMargin()
+  public function getBottomMargin()
   {
     return $this->getPageHeight() - $this->bottom_margin_width;
   }  
   
-  function getPageCenter()
+  public function getPageCenter()
   {
     return $this->getPageWidth()/2;
   }
   
-  function getLineCenter()
+  public function getLineCenter()
   {
     return $this->getLineWidth()/2;
   }
   
-  function getLineWidth()
+  public function getLineWidth()
   {
     return $this->getPageWidth() - $this->left_margin_width - $this->right_margin_width;
   }
   
-  function getPageWidth()
+  public function getPageWidth()
   {
     return $this->page_width;
   }
   
-  function getPageHeight()
+  public function getPageHeight()
   {
     return $this->page_height;
+  }
+  
+  // need better name?
+  public function getPageRemaining()
+  {
+    return $this->getPageHeight() - $this->text_y - $this->bottom_margin_width;
   }
 
   //
   // FONTS
   //
   
-  function setTextFont()
+  public function setTextFont()
   {
     $this->setFont($this->text_font_name, $this->text_font_size);
   }
   
-  function setDataFont()
+  public function setDataFont()
   {
     $this->setFont($this->data_font_name, $this->data_font_size);
   }
 
-  function setSectionFont()
+  public function setSectionFont()
   {
     $this->setFont($this->section_font_name, $this->section_font_size);
   }
 
-  function setSubSectionFont()
+  public function setSubSectionFont()
   {
     $this->setFont($this->subsection_font_name, $this->subsection_font_size);
   }
   
-  function setHeaderFont()
+  public function setHeaderFont()
   {
     $this->setFont($this->header_font_name, $this->header_font_size);
   }
   
-  function setFont($font_name, $font_size)
+  public function setFont($font_name, $font_size)
   {
     //if ($this->font_name == $font_name && $this->font_size == $font_size)
     //  return;
@@ -348,11 +399,17 @@ class PdfCanvas
     $this->pdf->setfont($this->font, $this->font_size);
   }
   
+  public function setFontAndColor($font_name, $font_size, $color_name)
+  {
+    $this->setFont($font_name, $font_size);
+    $this->setColor($color_name);
+  }
+  
   //
   // headers and footers
   //
   
-  function writeHeaders()
+  public function writeHeaders()
   {
     $this->setHeaderFont();
 
@@ -379,7 +436,7 @@ class PdfCanvas
     $this->setTextFont();
   }
   
-  function writeFooters()
+  public function writeFooters()
   {
     $this->setHeaderFont();
     
@@ -414,12 +471,10 @@ class PdfCanvas
   // sections
   //
 
-  function writeSection($text, $newPage = true)
+  public function writeSection($text)
   {
-    if ($newPage) {
+    if ($this->page_number > 1)
       $this->newPage();
-      $this->newLine();
-    }      
     
     $this->header_right_text = $text;
     
@@ -430,7 +485,7 @@ class PdfCanvas
     $this->writeHrule();
   }
   
-  function writeSubsection($text)
+  public function writeSubsection($text)
   {
     $this->setSubSectionFont();
     
@@ -445,17 +500,17 @@ class PdfCanvas
   // text metrics
   //
   
-  function getTextWidth($text)
+  public function getTextWidth($text)
   {
     return $this->pdf->stringwidth($text, $this->font, $this->font_size);
   }
   
-  function alignRight($x, $text)
+  public function alignRight($x, $text)
   {
     return $x - $this->getTextWidth($text);
   }  
   
-  function alignCenter($x, $text)
+  public function alignCenter($x, $text)
   {
     return $x - ($this->getTextWidth($text)/2);
   }
@@ -464,37 +519,37 @@ class PdfCanvas
   // text writing to current line
   //
   
-  function writeText($text)
+  public function writeText($text)
   {
     return $this->writeTextOpts(array(), $text);
   }
   
-  function writeTextLine($text)
+  public function writeTextLine($text)
   {
     return $this->writeTextOpts(array('newline'=>true), $text);
   }
   
-  function writeTextIndent($x, $text)
+  public function writeTextIndent($x, $text)
   {
     return $this->writeTextOpts(array('indent'=>$x), $text);
   }
   
-  function writeTextLineIndent($x, $text)
+  public function writeTextLineIndent($x, $text)
   {
     return $this->writeTextOpts(array('indent'=>$x,'newline'=>true), $text);
   }
   
-  function writeTextBlock($text)
+  public function writeTextBlock($text)
   {
     return $this->writeTextOpts(array('newline'=>true,'block'=>true), $text);
   }
   
-  function writeTextBlockIndent($x, $text)
+  public function writeTextBlockIndent($x, $text)
   {
     return $this->writeTextOpts(array('newline'=>true,'block'=>true,'indent'=>$x), $text);
   }
   
-  function writeTextOpts($opts = array(), $text)
+  public function writeTextOpts($opts = array(), $text)
   {
     $x = $opts['x'] ?: 0;
     $indent = $opts['indent'] ?: 0;
@@ -564,7 +619,7 @@ class PdfCanvas
   // writing column text
   //
   
-  function writeTextColumn($width, $align, $text)
+  public function writeTextColumn($width, $align, $text)
   {
     $this->writeTextOpts(array('width'=>$width, 
     	                         'align'=>$align,
@@ -573,12 +628,12 @@ class PdfCanvas
     $this->$column_x = $this->$column_x + $width + $this->column_spacing;
   }
   
-  function writeTextLineCenter($text)
+  public function writeTextLineCenter($text)
   {
     $this->writeTextOpts(array('align'=>'c','newline'=>true), $text)
   }
   
-  function writeTextLineRight($text)
+  public function writeTextLineRight($text)
   {
     $this->writeTextOpts(array('align'=>'r','newline'=>true), $text)
   }
@@ -587,7 +642,7 @@ class PdfCanvas
   // text with absolute positioning
   //
   
-  function writeTextAbs($opts = array(), $text)
+  public function writeTextAbs($opts = array(), $text)
   {
     $origin = $opts['origin'] ?: new Point(0,0);
     $offset = $opts['offset'] ?: new Point(0,0);
@@ -644,7 +699,7 @@ class PdfCanvas
     }
   }
   
-  function writeTextXY($x, $y, $text)
+  public function writeTextXY($x, $y, $text)
   {
     $this->debug("writeTextXY:$x,$y,$text");
     
@@ -654,12 +709,12 @@ class PdfCanvas
     return new Point(($x + $this->getTextWidth($text)), $y);
   } 
   
-  function writeTextXYCenter($x, $y, $text)
+  public function writeTextXYCenter($x, $y, $text)
   {
     return $this->writeTextXY($this->alignCenter($x, $text), $y, $text);
   } 
   
-  function writeTextXYRight($x, $y, $text)
+  public function writeTextXYRight($x, $y, $text)
   {
     return $this->writeTextXY($this->alignRight($x, $text), $y, $text);
   }
@@ -668,22 +723,13 @@ class PdfCanvas
   // graphs
   //
 
-  function setGraphRows($rows)
+  public function startGraph($title, $x_range, $y_range)
   {
-    $this->graph_rows = $rows;
-  }
-
-  function setGraphColumns($cols)
-  {
-    $this->graph_cols = $cols;
-  }
-  /*
-  function graphNextXY()
-  {
-    if ($this->graph_index == 6) {
+    // start a new page if this page is full
+    if ($this->graph_index == ($this->graph_rows * $this->graph_columns))
       $this->newPage();
-    }
-
+      
+    /*
     $this->graph_width = (500) / $this->graph_cols;
     $this->graph_height = (660) / $this->graph_rows;
 
@@ -691,219 +737,83 @@ class PdfCanvas
     $y_index = (int) ($this->graph_index / $this->graph_cols);
 
     $this->graph_x = 50 + $x_index * $this->graph_width;
-    $this->graph_y = 820 - ($y_index + 1) * $this->graph_height;
-
-    $this->graph_index++;
-  }
-
-  function drawGraph($name, $gds)
-  {
-    $this->graphNextXY();
-    
-    $gd = $this->getDominantGraphData($gds);
-    $graph = $this->createGraph($this,
-                    $this->graph_x, 
-                    $this->graph_y,
-                    $this->graph_width - 60,
-                    $this->graph_height - 100,
-                    name, 
-                    $gd);
-                    
-    $this->createGraphData($gds, $graph);
-    
-    $graph->drawLegends($gds);
-    //$graph->end();
-  }
-  
-  function getDominantGraphData($gds)
-  {
-    $gdd = $gds[0];
-    foreach($gds as $gd) {
-      if ($gd->max > $gdd->max) {
-        $gdd=$gd;
-      }
-    }
-    return $gdd;
-  }
-  
-  function createGraph(PdfCanvas $canvas,
-                       $x, $y,
-                       $width, $height,
-                       String $title,
-                       GraphData $gd,
-                       boolean $displayYLabels=true,
-                       boolean $trace=false)
-  {
-    global $g_pdf;
-    global $g_start;
-    global $g_end;
-    global $grey;
-    global $lightGrey;
-    global $medGrey;
-    global $darkGrey;
-    global $black;
-    global $majorTicks, $minorTicks;
-  
-    $graph = new Graph($g_pdf, $title,
-                       new Point($x, $y),
-                       new Size($width, $height),
-                       new Range($g_start * 1000, $g_end * 1000),
-                       new Range(0, $gd->max),
-                       $trace);
-    $graph->start();
-  
-    $valid = $gd->validate();
-  
-    if ($valid) {
-      $graph->canvas->setColor($black);
-      $graph->canvas->setFont("Helvetica-Bold", 12);
-      $graph->drawTitle($title);
-  
-      $graph->canvas->setColor($lightGrey);
-      $graph->drawGridLines($minorTicks, $gd->yincrement/2);
-  
-      $graph->canvas->setColor($medGrey);
-      $graph->drawGridLines($majorTicks, $gd->yincrement);
-  
-      $canvas->setColor($darkGrey);
-      $graph->drawGrid();
-  
-      if ($displayYLabels) {
-        $graph->drawYGridLabels($gd->yincrement);
-      }
-  
-      $graph->drawXGridLabels($majorTicks, "displayTimeLabel");
-    } else {
-      debug("Not displaying graph $title because the data was not valid");
-      $canvas->setColor($black);
-      $canvas->setFont("Helvetica-Bold", 12);
-      $graph->drawTitle($title);
-      $canvas->setColor($darkGrey);
-      $graph->drawGrid();
-    }
-    
-    return $graph;
-  }
-  
-  function createGraphData($name, $data, $color=$blue)
-  {
-    $dataLine = array();
-    $max = -100;
-    
-    foreach($data as $d) {
-      $time = $d->time;
+    $this->graph_y = 820 - ($y_index + 1) * $this->graph_height;      
+    */
       
-      $value_avg = $d->value;
-      $value_min = $d->min;
-      $value_max = $d->max;
-  
-      if ($value_min < $value_max) {
-        array_push($dataLine, new Point($time, $value_avg));
-        array_push($dataLine, new Point($time + 0, $value_max));
-        array_push($dataLine, new Point($time + 0, $value_min));
-        array_push($dataLine, new Point($time + 0, $value_avg));
-      }
-      else {
-        array_push($dataLine, new Point($time + 0, $value_max));
-      }
-  
-      if ($max < $value_max)
-        $max = $value_max;
-    }
-  
-    $gd = new GraphData();
-    $gd->name = $name;
-    $gd->dataLine = $dataLine;
-    $gd->max = $max + ($max * 0.05) ;
-    $gd->yincrement = calcYincrement($max);
-    $gd->color=$color;
-  
-    return $gd;
-  }
-  
-  function pdf_graph_draw_lines($gds, $graph)
-  {
-    global $g_canvas;
-  
-    $g_canvas->set_line_width(1);
-  
-    $gds = array_reverse($gds);
-  
-    foreach($gds as $gd) {
-      if ($gd->validate()) {
-        $g_canvas->setColor($gd->color);
-        
-        if (sizeof($gd->dataLine) != 0) {
-        	$graph->draw_line_graph($gd->dataLine);
-        }
-      }
-    }
-  }
-  */
-}
+    // calcuate the vizible size for this graph based on the amount of
+    // usable space on the page and the number of graphs per row/column
+    $x_size = ($this->getLineWidth() / $this->graph_columns) - ($this->graph_padding_x * 2);
+    $y_size = ($this->getPageRemaining() / $this->graph_rows) - ($this->graph_padding_y * 2) - $this->legend_size;
+      
+    $this->graph_size = new Size($x_size, $y_size);
 
-class Point 
-{
-  private $x;
-  private $y;
-
-  function Point($x = 0, $y = 0)
-  {
-    $this->x = (float) $x;
-    $this->y = (float) $y;
-  }
-
-  function __get($name)
-  {
-    return $this->$name;
-  }  
-  
-  function __set($name, $value)
-  {
-    $this->$name = (double) $value;
-  }
-  
-  function __toString()
-  {
-    return "POINT({$this->x},{$this->y})";
-  }
-}
-
-
-class GraphData 
-{
-  public $name;
-  public $dataLine;
-  public $max;
-  public $yincrement;
-  public $color;
-
-  function __toString() {
-    return "GraphData name $this->name dataLine $this->dataLine max $this->max yincrement $this->yincrement";
-  }
-
-  function validate() {
-
-    if (sizeof($this->dataLine)==0) {
-      debug(" no data in " . $this->name);
-      return false;
-    }
-
-    if ($this->max==0) {
-      $this->max=10;
-      $this->yincrement=1;
-    }
+    // calculate the origin for this graph (bottom-left coordinate)
+    $index = $this->graph_index;
+                                 
+    $x_index = (int) ($index % $this->graph_columns);
+    $y_index = (int) ($index / $this->graph_columns);
     
-    return true;
+    $this->debug("x_index=$x_index");
+    $this->debug("y_index=$y_index");
+    
+    $x_origin = $this->getLeftMargin() + ($this->graph_padding_x) + ($x_index * ($this->graph_size->width + ($this->graph_padding_x * 2)));
+    $y_origin = $this->text_y + $this->graph_padding_y + ($this->graph_size->height + $y_index * ($this->graph_size->height + $this->legend_size + ($this->graph_padding_y * 2)));
+    $y_origin = $this->translateY($y_origin);
+    
+    //($this->graph_padding_y) - ($this->text_y + ($y_index * $this->graph_size->height)) - $this->graph_size->height - (($y_index*2) * $this->graph_padding_y) - ($y_index * $this->legend_size);
+    
+    //$x_origin += ($this->graph_padding_x / 2);
+
+    $this->graph_origin = new Point($x_origin, $y_origin);
+
+    // set a flag that we are currently writing a graph - this change the 
+    // y orientation from top/bottom to bottom/top (see translateY)
+    $this->in_graph = true;
+    
+    // increment the graphs counter for this page
+    $this->graph_index++;
+                                      
+    // save the previous pdf settings (old origin)
+    $this->pdf->save();
+    
+    // tell pdf to translate our coordinates based on the origin of the graph
+    //$this->pdf->translate($this->graph_origin->x, $this->translateY($this->graph_origin->y));
+    $this->pdf->translate($this->graph_origin->x, $this->graph_origin->y);
+                                    
+    // construct the new graph
+    $this->graph = new PdfCanvasGraph($this,
+                                      $title,
+                                      $this->graph_size,
+                                      $x_range,
+                                      $y_range);
+                                      
+    $this->debug("startGraph:origin={$this->graph_origin},index=$index,graph={$this->graph}");
+                                      
+    return $this->graph;
+  }
+
+  public function endGraph()
+  {
+    $this->debug("endGraph:{$this->graph->title}");
+    
+    unset($this->graph);
+    
+    // restore the old origin
+    $this->pdf->restore();
+    
+    // reset the flat that we are currently writing a graph - this changes the 
+    // y orientation from bottom/top to top/bottom (see translateY)
+    $this->in_graph = false;
   }
 }
 
-class RGBColor {
+class RGBColor 
+{
   private $red;
   private $green;
   private $blue;
 
-  function RGBColor($red, $green, $blue)
+  public function RGBColor($red, $green, $blue)
   {
     if ($red > 1)
       $red = $red / 255;
@@ -916,333 +826,103 @@ class RGBColor {
     $this->green = $green;
     $this->blue = $blue;
   }
-
-  function doSetColor($canvas)
+  
+  public function __get($name)
   {
-    $canvas->setRGBColor($this->red, $this->green, $this->blue);
-  } 
-}
-/*
-class Graph {
-  private $pixelSize;
-  private $xRange;
-  private $yRange;
-  private $g_canvas;
-  private $title;
-  private $pixelPerUnit;
-
-  function Graph($pdf,
-                 string $title,
-                 Point $origin,
-                 Size $pixelSize,
-                 Range $xRange,
-                 Range $yRange,
-                 boolean $trace=false)
-  {
-    $this->title = $title;
-    $this->canvas = new Canvas($pdf, $origin);
-    $this->pixelSize = $pixelSize;
-    $this->xRange = $xRange;
-    $this->yRange = $yRange;
-    $this->trace = $trace;
-   
-
-    if ($this->yRange->size()==0.0) {
-       debug("YRANGE was 0 for " . $this->title);
-       $this->valid=false;
-    } else {
-      $this->valid=true;
-    }
-
-    $this->pixelPerUnit = new Size();
-    $this->pixelPerUnit->width = $this->pixelSize->width / $this->xRange->size();
-    $this->pixelPerUnit->height = $this->pixelSize->height / $this->yRange->size();
-
-    if ($this->pixelPerUnit->width == 0.0 || $this->pixelPerUnit->height == 0.0) {
-       debug("pixel per unit was 0.0 " . $this->title);
-       $this->valid=false;
-       
-    } else {
-      $this->xOffsetPixels = $this->xRange->start * $this->pixelPerUnit->width;
-      $this->yOffsetPixels = $this->yRange->start * $this->pixelPerUnit->height;
-    }
-    if ($this->trace) {
-       $this->trace("$title graph created --------------------- ");
-    }
-
-  }
-
-  function trace($msg) {
-	if ($this->trace) debug("GRAPH " . $this->title . " " . $msg);
-  }
-
-
-  function __toString() {
-    $str = "(GRAPH Canvas $this->canvas, XRANGE $this->xRange, YRANGE $this->yRange)";
-    return $str;
-  }
-
-  function start() {
-    $this->canvas->start();
-  }
-
-  function end() {
-    $this->canvas->end();
-  }
-
-
-  function __destruct() {
-    $this->canvas = null;
-  }
-
-
-  function convertPoint($point) {
-    $convertedPoint = new Point();
-    $convertedPoint->x = intval(($point->x  * $this->pixelPerUnit->width) - $this->xOffsetPixels);
-    $convertedPoint->y = intval(($point->y  * $this->pixelPerUnit->height) - $this->yOffsetPixels);
-    if ($convertedPoint->x > 1000 || $convertedPoint->x < 0) {
-       debug("Point out of range x axis $convertedPoint->x  for " .  $this->title);
-       $this->valid = false;
-    }
-    if ($convertedPoint->y > 1000 || $convertedPoint->y < 0) {
-       debug("Point out of range y axis $convertedPoint->y for " .  $this->title);
-       $this->valid = false;
-    }
-    return $convertedPoint;
-  }
-
-  function drawTitle($title=null) {
-    $this->trace("drawTitle " . $title);
-
-    if (!$title) $title = $this->title;
-    $y = $this->pixelSize->height + 15;
-    $x = 0.0;
-    if ($this->valid) {
-       $this->trace("drawTitle valid" );
-       $this->canvas->writeText(new Point($x, $y), $title);
-    } else {
-      $this->trace("drawTitle no data" );
-      $this->canvas->writeText(new Point($x, $y), $title . " no data");
-    }
-  }
-
-  function drawLegends($legends, $point=new Point(0.0, -20)) {
-
-    if (!$this->valid) {
-       $this->trace("drawLegends NOT VALID" );
-       return;
-    }
-
-    $this->trace("drawLegends" );
-
-    $col2 =   (double) $this->pixelSize->width / 2;
-    $index = 0;
-    $yinc = -7;
-    $initialYLoc = -20;
-    $yloc = $initialYLoc;
-
-    foreach ($legends as $legend) {
-      if ($index % 2 == 0) {
-	      $xloc = 0.0;
-      } else {
-	      $xloc = $col2;
-      }
-    
-      $row = floor($index / 2);
-      
-      $yloc = ((($row) * $yinc) + $initialYLoc);
-
-      $this->drawLegend($legend->color, $legend->name, new Point($xloc, $yloc));
-      $index++;
-
-
-    }
-  }
-
-  function drawLegend($color, $name, $point=new Point(0.0, -20)) {
-    if (!$this->valid) {
-       return;
-    }
-
- 
-    $this->trace("drawLegend SINGLE " . $name);
-
-    global $g_canvas;
-    global $black;
-
-    $x = $point->x;
-    $y = $point->y;
-
-    $g_canvas->setColor($color);
-    $this->canvas->moveTo(new Point($x, $y+2.5));
-    $this->canvas->lineTo(new Point($x+5, $y+5));
-    $this->canvas->lineTo(new Point($x+10, $y+2.5));
-    $this->canvas->lineTo(new Point($x+15, $y+2.5));
-    $this->canvas->stroke();
-
-    $g_canvas->setColor($black);
-    $this->canvas->setFont("Helvetica-Bold", 6);
-    $this->canvas->setColor($black);
-    $this->canvas->writeText(new Point($x+20, $y), $name);
+    return $this->$name;
   }
   
-  function draw_line_graph($dataLine)
+  public function __toString()
   {
-    if (!$this->valid) {
-       return;
-    }
-    
-    $this->trace("drawLine ");
-
-    $this->canvas->moveTo($this->convertPoint($dataLine[0]));
-
-    for ($index = 1; $index < sizeof($dataLine); $index++) {
-      $p = $this->convertPoint($dataLine[$index]);
-      if (!$this->valid) {
-      	 break;
-      }
-      
-      $this->canvas->lineTo($p);
-    }
-
-    $this->canvas->stroke();
-  }
-
-  function drawGrid()
-  {
-    $this->canvas->set_line_width(1.5);
-
-    $this->trace("drawGrid ");
-
-    $width = (double) $this->pixelSize->width;
-    $height = (double) $this->pixelSize->height;
-    $this->canvas->moveTo(new Point(0.0, 0.0));
-    $this->canvas->lineTo(new Point($width, 0.0));
-    $this->canvas->lineTo(new Point($width, $height));
-    $this->canvas->lineTo(new Point(0.0, $height));
-    $this->canvas->lineTo(new Point(0.0, 0.0));
-    $this->canvas->stroke();
-  }
-
-  function drawGridLines($xstep, $ystep)
-  {
-    $this->canvas->set_line_width(0.5);
-
-    if (!$ystep) {
-      $this->valid = false;
-      debug("No ystep was passed " .  $this->title);
-    }
-
-    if (!$this->valid) {
-       return;
-    }
-
-    $this->trace("drawGridLines ");
-
-    $width = intval($this->pixelSize->width);
-    $height = intval($this->pixelSize->height);
-
-    $xstep_width = $xstep * $this->pixelPerUnit->width;
-    $ystep_width = $ystep * $this->pixelPerUnit->height;
-
-    if ($xstep_width <= 0.0 || $ystep_width <= 0.0) {
-       debug("          ====== Step width was 0 x $xstep_width y $ystep_width " . $this->title);
-       debug("      ppu width    " . $this->pixelPerUnit->width);
-       debug("      xstep     $xstep ");
-
-       $this->valid = false;
-
-       return;
-    }
-
-    for ($index = 0; $width >= (($index)*$xstep_width); $index++) {
-      $currentX = intval($index*$xstep_width);
-      $this->canvas->moveTo(new Point($currentX, 0.0));
-      $this->canvas->lineTo(new Point($currentX, $height));
-      $this->canvas->stroke();
-    }    
-
-
-    for ($index = 0; $height >= ($index*$ystep_width); $index++) {
-      $currentY = intval($index*$ystep_width);
-      $this->canvas->moveTo(new Point(0.0, $currentY));
-      $this->canvas->lineTo(new Point($width, $currentY));
-      $this->canvas->stroke();
-    }    
-
-
-  }
-
-  function drawXGridLabels($xstep, $func)
-  {
-    if (!$this->valid) {
-       return;
-    }
-
-    $this->trace("X drawXGridLabels xstep $xstep, func $func");
-
-
-    $this->canvas->setFont("Helvetica-Bold", 9);
-    $width =   (double) $this->pixelSize->width;
-
-    $xstep_width = ($xstep) * $this->pixelPerUnit->width;
-
-    for ($index = 0; $width >= ($index*$xstep_width); $index++) {
-      $currentX = $index*$xstep_width;
-      $stepValue = (int) $index * $xstep;
-      $currentValue = $stepValue + (int) $this->xRange->start;
-      $currentValue = intval($currentValue);
-
-      if (!$func){
-      	$currentLabel = $currentValue;
-      } else {
-	$currentLabel = $func($currentValue);
-      }
-      $this->canvas->writeText(new Point($currentX-3, -10), $currentLabel);
-    }    
-  }
-
-  function drawYGridLabels($step, $func=null, $xpos=-28) {
-    if (!$this->valid) {
-       return;
-    }
-
-    $this->trace("Y drawYGridLabels xstep $step, func $func");
-
-
-    $this->canvas->setFont("Helvetica-Bold", 9);
-    $height = (double) $this->pixelSize->height;
-
-    $step_width = ($step) * $this->pixelPerUnit->height;
-
-    for ($index = 0; $height >= ($index*$step_width); $index++) {
-      $currentYPixel = $index*$step_width;
-      $currentYValue =	($index * $step) + $this->yRange->start;
-      
-      if ($func) {
-	$currentLabel = $func($currentYValue);
-      } else {
-      	if ($currentYValue >      1000000000) {
-	   $currentLabel = "" . $currentYValue / 1000000000 . "G";
-	}
-        elseif ($currentYValue > 1000000) {
-	   $currentLabel = "" . $currentYValue / 1000000 . "M";
-	}
-        elseif ($currentYValue > 1000) {
-	   $currentLabel = "" . $currentYValue / 1000 . "K";
-	}
-        else {
-	  $currentLabel = $currentYValue; 
-	}
-      }
-
-      $x = -5;
-      
-      $this->canvas->writeText_ralign_xy($x, $currentYPixel - 3,
-                                          $currentLabel);
-    }    
+    return "RGBColor({$this->red},{$this->green},{$this->blue})";
   }
 }
-*/
+
+class Point 
+{
+  private $x;
+  private $y;
+
+  public function Point($x = 0, $y = 0)
+  {
+    $this->x = (float) $x;
+    $this->y = (float) $y;
+  }
+
+  public function __get($name)
+  {
+    return $this->$name;
+  }  
+  
+  public function __set($name, $value)
+  {
+    $this->$name = (double) $value;
+  }
+  
+  public function __toString()
+  {
+    return "Point({$this->x},{$this->y})";
+  }
+}
+
+class Range 
+{
+  private $start;
+  private $stop;
+
+  public function Range($start, $stop)
+  {
+    $this->start = (float) $start;
+    $this->stop = (float) $stop;
+  }
+
+  public function __set($name, $value)
+  {
+    $this->$name = (double) $value;
+  }
+
+  public function __get($name)
+  {
+    return $this->$name;
+  }
+
+  public function __toString()
+  {
+    return "Range({$this->start},{$this->stop})";
+  }
+
+  public function size()
+  {
+    return $this->stop - $this->start;
+  }
+}
+
+class Size 
+{
+  private $width;
+  private $height;
+
+  public function Size($width = 0, $height = 0)
+  {
+    $this->width = $width;
+    $this->height = $height;
+  }
+
+  public function __set($name, $value)
+  {
+    $this->$name = (double) $value;
+  }
+
+  public function __get($name)
+  {
+    return $this->$name;
+  }
+
+  public function __toString()
+  {
+    return "Size({$this->width},{$this->height})";
+  }
+}
+
 
 ?>
