@@ -60,8 +60,8 @@ public class PDFStream {
   private double _textX = 0;
   private double _textY = 0;
 
-  private double _x = 0;
-  private double _y = 0;
+  private double _x = -1;
+  private double _y = -1;
   private boolean _hasGraphicsPos = true;
 
   PDFStream(int id)
