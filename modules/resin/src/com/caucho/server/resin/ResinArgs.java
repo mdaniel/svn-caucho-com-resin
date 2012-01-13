@@ -559,7 +559,8 @@ public class ResinArgs
                || "--jmx-port".equals(argv[i])) {
         i += 2;
       }
-      else if ("--user-properties".equals(arg)) {
+      else if ("-user-properties".equals(argv[i])
+               || "--user-properties".equals(argv[i])) {
         i += 2;
       }
       else if ("--mode".equals(arg)) {
