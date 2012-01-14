@@ -195,6 +195,9 @@ public class ResinBoot
   {
     if (! (_args.isDynamicServer() || _resinConfig.isHomeCluster()))
       return;
+    
+    if (_args.getServerId() != null)
+      return;
 
     if (findLocalClients().isEmpty()) {
       WatchdogClient client = _resinConfig.addDynamicClient(_args);
@@ -208,7 +211,12 @@ public class ResinBoot
   {
     return _resinConfig.findClient(serverId, args);
   }
-  
+
+  WatchdogClient findShutdownClient(WatchdogArgs args)
+  {
+    return _resinConfig.findShutdownClient(args.getClusterId());
+  }
+ 
   ArrayList<WatchdogClient> findLocalClients()
   {
     return _resinConfig.findLocalClients();

@@ -216,6 +216,11 @@ class WatchdogConfig
     return _cluster;
   }
   
+  public String getHomeCluster()
+  {
+    return _cluster.getResin().getHomeCluster();
+  }
+  
   /**
    * Adds a http.
    */

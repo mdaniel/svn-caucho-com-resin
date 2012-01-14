@@ -63,6 +63,11 @@ public class BootClusterConfig {
     _system = system;
     _resin = resin;
   }
+  
+  public BootResinConfig getResin()
+  {
+    return _resin;
+  }
 
   @Configurable
   public void setId(String id)
@@ -117,9 +122,10 @@ public class BootClusterConfig {
     if (_resin.isWatchdogManagerConfig())
       return;
       
-    if (_resin.findClient(config.getId()) != null)
+    if (_resin.findClient(config.getId()) != null) {
       throw new ConfigException(L.l("<server id='{0}'> is a duplicate server.  servers must have unique ids.",
                                     config.getId()));
+    }
       
     _resin.addServer(config);
     

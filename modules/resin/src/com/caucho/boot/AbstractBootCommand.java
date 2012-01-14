@@ -104,6 +104,9 @@ public abstract class AbstractBootCommand implements BootCommand {
   {
     WatchdogClient client = boot.findClient(args.getServerId(), args);
     
+    if (client == null)
+      client = boot.findShutdownClient(args);
+    
     return doCommand(args, client);
   }
   

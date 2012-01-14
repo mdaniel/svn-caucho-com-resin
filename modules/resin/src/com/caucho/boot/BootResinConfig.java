@@ -245,18 +245,16 @@ public class BootResinConfig // implements EnvironmentBean
       
       // cloud/1292, server/6e11
       if (args.isDynamicServer()) {
-        return null;
-        /*
         client = findShutdownClient(_args.getClusterId());
         
-        if (client == null) {
-          throw new ConfigException(L.l("Resin/{0}: {1} -cluster '{2}' does not match any defined <server>\nin {3}.",
-                                        VersionFactory.getVersion(),
-                                        _args.getCommand(),
-                                        _args.getClusterId(), 
-                                        _args.getResinConf()));
-        }
-        */
+        if (client != null)
+          return client;
+        
+        throw new ConfigException(L.l("Resin/{0}: {1} -cluster '{2}' does not match any defined <server>\nin {3}.",
+                                      VersionFactory.getVersion(),
+                                      _args.getCommand(),
+                                      _args.getClusterId(), 
+                                      _args.getResinConf()));
       }
       
       if (! args.getCommand().isStart() && ! args.getCommand().isConsole()) {
@@ -286,18 +284,19 @@ public class BootResinConfig // implements EnvironmentBean
     }
 
     // server/6e10
-    /*
-    if (args.isDynamicServer())
+    if (args.isDynamicServer() || getHomeCluster() != null)
       return null;
-      */
 
+    /*
     if (client == null && _args.getCommand().isShutdown()) {
       client = findShutdownClient(_args.getClusterId());
     }
+    */
 
     if (client == null
-        && ! (_args.getCommand().isStart()
-              || _args.getCommand().isConsole())) {
+        && (! _args.getCommand().isStart()
+            && ! _args.getCommand().isConsole()
+            || _args.isDynamicServer())) {
       client = findShutdownClient(_args.getClusterId());
     }
 

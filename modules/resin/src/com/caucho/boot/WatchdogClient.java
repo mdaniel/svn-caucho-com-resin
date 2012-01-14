@@ -538,6 +538,11 @@ class WatchdogClient
         list.add(argv[i]);
     }
 
+    if (! args.isDynamicServer() && _config.getHomeCluster() != null) {
+      list.add("--cluster");
+      list.add(_config.getHomeCluster());
+    }
+
     list.add("--log-directory");
     list.add(getLogDirectory().getFullPath());
 
