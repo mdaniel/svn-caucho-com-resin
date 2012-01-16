@@ -20,14 +20,22 @@ class PdfCanvas
   public $orange = new RGBColor(1.0, 0.66, 0.0);
   public $cyan = new RGBColor(0.0, 0.66, 1.0);
   public $brown = new RGBColor(0.66, 0.20, 0.20);
+  public $white = new RGBColor(1, 1, 1);
       
   private $pdf;
   
+  private $state_stack = Array();
+  
   private $page_number = 0;
+  private $has_page = false;
 
   private $text_y;
   
+  // state
   private $font;
+  private $color
+  private $line_width
+  private $origin;
   
   private $font_name;
   private $font_size;
@@ -69,7 +77,9 @@ class PdfCanvas
   private $column_x;
   
   private $graph_rows = 3;
-  private $graph_columns = 3;
+  private $graph_columns = 2;
+  
+  private $graph_space_start_y;
   
   private $graph_padding_x = 10;
   private $graph_padding_y = 20;
@@ -81,8 +91,6 @@ class PdfCanvas
   private $graph_index;
   private $graph_origin;
   private $graph_size;
-  
-  private $is_debug = false; 
   
   public function PdfCanvas()
   {
@@ -99,27 +107,42 @@ class PdfCanvas
   {
     $this->debug("newPage");
     
-    if ($end_page)
+    if ($end_page && $this->has_page)
     {
+      $this->debug("end_page");
+      
       $this->writeHeaders();
       $this->writeFooters();
       
-      $this->debug("end_page");
+      $this->saveState();
       $this->pdf->end_page();
     }
     
-    $this->debug("begin_page");
+    //$this->debug("begin_page");
     $this->pdf->begin_page($this->page_width, $this->page_height);
     
     $this->page_number++;
     
-    $this->setTextFont();
+    if (! $this->has_page) {
+      $this->has_page = true;
+
+      // these set the base graphics state
+      $this->setTextFont();
+      $this->setLineWidth(1);
+      $this->origin = new Point(0,0);
+      
+      $this->saveState();
+    } else {
+      $this->restoreState();    
+    }
     
     $this->text_y = $this->getTopMargin() + $this->font_size;
     
     $this->graph_index = 0;
     $this->graph_x = 0;
     $this->graph_y = 0;
+    
+    $this->graph_space_start_y = $this->text_y;
   }
 
   public function end()
@@ -129,10 +152,10 @@ class PdfCanvas
     $this->writeHeaders();
     $this->writeFooters();
     
-    $this->debug("end_page");
+    //$this->debug("end_page");
     $this->pdf->end_page();
     
-    $this->debug("end_document");
+    //$this->debug("end_document");
     $this->pdf->end_document();
   }
   
@@ -170,8 +193,60 @@ class PdfCanvas
   
   public function debug($text) 
   {
-    //if ($is_debug)
-      System::out->println($text);
+    //if (preg_match("/WARNING/", $text))
+    //  System::out->println($text);
+  }
+  
+  public function saveState()
+  {
+    // doh!  our pdfstream does not save state between pages!
+    if ($this->has_page) {
+      $this->pdf->save();
+    }
+    
+    $state = new GraphicsState($this->page_number,
+                               $this->font_name,
+                               $this->font_size,
+                               $this->color,
+                               $this->line_width,
+                               $this->origin);
+    
+    
+    $stack_size = array_push($this->state_stack, $state);
+    
+    $this->debug("saveState:stack_size=$stack_size,$state");
+  }
+  
+  public function restoreState()
+  {
+    // doh!  our pdfstream does not save state between pages!
+    if ($this->has_page) {
+      //$this->debug("restoreState");
+      $this->pdf->restore();
+    }
+    
+    $state = array_pop($this->state_stack);
+    //$this->debug("pop state: {$state->id}");
+    
+    if(! $state) {
+      $this->debug("Warning: no saved state to restore!");
+    //} elseif ($state->page_number == $this->page_number) {
+    //  $this->debug("Skipping internal restore... still on page {$this->page_number}");
+    } else {
+      $this->debug("restoreState:$state");
+      $this->setFontAndColor($state->font_name, $state->font_size, $state->color);
+      $this->setLineWidth($state->line_width);
+      
+      // not sure...
+      //$revert_origin = new Point($state->origin->x*-1, $state->origin->y*-1);
+      //$this->translate($revert_origin);
+    }
+  }
+  
+  public function translate($origin)
+  {
+    $this->origin = $origin;
+    $this->pdf->translate($origin->x, $origin->y);
   }
   
   // 
@@ -180,37 +255,50 @@ class PdfCanvas
   
   public function setLineWidth($width)
   {
+    $this->line_width = line_width;
     $this->pdf->setlinewidth($width);
   }
   
   public function drawLine($p1, $p2)
   {
-    $this->pdf->moveto($p1->x, $this->translateY($p1->y));
-    $this->pdf->lineto($p2->x, $this->translateY($p2->y));
+    $this->pdf->moveto($p1->x, $this->invertY($p1->y));
+    $this->pdf->lineto($p2->x, $this->invertY($p2->y));
     $this->pdf->stroke();
   }
   
-  public function writeHrule($indent = 0)
+  public function writeHrule($indent = 0, $line_width = 1, $color="black")
   {
+    $this->saveState();
+    
+    $this->setLineWidth($line_width);
+    $this->setColor($color);
     $height = $this->getLineHeight()/2;
+    
     $this->drawLine(new Point($this->getLeftMargin() + $indent, $this->text_y - $height),
                     new Point($this->getRightMargin(), $this->text_y - $height));
     $this->newLine();
+    
+    $this->restoreState();
   }
   
   // raw graphics
   
-  public function setColor($name)
+  public function setColor($color)
   {
-    $this->setRGBColor($this->getRGBColor($name));
+    if (is_string($color)) {
+      $this->color = $this->nameToColor($color);
+    } else {
+      $this->color = $color;
+    }
+    
+    //$this->debug("setColor:{$this->color}");
+    
+    $this->pdf->setrgbcolor($this->color->red, 
+                            $this->color->green, 
+                            $this->color->blue);
   }  
   
-  public function setRGBColor(RGBColor $color)
-  {
-    $this->pdf->setrgbcolor($color->red, $color->green, $color->blue);
-  } 
-
-  public function getRGBColor($name)
+  public function nameToColor($name)
   {
     $s = strtolower($name);
     $color = $this->$s;
@@ -230,8 +318,8 @@ class PdfCanvas
   
   public function moveToXY($x, $y)
   {
-    $this->debug("moveToXY($x,$y)");
-    $this->pdf->moveto($x, $this->translateY($y));
+    //$this->debug("moveToXY($x,$y)");
+    $this->pdf->moveto($x, $this->invertY($y));
   }
   
   public function lineToPoint($p)
@@ -241,8 +329,8 @@ class PdfCanvas
   
   public function lineToXY($x, $y)
   {
-    $this->debug("lineToXY($x,$y)");
-    $this->pdf->lineto($x, $this->translateY($y));
+    //$this->debug("lineToXY($x,$y)");
+    $this->pdf->lineto($x, $this->invertY($y));
   }
   
   public function stroke()
@@ -258,9 +346,9 @@ class PdfCanvas
   {
     for($i=0;$i<$count;$i++) {
       $this->text_y += $this->getLineHeight();
-      $this->$column_x = $this->getLeftMargin();
+      $this->column_x = $this->getLeftMargin();
       
-      if ($this->text_y > $this->translateY($this->bottom_margin_width)) {
+      if ($this->text_y > $this->invertY($this->bottom_margin_width)) {
         $this->newPage();
       }
     }
@@ -283,7 +371,7 @@ class PdfCanvas
     return $this->font_size + $this->line_spacing;
   }
   
-  public function translateY($y)
+  public function invertY($y)
   {
     // Note:
     // Graphs are drawn bottom to top (0,0 is bottom-left corner)
@@ -358,29 +446,39 @@ class PdfCanvas
   // FONTS
   //
   
-  public function setTextFont()
+  public function setTextFont($size=$this->text_font_size, $color="black")
   {
-    $this->setFont($this->text_font_name, $this->text_font_size);
+    $this->setFontAndColor($this->text_font_name, 
+                           $size, 
+                           $color);
   }
   
-  public function setDataFont()
+  public function setDataFont($size=$this->data_font_size, $color="black")
   {
-    $this->setFont($this->data_font_name, $this->data_font_size);
+    $this->setFontAndColor($this->data_font_name, 
+                           $size, 
+                           $color);
   }
 
-  public function setSectionFont()
+  public function setSectionFont($size=$this->section_font_size, $color="black")
   {
-    $this->setFont($this->section_font_name, $this->section_font_size);
+    $this->setFontAndColor($this->section_font_name, 
+                           $size, 
+                           $color);
   }
 
-  public function setSubSectionFont()
+  public function setSubSectionFont($size=$this->subsection_font_size, $color="black")
   {
-    $this->setFont($this->subsection_font_name, $this->subsection_font_size);
+    $this->setFontAndColor($this->subsection_font_name, 
+                           $size, 
+                           $color);
   }
   
   public function setHeaderFont()
   {
-    $this->setFont($this->header_font_name, $this->header_font_size);
+    $this->setFontAndColor($this->header_font_name, 
+                           $this->header_font_size, 
+                           "black");
   }
   
   public function setFont($font_name, $font_size)
@@ -389,28 +487,34 @@ class PdfCanvas
     //  return;
     
     $font = $this->pdf->load_font($font_name, "", "");
+    if (! $font) {
+      $this->debug("Font not found: $font_name");
+    } else {
+      $this->font = $font;
+      $this->font_name = $font_name;
+      $this->font_size = $font_size;
     
-    $this->font = $font;
-    $this->font_name = $font_name;
-    $this->font_size = $font_size;
+      //$this->debug("setFont:$font_name,$font_size");
     
-    $this->debug("setFont:{$this->font}");
-    
-    $this->pdf->setfont($this->font, $this->font_size);
+      $this->pdf->setfont($this->font, $this->font_size);
+    }
   }
   
   public function setFontAndColor($font_name, $font_size, $color_name)
   {
     $this->setFont($font_name, $font_size);
     $this->setColor($color_name);
-  }
-  
+  } 
+   
   //
   // headers and footers
   //
   
   public function writeHeaders()
   {
+    //$this->debug("writeHeaders");
+    
+    $this->saveState();
     $this->setHeaderFont();
 
     $line = ($this->top_margin_width/2) + ($this->font_size/2);
@@ -433,11 +537,14 @@ class PdfCanvas
                               $this->header_right_text);
     }
 
-    $this->setTextFont();
+    $this->restoreState();
   }
   
   public function writeFooters()
   {
+    //$this->debug("writeFooters");
+    
+    $this->saveState();
     $this->setHeaderFont();
     
     $line = $this->page_height - ($this->bottom_margin_width/2) + ($this->font_size/2);
@@ -464,36 +571,42 @@ class PdfCanvas
                               $this->footer_right_text);
     }
     
-    $this->setTextFont();
+    $this->restoreState();
   }  
   
   //
   // sections
   //
 
-  public function writeSection($text)
+  public function writeSection($text, $new_page = true)
   {
-    if ($this->page_number > 1)
+    if ($new_page)
       $this->newPage();
     
     $this->header_right_text = $text;
     
+    $this->saveState();
     $this->setSectionFont();
     $this->writeTextLine($text);
 
     $this->setTextFont();
-    $this->writeHrule();
+    $this->writeHrule(0,2);
+    
+    $this->restoreState();
   }
   
   public function writeSubsection($text)
   {
+    $this->saveState();
     $this->setSubSectionFont();
     
     $this->newLine();
     $this->writeTextLine($text);
-    $this->setTextFont();
     
-    $this->writeHrule();
+    $this->setTextFont();
+    $this->writeHrule(0,1);
+    
+    $this->restoreState();
   }
   
   // 
@@ -534,6 +647,16 @@ class PdfCanvas
     return $this->writeTextOpts(array('indent'=>$x), $text);
   }
   
+  public function writeTextRight($width, $text)
+  {
+    return $this->writeTextOpts(array('width'=>$width,'align'=>'r'), $text);
+  }
+  
+  public function writeTextCenter($width, $text)
+  {
+    return $this->writeTextOpts(array('width'=>$width,'align'=>'c'), $text);
+  }
+  
   public function writeTextLineIndent($x, $text)
   {
     return $this->writeTextOpts(array('indent'=>$x,'newline'=>true), $text);
@@ -568,7 +691,7 @@ class PdfCanvas
     if ($line_count > 1) {
       $ret = 0;
       for($i=0; $i<$line_count; $i++) {
-        $this->debug("RECURS");
+        //$this->debug("RECURS");
         $ret = $this->writeTextOpts(array(
                                    'x'=>$x,
         													 'indent'=>$indent,
@@ -578,7 +701,7 @@ class PdfCanvas
                                    'block'=>false), $lines[$i]);
 
         if ($newline || $i < ($line_count -1)) {
-          $this->debug("<newline>");
+          //$this->debug("<newline>");
           $ret = $this->newLine();
         }
       }
@@ -604,6 +727,10 @@ class PdfCanvas
         $x_pos = $x + $indent;
       }
       
+      // this is a hack... just in case text_y gets too far down the page
+      if ($this->text_y >= $this->getBottomMargin())
+        $this->newPage();
+      
       $point = $this->writeTextXY($x_pos,
                                   $this->text_y,
                                   $text);
@@ -623,9 +750,9 @@ class PdfCanvas
   {
     $this->writeTextOpts(array('width'=>$width, 
     	                         'align'=>$align,
-                               'x'=>$this->$column_x), $text);
+                               'x'=>$this->column_x), $text);
     
-    $this->$column_x = $this->$column_x + $width + $this->column_spacing;
+    $this->column_x = $this->column_x + $width + $this->column_spacing;
   }
   
   public function writeTextLineCenter($text)
@@ -703,7 +830,7 @@ class PdfCanvas
   {
     $this->debug("writeTextXY:$x,$y,$text");
     
-    $this->pdf->set_text_pos($x, $this->translateY($y));
+    $this->pdf->set_text_pos($x, $this->invertY($y));
     $this->pdf->show($text);
     
     return new Point(($x + $this->getTextWidth($text)), $y);
@@ -722,30 +849,33 @@ class PdfCanvas
   //
   // graphs
   //
-
-  public function startGraph($title, $x_range, $y_range)
+  
+  public function allocateGraphSpace($rows = $this->graph_rows, $columns = $this->graph_columns)
   {
-    // start a new page if this page is full
-    if ($this->graph_index == ($this->graph_rows * $this->graph_columns))
-      $this->newPage();
-      
-    /*
-    $this->graph_width = (500) / $this->graph_cols;
-    $this->graph_height = (660) / $this->graph_rows;
-
-    $x_index = (int) ($this->graph_index % $this->graph_cols);
-    $y_index = (int) ($this->graph_index / $this->graph_cols);
-
-    $this->graph_x = 50 + $x_index * $this->graph_width;
-    $this->graph_y = 820 - ($y_index + 1) * $this->graph_height;      
-    */
-      
-    // calcuate the vizible size for this graph based on the amount of
-    // usable space on the page and the number of graphs per row/column
+    $this->graph_space_start_y = $this->text_y;
+    
+    $this->graph_rows = $rows;
+    $this->graph_columns = $columns;
+    
+    // calcuate the vizible size for each graph based on the amount of
+    // remaining space on the page and the number of rows and columns
+    
     $x_size = ($this->getLineWidth() / $this->graph_columns) - ($this->graph_padding_x * 2);
     $y_size = ($this->getPageRemaining() / $this->graph_rows) - ($this->graph_padding_y * 2) - $this->legend_size;
       
     $this->graph_size = new Size($x_size, $y_size);
+    
+    $this->debug("allocateGraphSpace:rows={$this->graph_rows},columns={$this->graph_columns},graph_size={$this->graph_size}");
+  }
+
+  public function startGraph($title, $x_range, $y_range)
+  {
+    if(! $this->graph_size)
+      $this->allocateGraphSpace();
+    
+    // start a new page if this page is full
+    if ($this->graph_index == ($this->graph_rows * $this->graph_columns))
+      $this->newPage();
 
     // calculate the origin for this graph (bottom-left coordinate)
     $index = $this->graph_index;
@@ -753,32 +883,24 @@ class PdfCanvas
     $x_index = (int) ($index % $this->graph_columns);
     $y_index = (int) ($index / $this->graph_columns);
     
-    $this->debug("x_index=$x_index");
-    $this->debug("y_index=$y_index");
-    
     $x_origin = $this->getLeftMargin() + ($this->graph_padding_x) + ($x_index * ($this->graph_size->width + ($this->graph_padding_x * 2)));
-    $y_origin = $this->text_y + $this->graph_padding_y + ($this->graph_size->height + $y_index * ($this->graph_size->height + $this->legend_size + ($this->graph_padding_y * 2)));
-    $y_origin = $this->translateY($y_origin);
-    
-    //($this->graph_padding_y) - ($this->text_y + ($y_index * $this->graph_size->height)) - $this->graph_size->height - (($y_index*2) * $this->graph_padding_y) - ($y_index * $this->legend_size);
-    
-    //$x_origin += ($this->graph_padding_x / 2);
+    $y_origin = $this->graph_space_start_y + $this->graph_padding_y + ($this->graph_size->height + $y_index * ($this->graph_size->height + $this->legend_size + ($this->graph_padding_y * 2)));
+    $y_origin = $this->invertY($y_origin);
 
     $this->graph_origin = new Point($x_origin, $y_origin);
 
     // set a flag that we are currently writing a graph - this change the 
-    // y orientation from top/bottom to bottom/top (see translateY)
+    // y orientation from top/bottom to bottom/top (see invertY)
     $this->in_graph = true;
     
     // increment the graphs counter for this page
     $this->graph_index++;
                                       
     // save the previous pdf settings (old origin)
-    $this->pdf->save();
+    $this->saveState();
     
     // tell pdf to translate our coordinates based on the origin of the graph
-    //$this->pdf->translate($this->graph_origin->x, $this->translateY($this->graph_origin->y));
-    $this->pdf->translate($this->graph_origin->x, $this->graph_origin->y);
+    $this->translate($this->graph_origin);
                                     
     // construct the new graph
     $this->graph = new PdfCanvasGraph($this,
@@ -789,6 +911,10 @@ class PdfCanvas
                                       
     $this->debug("startGraph:origin={$this->graph_origin},index=$index,graph={$this->graph}");
                                       
+    if (! $this->graph->valid) {
+      $this->debug(" graph $title is invalid:size={$this->graph_size},x_range={$x_range},y_range={$y_range}");
+    }
+    
     return $this->graph;
   }
 
@@ -796,14 +922,16 @@ class PdfCanvas
   {
     $this->debug("endGraph:{$this->graph->title}");
     
-    unset($this->graph);
-    
     // restore the old origin
-    $this->pdf->restore();
+    $this->restoreState();
     
-    // reset the flat that we are currently writing a graph - this changes the 
-    // y orientation from bottom/top to top/bottom (see translateY)
+    // reset the flag that we are currently writing a graph - this changes the 
+    // y orientation from bottom/top to top/bottom (see invertY)
     $this->in_graph = false;
+    
+    $this->text_y = $this->invertY($this->graph_origin->y - $this->legend_size - $this->graph_padding_y);
+    
+    unset($this->graph);
   }
 }
 
@@ -921,6 +1049,50 @@ class Size
   public function __toString()
   {
     return "Size({$this->width},{$this->height})";
+  }
+}
+
+$state_counter = 1;
+  
+class GraphicsState
+{
+  private $id;
+  
+  private $page_number;
+  private $font_name;
+  private $font_size;
+  private $color;
+  private $line_width;
+  private $origin;
+  // there's more we could add but these are the only ones we use right now
+  
+  public function GraphicsState($page_number, $font_name, $font_size, $color, $line_width, $origin = null)
+  {
+    global $state_counter;
+    
+    $this->page_number = $page_number;
+    $this->font_name = $font_name;
+    $this->font_size = $font_size;
+    $this->color = $color;
+    $this->line_width = $line_width;
+    $this->origin = $origin;
+    
+    $this->id = $state_counter++;
+  }
+
+  public function __set($name, $value)
+  {
+    $this->$name = $value;
+  }
+
+  public function __get($name)
+  {
+    return $this->$name;
+  }
+
+  public function __toString()
+  {
+    return "GraphicsState(id={$this->id},page_number={$this->page_number},font_name={$this->font_name},font_size={$this->font_size},color={$this->color},line_width={$this->line_width},origin={$this->origin})";
   }
 }
 

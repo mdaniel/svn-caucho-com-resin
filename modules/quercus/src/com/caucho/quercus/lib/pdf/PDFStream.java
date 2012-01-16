@@ -217,11 +217,9 @@ public class PDFStream {
 
   public void moveTo(double x, double y)
   {
-    if (_x != x || _y != y) {
-      _x = x;
-      _y = y;
-      _hasGraphicsPos = false;
-    }
+    _x = x;
+    _y = y;
+    _hasGraphicsPos = false;
   }
 
   public static int STROKE = 1;

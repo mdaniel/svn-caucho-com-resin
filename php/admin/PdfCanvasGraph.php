@@ -42,7 +42,7 @@ class PdfCanvasGraph
       $this->xOffsetPixels = $this->x_range->start * $this->ppu->width;
       $this->yOffsetPixels = $this->y_range->start * $this->ppu->height;
     } else {
-      $this->setInvalid("pixels per unit was width={$this->ppu->width} height={$this->ppu->height}");
+      $this->setInvalid("ppu={$this->ppu}");
     }
   }
 
@@ -80,50 +80,27 @@ class PdfCanvasGraph
     if ($convertedPoint->y > 1000 || $convertedPoint->y < 0)
        $this->setInvalid("Point out of range y axis: {$convertedPoint->y}");
        
-    $this->debug("convertPoint $point to $convertedPoint");
+    //$this->debug("convertPoint $point to $convertedPoint");
     
     return $convertedPoint;
   }
   
-  public function setFont($font_name, $font_size)
-  {
-    $this->canvas->setFont($font_name, $font_size);
-  }
-
-  public function setColor($name)
-  {
-    $this->canvas->setColor($name);
-  }
-  
-  public function setRGBColor($color)
-  {
-    $this->canvas->setRGBColor($color);
-  }
-  
-  public function setFontAndColor($font_name, $font_size, $color_name)
-  {
-    $this->canvas->setFontAndColor($font_name, $font_size, $color_name);
-  }
-  
-  public function setLineWidth($width)
-  {
-    $this->canvas->setLineWidth($width);
-  }
-    
   public function drawTitle($color) 
   {
     $this->debug("drawTitle:color=$color");
     
-    $this->setFontAndColor("Helvetica", 12, $color);
+    $this->canvas->setFontAndColor("Helvetica", 12, $color);
 
     $x = 0.0;
     $y = $this->pixel_size->height + $this->canvas->getLineHeight()/2;
     
-    if ($this->valid) {
-       $this->canvas->writeTextXY($x, $y, $this->title);
-    } else {
-      $this->debug("drawTitle failed: no data");
-      $this->canvas->writeTextXY($x, $y, "{$this->title} no data");
+    $this->canvas->writeTextXY($x, $y, $this->title);
+    
+    if (! $this->valid) {
+      $x = $this->pixel_size->width/2;
+      $y = $this->pixel_size->height/2;
+      $this->canvas->setFontAndColor("Courier-Bold", 8, "med_grey");
+      $this->canvas->writeTextXYCenter($x, $y, "NO DATA");
     }
   }
 
@@ -148,7 +125,6 @@ class PdfCanvasGraph
       }
     
       $row = floor($index / 2);
-      
       $yloc = ((($row) * $yinc) + $initialYLoc);
 
       $this->drawLegend($legend->color, $legend->name, new Point($xloc, $yloc));
@@ -174,19 +150,19 @@ class PdfCanvasGraph
     $this->canvas->lineToXY($x+15, $y+2.5);
     $this->canvas->stroke();
 
-    $this->setFontAndColor("Helvetica-Bold", 6, "black");
+    $this->canvas->setFontAndColor("Helvetica", 7, "black");
     $this->canvas->writeTextXY($x+20, $y, $name);
   }
   
-  public function drawLineGraph($dataLine, $rgbColor, $lineWidth)
+  public function drawLineGraph($dataLine, $color, $lineWidth)
   {
     if (! $this->valid)
        return;
     
-    $this->debug("drawLineGraph:dataLine=$dataLine,rgbColor=$rgbColor,lineWidth=$lineWidth");
+    $this->debug("drawLineGraph:dataLine=$dataLine,color=$color,lineWidth=$lineWidth");
     
-    $this->setRGBColor($rgbColor);
-    $this->setLineWidth($lineWidth);
+    $this->canvas->setColor($color);
+    $this->canvas->setLineWidth($lineWidth);
     
     $this->canvas->moveToPoint($this->convertPoint($dataLine[0]));
 
@@ -207,7 +183,7 @@ class PdfCanvasGraph
     $this->debug("drawGrid:color=$color");
     
     $this->canvas->setLineWidth(1);
-    $this->setColor($color);
+    $this->canvas->setColor($color);
     
     $width = (double) $this->pixel_size->width;
     $height = (double) $this->pixel_size->height;
@@ -222,11 +198,11 @@ class PdfCanvasGraph
 
   public function drawGridLines($xstep, $ystep, $color)
   {
-    $this->setLineWidth(0.5);
-    $this->setColor($color);
+    $this->canvas->setLineWidth(0.5);
+    $this->canvas->setColor($color);
     
-    if (! $ystep)
-      $this->setInvalid("No ystep was passed");
+//    if (! $ystep)
+//      $this->setInvalid("No ystep was passed");
 
     if (!$this->valid)
        return;
@@ -256,7 +232,7 @@ class PdfCanvasGraph
       $this->canvas->moveToXY(0.0, $currentY);
       $this->canvas->lineToXY($width, $currentY);
       $this->canvas->stroke();
-    }    
+    }
   }
 
   public function drawXGridLabels($xstep, $func=null)
@@ -269,7 +245,7 @@ class PdfCanvasGraph
 
     $this->debug("drawXGridLabels:xstep=$xstep,func=$func,width=$width,xstep_width=$xstep_width");
     
-    $this->setFontAndColor("Helvetica", 9, "black");
+    $this->canvas->setFontAndColor("Helvetica", 9, "black");
     
     for ($index = 0; $width >= ($index*$xstep_width); $index++) {
       $currentX = $index*$xstep_width;
@@ -294,7 +270,7 @@ class PdfCanvasGraph
 
     $this->debug("drawYGridLabels:ystep=$ystep,func=$func,xpos=$xpos");
 
-    $this->setFontAndColor("Helvetica", 9, "black");
+    $this->canvas->setFontAndColor("Helvetica", 9, "black");
     $height = (double) $this->pixel_size->height;
 
     $step_width = ($ystep) * $this->ppu->height;
@@ -341,7 +317,6 @@ class GraphData
   private $name;
   private $dataLine;
   private $max;
-  private $yincrement;
   private $color;
 
   public function __set($name, $value)
@@ -356,21 +331,7 @@ class GraphData
   
   public function __toString() 
   {
-    return "GraphData(name={$this->name},dataLine={$this->dataLine},max={$this->max},yincrement={$this->yincrement},color=$color)";
-  }
-
-  public function validate() 
-  {
-    if (sizeof($this->dataLine) == 0) {
-      return false;
-    }
-
-    if ($this->max == 0) {
-      $this->max=10;
-      $this->yincrement=1;
-    }
-    
-    return true;
+    return "GraphData(name={$this->name},dataLine={$this->dataLine},max={$this->max},color=$color)";
   }
 }
 
