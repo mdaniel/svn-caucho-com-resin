@@ -115,7 +115,7 @@ public class HmtpReader {
 
     Hessian2Input hIn = _hIn;
     
-    hIn.init(is);
+    hIn.initPacket(is);
 
     int type = hIn.readInt();
     String to = readAddress(hIn);
