@@ -332,12 +332,12 @@ public class PDFStream {
       _hasTextPos = true;
     }
 
-    println("(" + text + ") Tj");
+    println("(" + pdfEscapeText(text) + ") Tj");
   }
 
   public void continue_text(String text)
   {
-    println("(" + text + ") T*");
+    println("(" + pdfEscapeText(text) + ") T*");
   }
 
   public boolean fit_image(PDFImage img)
@@ -427,5 +427,34 @@ public class PDFStream {
   {
     _tempStream.writeToStream(os);
     _tempStream.destroy();
+  }
+  
+  public static String pdfEscapeText(String text)
+  {
+    StringBuilder sb = new StringBuilder();
+    
+    for(char c : text.toCharArray()) {
+      if (c == '(' || c == ')' || c == '\\') {
+        sb.append('\\');
+        sb.append(c);
+      } else if (c == 0x0A) {
+        sb.append("\\n");
+      } else if (c == 0x0D) {
+        sb.append("\\r");
+      } else if (c == 0x09) {
+        sb.append("\\t");
+      } else if (c == 0x08) {
+        sb.append("\\b");
+      } else if (c == 0xFF) {
+        sb.append("\\f");
+      } else if (c == 0xFF) {
+        sb.append("\\f");
+      } else {
+        sb.append(c);
+      }
+      // TODO: replace other unprintable chars with octal value
+    }
+    
+    return sb.toString();
   }
 }

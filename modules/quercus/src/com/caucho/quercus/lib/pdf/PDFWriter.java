@@ -87,25 +87,22 @@ public class PDFWriter {
     println("#\u00c0\u00c3\u00c4\u00c9");
   }
 
-  public void writeCatalog(int catalogId, int pagesId,
-                           ArrayList<Integer> pagesList, int pageCount)
+  public void writeCatalog(int catalogId, 
+                           int rootId, 
+                           ArrayList<Integer> pagesList, 
+                           int pageCount)
     throws IOException
   {
-    int pageId = pagesId;
-
-    if (pagesList.size() > 0)
-      pageId = allocateId(1);
-
     beginObject(catalogId);
 
     println("  << /Type /Catalog");
-    println("     /Pages " + pageId + " 0 R");
+    println("     /Pages " + rootId + " 0 R");
     println("  >>");
 
     endObject();
 
     if (pagesList.size() > 0) {
-      beginObject(pageId);
+      beginObject(rootId);
 
       println("  << /Type /Pages");
       print("     /Kids [");
@@ -125,7 +122,7 @@ public class PDFWriter {
     }
   }
 
-  public void writePageGroup(int id, ArrayList<PDFPage> pages)
+  public void writePageGroup(int id, int parentId, ArrayList<PDFPage> pages)
     throws IOException
   {
     beginObject(id);
@@ -141,6 +138,8 @@ public class PDFWriter {
 
     println("]");
     println("     /Count " + pages.size());
+    println("     /Parent " + parentId + " 0 R");
+    
     println("  >>");
     endObject();
 
@@ -173,7 +172,7 @@ public class PDFWriter {
 
     println("xref");
     println("0 " + (_xref.size() + 1) + "");
-    println("0000000000 65535 f");
+    print("0000000000 65535 f \n");
 
     for (int i = 0; i < _xref.size(); i++)
       _xref.get(i).write();
@@ -332,10 +331,9 @@ public class PDFWriter {
       _out.print(_offset / 10L % 10);
       _out.print(_offset % 10);
 
-      _out.print(' ');
-      _out.println("00000 n");
+      _out.print(" 00000 n \n");
 
-      _offset += 19;
+      _offset += 20;
     }
   }
 }

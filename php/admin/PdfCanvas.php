@@ -100,21 +100,21 @@ class PdfCanvas
     
     $this->pdf->begin_document();
     
-    $this->newPage(false);
+    $this->newPage();
   }
   
-  public function newPage($end_page = true)
+  public function newPage()
   {
     $this->debug("newPage");
     
-    if ($end_page && $this->has_page)
+    if ($this->has_page)
     {
-      $this->debug("end_page");
+      $this->saveState();
       
       $this->writeHeaders();
       $this->writeFooters();
       
-      $this->saveState();
+      //$this->debug("end_page");
       $this->pdf->end_page();
     }
     
@@ -130,8 +130,6 @@ class PdfCanvas
       $this->setTextFont();
       $this->setLineWidth(1);
       $this->origin = new Point(0,0);
-      
-      $this->saveState();
     } else {
       $this->restoreState();    
     }
@@ -197,10 +195,11 @@ class PdfCanvas
     //  System::out->println($text);
   }
   
-  public function saveState()
+  public function saveState($pdf_save = false)
   {
-    // doh!  our pdfstream does not save state between pages!
-    if ($this->has_page) {
+    // pdf does not save state between pages
+    if ($pdf_save) {
+      // $this->debug("save");
       $this->pdf->save();
     }
     
@@ -217,11 +216,11 @@ class PdfCanvas
     $this->debug("saveState:stack_size=$stack_size,$state");
   }
   
-  public function restoreState()
+  public function restoreState($pdf_restore = false)
   {
     // doh!  our pdfstream does not save state between pages!
-    if ($this->has_page) {
-      //$this->debug("restoreState");
+    if ($pdf_restore) {
+      //$this->debug("restore");
       $this->pdf->restore();
     }
     
@@ -514,7 +513,6 @@ class PdfCanvas
   {
     //$this->debug("writeHeaders");
     
-    $this->saveState();
     $this->setHeaderFont();
 
     $line = ($this->top_margin_width/2) + ($this->font_size/2);
@@ -536,15 +534,12 @@ class PdfCanvas
                               $line,
                               $this->header_right_text);
     }
-
-    $this->restoreState();
   }
   
   public function writeFooters()
   {
     //$this->debug("writeFooters");
     
-    $this->saveState();
     $this->setHeaderFont();
     
     $line = $this->page_height - ($this->bottom_margin_width/2) + ($this->font_size/2);
@@ -570,8 +565,6 @@ class PdfCanvas
                               $line,
                               $this->footer_right_text);
     }
-    
-    $this->restoreState();
   }  
   
   //
@@ -897,7 +890,7 @@ class PdfCanvas
     $this->graph_index++;
                                       
     // save the previous pdf settings (old origin)
-    $this->saveState();
+    $this->saveState(true);
     
     // tell pdf to translate our coordinates based on the origin of the graph
     $this->translate($this->graph_origin);
@@ -923,7 +916,7 @@ class PdfCanvas
     $this->debug("endGraph:{$this->graph->title}");
     
     // restore the old origin
-    $this->restoreState();
+    $this->restoreState(true);
     
     // reset the flag that we are currently writing a graph - this changes the 
     // y orientation from bottom/top to top/bottom (see invertY)

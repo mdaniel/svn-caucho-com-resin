@@ -816,30 +816,37 @@ function findStatByStat($theStat)
 
 function admin_pdf_heap_dump()
 {
-  $heap_dump = admin_pdf_snapshot("Resin|HeapDump");
-  if (! $heap_dump) {
+  global $g_canvas;
+  
+  $g_canvas->writeSection("Heap Dump");
+  
+  $dump = admin_pdf_snapshot("Resin|HeapDump");
+  if (! $dump) {
     $g_canvas->writeTextLineIndent(20, "No Data");
     return;
   }
+  
+  $heap =& $dump["heap"];
+  if (! $heap || ! sizeof($heap))
+    return;
     
-  $heap =& $heap_dump["heap"];
+  $g_canvas->setFont("Courier-Bold", 8);
+    
+  $create_time = $dump["create_time"];
+  $g_canvas->writeTextLineIndent(10, "Created: " . $create_time);
+  $g_canvas->newLine();
 
-  admin_pdf_selected_heap_dump($heap, "Heap Dump", 100);
+  admin_pdf_selected_heap_dump($heap, 100);
 
   //$class_loader_heap = heap_select_classes($heap_dump["heap"]);
   //admin_pdf_selected_heap_dump($class_loader_heap, "ClassLoader Heap Dump", 100);
 }
 
-function admin_pdf_selected_heap_dump($heap, $title, $max)
+function admin_pdf_selected_heap_dump($heap, $max)
 {
   global $g_canvas;
   
-  if (! $heap || ! sizeof($heap))
-    return;
-
   uksort($heap, "heap_descendant_cmp");
-
-  $g_canvas->writeSection($title);
 
   admin_pdf_heap_dump_header();
 
