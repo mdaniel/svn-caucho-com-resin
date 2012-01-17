@@ -1,4 +1,4 @@
-/*
+  /*
  * Copyright (c) 1998-2012 Caucho Technology -- all rights reserved
  *
  * This file is part of Resin(R) Open Source
@@ -44,6 +44,7 @@ import javax.servlet.http.HttpServletResponse;
 
 import com.caucho.config.ConfigException;
 import com.caucho.jmx.Jmx;
+import com.caucho.jmx.MXAction;
 import com.caucho.jmx.MXName;
 import com.caucho.management.server.ManagementMXBean;
 import com.caucho.util.L10N;
@@ -94,17 +95,20 @@ public class AdminRestServlet extends HttpServlet {
       out.println(L.l("admin requires a secure connection"));
       return;
     }
-    
-    String actionName = req.getParameter("action");
-    
-    if (actionName == null) {
+
+    String pathInfo = req.getPathInfo();
+
+    if (pathInfo == null || "/".equals(pathInfo)) {
       res.setStatus(500);
       res.setContentType("text/plain");
-      
+
       PrintWriter out = res.getWriter();
-      out.println(L.l("action parameter is required"));
+      out.println(L.l("action is required"));
+
       return;
     }
+
+    final String actionName = pathInfo.substring(1);
     
     Action action = _actionMap.get(actionName);
     
@@ -125,11 +129,13 @@ public class AdminRestServlet extends HttpServlet {
     Class<?> cl = ManagementMXBean.class;
     
     for (Method method : cl.getDeclaredMethods()) {
-      String name = method.getName();
-      
-      if (name.startsWith("get") || name.startsWith("set"))
+      MXAction mxAction = method.getAnnotation(MXAction.class);
+
+      if (mxAction == null)
         continue;
-      
+
+      String name = mxAction.value();
+
       Action action = new Action(method);
       
       _actionMap.put(name, action);
@@ -248,7 +254,21 @@ public class AdminRestServlet extends HttpServlet {
       out.println(value);
     }
   }
-  
+
+  static class BooleanMarshal extends Marshal
+  {
+    @Override
+    public Object marshal(HttpServletRequest request, String name)
+    {
+      String param = request.getParameter(name);
+
+      if (param != null)
+        return Boolean.parseBoolean(param);
+      else
+        return Boolean.FALSE;
+    }
+  }
+
   static class StringMarshal extends Marshal {
     @Override
     public Object marshal(HttpServletRequest request, String name)
@@ -323,7 +343,8 @@ public class AdminRestServlet extends HttpServlet {
     _marshalMap.put(Integer.class, new IntegerMarshal());
     _marshalMap.put(Long.class, new LongMarshal());
     _marshalMap.put(InputStream.class, new InputStreamMarshal());
-    
+    _marshalMap.put(boolean.class, new BooleanMarshal());
+
     introspectManagementOperations();
   }
 }

@@ -29,13 +29,24 @@
 
 package com.caucho.server.resin;
 
+import com.caucho.bam.actor.ActorSender;
+import com.caucho.bam.actor.LocalActorSender;
+import com.caucho.boot.WatchdogStatusQuery;
+import com.caucho.cloud.bam.BamSystem;
+import com.caucho.cloud.network.NetworkClusterSystem;
+import com.caucho.cloud.topology.CloudServer;
+import com.caucho.jmx.MXName;
+import com.caucho.management.server.AbstractManagedObject;
+import com.caucho.management.server.ManagementMXBean;
+import com.caucho.server.admin.HmuxClientFactory;
+import com.caucho.server.admin.JmxDumpQuery;
+import com.caucho.server.admin.JmxListQuery;
+
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
-
-import com.caucho.management.server.AbstractManagedObject;
-import com.caucho.management.server.ManagementMXBean;
+import java.io.Serializable;
 
 public class ManagementAdmin extends AbstractManagedObject
   implements ManagementMXBean
@@ -57,7 +68,7 @@ public class ManagementAdmin extends AbstractManagedObject
   {
     return null;
   }
-  
+
   /**
    * Test interface
    */
@@ -66,21 +77,95 @@ public class ManagementAdmin extends AbstractManagedObject
   {
     return "hello, world";
   }
-  
+
+  @Override
+  public String listJmx(String serverId,
+                        String pattern,
+                        boolean isPrintAttributes,
+                        boolean isPrintValues,
+                        boolean isPrintOperations,
+                        boolean isPrintAllBeans,
+                        boolean isPrintPlatformBeans)
+  {
+    JmxListQuery query = new JmxListQuery(pattern,
+                                          isPrintAttributes,
+                                          isPrintValues,
+                                          isPrintOperations,
+                                          isPrintAllBeans,
+                                          isPrintPlatformBeans);
+
+    return (String) query(serverId, query);
+  }
+
+  @Override
+  public String dumpJmx(@MXName("server") String serverId)
+  {
+    JmxDumpQuery query = new JmxDumpQuery();
+
+    return (String) query(serverId, query);
+  }
+
+  @Override
+  public String getStatus(@MXName("server") String serverId)
+  {
+    WatchdogStatusQuery query = new WatchdogStatusQuery();
+
+    return (String) query(serverId, query);
+  }
+
+  private CloudServer getServer(String server)
+  {
+    CloudServer cloudServer;
+
+    if (server == null)
+      cloudServer = NetworkClusterSystem.getCurrent().getSelfServer();
+    else cloudServer = NetworkClusterSystem.getCurrent()
+                                           .getSelfServer()
+                                           .getPod()
+                                           .findServer(
+                                             server);
+
+    return cloudServer;
+  }
+
+  private Object query(String serverId, Serializable query)
+  {
+    final ActorSender sender;
+
+    CloudServer server = getServer(serverId);
+
+    if (server.isSelf()) {
+      sender = new LocalActorSender(BamSystem.getCurrentBroker(), "");
+    }
+    else {
+      String authKey = Resin.getCurrent().getResinSystemAuthKey();
+
+      HmuxClientFactory hmuxFactory
+        = new HmuxClientFactory(server.getAddress(),
+                                server.getPort(),
+                                "",
+                                authKey);
+
+      sender = hmuxFactory.create();
+    }
+
+    return sender.query("manager@resin.caucho", query);
+  }
+
   public InputStream test(String value, InputStream is)
     throws IOException
   {
     ByteArrayOutputStream out = new ByteArrayOutputStream();
-    
+
     out.write(value.getBytes());
     out.write('\n');
-    
+
     int ch;
-    
+
     while ((ch = is.read()) >= 0) {
       out.write(ch);
     }
-    
+
     return new ByteArrayInputStream(out.toByteArray());
   }
 }

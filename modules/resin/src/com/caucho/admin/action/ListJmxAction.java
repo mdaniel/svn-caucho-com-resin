@@ -88,7 +88,7 @@ public class ListJmxAction extends AbstractJmxAction implements AdminAction
         beans.add(mbean);
 
         resultBuilder.append(mbean).append('\n');
-        if (printAttributes) {
+        if (printAttributes || printValues) {
           resultBuilder.append("  attributes:\n");
           MBeanAttributeInfo []attributes = server.getMBeanInfo(mbean)
                                                   .getAttributes();

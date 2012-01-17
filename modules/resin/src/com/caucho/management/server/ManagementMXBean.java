@@ -29,24 +29,45 @@
 
 package com.caucho.management.server;
 
+import com.caucho.jmx.Description;
+import com.caucho.jmx.MXAction;
+import com.caucho.jmx.MXName;
+
 import java.io.IOException;
 import java.io.InputStream;
 
-import com.caucho.jmx.Description;
-import com.caucho.jmx.MXName;
-
 /**
  * Management facade for Resin, used for REST.
- *
+ * <p/>
  * <pre>
  * resin:type=Management
  * </pre>
  */
 @Description("Management Facade for Resin")
-public interface ManagementMXBean extends ManagedObjectMXBean {
+public interface ManagementMXBean extends ManagedObjectMXBean
+{
   @Description("hello, world test interface")
+  @MXAction("hello")
   public String hello();
-  
+
+  @Description("Produces a complete dump of JMX objects and values")
+  @MXAction("jmx-dump")
+  public String dumpJmx(@MXName("server") String value);
+
+  @Description("lists the JMX MBeans in a Resin server (Resin Pro)")
+  @MXAction("jmx-list")
+  public String listJmx(@MXName("server") String serverId,
+                        @MXName("pattern") String pattern,
+                        @MXName("print-attributes") boolean isPrintAttributes,
+                        @MXName("print-values") boolean isPrintValues,
+                        @MXName("print-operations") boolean isPrintOperations,
+                        @MXName("print-all-beans") boolean isPrintAllBeans,
+                        @MXName("print-platform-beans") boolean isPrintPlatformBeans);
+
+  @Description("Prints status of a server")
+  @MXAction("status")
+  public String getStatus(@MXName("server") String value);
+
   // XXX: temporary example until we have a real one
   public InputStream test(@MXName("test-param") String value,
                           InputStream is)
