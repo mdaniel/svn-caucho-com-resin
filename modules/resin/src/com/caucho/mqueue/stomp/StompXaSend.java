@@ -29,51 +29,30 @@
 
 package com.caucho.mqueue.stomp;
 
-import javax.annotation.PostConstruct;
-
-import com.caucho.network.listen.Protocol;
-import com.caucho.network.listen.ProtocolConnection;
-import com.caucho.network.listen.SocketLink;
+import com.caucho.vfs.TempBuffer;
 
 /**
- * Custom serialization for the cache
+ * xa item for a send
  */
-public class StompProtocol implements Protocol
+class StompXaSend extends StompXaItem
 {
-  private StompBroker _broker;
+  private StompDestination _dest;
   
-  public void setBroker(StompBroker broker)
-  {
-    _broker = broker;
-  }
+  private TempBuffer _tBuf;
+  private int _length;
   
-  @PostConstruct
-  public void init()
+  StompXaSend(StompDestination dest, TempBuffer tBuf, int length)
   {
-    if (_broker == null) {
-      _broker = StompEnvironmentBroker.create();
-    }
-  }
-  
-  public StompBroker getBroker()
-  {
-    return _broker;
+    _dest = dest;
+    _tBuf = tBuf;
+    _length = length;
   }
   
   @Override
-  public ProtocolConnection createConnection(SocketLink link)
+  boolean doCommand(StompConnection conn)
   {
-    return new StompConnection(this, link);
-  }
-
-  @Override
-  public String getProtocolName()
-  {
-    return "stomp";
-  }
-  
-  public StompDestination createDestination(String name)
-  {
-    return _broker.createDestination(name);
+    _dest.messageComplete(_tBuf, _length, null);
+    
+    return true;
   }
 }

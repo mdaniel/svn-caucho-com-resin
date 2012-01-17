@@ -29,51 +29,43 @@
 
 package com.caucho.mqueue.stomp;
 
-import javax.annotation.PostConstruct;
+import java.io.IOException;
 
-import com.caucho.network.listen.Protocol;
-import com.caucho.network.listen.ProtocolConnection;
-import com.caucho.network.listen.SocketLink;
+import com.caucho.vfs.ReadStream;
+import com.caucho.vfs.WriteStream;
 
 /**
- * Custom serialization for the cache
+ * Unsubscribe from a stomp message destination.
  */
-public class StompProtocol implements Protocol
+public class StompAckCommand extends StompCommand
 {
-  private StompBroker _broker;
-  
-  public void setBroker(StompBroker broker)
+  @Override
+  boolean doCommand(StompConnection conn, ReadStream is, WriteStream os)
+    throws IOException
   {
-    _broker = broker;
-  }
-  
-  @PostConstruct
-  public void init()
-  {
-    if (_broker == null) {
-      _broker = StompEnvironmentBroker.create();
+    String subscription = conn.getSubscription();
+    long mid = conn.getMessageId();
+    StompReceiptListener listener = conn.createReceiptCallback();
+                       
+    if (subscription == null)
+      throw new IOException("bad id");
+    
+    if (mid <= 0)
+      throw new IOException("bad mid");
+                       
+    if (! skipToEnd(is))
+      return false;
+    
+    boolean isValid = conn.ack(subscription, mid);
+    
+    if (listener != null) {
+      if (isValid)
+        listener.onComplete();
+      else
+        listener.onError("cannot ack from " + subscription);
     }
+    
+    return true;
   }
   
-  public StompBroker getBroker()
-  {
-    return _broker;
-  }
-  
-  @Override
-  public ProtocolConnection createConnection(SocketLink link)
-  {
-    return new StompConnection(this, link);
-  }
-
-  @Override
-  public String getProtocolName()
-  {
-    return "stomp";
-  }
-  
-  public StompDestination createDestination(String name)
-  {
-    return _broker.createDestination(name);
-  }
 }

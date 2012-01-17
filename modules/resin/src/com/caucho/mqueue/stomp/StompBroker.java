@@ -29,51 +29,13 @@
 
 package com.caucho.mqueue.stomp;
 
-import javax.annotation.PostConstruct;
-
-import com.caucho.network.listen.Protocol;
-import com.caucho.network.listen.ProtocolConnection;
-import com.caucho.network.listen.SocketLink;
-
 /**
  * Custom serialization for the cache
  */
-public class StompProtocol implements Protocol
+public interface StompBroker
 {
-  private StompBroker _broker;
+  public StompDestination createDestination(String name);
   
-  public void setBroker(StompBroker broker)
-  {
-    _broker = broker;
-  }
-  
-  @PostConstruct
-  public void init()
-  {
-    if (_broker == null) {
-      _broker = StompEnvironmentBroker.create();
-    }
-  }
-  
-  public StompBroker getBroker()
-  {
-    return _broker;
-  }
-  
-  @Override
-  public ProtocolConnection createConnection(SocketLink link)
-  {
-    return new StompConnection(this, link);
-  }
-
-  @Override
-  public String getProtocolName()
-  {
-    return "stomp";
-  }
-  
-  public StompDestination createDestination(String name)
-  {
-    return _broker.createDestination(name);
-  }
+  public StompSubscription createSubscription(String name,
+                                              StompMessageListener listener);
 }
