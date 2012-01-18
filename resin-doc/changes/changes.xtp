@@ -12,6 +12,8 @@
 
 <s2 title="4.0.25 - snapshot">
 <ul>
+<li>cache: validate/remove corrupted blob rows (#4919, rep by Keith Fetterman)</li>
+<li>cache: remove corrupted database on restart (#4919, rep by Keith Fetterman)</li>
 <li>servlet: add form-parameter-max (default 10000) to limit form parameters (#4912, rep by georgbuschbeck)</li>
 <li>install: make install target fails to compare directories on Solaris (#4917, rep by Leonid Kaminksy)</li>
 <li>install: ./configure fails to link conftest on Solaris (#4916, rep by Leonid Kaminksy)</li>

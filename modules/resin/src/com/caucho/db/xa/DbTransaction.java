@@ -437,19 +437,6 @@ public class DbTransaction extends StoreTransaction {
   public void writeData()
     throws SQLException
   {
-    if (_deleteInodes != null) {
-      while (_deleteInodes.size() > 0) {
-        Inode inode = _deleteInodes.remove(0);
-
-        // XXX: should be allocating based on auto-commit
-        try {
-          inode.remove();
-        } catch (Exception e) {
-          log.log(Level.WARNING, e.toString(), e);
-        }
-      }
-    }
-
     ArrayList<Block> updateBlocks = _updateBlocks;
     
     if (updateBlocks != null) {
@@ -478,6 +465,18 @@ public class DbTransaction extends StoreTransaction {
           block.getStore().deallocateBlock(block.getBlockId());
         } catch (IOException e) {
           throw new SQLExceptionWrapper(e);
+        }
+      }
+    }
+    if (_deleteInodes != null) {
+      while (_deleteInodes.size() > 0) {
+        Inode inode = _deleteInodes.remove(0);
+
+        // XXX: should be allocating based on auto-commit
+        try {
+          inode.remove();
+        } catch (Exception e) {
+          log.log(Level.WARNING, e.toString(), e);
         }
       }
     }

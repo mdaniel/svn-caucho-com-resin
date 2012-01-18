@@ -31,6 +31,7 @@ package com.caucho.server.distcache;
 
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.logging.Level;
 import java.util.logging.Logger;
 
 import javax.sql.DataSource;
@@ -38,6 +39,7 @@ import javax.sql.DataSource;
 import com.caucho.config.ConfigException;
 import com.caucho.db.jdbc.DataSourceImpl;
 import com.caucho.env.distcache.CacheDataBacking;
+import com.caucho.env.health.HealthSystemFacade;
 import com.caucho.env.service.ResinSystem;
 import com.caucho.env.service.RootDirectorySystem;
 import com.caucho.util.HashKey;
@@ -250,13 +252,34 @@ public class CacheDataBackingImpl implements CacheDataBacking {
 
       String serverId = ResinSystem.getCurrentId();
 
-
       if (serverId.isEmpty())
         serverId = "default";
       
       DataSource dataSource = createDataSource(dataDirectory, serverId);
+      
+      Path mnodeDb = dataDirectory.lookup(serverId).lookup("mnode.db");
+      Path dataDb = dataDirectory.lookup(serverId).lookup("data.db");
+      
+      String exitMessage = HealthSystemFacade.getExitMessage();
+      
+      if (exitMessage.indexOf(mnodeDb.getFullPath()) >= 0
+          || exitMessage.indexOf(dataDb.getFullPath()) >= 0) {
+        log.warning("removing cache database " + mnodeDb.getFullPath() + " because of corruption");
+        
+        try {
+          mnodeDb.remove();
+        } catch (Exception e) {
+          log.log(Level.WARNING, e.toString(), e);
+        }
+        
+        try {
+          dataDb.remove();
+        } catch (Exception e) {
+          log.log(Level.WARNING, e.toString(), e);
+        }
+      }
+      
       String tableName = "mnode";
-
       _mnodeStore = new MnodeStore(dataSource, tableName, serverId);
       _mnodeStore.init();
       

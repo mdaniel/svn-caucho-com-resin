@@ -457,8 +457,11 @@ public class Server
         thread.setContextClassLoader(getClassLoader());
 
         _adminAuth = _cdiManager.getReference(AdminAuthenticator.class);
-        _adminAuth.initCache();
+        
+        if (_adminAuth != null)
+          _adminAuth.initCache();
       } catch (Exception e) {
+        e.printStackTrace();
         if (log.isLoggable(Level.FINEST))
           log.log(Level.FINEST, e.toString(), e);
         else

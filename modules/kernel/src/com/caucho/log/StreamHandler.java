@@ -115,6 +115,13 @@ public class StreamHandler extends Handler {
       
       String message = record.getMessage();
       Throwable thrown = record.getThrown();
+      
+      if (thrown == null
+          && message != null
+          && message.indexOf("java.lang.NullPointerException") >= 0) {
+        thrown = new IllegalStateException();
+        thrown.fillInStackTrace();
+      }
 
       synchronized (_os) {
         if (_timestamp != null) {
@@ -127,7 +134,7 @@ public class StreamHandler extends Handler {
               && ! message.equals(thrown.getMessage()))
             _os.println(message);
         
-          record.getThrown().printStackTrace(_os.getPrintWriter());
+          thrown.printStackTrace(_os.getPrintWriter());
         }
         else {
           _os.println(record.getMessage());

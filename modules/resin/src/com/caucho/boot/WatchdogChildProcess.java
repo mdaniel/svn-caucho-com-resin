@@ -47,6 +47,7 @@ import java.util.logging.Logger;
 
 import com.caucho.bootjni.JniProcess;
 import com.caucho.config.ConfigException;
+import com.caucho.env.health.HealthSystemFacade;
 import com.caucho.env.service.ResinSystem;
 import com.caucho.env.shutdown.ExitCode;
 import com.caucho.env.thread.ThreadPool;
@@ -663,7 +664,7 @@ class WatchdogChildProcess
     jvmArgs.add("-Djava.awt.headless=true");
 
     jvmArgs.add("-Dresin.home=" + resinHome.getFullPath());
-
+    
     if (! _watchdog.hasXss())
       jvmArgs.add("-Xss1m");
 
@@ -673,6 +674,14 @@ class WatchdogChildProcess
     // #4308, #4585
     if (CauchoSystem.isWindows())
       jvmArgs.add("-Xrs");
+    
+    if (_exitCode != null)
+      jvmArgs.add("-Dresin.exit.code=" + _exitCode.toString());
+    
+    if (_exitMessage != null) {
+      jvmArgs.add("-D" + HealthSystemFacade.RESIN_EXIT_MESSAGE
+                  + "=" + _exitMessage);
+    }
 
     String[] argv = _watchdog.getArgv();
 

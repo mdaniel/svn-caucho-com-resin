@@ -101,8 +101,6 @@ public final class BTree {
 
   private long _timeout = 120000L;
 
-  private volatile boolean _isStarted;
-
   /**
    * Creates a new BTree with the given backing.
    *
@@ -464,7 +462,7 @@ public final class BTree {
                     keyBuffer, keyOffset, keyLength, value);
     }
     else {
-      throw new IllegalStateException("ran out of key space");
+      throw corrupted("ran out of key space");
     }
 
     // return split(blockIndex, block);
@@ -480,7 +478,7 @@ public final class BTree {
 
     if (index < length) {
       if (offset + tupleSize < HEADER_SIZE)
-        throw new IllegalStateException();
+        throw corrupted("key tuple space issue " + offset + " " + tupleSize);
       
       System.arraycopy(buffer, offset,
                        buffer, offset + tupleSize,
@@ -494,7 +492,7 @@ public final class BTree {
       log.log(Level.ALL, "btree insert at " + debugId(blockId) + ":" + offset + " value:" + debugId(value));
 
     if (offset + PTR_SIZE < HEADER_SIZE)
-      throw new IllegalStateException();
+      throw corrupted("offset ptr problem: " + offset);
       
     System.arraycopy(keyBuffer, keyOffset,
                      buffer, offset + PTR_SIZE,
@@ -560,8 +558,8 @@ public final class BTree {
       return;
 
     if (length < 2)
-      throw new IllegalStateException(L.l("illegal length '{0}' for block {1}",
-                                          length, debugId(blockId)));
+      throw corrupted(L.l("illegal length '{0}' for block {1}",
+                          length, debugId(blockId)));
       
     Block leftBlock = null;
 
@@ -697,7 +695,7 @@ public final class BTree {
       //                    + " PIVOT=" + pivot);
 
       if (length <= 2 || _n < length || pivot < 1 || length <= pivot)
-        throw new IllegalStateException(Long.toHexString(parentBlock.getBlockId()) + ": " + length + " is an illegal length, or pivot " + pivot + " is bad, with n=" + _n);
+        throw corrupted(Long.toHexString(parentBlock.getBlockId()) + ": " + length + " is an illegal length, or pivot " + pivot + " is bad, with n=" + _n);
 
       int pivotOffset = HEADER_SIZE + pivot * _tupleSize;
       long pivotValue = getPointer(parentBuffer, pivotOffset);
@@ -715,7 +713,7 @@ public final class BTree {
       byte []rightBuffer = rightBlock.getBuffer();
 
       if (length - pivot - 1 < 0)
-        throw new IllegalStateException("illegal length " + pivot + " " + length);
+        throw corrupted("illegal length " + pivot + " " + length);
 
       System.arraycopy(parentBuffer, pivotOffset + _tupleSize,
                        rightBuffer, HEADER_SIZE,
@@ -1144,10 +1142,10 @@ public final class BTree {
                                  Block left, Block right)
   {
     if (isLeaf(leftBuffer, left) != isLeaf(rightBuffer, right)) {
-      throw new IllegalStateException(L.l("leaf mismatch {0} {1} and {2} {3}",
-                                          isLeaf(leftBuffer, left),
-                                          isLeaf(rightBuffer, right),
-                                          left, right));
+      throw corrupted(L.l("leaf mismatch {0} {1} and {2} {3}",
+                          isLeaf(leftBuffer, left),
+                          isLeaf(rightBuffer, right),
+                          left, right));
     }
   }
 
@@ -1165,7 +1163,7 @@ public final class BTree {
     int length = getLength(buffer);
 
     if (length < 1)
-      throw new IllegalStateException("zero length for " + debugId(parent.getBlockId()));
+      throw corrupted("zero length for " + debugId(parent.getBlockId()));
 
     int offset = HEADER_SIZE;
     int tupleSize = _tupleSize;
@@ -1188,7 +1186,7 @@ public final class BTree {
     if (pointer == blockId)
       return getPointer(buffer, HEADER_SIZE + (length - 1) * tupleSize);
     else
-      throw new IllegalStateException("Can't find " + debugId(blockId) + " in parent " + debugId(parent.getBlockId()));
+      throw corrupted("Can't find " + debugId(blockId) + " in parent " + debugId(parent.getBlockId()));
   }
 
   /**
@@ -1286,10 +1284,10 @@ public final class BTree {
                          long blockId)
   {
     if (isLeaf(leftBuffer) != isLeaf(buffer)) {
-      throw new IllegalStateException("leaf does not match "
-                                      + isLeaf(leftBuffer)
-                                      + " " + isLeaf(buffer)
-                                      + debugId(blockId));
+      throw corrupted("leaf does not match "
+                      + isLeaf(leftBuffer)
+                      + " " + isLeaf(buffer)
+                      + debugId(blockId));
     }
     
     int tupleSize = _tupleSize;
@@ -1340,7 +1338,7 @@ public final class BTree {
     long pointer = getPointer(parentBuffer, NEXT_OFFSET);
 
     if (pointer != blockId) {
-      throw new IllegalStateException("BTree remove can't find matching block: " + debugId(blockId));
+      throw corrupted("BTree remove can't find matching block: " + debugId(blockId));
     }
     
     setPointer(parentBuffer, NEXT_OFFSET, leftBlockId);
@@ -1465,10 +1463,10 @@ public final class BTree {
                           long blockId)
   {
     if (isLeaf(buffer) != isLeaf(rightBuffer)) {
-      throw new IllegalStateException("leaf does not match "
-                                      + isLeaf(buffer)
-                                      + " " + isLeaf(rightBuffer)
-                                      + debugId(blockId));
+      throw corrupted("leaf does not match "
+                      + isLeaf(buffer)
+                      + " " + isLeaf(rightBuffer)
+                      + debugId(blockId));
     }
     
     int tupleSize = _tupleSize;
@@ -1512,7 +1510,7 @@ public final class BTree {
       }
     }
 
-    throw new IllegalStateException("BTree merge right can't find matching index: " + debugId(blockId));
+    throw corrupted("BTree merge right can't find matching index: " + debugId(blockId));
   }
 
   /**
@@ -1540,13 +1538,11 @@ public final class BTree {
       int newOffset = offset + delta;
 
       if (newOffset < 0) {
-        System.out.println("UNDERFLOW: " + debugId(blockId)  + " LENGTH:" + length + " STU:" + getLength(buffer) + " DELTA:" + delta);
-        throw new IllegalStateException("lookupTuple underflow newOffset:" + newOffset);
+        throw corrupted("lookupTuple underflow newOffset:" + newOffset);
 
       }
       else if (newOffset > 65536) {
-        System.out.println("OVERFLOW: " + debugId(blockId)  + " LENGTH:" + length + " STU:" + getLength(buffer) + " DELTA:" + delta);
-        throw new IllegalStateException("lookupTuple overflow newOffset:" + newOffset);
+        throw corrupted("lookupTuple overflow newOffset:" + newOffset);
 
       }
 
@@ -1557,7 +1553,7 @@ public final class BTree {
         value = getPointer(buffer, newOffset);
 
         if (value == 0 && ! isLeaf)
-          throw new IllegalStateException("illegal 0 value at " + newOffset + " for block " + debugId(blockId));
+          throw corrupted("illegal 0 value at " + newOffset + " for block " + debugId(blockId));
 
         return value;
       }
@@ -1577,7 +1573,7 @@ public final class BTree {
         value = getPointer(buffer, newOffset);
 
         if (value == 0 && ! isLeaf)
-          throw new IllegalStateException("illegal 0 value at " + newOffset + " for block " + debugId(blockId));
+          throw corrupted("illegal 0 value at " + newOffset + " for block " + debugId(blockId));
 
         return value;
       }
@@ -1591,7 +1587,7 @@ public final class BTree {
         
         /*
         if (value == 0 && ! isLeaf)
-          throw new IllegalStateException("illegal 0 value at end=" + newOffset + " for block " + debugId(blockId) + " tuple=" + _tupleSize);
+          throw corrupted("illegal 0 value at end=" + newOffset + " for block " + debugId(blockId) + " tuple=" + _tupleSize);
 
         return value;
         */
@@ -1600,7 +1596,7 @@ public final class BTree {
         value = getPointer(buffer, offset);
 
         if (value == 0 && ! isLeaf)
-          throw new IllegalStateException("illegal 0 value at " + newOffset + " for block " + debugId(blockId));
+          throw corrupted("illegal 0 value at " + newOffset + " for block " + debugId(blockId));
 
         return value;
       }
@@ -1612,7 +1608,7 @@ public final class BTree {
       value = getPointer(buffer, NEXT_OFFSET);
 
       if (value == 0 && ! isLeaf)
-        throw new IllegalStateException("illegal 0 value at NEXT_OFFSET for block " + debugId(blockId));
+        throw corrupted("illegal 0 value at NEXT_OFFSET for block " + debugId(blockId));
 
       return value;
     }
@@ -1646,7 +1642,7 @@ public final class BTree {
 
         if (offset + tupleSize < blockEnd) {
           if (offset < HEADER_SIZE)
-            throw new IllegalStateException();
+            throw corrupted("header_size problem: " + offset);
 
           System.arraycopy(buffer, offset + tupleSize,
                            buffer, offset,
@@ -1678,19 +1674,19 @@ public final class BTree {
     int end = HEADER_SIZE + tupleSize * length;
     
     if (length < 0 || BlockStore.BLOCK_SIZE < end) {
-      throw new IllegalStateException("illegal length " + length + " for " + debugId(blockId));
+      throw corrupted("illegal length " + length + " for " + debugId(blockId));
     }
 
     int offset;
 
     if (false && getPointer(buffer, NEXT_OFFSET) == 0)
-      throw new IllegalStateException("Null next pointer for " + debugId(blockId));
+      throw corrupted("Null next pointer for " + debugId(blockId));
 
     for (offset = HEADER_SIZE;
          offset < end;
          offset += tupleSize) {
       if (getPointer(buffer, offset) == 0)
-        throw new IllegalStateException("Null pointer at " + offset + " for " + debugId(blockId) + " tupleSize=" + tupleSize);
+        throw corrupted("Null pointer at " + offset + " for " + debugId(blockId) + " tupleSize=" + tupleSize);
     }
   }
 
@@ -1704,15 +1700,13 @@ public final class BTree {
       return false;
     else {
       if (! block.isIndex())
-        throw new IllegalStateException(L.l("block {0} is not an index block",
-                                            block));
+        throw corrupted(L.l("block {0} is not an index block", block));
       
       if (! block.isValid())
-        throw new IllegalStateException(L.l("block {0} is not valid",
-                                            block));
+        throw corrupted(L.l("block {0} is not valid", block));
       
-      throw new IllegalStateException(L.l("leaf value is invalid: {0} for {1}",
-                                          flags, block));
+      throw corrupted(L.l("leaf value is invalid: {0} for {1}",
+                          flags, block));
     }
   }
 
@@ -1738,8 +1732,7 @@ public final class BTree {
     else if (flags == IS_NODE)
       return false;
     else
-      throw new IllegalStateException(L.l("leaf value is invalid: {0}",
-                                          flags));
+      throw corrupted(L.l("leaf value is invalid: {0}", flags));
   }
 
   private void setLeaf(byte []buffer, boolean isLeaf)
@@ -1795,8 +1788,7 @@ public final class BTree {
   private void setLength(byte []buffer, int value)
   {
     if (value < 0 || BLOCK_SIZE / _tupleSize < value) {
-      System.out.println("BAD-LENGTH: " + value);
-      throw new IllegalArgumentException("BTree: bad length " + value);
+      corrupted("BTree: bad length " + value);
     }
 
     setInt(buffer, LENGTH_OFFSET, value);
@@ -1810,8 +1802,7 @@ public final class BTree {
     int value = getInt(buffer, LENGTH_OFFSET);
     
     if (value < 0 || value > 65536) {
-      System.out.println("BAD-LENGTH: " + value);
-      throw new IllegalArgumentException("BTree: bad length " + value);
+      corrupted("BTree: bad length " + value);
     }
 
     return value;
@@ -1835,20 +1826,6 @@ public final class BTree {
     buffer[offset + 7] = (byte) (value);
   }
 
-  /**
-   * Opens the BTree.
-   */
-  private void start()
-    throws IOException
-  {
-    synchronized (this) {
-      if (_isStarted)
-        return;
-
-      _isStarted = true;
-    }
-  }
-  
   /**
    * Testing: returns the keys for a block
    */
@@ -1938,6 +1915,15 @@ public final class BTree {
   private String debugId(long blockId)
   {
     return Long.toHexString(blockId);
+  }
+  
+  private RuntimeException corrupted(String msg)
+  {
+    IllegalStateException e = new IllegalStateException(_store + ": " + msg);
+    
+    _store.fatalCorrupted(msg);
+    
+    throw e;
   }
 
   public void close()

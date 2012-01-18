@@ -97,7 +97,7 @@ public class DebugStore {
       case BlockStore.ALLOC_ROW:
         out.print('r');
         break;
-      case BlockStore.ALLOC_USED:
+      case BlockStore.ALLOC_DATA:
         out.print('u');
         break;
         /*

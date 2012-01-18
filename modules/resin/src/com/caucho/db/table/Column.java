@@ -467,6 +467,17 @@ abstract public class Column {
   }
 
   /**
+   * Returns true if the column is valid (i.e. not corrupted).
+   *
+   * @param block the block's buffer
+   * @param rowOffset the offset of the row in the block
+   */
+  public boolean isValid(byte []block, int rowOffset)
+  {
+    return true;
+  }
+
+  /**
    * Returns true if the bytes are equal.
    */
   public boolean isEqual(byte []block, int rowOffset,

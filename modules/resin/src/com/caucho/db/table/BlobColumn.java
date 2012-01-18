@@ -214,6 +214,8 @@ class BlobColumn extends Column {
       Inode inode = new Inode();
       inode.init(getTable(), xa, block, rowOffset + _columnOffset);
       xa.addDeleteInode(inode);
+      
+      setNull(block, rowOffset);
     }
   }
 
@@ -302,6 +304,22 @@ class BlobColumn extends Column {
     else {
       setString(xa, block, rowOffset, expr.evalString(context));
     }
+  }
+
+  /**
+   * Returns true if the column is valid (i.e. not corrupted).
+   *
+   * @param block the block's buffer
+   * @param rowOffset the offset of the row in the block
+   */
+  @Override
+  public boolean isValid(byte []block, int rowOffset)
+  {
+    if (isNull(block, rowOffset)) {
+      return true;
+    }
+    
+    return Inode.isValid(getTable(), block, rowOffset + _columnOffset);
   }
 
   /**

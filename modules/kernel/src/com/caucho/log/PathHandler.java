@@ -224,7 +224,7 @@ public class PathHandler extends Handler {
 
       String message = record.getMessage();
       Throwable thrown = record.getThrown();
-
+      
       synchronized (_os) {
         /*
         if (_timestamp != null) {

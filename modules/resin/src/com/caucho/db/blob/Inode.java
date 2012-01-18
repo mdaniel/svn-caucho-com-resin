@@ -454,10 +454,7 @@ public class Inode {
         long miniFragAddr = store.allocateMiniFragment();
 
         if (miniFragAddr == 0) {
-          store.setCorrupted(true);
-
-          throw new IllegalStateException(L.l("{0} illegal mini fragment",
-                                              store));
+          corrupted(store, L.l("{0} illegal mini fragment", store));
         }
 
         writeMiniFragAddr(inode, inodeOffset,
@@ -496,10 +493,8 @@ public class Inode {
                                   currentLength);
 
         if (addr == 0) {
-          store.setCorrupted(true);
-
-          throw new IllegalStateException(L.l("{0}: inode: illegal block at {1}",
-                                              store, currentLength));
+          corrupted(store, L.l("{0}: inode: illegal block at {1}",
+                               store, currentLength));
         }
 
         int blockOffset = (int) (currentLength % BLOCK_SIZE);
@@ -530,10 +525,7 @@ public class Inode {
         block.free();
 
         if (blockAddr == 0) {
-          store.setCorrupted(true);
-
-          throw new IllegalStateException(L.l("{0}: illegal block",
-                                              store));
+          corrupted(store, L.l("{0}: illegal block", store));
         }
 
         writeBlockAddr(inode, inodeOffset,
@@ -655,10 +647,7 @@ public class Inode {
         long miniFragAddr = store.allocateMiniFragment();
 
         if (miniFragAddr == 0) {
-          store.setCorrupted(true);
-
-          throw new IllegalStateException(L.l("{0} illegal mini fragment",
-                                              store));
+          corrupted(store, L.l("{0} illegal mini fragment", store));
         }
 
         writeMiniFragAddr(inode, inodeOffset,
@@ -703,9 +692,7 @@ public class Inode {
                                   currentLength);
 
         if (addr == 0) {
-          store.setCorrupted(true);
-
-          throw new IllegalStateException(store + " inode: illegal block at " + currentLength);
+          corrupted(store, store + " inode: illegal block at " + currentLength);
         }
 
         int blockOffset = (int) (currentLength % BLOCK_SIZE);
@@ -815,18 +802,14 @@ public class Inode {
           long fragAddr = readMiniFragAddr(bytes, 0, _store, length - 1);
 
           if ((fragAddr & BlockStore.BLOCK_MASK) == 0) {
-            _store.setCorrupted(true);
-
             String msg = _store + ": inode block " + Long.toHexString(length) + " has 0 fragment";
 
-            throw stateError(msg);
+            corrupted(_store, msg);
           }
           else if (fragAddr < 0) {
             String msg = _store + ": inode block " + Long.toHexString(length) + " has invalid fragment " + Long.toHexString(fragAddr);
 
-            _store.setCorrupted(true);
-
-            throw stateError(msg);
+            corrupted(_store, msg);
           }
 
           _store.deleteMiniFragment(fragAddr);
@@ -834,12 +817,16 @@ public class Inode {
       }
       else {
         long indAddr = readLong(bytes, (DIRECT_BLOCKS + 1) * 8);
+        
+        if (! validateBlockAddr(indAddr, length, BlockStore.ALLOC_INODE_PTR)) {
+          return;
+        }
 
         for (; length > 0; length -= BLOCK_SIZE) {
           int blockCount = (int) ((length - 1) / BLOCK_SIZE);
           long blockAddr = readBlockAddr(bytes, 0, _store, length - 1);
 
-          if (! validateBlockAddr(blockAddr, length)) {
+          if (! validateBlockAddr(blockAddr, length, BlockStore.ALLOC_DATA)) {
             continue;
           }
 
@@ -856,7 +843,7 @@ public class Inode {
 
             blockAddr = _store.readBlockLong(indAddr, dblIndex);
 
-            if (! validateBlockAddr(blockAddr, length)) {
+            if (! validateBlockAddr(blockAddr, length, BlockStore.ALLOC_DATA)) {
               continue;
             }
               
@@ -885,12 +872,15 @@ public class Inode {
     }
   }
 
-  private boolean validateBlockAddr(long blockAddr, long length)
+  private boolean validateBlockAddr(long blockAddr, long length, int allocCode)
   {
-    if ((blockAddr & BlockStore.BLOCK_MASK) == 0) {
-      String msg = _store + ": inode block " + Long.toHexString(length) + " has 0 block";
+    if ((blockAddr & BlockStore.BLOCK_MASK) != 0) {
+      String msg = (_store + ": inode block " + Long.toHexString(length) + " has non-zero offset 0x"
+                    + Long.toHexString(blockAddr & BlockStore.BLOCK_MASK)); 
+      
       log.warning(msg);
-      _store.setCorrupted(true);
+      
+      corrupted(_store, msg);
 
       return false;
     }
@@ -898,12 +888,128 @@ public class Inode {
       String msg = _store + ": inode block " + Long.toHexString(length) + " has invalid block " + Long.toHexString(blockAddr);
 
       log.warning(msg);
-      _store.setCorrupted(true);
+      
+      corrupted(_store, msg);
 
       return false;
     }
-    else
+    else if (_store.getAllocation(blockAddr) != allocCode) {
+      String msg = (_store + ": inode block "
+                    + Long.toHexString(length)
+                    + " has invalid block code (" + _store.getAllocation(blockAddr) + ")"
+                    + " expected (" + allocCode + ")");
+
+      log.warning(msg);
+      
+      corrupted(_store, msg);
+
+      return false;
+    }
+    else {
       return true;
+    }
+  }
+
+  /**
+   * Deletes the inode
+   */
+  public static boolean isValid(BlockStore store, byte []bytes, int offset)
+  {
+    long length = readLong(bytes, 0);
+
+    try {
+      if (length <= INLINE_BLOB_SIZE || bytes == null)
+        return true;
+      else if (length <= MINI_FRAG_BLOB_SIZE) {
+        for (; length > 0; length -= MINI_FRAG_SIZE) {
+          long fragAddr = readMiniFragAddr(bytes, 0, store, length - 1);
+
+          if ((fragAddr & BlockStore.BLOCK_MASK) == 0) {
+            String msg = store + ": inode block " + Long.toHexString(length) + " has 0 fragment";
+            log.warning(msg);
+
+            return false;
+          }
+          else if (fragAddr < 0) {
+            String msg = store + ": inode block " + Long.toHexString(length) + " has invalid fragment " + Long.toHexString(fragAddr);
+            log.warning(msg);
+            
+            return false;
+          }
+        }
+      }
+      else {
+        long indAddr = readLong(bytes, (DIRECT_BLOCKS + 1) * 8);
+        
+        if (! isValidBlockAddr(store, indAddr, length, BlockStore.ALLOC_INODE_PTR)) {
+          return false;
+        }
+
+        for (; length > 0; length -= BLOCK_SIZE) {
+          int blockCount = (int) ((length - 1) / BLOCK_SIZE);
+          long blockAddr = readBlockAddr(bytes, 0, store, length - 1);
+
+          if (! isValidBlockAddr(store, blockAddr, length, BlockStore.ALLOC_DATA)) {
+            return false;
+          }
+          
+          int dblBlockCount
+            = (blockCount - DIRECT_BLOCKS - SINGLE_INDIRECT_BLOCKS);
+
+          // remove the double indirect blocks
+          if (dblBlockCount >= 0
+              && dblBlockCount % INDIRECT_BLOCKS == 0) {
+            int dblIndex = (int) 8 * (dblBlockCount / INDIRECT_BLOCKS
+                                      + SINGLE_INDIRECT_BLOCKS);
+
+            blockAddr = store.readBlockLong(indAddr, dblIndex);
+
+            if (! isValidBlockAddr(store, blockAddr, length, BlockStore.ALLOC_DATA)) {
+              return false;
+            }
+          }
+        }
+      }
+    } catch (Exception e) {
+      log.log(Level.WARNING, e.toString(), e);
+    }
+    
+    return true;
+  }
+
+  private static boolean isValidBlockAddr(BlockStore store,
+                                          long blockAddr, 
+                                          long length, 
+                                          int allocCode)
+  {
+    if ((blockAddr & BlockStore.BLOCK_MASK) != 0) {
+      String msg = (store + ": inode block " + Long.toHexString(length) + " has non-zero offset 0x"
+                    + Long.toHexString(blockAddr & BlockStore.BLOCK_MASK)); 
+      
+      log.warning(msg);
+      
+      return false;
+    }
+    else if (blockAddr < 0) {
+      String msg = store + ": inode block " + Long.toHexString(length) + " has invalid block " + Long.toHexString(blockAddr);
+
+      log.warning(msg);
+      
+      return false;
+    }
+    else if (store.getAllocation(blockAddr) != allocCode) {
+      String msg = (store + ": inode block "
+                    + Long.toHexString(length)
+                    + " has invalid block code (" + store.getAllocation(blockAddr) + ")"
+                    + " expected (" + allocCode + ")");
+
+      log.warning(msg);
+      
+      return false;
+    }
+    else {
+      return true;
+    }
   }
 
   /**
@@ -940,9 +1046,7 @@ public class Inode {
     int fragCount = (int) (fragLength / MINI_FRAG_SIZE);
 
     if ((fragAddr & BlockStore.BLOCK_MASK) == 0) {
-      store.setCorrupted(true);
-
-      throw new IllegalStateException(store + ": inode block " + fragLength + " has zero value " + fragAddr);
+      corrupted(store, (store + ": inode block " + fragLength + " has zero value " + fragAddr));
     }
 
     writeLong(inode, offset + (fragCount + 1) * 8, fragAddr);
@@ -964,9 +1068,7 @@ public class Inode {
       long indAddr = readLong(inode, inodeOffset + (DIRECT_BLOCKS + 1) * 8);
 
       if (indAddr == 0) {
-        store.setCorrupted(true);
-
-        throw new IllegalStateException(L.l("{0} null block id", store));
+        corrupted(store, L.l("{0} null block id", store));
       }
 
       if (fileOffset < SINGLE_INDIRECT_MAX) {
@@ -986,9 +1088,7 @@ public class Inode {
         long dblIndAddr = store.readBlockLong(indAddr, dblBlockIndex);
 
         if (dblIndAddr == 0) {
-          store.setCorrupted(true);
-
-          throw new IllegalStateException(L.l("null indirect block id"));
+          corrupted(store, L.l("null indirect block id"));
         }
 
         int blockOffset = 8 * (blockCount % INDIRECT_BLOCKS);
@@ -996,11 +1096,9 @@ public class Inode {
         return store.readBlockLong(dblIndAddr, blockOffset);
       }
       else {
-        store.setCorrupted(true);
-
-        throw new IllegalStateException(L.l("{0} size over {1}M not supported",
-                                            store,
-                                            (DOUBLE_INDIRECT_MAX / (1024 * 1024))));
+        throw corrupted(store, L.l("{0} size over {1}M not supported",
+                                   store,
+                                   (DOUBLE_INDIRECT_MAX / (1024 * 1024))));
       }
     }
   }
@@ -1017,10 +1115,8 @@ public class Inode {
 
     // XXX: not sure if correct, needs XA?
     if ((blockAddr & BlockStore.BLOCK_MASK) == 0) {
-      store.setCorrupted(true);
-
       String msg = store + ": inode block " + blockCount + " writing 0 fragment";
-      throw stateError(msg);
+      corrupted(store, msg);
     }
 
     if (fileOffset < DIRECT_MAX) {
@@ -1030,7 +1126,7 @@ public class Inode {
       long indAddr = readLong(inode, inodeOffset + (DIRECT_BLOCKS + 1) * 8);
 
       if (indAddr == 0) {
-        Block block = store.allocateBlock();
+        Block block = store.allocateIndirectBlock();
         indAddr = block.getBlockId();
         block.free();
 
@@ -1046,9 +1142,7 @@ public class Inode {
       long indAddr = readLong(inode, inodeOffset + (DIRECT_BLOCKS + 1) * 8);
 
       if (indAddr == 0) {
-        store.setCorrupted(true);
-
-        throw new IllegalStateException(L.l("{0} null block id", store));
+        corrupted(store, L.l("{0} null block id", store));
       }
       
       blockCount = blockCount - DIRECT_BLOCKS - SINGLE_INDIRECT_BLOCKS;
@@ -1076,12 +1170,21 @@ public class Inode {
       xa.addUpdateBlock(writeBlock);
     }
     else {
-      store.setCorrupted(true);
-
-      throw new IllegalStateException(L.l("{0} size over {1}M not supported",
-                                          store,
-                                          (DOUBLE_INDIRECT_MAX / (1024 * 1024))));
+      corrupted(store, L.l("{0} size over {1}M not supported",
+                           store,
+                           (DOUBLE_INDIRECT_MAX / (1024 * 1024))));
     }
+  }
+
+  private static RuntimeException corrupted(BlockStore store, String msg)
+  {
+    store.fatalCorrupted(msg);
+
+    IllegalStateException e = new IllegalStateException(msg);
+    e.fillInStackTrace();
+    log.log(Level.WARNING, e.toString(), e);
+    
+    throw e;
   }
 
   /**
@@ -1113,13 +1216,5 @@ public class Inode {
     buffer[offset + 5] = (byte) (v >> 16);
     buffer[offset + 6] = (byte) (v >> 8);
     buffer[offset + 7] = (byte) (v);
-  }
-
-  private static IllegalStateException stateError(String msg)
-  {
-    IllegalStateException e = new IllegalStateException(msg);
-    e.fillInStackTrace();
-    log.log(Level.WARNING, e.toString(), e);
-    return e;
   }
 }

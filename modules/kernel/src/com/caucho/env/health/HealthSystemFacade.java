@@ -39,10 +39,22 @@ public class HealthSystemFacade {
   private static final Logger log
     = Logger.getLogger(HealthSystemFacade.class.getName());
   
+  public static final String RESIN_EXIT_MESSAGE = "resin.exit.message";
+  
   private static final HealthSystemFacade _facade;
   
   protected HealthSystemFacade()
   {
+  }
+  
+  public static String getExitMessage()
+  {
+    String msg = System.getProperty(RESIN_EXIT_MESSAGE);
+    
+    if (msg != null)
+      return msg;
+    else
+      return "";
   }
   
   public static void fireEvent(String eventName, String eventMessage)
@@ -50,7 +62,16 @@ public class HealthSystemFacade {
     _facade.fireEventImpl(eventName, eventMessage);
   }
   
+  public static void fireFatalEvent(String eventName, String eventMessage)
+  {
+    _facade.fireFatalEventImpl(eventName, eventMessage);
+  }
+  
   protected void fireEventImpl(String eventName, String eventMessage)
+  {
+  }
+  
+  protected void fireFatalEventImpl(String eventName, String eventMessage)
   {
   }
   
