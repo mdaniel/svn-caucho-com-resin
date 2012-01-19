@@ -35,22 +35,27 @@ import com.caucho.boot.WatchdogStatusQuery;
 import com.caucho.cloud.bam.BamSystem;
 import com.caucho.cloud.network.NetworkClusterSystem;
 import com.caucho.cloud.topology.CloudServer;
-import com.caucho.jmx.MXName;
 import com.caucho.management.server.AbstractManagedObject;
 import com.caucho.management.server.ManagementMXBean;
 import com.caucho.server.admin.HmuxClientFactory;
+import com.caucho.server.admin.JmxCallQuery;
 import com.caucho.server.admin.JmxDumpQuery;
 import com.caucho.server.admin.JmxListQuery;
+import com.caucho.server.admin.JmxSetQuery;
+import com.caucho.util.L10N;
 
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.Serializable;
+import java.util.ArrayList;
+import java.util.List;
 
 public class ManagementAdmin extends AbstractManagedObject
   implements ManagementMXBean
 {
+  private static final L10N L = new L10N(ManagementAdmin.class);
   private final Resin _resin;
 
   /**
@@ -98,7 +103,110 @@ public class ManagementAdmin extends AbstractManagedObject
   }
 
   @Override
-  public String dumpJmx(@MXName("server") String serverId)
+  public String setJmx(String serverId,
+                       String pattern,
+                       String attribute,
+                       String value)
+  {
+    JmxSetQuery query = new JmxSetQuery(pattern, attribute, value);
+
+    return (String) query(serverId, query);
+  }
+
+  @Override
+  public String callJmx(String serverId,
+                        String pattern,
+                        String operation,
+                        String operationIdx,
+                        String values)
+  {
+    List<String> params = new ArrayList<String>();
+
+    StringBuilder builder = null;
+
+    if (values != null) {
+      char []chars = values.toCharArray();
+
+      for (int i = 0; i < chars.length; i++) {
+        char c = chars[i];
+
+        if (c == ' ') {
+
+          if (builder != null) {
+            params.add(builder.toString());
+
+            builder = null;
+          }
+          continue;
+        }
+
+        if ('\'' == c || '"' == c) {
+          char quote = c;
+
+          i++;
+
+          final int start = i;
+
+          while (i < chars.length) {
+            if (chars[i] == quote && chars[i - 1] != '\\')
+              break;
+
+            i++;
+          }
+
+          final int end = i;
+
+          if (i == chars.length || chars[end] != quote)
+            return new IllegalArgumentException(L.l(
+              "`{0}' expected at {1} in '{2}'",
+              quote,
+              end,
+              values)).toString();
+
+          builder = new StringBuilder();
+          for (int j = start; j < end; j++) {
+            if (chars[j] == '\\' && chars[j + 1] == '\'') {
+              builder.append('\'');
+              j++;
+            }
+            else if (chars[j] == '\\' && chars[j + 1] == '"') {
+              builder.append('"');
+              j++;
+            }
+            else {
+              builder.append(chars[j]);
+            }
+          }
+          params.add(builder.toString());
+
+          builder = null;
+        }
+        else {
+          if (builder == null)
+            builder = new StringBuilder();
+
+          builder.append(c);
+        }
+      }
+
+      if (builder != null)
+        params.add(builder.toString());
+    }
+    //
+    int operationIndex = -1;
+    if (operationIdx != null)
+      operationIndex = Integer.parseInt(operationIdx);
+
+    JmxCallQuery query = new JmxCallQuery(pattern,
+                                          operation,
+                                          operationIndex,
+                                          params.toArray(new String[params.size()]));
+
+    return (String) query(serverId, query);
+  }
+
+  @Override
+  public String dumpJmx(String serverId)
   {
     JmxDumpQuery query = new JmxDumpQuery();
 
@@ -106,7 +214,7 @@ public class ManagementAdmin extends AbstractManagedObject
   }
 
   @Override
-  public String getStatus(@MXName("server") String serverId)
+  public String getStatus(String serverId)
   {
     WatchdogStatusQuery query = new WatchdogStatusQuery();
 

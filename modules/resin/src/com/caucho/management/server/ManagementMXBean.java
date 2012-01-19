@@ -64,6 +64,21 @@ public interface ManagementMXBean extends ManagedObjectMXBean
                         @MXName("print-all-beans") boolean isPrintAllBeans,
                         @MXName("print-platform-beans") boolean isPrintPlatformBeans);
 
+  @Description("sets JMX Mbean's attribute")
+  @MXAction("jmx-set")
+  public String setJmx(@MXName("server") String serverId,
+                       @MXName("pattern") String pattern,
+                       @MXName("attribute") String attribute,
+                       @MXName("value") String value);
+
+  @Description("calls a method on a JMX MBean")
+  @MXAction("jmx-call")
+  public String callJmx(@MXName("server") String serverId,
+                        @MXName("pattern") String pattern,
+                        @MXName("operation") String operation,
+                        @MXName("operation-index") String operationIdx,
+                        @MXName("values") String values);
+
   @Description("Prints status of a server")
   @MXAction("status")
   public String getStatus(@MXName("server") String value);
