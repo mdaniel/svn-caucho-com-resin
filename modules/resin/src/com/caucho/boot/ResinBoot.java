@@ -291,7 +291,6 @@ public class ResinBoot
     BootCommand command = null;
     try {
       boot = new ResinBoot(argv);
-
       command = boot.getCommand();
 
       while (boot.start()) {

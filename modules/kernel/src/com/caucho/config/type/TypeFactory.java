@@ -454,7 +454,7 @@ public class TypeFactory implements AddLoaderListener
     String urnName = "urn:" + pkg + '.' + name;
     
     Class<?> cl = findUrnClass(urnName, loader);
-    
+
     if (cl == null) {
       cl = loadClassImpl(pkg, name, loader);
       
@@ -498,11 +498,13 @@ public class TypeFactory implements AddLoaderListener
     for (String pkgName : pkgList) {
       try {
         Class<?> cl;
+        
+        String className = pkgName + '.' + name;
 
         if (dynLoader != null)
-          cl = dynLoader.loadClassImpl(pkgName + '.' + name, false);
+          cl = dynLoader.loadClassImpl(className, false);
         else
-          cl = Class.forName(pkgName + '.' + name, false, loader);
+          cl = Class.forName(className, false, loader);
 
         if (cl != null)
           return cl;
