@@ -605,7 +605,7 @@ public class BlockStore {
    */
   public boolean isRowBlock(long blockAddress)
   {
-    return getAllocation(blockAddress / BLOCK_SIZE) == ALLOC_ROW;
+    return getAllocationByAddress(blockAddress) == ALLOC_ROW;
   }
 
   /**
@@ -661,7 +661,15 @@ public class BlockStore {
    */
   public boolean isIndexBlock(long blockAddress)
   {
-    return getAllocation(blockAddress / BLOCK_SIZE) == ALLOC_INDEX;
+    return getAllocationByAddress(blockAddress) == ALLOC_INDEX;
+  }
+
+  /**
+   * Return true if the block is an index block.
+   */
+  public boolean isInodePtrBlock(long blockAddress)
+  {
+    return getAllocationByAddress(blockAddress) == ALLOC_INODE_PTR;
   }
 
   /**
@@ -740,6 +748,7 @@ public class BlockStore {
   private void extendFile()
   {
     long newBlockCount;
+    long newBlockIndex;
 
     synchronized (_allocationLock) {
       if (_freeAllocIndex < _blockCount)
@@ -749,9 +758,12 @@ public class BlockStore {
         newBlockCount = _blockCount + 1;
       else
         newBlockCount = _blockCount + 256;
-
+      
+      if (newBlockCount * BLOCK_SIZE < _readWrite.getFileSize())
+        newBlockCount = _readWrite.getFileSize() / BLOCK_SIZE;
+      
       while (_allocationTable.length / ALLOC_BYTES_PER_BLOCK
-             <= newBlockCount) {
+             < newBlockCount) {
         // expand the allocation table
 
         byte []newTable = new byte[_allocationTable.length + ALLOC_CHUNK_SIZE];
@@ -761,17 +773,18 @@ public class BlockStore {
         _allocationTable = newTable;
 
         long superBlockMax = _allocationTable.length / ALLOC_BYTES_PER_BLOCK;
-        for (long count = 0;
-             count < superBlockMax;
-             count += ALLOC_GROUP_COUNT) {
+        for (long index = 0;
+             index < superBlockMax;
+             index += ALLOC_GROUP_COUNT) {
           // if the allocation table is over 8k, allocate the block for the
           // extension (each allocation block of 8k allocates 512m)
-          setAllocation(count, ALLOC_DATA);
+          setAllocation(index, ALLOC_DATA);
           // System.out.println("SET_ALLOC: " + count);
 
           // avoid collision
-          if (newBlockCount == count)
+          if (newBlockCount == index + 1) {
             newBlockCount++;
+          }
         }
 
         _allocDirtyMin = 0;
@@ -784,15 +797,17 @@ public class BlockStore {
       _blockCount = newBlockCount;
       _freeAllocIndex = 0;
 
-      if (getAllocation(newBlockCount) != ALLOC_FREE) {
-        System.out.println(this + " BAD_BLOCK: " + newBlockCount
-                           + " " + getAllocation(newBlockCount));
+      newBlockIndex = newBlockCount - 1;
+
+      if (getAllocation(newBlockIndex) != ALLOC_FREE) {
+        System.out.println(this + " BAD_BLOCK: " + newBlockIndex
+                           + " " + getAllocation(newBlockIndex));
       }
 
-      setAllocation(newBlockCount, ALLOC_DATA);
+      setAllocation(newBlockIndex, ALLOC_DATA);
     }
 
-    long blockId = blockIndexToBlockId(newBlockCount);
+    long blockId = blockIndexToBlockId(newBlockIndex);
 
     Block block = _blockManager.getBlock(this, blockId);
 
@@ -814,7 +829,7 @@ public class BlockStore {
     block.free();
 
     synchronized (_allocationLock) {
-      setAllocation(newBlockCount, ALLOC_FREE);
+      setAllocation(newBlockIndex, ALLOC_FREE);
     }
   }
 
@@ -882,6 +897,14 @@ public class BlockStore {
     saveAllocation();
   }
 
+  /**
+   * Sets the allocation for a block.
+   */
+  public final int getAllocationByAddress(long blockAddress)
+  {
+    return getAllocation(blockAddress / BLOCK_SIZE);
+  }
+  
   /**
    * Sets the allocation for a block.
    */
@@ -1508,6 +1531,7 @@ public class BlockStore {
             if ((blockBuffer[offset] & mask) == 0) {
               fragOffset = i;
               blockBuffer[offset] |= mask;
+
               block.setDirty(offset, offset + 1);
               break;
             }

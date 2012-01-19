@@ -31,6 +31,7 @@ package com.caucho.db.debug;
 
 import java.io.IOException;
 
+import com.caucho.db.block.Block;
 import com.caucho.db.block.BlockStore;
 import com.caucho.vfs.Path;
 import com.caucho.vfs.ReadStream;
@@ -84,82 +85,122 @@ public class DebugStore {
     throws IOException
   {
     out.println();
+    
+    StringBuilder sb = new StringBuilder();
+    
+    int lastData = 0;
 
-    for (int i = 0; i < 2 * count; i += 2) {
-      int v = allocTable[i];
+    for (int i = 0; i < count; i++) {
+      int v = allocTable[2 * i];
 
       int code = v & 0xf;
-
+      
       switch (code) {
       case BlockStore.ALLOC_FREE:
-        out.print('.');
+        sb.append('.');
         break;
       case BlockStore.ALLOC_ROW:
-        out.print('r');
+        sb.append('r');
         break;
       case BlockStore.ALLOC_DATA:
-        out.print('u');
+        sb.append('+');
         break;
-        /*
-      case BlockStore.ALLOC_FRAGMENT:
-        out.print('f');
+      case BlockStore.ALLOC_INODE_PTR:
+        sb.append('p');
         break;
-        */
       case BlockStore.ALLOC_MINI_FRAG:
-        out.print('m');
+        sb.append('f');
         break;
       case BlockStore.ALLOC_INDEX:
-        out.print('i');
+        sb.append('i');
         break;
       default:
-        out.print('?');
+        sb.append('?');
+        break;
       }
       
-      if (i % 64 == 63)
-        out.println();
-      else if (i % 8 == 7)
-        out.print(' ');
+      if (code != BlockStore.ALLOC_FREE) {
+        lastData = sb.length();
+      }
+      
+      if (i % 64 == 63) {
+        sb.append("\n");
+      }
+      else if (i % 8 == 7) {
+        sb.append(' ');
+      }
     }
     
-    out.println();
+    sb.setLength(lastData);
+    
+    out.println(sb);
   }
 
   private void debugFragments(WriteStream out, byte []allocTable, long count)
     throws Exception
   {
-    long totalUsed = 0;
+    int totalUsed = 0;
     
-    byte []block = new byte[BlockStore.BLOCK_SIZE];
+    StringBuilder sb = new StringBuilder();
     
-    for (int i = 0; i < 2 * count; i += 2) {
-      int code = allocTable[i];
+    int lastData = 0;
+    
+    int len = 0;
 
-      /*
-      if (code == BlockStore.ALLOC_FRAGMENT) {
-        int fragCount = 0;
+    for (int i = 0; i < count; i++) {
+      int v = allocTable[2 * i];
 
-        for (int j = 0; j < 8; j++) {
-          if ((allocTable[i + 1] & (1 << j)) != 0)
-            fragCount++;
-        }
-
-        totalUsed += fragCount;
-
-        out.println();
-
-        out.print("Fragment Block " + (i / 2) + ": ");
-        for (int j = 0; j < 8; j++) {
-          if ((allocTable[i + 1] & (1 << j)) != 0)
-            out.print("1");
-          else
-            out.print(".");
-        }
+      int code = v & 0xf;
+      
+      if (code != BlockStore.ALLOC_MINI_FRAG) {
+        continue;
       }
-      */
-    }
+      
+      Block block = _store.readBlock(i * BlockStore.BLOCK_SIZE);
+      
+      try {
+        block.read();
+        byte []buffer = block.getBuffer();
 
+        for (int j = 0; j < (BlockStore.MINI_FRAG_PER_BLOCK + 7) / 8; j++) {
+          int mask = buffer[j + BlockStore.MINI_FRAG_ALLOC_OFFSET] & 0xff;
+
+          sb.append(bits(mask >> 4));
+          sb.append(bits(mask));
+      
+          len++;
+          if (len % 32 == 0)
+            sb.append("\n");
+          else if (len % 4 == 0)
+            sb.append(" ");
+        }
+      } finally {
+        block.free();
+      }
+    }
+    
+    if (sb.length() > 0) {
+      out.println();
+      out.println("Fragments:");
+      out.println(sb);
+    }
+    
     out.println();
     out.println("Total-used: " + totalUsed);
+  }
+  
+  private char bits(int b)
+  {
+    b = b & 0xf;
+    
+    if (b == 0)
+      return '.';
+    else if (b == 15)
+      return '+';
+    else if (b < 10)
+      return (char) (b + '0');
+    else
+      return (char) (b + 'a' - 10);
   }
 
   private void readBlock(byte []block, long count)
@@ -179,5 +220,10 @@ public class DebugStore {
   private int readShort(byte []block, int offset)
   {
     return ((block[offset] & 0xff) << 8) + (block[offset + 1] & 0xff);
+  }
+  
+  public void close()
+  {
+    _store.close();
   }
 }

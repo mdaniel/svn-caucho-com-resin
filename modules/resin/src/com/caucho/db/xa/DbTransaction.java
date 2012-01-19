@@ -456,18 +456,7 @@ public class DbTransaction extends StoreTransaction {
         }
       }
     }
-
-    if (_deallocateBlocks != null) {
-      while (_deallocateBlocks.size() > 0) {
-        Block block = _deallocateBlocks.remove(0);
-
-        try {
-          block.getStore().deallocateBlock(block.getBlockId());
-        } catch (IOException e) {
-          throw new SQLExceptionWrapper(e);
-        }
-      }
-    }
+    
     if (_deleteInodes != null) {
       while (_deleteInodes.size() > 0) {
         Inode inode = _deleteInodes.remove(0);
@@ -477,6 +466,18 @@ public class DbTransaction extends StoreTransaction {
           inode.remove();
         } catch (Exception e) {
           log.log(Level.WARNING, e.toString(), e);
+        }
+      }
+    }
+
+    if (_deallocateBlocks != null) {
+      while (_deallocateBlocks.size() > 0) {
+        Block block = _deallocateBlocks.remove(0);
+
+        try {
+          block.getStore().deallocateBlock(block.getBlockId());
+        } catch (IOException e) {
+          throw new SQLExceptionWrapper(e);
         }
       }
     }
