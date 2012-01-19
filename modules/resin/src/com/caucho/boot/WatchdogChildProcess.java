@@ -86,6 +86,7 @@ class WatchdogChildProcess
   private final Lifecycle _lifecycle = new Lifecycle();
 
   private WatchdogActor _watchdogActor;
+  private WatchdogChildTask _task;
 
   private Socket _childSocket;
   private AtomicReference<Process> _processRef
@@ -100,11 +101,13 @@ class WatchdogChildProcess
 
   WatchdogChildProcess(String id,
                        ResinSystem system,
-                       WatchdogChild watchdog)
+                       WatchdogChild watchdog,
+                       WatchdogChildTask task)
   {
     _id = id;
     _system = system;
     _watchdog = watchdog;
+    _task = task;
   }
 
   int getPid()
@@ -146,6 +149,11 @@ class WatchdogChildProcess
   public String getExitMessage()
   {
     return _exitMessage;
+  }
+  
+  public void setShutdownMessage(String msg)
+  {
+    _task.setShutdownMessage(msg);
   }
   
   public long getUptime()
@@ -209,7 +217,8 @@ class WatchdogChildProcess
         
         message(new StartInfoMessage(_watchdog.isRestart(),
                                      _watchdog.getRestartMessage(),
-                                     _watchdog.getPreviousExitCode()));
+                                     _watchdog.getPreviousExitCode(),
+                                     _task.getShutdownMessage()));
 
         _status = process.waitFor();
 
@@ -674,13 +683,20 @@ class WatchdogChildProcess
     // #4308, #4585
     if (CauchoSystem.isWindows())
       jvmArgs.add("-Xrs");
-    
-    if (_exitCode != null)
-      jvmArgs.add("-Dresin.exit.code=" + _exitCode.toString());
-    
-    if (_exitMessage != null) {
+
+    if (_task.getPreviousExitCode() != null)
+      jvmArgs.add("-Dresin.exit.code=" + _task.getPreviousExitCode().toString());
+
+    /*
+    if (_task.getRestartMessage() != null) {
       jvmArgs.add("-D" + HealthSystemFacade.RESIN_EXIT_MESSAGE
-                  + "=" + _exitMessage);
+                  + "=" + _task.getRestartMessage());
+    }
+    */
+    
+    if (_task.getShutdownMessage() != null) {
+      jvmArgs.add("-D" + HealthSystemFacade.RESIN_EXIT_MESSAGE
+                  + "=" + _task.getShutdownMessage());
     }
 
     String[] argv = _watchdog.getArgv();

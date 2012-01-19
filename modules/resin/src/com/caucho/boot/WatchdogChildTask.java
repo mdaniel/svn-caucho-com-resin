@@ -63,6 +63,8 @@ class WatchdogChildTask implements Runnable
   private boolean _isRestart;
   private String _restartMessage;
   private ExitCode _previousExitCode;
+  
+  private String _shutdownMessage;
 
   WatchdogChildTask(ResinSystem system,
                     WatchdogChild watchdog)
@@ -148,6 +150,16 @@ class WatchdogChildTask implements Runnable
     return _previousExitCode;
   }
   
+  String getShutdownMessage()
+  {
+    return _shutdownMessage;
+  }
+  
+  void setShutdownMessage(String msg)
+  {
+    _shutdownMessage = msg;
+  }
+  
   Serializable queryGet(Serializable payload)
   {
     WatchdogChildProcess process = _process;
@@ -212,8 +224,11 @@ class WatchdogChildTask implements Runnable
 
         log.info(_watchdog + " starting");
 
-        process = new WatchdogChildProcess(id, _system, _watchdog);
+        process = new WatchdogChildProcess(id, _system, _watchdog,
+                                           this);
         _process = process;
+        
+        String lastShutdownMessage = _shutdownMessage;
 
         try {
           _process.run();
@@ -237,6 +252,10 @@ class WatchdogChildTask implements Runnable
           } catch (Exception e) {
             
           }
+        }
+         
+        if (lastShutdownMessage == _shutdownMessage) {
+          _shutdownMessage = null;
         }
       }
 

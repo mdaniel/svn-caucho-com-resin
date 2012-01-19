@@ -74,9 +74,14 @@ public class WatchdogActor extends SimpleActor
   @Message
   public void onWarning(String to, String from, WarningMessage warning)
   {
+    String msg = warning.getMessage();
+    
     log.warning("Watchdog received warning "
                 + "from Resin[" + _child.getId() + ",pid=" + _child.getPid() + "]:"
                 + "\n  " + warning.getMessage());
+    
+    if (msg.startsWith("Shutdown:"))
+      _child.setShutdownMessage(msg);
   }
   
   /*

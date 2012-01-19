@@ -238,7 +238,7 @@ public class ShutdownSystem extends AbstractResinSubSystem
     }
 
     try {
-      _warningService.sendWarning(this, msg);
+      _warningService.sendWarning(this, "Shutdown: " + msg);
     } catch (Exception e) {
       log.log(Level.WARNING, e.toString(), e);
     }

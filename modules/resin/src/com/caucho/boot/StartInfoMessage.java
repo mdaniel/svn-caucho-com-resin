@@ -39,6 +39,7 @@ import com.caucho.env.shutdown.ExitCode;
 public class StartInfoMessage implements Serializable {
   private boolean _isRestart;
   private String _restartMessage;
+  private String _shutdownMessage;
   private ExitCode _previousExitCode;
   
   public StartInfoMessage()
@@ -47,11 +48,13 @@ public class StartInfoMessage implements Serializable {
   
   public StartInfoMessage(boolean isRestart, 
                           String message,
-                          ExitCode previousExitCode)
+                          ExitCode previousExitCode,
+                          String shutdownMessage)
   {
     _isRestart = isRestart;
     _restartMessage = message;
     _previousExitCode = previousExitCode;
+    _shutdownMessage = shutdownMessage;
   }
   
   /**

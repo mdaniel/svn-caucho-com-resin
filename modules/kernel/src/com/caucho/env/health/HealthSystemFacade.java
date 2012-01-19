@@ -32,6 +32,9 @@ package com.caucho.env.health;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
+import com.caucho.env.shutdown.ExitCode;
+import com.caucho.env.shutdown.ShutdownSystem;
+
 /**
  * A facade for sending health events.
  */
@@ -73,6 +76,7 @@ public class HealthSystemFacade {
   
   protected void fireFatalEventImpl(String eventName, String eventMessage)
   {
+    ShutdownSystem.shutdownActive(ExitCode.HEALTH, eventName + ": " + eventMessage);
   }
   
   static {
