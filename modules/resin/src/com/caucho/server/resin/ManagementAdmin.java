@@ -31,6 +31,7 @@ package com.caucho.server.resin;
 
 import com.caucho.bam.actor.ActorSender;
 import com.caucho.bam.actor.LocalActorSender;
+import com.caucho.boot.LogLevelCommand;
 import com.caucho.boot.WatchdogStatusQuery;
 import com.caucho.cloud.bam.BamSystem;
 import com.caucho.cloud.network.NetworkClusterSystem;
@@ -43,9 +44,11 @@ import com.caucho.server.admin.JmxCallQuery;
 import com.caucho.server.admin.JmxDumpQuery;
 import com.caucho.server.admin.JmxListQuery;
 import com.caucho.server.admin.JmxSetQuery;
+import com.caucho.server.admin.LogLevelQuery;
 import com.caucho.server.admin.PdfReportQuery;
 import com.caucho.server.admin.ThreadDumpQuery;
 import com.caucho.util.L10N;
+import org.apache.tools.ant.types.LogLevel;
 
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
@@ -54,11 +57,15 @@ import java.io.InputStream;
 import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 public class ManagementAdmin extends AbstractManagedObject
   implements ManagementMXBean
 {
   private static final L10N L = new L10N(ManagementAdmin.class);
+  private static Logger log = Logger.getLogger(ManagementAdmin.class.getName());
+
   private final Resin _resin;
 
   /**
@@ -101,6 +108,37 @@ public class ManagementAdmin extends AbstractManagedObject
                                           isPrintOperations,
                                           isPrintAllBeans,
                                           isPrintPlatformBeans);
+
+    return (String) query(serverId, query);
+  }
+
+  @Override
+  public String logLevel(String serverId,
+                         String loggersValue,
+                         String levelValue,
+                         String activeTime)
+  {
+    String []loggers = null;
+
+    try {
+      loggers = parseValues(loggersValue);
+    } catch (IllegalArgumentException e) {
+      log.log(Level.FINER, e.getMessage(), e);
+
+      return e.toString();
+    }
+
+    if (loggers.length == 0)
+      loggers = new String []{"", "com.caucho"};
+
+    long period = 0;
+
+    if (activeTime != null)
+      period = Period.toPeriod(activeTime);
+
+    Level level = LogLevelCommand.getLevel("-" + levelValue);
+
+    LogLevelQuery query = new LogLevelQuery(loggers, level, period);
 
     return (String) query(serverId, query);
   }
@@ -169,8 +207,61 @@ public class ManagementAdmin extends AbstractManagedObject
                         String operationIdx,
                         String values)
   {
-    List<String> params = new ArrayList<String>();
+    String []params;
+    try {
+      params = parseValues(values);
+    } catch(IllegalArgumentException e) {
+      log.log(Level.FINER, e.getMessage(), e);
 
+      return e.toString();
+    }
+    //
+    int operationIndex = -1;
+    if (operationIdx != null)
+      operationIndex = Integer.parseInt(operationIdx);
+
+    JmxCallQuery query = new JmxCallQuery(pattern,
+                                          operation,
+                                          operationIndex,
+                                          params);
+
+    return (String) query(serverId, query);
+  }
+
+  @Override
+  public String dumpJmx(String serverId)
+  {
+    JmxDumpQuery query = new JmxDumpQuery();
+
+    return (String) query(serverId, query);
+  }
+
+  @Override
+  public String getStatus(String serverId)
+  {
+    WatchdogStatusQuery query = new WatchdogStatusQuery();
+
+    return (String) query(serverId, query);
+  }
+
+  private CloudServer getServer(String server)
+  {
+    CloudServer cloudServer;
+
+    if (server == null)
+      cloudServer = NetworkClusterSystem.getCurrent().getSelfServer();
+    else cloudServer = NetworkClusterSystem.getCurrent()
+                                           .getSelfServer()
+                                           .getPod()
+                                           .findServer(
+                                             server);
+
+    return cloudServer;
+  }
+
+  private String[] parseValues(String values)
+  {
+    List<String> params = new ArrayList<String>();
     StringBuilder builder = null;
 
     if (values != null) {
@@ -206,11 +297,11 @@ public class ManagementAdmin extends AbstractManagedObject
           final int end = i;
 
           if (i == chars.length || chars[end] != quote)
-            return new IllegalArgumentException(L.l(
+            throw new IllegalArgumentException(L.l(
               "`{0}' expected at {1} in '{2}'",
               quote,
               end,
-              values)).toString();
+              values));
 
           builder = new StringBuilder();
           for (int j = start; j < end; j++) {
@@ -241,48 +332,8 @@ public class ManagementAdmin extends AbstractManagedObject
       if (builder != null)
         params.add(builder.toString());
     }
-    //
-    int operationIndex = -1;
-    if (operationIdx != null)
-      operationIndex = Integer.parseInt(operationIdx);
 
-    JmxCallQuery query = new JmxCallQuery(pattern,
-                                          operation,
-                                          operationIndex,
-                                          params.toArray(new String[params.size()]));
-
-    return (String) query(serverId, query);
-  }
-
-  @Override
-  public String dumpJmx(String serverId)
-  {
-    JmxDumpQuery query = new JmxDumpQuery();
-
-    return (String) query(serverId, query);
-  }
-
-  @Override
-  public String getStatus(String serverId)
-  {
-    WatchdogStatusQuery query = new WatchdogStatusQuery();
-
-    return (String) query(serverId, query);
-  }
-
-  private CloudServer getServer(String server)
-  {
-    CloudServer cloudServer;
-
-    if (server == null)
-      cloudServer = NetworkClusterSystem.getCurrent().getSelfServer();
-    else cloudServer = NetworkClusterSystem.getCurrent()
-                                           .getSelfServer()
-                                           .getPod()
-                                           .findServer(
-                                             server);
-
-    return cloudServer;
+    return params.toArray(new String[params.size()]);
   }
 
   private Object query(String serverId, Serializable query)

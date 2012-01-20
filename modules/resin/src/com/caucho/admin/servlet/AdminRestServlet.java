@@ -47,6 +47,7 @@ import com.caucho.jmx.Jmx;
 import com.caucho.jmx.MXAction;
 import com.caucho.jmx.MXDefaultValue;
 import com.caucho.jmx.MXName;
+import com.caucho.jmx.MXValueRequired;
 import com.caucho.management.server.ManagementMXBean;
 import com.caucho.util.L10N;
 import com.caucho.vfs.Vfs;
@@ -148,7 +149,8 @@ public class AdminRestServlet extends HttpServlet {
 
     private String []_parameterNames;
     private Object [] _parameterDefaults;
-    
+    private boolean [] _parameterRequired;
+
     private Marshal []_parameterMarshal;
     private Marshal _returnMarshal;
     
@@ -163,12 +165,14 @@ public class AdminRestServlet extends HttpServlet {
       
       _parameterNames = new String[parameterTypes.length];
       _parameterDefaults = new Object[parameterTypes.length];
+      _parameterRequired = new boolean[parameterTypes.length];
 
       Annotation [][]paramAnn = method.getParameterAnnotations();
       
       for (int i = 0; i < _parameterNames.length; i++) {
         _parameterNames[i] = getParamName(paramAnn, i);
         _parameterDefaults[i] = getParameterDefault(paramAnn, i, parameterTypes[i]);
+        _parameterRequired[i] = isParameterRequired(paramAnn, i);
       }
       
       _parameterMarshal = new Marshal[parameterTypes.length];
@@ -198,7 +202,7 @@ public class AdminRestServlet extends HttpServlet {
       }
     }
 
-    private Object getParameterDefault(Annotation[][] paramAnn,
+    private Object getParameterDefault(Annotation [][]paramAnn,
                                        int i,
                                        Class type)
     {
@@ -211,6 +215,17 @@ public class AdminRestServlet extends HttpServlet {
       }
 
       return null;
+    }
+
+    private boolean isParameterRequired(Annotation [][]paramAnn,
+                                       int i)
+    {
+      for (Annotation ann : paramAnn[i]) {
+        if (ann.annotationType().equals(MXValueRequired.class))
+          return true;
+      }
+
+      return false;
     }
 
     private String getParamName(Annotation [][]paramAnn, int i)
@@ -245,16 +260,30 @@ public class AdminRestServlet extends HttpServlet {
         throw ConfigException.create(e);
       }
 
-      Object []param = new Object[_parameterMarshal.length];
+      Object []params = new Object[_parameterMarshal.length];
       
-      for (int i = 0; i < param.length; i++) {
-        param[i] = _parameterMarshal[i].marshal(req,
+      for (int i = 0; i < params.length; i++) {
+        String requestParam = req.getParameter(_parameterNames[i]);
+
+        if (requestParam == null && _parameterRequired[i]) {
+          res.setStatus(500);
+          res.setContentType("text/plain");
+
+          PrintWriter out = res.getWriter();
+
+          out.println(L.l("parameter `{0}' is requried.",
+                                                 _parameterNames[i]));
+
+          return;
+        }
+
+        params[i] = _parameterMarshal[i].marshal(req,
                                                 _parameterNames[i],
                                                 _parameterDefaults[i]);
       }
       
       try {
-        Object value = _method.invoke(management, param);
+        Object value = _method.invoke(management, params);
         
         _returnMarshal.unmarshal(res, value);
       } catch (Exception e) {

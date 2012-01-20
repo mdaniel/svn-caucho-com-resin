@@ -116,6 +116,10 @@ public class LogLevelCommand extends AbstractManagementCommand
     return 0;
   }
 
+  public static Level getLevel(String level) {
+    return _options.get(level);
+  }
+
   static {
     _options.put("-all", Level.ALL);
     _options.put("-finest", Level.FINEST);

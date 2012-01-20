@@ -33,6 +33,7 @@ import com.caucho.jmx.Description;
 import com.caucho.jmx.MXAction;
 import com.caucho.jmx.MXDefaultValue;
 import com.caucho.jmx.MXName;
+import com.caucho.jmx.MXValueRequired;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -64,6 +65,14 @@ public interface ManagementMXBean extends ManagedObjectMXBean
                         @MXName("print-operations") boolean isPrintOperations,
                         @MXName("print-all-beans") boolean isPrintAllBeans,
                         @MXName("print-platform-beans") boolean isPrintPlatformBeans);
+
+  @Description("sets the java.util.logging level for debugging (Resin Pro)")
+  @MXAction("log-level")
+  public String logLevel(@MXName("server") String serverId,
+                         @MXName("loggers") String loggersValue,
+                         @MXValueRequired
+                         @MXName("level") String levelValue,
+                         @MXName("active-time") String activeTime);
 
   @Description("creates a PDF report of a Resin server (Resin Pro)")
   @MXAction("pdf-report")
