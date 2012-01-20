@@ -33,6 +33,7 @@ import java.net.InetAddress;
 import java.util.concurrent.ConcurrentHashMap;
 
 import com.caucho.config.ConfigException;
+import com.caucho.util.Alarm;
 import com.caucho.util.L10N;
 
 /**
@@ -426,9 +427,14 @@ public class CloudServer {
   @Override
   public String toString()
   {
+    String address = _address;
+    
+    if (Alarm.isTest() && address.startsWith("192.168.1."))
+      address = "192.168.1.x";
+    
     return (getClass().getSimpleName() 
             + "[" + _id + "," + _index
-            + "," + _address + ":" + _port
+            + "," + address + ":" + _port
             + "]");
   }
 

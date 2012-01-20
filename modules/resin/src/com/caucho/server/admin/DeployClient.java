@@ -87,6 +87,11 @@ public class DeployClient implements Repository
   
   private String _url;
 
+  public DeployClient()
+  {
+    this(null);
+  }
+  
   public DeployClient(String serverId)
   {
     Server server = Server.getCurrent();
@@ -365,8 +370,11 @@ public class DeployClient implements Repository
     DeployCommitListQuery query = new DeployCommitListQuery(commitList);
     
     DeployCommitListQuery result = (DeployCommitListQuery) query(query);
-
-    return result.getCommitList();
+    
+    if (result != null)
+      return result.getCommitList();
+    else
+      return null;
   }
 
   public boolean getFile(String tagName, String fileName, OutputStream os)

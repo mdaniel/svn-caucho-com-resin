@@ -41,10 +41,6 @@ import javax.management.ObjectName;
 
 import com.caucho.admin.RemoteAdminService;
 import com.caucho.cloud.network.NetworkListenSystem;
-import com.caucho.cloud.topology.CloudCluster;
-import com.caucho.cloud.topology.CloudPod;
-import com.caucho.cloud.topology.CloudSystem;
-import com.caucho.cloud.topology.TopologyService;
 import com.caucho.config.Config;
 import com.caucho.config.ConfigException;
 import com.caucho.config.core.ResinProperties;
@@ -459,7 +455,6 @@ class WatchdogManager implements AlarmListener {
       }
       
       serverId = getServerId(serverId, args);
-
       WatchdogChild watchdog = _watchdogMap.get(serverId);
 
       if (watchdog == null)
@@ -604,10 +599,14 @@ class WatchdogManager implements AlarmListener {
     
     WatchdogConfig serverConfig = null;
     
-    WatchdogClient client = resin.findClient(serverId, args); 
+    WatchdogClient client;
+    
+    if (serverId != null)
+      client = resin.findClient(serverId);
+    else
+      client = resin.findClient(serverId, args); 
     
     //resin.findClient(serverId);
-
     if (client != null)
       serverConfig = client.getConfig();
     else
