@@ -39,14 +39,14 @@ import com.caucho.util.L10N;
 import com.caucho.vfs.*;
 
 import java.io.IOException;
-import java.util.ArrayList;
-import java.util.HashMap;
+import java.util.*;
 import java.util.logging.Logger;
 
 /**
  * pdf object oriented API facade
  */
-public class PDF {
+public class PDF 
+{
   private static final Logger log = Logger.getLogger(PDF.class.getName());
   private static final L10N L = new L10N(PDF.class);
 
@@ -70,6 +70,8 @@ public class PDF {
   private ArrayList<Integer> _pagesGroupList = new ArrayList<Integer>();
   private int _pageCount;
 
+  private PDFOutline _outline = null;
+  
   private int _catalogId;
 
   private int _rootId;
@@ -129,6 +131,35 @@ public class PDF {
     throws IOException
   {
     return begin_page(width, height);
+  }
+  
+  public int add_page_to_outline(String title)
+  {
+    return add_page_to_outline(title, -1);
+  }
+  
+  public int add_page_to_outline(String title, int parentId)
+  {
+    return add_page_to_outline(title, _page.getHeight(), parentId);
+  }
+
+  public int add_page_to_outline(String title, double pos, int parentId)
+  {
+    if (_outline == null) {
+      int outlineId = _out.allocateId(1);
+      _outline = new PDFOutline(outlineId);
+    }
+    
+    int id = _out.allocateId(1);
+    
+    PDFDestination dest = new PDFDestination(id, 
+                                             title, 
+                                             _page.getId(), 
+                                             pos);
+    
+    _outline.addDestination(dest, parentId);
+    
+    return id;
   }
 
   public boolean set_info(String key, String value)
@@ -457,7 +488,19 @@ public class PDF {
 
     return size * font.stringWidth(string) / 1000.0;
   }
-
+  
+  /*
+   * An ESTIMATE of the number of chars that will fit in the space based 
+   * on the avg glyph size.  This only works properly with fixed-width fonts!
+   * 
+   */
+  public int charCount(double width, @NotNull PDFFont font, double size)
+  {
+    if (font == null)
+      return 0;
+    
+    return (int) Math.round(width / (font.getAvgCharWidth() / 1000 * size));
+  }
 
   /**
    * Sets the text position.
@@ -1060,14 +1103,26 @@ public class PDF {
       // output stream already closed;
       return false;
     }
+    
     if (_pageGroup.size() > 0) {
       _out.writePageGroup(_pageParentId, _rootId, _pageGroup);
       _pageGroup.clear();
 
       _pagesGroupList.add(_pageParentId);
     }
+    
+    int outlineId = -1;
+    
+    if (_outline != null) {
+      outlineId = _outline.getId();
+      _out.writeOutline(_outline);
+    }
 
-    _out.writeCatalog(_catalogId, _rootId, _pagesGroupList, _pageCount);
+    _out.writeCatalog(_catalogId, 
+                      _rootId, 
+                      outlineId,
+                      _pagesGroupList, 
+                      _pageCount);
 
     _out.endDocument();
 

@@ -97,30 +97,58 @@ function admin_pdf_summary()
   if (! $summary)
     return;
     
+  $g_canvas->writeSubsection("Environment");
+  
+  $g_canvas->writeTextLine("{$summary['ipAddress']} running as {$summary['userName']}");
+  $g_canvas->writeTextLine($summary["jvm"]);
+  $g_canvas->writeTextLine($summary["machine"]);
+  
+  $g_canvas->writeSubsection("Available Resources");
+  
+  $col1 = 85;  
+  $col2 = 300;
+  
+  $g_canvas->writeTextColumn($col1, 'r', "JVM Heap:");
+  $g_canvas->writeTextColumn($col2, 'l', "{$summary['freeHeap']} of {$summary['totalHeap']}");
+  $g_canvas->newLine();
+  
+  $g_canvas->writeTextColumn($col1, 'r', "Physical Memory:");
+  $g_canvas->writeTextColumn($col2, 'l', "{$summary['freePhysical']} of {$summary['totalPhysical']}");
+  $g_canvas->newLine();
+  
+  $g_canvas->writeTextColumn($col1, 'r', "Swap Space:");
+  $g_canvas->writeTextColumn($col2, 'l', "{$summary['freeSwap']} of {$summary['totalSwap']}");
+  $g_canvas->newLine();
+  
+  $g_canvas->writeTextColumn($col1, 'r', "File Descriptors:");
+  $g_canvas->writeTextColumn($col2, 'l', "{$summary['freeFd']} of {$summary['totalFd']}");
+  $g_canvas->newLine();
+
   $g_canvas->writeSubsection("Resin Instance");
   
   $g_canvas->writeTextLine("$si - {$summary['serverID']}, {$summary['cluster']} Cluster");
   
-  $col = 50;
+  $col1 = 50;
+  $col2 = 300;
   
-  $g_canvas->writeTextColumn($col, 'r', "Home:");
-  $g_canvas->writeTextColumn($col, 'l', "{$summary['resinHome']}");
+  $g_canvas->writeTextColumn($col1, 'r', "Home:");
+  $g_canvas->writeTextColumn($col2, 'l', "{$summary['resinHome']}");
   $g_canvas->newLine();
   
-  $g_canvas->writeTextColumn($col, 'r', "Root:");
-  $g_canvas->writeTextColumn($col, 'l', "{$summary['resinRoot']}");
+  $g_canvas->writeTextColumn($col1, 'r', "Root:");
+  $g_canvas->writeTextColumn($col2, 'l', "{$summary['resinRoot']}");
   $g_canvas->newLine();
   
-  $g_canvas->writeTextColumn($col, 'r', "Conf:");
-  $g_canvas->writeTextColumn($col, 'l', "{$summary['resinConf']}");
+  $g_canvas->writeTextColumn($col1, 'r', "Conf:");
+  $g_canvas->writeTextColumn($col2, 'l', "{$summary['resinConf']}");
   $g_canvas->newLine();
   
-  $g_canvas->writeTextColumn($col, 'r', "Logs:");
-  $g_canvas->writeTextColumn($col, 'l', "{$summary['resinLog']}");
+  $g_canvas->writeTextColumn($col1, 'r', "Logs:");
+  $g_canvas->writeTextColumn($col2, 'l', "{$summary['resinLog']}");
   $g_canvas->newLine();
   
-  $g_canvas->writeTextColumn($col, 'r', "Data:");
-  $g_canvas->writeTextColumn($col, 'l', "{$summary['resinData']}");
+  $g_canvas->writeTextColumn($col1, 'r', "Data:");
+  $g_canvas->writeTextColumn($col2, 'l', "{$summary['resinData']}");
   $g_canvas->newLine();
   
   $g_canvas->newLine();
@@ -139,32 +167,6 @@ function admin_pdf_summary()
     $g_canvas->writeTextLineIndent(20, $license_data[2]);
   }
   
-  $g_canvas->writeSubsection("Environment");
-  
-  $g_canvas->writeTextLine("{$summary['ipAddress']} running as {$summary['userName']}");
-  $g_canvas->writeTextLine($summary["jvm"]);
-  $g_canvas->writeTextLine($summary["machine"]);
-  
-  $g_canvas->writeSubsection("Available Resources");
-  
-  $col = 75;  
-  
-  $g_canvas->writeTextColumn($col, 'r', "JVM Heap:");
-  $g_canvas->writeTextColumn($col, 'l', "{$summary['freeHeap']} of {$summary['totalHeap']}");
-  $g_canvas->newLine();
-  
-  $g_canvas->writeTextColumn($col, 'r', "Physical Memory:");
-  $g_canvas->writeTextColumn($col, 'l', "{$summary['freePhysical']} of {$summary['totalPhysical']}");
-  $g_canvas->newLine();
-  
-  $g_canvas->writeTextColumn($col, 'r', "Swap Space:");
-  $g_canvas->writeTextColumn($col, 'l', "{$summary['freeSwap']} of {$summary['totalSwap']}");
-  $g_canvas->newLine();
-  
-  $g_canvas->writeTextColumn($col, 'r', "File Descriptors:");
-  $g_canvas->writeTextColumn($col, 'l', "{$summary['freeFd']} of {$summary['totalFd']}");
-  $g_canvas->newLine();
-  
   admin_pdf_ports($summary);
 }
 
@@ -174,42 +176,43 @@ function admin_pdf_ports($summary)
   
   $g_canvas->writeSubsection("TCP Ports");
   
-  $g_canvas->setFont("Helvetica-Bold", "9");
-    
-  $col = 50;
+  $g_canvas->setFont("Courier-Bold", "8");
   
-  $g_canvas->writeTextColumn(150, 'c', "");
+  $col1 = 140;
+  $col = 45;
+  
+  $g_canvas->setFont("Courier", "8");
+  
+  $g_canvas->writeTextColumn($col1, 'c', "");
   
   $g_canvas->writeTextColumn($col*3, 'c', "Threads");
   $g_canvas->writeTextColumn($col*4, 'c', "Keepalive");
   $g_canvas->newLine();
   
-  $g_canvas->writeTextColumn(100, 'r', "Listener");
-  $g_canvas->writeTextColumn($col, 'l', "Status");
-  $g_canvas->writeTextColumn($col, 'l', "Active");
-  $g_canvas->writeTextColumn($col, 'l', "Idle");
-  $g_canvas->writeTextColumn($col, 'l', "Total");
-  $g_canvas->writeTextColumn($col, 'l', "Total");
-  $g_canvas->writeTextColumn($col, 'l', "Thread");
-  $g_canvas->writeTextColumn($col, 'l', "Non-Block");
-  $g_canvas->writeTextColumn($col, 'l', "Comet");
+  $g_canvas->writeTextColumnHeader($col1, 'r', "Listener");
+  $g_canvas->writeTextColumnHeader($col, 'l', "Status");
+  $g_canvas->writeTextColumnHeader($col, 'c', "Active");
+  $g_canvas->writeTextColumnHeader($col, 'c', "Idle");
+  $g_canvas->writeTextColumnHeader($col, 'c', "Total");
+  $g_canvas->writeTextColumnHeader($col, 'c', "Total");
+  $g_canvas->writeTextColumnHeader($col, 'c', "Thread");
+  $g_canvas->writeTextColumnHeader($col, 'c', "Non-Block");
+  $g_canvas->writeTextColumnHeader($col, 'c', "Comet");
   $g_canvas->newLine();
-  
-  $g_canvas->writeHrule(0, 1, "med_grey");
-  $g_canvas->setFont("Helvetica", "9");
+  $g_canvas->newLine();
   
   $ports = $summary["ports"];
   foreach($ports as $port) {
-    $g_canvas->writeTextColumn(100, 'r', $port[0]);
+    $g_canvas->writeTextColumn($col1, 'r', $port[0]);
     $g_canvas->writeTextColumn($col, 'l', $port[1]);
-    $g_canvas->writeTextColumn($col, 'l', $port[2]);
-    $g_canvas->writeTextColumn($col, 'l', $port[3]);
-    $g_canvas->writeTextColumn($col, 'l', $port[4]);
-    $g_canvas->writeTextColumn($col, 'l', $port[5]);
-    $g_canvas->writeTextColumn($col, 'l', $port[6]);
-    $g_canvas->writeTextColumn($col, 'l', $port[7]);
-    $g_canvas->writeTextColumn($col, 'l', $port[8]);
-    $g_canvas->writeTextColumn($col, 'l', $port[9]);
+    $g_canvas->writeTextColumn($col, 'c', $port[2]);
+    $g_canvas->writeTextColumn($col, 'c', $port[3]);
+    $g_canvas->writeTextColumn($col, 'c', $port[4]);
+    $g_canvas->writeTextColumn($col, 'c', $port[5]);
+    $g_canvas->writeTextColumn($col, 'c', $port[6]);
+    $g_canvas->writeTextColumn($col, 'c', $port[7]);
+    $g_canvas->writeTextColumn($col, 'c', $port[8]);
+    $g_canvas->writeTextColumn($col, 'c', $port[9]);
     $g_canvas->newLine();
   }
 }
@@ -383,18 +386,19 @@ function admin_pdf_health()
   
   $g_canvas->writeSection("Health");
   
-  $w1 = 60;
-  $w2 = 160;
-  $w3 = 0;
+  $w1 = 65;
+  $w2 = 165;
+  $w3 = 290;
 
-  $g_canvas->setFont("Helvetica-Bold", "9");
+  $g_canvas->setFont("Courier-Bold", "8");
   
-  $g_canvas->writeTextColumn($w1, 'r', "Status");
-  $g_canvas->writeTextColumn($w2, 'l', "Check");
-  $g_canvas->writeTextColumn($w3, 'l', "Message");
+  $g_canvas->writeTextColumnHeader($w1, 'c', "Status");
+  $g_canvas->writeTextColumnHeader($w2, 'l', "Check");
+  $g_canvas->writeTextColumnHeader($w3, 'l', "Message");
+  $g_canvas->newLine();
   $g_canvas->newLine();
   
-  $g_canvas->setFont("Helvetica", "9");
+  $g_canvas->setFont("Courier", "8");
   
   $health_dump = admin_pdf_snapshot("Resin|HealthDump");
   
@@ -405,9 +409,9 @@ function admin_pdf_health()
     $health =& $health_dump["health"];
   
     foreach ($health as $check) {
-      $g_canvas->writeTextColumn($w1, 'r', $check["status"]);
+      $g_canvas->writeTextColumn($w1, 'c', $check["status"]);
       $g_canvas->writeTextColumn($w2, 'l', $check["name"]);
-      $g_canvas->writeTextColumn($w2, 'l', $check["message"]);
+      $g_canvas->writeTextColumn($w3, 'l', $check["message"]);
       $g_canvas->newLine();
     }
   }
@@ -466,8 +470,7 @@ function admin_pdf_log_messages($title,
     $g_canvas->writeText($ts);
     
     $g_canvas->setFont("Courier", 8);
-    $msg = wordwrap($message->message, 90, "\n", false);
-    $g_canvas->writeTextBlockIndent(100, $msg);
+    $g_canvas->writeTextWrapIndent(100, $message->message);
     
     debug($message->message);
     
@@ -493,7 +496,7 @@ function draw_cluster_graphs($mPage)
   if (! $stat)
     return;
 
-  $g_canvas->writeSection("Cluster Graphs");
+  $g_canvas->writeSection("Cluster Status Graphs");
   
   $g_canvas->allocateGraphSpace(3,2);
 
@@ -634,7 +637,7 @@ function draw_graph($name, $gds)
   } else {
     
     $max_gd = get_largest_data($gds);
-    $max_y = $max_gd->max;
+    $max_y = $max_gd->max + (0.05 * $max_gd->max);
   
     $x_range = new Range($g_start * 1000, $g_end * 1000);
     
@@ -834,22 +837,33 @@ function admin_pdf_heap_dump()
     
   $create_time = $dump["create_time"];
   $g_canvas->writeTextLineIndent(10, "Created: " . $create_time);
-  $g_canvas->newLine();
+  
+  $max = 100;
 
-  admin_pdf_selected_heap_dump($heap, 100);
+  admin_pdf_selected_heap_dump($heap, "Top Classes by Memory Usage", $max);
 
-  //$class_loader_heap = heap_select_classes($heap_dump["heap"]);
-  //admin_pdf_selected_heap_dump($class_loader_heap, "ClassLoader Heap Dump", 100);
+  $class_loader_heap = heap_select_classloader($heap_dump["heap"]);
+  admin_pdf_selected_heap_dump($class_loader_heap, "ClassLoader Memory Usage ", $max);
 }
 
-function admin_pdf_selected_heap_dump($heap, $max)
+function admin_pdf_selected_heap_dump($heap, $title, $max)
 {
   global $g_canvas;
   
   uksort($heap, "heap_descendant_cmp");
+  
+  $g_canvas->writeSubSection($title);
+  
+  $cols = array(325,65,65,65);
 
-  admin_pdf_heap_dump_header();
-
+  $g_canvas->setFont("Courier-Bold",8);
+  $g_canvas->writeTextColumnHeader($cols[0], 'l', "Class Name");
+  $g_canvas->writeTextColumnHeader($cols[1], 'l', "self+desc");
+  $g_canvas->writeTextColumnHeader($cols[2], 'l', "self");
+  $g_canvas->writeTextColumnHeader($cols[3], 'l', "count");
+  $g_canvas->newLine();
+  $g_canvas->newLine();
+  
   $i = 0;
 
   $g_canvas->setDataFont();
@@ -859,26 +873,12 @@ function admin_pdf_selected_heap_dump($heap, $max)
       break;
     }
     
-    $g_canvas->writeTextIndent(10, $name);
-    $g_canvas->writeTextIndent(325, admin_pdf_size($value["descendant"]));
-    $g_canvas->writeTextIndent(400, admin_pdf_size($value["size"]));
-    $g_canvas->writeTextIndent(475, $value["count"]);
+    $g_canvas->writeTextColumn($cols[0], 'l', $name);
+    $g_canvas->writeTextColumn($cols[1], 'l', admin_pdf_size($value["descendant"]));
+    $g_canvas->writeTextColumn($cols[2], 'l', admin_pdf_size($value["size"]));
+    $g_canvas->writeTextColumn($cols[3], 'l', $value["count"]);
     $g_canvas->newLine();
   }
-}
-
-function admin_pdf_heap_dump_header()
-{
-  global $g_canvas;
-  
-  $g_canvas->setFont("Courier-Bold",8);
-  
-  $g_canvas->writeTextIndent(10, "Class Name");
-  $g_canvas->writeTextIndent(325, "self+desc");
-  $g_canvas->writeTextIndent(400, "self");
-  $g_canvas->writeTextIndent(475, "count");
-  $g_canvas->newLine();
-  $g_canvas->writeHrule(0, 1, "med_grey");
 }
 
 function heap_descendant_cmp($a, $b)
@@ -901,7 +901,7 @@ function admin_pdf_size($size)
     return $size;
 }
 
-function heap_select_classes(&$values)
+function heap_select_classloader(&$values)
 {
   $selected = array();
 
@@ -939,34 +939,36 @@ function admin_pdf_profile_section($name, $profile, $filter=null)
   $g_canvas->writeSubSection($name);
 
   $g_canvas->setFont("Courier-Bold",8);
+  
+  $col1 = 100;
+  $col2 = 300;
 
-  $g_canvas->writeTextColumn(100, 'r', "Time:");
-  $g_canvas->writeTextColumn(100, 'l', $profile["total_time"] / 1000 . "s");
+  $g_canvas->writeTextColumn($col1, 'r', "Time:");
+  $g_canvas->writeTextColumn($col2, 'l', $profile["total_time"] / 1000 . "s");
   $g_canvas->newLine();
   
-  $g_canvas->writeTextColumn(100, 'r', "Ticks:");
-  $g_canvas->writeTextColumn(100, 'l', $profile["ticks"]);
+  $g_canvas->writeTextColumn($col1, 'r', "Ticks:");
+  $g_canvas->writeTextColumn($col2, 'l', $profile["ticks"]);
   $g_canvas->newLine();
   
-  $g_canvas->writeTextColumn(100, 'r', "Sample-Period:");
-  $g_canvas->writeTextColumn(100, 'l', $profile["period"]);
+  $g_canvas->writeTextColumn($col1, 'r', "Sample-Period:");
+  $g_canvas->writeTextColumn($col2, 'l', $profile["period"]);
   $g_canvas->newLine();
   
-  $g_canvas->writeTextColumn(100, 'r', "End:");
-  $g_canvas->writeTextColumn(100, 'l', date("Y-m-d H:i", $profile["end_time"] / 1000));
+  $g_canvas->writeTextColumn($col1, 'r', "End:");
+  $g_canvas->writeTextColumn($col2, 'l', date("Y-m-d H:i", $profile["end_time"] / 1000));
   $g_canvas->newLine();
   
   $g_canvas->setDataFont();
   
   $g_canvas->newLine();
   
-  $g_canvas->writeTextColumn(60, 'r', "% Time");
-  $g_canvas->writeTextColumn(60, 'r', "Time Self");
-  $g_canvas->writeTextColumn(300, 'l', "Method Call");
-  $g_canvas->writeTextColumn(400, 'l', "State");
+  $g_canvas->writeTextColumnHeader(60, 'r', "% Time");
+  $g_canvas->writeTextColumnHeader(60, 'r', "Time Self");
+  $g_canvas->writeTextColumnHeader(310, 'l', "Method Call");
+  $g_canvas->writeTextColumnHeader(70, 'l', "State");
   $g_canvas->newLine();
-  
-  $g_canvas->writeHrule(0, 1, "med_grey");
+  $g_canvas->newLine();
   
   $ticks = $profile["ticks"];
   
@@ -1004,13 +1006,13 @@ function admin_pdf_profile_section($name, $profile, $filter=null)
     $g_canvas->setDataFont();
     $g_canvas->writeTextColumn(60, 'r', sprintf("%.2f%%", 100 * $entry["ticks"] / $ticks));
     $g_canvas->writeTextColumn(60, 'r', sprintf("%.2fs",  $entry["ticks"] * $period / 1000));
-    $g_canvas->writeTextColumn(300, 'l', $entry["name"]);
-    $g_canvas->writeTextColumn(400, 'l', $entry["state"]);
+    $g_canvas->writeTextColumn(310, 'l', $entry["name"]);
+    $g_canvas->writeTextColumn(70, 'l', $entry["state"]);
     $g_canvas->newLine();
 
     if ($stack) {
       $g_canvas->setDataFont(7);
-      $g_canvas->writeTextBlockIndent(130, $stack);
+      $g_canvas->writeTextWrapIndent(130, $stack);
     } else {
       $g_canvas->newLine();
     }
@@ -1085,8 +1087,8 @@ function admin_pdf_thread_dump()
   $g_canvas->setFont("Courier-Bold", 8);
 
   $create_time = $dump["create_time"];
-  $g_canvas->writeTextLineIndent(10, "Created: " . $create_time);
-  $g_canvas->writeHrule(0, 1, "med_grey");
+  $g_canvas->writeTextLine("Created: " . $create_time);
+  $g_canvas->newLine();
 
   $entries =& $dump["thread_dump"];
 
@@ -1111,7 +1113,7 @@ function admin_pdf_thread_dump()
     $stack = admin_pdf_thread_stack($entry, $max_stack);
 
     $g_canvas->setDataFont(7);
-    $g_canvas->writeTextBlockIndent(50, $stack);
+    $g_canvas->writeTextWrapIndent(20, $stack);
   }
 }
 
@@ -1228,14 +1230,14 @@ function admin_pdf_shared_entries($i, &$entries, $g_canvas)
        ($entry =& $entries[$i]) && $stack == thread_dump_stack($entry);
        $i++) {
     
-    $g_canvas->writeTextIndent(10, sprintf("%.40s", $entry["name"]));
+    $g_canvas->writeTextColumn(350, 'l', sprintf("%.40s", $entry["name"]));
     
     $state = $entry["state"];
     if ($state == "RUNNABLE" && $state["native"])
       $state .= " (JNI)";
       
-    $g_canvas->writeTextIndent(350, $state);
-    $g_canvas->writeTextIndent(450, "[" . $entry["id"] . "]");
+    $g_canvas->writeTextColumn(85, 'l', $state);
+    $g_canvas->writeTextColumn(40, 'l', "[" . $entry["id"] . "]");
     $g_canvas->newLine();
 
     $lock = $entry["lock"];
@@ -1246,7 +1248,7 @@ function admin_pdf_shared_entries($i, &$entries, $g_canvas)
         $trace .= " owned by [" . $lock["owner_id"] . "] " . $lock["owner_name"];
       }
 
-      $g_canvas->writeTextIndent(20, $trace);
+      $g_canvas->writeTextIndent(10, $trace);
       $g_canvas->newLine();
     }
   }
@@ -1281,10 +1283,20 @@ function admin_pdf_jmx_dump()
   $entries =& $dump["jmx"];
 
   ksort($entries);
+  
+  $last_domain;
 
   foreach ($entries as $name => &$values) {
+    
+    $domain = substr($name, 0, strpos($name, ":"));
+    
+    if ($domain != $last_domain) {
+      $g_canvas->addToOutline($domain);
+      $last_domain = $domain;
+    }
+      
     $g_canvas->setFont("Courier-Bold", 8);
-    $g_canvas->writeTextLine($name);
+    $g_canvas->writeTextWrap($name);
 
     $g_canvas->setFont("Courier", 8);
     admin_pdf_jmx_attributes($g_canvas, $values);
@@ -1296,9 +1308,14 @@ function admin_pdf_jmx_attributes($g_canvas, &$values)
 {
   ksort($values);
 
+  $col1 = 180;
+  $col2 = $g_canvas->getLineWidth() - $col1 - 20;
+  
   foreach ($values as $key => $value) {
-    $g_canvas->writeTextIndent(10, $key);
-    $g_canvas->writeTextBlockIndent(180, admin_pdf_attribute_value($value));
+    $g_canvas->writeTextColumn(10, 'l', "");
+    $g_canvas->writeTextColumn($col1, 'l', $key);
+    $g_canvas->writeTextColumn($col2, 'l', admin_pdf_attribute_value($value));
+    $g_canvas->newLine();
   }
 }
 
@@ -1338,7 +1355,7 @@ function admin_pdf_attribute_value($value, $depth = 0)
     return $v
   }
   else {
-    return wordwrap($value, 75, "\n", true);
+    return $value;
   }
 }
 

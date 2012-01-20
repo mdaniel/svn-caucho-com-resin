@@ -31,6 +31,9 @@ class PdfCanvas
 
   private $text_y;
   
+  private $section_id;
+  private $subsection_id;
+  
   // state
   private $font;
   private $color
@@ -75,6 +78,9 @@ class PdfCanvas
   
   private $column_spacing = 5;
   private $column_x;
+  private $row_y;
+  private $row_max_y;
+  private $in_column = false;
   
   private $graph_rows = 3;
   private $graph_columns = 2;
@@ -135,7 +141,7 @@ class PdfCanvas
     }
     
     $this->text_y = $this->getTopMargin() + $this->font_size;
-    
+
     $this->graph_index = 0;
     $this->graph_x = 0;
     $this->graph_y = 0;
@@ -341,15 +347,19 @@ class PdfCanvas
   // text positioning
   //
   
-  public function newLine($count = 1)
+  public function newLine()
   {
-    for($i=0;$i<$count;$i++) {
+    if ($this->row_max_y && ! $this->$in_column) {
+      $this->text_y = $this->row_max_y + $this->getLineHeight();
+      $this->row_max_y = 0;
+      $this->row_y = 0;
+        $this->column_x = $this->getLeftMargin();
+    } else {
       $this->text_y += $this->getLineHeight();
-      $this->column_x = $this->getLeftMargin();
+    }
       
-      if ($this->text_y > $this->invertY($this->bottom_margin_width)) {
-        $this->newPage();
-      }
+    if ($this->text_y > $this->invertY($this->bottom_margin_width)) {
+      $this->newPage();
     }
     
     return 0;
@@ -575,7 +585,10 @@ class PdfCanvas
   {
     if ($new_page)
       $this->newPage();
-    
+      
+    $this->section_id = $this->pdf->add_page_to_outline($text);
+    $this->subsection_id = 0;
+      
     $this->header_right_text = $text;
     
     $this->saveState();
@@ -590,6 +603,10 @@ class PdfCanvas
   
   public function writeSubsection($text)
   {
+    $this->subsection_id = $this->pdf->add_page_to_outline($text, 
+                                          $this->invertY($this->text_y), 
+                                          $this->section_id);
+    
     $this->saveState();
     $this->setSubSectionFont();
     
@@ -602,6 +619,20 @@ class PdfCanvas
     $this->restoreState();
   }
   
+  public function addToOutline($text)
+  {
+    $parent_id = -1;
+    if ($this->subsection_id)
+      $parent_id = $this->subsection_id;
+    elseif ($this->section_id) {
+      $parent_id = $this->section_id;
+    }
+    
+    $this->pdf->add_page_to_outline($text, 
+                                    $this->invertY($this->text_y - $this->getLineHeight()), 
+                                    $parent_id);
+  }
+  
   // 
   // text metrics
   //
@@ -609,6 +640,16 @@ class PdfCanvas
   public function getTextWidth($text)
   {
     return $this->pdf->stringwidth($text, $this->font, $this->font_size);
+  }
+  
+  public function getCharsRemaining($indent=0)
+  {
+    return $this->getCharsInWidth($this->getLineWidth() - $indent);
+  }
+  
+  public function getCharsInWidth($width)
+  {
+    return $this->pdf->charCount($width, $this->font, $this->font_size);
   }
   
   public function alignRight($x, $text)
@@ -665,6 +706,16 @@ class PdfCanvas
     return $this->writeTextOpts(array('newline'=>true,'block'=>true,'indent'=>$x), $text);
   }
   
+  public function writeTextWrap($text)
+  {
+    return $this->writeTextOpts(array('wrap'=>true,'newline'=>true), $text);
+  }
+  
+  public function writeTextWrapIndent($x, $text)
+  {
+    return $this->writeTextOpts(array('wrap'=>true,'indent'=>$x,'newline'=>true), $text);
+  }
+  
   public function writeTextOpts($opts = array(), $text)
   {
     $x = $opts['x'] ?: 0;
@@ -672,9 +723,17 @@ class PdfCanvas
     $align = $opts['align'] ?: 'l';
     $width = $opts['width'];
     $newline = $opts['newline'] ?: 0;
+    $wrap = $opts['wrap'] ?: 0;
     $block = $opts['block'] ?: 0;
     
     $line_count = 0;
+    
+    if ($wrap) {
+      $wrap_size = $width ? $this->getCharsInWidth($width) : 
+                            $this->getCharsRemaining($x + $indent);
+      $text = wordwrap($text, $wrap_size, "\n", true);
+      $block = true;
+    }
     
     if ($block) {
       $lines = preg_split("/[\\n]/", $text);
@@ -691,6 +750,7 @@ class PdfCanvas
                             		   'align'=>$align,
                                    'width'=>$width,
                                    'newline'=>false,
+                                   'wrap'=>false,
                                    'block'=>false), $lines[$i]);
 
         if ($newline || $i < ($line_count -1)) {
@@ -741,11 +801,52 @@ class PdfCanvas
   
   public function writeTextColumn($width, $align, $text)
   {
+    $this->$in_column = true;
+     
+    if ($this->row_y) {
+      $this->text_y = $this->row_y;
+    } else {
+      $this->row_y = $this->text_y;
+    }
+    
+    if (! $this->column_x)
+      $this->column_x = $this->getLeftMargin();
+    
     $this->writeTextOpts(array('width'=>$width, 
     	                         'align'=>$align,
+                               'wrap'=>true,
                                'x'=>$this->column_x), $text);
     
     $this->column_x = $this->column_x + $width + $this->column_spacing;
+    
+    if ($this->text_y >= $this->row_max_y)
+      $this->row_max_y = $this->text_y;
+      
+    $this->$in_column = false;
+  }
+  
+  public function writeTextColumnHeader($width, $align, $text)
+  {
+    if ($this->row_y) {
+      $this->text_y = $this->row_y;
+    } else {
+      $this->row_y = $this->text_y;
+    }
+    
+    if (! $this->column_x)
+      $this->column_x = $this->getLeftMargin();
+    
+    $col_x = $this->column_x;
+    
+    $this->writeTextColumn($width, $align, $text);
+    
+    $p1 = new Point($col_x, 
+                    $this->row_y + $this->getLineHeight()/4);
+
+    $p2 = new Point($col_x + $width, 
+                    $this->row_y + $this->getLineHeight()/4);
+                    
+    $this->drawLine($p1, $p2);
   }
   
   public function writeTextLineCenter($text)
@@ -772,6 +873,12 @@ class PdfCanvas
     $block = $opts['block'] ?: 0;
     
     $line_count = 0;
+    
+    if ($wrap) {
+      $width = $this->getCharsRemaining($x);
+      $text = wordwrap($text, $width, "\n", true);
+      $block = true;
+    }
     
     if ($block) {
       $lines = preg_split("/[\\n]/", $text);
@@ -821,7 +928,7 @@ class PdfCanvas
   
   public function writeTextXY($x, $y, $text)
   {
-    $this->debug("writeTextXY:$x,$y,$text");
+    #$this->debug("writeTextXY:$x,$y,$text");
     
     $this->pdf->set_text_pos($x, $this->invertY($y));
     $this->pdf->show($text);

@@ -146,18 +146,19 @@ $g_canvas->footer_right_text = date("Y-m-d H:i", $g_end);
 
 $g_canvas->writeSection("$g_title Report", false);
 
-$col = 75;
+$col1 = 85;
+$col2 = 300;
 
-$g_canvas->writeTextColumn($col, 'r', "Report Generated:");
-$g_canvas->writeTextColumn($col, 'l', date("Y-m-d H:i", time()));
+$g_canvas->writeTextColumn($col1, 'r', "Report Generated:");
+$g_canvas->writeTextColumn($col2, 'l', date("Y-m-d H:i", time()));
 $g_canvas->newLine();
 
-$g_canvas->writeTextColumn($col, 'r', "Snapshot Taken:");
-$g_canvas->writeTextColumn($col, 'l', date("Y-m-d H:i", $g_end));
+$g_canvas->writeTextColumn($col1, 'r', "Snapshot Taken:");
+$g_canvas->writeTextColumn($col2, 'l', date("Y-m-d H:i", $g_end));
 $g_canvas->newLine();
 
-$g_canvas->writeTextColumn($col, 'r', "Data Range:");
-$g_canvas->writeTextColumn($col, 'l', date("Y-m-d H:i", $g_start) . " through " . date("Y-m-d H:i", $g_end));
+$g_canvas->writeTextColumn($col1, 'r', "Data Range:");
+$g_canvas->writeTextColumn($col2, 'l', date("Y-m-d H:i", $g_start) . " through " . date("Y-m-d H:i", $g_end));
 $g_canvas->newLine();
 
 if ($mPage->isSummary()) {

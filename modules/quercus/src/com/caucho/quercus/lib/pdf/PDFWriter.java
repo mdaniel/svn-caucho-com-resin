@@ -34,6 +34,7 @@ import com.caucho.vfs.WriteStream;
 
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.List;
 import java.util.logging.Logger;
 
 /**
@@ -89,6 +90,7 @@ public class PDFWriter {
 
   public void writeCatalog(int catalogId, 
                            int rootId, 
+                           int outlineId,
                            ArrayList<Integer> pagesList, 
                            int pageCount)
     throws IOException
@@ -97,6 +99,12 @@ public class PDFWriter {
 
     println("  << /Type /Catalog");
     println("     /Pages " + rootId + " 0 R");
+    
+    if (outlineId > 0) {
+      println("     /PageMode /UseOutlines");
+      println("     /Outlines " + outlineId + " 0 R");
+    }
+    
     println("  >>");
 
     endObject();
@@ -120,6 +128,54 @@ public class PDFWriter {
 
       endObject();
     }
+  }
+  
+  public void writeOutline(PDFOutline outline)
+    throws IOException
+  {
+    List<PDFDestination> roots = outline.getRootDestinations();
+    
+    beginObject(outline.getId());
+    
+    println("  << /Type /Outlines");
+    println("     /First " + roots.get(0).getId() + " 0 R");
+    println("     /Last " + roots.get(roots.size()-1).getId() + " 0 R");
+    println("  >>");    
+    
+    for(int i=0; i<roots.size(); i++)
+      writeOutlineItem(roots, i);
+  }
+  
+  private void writeOutlineItem(List<PDFDestination> destinations, int index)
+    throws IOException
+  {
+    PDFDestination dest = destinations.get(index);
+    
+    List<PDFDestination> children = dest.getChildren();
+    for(int i=0; i<children.size(); i++)
+      writeOutlineItem(children, i);
+    
+    beginObject(dest.getId());
+      
+    println("  << /Title (" + PDFStream.pdfEscapeText(dest.getTitle()) + ")");
+    println("     /Parent " + dest.getParentId() + " 0 R");
+    println("     /Dest [" + dest.getPageId() + " 0 R /XYZ 0 " + dest.getPos() + " 0]");
+
+    if (index > 0)
+      println("     /Prev " + destinations.get(index-1).getId() + " 0 R");
+    
+    if (index < (destinations.size()-1))
+      println("     /Next " + destinations.get(index+1).getId() + " 0 R");
+    
+    if (! children.isEmpty()) {
+      println("     /First " + children.get(0).getId() + " 0 R");
+      println("     /Last " + children.get(children.size()-1).getId() + " 0 R");
+      println("     /Count " + (children.size() * -1));
+    }
+    
+    println("  >>");
+    
+    endObject();
   }
 
   public void writePageGroup(int id, int parentId, ArrayList<PDFPage> pages)

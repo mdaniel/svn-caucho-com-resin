@@ -32,7 +32,8 @@ package com.caucho.quercus.lib.pdf;
 /**
  * font
  */
-public class Font {
+public class Font 
+{
   private String _fontName;
   private String _weight;
 
@@ -49,6 +50,10 @@ public class Font {
   private double _underlinePosition;
   private double _underlineThickness;
   private double _italicAngle;
+  
+  private int _charCount = 0;
+  private double _totalWidth = 0;
+  private double _maxWidth = 0;
 
   private FontChar []_chars = new FontChar[256];
 
@@ -154,8 +159,14 @@ public class Font {
   {
     int code = fontChar.getCode();
 
-    if (code >= 0 && code < _chars.length)
+    if (code >= 0 && code < _chars.length) {
       _chars[code] = fontChar;
+
+      _charCount++;
+      _totalWidth += fontChar.getWidth();
+      if (fontChar.getWidth() > _maxWidth)
+        _maxWidth = fontChar.getWidth();
+    }
   }
 
   public double stringWidth(String text)
@@ -184,5 +195,15 @@ public class Font {
     }
 
     return width;
+  }
+  
+  public double getAvgCharWidth()
+  {
+    return (_totalWidth/_charCount);
+  }
+  
+  public double getMaxCharWidth()
+  {
+    return _maxWidth;
   }
 }

@@ -71,6 +71,16 @@ public class PDFPage {
   {
     return _id;
   }
+  
+  public double getWidth()
+  {
+    return _width;
+  }
+  
+  public double getHeight()
+  {
+    return _height;
+  }
 
   /**
    * Returns the stream.
@@ -129,7 +139,7 @@ public class PDFPage {
     out.println("     /Resources <<");
 
     for (Map.Entry<String,String> entry : _resources.entrySet()) {
-      out.println("      " + entry.getKey() + " " + entry.getValue());
+      out.println("     " + entry.getKey() + " " + entry.getValue());
     }
 
     out.println("     >>");

@@ -95,6 +95,16 @@ public class PDFFont extends PDFObject {
   {
     return _face.stringWidth(text);
   }
+  
+  public double getAvgCharWidth()
+  {
+    return _face.getAvgCharWidth();
+  }
+
+  public double getMaxCharWidth()
+  {
+    return _face.getMaxCharWidth();
+  }
 
   public String getPDFName()
   {
