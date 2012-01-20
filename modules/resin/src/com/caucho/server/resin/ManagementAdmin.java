@@ -35,6 +35,7 @@ import com.caucho.boot.WatchdogStatusQuery;
 import com.caucho.cloud.bam.BamSystem;
 import com.caucho.cloud.network.NetworkClusterSystem;
 import com.caucho.cloud.topology.CloudServer;
+import com.caucho.config.types.Period;
 import com.caucho.management.server.AbstractManagedObject;
 import com.caucho.management.server.ManagementMXBean;
 import com.caucho.server.admin.HmuxClientFactory;
@@ -42,6 +43,8 @@ import com.caucho.server.admin.JmxCallQuery;
 import com.caucho.server.admin.JmxDumpQuery;
 import com.caucho.server.admin.JmxListQuery;
 import com.caucho.server.admin.JmxSetQuery;
+import com.caucho.server.admin.PdfReportQuery;
+import com.caucho.server.admin.ThreadDumpQuery;
 import com.caucho.util.L10N;
 
 import java.io.ByteArrayInputStream;
@@ -98,6 +101,52 @@ public class ManagementAdmin extends AbstractManagedObject
                                           isPrintOperations,
                                           isPrintAllBeans,
                                           isPrintPlatformBeans);
+
+    return (String) query(serverId, query);
+  }
+
+  @Override
+  public String dumpThreads(String serverId) {
+
+    ThreadDumpQuery query = new ThreadDumpQuery();
+
+    return (String) query(serverId, query);
+  }
+
+  @Override
+  public String pdfReport(String serverId,
+                          String path,
+                          String report,
+                          String periodStr,
+                          String logDirectory,
+                          String profileTimeStr,
+                          String samplePeriodStr,
+                          boolean isSnapshot,
+                          boolean isWatchdog)
+  {
+    long period = -1;
+
+    if (periodStr != null)
+      period = Period.toPeriod(periodStr);
+
+    long profileTime = -1;
+
+    if (profileTimeStr != null)
+      profileTime = Period.toPeriod(profileTimeStr);
+
+    long samplePeriod = -1;
+
+    if (samplePeriodStr != null)
+      samplePeriod = Period.toPeriod(samplePeriodStr, 1);
+
+    PdfReportQuery query = new PdfReportQuery(path,
+                                              report,
+                                              period,
+                                              logDirectory,
+                                              profileTime,
+                                              samplePeriod,
+                                              isSnapshot,
+                                              isWatchdog);
 
     return (String) query(serverId, query);
   }

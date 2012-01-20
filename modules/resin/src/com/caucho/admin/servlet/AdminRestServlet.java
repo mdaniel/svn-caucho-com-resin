@@ -45,13 +45,14 @@ import javax.servlet.http.HttpServletResponse;
 import com.caucho.config.ConfigException;
 import com.caucho.jmx.Jmx;
 import com.caucho.jmx.MXAction;
+import com.caucho.jmx.MXDefaultValue;
 import com.caucho.jmx.MXName;
 import com.caucho.management.server.ManagementMXBean;
 import com.caucho.util.L10N;
 import com.caucho.vfs.Vfs;
 import com.caucho.vfs.WriteStream;
 
-@SuppressWarnings("serial")
+  @SuppressWarnings("serial")
 public class AdminRestServlet extends HttpServlet {
   private static final L10N L = new L10N(AdminRestServlet.class);
   
@@ -146,6 +147,7 @@ public class AdminRestServlet extends HttpServlet {
     private Method _method;
 
     private String []_parameterNames;
+    private Object [] _parameterDefaults;
     
     private Marshal []_parameterMarshal;
     private Marshal _returnMarshal;
@@ -160,11 +162,13 @@ public class AdminRestServlet extends HttpServlet {
       Class<?> []parameterTypes = method.getParameterTypes();
       
       _parameterNames = new String[parameterTypes.length];
-      
+      _parameterDefaults = new Object[parameterTypes.length];
+
       Annotation [][]paramAnn = method.getParameterAnnotations();
       
       for (int i = 0; i < _parameterNames.length; i++) {
         _parameterNames[i] = getParamName(paramAnn, i);
+        _parameterDefaults[i] = getParameterDefault(paramAnn, i, parameterTypes[i]);
       }
       
       _parameterMarshal = new Marshal[parameterTypes.length];
@@ -193,7 +197,22 @@ public class AdminRestServlet extends HttpServlet {
         _isGetStream = true;
       }
     }
-    
+
+    private Object getParameterDefault(Annotation[][] paramAnn,
+                                       int i,
+                                       Class type)
+    {
+      for (Annotation ann : paramAnn[i]) {
+        if (ann.annotationType().equals(MXDefaultValue.class)){
+          MXDefaultValue value = (MXDefaultValue) ann;
+
+          return toValue(type, value.value());
+        }
+      }
+
+      return null;
+    }
+
     private String getParamName(Annotation [][]paramAnn, int i)
     {
       if (paramAnn == null)
@@ -229,7 +248,9 @@ public class AdminRestServlet extends HttpServlet {
       Object []param = new Object[_parameterMarshal.length];
       
       for (int i = 0; i < param.length; i++) {
-        param[i] = _parameterMarshal[i].marshal(req, _parameterNames[i]);
+        param[i] = _parameterMarshal[i].marshal(req,
+                                                _parameterNames[i],
+                                                _parameterDefaults[i]);
       }
       
       try {
@@ -240,80 +261,140 @@ public class AdminRestServlet extends HttpServlet {
         throw ConfigException.create(e);
       }
     }
+
+    protected static Object toValue(Class type, String value)
+    {
+      if (boolean.class.equals(type) || Boolean.class.equals(type)) {
+        return Boolean.parseBoolean(value);
+      }
+      else if (byte.class.equals(type) || Byte.class.equals(type)) {
+        return Byte.parseByte(value);
+      }
+      else if (short.class.equals(type) || Short.class.equals(type)) {
+        return Short.parseShort(value);
+      }
+      else if (char.class.equals(type) || Character.class.equals(type)) {
+        return new Character((char) Integer.parseInt(value));
+      }
+      else if (int.class.equals(type) || Integer.class.equals(type)) {
+        return Integer.parseInt(value);
+      }
+      else if (long.class.equals(type) || Long.class.equals(type)) {
+        return Long.parseLong(value);
+      }
+      else if (float.class.equals(type) || Float.class.equals(type)) {
+        return Float.parseFloat(value);
+      }
+      else if (double.class.equals(type) || Double.class.equals(type)) {
+        return Double.parseDouble(value);
+      }
+      else if (type.isEnum()) {
+        return Enum.valueOf(type, value);
+      }
+      else {
+        return value;
+      }
+    }
   }
-  
-  abstract static class Marshal {
-    abstract public Object marshal(HttpServletRequest request, String name)
+
+  abstract static class Marshal<K>
+  {
+    abstract public Object marshal(HttpServletRequest request,
+                                   String name,
+                                   K defaultValue)
       throws IOException;
-    
+
     public void unmarshal(HttpServletResponse response, Object value)
       throws IOException
     {
       PrintWriter out = response.getWriter();
-        
+
       out.println(value);
     }
   }
 
-  static class BooleanMarshal extends Marshal
+  static class BooleanMarshal extends Marshal<Boolean>
   {
     @Override
-    public Object marshal(HttpServletRequest request, String name)
+    public Object marshal(HttpServletRequest request,
+                          String name,
+                          Boolean defaultValue)
     {
       String param = request.getParameter(name);
 
       if (param != null)
         return Boolean.parseBoolean(param);
+      else if (defaultValue != null)
+        return defaultValue;
       else
         return Boolean.FALSE;
     }
   }
 
-  static class StringMarshal extends Marshal {
+  static class StringMarshal extends Marshal<String> {
     @Override
-    public Object marshal(HttpServletRequest request, String name)
+    public Object marshal(HttpServletRequest request,
+                          String name,
+                          String defaultValue)
     {
-      return request.getParameter(name);
+      String param = request.getParameter(name);
+
+      if (param != null)
+        return param;
+      else
+        return defaultValue;
     }
   }
   
-  static class IntegerMarshal extends Marshal {
+  static class IntegerMarshal extends Marshal<Integer> {
     @Override
-    public Object marshal(HttpServletRequest request, String name)
+    public Object marshal(HttpServletRequest request,
+                          String name,
+                          Integer defaultValue)
     {
       String param = request.getParameter(name);
       
       if (param != null)
         return Integer.parseInt(param);
+      else if (defaultValue != null)
+        return defaultValue;
       else
         return 0;
     }
   }
   
-  static class LongMarshal extends Marshal {
+  static class LongMarshal extends Marshal<Long> {
     @Override
-    public Object marshal(HttpServletRequest request, String name)
+    public Object marshal(HttpServletRequest request,
+                          String name,
+                          Long defaultValue)
     {
       String param = request.getParameter(name);
-      
+
       if (param != null)
         return Long.parseLong(param);
+      else if (defaultValue != null)
+        return defaultValue;
       else
         return 0;
     }
   }
   
-  static class VoidMarshal extends Marshal {
+  static class VoidMarshal extends Marshal<Void> {
     @Override
-    public Object marshal(HttpServletRequest request, String name)
+    public Object marshal(HttpServletRequest request,
+                          String name,
+                          Void defaultValue)
     {
       throw new UnsupportedOperationException(getClass().getName());
     }
   }
   
-  static class InputStreamMarshal extends Marshal {
+  static class InputStreamMarshal extends Marshal<InputStream> {
     @Override
-    public Object marshal(HttpServletRequest request, String name)
+    public Object marshal(HttpServletRequest request,
+                          String name,
+                          InputStream defaultValue)
       throws IOException
     {
       return request.getInputStream();

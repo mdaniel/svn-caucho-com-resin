@@ -31,6 +31,7 @@ package com.caucho.management.server;
 
 import com.caucho.jmx.Description;
 import com.caucho.jmx.MXAction;
+import com.caucho.jmx.MXDefaultValue;
 import com.caucho.jmx.MXName;
 
 import java.io.IOException;
@@ -64,12 +65,30 @@ public interface ManagementMXBean extends ManagedObjectMXBean
                         @MXName("print-all-beans") boolean isPrintAllBeans,
                         @MXName("print-platform-beans") boolean isPrintPlatformBeans);
 
+  @Description("creates a PDF report of a Resin server (Resin Pro)")
+  @MXAction("pdf-report")
+  public String pdfReport(@MXName("server") String serverId,
+                          @MXName("path") String path,
+                          @MXName("report") String report,
+                          @MXName("period") String periodStr,
+                          @MXName("log-directory") String logDirectory,
+                          @MXName("profile-time") String profileTimeStr,
+                          @MXName("sample-period") String samplePeriodStr,
+                          @MXDefaultValue("true")
+                          @MXName("snapshot") boolean isSnapshot,
+                          @MXName("watchdog") boolean isWatchdog);
+
+
   @Description("sets JMX Mbean's attribute")
   @MXAction("jmx-set")
   public String setJmx(@MXName("server") String serverId,
                        @MXName("pattern") String pattern,
                        @MXName("attribute") String attribute,
                        @MXName("value") String value);
+
+  @Description("displays a JVM thread dump summary")
+  @MXAction("thread-dump")
+  public String dumpThreads(@MXName("server") String serverId);
 
   @Description("calls a method on a JMX MBean")
   @MXAction("jmx-call")
