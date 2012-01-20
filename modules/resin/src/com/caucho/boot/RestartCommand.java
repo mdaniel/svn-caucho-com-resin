@@ -49,6 +49,12 @@ public class RestartCommand extends AbstractStartCommand
   {
     return "restarts a Resin server";
   }
+  
+  @Override
+  public boolean isStart()
+  {
+    return true;
+  }
 
   @Override
   public int doCommand(WatchdogArgs args, WatchdogClient _client)

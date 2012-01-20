@@ -94,9 +94,9 @@
     <host id="" root-directory=".">
       <!--
          - webapps can be overridden/extended in the resin.xml
-         -
-         - <web-app id="/" root-directory="webapps/ROOT"/>
         -->
+      <web-app id="/" root-directory="webapps/ROOT"/>
+      
       <resin:if test="${resin_doc}">
         <web-app id="/resin-doc" root-directory="${resin.root}/doc/resin-doc"/>
       </resin:if>

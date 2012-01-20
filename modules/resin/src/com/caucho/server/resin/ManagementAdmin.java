@@ -48,7 +48,6 @@ import com.caucho.server.admin.LogLevelQuery;
 import com.caucho.server.admin.PdfReportQuery;
 import com.caucho.server.admin.ThreadDumpQuery;
 import com.caucho.util.L10N;
-import org.apache.tools.ant.types.LogLevel;
 
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
