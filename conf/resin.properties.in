@@ -40,7 +40,7 @@ setuid_group  : @SETUID_GROUP@
 
 # Set HTTP and HTTPS ports
 http          : @HTTP_PORT@
-# https         : @HTTPS_PORT@
+https         : @HTTPS_PORT@
 
 # OpenSSL certificate configuration
 # openssl_file : keys/test.crt
