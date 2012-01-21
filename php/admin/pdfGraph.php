@@ -82,7 +82,6 @@ function initPDF()
   global $g_canvas;
   
   $g_canvas = new PdfCanvas();
-  $g_canvas->is_debug = true;
   $g_canvas->setMargins(40, 30, 40, 30);
   $g_canvas->graph_padding_x = 25;
 }
@@ -472,8 +471,6 @@ function admin_pdf_log_messages($title,
     $g_canvas->setFont("Courier", 8);
     $g_canvas->writeTextWrapIndent(100, $message->message);
     
-    debug($message->message);
-    
     $g_canvas->newLine();
   }
 }
@@ -842,7 +839,7 @@ function admin_pdf_heap_dump()
 
   admin_pdf_selected_heap_dump($heap, "Top Classes by Memory Usage", $max);
 
-  $class_loader_heap = heap_select_classloader($heap_dump["heap"]);
+  $class_loader_heap = heap_select_classloader($heap);
   admin_pdf_selected_heap_dump($class_loader_heap, "ClassLoader Memory Usage ", $max);
 }
 
