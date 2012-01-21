@@ -57,27 +57,25 @@ public class RestartCommand extends AbstractStartCommand
   }
 
   @Override
-  public int doCommand(WatchdogArgs args, WatchdogClient _client)
+  public int doCommand(WatchdogArgs args, WatchdogClient client)
     throws BootArgumentException
   {
     try {
-      String id = args.getServerId();
+      // if (id == null)
+      // id = _client.getId();
       
-//      if (id == null)
-//        id = _client.getId();
-      
-      _client.restartWatchdog(id, args.getArgv());
+      client.restartWatchdog(args.getArgv());
 
       System.out.println(L().l(
-        "Resin/{0} restarted -server '{1}' for watchdog at {2}:{3}",
+        "Resin/{0} restarted{1} for watchdog at {2}:{3}",
         VersionFactory.getVersion(),
-        _client.getId(),
-        _client.getWatchdogAddress(),
-        _client.getWatchdogPort()));
+        getServerUsageArg(args, client.getId()),
+        client.getWatchdogAddress(),
+        client.getWatchdogPort()));
     } catch (Exception e) {
-      System.out.println(L().l("Resin/{0} can't restart -server '{1}'.\n{2}",
+      System.out.println(L().l("Resin/{0} can't restart{1}.\n{2}",
                                VersionFactory.getVersion(), 
-                               args.getServerId(),
+                               getServerUsageArg(args, client.getId()),
                                e.toString()));
 
       log().log(Level.FINE, e.toString(), e);

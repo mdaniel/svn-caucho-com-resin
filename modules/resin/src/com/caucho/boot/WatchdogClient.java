@@ -361,13 +361,15 @@ class WatchdogClient
     }
   }
 
-  public void restartWatchdog(String id, String []argv)
+  public void restartWatchdog(String []argv)
     throws IOException
   {
     // cloud/1295
     ActorSender conn = getConnection();
-
+    
     try {
+      String id = getId();
+      
       ResultStatus status = (ResultStatus)
       conn.query(WATCHDOG_ADDRESS, 
                  new WatchdogRestartQuery(id, argv),
