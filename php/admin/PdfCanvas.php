@@ -120,11 +120,11 @@ class PdfCanvas
       $this->writeHeaders();
       $this->writeFooters();
       
-      //$this->debug("end_page");
+      $this->debug("end_page");
       $this->pdf->end_page();
     }
     
-    //$this->debug("begin_page");
+    $this->debug("begin_page");
     $this->pdf->begin_page($this->page_width, $this->page_height);
     
     $this->page_number++;
@@ -141,6 +141,8 @@ class PdfCanvas
     }
     
     $this->text_y = $this->getTopMargin() + $this->font_size;
+    $this->row_y = $this->text_y;
+    $this->row_max_y = $this->row_y;
 
     $this->graph_index = 0;
     $this->graph_x = 0;
@@ -156,10 +158,10 @@ class PdfCanvas
     $this->writeHeaders();
     $this->writeFooters();
     
-    //$this->debug("end_page");
+    $this->debug("end_page");
     $this->pdf->end_page();
     
-    //$this->debug("end_document");
+    $this->debug("end_document");
     $this->pdf->end_document();
   }
   
@@ -197,15 +199,15 @@ class PdfCanvas
   
   public function debug($text) 
   {
-    //if (preg_match("/WARNING/", $text))
-    //  System::out->println($text);
+    #if (preg_match("/newLine|newRow/", $text))
+    #  System::out->println($text);
   }
   
   public function saveState($pdf_save = false)
   {
     // pdf does not save state between pages
     if ($pdf_save) {
-      // $this->debug("save");
+      $this->debug("save");
       $this->pdf->save();
     }
     
@@ -226,12 +228,12 @@ class PdfCanvas
   {
     // doh!  our pdfstream does not save state between pages!
     if ($pdf_restore) {
-      //$this->debug("restore");
+      $this->debug("restore");
       $this->pdf->restore();
     }
     
     $state = array_pop($this->state_stack);
-    //$this->debug("pop state: {$state->id}");
+    $this->debug("pop state: {$state->id}");
     
     if(! $state) {
       $this->debug("Warning: no saved state to restore!");
@@ -296,7 +298,7 @@ class PdfCanvas
       $this->color = $color;
     }
     
-    //$this->debug("setColor:{$this->color}");
+    $this->debug("setColor:{$this->color}");
     
     $this->pdf->setrgbcolor($this->color->red, 
                             $this->color->green, 
@@ -323,7 +325,7 @@ class PdfCanvas
   
   public function moveToXY($x, $y)
   {
-    //$this->debug("moveToXY($x,$y)");
+    $this->debug("moveToXY($x,$y)");
     $this->pdf->moveto($x, $this->invertY($y));
   }
   
@@ -334,7 +336,7 @@ class PdfCanvas
   
   public function lineToXY($x, $y)
   {
-    //$this->debug("lineToXY($x,$y)");
+    $this->debug("lineToXY($x,$y)");
     $this->pdf->lineto($x, $this->invertY($y));
   }
   
@@ -353,7 +355,7 @@ class PdfCanvas
       $this->text_y = $this->row_max_y + $this->getLineHeight();
       $this->row_max_y = 0;
       $this->row_y = 0;
-        $this->column_x = $this->getLeftMargin();
+      $this->column_x = $this->getLeftMargin();
     } else {
       $this->text_y += $this->getLineHeight();
     }
@@ -361,7 +363,7 @@ class PdfCanvas
     if ($this->text_y > $this->invertY($this->bottom_margin_width)) {
       $this->newPage();
     }
-    
+      
     return 0;
   }
   
@@ -503,7 +505,7 @@ class PdfCanvas
       $this->font_name = $font_name;
       $this->font_size = $font_size;
     
-      //$this->debug("setFont:$font_name,$font_size");
+      $this->debug("setFont:$font_name,$font_size");
     
       $this->pdf->setfont($this->font, $this->font_size);
     }
@@ -521,7 +523,7 @@ class PdfCanvas
   
   public function writeHeaders()
   {
-    //$this->debug("writeHeaders");
+    $this->debug("writeHeaders");
     
     $this->setHeaderFont();
 
@@ -548,7 +550,7 @@ class PdfCanvas
   
   public function writeFooters()
   {
-    //$this->debug("writeFooters");
+    $this->debug("writeFooters");
     
     $this->setHeaderFont();
     
@@ -619,18 +621,18 @@ class PdfCanvas
     $this->restoreState();
   }
   
-  public function addToOutline($text)
+  public function addToOutline($text, $parent_id=0)
   {
-    $parent_id = -1;
-    if ($this->subsection_id)
-      $parent_id = $this->subsection_id;
-    elseif ($this->section_id) {
-      $parent_id = $this->section_id;
+    if (! $parent_id) {
+      if ($this->subsection_id)
+        $parent_id = $this->subsection_id;
+      elseif ($this->section_id)
+        $parent_id = $this->section_id;
     }
     
-    $this->pdf->add_page_to_outline($text, 
-                                    $this->invertY($this->text_y - $this->getLineHeight()), 
-                                    $parent_id);
+    return $this->pdf->add_page_to_outline($text, 
+                                           $this->invertY($this->text_y - $this->getLineHeight()), 
+                                           $parent_id);
   }
   
   // 
@@ -743,7 +745,6 @@ class PdfCanvas
     if ($line_count > 1) {
       $ret = 0;
       for($i=0; $i<$line_count; $i++) {
-        //$this->debug("RECURS");
         $ret = $this->writeTextOpts(array(
                                    'x'=>$x,
         													 'indent'=>$indent,
@@ -754,7 +755,6 @@ class PdfCanvas
                                    'block'=>false), $lines[$i]);
 
         if ($newline || $i < ($line_count -1)) {
-          //$this->debug("<newline>");
           $ret = $this->newLine();
         }
       }
@@ -781,8 +781,9 @@ class PdfCanvas
       }
       
       // this is a hack... just in case text_y gets too far down the page
-      if ($this->text_y >= $this->getBottomMargin())
+      if ($this->text_y >= $this->getBottomMargin()) {
         $this->newPage();
+      }
       
       $point = $this->writeTextXY($x_pos,
                                   $this->text_y,
@@ -928,7 +929,7 @@ class PdfCanvas
   
   public function writeTextXY($x, $y, $text)
   {
-    #$this->debug("writeTextXY:$x,$y,$text");
+    $this->debug("writeTextXY:$x,$y,$text");
     
     $this->pdf->set_text_pos($x, $this->invertY($y));
     $this->pdf->show($text);

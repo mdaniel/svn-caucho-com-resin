@@ -53,7 +53,7 @@ $log_mbean = $mbean_server->lookup("resin:type=LogService");
 
 function debug($msg) 
 {
-  System::out->println($msg);
+  #System::out->println($msg);
 }
 
 function  my_error_handler($error_type, $error_msg, $errfile, $errline) {
@@ -1282,16 +1282,24 @@ function admin_pdf_jmx_dump()
   ksort($entries);
   
   $last_domain;
+  $last_domain_id;
+  
+  $last_mbean;
 
   foreach ($entries as $name => &$values) {
     
     $domain = substr($name, 0, strpos($name, ":"));
+    $mbean = substr($name, 0, strpos($name, ",") ?: strlen($name));
     
-    if ($domain != $last_domain) {
-      $g_canvas->addToOutline($domain);
-      $last_domain = $domain;
-    }
+    if ($domain != $last_domain)
+      $last_domain_id = $g_canvas->addToOutline($domain);
+    
+    if ($mbean != $last_mbean)
+      $g_canvas->addToOutline($mbean, $last_domain_id);
       
+    $last_domain = $domain;
+    $last_mbean = $mbean;
+    
     $g_canvas->setFont("Courier-Bold", 8);
     $g_canvas->writeTextWrap($name);
 
