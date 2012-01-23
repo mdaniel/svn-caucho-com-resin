@@ -30,9 +30,7 @@
 package com.caucho.boot;
 
 import java.net.InetAddress;
-import java.net.NetworkInterface;
 import java.util.ArrayList;
-import java.util.Enumeration;
 import java.util.HashMap;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -45,6 +43,7 @@ import com.caucho.config.program.ConfigProgram;
 import com.caucho.config.program.ContainerProgram;
 import com.caucho.env.service.ResinSystem;
 import com.caucho.security.AdminAuthenticator;
+import com.caucho.util.HostUtil;
 import com.caucho.util.L10N;
 import com.caucho.vfs.Path;
 
@@ -367,28 +366,7 @@ public class BootResinConfig // implements EnvironmentBean
   
   static ArrayList<InetAddress> getLocalAddresses()
   {
-    ArrayList<InetAddress> localAddresses = new ArrayList<InetAddress>();
-    
-    try {
-      Enumeration<NetworkInterface> ifaceEnum
-        = NetworkInterface.getNetworkInterfaces();
-    
-      while (ifaceEnum.hasMoreElements()) {
-        NetworkInterface iface = ifaceEnum.nextElement();
-
-        Enumeration<InetAddress> addrEnum = iface.getInetAddresses();
-      
-        while (addrEnum.hasMoreElements()) {
-          InetAddress addr = addrEnum.nextElement();
-        
-          localAddresses.add(addr);
-        }
-      }
-    } catch (Exception e) {
-      log.log(Level.WARNING, e.toString(), e);
-    }
-    
-    return localAddresses;
+    return HostUtil.getLocalAddresses();
   }
   
   private static boolean isLocalAddress(ArrayList<InetAddress> localAddresses,

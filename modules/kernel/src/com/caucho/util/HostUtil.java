@@ -107,12 +107,7 @@ public final class HostUtil {
     ArrayList<InetAddress> localAddresses = new ArrayList<InetAddress>();
     
     try {
-      Enumeration<NetworkInterface> ifaceEnum
-        = NetworkInterface.getNetworkInterfaces();
-    
-      while (ifaceEnum.hasMoreElements()) {
-        NetworkInterface iface = ifaceEnum.nextElement();
-
+      for (NetworkInterface iface : getNetworkInterfaces()) {
         Enumeration<InetAddress> addrEnum = iface.getInetAddresses();
       
         while (addrEnum.hasMoreElements()) {
@@ -146,5 +141,30 @@ public final class HostUtil {
     }
     
     return false;
+  }
+
+  /**
+   * @return
+   */
+  public static synchronized 
+  ArrayList<NetworkInterface> getNetworkInterfaces()
+  {
+    ArrayList<NetworkInterface> interfaceList
+      = new ArrayList<NetworkInterface>();
+  
+    try {
+      Enumeration<NetworkInterface> ifaceEnum
+        = NetworkInterface.getNetworkInterfaces();
+    
+      while (ifaceEnum.hasMoreElements()) {
+        NetworkInterface iface = ifaceEnum.nextElement();
+
+        interfaceList.add(iface);
+      }
+    } catch (Exception e) {
+      log.log(Level.WARNING, e.toString(), e);
+    }
+
+    return interfaceList;
   }
 }

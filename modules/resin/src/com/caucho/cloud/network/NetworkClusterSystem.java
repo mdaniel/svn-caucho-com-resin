@@ -30,18 +30,24 @@
 package com.caucho.cloud.network;
 
 import java.net.InetAddress;
-import java.net.NetworkInterface;
 import java.util.ArrayList;
-import java.util.Enumeration;
 import java.util.concurrent.CopyOnWriteArrayList;
-import java.util.logging.*;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
-import com.caucho.cloud.topology.*;
+import com.caucho.cloud.topology.AbstractCloudClusterListener;
+import com.caucho.cloud.topology.AbstractCloudPodListener;
+import com.caucho.cloud.topology.AbstractCloudServerListener;
+import com.caucho.cloud.topology.CloudCluster;
+import com.caucho.cloud.topology.CloudPod;
+import com.caucho.cloud.topology.CloudServer;
 import com.caucho.config.ConfigException;
-import com.caucho.env.service.*;
-import com.caucho.network.balance.ClientSocketFactory;
-import com.caucho.network.listen.*;
+import com.caucho.env.service.AbstractResinSubSystem;
+import com.caucho.env.service.ResinSystem;
+import com.caucho.network.listen.SocketPollService;
+import com.caucho.network.listen.TcpSocketLinkListener;
 import com.caucho.server.hmux.HmuxProtocol;
+import com.caucho.util.HostUtil;
 import com.caucho.util.L10N;
 
 /**
@@ -413,28 +419,7 @@ public class NetworkClusterSystem extends AbstractResinSubSystem
   
   public static ArrayList<InetAddress> getLocalAddresses()
   {
-    ArrayList<InetAddress> localAddresses = new ArrayList<InetAddress>();
-    
-    try {
-      Enumeration<NetworkInterface> ifaceEnum
-        = NetworkInterface.getNetworkInterfaces();
-    
-      while (ifaceEnum.hasMoreElements()) {
-        NetworkInterface iface = ifaceEnum.nextElement();
-
-        Enumeration<InetAddress> addrEnum = iface.getInetAddresses();
-      
-        while (addrEnum.hasMoreElements()) {
-          InetAddress addr = addrEnum.nextElement();
-        
-          localAddresses.add(addr);
-        }
-      }
-    } catch (Exception e) {
-      log.log(Level.WARNING, e.toString(), e);
-    }
-    
-    return localAddresses;
+    return HostUtil.getLocalAddresses();
   }
 
   @Override
