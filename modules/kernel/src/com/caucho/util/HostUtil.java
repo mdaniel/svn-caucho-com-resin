@@ -44,7 +44,7 @@ import com.caucho.config.ConfigException;
 public final class HostUtil {
   private static final Logger log = Logger.getLogger(HostUtil.class.getName());
   
-  private static final TimedCache _cache = new TimedCache(128, 5000);
+  private static final TimedCache _cache = new TimedCache(128, 2000);
   
   private HostUtil() {}
   
