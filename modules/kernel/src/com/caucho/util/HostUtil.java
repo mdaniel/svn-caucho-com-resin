@@ -44,6 +44,8 @@ import com.caucho.config.ConfigException;
 public final class HostUtil {
   private static final Logger log = Logger.getLogger(HostUtil.class.getName());
   
+  private static final TimedCache _cache = new TimedCache(128, 5000);
+  
   private HostUtil() {}
   
   public static String getLocalHostName()
@@ -150,21 +152,27 @@ public final class HostUtil {
   ArrayList<NetworkInterface> getNetworkInterfaces()
   {
     ArrayList<NetworkInterface> interfaceList
-      = new ArrayList<NetworkInterface>();
-  
-    try {
-      Enumeration<NetworkInterface> ifaceEnum
-        = NetworkInterface.getNetworkInterfaces();
+      = (ArrayList<NetworkInterface>) _cache.get("network-interfaces");
     
-      while (ifaceEnum.hasMoreElements()) {
-        NetworkInterface iface = ifaceEnum.nextElement();
+    if (interfaceList == null) {
+      interfaceList = new ArrayList<NetworkInterface>();
+      
+      try {
+        Enumeration<NetworkInterface> ifaceEnum
+          = NetworkInterface.getNetworkInterfaces();
+    
+        while (ifaceEnum.hasMoreElements()) {
+          NetworkInterface iface = ifaceEnum.nextElement();
 
-        interfaceList.add(iface);
+          interfaceList.add(iface);
+        }
+      } catch (Exception e) {
+        log.log(Level.WARNING, e.toString(), e);
       }
-    } catch (Exception e) {
-      log.log(Level.WARNING, e.toString(), e);
+      
+      _cache.put("network-interfaces", interfaceList);
     }
 
-    return interfaceList;
+    return new ArrayList<NetworkInterface>(interfaceList);
   }
 }
