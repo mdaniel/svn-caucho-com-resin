@@ -85,7 +85,6 @@ install	:
 			cp conf/health.xml $(resin_conf)/health.xml; \
 		fi;\
 		mkdir -p "$(resin_conf)/resin-inf"; \
-		# install -b -t "$(resin_conf)/resin-inf" conf/resin-inf/*; \
 	fi
 	(cd modules/c/src; $(MAKE) install)
 	if test -r $(resin_pro)/modules/c/src/Makefile; then \
