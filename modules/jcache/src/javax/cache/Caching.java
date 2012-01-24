@@ -142,7 +142,7 @@ public final class Caching {
       CacheManagerFactory factory;
       
       factory = _cachingProvider.getCacheManagerFactory();
-      System.out.println("FACTOR: " + factory);
+      //System.out.println("FACTOR: " + factory);
       return factory.getCacheManager(classLoader, name);
     }
   }
