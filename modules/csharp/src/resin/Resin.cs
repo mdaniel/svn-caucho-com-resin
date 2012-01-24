@@ -180,9 +180,10 @@ namespace Caucho
       arguments.Append(" -root-directory \"").Append(_rootDirectory).Append("\" ");
       if (ResinArgs.Server != null)
         arguments.Append(" -server ").Append(ResinArgs.Server);
+          /*
       else if (ResinArgs.DynamicServer != null)
         arguments.Append(" -dynamic-server ").Append(ResinArgs.DynamicServer);
-
+        */
       if (command != null)
         arguments.Append(' ').Append(command);
       else if (ResinArgs.RawArgs.Count == 1)
