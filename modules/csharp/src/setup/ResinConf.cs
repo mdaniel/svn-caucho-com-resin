@@ -60,6 +60,9 @@ namespace Caucho
           String addressListKey = addressList.Substring(2, addressList.Length - 3);
           addressList = (String)getProperties()[addressListKey];
         }
+        
+        if (addressList == null)
+          continue;
 
         addresses = addressList.Split(';');
 
@@ -227,6 +230,9 @@ namespace Caucho
 
     private static void parse(String path, String resinConf, Hashtable properties)
     {
+      if (path.StartsWith("cloud:"))
+        return;
+
       String file;
       if (path.StartsWith("${__DIR__}/")) {
         file = resinConf.Substring(0, resinConf.LastIndexOf('\\')) + '\\' + path.Substring(11, path.Length - 11);
