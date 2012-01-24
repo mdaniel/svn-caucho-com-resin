@@ -1,4 +1,5 @@
 /etc/resin/resin.xml
 /etc/resin/app-default.xml
+/etc/resin/cluster-default.xml
 /etc/init.d/resin
 /var/www/webapps/ROOT/index.jsp

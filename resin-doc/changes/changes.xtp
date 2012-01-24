@@ -10,7 +10,7 @@
 <li><a href="http://caucho.com/resin-3.1/changes/changes.xtp">Resin 3.1 changes</a></li>
 </ul>
 
-<s2 title="4.0.25 - snapshot">
+<s2 title="4.0.25 - Jan 24, 2012">
 <ul>
 <li>cache: validate/remove corrupted blob rows (#4919, rep by Keith Fetterman)</li>
 <li>cache: remove corrupted database on restart (#4919, rep by Keith Fetterman)</li>
