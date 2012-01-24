@@ -234,7 +234,15 @@ namespace Caucho
         else if ("-join-cluster".Equals(arguments[argsIdx])) {
           DynamicServer = true;
           Cluster = arguments[argsIdx + 1];
-          resinArgs.Append("-join-cluster ").Append(Cluster).Append(' ');
+          resinArgs.Append("-cluster ").Append(Cluster).Append(' ');
+
+          argsIdx += 2;
+        }
+        else if ("-cluster".Equals(arguments[argsIdx]))
+        {
+          DynamicServer = true;
+          Cluster = arguments[argsIdx + 1];
+          resinArgs.Append("-cluster ").Append(Cluster).Append(' ');
 
           argsIdx += 2;
         }

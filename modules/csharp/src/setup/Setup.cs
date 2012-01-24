@@ -629,7 +629,7 @@ namespace Caucho
         sb.Append(" -log-directory ").Append('"').Append(Log).Append('"');
 
       if (DynamicServer)
-        sb.Append(" -join-cluster ").Append(Cluster);
+        sb.Append(" -cluster ").Append(Cluster);
 
       if (Server != null && !"".Equals(Server))
         sb.Append(" -server ").Append(Server);
