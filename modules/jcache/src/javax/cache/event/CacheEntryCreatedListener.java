@@ -29,10 +29,7 @@
 
 package javax.cache.event;
 
-import javax.cache.Cache;
-
 public interface CacheEntryCreatedListener<K,V> extends CacheEntryListener<K,V>
 {
   public void entryCreated(CacheEntryEvent<? extends K,? extends V> entry);
-  public void entriesCreated(Iterable<Cache.Entry<? extends K,? extends V>> entry);
 }

@@ -51,6 +51,7 @@ import javax.cache.CacheManager;
 import javax.cache.CacheStatistics;
 import javax.cache.Status;
 import javax.cache.event.CacheEntryListener;
+import javax.cache.event.Filter;
 
 import com.caucho.config.ConfigException;
 import com.caucho.config.Configurable;
@@ -119,6 +120,12 @@ public class AbstractCache
   public void setManagerName(String managerName)
   {
     _managerName = managerName;
+  }
+  
+  @Override
+  public CacheManagerFacade getCacheManager()
+  {
+    return _cacheManager;
   }
   
   public void setCacheManager(CacheManagerFacade cacheManager)
@@ -542,7 +549,7 @@ public class AbstractCache
   }
 
   @Override
-  public Future loadAll(Collection keys)
+  public Future loadAll(Set keys)
       throws CacheException
   {
     return _delegate.loadAll(keys);
@@ -789,9 +796,9 @@ public class AbstractCache
    */
   @Override
   public boolean registerCacheEntryListener(CacheEntryListener listener,
-                                            boolean synchronous)
+                                            Filter filter)
   {
-    return _delegate.registerCacheEntryListener(listener, synchronous);
+    return _delegate.registerCacheEntryListener(listener, filter);
   }
 
   /**
@@ -1033,6 +1040,11 @@ public class AbstractCache
   public CacheConfiguration getConfiguration()
   {
     return _delegate.getConfiguration();
+  }
+  
+  public CacheConfig getConfig()
+  {
+    return _config;
   }
 
   /* (non-Javadoc)

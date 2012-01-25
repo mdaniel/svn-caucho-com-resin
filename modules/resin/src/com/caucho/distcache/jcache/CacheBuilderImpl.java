@@ -29,6 +29,8 @@
 
 package com.caucho.distcache.jcache;
 
+import java.util.concurrent.TimeUnit;
+
 import javax.cache.Cache;
 import javax.cache.CacheBuilder;
 import javax.cache.CacheLoader;
@@ -36,10 +38,12 @@ import javax.cache.CacheWriter;
 import javax.cache.CacheConfiguration.Duration;
 import javax.cache.CacheConfiguration.ExpiryType;
 import javax.cache.event.CacheEntryListener;
+import javax.cache.event.Filter;
 import javax.cache.transaction.IsolationLevel;
 import javax.cache.transaction.Mode;
 
 import com.caucho.distcache.ClusterCache;
+import com.caucho.server.distcache.CacheConfig;
 
 /**
  * Caching Provider for jcache
@@ -74,7 +78,7 @@ public class CacheBuilderImpl<K,V> implements CacheBuilder<K,V>
 
   @Override
   public CacheBuilder<K,V> registerCacheEntryListener(CacheEntryListener<K,V> listener,
-                                                      boolean synchronous)
+                                                      Filter filter)
   {
     return this;
   }
@@ -82,36 +86,56 @@ public class CacheBuilderImpl<K,V> implements CacheBuilder<K,V>
   @Override
   public CacheBuilder<K,V> setCacheLoader(CacheLoader<K,? extends V> cacheLoader)
   {
-    return this;
-  }
-
-  @Override
-  public CacheBuilder<K,V> setCacheWriter(CacheWriter<? super K,? super V> cacheWriter)
-  {
-    return this;
-  }
-
-  @Override
-  public CacheBuilder<K,V> setExpiry(ExpiryType type, Duration timeToLive)
-  {
+    _cache.getConfig().setCacheLoader(cacheLoader);
+    
     return this;
   }
 
   @Override
   public CacheBuilder<K,V> setReadThrough(boolean readThrough)
   {
+    _cache.getConfig().setReadThrough(readThrough);
+    
+    return this;
+  }
+
+  @Override
+  public CacheBuilder<K,V> setCacheWriter(CacheWriter<? super K,? super V> cacheWriter)
+  {
+    _cache.getConfig().setCacheWriter(cacheWriter);
+    
+    return this;
+  }
+
+  @Override
+  public CacheBuilder<K,V> setWriteThrough(boolean isWriteThrough)
+  {
+    _cache.getConfig().setWriteThrough(isWriteThrough);
+    
+    return this;
+  }
+
+  @Override
+  public CacheBuilder<K,V> setExpiry(ExpiryType type, Duration timeToLive)
+  {
+    _cache.getConfig().setExpiry(type, timeToLive);
+    
     return this;
   }
 
   @Override
   public CacheBuilder<K,V> setStatisticsEnabled(boolean isEnable)
   {
+    _cache.getConfig().setStatisticsEnabled(isEnable);
+    
     return this;
   }
 
   @Override
   public CacheBuilder<K,V> setStoreByValue(boolean storeByValue)
   {
+    _cache.getConfig().setStoreByValue(storeByValue);
+    
     return this;
   }
 
@@ -120,12 +144,6 @@ public class CacheBuilderImpl<K,V> implements CacheBuilder<K,V>
                                                  Mode mode)
   {
     throw new UnsupportedOperationException(getClass().getName());
-  }
-
-  @Override
-  public CacheBuilder<K,V> setWriteThrough(boolean writeThrough)
-  {
-    return this;
   }
   
   @Override

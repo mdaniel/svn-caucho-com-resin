@@ -48,6 +48,7 @@ import javax.cache.CacheManager;
 import javax.cache.CacheStatistics;
 import javax.cache.Status;
 import javax.cache.event.CacheEntryListener;
+import javax.cache.event.Filter;
 
 import com.caucho.cloud.loadbalance.LoadBalanceBuilder;
 import com.caucho.cloud.loadbalance.LoadBalanceManager;
@@ -874,7 +875,7 @@ public class MemcachedClient implements Cache
    * @see javax.cache.Cache#loadAll(java.util.Collection)
    */
   @Override
-  public Future loadAll(Collection keys) throws CacheException
+  public Future loadAll(Set keys) throws CacheException
   {
     // TODO Auto-generated method stub
     return null;
@@ -922,7 +923,7 @@ public class MemcachedClient implements Cache
    */
   @Override
   public boolean registerCacheEntryListener(CacheEntryListener listener,
-                                            boolean synchronous)
+                                            Filter filter)
   {
     // TODO Auto-generated method stub
     return false;
@@ -1116,5 +1117,15 @@ public class MemcachedClient implements Cache
   {
     // TODO Auto-generated method stub
     
+  }
+
+  /* (non-Javadoc)
+   * @see javax.cache.Cache#getCacheManager()
+   */
+  @Override
+  public CacheManager getCacheManager()
+  {
+    // TODO Auto-generated method stub
+    return null;
   }
 }

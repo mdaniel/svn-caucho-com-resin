@@ -27,50 +27,30 @@
  * @author Scott Ferguson
  */
 
-package com.caucho.distcache.jcache;
+package javax.cache.event;
 
-import javax.cache.CacheManager;
-import javax.cache.CacheManagerFactory;
-import javax.cache.CachingShutdownException;
+import javax.cache.CacheException;
 
-/**
- * Caching Provider for jcache
- */
-public class CacheManagerFactoryImpl implements CacheManagerFactory
+public class CacheEntryListenerException extends CacheException
 {
-  @Override
-  public CacheManager getCacheManager(String name)
-  {
-    ClassLoader loader = Thread.currentThread().getContextClassLoader();
-    
-    return getCacheManager(loader, name);
-  }
+  private static final long serialVersionUID = 1L;
 
-  @Override
-  public CacheManager getCacheManager(ClassLoader classLoader, String name)
-  {
-    return new CacheManagerFacade(name, classLoader);
-  }
-
-  @Override
-  public void close() throws CachingShutdownException
+  public CacheEntryListenerException()
   {
   }
-
-  @Override
-  public void close(ClassLoader classLoader) throws CachingShutdownException
+  
+  public CacheEntryListenerException(String msg)
   {
+    super(msg);
   }
-
-  @Override
-  public void close(ClassLoader classLoader, String name)
-      throws CachingShutdownException
+  
+  public CacheEntryListenerException(String msg, Throwable e)
   {
+    super(msg, e);
   }
-
-  @Override
-  public String toString()
+  
+  public CacheEntryListenerException(Throwable e)
   {
-    return getClass().getSimpleName() + "[]";
+    super(e);
   }
 }

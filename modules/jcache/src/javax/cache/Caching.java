@@ -34,7 +34,6 @@ import java.util.ServiceLoader;
 import java.util.HashMap;
 import java.util.WeakHashMap;
 
-import javax.cache.spi.CacheManagerFactory;
 import javax.cache.spi.CachingProvider;
 
 

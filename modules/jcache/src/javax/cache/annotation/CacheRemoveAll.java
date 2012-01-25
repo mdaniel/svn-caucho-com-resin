@@ -51,4 +51,7 @@ public @interface CacheRemoveAll
   @Nonbinding
   Class<? extends CacheResolverFactory> cacheResolverFactory()
     default CacheResolverFactory.class;
+  
+  Class<? extends Throwable>[] evictFor() default {};
+  Class<? extends Throwable>[] noEvictFor() default {};
 }

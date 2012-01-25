@@ -29,6 +29,8 @@
 
 package com.caucho.server.distcache;
 
+import java.util.concurrent.TimeUnit;
+
 import com.caucho.config.Configurable;
 import com.caucho.distcache.AbstractCache;
 import com.caucho.distcache.CacheSerializer;
@@ -37,12 +39,17 @@ import com.caucho.distcache.ResinCacheBuilder.Scope;
 import com.caucho.util.Alarm;
 import com.caucho.util.HashKey;
 
+import javax.cache.CacheBuilder;
+import javax.cache.CacheConfiguration;
 import javax.cache.CacheLoader;
+import javax.cache.CacheWriter;
+import javax.cache.transaction.IsolationLevel;
+import javax.cache.transaction.Mode;
 
 /**
  * Manages the distributed cache
  */
-public class CacheConfig
+public class CacheConfig implements CacheConfiguration
 {
   public static final long TIME_INFINITY  = Long.MAX_VALUE / 2;
   public static final long TIME_HOUR  = 3600 * 1000L;
@@ -70,8 +77,16 @@ public class CacheConfig
   private long _leaseExpireTimeout = 5 * 60 * 1000; // 5 min lease timeout
 
   private AbstractCache.Scope _scope = Scope.CLUSTER;
-  
+
+  private boolean _isReadThrough;
   private CacheLoader _cacheLoader;
+  
+  private boolean _isWriteThrough;
+  private CacheWriter _cacheWriter;
+  
+  private boolean _isStoreByValue = true;
+  private boolean _isStatisticsEnabled;
+  private boolean _isTransactionEnabled;
 
   private CacheSerializer _keySerializer;
   private CacheSerializer _valueSerializer;
@@ -81,7 +96,7 @@ public class CacheConfig
   /**
    * The Cache will use a CacheLoader to populate cache misses.
    */
-
+  @Override
   public CacheLoader getCacheLoader()
   {
     return _cacheLoader;
@@ -94,6 +109,39 @@ public class CacheConfig
   public void setCacheLoader(CacheLoader cacheLoader)
   {
     _cacheLoader = cacheLoader;
+  }
+
+  @Override
+  public boolean isReadThrough()
+  {
+    return _isReadThrough;
+  }
+  
+  public void setReadThrough(boolean isReadThrough)
+  {
+    _isReadThrough = isReadThrough;
+  }
+
+  @Override
+  public CacheWriter getCacheWriter()
+  {
+    return _cacheWriter;
+  }
+  
+  public void setCacheWriter(CacheWriter cacheWriter)
+  {
+    _cacheWriter = cacheWriter;
+  }
+
+  @Override
+  public boolean isWriteThrough()
+  {
+    return _isWriteThrough;
+  }
+
+  public void setWriteThrough(boolean isWriteThrough)
+  {
+    _isWriteThrough = isWriteThrough;
   }
 
   /**
@@ -489,6 +537,87 @@ public class CacheConfig
       */
     }
     // _accuracy = CacheStatistics.STATISTICS_ACCURACY_BEST_EFFORT;
+  }
+
+  public void setExpiry(ExpiryType type, Duration duration)
+  {
+    TimeUnit unit = duration.getTimeUnit();
+    
+    long timeout = unit.toMillis(duration.getTimeToLive());
+    
+    switch (type) {
+    case ACCESSED:
+      setAccessedExpireTimeout(timeout);
+      break;
+      
+    case MODIFIED:
+      setModifiedExpireTimeout(timeout);
+      break;
+      
+    default:
+      throw new UnsupportedOperationException(String.valueOf(type));
+    }
+  }
+
+  @Override
+  public Duration getExpiry(ExpiryType type)
+  {
+    long timeout;
+    
+    switch (type) {
+    case ACCESSED:
+      timeout = getAccessedExpireTimeout();
+      break;
+      
+    case MODIFIED:
+      timeout = getModifiedExpireTimeout();
+      break;
+      
+    default:
+      throw new UnsupportedOperationException(String.valueOf(type));
+    }
+
+    return new Duration(TimeUnit.MILLISECONDS, timeout);
+  }
+
+  @Override
+  public boolean isStatisticsEnabled()
+  {
+    return _isStatisticsEnabled;
+  }
+
+  public void setStatisticsEnabled(boolean isEnabled)
+  {
+    _isStatisticsEnabled = isEnabled;
+  }
+
+  @Override
+  public boolean isStoreByValue()
+  {
+    return _isStoreByValue;
+  }
+  
+  public void setStoreByValue(boolean isStoreByValue)
+  {
+    _isStoreByValue = isStoreByValue;
+  }
+
+  @Override
+  public boolean isTransactionEnabled()
+  {
+    return _isTransactionEnabled;
+  }
+
+  @Override
+  public IsolationLevel getTransactionIsolationLevel()
+  {
+    return IsolationLevel.NONE;
+  }
+
+  @Override
+  public Mode getTransactionMode()
+  {
+    return Mode.NONE;
   }
 
   @Override

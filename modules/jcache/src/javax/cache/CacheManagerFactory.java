@@ -27,50 +27,26 @@
  * @author Scott Ferguson
  */
 
-package com.caucho.distcache.jcache;
+package javax.cache;
 
-import javax.cache.CacheManager;
-import javax.cache.CacheManagerFactory;
-import javax.cache.CachingShutdownException;
 
 /**
- * Caching Provider for jcache
+ * Provides the capability of dynamically creating a cache.
+ *
+ * See  the  default implementation of this inteface in {@link com.caucho.cluster.CacheTemplate}
+ * for additional methods.
  */
-public class CacheManagerFactoryImpl implements CacheManagerFactory
-{
-  @Override
-  public CacheManager getCacheManager(String name)
-  {
-    ClassLoader loader = Thread.currentThread().getContextClassLoader();
-    
-    return getCacheManager(loader, name);
-  }
-
-  @Override
-  public CacheManager getCacheManager(ClassLoader classLoader, String name)
-  {
-    return new CacheManagerFacade(name, classLoader);
-  }
-
-  @Override
-  public void close() throws CachingShutdownException
-  {
-  }
-
-  @Override
-  public void close(ClassLoader classLoader) throws CachingShutdownException
-  {
-  }
-
-  @Override
+public interface CacheManagerFactory {
+  public CacheManager getCacheManager(String name);
+  
+  public CacheManager getCacheManager(ClassLoader classLoader, String name);
+  
+  public void close()
+    throws CachingShutdownException;
+  
+  public void close(ClassLoader classLoader)
+    throws CachingShutdownException;
+  
   public void close(ClassLoader classLoader, String name)
-      throws CachingShutdownException
-  {
-  }
-
-  @Override
-  public String toString()
-  {
-    return getClass().getSimpleName() + "[]";
-  }
+    throws CachingShutdownException;
 }

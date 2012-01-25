@@ -54,5 +54,11 @@ public @interface CacheResult
   @Nonbinding
   Class<? extends CacheKeyGenerator> cacheKeyGenerator()
     default CacheKeyGenerator.class;
+  
+  @Nonbinding
+  String exceptionCacheName() default "";
+  
+  Class<? extends Throwable>[]cachedExceptions() default {};
+  Class<? extends Throwable>[]nonCachedExceptions() default {};
 
 }

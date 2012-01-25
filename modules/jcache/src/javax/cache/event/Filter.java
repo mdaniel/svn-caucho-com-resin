@@ -27,26 +27,9 @@
  * @author Scott Ferguson
  */
 
-package javax.cache.spi;
+package javax.cache.event;
 
-import javax.cache.CacheManager;
-import javax.cache.CachingShutdownException;
-
-/**
- * Provides the capability of dynamically creating a cache.
- *
- * See  the  default implementation of this inteface in {@link com.caucho.cluster.CacheTemplate}
- * for additional methods.
- */
-public interface CacheManagerFactory {
-  public CacheManager getCacheManager(String name);
-  
-  public CacheManager getCacheManager(ClassLoader classLoader, String name);
-  
-  public void close() throws CachingShutdownException;
-  
-  public void close(ClassLoader classLoader) throws CachingShutdownException;
-  
-  public void close(ClassLoader classLoader, String name)
-    throws CachingShutdownException;
+public interface Filter
+{
+  public boolean evaluate(CacheEntryEvent event);
 }

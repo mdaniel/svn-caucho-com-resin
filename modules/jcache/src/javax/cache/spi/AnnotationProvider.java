@@ -29,8 +29,6 @@
 
 package javax.cache.spi;
 
-import javax.cache.OptionalFeature;
-
 /**
  * Infomation about supported options.
  */

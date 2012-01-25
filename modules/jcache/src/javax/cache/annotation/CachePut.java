@@ -55,4 +55,6 @@ public @interface CachePut
   Class<? extends CacheKeyGenerator> cacheKeyGenerator()
     default CacheKeyGenerator.class;
 
+  Class<? extends Throwable>[] cacheFor() default {};
+  Class<? extends Throwable>[] noCacheFor() default {};
 }

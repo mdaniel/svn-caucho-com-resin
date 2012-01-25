@@ -52,6 +52,7 @@ import javax.cache.CacheManager;
 import javax.cache.CacheStatistics;
 import javax.cache.Status;
 import javax.cache.event.CacheEntryListener;
+import javax.cache.event.Filter;
 
 import com.caucho.config.ConfigException;
 import com.caucho.config.Configurable;
@@ -116,6 +117,12 @@ public class CacheImpl
   public String getName()
   {
     return _name;
+  }
+  
+  @Override
+  public CacheManager getCacheManager()
+  {
+    throw new UnsupportedOperationException(getClass().getSimpleName());
   }
   
   public String getGuid()
@@ -655,7 +662,7 @@ public class CacheImpl
    */
   @Override
   public boolean registerCacheEntryListener(CacheEntryListener listener,
-                                            boolean synchronous)
+                                            Filter filter)
   {
     _listeners.add(listener);
     
@@ -966,14 +973,10 @@ public class CacheImpl
     }
   }
 
-  /* (non-Javadoc)
-   * @see javax.cache.Cache#getConfiguration()
-   */
   @Override
   public CacheConfiguration getConfiguration()
   {
-    // TODO Auto-generated method stub
-    return null;
+    return _config;
   }
 
   /* (non-Javadoc)
@@ -991,7 +994,7 @@ public class CacheImpl
    * @see javax.cache.Cache#loadAll(java.util.Collection, javax.cache.CacheLoader, java.lang.Object)
    */
   @Override
-  public Future loadAll(Collection keys)
+  public Future loadAll(Set keys)
       throws CacheException
   {
     // TODO Auto-generated method stub

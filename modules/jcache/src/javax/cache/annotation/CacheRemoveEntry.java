@@ -53,4 +53,7 @@ public @interface CacheRemoveEntry
   @Nonbinding
   Class<? extends CacheKeyGenerator> cacheKeyGenerator()
     default CacheKeyGenerator.class;
+  
+  Class<? extends Throwable> []evictFor() default {};
+  Class<? extends Throwable> []noEvictFor() default {};
 }

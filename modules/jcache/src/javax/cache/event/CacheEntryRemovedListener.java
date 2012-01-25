@@ -31,6 +31,6 @@ package javax.cache.event;
 
 public interface CacheEntryRemovedListener<K,V> extends CacheEntryListener<K,V>
 {
-  public void entryRemoved(CacheEntryEvent<? extends K,? extends V> entry);
-  public void entriesRemoved(Iterable<CacheEntryEvent<? extends K,? extends V>> entry);
+  public void entryRemoved(CacheEntryEvent<? extends K,? extends V> entry)
+    throws CacheEntryListenerException;
 }

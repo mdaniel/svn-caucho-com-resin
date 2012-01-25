@@ -57,8 +57,6 @@ public interface CacheConfiguration<K,V>
   
   public CacheWriter<? super K, ? super V> getCacheWriter();
   
-  public void setExpiry(ExpiryType type, Duration duration);
-  
   public Duration getExpiry(ExpiryType type);
   
   public static class Duration {
@@ -96,6 +94,13 @@ public interface CacheConfiguration<K,V>
     public long getTimeToLive()
     {
       return this.timeToLive;
+    }
+    
+    @Override
+    public String toString()
+    {
+      return (getClass().getSimpleName()
+              + "[" + getTimeToLive() + "," + getTimeUnit() + "]");
     }
   }
   

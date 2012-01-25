@@ -29,6 +29,7 @@
 
 package javax.cache.spi;
 
+import javax.cache.CacheManagerFactory;
 import javax.cache.OptionalFeature;
 
 /**

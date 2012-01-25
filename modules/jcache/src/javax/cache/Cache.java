@@ -43,6 +43,7 @@ import java.util.Set;
 import java.util.concurrent.Future;
 
 import javax.cache.event.CacheEntryListener;
+import javax.cache.event.Filter;
 
 /**
  * The persistent or distributed cache is usable like a normal map, but loads
@@ -63,7 +64,7 @@ public interface Cache<K,V> extends Iterable<Cache.Entry<K,V>>, CacheLifecycle {
   
   public Future<V> load(K key);
   
-  public Future<Map<K,? extends V>> loadAll(Collection<? extends K> keys);
+  public Future<Map<K,? extends V>> loadAll(Set<? extends K> keys);
   
   public CacheStatistics getStatistics();
   
@@ -100,13 +101,15 @@ public interface Cache<K,V> extends Iterable<Cache.Entry<K,V>>, CacheLifecycle {
   public CacheConfiguration<K,V> getConfiguration();
   
   public boolean registerCacheEntryListener(CacheEntryListener<? super K,? super V> listener,
-                                            boolean synchronous);
+                                            Filter filter);
   
   public boolean unregisterCacheEntryListener(CacheEntryListener<?,?> listener);
   
   public Object invokeEntryProcessor(K key, EntryProcessor<K, V> entryProcessor);
   
   public String getName();
+  
+  public CacheManager getCacheManager();
   
   public <T> T unwrap(Class<T> cl);
   
