@@ -2967,6 +2967,77 @@ when used in conjunction with more complex combining conditions.</i></p>
 
 </defun>
 
+<defun title="&lt;health:AnomalyAnalyzer>" name="health:AnomalyAnalyzer">
+
+<parents>cluster</parents>
+<javadoc class="com.caucho.health.AnomalyAnalyzer"/>
+
+<description>
+<p>AnomalyAnalyzer examines a meter value, checking for deviations from the 
+average value. So unusual changes like a spike in blocked threads can be 
+detected, logged, and trigger health actions.</p>
+</description>
+
+<attributes>
+  <tr>
+    <th>Attribute</th>
+    <th>Description</th>
+    <th>Type</th>
+    <th>Default</th>
+  </tr>
+  <tr>
+    <td>meter</td>
+    <td>Name of the meter to analyze (ie. from &lt;health:JmxMeter>)</td>
+    <td>String</td>
+    <td>required</td>
+  </tr>
+  <tr>
+    <td>health-event</td>
+    <td>A string to use to match using &lt;health:IfHealthEvent></td>
+    <td>String</td>
+    <td>None: when absent no health event will fire</td>
+  </tr>
+  <tr>
+    <td>min-samples</td>
+    <td>Minimum number of samples required to calculate an average</td>
+    <td>int</td>
+    <td>60 (typically 1 hour of data)</td>
+  </tr>
+  <tr>
+    <td>sigma-threshold</td>
+    <td>The number of standard deviations for a sample to be considered an anomaly.</td>
+    <td>int</td>
+    <td>5</td>
+  </tr>
+</attributes>
+
+<example title="Example: &lt;health:AnomalyAnalyzer> in health.xml">
+&lt;cluster xmlns="http://caucho.com/ns/resin"
+         xmlns:resin="urn:java:com.caucho.resin"
+         xmlns:health="urn:java:com.caucho.health"
+         xmlns:ee="urn:java:ee">
+         
+  &lt;health:JmxMeter>
+    &lt;name>JVM|Thread|JVM Blocked Count&lt;/name>
+    &lt;objectName>resin:type=JvmThreads&lt;/objectName>
+    &lt;attribute>BlockedCount&lt;/attribute>
+  &lt;/health:JmxMeter>
+
+  &lt;health:AnomalyAnalyzer>
+    &lt;meter>JVM|Thread|JVM Blocked Count&lt;/meter>
+    &lt;health-event>caucho.thread.anomaly.jvm-blocked&lt;/health-event>
+  &lt;/health:AnomalyAnalyzer>
+
+  &lt;health:DumpThreads>
+    &lt;health:IfHealthEvent regexp="caucho.thread"/>
+    &lt;health:IfNotRecent time="15m"/>
+  &lt;/health:DumpThreads>
+  
+&lt;/cluster>
+</example>
+
+</defun>
+
 <defun title="&lt;health:CallJmxOperation>" name="health:CallJmxOperation">
 
 <parents>cluster</parents>
@@ -3965,6 +4036,59 @@ properties, and JMX mbean attributes.</p>
     &lt;health:IfHealthCritical health-check="${memoryTenuredHealthCheck}"/>
   &lt;/health:Restart> 
 
+&lt;/cluster>
+</example>
+
+</defun>
+
+<defun title="&lt;health:IfHealthEvent>" name="health:IfHealthEvent">
+
+<parents>cluster</parents>
+<javadoc class="com.caucho.health.predicate.IfHealthEvent"/>
+
+<description>
+<p>Causes an action to fire in response to a matching health event.  This is 
+usually used in combination with <a config-tag="AnomalyAnalyzer"/> with a 
+&lt;health-event> attribute.</p> 
+</description>
+
+<attributes>
+  <tr>
+    <th>Attribute</th>
+    <th>Description</th>
+    <th>Type</th>
+    <th>Default</th>
+  </tr>
+  <tr>
+    <td>regexp</td>
+    <td>A regular expression the event must match.</td>
+    <td>java.util.regex.Pattern</td>
+    <td>required</td>
+  </tr>
+</attributes>
+
+<example title="Example: &lt;health:IfHealthEvent> in health.xml">
+&lt;cluster xmlns="http://caucho.com/ns/resin"
+         xmlns:resin="urn:java:com.caucho.resin"
+         xmlns:health="urn:java:com.caucho.health"
+         xmlns:ee="urn:java:ee">
+         
+  &lt;health:JmxMeter>
+    &lt;name>JVM|Thread|JVM Blocked Count&lt;/name>
+    &lt;objectName>resin:type=JvmThreads&lt;/objectName>
+    &lt;attribute>BlockedCount&lt;/attribute>
+  &lt;/health:JmxMeter>
+
+  &lt;health:AnomalyAnalyzer>
+    &lt;meter>JVM|Thread|JVM Blocked Count&lt;/meter>
+    &lt;health-event>caucho.thread.anomaly.jvm-blocked&lt;/health-event>
+  &lt;/health:AnomalyAnalyzer>
+
+  &lt;health:DumpThreads>
+    &lt;health:IfHealthEvent regexp="caucho.thread"/>
+    &lt;health:IfNotRecent time="15m"/>
+  &lt;/health:DumpThreads>
+  
 &lt;/cluster>
 </example>
 

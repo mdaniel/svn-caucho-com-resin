@@ -103,6 +103,32 @@ JMX meters.</p>
 
 </s1>
 
+<s1 title="Statistical Analysis">
+
+<s2 title="Detecting Anomalies">
+
+<p>Meters alone are useful for manual inspection in resin-admin since every 
+meter can be graphed. However Resin provides an extremely useful automatic 
+analysis tool called AnomalyAnalyzer. AnomalyAnalyzer looks at the current 
+meter value, checking for deviations from the average value. So unusual 
+changes like a spike in blocked threads can be detected.</p>
+
+<include-defun name="health:AnomalyAnalyzer"/>
+
+</s2>
+
+<s2 title="Reacting to Anomalies">
+
+<p>The &lt;health-event> attribute of AnomalyAnalyzer allows us to tie health 
+actions to a detected anomaly by using the &lt;health:IfHealthEvent> 
+condition.</p>
+
+<include-defun name="health:IfHealthEvent"/>
+
+</s2>
+
+</s1>
+
 </body>
 
 </document>

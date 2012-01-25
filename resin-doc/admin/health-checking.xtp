@@ -520,6 +520,8 @@ parameter, overall aggregated Resin health will be used.</p>
 
 <include-defun name="health:IfRecovered"/>
 
+<include-defun name="health:IfHealthEvent"/>
+
 </s2>
 
 <s2 title="Lifecycle conditions">

@@ -45,28 +45,22 @@ function display_tabs($pages)
   echo "<ul>";
 
   foreach ($pages as $page) {
-    $name = $page->name;
-    
-    $tab_name = $name . "-tab";
+    $name = preg_replace('/ /', '_', $page->name);
+    $tab_name = "$name-tab";
 
-    echo "<li><a href='#${tab_name}'>" . gettext($name) . "</a></li>\n";
+    echo "<li><a href='#${tab_name}'>" . gettext($page->name) . "</a></li>\n";
   }
-
-  echo "<li><a href='#new_meter-tab'>+</a></li>\n";
+  
   echo "</ul>\n";
 
   foreach ($pages as $page) {
-    $tab_name = $page->name . "-tab";
-
+    $name = preg_replace('/ /', '_', $page->name);
+    $tab_name = "$name-tab";
+    
     echo "<div id='${tab_name}'>\n";
-
     meter_display_page($page);
-
     echo "</div>";
   }
-
-  echo "<div id='new_meter-tab'>\n";
-  echo "</div>";
 
   echo "</div>\n";
 }
@@ -84,7 +78,9 @@ function meter_display_page($page)
 
   $si = sprintf("%02d", $g_server->Index);
 
-  $page_name = "pg_" . $page->name;
+  $name = preg_replace('/ /', '_', $page->name);
+  $page_name = "pg_" . $name;
+  
   $count = 0;
   
   $period_ms = $page->period;
