@@ -44,6 +44,7 @@ import java.util.concurrent.Future;
 
 import javax.cache.event.CacheEntryListener;
 import javax.cache.event.Filter;
+import javax.cache.mbeans.CacheMXBean;
 
 /**
  * The persistent or distributed cache is usable like a normal map, but loads
@@ -114,6 +115,8 @@ public interface Cache<K,V> extends Iterable<Cache.Entry<K,V>>, CacheLifecycle {
   public <T> T unwrap(Class<T> cl);
   
   Iterator<Cache.Entry<K,V>> iterator();
+  
+  public CacheMXBean getMBean();
   
   // CacheMXBean getMBean();
 

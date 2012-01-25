@@ -49,6 +49,7 @@ import javax.cache.CacheStatistics;
 import javax.cache.Status;
 import javax.cache.event.CacheEntryListener;
 import javax.cache.event.Filter;
+import javax.cache.mbeans.CacheMXBean;
 
 import com.caucho.cloud.loadbalance.LoadBalanceBuilder;
 import com.caucho.cloud.loadbalance.LoadBalanceManager;
@@ -1008,6 +1009,12 @@ public class MemcachedClient implements Cache
   {
     // TODO Auto-generated method stub
     
+  }
+
+  @Override
+  public CacheMXBean getMBean()
+  {
+    throw new UnsupportedOperationException(getClass().getName());
   }
 
   /* (non-Javadoc)

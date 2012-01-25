@@ -27,33 +27,15 @@
  * @author Scott Ferguson
  */
 
-package javax.cache.transaction;
+package javax.cache.mbeans;
 
-import static java.sql.Connection.TRANSACTION_NONE;
-import static java.sql.Connection.TRANSACTION_READ_UNCOMMITTED;
-import static java.sql.Connection.TRANSACTION_READ_COMMITTED;
-import static java.sql.Connection.TRANSACTION_REPEATABLE_READ;
-import static java.sql.Connection.TRANSACTION_SERIALIZABLE;
+import javax.cache.Status;
+import javax.management.MXBean;
 
-/**
- * Transaction modes.
- */
-public enum IsolationLevel {
-  NONE(TRANSACTION_NONE),
-  READ_UNCOMMITTED(TRANSACTION_READ_UNCOMMITTED),
-  READ_COMMITTED(TRANSACTION_READ_COMMITTED),
-  REPEATABLE_READ(TRANSACTION_REPEATABLE_READ),
-  SERIALIZABLE(TRANSACTION_SERIALIZABLE);
+@MXBean
+public interface CacheMXBean extends CacheStatisticsMXBean
+{
+  public String getName();
   
-  private final int value;
-  
-  private IsolationLevel(int value)
-  {
-    this.value = value;
-  }
-  
-  public int getValue()
-  {
-    return this.value;
-  }
+  public Status getStatus();
 }

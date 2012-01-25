@@ -53,6 +53,7 @@ import javax.cache.CacheStatistics;
 import javax.cache.Status;
 import javax.cache.event.CacheEntryListener;
 import javax.cache.event.Filter;
+import javax.cache.mbeans.CacheMXBean;
 
 import com.caucho.config.ConfigException;
 import com.caucho.config.Configurable;
@@ -902,6 +903,12 @@ public class CacheImpl
 
     if (_manager == null)
       throw new IllegalStateException("distributed cache manager not available");
+  }
+
+  @Override
+  public CacheMXBean getMBean()
+  {
+    throw new UnsupportedOperationException(getClass().getName());
   }
 
   /**
