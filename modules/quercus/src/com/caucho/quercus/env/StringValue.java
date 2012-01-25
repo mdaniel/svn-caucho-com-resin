@@ -800,10 +800,13 @@ abstract public class StringValue
     int i = 0;
     char ch = charAt(i);
     if (ch == '-') {
+      if (len == 1)
+        return this;
+      
       sign = -1;
       i++;
     }
-
+    
     for (; i < len; i++) {
       ch = charAt(i);
 
@@ -2454,6 +2457,7 @@ abstract public class StringValue
   /**
    * Test for equality
    */
+  @Override
   public boolean equals(Object o)
   {
     if (this == o)

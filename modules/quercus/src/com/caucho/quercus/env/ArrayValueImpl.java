@@ -772,6 +772,7 @@ public class ArrayValueImpl extends ArrayValue
   /**
    * Gets a new value.
    */
+  @Override
   public Value get(Value key)
   {
     key = key.toKey();

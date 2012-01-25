@@ -632,6 +632,9 @@ public class StringBuilderValue
     int i = 0;
     int ch = buffer[i];
     if (ch == '-') {
+      if (len == 1)
+        return this;
+      
       sign = -1;
       i++;
     }
