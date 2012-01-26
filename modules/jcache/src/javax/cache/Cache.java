@@ -36,7 +36,6 @@
 
 package javax.cache;
 
-import java.util.Collection;
 import java.util.Iterator;
 import java.util.Map;
 import java.util.Set;
@@ -51,30 +50,12 @@ import javax.cache.mbeans.CacheMXBean;
  * and stores data across the cluster.
  */
 public interface Cache<K,V> extends Iterable<Cache.Entry<K,V>>, CacheLifecycle {
-  /**
-   * Returns the object specified by the given key.
-   * <p/>
-   * If the item does not exist and a CacheLoader has been specified,
-   * the CacheLoader will be used to create a cache value.
-   */
   public V get(Object key);
 
   public Map<K,V> getAll(Set<? extends K> keys);
   
   public boolean containsKey(K key);
   
-  public Future<V> load(K key);
-  
-  public Future<Map<K,? extends V>> loadAll(Set<? extends K> keys);
-  
-  public CacheStatistics getStatistics();
-  
-  /**
-   * Puts a new item in the cache.
-   *
-   * @param key   the key of the item to put
-   * @param value the value of the item to put
-   */
   public void put(K key, V value);
   
   public V getAndPut(K key, V value);
@@ -99,27 +80,47 @@ public interface Cache<K,V> extends Iterable<Cache.Entry<K,V>>, CacheLifecycle {
   
   public void removeAll();
   
-  public CacheConfiguration<K,V> getConfiguration();
+  //
+  // preload
+  //
+  
+  public Future<V> load(K key);
+  
+  public Future<Map<K,? extends V>> loadAll(Set<? extends K> keys);
+  
+  //
+  // update operations
+  // 
+  
+  public Object invokeEntryProcessor(K key, EntryProcessor<K, V> entryProcessor);
+  
+  //
+  // listeners
+  //
   
   public boolean registerCacheEntryListener(CacheEntryListener<? super K,? super V> listener,
                                             Filter filter);
   
   public boolean unregisterCacheEntryListener(CacheEntryListener<?,?> listener);
   
-  public Object invokeEntryProcessor(K key, EntryProcessor<K, V> entryProcessor);
+  //
+  // management
+  //
   
   public String getName();
   
   public CacheManager getCacheManager();
   
-  public <T> T unwrap(Class<T> cl);
-  
+  public CacheConfiguration<K,V> getConfiguration();
+    
+  public CacheStatistics getStatistics();
+
   Iterator<Cache.Entry<K,V>> iterator();
   
   public CacheMXBean getMBean();
-  
-  // CacheMXBean getMBean();
 
+  public <T> T unwrap(Class<T> cl);
+  
   public interface Entry<K,V> {
     public K getKey();
     public V getValue();      

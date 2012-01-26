@@ -29,7 +29,9 @@
 
 package com.caucho.distcache.jcache;
 
+import java.util.HashSet;
 import java.util.Set;
+import java.util.concurrent.ConcurrentHashMap;
 
 import javax.cache.Cache;
 import javax.cache.CacheBuilder;
@@ -38,32 +40,35 @@ import javax.cache.OptionalFeature;
 import javax.cache.Status;
 import javax.transaction.UserTransaction;
 
-import com.caucho.loader.Environment;
+import com.caucho.server.distcache.CacheManagerImpl;
+import com.caucho.transaction.UserTransactionProxy;
 
 /**
  * Caching Provider for jcache
  */
 public class CacheManagerFacade implements CacheManager
 {
-  private String _name;
-  private String _guid;
+  private CacheManagerImpl _manager;
   
-  public CacheManagerFacade(String name, ClassLoader loader)
+  private ConcurrentHashMap<String,Cache<?,?>> _cacheMap
+    = new ConcurrentHashMap<String,Cache<?,?>>();
+  
+  public CacheManagerFacade(String name, 
+                            ClassLoader loader,
+                            CacheManagerImpl manager)
   {
-    _name = name;
-
-    _guid = Environment.getEnvironmentName(loader) + ":" + name;
+    _manager = manager;
   }
 
   @Override
   public String getName()
   {
-    return _name;
+    return _manager.getName();
   }
   
   public String getGuid()
   {
-    return _guid;
+    return _manager.getGuid();
   }
 
   @Override
@@ -71,29 +76,39 @@ public class CacheManagerFacade implements CacheManager
   {
     return new CacheBuilderImpl<K,V>(cacheName, this);
   }
-
-  @Override
-  public <K, V> Cache<K, V> getCache(String name)
+  
+  void addCache(String name, Cache<?,?> cache)
   {
-    return null;
+    _cacheMap.putIfAbsent(name, cache);
   }
 
   @Override
+  @SuppressWarnings("unchecked")
+  public <K, V> Cache<K, V> getCache(String name)
+  {
+    return (Cache) _cacheMap.get(name);
+  }
+
+  @Override
+  @SuppressWarnings("unchecked")
   public <K, V> Set<Cache<K, V>> getCaches()
   {
-    return null;
+    return new HashSet(_cacheMap.values());
   }
 
   @Override
   public Status getStatus()
   {
-    return null;
+    if (_manager != null)
+      return Status.STARTED;
+    else
+      return Status.STOPPED;
   }
 
   @Override
   public UserTransaction getUserTransaction()
   {
-    return null;
+    return UserTransactionProxy.getCurrent();
   }
 
   @Override
@@ -105,12 +120,13 @@ public class CacheManagerFacade implements CacheManager
   @Override
   public boolean removeCache(String cacheName) throws IllegalStateException
   {
-    return false;
+    return _cacheMap.remove(cacheName) != null;
   }
 
   @Override
   public void shutdown()
   {
+    _manager = null;
   }
 
   @Override
@@ -119,9 +135,14 @@ public class CacheManagerFacade implements CacheManager
     return null;
   }
   
+  public void close()
+  {
+    shutdown();
+  }
+  
   @Override
   public String toString()
   {
-    return getClass().getSimpleName() + "[" + _name + "," + _guid + "]";
+    return getClass().getSimpleName() + "[" + getName() + "," + getGuid() + "]";
   }
 }

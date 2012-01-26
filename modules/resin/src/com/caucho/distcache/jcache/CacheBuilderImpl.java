@@ -44,6 +44,7 @@ import javax.cache.transaction.Mode;
 
 import com.caucho.distcache.ClusterCache;
 import com.caucho.server.distcache.CacheConfig;
+import com.caucho.server.distcache.CacheManagerImpl;
 
 /**
  * Caching Provider for jcache
@@ -73,7 +74,9 @@ public class CacheBuilderImpl<K,V> implements CacheBuilder<K,V>
   {
     _cache.init();
     
-    return _cache;
+    _manager.addCache(_name, _cache);
+    
+    return _manager.getCache(_name);
   }
 
   @Override

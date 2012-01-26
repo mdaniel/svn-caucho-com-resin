@@ -115,7 +115,7 @@ public final class Caching {
     return getCachingSingleton().isAnnotationsSupported();
   }
   
-  public static CachingSingleton getCachingSingleton()
+  private static CachingSingleton getCachingSingleton()
   {
     CachingSingleton caching = null;
     

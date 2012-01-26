@@ -40,7 +40,9 @@ import java.util.concurrent.ConcurrentHashMap;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
+import javax.cache.Cache;
 import javax.cache.CacheLoader;
+import javax.cache.CacheWriter;
 
 import com.caucho.cloud.topology.TriadOwner;
 import com.caucho.db.blob.BlobInputStream;
@@ -377,13 +379,13 @@ public final class CacheStoreManager
     if (mnodeValue == null || mnodeValue.isExpired(now)) {
       CacheLoader loader = config.getCacheLoader();
 
-      if (loader != null && entry.getKey() != null) {
+      if (loader != null && config.isReadThrough() && entry.getKey() != null) {
         Object arg = null;
         
-        Object value = loader.load(entry.getKey());
+        Cache.Entry loaderEntry = loader.load(entry.getKey());
 
-        if (value != null) {
-          put(entry, value, config, now, mnodeValue);
+        if (entry != null) {
+          put(entry, loaderEntry.getValue(), config, now, mnodeValue);
 
           return;
         }
@@ -458,6 +460,12 @@ public final class CacheStoreManager
       return;
 
     config.getEngine().put(key, mnodeUpdate, mnodeValue);
+    
+    CacheWriter writer = config.getCacheWriter();
+    
+    if (writer != null && config.isWriteThrough()) {
+      writer.write(entry);
+    }
 
     return;
   }
@@ -536,6 +544,20 @@ public final class CacheStoreManager
 
     return getAndPut(entry, value, config, now, mnodeValue);
   }
+  
+  /**
+   * Sets a cache entry
+   */
+  final public Object getAndRemove(DistCacheEntry entry,
+                                   CacheConfig config)
+  {
+    long now = Alarm.getCurrentTime();
+
+    // server/60a0 - on server '4', need to read update from triad
+    MnodeEntry mnodeValue = getMnodeValue(entry, config, now); // , false);
+
+    return getAndPut(entry, null, config, now, mnodeValue);
+  }
 
   /**
    * Sets a cache entry
@@ -611,12 +633,28 @@ public final class CacheStoreManager
     return oldValueHash;
   }
 
-
-  public HashKey compareAndPut(DistCacheEntry entry, 
+  public Object getAndReplace(DistCacheEntry entry, 
                                HashKey testValue,
                                Object value, 
                                CacheConfig config)
   {
+    HashKey result = compareAndPut(entry, testValue, value, config);
+    
+    if (result == null || result.isNull()) {
+      return null;
+    }
+    else {
+      return readData(result,
+                      config.getValueSerializer(),
+                      config);
+    }
+  }
+  
+  public HashKey compareAndPut(DistCacheEntry entry, 
+                                 HashKey testValue,
+                                 Object value, 
+                                 CacheConfig config)
+    {
     DataItem dataItem = writeData(entry.getMnodeEntry(), 
                                   value,
                                   config.getValueSerializer());
@@ -965,6 +1003,12 @@ public final class CacheStoreManager
       return oldValueHash != null;
 
     config.getEngine().remove(key, mnodeUpdate, mnodeEntry);
+    
+    CacheWriter writer = config.getCacheWriter();
+    
+    if (writer != null && config.isWriteThrough()) {
+      writer.delete(entry.getKey());
+    }
 
     return oldValueHash != null;
   }
@@ -1365,6 +1409,11 @@ public final class CacheStoreManager
    */
   public void clearEphemeralEntries()
   {
+  }
+  
+  public Iterator<DistCacheEntry> getEntries()
+  {
+    return _entryCache.values();
   }
   
   public void start()

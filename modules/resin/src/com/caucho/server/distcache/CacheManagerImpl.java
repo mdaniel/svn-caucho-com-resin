@@ -38,6 +38,7 @@ import javax.enterprise.context.ApplicationScoped;
 import com.caucho.config.Configurable;
 import com.caucho.distcache.AbstractCache;
 import com.caucho.distcache.ClusterCache;
+import com.caucho.distcache.jcache.CacheBuilderImpl;
 import com.caucho.distcache.jcache.CacheManagerFacade;
 import com.caucho.loader.Environment;
 
@@ -58,6 +59,7 @@ public class CacheManagerImpl implements Closeable
   private String _name;
   private String _guid;
   private ConcurrentHashMap<String,CacheImpl> _cacheMap;
+  
   private CacheManagerFacade _facade;
 
   public CacheManagerImpl(DistCacheSystem cacheSystem,
@@ -71,14 +73,19 @@ public class CacheManagerImpl implements Closeable
 
     _cacheMap = new ConcurrentHashMap<String,CacheImpl>();
     
-    Environment.addCloseListener(this, loader);
+    _facade = new CacheManagerFacade(_name, loader, this);
     
-    _facade = new CacheManagerFacade(_name, loader);
+    Environment.addCloseListener(this, loader);
   }
   
-  public CacheBuilder<?,?> createBuilder(String name)
+  public String getName()
   {
-    return _facade.createCacheBuilder(name);
+    return _name;
+  }
+  
+  public String getGuid()
+  {
+    return _guid;
   }
   
   public CacheImpl getCache(String name)

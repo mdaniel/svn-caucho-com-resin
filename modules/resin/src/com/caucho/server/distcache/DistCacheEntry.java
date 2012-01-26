@@ -270,6 +270,16 @@ public class DistCacheEntry implements ExtCacheEntry {
   /**
    * Sets the current value
    */
+  public Object getAndReplace(HashKey testValue, 
+                               Object value, 
+                               CacheConfig config)
+  {
+    return _cacheService.getAndReplace(this, testValue, value, config);
+  }
+
+  /**
+   * Sets the current value
+   */
   public boolean compareAndPut(long version,
                                HashKey value,
                                long valueLength,
@@ -284,6 +294,14 @@ public class DistCacheEntry implements ExtCacheEntry {
   public boolean remove(CacheConfig config)
   {
     return _cacheService.remove(this, config);
+  }
+
+  /**
+   * Remove the value
+   */
+  public Object getAndRemove(CacheConfig config)
+  {
+    return _cacheService.getAndRemove(this, config);
   }
 
   /**

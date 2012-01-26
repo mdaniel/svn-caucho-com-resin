@@ -40,6 +40,6 @@ package javax.cache;
  * The lifecycle status of the Cache.
  */
 public enum OptionalFeature {
-    TRANSACTIONS,
-    STORE_BY_REFERENCE;
+  TRANSACTIONS,
+  STORE_BY_REFERENCE;
 }

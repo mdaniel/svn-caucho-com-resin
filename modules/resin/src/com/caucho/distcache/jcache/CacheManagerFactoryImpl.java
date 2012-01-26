@@ -29,15 +29,28 @@
 
 package com.caucho.distcache.jcache;
 
+import java.util.ArrayList;
+import java.util.HashMap;
+
 import javax.cache.CacheManager;
 import javax.cache.CacheManagerFactory;
 import javax.cache.CachingShutdownException;
+
+import com.caucho.config.ConfigException;
+import com.caucho.server.distcache.CacheManagerImpl;
+import com.caucho.server.distcache.DistCacheSystem;
+import com.caucho.util.L10N;
 
 /**
  * Caching Provider for jcache
  */
 public class CacheManagerFactoryImpl implements CacheManagerFactory
 {
+  private static final L10N L = new L10N(CacheManagerFactoryImpl.class);
+  
+  private HashMap<String,CacheManagerFacade> _cacheManagerMap
+    = new HashMap<String,CacheManagerFacade>();
+  
   @Override
   public CacheManager getCacheManager(String name)
   {
@@ -49,23 +62,78 @@ public class CacheManagerFactoryImpl implements CacheManagerFactory
   @Override
   public CacheManager getCacheManager(ClassLoader classLoader, String name)
   {
-    return new CacheManagerFacade(name, classLoader);
+    synchronized (_cacheManagerMap) {
+      CacheManagerFacade cm = _cacheManagerMap.get(name);
+    
+      if (cm == null) {
+        DistCacheSystem cacheService = DistCacheSystem.getCurrent();
+
+        if (cacheService == null)
+          throw new ConfigException(L.l("'{0}' cannot be initialized because it is not in a Resin environment",
+                                        getClass().getSimpleName()));
+        
+        CacheManagerImpl manager;
+        
+        if (name != null)
+          manager = cacheService.getCacheManager(name);
+        else
+          manager = cacheService.getCacheManager();
+        
+        cm = new CacheManagerFacade(name, classLoader, manager);
+        
+        _cacheManagerMap.put(name, cm);
+      }
+      
+      return cm;
+    }
   }
 
   @Override
   public void close() throws CachingShutdownException
   {
+    ArrayList<CacheManagerFacade> managerList
+      = new ArrayList<CacheManagerFacade>();
+  
+    synchronized (_cacheManagerMap) {
+      managerList.addAll(_cacheManagerMap.values());
+    
+      _cacheManagerMap.clear();
+    }
+  
+    for (CacheManagerFacade manager : managerList) {
+      manager.shutdown();
+    }
   }
 
   @Override
   public void close(ClassLoader classLoader) throws CachingShutdownException
   {
+    ArrayList<CacheManagerFacade> managerList
+      = new ArrayList<CacheManagerFacade>();
+  
+    synchronized (_cacheManagerMap) {
+      managerList.addAll(_cacheManagerMap.values());
+    
+      _cacheManagerMap.clear();
+    }
+  
+    for (CacheManagerFacade manager : managerList) {
+      manager.shutdown();
+    }
   }
 
   @Override
   public void close(ClassLoader classLoader, String name)
       throws CachingShutdownException
   {
+    CacheManagerFacade cm;
+    
+    synchronized (_cacheManagerMap) {
+      cm = _cacheManagerMap.remove(name);
+    }
+    
+    if (cm != null)
+      cm.close();
   }
 
   @Override
