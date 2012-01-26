@@ -34,7 +34,10 @@ import java.io.FileWriter;
 import java.io.IOException;
 import java.io.Writer;
 
+import com.caucho.server.admin.ErrorQueryResult;
+import com.caucho.server.admin.ManagementQueryResult;
 import com.caucho.server.admin.ManagerClient;
+import com.caucho.server.admin.StringQueryResult;
 import com.caucho.util.IoUtil;
 
 public class ThreadDumpCommand extends AbstractManagementCommand
@@ -55,36 +58,44 @@ public class ThreadDumpCommand extends AbstractManagementCommand
                        WatchdogClient client,
                        ManagerClient managerClient)
   {
-    String dump = managerClient.doThreadDump();
+    ManagementQueryResult result = managerClient.doThreadDump();
+    if (result instanceof ErrorQueryResult) {
+      ErrorQueryResult errorResult = (ErrorQueryResult) result;
+      System.out.println(errorResult.getException().getMessage());
 
-    String fileName = args.getArg("-file");
+      return 1;
+    } else {
+      StringQueryResult queryResult = (StringQueryResult) result;
 
-    if (fileName == null) {
-      System.out.println(dump);
+      String fileName = args.getArg("-file");
 
-      return 0;
-    }
+      if (fileName == null) {
+        System.out.println(queryResult.getValue());
 
-    Writer out = null;
+        return 0;
+      }
 
-    try {
-      File file = new File(fileName);
-      out = new FileWriter(file);
-      out.write(dump);
-      out.flush();
+      Writer out = null;
 
-      System.out.println("Thread dump was written to `"
-                         + file.getCanonicalPath()
-                         + "'");
+      try {
+        File file = new File(fileName);
+        out = new FileWriter(file);
+        out.write(queryResult.getValue());
+        out.flush();
 
-      return 0;
-    } catch (IOException e) {
-      e.printStackTrace();
+        System.out.println("Thread dump was written to `"
+                           + file.getCanonicalPath()
+                           + "'");
 
-      return 4;
-    } finally {
-      if (out != null)
-        IoUtil.close(out);
+        return 0;
+      } catch (IOException e) {
+        e.printStackTrace();
+
+        return 4;
+      } finally {
+        if (out != null)
+          IoUtil.close(out);
+      }
     }
   }
 

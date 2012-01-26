@@ -29,7 +29,19 @@
 
 package com.caucho.server.admin;
 
-import com.caucho.admin.action.*;
+import com.caucho.admin.action.AddLicenseAction;
+import com.caucho.admin.action.AddUserAction;
+import com.caucho.admin.action.CallJmxAction;
+import com.caucho.admin.action.HeapDumpAction;
+import com.caucho.admin.action.JmxDumpAction;
+import com.caucho.admin.action.ListJmxAction;
+import com.caucho.admin.action.ListUsersAction;
+import com.caucho.admin.action.PdfReportAction;
+import com.caucho.admin.action.ProfileAction;
+import com.caucho.admin.action.RemoveUserAction;
+import com.caucho.admin.action.SetJmxAction;
+import com.caucho.admin.action.SetLogLevelAction;
+import com.caucho.admin.action.ThreadDumpAction;
 import com.caucho.bam.Query;
 import com.caucho.bam.actor.SimpleActor;
 import com.caucho.bam.mailbox.MultiworkerMailbox;
@@ -39,6 +51,7 @@ import com.caucho.cloud.topology.CloudServer;
 import com.caucho.config.ConfigException;
 import com.caucho.env.service.ResinSystem;
 import com.caucho.security.AdminAuthenticator;
+import com.caucho.security.PasswordUser;
 import com.caucho.server.cluster.Server;
 import com.caucho.util.Alarm;
 import com.caucho.util.L10N;
@@ -46,7 +59,11 @@ import com.caucho.vfs.Path;
 import com.caucho.vfs.Vfs;
 
 import javax.annotation.PostConstruct;
+import java.util.ArrayList;
 import java.util.Date;
+import java.util.Hashtable;
+import java.util.List;
+import java.util.Map;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -116,10 +133,15 @@ public class ManagerActor extends SimpleActor
     ManagementQueryResult result = null;
 
     try {
-      result = new AddUserAction(_adminAuthenticator,
-                                 query.getUser(),
-                                 query.getPassword(),
-                                 query.getRoles()).execute();
+      PasswordUser user = new AddUserAction(_adminAuthenticator,
+                                            query.getUser(),
+                                            query.getPassword(),
+                                            query.getRoles()).execute();
+
+      result
+        = new AddUserQueryResult(new UserQueryResult.User(user.getPrincipal()
+                                                                .getName(),
+                                                            user.getRoles()));
     } catch (Exception e) {
       log.log(Level.WARNING, e.getMessage(), e);
 
@@ -132,11 +154,30 @@ public class ManagerActor extends SimpleActor
   }
 
   @Query
-  public ManagementQueryResult listUsers(long id, String to, String from, ListUsersQuery query) {
-    ManagementQueryResult result = null;
+  public ManagementQueryResult listUsers(long id,
+                                         String to,
+                                         String from,
+                                         ListUsersQuery query)
+  {
+    ManagementQueryResult result;
 
     try {
-      result = new ListUsersAction(_adminAuthenticator).execute();
+      Hashtable<String,com.caucho.security.PasswordUser> userMap
+        = new ListUsersAction(_adminAuthenticator).execute();
+
+      List <UserQueryResult.User> userList = new ArrayList<UserQueryResult.User>();
+
+      for (Map.Entry<String,PasswordUser> userEntry : userMap.entrySet()) {
+        com.caucho.security.PasswordUser passwordUser = userEntry.getValue();
+        UserQueryResult.User user = new UserQueryResult.User(userEntry.getKey(),
+                                                             passwordUser.getRoles());
+        userList.add(user);
+      }
+
+      UserQueryResult.User []users
+        = userList.toArray(new UserQueryResult.User[userList.size()]);
+
+      result = new ListUsersQueryResult(users);
     } catch (Exception e) {
       log.log(Level.WARNING, e.getMessage(), e);
 
@@ -154,11 +195,16 @@ public class ManagerActor extends SimpleActor
                                           String from,
                                           RemoveUserQuery query)
   {
-    ManagementQueryResult result = null;
+    ManagementQueryResult result;
 
     try {
-      result = new RemoveUserAction(_adminAuthenticator,
-                                    query.getUser()).execute();
+      PasswordUser user = new RemoveUserAction(_adminAuthenticator,
+                                               query.getUser()).execute();
+
+      result
+        = new RemoveUserQueryResult(new UserQueryResult.User(user.getPrincipal()
+                                                                .getName(),
+                                                            user.getRoles()));
     } catch (Exception e) {
       log.log(Level.WARNING, e.getMessage(), e);
 
@@ -171,21 +217,23 @@ public class ManagerActor extends SimpleActor
   }
 
   @Query
-  public String doThreadDump(long id,
-                             String to,
-                             String from,
-                             ThreadDumpQuery query)
+  public ManagementQueryResult doThreadDump(long id,
+                                            String to,
+                                            String from,
+                                            ThreadDumpQuery query)
   {
-    String result = null;
-    
+    ManagementQueryResult result;
+
     try {
-      result = new ThreadDumpAction().execute(false);
+      result = new StringQueryResult(new ThreadDumpAction().execute(false));
     } catch (ConfigException e) {
       log.log(Level.WARNING, e.getMessage(), e);
-      result = e.getMessage();
+
+      result = new ErrorQueryResult(e);
     } catch (Exception e) {
       log.log(Level.WARNING, e.getMessage(), e);
-      result = e.toString();
+
+      result = new ErrorQueryResult(e);
     }
     
     getBroker().queryResult(id, from, to, result);
@@ -194,20 +242,23 @@ public class ManagerActor extends SimpleActor
   }
 
   @Query
-  public String doHeapDump(long id, String to, String from, HeapDumpQuery query)
+  public ManagementQueryResult doHeapDump(long id, String to, String from, HeapDumpQuery query)
   {
-    String result = null;
+    ManagementQueryResult result;
     
     try {
-      result = new HeapDumpAction().execute(query.isRaw(), 
-                                            _server.getServerId(), 
-                                            _hprofDir);
+      String dump = new HeapDumpAction().execute(query.isRaw(),
+                                                 _server.getServerId(),
+                                                 _hprofDir);
+      result = new StringQueryResult(dump);
     } catch (ConfigException e) {
       log.log(Level.WARNING, e.getMessage(), e);
-      result = e.getMessage();
+
+      result = new ErrorQueryResult(e);
     } catch (Exception e) {
       log.log(Level.WARNING, e.getMessage(), e);
-      result = e.toString();
+
+      result = new ErrorQueryResult(e);
     }
     
     getBroker().queryResult(id, from, to, result);
@@ -216,23 +267,29 @@ public class ManagerActor extends SimpleActor
   }
   
   @Query
-  public String listJmx(long id, String to, String from, JmxListQuery query)
+  public ManagementQueryResult listJmx(long id,
+                                       String to,
+                                       String from,
+                                       JmxListQuery query)
   {
-    String result = null;
+    ManagementQueryResult result;
     
     try {
-      result = new ListJmxAction().execute(query.getPattern(),
-                                           query.isPrintAttributes(),
-                                           query.isPrintValues(),
-                                           query.isPrintOperations(),
-                                           query.isAllBeans(),
-                                           query.isPlatform());
+      String list = new ListJmxAction().execute(query.getPattern(),
+                                                query.isPrintAttributes(),
+                                                query.isPrintValues(),
+                                                query.isPrintOperations(),
+                                                query.isAllBeans(),
+                                                query.isPlatform());
+      result = new StringQueryResult(list);
     } catch (ConfigException e) {
       log.log(Level.WARNING, e.getMessage(), e);
-      result = e.getMessage();
+
+      result = new ErrorQueryResult(e);
     } catch (Exception e) {
       log.log(Level.WARNING, e.getMessage(), e);
-      result = e.toString();
+
+      result = new ErrorQueryResult(e);
     }
     
     getBroker().queryResult(id, from, to, result);
@@ -241,18 +298,25 @@ public class ManagerActor extends SimpleActor
   }
   
   @Query
-  public String doJmxDump(long id, String to, String from, JmxDumpQuery query)
+  public ManagementQueryResult doJmxDump(long id,
+                                         String to,
+                                         String from,
+                                         JmxDumpQuery query)
   {
-    String result = null;
+    ManagementQueryResult result;
     
     try {
-      result = new JmxDumpAction().execute();
+      String jmxDump = new JmxDumpAction().execute();
+
+      result = new StringQueryResult(jmxDump);
     } catch (ConfigException e) {
       log.log(Level.WARNING, e.getMessage(), e);
-      result = e.getMessage();
+
+      result = new ErrorQueryResult(e);
     } catch (Exception e) {
       log.log(Level.WARNING, e.getMessage(), e);
-      result = e.toString();
+
+      result = new ErrorQueryResult(e);
     }
     
     getBroker().queryResult(id, from, to, result);
@@ -261,20 +325,27 @@ public class ManagerActor extends SimpleActor
   }  
 
   @Query
-  public String setJmx(long id, String to, String from, JmxSetQuery query)
+  public ManagementQueryResult setJmx(long id,
+                                      String to,
+                                      String from,
+                                      JmxSetQuery query)
   {
-    String result = null;
+    ManagementQueryResult result;
     
     try {
-      result = new SetJmxAction().execute(query.getPattern(),
-                                          query.getAttribute(),
-                                          query.getValue());
+      String message = new SetJmxAction().execute(query.getPattern(),
+                                                  query.getAttribute(),
+                                                  query.getValue());
+
+      result = new StringQueryResult(message);
     } catch (ConfigException e) {
       log.log(Level.WARNING, e.getMessage(), e);
-      result = e.getMessage();
+
+      result = new ErrorQueryResult(e);
     } catch (Exception e) {
       log.log(Level.WARNING, e.getMessage(), e);
-      result = e.toString();
+
+      result = new ErrorQueryResult(e);
     }
     
     getBroker().queryResult(id, from, to, result);
@@ -283,21 +354,27 @@ public class ManagerActor extends SimpleActor
   }
 
   @Query
-  public String callJmx(long id, String to, String from, JmxCallQuery query)
+  public ManagementQueryResult callJmx(long id,
+                                       String to,
+                                       String from,
+                                       JmxCallQuery query)
   {
-    String result = null;
+    ManagementQueryResult result;
     
     try {
-      result = new CallJmxAction().execute(query.getPattern(),
-                                           query.getOperation(),
-                                           query.getOperationIndex(),
-                                           query.getParams());
+      String message = new CallJmxAction().execute(query.getPattern(),
+                                                   query.getOperation(),
+                                                   query.getOperationIndex(),
+                                                   query.getParams());
+      result = new StringQueryResult(message);
     } catch (ConfigException e) {
       log.log(Level.WARNING, e.getMessage(), e);
-      result = e.getMessage();
+
+      result = new ErrorQueryResult(e);
     } catch (Exception e) {
       log.log(Level.WARNING, e.getMessage(), e);
-      result = e.toString();
+
+      result = new ErrorQueryResult(e);
     }
       
     getBroker().queryResult(id, from, to, result);
@@ -306,23 +383,27 @@ public class ManagerActor extends SimpleActor
   }
 
   @Query
-  public String setLogLevel(long id, 
-                            String to, 
-                            String from, 
-                            LogLevelQuery query)
+  public ManagementQueryResult setLogLevel(long id,
+                                           String to,
+                                           String from,
+                                           LogLevelQuery query)
   {
-    String result = null;
+    ManagementQueryResult result;
     
     try {
-      result = new SetLogLevelAction().execute(query.getLoggers(),
-                                               query.getLevel(),
-                                               query.getPeriod());
+      String message = new SetLogLevelAction().execute(query.getLoggers(),
+                                                       query.getLevel(),
+                                                       query.getPeriod());
+
+      result = new StringQueryResult(message);
     } catch (ConfigException e) {
       log.log(Level.WARNING, e.getMessage(), e);
-      result = e.getMessage();
+
+      result = new ErrorQueryResult(e);
     } catch (Exception e) {
       log.log(Level.WARNING, e.getMessage(), e);
-      result = e.toString();
+
+      result = new ErrorQueryResult(e);
     }
 
     getBroker().queryResult(id, from, to, result);
@@ -331,9 +412,12 @@ public class ManagerActor extends SimpleActor
   }
 
   @Query
-  public String pdfReport(long id, String to, String from, PdfReportQuery query)
+  public ManagementQueryResult pdfReport(long id,
+                                         String to,
+                                         String from,
+                                         PdfReportQuery query)
   {
-    String result = null;
+    ManagementQueryResult result;
     
     PdfReportAction action = new PdfReportAction();
     
@@ -360,13 +444,18 @@ public class ManagerActor extends SimpleActor
 
     try {
       action.init();
-      result = action.execute();
+
+      String snapshot = action.execute();
+
+      result = new StringQueryResult(snapshot);
     } catch (ConfigException e) {
       log.log(Level.WARNING, e.getMessage(), e);
-      result = e.getMessage();
+
+      result = new ErrorQueryResult(e);
     } catch (Exception e) {
       log.log(Level.WARNING, e.getMessage(), e);
-      result = e.toString();
+
+      result = new ErrorQueryResult(e);
     }
     
     getBroker().queryResult(id, from, to, result);
@@ -375,20 +464,27 @@ public class ManagerActor extends SimpleActor
   }
 
   @Query
-  public String profile(long id, String to, String from, ProfileQuery query)
+  public ManagementQueryResult profile(long id,
+                                       String to,
+                                       String from,
+                                       ProfileQuery query)
   {
-    String result = null;
+    ManagementQueryResult result;
     
     try {
-      result = new ProfileAction().execute(query.getActiveTime(), 
-                                           query.getPeriod(), 
-                                           query.getDepth());
+      String profile = new ProfileAction().execute(query.getActiveTime(),
+                                                   query.getPeriod(),
+                                                   query.getDepth());
+
+      result = new StringQueryResult(profile);
     } catch (ConfigException e) {
       log.log(Level.WARNING, e.getMessage(), e);
-      result = e.getMessage();
+
+      result = new ErrorQueryResult(e);
     } catch (Exception e) {
       log.log(Level.WARNING, e.getMessage(), e);
-      result = e.toString();
+
+      result = new ErrorQueryResult(e);
     }
     
     getBroker().queryResult(id, from, to, result);
@@ -397,12 +493,12 @@ public class ManagerActor extends SimpleActor
   }
 
   @Query
-  public String listRestarts(long id,
-                             String to,
-                             String from,
-                             ListRestartsQuery query)
+  public ManagementQueryResult listRestarts(long id,
+                                            String to,
+                                            String from,
+                                            ListRestartsQuery query)
   {
-    String result = null;
+    ManagementQueryResult result;
 
     try {
       final long now = Alarm.getCurrentTime();
@@ -421,9 +517,10 @@ public class ManagerActor extends SimpleActor
       Date since = new Date(now - query.getTimeBackSpan());
 
       if (restartTimes.length == 0) {
-        result = L.l("Server '{0}' hasn't restarted since '{1}'",
-                     cloudServer,
-                     since);
+        result = new StringQueryResult(L.l(
+          "Server '{0}' hasn't restarted since '{1}'",
+          cloudServer,
+          since));
       }
       else if (restartTimes.length == 1) {
         StringBuilder resultBuilder = new StringBuilder(L.l(
@@ -432,7 +529,7 @@ public class ManagerActor extends SimpleActor
         resultBuilder.append("\n  ");
         resultBuilder.append(new Date(restartTimes[0]));
 
-        result = resultBuilder.toString();
+        result = new StringQueryResult(resultBuilder.toString());
 
       }
       else {
@@ -446,12 +543,12 @@ public class ManagerActor extends SimpleActor
           resultBuilder.append(new Date(restartTime));
         }
 
-        result = resultBuilder.toString();
+        result = new StringQueryResult(resultBuilder.toString());
       }
     } catch (Exception e) {
       log.log(Level.WARNING, e.getMessage(), e);
 
-      result = e.toString();
+      result = new ErrorQueryResult(e);
     }
 
     getBroker().queryResult(id, from, to, result);
@@ -460,29 +557,32 @@ public class ManagerActor extends SimpleActor
   }
   
   @Query
-  public String addLicense(long id, 
-                           String to, 
-                           String from, 
-                           LicenseAddQuery query)
+  public ManagementQueryResult addLicense(long id,
+                                          String to,
+                                          String from,
+                                          LicenseAddQuery query)
   {
-    String result = null;
+    ManagementQueryResult result;
     
     try {
-      result = new AddLicenseAction().execute(query.getLicenseContent(), 
-                                              query.getFileName(),
-                                              query.isOverwrite(),
-                                              query.isRestart());
+      String message = new AddLicenseAction().execute(query.getLicenseContent(),
+                                                      query.getFileName(),
+                                                      query.isOverwrite(),
+                                                      query.isRestart());
+
+      result = new StringQueryResult(message);
     } catch (ConfigException e) {
       log.log(Level.WARNING, e.getMessage(), e);
-      result = e.getMessage();
+
+      result = new ErrorQueryResult(e);
     } catch (Exception e) {
       log.log(Level.WARNING, e.getMessage(), e);
-      result = e.toString();
+
+      result = new ErrorQueryResult(e);
     }
     
     getBroker().queryResult(id, from, to, result);
 
     return result;
-  }  
-  
+  }
 }

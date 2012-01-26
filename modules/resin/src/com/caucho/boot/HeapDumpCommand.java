@@ -29,7 +29,10 @@
 
 package com.caucho.boot;
 
+import com.caucho.server.admin.ErrorQueryResult;
+import com.caucho.server.admin.ManagementQueryResult;
 import com.caucho.server.admin.ManagerClient;
+import com.caucho.server.admin.StringQueryResult;
 import com.caucho.util.L10N;
 
 /**
@@ -39,12 +42,12 @@ import com.caucho.util.L10N;
 public class HeapDumpCommand extends AbstractManagementCommand
 {
   private static final L10N L = new L10N(HeapDumpCommand.class);
-  
+
   public HeapDumpCommand()
   {
     addFlagOption("raw", "creates a JVM hprof file");
   }
-  
+
   @Override
   public String getDescription()
   {
@@ -58,11 +61,20 @@ public class HeapDumpCommand extends AbstractManagementCommand
   {
     boolean raw = args.hasOption("-raw");
 
-    String data = managerClient.doHeapDump(raw);
+    ManagementQueryResult result = managerClient.doHeapDump(raw);
 
-    System.out.println(data);
+    if (result instanceof ErrorQueryResult) {
+      ErrorQueryResult errorResult = (ErrorQueryResult) result;
+      System.out.println(errorResult.getException().getMessage());
 
-    return 0;
+      return RETURN_CODE_SERVER_ERROR;
+    }
+    else {
+      StringQueryResult queryResult = (StringQueryResult) result;
+      System.out.println(queryResult.getValue());
+
+      return 0;
+    }
   }
 
   @Override

@@ -160,57 +160,59 @@ public class ManagerClient
   {
     AddUserQuery query = new AddUserQuery(user, password, roles);
 
-    return (ManagementQueryResult) query(query);
+    return query(query);
   }
 
   public ManagementQueryResult removeUser(String user)
   {
     RemoveUserQuery query = new RemoveUserQuery(user);
 
-    return (ManagementQueryResult) query(query);
+    return query(query);
   }
 
   public ManagementQueryResult listUsers()
   {
     ListUsersQuery query = new ListUsersQuery();
 
-    return (ManagementQueryResult) query(query);
+    return query(query);
   }
 
-  public String doThreadDump()
+  public ManagementQueryResult doThreadDump()
   {
     ThreadDumpQuery query = new ThreadDumpQuery();
 
-    return (String) query(query);
+    return query(query);
   }
 
-  public String doHeapDump(boolean raw)
+  public ManagementQueryResult doHeapDump(boolean raw)
   {
     HeapDumpQuery query = new HeapDumpQuery(raw);
 
-    return (String) query(query);
+    return query(query);
   }
 
-  public String doJmxDump()
+  public ManagementQueryResult doJmxDump()
   {
     JmxDumpQuery query = new JmxDumpQuery();
 
-    return (String) query(query);
+    return query(query);
   }
 
-  public String setLogLevel(String[] loggers, Level logLevel, long period)
+  public ManagementQueryResult setLogLevel(String []loggers,
+                                           Level logLevel,
+                                           long period)
   {
     LogLevelQuery query = new LogLevelQuery(loggers, logLevel, period);
 
-    return (String) query(query);
+    return query(query);
   }
 
-  public String listJmx(String pattern,
-                        boolean isPrintAttributes,
-                        boolean isPrintValues,
-                        boolean isPrintOperations,
-                        boolean isAll,
-                        boolean isPlatform)
+  public ManagementQueryResult listJmx(String pattern,
+                                       boolean isPrintAttributes,
+                                       boolean isPrintValues,
+                                       boolean isPrintOperations,
+                                       boolean isAll,
+                                       boolean isPlatform)
   {
     JmxListQuery query = new JmxListQuery(pattern,
                                           isPrintAttributes,
@@ -219,37 +221,39 @@ public class ManagerClient
                                           isAll,
                                           isPlatform);
 
-    return (String) query(query);
+    return query(query);
   }
 
-  public String setJmx(String pattern, String attribute, String value)
+  public ManagementQueryResult setJmx(String pattern,
+                                      String attribute,
+                                      String value)
   {
     JmxSetQuery query = new JmxSetQuery(pattern, attribute, value);
 
-    return (String) query(query);
+    return query(query);
   }
 
-  public String callJmx(String pattern,
-                        String operation,
-                        int opIndex,
-                        String []trailingArgs)
+  public ManagementQueryResult callJmx(String pattern,
+                                       String operation,
+                                       int opIndex,
+                                       String[] trailingArgs)
   {
     JmxCallQuery query = new JmxCallQuery(pattern,
                                           operation,
                                           opIndex,
                                           trailingArgs);
 
-    return (String) query(query);
+    return query(query);
   }
-  
-  public String pdfReport(String path, 
-                          String report, 
-                          long period, 
-                          String logDirectory,
-                          long profileTime,
-                          long samplePeriod,
-                          boolean isSnapshot,
-                          boolean isWatchdog)
+
+  public ManagementQueryResult pdfReport(String path,
+                                         String report,
+                                         long period,
+                                         String logDirectory,
+                                         long profileTime,
+                                         long samplePeriod,
+                                         boolean isSnapshot,
+                                         boolean isWatchdog)
   {
     PdfReportQuery query = new PdfReportQuery(path, 
                                               report, 
@@ -267,49 +271,51 @@ public class ManagerClient
     else
       timeout = 60000L;
       
-    return (String) query(query, timeout);
+    return query(query, timeout);
   } 
 
-  public String profile(long activeTime, long period, int depth) 
+  public ManagementQueryResult profile(long activeTime, long period, int depth)
   {
     ProfileQuery query = new ProfileQuery(activeTime, period, depth);
 
-    return (String) query(query);
+    return query(query);
   }
 
-  public String listRestarts(long period)
+  public ManagementQueryResult listRestarts(long period)
   {
      ListRestartsQuery query = new ListRestartsQuery(period);
 
-    return (String) query(query);
+    return query(query);
   }
-  
-  public String addLicense(String licenseContent, 
-                           String fileName,
-                           boolean overwrite,
-                           boolean restart)
+
+  public ManagementQueryResult addLicense(String licenseContent,
+                                          String fileName,
+                                          boolean overwrite,
+                                          boolean restart)
   {
     LicenseAddQuery query = new LicenseAddQuery(licenseContent, 
                                                 fileName,
                                                 overwrite, 
                                                 restart);
-    return (String) query(query);
+    return query(query);
   }
 
-  protected Serializable query(Serializable query)
+  protected ManagementQueryResult query(Serializable query)
   {
     try {
-      return _bamClient.query(_managerAddress, query);
+      return (ManagementQueryResult)_bamClient.query(_managerAddress, query);
     } catch (ServiceUnavailableException e) {
       throw new ServiceUnavailableException("Manager service is not available, possibly because the resin.xml is missing a <resin:ManagerService> tag\n  " + e.getMessage(),
                                             e);
     }
   }
 
-  protected Serializable query(Serializable query, long timeout)
+  protected ManagementQueryResult query(Serializable query, long timeout)
   {
     try {
-      return _bamClient.query(_managerAddress, query, timeout);
+      return (ManagementQueryResult) _bamClient.query(_managerAddress,
+                                                      query,
+                                                      timeout);
     } catch (ServiceUnavailableException e) {
       throw new ServiceUnavailableException("Manager service is not available, possibly because the resin.xml is missing a <resin:ManagerService> tag\n  " + e.getMessage(),
                                             e);

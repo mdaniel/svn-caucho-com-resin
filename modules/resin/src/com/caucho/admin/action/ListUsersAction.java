@@ -56,25 +56,10 @@ public class ListUsersAction implements AdminAction
     _adminAuth = adminAuth;
   }
 
-  public ManagementQueryResult execute()
+  public Hashtable<String,PasswordUser> execute()
   {
     Hashtable<String,PasswordUser> userMap = _adminAuth.getUserMap();
 
-    List<UserQueryResult.User> userList = new ArrayList<UserQueryResult.User>();
-
-    for (Map.Entry<String,PasswordUser> userEntry : userMap.entrySet()) {
-      PasswordUser passwordUser = userEntry.getValue();
-      UserQueryResult.User user = new UserQueryResult.User(userEntry.getKey(),
-                                                           passwordUser.getRoles());
-      userList.add(user);
-    }
-
-    UserQueryResult.User []users
-      = userList.toArray(new UserQueryResult.User[userList.size()]);
-
-    ListUsersQueryResult result
-      = new ListUsersQueryResult(users);
-
-    return result;
+    return userMap;
   }
 }

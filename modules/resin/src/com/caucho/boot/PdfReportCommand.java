@@ -30,7 +30,10 @@
 package com.caucho.boot;
 
 import com.caucho.config.types.Period;
+import com.caucho.server.admin.ErrorQueryResult;
+import com.caucho.server.admin.ManagementQueryResult;
 import com.caucho.server.admin.ManagerClient;
+import com.caucho.server.admin.StringQueryResult;
 import com.caucho.util.L10N;
 
 public class PdfReportCommand extends AbstractManagementCommand
@@ -90,17 +93,27 @@ public class PdfReportCommand extends AbstractManagementCommand
     boolean isSnapshot = args.getArgBoolean("-snapshot", true);
     boolean isWatchdog = args.getArgBoolean("-watchdog", false);
 
-    String result = managerClient.pdfReport(path,
-                                            report,
-                                            period,
-                                            logDirectory,
-                                            profileTime,
-                                            samplePeriod,
-                                            isSnapshot,
-                                            isWatchdog);
+    ManagementQueryResult result = managerClient.pdfReport(path,
+                                                           report,
+                                                           period,
+                                                           logDirectory,
+                                                           profileTime,
+                                                           samplePeriod,
+                                                           isSnapshot,
+                                                           isWatchdog);
 
-    System.out.println(result);
+    if (result instanceof ErrorQueryResult) {
+      ErrorQueryResult errorResult = (ErrorQueryResult) result;
 
-    return 0;
+      System.out.println(errorResult.getException().getMessage());
+
+      return RETURN_CODE_SERVER_ERROR;
+    } else {
+      StringQueryResult queryResult = (StringQueryResult) result;
+
+      System.out.println(queryResult.getValue());
+
+      return 0;
+    }
   }
 }

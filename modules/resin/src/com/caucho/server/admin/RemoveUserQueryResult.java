@@ -29,15 +29,15 @@
 package com.caucho.server.admin;
 
 @SuppressWarnings("serial")
-public class RemoveUserQuerResult extends UserQueryResult
+public class RemoveUserQueryResult extends UserQueryResult
 {
   private User _user;
 
-  public RemoveUserQuerResult()
+  public RemoveUserQueryResult()
   {
   }
 
-  public RemoveUserQuerResult(User user)
+  public RemoveUserQueryResult(User user)
   {
     _user = user;
   }

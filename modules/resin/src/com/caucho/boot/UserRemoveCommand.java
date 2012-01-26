@@ -32,7 +32,7 @@ package com.caucho.boot;
 import com.caucho.server.admin.ErrorQueryResult;
 import com.caucho.server.admin.ManagementQueryResult;
 import com.caucho.server.admin.ManagerClient;
-import com.caucho.server.admin.RemoveUserQuerResult;
+import com.caucho.server.admin.RemoveUserQueryResult;
 import com.caucho.util.L10N;
 
 public class UserRemoveCommand extends AbstractManagementCommand
@@ -60,7 +60,7 @@ public class UserRemoveCommand extends AbstractManagementCommand
 
       return RETURN_CODE_SERVER_ERROR;
     } else {
-      RemoveUserQuerResult queryResult = (RemoveUserQuerResult) result;
+      RemoveUserQueryResult queryResult = (RemoveUserQueryResult) result;
 
       System.out.println(L.l("user `{0}' deleted",
                              queryResult.getUser().getName()));

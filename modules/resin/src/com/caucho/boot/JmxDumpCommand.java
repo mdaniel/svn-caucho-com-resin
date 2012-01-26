@@ -29,7 +29,10 @@
 
 package com.caucho.boot;
 
+import com.caucho.server.admin.ErrorQueryResult;
+import com.caucho.server.admin.ManagementQueryResult;
 import com.caucho.server.admin.ManagerClient;
+import com.caucho.server.admin.StringQueryResult;
 import com.caucho.util.IoUtil;
 import com.caucho.util.L10N;
 
@@ -58,47 +61,40 @@ public class JmxDumpCommand extends JmxCommand
                        WatchdogClient client,
                        ManagerClient managerClient)
   {
-    String dump = managerClient.doJmxDump();
+    ManagementQueryResult result = managerClient.doJmxDump();
+    if (result instanceof ErrorQueryResult) {
+      ErrorQueryResult errorResult = (ErrorQueryResult) result;
+      System.out.println(errorResult.getException().getMessage());
 
-    String fileName = args.getArg("-file");
+      return RETURN_CODE_SERVER_ERROR;
+    } else {
+      StringQueryResult queryResult = (StringQueryResult) result;
 
-    if (fileName == null) {
-      System.out.println(dump);
-      return 0;
-    }
+      String fileName = args.getArg("-file");
 
-    Writer out = null;
+      if (fileName == null) {
+        System.out.println(queryResult.getValue());
+        return 0;
+      }
 
-    try {
-      File file = new File(fileName);
-      out = new FileWriter(file);
-      out.write(dump);
-      out.flush();
+      Writer out = null;
 
-      System.out.println(L.l("JMX dump was written to '{0}'", 
-                             file.getCanonicalPath()));
+      try {
+        File file = new File(fileName);
+        out = new FileWriter(file);
+        out.write(queryResult.getValue());
+        out.flush();
 
-      return 0;
-    } catch (IOException e) {
-      e.printStackTrace();
-      return 4;
-    } finally {
-      IoUtil.close(out);
+        System.out.println(L.l("JMX dump was written to '{0}'",
+                               file.getCanonicalPath()));
+
+        return 0;
+      } catch (IOException e) {
+        e.printStackTrace();
+        return 4;
+      } finally {
+        IoUtil.close(out);
+      }
     }
   }
-
-  /*
-  @Override
-  public void usage()
-  {
-    System.err.println(L.l(
-      "usage: bin/resin.sh [-conf <file>] jmx-dump -user <user> -password <password> [-file <file>]"));
-    System.err.println(L.l(""));
-    System.err.println(L.l("description:"));
-    System.err.println(L.l("   prints a jmx dump taken on remote server"));
-    System.err.println(L.l(""));
-    System.err.println(L.l("options:"));
-    System.err.println(L.l("   -file <file>          : file name where jmx dump will be stored"));
-  }
-  */
 }

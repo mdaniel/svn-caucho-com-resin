@@ -30,13 +30,9 @@
 package com.caucho.admin.action;
 
 import com.caucho.security.AdminAuthenticator;
-import com.caucho.server.admin.AddUserQueryResult;
-import com.caucho.server.admin.ErrorQueryResult;
-import com.caucho.server.admin.Management;
-import com.caucho.server.admin.ManagementQueryResult;
+import com.caucho.security.PasswordUser;
 import com.caucho.util.L10N;
 
-import java.util.logging.Level;
 import java.util.logging.Logger;
 
 public class AddUserAction implements AdminAction
@@ -48,13 +44,13 @@ public class AddUserAction implements AdminAction
 
   private AdminAuthenticator _adminAuth;
   private String _user;
-  private char []_password;
-  private String []_roles;
+  private char[] _password;
+  private String[] _roles;
 
   public AddUserAction(AdminAuthenticator adminAuth,
                        String user,
-                       char []password,
-                       String []roles)
+                       char[] password,
+                       String[] roles)
   {
     _adminAuth = adminAuth;
     _user = user;
@@ -62,21 +58,12 @@ public class AddUserAction implements AdminAction
     _roles = roles;
   }
 
-  public ManagementQueryResult execute()
+  public PasswordUser execute()
   {
-    ManagementQueryResult result;
+    _adminAuth.addUser(_user, _password, _roles);
 
-    try {
-      _adminAuth.addUser(_user, _password, _roles);
+    PasswordUser user = _adminAuth.getUserMap().get(_user);
 
-      result = new AddUserQueryResult(new AddUserQueryResult.User(_user,
-                                                                  _roles));
-    } catch (IllegalArgumentException e) {
-      log.log(Level.WARNING, e.getMessage(), e);
-
-      result = new ErrorQueryResult(e);
-    }
-
-    return result;
+    return user;
   }
 }

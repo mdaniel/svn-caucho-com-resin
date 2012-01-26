@@ -31,7 +31,10 @@ package com.caucho.boot;
 import java.io.IOException;
 
 import com.caucho.config.ConfigException;
+import com.caucho.server.admin.ErrorQueryResult;
+import com.caucho.server.admin.ManagementQueryResult;
 import com.caucho.server.admin.ManagerClient;
+import com.caucho.server.admin.StringQueryResult;
 import com.caucho.util.CharBuffer;
 import com.caucho.util.L10N;
 import com.caucho.vfs.Path;
@@ -121,32 +124,21 @@ public class LicenseAddCommand extends AbstractManagementCommand
     if (licenseContent == null || licenseContent.isEmpty()) {
       throw new ConfigException(L.l("Failed to read {0}: empty", path));
     }
-    
-    String message = managerClient.addLicense(licenseContent, 
-                                              fileName,
-                                              overwrite,
-                                              restart);
 
-    System.out.println(message);
-    
-    return 0;
-  }
+    ManagementQueryResult result = managerClient.addLicense(licenseContent,
+                                                            fileName,
+                                                            overwrite,
+                                                            restart);
+    if (result instanceof ErrorQueryResult) {
+      ErrorQueryResult errorResult = (ErrorQueryResult) result;
+      System.out.println(errorResult.getException().getMessage());
 
-  /*
-  @Override
-  public void usage()
-  {
-    System.err.println(L.l(
-      "usage: bin/resin.sh [-conf <file>] license-add -license <license file> [-to <filename>] [-overwrite] [-restart]"));
-    System.err.println();
-    System.err.println(L.l("description:"));
-    System.err.println(L.l("   copies a license file to the appropriate license directory"));
-    System.err.println();
-    System.err.println(L.l("options:"));
-    System.err.println(L.l("   -license <license file> : path to license file to add (required)"));
-    System.err.println(L.l("   -to <filename>          : file name license will be written to (defaults to name of license file)"));
-    System.err.println(L.l("   -overwrite              : overwrite existing license file if exists"));
-    System.err.println(L.l("   -restart                : restart Resin after license is added"));
+      return RETURN_CODE_SERVER_ERROR;
+    } else {
+      StringQueryResult queryResult = (StringQueryResult) result;
+      System.out.println(queryResult.getValue());
+
+      return 0;
+    }
   }
-   */
 }

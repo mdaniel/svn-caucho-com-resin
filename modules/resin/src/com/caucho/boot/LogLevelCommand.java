@@ -30,7 +30,10 @@
 package com.caucho.boot;
 
 import com.caucho.config.types.Period;
+import com.caucho.server.admin.ErrorQueryResult;
+import com.caucho.server.admin.ManagementQueryResult;
 import com.caucho.server.admin.ManagerClient;
+import com.caucho.server.admin.StringQueryResult;
 import com.caucho.util.L10N;
 
 import java.util.*;
@@ -109,11 +112,21 @@ public class LogLevelCommand extends AbstractManagementCommand
       loggers[1] = "com.caucho";
     }
 
-    String message = managerClient.setLogLevel(loggers, logLevel, period);
+    ManagementQueryResult result = managerClient.setLogLevel(loggers,
+                                                             logLevel,
+                                                             period);
 
-    System.out.println(message);
+    if (result instanceof ErrorQueryResult) {
+      ErrorQueryResult errorResult = (ErrorQueryResult) result;
+      System.out.println(errorResult.getException().getMessage());
 
-    return 0;
+      return RETURN_CODE_SERVER_ERROR;
+    } else {
+      StringQueryResult queryResult = (StringQueryResult) result;
+      System.out.println(queryResult.getValue());
+
+      return 0;
+    }
   }
 
   public static Level getLevel(String level) {

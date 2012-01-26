@@ -30,13 +30,9 @@
 package com.caucho.admin.action;
 
 import com.caucho.security.AdminAuthenticator;
-import com.caucho.server.admin.ErrorQueryResult;
-import com.caucho.server.admin.ManagementQueryResult;
-import com.caucho.server.admin.RemoveUserQuerResult;
-import com.caucho.server.admin.UserQueryResult;
+import com.caucho.security.PasswordUser;
 import com.caucho.util.L10N;
 
-import java.util.logging.Level;
 import java.util.logging.Logger;
 
 public class RemoveUserAction implements AdminAction
@@ -55,21 +51,12 @@ public class RemoveUserAction implements AdminAction
     _user = user;
   }
 
-  public ManagementQueryResult execute()
+  public PasswordUser execute()
   {
-    ManagementQueryResult result;
+    PasswordUser user = _adminAuth.getUserMap().get(_user);
 
-    try {
-      _adminAuth.removeUser(_user);
+    _adminAuth.removeUser(_user);
 
-      result = new RemoveUserQuerResult(new UserQueryResult.User(_user,
-                                                                 new String[0]));
-    } catch (IllegalArgumentException e) {
-      log.log(Level.WARNING, e.getMessage(), e);
-
-      result = new ErrorQueryResult(e);
-    }
-
-    return result;
+    return user;
   }
 }
