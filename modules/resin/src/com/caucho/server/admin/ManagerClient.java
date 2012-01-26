@@ -153,26 +153,28 @@ public class ManagerClient
   {
     return _bamClient;
   }
-  
-  public String addUser(String user, char []password, String []roles)
+
+  public ManagementQueryResult addUser(String user,
+                                       char []password,
+                                       String []roles)
   {
     AddUserQuery query = new AddUserQuery(user, password, roles);
 
-    return (String) query(query);
+    return (ManagementQueryResult) query(query);
   }
 
-  public String removeUser(String user)
+  public ManagementQueryResult removeUser(String user)
   {
     RemoveUserQuery query = new RemoveUserQuery(user);
 
-    return (String) query(query);
+    return (ManagementQueryResult) query(query);
   }
 
-  public String listUsers()
+  public ManagementQueryResult listUsers()
   {
     ListUsersQuery query = new ListUsersQuery();
 
-    return (String) query(query);
+    return (ManagementQueryResult) query(query);
   }
 
   public String doThreadDump()

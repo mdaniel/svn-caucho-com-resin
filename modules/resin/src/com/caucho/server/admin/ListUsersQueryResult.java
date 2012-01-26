@@ -7,9 +7,8 @@
  * notice unmodified.
  *
  * Resin Open Source is free software; you can redistribute it and/or modify
- * it under the terms of the GNU General Public License as published by
- * the Free Software Foundation; either version 2 of the License, or
- * (at your option) any later version.
+ * it under the terms of the GNU General Public License version 2
+ * as published by the Free Software Foundation.
  *
  * Resin Open Source is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
@@ -27,8 +26,24 @@
  * @author Alex Rojkov
  */
 
-package com.caucho.boot;
+package com.caucho.server.admin;
 
-public class WebAppListCommand extends DeployListCommand
+@SuppressWarnings("serial")
+public class ListUsersQueryResult extends UserQueryResult
 {
+  private User []_users;
+
+  public ListUsersQueryResult()
+  {
+  }
+
+  public ListUsersQueryResult(User[] users)
+  {
+    _users = users;
+  }
+
+  public User []getUsers()
+  {
+    return _users;
+  }
 }

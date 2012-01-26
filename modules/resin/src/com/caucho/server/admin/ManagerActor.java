@@ -108,8 +108,12 @@ public class ManagerActor extends SimpleActor
   }
 
   @Query
-  public String addUser(long id, String to, String from, AddUserQuery query) {
-    String result = null;
+  public ManagementQueryResult addUser(long id,
+                                       String to,
+                                       String from,
+                                       AddUserQuery query)
+  {
+    ManagementQueryResult result = null;
 
     try {
       result = new AddUserAction(_adminAuthenticator,
@@ -119,7 +123,7 @@ public class ManagerActor extends SimpleActor
     } catch (Exception e) {
       log.log(Level.WARNING, e.getMessage(), e);
 
-      result = e.toString();
+      result = new ErrorQueryResult(e);
     }
 
     getBroker().queryResult(id, from, to, result);
@@ -128,15 +132,15 @@ public class ManagerActor extends SimpleActor
   }
 
   @Query
-  public String listUsers(long id, String to, String from, ListUsersQuery query) {
-    String result = null;
+  public ManagementQueryResult listUsers(long id, String to, String from, ListUsersQuery query) {
+    ManagementQueryResult result = null;
 
     try {
       result = new ListUsersAction(_adminAuthenticator).execute();
     } catch (Exception e) {
       log.log(Level.WARNING, e.getMessage(), e);
 
-      result = e.toString();
+      result = new ErrorQueryResult(e);
     }
 
     getBroker().queryResult(id, from, to, result);
@@ -145,12 +149,12 @@ public class ManagerActor extends SimpleActor
   }
 
   @Query
-  public String removeUser(long id,
-                           String to,
-                           String from,
-                           RemoveUserQuery query)
+  public ManagementQueryResult removeUser(long id,
+                                          String to,
+                                          String from,
+                                          RemoveUserQuery query)
   {
-    String result = null;
+    ManagementQueryResult result = null;
 
     try {
       result = new RemoveUserAction(_adminAuthenticator,
@@ -158,7 +162,7 @@ public class ManagerActor extends SimpleActor
     } catch (Exception e) {
       log.log(Level.WARNING, e.getMessage(), e);
 
-      result = e.toString();
+      result = new ErrorQueryResult(e);
     }
 
     getBroker().queryResult(id, from, to, result);

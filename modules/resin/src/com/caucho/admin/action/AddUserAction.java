@@ -30,8 +30,13 @@
 package com.caucho.admin.action;
 
 import com.caucho.security.AdminAuthenticator;
+import com.caucho.server.admin.AddUserQueryResult;
+import com.caucho.server.admin.ErrorQueryResult;
+import com.caucho.server.admin.Management;
+import com.caucho.server.admin.ManagementQueryResult;
 import com.caucho.util.L10N;
 
+import java.util.logging.Level;
 import java.util.logging.Logger;
 
 public class AddUserAction implements AdminAction
@@ -57,14 +62,21 @@ public class AddUserAction implements AdminAction
     _roles = roles;
   }
 
-  public String execute()
+  public ManagementQueryResult execute()
   {
+    ManagementQueryResult result;
+
     try {
       _adminAuth.addUser(_user, _password, _roles);
 
-      return L.l("user `{0}' added", _user);
+      result = new AddUserQueryResult(new AddUserQueryResult.User(_user,
+                                                                  _roles));
     } catch (IllegalArgumentException e) {
-      return e.getMessage();
+      log.log(Level.WARNING, e.getMessage(), e);
+
+      result = new ErrorQueryResult(e);
     }
+
+    return result;
   }
 }

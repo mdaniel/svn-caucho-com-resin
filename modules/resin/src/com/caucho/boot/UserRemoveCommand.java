@@ -29,7 +29,10 @@
 
 package com.caucho.boot;
 
+import com.caucho.server.admin.ErrorQueryResult;
+import com.caucho.server.admin.ManagementQueryResult;
 import com.caucho.server.admin.ManagerClient;
+import com.caucho.server.admin.RemoveUserQuerResult;
 import com.caucho.util.L10N;
 
 public class UserRemoveCommand extends AbstractManagementCommand
@@ -48,17 +51,28 @@ public class UserRemoveCommand extends AbstractManagementCommand
                        ManagerClient managerClient)
   {
     String user = args.getDefaultArg();
-    String message = managerClient.removeUser(user);
 
-    System.out.println(message);
+    ManagementQueryResult result = managerClient.removeUser(user);
 
-    return 0;
+    if (result instanceof ErrorQueryResult) {
+      ErrorQueryResult errorResult = (ErrorQueryResult) result;
+      System.out.println(errorResult.getException().getMessage());
+
+      return RETURN_CODE_SERVER_ERROR;
+    } else {
+      RemoveUserQuerResult queryResult = (RemoveUserQuerResult) result;
+
+      System.out.println(L.l("user `{0}' deleted",
+                             queryResult.getUser().getName()));
+
+      return 0;
+    }
   }
 
   @Override
   public String getUsageArgs()
   {
-     return " <user>";
+    return " <user>";
   }
 
   @Override

@@ -35,8 +35,9 @@ import com.caucho.server.admin.ManagerClient;
 import com.caucho.util.L10N;
 
 public abstract class AbstractManagementCommand extends AbstractRemoteCommand {
+  public static final int RETURN_CODE_SERVER_ERROR = 32;
   private static final L10N L = new L10N(AbstractManagementCommand.class);
-  
+
   @Override
   public int doCommand(WatchdogArgs args,
                        WatchdogClient client)

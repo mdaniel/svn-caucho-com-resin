@@ -29,8 +29,15 @@
 
 package com.caucho.boot;
 
+import com.caucho.security.PasswordUser;
+import com.caucho.server.admin.ErrorQueryResult;
+import com.caucho.server.admin.ListUsersQueryResult;
+import com.caucho.server.admin.ManagementQueryResult;
 import com.caucho.server.admin.ManagerClient;
+import com.caucho.server.admin.UserQueryResult;
 import com.caucho.util.L10N;
+
+import java.util.Iterator;
 
 public class UserListCommand extends AbstractManagementCommand
 {
@@ -47,9 +54,44 @@ public class UserListCommand extends AbstractManagementCommand
                        WatchdogClient client,
                        ManagerClient managerClient)
   {
-    String message = managerClient.listUsers();
+    ManagementQueryResult result = managerClient.listUsers();
 
-    System.out.println(message);
+    if (result instanceof ErrorQueryResult) {
+      ErrorQueryResult errorResult = (ErrorQueryResult) result;
+
+      System.out.println(errorResult.getException().getMessage());
+
+      return RETURN_CODE_SERVER_ERROR;
+    }
+
+    ListUsersQueryResult queryResult = (ListUsersQueryResult) result;
+
+    if (queryResult.getUsers().length == 0) {
+      System.out.println("no users found");
+
+      return 0;
+    }
+
+    for (UserQueryResult.User user : queryResult.getUsers()) {
+      System.out.print(user.getName());
+
+      String []roles = user.getRoles();
+      if (roles == null || roles.length == 0) {
+        System.out.println();
+
+        continue;
+      }
+
+      System.out.print(": ");
+      for (int i = 0; i < roles.length;i++) {
+        System.out.print(roles[i]);
+
+        if (i + 1 < roles.length) {
+          System.out.print(", ");
+        }
+      }
+      System.out.println();
+    }
 
     return 0;
   }
