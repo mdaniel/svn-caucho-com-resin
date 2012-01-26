@@ -1114,6 +1114,9 @@ r_web-app-Basis =
 
   & r_filter-mapping*
 
+  & (attribute form-parameter-max { r_int-Type }
+     | element form-parameter-max { r_int-Type })?
+
   & (attribute idle-time { r_period-Type }
      | element idle-time { r_period-Type })?
 

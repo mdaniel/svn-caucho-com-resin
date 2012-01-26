@@ -156,7 +156,7 @@ public final class LruCache<K,V> {
   {
     _isEnableListeners = isEnable;
   }
-  
+
   public void setEnableStatistics(boolean isEnable)
   {
     _isEnableStatistics = isEnable;
@@ -684,9 +684,9 @@ public final class LruCache<K,V> {
   public Iterator<K> keys()
   {
     KeyIterator<K,V> iter = new KeyIterator<K,V>(this);
-    
+
     iter.init(this);
-    
+
     return iter;
   }
 
@@ -696,9 +696,9 @@ public final class LruCache<K,V> {
   public Iterator<K> keys(Iterator<K> oldIter)
   {
     KeyIterator<K,V> iter = (KeyIterator<K,V>) oldIter;
-    
+
     iter.init(this);
-    
+
     return oldIter;
   }
 
@@ -798,7 +798,6 @@ public final class LruCache<K,V> {
     /**
      * Returns the next entry in the cache.
      */
-    @Override
     public boolean hasNext()
     {
       return _item != null;
@@ -807,7 +806,6 @@ public final class LruCache<K,V> {
     /**
      * Returns the next key.
      */
-    @Override
     public K next()
     {
       CacheItem<K,V> entry = _item;
@@ -826,7 +824,6 @@ public final class LruCache<K,V> {
         return null;
     }
 
-    @Override
     public void remove()
     {
       throw new UnsupportedOperationException();

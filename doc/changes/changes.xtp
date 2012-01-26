@@ -12,6 +12,7 @@
 
 <s2 title="3.1.13 snapshot">
 <ul>
+<li>servlet: form-parameter-max limit for hash collisions (#4912, rep by georgbuschbeck)</li>
 <li>xa: rollback/forget (#4799)</li>
 </ul>
 </s2>

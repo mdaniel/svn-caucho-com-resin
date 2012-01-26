@@ -193,6 +193,7 @@ public class WebApp extends ServletContextImpl
   private boolean _isInheritSession;
 
   private String _characterEncoding;
+  private int _formParameterMax = 10000;
 
   // The cache
   private AbstractCache _cache;
@@ -208,7 +209,7 @@ public class WebApp extends ServletContextImpl
   // login configuration factory for lazy start
   private Login _loginFactory;
   private AbstractLogin _login;
-  
+
   // Old login manager for compat
   private AbstractLogin _loginManager;
 
@@ -322,11 +323,11 @@ public class WebApp extends ServletContextImpl
 
     _controller = controller;
     _appDir = controller.getRootDirectory();
-    
+
     try {
       _classLoader
-	= new EnvironmentClassLoader(controller.getParentClassLoader(),
-				     "web-app:" + getURL());
+        = new EnvironmentClassLoader(controller.getParentClassLoader(),
+                                     "web-app:" + getURL());
 
       // the JSP servlet needs to initialize the JspFactory
       JspServlet.initStatic();
@@ -1557,25 +1558,25 @@ public class WebApp extends ServletContextImpl
       Throwable e1 = e;
       for (;
            e1 != null
-	     && ! (e1 instanceof ConfigException)
+             && ! (e1 instanceof ConfigException)
              && e1.getCause() != null
              && e1.getCause() != e1;
            e1 = e1.getCause()) {
       }
-      
+
       if (e1 != null) {
-	if (e1 instanceof ConfigException) {
-	  if (log.isLoggable(Level.FINE))
-	    log.log(Level.WARNING, e1.toString(), e1);
-	  else
-	    log.warning(e1.getMessage());
-	}
-	else {
-	  log.log(Level.WARNING, e1.toString(), e1);
-	}
+        if (e1 instanceof ConfigException) {
+          if (log.isLoggable(Level.FINE))
+            log.log(Level.WARNING, e1.toString(), e1);
+          else
+            log.warning(e1.getMessage());
+        }
+        else {
+          log.log(Level.WARNING, e1.toString(), e1);
+        }
       }
     }
-    
+
     if (_configException == null)
       _configException = e;
 
@@ -1647,6 +1648,16 @@ public class WebApp extends ServletContextImpl
   public void setIdleTime(Period idle)
   {
     _idleTime = idle.getPeriod();
+  }
+
+  public void setFormParameterMax(int max)
+  {
+    _formParameterMax = max;
+  }
+
+  public int getFormParameterMax()
+  {
+    return _formParameterMax;
   }
 
   /**
@@ -1761,9 +1772,9 @@ public class WebApp extends ServletContextImpl
       ServletAuthenticator auth = null;
 
       try {
-	auth = webBeans.getByType(ServletAuthenticator.class);
+        auth = webBeans.getByType(ServletAuthenticator.class);
       } catch (Exception e) {
-	log.log(Level.FINE, e.toString(), e);
+        log.log(Level.FINE, e.toString(), e);
       }
 
       setAttribute("caucho.authenticator", auth);
@@ -1848,7 +1859,7 @@ public class WebApp extends ServletContextImpl
       }
 
       _jspApplicationContext.addELResolver(new WebBeansELResolver());
-      
+
       ServletContextEvent event = new ServletContextEvent(this);
 
       for (Listener listener : _listeners) {
@@ -2026,17 +2037,17 @@ public class WebApp extends ServletContextImpl
         chain = new ExceptionFilterChain(_configException);
         invocation.setFilterChain(chain);
         invocation.setDependency(AlwaysModified.create());
-	
+
         return invocation;
       }
       else if (! _lifecycle.waitForActive(_activeWaitTime)) {
-	if (log.isLoggable(Level.FINE))
-	  log.fine(this + " returned 503 busy for '" + invocation.getRawURI() + "'");
+        if (log.isLoggable(Level.FINE))
+          log.fine(this + " returned 503 busy for '" + invocation.getRawURI() + "'");
         int code = HttpServletResponse.SC_SERVICE_UNAVAILABLE;
         chain = new ErrorFilterChain(code);
         invocation.setFilterChain(chain);
         invocation.setDependency(AlwaysModified.create());
-	
+
         return invocation;
       }
       else {
@@ -2048,8 +2059,8 @@ public class WebApp extends ServletContextImpl
         boolean isCache = true;
         if (query != null && query.indexOf("jsp_precompile") >= 0)
           isCache = false;
-	else if (_rewriteDispatch != null)
-	  isCache = false;
+        else if (_rewriteDispatch != null)
+          isCache = false;
 
         if (isCache)
           entry = _filterChainCache.get(invocation.getContextURI());
@@ -2098,17 +2109,17 @@ public class WebApp extends ServletContextImpl
       }
 
       if (_oldWebApp != null
-	  && Alarm.getCurrentTime() < _oldWebAppExpireTime) {
-	Invocation oldInvocation = new Invocation();
-	oldInvocation.copyFrom(invocation);
-	oldInvocation.setWebApp(_oldWebApp);
+          && Alarm.getCurrentTime() < _oldWebAppExpireTime) {
+        Invocation oldInvocation = new Invocation();
+        oldInvocation.copyFrom(invocation);
+        oldInvocation.setWebApp(_oldWebApp);
 
-	_oldWebApp.buildInvocation(oldInvocation);
-	
-	invocation = new VersionInvocation(invocation, this,
-					   oldInvocation,
-					   oldInvocation.getWebApp(),
-					   _oldWebAppExpireTime);
+        _oldWebApp.buildInvocation(oldInvocation);
+
+        invocation = new VersionInvocation(invocation, this,
+                                           oldInvocation,
+                                           oldInvocation.getWebApp(),
+                                           _oldWebAppExpireTime);
       }
 
       return invocation;
@@ -2133,12 +2144,12 @@ public class WebApp extends ServletContextImpl
 
     if (server != null)
       server.clearCache();
-    
+
     WebAppContainer parent = _parent;
 
     if (parent != null)
       parent.clearCache();
-    
+
     // server/1kg1
     synchronized (_filterChainCache) {
       _filterChainCache.clear();
@@ -2281,8 +2292,8 @@ public class WebApp extends ServletContextImpl
         _parent.buildDispatchInvocation(dispatchInvocation);
       }
       else if (! _lifecycle.waitForActive(_activeWaitTime)) {
-	throw new IllegalStateException(L.l("'{0}' is restarting and is not yet ready to receive requests",
-					    _contextPath));
+        throw new IllegalStateException(L.l("'{0}' is restarting and is not yet ready to receive requests",
+                                            _contextPath));
       }
       else {
         FilterChain chain = _servletMapper.mapServlet(includeInvocation);
@@ -2305,7 +2316,7 @@ public class WebApp extends ServletContextImpl
       disp = new RequestDispatcherImpl(includeInvocation,
                                        forwardInvocation,
                                        errorInvocation,
-				       dispatchInvocation,
+                                       dispatchInvocation,
                                        this);
 
       getDispatcherCache().put(url, disp);
@@ -2394,8 +2405,8 @@ public class WebApp extends ServletContextImpl
       decoder.splitQuery(errorInvocation, rawURI);
 
       if (! _lifecycle.waitForActive(_activeWaitTime)) {
-	throw new IllegalStateException(L.l("'{0}' is restarting and it not yet ready to receive requests",
-					    _contextPath));
+        throw new IllegalStateException(L.l("'{0}' is restarting and it not yet ready to receive requests",
+                                            _contextPath));
       }
       else if (_parent != null) {
         _parent.buildInvocation(loginInvocation);
@@ -2413,7 +2424,7 @@ public class WebApp extends ServletContextImpl
       disp = new RequestDispatcherImpl(loginInvocation,
                                        loginInvocation,
                                        errorInvocation,
-				       loginInvocation,
+                                       loginInvocation,
                                        this);
       disp.setLogin(true);
 
@@ -2454,7 +2465,7 @@ public class WebApp extends ServletContextImpl
   {
     if (uri == null)
       throw new NullPointerException();
-    
+
     String realPath = _realPathCache.get(uri);
 
     if (realPath != null)
@@ -2552,7 +2563,7 @@ public class WebApp extends ServletContextImpl
   {
     if (_loginFactory != null) {
       synchronized (_loginFactory) {
-	_login = _loginFactory.getLoginObject();
+        _login = _loginFactory.getLoginObject();
       }
 
       return _login;
@@ -2756,25 +2767,25 @@ public class WebApp extends ServletContextImpl
       _sessionManager = null;
 
       if (sessionManager != null
-	  && (! _isInheritSession || _controller.getParent() == null))
+          && (! _isInheritSession || _controller.getParent() == null))
         sessionManager.close();
 
       if (_servletManager != null)
-	_servletManager.destroy();
+        _servletManager.destroy();
       if (_filterManager != null)
-	_filterManager.destroy();
+        _filterManager.destroy();
 
       // server/10g8 -- webApp listeners after session
       if (_webAppListeners != null) {
-	for (int i = _webAppListeners.size() - 1; i >= 0; i--) {
-	  ServletContextListener listener = _webAppListeners.get(i);
+        for (int i = _webAppListeners.size() - 1; i >= 0; i--) {
+          ServletContextListener listener = _webAppListeners.get(i);
 
-	  try {
-	    listener.contextDestroyed(event);
-	  } catch (Exception e) {
-	    log.log(Level.WARNING, e.toString(), e);
-	  }
-	}
+          try {
+            listener.contextDestroyed(event);
+          } catch (Exception e) {
+            log.log(Level.WARNING, e.toString(), e);
+          }
+        }
       }
 
       try {
