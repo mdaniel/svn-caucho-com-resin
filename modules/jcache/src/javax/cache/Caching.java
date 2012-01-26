@@ -29,11 +29,15 @@
 
 package javax.cache;
 
+import java.lang.ref.SoftReference;
+import java.lang.ref.WeakReference;
 import java.util.Iterator;
 import java.util.ServiceLoader;
-import java.util.HashMap;
 import java.util.WeakHashMap;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
+import javax.cache.spi.AnnotationProvider;
 import javax.cache.spi.CachingProvider;
 
 
@@ -44,7 +48,14 @@ import javax.cache.spi.CachingProvider;
  * for additional methods.
  */
 public final class Caching {
+  private static final Logger log = Logger.getLogger(Caching.class.getName());
+  
   public static final String DEFAULT_CACHE_MANAGER_NAME = "__default__";
+  
+  private static final WeakHashMap<ClassLoader,CachingSingleton> _cacheMap
+    = new WeakHashMap<ClassLoader,CachingSingleton>();
+  
+  private static final ClassLoader _systemClassLoader;
   
   private Caching()
   {
@@ -52,7 +63,7 @@ public final class Caching {
   
   public static CacheManagerFactory getCacheManagerFactory()
   {
-    throw new UnsupportedOperationException();
+    return getCachingSingleton().getFactory();
   }
   
   public static CacheManager getCacheManager()
@@ -67,82 +78,170 @@ public final class Caching {
   
   public static CacheManager getCacheManager(String name)
   {
-    return CachingSingleton.INSTANCE.getCacheManager(name);
+    return getCacheManagerFactory().getCacheManager(name);
   }
   
   public static CacheManager getCacheManager(ClassLoader classLoader,
                                              String name)
   {
-    return CachingSingleton.INSTANCE.getCacheManager(classLoader, name);
+    return getCacheManagerFactory().getCacheManager(classLoader, name);
   }
   
   public static void close()
     throws CachingShutdownException
   {
-    throw new UnsupportedOperationException();
+    getCacheManagerFactory().close();
   }
   
   public static void close(ClassLoader classLoader)
     throws CachingShutdownException
   {
-    throw new UnsupportedOperationException();
+      getCacheManagerFactory().close(classLoader);
   }
   
   public static void close(ClassLoader classLoader, String name)
     throws CachingShutdownException
   {
-      throw new UnsupportedOperationException();
+    getCacheManagerFactory().close(classLoader, name);
   }
   
-  public static boolean isSupported(OptionalFeature optionalFeature)
+  public static boolean isSupported(OptionalFeature feature)
   {
-    throw new UnsupportedOperationException();
+    return getCachingSingleton().getProvider().isSupported(feature);
   }
   
   public static boolean isAnnotationsSupported()
   {
-    throw new UnsupportedOperationException();
+    return getCachingSingleton().isAnnotationsSupported();
+  }
+  
+  public static CachingSingleton getCachingSingleton()
+  {
+    CachingSingleton caching = null;
+    
+    ClassLoader loader = Thread.currentThread().getContextClassLoader();
+    
+    if (loader == null)
+      loader = _systemClassLoader;
+    
+    synchronized (_cacheMap) {
+      caching =_cacheMap.get(loader);
+    
+      if (caching == null) {
+        caching = new CachingSingleton(loader);
+      
+        _cacheMap.put(loader, caching);
+      }
+    }
+
+    return caching;
   }
 
   private static final class CachingSingleton {
-    private static CachingSingleton INSTANCE = new CachingSingleton();
+    private WeakReference<ClassLoader> _loaderRef;
+    private SoftReference<CachingProvider> _providerRef;
+    private SoftReference<AnnotationProvider> _annProviderRef;
     
-    private final CachingProvider _cachingProvider;
-    
-    private CachingSingleton()
+    CachingSingleton(ClassLoader loader)
     {
-      ServiceLoader<CachingProvider> serviceLoader
-        = ServiceLoader.load(CachingProvider.class);
-      
-      Iterator<CachingProvider> iter = serviceLoader.iterator();
-      
-      _cachingProvider = iter.hasNext() ? iter.next() : null;
+      _loaderRef = new WeakReference<ClassLoader>(loader);
     }
     
-    public CacheManager getCacheManager(String name)
+    CacheManagerFactory getFactory()
     {
-      ClassLoader loader = Thread.currentThread().getContextClassLoader();
-      
-      return getCacheManager(loader, name);
+      return getProvider().getCacheManagerFactory();
     }
     
-    public CacheManager getCacheManager(ClassLoader classLoader,
-                                        String name)
+    public boolean isAnnotationsSupported()
     {
-      if (classLoader == null)
-        throw new NullPointerException();
-      
-      if (name == null)
-        throw new NullPointerException();
-      
-      if (_cachingProvider == null)
-        throw new IllegalStateException("Cannot find a CachingProvider"); 
-    
-      CacheManagerFactory factory;
-      
-      factory = _cachingProvider.getCacheManagerFactory();
-      //System.out.println("FACTOR: " + factory);
-      return factory.getCacheManager(classLoader, name);
+      return getAnnProvider() != null;
     }
+    
+    private synchronized CachingProvider getProvider()
+    {
+      CachingProvider provider = null;
+      
+      if (_providerRef != null)
+        provider = _providerRef.get();
+      
+      if (provider == null) {
+        Thread thread = Thread.currentThread();
+        ClassLoader oldLoader = thread.getContextClassLoader();
+        
+        try {
+          thread.setContextClassLoader(_loaderRef.get());
+          
+          ServiceLoader<CachingProvider> serviceLoader
+            = ServiceLoader.load(CachingProvider.class);
+  
+          Iterator<CachingProvider> iter = serviceLoader.iterator();
+  
+          provider = iter.hasNext() ? iter.next() : null;
+        } finally {
+          thread.setContextClassLoader(oldLoader);
+        }
+        
+        if (provider == null)
+          throw new IllegalStateException("Cannot find a CachingProvider: "
+                                          + _loaderRef.get());
+        
+        if (log.isLoggable(Level.FINE)) {
+          log.fine("Caching: using provider " + provider);
+        }
+        
+        _providerRef = new SoftReference<CachingProvider>(provider);
+      }
+      
+      return provider;
+    }
+    
+    private synchronized AnnotationProvider getAnnProvider()
+    {
+      AnnotationProvider provider = null;
+      
+      if (_annProviderRef != null)
+        provider = _annProviderRef.get();
+      
+      if (provider == null) {
+        Thread thread = Thread.currentThread();
+        ClassLoader oldLoader = thread.getContextClassLoader();
+        
+        try {
+          thread.setContextClassLoader(_loaderRef.get());
+          
+          ServiceLoader<AnnotationProvider> serviceLoader
+            = ServiceLoader.load(AnnotationProvider.class);
+  
+          Iterator<AnnotationProvider> iter = serviceLoader.iterator();
+  
+          provider = iter.hasNext() ? iter.next() : null;
+        } finally {
+          thread.setContextClassLoader(oldLoader);
+        }
+        
+        if (provider == null)
+          return null;
+        
+        if (log.isLoggable(Level.FINE)) {
+          log.fine("Caching: using provider " + provider);
+        }
+        
+        _annProviderRef = new SoftReference<AnnotationProvider>(provider);
+      }
+      
+      return provider;
+    }
+  }
+  
+  static {
+    ClassLoader systemClassLoader = null;
+    
+    try {
+      systemClassLoader = ClassLoader.getSystemClassLoader();
+    } catch (Exception e) {
+      log.log(Level.FINER, e.toString(), e);
+    }
+    
+    _systemClassLoader = systemClassLoader;
   }
 }
