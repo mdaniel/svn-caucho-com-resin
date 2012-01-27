@@ -181,7 +181,8 @@ public class ManagementAdmin extends AbstractManagedObject
                                               profileTime,
                                               samplePeriod,
                                               isSnapshot,
-                                              isWatchdog);
+                                              isWatchdog,
+                                              false);
 
     return query(serverId, query);
   }
