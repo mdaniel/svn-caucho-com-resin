@@ -100,7 +100,9 @@ public interface ManagementMXBean extends ManagedObjectMXBean
                                          @MXDefaultValue("true")
                                          @MXName("snapshot") boolean isSnapshot,
                                          @MXName("watchdog")
-                                         boolean isWatchdog)
+                                         boolean isWatchdog,
+                                         @MXName("load-pdf")
+                                         boolean isLoadPdf)
     throws ReflectionException;
 
   @Description("sets JMX Mbean's attribute")

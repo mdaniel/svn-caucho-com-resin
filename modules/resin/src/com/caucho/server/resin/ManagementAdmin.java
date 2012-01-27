@@ -157,7 +157,8 @@ public class ManagementAdmin extends AbstractManagedObject
                                          String profileTimeStr,
                                          String samplePeriodStr,
                                          boolean isSnapshot,
-                                         boolean isWatchdog)
+                                         boolean isWatchdog,
+                                         boolean isLoadPdf)
   {
     long period = -1;
 
@@ -182,7 +183,7 @@ public class ManagementAdmin extends AbstractManagedObject
                                               samplePeriod,
                                               isSnapshot,
                                               isWatchdog,
-                                              false);
+                                              isLoadPdf);
 
     return query(serverId, query);
   }

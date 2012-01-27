@@ -9,7 +9,6 @@ package com.caucho.admin.action;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 
-import javax.jms.Message;
 import javax.mail.internet.InternetAddress;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
@@ -243,7 +242,14 @@ public class PdfReportAction implements AdminAction
           _path = path.getNativePath();
         }
       }
-      
+
+      if (_path == null) {
+        Path path = resin.getResinHome().lookup("php/admin/pdf-gen.php");
+
+        if (path.canRead())
+          _path = path.getNativePath();
+      }
+
       if (_path != null)
         _phpPath = Vfs.lookup(_path);
     }

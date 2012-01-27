@@ -37,6 +37,7 @@ package com.caucho.admin.servlet;
  import com.caucho.management.server.ManagementMXBean;
  import com.caucho.server.admin.ErrorQueryResult;
  import com.caucho.server.admin.ManagementQueryResult;
+ import com.caucho.server.admin.PdfReportQueryResult;
  import com.caucho.server.admin.StringQueryResult;
  import com.caucho.util.L10N;
  import com.caucho.vfs.Vfs;
@@ -484,9 +485,8 @@ public class AdminRestServlet extends HttpServlet {
       if (value instanceof ErrorQueryResult)
         errorResult = (ErrorQueryResult) value;
 
-      PrintWriter writer = response.getWriter();
-
       if (errorResult != null) {
+        PrintWriter writer = response.getWriter();
         response.setStatus(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
         if (errorResult.getException() instanceof ConfigException)
           writer.println(errorResult.getException().getMessage());
@@ -499,7 +499,23 @@ public class AdminRestServlet extends HttpServlet {
       if (value instanceof StringQueryResult) {
         StringQueryResult queryResult = (StringQueryResult) value;
 
+        PrintWriter writer = response.getWriter();
         writer.println(queryResult.getValue());
+
+        return;
+      }
+
+      if(value instanceof PdfReportQueryResult) {
+        PdfReportQueryResult queryResult
+          = (PdfReportQueryResult) value;
+
+        if (queryResult.getPdfBytes() != null) {
+          response.setContentType("application/pdf");
+          response.getOutputStream().write(queryResult.getPdfBytes());
+        } else {
+          PrintWriter writer = response.getWriter();
+          writer.println(queryResult.getMessage());
+        }
       }
     }
   }
