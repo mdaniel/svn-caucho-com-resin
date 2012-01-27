@@ -28,37 +28,32 @@
 
 package com.caucho.admin.servlet;
 
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.OutputStream;
-import java.io.PrintWriter;
-import java.io.Writer;
-import java.lang.annotation.Annotation;
-import java.lang.reflect.Method;
-import java.security.Principal;
-import java.util.HashMap;
+ import com.caucho.config.ConfigException;
+ import com.caucho.jmx.Jmx;
+ import com.caucho.jmx.MXAction;
+ import com.caucho.jmx.MXDefaultValue;
+ import com.caucho.jmx.MXName;
+ import com.caucho.jmx.MXValueRequired;
+ import com.caucho.management.server.ManagementMXBean;
+ import com.caucho.server.admin.ErrorQueryResult;
+ import com.caucho.server.admin.ManagementQueryResult;
+ import com.caucho.server.admin.StringQueryResult;
+ import com.caucho.util.L10N;
+ import com.caucho.vfs.Vfs;
+ import com.caucho.vfs.WriteStream;
 
-import javax.naming.ConfigurationException;
-import javax.servlet.ServletException;
-import javax.servlet.http.HttpServlet;
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
-
-import com.caucho.bam.packet.QueryResult;
-import com.caucho.config.ConfigException;
-import com.caucho.jmx.Jmx;
-import com.caucho.jmx.MXAction;
-import com.caucho.jmx.MXDefaultValue;
-import com.caucho.jmx.MXName;
-import com.caucho.jmx.MXValueRequired;
-import com.caucho.management.server.ManagementMXBean;
-import com.caucho.network.listen.Throttle;
-import com.caucho.server.admin.ErrorQueryResult;
-import com.caucho.server.admin.ManagementQueryResult;
-import com.caucho.server.admin.StringQueryResult;
-import com.caucho.util.L10N;
-import com.caucho.vfs.Vfs;
-import com.caucho.vfs.WriteStream;
+ import javax.servlet.ServletException;
+ import javax.servlet.http.HttpServlet;
+ import javax.servlet.http.HttpServletRequest;
+ import javax.servlet.http.HttpServletResponse;
+ import java.io.IOException;
+ import java.io.InputStream;
+ import java.io.OutputStream;
+ import java.io.PrintWriter;
+ import java.lang.annotation.Annotation;
+ import java.lang.reflect.Method;
+ import java.security.Principal;
+ import java.util.HashMap;
 
   @SuppressWarnings("serial")
 public class AdminRestServlet extends HttpServlet {
@@ -171,8 +166,8 @@ public class AdminRestServlet extends HttpServlet {
     private Method _method;
 
     private String []_parameterNames;
-    private Object [] _parameterDefaults;
-    private boolean [] _parameterRequired;
+    private Object []_parameterDefaults;
+    private boolean []_parameterRequired;
 
     private Marshal []_parameterMarshal;
     private Marshal _returnMarshal;

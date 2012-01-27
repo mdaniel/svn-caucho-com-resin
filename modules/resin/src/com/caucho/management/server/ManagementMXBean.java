@@ -72,7 +72,8 @@ public interface ManagementMXBean extends ManagedObjectMXBean
                                        @MXName("print-all-beans")
                                        boolean isPrintAllBeans,
                                        @MXName("print-platform-beans")
-                                       boolean isPrintPlatformBeans);
+                                       boolean isPrintPlatformBeans)
+    throws ReflectionException;
 
   @Description("sets the java.util.logging level for debugging (Resin Pro)")
   @MXAction("log-level")
