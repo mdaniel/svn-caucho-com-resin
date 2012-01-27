@@ -34,6 +34,8 @@ import com.caucho.jmx.MXAction;
 import com.caucho.jmx.MXDefaultValue;
 import com.caucho.jmx.MXName;
 import com.caucho.jmx.MXValueRequired;
+import com.caucho.quercus.lib.reflection.ReflectionException;
+import com.caucho.server.admin.ManagementQueryResult;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -54,62 +56,79 @@ public interface ManagementMXBean extends ManagedObjectMXBean
 
   @Description("Produces a complete dump of JMX objects and values")
   @MXAction("jmx-dump")
-  public String dumpJmx(@MXName("server") String value);
+  public ManagementQueryResult dumpJmx(@MXName("server") String value)
+    throws ReflectionException;
 
   @Description("lists the JMX MBeans in a Resin server (Resin Pro)")
   @MXAction("jmx-list")
-  public String listJmx(@MXName("server") String serverId,
-                        @MXName("pattern") String pattern,
-                        @MXName("print-attributes") boolean isPrintAttributes,
-                        @MXName("print-values") boolean isPrintValues,
-                        @MXName("print-operations") boolean isPrintOperations,
-                        @MXName("print-all-beans") boolean isPrintAllBeans,
-                        @MXName("print-platform-beans") boolean isPrintPlatformBeans);
+  public ManagementQueryResult listJmx(@MXName("server") String serverId,
+                                       @MXName("pattern") String pattern,
+                                       @MXName("print-attributes")
+                                       boolean isPrintAttributes,
+                                       @MXName("print-values")
+                                       boolean isPrintValues,
+                                       @MXName("print-operations")
+                                       boolean isPrintOperations,
+                                       @MXName("print-all-beans")
+                                       boolean isPrintAllBeans,
+                                       @MXName("print-platform-beans")
+                                       boolean isPrintPlatformBeans);
 
   @Description("sets the java.util.logging level for debugging (Resin Pro)")
   @MXAction("log-level")
-  public String logLevel(@MXName("server") String serverId,
-                         @MXName("loggers") String loggersValue,
-                         @MXValueRequired
-                         @MXName("level") String levelValue,
-                         @MXName("active-time") String activeTime);
+  public ManagementQueryResult logLevel(@MXName("server") String serverId,
+                                        @MXName("loggers") String loggersValue,
+                                        @MXValueRequired
+                                        @MXName("level") String levelValue,
+                                        @MXName("active-time")
+                                        String activeTime)
+    throws ReflectionException;
 
   @Description("creates a PDF report of a Resin server (Resin Pro)")
   @MXAction("pdf-report")
-  public String pdfReport(@MXName("server") String serverId,
-                          @MXName("path") String path,
-                          @MXName("report") String report,
-                          @MXName("period") String periodStr,
-                          @MXName("log-directory") String logDirectory,
-                          @MXName("profile-time") String profileTimeStr,
-                          @MXName("sample-period") String samplePeriodStr,
-                          @MXDefaultValue("true")
-                          @MXName("snapshot") boolean isSnapshot,
-                          @MXName("watchdog") boolean isWatchdog);
-
+  public ManagementQueryResult pdfReport(@MXName("server") String serverId,
+                                         @MXName("path") String path,
+                                         @MXName("report") String report,
+                                         @MXName("period") String periodStr,
+                                         @MXName("log-directory")
+                                         String logDirectory,
+                                         @MXName("profile-time")
+                                         String profileTimeStr,
+                                         @MXName("sample-period")
+                                         String samplePeriodStr,
+                                         @MXDefaultValue("true")
+                                         @MXName("snapshot") boolean isSnapshot,
+                                         @MXName("watchdog")
+                                         boolean isWatchdog)
+    throws ReflectionException;
 
   @Description("sets JMX Mbean's attribute")
   @MXAction("jmx-set")
-  public String setJmx(@MXName("server") String serverId,
-                       @MXName("pattern") String pattern,
-                       @MXName("attribute") String attribute,
-                       @MXName("value") String value);
+  public ManagementQueryResult setJmx(@MXName("server") String serverId,
+                                      @MXName("pattern") String pattern,
+                                      @MXName("attribute") String attribute,
+                                      @MXName("value") String value)
+    throws ReflectionException;
 
   @Description("displays a JVM thread dump summary")
   @MXAction("thread-dump")
-  public String dumpThreads(@MXName("server") String serverId);
+  public ManagementQueryResult dumpThreads(@MXName("server") String serverId)
+    throws ReflectionException;
 
   @Description("calls a method on a JMX MBean")
   @MXAction("jmx-call")
-  public String callJmx(@MXName("server") String serverId,
-                        @MXName("pattern") String pattern,
-                        @MXName("operation") String operation,
-                        @MXName("operation-index") String operationIdx,
-                        @MXName("values") String values);
+  public ManagementQueryResult callJmx(@MXName("server") String serverId,
+                                       @MXName("pattern") String pattern,
+                                       @MXName("operation") String operation,
+                                       @MXName("operation-index")
+                                       String operationIdx,
+                                       @MXName("values") String values)
+    throws ReflectionException;
 
   @Description("Prints status of a server")
   @MXAction("status")
-  public String getStatus(@MXName("server") String value);
+  public ManagementQueryResult getStatus(@MXName("server") String value)
+    throws ReflectionException;
 
   // XXX: temporary example until we have a real one
   public InputStream test(@MXName("test-param") String value,

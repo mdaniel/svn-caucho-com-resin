@@ -45,6 +45,7 @@ import com.caucho.server.admin.JmxDumpQuery;
 import com.caucho.server.admin.JmxListQuery;
 import com.caucho.server.admin.JmxSetQuery;
 import com.caucho.server.admin.LogLevelQuery;
+import com.caucho.server.admin.ManagementQueryResult;
 import com.caucho.server.admin.PdfReportQuery;
 import com.caucho.server.admin.ThreadDumpQuery;
 import com.caucho.util.L10N;
@@ -93,13 +94,13 @@ public class ManagementAdmin extends AbstractManagedObject
   }
 
   @Override
-  public String listJmx(String serverId,
-                        String pattern,
-                        boolean isPrintAttributes,
-                        boolean isPrintValues,
-                        boolean isPrintOperations,
-                        boolean isPrintAllBeans,
-                        boolean isPrintPlatformBeans)
+  public ManagementQueryResult listJmx(String serverId,
+                                       String pattern,
+                                       boolean isPrintAttributes,
+                                       boolean isPrintValues,
+                                       boolean isPrintOperations,
+                                       boolean isPrintAllBeans,
+                                       boolean isPrintPlatformBeans)
   {
     JmxListQuery query = new JmxListQuery(pattern,
                                           isPrintAttributes,
@@ -108,27 +109,23 @@ public class ManagementAdmin extends AbstractManagedObject
                                           isPrintAllBeans,
                                           isPrintPlatformBeans);
 
-    return (String) query(serverId, query);
+    ManagementQueryResult result = query(serverId, query);
+
+    return result;
   }
 
   @Override
-  public String logLevel(String serverId,
-                         String loggersValue,
-                         String levelValue,
-                         String activeTime)
+  public ManagementQueryResult logLevel(String serverId,
+                                        String loggersValue,
+                                        String levelValue,
+                                        String activeTime)
   {
-    String []loggers = null;
+    String[] loggers = null;
 
-    try {
-      loggers = parseValues(loggersValue);
-    } catch (IllegalArgumentException e) {
-      log.log(Level.FINER, e.getMessage(), e);
-
-      return e.toString();
-    }
+    loggers = parseValues(loggersValue);
 
     if (loggers.length == 0)
-      loggers = new String []{"", "com.caucho"};
+      loggers = new String[]{"", "com.caucho"};
 
     long period = 0;
 
@@ -139,27 +136,28 @@ public class ManagementAdmin extends AbstractManagedObject
 
     LogLevelQuery query = new LogLevelQuery(loggers, level, period);
 
-    return (String) query(serverId, query);
+    return query(serverId, query);
   }
 
   @Override
-  public String dumpThreads(String serverId) {
+  public ManagementQueryResult dumpThreads(String serverId)
+  {
 
     ThreadDumpQuery query = new ThreadDumpQuery();
 
-    return (String) query(serverId, query);
+    return query(serverId, query);
   }
 
   @Override
-  public String pdfReport(String serverId,
-                          String path,
-                          String report,
-                          String periodStr,
-                          String logDirectory,
-                          String profileTimeStr,
-                          String samplePeriodStr,
-                          boolean isSnapshot,
-                          boolean isWatchdog)
+  public ManagementQueryResult pdfReport(String serverId,
+                                         String path,
+                                         String report,
+                                         String periodStr,
+                                         String logDirectory,
+                                         String profileTimeStr,
+                                         String samplePeriodStr,
+                                         boolean isSnapshot,
+                                         boolean isWatchdog)
   {
     long period = -1;
 
@@ -185,35 +183,29 @@ public class ManagementAdmin extends AbstractManagedObject
                                               isSnapshot,
                                               isWatchdog);
 
-    return (String) query(serverId, query);
+    return query(serverId, query);
   }
 
   @Override
-  public String setJmx(String serverId,
-                       String pattern,
-                       String attribute,
-                       String value)
+  public ManagementQueryResult setJmx(String serverId,
+                                      String pattern,
+                                      String attribute,
+                                      String value)
   {
     JmxSetQuery query = new JmxSetQuery(pattern, attribute, value);
 
-    return (String) query(serverId, query);
+    return query(serverId, query);
   }
 
   @Override
-  public String callJmx(String serverId,
-                        String pattern,
-                        String operation,
-                        String operationIdx,
-                        String values)
+  public ManagementQueryResult callJmx(String serverId,
+                                       String pattern,
+                                       String operation,
+                                       String operationIdx,
+                                       String values)
   {
-    String []params;
-    try {
-      params = parseValues(values);
-    } catch(IllegalArgumentException e) {
-      log.log(Level.FINER, e.getMessage(), e);
-
-      return e.toString();
-    }
+    String[] params;
+    params = parseValues(values);
     //
     int operationIndex = -1;
     if (operationIdx != null)
@@ -224,23 +216,23 @@ public class ManagementAdmin extends AbstractManagedObject
                                           operationIndex,
                                           params);
 
-    return (String) query(serverId, query);
+    return query(serverId, query);
   }
 
   @Override
-  public String dumpJmx(String serverId)
+  public ManagementQueryResult dumpJmx(String serverId)
   {
     JmxDumpQuery query = new JmxDumpQuery();
 
-    return (String) query(serverId, query);
+    return query(serverId, query);
   }
 
   @Override
-  public String getStatus(String serverId)
+  public ManagementQueryResult getStatus(String serverId)
   {
     WatchdogStatusQuery query = new WatchdogStatusQuery();
 
-    return (String) query(serverId, query);
+    return query(serverId, query);
   }
 
   private CloudServer getServer(String server)
@@ -264,7 +256,7 @@ public class ManagementAdmin extends AbstractManagedObject
     StringBuilder builder = null;
 
     if (values != null) {
-      char []chars = values.toCharArray();
+      char[] chars = values.toCharArray();
 
       for (int i = 0; i < chars.length; i++) {
         char c = chars[i];
@@ -335,7 +327,7 @@ public class ManagementAdmin extends AbstractManagedObject
     return params.toArray(new String[params.size()]);
   }
 
-  private Object query(String serverId, Serializable query)
+  private ManagementQueryResult query(String serverId, Serializable query)
   {
     final ActorSender sender;
 
@@ -356,7 +348,7 @@ public class ManagementAdmin extends AbstractManagedObject
       sender = hmuxFactory.create();
     }
 
-    return sender.query("manager@resin.caucho", query);
+    return (ManagementQueryResult) sender.query("manager@resin.caucho", query);
   }
 
   public InputStream test(String value, InputStream is)

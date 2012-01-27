@@ -1,4 +1,4 @@
-  /*
+ /*
  * Copyright (c) 1998-2012 Caucho Technology -- all rights reserved
  *
  * This file is part of Resin(R) Open Source
@@ -32,16 +32,19 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.io.PrintWriter;
+import java.io.Writer;
 import java.lang.annotation.Annotation;
 import java.lang.reflect.Method;
 import java.security.Principal;
 import java.util.HashMap;
 
+import javax.naming.ConfigurationException;
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
+import com.caucho.bam.packet.QueryResult;
 import com.caucho.config.ConfigException;
 import com.caucho.jmx.Jmx;
 import com.caucho.jmx.MXAction;
@@ -49,6 +52,10 @@ import com.caucho.jmx.MXDefaultValue;
 import com.caucho.jmx.MXName;
 import com.caucho.jmx.MXValueRequired;
 import com.caucho.management.server.ManagementMXBean;
+import com.caucho.network.listen.Throttle;
+import com.caucho.server.admin.ErrorQueryResult;
+import com.caucho.server.admin.ManagementQueryResult;
+import com.caucho.server.admin.StringQueryResult;
 import com.caucho.util.L10N;
 import com.caucho.vfs.Vfs;
 import com.caucho.vfs.WriteStream;
@@ -120,10 +127,26 @@ public class AdminRestServlet extends HttpServlet {
       
       PrintWriter out = res.getWriter();
       out.println(L.l("'{0}' is an unknown action", actionName));
+
       return;
     }
-    
-    action.doAction(req, res);
+
+    try {
+      action.doAction(req, res);
+    } catch (Exception e) {
+      Throwable cause = e;
+      while (cause.getCause() != null)
+        cause = cause.getCause();
+
+      res.setStatus(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
+
+      PrintWriter writer = res.getWriter();
+
+      if (cause instanceof ConfigException)
+        writer.println(cause.getMessage());
+      else
+        writer.println(cause);
+    }
   }
   
   static private void introspectManagementOperations()
@@ -333,7 +356,7 @@ public class AdminRestServlet extends HttpServlet {
                                    K defaultValue)
       throws IOException;
 
-    public void unmarshal(HttpServletResponse response, Object value)
+    public void unmarshal(HttpServletResponse response, K value)
       throws IOException
     {
       PrintWriter out = response.getWriter();
@@ -430,23 +453,62 @@ public class AdminRestServlet extends HttpServlet {
     }
 
     @Override
-    public void unmarshal(HttpServletResponse response, Object value)
+    public void unmarshal(HttpServletResponse response, InputStream value)
       throws IOException
     {
-      InputStream is = (InputStream) value;
-      
       OutputStream os = response.getOutputStream();
       
       WriteStream out = Vfs.openWrite(os);
       
       try {
-        out.writeStream(is);
+        out.writeStream(value);
       } finally {
         out.close();
       }
     }
   }
-  
+
+  static class ManagementQueryResultMarshal
+    extends Marshal<ManagementQueryResult>
+  {
+    @Override
+    public Object marshal(HttpServletRequest request,
+                          String name,
+                          ManagementQueryResult defaultValue)
+      throws IOException
+    {
+      throw new AbstractMethodError();
+    }
+
+    @Override
+    public void unmarshal(HttpServletResponse response,
+                          ManagementQueryResult value)
+      throws IOException
+    {
+      ErrorQueryResult errorResult = null;
+      if (value instanceof ErrorQueryResult)
+        errorResult = (ErrorQueryResult) value;
+
+      PrintWriter writer = response.getWriter();
+
+      if (errorResult != null) {
+        response.setStatus(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
+        if (errorResult.getException() instanceof ConfigException)
+          writer.println(errorResult.getException().getMessage());
+        else
+          writer.println(errorResult.getException());
+
+        return;
+      }
+
+      if (value instanceof StringQueryResult) {
+        StringQueryResult queryResult = (StringQueryResult) value;
+
+        writer.println(queryResult.getValue());
+      }
+    }
+  }
+
   static {
     _marshalMap.put(void.class, new VoidMarshal());
     _marshalMap.put(String.class, new StringMarshal());
@@ -454,6 +516,7 @@ public class AdminRestServlet extends HttpServlet {
     _marshalMap.put(Long.class, new LongMarshal());
     _marshalMap.put(InputStream.class, new InputStreamMarshal());
     _marshalMap.put(boolean.class, new BooleanMarshal());
+    _marshalMap.put(ManagementQueryResult.class, new ManagementQueryResultMarshal());
 
     introspectManagementOperations();
   }

@@ -104,12 +104,22 @@ public class JmxSetCommand extends JmxCommand
                                                         attribute,
                                                         value);
 
-    if (result instanceof ErrorQueryResult) {
-      ErrorQueryResult errorResult = (ErrorQueryResult) result;
+    ErrorQueryResult errorResult = null;
+    if (result instanceof ErrorQueryResult)
+      errorResult = (ErrorQueryResult) result;
+
+    if (errorResult != null
+        && errorResult.getException() instanceof IllegalArgumentException) {
+      System.out.println(errorResult.getException());
+
+      return RETURN_CODE_SERVER_ERROR;
+    }
+    else if (errorResult != null) {
       System.out.println(errorResult.getException().getMessage());
 
       return RETURN_CODE_SERVER_ERROR;
-    } else {
+    }
+    else {
       StringQueryResult queryResult = (StringQueryResult) result;
       System.out.println(queryResult.getValue());
 

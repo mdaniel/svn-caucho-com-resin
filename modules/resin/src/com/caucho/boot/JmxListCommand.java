@@ -108,7 +108,7 @@ public class JmxListCommand extends JmxCommand
       return RETURN_CODE_SERVER_ERROR;
     } else {
       StringQueryResult queryResult = (StringQueryResult) result;
-      System.out.println(queryResult.getValue());
+      System.out.print(queryResult.getValue());
 
       return 0;
     }
