@@ -442,12 +442,17 @@ public class ManagerActor extends SimpleActor
     if (query.getLogDirectory() != null)
       action.setLogDirectory(query.getLogDirectory());
 
+    action.setReturnPdf(query.isReturnPdf());
+
     try {
       action.init();
 
-      String snapshot = action.execute();
+      PdfReportAction.PdfReportActionResult actionResult =
+        action.execute();
 
-      result = new StringQueryResult(snapshot);
+      result = new PdfReportQueryResult(actionResult.getMessage(),
+                                        actionResult.getFileName(),
+                                        actionResult.getPdfBytes());
     } catch (ConfigException e) {
       log.log(Level.WARNING, e.getMessage(), e);
 

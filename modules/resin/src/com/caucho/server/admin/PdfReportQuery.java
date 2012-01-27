@@ -40,6 +40,7 @@ public class PdfReportQuery implements java.io.Serializable
   private long _samplePeriod;
   private boolean _isSnapshot;
   private boolean _isWatchdog;
+  private boolean isReturnPdf;
   
   public PdfReportQuery()
   {
@@ -52,7 +53,8 @@ public class PdfReportQuery implements java.io.Serializable
                         long profileTime,
                         long samplePeriod,
                         boolean isSnapshot,
-                        boolean isWatchdog)
+                        boolean isWatchdog,
+                        boolean isReturnPdf)
   {
     _path = path;
     _report = report;
@@ -62,6 +64,7 @@ public class PdfReportQuery implements java.io.Serializable
     _samplePeriod = samplePeriod;
     _isSnapshot = isSnapshot;
     _isWatchdog = isWatchdog;
+    this.isReturnPdf = isReturnPdf;
   }
   
   public String getPath()
@@ -137,6 +140,16 @@ public class PdfReportQuery implements java.io.Serializable
   public boolean isWatchdog()
   {
     return _isWatchdog;
+  }
+
+  public boolean isReturnPdf()
+  {
+    return isReturnPdf;
+  }
+
+  public void setReturnPdf(boolean returnPdf)
+  {
+    isReturnPdf = returnPdf;
   }
 
   @Override
