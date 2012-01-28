@@ -33,6 +33,8 @@ import java.lang.reflect.Method;
 import java.util.HashMap;
 import java.util.List;
 
+import javax.cache.annotation.CacheKeyParam;
+import javax.cache.annotation.CacheRemoveEntry;
 import javax.cache.annotation.CacheResult;
 import javax.ejb.MessageDriven;
 import javax.ejb.SessionSynchronization;
@@ -47,11 +49,12 @@ import com.caucho.inject.Module;
 import com.caucho.java.JavaWriter;
 
 /**
- * Represents the XA interception
+ * Represents the caching interception
  */
 @Module
 public class CacheGenerator<X> extends AbstractAspectGenerator<X> {
-  private CacheResult _cache;
+  private CacheResult _cacheResult;
+  private CacheRemoveEntry _cacheRemove;
   
   private String _cacheName;
   private String _cacheInstance;
@@ -59,13 +62,18 @@ public class CacheGenerator<X> extends AbstractAspectGenerator<X> {
   public CacheGenerator(CacheFactory<X> factory,
                         AnnotatedMethod<? super X> method,
                         AspectGenerator<X> next,
-                        CacheResult cache)
+                        CacheResult cache,
+                        CacheRemoveEntry cacheRemove)
   {
     super(factory, method, next);
     
-    _cache = cache;
+    _cacheResult = cache;
+    _cacheRemove = cacheRemove;
     
-    _cacheName = _cache.cacheName();
+    if (_cacheResult != null)
+      _cacheName = _cacheResult.cacheName();
+    else if (_cacheRemove != null)
+      _cacheName = _cacheRemove.cacheName();
     
     if ("".equals(_cacheName)) {
       Method javaMethod = method.getJavaMember();
@@ -116,29 +124,58 @@ public class CacheGenerator<X> extends AbstractAspectGenerator<X> {
   @Override
   public void generatePreCall(JavaWriter out) throws IOException
   {
+    buildCacheKey(out);
+
+    if (_cacheResult != null && ! _cacheResult.skipGet()) {
+      out.println("Object cacheValue = " + _cacheInstance + ".get(candiCacheKey);");
+    
+      out.println("if (cacheValue != null) {");
+      out.print("  return (");
+      out.printClass(getJavaMethod().getReturnType());
+      out.println(") cacheValue;");
+      out.println("}");
+    }
+
+    super.generatePreCall(out);
+  }
+  
+  private void buildCacheKey(JavaWriter out)
+    throws IOException
+  {
     out.println();
     out.println("com.caucho.config.util.CacheKey candiCacheKey");
     out.print("  = new com.caucho.config.util.CacheKey(");
     
     List params = getMethod().getParameters();
     
+    boolean isCacheKeyParam = isCacheKeyParam(params);
+    boolean isFirst = true;
+  
     for (int i = 0; i < params.size(); i++) {
-      if (i != 0)
+      AnnotatedParameter<?> param = (AnnotatedParameter<?>) params.get(i);
+      
+      if (isCacheKeyParam && ! param.isAnnotationPresent(CacheKeyParam.class))
+        continue;
+      
+      if (! isFirst)
         out.print(", ");
+      
       out.print("a" + i);
+      isFirst = false;
     }
 
     out.println(");");
+  }
+  
+  private boolean isCacheKeyParam(List<AnnotatedParameter<?>> params)
+  {
+    for (AnnotatedParameter<?> param : params) {
+      if (param.isAnnotationPresent(CacheKeyParam.class)) {
+        return true;
+      }
+    }
     
-    out.println("Object cacheValue = " + _cacheInstance + ".get(candiCacheKey);");
-    
-    out.println("if (cacheValue != null) {");
-    out.print("return (");
-    out.printClass(getJavaMethod().getReturnType());
-    out.print(") cacheValue;");
-    out.println("}");
-
-    super.generatePreCall(out);
+    return false;
   }
 
   /**
@@ -162,6 +199,12 @@ public class CacheGenerator<X> extends AbstractAspectGenerator<X> {
   {
     super.generatePostCall(out);
 
-    out.println(_cacheInstance + ".put(candiCacheKey, result);");
+    if (_cacheResult != null) {
+      out.println(_cacheInstance + ".put(candiCacheKey, result);");
+    }
+
+    if (_cacheRemove!= null) {
+      out.println(_cacheInstance + ".remove(candiCacheKey);");
+    }
   }
 }

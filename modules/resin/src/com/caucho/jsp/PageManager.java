@@ -423,7 +423,7 @@ abstract public class PageManager {
     }
   }
   
-  class Entry implements CacheListener {
+  public class Entry implements CacheListener {
     private String _key;
     Page _page;
     

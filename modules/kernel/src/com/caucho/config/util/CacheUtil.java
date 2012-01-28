@@ -30,16 +30,25 @@ package com.caucho.config.util;
 
 import javax.cache.Cache;
 import javax.cache.CacheBuilder;
+import javax.cache.CacheManager;
 import javax.cache.Caching;
 
 /**
- * Utilities to manage locks.
+ * Utilities to manage caching.
  */
 public class CacheUtil {
   public static Cache<?,?> getCache(String name)
   {
-    CacheBuilder<?, ?> builder = Caching.getCacheManager().createCacheBuilder(name);
+    CacheManager manager = Caching.getCacheManager();
     
-    return builder.build();
+    Cache<?,?> cache = manager.getCache(name);
+    
+    if (cache == null) {
+      CacheBuilder<?, ?> builder = Caching.getCacheManager().createCacheBuilder(name);
+    
+      cache = builder.build();
+    }
+    
+    return cache;
   }
 }

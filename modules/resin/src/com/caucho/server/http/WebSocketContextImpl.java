@@ -177,8 +177,6 @@ class WebSocketContextImpl
     if (_isWriteClosed.getAndSet(true))
       return;
     
-    Thread.dumpStack();
-
     WriteStream out = _controller.getWriteStream();
     
     try {
