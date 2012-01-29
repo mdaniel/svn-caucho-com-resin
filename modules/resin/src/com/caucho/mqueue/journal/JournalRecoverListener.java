@@ -27,15 +27,20 @@
  * @author Scott Ferguson
  */
 
-package com.caucho.mqueue;
+package com.caucho.mqueue.journal;
+
+import java.io.IOException;
+
+import com.caucho.db.block.BlockStore;
 
 /**
- * Interface for the transaction log.
+ * Interface to receive recover events for the journal on startup.
  */
-public interface LogApi
+public interface JournalRecoverListener
 {
-  public void log(int code, long sequence, long xa, 
-                  byte []buffer, int offset, int length);
-  
-  public void syncDisk();
+  public void onEntry(int code, boolean isInit, boolean isFin,
+                      long id, long seq,
+                      BlockStore store, 
+                      long blockAddress, int blockOffset, int length)
+    throws IOException;
 }
