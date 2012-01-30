@@ -12,6 +12,7 @@
 
 <s2 title="4.0.26 - snapshot">
 <ul>
+<li>jcache: cache annotations (@CacheResult, @CachePut)</li>
 <li>websocket: debug threaddump not removed (#bhauer, #4940)</li>
 </ul>
 </s2>

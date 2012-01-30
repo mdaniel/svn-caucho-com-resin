@@ -75,6 +75,11 @@ abstract public class AbstractAspectGenerator<X> implements AspectGenerator<X> {
     return _factory.getAspectBeanFactory();
   }
   
+  protected String getInstanceName()
+  {
+    return getBeanFactory().getBeanInstance();
+  }
+  
   /**
    * Returns the owning bean type.
    */

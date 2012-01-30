@@ -29,6 +29,8 @@
 
 package com.caucho.config.gen;
 
+import javax.cache.annotation.CachePut;
+import javax.cache.annotation.CacheRemoveAll;
 import javax.cache.annotation.CacheRemoveEntry;
 import javax.cache.annotation.CacheResult;
 import javax.ejb.Remove;
@@ -62,15 +64,21 @@ public class CacheFactory<X>
                                    boolean isEnhanced)
   {
     CacheResult cacheResult = method.getAnnotation(CacheResult.class);
+    CachePut cachePut = method.getAnnotation(CachePut.class);
     CacheRemoveEntry cacheRemove = method.getAnnotation(CacheRemoveEntry.class);
+    CacheRemoveAll cacheRemoveAll = method.getAnnotation(CacheRemoveAll.class);
     
-    if (cacheResult != null || cacheRemove != null) {
+    if (cacheResult != null
+        || cachePut != null
+        || cacheRemove != null
+        || cacheRemoveAll != null) {
       isEnhanced = true;
       
       AspectGenerator<X> next = super.create(method, isEnhanced);
       
       return new CacheGenerator<X>(this, method, next, 
-                                   cacheResult, cacheRemove);
+                                   cacheResult, cachePut, 
+                                   cacheRemove, cacheRemoveAll);
     }
     
     return super.create(method, isEnhanced);

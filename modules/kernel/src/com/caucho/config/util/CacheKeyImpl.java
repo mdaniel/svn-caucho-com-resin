@@ -30,14 +30,16 @@ package com.caucho.config.util;
 
 import java.io.Serializable;
 
+import javax.cache.annotation.CacheKey;
+
 /**
  * Key for a cacheable method.
  */
 @SuppressWarnings("serial")
-public class CacheKey implements Serializable {
+public class CacheKeyImpl implements Serializable, CacheKey {
   private Object []_key;
   
-  public CacheKey(Object ...key)
+  public CacheKeyImpl(Object ...key)
   {
     _key = key;
   }
@@ -64,10 +66,10 @@ public class CacheKey implements Serializable {
   @Override
   public boolean equals(Object o)
   {
-    if (o == null || o.getClass() != CacheKey.class)
+    if (o == null || o.getClass() != CacheKeyImpl.class)
       return false;
     
-    CacheKey cacheKey = (CacheKey) o;
+    CacheKeyImpl cacheKey = (CacheKeyImpl) o;
     Object []key = cacheKey._key;
     
     int length = _key.length;

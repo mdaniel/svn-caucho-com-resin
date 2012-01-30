@@ -28,10 +28,16 @@
  */
 package com.caucho.config.util;
 
+import java.lang.annotation.Annotation;
+import java.lang.reflect.Method;
+import java.util.Set;
+
 import javax.cache.Cache;
 import javax.cache.CacheBuilder;
 import javax.cache.CacheManager;
 import javax.cache.Caching;
+import javax.cache.annotation.CacheInvocationParameter;
+import javax.cache.annotation.CacheKeyInvocationContext;
 
 /**
  * Utilities to manage caching.

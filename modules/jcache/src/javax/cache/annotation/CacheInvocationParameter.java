@@ -34,12 +34,11 @@ import java.util.Set;
 
 public interface CacheInvocationParameter
 {
+  public Set<Annotation> getAnnotations();
 
+  public int getParameterPosition();
+  
   public Class<?> getRawType();
   
   public Object getValue();
-  
-  public Set<Annotation> getAnnotations();
-  
-  public int getParameterPosition();
 }
