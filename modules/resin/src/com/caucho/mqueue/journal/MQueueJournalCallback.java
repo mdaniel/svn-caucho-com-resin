@@ -27,48 +27,21 @@
  * @author Scott Ferguson
  */
 
-package com.caucho.mqueue;
+package com.caucho.mqueue.journal;
+
+import com.caucho.db.block.BlockStore;
+import com.caucho.vfs.Path;
+import com.caucho.vfs.TempBuffer;
 
 /**
- * Item for the disruptor.
+ * Interface for the transaction log.
+ * 
+ * MQueueJournal is not thread safe. It is intended to be used by a
+ * single thread.
  */
-public final class MQueueItem<T>
+public interface MQueueJournalCallback
 {
-  private final int _index;
-  
-  private final T _value;
-  
-  private volatile int _sequence;
-  
-  MQueueItem(int index, T value)
-  {
-    _index = index;
-    _value = value;
-  }
-  
-  public final int getIndex()
-  {
-    return _index;
-  }
-  
-  public final T getValue()
-  {
-    return _value;
-  }
-  
-  public void setSequence(int sequence)
-  {
-    _sequence = sequence;
-  }
-  
-  public int getSequence()
-  {
-    return _sequence;
-  }
-
-  @Override
-  public String toString()
-  {
-    return getClass().getSimpleName() + "[" + _index + "," + _value + "]";
-  }
+  void onData(int code, boolean isInit, boolean isFinal,
+              long id, long sequence,
+              BlockStore blockStore, long blockAddr, int offset, int length);
 }

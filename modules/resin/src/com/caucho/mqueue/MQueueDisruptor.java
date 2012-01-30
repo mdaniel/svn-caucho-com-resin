@@ -29,18 +29,30 @@
 
 package com.caucho.mqueue;
 
-import com.caucho.vfs.TempBuffer;
+import java.util.concurrent.atomic.AtomicInteger;
+
+import com.caucho.env.thread.TaskWorker;
 
 /**
  * Interface for the transaction log.
  */
-public final class MQueueDisruptor
+public final class MQueueDisruptor<T>
 {
   private final int _size;
   private final int _mask;
-  private final MQueueItem []_itemRing;
+  private final MQueueItem<T> []_itemRing;
+  
+  private final MQueueItemFactory<T> _factory;
+  
+  private final AtomicInteger _head = new AtomicInteger();
+  
+  private final ConsumerWorker<T> _consumerWorker;
+  
+  private volatile int _sequence = 1;
+  private volatile int _tail;
  
-  public MQueueDisruptor(int capacity, int consumers)
+  public MQueueDisruptor(int capacity,
+                         MQueueItemFactory<T> itemFactory)
   {
     int size = 1;
     
@@ -54,7 +66,88 @@ public final class MQueueDisruptor
     _itemRing = new MQueueItem[size];
     
     for (int i = 0; i < _size; i++) {
-      _itemRing[i] = new MQueueItem();
+      _itemRing[i] = new MQueueItem<T>(i, itemFactory.create(i));
     }
+    
+    _factory = itemFactory;
+    _consumerWorker = new ConsumerWorker<T>(this);
+    }
+  
+  public final MQueueItem<T> startConsumer()
+  {
+    int head;
+    MQueueItem<T> item;
+    int nextHead;
+    
+    do {
+      head = _head.get();
+      item = _itemRing[head];
+      
+      nextHead = (head + 1) & _mask;
+      
+      // full queue
+      if (nextHead == _tail)
+        return null;
+    } while (! _head.compareAndSet(head, nextHead));
+    
+    return item;
+  }
+  
+  public final void finishConsumer(MQueueItem<T> item)
+  {
+    item.setSequence(_sequence + 1);
+
+    _consumerWorker.wake();
+  }
+  
+  private final boolean doConsume()
+  {
+    int tail = _tail;
+    int head = _head.get();
+    
+    if (head == tail) {
+      return false;
+    }
+    
+    MQueueItem<T> item = _itemRing[tail];
+      
+    int nextTail = tail + 1;
+    int sequence = _sequence;
+    
+    while (item.getSequence() < sequence) {
+      // wait for init complete
+    }
+    
+    try {
+      _factory.process(item.getValue());
+    } finally {
+      
+      if (_mask < nextTail) {
+        _sequence = sequence + 1;
+      }
+      
+      _tail = nextTail & _mask;
+    }
+      
+    return true;
+  }
+  
+  static class ConsumerWorker<T> extends TaskWorker {
+    private final MQueueDisruptor<T> _disruptor;
+    
+    ConsumerWorker(MQueueDisruptor<T> disruptor)
+    {
+      _disruptor = disruptor;
+    }
+
+    @Override
+    public long runTask()
+    {
+      while (_disruptor.doConsume()) {
+      }
+
+      return 0;
+    }
+    
   }
 }

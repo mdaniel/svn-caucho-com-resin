@@ -30,45 +30,11 @@
 package com.caucho.mqueue;
 
 /**
- * Item for the disruptor.
+ * Creates an item for the disruptor
  */
-public final class MQueueItem<T>
+public interface MQueueItemFactory<T>
 {
-  private final int _index;
+  public T create(int index);
   
-  private final T _value;
-  
-  private volatile int _sequence;
-  
-  MQueueItem(int index, T value)
-  {
-    _index = index;
-    _value = value;
-  }
-  
-  public final int getIndex()
-  {
-    return _index;
-  }
-  
-  public final T getValue()
-  {
-    return _value;
-  }
-  
-  public void setSequence(int sequence)
-  {
-    _sequence = sequence;
-  }
-  
-  public int getSequence()
-  {
-    return _sequence;
-  }
-
-  @Override
-  public String toString()
-  {
-    return getClass().getSimpleName() + "[" + _index + "," + _value + "]";
-  }
+  public void process(T value);
 }

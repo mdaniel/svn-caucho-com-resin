@@ -41,7 +41,7 @@ import com.caucho.vfs.Path;
  * MQueueJournal is not thread safe. It is intended to be used by a
  * single thread.
  */
-public class MQueueJournalFile implements JournalWriter
+public class MQueueJournalFile
 {
   public static final int BLOCK_BITS = BlockStore.BLOCK_BITS;
   public static final int BLOCK_SIZE = BlockStore.BLOCK_SIZE;
@@ -198,7 +198,13 @@ public class MQueueJournalFile implements JournalWriter
       }
     }
     
-    if (seqA == 0 && seqB == 0) {
+    int nextA = (seqA + 1) & FLAG_SEQ;
+    if (nextA == 0)
+      nextA = 2;
+    
+    boolean isFlipA = (nextA != seqB);
+    
+    if (seqA == 0) {
       // initial state
       _seq = FLAG_SEQ;
       _isFlipA = false;
@@ -207,19 +213,13 @@ public class MQueueJournalFile implements JournalWriter
       return;
     }
     
-    int nextA = (seqA + 1) & FLAG_SEQ;
-    if (nextA == 0)
-      nextA = 2;
-    
-    boolean isFlipA = (nextA != seqB);
-    
     boolean isFlipFree = true;
         
     _seq = isFlipA ? seqB : seqA;
     _tailAddress = isFlipA ? checkpointAddrB : checkpointAddrA;
     _tailOffset = isFlipA ? checkpointOffsetB : checkpointOffsetA;
     
-    if (_tailOffset < BLOCK_SIZE && _tailAddress < fileSize) {
+    if (_tailOffset < BLOCK_SIZE && _tailAddress < fileSize & _seq != 0) {
       try {
         while (recoverEntry(listener)) {
           isFlipFree = false;
@@ -235,7 +235,7 @@ public class MQueueJournalFile implements JournalWriter
     
     boolean isRecover = false;
     
-    if (_tailOffset < BLOCK_SIZE && _tailAddress < fileSize) {
+    if (_tailOffset < BLOCK_SIZE && _tailAddress < fileSize & _seq != 0) {
       try {
         while (recoverEntry(listener)) {
           isRecover = true;
@@ -288,6 +288,7 @@ public class MQueueJournalFile implements JournalWriter
         _tailOffset = i;
       }
       
+      System.out.println("SEQ: " + appSeq + " " + Long.toHexString(tailAddress) + " " + offset);
       listener.onEntry(code, 
                        (flags & FLAG_INIT) != 0,
                        (flags & FLAG_FIN) != 0,
@@ -304,18 +305,29 @@ public class MQueueJournalFile implements JournalWriter
   
   public void write(int code, boolean isInit, boolean isFin,
                     long id, long seq,
-                    byte []buffer, int offset, int length)
+                    byte []buffer, int offset, int length,
+                    MQueueJournalResult result)
     throws IOException
   {
+    boolean isFirst = true;
+    
     do {
       int sublen = writeImpl(code, isInit, isFin,
                              id, seq,
-                             buffer, offset, length);
+                             buffer, offset, length,
+                             result, isFirst);
+      
+      if (length <= 0 && isFirst) {
+        result.init2(0, 0, 0);
+      }
+      
+      isFirst = false;
       
       offset += sublen;
       length -= sublen;
       
       isInit = false;
+      
     } while (length > 0);
     
     if (_flipAddress < _tailAddress && _isFlipFree) {
@@ -325,7 +337,8 @@ public class MQueueJournalFile implements JournalWriter
   
   private int writeImpl(int code, boolean isInit, boolean isFin,
                         long id, long seq,
-                        byte []buffer, int offset, int length)
+                        byte []buffer, int offset, int length,
+                        MQueueJournalResult result, boolean isFirst)
     throws IOException
   {
     if (_tailBlock == null) {
@@ -367,6 +380,13 @@ public class MQueueJournalFile implements JournalWriter
 
     System.arraycopy(buffer, offset, tailBuffer, i, sublen);
     
+    if (isFirst) {
+      result.init1(_blockStore, _tailAddress, i, sublen);
+    }
+    else {
+      result.init2(_tailAddress, i, sublen);
+    }
+    
     i += sublen;
     i += (PAD_SIZE - i) & PAD_MASK;
     
@@ -385,7 +405,6 @@ public class MQueueJournalFile implements JournalWriter
     return sublen;
   }
   
-  @Override
   public void checkpoint(long blockAddr, int offset, int length)
     throws IOException
   {
