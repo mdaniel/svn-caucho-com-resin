@@ -162,6 +162,22 @@ public class MeterService extends AbstractResinSubSystem {
     return meter;
   }
 
+  public static AbstractMeter createJmxCalculation(String name, JmxExpr expr)
+  {
+    return create().createJmxCalculationImpl(name, expr);
+  }
+
+  private AbstractMeter createJmxCalculationImpl(String name, JmxExpr expr)
+  {
+    AbstractMeter meter = _meterMap.get(name);
+
+    if (meter == null) {
+      meter = createMeter(new JmxCalculationMeterImpl(name, expr));
+    }
+
+    return meter;
+  }
+
   public static TimeMeter createTimeMeter(String name)
   {
     return create().createTimeMeterImpl(name);

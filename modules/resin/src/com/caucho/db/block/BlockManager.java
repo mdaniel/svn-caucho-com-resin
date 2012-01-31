@@ -351,6 +351,21 @@ public final class BlockManager
   {
     return _blockCache.getMissCount();
   }
+  
+  @Override
+  public double getMissRate()
+  {
+    long missCount = getMissCountTotal();
+    long hitCount = getHitCountTotal();
+    
+    double accessCount = hitCount + missCount;
+    
+    if (accessCount == 0)
+      accessCount = 1;
+    
+    return missCount / accessCount;
+      
+  }
 
   final void addBlockRead()
   {

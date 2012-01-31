@@ -72,9 +72,16 @@ public interface BlockManagerMXBean extends ManagedObjectMXBean {
   public long getHitCountTotal();
 
   /**
-   * Returns the proxy cache miss count.
+   * Returns the block cache miss count.
    */
-  @Description("The hit count is the number of block accesses missing in"
+  @Description("The miss count is the number of block accesses missing in"
                + " the cache.")
   public long getMissCountTotal();
+
+  /**
+   * Returns the block cache miss rate.
+   */
+  @Description("The miss rate is the number of block accesses missing in"
+               + " the cache.")
+  public double getMissRate();
 }

@@ -332,24 +332,83 @@
   </health:JmxDeltaMeter>
   
   <health:JmxDeltaMeter>
-    <name>Resin|Cache|Block Read Count</name>
+    <name>Resin|Block Cache|Block Read Count</name>
     <objectName>resin:type=BlockManager</objectName>
     <attribute>BlockReadCountTotal</attribute>
   </health:JmxDeltaMeter>
 
   <health:JmxDeltaMeter>
-    <name>Resin|Cache|Block Write Count</name>
+    <name>Resin|Block Cache|Block Write Count</name>
     <objectName>resin:type=BlockManager</objectName>
     <attribute>BlockWriteCountTotal</attribute>
   </health:JmxDeltaMeter>
 
   <health:JmxDeltaMeter>
-    <name>Resin|Cache|Block Miss Count</name>
+    <name>Resin|Block Cache|Block Miss Count</name>
     <objectName>resin:type=BlockManager</objectName>
     <attribute>MissCountTotal</attribute>
   </health:JmxDeltaMeter>
 
+  <health:JmxMeter>
+    <name>Resin|Block Cache|Miss Rate</name>
+    <objectName>resin:type=BlockManager</objectName>
+    <attribute>MissRate</attribute>
+  </health:JmxMeter>
+  
+  <health:JmxDeltaMeter>
+    <name>Resin|Proxy Cache|Hit Count</name>
+    <objectName>resin:type=ProxyCache</objectName>
+    <attribute>HitCountTotal</attribute>
+  </health:JmxDeltaMeter>
+
+  <health:JmxDeltaMeter>
+    <name>Resin|Proxy Cache|Miss Count</name>
+    <objectName>resin:type=ProxyCache</objectName>
+    <attribute>MissCountTotal</attribute>
+  </health:JmxDeltaMeter>
+
+  <health:JmxCalculationMeter>
+    <name>Resin|Proxy Cache|Miss Rate</name>
+
+    <rate>
+      <delta objectName="resin:type=ProxyCache" attribute="MissCountTotal"/>
+      <delta objectName="resin:type=ProxyCache" attribute="HitCountTotal"/>
+    </rate>
+  </health:JmxCalculationMeter>
+
+  <health:JmxDeltaMeter>
+    <name>Resin|Proxy Cache|Invocation Miss Count</name>
+    <objectName>resin:type=ProxyCache</objectName>
+    <attribute>InvocationMissCountTotal</attribute>
+  </health:JmxDeltaMeter>
+
+  <health:JmxMeter>
+    <name>Resin|Proxy Cache|Invocation Hit Count</name>
+    <objectName>resin:type=ProxyCache</objectName>
+    <attribute>InvocationHitCountTotal</attribute>
+  </health:JmxMeter>
+
+  <health:JmxCalculationMeter>
+    <name>Resin|Proxy Cache|Cacheable Rate</name>
+    <ratio>
+      <add>
+        <delta objectName="resin:type=ProxyCache"
+               attribute="HitCountTotal"/>
+        <delta objectName="resin:type=ProxyCache"
+               attribute="MissCountTotal"/>
+      </add>
+
+      <add>
+        <delta objectName="resin:type=ProxyCache"
+               attribute="InvocationHitCountTotal"/>
+        <delta objectName="resin:type=ProxyCache"
+               attribute="InvocationMissCountTotal"/>
+      </add>
+    </ratio>
+  </health:JmxCalculationMeter>
+
   <health:AnomalyAnalyzer>
+
     <meter>Resin|Database|Connection Active</meter>
   </health:AnomalyAnalyzer>
 
@@ -411,7 +470,7 @@
       <meter>OS|CPU|CPU Active</meter>
     </graph>
 
-    <!-- row 2 -->
+    <!-- row 3 -->
       
     <graph name="Database Connection Active">
       <meter>Resin|Database|Connection Active</meter>
@@ -434,7 +493,7 @@
       <meter>OS|Network|tcp-syn-sent</meter>
     </graph>
 
-    <!-- row 3 -->
+    <!-- row 4 -->
       
     <graph name="Memory">
       <meter>JVM|Memory|Heap Memory Used</meter>
@@ -446,6 +505,35 @@
     <graph name="GC Time">
       <meter>JVM|Memory|GC Time|PS MarkSweep</meter>
       <meter>JVM|Memory|GC Time|PS Scavenge</meter>
+    </graph>
+
+    <!-- row 5 -->
+      
+    <graph name="Block Cache I/O">
+      <meter>Resin|Block Cache|Block Read Count</meter>
+      <meter>Resin|Block Cache|Block Write Count</meter>
+    </graph>
+
+    <graph name="Block Cache Miss Rate">
+      <meter>Resin|Block Cache|Miss Rate</meter>
+    </graph>
+      
+    <graph name="Proxy Cache Hit/Miss">
+      <meter>Resin|Proxy Cache|Hit Count</meter>
+      <meter>Resin|Proxy Cache|Miss Count</meter>
+    </graph>
+
+    <graph name="Proxy Cache Miss Rate">
+      <meter>Resin|Proxy Cache|Miss Rate</meter>
+    </graph>
+      
+    <graph name="Invocation Hit/Miss">
+      <meter>Resin|Proxy Cache|Invocation Hit Count</meter>
+      <meter>Resin|Proxy Cache|Invocation Miss Count</meter>
+    </graph>
+
+    <graph name="Proxy Cache Cacheable Rate">
+      <meter>Resin|Proxy Cache|Cacheable Rate</meter>
     </graph>
   </health:MeterGraphPage>
 

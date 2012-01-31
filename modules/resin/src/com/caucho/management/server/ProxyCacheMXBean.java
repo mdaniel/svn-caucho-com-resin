@@ -48,16 +48,37 @@ public interface ProxyCacheMXBean extends ManagedObjectMXBean {
   /**
    * Returns the proxy cache hit count.
    */
-  @Description("The proxy cache is used to cache responses that"
-               + " set appropriate HTTP headers")
+  @Description("The number of cacheable requests that hit the cache")
   public long getHitCountTotal();
 
   /**
    * Returns the proxy cache miss count.
    */
-  @Description("The proxy cache is used to cache responses that"
-               + " set appropriate HTTP headers")
+  @Description("The number of cacheable requests that miss the cache")
   public long getMissCountTotal();
+  
+  /**
+   * Returns the proxy cache miss count.
+   */
+  public double getMissRate();
+  
+  /**
+   * Returns the invocation hit count
+   */
+  @Description("The total invocation hits")
+  public long getInvocationHitCountTotal();
+  
+  /**
+   * Returns the invocation miss count
+   */
+  @Description("The total invocation misses")
+  public long getInvocationMissCountTotal();
+  
+  /**
+   * Returns the cacheable rate
+   */
+  @Description("The cacheable rate")
+  public double getCacheableRate();
 
   /**
    * Return most used cacheable connections.

@@ -28,38 +28,32 @@
 
 package com.caucho.env.meter;
 
+import java.util.ArrayList;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
+import javax.annotation.PostConstruct;
 import javax.management.MBeanServer;
 import javax.management.ObjectName;
 
 import com.caucho.config.ConfigException;
 import com.caucho.jmx.Jmx;
+import com.caucho.util.L10N;
 
-public final class JmxDeltaMeter extends AbstractMeter {
+public final class JmxCalculationMeterImpl extends AbstractMeter {
+  private static final L10N L = new L10N(JmxExpr.class);
   private static final Logger log
-  = Logger.getLogger(JmxDeltaMeter.class.getName());
-
-  private MBeanServer _server;
-  private ObjectName _objectName;
-  private String _attribute;
-
-  private double _lastValue;
+    = Logger.getLogger(JmxExpr.class.getName());
+  
   private double _lastSample;
-
-  public JmxDeltaMeter(String name, String objectName, String attribute)
+  
+  private JmxExpr _expr;
+  
+  public JmxCalculationMeterImpl(String name, JmxExpr expr)
   {
     super(name);
-
-    try {
-      _objectName = new ObjectName(objectName);
-    } catch (Exception e) {
-        throw ConfigException.create(e);
-    }
-
-    _attribute = attribute;
-    _server = Jmx.getGlobalMBeanServer();
+    
+    _expr = expr;
   }
 
   /**
@@ -68,26 +62,16 @@ public final class JmxDeltaMeter extends AbstractMeter {
   @Override
   public double sample()
   {
-    try {
-      Object objValue = _server.getAttribute(_objectName, _attribute);
-
-      if (objValue == null)
-        return 0;
-      
-      double lastValue = _lastValue;
-      _lastValue = lastValue;
-      double value = ((Number) objValue).doubleValue();
-      
-      _lastSample = value - lastValue;
-      
-      return _lastSample;
-    } catch (Exception e) {
-      log.log(Level.FINE, e.toString(), e);
-
-      return 0;
+    if (_expr != null) {
+      _expr.sample();
     }
+    
+    _lastSample = _expr.calculate();
+    
+    return _lastSample;
   }
   
+  @Override
   public double peek()
   {
     return _lastSample;

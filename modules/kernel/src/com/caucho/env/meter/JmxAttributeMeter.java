@@ -52,7 +52,7 @@ public final class JmxAttributeMeter extends AbstractMeter {
     super(name);
 
     try {
-        _objectName = new ObjectName(objectName);
+      _objectName = new ObjectName(objectName);
     } catch (Exception e) {
         throw ConfigException.create(e);
     }
