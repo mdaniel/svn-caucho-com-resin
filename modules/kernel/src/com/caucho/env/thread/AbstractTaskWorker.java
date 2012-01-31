@@ -56,6 +56,9 @@ abstract public class AbstractTaskWorker implements Runnable {
   private final AtomicBoolean _isActive = new AtomicBoolean();
 
   private final ClassLoader _classLoader;
+  
+  private final String _threadName;
+  
   private long _workerIdleTimeout = 30000L;
   private boolean _isClosed;
   
@@ -66,6 +69,8 @@ abstract public class AbstractTaskWorker implements Runnable {
   protected AbstractTaskWorker(ClassLoader classLoader)
   {
     _classLoader = classLoader;
+    
+    _threadName = toString() + "-" + _idGen.incrementAndGet();
   }
 
   protected boolean isPermanent()
@@ -132,7 +137,7 @@ abstract public class AbstractTaskWorker implements Runnable {
   protected String getThreadName()
   {
     // return getClass().getSimpleName() + "-" + _idGen.incrementAndGet();
-    return toString() + "-" + _idGen.incrementAndGet();
+    return _threadName;
   }
   
   protected void onThreadStart()

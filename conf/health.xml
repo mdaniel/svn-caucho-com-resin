@@ -349,11 +349,17 @@
     <attribute>MissCountTotal</attribute>
   </health:JmxDeltaMeter>
 
-  <health:JmxMeter>
+  <health:JmxCalculationMeter>
     <name>Resin|Block Cache|Miss Rate</name>
-    <objectName>resin:type=BlockManager</objectName>
-    <attribute>MissRate</attribute>
-  </health:JmxMeter>
+
+    <rate>
+      <delta objectName="resin:type=BlockManager"
+             attribute="MissCountTotal"/>
+
+      <delta objectName="resin:type=BlockManager"
+             attribute="HitCountTotal"/>
+    </rate>
+  </health:JmxCalculationMeter>
   
   <health:JmxDeltaMeter>
     <name>Resin|Proxy Cache|Hit Count</name>
@@ -382,11 +388,11 @@
     <attribute>InvocationMissCountTotal</attribute>
   </health:JmxDeltaMeter>
 
-  <health:JmxMeter>
+  <health:JmxDeltaMeter>
     <name>Resin|Proxy Cache|Invocation Hit Count</name>
     <objectName>resin:type=ProxyCache</objectName>
     <attribute>InvocationHitCountTotal</attribute>
-  </health:JmxMeter>
+  </health:JmxDeltaMeter>
 
   <health:JmxCalculationMeter>
     <name>Resin|Proxy Cache|Cacheable Rate</name>

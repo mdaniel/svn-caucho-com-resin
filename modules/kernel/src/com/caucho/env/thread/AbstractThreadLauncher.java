@@ -436,7 +436,7 @@ abstract public class AbstractThreadLauncher extends AbstractTaskWorker {
   
   protected boolean isIdleTooLow(int startingCount)
   {
-    return (_idleCount.get() + startingCount < _idleMin);
+    return (_idleCount.get() + startingCount <= _idleMin);
   }
   
   @Override

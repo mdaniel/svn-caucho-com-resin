@@ -280,7 +280,7 @@ public final class Block implements SyncCacheListener {
   /**
    * Marks the block's data as dirty
    */
-  public void setDirty(int min, int max)
+  public final void setDirty(int min, int max)
   {
     if (BlockStore.BLOCK_SIZE < max || min < 0 || max < min)
       throw new IllegalStateException("min=" + min + ", max=" + max);
@@ -302,6 +302,16 @@ public final class Block implements SyncCacheListener {
       
       newDirty = ((long) dirtyMax << 32) + dirtyMin;
     } while (! _dirtyRange.compareAndSet(oldDirty, newDirty));
+  }
+
+  /**
+   * Sets a specific dirty value. Not thread safe.
+   */
+  public final void setDirtyExact(int min, int max)
+  {
+    long newDirty = (((long) max) << 32) + min;
+    
+    _dirtyRange.set(newDirty);
   }
 
   /**

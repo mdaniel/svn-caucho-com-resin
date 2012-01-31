@@ -32,9 +32,9 @@ package com.caucho.mqueue;
 /**
  * Creates an item for the disruptor
  */
-public interface MQueueItemFactory<T>
+abstract public class MQueueItemFactory<T>
 {
-  public T create(int index);
+  abstract public T create(int index);
   
-  public void process(T value);
+  abstract public void process(T value) throws Exception;
 }

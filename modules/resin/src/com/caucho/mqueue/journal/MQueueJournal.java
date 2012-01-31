@@ -60,9 +60,9 @@ public class MQueueJournal
     _path = path;
     _journalFile = new MQueueJournalFile(path, listener);
     
-    int size = 4 * 1024;
+    int size = 1 * 1024;
     
-    JournalFactory factory = new JournalFactory(this);
+    JournalFactory factory = new JournalFactory();
     
     _disruptor = new MQueueDisruptor<MQueueJournalEntry>(size, factory);
   }
@@ -83,7 +83,7 @@ public class MQueueJournal
 
     MQueueItem<MQueueJournalEntry> item = null;
     
-    while ((item = _disruptor.startConsumer()) == null) {
+    while ((item = _disruptor.startProducer()) == null) {
       if (repeatMax < repeat++) {
         repeat = 0;
         
@@ -98,45 +98,51 @@ public class MQueueJournal
     
     entry.init(code, id, seq, buffer, offset, length, callback, tBuf);
     
-    _disruptor.finishConsumer(item);
+    _disruptor.finishProducer(item);
   }
   
   public void checkpoint(long blockAddr, int offset, int length)
   {
-    int repeatMax = 256;
-    int repeat = 0;
-
     MQueueItem<MQueueJournalEntry> item = null;
     
-    while ((item = _disruptor.startConsumer()) == null) {
-      if (repeatMax < repeat++) {
-        repeat = 0;
-        
-        try {
-          Thread.sleep(0, 10);
-        } catch (Exception e) {
-        }
-      }
+    if ((item = _disruptor.startProducer()) == null) {
+      return;
     }
     
     MQueueJournalEntry entry = item.getValue();
     
     entry.initCheckpoint(blockAddr, offset, length);
     
-    _disruptor.finishConsumer(item);
+    _disruptor.finishProducer(item);
   }
   
-  private void processData(MQueueJournalEntry entry)
+  private final void processEntry(MQueueJournalEntry entry)
+    throws IOException
   {
-    try {
+    if (entry.isData())
+      processData(entry);
+    else
+      processCheckpoint(entry);
+  }
+  
+  private final void processData(MQueueJournalEntry entry)
+    throws IOException
+  {
       int code = entry.getCode();
       long id = entry.getId();
       long sequence = entry.getSequence();
       MQueueJournalResult result = entry.getResult();
       
+      byte []buffer = entry.getBuffer();
+      
+      if (buffer == null) {
+        //System.out.println("NULLB:" + sequence);
+        return;
+      }
+      
       _journalFile.write(code, entry.isInit(), entry.isFin(),
                          id, sequence,
-                         entry.getBuffer(), entry.getOffset(), entry.getLength(),
+                         buffer, entry.getOffset(), entry.getLength(),
                          entry.getResult());
     
       entry.freeTempBuffer();
@@ -166,24 +172,16 @@ public class MQueueJournal
                   result.getOffset2(),
                   result.getLength2());
       }
-    } catch (IOException e) {
-      log.log(Level.FINER, e.toString(), e);
-    }
-    
   }
   
-  private void processCheckpoint(MQueueJournalEntry entry)
+  private final void processCheckpoint(MQueueJournalEntry entry)
+    throws IOException
   {
-    try {
       long blockAddr = entry.getBlockAddr();
       int offset = entry.getOffset();
       int length = entry.getLength();
       
       _journalFile.checkpoint(blockAddr, offset, length);
-    } catch (IOException e) {
-      log.log(Level.FINER, e.toString(), e);
-    }
-    
   }
   
   public void close()
@@ -197,14 +195,7 @@ public class MQueueJournal
     return getClass().getSimpleName() + "[" + _path + "]";
   }
   
-  static class JournalFactory implements MQueueItemFactory<MQueueJournalEntry> {
-    private final MQueueJournal _journal;
-    
-    JournalFactory(MQueueJournal journal)
-    {
-      _journal = journal;
-    }
-
+  private class JournalFactory extends MQueueItemFactory<MQueueJournalEntry> {
     @Override
     public MQueueJournalEntry create(int index)
     {
@@ -212,13 +203,10 @@ public class MQueueJournal
     }
 
     @Override
-    public void process(MQueueJournalEntry entry)
+    public final void process(MQueueJournalEntry entry)
+      throws IOException
     {
-      if (entry.isData())
-        _journal.processData(entry);
-      else
-        _journal.processCheckpoint(entry);
+      processEntry(entry);
     }
-    
   }
 }

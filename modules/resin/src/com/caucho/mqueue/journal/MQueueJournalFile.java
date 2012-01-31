@@ -41,7 +41,7 @@ import com.caucho.vfs.Path;
  * MQueueJournal is not thread safe. It is intended to be used by a
  * single thread.
  */
-public class MQueueJournalFile
+public final class MQueueJournalFile
 {
   public static final int BLOCK_BITS = BlockStore.BLOCK_BITS;
   public static final int BLOCK_SIZE = BlockStore.BLOCK_SIZE;
@@ -74,7 +74,7 @@ public class MQueueJournalFile
   
 
   
-  private Path _path;
+  private final Path _path;
   private BlockStore _blockStore;
   
   private long _flipAddress;
@@ -84,6 +84,9 @@ public class MQueueJournalFile
   private long _tailAddress;
   private int _tailOffset;
   private Block _tailBlock;
+  
+  private Block _headerBlockA;
+  private Block _headerBlockB;
   
   private int _seq;
   
@@ -113,8 +116,6 @@ public class MQueueJournalFile
     int count = (int) (size / BLOCK_SIZE);
     
     _flipAddress = 2 * BLOCK_SIZE * count + FILE_DATA_OFFSET;
-    
-    System.out.println("ADDR: " + Long.toHexString(_flipAddress));
   }
   
   private void init(JournalRecoverListener listener)
@@ -129,6 +130,18 @@ public class MQueueJournalFile
     _tailOffset = 0;
     
     _isFlipFree = true;
+    
+    try {
+      long headerAddrA = FILE_HEADER_OFFSET + 0 * BLOCK_SIZE;
+      
+      _headerBlockA = _blockStore.readBlock(headerAddrA);
+      
+      long headerAddrB = FILE_HEADER_OFFSET + BLOCK_SIZE;
+      
+      _headerBlockB = _blockStore.readBlock(headerAddrB);
+    } catch (Exception e) {
+      throw new RuntimeException(e);
+    }
   
     try {
       recover(listener);
@@ -152,51 +165,35 @@ public class MQueueJournalFile
     long checkpointAddrB = 0;
     int checkpointOffsetB = 0;
 
-    try {
-      long addr = FILE_HEADER_OFFSET + 0 * BLOCK_SIZE;
+    block = _headerBlockA;
       
-      block = _blockStore.readBlock(addr);
+    byte []buffer = block.getBuffer();
       
-      byte []buffer = block.getBuffer();
+    seqA = buffer[FH_OFF_SEQ] & FLAG_SEQ;
       
-      seqA = buffer[FH_OFF_SEQ] & FLAG_SEQ;
+    if ((seqA & 1) != 0)
+      seqA = 0;
       
-      if ((seqA & 1) != 0)
-        seqA = 0;
+    checkpointAddrA = readLong(buffer, FH_CHECKPOINT_ADDR);
+    checkpointOffsetA = readInt(buffer, FH_CHECKPOINT_OFFSET);
       
-      checkpointAddrA = readLong(buffer, FH_CHECKPOINT_ADDR);
-      checkpointOffsetA = readInt(buffer, FH_CHECKPOINT_OFFSET);
-      
-      if (checkpointAddrA < FILE_DATA_OFFSET)
-        checkpointAddrA = FILE_DATA_OFFSET;
-    } finally {
-      if (block != null) {
-        block.free();
-      }
-    }
+    if (checkpointAddrA < FILE_DATA_OFFSET)
+      checkpointAddrA = FILE_DATA_OFFSET;
 
-    try {
-      long addr = FILE_HEADER_OFFSET + 1 * BLOCK_SIZE;
+    block = _headerBlockB;
       
-      block = _blockStore.readBlock(addr);
+    buffer = block.getBuffer();
       
-      byte []buffer = block.getBuffer();
+    seqB = buffer[FH_OFF_SEQ] & 0xff;
       
-      seqB = buffer[FH_OFF_SEQ] & 0xff;
+    if ((seqB & 1) != 1)
+      seqB = 0;
       
-      if ((seqB & 1) != 1)
-        seqB = 0;
+    checkpointAddrB = readLong(buffer, FH_CHECKPOINT_ADDR);
+    checkpointOffsetB = readInt(buffer, FH_CHECKPOINT_OFFSET);
       
-      checkpointAddrB = readLong(buffer, FH_CHECKPOINT_ADDR);
-      checkpointOffsetB = readInt(buffer, FH_CHECKPOINT_OFFSET);
-      
-      if (checkpointAddrB < FILE_DATA_OFFSET + BLOCK_SIZE)
-        checkpointAddrB = FILE_DATA_OFFSET + BLOCK_SIZE;
-    } finally {
-      if (block != null) {
-        block.free();
-      }
-    }
+    if (checkpointAddrB < FILE_DATA_OFFSET + BLOCK_SIZE)
+      checkpointAddrB = FILE_DATA_OFFSET + BLOCK_SIZE;
     
     int nextA = (seqA + 1) & FLAG_SEQ;
     if (nextA == 0)
@@ -288,7 +285,6 @@ public class MQueueJournalFile
         _tailOffset = i;
       }
       
-      System.out.println("SEQ: " + appSeq + " " + Long.toHexString(tailAddress) + " " + offset);
       listener.onEntry(code, 
                        (flags & FLAG_INIT) != 0,
                        (flags & FLAG_FIN) != 0,
@@ -303,10 +299,10 @@ public class MQueueJournalFile
     return true;
   }
   
-  public void write(int code, boolean isInit, boolean isFin,
-                    long id, long seq,
-                    byte []buffer, int offset, int length,
-                    MQueueJournalResult result)
+  public final void write(int code, boolean isInit, boolean isFin,
+                          long id, long seq,
+                          byte []buffer, int offset, int length,
+                          MQueueJournalResult result)
     throws IOException
   {
     boolean isFirst = true;
@@ -317,8 +313,9 @@ public class MQueueJournalFile
                              buffer, offset, length,
                              result, isFirst);
       
-      if (length <= 0 && isFirst) {
+      if (length <= sublen && isFirst) {
         result.init2(0, 0, 0);
+        break;
       }
       
       isFirst = false;
@@ -390,7 +387,8 @@ public class MQueueJournalFile
     i += sublen;
     i += (PAD_SIZE - i) & PAD_MASK;
     
-    _tailBlock.setDirty(_tailOffset, i);
+    // _tailBlock.setDirty(_tailOffset, i);
+    _tailBlock.setDirtyExact(0, i);
     
     if (i == BLOCK_SIZE) {
       _tailBlock.free();
@@ -421,41 +419,34 @@ public class MQueueJournalFile
     
     long headerAddr = FILE_HEADER_OFFSET + (isCheckpointA ? 0 : BLOCK_SIZE);
     
-    Block block = null;
-    try {
-      block = _blockStore.readBlock(headerAddr);
+    Block block = isCheckpointA ? _headerBlockA : _headerBlockB;
       
-      byte []buffer = block.getBuffer();
+    byte []buffer = block.getBuffer();
       
-      writeLong(buffer, FH_CHECKPOINT_ADDR, blockAddr);
-      writeInt(buffer, FH_CHECKPOINT_OFFSET, tail);
+    writeLong(buffer, FH_CHECKPOINT_ADDR, blockAddr);
+    writeInt(buffer, FH_CHECKPOINT_OFFSET, tail);
       
-      block.setDirty(0, FH_END);
-    } finally {
-      if (block != null)
-        block.free();
-    }
+    // block.setDirty(0, FH_END);
+    block.setDirtyExact(0, FH_END);
     
     if (isCheckpointA == _isFlipA && ! _isFlipFree) {
       // if checkpoint clears the flip, then clear it as well.
       headerAddr = FILE_HEADER_OFFSET + (isCheckpointA ? BLOCK_SIZE : 0);
       
-      block = null;
-      try {
-        block = _blockStore.readBlock(headerAddr);
+      block = isCheckpointA ? _headerBlockB : _headerBlockA;
         
-        byte []buffer = block.getBuffer();
+      buffer = block.getBuffer();
         
-        writeLong(buffer, FH_CHECKPOINT_ADDR, 0);
-        writeInt(buffer, FH_CHECKPOINT_OFFSET, Integer.MAX_VALUE / 2);
+      writeLong(buffer, FH_CHECKPOINT_ADDR, 0);
+      writeInt(buffer, FH_CHECKPOINT_OFFSET, Integer.MAX_VALUE / 2);
         
-        block.setDirty(0, FH_END);
-      } finally {
-        if (block != null)
-          block.free();
-      }
+      // block.setDirty(0, FH_END);
+      block.setDirtyExact(0, FH_END);
       
       _isFlipFree = true;
+      
+      _headerBlockA.commit();
+      _headerBlockB.commit();
     }
   }
   
@@ -480,25 +471,17 @@ public class MQueueJournalFile
     
     _isFlipFree = false;
     
-    long headerAddress = FILE_HEADER_OFFSET + (_isFlipA ? 0 : BLOCK_SIZE); 
+    Block block = _isFlipA ? _headerBlockA : _headerBlockB;
     
-    Block block = _blockStore.readBlock(headerAddress);
-    
-    try {
-      byte []buffer = block.getBuffer();
+    byte []buffer = block.getBuffer();
       
-      buffer[FH_OFF_SEQ] = (byte) _seq;
+    buffer[FH_OFF_SEQ] = (byte) _seq;
       
-      writeLong(buffer, FH_CHECKPOINT_ADDR, 0);
-      writeLong(buffer, FH_CHECKPOINT_OFFSET, 0);
+    writeLong(buffer, FH_CHECKPOINT_ADDR, 0);
+    writeLong(buffer, FH_CHECKPOINT_OFFSET, 0);
       
-      block.setDirty(0, FH_END);
-      
-    } finally {
-      block.free();
-    }
-    
-    System.out.println("SEQ: " + _seq + " " + Long.toHexString(_tailAddress));
+    // block.setDirty(0, FH_END);
+    block.setDirtyExact(0, FH_END);
   }
   
   private static int readShort(byte []buffer, int offset)
@@ -552,8 +535,22 @@ public class MQueueJournalFile
     Block tailBlock = _tailBlock;
     _tailBlock = null;
     
+    Block headerBlockA = _headerBlockA;
+    _headerBlockA = null;
+    
+    Block headerBlockB = _headerBlockB;
+    _headerBlockB = null;
+    
     if (tailBlock != null) {
       tailBlock.free();
+    }
+    
+    if (headerBlockA != null) {
+      headerBlockA.free();
+    }
+    
+    if (headerBlockB != null) {
+      headerBlockB.free();
     }
     
     _blockStore.flush();

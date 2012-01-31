@@ -29,6 +29,8 @@
 
 package com.caucho.mqueue;
 
+import java.util.concurrent.atomic.AtomicBoolean;
+
 /**
  * Item for the disruptor.
  */
@@ -38,7 +40,9 @@ public final class MQueueItem<T>
   
   private final T _value;
   
-  private volatile int _sequence;
+  // private volatile boolean _isValid; // volatile int _sequence;
+  
+  private final AtomicBoolean _isValid = new AtomicBoolean();
   
   MQueueItem(int index, T value)
   {
@@ -56,6 +60,7 @@ public final class MQueueItem<T>
     return _value;
   }
   
+  /*
   public void setSequence(int sequence)
   {
     _sequence = sequence;
@@ -64,6 +69,22 @@ public final class MQueueItem<T>
   public int getSequence()
   {
     return _sequence;
+  }
+  */
+  
+  public final boolean isValid()
+  {
+    return _isValid.get();
+  }
+  
+  public final void clearValid()
+  {
+    _isValid.set(false);
+  }
+  
+  public final void setValid()
+  {
+    _isValid.set(true);
   }
 
   @Override
