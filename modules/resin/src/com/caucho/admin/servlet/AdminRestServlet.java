@@ -34,7 +34,9 @@ package com.caucho.admin.servlet;
  import com.caucho.jmx.MXDefaultValue;
  import com.caucho.jmx.MXName;
  import com.caucho.jmx.MXValueRequired;
+ import com.caucho.lifecycle.LifecycleState;
  import com.caucho.management.server.ManagementMXBean;
+ import com.caucho.server.admin.ControllerStateActionQueryResult;
  import com.caucho.server.admin.ErrorQueryResult;
  import com.caucho.server.admin.ManagementQueryResult;
  import com.caucho.server.admin.PdfReportQueryResult;
@@ -516,6 +518,26 @@ public class AdminRestServlet extends HttpServlet {
           PrintWriter writer = response.getWriter();
           writer.println(queryResult.getMessage());
         }
+
+        return;
+      }
+
+      if (value instanceof ControllerStateActionQueryResult) {
+        ControllerStateActionQueryResult queryResult =
+          (ControllerStateActionQueryResult) value;
+        String message;
+        if (queryResult.getState() == LifecycleState.STOPPED) {
+          message = L.l("application {0} is stopped", queryResult.getTag());
+        } else if (queryResult.getState() == LifecycleState.ACTIVE) {
+          message = L.l("application {0} is active", queryResult.getTag());
+        } else {
+          message = L.l("unexpected application {0} state: {1}",
+                        queryResult.getTag(),
+                        queryResult.getState().getStateName());
+        }
+
+        PrintWriter writer = response.getWriter();
+        writer.println(message);
       }
     }
   }

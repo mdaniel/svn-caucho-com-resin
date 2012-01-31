@@ -60,6 +60,7 @@ import com.caucho.env.repository.RepositorySpi;
 import com.caucho.env.repository.RepositorySystem;
 import com.caucho.env.repository.RepositoryTagEntry;
 import com.caucho.jmx.Jmx;
+import com.caucho.lifecycle.LifecycleState;
 import com.caucho.management.server.DeployControllerMXBean;
 import com.caucho.management.server.EAppMXBean;
 import com.caucho.management.server.WebAppMXBean;
@@ -75,6 +76,8 @@ import com.caucho.vfs.Vfs;
 
 public class DeployActor extends SimpleActor
 {
+  public static final String address = "deploy@resin.caucho";
+
   private static final Logger log
     = Logger.getLogger(DeployActor.class.getName());
 
@@ -88,7 +91,7 @@ public class DeployActor extends SimpleActor
 
   public DeployActor()
   {
-    super("deploy@resin.caucho", BamSystem.getCurrentBroker());
+    super(address, BamSystem.getCurrentBroker());
   }
   
   /*
@@ -340,7 +343,7 @@ public class DeployActor extends SimpleActor
     }
     
     if (item != null) {
-      TagStateQuery result = new TagStateQuery(tag, item.getState(), 
+      TagStateQuery result = new TagStateQuery(tag, item.getStateName(),
                                                item.getDeployException());
       
       getBroker().queryResult(id, from, to, result);
@@ -465,118 +468,143 @@ public class DeployActor extends SimpleActor
 
   private String deploy(String gitPath)
   {
-    return start(gitPath);
+    LifecycleState state = start(gitPath);
+
+    return state.getStateName();
   }
 
   /**
    * @deprecated
    */
   @Query
-  public boolean controllerStart(long id,
-                                 String to,
-                                 String from,
-                                 ControllerStartQuery query)
+  public ManagementQueryResult controllerStart(long id,
+                                               String to,
+                                               String from,
+                                               ControllerStartQuery query)
   {
-    String status = start(query.getTag());
+    ManagementQueryResult result;
 
-    log.fine(this + " start '" + query.getTag() + "' -> " + status);
+    try {
+      LifecycleState state = start(query.getTag());
 
-    getBroker().queryResult(id, from, to, true);
+      result = new ControllerStateActionQueryResult(query.getTag(), state);
 
-    return true;
+      log.fine(this + " start '" + query.getTag() + "' -> " + state.getStateName());
+    } catch (Exception e) {
+      log.log(Level.FINE, e.toString(), e);
+
+      result = new ErrorQueryResult(e);
+    }
+
+    getBroker().queryResult(id, from, to, result);
+
+    return result;
   }
 
-  private String start(String tag)
+  private LifecycleState start(String tag)
   {
     DeployControllerService service = DeployControllerService.getCurrent();
     
     DeployTagItem controller = service.getTagItem(tag);
 
     if (controller == null)
-      return L.l("'{0}' is an unknown controller", controller);
+      throw new IllegalArgumentException(L.l("'{0}' is an unknown controller",
+                                             tag));
 
-    try {
-      controller.toStart();
+    controller.toStart();
 
-      return controller.getState();
-    } catch (Exception e) {
-      log.log(Level.FINE, e.toString(), e);
-
-      return e.toString();
-    }
+    return controller.getState();
   }
 
   /**
    * @deprecated
    */
   @Query
-  public boolean controllerStop(long id,
-                                String to,
-                                String from,
-                                ControllerStopQuery query)
+  public ManagementQueryResult controllerStop(long id,
+                                              String to,
+                                              String from,
+                                              ControllerStopQuery query)
   {
-    String status = stop(query.getTag());
+    ManagementQueryResult result ;
 
-    log.fine(this + " stop '" + query.getTag() + "' -> " + status);
+    try {
+      LifecycleState state = stop(query.getTag());
 
-    getBroker().queryResult(id, from, to, true);
+      result = new ControllerStateActionQueryResult(query.getTag(), state);
 
-    return true;
+      log.fine(this
+               + " stop '"
+               + query.getTag()
+               + "' -> "
+               + state.getStateName());
+    } catch (Exception e) {
+      log.log(Level.FINE, e.toString(), e);
+
+      result = new ErrorQueryResult(e);
+    }
+
+    getBroker().queryResult(id, from, to, result);
+
+    return result;
   }
 
-  private String stop(String tag)
+  private LifecycleState stop(String tag)
   {
     DeployControllerService service = DeployControllerService.getCurrent();
 
     DeployTagItem controller = service.getTagItem(tag);
 
     if (controller == null)
-      return L.l("'{0}' is an unknown controller", controller);
+      throw new IllegalArgumentException(L.l("'{0}' is an unknown controller",
+                                             tag));
+    controller.toStop();
 
-    try {
-      controller.toStop();
-
-      return controller.getState();
-    } catch (Exception e) {
-      log.log(Level.FINE, e.toString(), e);
-
-      return e.toString();
-    }
+    return controller.getState();
   }
 
   @Query
-  public boolean controllerRestart(long id,
-                                   String to,
-                                   String from,
-                                   ControllerRestartQuery query)
+  public ManagementQueryResult controllerRestart(long id,
+                                                 String to,
+                                                 String from,
+                                                 ControllerRestartQuery query)
   {
-    String status = restart(query.getTag());
+    ManagementQueryResult result;
 
-    log.fine(this + " restart '" + query.getTag() + "' -> " + status);
+    try {
+      LifecycleState state = restart(query.getTag());
 
-    getBroker().queryResult(id, from, to, true);
+      result = new ControllerStateActionQueryResult(query.getTag(), state);
 
-    return true;
+      log.fine(this
+               + " restart '"
+               + query.getTag()
+               + "' -> "
+               + state.getStateName());
+
+    } catch (Exception e) {
+      log.log(Level.FINE, e.toString(), e);
+
+      result = new ErrorQueryResult(e);
+    }
+
+    getBroker().queryResult(id, from, to, result);
+
+    return result;
   }
 
-  private String restart(String tag)
+  private LifecycleState restart(String tag)
   {
     DeployControllerService service = DeployControllerService.getCurrent();
 
     DeployTagItem controller = service.getTagItem(tag);
 
     if (controller == null)
-      return L.l("'{0}' is an unknown controller", controller);
+      throw new IllegalArgumentException(L.l("'{0}' is an unknown controller",
+                                             tag));
 
-    try {
-      controller.toRestart();
+    controller.toRestart();
 
-      return controller.getState();
-    } catch (Exception e) {
-      log.log(Level.FINE, e.toString(), e);
-
-      return e.toString();
-    }
+    return controller.getState();
   }
 
   /**

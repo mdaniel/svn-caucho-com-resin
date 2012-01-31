@@ -102,7 +102,7 @@ public class DeployClient implements Repository
     _bamClient = server.createAdminClient(getClass().getSimpleName());
 
     //_deployAddress = "deploy@" + serverId + ".resin.caucho";
-    _deployAddress = "deploy@resin.caucho";
+    _deployAddress = DeployActor.address;
   }
   
   public DeployClient(String url, ActorSender client)
@@ -111,7 +111,7 @@ public class DeployClient implements Repository
     
     _url = url;
 
-    _deployAddress = "deploy@resin.caucho";
+    _deployAddress = DeployActor.address;
   }
   
   public DeployClient(String host, int port,
@@ -129,7 +129,7 @@ public class DeployClient implements Repository
 
       _bamClient = client;
     
-      _deployAddress = "deploy@resin.caucho";
+      _deployAddress = DeployActor.address;
     } catch (RemoteConnectionFailedException e) {
       throw new RemoteConnectionFailedException(L.l("Connection to '{0}' failed for remote deploy. Check the server and make sure the server has started and that <resin:RemoteAdminService> is enabled in the resin.xml.\n  {1}",
                                                     url, e.getMessage()),
@@ -468,11 +468,11 @@ public class DeployClient implements Repository
    * @param tag the encoded controller name
    *
    */
-  public Boolean restart(String tag)
+  public ManagementQueryResult restart(String tag)
   {
     ControllerRestartQuery query = new ControllerRestartQuery(tag);
 
-    return (Boolean) query(query);
+    return (ManagementQueryResult) query(query);
   }
 
   /**
@@ -482,11 +482,11 @@ public class DeployClient implements Repository
    *
    * @deprecated
    */
-  public Boolean start(String tag)
+  public ManagementQueryResult start(String tag)
   {
     ControllerStartQuery query = new ControllerStartQuery(tag);
 
-    return (Boolean) query(query);
+    return (ManagementQueryResult) query(query);
   }
 
   /**
@@ -496,11 +496,11 @@ public class DeployClient implements Repository
    *
    * @deprecated
    */
-  public Boolean stop(String tag)
+  public ManagementQueryResult stop(String tag)
   {
     ControllerStopQuery query = new ControllerStopQuery(tag);
 
-    return (Boolean) query(query);
+    return (ManagementQueryResult) query(query);
   }
 
   /**

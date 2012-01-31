@@ -30,6 +30,7 @@
 package com.caucho.env.deploy;
 
 import com.caucho.lifecycle.Lifecycle;
+import com.caucho.lifecycle.LifecycleState;
 import com.caucho.util.ConcurrentArrayList;
 
 /**
@@ -124,10 +125,15 @@ public class DeployTagItem {
     }
   }
 
+  public LifecycleState getState()
+  {
+    return _lifecycle.getState();
+  }
+
   /**
    * Returns the lifecycle state of the item.
    */
-  public String getState()
+  public String getStateName()
   {
     return _lifecycle.getStateName();
   }

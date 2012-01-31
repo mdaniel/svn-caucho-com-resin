@@ -29,6 +29,9 @@
 
 package com.caucho.boot;
 
+import com.caucho.server.admin.ControllerStateActionQueryResult;
+import com.caucho.server.admin.ErrorQueryResult;
+import com.caucho.server.admin.ManagementQueryResult;
 import com.caucho.server.admin.WebAppDeployClient;
 import com.caucho.util.L10N;
 
@@ -55,15 +58,23 @@ public class WebAppStopCommand extends WebAppCommand
   {
     int code = 0;
 
-    if (deployClient.stop(tag)) {
+    ManagementQueryResult result = deployClient.stop(tag);
+
+    if (result instanceof ErrorQueryResult) {
+      ErrorQueryResult errorResult = (ErrorQueryResult) result;
+
+      System.out.println(L.l("'{0}' failed to stop", tag));
+      System.out.println(errorResult.getException().toString());
+
+      code = 3;
+    }
+    else {
+      ControllerStateActionQueryResult queryResult
+        = (ControllerStateActionQueryResult) result;
+
       System.out.println(L.l("'{0}' is stopped", tag));
 
       code = 0;
-    }
-    else {
-      System.out.println(L.l("'{0}' failed to stop", tag));
-
-      code = 3;
     }
 
     return code;

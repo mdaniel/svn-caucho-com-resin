@@ -37,8 +37,14 @@ import com.caucho.cloud.bam.BamSystem;
 import com.caucho.cloud.network.NetworkClusterSystem;
 import com.caucho.cloud.topology.CloudServer;
 import com.caucho.config.types.Period;
+import com.caucho.jmx.MXName;
 import com.caucho.management.server.AbstractManagedObject;
 import com.caucho.management.server.ManagementMXBean;
+import com.caucho.quercus.lib.reflection.ReflectionException;
+import com.caucho.server.admin.ControllerRestartQuery;
+import com.caucho.server.admin.ControllerStartQuery;
+import com.caucho.server.admin.ControllerStopQuery;
+import com.caucho.server.admin.DeployActor;
 import com.caucho.server.admin.HmuxClientFactory;
 import com.caucho.server.admin.JmxCallQuery;
 import com.caucho.server.admin.JmxDumpQuery;
@@ -222,6 +228,81 @@ public class ManagementAdmin extends AbstractManagedObject
   }
 
   @Override
+  public ManagementQueryResult startWebApp(String serverId,
+                                           String tag,
+                                           String name,
+                                           String stage,
+                                           String host,
+                                           String version)
+    throws ReflectionException
+  {
+    if (tag != null && name != null)
+      throw new IllegalArgumentException(L.l(
+        "can't specify name '{0}' with tag {1}",
+        name,
+        tag));
+
+    if (tag == null)
+      tag = makeTag(name, stage, host, version);
+
+    ControllerStartQuery query = new ControllerStartQuery(tag);
+
+    ManagementQueryResult result = queryDeployActor(serverId, query);
+
+    return result;
+  }
+
+  @Override
+  public ManagementQueryResult stopWebApp(String serverId,
+                                          String tag,
+                                          String name,
+                                          String stage,
+                                          String host,
+                                          String version)
+    throws ReflectionException
+  {
+    if (tag != null && name != null)
+      throw new IllegalArgumentException(L.l(
+        "can't specify name '{0}' with tag {1}",
+        name,
+        tag));
+
+    if (tag == null)
+      tag = makeTag(name, stage, host, version);
+
+    ControllerStopQuery query = new ControllerStopQuery(tag);
+
+    ManagementQueryResult result = queryDeployActor(serverId, query);
+
+    return result;
+  }
+
+  @Override
+  public ManagementQueryResult restartWebApp(String serverId,
+                                             String tag,
+                                             String name,
+                                             String stage,
+                                             String host,
+                                             String version)
+    throws ReflectionException
+  {
+    if (tag != null && name != null)
+      throw new IllegalArgumentException(L.l(
+        "can't specify name '{0}' with tag {1}",
+        name,
+        tag));
+
+    if (tag == null)
+      tag = makeTag(name, stage, host, version);
+
+    ControllerRestartQuery query = new ControllerRestartQuery(tag);
+
+    ManagementQueryResult result = queryDeployActor(serverId, query);
+
+    return result;
+  }
+
+  @Override
   public ManagementQueryResult dumpJmx(String serverId)
   {
     JmxDumpQuery query = new JmxDumpQuery();
@@ -235,6 +316,24 @@ public class ManagementAdmin extends AbstractManagedObject
     WatchdogStatusQuery query = new WatchdogStatusQuery();
 
     return query(serverId, query);
+  }
+
+  private String makeTag(String name,
+                         String stage,
+                         String host,
+                         String version)
+  {
+    String tag = stage + "/webapp/" + host;
+
+    if (name.startsWith("/"))
+      tag = tag + name;
+    else
+      tag = tag + '/' + name;
+
+    if (version != null)
+      tag = tag + '-' + version;
+
+    return tag;
   }
 
   private CloudServer getServer(String server)
@@ -351,6 +450,31 @@ public class ManagementAdmin extends AbstractManagedObject
     }
 
     return (ManagementQueryResult) sender.query("manager@resin.caucho", query);
+  }
+
+  private ManagementQueryResult queryDeployActor(String serverId,
+                                                 Serializable query)
+  {
+    final ActorSender sender;
+
+    CloudServer server = getServer(serverId);
+
+    if (server.isSelf()) {
+      sender = new LocalActorSender(BamSystem.getCurrentBroker(), "");
+    }
+    else {
+      String authKey = Resin.getCurrent().getResinSystemAuthKey();
+
+      HmuxClientFactory hmuxFactory
+        = new HmuxClientFactory(server.getAddress(),
+                                server.getPort(),
+                                "",
+                                authKey);
+
+      sender = hmuxFactory.create();
+    }
+
+    return (ManagementQueryResult) sender.query(DeployActor.address, query);
   }
 
   public InputStream test(String value, InputStream is)

@@ -128,6 +128,42 @@ public interface ManagementMXBean extends ManagedObjectMXBean
                                        @MXName("values") String values)
     throws ReflectionException;
 
+  @Description("starts a deployed application")
+  @MXAction("web-app-start")
+  public ManagementQueryResult startWebApp(@MXName("server") String serverId,
+                                           @MXName("tag") String tag,
+                                           @MXName("name") String name,
+                                           @MXDefaultValue("production")
+                                           @MXName("stage") String stage,
+                                           @MXDefaultValue("default")
+                                           @MXName("host") String host,
+                                           @MXName("version") String version)
+    throws ReflectionException;
+
+  @Description("stops a deployed application")
+  @MXAction("web-app-stop")
+  public ManagementQueryResult stopWebApp(@MXName("server") String serverId,
+                                          @MXName("tag") String tag,
+                                          @MXName("name") String name,
+                                          @MXDefaultValue("production")
+                                          @MXName("stage") String stage,
+                                          @MXDefaultValue("default")
+                                          @MXName("host") String host,
+                                          @MXName("version") String version)
+    throws ReflectionException;
+
+  @Description("restarts a deployed application")
+  @MXAction("web-app-restart")
+  public ManagementQueryResult restartWebApp(@MXName("server") String serverId,
+                                             @MXName("tag") String tag,
+                                             @MXName("name") String name,
+                                             @MXDefaultValue("production")
+                                             @MXName("stage") String stage,
+                                             @MXDefaultValue("default")
+                                             @MXName("host") String host,
+                                             @MXName("version") String version)
+    throws ReflectionException;
+
   @Description("Prints status of a server")
   @MXAction("status")
   public ManagementQueryResult getStatus(@MXName("server") String value)
