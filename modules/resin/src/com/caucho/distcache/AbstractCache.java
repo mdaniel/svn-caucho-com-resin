@@ -817,7 +817,7 @@ public class AbstractCache
   @Override
   public CacheStatistics getStatistics()
   {
-    return null; // this;
+    return _delegate.getStatistics();
   }
 
   /**
@@ -1066,9 +1066,6 @@ public class AbstractCache
     return _delegate.invokeEntryProcessor(key, entryProcessor);
   }
 
-  /* (non-Javadoc)
-   * @see javax.cache.Cache#removeAll(java.util.Set)
-   */
   @Override
   public void removeAll(Set keys)
   {
@@ -1078,7 +1075,7 @@ public class AbstractCache
   @Override
   public CacheMXBean getMBean()
   {
-    throw new UnsupportedOperationException(getClass().getName());
+    return _delegate.getMBean();
   }
 
   @Override

@@ -34,12 +34,17 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.util.Collection;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.ConcurrentLinkedQueue;
+import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Future;
+import java.util.concurrent.TimeUnit;
+import java.util.concurrent.TimeoutException;
+import java.util.concurrent.atomic.AtomicLong;
 
 import javax.cache.Cache;
 import javax.cache.CacheConfiguration;
@@ -64,7 +69,10 @@ import com.caucho.distcache.ExtCacheEntry;
 import com.caucho.distcache.ObjectCache;
 import com.caucho.env.distcache.CacheDataBacking;
 import com.caucho.loader.Environment;
+import com.caucho.management.server.AbstractManagedObject;
+import com.caucho.mqueue.MemoryQueueWorker;
 import com.caucho.server.distcache.CacheStoreManager.DataItem;
+import com.caucho.util.Alarm;
 import com.caucho.util.ConcurrentArrayList;
 import com.caucho.util.HashKey;
 import com.caucho.util.L10N;
@@ -93,8 +101,18 @@ public class CacheImpl<K,V>
   private ConcurrentArrayList<UpdatedListener<K,V>> _updatedListeners;
   private ConcurrentArrayList<CacheEntryExpiredListener> _expiredListeners;
   private ConcurrentArrayList<RemovedListener<K,V>> _removedListeners;
+  
+  private LoadQueueWorker<K,V> _loadQueue;
 
   // private LruCache<Object,DistCacheEntry> _entryCache;
+  
+  private final AtomicLong _getCount = new AtomicLong();
+  private final AtomicLong _hitCount = new AtomicLong();
+  private final AtomicLong _missCount = new AtomicLong();
+  private final AtomicLong _putCount = new AtomicLong();
+  private final AtomicLong _removeCount = new AtomicLong();
+  
+  private CacheAdmin _admin = new CacheAdmin();
 
   private boolean _isInit;
   private boolean _isClosed;
@@ -222,6 +240,8 @@ public class CacheImpl<K,V>
     }
     
     _manager.initCache(this);
+    
+    _admin.register();
   }
 
   /**
@@ -250,6 +270,12 @@ public class CacheImpl<K,V>
   public V get(Object key)
   {
     DistCacheEntry entry = getDistCacheEntry(key);
+    
+    _getCount.incrementAndGet();
+    if (! entry.isValueNull())
+      _hitCount.incrementAndGet();
+    else
+      _missCount.incrementAndGet();
     
     V value = (V) entry.get(_config);
     
@@ -328,7 +354,8 @@ public class CacheImpl<K,V>
   public void put(K key, V value)
   {
     getDistCacheEntry(key).put(value, _config);
-    
+
+    _putCount.incrementAndGet();
     entryUpdate(key, value);
   }
 
@@ -505,8 +532,10 @@ public class CacheImpl<K,V>
   {
     boolean isRemoved = getDistCacheEntry(key).remove(_config);
     
-    if (isRemoved)
+    if (isRemoved) {
       entryRemoved(key);
+      _removeCount.incrementAndGet();
+    }
     
     return isRemoved;
   }
@@ -687,7 +716,7 @@ public class CacheImpl<K,V>
   @Override
   public CacheStatistics getStatistics()
   {
-    return null; // this;
+    return getMBean();
   }
 
   /**
@@ -768,9 +797,12 @@ public class CacheImpl<K,V>
   {
     _isClosed = true;
     
+    _admin.unregister();
+    
     _localManager.remove(_guid);
     
     _manager.closeCache(_guid);
+    
   }
   
   public boolean loadData(HashKey valueHash, WriteStream os)
@@ -864,7 +896,7 @@ public class CacheImpl<K,V>
   @Override
   public CacheMXBean getMBean()
   {
-    throw new UnsupportedOperationException(getClass().getName());
+    return _admin;
   }
 
   @Override
@@ -885,26 +917,48 @@ public class CacheImpl<K,V>
     return entryProcessor.process(new MutableEntry(entry));
   }
 
-  /* (non-Javadoc)
-   * @see javax.cache.Cache#load(java.lang.Object, javax.cache.CacheLoader, java.lang.Object)
-   */
   @Override
-  public Future load(Object key)
-      throws CacheException
+  public Future<V> load(K key)
+    throws CacheException
   {
-    // TODO Auto-generated method stub
-    return null;
+      LoadQueueWorker<K,V> loadQueue;
+      
+      synchronized (this) {
+        loadQueue = _loadQueue;
+        
+        if (loadQueue == null) {
+          loadQueue = new LoadQueueWorker<K,V>(this);
+          _loadQueue = loadQueue;
+        }
+      }
+      
+      LoadFuture<K,V> loadFuture = new LoadFuture<K,V>(this, key);
+      
+      loadQueue.offer(loadFuture);
+
+      return loadFuture;
   }
 
-  /* (non-Javadoc)
-   * @see javax.cache.Cache#loadAll(java.util.Collection, javax.cache.CacheLoader, java.lang.Object)
-   */
   @Override
-  public Future loadAll(Set keys)
-      throws CacheException
+  public Future<Map<K,? extends V>> loadAll(Set<? extends K> keys)
+    throws CacheException
   {
-    // TODO Auto-generated method stub
-    return null;
+    LoadQueueWorker<K,V> loadQueue;
+    
+    synchronized (this) {
+      loadQueue = _loadQueue;
+      
+      if (loadQueue == null) {
+        loadQueue = new LoadQueueWorker<K,V>(this);
+        _loadQueue = loadQueue;
+      }
+    }
+    
+    LoadFuture loadFuture = new LoadFuture(this, keys);
+    
+    loadQueue.offer(loadFuture);
+
+    return loadFuture;
   }
 
   @Override
@@ -1226,6 +1280,238 @@ public class CacheImpl<K,V>
     public V getValue()
     {
       return _value;
+    }
+  }
+  
+  static class LoadQueueWorker<K,V> 
+    extends MemoryQueueWorker<LoadFuture<K,V>> {
+    private CacheImpl<K,V> _cache;
+    
+    LoadQueueWorker(CacheImpl<K,V> cache)
+    {
+      _cache = cache;
+    }
+    
+    @Override
+    protected void processItem(LoadFuture<K,V> item)
+    {
+      CacheImpl<K,V> cache = _cache;
+      
+      if (cache != null)
+        item.process(cache);
+    }
+    
+    void close()
+    {
+      _cache = null;
+    }
+  }
+  
+  static class LoadFuture<K,V> implements Future<V> {
+    private CacheImpl<K,V> _cache;
+    
+    private K _key;
+    private Set<K> _keySet;
+    private V _value;
+    
+    private volatile boolean _isDone;
+    
+    LoadFuture(CacheImpl<K,V> cache, K key)
+    {
+      _cache = cache;
+      _key = key;
+    }
+    
+    LoadFuture(CacheImpl<K,V> cache, Set<K> keySet)
+    {
+      _cache = cache;
+      _keySet = keySet;
+    }
+    
+    void process(CacheImpl<K,V> cache)
+    {
+      try {
+        if (_keySet != null) {
+          _value = (V) cache.getAll(_keySet);
+        }
+        else {
+          _value = cache.get(_key);
+        }
+      } finally {
+        _cache = null;
+        
+        synchronized (this) {
+          _isDone = true;
+          notifyAll();
+        }
+      }
+    }
+    
+    @Override
+    public boolean cancel(boolean isCancel)
+    {
+      return false;
+    }
+
+    @Override
+    public V get() throws InterruptedException, ExecutionException
+    {
+      synchronized (this) {
+        while (! _isDone && ! _cache.isClosed()) {
+          try {
+            wait();
+          } catch (Exception e) {
+          }
+        }
+      }
+      
+      return _value;
+    }
+
+    @Override
+    public V get(long time, TimeUnit timeUnit)
+      throws InterruptedException,
+        ExecutionException, TimeoutException
+    {
+      long timeout = timeUnit.toMillis(time);
+      long expireTime = Alarm.getCurrentTimeActual() + timeout;
+      
+      synchronized (this) {
+        long now;
+        
+        while (! _isDone
+               && ! _cache.isClosed()
+               && ((now = Alarm.getCurrentTimeActual()) < expireTime)) {
+          try {
+            long delta = expireTime - now;
+            
+            wait(delta);
+          } catch (Exception e) {
+          }
+        }
+      }
+      
+      return _value;
+    }
+
+    @Override
+    public boolean isCancelled()
+    {
+      return false;
+    }
+
+    @Override
+    public boolean isDone()
+    {
+      return _isDone;
+    }
+    
+  }
+  
+  class CacheAdmin extends AbstractManagedObject implements CacheMXBean {
+    protected void register()
+    {
+      super.registerSelf();
+    }
+    
+    void unregister()
+    {
+      super.unregisterSelf();
+    }
+    
+    @Override
+    public String getName()
+    {
+      return CacheImpl.this.getGuid();
+    }
+
+    @Override
+    public Status getStatus()
+    {
+      return CacheImpl.this.getStatus();
+    }
+
+    @Override
+    public Date getStartAccumulationDate()
+    {
+      return null;
+    }
+
+    @Override
+    public long getCacheHits()
+    {
+      return _hitCount.get();
+    }
+
+    @Override
+    public long getCacheMisses()
+    {
+      return _missCount.get();
+    }
+
+    @Override
+    public float getCacheHitPercentage()
+    {
+      return 100 - getCacheMissPercentage();
+    }
+
+    @Override
+    public float getCacheMissPercentage()
+    {
+      long hits = getCacheHits();
+      long misses = getCacheMisses();
+      
+      if (hits == 0)
+        hits = 1;
+      
+      return (float) (100.0 * misses / (hits + misses));
+    }
+
+    @Override
+    public long getCacheGets()
+    {
+      return _getCount.get();
+    }
+
+    @Override
+    public long getCachePuts()
+    {
+      return _putCount.get();
+    }
+
+    @Override
+    public long getCacheRemovals()
+    {
+      return _removeCount.get();
+    }
+
+    @Override
+    public float getAverageGetMillis()
+    {
+      return 0;
+    }
+
+    @Override
+    public float getAveragePutMillis()
+    {
+      return 0;
+    }
+
+    @Override
+    public float getAverageRemoveMillis()
+    {
+      return 0;
+    }
+
+    @Override
+    public long getCacheEvictions()
+    {
+      return 0;
+    }
+
+    @Override
+    public void clearStatistics()
+    {
     }
   }
 }

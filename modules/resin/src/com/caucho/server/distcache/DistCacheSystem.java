@@ -114,7 +114,7 @@ public class DistCacheSystem extends AbstractResinSubSystem
   
   public CacheManagerImpl getCacheManager(String name, ClassLoader loader)
   {
-    String guid = Environment.getEnvironmentName(loader) + ":" + name;
+    String guid = name + ":" + Environment.getEnvironmentName(loader);
     
     CacheManagerImpl cacheManager = _managerMap.get(guid);
     

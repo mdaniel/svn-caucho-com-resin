@@ -98,7 +98,7 @@ public class CacheManagerImpl implements Closeable
     CacheImpl cache = _cacheMap.get(name);
     
     if (cache == null) {
-      String guid = _guid + ":" + name;
+      String guid = name + ":" + _guid;
       
       cache = new CacheImpl(this, name, guid, config);
 
