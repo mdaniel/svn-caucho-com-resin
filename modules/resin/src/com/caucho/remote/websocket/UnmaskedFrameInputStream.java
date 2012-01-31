@@ -53,7 +53,7 @@ public class UnmaskedFrameInputStream extends FrameInputStream
 {
   private InputStream _is;
   
-  private boolean _isFinal;
+  private boolean _isFinal = true;
   private int _op;
   private long _length;
 

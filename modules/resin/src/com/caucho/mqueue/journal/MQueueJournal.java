@@ -78,21 +78,10 @@ public class MQueueJournal
     if (callback == null)
       throw new NullPointerException();
     
-    int repeatMax = 256;
+    int repeatMax = 256 * 1024;
     int repeat = 0;
 
-    MQueueItem<MQueueJournalEntry> item = null;
-    
-    while ((item = _disruptor.startProducer()) == null) {
-      if (repeatMax < repeat++) {
-        repeat = 0;
-        
-        try {
-          Thread.sleep(0, 10);
-        } catch (Exception e) {
-        }
-      }
-    }
+    MQueueItem<MQueueJournalEntry> item = _disruptor.startProducer(true);
     
     MQueueJournalEntry entry = item.getValue();
     
@@ -105,7 +94,7 @@ public class MQueueJournal
   {
     MQueueItem<MQueueJournalEntry> item = null;
     
-    if ((item = _disruptor.startProducer()) == null) {
+    if ((item = _disruptor.startProducer(false)) == null) {
       return;
     }
     

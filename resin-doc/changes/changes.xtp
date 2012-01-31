@@ -12,6 +12,7 @@
 
 <s2 title="4.0.26 - snapshot">
 <ul>
+<li>websocket/hessian: websocket frame must be read fully on hessian end (#4943)</li>
 <li>jcache: cache annotations (@CacheResult, @CachePut)</li>
 <li>websocket: debug threaddump not removed (#bhauer, #4940)</li>
 </ul>

@@ -88,9 +88,10 @@ abstract public class FrameInputStream extends InputStream
     throws IOException
   {
     long length = getLength();
-    
-    if (length > 0)
+
+    if (length > 0) {
       skip(length);
+    }
 
     while (true) {
       if (! readFrameHeaderImpl())

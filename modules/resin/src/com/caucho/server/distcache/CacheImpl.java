@@ -93,6 +93,7 @@ public class CacheImpl<K,V>
   private CacheStoreManager _manager;
 
   private final String _name;
+  private final String _managerName;
   private final String _guid;
 
   private final CacheConfig _config;
@@ -119,11 +120,13 @@ public class CacheImpl<K,V>
 
   public CacheImpl(CacheManagerImpl localManager,
                    String name,
+                   String managerName,
                    String guid,
                    CacheConfig config)
   {
     _localManager = localManager;
     _name = name;
+    _managerName = managerName;
     _guid = guid;
     _config = config;
     
@@ -136,6 +139,11 @@ public class CacheImpl<K,V>
   public String getName()
   {
     return _name;
+  }
+  
+  public String getManagerName()
+  {
+    return _managerName;
   }
   
   @Override
@@ -1422,7 +1430,7 @@ public class CacheImpl<K,V>
     @Override
     public String getName()
     {
-      return CacheImpl.this.getGuid();
+      return CacheImpl.this.getName()  + "|" + CacheImpl.this.getManagerName();
     }
 
     @Override

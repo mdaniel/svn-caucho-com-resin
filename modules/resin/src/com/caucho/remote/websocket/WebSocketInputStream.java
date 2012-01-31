@@ -54,7 +54,7 @@ public class WebSocketInputStream extends InputStream
 {
   private final FrameInputStream _is;
   private long _length;
-  private boolean _isFinal;
+  private boolean _isFinal = true;
 
   public WebSocketInputStream(FrameInputStream is)
     throws IOException
@@ -71,12 +71,16 @@ public class WebSocketInputStream extends InputStream
   public boolean startBinaryMessage()
     throws IOException
   {
+    while (! _isFinal || _length > 0) {
+      skip(_length);
+    }
+      
     if (! _is.readFrameHeader()) {
       return false;
     }
     
     if (_is.getOpcode() != OP_BINARY)
-      throw new UnsupportedOperationException("Expected binary at: " + _is.getOpcode());
+      throw new UnsupportedOperationException("Expected binary at: OP:" + _is.getOpcode());
     
     init();
     
@@ -123,20 +127,25 @@ public class WebSocketInputStream extends InputStream
   public int read(byte []buffer, int offset, int length)
     throws IOException
   {
+    FrameInputStream is = _is;
+    
     while (_length == 0 && ! _isFinal) {
-      if (! _is.readFrameHeader())
+      if (! is.readFrameHeader())
         return -1;
       
-      if (_is.getOpcode() == OP_CLOSE) {
+      int opcode = is.getOpcode();
+      
+      if (opcode == OP_CLOSE) {
         return -1;
       }
-      else if (_is.getOpcode() != OP_CONT) {
-        _is.closeError(1002, "illegal fragment");
+      else if (opcode != OP_CONT) {
+        is.closeError(1002, "illegal fragment");
         return -1;
       }
       
-      _length = _is.getLength();
-      _isFinal = _is.isFinal();
+      
+      _length = is.getLength();
+      _isFinal = is.isFinal();
     }
 
     if (_length <= 0)
@@ -146,7 +155,7 @@ public class WebSocketInputStream extends InputStream
     if (length < sublen)
       sublen = length;
     
-    sublen = _is.read(buffer, offset, sublen);
+    sublen = is.read(buffer, offset, sublen);
 
     if (sublen < 0)
       return -1;
@@ -154,5 +163,41 @@ public class WebSocketInputStream extends InputStream
     _length -= sublen;
 
     return sublen;
+  }
+  
+  public long skip(long length)
+    throws IOException
+  {
+    long skipLength = 0;
+    
+    do {
+      if (_length == 0 && ! _isFinal) {
+        if (! _is.readFrameHeader())
+          return -1;
+      
+        _length = _is.getLength();
+        _isFinal = _is.isFinal();
+      }
+      
+      long sublen = _length;
+      
+      if (length < sublen)
+        sublen = length;
+      
+      _length -= sublen;
+      
+      skipLength += sublen;
+    } while (length > 0 && (_length > 0 || ! _isFinal));
+    
+    return skipLength;
+  }
+  
+  @Override
+  public void close()
+    throws IOException
+  {
+    while (_length > 0 || ! _isFinal) {
+      skip(_length);
+    }
   }
 }

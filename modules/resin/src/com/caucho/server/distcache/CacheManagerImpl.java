@@ -100,7 +100,7 @@ public class CacheManagerImpl implements Closeable
     if (cache == null) {
       String guid = name + ":" + _guid;
       
-      cache = new CacheImpl(this, name, guid, config);
+      cache = new CacheImpl(this, name, getName(), guid, config);
 
       _cacheMap.putIfAbsent(name, cache);
     }

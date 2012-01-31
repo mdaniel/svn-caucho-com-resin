@@ -29,6 +29,7 @@
 
 package com.caucho.mqueue;
 
+import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -53,6 +54,8 @@ public final class MQueueDisruptor<T>
   private final AtomicInteger _tailRef = new AtomicInteger();
   
   private final ConsumerWorker<T> _consumerWorker;
+  
+  private final AtomicBoolean _isWait = new AtomicBoolean();
   
   private volatile int _sequence = 1;
   private volatile int _tail;
@@ -79,7 +82,7 @@ public final class MQueueDisruptor<T>
     _consumerWorker = new ConsumerWorker<T>(this);
     }
   
-  public final MQueueItem<T> startProducer()
+  public final MQueueItem<T> startProducer(boolean isWait)
   {
     int head;
     MQueueItem<T> item;
@@ -97,12 +100,43 @@ public final class MQueueDisruptor<T>
         return null;
       }
       */
-      if (nextHead == _tailRef.get()) {
-        return null;
+      int tail = _tailRef.get();
+      
+      if (nextHead == tail) {
+        if (isWait)
+          waitForQueue(tail);
+        else
+          return null;
       }
     } while (! _head.compareAndSet(head, nextHead));
     
     return item;
+  }
+  
+  private void waitForQueue(int tail)
+  {
+    synchronized (_isWait) {
+      while (_tailRef.get() == tail) {
+        _isWait.set(true);
+        
+        try {
+          _isWait.wait(10);
+        } catch (Exception e) {
+          
+        }
+      }
+    }
+  }
+  
+  private void wakeQueue()
+  {
+    boolean isWait = _isWait.getAndSet(false);
+    
+    if (isWait) {
+      synchronized (_isWait) {
+        _isWait.notifyAll();
+      }
+    }
   }
   
   public final void finishProducer(MQueueItem<T> item)
@@ -153,7 +187,7 @@ public final class MQueueDisruptor<T>
     return true;
   }
 
-  static class ConsumerWorker<T> extends TaskWorker {
+  static final class ConsumerWorker<T> extends TaskWorker {
     private final MQueueDisruptor<T> _disruptor;
     
     ConsumerWorker(MQueueDisruptor<T> disruptor)
@@ -162,9 +196,17 @@ public final class MQueueDisruptor<T>
     }
 
     @Override
-    public long runTask()
+    public final long runTask()
     {
-      while (_disruptor.doConsume()) {
+      MQueueDisruptor<T> disruptor = _disruptor;
+      
+      while (disruptor.doConsume()) {
+        int tail = _disruptor._tailRef.get();
+        int head = _disruptor._head.get();
+        
+        if (((head - tail) & _disruptor._mask) < (_disruptor._size >> 1)) {
+          _disruptor.wakeQueue();
+        }
       }
 
       return 0;

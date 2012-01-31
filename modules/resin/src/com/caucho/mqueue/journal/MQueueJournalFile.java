@@ -391,8 +391,12 @@ public final class MQueueJournalFile
     _tailBlock.setDirtyExact(0, i);
     
     if (i == BLOCK_SIZE) {
-      _tailBlock.free();
+      Block block = _tailBlock;
       _tailBlock = null;
+      
+      block.free();
+      block.commit();
+      
       _tailAddress += 2 * BLOCK_SIZE;
       _tailOffset = 0;
     }
