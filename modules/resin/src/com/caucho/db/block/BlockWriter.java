@@ -34,6 +34,7 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 
 import com.caucho.env.thread.TaskWorker;
+import com.caucho.env.thread2.TaskWorker2;
 
 /**
  * Writer thread serializing dirty blocks.

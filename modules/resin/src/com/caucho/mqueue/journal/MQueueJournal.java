@@ -60,7 +60,7 @@ public class MQueueJournal
     _path = path;
     _journalFile = new MQueueJournalFile(path, listener);
     
-    int size = 1 * 1024;
+    int size = 16 * 1024;
     
     JournalFactory factory = new JournalFactory();
     

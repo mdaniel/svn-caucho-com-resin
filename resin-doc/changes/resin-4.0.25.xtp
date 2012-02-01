@@ -31,9 +31,9 @@ include more information including Resin paths, ports, licenses, and
 health status.  
 </p>
 
-<p>PDF reports can be genearted on-demand from the Summary and Watchdog pages 
-in resin-admin, automatically in health.xml, or from the command line as 
-follows:</p>
+<p>PDF reports can be generated on-demand from the Summary
+and Watchdog pages in resin-admin, automatically in health.xml,
+or from the command line as follows:</p>
 
 <example title="Example: generating PDF reports from the command-line">
 # report on the last restart

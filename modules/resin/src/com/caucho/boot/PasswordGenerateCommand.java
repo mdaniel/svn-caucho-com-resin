@@ -67,20 +67,20 @@ public class PasswordGenerateCommand extends AbstractBootCommand
   {
     // validateArgs(args.getArgv());
     
-    String user = args.getArg("user");
-    String password = args.getArg("password");
+    String user = args.getArg("-user");
+    String password = args.getArg("-password");
     
     List<String> tailArgs = args.getTailArgs();
     
-    if (tailArgs.size() == 2 && 
-        ! tailArgs.get(0).startsWith("-") && 
-        ! tailArgs.get(1).startsWith("-")) {
+    if (tailArgs.size() == 2
+        && ! tailArgs.get(0).startsWith("-")
+        && ! tailArgs.get(1).startsWith("-")) {
       user = tailArgs.get(0);
       password = tailArgs.get(1);
     }
     
     if (user == null)
-      throw new ConfigException(L().l("generate-password requires a -user argument"));
+      throw new ConfigException(L().l("generate-password requires a --user argument"));
     
     if (password == null)
       password = readPasswordFromConsole();

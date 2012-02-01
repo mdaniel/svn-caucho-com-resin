@@ -27,23 +27,24 @@
  * @author Scott Ferguson
  */
 
-package com.caucho.env.thread;
+package com.caucho.env.thread2;
 
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.atomic.AtomicLong;
 import java.util.logging.Logger;
 
 import com.caucho.config.ConfigException;
+import com.caucho.env.thread2.AbstractTaskWorker2;
 import com.caucho.inject.Module;
 import com.caucho.lifecycle.Lifecycle;
 import com.caucho.util.Alarm;
 import com.caucho.util.L10N;
 
 @Module
-abstract public class AbstractThreadLauncher extends AbstractTaskWorker {
-  private static final L10N L = new L10N(AbstractThreadLauncher.class);
+abstract public class AbstractThreadLauncher2 extends AbstractTaskWorker2 {
+  private static final L10N L = new L10N(AbstractThreadLauncher2.class);
   private static final Logger log
-    = Logger.getLogger(AbstractThreadLauncher.class.getName());
+    = Logger.getLogger(AbstractThreadLauncher2.class.getName());
   
   private static final long LAUNCHER_TIMEOUT = 60000L;
 
@@ -90,12 +91,12 @@ abstract public class AbstractThreadLauncher extends AbstractTaskWorker {
   
   private final Lifecycle _lifecycle;
 
-  protected AbstractThreadLauncher()
+  protected AbstractThreadLauncher2()
   {
     this(Thread.currentThread().getContextClassLoader());
   }
 
-  protected AbstractThreadLauncher(ClassLoader loader)
+  protected AbstractThreadLauncher2(ClassLoader loader)
   {
     super(loader);
     

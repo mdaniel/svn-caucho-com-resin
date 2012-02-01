@@ -126,7 +126,7 @@ public class InlineBeanType<T> extends ConfigType<T>
 
   //private ArrayList<ConfigProgram> _injectList;
   private ArrayList<ConfigProgram> _initList;
-
+  
   private boolean _isIntrospecting;
   private boolean _isIntrospected;
   private ArrayList<InlineBeanType<?>> _pendingChildList
@@ -171,9 +171,6 @@ public class InlineBeanType<T> extends ConfigType<T>
   public Object create(Object parent, QName name)
   {
     try {
-      InjectManager cdiManager
-        = InjectManager.create(_beanClass.getClassLoader());
-
       if (_injectionTarget == null) {
         if (_beanClass.isInterface())
           throw new ConfigException(L.l("{0} cannot be instantiated because it is an interface",
@@ -181,6 +178,9 @@ public class InlineBeanType<T> extends ConfigType<T>
 
         AnnotatedType<T> type = getAnnotatedType();
 
+        InjectManager cdiManager
+          = InjectManager.create(_beanClass.getClassLoader());
+        
         InjectionTargetBuilder<T> builder
           = new InjectionTargetBuilder<T>(cdiManager, type);
 

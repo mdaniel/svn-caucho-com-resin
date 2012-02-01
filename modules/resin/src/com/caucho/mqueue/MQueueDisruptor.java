@@ -35,6 +35,7 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 
 import com.caucho.env.thread.TaskWorker;
+import com.caucho.env.thread2.TaskWorker2;
 
 /**
  * Interface for the transaction log.
@@ -50,15 +51,14 @@ public final class MQueueDisruptor<T>
   
   private final MQueueItemFactory<T> _factory;
   
+  private final AtomicInteger _headAlloc = new AtomicInteger();
   private final AtomicInteger _head = new AtomicInteger();
-  private final AtomicInteger _tailRef = new AtomicInteger();
+  // private final AtomicInteger _tailRef = new AtomicInteger();
+  private volatile int _tail;
   
-  private final ConsumerWorker<T> _consumerWorker;
+  private final ConsumerWorker _consumerWorker;
   
   private final AtomicBoolean _isWait = new AtomicBoolean();
-  
-  private volatile int _sequence = 1;
-  private volatile int _tail;
  
   public MQueueDisruptor(int capacity,
                          MQueueItemFactory<T> itemFactory)
@@ -79,8 +79,17 @@ public final class MQueueDisruptor<T>
     }
     
     _factory = itemFactory;
-    _consumerWorker = new ConsumerWorker<T>(this);
-    }
+    _consumerWorker = new ConsumerWorker();
+  }
+  
+  private final int getSize()
+  {
+    int head = _head.get();
+    // int tail = _tailRef.get();
+    int tail = _tail;
+    
+    return (_size + tail - head) % _size;
+  }
   
   public final MQueueItem<T> startProducer(boolean isWait)
   {
@@ -89,7 +98,7 @@ public final class MQueueDisruptor<T>
     int nextHead;
     
     do {
-      head = _head.get();
+      head = _headAlloc.get();
       item = _itemRing[head];
       
       nextHead = (head + 1) & _mask;
@@ -100,29 +109,34 @@ public final class MQueueDisruptor<T>
         return null;
       }
       */
-      int tail = _tailRef.get();
+      // int tail = _tailRef.get();
+      int tail = _tail;
       
       if (nextHead == tail) {
-        if (isWait)
-          waitForQueue(tail);
+        if (isWait) {
+          waitForQueue(head, tail);
+        }
         else
           return null;
       }
-    } while (! _head.compareAndSet(head, nextHead));
+    } while (! _headAlloc.compareAndSet(head, nextHead));
     
     return item;
   }
   
-  private void waitForQueue(int tail)
+  private void waitForQueue(int head, int tail)
   {
+    _consumerWorker.wake();
+    
     synchronized (_isWait) {
-      while (_tailRef.get() == tail) {
-        _isWait.set(true);
-        
+      _isWait.set(true);
+      
+      while (_headAlloc.get() == head 
+             && _tail == tail
+             && _isWait.get()) {
         try {
           _isWait.wait(10);
         } catch (Exception e) {
-          
         }
       }
     }
@@ -130,10 +144,11 @@ public final class MQueueDisruptor<T>
   
   private void wakeQueue()
   {
-    boolean isWait = _isWait.getAndSet(false);
+    boolean isWait = _isWait.get();
     
     if (isWait) {
       synchronized (_isWait) {
+        _isWait.set(false);
         _isWait.notifyAll();
       }
     }
@@ -143,34 +158,55 @@ public final class MQueueDisruptor<T>
   {
     // item.setSequence(_sequence + 1);
     
-    item.setValid();
+    int head = item.getIndex();
+    int nextHead = (head + 1) & _mask;
+    
+    while (! _head.compareAndSet(head, nextHead)) {
+    }
 
     _consumerWorker.wake();
   }
   
-  private final boolean doConsume()
+  private final void consumeAll()
   {
-    // int tail = _tail;
-    int tail = _tailRef.get();
-    int head = _head.get();
+    doConsume();
     
-    if (head == tail) {
-      return false;
-    }
+    wakeQueue();
+  }
+  
+  private final void doConsume()
+  {
+    MQueueItem<T> []itemRing = _itemRing;
+    int mask = _mask;
+    // AtomicInteger tailRef = _tailRef;
+    AtomicInteger headRef = _head;
+    MQueueItemFactory<T> factory = _factory;
+    // int tail = tailRef.get();
+    int tail = _tail;
     
-    MQueueItem<T> item = _itemRing[tail];
+    while (true) {
+      // int tail = _tail;
+      // int tail = tailRef.get();
+      int head = headRef.get();
+    
+      if (head == tail) {
+        return;
+      }
+    
+      MQueueItem<T> item = itemRing[tail];
       
-    int nextTail = tail + 1;
-    // int sequence = _sequence;
-    
-    while (! item.isValid()) {
-      // wait for init complete
+      int nextTail = (tail + 1) & mask;
+      
+      process(item.getValue(), nextTail);
+
+      tail = nextTail;
     }
-    
-    item.clearValid();
-    
+  }
+  
+  private void process(T value, int nextTail)
+  {
     try {
-      _factory.process(item.getValue());
+      _factory.process(value);
     } catch (Exception e) {
       log.log(Level.FINER, e.toString(), e);
     } finally {
@@ -181,36 +217,49 @@ public final class MQueueDisruptor<T>
       */
       
       // _tail = nextTail & _mask;
-      _tailRef.set(nextTail & _mask);
+      // _tailRef.set(nextTail);
+      _tail = nextTail;
     }
-      
-    return true;
   }
 
-  static final class ConsumerWorker<T> extends TaskWorker {
-    private final MQueueDisruptor<T> _disruptor;
-    
-    ConsumerWorker(MQueueDisruptor<T> disruptor)
-    {
-      _disruptor = disruptor;
-    }
-
+  private final class ConsumerWorker extends TaskWorker {
     @Override
     public final long runTask()
-    {
-      MQueueDisruptor<T> disruptor = _disruptor;
+    {/*
+      boolean isWait = _isWait.get();
       
-      while (disruptor.doConsume()) {
-        int tail = _disruptor._tailRef.get();
-        int head = _disruptor._head.get();
-        
-        if (((head - tail) & _disruptor._mask) < (_disruptor._size >> 1)) {
+      if (isWait) {
+        _wakeWorker.wake();
+      }
+      */
+      /*
+      int count = -1;
+      
+      if (isWait) {
+        count = _disruptor.getSize() >> 2;
+      }
+      */
+
+      consumeAll();
+      /*
+      while (doConsume()) {
+        if (count-- == 0) {
           _disruptor.wakeQueue();
         }
       }
+      */
+      
+      // _disruptor.wakeQueue();
+      
+      /*
+      if (_isWait.get()) {
+        _wakeWorker.wake();
+      }
+      */
+      
+      wakeQueue();
 
       return 0;
     }
-    
   }
 }
