@@ -195,6 +195,11 @@ public class StatSystem extends AbstractResinSubSystem
   {
     throw new AbstractMethodError();
   }
+  
+  public MeterGraphPageInfo getMeterGraphPage(String name)
+  {
+    throw new AbstractMethodError();
+  }
 
   public long[] getStartTimes(int index, long startTime, long endTime)
   {

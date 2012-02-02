@@ -84,4 +84,9 @@ public interface StatServiceMXBean extends ManagedObjectMXBean
    * Returns predefined meter graph pages.
    */
   public MeterGraphPageInfo []getMeterGraphPages();
+  
+  /**
+   * Returns a predefined meter graph page.
+   */
+  public MeterGraphPageInfo getMeterGraphPage(String name);
 }

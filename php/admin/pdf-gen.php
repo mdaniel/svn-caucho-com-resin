@@ -7,16 +7,12 @@ define("STEP", 1);
 define("HOUR", 3600);
 define("DAY", 24 * HOUR);
 
-if (! $g_report)
-  $g_report = $_REQUEST["report"];
+global $g_report;
+global $g_title;
+global $g_is_snapshot;
 
-if (! $g_title) {
-  $g_title = $_REQUEST["title"];
-}
-
-if (! $g_title) {
-  $g_title = $g_report;
-}  
+$g_report = get_param($g_report, "report", "Snapshot");
+$g_title = get_param($g_title, "title", $g_report);
 
 if ($g_is_snapshot || $_REQUEST["snapshot"]) {
   $snapshot = $g_mbean_server->lookup("resin:type=SnapshotService");
@@ -53,17 +49,7 @@ if ($g_is_snapshot || $_REQUEST["snapshot"]) {
 
 initPDF();
 
-$pdf_name = $g_report;
-
-if (! $pdf_name) {
-  $pdf_name = $_REQUEST["report"];
-  
-  if (! $pdf_name) {
-    $pdf_name = "Snapshot";
-  }
-}
-
-$mPage = getMeterGraphPage($pdf_name);
+$mPage = getMeterGraphPage($g_report);
 if (! $mPage) {
   $mPage = getMeterGraphPage("Snapshot");
 }

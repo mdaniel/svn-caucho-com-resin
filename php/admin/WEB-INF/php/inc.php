@@ -1329,4 +1329,16 @@ function require_professional($msg = "This feature requires Resin Professional a
   return true;
 }
 
+function get_param($current, $name, $default=null)
+{
+  if ($current)
+    return $current;
+    
+  if ($_REQUEST[$name])
+    return $_REQUEST[$name];
+    
+  return $default;
+}
+
+
 ?>

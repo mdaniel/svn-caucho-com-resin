@@ -6,6 +6,7 @@
  */
 
 require_once "WEB-INF/php/inc.php";
+require_once "WEB-INF/php/meters_inc.php";
 
 if (! admin_init()) {
   return;
@@ -272,6 +273,7 @@ function print_overview_graphs()
 
   stat_graph($threads_params,
              array("$si|JVM|Thread|JVM Thread Count",
+                   "$si|Resin|Thread|Thread Count",
                    "$si|Resin|Thread|Thread Idle Count",
                    "$si|JVM|Thread|JVM Runnable Count",
                    "$si|JVM|Thread|JVM Blocked Count",
@@ -285,10 +287,12 @@ function print_overview_graphs()
 	$mem_params->alt = gettext('A line graph representing the amount of free and used memory in each of the heap, tenured, and permgen pools over the last 6 hours.');
   
   stat_graph($mem_params,
-             array("$si|JVM|Memory|Heap Memory Used",
-                   "$si|JVM|Memory|Heap Memory Free",
+             array("$si|JVM|Memory|Heap Memory Free",
+                   "$si|JVM|Memory|Heap Memory Used",
                    "$si|JVM|Memory|Tenured Memory Free",
-                   "$si|JVM|Memory|PermGen Memory Free"));
+                   "$si|JVM|Memory|Tenured Memory Used",
+             			 "$si|JVM|Memory|PermGen Memory Free"),
+             			 "$si|JVM|Memory|PermGen Memory Used");
 
   echo "</td><td>\n";
 
@@ -297,7 +301,8 @@ function print_overview_graphs()
   $cpu_params->alt
     = gettext('A line graph representing the active CPU usage over the last 6 hours.');
 
-  stat_graph($cpu_params, array("$si|OS|CPU|CPU Active"));
+  stat_graph($cpu_params, 
+             array("$si|OS|CPU|CPU Active", "$si|OS|CPU|Unix Load Avg"));
 
   echo "</td></tr>\n";
   echo "</table>\n";
@@ -305,131 +310,13 @@ function print_overview_graphs()
 
 function print_graphs()
 {
-  global $g_server;
-
-  $server = $g_server;
-  $si = sprintf("%02d", $server->ServerIndex);
-  
-  $stat = get_stats_service();
-
-  if (! require_professional()) {
+  $stat_service = get_stats_service();
+  if (! $stat_service)
     return;
-  } else if (! $stat) {
 
-    echo "<div classf=\"req-pro-message\">" . gettext('This feature requires &lt;resin:AdminServices/> in resin.xml') . "</div>\n";
-
-    return;
-  }
-
-  enable_graph_controls();
-
-  $width = 250;
-  $height = 150;
-
-  echo "<h2>" . gettext('Summary Graphs') . "</h2>\n";
-	
-  echo "<table summary='Graphs' border='0' cellspacing='0' cellpadding='5'>";
-  echo "<tr valign='top'><td>";
-
-  $request_count_params = new GraphParams("request", $width, $height);
-  $request_count_params->title = gettext('Request Count');
-  $request_count_params->alt
-    = gettext('A line graph representing the number HTTP requests received over the last 6 hours.');
-
-  stat_graph($request_count_params, array("$si|Resin|Http|Request Count"));
-             
-  echo "</td><td>";
-
-  $request_time_params = new GraphParams("request_time", $width, $height);
-  $request_time_params->title = gettext('Request Time');
-  $request_time_params->alt = gettext('A line graph representing the amount of time spent processing HTTP requests over the last 6 hours.');
-
-  stat_graph($request_time_params,
-             array("$si|Resin|Http|Request Time",
-                   "$si|Resin|Http|Request Time Max"));
-		
-  echo "</td><td>";
-
-  $threads_params = new GraphParams("threads", $width, $height);
-  $threads_params->title = gettext('Threads');
-  $threads_params->alt = gettext('A line graph representing the number of threads in various thread pools over the last 6 hours.');
-
-  stat_graph($threads_params,
-             array("$si|JVM|Thread|JVM Thread Count",
-                   "$si|Resin|Thread|Thread Count",
-                   "$si|Resin|Thread|Thread Idle Count",
-                   "$si|JVM|Thread|JVM Runnable Count",
-                   "$si|JVM|Thread|JVM Blocked Count",
-                   "$si|JVM|Thread|JVM Native Count",
-                   "$si|JVM|Thread|JVM Waiting Count"));
-/*               
-  stat_graph("thread", $width, $height,
-             array("$si|JVM|Thread|JVM Thread Count",
-                   "$si|Resin|Thread|Thread Count",
-                   "$si|Resin|Thread|Thread Active Count",
-                   "$si|Resin|Thread|Thread Task Queue",
-                   "$si|Resin|Thread|Thread Priority Queue",
-                   "$si|Resin|Thread|Thread Overflow Count"),
-             "A line graph representing the number of threads in various thread pools over the last 6 hours.");
-*/               
-  echo "</td></tr>";
-  echo "<tr valign='top'><td>";
-
-  $database_params = new GraphParams("database", $width, $height);
-  $database_params->title = gettext('Database Connection Active');
-  $database_params->alt = gettext('A line graph representing the amout of time the database connection was active over the last 6 hours.');
-
-  stat_graph($database_params, array("$si|Resin|Database|Connection Active"));
-
-  echo "</td><td>";
-
-  $database_time_params = new GraphParams("database_time", $width, $height);
-  $database_time_params->title = gettext('Database Query Time');
-  $database_time_params->alt = gettext('A line graph representing the amout of time spent querying the database over the last 6 hours.');
-
-  stat_graph($database_time_params,
-             array("$si|Resin|Database|Query Time",
-                   "$si|Resin|Database|Query Time Max"));
-		
-  echo "</td><td>";
-
-  $cpu_params = new GraphParams("cpu", $width, $height);
-  $cpu_params->title = gettext('CPU');
-  $cpu_params->alt = gettext('A line graph representing the active CPU usage over the last 6 hours.');
-
-  stat_graph($cpu_params, array("$si|OS|CPU|CPU Active"));
-
-  echo "</td></tr>";
-  echo "<tr valign='top'><td>";
-
-  $memory_params = new GraphParams("memory", $width, $height);
-  $memory_params->title = gettext('Memory');
-  $memory_params->alt = gettext('A line graph representing the amount of free and used memory in each of the heap, tenured, and permgen pools over the last 6 hours.');
-
-  stat_graph($memory_params,
-             array("$si|JVM|Memory|Heap Memory Used",
-                   "$si|JVM|Memory|Heap Memory Free",
-                   "$si|JVM|Memory|Tenured Memory Used",
-                   "$si|JVM|Memory|PermGen Memory Used"));
-             
-  echo "</td><td>";
-
-  $memory_gc_params = new GraphParams("memory_gc", $width, $height);
-  $memory_gc_params->title = gettext('GC Time');
-  $memory_gc_params->alt = gettext('A line graph representing the amount of time spent perfoming garbage collection over the last 6 hours.');
-
-  stat_graph_regexp($memory_gc_params, "/$si\|JVM\|Memory\|GC Time/");
-  
-  echo "</td><td>";
-
-  $netstat_params = new GraphParams("netstat", $width, $height);
-  $netstat_params->title = gettext('Netstat');
-  $netstat_params->alt = gettext('A line graph representing network activity over the last 6 hours.');
-
-  stat_graph_regexp($netstat_params, "/$si\|OS\|Network\|(?!tcp-time)/");
-
-  echo "</td></tr>";
-  echo "</table>";
+  $page = $stat_service->getMeterGraphPage("Snapshot");
+  if ($page)
+    meter_display_page($page);  
 }
 
 function recent_messages()

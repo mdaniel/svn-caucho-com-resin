@@ -474,6 +474,7 @@
       
     <graph name="CPU">
       <meter>OS|CPU|CPU Active</meter>
+      <meter>OS|CPU|Unix Load Avg</meter>
     </graph>
 
     <!-- row 3 -->
@@ -502,9 +503,11 @@
     <!-- row 4 -->
       
     <graph name="Memory">
-      <meter>JVM|Memory|Heap Memory Used</meter>
       <meter>JVM|Memory|Heap Memory Free</meter>
+      <meter>JVM|Memory|Heap Memory Used</meter>
+      <meter>JVM|Memory|Tenured Memory Free</meter>
       <meter>JVM|Memory|Tenured Memory Used</meter>
+      <meter>JVM|Memory|PermGen Memory Free</meter>
       <meter>JVM|Memory|PermGen Memory Used</meter>
     </graph>
       
