@@ -594,9 +594,9 @@ public class WriteStream extends OutputStreamWithBuffer
       return;
 
     byte []writeBuffer = _writeBuffer;
+    int writeLength = _writeLength;
 
     while (length > 0) {
-      int writeLength = _writeLength;
       int sublen = writeBuffer.length - writeLength;
 
       if (sublen <= 0) {
@@ -605,16 +605,20 @@ public class WriteStream extends OutputStreamWithBuffer
         writeLength = 0;
         sublen = writeBuffer.length - writeLength;
       }
+      
       if (length < sublen)
         sublen = length;
 
-      for (int i = sublen - 1; i >= 0; i--)
+      for (int i = sublen - 1; i >= 0; i--) {
         writeBuffer[writeLength + i] = (byte) buffer[offset + i];
+      }
 
-      _writeLength = writeLength + sublen;
+      writeLength += sublen;
       offset += sublen;
       length -= sublen;
     }
+    
+    _writeLength = writeLength;
   }
 
   /**

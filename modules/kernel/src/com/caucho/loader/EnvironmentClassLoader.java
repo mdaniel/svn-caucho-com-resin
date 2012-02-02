@@ -116,7 +116,17 @@ public class EnvironmentClassLoader extends DynamicClassLoader
    */
   protected EnvironmentClassLoader(ClassLoader parent, String id)
   {
-    super(parent);
+    this(parent, id, false);
+  }
+
+  /**
+   * Creates a new environment class loader.
+   */
+  protected EnvironmentClassLoader(ClassLoader parent, 
+                                   String id, 
+                                   boolean isRoot)
+  {
+    super(parent, true, isRoot);
     
     if (id != null)
       setId(id);

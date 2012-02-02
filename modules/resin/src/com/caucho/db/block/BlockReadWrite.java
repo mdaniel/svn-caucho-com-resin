@@ -214,7 +214,7 @@ public class BlockReadWrite {
         for (int i = readLen; i < BlockStore.BLOCK_SIZE; i++)
           buffer[i] = 0;
       }
-
+      
       _blockManager.addBlockRead();
 
       freeRowFile(wrapper, isPriority);

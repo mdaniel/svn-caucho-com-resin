@@ -40,6 +40,7 @@ import com.caucho.log.AbstractRolloverLog;
 import com.caucho.server.cache.TempFileService;
 import com.caucho.util.Alarm;
 import com.caucho.util.FreeList;
+import com.caucho.util.FreeRing;
 import com.caucho.util.L10N;
 import com.caucho.vfs.TempStreamApi;
 
@@ -58,8 +59,8 @@ public class AccessLogWriter extends AbstractRolloverLog
   private final Object _bufferLock = new Object();
 
   private final Semaphore _logSemaphore = new Semaphore(16 * 1024);
-  private final FreeList<LogBuffer> _freeList
-    = new FreeList<LogBuffer>(512);
+  private final FreeRing<LogBuffer> _freeList
+    = new FreeRing<LogBuffer>(512);
 
   private LogBuffer _logHead;
   private LogBuffer _logTail;

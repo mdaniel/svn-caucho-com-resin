@@ -37,6 +37,7 @@ import com.caucho.make.Make;
 import com.caucho.server.util.CauchoSystem;
 import com.caucho.util.Alarm;
 import com.caucho.util.CharBuffer;
+import com.caucho.util.Crc64;
 import com.caucho.util.L10N;
 import com.caucho.vfs.Depend;
 import com.caucho.vfs.Path;
@@ -545,6 +546,7 @@ public class CompilingLoader extends Loader implements Make {
   /**
    * Returns the code source for the directory.
    */
+  @Override
   protected CodeSource getCodeSource(Path path)
   {
     return _codeSource;
@@ -698,6 +700,14 @@ public class CompilingLoader extends Loader implements Make {
       return path;
 
     return null;
+  }
+
+  @Override
+  protected long getHashCrc(long crc64)
+  {
+    crc64 = Crc64.generate(_classDir.getURL());
+    
+    return crc64;
   }
 
   /**

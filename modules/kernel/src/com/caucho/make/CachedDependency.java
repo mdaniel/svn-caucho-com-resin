@@ -65,6 +65,7 @@ abstract public class CachedDependency implements Dependency {
   /**
    * Returns true if the underlying resource has changed.
    */
+  @Override
   public final boolean isModified()
   {
     long now = Alarm.getCurrentTime();

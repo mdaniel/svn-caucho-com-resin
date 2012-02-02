@@ -32,6 +32,7 @@ package com.caucho.config.core;
 import com.caucho.config.Config;
 import com.caucho.config.ConfigException;
 import com.caucho.config.SchemaBean;
+import com.caucho.config.annotation.NoAspect;
 import com.caucho.config.type.FlowBean;
 import com.caucho.config.types.FileSetType;
 import com.caucho.loader.Environment;
@@ -52,6 +53,7 @@ import java.util.logging.Logger;
 /**
  * Imports properties values from a separate file.
  */
+@NoAspect
 public class ResinProperties extends ResinControl implements FlowBean
 {
   private static final L10N L = new L10N(ResinProperties.class);

@@ -95,8 +95,9 @@ public class ManagedBeanImpl<X> extends AbstractIntrospectedBean<X>
     InjectionTargetBuilder<X> target;
     target = new InjectionTargetBuilder<X>(injectManager, beanType, this);
     
-    if (isSessionBean)
+    if (isSessionBean) {
       target.setGenerateInterception(false);
+    }
     
     _injectionTarget = target;
   }

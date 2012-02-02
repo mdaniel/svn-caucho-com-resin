@@ -56,6 +56,8 @@ public class AnnotatedElementImpl implements Annotated, BaseTypeAnnotated
   private Set<Type> _typeSet;
 
   private AnnotationSet _annSet;
+  
+  private Annotated _sourceAnnotated;
 
   public AnnotatedElementImpl(BaseType type,
                               Annotated annotated,
@@ -79,6 +81,8 @@ public class AnnotatedElementImpl implements Annotated, BaseTypeAnnotated
         _annSet.add(ann);
       }
     }
+    
+    _sourceAnnotated = annotated;
   }
 
   public AnnotatedElementImpl(Annotated annotated)
@@ -257,6 +261,19 @@ public class AnnotatedElementImpl implements Annotated, BaseTypeAnnotated
   {
     if (_annSet != null)
       _annSet.clear();
+  }
+  
+  @Override
+  public void addOverrideAnnotation(Annotation ann)
+  {
+    _annSet.add(ann);
+
+    // ioc/10a0 - @NoAspect - cache that base class has no aspect
+    if (_sourceAnnotated instanceof BaseTypeAnnotated) {
+      BaseTypeAnnotated baseAnn = (BaseTypeAnnotated) _sourceAnnotated;
+      
+      baseAnn.addOverrideAnnotation(ann);
+    }
   }
 
   /**

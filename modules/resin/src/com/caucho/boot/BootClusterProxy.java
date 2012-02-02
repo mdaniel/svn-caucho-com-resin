@@ -29,9 +29,11 @@
 
 package com.caucho.boot;
 
+import com.caucho.config.annotation.NoAspect;
 import com.caucho.config.program.ConfigProgram;
 import com.caucho.config.program.ContainerProgram;
 
+@NoAspect
 public class BootClusterProxy {
   private String _id = "";
   

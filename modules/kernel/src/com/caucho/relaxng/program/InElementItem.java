@@ -90,6 +90,7 @@ public class InElementItem extends Item {
   /**
    * Interleaves a continuation.
    */
+  @Override
   public Item interleaveContinuation(Item cont)
   {
     return create(_eltItem, InterleaveItem.create(cont, _contItem));
@@ -98,6 +99,7 @@ public class InElementItem extends Item {
   /**
    * Adds a continuation
    */
+  @Override
   public Item inElementContinuation(Item cont)
   {
     return create(_eltItem, create(_contItem, cont));

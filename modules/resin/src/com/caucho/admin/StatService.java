@@ -34,10 +34,9 @@ import javax.ejb.Startup;
 import javax.inject.Singleton;
 
 import com.caucho.config.Configurable;
-import com.caucho.server.admin.*;
+import com.caucho.server.admin.StatSystem;
 import com.caucho.server.admin.StatSystem.JmxItem;
 import com.caucho.server.resin.Resin;
-import com.caucho.util.L10N;
 
 @Startup
 @Singleton

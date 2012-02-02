@@ -182,7 +182,6 @@ Java_com_caucho_vfs_JniSocketImpl_writeNative(JNIEnv *env,
   int write_length = 0;
   int result;
     
-
   if (! conn || conn->fd < 0 || ! buf) {
     return -1;
   }
@@ -190,6 +189,8 @@ Java_com_caucho_vfs_JniSocketImpl_writeNative(JNIEnv *env,
   conn->jni_env = env;
 
   while (length > 0) {
+    jbyte *cBuf;
+
     if (length < sizeof(buffer))
       sublen = length;
     else
@@ -198,16 +199,6 @@ Java_com_caucho_vfs_JniSocketImpl_writeNative(JNIEnv *env,
     resin_get_byte_array_region(env, buf, offset, sublen, buffer);
 
     result = conn->ops->write(conn, buffer, sublen);
-
-    /*
-    ptr = (*env)->GetByteArrayElements(env, buf, &is_copy);
-
-    if (ptr) {
-      result = conn->ops->write(conn, ptr + offset, sublen);
-
-      (*env)->ReleaseByteArrayElements(env, buf, ptr, is_copy);
-    }
-    */
     
     if (result == length)
       return result + write_length;

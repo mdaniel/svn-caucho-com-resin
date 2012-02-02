@@ -1435,7 +1435,15 @@ public class TcpSocketLinkListener
     _keepaliveThreadCount.incrementAndGet();
 
     try {
-      int result = is.fillWithTimeout(timeout);
+      int result;
+      
+      if (_keepaliveThreadCount.get() < 32) {
+        // benchmark perf with memcache
+        result = is.fillBuffer();
+      }
+      else {
+        result = is.fillWithTimeout(timeout);
+      }
 
       if (isClosed()) {
         return -1;

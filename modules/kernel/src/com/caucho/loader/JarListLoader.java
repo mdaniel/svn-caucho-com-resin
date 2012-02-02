@@ -163,7 +163,8 @@ abstract public class JarListLoader extends Loader implements Dependency {
     
     _jarList.add(jarEntry);
 
-    _dependencyList.add(new Depend(jarPath));
+    // _dependencyList.add(new Depend(jarPath));
+    _dependencyList.add(new Depend(jar));
 
     if (_pathMap == null && isJarCacheEnabled())
       _pathMap = new JarMap();

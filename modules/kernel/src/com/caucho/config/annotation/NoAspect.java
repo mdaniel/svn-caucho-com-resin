@@ -27,28 +27,17 @@
  * @author Scott Ferguson
  */
 
-package com.caucho.config.reflect;
+package com.caucho.config.annotation;
 
-import java.lang.annotation.Annotation;
-import java.util.HashMap;
-import java.util.Set;
-
+import static java.lang.annotation.ElementType.*;
+import static java.lang.annotation.RetentionPolicy.*;
+import java.lang.annotation.Retention;
+import java.lang.annotation.Target;
 
 /**
- * Abstract introspected view of a Bean
+ * The @NonEL annotation for annotations not evaluating el
  */
-public interface BaseTypeAnnotated {
-  public BaseType getBaseTypeImpl();
-  
-  public HashMap<String,BaseType> getBaseTypeParamMap();
-  
-  /**
-   * Returns the type variables local to the type.
-   */
-  public Set<VarType<?>> getTypeVariables();
-  
-  /**
-   * Overrides, e.g. for analysis
-   */
-  public void addOverrideAnnotation(Annotation ann);
+@Retention(RUNTIME)
+@Target({METHOD, TYPE})
+public @interface NoAspect {
 }

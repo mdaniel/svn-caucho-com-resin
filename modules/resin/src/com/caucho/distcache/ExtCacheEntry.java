@@ -29,9 +29,14 @@
 
 package com.caucho.distcache;
 
+import java.io.IOException;
+import java.io.OutputStream;
+
 import javax.cache.Cache;
 
+import com.caucho.server.distcache.CacheConfig;
 import com.caucho.util.HashKey;
+import com.caucho.vfs.WriteStream;
 
 /**
  * Provides additional information about an entry in a {@link javax.cache.Cache}.
@@ -111,4 +116,10 @@ public interface ExtCacheEntry<K,V> extends Cache.Entry<K,V>
    * @return
    */
   public long getVersion();
+  
+  /**
+   * Loads the data to the output stream.
+   */
+  public boolean readData(OutputStream os, CacheConfig config)
+    throws IOException;
 }

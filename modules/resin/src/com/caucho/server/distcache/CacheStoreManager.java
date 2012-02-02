@@ -1339,7 +1339,8 @@ public final class CacheStoreManager
 
       return false;
     } finally {
-      out.close();
+      if (out != os)
+        out.close();
     }
   }
   

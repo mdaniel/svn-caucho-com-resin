@@ -32,6 +32,7 @@ package com.caucho.boot;
 import java.net.InetAddress;
 
 import com.caucho.config.ConfigException;
+import com.caucho.config.annotation.NoAspect;
 import com.caucho.config.program.ConfigProgram;
 import com.caucho.network.listen.TcpSocketLinkListener;
 import com.caucho.vfs.QServerSocket;
@@ -40,6 +41,7 @@ import com.caucho.vfs.SSLFactory;
 /**
  * Represents a protocol connection.
  */
+@NoAspect
 public class OpenPort extends TcpSocketLinkListener
 {
   private String _protocol;

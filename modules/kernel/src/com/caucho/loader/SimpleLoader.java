@@ -109,7 +109,7 @@ public class SimpleLoader extends Loader {
                                           Path path,
                                           String prefix)
   {
-    DynamicClassLoader loader = new DynamicClassLoader(parent, false);
+    DynamicClassLoader loader = new DynamicClassLoader(parent, false, true);
 
     SimpleLoader simpleLoader = new SimpleLoader(loader, path, prefix);
     simpleLoader.init();
@@ -132,7 +132,7 @@ public class SimpleLoader extends Loader {
   public static DynamicClassLoader create(ClassLoader parent,
                                           Path path)
   {
-    DynamicClassLoader loader = new DynamicClassLoader(parent, false);
+    DynamicClassLoader loader = new DynamicClassLoader(parent, false, false);
 
     loader.addLoader(new SimpleLoader(loader, path));
 

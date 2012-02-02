@@ -37,7 +37,6 @@ import java.util.logging.Logger;
 
 import javax.enterprise.context.spi.CreationalContext;
 import javax.enterprise.inject.InjectionException;
-import javax.enterprise.inject.spi.AnnotatedType;
 import javax.enterprise.inject.spi.InjectionTarget;
 import javax.servlet.Servlet;
 import javax.servlet.ServletConfig;
@@ -50,10 +49,8 @@ import javax.servlet.jsp.JspContext;
 import javax.servlet.jsp.PageContext;
 
 import com.caucho.config.ConfigException;
-import com.caucho.config.inject.CreationalContextImpl;
 import com.caucho.config.inject.InjectManager;
 import com.caucho.config.inject.OwnerCreationalContext;
-import com.caucho.config.xml.XmlConfigContext;
 import com.caucho.java.JavaCompilerUtil;
 import com.caucho.jsp.cfg.JspPropertyGroup;
 import com.caucho.loader.Environment;
@@ -61,7 +58,7 @@ import com.caucho.server.util.CauchoSystem;
 import com.caucho.server.webapp.WebApp;
 import com.caucho.util.Alarm;
 import com.caucho.util.CacheListener;
-import com.caucho.util.FreeList;
+import com.caucho.util.FreeRing;
 import com.caucho.util.LruCache;
 import com.caucho.vfs.MemoryPath;
 import com.caucho.vfs.Path;
@@ -77,11 +74,11 @@ abstract public class PageManager {
   
   static final long ACCESS_INTERVAL = 60000L;
 
-  private FreeList<PageContextImpl> _freePages
-    = new FreeList<PageContextImpl>(256);
+  private FreeRing<PageContextImpl> _freePages
+    = new FreeRing<PageContextImpl>(256);
 
-  private FreeList<PageContextWrapper> _freePageWrappers
-    = new FreeList<PageContextWrapper>(256);
+  private FreeRing<PageContextWrapper> _freePageWrappers
+    = new FreeRing<PageContextWrapper>(256);
 
   protected WebApp _webApp;
   private Path _classDir;

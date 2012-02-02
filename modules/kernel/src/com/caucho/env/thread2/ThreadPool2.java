@@ -29,19 +29,16 @@
 
 package com.caucho.env.thread2;
 
-import java.util.concurrent.ConcurrentLinkedQueue;
 import java.util.concurrent.atomic.AtomicLong;
 import java.util.concurrent.atomic.AtomicReference;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
-import com.caucho.config.ConfigException;
 import com.caucho.env.health.HealthSystemFacade;
 import com.caucho.env.shutdown.ExitCode;
 import com.caucho.env.shutdown.ShutdownSystem;
 import com.caucho.lifecycle.Lifecycle;
 import com.caucho.util.Alarm;
-import com.caucho.util.FreeList;
 import com.caucho.util.L10N;
 
 /**
@@ -687,7 +684,7 @@ public final class ThreadPool2 {
     @Override
     public long runTask()
     {
-      int loopCount = 1;//4 * 1024;
+      int loopCount = 1;
       int i = 0;
       
       for (i = 0; i < loopCount; i++) {

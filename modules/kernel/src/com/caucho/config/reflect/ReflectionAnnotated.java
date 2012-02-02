@@ -167,6 +167,11 @@ public class ReflectionAnnotated implements Annotated, BaseTypeAnnotated
 
     return false;
   }
+  
+  public void addOverrideAnnotation(Annotation ann)
+  {
+    addAnnotation(ann);
+  }
 
   @Override
   public String toString()

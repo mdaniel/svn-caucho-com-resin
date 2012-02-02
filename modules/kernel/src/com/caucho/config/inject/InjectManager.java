@@ -376,8 +376,6 @@ public final class InjectManager
 
       if (_classLoader != null)
         _classLoader.getNewTempClassLoader();
-      else
-        new DynamicClassLoader(null);
     } finally {
       thread.setContextClassLoader(oldLoader);
     }

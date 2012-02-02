@@ -229,7 +229,7 @@ public class DataStore {
   {
     try {
       Blob blob = loadBlob(id);
-      
+
       if (blob != null) {
         InputStream is = blob.getBinaryStream();
 

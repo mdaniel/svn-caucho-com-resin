@@ -30,6 +30,7 @@
 package com.caucho.config.types;
 
 import com.caucho.config.ConfigException;
+import com.caucho.config.annotation.NoAspect;
 import com.caucho.util.L10N;
 import com.caucho.vfs.Path;
 import com.caucho.vfs.Vfs;
@@ -44,6 +45,8 @@ import java.util.logging.Logger;
 /**
  * Abstract type building a path pattern.  The pattern follows ant.
  */
+
+@NoAspect
 public class FileSetType {
   static final L10N L = new L10N(PathPatternType.class);
   static final Logger log = Logger.getLogger(PathPatternType.class.getName());

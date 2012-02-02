@@ -32,11 +32,13 @@ import java.util.ArrayList;
 
 import javax.annotation.PostConstruct;
 
+import com.caucho.config.annotation.NoAspect;
 import com.caucho.config.type.FlowBean;
 
 /**
  * Executes code when an expression is valid.
  */
+@NoAspect
 public class ResinChoose extends ResinControl implements FlowBean {
   private ArrayList<ResinWhen> _whenList = new ArrayList<ResinWhen>();
   private ResinWhen _otherwise;

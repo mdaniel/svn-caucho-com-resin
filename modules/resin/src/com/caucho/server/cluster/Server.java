@@ -98,6 +98,7 @@ import com.caucho.server.webapp.WebAppConfig;
 import com.caucho.util.Alarm;
 import com.caucho.util.AlarmListener;
 import com.caucho.util.FreeList;
+import com.caucho.util.FreeRing;
 import com.caucho.util.L10N;
 import com.caucho.vfs.Dependency;
 import com.caucho.vfs.Path;
@@ -162,8 +163,8 @@ public class Server
 
   private PersistentStoreConfig _persistentStoreConfig;
   
-  private final FreeList<HttpBufferStore> _httpBufferFreeList
-    = new FreeList<HttpBufferStore>(256);
+  private final FreeRing<HttpBufferStore> _httpBufferFreeList
+    = new FreeRing<HttpBufferStore>(256);
 
   
   //
@@ -1063,15 +1064,17 @@ public class Server
   {
     HttpBufferStore buffer = _httpBufferFreeList.allocate();
 
-    if (buffer == null)
+    if (buffer == null) {
       buffer = new HttpBufferStore(getUrlLengthMax());
+    }
 
     return buffer;
   }
 
   public void freeHttpBuffer(HttpBufferStore buffer)
   {
-    _httpBufferFreeList.free(buffer);
+    if (! _httpBufferFreeList.free(buffer)) {
+    }
   }
 
   /**

@@ -68,15 +68,15 @@ public class SystemClassLoader
    */
   public SystemClassLoader(ClassLoader parent)
   {
-    super(parent, "system");
+    super(parent, "system", true);
 
     String preScan = System.getProperty("caucho.jar.prescan");
     
     // #4420 - major performance for Spring-like startup if preScan is disabled
     // preScan = "false";
     
-    if ("false".equals(preScan)) {
-      DynamicClassLoader.setJarCacheEnabled(false);
+    if (! "false".equals(preScan)) {
+      DynamicClassLoader.setJarCacheEnabled(true);
     }
 
     String smallmem = System.getProperty("caucho.smallmem");

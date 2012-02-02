@@ -273,6 +273,7 @@ public class JspWriterAdapter extends AbstractBodyContent {
   /**
    * Pops the enclosing writer.
    */
+  @Override
   AbstractJspWriter popWriter()
   {
     try {
@@ -284,6 +285,7 @@ public class JspWriterAdapter extends AbstractBodyContent {
     return super.popWriter();
   }
 
+  @Override
   final public void close() throws IOException
   {
     _isClosed = true;
@@ -291,8 +293,9 @@ public class JspWriterAdapter extends AbstractBodyContent {
     AbstractResponseStream out = _out;
     _out = null;
     
-    if (out != null && ! out.isCauchoResponseStream())
+    if (out != null && ! out.isCauchoResponseStream()) {
       out.flushBuffer();
+    }
   }
 
   public String toString()

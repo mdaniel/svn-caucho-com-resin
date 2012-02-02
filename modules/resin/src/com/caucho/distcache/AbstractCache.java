@@ -467,6 +467,11 @@ public class AbstractCache
   {
     return _delegate.getExtCacheEntry(key);
   }
+  
+  public ExtCacheEntry getLiveCacheEntry(Object key)
+  {
+    return _delegate.getLiveCacheEntry(key);
+  }
 
   /**
    * Puts a new item in the cache.

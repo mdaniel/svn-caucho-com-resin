@@ -33,8 +33,10 @@ import java.util.ArrayList;
 import javax.enterprise.context.spi.CreationalContext;
 
 import com.caucho.config.ConfigException;
+import com.caucho.config.annotation.NoAspect;
 import com.caucho.util.L10N;
 
+@NoAspect
 public class ContainerProgram extends ConfigProgram {
   static final L10N L = new L10N(ContainerProgram.class);
 

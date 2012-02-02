@@ -1075,9 +1075,6 @@ public class TcpSocketLink extends AbstractSocketLink
     RequestState result = RequestState.EXIT;
 
     try {
-      // clear the interrupted flag
-      Thread.interrupted();
-      
       // boolean isKeepalive = false; // taskType == Task.KEEPALIVE;
       boolean isKeepalive = taskType == Task.KEEPALIVE && ! _state.isKeepalive();
 
@@ -1149,6 +1146,9 @@ public class TcpSocketLink extends AbstractSocketLink
       if (_listener.isClosed()) {
         return RequestState.EXIT;
       }
+      
+      // clear the interrupted flag
+      Thread.interrupted();
 
       if (isKeepalive
           && (result = processKeepalive()) != RequestState.REQUEST_COMPLETE) {

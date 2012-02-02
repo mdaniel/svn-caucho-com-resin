@@ -77,38 +77,6 @@ public class JarMap {
 
     return add(cbuf, length, entry);
   }
-    
-  public JarList add(char []name, int length, JarEntry entry)
-  {
-    if (_entries.length <= _size)
-      resize();
-    
-    JarList key = new JarList();
-
-    key.init(name, length);
-
-    key._entry = entry;
-
-    int hash = key.hashCode() & _mask;
-
-    for (JarList ptr = _entries[hash]; ptr != null; ptr = ptr._nextHash) {
-      if (ptr.equals(key)) {
-        key.clearName();
-        key._next = ptr._next;
-        ptr._next = key;
-
-        return ptr;
-      }
-    }
-
-    _size++;
-    
-    key.copyName();
-    key._nextHash = _entries[hash];
-    _entries[hash] = key;
-
-    return key;
-  }
 
   public JarList get(String name)
   {
@@ -164,17 +132,7 @@ public class JarMap {
         }
 
         if (scan != null && scan.open()) {
-          while (scan.next()) {
-            char []buffer = scan.getNameBuffer();
-            int length = scan.getNameLength();
-            
-            // server/249b, env/009r
-            if (length > 0 && buffer[length - 1] == '/') {
-              length--;
-            }
-
-            add(buffer, length, jarEntry);
-          }
+          scanZip(scan, jarEntry);
 
           isValidScan = true;
         }
@@ -215,23 +173,73 @@ public class JarMap {
         scan.close();
     }
   }
+  
+  private void scanZip(ZipScanner scan, JarEntry jarEntry) 
+    throws IOException
+  {
+    while (scan.next()) {
+      char []buffer = scan.getNameBuffer();
+      int length = scan.getNameLength();
+    
+      // server/249b, env/009r
+      if (length > 0 && buffer[length - 1] == '/') {
+        length--;
+      }
+
+      add(buffer, length, jarEntry);
+    }
+  }
+  
+  public JarList add(char []name, int length, JarEntry entry)
+  {
+    if (_entries.length <= _size) {
+      resize();
+    }
+    
+    JarList key = new JarList();
+
+    key.init(name, length);
+
+    key._entry = entry;
+
+    int hash = key.hashCode() & _mask;
+
+    for (JarList ptr = _entries[hash]; ptr != null; ptr = ptr._nextHash) {
+      if (ptr.equals(key)) {
+        key.clearName();
+        key._next = ptr._next;
+        ptr._next = key;
+
+        return ptr;
+      }
+    }
+
+    _size++;
+    
+    key.copyName();
+    key._nextHash = _entries[hash];
+    _entries[hash] = key;
+
+    return key;
+  }
 
   public void clear()
   {
     _size = 0;
 
-    for (int i = 0; i < _entries.length; i++)
+    for (int i = 0; i < _entries.length; i++) {
       _entries[i] = null;
+    }
   }
 
   static final class JarList {
-    JarList _nextHash;
+    private JarList _nextHash;
     
-    JarList _next;
-    JarEntry _entry;
+    private JarList _next;
+    private JarEntry _entry;
 
-    char []_name;
-    int _length;
+    private char []_name;
+    private int _length;
 
     JarList()
     {
@@ -316,6 +324,14 @@ public class JarMap {
         return false;
 
       JarList entry = (JarList) o;
+      
+      return equals(entry);
+    }
+
+    public boolean equals(JarList entry)
+    {
+      if (this == entry)
+        return true;
 
       int length = _length;
 
@@ -333,6 +349,7 @@ public class JarMap {
       return true;
     }
 
+    @Override
     public String toString()
     {
       return (getClass().getSimpleName()

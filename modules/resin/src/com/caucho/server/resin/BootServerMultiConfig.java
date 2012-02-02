@@ -35,6 +35,7 @@ import javax.annotation.PostConstruct;
 
 import com.caucho.config.ConfigException;
 import com.caucho.config.Configurable;
+import com.caucho.config.annotation.NoAspect;
 import com.caucho.config.program.ConfigProgram;
 import com.caucho.config.program.ContainerProgram;
 import com.caucho.util.L10N;
@@ -44,6 +45,8 @@ import com.caucho.util.L10N;
  * 
  * It matches the &lt;server-multi> tag in the resin.xml
  */
+
+@NoAspect
 public class BootServerMultiConfig 
 {
   private static final L10N L = new L10N(BootServerMultiConfig.class);

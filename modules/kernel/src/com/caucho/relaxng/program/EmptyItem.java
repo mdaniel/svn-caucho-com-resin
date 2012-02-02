@@ -36,7 +36,7 @@ import java.util.HashSet;
 /**
  * Generates programs from patterns.
  */
-public class EmptyItem extends Item {
+public final class EmptyItem extends Item {
   protected final static L10N L = new L10N(EmptyItem.class);
 
   private static final EmptyItem EMPTY = new EmptyItem();
@@ -59,7 +59,8 @@ public class EmptyItem extends Item {
   /**
    * The empty item can produce empty.
    */
-  public boolean allowEmpty()
+  @Override
+  public final boolean allowEmpty()
   {
     return true;
   }

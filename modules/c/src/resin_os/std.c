@@ -221,6 +221,7 @@ std_read(connection_t *conn, char *buf, int len, int timeout)
   do {
     /* recv returns 0 on end of file */
     result = recv(fd, buf, len, 0);
+    //    fprintf(stderr, "rcv %d\n", result);
 
     if (result > 0)
       return result;

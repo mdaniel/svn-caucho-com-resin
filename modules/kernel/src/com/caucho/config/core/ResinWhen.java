@@ -28,12 +28,14 @@
 
 package com.caucho.config.core;
 
+import com.caucho.config.annotation.NoAspect;
 import com.caucho.config.program.ConfigProgram;
 import com.caucho.config.program.ContainerProgram;
 
 /**
  * Executes code when an expression is valid.
  */
+@NoAspect
 public class ResinWhen extends ResinControl {
   private ContainerProgram _init = new ContainerProgram();
 

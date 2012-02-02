@@ -80,6 +80,7 @@ import com.caucho.loader.Environment;
 import com.caucho.loader.EnvironmentBean;
 import com.caucho.loader.EnvironmentClassLoader;
 import com.caucho.loader.EnvironmentLocal;
+import com.caucho.loader.RootDynamicClassLoader;
 import com.caucho.util.IoUtil;
 import com.caucho.util.L10N;
 import com.caucho.util.QDate;
@@ -306,8 +307,10 @@ public class TypeFactory implements AddLoaderListener
       }
     }
 
+    /*
     if (RESIN_NS.equals(uri))
       uri = "urn:java:ee";
+      */
 
     if (uri != null && uri.startsWith("urn:java:")) {
       String pkg = uri.substring("urn:java:".length());
@@ -458,11 +461,18 @@ public class TypeFactory implements AddLoaderListener
     if (cl == null) {
       cl = loadClassImpl(pkg, name, loader);
       
-      if (cl != null)
-        putUrnClass(urnName, cl, cl.getClassLoader());
+      // save negative lookups
+      if (cl == null) {
+        cl = NullClass.class;
+      }
+      
+      putUrnClass(urnName, cl, cl.getClassLoader());
     }
     
-    return cl;
+    if (cl == NullClass.class)
+      return null;
+    else
+      return cl;
   }
   
   private Class<?> findUrnClass(String urnName, ClassLoader loader)
@@ -969,9 +979,13 @@ public class TypeFactory implements AddLoaderListener
     _nsMap.put(ns.getName(), ns);
   }
 
+  @Override
   public String toString()
   {
     return getClass().getSimpleName() + "[" + _loader + "]";
+  }
+  
+  private static class NullClass {
   }
 
   static {
@@ -1018,13 +1032,15 @@ public class TypeFactory implements AddLoaderListener
 
     _primitiveTypes.put(MethodExpression.class, MethodExpressionType.TYPE);
 
+    /*
     ClassLoader systemClassLoader = null;
 
     try {
       systemClassLoader = ClassLoader.getSystemClassLoader();
     } catch (Exception e) {
     }
+    */
 
-    _systemClassLoader = systemClassLoader;
+    _systemClassLoader = RootDynamicClassLoader.getSystemRootClassLoader();
   }
 }

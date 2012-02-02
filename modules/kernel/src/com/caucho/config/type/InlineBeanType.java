@@ -599,6 +599,7 @@ public class InlineBeanType<T> extends ConfigType<T>
           _isEL = ! _beanClass.isAnnotationPresent(NonEL.class);
           
           try {
+            // System.out.println("INTROSPECT: " + _beanClass);
             Method []methods = _beanClass.getDeclaredMethods();
 
             introspectMethods(methods);

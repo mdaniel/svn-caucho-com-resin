@@ -41,6 +41,7 @@ import java.util.logging.Logger;
 import javax.annotation.PostConstruct;
 
 import com.caucho.config.ConfigException;
+import com.caucho.util.Crc64;
 import com.caucho.vfs.JarPath;
 import com.caucho.vfs.Path;
 
@@ -227,6 +228,17 @@ abstract public class Loader {
     }
   }
   
+  protected long getHashCrc(long crc64)
+  {
+    ArrayList<String> pathList = new ArrayList<String>();
+    buildClassPath(pathList);
+    
+    for (String path : pathList) {
+      crc64 = Crc64.generate(path);
+    }
+    
+    return crc64;
+  }
   /**
    * Adds the sourcepath of this loader.
    */

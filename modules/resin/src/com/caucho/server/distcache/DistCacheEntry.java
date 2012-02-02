@@ -353,6 +353,31 @@ public class DistCacheEntry implements ExtCacheEntry {
   {
     return getMnodeEntry().getValueLength();
   }
+  
+  /**
+   * Writes the data to a stream.
+   */
+  @Override
+  public boolean readData(OutputStream os, CacheConfig config)
+    throws IOException
+  {
+    return _cacheService.readData(getMnodeEntry(), os, config);
+    /*
+    MnodeEntry entry = getMnodeEntry();
+    
+    if (entry == null) {
+      return;
+    }
+    
+    BlobImpl blob = (BlobImpl) entry.getBlob();
+    
+    if (blob == null) {
+      entry.gthis....
+    }
+
+    blob.writeToStream(os);
+    */
+  }
 
   @Override
   public long getAccessedExpireTimeout()

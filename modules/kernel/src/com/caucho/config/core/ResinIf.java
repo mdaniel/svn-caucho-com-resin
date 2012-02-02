@@ -31,6 +31,7 @@ package com.caucho.config.core;
 
 import javax.annotation.PostConstruct;
 
+import com.caucho.config.annotation.NoAspect;
 import com.caucho.config.program.ConfigProgram;
 import com.caucho.config.program.ContainerProgram;
 import com.caucho.config.type.FlowBean;
@@ -38,6 +39,7 @@ import com.caucho.config.type.FlowBean;
 /**
  * Sets an EL value.
  */
+@NoAspect
 public class ResinIf extends ResinControl implements FlowBean {
   private ContainerProgram _init = new ContainerProgram();
 

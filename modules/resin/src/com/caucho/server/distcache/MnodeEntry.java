@@ -33,7 +33,9 @@ import com.caucho.distcache.ExtCacheEntry;
 import com.caucho.util.Alarm;
 import com.caucho.util.HashKey;
 import com.caucho.util.Hex;
+import com.caucho.vfs.WriteStream;
 
+import java.io.OutputStream;
 import java.lang.ref.SoftReference;
 import java.sql.Blob;
 
@@ -369,6 +371,12 @@ public final class MnodeEntry extends MnodeValue implements ExtCacheEntry {
   public void setBlob(Blob blob)
   {
     _blob = blob;
+  }
+  
+  @Override
+  public boolean readData(OutputStream os, CacheConfig config)
+  {
+    throw new UnsupportedOperationException(getClass().getName());
   }
 
   @Override

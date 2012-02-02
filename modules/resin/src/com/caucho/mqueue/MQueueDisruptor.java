@@ -169,56 +169,61 @@ public final class MQueueDisruptor<T>
   
   private final void consumeAll()
   {
-    doConsume();
+    try {
+      doConsume();
+    } catch (Exception e) {
+      log.log(Level.FINER, e.toString(), e);
+    }
     
     wakeQueue();
   }
   
   private final void doConsume()
+    throws Exception
   {
-    MQueueItem<T> []itemRing = _itemRing;
-    int mask = _mask;
-    // AtomicInteger tailRef = _tailRef;
     AtomicInteger headRef = _head;
-    MQueueItemFactory<T> factory = _factory;
-    // int tail = tailRef.get();
+    int head = headRef.get();
     int tail = _tail;
     
-    while (true) {
-      // int tail = _tail;
-      // int tail = tailRef.get();
-      int head = headRef.get();
-    
-      if (head == tail) {
-        return;
-      }
-    
-      MQueueItem<T> item = itemRing[tail];
-      
-      int nextTail = (tail + 1) & mask;
-      
-      process(item.getValue(), nextTail);
-
-      tail = nextTail;
+    if (head == tail) {
+      return;
     }
-  }
-  
-  private void process(T value, int nextTail)
-  {
+
+    MQueueItemFactory<T> factory = _factory;
+    
+    MQueueItem<T> []itemRing = _itemRing;
+    
+    int mask = _mask;
+    int tailCheckMask = mask >> 1;
+    
     try {
-      _factory.process(value);
-    } catch (Exception e) {
-      log.log(Level.FINER, e.toString(), e);
-    } finally {
-      /*
-      if (_mask < nextTail) {
-        _sequence = sequence + 1;
-      }
-      */
+      while (true) {
+        if (head == tail) {
+          head = headRef.get();
+        
+          if (head == tail) {
+            return;
+          }
+        }
       
-      // _tail = nextTail & _mask;
-      // _tailRef.set(nextTail);
-      _tail = nextTail;
+        if ((tail & tailCheckMask) == 0 && _isWait.get()) {
+          _tail = tail;
+          
+          wakeQueue();
+        }
+    
+        MQueueItem<T> item = itemRing[tail];
+      
+        tail = (tail + 1) & mask;
+        
+        factory.process(item.getValue());
+        
+        if ((tail & 0x7f) == 0) {
+          _tail = tail;
+        }
+      }
+    } finally {
+      _tail = tail;
     }
   }
 

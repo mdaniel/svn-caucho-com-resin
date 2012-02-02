@@ -169,7 +169,7 @@ public class DynamicClassLoader extends java.net.URLClassLoader
    */
   public DynamicClassLoader(ClassLoader parent)
   {
-    this(parent, true);
+    this(parent, true, false);
   }
 
   /**
@@ -177,9 +177,11 @@ public class DynamicClassLoader extends java.net.URLClassLoader
    *
    * @param parent parent class loader
    */
-  public DynamicClassLoader(ClassLoader parent, boolean enableDependencyCheck)
+  public DynamicClassLoader(ClassLoader parent, 
+                            boolean enableDependencyCheck,
+                            boolean isRoot)
   {
-    super(NULL_URL_ARRAY, getInitParent(parent));
+    super(NULL_URL_ARRAY, getInitParent(parent, isRoot));
 
     parent = getParent();
 
@@ -190,7 +192,9 @@ public class DynamicClassLoader extends java.net.URLClassLoader
     _dependencies.setCheckInterval(_globalDependencyCheckInterval);
 
     for (; parent != null; parent = parent.getParent()) {
-      if (parent instanceof DynamicClassLoader) {
+      if (parent instanceof RootDynamicClassLoader) {
+      }
+      else if (parent instanceof DynamicClassLoader) {
         DynamicClassLoader loader = (DynamicClassLoader) parent;
 
         loader.init();
@@ -228,12 +232,16 @@ public class DynamicClassLoader extends java.net.URLClassLoader
    * Returns the initialization parent, i.e. the parent if given
    * or the context class loader if not given.
    */
-  private static ClassLoader getInitParent(ClassLoader parent)
+  private static ClassLoader getInitParent(ClassLoader parent,
+                                           boolean isRoot)
   {
-    if (parent != null)
+    if (parent == null)
+      parent = Thread.currentThread().getContextClassLoader();
+    
+    if (isRoot || parent instanceof DynamicClassLoader)
       return parent;
     else
-      return Thread.currentThread().getContextClassLoader();
+      return RootDynamicClassLoader.create(parent);
   }
 
   /**
@@ -999,12 +1007,25 @@ public class DynamicClassLoader extends java.net.URLClassLoader
   {
     long crc64 = getParentHashCrc();
     
+    /*
     ArrayList<String> list = new ArrayList<String>();
     
     buildSelfClassPath(list);
     
     for (int i = 0; i < list.size(); i++) {
       crc64 = Crc64.generate(crc64, list.get(i));
+    }
+    */
+    
+    // buildImportClassPath(cp);
+
+    ArrayList<Loader> loaders = getLoaders();
+    if (loaders != null) {
+      for (int i = 0; i < loaders.size(); i++) {
+        Loader loader = loaders.get(i);
+
+        crc64 = loader.getHashCrc(crc64);
+      }
     }
     
     return crc64;
@@ -1436,7 +1457,6 @@ public class DynamicClassLoader extends java.net.URLClassLoader
     throws ClassNotFoundException
   {
     // XXX: removed sync block, since handled below
-
     Class<?> cl = null;
 
     cl = loadClassImpl(name, resolve);

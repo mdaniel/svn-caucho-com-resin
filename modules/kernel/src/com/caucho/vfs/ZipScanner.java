@@ -36,7 +36,7 @@ import java.util.logging.*;
  * Scans a zip file, returning the names. The ZipScanner only works with
  * central directory style zip files.
  */
-public class ZipScanner
+public final class ZipScanner
 {
   private static Logger _log;
   
@@ -107,7 +107,7 @@ public class ZipScanner
     }
   }
 
-  public boolean open()
+  public final boolean open()
     throws IOException
   {
     if (! _isValid)
@@ -120,7 +120,7 @@ public class ZipScanner
     return true;
   }
 
-  public boolean next()
+  public final boolean next()
     throws IOException
   {
     if (_entries <= _index)
@@ -171,7 +171,7 @@ public class ZipScanner
     return true;
   }
 
-  public String getName()
+  public final String getName()
   {
     if (_name == null)
       _name = new String(_cbuf, 0, _nameLen);
@@ -179,12 +179,12 @@ public class ZipScanner
     return _name;
   }
 
-  public char []getNameBuffer()
+  public final char []getNameBuffer()
   {
     return _cbuf;
   }
 
-  public int getNameLength()
+  public final int getNameLength()
   {
     return _nameLen;
   }

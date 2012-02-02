@@ -270,7 +270,6 @@ public class CompactParser {
   {
     while (true) {
       int token = parseToken();
-      Pattern pattern;
 
       switch (token) {
       case -1:
@@ -289,8 +288,8 @@ public class CompactParser {
 
       case IDENTIFIER:
         String name = _lexeme;
-        Pattern oldPattern = grammar.getDefinition(name);
-        pattern = new GroupPattern();
+        // Pattern oldPattern = grammar.getDefinition(name);
+        // pattern = new GroupPattern();
         next = parseToken();
         if (next == '=') {
           if (grammar.getDefinition(name) != null)
@@ -601,6 +600,7 @@ public class CompactParser {
     throws IOException, SAXException, RelaxException
   {
     int ch = skipWhitespace();
+    
     if (ch == '(') {
       NameClassPattern name = parseNameClass(grammar, isElement);
       ch = skipWhitespace();
@@ -610,19 +610,36 @@ public class CompactParser {
     }
 
     char []cbuf = _cb.getBuffer();
+    byte []buffer = _buffer;
     int i = 0;
+    
+    int offset = _offset;
+    int length = _length;
     
     while (ch > 0 && ch < 256 && NAME_CHAR[ch]) {
       cbuf[i++] = (char) ch;
 
-      if (_offset < _length) {
-        ch = _buffer[_offset++] & 0xff;
-        if (ch == '\n')
+      if (offset < length) {
+        ch = buffer[offset++] & 0xff;
+        
+        if (ch == '\n') {
           _line++;
+        }
       }
-      else
+      else {
+        _offset = offset;
+        _length = length;
+        
         ch = read();
+        
+        offset = _offset;
+        length = _length;
+      }
     }
+    
+    _offset = offset;
+    _length = length;
+    
     _cb.setLength(i);
     
     if (ch == '*')
@@ -723,16 +740,20 @@ public class CompactParser {
       return ch;
     }
 
-    _cb.clear();
+    CharBuffer cb = _cb;
+    cb.clear();
+    
+    byte []buffer = _buffer;
       
     while (true)  {
       if (_offset < _length) {
-        ch = _buffer[_offset++];
+        ch = buffer[_offset++];
         if (ch == '\n')
           _line++;
       }
-      else
+      else {
         ch = read();
+      }
 
       switch (ch) {
       case ' ':
@@ -766,11 +787,12 @@ public class CompactParser {
           if (ch != '#')
             throw error(L.l("expected '#' at '{0}'", String.valueOf((char) ch)));
         
-          if (_cb.length() > 0)
-            _cb.append('\n');
+          if (cb.length() > 0)
+            cb.append('\n');
 
-          for (ch = read(); ch > 0 && ch != '\n' && ch != '\r'; ch = read())
-            _cb.append((char) ch);
+          for (ch = read(); ch > 0 && ch != '\n' && ch != '\r'; ch = read()) {
+            cb.append((char) ch);
+          }
 
           if (ch == '\r') {
             ch = read();
@@ -785,29 +807,29 @@ public class CompactParser {
         return COMMENT;
 
       case -1:
-        _cb.append("end of file");
+        cb.append("end of file");
         return -1;
 
       default:
         if (XmlChar.isNameStart(ch)) {
-          char []cbuf = _cb.getBuffer();
+          char []cbuf = cb.getBuffer();
           int i = 0;
 
           while (ch > 0 && ch < 256 && NAME_CHAR[ch]) {
             cbuf[i++] = (char) ch;
 
             if (_offset < _length) {
-              ch = _buffer[_offset++] & 0xff;
+              ch = buffer[_offset++] & 0xff;
               if (ch == '\n')
                 _line++;
             }
             else
               ch = read();
           }
-          _cb.setLength(i);
+          cb.setLength(i);
           unread();
 
-          int token = _tokenMap.get(_cb);
+          int token = _tokenMap.get(cb);
 
           if (token > 0) {
             _lexeme = null;
@@ -819,7 +841,7 @@ public class CompactParser {
           }
         }
         else if (ch < 0) {
-          _cb.append("end of file");
+          cb.append("end of file");
           return -1;
         }
         else {
@@ -928,14 +950,20 @@ public class CompactParser {
   private int read()
     throws IOException
   {
-    if (_length <= _offset) {
+    int offset = _offset;
+
+    if (_length <= offset) {
       fillBuffer();
+      
+      offset = _offset;
 
       if (_length < 0)
         return -1;
     }
     
-    int ch = _buffer[_offset++];
+    int ch = _buffer[offset++];
+    
+    _offset = offset;
     
     if (ch == '\n')
       _line++;

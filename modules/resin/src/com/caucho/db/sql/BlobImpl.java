@@ -29,6 +29,7 @@
 package com.caucho.db.sql;
 
 import com.caucho.db.blob.BlobInputStream;
+import com.caucho.db.blob.Inode;
 import com.caucho.db.block.BlockStore;
 import com.caucho.util.L10N;
 
@@ -112,6 +113,14 @@ public class BlobImpl implements java.sql.Blob {
   {
     return BlobInputStream.readLong(_inode, 0);
   }
+  
+  public void writeToStream(OutputStream out)
+    throws IOException
+  {
+    long length = BlobInputStream.readLong(_inode, 0);
+    
+    Inode.writeToStream(_inode, 0, _store, out, 0, length);
+  }
 
   /**
    * Returns the position in the blob where the pattern starts.
@@ -167,16 +176,19 @@ public class BlobImpl implements java.sql.Blob {
     throw new UnsupportedOperationException();
   }
 
-  public String toString()
+  public void free() throws SQLException
   {
-    return "BlobImpl[]";
+    throw new UnsupportedOperationException("Not supported yet.");
   }
 
-    public void free() throws SQLException {
-        throw new UnsupportedOperationException("Not supported yet.");
-    }
+  public InputStream getBinaryStream(long pos, long length) throws SQLException
+  {
+    throw new UnsupportedOperationException("Not supported yet.");
+  }
 
-    public InputStream getBinaryStream(long pos, long length) throws SQLException {
-        throw new UnsupportedOperationException("Not supported yet.");
-    }
+  @Override
+  public String toString()
+  {
+    return getClass().getSimpleName();
+  }
 }

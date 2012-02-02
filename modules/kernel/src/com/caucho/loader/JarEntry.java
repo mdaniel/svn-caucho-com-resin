@@ -29,23 +29,22 @@
 
 package com.caucho.loader;
 
-import com.caucho.config.ConfigException;
-import com.caucho.util.L10N;
-import com.caucho.vfs.JarPath;
-import com.caucho.vfs.Path;
-
 import java.io.IOException;
 import java.net.URL;
 import java.security.CodeSource;
 import java.security.cert.Certificate;
 import java.util.ArrayList;
-import java.util.Iterator;
 import java.util.Map;
 import java.util.jar.Attributes;
 import java.util.jar.Manifest;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import java.util.regex.Pattern;
+
+import com.caucho.config.ConfigException;
+import com.caucho.util.L10N;
+import com.caucho.vfs.JarPath;
+import com.caucho.vfs.Path;
 
 /**
  * JarEntry.
@@ -56,10 +55,12 @@ class JarEntry {
     = Logger.getLogger(JarEntry.class.getName());
 
   private Manifest _manifest;
+  private boolean _isManifestRead;
+  
   private JarPath _jarPath;
   private ArrayList<ClassPackage> _packages = new ArrayList<ClassPackage>();
 
-  private CodeSource _codeSource;
+  // private CodeSource _codeSource;
 
   /**
    * Creates a JarEntry.
@@ -68,44 +69,55 @@ class JarEntry {
   {
     _jarPath = jarPath;
 
+    /*
     try {
       _codeSource = new CodeSource(new URL(jarPath.getURL()),
                                    (Certificate []) jarPath.getCertificates());
     } catch (Exception e) {
       log.log(Level.WARNING, e.toString(), e);
     }
+     */
 
-    readManifest();
+    // readManifest();
   }
 
   /**
    * Reads the jar's manifest.
    */
-  private void readManifest()
+  private void loadManifest()
   {
-    try {
-      _manifest = _jarPath.getManifest();
-      if (_manifest == null)
+    if (_isManifestRead)
+      return;
+    
+    synchronized (this) {
+      if (_isManifestRead)
         return;
 
-      Attributes attr = _manifest.getMainAttributes();
-      if (attr != null)
-        addManifestPackage("", attr);
+      try {
+        _manifest = _jarPath.getManifest();
+        if (_manifest == null)
+          return;
 
-      Map entries = _manifest.getEntries();
-      
-      Iterator iter = entries.keySet().iterator();
-      while (iter.hasNext()) {
-        String pkg = (String) iter.next();
-        
-        attr = _manifest.getAttributes(pkg);
-        if (attr == null)
-          continue;
+        Attributes attr = _manifest.getMainAttributes();
+        if (attr != null)
+          addManifestPackage("", attr);
 
-        addManifestPackage(pkg, attr);
+        Map<String,Attributes> entries = _manifest.getEntries();
+
+        for (Map.Entry<String,Attributes> entry : entries.entrySet()) {
+          String pkg = entry.getKey();
+
+          attr = entry.getValue();
+          if (attr == null)
+            continue;
+
+          addManifestPackage(pkg, attr);
+        }
+      } catch (IOException e) {
+        log.log(Level.WARNING, e.toString(), e);
+      } finally {
+        _isManifestRead = true;
       }
-    } catch (IOException e) {
-      log.log(Level.WARNING, e.toString(), e);
     }
   }
 
@@ -147,6 +159,8 @@ class JarEntry {
   public void validate()
     throws ConfigException
   {
+    loadManifest();
+    
     if (_manifest != null)
       validateManifest(_jarPath.getContainer().getURL(), _manifest);
   }
@@ -202,6 +216,8 @@ class JarEntry {
 
   public ClassPackage getPackage(String name)
   {
+    loadManifest();
+    
     ClassPackage bestPackage = null;
     int bestLength = -1;
 
@@ -247,6 +263,7 @@ class JarEntry {
   /**
    * Tests for equality.
    */
+  @Override
   public boolean equals(Object o)
   {
     if (! (o instanceof JarEntry))
@@ -257,6 +274,7 @@ class JarEntry {
     return _jarPath.equals(entry._jarPath);
   }
 
+  @Override
   public String toString()
   {
     return getClass().getSimpleName() + "[" + _jarPath + "]";
