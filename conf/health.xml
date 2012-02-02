@@ -8,7 +8,6 @@
   <!--
      - Health monitoring system default configuration
     -->
-         
   <health:HealthSystem>
     <enabled>true</enabled>
     <startup-delay>15m</startup-delay>
@@ -22,14 +21,14 @@
   </health:Restart>
 
   <!--
-     - save jmx information on start.
+     - Save jmx information on start.
     -->
   <health:DumpJmx async="true">
     <health:OnStart/>
   </health:DumpJmx>
 
   <!--
-     - take snapshot on abnormal stop
+     - Take snapshot on abnormal stop
     -->
   <health:Snapshot>
     <health:OnAbnormalStop/>
@@ -55,13 +54,11 @@
   <!--
      - Checks for JVM-detected deadlocks.
     -->
-  
   <health:JvmDeadlockHealthCheck/>
 
   <!--
-     - heap memory checks
+     - Heap memory checks
     -->
-  
   <health:MemoryTenuredHealthCheck>
     <memory-free-min>1m</memory-free-min>
   </health:MemoryTenuredHealthCheck>
@@ -73,7 +70,6 @@
   <!--
      - Dump heap if memory pools are critically low 
     -->
-  
   <health:DumpHeap>
     <health:Or>
       <health:IfHealthCritical healthCheck="${memoryTenuredHealthCheck}"/>
@@ -85,12 +81,9 @@
   <!--
      - Dump active threads if cpu usage is critically high
     -->
-
   <health:CpuHealthCheck>
     <warning-threshold>95</warning-threshold>
-    <!--
-       - <critical-threshold>99</critical-threshold>
-      -->
+    <!--  <critical-threshold>99</critical-threshold> -->
   </health:CpuHealthCheck>
   
   <health:DumpThreads>
@@ -105,42 +98,42 @@
   <!--
      - Check cluster heartbeats
     -->
-
   <health:HeartbeatHealthCheck/>
 
   <!--
      - Log connection pool limits reached
     -->
-
   <health:ConnectionPoolHealthCheck/>
   
   <!--
      - Log transaction manager commit failures 
     -->
-
   <health:TransactionHealthCheck/>
   
   <!--
      - Restart if any health checks are frozen or threads are hung 
     -->
-    
   <health:HealthSystemHealthCheck/>
   
   <!--
-    - Warning about an expiring Resin Pro License 
-   -->
+     - Warning about an expiring Resin Pro License 
+    -->
   <health:LicenseHealthCheck>
     <warning-period>30D</warning-period>
   </health:LicenseHealthCheck>
   
-  <!-- JMX Meters - for graphing in resin-admin -->
-  
+  <!--
+     - JMX Meters - for graphing and anomaly detection 
+    -->
   <health:JmxMeter>
     <name>Resin|Uptime|Uptime</name>
     <objectName>resin:type=Server</objectName>
     <attribute>Uptime</attribute>
   </health:JmxMeter>
    
+  <!-- 
+     - Meters: operating system metrics 
+    -->
   <health:JmxMeter>
     <name>OS|CPU|Unix Load Avg</name>
     <objectName>resin:type=Server</objectName>
@@ -165,10 +158,9 @@
     <attribute>OpenFileDescriptorCount</attribute>
   </health:JmxMeter>
 
-  <health:AnomalyAnalyzer>
-    <meter>OS|Process|File Descriptor Count</meter>
-  </health:AnomalyAnalyzer>
-   
+  <!-- 
+     - Meters: memory metrics
+    -->
   <health:JmxMeter>
     <name>JVM|Memory|Heap Memory Used</name>
     <objectName>resin:type=Server</objectName>
@@ -205,6 +197,9 @@
     <attribute>TenuredFree</attribute>
   </health:JmxMeter>
 
+  <!-- 
+     - Meters: classloading and compilation 
+    -->
   <health:JmxMeter>
     <name>JVM|Memory|Loaded Classes</name>
     <objectName>java.lang:type=ClassLoading</objectName>
@@ -217,30 +212,21 @@
     <attribute>TotalCompilationTime</attribute>
   </health:JmxDeltaMeter>
   
+  <!-- 
+     - Meters: jvm thread metrics 
+    -->
   <health:JmxMeter>
     <name>JVM|Thread|JVM Thread Count</name>
     <objectName>java.lang:type=Threading</objectName>
     <attribute>ThreadCount</attribute>
   </health:JmxMeter>
 
-  <health:AnomalyAnalyzer>
-    <meter>JVM|Thread|JVM Thread Count</meter>
-
-    <health-event>caucho.thread.anomaly.jvm-thread</health-event>
-  </health:AnomalyAnalyzer>
-  
   <health:JmxMeter>
     <name>JVM|Thread|JVM Runnable Count</name>
     <objectName>resin:type=JvmThreads</objectName>
     <attribute>RunnableCount</attribute>
   </health:JmxMeter>
 
-  <health:AnomalyAnalyzer>
-    <meter>JVM|Thread|JVM Runnable Count</meter>
-
-    <health-event>caucho.thread.anomaly.jvm-runnable</health-event>
-  </health:AnomalyAnalyzer>
-  
   <health:JmxMeter>
     <name>JVM|Thread|JVM Native Count</name>
     <objectName>resin:type=JvmThreads</objectName>
@@ -253,24 +239,15 @@
     <attribute>WaitingCount</attribute>
   </health:JmxMeter>
 
-  <health:AnomalyAnalyzer>
-    <meter>JVM|Thread|JVM Waiting Count</meter>
-
-    <health-event>caucho.thread.anomaly.jvm-waiting</health-event>
-  </health:AnomalyAnalyzer>
-  
   <health:JmxMeter>
     <name>JVM|Thread|JVM Blocked Count</name>
     <objectName>resin:type=JvmThreads</objectName>
     <attribute>BlockedCount</attribute>
   </health:JmxMeter>
 
-  <health:AnomalyAnalyzer>
-    <meter>JVM|Thread|JVM Blocked Count</meter>
-    
-    <health-event>caucho.thread.anomaly.jvm-blocked</health-event>
-  </health:AnomalyAnalyzer>
-
+  <!-- 
+     - Meters: resin thread-pool metrics 
+    -->
   <health:JmxMeter>
     <name>Resin|Thread|Thread Count</name>
     <objectName>resin:type=ThreadPool</objectName>
@@ -282,12 +259,6 @@
     <objectName>resin:type=ThreadPool</objectName>
     <attribute>ThreadActiveCount</attribute>
   </health:JmxMeter>
-
-  <health:AnomalyAnalyzer>
-    <meter>Resin|Thread|Thread Active Count</meter>
-
-    <health-event>caucho.thread.anomaly.resin-active</health-event>
-  </health:AnomalyAnalyzer>
 
   <health:JmxMeter>
     <name>Resin|Thread|Thread Idle Count</name>
@@ -331,6 +302,9 @@
     <attribute>ThreadOverflowCountTotal</attribute>
   </health:JmxDeltaMeter>
   
+  <!-- 
+     - Meters: block manager 
+    -->
   <health:JmxDeltaMeter>
     <name>Resin|Block Cache|Block Read Count</name>
     <objectName>resin:type=BlockManager</objectName>
@@ -351,16 +325,17 @@
 
   <health:JmxCalculationMeter>
     <name>Resin|Block Cache|Miss Rate</name>
-
     <rate>
       <delta objectName="resin:type=BlockManager"
              attribute="MissCountTotal"/>
-
       <delta objectName="resin:type=BlockManager"
              attribute="HitCountTotal"/>
     </rate>
   </health:JmxCalculationMeter>
   
+  <!-- 
+     - Meters: proxy cache 
+    -->
   <health:JmxDeltaMeter>
     <name>Resin|Proxy Cache|Hit Count</name>
     <objectName>resin:type=ProxyCache</objectName>
@@ -375,10 +350,11 @@
 
   <health:JmxCalculationMeter>
     <name>Resin|Proxy Cache|Miss Rate</name>
-
     <rate>
-      <delta objectName="resin:type=ProxyCache" attribute="MissCountTotal"/>
-      <delta objectName="resin:type=ProxyCache" attribute="HitCountTotal"/>
+      <delta objectName="resin:type=ProxyCache" 
+             attribute="MissCountTotal"/>
+      <delta objectName="resin:type=ProxyCache" 
+             attribute="HitCountTotal"/>
     </rate>
   </health:JmxCalculationMeter>
 
@@ -403,7 +379,6 @@
         <delta objectName="resin:type=ProxyCache"
                attribute="MissCountTotal"/>
       </add>
-
       <add>
         <delta objectName="resin:type=ProxyCache"
                attribute="InvocationHitCountTotal"/>
@@ -413,8 +388,39 @@
     </ratio>
   </health:JmxCalculationMeter>
 
+  <!-- 
+     - Anomaly analyzers 
+    -->
   <health:AnomalyAnalyzer>
+    <meter>OS|Process|File Descriptor Count</meter>
+  </health:AnomalyAnalyzer>
 
+  <health:AnomalyAnalyzer>
+    <meter>JVM|Thread|JVM Thread Count</meter>
+    <health-event>caucho.thread.anomaly.jvm-thread</health-event>
+  </health:AnomalyAnalyzer>
+
+  <health:AnomalyAnalyzer>
+    <meter>JVM|Thread|JVM Runnable Count</meter>
+    <health-event>caucho.thread.anomaly.jvm-runnable</health-event>
+  </health:AnomalyAnalyzer>
+
+  <health:AnomalyAnalyzer>
+    <meter>JVM|Thread|JVM Waiting Count</meter>
+    <health-event>caucho.thread.anomaly.jvm-waiting</health-event>
+  </health:AnomalyAnalyzer>
+  
+  <health:AnomalyAnalyzer>
+    <meter>JVM|Thread|JVM Blocked Count</meter>
+    <health-event>caucho.thread.anomaly.jvm-blocked</health-event>
+  </health:AnomalyAnalyzer>
+  
+  <health:AnomalyAnalyzer>
+    <meter>Resin|Thread|Thread Active Count</meter>
+    <health-event>caucho.thread.anomaly.resin-active</health-event>
+  </health:AnomalyAnalyzer>
+  
+  <health:AnomalyAnalyzer>
     <meter>Resin|Database|Connection Active</meter>
   </health:AnomalyAnalyzer>
 
@@ -430,63 +436,35 @@
     <meter>Resin|Http|5xx</meter>
   </health:AnomalyAnalyzer>
 
-  <!-- meter graphs -->
+  <!-- Meter graphs pages: for resin-admin and PDF reports -->
   
   <health:MeterGraphPage>
     <name>Snapshot</name>
     <period>6h</period>
     <columns>3</columns>
       
+    <!-- row 1 -->
+
     <graph name="Request Count">
       <meter>Resin|Http|Request Count</meter>
+      <meter>Resin|Http|Session Save Count</meter>
     </graph>
       
     <graph name="Request Time">
       <meter>Resin|Http|Request Time</meter>
       <meter>Resin|Http|Request Time Max</meter>
     </graph>
-      
-    <graph name="Threads">
-      <meter>JVM|Thread|JVM Thread Count</meter>
-      <meter>Resin|Thread|Thread Count</meter>
-      <meter>Resin|Thread|Thread Idle Count</meter>
-      <meter>JVM|Thread|JVM Runnable Count</meter>
-      <meter>JVM|Thread|JVM Blocked Count</meter>
-      <meter>JVM|Thread|JVM Native Count</meter>
-      <meter>JVM|Thread|JVM Waiting Count</meter>
+
+    <graph name="Request Errors">
+      <meter>Resin|Http|400</meter>
+      <meter>Resin|Http|404</meter>
+      <meter>Resin|Http|4xx</meter>
+      <meter>Resin|Http|500</meter>
+      <meter>Resin|Http|503</meter>
+      <meter>Resin|Http|5xx</meter>
     </graph>
 
     <!-- row 2 -->
-      
-    <graph name="HTTP Request Errors">
-      <meter>Resin|Http|500</meter>
-      <meter>Resin|Http|503</meter>
-      <meter>Resin|Http|400</meter>
-      <meter>Resin|Http|404</meter>
-      <meter>Resin|Http|5xx</meter>
-      <meter>Resin|Http|4xx</meter>
-    </graph>
-      
-    <graph name="Log Warnings">
-      <meter>Resin|Log|Critical</meter>
-      <meter>Resin|Log|Warning</meter>
-    </graph>
-      
-    <graph name="CPU">
-      <meter>OS|CPU|CPU Active</meter>
-      <meter>OS|CPU|Unix Load Avg</meter>
-    </graph>
-
-    <!-- row 3 -->
-      
-    <graph name="Database Connection Active">
-      <meter>Resin|Database|Connection Active</meter>
-    </graph>
-      
-    <graph name="Database Query Time">
-      <meter>Resin|Database|Query Time</meter>
-      <meter>Resin|Database|Query Time Max</meter>
-    </graph>
       
     <graph name="Netstat">
       <meter>OS|Network|tcp-established</meter>
@@ -500,24 +478,94 @@
       <meter>OS|Network|tcp-syn-sent</meter>
     </graph>
 
-    <!-- row 4 -->
-      
-    <graph name="Memory">
-      <meter>JVM|Memory|Heap Memory Free</meter>
+    <graph name="CPU">
+      <meter>OS|CPU|CPU Active</meter>
+    </graph>
+
+    <graph name="Load Avg">
+      <meter>OS|CPU|Unix Load Avg</meter>
+    </graph>
+
+    <!-- row 3 -->
+    
+    <graph name="JVM Memory">
       <meter>JVM|Memory|Heap Memory Used</meter>
-      <meter>JVM|Memory|Tenured Memory Free</meter>
+      <meter>JVM|Memory|Heap Memory Free</meter>
       <meter>JVM|Memory|Tenured Memory Used</meter>
-      <meter>JVM|Memory|PermGen Memory Free</meter>
+      <meter>JVM|Memory|Tenured Memory Free</meter>
       <meter>JVM|Memory|PermGen Memory Used</meter>
+      <meter>JVM|Memory|PermGen Memory Free</meter>
     </graph>
       
-    <graph name="GC Time">
+    <graph name="Physical Memory">
+      <meter>OS|Memory|Physical Memory Free</meter>
+      <meter>OS|Memory|Swap Free</meter>
+    </graph>
+
+    <graph name="File Descriptors">
+      <meter>OS|Process|File Descriptor Count</meter>
+    </graph>
+
+    <!-- row 4 -->
+
+    <graph name="Class Loading">
+      <meter>JVM|Memory|Loaded Classes</meter>
+      <meter>JVM|Compilation|Compilation Time</meter>
+    </graph>
+
+    <graph name="Garbage Collection Time">
       <meter>JVM|Memory|GC Time|PS MarkSweep</meter>
       <meter>JVM|Memory|GC Time|PS Scavenge</meter>
+      <meter>JVM|Memory|GC Time|ParNew</meter>
+      <meter>JVM|Memory|GC Time|ConcurrentMarkSweep</meter>
+    </graph>
+
+    <graph name="Log Warnings">
+      <meter>Resin|Log|Warning</meter>
+      <meter>Resin|Log|Severe</meter>
     </graph>
 
     <!-- row 5 -->
+
+    <graph name="JVM Threads">
+      <meter>JVM|Thread|JVM Thread Count</meter>
+      <meter>JVM|Thread|JVM Runnable Count</meter>
+      <meter>JVM|Thread|JVM Blocked Count</meter>
+      <meter>JVM|Thread|JVM Native Count</meter>
+      <meter>JVM|Thread|JVM Waiting Count</meter>
+    </graph>
+
+    <graph name="Resin Thread Pool">
+      <meter>Resin|Thread|Thread Count</meter>
+      <meter>Resin|Thread|Thread Active Count</meter>
+      <meter>Resin|Thread|Thread Wait Count</meter>
+      <meter>Resin|Thread|Thread Overflow Count</meter>
+      <meter>Resin|Thread|Thread Starting Count</meter>
+    </graph>
+    
+    <graph name="Resin Task Queue">
+      <meter>Resin|Thread|Thread Priority Queue</meter>
+      <meter>Resin|Thread|Thread Task Queue</meter>
+    </graph>
+
+    <!-- row 6 -->
+
+    <graph name="Database Connection Active">
+      <meter>Resin|Database|Connection Count</meter>
+      <meter>Resin|Database|Connection Active</meter>
+    </graph>
       
+    <graph name="Database Query Time">
+      <meter>Resin|Database|Query Time</meter>
+      <meter>Resin|Database|Query Time Max</meter>
+    </graph>
+      
+    <graph name="Database Query Count">
+      <meter>Resin|Database|Query Count</meter>
+    </graph>
+    
+    <!-- row 7 -->
+
     <graph name="Block Cache I/O">
       <meter>Resin|Block Cache|Block Read Count</meter>
       <meter>Resin|Block Cache|Block Write Count</meter>
@@ -532,6 +580,8 @@
       <meter>Resin|Proxy Cache|Miss Count</meter>
     </graph>
 
+    <!-- row 8 -->
+
     <graph name="Proxy Cache Miss Rate">
       <meter>Resin|Proxy Cache|Miss Rate</meter>
     </graph>
@@ -544,30 +594,32 @@
     <graph name="Proxy Cache Cacheable Rate">
       <meter>Resin|Proxy Cache|Cacheable Rate</meter>
     </graph>
+
   </health:MeterGraphPage>
-
+    
   <!--
-     - automatic pdf reports
+     - Automatic PDF reports
     -->
-    <health:PdfReport>
-      <path>${resin.root}/doc/admin/pdf-gen.php</path>
-      <report>Summary</report>
-      <period>7D</period>
-      <snapshot/>
-      <mail-to>${email}</mail-to>
-      <mail-from>${email_from}</mail-from>
-      <!-- <profile-time>60s</profile-time> -->
-      <health:IfCron value="0 0 * * 0"/>
-    </health:PdfReport>
+  <health:PdfReport>
+    <path>${resin.root}/doc/admin/pdf-gen.php</path>
+    <report>Summary</report>
+    <period>7D</period>
+    <snapshot/>
+    <mail-to>${email}</mail-to>
+    <mail-from>${email_from}</mail-from>
+    <!-- <profile-time>60s</profile-time> -->
+    
+    <health:IfCron value="0 0 * * 0"/>
+  </health:PdfReport>
 
-    <health:PdfReport>
-      <path>${resin.root}/doc/admin/pdf-gen.php</path>
-      <report>Restart</report>
-      <period>2h</period>
-      <mail-to>${email}</mail-to>
-      <mail-from>${email_from}</mail-from>
-      <health:OnRestart/>
-    </health:PdfReport>
+  <health:PdfReport>
+    <path>${resin.root}/doc/admin/pdf-gen.php</path>
+    <report>Restart</report>
+    <period>2h</period>
+    <mail-to>${email}</mail-to>
+    <mail-from>${email_from}</mail-from>
+    <health:OnRestart/>
+  </health:PdfReport>
 
   </resin:if>
 
