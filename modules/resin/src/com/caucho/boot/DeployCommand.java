@@ -31,6 +31,7 @@ package com.caucho.boot;
 
 import com.caucho.config.ConfigException;
 import com.caucho.env.repository.CommitBuilder;
+import com.caucho.server.admin.DeployClient;
 import com.caucho.server.admin.WebAppDeployClient;
 import com.caucho.util.L10N;
 import com.caucho.vfs.Path;
@@ -43,7 +44,7 @@ public class DeployCommand extends AbstractRepositoryCommand {
   {
     addValueOption("host", "host", "virtual host to make application available on");
     addValueOption("name", "name", "name of the context to deploy to, defaults to war-file name");
-    addValueOption("stage", "stage", "tage to deploy application to, defaults to production");
+    addValueOption("stage", "stage", "stage to deploy application to, defaults to production");
     addValueOption("version", "version", "version of application formatted as <major.minor.micro.qualifier>");
     addValueOption("m", "message", "commit message");
   }
@@ -127,7 +128,7 @@ public class DeployCommand extends AbstractRepositoryCommand {
 
     String version = args.getArg("-version");
     if (version != null)
-      fillInVersion(commit, version);
+      DeployClient.fillInVersion(commit, version);
 
     deployClient.commitArchive(commit, path);
 

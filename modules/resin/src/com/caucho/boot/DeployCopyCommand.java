@@ -31,6 +31,7 @@ package com.caucho.boot;
 
 import com.caucho.config.ConfigException;
 import com.caucho.env.repository.CommitBuilder;
+import com.caucho.server.admin.DeployClient;
 import com.caucho.server.admin.WebAppDeployClient;
 import com.caucho.util.L10N;
 
@@ -90,7 +91,7 @@ public class DeployCopyCommand extends AbstractRepositoryCommand {
 
     String version = args.getArg("-source-version");
     if (version != null)
-      fillInVersion(source, version);
+      DeployClient.fillInVersion(source, version);
 
     String targetContext = args.getArg("-target");
 
@@ -132,7 +133,7 @@ public class DeployCopyCommand extends AbstractRepositoryCommand {
 
     String targetVersion = args.getArg("-target-version");
     if (targetVersion != null)
-      fillInVersion(target, targetVersion);
+      DeployClient.fillInVersion(target, targetVersion);
 
     deployClient.copyTag(target, source);
 

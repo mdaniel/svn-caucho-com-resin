@@ -39,4 +39,5 @@ import java.lang.annotation.Target;
 public @interface MXAction
 {
   public String value();
+  public String method() default "GET";
 }

@@ -31,20 +31,20 @@ package com.caucho.server.resin;
 
 import com.caucho.bam.actor.ActorSender;
 import com.caucho.bam.actor.LocalActorSender;
+import com.caucho.bam.actor.RemoteActorSender;
 import com.caucho.boot.LogLevelCommand;
 import com.caucho.boot.WatchdogStatusQuery;
 import com.caucho.cloud.bam.BamSystem;
 import com.caucho.cloud.network.NetworkClusterSystem;
 import com.caucho.cloud.topology.CloudServer;
 import com.caucho.config.types.Period;
+import com.caucho.env.repository.CommitBuilder;
+import com.caucho.jmx.MXDefaultValue;
 import com.caucho.jmx.MXName;
 import com.caucho.management.server.AbstractManagedObject;
 import com.caucho.management.server.ManagementMXBean;
 import com.caucho.quercus.lib.reflection.ReflectionException;
-import com.caucho.server.admin.ControllerRestartQuery;
-import com.caucho.server.admin.ControllerStartQuery;
-import com.caucho.server.admin.ControllerStopQuery;
-import com.caucho.server.admin.DeployActor;
+import com.caucho.server.admin.DeployClient;
 import com.caucho.server.admin.HmuxClientFactory;
 import com.caucho.server.admin.JmxCallQuery;
 import com.caucho.server.admin.JmxDumpQuery;
@@ -53,7 +53,9 @@ import com.caucho.server.admin.JmxSetQuery;
 import com.caucho.server.admin.LogLevelQuery;
 import com.caucho.server.admin.ManagementQueryResult;
 import com.caucho.server.admin.PdfReportQuery;
+import com.caucho.server.admin.TagResult;
 import com.caucho.server.admin.ThreadDumpQuery;
+import com.caucho.server.admin.WebAppDeployClient;
 import com.caucho.util.L10N;
 
 import java.io.ByteArrayInputStream;
@@ -245,9 +247,9 @@ public class ManagementAdmin extends AbstractManagedObject
     if (tag == null)
       tag = makeTag(name, stage, host, version);
 
-    ControllerStartQuery query = new ControllerStartQuery(tag);
+    WebAppDeployClient deployClient = getWebappDeployClient(serverId);
 
-    ManagementQueryResult result = queryDeployActor(serverId, query);
+    ManagementQueryResult result = deployClient.start(tag);
 
     return result;
   }
@@ -270,9 +272,9 @@ public class ManagementAdmin extends AbstractManagedObject
     if (tag == null)
       tag = makeTag(name, stage, host, version);
 
-    ControllerStopQuery query = new ControllerStopQuery(tag);
+    WebAppDeployClient deployClient = getWebappDeployClient(serverId);
 
-    ManagementQueryResult result = queryDeployActor(serverId, query);
+    ManagementQueryResult result = deployClient.stop(tag);
 
     return result;
   }
@@ -295,9 +297,163 @@ public class ManagementAdmin extends AbstractManagedObject
     if (tag == null)
       tag = makeTag(name, stage, host, version);
 
-    ControllerRestartQuery query = new ControllerRestartQuery(tag);
+    WebAppDeployClient deployClient = getWebappDeployClient(serverId);
 
-    ManagementQueryResult result = queryDeployActor(serverId, query);
+    ManagementQueryResult result = deployClient.restart(tag);
+
+    return result;
+  }
+
+  @Override
+  public String webappDeploy(String serverId,
+                             String context,
+                             String host,
+                             String stage,
+                             String version,
+                             String message,
+                             InputStream is)
+    throws ReflectionException
+  {
+    WebAppDeployClient deployClient = getWebappDeployClient(serverId);
+
+    CommitBuilder commit = new CommitBuilder();
+
+    commit.type("webapp");
+
+    if (stage != null)
+      commit.stage(stage);
+
+    commit.tagKey(host + "/" + context);
+
+    if (version != null)
+      DeployClient.fillInVersion(commit, version);
+
+    if (message == null)
+      message = "deploy " + context + " via REST interface";
+
+    commit.message(message);
+
+    commit.attribute("user", System.getProperty("user.name"));
+
+    deployClient.commitArchive(commit, is);
+
+    String result = "Deployed "
+                    + commit.getId()
+                    + " to "
+                    + deployClient.getUrl();
+
+    return result;
+  }
+
+  @Override
+  public String deployCopy(String serverId,
+                           String sourceContext,
+                           String sourceHost,
+                           String sourceStage,
+                           String sourceVersion,
+                           String targetContext,
+                           String targetHost,
+                           String targetStage,
+                           String targetVersion,
+                           String message) throws ReflectionException
+  {
+
+    if (sourceContext == null)
+      throw new IllegalArgumentException(L.l("missing source parameter"));
+    
+    if (sourceHost == null)
+      sourceHost = "default";
+
+    CommitBuilder source = new CommitBuilder();
+    source.type("webapp");
+
+    if (sourceStage != null)
+      source.stage(sourceStage);
+
+    source.tagKey(sourceHost + "/" + sourceContext);
+    
+
+    if (targetContext == null)
+      throw new IllegalArgumentException(L.l("missing target parameter"));
+    
+    if (targetHost == null)
+      targetHost = "default";
+
+    CommitBuilder target = new CommitBuilder();
+    target.type("webapp");
+
+    if (targetStage != null)
+      target.stage(targetStage);
+
+    target.tagKey(targetHost + "/" + targetContext);
+
+    if (sourceVersion != null)
+      DeployClient.fillInVersion(source, sourceVersion);
+
+    if (targetVersion != null)
+      DeployClient.fillInVersion(source, sourceVersion);
+
+    if (message == null)
+      message = L.l("copy '{0}' to '{1}'", source.getTagKey(), target.getTagKey());
+
+    target.message(message);
+
+    WebAppDeployClient deployClient = getWebappDeployClient(serverId);
+
+    deployClient.copyTag(target, source);
+
+    String result = L.l("copied {0} to {1}", source.getId(), target.getId());
+
+    return result;
+  }
+
+  @Override
+  public TagResult []deployList(String serverId, String pattern)
+    throws ReflectionException
+  {
+    WebAppDeployClient deployClient = getWebappDeployClient(serverId);
+
+    TagResult []result = deployClient.queryTags(pattern);
+
+    return result;
+  }
+
+  @Override
+  public String undeploy(String serverId,
+                         String context,
+                         String host,
+                         String stage,
+                         String version,
+                         String message)
+  throws ReflectionException
+  {
+    if (context == null) {
+      throw new IllegalArgumentException(L.l("missing context parameter"));
+    }
+
+    CommitBuilder commit = new CommitBuilder();
+    commit.type("webapp");
+
+    if (stage != null)
+      commit.stage(stage);
+
+    commit.tagKey(host + "/" + context);
+
+    if (message == null)
+      message = "undeploy " + context + " via REST interface";
+
+    commit.message(message);
+
+    if (version != null)
+      DeployClient.fillInVersion(commit, version);
+
+    WebAppDeployClient deployClient = getWebappDeployClient(serverId);
+
+    deployClient.removeTag(commit);
+
+    String result = L.l("Undeployed {0} from {1}",
+                        context,
+                        deployClient.getUrl());
 
     return result;
   }
@@ -452,8 +608,7 @@ public class ManagementAdmin extends AbstractManagedObject
     return (ManagementQueryResult) sender.query("manager@resin.caucho", query);
   }
 
-  private ManagementQueryResult queryDeployActor(String serverId,
-                                                 Serializable query)
+  private WebAppDeployClient getWebappDeployClient(String serverId)
   {
     final ActorSender sender;
 
@@ -474,7 +629,13 @@ public class ManagementAdmin extends AbstractManagedObject
       sender = hmuxFactory.create();
     }
 
-    return (ManagementQueryResult) sender.query(DeployActor.address, query);
+    String url;
+    if (sender instanceof RemoteActorSender)
+      url = ((RemoteActorSender) sender).getUrl();
+    else
+      url = sender.getAddress();
+
+    return new WebAppDeployClient(url, sender);
   }
 
   public InputStream test(String value, InputStream is)

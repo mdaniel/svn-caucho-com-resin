@@ -31,6 +31,7 @@ package com.caucho.boot;
 
 import com.caucho.config.ConfigException;
 import com.caucho.env.repository.CommitBuilder;
+import com.caucho.server.admin.DeployClient;
 import com.caucho.server.admin.WebAppDeployClient;
 import com.caucho.util.L10N;
 
@@ -97,7 +98,7 @@ public class UndeployCommand extends AbstractRepositoryCommand
 
     String version = args.getArg("-version");
     if (version != null)
-      fillInVersion(commit, version);
+      DeployClient.fillInVersion(commit, version);
 
     deployClient.removeTag(commit);
 

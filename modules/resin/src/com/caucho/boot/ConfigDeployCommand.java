@@ -31,6 +31,7 @@ package com.caucho.boot;
 
 import com.caucho.config.ConfigException;
 import com.caucho.env.repository.CommitBuilder;
+import com.caucho.server.admin.DeployClient;
 import com.caucho.server.admin.WebAppDeployClient;
 import com.caucho.util.L10N;
 import com.caucho.vfs.Path;
@@ -100,7 +101,7 @@ public class ConfigDeployCommand extends AbstractRepositoryCommand {
 
     String version = args.getArg("-version");
     if (version != null)
-      fillInVersion(commit, version);
+      DeployClient.fillInVersion(commit, version);
 
     if (jarPath.isFile())
       deployClient.commitArchive(commit, jarPath);
@@ -112,26 +113,4 @@ public class ConfigDeployCommand extends AbstractRepositoryCommand {
 
     return 0;
   }
-
-  /*
-  @Override
-  public void usage()
-  {
-    System.err.println(L.l("usage: bin/resin.sh [-conf <file>] deploy -user <user> -password <password> [options] <war-file>"));
-    System.err.println(L.l(""));
-    System.err.println(L.l("description:"));
-    System.err.println(L.l("   deploys application specified in a <war-file> to resin server"));
-    System.err.println(L.l(""));
-    System.err.println(L.l("options:"));
-    System.err.println(L.l("   -address <address>    : ip or host name of the server"));
-    System.err.println(L.l("   -port <port>          : server http port"));
-    System.err.println(L.l("   -user <user>          : user name used for authentication to the server"));
-    System.err.println(L.l("   -password <password>  : password used for authentication to the server"));
-    System.err.println(L.l("   -host <host>          : virtual host to make application available on"));
-    System.err.println(L.l("   -name <name>          : name of the context to deploy to, defaults to war-file name"));
-    System.err.println(L.l("   -stage <stage>        : stage to deploy application to, defaults to production"));
-    System.err.println(L.l("   -version <version>    : version of application formatted as <major.minor.micro.qualifier>"));
-    System.err.println(L.l("   -m <message>          : commit message"));
-  }
-  */
 }

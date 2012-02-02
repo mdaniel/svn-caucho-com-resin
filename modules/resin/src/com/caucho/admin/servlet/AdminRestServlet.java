@@ -41,6 +41,7 @@ package com.caucho.admin.servlet;
  import com.caucho.server.admin.ManagementQueryResult;
  import com.caucho.server.admin.PdfReportQueryResult;
  import com.caucho.server.admin.StringQueryResult;
+ import com.caucho.server.admin.TagResult;
  import com.caucho.util.L10N;
  import com.caucho.vfs.Vfs;
  import com.caucho.vfs.WriteStream;
@@ -53,6 +54,7 @@ package com.caucho.admin.servlet;
  import java.io.InputStream;
  import java.io.OutputStream;
  import java.io.PrintWriter;
+ import java.io.Writer;
  import java.lang.annotation.Annotation;
  import java.lang.reflect.Method;
  import java.security.Principal;
@@ -129,6 +131,17 @@ public class AdminRestServlet extends HttpServlet {
       return;
     }
 
+    if (! action.getHttpMethod().equals(req.getMethod())) {
+      res.setStatus(500);
+      res.setContentType("text/plain");
+
+      PrintWriter out = res.getWriter();
+
+      out.println(L.l("http method {0} is expected", action.getHttpMethod()));
+
+      return;
+    }
+
     try {
       action.doAction(req, res);
     } catch (Exception e) {
@@ -158,8 +171,9 @@ public class AdminRestServlet extends HttpServlet {
         continue;
 
       String name = mxAction.value();
+      String httpMethod = mxAction.method();
 
-      Action action = new Action(method);
+      Action action = new Action(method, httpMethod);
       
       _actionMap.put(name, action);
     }
@@ -167,6 +181,8 @@ public class AdminRestServlet extends HttpServlet {
   
   static class Action {
     private Method _method;
+
+    private String _httpMethod;
 
     private String []_parameterNames;
     private Object []_parameterDefaults;
@@ -178,9 +194,10 @@ public class AdminRestServlet extends HttpServlet {
     private boolean _isPutStream;
     private boolean _isGetStream;
     
-    Action(Method method)
+    Action(Method method, String httpMethod)
     {
       _method = method;
+      _httpMethod = httpMethod;
       
       Class<?> []parameterTypes = method.getParameterTypes();
       
@@ -269,7 +286,12 @@ public class AdminRestServlet extends HttpServlet {
     {
       return _parameterNames;
     }
-    
+
+    public String getHttpMethod()
+    {
+      return _httpMethod;
+    }
+
     void doAction(HttpServletRequest req, HttpServletResponse res)
       throws IOException, ServletException
     {
@@ -542,6 +564,31 @@ public class AdminRestServlet extends HttpServlet {
     }
   }
 
+  static class TagResultMarshal extends Marshal<TagResult[]> {
+    @Override
+    public Object marshal(HttpServletRequest request,
+                          String name,
+                          TagResult []defaultValue) throws IOException
+    {
+      throw new AbstractMethodError(getClass().getName());
+    }
+
+    @Override
+    public void unmarshal(HttpServletResponse response, TagResult []value)
+      throws IOException
+    {
+      PrintWriter writer = response.getWriter();
+
+      for (TagResult tag : value) {
+        writer.println(tag.getTag());
+      }
+
+      if (value.length == 0) {
+        writer.println(L.l("no matching applications is found"));
+      }
+    }
+  }
+
   static {
     _marshalMap.put(void.class, new VoidMarshal());
     _marshalMap.put(String.class, new StringMarshal());
@@ -550,6 +597,7 @@ public class AdminRestServlet extends HttpServlet {
     _marshalMap.put(InputStream.class, new InputStreamMarshal());
     _marshalMap.put(boolean.class, new BooleanMarshal());
     _marshalMap.put(ManagementQueryResult.class, new ManagementQueryResultMarshal());
+    _marshalMap.put(TagResult[].class, new TagResultMarshal());
 
     introspectManagementOperations();
   }

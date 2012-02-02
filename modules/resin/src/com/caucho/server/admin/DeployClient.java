@@ -49,6 +49,7 @@ import com.caucho.bam.query.QueryCallback;
 import com.caucho.cloud.deploy.CopyTagQuery;
 import com.caucho.cloud.deploy.RemoveTagQuery;
 import com.caucho.cloud.deploy.SetTagQuery;
+import com.caucho.config.ConfigException;
 import com.caucho.env.git.GitCommitJar;
 import com.caucho.env.git.GitCommitTree;
 import com.caucho.env.git.GitObjectStream;
@@ -572,7 +573,7 @@ public class DeployClient implements Repository
                                             e);
     }
   }
-  
+
   public void close()
   {
     _bamClient.close();
@@ -585,6 +586,30 @@ public class DeployClient implements Repository
       return getClass().getSimpleName() + "[" + _deployAddress + "]";
     else
       return getClass().getSimpleName() + "[" + _bamClient + "]";
+  }
+
+  public static final void fillInVersion(CommitBuilder commit,
+                                         String version)
+  {
+    String []parts = version.split("\\.");
+    if (parts.length < 2)
+      throw new ConfigException(L.l(
+        "erroneous version '{0}'. Version expected in format %d.%d[.%d[.%s]]",
+        version));
+
+    int major = Integer.parseInt(parts[0]);
+    int minor = Integer.parseInt(parts[1]);
+    int micro = 0;
+
+    if (parts.length > 2)
+      micro = Integer.parseInt(parts[2]);
+
+    String qualifier = null;
+
+    if (parts.length == 4)
+      qualifier = parts[3];
+
+    commit.version(major, minor, micro, qualifier);
   }
 
   /* (non-Javadoc)

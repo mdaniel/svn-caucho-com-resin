@@ -36,6 +36,7 @@ import com.caucho.jmx.MXName;
 import com.caucho.jmx.MXValueRequired;
 import com.caucho.quercus.lib.reflection.ReflectionException;
 import com.caucho.server.admin.ManagementQueryResult;
+import com.caucho.server.admin.TagResult;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -76,7 +77,7 @@ public interface ManagementMXBean extends ManagedObjectMXBean
     throws ReflectionException;
 
   @Description("sets the java.util.logging level for debugging (Resin Pro)")
-  @MXAction("log-level")
+  @MXAction(value = "log-level", method = "POST")
   public ManagementQueryResult logLevel(@MXName("server") String serverId,
                                         @MXName("loggers") String loggersValue,
                                         @MXValueRequired
@@ -106,7 +107,7 @@ public interface ManagementMXBean extends ManagedObjectMXBean
     throws ReflectionException;
 
   @Description("sets JMX Mbean's attribute")
-  @MXAction("jmx-set")
+  @MXAction(value = "jmx-set", method = "POST")
   public ManagementQueryResult setJmx(@MXName("server") String serverId,
                                       @MXName("pattern") String pattern,
                                       @MXName("attribute") String attribute,
@@ -119,7 +120,7 @@ public interface ManagementMXBean extends ManagedObjectMXBean
     throws ReflectionException;
 
   @Description("calls a method on a JMX MBean")
-  @MXAction("jmx-call")
+  @MXAction(value = "jmx-call", method = "POST")
   public ManagementQueryResult callJmx(@MXName("server") String serverId,
                                        @MXName("pattern") String pattern,
                                        @MXName("operation") String operation,
@@ -129,7 +130,7 @@ public interface ManagementMXBean extends ManagedObjectMXBean
     throws ReflectionException;
 
   @Description("starts a deployed application")
-  @MXAction("web-app-start")
+  @MXAction(value = "web-app-start", method = "POST")
   public ManagementQueryResult startWebApp(@MXName("server") String serverId,
                                            @MXName("tag") String tag,
                                            @MXName("name") String name,
@@ -141,7 +142,7 @@ public interface ManagementMXBean extends ManagedObjectMXBean
     throws ReflectionException;
 
   @Description("stops a deployed application")
-  @MXAction("web-app-stop")
+  @MXAction(value = "web-app-stop", method = "POST")
   public ManagementQueryResult stopWebApp(@MXName("server") String serverId,
                                           @MXName("tag") String tag,
                                           @MXName("name") String name,
@@ -153,7 +154,7 @@ public interface ManagementMXBean extends ManagedObjectMXBean
     throws ReflectionException;
 
   @Description("restarts a deployed application")
-  @MXAction("web-app-restart")
+  @MXAction(value = "web-app-restart", method = "POST")
   public ManagementQueryResult restartWebApp(@MXName("server") String serverId,
                                              @MXName("tag") String tag,
                                              @MXName("name") String name,
@@ -162,6 +163,52 @@ public interface ManagementMXBean extends ManagedObjectMXBean
                                              @MXDefaultValue("default")
                                              @MXName("host") String host,
                                              @MXName("version") String version)
+    throws ReflectionException;
+
+  @Description("deploys an application")
+  @MXAction(value = "web-app-deploy", method = "POST")
+  public String webappDeploy(@MXName("server") String serverId,
+                             @MXName("context") String context,
+                             @MXDefaultValue("default")
+                             @MXName("host") String host,
+                             @MXName("stage") String stage,
+                             @MXName("version") String version,
+                             @MXName("message") String message,
+                             InputStream is)
+    throws ReflectionException;
+
+  @Description("copies a deployment to a new tag name")
+  @MXAction(value = "deploy-copy", method = "POST")
+  public String deployCopy(@MXName("server") String serverId,
+                           @MXName("source-context") String sourceContext,
+                           @MXDefaultValue("default")
+                           @MXName("source-host") String sourceHost,
+                           @MXName("source-stage") String sourceStage,
+                           @MXName("source-version") String sourceVersion,
+                           @MXName("target-context") String targetContext,
+                           @MXDefaultValue("default")
+                           @MXName("target-host") String targetHost,
+                           @MXName("target-stage") String targetStage,
+                           @MXName("target-version") String targetVersion,
+                           @MXName("message") String message)
+  throws ReflectionException;
+
+  @Description("lists deployed applications")
+  @MXAction("deploy-list")
+  public TagResult []deployList(@MXName("server") String serverId,
+                                @MXDefaultValue(".*")
+                                @MXName("pattern") String pattern)
+    throws ReflectionException;
+
+  @Description("undeploys an application")
+  @MXAction(value = "web-app-undeploy", method = "POST")
+  public String undeploy(@MXName("server") String serverId,
+                         @MXName("context") String context,
+                         @MXDefaultValue("default")
+                         @MXName("host") String host,
+                         @MXName("stage") String stage,
+                         @MXName("version") String version,
+                         @MXName("message") String message)
     throws ReflectionException;
 
   @Description("Prints status of a server")
