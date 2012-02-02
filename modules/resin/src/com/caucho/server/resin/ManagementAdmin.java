@@ -33,28 +33,19 @@ import com.caucho.bam.actor.ActorSender;
 import com.caucho.bam.actor.LocalActorSender;
 import com.caucho.bam.actor.RemoteActorSender;
 import com.caucho.boot.LogLevelCommand;
-import com.caucho.boot.WatchdogStatusQuery;
 import com.caucho.cloud.bam.BamSystem;
 import com.caucho.cloud.network.NetworkClusterSystem;
 import com.caucho.cloud.topology.CloudServer;
 import com.caucho.config.types.Period;
 import com.caucho.env.repository.CommitBuilder;
-import com.caucho.jmx.MXDefaultValue;
-import com.caucho.jmx.MXName;
 import com.caucho.management.server.AbstractManagedObject;
 import com.caucho.management.server.ManagementMXBean;
 import com.caucho.quercus.lib.reflection.ReflectionException;
 import com.caucho.server.admin.DeployClient;
 import com.caucho.server.admin.HmuxClientFactory;
-import com.caucho.server.admin.JmxCallQuery;
-import com.caucho.server.admin.JmxDumpQuery;
-import com.caucho.server.admin.JmxListQuery;
-import com.caucho.server.admin.JmxSetQuery;
-import com.caucho.server.admin.LogLevelQuery;
 import com.caucho.server.admin.ManagementQueryResult;
-import com.caucho.server.admin.PdfReportQuery;
+import com.caucho.server.admin.ManagerClient;
 import com.caucho.server.admin.TagResult;
-import com.caucho.server.admin.ThreadDumpQuery;
 import com.caucho.server.admin.WebAppDeployClient;
 import com.caucho.util.L10N;
 
@@ -62,7 +53,6 @@ import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
-import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.logging.Level;
@@ -110,23 +100,22 @@ public class ManagementAdmin extends AbstractManagedObject
                                        boolean isPrintAllBeans,
                                        boolean isPrintPlatformBeans)
   {
-    JmxListQuery query = new JmxListQuery(pattern,
-                                          isPrintAttributes,
-                                          isPrintValues,
-                                          isPrintOperations,
-                                          isPrintAllBeans,
-                                          isPrintPlatformBeans);
+    ManagerClient managerClient = getManagerClient(serverId);
 
-    ManagementQueryResult result = query(serverId, query);
+    return managerClient.listJmx(pattern,
+                                 isPrintAttributes,
+                                 isPrintValues,
+                                 isPrintOperations,
+                                 isPrintAllBeans,
+                                 isPrintPlatformBeans);
 
-    return result;
   }
 
   @Override
-  public ManagementQueryResult logLevel(String serverId,
-                                        String loggersValue,
-                                        String levelValue,
-                                        String activeTime)
+  public ManagementQueryResult setLogLevel(String serverId,
+                                           String loggersValue,
+                                           String levelValue,
+                                           String activeTime)
   {
     String[] loggers = null;
 
@@ -142,18 +131,17 @@ public class ManagementAdmin extends AbstractManagedObject
 
     Level level = LogLevelCommand.getLevel("-" + levelValue);
 
-    LogLevelQuery query = new LogLevelQuery(loggers, level, period);
+    ManagerClient managerClient = getManagerClient(serverId);
 
-    return query(serverId, query);
+    return managerClient.setLogLevel(loggers, level, period);
   }
 
   @Override
-  public ManagementQueryResult dumpThreads(String serverId)
+  public ManagementQueryResult doThreadDump(String serverId)
   {
+    ManagerClient managerClient = getManagerClient(serverId);
 
-    ThreadDumpQuery query = new ThreadDumpQuery();
-
-    return query(serverId, query);
+    return managerClient.doThreadDump();
   }
 
   @Override
@@ -183,17 +171,17 @@ public class ManagementAdmin extends AbstractManagedObject
     if (samplePeriodStr != null)
       samplePeriod = Period.toPeriod(samplePeriodStr, 1);
 
-    PdfReportQuery query = new PdfReportQuery(path,
-                                              report,
-                                              period,
-                                              logDirectory,
-                                              profileTime,
-                                              samplePeriod,
-                                              isSnapshot,
-                                              isWatchdog,
-                                              isLoadPdf);
+    ManagerClient managerClient = getManagerClient(serverId);
 
-    return query(serverId, query);
+    return managerClient.pdfReport(path,
+                            report,
+                            period,
+                            logDirectory,
+                            profileTime,
+                            samplePeriod,
+                            isSnapshot,
+                            isWatchdog,
+                            isLoadPdf);
   }
 
   @Override
@@ -202,9 +190,9 @@ public class ManagementAdmin extends AbstractManagedObject
                                       String attribute,
                                       String value)
   {
-    JmxSetQuery query = new JmxSetQuery(pattern, attribute, value);
+    ManagerClient managerClient = getManagerClient(serverId);
 
-    return query(serverId, query);
+    return managerClient.setJmx(pattern, attribute, value);
   }
 
   @Override
@@ -221,12 +209,9 @@ public class ManagementAdmin extends AbstractManagedObject
     if (operationIdx != null)
       operationIndex = Integer.parseInt(operationIdx);
 
-    JmxCallQuery query = new JmxCallQuery(pattern,
-                                          operation,
-                                          operationIndex,
-                                          params);
+    ManagerClient managerClient = getManagerClient(serverId);
 
-    return query(serverId, query);
+    return managerClient.callJmx(pattern, operation, operationIndex, params);
   }
 
   @Override
@@ -459,19 +444,54 @@ public class ManagementAdmin extends AbstractManagedObject
   }
 
   @Override
-  public ManagementQueryResult dumpJmx(String serverId)
+  public ManagementQueryResult doJmxDump(String serverId)
   {
-    JmxDumpQuery query = new JmxDumpQuery();
+    ManagerClient managerClient = getManagerClient(serverId);
 
-    return query(serverId, query);
+    return managerClient.doJmxDump();
+  }
+
+  @Override
+  public ManagementQueryResult addUser(String serverId,
+                                       String user,
+                                       String password,
+                                       String rolesStr)
+  throws ReflectionException
+  {
+    String[] roles;
+    if (rolesStr != null)
+      roles = rolesStr.split("(,|;)");
+    else
+      roles = new String[]{};
+
+    ManagerClient managerClient = getManagerClient(serverId);
+
+    return managerClient.addUser(user, password.toCharArray(), roles);
+  }
+
+  @Override
+  public ManagementQueryResult listUsers(String serverId)
+    throws ReflectionException
+  {
+    ManagerClient managerClient = getManagerClient(serverId);
+
+    return managerClient.listUsers();
+  }
+
+  @Override
+  public ManagementQueryResult removeUser(String serverId,
+                                          String user)
+  throws ReflectionException
+  {
+    ManagerClient managerClient = getManagerClient(serverId);
+
+    return managerClient.removeUser(user);
   }
 
   @Override
   public ManagementQueryResult getStatus(String serverId)
   {
-    WatchdogStatusQuery query = new WatchdogStatusQuery();
-
-    return query(serverId, query);
+    return null;
   }
 
   private String makeTag(String name,
@@ -584,8 +604,7 @@ public class ManagementAdmin extends AbstractManagedObject
     return params.toArray(new String[params.size()]);
   }
 
-  private ManagementQueryResult query(String serverId, Serializable query)
-  {
+  private ManagerClient getManagerClient(String serverId) {
     final ActorSender sender;
 
     CloudServer server = getServer(serverId);
@@ -605,7 +624,7 @@ public class ManagementAdmin extends AbstractManagedObject
       sender = hmuxFactory.create();
     }
 
-    return (ManagementQueryResult) sender.query("manager@resin.caucho", query);
+    return new ManagerClient(sender);
   }
 
   private WebAppDeployClient getWebappDeployClient(String serverId)

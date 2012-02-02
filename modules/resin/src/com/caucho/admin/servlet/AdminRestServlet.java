@@ -36,12 +36,16 @@ package com.caucho.admin.servlet;
  import com.caucho.jmx.MXValueRequired;
  import com.caucho.lifecycle.LifecycleState;
  import com.caucho.management.server.ManagementMXBean;
+ import com.caucho.server.admin.AddUserQueryResult;
  import com.caucho.server.admin.ControllerStateActionQueryResult;
  import com.caucho.server.admin.ErrorQueryResult;
+ import com.caucho.server.admin.ListUsersQueryResult;
  import com.caucho.server.admin.ManagementQueryResult;
  import com.caucho.server.admin.PdfReportQueryResult;
+ import com.caucho.server.admin.RemoveUserQueryResult;
  import com.caucho.server.admin.StringQueryResult;
  import com.caucho.server.admin.TagResult;
+ import com.caucho.server.admin.UserQueryResult;
  import com.caucho.util.L10N;
  import com.caucho.vfs.Vfs;
  import com.caucho.vfs.WriteStream;
@@ -500,6 +504,7 @@ public class AdminRestServlet extends HttpServlet {
       throw new AbstractMethodError();
     }
 
+    //XXX: refactor
     @Override
     public void unmarshal(HttpServletResponse response,
                           ManagementQueryResult value)
@@ -516,20 +521,12 @@ public class AdminRestServlet extends HttpServlet {
           writer.println(errorResult.getException().getMessage());
         else
           writer.println(errorResult.getException());
-
-        return;
-      }
-
-      if (value instanceof StringQueryResult) {
+      } else      if (value instanceof StringQueryResult) {
         StringQueryResult queryResult = (StringQueryResult) value;
 
         PrintWriter writer = response.getWriter();
         writer.println(queryResult.getValue());
-
-        return;
-      }
-
-      if(value instanceof PdfReportQueryResult) {
+      } else if(value instanceof PdfReportQueryResult) {
         PdfReportQueryResult queryResult
           = (PdfReportQueryResult) value;
 
@@ -540,11 +537,7 @@ public class AdminRestServlet extends HttpServlet {
           PrintWriter writer = response.getWriter();
           writer.println(queryResult.getMessage());
         }
-
-        return;
-      }
-
-      if (value instanceof ControllerStateActionQueryResult) {
+      } else if (value instanceof ControllerStateActionQueryResult) {
         ControllerStateActionQueryResult queryResult =
           (ControllerStateActionQueryResult) value;
         String message;
@@ -560,6 +553,55 @@ public class AdminRestServlet extends HttpServlet {
 
         PrintWriter writer = response.getWriter();
         writer.println(message);
+      } else if (value instanceof AddUserQueryResult){
+        PrintWriter writer = response.getWriter();
+
+        AddUserQueryResult queryResult = (AddUserQueryResult) value;
+
+        UserQueryResult.User user = queryResult.getUser();
+
+        String []roles = user.getRoles();
+        queryResult.getUser();
+
+        writer.print(L.l("user {0} added", user.getName()));
+        for (int i = 0; i < roles.length; i++) {
+          String role = roles[i];
+          if (i == 0)
+            writer.print(" with roles: ");
+          writer.print(role);
+          if (i + 1 < roles.length)
+            writer.print(", ");
+        }
+
+        writer.println();
+      } else if (value instanceof RemoveUserQueryResult) {
+        PrintWriter writer = response.getWriter();
+
+        RemoveUserQueryResult queryResult = (RemoveUserQueryResult) value;
+        UserQueryResult.User user = queryResult.getUser();
+        writer.println(L.l("user {0} is removed", user.getName()));
+
+      } else if (value instanceof ListUsersQueryResult) {
+        ListUsersQueryResult queryResult = (ListUsersQueryResult) value;
+
+        UserQueryResult.User []users = queryResult.getUsers();
+
+        PrintWriter writer = response.getWriter();
+        for (UserQueryResult.User user : users) {
+          String []roles = user.getRoles();
+
+          writer.print(user.getName());
+          for (int i = 0; i < roles.length; i++) {
+            String role = roles[i];
+            if (i == 0)
+              writer.print(": ");
+            writer.print(role);
+            if (i + 1 < roles.length)
+              writer.print(", ");
+          }
+
+          writer.println();
+        }
       }
     }
   }

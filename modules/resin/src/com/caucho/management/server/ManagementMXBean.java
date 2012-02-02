@@ -57,7 +57,7 @@ public interface ManagementMXBean extends ManagedObjectMXBean
 
   @Description("Produces a complete dump of JMX objects and values")
   @MXAction("jmx-dump")
-  public ManagementQueryResult dumpJmx(@MXName("server") String value)
+  public ManagementQueryResult doJmxDump(@MXName("server") String value)
     throws ReflectionException;
 
   @Description("lists the JMX MBeans in a Resin server (Resin Pro)")
@@ -78,12 +78,13 @@ public interface ManagementMXBean extends ManagedObjectMXBean
 
   @Description("sets the java.util.logging level for debugging (Resin Pro)")
   @MXAction(value = "log-level", method = "POST")
-  public ManagementQueryResult logLevel(@MXName("server") String serverId,
-                                        @MXName("loggers") String loggersValue,
-                                        @MXValueRequired
-                                        @MXName("level") String levelValue,
-                                        @MXName("active-time")
-                                        String activeTime)
+  public ManagementQueryResult setLogLevel(@MXName("server") String serverId,
+                                           @MXName("loggers")
+                                           String loggersValue,
+                                           @MXValueRequired
+                                           @MXName("level") String levelValue,
+                                           @MXName("active-time")
+                                           String activeTime)
     throws ReflectionException;
 
   @Description("creates a PDF report of a Resin server (Resin Pro)")
@@ -116,7 +117,7 @@ public interface ManagementMXBean extends ManagedObjectMXBean
 
   @Description("displays a JVM thread dump summary")
   @MXAction("thread-dump")
-  public ManagementQueryResult dumpThreads(@MXName("server") String serverId)
+  public ManagementQueryResult doThreadDump(@MXName("server") String serverId)
     throws ReflectionException;
 
   @Description("calls a method on a JMX MBean")
@@ -209,6 +210,26 @@ public interface ManagementMXBean extends ManagedObjectMXBean
                          @MXName("stage") String stage,
                          @MXName("version") String version,
                          @MXName("message") String message)
+    throws ReflectionException;
+
+  @Description("adds an administration user and password")
+  @MXAction(value = "user-add", method = "POST")
+  public ManagementQueryResult addUser(@MXName("server") String serverId,
+                                       @MXValueRequired
+                                       @MXName("user") String user,
+                                       @MXName("password") String password,
+                                       @MXName("roles") String rolesStr)
+    throws ReflectionException;
+
+  @Description("lists the administration user")
+  @MXAction(value = "user-list", method = "GET")
+  public ManagementQueryResult listUsers(@MXName("server") String serverId)
+    throws ReflectionException;
+
+  @Description("removes an administration user")
+  @MXAction(value = "user-remove", method = "POST")
+  public ManagementQueryResult removeUser(@MXName("server") String serverId,
+                                          @MXName("user") String user)
     throws ReflectionException;
 
   @Description("Prints status of a server")
