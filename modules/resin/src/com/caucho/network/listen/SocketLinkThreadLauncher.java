@@ -41,6 +41,8 @@ class SocketLinkThreadLauncher extends AbstractThreadLauncher
 {
   private ThreadPool _threadPool = ThreadPool.getThreadPool();
   private TcpSocketLinkListener _listener;
+  
+  private String _threadName;
 
   SocketLinkThreadLauncher(TcpSocketLinkListener listener)
   {
@@ -59,7 +61,13 @@ class SocketLinkThreadLauncher extends AbstractThreadLauncher
   @Override
   protected String getThreadName()
   {
-    return "resin-port-" + _listener.getAddress() + ":" + _listener.getPort();
+    if (_threadName == null) {
+      _threadName = ("resin-port-"
+          + _listener.getAddress()
+          + ":" + _listener.getPort());
+    }
+    
+    return _threadName;
   }
 
   @Override

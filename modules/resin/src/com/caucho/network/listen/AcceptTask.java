@@ -54,7 +54,6 @@ class AcceptTask extends ConnectionTask {
 
     try {
       launcher.onChildThreadBegin();
-      launcher.onChildIdleEnd();
       
       super.run();
     } finally {

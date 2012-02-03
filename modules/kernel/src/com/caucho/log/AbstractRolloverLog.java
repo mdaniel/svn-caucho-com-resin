@@ -33,7 +33,7 @@ import com.caucho.config.ConfigException;
 import com.caucho.config.types.Bytes;
 import com.caucho.config.types.CronType;
 import com.caucho.config.types.Period;
-import com.caucho.env.thread.TaskWorker;
+import com.caucho.env.thread.AbstractTaskWorker;
 import com.caucho.util.Alarm;
 import com.caucho.util.AlarmListener;
 import com.caucho.util.IoUtil;
@@ -847,7 +847,7 @@ public class AbstractRolloverLog {
     
     _rolloverWorker.wake();
     
-    _rolloverWorker.destroy();
+    _rolloverWorker.close();
 
     synchronized (_logLock) {
       closeLogStream();
@@ -925,7 +925,7 @@ public class AbstractRolloverLog {
     return getClass().getSimpleName() + "[" + _path + "]";
   }
 
-  class RolloverWorker extends TaskWorker {
+  class RolloverWorker extends AbstractTaskWorker {
     @Override
     public long runTask()
     {
@@ -935,7 +935,7 @@ public class AbstractRolloverLog {
     }
   }
 
-  class FlushWorker extends TaskWorker {
+  class FlushWorker extends AbstractTaskWorker {
     @Override
     public long runTask()
     {

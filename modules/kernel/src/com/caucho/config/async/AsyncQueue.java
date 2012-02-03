@@ -34,13 +34,12 @@ import java.util.concurrent.TimeUnit;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
-import com.caucho.env.thread.TaskWorker;
-
+import com.caucho.env.thread.AbstractTaskWorker;
 
 /**
  * Represents the @Asynchronous interception
  */
-public class AsyncQueue extends TaskWorker {
+public class AsyncQueue extends AbstractTaskWorker {
   private static final Logger log = Logger.getLogger(AsyncQueue.class.getName());
   
   private final ArrayBlockingQueue<Runnable> _queue

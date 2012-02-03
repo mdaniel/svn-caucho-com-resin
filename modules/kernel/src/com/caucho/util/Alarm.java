@@ -36,7 +36,7 @@ import java.util.concurrent.locks.LockSupport;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
-import com.caucho.env.thread.TaskWorker;
+import com.caucho.env.thread.AbstractTaskWorker;
 import com.caucho.env.thread.ThreadPool;
 import com.caucho.loader.ClassLoaderListener;
 import com.caucho.loader.DynamicClassLoader;
@@ -654,7 +654,7 @@ public class Alarm implements ThreadTask, ClassLoaderListener {
     }
   }
 
-  static class CoordinatorThread extends TaskWorker {
+  static class CoordinatorThread extends AbstractTaskWorker {
     private long _lastTime;
     
     @Override
@@ -669,11 +669,12 @@ public class Alarm implements ThreadTask, ClassLoaderListener {
     @Override
     public long runTask()
     {
-      if (isTest())
+      if (isTest()) {
         return -1;
+      }
       
       _lastTime = getCurrentTime();
-      
+
       while (true) {
         long now = getCurrentTime();
         
@@ -683,10 +684,12 @@ public class Alarm implements ThreadTask, ClassLoaderListener {
         // #3548 - getCurrentTime for consistency
         // long now = getCurrentTime();
 
-        if (next < 0)
+        if (next < 0) {
           return 120000L;
-        else if (now < next)
+        }
+        else if (now < next) {
           return next - now;
+        }
       }
     }
 

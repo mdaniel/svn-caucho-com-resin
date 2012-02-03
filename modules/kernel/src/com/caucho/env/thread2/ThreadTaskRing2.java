@@ -103,9 +103,11 @@ public class ThreadTaskRing2 {
       System.out.println("BAD:" + head + " " + nextHead);
     }
     
+    /*
     if (getSize() > 5) {
-      System.out.println("OOK: " + head + " " + nextHead + " " + tail);
+      System.out.println("TASK-BEHIND-OOK: " + head + " " + nextHead + " " + tail);
     }
+    */
     
     return true;
   }
@@ -117,7 +119,6 @@ public class ThreadTaskRing2 {
     int nextTail;
     
     Item item;
-    
 
     do {
       tail = _tail.get();
@@ -129,13 +130,8 @@ public class ThreadTaskRing2 {
         return false;
       }
       
-      
       item = _ring[tail];
     } while (! _tail.compareAndSet(tail, nextTail));
-    
-    if (getSize() > 5) {
-      System.out.println("OOK2: " + head + " " + tail + " " + nextTail);
-    }
     
     item.schedule(thread);
     
@@ -184,9 +180,11 @@ public class ThreadTaskRing2 {
                            + " " + _head.get() + " " + _tail.get());
       }
       
+      /*
       if (getSize() > 10) {
         System.out.println("SCHED: " + _head.get() + " " + _tail.get() + " " + task + " " + thread);
       }
+      */
     
       ClassLoader loader = _loaderRef.getAndSet(null);
 

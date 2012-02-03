@@ -58,7 +58,7 @@ final class ResinThread2 extends Thread {
   {
     _id = id;
     _name = "resin2-" + _id;
-    System.out.println("LAUNCH: " + _name);
+
     _pool = pool;
     _launcher = launcher;
 
@@ -115,14 +115,12 @@ final class ResinThread2 extends Thread {
   {
     try {
       _launcher.onChildThreadBegin();
-      _launcher.onChildIdleBegin();
       
       runTasks();
     } catch (Throwable e) {
       log.log(Level.WARNING, e.toString(), e);
     } finally {
       _launcher.onChildIdleEnd();
-      _launcher.onChildThreadEnd();
     }
   }
 
@@ -137,7 +135,10 @@ final class ResinThread2 extends Thread {
       Runnable task = null;
       ClassLoader classLoader = null;
 
-      if (_launcher.isIdleExpire()) {
+      if (_taskRef.get() != null) {
+        
+      }
+      else if (_launcher.isIdleExpire()) {
         return;
       }
       else if (_pool.execute(this)) {
@@ -188,9 +189,9 @@ final class ResinThread2 extends Thread {
   private void park()
   {
     // _pool.beginIdle(this);
+    setName(_name);
 
     while (! _isClose && _taskRef.get() == null) {
-      setName(_name);
       Thread.interrupted();
       LockSupport.park();
     }

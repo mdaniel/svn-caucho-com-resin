@@ -45,6 +45,7 @@ public final class FreeRing<T> {
   
   private final AtomicReferenceArray<T> _ring;
 
+  private final AtomicInteger _headAlloc = new AtomicInteger();
   private final AtomicInteger _head = new AtomicInteger();
   private final AtomicInteger _tail = new AtomicInteger();
 
@@ -105,19 +106,24 @@ public final class FreeRing<T> {
     int nextHead;
     int tail;
 
-    do {
+    while (true) {
       head = _head.get();
       tail = _tail.get();
       
       nextHead = (head + 1) & _mask;
       
-      if (nextHead == tail)
+      if (nextHead == tail) {
         return false;
-    } while (! _ring.compareAndSet(head, null, obj));
-    
-    _head.set(nextHead);
-
-    return true;
+      }
+      
+      if (_ring.compareAndSet(head, null, obj)) {
+        _head.set(nextHead);
+        return true;
+      }
+      else if (_head.compareAndSet(head, nextHead)) {
+        return false;
+      }
+    }
   }
 
   /**

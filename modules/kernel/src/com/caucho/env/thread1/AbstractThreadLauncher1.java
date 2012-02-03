@@ -27,24 +27,24 @@
  * @author Scott Ferguson
  */
 
-package com.caucho.env.thread2;
+package com.caucho.env.thread1;
 
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.atomic.AtomicLong;
 import java.util.logging.Logger;
 
 import com.caucho.config.ConfigException;
-import com.caucho.env.thread2.AbstractTaskWorker2;
+import com.caucho.env.thread1.AbstractTaskWorker1;
 import com.caucho.inject.Module;
 import com.caucho.lifecycle.Lifecycle;
 import com.caucho.util.Alarm;
 import com.caucho.util.L10N;
 
 @Module
-abstract public class AbstractThreadLauncher2 extends AbstractTaskWorker2 {
-  private static final L10N L = new L10N(AbstractThreadLauncher2.class);
+abstract public class AbstractThreadLauncher1 extends AbstractTaskWorker1 {
+  private static final L10N L = new L10N(AbstractThreadLauncher1.class);
   private static final Logger log
-    = Logger.getLogger(AbstractThreadLauncher2.class.getName());
+    = Logger.getLogger(AbstractThreadLauncher1.class.getName());
   
   private static final long LAUNCHER_TIMEOUT = 60000L;
 
@@ -91,12 +91,12 @@ abstract public class AbstractThreadLauncher2 extends AbstractTaskWorker2 {
   
   private final Lifecycle _lifecycle;
 
-  protected AbstractThreadLauncher2()
+  protected AbstractThreadLauncher1()
   {
     this(Thread.currentThread().getContextClassLoader());
   }
 
-  protected AbstractThreadLauncher2(ClassLoader loader)
+  protected AbstractThreadLauncher1(ClassLoader loader)
   {
     super(loader);
     
@@ -246,9 +246,9 @@ abstract public class AbstractThreadLauncher2 extends AbstractTaskWorker2 {
   }
   
   @Override
-  public void close()
+  public void destroy()
   {
-    super.close();
+    super.destroy();
     
     _lifecycle.toDestroy();
   }
@@ -269,8 +269,6 @@ abstract public class AbstractThreadLauncher2 extends AbstractTaskWorker2 {
   {
     _threadCount.incrementAndGet();
     
-    onChildIdleBegin();
-    
     int startCount = _startingCount.decrementAndGet();
 
     if (startCount < 0) {
@@ -287,7 +285,6 @@ abstract public class AbstractThreadLauncher2 extends AbstractTaskWorker2 {
    */
   public void onChildThreadResume()
   {
-    onChildIdleBegin();
     _threadCount.incrementAndGet();
   }
   
@@ -296,8 +293,6 @@ abstract public class AbstractThreadLauncher2 extends AbstractTaskWorker2 {
    */
   public void onChildThreadEnd()
   {
-    onChildIdleEnd();
-    
     if (_threadMax <= _threadCount.getAndDecrement()) {
       wake();
     }
@@ -365,11 +360,6 @@ abstract public class AbstractThreadLauncher2 extends AbstractTaskWorker2 {
     } while (! _idleCount.compareAndSet(idleCount, idleCount + 1));
     
     return true;
-  }
-  
-  public boolean isIdleOverflow()
-  {
-    return _idleMax < _idleCount.get();
   }
   
   /**
@@ -449,20 +439,17 @@ abstract public class AbstractThreadLauncher2 extends AbstractTaskWorker2 {
     return (_idleCount.get() + startingCount <= _idleMin);
   }
   
-  /*
   @Override
   protected boolean isPermanent()
   {
     return true;
   }
-  */
 
   protected void update()
   {
     long now = getCurrentTimeActual();
     
     _threadIdleExpireTime.set(now + _idleTimeout);
-    
     wake();
   }
 

@@ -27,40 +27,39 @@
  * @author Scott Ferguson
  */
 
-package com.caucho.mqueue;
+package com.caucho.env.thread;
 
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
-import com.caucho.env.thread.AbstractTaskWorker;
-
 /**
- * Interface for the transaction log.
+ * Single-consumer queue.
  */
-public final class MQueueDisruptor<T>
+public class SingleConsumerRing<T>
 {
   private static final Logger log
-    = Logger.getLogger(MQueueDisruptor.class.getName());
+    = Logger.getLogger(SingleConsumerRing.class.getName());
   
   private final int _size;
   private final int _mask;
-  private final MQueueItem<T> []_itemRing;
-  
-  private final MQueueItemFactory<T> _factory;
+  private final RingItem<T> []_itemRing;
   
   private final AtomicInteger _headAlloc = new AtomicInteger();
   private final AtomicInteger _head = new AtomicInteger();
-  // private final AtomicInteger _tailRef = new AtomicInteger();
-  private volatile int _tail;
   
-  private final ConsumerWorker _consumerWorker;
+  private final TaskWorker _consumer;
+  
+  private final int _producerWakeMask;
+
+  private volatile int _tail;
   
   private final AtomicBoolean _isWait = new AtomicBoolean();
  
-  public MQueueDisruptor(int capacity,
-                         MQueueItemFactory<T> itemFactory)
+  public SingleConsumerRing(int capacity, 
+                            TaskFactory<T> factory,
+                            TaskWorker consumer)
   {
     int size = 1;
     
@@ -71,17 +70,30 @@ public final class MQueueDisruptor<T>
     
     _mask = size - 1;
     
-    _itemRing = new MQueueItem[size];
+    _itemRing = createRing(size);
+    
+    _consumer = consumer;
     
     for (int i = 0; i < _size; i++) {
-      _itemRing[i] = new MQueueItem<T>(i, itemFactory.create(i));
+      T value = factory != null ? factory.createValue(i) : null;
+      
+      _itemRing[i] = new RingItem<T>(i, value);
     }
     
-    _factory = itemFactory;
-    _consumerWorker = new ConsumerWorker();
+    int wakeMask = (_mask >> 4);
+    
+    if (0x3f < wakeMask)
+      wakeMask = 0x3f;
+    
+    _producerWakeMask = wakeMask;
   }
   
-  private final int getSize()
+  public final boolean isEmpty()
+  {
+    return _head.get() == _tail;
+  }
+  
+  public final int getSize()
   {
     int head = _head.get();
     // int tail = _tailRef.get();
@@ -90,12 +102,12 @@ public final class MQueueDisruptor<T>
     return (_size + tail - head) % _size;
   }
   
-  public final MQueueItem<T> startProducer(boolean isWait)
+  public final RingItem<T> startProducer(boolean isWait)
   {
     int head;
-    MQueueItem<T> item;
+    RingItem<T> item;
     int nextHead;
-    
+
     do {
       head = _headAlloc.get();
       item = _itemRing[head];
@@ -114,18 +126,44 @@ public final class MQueueDisruptor<T>
       if (nextHead == tail) {
         if (isWait) {
           waitForQueue(head, tail);
+          head = -1;
         }
-        else
+        else {
           return null;
+        }
       }
     } while (! _headAlloc.compareAndSet(head, nextHead));
     
     return item;
   }
   
+  public final void finishProducer(RingItem<T> item)
+  {
+    int head = item.getIndex();
+    int nextHead = (head + 1) & _mask;
+    
+    while (! _head.compareAndSet(head, nextHead)) {
+    }
+
+    if ((head & _producerWakeMask) == 0) {
+      _consumer.wake();
+    }
+  }
+  
+  public final void wake()
+  {
+    _consumer.wake();
+  }
+  
+  @SuppressWarnings("unchecked")
+  private RingItem<T> []createRing(int size)
+  {
+    return new RingItem[size];
+  }
+  
   private void waitForQueue(int head, int tail)
   {
-    _consumerWorker.wake();
+    _consumer.wake();
     
     synchronized (_isWait) {
       _isWait.set(true);
@@ -153,31 +191,56 @@ public final class MQueueDisruptor<T>
     }
   }
   
-  public final void finishProducer(MQueueItem<T> item)
+  /**
+   * Called by the consumer to process all the values.
+   */
+  public final void consumeAll(TaskFactory<T> factory)
   {
-    // item.setSequence(_sequence + 1);
+    int count = 4;
     
-    int head = item.getIndex();
-    int nextHead = (head + 1) & _mask;
+    for (int i = 0; i < count; i++) {
+      try {
+        if (doConsume(factory)) {
+          i = 0;
+        }
+      
+        factory.processOnComplete();
+      } catch (Exception e) {
+        e.printStackTrace();
+        log.log(Level.FINER, e.toString(), e);
+      }
     
-    while (! _head.compareAndSet(head, nextHead)) {
+      wakeQueue();
     }
-
-    _consumerWorker.wake();
   }
   
-  private final void consumeAll()
+  /**
+   * Returns the next item in the queue, or null if there are
+   * no items. Must be called only by the consumer thread, because
+   * it is not thread-safe.
+   */
+  public T take()
   {
-    try {
-      doConsume();
-    } catch (Exception e) {
-      log.log(Level.FINER, e.toString(), e);
+    AtomicInteger headRef = _head;
+    int head = headRef.get();
+    int tail = _tail;
+    
+    if (head == tail) {
+      return null;
     }
+    
+    RingItem<T> item = _itemRing[tail];
+    
+    T value = item.getAndClearValue();
+  
+    _tail = (tail + 1) & _mask;
     
     wakeQueue();
+    
+    return value;
   }
   
-  private final void doConsume()
+  private final boolean doConsume(TaskFactory<T> factory)
     throws Exception
   {
     AtomicInteger headRef = _head;
@@ -185,15 +248,15 @@ public final class MQueueDisruptor<T>
     int tail = _tail;
     
     if (head == tail) {
-      return;
+      return false;
     }
 
-    MQueueItemFactory<T> factory = _factory;
-    
-    MQueueItem<T> []itemRing = _itemRing;
+    RingItem<T> []itemRing = _itemRing;
     
     int mask = _mask;
-    int tailCheckMask = mask >> 1;
+    int tailCheckMask = (mask >> 3);
+    
+    int updateMask = (mask >> 6);
     
     try {
       while (true) {
@@ -201,7 +264,7 @@ public final class MQueueDisruptor<T>
           head = headRef.get();
         
           if (head == tail) {
-            return;
+            return true;
           }
         }
       
@@ -211,13 +274,13 @@ public final class MQueueDisruptor<T>
           wakeQueue();
         }
     
-        MQueueItem<T> item = itemRing[tail];
+        RingItem<T> item = itemRing[tail];
       
         tail = (tail + 1) & mask;
         
-        factory.process(item.getValue());
+        factory.process(item);
         
-        if ((tail & 0x7f) == 0) {
+        if ((tail & updateMask) == 0) {
           _tail = tail;
         }
       }
@@ -225,45 +288,55 @@ public final class MQueueDisruptor<T>
       _tail = tail;
     }
   }
-
-  private final class ConsumerWorker extends AbstractTaskWorker {
-    @Override
-    public final long runTask()
-    {/*
-      boolean isWait = _isWait.get();
-      
-      if (isWait) {
-        _wakeWorker.wake();
-      }
-      */
-      /*
-      int count = -1;
-      
-      if (isWait) {
-        count = _disruptor.getSize() >> 2;
-      }
-      */
-
-      consumeAll();
-      /*
-      while (doConsume()) {
-        if (count-- == 0) {
-          _disruptor.wakeQueue();
-        }
-      }
-      */
-      
-      // _disruptor.wakeQueue();
-      
-      /*
-      if (_isWait.get()) {
-        _wakeWorker.wake();
-      }
-      */
-      
-      wakeQueue();
-
-      return 0;
+  
+  public static class RingItem<T>
+  {
+    private final int _index;
+    
+    private T _value;
+    
+    RingItem(int index, T value)
+    {
+      _index = index;
+      _value = value;
     }
+    
+    private final int getIndex()
+    {
+      return _index;
+    }
+    
+    public final T getValue()
+    {
+      return _value;
+    }
+    
+    public final void setValue(T value)
+    {
+      _value = value;
+    }
+    
+    public final T getAndClearValue()
+    {
+      T value = _value;
+      
+      _value = null;
+      
+      return value;
+    }
+
+    @Override
+    public String toString()
+    {
+      return getClass().getSimpleName() + "[" + _index + "," + _value + "]";
+    }
+  }
+  
+  public interface TaskFactory<T> {
+    public T createValue(int index);
+    
+    public void process(RingItem<T> item);
+    
+    public void processOnComplete();
   }
 }

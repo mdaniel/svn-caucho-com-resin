@@ -27,7 +27,7 @@
  * @author Scott Ferguson
  */
 
-package com.caucho.env.thread2;
+package com.caucho.env.thread1;
 
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicInteger;
@@ -36,22 +36,19 @@ import java.util.concurrent.locks.LockSupport;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
-import com.caucho.env.thread.TaskWorker;
 import com.caucho.env.warning.WarningService;
 import com.caucho.util.Alarm;
 
 /**
  * A generic pool of threads available for Alarms and Work tasks.
  */
-abstract public class AbstractTaskWorker2 implements Runnable, TaskWorker {
+abstract public class AbstractTaskWorker1 implements Runnable {
   private static final Logger log
-    = Logger.getLogger(AbstractTaskWorker2.class.getName());
+    = Logger.getLogger(AbstractTaskWorker1.class.getName());
   
   private static final int TASK_PARK = 0;
   private static final int TASK_SLEEP = 1;
   private static final int TASK_READY = 2;
-  
-  private static final long PERMANENT_TIMEOUT = 30000L;
   
   private static final AtomicLong _idGen = new AtomicLong();
   
@@ -60,17 +57,20 @@ abstract public class AbstractTaskWorker2 implements Runnable, TaskWorker {
 
   private final ClassLoader _classLoader;
   
-  private String _threadName;
+  private final String _threadName;
   
-  // private long _workerIdleTimeout = 30000L;
-  private long _workerIdleTimeout = 500;
+  private long _workerIdleTimeout = 30000L;
   private boolean _isClosed;
   
+  private int _loopCount = 0;
+
   private volatile Thread _thread;
 
-  protected AbstractTaskWorker2(ClassLoader classLoader)
+  protected AbstractTaskWorker1(ClassLoader classLoader)
   {
     _classLoader = classLoader;
+    
+    _threadName = toString() + "-" + _idGen.incrementAndGet();
   }
 
   protected boolean isPermanent()
@@ -86,7 +86,12 @@ abstract public class AbstractTaskWorker2 implements Runnable, TaskWorker {
     _workerIdleTimeout = timeout;
   }
   
-  public final boolean isTaskActive()
+  protected void setLoopCount(int count)
+  {
+    _loopCount = count;
+  }
+  
+  public boolean isTaskActive()
   {
     return _isActive.get();
   }
@@ -98,7 +103,7 @@ abstract public class AbstractTaskWorker2 implements Runnable, TaskWorker {
   
   abstract public long runTask();
 
-  public void close()
+  public void destroy()
   {
     _isClosed = true;
 
@@ -106,21 +111,15 @@ abstract public class AbstractTaskWorker2 implements Runnable, TaskWorker {
     
     Thread thread = _thread;
 
-    if (thread != null) {
+    if (thread != null)
       LockSupport.unpark(thread);
-    }
   }
 
-  @Override
   public final void wake()
   {
-    if (_taskState.get() == TASK_READY) {
-      return;
-    }
-    
     int oldState = _taskState.getAndSet(TASK_READY);
 
-    if (_isActive.compareAndSet(false, true)) {
+    if (! _isActive.getAndSet(true)) {
       startWorkerThread();
     }
 
@@ -128,23 +127,16 @@ abstract public class AbstractTaskWorker2 implements Runnable, TaskWorker {
       Thread thread = _thread;
 
       if (thread != null) {
-        unpark(thread);
+        LockSupport.unpark(thread);
       }
     }
   }
   
   abstract protected void startWorkerThread();
-  
-  protected void unpark(Thread thread)
-  {
-    LockSupport.unpark(thread);
-  }
 
   protected String getThreadName()
   {
-    if (_threadName == null)
-      _threadName = toString() + "-" + _idGen.incrementAndGet();
-
+    // return getClass().getSimpleName() + "-" + _idGen.incrementAndGet();
     return _threadName;
   }
   
@@ -154,14 +146,6 @@ abstract public class AbstractTaskWorker2 implements Runnable, TaskWorker {
   
   protected void onThreadComplete()
   {
-  }
-  
-  private long getIdleTimeout()
-  {
-    if (isPermanent())
-      return PERMANENT_TIMEOUT;
-    else
-      return _workerIdleTimeout;
   }
 
   @Override
@@ -179,12 +163,10 @@ abstract public class AbstractTaskWorker2 implements Runnable, TaskWorker {
 
       long now = getCurrentTimeActual();
       
-      long idleTimeout = getIdleTimeout();
-      
       long expires;
       
-      if (idleTimeout > 0)
-        expires = now + idleTimeout;
+      if (_workerIdleTimeout > 0)
+        expires = now + _workerIdleTimeout;
       else
         expires = 0;
       
@@ -199,8 +181,11 @@ abstract public class AbstractTaskWorker2 implements Runnable, TaskWorker {
           if (delta > 0) {
             expires = now + delta;
           }
-          else if (idleTimeout > 0) {
-            expires = now + idleTimeout;
+          else if (delta == 0) {
+            expires = 0;
+          }
+          else if (_workerIdleTimeout > 0) {
+            expires = now + _workerIdleTimeout;
           }
           else {
             expires = 0;
@@ -210,15 +195,18 @@ abstract public class AbstractTaskWorker2 implements Runnable, TaskWorker {
         if (isClosed())
           return;
         
+        for (int i = _loopCount; i >= 0; i--) {
+          if (_taskState.get() == TASK_READY)
+            break;
+        }
+        
         if (expires > 0 && _taskState.compareAndSet(TASK_SLEEP, TASK_PARK)) {
           Thread.interrupted();
           LockSupport.parkUntil(expires);
         }
         
-        if (isPermanent()) {
-          expires = getCurrentTimeActual() + idleTimeout;
+        if (isPermanent())
           _taskState.set(TASK_READY);
-        }
       } while (_taskState.get() == TASK_READY
                || isPermanent()
                || getCurrentTimeActual() < expires);
@@ -232,9 +220,8 @@ abstract public class AbstractTaskWorker2 implements Runnable, TaskWorker {
 
       onThreadComplete();
       
-      if (_taskState.get() == TASK_READY) {
+      if (_taskState.get() == TASK_READY)
         wake();
-      }
       
       thread.setName(oldName);
     }

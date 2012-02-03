@@ -27,7 +27,7 @@
  * @author Scott Ferguson
  */
 
-package com.caucho.env.thread;
+package com.caucho.env.thread1;
 
 import java.util.concurrent.atomic.AtomicReference;
 import java.util.concurrent.locks.LockSupport;
@@ -37,17 +37,17 @@ import java.util.logging.Logger;
 /**
  * A generic pool of threads available for Alarms and Work tasks.
  */
-final class ResinThread extends Thread {
+final class ResinThread1 extends Thread {
   private static final Logger log 
-    = Logger.getLogger(ResinThread.class.getName());
+    = Logger.getLogger(ResinThread1.class.getName());
   
   private final int _id;
   private final String _name;
   
-  private final ThreadPool _pool;
-  private final ThreadLauncher _launcher;
+  private final ThreadPool1 _pool;
+  private final ThreadLauncher1 _launcher;
   
-  private volatile ResinThread _next;
+  private volatile ResinThread1 _next;
   private boolean _isClose;
   
   private volatile ClassLoader _taskLoader;
@@ -55,7 +55,7 @@ final class ResinThread extends Thread {
   private final AtomicReference<Runnable> _taskRef
     = new AtomicReference<Runnable>();
 
-  ResinThread(int id, ThreadPool pool, ThreadLauncher launcher)
+  ResinThread1(int id, ThreadPool1 pool, ThreadLauncher1 launcher)
   {
     _id = id;
     _name = "resin-" + _id;
@@ -82,12 +82,12 @@ final class ResinThread extends Thread {
     return getId();
   }
   
-  final ResinThread getNext()
+  final ResinThread1 getNext()
   {
     return _next;
   }
   
-  final void setNext(ResinThread thread)
+  final void setNext(ResinThread1 thread)
   {
     _next = thread;
   }

@@ -192,6 +192,11 @@ public class TcpSocketLink extends AbstractSocketLink
   {
     return _listener;
   }
+  
+  public SocketLinkThreadLauncher getLauncher()
+  {
+    return getListener().getLauncher();
+  }
 
   /**
    * Returns the request for the connection.
@@ -628,8 +633,6 @@ public class TcpSocketLink extends AbstractSocketLink
     if (_requestStateRef.get().toAccept(_requestStateRef)) {
       ThreadPool threadPool = _listener.getThreadPool();
     
-      SocketLinkThreadLauncher launcher = _listener.getLauncher();
-      
       if (log.isLoggable(Level.FINER)) {
         log.finer(this + " request-accept " + getName()
                   + " (count=" + _listener.getThreadCount()
@@ -637,19 +640,8 @@ public class TcpSocketLink extends AbstractSocketLink
       }
       
       
-      boolean isValid = false;
-      
-      launcher.onChildIdleBegin();
-      try {
-        if (threadPool.start(getAcceptTask())) {
-          isValid = true;
-        }
-        else {
-          log.severe(L.l("Start failed for {0}", this));
-        }
-      } finally {
-        if (! isValid)
-          launcher.onChildIdleEnd();
+      if (! threadPool.start(getAcceptTask())) {
+        log.severe(L.l("Start failed for {0}", this));
       }
     }
   }
@@ -880,6 +872,7 @@ public class TcpSocketLink extends AbstractSocketLink
     throws IOException
   {
     TcpSocketLinkListener listener = getListener();
+    SocketLinkThreadLauncher launcher = listener.getLauncher();
     
     RequestState result = RequestState.REQUEST_COMPLETE;
 
@@ -904,7 +897,13 @@ public class TcpSocketLink extends AbstractSocketLink
                   + getRemoteHost() + ":" + getRemotePort());
       }
 
-      result = handleRequests(Task.ACCEPT);
+      launcher.onChildIdleEnd();
+      try {
+        result = handleRequests(Task.ACCEPT);
+      } finally {
+        // XXX: possibly finish
+        launcher.onChildIdleBegin();
+      }
     }
 
     return result;
@@ -913,15 +912,12 @@ public class TcpSocketLink extends AbstractSocketLink
   private boolean accept()
   {
     SocketLinkThreadLauncher launcher = _listener.getLauncher();
-    
-    if (! launcher.childIdleBegin())
+
+    if (launcher.isIdleOverflow()) {
       return false;
-    
-    try {
-      return getListener().accept(getSocket());
-    } finally {
-      launcher.onChildIdleEnd();
     }
+
+    return getListener().accept(getSocket());
   }
 
   @Friend(KeepaliveRequestTask.class)
@@ -1124,8 +1120,17 @@ public class TcpSocketLink extends AbstractSocketLink
       if (taskType == Task.ACCEPT) {
         return result;
       }
-      else
-        return _acceptTask.doTask();
+      else {
+        SocketLinkThreadLauncher launcher = getLauncher();
+        
+        try {
+          launcher.onChildIdleBegin();
+          
+          return _acceptTask.doTask();
+        } finally {
+          launcher.onChildIdleEnd();
+        }
+      }
       
     default:
       throw new IllegalStateException(String.valueOf(result));

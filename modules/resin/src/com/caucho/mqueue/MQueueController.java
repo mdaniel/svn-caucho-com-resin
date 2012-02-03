@@ -29,13 +29,13 @@
 
 package com.caucho.mqueue;
 
-import com.caucho.env.thread.TaskWorker;
+import com.caucho.env.thread.AbstractTaskWorker;
 import com.caucho.vfs.TempBuffer;
 
 /**
  * Interface for the transaction log.
  */
-public final class MQueueController extends TaskWorker
+public final class MQueueController extends AbstractTaskWorker
 {
   private final MQueueDisruptor _disruptor;
   private final MQueueItem []_ring;

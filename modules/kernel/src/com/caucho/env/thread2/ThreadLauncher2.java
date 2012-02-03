@@ -29,7 +29,7 @@
 
 package com.caucho.env.thread2;
 
-import java.util.concurrent.atomic.AtomicInteger;
+import java.util.concurrent.locks.LockSupport;
 import java.util.logging.Logger;
 
 import com.caucho.env.health.HealthSystemFacade;
@@ -47,76 +47,19 @@ class ThreadLauncher2 extends AbstractThreadLauncher2 {
   public static final String THREAD_CREATE_THROTTLE_EVENT
     = "caucho.thread.pool.throttle";
   
-  private static final int DEFAULT_PRIORITY_IDLE_MIN = 2;
-  
   private final ThreadPool2 _pool;
-  
-  private int _priorityIdleMin;
-  
-  private final AtomicInteger _priorityIdleCount = new AtomicInteger();
 
   ThreadLauncher2(ThreadPool2 pool)
   {
     super(ClassLoader.getSystemClassLoader());
     
     _pool = pool;
-    
-    setPriorityIdleMin(DEFAULT_PRIORITY_IDLE_MIN);
   }
   
-  public void setPriorityIdleMin(int min)
-  {
-    if (min <= 0)
-      throw new IllegalArgumentException();
-    
-    _priorityIdleMin = min;
-    
-    update();
-  }
-  
-  public int getPriorityIdleMin()
-  {
-    return _priorityIdleMin;
-  }
-  
-  protected boolean beginPriorityIdle()
-  {
-    int priorityIdle = _priorityIdleCount.get();
-  
-    if (priorityIdle < _priorityIdleMin
-        && _priorityIdleCount.compareAndSet(priorityIdle, priorityIdle + 1)) {
-      return true;
-    }
-    else
-      return false;
-  }
-  
-  protected void onPriorityIdleEnd()
-  {
-    int priorityIdleCount = _priorityIdleCount.getAndDecrement();
-    
-    if (priorityIdleCount < _priorityIdleMin) {
-      wake();
-    }
-  }
-
   @Override
-  protected boolean isIdleTooLow(int startingCount)
+  public final boolean isPermanent()
   {
-    if (true)
-      return super.isIdleTooLow(startingCount);
-    
-    int surplus = _priorityIdleCount.get() - _priorityIdleMin;
-    
-    if (surplus >= 0)
-      return super.isIdleTooLow(startingCount);
-    
-    startingCount += surplus;
-    
-    if (startingCount < 0)
-      return true;
-    else
-      return super.isIdleTooLow(startingCount);
+    return true;
   }
 
   @Override
@@ -160,6 +103,12 @@ class ThreadLauncher2 extends AbstractThreadLauncher2 {
     }
   }
   
+  @Override
+  protected void unpark(Thread thread)
+  {
+    LockSupport.unpark(thread);
+  }
+  
   //
   // event handling
   
@@ -169,22 +118,14 @@ class ThreadLauncher2 extends AbstractThreadLauncher2 {
     HealthSystemFacade.fireEvent(THREAD_FULL_EVENT, 
                                  "threads=" + getThreadCount());
   }
-  
+
+  @Override
   protected void onThrottle(String msg)
   {
     log.warning(msg);
     
     HealthSystemFacade.fireEvent(THREAD_CREATE_THROTTLE_EVENT, 
                                  msg);
-  }
- 
-  //
-  // statistics
-  //
-  
-  public int getPriorityIdleCount()
-  {
-    return _priorityIdleCount.get();
   }
   
   @Override

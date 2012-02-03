@@ -1828,7 +1828,7 @@ public class BlockStore {
       _blockManager.freeStore(this);
     }
     
-    _writer.destroy();
+    _writer.close();
     
     _writer.waitForComplete(60000);
 

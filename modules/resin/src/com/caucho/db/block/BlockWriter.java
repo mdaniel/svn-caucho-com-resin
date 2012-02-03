@@ -33,13 +33,12 @@ import java.util.ArrayList;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
-import com.caucho.env.thread.TaskWorker;
-import com.caucho.env.thread2.TaskWorker2;
+import com.caucho.env.thread.AbstractTaskWorker;
 
 /**
  * Writer thread serializing dirty blocks.
  */
-public class BlockWriter extends TaskWorker {
+public class BlockWriter extends AbstractTaskWorker {
   private final static Logger log
     = Logger.getLogger(BlockWriter.class.getName());
   

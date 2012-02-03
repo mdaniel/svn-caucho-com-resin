@@ -27,45 +27,71 @@
  * @author Scott Ferguson
  */
 
-package com.caucho.env.thread;
+package com.caucho.env.thread1;
 
-import com.caucho.env.thread2.AbstractTaskWorker2;
+import java.util.concurrent.locks.LockSupport;
+
+import com.caucho.util.Alarm;
 
 /**
  * A generic pool of threads available for Alarms and Work tasks.
  */
-abstract public class AbstractTaskWorker 
-  extends AbstractTaskWorker2
-  implements TaskWorker {
-  private ThreadPool _threadPool;
-  
-  protected AbstractTaskWorker()
+final class ThreadTask1 {
+  private final Runnable _runnable;
+  private final ClassLoader _loader;
+  private volatile Thread _thread;
+
+  ThreadTask1(Runnable runnable, ClassLoader loader, Thread thread)
   {
-    this(ThreadPool.getCurrent());
+    _runnable = runnable;
+    _loader = loader;
+    _thread = thread;
   }
 
-  protected AbstractTaskWorker(ThreadPool threadPool)
+  final Runnable getRunnable()
   {
-    this(Thread.currentThread().getContextClassLoader(), threadPool);
+    return _runnable;
   }
 
-  protected AbstractTaskWorker(ClassLoader classLoader,
-                               ThreadPool threadPool)
+  final ClassLoader getLoader()
   {
-    super(classLoader);
-    
-    _threadPool = threadPool;
-  }
-
-  @Override
-  protected void startWorkerThread()
-  {
-    _threadPool.schedulePriority(this);
+    return _loader;
   }
   
-    @Override
-  protected void unpark(Thread thread)
+  void clearThread()
   {
-    _threadPool.scheduleUnpark(thread);
+    _thread = null;
+  }
+
+  final void wake()
+  {
+    Thread thread = _thread;
+    _thread = null;
+
+    if (thread != null)
+      LockSupport.unpark(thread);
+  }
+
+  final void park(long expires)
+  {
+    Thread thread = _thread;
+
+    while (_thread != null
+           && Alarm.getCurrentTimeActual() < expires) {
+      try {
+        Thread.interrupted();
+        LockSupport.parkUntil(thread, expires);
+      } catch (Exception e) {
+      }
+    }
+
+    /*
+      if (_thread != null) {
+        System.out.println("TIMEOUT:" + thread);
+        Thread.dumpStack();
+      }
+     */
+
+    _thread = null;
   }
 }

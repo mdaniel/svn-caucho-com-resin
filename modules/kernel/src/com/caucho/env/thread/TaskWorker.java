@@ -29,31 +29,9 @@
 
 package com.caucho.env.thread;
 
-
 /**
- * A task worker based on the Resin thread pool.
+ * A generic pool of threads available for Alarms and Work tasks.
  */
-abstract public class TaskWorker extends AbstractTaskWorker {
-  private final ThreadPool _threadPool;
-  // private final ThreadRing _threadRing;
-
-  protected TaskWorker()
-  {
-    super(Thread.currentThread().getContextClassLoader());
-    
-    _threadPool = ThreadPool.getCurrent();
-    // _threadRing = _threadPool.getRing();
-    
-    // setWorkerIdleTimeout(0);
-    
-    // setLoopCount(1024);
-  }
-
-  @Override
-  protected void startWorkerThread()
-  {
-    _threadPool.schedulePriority(this);
-    
-    // _threadRing.schedule(this);
-  }
+public interface TaskWorker {
+  public void wake();
 }

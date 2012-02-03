@@ -29,69 +29,58 @@
 
 package com.caucho.env.thread;
 
-import java.util.concurrent.locks.LockSupport;
-
-import com.caucho.util.Alarm;
+import com.caucho.env.thread.SingleConsumerRing.RingItem;
+import com.caucho.env.thread.SingleConsumerRing.TaskFactory;
 
 /**
- * A generic pool of threads available for Alarms and Work tasks.
+ * Single-consumer queue.
  */
-final class ThreadTask {
-  private final Runnable _runnable;
-  private final ClassLoader _loader;
-  private volatile Thread _thread;
-
-  ThreadTask(Runnable runnable, ClassLoader loader, Thread thread)
+public class QueueWorker<T>
+{
+  private final SingleConsumerRing<T> _ring;
+  private final TaskFactory<T> _factory;
+  private final AbstractTaskWorker _consumerWorker;
+ 
+  public QueueWorker(int capacity, TaskFactory<T> factory)
   {
-    _runnable = runnable;
-    _loader = loader;
-    _thread = thread;
-  }
-
-  final Runnable getRunnable()
-  {
-    return _runnable;
-  }
-
-  final ClassLoader getLoader()
-  {
-    return _loader;
+    _factory = factory;
+    _consumerWorker = new ConsumerWorker();
+    _ring = new SingleConsumerRing<T>(capacity, factory, _consumerWorker);
   }
   
-  void clearThread()
+  public final boolean isEmpty()
   {
-    _thread = null;
+    return _ring.isEmpty();
+  }
+  
+  public final int getSize()
+  {
+    return _ring.getSize();
+  }
+  
+  public final RingItem<T> startProducer(boolean isWait)
+  {
+    return _ring.startProducer(isWait);
+  }
+  
+  public final void finishProducer(RingItem<T> item)
+  {
+    _ring.finishProducer(item);
   }
 
-  final void wake()
-  {
-    Thread thread = _thread;
-    _thread = null;
+  private final class ConsumerWorker extends AbstractTaskWorker {
+    @Override
+    public final long runTask()
+    {
+      _ring.consumeAll(_factory);
 
-    if (thread != null)
-      LockSupport.unpark(thread);
-  }
-
-  final void park(long expires)
-  {
-    Thread thread = _thread;
-
-    while (_thread != null
-           && Alarm.getCurrentTimeActual() < expires) {
-      try {
-        Thread.interrupted();
-        LockSupport.parkUntil(thread, expires);
-      } catch (Exception e) {
-      }
+      return 0;
     }
-
-    /*
-      if (_thread != null) {
-        System.out.println("TIMEOUT:" + thread);
-        Thread.dumpStack();
-      }
-     */
-
-    _thread = null;
+    
+    @Override
+    public String toString()
+    {
+      return getClass().getSimpleName() + "[" + _factory + "]";
+    }
   }
 }

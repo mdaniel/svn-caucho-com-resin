@@ -299,7 +299,7 @@ public class MultiworkerMailbox implements Mailbox, Closeable
     }
 
     for (MailboxWorker worker : _workers) {
-      worker.destroy();
+      worker.close();
     }
     
     _lifecycle.toDestroy();

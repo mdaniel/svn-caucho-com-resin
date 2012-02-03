@@ -33,12 +33,12 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 
 import com.caucho.bam.packet.Packet;
-import com.caucho.env.thread.TaskWorker;
+import com.caucho.env.thread.AbstractTaskWorker;
 
 /**
  * Queue of hmtp packets
  */
-public class MailboxWorker extends TaskWorker
+public class MailboxWorker extends AbstractTaskWorker
 {
   private static final Logger log
     = Logger.getLogger(MailboxWorker.class.getName());
@@ -52,7 +52,7 @@ public class MailboxWorker extends TaskWorker
   {
     _queue = queue;
     
-    setWorkerIdleTimeout(5000);
+    setWorkerIdleTimeout(500);
     
     _toString = getClass().getSimpleName() + "[" + _queue.getAddress() + "]";
   }

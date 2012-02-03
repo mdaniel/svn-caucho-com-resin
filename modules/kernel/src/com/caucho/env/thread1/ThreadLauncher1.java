@@ -27,7 +27,7 @@
  * @author Scott Ferguson
  */
 
-package com.caucho.env.thread;
+package com.caucho.env.thread1;
 
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.logging.Logger;
@@ -38,9 +38,9 @@ import com.caucho.env.shutdown.ShutdownSystem;
 import com.caucho.inject.Module;
 
 @Module
-class ThreadLauncher extends AbstractThreadLauncher {
+class ThreadLauncher1 extends AbstractThreadLauncher1 {
   private static final Logger log
-    = Logger.getLogger(ThreadLauncher.class.getName());
+    = Logger.getLogger(ThreadLauncher1.class.getName());
   
   public static final String THREAD_FULL_EVENT
     = "caucho.thread.pool.full";
@@ -49,13 +49,13 @@ class ThreadLauncher extends AbstractThreadLauncher {
   
   private static final int DEFAULT_PRIORITY_IDLE_MIN = 2;
   
-  private final ThreadPool _pool;
+  private final ThreadPool1 _pool;
   
   private int _priorityIdleMin;
   
   private final AtomicInteger _priorityIdleCount = new AtomicInteger();
 
-  ThreadLauncher(ThreadPool pool)
+  ThreadLauncher1(ThreadPool1 pool)
   {
     super(ClassLoader.getSystemClassLoader());
     
@@ -146,7 +146,7 @@ class ThreadLauncher extends AbstractThreadLauncher {
   protected void launchChildThread(int id)
   {
     try {
-      ResinThread poolThread = new ResinThread(id, _pool, this);
+      ResinThread1 poolThread = new ResinThread1(id, _pool, this);
       poolThread.start();
     } catch (Throwable e) {
       e.printStackTrace();

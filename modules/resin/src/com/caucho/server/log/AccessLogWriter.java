@@ -35,11 +35,11 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 
 import com.caucho.env.meter.SemaphoreMeter;
-import com.caucho.env.thread.TaskWorker;
+import com.caucho.env.thread.AbstractTaskWorker;
+import com.caucho.env.thread.AbstractWorkerQueue;
 import com.caucho.log.AbstractRolloverLog;
 import com.caucho.server.cache.TempFileService;
 import com.caucho.util.Alarm;
-import com.caucho.util.FreeList;
 import com.caucho.util.FreeRing;
 import com.caucho.util.L10N;
 import com.caucho.vfs.TempStreamApi;
@@ -62,11 +62,8 @@ public class AccessLogWriter extends AbstractRolloverLog
   private final FreeRing<LogBuffer> _freeList
     = new FreeRing<LogBuffer>(512);
 
-  private LogBuffer _logHead;
-  private LogBuffer _logTail;
-  private int _logQueueSize;
-
   private final LogWriterTask _logWriterTask = new LogWriterTask();
+  
   private SemaphoreMeter _semaphoreProbe;
   
   private TempFileService _tempService;
@@ -111,22 +108,7 @@ public class AccessLogWriter extends AbstractRolloverLog
 
   void writeBuffer(LogBuffer buffer)
   {
-    synchronized (_bufferLock) {
-      if (_logTail != null) {
-        _logTail.setNext(buffer);
-        _logTail = buffer;
-        _logQueueSize++;
-      }
-      else {
-        _logHead = buffer;
-        _logTail = buffer;
-        _logQueueSize = 1;
-      }
-    }
-
-    if (_logQueueSize > 64 || _isAutoFlush) {
-      _logWriterTask.wake();
-    }
+    _logWriterTask.offer(buffer);
   }
 
   // must be synchronized by _bufferLock.
@@ -134,7 +116,7 @@ public class AccessLogWriter extends AbstractRolloverLog
   protected void flush()
   {
     // server/021g
-    _logWriterTask.wake();
+    // _logWriterTask.wake();
     
     waitForFlush(10);
     
@@ -152,7 +134,7 @@ public class AccessLogWriter extends AbstractRolloverLog
     expire = Alarm.getCurrentTimeActual() + timeout;
 
     while (true) {
-      if (_logHead == null)
+      if (_logWriterTask.isEmpty())
         return;
 
       long delta;
@@ -165,7 +147,7 @@ public class AccessLogWriter extends AbstractRolloverLog
         delta = 50;
 
       try {
-        _logWriterTask.wake();
+        // _logWriterTask.wake();
 
         Thread.sleep(delta);
       } catch (Exception e) {
@@ -173,40 +155,9 @@ public class AccessLogWriter extends AbstractRolloverLog
     }
   }
 
-  private boolean flushBuffer()
-  {
-    LogBuffer ptr = null;
-
-    synchronized (_bufferLock) {
-      ptr = _logHead;
-      _logHead = null;
-      _logTail = null;
-      _logQueueSize = 0;
-    }
-
-    if (ptr == null)
-      return false;
-
-    while (ptr != null) {
-      LogBuffer next = ptr.getNext();
-      ptr.setNext(null);
-
-      try {
-        write(ptr.getBuffer(), 0, ptr.getLength());
-      } catch (Throwable e) {
-        log.log(Level.WARNING, e.toString(), e);
-      } finally {
-        freeBuffer(ptr);
-      }
-
-      ptr = next;
-    }
-
-    return true;
-  }
-
   LogBuffer allocateBuffer()
   {
+    /*
     try {
       Thread.interrupted();
       _logSemaphore.acquire();
@@ -216,6 +167,7 @@ public class AccessLogWriter extends AbstractRolloverLog
     } catch (Exception e) {
       e.printStackTrace();
     }
+    */
 
     LogBuffer buffer = _freeList.allocate();
 
@@ -227,12 +179,13 @@ public class AccessLogWriter extends AbstractRolloverLog
 
   void freeBuffer(LogBuffer logBuffer)
   {
+    /*
     _logSemaphore.release();
     
     if (_semaphoreProbe != null)
       _semaphoreProbe.release();
-
-    logBuffer.setNext(null);
+*/
+    // logBuffer.setNext(null);
 
     _freeList.free(logBuffer);
   }
@@ -249,23 +202,37 @@ public class AccessLogWriter extends AbstractRolloverLog
   public void destroy()
     throws IOException
   {
-    _logWriterTask.destroy();
+    // _logWriterTask.close();
   }
 
-  class LogWriterTask extends TaskWorker {
-    @Override
-    public long runTask()
+  class LogWriterTask extends AbstractWorkerQueue<LogBuffer> {
+    LogWriterTask()
     {
-      while (flushBuffer()) {
-      }
+      super(16 * 1024);
+    }
 
+    @Override
+    protected void processValue(LogBuffer value)
+    {
+      try {
+        if (value != null)
+          write(value.getBuffer(), 0, value.getLength());
+      } catch (Throwable e) {
+        log.log(Level.WARNING, e.toString(), e);
+      } finally {
+        if (value != null)
+          freeBuffer(value);
+      }
+    }
+
+    @Override
+    protected void processOnComplete()
+    {
       try {
         flushStream();
       } catch (IOException e) {
         log.log(Level.FINE, e.toString(), e);
       }
-      
-      return -1;
     }
   }
 }

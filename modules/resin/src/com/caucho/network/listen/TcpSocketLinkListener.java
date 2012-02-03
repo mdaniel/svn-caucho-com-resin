@@ -80,7 +80,7 @@ public class TcpSocketLinkListener
   private static final Logger log
     = Logger.getLogger(TcpSocketLinkListener.class.getName());
   
-  private static final int ACCEPT_IDLE_MIN = 16;
+  private static final int ACCEPT_IDLE_MIN = 4;
   private static final int ACCEPT_IDLE_MAX = 64;
   
   private static final int ACCEPT_THROTTLE_LIMIT = 1024;
@@ -1437,9 +1437,9 @@ public class TcpSocketLinkListener
     try {
       int result;
       
-      if (_keepaliveThreadCount.get() < 32) {
+      if (false && _keepaliveThreadCount.get() < 32) {
         // benchmark perf with memcache
-        result = is.fillBuffer();
+        result = is.fillWithTimeout(-1);
       }
       else {
         result = is.fillWithTimeout(timeout);
@@ -1660,7 +1660,7 @@ public class TcpSocketLinkListener
     if (log.isLoggable(Level.FINE))
       log.fine(this + " closing");
 
-    _launcher.destroy();
+    _launcher.close();
 
     Alarm suspendAlarm = _suspendAlarm;
     _suspendAlarm = null;

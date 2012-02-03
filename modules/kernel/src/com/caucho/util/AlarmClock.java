@@ -57,9 +57,6 @@ public class AlarmClock {
   
   private long _lastTime;
   
-  private ArrayList<Alarm> _overflow
-    = new ArrayList<Alarm>();
-  
   private Object _lock = new Object();
   
   private ThreadPool _threadPool = ThreadPool.getThreadPool();
@@ -232,8 +229,9 @@ public class AlarmClock {
     
     long nextTime = _nextAlarmTime.get();
     
-    if (now < nextTime)
+    if (now < nextTime) {
       return nextTime;
+    }
     
     _nextAlarmTime.set(now + CLOCK_NEXT);
     
@@ -342,10 +340,12 @@ public class AlarmClock {
         e.printStackTrace();
       }
     }
-    else if (alarm.isPriority())
+    else if (alarm.isPriority()) {
       _threadPool.schedulePriority(alarm);
-    else
+    }
+    else {
       _threadPool.schedule(alarm);
+    }
   }
   
   private int getBucket(long time)

@@ -32,14 +32,8 @@ package com.caucho.env.thread2;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.atomic.AtomicReference;
-import java.util.logging.Level;
-import java.util.logging.Logger;
-
-import com.caucho.env.thread.ThreadPool;
 
 public class ThreadIdleRing2 {
-  private static final Logger log = Logger.getLogger(ThreadIdleRing2.class.getName());
-  
   private final static int RING_SIZE = 16 * 1024;
   
   private final ResinThread2 [] _ring;
@@ -71,7 +65,6 @@ public class ThreadIdleRing2 {
   {
     int head;
     int nextHead;
-    Item item;
     
     if (thread == null) {
       throw new IllegalStateException();
@@ -99,8 +92,6 @@ public class ThreadIdleRing2 {
   {
     int tail;
     int nextTail;
-    
-    Item item;
     
     ResinThread2 thread = null;
 
@@ -148,30 +139,6 @@ public class ThreadIdleRing2 {
       }
       
       return true;
-    }
-
-    private final void schedule(ResinThread2 thread)
-    {
-      Runnable task;
-      
-      if (! _isSet.get()) {
-        System.out.println("BAD7:" + _isSet.get()
-                           + " " + _head.get() + " " + _tail.get());
-        
-      }
-    
-      while ((task = _taskRef.getAndSet(null)) == null) {
-        System.out.println("BAD2:" + _isSet.get()
-                           + " " + _head.get() + " " + _tail.get());
-      }
-    
-      ClassLoader loader = _loaderRef.getAndSet(null);
-
-      thread.scheduleTask(task, loader);
-      
-      if (! _isSet.getAndSet(false)) {
-        System.out.println("BAD4:");
-      }
     }
   }
 }

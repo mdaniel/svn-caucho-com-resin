@@ -68,9 +68,10 @@ import com.caucho.distcache.ByteStreamCache;
 import com.caucho.distcache.ExtCacheEntry;
 import com.caucho.distcache.ObjectCache;
 import com.caucho.env.distcache.CacheDataBacking;
+import com.caucho.env.thread.AbstractWorkerQueue;
+import com.caucho.env.thread.QueueWorker;
 import com.caucho.loader.Environment;
 import com.caucho.management.server.AbstractManagedObject;
-import com.caucho.mqueue.MemoryQueueWorker;
 import com.caucho.server.distcache.CacheStoreManager.DataItem;
 import com.caucho.util.Alarm;
 import com.caucho.util.ConcurrentArrayList;
@@ -1292,16 +1293,18 @@ public class CacheImpl<K,V>
   }
   
   static class LoadQueueWorker<K,V> 
-    extends MemoryQueueWorker<LoadFuture<K,V>> {
+    extends AbstractWorkerQueue<LoadFuture<K,V>> {
     private CacheImpl<K,V> _cache;
     
     LoadQueueWorker(CacheImpl<K,V> cache)
     {
+      super(256);
+      
       _cache = cache;
     }
     
     @Override
-    protected void processItem(LoadFuture<K,V> item)
+    protected void processValue(LoadFuture<K,V> item)
     {
       CacheImpl<K,V> cache = _cache;
       
