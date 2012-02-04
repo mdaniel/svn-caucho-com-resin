@@ -62,7 +62,7 @@ public final class MQueueDisruptor<T>
   public MQueueDisruptor(int capacity,
                          MQueueItemFactory<T> itemFactory)
   {
-    int size = 1;
+    int size = 8;
     
     for (; size < capacity; size *= 2) {
     }
@@ -73,8 +73,13 @@ public final class MQueueDisruptor<T>
     
     _itemRing = new MQueueItem[size];
     
-    for (int i = 0; i < _size; i++) {
-      _itemRing[i] = new MQueueItem<T>(i, itemFactory.create(i));
+    // offset to avoid cpu cache conflicts
+    for (int j = 0; j < 8; j++) {
+      for (int i = 0; i < _size; i += 8) {
+        int index = i + j;
+        
+        _itemRing[index] = new MQueueItem<T>(index, itemFactory.create(index));
+      }
     }
     
     _factory = itemFactory;

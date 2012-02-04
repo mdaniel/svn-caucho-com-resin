@@ -460,8 +460,10 @@ public final class MQueueJournalFile
     Block tailBlock = _tailBlock;
     _tailBlock = null;
     
-    if (tailBlock != null)
+    if (tailBlock != null) {
       tailBlock.free();
+      tailBlock.commit();
+    }
     
     int seq = (_seq + 1) & FLAG_SEQ;
     

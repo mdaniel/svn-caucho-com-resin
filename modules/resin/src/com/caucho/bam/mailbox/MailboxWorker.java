@@ -51,8 +51,9 @@ public class MailboxWorker extends AbstractTaskWorker
   public MailboxWorker(MultiworkerMailbox queue)
   {
     _queue = queue;
-    
-    setWorkerIdleTimeout(500);
+
+    // can't wait until spawning is fixed
+    setWorkerIdleTimeout(0);
     
     _toString = getClass().getSimpleName() + "[" + _queue.getAddress() + "]";
   }

@@ -408,22 +408,24 @@ class WatchdogClient
 
   private ActorSender getConnection()
   {
-    if (_conn == null) {
-      String url = ("http://" + getWatchdogAddress()
-                    + ":" + getWatchdogPort()
-                    + "/hmtp");
-      
-      HmtpClient client = new HmtpClient(url);
+    synchronized (this) {
+      if (_conn == null) {
+        String url = ("http://" + getWatchdogAddress()
+            + ":" + getWatchdogPort()
+            + "/hmtp");
+        
+        HmtpClient client = new HmtpClient(url);
 
-      client.setVirtualHost("admin.resin");
+        client.setVirtualHost("admin.resin");
+        
+        String uid = "";
       
-      String uid = "";
-      
-      client.setEncryptPassword(true);
+        client.setEncryptPassword(true);
 
-      client.connect(uid, getResinSystemAuthKey());
+        client.connect(uid, getResinSystemAuthKey());
 
-      _conn = client;
+        _conn = client;
+      }
     }
 
     return _conn;

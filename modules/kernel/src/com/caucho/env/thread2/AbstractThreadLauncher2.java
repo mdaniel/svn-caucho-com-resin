@@ -39,6 +39,7 @@ import com.caucho.inject.Module;
 import com.caucho.lifecycle.Lifecycle;
 import com.caucho.util.Alarm;
 import com.caucho.util.L10N;
+import com.caucho.util.ThreadDump;
 
 @Module
 abstract public class AbstractThreadLauncher2 extends AbstractTaskWorker2 {
@@ -514,7 +515,9 @@ abstract public class AbstractThreadLauncher2 extends AbstractTaskWorker2 {
     if (_throttleCount < _throttleLimit) {
       return;
     }
-    System.out.println("THROTTLE: " + _throttleCount + " " + this);
+    System.out.println("THROTTLE: " + _throttleCount + " " + this
+                       + " idle:" + getIdleCount());
+    
     if (! _isThrottle) {
       _isThrottle = true;
       
