@@ -58,7 +58,6 @@ import com.caucho.util.L10N;
 import com.caucho.vfs.NullWriteStream;
 import com.caucho.vfs.Path;
 import com.caucho.vfs.WriteStream;
-import com.caucho.xmpp.disco.DiscoInfoQuery;
 
 import javax.annotation.PostConstruct;
 import javax.inject.Inject;
@@ -208,10 +207,6 @@ public class BamPhpActor extends SimpleActor {
   public void query(long id, String to, String from, Serializable value)
   {
     BamEventType eventType = BamEventType.QUERY_GET;
-
-    // XXX move to override of introspected method
-    if (value instanceof DiscoInfoQuery)
-      eventType = BamEventType.GET_DISCO_FEATURES;
 
     Env env = createEnv(_page, eventType, to, from, value);
     boolean understood = false;

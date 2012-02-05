@@ -40,7 +40,7 @@ import com.caucho.mqueue.MQueueDisruptor.ItemProcessor;
  * single thread.
  */
 public class MQueueJournalItemProcessor
-  extends ItemProcessor<MQueueJournalEntry>
+  extends ItemProcessor<JournalFileItem>
 {
   private final MQueueJournalFile _journalFile;
   
@@ -50,7 +50,7 @@ public class MQueueJournalItemProcessor
   }
 
   @Override
-  public final void process(MQueueJournalEntry entry)
+  public final void process(JournalFileItem entry)
     throws IOException
   {
     if (entry.isData())
@@ -59,7 +59,7 @@ public class MQueueJournalItemProcessor
       processCheckpoint(entry);
   }
   
-  private final void processData(MQueueJournalEntry entry)
+  private final void processData(JournalFileItem entry)
     throws IOException
   {
       int code = entry.getCode();
@@ -77,38 +77,12 @@ public class MQueueJournalItemProcessor
       _journalFile.write(code, entry.isInit(), entry.isFin(),
                          id, sequence,
                          buffer, entry.getOffset(), entry.getLength(),
-                         entry.getResult());
+                         result);
     
       entry.freeTempBuffer();
-      
-      MQueueJournalCallback cb = entry.getCallback();
-      
-      boolean isInit = true;
-      boolean isFinal = true;
-      
-      long addr2 = result.getBlockAddr2();
-      
-      boolean isFinal1 = isFinal;
-      
-      if (addr2 > 0)
-        isFinal1 = false;
-      
-      cb.onData(code, isInit, isFinal1, id, sequence, 
-                result.getBlockStore(), 
-                result.getBlockAddr1(), 
-                result.getOffset1(),
-                result.getLength1());
-      
-      if (addr2 > 0) {
-        cb.onData(code, false, isFinal, id, sequence, 
-                  result.getBlockStore(), 
-                  addr2,
-                  result.getOffset2(),
-                  result.getLength2());
-      }
-  }
+   }
   
-  private final void processCheckpoint(MQueueJournalEntry entry)
+  private final void processCheckpoint(JournalFileItem entry)
     throws IOException
   {
     long blockAddr = entry.getBlockAddr();

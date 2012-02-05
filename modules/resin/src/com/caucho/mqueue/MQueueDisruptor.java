@@ -52,7 +52,7 @@ public final class MQueueDisruptor<T extends DisruptorItem>
   private final int _mask;
   private final T []_itemRing;
   
-  private final DisruptorWorker<T> _firstWorker;
+  private final DisruptorWorker<? super T> _firstWorker;
   
   private final AtomicInteger _headAlloc = new AtomicInteger();
   private volatile int _head;
@@ -62,7 +62,7 @@ public final class MQueueDisruptor<T extends DisruptorItem>
  
   public MQueueDisruptor(int capacity,
                          ItemFactory<T> itemFactory,
-                         ItemProcessor<T> ...processors)
+                         ItemProcessor<? super T> ...processors)
   {
     if (processors.length < 1)
       throw new IllegalArgumentException();
@@ -228,7 +228,7 @@ public final class MQueueDisruptor<T extends DisruptorItem>
     
     private final int _tailChunk;
     
-    private final ItemProcessor<T> _processor;
+    private final ItemProcessor<? super T> _processor;
     
     private final DisruptorIndex _head;
     
@@ -238,7 +238,7 @@ public final class MQueueDisruptor<T extends DisruptorItem>
     private final AtomicBoolean _isWaitRef;
     
     DisruptorConsumer(T []ring,
-                     ItemProcessor<T> processor,
+                     ItemProcessor<? super T> processor,
                      DisruptorIndex head,
                      AtomicBoolean isWaitRef)
     {
@@ -317,7 +317,7 @@ public final class MQueueDisruptor<T extends DisruptorItem>
         head = (tail + tailChunk) & mask & ~tailChunkMask;
       }
       
-      final ItemProcessor<T> processor = _processor;
+      final ItemProcessor<? super T> processor = _processor;
       final DisruptorWorker<T> nextWorker = _nextWorker;
       
       final AtomicBoolean isWait = _isWaitRef;

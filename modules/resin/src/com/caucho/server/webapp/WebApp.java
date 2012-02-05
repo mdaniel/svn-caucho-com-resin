@@ -119,7 +119,6 @@ import com.caucho.env.deploy.EnvironmentDeployInstance;
 import com.caucho.env.deploy.RepositoryDependency;
 import com.caucho.i18n.CharacterEncoding;
 import com.caucho.java.WorkDir;
-import com.caucho.jsf.cfg.JsfPropertyGroup;
 import com.caucho.jsp.JspServlet;
 import com.caucho.jsp.cfg.JspConfig;
 import com.caucho.jsp.cfg.JspPropertyGroup;
@@ -391,7 +390,6 @@ public class WebApp extends ServletContextImpl
   // special
   private int _jspState;
   private JspPropertyGroup _jsp;
-  private JsfPropertyGroup _jsf;
 
   private ArrayList<JspTaglib> _taglibList;
   private JspApplicationContextImpl _jspApplicationContext;
@@ -2258,26 +2256,6 @@ public class WebApp extends ServletContextImpl
   public JspPropertyGroup getJsp()
   {
     return _jsp;
-  }
-
-  /**
-   * jsf configuration
-   */
-  public JsfPropertyGroup createJsf()
-  {
-    if (_jsf == null)
-      _jsf = new JsfPropertyGroup();
-
-    return _jsf;
-  }
-
-  /**
-   * Returns the JSF configuration
-   */
-  @Configurable
-  public JsfPropertyGroup getJsf()
-  {
-    return _jsf;
   }
 
   public boolean isFacesServletConfigured()

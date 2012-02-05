@@ -38,7 +38,7 @@ import com.caucho.vfs.TempBuffer;
  * MQueueJournal is not thread safe. It is intended to be used by a
  * single thread.
  */
-public final class MQueueJournalEntry extends DisruptorItem
+public class JournalFileItem extends DisruptorItem
 {
   private boolean _isData;
   
@@ -60,7 +60,7 @@ public final class MQueueJournalEntry extends DisruptorItem
   
   private TempBuffer _tBuf;
   
-  public MQueueJournalEntry(int index)
+  public JournalFileItem(int index)
   {
     super(index);
   }
@@ -92,6 +92,11 @@ public final class MQueueJournalEntry extends DisruptorItem
     _blockAddr = blockAddr;
     _offset = offset;
     _length = length;
+  }
+  
+  public final void setCode(int code)
+  {
+    _code = code;
   }
   
   public final boolean isData()

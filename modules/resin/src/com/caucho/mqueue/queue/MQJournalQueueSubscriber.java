@@ -40,31 +40,32 @@ import com.caucho.vfs.TempBuffer;
  * MQueueJournal is not thread safe. It is intended to be used by a
  * single thread.
  */
-public class MQJournalQueuePublisher
+public class MQJournalQueueSubscriber
 {
   private MQJournalQueue _queue;
   private MQueueDisruptor<JournalQueueEntry> _disruptor;
   
-  private long _id = 3;
-  private long _sequence;
-  
-  MQJournalQueuePublisher(MQJournalQueue queue)
+  MQJournalQueueSubscriber(MQJournalQueue queue)
   {
     _queue = queue;
+    
     _disruptor = queue.getDisruptor();
   }
   
-  public void write(byte []buffer, int offset, int length, TempBuffer tBuf)
+  public void start()
   {
-    long sequence = _sequence++;
-    
     JournalQueueEntry entry = _disruptor.startProducer(true);
     
-    entry.init('D', _id, sequence, buffer, offset, length, null, tBuf);
+    entry.initSubscribe(this);
     
     _disruptor.finishProducer(entry);
-    
     _disruptor.wake();
+  }
+  
+  boolean offerEntry(long sequence)
+  {
+    System.out.println("OFFER: " + sequence);
+    return true;
   }
   
   public String toString()

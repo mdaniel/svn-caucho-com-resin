@@ -33,8 +33,9 @@ import java.util.logging.Logger;
 
 import com.caucho.db.block.BlockStore;
 import com.caucho.mqueue.MQueueDisruptor.ItemProcessor;
-import com.caucho.mqueue.journal.MQueueJournalEntry;
+import com.caucho.mqueue.journal.JournalFileItem;
 import com.caucho.mqueue.journal.MQueueJournalResult;
+import com.caucho.util.ConcurrentArrayList;
 
 /**
  * Interface for the transaction log.
@@ -43,13 +44,16 @@ import com.caucho.mqueue.journal.MQueueJournalResult;
  * single thread.
  */
 class JournalQueueActor
-  extends ItemProcessor<MQueueJournalEntry>
+  extends ItemProcessor<JournalQueueEntry>
 {
   private static final Logger log
     = Logger.getLogger(ItemProcessor.class.getName());
   
   private QueueEntry _head;
   private QueueEntry _tail;
+  
+  private ConcurrentArrayList<SubscriberNode> _subscriberList
+    = new ConcurrentArrayList<SubscriberNode>(SubscriberNode.class);
   
   private int _size;
   
@@ -59,7 +63,7 @@ class JournalQueueActor
   }
 
   @Override
-  public void process(MQueueJournalEntry entry)
+  public void process(JournalQueueEntry entry)
     throws Exception
   {
     MQueueJournalResult result = entry.getResult();
@@ -83,6 +87,14 @@ class JournalQueueActor
                     result.getOffset2(),
                     result.getLength2());
       }
+      break;
+      
+    case 'S':
+      subscribe(entry.getSubscriber());
+      break;
+      
+    case 'U':
+      unsubscribe(entry.getSubscriber());
       break;
       
     default:
@@ -109,6 +121,49 @@ class JournalQueueActor
     _size++;
     
     System.out.println("ITEM: " + Long.toHexString(blockAddr) + " " + offset + " " + length);
+  }
+  
+  private void subscribe(MQJournalQueueSubscriber subscriber)
+  {
+    System.out.println("SUBSCRIBE: " + subscriber);
+    
+    SubscriberNode node = new SubscriberNode(subscriber);
+    
+    _subscriberList.add(node);
+    
+    send();
+  }
+  
+  private void unsubscribe(MQJournalQueueSubscriber subscriber)
+  {
+    System.out.println("SUBSCRIBE: " + subscriber);
+    
+    for (SubscriberNode node : _subscriberList.toArray()) {
+      if (node.getSubscriber() == subscriber) {
+        _subscriberList.remove(node);
+      }
+    }
+    // _subscriberList.remove(subscriber);
+  }
+  
+  private void send()
+  {
+    if (_head == null) {
+      return;
+    }
+    
+    for (SubscriberNode node : _subscriberList.toArray()) {
+      MQJournalQueueSubscriber sub = node.getSubscriber();
+      
+      System.out.println("SEND: " + node.getSubscriber());
+      
+      QueueEntry entry = _head;
+      _head = _head.getNext();
+      if (_head == null)
+        _tail = null;
+      
+      sub.offerEntry(entry.getSequence());
+    }
   }
   
   public String toString()
@@ -140,6 +195,19 @@ class JournalQueueActor
     {
       _next = next;
     }
+  }
+  
+  public static class SubscriberNode {
+    private final MQJournalQueueSubscriber _subscriber;
     
+    SubscriberNode(MQJournalQueueSubscriber subscriber)
+    {
+      _subscriber = subscriber;
+    }
+    
+    public MQJournalQueueSubscriber getSubscriber()
+    {
+      return _subscriber;
+    }
   }
 }

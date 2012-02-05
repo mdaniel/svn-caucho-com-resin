@@ -54,7 +54,6 @@ import com.caucho.server.webapp.WebAppController;
 import com.caucho.util.L10N;
 import com.caucho.vfs.Path;
 import com.caucho.vfs.Vfs;
-import com.caucho.jsf.cfg.JsfPropertyGroup;
 
 import javax.annotation.*;
 import javax.servlet.SingleThreadModel;
@@ -95,8 +94,6 @@ public class JspCompiler implements EnvironmentBean {
   private final TagFileManager _tagFileManager;
 
   private JspPropertyGroup _jspPropertyGroup;
-
-  private JsfPropertyGroup _jsfPropertyGroup;
 
   private boolean _isXml;
   private ArrayList<String> _preludeList = new ArrayList<String>();
@@ -312,24 +309,6 @@ public class JspCompiler implements EnvironmentBean {
   public JspPropertyGroup getJspPropertyGroup()
   {
     return _jspPropertyGroup;
-  }
-
-  /**
-   * Sets JsfPropertyGropu
-   */
-  public JsfPropertyGroup createJsf() {
-    if (_jsfPropertyGroup == null)
-      _jsfPropertyGroup = new JsfPropertyGroup();
-
-    return _jsfPropertyGroup;
-  }
-
-  /**
-   * Gets JsfPropertyGroup
-   */
-  public JsfPropertyGroup getJsfPropertyGroup()
-  {
-    return _jsfPropertyGroup;
   }
 
   /**

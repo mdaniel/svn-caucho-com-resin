@@ -58,7 +58,6 @@ import com.caucho.util.L10N;
 import com.caucho.vfs.NullWriteStream;
 import com.caucho.vfs.Path;
 import com.caucho.vfs.WriteStream;
-import com.caucho.xmpp.disco.DiscoInfoQuery;
 
 import javax.annotation.PostConstruct;
 import javax.sql.DataSource;

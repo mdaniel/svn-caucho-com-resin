@@ -43,7 +43,6 @@ import com.caucho.util.L10N;
 import com.caucho.vfs.Path;
 import com.caucho.vfs.PersistentDependency;
 import com.caucho.xml.Xml;
-import com.caucho.jsf.cfg.JsfPropertyGroup;
 
 import org.xml.sax.SAXException;
 
@@ -78,8 +77,6 @@ public class JspCompilerInstance {
   private String _className;
 
   private JspPropertyGroup _jspPropertyGroup;
-
-  private JsfPropertyGroup _jsfPropertyGroup;
 
   // The builder
   private JspBuilder _jspBuilder;
@@ -360,12 +357,6 @@ public class JspCompilerInstance {
         taglibManager.setTldFileSet(jspPropertyGroup.getTldFileSet());
     }
 
-    if (_jsfPropertyGroup == null)
-      _jsfPropertyGroup = _jspCompiler.getJsfPropertyGroup();
-
-    if (_jsfPropertyGroup == null && app != null)
-       _jsfPropertyGroup = app.getJsf();
-
     _parseState.setResourceManager(resourceManager);
     LineMap lineMap = null;
 
@@ -377,7 +368,6 @@ public class JspCompilerInstance {
     _jspBuilder.setParseState(_parseState);
     _jspBuilder.setJspCompiler(_jspCompiler);
     _jspBuilder.setJspPropertyGroup(_jspPropertyGroup);
-    _jspBuilder.setJsfPropertyGroup(_jsfPropertyGroup);
     _jspBuilder.setTagManager(_tagManager);
     _jspBuilder.setPageConfig(pageConfig);
     _jspBuilder.setPrototype(_isPrototype);

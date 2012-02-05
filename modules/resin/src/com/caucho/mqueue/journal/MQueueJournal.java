@@ -50,7 +50,7 @@ public class MQueueJournal
   private final Path _path;
   private final MQueueJournalFile _journalFile;
   
-  private final MQueueDisruptor<MQueueJournalEntry> _disruptor;
+  private final MQueueDisruptor<JournalFileItem> _disruptor;
   
   public MQueueJournal(Path path,
                        JournalRecoverListener listener)
@@ -62,7 +62,7 @@ public class MQueueJournal
     
     JournalFactory factory = new JournalFactory();
     
-    _disruptor = new MQueueDisruptor<MQueueJournalEntry>(size, factory, factory);
+    _disruptor = new MQueueDisruptor<JournalFileItem>(size, factory, factory);
   }
   
   public void write(int code, long id, long seq,
@@ -76,7 +76,7 @@ public class MQueueJournal
     if (callback == null)
       throw new NullPointerException();
     
-    MQueueJournalEntry entry = _disruptor.startProducer(true);
+    JournalFileItem entry = _disruptor.startProducer(true);
     
     entry.init(code, id, seq, buffer, offset, length, callback, tBuf);
     
@@ -85,7 +85,7 @@ public class MQueueJournal
   
   public void checkpoint(long blockAddr, int offset, int length)
   {
-    MQueueJournalEntry entry = null;
+    JournalFileItem entry = null;
     
     if ((entry = _disruptor.startProducer(false)) == null) {
       return;
@@ -96,7 +96,7 @@ public class MQueueJournal
     _disruptor.finishProducer(entry);
   }
   
-  private final void processEntry(MQueueJournalEntry entry)
+  private final void processEntry(JournalFileItem entry)
     throws IOException
   {
     if (entry.isData())
@@ -105,7 +105,7 @@ public class MQueueJournal
       processCheckpoint(entry);
   }
   
-  private final void processData(MQueueJournalEntry entry)
+  private final void processData(JournalFileItem entry)
     throws IOException
   {
       int code = entry.getCode();
@@ -154,7 +154,7 @@ public class MQueueJournal
       }
   }
   
-  private final void processCheckpoint(MQueueJournalEntry entry)
+  private final void processCheckpoint(JournalFileItem entry)
     throws IOException
   {
       long blockAddr = entry.getBlockAddr();
@@ -176,16 +176,16 @@ public class MQueueJournal
   }
   
   private class JournalFactory
-    extends ItemProcessor<MQueueJournalEntry>
-    implements ItemFactory<MQueueJournalEntry> { 
+    extends ItemProcessor<JournalFileItem>
+    implements ItemFactory<JournalFileItem> { 
     @Override
-    public MQueueJournalEntry createItem(int index)
+    public JournalFileItem createItem(int index)
     {
-      return new MQueueJournalEntry(index);
+      return new JournalFileItem(index);
     }
 
     @Override
-    public final void process(MQueueJournalEntry entry)
+    public final void process(JournalFileItem entry)
       throws IOException
     {
       processEntry(entry);

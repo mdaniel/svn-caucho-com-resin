@@ -37,7 +37,7 @@ import com.caucho.mqueue.MQueueDisruptor;
 import com.caucho.mqueue.MQueueDisruptor.ItemFactory;
 import com.caucho.mqueue.journal.JournalRecoverListener;
 import com.caucho.mqueue.journal.MQueueJournalCallback;
-import com.caucho.mqueue.journal.MQueueJournalEntry;
+import com.caucho.mqueue.journal.JournalFileItem;
 import com.caucho.mqueue.journal.MQueueJournalFile;
 import com.caucho.mqueue.journal.MQueueJournalItemProcessor;
 /**
@@ -52,7 +52,7 @@ public class MQJournalQueue
   private MQueueJournalFile _journalFile;
   private JournalQueueActor _journalActor;
   
-  private MQueueDisruptor<MQueueJournalEntry> _disruptorQueue;
+ MQueueDisruptor<JournalQueueEntry> _disruptorQueue;
   
   public MQJournalQueue(Path path)
   {
@@ -63,8 +63,8 @@ public class MQJournalQueue
     
     _journalActor = new JournalQueueActor();
     
-    _disruptorQueue = new MQueueDisruptor<MQueueJournalEntry>(8192,
-                      new JournalItemFactory(),
+    _disruptorQueue = new MQueueDisruptor<JournalQueueEntry>(8192,
+                      new JournalQueueFactory(),
                       new MQueueJournalItemProcessor(_journalFile),
                       _journalActor);
   }
@@ -74,7 +74,7 @@ public class MQJournalQueue
     return _journalActor.getSize();
   }
   
-  MQueueDisruptor<MQueueJournalEntry> getDisruptor()
+  MQueueDisruptor<JournalQueueEntry> getDisruptor()
   {
     return _disruptorQueue;
   }
@@ -84,16 +84,21 @@ public class MQJournalQueue
     return new MQJournalQueuePublisher(this);
   }
   
+  public MQJournalQueueSubscriber createSubscriber()
+  {
+    return new MQJournalQueueSubscriber(this);
+  }
+  
   public String toString()
   {
     return getClass().getSimpleName() + "[" + _path + "]";
   }
   
-  static class JournalItemFactory implements ItemFactory<MQueueJournalEntry> {
+  static class JournalQueueFactory implements ItemFactory<JournalQueueEntry> {
     @Override
-    public MQueueJournalEntry createItem(int index)
+    public JournalQueueEntry createItem(int index)
     {
-      return new MQueueJournalEntry(index);
+      return new JournalQueueEntry(index);
     }
     
   }

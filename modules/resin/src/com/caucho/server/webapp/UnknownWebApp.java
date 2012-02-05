@@ -119,7 +119,6 @@ import com.caucho.env.deploy.EnvironmentDeployInstance;
 import com.caucho.env.deploy.RepositoryDependency;
 import com.caucho.i18n.CharacterEncoding;
 import com.caucho.java.WorkDir;
-import com.caucho.jsf.cfg.JsfPropertyGroup;
 import com.caucho.jsp.JspServlet;
 import com.caucho.jsp.cfg.JspConfig;
 import com.caucho.jsp.cfg.JspPropertyGroup;
