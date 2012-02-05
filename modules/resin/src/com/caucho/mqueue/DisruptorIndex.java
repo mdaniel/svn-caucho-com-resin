@@ -29,67 +29,10 @@
 
 package com.caucho.mqueue;
 
-import java.util.concurrent.atomic.AtomicBoolean;
-
 /**
- * Item for the disruptor.
+ * index for the disruptor.
  */
-public final class MQueueItem<T>
+abstract class DisruptorIndex
 {
-  private final int _index;
-  
-  private final T _value;
-  
-  // private volatile boolean _isValid; // volatile int _sequence;
-  
-  private final AtomicBoolean _isValid = new AtomicBoolean();
-  
-  MQueueItem(int index, T value)
-  {
-    _index = index;
-    _value = value;
-  }
-  
-  public final int getIndex()
-  {
-    return _index;
-  }
-  
-  public final T getValue()
-  {
-    return _value;
-  }
-  
-  /*
-  public void setSequence(int sequence)
-  {
-    _sequence = sequence;
-  }
-  
-  public int getSequence()
-  {
-    return _sequence;
-  }
-  */
-  
-  public final boolean isValid()
-  {
-    return _isValid.get();
-  }
-  
-  public final void clearValid()
-  {
-    _isValid.set(false);
-  }
-  
-  public final void setValid()
-  {
-    _isValid.set(true);
-  }
-
-  @Override
-  public String toString()
-  {
-    return getClass().getSimpleName() + "[" + _index + "," + _value + "]";
-  }
+  abstract int get();
 }

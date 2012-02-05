@@ -29,7 +29,7 @@
 
 package com.caucho.mqueue.journal;
 
-import com.caucho.vfs.Path;
+import com.caucho.mqueue.DisruptorItem;
 import com.caucho.vfs.TempBuffer;
 
 /**
@@ -38,7 +38,7 @@ import com.caucho.vfs.TempBuffer;
  * MQueueJournal is not thread safe. It is intended to be used by a
  * single thread.
  */
-public final class MQueueJournalEntry
+public final class MQueueJournalEntry extends DisruptorItem
 {
   private boolean _isData;
   
@@ -59,6 +59,11 @@ public final class MQueueJournalEntry
   private final MQueueJournalResult _result = new MQueueJournalResult();
   
   private TempBuffer _tBuf;
+  
+  public MQueueJournalEntry(int index)
+  {
+    super(index);
+  }
   
   public final void init(int code, long id, long seq,
                          byte []buffer, int offset, int length,

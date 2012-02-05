@@ -30,14 +30,8 @@
 package com.caucho.mqueue.journal;
 
 import java.io.IOException;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 
-import com.caucho.mqueue.MQueueDisruptor;
-import com.caucho.mqueue.MQueueDisruptor.ItemFactory;
 import com.caucho.mqueue.MQueueDisruptor.ItemProcessor;
-import com.caucho.vfs.Path;
-import com.caucho.vfs.TempBuffer;
 
 /**
  * Interface for the transaction log.
@@ -45,58 +39,18 @@ import com.caucho.vfs.TempBuffer;
  * MQueueJournal is not thread safe. It is intended to be used by a
  * single thread.
  */
-public class MQueueJournal
+public class MQueueJournalItemProcessor
+  extends ItemProcessor<MQueueJournalEntry>
 {
-  private final Path _path;
   private final MQueueJournalFile _journalFile;
   
-  private final MQueueDisruptor<MQueueJournalEntry> _disruptor;
-  
-  public MQueueJournal(Path path,
-                       JournalRecoverListener listener)
+  public MQueueJournalItemProcessor(MQueueJournalFile journalFile)
   {
-    _path = path;
-    _journalFile = new MQueueJournalFile(path, listener);
-    
-    int size = 16 * 1024;
-    
-    JournalFactory factory = new JournalFactory();
-    
-    _disruptor = new MQueueDisruptor<MQueueJournalEntry>(size, factory, factory);
+    _journalFile = journalFile;
   }
-  
-  public void write(int code, long id, long seq,
-                    byte []buffer, int offset, int length,
-                    MQueueJournalCallback callback,
-                    TempBuffer tBuf)
-  {
-    if (buffer == null)
-      throw new NullPointerException();
-      
-    if (callback == null)
-      throw new NullPointerException();
-    
-    MQueueJournalEntry entry = _disruptor.startProducer(true);
-    
-    entry.init(code, id, seq, buffer, offset, length, callback, tBuf);
-    
-    _disruptor.finishProducer(entry);
-  }
-  
-  public void checkpoint(long blockAddr, int offset, int length)
-  {
-    MQueueJournalEntry entry = null;
-    
-    if ((entry = _disruptor.startProducer(false)) == null) {
-      return;
-    }
-    
-    entry.initCheckpoint(blockAddr, offset, length);
-    
-    _disruptor.finishProducer(entry);
-  }
-  
-  private final void processEntry(MQueueJournalEntry entry)
+
+  @Override
+  public final void process(MQueueJournalEntry entry)
     throws IOException
   {
     if (entry.isData())
@@ -157,38 +111,16 @@ public class MQueueJournal
   private final void processCheckpoint(MQueueJournalEntry entry)
     throws IOException
   {
-      long blockAddr = entry.getBlockAddr();
-      int offset = entry.getOffset();
-      int length = entry.getLength();
+    long blockAddr = entry.getBlockAddr();
+    int offset = entry.getOffset();
+    int length = entry.getLength();
       
-      _journalFile.checkpoint(blockAddr, offset, length);
-  }
-  
-  public void close()
-  {
-    _journalFile.close();
+    _journalFile.checkpoint(blockAddr, offset, length);
   }
   
   @Override
   public String toString()
   {
-    return getClass().getSimpleName() + "[" + _path + "]";
-  }
-  
-  private class JournalFactory
-    extends ItemProcessor<MQueueJournalEntry>
-    implements ItemFactory<MQueueJournalEntry> { 
-    @Override
-    public MQueueJournalEntry createItem(int index)
-    {
-      return new MQueueJournalEntry(index);
-    }
-
-    @Override
-    public final void process(MQueueJournalEntry entry)
-      throws IOException
-    {
-      processEntry(entry);
-    }
+    return getClass().getSimpleName() + "[" + _journalFile + "]";
   }
 }

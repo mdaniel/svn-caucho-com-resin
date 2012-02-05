@@ -27,12 +27,48 @@
  * @author Scott Ferguson
  */
 
-package com.caucho.mqueue;
+package com.caucho.mqueue.queue;
+
+import com.caucho.mqueue.MQueueDisruptor;
+import com.caucho.mqueue.journal.MQueueJournalEntry;
+import com.caucho.vfs.Path;
+import com.caucho.vfs.TempBuffer;
 
 /**
  * Interface for the transaction log.
+ * 
+ * MQueueJournal is not thread safe. It is intended to be used by a
+ * single thread.
  */
-public interface MQueueTask
+public class MQJournalQueuePublisher
 {
-  void doAction(MQueueItem item);
+  private MQJournalQueue _queue;
+  private MQueueDisruptor<MQueueJournalEntry> _disruptor;
+  
+  private long _id = 3;
+  private long _sequence;
+  
+  MQJournalQueuePublisher(MQJournalQueue queue)
+  {
+    _queue = queue;
+    _disruptor = queue.getDisruptor();
+  }
+  
+  public void write(byte []buffer, int offset, int length, TempBuffer tBuf)
+  {
+    long sequence = _sequence++;
+    
+    MQueueJournalEntry entry = _disruptor.startProducer(true);
+    
+    entry.init('D', _id, sequence, buffer, offset, length, null, tBuf);
+    
+    _disruptor.finishProducer(entry);
+    
+    _disruptor.wake();
+  }
+  
+  public String toString()
+  {
+    return getClass().getSimpleName() + "[" + _queue + "]";
+  }
 }

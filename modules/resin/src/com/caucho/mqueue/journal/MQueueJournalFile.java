@@ -564,6 +564,7 @@ public final class MQueueJournalFile
     _blockStore.close();
   }
   
+  @Override
   public String toString()
   {
     return getClass().getSimpleName() + "[" + _path + "]";

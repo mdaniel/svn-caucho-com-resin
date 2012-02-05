@@ -29,59 +29,26 @@
 
 package com.caucho.mqueue;
 
-import com.caucho.env.thread.AbstractTaskWorker;
-import com.caucho.vfs.TempBuffer;
-
 /**
- * Interface for the transaction log.
+ * Item for the disruptor.
  */
-public final class MQueueController extends AbstractTaskWorker
+public class DisruptorItem
 {
-  private final MQueueDisruptor _disruptor;
-  private final MQueueItem []_ring;
+  private final int _index;
   
-  private final int _controllerId;
-  
-  private final MQueueController _prev;
-  private MQueueController _next;
-  
-  private MQueueTask _task;
-  
-  private volatile int _index;
-  
-  MQueueController(MQueueDisruptor disruptor,
-                   MQueueController prev)
+  protected DisruptorItem(int index)
   {
-    _disruptor = disruptor;
-    _ring = null;
-    _controllerId = 0;
-    _prev = prev;
+    _index = index;
   }
   
-  private int getIndex()
+  public int getIndex()
   {
     return _index;
   }
-  
-  private boolean doStuff()
-  {
-    int tail = _index;
-   
-    int head = _prev.getIndex();
-    
-    if (head != tail) {
-      MQueueItem item = _ring[tail];
-    }
-    
-    return false;
-  }
 
   @Override
-  public long runTask()
+  public String toString()
   {
-    while (doStuff()) {
-    }
-    
-    return 0;
+    return getClass().getSimpleName() + "[]";
   }
 }

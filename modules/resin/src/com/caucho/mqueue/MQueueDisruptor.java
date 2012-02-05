@@ -31,6 +31,7 @@ package com.caucho.mqueue;
 
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicInteger;
+import java.util.concurrent.atomic.AtomicIntegerFieldUpdater;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -39,29 +40,33 @@ import com.caucho.env.thread.AbstractTaskWorker;
 /**
  * Interface for the transaction log.
  */
-public final class MQueueDisruptor<T>
+public final class MQueueDisruptor<T extends DisruptorItem>
+  extends DisruptorIndex
 {
   private static final Logger log
     = Logger.getLogger(MQueueDisruptor.class.getName());
   
+  private static final AtomicIntegerFieldUpdater<MQueueDisruptor<?>> _headUpdater;
+  
   private final int _size;
   private final int _mask;
-  private final MQueueItem<T> []_itemRing;
+  private final T []_itemRing;
   
-  private final MQueueItemFactory<T> _factory;
+  private final DisruptorWorker<T> _firstWorker;
   
   private final AtomicInteger _headAlloc = new AtomicInteger();
-  private final AtomicInteger _head = new AtomicInteger();
-  // private final AtomicInteger _tailRef = new AtomicInteger();
-  private volatile int _tail;
+  private volatile int _head;
+  private final DisruptorIndex _tailRef;
   
-  private final ConsumerWorker _consumerWorker;
-  
-  private final AtomicBoolean _isWait = new AtomicBoolean();
+  private final AtomicBoolean _isWaitRef = new AtomicBoolean();
  
   public MQueueDisruptor(int capacity,
-                         MQueueItemFactory<T> itemFactory)
+                         ItemFactory<T> itemFactory,
+                         ItemProcessor<T> ...processors)
   {
+    if (processors.length < 1)
+      throw new IllegalArgumentException();
+    
     int size = 8;
     
     for (; size < capacity; size *= 2) {
@@ -71,34 +76,95 @@ public final class MQueueDisruptor<T>
     
     _mask = size - 1;
     
-    _itemRing = new MQueueItem[size];
+    _itemRing = createRing(size);
+    
+    int processorsSize = processors.length;
     
     // offset to avoid cpu cache conflicts
     for (int j = 0; j < 8; j++) {
       for (int i = 0; i < _size; i += 8) {
         int index = i + j;
         
-        _itemRing[index] = new MQueueItem<T>(index, itemFactory.create(index));
+        _itemRing[index] = itemFactory.createItem(index);
+        
+        if (_itemRing[index] == null)
+          throw new NullPointerException();
       }
     }
     
-    _factory = itemFactory;
-    _consumerWorker = new ConsumerWorker();
+    DisruptorIndex tail = null;
+    DisruptorIndex prevIndex = this;
+    
+    DisruptorConsumer<T> prevConsumer = null;
+    DisruptorWorker<T> firstWorker = null;
+    
+    for (int i = 0; i < processorsSize; i++) {
+      AtomicBoolean isWaitRef = null;
+      
+      if (i == processorsSize - 1) {
+        isWaitRef = _isWaitRef;
+      }
+      
+      DisruptorConsumer<T> consumer
+        = new DisruptorConsumer<T>(_itemRing,
+                                   processors[i],
+                                   prevIndex,
+                                   isWaitRef);
+      
+      DisruptorWorker<T> worker = new DisruptorWorker<T>(consumer);
+      
+      if (prevConsumer != null) {
+        prevConsumer.setNextWorker(worker);
+      }
+      
+      if (firstWorker == null) {
+        firstWorker = worker;
+      }
+
+      prevConsumer = consumer;
+      tail = consumer;
+      prevIndex = consumer;
+    }
+    
+    _tailRef = tail;
+    _firstWorker = firstWorker;
   }
   
-  private final int getSize()
+  int get()
   {
-    int head = _head.get();
-    // int tail = _tailRef.get();
-    int tail = _tail;
+    return _head;
+  }
+  
+  @SuppressWarnings("unchecked")
+  private T []createRing(int size)
+  {
+    return (T []) new DisruptorItem[size];
+  }
+  
+  public final boolean isEmpty()
+  {
+    return _headAlloc.get() == _tailRef.get();
+  }
+  
+  public final int getSize()
+  {
+    int head = _headAlloc.get();
+    int tail = _tailRef.get();
     
     return (_size + tail - head) % _size;
   }
   
-  public final MQueueItem<T> startProducer(boolean isWait)
+  public final void wake()
+  {
+    if (! isEmpty()) {
+      _firstWorker.wake();
+    }
+  }
+  
+  public final T startProducer(boolean isWait)
   {
     int head;
-    MQueueItem<T> item;
+    T item;
     int nextHead;
     
     do {
@@ -108,13 +174,7 @@ public final class MQueueDisruptor<T>
       nextHead = (head + 1) & _mask;
       
       // full queue
-      /*
-      if (nextHead == _tail) {
-        return null;
-      }
-      */
-      // int tail = _tailRef.get();
-      int tail = _tail;
+      int tail = _tailRef.get();
       
       if (nextHead == tail) {
         if (isWait) {
@@ -130,145 +190,224 @@ public final class MQueueDisruptor<T>
   
   private void waitForQueue(int head, int tail)
   {
-    _consumerWorker.wake();
+    _firstWorker.wake();
     
-    synchronized (_isWait) {
-      _isWait.set(true);
+    synchronized (_isWaitRef) {
+      _isWaitRef.set(true);
       
       while (_headAlloc.get() == head 
-             && _tail == tail
-             && _isWait.get()) {
+             && _tailRef.get() == tail
+             && _isWaitRef.get()) {
         try {
-          _isWait.wait(10);
+          _isWaitRef.wait(100);
         } catch (Exception e) {
         }
       }
     }
   }
   
-  private void wakeQueue()
-  {
-    boolean isWait = _isWait.get();
-    
-    if (isWait) {
-      synchronized (_isWait) {
-        _isWait.set(false);
-        _isWait.notifyAll();
-      }
-    }
-  }
-  
-  public final void finishProducer(MQueueItem<T> item)
+  public final void finishProducer(T item)
   {
     // item.setSequence(_sequence + 1);
     
     int head = item.getIndex();
     int nextHead = (head + 1) & _mask;
     
-    while (! _head.compareAndSet(head, nextHead)) {
+    while (! _headUpdater.compareAndSet(this, head, nextHead)) {
     }
 
-    _consumerWorker.wake();
+    // wake mask
+    _firstWorker.wake();
   }
-  
-  private final void consumeAll()
-  {
-    try {
-      doConsume();
-    } catch (Exception e) {
-      log.log(Level.FINER, e.toString(), e);
-    }
-    
-    wakeQueue();
-  }
-  
-  private final void doConsume()
-    throws Exception
-  {
-    AtomicInteger headRef = _head;
-    int head = headRef.get();
-    int tail = _tail;
-    
-    if (head == tail) {
-      return;
-    }
 
-    MQueueItemFactory<T> factory = _factory;
+  private static final class DisruptorConsumer<T extends DisruptorItem>
+    extends DisruptorIndex
+  {
+    private final T []_itemRing;
+    private final int _mask;
     
-    MQueueItem<T> []itemRing = _itemRing;
+    private final int _tailChunk;
     
-    int mask = _mask;
-    int tailCheckMask = mask >> 1;
+    private final ItemProcessor<T> _processor;
     
-    try {
-      while (true) {
-        if (head == tail) {
-          head = headRef.get();
-        
-          if (head == tail) {
-            return;
-          }
-        }
+    private final DisruptorIndex _head;
+    
+    private volatile int _tail;
+    
+    private DisruptorWorker<T> _nextWorker;
+    private final AtomicBoolean _isWaitRef;
+    
+    DisruptorConsumer(T []ring,
+                     ItemProcessor<T> processor,
+                     DisruptorIndex head,
+                     AtomicBoolean isWaitRef)
+    {
+      _itemRing = ring;
+      _mask = _itemRing.length - 1;
       
-        if ((tail & tailCheckMask) == 0 && _isWait.get()) {
-          _tail = tail;
+      int tailChunk = 0x100;
+      
+      if (_itemRing.length < tailChunk * 2) {
+        tailChunk = _itemRing.length >> 1;
+      }
+      
+      if (tailChunk == 0)
+        tailChunk = 1;
+      
+      _tailChunk = tailChunk;
+      
+      _processor = processor;
+      _head = head;
+      
+      _isWaitRef = isWaitRef;
+    }
+    
+    void setNextWorker(DisruptorWorker<T> nextWorker)
+    {
+      _nextWorker = nextWorker;
+    }
+    
+    private final void consumeAll()
+    {
+      boolean isWakeNext = true;
+      
+      try {
+        isWakeNext = doConsume();
+      } catch (Exception e) {
+        log.log(Level.FINER, e.toString(), e);
+      }
+
+      if (isWakeNext) {
+        if (_nextWorker != null) {
+          _nextWorker.wake();
+        }
           
-          wakeQueue();
-        }
+        wakeQueue();
+      }
+    }
     
-        MQueueItem<T> item = itemRing[tail];
+    @Override
+    public final int get()
+    {
+      return _tail;
+    }
+    
+    private final boolean doConsume()
+      throws Exception
+    {
+      final DisruptorIndex headRef = _head;
       
-        tail = (tail + 1) & mask;
+      int head = headRef.get();
+      int tail = _tail;
+      
+      if (head == tail) {
+        return false;
+      }
+
+      final T []itemRing = _itemRing;
+      
+      int mask = _mask;
+      
+      int tailChunk = _tailChunk;
+      int tailChunkMask = tailChunk - 1;
+      
+      int tailWakeMask = mask >> 1;
+    
+      if (head < tail || (head & ~ tailChunkMask) != (tail & ~ tailChunkMask)) {
+        head = (tail + tailChunk) & mask & ~tailChunkMask;
+      }
+      
+      final ItemProcessor<T> processor = _processor;
+      final DisruptorWorker<T> nextWorker = _nextWorker;
+      
+      final AtomicBoolean isWait = _isWaitRef;
+
+      try {
+        while (true) {
+          if (head == tail) {
+            _tail = tail;
+            
+            head = headRef.get();
+            
+            if (head == tail) {
+              return true;
+            }
+            
+            if (nextWorker != null) {
+              nextWorker.wake();
+            }
+            
+            if ((tail & tailWakeMask) == 0
+                && isWait != null && isWait.get()) {
+              wakeQueue();
+            }
+            
+            if (head < tail
+                || (head & ~ tailChunkMask) != (tail & ~ tailChunkMask)) {
+              head = (tail + tailChunk) & mask & ~tailChunkMask;
+            }
+          }
+      
+          T item = itemRing[tail];
         
-        factory.process(item.getValue());
-        
-        if ((tail & 0x7f) == 0) {
-          _tail = tail;
+          tail = (tail + 1) & mask;
+          
+          processor.process(item);
+        }
+      } finally {
+        _tail = tail;
+      }
+    }
+    
+    private void wakeQueue()
+    {
+      AtomicBoolean isWaitRef = _isWaitRef;
+      
+      if (isWaitRef == null)
+        return;
+      
+      boolean isWait = isWaitRef.get();
+      
+      if (isWait) {
+        synchronized (isWaitRef) {
+          isWaitRef.set(false);
+          isWaitRef.notifyAll();
         }
       }
-    } finally {
-      _tail = tail;
     }
   }
-
-  private final class ConsumerWorker extends AbstractTaskWorker {
+  
+  private static class DisruptorWorker<T extends DisruptorItem>
+    extends AbstractTaskWorker
+  {
+    private final DisruptorConsumer<T> _consumer;
+    
+    DisruptorWorker(DisruptorConsumer<T> consumer)
+    {
+      _consumer = consumer;
+    }
+    
     @Override
     public final long runTask()
-    {/*
-      boolean isWait = _isWait.get();
-      
-      if (isWait) {
-        _wakeWorker.wake();
-      }
-      */
-      /*
-      int count = -1;
-      
-      if (isWait) {
-        count = _disruptor.getSize() >> 2;
-      }
-      */
-
-      consumeAll();
-      /*
-      while (doConsume()) {
-        if (count-- == 0) {
-          _disruptor.wakeQueue();
-        }
-      }
-      */
-      
-      // _disruptor.wakeQueue();
-      
-      /*
-      if (_isWait.get()) {
-        _wakeWorker.wake();
-      }
-      */
-      
-      wakeQueue();
+    {
+      _consumer.consumeAll();
 
       return 0;
     }
+  }
+  
+  public interface ItemFactory<T extends DisruptorItem> {
+    public T createItem(int index);
+  }
+  
+  abstract public static class ItemProcessor<T extends DisruptorItem> {
+    abstract public void process(T item) throws Exception;
+  }
+  
+  static {
+    AtomicIntegerFieldUpdater headUpdater
+      = AtomicIntegerFieldUpdater.newUpdater(MQueueDisruptor.class, "_head");
+    
+    _headUpdater = headUpdater;
   }
 }
