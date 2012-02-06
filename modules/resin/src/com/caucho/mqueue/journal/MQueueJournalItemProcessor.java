@@ -31,7 +31,7 @@ package com.caucho.mqueue.journal;
 
 import java.io.IOException;
 
-import com.caucho.mqueue.MQueueDisruptor.ItemProcessor;
+import com.caucho.env.thread.DisruptorQueue.ItemProcessor;
 
 /**
  * Interface for the transaction log.

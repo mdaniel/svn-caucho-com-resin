@@ -33,9 +33,9 @@ import java.io.IOException;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
-import com.caucho.mqueue.MQueueDisruptor;
-import com.caucho.mqueue.MQueueDisruptor.ItemFactory;
-import com.caucho.mqueue.MQueueDisruptor.ItemProcessor;
+import com.caucho.env.thread.DisruptorQueue;
+import com.caucho.env.thread.DisruptorQueue.ItemFactory;
+import com.caucho.env.thread.DisruptorQueue.ItemProcessor;
 import com.caucho.vfs.Path;
 import com.caucho.vfs.TempBuffer;
 
@@ -50,7 +50,7 @@ public class MQueueJournal
   private final Path _path;
   private final MQueueJournalFile _journalFile;
   
-  private final MQueueDisruptor<JournalFileItem> _disruptor;
+  private final DisruptorQueue<JournalFileItem> _disruptor;
   
   public MQueueJournal(Path path,
                        JournalRecoverListener listener)
@@ -62,7 +62,7 @@ public class MQueueJournal
     
     JournalFactory factory = new JournalFactory();
     
-    _disruptor = new MQueueDisruptor<JournalFileItem>(size, factory, factory);
+    _disruptor = new DisruptorQueue<JournalFileItem>(size, factory, factory);
   }
   
   public void write(int code, long id, long seq,

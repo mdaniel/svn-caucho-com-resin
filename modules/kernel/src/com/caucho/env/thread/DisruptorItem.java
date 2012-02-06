@@ -27,48 +27,28 @@
  * @author Scott Ferguson
  */
 
-package com.caucho.mqueue.queue;
-
-import com.caucho.env.thread.DisruptorQueue;
-import com.caucho.mqueue.journal.JournalFileItem;
-import com.caucho.vfs.Path;
-import com.caucho.vfs.TempBuffer;
+package com.caucho.env.thread;
 
 /**
- * Interface for the transaction log.
- * 
- * MQueueJournal is not thread safe. It is intended to be used by a
- * single thread.
+ * Item for the disruptor.
  */
-public class MQJournalQueuePublisher
+public class DisruptorItem
 {
-  private MQJournalQueue _queue;
-  private DisruptorQueue<JournalQueueEntry> _disruptor;
+  private final int _index;
   
-  private long _id = 3;
-  private long _sequence;
-  
-  MQJournalQueuePublisher(MQJournalQueue queue)
+  protected DisruptorItem(int index)
   {
-    _queue = queue;
-    _disruptor = queue.getDisruptor();
+    _index = index;
   }
   
-  public void write(byte []buffer, int offset, int length, TempBuffer tBuf)
+  public int getIndex()
   {
-    long sequence = _sequence++;
-    
-    JournalQueueEntry entry = _disruptor.startProducer(true);
-    
-    entry.init('D', _id, sequence, buffer, offset, length, null, tBuf);
-    
-    _disruptor.finishProducer(entry);
-    
-    _disruptor.wake();
+    return _index;
   }
-  
+
+  @Override
   public String toString()
   {
-    return getClass().getSimpleName() + "[" + _queue + "]";
+    return getClass().getSimpleName() + "[]";
   }
 }

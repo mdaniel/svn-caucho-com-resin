@@ -39,6 +39,8 @@ import com.caucho.mqueue.journal.JournalFileItem;
  */
 public class JournalQueueEntry extends JournalFileItem
 {
+  private static final byte []EMPTY_BUFFER = new byte[0];
+  
   private MQJournalQueueSubscriber _subscriber;
   
   JournalQueueEntry(int index)
@@ -46,9 +48,25 @@ public class JournalQueueEntry extends JournalFileItem
     super(index);
   }
   
+  public void initAck(long sequence, MQJournalQueueSubscriber sub)
+  {
+    long id = 3;
+    
+    init('A', id, sequence, EMPTY_BUFFER, 0, 0, null, null);
+    
+    _subscriber = sub;
+  }
+  
   public void initSubscribe(MQJournalQueueSubscriber subscriber)
   {
     setCode('S');
+    
+    _subscriber = subscriber;
+  }
+  
+  public void initUnsubscribe(MQJournalQueueSubscriber subscriber)
+  {
+    setCode('U');
     
     _subscriber = subscriber;
   }

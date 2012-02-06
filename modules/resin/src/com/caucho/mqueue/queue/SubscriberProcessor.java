@@ -27,28 +27,16 @@
  * @author Scott Ferguson
  */
 
-package com.caucho.mqueue;
+package com.caucho.mqueue.queue;
+
+import java.io.IOException;
+import java.io.InputStream;
 
 /**
- * Item for the disruptor.
+ * Generic interface to read a received message.
  */
-public class DisruptorItem
+public interface SubscriberProcessor
 {
-  private final int _index;
-  
-  protected DisruptorItem(int index)
-  {
-    _index = index;
-  }
-  
-  public int getIndex()
-  {
-    return _index;
-  }
-
-  @Override
-  public String toString()
-  {
-    return getClass().getSimpleName() + "[]";
-  }
+  public void process(long sequence, InputStream message)
+    throws IOException;
 }

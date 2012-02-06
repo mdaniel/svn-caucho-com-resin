@@ -56,8 +56,6 @@ public class ThreadTaskRing2 {
     for (int i = 0; i < _ring.length; i++) {
       _ring[i] = new Item();
     }
-    
-    System.out.println("MASK: " + Integer.toHexString(_mask));
   }
   
   public boolean isEmpty()

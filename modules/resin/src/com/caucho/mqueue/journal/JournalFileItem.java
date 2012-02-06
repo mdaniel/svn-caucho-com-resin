@@ -29,7 +29,7 @@
 
 package com.caucho.mqueue.journal;
 
-import com.caucho.mqueue.DisruptorItem;
+import com.caucho.env.thread.DisruptorItem;
 import com.caucho.vfs.TempBuffer;
 
 /**

@@ -29,10 +29,12 @@
 
 package com.caucho.mqueue.queue;
 
-import com.caucho.mqueue.MQueueDisruptor;
-import com.caucho.mqueue.journal.JournalFileItem;
-import com.caucho.vfs.Path;
-import com.caucho.vfs.TempBuffer;
+import java.io.InputStream;
+
+import com.caucho.env.thread.DisruptorQueue;
+import com.caucho.env.thread.DisruptorQueue.ItemFactory;
+import com.caucho.env.thread.DisruptorQueue.ItemProcessor;
+import com.caucho.util.Friend;
 
 /**
  * Interface for the transaction log.
@@ -43,33 +45,91 @@ import com.caucho.vfs.TempBuffer;
 public class MQJournalQueueSubscriber
 {
   private MQJournalQueue _queue;
-  private MQueueDisruptor<JournalQueueEntry> _disruptor;
+  private DisruptorQueue<JournalQueueEntry> _journalQueue;
   
-  MQJournalQueueSubscriber(MQJournalQueue queue)
+  private DisruptorQueue<SubscriberEntry> _subscriberQueue;
+  private SubscriberProcessor _processor;
+  
+  MQJournalQueueSubscriber(MQJournalQueue queue, SubscriberProcessor processor)
   {
     _queue = queue;
     
-    _disruptor = queue.getDisruptor();
+    _journalQueue = queue.getDisruptor();
+    _processor = processor;
+    
+    if (processor == null)
+      throw new NullPointerException();
+    
+    _subscriberQueue = new DisruptorQueue<SubscriberEntry>(64, 
+                                    new SubscriberEntryFactory(),
+                                    new SubscriberItemProcessor());
   }
   
   public void start()
   {
-    JournalQueueEntry entry = _disruptor.startProducer(true);
+    JournalQueueEntry entry = _journalQueue.startProducer(true);
     
     entry.initSubscribe(this);
     
-    _disruptor.finishProducer(entry);
-    _disruptor.wake();
+    _journalQueue.finishProducer(entry);
+    _journalQueue.wake();
   }
   
-  boolean offerEntry(long sequence)
+  public void stop()
   {
-    System.out.println("OFFER: " + sequence);
+    JournalQueueEntry entry = _journalQueue.startProducer(true);
+    
+    entry.initUnsubscribe(this);
+    
+    _journalQueue.finishProducer(entry);
+    _journalQueue.wake();
+  }
+  
+  @Friend(JournalQueueActor.class)
+  boolean offerEntry(long sequence, JournalDataNode dataHead)
+  {
+    SubscriberEntry entry = _subscriberQueue.startProducer(false);
+    
+    if (entry == null)
+      return false;
+    
+    entry.initQueueData(sequence, dataHead);
+    
+    _subscriberQueue.finishProducer(entry);
+    _subscriberQueue.wake();
+    
     return true;
+  }
+  
+  public void ack(long sequence)
+  {
+    _queue.ack(sequence, this);
   }
   
   public String toString()
   {
     return getClass().getSimpleName() + "[" + _queue + "]";
+  }
+  
+  static class SubscriberEntryFactory implements ItemFactory<SubscriberEntry> {
+    @Override
+    public SubscriberEntry createItem(int index)
+    {
+      return new SubscriberEntry(index);
+    }
+  }
+  
+  class SubscriberItemProcessor extends ItemProcessor<SubscriberEntry> {
+    @Override
+    public void process(SubscriberEntry item) throws Exception
+    {
+      InputStream is = new DataNodeInputStream(item.getDataHead());
+      
+      try {
+        _processor.process(item.getSequence(), is);
+      } finally {
+        ack(item.getSequence());
+      }
+    }
   }
 }

@@ -626,9 +626,11 @@ public class ThreadPool2 {
   {
     // LockSupport.unpark(thread);
     
+
     RingItem<Thread> item = _unparkQueue.startProducer(true);
     item.setValue(thread);
     _unparkQueue.finishProducer(item);
+    _unparkQueue.wake();
   }
   
   //

@@ -29,46 +29,51 @@
 
 package com.caucho.mqueue.queue;
 
-import com.caucho.env.thread.DisruptorQueue;
-import com.caucho.mqueue.journal.JournalFileItem;
-import com.caucho.vfs.Path;
-import com.caucho.vfs.TempBuffer;
+import java.io.IOException;
+
+import com.caucho.db.block.BlockStore;
 
 /**
- * Interface for the transaction log.
- * 
- * MQueueJournal is not thread safe. It is intended to be used by a
- * single thread.
+ * A chunk of journal data, part of a queue message.
  */
-public class MQJournalQueuePublisher
+final class JournalDataNode
 {
-  private MQJournalQueue _queue;
-  private DisruptorQueue<JournalQueueEntry> _disruptor;
+  private final BlockStore _store;
   
-  private long _id = 3;
-  private long _sequence;
+  private final long _blockAddress;
+  private final int _offset;
+  private final int _length;
   
-  MQJournalQueuePublisher(MQJournalQueue queue)
+  private JournalDataNode _next;
+  
+  JournalDataNode(BlockStore store, long blockAddress, int offset, int length)
   {
-    _queue = queue;
-    _disruptor = queue.getDisruptor();
+    _store = store;
+    
+    _blockAddress = blockAddress;
+    _offset = offset;
+    _length = length;
   }
   
-  public void write(byte []buffer, int offset, int length, TempBuffer tBuf)
+  final int getLength()
   {
-    long sequence = _sequence++;
-    
-    JournalQueueEntry entry = _disruptor.startProducer(true);
-    
-    entry.init('D', _id, sequence, buffer, offset, length, null, tBuf);
-    
-    _disruptor.finishProducer(entry);
-    
-    _disruptor.wake();
+    return _length;
   }
   
-  public String toString()
+  final void read(int nodeOffset, byte []buffer, int offset, int length)
+    throws IOException
   {
-    return getClass().getSimpleName() + "[" + _queue + "]";
+    _store.readBlock(_blockAddress, nodeOffset + _offset,
+                     buffer, offset, length);
+  }
+  
+  final JournalDataNode getNext()
+  {
+    return _next;
+  }
+  
+  final void setNext(JournalDataNode next)
+  {
+    _next = next;
   }
 }

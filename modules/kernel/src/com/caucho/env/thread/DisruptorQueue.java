@@ -27,7 +27,7 @@
  * @author Scott Ferguson
  */
 
-package com.caucho.mqueue;
+package com.caucho.env.thread;
 
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicInteger;
@@ -35,18 +35,17 @@ import java.util.concurrent.atomic.AtomicIntegerFieldUpdater;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
-import com.caucho.env.thread.AbstractTaskWorker;
 
 /**
  * Interface for the transaction log.
  */
-public final class MQueueDisruptor<T extends DisruptorItem>
+public final class DisruptorQueue<T extends DisruptorItem>
   extends DisruptorIndex
 {
   private static final Logger log
-    = Logger.getLogger(MQueueDisruptor.class.getName());
+    = Logger.getLogger(DisruptorQueue.class.getName());
   
-  private static final AtomicIntegerFieldUpdater<MQueueDisruptor<?>> _headUpdater;
+  private static final AtomicIntegerFieldUpdater<DisruptorQueue<?>> _headUpdater;
   
   private final int _size;
   private final int _mask;
@@ -60,7 +59,7 @@ public final class MQueueDisruptor<T extends DisruptorItem>
   
   private final AtomicBoolean _isWaitRef = new AtomicBoolean();
  
-  public MQueueDisruptor(int capacity,
+  public DisruptorQueue(int capacity,
                          ItemFactory<T> itemFactory,
                          ItemProcessor<? super T> ...processors)
   {
@@ -299,7 +298,7 @@ public final class MQueueDisruptor<T extends DisruptorItem>
       
       int head = headRef.get();
       int tail = _tail;
-      
+
       if (head == tail) {
         return false;
       }
@@ -375,6 +374,12 @@ public final class MQueueDisruptor<T extends DisruptorItem>
         }
       }
     }
+    
+    @Override
+    public String toString()
+    {
+      return getClass().getSimpleName() + "[" + _processor + "]";
+    }
   }
   
   private static class DisruptorWorker<T extends DisruptorItem>
@@ -394,6 +399,12 @@ public final class MQueueDisruptor<T extends DisruptorItem>
 
       return 0;
     }
+    
+    @Override
+    public String toString()
+    {
+      return getClass().getSimpleName() + "[" + _consumer + "]";
+    }
   }
   
   public interface ItemFactory<T extends DisruptorItem> {
@@ -406,7 +417,7 @@ public final class MQueueDisruptor<T extends DisruptorItem>
   
   static {
     AtomicIntegerFieldUpdater headUpdater
-      = AtomicIntegerFieldUpdater.newUpdater(MQueueDisruptor.class, "_head");
+      = AtomicIntegerFieldUpdater.newUpdater(DisruptorQueue.class, "_head");
     
     _headUpdater = headUpdater;
   }

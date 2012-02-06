@@ -32,8 +32,7 @@ package com.caucho.mqueue.queue;
 import java.util.logging.Logger;
 
 import com.caucho.db.block.BlockStore;
-import com.caucho.mqueue.MQueueDisruptor.ItemProcessor;
-import com.caucho.mqueue.journal.JournalFileItem;
+import com.caucho.env.thread.DisruptorQueue.ItemProcessor;
 import com.caucho.mqueue.journal.MQueueJournalResult;
 import com.caucho.util.ConcurrentArrayList;
 
@@ -55,11 +54,24 @@ class JournalQueueActor
   private ConcurrentArrayList<SubscriberNode> _subscriberList
     = new ConcurrentArrayList<SubscriberNode>(SubscriberNode.class);
   
+  private long _enqueueCount;
+  private long _dequeueCount;
+  
   private int _size;
   
   public int getSize()
   {
     return _size;
+  }
+  
+  public long getEnqueueCount()
+  {
+    return _enqueueCount;
+  }
+  
+  public long getDequeueCount()
+  {
+    return _dequeueCount;
   }
 
   @Override
@@ -70,7 +82,7 @@ class JournalQueueActor
     
     int code = entry.getCode();
     long sequence = entry.getSequence();
-    
+
     switch (code) {
     case 'D':
       processData(sequence,
@@ -97,7 +109,12 @@ class JournalQueueActor
       unsubscribe(entry.getSubscriber());
       break;
       
+    case 'A':
+      ack(entry.getSequence(), entry.getSubscriber());
+      break;
+      
     default:
+      System.out.println("UNKNOWN: " + (char) code);
       log.warning("Unknown code: " + (char) code
                   + " " + Integer.toHexString(code));
     }
@@ -109,6 +126,8 @@ class JournalQueueActor
   {
     QueueEntry entry = new QueueEntry(sequence);
     
+    entry.addData(blockStore, blockAddr, offset, length);
+    
     if (_tail != null) {
       _tail.setNext(entry);
     }
@@ -119,14 +138,13 @@ class JournalQueueActor
     _tail = entry;
     
     _size++;
+    _enqueueCount++;
     
-    System.out.println("ITEM: " + Long.toHexString(blockAddr) + " " + offset + " " + length);
+    send();
   }
   
   private void subscribe(MQJournalQueueSubscriber subscriber)
   {
-    System.out.println("SUBSCRIBE: " + subscriber);
-    
     SubscriberNode node = new SubscriberNode(subscriber);
     
     _subscriberList.add(node);
@@ -136,14 +154,23 @@ class JournalQueueActor
   
   private void unsubscribe(MQJournalQueueSubscriber subscriber)
   {
-    System.out.println("SUBSCRIBE: " + subscriber);
-    
     for (SubscriberNode node : _subscriberList.toArray()) {
       if (node.getSubscriber() == subscriber) {
         _subscriberList.remove(node);
       }
     }
     // _subscriberList.remove(subscriber);
+  }
+  
+  private void ack(long sequence, MQJournalQueueSubscriber subscriber)
+  {
+    for (SubscriberNode node : _subscriberList.toArray()) {
+      if (node.getSubscriber() == subscriber) {
+        node.setAvailable(true);
+      }
+    }
+    
+    send();
   }
   
   private void send()
@@ -155,17 +182,25 @@ class JournalQueueActor
     for (SubscriberNode node : _subscriberList.toArray()) {
       MQJournalQueueSubscriber sub = node.getSubscriber();
       
-      System.out.println("SEND: " + node.getSubscriber());
+      if (! node.isAvailable()) {
+        continue;
+      }
       
       QueueEntry entry = _head;
       _head = _head.getNext();
       if (_head == null)
         _tail = null;
       
-      sub.offerEntry(entry.getSequence());
+      _size--;
+      _dequeueCount++;
+      
+      sub.offerEntry(entry.getSequence(), entry.getDataHead());
+      
+      node.setAvailable(false);
     }
   }
   
+  @Override
   public String toString()
   {
     return getClass().getSimpleName() + "[]";
@@ -175,6 +210,9 @@ class JournalQueueActor
     private final long _sequence;
     
     private QueueEntry _next;
+    
+    private JournalDataNode _head;
+    private JournalDataNode _tail;
     
     QueueEntry(long sequence)
     {
@@ -195,10 +233,35 @@ class JournalQueueActor
     {
       _next = next;
     }
+    
+    JournalDataNode getDataHead()
+    {
+      return _head;
+    }
+    
+    void addData(BlockStore blockStore, 
+                 long blockAddress, 
+                 int offset, 
+                 int length)
+    {
+      JournalDataNode dataNode
+        = new JournalDataNode(blockStore, blockAddress, offset, length);
+
+      if (_tail != null) {
+        _tail.setNext(dataNode);
+      }
+      else {
+        _head = dataNode;
+        
+        _tail = dataNode;
+      }
+    }
   }
   
   public static class SubscriberNode {
     private final MQJournalQueueSubscriber _subscriber;
+    
+    private boolean _isAvailable = true;
     
     SubscriberNode(MQJournalQueueSubscriber subscriber)
     {
@@ -208,6 +271,16 @@ class JournalQueueActor
     public MQJournalQueueSubscriber getSubscriber()
     {
       return _subscriber;
+    }
+    
+    public boolean isAvailable()
+    {
+      return _isAvailable;
+    }
+    
+    public void setAvailable(boolean isAvailable)
+    {
+      _isAvailable = isAvailable;
     }
   }
 }

@@ -33,8 +33,8 @@ import java.io.IOException;
 
 import com.caucho.vfs.Path;
 import com.caucho.db.block.BlockStore;
-import com.caucho.mqueue.MQueueDisruptor;
-import com.caucho.mqueue.MQueueDisruptor.ItemFactory;
+import com.caucho.env.thread.DisruptorQueue;
+import com.caucho.env.thread.DisruptorQueue.ItemFactory;
 import com.caucho.mqueue.journal.JournalRecoverListener;
 import com.caucho.mqueue.journal.MQueueJournalCallback;
 import com.caucho.mqueue.journal.JournalFileItem;
@@ -52,7 +52,7 @@ public class MQJournalQueue
   private MQueueJournalFile _journalFile;
   private JournalQueueActor _journalActor;
   
- MQueueDisruptor<JournalQueueEntry> _disruptorQueue;
+ DisruptorQueue<JournalQueueEntry> _disruptorQueue;
   
   public MQJournalQueue(Path path)
   {
@@ -63,7 +63,7 @@ public class MQJournalQueue
     
     _journalActor = new JournalQueueActor();
     
-    _disruptorQueue = new MQueueDisruptor<JournalQueueEntry>(8192,
+    _disruptorQueue = new DisruptorQueue<JournalQueueEntry>(8192,
                       new JournalQueueFactory(),
                       new MQueueJournalItemProcessor(_journalFile),
                       _journalActor);
@@ -74,7 +74,17 @@ public class MQJournalQueue
     return _journalActor.getSize();
   }
   
-  MQueueDisruptor<JournalQueueEntry> getDisruptor()
+  public long getEnqueueCount()
+  {
+    return _journalActor.getEnqueueCount();
+  }
+  
+  public long getDequeueCount()
+  {
+    return _journalActor.getDequeueCount();
+  }
+  
+  DisruptorQueue<JournalQueueEntry> getDisruptor()
   {
     return _disruptorQueue;
   }
@@ -84,11 +94,22 @@ public class MQJournalQueue
     return new MQJournalQueuePublisher(this);
   }
   
-  public MQJournalQueueSubscriber createSubscriber()
+  public MQJournalQueueSubscriber 
+  createSubscriber(SubscriberProcessor processor)
   {
-    return new MQJournalQueueSubscriber(this);
+    return new MQJournalQueueSubscriber(this, processor);
   }
   
+  void ack(long sequence, MQJournalQueueSubscriber subscriber)
+  {
+    JournalQueueEntry entry = _disruptorQueue.startProducer(true);
+    
+    entry.initAck(sequence, subscriber);
+    
+    _disruptorQueue.finishProducer(entry);
+    _disruptorQueue.wake();
+  }
+
   public String toString()
   {
     return getClass().getSimpleName() + "[" + _path + "]";
