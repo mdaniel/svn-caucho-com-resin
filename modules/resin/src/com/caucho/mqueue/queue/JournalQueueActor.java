@@ -110,7 +110,8 @@ class JournalQueueActor
       break;
       
     case 'A':
-      ack(entry.getSequence(), entry.getSubscriber());
+      ack(entry.getSequence());
+      ack(entry.getSubscriber());
       break;
       
     default:
@@ -162,7 +163,29 @@ class JournalQueueActor
     // _subscriberList.remove(subscriber);
   }
   
-  private void ack(long sequence, MQJournalQueueSubscriber subscriber)
+  private void ack(long sequence)
+  {
+    QueueEntry entry = _head;
+    QueueEntry prev = null;
+    
+    for (; entry != null; entry = entry.getNext()) {
+      if (entry.getSequence() == sequence) {
+        if (prev != null) {
+          prev.setNext(entry.getNext());
+        }
+        else {
+          _head = entry.getNext();
+          
+          if (_head == null)
+            _tail = null;
+        }
+        
+        return;
+      }
+    }
+  }
+  
+  private void ack(MQJournalQueueSubscriber subscriber)
   {
     for (SubscriberNode node : _subscriberList.toArray()) {
       if (node.getSubscriber() == subscriber) {

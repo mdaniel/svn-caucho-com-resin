@@ -30,6 +30,8 @@
 package com.caucho.mqueue.queue;
 
 import java.io.IOException;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 import com.caucho.vfs.Path;
 import com.caucho.db.block.BlockStore;
@@ -40,6 +42,7 @@ import com.caucho.mqueue.journal.MQueueJournalCallback;
 import com.caucho.mqueue.journal.JournalFileItem;
 import com.caucho.mqueue.journal.MQueueJournalFile;
 import com.caucho.mqueue.journal.MQueueJournalItemProcessor;
+import com.caucho.mqueue.journal.MQueueJournalResult;
 /**
  * Interface for the transaction log.
  * 
@@ -48,6 +51,9 @@ import com.caucho.mqueue.journal.MQueueJournalItemProcessor;
  */
 public class MQJournalQueue
 {
+  private static final Logger log
+    = Logger.getLogger(MQJournalQueue.class.getName());
+  
   private Path _path;
   private MQueueJournalFile _journalFile;
   private JournalQueueActor _journalActor;
@@ -58,10 +64,10 @@ public class MQJournalQueue
   {
     _path = path;
     
+    _journalActor = new JournalQueueActor();
+    
     JournalRecoverListener recover = new RecoverListener();
     _journalFile = new MQueueJournalFile(path, recover);
-    
-    _journalActor = new JournalQueueActor();
     
     _disruptorQueue = new DisruptorQueue<JournalQueueEntry>(8192,
                       new JournalQueueFactory(),
@@ -109,6 +115,13 @@ public class MQJournalQueue
     _disruptorQueue.finishProducer(entry);
     _disruptorQueue.wake();
   }
+  
+  public void close()
+  {
+    _disruptorQueue.wake(); // XXX: close
+    
+    _journalFile.close();
+  }
 
   public String toString()
   {
@@ -125,7 +138,8 @@ public class MQJournalQueue
   }
   
   class RecoverListener implements JournalRecoverListener {
-
+    private JournalQueueEntry _entry = new JournalQueueEntry(0);
+    
     /* (non-Javadoc)
      * @see com.caucho.mqueue.journal.JournalRecoverListener#onEntry(int, boolean, boolean, long, long, com.caucho.db.block.BlockStore, long, int, int)
      */
@@ -134,9 +148,19 @@ public class MQJournalQueue
                         long seq, BlockStore store, long blockAddress,
                         int blockOffset, int length) throws IOException
     {
-      // TODO Auto-generated method stub
+      _entry.init(code, id, seq, null, 0, 0, null, null);
       
+      MQueueJournalResult result = _entry.getResult();
+      
+      result.init1(store, blockAddress, blockOffset, length);
+
+      try {
+        _journalActor.process(_entry);
+      } catch (Exception e) {
+        log.log(Level.WARNING, e.toString(), e);
+      }
+      
+      _entry.clear();
     }
-    
   }
 }

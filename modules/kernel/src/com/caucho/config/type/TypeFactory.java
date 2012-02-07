@@ -463,13 +463,13 @@ public class TypeFactory implements AddLoaderListener
       
       // save negative lookups
       if (cl == null) {
-        cl = NullClass.class;
+        cl = void.class;
       }
       
       putUrnClass(urnName, cl, cl.getClassLoader());
     }
     
-    if (cl == NullClass.class)
+    if (cl == void.class)
       return null;
     else
       return cl;
@@ -482,7 +482,7 @@ public class TypeFactory implements AddLoaderListener
       
       Class<?> cl = factory._urnClassMap.get(urnName);
       
-      if (cl != null)
+      if (cl != null && cl != void.class)
         return cl;
     }
     
