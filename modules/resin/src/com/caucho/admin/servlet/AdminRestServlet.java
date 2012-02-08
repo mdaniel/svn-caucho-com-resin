@@ -31,9 +31,7 @@ package com.caucho.admin.servlet;
  import com.caucho.config.ConfigException;
  import com.caucho.jmx.Jmx;
  import com.caucho.jmx.MXAction;
- import com.caucho.jmx.MXDefaultValue;
- import com.caucho.jmx.MXName;
- import com.caucho.jmx.MXValueRequired;
+ import com.caucho.jmx.MXParam;
  import com.caucho.lifecycle.LifecycleState;
  import com.caucho.management.server.ManagementMXBean;
  import com.caucho.server.admin.AddUserQueryResult;
@@ -58,7 +56,6 @@ package com.caucho.admin.servlet;
  import java.io.InputStream;
  import java.io.OutputStream;
  import java.io.PrintWriter;
- import java.io.Writer;
  import java.lang.annotation.Annotation;
  import java.lang.reflect.Method;
  import java.security.Principal;
@@ -212,9 +209,29 @@ public class AdminRestServlet extends HttpServlet {
       Annotation [][]paramAnn = method.getParameterAnnotations();
       
       for (int i = 0; i < _parameterNames.length; i++) {
-        _parameterNames[i] = getParamName(paramAnn, i);
-        _parameterDefaults[i] = getParameterDefault(paramAnn, i, parameterTypes[i]);
-        _parameterRequired[i] = isParameterRequired(paramAnn, i);
+        MXParam mxParam = null;
+        for (Annotation a: paramAnn[i]) {
+          if (a.annotationType().equals(MXParam.class)) {
+            mxParam = (MXParam) a;
+
+            break;
+          }
+        }
+
+        if (mxParam == null) {
+          _parameterNames[i] = "p" + i;
+          _parameterDefaults[i] = null;
+          _parameterRequired[i] = false;
+        } else {
+          _parameterNames[i] = mxParam.name();
+          _parameterRequired[i] = mxParam.required();
+
+          String defaultValue = mxParam.defaultValue();
+          defaultValue = MXParam.NULL.equals(defaultValue) ? null : defaultValue;
+
+          _parameterDefaults[i]
+            = toValue(parameterTypes[i], defaultValue);
+        }
       }
       
       _parameterMarshal = new Marshal[parameterTypes.length];
@@ -244,48 +261,6 @@ public class AdminRestServlet extends HttpServlet {
       }
     }
 
-    private Object getParameterDefault(Annotation [][]paramAnn,
-                                       int i,
-                                       Class type)
-    {
-      for (Annotation ann : paramAnn[i]) {
-        if (ann.annotationType().equals(MXDefaultValue.class)){
-          MXDefaultValue value = (MXDefaultValue) ann;
-
-          return toValue(type, value.value());
-        }
-      }
-
-      return null;
-    }
-
-    private boolean isParameterRequired(Annotation [][]paramAnn,
-                                       int i)
-    {
-      for (Annotation ann : paramAnn[i]) {
-        if (ann.annotationType().equals(MXValueRequired.class))
-          return true;
-      }
-
-      return false;
-    }
-
-    private String getParamName(Annotation [][]paramAnn, int i)
-    {
-      if (paramAnn == null)
-        return "p" + i;
-      
-      for (Annotation ann : paramAnn[i]) {
-        if (ann.annotationType().equals(MXName.class)){
-          MXName name = (MXName) ann;
-
-          return name.value();
-        }
-      }
-      
-      return "p" + 1;
-    }
-    
     String []getParameterNames()
     {
       return _parameterNames;
@@ -515,27 +490,28 @@ public class AdminRestServlet extends HttpServlet {
         errorResult = (ErrorQueryResult) value;
 
       if (errorResult != null) {
-        PrintWriter writer = response.getWriter();
+        PrintWriter out = response.getWriter();
         response.setStatus(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
         if (errorResult.getException() instanceof ConfigException)
-          writer.println(errorResult.getException().getMessage());
+          out.println(errorResult.getException().getMessage());
         else
-          writer.println(errorResult.getException());
+          out.println(errorResult.getException());
       } else      if (value instanceof StringQueryResult) {
         StringQueryResult queryResult = (StringQueryResult) value;
 
-        PrintWriter writer = response.getWriter();
-        writer.println(queryResult.getValue());
+        PrintWriter out = response.getWriter();
+        out.println(queryResult.getValue());
       } else if(value instanceof PdfReportQueryResult) {
         PdfReportQueryResult queryResult
           = (PdfReportQueryResult) value;
 
-        if (queryResult.getPdfBytes() != null) {
+        if (queryResult.getInputStream() != null) {
           response.setContentType("application/pdf");
-          response.getOutputStream().write(queryResult.getPdfBytes());
+
+          //response.getOutputStream().write(queryResult.getInputStream());
         } else {
-          PrintWriter writer = response.getWriter();
-          writer.println(queryResult.getMessage());
+          PrintWriter out = response.getWriter();
+          out.println(queryResult.getMessage());
         }
       } else if (value instanceof ControllerStateActionQueryResult) {
         ControllerStateActionQueryResult queryResult =
@@ -551,8 +527,8 @@ public class AdminRestServlet extends HttpServlet {
                         queryResult.getState().getStateName());
         }
 
-        PrintWriter writer = response.getWriter();
-        writer.println(message);
+        PrintWriter out = response.getWriter();
+        out.println(message);
       } else if (value instanceof AddUserQueryResult){
         PrintWriter writer = response.getWriter();
 
@@ -583,7 +559,7 @@ public class AdminRestServlet extends HttpServlet {
 
       } else if (value instanceof ListUsersQueryResult) {
         ListUsersQueryResult queryResult = (ListUsersQueryResult) value;
-
+        //json!{}
         UserQueryResult.User []users = queryResult.getUsers();
 
         PrintWriter writer = response.getWriter();

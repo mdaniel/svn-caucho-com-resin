@@ -27,22 +27,24 @@
  */
 package com.caucho.server.admin;
 
+import java.io.InputStream;
+
 @SuppressWarnings("serial")
 public class PdfReportQueryResult extends ManagementQueryResult
 {
   private String _message;
   private String _fileName;
-  private byte []_pdfBytes;
+  private InputStream _in;
 
   public PdfReportQueryResult()
   {
   }
 
-  public PdfReportQueryResult(String message, String fileName, byte []pdfBytes)
+  public PdfReportQueryResult(String message, String fileName, InputStream in)
   {
     _message = message;
     _fileName = fileName;
-    _pdfBytes = pdfBytes;
+    _in = in;
   }
 
   public String getMessage()
@@ -55,8 +57,8 @@ public class PdfReportQueryResult extends ManagementQueryResult
     return _fileName;
   }
 
-  public byte[] getPdfBytes()
+  public InputStream getInputStream()
   {
-    return _pdfBytes;
+    return _in;
   }
 }

@@ -24,7 +24,7 @@
  *   59 Temple Place, Suite 330
  *   Boston, MA 02111-1307  USA
  *
- * @author Alex Rojkov
+ * @author Scott Ferguson
  */
 
 package com.caucho.jmx;
@@ -36,7 +36,13 @@ import java.lang.annotation.Target;
 
 @Target({ElementType.PARAMETER})
 @Retention(RetentionPolicy.RUNTIME)
-public @interface MXDefaultValue
+public @interface MXParam
 {
-  public String value();
+  public final static String NULL = "[null]";
+
+  public String name();
+
+  public String defaultValue() default NULL;
+
+  public boolean required() default false;
 }
