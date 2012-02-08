@@ -29,7 +29,7 @@
 
 package com.caucho.mqueue.journal;
 
-import com.caucho.env.thread.DisruptorItem;
+import com.caucho.util.RingItem;
 import com.caucho.vfs.TempBuffer;
 
 /**
@@ -38,7 +38,7 @@ import com.caucho.vfs.TempBuffer;
  * MQueueJournal is not thread safe. It is intended to be used by a
  * single thread.
  */
-public class JournalFileItem extends DisruptorItem
+public class JournalFileItem extends RingItem
 {
   private boolean _isData;
   

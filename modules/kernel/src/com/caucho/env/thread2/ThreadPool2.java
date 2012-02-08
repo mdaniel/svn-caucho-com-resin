@@ -35,15 +35,14 @@ import java.util.concurrent.locks.LockSupport;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
-import com.caucho.util.Friend;
 import com.caucho.env.health.HealthSystemFacade;
 import com.caucho.env.shutdown.ExitCode;
 import com.caucho.env.shutdown.ShutdownSystem;
-import com.caucho.env.thread.SingleConsumerRing;
-import com.caucho.env.thread.SingleConsumerRing.RingItem;
 import com.caucho.lifecycle.Lifecycle;
 import com.caucho.util.Alarm;
+import com.caucho.util.Friend;
 import com.caucho.util.L10N;
+import com.caucho.util.RingValueQueue;
 
 /**
  * A generic pool of threads available for Alarms and Work tasks.
@@ -101,8 +100,8 @@ public class ThreadPool2 {
   // the idle stack
   //
   
-  private final ThreadIdleRing2 _idleThreadRing
-    = new ThreadIdleRing2();
+  private final RingValueQueue<ResinThread2> _idleThreadRing
+    = new RingValueQueue<ResinThread2>(8192);
 
   //
   // task/priority overflow queues
@@ -112,8 +111,8 @@ public class ThreadPool2 {
   
   private final ThreadTaskRing2 _priorityQueue = new ThreadTaskRing2();
   
-  private final SingleConsumerRing<Thread> _unparkQueue
-    = new SingleConsumerRing<Thread>(1024, null, _scheduleWorker);
+  private final RingValueQueue<Thread> _unparkQueue
+    = new RingValueQueue<Thread>(1024);
 
   private int _waitCount;
 
@@ -626,11 +625,8 @@ public class ThreadPool2 {
   {
     // LockSupport.unpark(thread);
     
-
-    RingItem<Thread> item = _unparkQueue.startProducer(true);
-    item.setValue(thread);
-    _unparkQueue.finishProducer(item);
-    _unparkQueue.wake();
+    _unparkQueue.offer(thread);
+    _scheduleWorker.wake();
   }
   
   //
@@ -725,7 +721,7 @@ public class ThreadPool2 {
     {
       super(ThreadScheduleWorker.class.getClassLoader());
     }
-    
+
     @Override
     public long runTask()
     {
@@ -837,6 +833,5 @@ public class ThreadPool2 {
     {
       LockSupport.unpark(thread);
     }
-
   }
 }

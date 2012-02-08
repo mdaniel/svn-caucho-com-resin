@@ -33,10 +33,10 @@ import java.io.IOException;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
+import com.caucho.util.RingItemFactory;
 import com.caucho.vfs.Path;
 import com.caucho.db.block.BlockStore;
 import com.caucho.env.thread.DisruptorQueue;
-import com.caucho.env.thread.DisruptorQueue.ItemFactory;
 import com.caucho.mqueue.journal.JournalRecoverListener;
 import com.caucho.mqueue.journal.MQueueJournalCallback;
 import com.caucho.mqueue.journal.JournalFileItem;
@@ -128,7 +128,7 @@ public class MQJournalQueue
     return getClass().getSimpleName() + "[" + _path + "]";
   }
   
-  static class JournalQueueFactory implements ItemFactory<JournalQueueEntry> {
+  static class JournalQueueFactory implements RingItemFactory<JournalQueueEntry> {
     @Override
     public JournalQueueEntry createItem(int index)
     {

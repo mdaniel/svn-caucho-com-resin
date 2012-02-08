@@ -27,49 +27,28 @@
  * @author Scott Ferguson
  */
 
-package com.caucho.mqueue.queue;
-
-import com.caucho.mqueue.journal.JournalFileItem;
-import com.caucho.util.RingItem;
+package com.caucho.util;
 
 /**
- * Interface for the transaction log.
- * 
- * MQueueJournal is not thread safe. It is intended to be used by a
- * single thread.
+ * Item for the disruptor.
  */
-public class SubscriberEntry extends RingItem
+public class RingItem
 {
-  private static final byte []EMPTY_BUFFER = new byte[0];
+  private final int _index;
   
-  private long _sequence;
-  private JournalDataNode _dataHead;
-  
-  SubscriberEntry(int index)
+  protected RingItem(int index)
   {
-    super(index);
+    _index = index;
   }
   
-  public final void initQueueData(long sequence, JournalDataNode dataHead)
+  public int getIndex()
   {
-    _sequence = sequence;
-    
-    _dataHead = dataHead;
+    return _index;
   }
-  
-  public final long getSequence()
+
+  @Override
+  public String toString()
   {
-    return _sequence;
-  }
-  
-  public final JournalDataNode getDataHead()
-  {
-    return _dataHead;
-  }
-  
-  public void clear()
-  {
-    _sequence = 0;
-    _dataHead = null;
+    return getClass().getSimpleName() + "[]";
   }
 }

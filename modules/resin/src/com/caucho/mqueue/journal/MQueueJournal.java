@@ -34,8 +34,8 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 
 import com.caucho.env.thread.DisruptorQueue;
-import com.caucho.env.thread.DisruptorQueue.ItemFactory;
 import com.caucho.env.thread.DisruptorQueue.ItemProcessor;
+import com.caucho.util.RingItemFactory;
 import com.caucho.vfs.Path;
 import com.caucho.vfs.TempBuffer;
 
@@ -177,7 +177,7 @@ public class MQueueJournal
   
   private class JournalFactory
     extends ItemProcessor<JournalFileItem>
-    implements ItemFactory<JournalFileItem> { 
+    implements RingItemFactory<JournalFileItem> { 
     @Override
     public JournalFileItem createItem(int index)
     {

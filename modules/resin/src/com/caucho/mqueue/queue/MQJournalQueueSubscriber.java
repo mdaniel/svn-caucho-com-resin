@@ -32,9 +32,9 @@ package com.caucho.mqueue.queue;
 import java.io.InputStream;
 
 import com.caucho.env.thread.DisruptorQueue;
-import com.caucho.env.thread.DisruptorQueue.ItemFactory;
 import com.caucho.env.thread.DisruptorQueue.ItemProcessor;
 import com.caucho.util.Friend;
+import com.caucho.util.RingItemFactory;
 
 /**
  * Interface for the transaction log.
@@ -111,7 +111,7 @@ public class MQJournalQueueSubscriber
     return getClass().getSimpleName() + "[" + _queue + "]";
   }
   
-  static class SubscriberEntryFactory implements ItemFactory<SubscriberEntry> {
+  static class SubscriberEntryFactory implements RingItemFactory<SubscriberEntry> {
     @Override
     public SubscriberEntry createItem(int index)
     {

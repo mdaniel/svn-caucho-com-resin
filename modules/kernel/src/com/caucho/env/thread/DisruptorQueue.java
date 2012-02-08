@@ -35,11 +35,14 @@ import java.util.concurrent.atomic.AtomicIntegerFieldUpdater;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
+import com.caucho.util.RingItem;
+import com.caucho.util.RingItemFactory;
+
 
 /**
  * Interface for the transaction log.
  */
-public final class DisruptorQueue<T extends DisruptorItem>
+public final class DisruptorQueue<T extends RingItem>
   extends DisruptorIndex
 {
   private static final Logger log
@@ -60,8 +63,8 @@ public final class DisruptorQueue<T extends DisruptorItem>
   private final AtomicBoolean _isWaitRef = new AtomicBoolean();
  
   public DisruptorQueue(int capacity,
-                         ItemFactory<T> itemFactory,
-                         ItemProcessor<? super T> ...processors)
+                        RingItemFactory<T> itemFactory,
+                        ItemProcessor<? super T> ...processors)
   {
     if (processors.length < 1)
       throw new IllegalArgumentException();
@@ -137,7 +140,7 @@ public final class DisruptorQueue<T extends DisruptorItem>
   @SuppressWarnings("unchecked")
   private T []createRing(int size)
   {
-    return (T []) new DisruptorItem[size];
+    return (T []) new RingItem[size];
   }
   
   public final boolean isEmpty()
@@ -219,7 +222,7 @@ public final class DisruptorQueue<T extends DisruptorItem>
     _firstWorker.wake();
   }
 
-  private static final class DisruptorConsumer<T extends DisruptorItem>
+  private static final class DisruptorConsumer<T extends RingItem>
     extends DisruptorIndex
   {
     private final T []_itemRing;
@@ -382,7 +385,7 @@ public final class DisruptorQueue<T extends DisruptorItem>
     }
   }
   
-  private static class DisruptorWorker<T extends DisruptorItem>
+  private static class DisruptorWorker<T extends RingItem>
     extends AbstractTaskWorker
   {
     private final DisruptorConsumer<T> _consumer;
@@ -407,11 +410,7 @@ public final class DisruptorQueue<T extends DisruptorItem>
     }
   }
   
-  public interface ItemFactory<T extends DisruptorItem> {
-    public T createItem(int index);
-  }
-  
-  abstract public static class ItemProcessor<T extends DisruptorItem> {
+  abstract public static class ItemProcessor<T extends RingItem> {
     abstract public void process(T item) throws Exception;
   }
   

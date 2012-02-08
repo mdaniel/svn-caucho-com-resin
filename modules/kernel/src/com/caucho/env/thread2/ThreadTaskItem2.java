@@ -36,48 +36,32 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 
 import com.caucho.env.thread.ThreadPool;
-import com.caucho.util.RingItemFactory;
+import com.caucho.util.RingItem;
 import com.caucho.util.RingQueue;
 
-public class ThreadTaskRing2 extends RingQueue<ThreadTaskItem2> {
-  private static final int RING_SIZE = 16 * 1024;
+final class ThreadTaskItem2 extends RingItem {
+  private Runnable _task;
+  private ClassLoader _loader;
   
-  public ThreadTaskRing2()
+  ThreadTaskItem2(int index)
   {
-    super(RING_SIZE, new ThreadTaskItemFactory());
+    super(index);
   }
-  
-  public boolean offer(Runnable task, ClassLoader loader)
+    
+  final void init(Runnable task, ClassLoader loader)
   {
-    ThreadTaskItem2 item = beginOffer(true);
-    
-    item.init(task, loader);
-    
-    completeOffer(item);
-    
-    return true;
+    _task = task;
+    _loader = loader;
   }
-  
-  boolean schedule(ResinThread2 thread)
+
+  final void schedule(ResinThread2 thread)
   {
-    ThreadTaskItem2 item = beginTake();
+    Runnable task = _task;
+    _task = null;
     
-    if (item == null)
-      return false;
+    ClassLoader loader = _loader;
+    _loader = null;
     
-    item.schedule(thread);
-    
-    completeTake(item);
-    
-    return true;
-  }
-  
-  private static class ThreadTaskItemFactory
-    implements RingItemFactory<ThreadTaskItem2> {
-    
-    public ThreadTaskItem2 createItem(int index)
-    {
-      return new ThreadTaskItem2(index);
-    }
+    thread.scheduleTask(task, loader);
   }
 }

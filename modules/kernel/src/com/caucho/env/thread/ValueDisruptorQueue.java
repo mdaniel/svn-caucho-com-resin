@@ -29,14 +29,9 @@
 
 package com.caucho.env.thread;
 
-import java.util.concurrent.atomic.AtomicBoolean;
-import java.util.concurrent.atomic.AtomicInteger;
-import java.util.concurrent.atomic.AtomicIntegerFieldUpdater;
-import java.util.logging.Level;
-import java.util.logging.Logger;
-
-import com.caucho.env.thread.DisruptorQueue.ItemFactory;
 import com.caucho.env.thread.DisruptorQueue.ItemProcessor;
+import com.caucho.util.RingItem;
+import com.caucho.util.RingItemFactory;
 
 
 /**
@@ -68,7 +63,7 @@ public class ValueDisruptorQueue<T>
     public void process(T value) throws Exception;
   }
   
-  private static final class ValueItem<T> extends DisruptorItem {
+  private static final class ValueItem<T> extends RingItem {
     private T _value;
     
     ValueItem(int index)
@@ -90,7 +85,7 @@ public class ValueDisruptorQueue<T>
   }
   
   private static final class ValueFactory<T> 
-    implements ItemFactory<ValueItem<T>>
+    implements RingItemFactory<ValueItem<T>>
   {
     public ValueItem<T> createItem(int index)
     {

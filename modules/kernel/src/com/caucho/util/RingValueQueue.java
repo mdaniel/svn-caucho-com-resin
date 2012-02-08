@@ -27,28 +27,50 @@
  * @author Scott Ferguson
  */
 
-package com.caucho.env.thread;
+package com.caucho.util;
 
-/**
- * Item for the disruptor.
- */
-public class DisruptorItem
-{
-  private final int _index;
+import java.util.concurrent.atomic.AtomicBoolean;
+import java.util.concurrent.atomic.AtomicInteger;
+import java.util.logging.Level;
+import java.util.logging.Logger;
+
+public class RingValueQueue<T> extends RingQueue<RingValueItem<T>> {
   
-  protected DisruptorItem(int index)
+  public RingValueQueue(int capacity)
   {
-    _index = index;
+    super(capacity, new RingValueItemFactory());
   }
   
-  public int getIndex()
+  public boolean offer(T value)
   {
-    return _index;
+    RingValueItem<T> item = beginOffer(true);
+    
+    item.setValue(value);
+    
+    completeOffer(item);
+    
+    return true;
   }
-
-  @Override
-  public String toString()
+ 
+  public T take()
   {
-    return getClass().getSimpleName() + "[]";
+    RingValueItem<T> item = beginTake();
+    
+    if (item == null)
+      return null;
+    
+    T value = item.getAndClearValue();
+    
+    completeTake(item);
+    
+    return value;
+  }
+  
+  static class RingValueItemFactory<T> implements RingItemFactory<RingValueItem<T>> {
+    @Override
+    public RingValueItem<T> createItem(int index)
+    {
+      return new RingValueItem<T>(index);
+    }
   }
 }
