@@ -75,7 +75,9 @@ public class RepositoryRoot
   
   public void update()
   {
-    if (isModified()) {
+    if (! exists()) {
+      deleteLocalCopy();
+    } else if (isModified()) {
       try {
         extractFromRepository();
       } catch (IOException e) {
@@ -83,7 +85,18 @@ public class RepositoryRoot
       }
     }
   }
-  
+
+  private boolean exists() {
+    String tag = getId();
+
+    String treeHash = _repository.getTagContentHash(tag);
+
+    if (treeHash != null)
+      return true;
+    else
+      return false;
+  }
+
   private boolean isModified()
   {
     String tag = getId();
@@ -94,7 +107,22 @@ public class RepositoryRoot
     else
       return ! treeHash.equals(_rootHash);
   }
-  
+
+  private synchronized boolean deleteLocalCopy()
+  {
+    try {
+      Path pwd = getRootDirectory();
+
+      pwd.removeAll();
+
+      return true;
+
+    } catch (IOException e) {
+      log.log(Level.WARNING, e.getMessage(), e);
+
+      return false;
+    }
+  }
   /**
    * Extract the contents from the repository into the root directory.
    */

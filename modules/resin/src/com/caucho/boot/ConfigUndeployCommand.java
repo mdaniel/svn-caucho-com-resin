@@ -57,7 +57,7 @@ public class ConfigUndeployCommand extends AbstractRepositoryCommand {
   @Override
   public String getDescription()
   {
-    return "undeploys a configuration";
+    return "undeploys configuration";
   }
   
   @Override
@@ -99,7 +99,7 @@ public class ConfigUndeployCommand extends AbstractRepositoryCommand {
 
     deployClient.undeploy(commit);
 
-    System.out.println("undeployed " + commit.getId() + " from "
+    System.out.println("Undeployed " + commit.getId() + " from "
                        + deployClient.getUrl());
 
     return 0;
