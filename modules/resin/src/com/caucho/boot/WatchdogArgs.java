@@ -1043,7 +1043,8 @@ class WatchdogArgs
     addCommand(new ConfigCatCommand());
     addCommand(new ConfigDeployCommand());
     addCommand(new ConfigLsCommand());
-    
+    addCommand(new ConfigUndeployCommand());
+
     addCommand(new ConsoleCommand());
     addCommand(new DeployCopyCommand());
     addCommand(new DeployCommand());

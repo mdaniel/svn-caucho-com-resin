@@ -42,7 +42,7 @@ public class WebAppStartCommand extends WebAppCommand
   public WebAppStartCommand()
   {
     addValueOption("host", "host", "virtual host to make application available on");
-    addValueOption("stage", "stage", "tage to deploy application to, defaults to production");
+    addValueOption("stage", "stage", "stage to deploy application to, defaults to production");
     addValueOption("version", "version", "version of application formatted as <major.minor.micro.qualifier>");
   }
 
