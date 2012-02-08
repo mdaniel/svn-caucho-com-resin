@@ -124,6 +124,7 @@ public class PdfReportCommand extends AbstractManagementCommand
       PdfReportQueryResult queryResult = (PdfReportQueryResult) result;
       System.out.println(queryResult.getMessage());
 
+      /*
       if (queryResult.getPdfBytes() != null) {
         File file;
 
@@ -153,7 +154,7 @@ public class PdfReportCommand extends AbstractManagementCommand
         } finally {
           IoUtil.close(out);
         }
-      }
+      }*/
 
       return 0;
     }

@@ -452,7 +452,7 @@ public class ManagerActor extends SimpleActor
 
       result = new PdfReportQueryResult(actionResult.getMessage(),
                                         actionResult.getFileName(),
-                                        actionResult.getPdfBytes());
+                                        null);//actionResult.getPdfBytes());
     } catch (ConfigException e) {
       log.log(Level.WARNING, e.getMessage(), e);
 
