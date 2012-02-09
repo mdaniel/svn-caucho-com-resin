@@ -27,50 +27,22 @@
  * @author Scott Ferguson
  */
 
-package com.caucho.env.thread2;
+package com.caucho.bam.mailbox;
 
-import com.caucho.util.RingItemFactory;
-import com.caucho.util.RingQueue;
+import com.caucho.bam.packet.Packet;
+import com.caucho.env.thread.ValueDisruptorQueue;
 
-public class ThreadTaskRing2 extends RingQueue<ThreadTaskItem2> {
-  private static final int RING_SIZE = 16 * 1024;
-  
-  public ThreadTaskRing2()
+/**
+ * Queue/worker for a mailbox. 
+ */
+public class MailboxQueue2 extends ValueDisruptorQueue<Packet>
+{
+  /**
+   * @param capacity
+   * @param processor
+   */
+  public MailboxQueue2(int capacity, ValueProcessor<Packet> processor)
   {
-    super(RING_SIZE, new ThreadTaskItemFactory());
-  }
-  
-  public boolean offer(Runnable task, ClassLoader loader)
-  {
-    ThreadTaskItem2 item = beginOffer(true);
-    
-    item.init(task, loader);
-    
-    completeOffer(item);
-    
-    return true;
-  }
-  
-  boolean schedule(ResinThread2 thread)
-  {
-    ThreadTaskItem2 item = beginTake();
-    
-    if (item == null)
-      return false;
-    
-    item.schedule(thread);
-    
-    completeTake(item);
-    
-    return true;
-  }
-  
-  private static class ThreadTaskItemFactory
-    implements RingItemFactory<ThreadTaskItem2> {
-    
-    public ThreadTaskItem2 createItem(int index)
-    {
-      return new ThreadTaskItem2(index);
-    }
+    super(capacity, processor);
   }
 }

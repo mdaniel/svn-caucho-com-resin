@@ -31,6 +31,7 @@ package com.caucho.bam.mailbox;
 
 import java.io.Closeable;
 import java.io.Serializable;
+import java.util.concurrent.atomic.AtomicInteger;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -41,10 +42,11 @@ import com.caucho.bam.broker.Broker;
 import com.caucho.bam.packet.Message;
 import com.caucho.bam.packet.MessageError;
 import com.caucho.bam.packet.Packet;
-import com.caucho.bam.packet.QueryError;
 import com.caucho.bam.packet.Query;
+import com.caucho.bam.packet.QueryError;
 import com.caucho.bam.packet.QueryResult;
 import com.caucho.bam.stream.MessageStream;
+import com.caucho.env.thread.ValueDisruptorQueue.ValueProcessor;
 import com.caucho.lifecycle.Lifecycle;
 import com.caucho.util.L10N;
 
@@ -61,11 +63,14 @@ public class MultiworkerMailbox implements Mailbox, Closeable
   private final String _address;
   private final Broker _broker;
   private final MessageStream _actorStream;
+  
+  private final int _queueSize = 1024;
 
-  private final MailboxWorker []_workers;
-  private final MailboxQueue _queue;
+  private final MailboxQueue2 []_queues;
   
   private final Lifecycle _lifecycle = new Lifecycle();
+  
+  private final AtomicInteger _roundRobin = new AtomicInteger();
 
   public MultiworkerMailbox(MessageStream actorStream,
                             Broker broker,
@@ -96,29 +101,34 @@ public class MultiworkerMailbox implements Mailbox, Closeable
     else
       _name = _actorStream.getAddress();
     
-    _workers = new MailboxWorker[threadMax];
+    _queues = new MailboxQueue2[threadMax];
     
     for (int i = 0; i < threadMax; i++) {
-      _workers[i] = createWorker();
+      _queues[i] = createWorker();
     }
-    
+
+    /*
     int maxDiscardSize = -1;
     int maxBlockSize = 1024;
     long expireTimeout = -1;
-
-    _queue = new MailboxQueue(_name, maxDiscardSize, maxBlockSize, expireTimeout);
+    */
     
     _lifecycle.toActive();
   }
   
-  protected MailboxWorker createWorker()
+  protected MailboxQueue2 createWorker()
   {
-    return new MailboxWorker(this);
+    return new MailboxQueue2(_queueSize, createProcessor());
+  }
+  
+  protected ValueProcessor<Packet> createProcessor()
+  {
+    return new PacketProcessor();
   }
   
   public int getThreadMax()
   {
-    return _workers.length;
+    return _queues.length;
   }
 
   /**
@@ -138,7 +148,9 @@ public class MultiworkerMailbox implements Mailbox, Closeable
    */
   public boolean isPacketAvailable()
   {
-    return ! _queue.isEmpty();
+    // return ! _queue.isEmpty();
+    
+    return false;
   }
   
   /**
@@ -230,52 +242,30 @@ public class MultiworkerMailbox implements Mailbox, Closeable
       throw new IllegalStateException(L.l("{0} cannot accept packets because it's no longer active",
                                           this));
     
+    MailboxQueue2 workerQueue = findWorker();
+    
     if (log.isLoggable(Level.FINEST)) {
-      int size = _queue.getSize();
+      int size = workerQueue.getSize();
       log.finest(this + " enqueue(" + size + ") " + packet);
     }
-
-    _queue.enqueue(packet);
-
-    /*
-    if (_dequeueCount.get() > 0)
-      return;
-    */
-
-    wakeConsumer(packet);
-
-    /*
-    if (Alarm.isTest()) {
-      // wait a millisecond for the dequeue to avoid spawing extra
-      // processing threads
-      packet.waitForDequeue(10);
-    }
-    */
-  }
-
-  private void wakeConsumer(Packet packet)
-  {
-    for (MailboxWorker worker : _workers) {
-      boolean isRunning = worker.isRunning();
-      
-      worker.wake();
-      
-      if (! isRunning)
-        return;
-    }
-  }
-
-  /**
-   * Dispatches the packet to the stream
-   */
-  protected void dispatch(Packet packet)
-  {
-    packet.dispatch(getActorStream(), _broker);
+    
+    workerQueue.offer(packet);
+    workerQueue.wake();
   }
   
-  protected Packet dequeue()
+  private MailboxQueue2 findWorker()
   {
-    return _queue.dequeue();
+    for (MailboxQueue2 queue : _queues) {
+      if (queue.isEmpty()) {
+        return queue;
+      }
+    }
+    
+    int roundRobin = _roundRobin.incrementAndGet();
+    
+    int index = (roundRobin & 0x7fffffff) % _queues.length;
+    
+    return _queues[index];
   }
 
   @Override
@@ -283,13 +273,13 @@ public class MultiworkerMailbox implements Mailbox, Closeable
   {
     _lifecycle.toStop();
 
-    for (MailboxWorker worker : _workers) {
+    for (MailboxQueue2 worker : _queues) {
       worker.wake();
     }
     
     long expires = getCurrentTimeActual() + 2000;
     
-    while (! _queue.isEmpty()
+    while (! isQueueEmpty()
            && getCurrentTimeActual() < expires) {
       try {
         Thread.sleep(100);
@@ -298,11 +288,22 @@ public class MultiworkerMailbox implements Mailbox, Closeable
       }
     }
 
-    for (MailboxWorker worker : _workers) {
-      worker.close();
+    for (MailboxQueue2 queue : _queues) {
+      queue.close();
     }
     
     _lifecycle.toDestroy();
+  }
+  
+  private boolean isQueueEmpty()
+  {
+    for (MailboxQueue2 queue : _queues) {
+      if (queue.isEmpty()) {
+        return true;
+      }
+    }
+    
+    return false;
   }
   
   protected long getCurrentTimeActual()
@@ -320,5 +321,19 @@ public class MultiworkerMailbox implements Mailbox, Closeable
   public String toString()
   {
     return getClass().getSimpleName() + "[" + _name + "]";
+  }
+  
+  private class PacketProcessor implements ValueProcessor<Packet> {
+    @Override
+    public void process(Packet packet) throws Exception
+    {
+      packet.dispatch(getActorStream(), _broker);
+    }
+
+    @Override
+    public void onEmpty() throws Exception
+    {
+    }
+    
   }
 }

@@ -176,8 +176,8 @@ public class MQueueJournal
   }
   
   private class JournalFactory
-    extends ItemProcessor<JournalFileItem>
-    implements RingItemFactory<JournalFileItem> { 
+    implements ItemProcessor<JournalFileItem>,
+    RingItemFactory<JournalFileItem> { 
     @Override
     public JournalFileItem createItem(int index)
     {
@@ -189,6 +189,11 @@ public class MQueueJournal
       throws IOException
     {
       processEntry(entry);
+    }
+
+    @Override
+    public void onEmpty() throws Exception
+    {
     }
   }
 }

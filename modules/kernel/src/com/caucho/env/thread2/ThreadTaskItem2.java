@@ -29,15 +29,7 @@
 
 package com.caucho.env.thread2;
 
-import java.util.concurrent.atomic.AtomicBoolean;
-import java.util.concurrent.atomic.AtomicInteger;
-import java.util.concurrent.atomic.AtomicReference;
-import java.util.logging.Level;
-import java.util.logging.Logger;
-
-import com.caucho.env.thread.ThreadPool;
 import com.caucho.util.RingItem;
-import com.caucho.util.RingQueue;
 
 final class ThreadTaskItem2 extends RingItem {
   private Runnable _task;

@@ -34,12 +34,10 @@ import java.util.concurrent.atomic.AtomicLong;
 import java.util.logging.Logger;
 
 import com.caucho.config.ConfigException;
-import com.caucho.env.thread2.AbstractTaskWorker2;
 import com.caucho.inject.Module;
 import com.caucho.lifecycle.Lifecycle;
 import com.caucho.util.Alarm;
 import com.caucho.util.L10N;
-import com.caucho.util.ThreadDump;
 
 @Module
 abstract public class AbstractThreadLauncher2 extends AbstractTaskWorker2 {

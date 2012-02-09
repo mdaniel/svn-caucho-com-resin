@@ -52,6 +52,16 @@ public class ValueDisruptorQueue<T>
                                  new ValueItemProcessor<T>(processor));
   }
   
+  public boolean isEmpty()
+  {
+    return _disruptor.isEmpty();
+  }
+  
+  public int getSize()
+  {
+    return _disruptor.getSize();
+  }
+  
   public void offer(T value)
   {
     ValueItem<T> item = _disruptor.startProducer(true);
@@ -59,8 +69,20 @@ public class ValueDisruptorQueue<T>
     _disruptor.finishProducer(item);
   }
   
+  public void wake()
+  {
+    _disruptor.wake();
+  }
+  
+  public void close()
+  {
+    // _disruptor.close();
+  }
+  
   public interface ValueProcessor<T> {
     public void process(T value) throws Exception;
+    
+    public void onEmpty() throws Exception;
   }
   
   private static final class ValueItem<T> extends RingItem {
@@ -94,7 +116,7 @@ public class ValueDisruptorQueue<T>
   }
   
   private static final class ValueItemProcessor<T> 
-    extends ItemProcessor<ValueItem<T>>
+    implements ItemProcessor<ValueItem<T>>
   {
     private final ValueProcessor<T> _processor;
     
@@ -110,6 +132,11 @@ public class ValueDisruptorQueue<T>
       T value = item.getAndClear();
       
       _processor.process(value);
+    }
+
+    @Override
+    public void onEmpty() throws Exception
+    {
     }
   }
 }

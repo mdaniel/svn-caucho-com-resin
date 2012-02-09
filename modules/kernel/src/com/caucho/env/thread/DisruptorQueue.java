@@ -358,6 +358,8 @@ public final class DisruptorQueue<T extends RingItem>
         }
       } finally {
         _tail = tail;
+        
+        processor.onEmpty();
       }
     }
     
@@ -410,8 +412,10 @@ public final class DisruptorQueue<T extends RingItem>
     }
   }
   
-  abstract public static class ItemProcessor<T extends RingItem> {
-    abstract public void process(T item) throws Exception;
+  public interface ItemProcessor<T extends RingItem> {
+    public void process(T item) throws Exception;
+    
+    public void onEmpty() throws Exception;
   }
   
   static {

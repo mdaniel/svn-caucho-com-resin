@@ -504,7 +504,7 @@ public class AdminRestServlet extends HttpServlet {
       } else if(value instanceof PdfReportQueryResult) {
         PdfReportQueryResult queryResult
           = (PdfReportQueryResult) value;
-
+/* XXX: compile
         if (queryResult.getPdf() != null) {
           response.setContentType("application/pdf");
 
@@ -514,6 +514,7 @@ public class AdminRestServlet extends HttpServlet {
           PrintWriter out = response.getWriter();
           out.println(queryResult.getMessage());
         }
+        */
       } else if (value instanceof ControllerStateActionQueryResult) {
         ControllerStateActionQueryResult queryResult =
           (ControllerStateActionQueryResult) value;

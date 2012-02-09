@@ -40,7 +40,7 @@ import com.caucho.env.thread.DisruptorQueue.ItemProcessor;
  * single thread.
  */
 public class MQueueJournalItemProcessor
-  extends ItemProcessor<JournalFileItem>
+  implements ItemProcessor<JournalFileItem>
 {
   private final MQueueJournalFile _journalFile;
   
@@ -90,6 +90,11 @@ public class MQueueJournalItemProcessor
     int length = entry.getLength();
       
     _journalFile.checkpoint(blockAddr, offset, length);
+  }
+
+  @Override
+  public void onEmpty() throws Exception
+  {
   }
   
   @Override

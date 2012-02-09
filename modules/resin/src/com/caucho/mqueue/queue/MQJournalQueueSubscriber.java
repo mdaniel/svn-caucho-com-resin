@@ -119,7 +119,7 @@ public class MQJournalQueueSubscriber
     }
   }
   
-  class SubscriberItemProcessor extends ItemProcessor<SubscriberEntry> {
+  class SubscriberItemProcessor implements ItemProcessor<SubscriberEntry> {
     @Override
     public void process(SubscriberEntry item) throws Exception
     {
@@ -130,6 +130,11 @@ public class MQJournalQueueSubscriber
       } finally {
         ack(item.getSequence());
       }
+    }
+
+    @Override
+    public void onEmpty() throws Exception
+    {
     }
   }
 }

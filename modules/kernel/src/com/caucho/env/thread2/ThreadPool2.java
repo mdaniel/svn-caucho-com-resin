@@ -29,6 +29,7 @@
 
 package com.caucho.env.thread2;
 
+import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.atomic.AtomicLong;
 import java.util.concurrent.atomic.AtomicReference;
 import java.util.concurrent.locks.LockSupport;
@@ -564,7 +565,7 @@ public class ThreadPool2 {
 
     return scheduleImpl(task, loader, expire, isPriority, isQueue);
   }
-
+  
   /**
    * main scheduling implementation class.
    */
@@ -576,11 +577,13 @@ public class ThreadPool2 {
   {
     if (isPriority) {
       if (! _priorityQueue.offer(task, loader)) {
+        System.out.println("PRIORITY_FULL");
         return false;
       }
     }
     else {
       if (! _taskQueue.offer(task, loader)) {
+        System.out.println("TASK_FULL");
         return false;
       }
     }
@@ -674,6 +677,7 @@ public class ThreadPool2 {
     
     _lifecycle.toDestroy();
     _launcher.close();
+    _scheduleWorker.close();
     
     interrupt();
   }
@@ -721,16 +725,22 @@ public class ThreadPool2 {
     {
       super(ThreadScheduleWorker.class.getClassLoader());
     }
+    
+    @Override
+    public boolean isPermanent()
+    {
+      return true;
+    }
 
     @Override
     public long runTask()
     {
-      int loopCount = 1;
-      int i = 0;
+      int loopCount = 2;
+      int i;
       
-      for (i = 0; i < loopCount; i++) {
+      for (i = 0; i <= loopCount; i++) {
         while (invoke()) {
-          i = 0;
+          i = -1;
         }
       }
       
@@ -793,7 +803,6 @@ public class ThreadPool2 {
       ResinThread2 thread = _idleThreadRing.take();
         
       if (thread == null) {
-        System.out.println("DEADL:");
         _launcher.wake();
         return true;
       }

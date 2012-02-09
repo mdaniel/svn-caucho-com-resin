@@ -43,7 +43,7 @@ import com.caucho.util.ConcurrentArrayList;
  * single thread.
  */
 class JournalQueueActor
-  extends ItemProcessor<JournalQueueEntry>
+  implements ItemProcessor<JournalQueueEntry>
 {
   private static final Logger log
     = Logger.getLogger(ItemProcessor.class.getName());
@@ -305,5 +305,15 @@ class JournalQueueActor
     {
       _isAvailable = isAvailable;
     }
+  }
+
+  /* (non-Javadoc)
+   * @see com.caucho.env.thread.DisruptorQueue.ItemProcessor#onEmpty()
+   */
+  @Override
+  public void onEmpty() throws Exception
+  {
+    // TODO Auto-generated method stub
+    
   }
 }

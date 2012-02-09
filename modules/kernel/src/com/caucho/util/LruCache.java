@@ -52,7 +52,7 @@ public final class LruCache<K,V> {
 
   // hash table containing the entries.  Its size is twice the capacity
   // so it will always remain at least half empty
-  private final CacheItem []_entries;
+  private final CacheItem<K,V> []_entries;
   private final Object []_locks;
 
   // mask for hash mapping
@@ -84,7 +84,7 @@ public final class LruCache<K,V> {
 
   // lru timeout reduces lru updates for the most used items
   private final int _lruTimeout;
-
+  
   private final AtomicBoolean _isLruTailRemove = new AtomicBoolean();
 
   // counts group 2 updates, rolling over at 0x3fffffff
@@ -135,7 +135,7 @@ public final class LruCache<K,V> {
     _capacity1 = _capacity / 2;
 
     if (_capacity > 32)
-      _lruTimeout = _capacity / 32;
+      _lruTimeout = _capacity / 8;
     else
       _lruTimeout = 1;
 
