@@ -50,12 +50,16 @@ import com.caucho.cloud.network.NetworkClusterSystem;
 import com.caucho.cloud.topology.CloudServer;
 import com.caucho.config.ConfigException;
 import com.caucho.env.service.ResinSystem;
+import com.caucho.quercus.lib.file.Stream;
 import com.caucho.security.AdminAuthenticator;
 import com.caucho.security.PasswordUser;
 import com.caucho.server.cluster.Server;
 import com.caucho.util.Alarm;
 import com.caucho.util.L10N;
 import com.caucho.vfs.Path;
+import com.caucho.vfs.StreamSource;
+import com.caucho.vfs.TempOutputStream;
+import com.caucho.vfs.TempStream;
 import com.caucho.vfs.Vfs;
 
 import javax.annotation.PostConstruct;
@@ -442,7 +446,12 @@ public class ManagerActor extends SimpleActor
     if (query.getLogDirectory() != null)
       action.setLogDirectory(query.getLogDirectory());
 
-    action.setReturnPdf(query.isReturnPdf());
+    TempOutputStream pdfStream = null;
+
+    if (query.isReturnPdf())
+      pdfStream = new TempOutputStream();
+
+    action.setOutputStream(pdfStream);
 
     try {
       action.init();
@@ -450,9 +459,14 @@ public class ManagerActor extends SimpleActor
       PdfReportAction.PdfReportActionResult actionResult =
         action.execute();
 
+      StreamSource pdfSource = null;
+
+      if (pdfStream != null)
+        pdfSource = new StreamSource(pdfStream);
+
       result = new PdfReportQueryResult(actionResult.getMessage(),
                                         actionResult.getFileName(),
-                                        null);//actionResult.getPdfBytes());
+                                        pdfSource);
     } catch (ConfigException e) {
       log.log(Level.WARNING, e.getMessage(), e);
 

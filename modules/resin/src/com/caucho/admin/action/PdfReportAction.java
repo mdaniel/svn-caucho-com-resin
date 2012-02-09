@@ -27,6 +27,7 @@ import com.caucho.util.IoUtil;
 import com.caucho.util.L10N;
 import com.caucho.util.QDate;
 import com.caucho.vfs.Path;
+import com.caucho.vfs.TempOutputStream;
 import com.caucho.vfs.TempStream;
 import com.caucho.vfs.Vfs;
 import com.caucho.vfs.WriteStream;
@@ -44,7 +45,6 @@ public class PdfReportAction implements AdminAction
   private long _period;
   private String _report;
   private String _title;
-  private boolean _isReturnPdf;
 
   private MailService _mailService = new MailService();
   private String _mailTo;
@@ -61,6 +61,8 @@ public class PdfReportAction implements AdminAction
   private Path _phpPath;
   private Path _logPath;
   private String _fileName;
+
+  private TempOutputStream _pdfStream;
 
   public String getPath()
   {
@@ -164,14 +166,14 @@ public class PdfReportAction implements AdminAction
       _mailFrom = mailFrom;
   }
 
-  public boolean isReturnPdf()
+  public TempOutputStream getOutputStream()
   {
-    return _isReturnPdf;
+    return _pdfStream;
   }
 
-  public void setReturnPdf(boolean returnPdf)
+  public void setOutputStream(TempOutputStream out)
   {
-    _isReturnPdf = returnPdf;
+    _pdfStream = out;
   }
 
   private String calculateReport()
@@ -353,14 +355,13 @@ public class PdfReportAction implements AdminAction
       }
 
       Path path = writePdfToFile(ts);
-      byte []pdfBytes = null;
 
-      if (_isReturnPdf)
-        pdfBytes = writePdfToByteArray(ts);
+      if (_pdfStream != null)
+        ts.writeToStream(_pdfStream);
 
       String message = L.l("generated {0}", path);
       PdfReportActionResult actionResult
-        = new PdfReportActionResult(message, path.getPath(), pdfBytes);
+        = new PdfReportActionResult(message, path.getPath(), _pdfStream);
 
       return actionResult;
     } finally {
@@ -440,15 +441,15 @@ public class PdfReportAction implements AdminAction
   {
     private String _message;
     private String _fileName;
-    private byte [] _pdfBytes;
+    private TempOutputStream _out;
 
     public PdfReportActionResult(String message,
                                  String fileName,
-                                 byte []pdfBytes)
+                                 TempOutputStream out)
     {
       _message = message;
       _fileName = fileName;
-      _pdfBytes = pdfBytes;
+      _out = out;
     }
 
     public String getMessage()
@@ -456,8 +457,9 @@ public class PdfReportAction implements AdminAction
       return _message;
     }
 
-    public byte []getPdfBytes(){
-      return _pdfBytes;
+    public TempOutputStream getOut()
+    {
+      return _out;
     }
 
     public String getFileName()

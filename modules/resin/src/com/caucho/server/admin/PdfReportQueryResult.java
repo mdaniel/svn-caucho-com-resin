@@ -27,24 +27,27 @@
  */
 package com.caucho.server.admin;
 
-import java.io.InputStream;
+import com.caucho.quercus.lib.file.Stream;
+import com.caucho.vfs.StreamSource;
+import com.caucho.vfs.TempOutputStream;
 
 @SuppressWarnings("serial")
 public class PdfReportQueryResult extends ManagementQueryResult
 {
   private String _message;
   private String _fileName;
-  private InputStream _in;
+  private StreamSource _pdf;
+
 
   public PdfReportQueryResult()
   {
   }
 
-  public PdfReportQueryResult(String message, String fileName, InputStream in)
+  public PdfReportQueryResult(String message, String fileName, StreamSource pdf)
   {
     _message = message;
     _fileName = fileName;
-    _in = in;
+    _pdf = pdf;
   }
 
   public String getMessage()
@@ -57,8 +60,8 @@ public class PdfReportQueryResult extends ManagementQueryResult
     return _fileName;
   }
 
-  public InputStream getInputStream()
+  public StreamSource getPdf()
   {
-    return _in;
+    return _pdf;
   }
 }

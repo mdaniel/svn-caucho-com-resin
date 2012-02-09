@@ -36,11 +36,13 @@ import com.caucho.server.admin.ManagerClient;
 import com.caucho.server.admin.PdfReportQueryResult;
 import com.caucho.util.IoUtil;
 import com.caucho.util.L10N;
+import com.caucho.vfs.StreamSource;
 import sun.misc.IOUtils;
 
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
+import java.io.InputStream;
 
 public class PdfReportCommand extends AbstractManagementCommand
 {
@@ -124,38 +126,48 @@ public class PdfReportCommand extends AbstractManagementCommand
       PdfReportQueryResult queryResult = (PdfReportQueryResult) result;
       System.out.println(queryResult.getMessage());
 
-      /*
-      if (queryResult.getPdfBytes() != null) {
-        File file;
-
-        String fileName = queryResult.getFileName();
-        if (fileName.lastIndexOf('/') > 0)
-          fileName = fileName.substring(fileName.lastIndexOf('/'));
-        else if (fileName.lastIndexOf('\\') > 0)
-          fileName = fileName.substring(fileName.lastIndexOf('\\'));
-
-        if (localDir != null) {
-          file = new File(localDir, fileName);
-
-          file.getParentFile().mkdirs();
-        } else {
-          file = new File(fileName);
-        }
-
-        FileOutputStream out = null;
+      if (isReturnPdf){
+        StreamSource streamSource = queryResult.getPdf();
         try {
-          out = new FileOutputStream(file);
-          out.write(queryResult.getPdfBytes());
-          System.out.println(L.l("Local copy is written to '{0}'",
-                                 file.toString()));
-        } catch (IOException e) {
-          System.out.println(L.l("Can't write a local copy '{0}'",
-                                 file.toString()));
-        } finally {
-          IoUtil.close(out);
-        }
-      }*/
+          InputStream in = streamSource.getInputStream();
+          File file;
 
+          String fileName = queryResult.getFileName();
+          if (fileName.lastIndexOf('/') > 0)
+            fileName = fileName.substring(fileName.lastIndexOf('/'));
+          else if (fileName.lastIndexOf('\\') > 0)
+            fileName = fileName.substring(fileName.lastIndexOf('\\'));
+
+          if (localDir != null) {
+            file = new File(localDir, fileName);
+
+            file.getParentFile().mkdirs();
+          } else {
+            file = new File(fileName);
+          }
+
+          FileOutputStream out = null;
+          try {
+            out = new FileOutputStream(file);
+            byte []buffer = new byte[1024];
+            int len = -1;
+            while ((len = in.read(buffer))> 0)
+              out.write(buffer, 0, len);
+
+            out.flush();
+            System.out.println(L.l("Local copy is written to '{0}'",
+                                   file.toString()));
+          } catch (IOException e) {
+            System.out.println(L.l("Can't write a local copy '{0}'",
+                                   file.toString()));
+          } finally {
+            IoUtil.close(out);
+          }
+
+        } catch (IOException e) {
+          e.printStackTrace();
+        }
+      }
       return 0;
     }
   }
