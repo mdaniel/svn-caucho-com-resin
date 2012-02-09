@@ -505,11 +505,12 @@ public class AdminRestServlet extends HttpServlet {
         PdfReportQueryResult queryResult
           = (PdfReportQueryResult) value;
 
-        if (queryResult.getInputStream() != null) {
+        if (queryResult.getPdf() != null) {
           response.setContentType("application/pdf");
 
           //response.getOutputStream().write(queryResult.getInputStream());
-        } else {
+        }
+        else {
           PrintWriter out = response.getWriter();
           out.println(queryResult.getMessage());
         }
