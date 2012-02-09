@@ -180,6 +180,8 @@ public final class DisruptorQueue<T extends RingItem>
       
       if (nextHead == tail) {
         if (isWait) {
+          head = -1;
+          nextHead = 0;
           waitForQueue(head, tail);
         }
         else

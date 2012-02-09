@@ -600,11 +600,11 @@ public class ThreadPool2 {
   @Friend(ResinThread2.class)
   boolean execute(ResinThread2 thread)
   {
-    if (_priorityQueue.schedule(thread)) {
+    if (_priorityQueue.takeAndSchedule(thread)) {
       return true;
     }
     else if (getPriorityIdleMin() < _launcher.getIdleCount() 
-             && _taskQueue.schedule(thread)) {
+             && _taskQueue.takeAndSchedule(thread)) {
       return true;
     }
     
@@ -749,9 +749,20 @@ public class ThreadPool2 {
     
     private boolean invoke()
     {
-      return (invokePriorityQueue()
-              || invokeIdleQueue()
-              || invokeUnpark());
+      boolean isInvoke = false;
+      
+      if (invokePriorityQueue()) {
+        isInvoke = true;
+      }
+      else if (invokeIdleQueue()) {
+        isInvoke = true;
+      }
+      
+      if (invokeUnpark()) {
+        isInvoke = true;
+      }
+      
+      return isInvoke;
     }
     
     private boolean invokeUnpark()
@@ -779,7 +790,7 @@ public class ThreadPool2 {
         return true;
       }
          
-      if (_priorityQueue.schedule(thread)) {
+      if (_priorityQueue.takeAndSchedule(thread)) {
         thread.unpark();
         return true;
       }
@@ -794,7 +805,7 @@ public class ThreadPool2 {
       if (_taskQueue.isEmpty()) {
         return false;
       }
-      
+
       if (_launcher.getIdleCount() <= getPriorityIdleMin()) {
         _launcher.wake();
         return true;
@@ -807,7 +818,7 @@ public class ThreadPool2 {
         return true;
       }
          
-      if (_taskQueue.schedule(thread)) {
+      if (_taskQueue.takeAndSchedule(thread)) {
         thread.unpark();
         return true;
       }

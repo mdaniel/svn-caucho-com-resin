@@ -51,7 +51,7 @@ public class ThreadTaskRing2 extends RingQueue<ThreadTaskItem2> {
     return true;
   }
   
-  boolean schedule(ResinThread2 thread)
+  boolean takeAndSchedule(ResinThread2 thread)
   {
     ThreadTaskItem2 item = beginTake();
     

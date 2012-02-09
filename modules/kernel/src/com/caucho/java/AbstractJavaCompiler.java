@@ -105,10 +105,11 @@ abstract public class AbstractJavaCompiler implements Runnable {
   @Override
   public void run()
   {
-    _compileThread = Thread.currentThread();
+    Thread thread = Thread.currentThread();
+    _compileThread = thread;
     
     try {
-      Thread.currentThread().setContextClassLoader(_loader);
+      thread.setContextClassLoader(_loader);
 
       compileInt(_path, _lineMap);
     } catch (final Throwable e) {
@@ -126,7 +127,7 @@ abstract public class AbstractJavaCompiler implements Runnable {
       };
       _exception = e;
     } finally {
-      Thread.currentThread().setContextClassLoader(null);
+      thread.setContextClassLoader(null);
 
       notifyComplete();
 

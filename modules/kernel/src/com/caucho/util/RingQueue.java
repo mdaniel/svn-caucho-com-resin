@@ -79,7 +79,7 @@ public class RingQueue<T extends RingItem> {
     return (_ring.length + head - tail) & _mask;
   }
   
-  public T beginOffer(boolean isWait)
+  public final T beginOffer(boolean isWait)
   {
     int head;
     int nextHead;
@@ -93,6 +93,8 @@ public class RingQueue<T extends RingItem> {
       
       if (nextHead == tail) {
         if (isWait) {
+          head = -1;
+          nextHead = 0;
           waitForEmpty();
         }
         else {
@@ -106,7 +108,7 @@ public class RingQueue<T extends RingItem> {
     return item;
   }
   
-  public void completeOffer(T item)
+  public final void completeOffer(T item)
   {
     int head = item.getIndex();
     int nextHead = (head + 1) & _mask;
@@ -115,7 +117,7 @@ public class RingQueue<T extends RingItem> {
     }
   }
  
-  public T beginTake()
+  public final T beginTake()
   {
     int head;
     int tail;
@@ -135,7 +137,7 @@ public class RingQueue<T extends RingItem> {
     return _ring[tail];
   }
   
-  public void completeTake(T item)
+  public final void completeTake(T item)
   {
     int tail = item.getIndex();
     int nextTail = (tail + 1) & _mask;
@@ -150,12 +152,25 @@ public class RingQueue<T extends RingItem> {
   {
     synchronized (_isWait) {
       _isWait.set(true);
-      try {
-        _isWait.wait();
-      } catch (Exception e) {
-        log.log(Level.FINER, e.toString(), e);
+      
+      if (isFull()) {
+        try {
+          _isWait.wait();
+        } catch (Exception e) {
+          log.log(Level.FINER, e.toString(), e);
+        }
       }
     }
+  }
+  
+  private boolean isFull()
+  {
+    int head = _head.get();
+    int tail = _tail.get();
+    
+    int nextHead = (head + 1) & _mask;
+    
+    return nextHead == tail;
   }
   
   private void wakeEmpty()
