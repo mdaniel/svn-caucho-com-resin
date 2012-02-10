@@ -151,7 +151,6 @@ public class ManagementAdmin extends AbstractManagedObject
 
   @Override
   public PdfReportQueryResult pdfReport(String serverId,
-                                        String path,
                                         String report,
                                         String periodStr,
                                         String logDirectory,
@@ -178,15 +177,15 @@ public class ManagementAdmin extends AbstractManagedObject
 
     ManagerClient managerClient = getManagerClient(serverId);
 
-    return managerClient.pdfReport(path,
-                            report,
-                            period,
-                            logDirectory,
-                            profileTime,
-                            samplePeriod,
-                            isSnapshot,
-                            isWatchdog,
-                            isLoadPdf);
+    return managerClient.pdfReport(null,
+                                   report,
+                                   period,
+                                   logDirectory,
+                                   profileTime,
+                                   samplePeriod,
+                                   isSnapshot,
+                                   isWatchdog,
+                                   isLoadPdf);
   }
 
   @Override
