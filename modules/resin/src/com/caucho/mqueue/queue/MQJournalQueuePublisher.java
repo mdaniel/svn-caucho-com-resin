@@ -29,7 +29,7 @@
 
 package com.caucho.mqueue.queue;
 
-import com.caucho.env.thread.DisruptorQueue;
+import com.caucho.env.thread.ActorQueue;
 import com.caucho.mqueue.journal.JournalFileItem;
 import com.caucho.vfs.Path;
 import com.caucho.vfs.TempBuffer;
@@ -43,7 +43,7 @@ import com.caucho.vfs.TempBuffer;
 public class MQJournalQueuePublisher
 {
   private MQJournalQueue _queue;
-  private DisruptorQueue<JournalQueueEntry> _disruptor;
+  private ActorQueue<JournalQueueEntry> _disruptor;
   
   private long _id = 3;
   private long _sequence;
@@ -58,11 +58,11 @@ public class MQJournalQueuePublisher
   {
     long sequence = _sequence++;
     
-    JournalQueueEntry entry = _disruptor.startProducer(true);
+    JournalQueueEntry entry = _disruptor.startOffer(true);
     
     entry.init('D', _id, sequence, buffer, offset, length, null, tBuf);
     
-    _disruptor.finishProducer(entry);
+    _disruptor.finishOffer(entry);
     
     _disruptor.wake();
   }

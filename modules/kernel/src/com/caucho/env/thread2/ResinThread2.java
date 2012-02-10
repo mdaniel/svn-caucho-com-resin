@@ -120,7 +120,7 @@ final class ResinThread2 extends Thread {
     } catch (Throwable e) {
       log.log(Level.WARNING, e.toString(), e);
     } finally {
-      _launcher.onChildIdleEnd();
+      _launcher.onChildThreadEnd();
     }
   }
 

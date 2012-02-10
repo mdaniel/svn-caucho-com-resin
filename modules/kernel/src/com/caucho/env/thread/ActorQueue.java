@@ -42,29 +42,29 @@ import com.caucho.util.RingItemFactory;
 /**
  * Interface for the transaction log.
  */
-public final class DisruptorQueue<T extends RingItem>
-  extends DisruptorIndex
+public final class ActorQueue<T extends RingItem>
+  extends ActorQueueIndex
 {
   private static final Logger log
-    = Logger.getLogger(DisruptorQueue.class.getName());
+    = Logger.getLogger(ActorQueue.class.getName());
   
-  private static final AtomicIntegerFieldUpdater<DisruptorQueue<?>> _headUpdater;
+  private static final AtomicIntegerFieldUpdater<ActorQueue<?>> _headUpdater;
   
   private final int _size;
   private final int _mask;
   private final T []_itemRing;
   
-  private final DisruptorWorker<? super T> _firstWorker;
+  private final ActorWorker<? super T> _firstWorker;
   
   private final AtomicInteger _headAlloc = new AtomicInteger();
   private volatile int _head;
-  private final DisruptorIndex _tailRef;
+  private final ActorQueueIndex _tailRef;
   
   private final AtomicBoolean _isWaitRef = new AtomicBoolean();
  
-  public DisruptorQueue(int capacity,
-                        RingItemFactory<T> itemFactory,
-                        ItemProcessor<? super T> ...processors)
+  public ActorQueue(int capacity,
+                    RingItemFactory<T> itemFactory,
+                    ItemProcessor<? super T> ...processors)
   {
     if (processors.length < 1)
       throw new IllegalArgumentException();
@@ -94,11 +94,11 @@ public final class DisruptorQueue<T extends RingItem>
       }
     }
     
-    DisruptorIndex tail = null;
-    DisruptorIndex prevIndex = this;
+    ActorQueueIndex tail = null;
+    ActorQueueIndex prevIndex = this;
     
-    DisruptorConsumer<T> prevConsumer = null;
-    DisruptorWorker<T> firstWorker = null;
+    ActorConsumer<T> prevConsumer = null;
+    ActorWorker<T> firstWorker = null;
     
     for (int i = 0; i < processorsSize; i++) {
       AtomicBoolean isWaitRef = null;
@@ -107,13 +107,13 @@ public final class DisruptorQueue<T extends RingItem>
         isWaitRef = _isWaitRef;
       }
       
-      DisruptorConsumer<T> consumer
-        = new DisruptorConsumer<T>(_itemRing,
+      ActorConsumer<T> consumer
+        = new ActorConsumer<T>(_itemRing,
                                    processors[i],
                                    prevIndex,
                                    isWaitRef);
       
-      DisruptorWorker<T> worker = new DisruptorWorker<T>(consumer);
+      ActorWorker<T> worker = new ActorWorker<T>(consumer);
       
       if (prevConsumer != null) {
         prevConsumer.setNextWorker(worker);
@@ -163,20 +163,25 @@ public final class DisruptorQueue<T extends RingItem>
     }
   }
   
-  public final T startProducer(boolean isWait)
+  public final T startOffer(boolean isWait)
   {
+    final AtomicInteger headAlloc = _headAlloc;
+    final ActorQueueIndex tailRef = _tailRef;
+    final T []itemRing = _itemRing;
+    final int mask = _mask;
+    
     int head;
     T item;
     int nextHead;
     
     do {
-      head = _headAlloc.get();
-      item = _itemRing[head];
+      head = headAlloc.get();
+      item = itemRing[head];
       
-      nextHead = (head + 1) & _mask;
+      nextHead = (head + 1) & mask;
       
       // full queue
-      int tail = _tailRef.get();
+      int tail = tailRef.get();
       
       if (nextHead == tail) {
         if (isWait) {
@@ -187,9 +192,25 @@ public final class DisruptorQueue<T extends RingItem>
         else
           return null;
       }
-    } while (! _headAlloc.compareAndSet(head, nextHead));
+    } while (! headAlloc.compareAndSet(head, nextHead));
     
     return item;
+  }
+  
+  public final void finishOffer(T item)
+  {
+    // item.setSequence(_sequence + 1);
+    
+    final int head = item.getIndex();
+    final int nextHead = (head + 1) & _mask;
+    
+    final AtomicIntegerFieldUpdater<ActorQueue<?>> headUpdater = _headUpdater;
+    
+    while (! headUpdater.compareAndSet(this, head, nextHead)) {
+    }
+
+    // wake mask
+    _firstWorker.wake();
   }
   
   private void waitForQueue(int head, int tail)
@@ -209,23 +230,9 @@ public final class DisruptorQueue<T extends RingItem>
       }
     }
   }
-  
-  public final void finishProducer(T item)
-  {
-    // item.setSequence(_sequence + 1);
-    
-    int head = item.getIndex();
-    int nextHead = (head + 1) & _mask;
-    
-    while (! _headUpdater.compareAndSet(this, head, nextHead)) {
-    }
 
-    // wake mask
-    _firstWorker.wake();
-  }
-
-  private static final class DisruptorConsumer<T extends RingItem>
-    extends DisruptorIndex
+  private static final class ActorConsumer<T extends RingItem>
+    extends ActorQueueIndex
   {
     private final T []_itemRing;
     private final int _mask;
@@ -234,16 +241,16 @@ public final class DisruptorQueue<T extends RingItem>
     
     private final ItemProcessor<? super T> _processor;
     
-    private final DisruptorIndex _head;
+    private final ActorQueueIndex _head;
     
     private volatile int _tail;
     
-    private DisruptorWorker<T> _nextWorker;
+    private ActorWorker<T> _nextWorker;
     private final AtomicBoolean _isWaitRef;
     
-    DisruptorConsumer(T []ring,
+    ActorConsumer(T []ring,
                      ItemProcessor<? super T> processor,
-                     DisruptorIndex head,
+                     ActorQueueIndex head,
                      AtomicBoolean isWaitRef)
     {
       _itemRing = ring;
@@ -266,7 +273,7 @@ public final class DisruptorQueue<T extends RingItem>
       _isWaitRef = isWaitRef;
     }
     
-    void setNextWorker(DisruptorWorker<T> nextWorker)
+    void setNextWorker(ActorWorker<T> nextWorker)
     {
       _nextWorker = nextWorker;
     }
@@ -299,7 +306,7 @@ public final class DisruptorQueue<T extends RingItem>
     private final boolean doConsume()
       throws Exception
     {
-      final DisruptorIndex headRef = _head;
+      final ActorQueueIndex headRef = _head;
       
       int head = headRef.get();
       int tail = _tail;
@@ -322,7 +329,7 @@ public final class DisruptorQueue<T extends RingItem>
       }
       
       final ItemProcessor<? super T> processor = _processor;
-      final DisruptorWorker<T> nextWorker = _nextWorker;
+      final ActorWorker<T> nextWorker = _nextWorker;
       
       final AtomicBoolean isWait = _isWaitRef;
 
@@ -389,12 +396,12 @@ public final class DisruptorQueue<T extends RingItem>
     }
   }
   
-  private static class DisruptorWorker<T extends RingItem>
+  private static class ActorWorker<T extends RingItem>
     extends AbstractTaskWorker
   {
-    private final DisruptorConsumer<T> _consumer;
+    private final ActorConsumer<T> _consumer;
     
-    DisruptorWorker(DisruptorConsumer<T> consumer)
+    ActorWorker(ActorConsumer<T> consumer)
     {
       _consumer = consumer;
     }
@@ -422,7 +429,7 @@ public final class DisruptorQueue<T extends RingItem>
   
   static {
     AtomicIntegerFieldUpdater headUpdater
-      = AtomicIntegerFieldUpdater.newUpdater(DisruptorQueue.class, "_head");
+      = AtomicIntegerFieldUpdater.newUpdater(ActorQueue.class, "_head");
     
     _headUpdater = headUpdater;
   }

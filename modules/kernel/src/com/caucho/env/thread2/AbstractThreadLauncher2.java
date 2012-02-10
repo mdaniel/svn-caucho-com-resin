@@ -295,6 +295,7 @@ abstract public class AbstractThreadLauncher2 extends AbstractTaskWorker2 {
    */
   public void onChildThreadEnd()
   {
+    try {
     onChildIdleEnd();
     
     if (_threadMax <= _threadCount.getAndDecrement()) {
@@ -303,6 +304,9 @@ abstract public class AbstractThreadLauncher2 extends AbstractTaskWorker2 {
 
     if (_idleCount.get() <= _idleMin) {
       wake();
+    }
+    } catch (Exception e) {
+      e.printStackTrace();
     }
   }
   
@@ -331,7 +335,6 @@ abstract public class AbstractThreadLauncher2 extends AbstractTaskWorker2 {
       if (_idleMax < idleCount 
           && _idleMin < _idleMax) {
         /*
-                && nextIdleExpire - idleExpire > 100
           && _threadIdleExpireTime.compareAndSet(idleExpire, nextIdleExpire)) {
           */
         _threadIdleExpireTime.compareAndSet(idleExpire, nextIdleExpire);
@@ -438,11 +441,6 @@ abstract public class AbstractThreadLauncher2 extends AbstractTaskWorker2 {
     }
   }
   
-  private void onStartFail()
-  {
-    _startingCount.getAndDecrement();
-  }
-  
   protected boolean isIdleTooLow(int startingCount)
   {
     return (_idleCount.get() + startingCount <= _idleMin);
@@ -486,10 +484,16 @@ abstract public class AbstractThreadLauncher2 extends AbstractTaskWorker2 {
         
         isValid = true;
       } finally {
-        if (! isValid)
+        if (! isValid) {
           onStartFail();
+        }
       }
     }
+  }
+  
+  private void onStartFail()
+  {
+    _startingCount.getAndDecrement();
   }
   
   /**
@@ -513,8 +517,11 @@ abstract public class AbstractThreadLauncher2 extends AbstractTaskWorker2 {
     if (_throttleCount < _throttleLimit) {
       return;
     }
+    
+    /*
     System.out.println("THROTTLE: " + _throttleCount + " " + this
                        + " idle:" + getIdleCount());
+                       */
     
     if (! _isThrottle) {
       _isThrottle = true;

@@ -32,7 +32,7 @@ package com.caucho.env.thread;
 /**
  * index for the disruptor.
  */
-abstract class DisruptorIndex
+abstract class ActorQueueIndex
 {
   abstract int get();
 }

@@ -46,7 +46,7 @@ import com.caucho.bam.packet.Query;
 import com.caucho.bam.packet.QueryError;
 import com.caucho.bam.packet.QueryResult;
 import com.caucho.bam.stream.MessageStream;
-import com.caucho.env.thread.ValueDisruptorQueue.ValueProcessor;
+import com.caucho.env.thread.ValueActorQueue.ValueProcessor;
 import com.caucho.lifecycle.Lifecycle;
 import com.caucho.util.L10N;
 

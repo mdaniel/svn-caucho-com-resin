@@ -30,12 +30,12 @@
 package com.caucho.bam.mailbox;
 
 import com.caucho.bam.packet.Packet;
-import com.caucho.env.thread.ValueDisruptorQueue;
+import com.caucho.env.thread.ValueActorQueue;
 
 /**
  * Queue/worker for a mailbox. 
  */
-public class MailboxQueue2 extends ValueDisruptorQueue<Packet>
+public class MailboxQueue2 extends ValueActorQueue<Packet>
 {
   /**
    * @param capacity

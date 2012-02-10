@@ -31,8 +31,8 @@ package com.caucho.mqueue.queue;
 
 import java.io.InputStream;
 
-import com.caucho.env.thread.DisruptorQueue;
-import com.caucho.env.thread.DisruptorQueue.ItemProcessor;
+import com.caucho.env.thread.ActorQueue;
+import com.caucho.env.thread.ActorQueue.ItemProcessor;
 import com.caucho.util.Friend;
 import com.caucho.util.RingItemFactory;
 
@@ -45,9 +45,9 @@ import com.caucho.util.RingItemFactory;
 public class MQJournalQueueSubscriber
 {
   private MQJournalQueue _queue;
-  private DisruptorQueue<JournalQueueEntry> _journalQueue;
+  private ActorQueue<JournalQueueEntry> _journalQueue;
   
-  private DisruptorQueue<SubscriberEntry> _subscriberQueue;
+  private ActorQueue<SubscriberEntry> _subscriberQueue;
   private SubscriberProcessor _processor;
   
   MQJournalQueueSubscriber(MQJournalQueue queue, SubscriberProcessor processor)
@@ -60,42 +60,42 @@ public class MQJournalQueueSubscriber
     if (processor == null)
       throw new NullPointerException();
     
-    _subscriberQueue = new DisruptorQueue<SubscriberEntry>(64, 
+    _subscriberQueue = new ActorQueue<SubscriberEntry>(64, 
                                     new SubscriberEntryFactory(),
                                     new SubscriberItemProcessor());
   }
   
   public void start()
   {
-    JournalQueueEntry entry = _journalQueue.startProducer(true);
+    JournalQueueEntry entry = _journalQueue.startOffer(true);
     
     entry.initSubscribe(this);
     
-    _journalQueue.finishProducer(entry);
+    _journalQueue.finishOffer(entry);
     _journalQueue.wake();
   }
   
   public void stop()
   {
-    JournalQueueEntry entry = _journalQueue.startProducer(true);
+    JournalQueueEntry entry = _journalQueue.startOffer(true);
     
     entry.initUnsubscribe(this);
     
-    _journalQueue.finishProducer(entry);
+    _journalQueue.finishOffer(entry);
     _journalQueue.wake();
   }
   
   @Friend(JournalQueueActor.class)
   boolean offerEntry(long sequence, JournalDataNode dataHead)
   {
-    SubscriberEntry entry = _subscriberQueue.startProducer(false);
+    SubscriberEntry entry = _subscriberQueue.startOffer(false);
     
     if (entry == null)
       return false;
     
     entry.initQueueData(sequence, dataHead);
     
-    _subscriberQueue.finishProducer(entry);
+    _subscriberQueue.finishOffer(entry);
     _subscriberQueue.wake();
     
     return true;

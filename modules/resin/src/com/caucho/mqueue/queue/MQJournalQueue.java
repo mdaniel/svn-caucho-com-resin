@@ -36,7 +36,7 @@ import java.util.logging.Logger;
 import com.caucho.util.RingItemFactory;
 import com.caucho.vfs.Path;
 import com.caucho.db.block.BlockStore;
-import com.caucho.env.thread.DisruptorQueue;
+import com.caucho.env.thread.ActorQueue;
 import com.caucho.mqueue.journal.JournalRecoverListener;
 import com.caucho.mqueue.journal.MQueueJournalCallback;
 import com.caucho.mqueue.journal.JournalFileItem;
@@ -58,7 +58,7 @@ public class MQJournalQueue
   private MQueueJournalFile _journalFile;
   private JournalQueueActor _journalActor;
   
- DisruptorQueue<JournalQueueEntry> _disruptorQueue;
+ ActorQueue<JournalQueueEntry> _disruptorQueue;
   
   public MQJournalQueue(Path path)
   {
@@ -69,7 +69,7 @@ public class MQJournalQueue
     JournalRecoverListener recover = new RecoverListener();
     _journalFile = new MQueueJournalFile(path, recover);
     
-    _disruptorQueue = new DisruptorQueue<JournalQueueEntry>(8192,
+    _disruptorQueue = new ActorQueue<JournalQueueEntry>(8192,
                       new JournalQueueFactory(),
                       new MQueueJournalItemProcessor(_journalFile),
                       _journalActor);
@@ -90,7 +90,7 @@ public class MQJournalQueue
     return _journalActor.getDequeueCount();
   }
   
-  DisruptorQueue<JournalQueueEntry> getDisruptor()
+  ActorQueue<JournalQueueEntry> getDisruptor()
   {
     return _disruptorQueue;
   }
@@ -108,11 +108,11 @@ public class MQJournalQueue
   
   void ack(long sequence, MQJournalQueueSubscriber subscriber)
   {
-    JournalQueueEntry entry = _disruptorQueue.startProducer(true);
+    JournalQueueEntry entry = _disruptorQueue.startOffer(true);
     
     entry.initAck(sequence, subscriber);
     
-    _disruptorQueue.finishProducer(entry);
+    _disruptorQueue.finishOffer(entry);
     _disruptorQueue.wake();
   }
   

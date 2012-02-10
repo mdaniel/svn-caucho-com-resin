@@ -33,8 +33,8 @@ import java.io.IOException;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
-import com.caucho.env.thread.DisruptorQueue;
-import com.caucho.env.thread.DisruptorQueue.ItemProcessor;
+import com.caucho.env.thread.ActorQueue;
+import com.caucho.env.thread.ActorQueue.ItemProcessor;
 import com.caucho.util.RingItemFactory;
 import com.caucho.vfs.Path;
 import com.caucho.vfs.TempBuffer;
@@ -50,7 +50,7 @@ public class MQueueJournal
   private final Path _path;
   private final MQueueJournalFile _journalFile;
   
-  private final DisruptorQueue<JournalFileItem> _disruptor;
+  private final ActorQueue<JournalFileItem> _disruptor;
   
   public MQueueJournal(Path path,
                        JournalRecoverListener listener)
@@ -62,7 +62,7 @@ public class MQueueJournal
     
     JournalFactory factory = new JournalFactory();
     
-    _disruptor = new DisruptorQueue<JournalFileItem>(size, factory, factory);
+    _disruptor = new ActorQueue<JournalFileItem>(size, factory, factory);
   }
   
   public void write(int code, long id, long seq,
@@ -76,24 +76,24 @@ public class MQueueJournal
     if (callback == null)
       throw new NullPointerException();
     
-    JournalFileItem entry = _disruptor.startProducer(true);
+    JournalFileItem entry = _disruptor.startOffer(true);
     
     entry.init(code, id, seq, buffer, offset, length, callback, tBuf);
     
-    _disruptor.finishProducer(entry);
+    _disruptor.finishOffer(entry);
   }
   
   public void checkpoint(long blockAddr, int offset, int length)
   {
     JournalFileItem entry = null;
     
-    if ((entry = _disruptor.startProducer(false)) == null) {
+    if ((entry = _disruptor.startOffer(false)) == null) {
       return;
     }
     
     entry.initCheckpoint(blockAddr, offset, length);
     
-    _disruptor.finishProducer(entry);
+    _disruptor.finishOffer(entry);
   }
   
   private final void processEntry(JournalFileItem entry)

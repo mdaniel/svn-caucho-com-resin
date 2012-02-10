@@ -32,7 +32,7 @@ package com.caucho.mqueue.queue;
 import java.util.logging.Logger;
 
 import com.caucho.db.block.BlockStore;
-import com.caucho.env.thread.DisruptorQueue.ItemProcessor;
+import com.caucho.env.thread.ActorQueue.ItemProcessor;
 import com.caucho.mqueue.journal.MQueueJournalResult;
 import com.caucho.util.ConcurrentArrayList;
 

@@ -29,7 +29,7 @@
 
 package com.caucho.env.thread;
 
-import com.caucho.env.thread.DisruptorQueue.ItemProcessor;
+import com.caucho.env.thread.ActorQueue.ItemProcessor;
 import com.caucho.util.RingItem;
 import com.caucho.util.RingItemFactory;
 
@@ -37,41 +37,41 @@ import com.caucho.util.RingItemFactory;
 /**
  * Interface for the transaction log.
  */
-public class ValueDisruptorQueue<T>
+public class ValueActorQueue<T>
 {
-  private final DisruptorQueue<ValueItem<T>> _disruptor;
+  private final ActorQueue<ValueItem<T>> _actorQueue;
  
-  public ValueDisruptorQueue(int capacity,
+  public ValueActorQueue(int capacity,
                              ValueProcessor<T> processor)
   {
     if (processor == null)
       throw new NullPointerException();
     
-    _disruptor = new DisruptorQueue<ValueItem<T>>(capacity,
-                                 new ValueFactory<T>(),
+    _actorQueue = new ActorQueue<ValueItem<T>>(capacity,
+                                 new ValueItemFactory<T>(),
                                  new ValueItemProcessor<T>(processor));
   }
   
   public boolean isEmpty()
   {
-    return _disruptor.isEmpty();
+    return _actorQueue.isEmpty();
   }
   
   public int getSize()
   {
-    return _disruptor.getSize();
+    return _actorQueue.getSize();
   }
   
-  public void offer(T value)
+  public final void offer(T value)
   {
-    ValueItem<T> item = _disruptor.startProducer(true);
+    ValueItem<T> item = _actorQueue.startOffer(true);
     item.init(value);
-    _disruptor.finishProducer(item);
+    _actorQueue.finishOffer(item);
   }
   
   public void wake()
   {
-    _disruptor.wake();
+    _actorQueue.wake();
   }
   
   public void close()
@@ -106,9 +106,10 @@ public class ValueDisruptorQueue<T>
     }
   }
   
-  private static final class ValueFactory<T> 
+  private static final class ValueItemFactory<T> 
     implements RingItemFactory<ValueItem<T>>
   {
+    @Override
     public ValueItem<T> createItem(int index)
     {
       return new ValueItem<T>(index);

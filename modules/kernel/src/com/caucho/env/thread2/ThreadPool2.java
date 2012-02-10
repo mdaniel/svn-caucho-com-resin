@@ -29,7 +29,6 @@
 
 package com.caucho.env.thread2;
 
-import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.atomic.AtomicLong;
 import java.util.concurrent.atomic.AtomicReference;
 import java.util.concurrent.locks.LockSupport;
@@ -735,7 +734,7 @@ public class ThreadPool2 {
     @Override
     public long runTask()
     {
-      int loopCount = 2;
+      int loopCount = 4;
       int i;
       
       for (i = 0; i <= loopCount; i++) {
@@ -744,7 +743,7 @@ public class ThreadPool2 {
         }
       }
       
-      return 1;
+      return 10;
     }
     
     private boolean invoke()
