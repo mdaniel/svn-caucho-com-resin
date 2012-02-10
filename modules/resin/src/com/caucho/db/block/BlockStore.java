@@ -46,6 +46,7 @@ import com.caucho.env.health.HealthSystemFacade;
 import com.caucho.lifecycle.Lifecycle;
 import com.caucho.util.L10N;
 import com.caucho.vfs.Path;
+import com.caucho.vfs.RandomAccessStream;
 
 /**
  * The store manages the block-based persistent store file.  Each table
@@ -357,6 +358,11 @@ public class BlockStore {
   BlockWriter getWriter()
   {
     return _writer;
+  }
+  
+  public RandomAccessStream getMmap()
+  {
+    return _readWrite.getMmap();
   }
 
   /*

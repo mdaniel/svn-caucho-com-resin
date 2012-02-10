@@ -458,6 +458,42 @@ public final class JniSocketImpl extends QSocket {
     return result;
   }
 
+  public int writeMmap(byte[] buffer, int offset, int length,
+                       long mmapAddress, int mmapLength)
+    throws IOException
+  {
+    int result;
+    
+    long requestExpireTime = _requestExpireTime;
+    
+    if (requestExpireTime > 0 && requestExpireTime < Alarm.getCurrentTime()) {
+      close();
+      throw new ClientDisconnectException(L.l("{0}: request-timeout write",
+                                              getRemoteAddress()));
+    }
+    
+    
+    synchronized (_writeLock) {
+      long now = Alarm.getCurrentTimeActual();
+      long expires = _socketTimeout + now;
+      
+      do {
+        result = writeMmapNative(_fd, buffer, offset, length,
+                                 mmapAddress, mmapLength);
+        
+        //byte []tempBuffer = _byteBuffer.array();
+        //System.out.println("TEMP: " + tempBuffer);
+        //System.arraycopy(buffer, offset, tempBuffer, 0, length);
+        //_byteBuffer.position(0);
+        //_byteBuffer.put(buffer, offset, length);
+        //result = writeNativeNio(_fd, _byteBuffer, 0, length);
+      } while (result == JniStream.TIMEOUT_EXN
+               && Alarm.getCurrentTimeActual() < expires);
+    }
+    
+    return result;
+  }
+
   /**
    * Flushes the socket.
    */
@@ -692,6 +728,11 @@ public final class JniSocketImpl extends QSocket {
   native int writeNative2(long fd,
                           byte []buf1, int off1, int len1,
                           byte []buf2, int off2, int len2)
+    throws IOException;
+  
+  native int writeMmapNative(long fd,
+                             byte []buf, int off, int len,
+                             long mmapAddress, int mmapOffset)
     throws IOException;
 
   /*

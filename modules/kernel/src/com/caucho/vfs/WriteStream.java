@@ -54,7 +54,7 @@ import com.caucho.vfs.i18n.EncodingWriter;
  * streams.
  */
 public class WriteStream extends OutputStreamWithBuffer
-    implements LockableStream
+implements LockableStream, SendfileOutputStream
 {
   private static final byte []lfBytes = new byte[] {'\n'};
   private static final byte []crBytes = new byte[] {'\r'};
@@ -1455,6 +1455,44 @@ public class WriteStream extends OutputStreamWithBuffer
       else
         return false;
     }
+  }
+
+  @Override
+  public boolean isMmapEnabled()
+  {
+    System.out.println("MMAP: " + _source);
+    return _source.isMmapEnabled();
+  }
+
+  @Override
+  public boolean isSendfileEnabled()
+  {
+    return _source.isSendfileEnabled();
+  }
+
+  @Override
+  public void writeMmap(byte[] buffer, int offset, int length,
+                        long mmapAddress, int mmapLength) throws IOException
+  {
+    if (buffer != null) {
+      write(buffer, offset, length);
+    }
+    
+    if (_writeLength > 0) {
+      int writeLength = _writeLength;
+      _writeLength = 0;
+      _position += writeLength;
+      
+      _source.writeMmap(_writeBuffer, 0, writeLength,
+                        mmapAddress, mmapLength);
+      
+    }
+    else {
+      _source.writeMmap(null, 0, 0,
+                        mmapAddress, mmapLength);
+    }
+    
+    _position += mmapLength;
   }
 
   @Override

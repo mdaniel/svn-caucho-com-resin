@@ -219,6 +219,66 @@ Java_com_caucho_vfs_JniSocketImpl_writeNative(JNIEnv *env,
   return write_length;
 }
 
+JNIEXPORT jint JNICALL
+Java_com_caucho_vfs_JniSocketImpl_writeMmapNative(JNIEnv *env,
+                                                  jobject obj,
+                                                  jlong conn_fd,
+                                                  jbyteArray buf,
+                                                  jint offset,
+                                                  jint length,
+                                                  jlong mmapAddress,
+                                                  jint mmapLength)
+{
+  connection_t *conn = (connection_t *) (PTR) conn_fd;
+  char buffer[STACK_BUFFER_SIZE];
+  int sublen;
+  int write_length = 0;
+  int result;
+    
+  if (! conn || conn->fd < 0) {
+    return -1;
+  }
+  
+  conn->jni_env = env;
+
+  while (length > 0 && buf) {
+    jbyte *cBuf;
+
+    if (length < sizeof(buffer))
+      sublen = length;
+    else
+      sublen = sizeof(buffer);
+
+    resin_get_byte_array_region(env, buf, offset, sublen, buffer);
+
+    result = conn->ops->write(conn, buffer, sublen);
+    
+    if (result < 0) {
+      /*
+      fprintf(stdout, "write-ops: write result=%d errno=%d\n", 
+              result, errno);
+      fflush(stdout);
+      */
+      return result;
+    }
+
+    length -= result;
+    offset += result;
+    write_length += result;
+  }
+
+  result = conn->ops->write(conn, mmapAddress, mmapLength);
+
+  fprintf(stderr, "WRITTENMMAP: %p %d\n", mmapAddress, result);
+
+  if (result < 0) {
+    return result;
+  }
+  else {
+    return result + write_length;
+  }
+}
+
 JNIEXPORT jobject JNICALL
 Java_com_caucho_vfs_JniSocketImpl_createByteBuffer(JNIEnv *env,
                                                    jobject this,

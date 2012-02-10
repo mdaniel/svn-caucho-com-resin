@@ -258,6 +258,11 @@ public class BlockReadWrite {
       closeRowFile(wrapper, isPriority);
     }
   }
+  
+  RandomAccessStream getMmap()
+  {
+    return _mmapFile.get();
+  }
 
   /**
    * Opens the underlying file to the database.

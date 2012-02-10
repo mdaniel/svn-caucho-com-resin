@@ -34,9 +34,15 @@ import java.util.ArrayList;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
+import com.caucho.util.L10N;
+import com.caucho.vfs.SendfileOutputStream;
 import com.caucho.vfs.WriteStream;
 
-public class HttpResponseStream extends ResponseStream {
+public class HttpResponseStream
+  extends ResponseStream
+  implements SendfileOutputStream
+{
+  private static final L10N L = new L10N(HttpResponseStream.class);
   private static final Logger log
     = Logger.getLogger(HttpResponseStream.class.getName());
 
@@ -294,5 +300,31 @@ public class HttpResponseStream extends ResponseStream {
       return (byte) ('0' + value);
     else
       return (byte) ('a' + value - 10);
+  }
+
+  @Override
+  public boolean isMmapEnabled()
+  {
+    return _nextStream.isMmapEnabled();
+  }
+
+  @Override
+  public boolean isSendfileEnabled()
+  {
+    return _nextStream.isSendfileEnabled();
+  }
+
+  @Override
+  public void writeMmap(byte[] buffer, int offset, int length,
+                        long mmapAddress, int mmapLength) throws IOException
+  {
+    if (_isChunkedEncoding) {
+      throw new IllegalStateException(L.l("writeMmap cannot use chunked"));
+    }
+    
+    flush(); // XXX:
+    
+    _nextStream.writeMmap(buffer, offset, length,
+                          mmapAddress, mmapLength);
   }
 }

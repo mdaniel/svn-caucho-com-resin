@@ -120,6 +120,11 @@ abstract public class RandomAccessStream
   abstract public long getFilePointer()
     throws IOException;
   
+  public long getMmapAddress() throws IOException
+  {
+    throw new UnsupportedOperationException(getClass().getName());
+  }
+  
   public final boolean isOpen()
   {
     return _useCount.get() > 0;
