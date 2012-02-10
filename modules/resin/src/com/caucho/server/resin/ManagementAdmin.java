@@ -45,6 +45,7 @@ import com.caucho.server.admin.DeployClient;
 import com.caucho.server.admin.HmuxClientFactory;
 import com.caucho.server.admin.ManagementQueryResult;
 import com.caucho.server.admin.ManagerClient;
+import com.caucho.server.admin.PdfReportQueryResult;
 import com.caucho.server.admin.TagResult;
 import com.caucho.server.admin.WebAppDeployClient;
 import com.caucho.util.L10N;
@@ -145,16 +146,16 @@ public class ManagementAdmin extends AbstractManagedObject
   }
 
   @Override
-  public ManagementQueryResult pdfReport(String serverId,
-                                         String path,
-                                         String report,
-                                         String periodStr,
-                                         String logDirectory,
-                                         String profileTimeStr,
-                                         String samplePeriodStr,
-                                         boolean isSnapshot,
-                                         boolean isWatchdog,
-                                         boolean isLoadPdf)
+  public PdfReportQueryResult pdfReport(String serverId,
+                                        String path,
+                                        String report,
+                                        String periodStr,
+                                        String logDirectory,
+                                        String profileTimeStr,
+                                        String samplePeriodStr,
+                                        boolean isSnapshot,
+                                        boolean isWatchdog,
+                                        boolean isLoadPdf)
   {
     long period = -1;
 

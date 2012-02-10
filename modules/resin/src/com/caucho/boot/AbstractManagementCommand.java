@@ -50,10 +50,15 @@ public abstract class AbstractManagementCommand extends AbstractRemoteCommand {
 
       return doCommand(args, client, managerClient);
     } catch (Exception e) {
+      Throwable cause = e;
+
+      while (cause.getCause() != null)
+        cause = cause.getCause();
+
       if (args.isVerbose())
         e.printStackTrace();
       else
-        System.out.println(e.toString());
+        System.out.println(cause.toString());
 
       if (e instanceof NotAuthorizedException)
         return 1;

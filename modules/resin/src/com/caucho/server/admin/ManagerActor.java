@@ -50,7 +50,6 @@ import com.caucho.cloud.network.NetworkClusterSystem;
 import com.caucho.cloud.topology.CloudServer;
 import com.caucho.config.ConfigException;
 import com.caucho.env.service.ResinSystem;
-import com.caucho.quercus.lib.file.Stream;
 import com.caucho.security.AdminAuthenticator;
 import com.caucho.security.PasswordUser;
 import com.caucho.server.cluster.Server;
@@ -58,11 +57,11 @@ import com.caucho.util.Alarm;
 import com.caucho.util.L10N;
 import com.caucho.vfs.Path;
 import com.caucho.vfs.StreamSource;
-import com.caucho.vfs.TempOutputStream;
-import com.caucho.vfs.TempStream;
 import com.caucho.vfs.Vfs;
 
 import javax.annotation.PostConstruct;
+import java.io.IOException;
+import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.Hashtable;
@@ -416,13 +415,11 @@ public class ManagerActor extends SimpleActor
   }
 
   @Query
-  public ManagementQueryResult pdfReport(long id,
-                                         String to,
-                                         String from,
-                                         PdfReportQuery query)
+  public PdfReportQueryResult pdfReport(long id,
+                                        String to,
+                                        String from,
+                                        PdfReportQuery query)
   {
-    ManagementQueryResult result;
-    
     PdfReportAction action = new PdfReportAction();
     
     if (query.getPath() != null)
@@ -446,12 +443,7 @@ public class ManagerActor extends SimpleActor
     if (query.getLogDirectory() != null)
       action.setLogDirectory(query.getLogDirectory());
 
-    TempOutputStream pdfStream = null;
-
-    if (query.isReturnPdf())
-      pdfStream = new TempOutputStream();
-
-    action.setOutputStream(pdfStream);
+    action.setReturnPdf(query.isReturnPdf());
 
     try {
       action.init();
@@ -461,25 +453,26 @@ public class ManagerActor extends SimpleActor
 
       StreamSource pdfSource = null;
 
-      if (pdfStream != null)
-        pdfSource = new StreamSource(pdfStream);
+      if (query.isReturnPdf())
+        pdfSource = new StreamSource(actionResult.getPdfOutputStream());
 
-      result = new PdfReportQueryResult(actionResult.getMessage(),
-                                        actionResult.getFileName(),
-                                        pdfSource);
-    } catch (ConfigException e) {
+      PdfReportQueryResult result
+        = new PdfReportQueryResult(actionResult.getMessage(),
+                                   actionResult.getFileName(),
+                                   pdfSource);
+
+      getBroker().queryResult(id, from, to, result);
+
+      return result;
+    } catch (RuntimeException e) {
       log.log(Level.WARNING, e.getMessage(), e);
 
-      result = new ErrorQueryResult(e);
-    } catch (Exception e) {
+      throw e;
+    } catch (IOException e) {
       log.log(Level.WARNING, e.getMessage(), e);
 
-      result = new ErrorQueryResult(e);
+      throw new RuntimeException(e);
     }
-    
-    getBroker().queryResult(id, from, to, result);
-
-    return result;
   }
 
   @Query

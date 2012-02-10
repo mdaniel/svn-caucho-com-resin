@@ -36,6 +36,7 @@ import com.caucho.server.admin.ManagerClient;
 import com.caucho.server.admin.PdfReportQueryResult;
 import com.caucho.util.IoUtil;
 import com.caucho.util.L10N;
+import com.caucho.util.ThreadDump;
 import com.caucho.vfs.StreamSource;
 import sun.misc.IOUtils;
 
@@ -115,60 +116,52 @@ public class PdfReportCommand extends AbstractManagementCommand
                                                            isSnapshot,
                                                            isWatchdog,
                                                            isReturnPdf);
+    PdfReportQueryResult queryResult = (PdfReportQueryResult) result;
+    System.out.println(queryResult.getMessage());
 
-    if (result instanceof ErrorQueryResult) {
-      ErrorQueryResult errorResult = (ErrorQueryResult) result;
+    if (isReturnPdf) {
+      StreamSource streamSource = queryResult.getPdf();
+      try {
+        InputStream in = streamSource.getInputStream();
+        File file;
 
-      System.out.println(errorResult.getException().getMessage());
+        String fileName = queryResult.getFileName();
+        if (fileName.lastIndexOf('/') > 0)
+          fileName = fileName.substring(fileName.lastIndexOf('/'));
+        else if (fileName.lastIndexOf('\\') > 0)
+          fileName = fileName.substring(fileName.lastIndexOf('\\'));
 
-      return RETURN_CODE_SERVER_ERROR;
-    } else {
-      PdfReportQueryResult queryResult = (PdfReportQueryResult) result;
-      System.out.println(queryResult.getMessage());
+        if (localDir != null) {
+          file = new File(localDir, fileName);
 
-      if (isReturnPdf){
-        StreamSource streamSource = queryResult.getPdf();
-        try {
-          InputStream in = streamSource.getInputStream();
-          File file;
-
-          String fileName = queryResult.getFileName();
-          if (fileName.lastIndexOf('/') > 0)
-            fileName = fileName.substring(fileName.lastIndexOf('/'));
-          else if (fileName.lastIndexOf('\\') > 0)
-            fileName = fileName.substring(fileName.lastIndexOf('\\'));
-
-          if (localDir != null) {
-            file = new File(localDir, fileName);
-
-            file.getParentFile().mkdirs();
-          } else {
-            file = new File(fileName);
-          }
-
-          FileOutputStream out = null;
-          try {
-            out = new FileOutputStream(file);
-            byte []buffer = new byte[1024];
-            int len = -1;
-            while ((len = in.read(buffer))> 0)
-              out.write(buffer, 0, len);
-
-            out.flush();
-            System.out.println(L.l("Local copy is written to '{0}'",
-                                   file.toString()));
-          } catch (IOException e) {
-            System.out.println(L.l("Can't write a local copy '{0}'",
-                                   file.toString()));
-          } finally {
-            IoUtil.close(out);
-          }
-
-        } catch (IOException e) {
-          e.printStackTrace();
+          file.getParentFile().mkdirs();
         }
+        else {
+          file = new File(fileName);
+        }
+
+        FileOutputStream out = null;
+        try {
+          out = new FileOutputStream(file);
+          byte []buffer = new byte[1024];
+          int len = -1;
+          while ((len = in.read(buffer)) > 0)
+            out.write(buffer, 0, len);
+
+          out.flush();
+          System.out.println(L.l("Local copy is written to '{0}'",
+                                 file.toString()));
+        } catch (IOException e) {
+          System.out.println(L.l("Can't write a local copy '{0}'",
+                                 file.toString()));
+        } finally {
+          IoUtil.close(out);
+        }
+
+      } catch (IOException e) {
+        e.printStackTrace();
       }
-      return 0;
     }
+    return 0;
   }
 }

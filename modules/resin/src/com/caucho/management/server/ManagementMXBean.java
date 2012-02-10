@@ -34,6 +34,7 @@ import com.caucho.jmx.MXAction;
 import com.caucho.jmx.MXParam;
 import com.caucho.quercus.lib.reflection.ReflectionException;
 import com.caucho.server.admin.ManagementQueryResult;
+import com.caucho.server.admin.PdfReportQueryResult;
 import com.caucho.server.admin.TagResult;
 
 import java.io.IOException;
@@ -88,24 +89,25 @@ public interface ManagementMXBean extends ManagedObjectMXBean
 
   @Description("creates a PDF report of a Resin server (Resin Pro)")
   @MXAction(value = "pdf-report", contentType = "application/pdf")
-  public ManagementQueryResult pdfReport(@MXParam(name = "server") String serverId,
-                                         @MXParam(name = "path") String path,
-                                         @MXParam(name = "report") String report,
-                                         @MXParam(name = "period") String periodStr,
-                                         @MXParam(name = "log-directory")
-                                         String logDirectory,
-                                         @MXParam(name = "profile-time")
-                                         String profileTimeStr,
-                                         @MXParam(name = "sample-period")
-                                         String samplePeriodStr,
-                                         @MXParam(name = "snapshot",
-                                                  defaultValue = "true")
-                                         boolean isSnapshot,
-                                         @MXParam(name = "watchdog")
-                                         boolean isWatchdog,
-                                         @MXParam(name = "load-pdf")
-                                         boolean isLoadPdf)
-    throws ReflectionException;
+  public PdfReportQueryResult pdfReport(@MXParam(name = "server") String serverId,
+                                        @MXParam(name = "path") String path,
+                                        @MXParam(name = "report") String report,
+                                        @MXParam(name = "period")
+                                        String periodStr,
+                                        @MXParam(name = "log-directory")
+                                        String logDirectory,
+                                        @MXParam(name = "profile-time")
+                                        String profileTimeStr,
+                                        @MXParam(name = "sample-period")
+                                        String samplePeriodStr,
+                                        @MXParam(name = "snapshot",
+                                                 defaultValue = "true")
+                                        boolean isSnapshot,
+                                        @MXParam(name = "watchdog")
+                                        boolean isWatchdog,
+                                        @MXParam(name = "load-pdf")
+                                        boolean isLoadPdf)
+  throws ReflectionException;
 
   @Description("sets JMX Mbean's attribute")
   @MXAction(value = "jmx-set", method = "POST")

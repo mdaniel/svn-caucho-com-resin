@@ -246,34 +246,34 @@ public class ManagerClient
     return query(query);
   }
 
-  public ManagementQueryResult pdfReport(String path,
-                                         String report,
-                                         long period,
-                                         String logDirectory,
-                                         long profileTime,
-                                         long samplePeriod,
-                                         boolean isSnapshot,
-                                         boolean isWatchdog,
-                                         boolean isReportReturned)
+  public PdfReportQueryResult pdfReport(String path,
+                                        String report,
+                                        long period,
+                                        String logDirectory,
+                                        long profileTime,
+                                        long samplePeriod,
+                                        boolean isSnapshot,
+                                        boolean isWatchdog,
+                                        boolean isReportReturned)
   {
-    PdfReportQuery query = new PdfReportQuery(path, 
-                                              report, 
-                                              period, 
+    PdfReportQuery query = new PdfReportQuery(path,
+                                              report,
+                                              period,
                                               logDirectory,
                                               profileTime,
                                               samplePeriod,
                                               isSnapshot,
                                               isWatchdog,
                                               isReportReturned);
-    
+
     long timeout;
-    
+
     if (profileTime > 0)
       timeout = profileTime + 60000L;
     else
       timeout = 60000L;
-      
-    return query(query, timeout);
+
+    return (PdfReportQueryResult) query(query, timeout);
   } 
 
   public ManagementQueryResult profile(long activeTime, long period, int depth)

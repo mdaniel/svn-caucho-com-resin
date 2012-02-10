@@ -45,10 +45,12 @@ package com.caucho.admin.servlet;
  import com.caucho.server.admin.TagResult;
  import com.caucho.server.admin.UserQueryResult;
  import com.caucho.util.L10N;
+ import com.caucho.vfs.ReadStream;
  import com.caucho.vfs.Vfs;
  import com.caucho.vfs.WriteStream;
 
  import javax.servlet.ServletException;
+ import javax.servlet.ServletOutputStream;
  import javax.servlet.http.HttpServlet;
  import javax.servlet.http.HttpServletRequest;
  import javax.servlet.http.HttpServletResponse;
@@ -584,6 +586,43 @@ public class AdminRestServlet extends HttpServlet {
     }
   }
 
+    static class PdfReportQueryResultMarshal
+      extends Marshal<PdfReportQueryResult>
+    {
+      @Override
+      public Object marshal(HttpServletRequest request,
+                          String name,
+                          PdfReportQueryResult defaultValue)
+      throws IOException
+    {
+      throw new AbstractMethodError();
+    }
+
+    @Override
+    public void unmarshal(HttpServletResponse response,
+                          PdfReportQueryResult value)
+      throws IOException
+    {
+      if (value.getPdf() != null) {
+        response.setContentType("application/pdf");
+        ServletOutputStream out = response.getOutputStream();
+        InputStream in = value.getPdf().getInputStream();
+
+        byte []buffer = new byte[1024];
+        int len;
+
+        while ((len = in.read(buffer)) > 0)
+          out.write(buffer, 0, len);
+
+        out.flush();
+      }
+      else {
+        PrintWriter out = response.getWriter();
+        out.println(value.getMessage());
+      }
+    }
+  }
+
   static class TagResultMarshal extends Marshal<TagResult[]> {
     @Override
     public Object marshal(HttpServletRequest request,
@@ -617,6 +656,7 @@ public class AdminRestServlet extends HttpServlet {
     _marshalMap.put(InputStream.class, new InputStreamMarshal());
     _marshalMap.put(boolean.class, new BooleanMarshal());
     _marshalMap.put(ManagementQueryResult.class, new ManagementQueryResultMarshal());
+    _marshalMap.put(PdfReportQueryResult.class, new PdfReportQueryResultMarshal());
     _marshalMap.put(TagResult[].class, new TagResultMarshal());
 
     introspectManagementOperations();

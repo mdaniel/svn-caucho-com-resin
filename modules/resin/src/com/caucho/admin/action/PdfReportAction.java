@@ -6,13 +6,6 @@
 
 package com.caucho.admin.action;
 
-import java.io.ByteArrayOutputStream;
-import java.io.IOException;
-
-import javax.mail.internet.InternetAddress;
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
-
 import com.caucho.config.ConfigException;
 import com.caucho.hemp.services.MailService;
 import com.caucho.quercus.QuercusContext;
@@ -31,6 +24,13 @@ import com.caucho.vfs.TempOutputStream;
 import com.caucho.vfs.TempStream;
 import com.caucho.vfs.Vfs;
 import com.caucho.vfs.WriteStream;
+import com.caucho.vfs.WriterStreamImpl;
+import sun.misc.IOUtils;
+
+import javax.mail.internet.InternetAddress;
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
+import java.io.IOException;
 
 public class PdfReportAction implements AdminAction
 {
@@ -55,14 +55,14 @@ public class PdfReportAction implements AdminAction
   private long _profileTick;
   
   private boolean _isWatchdog;
+
+  private boolean _isReturnPdf;
   
   private QuercusContext _quercus;
   
   private Path _phpPath;
   private Path _logPath;
   private String _fileName;
-
-  private TempOutputStream _pdfStream;
 
   public String getPath()
   {
@@ -166,14 +166,14 @@ public class PdfReportAction implements AdminAction
       _mailFrom = mailFrom;
   }
 
-  public TempOutputStream getOutputStream()
+  public boolean isReturnPdf()
   {
-    return _pdfStream;
+    return _isReturnPdf;
   }
 
-  public void setOutputStream(TempOutputStream out)
+  public void setReturnPdf(boolean returnPdf)
   {
-    _pdfStream = out;
+    _isReturnPdf = returnPdf;
   }
 
   private String calculateReport()
@@ -299,18 +299,20 @@ public class PdfReportAction implements AdminAction
 
     return _fileName;
   }
-  
+
   public PdfReportActionResult execute()
-    throws Exception
+    throws IOException
   {
     Env env = null;
+    WriteStream ws = null;
+    TempOutputStream pdfOut = null;
 
     try {
       QuercusPage page = getQuercusContext().parse(_phpPath);
   
       TempStream ts = new TempStream();
       ts.openWrite();
-      WriteStream ws = new WriteStream(ts);
+      ws = new WriteStream(ts);
       
       HttpServletRequest request = new StubServletRequest();
       HttpServletResponse response = new StubServletResponse();
@@ -336,12 +338,12 @@ public class PdfReportAction implements AdminAction
       env.start();
   
       Value result = env.executeTop();
-  
-      ws.close();
-        
+
       if (! result.toString().equals("ok")) {
-        throw new Exception(L.l("generation failed: {0}", result.toString()));
+        throw new RuntimeException(L.l("generation failed: {0}", result.toString()));
       }
+
+      ws.flush();
 
       if (_mailTo != null && ! "".equals(_mailTo)) {
         mailPdf(ts);
@@ -356,17 +358,24 @@ public class PdfReportAction implements AdminAction
 
       Path path = writePdfToFile(ts);
 
-      if (_pdfStream != null)
-        ts.writeToStream(_pdfStream);
+      if (_isReturnPdf) {
+        pdfOut = new TempOutputStream();
+        ts.writeToStream(pdfOut);
+      }
 
       String message = L.l("generated {0}", path);
+
       PdfReportActionResult actionResult
-        = new PdfReportActionResult(message, path.getPath(), _pdfStream);
+        = new PdfReportActionResult(message, path.getPath(), pdfOut);
 
       return actionResult;
     } finally {
+      IoUtil.close(ws);
+      IoUtil.close(pdfOut);
+
       if (env != null)
         env.close();
+
     }
   }
   
@@ -429,19 +438,11 @@ public class PdfReportAction implements AdminAction
     return path;
   }
 
-  private byte []writePdfToByteArray(TempStream ts) throws IOException
-  {
-    ByteArrayOutputStream out = new ByteArrayOutputStream();
-    ts.writeToStream(out);
-
-    return out.toByteArray();
-  }
-
   public static class PdfReportActionResult
   {
     private String _message;
     private String _fileName;
-    private TempOutputStream _out;
+    private TempOutputStream _pdfOutputStream;
 
     public PdfReportActionResult(String message,
                                  String fileName,
@@ -449,7 +450,7 @@ public class PdfReportAction implements AdminAction
     {
       _message = message;
       _fileName = fileName;
-      _out = out;
+      _pdfOutputStream = out;
     }
 
     public String getMessage()
@@ -457,9 +458,9 @@ public class PdfReportAction implements AdminAction
       return _message;
     }
 
-    public TempOutputStream getOut()
+    public TempOutputStream getPdfOutputStream()
     {
-      return _out;
+      return _pdfOutputStream;
     }
 
     public String getFileName()
