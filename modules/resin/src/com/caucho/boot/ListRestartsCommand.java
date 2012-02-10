@@ -30,8 +30,6 @@
 package com.caucho.boot;
 
 import com.caucho.config.types.Period;
-import com.caucho.server.admin.ErrorQueryResult;
-import com.caucho.server.admin.ManagementQueryResult;
 import com.caucho.server.admin.ManagerClient;
 import com.caucho.server.admin.StringQueryResult;
 import com.caucho.util.L10N;
@@ -42,7 +40,9 @@ public class ListRestartsCommand extends AbstractManagementCommand
 
   public ListRestartsCommand()
   {
-    addValueOption("period", "period", "specifies look back period of time. e.g. '-period 1D' will list restarts since same time yesterday.");
+    addValueOption("period",
+                   "period",
+                   "specifies look back period of time. e.g. '-period 1D' will list restarts since same time yesterday.");
   }
 
   @Override
@@ -63,17 +63,10 @@ public class ListRestartsCommand extends AbstractManagementCommand
 
     final long period = Period.toPeriod(listPeriod);
 
-    ManagementQueryResult result = managerClient.listRestarts(period);
-    if (result instanceof ErrorQueryResult) {
-      ErrorQueryResult errorResult = (ErrorQueryResult) result;
-      System.out.println(errorResult.getException().getMessage());
+    StringQueryResult result = managerClient.listRestarts(period);
 
-      return RETURN_CODE_SERVER_ERROR;
-    } else {
-      StringQueryResult queryResult = (StringQueryResult) result;
-      System.out.println(queryResult.getValue());
+    System.out.println(result.getValue());
 
-      return 0;
-    }
+    return 0;
   }
 }

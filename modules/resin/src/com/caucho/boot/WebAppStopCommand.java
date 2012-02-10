@@ -30,8 +30,6 @@
 package com.caucho.boot;
 
 import com.caucho.server.admin.ControllerStateActionQueryResult;
-import com.caucho.server.admin.ErrorQueryResult;
-import com.caucho.server.admin.ManagementQueryResult;
 import com.caucho.server.admin.WebAppDeployClient;
 import com.caucho.util.L10N;
 
@@ -56,28 +54,11 @@ public class WebAppStopCommand extends WebAppCommand
   protected int doCommand(WebAppDeployClient deployClient,
                           String tag)
   {
-    int code = 0;
+    ControllerStateActionQueryResult result = deployClient.stop(tag);
 
-    ManagementQueryResult result = deployClient.stop(tag);
+    System.out.println(L.l("'{0}' is stopped", tag));
 
-    if (result instanceof ErrorQueryResult) {
-      ErrorQueryResult errorResult = (ErrorQueryResult) result;
-
-      System.out.println(L.l("'{0}' failed to stop", tag));
-      System.out.println(errorResult.getException().toString());
-
-      code = 3;
-    }
-    else {
-      ControllerStateActionQueryResult queryResult
-        = (ControllerStateActionQueryResult) result;
-
-      System.out.println(L.l("'{0}' is stopped", tag));
-
-      code = 0;
-    }
-
-    return code;
+    return 0;
   }
 
   @Override
@@ -91,26 +72,4 @@ public class WebAppStopCommand extends WebAppCommand
    {
      return true;
    }
-
-  /*
-   @Override
-  public void usage()
-  {
-    System.err.println(L.l("usage: bin/resin.sh [-conf <file>] [-server <id>] deploy-stop -user <user> -password <password> [options] <name>"));
-    System.err.println(L.l(""));
-    System.err.println(L.l("description:"));
-    System.err.println(L.l("   stop application context specified in a <name>"));
-    System.err.println(L.l(""));
-    System.err.println(L.l("options:"));
-    System.err.println(L.l("   -conf <file>          : resin configuration file"));
-    System.err.println(L.l("   -server <id>          : id of a server"));
-    System.err.println(L.l("   -address <address>    : ip or host name of the server"));
-    System.err.println(L.l("   -port <port>          : server http port"));
-    System.err.println(L.l("   -user <user>          : user name used for authentication to the server"));
-    System.err.println(L.l("   -password <password>  : password used for authentication to the server"));
-    System.err.println(L.l("   -host <host>          : virtual host to make application available on"));
-    System.err.println(L.l("   -stage <stage>        : name of the stage, for servers running in staging mode"));
-    System.err.println(L.l("   -version <version>    : version of application formatted as <major.minor.micro.qualifier>"));
-  }
-  */
 }

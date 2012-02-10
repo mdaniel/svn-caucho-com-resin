@@ -30,8 +30,6 @@
 package com.caucho.boot;
 
 import com.caucho.server.admin.ControllerStateActionQueryResult;
-import com.caucho.server.admin.ErrorQueryResult;
-import com.caucho.server.admin.ManagementQueryResult;
 import com.caucho.server.admin.WebAppDeployClient;
 import com.caucho.util.L10N;
 
@@ -56,24 +54,11 @@ public class WebAppStartCommand extends WebAppCommand
   protected int doCommand(WebAppDeployClient deployClient,
                           String tag)
   {
-    int code = 0;
+    ControllerStateActionQueryResult result = deployClient.start(tag);
 
-    ManagementQueryResult result = deployClient.start(tag);
+    System.out.println(L.l("'{0}' is started", tag));
 
-    if (result instanceof ErrorQueryResult) {
-      ErrorQueryResult errorResult = (ErrorQueryResult) result;
-
-      System.out.println(L.l("'{0}' failed to start", tag));
-      System.out.println(errorResult.getException().toString());
-
-      code = 3;
-    } else {
-      System.out.println(L.l("'{0}' is started", tag));
-
-      code = 0;
-    }
-
-    return code;
+    return 0;
   }
 
   @Override

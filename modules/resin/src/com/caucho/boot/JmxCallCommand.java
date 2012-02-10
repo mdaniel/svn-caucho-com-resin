@@ -30,8 +30,6 @@
 package com.caucho.boot;
 
 import com.caucho.config.ConfigException;
-import com.caucho.server.admin.ErrorQueryResult;
-import com.caucho.server.admin.ManagementQueryResult;
 import com.caucho.server.admin.ManagerClient;
 import com.caucho.server.admin.StringQueryResult;
 import com.caucho.util.L10N;
@@ -102,21 +100,13 @@ public class JmxCallCommand extends JmxCommand
       operationIndex  = Integer.parseInt(index);
     }
 
-    ManagementQueryResult result = managerClient.callJmx(pattern,
-                                                         operation,
-                                                         operationIndex,
-                                                         trailingArgs);
+    StringQueryResult result = managerClient.callJmx(pattern,
+                                                     operation,
+                                                     operationIndex,
+                                                     trailingArgs);
 
-    if (result instanceof ErrorQueryResult) {
-      ErrorQueryResult errorResult = (ErrorQueryResult) result;
-      System.out.println(errorResult.getException().getMessage());
+    System.out.println(result.getValue());
 
-      return RETURN_CODE_SERVER_ERROR;
-    } else {
-      StringQueryResult queryResult = (StringQueryResult) result;
-      System.out.println(queryResult.getValue());
-
-      return 0;
-    }
+    return 0;
   }
 }

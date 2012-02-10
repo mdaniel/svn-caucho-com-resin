@@ -29,8 +29,6 @@
 
 package com.caucho.boot;
 
-import com.caucho.server.admin.ErrorQueryResult;
-import com.caucho.server.admin.ManagementQueryResult;
 import com.caucho.server.admin.ManagerClient;
 import com.caucho.server.admin.RemoveUserQueryResult;
 import com.caucho.util.L10N;
@@ -52,21 +50,12 @@ public class UserRemoveCommand extends AbstractManagementCommand
   {
     String user = args.getDefaultArg();
 
-    ManagementQueryResult result = managerClient.removeUser(user);
+    RemoveUserQueryResult result = managerClient.removeUser(user);
 
-    if (result instanceof ErrorQueryResult) {
-      ErrorQueryResult errorResult = (ErrorQueryResult) result;
-      System.out.println(errorResult.getException().getMessage());
+    System.out.println(L.l("user `{0}' deleted",
+                           result.getUser().getName()));
 
-      return RETURN_CODE_SERVER_ERROR;
-    } else {
-      RemoveUserQueryResult queryResult = (RemoveUserQueryResult) result;
-
-      System.out.println(L.l("user `{0}' deleted",
-                             queryResult.getUser().getName()));
-
-      return 0;
-    }
+    return 0;
   }
 
   @Override
@@ -80,22 +69,4 @@ public class UserRemoveCommand extends AbstractManagementCommand
   {
     return true;
   }
-
-  /*
-   @Override
-  public void usage()
-  {
-    System.err.println(L.l(
-      "usage: bin/resin.sh [-conf <file>] user-remove -address <address> -port <port> -user <user> -password <password> user"));
-    System.err.println(L.l(""));
-    System.err.println(L.l("description:"));
-    System.err.println(L.l("   removes specified administrative user\n"));
-    System.err.println(L.l(""));
-    System.err.println(L.l("options:"));
-    System.err.println(L.l("   -address <address>      : ip or host name of the server"));
-    System.err.println(L.l("   -port <port>            : server http port"));
-    System.err.println(L.l("   -user <user>            : specifies name to use for authorising the request."));
-    System.err.println(L.l("   -password <password>    : specifies password to use for authorising the request."));
-  }
-   */
 }

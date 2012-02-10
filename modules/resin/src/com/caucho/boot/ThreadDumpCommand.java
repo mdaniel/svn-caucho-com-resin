@@ -29,16 +29,14 @@
 
 package com.caucho.boot;
 
+import com.caucho.server.admin.ManagerClient;
+import com.caucho.server.admin.StringQueryResult;
+import com.caucho.util.IoUtil;
+
 import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.io.Writer;
-
-import com.caucho.server.admin.ErrorQueryResult;
-import com.caucho.server.admin.ManagementQueryResult;
-import com.caucho.server.admin.ManagerClient;
-import com.caucho.server.admin.StringQueryResult;
-import com.caucho.util.IoUtil;
 
 public class ThreadDumpCommand extends AbstractManagementCommand
 {
@@ -58,44 +56,36 @@ public class ThreadDumpCommand extends AbstractManagementCommand
                        WatchdogClient client,
                        ManagerClient managerClient)
   {
-    ManagementQueryResult result = managerClient.doThreadDump();
-    if (result instanceof ErrorQueryResult) {
-      ErrorQueryResult errorResult = (ErrorQueryResult) result;
-      System.out.println(errorResult.getException().getMessage());
+    StringQueryResult result = managerClient.doThreadDump();
 
-      return 1;
-    } else {
-      StringQueryResult queryResult = (StringQueryResult) result;
+    String fileName = args.getArg("-file");
 
-      String fileName = args.getArg("-file");
+    if (fileName == null) {
+      System.out.println(result.getValue());
 
-      if (fileName == null) {
-        System.out.println(queryResult.getValue());
+      return 0;
+    }
 
-        return 0;
-      }
+    Writer out = null;
 
-      Writer out = null;
+    try {
+      File file = new File(fileName);
+      out = new FileWriter(file);
+      out.write(result.getValue());
+      out.flush();
 
-      try {
-        File file = new File(fileName);
-        out = new FileWriter(file);
-        out.write(queryResult.getValue());
-        out.flush();
+      System.out.println("Thread dump was written to `"
+                         + file.getCanonicalPath()
+                         + "'");
 
-        System.out.println("Thread dump was written to `"
-                           + file.getCanonicalPath()
-                           + "'");
+      return 0;
+    } catch (IOException e) {
+      e.printStackTrace();
 
-        return 0;
-      } catch (IOException e) {
-        e.printStackTrace();
-
-        return 4;
-      } finally {
-        if (out != null)
-          IoUtil.close(out);
-      }
+      return 4;
+    } finally {
+      if (out != null)
+        IoUtil.close(out);
     }
   }
 

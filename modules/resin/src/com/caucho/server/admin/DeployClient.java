@@ -469,11 +469,11 @@ public class DeployClient implements Repository
    * @param tag the encoded controller name
    *
    */
-  public ManagementQueryResult restart(String tag)
+  public ControllerStateActionQueryResult restart(String tag)
   {
     ControllerRestartQuery query = new ControllerRestartQuery(tag);
 
-    return (ManagementQueryResult) query(query);
+    return (ControllerStateActionQueryResult) query(query);
   }
 
   /**
@@ -483,11 +483,11 @@ public class DeployClient implements Repository
    *
    * @deprecated
    */
-  public ManagementQueryResult start(String tag)
+  public ControllerStateActionQueryResult start(String tag)
   {
     ControllerStartQuery query = new ControllerStartQuery(tag);
 
-    return (ManagementQueryResult) query(query);
+    return (ControllerStateActionQueryResult) query(query);
   }
 
   /**
@@ -497,11 +497,11 @@ public class DeployClient implements Repository
    *
    * @deprecated
    */
-  public ManagementQueryResult stop(String tag)
+  public ControllerStateActionQueryResult stop(String tag)
   {
     ControllerStopQuery query = new ControllerStopQuery(tag);
 
-    return (ManagementQueryResult) query(query);
+    return (ControllerStateActionQueryResult) query(query);
   }
 
   /**

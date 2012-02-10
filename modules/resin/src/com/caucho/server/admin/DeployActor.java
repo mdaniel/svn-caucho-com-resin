@@ -477,24 +477,17 @@ public class DeployActor extends SimpleActor
    * @deprecated
    */
   @Query
-  public ManagementQueryResult controllerStart(long id,
-                                               String to,
-                                               String from,
-                                               ControllerStartQuery query)
+  public ControllerStateActionQueryResult controllerStart(long id,
+                                                          String to,
+                                                          String from,
+                                                          ControllerStartQuery query)
   {
-    ManagementQueryResult result;
+    LifecycleState state = start(query.getTag());
 
-    try {
-      LifecycleState state = start(query.getTag());
+    ControllerStateActionQueryResult result
+      = new ControllerStateActionQueryResult(query.getTag(), state);
 
-      result = new ControllerStateActionQueryResult(query.getTag(), state);
-
-      log.fine(this + " start '" + query.getTag() + "' -> " + state.getStateName());
-    } catch (Exception e) {
-      log.log(Level.FINE, e.toString(), e);
-
-      result = new ErrorQueryResult(e);
-    }
+    log.fine(this + " start '" + query.getTag() + "' -> " + state.getStateName());
 
     getBroker().queryResult(id, from, to, result);
 
@@ -520,28 +513,17 @@ public class DeployActor extends SimpleActor
    * @deprecated
    */
   @Query
-  public ManagementQueryResult controllerStop(long id,
-                                              String to,
-                                              String from,
-                                              ControllerStopQuery query)
+  public ControllerStateActionQueryResult controllerStop(long id,
+                                                         String to,
+                                                         String from,
+                                                         ControllerStopQuery query)
   {
-    ManagementQueryResult result ;
+    LifecycleState state = stop(query.getTag());
 
-    try {
-      LifecycleState state = stop(query.getTag());
+    ControllerStateActionQueryResult result
+      = new ControllerStateActionQueryResult(query.getTag(), state);
 
-      result = new ControllerStateActionQueryResult(query.getTag(), state);
-
-      log.fine(this
-               + " stop '"
-               + query.getTag()
-               + "' -> "
-               + state.getStateName());
-    } catch (Exception e) {
-      log.log(Level.FINE, e.toString(), e);
-
-      result = new ErrorQueryResult(e);
-    }
+    log.fine(this + " stop '" + query.getTag() + "' -> " + state.getStateName());
 
     getBroker().queryResult(id, from, to, result);
 
@@ -563,29 +545,21 @@ public class DeployActor extends SimpleActor
   }
 
   @Query
-  public ManagementQueryResult controllerRestart(long id,
-                                                 String to,
-                                                 String from,
-                                                 ControllerRestartQuery query)
+  public ControllerStateActionQueryResult controllerRestart(long id,
+                                                            String to,
+                                                            String from,
+                                                            ControllerRestartQuery query)
   {
-    ManagementQueryResult result;
+    LifecycleState state = restart(query.getTag());
 
-    try {
-      LifecycleState state = restart(query.getTag());
+    ControllerStateActionQueryResult result
+      = new ControllerStateActionQueryResult(query.getTag(), state);
 
-      result = new ControllerStateActionQueryResult(query.getTag(), state);
-
-      log.fine(this
-               + " restart '"
-               + query.getTag()
-               + "' -> "
-               + state.getStateName());
-
-    } catch (Exception e) {
-      log.log(Level.FINE, e.toString(), e);
-
-      result = new ErrorQueryResult(e);
-    }
+    log.fine(this
+             + " restart '"
+             + query.getTag()
+             + "' -> "
+             + state.getStateName());
 
     getBroker().queryResult(id, from, to, result);
 

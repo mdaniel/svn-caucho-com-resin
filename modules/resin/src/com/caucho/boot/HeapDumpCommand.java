@@ -29,8 +29,6 @@
 
 package com.caucho.boot;
 
-import com.caucho.server.admin.ErrorQueryResult;
-import com.caucho.server.admin.ManagementQueryResult;
 import com.caucho.server.admin.ManagerClient;
 import com.caucho.server.admin.StringQueryResult;
 import com.caucho.util.L10N;
@@ -61,20 +59,11 @@ public class HeapDumpCommand extends AbstractManagementCommand
   {
     boolean raw = args.hasOption("-raw");
 
-    ManagementQueryResult result = managerClient.doHeapDump(raw);
+    StringQueryResult result = managerClient.doHeapDump(raw);
 
-    if (result instanceof ErrorQueryResult) {
-      ErrorQueryResult errorResult = (ErrorQueryResult) result;
-      System.out.println(errorResult.getException().getMessage());
+    System.out.println(result.getValue());
 
-      return RETURN_CODE_SERVER_ERROR;
-    }
-    else {
-      StringQueryResult queryResult = (StringQueryResult) result;
-      System.out.println(queryResult.getValue());
-
-      return 0;
-    }
+    return 0;
   }
 
   @Override

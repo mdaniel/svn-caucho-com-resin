@@ -30,8 +30,6 @@
 package com.caucho.boot;
 
 import com.caucho.config.ConfigException;
-import com.caucho.server.admin.ErrorQueryResult;
-import com.caucho.server.admin.ManagementQueryResult;
 import com.caucho.server.admin.ManagerClient;
 import com.caucho.server.admin.StringQueryResult;
 import com.caucho.util.L10N;
@@ -100,30 +98,12 @@ public class JmxSetCommand extends JmxCommand
       throw new ConfigException(L.l(
         "jmx-set requires <value> parameter be specified"));
 
-    ManagementQueryResult result = managerClient.setJmx(pattern,
-                                                        attribute,
-                                                        value);
+    StringQueryResult result = managerClient.setJmx(pattern,
+                                                    attribute,
+                                                    value);
 
-    ErrorQueryResult errorResult = null;
-    if (result instanceof ErrorQueryResult)
-      errorResult = (ErrorQueryResult) result;
+    System.out.println(result.getValue());
 
-    if (errorResult != null
-        && errorResult.getException() instanceof IllegalArgumentException) {
-      System.out.println(errorResult.getException());
-
-      return RETURN_CODE_SERVER_ERROR;
-    }
-    else if (errorResult != null) {
-      System.out.println(errorResult.getException().getMessage());
-
-      return RETURN_CODE_SERVER_ERROR;
-    }
-    else {
-      StringQueryResult queryResult = (StringQueryResult) result;
-      System.out.println(queryResult.getValue());
-
-      return 0;
-    }
+    return 0;
   }
 }

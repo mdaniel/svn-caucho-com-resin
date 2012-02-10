@@ -30,13 +30,10 @@
 package com.caucho.boot;
 
 import com.caucho.server.admin.AddUserQueryResult;
-import com.caucho.server.admin.ErrorQueryResult;
-import com.caucho.server.admin.ManagementQueryResult;
 import com.caucho.server.admin.ManagerClient;
 import com.caucho.util.L10N;
 
 import java.util.Arrays;
-import java.util.HashSet;
 
 public class UserAddCommand extends AbstractManagementCommand
 {
@@ -93,21 +90,11 @@ public class UserAddCommand extends AbstractManagementCommand
 
     String []roles = args.getDefaultArgs();
 
-    ManagementQueryResult result = managerClient.addUser(user, password, roles);
+    AddUserQueryResult result = managerClient.addUser(user, password, roles);
 
-    if (result instanceof ErrorQueryResult) {
-      ErrorQueryResult errorResult = (ErrorQueryResult) result;
-      System.out.println(errorResult.getException().getMessage());
-
-      return RETURN_CODE_SERVER_ERROR;
-    }
-    else {
-      AddUserQueryResult queryResult = (AddUserQueryResult) result;
-
-      System.out.println(L.l("user `{0}' added",
-                             queryResult.getUser().getName()));
-      return 0;
-    }
+    System.out.println(L.l("user `{0}' added",
+                           result.getUser().getName()));
+    return 0;
   }
 
   @Override

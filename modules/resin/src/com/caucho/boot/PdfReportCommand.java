@@ -30,15 +30,11 @@
 package com.caucho.boot;
 
 import com.caucho.config.types.Period;
-import com.caucho.server.admin.ErrorQueryResult;
-import com.caucho.server.admin.ManagementQueryResult;
 import com.caucho.server.admin.ManagerClient;
 import com.caucho.server.admin.PdfReportQueryResult;
 import com.caucho.util.IoUtil;
 import com.caucho.util.L10N;
-import com.caucho.util.ThreadDump;
 import com.caucho.vfs.StreamSource;
-import sun.misc.IOUtils;
 
 import java.io.File;
 import java.io.FileOutputStream;
@@ -51,7 +47,6 @@ public class PdfReportCommand extends AbstractManagementCommand
   
   public PdfReportCommand()
   {
-    addValueOption("path", "file", "path to a PDF-generating .php file");
     addValueOption("period", "time", "specifies look-back period of time (default 7D)");
     addValueOption("report", "value", "specifies the report-type key (default Snapshot)");
     addValueOption("logdir", "dir", "PDF output directory (default to resin log)");
@@ -107,7 +102,7 @@ public class PdfReportCommand extends AbstractManagementCommand
     String localDir = args.getArg("-local-dir");
     boolean isReturnPdf = isLocal || localDir != null;
 
-    ManagementQueryResult result = managerClient.pdfReport(path,
+    PdfReportQueryResult result = managerClient.pdfReport(path,
                                                            report,
                                                            period,
                                                            logDirectory,
@@ -116,16 +111,16 @@ public class PdfReportCommand extends AbstractManagementCommand
                                                            isSnapshot,
                                                            isWatchdog,
                                                            isReturnPdf);
-    PdfReportQueryResult queryResult = (PdfReportQueryResult) result;
-    System.out.println(queryResult.getMessage());
+
+    System.out.println(result.getMessage());
 
     if (isReturnPdf) {
-      StreamSource streamSource = queryResult.getPdf();
+      StreamSource streamSource = result.getPdf();
       try {
         InputStream in = streamSource.getInputStream();
         File file;
 
-        String fileName = queryResult.getFileName();
+        String fileName = result.getFileName();
         if (fileName.lastIndexOf('/') > 0)
           fileName = fileName.substring(fileName.lastIndexOf('/'));
         else if (fileName.lastIndexOf('\\') > 0)

@@ -30,8 +30,6 @@
 package com.caucho.boot;
 
 import com.caucho.server.admin.ControllerStateActionQueryResult;
-import com.caucho.server.admin.ErrorQueryResult;
-import com.caucho.server.admin.ManagementQueryResult;
 import com.caucho.server.admin.WebAppDeployClient;
 import com.caucho.util.L10N;
 
@@ -56,24 +54,11 @@ public class WebAppRestartCommand extends WebAppCommand
   protected int doCommand(WebAppDeployClient deployClient,
                           String tag)
   {
-    int code = 0;
+    ControllerStateActionQueryResult result = deployClient.restart(tag);
 
-    ManagementQueryResult result = deployClient.restart(tag);
+    System.out.println(L.l("'{0}' is restarted", tag));
 
-    if (result instanceof ErrorQueryResult) {
-      ErrorQueryResult errorResult = (ErrorQueryResult) result;
-
-      System.out.println(L.l("'{0}' failed to restart", tag));
-      System.out.println(errorResult.getException().toString());
-
-      code = 3;
-    } else {
-      System.out.println(L.l("'{0}' is restarted", tag));
-
-      code = 0;
-    }
-
-    return code;
+    return 0;
   }
 
   @Override

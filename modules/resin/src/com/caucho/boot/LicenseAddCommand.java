@@ -28,11 +28,7 @@
 
 package com.caucho.boot;
 
-import java.io.IOException;
-
 import com.caucho.config.ConfigException;
-import com.caucho.server.admin.ErrorQueryResult;
-import com.caucho.server.admin.ManagementQueryResult;
 import com.caucho.server.admin.ManagerClient;
 import com.caucho.server.admin.StringQueryResult;
 import com.caucho.util.CharBuffer;
@@ -40,6 +36,8 @@ import com.caucho.util.L10N;
 import com.caucho.vfs.Path;
 import com.caucho.vfs.ReadStream;
 import com.caucho.vfs.Vfs;
+
+import java.io.IOException;
 
 public class LicenseAddCommand extends AbstractManagementCommand
 {
@@ -125,20 +123,12 @@ public class LicenseAddCommand extends AbstractManagementCommand
       throw new ConfigException(L.l("Failed to read {0}: empty", path));
     }
 
-    ManagementQueryResult result = managerClient.addLicense(licenseContent,
-                                                            fileName,
-                                                            overwrite,
-                                                            restart);
-    if (result instanceof ErrorQueryResult) {
-      ErrorQueryResult errorResult = (ErrorQueryResult) result;
-      System.out.println(errorResult.getException().getMessage());
+    StringQueryResult result = managerClient.addLicense(licenseContent,
+                                                        fileName,
+                                                        overwrite,
+                                                        restart);
+    System.out.println(result.getValue());
 
-      return RETURN_CODE_SERVER_ERROR;
-    } else {
-      StringQueryResult queryResult = (StringQueryResult) result;
-      System.out.println(queryResult.getValue());
-
-      return 0;
-    }
+    return 0;
   }
 }

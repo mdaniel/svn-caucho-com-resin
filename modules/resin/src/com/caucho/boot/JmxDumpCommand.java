@@ -29,8 +29,6 @@
 
 package com.caucho.boot;
 
-import com.caucho.server.admin.ErrorQueryResult;
-import com.caucho.server.admin.ManagementQueryResult;
 import com.caucho.server.admin.ManagerClient;
 import com.caucho.server.admin.StringQueryResult;
 import com.caucho.util.IoUtil;
@@ -61,40 +59,34 @@ public class JmxDumpCommand extends JmxCommand
                        WatchdogClient client,
                        ManagerClient managerClient)
   {
-    ManagementQueryResult result = managerClient.doJmxDump();
-    if (result instanceof ErrorQueryResult) {
-      ErrorQueryResult errorResult = (ErrorQueryResult) result;
-      System.out.println(errorResult.getException().getMessage());
+    StringQueryResult result = managerClient.doJmxDump();
 
-      return RETURN_CODE_SERVER_ERROR;
-    } else {
-      StringQueryResult queryResult = (StringQueryResult) result;
+    StringQueryResult queryResult = result;
 
-      String fileName = args.getArg("-file");
+    String fileName = args.getArg("-file");
 
-      if (fileName == null) {
-        System.out.println(queryResult.getValue());
-        return 0;
-      }
+    if (fileName == null) {
+      System.out.println(queryResult.getValue());
+      return 0;
+    }
 
-      Writer out = null;
+    Writer out = null;
 
-      try {
-        File file = new File(fileName);
-        out = new FileWriter(file);
-        out.write(queryResult.getValue());
-        out.flush();
+    try {
+      File file = new File(fileName);
+      out = new FileWriter(file);
+      out.write(queryResult.getValue());
+      out.flush();
 
-        System.out.println(L.l("JMX dump was written to '{0}'",
-                               file.getCanonicalPath()));
+      System.out.println(L.l("JMX dump was written to '{0}'",
+                             file.getCanonicalPath()));
 
-        return 0;
-      } catch (IOException e) {
-        e.printStackTrace();
-        return 4;
-      } finally {
-        IoUtil.close(out);
-      }
+      return 0;
+    } catch (IOException e) {
+      e.printStackTrace();
+      return 4;
+    } finally {
+      IoUtil.close(out);
     }
   }
 }

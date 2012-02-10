@@ -154,65 +154,65 @@ public class ManagerClient
     return _bamClient;
   }
 
-  public ManagementQueryResult addUser(String user,
-                                       char []password,
-                                       String []roles)
+  public AddUserQueryResult addUser(String user,
+                                    char []password,
+                                    String []roles)
   {
     AddUserQuery query = new AddUserQuery(user, password, roles);
 
-    return query(query);
+    return (AddUserQueryResult) query(query);
   }
 
-  public ManagementQueryResult removeUser(String user)
+  public RemoveUserQueryResult removeUser(String user)
   {
     RemoveUserQuery query = new RemoveUserQuery(user);
 
-    return query(query);
+    return (RemoveUserQueryResult) query(query);
   }
 
-  public ManagementQueryResult listUsers()
+  public ListUsersQueryResult listUsers()
   {
     ListUsersQuery query = new ListUsersQuery();
 
-    return query(query);
+    return (ListUsersQueryResult) query(query);
   }
 
-  public ManagementQueryResult doThreadDump()
+  public StringQueryResult doThreadDump()
   {
     ThreadDumpQuery query = new ThreadDumpQuery();
 
-    return query(query);
+    return (StringQueryResult) query(query);
   }
 
-  public ManagementQueryResult doHeapDump(boolean raw)
+  public StringQueryResult doHeapDump(boolean raw)
   {
     HeapDumpQuery query = new HeapDumpQuery(raw);
 
-    return query(query);
+    return (StringQueryResult) query(query);
   }
 
-  public ManagementQueryResult doJmxDump()
+  public StringQueryResult doJmxDump()
   {
     JmxDumpQuery query = new JmxDumpQuery();
 
-    return query(query);
+    return (StringQueryResult) query(query);
   }
 
-  public ManagementQueryResult setLogLevel(String []loggers,
+  public StringQueryResult setLogLevel(String []loggers,
                                            Level logLevel,
                                            long period)
   {
     LogLevelQuery query = new LogLevelQuery(loggers, logLevel, period);
 
-    return query(query);
+    return (StringQueryResult) query(query);
   }
 
-  public ManagementQueryResult listJmx(String pattern,
-                                       boolean isPrintAttributes,
-                                       boolean isPrintValues,
-                                       boolean isPrintOperations,
-                                       boolean isAll,
-                                       boolean isPlatform)
+  public StringQueryResult listJmx(String pattern,
+                                   boolean isPrintAttributes,
+                                   boolean isPrintValues,
+                                   boolean isPrintOperations,
+                                   boolean isAll,
+                                   boolean isPlatform)
   {
     JmxListQuery query = new JmxListQuery(pattern,
                                           isPrintAttributes,
@@ -221,29 +221,29 @@ public class ManagerClient
                                           isAll,
                                           isPlatform);
 
-    return query(query);
+    return (StringQueryResult) query(query);
   }
 
-  public ManagementQueryResult setJmx(String pattern,
+  public StringQueryResult setJmx(String pattern,
                                       String attribute,
                                       String value)
   {
     JmxSetQuery query = new JmxSetQuery(pattern, attribute, value);
 
-    return query(query);
+    return (StringQueryResult) query(query);
   }
 
-  public ManagementQueryResult callJmx(String pattern,
-                                       String operation,
-                                       int opIndex,
-                                       String[] trailingArgs)
+  public StringQueryResult callJmx(String pattern,
+                                   String operation,
+                                   int opIndex,
+                                   String []trailingArgs)
   {
     JmxCallQuery query = new JmxCallQuery(pattern,
                                           operation,
                                           opIndex,
                                           trailingArgs);
 
-    return query(query);
+    return (StringQueryResult) query(query);
   }
 
   public PdfReportQueryResult pdfReport(String path,
@@ -276,48 +276,48 @@ public class ManagerClient
     return (PdfReportQueryResult) query(query, timeout);
   } 
 
-  public ManagementQueryResult profile(long activeTime, long period, int depth)
+  public StringQueryResult profile(long activeTime, long period, int depth)
   {
     ProfileQuery query = new ProfileQuery(activeTime, period, depth);
 
-    return query(query);
+    return (StringQueryResult) query(query);
   }
 
-  public ManagementQueryResult listRestarts(long period)
+  public StringQueryResult listRestarts(long period)
   {
-     ListRestartsQuery query = new ListRestartsQuery(period);
+    ListRestartsQuery query = new ListRestartsQuery(period);
 
-    return query(query);
+    return (StringQueryResult) query(query);
   }
 
-  public ManagementQueryResult addLicense(String licenseContent,
-                                          String fileName,
-                                          boolean overwrite,
-                                          boolean restart)
+  public StringQueryResult addLicense(String licenseContent,
+                                      String fileName,
+                                      boolean overwrite,
+                                      boolean restart)
   {
     LicenseAddQuery query = new LicenseAddQuery(licenseContent, 
                                                 fileName,
                                                 overwrite, 
                                                 restart);
-    return query(query);
+    return (StringQueryResult) query(query);
   }
 
-  protected ManagementQueryResult query(Serializable query)
+  protected Serializable query(Serializable query)
   {
     try {
-      return (ManagementQueryResult)_bamClient.query(_managerAddress, query);
+      return _bamClient.query(_managerAddress, query);
     } catch (ServiceUnavailableException e) {
       throw new ServiceUnavailableException("Manager service is not available, possibly because the resin.xml is missing a <resin:ManagerService> tag\n  " + e.getMessage(),
                                             e);
     }
   }
 
-  protected ManagementQueryResult query(Serializable query, long timeout)
+  protected Serializable query(Serializable query, long timeout)
   {
     try {
-      return (ManagementQueryResult) _bamClient.query(_managerAddress,
-                                                      query,
-                                                      timeout);
+      return _bamClient.query(_managerAddress,
+                              query,
+                              timeout);
     } catch (ServiceUnavailableException e) {
       throw new ServiceUnavailableException("Manager service is not available, possibly because the resin.xml is missing a <resin:ManagerService> tag\n  " + e.getMessage(),
                                             e);

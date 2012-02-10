@@ -30,8 +30,6 @@
 package com.caucho.boot;
 
 import com.caucho.config.ConfigException;
-import com.caucho.server.admin.ErrorQueryResult;
-import com.caucho.server.admin.ManagementQueryResult;
 import com.caucho.server.admin.ManagerClient;
 import com.caucho.server.admin.StringQueryResult;
 import com.caucho.util.L10N;
@@ -94,23 +92,15 @@ public class JmxListCommand extends JmxCommand
     boolean isAll = args.hasOption("-all");
     boolean isPlatform = args.hasOption("-platform");
 
-    ManagementQueryResult result = managerClient.listJmx(pattern,
+    StringQueryResult result = managerClient.listJmx(pattern,
                                                      isPrintAttributes,
                                                      isPrintValues,
                                                      isPrintOperations,
                                                      isAll,
                                                      isPlatform);
 
-    if (result instanceof ErrorQueryResult) {
-      ErrorQueryResult errorResult = (ErrorQueryResult) result;
-      System.out.println(errorResult.getException().getMessage());
+    System.out.print(result.getValue());
 
-      return RETURN_CODE_SERVER_ERROR;
-    } else {
-      StringQueryResult queryResult = (StringQueryResult) result;
-      System.out.print(queryResult.getValue());
-
-      return 0;
-    }
+    return 0;
   }
 }

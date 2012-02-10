@@ -31,15 +31,9 @@ package com.caucho.admin.action;
 
 import com.caucho.security.AdminAuthenticator;
 import com.caucho.security.PasswordUser;
-import com.caucho.server.admin.ListUsersQueryResult;
-import com.caucho.server.admin.ManagementQueryResult;
-import com.caucho.server.admin.UserQueryResult;
 import com.caucho.util.L10N;
 
-import java.util.ArrayList;
 import java.util.Hashtable;
-import java.util.List;
-import java.util.Map;
 import java.util.logging.Logger;
 
 public class ListUsersAction implements AdminAction

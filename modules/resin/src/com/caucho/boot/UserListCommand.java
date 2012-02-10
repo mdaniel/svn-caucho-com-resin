@@ -29,15 +29,10 @@
 
 package com.caucho.boot;
 
-import com.caucho.security.PasswordUser;
-import com.caucho.server.admin.ErrorQueryResult;
 import com.caucho.server.admin.ListUsersQueryResult;
-import com.caucho.server.admin.ManagementQueryResult;
 import com.caucho.server.admin.ManagerClient;
 import com.caucho.server.admin.UserQueryResult;
 import com.caucho.util.L10N;
-
-import java.util.Iterator;
 
 public class UserListCommand extends AbstractManagementCommand
 {
@@ -54,25 +49,15 @@ public class UserListCommand extends AbstractManagementCommand
                        WatchdogClient client,
                        ManagerClient managerClient)
   {
-    ManagementQueryResult result = managerClient.listUsers();
+    ListUsersQueryResult result = managerClient.listUsers();
 
-    if (result instanceof ErrorQueryResult) {
-      ErrorQueryResult errorResult = (ErrorQueryResult) result;
-
-      System.out.println(errorResult.getException().getMessage());
-
-      return RETURN_CODE_SERVER_ERROR;
-    }
-
-    ListUsersQueryResult queryResult = (ListUsersQueryResult) result;
-
-    if (queryResult.getUsers().length == 0) {
+    if (result.getUsers().length == 0) {
       System.out.println("no users found");
 
       return 0;
     }
 
-    for (UserQueryResult.User user : queryResult.getUsers()) {
+    for (UserQueryResult.User user : result.getUsers()) {
       System.out.print(user.getName());
 
       String []roles = user.getRoles();

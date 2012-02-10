@@ -30,20 +30,20 @@
 package com.caucho.boot;
 
 import com.caucho.config.types.Period;
-import com.caucho.server.admin.ErrorQueryResult;
-import com.caucho.server.admin.ManagementQueryResult;
 import com.caucho.server.admin.ManagerClient;
 import com.caucho.server.admin.StringQueryResult;
 import com.caucho.util.L10N;
 
-import java.util.*;
+import java.util.LinkedHashMap;
+import java.util.Map;
 import java.util.logging.Level;
 
 public class LogLevelCommand extends AbstractManagementCommand
 {
   private static final L10N L = new L10N(LogLevelCommand.class);
 
-  private static final Map<String, Level> _options = new LinkedHashMap<String, Level>();
+  private static final Map<String,Level> _options
+    = new LinkedHashMap<String,Level>();
 
   public LogLevelCommand()
   {
@@ -56,10 +56,12 @@ public class LogLevelCommand extends AbstractManagementCommand
     addFlagOption("warning", "non-fatal warnings");
     addFlagOption("severe", "severe, typically fatal warnings");
     addFlagOption("off", "disable logging");
-    
-    addValueOption("active-time", "time", "specifies temporary level active time (default permanent). e.g. 5s");
+
+    addValueOption("active-time",
+                   "time",
+                   "specifies temporary level active time (default permanent). e.g. 5s");
   }
-  
+
   @Override
   public String getUsageArgs()
   {
@@ -77,21 +79,21 @@ public class LogLevelCommand extends AbstractManagementCommand
   {
     return "sets the java.util.logging level for debugging";
   }
- 
+
   @Override
   public int doCommand(WatchdogArgs args,
                        WatchdogClient client,
                        ManagerClient managerClient)
   {
     Level logLevel = null;
-    
-    for(Map.Entry<String, Level> entry : _options.entrySet()) {
+
+    for (Map.Entry<String,Level> entry : _options.entrySet()) {
       if (args.hasOption(entry.getKey())) {
         logLevel = entry.getValue();
         break;
       }
     }
-    
+
     if (logLevel == null) {
       usage();
 
@@ -112,24 +114,17 @@ public class LogLevelCommand extends AbstractManagementCommand
       loggers[1] = "com.caucho";
     }
 
-    ManagementQueryResult result = managerClient.setLogLevel(loggers,
-                                                             logLevel,
-                                                             period);
+    StringQueryResult result = managerClient.setLogLevel(loggers,
+                                                         logLevel,
+                                                         period);
 
-    if (result instanceof ErrorQueryResult) {
-      ErrorQueryResult errorResult = (ErrorQueryResult) result;
-      System.out.println(errorResult.getException().getMessage());
+    System.out.println(result.getValue());
 
-      return RETURN_CODE_SERVER_ERROR;
-    } else {
-      StringQueryResult queryResult = (StringQueryResult) result;
-      System.out.println(queryResult.getValue());
-
-      return 0;
-    }
+    return 0;
   }
 
-  public static Level getLevel(String level) {
+  public static Level getLevel(String level)
+  {
     return _options.get(level);
   }
 
