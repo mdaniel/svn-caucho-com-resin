@@ -85,7 +85,7 @@ public class ConfigLsCommand extends AbstractRepositoryCommand {
         }
       }
     } catch (IOException e) {
-      ConfigException.create(e);
+      throw ConfigException.create(e);
     }
 
     return 0;

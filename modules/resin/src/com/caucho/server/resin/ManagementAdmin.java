@@ -36,6 +36,7 @@ import com.caucho.boot.LogLevelCommand;
 import com.caucho.cloud.bam.BamSystem;
 import com.caucho.cloud.network.NetworkClusterSystem;
 import com.caucho.cloud.topology.CloudServer;
+import com.caucho.config.ConfigException;
 import com.caucho.config.types.Period;
 import com.caucho.env.repository.CommitBuilder;
 import com.caucho.management.server.AbstractManagedObject;
@@ -53,6 +54,7 @@ import com.caucho.server.admin.StringQueryResult;
 import com.caucho.server.admin.TagResult;
 import com.caucho.server.admin.WebAppDeployClient;
 import com.caucho.util.L10N;
+import com.caucho.vfs.TempOutputStream;
 
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
@@ -94,6 +96,123 @@ public class ManagementAdmin extends AbstractManagedObject
   public String hello()
   {
     return "hello, world";
+  }
+
+  @Override
+  public String configDeploy(String serverId,
+                             String stage,
+                             String version,
+                             String message,
+                             InputStream is) throws ReflectionException
+  {
+    CommitBuilder commit = new CommitBuilder();
+
+    if (stage != null)
+      commit.stage(stage);
+
+    commit.type("config");
+    commit.tagKey("resin");
+
+
+    if (message == null)
+      message = "deploy config via REST";
+
+    commit.message(message);
+
+    if (version != null)
+      DeployClient.fillInVersion(commit, version);
+
+    DeployClient client = getWebappDeployClient(serverId);
+
+    client.commitArchive(commit, is);
+
+    return "Deployed config " + commit.getId() + " to " + client.getUrl();
+  }
+
+  @Override
+  public InputStream configCat(String serverId,
+                                String name,
+                                String stage,
+                                String version,
+                                String message)
+    throws ReflectionException
+  {
+    CommitBuilder commit = new CommitBuilder();
+    if (stage != null)
+      commit.stage(stage);
+
+    commit.type("config");
+    commit.tagKey("resin");
+
+    try {
+      TempOutputStream out = new TempOutputStream();
+
+      DeployClient client = getWebappDeployClient(serverId);
+
+      client.getFile(commit.getId(), name, out);
+
+      out.flush();
+
+      return out.getInputStream();
+    } catch (IOException e) {
+      throw ConfigException.create(e);
+    }
+  }
+
+  @Override
+  public String []configLs(String serverId,
+                         String name,
+                         String stage,
+                         String version,
+                         String message)
+    throws ReflectionException
+  {
+
+    CommitBuilder commit = new CommitBuilder();
+    if (stage != null)
+      commit.stage(stage);
+
+    commit.type("config");
+    commit.tagKey("resin");
+
+    try {
+      DeployClient client = getWebappDeployClient(serverId);
+
+      String []files = client.listFiles(commit.getId(), name);
+
+      return files;
+    } catch (IOException e) {
+      throw ConfigException.create(e);
+    }
+  }
+
+  @Override
+  public String configUndeploy(String serverId,
+                               String stage,
+                               String version,
+                               String message)
+    throws ReflectionException
+  {
+    CommitBuilder commit = new CommitBuilder();
+    if (stage != null)
+      commit.stage(stage);
+
+    commit.type("config");
+    commit.tagKey("resin");
+
+    if (message == null)
+      message = "undeploy config via REST";
+
+    commit.message(message);
+
+    if (version != null)
+      DeployClient.fillInVersion(commit, version);
+
+    DeployClient client = getWebappDeployClient(serverId);
+
+    client.undeploy(commit);
+
+    return "Undeployed " + commit.getId() + " from " + client.getUrl();
   }
 
   @Override

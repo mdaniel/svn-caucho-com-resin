@@ -58,6 +58,41 @@ public interface ManagementMXBean extends ManagedObjectMXBean
   @MXAction("hello")
   public String hello();
 
+  @Description("deploys configuration")
+  @MXAction(value = "config-deploy", method = "POST")
+  public String configDeploy(@MXParam(name = "server") String serverId,
+                             @MXParam(name = "stage") String stage,
+                             @MXParam(name = "version") String version,
+                             @MXParam(name = "message") String message,
+                             InputStream is)
+    throws ReflectionException;
+
+  @Description("pulls a configuration file")
+  @MXAction(value = "config-cat", method = "GET")
+  public InputStream configCat(@MXParam(name = "server") String serverId,
+                          @MXParam(name = "name", required = true) String name,
+                          @MXParam(name = "stage") String stage,
+                          @MXParam(name = "version") String version,
+                          @MXParam(name = "message") String message)
+    throws ReflectionException;
+
+  @Description("list the configuration files")
+  @MXAction(value = "config-ls", method = "GET")
+  public String []configLs(@MXParam(name = "server") String serverId,
+                         @MXParam(name = "name") String name,
+                         @MXParam(name = "stage") String stage,
+                         @MXParam(name = "version") String version,
+                         @MXParam(name = "message") String message)
+  throws ReflectionException;
+
+  @Description("undeploy configuration")
+  @MXAction(value = "config-undeploy", method = "POST")
+  public String configUndeploy(@MXParam(name = "server") String serverId,
+                               @MXParam(name = "stage") String stage,
+                               @MXParam(name = "version") String version,
+                               @MXParam(name = "message") String message)
+    throws ReflectionException;
+
   @Description("Produces a complete dump of JMX objects and values")
   @MXAction("jmx-dump")
   public StringQueryResult doJmxDump(@MXParam(name = "server") String value)
@@ -187,7 +222,6 @@ public interface ManagementMXBean extends ManagedObjectMXBean
   @MXAction(value = "web-app-deploy", method = "POST")
   public String webappDeploy(@MXParam(name = "server") String serverId,
                              @MXParam(name = "context") String context,
-                             //change to name?
                              @MXParam(name = "host", defaultValue = "default")
                              String host,
                              @MXParam(name = "stage") String stage,

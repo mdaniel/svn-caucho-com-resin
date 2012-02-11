@@ -48,7 +48,6 @@ import com.caucho.vfs.Vfs;
 import com.caucho.vfs.WriteStream;
 
 import javax.servlet.ServletException;
-import javax.servlet.ServletOutputStream;
 import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
@@ -153,12 +152,12 @@ public class AdminRestServlet extends HttpServlet
 
       res.setStatus(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
 
-      PrintWriter writer = res.getWriter();
+      PrintWriter out = res.getWriter();
 
       if (cause instanceof ConfigException)
-        writer.println(cause.getMessage());
+        out.println(cause.getMessage());
       else
-        writer.println(cause);
+        out.println(cause);
     }
   }
 
@@ -511,7 +510,6 @@ public class AdminRestServlet extends HttpServlet
       throw new AbstractMethodError();
     }
 
-    //XXX: refactor
     @Override
     public void unmarshal(HttpServletResponse response,
                           ControllerStateActionQueryResult value)
@@ -554,24 +552,24 @@ public class AdminRestServlet extends HttpServlet
                           AddUserQueryResult value)
       throws IOException
     {
-      PrintWriter writer = response.getWriter();
+      PrintWriter out = response.getWriter();
 
       UserQueryResult.User user = value.getUser();
 
       String []roles = user.getRoles();
       value.getUser();
 
-      writer.print(L.l("user {0} added", user.getName()));
+      out.print(L.l("user {0} added", user.getName()));
       for (int i = 0; i < roles.length; i++) {
         String role = roles[i];
         if (i == 0)
-          writer.print(" with roles: ");
-        writer.print(role);
+          out.print(" with roles: ");
+        out.print(role);
         if (i + 1 < roles.length)
-          writer.print(", ");
+          out.print(", ");
       }
 
-      writer.println();
+      out.println();
     }
   }
 
@@ -592,11 +590,11 @@ public class AdminRestServlet extends HttpServlet
                           RemoveUserQueryResult value)
       throws IOException
     {
-      PrintWriter writer = response.getWriter();
+      PrintWriter out = response.getWriter();
 
       UserQueryResult.User user = value.getUser();
 
-      writer.println(L.l("user {0} is removed", user.getName()));
+      out.println(L.l("user {0} is removed", user.getName()));
     }
   }
 
@@ -620,21 +618,21 @@ public class AdminRestServlet extends HttpServlet
       //json!{}
       UserQueryResult.User []users = value.getUsers();
 
-      PrintWriter writer = response.getWriter();
+      PrintWriter out = response.getWriter();
       for (UserQueryResult.User user : users) {
         String []roles = user.getRoles();
 
-        writer.print(user.getName());
+        out.print(user.getName());
         for (int i = 0; i < roles.length; i++) {
           String role = roles[i];
           if (i == 0)
-            writer.print(": ");
-          writer.print(role);
+            out.print(": ");
+          out.print(role);
           if (i + 1 < roles.length)
-            writer.print(", ");
+            out.print(", ");
         }
 
-        writer.println();
+        out.println();
       }
     }
   }
@@ -658,14 +656,10 @@ public class AdminRestServlet extends HttpServlet
     {
       if (value.getPdf() != null) {
         response.setContentType("application/pdf");
-        ServletOutputStream out = response.getOutputStream();
-        InputStream in = value.getPdf().getInputStream();
 
-        byte []buffer = new byte[1024];
-        int len;
+        WriteStream out = Vfs.openWrite(response.getOutputStream());
 
-        while ((len = in.read(buffer)) > 0)
-          out.write(buffer, 0, len);
+        out.writeStream(value.getPdf().getInputStream());
 
         out.flush();
       }
@@ -690,14 +684,36 @@ public class AdminRestServlet extends HttpServlet
     public void unmarshal(HttpServletResponse response, TagResult []value)
       throws IOException
     {
-      PrintWriter writer = response.getWriter();
+      PrintWriter out = response.getWriter();
 
       for (TagResult tag : value) {
-        writer.println(tag.getTag());
+        out.println(tag.getTag());
       }
 
       if (value.length == 0) {
-        writer.println(L.l("no matching applications is found"));
+        out.println(L.l("no matching applications is found"));
+      }
+    }
+  }
+
+  static class StringArrayMarshal extends Marshal<String[]>
+  {
+    @Override
+    public Object marshal(HttpServletRequest request,
+                          String name,
+                          String []value) throws IOException
+    {
+      throw new AbstractMethodError(getClass().getName());
+    }
+
+    @Override
+    public void unmarshal(HttpServletResponse response, String []values)
+      throws IOException
+    {
+      PrintWriter out = response.getWriter();
+
+      for (String value : values) {
+        out.println(value);
       }
     }
   }
@@ -712,6 +728,8 @@ public class AdminRestServlet extends HttpServlet
     _marshalMap.put(StringQueryResult.class, new StringQueryResultMarshal());
     _marshalMap.put(AddUserQueryResult.class, new AddUserQueryResultMarshal());
     _marshalMap.put(TagResult[].class, new TagResultMarshal());
+    _marshalMap.put(String[].class, new StringArrayMarshal());
+    _marshalMap.put(InputStream.class, new InputStreamMarshal());
 
     _marshalMap.put(RemoveUserQueryResult.class,
                     new RemoveUserQueryResultMarshal());
