@@ -29,13 +29,19 @@
 
 package com.caucho.mqueue.stomp;
 
+import com.caucho.vfs.TempBuffer;
+
 /**
  * Custom serialization for the cache
  */
-public interface StompBroker
+public interface StompPublisher
 {
-  public StompPublisher createPublisher(String name);
+  public void messagePart(TempBuffer buffer, int length);
   
-  public StompSubscription createSubscription(String name,
-                                              StompMessageListener listener);
+  // XXX: needs contentType, xid
+  public void messageComplete(TempBuffer buffer, 
+                              int length,
+                              StompReceiptListener receiptListener);
+  
+  public void close();
 }

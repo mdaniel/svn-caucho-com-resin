@@ -88,14 +88,14 @@ public class StompConnection implements ProtocolConnection
   private static final CharBuffer TRANSACTION
     = new CharBuffer("transaction");
 
-  private static final StompDestination NULL_DESTINATION
+  private static final StompPublisher NULL_DESTINATION
     = new StompNullDestination();
   
   private StompProtocol _stomp;
   private SocketLink _link;
   
-  private HashMap<String,StompDestination> _destinationMap
-    = new HashMap<String,StompDestination>();
+  private HashMap<String,StompPublisher> _destinationMap
+    = new HashMap<String,StompPublisher>();
   
   private HashMap<String,StompSubscription> _subscriptionMap
     = new HashMap<String,StompSubscription>();
@@ -173,12 +173,12 @@ public class StompConnection implements ProtocolConnection
     return _contentType;
   }
   
-  public StompDestination getDestination()
+  public StompPublisher getDestination()
   {
     if (_destinationName == null)
       return null;
     
-    StompDestination dest = _destinationMap.get(_destinationName);
+    StompPublisher dest = _destinationMap.get(_destinationName);
     
     if (dest == null) {
       dest = _stomp.createDestination(_destinationName);
@@ -328,7 +328,7 @@ public class StompConnection implements ProtocolConnection
     }
     
     WriteStream os = _link.getWriteStream();
-    
+    System.out.println("CMD: " + cmd + " " + os);
     return cmd.doCommand(this, is, os);
   }
   
@@ -488,9 +488,8 @@ public class StompConnection implements ProtocolConnection
   void message(String subscription,
                String destination,
                long messageId,
-               String contentType,
-               int contentLength,
-               InputStream bodyIs)
+               InputStream bodyIs,
+               long contentLength)
     throws IOException
   {
     WriteStream out = _link.getWriteStream();
@@ -502,18 +501,20 @@ public class StompConnection implements ProtocolConnection
     out.print(destination);
     out.print("\nmessage-id:");
     out.print(messageId);
-    
+
+    /*
     if (contentType != null) {
       out.print("\ncontent-type:");
       out.print(contentType);
     }
+    */
     
     if (contentLength >= 0) {
       out.print("\ncontent-length:");
       out.print(contentLength);
       out.print("\n\n");
       
-      out.writeStream(bodyIs, contentLength);
+      out.writeStream(bodyIs, (int) contentLength);
     }
     else {
       out.print("\n\n");
@@ -539,8 +540,8 @@ public class StompConnection implements ProtocolConnection
   @Override
   public void onCloseConnection()
   {
-    ArrayList<StompDestination> destList
-      = new ArrayList<StompDestination>(_destinationMap.values());
+    ArrayList<StompPublisher> destList
+      = new ArrayList<StompPublisher>(_destinationMap.values());
   
     _destinationMap.clear();
     
@@ -550,7 +551,7 @@ public class StompConnection implements ProtocolConnection
     _destinationMap.clear();
     _subscriptionMap.clear();
     
-    for (StompDestination dest : destList) {
+    for (StompPublisher dest : destList) {
       dest.close();
     }
     
@@ -604,13 +605,12 @@ public class StompConnection implements ProtocolConnection
 
     @Override
     public void onMessage(long messageId,
-                          String contentType,
-                          int contentLength,
-                          InputStream bodyIs)
+                          InputStream bodyIs,
+                          long contentLength)
       throws IOException
     {
       _conn.message(_subscription, _destination,
-                    messageId, contentType, contentLength, bodyIs);
+                    messageId, bodyIs, contentLength);
     }
   }
   

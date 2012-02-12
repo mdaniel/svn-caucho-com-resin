@@ -38,8 +38,7 @@ import java.io.InputStream;
 public interface StompMessageListener
 {
   public void onMessage(long messageId,
-                        String contentType,
-                        int contentLength,
-                        InputStream bodyIs)
+                        InputStream bodyIs,
+                        long contentLength)
     throws IOException;
 }

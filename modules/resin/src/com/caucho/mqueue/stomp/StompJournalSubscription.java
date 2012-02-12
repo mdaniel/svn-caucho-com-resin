@@ -29,19 +29,37 @@
 
 package com.caucho.mqueue.stomp;
 
-import com.caucho.vfs.TempBuffer;
+import com.caucho.mqueue.queue.MQJournalQueueSubscriber;
 
 /**
- * Custom serialization for the cache
+ * Subscription to a destination
  */
-public interface StompDestination
+public class StompJournalSubscription implements StompSubscription
 {
-  public void messagePart(TempBuffer buffer, int length);
+  private MQJournalQueueSubscriber _subscriber;
   
-  // XXX: needs contentType, xid
-  public void messageComplete(TempBuffer buffer, 
-                              int length,
-                              StompReceiptListener receiptListener);
+  StompJournalSubscription(MQJournalQueueSubscriber sub)
+  {
+    _subscriber = sub;
+    
+    _subscriber.start();
+  }
   
-  public void close();
+  @Override
+  public void ack(long mid)
+  {
+    System.out.println("ACK: " + mid);
+  }
+  
+  @Override
+  public void nack(long mid)
+  {
+    System.out.println("NACK: " + mid);
+  }
+  
+  @Override
+  public void close()
+  {
+    
+  }
 }

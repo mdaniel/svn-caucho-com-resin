@@ -67,6 +67,17 @@ public class SubscriberEntry extends RingItem
     return _dataHead;
   }
   
+  public final long getLength()
+  {
+    long length = 0;
+    
+    for (JournalDataNode ptr = _dataHead; ptr != null; ptr = ptr.getNext()) {
+      length += ptr.getLength();
+    }
+    
+    return length;
+  }
+  
   public void clear()
   {
     _sequence = 0;

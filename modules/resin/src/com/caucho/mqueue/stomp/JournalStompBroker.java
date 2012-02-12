@@ -29,28 +29,62 @@
 
 package com.caucho.mqueue.stomp;
 
+import javax.annotation.PostConstruct;
+import javax.ejb.Startup;
+import javax.inject.Singleton;
+
+import com.caucho.config.ConfigException;
+import com.caucho.mqueue.queue.MQJournalQueue;
+import com.caucho.mqueue.queue.MQJournalQueuePublisher;
+import com.caucho.mqueue.queue.MQJournalQueueSubscriber;
+import com.caucho.mqueue.queue.SubscriberProcessor;
+import com.caucho.util.L10N;
+import com.caucho.vfs.Path;
+
 /**
- * AbstractStompBroker with common routines for brokers.
+ * Simple stomp broker.
  */
-abstract public class AbstractStompBroker implements StompBroker
+@Startup
+@Singleton
+public class JournalStompBroker extends AbstractStompBroker
 {
+  private static final L10N L = new L10N(JournalStompBroker.class);
+  
+  private Path _path;
+  private MQJournalQueue _queue;
+  
+  public void setPath(Path path)
+  {
+    _path = path;
+  }
+  
+  @PostConstruct
+  public void init()
+  {
+    if (_path == null)
+      throw new ConfigException(L.l("'path' is required for a journal broker."));
+    
+    _queue = new MQJournalQueue(_path);
+    
+    registerSelf();
+  }
+  
   @Override
   public StompPublisher createPublisher(String name)
   {
-    return null;
+    MQJournalQueuePublisher jPublisher = _queue.createPublisher();
+    
+    return new StompJournalPublisher(jPublisher);
   }
   
   @Override
   public StompSubscription createSubscription(String name,
                                               StompMessageListener listener)
   {
-    return null;
-  }
-  
-  protected void registerSelf()
-  {
-    StompEnvironmentBroker envBroker = StompEnvironmentBroker.create();
+    SubscriberProcessor processor = new StompSubscriberProcessor(listener);
+    System.out.println("SUB: " + name);
+    MQJournalQueueSubscriber jSubscriber = _queue.createSubscriber(processor);
     
-    envBroker.addBroker(this);
+    return new StompJournalSubscription(jSubscriber);
   }
 }

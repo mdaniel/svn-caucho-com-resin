@@ -29,13 +29,28 @@
 
 package com.caucho.mqueue.stomp;
 
+import java.io.IOException;
+import java.io.InputStream;
+
+import com.caucho.mqueue.queue.SubscriberProcessor;
+
 /**
- * Custom serialization for the cache
+ * Generic interface to read a received message.
  */
-public interface StompBroker
+public class StompSubscriberProcessor implements SubscriberProcessor
 {
-  public StompPublisher createPublisher(String name);
+  private StompMessageListener _stompListener;
   
-  public StompSubscription createSubscription(String name,
-                                              StompMessageListener listener);
+  StompSubscriberProcessor(StompMessageListener stompListener)
+  {
+    _stompListener = stompListener;
+  }
+  
+  @Override
+  public void process(long sequence, InputStream is, long length)
+    throws IOException
+  {
+    _stompListener.onMessage(sequence, is, length);
+    System.out.println("PROCESS: " + sequence);
+  }
 }

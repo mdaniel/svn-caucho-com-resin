@@ -126,7 +126,7 @@ public class MQJournalQueueSubscriber
       InputStream is = new DataNodeInputStream(item.getDataHead());
       
       try {
-        _processor.process(item.getSequence(), is);
+        _processor.process(item.getSequence(), is, item.getLength());
       } finally {
         ack(item.getSequence());
       }

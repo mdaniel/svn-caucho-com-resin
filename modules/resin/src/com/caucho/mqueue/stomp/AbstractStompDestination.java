@@ -34,7 +34,7 @@ import com.caucho.vfs.TempBuffer;
 /**
  * Custom serialization for the cache
  */
-public class AbstractStompDestination implements StompDestination
+public class AbstractStompDestination implements StompPublisher
 {
   @Override
   public void messagePart(TempBuffer buffer, int length)

@@ -37,6 +37,6 @@ import java.io.InputStream;
  */
 public interface SubscriberProcessor
 {
-  public void process(long sequence, InputStream message)
+  public void process(long sequence, InputStream message, long length)
     throws IOException;
 }

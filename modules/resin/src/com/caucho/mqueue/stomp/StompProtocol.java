@@ -72,8 +72,8 @@ public class StompProtocol implements Protocol
     return "stomp";
   }
   
-  public StompDestination createDestination(String name)
+  public StompPublisher createDestination(String name)
   {
-    return _broker.createDestination(name);
+    return _broker.createPublisher(name);
   }
 }

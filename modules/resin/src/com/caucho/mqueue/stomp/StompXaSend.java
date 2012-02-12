@@ -36,12 +36,12 @@ import com.caucho.vfs.TempBuffer;
  */
 class StompXaSend extends StompXaItem
 {
-  private StompDestination _dest;
+  private StompPublisher _dest;
   
   private TempBuffer _tBuf;
   private int _length;
   
-  StompXaSend(StompDestination dest, TempBuffer tBuf, int length)
+  StompXaSend(StompPublisher dest, TempBuffer tBuf, int length)
   {
     _dest = dest;
     _tBuf = tBuf;

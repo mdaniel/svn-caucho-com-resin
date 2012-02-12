@@ -44,7 +44,7 @@ public class StompSendCommand extends StompCommand
   boolean doCommand(StompConnection conn, ReadStream is, WriteStream os)
     throws IOException
   {
-    StompDestination dest = conn.getDestination();
+    StompPublisher dest = conn.getDestination();
     
     long contentLength = conn.getContentLength();
     String contentType = conn.getContentType();

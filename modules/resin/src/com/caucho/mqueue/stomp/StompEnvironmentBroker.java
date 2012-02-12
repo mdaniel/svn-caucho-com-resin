@@ -89,15 +89,15 @@ public class StompEnvironmentBroker implements StompBroker
   }
   
   @Override
-  public StompDestination createDestination(String name)
+  public StompPublisher createPublisher(String name)
   {
     StompBroker broker = _brokerMap.get(name);
     
     if (broker != null)
-      return broker.createDestination(name);
+      return broker.createPublisher(name);
     
     for (StompBroker registeredBroker : _brokerList) {
-      StompDestination dest = registeredBroker.createDestination(name);
+      StompPublisher dest = registeredBroker.createPublisher(name);
       
       if (dest != null) {
         _brokerMap.put(name, registeredBroker);

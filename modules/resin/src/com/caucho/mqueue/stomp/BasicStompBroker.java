@@ -30,12 +30,8 @@
 package com.caucho.mqueue.stomp;
 
 /**
- * Custom serialization for the cache
+ * Simple stomp broker.
  */
-public interface StompBroker
+public class BasicStompBroker extends AbstractStompBroker
 {
-  public StompPublisher createPublisher(String name);
-  
-  public StompSubscription createSubscription(String name,
-                                              StompMessageListener listener);
 }

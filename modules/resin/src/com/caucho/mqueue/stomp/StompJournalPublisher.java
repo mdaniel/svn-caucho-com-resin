@@ -29,13 +29,41 @@
 
 package com.caucho.mqueue.stomp;
 
+import com.caucho.mqueue.queue.MQJournalQueuePublisher;
+import com.caucho.vfs.TempBuffer;
+
 /**
  * Custom serialization for the cache
  */
-public interface StompBroker
+public class StompJournalPublisher implements StompPublisher
 {
-  public StompPublisher createPublisher(String name);
+  private MQJournalQueuePublisher _publisher;
   
-  public StompSubscription createSubscription(String name,
-                                              StompMessageListener listener);
+  StompJournalPublisher(MQJournalQueuePublisher publisher)
+  {
+    _publisher = publisher;
+  }
+  
+  @Override
+  public void messagePart(TempBuffer buffer, int length)
+  {
+    System.out.println("PART: " + length);
+  }
+  
+  // XXX: needs contentType, xid
+  @Override
+  public void messageComplete(TempBuffer buffer, 
+                              int length,
+                              StompReceiptListener receiptListener)
+  {
+    System.out.println("COMPLETE: " + length);
+    
+    _publisher.write(buffer.getBuffer(), 0, length, buffer);
+  }
+  
+  public void close()
+  {
+    System.out.println("CLOSE:");
+    
+  }
 }
