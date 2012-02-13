@@ -620,6 +620,27 @@ implements LockableStream, SendfileOutputStream
     
     _writeLength = writeLength;
   }
+  
+  public final void printUtf8(String value, int offset, int length)
+    throws IOException
+  {
+    for (int i = 0; i < length; i++) {
+      int ch = value.charAt(offset + i);
+      
+      if (ch < 0x80) {
+        write(ch);
+      }
+      else if (ch < 0x800) {
+        write(0xc0 | (ch >> 6));
+        write(0x80 | (ch & 0x3f));
+      }
+      else {
+        write(0xe0 | (ch >> 12));
+        write(0x80 | ((ch >> 6) & 0x3f));
+        write(0x80 | (ch & 0x3f));
+      }
+    }
+  }
 
   /**
    * Prints the character buffer to the stream.
