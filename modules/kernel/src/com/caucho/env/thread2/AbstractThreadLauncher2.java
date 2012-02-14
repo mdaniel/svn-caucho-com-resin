@@ -34,10 +34,12 @@ import java.util.concurrent.atomic.AtomicLong;
 import java.util.logging.Logger;
 
 import com.caucho.config.ConfigException;
+import com.caucho.env.thread.ThreadPool;
 import com.caucho.inject.Module;
 import com.caucho.lifecycle.Lifecycle;
 import com.caucho.util.Alarm;
 import com.caucho.util.L10N;
+import com.caucho.util.ThreadDump;
 
 @Module
 abstract public class AbstractThreadLauncher2 extends AbstractTaskWorker2 {
@@ -443,7 +445,7 @@ abstract public class AbstractThreadLauncher2 extends AbstractTaskWorker2 {
   
   protected boolean isIdleTooLow(int startingCount)
   {
-    return (_idleCount.get() + startingCount <= _idleMin);
+    return (_idleCount.get() + startingCount < _idleMin);
   }
   
   /*
@@ -479,6 +481,10 @@ abstract public class AbstractThreadLauncher2 extends AbstractTaskWorker2 {
         int id = _gId.incrementAndGet();
         
         updateThrottle();
+        
+        if (id == 200) {
+          ThreadDump.create().dumpThreads();
+        }
         
         launchChildThread(id);
         

@@ -89,6 +89,8 @@ struct connection_t {
   char *ssl_cipher;
   int ssl_bits;
 
+  int pipe[2];
+
 #ifdef WIN32
   //WSAEVENT event;
 #endif
@@ -254,5 +256,7 @@ resin_get_byte_array_region(JNIEnv *env,
 
 int poll_read(int fd, int ms);
 int poll_write(int fd, int ms);
+
+#define RESIN_BLOCK_SIZE (8 * 1024)
 
 #endif /* RESIN_H */

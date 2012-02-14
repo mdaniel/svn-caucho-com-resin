@@ -64,9 +64,11 @@ public class ValueActorQueue<T>
   
   public final void offer(T value)
   {
-    ValueItem<T> item = _actorQueue.startOffer(true);
+    ActorQueue<ValueItem<T>> actorQueue = _actorQueue;
+    
+    ValueItem<T> item = actorQueue.startOffer(true);
     item.init(value);
-    _actorQueue.finishOffer(item);
+    actorQueue.finishOffer(item);
   }
   
   public void wake()
@@ -138,6 +140,12 @@ public class ValueActorQueue<T>
     @Override
     public void onEmpty() throws Exception
     {
+    }
+    
+    @Override
+    public String toString()
+    {
+      return getClass().getSimpleName() + "[" + _processor + "]";
     }
   }
 }

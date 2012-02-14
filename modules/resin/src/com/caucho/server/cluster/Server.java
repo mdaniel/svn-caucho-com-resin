@@ -29,6 +29,7 @@
 
 package com.caucho.server.cluster;
 
+import java.util.concurrent.atomic.AtomicLong;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import java.util.regex.Matcher;
@@ -51,6 +52,7 @@ import com.caucho.cloud.topology.CloudPod;
 import com.caucho.cloud.topology.CloudServer;
 import com.caucho.config.ConfigException;
 import com.caucho.config.inject.InjectManager;
+import com.caucho.config.types.Bytes;
 import com.caucho.config.types.Period;
 import com.caucho.distcache.ClusterCache;
 import com.caucho.env.service.ResinSystem;
@@ -163,6 +165,9 @@ public class Server
 
   private PersistentStoreConfig _persistentStoreConfig;
   
+  private boolean _isSendfileEnabled;
+  private long _sendfileMinLength = 128 * 1024L;
+  
   private final FreeRing<HttpBufferStore> _httpBufferFreeList
     = new FreeRing<HttpBufferStore>(256);
 
@@ -176,6 +181,8 @@ public class Server
   // private GlobalCache _globalStore;
 
   // stats
+  
+  private final AtomicLong _sendfileCount = new AtomicLong();
 
   private long _startTime;
 
@@ -730,6 +737,42 @@ public class Server
     log.warning(L.l("<proxy-cache> requires Resin Professional.  Please see http://www.caucho.com for Resin Professional information and licensing."));
 
     return new AbstractProxyCache();
+  }
+  
+  /**
+   * Returns true if sendfile is enabled.
+   */
+  public void setSendfileEnable(boolean isEnable)
+  {
+    _isSendfileEnabled = isEnable;
+  }
+  
+  /**
+   * Returns true if sendfile is enabled.
+   */
+  public boolean isSendfileEnable()
+  {
+    return _isSendfileEnabled;
+  }
+  
+  public long getSendfileMinLength()
+  {
+    return _sendfileMinLength;
+  }
+  
+  public void setSendfileMinLength(long bytes)
+  {
+    _sendfileMinLength = bytes;
+  }
+  
+  public long getSendfileCount()
+  {
+    return _sendfileCount.get();
+  }
+  
+  public void addSendfileCount()
+  {
+    _sendfileCount.incrementAndGet();
   }
 
   /**

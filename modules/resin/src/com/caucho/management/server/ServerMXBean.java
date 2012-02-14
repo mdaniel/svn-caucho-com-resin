@@ -311,6 +311,12 @@ public interface ServerMXBean extends ManagedObjectMXBean {
    */
   @Description("The current CPU load average")
   public double getCpuLoadAvg();
+  
+  /**
+   * Returns the number of sendfile() responses
+   */
+  @Description("The total count of sendfile responses")
+  public long getSendfileCountTotal();
 
   //
   // Operations

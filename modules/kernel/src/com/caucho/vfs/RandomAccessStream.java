@@ -120,6 +120,11 @@ abstract public class RandomAccessStream
   abstract public long getFilePointer()
     throws IOException;
   
+  public boolean isMmap()
+  {
+    return false;
+  }
+  
   public long getMmapAddress() throws IOException
   {
     throw new UnsupportedOperationException(getClass().getName());
@@ -161,6 +166,19 @@ abstract public class RandomAccessStream
         log.log(Level.WARNING, e.toString(), e);
       }
     }
+  }
+  
+  public boolean startUse()
+  {
+    // XXX: for mmap
+    
+    return false;
+  }
+  
+  public void finishUse()
+    throws IOException
+  {
+    // XXX: for mmap
   }
   
   /**

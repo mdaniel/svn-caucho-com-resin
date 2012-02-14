@@ -212,7 +212,7 @@ public class AccessLogWriter extends AbstractRolloverLog
     }
 
     @Override
-    protected void processValue(LogBuffer value)
+    public void process(LogBuffer value)
     {
       try {
         if (value != null)
@@ -226,7 +226,7 @@ public class AccessLogWriter extends AbstractRolloverLog
     }
 
     @Override
-    protected void processOnComplete()
+    public void onEmpty()
     {
       try {
         flushStream();

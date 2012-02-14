@@ -351,8 +351,15 @@ public class StubServletResponse implements CauchoResponse {
     return false;
   }
   
+  @Override
   public void setCacheInvocation(AbstractCacheFilterChain cacheFilterChain)
   {
+  }
+  
+  @Override
+  public boolean isCaching()
+  {
+    return false;
   }
 
   public void setMatchCacheEntry(AbstractCacheEntry cacheEntry)

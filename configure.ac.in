@@ -880,7 +880,7 @@ fi
 
 case "$target_os" in
   linux*)
-        CFLAGS="$CFLAGS -DHAS_SOCK_TIMEOUT"
+        CFLAGS="$CFLAGS -DHAS_SOCK_TIMEOUT -DHAS_SENDFILE -DHAS_SPLICE"
 	;;
   solaris*)
         CFLAGS="$CFLAGS -DHAS_SOCK_TIMEOUT"

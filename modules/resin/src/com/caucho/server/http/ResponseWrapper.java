@@ -495,11 +495,16 @@ public class ResponseWrapper implements ServletResponse {
     return false;
   }
 
-  public void setCacheInvocation(AbstractCacheFilterChain cacheFilterChain)
+  public void setMatchCacheEntry(AbstractCacheEntry cacheEntry)
   {
   }
 
-  public void setMatchCacheEntry(AbstractCacheEntry cacheEntry)
+  public void setCacheInvocation(AbstractCacheFilterChain cacheFilterChain)
   {
+  }
+  
+  public boolean isCaching()
+  {
+    return false;
   }
 }

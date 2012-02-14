@@ -41,7 +41,9 @@ import com.caucho.vfs.Path;
 /**
  * API for handling the PrintWriter/ServletOutputStream
  */
-public abstract class AbstractResponseStream extends OutputStreamWithBuffer {
+public abstract class AbstractResponseStream 
+  extends OutputStreamWithBuffer
+{
   private State _state = State.START;
   
   public void setCauchoResponse(CauchoResponse res)
@@ -315,10 +317,10 @@ public abstract class AbstractResponseStream extends OutputStreamWithBuffer {
    * @param path the path to the file
    * @param length the length of the file (-1 if unknown)
    */
-  public void sendFile(Path path, long length)
+  public void sendFile(Path path, long offset, long length)
     throws IOException
   {
-    path.writeToStream(this);
+    path.sendfile(this, offset, length);
   }
 
   /**

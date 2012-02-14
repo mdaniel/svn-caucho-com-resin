@@ -34,7 +34,7 @@ public final class JniSocketImpl extends QSocket {
 
   private static final JniTroubleshoot _jniTroubleshoot;
 
-  private long _fd;
+  private long _socketFd;
   private JniStream _stream;
 
   private final byte []_localAddrBuffer = new byte[16];
@@ -71,7 +71,7 @@ public final class JniSocketImpl extends QSocket {
 
   public JniSocketImpl()
   {
-    _fd = nativeAllocate();
+    _socketFd = nativeAllocate();
   }
 
   public static boolean isEnabled()
@@ -112,7 +112,7 @@ public final class JniSocketImpl extends QSocket {
     _isClosed.set(false);
     
     synchronized (_writeLock) {
-      return nativeConnect(_fd, host, port);
+      return nativeConnect(_socketFd, host, port);
     }
   }
 
@@ -134,18 +134,18 @@ public final class JniSocketImpl extends QSocket {
 
     synchronized (_writeLock) {
       // initialize fields from the _fd
-      return nativeAccept(serverSocketFd, _fd, _localAddrBuffer, _remoteAddrBuffer);
+      return nativeAccept(serverSocketFd, _socketFd, _localAddrBuffer, _remoteAddrBuffer);
     }
   }
 
   public long getFd()
   {
-    return _fd;
+    return _socketFd;
   }
 
   public int getNativeFd()
   {
-    return getNativeFd(_fd);
+    return getNativeFd(_socketFd);
   }
 
   /**
@@ -313,7 +313,7 @@ public final class JniSocketImpl extends QSocket {
   public String getCipherSuite()
   {
     synchronized (this) {
-      return getCipher(_fd);
+      return getCipher(_socketFd);
     }
   }
 
@@ -323,7 +323,7 @@ public final class JniSocketImpl extends QSocket {
   @Override
   public int getCipherBits()
   {
-    return getCipherBits(_fd);
+    return getCipherBits(_socketFd);
   }
 
   /**
@@ -335,7 +335,7 @@ public final class JniSocketImpl extends QSocket {
   {
     TempBuffer tb = TempBuffer.allocate();
     byte []buffer = tb.getBuffer();
-    int len = getClientCertificate(_fd, buffer, 0, buffer.length);
+    int len = getClientCertificate(_socketFd, buffer, 0, buffer.length);
     X509Certificate cert = null;
 
     if (len > 0 && len < buffer.length) {
@@ -371,7 +371,7 @@ public final class JniSocketImpl extends QSocket {
   public boolean isEof()
   {
     synchronized (_readLock) {
-      return nativeIsEof(_fd);
+      return nativeIsEof(_socketFd);
     }
   }
 
@@ -408,7 +408,7 @@ public final class JniSocketImpl extends QSocket {
         expires = _socketTimeout + now - gap;
 
       do {
-        result = readNative(_fd, buffer, offset, length, timeout);
+        result = readNative(_socketFd, buffer, offset, length, timeout);
         
         now = Alarm.getCurrentTimeActual();
         
@@ -440,7 +440,7 @@ public final class JniSocketImpl extends QSocket {
       long expires = _socketTimeout + now;
       
       do {
-        result = writeNative(_fd, buffer, offset, length);
+        result = writeNative(_socketFd, buffer, offset, length);
         
         //byte []tempBuffer = _byteBuffer.array();
         //System.out.println("TEMP: " + tempBuffer);
@@ -458,8 +458,8 @@ public final class JniSocketImpl extends QSocket {
     return result;
   }
 
-  public int writeMmap(byte[] buffer, int offset, int length,
-                       long mmapAddress, int mmapLength)
+  /*
+  public int writeMmap(long mmapAddress, long mmapOffset, int mmapLength)
     throws IOException
   {
     int result;
@@ -478,8 +478,70 @@ public final class JniSocketImpl extends QSocket {
       long expires = _socketTimeout + now;
       
       do {
-        result = writeMmapNative(_fd, buffer, offset, length,
-                                 mmapAddress, mmapLength);
+        result = writeMmapNative(_socketFd, null, 0, 0,
+                                 mmapAddress, mmapOffset, mmapLength);
+      } while (result == JniStream.TIMEOUT_EXN
+               && Alarm.getCurrentTimeActual() < expires);
+    }
+    
+    return result;
+  }
+  */
+  public int writeMmap(long mmapAddress,
+                       long []mmapBlocks,
+                       long mmapOffset, 
+                       long mmapLength)
+    throws IOException
+  {
+    int result;
+  
+    long requestExpireTime = _requestExpireTime;
+  
+    if (requestExpireTime > 0 && requestExpireTime < Alarm.getCurrentTime()) {
+      close();
+      throw new ClientDisconnectException(L.l("{0}: request-timeout write",
+                                              getRemoteAddress()));
+    }
+  
+    synchronized (_writeLock) {
+      long now = Alarm.getCurrentTimeActual();
+      long expires = _socketTimeout + now;
+    
+      do {
+        result = writeMmapNative(_socketFd, 
+                                 mmapAddress, mmapBlocks, mmapOffset, mmapLength);
+      } while (result == JniStream.TIMEOUT_EXN
+          && Alarm.getCurrentTimeActual() < expires);
+    }
+  
+    return result;
+  }
+  
+  public boolean isSendfileEnabled()
+  {
+    return JniServerSocketImpl.isSendfileEnabled();
+  }
+
+  public int writeSendfile(int fd, long fdOffset, int fdLength)
+    throws IOException
+  {
+    int result;
+    
+    long requestExpireTime = _requestExpireTime;
+    
+    if (requestExpireTime > 0 && requestExpireTime < Alarm.getCurrentTime()) {
+      close();
+      throw new ClientDisconnectException(L.l("{0}: request-timeout sendfile",
+                                              getRemoteAddress()));
+    }
+    
+    
+    synchronized (_writeLock) {
+      long now = Alarm.getCurrentTimeActual();
+      long expires = _socketTimeout + now;
+      
+      do {
+        result = writeSendfileNative(_socketFd, fd, fdOffset, fdLength);
         
         //byte []tempBuffer = _byteBuffer.array();
         //System.out.println("TEMP: " + tempBuffer);
@@ -501,7 +563,7 @@ public final class JniSocketImpl extends QSocket {
     throws IOException
   {
     synchronized (_writeLock) {
-      return flushNative(_fd);
+      return flushNative(_socketFd);
     }
   }
 
@@ -654,7 +716,7 @@ public final class JniSocketImpl extends QSocket {
   public void forceShutdown()
   {
     // can't be locked because of shutdown
-    nativeCloseFd(_fd);
+    nativeCloseFd(_socketFd);
   }
 
   /**
@@ -671,15 +733,15 @@ public final class JniSocketImpl extends QSocket {
       _stream.close();
 
     // XXX: can't be locked because of shutdown
-    nativeClose(_fd);
+    nativeClose(_socketFd);
   }
 
   @Override
   protected void finalize()
     throws Throwable
   {
-    long fd = _fd;
-    _fd = 0;
+    long fd = _socketFd;
+    _socketFd = 0;
     
     try {
       super.finalize();
@@ -729,10 +791,22 @@ public final class JniSocketImpl extends QSocket {
                           byte []buf1, int off1, int len1,
                           byte []buf2, int off2, int len2)
     throws IOException;
+
+  /*
+  native int writeMmapNative(long fd,
+                             long mmapAddress, long mmapOffset, int mmapLength)
+    throws IOException;
+    */
   
   native int writeMmapNative(long fd,
-                             byte []buf, int off, int len,
-                             long mmapAddress, int mmapOffset)
+                             long mmapAddress, 
+                             long []mmapBlocks,
+                             long mmapOffset, 
+                             long mmapLength)
+    throws IOException;
+  
+  native int writeSendfileNative(long socket,
+                                 int fd, long fdOffset, int fdLength)
     throws IOException;
 
   /*
@@ -754,7 +828,7 @@ public final class JniSocketImpl extends QSocket {
   public String toString()
   {
     return ("JniSocketImpl$" + System.identityHashCode(this)
-            + "[" + _fd + ",fd=" + getNativeFd(_fd) + "]");
+            + "[" + _socketFd + ",fd=" + getNativeFd(_socketFd) + "]");
   }
 
   static {

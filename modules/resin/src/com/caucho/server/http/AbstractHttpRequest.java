@@ -1766,6 +1766,16 @@ public abstract class AbstractHttpRequest
         getServer().freeHttpBuffer(httpBuffer);
     }
   }
+  
+  public void beginThreadIdle()
+  {
+    _tcpConn.beginThreadIdle();
+  }
+  
+  public void endThreadIdle()
+  {
+    _tcpConn.endThreadIdle();
+  }
 
   @Override
   public void onCloseConnection()

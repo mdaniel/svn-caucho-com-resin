@@ -472,23 +472,35 @@ public class CauchoResponseWrapper extends AbstractCauchoResponse
     return null;
   }
 
+  @Override
   public void setCacheInvocation(AbstractCacheFilterChain cacheFilterChain)
   {
+  }
+
+  @Override
+  public boolean isCaching()
+  {
+    return false;
   }
 
   public void setMatchCacheEntry(AbstractCacheEntry cacheEntry)
   {
   }
 
+  @Override
   public ServletResponse getResponse()
   {
     return _response;
   }
 
-  public void setForwardEnclosed(boolean isForwardEnclosed) {
+  @Override
+  public void setForwardEnclosed(boolean isForwardEnclosed)
+  {
   }
 
-  public boolean isForwardEnclosed() {
+  @Override
+  public boolean isForwardEnclosed()
+  {
     return false;
   }
 

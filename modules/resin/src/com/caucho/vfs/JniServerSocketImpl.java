@@ -41,6 +41,9 @@ import com.caucho.util.L10N;
 public class JniServerSocketImpl extends QServerSocket {
   private static final L10N L = new L10N(JniServerSocketImpl.class);
   private static final JniTroubleshoot _jniTroubleshoot;
+  
+  private static final boolean _isSendfileEnabled;
+  private static final boolean _isCorkEnabled;
 
   private long _fd;
   private String _id;
@@ -92,6 +95,16 @@ public class JniServerSocketImpl extends QServerSocket {
       return _jniTroubleshoot.getMessage();
     else
       return null;
+  }
+  
+  public static boolean isSendfileEnabled()
+  {
+    return _isSendfileEnabled;
+  }
+  
+  public static boolean isTcpCorkEnabled()
+  {
+    return _isCorkEnabled;
   }
 
   /**
@@ -318,6 +331,16 @@ public class JniServerSocketImpl extends QServerSocket {
   private native boolean nativeSetSaveOnExec(long fd);
 
   /**
+   * True if sendfile is available.
+   */
+  private static native boolean nativeIsSendfileEnabled();
+
+  /**
+   * True if cork is available.
+   */
+  private static native boolean nativeIsCorkEnabled();
+
+  /**
    * Closes the server socket.
    */
   native int closeNative(long fd)
@@ -325,17 +348,25 @@ public class JniServerSocketImpl extends QServerSocket {
 
   static {
     JniTroubleshoot jniTroubleshoot = null;
+    
+    boolean isSendfileEnabled = false;
+    boolean isCorkEnabled = false;
 
     try {
       System.loadLibrary("resin_os");
       jniTroubleshoot
         = new JniTroubleshoot(JniServerSocketImpl.class, "resin_os");
+      
+      isSendfileEnabled = nativeIsSendfileEnabled(); 
+      isCorkEnabled = nativeIsCorkEnabled(); 
     } catch (Throwable e) {
       jniTroubleshoot
         = new JniTroubleshoot(JniServerSocketImpl.class, "resin_os", e);
     }
 
     _jniTroubleshoot = jniTroubleshoot;
+    _isSendfileEnabled = isSendfileEnabled;
+    _isCorkEnabled = isCorkEnabled;
   }
 }
 

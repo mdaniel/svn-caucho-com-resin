@@ -752,6 +752,12 @@ r_server-Content =
   & (attribute request-timeout { r_period-Type }
      | element request-timeout { r_period-Type })?
 
+  & (attribute sendfile-enable { r_boolean-Type }
+     | element sendfile-enable { r_boolean-Type })?
+
+  & (attribute sendfile-min-length { r_int-Type }
+     | element sendfile-min-length { r_int-Type })?
+
   & (attribute shutdown-wait-max { r_period-Type }
      | element shutdown-wait-max { r_period-Type })?
 

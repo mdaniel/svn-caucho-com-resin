@@ -466,6 +466,18 @@ public class ServletContainerConfig implements EnvironmentBean, SchemaBean
   {
     _servletContainer.setIgnoreClientDisconnect(isIgnore);
   }
+  
+  @Configurable
+  public void setSendfileEnable(boolean isEnable)
+  {
+    _servletContainer.setSendfileEnable(isEnable);
+  }
+  
+  @Configurable
+  public void setSendfileMinLength(Bytes bytes)
+  {
+    _servletContainer.setSendfileMinLength(bytes.getBytes());
+  }
 
   /**
    * Adds a WebAppDefault.

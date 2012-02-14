@@ -69,7 +69,9 @@ public interface CauchoResponse extends HttpServletResponse {
   public void killCache();
   public void setNoCache(boolean killCache);
   public void setPrivateCache(boolean isPrivate);
+  
   public void setCacheInvocation(AbstractCacheFilterChain cacheFilterChain);
+  public boolean isCaching();
 
   public boolean isNoCacheUnlessVary();
   

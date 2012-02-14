@@ -75,6 +75,17 @@ public class JniFileStream extends StreamImpl
   {
     return _jniTroubleshoot.getCause();
   }
+  
+  static int openFileDescriptorRead(byte []name, int length)
+  {
+    return nativeOpenRead(name, length);
+  }
+  
+  static void closeFileDescriptor(int fd)
+    throws IOException
+  {
+    nativeClose(fd);
+  }
 
   public static JniFileStream openRead(byte []name, int length)
   {

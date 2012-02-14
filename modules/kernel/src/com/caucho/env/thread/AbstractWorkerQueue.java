@@ -29,19 +29,18 @@
 
 package com.caucho.env.thread;
 
-import com.caucho.env.thread.SingleConsumerRing.RingItem;
-import com.caucho.env.thread.SingleConsumerRing.TaskFactory;
+import com.caucho.env.thread.ValueActorQueue.ValueProcessor;
 
 /**
  * Ring-based memory queue processed by a single worker.
  */
-abstract public class AbstractWorkerQueue<T>
+abstract public class AbstractWorkerQueue<T> implements ValueProcessor<T> 
 {
-  private final QueueWorker<T> _queueConsumer;
+  private final ValueActorQueue<T> _queueConsumer;
   
   public AbstractWorkerQueue(int size)
   {
-    _queueConsumer = new QueueWorker<T>(size, new QueueFactory());
+    _queueConsumer = new ValueActorQueue<T>(size, this);
   }
   
   public final boolean isEmpty()
@@ -56,47 +55,16 @@ abstract public class AbstractWorkerQueue<T>
   
   public final boolean offer(T value)
   {
-    RingItem<T> item = _queueConsumer.startProducer(true);
-    
-    item.setValue(value);
-    
-    _queueConsumer.finishProducer(item);
+    _queueConsumer.offer(value);
     
     return true;
   }
   
-  abstract protected void processValue(T value);
+  @Override
+  abstract public void process(T value);
   
-  protected void processOnComplete()
+  @Override
+  public void onEmpty()
   {
-    
-  }
-  
-  private class QueueFactory implements TaskFactory<T> {
-    @Override
-    public T createValue(int index)
-    {
-      return null;
-    }
-
-    @Override
-    public void process(RingItem<T> item)
-    {
-      T value = item.getAndClearValue();
-
-      processValue(value);
-    }
-
-    @Override
-    public void processOnComplete()
-    {
-      AbstractWorkerQueue.this.processOnComplete();
-    }
-   
-    @Override
-    public String toString()
-    {
-      return AbstractWorkerQueue.this.getClass().getSimpleName() + ".QueueFactory[]";
-    }
   }
 }

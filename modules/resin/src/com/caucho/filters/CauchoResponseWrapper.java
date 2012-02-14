@@ -40,6 +40,7 @@ import javax.servlet.ServletOutputStream;
 import javax.servlet.ServletResponse;
 import javax.servlet.http.HttpServletResponse;
 
+import com.caucho.server.cache.AbstractCacheFilterChain;
 import com.caucho.server.http.AbstractResponseStream;
 import com.caucho.server.http.CauchoResponse;
 import com.caucho.server.http.ResponseWrapper;

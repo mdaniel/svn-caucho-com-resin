@@ -95,6 +95,18 @@ public class ServerConfig
     _config.setThreadExecutorTaskMax(max);
   }
   
+  @Configurable
+  public void setSendfileEnable(boolean isEnable)
+  {
+    _config.setSendfileEnable(isEnable);
+  }
+  
+  @Configurable
+  public void setSendfileMinLength(Bytes bytes)
+  {
+    _config.setSendfileMinLength(bytes);
+  }
+  
   public void addBuilderProgram(ConfigProgram program)
   {
   }

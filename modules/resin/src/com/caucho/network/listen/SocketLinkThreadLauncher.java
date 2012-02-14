@@ -102,4 +102,10 @@ class SocketLinkThreadLauncher extends AbstractThreadLauncher
   {
     _threadPool.schedule(this);
   }
+ 
+  @Override
+  public String toString()
+  {
+    return getClass().getSimpleName() + "[" + _listener + "]";
+  }
 }

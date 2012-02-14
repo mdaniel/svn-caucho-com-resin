@@ -380,6 +380,9 @@ public class AccessLog extends AbstractAccessLog implements AlarmListener
     }
 
     LogBuffer logBuffer = _logWriter.allocateBuffer();
+    
+    // logging is treated as idle for thread launching purposes
+    absRequest.beginThreadIdle();
 
     try {
       byte []buffer = logBuffer.getBuffer();
@@ -393,6 +396,8 @@ public class AccessLog extends AbstractAccessLog implements AlarmListener
     } finally {
       if (logBuffer != null)
         _logWriter.freeBuffer(logBuffer);
+      
+      absRequest.endThreadIdle();
     }
   }
 

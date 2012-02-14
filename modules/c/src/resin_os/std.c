@@ -329,6 +329,8 @@ int
 conn_close(connection_t *conn)
 {
   int fd;
+  int pipe0;
+  int pipe1;
 
   if (! conn)
     return -1;
@@ -336,8 +338,22 @@ conn_close(connection_t *conn)
   fd = conn->fd;
   conn->fd = -1;
 
+  pipe0 = conn->pipe[0];
+  pipe1 = conn->pipe[1];
+
+  conn->pipe[0] = 0;
+  conn->pipe[1] = 0;
+
   if (fd > 0) {
     closesocket(fd);
+  }
+
+  if (pipe0 > 0) {
+    close(pipe0);
+  }
+
+  if (pipe1 > 0) {
+    close(pipe1);
   }
 
   return 1;
@@ -354,6 +370,7 @@ std_accept(server_socket_t *ss, connection_t *conn)
   int poll_result;
   struct timeval timeout;
   int result;
+  int is_cork = 0;
 
   if (! ss || ! conn)
     return 0;
@@ -365,9 +382,11 @@ std_accept(server_socket_t *ss, connection_t *conn)
   if (conn->fd > 0)
     return 0;
 
+  /*
   memset(sin_data, 0, sizeof(sin_data));
   sin = (struct sockaddr *) &sin_data;
   sin_len = sizeof(sin_data);
+  */
 
 #ifdef WIN32
   WaitForSingleObject(ss->accept_lock, INFINITE);
@@ -378,7 +397,10 @@ std_accept(server_socket_t *ss, connection_t *conn)
   }
 #endif
   
-  sock = accept(fd, sin, &sin_len);
+  sin_len = sizeof(conn->client_data);
+  memset(conn->client_data, 0, sin_len);
+  conn->client_sin = (struct sockaddr *) &conn->client_data;
+  sock = accept(fd, conn->client_sin, &sin_len);
 
 #ifdef WIN32
   ReleaseMutex(ss->accept_lock);
@@ -387,11 +409,20 @@ std_accept(server_socket_t *ss, connection_t *conn)
   if (sock < 0)
     return 0;
 
-  if (ss->tcp_no_delay) {
+  if (ss->tcp_no_delay && ! is_cork) {
     int flag = 1;
 
     setsockopt(sock, IPPROTO_TCP, TCP_NODELAY, (char *) &flag, sizeof(int));
   }
+
+#ifdef TCP_CORK
+  if (is_cork) {
+    int flag = 1;
+    int result;
+
+    result = setsockopt(sock, IPPROTO_TCP, TCP_CORK, (char *) &flag, sizeof(int));
+  }
+#endif  
 
 #ifdef SO_KEEPALIVE
   if (ss->tcp_keepalive) {
@@ -427,8 +458,10 @@ std_accept(server_socket_t *ss, connection_t *conn)
   conn->fd = sock;
   conn->sock = 0;
   conn->ops = &std_ops;
+  /*
   conn->client_sin = (struct sockaddr *) &conn->client_data;
   memcpy(conn->client_sin, sin, sizeof(conn->client_data));
+  */
   conn->is_init = 0;
 
   conn->server_sin = (struct sockaddr *) &conn->server_data;

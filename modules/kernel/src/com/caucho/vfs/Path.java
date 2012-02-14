@@ -1375,6 +1375,22 @@ public abstract class Path implements Comparable<Path> {
       is.close();
     }
   }
+  
+  /**
+   * Utility to write the contents of this path to the destination stream.
+   *
+   * @param os destination stream.
+   */
+  public void sendfile(OutputStream os, long offset, long length)
+    throws IOException
+  {
+    if (os instanceof OutputStreamWithBuffer) {
+      writeToStream((OutputStreamWithBuffer) os);
+    }
+    else {
+      writeToStream(os);
+    }
+  }
 
   /**
    * Returns the crc64 code.

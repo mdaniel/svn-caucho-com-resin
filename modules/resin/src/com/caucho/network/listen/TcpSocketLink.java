@@ -1421,6 +1421,20 @@ public class TcpSocketLink extends AbstractSocketLink
                + state +", reason=" + reason);
     }
   }
+  
+  //
+  // idle management (for logging)
+  //
+  
+  public void beginThreadIdle()
+  {
+    _listener.getLauncher().onChildIdleBegin();
+  }
+  
+  public void endThreadIdle()
+  {
+    _listener.getLauncher().onChildIdleEnd();
+  }
 
   //
   // async/comet state transitions

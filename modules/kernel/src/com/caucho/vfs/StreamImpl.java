@@ -355,8 +355,24 @@ public class StreamImpl {
   }
   
 
-  public void writeMmap(byte[] writeBuffer, int i, int writeLength,
-                        long mmapAddress, int mmapLength)
+  /*
+  public void writeMmap(long mmapAddress, long mmapOffset, int mmapLength)
+    throws IOException
+  {
+    throw new UnsupportedOperationException(getClass().getName());
+  }
+  */
+  
+  public void writeMmap(long mmapAddress,
+                        long []mmapBlocks,
+                        long mmapOffset, 
+                        long mmapLength)
+    throws IOException
+  {
+    throw new UnsupportedOperationException(getClass().getName());
+  }
+
+  public void writeSendfile(int fd, long fdOffset, int fdLength)
     throws IOException
   {
     throw new UnsupportedOperationException(getClass().getName());

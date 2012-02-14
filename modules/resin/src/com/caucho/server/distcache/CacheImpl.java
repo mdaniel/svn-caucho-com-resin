@@ -69,7 +69,6 @@ import com.caucho.distcache.ExtCacheEntry;
 import com.caucho.distcache.ObjectCache;
 import com.caucho.env.distcache.CacheDataBacking;
 import com.caucho.env.thread.AbstractWorkerQueue;
-import com.caucho.env.thread.QueueWorker;
 import com.caucho.loader.Environment;
 import com.caucho.management.server.AbstractManagedObject;
 import com.caucho.server.distcache.CacheStoreManager.DataItem;
@@ -1304,7 +1303,7 @@ public class CacheImpl<K,V>
     }
     
     @Override
-    protected void processValue(LoadFuture<K,V> item)
+    public void process(LoadFuture<K,V> item)
     {
       CacheImpl<K,V> cache = _cache;
       

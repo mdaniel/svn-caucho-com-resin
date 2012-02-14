@@ -423,6 +423,15 @@ public class ServerAdmin extends AbstractEmitterObject
   }
 
   /**
+   * Returns the invocation cache miss count.
+   */
+  @Override
+  public long getSendfileCountTotal()
+  {
+    return _server.getSendfileCount();
+  }
+
+  /**
    * Returns the current total amount of memory available for the JVM, in bytes.
    */
   @Override

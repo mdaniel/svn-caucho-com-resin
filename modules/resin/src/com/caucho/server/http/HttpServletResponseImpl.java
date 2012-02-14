@@ -437,6 +437,12 @@ public final class HttpServletResponseImpl extends AbstractCauchoResponse
   {
     return _cacheInvocation;
   }
+  
+  @Override
+  public boolean isCaching()
+  {
+    return _cacheInvocation != null;
+  }
 
   /**
    * Set no cache w/o vary

@@ -2599,6 +2599,24 @@ public class WebApp extends ServletContextImpl
 
     log.config("<config-file> is deprecated.  Please use resin:import.");
   }
+  
+  public boolean isSendfileEnabled()
+  {
+    return _server.isSendfileEnable();
+  }
+  
+  public void addSendfileCount()
+  {
+    _server.addSendfileCount();
+  }
+  
+  /**
+   * Returns the minimum length for a caching sendfile
+   */
+  public long getSendfileMinLength()
+  {
+    return _server.getSendfileMinLength();
+  }
 
   /**
    * Returns true if the webApp is active.

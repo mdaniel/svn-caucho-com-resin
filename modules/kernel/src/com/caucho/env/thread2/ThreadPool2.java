@@ -734,7 +734,7 @@ public class ThreadPool2 {
     @Override
     public long runTask()
     {
-      int loopCount = 4;
+      int loopCount = 2;
       int i;
       
       for (i = 0; i <= loopCount; i++) {
@@ -743,7 +743,7 @@ public class ThreadPool2 {
         }
       }
       
-      return 10;
+      return 1000;
     }
     
     private boolean invoke()

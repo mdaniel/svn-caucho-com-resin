@@ -413,7 +413,7 @@ public final class Block implements SyncCacheListener {
   /**
    * Forces a write of the data.
    */
-  private boolean save()
+  public boolean save()
   {
     if (_dirtyRange.get() == INIT_DIRTY) {
       return false;

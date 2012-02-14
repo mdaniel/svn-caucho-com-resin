@@ -13,6 +13,7 @@
 #include <ws2tcpip.h>
 #include <io.h>
 #else
+#define _GNU_SOURCE
 #include <sys/param.h>
 #include <sys/time.h>
 #include <sys/types.h>
@@ -22,17 +23,25 @@
 #include <netinet/in.h>
 #include <arpa/inet.h>
 #include <unistd.h>
+
 #ifdef EPOLL
 #include <sys/epoll.h>
 #endif
+
 #ifdef POLL
 #include <sys/poll.h>
 #else
 #include <sys/select.h>
 #endif
+
 #include <pwd.h>
 #include <syslog.h>
 #include <netdb.h>
+
+#ifdef HAS_SENDFILE
+#include <sys/sendfile.h>
+#endif
+
 #endif
 
 #ifdef linux
@@ -49,6 +58,9 @@
 #include <errno.h>
 /* probably system-dependent */
 #include <jni.h>
+
+#include <fcntl.h>
+#include <sys/uio.h>
 
 #include "resin.h"
 
@@ -219,21 +231,20 @@ Java_com_caucho_vfs_JniSocketImpl_writeNative(JNIEnv *env,
   return write_length;
 }
 
+#if 0
 JNIEXPORT jint JNICALL
 Java_com_caucho_vfs_JniSocketImpl_writeMmapNative(JNIEnv *env,
                                                   jobject obj,
                                                   jlong conn_fd,
-                                                  jbyteArray buf,
-                                                  jint offset,
-                                                  jint length,
                                                   jlong mmapAddress,
+                                                  jlong mmapOffset,
                                                   jint mmapLength)
 {
   connection_t *conn = (connection_t *) (PTR) conn_fd;
-  char buffer[STACK_BUFFER_SIZE];
   int sublen;
   int write_length = 0;
   int result;
+  off_t sendfile_offset;
     
   if (! conn || conn->fd < 0) {
     return -1;
@@ -241,43 +252,276 @@ Java_com_caucho_vfs_JniSocketImpl_writeMmapNative(JNIEnv *env,
   
   conn->jni_env = env;
 
-  while (length > 0 && buf) {
-    jbyte *cBuf;
-
-    if (length < sizeof(buffer))
-      sublen = length;
-    else
-      sublen = sizeof(buffer);
-
-    resin_get_byte_array_region(env, buf, offset, sublen, buffer);
-
-    result = conn->ops->write(conn, buffer, sublen);
-    
-    if (result < 0) {
-      /*
-      fprintf(stdout, "write-ops: write result=%d errno=%d\n", 
-              result, errno);
-      fflush(stdout);
-      */
-      return result;
+  if (conn->pipe[0] <= 0) {
+    if (pipe(conn->pipe) < 0) {
+      fprintf(stderr, "BADPIPE\n");
     }
-
-    length -= result;
-    offset += result;
-    write_length += result;
   }
 
-  result = conn->ops->write(conn, mmapAddress, mmapLength);
+  {
+    struct iovec io;
+    loff_t splice_offset;
+    int mmapFd = (int) mmapAddress;
 
+    io.iov_base = mmapAddress + mmapOffset;
+    io.iov_len = mmapLength;
+
+    splice_offset = mmapOffset;
+    result = vmsplice(conn->pipe[1], &io, 1, SPLICE_F_MOVE);
+    //fprintf(stderr, "FD %d %x\n", mmapFd, (int) mmapOffset);
+    //result = splice(mmapFd, &splice_offset, conn->pipe[1], 0, mmapLength, 0);
+
+    //    fprintf(stderr, "splice1 %d %d\n", conn->pipe[1], result);
+
+    result = splice(conn->pipe[0], 0, conn->fd, 0, mmapLength,
+                    SPLICE_F_MOVE|SPLICE_F_MORE);
+    //     fprintf(stderr, "splice2 %d %d\n", conn->pipe[0], result);
+  }
+  /*
+  result = conn->ops->write(conn, mmapAddress + mmapOffset, mmapLength);
+  */
+
+  /*
+  fprintf(stderr, "SENDFILE %d %x %d\n", (int) mmapAddress, (int) mmapOffset, mmapLength);
+  */
+
+  /*
+  sendfile_offset = mmapOffset;
+  result = sendfile(conn->fd, (int) mmapAddress, &sendfile_offset, mmapLength);
+  */
+
+  /*
   fprintf(stderr, "WRITTENMMAP: %p %d\n", mmapAddress, result);
+  */
 
   if (result < 0) {
     return result;
   }
   else {
-    return result + write_length;
+    return write_length + result;
   }
 }
+#endif
+
+#ifdef HAS_SPLICE
+
+static int
+write_splice(connection_t *conn,
+             long mmap_address,
+             int sub_offset,
+             int sublen)
+{
+  struct iovec io;
+  loff_t splice_offset;
+  int result;
+  int fd = conn->fd;
+
+  if (fd < 0) {
+    return -1;
+  }
+
+  io.iov_base = (void*) (mmap_address + sub_offset);
+  io.iov_len = sublen;
+
+  if (conn->pipe[0] <= 0) {
+    if (pipe(conn->pipe) < 0) {
+      fprintf(stderr, "BADPIPE\n");
+    }
+  }
+
+  splice_offset = sub_offset;
+  sublen = vmsplice(conn->pipe[1], &io, 1, SPLICE_F_MOVE);
+
+  if (sublen < 0) {
+    fprintf(stderr, "vmsplice %d %d\n", sublen, errno);
+    return -1;
+  }
+
+  result = splice(conn->pipe[0], 0, fd, 0, sublen,
+                  SPLICE_F_MOVE|SPLICE_F_MORE);
+
+  if (result < 0) {
+    fprintf(stderr, "splice result:%d pipe:%d fd:%d %d\n",
+            result, conn->pipe[0], fd, errno);
+    return -1;
+  }
+
+  return result;
+}
+
+#else
+
+static int
+write_splice(connection_t *conn,
+             long mmap_address,
+             int sub_offset,
+             int sublen)
+{
+  return conn->ops->write(conn, 
+                          (void*) (PTR) (mmap_address + sub_offset), 
+                          sublen);
+}
+
+#endif
+
+JNIEXPORT jint JNICALL
+Java_com_caucho_vfs_JniSocketImpl_writeMmapNative(JNIEnv *env,
+                                                  jobject obj,
+                                                  jlong conn_fd,
+                                                  jlong mmap_address,
+                                                  jlongArray mmap_blocks_arr,
+                                                  jlong mmap_offset,
+                                                  jlong mmap_length)
+{
+  connection_t *conn = (connection_t *) (PTR) conn_fd;
+  int sublen;
+  int write_length = 0;
+  int result;
+  long block_size = RESIN_BLOCK_SIZE;
+  int i;
+  int blocks_len;
+  jlong *mmap_blocks = 0;
+    
+  if (! conn || conn->fd < 0) {
+    return -1;
+  }
+  
+  conn->jni_env = env;
+
+  blocks_len = (*env)->GetArrayLength(env, mmap_blocks_arr);
+  mmap_blocks = (*env)->GetLongArrayElements(env, mmap_blocks_arr, 0);
+
+  if (! mmap_blocks) {
+    return -1;
+  }
+
+  i = 0;
+  for (; mmap_length > 0; mmap_length -= block_size, i++) {
+    jint sublen = (jint) mmap_length;
+    jlong sub_offset = 0;
+
+    if (block_size < sublen) {
+      sublen = block_size;
+    }
+
+    sub_offset = mmap_blocks[i] & ~(block_size - 1);
+
+    while (sublen > 0) {
+      result = write_splice(conn, mmap_address, sub_offset, sublen);
+
+      if (result > 0) {
+        write_length += result;
+        sub_offset += result;
+        sublen -= result;
+      }
+      else {
+        sublen = -1;
+        break;
+      }
+    }
+
+    if (sublen < 0) {
+      break;
+    }
+  }
+
+  (*env)->ReleaseLongArrayElements(env, mmap_blocks_arr, mmap_blocks, 0);
+
+  if (result < 0) {
+    fprintf(stderr, "ERR %d %d\n", result, errno);
+    return result;
+  }
+  else {
+    return write_length + result;
+  }
+}
+
+#ifdef HAS_SENDFILE
+
+JNIEXPORT jint JNICALL
+Java_com_caucho_vfs_JniSocketImpl_writeSendfileNative(JNIEnv *env,
+                                                      jobject obj,
+                                                      jlong conn_fd,
+                                                      jint fd,
+                                                      jlong fdOffset,
+                                                      jint fdLength)
+{
+  connection_t *conn = (connection_t *) (PTR) conn_fd;
+  int sublen;
+  int write_length = 0;
+  int result;
+  off_t sendfile_offset;
+    
+  if (! conn || conn->fd < 0 || conn->ssl_bits) {
+    return -1;
+  }
+  
+  conn->jni_env = env;
+
+  sendfile_offset = fdOffset;
+  result = sendfile(conn->fd, fd, &sendfile_offset, fdLength);
+
+  if (result < 0) {
+    fprintf(stderr, "sendfile ERR %d %d\n", result, errno);
+    return result;
+  }
+  else {
+    return write_length + result;
+  }
+}
+
+#else
+
+JNIEXPORT jint JNICALL
+Java_com_caucho_vfs_JniSocketImpl_writeSendfileNative(JNIEnv *env,
+                                                      jobject obj,
+                                                      jlong conn_fd,
+                                                      jint fd,
+                                                      jlong fd_offset,
+                                                      jint fd_length)
+{
+  connection_t *conn = (connection_t *) (PTR) conn_fd;
+  int sublen;
+  int write_length = 0;
+  int result;
+  off_t sendfile_offset;
+  char buffer[16 * 1024];
+    
+  if (! conn || conn->fd < 0) {
+    return -1;
+  }
+  
+  conn->jni_env = env;
+
+  sendfile_offset = fd_offset;
+
+  while (fd_length > 0) {
+    sublen = sizeof(buffer);
+
+    if (fd_length < sublen) {
+      sublen = fd_length;
+    }
+    
+    sublen = read(fd, buffer, sublen);
+
+    if (sublen < 0)
+      return sublen;
+
+    result = conn->ops->write(conn, buffer, sublen);
+
+    if (result < 0) {
+      fprintf(stderr, "ERR %d %d\n", result, errno);
+      return result;
+    }
+
+    write_length += sublen;
+    fd_length -= sublen;
+  }
+
+  return write_length + result;
+}
+
+#endif
 
 JNIEXPORT jobject JNICALL
 Java_com_caucho_vfs_JniSocketImpl_createByteBuffer(JNIEnv *env,
@@ -1275,8 +1519,8 @@ Java_com_caucho_vfs_JniSocketImpl_getClientCertificate(JNIEnv *env,
 
 JNIEXPORT jint JNICALL
 Java_com_caucho_vfs_JniSocketImpl_getNativeFd(JNIEnv *env,
-                                           jobject obj,
-                                           jlong conn_fd)
+                                              jobject obj,
+                                              jlong conn_fd)
 {
   connection_t *conn = (connection_t *) (PTR) conn_fd;
 
@@ -1284,4 +1528,26 @@ Java_com_caucho_vfs_JniSocketImpl_getNativeFd(JNIEnv *env,
     return -1;
   else
     return conn->fd;
+}
+
+JNIEXPORT jboolean JNICALL
+Java_com_caucho_vfs_JniServerSocketImpl_nativeIsSendfileEnabled(JNIEnv *env,
+                                                                jobject obj)
+{
+#ifdef HAS_SENDFILE
+  return 1;
+#else
+  return 0;
+#endif  
+}
+
+JNIEXPORT jboolean JNICALL
+Java_com_caucho_vfs_JniServerSocketImpl_nativeIsCorkEnabled(JNIEnv *env,
+                                                            jobject obj)
+{
+#ifdef TCP_CORK
+  return 1;
+#else
+  return 0;
+#endif  
 }

@@ -1481,7 +1481,6 @@ implements LockableStream, SendfileOutputStream
   @Override
   public boolean isMmapEnabled()
   {
-    System.out.println("MMAP: " + _source);
     return _source.isMmapEnabled();
   }
 
@@ -1491,29 +1490,60 @@ implements LockableStream, SendfileOutputStream
     return _source.isSendfileEnabled();
   }
 
+  /*
   @Override
-  public void writeMmap(byte[] buffer, int offset, int length,
-                        long mmapAddress, int mmapLength) throws IOException
+  public void writeMmap(long mmapAddress, long mmapOffset, int mmapLength)
+    throws IOException
   {
-    if (buffer != null) {
-      write(buffer, offset, length);
-    }
-    
     if (_writeLength > 0) {
       int writeLength = _writeLength;
       _writeLength = 0;
       _position += writeLength;
       
-      _source.writeMmap(_writeBuffer, 0, writeLength,
-                        mmapAddress, mmapLength);
-      
+      _source.write(_writeBuffer, 0, writeLength, false);
     }
-    else {
-      _source.writeMmap(null, 0, 0,
-                        mmapAddress, mmapLength);
-    }
+
+    _source.writeMmap(mmapAddress, mmapOffset, mmapLength);
     
     _position += mmapLength;
+  }
+  */
+  
+  @Override
+  public void writeMmap(long mmapAddress,
+                        long []mmapBlocks,
+                        long mmapOffset, 
+                        long mmapLength)
+    throws IOException
+  {
+    if (_writeLength > 0) {
+      int writeLength = _writeLength;
+      _writeLength = 0;
+      _position += writeLength;
+      
+      _source.write(_writeBuffer, 0, writeLength, false);
+    }
+
+    _source.writeMmap(mmapAddress, mmapBlocks, mmapOffset, mmapLength);
+    
+    _position += mmapLength;
+  }
+
+  @Override
+  public void writeSendfile(int fd, long fdOffset, int fdLength)
+    throws IOException
+  {
+    if (_writeLength > 0) {
+      int writeLength = _writeLength;
+      _writeLength = 0;
+      _position += writeLength;
+      
+      _source.write(_writeBuffer, 0, writeLength, false);
+    }
+    
+    _source.writeSendfile(fd, fdOffset, fdLength);
+    
+    _position += fdLength;
   }
 
   @Override
