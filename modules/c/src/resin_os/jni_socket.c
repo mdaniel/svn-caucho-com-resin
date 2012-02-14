@@ -258,7 +258,7 @@ write_splice(connection_t *conn,
   sublen = vmsplice(conn->pipe[1], &io, 1, SPLICE_F_MOVE);
 
   if (sublen < 0) {
-    if (errno != EAGAIN && errno != ECONNRESET) {
+    if (errno != EAGAIN && errno != ECONNRESET && errno != EPIPE) {
       fprintf(stderr, "vmsplice addr:%lx result:%d %d\n", 
               mmap_address,
               sublen, errno);
@@ -271,7 +271,7 @@ write_splice(connection_t *conn,
                   SPLICE_F_MOVE|SPLICE_F_MORE);
 
   if (sublen < 0) {
-    if (errno != EAGAIN && errno != ECONNRESET) {
+    if (errno != EAGAIN && errno != ECONNRESET && errno != EPIPE) {
       fprintf(stderr, "splice result:%d pipe:%d fd:%d addr:%lx errno:%d\n",
               result, conn->pipe[0], fd, mmap_address, errno);
     }
@@ -393,7 +393,10 @@ Java_com_caucho_vfs_JniSocketImpl_writeSendfileNative(JNIEnv *env,
   result = sendfile(conn->fd, fd, &sendfile_offset, fdLength);
 
   if (result < 0) {
-    fprintf(stderr, "sendfile ERR %d %d\n", result, errno);
+    if (errno != EAGAIN && errno != ECONNRESET && errno != EPIPE) {
+      fprintf(stderr, "sendfile ERR %d %d\n", result, errno);
+    }
+    
     return result;
   }
   else {
