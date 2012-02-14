@@ -31,7 +31,6 @@ package com.caucho.util;
 
 import java.util.ArrayList;
 import java.util.Iterator;
-import java.util.logging.Logger;
 import java.util.concurrent.atomic.AtomicBoolean;
 
 /**
@@ -42,9 +41,6 @@ import java.util.concurrent.atomic.AtomicBoolean;
  * <p>LongKeyLruCache is synchronized.
  */
 public class LongKeyLruCache<V> {
-  private static final Logger log
-    = Logger.getLogger(LongKeyLruCache.class.getName());
-  
   private static final int LRU_MASK = 0x3fffffff;
   
   // maximum allowed entries
@@ -116,7 +112,7 @@ public class LongKeyLruCache<V> {
     _capacity1 = _capacity / 2;
 
     if (capacity > 32)
-      _lruTimeout = capacity / 32;
+      _lruTimeout = capacity / 8;
     else
       _lruTimeout = 1;
   }

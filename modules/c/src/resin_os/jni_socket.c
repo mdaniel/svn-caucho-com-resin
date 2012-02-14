@@ -231,88 +231,14 @@ Java_com_caucho_vfs_JniSocketImpl_writeNative(JNIEnv *env,
   return write_length;
 }
 
-#if 0
-JNIEXPORT jint JNICALL
-Java_com_caucho_vfs_JniSocketImpl_writeMmapNative(JNIEnv *env,
-                                                  jobject obj,
-                                                  jlong conn_fd,
-                                                  jlong mmapAddress,
-                                                  jlong mmapOffset,
-                                                  jint mmapLength)
-{
-  connection_t *conn = (connection_t *) (PTR) conn_fd;
-  int sublen;
-  int write_length = 0;
-  int result;
-  off_t sendfile_offset;
-    
-  if (! conn || conn->fd < 0) {
-    return -1;
-  }
-  
-  conn->jni_env = env;
-
-  if (conn->pipe[0] <= 0) {
-    if (pipe(conn->pipe) < 0) {
-      fprintf(stderr, "BADPIPE\n");
-    }
-  }
-
-  {
-    struct iovec io;
-    loff_t splice_offset;
-    int mmapFd = (int) mmapAddress;
-
-    io.iov_base = mmapAddress + mmapOffset;
-    io.iov_len = mmapLength;
-
-    splice_offset = mmapOffset;
-    result = vmsplice(conn->pipe[1], &io, 1, SPLICE_F_MOVE);
-    //fprintf(stderr, "FD %d %x\n", mmapFd, (int) mmapOffset);
-    //result = splice(mmapFd, &splice_offset, conn->pipe[1], 0, mmapLength, 0);
-
-    //    fprintf(stderr, "splice1 %d %d\n", conn->pipe[1], result);
-
-    result = splice(conn->pipe[0], 0, conn->fd, 0, mmapLength,
-                    SPLICE_F_MOVE|SPLICE_F_MORE);
-    //     fprintf(stderr, "splice2 %d %d\n", conn->pipe[0], result);
-  }
-  /*
-  result = conn->ops->write(conn, mmapAddress + mmapOffset, mmapLength);
-  */
-
-  /*
-  fprintf(stderr, "SENDFILE %d %x %d\n", (int) mmapAddress, (int) mmapOffset, mmapLength);
-  */
-
-  /*
-  sendfile_offset = mmapOffset;
-  result = sendfile(conn->fd, (int) mmapAddress, &sendfile_offset, mmapLength);
-  */
-
-  /*
-  fprintf(stderr, "WRITTENMMAP: %p %d\n", mmapAddress, result);
-  */
-
-  if (result < 0) {
-    return result;
-  }
-  else {
-    return write_length + result;
-  }
-}
-#endif
-
 #ifdef HAS_SPLICE
 
 static int
 write_splice(connection_t *conn,
-             long mmap_address,
-             int sub_offset,
+             jlong mmap_address,
              int sublen)
 {
   struct iovec io;
-  loff_t splice_offset;
   int result;
   int fd = conn->fd;
 
@@ -320,7 +246,7 @@ write_splice(connection_t *conn,
     return -1;
   }
 
-  io.iov_base = (void*) (mmap_address + sub_offset);
+  io.iov_base = (void*) (mmap_address);
   io.iov_len = sublen;
 
   if (conn->pipe[0] <= 0) {
@@ -329,20 +255,27 @@ write_splice(connection_t *conn,
     }
   }
 
-  splice_offset = sub_offset;
   sublen = vmsplice(conn->pipe[1], &io, 1, SPLICE_F_MOVE);
 
   if (sublen < 0) {
-    fprintf(stderr, "vmsplice %d %d\n", sublen, errno);
+    if (errno != EAGAIN && errno != ECONNRESET) {
+      fprintf(stderr, "vmsplice addr:%lx result:%d %d\n", 
+              mmap_address,
+              sublen, errno);
+    }
+    
     return -1;
   }
 
   result = splice(conn->pipe[0], 0, fd, 0, sublen,
                   SPLICE_F_MOVE|SPLICE_F_MORE);
 
-  if (result < 0) {
-    fprintf(stderr, "splice result:%d pipe:%d fd:%d %d\n",
-            result, conn->pipe[0], fd, errno);
+  if (sublen < 0) {
+    if (errno != EAGAIN && errno != ECONNRESET) {
+      fprintf(stderr, "splice result:%d pipe:%d fd:%d addr:%lx errno:%d\n",
+              result, conn->pipe[0], fd, mmap_address, errno);
+    }
+
     return -1;
   }
 
@@ -354,11 +287,10 @@ write_splice(connection_t *conn,
 static int
 write_splice(connection_t *conn,
              long mmap_address,
-             int sub_offset,
              int sublen)
 {
   return conn->ops->write(conn, 
-                          (void*) (PTR) (mmap_address + sub_offset), 
+                          (void*) (PTR) (mmap_address), 
                           sublen);
 }
 
@@ -407,7 +339,7 @@ Java_com_caucho_vfs_JniSocketImpl_writeMmapNative(JNIEnv *env,
     sub_offset = mmap_blocks[i] & ~(block_size - 1);
 
     while (sublen > 0) {
-      result = write_splice(conn, mmap_address, sub_offset, sublen);
+      result = write_splice(conn, mmap_address + sub_offset, sublen);
 
       if (result > 0) {
         write_length += result;
@@ -428,7 +360,6 @@ Java_com_caucho_vfs_JniSocketImpl_writeMmapNative(JNIEnv *env,
   (*env)->ReleaseLongArrayElements(env, mmap_blocks_arr, mmap_blocks, 0);
 
   if (result < 0) {
-    fprintf(stderr, "ERR %d %d\n", result, errno);
     return result;
   }
   else {

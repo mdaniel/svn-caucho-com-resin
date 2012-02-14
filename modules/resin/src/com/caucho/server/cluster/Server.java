@@ -165,7 +165,7 @@ public class Server
 
   private PersistentStoreConfig _persistentStoreConfig;
   
-  private boolean _isSendfileEnabled;
+  private boolean _isSendfileEnabled = true;
   private long _sendfileMinLength = 128 * 1024L;
   
   private final FreeRing<HttpBufferStore> _httpBufferFreeList
