@@ -164,6 +164,23 @@ public interface ManagementMXBean extends ManagedObjectMXBean
     @MXParam(name = "server") String serverId)
     throws ReflectionException;
 
+  @Description("adds a Resin-Professional license to an installation")
+  @MXAction(value = "license-add", method = "POST")
+  public StringQueryResult addLicense(
+    @MXParam(name = "server") String serverId,
+    @MXParam(name = "overwrite") boolean isOverwrite,
+    @MXParam(name = "to", required = true) String to,
+    @MXParam(name = "restart") boolean isRestart,
+    InputStream in)
+    throws ReflectionException;
+
+  @Description("lists the most recent Resin server restart times")
+  @MXAction(value = "list-restarts", method = "GET")
+  public StringQueryResult listRestarts(
+    @MXParam(name = "server") String serverId,
+    @MXParam(name = "period", defaultValue = "7D") String periodStr)
+    throws ReflectionException;
+
   @Description("calls a method on a JMX MBean")
   @MXAction(value = "jmx-call", method = "POST")
   public StringQueryResult callJmx(

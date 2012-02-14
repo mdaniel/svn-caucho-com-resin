@@ -438,6 +438,9 @@ public class ManagerActor extends SimpleActor
 
     StatSystem statSystem = ResinSystem.getCurrentService(StatSystem.class);
 
+    if (statSystem == null)
+      throw new IllegalStateException("StatSystem is not active");
+
     long []restartTimes
       = statSystem.getStartTimes(index, now - query.getTimeBackSpan(), now);
 

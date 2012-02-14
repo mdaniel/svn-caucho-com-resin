@@ -39,6 +39,7 @@ import com.caucho.cloud.topology.CloudServer;
 import com.caucho.config.ConfigException;
 import com.caucho.config.types.Period;
 import com.caucho.env.repository.CommitBuilder;
+import com.caucho.jmx.MXParam;
 import com.caucho.management.server.AbstractManagedObject;
 import com.caucho.management.server.ManagementMXBean;
 import com.caucho.quercus.lib.reflection.ReflectionException;
@@ -53,8 +54,11 @@ import com.caucho.server.admin.RemoveUserQueryResult;
 import com.caucho.server.admin.StringQueryResult;
 import com.caucho.server.admin.TagResult;
 import com.caucho.server.admin.WebAppDeployClient;
+import com.caucho.util.CharBuffer;
 import com.caucho.util.L10N;
+import com.caucho.vfs.ReadStream;
 import com.caucho.vfs.TempOutputStream;
+import com.caucho.vfs.Vfs;
 
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
@@ -213,6 +217,59 @@ public class ManagementAdmin extends AbstractManagedObject
     client.undeploy(commit);
 
     return "Undeployed " + commit.getId() + " from " + client.getUrl();
+  }
+
+  @Override
+  public StringQueryResult addLicense(String serverId,
+                                      boolean isOverwrite,
+                                      String to,
+                                      boolean isRestart,
+                                      InputStream in) throws ReflectionException
+  {
+    String licenseContent = null;
+
+    ReadStream is = Vfs.openRead(in);
+    CharBuffer cb = new CharBuffer();
+    try {
+      int ch;
+      while ((ch = is.read()) >= 0)
+        cb.append((char) ch);
+
+      licenseContent = cb.toString();
+    } catch (IOException e) {
+      throw new ConfigException(L.l(
+        "Failed to read license from request input stream: {0}",
+        e.toString()), e);
+    } finally {
+      if (cb != null)
+        cb.close();
+      if (is != null)
+        is.close();
+    }
+
+    if (licenseContent == null || licenseContent.isEmpty()) {
+      throw new ConfigException(L.l(
+        "Failed to read license from request input stream: empty"));
+    }
+
+    ManagerClient client = getManagerClient(serverId);
+
+    return client.addLicense(licenseContent, to, isOverwrite, isRestart);
+  }
+
+  @Override public StringQueryResult listRestarts(
+    @MXParam(name = "server") String serverId,
+    @MXParam(name = "period")
+    String periodStr)
+    throws ReflectionException
+  {
+    final long period = Period.toPeriod(periodStr);
+
+    ManagerClient client = getManagerClient(serverId);
+
+    StringQueryResult result = client.listRestarts(period);
+
+    return result;
   }
 
   @Override
