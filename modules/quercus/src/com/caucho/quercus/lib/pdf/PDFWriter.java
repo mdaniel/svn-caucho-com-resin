@@ -140,7 +140,9 @@ public class PDFWriter {
     println("  << /Type /Outlines");
     println("     /First " + roots.get(0).getId() + " 0 R");
     println("     /Last " + roots.get(roots.size()-1).getId() + " 0 R");
-    println("  >>");    
+    println("  >>");
+    
+    endObject();
     
     for(int i=0; i<roots.size(); i++)
       writeOutlineItem(roots, i);

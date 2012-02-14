@@ -30,6 +30,7 @@
 package com.caucho.quercus.lib.pdf;
 
 import com.caucho.quercus.QuercusModuleException;
+import com.caucho.util.CharBuffer;
 import com.caucho.util.L10N;
 import com.caucho.vfs.TempStream;
 import com.caucho.vfs.WriteStream;
@@ -143,17 +144,13 @@ public class PDFStream {
     flushToGraph();
 
     if (x1 == x2 && y1 == y2) {
-      println(x1 + " " + y1 + " " +
-                   x3 + " " + y3 + " y");
+      println(String.format("%1.2f %1.2f %1.2f %1.2f y", x1, y1, x3, y3));
     }
     else if (x2 == x3 && y2 == y3) {
-      println(x1 + " " + y1 + " " +
-                   x2 + " " + y2 + " v");
+      println(String.format("%1.2f %1.2f %1.2f %1.2f v",x1, y1, x2, y2));
     }
     else {
-      println(x1 + " " + y1 + " " +
-                   x2 + " " + y2 + " " +
-                   x3 + " " + y3 + " c");
+      println(String.format("%1.2f %1.2f %1.2f %1.2f %1.2f %1.2f c", x1, y1, x2, y2, x3, y3));
     }
 
     _x = x3;
@@ -201,7 +198,7 @@ public class PDFStream {
     flushToGraph();
 
     if (x != _x || y != _y || ! _hasGraphicsPos)
-      println(x + " " + y + " l");
+      println(String.format("%1.2f %1.2f l", x, y));
 
     _x = x;
     _y = y;
@@ -212,7 +209,7 @@ public class PDFStream {
   {
     flushToGraph();
 
-    println(x + " " + y + " " + w + " " + h + " re");
+    println(String.format("%1.2f %1.2f %1.2f %1.2f re", x, y, w, h));
   }
 
   public void moveTo(double x, double y)
@@ -243,25 +240,25 @@ public class PDFStream {
 
     if ("gray".equals(colorspace)) {
       if ((type & STROKE) != 0)
-        println(c1 + " G");
+        println(String.format("%1.4f G", c1));
       if ((type & FILL) != 0)
-        println(c1 + " g");
+        println(String.format("%1.4f g", c1));
 
       return true;
     }
     else if ("rgb".equals(colorspace)) {
-      if ((type & STROKE) != 0)
-        println(c1 + " " + c2 + " " + c3 + " RG");
+      if ((type & STROKE) != 0) 
+        println(String.format("%1.4f %1.4f %1.4f RG", c1, c2, c3));
       if ((type & FILL) != 0)
-        println(c1 + " " + c2 + " " + c3 + " rg");
+        println(String.format("%1.4f %1.4f %1.4f rg", c1, c2, c3));
 
       return true;
     }
     else if ("cmyk".equals(colorspace)) {
       if ((type & STROKE) != 0)
-        println(c1 + " " + c2 + " " + c3 + " " + c4 + " K");
+        println(String.format("%1.4f %1.4f %1.4f %1.4f K", c1, c2, c3, c4));
       if ((type & FILL) != 0)
-        println(c1 + " " + c2 + " " + c3 + " " + c4 + " k");
+        println(String.format("%1.4f %1.4f %1.4f %1.4f k", c1, c2, c3, c4));
 
       return true;
     }
@@ -274,12 +271,12 @@ public class PDFStream {
 
   public void setDash(double b, double w)
   {
-    println("[" + b + " " + w + "] 0 d");
+    println(String.format("[%1.2f %1.2f] 0 d", b, w));
   }
 
   public boolean setlinewidth(double w)
   {
-    println(w + " w");
+    println(String.format("%1.2f w", w));
 
     return true;
   }
@@ -289,6 +286,8 @@ public class PDFStream {
    */
   public boolean save()
   {
+    flushToGraph();
+    
     println("q");
 
     return true;
@@ -299,6 +298,8 @@ public class PDFStream {
    */
   public boolean restore()
   {
+    flushToGraph();
+    
     println("Q");
 
     return true;
@@ -307,7 +308,7 @@ public class PDFStream {
   public boolean concat(double a, double b, double c,
                         double d, double e, double f)
   {
-    println(String.format("%.4f %.4f %.4f %.4f %.4f %.4f cm",
+    println(String.format("%1.2f %1.2f %1.2f %1.2f %1.2f %1.2f cm",
                           a, b, c, d, e, f));
 
     return true;
@@ -328,7 +329,7 @@ public class PDFStream {
     }
 
     if (! _hasTextPos) {
-      println(_textX + " " + _textY + " Td");
+      println(String.format("%1.2f %1.2f Td", _textX, _textY));
       _hasTextPos = true;
     }
 
@@ -368,7 +369,7 @@ public class PDFStream {
       flush();
 
       if (! _hasGraphicsPos) {
-        _out.println(_x + " " + _y + " m");
+        _out.println(String.format("%1.2f %1.2f m", _x, _y));
         _hasGraphicsPos = true;
       }
     } catch (IOException e) {
@@ -431,30 +432,28 @@ public class PDFStream {
   
   public static String pdfEscapeText(String text)
   {
-    StringBuilder sb = new StringBuilder();
+    CharBuffer cb = new CharBuffer();
     
     for(char c : text.toCharArray()) {
       if (c == '(' || c == ')' || c == '\\') {
-        sb.append('\\');
-        sb.append(c);
+        cb.append('\\');
+        cb.append(c);
       } else if (c == 0x0A) {
-        sb.append("\\n");
+        cb.append('\n');
       } else if (c == 0x0D) {
-        sb.append("\\r");
+        cb.append('\r');
       } else if (c == 0x09) {
-        sb.append("\\t");
+        cb.append('\t');
       } else if (c == 0x08) {
-        sb.append("\\b");
+        cb.append('\b');
       } else if (c == 0xFF) {
-        sb.append("\\f");
-      } else if (c == 0xFF) {
-        sb.append("\\f");
+        cb.append('\f');
       } else {
-        sb.append(c);
+        cb.append(c);
       }
       // TODO: replace other unprintable chars with octal value
     }
     
-    return sb.toString();
+    return cb.toString();
   }
 }
