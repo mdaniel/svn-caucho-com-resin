@@ -29,8 +29,6 @@
 
 package com.caucho.util;
 
-import java.util.concurrent.atomic.AtomicInteger;
-import java.util.concurrent.atomic.AtomicReferenceArray;
 
 /**
  * FreeList provides a simple class to manage free objects.  This is useful
@@ -40,14 +38,7 @@ import java.util.concurrent.atomic.AtomicReferenceArray;
  * do nothing.
  */
 public final class FreeRing<T> {
-  private final int _size;
-  private final int _mask;
-  
-  private final AtomicReferenceArray<T> _ring;
-
-  private final AtomicInteger _headAlloc = new AtomicInteger();
-  private final AtomicInteger _head = new AtomicInteger();
-  private final AtomicInteger _tail = new AtomicInteger();
+  private final RingValueQueue<T> _ringQueue;
 
   /**
    * Create a new free list.
@@ -56,16 +47,7 @@ public final class FreeRing<T> {
    */
   public FreeRing(int capacity)
   {
-    int size = 1;
-    
-    while (size < capacity) {
-      size *= 2;
-    }
-    
-    _size = size;
-    _mask = size - 1;
-    
-    _ring = new AtomicReferenceArray<T>(size);
+    _ringQueue = new RingValueQueue<T>(capacity);
   }
   
   /**
@@ -76,21 +58,7 @@ public final class FreeRing<T> {
    */
   public T allocate()
   {
-    int head;
-    int tail;
-    int nextTail;
-
-    do {
-      head = _head.get();
-      tail = _tail.get();
-      
-      if (head == tail)
-        return null;
-      
-      nextTail = (tail + 1) & _mask;
-    } while (! _tail.compareAndSet(tail, nextTail));
-
-    return _ring.getAndSet(tail, null);
+    return _ringQueue.take();
   }
   
   
@@ -100,44 +68,24 @@ public final class FreeRing<T> {
    *
    * @param obj the object to be freed.
    */
-  public boolean free(T obj)
+  public boolean free(T value)
   {
-    int head;
-    int nextHead;
-    int tail;
+    return _ringQueue.offer(value, false);
+  }
 
-    while (true) {
-      head = _head.get();
-      tail = _tail.get();
-      
-      nextHead = (head + 1) & _mask;
-      
-      if (nextHead == tail) {
-        return false;
-      }
-      
-      if (_ring.compareAndSet(head, null, obj)) {
-        _head.set(nextHead);
-        return true;
-      }
-      else if (_head.compareAndSet(head, nextHead)) {
-        return false;
-      }
+  /**
+   * Frees the object.  If the free list is full, the object will be garbage
+   * collected.
+   *
+   * @param obj the object to be freed.
+   */
+  public boolean freeCareful(T value)
+  {
+    if (checkDuplicate(value)) {
+      throw new IllegalStateException("tried to free object twice: " + value);
     }
-  }
 
-  /**
-   * Frees the object.  If the free list is full, the object will be garbage
-   * collected.
-   *
-   * @param obj the object to be freed.
-   */
-  public boolean freeCareful(T obj)
-  {
-    if (checkDuplicate(obj))
-      throw new IllegalStateException("tried to free object twice: " + obj);
-
-    return free(obj);
+    return free(value);
   }
 
   /**
@@ -145,11 +93,13 @@ public final class FreeRing<T> {
    */
   public boolean checkDuplicate(T obj)
   {
+    /*
     for (int i = 0; i < _size; i++) {
       if (_ring.get(i) == obj) {
         return true;
       }
     }
+    */
 
     return false;
   }

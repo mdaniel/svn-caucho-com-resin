@@ -67,7 +67,9 @@ public class ReflectionAnnotated implements Annotated, BaseTypeAnnotated
       _annSet = new LinkedHashSet<Annotation>();
 
       for (Annotation ann : annList) {
-        _annSet.add(ann);
+        if (ann != null) {
+          _annSet.add(ann);
+        }
       }
 
       _annArray = new Annotation[_annSet.size()];
@@ -146,6 +148,10 @@ public class ReflectionAnnotated implements Annotated, BaseTypeAnnotated
 
   protected void addAnnotation(Annotation ann)
   {
+    if (ann == null) {
+      return;
+    }
+    
     if (_annSet == _emptyAnnSet)
       _annSet = new LinkedHashSet<Annotation>();
 
@@ -168,6 +174,7 @@ public class ReflectionAnnotated implements Annotated, BaseTypeAnnotated
     return false;
   }
   
+  @Override
   public void addOverrideAnnotation(Annotation ann)
   {
     addAnnotation(ann);

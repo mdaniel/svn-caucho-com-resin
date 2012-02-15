@@ -1769,12 +1769,20 @@ public abstract class AbstractHttpRequest
   
   public void beginThreadIdle()
   {
-    _tcpConn.beginThreadIdle();
+    TcpSocketLink tcpConn = _tcpConn;
+    
+    if (tcpConn != null) {
+      tcpConn.beginThreadIdle();
+    }
   }
   
   public void endThreadIdle()
   {
-    _tcpConn.endThreadIdle();
+    TcpSocketLink tcpConn = _tcpConn;
+    
+    if (tcpConn != null) {
+      tcpConn.endThreadIdle();
+    }
   }
 
   @Override

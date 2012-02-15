@@ -116,7 +116,9 @@ public class DistCacheEntry implements ExtCacheEntry {
   @Override
   public boolean isValueNull()
   {
-    return getMnodeEntry().isValueNull();
+    MnodeEntry entry = getMnodeEntry();
+    
+    return entry == null || entry.isValueNull();
   }
 
   /**

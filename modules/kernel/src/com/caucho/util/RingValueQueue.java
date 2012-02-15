@@ -51,6 +51,21 @@ public class RingValueQueue<T> extends RingQueue<RingValueItem<T>> {
     
     return true;
   }
+  
+  public boolean offer(T value, boolean isWait)
+  {
+    RingValueItem<T> item = beginOffer(isWait);
+    
+    if (item == null) {
+      return false;
+    }
+    
+    item.setValue(value);
+    
+    completeOffer(item);
+    
+    return true;
+  }
  
   public T take()
   {

@@ -116,7 +116,7 @@ public class AccessLogWriter extends AbstractRolloverLog
   protected void flush()
   {
     // server/021g
-    // _logWriterTask.wake();
+    _logWriterTask.wake();
     
     waitForFlush(10);
     
@@ -134,8 +134,9 @@ public class AccessLogWriter extends AbstractRolloverLog
     expire = Alarm.getCurrentTimeActual() + timeout;
 
     while (true) {
-      if (_logWriterTask.isEmpty())
+      if (_logWriterTask.isEmpty()) {
         return;
+      }
 
       long delta;
       delta = expire - Alarm.getCurrentTimeActual();
@@ -143,11 +144,12 @@ public class AccessLogWriter extends AbstractRolloverLog
       if (delta < 0)
         return;
 
-      if (delta > 50)
+      if (delta > 50) {
         delta = 50;
+      }
 
       try {
-        // _logWriterTask.wake();
+        _logWriterTask.wake();
 
         Thread.sleep(delta);
       } catch (Exception e) {
@@ -171,8 +173,9 @@ public class AccessLogWriter extends AbstractRolloverLog
 
     LogBuffer buffer = _freeList.allocate();
 
-    if (buffer == null)
+    if (buffer == null) {
       buffer = new LogBuffer();
+    }
 
     return buffer;
   }
@@ -196,13 +199,23 @@ public class AccessLogWriter extends AbstractRolloverLog
     return _tempService.getManager().createTempStream();
   }
 
+  @Override
+  public void close()
+    throws IOException
+  {
+    try {
+      flush();
+    } finally {
+      super.close();
+    }
+  }
   /**
    * Closes the log, flushing the results.
    */
   public void destroy()
     throws IOException
   {
-    // _logWriterTask.close();
+    _logWriterTask.close();
   }
 
   class LogWriterTask extends AbstractWorkerQueue<LogBuffer> {
@@ -215,8 +228,9 @@ public class AccessLogWriter extends AbstractRolloverLog
     public void process(LogBuffer value)
     {
       try {
-        if (value != null)
+        if (value != null) {
           write(value.getBuffer(), 0, value.getLength());
+        }
       } catch (Throwable e) {
         log.log(Level.WARNING, e.toString(), e);
       } finally {
@@ -233,6 +247,11 @@ public class AccessLogWriter extends AbstractRolloverLog
       } catch (IOException e) {
         log.log(Level.FINE, e.toString(), e);
       }
+    }
+    
+    public void close()
+    {
+      wake();
     }
   }
 }

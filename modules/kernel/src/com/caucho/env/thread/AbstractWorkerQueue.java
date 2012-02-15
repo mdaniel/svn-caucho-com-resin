@@ -60,6 +60,11 @@ abstract public class AbstractWorkerQueue<T> implements ValueProcessor<T>
     return true;
   }
   
+  public final void wake()
+  {
+    _queueConsumer.wake();
+  }
+  
   @Override
   abstract public void process(T value);
   
