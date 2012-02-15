@@ -31,15 +31,33 @@ package com.caucho.env.thread;
 
 import java.util.concurrent.atomic.AtomicReference;
 
-import com.caucho.env.thread1.ThreadPool1;
+import com.caucho.config.ConfigException;
 import com.caucho.env.thread2.ThreadPool2;
+import com.caucho.util.L10N;
 
 /**
  * A generic pool of threads available for Alarms and Work tasks.
  */
 public final class ThreadPool extends ThreadPool2 {
+  private static final L10N L = new L10N(ThreadPool.class);
+  
   private static final AtomicReference<ThreadPool> _globalThreadPool
     = new AtomicReference<ThreadPool>();
+  
+  private static final int DEFAULT_EXECUTOR_TASK_MAX = 16;
+  private static final long MAX_EXPIRE = Long.MAX_VALUE / 2;
+  
+  //
+  // executor
+  //
+  private int _executorTaskMax = DEFAULT_EXECUTOR_TASK_MAX;
+
+  private final Object _executorLock = new Object();
+  // number of executor tasks running
+  private int _executorTaskCount;
+  // queue for waiting executor tasks
+  private ExecutorQueueItem _executorQueueHead;
+  private ExecutorQueueItem _executorQueueTail;
   
   public ThreadPool()
   {
@@ -91,11 +109,57 @@ public final class ThreadPool extends ThreadPool2 {
   }
 
   /**
+   * Sets the maximum number of executor threads.
+   */
+  public void setExecutorTaskMax(int max)
+  {
+    if (getThreadMax() < max)
+      throw new ConfigException(L.l("<thread-executor-max> ({0}) must be less than <thread-max> ({1})",
+                                    max, getThreadMax()));
+
+    if (max == 0)
+      throw new ConfigException(L.l("<thread-executor-max> must not be zero."));
+
+    _executorTaskMax = max;
+  }
+
+  /**
+   * Gets the maximum number of executor threads.
+   */
+  public int getExecutorTaskMax()
+  {
+    return _executorTaskMax;
+  }
+
+  /**
    * Schedules an executor task.
    */
   public boolean scheduleExecutorTask(Runnable task)
   {
-    return false;
+    ClassLoader loader = Thread.currentThread().getContextClassLoader();
+
+    synchronized (_executorLock) {
+      _executorTaskCount++;
+
+      if (_executorTaskCount <= _executorTaskMax || _executorTaskMax < 0) {
+        boolean isPriority = false;
+        boolean isQueue = true;
+
+        return scheduleImpl(task, loader, MAX_EXPIRE, isPriority, isQueue);
+      }
+      else {
+        ExecutorQueueItem item = new ExecutorQueueItem(task, loader);
+
+        if (_executorQueueTail != null)
+          _executorQueueTail._next = item;
+        else
+          _executorQueueHead = item;
+
+        _executorQueueTail = item;
+
+        return false;
+      }
+    }
   }
 
   /**
@@ -103,15 +167,54 @@ public final class ThreadPool extends ThreadPool2 {
    */
   public void completeExecutorTask()
   {
-    
+    ExecutorQueueItem item = null;
+
+    synchronized (_executorLock) {
+      _executorTaskCount--;
+
+      assert(_executorTaskCount >= 0);
+
+      if (_executorQueueHead != null) {
+        item = _executorQueueHead;
+
+        _executorQueueHead = item._next;
+
+        if (_executorQueueHead == null)
+          _executorQueueTail = null;
+      }
+    }
+
+    if (item != null) {
+      Runnable task = item.getRunnable();
+      ClassLoader loader = item.getLoader();
+
+      boolean isPriority = false;
+      boolean isQueue = true;
+
+      scheduleImpl(task, loader, MAX_EXPIRE, isPriority, isQueue);
+    }
   }
-  
-  public int getExecutorTaskMax()
-  {
-    return 0;
-  }
-  
-  public void setExecutorTaskMax(int max)
-  {
+ 
+  static class ExecutorQueueItem {
+    Runnable _runnable;
+    ClassLoader _loader;
+
+    ExecutorQueueItem _next;
+
+    ExecutorQueueItem(Runnable runnable, ClassLoader loader)
+    {
+      _runnable = runnable;
+      _loader = loader;
+    }
+
+    Runnable getRunnable()
+    {
+      return _runnable;
+    }
+
+    ClassLoader getLoader()
+    {
+      return _loader;
+    }
   }
 }

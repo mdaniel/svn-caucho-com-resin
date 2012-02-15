@@ -568,7 +568,7 @@ public class ThreadPool2 {
   /**
    * main scheduling implementation class.
    */
-  private boolean scheduleImpl(Runnable task,
+  protected boolean scheduleImpl(Runnable task,
                                ClassLoader loader,
                                long expireTime,
                                boolean isPriority,
