@@ -49,22 +49,118 @@ import com.caucho.vfs.ReadStream;
  * b6-b7 - extra (frame type specific, channel)
  * </pre>
  */
-public class AmqpReader {
+public class AmqpReader implements AmqpConstants {
   private ReadStream _is;
+  private boolean _isNull;
   
   public void init(ReadStream is)
   {
     _is = is;
   }
   
+  public int read()
+    throws IOException
+  {
+    return _is.read();
+  }
+  
+  public boolean readBoolean()
+    throws IOException
+  {
+    _isNull = false;
+    
+    ReadStream is = _is;
+    
+    int code = is.read();
+      
+    switch (code) {
+    case E_NULL:
+      _isNull = true;
+      return false;
+      
+    case E_TRUE:
+      return true;
+      
+    case E_FALSE:
+      return false;
+      
+    case E_BOOLEAN_1:
+      return is.read() != 0;
+      
+    default:
+      throw new IOException("unknown boolean code: " + (char) code);
+    }
+  }
+ 
   public int readInt()
     throws IOException
   {
+    _isNull = false;
+    
+    ReadStream is = _is;
+      
+    int code = is.read();
+      
+    switch (code) {
+    case E_NULL:
+      _isNull = true;
+      return 0;
+      
+    case E_I0:
+      return 0;
+      
+    case E_BYTE_1:
+    case E_INT_1:
+      return (byte) is.read();
+      
+    case E_UBYTE_1:
+    case E_UINT_1:
+      return is.read() & 0xff;
+      
+    case E_SHORT:
+      return (short) readShort(is);
+      
+    case E_USHORT:
+      return readShort(is) & 0xffff;
+      
+    case E_INT_4:
+    case E_UINT_4:
+      return readInt(is);
+      
+    default:
+      throw new IOException("unknown code: " + (char) code);
+    }
+  }
+  
+  private int readShort(ReadStream is)
+    throws IOException
+  {
+    return (((is.read() & 0xff) << 8)
+           + ((is.read() & 0xff)));
+  }
+  
+  private int readInt(ReadStream is)
+    throws IOException
+  {
+    return (((is.read() & 0xff) << 24)
+           + ((is.read() & 0xff) << 16)
+           + ((is.read() & 0xff) << 8)
+           + ((is.read() & 0xff)));
+  }
+  
+  public String readSymbol()
+    throws IOException
+  {
+    _isNull = false;
+    
     ReadStream is = _is;
     
     int code = is.read();
     
     switch (code) {
+    case E_NULL:
+      return null;
+      
     default:
       throw new IOException("unknown code: " + (char) code);
     }
