@@ -27,16 +27,21 @@ home_cluster : app
 
 # List cluster Triad server ip-addresses, space separated.
 # notes; triad servers, must be listed for web to find app
-# web_servers      : 
+
+# web_servers      :
+
 app_servers      : 127.0.0.1
-# cache_servers    : 
+
+# Configures Resin as a memcached server
+# memcached_servers    :
+# memcached_port : 11211
 
 # For security, Resin can switch to a non-root user after binding to port 80
 setuid_user   : @SETUID_USER@
 setuid_group  : @SETUID_GROUP@
 
 # Arg passed directly to the JVM
-# jvm_args  : -Xmx2048m
+# jvm_args  : -Xmx2048m -XX:PermGen=256m
 
 # Set HTTP and HTTPS ports
 http          : @HTTP_PORT@
@@ -53,6 +58,9 @@ http          : @HTTP_PORT@
 # jsse_keystore_password : changeme
 
 # Resin will fallback to using a self-signed dev certificate for HTTPS
+
+# Sets the proxy cache memory size
+# proxy_cache_size : 256m
 
 # Enable clustered persistent sessions
 session_store : true

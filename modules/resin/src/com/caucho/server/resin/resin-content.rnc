@@ -668,8 +668,11 @@ r_server-default = element server-default {
 }
 
 r_server-Content =
-  (attribute backup { r_boolean-Type }
-   | element backup { r_boolean-Type })?
+  (attribute allow-non-reserved-ip { r_boolean-Type }
+   | element allow-non-reserved-ip  { r_boolean-Type })?
+   
+ & (attribute backup { r_boolean-Type }
+    | element backup { r_boolean-Type })?
 
   & r_bean-Custom*
 

@@ -413,7 +413,7 @@ public class HmuxDispatchRequest {
       ClusterServer server = cloudServer.getData(ClusterServer.class);
 
       if (server != null) {
-        String srunHost = server.getAddress() + ":" + server.getPort();
+        String srunHost = server.getIp() + ":" + server.getPort();
 
         boolean isSSL = false; // server.isSSL();
         

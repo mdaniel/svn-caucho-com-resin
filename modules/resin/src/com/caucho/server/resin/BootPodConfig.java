@@ -157,6 +157,7 @@ public class BootPodConfig
       String address = bootServer.getAddress();
       int port = bootServer.getPort();
       boolean isSecure = bootServer.isSecure();
+      boolean isAllowExternal = bootServer.isAllowExternalAddress();
       
       cloudServer = cloudPod.findServer(id);
       
@@ -169,7 +170,8 @@ public class BootPodConfig
                                                           port,
                                                           isSecure);
       } else {
-        cloudServer = cloudPod.createStaticServer(id, address, port, isSecure);
+        cloudServer = cloudPod.createStaticServer(id, address, port, 
+                                                  isSecure, isAllowExternal);
       }
       
       bootServer.initTopology(cloudServer);

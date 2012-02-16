@@ -37,8 +37,8 @@ import java.io.File;
  * Configuration for CaseInsensitive environments.
  */
 public class CaseInsensitive {
-  private final static EnvironmentLocal<Boolean> _caseInsensitive =
-  new EnvironmentLocal<Boolean>("caucho.vfs.case-insensitive");
+  private final static EnvironmentLocal<Boolean> _caseInsensitive
+    = new EnvironmentLocal<Boolean>("caucho.vfs.case-insensitive");
   
   private boolean _isCaseInsensitive = true;
 
@@ -53,8 +53,9 @@ public class CaseInsensitive {
   {
     Boolean value = _caseInsensitive.get();
 
-    if (value == null)
-      return File.separatorChar == '\\';
+    if (value == null) {
+      return (File.separatorChar == '\\');
+    }
     else
       return value.booleanValue();
   }

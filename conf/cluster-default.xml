@@ -50,7 +50,7 @@
     <!--
        - Enables the proxy cache (available in Resin Professional) 
       -->
-    <proxy-cache memory-size="${proxy_cache_size?:'64M'}">
+    <proxy-cache memory-size="${proxy_cache_size}">
      <!-- Vary header rewriting for IE -->
       <rewrite-vary-as-private/>
     </proxy-cache>

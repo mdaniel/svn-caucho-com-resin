@@ -31,6 +31,8 @@ package com.caucho.cloud.topology;
 
 import java.net.InetAddress;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 import com.caucho.config.ConfigException;
 import com.caucho.util.Alarm;
@@ -54,6 +56,9 @@ import com.caucho.util.L10N;
  */
 public class CloudServer {
   private static final L10N L = new L10N(CloudServer.class);
+  private static final Logger log
+    = Logger.getLogger(CloudServer.class.getName()); 
+  
   private static final int DECODE[];
 
   private final String _id;
@@ -72,6 +77,8 @@ public class CloudServer {
   private final int _port;
   private final boolean _isSSL;
   
+  private final boolean _isAllowExternal;
+  
   private boolean _isSelf;
   
   private final ConcurrentHashMap<Class<?>,Object> _dataMap
@@ -85,7 +92,8 @@ public class CloudServer {
                      String address,
                      int port,
                      boolean isSSL,
-                     ServerType isStatic)
+                     ServerType isStatic,
+                     boolean isAllowExternal)
   {
     if (id.equals(""))
       throw new IllegalArgumentException();
@@ -111,6 +119,7 @@ public class CloudServer {
     _port = port;
     _isSSL = isSSL;
     _isStatic = isStatic;
+    _isAllowExternal = isAllowExternal;
 
     // _clusterPort = new ClusterPort(this);
     // _ports.add(_clusterPort);
@@ -129,7 +138,7 @@ public class CloudServer {
 
     _uniqueDomainId = _uniqueClusterId + "." + clusterId.replace('.', '_');
     
-    if (! isLocalAddress(getAddress()) && ! isExternal()) {
+    if (! isLocalAddress(getAddress()) && ! isExternal() && ! isAllowExternal()) {
       throw new ConfigException(L.l("'{0}' is not a valid cluster IP address because it is not a private network IP address.",
                                     getAddress()));
     }
@@ -241,6 +250,14 @@ public class CloudServer {
   {
     return _isStatic.isExternal();
   }
+
+  /**
+   * True for external-address configured servers.
+   */
+  public boolean isAllowExternal()
+  {
+    return _isAllowExternal;
+  }
   
   /**
    * True for the active server
@@ -314,6 +331,17 @@ public class CloudServer {
   public final String getAddress()
   {
     return _address;
+  }
+  
+  public final String getIpAddress()
+  {
+    try {
+      return InetAddress.getByName(getAddress()).getHostAddress();
+    } catch (Exception e) {
+      log.log(Level.FINER, e.toString(), e);
+        
+      return getAddress();
+    }
   }
   
   /**

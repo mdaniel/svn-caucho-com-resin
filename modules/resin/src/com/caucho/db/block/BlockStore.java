@@ -889,9 +889,9 @@ public class BlockStore {
     if (blockId == 0)
       return;
 
-    synchronized (_allocationLock) {
-      long index = blockIdToIndex(blockId);
+    long index = blockIdToIndex(blockId);
 
+    synchronized (_allocationLock) {
       if (getAllocation(index) == ALLOC_FREE) {
         throw new IllegalStateException(L.l("{0} double free of {1}",
                                             this, Long.toHexString(blockId)));

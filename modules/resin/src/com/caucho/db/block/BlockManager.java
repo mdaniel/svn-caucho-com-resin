@@ -103,13 +103,23 @@ public final class BlockManager
     
     memorySize = ((maxMemory / meg) / 8) * meg;
 
-    if (memorySize < minSize)
+    if (memorySize < minSize) {
       memorySize = minSize;
+    }
     
-    if (maxSize < memorySize)
-      memorySize = maxSize;
-
-    return memorySize / BlockStore.BLOCK_SIZE;
+    if (maxSize < memorySize) {
+      memorySize = maxSize; 
+    }
+    
+    int blockCount = (int) (memorySize / BlockStore.BLOCK_SIZE);
+    
+    int size = 256;
+    
+    // force to be a smaller power of 2
+    for (; 2 * size <= blockCount; size *= 2) {
+    }
+    
+    return size;
   }
 
   private static long getMaxMemory()
@@ -151,8 +161,14 @@ public final class BlockManager
    */
   public void setCapacity(int minCapacity)
   {
-    if (minCapacity > 1024 * 1024 / BlockStore.BLOCK_SIZE)
+    if (minCapacity > 1024 * 1024 / BlockStore.BLOCK_SIZE) {
       _blockCache = _blockCache.setCapacity(minCapacity);
+    }
+  }
+  
+  public long getBlockCacheMemoryCapacity()
+  {
+    return _blockCache.getCapacity() * BlockStore.BLOCK_SIZE;
   }
   
   public boolean isEnableMmap()

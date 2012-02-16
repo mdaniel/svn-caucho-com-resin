@@ -57,6 +57,7 @@ public class BootServerMultiConfig
   private int _port = -1;
   private ArrayList<String> _addressList;
   private boolean _isSecure;
+  private boolean _isAllowNonReservedIp;
 
   private ContainerProgram _serverProgram
     = new ContainerProgram();
@@ -110,6 +111,16 @@ public class BootServerMultiConfig
   public boolean isSecure()
   {
     return _isSecure;
+  }
+  
+  public void setAllowNonReservedIp(boolean isAllow)
+  {
+    _isAllowNonReservedIp = isAllow;
+  }
+  
+  public boolean isAllowNonReservedIp()
+  {
+    return _isAllowNonReservedIp;
   }
   
   public void addBuilderProgram(ConfigProgram program)

@@ -12,6 +12,11 @@
 
 <s2 title="4.0.26 - snapshot">
 <ul>
+<li>watchdog: add allow-non-reserved-ip as a &lt;server> argument for private networks (#4941, rep by georgbuschbeck)</li>
+<li>http: added sendfile() for large files</li>
+<li>watchdog: Resin pwd is set to root-directory (#4928, rep by Trung Nguyen)</li>
+<li>mod_caucho: send resolved IP address for cluster (#4945)</li>
+<li>thread: update threading architecture</li>
 <li>cli: password-generate issue with --user (#4938)</li>
 <li>websocket/hessian: websocket frame must be read fully on hessian end (#4943)</li>
 <li>jcache: cache annotations (@CacheResult, @CachePut)</li>

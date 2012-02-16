@@ -109,7 +109,9 @@ class WatchdogConfig
     _args = args;
     _rootDirectory = rootDirectory;
     
-    _pwd = Vfs.lookup();
+    // #4928
+    //_pwd = Vfs.lookup();
+    _pwd = rootDirectory;
 
     _is64bit = args.is64Bit();
   }

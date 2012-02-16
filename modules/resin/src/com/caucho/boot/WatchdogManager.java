@@ -208,9 +208,15 @@ class WatchdogManager implements AlarmListener {
     if (server == null)
       server = _watchdogMap.get(serverId);
     
-    if (server == null)
-      throw new IllegalStateException(L().l("'{0}' is an unknown server",
-                                            serverId));
+    if (server == null) {
+      if (serverId == null) {
+        throw new IllegalStateException(L().l("Cannot find any <server> or <server-multi> matching a local IP address"));
+      }
+      else {
+        throw new IllegalStateException(L().l("'{0}' is an unknown server",
+                                              serverId));
+      }
+    }
     
     JniBoot boot = new JniBoot();
     Path logDirectory = getLogDirectory();

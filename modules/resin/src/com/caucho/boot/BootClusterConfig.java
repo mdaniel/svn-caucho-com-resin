@@ -159,9 +159,17 @@ public class BootClusterConfig {
         address = address.substring(0, p);
       }
       
+      boolean isAllowNonReservedIp = multiServer.isAllowNonReservedIp();
+      
       server.setAddress(address);
       server.setPort(port);
       // server.setExternalAddress(isExternal);
+      
+      /*
+      if (isAllowNonReservedIp) {
+        server.setAllowNonReservedIp(true);
+      }
+      */
       
       multiServer.getServerProgram().configure(server);
       

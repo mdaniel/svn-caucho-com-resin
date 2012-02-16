@@ -184,14 +184,21 @@ public class BootClusterConfig implements SchemaBean
         address = address.substring(0, p);
       }
       
+      boolean isAllowNonReservedIp = multiServer.isAllowNonReservedIp();
+      
       BootServerConfig server = createServer();
       
       server.setId(multiServer.getIdPrefix() + index++);
       server.setAddress(address);
       server.setPort(port);
       
-      if (isExt)
+      if (isExt) {
         server.setExternalAddress(true);
+      }
+      
+      if (isAllowNonReservedIp) {
+        server.setAllowNonReservedIp(true);
+      }
       
       server.addBuilderProgram(multiServer.getServerProgram());
       // server.init();

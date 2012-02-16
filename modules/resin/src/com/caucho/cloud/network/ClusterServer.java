@@ -674,6 +674,14 @@ public final class ClusterServer {
   }
 
   /**
+   * Gets the ip.
+   */
+  public String getIp()
+  {
+    return getCloudServer().getIpAddress();
+  }
+
+  /**
    * Gets the port.
    */
   public int getPort()
