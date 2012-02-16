@@ -88,7 +88,7 @@ public class AmqpReader implements AmqpConstants {
       return is.read() != 0;
       
     default:
-      throw new IOException("unknown boolean code: " + (char) code);
+      throw new IOException("unknown boolean code: " + Integer.toHexString(code));
     }
   }
  
@@ -128,24 +128,8 @@ public class AmqpReader implements AmqpConstants {
       return readInt(is);
       
     default:
-      throw new IOException("unknown code: " + (char) code);
+      throw new IOException("unknown int code: " + Integer.toHexString(code));
     }
-  }
-  
-  private int readShort(ReadStream is)
-    throws IOException
-  {
-    return (((is.read() & 0xff) << 8)
-           + ((is.read() & 0xff)));
-  }
-  
-  private int readInt(ReadStream is)
-    throws IOException
-  {
-    return (((is.read() & 0xff) << 24)
-           + ((is.read() & 0xff) << 16)
-           + ((is.read() & 0xff) << 8)
-           + ((is.read() & 0xff)));
   }
   
   public String readSymbol()
@@ -161,8 +145,138 @@ public class AmqpReader implements AmqpConstants {
     case E_NULL:
       return null;
       
+    case E_SYMBOL_1:
+      return readSymbol(is.read() & 0xff);
+      
+    case E_SYMBOL_4:
+      return readSymbol(readInt(is));
+      
     default:
-      throw new IOException("unknown code: " + (char) code);
+      throw new IOException("unknown symbol code: " + Integer.toHexString(code));
     }
+  }
+  
+  public String readUtf8()
+    throws IOException
+  {
+    _isNull = false;
+    
+    ReadStream is = _is;
+    
+    int code = is.read();
+    
+    switch (code) {
+    case E_NULL:
+      return null;
+      
+    case E_UTF8_1:
+      return readUtf8(is.read() & 0xff);
+      
+    case E_UTF8_4:
+      return readUtf8(readInt(is));
+      
+    default:
+      throw new IOException("unknown symbol code: " + Integer.toHexString(code));
+    }
+  }
+  
+  public List<?> readList()
+    throws IOException
+  {
+    _isNull = false;
+    
+    ReadStream is = _is;
+    
+    int code = is.read();
+    
+    switch (code) {
+    case E_NULL:
+      return null;
+      
+    default:
+      throw new IOException("unknown array code: " + Integer.toHexString(code));
+    }
+  }
+  
+  public List<?> readArray()
+    throws IOException
+  {
+    _isNull = false;
+    
+    ReadStream is = _is;
+    
+    int code = is.read();
+    
+    switch (code) {
+    case E_NULL:
+      return null;
+      
+    default:
+      throw new IOException("unknown array code: " + Integer.toHexString(code));
+    }
+  }
+  
+  public Map<?,?> readMap()
+    throws IOException
+  {
+    _isNull = false;
+    
+    ReadStream is = _is;
+    
+    int code = is.read();
+    
+    switch (code) {
+    case E_NULL:
+      return null;
+      
+    default:
+      throw new IOException("unknown map code: " + Integer.toHexString(code));
+    }
+  }
+
+  private String readSymbol(int length)
+    throws IOException
+  {
+    StringBuilder sb = new StringBuilder();
+    
+    ReadStream is = _is;
+    for (int i = 0; i < length; i++) {
+      int ch = _is.read();
+      
+      sb.append((char) ch);
+    }
+    
+    return sb.toString();
+  }
+
+  private String readUtf8(int length)
+    throws IOException
+  {
+    StringBuilder sb = new StringBuilder();
+    
+    ReadStream is = _is;
+    for (int i = 0; i < length; i++) {
+      int ch = _is.read();
+      
+      sb.append((char) ch);
+    }
+    
+    return sb.toString();
+  }
+
+  private int readShort(ReadStream is)
+    throws IOException
+  {
+    return (((is.read() & 0xff) << 8)
+           + ((is.read() & 0xff)));
+  }
+  
+  private int readInt(ReadStream is)
+    throws IOException
+  {
+    return (((is.read() & 0xff) << 24)
+           + ((is.read() & 0xff) << 16)
+           + ((is.read() & 0xff) << 8)
+           + ((is.read() & 0xff)));
   }
 }

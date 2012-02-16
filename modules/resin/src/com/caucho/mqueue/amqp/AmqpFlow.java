@@ -33,61 +33,49 @@ import java.io.IOException;
 import java.util.List;
 import java.util.Map;
 
-/**
- * AMQP session-begin frame 
- */
-public class AmqpSessionBegin extends AmqpAbstractPacket {
-  public static final int CODE = AmqpConstants.FT_SESSION_OPEN;
+import javax.annotation.PostConstruct;
 
-  private int _remoteChannel;   // ushort
-  private long _nextOutgoingId; // uint xfer-no/seq-no (required) RFC-1982
-  private int _incomingWindow;  // uint (required)
-  private int _outgoingWindow;  // uint (required)
-  private int _handleMax;       // uint handle
-  private List<String> _offeredCapabilities;
-  private List<String> _desiredCapabilities;
+import com.caucho.mqueue.amqp.AmqpLinkAttach.ReceiverSettleMode;
+import com.caucho.mqueue.amqp.AmqpLinkAttach.Role;
+import com.caucho.network.listen.Protocol;
+import com.caucho.network.listen.ProtocolConnection;
+import com.caucho.network.listen.SocketLink;
+
+/**
+ * AMQP link flow
+ */
+public class AmqpFlow extends AmqpAbstractPacket {
+  public static final int CODE = AmqpConstants.FT_LINK_FLOW;
+
+  private long _nextIncomingId; // uint seq (RFC1892)
+  private int _incomingWindow; // uint (required)
+  private long _nextOutgoingId; // uint seq (required) (RFC1892)
+  private int _outgoingWindow; // uint (required)
+  private int _handle;         // uint
+  private long _deliveryCount; // uint seq
+  private int _linkCredit;     // uint
+  private int _available;      // uint
+  private boolean _isDrain;
+  private boolean _isEcho;
   private Map<String,?> _properties;
-  
-  public void setRemoteChannel(int channel)
-  {
-    _remoteChannel = channel;
-  }
-  
-  public void setNextOutgoingId(long id)
-  {
-    _nextOutgoingId = id;
-  }
-  
-  public void setIncomingWindow(int window)
-  {
-    _incomingWindow = window;
-  }
-  
-  public void setOutgoingWindow(int window)
-  {
-    _outgoingWindow = window;
-  }
-  
-  public void setHandleMax(int max)
-  {
-    _handleMax = max;
-  }
   
   @Override
   public void write(AmqpWriter out)
     throws IOException
   {
-    out.writeDescriptor(FT_SESSION_OPEN);
+    out.writeDescriptor(FT_LINK_FLOW);
     
-    out.writeUshort(_remoteChannel);
-    
-    out.writeUlong(_nextOutgoingId);
+    out.writeUint((int) _nextIncomingId);
     out.writeUint(_incomingWindow);
+    out.writeUint((int) _nextOutgoingId);
     out.writeUint(_outgoingWindow);
-    out.writeUint(_handleMax);
-    
-    out.writeArray(_offeredCapabilities);
-    out.writeArray(_desiredCapabilities);
+    out.writeUint(_handle);
+    out.writeUint((int) _deliveryCount);
+    out.writeUint(_linkCredit);
+    out.writeUint(_available);
+    out.writeBoolean(_isDrain);
+    out.writeBoolean(_isEcho);
     out.writeMap(_properties);
   }
+
 }

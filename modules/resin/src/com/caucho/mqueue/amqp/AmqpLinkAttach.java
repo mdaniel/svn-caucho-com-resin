@@ -29,34 +29,83 @@
 
 package com.caucho.mqueue.amqp;
 
+import java.io.IOException;
 import java.util.List;
 import java.util.Map;
 
-import javax.annotation.PostConstruct;
-
-import com.caucho.network.listen.Protocol;
-import com.caucho.network.listen.ProtocolConnection;
-import com.caucho.network.listen.SocketLink;
-
 /**
- * AMQP session-begin frame 
+ * AMQP link-attach frame 
  */
 public class AmqpLinkAttach extends AmqpAbstractPacket {
   public static final int CODE = AmqpConstants.FT_LINK_ATTACH;
+  
+  public static final int SENDER_SETTLE_MODE_MIXED = 2;
 
-  private String _name; // required
-  private String _handle; // required
-  private String _role; // required
-  private String _senderSettleMode = "mixed";
-  private String _receiverSettleMode = "first";
+  private String _name; // (required)
+  private int _handle; // uint (required)
+  private Role _role = Role.RECEIVER; // required
+  private SenderSettleMode _senderSettleMode  // ubyte
+    = SenderSettleMode.MIXED;
+  private ReceiverSettleMode _receiverSettleMode // ubyte
+    = ReceiverSettleMode.FIRST;
+  
   private String _source;
   private String _target;
-  private Map _unsettled;
+  
+  private Map<?,?> _unsettled;
+  
   private boolean _isIncompleteUnsettled;
-  private long _initialDeliveryCount;
-  private long _maxMessageSize;
+  private long _initialDeliveryCount; // uint sequence (RFC1982)
+  private long _maxMessageSize;       // ulong
+  
   private List<String> _offeredCapabilities;
   private List<String> _desiredCapabilities;
   
-  private Map _properties;
+  private Map<String,?> _properties;
+  
+  @Override
+  public void write(AmqpWriter out)
+    throws IOException
+  {
+    out.writeDescriptor(FT_LINK_ATTACH);
+    
+    out.writeString(_name);
+    out.writeUint(_handle);
+    
+    out.writeBoolean(_role == Role.RECEIVER);
+    
+    out.writeUbyte(_senderSettleMode.ordinal());
+    out.writeUbyte(_receiverSettleMode.ordinal());
+    
+    out.writeNull(); // source
+    out.writeNull(); // target
+    
+    out.writeMap(_unsettled);
+    out.writeBoolean(_isIncompleteUnsettled);
+    
+    out.writeUint((int) _initialDeliveryCount);
+    out.writeUlong(_maxMessageSize);
+    
+    out.writeArray(_offeredCapabilities);
+    out.writeArray(_desiredCapabilities);
+    out.writeMap(_properties);
+  }
+  
+  // boolean
+  public enum Role {
+    SENDER,   // false
+    RECEIVER; // true
+  }
+  
+  // ubyte
+  public enum SenderSettleMode {
+    UNSETTLED,
+    SETTLED,
+    MIXED;
+  }
+  
+  public enum ReceiverSettleMode {
+    FIRST,
+    SECOND;
+  }
 }

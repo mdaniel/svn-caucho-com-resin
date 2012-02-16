@@ -30,20 +30,42 @@
 package com.caucho.mqueue.amqp;
 
 import java.io.IOException;
+import java.util.List;
+import java.util.Map;
+
+import javax.annotation.PostConstruct;
+
+import com.caucho.mqueue.amqp.AmqpLinkAttach.ReceiverSettleMode;
+import com.caucho.mqueue.amqp.AmqpLinkAttach.Role;
+import com.caucho.network.listen.Protocol;
+import com.caucho.network.listen.ProtocolConnection;
+import com.caucho.network.listen.SocketLink;
 
 /**
- * Custom serialization for the cache
+ * AMQP link flow
  */
-abstract public class AmqpAbstractPacket implements AmqpConstants {
+public class AmqpDisposition extends AmqpAbstractPacket {
+  public static final int CODE = AmqpConstants.FT_LINK_FLOW;
+
+  private Role _role = Role.SENDER; // ubyte (required)
+  private long _first; // uint seq (required)
+  private long _last; // uint seq
+  private boolean _isSettled;
+  private String _state; // delivery-state
+  private boolean _isBatchable;
+  
+  @Override
   public void write(AmqpWriter out)
     throws IOException
   {
-    throw new UnsupportedOperationException(getClass().getName());
+    out.writeDescriptor(FT_MESSAGE_DISPOSITION);
+    
+    out.writeUbyte(_role.ordinal());
+    out.writeUint((int) _first);
+    out.writeUint((int) _last);
+    out.writeBoolean(_isSettled);
+    out.writeNull(); // state
+    out.writeBoolean(_isBatchable);
   }
-  
-  public void read(AmqpReader in)
-    throws IOException
-  {
-    throw new UnsupportedOperationException(getClass().getName());
-  }
+
 }

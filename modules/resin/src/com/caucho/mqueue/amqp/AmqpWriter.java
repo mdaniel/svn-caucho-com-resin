@@ -235,7 +235,7 @@ public class AmqpWriter implements AmqpConstants {
     os.write((int) (value));
   }
   
-  public void writeUtf8(String value)
+  public void writeString(String value)
     throws IOException
   {
     WriteStream os = _os;
@@ -309,6 +309,54 @@ public class AmqpWriter implements AmqpConstants {
     }
     
     os.print(value, 0, len);
+  }
+  
+  public void writeDescriptor(int code)
+    throws IOException
+  {
+    WriteStream os = _os;
+    
+    os.write(E_DESCRIPTOR);
+    writeUlong(code);
+  }
+  
+  public void writeList(List<?> list)
+    throws IOException
+  {
+    WriteStream os = _os;
+    
+    if (list == null) {
+      os.write(E_NULL);
+      return;
+    }
+    
+    throw new UnsupportedOperationException();
+  }
+  
+  public void writeArray(List<?> list)
+    throws IOException
+  {
+    WriteStream os = _os;
+    
+    if (list == null) {
+      os.write(E_NULL);
+      return;
+    }
+    
+    throw new UnsupportedOperationException();
+  }
+  
+  public void writeMap(Map<?,?> map)
+    throws IOException
+  {
+    WriteStream os = _os;
+    
+    if (map == null) {
+      os.write(E_NULL);
+      return;
+    }
+    
+    throw new UnsupportedOperationException();
   }
   
   public void flush()

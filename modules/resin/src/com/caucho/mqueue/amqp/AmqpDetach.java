@@ -32,18 +32,24 @@ package com.caucho.mqueue.amqp;
 import java.io.IOException;
 
 /**
- * Custom serialization for the cache
+ * AMQP link detach
  */
-abstract public class AmqpAbstractPacket implements AmqpConstants {
+public class AmqpDetach extends AmqpAbstractPacket {
+  public static final int CODE = AmqpConstants.FT_LINK_DETACH;
+
+  private int _handle; // uint(required)
+  private boolean _isClosed;
+  private String _error;
+  
+  @Override
   public void write(AmqpWriter out)
     throws IOException
   {
-    throw new UnsupportedOperationException(getClass().getName());
+    out.writeDescriptor(FT_LINK_DETACH);
+    
+    out.writeUint(_handle);
+    out.writeBoolean(_isClosed);
+    out.writeNull(); // error
   }
-  
-  public void read(AmqpReader in)
-    throws IOException
-  {
-    throw new UnsupportedOperationException(getClass().getName());
-  }
+
 }

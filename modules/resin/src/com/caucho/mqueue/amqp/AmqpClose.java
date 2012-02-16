@@ -32,18 +32,20 @@ package com.caucho.mqueue.amqp;
 import java.io.IOException;
 
 /**
- * Custom serialization for the cache
+ * AMQP connection close
  */
-abstract public class AmqpAbstractPacket implements AmqpConstants {
+public class AmqpClose extends AmqpAbstractPacket {
+  public static final int CODE = AmqpConstants.FT_CONN_CLOSE;
+
+  private String _error;
+  
+  @Override
   public void write(AmqpWriter out)
     throws IOException
   {
-    throw new UnsupportedOperationException(getClass().getName());
+    out.writeDescriptor(FT_CONN_CLOSE);
+    
+    out.writeNull(); // error
   }
-  
-  public void read(AmqpReader in)
-    throws IOException
-  {
-    throw new UnsupportedOperationException(getClass().getName());
-  }
+
 }

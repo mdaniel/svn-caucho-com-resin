@@ -29,6 +29,7 @@
 
 package com.caucho.mqueue.amqp;
 
+import java.io.IOException;
 import java.util.List;
 import java.util.Map;
 
@@ -38,15 +39,61 @@ import java.util.Map;
 public class AmqpConnectionOpen extends AmqpAbstractPacket {
   public static final int CODE = AmqpConstants.FT_CONN_OPEN;
   
-  private String _containerId; // required
+  private String _containerId;    // required
   private String _hostname;
-  private int _maxFrameSize = Integer.MAX_VALUE; 
-  private int _channelMax = 65535;
-  private long _idleTimeout;
-  private List<String> _outgoingLocales;
-  private List<String> _incomingLocales;
-  private List<String> _offeredCapabilities;
-  private List<String> _desiredCapabilities;
+  private int _maxFrameSize = 0; // uint
+  private int _channelMax = 0;   // ushort
+  private long _idleTimeout;     // uint (milliseconds)
+  private List<String> _outgoingLocales;     // symbol*
+  private List<String> _incomingLocales;     // symbol*
+  private List<String> _offeredCapabilities; // symbol*
+  private List<String> _desiredCapabilities; // symbol*
   
-  private Map _properties;
+  private Map<String,?> _properties;         // field
+  
+  public void setContainerId(String id)
+  {
+    _containerId = id;
+  }
+  
+  public void setHostname(String hostname)
+  {
+    _hostname = hostname;
+  }
+  
+  public void setMaxFrameSize(int size)
+  {
+    _maxFrameSize = size;
+  }
+  
+  public void setChannelMax(int max)
+  {
+    _channelMax = max;
+  }
+  
+  public void setIdleTimeout(long timeout)
+  {
+    _idleTimeout = timeout;
+  }
+  
+  @Override
+  public void write(AmqpWriter out)
+    throws IOException
+  {
+    out.writeDescriptor(FT_CONN_OPEN);
+    
+    out.writeString(_containerId);
+    out.writeString(_hostname);
+      
+    out.writeUint(_maxFrameSize);
+    out.writeUshort(_channelMax);
+    out.writeUint((int) _idleTimeout);
+    
+    out.writeArray(_outgoingLocales);
+    out.writeArray(_incomingLocales);
+    out.writeArray(_offeredCapabilities);
+    out.writeArray(_desiredCapabilities);
+    
+    out.writeMap(_properties);
+  }
 }

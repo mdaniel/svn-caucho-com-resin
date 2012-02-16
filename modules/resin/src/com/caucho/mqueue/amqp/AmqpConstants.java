@@ -100,6 +100,9 @@ public interface AmqpConstants {
   public static final int MIN_MAX_FRAME_SIZE = 512;
   
   // encoding
+  // descriptor
+  public static final int E_DESCRIPTOR = 0x00;
+  
   // zero-length values
   public static final int E_NULL = 0x40;
   public static final int E_TRUE = 0x41;

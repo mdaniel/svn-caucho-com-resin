@@ -29,11 +29,14 @@
 
 package com.caucho.mqueue.amqp;
 
+import java.io.IOException;
 import java.util.List;
 import java.util.Map;
 
 import javax.annotation.PostConstruct;
 
+import com.caucho.mqueue.amqp.AmqpLinkAttach.ReceiverSettleMode;
+import com.caucho.mqueue.amqp.AmqpLinkAttach.Role;
 import com.caucho.network.listen.Protocol;
 import com.caucho.network.listen.ProtocolConnection;
 import com.caucho.network.listen.SocketLink;
@@ -44,16 +47,36 @@ import com.caucho.network.listen.SocketLink;
 public class AmqpMessageTransfer extends AmqpAbstractPacket {
   public static final int CODE = AmqpConstants.FT_MESSAGE_TRANSFER;
 
-  private String _handle; // required
-  private long _deliveryId;
-  private String _deliveryTag;
-  private String _messageFormat;
+  private int _handle; // uint (required)
+  private long _deliveryId; // uint seq (RFC1982)
+  private byte []_deliveryTag; // up to 32 byte
+  private int _messageFormat; // uint
   private boolean _isSettled;
   private boolean _isMore;
-  private String _receiverSettleMode;
-  private String _state;
+  private ReceiverSettleMode _receiverSettleMode
+    = ReceiverSettleMode.FIRST;
+  private String _state; // delivery-state
   private boolean _isResume;
   private boolean _isAborted;
   private boolean _isBatchable;
+  
+  @Override
+  public void write(AmqpWriter out)
+    throws IOException
+  {
+    out.writeDescriptor(FT_MESSAGE_TRANSFER);
+    
+    out.writeUint(_handle);
+    out.writeUint((int) _deliveryId);
+    out.writeNull(); // delivery-tag (binary)
+    out.writeUint(_messageFormat);
+    out.writeBoolean(_isSettled);
+    out.writeBoolean(_isMore);
+    out.writeUbyte(_receiverSettleMode.ordinal());
+    out.writeNull(); // delivery-state
+    out.writeBoolean(_isResume);
+    out.writeBoolean(_isAborted);
+    out.writeBoolean(_isBatchable);
+  }
 
 }
