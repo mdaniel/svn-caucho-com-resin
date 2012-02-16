@@ -133,7 +133,7 @@ public class MQJournalQueueSubscriber
     }
 
     @Override
-    public void onEmpty() throws Exception
+    public void onProcessComplete() throws Exception
     {
     }
   }

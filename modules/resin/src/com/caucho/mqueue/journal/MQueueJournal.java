@@ -192,7 +192,7 @@ public class MQueueJournal
     }
 
     @Override
-    public void onEmpty() throws Exception
+    public void onProcessComplete() throws Exception
     {
     }
   }

@@ -391,7 +391,7 @@ public final class ActorQueue<T extends RingItem>
       } finally {
         tailRef.set(tail);
         
-        processor.onEmpty();
+        processor.onProcessComplete();
       }
     }
     
@@ -460,6 +460,6 @@ public final class ActorQueue<T extends RingItem>
   public interface ItemProcessor<T extends RingItem> {
     public void process(T item) throws Exception;
     
-    public void onEmpty() throws Exception;
+    public void onProcessComplete() throws Exception;
   }
 }

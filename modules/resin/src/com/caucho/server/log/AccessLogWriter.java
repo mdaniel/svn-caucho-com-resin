@@ -240,7 +240,7 @@ public class AccessLogWriter extends AbstractRolloverLog
     }
 
     @Override
-    public void onEmpty()
+    public void onProcessComplete()
     {
       try {
         flushStream();

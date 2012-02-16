@@ -69,7 +69,7 @@ abstract public class AbstractWorkerQueue<T> implements ValueProcessor<T>
   abstract public void process(T value);
   
   @Override
-  public void onEmpty()
+  public void onProcessComplete()
   {
   }
 }

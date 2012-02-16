@@ -331,7 +331,7 @@ public class MultiworkerMailbox implements Mailbox, Closeable
     }
 
     @Override
-    public void onEmpty() throws Exception
+    public void onProcessComplete() throws Exception
     {
     }
     

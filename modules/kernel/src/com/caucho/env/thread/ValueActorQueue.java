@@ -84,7 +84,7 @@ public class ValueActorQueue<T>
   public interface ValueProcessor<T> {
     public void process(T value) throws Exception;
     
-    public void onEmpty() throws Exception;
+    public void onProcessComplete() throws Exception;
   }
   
   private static final class ValueItem<T> extends RingItem {
@@ -138,8 +138,9 @@ public class ValueActorQueue<T>
     }
 
     @Override
-    public void onEmpty() throws Exception
+    public void onProcessComplete() throws Exception
     {
+      _processor.onProcessComplete();
     }
     
     @Override

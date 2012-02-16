@@ -311,7 +311,7 @@ class JournalQueueActor
    * @see com.caucho.env.thread.DisruptorQueue.ItemProcessor#onEmpty()
    */
   @Override
-  public void onEmpty() throws Exception
+  public void onProcessComplete() throws Exception
   {
     // TODO Auto-generated method stub
     
