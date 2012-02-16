@@ -406,6 +406,16 @@ class WebSocketContextImpl
   }
 
   @Override
+  public void onClose(int closeCode, String closeMessage)
+  {
+    try {
+      _listener.onClose(this);
+    } catch (Exception e) {
+      log.log(Level.FINER, e.toString(), e);
+    }
+  }
+
+  @Override
   public String toString()
   {
     return getClass().getSimpleName() + "[" + _listener + "]";

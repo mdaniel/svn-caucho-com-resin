@@ -57,7 +57,7 @@ final class ResinThread2 extends Thread {
   ResinThread2(int id, ThreadPool2 pool, ThreadLauncher2 launcher)
   {
     _id = id;
-    _name = "resin2-" + _id;
+    _name = "resin-" + _id;
 
     _pool = pool;
     _launcher = launcher;

@@ -84,4 +84,10 @@ public interface WebSocketContext {
    * Disconnect the connection.
    */
   public void disconnect();
+
+  /**
+   * @param closeCode
+   * @param closeMessage
+   */
+  public void onClose(int closeCode, String closeMessage);
 }

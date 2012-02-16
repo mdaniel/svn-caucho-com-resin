@@ -216,7 +216,9 @@ abstract public class FrameInputStream extends InputStream
           closeCode = 1000;
           closeMessage = "ok";
         }
-
+        
+        _cxt.onClose(closeCode, closeMessage);
+        
         return false;
       } finally {
         closeError(closeCode, closeMessage);

@@ -406,4 +406,14 @@ public class WebSocketClient implements WebSocketContext, WebSocketConstants {
       }
     }
   }
+
+  /* (non-Javadoc)
+   * @see com.caucho.websocket.WebSocketContext#onClose(int, java.lang.String)
+   */
+  @Override
+  public void onClose(int closeCode, String closeMessage)
+  {
+    // TODO Auto-generated method stub
+    
+  }
 }

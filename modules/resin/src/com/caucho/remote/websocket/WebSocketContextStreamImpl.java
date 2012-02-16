@@ -183,6 +183,11 @@ public class WebSocketContextStreamImpl
   }
 
   @Override
+  public void onClose(int closeCode, String closeMessage)
+  {
+  }
+
+  @Override
   public String toString()
   {
     return getClass().getSimpleName() + "[" + getWriteStream() + "]";
