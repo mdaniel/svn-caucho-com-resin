@@ -489,6 +489,22 @@ public class PDF
     return size * font.stringWidth(string) / 1000.0;
   }
   
+  public double stringheight(String string, @NotNull PDFFont font, double size)
+  {
+    boolean hasCap = false;
+    
+    for(char c : string.toCharArray()) {
+      if (Character.isUpperCase(c)) {
+        hasCap = true;
+        break;
+      }
+    }
+    
+    double fontHeight = hasCap ? font.getCapHeight() : font.getXHeight();
+    
+    return size * fontHeight / 1000.0;
+  }
+  
   /*
    * An ESTIMATE of the number of chars that will fit in the space based 
    * on the avg glyph size.  This only works properly with fixed-width fonts!

@@ -9,7 +9,9 @@ if (! admin_init()) {
   return;
 }
 
+global $g_mbean_server;
 global $g_server_index;
+global $g_stat_prefix;
 
 global $g_page;
 global $g_time;
@@ -17,9 +19,6 @@ global $g_offset;
 global $g_period;
 
 $mbean_server = $g_mbean_server;
-$resin = $g_resin;
-$server = $g_server;
-
 $stat = get_stats_service();
 
 if (! require_professional()) {
@@ -32,14 +31,15 @@ if (! require_professional()) {
   return;
 }
 
+
 enable_graph_controls();
 
 echo "<h1>Watchdog";
 print_help("Watchdog");
 echo " Analysis</h1>\n";
 
-$index = $g_server->SelfServer->ClusterIndex;
-$si = sprintf("%02d", $index);
+$index = $g_server_index;
+$si = $g_stat_prefix;
 
 $now = time();
 $start = $now - 7 * 24 * 60 * 60;

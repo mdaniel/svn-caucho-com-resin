@@ -85,6 +85,11 @@ public class PDFFont extends PDFObject {
   {
     return _face.getCapHeight();
   }
+  
+  public double getXHeight()
+  {
+    return _face.getXHeight();
+  }
 
   public double getDescender()
   {

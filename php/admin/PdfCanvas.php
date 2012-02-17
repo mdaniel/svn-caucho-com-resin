@@ -89,7 +89,7 @@ class PdfCanvas
   
   private $graph_padding_x = 10;
   private $graph_padding_y = 20;
-  private $legend_size = 30;
+  private $legend_size = 35;
   
   private $in_graph = false;
   
@@ -199,7 +199,7 @@ class PdfCanvas
   
   public function debug($text) 
   {
-    #if (preg_match("/newLine|newRow/", $text))
+    #if (preg_match("/Request Time/", $text))
     #  System::out->println($text);
   }
   
@@ -351,7 +351,7 @@ class PdfCanvas
   
   public function newLine()
   {
-    if ($this->row_max_y && ! $this->$in_column) {
+    if ($this->row_max_y && ! $this->in_column) {
       $this->text_y = $this->row_max_y + $this->getLineHeight();
       $this->row_max_y = 0;
       $this->row_y = 0;
@@ -644,6 +644,11 @@ class PdfCanvas
     return $this->pdf->stringwidth($text, $this->font, $this->font_size);
   }
   
+  public function getTextHeight($text)
+  {
+    return $this->pdf->stringheight($text, $this->font, $this->font_size);
+  }
+  
   public function getCharsRemaining($indent=0)
   {
     return $this->getCharsInWidth($this->getLineWidth() - $indent);
@@ -802,7 +807,7 @@ class PdfCanvas
   
   public function writeTextColumn($width, $align, $text)
   {
-    $this->$in_column = true;
+    $this->in_column = true;
      
     if ($this->row_y) {
       $this->text_y = $this->row_y;
@@ -823,7 +828,7 @@ class PdfCanvas
     if ($this->text_y >= $this->row_max_y)
       $this->row_max_y = $this->text_y;
       
-    $this->$in_column = false;
+    $this->in_column = false;
   }
   
   public function writeTextColumnHeader($width, $align, $text)
@@ -964,7 +969,7 @@ class PdfCanvas
     $x_size = ($this->getLineWidth() / $this->graph_columns) - ($this->graph_padding_x * 2);
     $y_size = ($this->getPageRemaining() / $this->graph_rows) - ($this->graph_padding_y * 2) - $this->legend_size;
       
-    $this->graph_size = new Size($x_size, $y_size);
+    $this->graph_size = new Size(round($x_size), round($y_size));
     
     $this->debug("allocateGraphSpace:rows={$this->graph_rows},columns={$this->graph_columns},graph_size={$this->graph_size}");
   }

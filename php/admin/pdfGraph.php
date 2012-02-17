@@ -23,10 +23,6 @@ $g_pdf_colors = array(
     new RGBColor(0xc0, 0xc0, 0xc0), // gray
     new RGBColor(0x40, 0x80, 0x40)); // forest green
 
-$x = 20;
-$y = 750;
-$yinc = 12;
-
 if (! mbean_init()) {
   debug("Failed to load admin, die");
   return;
@@ -36,30 +32,27 @@ $mbean_server = $g_mbean_server;
 $resin = $g_resin;
 $server = $g_server;
 
-if ($g_mbean_server)
-  $stat = $g_mbean_server->lookup("resin:type=StatService");
+$stat = get_stats_service($mbean_server);
 
 if (! $stat) {
   debug("Postmortem analysis:: requires Resin Professional and a <resin:StatService/> and <resin:LogService/> defined in the resin.xml.");
   return;
 }
 
-$mbean_server = $g_mbean_server;
-$resin = $g_resin;
-$server = $g_server;
 $runtime = $g_mbean_server->lookup("java.lang:type=Runtime");
 $os = $g_mbean_server->lookup("java.lang:type=OperatingSystem");
-$log_mbean = $mbean_server->lookup("resin:type=LogService");
+$log_mbean = $g_mbean_server->lookup("resin:type=LogService");
 
 function debug($msg) 
 {
-  #System::out->println($msg);
+  System::out->println($msg);
 }
 
-function  my_error_handler($error_type, $error_msg, $errfile, $errline) {
-  if(!startsWith($error_msg,"Can't access private field")) {
-    //debug("ERROR HANDLER: type $error_type, msg $error_msg, file $errfile, lineno $errline");
-  }
+function  my_error_handler($error_type, $error_msg, $errfile, $errline) 
+{
+  #if(!startsWith($error_msg,"Can't access private field")) {
+  #  debug("ERROR HANDLER: type $error_type, msg $error_msg, file $errfile, lineno $errline");
+  #}
 }
 
 set_error_handler('my_error_handler'); 
@@ -88,8 +81,8 @@ function initPDF()
 
 function admin_pdf_summary()
 {
-  global $x, $y, $yinc, $server, $runtime, $os, $log_mbean, $g_canvas, $resin;
-  global $pageName, $si;
+  global $yinc, $server, $runtime, $os, $log_mbean, $g_canvas, $resin;
+  global $pageName, $g_si;
 
   $summary = admin_pdf_summary_fill();
 
@@ -125,7 +118,7 @@ function admin_pdf_summary()
 
   $g_canvas->writeSubsection("Resin Instance");
   
-  $g_canvas->writeTextLine("$si - {$summary['serverID']}, {$summary['cluster']} Cluster");
+  $g_canvas->writeTextLine("$g_si - {$summary['serverID']}, {$summary['cluster']} Cluster");
   
   $col1 = 50;
   $col2 = 300;
@@ -218,7 +211,10 @@ function admin_pdf_ports($summary)
 
 function admin_pdf_summary_fill()
 {
+  global $g_canvas;
+  
   $dump = admin_pdf_snapshot("Resin|JmxDump");
+  
   $jmx =& $dump["jmx"];
 
   if (! $jmx) {
@@ -346,16 +342,16 @@ function getMeterGraphPage($pdfName)
 
 function admin_pdf_snapshot($name)
 {
-  global $si, $log_mbean, $g_start, $g_end;
+  global $g_si, $log_mbean, $g_start, $g_end;
   
-  $times = $log_mbean->findMessageTimesByType("$si|$name",
+  $times = $log_mbean->findMessageTimesByType("$g_si|$name",
                                               "info",
                                               $g_start * 1000,
                                               $g_end * 1000);
+  //debug("admin_pdf_snapshot found " . count($times) . " logs for " . $name);
+                                              
   if (! $times || sizeof($times) == 0)
     return;
-    
-  //debug("admin_pdf_snapshot found " . count($times) . " logs for " . $name);
 
   $time = $times[sizeof($times) - 1];
 
@@ -364,7 +360,7 @@ function admin_pdf_snapshot($name)
   
   //debug("admin_pdf_snapshot using time $time");
     
-  $msgs = $log_mbean->findMessagesByType("$si|$name",
+  $msgs = $log_mbean->findMessagesByType("$g_si|$name",
                                          "info", $time, $time);
 
   $msg = $msgs[0];
@@ -381,7 +377,7 @@ function pdf_format_memory($memory)
 
 function admin_pdf_health()
 {
-  global $si, $log_mbean, $g_start, $g_end, $g_canvas;
+  global $g_si, $log_mbean, $g_start, $g_end, $g_canvas;
   
   $g_canvas->writeSection("Health");
   
@@ -447,7 +443,7 @@ function admin_pdf_log_messages($title,
                                        $start * 1000,
                                        $end * 1000);
 
-  if (! $messages || is_empty($message)) {
+  if (! $messages || empty($message)) {
     $g_canvas->setTextFont();
     $g_canvas->writeTextLineIndent(20, "No Data");
     return;
@@ -580,11 +576,13 @@ function create_graph_data($name, $data, $color)
   return $gd;
 }
 
-function calcYIncrement($range) 
+function calcYIncrement($size) 
 {
-  $size = $range->size();
+  $size = round($size);
+  if ($size == 0)
+    $size = 1;
   
-  $yincrement = (int) ($size / 2);
+  $yincrement = (int) ($size / 4);
   
   $div = 5;
 
@@ -610,13 +608,11 @@ function calcYIncrement($range)
 	  $div = 10;
   }
   
-  $yincrement = $yincrement - ($yincrement % $div); //make the increment divisible by 5
-
+  $yincrement = $yincrement - ($yincrement % $div);
+  
   if ($yincrement == 0) {
       $yincrement = round($size / 4, 2);
   }
-  
-  //debug("calcYincrement:$size = $yincrement");
     
   return $yincrement;
 }
@@ -633,17 +629,26 @@ function draw_graph($name, $gds)
     draw_invalid($graph);
   } else {
     
-    $max_gd = get_largest_data($gds);
-    $max_y = $max_gd->max + (0.05 * $max_gd->max);
-  
     $x_range = new Range($g_start * 1000, $g_end * 1000);
     
-    if ($max_y == 0)
-      $y_range = new Range(-1,1);
-    else
-      $y_range = new Range(0, $max_y);
+    $max_gd = get_largest_data($gds);
+    $max_y = $max_gd->max + (0.05 * $max_gd->max);
+    
+    $y_range = new Range(0, 1);
+    $yincrement = .25;
+    
+    if ($max_y > 0) {
+      $yincrement = calcYIncrement($max_y);
       
-    $yincrement = calcYIncrement($y_range);
+      $new_max = $yincrement;
+      while($new_max < $max_y) {
+        $new_max += $yincrement;
+      }
+    
+      $max_y = $new_max;
+    
+      $y_range = new Range(0, $max_y);
+    }
     
     $graph = $g_canvas->startGraph($name, $x_range, $y_range);
     
@@ -693,15 +698,15 @@ function setup_graph($graph, $title, $x_range, $y_range, $yincrement, $displayYL
 {
   global $majorTicks, $minorTicks;
   
-  //debug("setup_graph:title={$title},valid={$graph->valid}");
+  //debug("setup_graph:title={$title},valid={$graph->valid},x_range=$x_range,y_range=$y_range,yincrement=$yincrement");
   
   $graph->drawTitle("black");
 
   $graph->drawGridLines($minorTicks, $yincrement, "light_grey");
 
-  $graph->drawGridLines($majorTicks, $yincrement, "med_grey");
+  $graph->drawGridLines($majorTicks, $yincrement/2, "med_grey");
 
-  $graph->drawGrid("dark_grey");
+  $graph->drawBorder("dark_grey");
 
   if ($displayYLabels)
     $graph->drawYGridLabels($yincrement);
@@ -714,18 +719,16 @@ function draw_invalid($graph)
   global $g_canvas;
   
   $graph->drawTitle("black");
-  $graph->drawGrid("dark_grey");
+  $graph->drawBorder("dark_grey");
 }
 
 function draw_graph_lines($graph, $gds)
 {
-  $graph->canvas->setLineWidth(1);
-
   $gds = array_reverse($gds);
 
   foreach($gds as $gd) {
     if (sizeof($gd->dataLine) > 0)
-    	$graph->drawLineGraph($gd->dataLine, $gd->color);
+    	$graph->drawLineGraph($gd->dataLine, $gd->color, 1);
   }
 }
 
@@ -782,7 +785,7 @@ function findStatByStat($theStat)
   global $g_start;
   global $g_end;
   global $stat;
-  global $si;
+  global $g_si;
 
   //$step = ($g_end - $g_start) / 1000;
   $step = ($g_end - $g_start) / 500;
@@ -792,7 +795,7 @@ function findStatByStat($theStat)
     
   $full_names = $stat->statisticsNames();
   
-  //debug("findStatByStat:g_start=$g_start,g_end=$g_end,si=$si,step=$step,theStat=$theStat");
+  //debug("findStatByStat:g_start=$g_start,g_end=$g_end,si=$g_si,step=$step,theStat=$theStat");
   
   $statList = array();
   foreach ($full_names as $full_name)  {
@@ -801,7 +804,7 @@ function findStatByStat($theStat)
   
   foreach ($statList as $statItem) {
     
-    if ($statItem->server != $si) {
+    if ($statItem->server != $g_si) {
       continue;
     }
     
@@ -1372,11 +1375,11 @@ function findStats(String $category, String $subcategory=null)
   global $g_end;
   global $stat;
   global $statList;
-  global $si;
+  global $g_si;
 
   $map = array();
   foreach ($statList as $statItem) {
-    if ($statItem->server != $si) continue;
+    if ($statItem->server != $g_si) continue;
     if ($category == $statItem->category) {
       if ($subcategory && $subcategory == $statItem->subcategory) {
 	$map[$statItem->name]
@@ -1460,12 +1463,12 @@ function findStatByName(String $name,
   global $g_end;
   global $stat;
   global $statList;
-  global $si;
+  global $g_si;
 
   $arr = array();
   
   foreach ($statList as $statItem) {
-    if ($statItem->server != $si)
+    if ($statItem->server != $g_si)
       continue;
       
     if ($subcategory==$statItem->subcateogry) {

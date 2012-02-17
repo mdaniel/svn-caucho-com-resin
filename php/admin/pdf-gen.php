@@ -9,7 +9,10 @@ define("DAY", 24 * HOUR);
 
 global $g_report;
 global $g_title;
+global $g_is_watchdog;
 global $g_is_snapshot;
+global $profile_time;
+global $period;
 
 $g_report = get_param($g_report, "report", "Snapshot");
 $g_title = get_param($g_title, "title", $g_report);
@@ -94,15 +97,11 @@ else {
 }
 
 $majorTicks = $majorTicks * 1000;
-
-$minorTicks = $majorTicks/2;
+$minorTicks = $majorTicks/4;
 
 $page = 0;
 
-$index = $g_server->SelfServer->ClusterIndex;
-$si = sprintf("%02d", $index);
-
-$g_canvas->header_left_text = "$si - " . $g_server->SelfServer->Name;
+$g_canvas->header_left_text = $g_label;
 
 $time = $_REQUEST["time"];
 

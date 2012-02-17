@@ -70,7 +70,7 @@ function display_health_status_graph($s)
 
   $mbean_server = new MBeanServer($server_id);
 
-  $label = $si . " - " . $server_id;
+  $label = "$si - $server_id";
 	
   display_health_graph($mbean_server, $s, $si, $label);
 }

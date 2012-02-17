@@ -37,7 +37,7 @@ class PdfCanvasGraph
     $this->ppu = new Size();
     $this->ppu->width = $this->pixel_size->width / $this->x_range->size();
     $this->ppu->height = $this->pixel_size->height / $this->y_range->size();
-
+    
     if ($this->ppu->width > 0.0 && $this->ppu->height > 0.0) {
       $this->xOffsetPixels = $this->x_range->start * $this->ppu->width;
       $this->yOffsetPixels = $this->y_range->start * $this->ppu->height;
@@ -59,7 +59,7 @@ class PdfCanvasGraph
   
   public function debug($text) 
   {
-    $this->canvas->debug($text);
+    $this->canvas->debug("{$this->title}:$text");
   }
   
   public function end() 
@@ -71,8 +71,8 @@ class PdfCanvasGraph
   {
     $convertedPoint = new Point();
     
-    $convertedPoint->x = intval(($point->x  * $this->ppu->width) - $this->xOffsetPixels);
-    $convertedPoint->y = intval(($point->y  * $this->ppu->height) - $this->yOffsetPixels);
+    $convertedPoint->x = round(($point->x  * $this->ppu->width) - $this->xOffsetPixels);
+    $convertedPoint->y = round(($point->y  * $this->ppu->height) - $this->yOffsetPixels);
     
     if ($convertedPoint->x > 1000 || $convertedPoint->x < 0)
        $this->setInvalid("Point out of range x axis: {$convertedPoint->x}");
@@ -111,15 +111,15 @@ class PdfCanvasGraph
 
     $this->debug("drawLegends");
 
-    $col2 =   (double) $this->pixel_size->width / 2;
+    $col2 = round($this->pixel_size->width / 2) + 5;
     $index = 0;
     $yinc = -7;
-    $initialYLoc = -20;
+    $initialYLoc = -25;
     $yloc = $initialYLoc;
 
     foreach ($legends as $legend) {
       if ($index % 2 == 0) {
-	      $xloc = 0.0;
+	      $xloc = 5.0;
       } else {
 	      $xloc = $col2;
       }
@@ -178,9 +178,9 @@ class PdfCanvasGraph
     $this->canvas->stroke();
   }
 
-  public function drawGrid($color)
+  public function drawBorder($color)
   {
-    $this->debug("drawGrid:color=$color");
+    $this->debug("drawBorder:color=$color");
     
     $this->canvas->setLineWidth(1);
     $this->canvas->setColor($color);
@@ -209,8 +209,8 @@ class PdfCanvasGraph
 
     $this->debug("drawGridLines:xstep=$xstep,ystep=$ystep,color=$color");
 
-    $width = intval($this->pixel_size->width);
-    $height = intval($this->pixel_size->height);
+    $width = $this->pixel_size->width;
+    $height = $this->pixel_size->height;
 
     $xstep_width = $xstep * $this->ppu->width;
     $ystep_width = $ystep * $this->ppu->height;
@@ -221,14 +221,14 @@ class PdfCanvasGraph
     }
 
     for ($index = 0; $width >= (($index)*$xstep_width); $index++) {
-      $currentX = intval($index*$xstep_width);
+      $currentX = round($index*$xstep_width);
       $this->canvas->moveToXY($currentX, 0.0);
       $this->canvas->lineToXY($currentX, $height);
       $this->canvas->stroke();
-    }    
+    }
 
     for ($index = 0; $height >= ($index*$ystep_width); $index++) {
-      $currentY = intval($index*$ystep_width);
+      $currentY = round($index*$ystep_width);
       $this->canvas->moveToXY(0.0, $currentY);
       $this->canvas->lineToXY($width, $currentY);
       $this->canvas->stroke();
@@ -241,17 +241,18 @@ class PdfCanvasGraph
        return;
 
     $width = (double) $this->pixel_size->width;
-    $xstep_width = ($xstep) * $this->ppu->width;
+    $xstep_width = $xstep * $this->ppu->width;
+    
+    $font_size = 8;
 
     $this->debug("drawXGridLabels:xstep=$xstep,func=$func,width=$width,xstep_width=$xstep_width");
     
-    $this->canvas->setFontAndColor("Helvetica", 9, "black");
+    $this->canvas->setFontAndColor("Helvetica", $font_size, "black");
     
     for ($index = 0; $width >= ($index*$xstep_width); $index++) {
-      $currentX = $index*$xstep_width;
-      $stepValue = (int) $index * $xstep;
-      $currentValue = $stepValue + (int) $this->x_range->start;
-      $currentValue = intval($currentValue);
+      $currentX = round($index*$xstep_width);
+      $stepValue = round($index * $xstep);
+      $currentValue = $stepValue + $this->x_range->start;
 
       if (!$func) {
       	$currentLabel = $currentValue;
@@ -259,24 +260,30 @@ class PdfCanvasGraph
 	      $currentLabel = $this->$func($currentValue);
       }
       
-      $this->canvas->writeTextXY($currentX-3, -10, $currentLabel);
+      $this->canvas->writeTextXYCenter($currentX, -13, $currentLabel);
+      
+      $this->canvas->moveToXY($currentX, -4);
+      $this->canvas->lineToXY($currentX, 0);
+      $this->canvas->stroke();
     }
   }
 
-  public function drawYGridLabels($ystep, $func=null, $xpos=-28) 
+  public function drawYGridLabels($ystep, $func=null) 
   {
     if (! $this->valid)
        return;
+       
+    $font_size = 8;
 
-    $this->debug("drawYGridLabels:ystep=$ystep,func=$func,xpos=$xpos");
-
-    $this->canvas->setFontAndColor("Helvetica", 9, "black");
+    $this->canvas->setFontAndColor("Helvetica", $font_size, "black");
     $height = (double) $this->pixel_size->height;
 
-    $step_width = ($ystep) * $this->ppu->height;
+    $step_width = $ystep * $this->ppu->height;
 
+    $this->debug("drawYGridLabels:ystep=$ystep,func=$func,height=$height,step_width=$step_width");
+    
     for ($index = 0; $height >= ($index*$step_width); $index++) {
-      $currentYPixel = $index*$step_width;
+      $currentYPixel = round($index*$step_width);
       $currentYValue =	($index * $ystep) + $this->y_range->start;
       
       if ($func) {
@@ -293,9 +300,14 @@ class PdfCanvasGraph
 	      }
       }
 
-      $x = -5;
+      $x = -6;
+      $y = $currentYPixel - ($this->canvas->getTextHeight($currentLabel) / 2);
       
-      $this->canvas->writeTextXYRight($x, $currentYPixel - 3, $currentLabel);
+      $this->canvas->writeTextXYRight($x, $y, $currentLabel);
+      
+      $this->canvas->moveToXY(-4, $currentYPixel);
+      $this->canvas->lineToXY(0, $currentYPixel);
+      $this->canvas->stroke();
     }
   }
   

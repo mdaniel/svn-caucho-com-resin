@@ -28,21 +28,19 @@ if ($stat_service) {
 
   enable_graph_controls();
   
-  $si = sprintf("%02d", $g_server->Index);
-  
   $memory_params = new GraphParams("memory", 600, 200);
   $memory_params->title = gettext("Memory Free");
   $memory_params->alt = gettext('A line graph representing the amount of free memory in each of the heap, tenured, and permgen pools over the last 6 hours.');
 
-  stat_graph($memory_params, array("$si|JVM|Memory|Heap Memory Free",
-                                  "$si|JVM|Memory|Tenured Memory Free",
-                                  "$si|JVM|Memory|PermGen Memory Free"));
+  stat_graph($memory_params, array("$g_si|JVM|Memory|Heap Memory Free",
+                                  "$g_si|JVM|Memory|Tenured Memory Free",
+                                  "$g_si|JVM|Memory|PermGen Memory Free"));
 
   $gc_params = new GraphParams("gc", 600, 200);
   $gc_params->title = gettext('GC Time');
   $gc_params->alt = gettext('A line graph representing the amount of time spent perfoming garbage collection over the last 6 hours.');
   
-  stat_graph_regexp($gc_params, "/^$si\|JVM\|Memory\|GC Time/");
+  stat_graph_regexp($gc_params, "/^$g_si\|JVM\|Memory\|GC Time/");
 }
 
 $memoryBean = $g_mbean_server->lookup("resin:type=Memory");
