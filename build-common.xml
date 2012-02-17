@@ -1297,8 +1297,8 @@
         <filter token="HTTP_PORT" value="8080"/>
         <filter token="HTTPS_PORT" value="8443"/>
     
-        <filter token="SETUID_USER" value="resin"/>
-        <filter token="SETUID_GROUP" value="resin"/>
+        <filter token="SETUID_USER" value="www-data"/>
+        <filter token="SETUID_GROUP" value="www-data"/>
       </filterset>
     </copy>
     
