@@ -260,11 +260,13 @@ class PdfCanvasGraph
 	      $currentLabel = $this->$func($currentValue);
       }
       
-      $this->canvas->writeTextXYCenter($currentX, -13, $currentLabel);
-      
-      $this->canvas->moveToXY($currentX, -4);
-      $this->canvas->lineToXY($currentX, 0);
-      $this->canvas->stroke();
+      if (! is_null($currentLabel)) {
+        $this->canvas->writeTextXYCenter($currentX, -13, $currentLabel);
+        
+        $this->canvas->moveToXY($currentX, -4);
+        $this->canvas->lineToXY($currentX, 0);
+        $this->canvas->stroke();
+      }
     }
   }
 
@@ -286,7 +288,7 @@ class PdfCanvasGraph
       $currentYPixel = round($index*$step_width);
       $currentYValue =	($index * $ystep) + $this->y_range->start;
       
-      if ($func) {
+      if (isset($func)) {
 	      $currentLabel = $func($currentYValue);
       } else {
       	if ($currentYValue >      1000000000) {
@@ -300,14 +302,15 @@ class PdfCanvasGraph
 	      }
       }
 
-      $x = -6;
-      $y = $currentYPixel - ($this->canvas->getTextHeight($currentLabel) / 2);
-      
-      $this->canvas->writeTextXYRight($x, $y, $currentLabel);
-      
-      $this->canvas->moveToXY(-4, $currentYPixel);
-      $this->canvas->lineToXY(0, $currentYPixel);
-      $this->canvas->stroke();
+      if (! is_null($currentLabel)) {
+        $x = -6;
+        $y = $currentYPixel - ($this->canvas->getTextHeight($currentLabel) / 2);
+        $this->canvas->writeTextXYRight($x, $y, $currentLabel);
+        
+        $this->canvas->moveToXY(-4, $currentYPixel);
+        $this->canvas->lineToXY(0, $currentYPixel);
+        $this->canvas->stroke();
+      }
     }
   }
   

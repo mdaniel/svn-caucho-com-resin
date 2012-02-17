@@ -958,6 +958,8 @@ class PdfCanvas
   
   public function allocateGraphSpace($rows = $this->graph_rows, $columns = $this->graph_columns)
   {
+    $this->graph_index = 0;
+    
     $this->graph_space_start_y = $this->text_y;
     
     $this->graph_rows = $rows;

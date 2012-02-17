@@ -147,33 +147,33 @@ $g_canvas->writeTextColumn($col2, 'l', date("Y-m-d H:i", $g_start) . " through "
 $g_canvas->newLine();
 
 if ($mPage->isSummary()) {
-  admin_pdf_summary();
+  pdf_summary();
 }
 
-admin_pdf_health($g_canvas);
+pdf_health($g_canvas);
 
-draw_cluster_graphs($mPage);
+pdf_draw_cluster_graphs($mPage);
 
-draw_graphs($mPage, $g_canvas);
+pdf_draw_graphs($mPage);
 
 if ($mPage->isHeapDump()) {
-  admin_pdf_heap_dump();
+  pdf_heap_dump();
 }
  
 if ($mPage->isProfile()) {
-  admin_pdf_profile();
+  pdf_profile();
 }
 
 if ($mPage->isThreadDump()) {
-  admin_pdf_thread_dump();
+  pdf_thread_dump();
 }
 
 if ($mPage->isLog()) {
-  admin_pdf_draw_log();
+  pdf_write_log();
 }
 
 if ($mPage->isJmxDump()) {
-  admin_pdf_jmx_dump();
+  pdf_jmx_dump();
 }
 
 $g_canvas->end();

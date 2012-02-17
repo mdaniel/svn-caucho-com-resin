@@ -64,6 +64,7 @@ function mbean_init()
   global $g_server_id;
   global $g_server_index;
   global $g_si;
+  global $g_label;
   global $g_mbean_server;
   global $g_resin;
   global $g_server;
