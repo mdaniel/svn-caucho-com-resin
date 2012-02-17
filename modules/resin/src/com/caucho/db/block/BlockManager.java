@@ -351,6 +351,15 @@ public final class BlockManager
   }
 
   /**
+   * Returns the capacity in bytes.
+   */
+  @Override
+  public long getMemorySize()
+  {
+    return _blockCache.getCapacity() * BlockStore.BLOCK_SIZE;
+  }
+
+  /**
    * Returns the hit count.
    */
   @Override

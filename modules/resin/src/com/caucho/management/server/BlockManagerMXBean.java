@@ -48,6 +48,12 @@ public interface BlockManagerMXBean extends ManagedObjectMXBean {
   @Description("The number of blocks in the block manager")
   public long getBlockCapacity();
   
+  /**
+   * Returns the number of bytes in the block manager
+   */
+  @Description("The number of bytes in the block manager")
+  public long getMemorySize();
+  
   //
   // Statistics
   //

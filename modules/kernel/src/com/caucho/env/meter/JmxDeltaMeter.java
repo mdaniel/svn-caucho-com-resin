@@ -77,8 +77,8 @@ public final class JmxDeltaMeter extends AbstractMeter {
       }
       
       double lastValue = _lastValue;
-      _lastValue = lastValue;
       double value = ((Number) objValue).doubleValue();
+      _lastValue = value;
       
       _value = value - lastValue;
     } catch (Exception e) {

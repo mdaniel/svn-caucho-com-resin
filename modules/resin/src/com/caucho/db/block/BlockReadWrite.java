@@ -52,7 +52,8 @@ public class BlockReadWrite {
     = Logger.getLogger(BlockReadWrite.class.getName());
   private final static L10N L = new L10N(BlockReadWrite.class);
   
-  private final static long FILE_SIZE_INCREMENT = 32L * 1024 * 1024; 
+  private final static long FILE_SIZE_INCREMENT = 8L * 1024 * 1024; 
+  // private final static long FILE_SIZE_INCREMENT = 32L * 1024 * 1024; 
   // private final static long FILE_SIZE_INCREMENT = 64 * 1024; 
 
   private final BlockStore _store;
