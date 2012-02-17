@@ -35,6 +35,7 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
 import java.util.ArrayList;
+import java.util.concurrent.atomic.AtomicLong;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -81,6 +82,8 @@ public class MnodeStore implements AlarmListener {
 
   private long _serverVersion;
   private long _startupLastUpdateTime;
+  
+  private AtomicLong _entryCount = new AtomicLong();
   
   private Alarm _alarm;
   
@@ -223,6 +226,12 @@ public class MnodeStore implements AlarmListener {
 
     _serverVersion = initVersion();
     _startupLastUpdateTime = initLastUpdateTime();
+    
+    long initCount = getCountImpl();
+    
+    if (initCount > 0) {
+      _entryCount.set(initCount);
+    }
 
     _alarm = new Alarm(this);
     handleAlarm(_alarm);
@@ -594,6 +603,10 @@ public class MnodeStore implements AlarmListener {
 
       if (log.isLoggable(Level.FINER))
         log.finer(this + " insert key=" + id + " " + mnodeUpdate + " count=" + count);
+      
+      if (count > 0) {
+        _entryCount.addAndGet(1);
+      }
 
       return true;
     } catch (SQLException e) {
@@ -709,8 +722,11 @@ public class MnodeStore implements AlarmListener {
       
       int count = pstmt.executeUpdate();
 
-      if (count > 0)
+      if (count > 0) {
         log.finer(this + " expired " + count + " old data");
+      
+        _entryCount.addAndGet(-count);
+      }
     } catch (Exception e) {
       e.printStackTrace();
       log.log(Level.FINE, e.toString(), e);
@@ -722,8 +738,13 @@ public class MnodeStore implements AlarmListener {
   //
   // statistics
   //
-
+  
   public long getCount()
+  {
+    return _entryCount.get();
+  }
+
+  private long getCountImpl()
   {
     CacheMapConnection conn = null;
     ResultSet rs = null;

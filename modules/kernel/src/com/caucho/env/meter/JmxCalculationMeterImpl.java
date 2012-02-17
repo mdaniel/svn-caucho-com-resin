@@ -41,11 +41,7 @@ import com.caucho.jmx.Jmx;
 import com.caucho.util.L10N;
 
 public final class JmxCalculationMeterImpl extends AbstractMeter {
-  private static final L10N L = new L10N(JmxExpr.class);
-  private static final Logger log
-    = Logger.getLogger(JmxExpr.class.getName());
-  
-  private double _lastSample;
+  private double _value;
   
   private JmxExpr _expr;
   
@@ -60,20 +56,18 @@ public final class JmxCalculationMeterImpl extends AbstractMeter {
    * Polls the statistics attribute.
    */
   @Override
-  public double sample()
+  public void sample()
   {
     if (_expr != null) {
       _expr.sample();
     }
     
-    _lastSample = _expr.calculate();
-    
-    return _lastSample;
+    _value = _expr.calculate();
   }
   
   @Override
-  public double peek()
+  public double calculate()
   {
-    return _lastSample;
+    return _value;
   }
 }

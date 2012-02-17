@@ -47,9 +47,14 @@ public interface Meter {
   public String getName();
   
   /**
-   * Gather the meter's next sample.
+   * Gather the meter's next sample to be used by the calculate function.
    */
-  public double sample();
+  public void sample();
+  
+  /**
+   * Returns the meter's calculated value.
+   */
+  public double calculate();
 
   /**
    * Returns the current meter value without updating the sample.

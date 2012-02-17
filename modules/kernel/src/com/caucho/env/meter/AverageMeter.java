@@ -50,6 +50,8 @@ public final class AverageMeter extends TotalMeter implements AverageSensor {
   // for 95%
   private long _lastStdCount;
   private double _lastStdSum;
+  
+  private double _value;
 
   public AverageMeter(String name)
   {
@@ -73,6 +75,7 @@ public final class AverageMeter extends TotalMeter implements AverageSensor {
     return new SigmaProbe(name, n);
   }
 
+  @Override
   public final void add(long value)
   {
     double sqValue = value * value;
@@ -90,7 +93,8 @@ public final class AverageMeter extends TotalMeter implements AverageSensor {
   /**
    * Return the probe's next average.
    */
-  public final double sample()
+  @Override
+  public final void sample()
   {
     synchronized (_lock) {
       long count = _count.get();
@@ -102,10 +106,16 @@ public final class AverageMeter extends TotalMeter implements AverageSensor {
       _lastAvgSum = sum;
 
       if (count == lastCount)
-        return 0;
+        _value = 0;
       else
-        return _scale * (sum - lastSum) / (double) (count - lastCount);
+        _value = _scale * (sum - lastSum) / (double) (count - lastCount);
     }
+  }
+
+  @Override
+  public final double calculate()
+  {
+    return _value;
   }
 
   @Override
@@ -173,14 +183,23 @@ public final class AverageMeter extends TotalMeter implements AverageSensor {
   }
 
   class AverageCountProbe extends TotalMeter {
+    private double _value;
+    
     AverageCountProbe(String name)
     {
       super(name);
     }
 
-    public double sample()
+    @Override
+    public void sample()
     {
-      return sampleCount();
+      _value = sampleCount();
+    }
+    
+    @Override
+    public double calculate()
+    {
+      return _value;
     }
 
     @Override
@@ -191,19 +210,30 @@ public final class AverageMeter extends TotalMeter implements AverageSensor {
   }
 
   class MaxProbe extends AbstractMeter {
+    private double _value;
+    
     MaxProbe(String name)
     {
       super(name);
     }
 
-    public double sample()
+    @Override
+    public void sample()
     {
-      return sampleMax();
+      _value = sampleMax();
+    }
+    
+    @Override
+    public double calculate()
+    {
+      return _value;
     }
   }
 
   class SigmaProbe extends AbstractMeter {
     private final int _n;
+    
+    private double _value;
 
     SigmaProbe(String name, int n)
     {
@@ -212,9 +242,16 @@ public final class AverageMeter extends TotalMeter implements AverageSensor {
       _n = n;
     }
 
-    public double sample()
+    @Override
+    public void sample()
     {
-      return sampleSigma(_n);
+      _value = sampleSigma(_n);
+    }
+    
+    @Override
+    public double calculate()
+    {
+      return _value;
     }
   }
 }

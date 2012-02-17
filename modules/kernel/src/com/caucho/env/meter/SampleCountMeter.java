@@ -34,6 +34,8 @@ import java.util.concurrent.atomic.AtomicLong;
 public final class SampleCountMeter extends AbstractMeter {
   private final AtomicLong _count = new AtomicLong();
   private final AtomicLong _lastCount = new AtomicLong();
+  
+  private long _value;
 
   public SampleCountMeter(String name)
   {
@@ -48,11 +50,18 @@ public final class SampleCountMeter extends AbstractMeter {
   /**
    * Return the probe's next sample.
    */
-  public final double sample()
+  @Override
+  public final void sample()
   {
     long count = _count.get();
     long lastCount = _lastCount.getAndSet(count);
     
-    return count - lastCount;
+    _value = count - lastCount;
+  }
+  
+  @Override
+  public final double calculate()
+  {
+    return _value;
   }
 }

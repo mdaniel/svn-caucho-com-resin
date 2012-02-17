@@ -40,6 +40,8 @@ public final class CountMeter extends AbstractMeter implements CountSensor {
   private ConcurrentArrayList<CountSensor> _listeners;
   
   private long _lastTotal;
+  
+  private long _value;
 
   public CountMeter(String name)
   {
@@ -62,13 +64,18 @@ public final class CountMeter extends AbstractMeter implements CountSensor {
    * Sample the total count
    */
   @Override
-  public final double sample()
+  public final void sample()
   {
     long totalCount = _totalCount.get();
     long lastTotal = _lastTotal;
     _lastTotal = totalCount;
 
-    return totalCount - lastTotal;
+    _value = totalCount - lastTotal;
+  }
+  
+  public final double calculate()
+  {
+    return _value;
   }
   
   /**

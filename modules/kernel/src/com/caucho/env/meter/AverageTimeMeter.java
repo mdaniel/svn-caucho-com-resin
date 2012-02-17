@@ -35,6 +35,8 @@ import java.util.concurrent.atomic.AtomicInteger;
 public final class AverageTimeMeter extends AbstractMeter {
   private final AtomicLong _sum = new AtomicLong();
   private final AtomicInteger _count = new AtomicInteger();
+  
+  private double _value;
 
   public AverageTimeMeter(String name)
   {
@@ -55,14 +57,19 @@ public final class AverageTimeMeter extends AbstractMeter {
   /**
    * Return the probe's next sample.
    */
-  public final double sample()
+  public final void sample()
   {
     long sum = _sum.getAndSet(0);
     int count = _count.getAndSet(0);
 
     if (count != 0)
-      return sum / (double) count;
+      _value =sum / (double) count;
     else
-      return 0;
+      _value = 0;
+  }
+  
+  public final double calculate()
+  {
+    return _value;
   }
 }

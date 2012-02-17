@@ -43,6 +43,8 @@ public final class SemaphoreMeter extends AbstractMeter implements SemaphoreSens
   // for sample
   private long _lastAcquireCount;
   
+  private long _value;
+  
   public SemaphoreMeter(String name)
   {
     super(name);
@@ -93,9 +95,16 @@ public final class SemaphoreMeter extends AbstractMeter implements SemaphoreSens
   /**
    * Return the probe's next average.
    */
-  public final double sample()
+  @Override
+  public final void sample()
   {
-    return _acquireCount.get() - _releaseCount.get();
+    _value = _acquireCount.get() - _releaseCount.get();
+  }
+  
+  @Override
+  public final double calculate()
+  {
+    return _value;
   }
   
   /**
@@ -132,38 +141,65 @@ public final class SemaphoreMeter extends AbstractMeter implements SemaphoreSens
   }
 
   class CountProbe extends AbstractMeter {
+    private double _value;
+    
     CountProbe(String name)
     {
       super(name);
     }
 
-    public double sample()
+    @Override
+    public void sample()
     {
-      return sampleCount();
+      _value = sampleCount();
+    }
+    
+    @Override
+    public double calculate()
+    {
+      return _value;
     }
   }
 
   class MaxProbe extends AbstractMeter {
+    private double _value;
+    
     MaxProbe(String name)
     {
       super(name);
     }
 
-    public double sample()
+    @Override
+    public void sample()
     {
-      return sampleMax();
+      _value = sampleMax();
+    }
+    
+    @Override
+    public double calculate()
+    {
+      return _value;
     }
   }
 
   class MinProbe extends AbstractMeter {
+    private double _value;
+    
     MinProbe(String name)
     {
       super(name);
     }
 
-    public double sample()
+    @Override
+    public void sample()
     {
-      return sampleMin();
+      _value = sampleMin();
+    }
+    
+    @Override
+    public double calculate()
+    {
+      return _value;
     }
   }
 }

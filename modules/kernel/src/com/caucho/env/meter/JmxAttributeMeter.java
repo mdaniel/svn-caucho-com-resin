@@ -46,6 +46,7 @@ public final class JmxAttributeMeter extends AbstractMeter {
   private String _attribute;
   
   private double _lastSample;
+  private double _value;
 
   public JmxAttributeMeter(String name, String objectName, String attribute)
   {
@@ -65,27 +66,33 @@ public final class JmxAttributeMeter extends AbstractMeter {
    * Polls the statistics attribute.
    */
   @Override
-  public double sample()
+  public void sample()
   {
     try {
       Object value = _server.getAttribute(_objectName, _attribute);
 
-      if (value == null)
-        return 0;
+      if (value == null) {
+        _value = 0;
+        return;
+      }
       
-      _lastSample = ((Number) value).doubleValue();
-
-      return _lastSample;
+      _value = ((Number) value).doubleValue();
     } catch (Exception e) {
       log.log(Level.FINE, e.toString(), e);
 
-      return 0;
+      _value = 0;
     }
+  }
+  
+  @Override
+  public double calculate()
+  {
+    return _value;
   }
   
   @Override
   public double peek()
   {
-    return _lastSample;
+    return _value;
   }
 }

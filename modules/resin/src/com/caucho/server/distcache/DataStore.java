@@ -40,6 +40,7 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
+import java.util.concurrent.atomic.AtomicLong;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -90,6 +91,8 @@ public class DataStore {
   
   private final ConcurrentArrayList<MnodeOrphanListener> _orphanListeners
     = new ConcurrentArrayList<MnodeOrphanListener>(MnodeOrphanListener.class);
+  
+  private final AtomicLong _entryCount = new AtomicLong();
 
   private Alarm _alarm;
 
@@ -155,6 +158,12 @@ public class DataStore {
     throws Exception
   {
     initDatabase();
+    
+    long count = getCountImpl();
+    
+    if (count > 0) {
+      _entryCount.set(count);
+    }
 
     _alarm = new Alarm(new ExpireAlarm());
     // _alarm.queue(_expireTimeout);
@@ -512,6 +521,10 @@ public class DataStore {
         log.finer(this + " insert " + id + " length:" + length);
 
       // System.out.println("INSERT: " + id);
+      
+      if (count > 0) {
+        _entryCount.addAndGet(1);
+      }
 
       return count > 0;
     } catch (SqlIndexAlreadyExistsException e) {
@@ -600,8 +613,11 @@ public class DataStore {
 
       int count = pstmt.executeUpdate();
 
-      if (count > 0)
+      if (count > 0) {
         log.finer(this + " expired " + count + " old data");
+      
+        _entryCount.addAndGet(-count);
+      }
 
       // System.out.println(this + " EXPIRE: " + count);
     } catch (SQLException e) {
@@ -704,8 +720,13 @@ public class DataStore {
   //
   // statistics
   //
-
+  
   public long getCount()
+  {
+    return _entryCount.get();
+  }
+
+  private long getCountImpl()
   {
     DataConnection conn = null;
     ResultSet rs = null;

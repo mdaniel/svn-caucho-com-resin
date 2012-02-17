@@ -43,6 +43,8 @@ public final class TimeRangeMeter extends AbstractMeter implements TimeSensor {
   private final AtomicLong _lastAvgCount = new AtomicLong();
   private final AtomicLong _lastAvgTime = new AtomicLong();
   private final AtomicLong _lastCount = new AtomicLong();
+  
+  private double _value;
 
   public TimeRangeMeter(String name)
   {
@@ -94,7 +96,7 @@ public final class TimeRangeMeter extends AbstractMeter implements TimeSensor {
   /**
    * Return the probe's next sample.
    */
-  public final double sample()
+  public final void sample()
   {
     long count = _count.get();
     long lastCount = _lastAvgCount.getAndSet(count);
@@ -102,9 +104,14 @@ public final class TimeRangeMeter extends AbstractMeter implements TimeSensor {
     long lastTime = _lastAvgTime.getAndSet(time);
 
     if (count == lastCount)
-      return 0;
+      _value = 0;
     else
-      return _scale * (time - lastTime) / (double) (count - lastCount);
+      _value = _scale * (time - lastTime) / (double) (count - lastCount);
+  }
+  
+  public final double calculate()
+  {
+    return _value;
   }
   
   /**
@@ -129,38 +136,65 @@ public final class TimeRangeMeter extends AbstractMeter implements TimeSensor {
   }
 
   class TimeRangeCountProbe extends AbstractMeter {
+    private double _value;
+    
     TimeRangeCountProbe(String name)
     {
       super(name);
     }
 
-    public double sample()
+    @Override
+    public void sample()
     {
-      return sampleCount();
+      _value = sampleCount();
+    }
+    
+    @Override
+    public double calculate()
+    {
+      return _value;
     }
   }
 
   class TimeRangeActiveCountProbe extends AbstractMeter {
+    private double _value;
+    
     TimeRangeActiveCountProbe(String name)
     {
       super(name);
     }
 
-    public double sample()
+    @Override
+    public void sample()
     {
-      return _activeCount.get();
+      _value = _activeCount.get();
+    }
+    
+    @Override
+    public double calculate()
+    {
+      return _value;
     }
   }
 
   class TimeRangeMaxProbe extends AbstractMeter {
+    private double _value;
+    
     TimeRangeMaxProbe(String name)
     {
       super(name);
     }
 
-    public double sample()
+    @Override
+    public void sample()
     {
-      return sampleMax();
+      _value = sampleMax();
+    }
+    
+    @Override
+    public double calculate()
+    {
+      return _value;
     }
   }
 }

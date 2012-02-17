@@ -46,11 +46,16 @@ abstract public class AbstractMeter implements Meter {
   }
   
   /**
-   * Return the meter's next sample, resetting any counters for the next
-   * sample.
+   * Sample the meter, resetting any counters for the next sample.
    */
   @Override
-  abstract public double sample();
+  abstract public void sample();
+  
+  /**
+   * Calculate the current value based on the previous sample().
+   */
+  @Override
+  abstract public double calculate();
 
   /**
    * Returns the current value.

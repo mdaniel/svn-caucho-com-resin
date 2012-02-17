@@ -332,6 +332,30 @@
              attribute="HitCountTotal"/>
     </rate>
   </health:JmxCalculationMeter>
+
+  <health:JmxMeter>
+    <name>Resin|Cache Store|Mnode Count</name>
+    <objectName>resin:type=CacheStore</objectName>
+    <attribute>MnodeCount</attribute>
+  </health:JmxMeter>
+
+  <health:JmxMeter>
+    <name>Resin|Cache Store|Data Count</name>
+    <objectName>resin:type=CacheStore</objectName>
+    <attribute>DataCount</attribute>
+  </health:JmxMeter>
+
+  <health:JmxDeltaMeter>
+    <name>Resin|Cache Store|Mnode Count|Delta</name>
+    <objectName>resin:type=CacheStore</objectName>
+    <attribute>MnodeCount</attribute>
+  </health:JmxDeltaMeter>
+
+  <health:JmxDeltaMeter>
+    <name>Resin|Cache Store|Data Count|Delta</name>
+    <objectName>resin:type=CacheStore</objectName>
+    <attribute>DataCount</attribute>
+  </health:JmxDeltaMeter>
   
   <!-- 
      - Meters: proxy cache 
@@ -573,6 +597,16 @@
 
     <graph name="Block Cache Miss Rate">
       <meter>Resin|Block Cache|Miss Rate</meter>
+    </graph>
+
+    <graph name="Object Cache Entries">
+      <meter>Resin|Cache Store|Mnode Count</meter>
+      <meter>Resin|Cache Store|Data Count</meter>
+    </graph>
+
+    <graph name="Object Cache Entries Added">
+      <meter>Resin|Cache Store|Mnode Count|Delta</meter>
+      <meter>Resin|Cache Store|Data Count|Delta</meter>
     </graph>
       
     <graph name="Proxy Cache Hit/Miss">

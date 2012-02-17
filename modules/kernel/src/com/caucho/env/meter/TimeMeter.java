@@ -34,12 +34,15 @@ import java.util.concurrent.atomic.AtomicLong;
 public final class TimeMeter extends AbstractMeter implements TimeSensor {
   private final AtomicLong _count = new AtomicLong();
   private final AtomicLong _time = new AtomicLong();
+  
+  private double _value;
 
   public TimeMeter(String name)
   {
     super(name);
   }
 
+  @Override
   public final void add(long time)
   {
     _count.incrementAndGet();
@@ -49,14 +52,21 @@ public final class TimeMeter extends AbstractMeter implements TimeSensor {
   /**
    * Return the probe's next sample.
    */
-  public final double sample()
+  @Override
+  public final void sample()
   {
     long count = _count.getAndSet(0);
     long time = _time.getAndSet(0);
 
     if (count == 0)
-      return 0;
+      _value = 0;
     else
-      return time / (double) count;
+      _value = time / (double) count;
+  }
+  
+  @Override
+  public final double calculate()
+  {
+    return _value;
   }
 }

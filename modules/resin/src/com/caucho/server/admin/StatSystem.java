@@ -239,9 +239,14 @@ public class StatSystem extends AbstractResinSubSystem
       return _probe;
     }
     
-    double sample()
+    void sample()
     {
-      return _probe.sample();
+      _probe.sample();
+    }
+    
+    double calculate()
+    {
+      return _probe.calculate();
     }
 
     @Override

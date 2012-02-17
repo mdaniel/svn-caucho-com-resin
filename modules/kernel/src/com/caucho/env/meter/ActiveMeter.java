@@ -38,12 +38,14 @@ public final class ActiveMeter extends AbstractMeter implements ActiveSensor {
   private final AtomicLong _totalCount = new AtomicLong();
 
   private long _lastTotal;
+  private long _delta;
 
   public ActiveMeter(String name)
   {
     super(name);
   }
 
+  @Override
   public final void start()
   {
     long activeCount = _activeCount.incrementAndGet();
@@ -56,6 +58,7 @@ public final class ActiveMeter extends AbstractMeter implements ActiveSensor {
     }
   }
 
+  @Override
   public final void end()
   {
     _activeCount.decrementAndGet();
@@ -66,10 +69,12 @@ public final class ActiveMeter extends AbstractMeter implements ActiveSensor {
     return new MaxProbe(name);
   }
 
+  /*
   public AbstractMeter createTotal(String name)
   {
     return new TotalProbe(name);
   }
+  */
 
   /**
    * Sample the active count
@@ -90,27 +95,44 @@ public final class ActiveMeter extends AbstractMeter implements ActiveSensor {
   /**
    * Sample the total count
    */
-  public final double sample()
+  public final void sample()
   {
     long totalCount = _totalCount.get();
-    long lastTotal = _lastTotal;
-    _lastTotal = totalCount;
 
-    return totalCount - lastTotal;
+    _delta = totalCount - _lastTotal;
+    
+    _lastTotal = totalCount;
+    
+  }
+
+  @Override
+  public final double calculate()
+  {
+    return _delta;
   }
 
   class MaxProbe extends AbstractMeter {
+    private double _max;
+    
     MaxProbe(String name)
     {
       super(name);
     }
 
-    public double sample()
+    @Override
+    public void sample()
     {
-      return sampleMax();
+      _max = sampleMax();
+    }
+    
+    @Override
+    public double calculate()
+    {
+      return _max;
     }
   }
 
+  /*
   class TotalProbe extends AbstractMeter {
     TotalProbe(String name)
     {
@@ -122,4 +144,5 @@ public final class ActiveMeter extends AbstractMeter implements ActiveSensor {
       return sample();
     }
   }
+  */
 }
