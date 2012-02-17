@@ -42,6 +42,7 @@ import com.caucho.env.repository.CommitBuilder;
 import com.caucho.jmx.MXParam;
 import com.caucho.management.server.AbstractManagedObject;
 import com.caucho.management.server.ManagementMXBean;
+import com.caucho.management.server.StatServiceValue;
 import com.caucho.quercus.lib.reflection.ReflectionException;
 import com.caucho.server.admin.AddUserQueryResult;
 import com.caucho.server.admin.ControllerStateActionQueryResult;
@@ -51,11 +52,14 @@ import com.caucho.server.admin.ListUsersQueryResult;
 import com.caucho.server.admin.ManagerClient;
 import com.caucho.server.admin.PdfReportQueryResult;
 import com.caucho.server.admin.RemoveUserQueryResult;
+import com.caucho.server.admin.StatServiceValuesQueryResult;
 import com.caucho.server.admin.StringQueryResult;
 import com.caucho.server.admin.TagResult;
 import com.caucho.server.admin.WebAppDeployClient;
+import com.caucho.util.Alarm;
 import com.caucho.util.CharBuffer;
 import com.caucho.util.L10N;
+import com.caucho.util.QDate;
 import com.caucho.vfs.ReadStream;
 import com.caucho.vfs.TempOutputStream;
 import com.caucho.vfs.Vfs;
@@ -65,6 +69,8 @@ import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.ArrayList;
+import java.util.Calendar;
+import java.util.Date;
 import java.util.List;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -365,6 +371,25 @@ public class ManagementAdmin extends AbstractManagedObject
   }
 
   @Override
+  public StatServiceValuesQueryResult getStats(String serverId,
+                                               String metersStr,
+                                               String periodStr)
+  throws ReflectionException
+  {
+    Date to = new Date(Alarm.getCurrentTime());
+
+    ManagerClient managerClient = getManagerClient(serverId);
+    
+    long period = Period.toPeriod(periodStr);
+
+    Date from = new Date(to.getTime() - period);
+
+    String []meters = metersStr.split(",");
+
+    return managerClient.getStats(meters, from, to);
+  }
+
+  @Override
   public StringQueryResult setJmx(String serverId,
                                   String pattern,
                                   String attribute,
@@ -525,7 +550,7 @@ public class ManagementAdmin extends AbstractManagedObject
 
     if (sourceContext == null)
       throw new IllegalArgumentException(L.l("missing source parameter"));
-    
+
     if (sourceHost == null)
       sourceHost = "default";
 
@@ -536,11 +561,11 @@ public class ManagementAdmin extends AbstractManagedObject
       source.stage(sourceStage);
 
     source.tagKey(sourceHost + "/" + sourceContext);
-    
+
 
     if (targetContext == null)
       throw new IllegalArgumentException(L.l("missing target parameter"));
-    
+
     if (targetHost == null)
       targetHost = "default";
 
@@ -789,6 +814,9 @@ public class ManagementAdmin extends AbstractManagedObject
 
     CloudServer server = getServer(serverId);
 
+    if (server == null)
+      throw ConfigException.create(new IllegalArgumentException(L.l("unknown server '{0}'", serverId)));
+
     if (server.isSelf()) {
       sender = new LocalActorSender(BamSystem.getCurrentBroker(), "");
     }
@@ -812,6 +840,9 @@ public class ManagementAdmin extends AbstractManagedObject
     final ActorSender sender;
 
     CloudServer server = getServer(serverId);
+
+    if (server == null)
+      throw ConfigException.create(new IllegalArgumentException(L.l("unknown server '{0}'", serverId)));
 
     if (server.isSelf()) {
       sender = new LocalActorSender(BamSystem.getCurrentBroker(), "");

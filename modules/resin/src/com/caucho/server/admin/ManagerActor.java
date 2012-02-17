@@ -32,6 +32,7 @@ package com.caucho.server.admin;
 import com.caucho.admin.action.AddLicenseAction;
 import com.caucho.admin.action.AddUserAction;
 import com.caucho.admin.action.CallJmxAction;
+import com.caucho.admin.action.GetStatsAction;
 import com.caucho.admin.action.HeapDumpAction;
 import com.caucho.admin.action.JmxDumpAction;
 import com.caucho.admin.action.ListJmxAction;
@@ -50,6 +51,7 @@ import com.caucho.cloud.network.NetworkClusterSystem;
 import com.caucho.cloud.topology.CloudServer;
 import com.caucho.config.ConfigException;
 import com.caucho.env.service.ResinSystem;
+import com.caucho.management.server.StatServiceValue;
 import com.caucho.security.AdminAuthenticator;
 import com.caucho.security.PasswordUser;
 import com.caucho.server.cluster.Server;
@@ -338,6 +340,20 @@ public class ManagerActor extends SimpleActor
                                                      query.getPeriod());
 
     StringQueryResult result = new StringQueryResult(message);
+
+    getBroker().queryResult(id, from, to, result);
+
+    return result;
+  }
+
+  @Query
+  Serializable getStats(long id, String to, String from, StatsQuery query)
+  {
+    GetStatsAction action = new GetStatsAction();
+
+    StatServiceValuesQueryResult result = action.execute(query.getMeters(),
+                                                         query.getFrom(),
+                                                         query.getTo());
 
     getBroker().queryResult(id, from, to, result);
 

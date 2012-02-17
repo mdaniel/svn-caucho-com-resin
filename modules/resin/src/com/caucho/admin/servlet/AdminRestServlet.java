@@ -34,16 +34,18 @@ import com.caucho.jmx.MXAction;
 import com.caucho.jmx.MXParam;
 import com.caucho.lifecycle.LifecycleState;
 import com.caucho.management.server.ManagementMXBean;
+import com.caucho.management.server.StatServiceValue;
 import com.caucho.server.admin.AddUserQueryResult;
 import com.caucho.server.admin.ControllerStateActionQueryResult;
 import com.caucho.server.admin.ListUsersQueryResult;
 import com.caucho.server.admin.PdfReportQueryResult;
-import com.caucho.server.admin.RemoveUserQuery;
 import com.caucho.server.admin.RemoveUserQueryResult;
+import com.caucho.server.admin.StatServiceValuesQueryResult;
 import com.caucho.server.admin.StringQueryResult;
 import com.caucho.server.admin.TagResult;
 import com.caucho.server.admin.UserQueryResult;
 import com.caucho.util.L10N;
+import com.caucho.util.QDate;
 import com.caucho.vfs.Vfs;
 import com.caucho.vfs.WriteStream;
 
@@ -55,15 +57,25 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.io.PrintWriter;
+import java.io.Writer;
 import java.lang.annotation.Annotation;
 import java.lang.reflect.Method;
 import java.security.Principal;
+import java.text.DateFormat;
+import java.text.SimpleDateFormat;
+import java.util.Calendar;
+import java.util.Date;
 import java.util.HashMap;
+import java.util.Locale;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 @SuppressWarnings("serial")
 public class AdminRestServlet extends HttpServlet
 {
   private static final L10N L = new L10N(AdminRestServlet.class);
+  private static final Logger log
+    = Logger.getLogger(AdminRestServlet.class.getName());
 
   private static final HashMap<Class<?>,Marshal> _marshalMap
     = new HashMap<Class<?>,Marshal>();
@@ -146,6 +158,8 @@ public class AdminRestServlet extends HttpServlet
     try {
       action.doAction(req, res);
     } catch (Exception e) {
+      log.log(Level.FINE, e.getMessage(), e);
+
       Throwable cause = e;
       while (cause.getCause() != null)
         cause = cause.getCause();
@@ -371,7 +385,7 @@ public class AdminRestServlet extends HttpServlet
   static class BooleanMarshal extends Marshal<Boolean>
   {
     @Override
-    public Object marshal(HttpServletRequest request,
+    public Boolean marshal(HttpServletRequest request,
                           String name,
                           Boolean defaultValue)
     {
@@ -718,18 +732,77 @@ public class AdminRestServlet extends HttpServlet
     }
   }
 
+  static class StatServiceValuesQueryResultMarshal
+    extends Marshal<StatServiceValuesQueryResult>
+  {
+    @Override
+    public Object marshal(HttpServletRequest request,
+                          String name,
+                          StatServiceValuesQueryResult defaultValue)
+      throws IOException
+    {
+      return null;
+    }
+
+    @Override
+    public void unmarshal(HttpServletResponse response,
+                          StatServiceValuesQueryResult stats)
+      throws IOException
+    {
+      response.setContentType("application/json");
+
+      PrintWriter out = response.getWriter();
+
+      String []names = stats.getNames();
+      StatServiceValue [][]data = stats.getData();
+
+      out.println("[");
+      for (int i = 0; i < names.length; i++) {
+        String name = names[i];
+        StatServiceValue []values = data[i];
+
+        out.println("  {");
+        out.print("    \"label\":");
+        out.print('"' + name + '"');
+        out.println(',');
+        out.println("    \"data\": [");
+
+        for (int j = 0; j < values.length; j++) {
+          StatServiceValue value = values[j];
+          out.print("              ["
+                    + value.getTime()
+                    + ","
+                    + value.getValue()
+                    + "]");
+          if ((j + 1) < values.length)
+            out.print(",");
+          out.println();
+        }
+        out.println("            ]");
+        out.print("  }");
+        if ((i + 1) < names.length)
+          out.print(",");
+        out.println();
+      }
+
+      out.println("]");
+    }
+  }
+
   static {
     _marshalMap.put(void.class, new VoidMarshal());
     _marshalMap.put(String.class, new StringMarshal());
     _marshalMap.put(Integer.class, new IntegerMarshal());
     _marshalMap.put(Long.class, new LongMarshal());
-    _marshalMap.put(InputStream.class, new InputStreamMarshal());
     _marshalMap.put(boolean.class, new BooleanMarshal());
+    _marshalMap.put(InputStream.class, new InputStreamMarshal());
     _marshalMap.put(StringQueryResult.class, new StringQueryResultMarshal());
     _marshalMap.put(AddUserQueryResult.class, new AddUserQueryResultMarshal());
     _marshalMap.put(TagResult[].class, new TagResultMarshal());
     _marshalMap.put(String[].class, new StringArrayMarshal());
     _marshalMap.put(InputStream.class, new InputStreamMarshal());
+    _marshalMap.put(StatServiceValuesQueryResult.class,
+                    new StatServiceValuesQueryResultMarshal());
 
     _marshalMap.put(RemoveUserQueryResult.class,
                     new RemoveUserQueryResultMarshal());

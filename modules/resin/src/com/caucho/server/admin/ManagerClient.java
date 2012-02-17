@@ -33,10 +33,12 @@ import com.caucho.bam.RemoteListenerUnavailableException;
 import com.caucho.bam.ServiceUnavailableException;
 import com.caucho.bam.actor.ActorSender;
 import com.caucho.hmtp.HmtpClient;
+import com.caucho.management.server.StatServiceValue;
 import com.caucho.server.cluster.Server;
 import com.caucho.util.L10N;
 
 import java.io.Serializable;
+import java.util.Date;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -300,6 +302,13 @@ public class ManagerClient
                                                 overwrite, 
                                                 restart);
     return (StringQueryResult) query(query);
+  }
+
+  public StatServiceValuesQueryResult getStats(String []meters, Date from, Date to)
+  {
+    StatsQuery query = new StatsQuery(meters, from, to);
+
+    return (StatServiceValuesQueryResult) query(query);
   }
 
   protected Serializable query(Serializable query)

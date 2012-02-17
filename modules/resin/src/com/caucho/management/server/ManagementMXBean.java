@@ -38,11 +38,13 @@ import com.caucho.server.admin.ControllerStateActionQueryResult;
 import com.caucho.server.admin.ListUsersQueryResult;
 import com.caucho.server.admin.PdfReportQueryResult;
 import com.caucho.server.admin.RemoveUserQueryResult;
+import com.caucho.server.admin.StatServiceValuesQueryResult;
 import com.caucho.server.admin.StringQueryResult;
 import com.caucho.server.admin.TagResult;
 
 import java.io.IOException;
 import java.io.InputStream;
+import java.util.Date;
 
 /**
  * Management facade for Resin, used for REST.
@@ -148,6 +150,15 @@ public interface ManagementMXBean extends ManagedObjectMXBean
     @MXParam(name = "load-pdf")
     boolean isLoadPdf)
     throws ReflectionException;
+
+  @Description("outputs stats collected by a named meter")
+  @MXAction(value = "stats", method = "GET")
+  public StatServiceValuesQueryResult getStats(
+    @MXParam(name = "server") String serverId,
+    @MXParam(name = "meters", required = true) String metersStr,
+    @MXParam(name = "period", defaultValue = "7D")
+    String periodStr)
+  throws ReflectionException;
 
   @Description("sets JMX Mbean's attribute")
   @MXAction(value = "jmx-set", method = "POST")
