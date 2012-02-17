@@ -33,11 +33,6 @@ import java.io.IOException;
 import java.util.List;
 import java.util.Map;
 
-import javax.annotation.PostConstruct;
-
-import com.caucho.network.listen.Protocol;
-import com.caucho.network.listen.ProtocolConnection;
-import com.caucho.network.listen.SocketLink;
 import com.caucho.vfs.WriteStream;
 
 /**
@@ -50,9 +45,14 @@ import com.caucho.vfs.WriteStream;
  * </pre>
  */
 public class AmqpWriter implements AmqpConstants {
-  private WriteStream _os;
+  private AmqpBaseWriter _os;
   
   public void init(WriteStream os)
+  {
+    _os = new AmqpStreamWriter(os);
+  }
+  
+  public void init(AmqpBaseWriter os)
   {
     _os = os;
   }
@@ -72,7 +72,7 @@ public class AmqpWriter implements AmqpConstants {
   public void writeByte(int value)
     throws IOException
   {
-    WriteStream os = _os;
+    AmqpBaseWriter os = _os;
     
     if (value == 0) {
       os.write(E_I0);
@@ -86,21 +86,16 @@ public class AmqpWriter implements AmqpConstants {
   public void writeUbyte(int value)
     throws IOException
   {
-    WriteStream os = _os;
+    AmqpBaseWriter os = _os;
     
-    if (value == 0) {
-      os.write(E_I0);
-    }
-    else {
-      os.write(E_UBYTE_1);
-      os.write(value);
-    }
+    os.write(E_UBYTE_1);
+    os.write(value);
   }
   
   public void writeShort(int value)
     throws IOException
   {
-    WriteStream os = _os;
+    AmqpBaseWriter os = _os;
     
     if (value == 0) {
       os.write(E_I0);
@@ -115,7 +110,7 @@ public class AmqpWriter implements AmqpConstants {
   public void writeUshort(int value)
     throws IOException
   {
-    WriteStream os = _os;
+    AmqpBaseWriter os = _os;
     
     if (value == 0) {
       os.write(E_I0);
@@ -130,7 +125,7 @@ public class AmqpWriter implements AmqpConstants {
   public void writeInt(int value)
     throws IOException
   {
-    WriteStream os = _os;
+    AmqpBaseWriter os = _os;
     
     if (value == 0) {
       os.write(E_I0);
@@ -151,7 +146,7 @@ public class AmqpWriter implements AmqpConstants {
   public void writeUint(int value)
     throws IOException
   {
-    WriteStream os = _os;
+    AmqpBaseWriter os = _os;
     
     if (value == 0) {
       os.write(E_I0);
@@ -172,7 +167,7 @@ public class AmqpWriter implements AmqpConstants {
   public void writeLong(long value)
     throws IOException
   {
-    WriteStream os = _os;
+    AmqpBaseWriter os = _os;
     
     if (value == 0) {
       os.write(E_L0);
@@ -197,7 +192,7 @@ public class AmqpWriter implements AmqpConstants {
   public void writeUlong(long value)
     throws IOException
   {
-    WriteStream os = _os;
+    AmqpBaseWriter os = _os;
     
     if (value == 0) {
       os.write(E_L0);
@@ -222,7 +217,7 @@ public class AmqpWriter implements AmqpConstants {
   public void writeTimestamp(long value)
     throws IOException
   {
-    WriteStream os = _os;
+    AmqpBaseWriter os = _os;
     
     os.write(E_TIMESTAMP);
     os.write((int) (value >> 56));
@@ -238,7 +233,7 @@ public class AmqpWriter implements AmqpConstants {
   public void writeString(String value)
     throws IOException
   {
-    WriteStream os = _os;
+    AmqpBaseWriter os = _os;
     
     if (value == null) {
       os.write(E_NULL);
@@ -259,7 +254,9 @@ public class AmqpWriter implements AmqpConstants {
       os.write(len);
     }
     
-    os.printUtf8(value, 0, value.length());
+    for (int i = 0; i < value.length(); i++) {
+      os.write(value.charAt(i));
+    }
   }
   
   private int calculateUtf8Length(String value)
@@ -287,7 +284,7 @@ public class AmqpWriter implements AmqpConstants {
   public void writeSymbol(String value)
     throws IOException
   {
-    WriteStream os = _os;
+    AmqpBaseWriter os = _os;
     
     if (value == null) {
       os.write(E_NULL);
@@ -308,13 +305,15 @@ public class AmqpWriter implements AmqpConstants {
       os.write(len);
     }
     
-    os.print(value, 0, len);
+    for (int i = 0; i < value.length(); i++) {
+      os.write(value.charAt(i));
+    }
   }
   
   public void writeDescriptor(int code)
     throws IOException
   {
-    WriteStream os = _os;
+    AmqpBaseWriter os = _os;
     
     os.write(E_DESCRIPTOR);
     writeUlong(code);
@@ -323,7 +322,7 @@ public class AmqpWriter implements AmqpConstants {
   public void writeList(List<?> list)
     throws IOException
   {
-    WriteStream os = _os;
+    AmqpBaseWriter os = _os;
     
     if (list == null) {
       os.write(E_NULL);
@@ -331,12 +330,34 @@ public class AmqpWriter implements AmqpConstants {
     }
     
     throw new UnsupportedOperationException();
+  }
+  
+  public int startList()
+    throws IOException
+  {
+    AmqpBaseWriter os = _os;
+    
+    os.write(E_LIST_1);
+    os.write(0xff);
+    os.write(0xff);
+    
+    return os.getOffset();
+  }
+  
+  public void finishList(int startOffset, int count)
+  {
+    AmqpBaseWriter os = _os;
+    
+    int finishOffset = os.getOffset();
+
+    os.writeByte(startOffset - 2, (finishOffset - startOffset));
+    os.writeByte(startOffset - 1, count);
   }
   
   public void writeArray(List<?> list)
     throws IOException
   {
-    WriteStream os = _os;
+    AmqpBaseWriter os = _os;
     
     if (list == null) {
       os.write(E_NULL);
@@ -346,10 +367,76 @@ public class AmqpWriter implements AmqpConstants {
     throw new UnsupportedOperationException();
   }
   
+  public int startArray(int code)
+    throws IOException
+  {
+    AmqpBaseWriter os = _os;
+    
+    os.write(E_ARRAY_1);
+    os.write(0xff);
+    os.write(0xff);
+    
+    int offset = os.getOffset();
+    
+    os.write(code);
+    
+    return offset;
+  }
+  
+  public void finishArray(int startOffset, int count)
+  {
+    AmqpBaseWriter os = _os;
+    
+    int finishOffset = os.getOffset();
+
+    os.writeByte(startOffset - 2, (finishOffset - startOffset));
+    os.writeByte(startOffset - 1, count);
+  }
+  
+  private void writeSymbolValue(String value)
+    throws IOException
+  {
+    AmqpBaseWriter os = _os;
+    
+    int len = value.length();
+    
+    for (int i = 0; i < len; i++) {
+      os.write(value.charAt(i));
+    }
+  }
+  
+  public void writeSymbolArray(List<String> list)
+    throws IOException
+  {
+    AmqpBaseWriter os = _os;
+    
+    if (list == null || list.size() == 0) {
+      os.write(E_NULL);
+      return;
+    }
+    
+    if (list.size() == 1) {
+      writeSymbol(list.get(0));
+      return;
+    }
+     
+    int offset = startArray(E_SYMBOL_1);
+    
+    for (int i = 0; i < list.size(); i++) {
+      String value = list.get(i);
+      
+      os.write(value.length());
+      
+      writeSymbolValue(value);
+    }
+    
+    finishArray(offset, list.size());
+  }
+  
   public void writeMap(Map<?,?> map)
     throws IOException
   {
-    WriteStream os = _os;
+    AmqpBaseWriter os = _os;
     
     if (map == null) {
       os.write(E_NULL);

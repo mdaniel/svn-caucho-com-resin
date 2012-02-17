@@ -29,26 +29,12 @@
 
 package com.caucho.mqueue.amqp;
 
-import java.io.ByteArrayInputStream;
 import java.io.IOException;
-import java.io.InputStream;
-import java.io.OutputStream;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.logging.Level;
 import java.util.logging.Logger;
 
-import sun.net.ProgressSource.State;
-
-import com.caucho.distcache.ClusterCache;
-import com.caucho.distcache.ExtCacheEntry;
 import com.caucho.network.listen.ProtocolConnection;
 import com.caucho.network.listen.SocketLink;
-import com.caucho.util.Alarm;
-import com.caucho.util.CharBuffer;
-import com.caucho.util.HashKey;
 import com.caucho.vfs.ReadStream;
-import com.caucho.vfs.TempStream;
 import com.caucho.vfs.WriteStream;
 
 /**
@@ -63,6 +49,7 @@ public class AmqpConnection implements ProtocolConnection
   private SocketLink _link;
   
   private State _state = State.NEW;
+  private boolean _isSasl;
   
   AmqpConnection(AmqpProtocol amqp, SocketLink link)
   {
@@ -101,9 +88,33 @@ public class AmqpConnection implements ProtocolConnection
   {
     ReadStream is = _link.getReadStream();
     
+    System.out.println("REQ1:");
+    
     switch (_state) {
     case NEW:
-      readVersion(is);
+      if (! readVersion(is)) {
+        return false;
+      }
+      
+      System.out.println("SASL: " + _isSasl);
+      
+      if (_isSasl) {
+        System.out.println("SASL:");
+        try {
+          sendSaslChallenge();
+          System.out.println("SENDED:");
+          
+          readVersion(is);
+        } catch (Exception e) {
+          e.printStackTrace();
+        }
+        
+        int ch;
+        while ((ch = is.read()) >= 0) {
+          System.out.println("CH: " + Integer.toHexString(ch) + " " + (char) ch);
+        }
+        System.out.println("DONE-CH: " + Integer.toHexString(ch));
+      }
       break;
     default:
       System.out.println("UNKNOWN STATE: " + _state);
@@ -120,10 +131,23 @@ public class AmqpConnection implements ProtocolConnection
     if (is.read() != 'A'
         || is.read() != 'M'
         || is.read() != 'Q'
-        || is.read() != 'P'
-        || is.read() != 0) {
+        || is.read() != 'P') {
       System.out.println("ILLEGAL_HEADER:");
       throw new IOException();
+    }
+    
+    int code = is.read();
+    
+    switch (code) {
+    case 0x00:
+      _isSasl = false;
+      break;
+    case 0x03:
+      _isSasl = true;
+      break;
+    default:
+      System.out.println("BAD_CODE: " + code);
+      throw new IOException("Unknown code");
     }
     
     int major = is.read() & 0xff;
@@ -141,13 +165,47 @@ public class AmqpConnection implements ProtocolConnection
     os.write('M');
     os.write('Q');
     os.write('P');
-    os.write(0);
+    os.write(code); // sasl?
     os.write(0x01); // major
     os.write(0x00); // minor
     os.write(0x00); // version
     os.flush();
     
+    System.out.println("VERSION:");
+    
     return true;
+  }
+  
+  private void sendSaslChallenge()
+    throws IOException
+  {
+    WriteStream os = _link.getWriteStream();
+    
+    AmqpFrameWriter frameOs = new AmqpFrameWriter(os);
+    
+    frameOs.startFrame(1);
+    
+    AmqpWriter out = new AmqpWriter();
+    out.init(frameOs);
+    
+    SaslMechanisms mechanisms = new SaslMechanisms();
+    mechanisms.write(out);
+    
+    frameOs.finishFrame();
+    os.flush();
+    
+    System.out.println("SASL_DONE:");
+    
+    frameOs.startFrame(1);
+    out.init(frameOs);
+    
+    SaslOutcome outcome = new SaslOutcome();
+    outcome.write(out);
+    
+    frameOs.finishFrame();
+    os.flush();
+    
+    System.out.println("SASL_DONE2:");
   }
   
   @Override
