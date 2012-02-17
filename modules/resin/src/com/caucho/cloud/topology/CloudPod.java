@@ -283,6 +283,19 @@ public class CloudPod
   public CloudServer createStaticServer(String id,
                                         String address,
                                         int port,
+                                        boolean isSecure)
+  {
+    boolean isAllowExternal = false;
+    
+    return createServer(id, address, port, isSecure, 
+                        ServerType.STATIC, isAllowExternal);
+  }
+  /**
+   * Creates a new static server
+   */
+  public CloudServer createStaticServer(String id,
+                                        String address,
+                                        int port,
                                         boolean isSecure,
                                         boolean isAllowExternal)
   {

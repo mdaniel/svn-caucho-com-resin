@@ -943,6 +943,7 @@ public class CacheImpl<K,V>
       LoadFuture<K,V> loadFuture = new LoadFuture<K,V>(this, key);
       
       loadQueue.offer(loadFuture);
+      loadQueue.wake();
 
       return loadFuture;
   }
@@ -965,6 +966,7 @@ public class CacheImpl<K,V>
     LoadFuture loadFuture = new LoadFuture(this, keys);
     
     loadQueue.offer(loadFuture);
+    loadQueue.wake();
 
     return loadFuture;
   }
@@ -1307,8 +1309,9 @@ public class CacheImpl<K,V>
     {
       CacheImpl<K,V> cache = _cache;
       
-      if (cache != null)
+      if (cache != null) {
         item.process(cache);
+      }
     }
     
     void close()
