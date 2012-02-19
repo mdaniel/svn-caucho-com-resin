@@ -30,6 +30,8 @@
 package com.caucho.mqueue.amqp;
 
 import java.io.IOException;
+import java.io.InputStream;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
@@ -39,6 +41,7 @@ import com.caucho.network.listen.Protocol;
 import com.caucho.network.listen.ProtocolConnection;
 import com.caucho.network.listen.SocketLink;
 import com.caucho.vfs.ReadStream;
+import com.caucho.vfs.Vfs;
 
 /**
  * AMQP frame
@@ -53,9 +56,9 @@ public class AmqpReader implements AmqpConstants {
   private ReadStream _is;
   private boolean _isNull;
   
-  public void init(ReadStream is)
+  public void init(InputStream is)
   {
-    _is = is;
+    _is = Vfs.openRead(is);
   }
   
   public int read()
@@ -132,7 +135,54 @@ public class AmqpReader implements AmqpConstants {
     }
   }
   
-  public String readSymbol()
+  public long readLong()
+    throws IOException
+  {
+    _isNull = false;
+    
+    ReadStream is = _is;
+      
+    int code = is.read();
+      
+    switch (code) {
+    case E_NULL:
+      _isNull = true;
+      return 0;
+      
+    case E_I0:
+    case E_L0:
+      return 0;
+      
+    case E_BYTE_1:
+    case E_INT_1:
+    case E_LONG_1:
+      return (byte) is.read();
+      
+    case E_UBYTE_1:
+    case E_UINT_1:
+    case E_ULONG_1:
+      return is.read() & 0xff;
+      
+    case E_SHORT:
+      return (short) readShort(is);
+      
+    case E_USHORT:
+      return readShort(is) & 0xffff;
+      
+    case E_INT_4:
+    case E_UINT_4:
+      return readInt(is) & 0xffffffffL;
+      
+    case E_LONG_8:
+    case E_ULONG_8:
+      return readLong(is);
+      
+    default:
+      throw new IOException("unknown long code: " + Integer.toHexString(code));
+    }
+  }
+  
+  public List<String> readSymbolArray()
     throws IOException
   {
     _isNull = false;
@@ -141,22 +191,60 @@ public class AmqpReader implements AmqpConstants {
     
     int code = is.read();
     
+    if (code == E_NULL) {
+      return null;
+    }
+    
+    ArrayList<String> values = new ArrayList<String>();
+    
     switch (code) {
     case E_NULL:
       return null;
       
     case E_SYMBOL_1:
-      return readSymbol(is.read() & 0xff);
+    {
+      String value = readSymbol(is.read() & 0xff);
+      values.add(value);
+      return values;
+    }
       
     case E_SYMBOL_4:
-      return readSymbol(readInt(is));
+    {
+      String value = readSymbol(readInt(is));
+      values.add(value);
+      return values;
+    }
       
     default:
-      throw new IOException("unknown symbol code: " + Integer.toHexString(code));
+      throw new IOException("unknown symbol array code: " + Integer.toHexString(code));
     }
   }
+
+  public String readSymbol()
+    throws IOException
+  {
+      _isNull = false;
+      
+      ReadStream is = _is;
+      
+      int code = is.read();
+      
+      switch (code) {
+      case E_NULL:
+        return null;
+        
+      case E_SYMBOL_1:
+        return readSymbol(is.read() & 0xff);
+        
+      case E_SYMBOL_4:
+        return readSymbol(readInt(is));
+        
+      default:
+        throw new IOException("unknown symbol code: " + Integer.toHexString(code));
+      }
+  }
   
-  public String readUtf8()
+  public String readString()
     throws IOException
   {
     _isNull = false;
@@ -180,7 +268,7 @@ public class AmqpReader implements AmqpConstants {
     }
   }
   
-  public List<?> readList()
+  public long readDescriptor()
     throws IOException
   {
     _isNull = false;
@@ -191,11 +279,88 @@ public class AmqpReader implements AmqpConstants {
     
     switch (code) {
     case E_NULL:
+      _isNull = true;
+      return 0;
+      
+    case E_DESCRIPTOR:
+      return readLong();
+      
+    default:
+      throw new IOException("unknown descriptor code: " + Integer.toHexString(code));
+    }
+  }
+  
+  public <T extends AmqpAbstractPacket>
+  T readObject(Class<T> type)
+    throws IOException
+  {
+    long descriptor = readDescriptor();
+    
+    if (_isNull) {
       return null;
+    }
+    
+    return AmqpAbstractPacket.readType(this, descriptor, type);
+  }
+  
+  public List<?> readList()
+    throws IOException
+  {
+      _isNull = false;
+      
+      ReadStream is = _is;
+      
+      int code = is.read();
+      
+      switch (code) {
+      case E_NULL:
+        return null;
+        
+      default:
+        throw new IOException("unknown array code: " + Integer.toHexString(code));
+      }
+  }
+  
+  public int startList()
+    throws IOException
+  {
+    _isNull = false;
+    
+    ReadStream is = _is;
+    
+    int code = is.read();
+    
+    switch (code) {
+    case E_NULL:
+      return 0;
+      
+    case E_LIST_0:
+      return 0;
+      
+    case E_LIST_1:
+    {
+      int size = read() & 0xff;
+      int count = read() & 0xff;
+      
+      return count;
+    }
+    
+    case E_LIST_4:
+    {
+      int size = readInt(is);
+      int count = readInt(is);
+      
+      return count;
+    }
       
     default:
       throw new IOException("unknown array code: " + Integer.toHexString(code));
     }
+  }
+  
+  public void endList()
+  {
+    
   }
   
   public List<?> readArray()
@@ -216,8 +381,14 @@ public class AmqpReader implements AmqpConstants {
     }
   }
   
-  public Map<?,?> readMap()
+  public Map<String,?> readFieldMap()
     throws IOException
+  {
+    return (Map) readMap();
+  }
+  
+  public Map<?,?> readMap()
+  throws IOException
   {
     _isNull = false;
     
@@ -278,5 +449,18 @@ public class AmqpReader implements AmqpConstants {
            + ((is.read() & 0xff) << 16)
            + ((is.read() & 0xff) << 8)
            + ((is.read() & 0xff)));
+  }
+  
+  private long readLong(ReadStream is)
+    throws IOException
+  {
+    return (((is.read() & 0xffL) << 56)
+           + ((is.read() & 0xffL) << 48)
+           + ((is.read() & 0xffL) << 40)
+           + ((is.read() & 0xffL) << 32)
+           + ((is.read() & 0xffL) << 24)
+           + ((is.read() & 0xffL) << 16)
+           + ((is.read() & 0xffL) << 8)
+           + ((is.read() & 0xffL)));
   }
 }

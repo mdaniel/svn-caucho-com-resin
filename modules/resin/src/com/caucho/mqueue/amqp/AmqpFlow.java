@@ -30,21 +30,12 @@
 package com.caucho.mqueue.amqp;
 
 import java.io.IOException;
-import java.util.List;
 import java.util.Map;
-
-import javax.annotation.PostConstruct;
-
-import com.caucho.mqueue.amqp.AmqpLinkAttach.ReceiverSettleMode;
-import com.caucho.mqueue.amqp.AmqpLinkAttach.Role;
-import com.caucho.network.listen.Protocol;
-import com.caucho.network.listen.ProtocolConnection;
-import com.caucho.network.listen.SocketLink;
 
 /**
  * AMQP link flow
  */
-public class AmqpFlow extends AmqpAbstractPacket {
+public class AmqpFlow extends AmqpAbstractComposite {
   public static final int CODE = AmqpConstants.FT_LINK_FLOW;
 
   private long _nextIncomingId; // uint seq (RFC1892)
@@ -59,23 +50,105 @@ public class AmqpFlow extends AmqpAbstractPacket {
   private boolean _isEcho;
   private Map<String,?> _properties;
   
+  public long getNextIncomingId()
+  {
+    return _nextIncomingId;
+  }
+  
+  public int getIncomingWindow()
+  {
+    return _incomingWindow;
+  }
+  
+  public long getNextOutgoingId()
+  {
+    return _nextOutgoingId;
+  }
+  
+  public int getOutgoingWindow()
+  {
+    return _outgoingWindow;
+  }
+  
+  public int getHandle()
+  {
+    return _handle;
+  }
+  
+  public long getDeliveryCount()
+  {
+    return _deliveryCount;
+  }
+  
+  public int getLinkCredit()
+  {
+    return _linkCredit;
+  }
+  
+  public int getAvailable()
+  {
+    return _available;
+  }
+  
+  public boolean isDrain()
+  {
+    return _isDrain;
+  }
+  
+  public boolean isEcho()
+  {
+    return _isEcho;
+  }
+  
+  public Map<String,?> getProperties()
+  {
+    return _properties;
+  }
+  
   @Override
-  public void write(AmqpWriter out)
+  public long getDescriptorCode()
+  {
+    return FT_LINK_FLOW;
+  }
+  
+  @Override
+  public void readBody(AmqpReader in, int count)
     throws IOException
   {
-    out.writeDescriptor(FT_LINK_FLOW);
+    _nextIncomingId = in.readInt();
+    _incomingWindow = in.readInt();
+    _nextOutgoingId = in.readInt();
+    _outgoingWindow = in.readInt();
+    _handle = in.readInt();
+    _deliveryCount = in.readInt();
+    _linkCredit = in.readInt();
+    _available = in.readInt();
+    _isDrain = in.readBoolean();
+    _isEcho = in.readBoolean();
     
+    _properties = in.readFieldMap();
+  }
+  
+  @Override
+  public int writeBody(AmqpWriter out)
+    throws IOException
+  {
     out.writeUint((int) _nextIncomingId);
     out.writeUint(_incomingWindow);
     out.writeUint((int) _nextOutgoingId);
     out.writeUint(_outgoingWindow);
+    
     out.writeUint(_handle);
+    
     out.writeUint((int) _deliveryCount);
     out.writeUint(_linkCredit);
     out.writeUint(_available);
+    
     out.writeBoolean(_isDrain);
     out.writeBoolean(_isEcho);
+    
     out.writeMap(_properties);
+    
+    return 11;
   }
-
 }

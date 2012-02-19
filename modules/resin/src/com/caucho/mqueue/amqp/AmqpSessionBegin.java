@@ -36,7 +36,7 @@ import java.util.Map;
 /**
  * AMQP session-begin frame 
  */
-public class AmqpSessionBegin extends AmqpAbstractPacket {
+public class AmqpSessionBegin extends AmqpAbstractComposite {
   public static final int CODE = AmqpConstants.FT_SESSION_OPEN;
 
   private int _remoteChannel;   // ushort
@@ -53,9 +53,20 @@ public class AmqpSessionBegin extends AmqpAbstractPacket {
     _remoteChannel = channel;
   }
   
+  public int getRemoteChannel()
+  {
+    return _remoteChannel;
+  }
+  
   public void setNextOutgoingId(long id)
   {
     _nextOutgoingId = id;
+  }
+  
+  
+  public long getNextOutgoingId()
+  {
+    return _nextOutgoingId;
   }
   
   public void setIncomingWindow(int window)
@@ -63,9 +74,19 @@ public class AmqpSessionBegin extends AmqpAbstractPacket {
     _incomingWindow = window;
   }
   
+  public int getIncomingWindow()
+  {
+    return _incomingWindow;
+  }
+  
   public void setOutgoingWindow(int window)
   {
     _outgoingWindow = window;
+  }
+  
+  public int getOutgoingWindow()
+  {
+    return _outgoingWindow;
   }
   
   public void setHandleMax(int max)
@@ -73,12 +94,36 @@ public class AmqpSessionBegin extends AmqpAbstractPacket {
     _handleMax = max;
   }
   
+  public int getHandleMax()
+  {
+    return _handleMax;
+  }
+  
+  public List<String> getOfferedCapabilities()
+  {
+    return _offeredCapabilities;
+  }
+  
+  public List<String> getDesiredCapabilities()
+  {
+    return _desiredCapabilities;
+  }
+  
+  public Map<String,?> getProperties()
+  {
+    return _properties;
+  }
+  
   @Override
-  public void write(AmqpWriter out)
+  public long getDescriptorCode()
+  {
+    return FT_SESSION_OPEN;
+  }
+  
+  @Override
+  public int writeBody(AmqpWriter out)
     throws IOException
   {
-    out.writeDescriptor(FT_SESSION_OPEN);
-    
     out.writeUshort(_remoteChannel);
     
     out.writeUlong(_nextOutgoingId);
@@ -86,8 +131,27 @@ public class AmqpSessionBegin extends AmqpAbstractPacket {
     out.writeUint(_outgoingWindow);
     out.writeUint(_handleMax);
     
-    out.writeArray(_offeredCapabilities);
-    out.writeArray(_desiredCapabilities);
+    out.writeSymbolArray(_offeredCapabilities);
+    out.writeSymbolArray(_desiredCapabilities);
     out.writeMap(_properties);
+    
+    return 8;
+  }
+  
+  @Override
+  public void readBody(AmqpReader in, int count)
+    throws IOException
+  {
+    _remoteChannel = in.readInt();
+    _nextOutgoingId = in.readLong();
+      
+    _incomingWindow = in.readInt();
+    _outgoingWindow = in.readInt();
+    _handleMax = in.readInt();
+    
+    _offeredCapabilities = in.readSymbolArray();
+    _desiredCapabilities = in.readSymbolArray();
+    
+    _properties =in.readFieldMap();
   }
 }

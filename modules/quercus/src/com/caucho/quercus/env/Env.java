@@ -813,6 +813,9 @@ public class Env
    */
   public StringValue createBinaryBuilder(byte []buffer)
   {
+    if (buffer == null)
+      return StringBuilderValue.EMPTY;
+    
     if (_isUnicodeSemantics)
       return new BinaryBuilderValue(buffer, 0, buffer.length);
     else

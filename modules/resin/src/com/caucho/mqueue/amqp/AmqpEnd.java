@@ -34,18 +34,39 @@ import java.io.IOException;
 /**
  * AMQP session end
  */
-public class AmqpEnd extends AmqpAbstractPacket {
+public class AmqpEnd extends AmqpAbstractComposite {
   public static final int CODE = AmqpConstants.FT_SESSION_END;
 
-  private String _error;
+  private AmqpError _error;
+  
+  public AmqpError getError()
+  {
+    return _error;
+  }
   
   @Override
-  public void write(AmqpWriter out)
+  public long getDescriptorCode()
+  {
+    return FT_SESSION_END;
+  }
+  
+  @Override
+  public void readBody(AmqpReader in, int count)
     throws IOException
   {
-    out.writeDescriptor(FT_SESSION_END);
+    _error = in.readObject(AmqpError.class);
+  }
+  
+  @Override
+  public int writeBody(AmqpWriter out)
+    throws IOException
+  {
+    if (_error != null)
+      _error.write(out);
+    else
+      out.writeNull();
     
-    out.writeNull(); // error
+    return 1;
   }
 
 }

@@ -30,13 +30,14 @@
 package com.caucho.mqueue.amqp;
 
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
 /**
  * AMQP connection-open frame 
  */
-public class AmqpConnectionOpen extends AmqpAbstractPacket {
+public class AmqpConnectionOpen extends AmqpAbstractComposite {
   public static final int CODE = AmqpConstants.FT_CONN_OPEN;
   
   private String _containerId;    // required
@@ -51,9 +52,20 @@ public class AmqpConnectionOpen extends AmqpAbstractPacket {
   
   private Map<String,?> _properties;         // field
   
+  @Override
+  protected long getDescriptorCode()
+  {
+    return AmqpConstants.FT_CONN_OPEN;
+  }
+  
   public void setContainerId(String id)
   {
     _containerId = id;
+  }
+  
+  public String getContainerId()
+  {
+    return _containerId;
   }
   
   public void setHostname(String hostname)
@@ -61,9 +73,19 @@ public class AmqpConnectionOpen extends AmqpAbstractPacket {
     _hostname = hostname;
   }
   
+  public String getHostname()
+  {
+    return _hostname;
+  }
+  
   public void setMaxFrameSize(int size)
   {
     _maxFrameSize = size;
+  }
+  
+  public int getMaxFrameSize()
+  {
+    return _maxFrameSize;
   }
   
   public void setChannelMax(int max)
@@ -71,17 +93,86 @@ public class AmqpConnectionOpen extends AmqpAbstractPacket {
     _channelMax = max;
   }
   
+  public int getChannelMax()
+  {
+    return _channelMax;
+  }
+  
   public void setIdleTimeout(long timeout)
   {
     _idleTimeout = timeout;
   }
   
+  public long getIdleTimeout()
+  {
+    return _idleTimeout;
+  }
+  
+  public void addOutgoingLocale(String locale)
+  {
+    if (_outgoingLocales == null) {
+      _outgoingLocales = new ArrayList<String>();
+    }
+    
+    _outgoingLocales.add(locale);
+  }
+  
+  public List<String> getOutgoingLocales()
+  {
+    return _outgoingLocales;
+  }
+  
+  public void addIncomingLocale(String locale)
+  {
+    if (_incomingLocales == null) {
+      _incomingLocales = new ArrayList<String>();
+    }
+    
+    _incomingLocales.add(locale);
+  }
+  
+  public List<String> getIncomingLocales()
+  {
+    return _incomingLocales;
+  }
+  
+  public void addOfferedCapability(String capability)
+  {
+    if (_offeredCapabilities == null) {
+      _offeredCapabilities = new ArrayList<String>();
+    }
+    
+    _offeredCapabilities.add(capability);
+  }
+  
+  public List<String> getOfferedCapabilities()
+  {
+    return _offeredCapabilities;
+  }
+  
+  public void addDesiredCapability(String capability)
+  {
+    if (_desiredCapabilities == null) {
+      _desiredCapabilities = new ArrayList<String>();
+    }
+    
+    _desiredCapabilities.add(capability);
+  }
+  
+  public List<String> getDesiredCapabilities()
+  {
+    return _desiredCapabilities;
+  }
+  
+  public Map<String,?> getProperties()
+  {
+    return _properties;
+  }
+  
   @Override
-  public void write(AmqpWriter out)
+  public int writeBody(AmqpWriter out)
     throws IOException
   {
-    out.writeDescriptor(FT_CONN_OPEN);
-    
     out.writeString(_containerId);
     out.writeString(_hostname);
       
@@ -89,11 +180,32 @@ public class AmqpConnectionOpen extends AmqpAbstractPacket {
     out.writeUshort(_channelMax);
     out.writeUint((int) _idleTimeout);
     
-    out.writeArray(_outgoingLocales);
-    out.writeArray(_incomingLocales);
-    out.writeArray(_offeredCapabilities);
-    out.writeArray(_desiredCapabilities);
+    out.writeSymbolArray(_outgoingLocales);
+    out.writeSymbolArray(_incomingLocales);
+    out.writeSymbolArray(_offeredCapabilities);
+    out.writeSymbolArray(_desiredCapabilities);
     
     out.writeMap(_properties);
+    
+    return 10;
+  }
+  
+  @Override
+  public void readBody(AmqpReader in, int count)
+    throws IOException
+  {
+    _containerId = in.readString();
+    _hostname = in.readString();
+      
+    _maxFrameSize = in.readInt();
+    _channelMax = in.readInt();
+    _idleTimeout = in.readInt();
+    
+    _outgoingLocales = in.readSymbolArray();
+    _incomingLocales = in.readSymbolArray();
+    _offeredCapabilities = in.readSymbolArray();
+    _desiredCapabilities = in.readSymbolArray();
+    
+    _properties = in.readFieldMap();
   }
 }

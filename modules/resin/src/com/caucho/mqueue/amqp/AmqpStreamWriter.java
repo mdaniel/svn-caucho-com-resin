@@ -30,22 +30,13 @@
 package com.caucho.mqueue.amqp;
 
 import java.io.IOException;
-import java.io.OutputStream;
-import java.util.List;
-import java.util.Map;
 
-import javax.annotation.PostConstruct;
-
-import com.caucho.network.listen.Protocol;
-import com.caucho.network.listen.ProtocolConnection;
-import com.caucho.network.listen.SocketLink;
-import com.caucho.vfs.TempBuffer;
 import com.caucho.vfs.WriteStream;
 
 public class AmqpStreamWriter extends AmqpBaseWriter {
-  private OutputStream _os;
+  private WriteStream _os;
   
-  public AmqpStreamWriter(OutputStream os)
+  public AmqpStreamWriter(WriteStream os)
   {
     _os = os;
   }
@@ -64,23 +55,15 @@ public class AmqpStreamWriter extends AmqpBaseWriter {
     _os.flush();
   }
 
-  /* (non-Javadoc)
-   * @see com.caucho.mqueue.amqp.AmqpBaseWriter#getOffset()
-   */
   @Override
   public int getOffset()
   {
-    // TODO Auto-generated method stub
-    return 0;
+    return _os.getBufferOffset();
   }
 
-  /* (non-Javadoc)
-   * @see com.caucho.mqueue.amqp.AmqpBaseWriter#writeByte(int, int)
-   */
   @Override
   public void writeByte(int offset, int value)
   {
-    // TODO Auto-generated method stub
-    
+    _os.getBuffer()[offset] = (byte) value;
   }
 }

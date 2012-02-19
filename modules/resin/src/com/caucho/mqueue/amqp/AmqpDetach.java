@@ -34,22 +34,53 @@ import java.io.IOException;
 /**
  * AMQP link detach
  */
-public class AmqpDetach extends AmqpAbstractPacket {
+public class AmqpDetach extends AmqpAbstractComposite {
   public static final int CODE = AmqpConstants.FT_LINK_DETACH;
 
   private int _handle; // uint(required)
   private boolean _isClosed;
-  private String _error;
+  private AmqpError _error;
+  
+  public int getHandle()
+  {
+    return _handle;
+  }
+  
+  public boolean isClosed()
+  {
+    return _isClosed;
+  }
+  
+  public AmqpError getError()
+  {
+    return _error;
+  }
   
   @Override
-  public void write(AmqpWriter out)
+  public long getDescriptorCode()
+  {
+    return FT_LINK_DETACH;
+  }
+  
+  @Override
+  public void readBody(AmqpReader in, int count)
     throws IOException
   {
-    out.writeDescriptor(FT_LINK_DETACH);
-    
+    _handle = in.readInt();
+    _isClosed = in.readBoolean();
+    _error = in.readObject(AmqpError.class);
+  }
+  
+  @Override
+  public int writeBody(AmqpWriter out)
+    throws IOException
+  {
     out.writeUint(_handle);
     out.writeBoolean(_isClosed);
-    out.writeNull(); // error
+    
+    if (_error != null)
+      _error.write(out);
+    
+    return 3;
   }
-
 }

@@ -32,40 +32,53 @@ package com.caucho.mqueue.amqp;
 import java.io.IOException;
 
 /**
- * AMQP connection close
+ * AMQP delivery received
  */
-public class AmqpClose extends AmqpAbstractComposite {
-  public static final int CODE = AmqpConstants.FT_CONN_CLOSE;
-
-  private AmqpError _error;
+public class AmqpDeliveryReceived extends AmqpDeliveryState {
+  private long _sectionNumber; // uint mandatory
+  private long _sectionOffset; // ulong mandatory
   
-  public AmqpError getError()
+  public long getSectionNumber()
   {
-    return _error;
+    return _sectionNumber;
   }
   
+  public void setSectionNumber(long sectionNumber)
+  {
+    _sectionNumber = sectionNumber;
+  }
+  
+  public long getSectionOffset()
+  {
+    return _sectionOffset;
+  }
+  
+  public void setSectionOffset(long sectionOffset)
+  {
+    _sectionOffset = sectionOffset;
+  }
+
   @Override
   public long getDescriptorCode()
   {
-    return FT_CONN_CLOSE;
+    return ST_MESSAGE_RECEIVED;
   }
   
   @Override
   public void readBody(AmqpReader in, int count)
     throws IOException
   {
-    _error = in.readObject(AmqpError.class);
+    _sectionNumber = in.readLong();
+    _sectionOffset = in.readLong();
   }
   
   @Override
   public int writeBody(AmqpWriter out)
     throws IOException
   {
-    if (_error != null)
-      _error.write(out);
-    else
-      out.writeNull();
+    out.writeUint((int) _sectionNumber);
+    out.writeUlong(_sectionOffset);
     
-    return 1;
+    return 2;
   }
 }

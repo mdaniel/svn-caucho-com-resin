@@ -30,42 +30,55 @@
 package com.caucho.mqueue.amqp;
 
 import java.io.IOException;
+import java.util.Map;
 
 /**
- * AMQP connection close
+ * AMQP error
  */
-public class AmqpClose extends AmqpAbstractComposite {
-  public static final int CODE = AmqpConstants.FT_CONN_CLOSE;
-
-  private AmqpError _error;
+public class AmqpError extends AmqpAbstractComposite {
+  private String _condition;
+  private String _description;
+  private Map<String,?> _fields;
   
-  public AmqpError getError()
+  public String getCondition()
   {
-    return _error;
+    return _condition;
+  }
+  
+  public String getDescription()
+  {
+    return _description;
+  }
+  
+  public Map<String,?> getFields()
+  {
+    return _fields;
   }
   
   @Override
   public long getDescriptorCode()
   {
-    return FT_CONN_CLOSE;
+    return FT_ERROR;
   }
   
   @Override
   public void readBody(AmqpReader in, int count)
     throws IOException
   {
-    _error = in.readObject(AmqpError.class);
+    _condition = in.readSymbol();
+    _description = in.readString();
+    _fields = in.readFieldMap();
   }
   
   @Override
   public int writeBody(AmqpWriter out)
     throws IOException
   {
-    if (_error != null)
-      _error.write(out);
-    else
-      out.writeNull();
+    out.writeSymbol(_condition);
+    out.writeString(_description);
+    out.writeMap(_fields);
     
-    return 1;
+    return 3;
   }
+
 }

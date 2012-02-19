@@ -36,11 +36,9 @@ import java.util.Map;
 /**
  * AMQP link-attach frame 
  */
-public class AmqpLinkAttach extends AmqpAbstractPacket {
+public class AmqpLinkAttach extends AmqpAbstractComposite {
   public static final int CODE = AmqpConstants.FT_LINK_ATTACH;
   
-  public static final int SENDER_SETTLE_MODE_MIXED = 2;
-
   private String _name; // (required)
   private int _handle; // uint (required)
   private Role _role = Role.RECEIVER; // required
@@ -49,8 +47,8 @@ public class AmqpLinkAttach extends AmqpAbstractPacket {
   private ReceiverSettleMode _receiverSettleMode // ubyte
     = ReceiverSettleMode.FIRST;
   
-  private String _source;
-  private String _target;
+  private AmqpSource _source;
+  private AmqpTarget _target;
   
   private Map<?,?> _unsettled;
   
@@ -63,12 +61,95 @@ public class AmqpLinkAttach extends AmqpAbstractPacket {
   
   private Map<String,?> _properties;
   
+  public String getName()
+  {
+    return _name;
+  }
+  
+  public int getHandle()
+  {
+    return _handle;
+  }
+  
+  public Role getRole()
+  {
+    return _role;
+  }
+  
+  public SenderSettleMode getSenderSettleMode()
+  {
+    return _senderSettleMode;
+  }
+  
+  public ReceiverSettleMode getReceiverSettleMode()
+  {
+    return _receiverSettleMode;
+  }
+  
+  public AmqpSource getSource()
+  {
+    return _source;
+  }
+  
+  public void setSource(AmqpSource source)
+  {
+    _source = source;
+  }
+  
+  public AmqpTarget getTarget()
+  {
+    return _target;
+  }
+  
+  public void setTarget(AmqpTarget target)
+  {
+    _target = target;
+  }
+  
+  public Map<?,?> getUnsettled()
+  {
+    return _unsettled;
+  }
+  
+  public boolean isIncompleteUnsettled()
+  {
+    return _isIncompleteUnsettled;
+  }
+  
+  public long getInitialDeliveryCount()
+  {
+    return _initialDeliveryCount;
+  }
+  
+  public long getMaxMessageSize()
+  {
+    return _maxMessageSize;
+  }
+  
+  public List<String> getOfferedCapabilities()
+  {
+    return _offeredCapabilities;
+  }
+  
+  public List<String> getDesiredCapabilities()
+  {
+    return _desiredCapabilities;
+  }
+  
+  public Map<String,?> getProperties()
+  {
+    return _properties;
+  }
+  
+  public long getDescriptorCode()
+  {
+    return FT_LINK_ATTACH;
+  }
+  
   @Override
-  public void write(AmqpWriter out)
+  public int writeBody(AmqpWriter out)
     throws IOException
   {
-    out.writeDescriptor(FT_LINK_ATTACH);
-    
     out.writeString(_name);
     out.writeUint(_handle);
     
@@ -77,8 +158,19 @@ public class AmqpLinkAttach extends AmqpAbstractPacket {
     out.writeUbyte(_senderSettleMode.ordinal());
     out.writeUbyte(_receiverSettleMode.ordinal());
     
-    out.writeNull(); // source
-    out.writeNull(); // target
+    if (_source != null) {
+      _source.write(out);
+    }
+    else {
+      out.writeNull();
+    }
+    
+    if (_target != null) {
+      _target.write(out);
+    }
+    else {
+      out.writeNull();
+    }
     
     out.writeMap(_unsettled);
     out.writeBoolean(_isIncompleteUnsettled);
@@ -86,9 +178,35 @@ public class AmqpLinkAttach extends AmqpAbstractPacket {
     out.writeUint((int) _initialDeliveryCount);
     out.writeUlong(_maxMessageSize);
     
-    out.writeArray(_offeredCapabilities);
-    out.writeArray(_desiredCapabilities);
+    out.writeSymbolArray(_offeredCapabilities);
+    out.writeSymbolArray(_desiredCapabilities);
     out.writeMap(_properties);
+    
+    return 14;
+  }
+  
+  @Override
+  public void readBody(AmqpReader in, int count)
+    throws IOException
+  {
+    _name = in.readString();
+    _handle = in.readInt();
+    
+    _role = Role.values()[in.readBoolean() ? 1 : 0];
+    _senderSettleMode = SenderSettleMode.values()[in.readInt()];
+    _receiverSettleMode = ReceiverSettleMode.values()[in.readInt()];
+    
+    _source = in.readObject(AmqpSource.class);
+    _target = in.readObject(AmqpTarget.class);
+    
+    _unsettled = in.readMap();
+    _isIncompleteUnsettled = in.readBoolean();
+    _initialDeliveryCount = in.readInt();
+    _maxMessageSize = in.readLong();
+    
+    _offeredCapabilities = in.readSymbolArray();
+    _desiredCapabilities = in.readSymbolArray();
+    _properties = in.readFieldMap();
   }
   
   // boolean

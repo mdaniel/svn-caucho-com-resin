@@ -30,11 +30,19 @@
 package com.caucho.mqueue.amqp;
 
 import java.io.IOException;
+import java.util.HashMap;
+
+import com.caucho.util.L10N;
 
 /**
- * Custom serialization for the cache
+ * an abstract amqp custom typed data
  */
 abstract public class AmqpAbstractPacket implements AmqpConstants {
+  private static final L10N L = new L10N(AmqpAbstractPacket.class);
+  
+  private static HashMap<Long,AmqpAbstractPacket> _typeMap
+    = new HashMap<Long,AmqpAbstractPacket>();
+  
   public void write(AmqpWriter out)
     throws IOException
   {
@@ -45,5 +53,50 @@ abstract public class AmqpAbstractPacket implements AmqpConstants {
     throws IOException
   {
     throw new UnsupportedOperationException(getClass().getName());
+  }
+  
+  public void readValue(AmqpReader in)
+    throws IOException
+  {
+    throw new UnsupportedOperationException(getClass().getName());
+  }
+  
+  protected long getDescriptorCode()
+  {
+    throw new UnsupportedOperationException(getClass().getName());
+  }
+  
+  public <T extends AmqpAbstractPacket>
+  T create(Class<T> type)
+  {
+    throw new UnsupportedOperationException(getClass().getName());
+  }
+  
+  static <T extends AmqpAbstractPacket>
+  T readType(AmqpReader in, long typeCode, Class<T> type)
+    throws IOException
+  {
+    AmqpAbstractPacket factory = _typeMap.get(typeCode);
+    
+    if (factory == null) {
+      throw new IOException(L.l("0x{0} is an unknown type expected {1}",
+                                Long.toHexString(typeCode), type.getName()));
+    }
+    
+    T value = factory.create(type);
+    
+    value.readValue(in);
+    
+    return value;
+  }
+  
+  private static void addType(AmqpAbstractPacket factory)
+  {
+    _typeMap.put(factory.getDescriptorCode(), factory);
+  }
+  
+  static {
+    addType(new AmqpSource());
+    addType(new AmqpTarget());
   }
 }

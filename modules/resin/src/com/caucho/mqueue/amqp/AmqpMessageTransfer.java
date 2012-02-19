@@ -30,21 +30,13 @@
 package com.caucho.mqueue.amqp;
 
 import java.io.IOException;
-import java.util.List;
-import java.util.Map;
-
-import javax.annotation.PostConstruct;
 
 import com.caucho.mqueue.amqp.AmqpLinkAttach.ReceiverSettleMode;
-import com.caucho.mqueue.amqp.AmqpLinkAttach.Role;
-import com.caucho.network.listen.Protocol;
-import com.caucho.network.listen.ProtocolConnection;
-import com.caucho.network.listen.SocketLink;
 
 /**
  * AMQP session-begin frame 
  */
-public class AmqpMessageTransfer extends AmqpAbstractPacket {
+public class AmqpMessageTransfer extends AmqpAbstractComposite {
   public static final int CODE = AmqpConstants.FT_MESSAGE_TRANSFER;
 
   private int _handle; // uint (required)
@@ -55,28 +47,115 @@ public class AmqpMessageTransfer extends AmqpAbstractPacket {
   private boolean _isMore;
   private ReceiverSettleMode _receiverSettleMode
     = ReceiverSettleMode.FIRST;
-  private String _state; // delivery-state
+  private AmqpDeliveryState _state; // delivery-state
   private boolean _isResume;
   private boolean _isAborted;
   private boolean _isBatchable;
   
+  public int getHandle()
+  {
+    return _handle;
+  }
+  
+  public long getDeliveryId()
+  {
+    return _deliveryId;
+  }
+  
+  public byte []getDeliveryTag()
+  {
+    return _deliveryTag;
+  }
+  
+  public int getMessageFormat()
+  {
+    return _messageFormat;
+  }
+  
+  public boolean isSettled()
+  {
+    return _isSettled;
+  }
+  
+  public boolean isMore()
+  {
+    return _isMore;
+  }
+  
+  public ReceiverSettleMode getReceiverSettleMode()
+  {
+    return _receiverSettleMode;
+  }
+  
+  public AmqpDeliveryState getDeliveryState()
+  {
+    return _state;
+  }
+  
+  public boolean isResume()
+  {
+    return _isResume;
+  }
+  
+  public boolean isAborted()
+  {
+    return _isAborted;
+  }
+  
+  public boolean isBatchable()
+  {
+    return _isBatchable;
+  }
+  
+  public long getDescriptorCode()
+  {
+    return FT_MESSAGE_TRANSFER;
+  }
+  
   @Override
-  public void write(AmqpWriter out)
+  public int writeBody(AmqpWriter out)
     throws IOException
   {
-    out.writeDescriptor(FT_MESSAGE_TRANSFER);
-    
     out.writeUint(_handle);
     out.writeUint((int) _deliveryId);
     out.writeNull(); // delivery-tag (binary)
+    
     out.writeUint(_messageFormat);
+    
     out.writeBoolean(_isSettled);
     out.writeBoolean(_isMore);
     out.writeUbyte(_receiverSettleMode.ordinal());
-    out.writeNull(); // delivery-state
+    
+    if (_state != null)
+      _state.write(out);
+    else
+      out.writeNull();
+    
     out.writeBoolean(_isResume);
     out.writeBoolean(_isAborted);
     out.writeBoolean(_isBatchable);
+    
+    return 11;
   }
-
+ 
+  @Override
+  public void readBody(AmqpReader in, int count)
+  throws IOException
+  {
+    _handle = in.readInt();
+    _deliveryId = in.readLong();
+    
+    _deliveryTag = null; in.read();
+    
+    _messageFormat = in.readInt();
+    _isSettled = in.readBoolean();
+    _isMore = in.readBoolean();
+    _receiverSettleMode = ReceiverSettleMode.values()[in.readInt()];
+    
+    _state = in.readObject(AmqpDeliveryState.class);
+    
+    _isResume = in.readBoolean();
+    _isAborted = in.readBoolean();
+    _isBatchable = in.readBoolean();
+  }
 }

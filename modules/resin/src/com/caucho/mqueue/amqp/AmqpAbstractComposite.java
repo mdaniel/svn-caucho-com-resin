@@ -32,40 +32,39 @@ package com.caucho.mqueue.amqp;
 import java.io.IOException;
 
 /**
- * AMQP connection close
+ * AMQP composite list writer
  */
-public class AmqpClose extends AmqpAbstractComposite {
-  public static final int CODE = AmqpConstants.FT_CONN_CLOSE;
+abstract public class AmqpAbstractComposite extends AmqpAbstractPacket {
+  abstract protected long getDescriptorCode();
+  
+  abstract protected int writeBody(AmqpWriter out)
+    throws IOException;
+  
+  abstract protected void readBody(AmqpReader in, int count)
+    throws IOException;
 
-  private AmqpError _error;
-  
-  public AmqpError getError()
-  {
-    return _error;
-  }
-  
   @Override
-  public long getDescriptorCode()
-  {
-    return FT_CONN_CLOSE;
-  }
-  
-  @Override
-  public void readBody(AmqpReader in, int count)
+  public final void write(AmqpWriter out)
     throws IOException
   {
-    _error = in.readObject(AmqpError.class);
-  }
-  
-  @Override
-  public int writeBody(AmqpWriter out)
-    throws IOException
-  {
-    if (_error != null)
-      _error.write(out);
-    else
-      out.writeNull();
+    out.writeDescriptor(getDescriptorCode());
     
-    return 1;
+    int offset = out.startList();
+    
+    int count = writeBody(out);
+    
+    out.finishList(offset, count);
+  }
+  
+  public void read(AmqpReader in)
+    throws IOException
+  {
+    long code = in.readDescriptor();
+    
+    int count = in.startList();
+    
+    readBody(in, count);
+    
+    in.endList();
   }
 }

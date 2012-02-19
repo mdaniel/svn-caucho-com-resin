@@ -30,9 +30,11 @@
 package com.caucho.mqueue.amqp;
 
 import java.io.IOException;
+import java.io.OutputStream;
 import java.util.List;
 import java.util.Map;
 
+import com.caucho.vfs.Vfs;
 import com.caucho.vfs.WriteStream;
 
 /**
@@ -47,13 +49,15 @@ import com.caucho.vfs.WriteStream;
 public class AmqpWriter implements AmqpConstants {
   private AmqpBaseWriter _os;
   
-  public void init(WriteStream os)
+  public void init(OutputStream os)
   {
-    _os = new AmqpStreamWriter(os);
+    _os = new AmqpStreamWriter(Vfs.openWrite(os));
+    System.out.println("OS: " + os);
   }
   
-  public void init(AmqpBaseWriter os)
+  public void initBase(AmqpBaseWriter os)
   {
+    System.out.println("OS2: " + os);
     _os = os;
   }
   
@@ -74,13 +78,8 @@ public class AmqpWriter implements AmqpConstants {
   {
     AmqpBaseWriter os = _os;
     
-    if (value == 0) {
-      os.write(E_I0);
-    }
-    else {
-      os.write(E_BYTE_1);
-      os.write(value);
-    }
+    os.write(E_BYTE_1);
+    os.write(value);
   }
   
   public void writeUbyte(int value)
@@ -97,14 +96,9 @@ public class AmqpWriter implements AmqpConstants {
   {
     AmqpBaseWriter os = _os;
     
-    if (value == 0) {
-      os.write(E_I0);
-    }
-    else {
-      os.write(E_SHORT);
-      os.write(value >> 8);
-      os.write(value);
-    }
+    os.write(E_SHORT);
+    os.write(value >> 8);
+    os.write(value);
   }
   
   public void writeUshort(int value)
@@ -112,14 +106,9 @@ public class AmqpWriter implements AmqpConstants {
   {
     AmqpBaseWriter os = _os;
     
-    if (value == 0) {
-      os.write(E_I0);
-    }
-    else {
-      os.write(E_USHORT);
-      os.write(value >> 8);
-      os.write(value);
-    }
+    os.write(E_USHORT);
+    os.write(value >> 8);
+    os.write(value);
   }
   
   public void writeInt(int value)
@@ -310,7 +299,7 @@ public class AmqpWriter implements AmqpConstants {
     }
   }
   
-  public void writeDescriptor(int code)
+  public void writeDescriptor(long code)
     throws IOException
   {
     AmqpBaseWriter os = _os;
