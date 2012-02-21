@@ -32,7 +32,10 @@ package com.caucho.boot;
 import com.caucho.config.types.Period;
 import com.caucho.server.admin.ManagerClient;
 import com.caucho.server.admin.StringQueryResult;
+import com.caucho.util.Alarm;
 import com.caucho.util.L10N;
+
+import java.util.Date;
 
 public class ListRestartsCommand extends AbstractManagementCommand
 {
@@ -63,9 +66,41 @@ public class ListRestartsCommand extends AbstractManagementCommand
 
     final long period = Period.toPeriod(listPeriod);
 
-    StringQueryResult result = managerClient.listRestarts(period);
+    Date since = new Date(Alarm.getCurrentTime() - period);
 
-    System.out.println(result.getValue());
+    Date []restarts = managerClient.listRestarts(period);
+    
+    String message;
+
+    if (restarts.length == 0) {
+      message = L.l("Server hasn't restarted since '{1}'",
+                    since);
+    }
+    else if (restarts.length == 1) {
+      StringBuilder resultBuilder = new StringBuilder(L.l(
+        "Server started 1 time since '{0}'", since));
+
+      resultBuilder.append("\n  ");
+      resultBuilder.append(restarts[0]);
+
+      message = resultBuilder.toString();
+    }
+    else {
+      StringBuilder resultBuilder = new StringBuilder(L.l(
+        "Server restarted {0} times since '{1}'",
+        restarts.length,
+        since));
+
+      for (Date restart : restarts) {
+        resultBuilder.append("\n  ");
+        resultBuilder.append(restart);
+      }
+
+      message = resultBuilder.toString();
+    }
+
+
+    System.out.println(message);
 
     return 0;
   }

@@ -30,7 +30,9 @@
 package com.caucho.json;
 
 import java.io.*;
-import com.caucho.util.Utf8;
+
+import com.caucho.json.ser.JsonSerializer;
+import com.caucho.json.ser.JsonSerializerFactory;
 
 /**
  * Abstract output stream for JSON requests.

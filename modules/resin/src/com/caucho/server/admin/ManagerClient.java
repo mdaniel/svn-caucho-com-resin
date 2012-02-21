@@ -285,11 +285,11 @@ public class ManagerClient
     return (StringQueryResult) query(query);
   }
 
-  public StringQueryResult listRestarts(long period)
+  public Date []listRestarts(long period)
   {
     ListRestartsQuery query = new ListRestartsQuery(period);
 
-    return (StringQueryResult) query(query);
+    return (Date[]) query(query);
   }
 
   public StringQueryResult addLicense(String licenseContent,

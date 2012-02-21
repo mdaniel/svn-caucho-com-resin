@@ -44,6 +44,7 @@ import com.caucho.server.admin.TagResult;
 
 import java.io.IOException;
 import java.io.InputStream;
+import java.util.Date;
 
 /**
  * Management facade for Resin, used for REST.
@@ -187,7 +188,7 @@ public interface ManagementMXBean extends ManagedObjectMXBean
 
   @Description("lists the most recent Resin server restart times")
   @MXAction(value = "list-restarts", method = "GET")
-  public StringQueryResult listRestarts(
+  public Date[]listRestarts(
     @MXParam(name = "server") String serverId,
     @MXParam(name = "period", defaultValue = "7D") String periodStr)
     throws ReflectionException;

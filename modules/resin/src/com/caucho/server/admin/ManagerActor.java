@@ -439,7 +439,7 @@ public class ManagerActor extends SimpleActor
   }
 
   @Query
-  public StringQueryResult listRestarts(long id,
+  public Date []listRestarts(long id,
                                         String to,
                                         String from,
                                         ListRestartsQuery query)
@@ -460,42 +460,18 @@ public class ManagerActor extends SimpleActor
     long []restartTimes
       = statSystem.getStartTimes(index, now - query.getTimeBackSpan(), now);
 
-    Date since = new Date(now - query.getTimeBackSpan());
+    List<Date> restartsList = new ArrayList<Date>();
 
-    StringQueryResult result;
-    if (restartTimes.length == 0) {
-      result = new StringQueryResult(L.l(
-        "Server '{0}' hasn't restarted since '{1}'",
-        cloudServer,
-        since));
+    for (long restartTime : restartTimes) {
+      restartsList.add(new Date(restartTime));
     }
-    else if (restartTimes.length == 1) {
-      StringBuilder resultBuilder = new StringBuilder(L.l(
-        "Server started 1 time since '{0}'", since));
+    
+    Date []restarts = new Date[restartsList.size()];
+    restartsList.toArray(restarts);
+    
+    getBroker().queryResult(id, from, to, restarts);
 
-      resultBuilder.append("\n  ");
-      resultBuilder.append(new Date(restartTimes[0]));
-
-      result = new StringQueryResult(resultBuilder.toString());
-
-    }
-    else {
-      StringBuilder resultBuilder = new StringBuilder(L.l(
-        "Server restarted {0} times since '{1}'",
-        restartTimes.length,
-        since));
-
-      for (long restartTime : restartTimes) {
-        resultBuilder.append("\n  ");
-        resultBuilder.append(new Date(restartTime));
-      }
-
-      result = new StringQueryResult(resultBuilder.toString());
-    }
-
-    getBroker().queryResult(id, from, to, result);
-
-    return result;
+    return restarts;
   }
   
   @Query

@@ -27,18 +27,20 @@
  * @author Scott Ferguson
  */
 
-package com.caucho.json;
+package com.caucho.json.ser;
 
 import java.io.*;
 
-public class NullSerializer extends AbstractJsonSerializer {
-  static final JsonSerializer SER = new NullSerializer();
+import com.caucho.json.JsonOutput;
 
-  private NullSerializer() {}
+public class CharArraySerializer extends AbstractJsonSerializer<char[]> {
+  static final JsonSerializer SER = new CharArraySerializer();
+
+  private CharArraySerializer() {}
   
-  public void write(JsonOutput out, Object value, boolean annotated)
+  public void write(JsonOutput out, char []value, boolean annotated)
     throws IOException
   {
-    out.writeObject(null);
+    out.writeString(value, 0, value.length);
   }
 }

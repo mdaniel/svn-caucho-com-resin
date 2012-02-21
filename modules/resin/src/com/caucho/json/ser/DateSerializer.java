@@ -27,30 +27,21 @@
  * @author Scott Ferguson
  */
 
-package com.caucho.json;
+package com.caucho.json.ser;
 
-import java.io.*;
-import java.util.*;
+import com.caucho.json.JsonOutput;
 
-public class FloatArraySerializer extends AbstractJsonSerializer {
-  static final JsonSerializer SER = new FloatArraySerializer();
+import java.io.IOException;
+import java.util.Date;
 
-  private FloatArraySerializer() {}
+public class DateSerializer extends AbstractJsonSerializer<Date> {
+  static final JsonSerializer SER = new DateSerializer();
+
+  private DateSerializer() {}
   
-  public void write(JsonOutput out, Object objValue, boolean annotated)
+  public void write(JsonOutput out, Date value, boolean annotated)
     throws IOException
   {
-    float []value = (float []) objValue;
-
-    int i = 0;
-    
-    out.writeArrayBegin();
-    for (float child : value) {
-      if (i != 0)
-        out.writeArrayComma();
-      i++;
-      out.writeDouble(child);
-    }
-    out.writeArrayEnd();
+    out.writeString(value.toString());
   }
 }

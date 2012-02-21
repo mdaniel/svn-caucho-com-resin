@@ -263,7 +263,7 @@ public class ManagementAdmin extends AbstractManagedObject
     return client.addLicense(licenseContent, to, isOverwrite, isRestart);
   }
 
-  @Override public StringQueryResult listRestarts(
+  @Override public Date []listRestarts(
     @MXParam(name = "server") String serverId,
     @MXParam(name = "period")
     String periodStr)
@@ -273,7 +273,7 @@ public class ManagementAdmin extends AbstractManagedObject
 
     ManagerClient client = getManagerClient(serverId);
 
-    StringQueryResult result = client.listRestarts(period);
+    Date []result = client.listRestarts(period);
 
     return result;
   }

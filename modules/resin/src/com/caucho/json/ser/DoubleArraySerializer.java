@@ -27,29 +27,28 @@
  * @author Scott Ferguson
  */
 
-package com.caucho.json;
+package com.caucho.json.ser;
+
+import com.caucho.json.JsonOutput;
 
 import java.io.*;
-import java.util.*;
 
-public class LongArraySerializer extends AbstractJsonSerializer {
-  static final JsonSerializer SER = new LongArraySerializer();
+public class DoubleArraySerializer extends AbstractJsonSerializer<double[]> {
+  static final JsonSerializer SER = new DoubleArraySerializer();
 
-  private LongArraySerializer() {}
+  private DoubleArraySerializer() {}
   
-  public void write(JsonOutput out, Object objValue, boolean annotated)
+  public void write(JsonOutput out, double []value, boolean annotated)
     throws IOException
   {
-    long []value = (long []) objValue;
-
     int i = 0;
     
     out.writeArrayBegin();
-    for (long child : value) {
+    for (double child : value) {
       if (i != 0)
         out.writeArrayComma();
       i++;
-      out.writeLong(child);
+      out.writeDouble(child);
     }
     out.writeArrayEnd();
   }

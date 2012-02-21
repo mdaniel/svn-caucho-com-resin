@@ -27,30 +27,34 @@
  * @author Scott Ferguson
  */
 
-package com.caucho.json;
+package com.caucho.json.ser;
+
+import com.caucho.json.JsonOutput;
 
 import java.io.*;
 import java.util.*;
 
-public class BooleanArraySerializer extends AbstractJsonSerializer {
-  static final JsonSerializer SER = new BooleanArraySerializer();
+public class MapSerializer extends AbstractJsonSerializer<Map<Object, Object>> {
+  static final JsonSerializer SER = new MapSerializer();
 
-  private BooleanArraySerializer() {}
+  private MapSerializer() {}
   
-  public void write(JsonOutput out, Object objValue, boolean annotated)
+  public void write(JsonOutput out, Map<Object, Object> value, boolean annotated)
     throws IOException
   {
-    boolean []value = (boolean []) objValue;
-
     int i = 0;
     
-    out.writeArrayBegin();
-    for (boolean child : value) {
+    out.writeMapBegin();
+    for (Map.Entry entry : value.entrySet()) {
       if (i != 0)
-        out.writeArrayComma();
+        out.writeMapComma();
+      
       i++;
-      out.writeBoolean(child);
+
+      out.writeMapEntry(String.valueOf(entry.getKey()),
+                        entry.getValue(),
+                        annotated);
     }
-    out.writeArrayEnd();
+    out.writeMapEnd();
   }
 }

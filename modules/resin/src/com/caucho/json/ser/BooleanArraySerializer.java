@@ -27,22 +27,29 @@
  * @author Scott Ferguson
  */
 
-package com.caucho.json;
+package com.caucho.json.ser;
+
+import com.caucho.json.JsonOutput;
 
 import java.io.*;
-import java.util.*;
-import com.caucho.util.*;
 
-public class CharArraySerializer extends AbstractJsonSerializer {
-  static final JsonSerializer SER = new CharArraySerializer();
+public class BooleanArraySerializer extends AbstractJsonSerializer<boolean[]> {
+  static final JsonSerializer SER = new BooleanArraySerializer();
 
-  private CharArraySerializer() {}
+  private BooleanArraySerializer() {}
   
-  public void write(JsonOutput out, Object objValue, boolean annotated)
+  public void write(JsonOutput out, boolean []value, boolean annotated)
     throws IOException
   {
-    char []value = (char []) objValue;
-
-    out.writeString(value, 0, value.length);
+    int i = 0;
+    
+    out.writeArrayBegin();
+    for (boolean child : value) {
+      if (i != 0)
+        out.writeArrayComma();
+      i++;
+      out.writeBoolean(child);
+    }
+    out.writeArrayEnd();
   }
 }

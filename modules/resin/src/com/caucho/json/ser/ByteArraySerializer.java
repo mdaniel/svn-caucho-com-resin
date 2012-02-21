@@ -27,20 +27,25 @@
  * @author Scott Ferguson
  */
 
-package com.caucho.json;
+package com.caucho.json.ser;
 
 import java.io.*;
 
-public class LongSerializer extends AbstractJsonSerializer {
-  static final JsonSerializer SER = new LongSerializer();
+import com.caucho.json.JsonOutput;
+import com.caucho.util.*;
 
-  private LongSerializer() {}
+public class ByteArraySerializer extends AbstractJsonSerializer<byte[]> {
+  static final JsonSerializer SER = new ByteArraySerializer();
+
+  private ByteArraySerializer() {}
   
-  public void write(JsonOutput out, Object objValue, boolean annotated)
+  public void write(JsonOutput out, byte []value, boolean annotated)
     throws IOException
   {
-    Number value = (Number) objValue;
+    StringBuilder sb = new StringBuilder();
 
-    out.writeLong(value.longValue());
+    Base64.encode(sb, value, 0, value.length);
+
+    out.writeString(sb.toString());
   }
 }

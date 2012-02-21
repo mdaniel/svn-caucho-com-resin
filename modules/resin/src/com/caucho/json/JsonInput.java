@@ -31,6 +31,9 @@ package com.caucho.json;
 
 import java.io.*;
 import java.util.*;
+
+import com.caucho.json.ser.JsonDeserializer;
+import com.caucho.json.ser.JsonSerializerFactory;
 import com.caucho.util.Utf8;
 
 /**

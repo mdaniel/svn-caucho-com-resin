@@ -27,30 +27,33 @@
  * @author Scott Ferguson
  */
 
-package com.caucho.json;
+package com.caucho.json.ser;
+
+import com.caucho.json.JsonInput;
 
 import java.io.*;
-import java.util.*;
+import java.util.logging.*;
 
-public class ShortArraySerializer extends AbstractJsonSerializer {
-  static final JsonSerializer SER = new ShortArraySerializer();
+public class StringDeserializer implements JsonDeserializer
+{
+  private static final Logger log
+    = Logger.getLogger(StringDeserializer.class.getName());
 
-  private ShortArraySerializer() {}
-  
-  public void write(JsonOutput out, Object objValue, boolean annotated)
+  static final JsonDeserializer DESER = new StringDeserializer();
+
+  public Object read(JsonInput in)
     throws IOException
   {
-    short []value = (short []) objValue;
+    return in.readString();
+  }
 
-    int i = 0;
-    
-    out.writeArrayBegin();
-    for (short child : value) {
-      if (i != 0)
-        out.writeArrayComma();
-      i++;
-      out.writeLong(child);
-    }
-    out.writeArrayEnd();
+  public void readField(JsonInput in, Object bean, String fieldName)
+    throws IOException
+  {
+  }
+
+  public String toString()
+  {
+    return getClass().getSimpleName() + "[]";
   }
 }

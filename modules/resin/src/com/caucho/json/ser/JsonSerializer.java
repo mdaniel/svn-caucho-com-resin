@@ -27,14 +27,16 @@
  * @author Scott Ferguson
  */
 
-package com.caucho.json;
+package com.caucho.json.ser;
+
+import com.caucho.json.JsonOutput;
 
 import java.io.*;
 
-public interface JsonDeserializer {
-  public Object read(JsonInput in)
+public interface JsonSerializer<T> {
+  public void write(JsonOutput out, T value)
     throws IOException;
 
-  public void readField(JsonInput in, Object bean, String field)
+  public void write(JsonOutput out, T value, boolean annotated)
     throws IOException;
 }

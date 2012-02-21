@@ -27,14 +27,17 @@
  * @author Scott Ferguson
  */
 
-package com.caucho.json;
+package com.caucho.json.ser;
+
+import com.caucho.json.JsonInput;
 
 import java.io.*;
 import java.util.*;
 import java.util.logging.*;
 import java.lang.reflect.*;
 
-public class JavaDeserializer implements JsonDeserializer {
+public class JavaDeserializer implements JsonDeserializer
+{
   private static final Logger log
     = Logger.getLogger(JavaDeserializer.class.getName());
 

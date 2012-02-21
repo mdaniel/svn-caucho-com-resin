@@ -27,7 +27,11 @@
  * @author Scott Ferguson
  */
 
-package com.caucho.json;
+package com.caucho.json.ser;
+
+import com.caucho.json.Json;
+import com.caucho.json.JsonOutput;
+import com.caucho.json.Transient;
 
 import java.io.*;
 import java.util.*;

@@ -27,34 +27,16 @@
  * @author Scott Ferguson
  */
 
-package com.caucho.json;
+package com.caucho.json.ser;
+
+import com.caucho.json.JsonInput;
 
 import java.io.*;
-import java.util.*;
 
-public class MapSerializer extends AbstractJsonSerializer {
-  static final JsonSerializer SER = new MapSerializer();
+public interface JsonDeserializer {
+  public Object read(JsonInput in)
+    throws IOException;
 
-  private MapSerializer() {}
-  
-  public void write(JsonOutput out, Object objValue, boolean annotated)
-    throws IOException
-  {
-    Map<Object,Object> value = (Map) objValue;
-
-    int i = 0;
-    
-    out.writeMapBegin();
-    for (Map.Entry entry : value.entrySet()) {
-      if (i != 0)
-        out.writeMapComma();
-      
-      i++;
-
-      out.writeMapEntry(String.valueOf(entry.getKey()),
-                        entry.getValue(),
-                        annotated);
-    }
-    out.writeMapEnd();
-  }
+  public void readField(JsonInput in, Object bean, String field)
+    throws IOException;
 }

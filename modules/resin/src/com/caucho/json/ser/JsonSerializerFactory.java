@@ -27,9 +27,11 @@
  * @author Scott Ferguson
  */
 
-package com.caucho.json;
+package com.caucho.json.ser;
 
+import java.util.Arrays;
 import java.util.Collection;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
@@ -83,6 +85,9 @@ public class JsonSerializerFactory {
 
     if (cl.isArray())
       return ObjectArraySerializer.SER;
+
+    if(Enum.class.isAssignableFrom(cl))
+      return EnumSerializer.SER;
 
     return new JavaSerializer(cl, annotated);
   }
@@ -141,6 +146,8 @@ public class JsonSerializerFactory {
 
     _staticSerMap.put(String.class, StringSerializer.SER);
 
+    _staticSerMap.put(Date.class, DateSerializer.SER);
+
     _staticSerMap.put(boolean[].class, BooleanArraySerializer.SER);
     _staticSerMap.put(byte[].class, ByteArraySerializer.SER);
     _staticSerMap.put(char[].class, CharArraySerializer.SER);
@@ -151,5 +158,7 @@ public class JsonSerializerFactory {
     _staticSerMap.put(double[].class, DoubleArraySerializer.SER);
 
     _staticDeserMap.put(String.class, StringDeserializer.DESER);
+
+
   }
 }

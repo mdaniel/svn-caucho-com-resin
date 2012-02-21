@@ -27,32 +27,20 @@
  * @author Scott Ferguson
  */
 
-package com.caucho.json;
+package com.caucho.json.ser;
+
+import com.caucho.json.JsonOutput;
 
 import java.io.*;
-import java.util.*;
-import java.util.logging.*;
-import java.lang.reflect.*;
 
-public class StringDeserializer implements JsonDeserializer {
-  private static final Logger log
-    = Logger.getLogger(StringDeserializer.class.getName());
+public class StringSerializer  extends AbstractJsonSerializer<String>{
+  static final JsonSerializer SER = new StringSerializer();
 
-  static final JsonDeserializer DESER = new StringDeserializer();
-
-  public Object read(JsonInput in)
+  private StringSerializer() {}
+  
+  public void write(JsonOutput out, String value, boolean annotated)
     throws IOException
   {
-    return in.readString();
-  }
-
-  public void readField(JsonInput in, Object bean, String fieldName)
-    throws IOException
-  {
-  }
-
-  public String toString()
-  {
-    return getClass().getSimpleName() + "[]";
+    out.writeString(value);
   }
 }

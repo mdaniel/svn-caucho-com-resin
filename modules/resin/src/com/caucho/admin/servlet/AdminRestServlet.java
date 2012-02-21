@@ -692,6 +692,17 @@ public class AdminRestServlet extends HttpServlet
     }
   }
 
+  static class DateArrayMarshal extends Marshal<Date[]>
+  {
+    @Override
+    public Object marshal(HttpServletRequest request,
+                          String name,
+                          Date []value) throws IOException
+    {
+      throw new AbstractMethodError(getClass().getName());
+    }
+  }
+
   static class StatServiceValuesQueryResultMarshal
     extends Marshal<StatServiceValuesQueryResult>
   {
@@ -761,6 +772,8 @@ public class AdminRestServlet extends HttpServlet
     _marshalMap.put(TagResult[].class, new TagResultMarshal());
     _marshalMap.put(String[].class, new StringArrayMarshal());
     _marshalMap.put(InputStream.class, new InputStreamMarshal());
+    _marshalMap.put(Date[].class,
+                    new DateArrayMarshal());
     _marshalMap.put(StatServiceValuesQueryResult.class,
                     new StatServiceValuesQueryResultMarshal());
 
