@@ -34,61 +34,67 @@ import java.util.*;
 import java.util.logging.*;
 import java.lang.reflect.*;
 
-public class JavaSerializer implements JsonSerializer {
+public class JavaSerializer extends AbstractJsonSerializer {
   private static final Logger log
     = Logger.getLogger(JavaSerializer.class.getName());
 
   private Class _type;
-  private Field []_fields;
+  private JsonField []_fields;
 
-  JavaSerializer(Class type)
+  JavaSerializer(Class type, boolean annotated)
   {
     _type = type;
 
-    introspect();
+    introspect(annotated);
   }
 
-  void introspect()
+  void introspect(boolean annotated)
   {
-    ArrayList<Field> fields = new ArrayList<Field>();
+    ArrayList<JsonField> fields = new ArrayList<JsonField>();
 
-    introspectFields(fields, _type);
+    introspectFields(fields, _type, annotated);
 
-    Collections.sort(fields, new FieldComparator());
+    Collections.sort(fields, new JsonFieldComparator());
 
-    _fields = new Field[fields.size()];
+    _fields = new JsonField[fields.size()];
     fields.toArray(_fields);
   }
 
-  private void introspectFields(ArrayList<Field> fields,
-                                Class type)
+  private void introspectFields(ArrayList<JsonField> fields,
+                                Class type,
+                                boolean annotated)
   {
     if (type == null)
       return;
 
-    introspectFields(fields, type.getSuperclass());
+    introspectFields(fields, type.getSuperclass(), annotated);
 
     for (Field field : type.getDeclaredFields()) {
       if (Modifier.isTransient(field.getModifiers()))
         continue;
       if (Modifier.isStatic(field.getModifiers()))
         continue;
+      if (annotated && field.getAnnotation(Transient.class) != null)
+        continue;
 
       field.setAccessible(true);
-      fields.add(field);
+
+      Json json = field.getAnnotation(Json.class);
+      JsonField jsonField = new JsonField(field, json);
+      fields.add(jsonField);
     }
   }
 
-  public void write(JsonOutput out, Object value)
+  public void write(JsonOutput out, Object value, boolean annotated)
     throws IOException
   {
     int i = 0;
     out.writeMapBegin();
-    for (Field field : _fields) {
+    for (JsonField field : _fields) {
       Object fieldValue = null;
 
       try {
-        fieldValue = field.get(value);
+        fieldValue = field.getField().get(value);
       } catch (Exception e) {
         log.warning(out + " cannot get field " + field + " with value " + value);
       }
@@ -104,8 +110,32 @@ public class JavaSerializer implements JsonSerializer {
     out.writeMapEnd();
   }
 
-  static class FieldComparator implements Comparator<Field> {
-    public int compare(Field a, Field b)
+  static class JsonField {
+    private Field _field;
+    private String name;
+
+    JsonField(Field field, Json json)
+    {
+      _field = field;
+      if (json != null)
+        name = json.name();
+      else
+        name = _field.getName();
+    }
+
+    public Field getField()
+    {
+      return _field;
+    }
+
+    public String getName()
+    {
+      return name;
+    }
+  }
+
+  static class JsonFieldComparator implements Comparator<JsonField> {
+    public int compare(JsonField a, JsonField b)
     {
       return a.getName().compareTo(b.getName());
     }

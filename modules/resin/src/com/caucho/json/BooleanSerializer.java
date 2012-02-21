@@ -31,12 +31,12 @@ package com.caucho.json;
 
 import java.io.*;
 
-public class BooleanSerializer implements JsonSerializer {
+public class BooleanSerializer extends AbstractJsonSerializer {
   static final JsonSerializer SER = new BooleanSerializer();
 
   private BooleanSerializer() {}
   
-  public void write(JsonOutput out, Object objValue)
+  public void write(JsonOutput out, Object objValue, boolean annotated)
     throws IOException
   {
     Boolean value = (Boolean) objValue;

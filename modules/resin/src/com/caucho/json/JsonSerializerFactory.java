@@ -29,10 +29,10 @@
 
 package com.caucho.json;
 
-import java.io.*;
-import java.util.*;
-import java.util.concurrent.*;
-import com.caucho.util.Utf8;
+import java.util.Collection;
+import java.util.HashMap;
+import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
 
 public class JsonSerializerFactory {
   private static final HashMap<Class,JsonSerializer> _staticSerMap
@@ -51,12 +51,16 @@ public class JsonSerializerFactory {
   // serializers
   //
 
-  public JsonSerializer getSerializer(Class cl)
+  public JsonSerializer getSerializer(Class cl) {
+    return getSerializer(cl, false);
+  }
+
+  public JsonSerializer getSerializer(Class cl, boolean annotated)
   {
     JsonSerializer ser = _serMap.get(cl);
 
     if (ser == null) {
-      ser = createSerializer(cl);
+      ser = createSerializer(cl, annotated);
 
       _serMap.putIfAbsent(cl, ser);
     }
@@ -64,7 +68,7 @@ public class JsonSerializerFactory {
     return ser;
   }
 
-  protected JsonSerializer createSerializer(Class cl)
+  protected JsonSerializer createSerializer(Class cl, boolean annotated)
   {
     JsonSerializer ser = _staticSerMap.get(cl);
 
@@ -80,7 +84,7 @@ public class JsonSerializerFactory {
     if (cl.isArray())
       return ObjectArraySerializer.SER;
 
-    return new JavaSerializer(cl);
+    return new JavaSerializer(cl, annotated);
   }
 
   //

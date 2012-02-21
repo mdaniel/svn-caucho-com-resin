@@ -24,33 +24,19 @@
  *   59 Temple Place, Suite 330
  *   Boston, MA 02111-1307  USA
  *
- * @author Scott Ferguson
+ * @author Alex Rojkov
  */
 
 package com.caucho.json;
 
-import java.io.*;
-import java.util.*;
+import java.lang.annotation.ElementType;
+import java.lang.annotation.Retention;
+import java.lang.annotation.RetentionPolicy;
+import java.lang.annotation.Target;
 
-public class FloatArraySerializer extends AbstractJsonSerializer {
-  static final JsonSerializer SER = new FloatArraySerializer();
-
-  private FloatArraySerializer() {}
-  
-  public void write(JsonOutput out, Object objValue, boolean annotated)
-    throws IOException
-  {
-    float []value = (float []) objValue;
-
-    int i = 0;
-    
-    out.writeArrayBegin();
-    for (float child : value) {
-      if (i != 0)
-        out.writeArrayComma();
-      i++;
-      out.writeDouble(child);
-    }
-    out.writeArrayEnd();
-  }
+@Retention(value = RetentionPolicy.RUNTIME)
+@Target(value = {ElementType.FIELD, ElementType.TYPE})
+public @interface Json
+{
+  String name() default "";
 }

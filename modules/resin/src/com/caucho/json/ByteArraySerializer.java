@@ -33,12 +33,12 @@ import java.io.*;
 import java.util.*;
 import com.caucho.util.*;
 
-public class ByteArraySerializer implements JsonSerializer {
+public class ByteArraySerializer extends AbstractJsonSerializer {
   static final JsonSerializer SER = new ByteArraySerializer();
 
   private ByteArraySerializer() {}
   
-  public void write(JsonOutput out, Object objValue)
+  public void write(JsonOutput out, Object objValue, boolean annotated)
     throws IOException
   {
     byte []value = (byte []) objValue;

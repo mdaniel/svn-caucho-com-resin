@@ -32,12 +32,12 @@ package com.caucho.json;
 import java.io.*;
 import java.util.*;
 
-public class LongArraySerializer implements JsonSerializer {
+public class LongArraySerializer extends AbstractJsonSerializer {
   static final JsonSerializer SER = new LongArraySerializer();
 
   private LongArraySerializer() {}
   
-  public void write(JsonOutput out, Object objValue)
+  public void write(JsonOutput out, Object objValue, boolean annotated)
     throws IOException
   {
     long []value = (long []) objValue;

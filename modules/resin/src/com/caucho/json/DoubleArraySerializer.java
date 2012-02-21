@@ -32,12 +32,12 @@ package com.caucho.json;
 import java.io.*;
 import java.util.*;
 
-public class DoubleArraySerializer implements JsonSerializer {
+public class DoubleArraySerializer extends AbstractJsonSerializer {
   static final JsonSerializer SER = new DoubleArraySerializer();
 
   private DoubleArraySerializer() {}
   
-  public void write(JsonOutput out, Object objValue)
+  public void write(JsonOutput out, Object objValue, boolean annotated)
     throws IOException
   {
     double []value = (double []) objValue;

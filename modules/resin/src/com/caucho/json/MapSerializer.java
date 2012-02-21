@@ -32,12 +32,12 @@ package com.caucho.json;
 import java.io.*;
 import java.util.*;
 
-public class MapSerializer implements JsonSerializer {
+public class MapSerializer extends AbstractJsonSerializer {
   static final JsonSerializer SER = new MapSerializer();
 
   private MapSerializer() {}
   
-  public void write(JsonOutput out, Object objValue)
+  public void write(JsonOutput out, Object objValue, boolean annotated)
     throws IOException
   {
     Map<Object,Object> value = (Map) objValue;
@@ -50,8 +50,10 @@ public class MapSerializer implements JsonSerializer {
         out.writeMapComma();
       
       i++;
-      
-      out.writeMapEntry(String.valueOf(entry.getKey()), entry.getValue());
+
+      out.writeMapEntry(String.valueOf(entry.getKey()),
+                        entry.getValue(),
+                        annotated);
     }
     out.writeMapEnd();
   }

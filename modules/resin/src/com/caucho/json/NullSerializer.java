@@ -31,12 +31,12 @@ package com.caucho.json;
 
 import java.io.*;
 
-public class NullSerializer implements JsonSerializer {
+public class NullSerializer extends AbstractJsonSerializer {
   static final JsonSerializer SER = new NullSerializer();
 
   private NullSerializer() {}
   
-  public void write(JsonOutput out, Object value)
+  public void write(JsonOutput out, Object value, boolean annotated)
     throws IOException
   {
     out.writeObject(null);

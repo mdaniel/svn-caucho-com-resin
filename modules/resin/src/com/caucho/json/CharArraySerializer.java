@@ -33,12 +33,12 @@ import java.io.*;
 import java.util.*;
 import com.caucho.util.*;
 
-public class CharArraySerializer implements JsonSerializer {
+public class CharArraySerializer extends AbstractJsonSerializer {
   static final JsonSerializer SER = new CharArraySerializer();
 
   private CharArraySerializer() {}
   
-  public void write(JsonOutput out, Object objValue)
+  public void write(JsonOutput out, Object objValue, boolean annotated)
     throws IOException
   {
     char []value = (char []) objValue;

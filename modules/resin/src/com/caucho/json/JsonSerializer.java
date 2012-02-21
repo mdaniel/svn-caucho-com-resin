@@ -30,9 +30,11 @@
 package com.caucho.json;
 
 import java.io.*;
-import com.caucho.util.Utf8;
 
 public interface JsonSerializer {
   public void write(JsonOutput out, Object value)
+    throws IOException;
+
+  public void write(JsonOutput out, Object value, boolean annotated)
     throws IOException;
 }

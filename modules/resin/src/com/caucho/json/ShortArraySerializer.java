@@ -32,12 +32,12 @@ package com.caucho.json;
 import java.io.*;
 import java.util.*;
 
-public class ShortArraySerializer implements JsonSerializer {
+public class ShortArraySerializer extends AbstractJsonSerializer {
   static final JsonSerializer SER = new ShortArraySerializer();
 
   private ShortArraySerializer() {}
   
-  public void write(JsonOutput out, Object objValue)
+  public void write(JsonOutput out, Object objValue, boolean annotated)
     throws IOException
   {
     short []value = (short []) objValue;

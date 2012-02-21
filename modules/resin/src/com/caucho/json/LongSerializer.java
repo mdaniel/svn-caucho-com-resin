@@ -31,12 +31,12 @@ package com.caucho.json;
 
 import java.io.*;
 
-public class LongSerializer implements JsonSerializer {
+public class LongSerializer extends AbstractJsonSerializer {
   static final JsonSerializer SER = new LongSerializer();
 
   private LongSerializer() {}
   
-  public void write(JsonOutput out, Object objValue)
+  public void write(JsonOutput out, Object objValue, boolean annotated)
     throws IOException
   {
     Number value = (Number) objValue;
