@@ -28,11 +28,18 @@
 
 package com.caucho.server.admin;
 
+import com.caucho.json.Json;
+import com.caucho.json.Transient;
+
 import java.io.Serializable;
 
 @SuppressWarnings("serial")
 public class TagResult implements Serializable {
+
+  @Json(name = "tag")
   private String _tag;
+
+  @Transient
   private String _root;
 
   public TagResult()

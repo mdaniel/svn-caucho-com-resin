@@ -28,6 +28,7 @@
 
 package com.caucho.server.admin;
 
+import com.caucho.json.Json;
 import com.caucho.lifecycle.LifecycleState;
 
 /**
@@ -37,7 +38,10 @@ import com.caucho.lifecycle.LifecycleState;
 @SuppressWarnings("serial")
 public class ControllerStateActionQueryResult extends ManagementQueryResult
 {
+  @Json(name = "state")
   private LifecycleState _state;
+
+  @Json(name = "tag")
   private String _tag;
 
   public ControllerStateActionQueryResult()

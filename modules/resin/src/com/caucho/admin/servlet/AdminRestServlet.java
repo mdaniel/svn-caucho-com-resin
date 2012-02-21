@@ -32,6 +32,7 @@ import com.caucho.config.ConfigException;
 import com.caucho.jmx.Jmx;
 import com.caucho.jmx.MXAction;
 import com.caucho.jmx.MXParam;
+import com.caucho.json.JsonOutput;
 import com.caucho.lifecycle.LifecycleState;
 import com.caucho.management.server.ManagementMXBean;
 import com.caucho.management.server.StatServiceValue;
@@ -57,6 +58,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.io.PrintWriter;
+import java.io.Serializable;
 import java.io.Writer;
 import java.lang.annotation.Annotation;
 import java.lang.reflect.Method;
@@ -201,7 +203,7 @@ public class AdminRestServlet extends HttpServlet
     private String _httpMethod;
 
     private String []_parameterNames;
-    private Object []_parameterDefaults;
+    private Serializable []_parameterDefaults;
     private boolean []_parameterRequired;
 
     private Marshal []_parameterMarshal;
@@ -218,7 +220,7 @@ public class AdminRestServlet extends HttpServlet
       Class<?> []parameterTypes = method.getParameterTypes();
 
       _parameterNames = new String[parameterTypes.length];
-      _parameterDefaults = new Object[parameterTypes.length];
+      _parameterDefaults = new Serializable[parameterTypes.length];
       _parameterRequired = new boolean[parameterTypes.length];
 
       Annotation [][]paramAnn = method.getParameterAnnotations();
@@ -323,7 +325,7 @@ public class AdminRestServlet extends HttpServlet
       }
 
       try {
-        Object value = _method.invoke(management, params);
+        Serializable value = (Serializable) _method.invoke(management, params);
 
         _returnMarshal.unmarshal(res, value);
       } catch (Exception e) {
@@ -331,7 +333,7 @@ public class AdminRestServlet extends HttpServlet
       }
     }
 
-    protected static Object toValue(Class type, String value)
+    protected static Serializable toValue(Class type, String value)
     {
       if (boolean.class.equals(type) || Boolean.class.equals(type)) {
         return Boolean.parseBoolean(value);
@@ -376,9 +378,11 @@ public class AdminRestServlet extends HttpServlet
     public void unmarshal(HttpServletResponse response, K value)
       throws IOException
     {
-      PrintWriter out = response.getWriter();
+      JsonOutput out = new JsonOutput(response.getWriter());
 
-      out.println(value);
+      out.writeObject((Serializable) value);
+
+      out.flush();
     }
   }
 
@@ -507,8 +511,11 @@ public class AdminRestServlet extends HttpServlet
                           StringQueryResult value)
       throws IOException
     {
-      PrintWriter out = response.getWriter();
-      out.println(value.getValue());
+      JsonOutput out = new JsonOutput(response.getWriter());
+      
+      out.writeString(value.getValue());
+      
+      out.flush();
     }
   }
 
@@ -529,23 +536,11 @@ public class AdminRestServlet extends HttpServlet
                           ControllerStateActionQueryResult value)
       throws IOException
     {
-      ControllerStateActionQueryResult queryResult =
-        (ControllerStateActionQueryResult) value;
-      String message;
-      if (queryResult.getState() == LifecycleState.STOPPED) {
-        message = L.l("application {0} is stopped", queryResult.getTag());
-      }
-      else if (queryResult.getState() == LifecycleState.ACTIVE) {
-        message = L.l("application {0} is active", queryResult.getTag());
-      }
-      else {
-        message = L.l("unexpected application {0} state: {1}",
-                      queryResult.getTag(),
-                      queryResult.getState().getStateName());
-      }
+      JsonOutput out = new JsonOutput(response.getWriter());
 
-      PrintWriter out = response.getWriter();
-      out.println(message);
+      out.writeObject(value, true);
+
+      out.flush();
     }
   }
 
@@ -566,24 +561,11 @@ public class AdminRestServlet extends HttpServlet
                           AddUserQueryResult value)
       throws IOException
     {
-      PrintWriter out = response.getWriter();
+      JsonOutput out = new JsonOutput(response.getWriter());
 
-      UserQueryResult.User user = value.getUser();
+      out.writeObject(value.getUser(), true);
 
-      String []roles = user.getRoles();
-      value.getUser();
-
-      out.print(L.l("user {0} added", user.getName()));
-      for (int i = 0; i < roles.length; i++) {
-        String role = roles[i];
-        if (i == 0)
-          out.print(" with roles: ");
-        out.print(role);
-        if (i + 1 < roles.length)
-          out.print(", ");
-      }
-
-      out.println();
+      out.flush();
     }
   }
 
@@ -604,11 +586,11 @@ public class AdminRestServlet extends HttpServlet
                           RemoveUserQueryResult value)
       throws IOException
     {
-      PrintWriter out = response.getWriter();
+      JsonOutput out = new JsonOutput(response.getWriter());
 
-      UserQueryResult.User user = value.getUser();
-
-      out.println(L.l("user {0} is removed", user.getName()));
+      out.writeObject(value.getUser(), true);
+      
+      out.flush();
     }
   }
 
@@ -629,25 +611,13 @@ public class AdminRestServlet extends HttpServlet
                           ListUsersQueryResult value)
       throws IOException
     {
-      //json!{}
       UserQueryResult.User []users = value.getUsers();
 
-      PrintWriter out = response.getWriter();
-      for (UserQueryResult.User user : users) {
-        String []roles = user.getRoles();
+      JsonOutput out = new JsonOutput(response.getWriter());
 
-        out.print(user.getName());
-        for (int i = 0; i < roles.length; i++) {
-          String role = roles[i];
-          if (i == 0)
-            out.print(": ");
-          out.print(role);
-          if (i + 1 < roles.length)
-            out.print(", ");
-        }
+      out.writeObject(users);
 
-        out.println();
-      }
+      out.flush();
     }
   }
 
@@ -678,8 +648,13 @@ public class AdminRestServlet extends HttpServlet
         out.flush();
       }
       else {
-        PrintWriter out = response.getWriter();
-        out.println(value.getMessage());
+        response.setContentType("application/json");
+
+        JsonOutput out = new JsonOutput(response.getWriter());
+
+        out.writeObject(value.getFileName());
+        
+        out.flush();
       }
     }
   }
@@ -698,15 +673,11 @@ public class AdminRestServlet extends HttpServlet
     public void unmarshal(HttpServletResponse response, TagResult []value)
       throws IOException
     {
-      PrintWriter out = response.getWriter();
+      JsonOutput out = new JsonOutput(response.getWriter());
 
-      for (TagResult tag : value) {
-        out.println(tag.getTag());
-      }
+      out.writeObject(value, true);
 
-      if (value.length == 0) {
-        out.println(L.l("no matching applications is found"));
-      }
+      out.flush();
     }
   }
 
@@ -718,17 +689,6 @@ public class AdminRestServlet extends HttpServlet
                           String []value) throws IOException
     {
       throw new AbstractMethodError(getClass().getName());
-    }
-
-    @Override
-    public void unmarshal(HttpServletResponse response, String []values)
-      throws IOException
-    {
-      PrintWriter out = response.getWriter();
-
-      for (String value : values) {
-        out.println(value);
-      }
     }
   }
 

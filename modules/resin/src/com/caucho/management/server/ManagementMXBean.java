@@ -44,7 +44,6 @@ import com.caucho.server.admin.TagResult;
 
 import java.io.IOException;
 import java.io.InputStream;
-import java.util.Date;
 
 /**
  * Management facade for Resin, used for REST.
@@ -131,6 +130,7 @@ public interface ManagementMXBean extends ManagedObjectMXBean
     throws ReflectionException;
 
   @Description("creates a PDF report of a Resin server (Resin Pro)")
+  @MXAction(value = "pdf-report", method = "GET")
   public PdfReportQueryResult pdfReport(
     @MXParam(name = "server") String serverId,
     @MXParam(name = "report") String report,

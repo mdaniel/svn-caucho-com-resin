@@ -28,6 +28,8 @@
 
 package com.caucho.server.admin;
 
+import com.caucho.json.Json;
+
 import java.io.Serializable;
 
 @SuppressWarnings("serial")
@@ -35,7 +37,10 @@ public abstract class UserQueryResult extends ManagementQueryResult
 {
   public static class User implements Serializable
   {
+    @Json(name = "name")
     String _name;
+
+    @Json(name = "roles")
     String []_roles;
 
     public User(String name, String []roles)
