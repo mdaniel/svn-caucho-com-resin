@@ -12,6 +12,11 @@
 
 <s2 title="4.0.26 - snapshot">
 <ul>
+<li>xa: change timeout message to include EXTRA_TIMEOUT (#4927, rep by Shinomiya Nobuaki)</li>
+<li>config: tiered *.xml files belong in ${tier}-inf/*.xml and ${tier}-inf/*.jar (#4952)</li>
+<li>watchdog: improve error message when &lt;user-name> is an invalid user (#4942)</li>
+<li>web-server: HttpProxy needs to query DNS on timeout to pick up changes (#4903, rep by B. Plump)</li>
+<li>kernel: split CurrentTime from Alarm for embedded applications (#4889)</li>
 <li>watchdog: add allow-non-reserved-ip as a &lt;server> argument for private networks (#4941, rep by georgbuschbeck)</li>
 <li>http: added sendfile() for large files</li>
 <li>watchdog: Resin pwd is set to root-directory (#4928, rep by Trung Nguyen)</li>

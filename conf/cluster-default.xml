@@ -6,8 +6,8 @@
      -->
   <class-loader>
     <tree-loader path="${resin.root}/ext-lib"/>
-    <tree-loader path="${resin.root}/resin-inf/resin-inf"/>
-    <tree-loader path="cloud:/resin-inf/resin-inf"/>
+    <tree-loader path="${resin.root}/resin-inf"/>
+    <tree-loader path="cloud:/resin-inf"/>
   </class-loader>
 
   <!-- Java system-properties -->
@@ -30,8 +30,8 @@
 
     <!-- shared jars and drivers for the app-tier -->
     <class-loader>
-      <tree-loader path="${resin.root}/resin-inf/${cluster.id}-inf"/>
-      <tree-loader path="cloud:/resin-inf/{cluster.id}-inf"/>
+      <tree-loader path="${resin.root}/${cluster.id}-inf"/>
+      <tree-loader path="cloud:/{cluster.id}-inf"/>
     </class-loader>
 
     <!-- include resources config files in resources/ -->

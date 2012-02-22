@@ -94,7 +94,8 @@ public class AdminAuthenticator extends XmlAuthenticator
   {
   }
 
-  public final void initCache() {
+  public final void initCache()
+  {
     if (_authStore != null)
       return;
 

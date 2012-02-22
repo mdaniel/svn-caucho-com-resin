@@ -481,7 +481,8 @@ Java_com_caucho_bootjni_JniProcess_nativeChown(JNIEnv *env,
     
     if (passwd == 0) {
       resin_printf_exception(env, "java/lang/IllegalArgumentException",
-			     "'%s' is an unknown user.", userbuf);
+			     "setuid '%s' is an unknown <user-name>.",
+                             userbuf);
       
       return;
     }

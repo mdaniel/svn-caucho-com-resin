@@ -257,7 +257,8 @@ Java_com_caucho_bootjni_JniProcess_exec(JNIEnv *env,
 
     if (! passwd) {
       resin_printf_exception(env, "java/lang/IllegalArgumentException",
-			     "%s is an unknown user", user);
+			     "setuid '%s' is an unknown <user-name>",
+                             user);
       return 0;
     }
     
@@ -275,7 +276,7 @@ Java_com_caucho_bootjni_JniProcess_exec(JNIEnv *env,
 
     if (! group_ent) {
       resin_printf_exception(env, "java/lang/IllegalArgumentException",
-			     "%s is an unknown group", group);
+			     "setuid '%s' is an unknown <group-name>", group);
       return 0;
     }
     
