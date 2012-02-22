@@ -47,6 +47,7 @@ import com.caucho.lifecycle.LifecycleState;
 import com.caucho.management.server.AbstractManagedObject;
 import com.caucho.management.server.DeployControllerMXBean;
 import com.caucho.util.Alarm;
+import com.caucho.util.CurrentTime;
 
 /**
  * A deploy controller for an environment.
@@ -242,7 +243,7 @@ abstract public class DeployControllerAdmin<C extends EnvironmentDeployControlle
   {
     Logger log = _controller.getLog();
 
-    long timestamp = Alarm.getCurrentTime();
+    long timestamp = CurrentTime.getCurrentTime();
 
     String oldValue = oldState.toString();
     String newValue = newState.toString();

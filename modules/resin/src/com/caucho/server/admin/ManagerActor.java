@@ -56,6 +56,7 @@ import com.caucho.security.AdminAuthenticator;
 import com.caucho.security.PasswordUser;
 import com.caucho.server.cluster.Server;
 import com.caucho.util.Alarm;
+import com.caucho.util.CurrentTime;
 import com.caucho.util.L10N;
 import com.caucho.vfs.Path;
 import com.caucho.vfs.StreamSource;
@@ -444,7 +445,7 @@ public class ManagerActor extends SimpleActor
                                         String from,
                                         ListRestartsQuery query)
   {
-    final long now = Alarm.getCurrentTime();
+    final long now = CurrentTime.getCurrentTime();
 
     NetworkClusterSystem clusterService = NetworkClusterSystem.getCurrent();
 

@@ -30,6 +30,7 @@ package com.caucho.amber.query;
 
 import com.caucho.amber.expr.AmberExpr;
 import com.caucho.util.Alarm;
+import com.caucho.util.CurrentTime;
 
 import java.lang.ref.SoftReference;
 import java.sql.SQLException;
@@ -79,7 +80,7 @@ public class ResultSetCacheChunk {
     _fromList = query.getFromList();
     _resultList = query.getResultList();
 
-    _expireTime = Alarm.getCurrentTime() + query.getCacheMaxAge();
+    _expireTime = CurrentTime.getCurrentTime() + query.getCacheMaxAge();
   }
 
   /**
@@ -103,7 +104,7 @@ public class ResultSetCacheChunk {
    */
   public boolean isValid()
   {
-    return Alarm.getCurrentTime() <= _expireTime;
+    return CurrentTime.getCurrentTime() <= _expireTime;
   }
 
   /**

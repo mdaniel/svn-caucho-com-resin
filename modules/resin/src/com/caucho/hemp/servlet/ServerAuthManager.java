@@ -48,6 +48,7 @@ import com.caucho.security.BasicPrincipal;
 import com.caucho.security.DigestCredentials;
 import com.caucho.security.PasswordCredentials;
 import com.caucho.util.Alarm;
+import com.caucho.util.CurrentTime;
 import com.caucho.util.L10N;
 import com.caucho.util.LruCache;
 
@@ -207,7 +208,7 @@ public class ServerAuthManager {
     
     String algorithm = _security.getAlgorithm(uid);
 
-    String nonce = String.valueOf(Alarm.getCurrentTime());
+    String nonce = String.valueOf(CurrentTime.getCurrentTime());
     
     return new NonceQuery(algorithm, uid, nonce, clientSignature);
   }

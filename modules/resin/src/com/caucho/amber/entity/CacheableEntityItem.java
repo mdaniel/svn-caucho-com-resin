@@ -31,6 +31,7 @@ package com.caucho.amber.entity;
 
 import com.caucho.amber.manager.AmberConnection;
 import com.caucho.util.Alarm;
+import com.caucho.util.CurrentTime;
 
 import java.sql.SQLException;
 import java.util.Map;
@@ -52,7 +53,7 @@ public class CacheableEntityItem extends EntityItem {
     cacheEntity.__caucho_setConnection(null);
 
     if (cacheEntity.__caucho_isLoaded())
-      _expireTime = Alarm.getCurrentTime() + _home.getCacheTimeout();
+      _expireTime = CurrentTime.getCurrentTime() + _home.getCacheTimeout();
   }
 
   /**
@@ -71,7 +72,7 @@ public class CacheableEntityItem extends EntityItem {
    */
   public Entity getEntity()
   {
-    long now = Alarm.getCurrentTime();
+    long now = CurrentTime.getCurrentTime();
 
     if (_expireTime < now) {
       long timeout = _home.getCacheTimeout();
@@ -95,7 +96,7 @@ public class CacheableEntityItem extends EntityItem {
   @Override
   public Entity loadEntity(int loadGroup)
   {
-    long now = Alarm.getCurrentTime();
+    long now = CurrentTime.getCurrentTime();
 
     if (_expireTime < now) {
       _expireTime = now + _home.getCacheTimeout();
@@ -123,7 +124,7 @@ public class CacheableEntityItem extends EntityItem {
   public Entity loadEntity(AmberConnection aConn,
                            int loadGroup)
   {
-    long now = Alarm.getCurrentTime();
+    long now = CurrentTime.getCurrentTime();
 
     if (_expireTime < now) {
       _expireTime = now + _home.getCacheTimeout();
@@ -168,7 +169,7 @@ public class CacheableEntityItem extends EntityItem {
   public void save(Entity item)
   {
     /*
-      long now = Alarm.getCurrentTime();
+      long now = CurrentTime.getCurrentTime();
 
       synchronized (_cacheEntity) {
       _expireTime = now + _home.getCacheTimeout();

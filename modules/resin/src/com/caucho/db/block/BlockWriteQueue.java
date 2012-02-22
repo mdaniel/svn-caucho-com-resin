@@ -33,6 +33,7 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 
 import com.caucho.util.Alarm;
+import com.caucho.util.CurrentTime;
 
 /**
  * Queue for blocks to be written.
@@ -134,9 +135,9 @@ public class BlockWriteQueue {
  
   void waitForComplete(long timeout)
   {
-    long expireTime = Alarm.getCurrentTimeActual() + timeout;
+    long expireTime = CurrentTime.getCurrentTimeActual() + timeout;
     
-    while (Alarm.getCurrentTimeActual() < expireTime) {
+    while (CurrentTime.getCurrentTimeActual() < expireTime) {
       if (isEmpty())
         return;
       

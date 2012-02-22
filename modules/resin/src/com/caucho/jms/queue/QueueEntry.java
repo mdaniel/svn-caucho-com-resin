@@ -1,6 +1,8 @@
 package com.caucho.jms.queue;
 
 import com.caucho.util.Alarm;
+import com.caucho.util.CurrentTime;
+
 import java.io.Serializable;
 
 /**
@@ -34,7 +36,7 @@ public abstract class QueueEntry<M>
       throw new NullPointerException();
     
     _msgId = msgId;
-    _leaseExpire = leaseTimeout + Alarm.getCurrentTime();
+    _leaseExpire = leaseTimeout + CurrentTime.getCurrentTime();
     _expiresTime = expiresTime;
     _priority = priority;
   }
@@ -59,7 +61,7 @@ public abstract class QueueEntry<M>
    */
   public boolean isLease()
   {
-    return _leaseExpire < Alarm.getCurrentTime();
+    return _leaseExpire < CurrentTime.getCurrentTime();
   }
 
   public boolean isRead()
@@ -69,7 +71,7 @@ public abstract class QueueEntry<M>
   
   public boolean isExpired()
   {
-    return _expiresTime < Alarm.getCurrentTime();
+    return _expiresTime < CurrentTime.getCurrentTime();
   }
   
   

@@ -39,6 +39,7 @@ import java.util.logging.Logger;
 
 import com.caucho.env.thread.ThreadPool;
 import com.caucho.util.Alarm;
+import com.caucho.util.CurrentTime;
 
 /**
  * Provides abstract implementation for a memory queue.
@@ -149,8 +150,9 @@ public abstract class AbstractMemoryQueue<E,QE extends QueueEntry<E>>
                          QueueEntrySelector selector) 
     throws MessageException
   {
-    if (Alarm.isTest())
-      expireTime += Alarm.getCurrentTimeActual() - Alarm.getCurrentTime();
+    if (CurrentTime.isTest())
+      expireTime += (CurrentTime.getCurrentTimeActual()
+                     - CurrentTime.getCurrentTime());
 
     _receiverCount.incrementAndGet();
     
@@ -172,7 +174,7 @@ public abstract class AbstractMemoryQueue<E,QE extends QueueEntry<E>>
         return entry;
       }
   
-      if (expireTime <= Alarm.getCurrentTimeActual()) {
+      if (expireTime <= CurrentTime.getCurrentTimeActual()) {
         return null;
       }
   
@@ -616,7 +618,7 @@ public abstract class AbstractMemoryQueue<E,QE extends QueueEntry<E>>
       listen(this);
       
       while (_entry == null
-             && (Alarm.getCurrentTimeActual() < expireTime)) {
+             && (CurrentTime.getCurrentTimeActual() < expireTime)) {
         LockSupport.parkUntil(expireTime);
       }
 

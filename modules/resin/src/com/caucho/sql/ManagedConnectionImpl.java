@@ -32,6 +32,7 @@ package com.caucho.sql;
 import com.caucho.sql.spy.SpyConnection;
 import com.caucho.sql.spy.SpyXAResource;
 import com.caucho.util.Alarm;
+import com.caucho.util.CurrentTime;
 import com.caucho.util.L10N;
 import com.caucho.util.LruCache;
 
@@ -143,7 +144,7 @@ public class ManagedConnectionImpl
 
     initDriverConnection();
 
-    _lastEventTime = Alarm.getCurrentTime();
+    _lastEventTime = CurrentTime.getCurrentTime();
 
     int preparedStatementCacheSize = _dbPool.getPreparedStatementCacheSize();
 
@@ -204,7 +205,7 @@ public class ManagedConnectionImpl
     if (! ping())
       return null;
     
-    _lastEventTime = Alarm.getCurrentTime();
+    _lastEventTime = CurrentTime.getCurrentTime();
 
     return new UserConnection(this);
   }
@@ -216,7 +217,7 @@ public class ManagedConnectionImpl
   public void associateConnection(Object connection)
     throws ResourceException
   {
-    _lastEventTime = Alarm.getCurrentTime();
+    _lastEventTime = CurrentTime.getCurrentTime();
 
     UserConnection uConn = (UserConnection) connection;
 
@@ -550,7 +551,7 @@ public class ManagedConnectionImpl
 
       _connClosedEvent = evt;
 
-      _lastEventTime = Alarm.getCurrentTime();
+      _lastEventTime = CurrentTime.getCurrentTime();
     }
   }
 
@@ -739,7 +740,7 @@ public class ManagedConnectionImpl
       }
       */
       
-      _lastEventTime = Alarm.getCurrentTime();
+      _lastEventTime = CurrentTime.getCurrentTime();
 
       if (_readOnly)
         conn.setReadOnly(false);
@@ -806,7 +807,7 @@ public class ManagedConnectionImpl
   {
     DBPoolImpl dbPool = _factory.getDBPool();
 
-    long now = Alarm.getCurrentTime();
+    long now = CurrentTime.getCurrentTime();
     
     long pingInterval = dbPool.getPingInterval();
     

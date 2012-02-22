@@ -30,6 +30,7 @@
 package com.caucho.tools.profiler;
 
 import com.caucho.util.Alarm;
+import com.caucho.util.CurrentTime;
 
 import java.util.ArrayList;
 import java.util.logging.Level;
@@ -63,7 +64,7 @@ final class ThreadProfiler
 
   private long currentTimeNanoseconds()
   {
-    return Alarm.getExactTimeNanoseconds();
+    return CurrentTime.getExactTimeNanoseconds();
   }
 
   void start(ProfilerPoint profilerPoint)

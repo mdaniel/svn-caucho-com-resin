@@ -130,7 +130,7 @@ public class TimeIntervalElement
    */
   protected  long intervalNow()
   {
-    return Alarm.getCurrentTime();
+    return CurrentTime.getCurrentTime();
   }
 
   public TimeInterval getTimeInterval()

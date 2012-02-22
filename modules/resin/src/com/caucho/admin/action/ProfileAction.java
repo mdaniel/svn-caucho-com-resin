@@ -49,7 +49,7 @@ public class ProfileAction implements AdminAction
   
   public void cancel()
   {
-    _cancelledTime.compareAndSet(-1, Alarm.getCurrentTime());
+    _cancelledTime.compareAndSet(-1, CurrentTime.getCurrentTime());
     
     synchronized(this) {
       this.notify();
@@ -87,7 +87,7 @@ public class ProfileAction implements AdminAction
       throw new ConfigException(L.l("Profile is still active"));
     }
     
-    long startedAt = Alarm.getCurrentTime();
+    long startedAt = CurrentTime.getCurrentTime();
     
     start(samplingRate, depth);
     
@@ -96,7 +96,7 @@ public class ProfileAction implements AdminAction
         this.wait(activeTime);
       }
     } catch (InterruptedException e) {
-      _cancelledTime.compareAndSet(-1, Alarm.getCurrentTime());
+      _cancelledTime.compareAndSet(-1, CurrentTime.getCurrentTime());
     }
 
     profile.stop();

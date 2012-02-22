@@ -70,6 +70,7 @@ import com.caucho.server.util.CauchoSystem;
 import com.caucho.util.Alarm;
 import com.caucho.util.CharBuffer;
 import com.caucho.util.CompileException;
+import com.caucho.util.CurrentTime;
 import com.caucho.util.DisplayableException;
 import com.caucho.util.L10N;
 import com.caucho.util.LineCompileException;
@@ -479,7 +480,7 @@ public class ErrorPageManager {
 
       out.println("<code><pre>");
 
-      if (log.isLoggable(Level.FINE) && ! Alarm.isTest())
+      if (log.isLoggable(Level.FINE) && ! CurrentTime.isTest())
         doStackTrace = true;
 
       if (doStackTrace) {
@@ -528,7 +529,7 @@ public class ErrorPageManager {
       out.println("of this problem.</p>");
 
       out.println("<pre><code>");
-      out.println("Date: " + QDate.formatISO8601(Alarm.getCurrentTime()));
+      out.println("Date: " + QDate.formatISO8601(CurrentTime.getCurrentTime()));
       
       out.println("</code></pre>");
       
@@ -863,7 +864,7 @@ public class ErrorPageManager {
     if (s == null)
       return null;
 
-    if (Alarm.isTest()) {
+    if (CurrentTime.isTest()) {
       s = normalizeForTesting(s);
     }
 

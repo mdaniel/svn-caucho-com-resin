@@ -40,6 +40,7 @@ import javax.ejb.EJBException;
 
 import com.caucho.config.j2ee.EJBExceptionWrapper;
 import com.caucho.util.Alarm;
+import com.caucho.util.CurrentTime;
 
 
 /**
@@ -129,11 +130,11 @@ abstract public class AsyncItem<X> implements Runnable, Future<X> {
   {
     long timeoutMillis = unit.toMillis(timeout);
     
-    long expires = Alarm.getCurrentTimeActual() + timeoutMillis;
+    long expires = CurrentTime.getCurrentTimeActual() + timeoutMillis;
     
     synchronized (this) {
       while (! _isDone) {
-        long delta = expires - Alarm.getCurrentTimeActual();
+        long delta = expires - CurrentTime.getCurrentTimeActual();
         
         if (delta < 0)
           throw new TimeoutException(toString());

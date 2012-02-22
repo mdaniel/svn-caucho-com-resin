@@ -39,6 +39,7 @@ import javax.annotation.PostConstruct;
 import com.caucho.config.Config;
 import com.caucho.config.ConfigException;
 import com.caucho.util.Alarm;
+import com.caucho.util.CurrentTime;
 import com.caucho.vfs.Depend;
 import com.caucho.vfs.Path;
 
@@ -135,7 +136,7 @@ public class XmlRoleMap extends AbstractRoleMap
       return;
     
     try {
-      Alarm.getCurrentTime();
+      CurrentTime.getCurrentTime();
       new Depend(_path);
 
       if (log.isLoggable(Level.FINE))

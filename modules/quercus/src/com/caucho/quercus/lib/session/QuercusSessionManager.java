@@ -48,6 +48,7 @@ import com.caucho.util.Alarm;
 import com.caucho.util.AlarmListener;
 import com.caucho.util.Base64;
 import com.caucho.util.CharBuffer;
+import com.caucho.util.CurrentTime;
 import com.caucho.util.L10N;
 import com.caucho.util.LruCache;
 import com.caucho.util.RandomUtil;
@@ -530,7 +531,7 @@ public class QuercusSessionManager
       if (_isClosed)
         return;
 
-      long now = Alarm.getCurrentTime();
+      long now = CurrentTime.getCurrentTime();
 
       synchronized (_sessions) {
         _sessionIter = _sessions.values(_sessionIter);

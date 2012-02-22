@@ -39,6 +39,7 @@ import javax.ejb.Timer;
 import javax.ejb.TimerHandle;
 
 import com.caucho.util.Alarm;
+import com.caucho.util.CurrentTime;
 import com.caucho.util.L10N;
 
 /**
@@ -229,7 +230,7 @@ public class EjbTimer implements Timer, Runnable {
   {
     checkStatus();
 
-    long now = Alarm.getExactTime();
+    long now = CurrentTime.getExactTime();
     long nextTime = _timerTask.getNextAlarmTime();
 
     return (nextTime - now);

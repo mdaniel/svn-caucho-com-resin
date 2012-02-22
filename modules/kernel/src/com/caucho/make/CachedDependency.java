@@ -31,6 +31,7 @@ package com.caucho.make;
 
 import com.caucho.loader.Environment;
 import com.caucho.util.Alarm;
+import com.caucho.util.CurrentTime;
 import com.caucho.vfs.Dependency;
 
 /**
@@ -68,12 +69,12 @@ abstract public class CachedDependency implements Dependency {
   @Override
   public final boolean isModified()
   {
-    long now = Alarm.getCurrentTime();
+    long now = CurrentTime.getCurrentTime();
     if (now <= _lastCheckTime + _checkInterval)
       return _isModified;
 
     synchronized (this) {
-      now = Alarm.getCurrentTime();
+      now = CurrentTime.getCurrentTime();
       
       if (now <= _lastCheckTime + _checkInterval)
         return _isModified;

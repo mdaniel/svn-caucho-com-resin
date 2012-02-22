@@ -39,6 +39,7 @@ import com.caucho.env.deploy.DeployControllerApi;
 import com.caucho.env.deploy.DeployControllerType;
 import com.caucho.env.deploy.ExpandVersion;
 import com.caucho.util.Alarm;
+import com.caucho.util.CurrentTime;
 import com.caucho.util.L10N;
 
 /**
@@ -293,12 +294,12 @@ public class WebAppVersioningController extends WebAppController {
         if (size > 0) {
           WebAppController oldController = _controllerList.get(size - 1);
 
-          long expireTime = Alarm.getCurrentTime() + _versionRolloverTime;
+          long expireTime = CurrentTime.getCurrentTime() + _versionRolloverTime;
 
           _primaryController.setOldWebApp(oldController, expireTime);
         }
 
-        _restartTime = Alarm.getCurrentTime();
+        _restartTime = CurrentTime.getCurrentTime();
         clearCache();
         
         return true;

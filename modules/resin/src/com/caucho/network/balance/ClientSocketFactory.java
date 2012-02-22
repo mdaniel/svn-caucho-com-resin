@@ -43,6 +43,7 @@ import com.caucho.env.meter.ActiveTimeMeter;
 import com.caucho.env.meter.CountMeter;
 import com.caucho.env.meter.MeterService;
 import com.caucho.util.Alarm;
+import com.caucho.util.CurrentTime;
 import com.caucho.util.L10N;
 import com.caucho.util.QDate;
 import com.caucho.vfs.Path;
@@ -472,7 +473,7 @@ public class ClientSocketFactory implements ClientSocketFactoryApi
    */
   public double getLatencyFactor()
   {
-    long now = Alarm.getCurrentTime();
+    long now = CurrentTime.getCurrentTime();
 
     long decayPeriod = 60000;
 
@@ -507,7 +508,7 @@ public class ClientSocketFactory implements ClientSocketFactoryApi
    */
   public void setCpuLoadAvg(double load)
   {
-    _cpuSetTime = Alarm.getCurrentTime();
+    _cpuSetTime = CurrentTime.getCurrentTime();
     _cpuLoadAvg = load;
   }
 
@@ -519,7 +520,7 @@ public class ClientSocketFactory implements ClientSocketFactoryApi
     double avg = _cpuLoadAvg;
     long time = _cpuSetTime;
 
-    long now = Alarm.getCurrentTime();
+    long now = CurrentTime.getCurrentTime();
 
     if (now - time < 10000L)
       return avg;
@@ -596,7 +597,7 @@ public class ClientSocketFactory implements ClientSocketFactoryApi
     else if (! state.isEnabled())
       return false;
     else {
-      long now = Alarm.getCurrentTime();
+      long now = CurrentTime.getCurrentTime();
 
       if (now < _lastFailConnectTime + _dynamicFailRecoverTime) {
         return false;
@@ -625,7 +626,7 @@ public class ClientSocketFactory implements ClientSocketFactoryApi
     if (state == State.ACTIVE)
       return true;
     else if (state.isEnabled()) {
-      long now = Alarm.getCurrentTime();
+      long now = CurrentTime.getCurrentTime();
 
       if (now < _lastFailConnectTime + _dynamicFailRecoverTime) {
         return false;
@@ -670,7 +671,7 @@ public class ClientSocketFactory implements ClientSocketFactoryApi
   @Override
   public void toBusy()
   {
-    _lastBusyTime = Alarm.getCurrentTime();
+    _lastBusyTime = CurrentTime.getCurrentTime();
     _firstSuccessTime = 0;
 
     _requestBusyProbe.start();
@@ -685,7 +686,7 @@ public class ClientSocketFactory implements ClientSocketFactoryApi
   @Override
   public void toFail()
   {
-    _failTime = Alarm.getCurrentTime();
+    _failTime = CurrentTime.getCurrentTime();
     _lastFailTime = _failTime;
     _firstSuccessTime = 0;
 
@@ -709,7 +710,7 @@ public class ClientSocketFactory implements ClientSocketFactoryApi
     _failCountTotal.incrementAndGet();
     
     synchronized (this) {
-      long now = Alarm.getCurrentTime();
+      long now = CurrentTime.getCurrentTime();
       _firstSuccessTime = 0;
 
       // only degrade one per 100ms
@@ -743,7 +744,7 @@ public class ClientSocketFactory implements ClientSocketFactoryApi
       // only degrade one per 100ms
       _currentFailCount++;
       _warmupState--;
-      long now = Alarm.getCurrentTime();
+      long now = CurrentTime.getCurrentTime();
       _failTime = now;
       _lastFailTime = now;
       _lastFailConnectTime = now;
@@ -767,7 +768,7 @@ public class ClientSocketFactory implements ClientSocketFactoryApi
     getRequestBusyProbe().start();
 
     synchronized (this) {
-      _lastBusyTime = Alarm.getCurrentTime();
+      _lastBusyTime = CurrentTime.getCurrentTime();
       _firstSuccessTime = 0;
 
       _currentFailCount++;
@@ -790,7 +791,7 @@ public class ClientSocketFactory implements ClientSocketFactoryApi
     _currentFailCount = 0;
 
     if (_firstSuccessTime <= 0) {
-      _firstSuccessTime = Alarm.getCurrentTime();
+      _firstSuccessTime = CurrentTime.getCurrentTime();
     }
 
     // reset the connection fail recover time
@@ -880,7 +881,7 @@ public class ClientSocketFactory implements ClientSocketFactoryApi
     if (stream != null)
       return stream;
 
-    long now = Alarm.getCurrentTime();
+    long now = CurrentTime.getCurrentTime();
 
     if (now <= _failTime + _loadBalanceRecoverTime)
       return null;
@@ -932,7 +933,7 @@ public class ClientSocketFactory implements ClientSocketFactoryApi
     if (stream != null)
       return stream;
 
-    long now = Alarm.getCurrentTime();
+    long now = CurrentTime.getCurrentTime();
 
     if (now < _failTime + _loadBalanceRecoverTime) {
       return null;
@@ -975,7 +976,7 @@ public class ClientSocketFactory implements ClientSocketFactoryApi
    */
   private ClientSocket openRecycle()
   {
-    long now = Alarm.getCurrentTime();
+    long now = CurrentTime.getCurrentTime();
     ClientSocket stream = null;
 
     synchronized (this) {
@@ -1064,7 +1065,7 @@ public class ClientSocketFactory implements ClientSocketFactoryApi
           else
             _state = State.ACTIVE;
 
-          _firstSuccessTime = Alarm.getCurrentTime();
+          _firstSuccessTime = CurrentTime.getCurrentTime();
         }
 
         if (_warmupState < 0)
@@ -1124,7 +1125,7 @@ public class ClientSocketFactory implements ClientSocketFactoryApi
         stream = null;
       }
 
-      long now = Alarm.getCurrentTime();
+      long now = CurrentTime.getCurrentTime();
 
       long prevSuccessTime = _prevSuccessTime;
 
@@ -1143,7 +1144,7 @@ public class ClientSocketFactory implements ClientSocketFactoryApi
 
     updateWarmup();
 
-    long now = Alarm.getCurrentTime();
+    long now = CurrentTime.getCurrentTime();
     long maxIdleTime = _loadBalanceIdleTime;
     ClientSocket oldStream = null;
 
@@ -1181,7 +1182,7 @@ public class ClientSocketFactory implements ClientSocketFactoryApi
       if (! isEnabled())
         return;
 
-      long now = Alarm.getCurrentTime();
+      long now = CurrentTime.getCurrentTime();
       int warmupState = _warmupState;
 
       if (warmupState >= 0 && _firstSuccessTime > 0) {

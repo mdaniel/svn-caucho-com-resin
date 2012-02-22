@@ -43,6 +43,7 @@ import com.caucho.db.xa.DbTransaction;
 import com.caucho.env.thread.AbstractTaskWorker;
 import com.caucho.inject.Module;
 import com.caucho.util.Alarm;
+import com.caucho.util.CurrentTime;
 import com.caucho.util.L10N;
 import com.caucho.util.SQLExceptionWrapper;
 import com.caucho.vfs.Path;
@@ -1200,7 +1201,7 @@ public class Table extends BlockStore {
   @Override
   public String toString()
   {
-    int id = Alarm.isTest() ? 1 : getId();
+    int id = CurrentTime.isTest() ? 1 : getId();
     
     return getClass().getSimpleName() + "[" + getName() + ":" + id + "]";
   }

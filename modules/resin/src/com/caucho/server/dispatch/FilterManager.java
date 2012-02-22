@@ -167,7 +167,7 @@ public class FilterManager {
     Class<?> filterClass = config.getFilterClass();
 
     /* XXX:
-    if (! config.isAvailable(Alarm.getCurrentTime()))
+    if (! config.isAvailable(CurrentTime.getCurrentTime()))
       throw config.getInitException();
     */
 

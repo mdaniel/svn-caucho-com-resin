@@ -55,6 +55,7 @@ import com.caucho.server.admin.Management;
 import com.caucho.server.admin.TransactionManager;
 import com.caucho.server.cache.TempFileManager;
 import com.caucho.util.Alarm;
+import com.caucho.util.CurrentTime;
 import com.caucho.util.L10N;
 import com.caucho.vfs.Path;
 
@@ -202,7 +203,7 @@ public class ResinConfig implements EnvironmentBean
     ClassLoader loader = thread.getContextClassLoader();
     
     try {
-      if (! Alarm.isTest())
+      if (! CurrentTime.isTest())
         thread.setContextClassLoader(ClassLoader.getSystemClassLoader());
       
       logger.initImpl();
@@ -230,7 +231,7 @@ public class ResinConfig implements EnvironmentBean
     ClassLoader loader = thread.getContextClassLoader();
     
     try {
-      if (! Alarm.isTest())
+      if (! CurrentTime.isTest())
         thread.setContextClassLoader(ClassLoader.getSystemClassLoader());
       
       log.initImpl();
@@ -262,7 +263,7 @@ public class ResinConfig implements EnvironmentBean
     ClassLoader loader = thread.getContextClassLoader();
 
     try {
-      if (! Alarm.isTest())
+      if (! CurrentTime.isTest())
         thread.setContextClassLoader(ClassLoader.getSystemClassLoader());
 
       logHandler.initImpl();

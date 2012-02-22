@@ -30,6 +30,7 @@ package com.caucho.filters;
 
 import com.caucho.config.types.Period;
 import com.caucho.util.Alarm;
+import com.caucho.util.CurrentTime;
 
 import javax.servlet.Filter;
 import javax.servlet.FilterChain;
@@ -110,7 +111,7 @@ public class ExpiresFilter implements Filter {
 
       res.addHeader("Cache-Control", "max-age=" + (_cacheTime / 1000));
       
-      res.setDateHeader("Expires", Alarm.getCurrentTime() + _cacheTime);
+      res.setDateHeader("Expires", CurrentTime.getCurrentTime() + _cacheTime);
     }
 
     nextFilter.doFilter(request, response);

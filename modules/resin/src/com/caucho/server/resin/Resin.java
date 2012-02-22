@@ -83,6 +83,7 @@ import com.caucho.server.resin.BootConfig.BootType;
 import com.caucho.server.resin.ResinArgs.BoundPort;
 import com.caucho.util.Alarm;
 import com.caucho.util.CompileException;
+import com.caucho.util.CurrentTime;
 import com.caucho.util.L10N;
 import com.caucho.util.QDate;
 import com.caucho.vfs.MemoryPath;
@@ -177,7 +178,7 @@ public class Resin
    */
   public Resin(ResinArgs args)
   {
-    _startTime = Alarm.getCurrentTime();
+    _startTime = CurrentTime.getCurrentTime();
     
     _args = args;
     
@@ -720,7 +721,7 @@ public class Resin
       
       _resinSystem.start();
 
-      log().info(this + " started in " + (Alarm.getExactTime() - _startTime) + "ms");
+      log().info(this + " started in " + (CurrentTime.getExactTime() - _startTime) + "ms");
     } finally {
       thread.setContextClassLoader(oldLoader);
     }
@@ -898,7 +899,7 @@ public class Resin
     else if (isEmbedded()) { 
       _bootServerConfig = joinEmbed();
     }
-    else if (Alarm.isTest()) {
+    else if (CurrentTime.isTest()) {
       _bootServerConfig = joinTest();
     }
     else if (isWatchdog()) {

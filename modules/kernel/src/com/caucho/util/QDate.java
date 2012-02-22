@@ -195,7 +195,7 @@ public class QDate {
 
     _calendar = new GregorianCalendar(_timeZone);
 
-    setLocalTime(Alarm.getCurrentTime());
+    setLocalTime(CurrentTime.getCurrentTime());
   }
   
   /**

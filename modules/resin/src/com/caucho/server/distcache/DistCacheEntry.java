@@ -39,6 +39,7 @@ import java.util.concurrent.atomic.AtomicReference;
 import com.caucho.cloud.topology.TriadOwner;
 import com.caucho.distcache.ExtCacheEntry;
 import com.caucho.util.Alarm;
+import com.caucho.util.CurrentTime;
 import com.caucho.util.HashKey;
 import com.caucho.util.Hex;
 
@@ -169,7 +170,7 @@ public class DistCacheEntry implements ExtCacheEntry {
    */
   public Object get(CacheConfig config)
   {
-    long now = Alarm.getCurrentTime();
+    long now = CurrentTime.getCurrentTime();
 
     return _cacheService.get(this, config, now);
   }
@@ -180,7 +181,7 @@ public class DistCacheEntry implements ExtCacheEntry {
    */
   public Object getExact(CacheConfig config)
   {
-    long now = Alarm.getCurrentTime();
+    long now = CurrentTime.getCurrentTime();
 
     return _cacheService.getExact(this, config, now);
   }
@@ -190,7 +191,7 @@ public class DistCacheEntry implements ExtCacheEntry {
    */
   public MnodeEntry getMnodeValue(CacheConfig config)
   {
-    long now = Alarm.getCurrentTime();
+    long now = CurrentTime.getCurrentTime();
 
     return _cacheService.getMnodeValue(this, config, now); // , false);
   }

@@ -38,6 +38,7 @@ import com.caucho.env.meter.ActiveMeter;
 import com.caucho.env.meter.ActiveTimeMeter;
 import com.caucho.server.hmux.HmuxRequest;
 import com.caucho.util.Alarm;
+import com.caucho.util.CurrentTime;
 import com.caucho.util.L10N;
 import com.caucho.vfs.ReadStream;
 import com.caucho.vfs.WriteStream;
@@ -178,7 +179,7 @@ public class ClientSocket implements ClientSocketApi {
   @Override
   public boolean isIdleExpired()
   {
-    long now = Alarm.getCurrentTime();
+    long now = CurrentTime.getCurrentTime();
 
     return (_pool.getLoadBalanceIdleTime() < now - _idleStartTime);
   }
@@ -189,7 +190,7 @@ public class ClientSocket implements ClientSocketApi {
   @Override
   public boolean isIdleAlmostExpired(long delta)
   {
-    long now = Alarm.getCurrentTime();
+    long now = CurrentTime.getCurrentTime();
 
     return (_pool.getLoadBalanceIdleTime() < now - _idleStartTime + delta);
   }
@@ -286,7 +287,7 @@ public class ClientSocket implements ClientSocketApi {
 
       if (idleStartTime <= 0) {
         // for write-only, the read time is zero
-        idleStartTime = Alarm.getCurrentTime();
+        idleStartTime = CurrentTime.getCurrentTime();
       }
     }
     

@@ -49,6 +49,7 @@ import com.caucho.server.cluster.Server;
 import com.caucho.server.host.Host;
 import com.caucho.server.util.CauchoSystem;
 import com.caucho.util.Alarm;
+import com.caucho.util.CurrentTime;
 import com.caucho.vfs.Path;
 
 /**
@@ -566,7 +567,7 @@ public class WebAppController
     webApp.setDynamicDeploy(isDynamicDeploy());
 
     if (_oldWebAppController != null
-        && Alarm.getCurrentTime() < _oldWebAppExpireTime) {
+        && CurrentTime.getCurrentTime() < _oldWebAppExpireTime) {
       webApp.setOldWebApp(_oldWebAppController.request(),
                           _oldWebAppExpireTime);
     }
@@ -692,7 +693,7 @@ public class WebAppController
   @Override
   public String toString()
   {
-    if (com.caucho.util.Alarm.isTest())
+    if (com.caucho.util.CurrentTime.isTest())
       return getClass().getSimpleName() + "[" + getId() + "]";
     else
       return getClass().getSimpleName() + "$" + System.identityHashCode(this) + "[" + getId() + "]";

@@ -340,7 +340,7 @@ public class SessionArrayValue extends ArrayValueWrapper
       log.fine("remove session " + _id);
     }
 
-    long now = Alarm.getCurrentTime();
+    long now = CurrentTime.getCurrentTime();
 
     ClusterObject clusterObject = _clusterObject;
 

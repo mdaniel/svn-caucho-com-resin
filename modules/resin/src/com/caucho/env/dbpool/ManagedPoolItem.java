@@ -34,6 +34,7 @@ import com.caucho.transaction.ManagedXAResource;
 import com.caucho.transaction.UserTransactionImpl;
 import com.caucho.transaction.XAExceptionWrapper;
 import com.caucho.util.Alarm;
+import com.caucho.util.CurrentTime;
 import com.caucho.util.L10N;
 
 import javax.resource.NotSupportedException;
@@ -122,8 +123,8 @@ class ManagedPoolItem implements ConnectionEventListener, ManagedXAResource {
     _mcf = mcf;
     _mConn = conn;
 
-    _poolStartTime = Alarm.getCurrentTime();
-    _poolEventTime = Alarm.getCurrentTime();
+    _poolStartTime = CurrentTime.getCurrentTime();
+    _poolEventTime = CurrentTime.getCurrentTime();
 
     _connectionStartTime = cm.getConnectionTimeProbe().start();
 
@@ -236,7 +237,7 @@ class ManagedPoolItem implements ConnectionEventListener, ManagedXAResource {
                                      UserPoolItem oldPoolItem)
     throws ResourceException
   {
-    long now = Alarm.getCurrentTime();
+    long now = CurrentTime.getCurrentTime();
 
     long maxIdleTime = _cm.getMaxIdleTime();
     long maxPoolTime = _cm.getMaxPoolTime();
@@ -296,7 +297,7 @@ class ManagedPoolItem implements ConnectionEventListener, ManagedXAResource {
   boolean isValid()
   {
     synchronized (this) {
-      long now = Alarm.getCurrentTime();
+      long now = CurrentTime.getCurrentTime();
 
       long maxIdleTime = _cm.getMaxIdleTime();
       long maxPoolTime = _cm.getMaxPoolTime();
@@ -1096,7 +1097,7 @@ class ManagedPoolItem implements ConnectionEventListener, ManagedXAResource {
     if (log.isLoggable(Level.FINE))
       log.fine("idle " + this);
 
-    _poolEventTime = Alarm.getCurrentTime();
+    _poolEventTime = CurrentTime.getCurrentTime();
     _cm.toIdle(this);
   }
 

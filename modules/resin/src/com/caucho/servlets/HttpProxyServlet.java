@@ -51,6 +51,7 @@ import com.caucho.config.types.Period;
 import com.caucho.network.balance.ClientSocket;
 import com.caucho.server.http.CauchoRequest;
 import com.caucho.util.Alarm;
+import com.caucho.util.CurrentTime;
 import com.caucho.util.L10N;
 import com.caucho.vfs.ReadStream;
 import com.caucho.vfs.TempBuffer;
@@ -165,7 +166,7 @@ public class HttpProxyServlet extends GenericServlet {
     ClientSocket stream = _loadBalancer.openSticky(sessionId, request, null);
 
     try {
-      long startRequestTime = Alarm.getCurrentTime();
+      long startRequestTime = CurrentTime.getCurrentTime();
       
       if (stream == null) {
         log.warning(L.l("{0}: no backend servers available to process {1}",

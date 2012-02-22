@@ -47,6 +47,7 @@ import com.caucho.loader.DependencyCheckInterval;
 import com.caucho.loader.Environment;
 import com.caucho.util.Alarm;
 import com.caucho.util.AlarmListener;
+import com.caucho.util.CurrentTime;
 import com.caucho.util.L10N;
 import com.caucho.util.WeakAlarm;
 import com.caucho.vfs.Dependency;
@@ -463,13 +464,13 @@ abstract public class ExpandDeployGenerator<E extends ExpandDeployController<?>>
     }
 
     try {
-      long now = Alarm.getCurrentTime();
+      long now = CurrentTime.getCurrentTime();
       
       if (now < _lastCheckTime + _checkInterval) {
         return _isModified;
       }
 
-      _lastCheckTime = Alarm.getCurrentTime();
+      _lastCheckTime = CurrentTime.getCurrentTime();
 
       if (_expandManager != null) {
         _isModified = _expandManager.isModified();

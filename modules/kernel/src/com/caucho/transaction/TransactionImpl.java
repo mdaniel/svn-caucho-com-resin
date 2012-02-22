@@ -52,6 +52,7 @@ import com.caucho.transaction.xalog.AbstractXALogStream;
 import com.caucho.util.Alarm;
 import com.caucho.util.AlarmListener;
 import com.caucho.util.CharBuffer;
+import com.caucho.util.CurrentTime;
 import com.caucho.util.L10N;
 
 /**
@@ -628,7 +629,7 @@ public class TransactionImpl implements Transaction, AlarmListener {
 
     _status = Status.STATUS_ACTIVE;
 
-    _beginTime = Alarm.getCurrentTime();
+    _beginTime = CurrentTime.getCurrentTime();
 
     _rollbackException = null;
 

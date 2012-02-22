@@ -186,6 +186,7 @@ import com.caucho.server.util.CauchoSystem;
 import com.caucho.server.webbeans.SessionContextContainer;
 import com.caucho.util.Alarm;
 import com.caucho.util.CharBuffer;
+import com.caucho.util.CurrentTime;
 import com.caucho.util.L10N;
 import com.caucho.util.LruCache;
 import com.caucho.vfs.Dependency;
@@ -411,7 +412,7 @@ public class WebApp extends ServletContextImpl
   private final Lifecycle _lifecycle;
 
   private final AtomicInteger _requestCount = new AtomicInteger();
-  private long _lastRequestTime = Alarm.getCurrentTime();
+  private long _lastRequestTime = CurrentTime.getCurrentTime();
   private Pattern _cookieDomainPattern = null;
 
   //
@@ -3690,7 +3691,7 @@ public class WebApp extends ServletContextImpl
     if (_idleTime < 0)
       return false;
     else
-      return _lastRequestTime + _idleTime < Alarm.getCurrentTime();
+      return _lastRequestTime + _idleTime < CurrentTime.getCurrentTime();
   }
 
   /**
@@ -3851,7 +3852,7 @@ public class WebApp extends ServletContextImpl
       }
 
       if (_oldWebApp != null
-          && Alarm.getCurrentTime() < _oldWebAppExpireTime) {
+          && CurrentTime.getCurrentTime() < _oldWebAppExpireTime) {
         Invocation oldInvocation = new Invocation();
         oldInvocation.copyFrom(invocation);
         oldInvocation.setWebApp(_oldWebApp);
@@ -4529,7 +4530,7 @@ public class WebApp extends ServletContextImpl
   final boolean enterWebApp()
   {
     _requestCount.incrementAndGet();
-    _lastRequestTime = Alarm.getCurrentTime();
+    _lastRequestTime = CurrentTime.getCurrentTime();
 
     return _lifecycle.isActive();
   }
@@ -4685,13 +4686,13 @@ public class WebApp extends ServletContextImpl
       if (! _lifecycle.toStopping())
         return;
 
-      long beginStop = Alarm.getCurrentTime();
+      long beginStop = CurrentTime.getCurrentTime();
 
       clearCache();
       
       while (_requestCount.get() > 0
-             && Alarm.getCurrentTime() < beginStop + _shutdownWaitTime
-             && ! Alarm.isTest()) {
+             && CurrentTime.getCurrentTime() < beginStop + _shutdownWaitTime
+             && ! CurrentTime.isTest()) {
         try {
           Thread.interrupted();
           Thread.sleep(100);
@@ -4817,7 +4818,7 @@ public class WebApp extends ServletContextImpl
   {
     synchronized (this) {
       _status500CountTotal++;
-      _status500LastTime = Alarm.getExactTime();
+      _status500LastTime = CurrentTime.getCurrentTime();
     }
   }
 

@@ -32,6 +32,7 @@ import com.caucho.loader.ClassLoaderListener;
 import com.caucho.loader.DynamicClassLoader;
 import com.caucho.loader.Environment;
 import com.caucho.util.Alarm;
+import com.caucho.util.CurrentTime;
 import com.caucho.util.L10N;
 
 import java.util.ArrayList;
@@ -107,7 +108,7 @@ class JobThread implements Runnable {
     Thread thread = Thread.currentThread();
     
     while (true) {
-      long now = Alarm.getCurrentTime();
+      long now = CurrentTime.getCurrentTime();
       
       _runJobs.clear();
 

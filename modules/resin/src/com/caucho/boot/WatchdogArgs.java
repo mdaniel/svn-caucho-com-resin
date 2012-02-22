@@ -35,6 +35,7 @@ import com.caucho.license.*;
 import com.caucho.server.resin.ResinELContext;
 import com.caucho.server.util.CauchoSystem;
 import com.caucho.util.Alarm;
+import com.caucho.util.CurrentTime;
 import com.caucho.util.L10N;
 import com.caucho.vfs.Path;
 import com.caucho.vfs.Vfs;
@@ -214,7 +215,7 @@ class WatchdogArgs
   {
     if (_dynamicAddress != null)
       return _dynamicAddress;
-    else if (Alarm.isTest())
+    else if (CurrentTime.isTest())
       return "192.168.1.x";
     else {
       try {

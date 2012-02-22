@@ -67,6 +67,7 @@ import com.caucho.loader.EnvironmentLocal;
 import com.caucho.server.admin.AdminService;
 import com.caucho.util.Alarm;
 import com.caucho.util.Base64;
+import com.caucho.util.CurrentTime;
 import com.caucho.util.L10N;
 
 /**
@@ -82,7 +83,7 @@ public class HempBroker extends AbstractManagedBroker
     = new EnvironmentLocal<HempBroker>();
 
   private final AtomicLong _addressGenerator
-    = new AtomicLong(Alarm.getCurrentTime());
+    = new AtomicLong(CurrentTime.getCurrentTime());
 
   private HempBrokerManager _manager;
   private DomainManager _domainManager;

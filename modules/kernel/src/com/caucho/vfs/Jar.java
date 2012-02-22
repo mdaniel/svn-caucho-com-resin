@@ -52,6 +52,7 @@ import com.caucho.loader.EnvironmentLocal;
 import com.caucho.make.CachedDependency;
 import com.caucho.util.Alarm;
 import com.caucho.util.CacheListener;
+import com.caucho.util.CurrentTime;
 import com.caucho.util.IoUtil;
 import com.caucho.util.L10N;
 import com.caucho.util.Log;
@@ -721,9 +722,9 @@ public class Jar implements CacheListener {
    */
   private boolean isCacheValid()
   {
-    long now = Alarm.getCurrentTime();
+    long now = CurrentTime.getCurrentTime();
 
-    if ((now - _lastTime < 100) && ! Alarm.isTest())
+    if ((now - _lastTime < 100) && ! CurrentTime.isTest())
       return true;
 
     long oldLastModified = _lastModified;

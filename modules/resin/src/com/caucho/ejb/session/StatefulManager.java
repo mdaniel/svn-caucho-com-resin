@@ -67,6 +67,7 @@ import com.caucho.ejb.server.AbstractContext;
 import com.caucho.ejb.server.EjbInjectionTarget;
 import com.caucho.ejb.server.SingletonInjectionTarget;
 import com.caucho.util.Alarm;
+import com.caucho.util.CurrentTime;
 import com.caucho.util.L10N;
 
 /**
@@ -79,7 +80,7 @@ public class StatefulManager<X> extends AbstractSessionManager<X>
     = Logger.getLogger(StatefulManager.class.getName());
   
   private long _idleTimeout = 10 * 60 * 1000L;
-  private AtomicLong _sequence = new AtomicLong(Alarm.getCurrentTime());
+  private AtomicLong _sequence = new AtomicLong(CurrentTime.getCurrentTime());
   
   private ConcurrentHashMap<String,StatefulProxy> _sessionMap;
   //   = new ConcurrentHashMap<String,StatefulProxy>();

@@ -36,6 +36,7 @@ import java.util.logging.Logger;
 
 import com.caucho.config.ConfigException;
 import com.caucho.util.Alarm;
+import com.caucho.util.CurrentTime;
 import com.caucho.util.L10N;
 
 /**
@@ -457,8 +458,9 @@ public class CloudServer {
   {
     String address = _address;
     
-    if (Alarm.isTest() && address.startsWith("192.168.1."))
+    if (CurrentTime.isTest() && address.startsWith("192.168.1.")) {
       address = "192.168.1.x";
+    }
     
     return (getClass().getSimpleName() 
             + "[" + _id + "," + _index

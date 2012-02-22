@@ -117,7 +117,12 @@ public class OutboundMessageStream implements MessageStream {
   public void query(long id, String to, String from, Serializable payload)
   {
     try {
-      getLink().query(id, to, from, payload);
+      MessageStream link = getLink();
+      
+      if (link != null)
+        link.query(id, to, from, payload);
+      else
+        getBroker().queryError(id, from, to, payload, new BamError("link closed"));
     } catch (Exception e) {
       log.log(Level.FINER, e.toString(), e);
       

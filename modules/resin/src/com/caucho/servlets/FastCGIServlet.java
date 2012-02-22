@@ -42,6 +42,7 @@ import com.caucho.server.cluster.Server;
 import com.caucho.server.webapp.WebApp;
 import com.caucho.util.Alarm;
 import com.caucho.util.CharBuffer;
+import com.caucho.util.CurrentTime;
 import com.caucho.util.FreeList;
 import com.caucho.util.L10N;
 import com.caucho.util.QDate;
@@ -237,10 +238,10 @@ public class FastCGIServlet extends GenericServlet {
     }
 
     try {
-      // fcgiSocket.setExpire(Alarm.getCurrentTime() + _keepaliveTimeout);
+      // fcgiSocket.setExpire(CurrentTime.getCurrentTime() + _keepaliveTimeout);
 
       boolean isKeepalive = true;
-      long startRequestTime = Alarm.getCurrentTime();
+      long startRequestTime = CurrentTime.getCurrentTime();
       
       if (handleRequest(req, res, stream, out, isKeepalive)) {
         stream.free(startRequestTime);

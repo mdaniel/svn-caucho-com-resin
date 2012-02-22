@@ -31,6 +31,7 @@ package com.caucho.vfs;
 
 import com.caucho.util.Alarm;
 import com.caucho.util.ByteBuffer;
+import com.caucho.util.CurrentTime;
 import com.caucho.util.L10N;
 
 import java.io.FileNotFoundException;
@@ -483,7 +484,7 @@ public class MemoryPath extends FilesystemPath {
       this.name = name;
       this.data = data;
       this.type = type;
-      this.lastModified = Alarm.getCurrentTime();
+      this.lastModified = CurrentTime.getCurrentTime();
     }
 
     Node lookup(String name)
@@ -507,7 +508,7 @@ public class MemoryPath extends FilesystemPath {
       Node newNode = new Node(name, data, type);
       newNode.next = firstChild;
       firstChild = newNode;
-      lastModified = Alarm.getCurrentTime();
+      lastModified = CurrentTime.getCurrentTime();
 
       return newNode;
     }
@@ -592,7 +593,7 @@ public class MemoryPath extends FilesystemPath {
 
       _node = node;
       if (write)
-        node.lastModified = Alarm.getCurrentTime();
+        node.lastModified = CurrentTime.getCurrentTime();
       _write = write;
 
       _bb = bb;
@@ -659,7 +660,7 @@ public class MemoryPath extends FilesystemPath {
         _bb.add(buf, offset, length);
       }
 
-      _node.lastModified = Alarm.getCurrentTime();
+      _node.lastModified = CurrentTime.getCurrentTime();
     }
 
     @Override

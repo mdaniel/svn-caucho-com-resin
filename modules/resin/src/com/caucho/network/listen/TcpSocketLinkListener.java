@@ -59,6 +59,7 @@ import com.caucho.server.cluster.Server;
 import com.caucho.server.util.CauchoSystem;
 import com.caucho.util.Alarm;
 import com.caucho.util.AlarmListener;
+import com.caucho.util.CurrentTime;
 import com.caucho.util.FreeList;
 import com.caucho.util.Friend;
 import com.caucho.util.L10N;
@@ -214,7 +215,7 @@ public class TcpSocketLinkListener
     
     _launcher = new SocketLinkThreadLauncher(this);
     
-    if (Alarm.isTest()) {
+    if (CurrentTime.isTest()) {
       _launcher.setIdleMin(2);
       _launcher.setIdleMax(ACCEPT_IDLE_MAX);
     }
@@ -1266,7 +1267,7 @@ public class TcpSocketLinkListener
     connections = new TcpSocketLink[_activeConnectionSet.size()];
     _activeConnectionSet.toArray(connections);
 
-    long now = Alarm.getExactTime();
+    long now = CurrentTime.getExactTime();
     TcpConnectionInfo []infoList = new TcpConnectionInfo[connections.length];
 
     for (int i = 0 ; i < connections.length; i++) {
@@ -1361,7 +1362,7 @@ public class TcpSocketLinkListener
   {
     if (! _lifecycle.isActive())
       return false;
-    else if (connectionStartTime + _keepaliveTimeMax < Alarm.getCurrentTime())
+    else if (connectionStartTime + _keepaliveTimeMax < CurrentTime.getCurrentTime())
       return false;
     else if (_keepaliveMax <= _keepaliveAllocateCount.get())
       return false;
@@ -1826,7 +1827,7 @@ public class TcpSocketLinkListener
         _timeoutSet.clear();
         _completeSet.clear();
 
-        long now = Alarm.getCurrentTime();
+        long now = CurrentTime.getCurrentTime();
         
         // wake the launcher in case of freeze
         _launcher.wake();

@@ -41,6 +41,7 @@ import com.caucho.network.listen.ProtocolConnection;
 import com.caucho.network.listen.SocketLink;
 import com.caucho.util.Alarm;
 import com.caucho.util.CharBuffer;
+import com.caucho.util.CurrentTime;
 import com.caucho.util.HashKey;
 import com.caucho.vfs.ReadStream;
 import com.caucho.vfs.TempStream;
@@ -290,7 +291,7 @@ public class MemcachedConnection implements ProtocolConnection
         timeout = 1000L * expTime;
       }
       else {
-        timeout = expTime * 1000L - Alarm.getCurrentTime();
+        timeout = expTime * 1000L - CurrentTime.getCurrentTime();
       }
 
       boolean isStored = doCommand(conn, key, bytes, timeout, flags);
@@ -587,7 +588,7 @@ public class MemcachedConnection implements ProtocolConnection
         return;
       }
       
-      long now = Alarm.getCurrentTime();
+      long now = CurrentTime.getCurrentTime();
       
       if (entry.isExpired(now)) {
         System.out.println("DED: " + key);

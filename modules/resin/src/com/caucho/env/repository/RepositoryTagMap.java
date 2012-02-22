@@ -32,6 +32,7 @@ package com.caucho.env.repository;
 import com.caucho.env.git.*;
 import com.caucho.inject.Module;
 import com.caucho.util.Alarm;
+import com.caucho.util.CurrentTime;
 import com.caucho.util.L10N;
 import com.caucho.vfs.*;
 
@@ -104,7 +105,7 @@ public class RepositoryTagMap
   {
     _tagMap = Collections.unmodifiableMap(tagMap);
 
-    long now = Alarm.getCurrentTime();
+    long now = CurrentTime.getCurrentTime();
     
     if (parent.getSequence() < now)
       _sequence = now;

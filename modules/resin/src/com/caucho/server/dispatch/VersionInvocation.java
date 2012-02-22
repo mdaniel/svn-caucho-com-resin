@@ -32,6 +32,7 @@ package com.caucho.server.dispatch;
 import com.caucho.server.webapp.WebApp;
 import com.caucho.server.session.SessionManager;
 import com.caucho.server.http.HttpServletRequestImpl;
+import com.caucho.util.CurrentTime;
 import com.caucho.util.L10N;
 import com.caucho.util.Alarm;
 import com.caucho.vfs.Dependency;
@@ -77,7 +78,7 @@ public class VersionInvocation extends Invocation
   @Override
   public boolean isModified()
   {
-    long now = Alarm.getCurrentTime();
+    long now = CurrentTime.getCurrentTime();
 
     if (_expireTime < now)
       return true;
@@ -91,7 +92,7 @@ public class VersionInvocation extends Invocation
   @Override
   public boolean logModified(Logger log)
   {
-    long now = Alarm.getCurrentTime();
+    long now = CurrentTime.getCurrentTime();
     
     if (_expireTime < now) {
       log.info(L.l("{0}: versioning rollover complete.", _webApp));
@@ -110,7 +111,7 @@ public class VersionInvocation extends Invocation
   @Override
   public Invocation getRequestInvocation(HttpServletRequestImpl request)
   {
-    if (_expireTime < Alarm.getCurrentTime()) {
+    if (_expireTime < CurrentTime.getCurrentTime()) {
       return _invocation;
     }
 

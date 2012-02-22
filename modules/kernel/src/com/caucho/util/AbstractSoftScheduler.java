@@ -88,7 +88,7 @@ public class AbstractSoftScheduler<E extends TimeIntervalEntry>
    */
  public final void schedule(E entry)
   {
-     schedule(entry, Alarm.getCurrentTime());
+     schedule(entry, CurrentTime.getCurrentTime());
   }
 
   /**
@@ -128,7 +128,7 @@ public class AbstractSoftScheduler<E extends TimeIntervalEntry>
    */
   public final TimeInterval getSchedulerInterval(long time)
   {
-    long now = Alarm.getCurrentTime();
+    long now = CurrentTime.getCurrentTime();
     long rNow = now % _clockTic;
     long starts = now - rNow;
     long stops = now + _clockTic;
@@ -144,7 +144,7 @@ public class AbstractSoftScheduler<E extends TimeIntervalEntry>
    */
   public final TimeInterval getSchedulerInterval(long time, long interavalDuration)
   {
-    long now = Alarm.getCurrentTime();
+    long now = CurrentTime.getCurrentTime();
     long rNow = now % interavalDuration;
     long starts = now - rNow;
     long stops = now + interavalDuration;

@@ -36,6 +36,7 @@ import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReadWriteLock;
 
 import com.caucho.util.Alarm;
+import com.caucho.util.CurrentTime;
 
 /**
  * Locking for tables/etc.
@@ -118,7 +119,7 @@ public final class DatabaseLock implements ReadWriteLock {
     if (lockReadCounter())
       return;
     
-    long expires = Alarm.getCurrentTimeActual() + timeout;
+    long expires = CurrentTime.getCurrentTimeActual() + timeout;
     
     boolean isValid = false;
     
@@ -139,7 +140,7 @@ public final class DatabaseLock implements ReadWriteLock {
     if (lockWriteCounter())
       return;
     
-    long expires = Alarm.getCurrentTimeActual() + timeout;
+    long expires = CurrentTime.getCurrentTimeActual() + timeout;
     
     boolean isValid = false;
     
@@ -285,7 +286,7 @@ public final class DatabaseLock implements ReadWriteLock {
           }
         }
 
-        long delta = expires - Alarm.getCurrentTimeActual();
+        long delta = expires - CurrentTime.getCurrentTimeActual();
         
         if (delta <= 0) {
           throw new LockTimeoutException();
@@ -313,7 +314,7 @@ public final class DatabaseLock implements ReadWriteLock {
           }
         }
 
-        long delta = expires - Alarm.getCurrentTimeActual();
+        long delta = expires - CurrentTime.getCurrentTimeActual();
         
         if (delta <= 0) {
           throw new LockTimeoutException("write timeout 0x" + Long.toHexString(lock));

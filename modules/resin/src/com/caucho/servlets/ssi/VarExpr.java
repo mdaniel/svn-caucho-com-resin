@@ -33,6 +33,7 @@ import java.util.Locale;
 
 import com.caucho.VersionFactory;
 import com.caucho.util.Alarm;
+import com.caucho.util.CurrentTime;
 import com.caucho.util.IntMap;
 import com.caucho.util.QDate;
 import com.caucho.vfs.Path;
@@ -194,7 +195,7 @@ public class VarExpr extends SSIExpr {
       fmt = (String) request.getAttribute("caucho.ssi.timefmt");
       if (fmt == null)
         fmt = "%Y-%m-%d %H:%M:%S";
-      value = QDate.formatGMT(Alarm.getCurrentTime(), fmt);
+      value = QDate.formatGMT(CurrentTime.getCurrentTime(), fmt);
       break;
 
     case DATE_LOCAL:
@@ -202,7 +203,7 @@ public class VarExpr extends SSIExpr {
       if (fmt == null)
         fmt = "%Y-%m-%d %H:%M:%S";
       
-      value = QDate.formatLocal(Alarm.getCurrentTime(), fmt);
+      value = QDate.formatLocal(CurrentTime.getCurrentTime(), fmt);
       break;
 
     case DOCUMENT_NAME:

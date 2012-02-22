@@ -45,7 +45,7 @@ import com.caucho.inject.RequestContext;
 import com.caucho.loader.Environment;
 import com.caucho.management.server.AbstractManagedObject;
 import com.caucho.management.server.TcpConnectionMXBean;
-import com.caucho.util.Alarm;
+import com.caucho.util.CurrentTime;
 import com.caucho.util.Friend;
 import com.caucho.util.L10N;
 import com.caucho.vfs.ClientDisconnectException;
@@ -978,7 +978,7 @@ public class TcpSocketLink extends AbstractSocketLink
         long requestTimeout = getListener().getRequestTimeout();
         
         if (requestTimeout > 0)
-          _socket.setRequestExpireTime(Alarm.getCurrentTime() + requestTimeout);
+          _socket.setRequestExpireTime(CurrentTime.getCurrentTime() + requestTimeout);
 
         // server/1lb5, #4697
         // if (! async.isCompleteRequested()) {
@@ -1211,7 +1211,7 @@ public class TcpSocketLink extends AbstractSocketLink
 
       _currentRequest.set(_request);
       RequestContext.begin();
-      _requestStartTime = Alarm.getCurrentTime();
+      _requestStartTime = CurrentTime.getCurrentTime();
       
       long requestTimeout = getListener().getRequestTimeout();
       
@@ -1263,7 +1263,7 @@ public class TcpSocketLink extends AbstractSocketLink
   {
     TcpSocketLinkListener port = _listener;
 
-    _idleStartTime = Alarm.getCurrentTimeActual();
+    _idleStartTime = CurrentTime.getCurrentTimeActual();
     _idleExpireTime = _idleStartTime + _idleTimeout;
     
     // quick timed read to see if data is already available
@@ -1323,11 +1323,11 @@ public class TcpSocketLink extends AbstractSocketLink
       log.fine(dbgId() + " keepalive (thread)");
 
     long timeout = getListener().getKeepaliveTimeout();
-    long expires = timeout + Alarm.getCurrentTimeActual();
+    long expires = timeout + CurrentTime.getCurrentTimeActual();
 
     do {
       try {
-        long delta = expires - Alarm.getCurrentTimeActual();
+        long delta = expires - CurrentTime.getCurrentTimeActual();
         if (delta < 0)
           delta = 0;
 
@@ -1341,7 +1341,7 @@ public class TcpSocketLink extends AbstractSocketLink
         log.log(Level.FINEST, e.toString(), e);
         break;
       }
-    } while (Alarm.getCurrentTimeActual() < expires);
+    } while (CurrentTime.getCurrentTimeActual() < expires);
 
     // close();
     killKeepalive("thread-keepalive timeout");
@@ -1359,7 +1359,7 @@ public class TcpSocketLink extends AbstractSocketLink
   private void toStartConnection()
     throws IOException
   {
-    _connectionStartTime = Alarm.getCurrentTime();
+    _connectionStartTime = CurrentTime.getCurrentTime();
 
     setStatState("read");
     initSocket();
@@ -1484,7 +1484,7 @@ public class TcpSocketLink extends AbstractSocketLink
 
   private boolean toSuspend()
   {
-    _idleStartTime = Alarm.getCurrentTime();
+    _idleStartTime = CurrentTime.getCurrentTime();
     _idleExpireTime = _idleStartTime + _suspendTimeout;
 
     if (log.isLoggable(Level.FINER))
@@ -1675,7 +1675,7 @@ public class TcpSocketLink extends AbstractSocketLink
     public long getRequestActiveTime()
     {
       if (_requestStartTime > 0)
-        return Alarm.getCurrentTime() - _requestStartTime;
+        return CurrentTime.getCurrentTime() - _requestStartTime;
       else
         return -1;
     }

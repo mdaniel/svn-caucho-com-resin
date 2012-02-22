@@ -39,6 +39,7 @@ import com.caucho.inject.Module;
 import com.caucho.make.DependencyContainer;
 import com.caucho.util.Alarm;
 import com.caucho.util.ByteBuffer;
+import com.caucho.util.CurrentTime;
 import com.caucho.util.JniTroubleshoot;
 import com.caucho.util.L10N;
 import com.caucho.util.QDate;
@@ -461,7 +462,7 @@ public class ClassEntry implements Dependency {
       System.loadLibrary("resin_os");
       _hasJNIReload = canReloadNative();
 
-      if (Alarm.isTest()) {
+      if (CurrentTime.isTest()) {
         // skip logging for test
       }
       else if (_hasJNIReload)

@@ -30,6 +30,7 @@
 package com.caucho.vfs;
 
 import com.caucho.util.Alarm;
+import com.caucho.util.CurrentTime;
 
 import java.util.ArrayList;
 import java.util.logging.Logger;
@@ -134,7 +135,7 @@ public class BasicDependencyContainer
   {
     _isModified = false;
     
-    _lastCheckTime = Alarm.getCurrentTime();
+    _lastCheckTime = CurrentTime.getCurrentTime();
   }
 
   /**
@@ -153,7 +154,7 @@ public class BasicDependencyContainer
     try {
       long now;
       
-      now = Alarm.getCurrentTime();
+      now = CurrentTime.getCurrentTime();
 
       if (now < _lastCheckTime + _checkInterval)
         return _isModified;

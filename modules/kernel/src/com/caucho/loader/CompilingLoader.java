@@ -38,6 +38,7 @@ import com.caucho.server.util.CauchoSystem;
 import com.caucho.util.Alarm;
 import com.caucho.util.CharBuffer;
 import com.caucho.util.Crc64;
+import com.caucho.util.CurrentTime;
 import com.caucho.util.L10N;
 import com.caucho.vfs.Depend;
 import com.caucho.vfs.Path;
@@ -360,12 +361,12 @@ public class CompilingLoader extends Loader implements Make {
     throws IOException, ClassNotFoundException
   {
     synchronized (this) {
-      if (Alarm.getCurrentTime() < _lastMakeTime + 2000)
+      if (CurrentTime.getCurrentTime() < _lastMakeTime + 2000)
         return;
       
       makeImpl();
 
-      _lastMakeTime = Alarm.getCurrentTime();
+      _lastMakeTime = CurrentTime.getCurrentTime();
     }
   }
 

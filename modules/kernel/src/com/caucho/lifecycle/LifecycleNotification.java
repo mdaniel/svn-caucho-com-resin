@@ -30,6 +30,7 @@
 package com.caucho.lifecycle;
 
 import com.caucho.util.Alarm;
+import com.caucho.util.CurrentTime;
 
 import javax.management.Notification;
 
@@ -42,7 +43,7 @@ public class LifecycleNotification extends Notification {
   
   public LifecycleNotification(String type, Object source, long sequence)
   {
-    super(type, source, sequence, Alarm.getCurrentTime());
+    super(type, source, sequence, CurrentTime.getCurrentTime());
   }
   
   public LifecycleNotification(String type, Object source, long sequence,
@@ -60,6 +61,6 @@ public class LifecycleNotification extends Notification {
   public LifecycleNotification(String type, Object source, long sequence,
                                String message)
   {
-    super(type, source, sequence, Alarm.getCurrentTime(), message);
+    super(type, source, sequence, CurrentTime.getCurrentTime(), message);
   }
 }

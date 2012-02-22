@@ -59,6 +59,7 @@ import com.caucho.security.Login;
 import com.caucho.server.webapp.WebApp;
 import com.caucho.util.Alarm;
 import com.caucho.util.CacheListener;
+import com.caucho.util.CurrentTime;
 import com.caucho.util.L10N;
 import com.caucho.vfs.IOExceptionWrapper;
 import com.caucho.vfs.TempOutputStream;
@@ -119,7 +120,7 @@ public class SessionImpl implements HttpSession, CacheListener {
     _manager = manager;
     
     // TCK requires exact time
-    creationTime = Alarm.getExactTime();
+    creationTime = CurrentTime.getExactTime();
 
     _creationTime = creationTime;
     _accessTime = creationTime;
@@ -256,7 +257,7 @@ public class SessionImpl implements HttpSession, CacheListener {
   
   public boolean isTimeout()
   {
-    return isTimeout(Alarm.getCurrentTime());
+    return isTimeout(CurrentTime.getCurrentTime());
   }
 
   boolean isTimeout(long now)
@@ -514,7 +515,7 @@ public class SessionImpl implements HttpSession, CacheListener {
       unbind();
     
     // TCK now cares about exact time
-    now = Alarm.getCurrentTime();
+    now = CurrentTime.getExactTime();
 
     _isValid = true;
     _isNew = true;
@@ -532,7 +533,7 @@ public class SessionImpl implements HttpSession, CacheListener {
    */
   boolean addUse()
   {
-    _lastUseTime = Alarm.getCurrentTime();
+    _lastUseTime = CurrentTime.getCurrentTime();
 
     _useCount.incrementAndGet();
 
@@ -600,7 +601,8 @@ public class SessionImpl implements HttpSession, CacheListener {
   public void finishRequest()
   {
     // server/0122
-    _accessTime = Alarm.getCurrentTime();
+    // TCK cares about exact time
+    _accessTime = CurrentTime.getExactTime();
     _isNew = false;
 
     // update cache access?
@@ -623,7 +625,8 @@ public class SessionImpl implements HttpSession, CacheListener {
   {
     if (! _isValid)
       return false;
-    else if (_isIdleSet && _accessTime + _idleTimeout < Alarm.getCurrentTime()) {
+    else if (_isIdleSet
+             && _accessTime + _idleTimeout < CurrentTime.getCurrentTime()) {
       // server/01o2 (tck)
     
       return false;
@@ -778,7 +781,7 @@ public class SessionImpl implements HttpSession, CacheListener {
     if (log.isLoggable(Level.FINER))
       log.fine(this + " reset");
 
-    now = Alarm.getCurrentTime();
+    now = CurrentTime.getCurrentTime();
 
     unbind();
     _isValid = true;
@@ -1050,7 +1053,7 @@ public class SessionImpl implements HttpSession, CacheListener {
     if (log.isLoggable(Level.FINE))
       log.fine(this + " remove");
 
-    long now = Alarm.getCurrentTime();
+    long now = CurrentTime.getCurrentTime();
 
     // server/015k, server/10g2
     if (_isInvalidating

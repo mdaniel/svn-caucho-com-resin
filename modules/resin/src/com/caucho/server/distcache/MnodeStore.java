@@ -44,6 +44,7 @@ import javax.sql.DataSource;
 import com.caucho.db.jdbc.DataSourceImpl;
 import com.caucho.util.Alarm;
 import com.caucho.util.AlarmListener;
+import com.caucho.util.CurrentTime;
 import com.caucho.util.FreeList;
 import com.caucho.util.HashKey;
 import com.caucho.util.JdbcUtil;
@@ -528,7 +529,7 @@ public class MnodeStore implements AlarmListener {
         long accessedExpireTimeout = rs.getLong(7);
         long modifiedExpireTimeout = rs.getLong(8);
         long updateTime = rs.getLong(9);
-        long accessTime = Alarm.getExactTime();
+        long accessTime = CurrentTime.getCurrentTime();
         
         HashKey cacheHashKey
           = cacheHash != null ? new HashKey(cacheHash) : null;
@@ -597,7 +598,7 @@ public class MnodeStore implements AlarmListener {
       stmt.setLong(7, _serverVersion);
       stmt.setLong(8, mnodeUpdate.getAccessedExpireTimeout());
       stmt.setLong(9, mnodeUpdate.getModifiedExpireTimeout());
-      stmt.setLong(10, Alarm.getCurrentTime());
+      stmt.setLong(10, CurrentTime.getCurrentTime());
 
       int count = stmt.executeUpdate();
 
@@ -642,7 +643,7 @@ public class MnodeStore implements AlarmListener {
       stmt.setLong(3, _serverVersion);
       stmt.setLong(4, mnodeUpdate.getVersion());
       stmt.setLong(5, mnodeUpdate.getAccessedExpireTimeout());
-      stmt.setLong(6, Alarm.getCurrentTime());
+      stmt.setLong(6, CurrentTime.getCurrentTime());
 
       stmt.setBytes(7, key);
       stmt.setLong(8, mnodeUpdate.getVersion());
@@ -715,7 +716,7 @@ public class MnodeStore implements AlarmListener {
       conn = getConnection();
       PreparedStatement pstmt = conn.prepareExpire();
 
-      long now = Alarm.getCurrentTime();
+      long now = CurrentTime.getCurrentTime();
 
       pstmt.setLong(1, now);
       pstmt.setLong(2, now);

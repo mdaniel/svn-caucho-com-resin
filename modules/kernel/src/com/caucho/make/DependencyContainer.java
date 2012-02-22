@@ -35,6 +35,7 @@ import java.util.logging.Logger;
 
 import com.caucho.loader.DynamicClassLoader;
 import com.caucho.util.Alarm;
+import com.caucho.util.CurrentTime;
 import com.caucho.vfs.Dependency;
 
 /**
@@ -166,7 +167,7 @@ public class DependencyContainer implements Dependency
     if (_isModified)
       _checkExpiresTime = Long.MAX_VALUE / 2;
     else
-      _checkExpiresTime = Alarm.getCurrentTime() + _checkInterval;
+      _checkExpiresTime = CurrentTime.getCurrentTime() + _checkInterval;
     
     if (! isModified)
       _isModifiedLog = false;
@@ -194,7 +195,7 @@ public class DependencyContainer implements Dependency
   @Override
   public boolean isModified()
   {
-    long now = Alarm.getCurrentTime();
+    long now = CurrentTime.getCurrentTime();
 
     if (now < _checkExpiresTime)
       return _isModified;

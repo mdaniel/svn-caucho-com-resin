@@ -37,6 +37,7 @@ import com.caucho.distcache.CacheSerializer;
 import com.caucho.distcache.HessianSerializer;
 import com.caucho.distcache.ResinCacheBuilder.Scope;
 import com.caucho.util.Alarm;
+import com.caucho.util.CurrentTime;
 import com.caucho.util.HashKey;
 
 import javax.cache.CacheBuilder;
@@ -72,7 +73,7 @@ public class CacheConfig implements CacheConfiguration
   private long _accessedExpireTimeoutWindow = -1;
 
   private long _localExpireTimeout
-    = Alarm.isTest() ? -1 : 250L; // 250ms default timeout, except for QA
+    = CurrentTime.isTest() ? -1 : 250L; // 250ms default timeout, except for QA
 
   private long _leaseExpireTimeout = 5 * 60 * 1000; // 5 min lease timeout
 

@@ -828,7 +828,7 @@ public class ConnectionPool extends AbstractManagedObject
                                       UserPoolItem oldPoolItem)
     throws ResourceException
   {
-    long expireTime = Alarm.getCurrentTimeActual() + _connectionWaitTimeout;
+    long expireTime = CurrentTime.getCurrentTimeActual() + _connectionWaitTimeout;
 
     if (! _lifecycle.isActive()) {
       throw new IllegalStateException(L.l("{0}: Can't allocate connection because the connection pool is closed.",
@@ -903,7 +903,7 @@ public class ConnectionPool extends AbstractManagedObject
     while (_lifecycle.isActive()) {
       ManagedConnection mConn;
 
-      long now = Alarm.getCurrentTime();
+      long now = CurrentTime.getCurrentTime();
 
       if (_lastValidCheckTime + 15000L < now) {
         _lastValidCheckTime = now;
@@ -1034,7 +1034,7 @@ public class ConnectionPool extends AbstractManagedObject
     } finally {
       if (! isValid) {
         _connectionFailCountTotal.incrementAndGet();
-        _lastFailTime = Alarm.getCurrentTime();
+        _lastFailTime = CurrentTime.getCurrentTime();
       }
 
       // server/308b - connection removed on rollback-only, when it's
@@ -1112,7 +1112,7 @@ public class ConnectionPool extends AbstractManagedObject
         
         while (! isIdleAvailable() && ! isCreateAvailable()) {
           try {
-            long now = Alarm.getCurrentTimeActual();
+            long now = CurrentTime.getCurrentTimeActual();
             
             long delta = expireTime - now;
 
@@ -1201,7 +1201,7 @@ public class ConnectionPool extends AbstractManagedObject
 
       mConn.cleanup();
 
-      long now = Alarm.getCurrentTime();
+      long now = CurrentTime.getCurrentTime();
 
       if (_idlePool.size() == 0)
         _idlePoolExpire = now + _idleTimeout;

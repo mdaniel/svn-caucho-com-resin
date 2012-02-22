@@ -70,7 +70,7 @@ public class DateType extends ConfigType
       if (text == null)
         return null;
       else if ("".equals(text))
-        return new Date(Alarm.getCurrentTime());
+        return new Date(CurrentTime.getCurrentTime());
       
       QDate date = new QDate();
       date.parseDate(text);

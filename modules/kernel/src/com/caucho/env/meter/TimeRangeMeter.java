@@ -30,7 +30,7 @@ package com.caucho.env.meter;
 
 import java.util.concurrent.atomic.AtomicLong;
 
-import com.caucho.util.Alarm;
+import com.caucho.util.CurrentTime;
 
 public final class TimeRangeMeter extends AbstractMeter implements TimeSensor {
   private final double _scale;
@@ -70,7 +70,7 @@ public final class TimeRangeMeter extends AbstractMeter implements TimeSensor {
 
   public final long start()
   {
-    long startTime = Alarm.getCurrentTime();
+    long startTime = CurrentTime.getCurrentTime();
 
     _activeCount.incrementAndGet();
 
@@ -81,7 +81,7 @@ public final class TimeRangeMeter extends AbstractMeter implements TimeSensor {
   {
     _activeCount.decrementAndGet();
     
-    long time = Alarm.getCurrentTime() - startTime;
+    long time = CurrentTime.getCurrentTime() - startTime;
     
     _count.incrementAndGet();
     _time.addAndGet(time);

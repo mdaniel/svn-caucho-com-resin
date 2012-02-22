@@ -30,6 +30,7 @@ package com.caucho.config.functions;
 
 import com.caucho.server.util.CauchoSystem;
 import com.caucho.util.Alarm;
+import com.caucho.util.CurrentTime;
 import com.caucho.util.L10N;
 import com.caucho.util.QDate;
 import com.caucho.util.Sprintf;
@@ -60,7 +61,7 @@ public class FmtFunctions {
     long now;
 
     if (CauchoSystem.isTesting())
-      now = Alarm.getCurrentTime();
+      now = CurrentTime.getCurrentTime();
     else
       now = System.currentTimeMillis();
 

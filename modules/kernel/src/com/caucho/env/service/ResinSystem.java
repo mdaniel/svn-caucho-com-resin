@@ -49,6 +49,7 @@ import com.caucho.loader.Environment;
 import com.caucho.loader.EnvironmentClassLoader;
 import com.caucho.loader.EnvironmentLocal;
 import com.caucho.util.Alarm;
+import com.caucho.util.CurrentTime;
 import com.caucho.util.L10N;
 import com.caucho.vfs.Path;
 
@@ -463,9 +464,9 @@ public class ResinSystem
       if (! _lifecycle.toStarting())
         return;
 
-      _startTime = Alarm.getCurrentTime();
+      _startTime = CurrentTime.getCurrentTime();
 
-      if (! Alarm.isTest()) {
+      if (! CurrentTime.isTest()) {
         log.info("");
 
         log.info(VersionFactory.getFullVersion());

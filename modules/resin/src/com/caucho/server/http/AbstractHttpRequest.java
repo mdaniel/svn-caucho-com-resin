@@ -64,6 +64,7 @@ import com.caucho.util.Alarm;
 import com.caucho.util.CaseInsensitiveIntMap;
 import com.caucho.util.CharBuffer;
 import com.caucho.util.CharSegment;
+import com.caucho.util.CurrentTime;
 import com.caucho.util.HashMapImpl;
 import com.caucho.util.L10N;
 import com.caucho.util.LruCache;
@@ -1694,7 +1695,7 @@ public abstract class AbstractHttpRequest
   protected void startInvocation()
     throws IOException
   {
-    _startTime = Alarm.getExactTime();
+    _startTime = CurrentTime.getExactTime();
     
     TcpSocketLink tcpConn = _tcpConn;
     

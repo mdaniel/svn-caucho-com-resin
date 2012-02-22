@@ -35,6 +35,7 @@ import com.caucho.management.server.AbstractManagedObject;
 import com.caucho.management.server.RewriteRuleMXBean;
 import com.caucho.util.Alarm;
 import com.caucho.util.AlarmListener;
+import com.caucho.util.CurrentTime;
 import com.caucho.util.L10N;
 
 import javax.annotation.PostConstruct;
@@ -275,7 +276,7 @@ abstract public class AbstractRule
 
     private void queue()
     {
-      long now = Alarm.getCurrentTime();
+      long now = CurrentTime.getCurrentTime();
 
       long nextTime = _cron.nextTime(now);
 

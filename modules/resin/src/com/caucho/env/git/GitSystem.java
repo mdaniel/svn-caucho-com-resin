@@ -283,7 +283,7 @@ public class GitSystem extends AbstractResinSubSystem
   public void expandToPath(Path path, String sha1)
     throws IOException
   {
-    long now = Alarm.getCurrentTime();
+    long now = CurrentTime.getCurrentTime();
     
     expandToPath(path, sha1, now);
   }

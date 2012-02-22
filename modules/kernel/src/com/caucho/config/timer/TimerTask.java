@@ -38,6 +38,7 @@ import com.caucho.config.types.Trigger;
 import com.caucho.env.thread.ThreadPool;
 import com.caucho.util.Alarm;
 import com.caucho.util.AlarmListener;
+import com.caucho.util.CurrentTime;
 
 /**
  * Scheduled task.
@@ -97,7 +98,7 @@ public class TimerTask implements AlarmListener {
 
   public void start()
   {
-    long now = Alarm.getCurrentTime();
+    long now = CurrentTime.getCurrentTime();
     long nextTime = _trigger.nextTime(now);
 
     _alarm = new Alarm(this); // TODO Try a weak alarm instead.
@@ -143,7 +144,7 @@ public class TimerTask implements AlarmListener {
    */
   public long getNextAlarmTime()
   {
-    return _trigger.nextTime(Alarm.getExactTime() + 500);
+    return _trigger.nextTime(CurrentTime.getExactTime() + 500);
   }
 
   /**
@@ -170,7 +171,7 @@ public class TimerTask implements AlarmListener {
       return ScheduledTaskStatus.CANCELLED;
     }
 
-    long now = Alarm.getExactTime();
+    long now = CurrentTime.getExactTime();
     long nextTime = _trigger.nextTime(now + 500);
 
     if (now > nextTime) {
@@ -202,7 +203,7 @@ public class TimerTask implements AlarmListener {
 
       ThreadPool.getCurrent().schedule(_task);
 
-      long now = Alarm.getExactTime();
+      long now = CurrentTime.getExactTime();
       long nextTime = _trigger.nextTime(now + 500);
 
       if (nextTime > 0)

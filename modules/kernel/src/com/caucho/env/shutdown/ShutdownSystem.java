@@ -89,7 +89,7 @@ public class ShutdownSystem extends AbstractResinSubSystem
   
   public static ShutdownSystem createAndAddService()
   {
-    return createAndAddService(Alarm.isTest());
+    return createAndAddService(CurrentTime.isTest());
   }
 
   public static ShutdownSystem createAndAddService(boolean isEmbedded)
@@ -326,7 +326,7 @@ public class ShutdownSystem extends AbstractResinSubSystem
       _activeService.set(this);
     }
     
-    if (! Alarm.isTest() && ! _isEmbedded) {
+    if (! CurrentTime.isTest() && ! _isEmbedded) {
       _failSafeHaltThread = new FailSafeHaltThread();
       _failSafeHaltThread.start();
     }

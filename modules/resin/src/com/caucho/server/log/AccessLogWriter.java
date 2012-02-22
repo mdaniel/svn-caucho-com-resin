@@ -40,6 +40,7 @@ import com.caucho.env.thread.AbstractWorkerQueue;
 import com.caucho.log.AbstractRolloverLog;
 import com.caucho.server.cache.TempFileService;
 import com.caucho.util.Alarm;
+import com.caucho.util.CurrentTime;
 import com.caucho.util.FreeRing;
 import com.caucho.util.L10N;
 import com.caucho.vfs.TempStreamApi;
@@ -131,7 +132,7 @@ public class AccessLogWriter extends AbstractRolloverLog
   {
     long expire;
 
-    expire = Alarm.getCurrentTimeActual() + timeout;
+    expire = CurrentTime.getCurrentTimeActual() + timeout;
 
     while (true) {
       if (_logWriterTask.isEmpty()) {
@@ -139,7 +140,7 @@ public class AccessLogWriter extends AbstractRolloverLog
       }
 
       long delta;
-      delta = expire - Alarm.getCurrentTimeActual();
+      delta = expire - CurrentTime.getCurrentTimeActual();
 
       if (delta < 0)
         return;

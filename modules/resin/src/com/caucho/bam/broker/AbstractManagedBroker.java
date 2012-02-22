@@ -38,7 +38,7 @@ import com.caucho.bam.mailbox.MailboxType;
 import com.caucho.bam.mailbox.MultiworkerMailbox;
 import com.caucho.bam.mailbox.PassthroughMailbox;
 import com.caucho.bam.stream.MessageStream;
-import com.caucho.util.Alarm;
+import com.caucho.util.CurrentTime;
 
 /**
  * Broker is the hub which routes messages to actors.
@@ -47,7 +47,8 @@ abstract public class AbstractManagedBroker
   extends AbstractBroker
   implements ManagedBroker
 {
-  private final AtomicLong _sequence = new AtomicLong(Alarm.getCurrentTime());
+  private final AtomicLong _sequence
+    = new AtomicLong(CurrentTime.getCurrentTime());
   
   /**
    * Adds a mailbox.

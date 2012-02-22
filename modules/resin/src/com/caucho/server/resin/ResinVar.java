@@ -36,6 +36,7 @@ import java.util.logging.Logger;
 import com.caucho.VersionFactory;
 import com.caucho.cloud.topology.CloudServer;
 import com.caucho.util.Alarm;
+import com.caucho.util.CurrentTime;
 import com.caucho.vfs.Path;
 
 public class ResinVar {
@@ -93,7 +94,7 @@ public class ResinVar {
       if (_selfServer != null) {
         return _selfServer.getAddress();
       }
-      else if (Alarm.isTest())
+      else if (CurrentTime.isTest())
         return "127.0.0.1";
       else
         return InetAddress.getLocalHost().getHostAddress();
@@ -210,7 +211,7 @@ public class ResinVar {
    */
   public String getVersion()
   {
-    if (Alarm.isTest())
+    if (CurrentTime.isTest())
       return "3.1.test";
     else
       return VersionFactory.getVersion();
@@ -223,7 +224,7 @@ public class ResinVar {
    */
   public String getVersionDate()
   {
-    if (Alarm.isTest())
+    if (CurrentTime.isTest())
       return "19980508T0251";
     else
       return VersionFactory.getVersionDate();
@@ -237,7 +238,7 @@ public class ResinVar {
   public String getHostName()
   {
     try {
-      if (Alarm.isTest())
+      if (CurrentTime.isTest())
         return "localhost";
       else
         return InetAddress.getLocalHost().getHostName();

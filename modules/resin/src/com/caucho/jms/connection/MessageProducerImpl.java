@@ -37,6 +37,7 @@ import javax.jms.MessageProducer;
 
 import com.caucho.jms.queue.AbstractDestination;
 import com.caucho.util.Alarm;
+import com.caucho.util.CurrentTime;
 import com.caucho.util.L10N;
 
 /**
@@ -292,7 +293,7 @@ public class MessageProducerImpl implements MessageProducer {
     if (timeToLive <= 0)
       return timeToLive;
     else
-      return timeToLive + Alarm.getCurrentTime();
+      return timeToLive + CurrentTime.getCurrentTime();
   }
 
   /**

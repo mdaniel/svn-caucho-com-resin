@@ -58,6 +58,7 @@ import com.caucho.util.AlarmListener;
 import com.caucho.util.ByteBuffer;
 import com.caucho.util.CharBuffer;
 import com.caucho.util.CharSegment;
+import com.caucho.util.CurrentTime;
 import com.caucho.util.L10N;
 import com.caucho.util.QDate;
 import com.caucho.util.WeakAlarm;
@@ -558,7 +559,7 @@ public class AccessLog extends AbstractAccessLog implements AlarmListener
         }
 
       case 't':
-        long date = Alarm.getCurrentTime();
+        long date = CurrentTime.getCurrentTime();
 
         if (date / 1000 != _lastTime / 1000)
           fillTime(date);
@@ -576,7 +577,7 @@ public class AccessLog extends AbstractAccessLog implements AlarmListener
       case 'T':
         {
           long startTime = request.getStartTime();
-          long endTime = Alarm.getCurrentTime();
+          long endTime = CurrentTime.getCurrentTime();
 
           offset = print(buffer, offset, (int) ((endTime - startTime + 500) / 1000));
           break;
@@ -585,7 +586,7 @@ public class AccessLog extends AbstractAccessLog implements AlarmListener
       case 'D':
         {
           long startTime = request.getStartTime();
-          long endTime = Alarm.getExactTime();
+          long endTime = CurrentTime.getExactTime();
 
           offset = print(buffer, offset, (int) ((endTime - startTime) * 1000));
           break;

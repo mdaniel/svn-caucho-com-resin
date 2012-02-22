@@ -59,6 +59,7 @@ import com.caucho.log.RotateStream;
 import com.caucho.network.listen.TcpSocketLinkListener;
 import com.caucho.server.util.CauchoSystem;
 import com.caucho.util.Alarm;
+import com.caucho.util.CurrentTime;
 import com.caucho.util.L10N;
 import com.caucho.vfs.Path;
 import com.caucho.vfs.QServerSocket;
@@ -158,7 +159,7 @@ class WatchdogChildProcess
   
   public long getUptime()
   {
-    long now = Alarm.getCurrentTime();
+    long now = CurrentTime.getCurrentTime();
     long start = _startTime;
     
     if (_startTime > 0)
@@ -182,7 +183,7 @@ class WatchdogChildProcess
     Socket s = null;
 
     try {
-      _startTime = Alarm.getCurrentTime();
+      _startTime = CurrentTime.getCurrentTime();
       
       thread.setContextClassLoader(envLoader);
       envLoader.start();

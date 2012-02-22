@@ -49,6 +49,7 @@ import com.caucho.util.Alarm;
 import com.caucho.util.Base64;
 import com.caucho.util.CharBuffer;
 import com.caucho.util.Crc64;
+import com.caucho.util.CurrentTime;
 import com.caucho.vfs.ReadStream;
 import com.caucho.vfs.WriteStream;
 
@@ -264,7 +265,7 @@ public class HmuxDispatchRequest {
     
     long crc64 = 0;
 
-    if (! Alarm.isTest())
+    if (! CurrentTime.isTest())
       crc64 = Crc64.generate(crc64, VersionFactory.getFullVersion());
     
     queryServer(os);

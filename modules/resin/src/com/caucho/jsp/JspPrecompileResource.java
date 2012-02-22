@@ -38,6 +38,7 @@ import com.caucho.lifecycle.Lifecycle;
 import com.caucho.server.webapp.WebApp;
 import com.caucho.util.Alarm;
 import com.caucho.util.CompileException;
+import com.caucho.util.CurrentTime;
 import com.caucho.util.L10N;
 import com.caucho.vfs.Path;
 import com.caucho.vfs.Vfs;
@@ -161,11 +162,11 @@ public class JspPrecompileResource {
       ThreadPool.getThreadPool().schedule(task);
     }
 
-    long expire = Alarm.getCurrentTime() + _timeout;
+    long expire = CurrentTime.getCurrentTime() + _timeout;
     synchronized (this) {
       while (_completeCount < _threadCount) {
         try {
-          long timeout = expire - Alarm.getCurrentTime();
+          long timeout = expire - CurrentTime.getCurrentTime();
 
           if (timeout <= 0) {
             log.fine(this.getClass().getSimpleName() + " timeout occured");

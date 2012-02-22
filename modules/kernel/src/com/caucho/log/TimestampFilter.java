@@ -34,6 +34,7 @@ import java.util.ArrayList;
 import com.caucho.inject.Module;
 import com.caucho.loader.Environment;
 import com.caucho.util.Alarm;
+import com.caucho.util.CurrentTime;
 import com.caucho.util.QDate;
 import com.caucho.vfs.Path;
 import com.caucho.vfs.StreamImpl;
@@ -212,7 +213,7 @@ public class TimestampFilter extends StreamImpl {
     
     long now;
 
-    now = Alarm.getExactTime();
+    now = CurrentTime.getExactTime();
 
     for (int i = 0; i < length; i++) {
       int ch = buffer[offset + i];

@@ -51,6 +51,7 @@ import com.caucho.jms.queue.QueueEntry;
 import com.caucho.jms.selector.Selector;
 import com.caucho.jms.selector.SelectorParser;
 import com.caucho.util.Alarm;
+import com.caucho.util.CurrentTime;
 import com.caucho.util.L10N;
 
 /**
@@ -227,8 +228,9 @@ public class MessageConsumerImpl<E> implements MessageConsumer
   {
     long timeout = Long.MAX_VALUE / 2;
     
-    if (Alarm.isTest())
+    if (CurrentTime.isTest()) {
       timeout = 600000L;
+    }
     
     return receiveImpl(timeout);
   }
@@ -270,7 +272,7 @@ public class MessageConsumerImpl<E> implements MessageConsumer
     if (Long.MAX_VALUE / 2 < timeout || timeout < 0)
       timeout = Long.MAX_VALUE / 2;
 
-    long now = Alarm.getCurrentTimeActual();
+    long now = CurrentTime.getCurrentTimeActual();
     long expireTime = timeout > 0 ? now + timeout : 0;
 
     while (_session.isActive()) {

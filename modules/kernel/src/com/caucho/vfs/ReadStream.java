@@ -31,6 +31,7 @@ package com.caucho.vfs;
 
 import com.caucho.util.Alarm;
 import com.caucho.util.CharBuffer;
+import com.caucho.util.CurrentTime;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -466,7 +467,7 @@ public final class ReadStream extends InputStream
           _position += len;
           
           if (_isEnableReadTime)
-            _readTime = Alarm.getCurrentTime();
+            _readTime = CurrentTime.getCurrentTime();
         }
 
         return len;
@@ -1092,7 +1093,7 @@ public final class ReadStream extends InputStream
       _position += readLength;
       
       if (_isEnableReadTime)
-        _readTime = Alarm.getCurrentTime();
+        _readTime = CurrentTime.getCurrentTime();
 
       return true;
     }
@@ -1140,7 +1141,7 @@ public final class ReadStream extends InputStream
       _position += readLength;
       
       if (_isEnableReadTime)
-        _readTime = Alarm.getCurrentTime();
+        _readTime = CurrentTime.getCurrentTime();
       
       return readLength;
     }
@@ -1198,7 +1199,7 @@ public final class ReadStream extends InputStream
       _position += readLength;
       
       if (_isEnableReadTime)
-        _readTime = Alarm.getCurrentTime();
+        _readTime = CurrentTime.getCurrentTime();
       return true;
     }
     else if (readLength == READ_TIMEOUT) {
@@ -1241,7 +1242,7 @@ public final class ReadStream extends InputStream
       _position += readLength;
       
       if (_isEnableReadTime)
-        _readTime = Alarm.getCurrentTime();
+        _readTime = CurrentTime.getCurrentTime();
       return true;
     }
     else {

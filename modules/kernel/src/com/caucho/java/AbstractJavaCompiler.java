@@ -29,6 +29,7 @@
 package com.caucho.java;
 
 import com.caucho.util.Alarm;
+import com.caucho.util.CurrentTime;
 import com.caucho.util.DisplayableException;
 import com.caucho.util.L10N;
 
@@ -137,17 +138,17 @@ abstract public class AbstractJavaCompiler implements Runnable {
 
   protected void waitForComplete(long timeout)
   {
-    long endTime = Alarm.getCurrentTimeActual() + timeout;
+    long endTime = CurrentTime.getCurrentTimeActual() + timeout;
     Thread thread;
 
     synchronized (_isDone) {
       while (! isDone()
-          && Alarm.getCurrentTimeActual() <= endTime
+          && CurrentTime.getCurrentTimeActual() <= endTime
           && ((thread = _compileThread) == null || thread.isAlive())) {
         Thread.currentThread().interrupted();
         
         try {
-          _isDone.wait(endTime - Alarm.getCurrentTimeActual());
+          _isDone.wait(endTime - CurrentTime.getCurrentTimeActual());
         } catch (Exception e) {
         }
       }

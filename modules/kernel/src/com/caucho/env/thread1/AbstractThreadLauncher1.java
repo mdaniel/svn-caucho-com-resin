@@ -38,6 +38,7 @@ import com.caucho.env.thread1.AbstractTaskWorker1;
 import com.caucho.inject.Module;
 import com.caucho.lifecycle.Lifecycle;
 import com.caucho.util.Alarm;
+import com.caucho.util.CurrentTime;
 import com.caucho.util.L10N;
 
 @Module
@@ -486,7 +487,7 @@ abstract public class AbstractThreadLauncher1 extends AbstractTaskWorker1 {
    */
   protected void updateThrottle()
   {
-    long now = Alarm.getCurrentTimeActual();
+    long now = CurrentTime.getCurrentTimeActual();
     
     if (_throttleTimestamp + _throttlePeriod < now) {
       _throttleTimestamp = now;

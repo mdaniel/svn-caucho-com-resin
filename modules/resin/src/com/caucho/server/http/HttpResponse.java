@@ -44,6 +44,7 @@ import com.caucho.server.cluster.Server;
 import com.caucho.server.webapp.WebApp;
 import com.caucho.util.Alarm;
 import com.caucho.util.CharBuffer;
+import com.caucho.util.CurrentTime;
 import com.caucho.vfs.WriteStream;
 
 public class HttpResponse extends AbstractHttpResponse
@@ -152,7 +153,7 @@ public class HttpResponse extends AbstractHttpResponse
 
     os.print("\r\nContent-Length: 0");
 
-    long now = Alarm.getCurrentTime();
+    long now = CurrentTime.getCurrentTime();
     if (_lastDate + 1000 < now) {
       fillDate(now);
     }
@@ -333,7 +334,7 @@ public class HttpResponse extends AbstractHttpResponse
       }
     }
 
-    long now = Alarm.getCurrentTime();
+    long now = CurrentTime.getCurrentTime();
     ArrayList<Cookie> cookiesOut = response.getCookies();
 
     if (cookiesOut != null) {

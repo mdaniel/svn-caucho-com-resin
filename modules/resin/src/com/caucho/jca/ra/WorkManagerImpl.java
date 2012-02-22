@@ -31,6 +31,7 @@ package com.caucho.jca.ra;
 import com.caucho.env.thread.ThreadPool;
 import com.caucho.inject.Module;
 import com.caucho.util.Alarm;
+import com.caucho.util.CurrentTime;
 import com.caucho.util.L10N;
 
 import javax.resource.spi.work.ExecutionContext;
@@ -144,11 +145,11 @@ public class WorkManagerImpl implements WorkManager {
                         WorkListener listener)
     throws WorkException
   {
-    long start = Alarm.getCurrentTime();
+    long start = CurrentTime.getCurrentTime();
     
     startWork(work, startTimeout, context, listener, true);
 
-    return Alarm.getCurrentTime() - start;
+    return CurrentTime.getCurrentTime() - start;
   }
 
   /**

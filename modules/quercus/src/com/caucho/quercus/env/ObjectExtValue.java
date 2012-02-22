@@ -32,6 +32,7 @@ package com.caucho.quercus.env;
 import com.caucho.quercus.expr.Expr;
 import com.caucho.quercus.expr.LiteralStringExpr;
 import com.caucho.quercus.function.AbstractFunction;
+import com.caucho.util.CurrentTime;
 import com.caucho.util.Primes;
 import com.caucho.util.Alarm;
 import com.caucho.vfs.WriteStream;
@@ -1470,7 +1471,7 @@ public class ObjectExtValue extends ObjectValue
   @Override
   public String toString()
   {
-    if (Alarm.isTest())
+    if (CurrentTime.isTest())
       return getClass().getSimpleName() +  "[" + _className + "]";
     else
       return getClass().getSimpleName()

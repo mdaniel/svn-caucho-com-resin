@@ -39,6 +39,7 @@ import java.util.logging.Logger;
 import com.caucho.env.thread.TaskWorker;
 import com.caucho.env.warning.WarningService;
 import com.caucho.util.Alarm;
+import com.caucho.util.CurrentTime;
 
 /**
  * A generic pool of threads available for Alarms and Work tasks.
@@ -242,7 +243,7 @@ abstract public class AbstractTaskWorker2 implements Runnable, TaskWorker {
   
   protected long getCurrentTimeActual()
   {
-    return Alarm.getCurrentTimeActual();
+    return CurrentTime.getCurrentTimeActual();
   }
 
   @Override

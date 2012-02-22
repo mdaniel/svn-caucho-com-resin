@@ -34,6 +34,7 @@ import java.util.logging.Logger;
 
 import com.caucho.inject.Module;
 import com.caucho.util.Alarm;
+import com.caucho.util.CurrentTime;
 
 /**
  * Public API to control a comet connection.
@@ -241,7 +242,7 @@ class TcpAsyncController extends AsyncController {
     StringBuilder sb = new StringBuilder();
     sb.append(getClass().getSimpleName()).append("[");
 
-    if (Alarm.isTest())
+    if (CurrentTime.isTest())
       sb.append("test");
     else
       sb.append(conn.getId());

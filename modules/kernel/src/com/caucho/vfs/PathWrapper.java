@@ -92,9 +92,12 @@ public abstract class PathWrapper extends Path {
    *
    * @return the new path or null if the scheme doesn't exist
    */
-  public Path lookupImpl(String userPath, Map<String,Object> newAttributes)
+ @Override
+  public Path lookupImpl(String userPath, 
+                         Map<String,Object> newAttributes,
+                         boolean isAllowRoot)
   {
-    return getWrappedPath().lookupImpl(userPath, newAttributes);
+    return getWrappedPath().lookupImpl(userPath, newAttributes, isAllowRoot);
   }
 
   /**

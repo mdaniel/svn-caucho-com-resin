@@ -55,6 +55,7 @@ import com.caucho.server.cluster.ProtocolPort;
 import com.caucho.server.cluster.ProtocolPortConfig;
 import com.caucho.server.http.HttpProtocol;
 import com.caucho.util.Alarm;
+import com.caucho.util.CurrentTime;
 import com.caucho.util.L10N;
 
 /**
@@ -150,7 +151,7 @@ public final class ClusterServer {
       // _isHeartbeatActive.set(true);
     }
     
-    _stateTimestamp.set(Alarm.getCurrentTime());
+    _stateTimestamp.set(CurrentTime.getCurrentTime());
 
     StringBuilder sb = new StringBuilder();
 
@@ -710,12 +711,12 @@ public final class ClusterServer {
   {
     long timeout = 120 * 1000L;
     
-    long expireTime = Alarm.getCurrentTime() + timeout;
+    long expireTime = CurrentTime.getCurrentTime() + timeout;
     
     String address;
     
     while ((address = allocateLocalAddress()) == null
-           && Alarm.getCurrentTime() < expireTime) {
+           && CurrentTime.getCurrentTime() < expireTime) {
       try {
         Thread.sleep(1000);
       } catch (Exception e) {
@@ -1021,7 +1022,7 @@ public final class ClusterServer {
    */
   public boolean notifyHeartbeatStart()
   {
-    long now = Alarm.getCurrentTime();
+    long now = CurrentTime.getCurrentTime();
     
     _lastHeartbeatTime.set(now);
 
@@ -1068,7 +1069,7 @@ public final class ClusterServer {
     if (! isActive)
       return false;
     
-    _stateTimestamp.set(Alarm.getCurrentTime());
+    _stateTimestamp.set(CurrentTime.getCurrentTime());
 
     log.warning(this + " notify-heartbeat-stop");
     
@@ -1085,7 +1086,7 @@ public final class ClusterServer {
   public void stopServer()
   {
     _isHeartbeatActive.set(false);
-    _stateTimestamp.set(Alarm.getCurrentTime());
+    _stateTimestamp.set(CurrentTime.getCurrentTime());
 
     SocketPool pool = _clusterSocketPool.get();
     

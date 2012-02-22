@@ -68,6 +68,7 @@ import com.caucho.server.distcache.DistCacheSystem;
 import com.caucho.server.distcache.MnodeUpdate;
 import com.caucho.util.Alarm;
 import com.caucho.util.CharBuffer;
+import com.caucho.util.CurrentTime;
 import com.caucho.util.HashKey;
 import com.caucho.util.L10N;
 import com.caucho.vfs.ReadStream;
@@ -182,7 +183,7 @@ public class MemcachedClient implements Cache
       throw new CacheException("Cannot open client");
 
     boolean isValid = false;
-    long idleStartTime = Alarm.getCurrentTime();
+    long idleStartTime = CurrentTime.getCurrentTime();
     
     try {
       WriteStream out = client.getOutputStream();
@@ -290,7 +291,7 @@ public class MemcachedClient implements Cache
   
     long version = entry.getVersion();
   
-    long now = Alarm.getCurrentTime();
+    long now = CurrentTime.getCurrentTime();
   
     if (version < now)
       version = now;
@@ -303,7 +304,7 @@ public class MemcachedClient implements Cache
       throw new CacheException("Cannot open client");
 
     boolean isValid = false;
-    long idleStartTime = Alarm.getCurrentTime();
+    long idleStartTime = CurrentTime.getCurrentTime();
     
     try {
       WriteStream out = client.getOutputStream();
@@ -426,7 +427,7 @@ public class MemcachedClient implements Cache
   private void putImpl(Object key, Object value) throws CacheException
   {
     ClientSocket client = null;
-    long idleStartTime = Alarm.getCurrentTime();
+    long idleStartTime = CurrentTime.getCurrentTime();
     
     
     boolean isValid = false;
@@ -488,7 +489,7 @@ public class MemcachedClient implements Cache
   void putResin(String key, MnodeUpdate update) throws CacheException
   {
     ClientSocket client = null;
-    long idleStartTime = Alarm.getCurrentTime();
+    long idleStartTime = CurrentTime.getCurrentTime();
     
     CacheImpl cache = getLocalCache();
     
@@ -581,7 +582,7 @@ public class MemcachedClient implements Cache
   void removeImpl(Object key) throws CacheException
   {
     ClientSocket client = null;
-    long idleStartTime = Alarm.getCurrentTime();
+    long idleStartTime = CurrentTime.getCurrentTime();
     
     
     boolean isValid = false;
@@ -700,7 +701,7 @@ public class MemcachedClient implements Cache
     if (client == null)
       return;
 
-    long idleStartTime = Alarm.getCurrentTime();
+    long idleStartTime = CurrentTime.getCurrentTime();
     boolean isValid = false;
     
     try {

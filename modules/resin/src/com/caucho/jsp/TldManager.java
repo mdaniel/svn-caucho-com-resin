@@ -52,6 +52,7 @@ import com.caucho.loader.EnvironmentLocal;
 import com.caucho.server.util.CauchoSystem;
 import com.caucho.server.webapp.WebApp;
 import com.caucho.util.Alarm;
+import com.caucho.util.CurrentTime;
 import com.caucho.util.L10N;
 import com.caucho.vfs.JarPath;
 import com.caucho.vfs.Path;
@@ -246,7 +247,7 @@ public class TldManager {
     // loads tag libraries from the global context (so there's no
     // need to reparse the jars for each web-app
     if (_globalTaglibs == null) {
-      if (! Alarm.isTest()) {
+      if (! CurrentTime.isTest()) {
         log.info("Loading .tld files from global classpath");
       }
 

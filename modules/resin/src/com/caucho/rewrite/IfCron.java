@@ -33,6 +33,7 @@ import com.caucho.config.ConfigException;
 import com.caucho.config.Configurable;
 import com.caucho.config.types.CronType;
 import com.caucho.util.Alarm;
+import com.caucho.util.CurrentTime;
 import com.caucho.util.L10N;
 
 import javax.servlet.http.HttpServletRequest;
@@ -99,7 +100,7 @@ public class IfCron implements RequestPredicate
   @Override
   public boolean isMatch(HttpServletRequest request)
   {
-    long now = Alarm.getCurrentTime();
+    long now = CurrentTime.getCurrentTime();
 
     long prevEnable = _enableAt.prevTime(now);
     long prevDisable = _disableAt.prevTime(now);

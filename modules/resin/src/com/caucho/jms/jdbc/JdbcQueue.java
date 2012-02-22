@@ -37,6 +37,7 @@ import com.caucho.jms.message.MessageImpl;
 import com.caucho.jms.queue.AbstractQueue;
 import com.caucho.jms.queue.MessageException;
 import com.caucho.jms.queue.PollingQueue;
+import com.caucho.util.CurrentTime;
 import com.caucho.util.L10N;
 import com.caucho.util.Alarm;
 import com.caucho.jdbc.*;
@@ -251,7 +252,7 @@ public class JdbcQueue<E> extends PollingQueue<E> {
 
           selectStmt.setLong(1, minId);
           selectStmt.setInt(2, getId());
-          selectStmt.setLong(3, Alarm.getCurrentTime());
+          selectStmt.setLong(3, CurrentTime.getCurrentTime());
 
           MessageImpl msg = null;
 
@@ -424,7 +425,7 @@ public class JdbcQueue<E> extends PollingQueue<E> {
 
         selectStmt.setLong(1, minId);
         selectStmt.setInt(2, getId());
-        selectStmt.setLong(3, Alarm.getCurrentTime());
+        selectStmt.setLong(3, CurrentTime.getCurrentTime());
 
         MessageImpl msg = null;
 

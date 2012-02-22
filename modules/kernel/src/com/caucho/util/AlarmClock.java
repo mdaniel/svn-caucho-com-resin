@@ -316,9 +316,9 @@ public class AlarmClock {
     boolean isStressTest = false;
     
     if (isStressTest)
-      now = Alarm.getExactTime();
+      now = CurrentTime.getExactTime();
     else
-      now = Alarm.getCurrentTime();
+      now = CurrentTime.getCurrentTime();
     
     long wakeTime = alarm.getAndSetWakeTime(0);
 

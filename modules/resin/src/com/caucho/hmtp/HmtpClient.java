@@ -47,6 +47,7 @@ import com.caucho.cloud.security.SecurityService;
 import com.caucho.remote.websocket.WebSocketClient;
 import com.caucho.security.DigestCredentials;
 import com.caucho.util.Alarm;
+import com.caucho.util.CurrentTime;
 import com.caucho.util.L10N;
 import com.caucho.websocket.WebSocketListener;
 
@@ -194,7 +195,7 @@ public class HmtpClient implements RemoteActorSender
       else if (credentials instanceof String) {
         String password = (String) credentials;
         
-        String clientNonce = String.valueOf(Alarm.getCurrentTime());
+        String clientNonce = String.valueOf(CurrentTime.getCurrentTime());
         
         NonceQuery nonceQuery = new NonceQuery("", uid, clientNonce);
         NonceQuery nonceResult = (NonceQuery) query(null, nonceQuery);

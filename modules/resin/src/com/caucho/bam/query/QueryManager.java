@@ -40,6 +40,7 @@ import com.caucho.bam.ErrorPacketException;
 import com.caucho.bam.TimeoutException;
 import com.caucho.util.Alarm;
 import com.caucho.util.AlarmListener;
+import com.caucho.util.CurrentTime;
 import com.caucho.util.WeakAlarm;
 
 /**
@@ -102,7 +103,7 @@ public class QueryManager {
 
     Alarm alarm = _alarm;
 
-    long expireTime = timeout + Alarm.getCurrentTime();
+    long expireTime = timeout + CurrentTime.getCurrentTime();
     
     if (alarm != null 
         && (! alarm.isQueued() 
@@ -239,7 +240,7 @@ public class QueryManager {
     
     void add(long id, QueryCallback callback, long timeout)
     {
-      long expires = timeout + Alarm.getCurrentTime();
+      long expires = timeout + CurrentTime.getCurrentTime();
       
       int hash = (int) (id & _mask);
 
@@ -394,10 +395,10 @@ public class QueryManager {
     boolean waitFor(long timeout)
     {
       _thread = Thread.currentThread();
-      long now = Alarm.getCurrentTimeActual();
+      long now = CurrentTime.getCurrentTimeActual();
       long expires = now + timeout;
 
-      while (! _isResult.get() && Alarm.getCurrentTimeActual() < expires) {
+      while (! _isResult.get() && CurrentTime.getCurrentTimeActual() < expires) {
         try {
           Thread.interrupted();
           LockSupport.parkUntil(expires);
@@ -449,7 +450,7 @@ public class QueryManager {
     public void handleAlarm(Alarm alarm)
     {
       try {
-        long now = Alarm.getCurrentTime();
+        long now = CurrentTime.getCurrentTime();
         
         checkTimeout(now);
       } finally {

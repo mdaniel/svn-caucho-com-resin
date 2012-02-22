@@ -53,6 +53,7 @@ import com.caucho.server.dispatch.Invocation;
 import com.caucho.server.dispatch.InvocationServer;
 import com.caucho.server.util.CauchoSystem;
 import com.caucho.util.Alarm;
+import com.caucho.util.CurrentTime;
 
 public class ServerAdmin extends AbstractEmitterObject
   implements ServerMXBean
@@ -255,7 +256,7 @@ public class ServerAdmin extends AbstractEmitterObject
   @Override
   public Date getCurrentTime()
   {
-    return new Date(Alarm.getExactTime());
+    return new Date(CurrentTime.getCurrentTime());
   }
 
   /**
@@ -273,7 +274,7 @@ public class ServerAdmin extends AbstractEmitterObject
   @Override
   public long getUptime()
   {
-    return Alarm.getExactTime() - _server.getStartTime();
+    return CurrentTime.getCurrentTime() - _server.getStartTime();
   }
 
   //
@@ -437,7 +438,7 @@ public class ServerAdmin extends AbstractEmitterObject
   @Override
   public long getRuntimeMemory()
   {
-    if (Alarm.isTest())
+    if (CurrentTime.isTest())
       return 666;
     else
       return Runtime.getRuntime().totalMemory();
@@ -449,7 +450,7 @@ public class ServerAdmin extends AbstractEmitterObject
   @Override
   public long getRuntimeMemoryFree()
   {
-    if (Alarm.isTest())
+    if (CurrentTime.isTest())
       return 666;
     else
       return Runtime.getRuntime().freeMemory();
@@ -462,7 +463,7 @@ public class ServerAdmin extends AbstractEmitterObject
   public double getCpuLoadAvg()
   {
     try {
-      if (Alarm.isTest())
+      if (CurrentTime.isTest())
         return 0;
       else
         return CauchoSystem.getLoadAvg();

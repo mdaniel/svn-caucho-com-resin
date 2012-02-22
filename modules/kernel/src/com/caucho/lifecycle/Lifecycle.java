@@ -47,6 +47,7 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 
 import com.caucho.util.Alarm;
+import com.caucho.util.CurrentTime;
 
 /**
  * Lifecycle class.
@@ -324,18 +325,18 @@ public final class Lifecycle {
       return false;
     
     // server/1d2j
-    long waitEnd = Alarm.getCurrentTimeActual() + timeout;
+    long waitEnd = CurrentTime.getCurrentTimeActual() + timeout;
 
     synchronized (this) {
       while ((state = _state.get()).isBeforeActive()
-             && Alarm.getCurrentTimeActual() < waitEnd) {
+             && CurrentTime.getCurrentTimeActual() < waitEnd) {
         if (state.isActive())
           return true;
         else if (state.isAfterActive())
           return false;
 
         try {
-          long delta = waitEnd - Alarm.getCurrentTimeActual();
+          long delta = waitEnd - CurrentTime.getCurrentTimeActual();
           
           if (delta > 0) {
             wait(delta);
@@ -461,7 +462,7 @@ public final class Lifecycle {
    public boolean toPostInit()
    {
      if (_state.compareAndSet(STOPPED, INIT)) {
-       _lastChangeTime = Alarm.getCurrentTime();
+       _lastChangeTime = CurrentTime.getCurrentTime();
 
        notifyListeners(STOPPED, INIT);
 
@@ -487,7 +488,7 @@ public final class Lifecycle {
         return false;
     } while (! _state.compareAndSet(state, STARTING));
 
-    _lastChangeTime = Alarm.getCurrentTime();
+    _lastChangeTime = CurrentTime.getCurrentTime();
 
     if (_log != null && _log.isLoggable(_level) && _log.isLoggable(Level.FINE))
       _log.fine(_name + " starting");
@@ -513,7 +514,7 @@ public final class Lifecycle {
         return false;
     } while (! _state.compareAndSet(state, ACTIVE));
 
-    _lastChangeTime = Alarm.getCurrentTime();
+    _lastChangeTime = CurrentTime.getCurrentTime();
 
     if (_log != null && _log.isLoggable(_level))
       _log.log(_level, _name + " active");
@@ -553,7 +554,7 @@ public final class Lifecycle {
         return false;
     } while (! _state.compareAndSet(state, FAILED));
 
-    _lastChangeTime = Alarm.getCurrentTime();
+    _lastChangeTime = CurrentTime.getCurrentTime();
 
     if (_log != null && _log.isLoggable(_level))
       _log.log(_level, _name + " fail");
@@ -581,7 +582,7 @@ public final class Lifecycle {
         return false;
     } while (! _state.compareAndSet(state, STOPPING));
 
-    _lastChangeTime = Alarm.getCurrentTime();
+    _lastChangeTime = CurrentTime.getCurrentTime();
 
     if (_log != null && _log.isLoggable(_level))
       _log.log(_level, _name + " stopping");
@@ -647,7 +648,7 @@ public final class Lifecycle {
         return false;
     } while (! _state.compareAndSet(state, newState));
 
-    _lastChangeTime = Alarm.getCurrentTime();
+    _lastChangeTime = CurrentTime.getCurrentTime();
 
     if (_log != null && _log.isLoggable(_lowLevel)) {
       _log.log(_lowLevel, _name + " " + newState);
@@ -667,7 +668,7 @@ public final class Lifecycle {
   {
     LifecycleState state = _state.getAndSet(newState);
 
-    _lastChangeTime = Alarm.getCurrentTime();
+    _lastChangeTime = CurrentTime.getCurrentTime();
 
     if (_log != null && _log.isLoggable(_lowLevel))
       _log.log(_lowLevel, _name + " " + newState);

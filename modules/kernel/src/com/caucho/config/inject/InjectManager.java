@@ -149,6 +149,7 @@ import com.caucho.loader.EnvironmentClassLoader;
 import com.caucho.loader.EnvironmentListener;
 import com.caucho.loader.EnvironmentLocal;
 import com.caucho.util.Alarm;
+import com.caucho.util.CurrentTime;
 import com.caucho.util.IoUtil;
 import com.caucho.util.L10N;
 import com.caucho.vfs.Path;
@@ -332,7 +333,7 @@ public final class InjectManager
   private boolean _isAfterBeanDiscoveryComplete;
   
   private final AtomicLong _xmlCookieSequence
-    = new AtomicLong(Alarm.getCurrentTime());
+    = new AtomicLong(CurrentTime.getCurrentTime());
 
   // XXX: needs to be a local resolver
   private ELResolver _elResolver = new CandiElResolver(this);

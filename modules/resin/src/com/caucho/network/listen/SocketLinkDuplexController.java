@@ -34,6 +34,7 @@ import java.util.logging.Logger;
 
 import com.caucho.inject.Module;
 import com.caucho.util.Alarm;
+import com.caucho.util.CurrentTime;
 import com.caucho.util.L10N;
 import com.caucho.vfs.ReadStream;
 import com.caucho.vfs.WriteStream;
@@ -270,7 +271,7 @@ public class SocketLinkDuplexController extends AsyncController {
 
     if (conn == null)
       return getClass().getSimpleName() + "[" + _listener + ",closed]";
-    else if (Alarm.isTest())
+    else if (CurrentTime.isTest())
       return getClass().getSimpleName() + "[" + _listener + "]";
     else
       return (getClass().getSimpleName() + "[" + conn.getId() + "," + _listener + "]");

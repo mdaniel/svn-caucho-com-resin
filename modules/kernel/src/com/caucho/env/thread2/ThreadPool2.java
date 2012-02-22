@@ -40,6 +40,7 @@ import com.caucho.env.shutdown.ExitCode;
 import com.caucho.env.shutdown.ShutdownSystem;
 import com.caucho.lifecycle.Lifecycle;
 import com.caucho.util.Alarm;
+import com.caucho.util.CurrentTime;
 import com.caucho.util.Friend;
 import com.caucho.util.L10N;
 import com.caucho.util.RingValueQueue;
@@ -442,7 +443,7 @@ public class ThreadPool2 {
     if (timeout < 0 || MAX_EXPIRE < timeout)
       expire = MAX_EXPIRE;
     else
-      expire = Alarm.getCurrentTimeActual() + timeout;
+      expire = CurrentTime.getCurrentTimeActual() + timeout;
 
     ClassLoader loader = Thread.currentThread().getContextClassLoader();
 
@@ -459,7 +460,7 @@ public class ThreadPool2 {
   {
     ClassLoader loader = Thread.currentThread().getContextClassLoader();
 
-    long expire = Alarm.getCurrentTimeActual() + PRIORITY_TIMEOUT;
+    long expire = CurrentTime.getCurrentTimeActual() + PRIORITY_TIMEOUT;
 
     boolean isPriority = true;
     boolean isQueue = true;
@@ -505,7 +506,7 @@ public class ThreadPool2 {
     if (timeout < 0 || timeout > MAX_EXPIRE)
       expire = MAX_EXPIRE;
     else
-      expire = Alarm.getCurrentTimeActual() + timeout;
+      expire = CurrentTime.getCurrentTimeActual() + timeout;
 
     ClassLoader loader = Thread.currentThread().getContextClassLoader();
 
@@ -522,7 +523,7 @@ public class ThreadPool2 {
   {
     ClassLoader loader = Thread.currentThread().getContextClassLoader();
 
-    long expire = Alarm.getCurrentTimeActual() + PRIORITY_TIMEOUT;
+    long expire = CurrentTime.getCurrentTimeActual() + PRIORITY_TIMEOUT;
 
     boolean isPriority = true;
     boolean isQueue = true;
@@ -555,7 +556,7 @@ public class ThreadPool2 {
     if (timeout < 0 || timeout > MAX_EXPIRE)
       expire = MAX_EXPIRE;
     else
-      expire = Alarm.getCurrentTimeActual() + timeout;
+      expire = CurrentTime.getCurrentTimeActual() + timeout;
 
     ClassLoader loader = Thread.currentThread().getContextClassLoader();
 

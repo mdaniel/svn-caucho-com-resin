@@ -30,6 +30,7 @@
 package com.caucho.server.hmux;
 
 import com.caucho.util.Alarm;
+import com.caucho.util.CurrentTime;
 import com.caucho.vfs.*;
 
 import java.io.IOException;
@@ -181,7 +182,7 @@ class HmuxStream extends StreamImpl {
     if (stream == null) {
     }
     // if the stream is still valid, use it
-    else if (Alarm.getCurrentTime() < streamTime + 5000) {
+    else if (CurrentTime.getCurrentTime() < streamTime + 5000) {
       stream.init(path);
       return stream;
     }
@@ -689,7 +690,7 @@ class HmuxStream extends StreamImpl {
     
     if (_isKeepalive) {
       HmuxStream oldSaved;
-      long now = Alarm.getCurrentTime();
+      long now = CurrentTime.getCurrentTime();
       synchronized (LOCK) {
         oldSaved = _savedStream;
         _savedStream = this;

@@ -32,6 +32,7 @@ package com.caucho.env.thread1;
 import java.util.concurrent.locks.LockSupport;
 
 import com.caucho.util.Alarm;
+import com.caucho.util.CurrentTime;
 
 /**
  * A generic pool of threads available for Alarms and Work tasks.
@@ -77,7 +78,7 @@ final class ThreadTask1 {
     Thread thread = _thread;
 
     while (_thread != null
-           && Alarm.getCurrentTimeActual() < expires) {
+           && CurrentTime.getCurrentTimeActual() < expires) {
       try {
         Thread.interrupted();
         LockSupport.parkUntil(thread, expires);

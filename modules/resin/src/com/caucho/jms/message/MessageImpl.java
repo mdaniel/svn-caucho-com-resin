@@ -871,7 +871,7 @@ public class MessageImpl implements Message, java.io.Serializable
   {
     if (_messageId != null)
       return getClass().getSimpleName() + "[" + _messageId + "]";
-    else if (Alarm.isTest())
+    else if (CurrentTime.isTest())
       return getClass().getSimpleName() + "[]";
     else
       return getClass().getSimpleName() + "@" + System.identityHashCode(this);

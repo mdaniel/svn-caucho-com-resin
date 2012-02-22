@@ -31,6 +31,7 @@ package com.caucho.log;
 
 import com.caucho.loader.EnvironmentLocal;
 import com.caucho.util.Alarm;
+import com.caucho.util.CurrentTime;
 import com.caucho.util.QDate;
 import com.caucho.vfs.StderrStream;
 import com.caucho.vfs.StdoutStream;
@@ -292,7 +293,7 @@ public class EnvironmentStream extends StreamImpl {
   public static void logStderr(String msg, Throwable e)
   {
     try {
-      long now = Alarm.getCurrentTime();
+      long now = CurrentTime.getCurrentTime();
     
       msg = QDate.formatLocal(now, "[%Y-%m-%d %H:%M:%S] ") + msg;
 
@@ -312,7 +313,7 @@ public class EnvironmentStream extends StreamImpl {
   public static void logStderr(String msg)
   {
     try {
-      long now = Alarm.getCurrentTime();
+      long now = CurrentTime.getCurrentTime();
     
       msg = QDate.formatLocal(now, "[%Y-%m-%d %H:%M:%S] ") + msg;
 

@@ -61,6 +61,7 @@ import com.caucho.env.repository.RepositoryTagListener;
 import com.caucho.hmtp.HmtpClient;
 import com.caucho.server.cluster.Server;
 import com.caucho.util.Alarm;
+import com.caucho.util.CurrentTime;
 import com.caucho.util.IoUtil;
 import com.caucho.util.L10N;
 import com.caucho.vfs.InputStreamSource;
@@ -747,13 +748,13 @@ public class DeployClient implements Repository
     
     boolean waitForDone(long timeout)
     {
-      long expires = Alarm.getCurrentTimeActual() + timeout;
+      long expires = CurrentTime.getCurrentTimeActual() + timeout;
 
       synchronized (this) {
         long delta;
         
         while (! isDone()
-               && (delta = (expires - Alarm.getCurrentTimeActual())) > 0) {
+               && (delta = (expires - CurrentTime.getCurrentTimeActual())) > 0) {
           try {
             Thread.interrupted();
             wait(delta);

@@ -16,6 +16,7 @@ import com.caucho.server.http.StubServletRequest;
 import com.caucho.server.http.StubServletResponse;
 import com.caucho.server.resin.Resin;
 import com.caucho.util.Alarm;
+import com.caucho.util.CurrentTime;
 import com.caucho.util.IoUtil;
 import com.caucho.util.L10N;
 import com.caucho.util.QDate;
@@ -285,7 +286,7 @@ public class PdfReportAction implements AdminAction
 
   public String getReportFileName() {
     if (_fileName == null) {
-      String date = QDate.formatLocal(Alarm.getCurrentTime(), "%Y%m%dT%H%M");
+      String date = QDate.formatLocal(CurrentTime.getCurrentTime(), "%Y%m%dT%H%M");
 
       String serverId = _serverId;
       if (serverId == null || serverId.isEmpty())
@@ -398,7 +399,7 @@ public class PdfReportAction implements AdminAction
   {
     String fileName = getReportFileName();
     
-    String userDate = QDate.formatLocal(Alarm.getCurrentTime(),
+    String userDate = QDate.formatLocal(CurrentTime.getCurrentTime(),
                                         "%Y-%m-%d %H:%M");
     
     String subject = "[Resin] PDF Report: " + calculateTitle() + "@" + _serverId

@@ -41,6 +41,7 @@ import javax.jms.*;
 import com.caucho.jms.message.*;
 import com.caucho.jms.connection.*;
 import com.caucho.util.Alarm;
+import com.caucho.util.CurrentTime;
 
 import com.caucho.util.L10N;
 
@@ -112,7 +113,7 @@ abstract public class AbstractTopic<E> extends AbstractDestination<E>
 
     timeout = unit.toMillis(timeout);
 
-    long expires = Alarm.getCurrentTime() + timeout;
+    long expires = CurrentTime.getCurrentTime() + timeout;
     
     String publisherId = null;
 
@@ -138,7 +139,7 @@ abstract public class AbstractTopic<E> extends AbstractDestination<E>
   {
     long msTimeout = unit.toMillis(timeout);
 
-    long expireTime = msTimeout + Alarm.getCurrentTime();
+    long expireTime = msTimeout + CurrentTime.getCurrentTime();
     
     E payload = receive(expireTime, true);
 

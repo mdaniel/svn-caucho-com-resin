@@ -69,6 +69,7 @@ import com.caucho.tools.profiler.ProfilerPoint;
 import com.caucho.tools.profiler.ProfilerPointConfig;
 import com.caucho.tools.profiler.XADataSourceWrapper;
 import com.caucho.util.Alarm;
+import com.caucho.util.CurrentTime;
 import com.caucho.util.IoUtil;
 import com.caucho.util.L10N;
 import com.caucho.util.SQLExceptionWrapper;
@@ -716,7 +717,7 @@ public class DriverConfig
       return conn;
     } catch (SQLException e) {
       _connectionFailCountTotal.incrementAndGet();
-      _lastFailTime = Alarm.getCurrentTime();
+      _lastFailTime = CurrentTime.getCurrentTime();
       
       throw e;
     }

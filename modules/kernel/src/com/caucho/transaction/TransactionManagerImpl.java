@@ -60,6 +60,7 @@ import com.caucho.transaction.xalog.AbstractXALogManager;
 import com.caucho.transaction.xalog.AbstractXALogStream;
 import com.caucho.util.Alarm;
 import com.caucho.util.Crc64;
+import com.caucho.util.CurrentTime;
 import com.caucho.util.L10N;
 import com.caucho.util.RandomUtil;
 
@@ -81,7 +82,7 @@ public class TransactionManagerImpl
 
   private long _randomId = RandomUtil.getRandomLong();
 
-  private AtomicLong _sequence = new AtomicLong(Alarm.getCurrentTime());
+  private AtomicLong _sequence = new AtomicLong(CurrentTime.getCurrentTime());
 
   private AbstractXALogManager _xaLogManager;
 
@@ -472,7 +473,7 @@ public class TransactionManagerImpl
   {
     _transactionCount.incrementAndGet();
 
-    return Alarm.getCurrentTime();
+    return CurrentTime.getCurrentTime();
   }
 
   int getTransactionCount()
@@ -586,7 +587,7 @@ public class TransactionManagerImpl
     _timeout = -1;
     AbstractXALogManager logManager = _xaLogManager;
     _xaLogManager = null;
-    _sequence.set(Alarm.getCurrentTime());
+    _sequence.set(CurrentTime.getCurrentTime());
     // _randomId = RandomUtil.getRandomLong();
 
     if (logManager != null)

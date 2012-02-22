@@ -56,13 +56,15 @@ public class Alarm implements ThreadTask, ClassLoaderListener {
   private static AtomicReferenceFieldUpdater<Alarm,Alarm> _nextUpdater;
   private static AtomicLongFieldUpdater<Alarm> _wakeTimeUpdater;
 
-  private static final AlarmThread _alarmThread;
+  // private static final AlarmThread _alarmThread;
   private static final CoordinatorThread _coordinatorThread;
 
+  /*
   private static volatile long _currentTime = System.currentTimeMillis();
 
   private static volatile boolean _isCurrentTimeUsed;
   private static volatile boolean _isSlowTime;
+  */
 
   // private static final AlarmHeap _heap = new AlarmHeap();
   private static final AlarmClock _clock = new AlarmClock();
@@ -72,8 +74,10 @@ public class Alarm implements ThreadTask, ClassLoaderListener {
 
   private static final boolean _isStressTest;
 
+  /*
   private static long _testTime;
   private static long _testNanoDelta;
+  */
   
   private volatile Alarm _next;
   private volatile long _wakeTime;
@@ -198,15 +202,18 @@ public class Alarm implements ThreadTask, ClassLoaderListener {
     _name = name;
   }
   
+  /*
   public static boolean isActive()
   {
     return _testTime == 0 && _alarmThread != null;
   }
+  */
   
   /**
    * Returns the approximate current time in milliseconds.
    * Convenient for minimizing system calls.
    */
+  /*
   public static long getCurrentTime()
   {
     // test avoids extra writes on multicore machines
@@ -231,10 +238,12 @@ public class Alarm implements ThreadTask, ClassLoaderListener {
 
     return _currentTime;
   }
+  */
 
   /**
    * Gets current time, handling test
    */
+  /*
   public static long getCurrentTimeActual()
   {
     if (_testTime > 0)
@@ -242,10 +251,12 @@ public class Alarm implements ThreadTask, ClassLoaderListener {
     else
       return getCurrentTime();
   }
+  */
 
   /**
    * Returns the exact current time in milliseconds.
    */
+  /*
   public static long getExactTime()
   {
     if (_testTime > 0)
@@ -254,10 +265,12 @@ public class Alarm implements ThreadTask, ClassLoaderListener {
       return System.currentTimeMillis();
     }
   }
+  */
 
   /**
    * Returns the exact current time in nanoseconds.
    */
+  /*
   public static long getExactTimeNanoseconds()
   {
     if (_testTime > 0) {
@@ -270,24 +283,29 @@ public class Alarm implements ThreadTask, ClassLoaderListener {
 
     return System.nanoTime();
   }
+  */
 
   /**
    * Returns true for testing.
    */
+  /*
   public static boolean isTest()
   {
     return _testTime > 0;
   }
+  */
 
   /**
    * Yield if in test mode to maintain ordering
    */
+  /*
   public static void yieldIfTest()
   {
     if (_testTime > 0) {
       // Thread.yield();
     }
   }
+  */
 
   /**
    * Returns the wake time of this alarm.
@@ -428,7 +446,7 @@ public class Alarm implements ThreadTask, ClassLoaderListener {
    */
   public void queue(long delta)
   {
-    long now = getCurrentTime();
+    long now = CurrentTime.getCurrentTime();
     
     // boolean isNotify = _heap.queueAt(this, now + delta);
     
@@ -547,28 +565,15 @@ public class Alarm implements ThreadTask, ClassLoaderListener {
     _clock.testClear();
   }
   
-  static void setTestTime(long time)
+  static void setAlarmTestTime(long time)
   {
-    _testTime = time;
-
-    if (_testTime > 0) {
-      if (time < _currentTime) {
-        testClear();
-      }
-
-      _currentTime = time;
-    }
-    else {
-      _currentTime = System.currentTimeMillis();
-    }
-
     // Alarm alarm;
 
     Thread thread = Thread.currentThread();
     ClassLoader oldLoader = thread.getContextClassLoader();
 
     try {
-      long now = getCurrentTime();
+      long now = CurrentTime.getCurrentTime();
       
       _clock.extractAlarm(now, true);
       /*
@@ -586,16 +591,19 @@ public class Alarm implements ThreadTask, ClassLoaderListener {
     }
   }
 
+  /*
   static void setTestNanoDelta(long delta)
   {
     _testNanoDelta = delta;
   }
+  */
 
   public String toString()
   {
     return "Alarm[" + _name + "]";
   }
 
+  /*
   static class AlarmThread extends Thread {
     AlarmThread()
     {
@@ -653,6 +661,7 @@ public class Alarm implements ThreadTask, ClassLoaderListener {
       }
     }
   }
+  */
 
   static class CoordinatorThread extends AbstractTaskWorker {
     private long _lastTime;
@@ -669,14 +678,14 @@ public class Alarm implements ThreadTask, ClassLoaderListener {
     @Override
     public long runTask()
     {
-      if (isTest()) {
+      if (CurrentTime.isTest()) {
         return -1;
       }
       
-      _lastTime = getCurrentTime();
+      _lastTime = CurrentTime.getCurrentTime();
 
       while (true) {
-        long now = getCurrentTime();
+        long now = CurrentTime.getCurrentTime();
         
         long next = _clock.extractAlarm(now, false);
         
@@ -707,7 +716,7 @@ public class Alarm implements ThreadTask, ClassLoaderListener {
           if (_isStressTest)
             now = Alarm.getExactTime();
           else
-            now = Alarm.getCurrentTime();
+            now = CurrentTime.getCurrentTime();
 
           long delta = now - alarm._wakeTime;
 
@@ -736,7 +745,7 @@ public class Alarm implements ThreadTask, ClassLoaderListener {
 
   static {
     ClassLoader systemLoader = null;
-    AlarmThread alarmThread = null;
+    // AlarmThread alarmThread = null;
     CoordinatorThread coordinator = null;
     ClassLoader loader = Alarm.class.getClassLoader();
 
@@ -753,8 +762,10 @@ public class Alarm implements ThreadTask, ClassLoaderListener {
           || loader instanceof DynamicClassLoader
           || loader == systemLoader
           || systemLoader != null && loader == systemLoader.getParent()) {
+        /*
         alarmThread = new AlarmThread();
         alarmThread.start();
+        */
 
         coordinator = new CoordinatorThread();
         coordinator.wake();
@@ -771,7 +782,7 @@ public class Alarm implements ThreadTask, ClassLoaderListener {
 
     // _systemLoader = systemLoader;
     _systemLoader = loader;
-    _alarmThread = alarmThread;
+    // _alarmThread = alarmThread;
     _coordinatorThread = coordinator;
 
     _isStressTest = System.getProperty("caucho.stress.test") != null;

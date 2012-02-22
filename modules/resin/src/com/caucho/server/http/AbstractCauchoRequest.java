@@ -29,34 +29,52 @@
 
 package com.caucho.server.http;
 
+import java.io.ByteArrayInputStream;
+import java.io.IOException;
+import java.io.InputStream;
+import java.nio.charset.Charset;
+import java.security.Principal;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.Collections;
+import java.util.Enumeration;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Locale;
+import java.util.Map;
+import java.util.Set;
+import java.util.logging.Level;
+import java.util.logging.Logger;
+
+import javax.servlet.MultipartConfigElement;
+import javax.servlet.RequestDispatcher;
+import javax.servlet.ServletException;
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
+import javax.servlet.http.HttpSession;
+import javax.servlet.http.Part;
+
 import com.caucho.i18n.CharacterEncoding;
-import com.caucho.server.cluster.Server;
-import com.caucho.util.CharBuffer;
-import com.caucho.util.CharSegment;
-import com.caucho.util.HashMapImpl;
-import com.caucho.util.L10N;
-import com.caucho.vfs.*;
 import com.caucho.network.listen.SocketLink;
+import com.caucho.security.AbstractLogin;
+import com.caucho.security.Authenticator;
+import com.caucho.security.Login;
+import com.caucho.security.RoleMapManager;
+import com.caucho.server.cluster.Server;
 import com.caucho.server.dispatch.ServletInvocation;
 import com.caucho.server.session.SessionImpl;
 import com.caucho.server.session.SessionManager;
 import com.caucho.server.webapp.WebApp;
-import com.caucho.security.AbstractLogin;
-import com.caucho.security.Authenticator;
-import com.caucho.security.RoleMapManager;
-import com.caucho.security.Login;
-import com.caucho.util.Alarm;
-
-import java.io.*;
-import java.lang.IllegalStateException;
-import java.nio.charset.Charset;
-import java.util.*;
-import java.util.logging.*;
-import java.security.*;
-
-
-import javax.servlet.*;
-import javax.servlet.http.*;
+import com.caucho.util.CharBuffer;
+import com.caucho.util.CharSegment;
+import com.caucho.util.CurrentTime;
+import com.caucho.util.HashMapImpl;
+import com.caucho.util.L10N;
+import com.caucho.vfs.Encoding;
+import com.caucho.vfs.Path;
+import com.caucho.vfs.ReadStream;
+import com.caucho.vfs.Vfs;
+import com.caucho.vfs.WriteStream;
 
 abstract public class AbstractCauchoRequest implements CauchoRequest {
   private static final L10N L = new L10N(AbstractCauchoRequest.class);
@@ -647,7 +665,7 @@ abstract public class AbstractCauchoRequest implements CauchoRequest {
 
     String id = getSessionId();
 
-    long now = Alarm.getCurrentTime();
+    long now = CurrentTime.getCurrentTime();
 
     SessionImpl session
       = manager.createSession(create, this, id, now,

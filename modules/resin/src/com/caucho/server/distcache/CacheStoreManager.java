@@ -52,6 +52,7 @@ import com.caucho.env.distcache.CacheDataBacking;
 import com.caucho.env.service.ResinSystem;
 import com.caucho.inject.Module;
 import com.caucho.util.Alarm;
+import com.caucho.util.CurrentTime;
 import com.caucho.util.FreeList;
 import com.caucho.util.HashKey;
 import com.caucho.util.L10N;
@@ -253,7 +254,7 @@ public final class CacheStoreManager
                                  CacheConfig config)
     throws IOException
   {
-    long now = Alarm.getCurrentTime();
+    long now = CurrentTime.getCurrentTime();
 
     MnodeEntry mnodeValue = getMnodeValue(entry, config, now); // , false);
 
@@ -337,7 +338,7 @@ public final class CacheStoreManager
   // XXX: needs to be moved
   protected void lazyValueUpdate(DistCacheEntry entry, CacheConfig config)
   {
-    reloadValue(entry, config, Alarm.getCurrentTime());
+    reloadValue(entry, config, CurrentTime.getCurrentTime());
   }
 
   protected boolean isLocalExpired(CacheConfig config,
@@ -418,7 +419,7 @@ public final class CacheStoreManager
                         Object value,
                         CacheConfig config)
   {
-    long now = Alarm.getCurrentTime();
+    long now = CurrentTime.getCurrentTime();
 
     // server/60a0 - on server '4', need to read update from triad
     MnodeEntry mnodeValue = getMnodeValue(entry, config, now); // , false);
@@ -537,7 +538,7 @@ public final class CacheStoreManager
                                 Object value,
                                 CacheConfig config)
   {
-    long now = Alarm.getCurrentTime();
+    long now = CurrentTime.getCurrentTime();
 
     // server/60a0 - on server '4', need to read update from triad
     MnodeEntry mnodeValue = getMnodeValue(entry, config, now); // , false);
@@ -551,7 +552,7 @@ public final class CacheStoreManager
   final public Object getAndRemove(DistCacheEntry entry,
                                    CacheConfig config)
   {
-    long now = Alarm.getCurrentTime();
+    long now = CurrentTime.getCurrentTime();
 
     // server/60a0 - on server '4', need to read update from triad
     MnodeEntry mnodeValue = getMnodeValue(entry, config, now); // , false);
@@ -791,7 +792,7 @@ public final class CacheStoreManager
 
     DistCacheEntry entry = getCacheEntry(key);
 
-    long now = Alarm.getCurrentTime();
+    long now = CurrentTime.getCurrentTime();
 
     if (entry.getMnodeEntry() == null
         || entry.getMnodeEntry().isExpired(now)) {
@@ -820,7 +821,7 @@ public final class CacheStoreManager
     long accessedExpireTimeout = mnodeValue.getAccessedExpireTimeout();
     long accessedTime = mnodeValue.getLastAccessedTime();
 
-    long now = Alarm.getCurrentTime();
+    long now = CurrentTime.getCurrentTime();
                        
     if (accessedExpireTimeout < CacheConfig.TIME_INFINITY
         && accessedTime + mnodeValue.getAccessExpireTimeoutWindow() < now) {
@@ -1069,7 +1070,7 @@ public final class CacheStoreManager
         = oldEntryValue != null ? oldEntryValue.getValueHashKey() : null;
 
       long oldVersion = oldEntryValue != null ? oldEntryValue.getVersion() : 0;
-      long now = Alarm.getCurrentTime();
+      long now = CurrentTime.getCurrentTime();
       
       if (version < oldVersion
           || (version == oldVersion
@@ -1374,7 +1375,7 @@ public final class CacheStoreManager
   {
     long newVersion = version + 1;
 
-    long now = Alarm.getCurrentTime();
+    long now = CurrentTime.getCurrentTime();
   
     if (newVersion < now)
       return now;

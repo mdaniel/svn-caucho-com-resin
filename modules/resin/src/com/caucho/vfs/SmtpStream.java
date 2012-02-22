@@ -31,6 +31,7 @@ package com.caucho.vfs;
 import com.caucho.server.util.CauchoSystem;
 import com.caucho.util.Alarm;
 import com.caucho.util.CharBuffer;
+import com.caucho.util.CurrentTime;
 import com.caucho.util.Log;
 import com.caucho.util.NullIterator;
 import com.caucho.util.QDate;
@@ -384,7 +385,7 @@ class SmtpStream extends MemoryStream {
     }
     os.print("\r\n");
     
-    String date = QDate.formatLocal(Alarm.getCurrentTime(),
+    String date = QDate.formatLocal(CurrentTime.getCurrentTime(),
                                     "%a, %d %b %Y %H:%M:%S %z");
 
     os.print("Date: " + date + "\r\n");

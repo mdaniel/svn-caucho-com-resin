@@ -74,6 +74,7 @@ import com.caucho.management.server.AbstractManagedObject;
 import com.caucho.server.distcache.CacheStoreManager.DataItem;
 import com.caucho.util.Alarm;
 import com.caucho.util.ConcurrentArrayList;
+import com.caucho.util.CurrentTime;
 import com.caucho.util.HashKey;
 import com.caucho.util.L10N;
 import com.caucho.util.LruCache;
@@ -1387,14 +1388,14 @@ public class CacheImpl<K,V>
         ExecutionException, TimeoutException
     {
       long timeout = timeUnit.toMillis(time);
-      long expireTime = Alarm.getCurrentTimeActual() + timeout;
+      long expireTime = CurrentTime.getCurrentTimeActual() + timeout;
       
       synchronized (this) {
         long now;
         
         while (! _isDone
                && ! _cache.isClosed()
-               && ((now = Alarm.getCurrentTimeActual()) < expireTime)) {
+               && ((now = CurrentTime.getCurrentTimeActual()) < expireTime)) {
           try {
             long delta = expireTime - now;
             

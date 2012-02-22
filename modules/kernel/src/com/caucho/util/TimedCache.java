@@ -109,12 +109,12 @@ public class TimedCache<K,V> {
       _expireInterval = expireInterval;
       _value = value;
 
-      _checkTime = Alarm.getCurrentTime();
+      _checkTime = CurrentTime.getCurrentTime();
     }
 
     boolean isValid()
     {
-      return Alarm.getCurrentTime() < _checkTime + _expireInterval;
+      return CurrentTime.getCurrentTime() < _checkTime + _expireInterval;
     }
 
     V getValue()

@@ -31,6 +31,7 @@ package com.caucho.java;
 
 import com.caucho.loader.EnvironmentLocal;
 import com.caucho.util.Alarm;
+import com.caucho.util.CurrentTime;
 import com.caucho.vfs.MemoryPath;
 import com.caucho.vfs.MergePath;
 import com.caucho.vfs.Path;
@@ -87,7 +88,8 @@ public class WorkDir {
     
     Path path;
     // Windows uses /temp as a work dir
-    if (com.caucho.server.util.CauchoSystem.isWindows() && ! Alarm.isTest())
+    if (com.caucho.server.util.CauchoSystem.isWindows()
+        && ! CurrentTime.isTest())
       path = Vfs.lookup("file:/c:/tmp/" + userName);
     else
       path = Vfs.lookup("file:/tmp/" + userName);

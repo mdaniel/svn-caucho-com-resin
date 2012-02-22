@@ -33,6 +33,7 @@ import java.util.HashMap;
 import java.util.Map;
 
 import com.caucho.util.Alarm;
+import com.caucho.util.CurrentTime;
 import com.caucho.util.L10N;
 import com.caucho.util.QDate;
 
@@ -207,7 +208,7 @@ public class CommitBuilder
                                           this));
 
     if (_date == 0)
-      _date = Alarm.getCurrentTime();
+      _date = CurrentTime.getCurrentTime();
     
     QDate qDate = QDate.allocateLocalDate();
     qDate.setGMTTime(_date);

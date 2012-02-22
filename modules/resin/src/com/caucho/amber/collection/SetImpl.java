@@ -34,6 +34,7 @@ import com.caucho.amber.AmberRuntimeException;
 import com.caucho.amber.manager.AmberConnection;
 import com.caucho.amber.query.UserQuery;
 import com.caucho.util.Alarm;
+import com.caucho.util.CurrentTime;
 
 import java.sql.SQLException;
 import java.util.AbstractSet;
@@ -157,7 +158,7 @@ public class SetImpl<E> extends AbstractSet<E>
   public void clear()
   {
     _values.clear();
-    _expireTime = Alarm.getCurrentTime();
+    _expireTime = CurrentTime.getCurrentTime();
   }
 
   /**
@@ -179,7 +180,7 @@ public class SetImpl<E> extends AbstractSet<E>
 
   protected boolean isValid()
   {
-    return Alarm.getCurrentTime() <= _expireTime;
+    return CurrentTime.getCurrentTime() <= _expireTime;
   }
 
   private void fill()
@@ -191,11 +192,11 @@ public class SetImpl<E> extends AbstractSet<E>
     if (_aConn == null)
       return;
 
-    if (Alarm.getCurrentTime() <= _expireTime)
+    if (CurrentTime.getCurrentTime() <= _expireTime)
       return;
 
     try {
-      _expireTime = Alarm.getCurrentTime();
+      _expireTime = CurrentTime.getCurrentTime();
 
       ((UserQuery) _query).setSession(_aConn);
       _values.clear();

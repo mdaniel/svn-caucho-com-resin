@@ -29,6 +29,7 @@
 
 package com.caucho.servlets;
 
+import com.caucho.util.CurrentTime;
 import com.caucho.util.L10N;
 import com.caucho.util.Alarm;
 import com.caucho.vfs.Path;
@@ -120,7 +121,7 @@ public class TcpPool {
   public Server nextServer()
   {
     synchronized (this) {
-      long now = Alarm.getCurrentTime();
+      long now = CurrentTime.getCurrentTime();
       
       int startIndex = _roundRobin;
       _roundRobin = (_roundRobin + 1) % _servers.length;
@@ -203,7 +204,7 @@ public class TcpPool {
 
     void fail()
     {
-      _lastFailTime = Alarm.getCurrentTime();
+      _lastFailTime = CurrentTime.getCurrentTime();
     }
 
     void close()

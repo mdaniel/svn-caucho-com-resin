@@ -121,7 +121,7 @@ public class ThreadDump
     ThreadInfo []info = threadBean.getThreadInfo(ids, 32);
 
     StringBuilder sb = new StringBuilder();
-    sb.append("Thread Dump generated " + new Date(Alarm.getCurrentTime()));
+    sb.append("Thread Dump generated " + new Date(CurrentTime.getCurrentTime()));
 
     Arrays.sort(info, new ThreadCompare());
     
@@ -235,7 +235,7 @@ public class ThreadDump
     StringBuilder sb = new StringBuilder();
     
     sb.append("{");
-    sb.append("\"create_time\" : \"" + new Date(Alarm.getCurrentTime()) + "\",\n");
+    sb.append("\"create_time\" : \"" + new Date(CurrentTime.getCurrentTime()) + "\",\n");
     sb.append("\"thread_dump\" : {\n");
     
     ThreadMXBean threadBean = ManagementFactory.getThreadMXBean();

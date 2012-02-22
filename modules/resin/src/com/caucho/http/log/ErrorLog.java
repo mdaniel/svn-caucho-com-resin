@@ -31,6 +31,7 @@ package com.caucho.http.log;
 import com.caucho.util.Alarm;
 import com.caucho.util.CharBuffer;
 import com.caucho.util.CompileException;
+import com.caucho.util.CurrentTime;
 import com.caucho.util.ExceptionWrapper;
 import com.caucho.util.QDate;
 import com.caucho.vfs.WriteStream;
@@ -66,7 +67,7 @@ public class ErrorLog extends AbstractErrorLog {
 
     CharBuffer cb = CharBuffer.allocate();
 
-    QDate.formatLocal(cb, Alarm.getCurrentTime(), "[%Y/%m/%d %H:%M:%S] ");
+    QDate.formatLocal(cb, CurrentTime.getCurrentTime(), "[%Y/%m/%d %H:%M:%S] ");
 
     cb.append(message);
 
@@ -108,7 +109,7 @@ public class ErrorLog extends AbstractErrorLog {
 
     CharBuffer cb = CharBuffer.allocate();
 
-    QDate.formatLocal(cb, Alarm.getCurrentTime(), "[%Y/%m/%d %H:%M:%S] ");
+    QDate.formatLocal(cb, CurrentTime.getCurrentTime(), "[%Y/%m/%d %H:%M:%S] ");
 
     cb.append(message);
 

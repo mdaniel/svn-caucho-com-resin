@@ -45,13 +45,14 @@ import com.caucho.bam.query.QuerySender;
 import com.caucho.bam.stream.MessageStream;
 import com.caucho.bam.stream.NullActor;
 import com.caucho.util.Alarm;
+import com.caucho.util.CurrentTime;
 
 /**
  * Broker is the hub which routes messages to actors.
  */
 public class SimpleBamManager implements BamManager
 {
-  private final AtomicLong _sequence = new AtomicLong(Alarm.getCurrentTime());
+  private final AtomicLong _sequence = new AtomicLong(CurrentTime.getCurrentTime());
   
   private ManagedBroker _broker;
   

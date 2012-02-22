@@ -279,7 +279,7 @@ public class StatefulGenerator<X> extends SessionGenerator<X> {
     out.pushDepth();
 
     out.println("_id = manager.generateKey();");
-    out.println("_lastAccessTime = com.caucho.util.Alarm.getCurrentTime();");
+    out.println("_lastAccessTime = com.caucho.util.CurrentTime.getCurrentTime();");
     out.println("_manager = manager;");
     out.println("_context = context;");
 
@@ -323,7 +323,7 @@ public class StatefulGenerator<X> extends SessionGenerator<X> {
     out.println("{");
     out.pushDepth();
     
-    out.println("long now = com.caucho.util.Alarm.getCurrentTime();");
+    out.println("long now = com.caucho.util.CurrentTime.getCurrentTime();");
     
     out.println("if (_manager.getIdleTimeout() < now - _lastAccessTime) {");
     out.println("  __caucho_destroy(null);");

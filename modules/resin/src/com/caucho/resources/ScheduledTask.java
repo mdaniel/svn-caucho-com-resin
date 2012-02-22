@@ -61,6 +61,7 @@ import com.caucho.server.util.ScheduledThreadPool;
 import com.caucho.server.webapp.WebApp;
 import com.caucho.util.Alarm;
 import com.caucho.util.AlarmListener;
+import com.caucho.util.CurrentTime;
 import com.caucho.util.L10N;
 
 /**
@@ -113,12 +114,12 @@ public class ScheduledTask
   /**
    * Sets the delay
    */
-  @Configurable  
+  @Configurable
   public void setDelay(Period delay)
   {
     _trigger = _timerTrigger;
 
-    _timerTrigger.setFirstTime(Alarm.getExactTime() + delay.getPeriod());
+    _timerTrigger.setFirstTime(CurrentTime.getExactTime() + delay.getPeriod());
   }
 
   /**
@@ -219,7 +220,7 @@ public class ScheduledTask
 
   private void start()
   {
-    long now = Alarm.getCurrentTime();
+    long now = CurrentTime.getCurrentTime();
     
     long nextTime = _trigger.nextTime(now + 500);
 
@@ -268,7 +269,7 @@ public class ScheduledTask
       _threadPool.execute(_task);
 
       // XXX: needs QA
-      long now = Alarm.getExactTime();
+      long now = CurrentTime.getExactTime();
       long nextTime = _trigger.nextTime(now + 500);
 
       if (_isActive) {

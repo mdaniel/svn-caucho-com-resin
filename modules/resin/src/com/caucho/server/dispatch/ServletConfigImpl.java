@@ -90,6 +90,7 @@ import com.caucho.servlet.comet.CometServlet;
 import com.caucho.util.Alarm;
 import com.caucho.util.AlarmListener;
 import com.caucho.util.CompileException;
+import com.caucho.util.CurrentTime;
 import com.caucho.util.L10N;
 
 /**
@@ -829,7 +830,7 @@ public class ServletConfigImpl
       UnavailableException unExn = (UnavailableException) exn;
 
       if (! unExn.isPermanent())
-        _nextInitTime = (Alarm.getCurrentTime() +
+        _nextInitTime = (CurrentTime.getCurrentTime() +
                          1000L * unExn.getUnavailableSeconds());
     }
   }
@@ -1041,7 +1042,7 @@ public class ServletConfigImpl
     } catch (Throwable e) {
       log.log(Level.WARNING, e.toString(), e);
     } finally {
-      long now = Alarm.getCurrentTime();
+      long now = CurrentTime.getCurrentTime();
       long nextTime = nextTimeout(now);
 
       Alarm nextAlarm = _alarm;
@@ -1186,7 +1187,7 @@ public class ServletConfigImpl
 
     Object servlet = null;
 
-    if (Alarm.getCurrentTime() < _nextInitTime)
+    if (CurrentTime.getCurrentTime() < _nextInitTime)
       throw _initException;
 
     /*
@@ -1225,8 +1226,8 @@ public class ServletConfigImpl
         }
 
         if ((_runAt != null || _cron != null) && _alarm != null) {
-          long nextTime = nextTimeout(Alarm.getCurrentTime());
-          _alarm.queue(nextTime - Alarm.getCurrentTime());
+          long nextTime = nextTimeout(CurrentTime.getCurrentTime());
+          _alarm.queue(nextTime - CurrentTime.getCurrentTime());
         }
       }
 

@@ -1830,7 +1830,7 @@ public class JavaJspGenerator extends JspGenerator {
     out.println("}");
 
     if (_rootNode.isStatic() && CauchoSystem.isTest())
-      out.println("private static long _caucho_lastModified = com.caucho.util.Alarm.getCurrentTime();");
+      out.println("private static long _caucho_lastModified = com.caucho.util.CurrentTime.getCurrentTime();");
 
     out.println();
     out.println("public long _caucho_lastModified()");

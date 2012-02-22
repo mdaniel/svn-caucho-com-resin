@@ -33,6 +33,7 @@ import com.caucho.amber.manager.AmberConnection;
 import com.caucho.amber.type.EntityType;
 import com.caucho.amber.type.AmberType;
 import com.caucho.util.Alarm;
+import com.caucho.util.CurrentTime;
 
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
@@ -114,7 +115,7 @@ public class CachedQuery {
     Class cl = entityType.getBeanClass();
     
     synchronized (this) {
-      long now = Alarm.getCurrentTime();
+      long now = CurrentTime.getCurrentTime();
 
       if (now < _loadTime + maxAge || _isLoading && _loadTime > 0) {
         int length = _values.size();
@@ -148,7 +149,7 @@ public class CachedQuery {
         if (_isValidLoad) {
           _values = values;
 
-          _loadTime = Alarm.getCurrentTime();
+          _loadTime = CurrentTime.getCurrentTime();
         }
       }
     } finally {

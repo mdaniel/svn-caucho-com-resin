@@ -31,6 +31,7 @@ package com.caucho.jmx;
 
 import com.caucho.util.Alarm;
 import com.caucho.util.CharBuffer;
+import com.caucho.util.CurrentTime;
 import com.caucho.util.L10N;
 
 import javax.management.*;
@@ -749,7 +750,7 @@ public class Jmx {
    */
   public static void queueRelative(TimerTask job, long delta)
   {
-    queueAbsolute(job, Alarm.getCurrentTime() + delta);
+    queueAbsolute(job, CurrentTime.getCurrentTime() + delta);
   }
 
   /**

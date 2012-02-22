@@ -47,6 +47,7 @@ import javax.management.openmbean.CompositeType;
 import com.caucho.config.ConfigException;
 import com.caucho.jmx.Jmx;
 import com.caucho.util.Alarm;
+import com.caucho.util.CurrentTime;
 import com.caucho.util.QDate;
 
 public class JmxDumpAction extends AbstractJmxAction implements AdminAction
@@ -67,7 +68,7 @@ public class JmxDumpAction extends AbstractJmxAction implements AdminAction
     
     sb.append("{");
     sb.append("\"create_time\": \""
-              + new Date(Alarm.getCurrentTime()) + "\"\n");
+              + new Date(CurrentTime.getCurrentTime()) + "\"\n");
     
     if (server != null) {
       sb.append(", \"jmx\": {\n");

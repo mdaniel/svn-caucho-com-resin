@@ -58,6 +58,7 @@ import com.caucho.server.util.CauchoSystem;
 import com.caucho.server.webapp.WebApp;
 import com.caucho.util.Alarm;
 import com.caucho.util.CacheListener;
+import com.caucho.util.CurrentTime;
 import com.caucho.util.FreeRing;
 import com.caucho.util.LruCache;
 import com.caucho.vfs.MemoryPath;
@@ -446,7 +447,7 @@ abstract public class PageManager {
 
     public void accessPage()
     {
-      long now = Alarm.getCurrentTime();
+      long now = CurrentTime.getCurrentTime();
 
       if (now < _lastAccessTime + ACCESS_INTERVAL)
         return;

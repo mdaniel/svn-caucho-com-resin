@@ -99,6 +99,7 @@ import com.caucho.server.webapp.WebApp;
 import com.caucho.server.webapp.WebAppConfig;
 import com.caucho.util.Alarm;
 import com.caucho.util.AlarmListener;
+import com.caucho.util.CurrentTime;
 import com.caucho.util.FreeList;
 import com.caucho.util.FreeRing;
 import com.caucho.util.L10N;
@@ -223,7 +224,7 @@ public class Server
 
     _serverLocal.set(this, getClassLoader());
 
-    if (! Alarm.isTest())
+    if (! CurrentTime.isTest())
       _serverHeader = "Resin/" + VersionFactory.getVersion();
     else
       _serverHeader = "Resin/1.1";
@@ -1214,9 +1215,9 @@ public class Server
       if (! _lifecycle.toStarting())
         return;
 
-      _startTime = Alarm.getCurrentTime();
+      _startTime = CurrentTime.getCurrentTime();
 
-      if (! Alarm.isTest()) {
+      if (! CurrentTime.isTest()) {
         /*
         log.info("");
 

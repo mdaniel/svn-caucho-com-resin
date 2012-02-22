@@ -58,6 +58,7 @@ import com.caucho.server.admin.TagResult;
 import com.caucho.server.admin.WebAppDeployClient;
 import com.caucho.util.Alarm;
 import com.caucho.util.CharBuffer;
+import com.caucho.util.CurrentTime;
 import com.caucho.util.L10N;
 import com.caucho.util.QDate;
 import com.caucho.vfs.ReadStream;
@@ -376,7 +377,7 @@ public class ManagementAdmin extends AbstractManagedObject
                                                String periodStr)
   throws ReflectionException
   {
-    Date to = new Date(Alarm.getCurrentTime());
+    Date to = new Date(CurrentTime.getCurrentTime());
 
     ManagerClient managerClient = getManagerClient(serverId);
     

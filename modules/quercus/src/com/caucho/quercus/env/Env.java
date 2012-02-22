@@ -1175,7 +1175,7 @@ public class Env
   public void checkTimeout()
   {
     /*
-    long now = Alarm.getCurrentTime();
+    long now = CurrentTime.getCurrentTime();
 
     if (_endTime < now)
       throw new QuercusRuntimeException(L.l("script timed out"));

@@ -33,6 +33,7 @@ import java.util.concurrent.atomic.AtomicLong;
 import com.caucho.env.meter.ActiveTimeSensor;
 import com.caucho.env.meter.AbstractMeter;
 import com.caucho.util.Alarm;
+import com.caucho.util.CurrentTime;
 
 public final class ActiveTimeMeter extends AbstractMeter implements ActiveTimeSensor {
   private final double _scale;
@@ -68,7 +69,7 @@ public final class ActiveTimeMeter extends AbstractMeter implements ActiveTimeSe
   @Override
   public final long start()
   {
-    long startTime = Alarm.getCurrentTime();
+    long startTime = CurrentTime.getCurrentTime();
 
     long activeCount = _activeCount.incrementAndGet();
 
@@ -87,7 +88,7 @@ public final class ActiveTimeMeter extends AbstractMeter implements ActiveTimeSe
     _totalCount.incrementAndGet();
     _activeCount.decrementAndGet();
 
-    long endTime = Alarm.getCurrentTime();
+    long endTime = CurrentTime.getCurrentTime();
 
     long value = endTime - startTime;
 

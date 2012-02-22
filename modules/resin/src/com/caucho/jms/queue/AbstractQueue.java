@@ -41,6 +41,7 @@ import javax.annotation.PostConstruct;
 import javax.annotation.PreDestroy;
 
 import com.caucho.util.Alarm;
+import com.caucho.util.CurrentTime;
 
 /**
  * Implements an abstract queue.
@@ -210,7 +211,7 @@ abstract public class AbstractQueue<E> extends AbstractDestination<E>
 
     timeout = unit.toMillis(timeout);
 
-    long expires = Alarm.getCurrentTime() + timeout;
+    long expires = CurrentTime.getCurrentTime() + timeout;
 
     String publisherId = null;
     
@@ -236,7 +237,7 @@ abstract public class AbstractQueue<E> extends AbstractDestination<E>
   {
     long msTimeout = unit.toMillis(timeout);
     
-    long expireTime = msTimeout + Alarm.getCurrentTime();
+    long expireTime = msTimeout + CurrentTime.getCurrentTime();
     
     E payload = receive(expireTime, true);
 
@@ -356,7 +357,7 @@ abstract public class AbstractQueue<E> extends AbstractDestination<E>
   {
     synchronized (this) {
       _listenerFailCount++;
-      _listenerFailLastTime = Alarm.getCurrentTime();
+      _listenerFailLastTime = CurrentTime.getCurrentTime();
     }
   }
 

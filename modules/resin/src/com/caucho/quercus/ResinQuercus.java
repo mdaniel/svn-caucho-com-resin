@@ -98,7 +98,7 @@ public class ResinQuercus extends QuercusContext
   @Override
   public long getCurrentTime()
   {
-    return Alarm.getCurrentTime();
+    return CurrentTime.getCurrentTime();
   }
   
   /**
@@ -107,7 +107,7 @@ public class ResinQuercus extends QuercusContext
   @Override
   public long getExactTimeNanoseconds()
   {
-    return Alarm.getExactTimeNanoseconds();
+    return CurrentTime.getExactTimeNanoseconds();
   }
   
   /**
@@ -116,7 +116,7 @@ public class ResinQuercus extends QuercusContext
   @Override
   public long getExactTime()
   {
-    return Alarm.getExactTime();
+    return CurrentTime.getExactTime();
   }
 
   @Override

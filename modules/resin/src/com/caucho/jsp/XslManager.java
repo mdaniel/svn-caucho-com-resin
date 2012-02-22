@@ -33,6 +33,7 @@ import com.caucho.server.http.CauchoRequest;
 import com.caucho.server.util.CauchoSystem;
 import com.caucho.server.webapp.WebApp;
 import com.caucho.util.Alarm;
+import com.caucho.util.CurrentTime;
 import com.caucho.util.L10N;
 import com.caucho.util.LruCache;
 import com.caucho.vfs.MergePath;
@@ -93,7 +94,7 @@ class XslManager {
 
     Templates stylesheet = null;
 
-    long now = Alarm.getCurrentTime();
+    long now = CurrentTime.getCurrentTime();
 
     SoftReference<Templates> templateRef = _xslCache.get(fullStyleSheet);
 

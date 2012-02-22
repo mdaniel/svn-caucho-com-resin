@@ -31,6 +31,7 @@ package com.caucho.vfs;
 
 import com.caucho.util.Alarm;
 import com.caucho.util.CharBuffer;
+import com.caucho.util.CurrentTime;
 import com.caucho.util.L10N;
 import com.caucho.util.LruCache;
 import com.caucho.util.QDate;
@@ -110,7 +111,9 @@ public class HttpPath extends FilesystemPath {
    * @return the final path.
    */
   @Override
-  public Path lookupImpl(String userPath, Map<String,Object> newAttributes)
+  public Path lookupImpl(String userPath, 
+                         Map<String,Object> newAttributes,
+                         boolean isAllowRoot)
   {
     String newPath;
 
@@ -124,7 +127,7 @@ public class HttpPath extends FilesystemPath {
 
     // parent handles scheme:xxx
     if (colon != -1 && (colon < slash || slash == -1))
-      return super.lookupImpl(userPath, newAttributes);
+      return super.lookupImpl(userPath, newAttributes, isAllowRoot);
       
       // //hostname
     if (slash == 0 && length > 1 && userPath.charAt(1) == '/')
@@ -445,7 +448,7 @@ public class HttpPath extends FilesystemPath {
     
     long now;
     
-    now = Alarm.getCurrentTime();
+    now = CurrentTime.getCurrentTime();
     
     synchronized (_cacheEntry) {
       try {

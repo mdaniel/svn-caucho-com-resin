@@ -32,6 +32,7 @@ import com.caucho.db.sql.Expr;
 import com.caucho.db.sql.FunExpr;
 import com.caucho.db.sql.QueryContext;
 import com.caucho.util.Alarm;
+import com.caucho.util.CurrentTime;
 import com.caucho.util.L10N;
 import com.caucho.util.QDate;
 
@@ -91,7 +92,7 @@ public class NowExpr extends FunExpr {
   public long evalLong(QueryContext context)
     throws SQLException
   {
-    return Alarm.getCurrentTime();
+    return CurrentTime.getCurrentTime();
   }
 
   /**

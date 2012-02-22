@@ -33,6 +33,7 @@ import com.caucho.config.ConfigException;
 import com.caucho.jdbc.JdbcMetaData;
 import com.caucho.jms.queue.AbstractDestination;
 import com.caucho.util.Alarm;
+import com.caucho.util.CurrentTime;
 import com.caucho.util.L10N;
 import com.caucho.util.Log;
 
@@ -218,7 +219,7 @@ abstract public class JdbcDestination extends AbstractDestination {
   protected void purgeExpiredMessages()
   {
     long purgeInterval = _jdbcManager.getPurgeInterval();
-    long now = Alarm.getCurrentTime();
+    long now = CurrentTime.getCurrentTime();
 
     if (now < _lastPurgeTime + purgeInterval)
       return;
@@ -236,7 +237,7 @@ abstract public class JdbcDestination extends AbstractDestination {
                       " WHERE expire < ? AND consumer IS NULL");
 
         PreparedStatement pstmt = conn.prepareStatement(sql);
-        pstmt.setLong(1, Alarm.getCurrentTime());
+        pstmt.setLong(1, CurrentTime.getCurrentTime());
 
         int count = pstmt.executeUpdate();
 

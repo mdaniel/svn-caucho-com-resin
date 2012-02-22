@@ -38,6 +38,7 @@ import com.caucho.config.Configurable;
 import com.caucho.config.inject.HandleAware;
 import com.caucho.util.Alarm;
 import com.caucho.util.Base64;
+import com.caucho.util.CurrentTime;
 import com.caucho.util.RandomUtil;
 
 /**
@@ -59,8 +60,8 @@ abstract public class AbstractDestination<E>
 
   protected AbstractDestination()
   {
-    if (_idRandom == 0 || Alarm.isTest()) {
-      _idCount.set(Alarm.getCurrentTime() << 16);
+    if (_idRandom == 0 || CurrentTime.isTest()) {
+      _idCount.set(CurrentTime.getCurrentTime() << 16);
       _idRandom = RandomUtil.getRandomLong();
     }
   }

@@ -54,6 +54,7 @@ import com.caucho.loader.EnvironmentListener;
 import com.caucho.loader.EnvironmentLocal;
 import com.caucho.util.Alarm;
 import com.caucho.util.AlarmListener;
+import com.caucho.util.CurrentTime;
 import com.caucho.util.L10N;
 
 /**
@@ -294,7 +295,7 @@ public class ScheduledThreadPool implements ScheduledExecutorService,
     if (_isShutdown)
       throw new IllegalStateException(L.l("Can't submit after ThreadPool has closed"));
 
-    long initialExpires = Alarm.getCurrentTime() + unit.toMillis(delay);
+    long initialExpires = CurrentTime.getCurrentTime() + unit.toMillis(delay);
 
     AlarmFuture future = new AlarmFuture(_loader, callable,
                                          initialExpires, 0, 0);
@@ -320,7 +321,7 @@ public class ScheduledThreadPool implements ScheduledExecutorService,
     if (_isShutdown)
       throw new IllegalStateException(L.l("Can't submit after ThreadPool has closed"));
 
-    long initialExpires = Alarm.getCurrentTime() + unit.toMillis(delay);
+    long initialExpires = CurrentTime.getCurrentTime() + unit.toMillis(delay);
 
     AlarmFuture future = new AlarmFuture(_loader, command, initialExpires, 0, 0);
 
@@ -346,7 +347,7 @@ public class ScheduledThreadPool implements ScheduledExecutorService,
     if (_isShutdown)
       throw new IllegalStateException(L.l("Can't submit after ThreadPool has closed"));
 
-    long initialExpires = Alarm.getExactTime() + unit.toMillis(initialDelay);
+    long initialExpires = CurrentTime.getExactTime() + unit.toMillis(initialDelay);
 
     AlarmFuture future = new AlarmFuture(_loader, command, initialExpires,
                                          unit.toMillis(period), 0);
@@ -373,7 +374,7 @@ public class ScheduledThreadPool implements ScheduledExecutorService,
     if (_isShutdown)
       throw new IllegalStateException(L.l("Can't submit after ThreadPool has closed"));
 
-    long initialExpires = Alarm.getCurrentTime() + unit.toMillis(initialDelay);
+    long initialExpires = CurrentTime.getCurrentTime() + unit.toMillis(initialDelay);
 
     AlarmFuture future = new AlarmFuture(_loader, command,
                                          initialExpires, 0, unit.toMillis(delay));
@@ -587,16 +588,16 @@ public class ScheduledThreadPool implements ScheduledExecutorService,
     public T get(long timeout, TimeUnit unit)
       throws InterruptedException, ExecutionException, TimeoutException
     {
-      long expire = Alarm.getCurrentTime() + unit.toMillis(timeout);
+      long expire = CurrentTime.getCurrentTime() + unit.toMillis(timeout);
 
       synchronized (this) {
-        while (!_isDone && !_isCancelled && Alarm.getCurrentTime() < expire
+        while (!_isDone && !_isCancelled && CurrentTime.getCurrentTime() < expire
                && !Thread.currentThread().isInterrupted()) {
-          if (! Alarm.isTest()) {
-            long delta = expire - Alarm.getCurrentTime();
+          if (! CurrentTime.isTest()) {
+            long delta = expire - CurrentTime.getCurrentTime();
             
             if (delta > 0) {
-              wait(expire - Alarm.getCurrentTime());
+              wait(expire - CurrentTime.getCurrentTime());
             }
           }
           else {
@@ -663,7 +664,7 @@ public class ScheduledThreadPool implements ScheduledExecutorService,
       if (_isDone)
         return "TaskFuture[" + task + ",done]";
       else if (_thread != null) {
-        if (Alarm.isTest())
+        if (CurrentTime.isTest())
           return "TaskFuture[" + task + ",active]";
         else
           return "TaskFuture[" + task + "," + _thread + "]";
@@ -753,7 +754,7 @@ public class ScheduledThreadPool implements ScheduledExecutorService,
     @Override
     public long getDelay(TimeUnit unit)
     {
-      long delay = _nextTime - Alarm.getCurrentTime();
+      long delay = _nextTime - CurrentTime.getCurrentTime();
 
       return TimeUnit.MILLISECONDS.convert(delay, unit);
     }
@@ -816,14 +817,14 @@ public class ScheduledThreadPool implements ScheduledExecutorService,
     public T get(long timeout, TimeUnit unit) throws InterruptedException,
         ExecutionException, TimeoutException
     {
-      long expire = Alarm.getCurrentTimeActual() + unit.toMillis(timeout);
+      long expire = CurrentTime.getCurrentTimeActual() + unit.toMillis(timeout);
       int count = _alarmCount;
 
       while (!_isDone && !_isCancelled && count == _alarmCount
-          && Alarm.getCurrentTimeActual() < expire
+          && CurrentTime.getCurrentTimeActual() < expire
           && !Thread.currentThread().isInterrupted()) {
         synchronized (this) {
-          long delta = expire - Alarm.getCurrentTimeActual();
+          long delta = expire - CurrentTime.getCurrentTimeActual();
           
           if (delta > 0)
             wait(delta);
@@ -875,13 +876,13 @@ public class ScheduledThreadPool implements ScheduledExecutorService,
             removeFuture(this);
           }
           else if (_delay > 0) {
-            _nextTime = Alarm.getCurrentTime() + _delay;
+            _nextTime = CurrentTime.getCurrentTime() + _delay;
 
             if (! _isShutdown && ! _isDone && ! _isCancelled)
               _alarm.queue(_delay);
           }
           else if (_period > 0) {
-            long now = Alarm.getCurrentTime();
+            long now = CurrentTime.getCurrentTime();
             long next;
 
             do {
@@ -910,7 +911,7 @@ public class ScheduledThreadPool implements ScheduledExecutorService,
       if (_isDone)
         return "AlarmFuture[" + task + ",done]";
       else if (_thread != null) {
-        if (Alarm.isTest())
+        if (CurrentTime.isTest())
           return "AlarmFuture[" + task + ",active]";
         else
           return "AlarmFuture[" + task + "," + _thread + "]";

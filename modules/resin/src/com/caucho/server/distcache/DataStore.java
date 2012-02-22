@@ -50,6 +50,7 @@ import com.caucho.db.index.SqlIndexAlreadyExistsException;
 import com.caucho.util.Alarm;
 import com.caucho.util.AlarmListener;
 import com.caucho.util.ConcurrentArrayList;
+import com.caucho.util.CurrentTime;
 import com.caucho.util.FreeList;
 import com.caucho.util.HashKey;
 import com.caucho.util.IoUtil;
@@ -509,7 +510,7 @@ public class DataStore {
 
       PreparedStatement stmt = conn.prepareInsert();
       stmt.setBytes(1, id.getHash());
-      stmt.setLong(2, _expireTimeout + Alarm.getCurrentTime());
+      stmt.setLong(2, _expireTimeout + CurrentTime.getCurrentTime());
       stmt.setBinaryStream(3, is, length);
 
       if (is == null)
@@ -560,7 +561,7 @@ public class DataStore {
       conn = getConnection();
       PreparedStatement pstmt = conn.prepareUpdateExpires();
 
-      long expireTime = _expireTimeout + Alarm.getCurrentTime();
+      long expireTime = _expireTimeout + CurrentTime.getCurrentTime();
 
       pstmt.setLong(1, expireTime);
       pstmt.setBytes(2, id.getHash());
@@ -596,7 +597,7 @@ public class DataStore {
   {
     validateDatabase();
 
-    long now = Alarm.getCurrentTime();
+    long now = CurrentTime.getCurrentTime();
 
     updateExpire(now);
     

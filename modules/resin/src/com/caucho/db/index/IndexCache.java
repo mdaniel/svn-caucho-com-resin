@@ -73,7 +73,7 @@ public final class IndexCache
     if (_staticCache == null) {
       int size;
       
-      if (Alarm.isTest())
+      if (CurrentTime.isTest())
         size = 8 * 1024;
       else
         size = 64 * 1024;

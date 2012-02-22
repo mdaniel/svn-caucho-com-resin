@@ -32,6 +32,7 @@ package com.caucho.loader;
 import com.caucho.management.server.AbstractManagedObject;
 import com.caucho.management.server.EnvironmentMXBean;
 import com.caucho.util.Alarm;
+import com.caucho.util.CurrentTime;
 
 import java.io.File;
 import java.lang.ref.*;
@@ -66,13 +67,13 @@ public class EnvironmentAdmin extends AbstractManagedObject
 
   void register()
   {
-    if (! Alarm.isTest())
+    if (! CurrentTime.isTest())
       registerSelf();
   }
 
   void unregister()
   {
-    if (! Alarm.isTest())
+    if (! CurrentTime.isTest())
       unregisterSelf();
   }
 

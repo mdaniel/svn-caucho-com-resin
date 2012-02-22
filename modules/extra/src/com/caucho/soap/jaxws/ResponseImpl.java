@@ -91,8 +91,8 @@ public class ResponseImpl<T> implements Response<T>  {
           wait(expire - Alarm.getExactTime());
       }
       else {
-        while (! _done && ! _cancelled && Alarm.getCurrentTime() < expire)
-          wait(expire - Alarm.getCurrentTime());
+        while (! _done && ! _cancelled && CurrentTime.getCurrentTime() < expire)
+          wait(expire - CurrentTime.getCurrentTime());
       }
 
       if (_cancelled)

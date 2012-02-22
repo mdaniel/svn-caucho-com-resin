@@ -29,6 +29,22 @@
 
 package com.caucho.server.webapp;
 
+import java.io.BufferedReader;
+import java.io.IOException;
+import java.util.Collections;
+import java.util.Enumeration;
+import java.util.HashMap;
+import java.util.Map;
+import java.util.logging.Level;
+import java.util.logging.Logger;
+
+import javax.servlet.RequestDispatcher;
+import javax.servlet.ServletException;
+import javax.servlet.ServletInputStream;
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
+import javax.servlet.http.HttpSession;
+
 import com.caucho.i18n.CharacterEncoding;
 import com.caucho.server.dispatch.Invocation;
 import com.caucho.server.http.CauchoRequest;
@@ -38,24 +54,13 @@ import com.caucho.server.http.RequestAdapter;
 import com.caucho.server.http.ServletInputStreamImpl;
 import com.caucho.server.session.SessionImpl;
 import com.caucho.server.session.SessionManager;
-import com.caucho.util.Alarm;
 import com.caucho.util.CharBuffer;
+import com.caucho.util.CurrentTime;
 import com.caucho.util.FreeList;
 import com.caucho.util.HashMapImpl;
 import com.caucho.vfs.BufferedReaderAdapter;
 import com.caucho.vfs.Encoding;
 import com.caucho.vfs.ReadStream;
-
-import javax.servlet.RequestDispatcher;
-import javax.servlet.ServletException;
-import javax.servlet.ServletInputStream;
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
-import javax.servlet.http.HttpSession;
-import java.io.BufferedReader;
-import java.io.IOException;
-import java.util.*;
-import java.util.logging.*;
 
 /**
  * sub-request for a include() page
@@ -481,7 +486,7 @@ class AbstractDispatchRequest extends RequestAdapter {
 
     String id = getRequestedSessionId();
 
-    long now = Alarm.getCurrentTime();
+    long now = CurrentTime.getCurrentTime();
 
     SessionImpl session;
 

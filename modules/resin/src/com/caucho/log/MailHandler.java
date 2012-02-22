@@ -179,7 +179,7 @@ public class MailHandler extends Handler implements AlarmListener
       }
 
       if (isStartAlarm) {
-        long delta = _lastMailTime + _timeIntervalMin - Alarm.getCurrentTime();
+        long delta = _lastMailTime + _timeIntervalMin - CurrentTime.getCurrentTime();
 
         if (delta < _delayTime)
           delta = _delayTime;
@@ -210,7 +210,7 @@ public class MailHandler extends Handler implements AlarmListener
       _text = null;
     }
 
-    _lastMailTime = Alarm.getCurrentTime();
+    _lastMailTime = CurrentTime.getCurrentTime();
 
     if (text != null)
       _mailService.send(text);

@@ -34,6 +34,7 @@ import com.caucho.network.listen.TcpSocketLink;
 import com.caucho.network.listen.SocketLink;
 import com.caucho.server.http.HttpServletRequestImpl;
 import com.caucho.util.Alarm;
+import com.caucho.util.CurrentTime;
 import com.caucho.vfs.ClientDisconnectException;
 import com.caucho.vfs.QSocket;
 
@@ -66,7 +67,7 @@ public class StatisticsFilterChain implements FilterChain
       if (connection instanceof TcpSocketLink) {
         TcpSocketLink tcpConnection = (TcpSocketLink) connection;
 
-        long time = Alarm.getExactTime();
+        long time = CurrentTime.getExactTime();
 
         long readBytes = -1;
         long writeBytes = -1;
@@ -87,7 +88,7 @@ public class StatisticsFilterChain implements FilterChain
         } catch (ClientDisconnectException ex) {
           clientDisconnectException = ex;
         } finally {
-          time = Alarm.getExactTime() - time;
+          time = CurrentTime.getExactTime() - time;
 
           readBytes = socket.getTotalReadBytes() - readBytes;
           writeBytes = socket.getTotalWriteBytes() - writeBytes;

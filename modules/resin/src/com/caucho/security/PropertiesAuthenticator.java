@@ -44,6 +44,7 @@ import javax.servlet.ServletException;
 import com.caucho.config.ConfigException;
 import com.caucho.config.Service;
 import com.caucho.util.Alarm;
+import com.caucho.util.CurrentTime;
 import com.caucho.vfs.Depend;
 import com.caucho.vfs.Path;
 
@@ -162,7 +163,7 @@ public class PropertiesAuthenticator extends AbstractAuthenticator {
     
     synchronized (this) {
       try {
-        _lastCheck = Alarm.getCurrentTime();
+        _lastCheck = CurrentTime.getCurrentTime();
         _depend = new Depend(_path);
 
         if (log.isLoggable(Level.FINE))
@@ -231,10 +232,10 @@ public class PropertiesAuthenticator extends AbstractAuthenticator {
       return false;
     else if (_depend == null)
       return true;
-    else if (Alarm.getCurrentTime() < _lastCheck + 5000)
+    else if (CurrentTime.getCurrentTime() < _lastCheck + 5000)
       return false;
     else {
-      _lastCheck = Alarm.getCurrentTime();
+      _lastCheck = CurrentTime.getCurrentTime();
       return _depend.isModified();
     }
   }

@@ -30,6 +30,7 @@ package com.caucho.server.thread;
 
 import com.caucho.util.Alarm;
 import com.caucho.util.CacheListener;
+import com.caucho.util.CurrentTime;
 
 /**
  * A single item timed cache.  The item will remain valid until it expires.
@@ -88,7 +89,7 @@ public class TimedItem {
    */
   public void put(Object value)
   {
-    createTime = Alarm.getCurrentTime();
+    createTime = CurrentTime.getCurrentTime();
     this.value = value;
   }
 
@@ -97,7 +98,7 @@ public class TimedItem {
    */
   public Object get()
   {
-    if (Alarm.getCurrentTime() < createTime + expireInterval)
+    if (CurrentTime.getCurrentTime() < createTime + expireInterval)
       return value;
     else {
       Object v = value;

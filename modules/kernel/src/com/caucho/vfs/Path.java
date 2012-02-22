@@ -129,6 +129,17 @@ public abstract class Path implements Comparable<Path> {
   }
 
   /**
+   * Looks up a new path based on the old path.
+   *
+   * @param name relative url to the new path
+   * @return The new path.
+   */
+  public final Path lookupChild(String name)
+  {
+    return lookupImpl(name, null, false);
+  }
+
+  /**
    * Looks up a path by a URL.
    */
   public final Path lookup(URL url)
@@ -152,7 +163,7 @@ public abstract class Path implements Comparable<Path> {
   public Path lookup(String userPath, Map<String,Object> newAttributes)
   {
     if (newAttributes != null)
-      return lookupImpl(userPath, newAttributes);
+      return lookupImpl(userPath, newAttributes, true);
     else if (userPath == null)
       return this;
 
@@ -161,7 +172,7 @@ public abstract class Path implements Comparable<Path> {
     if (path != null)
       return path;
 
-    path = lookupImpl(userPath, null);
+    path = lookupImpl(userPath, null, true);
 
     if (_startTime == 0) {
       _startTime = System.currentTimeMillis();
@@ -225,15 +236,23 @@ public abstract class Path implements Comparable<Path> {
    *
    * @return the new path or null if the scheme doesn't exist
    */
-  public Path lookupImpl(String userPath, Map<String,Object> newAttributes)
+  public Path lookupImpl(String userPath, 
+                         Map<String,Object> newAttributes,
+                         boolean isAllowRoot)
   {
-    if (userPath == null)
-      return lookupImpl(getPath(), newAttributes);
+    if (userPath == null) {
+      return lookupImpl(getPath(), newAttributes, isAllowRoot);
+    }
 
+    if (! isAllowRoot) {
+      return schemeWalk(userPath, newAttributes, userPath, 0);
+    }
+      
     String scheme = scanScheme(userPath);
 
-    if (scheme == null)
+    if (scheme == null) {
       return schemeWalk(userPath, newAttributes, userPath, 0);
+    }
 
     Path path;
 

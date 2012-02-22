@@ -29,6 +29,7 @@
 package com.caucho.jmx.stats;
 
 import com.caucho.util.Alarm;
+import com.caucho.util.CurrentTime;
 
 /**
  * Statistics for a range of values.
@@ -46,7 +47,7 @@ public class RangeStats {
    */
   public RangeStats()
   {
-    _startTime = Alarm.getCurrentTime();
+    _startTime = CurrentTime.getCurrentTime();
   }
 
   /**
@@ -54,7 +55,7 @@ public class RangeStats {
    */
   public RangeStats(String name)
   {
-    _startTime = Alarm.getCurrentTime();
+    _startTime = CurrentTime.getCurrentTime();
     
     _name = name;
   }

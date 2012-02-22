@@ -39,6 +39,7 @@ import com.caucho.server.http.AbstractResponseStream;
 import com.caucho.server.http.HttpServletResponseImpl;
 import com.caucho.util.Alarm;
 import com.caucho.util.CharBuffer;
+import com.caucho.util.CurrentTime;
 import com.caucho.vfs.WriteStream;
 
 /**
@@ -112,8 +113,10 @@ public class HmuxResponse extends AbstractHttpResponse {
       _req.writeHeader("Cache-Control", "private");
 
     int load = (int) (1000 * _req.getServer().getCpuLoad());
-    if (Alarm.isTest())
+    
+    if (CurrentTime.isTest()) {
       load = 0;
+    }
 
     _req.writeString(HmuxRequest.HMUX_META_HEADER, "cpu-load");
     _req.writeString(HmuxRequest.HMUX_STRING, String.valueOf(load));
@@ -139,7 +142,7 @@ public class HmuxResponse extends AbstractHttpResponse {
 
     HttpServletResponseImpl responseFacade = _request.getResponseFacade();
 
-    long now = Alarm.getCurrentTime();
+    long now = CurrentTime.getCurrentTime();
     ArrayList<Cookie> cookiesOut = responseFacade.getCookies();
 
     if (cookiesOut != null) {

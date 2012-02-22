@@ -31,6 +31,7 @@ package com.caucho.server.hmux;
 
 import com.caucho.util.Alarm;
 import com.caucho.util.CharBuffer;
+import com.caucho.util.CurrentTime;
 import com.caucho.util.L10N;
 import com.caucho.util.LruCache;
 import com.caucho.util.QDate;
@@ -115,7 +116,10 @@ public class HmuxPath extends FilesystemPath {
    *
    * @return the final path.
    */
-  public Path lookupImpl(String userPath, Map<String,Object> newAttributes)
+  @Override
+  public Path lookupImpl(String userPath, 
+                         Map<String,Object> newAttributes,
+                         boolean isAllowRoot)
   {
     String newPath;
 
@@ -127,8 +131,9 @@ public class HmuxPath extends FilesystemPath {
     int slash = userPath.indexOf('/');
 
     // parent handles scheme:xxx
-    if (colon != -1 && (colon < slash || slash == -1))
-      return super.lookupImpl(userPath, newAttributes);
+    if (colon != -1 && (colon < slash || slash == -1) && isAllowRoot) {
+      return super.lookupImpl(userPath, newAttributes, isAllowRoot);
+    }
       
       // //hostname
     if (slash == 0 && length > 1 && userPath.charAt(1) == '/')
@@ -402,7 +407,7 @@ public class HmuxPath extends FilesystemPath {
       }
     }
     
-    long now = Alarm.getCurrentTime();
+    long now = CurrentTime.getCurrentTime();
     synchronized (_cacheEntry) {
       try {
         if (_cacheEntry.expires > now)

@@ -85,7 +85,7 @@ public class TimedItem {
    */
   public void put(Object value)
   {
-    createTime = Alarm.getCurrentTime();
+    createTime = CurrentTime.getCurrentTime();
     this.value = value;
   }
 
@@ -94,7 +94,7 @@ public class TimedItem {
    */
   public Object get()
   {
-    if (Alarm.getCurrentTime() < createTime + expireInterval)
+    if (CurrentTime.getCurrentTime() < createTime + expireInterval)
       return value;
     else {
       Object v = value;

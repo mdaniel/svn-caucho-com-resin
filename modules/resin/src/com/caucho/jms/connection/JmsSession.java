@@ -75,6 +75,7 @@ import com.caucho.jms.queue.AbstractQueue;
 import com.caucho.jms.queue.AbstractTopic;
 import com.caucho.util.Alarm;
 import com.caucho.util.Base64;
+import com.caucho.util.CurrentTime;
 import com.caucho.util.L10N;
 import com.caucho.util.RandomUtil;
 import com.caucho.util.ThreadTask;
@@ -693,12 +694,12 @@ public class JmsSession implements XASession, ThreadTask, XAResource
       log.fine(toString() + " stopping");
     
     synchronized (_consumers) {
-      long timeout = Alarm.getCurrentTime() + SHUTDOWN_WAIT_TIME;
-      while (_isRunning && Alarm.getCurrentTime() < timeout) {
+      long timeout = CurrentTime.getCurrentTime() + SHUTDOWN_WAIT_TIME;
+      while (_isRunning && CurrentTime.getCurrentTime() < timeout) {
         try {
           _consumers.wait(SHUTDOWN_WAIT_TIME);
 
-          if (Alarm.isTest()) {
+          if (CurrentTime.isTest()) {
             return;
           }
         } catch (Throwable e) {
@@ -922,7 +923,7 @@ public class JmsSession implements XASession, ThreadTask, XAResource
 
     ThreadPool.getThreadPool().schedule(this);
 
-    if (Alarm.isTest()) {
+    if (CurrentTime.isTest()) {
       // the yield is only needed for the regressions
       try {
         Thread.sleep(10);
@@ -963,7 +964,7 @@ public class JmsSession implements XASession, ThreadTask, XAResource
     // of notification of message expiration. <P>Clients should not receive 
     // messages that have expired; however, the JMS API does not 
     // guarantee that this will not happen.
-    long now = Alarm.getExactTime();
+    long now = CurrentTime.getCurrentTime();
     long expireTime = 0;
     if (timeout == 0) {
       expireTime = now + MessageProducerImpl.DEFAULT_TIME_TO_LIVE;

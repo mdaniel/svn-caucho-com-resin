@@ -31,6 +31,7 @@ package com.caucho.server.distcache;
 
 import com.caucho.distcache.ExtCacheEntry;
 import com.caucho.util.Alarm;
+import com.caucho.util.CurrentTime;
 import com.caucho.util.HashKey;
 import com.caucho.util.Hex;
 import com.caucho.vfs.WriteStream;
@@ -92,7 +93,7 @@ public final class MnodeEntry extends MnodeValue implements ExtCacheEntry {
     _lastRemoteAccessTime = lastAccessTime;
     _lastModifiedTime = lastUpdateTime;
     
-    _lastAccessTime = Alarm.getExactTime();
+    _lastAccessTime = CurrentTime.getCurrentTime();
 
     _isImplicitNull = isImplicitNull;
     _isServerVersionValid = isServerVersionValid;
@@ -115,7 +116,7 @@ public final class MnodeEntry extends MnodeValue implements ExtCacheEntry {
     _lastRemoteAccessTime = lastAccessTime;
     _lastModifiedTime = lastUpdateTime;
     
-    _lastAccessTime = Alarm.getExactTime();
+    _lastAccessTime = CurrentTime.getCurrentTime();
 
     _isImplicitNull = isImplicitNull;
     _isServerVersionValid = isServerVersionValid;
@@ -141,7 +142,7 @@ public final class MnodeEntry extends MnodeValue implements ExtCacheEntry {
     _lastRemoteAccessTime = lastUpdateTime;
     _lastModifiedTime = lastUpdateTime;
     
-    _lastAccessTime = Alarm.getExactTime();
+    _lastAccessTime = CurrentTime.getCurrentTime();
 
     _leaseExpireTime = oldMnodeValue._leaseExpireTime;
     _leaseOwner = oldMnodeValue._leaseOwner;
@@ -468,7 +469,7 @@ public final class MnodeEntry extends MnodeValue implements ExtCacheEntry {
   @Override
   public boolean isValid()
   {
-    return (! isExpired(Alarm.getCurrentTime()));
+    return (! isExpired(CurrentTime.getCurrentTime()));
   }
 
   /*

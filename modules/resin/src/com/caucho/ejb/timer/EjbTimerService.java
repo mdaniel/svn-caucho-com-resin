@@ -50,6 +50,7 @@ import com.caucho.config.types.Trigger;
 import com.caucho.ejb.server.AbstractEjbBeanManager;
 import com.caucho.resources.TimerTrigger;
 import com.caucho.util.Alarm;
+import com.caucho.util.CurrentTime;
 import com.caucho.util.L10N;
 
 /**
@@ -107,7 +108,7 @@ public class EjbTimerService implements TimerService {
       throw new IllegalArgumentException("Timer duration must not be negative.");
     }
 
-    long expiration = Alarm.getCurrentTime() + duration;
+    long expiration = CurrentTime.getCurrentTime() + duration;
 
     return createOneTimeTimer(expiration, info);
   }
@@ -138,7 +139,7 @@ public class EjbTimerService implements TimerService {
           .l("Timer duration must not be negative."));
     }
 
-    long expiration = Alarm.getCurrentTime() + duration;
+    long expiration = CurrentTime.getCurrentTime() + duration;
 
     Serializable info = null;
 
@@ -190,7 +191,7 @@ public class EjbTimerService implements TimerService {
           .l("Timer interval duration must not be negative."));
     }
 
-    Date expiration = new Date(Alarm.getCurrentTime() + initialDuration);
+    Date expiration = new Date(CurrentTime.getCurrentTime() + initialDuration);
 
     return createRepeatingTimer(expiration, intervalDuration, info);
   }
@@ -236,7 +237,7 @@ public class EjbTimerService implements TimerService {
           .l("Timer interval duration must not be negative."));
     }
 
-    Date expiration = new Date(Alarm.getCurrentTime() + initialDuration);
+    Date expiration = new Date(CurrentTime.getCurrentTime() + initialDuration);
 
     Serializable info = null;
 

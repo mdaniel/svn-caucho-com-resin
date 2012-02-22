@@ -41,6 +41,7 @@ import com.caucho.management.server.AbstractManagedObject;
 import com.caucho.management.server.WatchdogMXBean;
 import com.caucho.network.listen.TcpSocketLinkListener;
 import com.caucho.util.Alarm;
+import com.caucho.util.CurrentTime;
 import com.caucho.util.L10N;
 import com.caucho.vfs.Path;
 
@@ -472,7 +473,7 @@ class WatchdogChild
   void notifyTaskStarted()
   {
     _startCount++;
-    _lastStartTime = new Date(Alarm.getExactTime());
+    _lastStartTime = new Date(CurrentTime.getExactTime());
     
     if (_initialStartTime == null)
       _initialStartTime = _lastStartTime; 

@@ -37,6 +37,7 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 
 import com.caucho.util.Alarm;
+import com.caucho.util.CurrentTime;
 import com.caucho.util.FreeRing;
 import com.caucho.util.L10N;
 import com.caucho.util.SQLExceptionWrapper;
@@ -441,10 +442,10 @@ public class BlockReadWrite {
             mmapFile.close();
             
             long timeout = 15000L;
-            long expires = Alarm.getCurrentTimeActual() + timeout;
+            long expires = CurrentTime.getCurrentTimeActual() + timeout;
             
             while (mmapFile.isOpen()
-                   && Alarm.getCurrentTimeActual() < expires) {
+                   && CurrentTime.getCurrentTimeActual() < expires) {
               // wait for close
             }
           }

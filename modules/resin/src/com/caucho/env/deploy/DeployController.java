@@ -40,6 +40,7 @@ import com.caucho.lifecycle.LifecycleListener;
 import com.caucho.lifecycle.LifecycleState;
 import com.caucho.loader.DynamicClassLoader;
 import com.caucho.util.Alarm;
+import com.caucho.util.CurrentTime;
 import com.caucho.util.L10N;
 import com.caucho.vfs.Dependency;
 
@@ -682,7 +683,7 @@ abstract public class DeployController<I extends DeployInstance>
 
       isActive = true;
 
-      _startTime = Alarm.getCurrentTime();
+      _startTime = CurrentTime.getCurrentTime();
     } catch (ConfigException e) {
       log.log(Level.FINEST, e.toString(), e);
 

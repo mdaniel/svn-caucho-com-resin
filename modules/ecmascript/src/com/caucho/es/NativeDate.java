@@ -29,6 +29,7 @@
 package com.caucho.es;
 
 import com.caucho.util.Alarm;
+import com.caucho.util.CurrentTime;
 import com.caucho.util.QDate;
 
 /**
@@ -426,7 +427,7 @@ class NativeDate extends Native {
     long value = 0;
 
     if (length == 0) {
-      return Alarm.getCurrentTime();
+      return CurrentTime.getCurrentTime();
     }
     else if (length == 1)
       value = (long) (eval.getArg(0).toNum());

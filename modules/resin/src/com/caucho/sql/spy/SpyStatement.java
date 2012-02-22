@@ -39,6 +39,7 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 
 import com.caucho.util.Alarm;
+import com.caucho.util.CurrentTime;
 import com.caucho.util.L10N;
 import com.caucho.util.SQLExceptionWrapper;
 
@@ -68,12 +69,12 @@ public class SpyStatement implements java.sql.Statement {
   
   protected long start()
   {
-    return Alarm.getExactTime();
+    return CurrentTime.getExactTime();
   }
   
   protected void log(long start, String msg)
   {
-    long delta = Alarm.getExactTime() - start;
+    long delta = CurrentTime.getExactTime() - start;
     
     log.fine("[" + delta + "ms] " + getId() + ":" + msg);
   }

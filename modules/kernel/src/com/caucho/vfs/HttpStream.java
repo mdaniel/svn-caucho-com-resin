@@ -31,6 +31,7 @@ package com.caucho.vfs;
 
 import com.caucho.util.Alarm;
 import com.caucho.util.CharBuffer;
+import com.caucho.util.CurrentTime;
 import com.caucho.util.L10N;
 import com.caucho.util.Log;
 
@@ -201,7 +202,7 @@ class HttpStream extends StreamImpl {
     if (stream != null) {
       long now;
       
-      now = Alarm.getCurrentTime();
+      now = CurrentTime.getCurrentTime();
       
       if (now < streamTime + 5000) {
         // if the stream is still valid, use it
@@ -888,7 +889,7 @@ class HttpStream extends StreamImpl {
       
       long now;
       
-      now = Alarm.getCurrentTime();
+      now = CurrentTime.getCurrentTime();
       
       synchronized (LOCK) {
         oldSaved = _savedStream;

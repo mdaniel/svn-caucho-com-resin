@@ -10,7 +10,6 @@ import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.net.InetAddress;
-import java.nio.ByteBuffer;
 import java.security.cert.CertificateFactory;
 import java.security.cert.X509Certificate;
 import java.util.concurrent.atomic.AtomicBoolean;
@@ -18,7 +17,7 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 
 import com.caucho.inject.Module;
-import com.caucho.util.Alarm;
+import com.caucho.util.CurrentTime;
 import com.caucho.util.JniTroubleshoot;
 import com.caucho.util.L10N;
 
@@ -386,7 +385,7 @@ public final class JniSocketImpl extends QSocket {
     
     long requestExpireTime = _requestExpireTime;
 
-    if (requestExpireTime > 0 && requestExpireTime < Alarm.getCurrentTime()) {
+    if (requestExpireTime > 0 && requestExpireTime < CurrentTime.getCurrentTime()) {
       close();
       throw new ClientDisconnectException(L.l("{0}: request-timeout read",
                                               getRemoteAddress()));
@@ -395,7 +394,7 @@ public final class JniSocketImpl extends QSocket {
     int result = 0;
     
     synchronized (_readLock) {
-      long now = Alarm.getCurrentTimeActual();
+      long now = CurrentTime.getCurrentTimeActual();
       
       long expires;
       
@@ -410,7 +409,7 @@ public final class JniSocketImpl extends QSocket {
       do {
         result = readNative(_socketFd, buffer, offset, length, timeout);
         
-        now = Alarm.getCurrentTimeActual();
+        now = CurrentTime.getCurrentTimeActual();
         
         timeout = expires - now;
       } while (result == JniStream.TIMEOUT_EXN && timeout > 0);
@@ -429,14 +428,14 @@ public final class JniSocketImpl extends QSocket {
     
     long requestExpireTime = _requestExpireTime;
     
-    if (requestExpireTime > 0 && requestExpireTime < Alarm.getCurrentTime()) {
+    if (requestExpireTime > 0 && requestExpireTime < CurrentTime.getCurrentTime()) {
       close();
       throw new ClientDisconnectException(L.l("{0}: request-timeout write",
                                               getRemoteAddress()));
     }
     
     synchronized (_writeLock) {
-      long now = Alarm.getCurrentTimeActual();
+      long now = CurrentTime.getCurrentTimeActual();
       long expires = _socketTimeout + now;
       
       do {
@@ -449,7 +448,7 @@ public final class JniSocketImpl extends QSocket {
         //_byteBuffer.put(buffer, offset, length);
         //result = writeNativeNio(_fd, _byteBuffer, 0, length);
       } while (result == JniStream.TIMEOUT_EXN
-               && Alarm.getCurrentTimeActual() < expires);
+               && CurrentTime.getCurrentTimeActual() < expires);
     }
     
     if (isEnd) {
@@ -466,7 +465,7 @@ public final class JniSocketImpl extends QSocket {
     
     long requestExpireTime = _requestExpireTime;
     
-    if (requestExpireTime > 0 && requestExpireTime < Alarm.getCurrentTime()) {
+    if (requestExpireTime > 0 && requestExpireTime < CurrentTime.getCurrentTime()) {
       close();
       throw new ClientDisconnectException(L.l("{0}: request-timeout write",
                                               getRemoteAddress()));
@@ -497,21 +496,21 @@ public final class JniSocketImpl extends QSocket {
   
     long requestExpireTime = _requestExpireTime;
   
-    if (requestExpireTime > 0 && requestExpireTime < Alarm.getCurrentTime()) {
+    if (requestExpireTime > 0 && requestExpireTime < CurrentTime.getCurrentTime()) {
       close();
       throw new ClientDisconnectException(L.l("{0}: request-timeout write",
                                               getRemoteAddress()));
     }
   
     synchronized (_writeLock) {
-      long now = Alarm.getCurrentTimeActual();
+      long now = CurrentTime.getCurrentTimeActual();
       long expires = _socketTimeout + now;
     
       do {
         result = writeMmapNative(_socketFd, 
                                  mmapAddress, mmapBlocks, mmapOffset, mmapLength);
       } while (result == JniStream.TIMEOUT_EXN
-          && Alarm.getCurrentTimeActual() < expires);
+               && CurrentTime.getCurrentTimeActual() < expires);
     }
   
     return result;
@@ -529,7 +528,7 @@ public final class JniSocketImpl extends QSocket {
     
     long requestExpireTime = _requestExpireTime;
     
-    if (requestExpireTime > 0 && requestExpireTime < Alarm.getCurrentTime()) {
+    if (requestExpireTime > 0 && requestExpireTime < CurrentTime.getCurrentTime()) {
       close();
       throw new ClientDisconnectException(L.l("{0}: request-timeout sendfile",
                                               getRemoteAddress()));
@@ -537,7 +536,7 @@ public final class JniSocketImpl extends QSocket {
     
     
     synchronized (_writeLock) {
-      long now = Alarm.getCurrentTimeActual();
+      long now = CurrentTime.getCurrentTimeActual();
       long expires = _socketTimeout + now;
       
       do {
@@ -550,7 +549,7 @@ public final class JniSocketImpl extends QSocket {
         //_byteBuffer.put(buffer, offset, length);
         //result = writeNativeNio(_fd, _byteBuffer, 0, length);
       } while (result == JniStream.TIMEOUT_EXN
-               && Alarm.getCurrentTimeActual() < expires);
+               && CurrentTime.getCurrentTimeActual() < expires);
     }
     
     return result;

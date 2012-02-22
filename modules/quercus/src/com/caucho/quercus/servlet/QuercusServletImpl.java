@@ -42,6 +42,7 @@ import com.caucho.quercus.env.QuercusValueException;
 import com.caucho.quercus.env.StringValue;
 import com.caucho.quercus.page.QuercusPage;
 import com.caucho.util.Alarm;
+import com.caucho.util.CurrentTime;
 import com.caucho.util.L10N;
 import com.caucho.vfs.FilePath;
 import com.caucho.vfs.Path;
@@ -89,7 +90,7 @@ public class QuercusServletImpl extends HttpServlet
     getQuercus().setPwd(pwd);
 
     // need to set these for non-Resin containers
-    if (! Alarm.isTest() && ! getQuercus().isResin()) {
+    if (! CurrentTime.isTest() && ! getQuercus().isResin()) {
       Vfs.setPwd(pwd);
       WorkDir.setLocalWorkDir(pwd.lookup("WEB-INF/work"));
     }

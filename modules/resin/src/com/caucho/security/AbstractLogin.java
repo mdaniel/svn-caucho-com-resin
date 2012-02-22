@@ -580,7 +580,7 @@ public abstract class AbstractLogin implements Login {
       if (manager != null) {
         try {
           SessionImpl session = manager.getSession(sessionId,
-                                                   Alarm.getCurrentTime(),
+                                                   CurrentTime.getCurrentTime(),
                                                    false, true);
 
           if (session != null) {
