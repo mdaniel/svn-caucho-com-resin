@@ -31,7 +31,6 @@ package com.caucho.amqp.broker;
 
 import com.caucho.loader.Environment;
 import com.caucho.loader.EnvironmentLocal;
-import com.caucho.mqueue.stomp.StompMessageListener;
 import com.caucho.util.ConcurrentArrayList;
 import com.caucho.util.LruCache;
 
@@ -111,7 +110,7 @@ public class AmqpEnvironmentBroker implements AmqpBroker
   
   @Override
   public AmqpReceiver createReceiver(String name,
-                                              StompMessageListener listener)
+                                              AmqpMessageListener listener)
   {
     for (AmqpBroker registeredBroker : _brokerList) {
       AmqpReceiver sub

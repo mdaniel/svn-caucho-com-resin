@@ -43,6 +43,7 @@ import com.caucho.amqp.broker.AmqpNullSender;
 import com.caucho.amqp.broker.AmqpSender;
 import com.caucho.amqp.broker.AmqpReceiptListener;
 import com.caucho.amqp.broker.AmqpReceiver;
+import com.caucho.amqp.broker.AmqpMessageListener;
 import com.caucho.distcache.ClusterCache;
 import com.caucho.distcache.ExtCacheEntry;
 import com.caucho.memcached.MemcachedProtocol;
@@ -235,7 +236,7 @@ public class StompConnection implements ProtocolConnection
       throw new IOException("sub exists");
     
     AmqpBroker broker = _stomp.getBroker();
-    StompMessageListener listener = new MessageListener(this, _id, _destinationName);
+    AmqpMessageListener listener = new MessageListener(this, _id, _destinationName);
     
     sub = broker.createReceiver(_destinationName, listener);
     
@@ -594,7 +595,7 @@ public class StompConnection implements ProtocolConnection
     }
   }
   
-  static class MessageListener implements StompMessageListener {
+  static class MessageListener implements AmqpMessageListener {
     private StompConnection _conn;
     private String _subscription;
     private String _destination;

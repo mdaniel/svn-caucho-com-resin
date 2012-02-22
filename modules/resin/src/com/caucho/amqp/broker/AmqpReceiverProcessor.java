@@ -33,16 +33,15 @@ import java.io.IOException;
 import java.io.InputStream;
 
 import com.caucho.mqueue.queue.SubscriberProcessor;
-import com.caucho.mqueue.stomp.StompMessageListener;
 
 /**
  * Generic interface to read a received message.
  */
 public class AmqpReceiverProcessor implements SubscriberProcessor
 {
-  private StompMessageListener _stompListener;
+  private AmqpMessageListener _stompListener;
   
-  AmqpReceiverProcessor(StompMessageListener stompListener)
+  AmqpReceiverProcessor(AmqpMessageListener stompListener)
   {
     _stompListener = stompListener;
   }

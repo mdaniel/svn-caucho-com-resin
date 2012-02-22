@@ -29,7 +29,6 @@
 
 package com.caucho.amqp.broker;
 
-import com.caucho.mqueue.stomp.StompMessageListener;
 
 /**
  * Broker interface for creating nodes and subscriptions to nodes.
@@ -39,5 +38,5 @@ public interface AmqpBroker
   public AmqpSender createSender(String name);
   
   public AmqpReceiver createReceiver(String name,
-                                          StompMessageListener listener);
+                                          AmqpMessageListener listener);
 }

@@ -38,7 +38,6 @@ import com.caucho.mqueue.queue.MQJournalQueue;
 import com.caucho.mqueue.queue.MQJournalQueuePublisher;
 import com.caucho.mqueue.queue.MQJournalQueueSubscriber;
 import com.caucho.mqueue.queue.SubscriberProcessor;
-import com.caucho.mqueue.stomp.StompMessageListener;
 import com.caucho.util.L10N;
 import com.caucho.vfs.Path;
 
@@ -80,7 +79,7 @@ public class JournalAmqpBroker extends AbstractAmqpBroker
   
   @Override
   public AmqpReceiver createReceiver(String name,
-                                              StompMessageListener listener)
+                                              AmqpMessageListener listener)
   {
     SubscriberProcessor processor = new AmqpReceiverProcessor(listener);
     System.out.println("SUB: " + name);

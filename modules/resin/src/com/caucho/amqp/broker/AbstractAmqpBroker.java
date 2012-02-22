@@ -29,7 +29,6 @@
 
 package com.caucho.amqp.broker;
 
-import com.caucho.mqueue.stomp.StompMessageListener;
 
 /**
  * AbstractStompBroker with common routines for brokers.
@@ -44,7 +43,7 @@ abstract public class AbstractAmqpBroker implements AmqpBroker
   
   @Override
   public AmqpReceiver createReceiver(String name,
-                                              StompMessageListener listener)
+                                              AmqpMessageListener listener)
   {
     return null;
   }

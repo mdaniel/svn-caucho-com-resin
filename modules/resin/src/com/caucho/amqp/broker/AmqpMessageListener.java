@@ -27,7 +27,7 @@
  * @author Scott Ferguson
  */
 
-package com.caucho.mqueue.stomp;
+package com.caucho.amqp.broker;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -35,7 +35,7 @@ import java.io.InputStream;
 /**
  * Listener for a destination.
  */
-public interface StompMessageListener
+public interface AmqpMessageListener
 {
   public void onMessage(long messageId,
                         InputStream bodyIs,
