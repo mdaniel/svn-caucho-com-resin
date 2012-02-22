@@ -37,13 +37,11 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.concurrent.atomic.AtomicInteger;
 
-import com.caucho.admin.RemoteAdminService;
 import com.caucho.bam.BamError;
 import com.caucho.bam.RemoteConnectionFailedException;
 import com.caucho.bam.RemoteListenerUnavailableException;
 import com.caucho.bam.ServiceUnavailableException;
 import com.caucho.bam.actor.ActorSender;
-import com.caucho.bam.actor.RemoteActorSender;
 import com.caucho.bam.broker.Broker;
 import com.caucho.bam.query.QueryCallback;
 import com.caucho.cloud.deploy.CopyTagQuery;
@@ -60,7 +58,6 @@ import com.caucho.env.repository.RepositoryTagEntry;
 import com.caucho.env.repository.RepositoryTagListener;
 import com.caucho.hmtp.HmtpClient;
 import com.caucho.server.cluster.Server;
-import com.caucho.util.Alarm;
 import com.caucho.util.CurrentTime;
 import com.caucho.util.IoUtil;
 import com.caucho.util.L10N;
@@ -470,11 +467,11 @@ public class DeployClient implements Repository
    * @param tag the encoded controller name
    *
    */
-  public ControllerStateActionQueryResult restart(String tag)
+  public ControllerStateActionQueryReply restart(String tag)
   {
     ControllerRestartQuery query = new ControllerRestartQuery(tag);
 
-    return (ControllerStateActionQueryResult) query(query);
+    return (ControllerStateActionQueryReply) query(query);
   }
 
   /**
@@ -484,11 +481,11 @@ public class DeployClient implements Repository
    *
    * @deprecated
    */
-  public ControllerStateActionQueryResult start(String tag)
+  public ControllerStateActionQueryReply start(String tag)
   {
     ControllerStartQuery query = new ControllerStartQuery(tag);
 
-    return (ControllerStateActionQueryResult) query(query);
+    return (ControllerStateActionQueryReply) query(query);
   }
 
   /**
@@ -498,11 +495,11 @@ public class DeployClient implements Repository
    *
    * @deprecated
    */
-  public ControllerStateActionQueryResult stop(String tag)
+  public ControllerStateActionQueryReply stop(String tag)
   {
     ControllerStopQuery query = new ControllerStopQuery(tag);
 
-    return (ControllerStateActionQueryResult) query(query);
+    return (ControllerStateActionQueryReply) query(query);
   }
 
   /**

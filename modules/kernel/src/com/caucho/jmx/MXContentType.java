@@ -27,48 +27,16 @@
  * @author Alex Rojkov
  */
 
-package com.caucho.boot;
+package com.caucho.jmx;
 
-import com.caucho.server.admin.ManagerClient;
-import com.caucho.server.admin.StringQueryReply;
-import com.caucho.util.L10N;
+import java.lang.annotation.ElementType;
+import java.lang.annotation.Retention;
+import java.lang.annotation.RetentionPolicy;
+import java.lang.annotation.Target;
 
-/**
- * Makes the remote server produce heap dump. Heap dump is written to a file
- * local to a remote server as it can be big.
- */
-public class HeapDumpCommand extends AbstractManagementCommand
+@Target({ElementType.METHOD})
+@Retention(RetentionPolicy.RUNTIME)
+public @interface MXContentType
 {
-  private static final L10N L = new L10N(HeapDumpCommand.class);
-
-  public HeapDumpCommand()
-  {
-    addFlagOption("raw", "creates a JVM hprof file");
-  }
-
-  @Override
-  public String getDescription()
-  {
-    return "produces a JVM memory heap dump";
-  }
-
-  @Override
-  public int doCommand(WatchdogArgs args,
-                       WatchdogClient client,
-                       ManagerClient managerClient)
-  {
-    boolean raw = args.hasOption("-raw");
-
-    StringQueryReply result = managerClient.doHeapDump(raw);
-
-    System.out.println(result.getValue());
-
-    return 0;
-  }
-
-  @Override
-  public boolean isProOnly()
-  {
-    return false;
-  }
+  public String value() default "application/json";
 }

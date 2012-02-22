@@ -25,13 +25,17 @@
  *
  * @author Alex Rojkov
  */
-
 package com.caucho.server.admin;
 
-import java.io.Serializable;
-
 @SuppressWarnings("serial")
-
-public abstract class ManagementQueryResult implements Serializable
+public class JsonQueryReply extends StringQueryReply
 {
+  public JsonQueryReply()
+  {
+  }
+
+  public JsonQueryReply(String value)
+  {
+    super(value);
+  }
 }

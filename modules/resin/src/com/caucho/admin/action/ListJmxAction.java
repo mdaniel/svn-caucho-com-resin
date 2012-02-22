@@ -29,7 +29,7 @@
 package com.caucho.admin.action;
 
 import com.caucho.config.ConfigException;
-import com.caucho.server.admin.ListJmxQueryResult;
+import com.caucho.server.admin.ListJmxQueryReply;
 import com.caucho.util.L10N;
 
 import javax.management.JMException;
@@ -56,7 +56,7 @@ public class ListJmxAction extends AbstractJmxAction implements AdminAction
 
   private static final L10N L = new L10N(ListJmxAction.class);
 
-  public ListJmxQueryResult execute(String pattern,
+  public ListJmxQueryReply execute(String pattern,
                                     boolean isPrintAttributes,
                                     boolean isPrintValues,
                                     boolean isPrintOperations,
@@ -85,8 +85,8 @@ public class ListJmxAction extends AbstractJmxAction implements AdminAction
     else
       nameQuery = ObjectName.getInstance("resin:*");
 
-    ListJmxQueryResult listJmxQueryResult
-      = new ListJmxQueryResult();
+    ListJmxQueryReply listJmxQueryResult
+      = new ListJmxQueryReply();
 
     for (final MBeanServer server : servers) {
       Set<ObjectName> mbeanSet = server.queryNames(nameQuery, null);
@@ -100,15 +100,15 @@ public class ListJmxAction extends AbstractJmxAction implements AdminAction
 
         beans.add(mbean);
 
-        ListJmxQueryResult.Bean bean = new ListJmxQueryResult.Bean();
+        ListJmxQueryReply.Bean bean = new ListJmxQueryReply.Bean();
         bean.setName(mbean.toString());
 
         if (isPrintAttributes || isPrintValues) {
           MBeanAttributeInfo []attributes = server.getMBeanInfo(mbean)
                                                   .getAttributes();
           for (MBeanAttributeInfo attribute : attributes) {
-            ListJmxQueryResult.Attribute attr
-              = new ListJmxQueryResult.Attribute();
+            ListJmxQueryReply.Attribute attr
+              = new ListJmxQueryReply.Attribute();
 
             attr.setName(attribute.getName());
 
@@ -130,8 +130,8 @@ public class ListJmxAction extends AbstractJmxAction implements AdminAction
           if (isPrintOperations) {
             for (MBeanOperationInfo operation : server.getMBeanInfo(mbean)
                                                       .getOperations()) {
-              ListJmxQueryResult.Operation op
-                = new ListJmxQueryResult.Operation();
+              ListJmxQueryReply.Operation op
+                = new ListJmxQueryReply.Operation();
 
               op.setName(operation.getName());
 
@@ -140,8 +140,8 @@ public class ListJmxAction extends AbstractJmxAction implements AdminAction
                 for (int i = 0; i < params.length; i++) {
                   MBeanParameterInfo param = params[i];
 
-                  ListJmxQueryResult.Param par
-                    = new ListJmxQueryResult.Param();
+                  ListJmxQueryReply.Param par
+                    = new ListJmxQueryReply.Param();
 
                   par.setName(param.getName());
                   par.setType(param.getType());

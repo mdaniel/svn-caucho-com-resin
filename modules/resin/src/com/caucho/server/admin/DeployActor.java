@@ -477,15 +477,15 @@ public class DeployActor extends SimpleActor
    * @deprecated
    */
   @Query
-  public ControllerStateActionQueryResult controllerStart(long id,
+  public ControllerStateActionQueryReply controllerStart(long id,
                                                           String to,
                                                           String from,
                                                           ControllerStartQuery query)
   {
     LifecycleState state = start(query.getTag());
 
-    ControllerStateActionQueryResult result
-      = new ControllerStateActionQueryResult(query.getTag(), state);
+    ControllerStateActionQueryReply result
+      = new ControllerStateActionQueryReply(query.getTag(), state);
 
     log.fine(this + " start '" + query.getTag() + "' -> " + state.getStateName());
 
@@ -513,15 +513,15 @@ public class DeployActor extends SimpleActor
    * @deprecated
    */
   @Query
-  public ControllerStateActionQueryResult controllerStop(long id,
+  public ControllerStateActionQueryReply controllerStop(long id,
                                                          String to,
                                                          String from,
                                                          ControllerStopQuery query)
   {
     LifecycleState state = stop(query.getTag());
 
-    ControllerStateActionQueryResult result
-      = new ControllerStateActionQueryResult(query.getTag(), state);
+    ControllerStateActionQueryReply result
+      = new ControllerStateActionQueryReply(query.getTag(), state);
 
     log.fine(this + " stop '" + query.getTag() + "' -> " + state.getStateName());
 
@@ -545,15 +545,15 @@ public class DeployActor extends SimpleActor
   }
 
   @Query
-  public ControllerStateActionQueryResult controllerRestart(long id,
+  public ControllerStateActionQueryReply controllerRestart(long id,
                                                             String to,
                                                             String from,
                                                             ControllerRestartQuery query)
   {
     LifecycleState state = restart(query.getTag());
 
-    ControllerStateActionQueryResult result
-      = new ControllerStateActionQueryResult(query.getTag(), state);
+    ControllerStateActionQueryReply result
+      = new ControllerStateActionQueryReply(query.getTag(), state);
 
     log.fine(this
              + " restart '"

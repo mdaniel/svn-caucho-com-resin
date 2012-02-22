@@ -34,6 +34,7 @@ import java.util.logging.*;
 import javax.management.*;
 
 import com.caucho.config.ConfigException;
+import com.caucho.server.admin.JmxSetQueryReply;
 import com.caucho.util.L10N;
 
 public class SetJmxAction extends AbstractJmxAction implements AdminAction
@@ -43,7 +44,9 @@ public class SetJmxAction extends AbstractJmxAction implements AdminAction
 
   private static final L10N L = new L10N(SetJmxAction.class);
 
-  public String execute(String pattern, String attributeName, String value)
+  public JmxSetQueryReply execute(String pattern,
+                                  String attributeName,
+                                  String value)
     throws ConfigException, JMException, ClassNotFoundException
   {
     final List<MBeanServer> servers = new LinkedList<MBeanServer>();
@@ -94,11 +97,13 @@ public class SetJmxAction extends AbstractJmxAction implements AdminAction
 
       subjectBeanServer.setAttribute(subjectBean, attribute);
 
-      return L.l("value for attribute `{0}' on bean `{1}' is changed from `{2}' to `{3}'",
-                 attributeName,
-                 subjectBean.getCanonicalName(),
-                 oldValue,
-                 attribValue);
+      JmxSetQueryReply reply
+        = new JmxSetQueryReply(subjectBean.getCanonicalName(),
+                               attributeName,
+                               String.valueOf(oldValue),
+                               String.valueOf(attribValue));
+      
+      return reply;
     }
   }
 }

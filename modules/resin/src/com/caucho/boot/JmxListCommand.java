@@ -30,7 +30,7 @@
 package com.caucho.boot;
 
 import com.caucho.config.ConfigException;
-import com.caucho.server.admin.ListJmxQueryResult;
+import com.caucho.server.admin.ListJmxQueryReply;
 import com.caucho.server.admin.ManagerClient;
 import com.caucho.util.L10N;
 
@@ -95,7 +95,7 @@ public class JmxListCommand extends JmxCommand
     boolean isAll = args.hasOption("-all");
     boolean isPlatform = args.hasOption("-platform");
 
-    ListJmxQueryResult result = managerClient.listJmx(pattern,
+    ListJmxQueryReply result = managerClient.listJmx(pattern,
                                                       isPrintAttributes,
                                                       isPrintValues,
                                                       isPrintOperations,
@@ -103,12 +103,12 @@ public class JmxListCommand extends JmxCommand
                                                       isPlatform);
     StringBuilder message = new StringBuilder();
 
-    for (ListJmxQueryResult.Bean bean : result.getBeans()) {
+    for (ListJmxQueryReply.Bean bean : result.getBeans()) {
       message.append(bean.getName()).append('\n');
       if (isPrintAttributes || isPrintValues) {
         message.append("  attributes:\n");
 
-        for (ListJmxQueryResult.Attribute attribute : bean.getAttributes()) {
+        for (ListJmxQueryReply.Attribute attribute : bean.getAttributes()) {
           message.append("    ").append(attribute.getName());
 
           if (isPrintValues) {
@@ -122,15 +122,15 @@ public class JmxListCommand extends JmxCommand
 
       if (isPrintOperations) {
         message.append("  operations:\n");
-        for (ListJmxQueryResult.Operation operation : bean.getOperations()) {
+        for (ListJmxQueryReply.Operation operation : bean.getOperations()) {
           message.append("    ")
                  .append(operation.getName());
 
-          List<ListJmxQueryResult.Param> params = operation.getParams();
+          List<ListJmxQueryReply.Param> params = operation.getParams();
           if (params != null && params.size() > 0) {
             message.append("\n      (\n");
             for (int i = 0; i < params.size(); i++) {
-              ListJmxQueryResult.Param param = params.get(i);
+              ListJmxQueryReply.Param param = params.get(i);
               message.append("        ").append(i).append(":");
               message.append(param.getType())
                      .append(' ')

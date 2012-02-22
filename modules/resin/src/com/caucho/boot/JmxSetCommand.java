@@ -30,8 +30,8 @@
 package com.caucho.boot;
 
 import com.caucho.config.ConfigException;
+import com.caucho.server.admin.JmxSetQueryReply;
 import com.caucho.server.admin.ManagerClient;
-import com.caucho.server.admin.StringQueryResult;
 import com.caucho.util.L10N;
 
 import javax.management.MalformedObjectNameException;
@@ -98,11 +98,18 @@ public class JmxSetCommand extends JmxCommand
       throw new ConfigException(L.l(
         "jmx-set requires <value> parameter be specified"));
 
-    StringQueryResult result = managerClient.setJmx(pattern,
+    JmxSetQueryReply reply = managerClient.setJmx(pattern,
                                                     attribute,
                                                     value);
 
-    System.out.println(result.getValue());
+    String message = L.l(
+      "value for attribute `{0}' on bean `{1}' is changed from `{2}' to `{3}'",
+      reply.getAttribute(),
+      reply.getBean(),
+      reply.getOldValue(),
+      reply.getNewValue());
+
+    System.out.println(message);
 
     return 0;
   }

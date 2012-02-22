@@ -30,7 +30,7 @@
 package com.caucho.boot;
 
 import com.caucho.server.admin.ManagerClient;
-import com.caucho.server.admin.StringQueryResult;
+import com.caucho.server.admin.StringQueryReply;
 import com.caucho.util.IoUtil;
 
 import java.io.File;
@@ -56,7 +56,7 @@ public class ThreadDumpCommand extends AbstractManagementCommand
                        WatchdogClient client,
                        ManagerClient managerClient)
   {
-    StringQueryResult result = managerClient.doThreadDump();
+    StringQueryReply result = managerClient.doThreadDump();
 
     String fileName = args.getArg("-file");
 

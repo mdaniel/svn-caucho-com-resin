@@ -29,8 +29,9 @@
 
 package com.caucho.boot;
 
+import com.caucho.server.admin.JsonQueryReply;
 import com.caucho.server.admin.ManagerClient;
-import com.caucho.server.admin.StringQueryResult;
+import com.caucho.server.admin.StringQueryReply;
 import com.caucho.util.IoUtil;
 import com.caucho.util.L10N;
 
@@ -59,9 +60,9 @@ public class JmxDumpCommand extends JmxCommand
                        WatchdogClient client,
                        ManagerClient managerClient)
   {
-    StringQueryResult result = managerClient.doJmxDump();
+    JsonQueryReply result = managerClient.doJmxDump();
 
-    StringQueryResult queryResult = result;
+    JsonQueryReply queryResult = result;
 
     String fileName = args.getArg("-file");
 

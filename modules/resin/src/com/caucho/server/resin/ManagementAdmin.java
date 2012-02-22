@@ -42,26 +42,26 @@ import com.caucho.env.repository.CommitBuilder;
 import com.caucho.jmx.MXParam;
 import com.caucho.management.server.AbstractManagedObject;
 import com.caucho.management.server.ManagementMXBean;
-import com.caucho.management.server.StatServiceValue;
 import com.caucho.quercus.lib.reflection.ReflectionException;
-import com.caucho.server.admin.AddUserQueryResult;
-import com.caucho.server.admin.ControllerStateActionQueryResult;
+import com.caucho.server.admin.AddUserQueryReply;
+import com.caucho.server.admin.ControllerStateActionQueryReply;
 import com.caucho.server.admin.DeployClient;
 import com.caucho.server.admin.HmuxClientFactory;
-import com.caucho.server.admin.ListJmxQueryResult;
-import com.caucho.server.admin.ListUsersQueryResult;
+import com.caucho.server.admin.JmxCallQueryReply;
+import com.caucho.server.admin.JmxSetQueryReply;
+import com.caucho.server.admin.JsonQueryReply;
+import com.caucho.server.admin.ListJmxQueryReply;
+import com.caucho.server.admin.ListUsersQueryReply;
 import com.caucho.server.admin.ManagerClient;
-import com.caucho.server.admin.PdfReportQueryResult;
-import com.caucho.server.admin.RemoveUserQueryResult;
-import com.caucho.server.admin.StatServiceValuesQueryResult;
-import com.caucho.server.admin.StringQueryResult;
+import com.caucho.server.admin.PdfReportQueryReply;
+import com.caucho.server.admin.RemoveUserQueryReply;
+import com.caucho.server.admin.StatServiceValuesQueryReply;
+import com.caucho.server.admin.StringQueryReply;
 import com.caucho.server.admin.TagResult;
 import com.caucho.server.admin.WebAppDeployClient;
-import com.caucho.util.Alarm;
 import com.caucho.util.CharBuffer;
 import com.caucho.util.CurrentTime;
 import com.caucho.util.L10N;
-import com.caucho.util.QDate;
 import com.caucho.vfs.ReadStream;
 import com.caucho.vfs.TempOutputStream;
 import com.caucho.vfs.Vfs;
@@ -71,7 +71,6 @@ import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.ArrayList;
-import java.util.Calendar;
 import java.util.Date;
 import java.util.List;
 import java.util.logging.Level;
@@ -99,15 +98,6 @@ public class ManagementAdmin extends AbstractManagedObject
   public String getName()
   {
     return null;
-  }
-
-  /**
-   * Test interface
-   */
-  @Override
-  public String hello()
-  {
-    return "hello, world";
   }
 
   @Override
@@ -228,7 +218,7 @@ public class ManagementAdmin extends AbstractManagedObject
   }
 
   @Override
-  public StringQueryResult addLicense(String serverId,
+  public StringQueryReply addLicense(String serverId,
                                       boolean isOverwrite,
                                       String to,
                                       boolean isRestart,
@@ -281,7 +271,7 @@ public class ManagementAdmin extends AbstractManagedObject
   }
 
   @Override
-  public ListJmxQueryResult listJmx(String serverId,
+  public ListJmxQueryReply listJmx(String serverId,
                                    String pattern,
                                    boolean isPrintAttributes,
                                    boolean isPrintValues,
@@ -301,7 +291,7 @@ public class ManagementAdmin extends AbstractManagedObject
   }
 
   @Override
-  public StringQueryResult setLogLevel(String serverId,
+  public StringQueryReply setLogLevel(String serverId,
                                        String loggersValue,
                                        String levelValue,
                                        String activeTime)
@@ -326,15 +316,15 @@ public class ManagementAdmin extends AbstractManagedObject
   }
 
   @Override
-  public StringQueryResult doThreadDump(String serverId)
+  public JsonQueryReply doThreadDump(String serverId)
   {
     ManagerClient managerClient = getManagerClient(serverId);
 
-    return managerClient.doThreadDump();
+    return managerClient.doJsonThreadDump();
   }
 
   @Override
-  public PdfReportQueryResult pdfReport(String serverId,
+  public PdfReportQueryReply pdfReport(String serverId,
                                         String report,
                                         String periodStr,
                                         String logDirectory,
@@ -373,7 +363,7 @@ public class ManagementAdmin extends AbstractManagedObject
   }
 
   @Override
-  public StatServiceValuesQueryResult getStats(String serverId,
+  public StatServiceValuesQueryReply getStats(String serverId,
                                                String metersStr,
                                                String periodStr)
   throws ReflectionException
@@ -392,7 +382,7 @@ public class ManagementAdmin extends AbstractManagedObject
   }
 
   @Override
-  public StringQueryResult setJmx(String serverId,
+  public JmxSetQueryReply setJmx(String serverId,
                                   String pattern,
                                   String attribute,
                                   String value)
@@ -403,7 +393,7 @@ public class ManagementAdmin extends AbstractManagedObject
   }
 
   @Override
-  public StringQueryResult callJmx(String serverId,
+  public JmxCallQueryReply callJmx(String serverId,
                                    String pattern,
                                    String operation,
                                    String operationIdx,
@@ -422,7 +412,7 @@ public class ManagementAdmin extends AbstractManagedObject
   }
 
   @Override
-  public ControllerStateActionQueryResult startWebApp(String serverId,
+  public ControllerStateActionQueryReply startWebApp(String serverId,
                                                       String tag,
                                                       String name,
                                                       String stage,
@@ -441,13 +431,13 @@ public class ManagementAdmin extends AbstractManagedObject
 
     WebAppDeployClient deployClient = getWebappDeployClient(serverId);
 
-    ControllerStateActionQueryResult result = deployClient.start(tag);
+    ControllerStateActionQueryReply result = deployClient.start(tag);
 
     return result;
   }
 
   @Override
-  public ControllerStateActionQueryResult stopWebApp(String serverId,
+  public ControllerStateActionQueryReply stopWebApp(String serverId,
                                                      String tag,
                                                      String name,
                                                      String stage,
@@ -466,13 +456,13 @@ public class ManagementAdmin extends AbstractManagedObject
 
     WebAppDeployClient deployClient = getWebappDeployClient(serverId);
 
-    ControllerStateActionQueryResult result = deployClient.stop(tag);
+    ControllerStateActionQueryReply result = deployClient.stop(tag);
 
     return result;
   }
 
   @Override
-  public ControllerStateActionQueryResult restartWebApp(String serverId,
+  public ControllerStateActionQueryReply restartWebApp(String serverId,
                                                         String tag,
                                                         String name,
                                                         String stage,
@@ -491,7 +481,7 @@ public class ManagementAdmin extends AbstractManagedObject
 
     WebAppDeployClient deployClient = getWebappDeployClient(serverId);
 
-    ControllerStateActionQueryResult result = deployClient.restart(tag);
+    ControllerStateActionQueryReply result = deployClient.restart(tag);
 
     return result;
   }
@@ -651,7 +641,7 @@ public class ManagementAdmin extends AbstractManagedObject
   }
 
   @Override
-  public StringQueryResult doJmxDump(String serverId)
+  public JsonQueryReply doJmxDump(String serverId)
   {
     ManagerClient managerClient = getManagerClient(serverId);
 
@@ -659,7 +649,7 @@ public class ManagementAdmin extends AbstractManagedObject
   }
 
   @Override
-  public AddUserQueryResult addUser(String serverId,
+  public AddUserQueryReply addUser(String serverId,
                                     String user,
                                     String password,
                                     String rolesStr)
@@ -677,7 +667,7 @@ public class ManagementAdmin extends AbstractManagedObject
   }
 
   @Override
-  public ListUsersQueryResult listUsers(String serverId)
+  public ListUsersQueryReply listUsers(String serverId)
     throws ReflectionException
   {
     ManagerClient managerClient = getManagerClient(serverId);
@@ -686,7 +676,7 @@ public class ManagementAdmin extends AbstractManagedObject
   }
 
   @Override
-  public RemoveUserQueryResult removeUser(String serverId,
+  public RemoveUserQueryReply removeUser(String serverId,
                                           String user)
   throws ReflectionException
   {
@@ -696,7 +686,7 @@ public class ManagementAdmin extends AbstractManagedObject
   }
 
   @Override
-  public StringQueryResult getStatus(String serverId)
+  public StringQueryReply getStatus(String serverId)
   {
     return null;
   }

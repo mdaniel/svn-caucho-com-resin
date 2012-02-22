@@ -28,22 +28,10 @@
 
 package com.caucho.server.admin;
 
+import java.io.Serializable;
+
 @SuppressWarnings("serial")
-public class ListUsersQueryResult extends UserQueryResult
+
+public abstract class ManagementQueryReply implements Serializable
 {
-  private User []_users;
-
-  public ListUsersQueryResult()
-  {
-  }
-
-  public ListUsersQueryResult(User[] users)
-  {
-    _users = users;
-  }
-
-  public User []getUsers()
-  {
-    return _users;
-  }
 }

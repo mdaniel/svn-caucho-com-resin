@@ -31,16 +31,20 @@ package com.caucho.management.server;
 
 import com.caucho.jmx.Description;
 import com.caucho.jmx.MXAction;
+import com.caucho.jmx.MXContentType;
 import com.caucho.jmx.MXParam;
 import com.caucho.quercus.lib.reflection.ReflectionException;
-import com.caucho.server.admin.AddUserQueryResult;
-import com.caucho.server.admin.ControllerStateActionQueryResult;
-import com.caucho.server.admin.ListJmxQueryResult;
-import com.caucho.server.admin.ListUsersQueryResult;
-import com.caucho.server.admin.PdfReportQueryResult;
-import com.caucho.server.admin.RemoveUserQueryResult;
-import com.caucho.server.admin.StatServiceValuesQueryResult;
-import com.caucho.server.admin.StringQueryResult;
+import com.caucho.server.admin.AddUserQueryReply;
+import com.caucho.server.admin.ControllerStateActionQueryReply;
+import com.caucho.server.admin.JmxCallQueryReply;
+import com.caucho.server.admin.JmxSetQueryReply;
+import com.caucho.server.admin.JsonQueryReply;
+import com.caucho.server.admin.ListJmxQueryReply;
+import com.caucho.server.admin.ListUsersQueryReply;
+import com.caucho.server.admin.PdfReportQueryReply;
+import com.caucho.server.admin.RemoveUserQueryReply;
+import com.caucho.server.admin.StatServiceValuesQueryReply;
+import com.caucho.server.admin.StringQueryReply;
 import com.caucho.server.admin.TagResult;
 
 import java.io.IOException;
@@ -57,12 +61,9 @@ import java.util.Date;
 @Description("Management Facade for Resin")
 public interface ManagementMXBean extends ManagedObjectMXBean
 {
-  @Description("hello, world test interface")
-  @MXAction("hello")
-  public String hello();
-
   @Description("deploys configuration")
   @MXAction(value = "config-deploy", method = "POST")
+  @MXContentType
   public String configDeploy(@MXParam(name = "server") String serverId,
                              @MXParam(name = "stage") String stage,
                              @MXParam(name = "version") String version,
@@ -72,6 +73,7 @@ public interface ManagementMXBean extends ManagedObjectMXBean
 
   @Description("pulls a configuration file")
   @MXAction(value = "config-cat", method = "GET")
+  @MXContentType("text/xml")
   public InputStream configCat(@MXParam(name = "server") String serverId,
                           @MXParam(name = "name", required = true) String name,
                           @MXParam(name = "stage") String stage,
@@ -81,6 +83,7 @@ public interface ManagementMXBean extends ManagedObjectMXBean
 
   @Description("list the configuration files")
   @MXAction(value = "config-ls", method = "GET")
+  @MXContentType
   public String []configLs(@MXParam(name = "server") String serverId,
                          @MXParam(name = "name") String name,
                          @MXParam(name = "stage") String stage,
@@ -90,6 +93,7 @@ public interface ManagementMXBean extends ManagedObjectMXBean
 
   @Description("undeploy configuration")
   @MXAction(value = "config-undeploy", method = "POST")
+  @MXContentType
   public String configUndeploy(@MXParam(name = "server") String serverId,
                                @MXParam(name = "stage") String stage,
                                @MXParam(name = "version") String version,
@@ -98,12 +102,13 @@ public interface ManagementMXBean extends ManagedObjectMXBean
 
   @Description("Produces a complete dump of JMX objects and values")
   @MXAction("jmx-dump")
-  public StringQueryResult doJmxDump(@MXParam(name = "server") String value)
+  public JsonQueryReply doJmxDump(@MXParam(name = "server") String value)
     throws ReflectionException;
 
   @Description("lists the JMX MBeans in a Resin server (Resin Pro)")
   @MXAction("jmx-list")
-  public ListJmxQueryResult listJmx(
+  @MXContentType
+  public ListJmxQueryReply listJmx(
     @MXParam(name = "server") String serverId,
     @MXParam(name = "pattern") String pattern,
     @MXParam(name = "print-attributes")
@@ -120,7 +125,8 @@ public interface ManagementMXBean extends ManagedObjectMXBean
 
   @Description("sets the java.util.logging level for debugging (Resin Pro)")
   @MXAction(value = "log-level", method = "POST")
-  public StringQueryResult setLogLevel(
+  @MXContentType
+  public StringQueryReply setLogLevel(
     @MXParam(name = "server") String serverId,
     @MXParam(name = "loggers")
     String loggersValue,
@@ -133,7 +139,8 @@ public interface ManagementMXBean extends ManagedObjectMXBean
 
   @Description("creates a PDF report of a Resin server (Resin Pro)")
   @MXAction(value = "pdf-report", method = "GET")
-  public PdfReportQueryResult pdfReport(
+  @MXContentType
+  public PdfReportQueryReply pdfReport(
     @MXParam(name = "server") String serverId,
     @MXParam(name = "report") String report,
     @MXParam(name = "period")
@@ -155,7 +162,8 @@ public interface ManagementMXBean extends ManagedObjectMXBean
 
   @Description("outputs stats collected by a named meter")
   @MXAction(value = "stats", method = "GET")
-  public StatServiceValuesQueryResult getStats(
+  @MXContentType
+  public StatServiceValuesQueryReply getStats(
     @MXParam(name = "server") String serverId,
     @MXParam(name = "meters", required = true) String metersStr,
     @MXParam(name = "period", defaultValue = "7D")
@@ -164,7 +172,8 @@ public interface ManagementMXBean extends ManagedObjectMXBean
 
   @Description("sets JMX Mbean's attribute")
   @MXAction(value = "jmx-set", method = "POST")
-  public StringQueryResult setJmx(@MXParam(name = "server") String serverId,
+  @MXContentType
+  public JmxSetQueryReply setJmx(@MXParam(name = "server") String serverId,
                                   @MXParam(name = "pattern") String pattern,
                                   @MXParam(name = "attribute")
                                   String attribute,
@@ -173,13 +182,15 @@ public interface ManagementMXBean extends ManagedObjectMXBean
 
   @Description("displays a JVM thread dump summary")
   @MXAction("thread-dump")
-  public StringQueryResult doThreadDump(
+  @MXContentType
+  public JsonQueryReply doThreadDump(
     @MXParam(name = "server") String serverId)
     throws ReflectionException;
 
   @Description("adds a Resin-Professional license to an installation")
   @MXAction(value = "license-add", method = "POST")
-  public StringQueryResult addLicense(
+  @MXContentType
+  public StringQueryReply addLicense(
     @MXParam(name = "server") String serverId,
     @MXParam(name = "overwrite") boolean isOverwrite,
     @MXParam(name = "to", required = true) String to,
@@ -189,6 +200,7 @@ public interface ManagementMXBean extends ManagedObjectMXBean
 
   @Description("lists the most recent Resin server restart times")
   @MXAction(value = "list-restarts", method = "GET")
+  @MXContentType
   public Date[]listRestarts(
     @MXParam(name = "server") String serverId,
     @MXParam(name = "period", defaultValue = "7D") String periodStr)
@@ -196,7 +208,8 @@ public interface ManagementMXBean extends ManagedObjectMXBean
 
   @Description("calls a method on a JMX MBean")
   @MXAction(value = "jmx-call", method = "POST")
-  public StringQueryResult callJmx(
+  @MXContentType
+  public JmxCallQueryReply callJmx(
     @MXParam(name = "server") String serverId,
     @MXParam(name = "pattern") String pattern,
     @MXParam(name = "operation") String operation,
@@ -207,7 +220,8 @@ public interface ManagementMXBean extends ManagedObjectMXBean
 
   @Description("starts a deployed application")
   @MXAction(value = "web-app-start", method = "POST")
-  public ControllerStateActionQueryResult startWebApp(
+  @MXContentType
+  public ControllerStateActionQueryReply startWebApp(
     @MXParam(name = "server") String serverId,
     @MXParam(name = "tag") String tag,
     @MXParam(name = "name") String name,
@@ -222,7 +236,8 @@ public interface ManagementMXBean extends ManagedObjectMXBean
 
   @Description("stops a deployed application")
   @MXAction(value = "web-app-stop", method = "POST")
-  public ControllerStateActionQueryResult stopWebApp(
+  @MXContentType
+  public ControllerStateActionQueryReply stopWebApp(
     @MXParam(name = "server") String serverId,
     @MXParam(name = "tag") String tag,
     @MXParam(name = "name") String name,
@@ -237,7 +252,8 @@ public interface ManagementMXBean extends ManagedObjectMXBean
 
   @Description("restarts a deployed application")
   @MXAction(value = "web-app-restart", method = "POST")
-  public ControllerStateActionQueryResult restartWebApp(
+  @MXContentType
+  public ControllerStateActionQueryReply restartWebApp(
     @MXParam(name = "server") String serverId,
     @MXParam(name = "tag") String tag,
     @MXParam(name = "name") String name,
@@ -250,6 +266,7 @@ public interface ManagementMXBean extends ManagedObjectMXBean
 
   @Description("deploys an application")
   @MXAction(value = "web-app-deploy", method = "POST")
+  @MXContentType
   public String webappDeploy(@MXParam(name = "server") String serverId,
                              @MXParam(name = "context") String context,
                              @MXParam(name = "host", defaultValue = "default")
@@ -262,6 +279,7 @@ public interface ManagementMXBean extends ManagedObjectMXBean
 
   @Description("copies a deployment to a new tag name")
   @MXAction(value = "deploy-copy", method = "POST")
+  @MXContentType
   public String deployCopy(@MXParam(name = "server") String serverId,
                            @MXParam(name = "source-context")
                            String sourceContext,
@@ -282,6 +300,7 @@ public interface ManagementMXBean extends ManagedObjectMXBean
 
   @Description("lists deployed applications")
   @MXAction("deploy-list")
+  @MXContentType
   public TagResult[] deployList(@MXParam(name = "server") String serverId,
                                 @MXParam(name = "pattern", defaultValue = ".*")
                                 String pattern)
@@ -289,6 +308,7 @@ public interface ManagementMXBean extends ManagedObjectMXBean
 
   @Description("undeploys an application")
   @MXAction(value = "web-app-undeploy", method = "POST")
+  @MXContentType
   public String undeploy(@MXParam(name = "server") String serverId,
                          @MXParam(name = "context") String context,
                          @MXParam(name = "host", defaultValue = "default")
@@ -300,7 +320,8 @@ public interface ManagementMXBean extends ManagedObjectMXBean
 
   @Description("adds an administration user and password")
   @MXAction(value = "user-add", method = "POST")
-  public AddUserQueryResult addUser(@MXParam(name = "server") String serverId,
+  @MXContentType
+  public AddUserQueryReply addUser(@MXParam(name = "server") String serverId,
                                     @MXParam(name = "user", required = true)
                                     String user,
                                     @MXParam(name = "password") String password,
@@ -309,24 +330,22 @@ public interface ManagementMXBean extends ManagedObjectMXBean
 
   @Description("lists the administration user")
   @MXAction(value = "user-list", method = "GET")
-  public ListUsersQueryResult listUsers(
+  @MXContentType
+  public ListUsersQueryReply listUsers(
     @MXParam(name = "server") String serverId)
     throws ReflectionException;
 
   @Description("removes an administration user")
   @MXAction(value = "user-remove", method = "POST")
-  public RemoveUserQueryResult removeUser(
+  @MXContentType
+  public RemoveUserQueryReply removeUser(
     @MXParam(name = "server") String serverId,
     @MXParam(name = "user") String user)
     throws ReflectionException;
 
   @Description("Prints status of a server")
   @MXAction("status")
-  public StringQueryResult getStatus(@MXParam(name = "server") String value)
+  @MXContentType
+  public StringQueryReply getStatus(@MXParam(name = "server") String value)
     throws ReflectionException;
-
-  // XXX: temporary example until we have a real one
-  public InputStream test(@MXParam(name = "test-param") String value,
-                          InputStream is)
-    throws IOException;
 }

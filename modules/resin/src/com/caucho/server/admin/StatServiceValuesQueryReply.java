@@ -25,25 +25,34 @@
  *
  * @author Alex Rojkov
  */
-
 package com.caucho.server.admin;
 
+import com.caucho.management.server.StatServiceValue;
+
 @SuppressWarnings("serial")
-public class AddUserQueryResult extends UserQueryResult
+public class StatServiceValuesQueryReply extends ManagementQueryReply
 {
-  private User _user;
+  private String []_names;
+  private StatServiceValue [][] _data;
 
-  public AddUserQueryResult()
+  public StatServiceValuesQueryReply()
   {
   }
 
-  public AddUserQueryResult(User user)
+  public StatServiceValuesQueryReply(String[] names,
+                                     StatServiceValue[][] data)
   {
-    _user = user;
+    _names = names;
+    _data = data;
   }
 
-  public User getUser()
+  public String []getNames()
   {
-    return _user;
+    return _names;
+  }
+
+  public StatServiceValue [][] getData()
+  {
+    return _data;
   }
 }

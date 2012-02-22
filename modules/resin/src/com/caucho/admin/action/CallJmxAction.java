@@ -34,6 +34,7 @@ import java.util.logging.*;
 import javax.management.*;
 
 import com.caucho.config.ConfigException;
+import com.caucho.server.admin.JmxCallQueryReply;
 import com.caucho.util.L10N;
 
 public class CallJmxAction extends AbstractJmxAction implements AdminAction
@@ -43,11 +44,11 @@ public class CallJmxAction extends AbstractJmxAction implements AdminAction
 
   private static final L10N L = new L10N(CallJmxAction.class);
 
-  public String execute(String pattern, 
-                        String operationName, 
-                        int operationIndex, 
-                        String []params)
-    throws ConfigException, JMException, ClassNotFoundException
+  public JmxCallQueryReply execute(String pattern,
+                                   String operationName,
+                                   int operationIndex,
+                                   String []params)
+  throws ConfigException, JMException, ClassNotFoundException
   {
     final List<MBeanServer> servers = new LinkedList<MBeanServer>();
 
@@ -141,11 +142,12 @@ public class CallJmxAction extends AbstractJmxAction implements AdminAction
                                             operationName,
                                             paramValues,
                                             signature);
+      
+      JmxCallQueryReply reply 
+        = new JmxCallQueryReply(subjectBean.getCanonicalName(), getSignature(operationInfo), String.valueOf(obj));
 
-      return L.l("method `{0}' called on `{1}' returned `{2}'.",
-                 getSignature(operationInfo),
-                 subjectBean.getCanonicalName(),
-                 obj);
+      return reply;
+
     }
   }
 }

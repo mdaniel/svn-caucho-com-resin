@@ -31,23 +31,25 @@ package com.caucho.admin.servlet;
 import com.caucho.config.ConfigException;
 import com.caucho.jmx.Jmx;
 import com.caucho.jmx.MXAction;
+import com.caucho.jmx.MXContentType;
 import com.caucho.jmx.MXParam;
 import com.caucho.json.JsonOutput;
-import com.caucho.lifecycle.LifecycleState;
 import com.caucho.management.server.ManagementMXBean;
 import com.caucho.management.server.StatServiceValue;
-import com.caucho.server.admin.AddUserQueryResult;
-import com.caucho.server.admin.ControllerStateActionQueryResult;
-import com.caucho.server.admin.ListJmxQueryResult;
-import com.caucho.server.admin.ListUsersQueryResult;
-import com.caucho.server.admin.PdfReportQueryResult;
-import com.caucho.server.admin.RemoveUserQueryResult;
-import com.caucho.server.admin.StatServiceValuesQueryResult;
-import com.caucho.server.admin.StringQueryResult;
+import com.caucho.server.admin.AddUserQueryReply;
+import com.caucho.server.admin.ControllerStateActionQueryReply;
+import com.caucho.server.admin.JmxCallQueryReply;
+import com.caucho.server.admin.JmxSetQueryReply;
+import com.caucho.server.admin.JsonQueryReply;
+import com.caucho.server.admin.ListJmxQueryReply;
+import com.caucho.server.admin.ListUsersQueryReply;
+import com.caucho.server.admin.PdfReportQueryReply;
+import com.caucho.server.admin.RemoveUserQueryReply;
+import com.caucho.server.admin.StatServiceValuesQueryReply;
+import com.caucho.server.admin.StringQueryReply;
 import com.caucho.server.admin.TagResult;
-import com.caucho.server.admin.UserQueryResult;
+import com.caucho.server.admin.UserQueryReply;
 import com.caucho.util.L10N;
-import com.caucho.util.QDate;
 import com.caucho.vfs.Vfs;
 import com.caucho.vfs.WriteStream;
 
@@ -60,16 +62,11 @@ import java.io.InputStream;
 import java.io.OutputStream;
 import java.io.PrintWriter;
 import java.io.Serializable;
-import java.io.Writer;
 import java.lang.annotation.Annotation;
 import java.lang.reflect.Method;
 import java.security.Principal;
-import java.text.DateFormat;
-import java.text.SimpleDateFormat;
-import java.util.Calendar;
 import java.util.Date;
 import java.util.HashMap;
-import java.util.Locale;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -212,11 +209,18 @@ public class AdminRestServlet extends HttpServlet
 
     private boolean _isPutStream;
     private boolean _isGetStream;
+    
+    private String _contentType;
 
     Action(Method method, String httpMethod)
     {
       _method = method;
       _httpMethod = httpMethod;
+      
+      MXContentType contentType = method.getAnnotation(MXContentType.class);
+      
+      if (contentType != null)
+        _contentType = contentType.value();
 
       Class<?> []parameterTypes = method.getParameterTypes();
 
@@ -326,7 +330,10 @@ public class AdminRestServlet extends HttpServlet
       }
 
       try {
-        Serializable value = (Serializable) _method.invoke(management, params);
+        Object value = _method.invoke(management, params);
+
+        if (_contentType != null)
+          res.setContentType(_contentType);
 
         _returnMarshal.unmarshal(res, value);
       } catch (Exception e) {
@@ -495,13 +502,13 @@ public class AdminRestServlet extends HttpServlet
     }
   }
 
-  static class StringQueryResultMarshal
-    extends Marshal<StringQueryResult>
+  static class StringQueryReplyMarshal
+    extends Marshal<StringQueryReply>
   {
     @Override
     public Object marshal(HttpServletRequest request,
                           String name,
-                          StringQueryResult defaultValue)
+                          StringQueryReply defaultValue)
       throws IOException
     {
       throw new AbstractMethodError();
@@ -509,7 +516,7 @@ public class AdminRestServlet extends HttpServlet
 
     @Override
     public void unmarshal(HttpServletResponse response,
-                          StringQueryResult value)
+                          StringQueryReply value)
       throws IOException
     {
       JsonOutput out = new JsonOutput(response.getWriter());
@@ -520,13 +527,13 @@ public class AdminRestServlet extends HttpServlet
     }
   }
 
-  static class ControllerStateActionQueryResultMarshal
-    extends Marshal<ControllerStateActionQueryResult>
+  static class JsonQueryReplyMarshal
+    extends Marshal<JsonQueryReply>
   {
     @Override
     public Object marshal(HttpServletRequest request,
                           String name,
-                          ControllerStateActionQueryResult defaultValue)
+                          JsonQueryReply defaultValue)
       throws IOException
     {
       throw new AbstractMethodError();
@@ -534,7 +541,30 @@ public class AdminRestServlet extends HttpServlet
 
     @Override
     public void unmarshal(HttpServletResponse response,
-                          ControllerStateActionQueryResult value)
+                          JsonQueryReply value)
+      throws IOException
+    {
+      PrintWriter out = response.getWriter();
+
+      out.write(value.getValue());
+    }
+  }
+  
+  static class ControllerStateActionQueryReplyMarshal
+    extends Marshal<ControllerStateActionQueryReply>
+  {
+    @Override
+    public Object marshal(HttpServletRequest request,
+                          String name,
+                          ControllerStateActionQueryReply defaultValue)
+      throws IOException
+    {
+      throw new AbstractMethodError();
+    }
+
+    @Override
+    public void unmarshal(HttpServletResponse response,
+                          ControllerStateActionQueryReply value)
       throws IOException
     {
       JsonOutput out = new JsonOutput(response.getWriter());
@@ -545,13 +575,13 @@ public class AdminRestServlet extends HttpServlet
     }
   }
 
-  static class AddUserQueryResultMarshal
-    extends Marshal<AddUserQueryResult>
+  static class AddUserQueryReplyMarshal
+    extends Marshal<AddUserQueryReply>
   {
     @Override
     public Object marshal(HttpServletRequest request,
                           String name,
-                          AddUserQueryResult defaultValue)
+                          AddUserQueryReply defaultValue)
       throws IOException
     {
       throw new AbstractMethodError();
@@ -559,7 +589,7 @@ public class AdminRestServlet extends HttpServlet
 
     @Override
     public void unmarshal(HttpServletResponse response,
-                          AddUserQueryResult value)
+                          AddUserQueryReply value)
       throws IOException
     {
       JsonOutput out = new JsonOutput(response.getWriter());
@@ -570,13 +600,13 @@ public class AdminRestServlet extends HttpServlet
     }
   }
 
-  static class RemoveUserQueryResultMarshal
-    extends Marshal<RemoveUserQueryResult>
+  static class RemoveUserQueryReplyMarshal
+    extends Marshal<RemoveUserQueryReply>
   {
     @Override
     public Object marshal(HttpServletRequest request,
                           String name,
-                          RemoveUserQueryResult defaultValue)
+                          RemoveUserQueryReply defaultValue)
       throws IOException
     {
       throw new AbstractMethodError();
@@ -584,7 +614,7 @@ public class AdminRestServlet extends HttpServlet
 
     @Override
     public void unmarshal(HttpServletResponse response,
-                          RemoveUserQueryResult value)
+                          RemoveUserQueryReply value)
       throws IOException
     {
       JsonOutput out = new JsonOutput(response.getWriter());
@@ -596,12 +626,12 @@ public class AdminRestServlet extends HttpServlet
   }
 
   static class ListUsersQueryResultMarshal
-    extends Marshal<ListUsersQueryResult>
+    extends Marshal<ListUsersQueryReply>
   {
     @Override
     public Object marshal(HttpServletRequest request,
                           String name,
-                          ListUsersQueryResult defaultValue)
+                          ListUsersQueryReply defaultValue)
       throws IOException
     {
       throw new AbstractMethodError();
@@ -609,10 +639,10 @@ public class AdminRestServlet extends HttpServlet
 
     @Override
     public void unmarshal(HttpServletResponse response,
-                          ListUsersQueryResult value)
+                          ListUsersQueryReply value)
       throws IOException
     {
-      UserQueryResult.User []users = value.getUsers();
+      UserQueryReply.User []users = value.getUsers();
 
       JsonOutput out = new JsonOutput(response.getWriter());
 
@@ -622,13 +652,13 @@ public class AdminRestServlet extends HttpServlet
     }
   }
 
-  static class PdfReportQueryResultMarshal
-    extends Marshal<PdfReportQueryResult>
+  static class PdfReportQueryReplyMarshal
+    extends Marshal<PdfReportQueryReply>
   {
     @Override
     public Object marshal(HttpServletRequest request,
                           String name,
-                          PdfReportQueryResult defaultValue)
+                          PdfReportQueryReply defaultValue)
       throws IOException
     {
       throw new AbstractMethodError();
@@ -636,7 +666,7 @@ public class AdminRestServlet extends HttpServlet
 
     @Override
     public void unmarshal(HttpServletResponse response,
-                          PdfReportQueryResult value)
+                          PdfReportQueryReply value)
       throws IOException
     {
       if (value.getPdf() != null) {
@@ -649,8 +679,6 @@ public class AdminRestServlet extends HttpServlet
         out.flush();
       }
       else {
-        response.setContentType("application/json");
-
         JsonOutput out = new JsonOutput(response.getWriter());
 
         out.writeObject(value.getFileName());
@@ -660,7 +688,7 @@ public class AdminRestServlet extends HttpServlet
     }
   }
 
-  static class TagResultMarshal extends Marshal<TagResult[]>
+  static class TagReplyMarshal extends Marshal<TagResult[]>
   {
     @Override
     public Object marshal(HttpServletRequest request,
@@ -704,12 +732,12 @@ public class AdminRestServlet extends HttpServlet
     }
   }
 
-  static class ListJmxQueryResultMarshal extends Marshal<ListJmxQueryResult>
+  static class ListJmxQueryReplyMarshal extends Marshal<ListJmxQueryReply>
   {
     @Override 
     public Object marshal(HttpServletRequest request,
                                     String name,
-                                    ListJmxQueryResult defaultValue)
+                                    ListJmxQueryReply defaultValue)
       throws IOException
     {
       throw new AbstractMethodError(getClass().getName());
@@ -717,7 +745,7 @@ public class AdminRestServlet extends HttpServlet
 
     @Override
     public void unmarshal(HttpServletResponse response,
-                          ListJmxQueryResult value)
+                          ListJmxQueryReply value)
       throws IOException
     {
       PrintWriter writer = response.getWriter();
@@ -732,13 +760,61 @@ public class AdminRestServlet extends HttpServlet
     }
   }
 
-  static class StatServiceValuesQueryResultMarshal
-    extends Marshal<StatServiceValuesQueryResult>
+  static class JmxSetQueryReplyMarshal extends Marshal<JmxSetQueryReply>
   {
     @Override
     public Object marshal(HttpServletRequest request,
                           String name,
-                          StatServiceValuesQueryResult defaultValue)
+                          JmxSetQueryReply defaultValue)
+      throws IOException
+    {
+      throw new AbstractMethodError(getClass().getName());
+    }
+
+    @Override
+    public void unmarshal(HttpServletResponse response,
+                          JmxSetQueryReply value)
+      throws IOException
+    {
+      JsonOutput out = new JsonOutput(response.getWriter());
+
+      out.writeObject(value, true);
+
+      out.flush();
+    }
+  }
+
+  static class JmxCallQueryReplyMarshal extends Marshal<JmxCallQueryReply>
+  {
+    @Override
+    public Object marshal(HttpServletRequest request,
+                          String name,
+                          JmxCallQueryReply defaultValue)
+      throws IOException
+    {
+      throw new AbstractMethodError(getClass().getName());
+    }
+
+    @Override
+    public void unmarshal(HttpServletResponse response,
+                          JmxCallQueryReply value)
+      throws IOException
+    {
+      JsonOutput out = new JsonOutput(response.getWriter());
+
+      out.writeObject(value, true);
+
+      out.flush();
+    }
+  }
+
+  static class StatServiceValuesQueryReplytMarshal
+    extends Marshal<StatServiceValuesQueryReply>
+  {
+    @Override
+    public Object marshal(HttpServletRequest request,
+                          String name,
+                          StatServiceValuesQueryReply defaultValue)
       throws IOException
     {
       return null;
@@ -746,11 +822,9 @@ public class AdminRestServlet extends HttpServlet
 
     @Override
     public void unmarshal(HttpServletResponse response,
-                          StatServiceValuesQueryResult stats)
+                          StatServiceValuesQueryReply stats)
       throws IOException
     {
-      response.setContentType("application/json");
-
       PrintWriter out = response.getWriter();
 
       String []names = stats.getNames();
@@ -796,30 +870,39 @@ public class AdminRestServlet extends HttpServlet
     _marshalMap.put(Long.class, new LongMarshal());
     _marshalMap.put(boolean.class, new BooleanMarshal());
     _marshalMap.put(InputStream.class, new InputStreamMarshal());
-    _marshalMap.put(StringQueryResult.class, new StringQueryResultMarshal());
-    _marshalMap.put(AddUserQueryResult.class, new AddUserQueryResultMarshal());
-    _marshalMap.put(TagResult[].class, new TagResultMarshal());
     _marshalMap.put(String[].class, new StringArrayMarshal());
     _marshalMap.put(InputStream.class, new InputStreamMarshal());
     _marshalMap.put(Date[].class,
                     new DateArrayMarshal());
-    _marshalMap.put(StatServiceValuesQueryResult.class,
-                    new StatServiceValuesQueryResultMarshal());
 
-    _marshalMap.put(RemoveUserQueryResult.class,
-                    new RemoveUserQueryResultMarshal());
+    _marshalMap.put(StringQueryReply.class, new StringQueryReplyMarshal());
+    _marshalMap.put(JsonQueryReply.class, new JsonQueryReplyMarshal());
+    _marshalMap.put(AddUserQueryReply.class, new AddUserQueryReplyMarshal());
+    _marshalMap.put(TagResult[].class, new TagReplyMarshal());
 
-    _marshalMap.put(ListUsersQueryResult.class,
+    _marshalMap.put(StatServiceValuesQueryReply.class,
+                    new StatServiceValuesQueryReplytMarshal());
+
+    _marshalMap.put(RemoveUserQueryReply.class,
+                    new RemoveUserQueryReplyMarshal());
+
+    _marshalMap.put(ListUsersQueryReply.class,
                     new ListUsersQueryResultMarshal());
 
-    _marshalMap.put(ListJmxQueryResult.class,
-                    new ListJmxQueryResultMarshal());
+    _marshalMap.put(ListJmxQueryReply.class,
+                    new ListJmxQueryReplyMarshal());
 
-    _marshalMap.put(ControllerStateActionQueryResult.class,
-                    new ControllerStateActionQueryResultMarshal());
+    _marshalMap.put(JmxSetQueryReply.class,
+                    new JmxSetQueryReplyMarshal());
 
-    _marshalMap.put(PdfReportQueryResult.class,
-                    new PdfReportQueryResultMarshal());
+    _marshalMap.put(JmxCallQueryReply.class,
+                    new JmxCallQueryReplyMarshal());
+
+    _marshalMap.put(ControllerStateActionQueryReply.class,
+                    new ControllerStateActionQueryReplyMarshal());
+
+    _marshalMap.put(PdfReportQueryReply.class,
+                    new PdfReportQueryReplyMarshal());
 
     introspectManagementOperations();
   }

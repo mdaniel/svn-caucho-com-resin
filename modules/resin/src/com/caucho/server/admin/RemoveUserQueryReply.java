@@ -25,34 +25,27 @@
  *
  * @author Alex Rojkov
  */
+
 package com.caucho.server.admin;
 
-import com.caucho.management.server.StatServiceValue;
-
 @SuppressWarnings("serial")
-public class StatServiceValuesQueryResult extends ManagementQueryResult
+public class RemoveUserQueryReply extends UserQueryReply
 {
-  private String []_names;
-  private StatServiceValue [][] _data;
+  private User _user;
 
-  public StatServiceValuesQueryResult()
+  public RemoveUserQueryReply()
   {
   }
 
-  public StatServiceValuesQueryResult(String []names,
-                                      StatServiceValue [][]data)
+  public RemoveUserQueryReply(User user)
   {
-    _names = names;
-    _data = data;
+    _user = user;
   }
 
-  public String []getNames()
-  {
-    return _names;
-  }
 
-  public StatServiceValue [][] getData()
+
+  public User getUser()
   {
-    return _data;
+    return _user;
   }
 }

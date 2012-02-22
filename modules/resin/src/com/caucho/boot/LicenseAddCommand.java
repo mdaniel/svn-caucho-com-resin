@@ -30,7 +30,7 @@ package com.caucho.boot;
 
 import com.caucho.config.ConfigException;
 import com.caucho.server.admin.ManagerClient;
-import com.caucho.server.admin.StringQueryResult;
+import com.caucho.server.admin.StringQueryReply;
 import com.caucho.util.CharBuffer;
 import com.caucho.util.L10N;
 import com.caucho.vfs.Path;
@@ -123,7 +123,7 @@ public class LicenseAddCommand extends AbstractManagementCommand
       throw new ConfigException(L.l("Failed to read {0}: empty", path));
     }
 
-    StringQueryResult result = managerClient.addLicense(licenseContent,
+    StringQueryReply result = managerClient.addLicense(licenseContent,
                                                         fileName,
                                                         overwrite,
                                                         restart);

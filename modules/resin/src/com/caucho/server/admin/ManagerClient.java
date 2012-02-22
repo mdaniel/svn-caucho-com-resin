@@ -33,7 +33,6 @@ import com.caucho.bam.RemoteListenerUnavailableException;
 import com.caucho.bam.ServiceUnavailableException;
 import com.caucho.bam.actor.ActorSender;
 import com.caucho.hmtp.HmtpClient;
-import com.caucho.management.server.StatServiceValue;
 import com.caucho.server.cluster.Server;
 import com.caucho.util.L10N;
 
@@ -156,60 +155,67 @@ public class ManagerClient
     return _bamClient;
   }
 
-  public AddUserQueryResult addUser(String user,
+  public AddUserQueryReply addUser(String user,
                                     char []password,
                                     String []roles)
   {
     AddUserQuery query = new AddUserQuery(user, password, roles);
 
-    return (AddUserQueryResult) query(query);
+    return (AddUserQueryReply) query(query);
   }
 
-  public RemoveUserQueryResult removeUser(String user)
+  public RemoveUserQueryReply removeUser(String user)
   {
     RemoveUserQuery query = new RemoveUserQuery(user);
 
-    return (RemoveUserQueryResult) query(query);
+    return (RemoveUserQueryReply) query(query);
   }
 
-  public ListUsersQueryResult listUsers()
+  public ListUsersQueryReply listUsers()
   {
     ListUsersQuery query = new ListUsersQuery();
 
-    return (ListUsersQueryResult) query(query);
+    return (ListUsersQueryReply) query(query);
   }
 
-  public StringQueryResult doThreadDump()
+  public StringQueryReply doThreadDump()
   {
     ThreadDumpQuery query = new ThreadDumpQuery();
 
-    return (StringQueryResult) query(query);
+    return (StringQueryReply) query(query);
   }
 
-  public StringQueryResult doHeapDump(boolean raw)
+  public JsonQueryReply doJsonThreadDump()
+  {
+    ThreadDumpQuery query = new ThreadDumpQuery(true);
+
+    return (JsonQueryReply) query(query);
+  }
+
+  public StringQueryReply doHeapDump(boolean raw)
   {
     HeapDumpQuery query = new HeapDumpQuery(raw);
 
-    return (StringQueryResult) query(query);
+    return (StringQueryReply) query(query);
   }
 
-  public StringQueryResult doJmxDump()
+  public JsonQueryReply doJmxDump()
   {
     JmxDumpQuery query = new JmxDumpQuery();
 
-    return (StringQueryResult) query(query);
+    return (JsonQueryReply) query(query);
   }
 
-  public StringQueryResult setLogLevel(String []loggers,
+  public StringQueryReply setLogLevel(String []loggers,
                                            Level logLevel,
                                            long period)
   {
     LogLevelQuery query = new LogLevelQuery(loggers, logLevel, period);
 
-    return (StringQueryResult) query(query);
+    return (StringQueryReply) query(query);
   }
 
-  public ListJmxQueryResult listJmx(String pattern,
+  public ListJmxQueryReply listJmx(String pattern,
                                     boolean isPrintAttributes,
                                     boolean isPrintValues,
                                     boolean isPrintOperations,
@@ -223,19 +229,19 @@ public class ManagerClient
                                           isAll,
                                           isPlatform);
 
-    return (ListJmxQueryResult) query(query);
+    return (ListJmxQueryReply) query(query);
   }
 
-  public StringQueryResult setJmx(String pattern,
+  public JmxSetQueryReply setJmx(String pattern,
                                       String attribute,
                                       String value)
   {
     JmxSetQuery query = new JmxSetQuery(pattern, attribute, value);
 
-    return (StringQueryResult) query(query);
+    return (JmxSetQueryReply) query(query);
   }
 
-  public StringQueryResult callJmx(String pattern,
+  public JmxCallQueryReply callJmx(String pattern,
                                    String operation,
                                    int opIndex,
                                    String []trailingArgs)
@@ -245,10 +251,10 @@ public class ManagerClient
                                           opIndex,
                                           trailingArgs);
 
-    return (StringQueryResult) query(query);
+    return (JmxCallQueryReply) query(query);
   }
 
-  public PdfReportQueryResult pdfReport(String path,
+  public PdfReportQueryReply pdfReport(String path,
                                         String report,
                                         long period,
                                         String logDirectory,
@@ -275,14 +281,14 @@ public class ManagerClient
     else
       timeout = 60000L;
 
-    return (PdfReportQueryResult) query(query, timeout);
+    return (PdfReportQueryReply) query(query, timeout);
   } 
 
-  public StringQueryResult profile(long activeTime, long period, int depth)
+  public StringQueryReply profile(long activeTime, long period, int depth)
   {
     ProfileQuery query = new ProfileQuery(activeTime, period, depth);
 
-    return (StringQueryResult) query(query);
+    return (StringQueryReply) query(query);
   }
 
   public Date []listRestarts(long period)
@@ -292,7 +298,7 @@ public class ManagerClient
     return (Date[]) query(query);
   }
 
-  public StringQueryResult addLicense(String licenseContent,
+  public StringQueryReply addLicense(String licenseContent,
                                       String fileName,
                                       boolean overwrite,
                                       boolean restart)
@@ -301,14 +307,14 @@ public class ManagerClient
                                                 fileName,
                                                 overwrite, 
                                                 restart);
-    return (StringQueryResult) query(query);
+    return (StringQueryReply) query(query);
   }
 
-  public StatServiceValuesQueryResult getStats(String []meters, Date from, Date to)
+  public StatServiceValuesQueryReply getStats(String []meters, Date from, Date to)
   {
     StatsQuery query = new StatsQuery(meters, from, to);
 
-    return (StatServiceValuesQueryResult) query(query);
+    return (StatServiceValuesQueryReply) query(query);
   }
 
   protected Serializable query(Serializable query)

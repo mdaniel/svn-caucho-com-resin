@@ -25,52 +25,45 @@
  *
  * @author Alex Rojkov
  */
-
 package com.caucho.server.admin;
 
 import com.caucho.json.Json;
-import com.caucho.lifecycle.LifecycleState;
 
-/**
- * This class is used with web-app-stop, web-app-start, web-app-restart,
- *
- */
 @SuppressWarnings("serial")
-public class ControllerStateActionQueryResult extends ManagementQueryResult
+public class JmxCallQueryReply extends ManagementQueryReply
 {
-  @Json(name = "state")
-  private LifecycleState _state;
+  @Json(name = "bean")
+  private String _bean;
+  @Json(name = "operation")
+  private String _operation;
+  @Json(name = "return-value")
+  private String _returnValue;
 
-  @Json(name = "tag")
-  private String _tag;
-
-  public ControllerStateActionQueryResult()
+  public JmxCallQueryReply()
   {
   }
 
-  public ControllerStateActionQueryResult(String tag, LifecycleState state)
+  public JmxCallQueryReply(String bean,
+                           String operation,
+                           String returnValue)
   {
-    _tag = tag;
-    _state = state;
+    _bean = bean;
+    _operation = operation;
+    _returnValue = returnValue;
   }
 
-  public LifecycleState getState()
+  public String getBean()
   {
-    return _state;
+    return _bean;
   }
 
-  public void setState(LifecycleState state)
+  public String getOperation()
   {
-    _state = state;
+    return _operation;
   }
 
-  public String getTag()
+  public String getReturnValue()
   {
-    return _tag;
-  }
-
-  public void setTag(String tag)
-  {
-    _tag = tag;
+    return _returnValue;
   }
 }

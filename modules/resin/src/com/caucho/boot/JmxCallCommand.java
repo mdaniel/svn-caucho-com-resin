@@ -30,8 +30,9 @@
 package com.caucho.boot;
 
 import com.caucho.config.ConfigException;
+import com.caucho.server.admin.JmxCallQueryReply;
 import com.caucho.server.admin.ManagerClient;
-import com.caucho.server.admin.StringQueryResult;
+import com.caucho.server.admin.StringQueryReply;
 import com.caucho.util.L10N;
 
 import javax.management.MalformedObjectNameException;
@@ -100,12 +101,17 @@ public class JmxCallCommand extends JmxCommand
       operationIndex  = Integer.parseInt(index);
     }
 
-    StringQueryResult result = managerClient.callJmx(pattern,
-                                                     operation,
-                                                     operationIndex,
-                                                     trailingArgs);
+    JmxCallQueryReply reply = managerClient.callJmx(pattern,
+                                                    operation,
+                                                    operationIndex,
+                                                    trailingArgs);
 
-    System.out.println(result.getValue());
+    String message = L.l("method `{0}' called on `{1}' returned `{2}'.",
+                         reply.getOperation(),
+                         reply.getBean(),
+                         reply.getReturnValue());
+
+    System.out.println(message);
 
     return 0;
   }

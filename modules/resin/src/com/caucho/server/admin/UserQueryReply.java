@@ -25,43 +25,38 @@
  *
  * @author Alex Rojkov
  */
+
 package com.caucho.server.admin;
 
-import com.caucho.quercus.lib.file.Stream;
-import com.caucho.vfs.StreamSource;
-import com.caucho.vfs.TempOutputStream;
+import com.caucho.json.Json;
+
+import java.io.Serializable;
 
 @SuppressWarnings("serial")
-public class PdfReportQueryResult extends ManagementQueryResult
+public abstract class UserQueryReply extends ManagementQueryReply
 {
-  private String _message;
-  private String _fileName;
-  private StreamSource _pdf;
-
-
-  public PdfReportQueryResult()
+  public static class User implements Serializable
   {
-  }
+    @Json(name = "name")
+    String _name;
 
-  public PdfReportQueryResult(String message, String fileName, StreamSource pdf)
-  {
-    _message = message;
-    _fileName = fileName;
-    _pdf = pdf;
-  }
+    @Json(name = "roles")
+    String []_roles;
 
-  public String getMessage()
-  {
-    return _message;
-  }
+    public User(String name, String []roles)
+    {
+      _name = name;
+      _roles = roles;
+    }
 
-  public String getFileName()
-  {
-    return _fileName;
-  }
+    public String getName()
+    {
+      return _name;
+    }
 
-  public StreamSource getPdf()
-  {
-    return _pdf;
+    public String []getRoles()
+    {
+      return _roles;
+    }
   }
 }

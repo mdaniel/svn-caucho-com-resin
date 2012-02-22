@@ -31,7 +31,7 @@ package com.caucho.boot;
 
 import com.caucho.config.types.Period;
 import com.caucho.server.admin.ManagerClient;
-import com.caucho.server.admin.PdfReportQueryResult;
+import com.caucho.server.admin.PdfReportQueryReply;
 import com.caucho.util.IoUtil;
 import com.caucho.util.L10N;
 import com.caucho.vfs.StreamSource;
@@ -102,7 +102,7 @@ public class PdfReportCommand extends AbstractManagementCommand
     String localDir = args.getArg("-local-dir");
     boolean isReturnPdf = isLocal || localDir != null;
 
-    PdfReportQueryResult result = managerClient.pdfReport(path,
+    PdfReportQueryReply result = managerClient.pdfReport(path,
                                                            report,
                                                            period,
                                                            logDirectory,

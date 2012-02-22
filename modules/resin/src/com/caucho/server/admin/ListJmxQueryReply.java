@@ -34,7 +34,7 @@ import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;
 
-public class ListJmxQueryResult extends ManagementQueryResult
+public class ListJmxQueryReply extends ManagementQueryReply
 {
   private List<Bean> _beans = new ArrayList<Bean>();
 

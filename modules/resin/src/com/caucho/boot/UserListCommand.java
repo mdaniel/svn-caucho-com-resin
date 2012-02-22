@@ -29,9 +29,9 @@
 
 package com.caucho.boot;
 
-import com.caucho.server.admin.ListUsersQueryResult;
+import com.caucho.server.admin.ListUsersQueryReply;
 import com.caucho.server.admin.ManagerClient;
-import com.caucho.server.admin.UserQueryResult;
+import com.caucho.server.admin.UserQueryReply;
 import com.caucho.util.L10N;
 
 public class UserListCommand extends AbstractManagementCommand
@@ -49,7 +49,7 @@ public class UserListCommand extends AbstractManagementCommand
                        WatchdogClient client,
                        ManagerClient managerClient)
   {
-    ListUsersQueryResult result = managerClient.listUsers();
+    ListUsersQueryReply result = managerClient.listUsers();
 
     if (result.getUsers().length == 0) {
       System.out.println("no users found");
@@ -57,7 +57,7 @@ public class UserListCommand extends AbstractManagementCommand
       return 0;
     }
 
-    for (UserQueryResult.User user : result.getUsers()) {
+    for (UserQueryReply.User user : result.getUsers()) {
       System.out.print(user.getName());
 
       String []roles = user.getRoles();

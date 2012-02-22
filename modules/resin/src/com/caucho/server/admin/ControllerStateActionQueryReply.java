@@ -25,24 +25,52 @@
  *
  * @author Alex Rojkov
  */
+
 package com.caucho.server.admin;
 
+import com.caucho.json.Json;
+import com.caucho.lifecycle.LifecycleState;
+
+/**
+ * This class is used with web-app-stop, web-app-start, web-app-restart,
+ *
+ */
 @SuppressWarnings("serial")
-public class StringQueryResult extends ManagementQueryResult
+public class ControllerStateActionQueryReply extends ManagementQueryReply
 {
-  private String _value;
+  @Json(name = "state")
+  private LifecycleState _state;
 
-  public StringQueryResult()
+  @Json(name = "tag")
+  private String _tag;
+
+  public ControllerStateActionQueryReply()
   {
   }
 
-  public StringQueryResult(String value)
+  public ControllerStateActionQueryReply(String tag, LifecycleState state)
   {
-    _value = value;
+    _tag = tag;
+    _state = state;
   }
 
-  public String getValue()
+  public LifecycleState getState()
   {
-    return _value;
+    return _state;
+  }
+
+  public void setState(LifecycleState state)
+  {
+    _state = state;
+  }
+
+  public String getTag()
+  {
+    return _tag;
+  }
+
+  public void setTag(String tag)
+  {
+    _tag = tag;
   }
 }

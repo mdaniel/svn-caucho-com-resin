@@ -30,7 +30,7 @@
 package com.caucho.boot;
 
 import com.caucho.server.admin.ManagerClient;
-import com.caucho.server.admin.StringQueryResult;
+import com.caucho.server.admin.StringQueryReply;
 import com.caucho.util.L10N;
 
 public class ProfileCommand extends AbstractManagementCommand
@@ -71,7 +71,7 @@ public class ProfileCommand extends AbstractManagementCommand
     if (depthArg != null)
       depth = Integer.parseInt(depthArg);
 
-    StringQueryResult result = managerClient.profile(activeTime,
+    StringQueryReply result = managerClient.profile(activeTime,
                                                      period,
                                                      depth);
 

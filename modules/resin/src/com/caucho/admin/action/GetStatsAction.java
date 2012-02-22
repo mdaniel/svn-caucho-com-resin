@@ -29,7 +29,7 @@
 package com.caucho.admin.action;
 
 import com.caucho.management.server.StatServiceValue;
-import com.caucho.server.admin.StatServiceValuesQueryResult;
+import com.caucho.server.admin.StatServiceValuesQueryReply;
 import com.caucho.server.admin.StatSystem;
 import com.caucho.server.cluster.Server;
 import com.caucho.util.L10N;
@@ -47,7 +47,7 @@ public class GetStatsAction implements AdminAction
 
   private static final L10N L = new L10N(GetStatsAction.class);
 
-  public StatServiceValuesQueryResult execute(String []meters,
+  public StatServiceValuesQueryReply execute(String []meters,
                                               Date from,
                                               Date to)
   {
@@ -98,6 +98,6 @@ public class GetStatsAction implements AdminAction
     StatServiceValue [][]data = new StatServiceValue[statValues.size()][];
     statValues.toArray(data);
 
-    return new StatServiceValuesQueryResult(names, data);
+    return new StatServiceValuesQueryReply(names, data);
   }
 }

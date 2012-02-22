@@ -31,7 +31,7 @@ package com.caucho.boot;
 
 import com.caucho.config.types.Period;
 import com.caucho.server.admin.ManagerClient;
-import com.caucho.server.admin.StringQueryResult;
+import com.caucho.server.admin.StringQueryReply;
 import com.caucho.util.L10N;
 
 import java.util.LinkedHashMap;
@@ -114,7 +114,7 @@ public class LogLevelCommand extends AbstractManagementCommand
       loggers[1] = "com.caucho";
     }
 
-    StringQueryResult result = managerClient.setLogLevel(loggers,
+    StringQueryReply result = managerClient.setLogLevel(loggers,
                                                          logLevel,
                                                          period);
 

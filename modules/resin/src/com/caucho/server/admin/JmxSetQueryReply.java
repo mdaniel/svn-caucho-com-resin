@@ -7,9 +7,8 @@
  * notice unmodified.
  *
  * Resin Open Source is free software; you can redistribute it and/or modify
- * it under the terms of the GNU General Public License as published by
- * the Free Software Foundation; either version 2 of the License, or
- * (at your option) any later version.
+ * it under the terms of the GNU General Public License version 2
+ * as published by the Free Software Foundation.
  *
  * Resin Open Source is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
@@ -26,32 +25,54 @@
  *
  * @author Alex Rojkov
  */
-
 package com.caucho.server.admin;
 
+import com.caucho.json.Json;
+
 @SuppressWarnings("serial")
-public class ThreadDumpQuery implements java.io.Serializable
+public class JmxSetQueryReply extends ManagementQueryReply
 {
+  @Json(name = "bean")
+  private String _bean;
+  @Json(name = "attribute")
+  private String _attribute;
+  @Json(name = "old-value")
+  private String _oldValue;
+  @Json(name = "new-value")
+  private String _newValue;
 
-  private boolean _isJson;
-  @SuppressWarnings("unused")
-  public ThreadDumpQuery()
+  public JmxSetQueryReply()
   {
   }
 
-  public ThreadDumpQuery(boolean json)
+  public JmxSetQueryReply(String bean,
+                          String attribute,
+                          String oldValue,
+                          String newValue)
   {
-    _isJson = json;
+    _bean = bean;
+    _attribute = attribute;
+    _oldValue = oldValue;
+    _newValue = newValue;
   }
 
-  public boolean isJson()
+  public String getBean()
   {
-    return _isJson;
+    return _bean;
   }
 
-  @Override
-  public String toString()
+  public String getAttribute()
   {
-    return getClass().getSimpleName() + "[]";
+    return _attribute;
+  }
+
+  public String getOldValue()
+  {
+    return _oldValue;
+  }
+
+  public String getNewValue()
+  {
+    return _newValue;
   }
 }

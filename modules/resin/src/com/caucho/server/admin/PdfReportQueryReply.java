@@ -7,9 +7,8 @@
  * notice unmodified.
  *
  * Resin Open Source is free software; you can redistribute it and/or modify
- * it under the terms of the GNU General Public License as published by
- * the Free Software Foundation; either version 2 of the License, or
- * (at your option) any later version.
+ * it under the terms of the GNU General Public License version 2
+ * as published by the Free Software Foundation.
  *
  * Resin Open Source is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
@@ -26,32 +25,41 @@
  *
  * @author Alex Rojkov
  */
-
 package com.caucho.server.admin;
 
+import com.caucho.vfs.StreamSource;
+
 @SuppressWarnings("serial")
-public class ThreadDumpQuery implements java.io.Serializable
+public class PdfReportQueryReply extends ManagementQueryReply
 {
+  private String _message;
+  private String _fileName;
+  private StreamSource _pdf;
 
-  private boolean _isJson;
-  @SuppressWarnings("unused")
-  public ThreadDumpQuery()
+
+  public PdfReportQueryReply()
   {
   }
 
-  public ThreadDumpQuery(boolean json)
+  public PdfReportQueryReply(String message, String fileName, StreamSource pdf)
   {
-    _isJson = json;
+    _message = message;
+    _fileName = fileName;
+    _pdf = pdf;
   }
 
-  public boolean isJson()
+  public String getMessage()
   {
-    return _isJson;
+    return _message;
   }
 
-  @Override
-  public String toString()
+  public String getFileName()
   {
-    return getClass().getSimpleName() + "[]";
+    return _fileName;
+  }
+
+  public StreamSource getPdf()
+  {
+    return _pdf;
   }
 }

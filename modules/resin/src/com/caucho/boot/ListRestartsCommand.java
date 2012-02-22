@@ -31,8 +31,6 @@ package com.caucho.boot;
 
 import com.caucho.config.types.Period;
 import com.caucho.server.admin.ManagerClient;
-import com.caucho.server.admin.StringQueryResult;
-import com.caucho.util.Alarm;
 import com.caucho.util.CurrentTime;
 import com.caucho.util.L10N;
 

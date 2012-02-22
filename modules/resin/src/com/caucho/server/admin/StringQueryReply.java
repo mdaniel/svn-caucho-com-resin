@@ -7,9 +7,8 @@
  * notice unmodified.
  *
  * Resin Open Source is free software; you can redistribute it and/or modify
- * it under the terms of the GNU General Public License as published by
- * the Free Software Foundation; either version 2 of the License, or
- * (at your option) any later version.
+ * it under the terms of the GNU General Public License version 2
+ * as published by the Free Software Foundation.
  *
  * Resin Open Source is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
@@ -26,32 +25,24 @@
  *
  * @author Alex Rojkov
  */
-
 package com.caucho.server.admin;
 
 @SuppressWarnings("serial")
-public class ThreadDumpQuery implements java.io.Serializable
+public class StringQueryReply extends ManagementQueryReply
 {
+  private String _value;
 
-  private boolean _isJson;
-  @SuppressWarnings("unused")
-  public ThreadDumpQuery()
+  public StringQueryReply()
   {
   }
 
-  public ThreadDumpQuery(boolean json)
+  public StringQueryReply(String value)
   {
-    _isJson = json;
+    _value = value;
   }
 
-  public boolean isJson()
+  public String getValue()
   {
-    return _isJson;
-  }
-
-  @Override
-  public String toString()
-  {
-    return getClass().getSimpleName() + "[]";
+    return _value;
   }
 }

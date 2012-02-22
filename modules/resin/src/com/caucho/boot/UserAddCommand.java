@@ -29,7 +29,7 @@
 
 package com.caucho.boot;
 
-import com.caucho.server.admin.AddUserQueryResult;
+import com.caucho.server.admin.AddUserQueryReply;
 import com.caucho.server.admin.ManagerClient;
 import com.caucho.util.L10N;
 
@@ -90,7 +90,7 @@ public class UserAddCommand extends AbstractManagementCommand
 
     String []roles = args.getDefaultArgs();
 
-    AddUserQueryResult result = managerClient.addUser(user, password, roles);
+    AddUserQueryReply result = managerClient.addUser(user, password, roles);
 
     System.out.println(L.l("user `{0}' added",
                            result.getUser().getName()));
