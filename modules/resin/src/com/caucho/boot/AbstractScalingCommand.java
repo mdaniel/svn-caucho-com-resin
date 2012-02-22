@@ -39,14 +39,14 @@ import java.lang.reflect.Constructor;
 public abstract class AbstractScalingCommand extends AbstractBootCommand
 {
   private static final L10N L = new L10N(AbstractScalingCommand.class);
-  private static Class scalingClientClass = null;
+  private static Class<?> _scalingClientClass;
 
   protected AbstractScalingCommand()
   {
-     addValueOption("address", "address", "ip or host name of the server");
-     addIntValueOption("port", "port", "server http port");
-     addValueOption("user", "user", "user name used for authentication to the server");
-     addValueOption("password", "password", "password used for authentication to the server");
+    addValueOption("address", "address", "ip or host name of the server");
+    addIntValueOption("port", "port", "server http port");
+    addValueOption("user", "user", "user name used for authentication to the server");
+    addValueOption("password", "password", "password used for authentication to the server");
   }
 
   protected ResinScalingClient getScalingClient(WatchdogArgs args,
@@ -84,10 +84,10 @@ public abstract class AbstractScalingCommand extends AbstractBootCommand
     String password = args.getArg("-password");
 
     try {
-      Constructor c = scalingClientClass.getConstructor(String.class,
-                                                        int.class,
-                                                        String.class,
-                                                        String.class);
+      Constructor c = _scalingClientClass.getConstructor(String.class,
+                                                         int.class,
+                                                         String.class,
+                                                         String.class);
 
       ResinScalingClient scaingClient;
       scaingClient = (ResinScalingClient) c.newInstance(address,
@@ -123,12 +123,12 @@ public abstract class AbstractScalingCommand extends AbstractBootCommand
 
   public boolean isPro()
   {
-    return (scalingClientClass != null);
+    return (_scalingClientClass != null);
   }
 
   static {
     try {
-      scalingClientClass = Class.forName(
+      _scalingClientClass = Class.forName(
         "com.caucho.cloud.elastic.ElasticCloudClient");
     } catch (ClassNotFoundException e) {
     }

@@ -49,6 +49,7 @@ public abstract class AbstractBootCommand implements BootCommand {
     
     addValueOption("root-directory", "file", "alternate root directory");
     addValueOption("log-directory", "file", "alternate log directory");
+    addValueOption("license-directory", "file", "alternate license directory");
     
     addFlagOption("verbose", "produce verbose output");
   }

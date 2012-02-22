@@ -45,6 +45,7 @@ import javax.management.ObjectName;
 import java.io.File;
 import java.io.IOException;
 import java.lang.management.ManagementFactory;
+import java.lang.reflect.Constructor;
 import java.net.InetAddress;
 import java.net.URL;
 import java.util.ArrayList;
@@ -80,6 +81,8 @@ class WatchdogArgs
   private String _mode;
   
   private Path _logDirectory;
+  private Path _licenseDirectory;
+
   private String _serverId = null;
   private String _clusterId;
   private int _watchdogPort;
@@ -155,6 +158,11 @@ class WatchdogArgs
   Path getLogDirectory()
   {
     return _logDirectory;
+  }
+
+  Path getLicenseDirectory()
+  {
+    return _licenseDirectory;
   }
 
   Path getResinConf()
@@ -469,6 +477,10 @@ class WatchdogArgs
       }
       else if ("-log-directory".equals(arg) || "--log-directory".equals(arg)) {
         _logDirectory = _rootDirectory.lookup(argv[i + 1]);
+        i++;
+      }
+      else if ("-license-directory".equals(arg) || "--license-directory".equals(arg)) {
+        _licenseDirectory = _rootDirectory.lookup(argv[i + 1]);
         i++;
       }
       else if ("-resin-home".equals(arg) || "--resin-home".equals(arg)) {
@@ -1019,8 +1031,16 @@ class WatchdogArgs
 
         Class<?> cl = Class.forName("com.caucho.license.LicenseCheckImpl",
             false, loader);
+        
+        Constructor<?> ctor = cl.getConstructor(File.class);
+        
+        File licenseFile = null;
+        
+        if (_licenseDirectory != null) {
+          licenseFile = new File(_licenseDirectory.getNativePath());
+        }
 
-        license = (LicenseCheck) cl.newInstance();
+        license = (LicenseCheck) ctor.newInstance(licenseFile);
 
         license.requireProfessional(1);
 
