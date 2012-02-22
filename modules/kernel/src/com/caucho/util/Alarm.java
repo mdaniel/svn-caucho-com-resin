@@ -446,7 +446,7 @@ public class Alarm implements ThreadTask, ClassLoaderListener {
    */
   public void queue(long delta)
   {
-    long now = CurrentTime.getCurrentTime();
+    long now = CurrentTime.getExactTime();
     
     // boolean isNotify = _heap.queueAt(this, now + delta);
     
@@ -682,10 +682,10 @@ public class Alarm implements ThreadTask, ClassLoaderListener {
         return -1;
       }
       
-      _lastTime = CurrentTime.getCurrentTime();
+      _lastTime = CurrentTime.getExactTime();
 
       while (true) {
-        long now = CurrentTime.getCurrentTime();
+        long now = CurrentTime.getExactTime();
         
         long next = _clock.extractAlarm(now, false);
         

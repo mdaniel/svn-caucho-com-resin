@@ -66,7 +66,7 @@ public class AlarmClock {
    *
    * @param delta time in milliseconds to wake
    */
-  boolean queueAt(Alarm alarm, long wakeTime)
+  public boolean queueAt(Alarm alarm, long wakeTime)
   {
     boolean isEarliest = false;
     
