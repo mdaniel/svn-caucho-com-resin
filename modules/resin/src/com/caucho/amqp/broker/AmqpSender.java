@@ -27,15 +27,26 @@
  * @author Scott Ferguson
  */
 
-package com.caucho.mqueue.stomp;
+package com.caucho.amqp.broker;
 
+import com.caucho.vfs.TempBuffer;
 
 /**
- * Callback for a message receipt.
+ * Custom serialization for the cache
  */
-public interface StompReceiptListener
+public interface AmqpSender
 {
-  public void onComplete();
+  public void messagePart(TempBuffer buffer, int length);
   
-  public void onError(String msg);
+  // XXX: needs contentType, xid
+  public void messageComplete(TempBuffer buffer, 
+                              int length,
+                              AmqpReceiptListener receiptListener);
+  
+  public void messageComplete(byte []buffer,
+                              int offset,
+                              int length,
+                              AmqpReceiptListener receiptListener);
+  
+  public void close();
 }

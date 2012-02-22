@@ -27,30 +27,39 @@
  * @author Scott Ferguson
  */
 
-package com.caucho.mqueue.stomp;
+package com.caucho.amqp.broker;
 
-import java.io.IOException;
-import java.io.InputStream;
-
-import com.caucho.mqueue.queue.SubscriberProcessor;
+import com.caucho.mqueue.queue.MQJournalQueueSubscriber;
 
 /**
- * Generic interface to read a received message.
+ * Subscription to a destination
  */
-public class StompSubscriberProcessor implements SubscriberProcessor
+public class AmqpJournalReceiver implements AmqpReceiver
 {
-  private StompMessageListener _stompListener;
+  private MQJournalQueueSubscriber _subscriber;
   
-  StompSubscriberProcessor(StompMessageListener stompListener)
+  AmqpJournalReceiver(MQJournalQueueSubscriber sub)
   {
-    _stompListener = stompListener;
+    _subscriber = sub;
+    
+    _subscriber.start();
   }
   
   @Override
-  public void process(long sequence, InputStream is, long length)
-    throws IOException
+  public void ack(long mid)
   {
-    _stompListener.onMessage(sequence, is, length);
-    System.out.println("PROCESS: " + sequence);
+    System.out.println("ACK: " + mid);
+  }
+  
+  @Override
+  public void nack(long mid)
+  {
+    System.out.println("NACK: " + mid);
+  }
+  
+  @Override
+  public void close()
+  {
+    
   }
 }

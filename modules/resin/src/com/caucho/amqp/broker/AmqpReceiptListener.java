@@ -27,11 +27,15 @@
  * @author Scott Ferguson
  */
 
-package com.caucho.mqueue.stomp;
+package com.caucho.amqp.broker;
+
 
 /**
- * Simple stomp broker.
+ * Callback for a message receipt.
  */
-public class BasicStompBroker extends AbstractStompBroker
+public interface AmqpReceiptListener
 {
+  public void onComplete();
+  
+  public void onError(String msg);
 }

@@ -31,6 +31,8 @@ package com.caucho.mqueue.stomp;
 
 import java.io.IOException;
 
+import com.caucho.amqp.broker.AmqpSender;
+import com.caucho.amqp.broker.AmqpReceiptListener;
 import com.caucho.vfs.ReadStream;
 import com.caucho.vfs.TempBuffer;
 import com.caucho.vfs.WriteStream;
@@ -44,12 +46,12 @@ public class StompSendCommand extends StompCommand
   boolean doCommand(StompConnection conn, ReadStream is, WriteStream os)
     throws IOException
   {
-    StompPublisher dest = conn.getDestination();
+    AmqpSender dest = conn.getDestination();
     
     long contentLength = conn.getContentLength();
     String contentType = conn.getContentType();
     String xa = conn.getTransaction();
-    StompReceiptListener receipt = conn.createReceiptCallback();
+    AmqpReceiptListener receipt = conn.createReceiptCallback();
     
     StompXaSend xaSend = null;
     

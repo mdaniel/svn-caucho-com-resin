@@ -27,31 +27,32 @@
  * @author Scott Ferguson
  */
 
-package com.caucho.mqueue.stomp;
+package com.caucho.amqp.broker;
 
 import com.caucho.loader.Environment;
 import com.caucho.loader.EnvironmentLocal;
+import com.caucho.mqueue.stomp.StompMessageListener;
 import com.caucho.util.ConcurrentArrayList;
 import com.caucho.util.LruCache;
 
 /**
  * Custom serialization for the cache
  */
-public class StompEnvironmentBroker implements StompBroker
+public class AmqpEnvironmentBroker implements AmqpBroker
 {
-  private static final EnvironmentLocal<StompEnvironmentBroker> _localBroker
-    = new EnvironmentLocal<StompEnvironmentBroker>();
+  private static final EnvironmentLocal<AmqpEnvironmentBroker> _localBroker
+    = new EnvironmentLocal<AmqpEnvironmentBroker>();
   
   private ClassLoader _loader;
   private String _id;
   
-  private ConcurrentArrayList<StompBroker> _brokerList
-    = new ConcurrentArrayList<StompBroker>(StompBroker.class);
+  private ConcurrentArrayList<AmqpBroker> _brokerList
+    = new ConcurrentArrayList<AmqpBroker>(AmqpBroker.class);
   
-  private LruCache<String,StompBroker> _brokerMap
-    = new LruCache<String,StompBroker>(1024);
+  private LruCache<String,AmqpBroker> _brokerMap
+    = new LruCache<String,AmqpBroker>(1024);
   
-  private StompEnvironmentBroker()
+  private AmqpEnvironmentBroker()
   {
     _loader = Thread.currentThread().getContextClassLoader();
     _id = Environment.getEnvironmentName(_loader);
@@ -59,18 +60,18 @@ public class StompEnvironmentBroker implements StompBroker
     _localBroker.set(this);
   }
   
-  public static StompEnvironmentBroker getCurrent()
+  public static AmqpEnvironmentBroker getCurrent()
   {
     return _localBroker.get();
   }
   
-  public static StompEnvironmentBroker create()
+  public static AmqpEnvironmentBroker create()
   {
     synchronized (_localBroker) {
-      StompEnvironmentBroker broker = _localBroker.getLevel();
+      AmqpEnvironmentBroker broker = _localBroker.getLevel();
       
       if (broker == null) {
-        broker = new StompEnvironmentBroker();
+        broker = new AmqpEnvironmentBroker();
         _localBroker.set(broker);
       }
       
@@ -78,26 +79,26 @@ public class StompEnvironmentBroker implements StompBroker
     }
   }
   
-  public void addBroker(StompBroker broker)
+  public void addBroker(AmqpBroker broker)
   {
     _brokerList.add(broker);
   }
   
-  public void removeBroker(StompBroker broker)
+  public void removeBroker(AmqpBroker broker)
   {
     _brokerList.remove(broker);
   }
   
   @Override
-  public StompPublisher createPublisher(String name)
+  public AmqpSender createSender(String name)
   {
-    StompBroker broker = _brokerMap.get(name);
+    AmqpBroker broker = _brokerMap.get(name);
     
     if (broker != null)
-      return broker.createPublisher(name);
+      return broker.createSender(name);
     
-    for (StompBroker registeredBroker : _brokerList) {
-      StompPublisher dest = registeredBroker.createPublisher(name);
+    for (AmqpBroker registeredBroker : _brokerList) {
+      AmqpSender dest = registeredBroker.createSender(name);
       
       if (dest != null) {
         _brokerMap.put(name, registeredBroker);
@@ -109,12 +110,12 @@ public class StompEnvironmentBroker implements StompBroker
   }
   
   @Override
-  public StompSubscription createSubscription(String name,
+  public AmqpReceiver createReceiver(String name,
                                               StompMessageListener listener)
   {
-    for (StompBroker registeredBroker : _brokerList) {
-      StompSubscription sub
-        = registeredBroker.createSubscription(name, listener);
+    for (AmqpBroker registeredBroker : _brokerList) {
+      AmqpReceiver sub
+        = registeredBroker.createReceiver(name, listener);
       
       if (sub != null) {
         return sub;

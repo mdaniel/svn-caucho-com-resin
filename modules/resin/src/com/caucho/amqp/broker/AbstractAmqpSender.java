@@ -27,14 +27,14 @@
  * @author Scott Ferguson
  */
 
-package com.caucho.mqueue.stomp;
+package com.caucho.amqp.broker;
 
 import com.caucho.vfs.TempBuffer;
 
 /**
  * Custom serialization for the cache
  */
-public class AbstractStompDestination implements StompPublisher
+public class AbstractAmqpSender implements AmqpSender
 {
   @Override
   public void messagePart(TempBuffer buffer, int length)
@@ -45,7 +45,7 @@ public class AbstractStompDestination implements StompPublisher
   @Override
   public void messageComplete(TempBuffer buffer,
                               int length,
-                              StompReceiptListener listener)
+                              AmqpReceiptListener listener)
   {
     if (listener != null) {
       listener.onComplete();
@@ -56,7 +56,7 @@ public class AbstractStompDestination implements StompPublisher
   public void messageComplete(byte []buffer,
                               int offset,
                               int length,
-                              StompReceiptListener listener)
+                              AmqpReceiptListener listener)
   {
     if (listener != null) {
       listener.onComplete();

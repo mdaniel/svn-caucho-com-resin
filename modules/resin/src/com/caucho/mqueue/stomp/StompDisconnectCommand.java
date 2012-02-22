@@ -31,6 +31,7 @@ package com.caucho.mqueue.stomp;
 
 import java.io.IOException;
 
+import com.caucho.amqp.broker.AmqpReceiptListener;
 import com.caucho.vfs.ReadStream;
 import com.caucho.vfs.WriteStream;
 
@@ -46,7 +47,7 @@ public class StompDisconnectCommand extends StompCommand
     if (! skipToEnd(is))
       return false;
 
-    StompReceiptListener listener = conn.createReceiptCallback();
+    AmqpReceiptListener listener = conn.createReceiptCallback();
     
     if (listener != null) {
       listener.onComplete();

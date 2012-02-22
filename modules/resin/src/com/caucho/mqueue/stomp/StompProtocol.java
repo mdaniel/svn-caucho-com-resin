@@ -31,6 +31,9 @@ package com.caucho.mqueue.stomp;
 
 import javax.annotation.PostConstruct;
 
+import com.caucho.amqp.broker.AmqpBroker;
+import com.caucho.amqp.broker.AmqpEnvironmentBroker;
+import com.caucho.amqp.broker.AmqpSender;
 import com.caucho.network.listen.Protocol;
 import com.caucho.network.listen.ProtocolConnection;
 import com.caucho.network.listen.SocketLink;
@@ -40,9 +43,9 @@ import com.caucho.network.listen.SocketLink;
  */
 public class StompProtocol implements Protocol
 {
-  private StompBroker _broker;
+  private AmqpBroker _broker;
   
-  public void setBroker(StompBroker broker)
+  public void setBroker(AmqpBroker broker)
   {
     _broker = broker;
   }
@@ -51,11 +54,11 @@ public class StompProtocol implements Protocol
   public void init()
   {
     if (_broker == null) {
-      _broker = StompEnvironmentBroker.create();
+      _broker = AmqpEnvironmentBroker.create();
     }
   }
   
-  public StompBroker getBroker()
+  public AmqpBroker getBroker()
   {
     return _broker;
   }
@@ -72,8 +75,8 @@ public class StompProtocol implements Protocol
     return "stomp";
   }
   
-  public StompPublisher createDestination(String name)
+  public AmqpSender createDestination(String name)
   {
-    return _broker.createPublisher(name);
+    return _broker.createSender(name);
   }
 }

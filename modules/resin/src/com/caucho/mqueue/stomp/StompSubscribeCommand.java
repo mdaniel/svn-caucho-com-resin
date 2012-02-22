@@ -31,6 +31,7 @@ package com.caucho.mqueue.stomp;
 
 import java.io.IOException;
 
+import com.caucho.amqp.broker.AmqpReceiptListener;
 import com.caucho.vfs.ReadStream;
 import com.caucho.vfs.WriteStream;
 
@@ -43,7 +44,7 @@ public class StompSubscribeCommand extends StompCommand
   boolean doCommand(StompConnection conn, ReadStream is, WriteStream os)
     throws IOException
   {
-    StompReceiptListener listener = conn.createReceiptCallback();
+    AmqpReceiptListener listener = conn.createReceiptCallback();
     
     if (! conn.subscribe())
       throw new IOException("bad sub");

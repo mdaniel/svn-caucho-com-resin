@@ -31,6 +31,7 @@ package com.caucho.mqueue.stomp;
 
 import java.io.IOException;
 
+import com.caucho.amqp.broker.AmqpReceiptListener;
 import com.caucho.vfs.ReadStream;
 import com.caucho.vfs.WriteStream;
 
@@ -44,7 +45,7 @@ public class StompUnsubscribeCommand extends StompCommand
     throws IOException
   {
     String id = conn.getId();
-    StompReceiptListener listener = conn.createReceiptCallback();
+    AmqpReceiptListener listener = conn.createReceiptCallback();
                        
     if (id == null)
       throw new IOException("bad id");

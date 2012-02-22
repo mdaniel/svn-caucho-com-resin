@@ -27,25 +27,54 @@
  * @author Scott Ferguson
  */
 
-package com.caucho.mqueue.stomp;
+package com.caucho.amqp.broker;
+
+import com.caucho.mqueue.queue.MQJournalQueuePublisher;
+import com.caucho.vfs.TempBuffer;
 
 /**
  * Custom serialization for the cache
  */
-public class AbstractStompSubscription implements StompSubscription
+public class AmqpJournalSender implements AmqpSender
 {
-  @Override
-  public void ack(long mid)
+  private MQJournalQueuePublisher _publisher;
+  
+  AmqpJournalSender(MQJournalQueuePublisher publisher)
   {
+    _publisher = publisher;
   }
   
   @Override
-  public void nack(long mid)
+  public void messagePart(TempBuffer buffer, int length)
   {
+    System.out.println("PART: " + length);
+  }
+  
+  // XXX: needs contentType, xid
+  @Override
+  public void messageComplete(TempBuffer buffer, 
+                              int length,
+                              AmqpReceiptListener receiptListener)
+  {
+    System.out.println("COMPLETE: " + length);
+    
+    _publisher.write(buffer.getBuffer(), 0, length, buffer);
   }
   
   @Override
+  public void messageComplete(byte []buffer,
+                              int offset,
+                              int length,
+                              AmqpReceiptListener receiptListener)
+  {
+    System.out.println("COMPLETE: " + length);
+    
+    _publisher.write(buffer, 0, length, null);
+  }
+  
   public void close()
   {
+    System.out.println("CLOSE:");
+    
   }
 }

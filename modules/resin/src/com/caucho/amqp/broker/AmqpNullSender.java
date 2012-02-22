@@ -27,30 +27,44 @@
  * @author Scott Ferguson
  */
 
-package com.caucho.mqueue.stomp;
+package com.caucho.amqp.broker;
+
+import com.caucho.vfs.TempBuffer;
 
 /**
- * AbstractStompBroker with common routines for brokers.
+ * Custom serialization for the cache
  */
-abstract public class AbstractStompBroker implements StompBroker
+public class AmqpNullSender implements AmqpSender
 {
   @Override
-  public StompPublisher createPublisher(String name)
+  public void messagePart(TempBuffer buffer, int length)
   {
-    return null;
   }
   
   @Override
-  public StompSubscription createSubscription(String name,
-                                              StompMessageListener listener)
+  public void messageComplete(TempBuffer buffer, 
+                              int length,
+                              AmqpReceiptListener listener)
   {
-    return null;
+    if (listener != null) {
+      listener.onComplete();
+    }
   }
   
-  protected void registerSelf()
+  @Override
+  public void messageComplete(byte []buffer,
+                              int offset,
+                              int length,
+                              AmqpReceiptListener listener)
   {
-    StompEnvironmentBroker envBroker = StompEnvironmentBroker.create();
+    if (listener != null) {
+      listener.onComplete();
+    }
+  }
+  
+  @Override
+  public void close()
+  {
     
-    envBroker.addBroker(this);
   }
 }

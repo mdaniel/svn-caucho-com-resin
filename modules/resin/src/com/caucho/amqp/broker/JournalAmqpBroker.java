@@ -27,7 +27,7 @@
  * @author Scott Ferguson
  */
 
-package com.caucho.mqueue.stomp;
+package com.caucho.amqp.broker;
 
 import javax.annotation.PostConstruct;
 import javax.ejb.Startup;
@@ -38,6 +38,7 @@ import com.caucho.mqueue.queue.MQJournalQueue;
 import com.caucho.mqueue.queue.MQJournalQueuePublisher;
 import com.caucho.mqueue.queue.MQJournalQueueSubscriber;
 import com.caucho.mqueue.queue.SubscriberProcessor;
+import com.caucho.mqueue.stomp.StompMessageListener;
 import com.caucho.util.L10N;
 import com.caucho.vfs.Path;
 
@@ -46,9 +47,9 @@ import com.caucho.vfs.Path;
  */
 @Startup
 @Singleton
-public class JournalStompBroker extends AbstractStompBroker
+public class JournalAmqpBroker extends AbstractAmqpBroker
 {
-  private static final L10N L = new L10N(JournalStompBroker.class);
+  private static final L10N L = new L10N(JournalAmqpBroker.class);
   
   private Path _path;
   private MQJournalQueue _queue;
@@ -70,21 +71,21 @@ public class JournalStompBroker extends AbstractStompBroker
   }
   
   @Override
-  public StompPublisher createPublisher(String name)
+  public AmqpSender createSender(String name)
   {
     MQJournalQueuePublisher jPublisher = _queue.createPublisher();
     
-    return new StompJournalPublisher(jPublisher);
+    return new AmqpJournalSender(jPublisher);
   }
   
   @Override
-  public StompSubscription createSubscription(String name,
+  public AmqpReceiver createReceiver(String name,
                                               StompMessageListener listener)
   {
-    SubscriberProcessor processor = new StompSubscriberProcessor(listener);
+    SubscriberProcessor processor = new AmqpReceiverProcessor(listener);
     System.out.println("SUB: " + name);
     MQJournalQueueSubscriber jSubscriber = _queue.createSubscriber(processor);
     
-    return new StompJournalSubscription(jSubscriber);
+    return new AmqpJournalReceiver(jSubscriber);
   }
 }

@@ -38,6 +38,11 @@ import java.util.HashMap;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
+import com.caucho.amqp.broker.AmqpBroker;
+import com.caucho.amqp.broker.AmqpNullSender;
+import com.caucho.amqp.broker.AmqpSender;
+import com.caucho.amqp.broker.AmqpReceiptListener;
+import com.caucho.amqp.broker.AmqpReceiver;
 import com.caucho.distcache.ClusterCache;
 import com.caucho.distcache.ExtCacheEntry;
 import com.caucho.memcached.MemcachedProtocol;
@@ -88,17 +93,17 @@ public class StompConnection implements ProtocolConnection
   private static final CharBuffer TRANSACTION
     = new CharBuffer("transaction");
 
-  private static final StompPublisher NULL_DESTINATION
-    = new StompNullDestination();
+  private static final AmqpSender NULL_DESTINATION
+    = new AmqpNullSender();
   
   private StompProtocol _stomp;
   private SocketLink _link;
   
-  private HashMap<String,StompPublisher> _destinationMap
-    = new HashMap<String,StompPublisher>();
+  private HashMap<String,AmqpSender> _destinationMap
+    = new HashMap<String,AmqpSender>();
   
-  private HashMap<String,StompSubscription> _subscriptionMap
-    = new HashMap<String,StompSubscription>();
+  private HashMap<String,AmqpReceiver> _subscriptionMap
+    = new HashMap<String,AmqpReceiver>();
   
   private CharBuffer _method = new CharBuffer();
   private char []_headerBuffer = new char[4096];
@@ -173,12 +178,12 @@ public class StompConnection implements ProtocolConnection
     return _contentType;
   }
   
-  public StompPublisher getDestination()
+  public AmqpSender getDestination()
   {
     if (_destinationName == null)
       return null;
     
-    StompPublisher dest = _destinationMap.get(_destinationName);
+    AmqpSender dest = _destinationMap.get(_destinationName);
     
     if (dest == null) {
       dest = _stomp.createDestination(_destinationName);
@@ -202,7 +207,7 @@ public class StompConnection implements ProtocolConnection
     return _receipt;
   }
   
-  public StompReceiptListener createReceiptCallback()
+  public AmqpReceiptListener createReceiptCallback()
   {
     if (_receipt != null)
       return new ReceiptListener(this, _receipt);
@@ -224,15 +229,15 @@ public class StompConnection implements ProtocolConnection
     if (_destinationName == null)
       throw new IOException("sub requires destination");
     
-    StompSubscription sub = _subscriptionMap.get(_id);
+    AmqpReceiver sub = _subscriptionMap.get(_id);
     
     if (sub != null)
       throw new IOException("sub exists");
     
-    StompBroker broker = _stomp.getBroker();
+    AmqpBroker broker = _stomp.getBroker();
     StompMessageListener listener = new MessageListener(this, _id, _destinationName);
     
-    sub = broker.createSubscription(_destinationName, listener);
+    sub = broker.createReceiver(_destinationName, listener);
     
     _subscriptionMap.put(_id, sub);
 
@@ -241,7 +246,7 @@ public class StompConnection implements ProtocolConnection
   
   public boolean unsubscribe(String id)
   {
-    StompSubscription sub = _subscriptionMap.remove(id);
+    AmqpReceiver sub = _subscriptionMap.remove(id);
     
     if (sub != null) {
       sub.close();
@@ -254,7 +259,7 @@ public class StompConnection implements ProtocolConnection
   
   public boolean ack(String sid, long mid)
   {
-    StompSubscription sub = _subscriptionMap.get(sid);
+    AmqpReceiver sub = _subscriptionMap.get(sid);
     
     if (sub != null) {
       sub.ack(mid);
@@ -267,7 +272,7 @@ public class StompConnection implements ProtocolConnection
   
   public boolean nack(String sid, long mid)
   {
-    StompSubscription sub = _subscriptionMap.get(sid);
+    AmqpReceiver sub = _subscriptionMap.get(sid);
     
     if (sub != null) {
       sub.nack(mid);
@@ -540,22 +545,22 @@ public class StompConnection implements ProtocolConnection
   @Override
   public void onCloseConnection()
   {
-    ArrayList<StompPublisher> destList
-      = new ArrayList<StompPublisher>(_destinationMap.values());
+    ArrayList<AmqpSender> destList
+      = new ArrayList<AmqpSender>(_destinationMap.values());
   
     _destinationMap.clear();
     
-    ArrayList<StompSubscription> subList
-      = new ArrayList<StompSubscription>(_subscriptionMap.values());
+    ArrayList<AmqpReceiver> subList
+      = new ArrayList<AmqpReceiver>(_subscriptionMap.values());
 
     _destinationMap.clear();
     _subscriptionMap.clear();
     
-    for (StompPublisher dest : destList) {
+    for (AmqpSender dest : destList) {
       dest.close();
     }
     
-    for (StompSubscription sub : subList) {
+    for (AmqpReceiver sub : subList) {
       sub.close();
     }
     
@@ -567,7 +572,7 @@ public class StompConnection implements ProtocolConnection
   {
   }
   
-  static class ReceiptListener implements StompReceiptListener {
+  static class ReceiptListener implements AmqpReceiptListener {
     private StompConnection _conn;
     private String _receipt;
   

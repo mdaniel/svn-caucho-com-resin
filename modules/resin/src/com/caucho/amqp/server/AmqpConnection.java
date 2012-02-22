@@ -32,6 +32,9 @@ package com.caucho.amqp.server;
 import java.io.IOException;
 import java.util.logging.Logger;
 
+import com.caucho.amqp.broker.AmqpBroker;
+import com.caucho.amqp.broker.AmqpEnvironmentBroker;
+import com.caucho.amqp.broker.AmqpSender;
 import com.caucho.amqp.io.FrameAttach;
 import com.caucho.amqp.io.FrameBegin;
 import com.caucho.amqp.io.FrameClose;
@@ -48,9 +51,6 @@ import com.caucho.amqp.io.FrameTransfer;
 import com.caucho.amqp.io.SaslMechanisms;
 import com.caucho.amqp.io.SaslOutcome;
 import com.caucho.amqp.io.FrameAttach.Role;
-import com.caucho.mqueue.stomp.StompBroker;
-import com.caucho.mqueue.stomp.StompEnvironmentBroker;
-import com.caucho.mqueue.stomp.StompPublisher;
 import com.caucho.network.listen.ProtocolConnection;
 import com.caucho.network.listen.SocketLink;
 import com.caucho.vfs.ReadStream;
@@ -330,11 +330,11 @@ public class AmqpConnection implements ProtocolConnection, AmqpReceiver
     
     AmqpSession session = _sessions[0];
     
-    StompBroker broker = StompEnvironmentBroker.create();
+    AmqpBroker broker = AmqpEnvironmentBroker.create();
     System.out.println("BROK:" + broker);
     String targetAddress = clientAttach.getTarget().getAddress();
     
-    StompPublisher pub = broker.createPublisher(targetAddress);
+    AmqpSender pub = broker.createSender(targetAddress);
     
     System.out.println("PUB: " + pub);
     

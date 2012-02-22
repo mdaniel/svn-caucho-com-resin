@@ -27,15 +27,12 @@
  * @author Scott Ferguson
  */
 
-package com.caucho.mqueue.stomp;
+package com.caucho.amqp.broker;
+
 
 /**
- * Custom serialization for the cache
+ * Simple stomp broker.
  */
-public interface StompBroker
+public class BasicAmqpBroker extends AbstractAmqpBroker
 {
-  public StompPublisher createPublisher(String name);
-  
-  public StompSubscription createSubscription(String name,
-                                              StompMessageListener listener);
 }

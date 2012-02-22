@@ -27,16 +27,26 @@
  * @author Scott Ferguson
  */
 
-package com.caucho.mqueue.stomp;
+package com.caucho.amqp.broker;
+
 
 /**
- * Subscription to a destination
+ * Custom serialization for the cache
  */
-public interface StompSubscription
+public class AbstractAmqpReceiver implements AmqpReceiver
 {
-  public void ack(long mid);
+  @Override
+  public void ack(long mid)
+  {
+  }
   
-  public void nack(long mid);
+  @Override
+  public void nack(long mid)
+  {
+  }
   
-  public void close();
+  @Override
+  public void close()
+  {
+  }
 }

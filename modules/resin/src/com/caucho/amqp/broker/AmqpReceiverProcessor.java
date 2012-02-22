@@ -27,33 +27,31 @@
  * @author Scott Ferguson
  */
 
-package com.caucho.mqueue.stomp;
+package com.caucho.amqp.broker;
 
-import com.caucho.amqp.broker.AmqpSender;
-import com.caucho.vfs.TempBuffer;
+import java.io.IOException;
+import java.io.InputStream;
+
+import com.caucho.mqueue.queue.SubscriberProcessor;
+import com.caucho.mqueue.stomp.StompMessageListener;
 
 /**
- * xa item for a send
+ * Generic interface to read a received message.
  */
-class StompXaSend extends StompXaItem
+public class AmqpReceiverProcessor implements SubscriberProcessor
 {
-  private AmqpSender _dest;
+  private StompMessageListener _stompListener;
   
-  private TempBuffer _tBuf;
-  private int _length;
-  
-  StompXaSend(AmqpSender dest, TempBuffer tBuf, int length)
+  AmqpReceiverProcessor(StompMessageListener stompListener)
   {
-    _dest = dest;
-    _tBuf = tBuf;
-    _length = length;
+    _stompListener = stompListener;
   }
   
   @Override
-  boolean doCommand(StompConnection conn)
+  public void process(long sequence, InputStream is, long length)
+    throws IOException
   {
-    _dest.messageComplete(_tBuf, _length, null);
-    
-    return true;
+    _stompListener.onMessage(sequence, is, length);
+    System.out.println("PROCESS: " + sequence);
   }
 }

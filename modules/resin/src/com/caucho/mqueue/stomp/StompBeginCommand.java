@@ -31,6 +31,7 @@ package com.caucho.mqueue.stomp;
 
 import java.io.IOException;
 
+import com.caucho.amqp.broker.AmqpReceiptListener;
 import com.caucho.vfs.ReadStream;
 import com.caucho.vfs.WriteStream;
 
@@ -44,7 +45,7 @@ public class StompBeginCommand extends StompCommand
     throws IOException
   {
     String transaction = conn.getTransaction();
-    StompReceiptListener listener = conn.createReceiptCallback();
+    AmqpReceiptListener listener = conn.createReceiptCallback();
                        
     if (transaction == null)
       throw new IOException("bad transaction");

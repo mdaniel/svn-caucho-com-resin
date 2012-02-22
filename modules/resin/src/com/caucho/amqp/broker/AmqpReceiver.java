@@ -27,39 +27,16 @@
  * @author Scott Ferguson
  */
 
-package com.caucho.mqueue.stomp;
-
-import com.caucho.mqueue.queue.MQJournalQueueSubscriber;
+package com.caucho.amqp.broker;
 
 /**
  * Subscription to a destination
  */
-public class StompJournalSubscription implements StompSubscription
+public interface AmqpReceiver
 {
-  private MQJournalQueueSubscriber _subscriber;
+  public void ack(long mid);
   
-  StompJournalSubscription(MQJournalQueueSubscriber sub)
-  {
-    _subscriber = sub;
-    
-    _subscriber.start();
-  }
+  public void nack(long mid);
   
-  @Override
-  public void ack(long mid)
-  {
-    System.out.println("ACK: " + mid);
-  }
-  
-  @Override
-  public void nack(long mid)
-  {
-    System.out.println("NACK: " + mid);
-  }
-  
-  @Override
-  public void close()
-  {
-    
-  }
+  public void close();
 }

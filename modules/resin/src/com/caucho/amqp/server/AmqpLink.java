@@ -29,8 +29,8 @@
 
 package com.caucho.amqp.server;
 
+import com.caucho.amqp.broker.AmqpSender;
 import com.caucho.amqp.io.FrameAttach;
-import com.caucho.mqueue.stomp.StompPublisher;
 
 /**
  * link session management
@@ -41,9 +41,9 @@ public class AmqpLink
   
   private FrameAttach _attach;
   
-  private StompPublisher _pub;
+  private AmqpSender _pub;
   
-  public AmqpLink(FrameAttach attach, StompPublisher pub)
+  public AmqpLink(FrameAttach attach, AmqpSender pub)
   {
     _handle = attach.getHandle();
     _attach = attach;
