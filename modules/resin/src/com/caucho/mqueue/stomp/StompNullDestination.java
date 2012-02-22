@@ -52,6 +52,17 @@ public class StompNullDestination implements StompPublisher
   }
   
   @Override
+  public void messageComplete(byte []buffer,
+                              int offset,
+                              int length,
+                              StompReceiptListener listener)
+  {
+    if (listener != null) {
+      listener.onComplete();
+    }
+  }
+  
+  @Override
   public void close()
   {
     

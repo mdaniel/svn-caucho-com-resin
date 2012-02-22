@@ -27,26 +27,59 @@
  * @author Scott Ferguson
  */
 
-package com.caucho.mqueue.stomp;
+package com.caucho.amqp.io;
 
-import com.caucho.vfs.TempBuffer;
+import java.io.IOException;
+import java.util.Map;
+
 
 /**
- * Custom serialization for the cache
+ * AMQP error
  */
-public interface StompPublisher
-{
-  public void messagePart(TempBuffer buffer, int length);
+public class AmqpError extends AmqpAbstractComposite {
+  private String _condition;
+  private String _description;
+  private Map<String,?> _fields;
   
-  // XXX: needs contentType, xid
-  public void messageComplete(TempBuffer buffer, 
-                              int length,
-                              StompReceiptListener receiptListener);
+  public String getCondition()
+  {
+    return _condition;
+  }
   
-  public void messageComplete(byte []buffer,
-                              int offset,
-                              int length,
-                              StompReceiptListener receiptListener);
+  public String getDescription()
+  {
+    return _description;
+  }
   
-  public void close();
+  public Map<String,?> getFields()
+  {
+    return _fields;
+  }
+  
+  @Override
+  public long getDescriptorCode()
+  {
+    return FT_ERROR;
+  }
+  
+  @Override
+  public void readBody(AmqpReader in, int count)
+    throws IOException
+  {
+    _condition = in.readSymbol();
+    _description = in.readString();
+    _fields = in.readFieldMap();
+  }
+  
+  @Override
+  public int writeBody(AmqpWriter out)
+    throws IOException
+  {
+    out.writeSymbol(_condition);
+    out.writeString(_description);
+    out.writeMap(_fields);
+    
+    return 3;
+  }
+
 }

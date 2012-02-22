@@ -61,6 +61,17 @@ public class StompJournalPublisher implements StompPublisher
     _publisher.write(buffer.getBuffer(), 0, length, buffer);
   }
   
+  @Override
+  public void messageComplete(byte []buffer,
+                              int offset,
+                              int length,
+                              StompReceiptListener receiptListener)
+  {
+    System.out.println("COMPLETE: " + length);
+    
+    _publisher.write(buffer, 0, length, null);
+  }
+  
   public void close()
   {
     System.out.println("CLOSE:");

@@ -27,26 +27,35 @@
  * @author Scott Ferguson
  */
 
-package com.caucho.mqueue.stomp;
+package com.caucho.amqp.io;
 
-import com.caucho.vfs.TempBuffer;
+import java.io.IOException;
+import java.util.ArrayList;
+
 
 /**
- * Custom serialization for the cache
+ * AMQP link detach
  */
-public interface StompPublisher
-{
-  public void messagePart(TempBuffer buffer, int length);
+public class SaslMechanisms extends AmqpAbstractPacket {
+  private ArrayList<String> _mechanisms = new ArrayList<String>();
   
-  // XXX: needs contentType, xid
-  public void messageComplete(TempBuffer buffer, 
-                              int length,
-                              StompReceiptListener receiptListener);
+  public SaslMechanisms()
+  {
+    _mechanisms.add("ANONYMOUS");
+  }
   
-  public void messageComplete(byte []buffer,
-                              int offset,
-                              int length,
-                              StompReceiptListener receiptListener);
-  
-  public void close();
+  @Override
+  public void write(AmqpWriter out)
+    throws IOException
+  {
+    out.writeDescriptor(ST_SASL_MECHANISMS);
+    
+    int offset = out.startList();
+    
+    out.writeSymbolArray(_mechanisms);
+    
+    out.writeNull();// null term?
+    
+    out.finishList(offset, 1);
+  }
 }

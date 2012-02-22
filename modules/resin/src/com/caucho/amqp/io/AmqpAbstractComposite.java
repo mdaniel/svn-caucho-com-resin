@@ -27,26 +27,53 @@
  * @author Scott Ferguson
  */
 
-package com.caucho.mqueue.stomp;
+package com.caucho.amqp.io;
 
-import com.caucho.vfs.TempBuffer;
+import java.io.IOException;
+
 
 /**
- * Custom serialization for the cache
+ * AMQP composite list writer
  */
-public interface StompPublisher
-{
-  public void messagePart(TempBuffer buffer, int length);
+abstract public class AmqpAbstractComposite extends AmqpAbstractPacket {
+  abstract protected long getDescriptorCode();
   
-  // XXX: needs contentType, xid
-  public void messageComplete(TempBuffer buffer, 
-                              int length,
-                              StompReceiptListener receiptListener);
+  abstract protected int writeBody(AmqpWriter out)
+    throws IOException;
   
-  public void messageComplete(byte []buffer,
-                              int offset,
-                              int length,
-                              StompReceiptListener receiptListener);
+  abstract protected void readBody(AmqpReader in, int count)
+    throws IOException;
+
+  @Override
+  public final void write(AmqpWriter out)
+    throws IOException
+  {
+    out.writeDescriptor(getDescriptorCode());
+    
+    int offset = out.startList();
+    
+    int count = writeBody(out);
+    
+    out.finishList(offset, count);
+  }
   
-  public void close();
+  @Override
+  public void read(AmqpReader in)
+    throws IOException
+  {
+    long code = in.readDescriptor();
+    
+    readValue(in);
+  }
+  
+  @Override
+  public void readValue(AmqpReader in)
+    throws IOException
+  {
+    int count = in.startList();
+    
+    readBody(in, count);
+    
+    in.endList();
+  }
 }

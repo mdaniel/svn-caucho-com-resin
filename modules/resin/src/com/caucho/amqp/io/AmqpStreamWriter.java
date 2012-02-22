@@ -27,26 +27,43 @@
  * @author Scott Ferguson
  */
 
-package com.caucho.mqueue.stomp;
+package com.caucho.amqp.io;
 
-import com.caucho.vfs.TempBuffer;
+import java.io.IOException;
 
-/**
- * Custom serialization for the cache
- */
-public interface StompPublisher
-{
-  public void messagePart(TempBuffer buffer, int length);
+import com.caucho.vfs.WriteStream;
+
+public class AmqpStreamWriter extends AmqpBaseWriter {
+  private WriteStream _os;
   
-  // XXX: needs contentType, xid
-  public void messageComplete(TempBuffer buffer, 
-                              int length,
-                              StompReceiptListener receiptListener);
+  public AmqpStreamWriter(WriteStream os)
+  {
+    _os = os;
+  }
   
-  public void messageComplete(byte []buffer,
-                              int offset,
-                              int length,
-                              StompReceiptListener receiptListener);
+  @Override
+  public void write(int ch)
+    throws IOException
+  {
+    _os.write(ch);
+  }
   
-  public void close();
+  @Override
+  public void flush()
+    throws IOException
+  {
+    _os.flush();
+  }
+
+  @Override
+  public int getOffset()
+  {
+    return _os.getBufferOffset();
+  }
+
+  @Override
+  public void writeByte(int offset, int value)
+  {
+    _os.getBuffer()[offset] = (byte) value;
+  }
 }

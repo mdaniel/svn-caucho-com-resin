@@ -27,26 +27,50 @@
  * @author Scott Ferguson
  */
 
-package com.caucho.mqueue.stomp;
+package com.caucho.amqp.io;
 
-import com.caucho.vfs.TempBuffer;
+import java.io.IOException;
+
 
 /**
- * Custom serialization for the cache
+ * AMQP client/server frame handler.
  */
-public interface StompPublisher
-{
-  public void messagePart(TempBuffer buffer, int length);
-  
-  // XXX: needs contentType, xid
-  public void messageComplete(TempBuffer buffer, 
-                              int length,
-                              StompReceiptListener receiptListener);
-  
-  public void messageComplete(byte []buffer,
-                              int offset,
-                              int length,
-                              StompReceiptListener receiptListener);
-  
-  public void close();
+public interface AmqpReceiver {
+
+  /**
+   * Receives a session-begin frame.
+   * @throws IOException 
+   */
+  void onBegin(FrameBegin frameBegin)
+    throws IOException;
+
+  /**
+   * @param frameEnd
+   */
+  void onEnd(FrameEnd frameEnd)
+    throws IOException;
+
+  /**
+   * @param frameClose
+   */
+  void onClose(FrameClose frameClose)
+    throws IOException;
+
+  /**
+   * @param frameAttach
+   */
+  void onAttach(FrameAttach frameAttach)
+    throws IOException;
+
+  /**
+   * @param frameDetach
+   */
+  void onDetach(FrameDetach frameDetach)
+    throws IOException;
+
+  /**
+   * @param frameTransfer
+   */
+  void onTransfer(AmqpFrameReader fin, FrameTransfer frameTransfer)
+    throws IOException;
 }

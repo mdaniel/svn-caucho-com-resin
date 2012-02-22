@@ -27,26 +27,60 @@
  * @author Scott Ferguson
  */
 
-package com.caucho.mqueue.stomp;
+package com.caucho.amqp.io;
 
-import com.caucho.vfs.TempBuffer;
+import java.io.IOException;
+
 
 /**
- * Custom serialization for the cache
+ * AMQP session end
  */
-public interface StompPublisher
-{
-  public void messagePart(TempBuffer buffer, int length);
+public class FrameEnd extends AmqpAbstractFrame {
+  public static final int CODE = AmqpConstants.FT_SESSION_END;
+
+  private AmqpError _error;
   
-  // XXX: needs contentType, xid
-  public void messageComplete(TempBuffer buffer, 
-                              int length,
-                              StompReceiptListener receiptListener);
+  public AmqpError getError()
+  {
+    return _error;
+  }
   
-  public void messageComplete(byte []buffer,
-                              int offset,
-                              int length,
-                              StompReceiptListener receiptListener);
+  @Override
+  public long getDescriptorCode()
+  {
+    return FT_SESSION_END;
+  }
   
-  public void close();
+  @Override
+  public FrameEnd createInstance()
+  {
+    return new FrameEnd();
+  }
+  
+  @Override
+  public void invoke(AmqpFrameReader fin, AmqpReceiver receiver)
+    throws IOException
+  {
+    receiver.onEnd(this);
+  }
+  
+  @Override
+  public void readBody(AmqpReader in, int count)
+    throws IOException
+  {
+    _error = in.readObject(AmqpError.class);
+  }
+  
+  @Override
+  public int writeBody(AmqpWriter out)
+    throws IOException
+  {
+    if (_error != null)
+      _error.write(out);
+    else
+      out.writeNull();
+    
+    return 1;
+  }
+
 }

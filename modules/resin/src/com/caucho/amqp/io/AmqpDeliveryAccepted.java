@@ -27,26 +27,31 @@
  * @author Scott Ferguson
  */
 
-package com.caucho.mqueue.stomp;
+package com.caucho.amqp.io;
 
-import com.caucho.vfs.TempBuffer;
+import java.io.IOException;
+
 
 /**
- * Custom serialization for the cache
+ * AMQP delivery accepted
  */
-public interface StompPublisher
-{
-  public void messagePart(TempBuffer buffer, int length);
+public class AmqpDeliveryAccepted extends AmqpDeliveryState {
+  @Override
+  public long getDescriptorCode()
+  {
+    return ST_MESSAGE_ACCEPTED;
+  }
   
-  // XXX: needs contentType, xid
-  public void messageComplete(TempBuffer buffer, 
-                              int length,
-                              StompReceiptListener receiptListener);
+  @Override
+  public void readBody(AmqpReader in, int count)
+    throws IOException
+  {
+  }
   
-  public void messageComplete(byte []buffer,
-                              int offset,
-                              int length,
-                              StompReceiptListener receiptListener);
-  
-  public void close();
+  @Override
+  public int writeBody(AmqpWriter out)
+    throws IOException
+  {
+    return 0;
+  }
 }

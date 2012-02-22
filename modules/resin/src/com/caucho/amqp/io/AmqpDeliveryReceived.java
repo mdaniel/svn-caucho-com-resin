@@ -27,26 +27,59 @@
  * @author Scott Ferguson
  */
 
-package com.caucho.mqueue.stomp;
+package com.caucho.amqp.io;
 
-import com.caucho.vfs.TempBuffer;
+import java.io.IOException;
+
 
 /**
- * Custom serialization for the cache
+ * AMQP delivery received
  */
-public interface StompPublisher
-{
-  public void messagePart(TempBuffer buffer, int length);
+public class AmqpDeliveryReceived extends AmqpDeliveryState {
+  private long _sectionNumber; // uint mandatory
+  private long _sectionOffset; // ulong mandatory
   
-  // XXX: needs contentType, xid
-  public void messageComplete(TempBuffer buffer, 
-                              int length,
-                              StompReceiptListener receiptListener);
+  public long getSectionNumber()
+  {
+    return _sectionNumber;
+  }
   
-  public void messageComplete(byte []buffer,
-                              int offset,
-                              int length,
-                              StompReceiptListener receiptListener);
+  public void setSectionNumber(long sectionNumber)
+  {
+    _sectionNumber = sectionNumber;
+  }
   
-  public void close();
+  public long getSectionOffset()
+  {
+    return _sectionOffset;
+  }
+  
+  public void setSectionOffset(long sectionOffset)
+  {
+    _sectionOffset = sectionOffset;
+  }
+
+  @Override
+  public long getDescriptorCode()
+  {
+    return ST_MESSAGE_RECEIVED;
+  }
+  
+  @Override
+  public void readBody(AmqpReader in, int count)
+    throws IOException
+  {
+    _sectionNumber = in.readLong();
+    _sectionOffset = in.readLong();
+  }
+  
+  @Override
+  public int writeBody(AmqpWriter out)
+    throws IOException
+  {
+    out.writeUint((int) _sectionNumber);
+    out.writeUlong(_sectionOffset);
+    
+    return 2;
+  }
 }

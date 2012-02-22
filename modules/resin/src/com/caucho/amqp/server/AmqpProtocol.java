@@ -27,26 +27,45 @@
  * @author Scott Ferguson
  */
 
-package com.caucho.mqueue.stomp;
+package com.caucho.amqp.server;
 
-import com.caucho.vfs.TempBuffer;
+import javax.annotation.PostConstruct;
+
+import com.caucho.network.listen.Protocol;
+import com.caucho.network.listen.ProtocolConnection;
+import com.caucho.network.listen.SocketLink;
 
 /**
  * Custom serialization for the cache
  */
-public interface StompPublisher
+public class AmqpProtocol implements Protocol
 {
-  public void messagePart(TempBuffer buffer, int length);
+  @PostConstruct
+  public void init()
+  {
+    /*
+    if (_broker == null) {
+      _broker = StompEnvironmentBroker.create();
+    }
+    */
+  }
   
-  // XXX: needs contentType, xid
-  public void messageComplete(TempBuffer buffer, 
-                              int length,
-                              StompReceiptListener receiptListener);
+  /*
+  public StompBroker getBroker()
+  {
+    return _broker;
+  }
+  */
   
-  public void messageComplete(byte []buffer,
-                              int offset,
-                              int length,
-                              StompReceiptListener receiptListener);
-  
-  public void close();
+  @Override
+  public ProtocolConnection createConnection(SocketLink link)
+  {
+    return new AmqpConnection(this, link);
+  }
+
+  @Override
+  public String getProtocolName()
+  {
+    return "amqp";
+  }
 }

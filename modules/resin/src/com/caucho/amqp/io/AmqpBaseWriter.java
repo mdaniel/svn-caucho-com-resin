@@ -27,26 +27,33 @@
  * @author Scott Ferguson
  */
 
-package com.caucho.mqueue.stomp;
+package com.caucho.amqp.io;
 
+import java.io.IOException;
+import java.io.OutputStream;
+import java.util.List;
+import java.util.Map;
+
+import javax.annotation.PostConstruct;
+
+import com.caucho.network.listen.Protocol;
+import com.caucho.network.listen.ProtocolConnection;
+import com.caucho.network.listen.SocketLink;
 import com.caucho.vfs.TempBuffer;
+import com.caucho.vfs.WriteStream;
 
-/**
- * Custom serialization for the cache
- */
-public interface StompPublisher
-{
-  public void messagePart(TempBuffer buffer, int length);
+abstract public class AmqpBaseWriter extends OutputStream {
+  abstract public int getOffset();
   
-  // XXX: needs contentType, xid
-  public void messageComplete(TempBuffer buffer, 
-                              int length,
-                              StompReceiptListener receiptListener);
+  abstract public void writeByte(int offset, int value);
   
-  public void messageComplete(byte []buffer,
-                              int offset,
-                              int length,
-                              StompReceiptListener receiptListener);
+  public void writeInt(int offset, int value)
+  {
+    throw new UnsupportedOperationException();
+  }
   
-  public void close();
+  public void shiftRight(int offset, int length)
+  {
+    throw new UnsupportedOperationException();
+  }
 }

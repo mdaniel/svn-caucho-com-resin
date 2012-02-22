@@ -27,26 +27,13 @@
  * @author Scott Ferguson
  */
 
-package com.caucho.mqueue.stomp;
+package com.caucho.amqp.io;
 
-import com.caucho.vfs.TempBuffer;
+import java.io.IOException;
+
 
 /**
- * Custom serialization for the cache
+ * message delivery state
  */
-public interface StompPublisher
-{
-  public void messagePart(TempBuffer buffer, int length);
-  
-  // XXX: needs contentType, xid
-  public void messageComplete(TempBuffer buffer, 
-                              int length,
-                              StompReceiptListener receiptListener);
-  
-  public void messageComplete(byte []buffer,
-                              int offset,
-                              int length,
-                              StompReceiptListener receiptListener);
-  
-  public void close();
+abstract public class AmqpDeliveryState extends AmqpAbstractComposite {
 }

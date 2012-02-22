@@ -27,26 +27,29 @@
  * @author Scott Ferguson
  */
 
-package com.caucho.mqueue.stomp;
-
-import com.caucho.vfs.TempBuffer;
+package com.caucho.amqp;
 
 /**
- * Custom serialization for the cache
+ * AMQP exception
  */
-public interface StompPublisher
-{
-  public void messagePart(TempBuffer buffer, int length);
+@SuppressWarnings("serial")
+public class AmqpException extends RuntimeException {
+  public AmqpException()
+  {
+  }
   
-  // XXX: needs contentType, xid
-  public void messageComplete(TempBuffer buffer, 
-                              int length,
-                              StompReceiptListener receiptListener);
+  public AmqpException(String msg)
+  {
+    super(msg);
+  }
   
-  public void messageComplete(byte []buffer,
-                              int offset,
-                              int length,
-                              StompReceiptListener receiptListener);
+  public AmqpException(String msg, Throwable cause)
+  {
+    super(msg, cause);
+  }
   
-  public void close();
+  public AmqpException(Throwable cause)
+  {
+    super(cause);
+  }
 }

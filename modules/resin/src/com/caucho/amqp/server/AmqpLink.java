@@ -27,26 +27,45 @@
  * @author Scott Ferguson
  */
 
-package com.caucho.mqueue.stomp;
+package com.caucho.amqp.server;
 
-import com.caucho.vfs.TempBuffer;
+import com.caucho.amqp.io.FrameAttach;
+import com.caucho.mqueue.stomp.StompPublisher;
 
 /**
- * Custom serialization for the cache
+ * link session management
  */
-public interface StompPublisher
+public class AmqpLink
 {
-  public void messagePart(TempBuffer buffer, int length);
+  private int _handle;
   
-  // XXX: needs contentType, xid
-  public void messageComplete(TempBuffer buffer, 
-                              int length,
-                              StompReceiptListener receiptListener);
+  private FrameAttach _attach;
   
-  public void messageComplete(byte []buffer,
-                              int offset,
-                              int length,
-                              StompReceiptListener receiptListener);
+  private StompPublisher _pub;
   
-  public void close();
+  public AmqpLink(FrameAttach attach, StompPublisher pub)
+  {
+    _handle = attach.getHandle();
+    _attach = attach;
+    
+    _pub = pub;
+  }
+  
+  public int getHandle()
+  {
+    return _handle;
+  }
+  
+  void write(byte []buffer, int offset, int length)
+  {
+    _pub.messageComplete(buffer, offset, length, null);
+    
+    System.out.println(_pub + " " + new String(buffer, offset, length));
+  }
+  
+  @Override
+  public String toString()
+  {
+    return getClass().getSimpleName() + "[" + _handle + "," + _attach.getName() + "]";
+  }
 }
