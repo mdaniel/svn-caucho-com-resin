@@ -209,12 +209,12 @@ public class ManagerClient
     return (StringQueryResult) query(query);
   }
 
-  public StringQueryResult listJmx(String pattern,
-                                   boolean isPrintAttributes,
-                                   boolean isPrintValues,
-                                   boolean isPrintOperations,
-                                   boolean isAll,
-                                   boolean isPlatform)
+  public ListJmxQueryResult listJmx(String pattern,
+                                    boolean isPrintAttributes,
+                                    boolean isPrintValues,
+                                    boolean isPrintOperations,
+                                    boolean isAll,
+                                    boolean isPlatform)
   {
     JmxListQuery query = new JmxListQuery(pattern,
                                           isPrintAttributes,
@@ -223,7 +223,7 @@ public class ManagerClient
                                           isAll,
                                           isPlatform);
 
-    return (StringQueryResult) query(query);
+    return (ListJmxQueryResult) query(query);
   }
 
   public StringQueryResult setJmx(String pattern,

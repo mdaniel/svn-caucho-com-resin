@@ -48,6 +48,7 @@ import com.caucho.server.admin.AddUserQueryResult;
 import com.caucho.server.admin.ControllerStateActionQueryResult;
 import com.caucho.server.admin.DeployClient;
 import com.caucho.server.admin.HmuxClientFactory;
+import com.caucho.server.admin.ListJmxQueryResult;
 import com.caucho.server.admin.ListUsersQueryResult;
 import com.caucho.server.admin.ManagerClient;
 import com.caucho.server.admin.PdfReportQueryResult;
@@ -280,7 +281,7 @@ public class ManagementAdmin extends AbstractManagedObject
   }
 
   @Override
-  public StringQueryResult listJmx(String serverId,
+  public ListJmxQueryResult listJmx(String serverId,
                                    String pattern,
                                    boolean isPrintAttributes,
                                    boolean isPrintValues,

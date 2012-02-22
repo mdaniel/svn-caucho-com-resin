@@ -35,6 +35,7 @@ import com.caucho.jmx.MXParam;
 import com.caucho.quercus.lib.reflection.ReflectionException;
 import com.caucho.server.admin.AddUserQueryResult;
 import com.caucho.server.admin.ControllerStateActionQueryResult;
+import com.caucho.server.admin.ListJmxQueryResult;
 import com.caucho.server.admin.ListUsersQueryResult;
 import com.caucho.server.admin.PdfReportQueryResult;
 import com.caucho.server.admin.RemoveUserQueryResult;
@@ -102,7 +103,7 @@ public interface ManagementMXBean extends ManagedObjectMXBean
 
   @Description("lists the JMX MBeans in a Resin server (Resin Pro)")
   @MXAction("jmx-list")
-  public StringQueryResult listJmx(
+  public ListJmxQueryResult listJmx(
     @MXParam(name = "server") String serverId,
     @MXParam(name = "pattern") String pattern,
     @MXParam(name = "print-attributes")

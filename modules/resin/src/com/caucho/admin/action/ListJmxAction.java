@@ -28,14 +28,26 @@
 
 package com.caucho.admin.action;
 
-import java.lang.management.ManagementFactory;
-import java.util.*;
-import java.util.logging.*;
-
-import javax.management.*;
-
 import com.caucho.config.ConfigException;
+import com.caucho.server.admin.ListJmxQueryResult;
 import com.caucho.util.L10N;
+
+import javax.management.JMException;
+import javax.management.MBeanAttributeInfo;
+import javax.management.MBeanOperationInfo;
+import javax.management.MBeanParameterInfo;
+import javax.management.MBeanServer;
+import javax.management.MBeanServerFactory;
+import javax.management.ObjectName;
+import java.lang.management.ManagementFactory;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.HashSet;
+import java.util.LinkedList;
+import java.util.List;
+import java.util.Set;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 public class ListJmxAction extends AbstractJmxAction implements AdminAction
 {
@@ -44,40 +56,41 @@ public class ListJmxAction extends AbstractJmxAction implements AdminAction
 
   private static final L10N L = new L10N(ListJmxAction.class);
 
-  public String execute(String pattern,
-                        boolean printAttributes,
-                        boolean printValues,
-                        boolean printOperations,
-                        boolean allBeans,
-                        boolean usePlatform)
+  public ListJmxQueryResult execute(String pattern,
+                                    boolean isPrintAttributes,
+                                    boolean isPrintValues,
+                                    boolean isPrintOperations,
+                                    boolean isAllBeans,
+                                    boolean isUsePlatform)
     throws ConfigException, JMException, ClassNotFoundException
   {
     final List<MBeanServer> servers = new LinkedList<MBeanServer>();
 
-    if (usePlatform) {
+    if (isUsePlatform) {
       servers.add(ManagementFactory.getPlatformMBeanServer());
     }
     else {
       servers.addAll(MBeanServerFactory.findMBeanServer(null));
     }
 
-    StringBuilder resultBuilder = new StringBuilder();
-
     Set<ObjectName> beans = new HashSet<ObjectName>();
 
     ObjectName nameQuery = null;
     if (pattern != null)
       nameQuery = ObjectName.getInstance(pattern);
-    else if (allBeans)
+    else if (isAllBeans)
       nameQuery = ObjectName.WILDCARD;
-    else if (nameQuery == null && usePlatform)
+    else if (nameQuery == null && isUsePlatform)
       nameQuery = ObjectName.getInstance("java.lang:*");
     else
       nameQuery = ObjectName.getInstance("resin:*");
 
+    ListJmxQueryResult listJmxQueryResult
+      = new ListJmxQueryResult();
+
     for (final MBeanServer server : servers) {
       Set<ObjectName> mbeanSet = server.queryNames(nameQuery, null);
-      
+
       ArrayList<ObjectName> mbeans = new ArrayList<ObjectName>(mbeanSet);
       Collections.sort(mbeans);
 
@@ -87,70 +100,68 @@ public class ListJmxAction extends AbstractJmxAction implements AdminAction
 
         beans.add(mbean);
 
-        resultBuilder.append(mbean).append('\n');
-        if (printAttributes || printValues) {
-          resultBuilder.append("  attributes:\n");
+        ListJmxQueryResult.Bean bean = new ListJmxQueryResult.Bean();
+        bean.setName(mbean.toString());
+
+        if (isPrintAttributes || isPrintValues) {
           MBeanAttributeInfo []attributes = server.getMBeanInfo(mbean)
                                                   .getAttributes();
           for (MBeanAttributeInfo attribute : attributes) {
-            resultBuilder.append("    ").append(attribute);
+            ListJmxQueryResult.Attribute attr
+              = new ListJmxQueryResult.Attribute();
 
-            if (printValues) {
-              resultBuilder.append('=');
+            attr.setName(attribute.getName());
+
+            if (isPrintValues) {
               try {
                 Object value = server.getAttribute(mbean, attribute.getName());
-                resultBuilder.append('=').append(value);
+                attr.setValue(value);
               } catch (Exception e) {
-                resultBuilder.append('=').append(e.getMessage());
+                log.log(Level.FINER, e.getMessage(), e);
+
+                attr.setValue(e);
               }
             }
-            resultBuilder.append('\n');
+
+            bean.add(attr);
           }
         }
 
-        if (printOperations) {
-          resultBuilder.append("  operations:\n");
-          for (MBeanOperationInfo operation : server.getMBeanInfo(mbean)
-                                                    .getOperations()) {
-            resultBuilder.append("    ")
-                         .append(operation.getName());
+          if (isPrintOperations) {
+            for (MBeanOperationInfo operation : server.getMBeanInfo(mbean)
+                                                      .getOperations()) {
+              ListJmxQueryResult.Operation op
+                = new ListJmxQueryResult.Operation();
 
-            MBeanParameterInfo []params = operation.getSignature();
-            if (params.length > 0) {
-              resultBuilder.append("\n      (\n");
-              for (int i = 0; i < params.length; i++) {
-                MBeanParameterInfo param = params[i];
+              op.setName(operation.getName());
 
-                resultBuilder.append("        ").append(i).append(":");
-                resultBuilder.append(param.getType())
-                             .append(' ')
-                             .append(param.getName());
-                if (param.getDescription() != null
-                    && ! param.getDescription().isEmpty())
-                  resultBuilder.append(" /*")
-                               .append(param.getDescription())
-                               .append("*/");
+              MBeanParameterInfo []params = operation.getSignature();
+              if (params.length > 0) {
+                for (int i = 0; i < params.length; i++) {
+                  MBeanParameterInfo param = params[i];
 
-                resultBuilder.append('\n');
+                  ListJmxQueryResult.Param par
+                    = new ListJmxQueryResult.Param();
+
+                  par.setName(param.getName());
+                  par.setType(param.getType());
+                  par.setDescription(param.getDescription());
+
+                  op.add(par);
+                }
               }
-              resultBuilder.append("      )");
-            } else {
-              resultBuilder.append("()");
-            }
 
-            if (operation.getDescription() != null
-                && ! operation.getDescription().isEmpty()) {
-              resultBuilder.append("/*")
-                           .append(operation.getDescription())
-                           .append("*/");
-            }
+              op.setDescription(operation.getDescription());
 
-            resultBuilder.append('\n');
+              op.setType(operation.getReturnType());
+
+              bean.add(op);
+            }
           }
-        }
+        listJmxQueryResult.add(bean);
       }
     }
 
-    return resultBuilder.toString();
+    return listJmxQueryResult;
   }
 }

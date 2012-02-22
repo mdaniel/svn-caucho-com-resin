@@ -239,20 +239,19 @@ public class ManagerActor extends SimpleActor
   }
   
   @Query
-  public StringQueryResult listJmx(long id,
-                                   String to,
-                                   String from,
-                                   JmxListQuery query)
+  public ListJmxQueryResult listJmx(long id,
+                                    String to,
+                                    String from,
+                                    JmxListQuery query)
   {
     try {
-      String list = new ListJmxAction().execute(query.getPattern(),
-                                                query.isPrintAttributes(),
-                                                query.isPrintValues(),
-                                                query.isPrintOperations(),
-                                                query.isAllBeans(),
-                                                query.isPlatform());
-
-      StringQueryResult result = new StringQueryResult(list);
+      ListJmxQueryResult result
+        = new ListJmxAction().execute(query.getPattern(),
+                                      query.isPrintAttributes(),
+                                      query.isPrintValues(),
+                                      query.isPrintOperations(),
+                                      query.isAllBeans(),
+                                      query.isPlatform());
 
       getBroker().queryResult(id, from, to, result);
 

@@ -38,6 +38,7 @@ import com.caucho.management.server.ManagementMXBean;
 import com.caucho.management.server.StatServiceValue;
 import com.caucho.server.admin.AddUserQueryResult;
 import com.caucho.server.admin.ControllerStateActionQueryResult;
+import com.caucho.server.admin.ListJmxQueryResult;
 import com.caucho.server.admin.ListUsersQueryResult;
 import com.caucho.server.admin.PdfReportQueryResult;
 import com.caucho.server.admin.RemoveUserQueryResult;
@@ -703,6 +704,34 @@ public class AdminRestServlet extends HttpServlet
     }
   }
 
+  static class ListJmxQueryResultMarshal extends Marshal<ListJmxQueryResult>
+  {
+    @Override 
+    public Object marshal(HttpServletRequest request,
+                                    String name,
+                                    ListJmxQueryResult defaultValue)
+      throws IOException
+    {
+      throw new AbstractMethodError(getClass().getName());
+    }
+
+    @Override
+    public void unmarshal(HttpServletResponse response,
+                          ListJmxQueryResult value)
+      throws IOException
+    {
+      PrintWriter writer = response.getWriter();
+      
+      JsonOutput out = new JsonOutput(response.getWriter());
+      
+      out.writeObject((Serializable)value.getBeans(), true);
+      
+      out.flush();
+      
+      writer.flush();
+    }
+  }
+
   static class StatServiceValuesQueryResultMarshal
     extends Marshal<StatServiceValuesQueryResult>
   {
@@ -782,6 +811,9 @@ public class AdminRestServlet extends HttpServlet
 
     _marshalMap.put(ListUsersQueryResult.class,
                     new ListUsersQueryResultMarshal());
+
+    _marshalMap.put(ListJmxQueryResult.class,
+                    new ListJmxQueryResultMarshal());
 
     _marshalMap.put(ControllerStateActionQueryResult.class,
                     new ControllerStateActionQueryResultMarshal());

@@ -30,12 +30,13 @@
 package com.caucho.boot;
 
 import com.caucho.config.ConfigException;
+import com.caucho.server.admin.ListJmxQueryResult;
 import com.caucho.server.admin.ManagerClient;
-import com.caucho.server.admin.StringQueryResult;
 import com.caucho.util.L10N;
 
 import javax.management.MalformedObjectNameException;
 import javax.management.ObjectName;
+import java.util.List;
 
 public class JmxListCommand extends JmxCommand
 {
@@ -46,16 +47,18 @@ public class JmxListCommand extends JmxCommand
     addFlagOption("attributes", "prints MBean's attributes");
     addFlagOption("values", "prints attribute values");
     addFlagOption("operations", "prints operations");
-    addFlagOption("all", "when <pattern> not specified sets the wildcard pattern (*:*)");
-    addFlagOption("platform", "when <pattern> not specified sets the pattern to (java.lang:*)");
+    addFlagOption("all",
+                  "when <pattern> not specified sets the wildcard pattern (*:*)");
+    addFlagOption("platform",
+                  "when <pattern> not specified sets the pattern to (java.lang:*)");
   }
-  
+
   @Override
   public String getDescription()
   {
     return "lists the JMX MBeans in a Resin server";
   }
-  
+
   public String getUsageArgs()
   {
     return " [<pattern>]";
@@ -92,14 +95,73 @@ public class JmxListCommand extends JmxCommand
     boolean isAll = args.hasOption("-all");
     boolean isPlatform = args.hasOption("-platform");
 
-    StringQueryResult result = managerClient.listJmx(pattern,
-                                                     isPrintAttributes,
-                                                     isPrintValues,
-                                                     isPrintOperations,
-                                                     isAll,
-                                                     isPlatform);
+    ListJmxQueryResult result = managerClient.listJmx(pattern,
+                                                      isPrintAttributes,
+                                                      isPrintValues,
+                                                      isPrintOperations,
+                                                      isAll,
+                                                      isPlatform);
+    StringBuilder message = new StringBuilder();
 
-    System.out.print(result.getValue());
+    for (ListJmxQueryResult.Bean bean : result.getBeans()) {
+      message.append(bean.getName()).append('\n');
+      if (isPrintAttributes || isPrintValues) {
+        message.append("  attributes:\n");
+
+        for (ListJmxQueryResult.Attribute attribute : bean.getAttributes()) {
+          message.append("    ").append(attribute.getName());
+
+          if (isPrintValues) {
+            message.append('=');
+            Object value = attribute.getValue();
+            message.append('=').append(value);
+          }
+          message.append('\n');
+        }
+      }
+
+      if (isPrintOperations) {
+        message.append("  operations:\n");
+        for (ListJmxQueryResult.Operation operation : bean.getOperations()) {
+          message.append("    ")
+                 .append(operation.getName());
+
+          List<ListJmxQueryResult.Param> params = operation.getParams();
+          if (params != null && params.size() > 0) {
+            message.append("\n      (\n");
+            for (int i = 0; i < params.size(); i++) {
+              ListJmxQueryResult.Param param = params.get(i);
+              message.append("        ").append(i).append(":");
+              message.append(param.getType())
+                     .append(' ')
+                     .append(param.getName());
+              if (param.getDescription() != null
+                  && !param.getDescription().isEmpty())
+                message.append(" /*")
+                       .append(param.getDescription())
+                       .append("*/");
+
+              message.append('\n');
+            }
+            message.append("      )");
+          }
+          else {
+            message.append("()");
+          }
+
+          if (operation.getDescription() != null
+              && !operation.getDescription().isEmpty()) {
+            message.append("/*")
+                   .append(operation.getDescription())
+                   .append("*/");
+          }
+
+          message.append('\n');
+        }
+      }
+    }
+
+    System.out.print(message.toString());
 
     return 0;
   }
