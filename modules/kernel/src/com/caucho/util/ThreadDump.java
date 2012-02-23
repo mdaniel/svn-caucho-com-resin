@@ -234,9 +234,12 @@ public class ThreadDump
   {
     StringBuilder sb = new StringBuilder();
     
-    sb.append("{");
-    sb.append("\"create_time\" : \"" + new Date(CurrentTime.getCurrentTime()) + "\",\n");
-    sb.append("\"thread_dump\" : {\n");
+    long timestamp = CurrentTime.getCurrentTime();
+    
+    sb.append("{\n");
+    sb.append("  \"create_time\": \"" + new Date(timestamp) + "\",\n");
+    sb.append("  \"timestamp\": " + timestamp + ",\n");
+    sb.append("  \"thread_dump\" : {\n");
     
     ThreadMXBean threadBean = ManagementFactory.getThreadMXBean();
 
@@ -257,7 +260,7 @@ public class ThreadDump
       jsonDumpThread(sb, threadInfo);
     }
     
-    sb.append("\n}");
+    sb.append("\n  }");
     sb.append("\n}");
 
     return sb.toString();

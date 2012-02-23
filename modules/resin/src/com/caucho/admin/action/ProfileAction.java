@@ -192,15 +192,17 @@ public class ProfileAction implements AdminAction
     }
     
     StringBuilder sb = new StringBuilder();
-    sb.append("{");
     
-    sb.append("\n  \"total_time\" : " + profile.getRunTime());
+    long timestamp = CurrentTime.getCurrentTime();
+    
+    sb.append("{\n");
+    sb.append("  \"create_time\": \"" + new Date(timestamp) + "\"");
+    sb.append(",\n  \"timestamp\": " + timestamp);
     sb.append(",\n  \"ticks\" : " + profile.getTicks());
     sb.append(",\n  \"depth\" : " + profile.getDepth());
     sb.append(",\n  \"period\" : " + profile.getPeriod());
     sb.append(",\n  \"end_time\" : " + profile.getEndTime());
     sb.append(",\n  \"gc_time\" : " + profile.getGcTime());
-    
     sb.append(",\n  \"profile\" :  [\n");
     
     for (int i = 0; i < entries.length; i++) {
@@ -221,9 +223,8 @@ public class ProfileAction implements AdminAction
     jsonGc(sb, gcTicks);
     */
     
-    sb.append("\n]");
-    
-    sb.append("}");
+    sb.append("\n  ]");
+    sb.append("\n}");
  
     return sb.toString();
   }

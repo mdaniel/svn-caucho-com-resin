@@ -170,10 +170,10 @@ function stat_graph_regexp($params, $pattern)
 
   $names = preg_grep($pattern, $full_names);
   
-  if (count($names) > 0) {
+  if (count($names) > 0)
     sort($names);
-    stat_graph($params, $names);
-  }
+    
+  stat_graph($params, $names);
 }
 
 function stat_graph($params, $names)
@@ -405,7 +405,7 @@ function stat_graph_script($stat, $canvas, $names,
   echo "var thumb_plot = $.plot(\"#${canvas}-thumb-plot\", thumb_graphs, thumb_options);\n\n";
   
   if (! $has_data) {
-    echo "  $('<div class=\"no-data\">No data available</div>').appendTo(\"#${canvas}-thumb-plot\");\n";
+    echo "  $('<div class=\"no-data\">NO DATA</div>').appendTo(\"#${canvas}-thumb-plot\");\n";
   } else {
   
     echo "$(\"#${canvas}-thumb-plot\").css('cursor','pointer');\n";

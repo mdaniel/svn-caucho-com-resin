@@ -288,7 +288,7 @@ function print_overview_graphs()
     = gettext('A line graph representing the active CPU usage over the last 6 hours.');
 
   stat_graph($cpu_params, 
-             array("$g_si|OS|CPU|CPU Active", "$g_si|OS|CPU|Unix Load Avg"));
+             array("$g_si|OS|CPU|CPU Active"));
 
   echo "</td></tr>\n";
   echo "</table>\n";

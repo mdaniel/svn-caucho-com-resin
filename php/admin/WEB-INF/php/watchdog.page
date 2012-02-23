@@ -38,13 +38,10 @@ echo "<h1>Watchdog";
 print_help("Watchdog");
 echo " Analysis</h1>\n";
 
-$index = $g_server_index;
-$si = $g_stat_prefix;
-
 $now = time();
 $start = $now - 7 * 24 * 60 * 60;
 
-$restart_list = $stat->getStartTimes($index, $start * 1000, $now * 1000);
+$restart_list = $stat->getStartTimes($g_server_index, $start * 1000, $now * 1000);
 
 if (empty($restart_list)) {
   echo "<p>";
@@ -124,7 +121,7 @@ echo "</div>";
 function display_watchdog_graph($mbean_server)
 {
   global $restart_time;
-  global $si;
+  global $g_si;
   
   $width = 250;
   $height = 150;
@@ -144,7 +141,7 @@ function display_watchdog_graph($mbean_server)
   $health_params->labels_mbean = "resin:type=HealthSystem";
   $health_params->legend = "right";
   
-  stat_graph_regexp($health_params, "/^$si\|Resin\|Health/");
+  stat_graph_regexp($health_params, "/^$g_si\|Resin\|Health/");
   
   echo "</td></tr>\n";
   echo "<tr valign='top'><td>";
@@ -155,7 +152,7 @@ function display_watchdog_graph($mbean_server)
   $request_params->alt
     = gettext('A line graph representing the number HTTP requests received in the last 60 minutes before the selected restart.');
 
-  stat_graph($request_params, array("$si|Resin|Http|Request Count"));
+  stat_graph($request_params, array("$g_si|Resin|Http|Request Count"));
              
   echo "</td><td>";
 
@@ -167,8 +164,8 @@ function display_watchdog_graph($mbean_server)
     = gettext('A line graph representing the amount of time spent processing HTTP requests in the last 60 minutes before the selected restart.');
 
   stat_graph($request_time_params,
-             array("$si|Resin|Http|Request Time",
-                  "$si|Resin|Http|Request Time Max"));
+             array("$g_si|Resin|Http|Request Time",
+                  "$g_si|Resin|Http|Request Time Max"));
 
   echo "</td><td>";
 
@@ -178,7 +175,7 @@ function display_watchdog_graph($mbean_server)
   $netstat_params->alt
     = gettext('A line graph representing network activity over the last 6 hours.');
 
-  stat_graph_regexp($netstat_params, "/$si\|OS\|Network\|(?!tcp-time)/");
+  stat_graph_regexp($netstat_params, "/$g_si\|OS\|Network\|(?!tcp-time)/");
 
   echo "</td></tr>\n";
   echo "<tr valign='top'><td>";
@@ -190,7 +187,7 @@ function display_watchdog_graph($mbean_server)
   $database_params->alt
     = gettext('A line graph representing the amout of time the database connection was active in the last 60 minutes before the selected restart.');
 
-  stat_graph($database_params, array("$si|Resin|Database|Connection Active"));
+  stat_graph($database_params, array("$g_si|Resin|Database|Connection Active"));
 
   echo "</td><td>";
 
@@ -202,8 +199,8 @@ function display_watchdog_graph($mbean_server)
     = gettext('A line graph representing the amout of time spent querying the database in the last 60 minutes before the selected restart.');
 
   stat_graph($database_time_params,
-             array("$si|Resin|Database|Query Time",
-                  "$si|Resin|Database|Query Time Max"));
+             array("$g_si|Resin|Database|Query Time",
+                  "$g_si|Resin|Database|Query Time Max"));
 
   echo "</td><td></td></tr>\n";
   echo "<tr valign='top'><td>";
@@ -216,11 +213,11 @@ function display_watchdog_graph($mbean_server)
     = gettext('A line graph representing the number of threads in various thread pools in the last 60 minutes before the selected restart.');
 
   stat_graph($jvm_thread_params,
-             array("$si|JVM|Thread|JVM Thread Count",
-                  "$si|JVM|Thread|JVM Runnable Count",
-                  "$si|JVM|Thread|JVM Native Count",
-                  "$si|JVM|Thread|JVM Waiting Count",
-                  "$si|JVM|Thread|JVM Blocked Count"));
+             array("$g_si|JVM|Thread|JVM Thread Count",
+                  "$g_si|JVM|Thread|JVM Runnable Count",
+                  "$g_si|JVM|Thread|JVM Native Count",
+                  "$g_si|JVM|Thread|JVM Waiting Count",
+                  "$g_si|JVM|Thread|JVM Blocked Count"));
 
   echo "</td><td>";
 
@@ -232,13 +229,13 @@ function display_watchdog_graph($mbean_server)
     = gettext('A line graph representing the number of threads in Resin thread pools in the last 60 minutes before the selected restart.');
 
   stat_graph($resin_thread_params,
-             array("$si|JVM|Thread|JVM Thread Count",
-                  "$si|Resin|Thread|Thread Count",
-                  "$si|Resin|Thread|Thread Active Count",
-                  "$si|Resin|Thread|Thread Idle Count",
-                  "$si|Resin|Thread|Thread Task Queue",
-                  "$si|Resin|Thread|Thread Priority Queue",
-                  "$si|Resin|Thread|Thread Overflow Count"));
+             array("$g_si|JVM|Thread|JVM Thread Count",
+                  "$g_si|Resin|Thread|Thread Count",
+                  "$g_si|Resin|Thread|Thread Active Count",
+                  "$g_si|Resin|Thread|Thread Idle Count",
+                  "$g_si|Resin|Thread|Thread Task Queue",
+                  "$g_si|Resin|Thread|Thread Priority Queue",
+                  "$g_si|Resin|Thread|Thread Overflow Count"));
 
   echo "</td><td>";
 
@@ -248,7 +245,7 @@ function display_watchdog_graph($mbean_server)
   $cpu_params->alt
     = gettext('A line graph representing the active CPU usage in the last 60 minutes before the selected restart.');
 
-  stat_graph_regexp($cpu_params, "/^$si\|OS\|CPU\|CPU Active/");
+  stat_graph_regexp($cpu_params, "/^$g_si\|OS\|CPU\|CPU Active/");
 
   echo "</td></tr>\n";
   echo "<tr valign='top'><td>";
@@ -260,9 +257,9 @@ function display_watchdog_graph($mbean_server)
     = gettext('A line graph representing the amount of time spent perfoming garbage collection in the last 60 minutes before the selected restart.');
 
   stat_graph($memory_params,
-             array("$si|JVM|Memory|Heap Memory Free",
-                  "$si|JVM|Memory|Tenured Memory Free",
-                  "$si|JVM|Memory|PermGen Memory Free"));
+             array("$g_si|JVM|Memory|Heap Memory Free",
+                  "$g_si|JVM|Memory|Tenured Memory Free",
+                  "$g_si|JVM|Memory|PermGen Memory Free"));
 
   echo "</td><td>";
 
@@ -273,7 +270,7 @@ function display_watchdog_graph($mbean_server)
   $memory_gc_params->alt
     = gettext('A line graph representing network activity in the last 60 minutes before the selected restart.');
 
-  stat_graph_regexp($memory_gc_params, "/$si\|JVM\|Memory\|GC Time/");
+  stat_graph_regexp($memory_gc_params, "/$g_si\|JVM\|Memory\|GC Time/");
 
   echo "</td><td>";
 
@@ -285,7 +282,7 @@ function display_watchdog_graph($mbean_server)
     = gettext('A line graph representing the file descriptor count in the last 60 minutes before the selected restart.');
 
   stat_graph_regexp($file_descriptors_params,
-                    "/$si\|OS\|Process\|File Descriptor Count/");
+                    "/$g_si\|OS\|Process\|File Descriptor Count/");
 
   echo "</td></tr>\n";
   echo "</table>";

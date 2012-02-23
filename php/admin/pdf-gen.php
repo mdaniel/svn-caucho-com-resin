@@ -13,6 +13,11 @@ global $g_is_watchdog;
 global $g_is_snapshot;
 global $profile_time;
 global $period;
+global $g_jmx_dump;
+global $g_jmx_dump_time;
+global $g_start, $g_end, $g_end_unadjusted;
+global $g_canvas;
+global $g_server;
 
 $g_report = get_param($g_report, "report", "Snapshot");
 $g_title = get_param($g_title, "title", $g_report);
@@ -112,15 +117,14 @@ if (! $time) {
   else {
     $time = time() + 5;
   }
-}  
+}
 
 $g_end = $time;
+$g_end_unadjusted = $g_end;
 
 if (2 * DAY <= $period) {
   $tz = date_offset_get(new DateTime);
-
   $ticks_sec = $majorTicks / 1000;
-
   $g_end = ceil(($g_end + $tz) / $ticks_sec) * $ticks_sec - $tz;
 }
 
@@ -129,51 +133,47 @@ $g_start = $g_end - $period;
 $g_canvas->footer_left_text = date("Y-m-d H:i", $g_end);
 $g_canvas->footer_right_text = date("Y-m-d H:i", $g_end);
 
-$g_canvas->writeSection("$g_title Report", false);
-
-$col1 = 85;
-$col2 = 300;
-
-$g_canvas->writeTextColumn($col1, 'r', "Report Generated:");
-$g_canvas->writeTextColumn($col2, 'l', date("Y-m-d H:i", time()));
-$g_canvas->newLine();
-
-$g_canvas->writeTextColumn($col1, 'r', "Snapshot Taken:");
-$g_canvas->writeTextColumn($col2, 'l', date("Y-m-d H:i", $g_end));
-$g_canvas->newLine();
-
-$g_canvas->writeTextColumn($col1, 'r', "Data Range:");
-$g_canvas->writeTextColumn($col2, 'l', date("Y-m-d H:i", $g_start) . " through " . date("Y-m-d H:i", $g_end));
-$g_canvas->newLine();
-
-if ($mPage->isSummary()) {
-  pdf_summary();
-}
-
-pdf_health($g_canvas);
-
-pdf_draw_cluster_graphs($mPage);
-
-pdf_draw_graphs($mPage);
-
-if ($mPage->isHeapDump()) {
-  pdf_heap_dump();
-}
- 
-if ($mPage->isProfile()) {
-  pdf_profile();
-}
-
-if ($mPage->isThreadDump()) {
-  pdf_thread_dump();
-}
-
-if ($mPage->isLog()) {
-  pdf_write_log();
-}
-
-if ($mPage->isJmxDump()) {
-  pdf_jmx_dump();
+$jmx_dump = pdf_load_json_dump("Resin|JmxDump", "jmx");
+if (! $jmx_dump) {
+  $g_canvas->newLine();
+  $g_canvas->writeTextLine("Error: No stored JMX snapshot was found in the timeframe " . date("Y-m-d H:i", $g_start) . " through " . date("Y-m-d H:i", $g_end))
+} else {
+  
+  $g_jmx_dump_time = create_timestamp($jmx_dump);
+  $g_jmx_dump =& $jmx_dump["jmx"];
+  
+  pdf_header();
+  
+  if ($mPage->isSummary()) {
+    pdf_summary();
+  }
+  
+  pdf_health();
+  
+  pdf_draw_cluster_graphs($mPage);
+  
+  pdf_draw_graphs($mPage);
+  
+  if ($mPage->isHeapDump()) {
+    pdf_heap_dump();
+  }
+  
+  if ($mPage->isProfile()) {
+    pdf_profile();
+  }
+  
+  if ($mPage->isThreadDump()) {
+    pdf_thread_dump();
+  }
+  
+  if ($mPage->isLog()) {
+    pdf_write_log();
+  }
+  
+  if ($mPage->isJmxDump()) {
+    pdf_jmx_dump();
+  }
+  
 }
 
 $g_canvas->end();

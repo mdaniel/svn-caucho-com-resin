@@ -63,21 +63,22 @@ public class JmxDumpAction extends AbstractJmxAction implements AdminAction
     MBeanServer server = Jmx.getMBeanServer();
     if (server == null)
       server = ManagementFactory.getPlatformMBeanServer();
+    
+    if (server == null)
+      return null;
 
     StringBuilder sb = new StringBuilder();
     
-    sb.append("{");
-    sb.append("\"create_time\": \""
-              + new Date(CurrentTime.getCurrentTime()) + "\"\n");
+    long timestamp = CurrentTime.getCurrentTime();
     
-    if (server != null) {
-      sb.append(", \"jmx\": {\n");
-      
-      fillServer(sb, server);
-      
-      sb.append("\n}");
-    }
+    sb.append("{\n");
+    sb.append("  \"create_time\": \"" + new Date(timestamp) + "\",\n");
+    sb.append("  \"timestamp\": " + timestamp + ",\n");
+    sb.append("  \"jmx\" : {\n");
     
+    fillServer(sb, server);
+
+    sb.append("\n  }");
     sb.append("\n}");
     
     return sb.toString();
