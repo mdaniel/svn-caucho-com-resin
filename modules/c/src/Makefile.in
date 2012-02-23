@@ -1,7 +1,7 @@
 SHELL=@SHELL@
 srcdir = @srcdir@
 top_srcdir = @top_srcdir@
-plugins=@plugins@
+plugins=@plugins@ resinssl resin_os
 
 all	: plugins
 
