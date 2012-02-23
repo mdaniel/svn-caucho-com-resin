@@ -29,12 +29,12 @@
 
 package com.caucho.boot;
 
+import java.util.Date;
+
 import com.caucho.config.types.Period;
 import com.caucho.server.admin.ManagerClient;
 import com.caucho.util.CurrentTime;
 import com.caucho.util.L10N;
-
-import java.util.Date;
 
 public class ListRestartsCommand extends AbstractManagementCommand
 {
