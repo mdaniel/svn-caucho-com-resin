@@ -498,8 +498,9 @@ public class CacheImpl<K,V>
     if (oldHash == null || oldHash.isNull()) {
       isChanged = (result == null || result.isNull());
     }
-    else
-      isChanged = ! oldHash.equals(result);
+    else {
+      isChanged = oldHash.equals(result);
+    }
     
     return isChanged;
   }

@@ -211,6 +211,13 @@ public class CacheKeyGeneratorImpl {
     {
       return _cacheAnnotation;
     }
+    
+    public String toString()
+    {
+      return (getClass().getSimpleName() + "[" + _cacheName + ","
+              + _method.getDeclaringClass().getSimpleName() + "."
+              + _method.getName());
+    }
   }
   
   class InvocationContext extends MethodDetails

@@ -591,7 +591,6 @@ public class MemcachedConnection implements ProtocolConnection
       long now = CurrentTime.getCurrentTime();
       
       if (entry.isExpired(now)) {
-        System.out.println("DED: " + key);
         return;
       }
       
@@ -599,7 +598,7 @@ public class MemcachedConnection implements ProtocolConnection
       long unique = getCasKey(valueKey);
       
       if (hash != 0 && hash == unique) {
-        out.print("NOT_MODIFIED\r\n");
+        // out.print("NOT_MODIFIED\r\n");
         // get-if-modified
         return;
       }
