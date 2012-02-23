@@ -38,5 +38,5 @@ public interface AmqpBroker
   public AmqpSender createSender(String name);
   
   public AmqpReceiver createReceiver(String name,
-                                          AmqpMessageListener listener);
+                                     AmqpMessageListener listener);
 }

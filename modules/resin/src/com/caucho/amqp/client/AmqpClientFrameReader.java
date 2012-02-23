@@ -58,37 +58,50 @@ import com.caucho.vfs.WriteStream;
 /**
  * AMQP client
  */
-public class AmqpClientSender {
+class AmqpClientFrameReader implements Runnable {
   private static final Logger log
-    = Logger.getLogger(AmqpClientSender.class.getName());
+    = Logger.getLogger(AmqpClientFrameReader.class.getName());
   
   private AmqpClientImpl _client;
   
-  private String _address;
-  private int _handle;
+  private AmqpFrameReader _fin;
+  private AmqpReader _ain;
   
-  AmqpClientSender(AmqpClientImpl client,
-                   String address,
-                   int handle)
+  AmqpClientFrameReader(AmqpClientImpl client,
+                   AmqpFrameReader fin,
+                   AmqpReader ain)
   {
     _client = client;
-    _address = address;
-    _handle = handle;
-  }
-  
-  public void send(byte []buffer)
-  {
-    _client.transmit(_handle, buffer, 0, buffer.length);
-  }
-  
-  public void close()
-  {
-    _client.closeSender(_handle);
+    _fin = fin;
+    _ain = ain;
   }
   
   @Override
-  public String toString()
+  public void run()
   {
-    return getClass().getSimpleName() + "[" + _handle + "," + _address + "]";
+    try {
+      while (! _client.isDisconnected() && readFrame()) {
+      }
+    } catch (IOException e) {
+      log.log(Level.FINE, e.toString(), e);
+    } finally {
+      _client.onClose();
+    }
+  }
+  
+  private boolean readFrame()
+    throws IOException
+  {
+    if (! _fin.startFrame()) {
+      return false;
+    }
+    
+    AmqpAbstractFrame frame = _ain.readObject(AmqpAbstractFrame.class);
+    
+    frame.invoke(_fin, _client);
+    
+    _fin.finishFrame();
+    
+    return true;
   }
 }

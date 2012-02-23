@@ -27,50 +27,43 @@
  * @author Scott Ferguson
  */
 
-package com.caucho.amqp.io;
+package com.caucho.amqp.server;
 
 import java.io.IOException;
+import java.io.InputStream;
 
+import com.caucho.amqp.broker.AmqpMessageListener;
+import com.caucho.amqp.broker.AmqpReceiver;
+import com.caucho.amqp.broker.AmqpSender;
+import com.caucho.amqp.io.FrameAttach;
 
 /**
- * AMQP client/server frame handler.
+ * link session management
  */
-public interface AmqpReceiver {
+public class AmqpReceiverLink extends AmqpLink implements AmqpMessageListener
+{
+  private AmqpConnection _conn;
+  
+  private AmqpReceiver _sub;
+  
+  public AmqpReceiverLink(AmqpConnection conn, FrameAttach attach)
+  {
+    super(attach);
+    
+    _conn = conn;
+  }
+  
+  void setReceiver(AmqpReceiver sub)
+  {
+    _sub = sub;
+  }
 
-  /**
-   * Receives a session-begin frame.
-   * @throws IOException 
-   */
-  void onBegin(FrameBegin frameBegin)
-    throws IOException;
-
-  /**
-   * @param frameEnd
-   */
-  void onEnd(FrameEnd frameEnd)
-    throws IOException;
-
-  /**
-   * @param frameClose
-   */
-  void onClose(FrameClose frameClose)
-    throws IOException;
-
-  /**
-   * @param frameAttach
-   */
-  void onAttach(FrameAttach frameAttach)
-    throws IOException;
-
-  /**
-   * @param frameDetach
-   */
-  void onDetach(FrameDetach frameDetach)
-    throws IOException;
-
-  /**
-   * @param frameTransfer
-   */
-  void onTransfer(AmqpFrameReader fin, FrameTransfer frameTransfer)
-    throws IOException;
+  @Override
+  public void onMessage(long messageId, 
+                        InputStream bodyIs, 
+                        long contentLength)
+    throws IOException
+  {
+    _conn.writeMessage(this, bodyIs, contentLength);
+  }
 }

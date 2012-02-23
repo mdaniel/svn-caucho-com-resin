@@ -38,7 +38,7 @@ import java.util.logging.Logger;
 import com.caucho.amqp.AmqpException;
 import com.caucho.amqp.io.AmqpAbstractComposite;
 import com.caucho.amqp.io.AmqpAbstractPacket;
-import com.caucho.amqp.io.AmqpReceiver;
+import com.caucho.amqp.io.AmqpFrameHandler;
 import com.caucho.amqp.io.FrameBegin;
 import com.caucho.amqp.io.FrameOpen;
 import com.caucho.amqp.io.AmqpConstants;
@@ -58,50 +58,48 @@ import com.caucho.vfs.WriteStream;
 /**
  * AMQP client
  */
-class AmqpClientReader implements Runnable {
+public class AmqpClientReceiver {
   private static final Logger log
-    = Logger.getLogger(AmqpClientReader.class.getName());
+    = Logger.getLogger(AmqpClientReceiver.class.getName());
   
   private AmqpClientImpl _client;
   
-  private AmqpFrameReader _fin;
-  private AmqpReader _ain;
+  private String _address;
+  private int _handle;
   
-  AmqpClientReader(AmqpClientImpl client,
-                   AmqpFrameReader fin,
-                   AmqpReader ain)
+  private String _value;
+  
+  AmqpClientReceiver(AmqpClientImpl client,
+                   String address,
+                   int handle)
   {
     _client = client;
-    _fin = fin;
-    _ain = ain;
+    _address = address;
+    _handle = handle;
+  }
+  
+  public String take()
+  {
+    String value = _value;
+    
+    _value = null;
+    
+    return value;
+  }
+  
+  void setValue(String value)
+  {
+    _value = value;
+  }
+  
+  public void close()
+  {
+    _client.closeReceiver(_handle);
   }
   
   @Override
-  public void run()
+  public String toString()
   {
-    try {
-      while (! _client.isDisconnected() && readFrame()) {
-      }
-    } catch (IOException e) {
-      log.log(Level.FINE, e.toString(), e);
-    } finally {
-      _client.onClose();
-    }
-  }
-  
-  private boolean readFrame()
-    throws IOException
-  {
-    if (! _fin.startFrame()) {
-      return false;
-    }
-    
-    AmqpAbstractFrame frame = _ain.readObject(AmqpAbstractFrame.class);
-    
-    frame.invoke(_fin, _client);
-    
-    _fin.finishFrame();
-    
-    return true;
+    return getClass().getSimpleName() + "[" + _handle + "," + _address + "]";
   }
 }

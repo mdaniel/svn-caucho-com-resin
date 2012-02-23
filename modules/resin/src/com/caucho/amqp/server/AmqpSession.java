@@ -39,7 +39,7 @@ import com.caucho.amqp.io.AmqpAbstractFrame;
 import com.caucho.amqp.io.AmqpFrameReader;
 import com.caucho.amqp.io.AmqpFrameWriter;
 import com.caucho.amqp.io.AmqpReader;
-import com.caucho.amqp.io.AmqpReceiver;
+import com.caucho.amqp.io.AmqpFrameHandler;
 import com.caucho.amqp.io.AmqpWriter;
 import com.caucho.amqp.io.SaslMechanisms;
 import com.caucho.amqp.io.SaslOutcome;

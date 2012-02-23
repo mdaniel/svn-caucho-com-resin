@@ -29,6 +29,7 @@
 
 package com.caucho.amqp.server;
 
+import com.caucho.amqp.broker.AmqpReceiver;
 import com.caucho.amqp.broker.AmqpSender;
 import com.caucho.amqp.io.FrameAttach;
 
@@ -45,10 +46,15 @@ public class AmqpLink
   
   public AmqpLink(FrameAttach attach, AmqpSender pub)
   {
-    _handle = attach.getHandle();
-    _attach = attach;
+    this(attach);
     
     _pub = pub;
+  }
+  
+  public AmqpLink(FrameAttach attach)
+  {
+    _handle = attach.getHandle();
+    _attach = attach;
   }
   
   public int getHandle()
@@ -59,8 +65,6 @@ public class AmqpLink
   void write(byte []buffer, int offset, int length)
   {
     _pub.messageComplete(buffer, offset, length, null);
-    
-    System.out.println(_pub + " " + new String(buffer, offset, length));
   }
   
   @Override

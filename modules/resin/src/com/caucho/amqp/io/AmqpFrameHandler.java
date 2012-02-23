@@ -33,54 +33,44 @@ import java.io.IOException;
 
 
 /**
- * AMQP session end
+ * AMQP client/server frame handler.
  */
-public class FrameEnd extends AmqpAbstractFrame {
-  public static final int CODE = AmqpConstants.FT_SESSION_END;
+public interface AmqpFrameHandler {
 
-  private AmqpError _error;
-  
-  public AmqpError getError()
-  {
-    return _error;
-  }
-  
-  @Override
-  public long getDescriptorCode()
-  {
-    return FT_SESSION_END;
-  }
-  
-  @Override
-  public FrameEnd createInstance()
-  {
-    return new FrameEnd();
-  }
-  
-  @Override
-  public void invoke(AmqpFrameReader fin, AmqpFrameHandler receiver)
-    throws IOException
-  {
-    receiver.onEnd(this);
-  }
-  
-  @Override
-  public void readBody(AmqpReader in, int count)
-    throws IOException
-  {
-    _error = in.readObject(AmqpError.class);
-  }
-  
-  @Override
-  public int writeBody(AmqpWriter out)
-    throws IOException
-  {
-    if (_error != null)
-      _error.write(out);
-    else
-      out.writeNull();
-    
-    return 1;
-  }
+  /**
+   * Receives a session-begin frame.
+   * @throws IOException 
+   */
+  void onBegin(FrameBegin frameBegin)
+    throws IOException;
 
+  /**
+   * @param frameEnd
+   */
+  void onEnd(FrameEnd frameEnd)
+    throws IOException;
+
+  /**
+   * @param frameClose
+   */
+  void onClose(FrameClose frameClose)
+    throws IOException;
+
+  /**
+   * @param frameAttach
+   */
+  void onAttach(FrameAttach frameAttach)
+    throws IOException;
+
+  /**
+   * @param frameDetach
+   */
+  void onDetach(FrameDetach frameDetach)
+    throws IOException;
+
+  /**
+   * @param frameTransfer
+   */
+  void onTransfer(AmqpFrameReader fin, FrameTransfer frameTransfer)
+    throws IOException;
 }

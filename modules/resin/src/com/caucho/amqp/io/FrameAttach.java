@@ -170,7 +170,7 @@ public class FrameAttach extends AmqpAbstractFrame {
   }
   
   @Override
-  public void invoke(AmqpFrameReader fin, AmqpReceiver receiver)
+  public void invoke(AmqpFrameReader fin, AmqpFrameHandler receiver)
     throws IOException
   {
     receiver.onAttach(this);

@@ -45,7 +45,7 @@ import com.caucho.amqp.io.FrameAttach;
 import com.caucho.amqp.io.FrameClose;
 import com.caucho.amqp.io.FrameDetach;
 import com.caucho.amqp.io.FrameEnd;
-import com.caucho.amqp.io.AmqpReceiver;
+import com.caucho.amqp.io.AmqpFrameHandler;
 import com.caucho.amqp.io.FrameOpen;
 import com.caucho.amqp.io.AmqpConstants;
 import com.caucho.amqp.io.AmqpError;
@@ -70,7 +70,7 @@ import com.caucho.vfs.WriteStream;
 /**
  * AMQP client
  */
-public class AmqpClientImpl implements AmqpReceiver {
+public class AmqpClientImpl implements AmqpFrameHandler {
   private static final L10N L = new L10N(AmqpClientImpl.class);
   
   private static final Logger log
@@ -92,7 +92,9 @@ public class AmqpClientImpl implements AmqpReceiver {
   private AmqpFrameReader _fin;
   private AmqpReader _ain;
   
-  private AmqpClientReader _reader;
+  private AmqpClientFrameReader _reader;
+  
+  private int _handleCounter = 1;
   
   private final AtomicBoolean _isClosed = new AtomicBoolean();
   private boolean _isDisconnected;
@@ -141,7 +143,7 @@ public class AmqpClientImpl implements AmqpReceiver {
       readOpen();
       System.out.println("OK-OPEN");
       
-      _reader = new AmqpClientReader(this, _fin, _ain);
+      _reader = new AmqpClientFrameReader(this, _fin, _ain);
       
       ThreadPool.getCurrent().schedule(_reader);
       
@@ -157,7 +159,7 @@ public class AmqpClientImpl implements AmqpReceiver {
   
   public AmqpClientSender createSender(String address)
   {
-    int handle = 1;
+    int handle = _handleCounter++;
     
     FrameAttach attach = new FrameAttach();
     attach.setName("client-" + address);
@@ -186,9 +188,67 @@ public class AmqpClientImpl implements AmqpReceiver {
     }
   }
   
+  public AmqpClientReceiver createReceiver(String address)
+  {
+    int handle = _handleCounter++;
+    
+    FrameAttach attach = new FrameAttach();
+    attach.setName("client-" + address);
+    attach.setHandle(handle);
+    attach.setRole(Role.RECEIVER);
+    
+    LinkSource source = new LinkSource();
+    source.setAddress(address);
+    attach.setSource(source);
+    
+    LinkTarget target = new LinkTarget();
+    attach.setTarget(target);
+    
+    while (_links.size() <= handle) {
+      _links.add(null);
+    }
+    
+    Link link = new Link(attach);
+    
+    _links.set(handle, link);
+    System.out.println("LINKS: " + _links);
+    
+    try {
+      writeFrame(attach);
+      
+      AmqpClientReceiver receiver;
+    
+      receiver = new AmqpClientReceiver(this, address, attach.getHandle());
+      
+      link.setReceiver(receiver);
+      
+      return receiver;
+    } catch (IOException e) {
+      throw new AmqpException(e);
+    }
+  }
+
   void closeSender(int handle)
   {
     Link link = _links.set(handle, null);
+    System.out.println("CLOSE: " + link);
+    
+    if (link != null) {
+      FrameDetach detach = new FrameDetach();
+      detach.setHandle(handle);
+      
+      try {
+        writeFrame(detach);
+      } catch (IOException e) {
+        throw new AmqpException(e);
+      }
+    }
+  }
+  
+  void closeReceiver(int handle)
+  {
+    Link link = _links.set(handle, null);
+    System.out.println("CLOSE2: " + link);
     
     if (link != null) {
       FrameDetach detach = new FrameDetach();
@@ -334,6 +394,7 @@ public class AmqpClientImpl implements AmqpReceiver {
       _aout.writeBinary(buffer, offset, length);
     
       _fout.finishFrame();
+      _fout.flush();
     } catch (IOException e) {
       log.log(Level.FINER, e.toString(), e);
     }
@@ -358,7 +419,21 @@ public class AmqpClientImpl implements AmqpReceiver {
                          FrameTransfer frameTransfer)
     throws IOException
   {
-    System.out.println("CLIENT_BEGIN: " + frameTransfer);
+    int handle = frameTransfer.getHandle();
+    
+    Link link = _links.get(handle);
+    AmqpClientReceiver receiver = link.getReceiver();
+
+    AmqpReader ain = new AmqpReader();
+    ain.init(fin);
+    
+    long desc = ain.readDescriptor();
+    
+    byte []data = ain.readBinary();
+    
+    String value = new String(data);
+    
+    receiver.setValue(value);
   }
   
   @Override
@@ -478,10 +553,21 @@ public class AmqpClientImpl implements AmqpReceiver {
   
   static class Link {
     private FrameAttach _attach;
+    private AmqpClientReceiver _receiver;
     
     Link(FrameAttach attach)
     {
       _attach = attach;
+    }
+    
+    void setReceiver(AmqpClientReceiver receiver)
+    {
+      _receiver = receiver;
+    }
+    
+    AmqpClientReceiver getReceiver()
+    {
+      return _receiver;
     }
   }
 }

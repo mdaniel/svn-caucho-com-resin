@@ -30,10 +30,13 @@
 package com.caucho.amqp.server;
 
 import java.io.IOException;
+import java.io.InputStream;
 import java.util.logging.Logger;
 
 import com.caucho.amqp.broker.AmqpBroker;
 import com.caucho.amqp.broker.AmqpEnvironmentBroker;
+import com.caucho.amqp.broker.AmqpMessageListener;
+import com.caucho.amqp.broker.AmqpReceiver;
 import com.caucho.amqp.broker.AmqpSender;
 import com.caucho.amqp.io.FrameAttach;
 import com.caucho.amqp.io.FrameBegin;
@@ -45,7 +48,7 @@ import com.caucho.amqp.io.AmqpAbstractFrame;
 import com.caucho.amqp.io.AmqpFrameReader;
 import com.caucho.amqp.io.AmqpFrameWriter;
 import com.caucho.amqp.io.AmqpReader;
-import com.caucho.amqp.io.AmqpReceiver;
+import com.caucho.amqp.io.AmqpFrameHandler;
 import com.caucho.amqp.io.AmqpWriter;
 import com.caucho.amqp.io.FrameTransfer;
 import com.caucho.amqp.io.SaslMechanisms;
@@ -60,7 +63,7 @@ import com.caucho.vfs.WriteStream;
 /**
  * Custom serialization for the cache
  */
-public class AmqpConnection implements ProtocolConnection, AmqpReceiver
+public class AmqpConnection implements ProtocolConnection, AmqpFrameHandler
 {
   private static final Logger log
     = Logger.getLogger(AmqpConnection.class.getName());
@@ -293,6 +296,28 @@ public class AmqpConnection implements ProtocolConnection, AmqpReceiver
     _fout.flush();
   }
   
+  void writeMessage(AmqpLink link, InputStream is, long length)
+    throws IOException
+  {
+    FrameTransfer transfer = new FrameTransfer();
+    
+    transfer.setHandle(link.getHandle());
+    
+    _fout.startFrame(0);
+    
+    transfer.write(_aout);
+    
+    int ch;
+    
+    while ((ch = is.read()) >= 0) {
+      _fout.write(ch);
+    }
+    
+    _fout.finishFrame();
+    _fout.flush();
+    System.out.println("MSG:");
+  }
+  
   private boolean readFrame()
     throws IOException
   {
@@ -326,19 +351,32 @@ public class AmqpConnection implements ProtocolConnection, AmqpReceiver
   public void onAttach(FrameAttach clientAttach)
     throws IOException
   {
-    FrameAttach serverAttach = new FrameAttach();
-    
     AmqpSession session = _sessions[0];
     
-    AmqpBroker broker = AmqpEnvironmentBroker.create();
-    System.out.println("BROK:" + broker);
+    if (Role.SENDER.equals(clientAttach.getRole())) {
+      attachSender(clientAttach, session);
+    }
+    else if (Role.RECEIVER.equals(clientAttach.getRole())) {
+      attachReceiver(clientAttach, session);
+    }
+    else {
+      throw new IllegalStateException("bad role");
+    }
+  }
+
+  private void attachSender(FrameAttach clientAttach, 
+                            AmqpSession session)
+    throws IOException
+  {
     String targetAddress = clientAttach.getTarget().getAddress();
+    
+    AmqpBroker broker = AmqpEnvironmentBroker.create();
     
     AmqpSender pub = broker.createSender(targetAddress);
     
-    System.out.println("PUB: " + pub);
-    
     session.addLink(new AmqpLink(clientAttach, pub));
+    
+    FrameAttach serverAttach = new FrameAttach();
     
     serverAttach.setName(clientAttach.getName());
     serverAttach.setHandle(clientAttach.getHandle());
@@ -347,7 +385,31 @@ public class AmqpConnection implements ProtocolConnection, AmqpReceiver
       serverAttach.setRole(Role.RECEIVER);
     }
     
-    System.out.println("STACCH: " + clientAttach);
+    sendFrame(serverAttach);
+  }
+
+  private void attachReceiver(FrameAttach clientAttach, 
+                              AmqpSession session)
+    throws IOException
+  {
+    String sourceAddress = clientAttach.getSource().getAddress();
+    
+    AmqpBroker broker = AmqpEnvironmentBroker.create();
+    
+    AmqpReceiverLink link = new AmqpReceiverLink(this, clientAttach);
+    
+    AmqpReceiver sub = broker.createReceiver(sourceAddress, link);
+    
+    link.setReceiver(sub);
+    
+    session.addLink(link);
+    
+    FrameAttach serverAttach = new FrameAttach();
+    
+    serverAttach.setName(clientAttach.getName());
+    serverAttach.setHandle(clientAttach.getHandle());
+    
+    serverAttach.setRole(Role.SENDER);
     
     sendFrame(serverAttach);
   }

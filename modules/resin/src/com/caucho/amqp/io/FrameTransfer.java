@@ -130,7 +130,7 @@ public class FrameTransfer extends AmqpAbstractFrame {
   }
   
   @Override
-  public void invoke(AmqpFrameReader fin, AmqpReceiver handler)
+  public void invoke(AmqpFrameReader fin, AmqpFrameHandler handler)
     throws IOException
   {
     handler.onTransfer(fin, this);

@@ -243,7 +243,48 @@ public class AmqpReader implements AmqpConstants {
         throw new IOException("unknown symbol code: " + Integer.toHexString(code));
       }
   }
-  
+
+  public byte []readBinary()
+    throws IOException
+  {
+    _isNull = false;
+      
+    InputStream is = _is;
+      
+    int code = is.read();
+    int len;
+      
+    switch (code) {
+    case E_NULL:
+      return null;
+        
+    case E_BIN_1:
+    {
+      len = (is.read() & 0xff);
+      byte []data = new byte[len];
+     
+      // XXX: read, all
+      is.read(data, 0, data.length);
+      
+      return data;
+    }
+        
+    case E_BIN_4:
+    {
+      len = readInt(is);
+      byte []data = new byte[len];
+       
+      // XXX: read, all
+      is.read(data, 0, data.length);
+        
+      return data;
+    }
+        
+    default:
+      throw new IOException("unknown binary code: " + Integer.toHexString(code));
+    }
+  }
+
   public String readString()
     throws IOException
   {
