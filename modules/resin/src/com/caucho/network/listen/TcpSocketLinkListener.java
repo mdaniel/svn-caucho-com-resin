@@ -64,6 +64,7 @@ import com.caucho.util.FreeList;
 import com.caucho.util.Friend;
 import com.caucho.util.L10N;
 import com.caucho.vfs.JsseSSLFactory;
+import com.caucho.vfs.OpenSSLFactory;
 import com.caucho.vfs.QJniServerSocket;
 import com.caucho.vfs.QServerSocket;
 import com.caucho.vfs.QSocket;
@@ -375,11 +376,13 @@ public class TcpSocketLinkListener
     throws ConfigException
   {
     try {
+      /*
       ClassLoader loader = Thread.currentThread().getContextClassLoader();
 
       Class<?> cl = Class.forName("com.caucho.vfs.OpenSSLFactory", false, loader);
+      */
 
-      _sslFactory = (SSLFactory) cl.newInstance();
+      _sslFactory = new OpenSSLFactory(); // (SSLFactory) cl.newInstance();
 
       return _sslFactory;
     } catch (Throwable e) {

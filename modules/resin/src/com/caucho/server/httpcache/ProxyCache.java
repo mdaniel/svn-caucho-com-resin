@@ -26,7 +26,6 @@ import com.caucho.config.types.Bytes;
 import com.caucho.db.Database;
 import com.caucho.db.block.BlockManager;
 import com.caucho.db.block.BlockStore;
-import com.caucho.license.LicenseCheck;
 import com.caucho.loader.CloseListener;
 import com.caucho.loader.Environment;
 import com.caucho.loader.EnvironmentLocal;
@@ -80,19 +79,6 @@ public class ProxyCache extends AbstractProxyCache
   public ProxyCache()
     throws ConfigException
   {
-    try {
-      Class<?> cl = Class.forName("com.caucho.license.LicenseCheckImpl");
-      LicenseCheck license = (LicenseCheck) cl.newInstance();
-
-      license.requireProfessional(1);
-    } catch (ConfigException e) {
-      throw e;
-    } catch (Exception e) {
-      log.log(Level.FINE, e.toString(), e);
-
-      throw new ConfigException(L.l("<cache> requires a valid Resin Professional license.\nSee http://www.caucho.com for information on licensing."));
-    }
-
     _resin = Resin.getCurrent();
     _cacheLocal.set(this);
 
