@@ -31,7 +31,7 @@ package com.caucho.admin.action;
 import com.caucho.management.server.StatServiceValue;
 import com.caucho.server.admin.StatServiceValuesQueryReply;
 import com.caucho.server.admin.StatSystem;
-import com.caucho.server.cluster.Server;
+import com.caucho.server.cluster.ServletService;
 import com.caucho.util.L10N;
 
 import java.util.ArrayList;
@@ -53,7 +53,7 @@ public class GetStatsAction implements AdminAction
   {
     StatSystem stats = StatSystem.getCurrent();
 
-    int id = Server.getCurrent().getServerIndex();
+    int id = ServletService.getCurrent().getServerIndex();
 
     String serverIndex;
 

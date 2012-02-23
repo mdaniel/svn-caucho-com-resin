@@ -27,7 +27,7 @@
  * @author Scott Ferguson
  */
 
-package com.caucho.server.cache;
+package com.caucho.server.httpcache;
 
 import java.io.IOException;
 import java.io.OutputStream;

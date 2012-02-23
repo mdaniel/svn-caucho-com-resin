@@ -49,11 +49,11 @@ import com.caucho.loader.EnvironmentClassLoader;
 import com.caucho.network.listen.TcpSocketLinkListener;
 import com.caucho.rewrite.DispatchRule;
 import com.caucho.server.admin.Management;
-import com.caucho.server.cache.AbstractProxyCache;
 import com.caucho.server.distcache.PersistentStoreConfig;
 import com.caucho.server.e_app.EarConfig;
 import com.caucho.server.host.HostConfig;
 import com.caucho.server.host.HostExpandDeployGenerator;
+import com.caucho.server.httpcache.AbstractProxyCache;
 import com.caucho.server.log.AccessLog;
 import com.caucho.server.resin.Resin;
 import com.caucho.server.rewrite.RewriteDispatch;
@@ -93,12 +93,12 @@ public class ServletContainerConfig implements EnvironmentBean, SchemaBean
   private long _threadIdleTimeout = -1;
   
   private CloudServer _selfServer;
-  private Server _servletContainer;
+  private ServletService _servletContainer;
 
   /**
    * Creates a new servlet server.
    */
-  public ServletContainerConfig(Server servletContainer)
+  public ServletContainerConfig(ServletService servletContainer)
   {
     _servletContainer = servletContainer;
     

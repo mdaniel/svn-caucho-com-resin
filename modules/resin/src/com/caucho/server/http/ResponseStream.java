@@ -38,8 +38,8 @@ import java.util.logging.Logger;
 
 import javax.servlet.http.HttpServletResponse;
 
-import com.caucho.server.cache.AbstractCacheEntry;
-import com.caucho.server.cache.AbstractCacheFilterChain;
+import com.caucho.server.httpcache.AbstractCacheEntry;
+import com.caucho.server.httpcache.AbstractCacheFilterChain;
 import com.caucho.server.webapp.WebApp;
 import com.caucho.util.L10N;
 import com.caucho.vfs.ClientDisconnectException;

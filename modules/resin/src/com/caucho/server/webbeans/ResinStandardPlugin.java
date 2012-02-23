@@ -65,7 +65,7 @@ import com.caucho.jmx.Jmx;
 import com.caucho.loader.ModuleConfig;
 import com.caucho.remote.BamService;
 import com.caucho.server.admin.AdminService;
-import com.caucho.server.cluster.Server;
+import com.caucho.server.cluster.ServletService;
 import com.caucho.util.L10N;
 
 /**
@@ -227,7 +227,7 @@ public class ResinStandardPlugin implements Extension {
     if (annotated.isAnnotationPresent(AdminService.class)) {
       AdminService service = annotated.getAnnotation(AdminService.class);
 
-      Server server = Server.getCurrent();
+      ServletService server = ServletService.getCurrent();
 
       if (server == null) {
         throw new ConfigException(L

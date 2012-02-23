@@ -27,7 +27,7 @@
  * @author Scott Ferguson
  */
 
-package com.caucho.server.cache;
+package com.caucho.server.httpcache;
 
 import com.caucho.config.types.Bytes;
 import com.caucho.server.webapp.WebApp;

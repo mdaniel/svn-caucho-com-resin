@@ -33,7 +33,7 @@ import com.caucho.cloud.network.NetworkListenSystem;
 import com.caucho.config.ConfigException;
 import com.caucho.env.service.ResinSystem;
 import com.caucho.network.listen.TcpSocketLinkListener;
-import com.caucho.server.cluster.Server;
+import com.caucho.server.cluster.ServletService;
 import com.caucho.server.http.HttpProtocol;
 
 /**
@@ -88,7 +88,7 @@ public class HttpEmbed extends PortEmbed
    * Binds the port to the server
    */
   @Override
-  public void bindTo(Server server)
+  public void bindTo(ServletService server)
   {
     try {
       _port = new TcpSocketLinkListener();

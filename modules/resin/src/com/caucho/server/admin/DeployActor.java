@@ -64,7 +64,7 @@ import com.caucho.lifecycle.LifecycleState;
 import com.caucho.management.server.DeployControllerMXBean;
 import com.caucho.management.server.EAppMXBean;
 import com.caucho.management.server.WebAppMXBean;
-import com.caucho.server.cluster.Server;
+import com.caucho.server.cluster.ServletService;
 import com.caucho.server.host.HostController;
 import com.caucho.server.webapp.WebAppContainer;
 import com.caucho.server.webapp.WebAppController;
@@ -83,7 +83,7 @@ public class DeployActor extends SimpleActor
 
   private static final L10N L = new L10N(DeployActor.class);
 
-  private Server _server;
+  private ServletService _server;
 
   private RepositorySpi _repository;
 
@@ -108,7 +108,7 @@ public class DeployActor extends SimpleActor
     if (_isInit.getAndSet(true))
       return;
 
-    _server = Server.getCurrent();
+    _server = ServletService.getCurrent();
 
     if (_server == null)
       throw new ConfigException(L.l("resin:DeployService requires an active Server.\n  {0}",

@@ -59,7 +59,7 @@ import com.caucho.management.server.HostMXBean;
 import com.caucho.network.listen.TcpSocketLinkListener;
 import com.caucho.rewrite.DispatchRule;
 import com.caucho.rewrite.RewriteFilter;
-import com.caucho.server.cluster.Server;
+import com.caucho.server.cluster.ServletService;
 import com.caucho.server.dispatch.ExceptionFilterChain;
 import com.caucho.server.dispatch.Invocation;
 import com.caucho.server.dispatch.InvocationBuilder;
@@ -90,7 +90,7 @@ public class Host
   private static EnvironmentLocal<Host> _hostLocal
     = new EnvironmentLocal<Host>("caucho.host");
 
-  private final Server _servletContainer;
+  private final ServletService _servletContainer;
   private final HostContainer _parent;
 
   // The Host entry
@@ -304,7 +304,7 @@ public class Host
     else if (_hostName == null
              || _hostName.equals("")
              || _hostName.equals("default")) {
-      Server server = getServer();
+      ServletService server = getServer();
 
       if (server == null)
         return "http://localhost";
@@ -588,7 +588,7 @@ public class Host
   /**
    * Returns the owning server.
    */
-  public Server getServer()
+  public ServletService getServer()
   {
     return _parent.getServer();
   }
@@ -598,7 +598,7 @@ public class Host
    */
   public CloudCluster getCluster()
   {
-    Server server = getServer();
+    ServletService server = getServer();
 
     if (server != null)
       return server.getCluster();

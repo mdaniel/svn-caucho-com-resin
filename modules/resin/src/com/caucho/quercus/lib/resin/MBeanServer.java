@@ -37,7 +37,7 @@ import com.caucho.quercus.env.ArrayValue;
 import com.caucho.quercus.env.ArrayValueImpl;
 import com.caucho.quercus.env.Env;
 import com.caucho.server.cluster.Cluster;
-import com.caucho.server.cluster.Server;
+import com.caucho.server.cluster.ServletService;
 import com.caucho.server.resin.Resin;
 import com.caucho.server.admin.RemoteMBeanConnectionFactory;
 import com.caucho.util.L10N;
@@ -70,7 +70,7 @@ public class MBeanServer {
   {
     if (serverId == null
         || "".equals(serverId)
-        || Server.getCurrent().getServerId().equals(serverId)) {
+        || ServletService.getCurrent().getServerId().equals(serverId)) {
       _server = Jmx.getGlobalMBeanServer();
     }
     else {

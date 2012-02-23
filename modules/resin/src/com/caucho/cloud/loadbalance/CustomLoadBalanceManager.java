@@ -31,7 +31,7 @@ package com.caucho.cloud.loadbalance;
 
 import com.caucho.config.ConfigException;
 import com.caucho.network.balance.ClientSocketFactory;
-import com.caucho.server.cluster.Server;
+import com.caucho.server.cluster.ServletService;
 import com.caucho.util.L10N;
 
 
@@ -67,7 +67,7 @@ abstract public class CustomLoadBalanceManager extends LoadBalanceManager {
     String host = address.substring(0, p);
     int port = Integer.parseInt(address.substring(p + 1));
 
-    Server server = Server.getCurrent();
+    ServletService server = ServletService.getCurrent();
 
     boolean isSecure = false;
 

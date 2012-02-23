@@ -38,7 +38,7 @@ import com.caucho.env.meter.SemaphoreMeter;
 import com.caucho.env.thread.AbstractTaskWorker;
 import com.caucho.env.thread.AbstractWorkerQueue;
 import com.caucho.log.AbstractRolloverLog;
-import com.caucho.server.cache.TempFileService;
+import com.caucho.server.httpcache.TempFileService;
 import com.caucho.util.Alarm;
 import com.caucho.util.CurrentTime;
 import com.caucho.util.FreeRing;

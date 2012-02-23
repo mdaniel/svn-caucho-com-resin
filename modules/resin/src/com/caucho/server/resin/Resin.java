@@ -75,7 +75,7 @@ import com.caucho.loader.EnvironmentClassLoader;
 import com.caucho.loader.EnvironmentLocal;
 import com.caucho.server.admin.Management;
 import com.caucho.server.admin.StatSystem;
-import com.caucho.server.cluster.Server;
+import com.caucho.server.cluster.ServletService;
 import com.caucho.server.cluster.ServerConfig;
 import com.caucho.server.cluster.ServletContainerConfig;
 import com.caucho.server.cluster.ServletSystem;
@@ -141,7 +141,7 @@ public class Resin
   private CloudServer _selfServer;
   
   private ServletContainerConfig _servletContainerConfig;
-  private Server _servletSystem;
+  private ServletService _servletSystem;
 
   private long _initialStartTime;
   private long _startTime;
@@ -523,7 +523,7 @@ public class Resin
   /**
    * Returns the active server.
    */
-  public Server getServer()
+  public ServletService getServer()
   {
     return _servletSystem;
   }
@@ -541,7 +541,7 @@ public class Resin
     return _selfServer;
   }
 
-  public Server createServer()
+  public ServletService createServer()
   {
     if (_servletSystem == null) {
       configure();

@@ -53,11 +53,11 @@ import com.caucho.env.warning.WarningService;
 import com.caucho.license.LicenseCheck;
 import com.caucho.server.admin.Management;
 import com.caucho.server.admin.StatSystem;
-import com.caucho.server.cache.TempFileService;
 import com.caucho.server.cluster.ClusterPod;
-import com.caucho.server.cluster.Server;
+import com.caucho.server.cluster.ServletService;
 import com.caucho.server.distcache.CacheStoreManager;
 import com.caucho.server.distcache.DistCacheSystem;
+import com.caucho.server.httpcache.TempFileService;
 import com.caucho.util.L10N;
 import com.caucho.vfs.Path;
 
@@ -208,9 +208,9 @@ public class ResinDelegate
   /**
    * @return
    */
-  protected Server createServer()
+  protected ServletService createServer()
   {
-    return new Server(getResin());
+    return new ServletService(getResin());
   }
 
   protected Management createResinManagement()

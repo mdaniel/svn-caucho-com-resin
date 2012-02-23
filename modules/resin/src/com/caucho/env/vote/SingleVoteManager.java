@@ -30,15 +30,15 @@
 package com.caucho.env.vote;
 
 import com.caucho.cloud.network.ClusterServer;
-import com.caucho.server.cluster.Server;
+import com.caucho.server.cluster.ServletService;
 
 /**
  * Manages the distributed vote
  */
 public class SingleVoteManager extends AbstractVoteManager {
-  private Server _server;
+  private ServletService _server;
 
-  public SingleVoteManager(Server server)
+  public SingleVoteManager(ServletService server)
   {
     _server = server;
   }

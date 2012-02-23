@@ -1,67 +1,50 @@
 /*
  * Copyright (c) 1998-2012 Caucho Technology -- all rights reserved
  *
- * This file is part of Resin(R) Open Source
- *
- * Each copy or derived work must preserve the copyright notice and this
- * notice unmodified.
- *
- * Resin Open Source is free software; you can redistribute it and/or modify
- * it under the terms of the GNU General Public License as published by
- * the Free Software Foundation; either version 2 of the License, or
- * (at your option) any later version.
- *
- * Resin Open Source is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE, or any warranty
- * of NON-INFRINGEMENT.  See the GNU General Public License for more
- * details.
- *
- * You should have received a copy of the GNU General Public License
- * along with Resin Open Source; if not, write to the
- *
- *   Free Software Foundation, Inc.
- *   59 Temple Place, Suite 330
- *   Boston, MA 02111-1307  USA
- *
  * @author Scott Ferguson
  */
 
-package com.caucho.server.cache;
+package com.caucho.server.httpcache;
 
 import com.caucho.db.block.Block;
 import com.caucho.db.block.BlockStore;
+// import com.caucho.db.lock.Lock;
 import com.caucho.db.xa.RawTransaction;
 import com.caucho.db.xa.StoreTransaction;
 import com.caucho.util.L10N;
 import com.caucho.vfs.OutputStreamWithBuffer;
+import com.caucho.vfs.RandomAccessStream;
+import com.caucho.vfs.SendfileOutputStream;
 import com.caucho.vfs.TempCharBuffer;
 
 import java.io.IOException;
-import java.io.InputStream;
 import java.io.OutputStream;
 import java.io.Writer;
 import java.util.ArrayList;
+import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicInteger;
+import java.util.concurrent.locks.Lock;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
 /**
- * Represents an inode to a temporary file.
+ * Represents the final servlet in a filter chain.
  */
-public class TempFileInode {
-  private static final L10N L = new L10N(TempFileInode.class);
+class ProxyCacheInode {
+  private static final L10N L = new L10N(ProxyCacheInode.class);
   private static final Logger log
-    = Logger.getLogger(TempFileInode.class.getName());
+    = Logger.getLogger(ProxyCacheInode.class.getName());
 
   private final BlockStore _store;
-  private AtomicInteger _useCount = new AtomicInteger(1);
+  private final AtomicInteger _useCount = new AtomicInteger(1);
 
   private ArrayList<Long> _blockList = new ArrayList<Long>();
   private long []_blockArray;
   private long _length;
+  
+  private boolean _isWritten;
 
-  TempFileInode(BlockStore store)
+  ProxyCacheInode(BlockStore store)
   {
     _store = store;
   }
@@ -71,105 +54,172 @@ public class TempFileInode {
     return _length;
   }
 
+  boolean isClosed()
+  {
+    return _useCount.get() <= 0;
+  }
+  
   /**
    * Allocates access to the inode.
    */
   public boolean allocate()
   {
     int count;
-    
-    while ((count = _useCount.get()) > 0) {
-      if (_useCount.compareAndSet(count, count + 1))
-        return true;
-    }
-    
-    return false;
+
+    do {
+      count = _useCount.get();
+
+      if (count <= 0)
+        return false;
+    } while (! _useCount.compareAndSet(count, count + 1));
+
+    return _blockArray != null;
   }
 
-  /**
-   * Opens a stream to write to the temp file
-   */
   public OutputStream openOutputStream()
   {
-    return new TempFileOutputStream();
-  }
-
-  /**
-   * Opens a stream to read from the temp file
-   */
-  public InputStream openInputStream()
-  {
-    return new TempFileInputStream();
+    return new CacheOutputStream();
   }
 
   public Writer openWriter()
   {
-    return new TempFileWriter();
+    return new CacheWriter();
   }
 
   /**
    * Writes the inode value to a stream.
    */
-  public void writeToStream(OutputStreamWithBuffer os)
+  public boolean writeToStream(OutputStreamWithBuffer os)
     throws IOException
   {
-    writeToStream(os, 0, _length);
+    return writeToStream(os, 0, _length);
   }
 
   /**
    * Writes the inode value to a stream.
    */
-  public void writeToStream(OutputStreamWithBuffer os,
-                            long offset, long length)
+  public boolean writeToStream(OutputStreamWithBuffer os,
+                               long offset, long length)
     throws IOException
   {
+    RandomAccessStream mmap = _store.getMmap();
+    
+    if (length >= 8 * 1024 
+        && mmap != null
+        && mmap.isMmap()
+        && os instanceof SendfileOutputStream
+        && isWritten()) {
+      SendfileOutputStream mmapOut = (SendfileOutputStream) os;
+      
+      if (mmapOut.isMmapEnabled()) {
+        if (mmap.writeToStream(mmapOut, offset, length,
+                               _blockArray, _length)) {
+          return true;
+        }
+      }
+    }
+    
     if (_length < length)
       length = _length;
 
-    byte []buffer = os.getBuffer();
-    int writeLength = buffer.length;
-    int writeOffset = os.getBufferOffset();
     long []blockArray = _blockArray;
+    
+    if (blockArray == null)
+      return false;
 
     while (length > 0) {
-      int sublen = writeLength - writeOffset;
+      int sublen = (int) length;
 
-      if (sublen == 0) {
-        buffer = os.nextBuffer(writeOffset);
-        writeOffset = os.getBufferOffset();
-        sublen = writeLength - writeOffset;
-      }
-
-      if (length < sublen)
-        sublen = (int) length;
-
-      long blockId = blockArray[(int) (offset / BlockStore.BLOCK_SIZE)];
+      long blockAddress = blockArray[(int) (offset / BlockStore.BLOCK_SIZE)];
       int blockOffset = (int) (offset % BlockStore.BLOCK_SIZE);
 
       if (BlockStore.BLOCK_SIZE - blockOffset < sublen)
         sublen = BlockStore.BLOCK_SIZE - blockOffset;
 
-      int len = _store.readBlock(blockId, blockOffset,
-                                 buffer, writeOffset, sublen);
+      _store.readBlock(blockAddress, blockOffset, os, sublen);
 
-      if (len <= 0) {
-        break;
-      }
-
-      writeOffset += len;
-      offset += len;
-      length -= len;
+      offset += sublen;
+      length -= sublen;
     }
 
-    os.setBufferOffset(writeOffset);
-
-    /*
-      if (_useCount < 2)
-      System.out.println("USE_COUNT: " + _useCount);
-    */
-
-    if (_useCount.get() <= 0)
+    if (_useCount.get() <= 0) {
       throw new IllegalStateException(L.l("Unexpected close of cache inode"));
+    }
+    
+    return true;
+  }
+  
+  private boolean isWritten()
+  {
+    if (_isWritten)
+      return true;
+
+    long []blockArray = _blockArray;
+    
+    if (blockArray == null)
+      return false;
+    
+    boolean isWritten = true;
+
+    try {
+      for (int i = 0; i < blockArray.length; i++) {
+        long blockAddress = blockArray[i];
+
+        Block block = _store.loadBlock(blockAddress);
+        try {
+          if (block.isDirty()) {
+            isWritten = false;
+            block.save();
+          }
+        } finally {
+          block.free();
+        }
+      }
+    } catch (Exception e) {
+      isWritten = false;
+      
+      log.log(Level.WARNING, e.toString(), e);
+    }
+
+    if (isWritten) {
+      _isWritten = true;
+    }
+    
+    return _isWritten;
+  }
+  /**
+   * Writes the inode value to a stream.
+   */
+  private boolean writeToMmap(RandomAccessStream mmapStream,
+                              SendfileOutputStream os,
+                              long offset, long length)
+    throws IOException
+  {
+    long mmapAddress = mmapStream.getMmapAddress();
+    
+    if (mmapAddress <= 0) {
+      //throw new IllegalStateException(L.l("Invalid mmap call"));
+      System.out.println("MMAP: " + mmapAddress);
+      return false;
+    }
+    
+    if (_length < length)
+      length = _length;
+
+    long []blockArray = _blockArray;
+    
+    if (blockArray == null) {
+      return false;
+    }
+    
+    os.writeMmap(mmapAddress, blockArray, offset, length);
+
+    if (_useCount.get() <= 0) {
+      throw new IllegalStateException(L.l("Unexpected close of cache inode"));
+    }
+    
+    return true;
+
   }
 
   /**
@@ -186,7 +236,8 @@ public class TempFileInode {
     long length = _length;
 
     while (length > 0) {
-      long blockId = _blockArray[(int) (offset / BlockStore.BLOCK_SIZE)];
+      long blockAddress
+        = _blockArray[(int) (offset / BlockStore.BLOCK_SIZE)];
       int blockOffset = (int) (offset % BlockStore.BLOCK_SIZE);
 
       int sublen = (BlockStore.BLOCK_SIZE - blockOffset) / 2;
@@ -197,8 +248,7 @@ public class TempFileInode {
       if (length < 2 * sublen)
         sublen = (int) (length / 2);
 
-      int len = _store.readBlock(blockId, blockOffset,
-                                 buffer, 0, sublen);
+      int len = _store.readBlock(blockAddress, blockOffset, buffer, 0, sublen);
 
       if (len <= 0)
         break;
@@ -227,7 +277,7 @@ public class TempFileInode {
     }
     else if (useCount < 0) {
       //System.out.println("BAD: " + useCount);
-      throw new IllegalStateException("illegal use count: " + useCount);
+      throw new IllegalStateException();
     }
   }
 
@@ -247,33 +297,50 @@ public class TempFileInode {
     if (blockArray != null) {
       if (_useCount.get() > 0)
         Thread.dumpStack();
-      
-      for (long block : blockArray) {
+      for (long blockId : blockArray) {
+        Block block = null;
+
+        Lock lock = null;
+        
         try {
-          _store.deallocateBlock(block);
-        } catch (IOException e) {
+          block = _store.loadBlock(blockId);
+          lock = block.getWriteLock();
+
+          lock.tryLock(60000L, TimeUnit.MILLISECONDS);
+          block.deallocate();
+        } catch (Exception e) {
           log.log(Level.WARNING, e.toString(), e);
+        } finally {
+          if (lock != null)
+            lock.unlock();
+          
+          if (block != null)
+            block.free();
         }
       }
-      
       if (_useCount.get() > 0)
         Thread.dumpStack();
     }
     else if (blockList != null) {
       //System.out.println("FRAGMENT-LIST: " + fragmentList);
 
-      for (long block : blockList) {
+      for (long blockId : blockList) {
+        Block block = null;
         try {
-          _store.deallocateBlock(block);
+          block = _store.loadBlock(blockId);
+          block.deallocate();
         } catch (IOException e) {
           log.log(Level.WARNING, e.toString(), e);
+        } finally {
+          if (block != null)
+            block.free();
         }
       }
     }
   }
 
-  class TempFileOutputStream extends OutputStream {
-    private final StoreTransaction _xa = RawTransaction.create();
+  class CacheOutputStream extends OutputStream {
+    // private final StoreTransaction _xa = RawTransaction.create();
     private final byte []_tempBuffer = new byte[8];
 
     @Override
@@ -292,10 +359,10 @@ public class TempFileInode {
       while (length > 0) {
         while (_blockList.size() <= _length / BlockStore.BLOCK_SIZE) {
           Block block = _store.allocateBlock();
-
-          _blockList.add(block.getBlockId());
-          
+          long blockId = block.getBlockId();
           block.free();
+
+          _blockList.add(blockId);
         }
 
         int blockOffset = (int) (_length % BlockStore.BLOCK_SIZE);
@@ -306,23 +373,18 @@ public class TempFileInode {
           sublen = length;
 
         _length += sublen;
-        
         Block block = _store.writeBlock(blockAddress, blockOffset,
                                         buffer, offset, sublen);
-        
-        _xa.addUpdateBlock(block);
 
         length -= sublen;
         offset += sublen;
       }
     }
 
-    @Override
     public void flush()
     {
     }
 
-    @Override
     public void close()
     {
       if (_blockList == null)
@@ -336,69 +398,7 @@ public class TempFileInode {
     }
   }
 
-
-  class TempFileInputStream extends InputStream {
-    private final byte []_tempBuffer = new byte[1];
-
-    private int _offset;
-
-    public int read()
-      throws IOException
-    {
-      int len = read(_tempBuffer, 0, 1);
-
-      if (len > 0)
-        return _tempBuffer[0] & 0xff;
-      else
-        return -1;
-    }
-
-    /**
-     * Writes the inode value to a stream.
-     */
-    public int read(byte []buffer, int offset, int length)
-      throws IOException
-    {
-      if (_length - _offset < length)
-        length = (int) (_length - _offset);
-
-      long []blockArray = _blockArray;
-      int readLength = 0;
-
-      while (length > 0) {
-        long blockId = blockArray[(int) (_offset / BlockStore.BLOCK_SIZE)];
-        int blockOffset = (int) (_offset % BlockStore.BLOCK_SIZE);
-
-        int sublen = length;
-
-        if (BlockStore.BLOCK_SIZE - blockOffset < sublen)
-          sublen = BlockStore.BLOCK_SIZE - blockOffset;
-
-        int len = _store.readBlock(blockId, blockOffset,
-                                   buffer, offset, sublen);
-
-        if (len <= 0) {
-          break;
-        }
-
-        offset += len;
-        _offset += len;
-        length -= len;
-        readLength += len;
-      }
-
-      if (readLength <= 0)
-        return -1;
-      else
-        return readLength;
-    }
-
-    public void close()
-    {
-    }
-  }
-
-  class TempFileWriter extends Writer {
+  class CacheWriter extends Writer {
     private final StoreTransaction _xa = RawTransaction.create();
     private final char []_tempBuffer = new char[8];
 
@@ -416,25 +416,24 @@ public class TempFileInode {
       while (length > 0) {
         while (_blockList.size() <= _length / BlockStore.BLOCK_SIZE) {
           Block block = _store.allocateBlock();
-
-          _blockList.add(block.getBlockId());
-          
+          long blockId = block.getBlockId();
           block.free();
+
+          _blockList.add(blockId);
         }
 
         int blockOffset = (int) (_length % BlockStore.BLOCK_SIZE);
-        long blockId = _blockList.get(_blockList.size() - 1);
+        long blockAddress = _blockList.get(_blockList.size() - 1);
 
         int sublen = (BlockStore.BLOCK_SIZE - blockOffset) / 2;
         if (length < sublen)
           sublen = length;
 
         _length += 2 * sublen;
-        Block block = _store.writeBlock(blockId, blockOffset,
-                                        buffer, offset, sublen);
+        Block writeBlock = _store.writeBlock(blockAddress, blockOffset,
+                                             buffer, offset, sublen);
+        _xa.addUpdateBlock(writeBlock);
 
-        _xa.addUpdateBlock(block);
-        
         length -= sublen;
         offset += sublen;
       }

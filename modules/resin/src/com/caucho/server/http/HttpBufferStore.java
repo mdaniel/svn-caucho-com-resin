@@ -29,7 +29,7 @@
 
 package com.caucho.server.http;
 
-import com.caucho.server.cluster.Server;
+import com.caucho.server.cluster.ServletService;
 import com.caucho.util.CharSegment;
 import com.caucho.util.FreeList;
 import com.caucho.vfs.TempBuffer;

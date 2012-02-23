@@ -61,9 +61,9 @@ public class ServerAdmin extends AbstractEmitterObject
   private static final String BYTES_PROBE = "Resin|Http|Request Bytes";
   private TotalMeter _httpBytesProbe;
 
-  private Server _server;
+  private ServletService _server;
 
-  ServerAdmin(Server server)
+  ServerAdmin(ServletService server)
   {
     _server = server;
 

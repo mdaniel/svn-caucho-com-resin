@@ -57,7 +57,7 @@ import com.caucho.env.repository.RepositoryException;
 import com.caucho.env.repository.RepositoryTagEntry;
 import com.caucho.env.repository.RepositoryTagListener;
 import com.caucho.hmtp.HmtpClient;
-import com.caucho.server.cluster.Server;
+import com.caucho.server.cluster.ServletService;
 import com.caucho.util.CurrentTime;
 import com.caucho.util.IoUtil;
 import com.caucho.util.L10N;
@@ -93,7 +93,7 @@ public class DeployClient implements Repository
   
   public DeployClient(String serverId)
   {
-    Server server = Server.getCurrent();
+    ServletService server = ServletService.getCurrent();
 
     if (server == null)
       throw new IllegalStateException(L.l("DeployClient was not called in a Resin context. For external clients, use the DeployClient constructor with host,port arguments."));

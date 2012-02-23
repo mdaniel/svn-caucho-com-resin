@@ -29,8 +29,8 @@
 
 package com.caucho.server.http;
 
-import com.caucho.server.cache.AbstractCacheEntry;
-import com.caucho.server.cache.AbstractCacheFilterChain;
+import com.caucho.server.httpcache.AbstractCacheEntry;
+import com.caucho.server.httpcache.AbstractCacheFilterChain;
 import com.caucho.server.webapp.*;
 
 import java.io.*;

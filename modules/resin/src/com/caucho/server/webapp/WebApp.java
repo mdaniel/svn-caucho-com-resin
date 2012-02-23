@@ -148,8 +148,7 @@ import com.caucho.security.Authenticator;
 import com.caucho.security.BasicLogin;
 import com.caucho.security.Login;
 import com.caucho.security.RoleMapManager;
-import com.caucho.server.cache.AbstractProxyCache;
-import com.caucho.server.cluster.Server;
+import com.caucho.server.cluster.ServletService;
 import com.caucho.server.dispatch.ErrorFilterChain;
 import com.caucho.server.dispatch.ExceptionFilterChain;
 import com.caucho.server.dispatch.FilterChainBuilder;
@@ -171,6 +170,7 @@ import com.caucho.server.dispatch.UrlMap;
 import com.caucho.server.dispatch.VersionInvocation;
 import com.caucho.server.host.Host;
 import com.caucho.server.http.StubSessionContextRequest;
+import com.caucho.server.httpcache.AbstractProxyCache;
 import com.caucho.server.log.AbstractAccessLog;
 import com.caucho.server.log.AccessLog;
 import com.caucho.server.resin.Resin;
@@ -223,7 +223,7 @@ public class WebApp extends ServletContextImpl
   // The environment class loader
   private EnvironmentClassLoader _classLoader;
 
-  private Server _server;
+  private ServletService _server;
   private Host _host;
   // The parent
   private WebAppContainer _parent;
@@ -444,7 +444,7 @@ public class WebApp extends ServletContextImpl
     if (_server == null) {
       throw new IllegalStateException(L.l("{0} requires an active {1}",
                                           getClass().getSimpleName(),
-                                          Server.class.getSimpleName()));
+                                          ServletService.class.getSimpleName()));
     }
     
     _host = controller.getHost();
@@ -665,7 +665,7 @@ public class WebApp extends ServletContextImpl
   /**
    * Gets the dispatch server.
    */
-  public Server getServer()
+  public ServletService getServer()
   {
     return _server;
   }
@@ -695,7 +695,7 @@ public class WebApp extends ServletContextImpl
       _invocationDecoder = _server.getInvocationDecoder();
 
     if (_invocationDecoder == null && _server == null)
-      _invocationDecoder = Server.getCurrent().getInvocationDecoder();
+      _invocationDecoder = ServletService.getCurrent().getInvocationDecoder();
 
     return _invocationDecoder;
   }
@@ -3505,7 +3505,7 @@ public class WebApp extends ServletContextImpl
 
       String serverId = null;
       
-      Server server = Server.getCurrent();
+      ServletService server = ServletService.getCurrent();
       
       if (server != null)
         serverId = server.getServerId();

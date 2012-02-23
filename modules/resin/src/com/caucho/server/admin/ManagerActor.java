@@ -53,7 +53,7 @@ import com.caucho.config.ConfigException;
 import com.caucho.env.service.ResinSystem;
 import com.caucho.security.AdminAuthenticator;
 import com.caucho.security.PasswordUser;
-import com.caucho.server.cluster.Server;
+import com.caucho.server.cluster.ServletService;
 import com.caucho.util.CurrentTime;
 import com.caucho.util.L10N;
 import com.caucho.vfs.Path;
@@ -80,7 +80,7 @@ public class ManagerActor extends SimpleActor
 
   private static final L10N L = new L10N(ManagerActor.class);
 
-  private Server _server;
+  private ServletService _server;
   private Path _hprofDir;
 
   private AtomicBoolean _isInit = new AtomicBoolean();
@@ -98,7 +98,7 @@ public class ManagerActor extends SimpleActor
     if (_isInit.getAndSet(true))
       return;
 
-    _server = Server.getCurrent();
+    _server = ServletService.getCurrent();
     if (_server == null)
       throw new ConfigException(L.l(
         "resin:ManagerService requires an active Server.\n  {0}",

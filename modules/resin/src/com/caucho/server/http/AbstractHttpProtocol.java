@@ -31,7 +31,7 @@ package com.caucho.server.http;
 
 import com.caucho.config.ConfigException;
 import com.caucho.network.listen.AbstractProtocol;
-import com.caucho.server.cluster.Server;
+import com.caucho.server.cluster.ServletService;
 import com.caucho.util.L10N;
 
 /**
@@ -43,9 +43,9 @@ abstract public class AbstractHttpProtocol extends AbstractProtocol {
   /**
    * Returns the active server.
    */
-  public Server getServletSystem()
+  public ServletService getServletSystem()
   {
-    Server servletSystem = Server.getCurrent();
+    ServletService servletSystem = ServletService.getCurrent();
     
     if (servletSystem == null) {
       throw new ConfigException(L.l("{0} needs an active Resin Servlet System.",

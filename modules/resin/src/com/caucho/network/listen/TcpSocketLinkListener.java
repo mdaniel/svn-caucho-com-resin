@@ -55,7 +55,7 @@ import com.caucho.env.thread.ThreadPool;
 import com.caucho.lifecycle.Lifecycle;
 import com.caucho.management.server.PortMXBean;
 import com.caucho.management.server.TcpConnectionInfo;
-import com.caucho.server.cluster.Server;
+import com.caucho.server.cluster.ServletService;
 import com.caucho.server.util.CauchoSystem;
 import com.caucho.util.Alarm;
 import com.caucho.util.AlarmListener;
@@ -694,8 +694,8 @@ public class TcpSocketLinkListener
       _throttle = Throttle.createPro();
 
       if (_throttle == null
-          && Server.getCurrent() != null
-          && ! Server.getCurrent().isWatchdog())
+          && ServletService.getCurrent() != null
+          && ! ServletService.getCurrent().isWatchdog())
         throw new ConfigException(L.l("throttle configuration requires Resin Professional"));
     }
 

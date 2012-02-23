@@ -36,7 +36,7 @@ import javax.jms.Topic;
 
 import com.caucho.jms.queue.AbstractMemoryQueue;
 import com.caucho.loader.Environment;
-import com.caucho.server.cluster.Server;
+import com.caucho.server.cluster.ServletService;
 import com.caucho.util.Hex;
 import com.caucho.vfs.Path;
 
@@ -163,8 +163,8 @@ public class FileQueueImpl<E extends Serializable>
 
         digest.update(env.getBytes());
 
-        if (Server.getCurrent() != null)
-          digest.update(Server.getCurrent().getServerId().getBytes());
+        if (ServletService.getCurrent() != null)
+          digest.update(ServletService.getCurrent().getServerId().getBytes());
 
         digest.update(getClass().getSimpleName().getBytes());
         digest.update(getName().getBytes());

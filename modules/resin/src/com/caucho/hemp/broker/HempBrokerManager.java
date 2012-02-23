@@ -37,7 +37,7 @@ import java.util.logging.Logger;
 import com.caucho.bam.broker.Broker;
 import com.caucho.env.service.ResinSystem;
 import com.caucho.loader.EnvironmentLocal;
-import com.caucho.server.cluster.Server;
+import com.caucho.server.cluster.ServletService;
 import com.caucho.server.host.Host;
 
 
@@ -127,7 +127,7 @@ public class HempBrokerManager
     if (brokerRef != null)
       return brokerRef.get();
 
-    Server server = Server.getCurrent();
+    ServletService server = ServletService.getCurrent();
 
     if (server == null || ! server.isActive())
       return null;

@@ -73,7 +73,6 @@ import com.caucho.management.server.ServerMXBean;
 import com.caucho.rewrite.DispatchRule;
 import com.caucho.security.AdminAuthenticator;
 import com.caucho.security.PermissionManager;
-import com.caucho.server.cache.AbstractProxyCache;
 import com.caucho.server.dispatch.ErrorFilterChain;
 import com.caucho.server.dispatch.ExceptionFilterChain;
 import com.caucho.server.dispatch.Invocation;
@@ -90,6 +89,8 @@ import com.caucho.server.host.HostContainer;
 import com.caucho.server.host.HostController;
 import com.caucho.server.host.HostExpandDeployGenerator;
 import com.caucho.server.http.HttpBufferStore;
+import com.caucho.server.httpcache.AbstractProxyCache;
+import com.caucho.server.httpcache.ProxyCache;
 import com.caucho.server.log.AccessLog;
 import com.caucho.server.resin.Resin;
 import com.caucho.server.rewrite.RewriteDispatch;
@@ -107,20 +108,20 @@ import com.caucho.vfs.Dependency;
 import com.caucho.vfs.Path;
 import com.caucho.vfs.Vfs;
 
-public class Server
+public class ServletService
   implements AlarmListener, ClassLoaderListener, InvocationBuilder, Dependency
 {
-  private static final L10N L = new L10N(Server.class);
+  private static final L10N L = new L10N(ServletService.class);
   private static final Logger log
-    = Logger.getLogger(Server.class.getName());
+    = Logger.getLogger(ServletService.class.getName());
 
   private static final long ALARM_INTERVAL = 60000;
 
   private static final EnvironmentLocal<String> _serverIdLocal
     = new EnvironmentLocal<String>("caucho.server-id");
 
-  private static final EnvironmentLocal<Server> _serverLocal
-    = new EnvironmentLocal<Server>();
+  private static final EnvironmentLocal<ServletService> _serverLocal
+    = new EnvironmentLocal<ServletService>();
 
   private final Resin _resin;
   private final ResinSystem _resinSystem;
@@ -192,7 +193,7 @@ public class Server
   /**
    * Creates a new servlet server.
    */
-  public Server(Resin resin)
+  public ServletService(Resin resin)
   {
     if (resin == null)
       throw new NullPointerException();
@@ -281,7 +282,7 @@ public class Server
   /**
    * Returns the current server
    */
-  public static Server getCurrent()
+  public static ServletService getCurrent()
   {
     return _serverLocal.get();
   }
@@ -722,22 +723,27 @@ public class Server
   }
 
   /**
-   * Creates the proxy cache.
+   * Creates the http cache.
    */
   public AbstractProxyCache createProxyCache()
     throws ConfigException
   {
-    if (_proxyCache == null)
+    if (_proxyCache == null) {
       _proxyCache = instantiateProxyCache();
+    }
 
     return _proxyCache;
   }
   
   protected AbstractProxyCache instantiateProxyCache()
   {
+    /*
     log.warning(L.l("<proxy-cache> requires Resin Professional.  Please see http://www.caucho.com for Resin Professional information and licensing."));
 
     return new AbstractProxyCache();
+    */
+    
+    return new ProxyCache();
   }
   
   /**

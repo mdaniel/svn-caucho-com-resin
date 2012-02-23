@@ -47,7 +47,7 @@ import javax.security.auth.Subject;
 
 import com.caucho.cloud.network.ClusterServer;
 import com.caucho.env.dbpool.IdlePoolSet;
-import com.caucho.server.cluster.Server;
+import com.caucho.server.cluster.ServletService;
 import com.caucho.util.L10N;
 
 /**
@@ -75,7 +75,7 @@ public class ManagedFactoryImpl
     _drivers = drivers;
     _backupDrivers = backupDrivers;
 
-    Server server = Server.getCurrent();
+    ServletService server = ServletService.getCurrent();
     if (server != null) {
       ClusterServer selfServer = server.getSelfServer();
 

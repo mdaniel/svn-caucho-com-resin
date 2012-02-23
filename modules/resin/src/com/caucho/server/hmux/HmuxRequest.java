@@ -46,7 +46,7 @@ import com.caucho.cloud.bam.BamSystem;
 import com.caucho.cloud.hmtp.HmtpRequest;
 import com.caucho.network.listen.ProtocolConnection;
 import com.caucho.network.listen.SocketLink;
-import com.caucho.server.cluster.Server;
+import com.caucho.server.cluster.ServletService;
 import com.caucho.server.dispatch.Invocation;
 import com.caucho.server.http.AbstractHttpRequest;
 import com.caucho.server.http.AbstractResponseStream;
@@ -252,7 +252,7 @@ public class HmuxRequest extends AbstractHttpRequest
   private HmuxProtocol _hmuxProtocol;
   private ErrorPageManager _errorManager;
 
-  public HmuxRequest(Server server,
+  public HmuxRequest(ServletService server,
                      SocketLink conn,
                      HmuxProtocol protocol)
   {
@@ -432,7 +432,7 @@ public class HmuxRequest extends AbstractHttpRequest
     _hasRequest = true;
     // setStartDate();
 
-    Server server = getServer();
+    ServletService server = getServer();
 
     if (server == null || server.isDestroyed()) {
       log.fine(dbgId() + "server is closed");
@@ -609,7 +609,7 @@ public class HmuxRequest extends AbstractHttpRequest
 
       code = is.read();
 
-      Server server = getServer();
+      ServletService server = getServer();
       if (server == null || server.isDestroyed()) {
         log.fine(dbgId() + " request after server close");
         killKeepalive("after server close");

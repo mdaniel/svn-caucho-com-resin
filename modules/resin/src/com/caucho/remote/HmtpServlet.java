@@ -58,7 +58,7 @@ import com.caucho.hmtp.HmtpReader;
 import com.caucho.hmtp.HmtpWebSocketContextWriter;
 import com.caucho.hmtp.HmtpWriter;
 import com.caucho.security.Authenticator;
-import com.caucho.server.cluster.Server;
+import com.caucho.server.cluster.ServletService;
 import com.caucho.server.http.HttpServletRequestImpl;
 import com.caucho.server.http.HttpServletResponseImpl;
 import com.caucho.util.L10N;
@@ -134,7 +134,7 @@ public class HmtpServlet extends GenericServlet {
     _authManager.setAuthenticationRequired(_isAuthenticationRequired);
 
     if (_isAdmin)
-      _broker = Server.getCurrent().getAdminBroker();
+      _broker = ServletService.getCurrent().getAdminBroker();
     else
       _broker = HempBroker.getCurrent();
     

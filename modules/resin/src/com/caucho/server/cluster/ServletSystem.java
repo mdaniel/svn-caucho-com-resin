@@ -36,14 +36,14 @@ import com.caucho.env.service.*;
  */
 public class ServletSystem extends AbstractResinSubSystem
 {
-  private Server _server;
+  private ServletService _server;
   
-  public ServletSystem(Server server)
+  public ServletSystem(ServletService server)
   {
     _server = server;
   }
   
-  public static ServletSystem createAndAddService(Server server)
+  public static ServletSystem createAndAddService(ServletService server)
   {
     ResinSystem system = preCreate(ServletSystem.class);
     
@@ -58,7 +58,7 @@ public class ServletSystem extends AbstractResinSubSystem
     return ResinSystem.getCurrentService(ServletSystem.class);
   }
   
-  public Server getServer()
+  public ServletService getServer()
   {
     return _server;
   }

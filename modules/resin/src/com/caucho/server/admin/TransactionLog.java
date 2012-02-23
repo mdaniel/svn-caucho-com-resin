@@ -30,7 +30,7 @@ package com.caucho.server.admin;
 
 import com.caucho.config.ConfigException;
 import com.caucho.server.cluster.Cluster;
-import com.caucho.server.cluster.Server;
+import com.caucho.server.cluster.ServletService;
 import com.caucho.transaction.TransactionManagerImpl;
 import com.caucho.transaction.xalog.AbstractXALogManager;
 import com.caucho.util.L10N;
@@ -75,7 +75,7 @@ public class TransactionLog
   public void start()
   {
     if (_path == null) {
-      Server server = Server.getCurrent();
+      ServletService server = ServletService.getCurrent();
 
       if (server == null)
         return;

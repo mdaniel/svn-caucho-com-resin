@@ -36,7 +36,7 @@ import java.util.logging.Logger;
 
 import com.caucho.bam.mailbox.Mailbox;
 import com.caucho.bam.stream.MessageStream;
-import com.caucho.server.cluster.Server;
+import com.caucho.server.cluster.ServletService;
 
 /**
  * Domain manager for foreign domains

@@ -28,7 +28,7 @@
 
 package com.caucho.server.http;
 
-import com.caucho.server.cluster.Server;
+import com.caucho.server.cluster.ServletService;
 
 /**
  * Handles a compiling request.
@@ -39,7 +39,7 @@ public class CompileRequest extends HttpRequest {
    *
    * @param server the owning server.
    */
-  CompileRequest(Server server) 
+  CompileRequest(ServletService server) 
   {
     super(server, null);
   }

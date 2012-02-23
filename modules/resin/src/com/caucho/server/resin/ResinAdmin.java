@@ -38,7 +38,7 @@ import com.caucho.management.server.ClusterMXBean;
 import com.caucho.management.server.ResinMXBean;
 import com.caucho.management.server.ServerMXBean;
 import com.caucho.management.server.ThreadPoolMXBean;
-import com.caucho.server.cluster.Server;
+import com.caucho.server.cluster.ServletService;
 import com.caucho.server.util.CauchoSystem;
 
 public class ResinAdmin extends AbstractManagedObject
@@ -133,7 +133,7 @@ public class ResinAdmin extends AbstractManagedObject
   @Override
   public ServerMXBean getServer()
   {
-    Server server = _resin.getServer();
+    ServletService server = _resin.getServer();
 
     if (server != null)
       return server.getAdmin();

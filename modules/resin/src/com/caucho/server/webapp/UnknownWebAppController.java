@@ -45,7 +45,7 @@ import com.caucho.env.deploy.DeployConfig;
 import com.caucho.env.deploy.DeployControllerAdmin;
 import com.caucho.env.deploy.EnvironmentDeployController;
 import com.caucho.inject.Module;
-import com.caucho.server.cluster.Server;
+import com.caucho.server.cluster.ServletService;
 import com.caucho.server.host.Host;
 import com.caucho.server.util.CauchoSystem;
 import com.caucho.util.Alarm;

@@ -39,7 +39,7 @@ import java.util.logging.Logger;
 
 import com.caucho.network.listen.ProtocolConnection;
 import com.caucho.network.listen.SocketLink;
-import com.caucho.server.cluster.Server;
+import com.caucho.server.cluster.ServletService;
 import com.caucho.server.dispatch.BadRequestException;
 import com.caucho.server.dispatch.Invocation;
 import com.caucho.server.dispatch.InvocationDecoder;
@@ -167,7 +167,7 @@ public class FastCgiRequest extends AbstractHttpRequest
    *
    * @param server the owning server.
    */
-  public FastCgiRequest(Server server, SocketLink conn)
+  public FastCgiRequest(ServletService server, SocketLink conn)
   {
     super(server, conn);
 
@@ -226,7 +226,7 @@ public class FastCgiRequest extends AbstractHttpRequest
     _hasRequest = false;
 
     SocketLink conn = getConnection();
-    Server server = getServer();
+    ServletService server = getServer();
 
     Thread thread = Thread.currentThread();
     ClassLoader oldLoader = thread.getContextClassLoader();

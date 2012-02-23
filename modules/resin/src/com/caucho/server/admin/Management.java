@@ -47,7 +47,7 @@ import com.caucho.security.Authenticator;
 import com.caucho.security.BasicPrincipal;
 import com.caucho.security.PasswordUser;
 import com.caucho.security.XmlAuthenticator;
-import com.caucho.server.cluster.Server;
+import com.caucho.server.cluster.ServletService;
 import com.caucho.server.host.HostConfig;
 import com.caucho.server.resin.Resin;
 import com.caucho.util.L10N;
@@ -63,7 +63,7 @@ public class Management
   public static final String HOST_NAME = "admin.caucho";
 
   private Resin _resin;
-  private Server _server;
+  private ServletService _server;
 
   private HostConfig _hostConfig;
 
@@ -87,7 +87,7 @@ public class Management
     _resin = resin;
   }
 
-  public void setServer(Server server)
+  public void setServer(ServletService server)
   {
     _server = server;
   }
@@ -253,7 +253,7 @@ public class Management
   /**
    * Starts the management server
    */
-  public void start(Server server)
+  public void start(ServletService server)
   {
     /*
     if (_deployService != null)

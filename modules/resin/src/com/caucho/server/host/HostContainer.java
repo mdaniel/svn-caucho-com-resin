@@ -43,7 +43,7 @@ import com.caucho.env.deploy.DeployContainerApi;
 import com.caucho.lifecycle.Lifecycle;
 import com.caucho.loader.EnvironmentClassLoader;
 import com.caucho.make.AlwaysModified;
-import com.caucho.server.cluster.Server;
+import com.caucho.server.cluster.ServletService;
 import com.caucho.server.dispatch.InvocationBuilder;
 import com.caucho.server.dispatch.ErrorFilterChain;
 import com.caucho.server.dispatch.Invocation;
@@ -64,7 +64,7 @@ public class HostContainer implements InvocationBuilder {
     = Logger.getLogger(HostContainer.class.getName());
   
   // the owning servlet container
-  private final Server _server;
+  private final ServletService _server;
   
   // The environment class loader
   private EnvironmentClassLoader _classLoader;
@@ -107,7 +107,7 @@ public class HostContainer implements InvocationBuilder {
   /**
    * Creates the webApp with its environment loader.
    */
-  public HostContainer(Server server)
+  public HostContainer(ServletService server)
   {
     _server = server;
     _classLoader = server.getClassLoader();
@@ -154,7 +154,7 @@ public class HostContainer implements InvocationBuilder {
   /**
    * Gets the dispatch server.
    */
-  public Server getServer()
+  public ServletService getServer()
   {
     return _server;
   }
@@ -343,7 +343,7 @@ public class HostContainer implements InvocationBuilder {
                                                       chain);
 
       if (rewriteChain != chain) {
-        Server server = getServer();
+        ServletService server = getServer();
         WebApp webApp = server.getDefaultWebApp();
         invocation.setWebApp(webApp);
 

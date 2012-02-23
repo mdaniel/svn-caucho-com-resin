@@ -62,7 +62,7 @@ import com.caucho.log.RotateStream;
 import com.caucho.network.listen.TcpSocketLinkListener;
 import com.caucho.security.AdminAuthenticator;
 import com.caucho.security.Authenticator;
-import com.caucho.server.cluster.Server;
+import com.caucho.server.cluster.ServletService;
 import com.caucho.server.http.HttpProtocol;
 import com.caucho.server.resin.Resin;
 import com.caucho.server.resin.ResinArgs;
@@ -96,7 +96,7 @@ class WatchdogManager implements AlarmListener {
   private BootManagementConfig _management;
   private final ResinSystem _system;
 
-  private Server _server;
+  private ServletService _server;
   private TcpSocketLinkListener _httpPort;
 
   private HashMap<String,WatchdogChild> _watchdogMap

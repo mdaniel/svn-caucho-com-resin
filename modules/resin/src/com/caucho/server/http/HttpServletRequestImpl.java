@@ -63,7 +63,7 @@ import com.caucho.remote.websocket.UnmaskedFrameInputStream;
 import com.caucho.remote.websocket.WebSocketConstants;
 import com.caucho.security.AbstractLogin;
 import com.caucho.security.Login;
-import com.caucho.server.cluster.Server;
+import com.caucho.server.cluster.ServletService;
 import com.caucho.server.dispatch.Invocation;
 import com.caucho.server.session.SessionManager;
 import com.caucho.server.webapp.WebApp;
@@ -1738,7 +1738,7 @@ public final class HttpServletRequestImpl extends AbstractCauchoRequest
       return null;
   }
 
-  public final Server getServer()
+  public final ServletService getServer()
   {
     return _request.getServer();
   }

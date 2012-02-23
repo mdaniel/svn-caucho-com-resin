@@ -45,7 +45,7 @@ import com.caucho.config.program.ConfigProgram;
 import com.caucho.config.program.ContainerProgram;
 import com.caucho.rewrite.DispatchRule;
 import com.caucho.rewrite.RewriteFilter;
-import com.caucho.server.cluster.Server;
+import com.caucho.server.cluster.ServletService;
 import com.caucho.server.webapp.WebApp;
 import com.caucho.util.L10N;
 
@@ -59,7 +59,7 @@ public class RewriteDispatch
     = Logger.getLogger(RewriteDispatch.class.getName());
 
   private final WebApp _webApp;
-  private final Server _server;
+  private final ServletService _server;
 
   private HashSet<String> _dispatcherTypes = new HashSet<String>();
 
@@ -76,7 +76,7 @@ public class RewriteDispatch
   private final boolean _isFiner;
   private final boolean _isFinest;
 
-  public RewriteDispatch(Server server)
+  public RewriteDispatch(ServletService server)
   {
     this(server, null);
   }
@@ -86,7 +86,7 @@ public class RewriteDispatch
     this(null, webApp);
   }
 
-  private RewriteDispatch(Server server, WebApp webApp)
+  private RewriteDispatch(ServletService server, WebApp webApp)
   {
     _server = server;
     _webApp = webApp;

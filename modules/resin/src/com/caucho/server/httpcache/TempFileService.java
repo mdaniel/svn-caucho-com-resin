@@ -27,7 +27,7 @@
  * @author Scott Ferguson
  */
 
-package com.caucho.server.cache;
+package com.caucho.server.httpcache;
 
 import com.caucho.env.service.*;
 import com.caucho.util.L10N;

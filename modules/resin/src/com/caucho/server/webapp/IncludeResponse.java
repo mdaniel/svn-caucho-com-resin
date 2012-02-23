@@ -40,12 +40,12 @@ import javax.servlet.ServletOutputStream;
 import javax.servlet.http.Cookie;
 import javax.servlet.http.HttpServletResponse;
 
-import com.caucho.server.cache.AbstractCacheFilterChain;
 import com.caucho.server.http.AbstractResponseStream;
 import com.caucho.server.http.CauchoResponse;
 import com.caucho.server.http.CauchoResponseWrapper;
 import com.caucho.server.http.ResponseWriter;
 import com.caucho.server.http.ServletOutputStreamImpl;
+import com.caucho.server.httpcache.AbstractCacheFilterChain;
 import com.caucho.util.L10N;
 import com.caucho.util.QDate;
 

@@ -52,7 +52,7 @@ import com.caucho.loader.Environment;
 import com.caucho.loader.EnvironmentLocal;
 import com.caucho.management.server.AbstractManagedObject;
 import com.caucho.management.server.FileQueueStoreMXBean;
-import com.caucho.server.cluster.Server;
+import com.caucho.server.cluster.ServletService;
 import com.caucho.util.FreeList;
 import com.caucho.util.JdbcUtil;
 import com.caucho.util.L10N;
@@ -103,7 +103,7 @@ public class FileQueueStore
 
   public static FileQueueStore create()
   {
-    Server server = Server.getCurrent();
+    ServletService server = ServletService.getCurrent();
 
     if (server == null)
       throw new IllegalStateException(L.l("FileQueueStore requires an active Resin instance"));

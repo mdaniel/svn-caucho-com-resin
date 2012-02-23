@@ -53,7 +53,7 @@ import com.caucho.network.listen.SocketLinkDuplexController;
 import com.caucho.network.listen.SocketLinkDuplexListener;
 import com.caucho.network.listen.TcpSocketLink;
 import com.caucho.security.SecurityContextProvider;
-import com.caucho.server.cluster.Server;
+import com.caucho.server.cluster.ServletService;
 import com.caucho.server.dispatch.Invocation;
 import com.caucho.server.dispatch.InvocationDecoder;
 import com.caucho.server.dispatch.InvocationServer;
@@ -113,7 +113,7 @@ public abstract class AbstractHttpRequest
   private static final LruCache<CharBuffer,String> _nameCache
     = new LruCache<CharBuffer,String>(1024);
 
-  private final Server _server;
+  private final ServletService _server;
 
   private final SocketLink _conn;
   private final TcpSocketLink _tcpConn;
@@ -171,7 +171,7 @@ public abstract class AbstractHttpRequest
    *
    * @param server the parent server
    */
-  protected AbstractHttpRequest(Server server, SocketLink conn)
+  protected AbstractHttpRequest(ServletService server, SocketLink conn)
   {
     _server = server;
 
@@ -198,7 +198,7 @@ public abstract class AbstractHttpRequest
     _response = createResponse();
   }
 
-  public Server getServer()
+  public ServletService getServer()
   {
     return _server;
   }
@@ -1609,8 +1609,8 @@ public abstract class AbstractHttpRequest
       log.log(Level.FINE, e1.toString(), e1);
     }
 
-    if (_server instanceof Server) {
-      WebApp webApp = ((Server) _server).getDefaultWebApp();
+    if (_server instanceof ServletService) {
+      WebApp webApp = ((ServletService) _server).getDefaultWebApp();
 
       if (webApp != null && getRequestFacade() != null) {
         webApp.accessLog(getRequestFacade(), getResponseFacade());

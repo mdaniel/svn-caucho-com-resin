@@ -51,7 +51,7 @@ import com.caucho.config.types.RawString;
 import com.caucho.lifecycle.Lifecycle;
 import com.caucho.loader.Environment;
 import com.caucho.network.listen.StreamSocketLink;
-import com.caucho.server.cluster.Server;
+import com.caucho.server.cluster.ServletService;
 import com.caucho.server.host.Host;
 import com.caucho.server.host.HostConfig;
 import com.caucho.server.http.HttpRequest;
@@ -95,7 +95,7 @@ public class ResinEmbed
   private CloudCluster _cluster;
   
   private Host _host;
-  private Server _server;
+  private ServletService _server;
 
   private String _serverHeader;
 

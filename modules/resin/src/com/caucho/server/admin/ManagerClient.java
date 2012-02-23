@@ -33,7 +33,7 @@ import com.caucho.bam.RemoteListenerUnavailableException;
 import com.caucho.bam.ServiceUnavailableException;
 import com.caucho.bam.actor.ActorSender;
 import com.caucho.hmtp.HmtpClient;
-import com.caucho.server.cluster.Server;
+import com.caucho.server.cluster.ServletService;
 import com.caucho.util.L10N;
 
 import java.io.Serializable;
@@ -59,7 +59,7 @@ public class ManagerClient
 
   public ManagerClient()
   {
-    Server server = Server.getCurrent();
+    ServletService server = ServletService.getCurrent();
 
     if (server == null)
       throw new IllegalStateException(L.l("ManagerClient was not called in a Resin context. For external clients, use the ManagerClient constructor with host,port arguments."));
@@ -71,7 +71,7 @@ public class ManagerClient
 
   public ManagerClient(String serverId)
   {
-    Server server = Server.getCurrent();
+    ServletService server = ServletService.getCurrent();
 
     if (server == null)
       throw new IllegalStateException(L.l("ManagerClient was not called in a Resin context. For external clients, use the ManagerClient constructor with host,port arguments."));

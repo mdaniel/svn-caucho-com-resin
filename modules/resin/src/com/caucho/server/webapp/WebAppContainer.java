@@ -55,7 +55,7 @@ import com.caucho.loader.EnvironmentListener;
 import com.caucho.make.AlwaysModified;
 import com.caucho.rewrite.DispatchRule;
 import com.caucho.rewrite.RewriteFilter;
-import com.caucho.server.cluster.Server;
+import com.caucho.server.cluster.ServletService;
 import com.caucho.server.dispatch.ErrorFilterChain;
 import com.caucho.server.dispatch.ExceptionFilterChain;
 import com.caucho.server.dispatch.Invocation;
@@ -87,7 +87,7 @@ public class WebAppContainer
   private static final Logger log
     = Logger.getLogger(WebAppContainer.class.getName());
 
-  private Server _server;
+  private ServletService _server;
   private Host _host;
 
   // The context class loader
@@ -139,7 +139,7 @@ public class WebAppContainer
   /**
    * Creates the webApp with its environment loader.
    */
-  public WebAppContainer(Server server,
+  public WebAppContainer(ServletService server,
                          Host host,
                          Path rootDirectory,
                          EnvironmentClassLoader loader,
@@ -182,7 +182,7 @@ public class WebAppContainer
     }
   }
 
-  protected Server getServer()
+  protected ServletService getServer()
   {
     return _server;
   }

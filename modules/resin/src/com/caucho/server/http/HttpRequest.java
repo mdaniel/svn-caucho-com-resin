@@ -45,7 +45,7 @@ import com.caucho.network.listen.SocketLink;
 import com.caucho.network.listen.SocketLinkDuplexController;
 import com.caucho.network.listen.SocketLinkDuplexListener;
 import com.caucho.network.listen.TcpSocketLink;
-import com.caucho.server.cluster.Server;
+import com.caucho.server.cluster.ServletService;
 import com.caucho.server.dispatch.BadRequestException;
 import com.caucho.server.dispatch.Invocation;
 import com.caucho.util.CharBuffer;
@@ -116,7 +116,7 @@ public class HttpRequest extends AbstractHttpRequest
    *
    * @param server the owning server.
    */
-  public HttpRequest(Server server, SocketLink conn)
+  public HttpRequest(ServletService server, SocketLink conn)
   {
     super(server, conn);
 
@@ -767,7 +767,7 @@ public class HttpRequest extends AbstractHttpRequest
   {
     boolean isInvocation = false;
 
-    Server server = getServer();
+    ServletService server = getServer();
     Thread thread = Thread.currentThread();
     ClassLoader oldLoader = thread.getContextClassLoader();
     long startTime = 0;

@@ -4,7 +4,7 @@ import java.io.*;
 
 import com.caucho.network.listen.ProtocolConnection;
 import com.caucho.network.listen.SocketLink;
-import com.caucho.server.cluster.Server;
+import com.caucho.server.cluster.ServletService;
 import com.caucho.server.dispatch.InvocationServer;
 import com.caucho.server.http.HttpRequest;
 import com.caucho.vfs.*;
@@ -17,7 +17,7 @@ public class SocketPolicyRequest extends HttpRequest
   private final Path _policy;
   private final SocketLink _connection;
 
-  public SocketPolicyRequest(Server server,
+  public SocketPolicyRequest(ServletService server,
                              SocketLink connection,
                              Path policy)
   {

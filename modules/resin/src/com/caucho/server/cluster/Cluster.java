@@ -127,7 +127,7 @@ abstract public class Cluster
   /**
    * Returns the server
    */
-  public Server getServer()
+  public ServletService getServer()
   {
     return getResin().getServer();
   }
@@ -469,7 +469,7 @@ abstract public class Cluster
      */
     public Path getRoot()
     {
-      return Server.getCurrent().getRootDirectory();
+      return ServletService.getCurrent().getRootDirectory();
     }
 
     /**

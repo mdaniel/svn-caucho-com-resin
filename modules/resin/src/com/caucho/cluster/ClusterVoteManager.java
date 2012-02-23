@@ -35,7 +35,7 @@ import com.caucho.config.ConfigException;
 import com.caucho.env.vote.AbstractVoteManager;
 import com.caucho.env.vote.VoteService;
 import com.caucho.loader.Environment;
-import com.caucho.server.cluster.Server;
+import com.caucho.server.cluster.ServletService;
 import com.caucho.util.L10N;
 
 import javax.annotation.PostConstruct;

@@ -46,7 +46,7 @@ import com.caucho.loader.EnvironmentClassLoader;
 import com.caucho.loader.SimpleLoader;
 import com.caucho.resin.ResinEmbed;
 import com.caucho.resin.WebAppEmbed;
-import com.caucho.server.cluster.Server;
+import com.caucho.server.cluster.ServletService;
 import com.caucho.server.util.CauchoSystem;
 import com.caucho.server.webapp.WebApp;
 import com.caucho.server.webapp.WebAppContainer;

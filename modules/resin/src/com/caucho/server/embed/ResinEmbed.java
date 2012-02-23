@@ -38,7 +38,7 @@ import com.caucho.config.ConfigException;
 import com.caucho.config.types.RawString;
 import com.caucho.lifecycle.Lifecycle;
 import com.caucho.resin.HttpEmbed;
-import com.caucho.server.cluster.Server;
+import com.caucho.server.cluster.ServletService;
 import com.caucho.server.host.Host;
 import com.caucho.server.host.HostConfig;
 import com.caucho.server.resin.Resin;
@@ -56,7 +56,7 @@ public class ResinEmbed
   
   private Resin _resin;
   private Host _host;
-  private Server _server;
+  private ServletService _server;
   
   private int _httpPort = -1;
 

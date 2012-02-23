@@ -37,7 +37,7 @@ import javax.annotation.PostConstruct;
 import com.caucho.config.ConfigException;
 import com.caucho.config.types.RawString;
 import com.caucho.env.deploy.DeployMode;
-import com.caucho.server.cluster.Server;
+import com.caucho.server.cluster.ServletService;
 import com.caucho.server.dispatch.ServletMapping;
 import com.caucho.server.host.HostConfig;
 import com.caucho.server.webapp.WebApp;
@@ -55,7 +55,7 @@ public class RemoteAdminService
   private static final L10N L = new L10N(RemoteAdminService.class);
 
   private String _hostName = "admin.resin";
-  private Server _server;
+  private ServletService _server;
   private boolean _isAuthenticationRequired = true;
 
   private WebApp _webApp;
@@ -69,7 +69,7 @@ public class RemoteAdminService
   public void init()
     throws Exception
   {
-    _server = Server.getCurrent();
+    _server = ServletService.getCurrent();
 
     if (_server == null)
       throw new ConfigException(L.l("<admin:{0}> may only be instantiated in an active server",

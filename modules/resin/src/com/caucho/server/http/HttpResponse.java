@@ -40,7 +40,7 @@ import javax.servlet.http.HttpServletResponse;
 import com.caucho.env.meter.CountSensor;
 import com.caucho.env.meter.MeterService;
 import com.caucho.network.listen.TcpSocketLink;
-import com.caucho.server.cluster.Server;
+import com.caucho.server.cluster.ServletService;
 import com.caucho.server.webapp.WebApp;
 import com.caucho.util.Alarm;
 import com.caucho.util.CharBuffer;
@@ -90,7 +90,7 @@ public class HttpResponse extends AbstractHttpResponse
     _request = request;
     _rawWrite = rawWrite;
 
-    Server server = request.getServer();
+    ServletService server = request.getServer();
 
     _resinServerBytes = ("\r\nServer: " + server.getServerHeader()).getBytes();
   }

@@ -61,7 +61,7 @@ import com.caucho.hessian.io.HessianDebugInputStream;
 import com.caucho.hessian.io.SerializerFactory;
 import com.caucho.management.server.SessionManagerMXBean;
 import com.caucho.security.Authenticator;
-import com.caucho.server.cluster.Server;
+import com.caucho.server.cluster.ServletService;
 import com.caucho.server.distcache.CacheImpl;
 import com.caucho.server.distcache.PersistentStoreConfig;
 import com.caucho.server.webapp.WebApp;
@@ -102,7 +102,7 @@ public final class SessionManager implements SessionCookieConfig, AlarmListener
   private final WebApp _webApp;
   private final SessionManagerAdmin _admin;
 
-  private final Server _servletContainer;
+  private final ServletService _servletContainer;
   private final ClusterServer _selfServer;
   private final int _selfIndex;
 

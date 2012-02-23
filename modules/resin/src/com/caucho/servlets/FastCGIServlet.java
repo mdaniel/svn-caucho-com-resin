@@ -38,7 +38,7 @@ import com.caucho.config.ConfigException;
 import com.caucho.config.types.Period;
 import com.caucho.network.balance.ClientSocket;
 import com.caucho.network.balance.ClientSocketFactory;
-import com.caucho.server.cluster.Server;
+import com.caucho.server.cluster.ServletService;
 import com.caucho.server.webapp.WebApp;
 import com.caucho.util.Alarm;
 import com.caucho.util.CharBuffer;

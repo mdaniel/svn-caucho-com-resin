@@ -60,7 +60,7 @@ import com.caucho.security.AbstractLogin;
 import com.caucho.security.Authenticator;
 import com.caucho.security.Login;
 import com.caucho.security.RoleMapManager;
-import com.caucho.server.cluster.Server;
+import com.caucho.server.cluster.ServletService;
 import com.caucho.server.dispatch.ServletInvocation;
 import com.caucho.server.session.SessionImpl;
 import com.caucho.server.session.SessionManager;
@@ -261,7 +261,7 @@ abstract public class AbstractCauchoRequest implements CauchoRequest {
 
   public abstract AbstractHttpRequest getAbstractHttpRequest();
 
-  public Server getServer() {
+  public ServletService getServer() {
     return getAbstractHttpRequest().getServer();
   }
 
