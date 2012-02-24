@@ -36,12 +36,17 @@ import java.util.logging.Logger;
 import com.caucho.amqp.broker.AmqpBroker;
 import com.caucho.amqp.broker.AmqpEnvironmentBroker;
 import com.caucho.amqp.broker.AmqpMessageListener;
-import com.caucho.amqp.broker.AmqpReceiver;
-import com.caucho.amqp.broker.AmqpSender;
+import com.caucho.amqp.broker.AmqpBrokerReceiver;
+import com.caucho.amqp.broker.AmqpBrokerSender;
+import com.caucho.amqp.io.DeliveryAccepted;
+import com.caucho.amqp.io.DeliveryRejected;
+import com.caucho.amqp.io.DeliveryReleased;
+import com.caucho.amqp.io.DeliveryState;
 import com.caucho.amqp.io.FrameAttach;
 import com.caucho.amqp.io.FrameBegin;
 import com.caucho.amqp.io.FrameClose;
 import com.caucho.amqp.io.FrameDetach;
+import com.caucho.amqp.io.FrameDisposition;
 import com.caucho.amqp.io.FrameEnd;
 import com.caucho.amqp.io.FrameOpen;
 import com.caucho.amqp.io.AmqpAbstractFrame;
@@ -61,12 +66,12 @@ import com.caucho.vfs.TempBuffer;
 import com.caucho.vfs.WriteStream;
 
 /**
- * Custom serialization for the cache
+ * Amqp server connection
  */
-public class AmqpConnection implements ProtocolConnection, AmqpFrameHandler
+public class AmqpServerConnection implements ProtocolConnection, AmqpFrameHandler
 {
   private static final Logger log
-    = Logger.getLogger(AmqpConnection.class.getName());
+    = Logger.getLogger(AmqpServerConnection.class.getName());
   
   private AmqpProtocol _amqp;
   private SocketLink _link;
@@ -85,7 +90,7 @@ public class AmqpConnection implements ProtocolConnection, AmqpFrameHandler
   private boolean _isClosed;
   private boolean _isDisconnected;
   
-  AmqpConnection(AmqpProtocol amqp, SocketLink link)
+  AmqpServerConnection(AmqpProtocol amqp, SocketLink link)
   {
     _amqp = amqp;
     _link = link;
@@ -296,11 +301,15 @@ public class AmqpConnection implements ProtocolConnection, AmqpFrameHandler
     _fout.flush();
   }
   
-  void writeMessage(AmqpLink link, InputStream is, long length)
+  void writeMessage(AmqpLink link, long messageId, InputStream is, long length)
     throws IOException
   {
-    FrameTransfer transfer = new FrameTransfer();
+    AmqpSession session = _sessions[0];
     
+    long deliveryId = session.addDelivery(link, messageId);
+    
+    FrameTransfer transfer = new FrameTransfer();
+    transfer.setDeliveryId(deliveryId);
     transfer.setHandle(link.getHandle());
     
     _fout.startFrame(0);
@@ -372,7 +381,7 @@ public class AmqpConnection implements ProtocolConnection, AmqpFrameHandler
     
     AmqpBroker broker = AmqpEnvironmentBroker.create();
     
-    AmqpSender pub = broker.createSender(targetAddress);
+    AmqpBrokerSender pub = broker.createSender(targetAddress);
     
     session.addLink(new AmqpLink(clientAttach, pub));
     
@@ -398,7 +407,7 @@ public class AmqpConnection implements ProtocolConnection, AmqpFrameHandler
     
     AmqpReceiverLink link = new AmqpReceiverLink(this, clientAttach);
     
-    AmqpReceiver sub = broker.createReceiver(sourceAddress, link);
+    AmqpBrokerReceiver sub = broker.createReceiver(sourceAddress, link);
     
     link.setReceiver(sub);
     
@@ -433,6 +442,28 @@ public class AmqpConnection implements ProtocolConnection, AmqpFrameHandler
     link.write(tBuf.getBuffer(), 0, len);
     // Link link = _links.get(handle);
     //System.out.println("MSG: " + transfer + " " + link);
+  }
+  
+  @Override
+  public void onDisposition(FrameDisposition disposition)
+    throws IOException
+  {
+    AmqpSession session = _sessions[0];
+    
+    DeliveryState state = disposition.getState();
+    
+    if (state instanceof DeliveryAccepted) {
+      session.accept();
+    }
+    else if (state instanceof DeliveryRejected) {
+      session.reject(disposition.getFirst(), disposition.getLast());
+    }
+    else if (state instanceof DeliveryReleased) {
+      session.release(disposition.getFirst(), disposition.getLast());
+    }
+    else {
+      System.out.println("UNKNOWN");
+    }
   }
 
   @Override

@@ -27,56 +27,15 @@
  * @author Scott Ferguson
  */
 
-package com.caucho.amqp.io;
+package com.caucho.amqp;
 
-import java.io.IOException;
-
+import com.caucho.amqp.broker.AmqpBrokerReceiver;
 
 /**
- * AMQP client/server frame handler.
+ * AMQP client connection facade
  */
-public interface AmqpFrameHandler {
-
-  /**
-   * Receives a session-begin frame.
-   * @throws IOException 
-   */
-  void onBegin(FrameBegin frameBegin)
-    throws IOException;
-
-  /**
-   * @param frameEnd
-   */
-  void onEnd(FrameEnd frameEnd)
-    throws IOException;
-
-  /**
-   * @param frameClose
-   */
-  void onClose(FrameClose frameClose)
-    throws IOException;
-
-  /**
-   * @param frameAttach
-   */
-  void onAttach(FrameAttach frameAttach)
-    throws IOException;
-
-  /**
-   * @param frameDetach
-   */
-  void onDetach(FrameDetach frameDetach)
-    throws IOException;
-
-  /**
-   * @param frameTransfer
-   */
-  void onTransfer(AmqpFrameReader fin, FrameTransfer frameTransfer)
-    throws IOException;
-
-  /**
-   * @param frameDisposition
-   */
-  void onDisposition(FrameDisposition frameDisposition)
-    throws IOException;
+public interface AmqpConnection {
+  public AmqpReceiver createReceiver(String queueName);
+  
+  public AmqpReceiverFactory createReceiverFactory();
 }

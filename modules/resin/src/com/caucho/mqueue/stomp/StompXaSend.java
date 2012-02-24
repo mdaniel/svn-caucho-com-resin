@@ -29,7 +29,7 @@
 
 package com.caucho.mqueue.stomp;
 
-import com.caucho.amqp.broker.AmqpSender;
+import com.caucho.amqp.broker.AmqpBrokerSender;
 import com.caucho.vfs.TempBuffer;
 
 /**
@@ -37,12 +37,12 @@ import com.caucho.vfs.TempBuffer;
  */
 class StompXaSend extends StompXaItem
 {
-  private AmqpSender _dest;
+  private AmqpBrokerSender _dest;
   
   private TempBuffer _tBuf;
   private int _length;
   
-  StompXaSend(AmqpSender dest, TempBuffer tBuf, int length)
+  StompXaSend(AmqpBrokerSender dest, TempBuffer tBuf, int length)
   {
     _dest = dest;
     _tBuf = tBuf;

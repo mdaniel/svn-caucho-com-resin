@@ -105,11 +105,16 @@ abstract public class AmqpAbstractPacket implements AmqpConstants {
     addType(new FrameBegin());
     addType(new FrameAttach());
     addType(new FrameTransfer());
+    addType(new FrameDisposition());
     addType(new FrameDetach());
     addType(new FrameEnd());
     addType(new FrameClose());
     
     addType(new LinkSource());
     addType(new LinkTarget());
+    
+    addType(new DeliveryAccepted());
+    addType(new DeliveryRejected());
+    addType(new DeliveryReleased());
   }
 }

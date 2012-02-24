@@ -60,7 +60,7 @@ public class AmqpProtocol implements Protocol
   @Override
   public ProtocolConnection createConnection(SocketLink link)
   {
-    return new AmqpConnection(this, link);
+    return new AmqpServerConnection(this, link);
   }
 
   @Override

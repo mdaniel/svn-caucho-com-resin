@@ -53,7 +53,12 @@ import com.caucho.vfs.WriteStream;
  */
 public class AmqpSession
 {
+  private long _deliveryId = 1;
+  
   private ArrayList<AmqpLink> _links = new ArrayList<AmqpLink>();
+  
+  private DeliveryNode _head;
+  private DeliveryNode _tail;
   
   public void addLink(AmqpLink link)
   {
@@ -70,5 +75,111 @@ public class AmqpSession
   public AmqpLink getLink(int handle)
   {
     return _links.get(handle);
+  }
+  
+  long addDelivery(AmqpLink link, long messageId)
+  {
+    long deliveryId = _deliveryId++;
+    
+    DeliveryNode node = new DeliveryNode(deliveryId, link, messageId);
+    
+    if (_tail != null) {
+      _tail.setNext(node);
+    }
+    else {
+      _head = node;
+    }
+    
+    return deliveryId;
+  }
+
+  void accept()
+  {
+    DeliveryNode node = _head;
+    
+    if (node != null) {
+      _head = node.getNext();
+      
+      if (_head == null)
+        _tail = null;
+      
+      AmqpLink link = node.getLink();
+      
+      link.accept(node.getMessageId());
+    }
+  }
+
+  public void reject(long first, long last)
+  {
+    DeliveryNode node = _head;
+    
+    if (node != null) {
+      _head = node.getNext();
+      
+      if (_head == null)
+        _tail = null;
+      
+      AmqpLink link = node.getLink();
+      
+      link.reject(node.getMessageId());
+    }
+  }
+
+  public void release(long first, long last)
+  {
+    DeliveryNode node = _head;
+    
+    if (node != null) {
+      _head = node.getNext();
+      
+      if (_head == null)
+        _tail = null;
+      
+      AmqpLink link = node.getLink();
+      
+      link.release(node.getMessageId());
+    }
+  }
+  
+  private static class DeliveryNode {
+    private final long _deliveryId;
+    private final AmqpLink _link;
+    private final long _messageId;
+    
+    private DeliveryNode _next;
+    
+    DeliveryNode(long deliveryId, 
+                 AmqpLink link,
+                 long messageId)
+    {
+      _deliveryId = deliveryId;
+      _link = link;
+      _messageId = messageId;
+    }
+    
+    public long getDeliveryId()
+    {
+      return _deliveryId;
+    }
+    
+    public long getMessageId()
+    {
+      return _messageId;
+    }
+    
+    public AmqpLink getLink()
+    {
+      return _link;
+    }
+    
+    public void setNext(DeliveryNode next)
+    {
+      _next = next;
+    }
+    
+    public DeliveryNode getNext()
+    {
+      return _next;
+    }
   }
 }

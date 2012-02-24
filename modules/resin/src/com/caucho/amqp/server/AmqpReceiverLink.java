@@ -33,8 +33,8 @@ import java.io.IOException;
 import java.io.InputStream;
 
 import com.caucho.amqp.broker.AmqpMessageListener;
-import com.caucho.amqp.broker.AmqpReceiver;
-import com.caucho.amqp.broker.AmqpSender;
+import com.caucho.amqp.broker.AmqpBrokerReceiver;
+import com.caucho.amqp.broker.AmqpBrokerSender;
 import com.caucho.amqp.io.FrameAttach;
 
 /**
@@ -42,18 +42,18 @@ import com.caucho.amqp.io.FrameAttach;
  */
 public class AmqpReceiverLink extends AmqpLink implements AmqpMessageListener
 {
-  private AmqpConnection _conn;
+  private AmqpServerConnection _conn;
   
-  private AmqpReceiver _sub;
+  private AmqpBrokerReceiver _sub;
   
-  public AmqpReceiverLink(AmqpConnection conn, FrameAttach attach)
+  public AmqpReceiverLink(AmqpServerConnection conn, FrameAttach attach)
   {
     super(attach);
     
     _conn = conn;
   }
   
-  void setReceiver(AmqpReceiver sub)
+  void setReceiver(AmqpBrokerReceiver sub)
   {
     _sub = sub;
   }
@@ -64,6 +64,24 @@ public class AmqpReceiverLink extends AmqpLink implements AmqpMessageListener
                         long contentLength)
     throws IOException
   {
-    _conn.writeMessage(this, bodyIs, contentLength);
+    _conn.writeMessage(this, messageId, bodyIs, contentLength);
+  }
+  
+  @Override
+  public void accept(long messageId)
+  {
+    _sub.accept(messageId);
+  }
+  
+  @Override
+  public void reject(long messageId)
+  {
+    _sub.reject(messageId);
+  }
+  
+  @Override
+  public void release(long messageId)
+  {
+    _sub.release(messageId);
   }
 }

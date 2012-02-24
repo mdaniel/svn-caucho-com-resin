@@ -70,7 +70,7 @@ public class JournalAmqpBroker extends AbstractAmqpBroker
   }
   
   @Override
-  public AmqpSender createSender(String name)
+  public AmqpBrokerSender createSender(String name)
   {
     MQJournalQueuePublisher jPublisher = _queue.createPublisher();
     
@@ -78,7 +78,7 @@ public class JournalAmqpBroker extends AbstractAmqpBroker
   }
   
   @Override
-  public AmqpReceiver createReceiver(String name,
+  public AmqpBrokerReceiver createReceiver(String name,
                                               AmqpMessageListener listener)
   {
     SubscriberProcessor processor = new AmqpReceiverProcessor(listener);

@@ -37,13 +37,19 @@ import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
+import com.caucho.amqp.AmqpConnection;
 import com.caucho.amqp.AmqpException;
+import com.caucho.amqp.AmqpReceiver;
 import com.caucho.amqp.io.AmqpAbstractComposite;
 import com.caucho.amqp.io.AmqpAbstractFrame;
 import com.caucho.amqp.io.AmqpAbstractPacket;
+import com.caucho.amqp.io.DeliveryAccepted;
+import com.caucho.amqp.io.DeliveryRejected;
+import com.caucho.amqp.io.DeliveryReleased;
 import com.caucho.amqp.io.FrameAttach;
 import com.caucho.amqp.io.FrameClose;
 import com.caucho.amqp.io.FrameDetach;
+import com.caucho.amqp.io.FrameDisposition;
 import com.caucho.amqp.io.FrameEnd;
 import com.caucho.amqp.io.AmqpFrameHandler;
 import com.caucho.amqp.io.FrameOpen;
@@ -70,11 +76,13 @@ import com.caucho.vfs.WriteStream;
 /**
  * AMQP client
  */
-public class AmqpClientImpl implements AmqpFrameHandler {
-  private static final L10N L = new L10N(AmqpClientImpl.class);
+public class AmqpConnectionImpl
+  implements AmqpConnection, AmqpFrameHandler
+{
+  private static final L10N L = new L10N(AmqpConnectionImpl.class);
   
   private static final Logger log
-    = Logger.getLogger(AmqpClientImpl.class.getName());
+    = Logger.getLogger(AmqpConnectionImpl.class.getName());
   
   private String _hostname;
   private int _port;
@@ -99,11 +107,11 @@ public class AmqpClientImpl implements AmqpFrameHandler {
   private final AtomicBoolean _isClosed = new AtomicBoolean();
   private boolean _isDisconnected;
   
-  public AmqpClientImpl()
+  public AmqpConnectionImpl()
   {
   }
   
-  public AmqpClientImpl(String hostname, int port)
+  public AmqpConnectionImpl(String hostname, int port)
   {
     _hostname = hostname;
     _port = port;
@@ -188,9 +196,25 @@ public class AmqpClientImpl implements AmqpFrameHandler {
     }
   }
   
-  public AmqpClientReceiver createReceiver(String address)
+  @Override
+  public AmqpClientReceiverFactory createReceiverFactory()
+  {
+    return new AmqpClientReceiverFactory(this);
+  }
+  
+  @Override
+  public AmqpReceiver createReceiver(String address)
+  {
+    AmqpClientReceiverFactory factory = createReceiverFactory();
+    factory.setAddress(address);
+    
+    return factory.build();
+  }
+  
+  AmqpClientReceiver buildReceiver(AmqpClientReceiverFactory factory)
   {
     int handle = _handleCounter++;
+    String address = factory.getAddress();
     
     FrameAttach attach = new FrameAttach();
     attach.setName("client-" + address);
@@ -211,14 +235,13 @@ public class AmqpClientImpl implements AmqpFrameHandler {
     Link link = new Link(attach);
     
     _links.set(handle, link);
-    System.out.println("LINKS: " + _links);
     
     try {
       writeFrame(attach);
       
       AmqpClientReceiver receiver;
     
-      receiver = new AmqpClientReceiver(this, address, attach.getHandle());
+      receiver = new AmqpClientReceiver(this, factory, attach.getHandle());
       
       link.setReceiver(receiver);
       
@@ -396,7 +419,67 @@ public class AmqpClientImpl implements AmqpFrameHandler {
       _fout.finishFrame();
       _fout.flush();
     } catch (IOException e) {
-      log.log(Level.FINER, e.toString(), e);
+      throw new AmqpException(e);
+    }
+  }
+
+  /**
+   * @param handle
+   */
+  public void dispositionAccept(int handle)
+  {
+    try {
+      _fout.startFrame(0);
+    
+      FrameDisposition disposition = new FrameDisposition();
+      disposition.setState(DeliveryAccepted.VALUE);
+      
+      disposition.write(_aout);
+    
+      _fout.finishFrame();
+      _fout.flush();
+    } catch (IOException e) {
+      throw new AmqpException(e);
+    }
+  }
+
+  /**
+   * @param handle
+   */
+  public void dispositionReject(int handle)
+  {
+    try {
+      _fout.startFrame(0);
+    
+      FrameDisposition disposition = new FrameDisposition();
+      disposition.setState(new DeliveryRejected());
+      
+      disposition.write(_aout);
+    
+      _fout.finishFrame();
+      _fout.flush();
+    } catch (IOException e) {
+      throw new AmqpException(e);
+    }
+  }
+
+  /**
+   * @param handle
+   */
+  public void dispositionRelease(int handle)
+  {
+    try {
+      _fout.startFrame(0);
+    
+      FrameDisposition disposition = new FrameDisposition();
+      disposition.setState(DeliveryReleased.VALUE);
+      
+      disposition.write(_aout);
+    
+      _fout.finishFrame();
+      _fout.flush();
+    } catch (IOException e) {
+      throw new AmqpException(e);
     }
   }
   
@@ -434,6 +517,13 @@ public class AmqpClientImpl implements AmqpFrameHandler {
     String value = new String(data);
     
     receiver.setValue(value);
+  }
+  
+  @Override
+  public void onDisposition(FrameDisposition frameDisposition)
+    throws IOException
+  {
+    System.out.println("CLIENT_DISPOSITION: " + frameDisposition);
   }
   
   @Override

@@ -29,8 +29,8 @@
 
 package com.caucho.amqp.server;
 
-import com.caucho.amqp.broker.AmqpReceiver;
-import com.caucho.amqp.broker.AmqpSender;
+import com.caucho.amqp.broker.AmqpBrokerReceiver;
+import com.caucho.amqp.broker.AmqpBrokerSender;
 import com.caucho.amqp.io.FrameAttach;
 
 /**
@@ -42,9 +42,9 @@ public class AmqpLink
   
   private FrameAttach _attach;
   
-  private AmqpSender _pub;
+  private AmqpBrokerSender _pub;
   
-  public AmqpLink(FrameAttach attach, AmqpSender pub)
+  public AmqpLink(FrameAttach attach, AmqpBrokerSender pub)
   {
     this(attach);
     
@@ -65,6 +65,30 @@ public class AmqpLink
   void write(byte []buffer, int offset, int length)
   {
     _pub.messageComplete(buffer, offset, length, null);
+  }
+
+  /**
+   * @param messageId
+   */
+  public void accept(long messageId)
+  {
+    throw new UnsupportedOperationException(getClass().getName());
+  }
+
+  /**
+   * @param messageId
+   */
+  public void reject(long messageId)
+  {
+    throw new UnsupportedOperationException(getClass().getName());
+  }
+
+  /**
+   * @param messageId
+   */
+  public void release(long messageId)
+  {
+    throw new UnsupportedOperationException(getClass().getName());
   }
   
   @Override

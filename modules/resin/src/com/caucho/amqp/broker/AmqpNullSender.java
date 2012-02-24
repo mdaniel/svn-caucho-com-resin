@@ -34,7 +34,7 @@ import com.caucho.vfs.TempBuffer;
 /**
  * Custom serialization for the cache
  */
-public class AmqpNullSender implements AmqpSender
+public class AmqpNullSender implements AmqpBrokerSender
 {
   @Override
   public void messagePart(TempBuffer buffer, int length)

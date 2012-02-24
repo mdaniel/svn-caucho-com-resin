@@ -36,13 +36,13 @@ package com.caucho.amqp.broker;
 abstract public class AbstractAmqpBroker implements AmqpBroker
 {
   @Override
-  public AmqpSender createSender(String name)
+  public AmqpBrokerSender createSender(String name)
   {
     return null;
   }
   
   @Override
-  public AmqpReceiver createReceiver(String name,
+  public AmqpBrokerReceiver createReceiver(String name,
                                               AmqpMessageListener listener)
   {
     return null;

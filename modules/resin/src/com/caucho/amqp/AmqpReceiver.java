@@ -27,26 +27,27 @@
  * @author Scott Ferguson
  */
 
-package com.caucho.amqp.broker;
+package com.caucho.amqp;
 
-import com.caucho.vfs.TempBuffer;
 
 /**
- * Custom serialization for the cache
+ * AMQP client receiver
  */
-public interface AmqpSender
-{
-  public void messagePart(TempBuffer buffer, int length);
+public interface AmqpReceiver {
+  public Object take();
   
-  // XXX: needs contentType, xid
-  public void messageComplete(TempBuffer buffer, 
-                              int length,
-                              AmqpReceiptListener receiptListener);
+  /**
+   * Accept the value for a non-auto-ack.
+   */
+  public void accept();
   
-  public void messageComplete(byte []buffer,
-                              int offset,
-                              int length,
-                              AmqpReceiptListener receiptListener);
+  /**
+   * Reject the value for a non-auto-ack.
+   */
+  public void reject();
   
-  public void close();
+  /**
+   * Release the value for a non-auto-ack.
+   */
+  public void release();
 }

@@ -27,13 +27,13 @@
  * @author Scott Ferguson
  */
 
-package com.caucho.amqp.io;
+package com.caucho.amqp;
 
-import java.io.IOException;
-
+import com.caucho.amqp.client.AmqpConnectionImpl;
+import com.caucho.amqp.server.AmqpProtocol;
 
 /**
- * message delivery state
+ * AMQP server protocol
  */
-abstract public class AmqpDeliveryState extends AmqpAbstractComposite {
+public class AmqpServerProtocol extends AmqpProtocol {
 }

@@ -40,9 +40,9 @@ import java.util.logging.Logger;
 
 import com.caucho.amqp.broker.AmqpBroker;
 import com.caucho.amqp.broker.AmqpNullSender;
-import com.caucho.amqp.broker.AmqpSender;
+import com.caucho.amqp.broker.AmqpBrokerSender;
 import com.caucho.amqp.broker.AmqpReceiptListener;
-import com.caucho.amqp.broker.AmqpReceiver;
+import com.caucho.amqp.broker.AmqpBrokerReceiver;
 import com.caucho.amqp.broker.AmqpMessageListener;
 import com.caucho.distcache.ClusterCache;
 import com.caucho.distcache.ExtCacheEntry;
@@ -94,17 +94,17 @@ public class StompConnection implements ProtocolConnection
   private static final CharBuffer TRANSACTION
     = new CharBuffer("transaction");
 
-  private static final AmqpSender NULL_DESTINATION
+  private static final AmqpBrokerSender NULL_DESTINATION
     = new AmqpNullSender();
   
   private StompProtocol _stomp;
   private SocketLink _link;
   
-  private HashMap<String,AmqpSender> _destinationMap
-    = new HashMap<String,AmqpSender>();
+  private HashMap<String,AmqpBrokerSender> _destinationMap
+    = new HashMap<String,AmqpBrokerSender>();
   
-  private HashMap<String,AmqpReceiver> _subscriptionMap
-    = new HashMap<String,AmqpReceiver>();
+  private HashMap<String,AmqpBrokerReceiver> _subscriptionMap
+    = new HashMap<String,AmqpBrokerReceiver>();
   
   private CharBuffer _method = new CharBuffer();
   private char []_headerBuffer = new char[4096];
@@ -179,12 +179,12 @@ public class StompConnection implements ProtocolConnection
     return _contentType;
   }
   
-  public AmqpSender getDestination()
+  public AmqpBrokerSender getDestination()
   {
     if (_destinationName == null)
       return null;
     
-    AmqpSender dest = _destinationMap.get(_destinationName);
+    AmqpBrokerSender dest = _destinationMap.get(_destinationName);
     
     if (dest == null) {
       dest = _stomp.createDestination(_destinationName);
@@ -230,7 +230,7 @@ public class StompConnection implements ProtocolConnection
     if (_destinationName == null)
       throw new IOException("sub requires destination");
     
-    AmqpReceiver sub = _subscriptionMap.get(_id);
+    AmqpBrokerReceiver sub = _subscriptionMap.get(_id);
     
     if (sub != null)
       throw new IOException("sub exists");
@@ -247,7 +247,7 @@ public class StompConnection implements ProtocolConnection
   
   public boolean unsubscribe(String id)
   {
-    AmqpReceiver sub = _subscriptionMap.remove(id);
+    AmqpBrokerReceiver sub = _subscriptionMap.remove(id);
     
     if (sub != null) {
       sub.close();
@@ -260,10 +260,10 @@ public class StompConnection implements ProtocolConnection
   
   public boolean ack(String sid, long mid)
   {
-    AmqpReceiver sub = _subscriptionMap.get(sid);
+    AmqpBrokerReceiver sub = _subscriptionMap.get(sid);
     
     if (sub != null) {
-      sub.ack(mid);
+      sub.accept(mid);
       return true;
     }
     else {
@@ -273,10 +273,10 @@ public class StompConnection implements ProtocolConnection
   
   public boolean nack(String sid, long mid)
   {
-    AmqpReceiver sub = _subscriptionMap.get(sid);
+    AmqpBrokerReceiver sub = _subscriptionMap.get(sid);
     
     if (sub != null) {
-      sub.nack(mid);
+      sub.reject(mid);
       return true;
     }
     else {
@@ -546,22 +546,22 @@ public class StompConnection implements ProtocolConnection
   @Override
   public void onCloseConnection()
   {
-    ArrayList<AmqpSender> destList
-      = new ArrayList<AmqpSender>(_destinationMap.values());
+    ArrayList<AmqpBrokerSender> destList
+      = new ArrayList<AmqpBrokerSender>(_destinationMap.values());
   
     _destinationMap.clear();
     
-    ArrayList<AmqpReceiver> subList
-      = new ArrayList<AmqpReceiver>(_subscriptionMap.values());
+    ArrayList<AmqpBrokerReceiver> subList
+      = new ArrayList<AmqpBrokerReceiver>(_subscriptionMap.values());
 
     _destinationMap.clear();
     _subscriptionMap.clear();
     
-    for (AmqpSender dest : destList) {
+    for (AmqpBrokerSender dest : destList) {
       dest.close();
     }
     
-    for (AmqpReceiver sub : subList) {
+    for (AmqpBrokerReceiver sub : subList) {
       sub.close();
     }
     

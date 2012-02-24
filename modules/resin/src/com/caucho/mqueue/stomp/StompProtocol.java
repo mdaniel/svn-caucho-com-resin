@@ -33,7 +33,7 @@ import javax.annotation.PostConstruct;
 
 import com.caucho.amqp.broker.AmqpBroker;
 import com.caucho.amqp.broker.AmqpEnvironmentBroker;
-import com.caucho.amqp.broker.AmqpSender;
+import com.caucho.amqp.broker.AmqpBrokerSender;
 import com.caucho.network.listen.Protocol;
 import com.caucho.network.listen.ProtocolConnection;
 import com.caucho.network.listen.SocketLink;
@@ -75,7 +75,7 @@ public class StompProtocol implements Protocol
     return "stomp";
   }
   
-  public AmqpSender createDestination(String name)
+  public AmqpBrokerSender createDestination(String name)
   {
     return _broker.createSender(name);
   }

@@ -27,56 +27,41 @@
  * @author Scott Ferguson
  */
 
-package com.caucho.amqp.io;
+package com.caucho.amqp;
 
-import java.io.IOException;
-
+import com.caucho.amqp.client.AmqpConnectionImpl;
 
 /**
- * AMQP client/server frame handler.
+ * AMQP client connection facade
  */
-public interface AmqpFrameHandler {
-
+public class AmqpConnectionFactory {
+  private String _host = "localhost";
+  private int _port = 5672;
+  
+  private String _virtualHost;
+  
   /**
-   * Receives a session-begin frame.
-   * @throws IOException 
+   * Sets the socket host
    */
-  void onBegin(FrameBegin frameBegin)
-    throws IOException;
-
+  public void setHost(String host)
+  {
+    _host = host;
+  }
+  
   /**
-   * @param frameEnd
+   * Sets the socket port.
    */
-  void onEnd(FrameEnd frameEnd)
-    throws IOException;
-
-  /**
-   * @param frameClose
-   */
-  void onClose(FrameClose frameClose)
-    throws IOException;
-
-  /**
-   * @param frameAttach
-   */
-  void onAttach(FrameAttach frameAttach)
-    throws IOException;
-
-  /**
-   * @param frameDetach
-   */
-  void onDetach(FrameDetach frameDetach)
-    throws IOException;
-
-  /**
-   * @param frameTransfer
-   */
-  void onTransfer(AmqpFrameReader fin, FrameTransfer frameTransfer)
-    throws IOException;
-
-  /**
-   * @param frameDisposition
-   */
-  void onDisposition(FrameDisposition frameDisposition)
-    throws IOException;
+  public void setPort(int port)
+  {
+    _port = port;
+  }
+  
+  public AmqpConnection connect()
+  {
+    AmqpConnectionImpl conn = new AmqpConnectionImpl(_host, _port);
+    
+    conn.connect();
+    
+    return conn;
+  }
 }

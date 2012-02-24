@@ -33,15 +33,20 @@ package com.caucho.amqp.broker;
 /**
  * Custom serialization for the cache
  */
-public class AbstractAmqpReceiver implements AmqpReceiver
+public class AbstractAmqpReceiver implements AmqpBrokerReceiver
 {
   @Override
-  public void ack(long mid)
+  public void accept(long mid)
   {
   }
   
   @Override
-  public void nack(long mid)
+  public void reject(long mid)
+  {
+  }
+  
+  @Override
+  public void release(long mid)
   {
   }
   

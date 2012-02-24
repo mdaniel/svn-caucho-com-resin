@@ -31,86 +31,50 @@ package com.caucho.amqp.io;
 
 import java.io.IOException;
 
-import com.caucho.amqp.io.FrameAttach.Role;
 
 /**
- * AMQP link flow
+ * AMQP delivery received
  */
-public class AmqpDisposition extends AmqpAbstractComposite {
-  public static final int CODE = AmqpConstants.FT_LINK_FLOW;
+public class DeliveryRejected extends DeliveryState {
+  private AmqpError _error;
+  
+  public AmqpError getError()
+  {
+    return _error;
+  }
+  
+  public void setError(AmqpError error)
+  {
+    _error = error;
+  }
 
-  private Role _role = Role.SENDER; // ubyte (required)
-  private long _first; // uint seq (required)
-  private long _last; // uint seq
-  private boolean _isSettled;
-  private AmqpDeliveryState _state; // delivery-state
-  private boolean _isBatchable;
-  
-  public Role getRole()
-  {
-    return _role;
-  }
-  
-  public long getFirst()
-  {
-    return _first;
-  }
-  
-  public long getLast()
-  {
-    return _last;
-  }
-  
-  public boolean isSettled()
-  {
-    return _isSettled;
-  }
-  
-  public AmqpDeliveryState getState()
-  {
-    return _state;
-  }
-  
-  public boolean isBatchable()
-  {
-    return _isBatchable;
-  }
-  
   @Override
   public long getDescriptorCode()
   {
-    return FT_LINK_FLOW;
+    return ST_MESSAGE_REJECTED;
+  }
+  
+  public DeliveryRejected createInstance()
+  {
+    return new DeliveryRejected();
   }
   
   @Override
   public void readBody(AmqpReader in, int count)
     throws IOException
   {
-    _role = Role.values()[in.readInt()];
-    _first = in.readInt();
-    _last = in.readInt();
-    _isSettled = in.readBoolean();
-    _state = in.readObject(AmqpDeliveryState.class);
-    _isBatchable = in.readBoolean();
+    _error = in.readObject(AmqpError.class);
   }
   
   @Override
   public int writeBody(AmqpWriter out)
     throws IOException
   {
-    out.writeUbyte(_role.ordinal());
-    out.writeUint((int) _first);
-    out.writeUint((int) _last);
-    out.writeBoolean(_isSettled);
-    
-    if (_state != null)
-      _state.write(out);
+    if (_error != null)
+      _error.write(out);
     else
-      out.writeNull(); // state
+      out.writeNull();
     
-    out.writeBoolean(_isBatchable);
-    
-    return 6;
+    return 1;
   }
-
 }

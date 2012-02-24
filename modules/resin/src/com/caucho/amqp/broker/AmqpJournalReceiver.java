@@ -34,7 +34,7 @@ import com.caucho.mqueue.queue.MQJournalQueueSubscriber;
 /**
  * Subscription to a destination
  */
-public class AmqpJournalReceiver implements AmqpReceiver
+public class AmqpJournalReceiver implements AmqpBrokerReceiver
 {
   private MQJournalQueueSubscriber _subscriber;
   
@@ -46,15 +46,21 @@ public class AmqpJournalReceiver implements AmqpReceiver
   }
   
   @Override
-  public void ack(long mid)
+  public void accept(long mid)
   {
     System.out.println("ACK: " + mid);
   }
   
   @Override
-  public void nack(long mid)
+  public void reject(long mid)
   {
     System.out.println("NACK: " + mid);
+  }
+  
+  @Override
+  public void release(long mid)
+  {
+    System.out.println("RELEASE: " + mid);
   }
   
   @Override

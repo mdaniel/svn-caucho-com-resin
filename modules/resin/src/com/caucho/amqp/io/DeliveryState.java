@@ -33,25 +33,7 @@ import java.io.IOException;
 
 
 /**
- * AMQP delivery accepted
+ * message delivery state
  */
-public class AmqpDeliveryAccepted extends AmqpDeliveryState {
-  @Override
-  public long getDescriptorCode()
-  {
-    return ST_MESSAGE_ACCEPTED;
-  }
-  
-  @Override
-  public void readBody(AmqpReader in, int count)
-    throws IOException
-  {
-  }
-  
-  @Override
-  public int writeBody(AmqpWriter out)
-    throws IOException
-  {
-    return 0;
-  }
+abstract public class DeliveryState extends AmqpAbstractComposite {
 }

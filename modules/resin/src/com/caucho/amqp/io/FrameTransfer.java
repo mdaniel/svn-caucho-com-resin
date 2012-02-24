@@ -48,7 +48,7 @@ public class FrameTransfer extends AmqpAbstractFrame {
   private boolean _isMore;
   private ReceiverSettleMode _receiverSettleMode
     = ReceiverSettleMode.FIRST;
-  private AmqpDeliveryState _state; // delivery-state
+  private DeliveryState _state; // delivery-state
   private boolean _isResume;
   private boolean _isAborted;
   private boolean _isBatchable;
@@ -98,7 +98,7 @@ public class FrameTransfer extends AmqpAbstractFrame {
     return _receiverSettleMode;
   }
   
-  public AmqpDeliveryState getDeliveryState()
+  public DeliveryState getDeliveryState()
   {
     return _state;
   }
@@ -176,7 +176,7 @@ public class FrameTransfer extends AmqpAbstractFrame {
     _isMore = in.readBoolean();
     _receiverSettleMode = ReceiverSettleMode.values()[in.readInt()];
     
-    _state = in.readObject(AmqpDeliveryState.class);
+    _state = in.readObject(DeliveryState.class);
     
     _isResume = in.readBoolean();
     _isAborted = in.readBoolean();

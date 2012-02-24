@@ -36,6 +36,7 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 
 import com.caucho.amqp.AmqpException;
+import com.caucho.amqp.AmqpSender;
 import com.caucho.amqp.io.AmqpAbstractComposite;
 import com.caucho.amqp.io.AmqpAbstractPacket;
 import com.caucho.amqp.io.AmqpFrameHandler;
@@ -58,22 +59,31 @@ import com.caucho.vfs.WriteStream;
 /**
  * AMQP client
  */
-public class AmqpClientSender {
+class AmqpClientSender implements AmqpSender {
   private static final Logger log
     = Logger.getLogger(AmqpClientSender.class.getName());
   
-  private AmqpClientImpl _client;
+  private AmqpConnectionImpl _client;
   
   private String _address;
   private int _handle;
   
-  AmqpClientSender(AmqpClientImpl client,
+  AmqpClientSender(AmqpConnectionImpl client,
                    String address,
                    int handle)
   {
     _client = client;
     _address = address;
     _handle = handle;
+  }
+  
+  @Override
+  public void offer(Object value)
+  {
+    String sValue = (String) value;
+    byte []bytes = sValue.getBytes();
+      
+    send(bytes);
   }
   
   public void send(byte []buffer)

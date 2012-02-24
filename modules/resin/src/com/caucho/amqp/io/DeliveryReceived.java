@@ -33,25 +33,53 @@ import java.io.IOException;
 
 
 /**
- * AMQP delivery accepted
+ * AMQP delivery received
  */
-public class AmqpDeliveryReleased extends AmqpDeliveryState {
+public class DeliveryReceived extends DeliveryState {
+  private long _sectionNumber; // uint mandatory
+  private long _sectionOffset; // ulong mandatory
+  
+  public long getSectionNumber()
+  {
+    return _sectionNumber;
+  }
+  
+  public void setSectionNumber(long sectionNumber)
+  {
+    _sectionNumber = sectionNumber;
+  }
+  
+  public long getSectionOffset()
+  {
+    return _sectionOffset;
+  }
+  
+  public void setSectionOffset(long sectionOffset)
+  {
+    _sectionOffset = sectionOffset;
+  }
+
   @Override
   public long getDescriptorCode()
   {
-    return ST_MESSAGE_RELEASED;
+    return ST_MESSAGE_RECEIVED;
   }
   
   @Override
   public void readBody(AmqpReader in, int count)
     throws IOException
   {
+    _sectionNumber = in.readLong();
+    _sectionOffset = in.readLong();
   }
   
   @Override
   public int writeBody(AmqpWriter out)
     throws IOException
   {
-    return 0;
+    out.writeUint((int) _sectionNumber);
+    out.writeUlong(_sectionOffset);
+    
+    return 2;
   }
 }

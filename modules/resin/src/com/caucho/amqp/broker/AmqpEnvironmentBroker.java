@@ -89,7 +89,7 @@ public class AmqpEnvironmentBroker implements AmqpBroker
   }
   
   @Override
-  public AmqpSender createSender(String name)
+  public AmqpBrokerSender createSender(String name)
   {
     AmqpBroker broker = _brokerMap.get(name);
     
@@ -97,7 +97,7 @@ public class AmqpEnvironmentBroker implements AmqpBroker
       return broker.createSender(name);
     
     for (AmqpBroker registeredBroker : _brokerList) {
-      AmqpSender dest = registeredBroker.createSender(name);
+      AmqpBrokerSender dest = registeredBroker.createSender(name);
       
       if (dest != null) {
         _brokerMap.put(name, registeredBroker);
@@ -109,11 +109,11 @@ public class AmqpEnvironmentBroker implements AmqpBroker
   }
   
   @Override
-  public AmqpReceiver createReceiver(String name,
+  public AmqpBrokerReceiver createReceiver(String name,
                                               AmqpMessageListener listener)
   {
     for (AmqpBroker registeredBroker : _brokerList) {
-      AmqpReceiver sub
+      AmqpBrokerReceiver sub
         = registeredBroker.createReceiver(name, listener);
       
       if (sub != null) {

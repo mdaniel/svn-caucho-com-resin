@@ -35,8 +35,8 @@ package com.caucho.amqp.broker;
  */
 public interface AmqpBroker
 {
-  public AmqpSender createSender(String name);
+  public AmqpBrokerSender createSender(String name);
   
-  public AmqpReceiver createReceiver(String name,
+  public AmqpBrokerReceiver createReceiver(String name,
                                      AmqpMessageListener listener);
 }

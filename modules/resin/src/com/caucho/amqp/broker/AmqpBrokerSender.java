@@ -29,14 +29,24 @@
 
 package com.caucho.amqp.broker;
 
+import com.caucho.vfs.TempBuffer;
+
 /**
- * Subscription to a destination
+ * Custom serialization for the cache
  */
-public interface AmqpReceiver
+public interface AmqpBrokerSender
 {
-  public void ack(long mid);
+  public void messagePart(TempBuffer buffer, int length);
   
-  public void nack(long mid);
+  // XXX: needs contentType, xid
+  public void messageComplete(TempBuffer buffer, 
+                              int length,
+                              AmqpReceiptListener receiptListener);
+  
+  public void messageComplete(byte []buffer,
+                              int offset,
+                              int length,
+                              AmqpReceiptListener receiptListener);
   
   public void close();
 }

@@ -27,54 +27,46 @@
  * @author Scott Ferguson
  */
 
-package com.caucho.amqp.broker;
+package com.caucho.amqp.io;
 
-import com.caucho.mqueue.queue.MQJournalQueuePublisher;
-import com.caucho.vfs.TempBuffer;
+import java.io.IOException;
+
 
 /**
- * Custom serialization for the cache
+ * AMQP delivery accepted
  */
-public class AmqpJournalSender implements AmqpBrokerSender
-{
-  private MQJournalQueuePublisher _publisher;
+public class DeliveryAccepted extends DeliveryState {
+  public static final DeliveryAccepted VALUE
+    = new DeliveryAccepted();
   
-  AmqpJournalSender(MQJournalQueuePublisher publisher)
+  @Override
+  public long getDescriptorCode()
   {
-    _publisher = publisher;
+    return ST_MESSAGE_ACCEPTED;
   }
   
   @Override
-  public void messagePart(TempBuffer buffer, int length)
+  public DeliveryAccepted createInstance()
   {
-    System.out.println("PART: " + length);
-  }
-  
-  // XXX: needs contentType, xid
-  @Override
-  public void messageComplete(TempBuffer buffer, 
-                              int length,
-                              AmqpReceiptListener receiptListener)
-  {
-    System.out.println("COMPLETE: " + length);
-    
-    _publisher.write(buffer.getBuffer(), 0, length, buffer);
+    return VALUE;
   }
   
   @Override
-  public void messageComplete(byte []buffer,
-                              int offset,
-                              int length,
-                              AmqpReceiptListener receiptListener)
+  public void readBody(AmqpReader in, int count)
+    throws IOException
   {
-    System.out.println("COMPLETE: " + length);
-    
-    _publisher.write(buffer, 0, length, null);
   }
   
-  public void close()
+  @Override
+  public int writeBody(AmqpWriter out)
+    throws IOException
   {
-    System.out.println("CLOSE:");
-    
+    return 0;
+  }
+ 
+  @Override
+  public String toString()
+  {
+    return getClass().getSimpleName() + "[]";
   }
 }

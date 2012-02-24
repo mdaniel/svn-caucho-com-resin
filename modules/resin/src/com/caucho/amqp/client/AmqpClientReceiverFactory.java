@@ -27,59 +27,78 @@
  * @author Scott Ferguson
  */
 
-package com.caucho.amqp.io;
+package com.caucho.amqp.client;
 
-import java.io.IOException;
+import com.caucho.amqp.AmqpReceiver;
+import com.caucho.amqp.AmqpReceiverFactory;
 
 
 /**
- * AMQP delivery received
+ * AMQP client
  */
-public class AmqpDeliveryReceived extends AmqpDeliveryState {
-  private long _sectionNumber; // uint mandatory
-  private long _sectionOffset; // ulong mandatory
+class AmqpClientReceiverFactory implements AmqpReceiverFactory {
+  private AmqpConnectionImpl _client;
   
-  public long getSectionNumber()
-  {
-    return _sectionNumber;
-  }
+  private String _address;
+  private int _prefetch = 1;
+  private boolean _isAutoAck = true;
   
-  public void setSectionNumber(long sectionNumber)
+  AmqpClientReceiverFactory(AmqpConnectionImpl client)
   {
-    _sectionNumber = sectionNumber;
-  }
-  
-  public long getSectionOffset()
-  {
-    return _sectionOffset;
-  }
-  
-  public void setSectionOffset(long sectionOffset)
-  {
-    _sectionOffset = sectionOffset;
+    _client = client;
   }
 
   @Override
-  public long getDescriptorCode()
+  public boolean getAckMode()
   {
-    return ST_MESSAGE_RECEIVED;
+    return _isAutoAck;
   }
-  
+
   @Override
-  public void readBody(AmqpReader in, int count)
-    throws IOException
+  public String getAddress()
   {
-    _sectionNumber = in.readLong();
-    _sectionOffset = in.readLong();
+    return _address;
   }
-  
+
   @Override
-  public int writeBody(AmqpWriter out)
-    throws IOException
+  public int getPrefetch()
   {
-    out.writeUint((int) _sectionNumber);
-    out.writeUlong(_sectionOffset);
+    return _prefetch;
+  }
+
+  @Override
+  public AmqpReceiverFactory setAckMode(boolean isAutoAck)
+  {
+    _isAutoAck = isAutoAck;
+
+    return this;
+  }
+
+  @Override
+  public AmqpReceiverFactory setAddress(String address)
+  {
+    _address = address;
     
-    return 2;
+    return this;
+  }
+
+  @Override
+  public AmqpReceiverFactory setPrefetch(int prefetch)
+  {
+    _prefetch = prefetch;
+    
+    return this;
+  }
+
+  @Override
+  public AmqpReceiver build()
+  {
+    return _client.buildReceiver(this);
+  }
+
+  @Override
+  public String toString()
+  {
+    return getClass().getSimpleName() + "[" + _client + "]";
   }
 }
