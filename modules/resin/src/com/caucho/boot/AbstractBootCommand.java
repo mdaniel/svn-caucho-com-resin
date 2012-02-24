@@ -35,7 +35,12 @@ import java.util.Comparator;
 import java.util.HashMap;
 import java.util.Map;
 
+import com.caucho.config.ConfigException;
+import com.caucho.util.L10N;
+
 public abstract class AbstractBootCommand implements BootCommand {
+  private static final L10N L = new L10N(AbstractBootCommand.class);
+  
   private final Map<String,BootOption> _optionMap
     = new HashMap<String,BootOption>();
 
@@ -107,6 +112,10 @@ public abstract class AbstractBootCommand implements BootCommand {
     
     if (client == null)
       client = boot.findShutdownClient(args);
+    
+    if (client == null) {
+      throw new ConfigException(L.l("No <server> can be found listening to a local IP address"));
+    }
     
     return doCommand(args, client);
   }
