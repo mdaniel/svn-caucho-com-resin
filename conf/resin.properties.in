@@ -41,7 +41,7 @@ setuid_user   : @SETUID_USER@
 setuid_group  : @SETUID_GROUP@
 
 # Arg passed directly to the JVM
-# jvm_args  : -Xmx2048m -XX:PermGen=256m
+# jvm_args  : -Xmx2048m -XX:MaxPermSize=256m
 
 # Set HTTP and HTTPS ports
 http          : @HTTP_PORT@
