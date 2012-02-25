@@ -48,6 +48,7 @@ import com.caucho.amqp.io.FrameClose;
 import com.caucho.amqp.io.FrameDetach;
 import com.caucho.amqp.io.FrameDisposition;
 import com.caucho.amqp.io.FrameEnd;
+import com.caucho.amqp.io.FrameFlow;
 import com.caucho.amqp.io.FrameOpen;
 import com.caucho.amqp.io.AmqpAbstractFrame;
 import com.caucho.amqp.io.AmqpFrameReader;
@@ -407,7 +408,9 @@ public class AmqpServerConnection implements ProtocolConnection, AmqpFrameHandle
     
     AmqpReceiverLink link = new AmqpReceiverLink(this, clientAttach);
     
-    AmqpBrokerReceiver sub = broker.createReceiver(sourceAddress, link);
+    int credit = 1;
+    
+    AmqpBrokerReceiver sub = broker.createReceiver(sourceAddress, credit, link);
     
     link.setReceiver(sub);
     
@@ -464,6 +467,15 @@ public class AmqpServerConnection implements ProtocolConnection, AmqpFrameHandle
     else {
       System.out.println("UNKNOWN");
     }
+  }
+  
+  @Override
+  public void onFlow(FrameFlow flow)
+    throws IOException
+  {
+    AmqpSession session = _sessions[0];
+    
+    session.onFlow(flow);
   }
 
   @Override

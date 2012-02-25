@@ -61,6 +61,11 @@ public class AmqpReader implements AmqpConstants {
     _is = is;
   }
   
+  public boolean isNull()
+  {
+    return _isNull;
+  }
+  
   public int read()
     throws IOException
   {

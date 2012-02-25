@@ -76,7 +76,7 @@ abstract public class AmqpAbstractPacket implements AmqpConstants {
     throws IOException
   {
     AmqpAbstractPacket factory = _typeMap.get(typeCode);
-    
+
     if (factory == null) {
       throw new IOException(L.l("0x{0} is an unknown type expected {1}",
                                 Long.toHexString(typeCode), type.getName()));
@@ -104,6 +104,7 @@ abstract public class AmqpAbstractPacket implements AmqpConstants {
     addType(new FrameOpen());
     addType(new FrameBegin());
     addType(new FrameAttach());
+    addType(new FrameFlow());
     addType(new FrameTransfer());
     addType(new FrameDisposition());
     addType(new FrameDetach());

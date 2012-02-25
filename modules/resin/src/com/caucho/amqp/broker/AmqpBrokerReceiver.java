@@ -40,5 +40,7 @@ public interface AmqpBrokerReceiver
   
   public void release(long mid);
   
+  public void flow(long deliveryCount, int credit);
+  
   public void close();
 }

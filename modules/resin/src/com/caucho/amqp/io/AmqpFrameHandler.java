@@ -78,5 +78,11 @@ public interface AmqpFrameHandler {
    * @param frameDisposition
    */
   void onDisposition(FrameDisposition frameDisposition)
+      throws IOException;
+
+  /**
+   * @param frameFlow
+   */
+  void onFlow(FrameFlow frameFlow)
     throws IOException;
 }

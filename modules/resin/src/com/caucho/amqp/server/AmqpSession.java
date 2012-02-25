@@ -34,6 +34,7 @@ import java.util.ArrayList;
 import java.util.logging.Logger;
 
 import com.caucho.amqp.io.FrameBegin;
+import com.caucho.amqp.io.FrameFlow;
 import com.caucho.amqp.io.FrameOpen;
 import com.caucho.amqp.io.AmqpAbstractFrame;
 import com.caucho.amqp.io.AmqpFrameReader;
@@ -75,6 +76,15 @@ public class AmqpSession
   public AmqpLink getLink(int handle)
   {
     return _links.get(handle);
+  }
+  
+  void onFlow(FrameFlow flow)
+  {
+    int handle = flow.getHandle();
+    
+    AmqpLink link = getLink(handle);
+    
+    link.onFlow(flow);
   }
   
   long addDelivery(AmqpLink link, long messageId)

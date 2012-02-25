@@ -79,7 +79,8 @@ public class JournalAmqpBroker extends AbstractAmqpBroker
   
   @Override
   public AmqpBrokerReceiver createReceiver(String name,
-                                              AmqpMessageListener listener)
+                                           int credit,
+                                           AmqpMessageListener listener)
   {
     SubscriberProcessor processor = new AmqpReceiverProcessor(listener);
     System.out.println("SUB: " + name);

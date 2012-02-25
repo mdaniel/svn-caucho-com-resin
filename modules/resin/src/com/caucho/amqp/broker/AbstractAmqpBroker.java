@@ -43,7 +43,8 @@ abstract public class AbstractAmqpBroker implements AmqpBroker
   
   @Override
   public AmqpBrokerReceiver createReceiver(String name,
-                                              AmqpMessageListener listener)
+                                           int credit,
+                                           AmqpMessageListener listener)
   {
     return null;
   }

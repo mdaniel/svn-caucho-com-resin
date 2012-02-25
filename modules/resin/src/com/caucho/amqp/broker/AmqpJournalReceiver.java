@@ -64,6 +64,12 @@ public class AmqpJournalReceiver implements AmqpBrokerReceiver
   }
   
   @Override
+  public void flow(long deliveryCount, int linkCredit)
+  {
+    System.out.println("FLOW: " + deliveryCount + " " + linkCredit);
+  }
+  
+  @Override
   public void close()
   {
     

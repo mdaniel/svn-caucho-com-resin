@@ -238,7 +238,8 @@ public class StompConnection implements ProtocolConnection
     AmqpBroker broker = _stomp.getBroker();
     AmqpMessageListener listener = new MessageListener(this, _id, _destinationName);
     
-    sub = broker.createReceiver(_destinationName, listener);
+    int credit = 1;
+    sub = broker.createReceiver(_destinationName, credit, listener);
     
     _subscriptionMap.put(_id, sub);
 

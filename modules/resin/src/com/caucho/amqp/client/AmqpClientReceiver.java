@@ -42,6 +42,9 @@ class AmqpClientReceiver implements AmqpReceiver {
   
   private final boolean _isAutoAck;
   
+  private long _deliveryCount = -1;
+  private int _linkCredit;
+  
   private String _value;
   
   AmqpClientReceiver(AmqpConnectionImpl client,
@@ -53,6 +56,12 @@ class AmqpClientReceiver implements AmqpReceiver {
     _handle = handle;
     
     _isAutoAck = builder.getAckMode();
+    
+    _linkCredit = builder.getPrefetch();
+    
+    if (_linkCredit > 0) {
+      _client.flow(_handle, _deliveryCount, _linkCredit);
+    }
   }
   
   @Override
@@ -62,8 +71,12 @@ class AmqpClientReceiver implements AmqpReceiver {
     
     _value = null;
     
-    if (value != null && _isAutoAck) {
-      _client.dispositionAccept(_handle);
+    if (value != null) {
+      _client.flow(_handle, _deliveryCount, _linkCredit);
+    
+      if (_isAutoAck) {
+        _client.dispositionAccept(_handle);
+      }
     }
     
     return value;
@@ -87,9 +100,15 @@ class AmqpClientReceiver implements AmqpReceiver {
     _client.dispositionRelease(_handle);
   }
   
+  void setDeliveryCount(long deliveryCount)
+  {
+    _deliveryCount = deliveryCount;
+  }
+  
   void setValue(String value)
   {
     _value = value;
+    _deliveryCount++;
   }
   
   public void close()

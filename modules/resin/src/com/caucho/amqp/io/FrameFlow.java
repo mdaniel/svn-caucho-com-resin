@@ -36,9 +36,7 @@ import java.util.Map;
 /**
  * AMQP link flow
  */
-public class FrameFlow extends AmqpAbstractComposite {
-  public static final int CODE = AmqpConstants.FT_LINK_FLOW;
-
+public class FrameFlow extends AmqpAbstractFrame {
   private long _nextIncomingId; // uint seq (RFC1892)
   private int _incomingWindow; // uint (required)
   private long _nextOutgoingId; // uint seq (required) (RFC1892)
@@ -76,6 +74,16 @@ public class FrameFlow extends AmqpAbstractComposite {
     return _handle;
   }
   
+  public void setHandle(int handle)
+  {
+    _handle = handle;
+  }
+  
+  public void setDeliveryCount(long deliveryCount)
+  {
+    _deliveryCount = deliveryCount;
+  }
+  
   public long getDeliveryCount()
   {
     return _deliveryCount;
@@ -86,9 +94,19 @@ public class FrameFlow extends AmqpAbstractComposite {
     return _linkCredit;
   }
   
+  public void setLinkCredit(int linkCredit)
+  {
+    _linkCredit = linkCredit;
+  }
+  
   public int getAvailable()
   {
     return _available;
+  }
+  
+  public void setAvailable(int available)
+  {
+    _available = available;
   }
   
   public boolean isDrain()
@@ -112,6 +130,20 @@ public class FrameFlow extends AmqpAbstractComposite {
     return FT_LINK_FLOW;
   }
   
+  
+  @Override
+  public FrameFlow createInstance()
+  {
+    return new FrameFlow();
+  }
+  
+  @Override
+  public void invoke(AmqpFrameReader fin, AmqpFrameHandler receiver)
+    throws IOException
+  {
+    receiver.onFlow(this);
+  }
+  
   @Override
   public void readBody(AmqpReader in, int count)
     throws IOException
@@ -120,10 +152,17 @@ public class FrameFlow extends AmqpAbstractComposite {
     _incomingWindow = in.readInt();
     _nextOutgoingId = in.readInt();
     _outgoingWindow = in.readInt();
+    
     _handle = in.readInt();
+    
     _deliveryCount = in.readInt();
+    if (in.isNull()) {
+      _deliveryCount = -1;
+    }
+    
     _linkCredit = in.readInt();
     _available = in.readInt();
+    
     _isDrain = in.readBoolean();
     _isEcho = in.readBoolean();
     
@@ -141,7 +180,13 @@ public class FrameFlow extends AmqpAbstractComposite {
     
     out.writeUint(_handle);
     
-    out.writeUint((int) _deliveryCount);
+    if (_deliveryCount >= 0) {
+      out.writeUint((int) _deliveryCount);
+    }
+    else {
+      out.writeNull();
+    }
+    
     out.writeUint(_linkCredit);
     out.writeUint(_available);
     

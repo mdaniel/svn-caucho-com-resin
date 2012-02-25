@@ -37,8 +37,6 @@ import com.caucho.amqp.io.FrameAttach.Role;
  * AMQP link flow
  */
 public class FrameDisposition extends AmqpAbstractFrame {
-  public static final int CODE = AmqpConstants.FT_LINK_FLOW;
-
   private Role _role = Role.SENDER; // ubyte (required)
   private long _first; // uint seq (required)
   private long _last; // uint seq
@@ -87,7 +85,7 @@ public class FrameDisposition extends AmqpAbstractFrame {
   @Override
   public long getDescriptorCode()
   {
-    return FT_LINK_FLOW;
+    return FT_MESSAGE_DISPOSITION;
   }
   
   @Override

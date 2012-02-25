@@ -110,11 +110,12 @@ public class AmqpEnvironmentBroker implements AmqpBroker
   
   @Override
   public AmqpBrokerReceiver createReceiver(String name,
-                                              AmqpMessageListener listener)
+                                           int credit,
+                                           AmqpMessageListener listener)
   {
     for (AmqpBroker registeredBroker : _brokerList) {
       AmqpBrokerReceiver sub
-        = registeredBroker.createReceiver(name, listener);
+        = registeredBroker.createReceiver(name, credit, listener);
       
       if (sub != null) {
         return sub;

@@ -51,6 +51,11 @@ public class AbstractAmqpReceiver implements AmqpBrokerReceiver
   }
   
   @Override
+  public void flow(long deliveryCount, int linkCredit)
+  {
+  }
+  
+  @Override
   public void close()
   {
   }

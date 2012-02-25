@@ -52,6 +52,7 @@ import com.caucho.amqp.io.FrameDetach;
 import com.caucho.amqp.io.FrameDisposition;
 import com.caucho.amqp.io.FrameEnd;
 import com.caucho.amqp.io.AmqpFrameHandler;
+import com.caucho.amqp.io.FrameFlow;
 import com.caucho.amqp.io.FrameOpen;
 import com.caucho.amqp.io.AmqpConstants;
 import com.caucho.amqp.io.AmqpError;
@@ -426,6 +427,28 @@ public class AmqpConnectionImpl
   /**
    * @param handle
    */
+  public void flow(int handle, long deliveryCount, int credit)
+  {
+    try {
+      _fout.startFrame(0);
+    
+      FrameFlow flow = new FrameFlow();
+      flow.setHandle(handle);
+      flow.setDeliveryCount(deliveryCount);
+      flow.setLinkCredit(credit);
+      
+      flow.write(_aout);
+    
+      _fout.finishFrame();
+      _fout.flush();
+    } catch (IOException e) {
+      throw new AmqpException(e);
+    }
+  }
+
+  /**
+   * @param handle
+   */
   public void dispositionAccept(int handle)
   {
     try {
@@ -494,7 +517,14 @@ public class AmqpConnectionImpl
   @Override
   public void onAttach(FrameAttach frameAttach) throws IOException
   {
-    System.out.println("CLIENT_BEGIN: " + frameAttach);
+    int handle = frameAttach.getHandle();
+    
+    Link link = _links.get(handle);
+    AmqpClientReceiver receiver = link.getReceiver();
+    
+    if (receiver != null) {
+      receiver.setDeliveryCount(frameAttach.getInitialDeliveryCount());
+    }
   }
   
   @Override
@@ -524,6 +554,13 @@ public class AmqpConnectionImpl
     throws IOException
   {
     System.out.println("CLIENT_DISPOSITION: " + frameDisposition);
+  }
+  
+  @Override
+  public void onFlow(FrameFlow frameFlow)
+    throws IOException
+  {
+    System.out.println("CLIENT_FLOW: " + frameFlow);
   }
   
   @Override

@@ -32,6 +32,7 @@ package com.caucho.amqp.server;
 import com.caucho.amqp.broker.AmqpBrokerReceiver;
 import com.caucho.amqp.broker.AmqpBrokerSender;
 import com.caucho.amqp.io.FrameAttach;
+import com.caucho.amqp.io.FrameFlow;
 
 /**
  * link session management
@@ -87,6 +88,14 @@ public class AmqpLink
    * @param messageId
    */
   public void release(long messageId)
+  {
+    throw new UnsupportedOperationException(getClass().getName());
+  }
+
+  /**
+   * @param flow
+   */
+  public void onFlow(FrameFlow flow)
   {
     throw new UnsupportedOperationException(getClass().getName());
   }

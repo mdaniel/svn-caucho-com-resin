@@ -36,6 +36,7 @@ import com.caucho.amqp.broker.AmqpMessageListener;
 import com.caucho.amqp.broker.AmqpBrokerReceiver;
 import com.caucho.amqp.broker.AmqpBrokerSender;
 import com.caucho.amqp.io.FrameAttach;
+import com.caucho.amqp.io.FrameFlow;
 
 /**
  * link session management
@@ -56,6 +57,15 @@ public class AmqpReceiverLink extends AmqpLink implements AmqpMessageListener
   void setReceiver(AmqpBrokerReceiver sub)
   {
     _sub = sub;
+  }
+
+  /**
+   * @param flow
+   */
+  @Override
+  public void onFlow(FrameFlow flow)
+  {
+    _sub.flow(flow.getDeliveryCount(), flow.getLinkCredit());
   }
 
   @Override
