@@ -324,6 +324,9 @@ public class AmqpReader implements AmqpConstants {
     int code = is.read();
     
     switch (code) {
+    case -1:
+      return -1;
+      
     case E_NULL:
       _isNull = true;
       return 0;
@@ -345,8 +348,46 @@ public class AmqpReader implements AmqpConstants {
     if (_isNull) {
       return null;
     }
-    
+   
+    return readObject(descriptor, type);
+  }
+  
+  public Object readObject(long descriptor)
+    throws IOException
+  {
+    return readObject(descriptor, AmqpAbstractPacket.class);
+  }
+  
+  public <T extends AmqpAbstractPacket>
+  T readObject(long descriptor, Class<T> type)
+    throws IOException
+  {
     return AmqpAbstractPacket.readType(this, descriptor, type);
+  }
+  
+  public Object readObject()
+    throws IOException
+  {
+    InputStream is = _is;
+    
+    int code = is.read();
+    int len;
+    
+    switch (code) {
+    case E_NULL:
+      return null;
+      
+    case E_UTF8_1:
+      len = is.read() & 0xff;
+      return readUtf8(len);
+      
+    case E_UTF8_4:
+      len = readInt(is);
+      return readUtf8(len);
+          
+    default:
+      throw new IllegalStateException("unknown code: 0x" + Integer.toHexString(code));
+    }
   }
   
   public List<?> readList()

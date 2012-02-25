@@ -31,6 +31,7 @@ package com.caucho.amqp.client;
 
 import java.io.EOFException;
 import java.io.IOException;
+import java.io.InputStream;
 import java.net.Socket;
 import java.util.ArrayList;
 import java.util.concurrent.atomic.AtomicBoolean;
@@ -413,10 +414,30 @@ public class AmqpConnectionImpl
       transfer.setDeliveryId(2);
       
       transfer.write(_aout);
-      
-      _aout.writeDescriptor(AmqpConstants.ST_MESSAGE_DATA);
-      _aout.writeBinary(buffer, offset, length);
+
+      _fout.write(buffer, offset, length);
+
+      _fout.finishFrame();
+      _fout.flush();
+    } catch (IOException e) {
+      throw new AmqpException(e);
+    }
+  }
+  
+  void transmit(int handle, InputStream is)
+    throws IOException
+  {
+    try {
+      _fout.startFrame(0);
     
+      FrameTransfer transfer = new FrameTransfer();
+      transfer.setHandle(handle);
+      transfer.setDeliveryId(2);
+      
+      transfer.write(_aout);
+
+      _fout.write(is);
+
       _fout.finishFrame();
       _fout.flush();
     } catch (IOException e) {
@@ -540,6 +561,9 @@ public class AmqpConnectionImpl
     AmqpReader ain = new AmqpReader();
     ain.init(fin);
     
+    receiver.receive(ain);
+    
+    /*
     long desc = ain.readDescriptor();
     
     byte []data = ain.readBinary();
@@ -547,6 +571,7 @@ public class AmqpConnectionImpl
     String value = new String(data);
     
     receiver.setValue(value);
+    */
   }
   
   @Override

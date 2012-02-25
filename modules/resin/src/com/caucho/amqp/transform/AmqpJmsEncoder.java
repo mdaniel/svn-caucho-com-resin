@@ -27,30 +27,44 @@
  * @author Scott Ferguson
  */
 
-package com.caucho.amqp;
+package com.caucho.amqp.transform;
 
-import com.caucho.amqp.transform.AmqpMessageDecoder;
+import java.io.IOException;
+
+import javax.jms.JMSException;
+import javax.jms.Message;
+import javax.jms.TextMessage;
+
+import com.caucho.amqp.AmqpException;
+import com.caucho.amqp.io.AmqpConstants;
+import com.caucho.amqp.io.AmqpWriter;
 
 
 /**
- * AMQP client receiver factor
+ * Encodes a message as a string.
  */
-public interface AmqpReceiverFactory {
-  public AmqpReceiverFactory setAddress(String address);
+public class AmqpJmsEncoder implements AmqpMessageEncoder<Message>
+{
+  public static final AmqpJmsEncoder ENCODER = new AmqpJmsEncoder();
   
-  public String getAddress();
+  @Override
+  public String getContentType(Message value)
+  {
+    return "text/plain";
+  }
   
-  public AmqpReceiverFactory setAckMode(boolean isAutoAck);
-  
-  public boolean getAckMode();
-  
-  public AmqpReceiverFactory setPrefetch(int prefetch);
-  
-  public int getPrefetch();
-  
-  public AmqpReceiverFactory setDecoder(AmqpMessageDecoder<?> decoder);
-  
-  public AmqpMessageDecoder<?> getDecoder();
-  
-  public AmqpReceiver build();
+  @Override
+  public void encode(AmqpWriter out,
+                     Message msg)
+    throws IOException
+  {
+    try {
+      TextMessage txtMessage = (TextMessage) msg;
+    
+      out.writeDescriptor(AmqpConstants.ST_MESSAGE_VALUE);
+      out.writeString(txtMessage.getText());
+    } catch (JMSException e) {
+      throw new AmqpException(e);
+    }
+  }
 }

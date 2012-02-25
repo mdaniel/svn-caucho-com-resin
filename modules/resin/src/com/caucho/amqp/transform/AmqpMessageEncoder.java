@@ -27,30 +27,20 @@
  * @author Scott Ferguson
  */
 
-package com.caucho.amqp;
+package com.caucho.amqp.transform;
 
-import com.caucho.amqp.transform.AmqpMessageDecoder;
+import java.io.IOException;
+
+import com.caucho.amqp.io.AmqpWriter;
 
 
 /**
- * AMQP client receiver factor
+ * encoding a message
  */
-public interface AmqpReceiverFactory {
-  public AmqpReceiverFactory setAddress(String address);
+public interface AmqpMessageEncoder<T>
+{
+  public String getContentType(T value);
   
-  public String getAddress();
-  
-  public AmqpReceiverFactory setAckMode(boolean isAutoAck);
-  
-  public boolean getAckMode();
-  
-  public AmqpReceiverFactory setPrefetch(int prefetch);
-  
-  public int getPrefetch();
-  
-  public AmqpReceiverFactory setDecoder(AmqpMessageDecoder<?> decoder);
-  
-  public AmqpMessageDecoder<?> getDecoder();
-  
-  public AmqpReceiver build();
+  public void encode(AmqpWriter out, T value)
+    throws IOException;
 }

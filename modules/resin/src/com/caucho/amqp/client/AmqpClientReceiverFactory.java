@@ -31,6 +31,8 @@ package com.caucho.amqp.client;
 
 import com.caucho.amqp.AmqpReceiver;
 import com.caucho.amqp.AmqpReceiverFactory;
+import com.caucho.amqp.transform.AmqpMessageDecoder;
+import com.caucho.amqp.transform.AmqpStringDecoder;
 
 
 /**
@@ -42,6 +44,7 @@ class AmqpClientReceiverFactory implements AmqpReceiverFactory {
   private String _address;
   private int _prefetch = 1;
   private boolean _isAutoAck = true;
+  private AmqpMessageDecoder<?> _decoder = AmqpStringDecoder.DECODER;
   
   AmqpClientReceiverFactory(AmqpConnectionImpl client)
   {
@@ -88,6 +91,23 @@ class AmqpClientReceiverFactory implements AmqpReceiverFactory {
     _prefetch = prefetch;
     
     return this;
+  }
+  
+  @Override
+  public AmqpReceiverFactory setDecoder(AmqpMessageDecoder<?> decoder)
+  {
+    if (decoder == null)
+      throw new NullPointerException();
+    
+    _decoder = decoder;
+    
+    return this;
+  }
+  
+  @Override
+  public AmqpMessageDecoder<?> getDecoder()
+  {
+    return _decoder;
   }
 
   @Override

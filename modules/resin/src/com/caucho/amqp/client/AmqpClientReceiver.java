@@ -29,7 +29,11 @@
 
 package com.caucho.amqp.client;
 
+import java.io.IOException;
+
 import com.caucho.amqp.AmqpReceiver;
+import com.caucho.amqp.io.AmqpReader;
+import com.caucho.amqp.transform.AmqpMessageDecoder;
 
 /**
  * AMQP client
@@ -42,10 +46,12 @@ class AmqpClientReceiver implements AmqpReceiver {
   
   private final boolean _isAutoAck;
   
+  private final AmqpMessageDecoder<?> _decoder;
+  
   private long _deliveryCount = -1;
   private int _linkCredit;
   
-  private String _value;
+  private Object _value;
   
   AmqpClientReceiver(AmqpConnectionImpl client,
                      AmqpClientReceiverFactory builder,
@@ -56,18 +62,20 @@ class AmqpClientReceiver implements AmqpReceiver {
     _handle = handle;
     
     _isAutoAck = builder.getAckMode();
+    _decoder = builder.getDecoder(); 
     
     _linkCredit = builder.getPrefetch();
     
     if (_linkCredit > 0) {
       _client.flow(_handle, _deliveryCount, _linkCredit);
     }
+    
   }
   
   @Override
-  public String take()
+  public Object take()
   {
-    String value = _value;
+    Object value = _value;
     
     _value = null;
     
@@ -105,10 +113,15 @@ class AmqpClientReceiver implements AmqpReceiver {
     _deliveryCount = deliveryCount;
   }
   
-  void setValue(String value)
+  /**
+   * @param ain
+   */
+  void receive(AmqpReader ain)
+    throws IOException
   {
-    _value = value;
     _deliveryCount++;
+
+    _value = _decoder.decode(ain, null);
   }
   
   public void close()

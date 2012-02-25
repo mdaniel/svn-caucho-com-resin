@@ -27,30 +27,37 @@
  * @author Scott Ferguson
  */
 
-package com.caucho.amqp;
+package com.caucho.amqp.transform;
 
-import com.caucho.amqp.transform.AmqpMessageDecoder;
+import java.io.IOException;
+
+import com.caucho.amqp.io.AmqpConstants;
+import com.caucho.amqp.io.AmqpReader;
+import com.caucho.amqp.io.AmqpWriter;
 
 
 /**
- * AMQP client receiver factor
+ * Encodes a message as a string.
  */
-public interface AmqpReceiverFactory {
-  public AmqpReceiverFactory setAddress(String address);
+public class AmqpStringDecoder implements AmqpMessageDecoder<String>
+{
+  public static final AmqpStringDecoder DECODER = new AmqpStringDecoder();
   
-  public String getAddress();
-  
-  public AmqpReceiverFactory setAckMode(boolean isAutoAck);
-  
-  public boolean getAckMode();
-  
-  public AmqpReceiverFactory setPrefetch(int prefetch);
-  
-  public int getPrefetch();
-  
-  public AmqpReceiverFactory setDecoder(AmqpMessageDecoder<?> decoder);
-  
-  public AmqpMessageDecoder<?> getDecoder();
-  
-  public AmqpReceiver build();
+  @Override
+  public String decode(AmqpReader in, String value)
+    throws IOException
+  {
+    long descriptor;
+    
+    while ((descriptor = in.readDescriptor()) >= 0) {
+      if (descriptor == AmqpConstants.ST_MESSAGE_VALUE) {
+        return in.readString();
+      }
+      else {
+        in.readObject(descriptor);
+      }
+    }
+    
+    return null;
+  }
 }

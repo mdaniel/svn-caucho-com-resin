@@ -30,6 +30,7 @@
 package com.caucho.amqp.io;
 
 import java.io.IOException;
+import java.io.InputStream;
 
 import com.caucho.vfs.TempBuffer;
 import com.caucho.vfs.WriteStream;
@@ -80,6 +81,23 @@ public class AmqpFrameWriter extends AmqpBaseWriter {
     
 
     _offset = 0;
+  }
+  
+  public int write(InputStream is)
+    throws IOException
+  {
+    int len = 0;
+    
+    int ch;
+    
+    while ((ch = is.read()) >= 0) {
+      len++;
+      write(ch);
+    }
+    
+    System.out.println("LEN:"+ len);
+    
+    return len;
   }
   
   @Override

@@ -27,30 +27,54 @@
  * @author Scott Ferguson
  */
 
-package com.caucho.amqp;
+package com.caucho.amqp.io;
 
-import com.caucho.amqp.transform.AmqpMessageDecoder;
-
+import java.io.IOException;
 
 /**
- * AMQP client receiver factor
+ * The message properties header.
  */
-public interface AmqpReceiverFactory {
-  public AmqpReceiverFactory setAddress(String address);
+public class MessageProperties extends AmqpAbstractComposite {
+  private long _messageId; // messageid
+  private String _contentType; // symbol
   
-  public String getAddress();
+  public String getContentType()
+  {
+    return _contentType;
+  }
   
-  public AmqpReceiverFactory setAckMode(boolean isAutoAck);
+  public void setContentType(String contentType)
+  {
+    _contentType = contentType;
+  }
   
-  public boolean getAckMode();
+  @Override
+  public long getDescriptorCode()
+  {
+    return ST_MESSAGE_PROPERTIES;
+  }
   
-  public AmqpReceiverFactory setPrefetch(int prefetch);
+  @Override
+  public MessageProperties createInstance()
+  {
+    return new MessageProperties();
+  }
   
-  public int getPrefetch();
+  @Override
+  public void readBody(AmqpReader in, int count)
+    throws IOException
+  {
+    _messageId = in.readInt();
+    _contentType = in.readSymbol();
+  }
   
-  public AmqpReceiverFactory setDecoder(AmqpMessageDecoder<?> decoder);
-  
-  public AmqpMessageDecoder<?> getDecoder();
-  
-  public AmqpReceiver build();
+  @Override
+  public int writeBody(AmqpWriter out)
+    throws IOException
+  {
+    out.writeInt((int) _messageId);
+    out.writeSymbol(_contentType);
+    
+    return 2;
+  }
 }
