@@ -47,10 +47,19 @@ public class Header {
   private Section _description;
   private Keywords _keywords;
   private String _tutorial;
+  private boolean _cauchoSite = true;
+    
+    
 
   public Header(Document document)
   {
     _document = document;
+  }
+
+  public void setCauchoSite(boolean cauchoSite){
+
+    _cauchoSite = cauchoSite;
+
   }
 
   public void setProduct(String product)
@@ -151,6 +160,25 @@ public class Header {
       out.writeEmptyElement("meta");
       out.writeAttribute("name", "keywords");
       out.writeAttribute("content", _keywords.toString());
+    }
+
+    if (_cauchoSite) {
+        out.writeStartElement("script");
+        out.writeAttribute("type", "text/javascript");
+        out.writeCharacters(
+                "    var _gaq = _gaq || [];\n" +
+        		"    _gaq.push(['_setAccount', 'UA-27887123-1']);\n" +
+        		"    _gaq.push(['_setDomainName', 'caucho.com']);\n" +
+        		"    _gaq.push(['_trackPageview']);\n" +
+        		"    (function() {\n" +
+        		"          var ga = document.createElement('script'); \n " +
+        		"          ga.type = 'text/javascript'; ga.async = true;\n"+
+        		"          ga.src = ('https:' == document.location.protocol ? 'https://ssl' : 'http://www') + " +
+        		"                  '.google-analytics.com/ga.js';" +
+        		"          var s = document.getElementsByTagName('script')[0]; s.parentNode.insertBefore(ga, s);\n" +
+        		"    })();");
+        out.writeEndElement(); // script
+
     }
 
     out.writeEmptyElement("link");

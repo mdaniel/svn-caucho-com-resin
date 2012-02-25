@@ -117,6 +117,22 @@ public class ResinDocServlet extends HttpServlet {
                                      request.getContextPath() + servletPath,
                                      _encoding);
 
+    String ip =request.getLocalAddr();
+    boolean cauchoHomeSite = false;
+    if ("50.19.211.121".equals(ip)) {
+        cauchoHomeSite = true;
+    }else if (request.getRequestURL().toString().contains("caucho.com")) {
+        cauchoHomeSite = true;
+    }else if(System.getProperty("test.pretend.to.be.caucho.site", "nope").equals("true")) {
+        cauchoHomeSite = true;
+    } else {
+        cauchoHomeSite = false;
+    }
+    
+    document.setCauchoSite(cauchoHomeSite);
+    
+    
+
     document.setDisableAction(isDisableAction());
 
     try {
@@ -135,6 +151,7 @@ public class ResinDocServlet extends HttpServlet {
         return;
       }
 
+      
       document.writeHtml(xmlOut);
 
       xmlOut.flush();

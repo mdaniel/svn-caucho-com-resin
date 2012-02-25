@@ -59,6 +59,8 @@ public class Document {
   private boolean _isArticle;
   private boolean _isDisableAction;
   private boolean _isJavascriptEnabled = true;
+  private boolean _cacuhoSite=true;
+
 
   private String _redirect;
 
@@ -85,6 +87,9 @@ public class Document {
     _contextPath = contextPath;
     _uri = uri;
     _encoding = encoding;
+  }
+  public void setCauchoSite(boolean cauchoSite) {
+      _cacuhoSite = cauchoSite;
   }
 
   public boolean isArticle()
@@ -366,11 +371,15 @@ public class Document {
     out.writeDefaultNamespace("http://www.w3.org/1999/xhtml");
     out.writeAttribute("lang", "en");
 
-    if (_header != null)
+    if (_header != null) {
+      _header.setCauchoSite(_cacuhoSite); 
       _header.writeHtml(out);
+    }
 
-    if (_body != null)
+    if (_body != null) {
+      _body.setCauchoSite(_cacuhoSite);
       _body.writeHtml(out);
+    }
 
     out.writeEndElement(); // html
   }

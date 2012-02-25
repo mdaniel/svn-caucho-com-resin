@@ -43,6 +43,7 @@ public class Body extends ContainerNode {
   private Navigation _navigation;
   private Index _index;
   private String _class;
+  private boolean _cacuhoSite=true;
 
   public Body(Document document)
   {
@@ -57,6 +58,9 @@ public class Body extends ContainerNode {
       _navigation = item.getNavigation();
   }
 
+  public void setCauchoSite(boolean cauchoSite) {
+      _cacuhoSite = cauchoSite;
+  }
   public void setClass(String styleClass)
   {
     _class = styleClass;
@@ -249,7 +253,8 @@ public class Body extends ContainerNode {
     out.writeCharacters("Copyright ");
     out.writeEntityRef("copy");
     out.writeCharacters(" 1998-2012 Caucho Technology, Inc. All rights reserved.");
-    out.writeEmptyElement("br");
+    //out.writeEmptyElement("br");
+    out.writeEntityRef("nbsp");
     out.writeCharacters("Resin ");
     out.writeStartElement("sup");
     out.writeStartElement("font");
@@ -257,11 +262,7 @@ public class Body extends ContainerNode {
     out.writeEntityRef("#174");
     out.writeEndElement();
     out.writeEndElement();
-    out.writeCharacters(" is a registered trademark, and Quercus");
-    out.writeStartElement("sup");
-    out.writeCharacters("tm");
-    out.writeEndElement();
-    out.writeCharacters(", Amber");
+    out.writeCharacters(" is a registered trademark. Quercus");
     out.writeStartElement("sup");
     out.writeCharacters("tm");
     out.writeEndElement();
@@ -270,14 +271,121 @@ public class Body extends ContainerNode {
     out.writeCharacters("tm");
     out.writeEndElement();
     out.writeCharacters(" are trademarks of Caucho Technology.");
+    if (this._cacuhoSite) {
+        out.writeEmptyElement("br");
+        out.writeEmptyElement("br");
+        out.writeCharacters("Cloud-optimized Resin Server is a Java EE certified Java Application Server, and Web Server, and Distributed Cache Server (Memcached).");
+        out.writeEmptyElement("br");
+        out.writeCharacters("Leading companies worldwide with demand for reliability and high performance web applications "+
+                "including SalesForce.com, CNET, DZone and many more are powered by Resin.");
+        out.writeEmptyElement("br");
+        out.writeEmptyElement("br");
+    }
     out.writeEndElement(); // small
     out.writeEndElement(); // em
     out.writeEndElement(); // td
     out.writeEndElement(); // tr
+    
+    
+    /////////////////////////////////////////////////////////////////////////////////////////////////////
+    if (_cacuhoSite) {
+        out.writeStartElement("tr");
+        out.writeStartElement("td");
+        out.writeStartElement("center");
+        out.writeStartElement("small");
+        out.writeStartElement("a");
+        out.writeAttribute("href", "/");
+        out.writeAttribute("title", "Caucho home, makers of Resin Server, Java Application Server, Web Server and Querus PHP engine.");
+        out.writeCharacters("home");
+        out.writeEndElement(); // a
+        out.writeEntityRef("nbsp");
+
+        out.writeStartElement("a");
+        out.writeAttribute("href", "/about/contact/");
+        out.writeCharacters("company");
+        out.writeEndElement(); // a
+        out.writeEntityRef("nbsp");
+
+        out.writeStartElement("a");
+        out.writeAttribute("href", "http://blog.caucho.com/");
+        out.writeAttribute("title", "Blog to discuss Resin Server, a Java EE certified Java Application Server, Web Server and Querus PHP engine");
+        out.writeCharacters("blog");
+        out.writeEndElement(); // a
+        out.writeEntityRef("nbsp");
+
+        out.writeStartElement("a");
+        out.writeAttribute("href", "http://wiki4.caucho.com/");
+        out.writeAttribute("title", "Wiki to cookbooks, tutorials for Resin Server (Application Server and Web Server)");
+        out.writeCharacters("wiki");
+        out.writeEndElement(); // a
+        out.writeEntityRef("nbsp");
+
+        out.writeStartElement("a");
+        out.writeAttribute("href", "/resin-4.0/");
+        out.writeCharacters("docs");
+        out.writeEndElement(); // a
+        out.writeEntityRef("nbsp");
+
+        out.writeStartElement("a");
+        out.writeAttribute("href", "/resin-application-server/");
+        out.writeAttribute("title", "Resin | Java Application Server | Java EE Certified | Cloud Optimized ");
+        out.writeCharacters("app server");
+        out.writeEndElement(); // a
+        out.writeEntityRef("nbsp");
+
+
+        out.writeStartElement("a");
+        out.writeAttribute("href", "/resin-web-server/");
+        out.writeAttribute("title", "Resin | Web Server | Proxy Cache | Cluster/Cloud aware Load balancing | FastCGI | Reverse Proxy | Recoverability and non-stop Reliability ");
+        out.writeCharacters("web server");
+        out.writeEndElement(); // a
+        out.writeEntityRef("nbsp");
+    
+        out.writeStartElement("a");
+        out.writeAttribute("href", "/resin-application-server/server-monitoring-watchdog-health-system/");
+        out.writeAttribute("title", "Resin Pro | Health System | Watchdog for recoverability and self healing | Server Monitoring | JVM Monitoring | Anomaly detection for detecting issues before they become problems | Server status reports");
+        out.writeCharacters("health");
+        out.writeEndElement(); // a
+        out.writeEntityRef("nbsp");
+
+        out.writeStartElement("a");
+        out.writeAttribute("href", "/resin-application-server/3g-java-clustering-cloud/");
+        out.writeAttribute("title", "Resin Pro | Cloud System | 3rd generation clustering technology | optimized for EC2, OpenStack | Cloud deployment | true elasticity | operational predictability | PaaS and DevOps ready");
+        out.writeCharacters("cloud");
+        out.writeEndElement(); // a
+        out.writeEntityRef("nbsp");
+
+
+        out.writeStartElement("a");
+        out.writeAttribute("href", "/resin-application-server/java-ee-web-profile/");
+        out.writeAttribute("title", "Resin  | Web Profile | Java EE Web Profile certified");
+        out.writeCharacters("java ee");
+        out.writeEndElement(); // a
+        out.writeEntityRef("nbsp");
+        
+
+        out.writeStartElement("a");
+        out.writeAttribute("href", "/resin-application-server/resin-professional-application-server/");
+        out.writeAttribute("title", "Resin  Pro | support, health and cloud  | choice of high traffic web sites");
+        out.writeCharacters("pro");
+        out.writeEndElement(); // a
+        out.writeEntityRef("nbsp");
+
+ 
+        out.writeEndElement(); // small
+        out.writeEndElement(); // center
+        out.writeEndElement(); // td
+        out.writeEndElement(); // tr
+
+        
+    }
+    
     out.writeEndElement(); // table
 
     out.writeEndElement(); // td
     out.writeEndElement(); // tr
+
+    
     out.writeEndElement(); // table
 
     out.writeEmptyElement("div");
