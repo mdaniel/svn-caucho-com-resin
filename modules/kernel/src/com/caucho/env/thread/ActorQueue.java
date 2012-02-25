@@ -443,6 +443,12 @@ public final class ActorQueue<T extends RingItem>
     }
     
     @Override
+    protected String getThreadName()
+    {
+      return String.valueOf(_consumer._processor);
+    }
+    
+    @Override
     public final long runTask()
     {
       _consumer.consumeAll();

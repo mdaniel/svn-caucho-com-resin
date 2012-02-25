@@ -462,6 +462,11 @@ class WatchdogManager implements AlarmListener {
       
       serverId = getServerId(serverId, args);
       WatchdogChild watchdog = _watchdogMap.get(serverId);
+      
+      if (watchdog == null) {
+        // env/0fp7
+        watchdog = _watchdogMap.get("default");
+      }
 
       if (watchdog == null)
         throw new ConfigException(L().l("No matching <server> found for start -server '{0}' in '{1}'",

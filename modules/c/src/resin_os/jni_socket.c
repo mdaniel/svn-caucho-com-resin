@@ -231,6 +231,7 @@ Java_com_caucho_vfs_JniSocketImpl_writeNative(JNIEnv *env,
   return write_length;
 }
 
+#undef HAS_SPLICE
 #ifdef HAS_SPLICE
 
 static int

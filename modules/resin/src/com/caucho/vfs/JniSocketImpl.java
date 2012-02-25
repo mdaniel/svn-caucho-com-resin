@@ -486,6 +486,13 @@ public final class JniSocketImpl extends QSocket {
     return result;
   }
   */
+
+  
+  public boolean isMmapEnabled()
+  {
+    return false;
+  }
+  
   public int writeMmap(long mmapAddress,
                        long []mmapBlocks,
                        long mmapOffset, 
@@ -701,6 +708,7 @@ public final class JniSocketImpl extends QSocket {
   /**
    * Returns true if closed.
    */
+  @Override
   public boolean isClosed()
   {
     return _isClosed.get();

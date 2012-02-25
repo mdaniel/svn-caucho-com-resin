@@ -162,7 +162,7 @@ public class JniStream extends StreamImpl {
   @Override
   public boolean isMmapEnabled()
   {
-    return true;
+    return _socket.isMmapEnabled();
   }
   
   /*

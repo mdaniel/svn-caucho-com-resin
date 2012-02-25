@@ -377,7 +377,7 @@ class WatchdogClient
                  BAM_TIMEOUT);
 
       if (! status.isSuccess())
-        throw new RuntimeException(L.l("{0}: watchdog restartfailed because of '{1}'",
+        throw new RuntimeException(L.l("{0}: watchdog restart failed because of '{1}'",
                                        this, status.getMessage()));
     } catch (RuntimeException e) {
       throw e;

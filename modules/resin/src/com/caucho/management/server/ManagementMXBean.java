@@ -33,7 +33,6 @@ import com.caucho.jmx.Description;
 import com.caucho.jmx.MXAction;
 import com.caucho.jmx.MXContentType;
 import com.caucho.jmx.MXParam;
-import com.caucho.quercus.lib.reflection.ReflectionException;
 import com.caucho.server.admin.AddUserQueryReply;
 import com.caucho.server.admin.ControllerStateActionQueryReply;
 import com.caucho.server.admin.JmxCallQueryReply;
@@ -50,6 +49,8 @@ import com.caucho.server.admin.TagResult;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.Date;
+
+import javax.management.ReflectionException;
 
 /**
  * Management facade for Resin, used for REST.

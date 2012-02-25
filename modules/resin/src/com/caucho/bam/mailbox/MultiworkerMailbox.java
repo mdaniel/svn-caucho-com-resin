@@ -335,5 +335,10 @@ public class MultiworkerMailbox implements Mailbox, Closeable
     {
     }
     
+    @Override
+    public String toString()
+    {
+      return getClass().getSimpleName() + "[" + _name + "]";
+    }
   }
 }

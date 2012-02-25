@@ -482,11 +482,16 @@ abstract public class AbstractThreadLauncher2 extends AbstractTaskWorker2 {
         int id = _gId.incrementAndGet();
         
         updateThrottle();
-        
+
+        /*
         if (id == 200) {
           ThreadDump.create().dumpThreads();
         }
-        
+        else */ 
+        if (id == 1000) {
+          ThreadDump.create().dumpThreads();
+        }
+
         launchChildThread(id);
         
         isValid = true;
