@@ -242,6 +242,7 @@ write_splice(connection_t *conn,
   struct iovec io;
   int result;
   int fd = conn->fd;
+  int write_len = 0;
 
   if (fd < 0) {
     return -1;
@@ -268,19 +269,27 @@ write_splice(connection_t *conn,
     return -1;
   }
 
-  result = splice(conn->pipe[0], 0, fd, 0, sublen,
-                  SPLICE_F_MOVE|SPLICE_F_MORE);
+  write_len = 0;
 
-  if (sublen < 0) {
-    if (errno != EAGAIN && errno != ECONNRESET && errno != EPIPE) {
-      fprintf(stderr, "splice result:%d pipe:%d fd:%d addr:%lx errno:%d\n",
-              result, conn->pipe[0], fd, mmap_address, errno);
+  while (write_len < sublen) {
+    int delta = sublen - write_len;
+
+    result = splice(conn->pipe[0], 0, fd, 0, delta,
+                    SPLICE_F_MOVE|SPLICE_F_MORE);
+
+    if (result <= 0) {
+      if (errno != EAGAIN && errno != ECONNRESET && errno != EPIPE) {
+        fprintf(stderr, "splice result:%d pipe:%d fd:%d addr:%lx errno:%d\n",
+                result, conn->pipe[0], fd, mmap_address, errno);
+      }
+
+      return -1;
     }
 
-    return -1;
+    write_len += result;
   }
 
-  return result;
+  return sublen;
 }
 
 #else
