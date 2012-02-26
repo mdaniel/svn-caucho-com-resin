@@ -134,37 +134,23 @@ public class Body extends ContainerNode {
 
     if (_class != null)
       out.writeAttribute("class", _class);
+    
+    
+    NavigationItem item = writeHeaderTable(out);
+    
+    
+    
 
+    /* Body table */
     out.writeStartElement("table");
     out.writeAttribute("width", "98%");
     out.writeAttribute("border", "0");
     out.writeAttribute("cellspacing", "0");
     out.writeAttribute("cellpadding", "0");
     out.writeAttribute("summary", "");
-
-    NavigationItem item = getDocument().getNavigation();
-
-    out.writeStartElement("tr");
-    out.writeStartElement("td");
-    out.writeAttribute("colspan", "2");
-    out.writeEndElement();
-
-    out.writeStartElement("td");
-    out.writeStartElement("div");
-    out.writeAttribute("class", "breadcrumb");
-
-    writeBreadcrumb(out, item);
-    out.writeEndElement();
-
-    out.writeEndElement();
-    out.writeEndElement();
-
-    writeTitleRow(out);
-
-    writeSpaceRow(out, 20);
-
-    String cp = getDocument().getContextPath();
-
+    
+    
+    
     // left
 
     // left navigation
@@ -180,11 +166,16 @@ public class Body extends ContainerNode {
 
     out.writeEndElement(); // td
 
-    out.writeStartElement("td"); //spacer
-    out.writeEndElement();
-
+    //Space
     out.writeStartElement("td");
+    out.writeAttribute("width","5%");
+    out.writeEntityRef("nbsp");
+    out.writeEndElement(); // td
 
+    
+    
+    out.writeStartElement("td");
+    out.writeAttribute("width","85%");
     // actual body
 
     out.writeStartElement("h1");
@@ -293,83 +284,7 @@ public class Body extends ContainerNode {
         out.writeStartElement("td");
         out.writeStartElement("center");
         out.writeStartElement("small");
-        out.writeStartElement("a");
-        out.writeAttribute("href", "/");
-        out.writeAttribute("title", "Caucho home, makers of Resin Server, Java Application Server, Web Server and Querus PHP engine.");
-        out.writeCharacters("home");
-        out.writeEndElement(); // a
-        out.writeEntityRef("nbsp");
-
-        out.writeStartElement("a");
-        out.writeAttribute("href", "/about/contact/");
-        out.writeCharacters("company");
-        out.writeEndElement(); // a
-        out.writeEntityRef("nbsp");
-
-        out.writeStartElement("a");
-        out.writeAttribute("href", "http://blog.caucho.com/");
-        out.writeAttribute("title", "Blog to discuss Resin Server, a Java EE certified Java Application Server, Web Server and Querus PHP engine");
-        out.writeCharacters("blog");
-        out.writeEndElement(); // a
-        out.writeEntityRef("nbsp");
-
-        out.writeStartElement("a");
-        out.writeAttribute("href", "http://wiki4.caucho.com/");
-        out.writeAttribute("title", "Wiki to cookbooks, tutorials for Resin Server (Application Server and Web Server)");
-        out.writeCharacters("wiki");
-        out.writeEndElement(); // a
-        out.writeEntityRef("nbsp");
-
-        out.writeStartElement("a");
-        out.writeAttribute("href", "/resin-4.0/");
-        out.writeCharacters("docs");
-        out.writeEndElement(); // a
-        out.writeEntityRef("nbsp");
-
-        out.writeStartElement("a");
-        out.writeAttribute("href", "/resin-application-server/");
-        out.writeAttribute("title", "Resin | Java Application Server | Java EE Certified | Cloud Optimized ");
-        out.writeCharacters("app server");
-        out.writeEndElement(); // a
-        out.writeEntityRef("nbsp");
-
-
-        out.writeStartElement("a");
-        out.writeAttribute("href", "/resin-web-server/");
-        out.writeAttribute("title", "Resin | Web Server | Proxy Cache | Cluster/Cloud aware Load balancing | FastCGI | Reverse Proxy | Recoverability and non-stop Reliability ");
-        out.writeCharacters("web server");
-        out.writeEndElement(); // a
-        out.writeEntityRef("nbsp");
-    
-        out.writeStartElement("a");
-        out.writeAttribute("href", "/resin-application-server/server-monitoring-watchdog-health-system/");
-        out.writeAttribute("title", "Resin Pro | Health System | Watchdog for recoverability and self healing | Server Monitoring | JVM Monitoring | Anomaly detection for detecting issues before they become problems | Server status reports");
-        out.writeCharacters("health");
-        out.writeEndElement(); // a
-        out.writeEntityRef("nbsp");
-
-        out.writeStartElement("a");
-        out.writeAttribute("href", "/resin-application-server/3g-java-clustering-cloud/");
-        out.writeAttribute("title", "Resin Pro | Cloud System | 3rd generation clustering technology | optimized for EC2, OpenStack | Cloud deployment | true elasticity | operational predictability | PaaS and DevOps ready");
-        out.writeCharacters("cloud");
-        out.writeEndElement(); // a
-        out.writeEntityRef("nbsp");
-
-
-        out.writeStartElement("a");
-        out.writeAttribute("href", "/resin-application-server/java-ee-web-profile/");
-        out.writeAttribute("title", "Resin  | Web Profile | Java EE Web Profile certified");
-        out.writeCharacters("java ee");
-        out.writeEndElement(); // a
-        out.writeEntityRef("nbsp");
-        
-
-        out.writeStartElement("a");
-        out.writeAttribute("href", "/resin-application-server/resin-professional-application-server/");
-        out.writeAttribute("title", "Resin  Pro | support, health and cloud  | choice of high traffic web sites");
-        out.writeCharacters("pro");
-        out.writeEndElement(); // a
-        out.writeEntityRef("nbsp");
+        writeTopLinks(out);
 
  
         out.writeEndElement(); // small
@@ -394,113 +309,207 @@ public class Body extends ContainerNode {
     out.writeEndElement(); //body
   }
 
+private NavigationItem writeHeaderTable(XMLStreamWriter out)
+        throws XMLStreamException {
+    //header table
+
+    out.writeStartElement("table");
+    out.writeAttribute("width", "98%");
+    out.writeAttribute("border", "0");
+    out.writeAttribute("cellspacing", "0");
+    out.writeAttribute("cellpadding", "0");
+    out.writeAttribute("summary", "");
+
+
+    
+    out.writeStartElement("tr");
+    
+    /* LOGO Cell */
+    out.writeStartElement("td");
+    out.writeStartElement("a");
+    out.writeAttribute("href", "http://www.caucho.com/");
+    out.writeAttribute("title", "Caucho maker of Resin Server | Application Server (Java EE Certified) and Web Server");
+    out.writeStartElement("img");    
+    out.writeAttribute("src", getDocument().getContextPath() + "/images/caucho-logo.png");
+    out.writeAttribute("alt", "Caucho maker of Resin Server | Application Server (Java EE Certified) and Web Server");
+    out.writeAttribute("width", "300");
+    out.writeAttribute("height", "50");
+    out.writeEndElement();//img
+    out.writeEndElement();//a
+
+    
+    /* Write Bread Crumb in Logo cell */
+    out.writeEmptyElement("br");
+    out.writeEmptyElement("br");
+    out.writeEmptyElement("br");
+    out.writeStartElement("div");
+    out.writeAttribute("class", "breadcrumb");
+    NavigationItem item = getDocument().getNavigation();
+    writeBreadcrumb(out, item);
+    out.writeEndElement();//end breadcrumb div
+    out.writeEndElement();//td end logo cell
+    
+    
+    //Space
+    out.writeStartElement("td");
+    out.writeAttribute("width","5%");
+    out.writeEntityRef("nbsp");
+    out.writeEndElement(); // td
+    
+    //Marketing blurb area
+    out.writeStartElement("td");
+    out.writeAttribute("width","70%");
+    out.writeStartElement("h1");
+    out.writeCharacters("Resin Documentation");
+    out.writeEndElement();
+    out.writeStartElement("div");
+    out.writeAttribute("style","float: right; border: 1px solid; padding: 10px;  margin: 10px; opacity:1.0; background-color:white;");
+    out.writeStartElement("small");
+    
+    out.writeStartElement("a");
+    out.writeAttribute("style", "text-decoration: none");
+    out.writeAttribute("href","http://www.caucho.com/resin-application-server/press/caucho-is-visionary/");
+    out.writeAttribute("title","Gartner’s latest Magic Quadrant report on Enterprise Application Servers positions Caucho’s Resin as \"Visionary\"");
+    out.writeCharacters("Feb 2012: Leading industry analyst names Caucho as \"Visionary\" vendor for Enterprise Application Servers."); 
+    out.writeEndElement(); // a
+    
+    out.writeEmptyElement("br");
+    
+    out.writeStartElement("a");
+    out.writeAttribute("style", "text-decoration: none");
+    out.writeAttribute("href","http://www.caucho.com/resin-application-server/press/netcraft-says-resin-application-server-grows-10x-over-last-year/");
+    out.writeAttribute("title","Resin Web Server Powers Over 4.7 Million Sites and grows by near 10x states NetCraft Feb 2012 Web Survey");
+    out.writeCharacters("Feb 2012: NetCraft survey says Resin experiencing strong growth in last year and used in number of the Million Busiest Sites.");
+    out.writeEndElement(); // a
+    
+    out.writeEndElement(); // small
+    out.writeEndElement(); // div
+    out.writeEndElement(); // td
+
+    //Top links
+    out.writeStartElement("td");
+    out.writeAttribute("width","20%");
+    writeTopLinks(out);
+    out.writeEndElement(); // td
+
+    //Space
+    out.writeStartElement("td");  
+    out.writeAttribute("width","5%");
+    out.writeEntityRef("nbsp");
+    out.writeEndElement(); // td
+
+    //Resin Logo
+    out.writeStartElement("td");
+    out.writeAttribute("width","10%");
+    out.writeAttribute("valign","bottom");
+    out.writeStartElement("a");
+    out.writeAttribute("href", "http://www.caucho.com/resin-application-server/");
+    out.writeAttribute("title", "Resin Server | Application Server (Java EE Certified) and Web Server");
+    out.writeStartElement("img");    
+    out.writeAttribute("src", getDocument().getContextPath() + "/images/resin_logo_small.jpg");
+    out.writeAttribute("alt", "Resin Server | Application Server (Java EE Certified) and Web Server");
+    out.writeEndElement();//img
+    out.writeEndElement();//a
+    out.writeEndElement(); // td
+
+    
+    /* End Header table. */
+    
+    out.writeEndElement(); //tr
+    out.writeEndElement(); //table
+    return item;
+}
+
+private void writeTopLinks(XMLStreamWriter out) throws XMLStreamException {
+    out.writeStartElement("a");
+    out.writeAttribute("href", "http://www.caucho.com/");
+    out.writeAttribute("title", "Caucho home, makers of Resin Server, Java Application Server, Web Server and Querus PHP engine.");
+    out.writeCharacters("home");
+    out.writeEndElement(); // a
+    out.writeEntityRef("nbsp");
+
+    out.writeStartElement("a");
+    out.writeAttribute("href", "http://www.caucho.com/about/");
+    out.writeCharacters("company");
+    out.writeEndElement(); // a
+    out.writeEntityRef("nbsp");
+
+    out.writeStartElement("a");
+    out.writeAttribute("href", "http://blog.caucho.com/");
+    out.writeAttribute("title", "Blog to discuss Resin Server, a Java EE certified Java Application Server, Web Server and Querus PHP engine");
+    out.writeCharacters("blog");
+    out.writeEndElement(); // a
+    out.writeEntityRef("nbsp");
+
+    out.writeStartElement("a");
+    out.writeAttribute("href", "http://wiki4.caucho.com/");
+    out.writeAttribute("title", "Wiki to cookbooks, tutorials for Resin Server (Application Server and Web Server)");
+    out.writeCharacters("wiki");
+    out.writeEndElement(); // a
+    out.writeEntityRef("nbsp");
+
+    out.writeStartElement("a");
+    out.writeAttribute("href", "http://www.caucho.com/resin-4.0/");
+    out.writeCharacters("docs");
+    out.writeEndElement(); // a
+    out.writeEntityRef("nbsp");
+    
+    out.writeEmptyElement("br");
+
+    out.writeStartElement("a");
+    out.writeAttribute("href", "http://www.caucho.com/resin-application-server/");
+    out.writeAttribute("title", "Resin | Java Application Server | Java EE Certified | Cloud Optimized ");
+    out.writeCharacters("app server");
+    out.writeEndElement(); // a
+    out.writeEntityRef("nbsp");
+
+
+    out.writeStartElement("a");
+    out.writeAttribute("href", "http://www.caucho.com/resin-web-server/");
+    out.writeAttribute("title", "Resin | Web Server | Proxy Cache | Cluster/Cloud aware Load balancing | FastCGI | Reverse Proxy | Recoverability and non-stop Reliability ");
+    out.writeCharacters("web server");
+    out.writeEndElement(); // a
+    out.writeEntityRef("nbsp");
+
+    out.writeEmptyElement("br");
+
+    out.writeStartElement("a");
+    out.writeAttribute("href", "http://www.caucho.com/resin-application-server/server-monitoring-watchdog-health-system/");
+    out.writeAttribute("title", "Resin Pro | Health System | Watchdog for recoverability and self healing | Server Monitoring | JVM Monitoring | Anomaly detection for detecting issues before they become problems | Server status reports");
+    out.writeCharacters("health");
+    out.writeEndElement(); // a
+    out.writeEntityRef("nbsp");
+
+    out.writeStartElement("a");
+    out.writeAttribute("href", "http://www.caucho.com/resin-application-server/3g-java-clustering-cloud/");
+    out.writeAttribute("title", "Resin Pro | Cloud System | 3rd generation clustering technology | optimized for EC2, OpenStack | Cloud deployment | true elasticity | operational predictability | PaaS and DevOps ready");
+    out.writeCharacters("cloud");
+    out.writeEndElement(); // a
+    out.writeEntityRef("nbsp");
+
+
+    out.writeStartElement("a");
+    out.writeAttribute("href", "http://www.caucho.com/resin-application-server/java-ee-web-profile/");
+    out.writeAttribute("title", "Resin  | Web Profile | Java EE Web Profile certified");
+    out.writeCharacters("java ee");
+    out.writeEndElement(); // a
+    out.writeEntityRef("nbsp");
+    
+
+    out.writeStartElement("a");
+    out.writeAttribute("href", "http://www.caucho.com/resin-application-server/resin-professional-application-server/");
+    out.writeAttribute("title", "Resin  Pro | support, health and cloud  | choice of high traffic web sites");
+    out.writeCharacters("pro");
+    out.writeEndElement(); // a
+    out.writeEntityRef("nbsp");
+}
+
   protected void writeContent(XMLStreamWriter out)
     throws XMLStreamException
   {
     super.writeHtml(out);
   }
 
-  private void writeSpaceRow(XMLStreamWriter out, int height)
-    throws XMLStreamException
-  {
-    // space row
-    out.writeStartElement("tr");
-    out.writeStartElement("td");
-    out.writeAttribute("colspan", "3");
-
-    writePixel(out, 1, height);
-
-    out.writeEndElement(); // </td>
-    out.writeEndElement(); // </tr>
-  }
-
-  private void writePixel(XMLStreamWriter out, int width, int height)
-    throws XMLStreamException
-  {
-    out.writeStartElement("img");
-    out.writeAttribute("alt", "");
-    out.writeAttribute("width", String.valueOf(width));
-    out.writeAttribute("height", String.valueOf(height));
-    out.writeAttribute("src", getDocument().getContextPath() + "/images/pixel.gif");
-    out.writeEndElement(); // </img>
-  }
-
-  private void writeTitleRow(XMLStreamWriter out)
-    throws XMLStreamException
-  {
-    // logo block
-    out.writeStartElement("tr");
-
-    out.writeStartElement("td");
-    out.writeAttribute("width", "180");
-    writePixel(out, 180, 1);
-    out.writeEndElement();
-
-    out.writeStartElement("td");
-    out.writeAttribute("width", "10");
-    writePixel(out, 10, 1);
-    out.writeEndElement();
-
-    // top label
-    out.writeStartElement("td");
-    out.writeAttribute("align", "right");
-
-    out.writeStartElement("img");
-    out.writeAttribute("alt", "Caucho Technology");
-    out.writeAttribute("align", "right");
-    out.writeAttribute("src", getDocument().getContextPath() + "/images/caucho-logo.png");
-    out.writeEndElement(); // </img>
-
-    out.writeEndElement(); // </td>
-
-    out.writeEndElement(); // </tr>
-  }
-
-  private void writeOldTitleRow(XMLStreamWriter out)
-    throws XMLStreamException
-  {
-    // logo block
-    out.writeStartElement("tr");
-
-    // spacer
-    out.writeStartElement("td");
-    out.writeAttribute("width", "2");
-    out.writeStartElement("img");
-    out.writeAttribute("alt", "");
-    out.writeAttribute("width", "2");
-    out.writeAttribute("height", "1");
-    out.writeAttribute("src", getDocument().getContextPath() + "/images/pixel.gif");
-    out.writeEndElement(); // </img>
-    out.writeEndElement(); // </td>
-
-    // logo
-    out.writeStartElement("td");
-    out.writeEndElement(); // </td>
-
-    // spacer
-    out.writeStartElement("td");
-    out.writeAttribute("width", "10");
-    out.writeStartElement("img");
-    out.writeAttribute("alt", "");
-    out.writeAttribute("width", "10");
-    out.writeAttribute("height", "1");
-    out.writeAttribute("src", getDocument().getContextPath() + "/images/pixel.gif");
-    out.writeEndElement(); // </img>
-    out.writeEndElement(); // </td>
-
-    // top label
-    out.writeStartElement("td");
-
-    out.writeStartElement("h1");
-    out.writeAttribute("class", "title");
-    if (getDocument().getHeader() != null)
-      out.writeCharacters(getDocument().getHeader().getTitle());
-    out.writeEndElement();
-
-    out.writeEndElement(); // </td>
-
-    out.writeEndElement(); // </tr>
-  }
 
   public void writeBreadcrumb(XMLStreamWriter out, NavigationItem item)
     throws XMLStreamException
