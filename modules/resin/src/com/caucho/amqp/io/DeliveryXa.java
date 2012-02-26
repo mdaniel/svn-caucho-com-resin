@@ -27,48 +27,46 @@
  * @author Scott Ferguson
  */
 
-package com.caucho.amqp.broker;
+package com.caucho.amqp.io;
+
+import java.io.IOException;
 
 
 /**
- * Custom serialization for the cache
+ * AMQP delivery accepted
  */
-public class AbstractAmqpReceiver implements AmqpBrokerReceiver
-{
+public class DeliveryXa extends DeliveryState {
+  private byte []_txnId; // required 32-bit binary
+  private DeliveryState _outcome;
+  
   @Override
-  public void accept(long xid, long mid)
+  public long getDescriptorCode()
   {
+    return ST_MESSAGE_RELEASED;
   }
   
   @Override
-  public void reject(long xid, long mid, String message)
+  public DeliveryXa createInstance()
   {
+    return new DeliveryXa();
   }
   
   @Override
-  public void release(long xid, long mid)
+  public void readBody(AmqpReader in, int count)
+    throws IOException
   {
+    _txnId = in.readBinary();
+    _outcome = in.readObject(DeliveryState.class);
   }
   
   @Override
-  public void modified(long xid,
-                       long mid, 
-                       boolean isFailed, 
-                       boolean isUndeliverableHere)
+  public int writeBody(AmqpWriter out)
+    throws IOException
   {
+    out.writeBinary(_txnId);
     
-  }
-  
-  
-  @Override
-  public void flow(long xid,
-                   long deliveryCount, 
-                   int linkCredit)
-  {
-  }
-  
-  @Override
-  public void close()
-  {
+    out.writeObject(_outcome);
+
+    return 2;
   }
 }

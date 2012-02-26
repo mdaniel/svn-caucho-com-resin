@@ -117,8 +117,11 @@ abstract public class AmqpAbstractPacket implements AmqpConstants {
     addType(new DeliveryAccepted());
     addType(new DeliveryRejected());
     addType(new DeliveryReleased());
+    addType(new DeliveryModified());
     
     addType(new MessageHeader());
     addType(new MessageProperties());
+    
+    addType(new AmqpError());
   }
 }

@@ -34,68 +34,61 @@ import java.util.Map;
 
 
 /**
- * AMQP error
+ * AMQP delivery received
  */
-public class AmqpError extends AmqpAbstractComposite {
-  private String _condition;
-  private String _description;
-  private Map<String,?> _fields;
+public class DeliveryModified extends DeliveryState {
+  private boolean _isDeliveryFailed;
+  private boolean _isUndeliverableHere;
+  private Map<String,?> _messageAnnotations;
   
-  public String getCondition()
+  public boolean isDeliveryFailed()
   {
-    return _condition;
+    return _isDeliveryFailed;
   }
   
-  public void setCondition(String condition)
+  public void setDeliveryFailed(boolean isFailed)
   {
-    _condition = condition;
+    _isDeliveryFailed = isFailed;
   }
   
-  public String getDescription()
+  public boolean isUndeliverableHere()
   {
-    return _description;
+    return _isUndeliverableHere;
   }
   
-  public void setDescription(String description)
+  public void setUndeliverableHere(boolean isUndeliverable)
   {
-    _description = description;
+    _isUndeliverableHere = isUndeliverable;
   }
-  
-  public Map<String,?> getFields()
-  {
-    return _fields;
-  }
-  
+
   @Override
   public long getDescriptorCode()
   {
-    return FT_ERROR;
+    return ST_MESSAGE_MODIFIED;
   }
   
-  @Override
-  public AmqpError createInstance()
+  public DeliveryModified createInstance()
   {
-    return new AmqpError();
+    return new DeliveryModified();
   }
   
   @Override
   public void readBody(AmqpReader in, int count)
     throws IOException
   {
-    _condition = in.readSymbol();
-    _description = in.readString();
-    _fields = in.readFieldMap();
+    _isDeliveryFailed = in.readBoolean();
+    _isUndeliverableHere = in.readBoolean();
+    _messageAnnotations = in.readFieldMap();
   }
   
   @Override
   public int writeBody(AmqpWriter out)
     throws IOException
   {
-    out.writeSymbol(_condition);
-    out.writeString(_description);
-    out.writeMap(_fields);
+    out.writeBoolean(_isDeliveryFailed);
+    out.writeBoolean(_isUndeliverableHere);
+    out.writeMap(_messageAnnotations);
     
     return 3;
   }
-
 }

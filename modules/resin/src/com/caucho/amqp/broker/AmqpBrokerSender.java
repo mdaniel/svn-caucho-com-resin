@@ -36,14 +36,15 @@ import com.caucho.vfs.TempBuffer;
  */
 public interface AmqpBrokerSender
 {
-  public void messagePart(TempBuffer buffer, int length);
+  public void messagePart(long xid, TempBuffer buffer, int length);
   
-  // XXX: needs contentType, xid
-  public void messageComplete(TempBuffer buffer, 
+  public void messageComplete(long xid,
+                              TempBuffer buffer, 
                               int length,
                               AmqpReceiptListener receiptListener);
   
-  public void messageComplete(byte []buffer,
+  public void messageComplete(long xid,
+                              byte []buffer,
                               int offset,
                               int length,
                               AmqpReceiptListener receiptListener);

@@ -65,7 +65,9 @@ public class AmqpReceiverLink extends AmqpLink implements AmqpMessageListener
   @Override
   public void onFlow(FrameFlow flow)
   {
-    _sub.flow(flow.getDeliveryCount(), flow.getLinkCredit());
+    long xid = 0;
+    
+    _sub.flow(xid, flow.getDeliveryCount(), flow.getLinkCredit());
   }
 
   @Override
@@ -78,20 +80,29 @@ public class AmqpReceiverLink extends AmqpLink implements AmqpMessageListener
   }
   
   @Override
-  public void accept(long messageId)
+  public void accept(long xid, long messageId)
   {
-    _sub.accept(messageId);
+    _sub.accept(xid, messageId);
   }
   
   @Override
-  public void reject(long messageId)
+  public void reject(long xid, long messageId, String message)
   {
-    _sub.reject(messageId);
+    _sub.reject(xid, messageId, message);
   }
   
   @Override
-  public void release(long messageId)
+  public void modified(long xid,
+                       long mid, 
+                       boolean isFailed, 
+                       boolean isUndeliverableHere)
   {
-    _sub.release(messageId);
+    _sub.modified(xid, mid, isFailed, isUndeliverableHere);
+  }
+  
+  @Override
+  public void release(long xid, long messageId)
+  {
+    _sub.release(xid, messageId);
   }
 }

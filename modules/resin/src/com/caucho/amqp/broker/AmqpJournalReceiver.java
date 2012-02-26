@@ -46,25 +46,34 @@ public class AmqpJournalReceiver implements AmqpBrokerReceiver
   }
   
   @Override
-  public void accept(long mid)
+  public void accept(long xid, long mid)
   {
-    System.out.println("ACK: " + mid);
+    System.out.println("accept: " + mid);
   }
   
   @Override
-  public void reject(long mid)
+  public void reject(long xid, long mid, String message)
   {
-    System.out.println("NACK: " + mid);
+    System.out.println("reject: " + mid);
+  }
+  
+  public void modified(long xid, 
+                       long mid, 
+                       boolean isFailed, 
+                       boolean isUndeliverableHere)
+  {
+    
+  }
+  
+
+  @Override
+  public void release(long xid, long mid)
+  {
+    System.out.println("releaseE: " + mid);
   }
   
   @Override
-  public void release(long mid)
-  {
-    System.out.println("RELEASE: " + mid);
-  }
-  
-  @Override
-  public void flow(long deliveryCount, int linkCredit)
+  public void flow(long xid, long deliveryCount, int linkCredit)
   {
     System.out.println("FLOW: " + deliveryCount + " " + linkCredit);
   }

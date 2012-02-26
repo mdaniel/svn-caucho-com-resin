@@ -77,10 +77,10 @@ public class StompSendCommand extends StompCommand
     
         if (xa == null) {
           if (offset + sublen == contentLength) {
-            dest.messageComplete(tBuf, sublen, receipt);
+            dest.messageComplete(conn.getXid(), tBuf, sublen, receipt);
           }
           else {
-            dest.messagePart(tBuf, sublen);
+            dest.messagePart(conn.getXid(), tBuf, sublen);
           }
         }
         else {
@@ -102,7 +102,7 @@ public class StompSendCommand extends StompCommand
         buffer[offset++] = (byte) ch;
         
         if (offset == buffer.length) {
-          dest.messagePart(tBuf, offset);
+          dest.messagePart(conn.getXid(), tBuf, offset);
           tBuf = TempBuffer.allocate();
           offset = 0;
         }
@@ -110,7 +110,7 @@ public class StompSendCommand extends StompCommand
       
       System.out.println("MSG: " + xa);
       if (xa == null)
-        dest.messageComplete(tBuf, offset, receipt);
+        dest.messageComplete(conn.getXid(), tBuf, offset, receipt);
       else {
         xaSend = new StompXaSend(dest, tBuf, offset);
       }

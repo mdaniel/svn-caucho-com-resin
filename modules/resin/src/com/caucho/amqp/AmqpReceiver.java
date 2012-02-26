@@ -37,17 +37,22 @@ public interface AmqpReceiver {
   public Object take();
   
   /**
-   * Accept the value for a non-auto-ack.
+   * Accept the last message.
    */
-  public void accept();
+  public void accepted();
   
   /**
-   * Reject the value for a non-auto-ack.
+   * Reject the last message.
    */
-  public void reject();
+  public void rejected(String errorMessage);
   
   /**
-   * Release the value for a non-auto-ack.
+   * Release the last message.
    */
-  public void release();
+  public void released();
+  
+  /**
+   * Returns the message as modified.
+   */
+  public void modified(boolean isFailed, boolean isUndelierableHere);
 }

@@ -45,14 +45,15 @@ public class AmqpJournalSender implements AmqpBrokerSender
   }
   
   @Override
-  public void messagePart(TempBuffer buffer, int length)
+  public void messagePart(long xid, TempBuffer buffer, int length)
   {
     System.out.println("PART: " + length);
   }
   
   // XXX: needs contentType, xid
   @Override
-  public void messageComplete(TempBuffer buffer, 
+  public void messageComplete(long xid,
+                              TempBuffer buffer, 
                               int length,
                               AmqpReceiptListener receiptListener)
   {
@@ -62,7 +63,8 @@ public class AmqpJournalSender implements AmqpBrokerSender
   }
   
   @Override
-  public void messageComplete(byte []buffer,
+  public void messageComplete(long xid,
+                              byte []buffer,
                               int offset,
                               int length,
                               AmqpReceiptListener receiptListener)

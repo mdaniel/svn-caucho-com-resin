@@ -52,7 +52,7 @@ class StompXaSend extends StompXaItem
   @Override
   boolean doCommand(StompConnection conn)
   {
-    _dest.messageComplete(_tBuf, _length, null);
+    _dest.messageComplete(conn.getXid(), _tBuf, _length, null);
     
     return true;
   }

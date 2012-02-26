@@ -27,48 +27,22 @@
  * @author Scott Ferguson
  */
 
-package com.caucho.amqp.broker;
+package com.caucho.amqp;
+
+import com.caucho.amqp.transform.AmqpMessageEncoder;
 
 
 /**
- * Custom serialization for the cache
+ * AMQP client receiver factor
  */
-public class AbstractAmqpReceiver implements AmqpBrokerReceiver
-{
-  @Override
-  public void accept(long xid, long mid)
-  {
-  }
+public interface AmqpSenderFactory {
+  public AmqpSenderFactory setAddress(String address);
   
-  @Override
-  public void reject(long xid, long mid, String message)
-  {
-  }
+  public String getAddress();
   
-  @Override
-  public void release(long xid, long mid)
-  {
-  }
+  public AmqpSenderFactory setEncoder(AmqpMessageEncoder<?> encoder);
   
-  @Override
-  public void modified(long xid,
-                       long mid, 
-                       boolean isFailed, 
-                       boolean isUndeliverableHere)
-  {
-    
-  }
+  public AmqpMessageEncoder<?> getEncoder();
   
-  
-  @Override
-  public void flow(long xid,
-                   long deliveryCount, 
-                   int linkCredit)
-  {
-  }
-  
-  @Override
-  public void close()
-  {
-  }
+  public AmqpSender<?> build();
 }

@@ -63,23 +63,15 @@ public class AmqpLink
     return _handle;
   }
   
-  void write(byte []buffer, int offset, int length)
+  void write(long xid, byte []buffer, int offset, int length)
   {
-    _pub.messageComplete(buffer, offset, length, null);
+    _pub.messageComplete(xid, buffer, offset, length, null);
   }
 
   /**
    * @param messageId
    */
-  public void accept(long messageId)
-  {
-    throw new UnsupportedOperationException(getClass().getName());
-  }
-
-  /**
-   * @param messageId
-   */
-  public void reject(long messageId)
+  public void accept(long xid, long messageId)
   {
     throw new UnsupportedOperationException(getClass().getName());
   }
@@ -87,7 +79,23 @@ public class AmqpLink
   /**
    * @param messageId
    */
-  public void release(long messageId)
+  public void reject(long xid, long messageId, String message)
+  {
+    throw new UnsupportedOperationException(getClass().getName());
+  }
+
+  /**
+   * @param messageId
+   */
+  public void release(long xid, long messageId)
+  {
+    throw new UnsupportedOperationException(getClass().getName());
+  }
+  
+  public void modified(long xid,
+                       long mid, 
+                       boolean isFailed, 
+                       boolean isUndeliverableHere)
   {
     throw new UnsupportedOperationException(getClass().getName());
   }

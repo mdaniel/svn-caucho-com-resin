@@ -38,7 +38,9 @@ import com.caucho.amqp.broker.AmqpEnvironmentBroker;
 import com.caucho.amqp.broker.AmqpMessageListener;
 import com.caucho.amqp.broker.AmqpBrokerReceiver;
 import com.caucho.amqp.broker.AmqpBrokerSender;
+import com.caucho.amqp.io.AmqpError;
 import com.caucho.amqp.io.DeliveryAccepted;
+import com.caucho.amqp.io.DeliveryModified;
 import com.caucho.amqp.io.DeliveryRejected;
 import com.caucho.amqp.io.DeliveryReleased;
 import com.caucho.amqp.io.DeliveryState;
@@ -442,7 +444,8 @@ public class AmqpServerConnection implements ProtocolConnection, AmqpFrameHandle
     
     fin.read(tBuf.getBuffer(), 0, len);
     
-    link.write(tBuf.getBuffer(), 0, len);
+    long xid = 0;
+    link.write(xid, tBuf.getBuffer(), 0, len);
     // Link link = _links.get(handle);
     //System.out.println("MSG: " + transfer + " " + link);
   }
@@ -454,15 +457,38 @@ public class AmqpServerConnection implements ProtocolConnection, AmqpFrameHandle
     AmqpSession session = _sessions[0];
     
     DeliveryState state = disposition.getState();
+    long xid = 0;
     
     if (state instanceof DeliveryAccepted) {
-      session.accept();
+      session.accept(xid);
     }
     else if (state instanceof DeliveryRejected) {
-      session.reject(disposition.getFirst(), disposition.getLast());
+      DeliveryRejected rejected = (DeliveryRejected) state;
+      
+      AmqpError error = rejected.getError();
+      
+      String message = null;
+      
+      if (error != null) {
+        message = error.getCondition() + ": " + error.getDescription();
+      }
+      
+      session.reject(xid,
+                     disposition.getFirst(),
+                     disposition.getLast(),
+                     message);
+    }
+    else if (state instanceof DeliveryModified) {
+      DeliveryModified modified = (DeliveryModified) state;
+      
+      session.modified(xid,
+                       disposition.getFirst(),
+                       disposition.getLast(),
+                       modified.isDeliveryFailed(),
+                       modified.isUndeliverableHere());
     }
     else if (state instanceof DeliveryReleased) {
-      session.release(disposition.getFirst(), disposition.getLast());
+      session.release(xid, disposition.getFirst(), disposition.getLast());
     }
     else {
       System.out.println("UNKNOWN");

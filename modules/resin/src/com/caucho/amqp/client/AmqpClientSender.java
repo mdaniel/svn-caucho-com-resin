@@ -32,6 +32,9 @@ package com.caucho.amqp.client;
 import java.io.EOFException;
 import java.io.IOException;
 import java.net.Socket;
+import java.util.Collection;
+import java.util.Iterator;
+import java.util.concurrent.TimeUnit;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -65,7 +68,9 @@ import com.caucho.vfs.WriteStream;
 /**
  * AMQP client
  */
-class AmqpClientSender implements AmqpSender {
+class AmqpClientSender<T> implements AmqpSender<T> {
+  private static final long TIMEOUT_INFINITY = Long.MAX_VALUE / 2;
+  
   private static final Logger log
     = Logger.getLogger(AmqpClientSender.class.getName());
   
@@ -74,25 +79,61 @@ class AmqpClientSender implements AmqpSender {
   private String _address;
   private int _handle;
   
-  private AmqpMessageEncoder<?> _defaultEncoder = AmqpStringEncoder.ENCODER;
+  private AmqpMessageEncoder<T> _encoder;
   
   AmqpClientSender(AmqpConnectionImpl client,
-                   String address,
+                   AmqpClientSenderFactory factory,
                    int handle)
   {
     _client = client;
-    _address = address;
+    _address = factory.getAddress();
     _handle = handle;
+    _encoder = (AmqpMessageEncoder) factory.getEncoder();
   }
-  
+
   @Override
-  @SuppressWarnings("unchecked")
-  public void offer(Object value)
+  public boolean add(T value)
   {
-    offer(value, (AmqpMessageEncoder) _defaultEncoder);
+    return offer(value);
   }
-  
-  public <T> void offer(T value, AmqpMessageEncoder<T> encoder)
+
+  @Override
+  public boolean addAll(Collection<? extends T> values)
+  {
+    for (T value : values) {
+      if (! add(value)) {
+        return false;
+      }
+    }
+    
+    return true;
+  }
+
+  @Override
+  public boolean offer(T value)
+  {
+    return offer(value, TIMEOUT_INFINITY);
+  }
+
+  @Override
+  public void put(T value) throws InterruptedException
+  {
+    offer(value, TIMEOUT_INFINITY);
+  }
+
+  @Override
+  public int remainingCapacity()
+  {
+    return 0;
+  }
+
+  @Override
+  public boolean offer(T value, long timeout, TimeUnit timeUnit)
+  {
+    return offer(value, timeUnit.toMicros(timeout));
+  }
+
+  private boolean offer(T value, long timeoutMicros)
   {
     try {
       TempOutputStream tOut = new TempOutputStream();
@@ -101,7 +142,7 @@ class AmqpClientSender implements AmqpSender {
       AmqpWriter aout = new AmqpWriter();
       aout.initBase(sout);
       
-      String contentType = encoder.getContentType(value);
+      String contentType = _encoder.getContentType(value);
       
       if (contentType != null) {
         MessageProperties properties = new MessageProperties();
@@ -111,7 +152,7 @@ class AmqpClientSender implements AmqpSender {
         properties.write(aout);
       }
     
-      encoder.encode(aout, value);
+      _encoder.encode(aout, value);
       
       sout.flush();
       os.flush();
@@ -120,19 +161,134 @@ class AmqpClientSender implements AmqpSender {
       tOut.close();
       
       _client.transmit(_handle, tOut.getInputStream());
+      
+      return true;
     } catch (IOException e) {
       throw new AmqpException(e);
     }
   }
   
-  public void send(byte []buffer)
-  {
-    _client.transmit(_handle, buffer, 0, buffer.length);
-  }
-  
   public void close()
   {
     _client.closeSender(_handle);
+  }
+
+  //
+  // consumer operations are unsupported
+  //
+
+  @Override
+  public boolean contains(Object value)
+  {
+    throw new UnsupportedOperationException(getClass().getSimpleName());
+  }
+
+  @Override
+  public int drainTo(Collection values)
+  {
+    throw new UnsupportedOperationException(getClass().getSimpleName());
+  }
+
+  @Override
+  public int drainTo(Collection arg0, int arg1)
+  {
+    throw new UnsupportedOperationException(getClass().getSimpleName());
+  }
+
+  @Override
+  public T poll(long timeout, TimeUnit unit) throws InterruptedException
+  {
+    throw new UnsupportedOperationException(getClass().getSimpleName());
+  }
+
+  @Override
+  public boolean remove(Object arg0)
+  {
+    throw new UnsupportedOperationException(getClass().getSimpleName());
+  }
+
+  @Override
+  public T take() throws InterruptedException
+  {
+    throw new UnsupportedOperationException(getClass().getSimpleName());
+  }
+
+  @Override
+  public T element()
+  {
+    throw new UnsupportedOperationException(getClass().getSimpleName());
+  }
+
+  @Override
+  public T peek()
+  {
+    throw new UnsupportedOperationException(getClass().getSimpleName());
+  }
+
+  @Override
+  public T poll()
+  {
+    throw new UnsupportedOperationException(getClass().getSimpleName());
+  }
+
+  @Override
+  public T remove()
+  {
+    throw new UnsupportedOperationException(getClass().getSimpleName());
+  }
+
+  @Override
+  public void clear()
+  {
+    throw new UnsupportedOperationException(getClass().getSimpleName());
+  }
+
+  @Override
+  public boolean containsAll(Collection<?> arg0)
+  {
+    throw new UnsupportedOperationException(getClass().getSimpleName());
+  }
+
+  @Override
+  public boolean isEmpty()
+  {
+    throw new UnsupportedOperationException(getClass().getSimpleName());
+  }
+
+  @Override
+  public Iterator iterator()
+  {
+    throw new UnsupportedOperationException(getClass().getSimpleName());
+  }
+
+  @Override
+  public boolean removeAll(Collection arg0)
+  {
+    throw new UnsupportedOperationException(getClass().getSimpleName());
+  }
+
+  @Override
+  public boolean retainAll(Collection arg0)
+  {
+    throw new UnsupportedOperationException(getClass().getSimpleName());
+  }
+
+  @Override
+  public int size()
+  {
+    throw new UnsupportedOperationException(getClass().getSimpleName());
+  }
+
+  @Override
+  public Object[] toArray()
+  {
+    throw new UnsupportedOperationException(getClass().getSimpleName());
+  }
+
+  @Override
+  public Object[] toArray(Object[] arg0)
+  {
+    throw new UnsupportedOperationException(getClass().getSimpleName());
   }
   
   @Override

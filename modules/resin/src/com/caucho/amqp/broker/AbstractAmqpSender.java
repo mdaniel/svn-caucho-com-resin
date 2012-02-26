@@ -37,13 +37,14 @@ import com.caucho.vfs.TempBuffer;
 public class AbstractAmqpSender implements AmqpBrokerSender
 {
   @Override
-  public void messagePart(TempBuffer buffer, int length)
+  public void messagePart(long xid, TempBuffer buffer, int length)
   {
     
   }
   
   @Override
-  public void messageComplete(TempBuffer buffer,
+  public void messageComplete(long xid,
+                              TempBuffer buffer,
                               int length,
                               AmqpReceiptListener listener)
   {
@@ -53,7 +54,8 @@ public class AbstractAmqpSender implements AmqpBrokerSender
   }
   
   @Override
-  public void messageComplete(byte []buffer,
+  public void messageComplete(long xid,
+                              byte []buffer,
                               int offset,
                               int length,
                               AmqpReceiptListener listener)

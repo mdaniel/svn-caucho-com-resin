@@ -45,6 +45,7 @@ import com.caucho.amqp.io.AmqpAbstractComposite;
 import com.caucho.amqp.io.AmqpAbstractFrame;
 import com.caucho.amqp.io.AmqpAbstractPacket;
 import com.caucho.amqp.io.DeliveryAccepted;
+import com.caucho.amqp.io.DeliveryModified;
 import com.caucho.amqp.io.DeliveryRejected;
 import com.caucho.amqp.io.DeliveryReleased;
 import com.caucho.amqp.io.FrameAttach;
@@ -167,9 +168,22 @@ public class AmqpConnectionImpl
     }
   }
   
-  public AmqpClientSender createSender(String address)
+  public AmqpClientSenderFactory createSenderFactory()
+  {
+    return new AmqpClientSenderFactory(this);
+  }
+  
+  @SuppressWarnings("unchecked")
+  public AmqpClientSender<?> createSender(String address)
+  {
+    return (AmqpClientSender) createSenderFactory().setAddress(address).build();
+  }
+  
+  AmqpClientSender<?> buildSender(AmqpClientSenderFactory factory)
   {
     int handle = _handleCounter++;
+    
+    String address = factory.getAddress();
     
     FrameAttach attach = new FrameAttach();
     attach.setName("client-" + address);
@@ -192,7 +206,7 @@ public class AmqpConnectionImpl
     try {
       writeFrame(attach);
     
-      return new AmqpClientSender(this, address, attach.getHandle());
+      return new AmqpClientSender(this, factory, attach.getHandle());
     } catch (IOException e) {
       throw new AmqpException(e);
     }
@@ -490,13 +504,54 @@ public class AmqpConnectionImpl
   /**
    * @param handle
    */
-  public void dispositionReject(int handle)
+  public void dispositionReject(int handle,
+                                String errorMessage)
   {
     try {
       _fout.startFrame(0);
     
       FrameDisposition disposition = new FrameDisposition();
-      disposition.setState(new DeliveryRejected());
+      
+      DeliveryRejected rejected = new DeliveryRejected();
+      
+      if (errorMessage != null) {
+        AmqpError error = new AmqpError();
+
+        error.setCondition("rejected");
+        error.setDescription(errorMessage);
+        
+        rejected.setError(error);
+      }
+      
+      disposition.setState(rejected);
+      
+      disposition.write(_aout);
+    
+      _fout.finishFrame();
+      _fout.flush();
+    } catch (IOException e) {
+      throw new AmqpException(e);
+    }
+  }
+
+  /**
+   * @param handle
+   */
+  public void dispositionModified(int handle,
+                                  boolean isFailed,
+                                  boolean isUndeliverableHere)
+  {
+    try {
+      _fout.startFrame(0);
+    
+      FrameDisposition disposition = new FrameDisposition();
+      
+      DeliveryModified modified = new DeliveryModified();
+      
+      modified.setDeliveryFailed(isFailed);
+      modified.setUndeliverableHere(isUndeliverableHere);
+      
+      disposition.setState(modified);
       
       disposition.write(_aout);
     

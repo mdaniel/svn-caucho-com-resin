@@ -34,13 +34,18 @@ package com.caucho.amqp.broker;
  */
 public interface AmqpBrokerReceiver
 {
-  public void accept(long mid);
+  public void accept(long xid, long mid);
   
-  public void reject(long mid);
+  public void reject(long xid, long mid, String message);
   
-  public void release(long mid);
+  public void release(long xid, long mid);
   
-  public void flow(long deliveryCount, int credit);
+  public void modified(long xid, 
+                       long mid, 
+                       boolean isFailed, 
+                       boolean isUndeliverableHere);
+  
+  public void flow(long xid, long deliveryCount, int credit);
   
   public void close();
 }

@@ -299,6 +299,17 @@ public class AmqpWriter implements AmqpConstants {
     }
   }
   
+  public void writeBinary(byte []buffer)
+    throws IOException
+  {
+    if (buffer == null) {
+      _os.write(E_NULL);
+      return;
+    }
+
+    writeBinary(buffer, 0, buffer.length);
+  }
+  
   public void writeBinary(byte []buffer, int offset, int length)
     throws IOException
   {
@@ -328,6 +339,15 @@ public class AmqpWriter implements AmqpConstants {
     
     os.write(E_DESCRIPTOR);
     writeUlong(code);
+  }
+  
+  public void writeObject(AmqpAbstractPacket value)
+    throws IOException
+  {
+    if (value != null)
+      value.write(this);
+    else
+      writeNull();
   }
   
   public void writeList(List<?> list)

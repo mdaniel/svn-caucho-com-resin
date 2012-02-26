@@ -91,23 +91,29 @@ class AmqpClientReceiver implements AmqpReceiver {
   }
   
   @Override
-  public void accept()
+  public void accepted()
   {
     _client.dispositionAccept(_handle);
   }
   
   @Override
-  public void reject()
+  public void rejected(String errorMessage)
   {
-    _client.dispositionReject(_handle);
+    _client.dispositionReject(_handle, errorMessage);
   }
   
   @Override
-  public void release()
+  public void released()
   {
     _client.dispositionRelease(_handle);
   }
   
+  @Override
+  public void modified(boolean isFailed, boolean isUndeliverableHere)
+  {
+    _client.dispositionModified(_handle, isFailed, isUndeliverableHere);
+  }
+
   void setDeliveryCount(long deliveryCount)
   {
     _deliveryCount = deliveryCount;

@@ -29,10 +29,11 @@
 
 package com.caucho.amqp;
 
+import java.util.concurrent.BlockingQueue;
+
 
 /**
  * AMQP client sender
  */
-public interface AmqpSender {
-  public void offer(Object value);
+public interface AmqpSender<T> extends BlockingQueue<T> {
 }

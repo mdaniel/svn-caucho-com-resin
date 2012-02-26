@@ -119,6 +119,8 @@ public class StompConnection implements ProtocolConnection
   private String _subscription;
   private String _transaction;
   
+  private long _xid;
+  
   private long _sessionId;
   private ArrayList<StompXaItem> _xaList;
   
@@ -202,6 +204,14 @@ public class StompConnection implements ProtocolConnection
   {
     return _id;
   }
+
+  /**
+   * @return
+   */
+  public long getXid()
+  {
+    return _xid;
+  }
   
   public String getReceipt()
   {
@@ -264,7 +274,7 @@ public class StompConnection implements ProtocolConnection
     AmqpBrokerReceiver sub = _subscriptionMap.get(sid);
     
     if (sub != null) {
-      sub.accept(mid);
+      sub.accept(_xid, mid);
       return true;
     }
     else {
@@ -277,7 +287,7 @@ public class StompConnection implements ProtocolConnection
     AmqpBrokerReceiver sub = _subscriptionMap.get(sid);
     
     if (sub != null) {
-      sub.reject(mid);
+      sub.reject(_xid, mid, null);
       return true;
     }
     else {

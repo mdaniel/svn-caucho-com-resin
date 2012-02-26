@@ -103,7 +103,7 @@ public class AmqpSession
     return deliveryId;
   }
 
-  void accept()
+  void accept(long xid)
   {
     DeliveryNode node = _head;
     
@@ -115,11 +115,11 @@ public class AmqpSession
       
       AmqpLink link = node.getLink();
       
-      link.accept(node.getMessageId());
+      link.accept(xid, node.getMessageId());
     }
   }
 
-  public void reject(long first, long last)
+  public void reject(long xid, long first, long last, String message)
   {
     DeliveryNode node = _head;
     
@@ -131,11 +131,11 @@ public class AmqpSession
       
       AmqpLink link = node.getLink();
       
-      link.reject(node.getMessageId());
+      link.reject(xid, node.getMessageId(), message);
     }
   }
 
-  public void release(long first, long last)
+  public void release(long xid, long first, long last)
   {
     DeliveryNode node = _head;
     
@@ -147,7 +147,26 @@ public class AmqpSession
       
       AmqpLink link = node.getLink();
       
-      link.release(node.getMessageId());
+      link.release(xid, node.getMessageId());
+    }
+  }
+
+  public void modified(long xid,
+                       long first, long last,
+                       boolean isFailed,
+                       boolean isUndeliverableHere)
+  {
+    DeliveryNode node = _head;
+    
+    if (node != null) {
+      _head = node.getNext();
+      
+      if (_head == null)
+        _tail = null;
+      
+      AmqpLink link = node.getLink();
+      
+      link.modified(xid, node.getMessageId(), isFailed, isUndeliverableHere);
     }
   }
   
