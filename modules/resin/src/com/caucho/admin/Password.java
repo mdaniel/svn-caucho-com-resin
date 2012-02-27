@@ -15,7 +15,7 @@ public class Password implements PasswordApi {
   
   private Password _passwordImpl;
   private String _value;
-  
+    
   public Password()
   {
     try {
@@ -25,6 +25,10 @@ public class Password implements PasswordApi {
     } catch (Exception e) {
       log.log(Level.FINEST, e.toString(), e);
     }
+  }
+  
+  protected Password(boolean isChild)
+  {
   }
   
   public void setSalt(String salt)
