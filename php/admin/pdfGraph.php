@@ -662,7 +662,10 @@ function pdf_draw_cluster_graphs($mPage)
   									  "Resin|Log|Critical", 
   									  "Resin|Log|Warning");
 
-  foreach ($cluster_servers as $server) {
+  foreach ($cluster_server_names as $cluster_server_name) {
+    
+    $server = $g_jmx_dump[$cluster_server_name];
+
     $si = sprintf("%02d", $server["ClusterIndex"]);
     $title = "{$si} - {$server["Name"]}";
     
