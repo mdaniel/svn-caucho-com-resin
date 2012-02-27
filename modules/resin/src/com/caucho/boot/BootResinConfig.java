@@ -356,8 +356,9 @@ public class BootResinConfig // implements EnvironmentBean
   public static boolean isLocalClient(ArrayList<InetAddress> localAddresses,
                                       WatchdogConfig config)
   {
-    if (config.isRequireExplicitId())
+    if (config.isRequireExplicitId()) {
       return false;
+    }
     
     String address = config.getAddress();
     
@@ -370,7 +371,7 @@ public class BootResinConfig // implements EnvironmentBean
   }
   
   private static boolean isLocalAddress(ArrayList<InetAddress> localAddresses,
-                                 String address)
+                                        String address)
   {
     if (address == null || "".equals(address))
       return false;
@@ -378,8 +379,9 @@ public class BootResinConfig // implements EnvironmentBean
     try {
       InetAddress addr = InetAddress.getByName(address);
       
-      if (localAddresses.contains(addr))
+      if (localAddresses.contains(addr)) {
         return true;
+      }
     } catch (Exception e) {
       log.log(Level.FINER, e.toString(), e);
       
