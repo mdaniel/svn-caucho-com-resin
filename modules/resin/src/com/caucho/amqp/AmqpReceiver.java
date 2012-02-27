@@ -29,13 +29,13 @@
 
 package com.caucho.amqp;
 
+import java.util.concurrent.BlockingQueue;
+
 
 /**
  * AMQP client receiver
  */
-public interface AmqpReceiver {
-  public Object take();
-  
+public interface AmqpReceiver<T> extends BlockingQueue<T> {
   /**
    * Accept the last message.
    */

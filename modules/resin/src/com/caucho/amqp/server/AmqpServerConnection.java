@@ -33,11 +33,6 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.util.logging.Logger;
 
-import com.caucho.amqp.broker.AmqpBroker;
-import com.caucho.amqp.broker.AmqpEnvironmentBroker;
-import com.caucho.amqp.broker.AmqpMessageListener;
-import com.caucho.amqp.broker.AmqpBrokerReceiver;
-import com.caucho.amqp.broker.AmqpBrokerSender;
 import com.caucho.amqp.io.AmqpError;
 import com.caucho.amqp.io.DeliveryAccepted;
 import com.caucho.amqp.io.DeliveryModified;
@@ -62,6 +57,11 @@ import com.caucho.amqp.io.FrameTransfer;
 import com.caucho.amqp.io.SaslMechanisms;
 import com.caucho.amqp.io.SaslOutcome;
 import com.caucho.amqp.io.FrameAttach.Role;
+import com.caucho.message.broker.MessageBroker;
+import com.caucho.message.broker.BrokerSubscriber;
+import com.caucho.message.broker.BrokerPublisher;
+import com.caucho.message.broker.EnvironmentMessageBroker;
+import com.caucho.message.broker.SubscriberMessageHandler;
 import com.caucho.network.listen.ProtocolConnection;
 import com.caucho.network.listen.SocketLink;
 import com.caucho.vfs.ReadStream;
@@ -382,9 +382,9 @@ public class AmqpServerConnection implements ProtocolConnection, AmqpFrameHandle
   {
     String targetAddress = clientAttach.getTarget().getAddress();
     
-    AmqpBroker broker = AmqpEnvironmentBroker.create();
+    MessageBroker broker = EnvironmentMessageBroker.create();
     
-    AmqpBrokerSender pub = broker.createSender(targetAddress);
+    BrokerPublisher pub = broker.createSender(targetAddress);
     
     session.addLink(new AmqpLink(clientAttach, pub));
     
@@ -406,13 +406,11 @@ public class AmqpServerConnection implements ProtocolConnection, AmqpFrameHandle
   {
     String sourceAddress = clientAttach.getSource().getAddress();
     
-    AmqpBroker broker = AmqpEnvironmentBroker.create();
+    MessageBroker broker = EnvironmentMessageBroker.create();
     
     AmqpReceiverLink link = new AmqpReceiverLink(this, clientAttach);
     
-    int credit = 1;
-    
-    AmqpBrokerReceiver sub = broker.createReceiver(sourceAddress, credit, link);
+    BrokerSubscriber sub = broker.createReceiver(sourceAddress, link);
     
     link.setReceiver(sub);
     

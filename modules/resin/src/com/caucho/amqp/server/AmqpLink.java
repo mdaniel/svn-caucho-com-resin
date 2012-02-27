@@ -29,10 +29,10 @@
 
 package com.caucho.amqp.server;
 
-import com.caucho.amqp.broker.AmqpBrokerReceiver;
-import com.caucho.amqp.broker.AmqpBrokerSender;
 import com.caucho.amqp.io.FrameAttach;
 import com.caucho.amqp.io.FrameFlow;
+import com.caucho.message.broker.BrokerSubscriber;
+import com.caucho.message.broker.BrokerPublisher;
 
 /**
  * link session management
@@ -43,9 +43,9 @@ public class AmqpLink
   
   private FrameAttach _attach;
   
-  private AmqpBrokerSender _pub;
+  private BrokerPublisher _pub;
   
-  public AmqpLink(FrameAttach attach, AmqpBrokerSender pub)
+  public AmqpLink(FrameAttach attach, BrokerPublisher pub)
   {
     this(attach);
     

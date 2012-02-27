@@ -29,7 +29,7 @@
 
 package com.caucho.amqp;
 
-import com.caucho.amqp.broker.AmqpBrokerReceiver;
+import com.caucho.message.broker.BrokerSubscriber;
 
 /**
  * AMQP client connection facade

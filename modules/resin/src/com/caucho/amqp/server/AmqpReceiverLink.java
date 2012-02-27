@@ -32,20 +32,20 @@ package com.caucho.amqp.server;
 import java.io.IOException;
 import java.io.InputStream;
 
-import com.caucho.amqp.broker.AmqpMessageListener;
-import com.caucho.amqp.broker.AmqpBrokerReceiver;
-import com.caucho.amqp.broker.AmqpBrokerSender;
 import com.caucho.amqp.io.FrameAttach;
 import com.caucho.amqp.io.FrameFlow;
+import com.caucho.message.broker.BrokerSubscriber;
+import com.caucho.message.broker.BrokerPublisher;
+import com.caucho.message.broker.SubscriberMessageHandler;
 
 /**
  * link session management
  */
-public class AmqpReceiverLink extends AmqpLink implements AmqpMessageListener
+public class AmqpReceiverLink extends AmqpLink implements SubscriberMessageHandler
 {
   private AmqpServerConnection _conn;
   
-  private AmqpBrokerReceiver _sub;
+  private BrokerSubscriber _sub;
   
   public AmqpReceiverLink(AmqpServerConnection conn, FrameAttach attach)
   {
@@ -54,7 +54,7 @@ public class AmqpReceiverLink extends AmqpLink implements AmqpMessageListener
     _conn = conn;
   }
   
-  void setReceiver(AmqpBrokerReceiver sub)
+  void setReceiver(BrokerSubscriber sub)
   {
     _sub = sub;
   }
