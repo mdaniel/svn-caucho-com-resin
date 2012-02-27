@@ -571,8 +571,8 @@ function pdf_draw_cluster_graphs($mPage)
   $cluster_server_name = $server["SelfServer"];
   $cluster_server = $g_jmx_dump[$cluster_server_name];
   
-  $cluster_servers = preg_grep_keys("/type=ClusterServer/", $g_jmx_dump);
-
+  $cluster_server_names = $cluster["Servers"];
+  
   $g_canvas->writeSection("Cluster Status");
   
   $g_canvas->setFont("Courier-Bold", "8");
@@ -601,7 +601,7 @@ function pdf_draw_cluster_graphs($mPage)
   $g_canvas->newLine();
 
   $g_canvas->writeTextColumn($col1, 'r', "Total Servers:");
-  $g_canvas->writeTextColumn($col2, 'l', count($cluster_servers));
+  $g_canvas->writeTextColumn($col2, 'l', count($cluster_server_names));
   $g_canvas->newLine();
   
   $triad_count = 0;
@@ -610,7 +610,10 @@ function pdf_draw_cluster_graphs($mPage)
   $dynamic_count = 0;
   $dynamic_line = "";
 
-  foreach ($cluster_servers as $server) {
+  foreach ($cluster_server_names as $cluster_server_name) {
+    
+    $server = $g_jmx_dump[$cluster_server_name];
+    
     $si = sprintf("%02d", $server["ClusterIndex"]);
     $name = "{$si} - {$server["Name"]}";
     
@@ -1481,7 +1484,7 @@ function pdf_jmx_dump()
     
     $g_canvas->setFont("Courier-Bold", 8);
     $g_canvas->writeTextWrap($name);
-
+    
     $g_canvas->setFont("Courier", 8);
     pdf_jmx_attributes($g_canvas, $values);
     $g_canvas->newLine();
@@ -1517,21 +1520,25 @@ function pdf_attribute_value($value, $depth = 0)
     $v = "{";
 
     foreach ($value as $key => $sub_value) {
-      if ($key == "java_class")
+      
+      if (is_string($key) && $key == "java_class") {
         continue;
+      }
         
       if ($i++ != 0 || $depth > 0 && sizeof($value) > 1) {
         $v .= "\n";
       }
       
-      for ($j = 0; $j < $depth + 1; $j++)
+      for ($j = 0; $j < $depth + 1; $j++) {
         $v .= " ";
-
+      }
+        
       if (is_integer($key)) {
         $v .= pdf_attribute_value($sub_value, $depth + 2);
       }
-      else
+      else {
         $v .= $key . " => " . pdf_attribute_value($sub_value, $depth + 2);
+      }
     }
     
     $v .= "  }";
