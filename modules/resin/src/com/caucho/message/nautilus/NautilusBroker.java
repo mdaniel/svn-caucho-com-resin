@@ -29,6 +29,7 @@
 
 package com.caucho.message.nautilus;
 
+import java.io.Closeable;
 import java.io.IOException;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.atomic.AtomicLong;
@@ -43,6 +44,7 @@ import com.caucho.config.ConfigException;
 import com.caucho.db.block.BlockStore;
 import com.caucho.env.service.RootDirectorySystem;
 import com.caucho.env.thread.ActorQueue;
+import com.caucho.loader.Environment;
 import com.caucho.message.broker.AbstractMessageBroker;
 import com.caucho.message.broker.BrokerSubscriber;
 import com.caucho.message.broker.BrokerPublisher;
@@ -52,6 +54,7 @@ import com.caucho.message.journal.JournalRecoverListener;
 import com.caucho.message.journal.JournalFile;
 import com.caucho.message.journal.JournalItemProcessor;
 import com.caucho.message.journal.JournalResult;
+import com.caucho.message.nautilus.NautilusBrokerStore.BrokerQueue;
 import com.caucho.util.L10N;
 import com.caucho.util.RingItemFactory;
 import com.caucho.vfs.Path;
@@ -61,7 +64,7 @@ import com.caucho.vfs.Path;
  */
 @Startup
 @Singleton
-public class NautilusBroker extends AbstractMessageBroker
+public class NautilusBroker extends AbstractMessageBroker implements Closeable
 {
   private static final Logger log = Logger.getLogger(NautilusBroker.class.getName());
   private static final L10N L = new L10N(NautilusBroker.class);
@@ -70,12 +73,9 @@ public class NautilusBroker extends AbstractMessageBroker
   private JournalFile _journalFile;
   private NautilusMultiQueueActor _nautilusActor;
 
-  ActorQueue<NautilusRingItem> _nautilusActorQueue;
+  private ActorQueue<NautilusRingItem> _nautilusActorQueue;
 
-  private ConcurrentHashMap<String,BrokerQueue> _queueMap
-    = new ConcurrentHashMap<String,BrokerQueue>();
-  
-  private AtomicLong _qidMax = new AtomicLong(1);
+  private NautilusBrokerStore _brokerStore = new NautilusBrokerStore();
   
   public void setPath(Path path)
   {
@@ -89,6 +89,8 @@ public class NautilusBroker extends AbstractMessageBroker
       throw new ConfigException(L.l("'path' is required for a journal broker."));
     
     initImpl();
+    
+    Environment.addCloseListener(this);
     
     registerSelf();
   }
@@ -137,17 +139,7 @@ public class NautilusBroker extends AbstractMessageBroker
   
   private BrokerQueue getQueue(String name)
   {
-    BrokerQueue queue = _queueMap.get(name);
-    
-    if (queue == null) {
-      long qid = _qidMax.getAndIncrement();
-      
-      queue = new BrokerQueue(name, qid);
-      
-      _queueMap.putIfAbsent(name, queue);
-      
-      queue = _queueMap.get(name);
-    }
+    BrokerQueue queue = _brokerStore.addQueue(name);
     
     return queue;
   }
@@ -156,6 +148,7 @@ public class NautilusBroker extends AbstractMessageBroker
   {
     _nautilusActor = new NautilusMultiQueueActor();
   
+    System.out.println("INIT:");
     JournalRecoverListener recover = new RecoverListener();
     _journalFile = new JournalFile(_path, recover);
   
@@ -185,8 +178,10 @@ public class NautilusBroker extends AbstractMessageBroker
     return _nautilusActorQueue;
   }
 
+  @Override
   public void close()
   {
+    System.out.println("CLOSE-ME:");
     _nautilusActorQueue.wake(); // XXX: close
     _journalFile.close();
   }
@@ -208,9 +203,9 @@ public class NautilusBroker extends AbstractMessageBroker
                         long qid,
                         long mid, BlockStore store, long blockAddress,
                         int blockOffset, int length) throws IOException
-                        {
+    {
       _entry.init(code, qid, mid, null, 0, 0, null, null);
-
+      
       JournalResult result = _entry.getResult();
 
       result.init1(store, blockAddress, blockOffset, length);
@@ -222,27 +217,6 @@ public class NautilusBroker extends AbstractMessageBroker
       }
 
       _entry.clear();
-    }
-  }
-  
-  static class BrokerQueue {
-    private String _name;
-    private long _qid;
-    
-    BrokerQueue(String name, long qid)
-    {
-      _name = name;
-      _qid = qid;
-    }
-    
-    public String getName()
-    {
-      return _name;
-    }
-    
-    public long getId()
-    {
-      return _qid;
     }
   }
 }

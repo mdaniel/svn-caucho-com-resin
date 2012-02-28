@@ -79,12 +79,12 @@ class NautilusQueue
     return _dequeueCount;
   }
   
-  void processData(long sequence, boolean isInit, boolean isFinal,
+  void processData(long mid, boolean isInit, boolean isFinal,
                    BlockStore blockStore,
                    long blockAddr, int offset, int length)
   {
-    QueueEntry entry = new QueueEntry(sequence);
-    
+    QueueEntry entry = new QueueEntry(mid);
+
     entry.addData(blockStore, blockAddr, offset, length);
     
     if (_tail != null) {
@@ -105,7 +105,7 @@ class NautilusQueue
   void subscribe(NautilusBrokerSubscriber subscriber)
   {
     _subscriberList.add(subscriber);
-    
+
     deliver();
   }
   
@@ -143,7 +143,6 @@ class NautilusQueue
   void deliver()
   {
     NautilusBrokerSubscriber []subList = _subscriberList.toArray();
-    
     // XXX: round robin
     
     while (_head != null) {

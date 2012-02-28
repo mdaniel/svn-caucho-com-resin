@@ -32,10 +32,8 @@ package com.caucho.message.nautilus;
 import java.util.HashMap;
 import java.util.logging.Logger;
 
-import com.caucho.db.block.BlockStore;
 import com.caucho.env.thread.ActorQueue.ItemProcessor;
 import com.caucho.message.journal.JournalResult;
-import com.caucho.util.ConcurrentArrayList;
 
 /**
  * Interface for the transaction log.
@@ -80,11 +78,11 @@ class NautilusMultiQueueActor
     JournalResult result = entry.getResult();
     
     int code = entry.getCode();
-    long sequence = entry.getSequence();
-
+    long mid = entry.getSequence();
+    
     switch (code) {
     case NautilusRingItem.JE_MESSAGE:
-      queue.processData(sequence,
+      queue.processData(mid,
                         entry.isInit(), entry.isFin(),
                         result.getBlockStore(),
                         result.getBlockAddr1(),
@@ -92,7 +90,7 @@ class NautilusMultiQueueActor
                         result.getLength1());
       
       if (result.getLength2() > 0) {
-        queue.processData(sequence, false, entry.isFin(),
+        queue.processData(mid, false, entry.isFin(),
                           result.getBlockStore(),
                           result.getBlockAddr2(),
                           result.getOffset2(),

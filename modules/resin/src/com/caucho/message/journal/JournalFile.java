@@ -91,7 +91,7 @@ public final class JournalFile
   private int _seq;
   
   public JournalFile(Path path,
-                           JournalRecoverListener listener)
+                     JournalRecoverListener listener)
   {
     _path = path;
     
@@ -269,8 +269,9 @@ public final class JournalFile
       
       i += HEADER_SIZE;
       
-      if (journalSeq != _seq || buffer.length <= len)
+      if (journalSeq != _seq || buffer.length <= len) {
         return false;
+      }
       
       int offset = i;
       
@@ -514,14 +515,14 @@ public final class JournalFile
   
   private static long readLong(byte []buffer, int offset)
   {
-    return (((buffer[offset + 0] & 0xff) << 56)
-           + ((buffer[offset + 1] & 0xff) << 48)
-           + ((buffer[offset + 2] & 0xff) << 40)
-           + ((buffer[offset + 3] & 0xff) << 32)
-           + ((buffer[offset + 4] & 0xff) << 24)
-           + ((buffer[offset + 5] & 0xff) << 16)
-           + ((buffer[offset + 6] & 0xff) << 8)
-           + ((buffer[offset + 7] & 0xff)));
+    return (((buffer[offset + 0] & 0xffL) << 56)
+           + ((buffer[offset + 1] & 0xffL) << 48)
+           + ((buffer[offset + 2] & 0xffL) << 40)
+           + ((buffer[offset + 3] & 0xffL) << 32)
+           + ((buffer[offset + 4] & 0xffL) << 24)
+           + ((buffer[offset + 5] & 0xffL) << 16)
+           + ((buffer[offset + 6] & 0xffL) << 8)
+           + ((buffer[offset + 7] & 0xffL)));
   }
   
   private static void writeLong(byte []buffer, int offset, long value)
