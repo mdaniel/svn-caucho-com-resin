@@ -367,7 +367,10 @@ public class JsonInput2
       }
     }
 
-    return new JsonMap(map);
+    if (ch == -1)
+      throw new IOException(this + " closing '}' expected at <EOF>");
+
+    throw new IOException(this + " closing '}' expected at " + (char) ch);
   }
 
   private int read()
