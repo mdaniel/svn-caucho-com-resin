@@ -29,24 +29,48 @@
 
 package com.caucho.message.local;
 
+import java.io.IOException;
 import java.util.Collection;
 import java.util.Iterator;
 import java.util.concurrent.TimeUnit;
 
+import com.caucho.amqp.AmqpException;
+import com.caucho.amqp.io.AmqpStreamWriter;
+import com.caucho.amqp.io.AmqpWriter;
+import com.caucho.amqp.io.MessageProperties;
 import com.caucho.amqp.transform.AmqpMessageEncoder;
 import com.caucho.message.MessageSender;
+import com.caucho.message.broker.BrokerPublisher;
+import com.caucho.message.broker.EnvironmentMessageBroker;
+import com.caucho.util.L10N;
+import com.caucho.vfs.TempOutputStream;
+import com.caucho.vfs.Vfs;
+import com.caucho.vfs.WriteStream;
 
 /**
  * local connection to the message store
  */
 public class LocalSender<T> implements MessageSender<T> {
+  private static final L10N L = new L10N(LocalSender.class);
+  
   private String _address;
   private AmqpMessageEncoder<T> _encoder;
+  
+  private BrokerPublisher _publisher;
   
   LocalSender(LocalSenderFactory factory)
   {
     _address = factory.getAddress();
     _encoder = (AmqpMessageEncoder) factory.getEncoder();
+    
+    EnvironmentMessageBroker broker = EnvironmentMessageBroker.getCurrent();
+        
+    _publisher = broker.createSender(_address);
+    
+    if (_publisher == null) {
+      throw new IllegalArgumentException(L.l("'{0}' is an unknown queue",
+                                             _address));
+    }
   }
   
   public String getAddress()
@@ -68,14 +92,45 @@ public class LocalSender<T> implements MessageSender<T> {
 
   @Override
   public boolean offer(T value, long timeout, TimeUnit timeUnit)
-      throws InterruptedException
   {
     return offerMicros(value, timeUnit.toMicros(timeout));
   }
   
   private boolean offerMicros(T value, long timeoutMicros)
   {
-    return false;
+    try {
+      TempOutputStream tOut = new TempOutputStream();
+      WriteStream os = Vfs.openWrite(tOut);
+      AmqpStreamWriter sout = new AmqpStreamWriter(os);
+      AmqpWriter aout = new AmqpWriter();
+      aout.initBase(sout);
+      
+      String contentType = _encoder.getContentType(value);
+      
+      if (contentType != null) {
+        MessageProperties properties = new MessageProperties();
+        
+        properties.setContentType(contentType);
+        
+        properties.write(aout);
+      }
+    
+      _encoder.encode(aout, value);
+      
+      sout.flush();
+      os.flush();
+      
+      tOut.flush();
+      tOut.close();
+
+      long xid = 0;
+      
+      _publisher.messageComplete(xid, tOut.getHead(), tOut.getLength(), null);
+      
+      return true;
+    } catch (IOException e) {
+      throw new AmqpException(e);
+    }
   }
 
   @Override
@@ -94,6 +149,12 @@ public class LocalSender<T> implements MessageSender<T> {
   public int remainingCapacity()
   {
     return 0;
+  }
+  
+  @Override
+  public void close()
+  {
+    
   }
 
   //

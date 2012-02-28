@@ -36,4 +36,5 @@ import java.util.concurrent.BlockingQueue;
  * message sender
  */
 public interface MessageSender<T> extends BlockingQueue<T> {
+  public void close();
 }
