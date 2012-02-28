@@ -118,15 +118,15 @@ class WatchdogArgs
 
     _javaHome = Vfs.lookup(System.getProperty("java.home"));
 
-    _argv = fillArgv(argv);
+    _is64bit = CauchoSystem.is64Bit();
 
     _resinConf = _resinHome.lookup("conf/resin.conf");
     if (! _resinConf.canRead())
       _resinConf = _resinHome.lookup("conf/resin.xml");
-
-    _is64bit = CauchoSystem.is64Bit();
     
     _userProperties = Vfs.lookup(System.getProperty("user.home") + "/.resin");
+
+    _argv = fillArgv(argv);
 
     parseCommandLine(_argv);
   }
@@ -445,90 +445,93 @@ class WatchdogArgs
     for (int i = 0; i < argv.length; i++) {
       String arg = argv[i];
       
-      if (! arg.startsWith("--") && arg.startsWith("-")) {
-        arg = "-" + arg;
+      String resinArg = arg;
+      
+      if (! resinArg.startsWith("--") && resinArg.startsWith("-")) {
+        resinArg = "-" + resinArg;
       }
 
       if ("-conf".equals(arg) || "--conf".equals(arg)) {
         resinConf = argv[i + 1];
         i++;
       }
-      else if ("--user-properties".equals(arg)) {
+      else if ("--user-properties".equals(resinArg)) {
         _userProperties = Vfs.lookup(argv[i + 1]);
         i++;
       }
-      else if ("--mode".equals(arg)) {
+      else if ("--mode".equals(resinArg)) {
         _mode = argv[i + 1];
         i++;
       }
-      else if ("-join-cluster".equals(arg)
-               || "--join-cluster".equals(arg)
-               || "-cluster".equals(arg)
+      else if ("--join-cluster".equals(resinArg)
                || "--cluster".equals(arg)) {
         _isDynamicServer = true;
         _clusterId = argv[i + 1];
 
         i++;
       }
-      else if ("-fine".equals(arg) || "--fine".equals(arg)) {
+      else if ("--fine".equals(resinArg)) {
         _isVerbose = true;
         Logger.getLogger("").setLevel(Level.FINE);
       }
-      else if ("-finer".equals(arg) || "--finer".equals(arg)) {
+      else if ("--finer".equals(resinArg)) {
         _isVerbose = true;
         Logger.getLogger("").setLevel(Level.FINER);
       }
-      else if ("-log-directory".equals(arg) || "--log-directory".equals(arg)) {
+      else if ("--log-directory".equals(resinArg)) {
         _logDirectory = _rootDirectory.lookup(argv[i + 1]);
         i++;
       }
-      else if ("-license-directory".equals(arg) || "--license-directory".equals(arg)) {
+      else if ("--license-directory".equals(resinArg)) {
         _licenseDirectory = _rootDirectory.lookup(argv[i + 1]);
         i++;
       }
-      else if ("-resin-home".equals(arg) || "--resin-home".equals(arg)) {
+      else if ("--resin-home".equals(resinArg)) {
         _resinHome = Vfs.lookup(argv[i + 1]);
         argv[i + 1] = _resinHome.getFullPath();
         i++;
       }
-      else if ("-root-directory".equals(arg) || "--root-directory".equals(arg)) {
+      else if ("--root-directory".equals(resinArg)) {
         _rootDirectory = Vfs.lookup(argv[i + 1]);
         argv[i + 1] = _rootDirectory.getFullPath();
         i++;
       }
-      else if ("-data-directory".equals(arg) || "--data-directory".equals(arg)) {
+      else if ("--data-directory".equals(resinArg)) {
         _dataDirectory = Vfs.lookup(argv[i + 1]);
         argv[i + 1] = _dataDirectory.getFullPath();
         i++;
       }
-      else if ("-server".equals(arg) || "--server".equals(arg)) {
+      else if ("--server".equals(resinArg)) {
         _serverId = argv[i + 1];
 
         i++;
       }
-      else if ("-cluster".equals(arg) || "--cluster".equals(arg)) {
+      else if ("--cluster".equals(resinArg)) {
         _clusterId = argv[i + 1];
         i++;
       }
-      else if ("-server-root".equals(arg) || "--server-root".equals(arg)) {
+      else if ("--server-root".equals(resinArg)) {
         _rootDirectory = Vfs.lookup(argv[i + 1]);
         argv[i + 1] = _rootDirectory.getFullPath();
         i++;
       }
-      else if ("-stage".equals(arg) || "--stage".equals(arg)) {
+      else if ("--stage".equals(resinArg)) {
         // skip stage
         i++;
       }
-      else if ("-preview".equals(arg) || "--preview".equals(arg)) {
+      else if ("--preview".equals(resinArg)) {
         // pass to server
       }
-      else if ("-watchdog-port".equals(arg) || "--watchdog-port".equals(arg)) {
+      else if ("--watchdog-port".equals(resinArg)) {
         _watchdogPort = Integer.parseInt(argv[i + 1]);
         i++;
       }
       else if (arg.startsWith("-J")
                || arg.startsWith("-D")
                || arg.startsWith("-X")) {
+        if (arg.equals("-J-d64")) {
+          _is64bit = true;
+        }
       }
       else if (arg.equals("-d64")) {
         _is64bit = true;
@@ -536,15 +539,15 @@ class WatchdogArgs
       else if (arg.equals("-d32")) {
         _is64bit = false;
       }
-      else if ("-debug-port".equals(arg) || "--debug-port".equals(arg)) {
+      else if ("--debug-port".equals(resinArg)) {
         i++;
       }
-      else if ("-jmx-port".equals(arg) || "--jmx-port".equals(arg)) {
+      else if ("--jmx-port".equals(resinArg)) {
         i++;
       }
-      else if ("--dump-heap-on-exit".equals(arg)) {
+      else if ("--dump-heap-on-exit".equals(resinArg)) {
       }
-      else if ("-verbose".equals(arg) || "--verbose".equals(arg)) {
+      else if ("--verbose".equals(resinArg)) {
         _isVerbose = true;
         Logger.getLogger("").setLevel(Level.CONFIG);
       }
@@ -780,8 +783,9 @@ class WatchdogArgs
         for (int i = 0; i < jvmArgs.length; i++) {
           String arg = jvmArgs[i];
 
-          if (args.contains(arg))
+          if (args.contains(arg)) {
             continue;
+          }
 
           if (arg.startsWith("-Djava.class.path=")) {
             // IBM JDK
@@ -806,8 +810,9 @@ class WatchdogArgs
       e.printStackTrace();
     }
 
-    for (int i = 0; i < argv.length; i++)
+    for (int i = 0; i < argv.length; i++) {
       args.add(argv[i]);
+    }
 
     argv = new String[args.size()];
 

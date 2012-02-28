@@ -480,9 +480,10 @@ public class CauchoSystem {
   {
     for (String prop : PROPERTIES_64) {
       String value = System.getProperty(prop);
-      
-      if (value != null)
-        return value.indexOf("64") >= 0;
+
+      if (value != null && value.indexOf("64") >= 0) {
+        return true;
+      }
     }
     
     return false;
