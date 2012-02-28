@@ -24,5 +24,27 @@ report 4.0.26 bugs at
 </p>
 </s1>
 
+<s1 title="Command Line Interface">
+  <p>Command line interface introduces a new command that deletes deployed
+    configuration
+  </p>
+  <example title="Example: undeploying configuration">
+    # deploy configuration
+    bin/resin.sh config-deploy -user foo -password ******* conf.jar
+    # undeploy configuraton
+    bin/resin.sh config-undeploy -user foo -password *******
+  </example>
+
+  <p>Capability to save PDF report was added to pdf-report command.</p>
+  <example title="Example: writing PDF report to a local file">
+    # create pdf-report
+    bin/resin.sh pdf-report -user foo -password ******* -local -local-dir /tmp
+  </example>
+</s1>
+
+<s1 title=".deb package distribution">
+  <p>Default resin user and group is changed to www-data for Resin Daemon.</p>
+</s1>
+
 </body>
 </document>

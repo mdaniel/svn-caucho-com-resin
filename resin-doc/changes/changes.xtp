@@ -12,6 +12,9 @@
 
 <s2 title="4.0.26 - snapshot">
 <ul>
+<li>cli: added config-undeploy command</li>
+<li>pdf-report: added option to save reports locally</li>
+<li>debian: changed default Resin Daemon user and group to www-data</li>
 <li>xa: change timeout message to include EXTRA_TIMEOUT (#4927, rep by Shinomiya Nobuaki)</li>
 <li>config: tiered *.xml files belong in ${tier}-inf/*.xml and ${tier}-inf/*.jar (#4952)</li>
 <li>watchdog: improve error message when &lt;user-name> is an invalid user (#4942)</li>
