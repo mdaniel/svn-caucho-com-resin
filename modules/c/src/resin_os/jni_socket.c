@@ -60,8 +60,9 @@
 #include <jni.h>
 
 #include <fcntl.h>
+#ifdef linux
 #include <sys/uio.h>
-
+#endif
 #include "resin.h"
 
 #define STACK_BUFFER_SIZE (16 * 1024)

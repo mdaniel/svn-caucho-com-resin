@@ -168,11 +168,11 @@
 			/>
 			<Tool
 				Name="VCLinkerTool"
-				AdditionalDependencies="resin.lib libeay32mt.lib ssleay32mt.lib ws2_32.lib odbc32.lib odbccp32.lib"
+				AdditionalDependencies="resin_os.lib libeay32mt.lib ssleay32mt.lib ws2_32.lib odbc32.lib odbccp32.lib"
 				OutputFile=".\Release/resinssl.dll"
 				LinkIncremental="1"
 				SuppressStartupBanner="true"
-				AdditionalLibraryDirectories="c:\openssl32\lib\vc,..\resin\Release"
+				AdditionalLibraryDirectories="c:\openssl32\lib\vc,..\resin_os\Release"
 				ModuleDefinitionFile=".\resinssl.def"
 				ProgramDatabaseFile=".\Release/resinssl.pdb"
 				RandomizedBaseAddress="1"

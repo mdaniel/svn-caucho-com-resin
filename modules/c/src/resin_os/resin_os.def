@@ -44,4 +44,7 @@ EXPORTS
 	Java_com_caucho_vfs_JniSocketImpl_nativeAllocate;
 	Java_com_caucho_vfs_JniSocketImpl_nativeFree;
 	resin_printf_exception
+	resin_throw_exception
+	cse_malloc
+	
 	
