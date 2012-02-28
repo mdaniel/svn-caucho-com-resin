@@ -459,15 +459,25 @@ public class AccessLog extends AbstractAccessLog implements AlarmListener
 
         // set cookie
       case Segment.SET_COOKIE:
-        ArrayList<Cookie> cookies = responseFacade.getCookies();
-        if (cookies == null || cookies.size() == 0)
-          buffer[offset++] = (byte) '-';
-        else {
-          _cb.clear();
-          response.fillCookie(_cb, (Cookie) cookies.get(0), 0, 0, false);
-
-          offset = print(buffer, offset, _cb.getBuffer(), 0, _cb.getLength());
+        if ("true".equals(request.getAttribute("com.caucho.servlets.hmux"))) {
+          value = response.getHeader(segment._string);
+          if (value == null)
+            buffer[offset++] = (byte) '-';
+          else
+            offset = print(buffer, offset, value);
         }
+        else {
+          ArrayList<Cookie> cookies = responseFacade.getCookies();
+          if (cookies == null || cookies.size() == 0)
+            buffer[offset++] = (byte) '-';
+          else {
+            _cb.clear();
+            response.fillCookie(_cb, (Cookie) cookies.get(0), 0, 0, false);
+
+            offset = print(buffer, offset, _cb.getBuffer(), 0, _cb.getLength());
+          }
+        }
+
         break;
 
       case 'h':
