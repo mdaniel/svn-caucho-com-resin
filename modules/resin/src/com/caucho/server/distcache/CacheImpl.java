@@ -279,13 +279,15 @@ public class CacheImpl<K,V>
   public V get(Object key)
   {
     DistCacheEntry entry = getDistCacheEntry(key);
-    
+
     _getCount.incrementAndGet();
-    if (! entry.isValueNull())
+    if (! entry.isValueNull()) {
       _hitCount.incrementAndGet();
-    else
+    }
+    else {
       _missCount.incrementAndGet();
-    
+    }
+
     V value = (V) entry.get(_config);
     
     entryRead(key, value);

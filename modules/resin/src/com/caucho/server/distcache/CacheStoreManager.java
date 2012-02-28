@@ -212,16 +212,18 @@ public final class CacheStoreManager
                           CacheConfig config,
                           long now,
                           boolean isExact)
-    {
+  {
     MnodeEntry mnodeValue = getMnodeValue(entry, config, now, isExact);
 
-    if (mnodeValue == null)
+    if (mnodeValue == null) {
       return null;
+    }
 
     Object value = mnodeValue.getValue();
 
-    if (value != null)
+    if (value != null) {
       return value;
+    }
 
     HashKey valueHash = mnodeValue.getValueHashKey();
 
@@ -1440,7 +1442,9 @@ public final class CacheStoreManager
 
   protected HashKey createHashKey(Object key, CacheConfig config)
   {
-    CacheKey cacheKey = new CacheKey(config.getGuid(), key);
+    CacheKey cacheKey = new CacheKey(config.getGuid(),
+                                     config.getGuidHash(), 
+                                     key);
     
     HashKey hashKey = _keyCache.get(cacheKey);
     
@@ -1601,16 +1605,12 @@ public final class CacheStoreManager
     }
   }
   
-  static class CacheKey {
-    private String _guid;
-    private Object _key;
+  static final class CacheKey {
+    private final String _guid;
+    private final Object _key;
+    private final int _hashCode;
     
-    CacheKey(String guid, Object key)
-    {
-      init(guid, key);
-    }
-    
-    void init(String guid, Object key)
+    CacheKey(String guid, int guidHash, Object key)
     {
       _guid = guid;
       
@@ -1618,18 +1618,14 @@ public final class CacheStoreManager
         key = NULL_OBJECT;
       
       _key = key;
+      
+      _hashCode = 65521 * (17 + guidHash) + key.hashCode();
     }
     
     @Override
-    public int hashCode()
+    public final int hashCode()
     {
-      int hash = 17;
-      
-      hash += _guid.hashCode();
-      
-      hash = 65521 * hash + _key.hashCode();
-      
-      return hash;
+      return _hashCode;
     }
     
     @Override

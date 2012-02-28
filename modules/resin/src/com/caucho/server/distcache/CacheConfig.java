@@ -62,6 +62,7 @@ public class CacheConfig implements CacheConfiguration
   public static final int FLAG_GLOBAL = 0x10;
 
   private String _guid;
+  private int _guidHash;
   private HashKey _cacheKey;
 
   private int _flags = (FLAG_BACKUP | FLAG_TRIPLICATE);
@@ -159,8 +160,13 @@ public class CacheConfig implements CacheConfiguration
   public void setGuid(String guid)
   {
     _guid = guid;
+    _guidHash = guid.hashCode();
   }
-
+  
+  public int getGuidHash()
+  {
+    return _guidHash;
+  }
 
   /**
    * Returns the globally-unique id for the cache.

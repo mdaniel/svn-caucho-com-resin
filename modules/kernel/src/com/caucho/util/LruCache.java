@@ -248,8 +248,9 @@ public final class LruCache<K,V> {
       }
     }
 
-    if (_isEnableStatistics)
+    if (_isEnableStatistics) {
       _missCount++;
+    }
 
     return null;
   }
