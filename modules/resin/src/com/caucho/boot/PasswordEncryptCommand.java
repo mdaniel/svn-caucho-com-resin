@@ -32,6 +32,7 @@ package com.caucho.boot;
 import java.io.Console;
 import java.util.List;
 
+import com.caucho.admin.Password;
 import com.caucho.admin.PasswordApi;
 import com.caucho.config.ConfigException;
 import com.caucho.util.L10N;
@@ -77,7 +78,12 @@ public class PasswordEncryptCommand extends AbstractBootCommand
     if (password == null)
       throw new ConfigException(L.l("password-encrypt requires a -password argument"));
     
-    System.out.println("password: {RESIN}" + encrypt(password, salt));
+    String value = encrypt(password, salt);
+    
+    if (value != null)
+      System.out.println("password: {RESIN}" + value);
+    else
+      System.out.println("password: " + password);
 
     return 0;
   }
@@ -107,12 +113,13 @@ public class PasswordEncryptCommand extends AbstractBootCommand
   private String encrypt(String password, String salt)
   {
     try {
-      Class<?> cl = Class.forName("com.caucho.admin.Password");
-      PasswordApi passwordApi = (PasswordApi) cl.newInstance();
-      
+      Class<?> cl = Class.forName("com.caucho.admin.PasswordImpl");
+      Password passwordApi = (Password) cl.newInstance();
+
       return passwordApi.encrypt(password, salt);
     } catch (Exception e) {
       throw ConfigException.create(e);
+      //return null;
     }
   }
   

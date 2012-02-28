@@ -61,6 +61,11 @@ public class Password implements PasswordApi {
   public String encrypt(String value, String salt)
     throws Exception
   {
-    return value;
+    if (_passwordImpl != null) {
+      return _passwordImpl.encrypt(value,  salt);
+    }
+    else {
+      return null;
+    }
   }
 }
