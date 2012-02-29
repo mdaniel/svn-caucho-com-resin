@@ -91,10 +91,10 @@ web_admin_enable : true
 # web_admin_ssl : true
 
 # Enable Resin REST Admin
-rest_admin_enable = false
+# rest_admin_enable : true
 
 # Require SSL for REST Admin
-rest_admin_secure = true
+rest_admin_secure : true
 
 #
 # Access to /resin-admin and remote CLI is password restricted.

@@ -160,12 +160,16 @@
       </resin:if>
 
       <resin:if test="${rest_admin_enable}">
-        <web-app id="/resin-rest" root-directory="${resin.root}/doc/resin-rest">
-          <login-config auth-method='basic' realm-name='resin'/>
+        <web-app id="/resin-rest"
+                 root-directory="${resin.root}/doc/resin-rest">
 
-          <security-constraint url-pattern='/*'/>
+          <resin:BasicLogin realm-name="resin"/>
 
-          <servlet-mapping url-pattern="/rest/*"
+          <resin:Allow url-pattern="/*">
+            <resin:IfUserInRole role="resin-admin"/>
+          </resin:Allow>
+
+          <servlet-mapping url-pattern="/*"
                            servlet-class="com.caucho.admin.servlet.AdminRestServlet">
             <init>
               <require-secure>${rest_admin_secure}</require-secure>
