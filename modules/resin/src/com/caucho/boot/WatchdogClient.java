@@ -297,8 +297,14 @@ class WatchdogClient
     long expireTime = CurrentTime.getCurrentTimeActual() + timeout;
     
     while (CurrentTime.getCurrentTimeActual() <= expireTime) {
-      if (pingWatchdog())
+      if (pingWatchdog()) {
         return process;
+      }
+      
+      try {
+        Thread.sleep(10);
+      } catch (Exception e) {
+      }
     }
     
     return null;
@@ -310,7 +316,6 @@ class WatchdogClient
 
     try {
       conn = getConnection();
-
       
       return true;
     } catch (Exception e) {
@@ -417,15 +422,22 @@ class WatchdogClient
         
         HmtpClient client = new HmtpClient(url);
 
-        client.setVirtualHost("admin.resin");
+        try {
+          client.setVirtualHost("admin.resin");
         
-        String uid = "";
+          String uid = "";
       
-        client.setEncryptPassword(true);
+          client.setEncryptPassword(true);
 
-        client.connect(uid, getResinSystemAuthKey());
+          client.connect(uid, getResinSystemAuthKey());
 
-        _conn = client;
+          _conn = client;
+          client = null;
+        } finally {
+          if (client != null) {
+            client.close();
+          }
+        }
       }
     }
 

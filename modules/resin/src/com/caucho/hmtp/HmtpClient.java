@@ -76,8 +76,6 @@ public class HmtpClient implements RemoteActorSender
   
   private BamException _connException;
 
-  private Broker _linkBroker;
-  
   private boolean _isMasked;
   
   private ClientAuthManager _authManager = new ClientAuthManager();
@@ -312,8 +310,16 @@ public class HmtpClient implements RemoteActorSender
     HmtpLinkFactory linkFactory = _linkFactory;
     _linkFactory = null;
     
-    if (linkFactory != null)
+    if (linkFactory != null) {
       linkFactory.close();
+    }
+    
+    LinkClient linkClient = _linkClient;
+    _linkClient = null;
+    
+    if (linkClient != null) {
+      linkClient.close();
+    }
 
     if (_webSocketClient != null)
       _webSocketClient.close(1000, "ok");
