@@ -93,7 +93,7 @@ web_admin_enable : true
 # Enable Resin REST Admin
 rest_admin_enable = false
 
-# Reqire SSL for REST Admin
+# Require SSL for REST Admin
 rest_admin_secure = true
 
 #

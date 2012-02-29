@@ -46,5 +46,19 @@ report 4.0.26 bugs at
   <p>Default resin user and group is changed to www-data for Resin Daemon.</p>
 </s1>
 
+<s1 title="REST Administration Interface">
+  <p>New Resin REST interface provides an http(s) integration point. By default
+  the interface is disabled. To enable the interface edit resin.properties to
+  set rest_admin_enable property to true. Also configure admin_user and
+  admin_password.
+  </p>
+  <p>Once the three prerequisites are met rest interface is available at its
+    default url: http://locahost:8080/resin-rest/rest</p>
+
+  <example title="Example: Listing MBeans via REST">
+    curl  --user admin:secret http://localhost:8080/resin-rest/rest/jmx-list
+  </example>
+</s1>
+
 </body>
 </document>
