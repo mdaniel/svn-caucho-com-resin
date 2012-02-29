@@ -158,6 +158,22 @@
           </prologue>
         </web-app>
       </resin:if>
+
+      <resin:if test="${rest_admin_enable}">
+        <web-app id="/resin-rest" root-directory="${resin.root}/doc/resin-rest">
+          <login-config auth-method='basic' realm-name='resin'/>
+
+          <security-constraint url-pattern='/*'/>
+
+          <servlet-mapping url-pattern="/rest/*"
+                           servlet-class="com.caucho.admin.servlet.AdminRestServlet">
+            <init>
+              <require-secure>${rest_admin_secure}</require-secure>
+            </init>
+          </servlet-mapping>
+        </web-app>
+      </resin:if>
+
     </host-default>
   </cluster-default>
 </resin>
