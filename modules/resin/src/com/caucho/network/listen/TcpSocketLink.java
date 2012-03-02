@@ -1054,8 +1054,9 @@ public class TcpSocketLink extends AbstractSocketLink
       }
     }
     
-    if (result == RequestState.EXIT)
+    if (result.isClosed()) {
       close();
+    }
 
     return result;
   }

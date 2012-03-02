@@ -66,9 +66,15 @@ enum RequestState {
   CLOSED {
     @Override
     public boolean isAcceptAllowed() { return true; }
+    
+    @Override
+    public boolean isClosed() { return true; }
   },
   
-  EXIT;
+  EXIT {
+    @Override
+    public boolean isClosed() { return true; }
+  };
   
   public boolean isAsyncOrDuplex()
   {
@@ -86,6 +92,11 @@ enum RequestState {
   }
   
   public boolean isAcceptAllowed()
+  {
+    return false;
+  }
+  
+  public boolean isClosed()
   {
     return false;
   }
