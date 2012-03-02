@@ -49,6 +49,7 @@ public interface SendfileOutputStream {
   
   public boolean isSendfileEnabled();
   
-  public void writeSendfile(int fd, long fileOffset, int fileLength)
+  public void writeSendfile(byte []fileName, int nameLength,
+                            long fileLength)
     throws IOException;
 }

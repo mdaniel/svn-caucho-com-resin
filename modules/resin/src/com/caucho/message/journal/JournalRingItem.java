@@ -158,7 +158,7 @@ public class JournalRingItem extends RingItem
     _buffer = null;
     
     if (tBuf != null) {
-      // tBuf.freeSelf();
+      tBuf.freeSelf();
     }
   }
   

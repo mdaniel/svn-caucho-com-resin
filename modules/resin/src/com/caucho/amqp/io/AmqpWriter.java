@@ -52,12 +52,10 @@ public class AmqpWriter implements AmqpConstants {
   public void init(OutputStream os)
   {
     _os = new AmqpStreamWriter(Vfs.openWrite(os));
-    System.out.println("OS: " + os);
   }
   
   public void initBase(AmqpBaseWriter os)
   {
-    System.out.println("OS2: " + os);
     _os = os;
   }
   
@@ -294,7 +292,7 @@ public class AmqpWriter implements AmqpConstants {
       os.write(len);
     }
     
-    for (int i = 0; i < value.length(); i++) {
+    for (int i = 0; i < len; i++) {
       os.write(value.charAt(i));
     }
   }

@@ -21,6 +21,7 @@
 #include <sys/resource.h>
 #include <dirent.h>
 #include <netinet/in.h>
+#include <netinet/tcp.h>
 #include <arpa/inet.h>
 #include <unistd.h>
 
@@ -380,28 +381,72 @@ Java_com_caucho_vfs_JniSocketImpl_writeMmapNative(JNIEnv *env,
 
 #ifdef HAS_SENDFILE
 
+static int
+jni_open_file(JNIEnv *env,
+              jbyteArray name,
+              jint length)
+{
+  char buffer[8192];
+  int fd;
+  int flags;
+  int offset = 0;
+
+  if (! name || length <= 0 || sizeof(buffer) <= length) {
+    return -1;
+  }
+
+  (*env)->GetByteArrayRegion(env, name, offset, length, (void*) buffer);
+
+  buffer[length] = 0;
+
+ flags = O_RDWR|O_CREAT;
+  
+#ifdef O_BINARY
+  flags |= O_BINARY;
+#endif
+  
+#ifdef O_LARGEFILE
+  flags |= O_LARGEFILE;
+#endif
+ 
+  fd = open(buffer, flags, 0664);
+
+  return fd;
+}
+
 JNIEXPORT jint JNICALL
 Java_com_caucho_vfs_JniSocketImpl_writeSendfileNative(JNIEnv *env,
                                                       jobject obj,
                                                       jlong conn_fd,
-                                                      jint fd,
-                                                      jlong fdOffset,
-                                                      jint fdLength)
+                                                      jbyteArray name,
+                                                      jint name_length,
+                                                      jlong file_length)
 {
   connection_t *conn = (connection_t *) (PTR) conn_fd;
   int sublen;
   int write_length = 0;
   int result;
+  int fd;
   off_t sendfile_offset;
     
   if (! conn || conn->fd < 0 || conn->ssl_bits) {
     return -1;
   }
-  
+
   conn->jni_env = env;
 
-  sendfile_offset = fdOffset;
-  result = sendfile(conn->fd, fd, &sendfile_offset, fdLength);
+  fd = jni_open_file(env, name, name_length);
+
+  if (fd < 0) {
+    /* file not found */
+    return -1;
+  }
+  
+  sendfile_offset = 0;
+
+  result = sendfile(conn->fd, fd, &sendfile_offset, file_length);
+
+  close(fd);
 
   if (result < 0) {
     if (errno != EAGAIN && errno != ECONNRESET && errno != EPIPE) {
@@ -621,11 +666,30 @@ Java_com_caucho_vfs_JniSocketImpl_flushNative(JNIEnv *env,
 					      jlong conn_fd)
 {
   connection_t *conn = (connection_t *) (PTR) conn_fd;
+  int fd;
 
-  if (! conn)
+  if (! conn) {
     return -1;
-  else
-    return 0;
+  }
+
+  fd = conn->fd;
+
+  if (fd <= 0) {
+    return -1;
+  }
+
+#ifdef TCP_CORK
+  if (conn->tcp_cork) {
+    int flag = 0;
+    int result;
+
+    result = setsockopt(fd, IPPROTO_TCP, TCP_CORK,
+                        (char *) &flag, sizeof(int));
+    flag = 1;
+    result = setsockopt(fd, IPPROTO_TCP, TCP_CORK,
+                        (char *) &flag, sizeof(int));
+  }
+#endif  
 
   /* return cse_flush_request(res); */
 }
@@ -1032,7 +1096,6 @@ Java_com_caucho_vfs_JniServerSocketImpl_bindPort(JNIEnv *env,
   ss->port = ntohs(sin->sin_port);
 
   ss->conn_socket_timeout = 65000;
-  ss->tcp_no_delay = 1;
 
   ss->accept = &std_accept;
   ss->close = &std_close_ss;
@@ -1124,6 +1187,20 @@ Java_com_caucho_vfs_JniServerSocketImpl_nativeSetTcpNoDelay(JNIEnv *env,
   ss->tcp_no_delay = enable;
 }
 
+JNIEXPORT jboolean JNICALL
+Java_com_caucho_vfs_JniServerSocketImpl_nativeIsTcpNoDelay(JNIEnv *env,
+                                                           jobject obj,
+                                                           jlong ss_fd)
+{
+  server_socket_t *ss = (server_socket_t *) (PTR) ss_fd;
+
+  if (! ss) {
+    return 0;
+  }
+  
+  return ss->tcp_no_delay;
+}
+
 JNIEXPORT void JNICALL
 Java_com_caucho_vfs_JniServerSocketImpl_nativeSetTcpKeepalive(JNIEnv *env,
                                                               jobject obj,
@@ -1136,6 +1213,51 @@ Java_com_caucho_vfs_JniServerSocketImpl_nativeSetTcpKeepalive(JNIEnv *env,
     return;
   
   ss->tcp_keepalive = enable;
+}
+
+JNIEXPORT jboolean JNICALL
+Java_com_caucho_vfs_JniServerSocketImpl_nativeIsTcpKeepalive(JNIEnv *env,
+                                                             jobject obj,
+                                                             jlong ss_fd)
+{
+  server_socket_t *ss = (server_socket_t *) (PTR) ss_fd;
+
+  if (! ss) {
+    return 0;
+  }
+  
+  return ss->tcp_keepalive;
+}
+
+JNIEXPORT jboolean JNICALL
+Java_com_caucho_vfs_JniServerSocketImpl_nativeIsTcpCork(JNIEnv *env,
+                                                        jobject obj,
+                                                        jlong ss_fd)
+{
+  server_socket_t *ss = (server_socket_t *) (PTR) ss_fd;
+
+  if (! ss) {
+    return 0;
+  }
+
+  return ss->tcp_cork;
+}
+
+JNIEXPORT void JNICALL
+Java_com_caucho_vfs_JniServerSocketImpl_nativeSetTcpCork(JNIEnv *env,
+                                                        jobject obj,
+                                                        jlong ss_fd,
+                                                        jboolean enable)
+{
+  server_socket_t *ss = (server_socket_t *) (PTR) ss_fd;
+
+  if (! ss) {
+    return;
+  }
+
+#ifdef TCP_CORK
+  ss->tcp_cork = 1;
+#endif  
 }
 
 JNIEXPORT void JNICALL

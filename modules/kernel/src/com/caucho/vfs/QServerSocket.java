@@ -55,6 +55,15 @@ abstract public class QServerSocket {
     return false;
   }
   
+  public void setTcpCork(boolean isCork)
+  {
+  }
+  
+  public boolean isTcpCork()
+  {
+    return false;
+  }
+  
   public boolean isJni()
   {
     return false;

@@ -80,6 +80,7 @@ struct connection_t {
 
   int is_recv_timeout;
   int is_read_shutdown;
+  int tcp_cork;
 
   char server_data[128];
   struct sockaddr *server_sin;
@@ -141,6 +142,7 @@ struct server_socket_t {
   int conn_socket_timeout;
   int tcp_no_delay;
   int tcp_keepalive;
+  int tcp_cork;
   
   int fd;
 

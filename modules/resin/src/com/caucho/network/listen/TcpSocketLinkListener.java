@@ -63,6 +63,7 @@ import com.caucho.util.CurrentTime;
 import com.caucho.util.FreeList;
 import com.caucho.util.Friend;
 import com.caucho.util.L10N;
+import com.caucho.vfs.JniServerSocketImpl;
 import com.caucho.vfs.JsseSSLFactory;
 import com.caucho.vfs.OpenSSLFactory;
 import com.caucho.vfs.QJniServerSocket;
@@ -153,6 +154,7 @@ public class TcpSocketLinkListener
 
   private boolean _isTcpNoDelay = true;
   private boolean _isTcpKeepalive;
+  private boolean _isTcpCork = true;
   
   private boolean _isEnableJni = true;
 
@@ -656,6 +658,23 @@ public class TcpSocketLinkListener
   }
 
   /**
+   * Gets the tcp-cork property
+   */
+  public boolean isTcpCork()
+  {
+    return _isTcpNoDelay;
+  }
+
+  /**
+   * Sets the tcp-no-delay property
+   */
+  @Configurable
+  public void setTcpCork(boolean tcpCork)
+  {
+    _isTcpCork = tcpCork;
+  }
+
+  /**
    * Configures the throttle.
    */
   @Configurable
@@ -685,10 +704,12 @@ public class TcpSocketLinkListener
   
   public boolean isJniEnabled()
   {
-    if (_serverSocket != null)
+    if (_serverSocket != null) {
       return _serverSocket.isJni();
-    else
+    }
+    else {
       return false;
+    }
   }
 
   private Throttle createThrottle()
@@ -1119,6 +1140,8 @@ public class TcpSocketLinkListener
 
     _serverSocket.setTcpNoDelay(_isTcpNoDelay);
     _serverSocket.setTcpKeepalive(_isTcpKeepalive);
+    _serverSocket.setTcpCork(_isTcpCork);
+    System.out.println("CORKING: " + _isTcpCork);
 
     _serverSocket.setConnectionSocketTimeout((int) getSocketTimeout());
 

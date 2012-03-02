@@ -66,14 +66,23 @@ import com.caucho.vfs.Path;
  */
 class NautilusBrokerStore extends AbstractMessageBroker
 {
+  private static final Logger log
+    = Logger.getLogger(NautilusBrokerStore.class.getName());
+  
   private AtomicLong _qidGen = new AtomicLong();
   private ClusterCache _queueCache;
 
   NautilusBrokerStore()
   {
-    CloudServer server = NetworkClusterSystem.getCurrentSelfServer();
+    long serverId = 0;
     
-    long serverId = server.getIndex();
+    try {
+      CloudServer server = NetworkClusterSystem.getCurrentSelfServer();
+    
+      serverId = server.getIndex();
+    } catch (Exception e) {
+      log.log(Level.FINER, e.toString(), e);
+    }
 
     // seq assigned to avoid conflict between servers and restarts
     long seq = (serverId << 56) + (CurrentTime.getCurrentTime() << 24);
@@ -94,9 +103,14 @@ class NautilusBrokerStore extends AbstractMessageBroker
     if (queue == null) {
       queue = new BrokerQueue(name, _qidGen.incrementAndGet());
       
-      _queueCache.putIfAbsent(name, queue);
+      //_queueCache.putIfAbsent(name, queue);
+      _queueCache.put(name, queue);
       
       queue = (BrokerQueue) _queueCache.get(name);
+      
+      if (queue == null) {
+        throw new NullPointerException();
+      }
     }
     
     return queue;

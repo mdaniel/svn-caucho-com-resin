@@ -40,9 +40,6 @@ import com.caucho.util.L10N;
 abstract public class AmqpAbstractPacket implements AmqpConstants {
   private static final L10N L = new L10N(AmqpAbstractPacket.class);
   
-  private static HashMap<Long,AmqpAbstractPacket> _typeMap
-    = new HashMap<Long,AmqpAbstractPacket>();
-  
   public void write(AmqpWriter out)
     throws IOException
   {
@@ -75,7 +72,7 @@ abstract public class AmqpAbstractPacket implements AmqpConstants {
   T readType(AmqpReader in, long typeCode, Class<T> type)
     throws IOException
   {
-    AmqpAbstractPacket factory = _typeMap.get(typeCode);
+    AmqpAbstractPacket factory = AmqpPacketMap.getPacket(typeCode);
 
     if (factory == null) {
       throw new IOException(L.l("0x{0} is an unknown type expected {1}",
@@ -93,35 +90,5 @@ abstract public class AmqpAbstractPacket implements AmqpConstants {
     packet.readValue(in);
     
     return (T) packet;
-  }
-  
-  private static void addType(AmqpAbstractPacket factory)
-  {
-    _typeMap.put(factory.getDescriptorCode(), factory);
-  }
-  
-  static {
-    addType(new FrameOpen());
-    addType(new FrameBegin());
-    addType(new FrameAttach());
-    addType(new FrameFlow());
-    addType(new FrameTransfer());
-    addType(new FrameDisposition());
-    addType(new FrameDetach());
-    addType(new FrameEnd());
-    addType(new FrameClose());
-    
-    addType(new LinkSource());
-    addType(new LinkTarget());
-    
-    addType(new DeliveryAccepted());
-    addType(new DeliveryRejected());
-    addType(new DeliveryReleased());
-    addType(new DeliveryModified());
-    
-    addType(new MessageHeader());
-    addType(new MessageProperties());
-    
-    addType(new AmqpError());
   }
 }

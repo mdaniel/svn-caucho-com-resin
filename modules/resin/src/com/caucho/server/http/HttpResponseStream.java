@@ -213,17 +213,25 @@ public class HttpResponseStream
   }
 
   @Override
-  protected void writeTailImpl(boolean isClose)
+  protected void writeTailImpl(boolean isComplete)
     throws IOException
   {
     if (! _isChunkedEncoding) {
-      // server/0550
-      _nextStream.flush();
-      // XXX: the isClose flag isn't accurate with keepalives
-      /*
-      if (isClose)
-        _next.close();
-      */
+      if (isComplete) {
+        AbstractHttpRequest req = _response.getRequest();
+        
+        if (req.isKeepalive()) {
+          _nextStream.flushBuffer();
+        }
+        else {
+          _nextStream.close();
+        }
+      }
+      else {
+        // server/0550
+        _nextStream.flushBuffer();
+      }
+
       return;
     }
 
@@ -239,18 +247,21 @@ public class HttpResponseStream
       byte []buffer = _nextStream.getBuffer();
       int len = bufferOffset - bufferStart;
       
-      if (len > 0)
+      if (len > 0) {
         writeChunkHeader(buffer, bufferStart, len);
-      else
+      }
+      else {
         bufferOffset = bufferStart - 8;
+      }
 
       _bufferStartOffset = 0;
     }
 
     ArrayList<String> footerKeys = _response.getFooterKeys();
 
-    if (footerKeys.size() == 0)
+    if (footerKeys.size() == 0) {
       _nextStream.write(_tailChunked, 0, _tailChunkedLength);
+    }
     else {
       ArrayList<String> footerValues = _response.getFooterValues();
 
@@ -366,21 +377,21 @@ public class HttpResponseStream
       throw new IllegalStateException(L.l("writeMmap cannot use chunked"));
     }
     
-    flush(); // XXX:
+    flushBuffer();
     
     _nextStream.writeMmap(mmapAddress, mmapBlocks, mmapOffset, mmapLength);
   }
 
   @Override
-  public void writeSendfile(int fd, long fdOffset, int fdLength)
+  public void writeSendfile(byte []fileName, int nameLength, long fileLength)
     throws IOException
   {
     if (_isChunkedEncoding) {
       throw new IllegalStateException(L.l("writeSendfile cannot use chunked"));
     }
     
-    flush(); // XXX:
+    flushBuffer();
     
-    _nextStream.writeSendfile(fd, fdOffset, fdLength);
+    _nextStream.writeSendfile(fileName, nameLength, fileLength);
   }
 }

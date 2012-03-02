@@ -876,7 +876,7 @@ public class TcpSocketLink extends AbstractSocketLink
     
     RequestState result = RequestState.REQUEST_COMPLETE;
 
-    while (result == RequestState.REQUEST_COMPLETE
+    while (result.isAcceptAllowed()
            && ! listener.isClosed()
            && ! getState().isDestroyed()) {
       
@@ -1114,6 +1114,7 @@ public class TcpSocketLink extends AbstractSocketLink
       return result;
       
     case REQUEST_COMPLETE:
+    case CLOSED:
       // acceptTask significantly faster than finishing
       close();
       
@@ -1288,7 +1289,7 @@ public class TcpSocketLink extends AbstractSocketLink
       setStatState(null);
       // close();
       
-      return RequestState.EXIT;
+      return RequestState.CLOSED;
     }
     
     getListener().addLifetimeKeepaliveCount();
@@ -1346,7 +1347,7 @@ public class TcpSocketLink extends AbstractSocketLink
     // close();
     killKeepalive("thread-keepalive timeout");
     
-    return RequestState.EXIT;
+    return RequestState.CLOSED;
   }
 
   //

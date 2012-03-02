@@ -30,33 +30,33 @@
 package com.caucho.message.local;
 
 import java.io.IOException;
-import java.util.Collection;
-import java.util.Iterator;
-import java.util.concurrent.TimeUnit;
 
 import com.caucho.amqp.AmqpException;
 import com.caucho.amqp.io.AmqpStreamWriter;
 import com.caucho.amqp.io.AmqpWriter;
 import com.caucho.amqp.io.MessageProperties;
 import com.caucho.amqp.transform.AmqpMessageEncoder;
-import com.caucho.message.MessageSender;
 import com.caucho.message.broker.BrokerPublisher;
 import com.caucho.message.broker.EnvironmentMessageBroker;
+import com.caucho.message.common.AbstractMessageSender;
 import com.caucho.util.L10N;
 import com.caucho.vfs.TempOutputStream;
 import com.caucho.vfs.Vfs;
+import com.caucho.vfs.VfsStream;
 import com.caucho.vfs.WriteStream;
 
 /**
  * local connection to the message store
  */
-public class LocalSender<T> implements MessageSender<T> {
+public class LocalSender<T> extends AbstractMessageSender<T> {
   private static final L10N L = new L10N(LocalSender.class);
   
   private String _address;
   private AmqpMessageEncoder<T> _encoder;
   
   private BrokerPublisher _publisher;
+  
+  private WriteStream _os;
   
   LocalSender(LocalSenderFactory factory)
   {
@@ -71,36 +71,23 @@ public class LocalSender<T> implements MessageSender<T> {
       throw new IllegalArgumentException(L.l("'{0}' is an unknown queue",
                                              _address));
     }
+    
+    _os = new WriteStream();
+    _os.setReuseBuffer(true);
   }
   
   public String getAddress()
   {
     return _address;
   }
-
-  @Override
-  public boolean add(T value)
-  {
-    return offer(value);
-  }
-
-  @Override
-  public boolean offer(T value)
-  {
-    return offerMicros(value, 0);
-  }
-
-  @Override
-  public boolean offer(T value, long timeout, TimeUnit timeUnit)
-  {
-    return offerMicros(value, timeUnit.toMicros(timeout));
-  }
   
-  private boolean offerMicros(T value, long timeoutMicros)
+  @Override
+  protected boolean offerMicros(T value, long timeoutMicros)
   {
     try {
       TempOutputStream tOut = new TempOutputStream();
-      WriteStream os = Vfs.openWrite(tOut);
+      WriteStream os = _os;
+      os.init(new VfsStream(null, tOut));
       AmqpStreamWriter sout = new AmqpStreamWriter(os);
       AmqpWriter aout = new AmqpWriter();
       aout.initBase(sout);
@@ -134,18 +121,6 @@ public class LocalSender<T> implements MessageSender<T> {
   }
 
   @Override
-  public void put(T value) throws InterruptedException
-  {
-    offerMicros(value, 0);
-  }
-
-  @Override
-  public boolean addAll(Collection<? extends T> arg0)
-  {
-    return false;
-  }
-
-  @Override
   public int remainingCapacity()
   {
     return 0;
@@ -154,125 +129,12 @@ public class LocalSender<T> implements MessageSender<T> {
   @Override
   public void close()
   {
+    BrokerPublisher pub = _publisher;
+    _publisher = null;
     
-  }
-
-  //
-  // receiver side
-  //
-
-  @Override
-  public T poll(long arg0, TimeUnit arg1) throws InterruptedException
-  {
-    throw new UnsupportedOperationException(getClass().getName());
-  }
-
-  @Override
-  public boolean remove(Object arg0)
-  {
-    throw new UnsupportedOperationException(getClass().getName());
-  }
-
-  @Override
-  public T take() throws InterruptedException
-  {
-    throw new UnsupportedOperationException(getClass().getName());
-  }
-
-  @Override
-  public T element()
-  {
-    throw new UnsupportedOperationException(getClass().getName());
-  }
-
-  @Override
-  public T peek()
-  {
-    throw new UnsupportedOperationException(getClass().getName());
-  }
-
-  @Override
-  public T poll()
-  {
-    throw new UnsupportedOperationException(getClass().getName());
-  }
-
-  @Override
-  public T remove()
-  {
-    throw new UnsupportedOperationException(getClass().getName());
-  }
-
-  @Override
-  public void clear()
-  {
-    throw new UnsupportedOperationException(getClass().getName());
-  }
-
-  @Override
-  public boolean containsAll(Collection<?> arg0)
-  {
-    throw new UnsupportedOperationException(getClass().getName());
-  }
-
-  @Override
-  public boolean isEmpty()
-  {
-    throw new UnsupportedOperationException(getClass().getName());
-  }
-
-  @Override
-  public Iterator<T> iterator()
-  {
-    throw new UnsupportedOperationException(getClass().getName());
-  }
-
-  @Override
-  public boolean removeAll(Collection<?> arg0)
-  {
-    throw new UnsupportedOperationException(getClass().getName());
-  }
-
-  @Override
-  public boolean retainAll(Collection<?> arg0)
-  {
-    throw new UnsupportedOperationException(getClass().getName());
-  }
-
-  @Override
-  public int size()
-  {
-    throw new UnsupportedOperationException(getClass().getName());
-  }
-
-  @Override
-  public Object[] toArray()
-  {
-    throw new UnsupportedOperationException(getClass().getName());
-  }
-
-  @Override
-  public <X> X[] toArray(X[] arg0)
-  {
-    throw new UnsupportedOperationException(getClass().getName());
-  }
-
-  @Override
-  public boolean contains(Object arg0)
-  {
-    throw new UnsupportedOperationException(getClass().getName());
-  }
-
-  @Override
-  public int drainTo(Collection<? super T> arg0)
-  {
-    throw new UnsupportedOperationException(getClass().getName());
-  }
-
-  @Override
-  public int drainTo(Collection<? super T> arg0, int arg1)
-  {
-    throw new UnsupportedOperationException(getClass().getName());
+    if (pub != null) {
+      pub.close();
+    }
   }
   
   @Override

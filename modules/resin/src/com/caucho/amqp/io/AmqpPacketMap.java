@@ -30,51 +30,51 @@
 package com.caucho.amqp.io;
 
 import java.io.IOException;
+import java.util.HashMap;
+
+import com.caucho.util.L10N;
 
 /**
- * The message properties header.
+ * an abstract amqp custom typed data
  */
-public final class MessageProperties extends AmqpAbstractComposite {
-  private long _messageId; // messageid
-  private String _contentType; // symbol
+public final class AmqpPacketMap {
+  private static final HashMap<Long,AmqpAbstractPacket> _typeMap
+    = new HashMap<Long,AmqpAbstractPacket>();
   
-  public String getContentType()
+  static AmqpAbstractPacket getPacket(long descriptor)
   {
-    return _contentType;
-  }
-  
-  public void setContentType(String contentType)
-  {
-    _contentType = contentType;
-  }
-  
-  @Override
-  public long getDescriptorCode()
-  {
-    return ST_MESSAGE_PROPERTIES;
-  }
-  
-  @Override
-  public MessageProperties createInstance()
-  {
-    return new MessageProperties();
-  }
-  
-  @Override
-  public void readBody(AmqpReader in, int count)
-    throws IOException
-  {
-    _messageId = in.readInt();
-    _contentType = in.readSymbol();
-  }
-  
-  @Override
-  public int writeBody(AmqpWriter out)
-    throws IOException
-  {
-    out.writeInt((int) _messageId);
-    out.writeSymbol(_contentType);
+    return _typeMap.get(descriptor);
     
-    return 2;
+  }
+  
+  private static void addType(AmqpAbstractPacket factory)
+  {
+    _typeMap.put(factory.getDescriptorCode(), factory);
+  }
+  
+  static {
+    //System.out.println("INIT_PACKET: test");
+    addType(new FrameOpen());
+    addType(new FrameBegin());
+    addType(new FrameAttach());
+    addType(new FrameFlow());
+    addType(new FrameTransfer());
+    addType(new FrameDisposition());
+    addType(new FrameDetach());
+    addType(new FrameEnd());
+    addType(new FrameClose());
+
+    addType(new LinkSource());
+    addType(new LinkTarget());
+
+    addType(new DeliveryAccepted());
+    addType(new DeliveryRejected());
+    addType(new DeliveryReleased());
+    addType(new DeliveryModified());
+
+    addType(new MessageHeader());
+    addType(new MessageProperties());
+
+    addType(new AmqpError());
   }
 }

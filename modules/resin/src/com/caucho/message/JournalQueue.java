@@ -53,7 +53,5 @@ public class JournalQueue
   public void init()
   {
     _broker = NautilusBroker.getCurrent();
-    
-    System.out.println("INIT:" + _name + " " + _broker);
   }
 }

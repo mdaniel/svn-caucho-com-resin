@@ -37,6 +37,9 @@ enum RequestState {
   REQUEST_COMPLETE {
     @Override
     public boolean isRequestKeepalive() { return true; }
+    
+    @Override
+    public boolean isAcceptAllowed() { return true; }
   },
   
   KEEPALIVE_SELECT {
@@ -60,6 +63,11 @@ enum RequestState {
     public boolean isDetach() { return true; }
   },
   
+  CLOSED {
+    @Override
+    public boolean isAcceptAllowed() { return true; }
+  },
+  
   EXIT;
   
   public boolean isAsyncOrDuplex()
@@ -73,6 +81,11 @@ enum RequestState {
   }
   
   public boolean isRequestKeepalive()
+  {
+    return false;
+  }
+  
+  public boolean isAcceptAllowed()
   {
     return false;
   }

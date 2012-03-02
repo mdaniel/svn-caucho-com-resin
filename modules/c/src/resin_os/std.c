@@ -4,6 +4,7 @@
  * @author Scott Ferguson
  */
 
+#define _GNU_SOURCE
 #include <sys/types.h>
 #ifdef WIN32
 #ifndef _WINSOCKAPI_ 
@@ -34,6 +35,9 @@
 #include <jni.h>
 #include <errno.h>
 #include <signal.h>
+#ifdef linux
+#include <sys/uio.h>
+#endif
 
 #include "resin.h"
 
@@ -118,17 +122,33 @@ poll_read(int fd, int ms)
 {
   struct pollfd pollfd[1];
   int result;
+  int rd_hup = 0;
+
+#ifdef POLLRDHUP
+  /* the other end has hung up */
+  rd_hup = POLLRDHUP;
+#endif  
   
   pollfd[0].fd = fd;
-  pollfd[0].events = POLLIN|POLLPRI;
+  pollfd[0].events = POLLIN|POLLPRI|rd_hup;
   pollfd[0].revents = 0;
 
   result = poll(pollfd, 1, ms);
 
-  if (result > 0 && (pollfd[0].revents & (POLLIN|POLLPRI)) == 0)
-    return 1;
-  else
+  if (result <= 0) {
     return result;
+  }
+  else if ((pollfd[0].revents & rd_hup) != 0) {
+    errno = ECONNRESET;
+    
+    return -1;
+  }
+  else if ((pollfd[0].revents & (POLLIN|POLLPRI)) == 0) {
+    return 1;
+  }
+  else {
+    return result;
+  }
 }
 
 int
@@ -196,8 +216,9 @@ std_read(connection_t *conn, char *buf, int len, int timeout)
   int retry = 3;
   int poll_result;
 
-  if (! conn)
+  if (! conn) {
     return -1;
+  }
   
   fd = conn->fd;
   
@@ -208,19 +229,22 @@ std_read(connection_t *conn, char *buf, int len, int timeout)
   if (timeout >= 0) {
     poll_result = poll_read(fd, timeout);
 
-    if (poll_result <= 0)
+    if (poll_result <= 0) {
       return calculate_poll_result(conn, poll_result);
+    }
   }
   else if (! conn->is_recv_timeout) {
     poll_result = poll_read(fd, conn->socket_timeout);
 
-    if (poll_result <= 0)
+    if (poll_result <= 0) {
       return calculate_poll_result(conn, poll_result);
+    }
   }
 
   do {
     /* recv returns 0 on end of file */
     result = recv(fd, buf, len, 0);
+
     //    fprintf(stderr, "rcv %d\n", result);
 
     if (result > 0)
@@ -370,7 +394,6 @@ std_accept(server_socket_t *ss, connection_t *conn)
   int poll_result;
   struct timeval timeout;
   int result;
-  int is_cork = 0;
 
   if (! ss || ! conn)
     return 0;
@@ -409,18 +432,20 @@ std_accept(server_socket_t *ss, connection_t *conn)
   if (sock < 0)
     return 0;
 
-  if (ss->tcp_no_delay && ! is_cork) {
+  if (ss->tcp_no_delay) { /* && ! ss->tcp_cork) { */
     int flag = 1;
 
     setsockopt(sock, IPPROTO_TCP, TCP_NODELAY, (char *) &flag, sizeof(int));
   }
 
+  conn->tcp_cork = 0;
 #ifdef TCP_CORK
-  if (is_cork) {
+  if (ss->tcp_cork) {
     int flag = 1;
     int result;
 
     result = setsockopt(sock, IPPROTO_TCP, TCP_CORK, (char *) &flag, sizeof(int));
+    conn->tcp_cork = 1;
   }
 #endif  
 
@@ -438,7 +463,7 @@ std_accept(server_socket_t *ss, connection_t *conn)
 #ifdef HAS_SOCK_TIMEOUT
   timeout.tv_sec = ss->conn_socket_timeout / 1000;
   timeout.tv_usec = ss->conn_socket_timeout % 1000 * 1000;
-  
+
   if (setsockopt(sock, SOL_SOCKET, SO_RCVTIMEO,
                  (char *) &timeout, sizeof(timeout)) == 0) {
     conn->is_recv_timeout = 1;

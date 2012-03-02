@@ -76,6 +76,8 @@ public final class Block implements SyncCacheListener {
 
   private final AtomicLong _dirtyRange = new AtomicLong(INIT_DIRTY);
   
+  private final boolean _isLogFine = log.isLoggable(Level.FINE);
+  
   private volatile boolean _isFreeBuffer = true;
   
   private boolean _isFlushDirtyOnCommit;
@@ -208,23 +210,25 @@ public final class Block implements SyncCacheListener {
       }
     } while (! _useCount.compareAndSet(useCount, useCount + 1));
 
-    if (getBuffer() == null) {
-      _useCount.decrementAndGet();
-      Thread.dumpStack();
-      log.fine(this + " null buffer " + this + " " + _useCount.get());
-      return false;
-    }
-
-    if (log.isLoggable(Level.ALL))
-      log.log(Level.ALL, this + " allocate (" + useCount + ")");
-
-    //System.out.println(this + " ALLOCATE " + _useCount);
-
-    if (useCount > 32 && log.isLoggable(Level.FINE)) {
-      log.fine("using " + this + " " + useCount + " times");
-      
-      if (log.isLoggable(Level.FINER)) {
+    if (_isLogFine) {
+      if (getBuffer() == null) {
+        _useCount.decrementAndGet();
         Thread.dumpStack();
+        log.fine(this + " null buffer " + this + " " + _useCount.get());
+        return false;
+      }
+
+      if (log.isLoggable(Level.ALL))
+        log.log(Level.ALL, this + " allocate (" + useCount + ")");
+
+      //System.out.println(this + " ALLOCATE " + _useCount);
+
+      if (useCount > 32 && log.isLoggable(Level.FINE)) {
+        log.fine("using " + this + " " + useCount + " times");
+      
+        if (log.isLoggable(Level.FINER)) {
+          Thread.dumpStack();
+        }
       }
     }
 

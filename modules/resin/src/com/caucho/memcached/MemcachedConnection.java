@@ -117,6 +117,18 @@ public class MemcachedConnection implements ProtocolConnection
   {
     ReadStream is = _link.getReadStream();
     
+    while (handleSingleRequest(is)) {
+      if (is.getBufferAvailable() <= 0) {
+        return true;
+      }
+    }
+    
+    return false;
+  }
+  
+  private boolean handleSingleRequest(ReadStream is)
+    throws IOException
+  {
     _method.clear();
     
     int ch;

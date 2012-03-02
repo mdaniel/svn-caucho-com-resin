@@ -490,7 +490,7 @@ public final class JniSocketImpl extends QSocket {
   
   public boolean isMmapEnabled()
   {
-    return false;
+    return true;
   }
   
   public int writeMmap(long mmapAddress,
@@ -528,7 +528,7 @@ public final class JniSocketImpl extends QSocket {
     return JniServerSocketImpl.isSendfileEnabled();
   }
 
-  public int writeSendfile(int fd, long fdOffset, int fdLength)
+  public int writeSendfile(byte []fileName, int nameLength, long fileLength)
     throws IOException
   {
     int result;
@@ -547,7 +547,7 @@ public final class JniSocketImpl extends QSocket {
       long expires = _socketTimeout + now;
       
       do {
-        result = writeSendfileNative(_socketFd, fd, fdOffset, fdLength);
+        result = writeSendfileNative(_socketFd, fileName, nameLength, fileLength);
         
         //byte []tempBuffer = _byteBuffer.array();
         //System.out.println("TEMP: " + tempBuffer);
@@ -568,6 +568,7 @@ public final class JniSocketImpl extends QSocket {
   public int flush()
     throws IOException
   {
+    // XXX: only on cork
     synchronized (_writeLock) {
       return flushNative(_socketFd);
     }
@@ -813,7 +814,8 @@ public final class JniSocketImpl extends QSocket {
     throws IOException;
   
   native int writeSendfileNative(long socket,
-                                 int fd, long fdOffset, int fdLength)
+                                 byte []fileName, int nameLength,
+                                 long fileLength)
     throws IOException;
 
   /*

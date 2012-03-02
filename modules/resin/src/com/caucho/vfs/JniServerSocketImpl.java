@@ -189,12 +189,50 @@ public class JniServerSocketImpl extends QServerSocket {
   }
 
   /**
-   * Sets the connection tcp-keepalivedelay.
+   * Sets the connection tcp-no-delay.
+   */
+  @Override
+  public boolean isTcpNoDelay()
+  {
+    return nativeIsTcpNoDelay(_fd);
+  }
+
+  /**
+   * Sets the connection tcp-keepalive delay.
    */
   @Override
   public void setTcpKeepalive(boolean isEnable)
   {
     nativeSetTcpKeepalive(_fd, isEnable);
+  }
+
+  /**
+   * Sets the connection tcp-keepalive delay.
+   */
+  @Override
+  public boolean isTcpKeepalive()
+  {
+    return nativeIsTcpKeepalive(_fd);
+  }
+
+  /**
+   * Sets the connection tcp-keepalive delay.
+   */
+  @Override
+  public void setTcpCork(boolean isEnable)
+  {
+    if (_isCorkEnabled) {
+      nativeSetTcpCork(_fd, isEnable);
+    }
+  }
+
+  /**
+   * Sets the connection tcp-keepalive delay.
+   */
+  @Override
+  public boolean isTcpCork()
+  {
+    return nativeIsTcpCork(_fd);
   }
 
   /**
@@ -306,9 +344,29 @@ public class JniServerSocketImpl extends QServerSocket {
   native void nativeSetTcpNoDelay(long fd, boolean isEnable);
 
   /**
+   * Sets the connection tcp-no-delay
+   */
+  native boolean nativeIsTcpNoDelay(long fd);
+
+  /**
    * Sets the connection tcp-keepalive
    */
   native void nativeSetTcpKeepalive(long fd, boolean isEnable);
+
+  /**
+   * Sets the connection tcp-keepalive
+   */
+  native boolean nativeIsTcpKeepalive(long fd);
+
+  /**
+   * Sets the connection tcp-cork
+   */
+  native void nativeSetTcpCork(long fd, boolean isEnable);
+
+  /**
+   * Sets the connection tcp-cork
+   */
+  native boolean nativeIsTcpCork(long fd);
   
   /**
    * Sets the listen backlog
@@ -358,7 +416,7 @@ public class JniServerSocketImpl extends QServerSocket {
         = new JniTroubleshoot(JniServerSocketImpl.class, "resin_os");
       
       isSendfileEnabled = nativeIsSendfileEnabled(); 
-      isCorkEnabled = nativeIsCorkEnabled(); 
+      isCorkEnabled = nativeIsCorkEnabled();
     } catch (Throwable e) {
       jniTroubleshoot
         = new JniTroubleshoot(JniServerSocketImpl.class, "resin_os", e);

@@ -397,7 +397,7 @@ public class ProxyCacheFilterChain extends AbstractCacheFilterChain
       response.setHeader("Last-Modified", entry._lastModified);
 
     if (entry._maxAge > 0) {
-      response.setDateHeader("Expires", now + entry._maxAge);
+      // response.setDateHeader("Expires", now + entry._maxAge);
       response.addHeader("Cache-Control", "max-age=" + entry._maxAge / 1000);
       
       entry._expireDate = now + entry._maxAge;

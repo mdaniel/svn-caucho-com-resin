@@ -33,13 +33,11 @@ import java.io.Closeable;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
-import java.util.Collection;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Map;
 import java.util.Set;
-import java.util.concurrent.ConcurrentLinkedQueue;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Future;
 import java.util.concurrent.TimeUnit;
@@ -72,12 +70,10 @@ import com.caucho.env.thread.AbstractWorkerQueue;
 import com.caucho.loader.Environment;
 import com.caucho.management.server.AbstractManagedObject;
 import com.caucho.server.distcache.CacheStoreManager.DataItem;
-import com.caucho.util.Alarm;
 import com.caucho.util.ConcurrentArrayList;
 import com.caucho.util.CurrentTime;
 import com.caucho.util.HashKey;
 import com.caucho.util.L10N;
-import com.caucho.util.LruCache;
 import com.caucho.vfs.StreamSource;
 import com.caucho.vfs.WriteStream;
 
@@ -91,7 +87,7 @@ public class CacheImpl<K,V>
   private static final L10N L = new L10N(CacheImpl.class);
 
   private CacheManagerImpl _localManager;
-  private CacheStoreManager _manager;
+  private final CacheStoreManager _manager;
 
   private final String _name;
   private final String _managerName;
@@ -130,6 +126,8 @@ public class CacheImpl<K,V>
     _managerName = managerName;
     _guid = guid;
     _config = config;
+    
+    _manager = getManager();
     
     init(true);
   }
@@ -235,7 +233,7 @@ public class CacheImpl<K,V>
 
       _config.init();
 
-      initServer();
+      // initServer();
       
       if (_config.getEngine() == null)
         _config.setEngine(_manager.getCacheEngine());
@@ -290,7 +288,9 @@ public class CacheImpl<K,V>
 
     V value = (V) entry.get(_config);
     
-    entryRead(key, value);
+    if (_readListeners != null) {
+      entryRead(key, value);
+    }
     
     return value;
   }
@@ -617,7 +617,7 @@ public class CacheImpl<K,V>
   /**
    * Returns the CacheKeyEntry for the given key.
    */
-  protected DistCacheEntry getDistCacheEntry(HashKey key)
+  protected final DistCacheEntry getDistCacheEntry(HashKey key)
   {
     return _manager.getCacheEntry(key, _config);
   }
@@ -879,6 +879,7 @@ public class CacheImpl<K,V>
     return dataItem.getValue();
   }
 
+  /*
   public void setManager(CacheStoreManager manager)
   {
     if (_manager != null)
@@ -886,23 +887,23 @@ public class CacheImpl<K,V>
     
     _manager = manager;
   }
+  */
   
-  private void initServer()
+  private CacheStoreManager getManager()
     throws ConfigException
   {
-    if (_manager != null)
-      return;
-    
     DistCacheSystem cacheService = DistCacheSystem.getCurrent();
 
     if (cacheService == null)
       throw new ConfigException(L.l("'{0}' cannot be initialized because it is not in a Resin environment",
                                     getClass().getSimpleName()));
 
-    _manager = cacheService.getDistCacheManager();
+    CacheStoreManager manager = cacheService.getDistCacheManager();
 
-    if (_manager == null)
+    if (manager == null)
       throw new IllegalStateException("distributed cache manager not available");
+    
+    return manager;
   }
 
   @Override

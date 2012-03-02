@@ -372,7 +372,8 @@ public class StreamImpl {
     throw new UnsupportedOperationException(getClass().getName());
   }
 
-  public void writeSendfile(int fd, long fdOffset, int fdLength)
+  public void writeSendfile(byte []fileName, int nameLength,
+                            long fileLength)
     throws IOException
   {
     throw new UnsupportedOperationException(getClass().getName());

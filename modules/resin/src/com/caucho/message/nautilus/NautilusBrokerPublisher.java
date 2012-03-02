@@ -64,8 +64,6 @@ public class NautilusBrokerPublisher implements BrokerPublisher
                               int length,
                               PublisherSettleHandler settleHandler)
   {
-    System.out.println("COMPLETE: " + length);
-    
     write(buffer.getBuffer(), 0, length, buffer);
   }
   
@@ -76,8 +74,6 @@ public class NautilusBrokerPublisher implements BrokerPublisher
                               int length,
                               PublisherSettleHandler settleHandler)
   {
-    System.out.println("COMPLETE: " + length);
-    
     write(buffer, 0, length, null);
   }
   

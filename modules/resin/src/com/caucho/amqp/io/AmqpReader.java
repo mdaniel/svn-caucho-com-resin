@@ -56,9 +56,21 @@ public class AmqpReader implements AmqpConstants {
   private InputStream _is;
   private boolean _isNull;
   
+  private byte []_buffer;
+  private int _offset;
+  private int _length;
+  
+  public AmqpReader()
+  {
+    _buffer = new byte[256];
+  }
+  
   public void init(InputStream is)
   {
     _is = is;
+    
+    _offset = 0;
+    _length = 0;
   }
   
   public boolean isNull()
@@ -69,7 +81,25 @@ public class AmqpReader implements AmqpConstants {
   public int read()
     throws IOException
   {
-    return _is.read();
+    int offset = _offset;
+    int length = _length;
+    
+    if (length <= offset) {
+      length = _is.read(_buffer, 0, _buffer.length);
+      _length = length;
+      offset = 0;
+      _offset = offset;
+      
+      if (length < 0) {
+        return length;
+      }
+    }
+    
+    int value = _buffer[offset++] & 0xff;
+    
+    _offset = offset;
+    
+    return value;
   }
   
   public boolean readBoolean()
@@ -77,9 +107,7 @@ public class AmqpReader implements AmqpConstants {
   {
     _isNull = false;
     
-    InputStream is = _is;
-    
-    int code = is.read();
+    int code = read();
       
     switch (code) {
     case E_NULL:
@@ -93,7 +121,7 @@ public class AmqpReader implements AmqpConstants {
       return false;
       
     case E_BOOLEAN_1:
-      return is.read() != 0;
+      return read() != 0;
       
     default:
       throw new IOException("unknown boolean code: " + Integer.toHexString(code));
@@ -105,9 +133,7 @@ public class AmqpReader implements AmqpConstants {
   {
     _isNull = false;
     
-    InputStream is = _is;
-      
-    int code = is.read();
+    int code = read();
       
     switch (code) {
     case E_NULL:
@@ -119,21 +145,21 @@ public class AmqpReader implements AmqpConstants {
       
     case E_BYTE_1:
     case E_INT_1:
-      return (byte) is.read();
+      return (byte) read();
       
     case E_UBYTE_1:
     case E_UINT_1:
-      return is.read() & 0xff;
+      return read() & 0xff;
       
     case E_SHORT:
-      return (short) readShort(is);
+      return (short) readShort();
       
     case E_USHORT:
-      return readShort(is) & 0xffff;
+      return readShort() & 0xffff;
       
     case E_INT_4:
     case E_UINT_4:
-      return readInt(is);
+      return readIntImpl();
       
     default:
       throw new IOException("unknown int code: " + Integer.toHexString(code));
@@ -145,9 +171,7 @@ public class AmqpReader implements AmqpConstants {
   {
     _isNull = false;
     
-    InputStream is = _is;
-      
-    int code = is.read();
+    int code = read();
       
     switch (code) {
     case E_NULL:
@@ -161,26 +185,26 @@ public class AmqpReader implements AmqpConstants {
     case E_BYTE_1:
     case E_INT_1:
     case E_LONG_1:
-      return (byte) is.read();
+      return (byte) read();
       
     case E_UBYTE_1:
     case E_UINT_1:
     case E_ULONG_1:
-      return is.read() & 0xff;
+      return read() & 0xff;
       
     case E_SHORT:
-      return (short) readShort(is);
+      return (short) readShort();
       
     case E_USHORT:
-      return readShort(is) & 0xffff;
+      return readShort() & 0xffff;
       
     case E_INT_4:
     case E_UINT_4:
-      return readInt(is) & 0xffffffffL;
+      return readIntImpl() & 0xffffffffL;
       
     case E_LONG_8:
     case E_ULONG_8:
-      return readLong(is);
+      return readLongImpl();
       
     default:
       throw new IOException("unknown long code: " + Integer.toHexString(code));
@@ -192,9 +216,7 @@ public class AmqpReader implements AmqpConstants {
   {
     _isNull = false;
     
-    InputStream is = _is;
-    
-    int code = is.read();
+    int code = read();
     
     if (code == E_NULL) {
       return null;
@@ -208,14 +230,14 @@ public class AmqpReader implements AmqpConstants {
       
     case E_SYMBOL_1:
     {
-      String value = readSymbol(is.read() & 0xff);
+      String value = readSymbol(read() & 0xff);
       values.add(value);
       return values;
     }
       
     case E_SYMBOL_4:
     {
-      String value = readSymbol(readInt(is));
+      String value = readSymbol(readIntImpl());
       values.add(value);
       return values;
     }
@@ -230,19 +252,17 @@ public class AmqpReader implements AmqpConstants {
   {
       _isNull = false;
       
-      InputStream is = _is;
-      
-      int code = is.read();
+      int code = read();
       
       switch (code) {
       case E_NULL:
         return null;
         
       case E_SYMBOL_1:
-        return readSymbol(is.read() & 0xff);
+        return readSymbol(read() & 0xff);
         
       case E_SYMBOL_4:
-        return readSymbol(readInt(is));
+        return readSymbol(readIntImpl());
         
       default:
         throw new IOException("unknown symbol code: " + Integer.toHexString(code));
@@ -254,9 +274,7 @@ public class AmqpReader implements AmqpConstants {
   {
     _isNull = false;
       
-    InputStream is = _is;
-      
-    int code = is.read();
+    int code = read();
     int len;
       
     switch (code) {
@@ -265,22 +283,26 @@ public class AmqpReader implements AmqpConstants {
         
     case E_BIN_1:
     {
-      len = (is.read() & 0xff);
+      len = (read() & 0xff);
       byte []data = new byte[len];
      
       // XXX: read, all
-      is.read(data, 0, data.length);
+      for (int i = 0; i < len; i++) {
+        data[i] = (byte) read();
+      }
       
       return data;
     }
         
     case E_BIN_4:
     {
-      len = readInt(is);
+      len = readIntImpl();
       byte []data = new byte[len];
        
       // XXX: read, all
-      is.read(data, 0, data.length);
+      for (int i = 0; i < len; i++) {
+        data[i] = (byte) read();
+      }
         
       return data;
     }
@@ -295,19 +317,17 @@ public class AmqpReader implements AmqpConstants {
   {
     _isNull = false;
     
-    InputStream is = _is;
-    
-    int code = is.read();
+    int code = read();
     
     switch (code) {
     case E_NULL:
       return null;
       
     case E_UTF8_1:
-      return readUtf8(is.read() & 0xff);
+      return readUtf8(read() & 0xff);
       
     case E_UTF8_4:
-      return readUtf8(readInt(is));
+      return readUtf8(readIntImpl());
       
     default:
       throw new IOException("unknown symbol code: " + Integer.toHexString(code));
@@ -319,9 +339,7 @@ public class AmqpReader implements AmqpConstants {
   {
     _isNull = false;
     
-    InputStream is = _is;
-    
-    int code = is.read();
+    int code = read();
     
     switch (code) {
     case -1:
@@ -368,9 +386,7 @@ public class AmqpReader implements AmqpConstants {
   public Object readObject()
     throws IOException
   {
-    InputStream is = _is;
-    
-    int code = is.read();
+    int code = read();
     int len;
     
     switch (code) {
@@ -378,11 +394,11 @@ public class AmqpReader implements AmqpConstants {
       return null;
       
     case E_UTF8_1:
-      len = is.read() & 0xff;
+      len = read() & 0xff;
       return readUtf8(len);
       
     case E_UTF8_4:
-      len = readInt(is);
+      len = readIntImpl();
       return readUtf8(len);
           
     default:
@@ -393,19 +409,17 @@ public class AmqpReader implements AmqpConstants {
   public List<?> readList()
     throws IOException
   {
-      _isNull = false;
+    _isNull = false;
       
-      InputStream is = _is;
+    int code = read();
       
-      int code = is.read();
-      
-      switch (code) {
-      case E_NULL:
-        return null;
+    switch (code) {
+    case E_NULL:
+      return null;
         
-      default:
-        throw new IOException("unknown array code: " + Integer.toHexString(code));
-      }
+    default:
+      throw new IOException("unknown array code: " + Integer.toHexString(code));
+    }
   }
   
   public int startList()
@@ -413,9 +427,7 @@ public class AmqpReader implements AmqpConstants {
   {
     _isNull = false;
     
-    InputStream is = _is;
-    
-    int code = is.read();
+    int code = read();
     
     switch (code) {
     case E_NULL:
@@ -434,8 +446,8 @@ public class AmqpReader implements AmqpConstants {
     
     case E_LIST_4:
     {
-      int size = readInt(is);
-      int count = readInt(is);
+      int size = readIntImpl();
+      int count = readIntImpl();
       
       return count;
     }
@@ -455,9 +467,7 @@ public class AmqpReader implements AmqpConstants {
   {
     _isNull = false;
     
-    InputStream is = _is;
-    
-    int code = is.read();
+    int code = read();
     
     switch (code) {
     case E_NULL:
@@ -479,9 +489,7 @@ public class AmqpReader implements AmqpConstants {
   {
     _isNull = false;
     
-    InputStream is = _is;
-    
-    int code = is.read();
+    int code = read();
     
     switch (code) {
     case E_NULL:
@@ -497,9 +505,8 @@ public class AmqpReader implements AmqpConstants {
   {
     StringBuilder sb = new StringBuilder();
     
-    InputStream is = _is;
     for (int i = 0; i < length; i++) {
-      int ch = is.read();
+      int ch = read();
       
       sb.append((char) ch);
     }
@@ -512,9 +519,8 @@ public class AmqpReader implements AmqpConstants {
   {
     StringBuilder sb = new StringBuilder();
     
-    InputStream is = _is;
     for (int i = 0; i < length; i++) {
-      int ch = _is.read();
+      int ch = read();
       
       sb.append((char) ch);
     }
@@ -522,32 +528,32 @@ public class AmqpReader implements AmqpConstants {
     return sb.toString();
   }
 
-  private int readShort(InputStream is)
+  private int readShort()
     throws IOException
   {
-    return (((is.read() & 0xff) << 8)
-           + ((is.read() & 0xff)));
+    return (((read() & 0xff) << 8)
+           + ((read() & 0xff)));
   }
   
-  private int readInt(InputStream is)
+  private int readIntImpl()
     throws IOException
   {
-    return (((is.read() & 0xff) << 24)
-           + ((is.read() & 0xff) << 16)
-           + ((is.read() & 0xff) << 8)
-           + ((is.read() & 0xff)));
+    return (((read() & 0xff) << 24)
+           + ((read() & 0xff) << 16)
+           + ((read() & 0xff) << 8)
+           + ((read() & 0xff)));
   }
   
-  private long readLong(InputStream is)
+  private long readLongImpl()
     throws IOException
   {
-    return (((is.read() & 0xffL) << 56)
-           + ((is.read() & 0xffL) << 48)
-           + ((is.read() & 0xffL) << 40)
-           + ((is.read() & 0xffL) << 32)
-           + ((is.read() & 0xffL) << 24)
-           + ((is.read() & 0xffL) << 16)
-           + ((is.read() & 0xffL) << 8)
-           + ((is.read() & 0xffL)));
+    return (((read() & 0xffL) << 56)
+           + ((read() & 0xffL) << 48)
+           + ((read() & 0xffL) << 40)
+           + ((read() & 0xffL) << 32)
+           + ((read() & 0xffL) << 24)
+           + ((read() & 0xffL) << 16)
+           + ((read() & 0xffL) << 8)
+           + ((read() & 0xffL)));
   }
 }

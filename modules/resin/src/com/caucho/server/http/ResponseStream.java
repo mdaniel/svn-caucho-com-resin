@@ -932,12 +932,12 @@ abstract public class ResponseStream extends ToByteResponseStream {
   abstract protected void closeNextImpl()
     throws IOException;
 
-  protected final void writeTail(boolean isClose)
+  protected final void writeTail(boolean isComplete)
     throws IOException
   {
     boolean isValid = false; 
     try {
-      writeTailImpl(isClose);
+      writeTailImpl(isComplete);
       
       isValid = true;
     } finally {
