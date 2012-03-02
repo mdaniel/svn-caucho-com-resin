@@ -4,13 +4,24 @@ Updated 4/1/2012 at 10:25 PM
 Prototype project for jamp (json actor message protocol)
 See: http://hessian.caucho.com/jamp/index.xtp
 
+WebSocket JavaScript API is described here http://dev.w3.org/html5/websockets/
+http://net.tutsplus.com/tutorials/javascript-ajax/start-using-html5-websockets-today/
+
+
 
 Project Goal: 
 
    Make calls from HTML 5.0 web application to JAMP websocket tier.
 
 Status: 
+
    Current Status:
+     Wrote simple JavaScript/HTML 5 client for Ajax and it works
+     Wrote WebSocket client, and WebSocket Listeners in Java. The listeners in Java handle the message fine, but it does not seem to send back the message very well.
+     I am getting WebSocket messages to Java handlers, but they are not able to send text back yet.
+
+
+   Older Status:
      2nd Early prototype working.
      Prototype sent AMP message from HTTP request to Servlet.
      I have enough where I can start writing the HTML 5 client. 
@@ -18,7 +29,7 @@ Status:
      Also created JampServlet which uses a ServiceInvoker and the new JampMessageReaderDecoder.
      It works round trip. Just implemented void calls, i.e., jamp send.
 
-   Last Status:
+   Older still Status:
      1st early prototype working. 
      Prototype sends method calls to file system via JampFileSenderMain.
 
