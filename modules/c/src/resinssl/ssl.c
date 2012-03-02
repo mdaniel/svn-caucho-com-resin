@@ -42,7 +42,7 @@ typedef struct CRYPTO_dynlock_value {
 
 #include <jni.h>
 
-#include "../resin/resin.h"
+#include "../resin_os/resin_os.h"
 
 static int ssl_open(connection_t *conn, int fd);
 static int ssl_read(connection_t *conn, char *buf, int len, int timeout);
@@ -425,7 +425,7 @@ static SSL_CTX *
 ssl_create_context(JNIEnv *env, ssl_config_t *config)
 {
   SSL_CTX *ctx;
-  SSL_METHOD *meth;
+  const SSL_METHOD *meth;
 
   ssl_init_locks();
 
@@ -686,7 +686,7 @@ ssl_open(connection_t *conn, int fd)
   int result;
   SSL_CTX *ctx;
   SSL *ssl;
-  SSL_CIPHER *cipher;
+  const SSL_CIPHER *cipher;
   int algbits;
   int ssl_error;
   server_socket_t *ss;
@@ -705,7 +705,7 @@ ssl_open(connection_t *conn, int fd)
     return -1;
   }
 
-  ctx = conn->context;
+  ctx = conn->ssl_context;
 
   if (! ctx) {
     if (conn->jni_env) {
@@ -719,7 +719,7 @@ ssl_open(connection_t *conn, int fd)
   }
 
   ssl = SSL_new(ctx);
-  conn->sock = ssl;
+  conn->ssl_sock = ssl;
 
   if (! ssl) {
     resin_printf_exception(conn->jni_env, "java/io/IOException",
@@ -774,7 +774,7 @@ ssl_open(connection_t *conn, int fd)
     }
 #endif
       
-    conn->sock = 0;
+    conn->ssl_sock = 0;
     SSL_set_app_data(ssl, 0);
     SSL_free(ssl);
     
@@ -836,7 +836,7 @@ ssl_read(connection_t *conn, char *buf, int len, int timeout)
     }
   }
 
-  ssl = conn->sock;
+  ssl = conn->ssl_sock;
   if (! ssl)
     return -1;
 
@@ -918,7 +918,7 @@ ssl_read_nonblock(connection_t *conn, char *buf, int len)
 static int
 ssl_write(connection_t *conn, char *buf, int len)
 {
-  SSL *ssl = conn->sock;
+  SSL *ssl = conn->ssl_sock;
   int fd;
   int ssl_error;
   int result;
@@ -1039,8 +1039,8 @@ ssl_close(connection_t *conn)
   fd = conn->fd;
   conn->fd = -1;
 
-  ssl = conn->sock;
-  conn->sock = 0;
+  ssl = conn->ssl_sock;
+  conn->ssl_sock = 0;
 
   conn->ssl_cipher = 0;
   conn->ssl_bits = 0;
@@ -1090,7 +1090,7 @@ ssl_read_client_certificate(connection_t *conn, char *buffer, int length)
     }
   }
 
-  cert = SSL_get_peer_certificate(conn->sock);
+  cert = SSL_get_peer_certificate(conn->ssl_sock);
 
   if (! cert)
     return -1;
@@ -1324,6 +1324,7 @@ Java_com_caucho_vfs_OpenSSLFactory_nativeInit(JNIEnv *env,
   }
 
   ss->ssl_config = config;
+  ss->tcp_cork = 0;
 
   if (! ss->context) {
     ss->context = ssl_create_context(env, config);
@@ -1361,10 +1362,10 @@ Java_com_caucho_vfs_OpenSSLFactory_open(JNIEnv *env,
    * is enabled, then we need to share the context.
    */
   if (config->verify_client && config->enable_session_cache) {
-    conn->context = conn->ss->context;
+    conn->ssl_context = conn->ss->context;
   }
-  else if (! conn->context) {
-    conn->context = ssl_create_context(env, config);
+  else if (! conn->ssl_context) {
+    conn->ssl_context = ssl_create_context(env, config);
   }
 
   conn->ops = &ssl_ops;

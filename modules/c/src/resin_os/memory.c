@@ -26,7 +26,7 @@
 #include <jni.h>
 #include <errno.h>
 
-#include "resin.h"
+#include "resin_os.h"
 
 typedef struct chunk_t {
   int bucket;

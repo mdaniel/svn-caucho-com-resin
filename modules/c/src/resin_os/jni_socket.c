@@ -64,7 +64,7 @@
 #ifdef linux
 #include <sys/uio.h>
 #endif
-#include "resin.h"
+#include "resin_os.h"
 
 #define STACK_BUFFER_SIZE (16 * 1024)
 
@@ -111,6 +111,52 @@ Java_com_caucho_vfs_JniSocketImpl_nativeAllocate(JNIEnv *env,
 #endif
 
   return (jlong) (PTR) conn;
+}
+
+static int
+resin_tcp_uncork(connection_t *conn)
+{
+#ifdef TCP_CORK  
+  int fd = conn->fd;
+  int flag = 0;
+  int result;
+
+  if (! conn->tcp_cork || ! conn->is_cork) {
+    return;
+  }
+
+  conn->is_cork = 0;
+
+  result = setsockopt(fd, IPPROTO_TCP, TCP_CORK,
+                      (char *) &flag, sizeof(int));
+
+  return result;
+#else
+  return 1;
+#endif
+}
+
+static int
+resin_tcp_cork(connection_t *conn)
+{
+#ifdef TCP_CORK  
+  int fd = conn->fd;
+  int flag = 1;
+  int result;
+
+  if (! conn->tcp_cork || conn->is_cork) {
+    return;
+  }
+
+  conn->is_cork = 1;
+
+  result = setsockopt(fd, IPPROTO_TCP, TCP_CORK,
+                      (char *) &flag, sizeof(int));
+
+  return result;
+#else
+  return 1;
+#endif
 }
 
 JNIEXPORT jint JNICALL
@@ -201,6 +247,8 @@ Java_com_caucho_vfs_JniSocketImpl_writeNative(JNIEnv *env,
   }
   
   conn->jni_env = env;
+
+  resin_tcp_cork(conn);
 
   while (length > 0) {
     jbyte *cBuf;
@@ -330,6 +378,8 @@ Java_com_caucho_vfs_JniSocketImpl_writeMmapNative(JNIEnv *env,
     return -1;
   }
   
+  resin_tcp_cork(conn);
+
   conn->jni_env = env;
 
   blocks_len = (*env)->GetArrayLength(env, mmap_blocks_arr);
@@ -433,6 +483,8 @@ Java_com_caucho_vfs_JniSocketImpl_writeSendfileNative(JNIEnv *env,
     return -1;
   }
 
+  resin_tcp_cork(conn);
+
   conn->jni_env = env;
 
   fd = jni_open_file(env, name, name_length);
@@ -482,6 +534,8 @@ Java_com_caucho_vfs_JniSocketImpl_writeSendfileNative(JNIEnv *env,
   }
   
   conn->jni_env = env;
+
+  resin_tcp_cork(conn);
 
   sendfile_offset = fd_offset;
 
@@ -540,6 +594,8 @@ Java_com_caucho_vfs_JniSocketImpl_writeNativeNio(JNIEnv *env,
   if (! conn || conn->fd < 0 || ! byte_buffer) {
     return -1;
   }
+  
+  resin_tcp_cork(conn);
   
   conn->jni_env = env;
 
@@ -611,6 +667,8 @@ Java_com_caucho_vfs_JniSocketImpl_writeNative2(JNIEnv *env,
   if (! conn || conn->fd < 0 || ! buf1 || ! buf2)
     return -1;
   
+  resin_tcp_cork(conn);
+
   conn->jni_env = env;
 
   while (sizeof(buffer) < len1) {
@@ -678,18 +736,7 @@ Java_com_caucho_vfs_JniSocketImpl_flushNative(JNIEnv *env,
     return -1;
   }
 
-#ifdef TCP_CORK
-  if (conn->tcp_cork) {
-    int flag = 0;
-    int result;
-
-    result = setsockopt(fd, IPPROTO_TCP, TCP_CORK,
-                        (char *) &flag, sizeof(int));
-    flag = 1;
-    result = setsockopt(fd, IPPROTO_TCP, TCP_CORK,
-                        (char *) &flag, sizeof(int));
-  }
-#endif  
+  resin_tcp_uncork(conn);
 
   /* return cse_flush_request(res); */
 }
@@ -787,7 +834,7 @@ Java_com_caucho_vfs_JniSocketImpl_isSecure(JNIEnv *env,
   if (! conn)
     return 0;
   
-  return conn->sock != 0 && conn->ssl_cipher != 0;
+  return conn->ssl_sock != 0 && conn->ssl_cipher != 0;
 }
 
 JNIEXPORT jstring JNICALL
@@ -797,7 +844,7 @@ Java_com_caucho_vfs_JniSocketImpl_getCipher(JNIEnv *env,
 {
   connection_t *conn = (connection_t *) (PTR) conn_fd;
 
-  if (! conn || ! conn->sock || ! conn->ssl_cipher)
+  if (! conn || ! conn->ssl_sock || ! conn->ssl_cipher)
     return 0;
   
   return (*env)->NewStringUTF(env, conn->ssl_cipher);
@@ -810,7 +857,7 @@ Java_com_caucho_vfs_JniSocketImpl_getCipherBits(JNIEnv *env,
 {
   connection_t *conn = (connection_t *) (PTR) conn_fd;
 
-  if (! conn || ! conn->sock)
+  if (! conn || ! conn->ssl_sock)
     return 0;
   else
     return conn->ssl_bits;
@@ -1256,7 +1303,9 @@ Java_com_caucho_vfs_JniServerSocketImpl_nativeSetTcpCork(JNIEnv *env,
   }
 
 #ifdef TCP_CORK
-  ss->tcp_cork = 1;
+  if (! ss->ssl_config) {
+    ss->tcp_cork = 1;
+  }
 #endif  
 }
 
@@ -1409,7 +1458,7 @@ socket_fill_address(JNIEnv *env, jobject obj,
     return;
 
   if (ss->_isSecure) {
-    jboolean is_secure = conn->sock != 0 && conn->ssl_cipher != 0;
+    jboolean is_secure = conn->ssl_sock != 0 && conn->ssl_cipher != 0;
     
     (*env)->SetBooleanField(env, obj, ss->_isSecure, is_secure);
   }

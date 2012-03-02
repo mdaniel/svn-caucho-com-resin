@@ -25,13 +25,13 @@ libresin_os.so	: $(OBJ)
 libresin_os.jnilib	: $(OBJ)
 	$(CC) $(LDFLAGS_SHLIB) -framework JavaVM -o $@ $(OBJ) $(PROXY_LIBS)
 
-boot.o		: Makefile resin.h
-java.o		: Makefile resin.h
-jni_os.o	: Makefile resin.h
-jni_jvmti.o	: Makefile resin.h
-jni_socket.o	: Makefile resin.h
-memory.o	: Makefile resin.h
-std.o		: Makefile resin.h
+boot.o		: Makefile resin_os.h
+java.o		: Makefile resin_os.h
+jni_os.o	: Makefile resin_os.h
+jni_jvmti.o	: Makefile resin_os.h
+jni_socket.o	: Makefile resin_os.h
+memory.o	: Makefile resin_os.h
+std.o		: Makefile resin_os.h
 
 clean	:
 	- rm *.o *.lo *.la *.so *.jnilib *.dylib *.$(SO)

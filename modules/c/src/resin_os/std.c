@@ -39,7 +39,7 @@
 #include <sys/uio.h>
 #endif
 
-#include "resin.h"
+#include "resin_os.h"
 
 static int std_read(connection_t *conn, char *buf, int len, int timeout);
 static int std_read_nonblock(connection_t *conn, char *buf, int len);
@@ -481,7 +481,7 @@ std_accept(server_socket_t *ss, connection_t *conn)
   conn->ssl_lock = &ss->ssl_lock;
 
   conn->fd = sock;
-  conn->sock = 0;
+  conn->ssl_sock = 0;
   conn->ops = &std_ops;
   /*
   conn->client_sin = (struct sockaddr *) &conn->client_data;

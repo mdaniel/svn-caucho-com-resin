@@ -34,7 +34,7 @@
 /* probably system-dependent */
 #include <jni.h>
 
-#include "resin.h"
+#include "resin_os.h"
 
 void
 resin_throw_exception(JNIEnv *env, const char *cl, const char *buf)

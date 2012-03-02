@@ -1141,7 +1141,6 @@ public class TcpSocketLinkListener
     _serverSocket.setTcpNoDelay(_isTcpNoDelay);
     _serverSocket.setTcpKeepalive(_isTcpKeepalive);
     _serverSocket.setTcpCork(_isTcpCork);
-    System.out.println("CORKING: " + _isTcpCork);
 
     _serverSocket.setConnectionSocketTimeout((int) getSocketTimeout());
 

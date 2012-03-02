@@ -10,7 +10,7 @@
 #include <netdb.h>
 #include <jni.h>
 
-#include "resin.h"
+#include "resin_os.h"
 
 int
 ssl_create(server_socket_t *ss, ssl_config_t *config)

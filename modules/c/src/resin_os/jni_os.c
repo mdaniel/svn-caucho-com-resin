@@ -37,7 +37,7 @@
 #include <errno.h>
 /* probably system-dependent */
 #include <jni.h>
-#include "resin.h"
+#include "resin_os.h"
 
 #define STACK_BUFFER_SIZE (16 * 1024)
 

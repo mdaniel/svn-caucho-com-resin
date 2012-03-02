@@ -67,12 +67,12 @@ struct connection_t {
 
   JNIEnv *jni_env;
   
-  void *context;
+  void *ssl_context;
   connection_ops_t *ops;
 
   int fd;
   int is_init;
-  void *sock;
+  void *ssl_sock;
 
   pthread_mutex_t *ssl_lock;
   int socket_timeout;
@@ -80,6 +80,8 @@ struct connection_t {
 
   int is_recv_timeout;
   int is_read_shutdown;
+  int tcp_cork;
+  int is_cork;
 
   char server_data[128];
   struct sockaddr *server_sin;
@@ -88,6 +90,8 @@ struct connection_t {
 
   char *ssl_cipher;
   int ssl_bits;
+
+  int pipe[2];
 
 #ifdef WIN32
   //WSAEVENT event;
@@ -137,6 +141,9 @@ struct server_socket_t {
   ssl_config_t *ssl_config;
   
   int conn_socket_timeout;
+  int tcp_no_delay;
+  int tcp_keepalive;
+  int tcp_cork;
   
   int fd;
 
@@ -236,15 +243,27 @@ symbol_table_add(jvmtiEnv *jvmti,
 
 #endif
 
-jlong crc64_generate(jlong crc, char *value, int max_length);
-jlong crc64_generate_bytes(jlong crc, char *buffer, int length);
+/*
+jlong crc64_generate(jlong crc, char *value);
+*/
+
+int 
+resin_set_byte_array_region(JNIEnv *env,
+                            jbyteArray j_buf, 
+                            jint offset,
+                            jint sublen,
+                            char *c_buf);
 
 int
-get_byte_array_region(JNIEnv *env, jbyteArray buf, jint offset, jint sublen,
-		      char *c_buf);
+resin_get_byte_array_region(JNIEnv *env,
+                            jbyteArray buf,
+                            jint offset,
+                            jint sublen,
+                            char *buffer);
 
-int
-set_byte_array_region(JNIEnv *env, jbyteArray buf, jint offset, jint sublen,
-		      char *c_buf);
+int poll_read(int fd, int ms);
+int poll_write(int fd, int ms);
+
+#define RESIN_BLOCK_SIZE (8 * 1024)
 
 #endif /* RESIN_H */

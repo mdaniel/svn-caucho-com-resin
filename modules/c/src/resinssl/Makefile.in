@@ -14,7 +14,7 @@ resin_libexec=@apache_libexec@
 LIBEXEC=@LIBEXEC@
 resin_home=$(DESTDIR)@resin_home@
 JNI_INCLUDE=@JNI_INCLUDE@
-INCLUDES = @INCLUDES@ $(JNI_INCLUDE) -I../common -I../resin
+INCLUDES = @INCLUDES@ $(JNI_INCLUDE) -I../common -I../resin_os
 CFLAGS = @CFLAGS@ -DRESIN_HOME=\"$(resin_home)\" $(INCLUDES) -DCPU=\"$(CPU)\" -DOS=$(OS) @CFLAGS_JNI@ @CFLAGS_SHLIB@ @CFLAGS_OPENSSL@
 OBJ=@SSL_OBJ@ @resin_os@/memory.o @resin_os@/std.o @resin_os@/java.o
 
@@ -26,7 +26,7 @@ libresinssl.so	: $(OBJ)
 libresinssl.jnilib	: $(OBJ)
 	$(CC) $(LDFLAGS_SHLIB) -framework JavaVM -o $@ $(OBJ) $(PROXY_LIBS)
 
-$(OBJ)	: ../resin/resin.h Makefile
+$(OBJ)	: ../resin_os/resin_os.h Makefile
 
 clean	:
 	rm -f *.o *.$(SO)
