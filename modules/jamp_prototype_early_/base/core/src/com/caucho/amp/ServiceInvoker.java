@@ -16,7 +16,7 @@ import com.caucho.encoder.JampMessageDecoder;
 public class ServiceInvoker {
     private Class<?> clazz;
     private Object instance;
-    private static Decoder messageDecoder = new JampMessageDecoder();
+    private  Decoder messageDecoder = new JampMessageDecoder();
     private static Decoder jsonDecoder = new JSONDecoder();
     
 	public ServiceInvoker (Class<?> clazz) {
@@ -32,7 +32,14 @@ public class ServiceInvoker {
 	    }
 	    return instance;
 	}
-	public void invokeMessage(Object payload) throws Exception {
+	
+	
+    public  void setMessageDecoder(Decoder messageDecoder) {
+        this.messageDecoder = messageDecoder;
+    }
+
+	
+	public Message invokeMessage(Object payload) throws Exception {
 	    Message message = (Message) messageDecoder.decodeObject(payload);
 	    
 	    jsonDecoder = new JSONDecoder();
@@ -46,6 +53,8 @@ public class ServiceInvoker {
 	    method.invoke(instance, parameters);
 	    
 	    System.out.println("THIS FAR " + method.getName());
+	    
+	    return message;
 	    
 	}
     private Object[] coerceArgumentList(List<Object> args,
