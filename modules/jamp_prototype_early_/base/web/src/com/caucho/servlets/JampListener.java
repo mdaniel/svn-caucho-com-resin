@@ -22,11 +22,11 @@ public class JampListener implements WebSocketListener {
         serviceInvoker.setMessageDecoder(new JampMessageReaderDecoder());
     }
     
-
+    
     @Override
     public void onReadText(WebSocketContext context, Reader aReader)
             throws IOException {
-
+        
         PrintWriter out = context.startTextMessage();
         
         out.println("emp data...");
@@ -35,16 +35,21 @@ public class JampListener implements WebSocketListener {
             System.out.println("ON READ TEXT ***********************************************");
             Message message = serviceInvoker.invokeMessage(new BufferedReader(aReader));
 
-            System.out.println("SERVICE INVOKDER WAS INVOKED ********************** \n" + message);
+            System.out.println("SERVICE INVOKER WAS INVOKED ********************** \n" + message);
             out.println(message.toString());
-            
-            out.flush();
-            out.close();
-        
+            System.out.println("Able to call println on printwriter ");
         } catch (Exception ex) {
+            System.out.println("PROBLEM " + ex.getMessage());
+            ex.printStackTrace();
+
             out.println("PROBLEM " + ex.getMessage());
             ex.printStackTrace(out);
-            ex.printStackTrace();
+        } finally {
+            
+            if (out!=null) {
+                out.close();
+            }
+            
         }
 
 
@@ -53,32 +58,32 @@ public class JampListener implements WebSocketListener {
 
     @Override
     public void onClose(WebSocketContext arg0) throws IOException {
-        // TODO Auto-generated method stub
-
+        System.out.println("ON CLOSE ***********************************************");
+        
     }
 
     @Override
     public void onDisconnect(WebSocketContext arg0) throws IOException {
-        // TODO Auto-generated method stub
+        System.out.println("ON DISCONNECT ***********************************************");
 
     }
 
     @Override
     public void onReadBinary(WebSocketContext arg0, InputStream arg1)
             throws IOException {
-        // TODO Auto-generated method stub
+        System.out.println("ON onReadBinary ***********************************************");
 
     }
 
     @Override
     public void onStart(WebSocketContext arg0) throws IOException {
-        // TODO Auto-generated method stub
+        System.out.println("ON start ***********************************************");
 
     }
 
     @Override
     public void onTimeout(WebSocketContext arg0) throws IOException {
-        // TODO Auto-generated method stub
+        System.out.println("ON timeout ***********************************************");
 
     }
 

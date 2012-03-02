@@ -45,9 +45,14 @@
             <script language="javascript">
    
                 var  socket = new WebSocket("ws://localhost:8080/jamp_servlet/JampServlet", "employee-add-protocol");
-                socket.onmessage== function(msg){  
+                socket.onmessage = function(msg){  
                     document.getElementById("span_result").innerHTML = msg.data;
                 }  
+    
+                socket.onerror = function(msg){  
+                    document.getElementById("error_result").innerHTML = "ERROR" + msg.data;
+                }  
+    
                 socket.onopen = function(){  
                     document.getElementById("span_result").innerHTML = "Socket Status: " +socket.readyState+ " (open)";
                 }  
@@ -72,7 +77,7 @@
 </script>
     </head>
     <body>
-        11th attempt <br />
+        12th attempt <br />
         <!-- Clicking this link initiates the asyncronous request -->
         <a href="javascript:sendEmployee();">Send Employee via Ajax</a><br />
         <a href="javascript:sendEmployeeViaWebSocket();">Send Employee via WebSocket</a><br />
@@ -80,5 +85,7 @@
 
         <!-- used to display the results of the asyncronous request -->
         <span id="span_result"></span>
+        <span id="error_result"></span>
+
     </body>
 </html>
