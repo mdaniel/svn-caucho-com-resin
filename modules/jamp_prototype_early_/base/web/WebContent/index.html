@@ -41,11 +41,43 @@
                 }
             }
             </script>
+            
+            <script language="javascript">
+   
+                var  socket = new WebSocket("ws://localhost:8080/jamp_servlet/JampServlet", "employee-add-protocol");
+                socket.onmessage== function(msg){  
+                    document.getElementById("span_result").innerHTML = msg.data;
+                }  
+                socket.onopen = function(){  
+                    document.getElementById("span_result").innerHTML = "Socket Status: " +socket.readyState+ " (open)";
+                }  
+                socket.onclose = function(){  
+                	document.getElementById("span_result").innerHTML = "Socket Status: " +socket.readyState+ " (Closed)";
+                	
+                }     
+				
+				function sendEmployeeViaWebSocket () {
+					
+				  document.getElementById("span_result").innerHTML="SENDING";		
+				  var obj = "[\"send\",\"to\",\"from\",\"addEmployee\",[{\"java_type\":\"com.caucho.test.Employee\",\"name\":\"Rick Hightower\",\"old\":false,\"phoneNumber\":\"5205551212\"},7,9.99,8,\"loves love but no love says\"]]";
+				
+				  socket.send(obj);
+				
+				}
+				
+                function clearSend () {
+                    document.getElementById("span_result").innerHTML="";       
+
+                }
+</script>
     </head>
     <body>
-        3rd attempt <br />
+        11th attempt <br />
         <!-- Clicking this link initiates the asyncronous request -->
-        <a href="javascript:sendEmployee();">Send Employee</a><br />
+        <a href="javascript:sendEmployee();">Send Employee via Ajax</a><br />
+        <a href="javascript:sendEmployeeViaWebSocket();">Send Employee via WebSocket</a><br />
+        <a href="javascript:clearSend();">Clear send results</a><br />
+
         <!-- used to display the results of the asyncronous request -->
         <span id="span_result"></span>
     </body>
