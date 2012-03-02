@@ -11,11 +11,18 @@ http://net.tutsplus.com/tutorials/javascript-ajax/start-using-html5-websockets-t
 
 Project Goal: 
 
-   Make calls from HTML 5.0 web application to JAMP websocket tier.
+   Make calls from HTML 5.0 web application to JAMP websocket tier. DONE!
+   It works. 
+
 
 Status: 
 
    Current Status:
+      Wrote simple JavaScript/HTML 5 client for WebSocket and it works
+      Found problem with websocket. It was a typo in the JavaScript. I hate JavaScript. No warning or error. Just did not work.
+
+
+   Older Status:
      Wrote simple JavaScript/HTML 5 client for Ajax and it works
      Wrote WebSocket client, and WebSocket Listeners in Java. The listeners in Java handle the message fine, but it does not seem to send back the message very well.
      I am getting WebSocket messages to Java handlers, but they are not able to send text back yet.
@@ -77,7 +84,9 @@ Status:
     
     
  Known limitations (and TODO list):
+
      JampServlet not generic. It could and should be.
+     JampListener (implements WebSocketListener) not generic either.
      WebSocketMessageSender, STOMPMessageSender are not implemented.
      JSONEncoder does not properly encode unicode /uXXX, tabs, formfeeds and more (it does 2 out of 9 which is fine for a prototype).
      JSONDecoder is String/character array based, it should be Reader based.
@@ -88,6 +97,7 @@ Status:
      ServiceInvoker does not handle List (not needed for first prototype, may be ok to leave out of prototype tutorial, easy to add).
      Code quality prototype mode (error checking minimal, no logging, etc.)
      Unit tesitng (not TDD, more like, just enough to feel confident that things are working) not robust
+
      
      
   Next steps: 
