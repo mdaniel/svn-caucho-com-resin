@@ -193,6 +193,15 @@ public final class CacheStoreManager
 
     return cacheEntry;
   }
+  
+  final public boolean load(DistCacheEntry entry,
+                            CacheConfig config,
+                            long now)
+  {
+    MnodeEntry mnodeValue = getMnodeValue(entry, config, now); // , false);
+    
+    return mnodeValue != null;
+  }
 
   final public Object get(DistCacheEntry entry,
                           CacheConfig config,

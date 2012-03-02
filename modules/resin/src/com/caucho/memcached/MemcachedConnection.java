@@ -580,13 +580,15 @@ public class MemcachedConnection implements ProtocolConnection
       
       do {
         cb.append((char) ch);
-      } while ((ch = rs.read()) >= 0 && ! Character.isWhitespace(ch));
+      } while ((ch = rs.read()) >= 0
+               && (ch != ' ' && ch != '\r' && ch != '\n'));
       
       rs.unread();
+
       
-      return true;
+      return ch >= 0;
     }
-    
+
     protected void getCache(WriteStream out,
                             ClusterCache cache,
                             String key,
@@ -596,20 +598,24 @@ public class MemcachedConnection implements ProtocolConnection
     {
       ExtCacheEntry entry = cache.getLiveCacheEntry(key);
 
-      if (entry == null || entry.isValueNull()) {
-        return;
-      }
-      
-      long now = CurrentTime.getCurrentTime();
-      
-      if (entry.isExpired(now)) {
+      if (entry == null) {
         return;
       }
       
       HashKey valueKey = entry.getValueHashKey();
+      
+      long now = CurrentTime.getCurrentTime();
+      
+      if (entry.isExpired(now)) {
+        System.out.println("EXP: " + key.length());
+        return;
+      }
+      
+      // HashKey valueKey = entry.getValueHashKey();
       long unique = getCasKey(valueKey);
       
       if (hash != 0 && hash == unique) {
+        System.out.println("NOM: " + key.length());
         // out.print("NOT_MODIFIED\r\n");
         // get-if-modified
         return;

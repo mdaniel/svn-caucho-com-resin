@@ -593,7 +593,13 @@ public class CacheImpl<K,V>
    */
   public ExtCacheEntry getLiveCacheEntry(Object key)
   {
-    return getDistCacheEntry(key);
+    DistCacheEntry distEntry = getDistCacheEntry(key);
+   
+    long now = CurrentTime.getCurrentTime();
+    
+    _manager.load(distEntry, _config, now);
+    
+    return distEntry;
   }
 
   /**
