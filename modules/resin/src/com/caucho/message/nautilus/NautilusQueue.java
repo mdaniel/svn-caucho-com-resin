@@ -33,6 +33,7 @@ import java.util.logging.Logger;
 
 import com.caucho.db.block.BlockStore;
 import com.caucho.env.thread.ActorQueue.ItemProcessor;
+import com.caucho.message.journal.JournalFile;
 import com.caucho.util.ConcurrentArrayList;
 
 /**
@@ -169,6 +170,30 @@ class NautilusQueue
       if (! isDeliver) {
         return;
       }
+    }
+  }
+
+  /**
+   * @param tailAddress
+   * @return
+   */
+  public long updateCheckpoint(long tailAddress)
+  {
+    QueueEntry head = _head;
+    
+    if (head == null) {
+      return tailAddress;
+    }
+    else {
+      long queueHeadAddress = head.getDataHead().getBlockAddress();
+      
+      if (! JournalFile.isSamePage(queueHeadAddress, tailAddress)) {
+        return -1;
+      }
+      else if (queueHeadAddress < tailAddress)
+        return queueHeadAddress;
+      else
+        return tailAddress;
     }
   }
   

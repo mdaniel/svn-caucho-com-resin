@@ -117,6 +117,16 @@ public final class JournalFile
     
     _flipAddress = 2 * BLOCK_SIZE * count + FILE_DATA_OFFSET;
   }
+
+  /**
+   * @param queueHeadAddress
+   * @param tailAddress
+   * @return
+   */
+  public static boolean isSamePage(long addressA, long addressB)
+  {
+    return ((addressA & BLOCK_SIZE) == (addressB & BLOCK_SIZE));
+  }
   
   private void init(JournalRecoverListener listener)
   {

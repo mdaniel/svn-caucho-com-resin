@@ -71,6 +71,22 @@ public class ValueActorQueue<T>
     actorQueue.finishOffer(item);
   }
   
+  public final boolean offer(T value, boolean isWait)
+  {
+    ActorQueue<ValueItem<T>> actorQueue = _actorQueue;
+    
+    ValueItem<T> item = actorQueue.startOffer(isWait);
+    
+    if (item == null) {
+      return false;
+    }
+    
+    item.init(value);
+    actorQueue.finishOffer(item);
+    
+    return true;
+  }
+  
   public void wake()
   {
     _actorQueue.wake();

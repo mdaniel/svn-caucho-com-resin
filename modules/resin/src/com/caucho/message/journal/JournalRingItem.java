@@ -89,6 +89,7 @@ public class JournalRingItem extends RingItem
   {
     _isData = false;
     
+    _code = 'C';
     _blockAddr = blockAddr;
     _offset = offset;
     _length = length;

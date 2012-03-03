@@ -40,6 +40,7 @@ import com.caucho.vfs.TempBuffer;
  */
 public class NautilusRingItem extends JournalRingItem
 {
+  public static final int JE_CHECKPOINT = 'C';
   public static final int JE_FLOW = 'F';
   public static final int JE_ACCEPTED = 'A';
   public static final int JE_MESSAGE = 'M';

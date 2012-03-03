@@ -50,10 +50,21 @@ class NautilusMultiQueueActor
   private HashMap<Long,NautilusQueue> _queueMap
     = new HashMap<Long,NautilusQueue>();
   
+  private NautilusCheckpointPublisher _checkpointPub;
+  
   private long _enqueueCount;
   private long _dequeueCount;
   
+  private long _messageCount;
+  private long _lastAddress;
+  private long _lastCheckpoint;
+  
   private int _size;
+
+  void setNautilusCheckpointPublisher(NautilusCheckpointPublisher pub)
+  {
+    _checkpointPub = pub;
+  }
   
   public int getSize()
   {
@@ -89,12 +100,20 @@ class NautilusMultiQueueActor
                         result.getOffset1(),
                         result.getLength1());
       
+      _lastAddress = result.getBlockAddr1();
+      
       if (result.getLength2() > 0) {
         queue.processData(mid, false, entry.isFin(),
                           result.getBlockStore(),
                           result.getBlockAddr2(),
                           result.getOffset2(),
                           result.getLength2());
+      }
+      
+      long count = ++_messageCount;
+      
+      if ((count & 0x3fff) == 0) {
+        updateCheckpoint(_lastAddress);
       }
       break;
       
@@ -118,10 +137,32 @@ class NautilusMultiQueueActor
       }
       break;
       
+    case NautilusRingItem.JE_CHECKPOINT:
+      break;
+      
     default:
       System.out.println("UNKNOWN: " + (char) code);
       log.warning("Unknown code: " + (char) code
                   + " " + Integer.toHexString(code));
+    }
+  }
+  
+  private void updateCheckpoint(long tailAddress)
+  {
+    long checkpointAddress = tailAddress;
+    
+    for (NautilusQueue queue : _queueMap.values()) {
+      if (checkpointAddress > 0) {
+        checkpointAddress = queue.updateCheckpoint(checkpointAddress);
+      }
+    }
+    
+    if (checkpointAddress > 0 && checkpointAddress != _lastCheckpoint) {
+      NautilusCheckpointPublisher checkpointPub = _checkpointPub;
+      if (checkpointPub != null
+          && checkpointPub.checkpoint(checkpointAddress)) {
+        _lastCheckpoint = checkpointAddress;
+      }
     }
   }
   
@@ -140,7 +181,7 @@ class NautilusMultiQueueActor
   @Override
   public void onProcessComplete() throws Exception
   {
-    
+//    updateCheckpoint(_lastAddress);
   }
    
   @Override

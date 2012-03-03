@@ -76,4 +76,9 @@ final class MessageDataNode
   {
     _next = next;
   }
+
+  final long getBlockAddress()
+  {
+    return _blockAddress;
+  }
 }

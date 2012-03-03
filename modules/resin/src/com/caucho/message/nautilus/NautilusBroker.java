@@ -156,6 +156,11 @@ public class NautilusBroker extends AbstractMessageBroker implements Closeable
         new NautilusItemFactory(),
         new JournalItemProcessor(_journalFile),
         _nautilusActor);
+    
+    NautilusCheckpointPublisher pub
+      = new NautilusCheckpointPublisher(_nautilusActorQueue);
+    
+    _nautilusActor.setNautilusCheckpointPublisher(pub);
   }
 
   public int getSize()

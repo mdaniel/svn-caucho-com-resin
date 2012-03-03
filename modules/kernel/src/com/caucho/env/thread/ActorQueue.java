@@ -157,7 +157,7 @@ public final class ActorQueue<T extends RingItem>
   
   public final void wake()
   {
-    if (! isEmpty()) {
+    if (! isEmpty() || _isWaitRef.get()) {
       _firstWorker.wake();
     }
   }
@@ -175,10 +175,10 @@ public final class ActorQueue<T extends RingItem>
     T item;
     int nextHead;
     
-    while (! isHeadAlloc.compareAndSet(false, true)) {
-    }
-    
     while (true) {
+      while (! isHeadAlloc.compareAndSet(false, true)) {
+      }
+      
       head = headRef.get(); // _head
       nextHead = (head + 1) & mask;
       
@@ -191,12 +191,12 @@ public final class ActorQueue<T extends RingItem>
         return item;
       }
       
+      isHeadAlloc.set(false);
+      
       if (isWait) {
         waitForQueue(head, tail);
       }
       else {
-        isHeadAlloc.set(false);
-        
         return null;
       }
     }
@@ -249,14 +249,14 @@ public final class ActorQueue<T extends RingItem>
   
   private void waitForQueue(int head, int tail)
   {
-    _firstWorker.wake();
-    
     synchronized (_isWaitRef) {
       _isWaitRef.set(true);
       
       while (_headRef.get() == head 
              && _tailRef.get() == tail
              && _isWaitRef.get()) {
+        _firstWorker.wake();
+        
         try {
           _isWaitRef.wait(100);
         } catch (Exception e) {
@@ -314,21 +314,17 @@ public final class ActorQueue<T extends RingItem>
     
     private final void consumeAll()
     {
-      boolean isWakeNext = true;
-      
       try {
-        isWakeNext = doConsume();
+        doConsume();
       } catch (Exception e) {
         log.log(Level.FINER, e.toString(), e);
       }
 
-      if (isWakeNext) {
-        if (_nextWorker != null) {
-          _nextWorker.wake();
-        }
-          
-        wakeQueue();
+      if (_nextWorker != null) {
+        _nextWorker.wake();
       }
+          
+      wakeQueue();
     }
     
     private final boolean doConsume()

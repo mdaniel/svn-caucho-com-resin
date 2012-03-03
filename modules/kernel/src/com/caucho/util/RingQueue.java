@@ -90,10 +90,10 @@ public class RingQueue<T extends RingItem> {
     
     AtomicBoolean isHeadAlloc = _isHeadAlloc;
     
-    while (! isHeadAlloc.compareAndSet(false, true)) {
-    }
-        
     while (true) {
+      while (! isHeadAlloc.compareAndSet(false, true)) {
+      }
+          
       head = _head.get();
       nextHead = (head + 1) & _mask;
       
@@ -103,12 +103,12 @@ public class RingQueue<T extends RingItem> {
         return _ring[head];
       }
       
+      isHeadAlloc.set(false);
+      
       if (isWait) {
         waitForEmpty();
       }
       else {
-        isHeadAlloc.set(false);
-        
         return null;
       }
     }
