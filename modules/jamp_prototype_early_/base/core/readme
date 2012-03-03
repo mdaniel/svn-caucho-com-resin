@@ -27,6 +27,12 @@ Status:
         String str = "ßæçîñking bad~\u007f\u0080~"; //Range checking 007f end of ascii and 0080 start of unicode
         assertEquals("\"\\u00DF\\u00E6\\u00E7\\u00EE\\u00F1king bad~\u007f\\u0080~\"", encoder.encodeObject(str));        
         assertEquals(str, decoder.decodeObject(encoder.encodeObject(str)));
+        
+      Note:  
+      Made JSON encoding ASCII to unicode safe /u007E to //u0080 to be exact, 
+      decoder does not care if it is utf 8 or utf 16 or utf whatever.
+      Encoding assumes ASCII as per discussion here http://stackoverflow.com/questions/583562/json-character-encoding. 
+      This is inline with other JSON libraries.
       
    Old Status:
       Wrote simple JavaScript/HTML 5 client for WebSocket and it works.
