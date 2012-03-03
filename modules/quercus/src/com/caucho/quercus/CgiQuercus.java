@@ -42,7 +42,7 @@ import com.caucho.vfs.StdoutStream;
 import com.caucho.vfs.WriteStream;
 
 public class CgiQuercus
-  extends CliQuercus
+  extends Quercus
 {
   @Override
   public Env createEnv(QuercusPage page,
@@ -60,7 +60,6 @@ public class CgiQuercus
     
     quercus.parseArgs(args);
     
-    quercus.init();
     quercus.start();
     
     if (quercus.getFileName() != null) {

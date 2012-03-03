@@ -197,8 +197,9 @@ public class HttpModule extends AbstractQuercusModule {
                                      @Optional @Reference Value line)
   {
     HttpServletResponse res = env.getResponse();
-
-    return res.isCommitted();
+    
+    // php/1b0n
+    return res != null && res.isCommitted();
   }
 
   /**
@@ -213,6 +214,12 @@ public class HttpModule extends AbstractQuercusModule {
                                   @Optional boolean secure,
                                   @Optional boolean httpOnly)
   {
+    HttpServletResponse response = env.getResponse();
+    
+    if (response == null) {
+      return false;
+    }
+    
     long now = env.getCurrentTime();
 
     if (value == null || value.equals(""))
@@ -274,7 +281,7 @@ public class HttpModule extends AbstractQuercusModule {
     if (secure)
       cookie.setSecure(true);
 
-    env.getResponse().addCookie(cookie);
+    response.addCookie(cookie);
 
     // add to headers list
 

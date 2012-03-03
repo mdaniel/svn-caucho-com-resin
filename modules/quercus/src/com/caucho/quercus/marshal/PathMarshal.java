@@ -29,13 +29,11 @@
 
 package com.caucho.quercus.marshal;
 
-import java.net.URL;
-
 import com.caucho.quercus.env.Env;
-import com.caucho.quercus.env.JavaURLValue;
 import com.caucho.quercus.env.JavaValue;
 import com.caucho.quercus.env.Value;
 import com.caucho.quercus.expr.Expr;
+import com.caucho.quercus.program.JavaClassDef;
 import com.caucho.vfs.Path;
 
 public class PathMarshal extends Marshal
@@ -60,9 +58,10 @@ public class PathMarshal extends Marshal
   public Value unmarshal(Env env, Object value)
   {
     // XXX: need test
-    return env.getQuercus()
-      .getJavaClassDefinition(value.getClass().getName())
-      .wrap(env, value);
+    String className = value.getClass().getName();
+    JavaClassDef def = env.getQuercus().getJavaClassDefinition(className);
+    
+    return def.wrap(env, value);
   }
   
   @Override

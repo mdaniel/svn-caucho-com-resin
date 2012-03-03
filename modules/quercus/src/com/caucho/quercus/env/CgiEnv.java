@@ -51,11 +51,6 @@ public class CgiEnv
   {
     super(quercus, page, out, request, response);
   }
-
-  public CgiEnv(QuercusContext quercus)
-  {
-    this(quercus, null, null, null, null);
-  }
   
   @Override
   protected String getQueryString()

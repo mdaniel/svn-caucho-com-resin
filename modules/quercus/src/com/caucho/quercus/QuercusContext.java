@@ -360,6 +360,10 @@ public class QuercusContext
   {
     return "apache";
   }
+  
+  public boolean isRegisterArgv() {
+    return getIniBoolean("register_argc_argv");
+  }
 
   public boolean isProfile()
   {

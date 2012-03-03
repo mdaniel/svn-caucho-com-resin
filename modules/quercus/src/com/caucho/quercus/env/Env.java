@@ -159,6 +159,9 @@ public class Env
   private static final int _ENV = 14;
   private static final int HTTP_SERVER_VARS = 15;
   private static final int HTTP_RAW_POST_DATA = 16;
+  
+  private static final int ARGC = 17;
+  private static final int ARGV = 18;
 
   private static final IntMap SPECIAL_VARS
     = new IntMap();
@@ -186,6 +189,9 @@ public class Env
   
   private static final StringValue S_FILES
     = new ConstStringValue("_FILES");
+  
+  private static final StringValue S_ARGV
+    = new ConstStringValue("argv");
 
   public static final Value []EMPTY_VALUE = new Value[0];
 
@@ -469,8 +475,13 @@ public class Env
       pageInit(_page);
     }
 
-    setPwd(_quercus.getPwd());
-
+    if (request != null && _page != null) {
+      setPwd(page.getPwd(null));
+    }
+    else {
+      setPwd(_quercus.getPwd());
+    }
+    
     if (_page != null) {
       setSelfPath(_page.getSelfPath(null));
 
@@ -2395,15 +2406,12 @@ public class Env
   private EnvVar getSuperGlobalRef(StringValue name,
                                    boolean isCheckGlobal,
                                    boolean isGlobal)
-  {
-    Var var;
-    EnvVar envVar;
-
+  { 
     int specialVarId = SPECIAL_VARS.get(name);
 
     if (isCheckGlobal) {
       if (specialVarId != IntMap.NULL) {
-        envVar = _globalMap.get(name);
+        EnvVar envVar = _globalMap.get(name);
 
         if (envVar != null)
           return envVar;
@@ -2412,8 +2420,8 @@ public class Env
 
     switch (specialVarId) {
       case _ENV: {
-        var = new Var();
-        envVar = new EnvVarImpl(var);
+        Var var = new Var();
+        EnvVar envVar = new EnvVarImpl(var);
 
         _globalMap.put(name, envVar);
 
@@ -2422,15 +2430,52 @@ public class Env
         return envVar;
       }
 
-      case HTTP_POST_VARS:
+      case ARGV: {
+        if (! _quercus.isRegisterArgv()) {
+          return null;
+        }
+        
+        Var var = new Var();
+        EnvVar envVar = new EnvVarImpl(var);
+
+        ArrayValue array = createArgv();
+        envVar.set(array);
+
+        _globalMap.put(name, envVar);
+        
+        return envVar;
+      }
+      
+      case ARGC: {
+        if (! _quercus.isRegisterArgv()) {
+          return null;
+        }
+        
+        Var array = getGlobalEnvVar(S_ARGV).getVar();
+                
+        int size = array.getSize();
+        
+        Var var = new Var();
+        EnvVar envVar = new EnvVarImpl(var);
+
+        LongValue value = LongValue.create(size);
+        envVar.set(value);
+
+        _globalMap.put(name, envVar);
+        
+        return envVar;
+      }
+
+      case HTTP_POST_VARS: {
         if (! QuercusContext.INI_REGISTER_LONG_ARRAYS.getAsBoolean(this))
           return null;
         else
           return getGlobalEnvVar(S_POST);
-
+      }
+      
       case _POST: {
-        var = new Var();
-        envVar = new EnvVarImpl(var);
+        Var var = new Var();
+        EnvVar envVar = new EnvVarImpl(var);
 
         _globalMap.put(name, envVar);
 
@@ -2448,15 +2493,16 @@ public class Env
         return envVar;
       }
 
-      case HTTP_POST_FILES:
+      case HTTP_POST_FILES: {
         if (! QuercusContext.INI_REGISTER_LONG_ARRAYS.getAsBoolean(this))
           return null;
         else
           return getGlobalEnvVar(S_FILES);
-
+      }
+      
       case _FILES: {
-        var = new Var();
-        envVar = new EnvVarImpl(var);
+        Var var = new Var();
+        EnvVar envVar = new EnvVarImpl(var);
 
         _globalMap.put(name, envVar);
 
@@ -2473,14 +2519,15 @@ public class Env
         return envVar;
       }
 
-      case HTTP_GET_VARS:
+      case HTTP_GET_VARS: {
         if (! QuercusContext.INI_REGISTER_LONG_ARRAYS.getAsBoolean(this))
           return null;
         else if (! isGlobal)
           return null;
         else
           return getGlobalEnvVar(S_GET);
-
+      }
+      
       case _GET: {
         if (isCheckGlobal) {
           EnvVar e = _globalMap.get(name);
@@ -2489,8 +2536,8 @@ public class Env
             return e;
         }
 
-        var = new Var();
-        envVar = new EnvVarImpl(var);
+        Var var = new Var();
+        EnvVar envVar = new EnvVarImpl(var);
 
         _globalMap.put(name, envVar);
 
@@ -2505,8 +2552,8 @@ public class Env
       }
 
       case _REQUEST: {
-        var = new Var();
-        envVar = new EnvVarImpl(var);
+        Var var = new Var();
+        EnvVar envVar = new EnvVarImpl(var);
 
         ArrayValue array = new ArrayValueImpl();
 
@@ -2551,8 +2598,8 @@ public class Env
         if (_inputData == null)
           return null;
 
-        var = new Var();
-        envVar = new EnvVarImpl(var);
+        Var var = new Var();
+        EnvVar envVar = new EnvVarImpl(var);
 
         _globalMap.put(name, envVar);
 
@@ -2561,15 +2608,16 @@ public class Env
         return envVar;
       }
 
-      case HTTP_SERVER_VARS:
+      case HTTP_SERVER_VARS: {
         if (! QuercusContext.INI_REGISTER_LONG_ARRAYS.getAsBoolean(this))
           return null;
         else
           return getGlobalEnvVar(S_SERVER);
-
+      }
+      
       case _SERVER: {
-        var = new Var();
-        envVar = new EnvVarImpl(var);
+        Var var = new Var();
+        EnvVar envVar = new EnvVarImpl(var);
 
         _globalMap.put(name, envVar);
 
@@ -2578,25 +2626,9 @@ public class Env
         if (_variablesOrder.indexOf('S') >= 0) {
           serverEnv = new ServerArrayValue(this);
           
-          String query = getQueryString();
-
-          if (_quercus.getIniBoolean("register_argc_argv")
-              && query != null) {
-            ArrayValue argv = new ArrayValueImpl();
-
-            int i = 0;
-            int j = 0;
-            while ((j = query.indexOf('+', i)) >= 0) {
-              String sub = query.substring(i, j);
-
-              argv.put(sub);
-
-              i = j + 1;
-            }
-
-            if (i < query.length())
-              argv.put(query.substring(i));
-
+          if (_quercus.isRegisterArgv()) {
+            ArrayValue argv = createArgv();
+            
             serverEnv.put(createString("argc"),
                           LongValue.create(argv.getSize()));
 
@@ -2612,8 +2644,8 @@ public class Env
       }
 
       case _GLOBAL: {
-        var = new Var();
-        envVar = new EnvVarImpl(var);
+        Var var = new Var();
+        EnvVar envVar = new EnvVarImpl(var);
 
         _globalMap.put(name, envVar);
 
@@ -2629,8 +2661,8 @@ public class Env
           return getGlobalEnvVar(S_COOKIE);
 
       case _COOKIE: {
-        var = new Var();
-        envVar = new EnvVarImpl(var);
+        Var var = new Var();
+        EnvVar envVar = new EnvVarImpl(var);
 
         _globalMap.put(name, envVar);
 
@@ -2643,10 +2675,10 @@ public class Env
       }
 
       case _SESSION: {
-        envVar = _globalMap.get("_SESSION");
+        EnvVar envVar = _globalMap.get("_SESSION");
 
         if (envVar == null) {
-          var = new SessionVar();
+          Var var = new SessionVar();
           envVar = new EnvVarImpl(var);
 
           _globalMap.put(name, envVar);
@@ -2656,8 +2688,8 @@ public class Env
       }
 
       case PHP_SELF: {
-        var = new Var();
-        envVar = new EnvVarImpl(var);
+        Var var = new Var();
+        EnvVar envVar = new EnvVarImpl(var);
 
         _globalMap.put(name, envVar);
 
@@ -2669,6 +2701,31 @@ public class Env
       default:
         return null;
     }
+  }
+
+  protected ArrayValue createArgv() {
+    ArrayValue array = new ArrayValueImpl();
+
+    String query = getQueryString();
+    
+    if (query == null) {
+      return array;
+    }
+    
+    int i = 0;
+    int j = 0;
+    while ((j = query.indexOf('+', i)) >= 0) {
+      String sub = query.substring(i, j);
+
+      array.put(sub);
+
+      i = j + 1;
+    }
+
+    if (i < query.length())
+      array.put(query.substring(i));
+    
+    return array;
   }
 
   protected String getQueryString()
@@ -2690,6 +2747,11 @@ public class Env
   protected ArrayValue getCookies()
   {
     ArrayValue array = new ArrayValueImpl();
+    
+    if (_request == null) {
+      return array;
+    }
+    
     boolean isMagicQuotes = getIniBoolean("magic_quotes_gpc");
 
     Cookie []cookies = _request.getCookies();
@@ -2711,9 +2773,9 @@ public class Env
     return array;
   }
 
-  public void setArgs(String []args)
+  public void setArgv(String []args)
   {
-    if (_quercus.getIniBoolean("register_argc_argv")) {
+    if (_quercus.isRegisterArgv()) {
       ArrayValue argv = new ArrayValueImpl();
 
       for (String arg : args) {
@@ -3929,11 +3991,6 @@ public class Env
    */
   public Value executeTop()
   {
-    Path oldPwd = getPwd();
-
-    Path pwd = _page.getPwd(this);
-
-    setPwd(pwd);
     try {
       return executePageTop(_page);
     } catch (QuercusLanguageException e) {
@@ -3952,8 +4009,6 @@ public class Env
       }
 
       return NullValue.NULL;
-    } finally {
-      setPwd(oldPwd);
     }
   }
 
@@ -5528,7 +5583,7 @@ public class Env
       return null;
 
     Path path = _lookupCache.get(relPath);
-
+    
     if (path == null) {
       path = getPwd().lookup(normalizePath(relPath));
       _lookupCache.put(relPath, path);
@@ -7319,6 +7374,10 @@ public class Env
     SPECIAL_VARS.put(MethodIntern.intern("_COOKIE"), _COOKIE);
     SPECIAL_VARS.put(MethodIntern.intern("_SESSION"), _SESSION);
     SPECIAL_VARS.put(MethodIntern.intern("_ENV"), _ENV);
+    
+    SPECIAL_VARS.put(MethodIntern.intern("argc"), ARGC);
+    SPECIAL_VARS.put(MethodIntern.intern("argv"), ARGV);
+    
     SPECIAL_VARS.put(MethodIntern.intern("HTTP_GET_VARS"), HTTP_GET_VARS);
     SPECIAL_VARS.put(MethodIntern.intern("HTTP_POST_VARS"), HTTP_POST_VARS);
     SPECIAL_VARS.put(MethodIntern.intern("HTTP_POST_FILES"), HTTP_POST_FILES);

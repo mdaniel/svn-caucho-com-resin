@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 1998-2012 Caucho Technology -- all rights reserved
+ * Copyright (c) 1998-2010 Caucho Technology -- all rights reserved
  *
  * This file is part of Resin(R) Open Source
  *
@@ -23,55 +23,41 @@
  *   Free Software Foundation, Inc.
  *   59 Temple Place, Suite 330
  *   Boston, MA 02111-1307  USA
- *
- * @author Nam Nguyen
  */
 
-package com.caucho.quercus;
+package com.caucho.quercus.env;
 
-import com.caucho.quercus.env.CliEnv;
-import com.caucho.quercus.env.Env;
+import com.caucho.quercus.QuercusContext;
 import com.caucho.quercus.page.QuercusPage;
 import com.caucho.vfs.WriteStream;
 
-import java.io.IOException;
-
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
-
-public class CliQuercus extends Quercus
-{ 
-  @Override
-  public Env createEnv(QuercusPage page,
-                       WriteStream out,
-                       HttpServletRequest request,
-                       HttpServletResponse response)
+/**
+ * @author nnguyen
+ *
+ */
+public class CliEnv extends Env {
+  private final String[] _argv;
+  
+  public CliEnv(QuercusContext quercus,
+                QuercusPage page,
+                WriteStream out,
+                String[] argv)
   {
-    return new CliEnv(this, page, out, getArgv());
+    super(quercus, page, out, null, null);
+    
+    _argv = argv;
   }
   
-  public static void main(String []args)
-    throws IOException
-  {
-    CliQuercus quercus = new CliQuercus();
-    
-    quercus.parseArgs(args);
-  
-    quercus.start();
-    
-    if (quercus.getFileName() != null) {
-      quercus.execute();
-    }
-    else {
-      throw new RuntimeException("input file not specified");
-    }
-  }
-  
-  /**
-   * Hard-coded to true for CLI according to php.net.
-   */
   @Override
-  public boolean isRegisterArgv() {
-    return true;
+  protected ArrayValue createArgv() {
+    ArrayValue array = new ArrayValueImpl();
+    
+    String[] argv = _argv;
+    
+    for (int i = 0; i < argv.length; i++) {
+      array.put(argv[i]);
+    }
+    
+    return array;
   }
 }
