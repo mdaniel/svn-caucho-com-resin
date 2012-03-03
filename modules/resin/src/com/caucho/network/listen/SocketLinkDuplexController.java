@@ -190,8 +190,8 @@ public class SocketLinkDuplexController extends AsyncController {
     } finally {
       thread.setName(oldName);
 
-      if (! isValid)
-        close();
+      if (! isValid) {
+        close();}
     }
 
     return true;
@@ -230,14 +230,15 @@ public class SocketLinkDuplexController extends AsyncController {
     _loader = null;
     
     _os = null;
-
+    System.out.println("CLOSE: " + this + " " + listener);
     /*
     IoUtil.close(is);
     */
     
     try {
-      if (conn != null)
+      if (conn != null) {
         conn.requestClose();
+      }
 
       /*
       if (conn != null)
@@ -248,6 +249,7 @@ public class SocketLinkDuplexController extends AsyncController {
 
     super.onClose();
     
+    System.out.println("CLOSE2: " + this + " " + listener);
     if (listener != null) {
       Thread thread = Thread.currentThread();
       ClassLoader oldLoader = thread.getContextClassLoader();

@@ -1111,14 +1111,15 @@ public class TcpSocketLink extends AbstractSocketLink
       return _duplexReadTask.doTask();
       
     case EXIT:
+    case CLOSED:
       close();
       return result;
       
     case REQUEST_COMPLETE:
-    case CLOSED:
       // acceptTask significantly faster than finishing
       close();
-      
+      return result;
+      /*
       if (taskType == Task.ACCEPT) {
         return result;
       }
@@ -1133,6 +1134,7 @@ public class TcpSocketLink extends AbstractSocketLink
           launcher.onChildIdleEnd();
         }
       }
+      */
       
     default:
       throw new IllegalStateException(String.valueOf(result));
