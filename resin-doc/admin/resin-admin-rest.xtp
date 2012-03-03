@@ -1,0 +1,607 @@
+<document>
+  <header>
+    <product>resin</product>
+    <title>REST Resin Administration</title>
+    <type>contents</type>
+    <description>
+      <p>Starting with version 4.0.26 Resin provides REST interface. Simple and
+        secure, it can be used for integration with services such as RightScale®
+        and others.
+      </p>
+    </description>
+  </header>
+  <body>
+    <localtoc/>
+
+    <s1 title="enabling the interface">
+
+      <p>By default the interface is disabled. Un-commenting line
+        <code>rest_admin_enable : true</code>
+        in resin properties enables the REST service.
+      </p>
+      <p>By default, the connection is required to be made over a secure
+        protocol(HTTPS). Relaxing the secure constraint can be done with setting
+        <code>rest_admin_secure</code>
+        to<code>true</code>.
+      </p>
+
+
+      <example title="Example: enabling Resin Secure REST interface">
+        # Enable Resin REST Admin
+        rest_admin_enable : true
+
+        # Require SSL for REST Admin
+        rest_admin_secure : true
+      </example>
+
+      <p>Resin REST Servlet is registered in
+        <code>cluster-default.xml</code>
+        file (see excerpt below for a reference).
+      </p>
+
+      <example title="Reference: registered REST Servlet">
+        &lt;resin:if test="${rest_admin_enable}">
+          &lt;web-app id="/resin-rest"
+                      root-directory="${resin.root}/doc/resin-rest">
+
+            &lt;resin:BasicLogin realm-name="resin"/>
+
+            &lt;resin:Allow url-pattern="/*">
+              &lt;resin:IfUserInRole role="resin-admin"/>
+            &lt;/resin:Allow>
+
+            &lt;servlet-mapping url-pattern="/*"
+                                servlet-class="com.caucho.admin.servlet.AdminRestServlet">
+              &lt;init>
+                &lt;require-secure>${rest_admin_secure}&lt;/require-secure>
+              &lt;/init>
+            &lt;/servlet-mapping>
+          &lt;/web-app>
+        &lt;/resin:if>
+      </example>
+
+      <p>The registration can be augmented further with
+        <code>resin:IfNetwork</code>
+        constraint to limit access to specific IPs only. Adding the constraint
+        must be considered when enabling access over HTTP.
+      </p>
+
+    </s1>
+
+    <s1 title="invoking REST action">
+      <p>Invoking REST action requires constructing an HTTP request with proper
+        url and body. REST action is encoded in the URL. Base of the URL is the
+        address of the Resin server itself combined with the context name of the
+        Resin REST web-app. The defaut URL is
+        <code>http://localhost:8080/resin-rest</code>. Concatenating the URL
+        with action name creates a complete Resin REST service URL. e.g.
+        <code>http://localhost:8080/resin-rest/jmx-list</code>
+      </p>
+
+      <example title="Example: invoking Resin REST jmx-list action">
+        ~$curl --user admin:secret http://localhost:8080/resin-rest/jmx-list
+      </example>
+    </s1>
+
+    <s1 title="interpreting Resin REST Service results">
+      <p>Resin REST replies with JSON Objects encoded as a String. Since
+        integration requires interchangeable data format JSON, with the
+        multitudes of available parsers in various languages, is a proper
+        choice. The output below has been post-formatted and shortened for easy
+        reading.
+      </p>
+
+      <example title="Example: invoking Resin REST jmx-list action">
+        ~$curl --user admin:secret
+        'http://localhost:8080/resin-rest/jmx-list?pattern=resin:type=Resin&amp;print-values=true'
+
+        [
+          {
+            "attributes":[
+              ...
+              {
+                "name":"ConfigFile",
+                "value":"/Volumes/projects/caucho/trunk/resin/conf/resin.xml"
+              },
+              {
+                "name":"LogDirectory",
+                "value":"/Volumes/projects/caucho/trunk/resin/log"
+              },
+              {
+                "name":"ResinHome",
+                "value":"/Volumes/projects/caucho/trunk/resin/"
+              },
+              {
+                "name":"RootDirectory",
+                "value":"/Volumes/projects/caucho/trunk/resin/"
+              }
+            ],
+           "name":"resin:type=Resin"
+          }
+          ...
+        ]
+
+      </example>
+    </s1>
+
+    <s1 title="available REST actions">
+      <deftable title="REST actions">
+        <tr>
+          <th>Command</th>
+          <th>Description</th>
+        </tr>
+        <tr>
+          <td>config-cat</td>
+          <td>prints configuration file deployed with
+            <code>config-deploy</code>
+            action or command
+          </td>
+        </tr>
+        <tr>
+          <td>config-deploy</td>
+          <td>deploys configuration</td>
+        </tr>
+        <tr>
+          <td>config-ls</td>
+          <td>lists files deployed via
+            <code>config-deploy</code>
+            command or action
+          </td>
+        </tr>
+        <tr>
+          <td>config-undeploy</td>
+          <td>config-undeploy</td>
+        </tr>
+        <tr>
+          <td>deploy-copy</td>
+          <td>copies an application from one context to another</td>
+        </tr>
+        <tr>
+          <td>deploy-list</td>
+          <td>lists all applications deployed on a server</td>
+        </tr>
+        <tr>
+          <td>jmx-call</td>
+          <td>calls MBean's method</td>
+        </tr>
+        <tr>
+          <td>jmx-dump</td>
+          <td>dump all MBean attributes and values</td>
+        </tr>
+        <tr>
+          <td>jmx-list</td>
+          <td>lists MBeans, attributes and operations</td>
+        </tr>
+        <tr>
+          <td>jmx-set</td>
+          <td>sets value of a jmx attribute</td>
+        </tr>
+        <tr>
+          <td>license-add</td>
+          <td>adds a license file</td>
+        </tr>
+        <tr>
+          <td>list-restarts</td>
+          <td>lists Resin server restarts</td>
+        </tr>
+        <tr>
+          <td>log-level</td>
+          <td>configures log level for one or more loggers</td>
+        </tr>
+        <tr>
+          <td>pdf-report</td>
+          <td>produces and returns pdf-report</td>
+        </tr>
+        <tr>
+          <td>stats</td>
+          <td>prints stats collected by Resin</td>
+        </tr>
+        <tr>
+          <td>thread-dump</td>
+          <td>produces a thread dump</td>
+        </tr>
+        <tr>
+          <td>user-add</td>
+          <td>adds an user with Resin administrator privileges</td>
+        </tr>
+        <tr>
+          <td>user-list</td>
+          <td>lists users with Resin administrator privileges</td>
+        </tr>
+        <tr>
+          <td>user-remove</td>
+          <td>removes user added with
+            <code>user-add</code>
+            command or action
+          </td>
+        </tr>
+        <tr>
+          <td>web-app-deploy</td>
+          <td>deploys an application to Resin</td>
+        </tr>
+        <tr>
+          <td>web-app-restart</td>
+          <td>restarts deployed application</td>
+        </tr>
+        <tr>
+          <td>web-app-start</td>
+          <td>starts deployed application</td>
+        </tr>
+        <tr>
+          <td>web-app-stop</td>
+          <td>stops deployed application</td>
+        </tr>
+        <tr>
+          <td>web-app-undeploy</td>
+          <td>undeploys an application deployed with
+            <code>web-app-deploy</code>
+            command
+          </td>
+        </tr>
+      </deftable>
+    </s1>
+
+    <!--
+    <s1 title="config-cat">
+      <p>config-cat</p>
+      <deftable title="config-cat options">
+        <tr>
+          <th>Option</th>
+          <th>Description</th>
+          <th>Default/Required</th>
+        </tr>
+        <tr>
+          <td>arg</td>
+          <td>descr</td>
+          <td>required</td>
+        </tr>
+      </deftable>
+    </s1>
+    <s1 title="config-deploy">
+      <p>config-deploy</p>
+      <deftable title="config-deploy options">
+        <tr>
+          <th>Option</th>
+          <th>Description</th>
+          <th>Default/Required</th>
+        </tr>
+        <tr>
+          <td>arg</td>
+          <td>descr</td>
+          <td>required</td>
+        </tr>
+      </deftable>
+    </s1>
+    <s1 title="config-ls">
+      <p>config-ls</p>
+      <deftable title="config-ls options">
+        <tr>
+          <th>Option</th>
+          <th>Description</th>
+          <th>Default/Required</th>
+        </tr>
+        <tr>
+          <td>arg</td>
+          <td>descr</td>
+          <td>required</td>
+        </tr>
+      </deftable>
+    </s1>
+    <s1 title="config-undeploy">
+      <p>config-undeploy</p>
+      <deftable title="config-undeploy options">
+        <tr>
+          <th>Option</th>
+          <th>Description</th>
+          <th>Default/Required</th>
+        </tr>
+        <tr>
+          <td>arg</td>
+          <td>descr</td>
+          <td>required</td>
+        </tr>
+      </deftable>
+    </s1>
+    <s1 title="deploy-copy">
+      <p>deploy-copy</p>
+      <deftable title="deploy-copy options">
+        <tr>
+          <th>Option</th>
+          <th>Description</th>
+          <th>Default/Required</th>
+        </tr>
+        <tr>
+          <td>arg</td>
+          <td>descr</td>
+          <td>required</td>
+        </tr>
+      </deftable>
+    </s1>
+    <s1 title="deploy-list">
+      <p>deploy-list</p>
+      <deftable title="deploy-list options">
+        <tr>
+          <th>Option</th>
+          <th>Description</th>
+          <th>Default/Required</th>
+        </tr>
+        <tr>
+          <td>arg</td>
+          <td>descr</td>
+          <td>required</td>
+        </tr>
+      </deftable>
+    </s1>
+    <s1 title="jmx-call">
+      <p>jmx-call</p>
+      <deftable title="jmx-call options">
+        <tr>
+          <th>Option</th>
+          <th>Description</th>
+          <th>Default/Required</th>
+        </tr>
+        <tr>
+          <td>arg</td>
+          <td>descr</td>
+          <td>required</td>
+        </tr>
+      </deftable>
+    </s1>
+    <s1 title="jmx-dump">
+      <p>jmx-dump</p>
+      <deftable title="jmx-dump options">
+        <tr>
+          <th>Option</th>
+          <th>Description</th>
+          <th>Default/Required</th>
+        </tr>
+        <tr>
+          <td>arg</td>
+          <td>descr</td>
+          <td>required</td>
+        </tr>
+      </deftable>
+    </s1>
+    <s1 title="jmx-list">
+      <p>jmx-list</p>
+      <deftable title="jmx-list options">
+        <tr>
+          <th>Option</th>
+          <th>Description</th>
+          <th>Default/Required</th>
+        </tr>
+        <tr>
+          <td>arg</td>
+          <td>descr</td>
+          <td>required</td>
+        </tr>
+      </deftable>
+    </s1>
+    <s1 title="jmx-set">
+      <p>jmx-set</p>
+      <deftable title="jmx-set options">
+        <tr>
+          <th>Option</th>
+          <th>Description</th>
+          <th>Default/Required</th>
+        </tr>
+        <tr>
+          <td>arg</td>
+          <td>descr</td>
+          <td>required</td>
+        </tr>
+      </deftable>
+    </s1>
+    <s1 title="license-add">
+      <p>license-add</p>
+      <deftable title="license-add options">
+        <tr>
+          <th>Option</th>
+          <th>Description</th>
+          <th>Default/Required</th>
+        </tr>
+        <tr>
+          <td>arg</td>
+          <td>descr</td>
+          <td>required</td>
+        </tr>
+      </deftable>
+    </s1>
+    <s1 title="list-restarts">
+      <p>list-restarts</p>
+      <deftable title="list-restarts options">
+        <tr>
+          <th>Option</th>
+          <th>Description</th>
+          <th>Default/Required</th>
+        </tr>
+        <tr>
+          <td>arg</td>
+          <td>descr</td>
+          <td>required</td>
+        </tr>
+      </deftable>
+    </s1>
+    <s1 title="log-level">
+      <p>log-level</p>
+      <deftable title="log-level options">
+        <tr>
+          <th>Option</th>
+          <th>Description</th>
+          <th>Default/Required</th>
+        </tr>
+        <tr>
+          <td>arg</td>
+          <td>descr</td>
+          <td>required</td>
+        </tr>
+      </deftable>
+    </s1>
+    <s1 title="pdf-report">
+      <p>pdf-report</p>
+      <deftable title="pdf-report options">
+        <tr>
+          <th>Option</th>
+          <th>Description</th>
+          <th>Default/Required</th>
+        </tr>
+        <tr>
+          <td>arg</td>
+          <td>descr</td>
+          <td>required</td>
+        </tr>
+      </deftable>
+    </s1>
+    <s1 title="stats">
+      <p>stats</p>
+      <deftable title="stats options">
+        <tr>
+          <th>Option</th>
+          <th>Description</th>
+          <th>Default/Required</th>
+        </tr>
+        <tr>
+          <td>arg</td>
+          <td>descr</td>
+          <td>required</td>
+        </tr>
+      </deftable>
+    </s1>
+    <s1 title="thread-dump">
+      <p>thread-dump</p>
+      <deftable title="thread-dump options">
+        <tr>
+          <th>Option</th>
+          <th>Description</th>
+          <th>Default/Required</th>
+        </tr>
+        <tr>
+          <td>arg</td>
+          <td>descr</td>
+          <td>required</td>
+        </tr>
+      </deftable>
+    </s1>
+    <s1 title="user-add">
+      <p>user-add</p>
+      <deftable title="user-add options">
+        <tr>
+          <th>Option</th>
+          <th>Description</th>
+          <th>Default/Required</th>
+        </tr>
+        <tr>
+          <td>arg</td>
+          <td>descr</td>
+          <td>required</td>
+        </tr>
+      </deftable>
+    </s1>
+    <s1 title="user-list">
+      <p>user-list</p>
+      <deftable title="user-list options">
+        <tr>
+          <th>Option</th>
+          <th>Description</th>
+          <th>Default/Required</th>
+        </tr>
+        <tr>
+          <td>arg</td>
+          <td>descr</td>
+          <td>required</td>
+        </tr>
+      </deftable>
+    </s1>
+    <s1 title="user-remove">
+      <p>user-remove</p>
+      <deftable title="user-remove options">
+        <tr>
+          <th>Option</th>
+          <th>Description</th>
+          <th>Default/Required</th>
+        </tr>
+        <tr>
+          <td>arg</td>
+          <td>descr</td>
+          <td>required</td>
+        </tr>
+      </deftable>
+    </s1>
+    <s1 title="web-app-deploy">
+      <p>web-app-deploy</p>
+      <deftable title="web-app-deploy options">
+        <tr>
+          <th>Option</th>
+          <th>Description</th>
+          <th>Default/Required</th>
+        </tr>
+        <tr>
+          <td>arg</td>
+          <td>descr</td>
+          <td>required</td>
+        </tr>
+      </deftable>
+    </s1>
+    <s1 title="web-app-restart">
+      <p>web-app-restart</p>
+      <deftable title="web-app-restart options">
+        <tr>
+          <th>Option</th>
+          <th>Description</th>
+          <th>Default/Required</th>
+        </tr>
+        <tr>
+          <td>arg</td>
+          <td>descr</td>
+          <td>required</td>
+        </tr>
+      </deftable>
+    </s1>
+    <s1 title="web-app-start">
+      <p>web-app-start</p>
+      <deftable title="web-app-start options">
+        <tr>
+          <th>Option</th>
+          <th>Description</th>
+          <th>Default/Required</th>
+        </tr>
+        <tr>
+          <td>arg</td>
+          <td>descr</td>
+          <td>required</td>
+        </tr>
+      </deftable>
+    </s1>
+    <s1 title="web-app-stop">
+      <p>web-app-stop</p>
+      <deftable title="web-app-stop options">
+        <tr>
+          <th>Option</th>
+          <th>Description</th>
+          <th>Default/Required</th>
+        </tr>
+        <tr>
+          <td>arg</td>
+          <td>descr</td>
+          <td>required</td>
+        </tr>
+      </deftable>
+    </s1>
+    <s1 title="web-app-undeploy">
+      <p>web-app-undeploy</p>
+      <deftable title="web-app-undeploy options">
+        <tr>
+          <th>Option</th>
+          <th>Description</th>
+          <th>Default/Required</th>
+        </tr>
+        <tr>
+          <td>arg</td>
+          <td>descr</td>
+          <td>required</td>
+        </tr>
+      </deftable>
+    </s1>
+-->
+  </body>
+</document>

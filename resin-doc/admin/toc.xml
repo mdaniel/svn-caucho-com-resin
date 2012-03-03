@@ -18,11 +18,6 @@
     
       <item link="resin-admin-console.xtp" title="web console"
             description="The web-based Resin administration console"/>
-
-      <!--
-      <item link="resin-admin-rest.xtp" title="rest"
-      -->
-      
     </item>
     
     <item link="clustering.xtp" title="Clustering"
@@ -46,7 +41,10 @@
 
     <item link="resin-admin-command-line.xtp" title="Command Line"
           description="The Command Line Resin Administration"/>
-    
+
+    <item link="resin-admin-rest.xtp" title="rest interface"
+          description="Resin REST administration interface"/>
+
     <item link="config.xtp" title="Configuration"
         description="Configuration principles for the Resin Server">
 
