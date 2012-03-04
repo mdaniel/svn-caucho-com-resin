@@ -4,7 +4,9 @@ import static org.junit.Assert.assertNotNull;
 
 import java.lang.reflect.Method;
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
 import org.junit.Test;
 
@@ -35,8 +37,17 @@ public class ServiceInvokerTest {
         List<AddressBook> books = new ArrayList<AddressBook>();
         books.add(new AddressBook("a"));
         books.add(new AddressBook("b"));
+
         
-        Employee emp = new Employee("rick", "510-555-1212", books);
+        Set<AddressBook> books2 = new HashSet<AddressBook>();
+        books2.add(new AddressBook("c"));
+        books2.add(new AddressBook("d"));
+
+        List<AddressBook> books3 = new ArrayList<AddressBook>();
+        books3.add(new AddressBook("e"));
+        books3.add(new AddressBook("f"));
+
+        Employee emp = new Employee("rick", "510-555-1212", books, books2, books3.toArray(new AddressBook[books3.size()]));
         emp.setOld(true);
         
         Object encodedObject = encoder.encodeMethodForSend(method, new Object[]{emp, 1, 1.0f, 2, "hello dolly"}, "to@me", "from@someoneelse");

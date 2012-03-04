@@ -1,5 +1,6 @@
 package com.caucho.encoder;
 
+import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
 
@@ -35,9 +36,9 @@ public class JampMethodEncoderTest {
         
         System.out.println(encodedObject);
         
-        assertTrue(encodedObject.equals("[\"send\",\"to@me\",\"from@someoneelse\",\"addEmployee\",[{\"java_type\":\"com.caucho.test.Employee\"," +
+        assertEquals("[\"send\",\"to@me\",\"from@someoneelse\",\"addEmployee\",[{\"java_type\":\"com.caucho.test.Employee\"," +
         		"\"name\":\"rick\",\"books\":[{\"java_type\":\"com.caucho.test.AddressBook\",\"foo\":\"a\"},{\"java_type\":" +
-        		"\"com.caucho.test.AddressBook\",\"foo\":\"b\"}],\"old\":false,\"phoneNumber\":\"510-555-1212\"},1,1.0,2,\"hello dolly\"]]"));
+        		"\"com.caucho.test.AddressBook\",\"foo\":\"b\"}],\"old\":false,\"phoneNumber\":\"510-555-1212\",\"books2\":null,\"books3\":null},1,1.0,2,\"hello dolly\"]]", encodedObject);
     }
 
 }

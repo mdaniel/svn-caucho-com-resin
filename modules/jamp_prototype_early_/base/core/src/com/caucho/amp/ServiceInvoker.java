@@ -1,6 +1,7 @@
 package com.caucho.amp;
 
 import java.lang.reflect.Array;
+import java.lang.reflect.Field;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
@@ -114,7 +115,7 @@ public class ServiceInvoker {
     private Object coerceList(List<Object> list, Class<?> paraType, Type[] types) throws Exception {
         if (paraType.isArray()) {
             Class<?> componentType = paraType.getComponentType();
-            Object array = list.toArray(new Object[list.size()]);
+            Object array = Array.newInstance(componentType, list.size());
             int index=0;
             for (Object object : list) {
                 object = coerceArgument(object, componentType, null);
@@ -122,13 +123,30 @@ public class ServiceInvoker {
                 index++;
             }
             return array;
-        } else if (paraType.isAssignableFrom(Collection.class)) {
+        } else {
             Collection<Object> collection = null;
-            if (paraType.isAssignableFrom(List.class)) {
-                collection = new ArrayList<Object>(list.size());  
-            } else if (paraType.isAssignableFrom(Set.class)) {
-                collection = new HashSet<Object>(list.size());
-            }   
+            
+            if (paraType.isInterface()) { 
+                if (paraType.isAssignableFrom(List.class)) {
+                    collection = new ArrayList<Object>(list.size());  
+                } else if (paraType.isAssignableFrom(Set.class)) {
+                    collection = new HashSet<Object>(list.size());
+                }  
+            } else {
+                if (Modifier.isAbstract( paraType.getModifiers() )) {
+                    return null;
+                } else {
+                    Object object = null;
+                    try {
+                        object = paraType.newInstance();
+                    }catch (Exception ex) {
+                        object = null;
+                    }              
+                    if (object!=null && object instanceof Collection){
+                        collection = (Collection<Object>) object;
+                    }
+                }
+            }
                 
             //    new ArrayList<Object>(list.size());
             
@@ -150,7 +168,6 @@ public class ServiceInvoker {
             return collection;
             
         }
-        return null;
     }
     private Object coerceObject(Map<String, Object> inputArgument, Class<?> paraType) throws Exception {
         Object instance = null;
@@ -161,19 +178,48 @@ public class ServiceInvoker {
             instance = paraType.newInstance();
         }
         
+        Set<String> props = new HashSet<String>(inputArgument.keySet());
+        props.remove("java_type");
+        
         Method[] setterMethods = getSetterMethods(paraType);
         for (Method m : setterMethods) {
             String propName = m.getName().substring(3);
             propName = propName.substring(0,1).toLowerCase() + propName.substring(1);
+            props.remove(propName); //remove it if we found the setter
             Object value = inputArgument.get(propName);
             Class<?> type = m.getParameterTypes()[0];
-            
-            
             Type[] types = m.getGenericParameterTypes();
-            
             invokeSetterMethod(type, instance, m, value, types);
         }
         
+        
+        /* Remaining props that do not have setter methods */
+        for (String propName : props) {
+            Field field = paraType.getDeclaredField(propName);
+       
+            Class<?> current = paraType;
+            while (field==null) {
+                if (current==Object.class) {
+                    break;
+                }
+                try {
+                    field = current.getDeclaredField(propName);
+                } catch (Exception e) {
+                    
+                }
+                if (field==null) {
+                    current = current.getSuperclass();
+                }
+            }
+            try {           
+                field.setAccessible(true);
+                field.set(instance, coerceArgument(inputArgument.get(field.getName()), field.getType(), new Type[]{field.getGenericType()}));
+                props.remove(field.getName());
+            } catch (Exception ex) {
+                // ok if it did not work. Should maybe do log warn.
+            }
+        }
+
         return instance;
     }
     private void invokeSetterMethod(Class<?> type, Object instance, Method m,

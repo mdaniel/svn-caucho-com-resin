@@ -17,7 +17,12 @@ Project Goal:
 
 Status: 
 
-  Status:
+
+  Current Status:
+   The list handling handles List generics, Sets, and arrays (tested manually, really needs some good unit tests).
+   If a prop can't be found in a setter method, it looks for a field in current class, and then keeps moving up super class tree.
+  
+  Old Status:
    Issue  Updated scope and FIXED    JSONStringDecoder decodes all escape characters specified in JSON but does not handle null, +NAN, -NAN  
              (minor oversights which may be okay for prototype).
    http://stackoverflow.com/questions/1423081/json-left-out-infinity-and-nan-json-status-in-ecmascript

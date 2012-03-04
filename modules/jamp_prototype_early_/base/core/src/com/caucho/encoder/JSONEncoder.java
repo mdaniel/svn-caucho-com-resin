@@ -96,7 +96,7 @@ public class JSONEncoder implements Encoder {
 
 			return encodeArray(array);
 			
-		} else if (obj instanceof Array){
+		} else if (obj.getClass().isArray()){
 			return encodeArray((Object[]) obj);			
 		}
 		
