@@ -211,7 +211,10 @@ public class JSONDecoder implements Decoder{
 			} else if (c=='t' || c=='f') {
 				value = decodeBoolean();
 				break;
-			} else if (c=='[') {
+			} else if (c=='n') {
+                value = decodeNull();
+                break;
+            } else if (c=='[') {
 				value = decodeJsonArray();
 				break;
 			} else if (c=='{') {
@@ -285,6 +288,19 @@ public class JSONDecoder implements Decoder{
 		}while (hasMore());
 		return Boolean.parseBoolean(builder.toString());
 	}
+	
+    private Object decodeNull() throws Exception {
+        StringBuilder builder = new StringBuilder();
+        do {
+            char c = this.currentChar();
+            if (Character.isWhitespace(c) || c==',' || c=='}') {
+                break;
+            }
+            builder.append(c);
+            this.nextChar();
+        }while (hasMore());
+        return null;
+    }
 
 	private Object decodeString() throws Exception {
 	    

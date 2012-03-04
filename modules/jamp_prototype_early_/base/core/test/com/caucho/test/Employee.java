@@ -1,21 +1,39 @@
 package com.caucho.test;
 
+import java.util.List;
+
 public class Employee {
-    
-	@Override
-    public String toString() {
-        return "Employee [name=" + name + ", phoneNumber=" + phoneNumber
-                + ", old=" + old + "]";
-    }
 
     private String name;
-	private String phoneNumber;
-	private boolean old;
+    private String phoneNumber;
+    private boolean old;
+    private List<AddressBook> books;
+
+    
+    
+	public List<AddressBook> getBooks() {
+        return books;
+    }
+
+
+    public void setBooks(List<AddressBook> books) {
+        this.books = books;
+    }
+
+
+    @Override
+    public String toString() {
+        return "Employee [name=" + name + ", phoneNumber=" + phoneNumber
+                + ", old=" + old + " ,\nbooks=" + books+ "\n]";
+    }
+
 	
-	public Employee(String name, String phoneNumber) {
+	public Employee(String name, String phoneNumber, List<AddressBook> books) {
 		this.name = name;
 		this.phoneNumber = phoneNumber;
+		this.books = books;
 	}
+
 
 	public Employee() {
 		

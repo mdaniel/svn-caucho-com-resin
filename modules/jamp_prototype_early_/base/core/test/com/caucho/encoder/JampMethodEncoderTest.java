@@ -4,9 +4,12 @@ import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
 
 import java.lang.reflect.Method;
+import java.util.ArrayList;
+import java.util.List;
 
 import org.junit.Test;
 
+import com.caucho.test.AddressBook;
 import com.caucho.test.Employee;
 import com.caucho.test.EmployeeService;
 
@@ -19,7 +22,12 @@ public class JampMethodEncoderTest {
         Method method = EmployeeService.class.getDeclaredMethod("addEmployee", Employee.class, int.class, float.class, Integer.class, String.class);
         assertNotNull(method);
         
-        Employee emp = new Employee("rick", "510-555-1212");
+        
+        List<AddressBook> books = new ArrayList<AddressBook>();
+        books.add(new AddressBook("a"));
+        books.add(new AddressBook("b"));
+
+        Employee emp = new Employee("rick", "510-555-1212", books);
         
         Object encodedObject = encoder.encodeMethodForSend(method, new Object[]{emp, 1, 1.0f, 2, "hello dolly"}, "to@me", "from@someoneelse");
 
@@ -27,9 +35,9 @@ public class JampMethodEncoderTest {
         
         System.out.println(encodedObject);
         
-        assertTrue(encodedObject.equals("[\"send\",\"to@me\",\"from@someoneelse\",\"addEmployee\"," +
-        		"[{\"java_type\":\"com.caucho.test.Employee\",\"name\":\"rick\",\"old\":false," +
-        				"\"phoneNumber\":\"510-555-1212\"},1,1.0,2,\"hello dolly\"]]"));
+        assertTrue(encodedObject.equals("[\"send\",\"to@me\",\"from@someoneelse\",\"addEmployee\",[{\"java_type\":\"com.caucho.test.Employee\"," +
+        		"\"name\":\"rick\",\"books\":[{\"java_type\":\"com.caucho.test.AddressBook\",\"foo\":\"a\"},{\"java_type\":" +
+        		"\"com.caucho.test.AddressBook\",\"foo\":\"b\"}],\"old\":false,\"phoneNumber\":\"510-555-1212\"},1,1.0,2,\"hello dolly\"]]"));
     }
 
 }

@@ -1,12 +1,18 @@
 package com.caucho.amp;
 
+import java.lang.reflect.Array;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
+import java.lang.reflect.ParameterizedType;
+import java.lang.reflect.Type;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 import com.caucho.encoder.Decoder;
 import com.caucho.encoder.JSONDecoder;
@@ -65,17 +71,23 @@ public class ServiceInvoker {
         for (int index=0; index<parameterTypes.length; index++) {
             Object inputArgument = args.get(index);
             Class<?> paraType = parameterTypes[index];
-            parameters.add(coerceArgument(inputArgument, paraType));
+            parameters.add(coerceArgument(inputArgument, paraType, null));
         }
         
         return parameters.toArray(new Object[parameterTypes.length]);
     }
     
-    private Object coerceArgument(Object inputArgument, Class<?> paraType)  throws Exception {
+    private Object coerceArgument(Object inputArgument, Class<?> paraType, Type[] types)  throws Exception {
         if (inputArgument instanceof Map && paraType.isAssignableFrom(Map.class)) {
             return new HashMap((Map)inputArgument);
         } else if (inputArgument instanceof Map) {
             return coerceObject((Map<String, Object>) inputArgument, paraType);
+        } else if (inputArgument instanceof List) {
+            return coerceList((List<Object>)inputArgument, paraType, types);  
+        } else if (inputArgument instanceof String) {
+            return inputArgument;
+        } else if (inputArgument instanceof Boolean) {
+            return inputArgument;
         } else if (paraType.isPrimitive()){
             if (paraType == boolean.class){
                 return inputArgument;
@@ -99,6 +111,47 @@ public class ServiceInvoker {
         return null;
     }
     
+    private Object coerceList(List<Object> list, Class<?> paraType, Type[] types) throws Exception {
+        if (paraType.isArray()) {
+            Class<?> componentType = paraType.getComponentType();
+            Object array = list.toArray(new Object[list.size()]);
+            int index=0;
+            for (Object object : list) {
+                object = coerceArgument(object, componentType, null);
+                Array.set(array, index, object);
+                index++;
+            }
+            return array;
+        } else if (paraType.isAssignableFrom(Collection.class)) {
+            Collection<Object> collection = null;
+            if (paraType.isAssignableFrom(List.class)) {
+                collection = new ArrayList<Object>(list.size());  
+            } else if (paraType.isAssignableFrom(Set.class)) {
+                collection = new HashSet<Object>(list.size());
+            }   
+                
+            //    new ArrayList<Object>(list.size());
+            
+            Class<?> componentType = null;
+            
+            if (types==null && list.size()>=1) {
+                Map <String, Object> map = (Map<String, Object>) list.get(0);
+                String className = (String) map.get("java_type");
+                componentType = Class.forName(className);
+            } else {
+                ParameterizedType pType = (ParameterizedType) types[0];
+                componentType = (Class<?>) pType.getActualTypeArguments()[0];
+            }
+            for (Object object : list) {
+                object = coerceArgument(object, componentType, null);
+                collection.add(object);
+            }
+            
+            return collection;
+            
+        }
+        return null;
+    }
     private Object coerceObject(Map<String, Object> inputArgument, Class<?> paraType) throws Exception {
         Object instance = null;
         if (paraType.isInterface()) {
@@ -115,18 +168,21 @@ public class ServiceInvoker {
             Object value = inputArgument.get(propName);
             Class<?> type = m.getParameterTypes()[0];
             
-            invokeSetterMethod(paraType, instance, m, value);
+            
+            Type[] types = m.getGenericParameterTypes();
+            
+            invokeSetterMethod(type, instance, m, value, types);
         }
         
         return instance;
     }
-    private void invokeSetterMethod(Class<?> paraType, Object instance, Method m,
-            Object value) throws IllegalAccessException,
+    private void invokeSetterMethod(Class<?> type, Object instance, Method m,
+            Object value, Type[] types) throws IllegalAccessException,
             InvocationTargetException, Exception {
    
         Object coercedValue = null;
         try {
-            coercedValue = coerceArgument(value, paraType);
+            coercedValue = coerceArgument(value, type, types);
             m.invoke(instance, new Object[]{coercedValue});
         }catch (Exception ex) {
             System.out.printf("Method name = %s, valueType=%s, corercedValueType=%s, value=%s, cvalue=%s \n", 

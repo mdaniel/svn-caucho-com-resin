@@ -17,7 +17,20 @@ Project Goal:
 
 Status: 
 
-  Current Status:
+  Status:
+   Issue  Updated scope and FIXED    JSONStringDecoder decodes all escape characters specified in JSON but does not handle null, +NAN, -NAN  
+             (minor oversights which may be okay for prototype).
+   http://stackoverflow.com/questions/1423081/json-left-out-infinity-and-nan-json-status-in-ecmascript
+   Seems NAN and Infinity must be coded as null.
+   
+   Issue handle nulls FIXED
+   
+   Issue ServiceInvoker does not handle List FIXED (not needed for first prototype, may be ok to leave out of prototype tutorial, easy to add).
+   
+   
+   
+  
+  Old Status:
       Issue FIXED JSONDecoder is String/character array based, it should be Reader based.
       
 
@@ -109,11 +122,8 @@ Status:
      JampServlet not generic. It could and should be.
      JampListener (implements WebSocketListener) not generic either.
      WebSocketMessageSender, STOMPMessageSender are not implemented.
-     JSONStringDecoder decodes all escape characters specified in JSON but does not handle null, +NAN, -NAN  
-             (minor oversights which may be okay for prototype).
      JavaDocs mostly missing.
      Resin coding style, mostly ignored for now, which may be ok if this is published tutorial/cookbook as it uses more common { placements.
-     ServiceInvoker does not handle List (not needed for first prototype, may be ok to leave out of prototype tutorial, easy to add).
      Code quality prototype mode (error checking minimal, no logging, etc.)
      Unit tesitng (not TDD, more like, just enough to feel confident that things are working) not robust
 
