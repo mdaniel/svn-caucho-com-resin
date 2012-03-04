@@ -17,7 +17,11 @@ Project Goal:
 
 Status: 
 
-   Current Status:
+  Current Status:
+      Issue FIXED JSONDecoder is String/character array based, it should be Reader based.
+      
+
+   Old Status:
       Issue FIXED JSONEncoder now properly encodes unicode /uXXX, tabs, formfeeds and more (it does 2 out of 9 which is fine for a prototype).
       This can be summed up as follows:
 
@@ -105,7 +109,6 @@ Status:
      JampServlet not generic. It could and should be.
      JampListener (implements WebSocketListener) not generic either.
      WebSocketMessageSender, STOMPMessageSender are not implemented.
-     JSONDecoder is String/character array based, it should be Reader based.
      JSONStringDecoder decodes all escape characters specified in JSON but does not handle null, +NAN, -NAN  
              (minor oversights which may be okay for prototype).
      JavaDocs mostly missing.

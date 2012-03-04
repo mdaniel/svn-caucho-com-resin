@@ -1,6 +1,7 @@
 package com.caucho.encoder;
 
 import java.io.PrintStream;
+import java.io.Reader;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -9,25 +10,76 @@ import java.util.Map;
 /** Converts an input JSON String into Java objects. */
 public class JSONDecoder implements Decoder{
 	
-	String str; 
-	char[] cs; 
-	int index; 
-	int line;
-	int lastLineStart;
-	char c;
-	final boolean debug=false;
-	
-	Map<String, Object> currentMap;
-	List<Object> currentList;
+    private Reader reader;
+	private String str; 
+	private char[] charArray; 
+	private int __index; 
+	private int line;
+	private int lastLineStart;
+	private char ch;
+	private final boolean debug=false; //just used to debug if their are problems
+    private int lastChar;
 	
 	JSONStringDecoder jsStringDecoder = new JSONStringDecoder();
 
+	private final boolean safe() {
+	    
+	    if (reader!=null) {
+	        return true;
+	    } else {
+	        return __index < charArray.length;
+	    }
+	}
 	
-	
+	private final boolean hasMore() throws Exception{
+	    if (reader==null) {
+	        return __index + 1 <= charArray.length;
+	    } else {
+	        return !(lastChar==-1);
+	    }
+	}
+    
+	private final char currentChar () throws Exception {
+	    
+	    if (reader==null) {
+    	    if (safe()) {
+    	        return ch = charArray[__index];
+    	    } else {
+    	        return ch;
+    	    }
+	    } else {
+	        return ch;
+	    }
+	}
+
+    private final char nextChar () throws Exception {
+        if (reader==null) {
+            if (hasMore()) {
+                __index++;
+                return this.currentChar();
+            } else {
+                return ch;
+            }
+        }else {
+            __index++;
+            this.lastChar = reader.read();
+            this.ch = (char) lastChar;
+            return ch;
+        }
+
+	}
+    
+    
 	@Override
 	public Object decodeObject(Object obj) throws Exception {
-		str = (String) obj;
-		cs = str.toCharArray();
+	    
+	    if (obj instanceof String) {
+	        str = (String) obj;
+	        charArray = str.toCharArray();
+	    } else if (obj instanceof Reader) {
+	        reader = (Reader) obj;
+	    }
+	    
 		return decodeValue("root");
 	}
 	
@@ -36,11 +88,11 @@ public class JSONDecoder implements Decoder{
 			PrintStream out = System.out;
 			out.println("Current line #" + line);
 			
-			out.println(currentMap);
-			out.println(currentList);
-			int lineCount = index-lastLineStart;
-			out.println("line contents\n" + str.substring(lastLineStart,index));
-
+			int lineCount = __index-lastLineStart;
+			
+			if (reader==null) {
+			    out.println("line contents\n" + str.substring(lastLineStart,__index));
+			}
 			StringBuilder builder = new StringBuilder();
 			for (int i=0; i<lineCount; i++) {
 				if (lineCount-1==i) {
@@ -54,85 +106,105 @@ public class JSONDecoder implements Decoder{
 	}
 	
 	public void skipWhiteSpace() throws Exception {
-		for (; index < cs.length; index++) {
-			c = cs[index];
+	    
+        //if (fine) System.out.println("skipWhiteSpace");
+	    
+        int tooMuchWhiteSpace = 20;
+        int count = 0;
+        
+	    while (hasMore()) {
+	        count ++;
+	        if (count>tooMuchWhiteSpace) break;
+			char c = this.currentChar();
+	        //if (fine) System.out.printf("skipWhiteSpace c='%s' \n", c);
 			if(c=='\n') {
 				line++;
-				lastLineStart=index;
+				lastLineStart=__index;
+				this.nextChar();
 				continue;
 			}
 			else if(c=='\r') {
 				line++;
-				if (index + 1 < cs.length) {
-					index++;
+				if (hasMore()) {
+					c = this.nextChar();
 					if (c!='\n') {
-						index--;
+		                lastLineStart=__index;
+					    break;
 					}
-					lastLineStart=index;
 				}
+                lastLineStart=__index;
+                this.nextChar();
 				continue;
 			}else if (Character.isWhitespace(c)) {
+			    this.nextChar();
 				continue;
-			}
-			else {
+			} else {
 				break;
 			}
 		}
+	    
+	    
 	}
 	
 	
 	public Object decodeJsonObject() throws Exception {
 		if (debug) System.out.println("decodeJsonObject enter");
-		if (c=='{' && index < cs.length) index++;
-		HashMap<String, Object> map = new HashMap<String, Object>();
-		this.currentMap = map;
-		for (; index < cs.length; index++) {
+		
+		if (this.currentChar() == '{' && this.hasMore()) this.nextChar();
+		
+		Map<String, Object> map = new HashMap<String, Object>();
+		do {
 
 			skipWhiteSpace();
-			if (index >= cs.length-1) break;
-			c = cs[index];
 			
+			char c = this.currentChar();
+
+
 			if (c=='"') {
 				String key = decodeKeyName();
-				if (debug) System.out.printf("key=%s\n", key);
-
-				index++;
-				if (index >= cs.length-1) break;
 				skipWhiteSpace();
+				c = this.currentChar();
 				if (c!=':') {
 					debug();
-					throw new IllegalStateException("Expecting to find ':', but found '"+ c +"' instead on line = " + line + "  index = " + index);
+					throw new IllegalStateException("Expecting to find ':', but found '"+ c +"' instead on line = " + line + "  index = " + __index);
 				}
-				index++;
-				if (index >= cs.length-1) break;
+				c=this.nextChar(); //skip past ':'				
 				skipWhiteSpace();				
 				Object value = decodeValue(key);
+				
+
 				if (debug) System.out.printf("key=%s, value=%s\n", key, value);
 				skipWhiteSpace();				
+				
+
 				map.put(key,value);
+				
+				c = this.currentChar();
 				if (!(c=='}' || c==',')){
 					debug();
-					throw new IllegalStateException("Unable to get key value pair c='"+ c + "' from Object line = " + line + "  index = " + index);				
+					throw new IllegalStateException("Unable to get key value pair c='"+ c + "' from Object line = " + line + "  index = " + __index);				
 				}
 			} 
 			if (c=='}'){
-				if (index < cs.length)index++;
+			    this.nextChar();
 				break;
 			} else if (c==','){
+	            this.nextChar();
 				continue;
 			}
 			else {
 				debug();
-				throw new IllegalStateException("Unable to get key value pair c='"+ c + "' from Object line = " + line + "  index = " + index);				
-			}
-		}
+				throw new IllegalStateException("Unable to get key value pair c='"+ c + "' from Object line = " + line + "  index = " + __index);				
+			}	
+		} while(this.hasMore());
 		return map;
 	}
 
 	private Object decodeValue(String key) throws Exception {
 		Object value = null;
-		for (; index < cs.length; index++) {
-			c = cs[index];
+		
+		while (hasMore()) {
+			char c = this.currentChar();
 			if (c=='"') {
 				value = decodeString();
 				break;
@@ -149,23 +221,19 @@ public class JSONDecoder implements Decoder{
 				value = decodeNumber();
 				break;
 			}
+			this.nextChar();
 		}
-		//System.out.println(key + " = " + value);
 		skipWhiteSpace();
-		if (!(c==',' || c=='}' || c==']' || c=='"' || Character.isWhitespace(c))) {
-			debug();
-			throw new IllegalStateException("Can't parse value of object entry expecting " +
-					"',' or '}' or ']' but got '" + c + "' line = " + line + "  index = " + index);
-		} 
 		return value;
 	}
 
 
-	private Object decodeNumber() {
-		int startIndex = index;
+	private Object decodeNumber() throws Exception {
+	    StringBuilder builder = new StringBuilder();
+	    
 		boolean doubleFloat = false;
-		for (; index < cs.length; index++) {
-			c = cs[index];
+		do {
+			char c = this.currentChar();
 			if (Character.isWhitespace(c) || c==',' || c=='}' || c==']') {
 				break;
 			}
@@ -174,13 +242,17 @@ public class JSONDecoder implements Decoder{
 				if (c=='.' || c=='e' || c=='E') {
 					doubleFloat = true;
 				}
+				builder.append(c);
+	            this.nextChar();
 				continue;
 			} else {
 				debug();
-				throw new IllegalStateException("Can't parse number line = " + line + "  index = " + index + " bad char = " + c);
+				throw new IllegalStateException("Can't parse number line = " + line + "  index = " + __index + " bad char = " + c);
 			}
-		}
-		String svalue = str.substring(startIndex, index);
+		} while (this.hasMore());
+		
+		
+		String svalue = builder.toString();
 		Object value = null;
 		try {
 			if (doubleFloat) {
@@ -190,7 +262,7 @@ public class JSONDecoder implements Decoder{
 			}
 		} catch (Exception ex) {
 			debug();
-			throw new IllegalStateException("Can't parse number bad number string line = " + line + "  index = " + index + " not a valid number = " + svalue);
+			throw new IllegalStateException("Can't parse number bad number string line = " + line + "  index = " + __index + " not a valid number = " + svalue);
 			
 		}
 		
@@ -198,79 +270,98 @@ public class JSONDecoder implements Decoder{
 		
 	}
 
-	private Object decodeBoolean() {
-		int startIndex = index;
-		for (; index < cs.length; index++) {
-			c = cs[index];
+	private int index() {
+	    return __index;
+	}
+	private Object decodeBoolean() throws Exception {
+	    StringBuilder builder = new StringBuilder();
+		do {
+			char c = this.currentChar();
 			if (Character.isWhitespace(c) || c==',' || c=='}') {
 				break;
 			}
-		}
-		return Boolean.parseBoolean(str.substring(startIndex, index));
+			builder.append(c);
+			this.nextChar();
+		}while (hasMore());
+		return Boolean.parseBoolean(builder.toString());
 	}
 
 	private Object decodeString() throws Exception {
-		
-		index++;
-		int startIndex = index;
-		for (; index < cs.length; index++) {
-			c = cs[index];
+	    
+	    StringBuilder builder = null;
+	        
+	    if (reader!=null) {
+ 	        builder = new StringBuilder();
+	    }
+	    
+		int startIndex = index()+1; //Increment past the starting quote
+		do {
+			char c = this.nextChar();
 			if (c=='"') {
 				break;
 			}
+		    if (reader!=null)builder.append(c);
+		} while (hasMore());
+		
+		String value =  null;
+		
+		if (reader!=null) {
+		    value = builder.toString();
+		} else {
+		    value = str.substring(startIndex, index());
 		}
 		
-		Object value =  encodeString(str.substring(startIndex, index));
-		if (index < cs.length) {
-			index++;
-		}
+		value = encodeString(value);
+	    this.nextChar(); //skip other quote
+
 		return value;
 	}
 
-	private Object encodeString(String string) throws Exception {
-		return jsStringDecoder.decodeObject(string);
+	private String encodeString(String string) throws Exception {
+		return (String) jsStringDecoder.decodeObject(string);
 	}
 
-	private String decodeKeyName() {
-		index++;
-		
-		int startIndex = index;
-		for (; index < cs.length; index++) {
-			c = cs[index];
+	private String decodeKeyName() throws Exception {
+
+	    StringBuilder builder = new StringBuilder();
+		do {
+			char c = this.nextChar();
 			if (c=='"') {
 				break;
-			}			
-		}
-		return str.substring(startIndex, index);
+			}
+			builder.append(c);
+		} while (hasMore());
+		
+        Object value =  builder.toString();
+        this.nextChar(); //skip other quote
+
+        return (String) value;
 	}
 
 
 	public Object decodeJsonArray() throws Exception {
-		if (c=='[' && index < cs.length) index++;
+		if (this.currentChar()=='[' && hasMore()) this.nextChar();
 		skipWhiteSpace();
-		ArrayList<Object> list = new ArrayList<Object>();
-		currentList = list;
+		List<Object> list = new ArrayList<Object>();
 		
 		int arrayIndex = 0;
 
-		for (; index < cs.length; index++) {
+		do {
 			skipWhiteSpace();
-			if (index >= cs.length-1) break;
-			c = cs[index];
-
+			char c = this.currentChar();
 			list.add( decodeValue(""+arrayIndex) );
 			arrayIndex++;
 			skipWhiteSpace();
+			c = this.currentChar();
 			if ( !(c==',' || c==']')) {
 				debug();
-				throw new IllegalStateException("Expecting to find ',' or ']', but found '"+ c +"' instead on line = " + line + "  index = " + index);
+				throw new IllegalStateException("Expecting to find ',' or ']', but found '"+ c +"' instead on line = " + line + "  index = " + index());
 			} 
-			
 			if (c==']') {
-				if (index < cs.length)index++;
+				this.nextChar();
 				break;
 			}
-		}
+		} while(this.hasMore());
 		return list;
 	}
 }

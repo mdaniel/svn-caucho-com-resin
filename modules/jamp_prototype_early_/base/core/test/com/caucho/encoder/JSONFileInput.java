@@ -26,21 +26,14 @@ public class JSONFileInput {
 			if (file.toString().endsWith(".json")) {
 				System.out.printf("next up %s \n", file.getName());
 
-				StringBuilder builder = new StringBuilder(512);
 
 				BufferedReader reader = null;
 
 				try {
 					reader = new BufferedReader(new FileReader(file));
 
-					String line = null;
-					do {
-						line = reader.readLine();
-						if (line != null)
-							builder.append(line).append("\n");
-					} while (line != null);
 					Decoder decoder = new JSONDecoder();
-					Object object = decoder.decodeObject(builder.toString());
+					Object object = decoder.decodeObject(reader);
 					verifyObject(object);
 					System.out.printf("verified %s \n\n", file.getName());
 				} finally {
