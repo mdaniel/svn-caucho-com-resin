@@ -40,17 +40,15 @@ import com.caucho.message.broker.SenderSettleHandler;
 public class AmqpServerSenderLink extends AmqpServerLink
 {
   private BrokerSender _pub;
-  private AmqpServerSession _session;
   private MessageSettleHandler _settleHandler;
   
   public AmqpServerSenderLink(AmqpServerSession session,
                               FrameAttach attach,
                               BrokerSender pub)
   {
-    super(session, attach, pub);
+    super(session, attach);
     
     _pub = pub;
-    _session = session;
   }
   
   public long nextMessageId()
@@ -68,7 +66,6 @@ public class AmqpServerSenderLink extends AmqpServerLink
       handler = new MessageSettleHandler(mid);
     }
     
-    System.out.println("SETTLE: " + isSettled);
     _pub.message(xid, mid, isDurable, priority, expireTime,
                  buffer, offset, length, null, handler);
   }
@@ -76,7 +73,7 @@ public class AmqpServerSenderLink extends AmqpServerLink
   /**
    * @param messageId
    */
-  public void accept(long xid, long messageId)
+  public void onAccept(long xid, long messageId)
   {
     throw new UnsupportedOperationException(getClass().getName());
   }
@@ -124,13 +121,13 @@ public class AmqpServerSenderLink extends AmqpServerLink
     @Override
     public void onAccepted(long mid)
     {
-      _session.onAccepted(_deliveryId);
+      getSession().onAccepted(_deliveryId);
     }
 
     @Override
     public void onRejected(long mid, String msg)
     {
-      _session.onRejected(_deliveryId, msg);
+      getSession().onRejected(_deliveryId, msg);
     }
   }
 }

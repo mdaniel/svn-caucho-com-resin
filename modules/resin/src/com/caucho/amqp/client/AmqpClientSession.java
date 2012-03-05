@@ -30,10 +30,25 @@
 package com.caucho.amqp.client;
 
 import com.caucho.amqp.common.AmqpSession;
+import com.caucho.amqp.io.DeliveryAccepted;
+import com.caucho.amqp.io.DeliveryState;
 
 /**
  * amqp session management
  */
 public class AmqpClientSession extends AmqpSession<AmqpClientLink>
 {
+  private AmqpClientConnectionImpl _conn;
+  
+  protected AmqpClientSession(AmqpClientConnectionImpl conn)
+  {
+    _conn = conn;
+  }
+  
+  public void accepted(long deliveryId)
+  {
+    DeliveryState accepted = DeliveryAccepted.VALUE;
+    
+    _conn.sendDisposition(this, deliveryId, accepted);
+  }
 }

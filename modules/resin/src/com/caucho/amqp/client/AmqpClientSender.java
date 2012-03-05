@@ -58,6 +58,7 @@ import com.caucho.amqp.io.MessageProperties;
 import com.caucho.amqp.marshal.AmqpMessageEncoder;
 import com.caucho.amqp.marshal.AmqpStringEncoder;
 import com.caucho.message.MessageFactory;
+import com.caucho.message.MessageSettleListener;
 import com.caucho.message.common.AbstractMessageSender;
 import com.caucho.util.L10N;
 import com.caucho.vfs.QSocket;
@@ -89,6 +90,8 @@ class AmqpClientSender<T> extends AbstractMessageSender<T> implements AmqpSender
                    AmqpClientSenderFactory factory,
                    AmqpClientLink link)
   {
+    super(factory);
+    
     _client = client;
     _address = factory.getAddress();
     _isAutoSettle = factory.isAutoSettle();
@@ -142,6 +145,15 @@ class AmqpClientSender<T> extends AbstractMessageSender<T> implements AmqpSender
       return true;
     } catch (IOException e) {
       throw new AmqpException(e);
+    }
+  }
+
+  void onAccept(long messageId)
+  {
+    MessageSettleListener listener = getSettleListener();
+    
+    if (listener != null) {
+      listener.onAccept(messageId);
     }
   }
 

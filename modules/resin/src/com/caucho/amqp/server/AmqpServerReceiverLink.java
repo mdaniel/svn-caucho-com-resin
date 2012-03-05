@@ -48,7 +48,7 @@ public class AmqpServerReceiverLink extends AmqpServerLink implements ReceiverMe
   public AmqpServerReceiverLink(AmqpServerSession session,
                                 FrameAttach attach)
   {
-    super(session, attach, null);
+    super(session, attach);
   }
   
   void setReceiver(BrokerReceiver sub)
@@ -79,7 +79,7 @@ public class AmqpServerReceiverLink extends AmqpServerLink implements ReceiverMe
   }
   
   @Override
-  public void accept(long xid, long messageId)
+  public void onAccept(long xid, long messageId)
   {
     _sub.accept(xid, messageId);
   }

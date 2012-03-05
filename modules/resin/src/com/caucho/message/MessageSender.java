@@ -44,6 +44,8 @@ public interface MessageSender<T> extends BlockingQueue<T> {
   
   public int getUnsettledCount();
   
+  public MessageSettleListener getSettleListener();
+  
   public MessageFactory<T> createMessageFactory();
   
   public void close();

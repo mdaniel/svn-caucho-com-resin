@@ -34,6 +34,7 @@ import java.io.InputStream;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
+import com.caucho.amqp.AmqpException;
 import com.caucho.amqp.common.AmqpSession;
 import com.caucho.amqp.io.AmqpConstants;
 import com.caucho.amqp.io.AmqpError;
@@ -397,7 +398,7 @@ public class AmqpServerConnection implements ProtocolConnection, AmqpFrameHandle
   public void onBegin(FrameBegin clientBegin)
     throws IOException
   {
-    _sessions[0] = new AmqpServerSession();
+    _sessions[0] = new AmqpServerSession(this);
     
     FrameBegin serverBegin = new FrameBegin();
     
@@ -431,7 +432,7 @@ public class AmqpServerConnection implements ProtocolConnection, AmqpFrameHandle
     
     BrokerSender pub = broker.createSender(targetAddress);
     
-    AmqpServerLink link = new AmqpServerLink(session, clientAttach, pub);
+    AmqpServerLink link = new AmqpServerSenderLink(session, clientAttach, pub);
     
     int incomingHandle = clientAttach.getHandle();
     int outgoingHandle = session.nextHandle();
@@ -444,9 +445,7 @@ public class AmqpServerConnection implements ProtocolConnection, AmqpFrameHandle
     serverAttach.setName(clientAttach.getName());
     serverAttach.setHandle(outgoingHandle);
     
-    if (clientAttach.getRole() == Role.SENDER) {
-      serverAttach.setRole(Role.RECEIVER);
-    }
+    serverAttach.setRole(Role.RECEIVER);
     
     sendFrame(serverAttach);
   }
@@ -536,7 +535,7 @@ public class AmqpServerConnection implements ProtocolConnection, AmqpFrameHandle
     long xid = 0;
     
     if (state instanceof DeliveryAccepted) {
-      session.accept(xid);
+      session.onAccept(xid);
     }
     else if (state instanceof DeliveryRejected) {
       DeliveryRejected rejected = (DeliveryRejected) state;
@@ -617,7 +616,24 @@ public class AmqpServerConnection implements ProtocolConnection, AmqpFrameHandle
       disconnect();
     }
   }
-  
+
+  void sendDisposition(AmqpServerSession session,
+                       long deliveryId, 
+                       DeliveryState state)
+  {
+    try {
+      FrameDisposition disposition = new FrameDisposition();
+      disposition.setFirst(deliveryId);
+      disposition.setLast(deliveryId);
+      disposition.setState(state);
+    
+      sendFrame(disposition);
+    } catch (IOException e) {
+      throw new AmqpException(e);
+    }
+    
+  }
+
   private void disconnect()
   {
     _isDisconnected = true;

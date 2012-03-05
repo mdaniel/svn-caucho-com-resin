@@ -38,9 +38,18 @@ import com.caucho.amqp.io.FrameAttach;
  */
 public class AmqpClientLink extends AmqpLink
 {
+  private AmqpClientReceiver<?> _receiver;
+  private AmqpClientSender<?> _sender;
+  
   public AmqpClientLink(AmqpClientSession session, FrameAttach attach)
   {
     super(session, attach);
+  }
+  
+  @Override
+  public AmqpClientSession getSession()
+  {
+    return (AmqpClientSession) super.getSession();
   }
   
   public long nextMessageId()
@@ -54,21 +63,34 @@ public class AmqpClientLink extends AmqpLink
   {
   }
 
-  /**
-   * @return
-   */
-  public AmqpClientReceiver getReceiver()
+  public AmqpClientReceiver<?> getReceiver()
   {
-    // TODO Auto-generated method stub
-    return null;
+    return _receiver;
+  }
+
+  public void setReceiver(AmqpClientReceiver<?> receiver)
+  {
+    _receiver = receiver;
+  }
+
+  public AmqpClientSender<?> getSender()
+  {
+    return _sender;
+  }
+
+  public void setSender(AmqpClientSender<?> sender)
+  {
+    _sender = sender;
   }
 
   /**
-   * @param receiver
+   * @param messageId
    */
-  public void setReceiver(AmqpClientReceiver receiver)
+  @Override
+  public void onAccept(long xid, long messageId)
   {
-    // TODO Auto-generated method stub
+    getSession().accepted(messageId);
     
+    getSender().onAccept(messageId);
   }
 }

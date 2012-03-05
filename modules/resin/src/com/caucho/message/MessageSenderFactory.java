@@ -41,5 +41,9 @@ public interface MessageSenderFactory {
   
   public boolean isAutoSettle();
   
+  public MessageSenderFactory setSettleListener(MessageSettleListener listener);
+  
+  public MessageSettleListener getSettleListener();
+  
   public MessageSender<?> build();
 }

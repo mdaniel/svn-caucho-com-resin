@@ -50,6 +50,7 @@ import com.caucho.amqp.io.DeliveryAccepted;
 import com.caucho.amqp.io.DeliveryModified;
 import com.caucho.amqp.io.DeliveryRejected;
 import com.caucho.amqp.io.DeliveryReleased;
+import com.caucho.amqp.io.DeliveryState;
 import com.caucho.amqp.io.FrameAttach;
 import com.caucho.amqp.io.FrameClose;
 import com.caucho.amqp.io.FrameDetach;
@@ -104,11 +105,6 @@ public class AmqpClientConnectionImpl
   private AmqpReader _ain;
   
   private AmqpClientFrameReader _reader;
-  
-  private int _handleCounter = 1;
-  
-  private long _deliveryId = 1;
-  private static final long DELIVERY_MASK = 0xffffffffL;
   
   private final AtomicBoolean _isClosed = new AtomicBoolean();
   private boolean _isDisconnected;
@@ -209,9 +205,13 @@ public class AmqpClientConnectionImpl
     session.addOutgoingLink(handle, link);
     
     try {
+      AmqpClientSender<?> sender = new AmqpClientSender(this, factory, link);
+      
+      link.setSender(sender);
+      
       writeFrame(attach);
-    
-      return new AmqpClientSender(this, factory, link);
+      
+      return sender;
     } catch (IOException e) {
       throw new AmqpException(e);
     }
@@ -411,8 +411,6 @@ public class AmqpClientConnectionImpl
     }
     
     FrameOpen open = (FrameOpen) value;
-
-    System.out.println("CLIENT_OPEN: " + open);
   }
   
   /*
@@ -489,6 +487,32 @@ public class AmqpClientConnectionImpl
     }
   }
 
+  void sendDisposition(AmqpClientSession session,
+                       long deliveryId, 
+                       DeliveryState state)
+  {
+    FrameDisposition disposition = new FrameDisposition();
+    disposition.setFirst(deliveryId);
+    disposition.setLast(deliveryId);
+    disposition.setState(state);
+    
+    sendFrame(disposition);
+  }
+  
+  private void sendFrame(AmqpAbstractFrame frame)
+  {
+    try {
+      _fout.startFrame(0);
+    
+      frame.write(_aout);
+  
+      _fout.finishFrame();
+      _fout.flush();
+    } catch (IOException e) {
+      throw new AmqpException(e);
+    }
+  }
+
   /**
    * @param handle
    */
@@ -496,7 +520,7 @@ public class AmqpClientConnectionImpl
   {
     try {
       _fout.startFrame(0);
-    
+      
       FrameDisposition disposition = new FrameDisposition();
       disposition.setState(DeliveryAccepted.VALUE);
       
@@ -591,9 +615,7 @@ public class AmqpClientConnectionImpl
   @Override
   public void onBegin(FrameBegin frameBegin) throws IOException
   {
-    _sessions[0] = new AmqpClientSession();
-    
-    System.out.println("CLIENT_BEGIN: " + frameBegin);
+    _sessions[0] = new AmqpClientSession(this);
   }
   
   @Override
@@ -639,10 +661,14 @@ public class AmqpClientConnectionImpl
   }
   
   @Override
-  public void onDisposition(FrameDisposition frameDisposition)
+  public void onDisposition(FrameDisposition disposition)
     throws IOException
   {
-    System.out.println("CLIENT_DISPOSITION: " + frameDisposition);
+    AmqpClientSession session = _sessions[0];
+    
+    session.onDisposition(disposition.getFirst(),
+                          disposition.getLast(),
+                          disposition.getState());
   }
   
   @Override

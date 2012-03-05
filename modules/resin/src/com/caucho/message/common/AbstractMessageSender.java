@@ -31,6 +31,8 @@ package com.caucho.message.common;
 
 import com.caucho.message.MessageFactory;
 import com.caucho.message.MessageSender;
+import com.caucho.message.MessageSenderFactory;
+import com.caucho.message.MessageSettleListener;
 
 /**
  * local connection to the message store
@@ -39,6 +41,13 @@ abstract public class AbstractMessageSender<T>
   extends AbstractQueueSender<T>
   implements MessageSender<T>
 {
+  private MessageSettleListener _settleListener;
+  
+  protected AbstractMessageSender(MessageSenderFactory factory)
+  {
+    _settleListener = factory.getSettleListener();
+  }
+  
   @Override
   public MessageFactory<T> createMessageFactory()
   {
@@ -55,6 +64,16 @@ abstract public class AbstractMessageSender<T>
   public int getUnsettledCount()
   {
     return 0;
+  }
+  
+  public MessageSettleListener getSettleListener()
+  {
+    return _settleListener;
+  }
+  
+  public void setMessageSettleListener(MessageSettleListener listener)
+  {
+    _settleListener = listener;
   }
   
   /**

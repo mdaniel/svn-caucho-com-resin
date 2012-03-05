@@ -61,6 +61,8 @@ public class LocalSender<T> extends AbstractMessageSender<T> {
   
   LocalSender(LocalSenderFactory factory)
   {
+    super(factory);
+    
     _address = factory.getAddress();
     _encoder = (AmqpMessageEncoder) factory.getEncoder();
     

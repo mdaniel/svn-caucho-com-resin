@@ -37,6 +37,7 @@ import com.caucho.amqp.marshal.AmqpMessageDecoder;
 import com.caucho.amqp.marshal.AmqpMessageEncoder;
 import com.caucho.amqp.marshal.AmqpStringDecoder;
 import com.caucho.amqp.marshal.AmqpStringEncoder;
+import com.caucho.message.MessageSettleListener;
 
 
 /**
@@ -45,6 +46,7 @@ import com.caucho.amqp.marshal.AmqpStringEncoder;
 class AmqpClientSenderFactory implements AmqpSenderFactory {
   private AmqpClientConnectionImpl _client;
   private boolean _isAutoSettle = true;
+  private MessageSettleListener _settleListener;
   
   private String _address;
   
@@ -78,6 +80,20 @@ class AmqpClientSenderFactory implements AmqpSenderFactory {
   public AmqpSenderFactory setAutoSettle(boolean isAutoSettle)
   {
     _isAutoSettle = isAutoSettle;
+    
+    return this;
+  }
+  
+  @Override
+  public MessageSettleListener getSettleListener()
+  {
+    return _settleListener;
+  }
+
+  @Override
+  public AmqpSenderFactory setSettleListener(MessageSettleListener listener)
+  {
+    _settleListener = listener;
     
     return this;
   }

@@ -96,7 +96,7 @@ abstract public class AmqpLink
   /**
    * @param messageId
    */
-  public void accept(long xid, long messageId)
+  public void onAccept(long xid, long messageId)
   {
     throw new UnsupportedOperationException(getClass().getName());
   }
@@ -137,26 +137,5 @@ abstract public class AmqpLink
   public String toString()
   {
     return getClass().getSimpleName() + "[" + _attach.getName() + "]";
-  }
-  
-  class MessageSettleHandler implements SenderSettleHandler {
-    private final long _deliveryId;
-    
-    MessageSettleHandler(long deliveryId)
-    {
-      _deliveryId = deliveryId;
-    }
-    
-    @Override
-    public void onAccepted(long mid)
-    {
-      _session.onAccepted(_deliveryId);
-    }
-
-    @Override
-    public void onRejected(long mid, String msg)
-    {
-      _session.onRejected(_deliveryId, msg);
-    }
   }
 }

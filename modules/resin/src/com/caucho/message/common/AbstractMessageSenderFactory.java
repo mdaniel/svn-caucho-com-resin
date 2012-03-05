@@ -30,6 +30,7 @@
 package com.caucho.message.common;
 
 import com.caucho.message.MessageSenderFactory;
+import com.caucho.message.MessageSettleListener;
 
 /**
  * local connection to the message store
@@ -37,6 +38,7 @@ import com.caucho.message.MessageSenderFactory;
 abstract public class AbstractMessageSenderFactory implements MessageSenderFactory {
   private String _address;
   private boolean _isAutoSettle = true;
+  private MessageSettleListener _settleListener;
 
   @Override
   public AbstractMessageSenderFactory setAddress(String address)
@@ -64,5 +66,19 @@ abstract public class AbstractMessageSenderFactory implements MessageSenderFacto
   public boolean isAutoSettle()
   {
     return _isAutoSettle;
+  }
+
+  @Override
+  public AbstractMessageSenderFactory setSettleListener(MessageSettleListener listener)
+  {
+    _settleListener = listener;
+    
+    return this;
+  }
+
+  @Override
+  public MessageSettleListener getSettleListener()
+  {
+    return _settleListener;
   }
 }

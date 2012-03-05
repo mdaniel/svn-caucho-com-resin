@@ -32,13 +32,21 @@ package com.caucho.amqp.server;
 import java.io.InputStream;
 
 import com.caucho.amqp.common.AmqpSession;
+import com.caucho.amqp.io.DeliveryAccepted;
+import com.caucho.amqp.io.DeliveryState;
 
 /**
  * amqp session management
  */
-public class AmqpServerSession extends AmqpSession<AmqpServerLink>
+class AmqpServerSession extends AmqpSession<AmqpServerLink>
 {
-
+  private AmqpServerConnection _conn;
+  
+  AmqpServerSession(AmqpServerConnection conn)
+  {
+    _conn = conn;
+  }
+  
   /**
    * @param amqpServerReceiverLink
    * @param messageId
@@ -48,6 +56,23 @@ public class AmqpServerSession extends AmqpSession<AmqpServerLink>
   public void writeMessage(AmqpServerReceiverLink amqpServerReceiverLink,
                            long messageId, InputStream bodyIs,
                            long contentLength)
+  {
+    // TODO Auto-generated method stub
+    
+  }
+
+  public void onAccepted(long deliveryId)
+  {
+    DeliveryState accepted = DeliveryAccepted.VALUE;
+    
+    _conn.sendDisposition(this, deliveryId, accepted);
+  }
+
+  /**
+   * @param deliveryId
+   * @param msg
+   */
+  public void onRejected(long deliveryId, String msg)
   {
     // TODO Auto-generated method stub
     

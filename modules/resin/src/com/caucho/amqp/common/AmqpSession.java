@@ -31,6 +31,12 @@ package com.caucho.amqp.common;
 
 import java.util.ArrayList;
 
+import com.caucho.amqp.io.AmqpError;
+import com.caucho.amqp.io.DeliveryAccepted;
+import com.caucho.amqp.io.DeliveryModified;
+import com.caucho.amqp.io.DeliveryRejected;
+import com.caucho.amqp.io.DeliveryReleased;
+import com.caucho.amqp.io.DeliveryState;
 import com.caucho.amqp.io.FrameFlow;
 
 /**
@@ -132,8 +138,9 @@ public class AmqpSession<L extends AmqpLink>
     return deliveryId;
   }
 
-  public void accept(long xid)
+  public void onAccept(long xid)
   {
+    System.out.println(this + " accept " + xid);
     DeliveryNode node = _head;
     
     if (node != null) {
@@ -144,7 +151,7 @@ public class AmqpSession<L extends AmqpLink>
       
       AmqpLink link = node.getLink();
       
-      link.accept(xid, node.getMessageId());
+      link.onAccept(xid, node.getMessageId());
     }
   }
 
@@ -199,6 +206,41 @@ public class AmqpSession<L extends AmqpLink>
     }
   }
   
+  public void onDisposition(long first, long last, DeliveryState state)
+  {
+    long xid = 0;
+    
+    if (state instanceof DeliveryAccepted) {
+      onAccept(xid);
+    }
+    else if (state instanceof DeliveryRejected) {
+      DeliveryRejected rejected = (DeliveryRejected) state;
+      
+      AmqpError error = rejected.getError();
+      
+      String message = null;
+      
+      if (error != null) {
+        message = error.getCondition() + ": " + error.getDescription();
+      }
+      
+      reject(xid, first, last, message);
+    }
+    else if (state instanceof DeliveryModified) {
+      DeliveryModified modified = (DeliveryModified) state;
+      
+      modified(xid, first, last,
+               modified.isDeliveryFailed(),
+               modified.isUndeliverableHere());
+    }
+    else if (state instanceof DeliveryReleased) {
+      release(xid, first, last);
+    }
+    else {
+      System.out.println("UNKNOWN");
+    }
+  }
+
   private static class DeliveryNode {
     private final long _deliveryId;
     private final AmqpLink _link;
@@ -239,24 +281,5 @@ public class AmqpSession<L extends AmqpLink>
     {
       return _next;
     }
-  }
-
-  /**
-   * @param deliveryId
-   */
-  public void onAccepted(long deliveryId)
-  {
-    // TODO Auto-generated method stub
-    
-  }
-
-  /**
-   * @param deliveryId
-   * @param msg
-   */
-  public void onRejected(long deliveryId, String msg)
-  {
-    // TODO Auto-generated method stub
-    
   }
 }
