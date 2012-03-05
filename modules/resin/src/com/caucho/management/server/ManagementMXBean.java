@@ -78,8 +78,7 @@ public interface ManagementMXBean extends ManagedObjectMXBean
   public InputStream configCat(@MXParam(name = "server") String serverId,
                           @MXParam(name = "name", required = true) String name,
                           @MXParam(name = "stage") String stage,
-                          @MXParam(name = "version") String version,
-                          @MXParam(name = "message") String message)
+                          @MXParam(name = "version") String version)
     throws ReflectionException;
 
   @Description("list the configuration files")
@@ -88,8 +87,7 @@ public interface ManagementMXBean extends ManagedObjectMXBean
   public String []configLs(@MXParam(name = "server") String serverId,
                          @MXParam(name = "name") String name,
                          @MXParam(name = "stage") String stage,
-                         @MXParam(name = "version") String version,
-                         @MXParam(name = "message") String message)
+                         @MXParam(name = "version") String version)
   throws ReflectionException;
 
   @Description("undeploy configuration")
@@ -127,6 +125,7 @@ public interface ManagementMXBean extends ManagedObjectMXBean
   @Description("sets the java.util.logging level for debugging (Resin Pro)")
   @MXAction(value = "log-level", method = "POST")
   @MXContentType
+
   public StringQueryReply setLogLevel(
     @MXParam(name = "server") String serverId,
     @MXParam(name = "loggers")
@@ -225,7 +224,7 @@ public interface ManagementMXBean extends ManagedObjectMXBean
   public ControllerStateActionQueryReply startWebApp(
     @MXParam(name = "server") String serverId,
     @MXParam(name = "tag") String tag,
-    @MXParam(name = "name") String name,
+    @MXParam(name = "context") String context,
     @MXParam(name = "stage",
              defaultValue = "production")
     String stage,
@@ -241,7 +240,7 @@ public interface ManagementMXBean extends ManagedObjectMXBean
   public ControllerStateActionQueryReply stopWebApp(
     @MXParam(name = "server") String serverId,
     @MXParam(name = "tag") String tag,
-    @MXParam(name = "name") String name,
+    @MXParam(name = "context") String context,
     @MXParam(name = "stage",
              defaultValue = "production")
     String stage,
@@ -257,7 +256,7 @@ public interface ManagementMXBean extends ManagedObjectMXBean
   public ControllerStateActionQueryReply restartWebApp(
     @MXParam(name = "server") String serverId,
     @MXParam(name = "tag") String tag,
-    @MXParam(name = "name") String name,
+    @MXParam(name = "context") String context,
     @MXParam(name = "stage",
              defaultValue = "production")
     String stage,
@@ -269,7 +268,8 @@ public interface ManagementMXBean extends ManagedObjectMXBean
   @MXAction(value = "web-app-deploy", method = "POST")
   @MXContentType
   public String webappDeploy(@MXParam(name = "server") String serverId,
-                             @MXParam(name = "context") String context,
+                             @MXParam(name = "context", required = true)
+                             String context,
                              @MXParam(name = "host", defaultValue = "default")
                              String host,
                              @MXParam(name = "stage") String stage,
@@ -311,7 +311,7 @@ public interface ManagementMXBean extends ManagedObjectMXBean
   @MXAction(value = "web-app-undeploy", method = "POST")
   @MXContentType
   public String undeploy(@MXParam(name = "server") String serverId,
-                         @MXParam(name = "context") String context,
+                         @MXParam(name = "context", required = true) String context,
                          @MXParam(name = "host", defaultValue = "default")
                          String host,
                          @MXParam(name = "stage") String stage,

@@ -135,8 +135,7 @@ public class ManagementAdmin extends AbstractManagedObject
   public InputStream configCat(String serverId,
                                 String name,
                                 String stage,
-                                String version,
-                                String message)
+                                String version)
     throws ReflectionException
   {
     CommitBuilder commit = new CommitBuilder();
@@ -165,8 +164,7 @@ public class ManagementAdmin extends AbstractManagedObject
   public String []configLs(String serverId,
                          String name,
                          String stage,
-                         String version,
-                         String message)
+                         String version)
     throws ReflectionException
   {
 
@@ -414,20 +412,20 @@ public class ManagementAdmin extends AbstractManagedObject
   @Override
   public ControllerStateActionQueryReply startWebApp(String serverId,
                                                       String tag,
-                                                      String name,
+                                                      String context,
                                                       String stage,
                                                       String host,
                                                       String version)
     throws ReflectionException
   {
-    if (tag != null && name != null)
+    if (tag != null && context != null)
       throw new IllegalArgumentException(L.l(
-        "can't specify name '{0}' with tag {1}",
-        name,
+        "can't specify context '{0}' with tag {1}",
+        context,
         tag));
 
     if (tag == null)
-      tag = makeTag(name, stage, host, version);
+      tag = makeTag(context, stage, host, version);
 
     WebAppDeployClient deployClient = getWebappDeployClient(serverId);
 
@@ -439,20 +437,20 @@ public class ManagementAdmin extends AbstractManagedObject
   @Override
   public ControllerStateActionQueryReply stopWebApp(String serverId,
                                                      String tag,
-                                                     String name,
+                                                     String context,
                                                      String stage,
                                                      String host,
                                                      String version)
     throws ReflectionException
   {
-    if (tag != null && name != null)
+    if (tag != null && context != null)
       throw new IllegalArgumentException(L.l(
-        "can't specify name '{0}' with tag {1}",
-        name,
+        "can't specify context '{0}' with tag {1}",
+        context,
         tag));
 
     if (tag == null)
-      tag = makeTag(name, stage, host, version);
+      tag = makeTag(context, stage, host, version);
 
     WebAppDeployClient deployClient = getWebappDeployClient(serverId);
 
@@ -464,20 +462,20 @@ public class ManagementAdmin extends AbstractManagedObject
   @Override
   public ControllerStateActionQueryReply restartWebApp(String serverId,
                                                         String tag,
-                                                        String name,
+                                                        String context,
                                                         String stage,
                                                         String host,
                                                         String version)
     throws ReflectionException
   {
-    if (tag != null && name != null)
+    if (tag != null && context != null)
       throw new IllegalArgumentException(L.l(
-        "can't specify name '{0}' with tag {1}",
-        name,
+        "can't specify context '{0}' with tag {1}",
+        context,
         tag));
 
     if (tag == null)
-      tag = makeTag(name, stage, host, version);
+      tag = makeTag(context, stage, host, version);
 
     WebAppDeployClient deployClient = getWebappDeployClient(serverId);
 
@@ -742,6 +740,7 @@ public class ManagementAdmin extends AbstractManagedObject
 
             builder = null;
           }
+
           continue;
         }
 
