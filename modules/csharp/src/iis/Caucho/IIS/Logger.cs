@@ -129,7 +129,7 @@ namespace Caucho.IIS
 
     internal bool IsLoggable(EventLogEntryType entryType)
     {
-      return entryType < _logLevel;
+      return entryType <= _logLevel;
     }
   }
 
