@@ -47,6 +47,7 @@ import com.caucho.config.Configurable;
 import com.caucho.config.types.Bytes;
 import com.caucho.config.types.CronType;
 import com.caucho.config.types.Period;
+import com.caucho.network.listen.TcpSocketLink;
 import com.caucho.server.http.AbstractHttpRequest;
 import com.caucho.server.http.AbstractHttpResponse;
 import com.caucho.server.http.CauchoRequest;
@@ -383,7 +384,13 @@ public class AccessLog extends AbstractAccessLog implements AlarmListener
     LogBuffer logBuffer = _logWriter.allocateBuffer();
     
     // logging is treated as idle for thread launching purposes
-    absRequest.beginThreadIdle();
+    TcpSocketLink tcpLink = absRequest.getTcpSocketLink();
+    
+    /*
+    if (tcpLink != null) {
+      tcpLink.beginThreadIdle();
+    }
+    */
 
     try {
       byte []buffer = logBuffer.getBuffer();
@@ -395,10 +402,14 @@ public class AccessLog extends AbstractAccessLog implements AlarmListener
       _logWriter.writeBuffer(logBuffer);
       logBuffer = null;
     } finally {
+      /*
+      if (tcpLink != null) {
+        tcpLink.endThreadIdle();
+      }
+      */
+      
       if (logBuffer != null)
         _logWriter.freeBuffer(logBuffer);
-      
-      absRequest.endThreadIdle();
     }
   }
 

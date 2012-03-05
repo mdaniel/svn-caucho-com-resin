@@ -224,6 +224,11 @@ public abstract class AbstractHttpRequest
   {
     return _conn;
   }
+  
+  public final TcpSocketLink getTcpSocketLink()
+  {
+    return _tcpConn;
+  }
 
   public final int getConnectionId()
   {

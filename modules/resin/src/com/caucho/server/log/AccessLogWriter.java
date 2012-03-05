@@ -58,6 +58,7 @@ public class AccessLogWriter extends AbstractRolloverLog
 
   private boolean _isAutoFlush;
   private final Object _bufferLock = new Object();
+  private final Object _offerLock = new Object();
 
   private final Semaphore _logSemaphore = new Semaphore(16 * 1024);
   private final FreeRing<LogBuffer> _freeList
@@ -109,7 +110,9 @@ public class AccessLogWriter extends AbstractRolloverLog
 
   void writeBuffer(LogBuffer buffer)
   {
-    _logWriterTask.offer(buffer);
+    synchronized (_offerLock) {
+      _logWriterTask.offer(buffer);
+    }
   }
 
   // must be synchronized by _bufferLock.
