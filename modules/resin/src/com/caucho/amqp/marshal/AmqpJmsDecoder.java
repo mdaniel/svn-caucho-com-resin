@@ -27,57 +27,50 @@
  * @author Scott Ferguson
  */
 
-package com.caucho.amqp.io;
+package com.caucho.amqp.marshal;
 
 import java.io.IOException;
 
+import javax.jms.Message;
+import javax.jms.TextMessage;
+
+import com.caucho.amqp.AmqpException;
+import com.caucho.amqp.io.AmqpConstants;
+import com.caucho.amqp.io.AmqpReader;
+import com.caucho.jms.message.TextMessageImpl;
+
 
 /**
- * AMQP connection close
+ * Encodes a message as a string.
  */
-public class FrameClose extends AmqpAbstractFrame {
-  private AmqpError _error;
+public class AmqpJmsDecoder implements AmqpMessageDecoder<Message>
+{
+  public static final AmqpJmsDecoder DECODER = new AmqpJmsDecoder();
   
   @Override
-  public final long getDescriptorCode()
-  {
-    return FT_CONN_CLOSE;
-  }
-  
-  public AmqpError getError()
-  {
-    return _error;
-  }
-  
-  @Override
-  public FrameClose createInstance()
-  {
-    return new FrameClose();
-  }
-  
-  @Override
-  public void invoke(AmqpReader ain, AmqpFrameHandler receiver)
+  public Message decode(AmqpReader in, Message prevValue)
     throws IOException
   {
-    receiver.onClose(this);
-  }
-
-  @Override
-  public void readBody(AmqpReader in, int count)
-    throws IOException
-  {
-    _error = in.readObject(AmqpError.class);
-  }
-  
-  @Override
-  public int writeBody(AmqpWriter out)
-    throws IOException
-  {
-    if (_error != null)
-      _error.write(out);
-    else
-      out.writeNull();
+    long descriptor;
     
-    return 1;
+    while ((descriptor = in.readDescriptor()) >= 0) {
+      if (descriptor == AmqpConstants.ST_MESSAGE_VALUE) {
+        String value = in.readString();
+        
+        try {
+          TextMessage txtMessage = new TextMessageImpl();
+          txtMessage.setText(value);
+        
+          return txtMessage;
+        } catch (Exception e) {
+          throw new AmqpException(e);
+        }
+      }
+      else {
+        in.readObject(descriptor);
+      }
+    }
+    
+    return null;
   }
 }

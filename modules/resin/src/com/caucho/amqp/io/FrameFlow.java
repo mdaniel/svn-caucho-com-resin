@@ -138,7 +138,7 @@ public class FrameFlow extends AmqpAbstractFrame {
   }
   
   @Override
-  public void invoke(AmqpFrameReader fin, AmqpFrameHandler receiver)
+  public void invoke(AmqpReader ain, AmqpFrameHandler receiver)
     throws IOException
   {
     receiver.onFlow(this);

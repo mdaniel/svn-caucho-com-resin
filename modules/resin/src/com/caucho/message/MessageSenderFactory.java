@@ -37,5 +37,9 @@ public interface MessageSenderFactory {
   
   public String getAddress();
   
+  public MessageSenderFactory setAutoSettle(boolean isAutoSettle);
+  
+  public boolean isAutoSettle();
+  
   public MessageSender<?> build();
 }

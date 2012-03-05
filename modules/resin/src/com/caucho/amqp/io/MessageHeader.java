@@ -37,10 +37,50 @@ import java.io.IOException;
 public class MessageHeader extends AmqpAbstractComposite {
   private boolean _isDurable;
   private int _priority = -1;  // ubyte
-  private long _ttl; // milliseconds
+  private long _ttl = -1; // milliseconds
   private boolean _isFirstAcquirer;
-  private int _deliveryCount; // uint
+  private int _deliveryCount = -1; // uint
   
+  public boolean isDurable()
+  {
+    return _isDurable;
+  }
+
+  public void setDurable(boolean durable)
+  {
+    _isDurable = durable;
+  }
+  
+  public int getPriority()
+  {
+    return _priority;
+  }
+  
+  public void setPriority(int priority)
+  {
+    _priority = priority;
+  }
+
+  public void setDeliveryCount(int deliveryCount)
+  {
+    _deliveryCount = deliveryCount;
+  }
+
+  public void setFirstAcquirer(boolean isFirstAcquirer)
+  {
+    _isFirstAcquirer = isFirstAcquirer;
+  }
+
+  public void setTimeToLive(long timeToLive)
+  {
+    _ttl = timeToLive;
+  }
+  
+  public long getTimeToLive()
+  {
+    return _ttl;
+  }
+ 
   @Override
   public long getDescriptorCode()
   {
@@ -65,6 +105,10 @@ public class MessageHeader extends AmqpAbstractComposite {
     }
     
     _ttl = in.readLong();
+    if (in.isNull()) {
+      _ttl = -1;
+    }
+    
     _isFirstAcquirer = in.readBoolean();
     _deliveryCount = in.readInt();
   }
@@ -79,8 +123,12 @@ public class MessageHeader extends AmqpAbstractComposite {
       out.writeUbyte(_priority);
     else
       out.writeNull();
+
+    if (_ttl >= 0)
+      out.writeUint((int) _ttl);
+    else
+      out.writeNull();
     
-    out.writeUint((int) _ttl);
     out.writeBoolean(_isFirstAcquirer);
     out.writeUint(_deliveryCount);
     

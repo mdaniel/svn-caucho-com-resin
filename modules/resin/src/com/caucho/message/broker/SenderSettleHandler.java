@@ -27,37 +27,15 @@
  * @author Scott Ferguson
  */
 
-package com.caucho.amqp.transform;
-
-import java.io.IOException;
-
-import com.caucho.amqp.io.AmqpConstants;
-import com.caucho.amqp.io.AmqpReader;
-import com.caucho.amqp.io.AmqpWriter;
+package com.caucho.message.broker;
 
 
 /**
- * Encodes a message as a string.
+ * Callback for a message receipt from the broker.
  */
-public class AmqpStringDecoder implements AmqpMessageDecoder<String>
+public interface SenderSettleHandler
 {
-  public static final AmqpStringDecoder DECODER = new AmqpStringDecoder();
+  public void onAccepted(long mid);
   
-  @Override
-  public String decode(AmqpReader in, String value)
-    throws IOException
-  {
-    long descriptor;
-    
-    while ((descriptor = in.readDescriptor()) >= 0) {
-      if (descriptor == AmqpConstants.ST_MESSAGE_VALUE) {
-        return in.readString();
-      }
-      else {
-        in.readObject(descriptor);
-      }
-    }
-    
-    return null;
-  }
+  public void onRejected(long mid, String msg);
 }

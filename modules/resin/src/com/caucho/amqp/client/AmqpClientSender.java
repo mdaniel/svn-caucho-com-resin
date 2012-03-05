@@ -53,9 +53,12 @@ import com.caucho.amqp.io.AmqpFrameReader;
 import com.caucho.amqp.io.AmqpFrameWriter;
 import com.caucho.amqp.io.AmqpReader;
 import com.caucho.amqp.io.AmqpWriter;
+import com.caucho.amqp.io.MessageHeader;
 import com.caucho.amqp.io.MessageProperties;
-import com.caucho.amqp.transform.AmqpMessageEncoder;
-import com.caucho.amqp.transform.AmqpStringEncoder;
+import com.caucho.amqp.marshal.AmqpMessageEncoder;
+import com.caucho.amqp.marshal.AmqpStringEncoder;
+import com.caucho.message.MessageFactory;
+import com.caucho.message.common.AbstractMessageSender;
 import com.caucho.util.L10N;
 import com.caucho.vfs.QSocket;
 import com.caucho.vfs.QSocketWrapper;
@@ -68,72 +71,36 @@ import com.caucho.vfs.WriteStream;
 /**
  * AMQP client
  */
-class AmqpClientSender<T> implements AmqpSender<T> {
+class AmqpClientSender<T> extends AbstractMessageSender<T> implements AmqpSender<T> {
   private static final long TIMEOUT_INFINITY = Long.MAX_VALUE / 2;
   
   private static final Logger log
     = Logger.getLogger(AmqpClientSender.class.getName());
   
-  private AmqpConnectionImpl _client;
+  private AmqpClientConnectionImpl _client;
   
-  private String _address;
-  private int _handle;
+  private final String _address;
+  private boolean _isAutoSettle;
+  private AmqpClientLink _link;
   
   private AmqpMessageEncoder<T> _encoder;
   
-  AmqpClientSender(AmqpConnectionImpl client,
+  AmqpClientSender(AmqpClientConnectionImpl client,
                    AmqpClientSenderFactory factory,
-                   int handle)
+                   AmqpClientLink link)
   {
     _client = client;
     _address = factory.getAddress();
-    _handle = handle;
+    _isAutoSettle = factory.isAutoSettle();
+    
+    _link = link;
     _encoder = (AmqpMessageEncoder) factory.getEncoder();
   }
 
   @Override
-  public boolean add(T value)
-  {
-    return offer(value);
-  }
-
-  @Override
-  public boolean addAll(Collection<? extends T> values)
-  {
-    for (T value : values) {
-      if (! add(value)) {
-        return false;
-      }
-    }
-    
-    return true;
-  }
-
-  @Override
-  public boolean offer(T value)
-  {
-    return offer(value, TIMEOUT_INFINITY);
-  }
-
-  @Override
-  public void put(T value) throws InterruptedException
-  {
-    offer(value, TIMEOUT_INFINITY);
-  }
-
-  @Override
-  public int remainingCapacity()
-  {
-    return 0;
-  }
-
-  @Override
-  public boolean offer(T value, long timeout, TimeUnit timeUnit)
-  {
-    return offer(value, timeUnit.toMicros(timeout));
-  }
-
-  private boolean offer(T value, long timeoutMicros)
+  protected boolean offerMicros(MessageFactory<T> factory,
+                                T value,
+                                long timeoutMicros)
   {
     try {
       TempOutputStream tOut = new TempOutputStream();
@@ -141,6 +108,16 @@ class AmqpClientSender<T> implements AmqpSender<T> {
       AmqpStreamWriter sout = new AmqpStreamWriter(os);
       AmqpWriter aout = new AmqpWriter();
       aout.initBase(sout);
+      
+      MessageHeader header = new MessageHeader();
+      
+      header.setDurable(_encoder.isDurable(factory, value));
+      header.setPriority(_encoder.getPriority(factory, value));
+      header.setTimeToLive(_encoder.getTimeToLive(factory, value));
+      header.setFirstAcquirer(_encoder.isFirstAcquirer(factory, value));
+      header.setDeliveryCount(0);
+      
+      header.write(aout);
       
       String contentType = _encoder.getContentType(value);
       
@@ -160,140 +137,23 @@ class AmqpClientSender<T> implements AmqpSender<T> {
       tOut.flush();
       tOut.close();
       
-      _client.transmit(_handle, tOut.getInputStream());
+      _client.transfer(_link, _isAutoSettle, tOut.getInputStream());
       
       return true;
     } catch (IOException e) {
       throw new AmqpException(e);
     }
   }
-  
+
+  @Override
   public void close()
   {
-    _client.closeSender(_handle);
-  }
-
-  //
-  // consumer operations are unsupported
-  //
-
-  @Override
-  public boolean contains(Object value)
-  {
-    throw new UnsupportedOperationException(getClass().getSimpleName());
-  }
-
-  @Override
-  public int drainTo(Collection values)
-  {
-    throw new UnsupportedOperationException(getClass().getSimpleName());
-  }
-
-  @Override
-  public int drainTo(Collection arg0, int arg1)
-  {
-    throw new UnsupportedOperationException(getClass().getSimpleName());
-  }
-
-  @Override
-  public T poll(long timeout, TimeUnit unit) throws InterruptedException
-  {
-    throw new UnsupportedOperationException(getClass().getSimpleName());
-  }
-
-  @Override
-  public boolean remove(Object arg0)
-  {
-    throw new UnsupportedOperationException(getClass().getSimpleName());
-  }
-
-  @Override
-  public T take() throws InterruptedException
-  {
-    throw new UnsupportedOperationException(getClass().getSimpleName());
-  }
-
-  @Override
-  public T element()
-  {
-    throw new UnsupportedOperationException(getClass().getSimpleName());
-  }
-
-  @Override
-  public T peek()
-  {
-    throw new UnsupportedOperationException(getClass().getSimpleName());
-  }
-
-  @Override
-  public T poll()
-  {
-    throw new UnsupportedOperationException(getClass().getSimpleName());
-  }
-
-  @Override
-  public T remove()
-  {
-    throw new UnsupportedOperationException(getClass().getSimpleName());
-  }
-
-  @Override
-  public void clear()
-  {
-    throw new UnsupportedOperationException(getClass().getSimpleName());
-  }
-
-  @Override
-  public boolean containsAll(Collection<?> arg0)
-  {
-    throw new UnsupportedOperationException(getClass().getSimpleName());
-  }
-
-  @Override
-  public boolean isEmpty()
-  {
-    throw new UnsupportedOperationException(getClass().getSimpleName());
-  }
-
-  @Override
-  public Iterator iterator()
-  {
-    throw new UnsupportedOperationException(getClass().getSimpleName());
-  }
-
-  @Override
-  public boolean removeAll(Collection arg0)
-  {
-    throw new UnsupportedOperationException(getClass().getSimpleName());
-  }
-
-  @Override
-  public boolean retainAll(Collection arg0)
-  {
-    throw new UnsupportedOperationException(getClass().getSimpleName());
-  }
-
-  @Override
-  public int size()
-  {
-    throw new UnsupportedOperationException(getClass().getSimpleName());
-  }
-
-  @Override
-  public Object[] toArray()
-  {
-    throw new UnsupportedOperationException(getClass().getSimpleName());
-  }
-
-  @Override
-  public Object[] toArray(Object[] arg0)
-  {
-    throw new UnsupportedOperationException(getClass().getSimpleName());
+    _client.closeSender(_link);
   }
   
   @Override
   public String toString()
   {
-    return getClass().getSimpleName() + "[" + _handle + "," + _address + "]";
+    return getClass().getSimpleName() + "[" + _address + "," + _link.getName() + "]";
   }
 }

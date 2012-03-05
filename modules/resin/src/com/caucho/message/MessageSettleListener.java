@@ -27,20 +27,14 @@
  * @author Scott Ferguson
  */
 
-package com.caucho.amqp.transform;
-
-import java.io.IOException;
-
-import com.caucho.amqp.io.AmqpWriter;
-
+package com.caucho.message;
 
 /**
- * encoding a message
+ * Callbacks when a sent message is settled on the broker, i.e. it
+ * has been received.
  */
-public interface AmqpMessageEncoder<T>
-{
-  public String getContentType(T value);
+public interface MessageSettleListener {
+  public void onAccept(long mid);
   
-  public void encode(AmqpWriter out, T value)
-    throws IOException;
+  public void onReject(long mid, String message);
 }

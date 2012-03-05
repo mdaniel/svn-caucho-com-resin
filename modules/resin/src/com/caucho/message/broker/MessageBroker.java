@@ -35,8 +35,8 @@ package com.caucho.message.broker;
  */
 public interface MessageBroker
 {
-  public BrokerPublisher createSender(String name);
+  public BrokerSender createSender(String name);
   
-  public BrokerSubscriber createReceiver(String name,
-                                           SubscriberMessageHandler listener);
+  public BrokerReceiver createReceiver(String name,
+                                           ReceiverMessageHandler listener);
 }

@@ -31,41 +31,46 @@ package com.caucho.amqp.server;
 
 import com.caucho.amqp.io.FrameAttach;
 import com.caucho.amqp.io.FrameFlow;
-import com.caucho.message.broker.BrokerSubscriber;
-import com.caucho.message.broker.BrokerPublisher;
+import com.caucho.message.broker.BrokerSender;
+import com.caucho.message.broker.SenderSettleHandler;
 
 /**
  * link session management
  */
-public class AmqpLink
+public class AmqpServerSenderLink extends AmqpServerLink
 {
-  private int _handle;
+  private BrokerSender _pub;
+  private AmqpServerSession _session;
+  private MessageSettleHandler _settleHandler;
   
-  private FrameAttach _attach;
-  
-  private BrokerPublisher _pub;
-  
-  public AmqpLink(FrameAttach attach, BrokerPublisher pub)
+  public AmqpServerSenderLink(AmqpServerSession session,
+                              FrameAttach attach,
+                              BrokerSender pub)
   {
-    this(attach);
+    super(session, attach, pub);
     
     _pub = pub;
+    _session = session;
   }
   
-  public AmqpLink(FrameAttach attach)
+  public long nextMessageId()
   {
-    _handle = attach.getHandle();
-    _attach = attach;
+    return _pub.nextMessageId();
   }
   
-  public int getHandle()
+  public void write(long xid, long mid, boolean isSettled,
+             boolean isDurable, int priority, long expireTime,
+             byte []buffer, int offset, int length)
   {
-    return _handle;
-  }
-  
-  void write(long xid, byte []buffer, int offset, int length)
-  {
-    _pub.messageComplete(xid, buffer, offset, length, null);
+    SenderSettleHandler handler = null;
+    
+    if (! isSettled) {
+      handler = new MessageSettleHandler(mid);
+    }
+    
+    System.out.println("SETTLE: " + isSettled);
+    _pub.message(xid, mid, isDurable, priority, expireTime,
+                 buffer, offset, length, null, handler);
   }
 
   /**
@@ -108,9 +113,24 @@ public class AmqpLink
     throw new UnsupportedOperationException(getClass().getName());
   }
   
-  @Override
-  public String toString()
-  {
-    return getClass().getSimpleName() + "[" + _handle + "," + _attach.getName() + "]";
+  class MessageSettleHandler implements SenderSettleHandler {
+    private final long _deliveryId;
+    
+    MessageSettleHandler(long deliveryId)
+    {
+      _deliveryId = deliveryId;
+    }
+    
+    @Override
+    public void onAccepted(long mid)
+    {
+      _session.onAccepted(_deliveryId);
+    }
+
+    @Override
+    public void onRejected(long mid, String msg)
+    {
+      _session.onRejected(_deliveryId, msg);
+    }
   }
 }

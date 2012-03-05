@@ -62,12 +62,12 @@ class AmqpClientFrameReader implements Runnable {
   private static final Logger log
     = Logger.getLogger(AmqpClientFrameReader.class.getName());
   
-  private AmqpConnectionImpl _client;
+  private AmqpClientConnectionImpl _client;
   
   private AmqpFrameReader _fin;
   private AmqpReader _ain;
   
-  AmqpClientFrameReader(AmqpConnectionImpl client,
+  AmqpClientFrameReader(AmqpClientConnectionImpl client,
                    AmqpFrameReader fin,
                    AmqpReader ain)
   {
@@ -98,7 +98,7 @@ class AmqpClientFrameReader implements Runnable {
     
     AmqpAbstractFrame frame = _ain.readObject(AmqpAbstractFrame.class);
     
-    frame.invoke(_fin, _client);
+    frame.invoke(_ain, _client);
     
     _fin.finishFrame();
     

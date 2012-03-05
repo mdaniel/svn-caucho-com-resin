@@ -27,57 +27,45 @@
  * @author Scott Ferguson
  */
 
-package com.caucho.amqp.io;
+package com.caucho.amqp.marshal;
 
 import java.io.IOException;
 
+import javax.jms.JMSException;
+import javax.jms.Message;
+import javax.jms.TextMessage;
+
+import com.caucho.amqp.AmqpException;
+import com.caucho.amqp.io.AmqpConstants;
+import com.caucho.amqp.io.AmqpWriter;
+
 
 /**
- * AMQP connection close
+ * Encodes a message as a string.
  */
-public class FrameClose extends AmqpAbstractFrame {
-  private AmqpError _error;
+public class AmqpJmsEncoder extends AbstractMessageEncoder<Message>
+  implements AmqpMessageEncoder<Message>
+{
+  public static final AmqpJmsEncoder ENCODER = new AmqpJmsEncoder();
   
   @Override
-  public final long getDescriptorCode()
+  public String getContentType(Message value)
   {
-    return FT_CONN_CLOSE;
-  }
-  
-  public AmqpError getError()
-  {
-    return _error;
+    return "text/plain";
   }
   
   @Override
-  public FrameClose createInstance()
-  {
-    return new FrameClose();
-  }
-  
-  @Override
-  public void invoke(AmqpReader ain, AmqpFrameHandler receiver)
+  public void encode(AmqpWriter out,
+                     Message msg)
     throws IOException
   {
-    receiver.onClose(this);
-  }
-
-  @Override
-  public void readBody(AmqpReader in, int count)
-    throws IOException
-  {
-    _error = in.readObject(AmqpError.class);
-  }
-  
-  @Override
-  public int writeBody(AmqpWriter out)
-    throws IOException
-  {
-    if (_error != null)
-      _error.write(out);
-    else
-      out.writeNull();
+    try {
+      TextMessage txtMessage = (TextMessage) msg;
     
-    return 1;
+      out.writeDescriptor(AmqpConstants.ST_MESSAGE_VALUE);
+      out.writeString(txtMessage.getText());
+    } catch (JMSException e) {
+      throw new AmqpException(e);
+    }
   }
 }

@@ -31,7 +31,7 @@ package com.caucho.message.stomp;
 
 import java.io.IOException;
 
-import com.caucho.message.broker.PublisherSettleHandler;
+import com.caucho.message.broker.SenderSettleHandler;
 import com.caucho.vfs.ReadStream;
 import com.caucho.vfs.WriteStream;
 
@@ -44,7 +44,8 @@ public class StompSubscribeCommand extends StompCommand
   boolean doCommand(StompConnection conn, ReadStream is, WriteStream os)
     throws IOException
   {
-    PublisherSettleHandler listener = conn.createReceiptCallback();
+    SenderSettleHandler listener = conn.createReceiptCallback();
+    long mid = 0;
     
     if (! conn.subscribe())
       throw new IOException("bad sub");
@@ -53,7 +54,7 @@ public class StompSubscribeCommand extends StompCommand
       return false;
     
     if (listener != null) {
-      listener.onComplete();
+      listener.onAccepted(mid);
     }
     
     return true;

@@ -29,45 +29,23 @@
 
 package com.caucho.message.broker;
 
-import com.caucho.vfs.TempBuffer;
-
 /**
- * Custom serialization for the cache
+ * Subscription to a destination
  */
-public class AbstractBrokerPublisher implements BrokerPublisher
+public interface BrokerReceiver
 {
-  @Override
-  public void messagePart(long xid, TempBuffer buffer, int length)
-  {
-    
-  }
+  public void accept(long xid, long mid);
   
-  @Override
-  public void messageComplete(long xid,
-                              TempBuffer buffer,
-                              int length,
-                              PublisherSettleHandler listener)
-  {
-    if (listener != null) {
-      listener.onComplete();
-    }
-  }
+  public void reject(long xid, long mid, String message);
   
-  @Override
-  public void messageComplete(long xid,
-                              byte []buffer,
-                              int offset,
-                              int length,
-                              PublisherSettleHandler listener)
-  {
-    if (listener != null) {
-      listener.onComplete();
-    }
-  }
+  public void release(long xid, long mid);
   
-  @Override
-  public void close()
-  {
-    
-  }
+  public void modified(long xid, 
+                       long mid, 
+                       boolean isFailed, 
+                       boolean isUndeliverableHere);
+  
+  public void flow(long xid, long deliveryCount, int credit);
+  
+  public void close();
 }

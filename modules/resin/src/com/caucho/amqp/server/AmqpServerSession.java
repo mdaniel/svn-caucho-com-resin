@@ -27,57 +27,29 @@
  * @author Scott Ferguson
  */
 
-package com.caucho.amqp.io;
+package com.caucho.amqp.server;
 
-import java.io.IOException;
+import java.io.InputStream;
 
+import com.caucho.amqp.common.AmqpSession;
 
 /**
- * AMQP connection close
+ * amqp session management
  */
-public class FrameClose extends AmqpAbstractFrame {
-  private AmqpError _error;
-  
-  @Override
-  public final long getDescriptorCode()
-  {
-    return FT_CONN_CLOSE;
-  }
-  
-  public AmqpError getError()
-  {
-    return _error;
-  }
-  
-  @Override
-  public FrameClose createInstance()
-  {
-    return new FrameClose();
-  }
-  
-  @Override
-  public void invoke(AmqpReader ain, AmqpFrameHandler receiver)
-    throws IOException
-  {
-    receiver.onClose(this);
-  }
+public class AmqpServerSession extends AmqpSession<AmqpServerLink>
+{
 
-  @Override
-  public void readBody(AmqpReader in, int count)
-    throws IOException
+  /**
+   * @param amqpServerReceiverLink
+   * @param messageId
+   * @param bodyIs
+   * @param contentLength
+   */
+  public void writeMessage(AmqpServerReceiverLink amqpServerReceiverLink,
+                           long messageId, InputStream bodyIs,
+                           long contentLength)
   {
-    _error = in.readObject(AmqpError.class);
-  }
-  
-  @Override
-  public int writeBody(AmqpWriter out)
-    throws IOException
-  {
-    if (_error != null)
-      _error.write(out);
-    else
-      out.writeNull();
+    // TODO Auto-generated method stub
     
-    return 1;
   }
 }

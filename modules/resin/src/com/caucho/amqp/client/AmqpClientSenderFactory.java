@@ -33,23 +33,24 @@ import com.caucho.amqp.AmqpReceiver;
 import com.caucho.amqp.AmqpReceiverFactory;
 import com.caucho.amqp.AmqpSender;
 import com.caucho.amqp.AmqpSenderFactory;
-import com.caucho.amqp.transform.AmqpMessageDecoder;
-import com.caucho.amqp.transform.AmqpMessageEncoder;
-import com.caucho.amqp.transform.AmqpStringDecoder;
-import com.caucho.amqp.transform.AmqpStringEncoder;
+import com.caucho.amqp.marshal.AmqpMessageDecoder;
+import com.caucho.amqp.marshal.AmqpMessageEncoder;
+import com.caucho.amqp.marshal.AmqpStringDecoder;
+import com.caucho.amqp.marshal.AmqpStringEncoder;
 
 
 /**
  * AMQP client
  */
 class AmqpClientSenderFactory implements AmqpSenderFactory {
-  private AmqpConnectionImpl _client;
+  private AmqpClientConnectionImpl _client;
+  private boolean _isAutoSettle = true;
   
   private String _address;
   
   private AmqpMessageEncoder<?> _encoder = AmqpStringEncoder.ENCODER;
   
-  AmqpClientSenderFactory(AmqpConnectionImpl client)
+  AmqpClientSenderFactory(AmqpClientConnectionImpl client)
   {
     _client = client;
   }
@@ -63,6 +64,20 @@ class AmqpClientSenderFactory implements AmqpSenderFactory {
   public AmqpSenderFactory setAddress(String address)
   {
     _address = address;
+    
+    return this;
+  }
+  
+  @Override
+  public boolean isAutoSettle()
+  {
+    return _isAutoSettle;
+  }
+
+  @Override
+  public AmqpSenderFactory setAutoSettle(boolean isAutoSettle)
+  {
+    _isAutoSettle = isAutoSettle;
     
     return this;
   }

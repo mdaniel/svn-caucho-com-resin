@@ -39,12 +39,12 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 
 import com.caucho.amqp.io.AmqpReader;
-import com.caucho.amqp.transform.AmqpMessageDecoder;
+import com.caucho.amqp.marshal.AmqpMessageDecoder;
 import com.caucho.message.MessageReceiver;
-import com.caucho.message.broker.BrokerPublisher;
-import com.caucho.message.broker.BrokerSubscriber;
+import com.caucho.message.broker.BrokerSender;
+import com.caucho.message.broker.BrokerReceiver;
 import com.caucho.message.broker.EnvironmentMessageBroker;
-import com.caucho.message.broker.SubscriberMessageHandler;
+import com.caucho.message.broker.ReceiverMessageHandler;
 import com.caucho.message.common.AbstractMessageReceiver;
 import com.caucho.util.L10N;
 
@@ -67,7 +67,7 @@ public class LocalReceiver<T> extends AbstractMessageReceiver<T> {
   private LinkedBlockingQueue<QueueEntry> _queue
     = new LinkedBlockingQueue<QueueEntry>();
   
-  private BrokerSubscriber _sub;
+  private BrokerReceiver _sub;
   
   LocalReceiver(LocalReceiverFactory factory)
   {
@@ -77,7 +77,7 @@ public class LocalReceiver<T> extends AbstractMessageReceiver<T> {
     
     EnvironmentMessageBroker broker = EnvironmentMessageBroker.getCurrent();
     
-    SubscriberMessageHandler handler = new LocalMessageHandler();
+    ReceiverMessageHandler handler = new LocalMessageHandler();
         
     _sub = broker.createReceiver(_address, handler);
     
@@ -146,7 +146,7 @@ public class LocalReceiver<T> extends AbstractMessageReceiver<T> {
     return getClass().getSimpleName() + "[" + getAddress() + "]";
   }
   
-  class LocalMessageHandler implements SubscriberMessageHandler {
+  class LocalMessageHandler implements ReceiverMessageHandler {
     @Override
     public void onMessage(long messageId, 
                           InputStream bodyIs, 

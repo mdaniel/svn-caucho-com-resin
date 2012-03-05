@@ -29,7 +29,7 @@
 
 package com.caucho.amqp;
 
-import com.caucho.amqp.client.AmqpConnectionImpl;
+import com.caucho.amqp.client.AmqpClientConnectionImpl;
 
 /**
  * AMQP client connection facade
@@ -58,7 +58,7 @@ public class AmqpConnectionFactory {
   
   public AmqpConnection connect()
   {
-    AmqpConnectionImpl conn = new AmqpConnectionImpl(_host, _port);
+    AmqpClientConnectionImpl conn = new AmqpClientConnectionImpl(_host, _port);
     
     conn.connect();
     

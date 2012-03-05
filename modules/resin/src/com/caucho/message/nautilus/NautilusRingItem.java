@@ -29,6 +29,7 @@
 
 package com.caucho.message.nautilus;
 
+import com.caucho.message.journal.JournalFile;
 import com.caucho.message.journal.JournalRingItem;
 import com.caucho.vfs.TempBuffer;
 
@@ -40,12 +41,12 @@ import com.caucho.vfs.TempBuffer;
  */
 public class NautilusRingItem extends JournalRingItem
 {
-  public static final int JE_CHECKPOINT = 'C';
-  public static final int JE_FLOW = 'F';
-  public static final int JE_ACCEPTED = 'A';
-  public static final int JE_MESSAGE = 'M';
-  public static final int JE_SUBSCRIBE = 'S';
-  public static final int JE_UNSUBSCRIBE = 'U';
+  public static final int JE_CHECKPOINT = JournalFile.OP_CHECKPOINT;
+  public static final int JE_MESSAGE = 0x02;
+  public static final int JE_FLOW = 0x03;
+  public static final int JE_SUBSCRIBE = 0x04;
+  public static final int JE_UNSUBSCRIBE = 0x05;
+  public static final int JE_ACCEPTED = 0x06;
   
   private static final byte []EMPTY_BUFFER = new byte[0];
   
@@ -58,11 +59,12 @@ public class NautilusRingItem extends JournalRingItem
     super(index);
   }
   
-  public void initAck(long qid,
+  public void initAck(long xid,
+                      long qid,
                       long mid,
                       NautilusBrokerSubscriber sub)
   {
-    init(JE_ACCEPTED, qid, mid, EMPTY_BUFFER, 0, 0, null, null);
+    init(JE_ACCEPTED, xid, qid, mid, EMPTY_BUFFER, 0, 0, null);
     
     _subscriber = sub;
   }
@@ -115,11 +117,18 @@ public class NautilusRingItem extends JournalRingItem
     _subscriber = null;
   }
 
-  public void initData(long qid,
-                       long mid,
-                       byte[] buffer, int offset, int length,
-                       TempBuffer tBuf)
+  public void initMessage(long xid,
+                          long qid,
+                          long mid,
+                          boolean isDurable,
+                          int priority,
+                          long expireTime,
+                          byte[] buffer, int offset, int length,
+                          TempBuffer tBuf)
   {
-    super.init(JE_MESSAGE, qid, mid, buffer, offset, length, null, tBuf);
+    long code = NautilusMultiQueueActor.encode(JE_MESSAGE, isDurable, priority,
+                                               expireTime);
+    
+    super.init(code, xid, qid, mid, buffer, offset, length, tBuf);
   }
 }

@@ -36,14 +36,14 @@ package com.caucho.message.broker;
 abstract public class AbstractMessageBroker implements MessageBroker
 {
   @Override
-  public BrokerPublisher createSender(String name)
+  public BrokerSender createSender(String name)
   {
     return null;
   }
   
   @Override
-  public BrokerSubscriber createReceiver(String name,
-                                           SubscriberMessageHandler listener)
+  public BrokerReceiver createReceiver(String name,
+                                           ReceiverMessageHandler listener)
   {
     return null;
   }

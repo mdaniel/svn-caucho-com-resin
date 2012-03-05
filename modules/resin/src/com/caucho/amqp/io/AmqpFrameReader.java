@@ -112,7 +112,8 @@ public class AmqpFrameReader extends InputStream {
     throws IOException
   {
     int delta = _size - _offset;
-    
+    _offset = _size;
+
     if (delta > 0) {
       _is.skip(delta);
     }

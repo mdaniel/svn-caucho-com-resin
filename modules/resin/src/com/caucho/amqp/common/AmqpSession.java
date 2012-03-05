@@ -27,83 +27,112 @@
  * @author Scott Ferguson
  */
 
-package com.caucho.amqp.server;
+package com.caucho.amqp.common;
 
-import java.io.IOException;
 import java.util.ArrayList;
-import java.util.logging.Logger;
 
-import com.caucho.amqp.io.FrameBegin;
 import com.caucho.amqp.io.FrameFlow;
-import com.caucho.amqp.io.FrameOpen;
-import com.caucho.amqp.io.AmqpAbstractFrame;
-import com.caucho.amqp.io.AmqpFrameReader;
-import com.caucho.amqp.io.AmqpFrameWriter;
-import com.caucho.amqp.io.AmqpReader;
-import com.caucho.amqp.io.AmqpFrameHandler;
-import com.caucho.amqp.io.AmqpWriter;
-import com.caucho.amqp.io.SaslMechanisms;
-import com.caucho.amqp.io.SaslOutcome;
-import com.caucho.network.listen.ProtocolConnection;
-import com.caucho.network.listen.SocketLink;
-import com.caucho.vfs.ReadStream;
-import com.caucho.vfs.WriteStream;
 
 /**
  * channel session management
  */
-public class AmqpSession
+public class AmqpSession<L extends AmqpLink>
 {
   private long _deliveryId = 1;
   
-  private ArrayList<AmqpLink> _links = new ArrayList<AmqpLink>();
+  private ArrayList<L> _incomingLinks = new ArrayList<L>();
+  private ArrayList<L> _outgoingLinks = new ArrayList<L>();
   
   private DeliveryNode _head;
   private DeliveryNode _tail;
   
-  public void addLink(AmqpLink link)
+  public void addIncomingLink(int handle, L link)
   {
-    int handle = link.getHandle();
-    
-    while (_links.size() <= handle) {
-      _links.add(null);
+    while (_incomingLinks.size() <= handle) {
+      _incomingLinks.add(null);
     }
     
-    _links.set(handle, link);
-    System.out.println("SET: " + handle);
+    _incomingLinks.set(handle, link);
   }
   
-  public AmqpLink getLink(int handle)
+  public L getIncomingLink(int handle)
   {
-    return _links.get(handle);
+    return _incomingLinks.get(handle);
   }
   
-  void onFlow(FrameFlow flow)
+  public int nextHandle()
+  {
+    for (int i = 0; i < _outgoingLinks.size(); i++) {
+      if (_outgoingLinks.get(i) == null) {
+        return i;
+      }
+    }
+    
+    return _outgoingLinks.size();
+  }
+  
+  public void addOutgoingLink(int handle, L link)
+  {
+    while (_outgoingLinks.size() <= handle) {
+      _outgoingLinks.add(null);
+    }
+    
+    _outgoingLinks.set(handle, link);
+  }
+  
+  public L detachOutgoingLink(int handle)
+  {
+    L link = _outgoingLinks.get(handle);
+    
+    _outgoingLinks.set(handle, null);
+    
+    return link;
+  }
+  
+  public L getOutgoingLink(int handle)
+  {
+    return _outgoingLinks.get(handle);
+  }
+  
+  public L findOutgoingLink(String name)
+  {
+    for (L link : _outgoingLinks) {
+      if (link != null && name.equals(link.getName())) {
+        return link;
+      }
+    }
+    
+    return null;
+  }
+
+  public void onFlow(FrameFlow flow)
   {
     int handle = flow.getHandle();
     
-    AmqpLink link = getLink(handle);
+    AmqpLink link = getIncomingLink(handle);
     
     link.onFlow(flow);
   }
   
-  long addDelivery(AmqpLink link, long messageId)
+  public long addDelivery(L link, long messageId, boolean isSettled)
   {
     long deliveryId = _deliveryId++;
     
-    DeliveryNode node = new DeliveryNode(deliveryId, link, messageId);
+    if (! isSettled) {
+      DeliveryNode node = new DeliveryNode(deliveryId, link, messageId);
     
-    if (_tail != null) {
-      _tail.setNext(node);
-    }
-    else {
-      _head = node;
+      if (_tail != null) {
+        _tail.setNext(node);
+      }
+      else {
+        _head = node;
+      }
     }
     
     return deliveryId;
   }
 
-  void accept(long xid)
+  public void accept(long xid)
   {
     DeliveryNode node = _head;
     
@@ -210,5 +239,24 @@ public class AmqpSession
     {
       return _next;
     }
+  }
+
+  /**
+   * @param deliveryId
+   */
+  public void onAccepted(long deliveryId)
+  {
+    // TODO Auto-generated method stub
+    
+  }
+
+  /**
+   * @param deliveryId
+   * @param msg
+   */
+  public void onRejected(long deliveryId, String msg)
+  {
+    // TODO Auto-generated method stub
+    
   }
 }

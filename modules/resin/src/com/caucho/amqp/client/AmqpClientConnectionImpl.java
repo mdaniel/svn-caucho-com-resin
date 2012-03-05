@@ -34,6 +34,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.net.Socket;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -41,6 +42,7 @@ import java.util.logging.Logger;
 import com.caucho.amqp.AmqpConnection;
 import com.caucho.amqp.AmqpException;
 import com.caucho.amqp.AmqpReceiver;
+import com.caucho.amqp.common.AmqpSession;
 import com.caucho.amqp.io.AmqpAbstractComposite;
 import com.caucho.amqp.io.AmqpAbstractFrame;
 import com.caucho.amqp.io.AmqpAbstractPacket;
@@ -67,7 +69,6 @@ import com.caucho.amqp.io.FrameTransfer;
 import com.caucho.amqp.io.LinkSource;
 import com.caucho.amqp.io.LinkTarget;
 import com.caucho.amqp.io.FrameAttach.Role;
-import com.caucho.amqp.server.AmqpSession;
 import com.caucho.env.thread.ThreadPool;
 import com.caucho.util.L10N;
 import com.caucho.vfs.QSocket;
@@ -79,13 +80,13 @@ import com.caucho.vfs.WriteStream;
 /**
  * AMQP client
  */
-public class AmqpConnectionImpl
+public class AmqpClientConnectionImpl
   implements AmqpConnection, AmqpFrameHandler
 {
-  private static final L10N L = new L10N(AmqpConnectionImpl.class);
+  private static final L10N L = new L10N(AmqpClientConnectionImpl.class);
   
   private static final Logger log
-    = Logger.getLogger(AmqpConnectionImpl.class.getName());
+    = Logger.getLogger(AmqpClientConnectionImpl.class.getName());
   
   private String _hostname;
   private int _port;
@@ -94,8 +95,7 @@ public class AmqpConnectionImpl
   private ReadStream _is;
   private WriteStream _os;
   
-  private AmqpSession[]_sessions = new AmqpSession[1];
-  private ArrayList<Link> _links = new ArrayList<Link>();
+  private AmqpClientSession[]_sessions = new AmqpClientSession[1];
   
   private AmqpFrameWriter _fout = new AmqpFrameWriter();
   private AmqpWriter _aout = new AmqpWriter();
@@ -107,14 +107,17 @@ public class AmqpConnectionImpl
   
   private int _handleCounter = 1;
   
+  private long _deliveryId = 1;
+  private static final long DELIVERY_MASK = 0xffffffffL;
+  
   private final AtomicBoolean _isClosed = new AtomicBoolean();
   private boolean _isDisconnected;
   
-  public AmqpConnectionImpl()
+  public AmqpClientConnectionImpl()
   {
   }
   
-  public AmqpConnectionImpl(String hostname, int port)
+  public AmqpClientConnectionImpl(String hostname, int port)
   {
     _hostname = hostname;
     _port = port;
@@ -181,7 +184,9 @@ public class AmqpConnectionImpl
   
   AmqpClientSender<?> buildSender(AmqpClientSenderFactory factory)
   {
-    int handle = _handleCounter++;
+    AmqpClientSession session = _sessions[0];
+    
+    int handle = session.nextHandle();
     
     String address = factory.getAddress();
     
@@ -196,17 +201,17 @@ public class AmqpConnectionImpl
     LinkTarget target = new LinkTarget();
     target.setAddress(address);
     attach.setTarget(target);
+
+    AmqpClientLink link = new AmqpClientLink(session, attach);
     
-    while (_links.size() <= handle) {
-      _links.add(null);
-    }
+    link.setOutgoingHandle(handle);
     
-    _links.set(handle, new Link(attach));
+    session.addOutgoingLink(handle, link);
     
     try {
       writeFrame(attach);
     
-      return new AmqpClientSender(this, factory, attach.getHandle());
+      return new AmqpClientSender(this, factory, link);
     } catch (IOException e) {
       throw new AmqpException(e);
     }
@@ -229,7 +234,9 @@ public class AmqpConnectionImpl
   
   AmqpClientReceiver buildReceiver(AmqpClientReceiverFactory factory)
   {
-    int handle = _handleCounter++;
+    AmqpClientSession session = _sessions[0];
+    
+    int handle = session.nextHandle();
     String address = factory.getAddress();
     
     FrameAttach attach = new FrameAttach();
@@ -244,20 +251,17 @@ public class AmqpConnectionImpl
     LinkTarget target = new LinkTarget();
     attach.setTarget(target);
     
-    while (_links.size() <= handle) {
-      _links.add(null);
-    }
+    AmqpClientLink link = new AmqpClientLink(session, attach);
+    link.setOutgoingHandle(handle);
     
-    Link link = new Link(attach);
-    
-    _links.set(handle, link);
+    session.addOutgoingLink(handle, link);
     
     try {
       writeFrame(attach);
       
       AmqpClientReceiver receiver;
     
-      receiver = new AmqpClientReceiver(this, factory, attach.getHandle());
+      receiver = new AmqpClientReceiver(this, factory, link);
       
       link.setReceiver(receiver);
       
@@ -267,10 +271,14 @@ public class AmqpConnectionImpl
     }
   }
 
-  void closeSender(int handle)
+  void closeSender(AmqpClientLink link)
   {
-    Link link = _links.set(handle, null);
-    System.out.println("CLOSE: " + link);
+    AmqpClientSession session = _sessions[0];
+    
+    int handle = link.getOutgoingHandle();
+    
+    session.detachOutgoingLink(handle);
+    link.setOutgoingHandle(-1);
     
     if (link != null) {
       FrameDetach detach = new FrameDetach();
@@ -284,21 +292,9 @@ public class AmqpConnectionImpl
     }
   }
   
-  void closeReceiver(int handle)
+  void closeReceiver(AmqpClientLink link)
   {
-    Link link = _links.set(handle, null);
-    System.out.println("CLOSE2: " + link);
-    
-    if (link != null) {
-      FrameDetach detach = new FrameDetach();
-      detach.setHandle(handle);
-      
-      try {
-        writeFrame(detach);
-      } catch (IOException e) {
-        throw new AmqpException(e);
-      }
-    }
+    closeSender(link);
   }
   
   private void connectSocket()
@@ -389,6 +385,7 @@ public class AmqpConnectionImpl
   private void writeFrame(AmqpAbstractFrame frame)
     throws IOException
   {
+    System.out.println("WF: " + frame);
     _fout.startFrame(0);
     frame.write(_aout);
     _fout.finishFrame();
@@ -418,6 +415,7 @@ public class AmqpConnectionImpl
     System.out.println("CLIENT_OPEN: " + open);
   }
   
+  /*
   void transmit(int handle, byte []buffer, int offset, int length)
   {
     try {
@@ -437,16 +435,26 @@ public class AmqpConnectionImpl
       throw new AmqpException(e);
     }
   }
+  */
   
-  void transmit(int handle, InputStream is)
+  void transfer(AmqpClientLink link,
+                boolean isSettled,
+                InputStream is)
     throws IOException
   {
+    AmqpClientSession session = _sessions[0];
+    
     try {
+      long mid = 0;
+      
+      long deliveryId = session.addDelivery(link, mid, isSettled);
+      
       _fout.startFrame(0);
     
       FrameTransfer transfer = new FrameTransfer();
-      transfer.setHandle(handle);
-      transfer.setDeliveryId(2);
+      transfer.setHandle(link.getOutgoingHandle());
+      transfer.setSettled(isSettled);
+      transfer.setDeliveryId(deliveryId);
       
       transfer.write(_aout);
 
@@ -462,13 +470,13 @@ public class AmqpConnectionImpl
   /**
    * @param handle
    */
-  public void flow(int handle, long deliveryCount, int credit)
+  public void flow(AmqpClientLink link, long deliveryCount, int credit)
   {
     try {
       _fout.startFrame(0);
     
       FrameFlow flow = new FrameFlow();
-      flow.setHandle(handle);
+      flow.setHandle(link.getOutgoingHandle());
       flow.setDeliveryCount(deliveryCount);
       flow.setLinkCredit(credit);
       
@@ -484,7 +492,7 @@ public class AmqpConnectionImpl
   /**
    * @param handle
    */
-  public void dispositionAccept(int handle)
+  public void dispositionAccept()
   {
     try {
       _fout.startFrame(0);
@@ -504,8 +512,7 @@ public class AmqpConnectionImpl
   /**
    * @param handle
    */
-  public void dispositionReject(int handle,
-                                String errorMessage)
+  public void dispositionReject(String errorMessage)
   {
     try {
       _fout.startFrame(0);
@@ -537,8 +544,7 @@ public class AmqpConnectionImpl
   /**
    * @param handle
    */
-  public void dispositionModified(int handle,
-                                  boolean isFailed,
+  public void dispositionModified(boolean isFailed,
                                   boolean isUndeliverableHere)
   {
     try {
@@ -565,7 +571,7 @@ public class AmqpConnectionImpl
   /**
    * @param handle
    */
-  public void dispositionRelease(int handle)
+  public void dispositionRelease()
   {
     try {
       _fout.startFrame(0);
@@ -585,7 +591,7 @@ public class AmqpConnectionImpl
   @Override
   public void onBegin(FrameBegin frameBegin) throws IOException
   {
-    _sessions[0] = new AmqpSession();
+    _sessions[0] = new AmqpClientSession();
     
     System.out.println("CLIENT_BEGIN: " + frameBegin);
   }
@@ -593,9 +599,13 @@ public class AmqpConnectionImpl
   @Override
   public void onAttach(FrameAttach frameAttach) throws IOException
   {
-    int handle = frameAttach.getHandle();
+    AmqpClientSession session = _sessions[0];
     
-    Link link = _links.get(handle);
+    AmqpClientLink link = session.findOutgoingLink(frameAttach.getName());
+    
+    int handle = frameAttach.getHandle();
+    session.addIncomingLink(handle, link); 
+    
     AmqpClientReceiver receiver = link.getReceiver();
     
     if (receiver != null) {
@@ -604,18 +614,17 @@ public class AmqpConnectionImpl
   }
   
   @Override
-  public void onTransfer(AmqpFrameReader fin,
+  public void onTransfer(AmqpReader ain,
                          FrameTransfer frameTransfer)
     throws IOException
   {
+    AmqpClientSession session = _sessions[0];
+    
     int handle = frameTransfer.getHandle();
     
-    Link link = _links.get(handle);
+    AmqpClientLink link = session.getIncomingLink(handle);
     AmqpClientReceiver receiver = link.getReceiver();
 
-    AmqpReader ain = new AmqpReader();
-    ain.init(fin);
-    
     receiver.receive(ain);
     
     /*
@@ -775,6 +784,24 @@ public class AmqpConnectionImpl
     AmqpClientReceiver getReceiver()
     {
       return _receiver;
+    }
+  }
+  
+  static class UnsettledNode {
+    private UnsettledNode _next;
+    
+    private int _handle;
+    private long _deliveryId;
+    
+    UnsettledNode(long deliveryId, int handle)
+    {
+      _deliveryId = deliveryId;
+      _handle = handle;
+    }
+    
+    void setNext(UnsettledNode next)
+    {
+      _next = next;
     }
   }
 }

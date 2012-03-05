@@ -27,57 +27,48 @@
  * @author Scott Ferguson
  */
 
-package com.caucho.amqp.io;
+package com.caucho.amqp.client;
 
-import java.io.IOException;
-
+import com.caucho.amqp.common.AmqpLink;
+import com.caucho.amqp.common.AmqpSession;
+import com.caucho.amqp.io.FrameAttach;
 
 /**
- * AMQP connection close
+ * link session management
  */
-public class FrameClose extends AmqpAbstractFrame {
-  private AmqpError _error;
-  
-  @Override
-  public final long getDescriptorCode()
+public class AmqpClientLink extends AmqpLink
+{
+  public AmqpClientLink(AmqpClientSession session, FrameAttach attach)
   {
-    return FT_CONN_CLOSE;
+    super(session, attach);
   }
   
-  public AmqpError getError()
+  public long nextMessageId()
   {
-    return _error;
+    return 3;
   }
   
-  @Override
-  public FrameClose createInstance()
+  public void write(long xid, long mid, boolean isSettled,
+             boolean isDurable, int priority, long expireTime,
+             byte []buffer, int offset, int length)
   {
-    return new FrameClose();
-  }
-  
-  @Override
-  public void invoke(AmqpReader ain, AmqpFrameHandler receiver)
-    throws IOException
-  {
-    receiver.onClose(this);
   }
 
-  @Override
-  public void readBody(AmqpReader in, int count)
-    throws IOException
+  /**
+   * @return
+   */
+  public AmqpClientReceiver getReceiver()
   {
-    _error = in.readObject(AmqpError.class);
+    // TODO Auto-generated method stub
+    return null;
   }
-  
-  @Override
-  public int writeBody(AmqpWriter out)
-    throws IOException
+
+  /**
+   * @param receiver
+   */
+  public void setReceiver(AmqpClientReceiver receiver)
   {
-    if (_error != null)
-      _error.write(out);
-    else
-      out.writeNull();
+    // TODO Auto-generated method stub
     
-    return 1;
   }
 }

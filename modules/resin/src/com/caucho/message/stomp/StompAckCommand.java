@@ -31,7 +31,7 @@ package com.caucho.message.stomp;
 
 import java.io.IOException;
 
-import com.caucho.message.broker.PublisherSettleHandler;
+import com.caucho.message.broker.SenderSettleHandler;
 import com.caucho.vfs.ReadStream;
 import com.caucho.vfs.WriteStream;
 
@@ -46,7 +46,7 @@ public class StompAckCommand extends StompCommand
   {
     String subscription = conn.getSubscription();
     long mid = conn.getMessageId();
-    PublisherSettleHandler listener = conn.createReceiptCallback();
+    SenderSettleHandler listener = conn.createReceiptCallback();
                        
     if (subscription == null)
       throw new IOException("bad id");
@@ -61,9 +61,9 @@ public class StompAckCommand extends StompCommand
     
     if (listener != null) {
       if (isValid)
-        listener.onComplete();
+        listener.onAccepted(mid);
       else
-        listener.onError("cannot ack from " + subscription);
+        listener.onRejected(mid, "cannot ack from " + subscription);
     }
     
     return true;

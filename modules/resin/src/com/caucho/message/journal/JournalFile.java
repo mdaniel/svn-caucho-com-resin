@@ -33,6 +33,7 @@ import java.io.IOException;
 
 import com.caucho.db.block.Block;
 import com.caucho.db.block.BlockStore;
+import com.caucho.util.L10N;
 import com.caucho.vfs.Path;
 
 /**
@@ -43,6 +44,8 @@ import com.caucho.vfs.Path;
  */
 public final class JournalFile
 {
+  private static final L10N L = new L10N(JournalFile.class);
+  
   public static final int BLOCK_BITS = BlockStore.BLOCK_BITS;
   public static final int BLOCK_SIZE = BlockStore.BLOCK_SIZE;
   
@@ -51,7 +54,8 @@ public final class JournalFile
   public static final int MIN_BLOCK_COUNT = 4;
   public static final long FILE_DATA_OFFSET = FILE_HEADER_OFFSET + 2 * FILE_HEADER_SIZE;
   
-  public static final int FH_OFF_SEQ = 0;
+  public static final int FH_OFF_PAGE = 0;
+  public static final int FH_PAGE_MASK = 0x03;
   public static final int FH_CHECKPOINT_ADDR = 8;
   public static final int FH_CHECKPOINT_OFFSET = 16;
   public static final int FH_END = 24;
@@ -62,17 +66,22 @@ public final class JournalFile
   public static final int PAD_MASK = PAD_SIZE - 1;
   
   public static final int HOFF_LENGTH = 0;
-  public static final int HOFF_FLAG = 2;
-  public static final int HOFF_CODE = 3;
-  public static final int HOFF_ID = 4;
-  public static final int HOFF_SEQ = 12;
-  public static final int HEADER_SIZE = 20;
+  public static final int HOFF_CODE = 2;
+  public static final int HOFF_QID = 8;
+  public static final int HOFF_MID = 16;
+  public static final int HOFF_XID = 24;
+  public static final int HEADER_SIZE = 32;
   
-  public static final int FLAG_INIT = 0x80;
-  public static final int FLAG_FIN = 0x40;
-  public static final int FLAG_SEQ = 0x0f;
+  public static final int H_LENGTH_MASK = 0x1fff;
+  public static final int H_PAGE = 0xe000;
+  public static final int H_PAGE_OFF = 11;
   
-
+  public static final long H_CODE_MASK = (1 << 45) - 1;
+  public static final long H_FIN = (1 << 47);
+  public static final long H_INIT = (1 << 46);
+  
+  public static final int OP_NULL = 0;
+  public static final int OP_CHECKPOINT = 1;
   
   private final Path _path;
   private BlockStore _blockStore;
@@ -88,7 +97,7 @@ public final class JournalFile
   private Block _headerBlockA;
   private Block _headerBlockB;
   
-  private int _seq;
+  private int _page;
   
   public JournalFile(Path path,
                      JournalRecoverListener listener)
@@ -104,14 +113,25 @@ public final class JournalFile
     setMinFlipSize(256 * 1024);
     
     init(listener);
+    
+    validateConstants();
+  }
+  
+  private void validateConstants()
+  {
+    // check the make sure the bitmap constants are sensible
+    if (H_LENGTH_MASK < BLOCK_SIZE - 1) {
+      throw new IllegalStateException(L.l("illegal mask"));
+    }
   }
   
   public void setMinFlipSize(long size)
   {
     size += (BLOCK_SIZE - size % BLOCK_SIZE) % BLOCK_SIZE;
     
-    if (size < 2 * BLOCK_SIZE)
+    if (size < 2 * BLOCK_SIZE) {
       size = 2 * BLOCK_SIZE;
+    }
     
     int count = (int) (size / BLOCK_SIZE);
     
@@ -179,7 +199,7 @@ public final class JournalFile
       
     byte []buffer = block.getBuffer();
       
-    seqA = buffer[FH_OFF_SEQ] & FLAG_SEQ;
+    seqA = buffer[FH_OFF_PAGE] & FH_PAGE_MASK;
       
     if ((seqA & 1) != 0)
       seqA = 0;
@@ -194,7 +214,7 @@ public final class JournalFile
       
     buffer = block.getBuffer();
       
-    seqB = buffer[FH_OFF_SEQ] & 0xff;
+    seqB = buffer[FH_OFF_PAGE] & FH_PAGE_MASK;
       
     if ((seqB & 1) != 1)
       seqB = 0;
@@ -205,7 +225,7 @@ public final class JournalFile
     if (checkpointAddrB < FILE_DATA_OFFSET + BLOCK_SIZE)
       checkpointAddrB = FILE_DATA_OFFSET + BLOCK_SIZE;
     
-    int nextA = (seqA + 1) & FLAG_SEQ;
+    int nextA = (seqA + 1) & FH_PAGE_MASK;
     if (nextA == 0)
       nextA = 2;
     
@@ -213,7 +233,7 @@ public final class JournalFile
     
     if (seqA == 0) {
       // initial state
-      _seq = FLAG_SEQ;
+      _page = FH_PAGE_MASK;
       _isFlipA = false;
       flip();
       _isFlipFree = true;
@@ -222,11 +242,11 @@ public final class JournalFile
     
     boolean isFlipFree = true;
         
-    _seq = isFlipA ? seqB : seqA;
+    _page = isFlipA ? seqB : seqA;
     _tailAddress = isFlipA ? checkpointAddrB : checkpointAddrA;
     _tailOffset = isFlipA ? checkpointOffsetB : checkpointOffsetA;
     
-    if (_tailOffset < BLOCK_SIZE && _tailAddress < fileSize & _seq != 0) {
+    if (_tailOffset < BLOCK_SIZE && _tailAddress < fileSize & _page != 0) {
       try {
         while (recoverEntry(listener)) {
           isFlipFree = false;
@@ -236,13 +256,13 @@ public final class JournalFile
       }
     }
     
-    _seq = isFlipA ? seqA : seqB;
+    _page = isFlipA ? seqA : seqB;
     _tailAddress = isFlipA ? checkpointAddrA : checkpointAddrB;
     _tailOffset = isFlipA ? checkpointOffsetA : checkpointOffsetB;
     
     boolean isRecover = false;
     
-    if (_tailOffset < BLOCK_SIZE && _tailAddress < fileSize & _seq != 0) {
+    if (_tailOffset < BLOCK_SIZE && _tailAddress < fileSize & _page != 0) {
       try {
         while (recoverEntry(listener)) {
           isRecover = true;
@@ -269,17 +289,24 @@ public final class JournalFile
       
       int len = readShort(buffer, i + HOFF_LENGTH);
       
-      int flags = buffer[i + HOFF_FLAG] & 0xff;
-      int code = buffer[i + HOFF_CODE] & 0xff;
+      int page = len >> H_PAGE_OFF;
+    
+      len &= H_LENGTH_MASK;
       
-      int journalSeq = flags & FLAG_SEQ;
+      long code = readCode(buffer, i + HOFF_CODE);
       
-      long appId = readLong(buffer, i + HOFF_ID);
-      long appSeq = readLong(buffer, i + HOFF_SEQ);
+      boolean isFin = (code & H_FIN) != 0;
+      boolean isInit = (code & H_INIT) != 0;
+      
+      code = (code & H_CODE_MASK);
+      
+      long qid = readLong(buffer, i + HOFF_QID);
+      long mid = readLong(buffer, i + HOFF_MID);
+      long xid = readLong(buffer, i + HOFF_XID);
       
       i += HEADER_SIZE;
       
-      if (journalSeq != _seq || buffer.length <= len) {
+      if (page != _page || buffer.length <= len) {
         return false;
       }
       
@@ -296,13 +323,12 @@ public final class JournalFile
         _tailOffset = i;
       }
       
-      listener.onEntry(code, 
-                       (flags & FLAG_INIT) != 0,
-                       (flags & FLAG_FIN) != 0,
-                       appId,
-                       appSeq,
-                       _blockStore, tailAddress, offset, 
-                       len);
+      listener.onEntry(code,
+                       isInit, isFin, 
+                       xid,
+                       qid,
+                       mid,
+                       _blockStore, tailAddress, offset, len);
     } finally {
       block.free();
     }
@@ -310,17 +336,21 @@ public final class JournalFile
     return true;
   }
   
-  public final void write(int code, boolean isInit, boolean isFin,
-                          long id, long seq,
+  public final void write(long code, boolean isInit, boolean isFin,
+                          long xid, long qid, long mid,
                           byte []buffer, int offset, int length,
                           JournalResult result)
     throws IOException
   {
+    if ((code & ~H_CODE_MASK) != 0) {
+      throw new IllegalArgumentException(L.l("invalid code 0x{0}",
+                                             Long.toHexString(code)));
+    }
+    
     boolean isFirst = true;
     
     do {
-      int sublen = writeImpl(code, isInit, isFin,
-                             id, seq,
+      int sublen = writeImpl(code, isInit, isFin, xid, qid, mid,
                              buffer, offset, length,
                              result, isFirst);
       
@@ -330,12 +360,10 @@ public final class JournalFile
       }
       
       isFirst = false;
+      isInit = false;
       
       offset += sublen;
       length -= sublen;
-      
-      isInit = false;
-      
     } while (length > 0);
     
     if (_flipAddress < _tailAddress && _isFlipFree) {
@@ -343,8 +371,9 @@ public final class JournalFile
     }
   }
   
-  private int writeImpl(int code, boolean isInit, boolean isFin,
-                        long id, long seq,
+  private int writeImpl(long code, 
+                        boolean isInit, boolean isFin,
+                        long xid, long qid, long mid,
                         byte []buffer, int offset, int length,
                         JournalResult result, boolean isFirst)
     throws IOException
@@ -358,31 +387,28 @@ public final class JournalFile
     
     int sublen = tailBuffer.length - i - HEADER_SIZE;
     
-    if (length <= sublen) {
+    if (length < sublen) {
       sublen = length;
-    }
-    else {
-      isFin = false;
+      isInit = false;
     }
     
-    tailBuffer[i + HOFF_LENGTH + 0] = (byte) (sublen >> 8);
-    tailBuffer[i + HOFF_LENGTH + 1] = (byte) (sublen);
+    int hLength = sublen + (_page << H_PAGE_OFF);
     
-    int flags = _seq;
+    tailBuffer[i + HOFF_LENGTH + 0] = (byte) (hLength >> 8);
+    tailBuffer[i + HOFF_LENGTH + 1] = (byte) (hLength);
     
     if (isInit) {
-      flags |= FLAG_INIT;
+      code |= H_INIT;
     }
     
     if (isFin) {
-      flags |= FLAG_FIN;
+      code |= H_FIN;
     }
-    
-    tailBuffer[i + HOFF_FLAG] = (byte) flags;
-    tailBuffer[i + HOFF_CODE] = (byte) code;
-    
-    writeLong(tailBuffer, i + HOFF_ID, id);
-    writeLong(tailBuffer, i + HOFF_SEQ, seq);
+
+    writeCode(tailBuffer, i + HOFF_CODE, code);
+    writeLong(tailBuffer, i + HOFF_XID, xid);
+    writeLong(tailBuffer, i + HOFF_QID, qid);
+    writeLong(tailBuffer, i + HOFF_MID, mid);
     
     i += HEADER_SIZE;
 
@@ -432,8 +458,6 @@ public final class JournalFile
     
     boolean isCheckpointA = ((blockAddr >> BLOCK_BITS) & 1) == 0;
     
-    long headerAddr = FILE_HEADER_OFFSET + (isCheckpointA ? 0 : BLOCK_SIZE);
-    
     Block block = isCheckpointA ? _headerBlockA : _headerBlockB;
       
     byte []buffer = block.getBuffer();
@@ -446,8 +470,6 @@ public final class JournalFile
     
     if (isCheckpointA == _isFlipA && ! _isFlipFree) {
       // if checkpoint clears the flip, then clear it as well.
-      headerAddr = FILE_HEADER_OFFSET + (isCheckpointA ? BLOCK_SIZE : 0);
-      
       block = isCheckpointA ? _headerBlockB : _headerBlockA;
         
       buffer = block.getBuffer();
@@ -476,13 +498,13 @@ public final class JournalFile
       tailBlock.commit();
     }
     
-    int seq = (_seq + 1) & FLAG_SEQ;
+    int nextPage = (_page + 1) & FH_PAGE_MASK;
     
-    if (seq < 2)
-      seq = 2;
+    if (nextPage < 2)
+      nextPage = 2;
     
-    _seq = seq;
-    _isFlipA = (seq & 1) == 0;
+    _page = nextPage;
+    _isFlipA = (nextPage & 1) == 0;
     _tailAddress = (FILE_DATA_OFFSET + (_isFlipA ? 0 : BLOCK_SIZE));
     _tailOffset = 0;
     
@@ -492,7 +514,7 @@ public final class JournalFile
     
     byte []buffer = block.getBuffer();
       
-    buffer[FH_OFF_SEQ] = (byte) _seq;
+    buffer[FH_OFF_PAGE] = (byte) _page;
       
     writeLong(buffer, FH_CHECKPOINT_ADDR, 0);
     writeLong(buffer, FH_CHECKPOINT_OFFSET, 0);
@@ -523,6 +545,26 @@ public final class JournalFile
     buffer[offset + 3] = (byte) (value >> 0);
   }
   
+  private static long readCode(byte []buffer, int offset)
+  {
+    return (((buffer[offset + 0] & 0xffL) << 40)
+           + ((buffer[offset + 1] & 0xffL) << 32)
+           + ((buffer[offset + 2] & 0xffL) << 24)
+           + ((buffer[offset + 3] & 0xffL) << 16)
+           + ((buffer[offset + 4] & 0xffL) << 8)
+           + ((buffer[offset + 5] & 0xffL)));
+  }
+  
+  private static void writeCode(byte []buffer, int offset, long value)
+  {
+    buffer[offset + 0] = (byte) (value >> 40);
+    buffer[offset + 1] = (byte) (value >> 32);
+    buffer[offset + 2] = (byte) (value >> 24);
+    buffer[offset + 3] = (byte) (value >> 16);
+    buffer[offset + 4] = (byte) (value >> 8);
+    buffer[offset + 5] = (byte) (value >> 0);
+  }
+
   private static long readLong(byte []buffer, int offset)
   {
     return (((buffer[offset + 0] & 0xffL) << 56)

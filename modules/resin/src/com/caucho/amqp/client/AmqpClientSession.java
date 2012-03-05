@@ -27,21 +27,13 @@
  * @author Scott Ferguson
  */
 
-package com.caucho.message.journal;
+package com.caucho.amqp.client;
 
-import com.caucho.db.block.BlockStore;
-import com.caucho.vfs.Path;
-import com.caucho.vfs.TempBuffer;
+import com.caucho.amqp.common.AmqpSession;
 
 /**
- * Interface for the transaction log.
- * 
- * MQueueJournal is not thread safe. It is intended to be used by a
- * single thread.
+ * amqp session management
  */
-public interface JournalCallback
+public class AmqpClientSession extends AmqpSession<AmqpClientLink>
 {
-  void onData(int code, boolean isInit, boolean isFinal,
-              long id, long sequence,
-              BlockStore blockStore, long blockAddr, int offset, int length);
 }

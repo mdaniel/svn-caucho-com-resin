@@ -29,13 +29,14 @@
 
 package com.caucho.amqp;
 
-import com.caucho.amqp.transform.AmqpMessageEncoder;
+import com.caucho.amqp.marshal.AmqpMessageEncoder;
+import com.caucho.message.MessageSenderFactory;
 
 
 /**
  * AMQP client receiver factor
  */
-public interface AmqpSenderFactory {
+public interface AmqpSenderFactory extends MessageSenderFactory {
   public AmqpSenderFactory setAddress(String address);
   
   public String getAddress();

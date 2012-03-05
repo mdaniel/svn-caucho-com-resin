@@ -37,7 +37,7 @@ import java.util.concurrent.TimeUnit;
 
 import com.caucho.amqp.AmqpReceiver;
 import com.caucho.amqp.io.AmqpReader;
-import com.caucho.amqp.transform.AmqpMessageDecoder;
+import com.caucho.amqp.marshal.AmqpMessageDecoder;
 
 /**
  * AMQP client
@@ -45,10 +45,10 @@ import com.caucho.amqp.transform.AmqpMessageDecoder;
 class AmqpClientReceiver<T> implements AmqpReceiver<T> {
   private static final long TIMEOUT_INFINITY = Long.MAX_VALUE / 2;
   
-  private final AmqpConnectionImpl _client;
+  private final AmqpClientConnectionImpl _client;
   
   private final String _address;
-  private final int _handle;
+  private final AmqpClientLink _link;
   
   private final boolean _isAutoAck;
   
@@ -60,13 +60,13 @@ class AmqpClientReceiver<T> implements AmqpReceiver<T> {
   private ConcurrentLinkedQueue<T> _valueQueue
     = new ConcurrentLinkedQueue<T>();
   
-  AmqpClientReceiver(AmqpConnectionImpl client,
+  AmqpClientReceiver(AmqpClientConnectionImpl client,
                      AmqpClientReceiverFactory builder,
-                     int handle)
+                     AmqpClientLink link)
   {
     _client = client;
     _address = builder.getAddress();
-    _handle = handle;
+    _link = link;
     
     _isAutoAck = builder.getAckMode();
     _decoder = (AmqpMessageDecoder) builder.getDecoder(); 
@@ -74,7 +74,7 @@ class AmqpClientReceiver<T> implements AmqpReceiver<T> {
     _prefetch = builder.getPrefetch();
     
     if (_prefetch > 0) {
-      _client.flow(_handle, _deliveryCount, _prefetch);
+      _client.flow(_link, _deliveryCount, _prefetch);
     }
     
   }
@@ -110,10 +110,10 @@ class AmqpClientReceiver<T> implements AmqpReceiver<T> {
       return null;
     }
     
-    _client.flow(_handle, _deliveryCount, _prefetch - _valueQueue.size());
+    _client.flow(_link, _deliveryCount, _prefetch - _valueQueue.size());
     
     if (_isAutoAck) {
-      _client.dispositionAccept(_handle);
+      _client.dispositionAccept();
     }
     
     return value;
@@ -140,25 +140,25 @@ class AmqpClientReceiver<T> implements AmqpReceiver<T> {
   @Override
   public void accepted()
   {
-    _client.dispositionAccept(_handle);
+    _client.dispositionAccept();
   }
   
   @Override
   public void rejected(String errorMessage)
   {
-    _client.dispositionReject(_handle, errorMessage);
+    _client.dispositionReject(errorMessage);
   }
   
   @Override
   public void released()
   {
-    _client.dispositionRelease(_handle);
+    _client.dispositionRelease();
   }
   
   @Override
   public void modified(boolean isFailed, boolean isUndeliverableHere)
   {
-    _client.dispositionModified(_handle, isFailed, isUndeliverableHere);
+    _client.dispositionModified(isFailed, isUndeliverableHere);
   }
 
   void setDeliveryCount(long deliveryCount)
@@ -180,13 +180,13 @@ class AmqpClientReceiver<T> implements AmqpReceiver<T> {
   
   public void close()
   {
-    _client.closeReceiver(_handle);
+    _client.closeReceiver(_link);
   }
   
   @Override
   public String toString()
   {
-    return getClass().getSimpleName() + "[" + _handle + "," + _address + "]";
+    return getClass().getSimpleName() + "[" + _address + "," + _link + "]";
   }
   
   static class ValueNode {

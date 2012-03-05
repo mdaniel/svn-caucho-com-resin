@@ -49,9 +49,19 @@ public class FrameDisposition extends AmqpAbstractFrame {
     return _role;
   }
   
+  public void setFirst(long first)
+  {
+    _first = first;
+  }
+  
   public long getFirst()
   {
     return _first;
+  }
+  
+  public void setLast(long last)
+  {
+    _last = last;
   }
   
   public long getLast()
@@ -95,7 +105,7 @@ public class FrameDisposition extends AmqpAbstractFrame {
   }
   
   @Override
-  public void invoke(AmqpFrameReader fin, AmqpFrameHandler receiver)
+  public void invoke(AmqpReader fin, AmqpFrameHandler receiver)
     throws IOException
   {
     receiver.onDisposition(this);

@@ -29,7 +29,7 @@
 
 package com.caucho.amqp;
 
-import com.caucho.amqp.client.AmqpConnectionImpl;
+import com.caucho.amqp.client.AmqpClientConnectionImpl;
 import com.caucho.amqp.server.AmqpProtocol;
 
 /**

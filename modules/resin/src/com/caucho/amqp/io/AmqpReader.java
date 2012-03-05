@@ -37,6 +37,7 @@ import java.util.Map;
 
 import javax.annotation.PostConstruct;
 
+import com.caucho.amqp.AmqpException;
 import com.caucho.network.listen.Protocol;
 import com.caucho.network.listen.ProtocolConnection;
 import com.caucho.network.listen.SocketLink;
@@ -73,6 +74,15 @@ public class AmqpReader implements AmqpConstants {
     _length = 0;
   }
   
+  public int getFrameAvailable()
+  {
+    try {
+      return _length - _offset + _is.available();
+    } catch (IOException e) {
+      throw new AmqpException(e);
+    }
+  }
+  
   public boolean isNull()
   {
     return _isNull;
@@ -85,14 +95,12 @@ public class AmqpReader implements AmqpConstants {
     int length = _length;
     
     if (length <= offset) {
-      length = _is.read(_buffer, 0, _buffer.length);
-      _length = length;
-      offset = 0;
-      _offset = offset;
-      
-      if (length < 0) {
-        return length;
+      if (! fillBuffer()) {
+        return -1;
       }
+      
+      offset = _offset;
+      length = _length;
     }
     
     int value = _buffer[offset++] & 0xff;
@@ -100,6 +108,74 @@ public class AmqpReader implements AmqpConstants {
     _offset = offset;
     
     return value;
+  }
+  
+  public long peekDescriptor()
+    throws IOException
+  {
+    ensureBuffer(10);
+    
+    int offset = _offset;
+    
+    long desc = readDescriptor();
+    
+    _offset = offset;
+    
+    return desc;
+  }
+  
+  private boolean ensureBuffer(int len)
+    throws IOException
+  {
+    if (len <= _length - _offset)
+      return true;
+    
+    System.arraycopy(_buffer, _offset, _buffer, 0, _length - _offset);
+    
+    int sublen = _buffer.length - _offset;
+    
+    sublen = _is.read(_buffer, _offset, sublen);
+    
+    if (sublen >= 0) {
+      _length = _offset + sublen;
+      _offset = 0;
+      return true;
+    }
+    else {
+      _length = _offset;
+      _offset = 0;
+      
+      return false;
+    }
+  }
+  
+  private boolean fillBuffer()
+    throws IOException
+  {
+    _length = _is.read(_buffer, 0, _buffer.length);
+    _offset = 0;
+    
+    return _length > 0;
+  }
+  
+  public int read(byte []buffer, int offset, int length)
+    throws IOException
+  {
+    int readLength = 0;
+    
+    while (readLength < length) {
+      int ch = read();
+      
+      if (ch < 0) {
+        return readLength > 0 ? readLength : -1;
+      }
+      
+      buffer[offset + readLength] = (byte) ch;
+      
+      readLength++;
+    }
+    
+    return readLength;
   }
   
   public boolean readBoolean()

@@ -29,7 +29,7 @@
 
 package com.caucho.amqp;
 
-import com.caucho.amqp.transform.AmqpMessageDecoder;
+import com.caucho.amqp.marshal.AmqpMessageDecoder;
 
 
 /**

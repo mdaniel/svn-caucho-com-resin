@@ -27,40 +27,37 @@
  * @author Scott Ferguson
  */
 
-package com.caucho.message.broker;
+package com.caucho.message.stomp;
 
+import com.caucho.message.broker.BrokerSender;
+import com.caucho.message.broker.SenderSettleHandler;
 import com.caucho.vfs.TempBuffer;
 
 /**
  * Custom serialization for the cache
  */
-public class NullPublisher implements BrokerPublisher
+public class NullSender implements BrokerSender
 {
   @Override
-  public void messagePart(long xid, TempBuffer buffer, int length)
+  public long nextMessageId()
   {
+    return 0;
   }
   
   @Override
-  public void messageComplete(long xid,
-                              TempBuffer buffer, 
-                              int length,
-                              PublisherSettleHandler listener)
+  public void message(long xid, 
+                      long mid,
+                      boolean isDurable,
+                      int priority,
+                      long expireTime,
+                      byte []buffer,
+                      int offset,
+                      int length,
+                      TempBuffer tBuf,
+                      SenderSettleHandler listener)
   {
     if (listener != null) {
-      listener.onComplete();
-    }
-  }
-  
-  @Override
-  public void messageComplete(long xid, 
-                              byte []buffer,
-                              int offset,
-                              int length,
-                              PublisherSettleHandler listener)
-  {
-    if (listener != null) {
-      listener.onComplete();
+      listener.onAccepted(mid);
     }
   }
   

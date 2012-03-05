@@ -35,8 +35,9 @@ import com.caucho.amqp.AmqpException;
 import com.caucho.amqp.io.AmqpStreamWriter;
 import com.caucho.amqp.io.AmqpWriter;
 import com.caucho.amqp.io.MessageProperties;
-import com.caucho.amqp.transform.AmqpMessageEncoder;
-import com.caucho.message.broker.BrokerPublisher;
+import com.caucho.amqp.marshal.AmqpMessageEncoder;
+import com.caucho.message.MessageFactory;
+import com.caucho.message.broker.BrokerSender;
 import com.caucho.message.broker.EnvironmentMessageBroker;
 import com.caucho.message.common.AbstractMessageSender;
 import com.caucho.util.L10N;
@@ -54,7 +55,7 @@ public class LocalSender<T> extends AbstractMessageSender<T> {
   private String _address;
   private AmqpMessageEncoder<T> _encoder;
   
-  private BrokerPublisher _publisher;
+  private BrokerSender _publisher;
   
   private WriteStream _os;
   
@@ -82,7 +83,9 @@ public class LocalSender<T> extends AbstractMessageSender<T> {
   }
   
   @Override
-  protected boolean offerMicros(T value, long timeoutMicros)
+  protected boolean offerMicros(MessageFactory<T> factory,
+                                T value,
+                                long timeoutMicros)
   {
     try {
       TempOutputStream tOut = new TempOutputStream();
@@ -111,8 +114,14 @@ public class LocalSender<T> extends AbstractMessageSender<T> {
       tOut.close();
 
       long xid = 0;
+      long mid = 0;
+      boolean isDurable = false;
+      int priority = 4;
+      long expireTime = 0;
       
-      _publisher.messageComplete(xid, tOut.getHead(), tOut.getLength(), null);
+      _publisher.message(xid, mid, isDurable, priority, expireTime,
+                         tOut.getHead().getBuffer(), 0, tOut.getLength(), 
+                         tOut.getHead(), null);
       
       return true;
     } catch (IOException e) {
@@ -129,7 +138,7 @@ public class LocalSender<T> extends AbstractMessageSender<T> {
   @Override
   public void close()
   {
-    BrokerPublisher pub = _publisher;
+    BrokerSender pub = _publisher;
     _publisher = null;
     
     if (pub != null) {

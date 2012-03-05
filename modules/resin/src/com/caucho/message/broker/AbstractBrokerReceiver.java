@@ -27,57 +27,48 @@
  * @author Scott Ferguson
  */
 
-package com.caucho.amqp.io;
-
-import java.io.IOException;
+package com.caucho.message.broker;
 
 
 /**
- * AMQP connection close
+ * Custom serialization for the cache
  */
-public class FrameClose extends AmqpAbstractFrame {
-  private AmqpError _error;
-  
+public class AbstractBrokerReceiver implements BrokerReceiver
+{
   @Override
-  public final long getDescriptorCode()
+  public void accept(long xid, long mid)
   {
-    return FT_CONN_CLOSE;
-  }
-  
-  public AmqpError getError()
-  {
-    return _error;
   }
   
   @Override
-  public FrameClose createInstance()
+  public void reject(long xid, long mid, String message)
   {
-    return new FrameClose();
   }
   
   @Override
-  public void invoke(AmqpReader ain, AmqpFrameHandler receiver)
-    throws IOException
+  public void release(long xid, long mid)
   {
-    receiver.onClose(this);
-  }
-
-  @Override
-  public void readBody(AmqpReader in, int count)
-    throws IOException
-  {
-    _error = in.readObject(AmqpError.class);
   }
   
   @Override
-  public int writeBody(AmqpWriter out)
-    throws IOException
+  public void modified(long xid,
+                       long mid, 
+                       boolean isFailed, 
+                       boolean isUndeliverableHere)
   {
-    if (_error != null)
-      _error.write(out);
-    else
-      out.writeNull();
     
-    return 1;
+  }
+  
+  
+  @Override
+  public void flow(long xid,
+                   long deliveryCount, 
+                   int linkCredit)
+  {
+  }
+  
+  @Override
+  public void close()
+  {
   }
 }

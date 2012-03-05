@@ -71,7 +71,7 @@ public interface AmqpFrameHandler {
   /**
    * @param frameTransfer
    */
-  void onTransfer(AmqpFrameReader fin, FrameTransfer frameTransfer)
+  void onTransfer(AmqpReader ain, FrameTransfer frameTransfer)
     throws IOException;
 
   /**

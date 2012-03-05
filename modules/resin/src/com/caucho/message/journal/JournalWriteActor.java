@@ -34,17 +34,15 @@ import java.io.IOException;
 import com.caucho.env.thread.ActorQueue.ItemProcessor;
 
 /**
- * Interface for the transaction log.
- * 
- * MQueueJournal is not thread safe. It is intended to be used by a
- * single thread.
+ * Actor-processor for writing to the transaction log. The actor is a
+ * single-threaded process.
  */
-public class JournalItemProcessor
+public class JournalWriteActor
   implements ItemProcessor<JournalRingItem>
 {
   private final JournalFile _journalFile;
   
-  public JournalItemProcessor(JournalFile journalFile)
+  public JournalWriteActor(JournalFile journalFile)
   {
     _journalFile = journalFile;
   }
@@ -62,25 +60,26 @@ public class JournalItemProcessor
   private final void processData(JournalRingItem entry)
     throws IOException
   {
-      int code = entry.getCode();
-      long id = entry.getId();
-      long sequence = entry.getSequence();
-      JournalResult result = entry.getResult();
-      
-      byte []buffer = entry.getBuffer();
-      
-      if (buffer == null) {
-        //System.out.println("NULLB:" + sequence);
-        return;
-      }
-      
-      _journalFile.write(code, entry.isInit(), entry.isFin(),
-                         id, sequence,
-                         buffer, entry.getOffset(), entry.getLength(),
-                         result);
+    byte []buffer = entry.getBuffer();
+
+    if (buffer == null) {
+      //System.out.println("NULLB:" + sequence);
+      return;
+    }
     
-      entry.freeTempBuffer();
-   }
+    long code = entry.getCode();
+    long xid = entry.getXid();
+    long qid = entry.getQid();
+    long mid = entry.getMid();
+    JournalResult result = entry.getResult();
+
+    _journalFile.write(code, entry.isInit(), entry.isFin(),
+                       xid, qid, mid,
+                       buffer, entry.getOffset(), entry.getLength(),
+                       result);
+
+    entry.freeTempBuffer();
+  }
   
   private final void processCheckpoint(JournalRingItem entry)
     throws IOException

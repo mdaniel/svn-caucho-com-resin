@@ -38,8 +38,8 @@ import com.caucho.db.block.BlockStore;
  */
 public interface JournalRecoverListener
 {
-  public void onEntry(int code, boolean isInit, boolean isFin,
-                      long id, long seq,
+  public void onEntry(long code, boolean isInit, boolean isFin,
+                      long xid, long qid, long mid,
                       BlockStore store, 
                       long blockAddress, int blockOffset, int length)
     throws IOException;

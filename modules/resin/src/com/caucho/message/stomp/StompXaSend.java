@@ -29,7 +29,7 @@
 
 package com.caucho.message.stomp;
 
-import com.caucho.message.broker.BrokerPublisher;
+import com.caucho.message.broker.BrokerSender;
 import com.caucho.vfs.TempBuffer;
 
 /**
@@ -37,12 +37,12 @@ import com.caucho.vfs.TempBuffer;
  */
 class StompXaSend extends StompXaItem
 {
-  private BrokerPublisher _dest;
+  private BrokerSender _dest;
   
   private TempBuffer _tBuf;
   private int _length;
   
-  StompXaSend(BrokerPublisher dest, TempBuffer tBuf, int length)
+  StompXaSend(BrokerSender dest, TempBuffer tBuf, int length)
   {
     _dest = dest;
     _tBuf = tBuf;
@@ -52,7 +52,13 @@ class StompXaSend extends StompXaItem
   @Override
   boolean doCommand(StompConnection conn)
   {
-    _dest.messageComplete(conn.getXid(), _tBuf, _length, null);
+    boolean isDurable= false;
+    int priority = -1;
+    long expireTime = 0;
+    long mid = 0;
+    
+    _dest.message(conn.getXid(), mid, isDurable, priority, expireTime,
+                  _tBuf.getBuffer(), 0, _length, _tBuf, null);
     
     return true;
   }

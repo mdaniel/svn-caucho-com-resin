@@ -27,18 +27,30 @@
  * @author Scott Ferguson
  */
 
-package com.caucho.amqp.transform;
+package com.caucho.message;
 
-import java.io.IOException;
-
-import com.caucho.amqp.io.AmqpReader;
+import java.util.concurrent.BlockingQueue;
 
 
 /**
- * encoding a message
+ * message factory
  */
-public interface AmqpMessageDecoder<T>
-{
-  public T decode(AmqpReader in, T value)
-    throws IOException;
+public interface MessageFactory<T> extends BlockingQueue<T> {
+  public void setDurable(boolean isDurable);
+  
+  public boolean isDurable();
+  
+  public void setPriority(int priority);
+
+  public int getPriority();
+
+  public long getTimeToLive();
+  
+  public void setTimeToLive(long timeToLive);
+
+  public boolean isFirstAcquirer();
+  
+  public void setFirstAcquirer(boolean isFirst);
+  
+  public void close();
 }

@@ -31,7 +31,7 @@ package com.caucho.message.stomp;
 
 import java.io.IOException;
 
-import com.caucho.message.broker.PublisherSettleHandler;
+import com.caucho.message.broker.SenderSettleHandler;
 import com.caucho.vfs.ReadStream;
 import com.caucho.vfs.WriteStream;
 
@@ -45,7 +45,8 @@ public class StompCommitCommand extends StompCommand
     throws IOException
   {
     String transaction = conn.getTransaction();
-    PublisherSettleHandler listener = conn.createReceiptCallback();
+    SenderSettleHandler listener = conn.createReceiptCallback();
+    long mid = 0;
                        
     if (transaction == null)
       throw new IOException("bad transaction");
@@ -57,9 +58,9 @@ public class StompCommitCommand extends StompCommand
     
     if (listener != null) {
       if (isValid)
-        listener.onComplete();
+        listener.onAccepted(mid);
       else
-        listener.onError("cannot commit " + transaction);
+        listener.onRejected(mid, "cannot commit " + transaction);
     }
     
     return true;

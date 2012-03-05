@@ -31,7 +31,7 @@ package com.caucho.message.stomp;
 
 import java.io.IOException;
 
-import com.caucho.message.broker.PublisherSettleHandler;
+import com.caucho.message.broker.SenderSettleHandler;
 import com.caucho.vfs.ReadStream;
 import com.caucho.vfs.WriteStream;
 
@@ -45,7 +45,8 @@ public class StompUnsubscribeCommand extends StompCommand
     throws IOException
   {
     String id = conn.getId();
-    PublisherSettleHandler listener = conn.createReceiptCallback();
+    SenderSettleHandler listener = conn.createReceiptCallback();
+    long mid = 0;
                        
     if (id == null)
       throw new IOException("bad id");
@@ -57,9 +58,9 @@ public class StompUnsubscribeCommand extends StompCommand
     
     if (listener != null) {
       if (isValid)
-        listener.onComplete();
+        listener.onAccepted(mid);
       else
-        listener.onError("cannot unsubscribe from " + id);
+        listener.onRejected(mid, "cannot unsubscribe from " + id);
     }
     
     return true;

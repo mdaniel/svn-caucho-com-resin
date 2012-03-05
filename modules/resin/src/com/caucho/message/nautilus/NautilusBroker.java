@@ -46,13 +46,13 @@ import com.caucho.env.service.RootDirectorySystem;
 import com.caucho.env.thread.ActorQueue;
 import com.caucho.loader.Environment;
 import com.caucho.message.broker.AbstractMessageBroker;
-import com.caucho.message.broker.BrokerSubscriber;
-import com.caucho.message.broker.BrokerPublisher;
+import com.caucho.message.broker.BrokerReceiver;
+import com.caucho.message.broker.BrokerSender;
 import com.caucho.message.broker.EnvironmentMessageBroker;
-import com.caucho.message.broker.SubscriberMessageHandler;
+import com.caucho.message.broker.ReceiverMessageHandler;
 import com.caucho.message.journal.JournalRecoverListener;
 import com.caucho.message.journal.JournalFile;
-import com.caucho.message.journal.JournalItemProcessor;
+import com.caucho.message.journal.JournalWriteActor;
 import com.caucho.message.journal.JournalResult;
 import com.caucho.message.nautilus.NautilusBrokerStore.BrokerQueue;
 import com.caucho.util.L10N;
@@ -118,7 +118,7 @@ public class NautilusBroker extends AbstractMessageBroker implements Closeable
   }
   
   @Override
-  public BrokerPublisher createSender(String name)
+  public BrokerSender createSender(String name)
   {
     BrokerQueue queue = getQueue(name);
     
@@ -126,8 +126,8 @@ public class NautilusBroker extends AbstractMessageBroker implements Closeable
   }
   
   @Override
-  public BrokerSubscriber createReceiver(String name,
-                                         SubscriberMessageHandler handler)
+  public BrokerReceiver createReceiver(String name,
+                                         ReceiverMessageHandler handler)
   {
     BrokerQueue queue = getQueue(name);
     
@@ -154,7 +154,7 @@ public class NautilusBroker extends AbstractMessageBroker implements Closeable
   
     _nautilusActorQueue = new ActorQueue<NautilusRingItem>(8192,
         new NautilusItemFactory(),
-        new JournalItemProcessor(_journalFile),
+        new JournalWriteActor(_journalFile),
         _nautilusActor);
     
     NautilusCheckpointPublisher pub
@@ -204,12 +204,19 @@ public class NautilusBroker extends AbstractMessageBroker implements Closeable
     private NautilusRingItem _entry = new NautilusRingItem(0);
 
     @Override
-    public void onEntry(int code, boolean isInit, boolean isFin, 
+    public void onEntry(long code,
+                        boolean isInit,
+                        boolean isFin, 
+                        long xid,
                         long qid,
-                        long mid, BlockStore store, long blockAddress,
-                        int blockOffset, int length) throws IOException
+                        long mid,
+                        BlockStore store,
+                        long blockAddress,
+                        int blockOffset,
+                        int length)
+      throws IOException
     {
-      _entry.init(code, qid, mid, null, 0, 0, null, null);
+      _entry.init(code, xid, qid, mid, null, 0, 0, null);
       
       JournalResult result = _entry.getResult();
 

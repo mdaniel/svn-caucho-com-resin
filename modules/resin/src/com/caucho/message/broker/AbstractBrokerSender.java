@@ -27,50 +27,40 @@
  * @author Scott Ferguson
  */
 
-package com.caucho.amqp.transform;
+package com.caucho.message.broker;
 
-import java.io.IOException;
-
-import javax.jms.Message;
-import javax.jms.TextMessage;
-
-import com.caucho.amqp.AmqpException;
-import com.caucho.amqp.io.AmqpConstants;
-import com.caucho.amqp.io.AmqpReader;
-import com.caucho.jms.message.TextMessageImpl;
-
+import com.caucho.vfs.TempBuffer;
 
 /**
- * Encodes a message as a string.
+ * Custom serialization for the cache
  */
-public class AmqpJmsDecoder implements AmqpMessageDecoder<Message>
+public class AbstractBrokerSender implements BrokerSender
 {
-  public static final AmqpJmsDecoder DECODER = new AmqpJmsDecoder();
+  public long nextMessageId()
+  {
+    return 0;
+  }
   
   @Override
-  public Message decode(AmqpReader in, Message prevValue)
-    throws IOException
+  public void message(long xid,
+                      long mid,
+                      boolean isDurable,
+                      int priority,
+                      long expireTime,
+                      byte []buffer,
+                      int offset,
+                      int length,
+                      TempBuffer tBuf,
+                      SenderSettleHandler listener)
   {
-    long descriptor;
-    
-    while ((descriptor = in.readDescriptor()) >= 0) {
-      if (descriptor == AmqpConstants.ST_MESSAGE_VALUE) {
-        String value = in.readString();
-        
-        try {
-          TextMessage txtMessage = new TextMessageImpl();
-          txtMessage.setText(value);
-        
-          return txtMessage;
-        } catch (Exception e) {
-          throw new AmqpException(e);
-        }
-      }
-      else {
-        in.readObject(descriptor);
-      }
+    if (listener != null) {
+      listener.onAccepted(mid);
     }
+  }
+  
+  @Override
+  public void close()
+  {
     
-    return null;
   }
 }

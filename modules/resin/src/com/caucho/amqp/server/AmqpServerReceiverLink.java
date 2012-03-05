@@ -34,27 +34,24 @@ import java.io.InputStream;
 
 import com.caucho.amqp.io.FrameAttach;
 import com.caucho.amqp.io.FrameFlow;
-import com.caucho.message.broker.BrokerSubscriber;
-import com.caucho.message.broker.BrokerPublisher;
-import com.caucho.message.broker.SubscriberMessageHandler;
+import com.caucho.message.broker.BrokerReceiver;
+import com.caucho.message.broker.BrokerSender;
+import com.caucho.message.broker.ReceiverMessageHandler;
 
 /**
  * link session management
  */
-public class AmqpReceiverLink extends AmqpLink implements SubscriberMessageHandler
+public class AmqpServerReceiverLink extends AmqpServerLink implements ReceiverMessageHandler
 {
-  private AmqpServerConnection _conn;
+  private BrokerReceiver _sub;
   
-  private BrokerSubscriber _sub;
-  
-  public AmqpReceiverLink(AmqpServerConnection conn, FrameAttach attach)
+  public AmqpServerReceiverLink(AmqpServerSession session,
+                                FrameAttach attach)
   {
-    super(attach);
-    
-    _conn = conn;
+    super(session, attach, null);
   }
   
-  void setReceiver(BrokerSubscriber sub)
+  void setReceiver(BrokerReceiver sub)
   {
     _sub = sub;
   }
@@ -76,7 +73,9 @@ public class AmqpReceiverLink extends AmqpLink implements SubscriberMessageHandl
                         long contentLength)
     throws IOException
   {
-    _conn.writeMessage(this, messageId, bodyIs, contentLength);
+    AmqpServerSession session = getSession();
+    
+    session.writeMessage(this, messageId, bodyIs, contentLength);
   }
   
   @Override

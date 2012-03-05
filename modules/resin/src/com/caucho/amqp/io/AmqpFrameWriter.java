@@ -79,7 +79,6 @@ public class AmqpFrameWriter extends AmqpBaseWriter {
     
     _os.write(_buffer, 0, _offset);
     
-
     _offset = 0;
   }
   
@@ -94,8 +93,6 @@ public class AmqpFrameWriter extends AmqpBaseWriter {
       len++;
       write(ch);
     }
-    
-    System.out.println("LEN:"+ len);
     
     return len;
   }

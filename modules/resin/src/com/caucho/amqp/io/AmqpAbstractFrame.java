@@ -36,7 +36,7 @@ import java.io.IOException;
  * AMQP frame packet
  */
 abstract public class AmqpAbstractFrame extends AmqpAbstractComposite {
-  public void invoke(AmqpFrameReader fin, AmqpFrameHandler receiver)
+  public void invoke(AmqpReader ain, AmqpFrameHandler receiver)
     throws IOException
   {
     throw new UnsupportedOperationException(getClass().getName());

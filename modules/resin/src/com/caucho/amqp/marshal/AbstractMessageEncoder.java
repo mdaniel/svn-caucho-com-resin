@@ -27,32 +27,50 @@
  * @author Scott Ferguson
  */
 
-package com.caucho.amqp.transform;
+package com.caucho.amqp.marshal;
 
 import java.io.IOException;
 
-import com.caucho.amqp.io.AmqpConstants;
 import com.caucho.amqp.io.AmqpWriter;
+import com.caucho.message.MessageFactory;
 
 
 /**
- * Encodes a message as a string.
+ * encoding a message
  */
-public class AmqpStringEncoder implements AmqpMessageEncoder<String>
+abstract public class AbstractMessageEncoder<T> implements AmqpMessageEncoder<T>
 {
-  public static final AmqpStringEncoder ENCODER = new AmqpStringEncoder();
-  
   @Override
-  public String getContentType(String value)
+  public boolean isDurable(MessageFactory<T> factory, T value)
   {
-    return "text/plain";
+    return factory.isDurable();
   }
   
   @Override
-  public void encode(AmqpWriter out, String value)
-    throws IOException
+  public int getPriority(MessageFactory<T> factory, T value)
   {
-    out.writeDescriptor(AmqpConstants.ST_MESSAGE_VALUE);
-    out.writeString(value);
+    return factory.getPriority();
   }
+  
+  @Override
+  public long getTimeToLive(MessageFactory<T> factory, T value)
+  {
+    return factory.getTimeToLive();
+  }
+  
+  @Override
+  public boolean isFirstAcquirer(MessageFactory<T> factory, T value)
+  {
+    return factory.isFirstAcquirer();
+  }
+  
+  @Override
+  public String getContentType(T value)
+  {
+    return null;
+  }
+  
+  @Override
+  abstract public void encode(AmqpWriter out, T value)
+    throws IOException;
 }

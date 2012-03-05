@@ -27,27 +27,37 @@
  * @author Scott Ferguson
  */
 
-package com.caucho.message.broker;
+package com.caucho.amqp.marshal;
 
-import com.caucho.vfs.TempBuffer;
+import java.io.IOException;
+
+import com.caucho.amqp.io.AmqpConstants;
+import com.caucho.amqp.io.AmqpReader;
+import com.caucho.amqp.io.AmqpWriter;
+
 
 /**
- * Custom serialization for the cache
+ * Encodes a message as a string.
  */
-public interface BrokerPublisher
+public class AmqpStringDecoder implements AmqpMessageDecoder<String>
 {
-  public void messagePart(long xid, TempBuffer buffer, int length);
+  public static final AmqpStringDecoder DECODER = new AmqpStringDecoder();
   
-  public void messageComplete(long xid,
-                              TempBuffer buffer, 
-                              int length,
-                              PublisherSettleHandler receiptListener);
-  
-  public void messageComplete(long xid,
-                              byte []buffer,
-                              int offset,
-                              int length,
-                              PublisherSettleHandler receiptListener);
-  
-  public void close();
+  @Override
+  public String decode(AmqpReader in, String value)
+    throws IOException
+  {
+    long descriptor;
+    
+    while ((descriptor = in.readDescriptor()) >= 0) {
+      if (descriptor == AmqpConstants.ST_MESSAGE_VALUE) {
+        return in.readString();
+      }
+      else {
+        in.readObject(descriptor);
+      }
+    }
+    
+    return null;
+  }
 }

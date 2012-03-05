@@ -31,7 +31,7 @@ package com.caucho.message.stomp;
 
 import java.io.IOException;
 
-import com.caucho.message.broker.PublisherSettleHandler;
+import com.caucho.message.broker.SenderSettleHandler;
 import com.caucho.vfs.ReadStream;
 import com.caucho.vfs.WriteStream;
 
@@ -44,13 +44,15 @@ public class StompDisconnectCommand extends StompCommand
   boolean doCommand(StompConnection conn, ReadStream is, WriteStream os)
     throws IOException
   {
+    long mid = 0;
+    
     if (! skipToEnd(is))
       return false;
 
-    PublisherSettleHandler listener = conn.createReceiptCallback();
+    SenderSettleHandler listener = conn.createReceiptCallback();
     
     if (listener != null) {
-      listener.onComplete();
+      listener.onAccepted(mid);
     }
     
     return false;

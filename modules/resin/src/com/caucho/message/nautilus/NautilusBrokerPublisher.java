@@ -30,14 +30,14 @@
 package com.caucho.message.nautilus;
 
 import com.caucho.env.thread.ActorQueue;
-import com.caucho.message.broker.BrokerPublisher;
-import com.caucho.message.broker.PublisherSettleHandler;
+import com.caucho.message.broker.BrokerSender;
+import com.caucho.message.broker.SenderSettleHandler;
 import com.caucho.vfs.TempBuffer;
 
 /**
  * Custom serialization for the cache
  */
-public class NautilusBrokerPublisher implements BrokerPublisher
+public class NautilusBrokerPublisher implements BrokerSender
 {
   private ActorQueue<NautilusRingItem> _nautilusQueue;
   
@@ -52,47 +52,36 @@ public class NautilusBrokerPublisher implements BrokerPublisher
   }
   
   @Override
-  public void messagePart(long xid, TempBuffer buffer, int length)
+  public long nextMessageId()
   {
-    System.out.println("PART: " + length);
-  }
-  
-  // XXX: needs contentType, xid
-  @Override
-  public void messageComplete(long xid,
-                              TempBuffer buffer, 
-                              int length,
-                              PublisherSettleHandler settleHandler)
-  {
-    write(buffer.getBuffer(), 0, length, buffer);
+    return ++_mid;
   }
   
   @Override
-  public void messageComplete(long xid,
-                              byte []buffer,
-                              int offset,
-                              int length,
-                              PublisherSettleHandler settleHandler)
+  public void message(long xid,
+                      long mid,
+                      boolean isDurable,
+                      int priority,
+                      long expireTime,
+                      byte []buffer,
+                      int offset,
+                      int length,
+                      TempBuffer tBuf,
+                      SenderSettleHandler settleHandler)
   {
-    write(buffer, 0, length, null);
-  }
-  
-  public void close()
-  {
-    System.out.println("CLOSE:");
-    
-  }
-  
-  public void write(byte []buffer, int offset, int length, TempBuffer tBuf)
-  {
-    long mid = _mid++;
-    
     NautilusRingItem entry = _nautilusQueue.startOffer(true);
     
-    entry.initData(_qid, mid, buffer, offset, length, tBuf);
+    entry.initMessage(xid, _qid, mid,
+                      isDurable, priority, expireTime,
+                      buffer, offset, length, tBuf);
     
     _nautilusQueue.finishOffer(entry);
     
     _nautilusQueue.wake();
+  }
+
+  @Override
+  public void close()
+  {
   }
 }

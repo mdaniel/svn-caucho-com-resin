@@ -27,12 +27,18 @@
  * @author Scott Ferguson
  */
 
-package com.caucho.message.broker;
+package com.caucho.amqp.marshal;
+
+import java.io.IOException;
+
+import com.caucho.amqp.io.AmqpReader;
 
 
 /**
- * Simple stomp broker.
+ * encoding a message
  */
-public class BasicMessageBroker extends AbstractMessageBroker
+public interface AmqpMessageDecoder<T>
 {
+  public T decode(AmqpReader in, T value)
+    throws IOException;
 }

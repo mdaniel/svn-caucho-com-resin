@@ -31,8 +31,11 @@ package com.caucho.amqp.server;
 
 import java.io.IOException;
 import java.io.InputStream;
+import java.util.logging.Level;
 import java.util.logging.Logger;
 
+import com.caucho.amqp.common.AmqpSession;
+import com.caucho.amqp.io.AmqpConstants;
 import com.caucho.amqp.io.AmqpError;
 import com.caucho.amqp.io.DeliveryAccepted;
 import com.caucho.amqp.io.DeliveryModified;
@@ -54,16 +57,18 @@ import com.caucho.amqp.io.AmqpReader;
 import com.caucho.amqp.io.AmqpFrameHandler;
 import com.caucho.amqp.io.AmqpWriter;
 import com.caucho.amqp.io.FrameTransfer;
+import com.caucho.amqp.io.MessageHeader;
 import com.caucho.amqp.io.SaslMechanisms;
 import com.caucho.amqp.io.SaslOutcome;
 import com.caucho.amqp.io.FrameAttach.Role;
 import com.caucho.message.broker.MessageBroker;
-import com.caucho.message.broker.BrokerSubscriber;
-import com.caucho.message.broker.BrokerPublisher;
+import com.caucho.message.broker.BrokerReceiver;
+import com.caucho.message.broker.BrokerSender;
 import com.caucho.message.broker.EnvironmentMessageBroker;
-import com.caucho.message.broker.SubscriberMessageHandler;
+import com.caucho.message.broker.ReceiverMessageHandler;
 import com.caucho.network.listen.ProtocolConnection;
 import com.caucho.network.listen.SocketLink;
+import com.caucho.util.CurrentTime;
 import com.caucho.vfs.ReadStream;
 import com.caucho.vfs.TempBuffer;
 import com.caucho.vfs.WriteStream;
@@ -82,7 +87,7 @@ public class AmqpServerConnection implements ProtocolConnection, AmqpFrameHandle
   private State _state = State.NEW;
   private boolean _isSasl;
   
-  private AmqpSession []_sessions = new AmqpSession[1];
+  private AmqpServerSession []_sessions = new AmqpServerSession[1];
   
   private AmqpFrameReader _fin;
   private AmqpReader _ain;
@@ -144,8 +149,6 @@ public class AmqpServerConnection implements ProtocolConnection, AmqpFrameHandle
   public boolean handleRequest() throws IOException
   {
     ReadStream is = _link.getReadStream();
-    
-    System.out.println("REQ1:");
     
     switch (_state) {
     case NEW:
@@ -235,8 +238,6 @@ public class AmqpServerConnection implements ProtocolConnection, AmqpFrameHandle
     os.write(0x00); // version
     os.flush();
     
-    System.out.println("VERSION:");
-    
     return true;
   }
   
@@ -275,17 +276,13 @@ public class AmqpServerConnection implements ProtocolConnection, AmqpFrameHandle
   private boolean readOpen()
     throws IOException
   {
-    System.out.println("PREOPEN:");
     if (! _fin.startFrame()) {
-      System.out.println("NOOPEN");
       return false;
     }
     
     FrameOpen open = _ain.readObject(FrameOpen.class);
     
     _fin.finishFrame();
-    
-    System.out.println("OPEN: "+ open);
     
     return true;
   }
@@ -304,16 +301,19 @@ public class AmqpServerConnection implements ProtocolConnection, AmqpFrameHandle
     _fout.flush();
   }
   
-  void writeMessage(AmqpLink link, long messageId, InputStream is, long length)
+  void writeMessage(AmqpServerReceiverLink link,
+                    long messageId,
+                    InputStream is,
+                    long length)
     throws IOException
   {
-    AmqpSession session = _sessions[0];
+    AmqpServerSession session = _sessions[0];
     
-    long deliveryId = session.addDelivery(link, messageId);
+    long deliveryId = session.addDelivery(link, messageId, false);
     
     FrameTransfer transfer = new FrameTransfer();
     transfer.setDeliveryId(deliveryId);
-    transfer.setHandle(link.getHandle());
+    transfer.setHandle(link.getOutgoingHandle());
     
     _fout.startFrame(0);
     
@@ -327,9 +327,56 @@ public class AmqpServerConnection implements ProtocolConnection, AmqpFrameHandle
     
     _fout.finishFrame();
     _fout.flush();
-    System.out.println("MSG:");
   }
-  
+
+  void onAccepted(long deliveryId)
+  {
+    try {
+      AmqpServerSession session = _sessions[0];
+    
+      FrameDisposition disposition = new FrameDisposition();
+      disposition.setFirst(deliveryId);
+      disposition.setLast(deliveryId);
+      disposition.setState(DeliveryAccepted.VALUE);
+    
+      _fout.startFrame(0);
+    
+      disposition.write(_aout);
+    
+      _fout.finishFrame();
+      _fout.flush();
+    } catch (IOException e) {
+      log.log(Level.FINER, e.toString(), e);
+    }
+ 
+  }
+
+  void onRejected(long deliveryId, String msg)
+  {
+    try {
+      AmqpServerSession session = _sessions[0];
+    
+      FrameDisposition disposition = new FrameDisposition();
+      disposition.setFirst(deliveryId);
+      disposition.setLast(deliveryId);
+      AmqpError error = new AmqpError();
+      error.setDescription(msg);
+      DeliveryRejected rejected = new DeliveryRejected();
+      rejected.setError(error);
+      disposition.setState(rejected);
+    
+      _fout.startFrame(0);
+    
+      disposition.write(_aout);
+    
+      _fout.finishFrame();
+      _fout.flush();
+    } catch (IOException e) {
+      log.log(Level.FINER, e.toString(), e);
+    }
+ 
+  }
+
   private boolean readFrame()
     throws IOException
   {
@@ -339,9 +386,7 @@ public class AmqpServerConnection implements ProtocolConnection, AmqpFrameHandle
     
     AmqpAbstractFrame frame = _ain.readObject(AmqpAbstractFrame.class);
     
-    System.out.println("SFRAME: " + frame);
-        
-    frame.invoke(_fin, this);
+    frame.invoke(_ain, this);
     
     _fin.finishFrame();
     
@@ -352,7 +397,7 @@ public class AmqpServerConnection implements ProtocolConnection, AmqpFrameHandle
   public void onBegin(FrameBegin clientBegin)
     throws IOException
   {
-    _sessions[0] = new AmqpSession();
+    _sessions[0] = new AmqpServerSession();
     
     FrameBegin serverBegin = new FrameBegin();
     
@@ -363,7 +408,7 @@ public class AmqpServerConnection implements ProtocolConnection, AmqpFrameHandle
   public void onAttach(FrameAttach clientAttach)
     throws IOException
   {
-    AmqpSession session = _sessions[0];
+    AmqpServerSession session = _sessions[0];
     
     if (Role.SENDER.equals(clientAttach.getRole())) {
       attachSender(clientAttach, session);
@@ -377,21 +422,27 @@ public class AmqpServerConnection implements ProtocolConnection, AmqpFrameHandle
   }
 
   private void attachSender(FrameAttach clientAttach, 
-                            AmqpSession session)
+                            AmqpServerSession session)
     throws IOException
   {
     String targetAddress = clientAttach.getTarget().getAddress();
     
     MessageBroker broker = EnvironmentMessageBroker.create();
     
-    BrokerPublisher pub = broker.createSender(targetAddress);
+    BrokerSender pub = broker.createSender(targetAddress);
     
-    session.addLink(new AmqpLink(clientAttach, pub));
+    AmqpServerLink link = new AmqpServerLink(session, clientAttach, pub);
+    
+    int incomingHandle = clientAttach.getHandle();
+    int outgoingHandle = session.nextHandle();
+    
+    session.addIncomingLink(incomingHandle, link);
+    session.addOutgoingLink(outgoingHandle, link);
     
     FrameAttach serverAttach = new FrameAttach();
     
     serverAttach.setName(clientAttach.getName());
-    serverAttach.setHandle(clientAttach.getHandle());
+    serverAttach.setHandle(outgoingHandle);
     
     if (clientAttach.getRole() == Role.SENDER) {
       serverAttach.setRole(Role.RECEIVER);
@@ -401,25 +452,29 @@ public class AmqpServerConnection implements ProtocolConnection, AmqpFrameHandle
   }
 
   private void attachReceiver(FrameAttach clientAttach, 
-                              AmqpSession session)
+                              AmqpServerSession session)
     throws IOException
   {
     String sourceAddress = clientAttach.getSource().getAddress();
     
     MessageBroker broker = EnvironmentMessageBroker.create();
     
-    AmqpReceiverLink link = new AmqpReceiverLink(this, clientAttach);
+    AmqpServerReceiverLink link = new AmqpServerReceiverLink(session, clientAttach);
     
-    BrokerSubscriber sub = broker.createReceiver(sourceAddress, link);
+    BrokerReceiver sub = broker.createReceiver(sourceAddress, link);
     
     link.setReceiver(sub);
     
-    session.addLink(link);
+    int incomingHandle = clientAttach.getHandle();
+    
+    session.addIncomingLink(incomingHandle, link);
+    
+    int outgoingHandle = session.nextHandle();
     
     FrameAttach serverAttach = new FrameAttach();
     
     serverAttach.setName(clientAttach.getName());
-    serverAttach.setHandle(clientAttach.getHandle());
+    serverAttach.setHandle(outgoingHandle);
     
     serverAttach.setRole(Role.SENDER);
     
@@ -427,32 +482,55 @@ public class AmqpServerConnection implements ProtocolConnection, AmqpFrameHandle
   }
   
   @Override
-  public void onTransfer(AmqpFrameReader fin, FrameTransfer transfer)
+  public void onTransfer(AmqpReader ain, FrameTransfer transfer)
     throws IOException
   {
-    AmqpSession session = _sessions[0];
+    AmqpServerSession session = _sessions[0];
     
     int handle = transfer.getHandle();
+    boolean isSettled = transfer.isSettled();
     
-    AmqpLink link = session.getLink(handle);
+    AmqpServerLink link = session.getIncomingLink(handle);
     
-    int len = fin.getSize() - fin.getOffset();
+    long desc = ain.peekDescriptor();
+    
+    MessageHeader header;
+    boolean isDurable = false;
+    int priority = -1;
+    long expireTime = 0;
+    
+    if (desc == AmqpConstants.ST_MESSAGE_HEADER) {
+      header = new MessageHeader();
+      header.read(ain);
+      
+      isDurable = header.isDurable();
+      priority = header.getPriority();
+      
+      long ttl = header.getTimeToLive();
+      
+      if (ttl >= 0) {
+        expireTime = ttl + CurrentTime.getCurrentTime();
+      }
+    }
+    
+    int len = ain.getFrameAvailable();
     
     TempBuffer tBuf = TempBuffer.allocate();
     
-    fin.read(tBuf.getBuffer(), 0, len);
+    ain.read(tBuf.getBuffer(), 0, len);
     
     long xid = 0;
-    link.write(xid, tBuf.getBuffer(), 0, len);
+    long mid = link.nextMessageId();
+    link.write(xid, mid, isSettled, isDurable, priority, expireTime,
+               tBuf.getBuffer(), 0, len);
     // Link link = _links.get(handle);
-    //System.out.println("MSG: " + transfer + " " + link);
   }
   
   @Override
   public void onDisposition(FrameDisposition disposition)
     throws IOException
   {
-    AmqpSession session = _sessions[0];
+    AmqpServerSession session = _sessions[0];
     
     DeliveryState state = disposition.getState();
     long xid = 0;
@@ -497,7 +575,7 @@ public class AmqpServerConnection implements ProtocolConnection, AmqpFrameHandle
   public void onFlow(FrameFlow flow)
     throws IOException
   {
-    AmqpSession session = _sessions[0];
+    AmqpServerSession session = _sessions[0];
     
     session.onFlow(flow);
   }
@@ -510,8 +588,6 @@ public class AmqpServerConnection implements ProtocolConnection, AmqpFrameHandle
     
     serverDetach.setHandle(clientDetach.getHandle());
     
-    System.out.println("STACCH: " + clientDetach);
-    
     sendFrame(serverDetach);
   }
 
@@ -522,7 +598,6 @@ public class AmqpServerConnection implements ProtocolConnection, AmqpFrameHandle
     AmqpSession session = _sessions[0];
     _sessions[0] = null;
 
-    System.out.println("SERVERE:" + clientEnd);
     if (session != null) {
       FrameEnd serverEnd = new FrameEnd();
     
@@ -535,8 +610,6 @@ public class AmqpServerConnection implements ProtocolConnection, AmqpFrameHandle
     throws IOException
   {
     try {
-      System.out.println("SERVERE:" + clientClose);
-    
       FrameClose serverClose = new FrameClose();
     
       sendFrame(serverClose);
@@ -576,7 +649,6 @@ public class AmqpServerConnection implements ProtocolConnection, AmqpFrameHandle
   @Override
   public void onCloseConnection()
   {
-    System.out.println("CLOSE");
   }
   
   private enum State {

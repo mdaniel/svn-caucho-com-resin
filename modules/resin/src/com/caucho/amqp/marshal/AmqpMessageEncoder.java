@@ -27,48 +27,29 @@
  * @author Scott Ferguson
  */
 
-package com.caucho.message.broker;
+package com.caucho.amqp.marshal;
+
+import java.io.IOException;
+
+import com.caucho.amqp.io.AmqpWriter;
+import com.caucho.message.MessageFactory;
 
 
 /**
- * Custom serialization for the cache
+ * encoding a message
  */
-public class AbstractBrokerSubscriber implements BrokerSubscriber
+public interface AmqpMessageEncoder<T>
 {
-  @Override
-  public void accept(long xid, long mid)
-  {
-  }
+  public boolean isDurable(MessageFactory<T> factory, T value);
   
-  @Override
-  public void reject(long xid, long mid, String message)
-  {
-  }
+  public int getPriority(MessageFactory<T> factory, T value);
   
-  @Override
-  public void release(long xid, long mid)
-  {
-  }
+  public long getTimeToLive(MessageFactory<T> factory, T value);
   
-  @Override
-  public void modified(long xid,
-                       long mid, 
-                       boolean isFailed, 
-                       boolean isUndeliverableHere)
-  {
-    
-  }
+  public boolean isFirstAcquirer(MessageFactory<T> factory, T value);
   
+  public String getContentType(T value);
   
-  @Override
-  public void flow(long xid,
-                   long deliveryCount, 
-                   int linkCredit)
-  {
-  }
-  
-  @Override
-  public void close()
-  {
-  }
+  public void encode(AmqpWriter out, T value)
+    throws IOException;
 }

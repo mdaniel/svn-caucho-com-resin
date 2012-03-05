@@ -27,57 +27,80 @@
  * @author Scott Ferguson
  */
 
-package com.caucho.amqp.io;
+package com.caucho.message.common;
 
-import java.io.IOException;
+import com.caucho.message.MessageFactory;
 
 
 /**
- * AMQP connection close
+ * message factory
  */
-public class FrameClose extends AmqpAbstractFrame {
-  private AmqpError _error;
-  
-  @Override
-  public final long getDescriptorCode()
+public class AbstractMessageFactory<T> 
+  extends AbstractQueueSender<T>
+  implements MessageFactory<T>
+{
+  private boolean _isDurable;
+  private int _priority = -1;
+  private long _ttl = -1;
+  private boolean _isFirstAcquirer = true;
+
+  public void setDurable(boolean isDurable)
   {
-    return FT_CONN_CLOSE;
-  }
-  
-  public AmqpError getError()
-  {
-    return _error;
-  }
-  
-  @Override
-  public FrameClose createInstance()
-  {
-    return new FrameClose();
+    _isDurable = isDurable;
   }
   
   @Override
-  public void invoke(AmqpReader ain, AmqpFrameHandler receiver)
-    throws IOException
+  public boolean isDurable()
   {
-    receiver.onClose(this);
+    return _isDurable;
   }
 
   @Override
-  public void readBody(AmqpReader in, int count)
-    throws IOException
+  public int getPriority()
   {
-    _error = in.readObject(AmqpError.class);
+    return _priority;
   }
   
   @Override
-  public int writeBody(AmqpWriter out)
-    throws IOException
+  public void setPriority(int priority)
   {
-    if (_error != null)
-      _error.write(out);
-    else
-      out.writeNull();
-    
-    return 1;
+    _priority = priority;
+  }
+
+  @Override
+  public long getTimeToLive()
+  {
+    return _ttl;
+  }
+  
+  @Override
+  public void setTimeToLive(long ttl)
+  {
+    _ttl = ttl;
+  }
+
+  @Override
+  public boolean isFirstAcquirer()
+  {
+    return _isFirstAcquirer;
+  }
+
+  @Override
+  public void setFirstAcquirer(boolean isFirst)
+  {
+    _isFirstAcquirer = isFirst;
+  }
+
+  @Override
+  protected boolean offerMicros(MessageFactory<T> factory, 
+                                T value,
+                                long timeoutMicros)
+  {
+    throw new UnsupportedOperationException(getClass().getName());
+  }
+
+  @Override
+  public void close()
+  {
   }
 }

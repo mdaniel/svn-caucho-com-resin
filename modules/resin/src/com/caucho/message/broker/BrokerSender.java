@@ -29,13 +29,25 @@
 
 package com.caucho.message.broker;
 
+import com.caucho.vfs.TempBuffer;
 
 /**
- * Callback for a message receipt.
+ * Sending a message to the broker. These calls are non-blocking async calls.
  */
-public interface PublisherSettleHandler
+public interface BrokerSender
 {
-  public void onComplete();
+  public long nextMessageId();
   
-  public void onError(String msg);
+  public void message(long xid,
+                      long mid,
+                      boolean isDurable,
+                      int priority,
+                      long expireTime,
+                      byte []buffer,
+                      int offset,
+                      int length,
+                      TempBuffer tBuf,
+                      SenderSettleHandler receiptListener);
+  
+  public void close();
 }

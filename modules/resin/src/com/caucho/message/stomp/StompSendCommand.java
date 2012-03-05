@@ -31,8 +31,8 @@ package com.caucho.message.stomp;
 
 import java.io.IOException;
 
-import com.caucho.message.broker.BrokerPublisher;
-import com.caucho.message.broker.PublisherSettleHandler;
+import com.caucho.message.broker.BrokerSender;
+import com.caucho.message.broker.SenderSettleHandler;
 import com.caucho.vfs.ReadStream;
 import com.caucho.vfs.TempBuffer;
 import com.caucho.vfs.WriteStream;
@@ -46,16 +46,17 @@ public class StompSendCommand extends StompCommand
   boolean doCommand(StompConnection conn, ReadStream is, WriteStream os)
     throws IOException
   {
-    BrokerPublisher dest = conn.getDestination();
+    BrokerSender dest = conn.getDestination();
     
     long contentLength = conn.getContentLength();
     String contentType = conn.getContentType();
     String xa = conn.getTransaction();
-    PublisherSettleHandler receipt = conn.createReceiptCallback();
+    SenderSettleHandler receipt = conn.createReceiptCallback();
     
     StompXaSend xaSend = null;
     
     int ch;
+    long mid = 0;
     
     if (contentLength >= 0) {
       int offset = 0;
@@ -76,12 +77,13 @@ public class StompSendCommand extends StompCommand
         }
     
         if (xa == null) {
-          if (offset + sublen == contentLength) {
-            dest.messageComplete(conn.getXid(), tBuf, sublen, receipt);
-          }
-          else {
-            dest.messagePart(conn.getXid(), tBuf, sublen);
-          }
+          boolean isFinal = (offset + sublen == contentLength);
+          boolean isDurable = false;
+          int priority = -1;
+          long expireTime = 0;
+          
+          dest.message(conn.getXid(), mid, isDurable, priority, expireTime,
+                       tBuf.getBuffer(), 0, sublen, tBuf, receipt);
         }
         else {
           xaSend = new StompXaSend(dest, tBuf, sublen);
@@ -96,21 +98,29 @@ public class StompSendCommand extends StompCommand
       TempBuffer tBuf = TempBuffer.allocate();
       byte []buffer = tBuf.getBuffer();
       
+      boolean isDurable = false;
+      int priority = -1;
+      long expireTime = 0;
+      
       int offset = 0;
       
       for (ch = is.read(); ch > 0; ch = is.read()) {
         buffer[offset++] = (byte) ch;
         
         if (offset == buffer.length) {
-          dest.messagePart(conn.getXid(), tBuf, offset);
+          dest.message(conn.getXid(), mid, isDurable, priority, expireTime,
+                       tBuf.getBuffer(), 0, offset, tBuf, receipt);
+
           tBuf = TempBuffer.allocate();
           offset = 0;
         }
       }
       
       System.out.println("MSG: " + xa);
-      if (xa == null)
-        dest.messageComplete(conn.getXid(), tBuf, offset, receipt);
+      if (xa == null) {
+        dest.message(conn.getXid(), mid, isDurable, priority, expireTime,
+                     tBuf.getBuffer(), 0, offset, tBuf, receipt);
+      }
       else {
         xaSend = new StompXaSend(dest, tBuf, offset);
       }
@@ -123,7 +133,7 @@ public class StompSendCommand extends StompCommand
       conn.addXaItem(xaSend);
       
       if (receipt != null)
-        receipt.onComplete();
+        receipt.onAccepted(mid);
     }
     
     return true;

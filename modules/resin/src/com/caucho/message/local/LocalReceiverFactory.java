@@ -29,10 +29,10 @@
 
 package com.caucho.message.local;
 
-import com.caucho.amqp.transform.AmqpMessageDecoder;
-import com.caucho.amqp.transform.AmqpMessageEncoder;
-import com.caucho.amqp.transform.AmqpStringDecoder;
-import com.caucho.amqp.transform.AmqpStringEncoder;
+import com.caucho.amqp.marshal.AmqpMessageDecoder;
+import com.caucho.amqp.marshal.AmqpMessageEncoder;
+import com.caucho.amqp.marshal.AmqpStringDecoder;
+import com.caucho.amqp.marshal.AmqpStringEncoder;
 import com.caucho.message.MessageConnection;
 import com.caucho.message.MessageReceiver;
 import com.caucho.message.MessageReceiverFactory;

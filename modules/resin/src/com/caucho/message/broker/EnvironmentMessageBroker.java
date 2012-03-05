@@ -100,7 +100,7 @@ public class EnvironmentMessageBroker implements MessageBroker
   }
   
   @Override
-  public BrokerPublisher createSender(String name)
+  public BrokerSender createSender(String name)
   {
     MessageBroker broker = _brokerMap.get(name);
     
@@ -108,7 +108,7 @@ public class EnvironmentMessageBroker implements MessageBroker
       return broker.createSender(name);
     
     for (MessageBroker registeredBroker : _brokerList) {
-      BrokerPublisher dest = registeredBroker.createSender(name);
+      BrokerSender dest = registeredBroker.createSender(name);
       
       if (dest != null) {
         _brokerMap.put(name, registeredBroker);
@@ -120,11 +120,11 @@ public class EnvironmentMessageBroker implements MessageBroker
   }
   
   @Override
-  public BrokerSubscriber createReceiver(String name,
-                                           SubscriberMessageHandler listener)
+  public BrokerReceiver createReceiver(String name,
+                                           ReceiverMessageHandler listener)
   {
     for (MessageBroker registeredBroker : _brokerList) {
-      BrokerSubscriber sub
+      BrokerReceiver sub
         = registeredBroker.createReceiver(name, listener);
       
       if (sub != null) {

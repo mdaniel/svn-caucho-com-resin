@@ -27,57 +27,33 @@
  * @author Scott Ferguson
  */
 
-package com.caucho.amqp.io;
+package com.caucho.message.common;
 
-import java.io.IOException;
-
+import com.caucho.message.MessageFactory;
 
 /**
- * AMQP connection close
+ * message factory
  */
-public class FrameClose extends AmqpAbstractFrame {
-  private AmqpError _error;
+public class SenderMessageFactory<T> extends AbstractMessageFactory<T>
+{
+  private final AbstractMessageSender<T> _sender;
   
-  @Override
-  public final long getDescriptorCode()
+  public SenderMessageFactory(AbstractMessageSender<T> sender)
   {
-    return FT_CONN_CLOSE;
-  }
-  
-  public AmqpError getError()
-  {
-    return _error;
-  }
-  
-  @Override
-  public FrameClose createInstance()
-  {
-    return new FrameClose();
-  }
-  
-  @Override
-  public void invoke(AmqpReader ain, AmqpFrameHandler receiver)
-    throws IOException
-  {
-    receiver.onClose(this);
+    _sender = sender;
   }
 
   @Override
-  public void readBody(AmqpReader in, int count)
-    throws IOException
+  protected boolean offerMicros(MessageFactory<T> factory, 
+                                T value,
+                                long timeoutMicros)
   {
-    _error = in.readObject(AmqpError.class);
+    return _sender.offerMicros(this, value, timeoutMicros);
   }
   
   @Override
-  public int writeBody(AmqpWriter out)
-    throws IOException
+  public String toString()
   {
-    if (_error != null)
-      _error.write(out);
-    else
-      out.writeNull();
-    
-    return 1;
+    return getClass().getSimpleName() + "[" + _sender + "]";
   }
 }

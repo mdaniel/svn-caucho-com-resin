@@ -27,44 +27,16 @@
  * @author Scott Ferguson
  */
 
-package com.caucho.amqp.transform;
-
-import java.io.IOException;
-
-import javax.jms.JMSException;
-import javax.jms.Message;
-import javax.jms.TextMessage;
-
-import com.caucho.amqp.AmqpException;
-import com.caucho.amqp.io.AmqpConstants;
-import com.caucho.amqp.io.AmqpWriter;
-
+package com.caucho.message.common;
 
 /**
- * Encodes a message as a string.
+ * message factory
  */
-public class AmqpJmsEncoder implements AmqpMessageEncoder<Message>
+public class NullMessageFactory extends AbstractMessageFactory<Object>
 {
-  public static final AmqpJmsEncoder ENCODER = new AmqpJmsEncoder();
-  
   @Override
-  public String getContentType(Message value)
+  public void setDurable(boolean isDurable)
   {
-    return "text/plain";
-  }
-  
-  @Override
-  public void encode(AmqpWriter out,
-                     Message msg)
-    throws IOException
-  {
-    try {
-      TextMessage txtMessage = (TextMessage) msg;
-    
-      out.writeDescriptor(AmqpConstants.ST_MESSAGE_VALUE);
-      out.writeString(txtMessage.getText());
-    } catch (JMSException e) {
-      throw new AmqpException(e);
-    }
+    throw new UnsupportedOperationException(getClass().getName());
   }
 }

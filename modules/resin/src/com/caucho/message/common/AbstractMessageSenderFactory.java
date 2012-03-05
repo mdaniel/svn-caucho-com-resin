@@ -27,18 +27,42 @@
  * @author Scott Ferguson
  */
 
-package com.caucho.message.broker;
+package com.caucho.message.common;
 
-import java.io.IOException;
-import java.io.InputStream;
+import com.caucho.message.MessageSenderFactory;
 
 /**
- * Listener for a destination.
+ * local connection to the message store
  */
-public interface SubscriberMessageHandler
-{
-  public void onMessage(long messageId,
-                        InputStream bodyIs,
-                        long contentLength)
-    throws IOException;
+abstract public class AbstractMessageSenderFactory implements MessageSenderFactory {
+  private String _address;
+  private boolean _isAutoSettle = true;
+
+  @Override
+  public AbstractMessageSenderFactory setAddress(String address)
+  {
+    _address = address;
+    
+    return this;
+  }
+
+  @Override
+  public String getAddress()
+  {
+    return _address;
+  }
+
+  @Override
+  public AbstractMessageSenderFactory setAutoSettle(boolean isAutoSettle)
+  {
+    _isAutoSettle = isAutoSettle;
+    
+    return this;
+  }
+
+  @Override
+  public boolean isAutoSettle()
+  {
+    return _isAutoSettle;
+  }
 }

@@ -30,8 +30,6 @@
 package com.caucho.message.journal;
 
 import com.caucho.db.block.BlockStore;
-import com.caucho.vfs.Path;
-import com.caucho.vfs.TempBuffer;
 
 /**
  * Interface for the transaction log.

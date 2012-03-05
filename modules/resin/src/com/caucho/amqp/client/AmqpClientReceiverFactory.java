@@ -31,22 +31,22 @@ package com.caucho.amqp.client;
 
 import com.caucho.amqp.AmqpReceiver;
 import com.caucho.amqp.AmqpReceiverFactory;
-import com.caucho.amqp.transform.AmqpMessageDecoder;
-import com.caucho.amqp.transform.AmqpStringDecoder;
+import com.caucho.amqp.marshal.AmqpMessageDecoder;
+import com.caucho.amqp.marshal.AmqpStringDecoder;
 
 
 /**
  * AMQP client
  */
 class AmqpClientReceiverFactory implements AmqpReceiverFactory {
-  private AmqpConnectionImpl _client;
+  private AmqpClientConnectionImpl _client;
   
   private String _address;
   private int _prefetch = 1;
   private boolean _isAutoAck = true;
   private AmqpMessageDecoder<?> _decoder = AmqpStringDecoder.DECODER;
   
-  AmqpClientReceiverFactory(AmqpConnectionImpl client)
+  AmqpClientReceiverFactory(AmqpClientConnectionImpl client)
   {
     _client = client;
   }

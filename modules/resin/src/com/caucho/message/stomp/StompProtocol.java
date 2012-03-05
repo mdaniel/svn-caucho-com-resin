@@ -32,7 +32,7 @@ package com.caucho.message.stomp;
 import javax.annotation.PostConstruct;
 
 import com.caucho.message.broker.MessageBroker;
-import com.caucho.message.broker.BrokerPublisher;
+import com.caucho.message.broker.BrokerSender;
 import com.caucho.message.broker.EnvironmentMessageBroker;
 import com.caucho.network.listen.Protocol;
 import com.caucho.network.listen.ProtocolConnection;
@@ -75,7 +75,7 @@ public class StompProtocol implements Protocol
     return "stomp";
   }
   
-  public BrokerPublisher createDestination(String name)
+  public BrokerSender createDestination(String name)
   {
     return _broker.createSender(name);
   }

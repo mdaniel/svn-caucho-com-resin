@@ -29,23 +29,16 @@
 
 package com.caucho.message.broker;
 
+import java.io.IOException;
+import java.io.InputStream;
+
 /**
- * Subscription to a destination
+ * Listener for a destination.
  */
-public interface BrokerSubscriber
+public interface ReceiverMessageHandler
 {
-  public void accept(long xid, long mid);
-  
-  public void reject(long xid, long mid, String message);
-  
-  public void release(long xid, long mid);
-  
-  public void modified(long xid, 
-                       long mid, 
-                       boolean isFailed, 
-                       boolean isUndeliverableHere);
-  
-  public void flow(long xid, long deliveryCount, int credit);
-  
-  public void close();
+  public void onMessage(long messageId,
+                        InputStream bodyIs,
+                        long contentLength)
+    throws IOException;
 }

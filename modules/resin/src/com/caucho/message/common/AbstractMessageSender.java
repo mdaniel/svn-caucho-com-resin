@@ -29,180 +29,40 @@
 
 package com.caucho.message.common;
 
-import java.util.Collection;
-import java.util.Iterator;
-import java.util.concurrent.TimeUnit;
-
+import com.caucho.message.MessageFactory;
 import com.caucho.message.MessageSender;
 
 /**
  * local connection to the message store
  */
-abstract public class AbstractMessageSender<T> implements MessageSender<T> {
-  /**
-   * Offers a value to the queue.
-   */
-  abstract protected boolean offerMicros(T value, long timeoutMicros);
+abstract public class AbstractMessageSender<T>
+  extends AbstractQueueSender<T>
+  implements MessageSender<T>
+{
+  @Override
+  public MessageFactory<T> createMessageFactory()
+  {
+    return new SenderMessageFactory<T>(this);
+  }
   
   @Override
-  public boolean add(T value)
+  public boolean isAutoSettle()
   {
-    return offer(value);
+    return true;
   }
-
+  
   @Override
-  public boolean offer(T value)
-  {
-    return offerMicros(value, 0);
-  }
-
-  @Override
-  public boolean offer(T value, long timeout, TimeUnit timeUnit)
-  {
-    return offerMicros(value, timeUnit.toMicros(timeout));
-  }
-
-  @Override
-  public void put(T value) throws InterruptedException
-  {
-    offerMicros(value, 0);
-  }
-
-  @Override
-  public boolean addAll(Collection<? extends T> arg0)
-  {
-    return false;
-  }
-
-  @Override
-  public int remainingCapacity()
+  public int getUnsettledCount()
   {
     return 0;
   }
   
-  @Override
-  public void close()
-  {
-    
-  }
-
-  //
-  // receiver side
-  //
-
-  @Override
-  public T poll(long arg0, TimeUnit arg1) throws InterruptedException
-  {
-    throw new UnsupportedOperationException(getClass().getName());
-  }
-
-  @Override
-  public boolean remove(Object arg0)
-  {
-    throw new UnsupportedOperationException(getClass().getName());
-  }
-
-  @Override
-  public T take() throws InterruptedException
-  {
-    throw new UnsupportedOperationException(getClass().getName());
-  }
-
-  @Override
-  public T element()
-  {
-    throw new UnsupportedOperationException(getClass().getName());
-  }
-
-  @Override
-  public T peek()
-  {
-    throw new UnsupportedOperationException(getClass().getName());
-  }
-
-  @Override
-  public T poll()
-  {
-    throw new UnsupportedOperationException(getClass().getName());
-  }
-
-  @Override
-  public T remove()
-  {
-    throw new UnsupportedOperationException(getClass().getName());
-  }
-
-  @Override
-  public void clear()
-  {
-    throw new UnsupportedOperationException(getClass().getName());
-  }
-
-  @Override
-  public boolean containsAll(Collection<?> arg0)
-  {
-    throw new UnsupportedOperationException(getClass().getName());
-  }
-
-  @Override
-  public boolean isEmpty()
-  {
-    throw new UnsupportedOperationException(getClass().getName());
-  }
-
-  @Override
-  public Iterator<T> iterator()
-  {
-    throw new UnsupportedOperationException(getClass().getName());
-  }
-
-  @Override
-  public boolean removeAll(Collection<?> arg0)
-  {
-    throw new UnsupportedOperationException(getClass().getName());
-  }
-
-  @Override
-  public boolean retainAll(Collection<?> arg0)
-  {
-    throw new UnsupportedOperationException(getClass().getName());
-  }
-
-  @Override
-  public int size()
-  {
-    throw new UnsupportedOperationException(getClass().getName());
-  }
-
-  @Override
-  public Object[] toArray()
-  {
-    throw new UnsupportedOperationException(getClass().getName());
-  }
-
-  @Override
-  public <X> X[] toArray(X[] arg0)
-  {
-    throw new UnsupportedOperationException(getClass().getName());
-  }
-
-  @Override
-  public boolean contains(Object arg0)
-  {
-    throw new UnsupportedOperationException(getClass().getName());
-  }
-
-  @Override
-  public int drainTo(Collection<? super T> arg0)
-  {
-    throw new UnsupportedOperationException(getClass().getName());
-  }
-
-  @Override
-  public int drainTo(Collection<? super T> arg0, int arg1)
-  {
-    throw new UnsupportedOperationException(getClass().getName());
-  }
+  /**
+   * Offers a value to the queue.
+   */
+  abstract protected boolean offerMicros(MessageFactory<T> factory,
+                                         T value,
+                                         long timeoutMicros);
   
   @Override
   public String toString()

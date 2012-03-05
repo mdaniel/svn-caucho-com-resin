@@ -29,35 +29,16 @@
 
 package com.caucho.message.local;
 
-import com.caucho.amqp.transform.AmqpMessageEncoder;
-import com.caucho.amqp.transform.AmqpStringEncoder;
-import com.caucho.message.MessageConnection;
-import com.caucho.message.MessageReceiver;
-import com.caucho.message.MessageReceiverFactory;
+import com.caucho.amqp.marshal.AmqpMessageEncoder;
+import com.caucho.amqp.marshal.AmqpStringEncoder;
 import com.caucho.message.MessageSender;
-import com.caucho.message.MessageSenderFactory;
+import com.caucho.message.common.AbstractMessageSenderFactory;
 
 /**
  * local connection to the message store
  */
-public class LocalSenderFactory implements MessageSenderFactory {
-  private String _address;
-  
+public class LocalSenderFactory extends AbstractMessageSenderFactory {
   private AmqpMessageEncoder<?> _encoder = new AmqpStringEncoder();
-
-  @Override
-  public LocalSenderFactory setAddress(String address)
-  {
-    _address = address;
-    
-    return this;
-  }
-
-  @Override
-  public String getAddress()
-  {
-    return _address;
-  }
   
   public AmqpMessageEncoder<?> getEncoder()
   {

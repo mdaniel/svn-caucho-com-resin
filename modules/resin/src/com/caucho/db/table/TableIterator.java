@@ -216,7 +216,7 @@ public class TableIterator {
    * @return true if a tuple is found,
    * or false if the block has no more tuples
    */
-  public boolean nextRow()
+  public final boolean nextRow()
     throws IOException
   {
     int rowOffset = _rowOffset;
@@ -359,7 +359,7 @@ public class TableIterator {
   /**
    * Returns true if the column is null.
    */
-  public boolean isNull(Column column)
+  public final boolean isNull(Column column)
     throws SQLException
   {
     return column.isNull(_buffer, _rowOffset);
