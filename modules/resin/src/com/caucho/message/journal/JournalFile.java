@@ -76,9 +76,9 @@ public final class JournalFile
   public static final int H_PAGE = 0xe000;
   public static final int H_PAGE_OFF = 11;
   
-  public static final long H_CODE_MASK = (1 << 45) - 1;
-  public static final long H_FIN = (1 << 47);
-  public static final long H_INIT = (1 << 46);
+  public static final long H_FIN = (1L << 47);
+  public static final long H_INIT = (1L << 46);
+  public static final long H_CODE_MASK = H_INIT - 1;
   
   public static final int OP_NULL = 0;
   public static final int OP_CHECKPOINT = 1;
@@ -315,7 +315,7 @@ public final class JournalFile
       i += len;
       i += (PAD_SIZE - i) & PAD_MASK;
       
-      if (i == BLOCK_SIZE) {
+      if (BLOCK_SIZE <= i) {
         _tailAddress = tailAddress + 2 * BLOCK_SIZE;
         _tailOffset = 0;
       }

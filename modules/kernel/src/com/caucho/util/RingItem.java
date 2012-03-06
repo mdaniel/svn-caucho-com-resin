@@ -52,12 +52,12 @@ public class RingItem
     return _isRingValue;
   }
   
-  public void setRingValue()
+  public final void setRingValue()
   {
     _isRingValue = true;
   }
   
-  public void clearRingValue()
+  public final void clearRingValue()
   {
     _isRingValue = false;
   }

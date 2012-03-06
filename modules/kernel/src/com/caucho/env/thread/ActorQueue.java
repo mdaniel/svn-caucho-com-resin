@@ -49,7 +49,7 @@ public final class ActorQueue<T extends RingItem>
   
   private final int _size;
   private final int _mask;
-  private final int _halfSize;
+  private final int _updateSize;
   private final T []_itemRing;
   
   private final ActorWorker<? super T> _firstWorker;
@@ -78,7 +78,7 @@ public final class ActorQueue<T extends RingItem>
     
     _size = size;
     _mask = size - 1;
-    _halfSize = _size >> 2;
+    _updateSize = _size >> 2;
     
     _itemRing = createRing(size);
     
@@ -209,7 +209,7 @@ public final class ActorQueue<T extends RingItem>
     final AtomicInteger headRef = _headRef;
     final T []ring = _itemRing;
     final int mask = _mask;
-    final int halfSize = _halfSize;
+    final int updateSize = _updateSize;
 
     loop:
     while (item.isRingValue()) {
@@ -219,12 +219,6 @@ public final class ActorQueue<T extends RingItem>
       if (head == headAlloc) {
         break;
       }
-      /*
-      if (((head - index) & mask) < halfSize) {
-        // someone else acked us
-        break;
-      }
-      */
       
       if (ring[head].isRingValue()) {
         int nextHead = (head + 1) & mask;
@@ -232,6 +226,11 @@ public final class ActorQueue<T extends RingItem>
         if (headRef.compareAndSet(head, nextHead) && head == index) {
           break;
         }
+      }
+      
+      if (((head + ring.length - index) & mask) < updateSize) {
+        // someone else acked us
+        break;
       }
     }
     // completeOffer must be single-threaded to avoid unnecessary

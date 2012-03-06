@@ -47,7 +47,7 @@ public class RingQueue<T extends RingItem> {
   private final AtomicInteger _tail = new AtomicInteger();
   
   private final int _mask;
-  private final int _halfSize;
+  private final int _updateSize;
   
   private final AtomicBoolean _isWait = new AtomicBoolean();
   
@@ -61,7 +61,7 @@ public class RingQueue<T extends RingItem> {
     
     _ring = (T[]) new RingItem[size];
     _mask = size - 1;
-    _halfSize = size >> 1;
+    _updateSize = size >> 2;
     
     for (int i = 0; i < _ring.length; i++) {
       _ring[i] = itemFactory.createItem(i);
@@ -87,57 +87,59 @@ public class RingQueue<T extends RingItem> {
     // completeOffer must be single threaded. A multi-threaded
     // completeOffer creates too much contention and spinning.
     
-    AtomicInteger headAllocRef = _headAlloc;
+    final AtomicInteger headAllocRef = _headAlloc;
+    final AtomicInteger tailRef = _tail;
+    final int mask = _mask;
     
     while (true) {
-      int head = headAllocRef.get();
+      int headAlloc = headAllocRef.get();
+      int tail = tailRef.get();
           
-      int nextHead = (head + 1) & _mask;
+      int nextHeadAlloc = (headAlloc + 1) & mask;
       
-      int tail = _tail.get();
-      
-      if (nextHead == tail) {
+      if (nextHeadAlloc == tail) {
         if (isWait) {
-          waitForEmpty();
+          waitForEmpty(headAlloc, tail);
         }
         else {
           return null;
         }
       }
-      else {  
-        if (headAllocRef.compareAndSet(head, nextHead)) {
-          return _ring[head];
-        }
+      else if (headAllocRef.compareAndSet(headAlloc, nextHeadAlloc)) {
+        return _ring[headAlloc];
       }
     }
   }
   
-  public final void completeOffer(T item)
+  public final void completeOffer(final T item)
   {
     item.setRingValue();
-    int index = item.getIndex();
+    
+    final AtomicInteger headAllocRef = _headAlloc;
+    final AtomicInteger headRef = _head;
+    final int index = item.getIndex();
+    final T []ring = _ring;
+    final int mask = _mask;
 
-    while (item.isRingValue()) {
-      int headAlloc = _headAlloc.get();
-      int head = _head.get();
+    while (true) {
+      int head = headRef.get();
+      int headAlloc = headAllocRef.get();
 
       if (head == headAlloc) {
         return;
       }
       
-      /*
-      if (_halfSize < ((index + _ring.length - head) & _mask)) {
-        // someone else acked us
-        return;
-      }
-      */
-      
-      if (_ring[head].isRingValue() ) {
-        int nextHead = (head + 1) & _mask;
+      if (ring[head].isRingValue()) {
+        int nextHead = (head + 1) & mask;
         
-        if (_head.compareAndSet(head, nextHead) && head == index) {
+        if (headRef.compareAndSet(head, nextHead) && head == index) {
           return;
         }
+      }
+      
+      if (((head + ring.length - index) & mask) < _updateSize) {
+        // someone else acked us
+        return;
       }
     }
   }
@@ -165,33 +167,25 @@ public class RingQueue<T extends RingItem> {
     return _ring[tailAlloc];
   }
   
-  public final void completePoll(T item)
+  public final void completePoll(final T item)
   {
     item.clearRingValue();
-    int index = item.getIndex();
+    final int index = item.getIndex();
     
-    AtomicInteger tailAllocRef = _tailAlloc;
-    AtomicInteger tailRef = _tail;
-    T []ring = _ring;
-    int ringLength = ring.length;
-    int mask = _mask;
-    int halfSize = _halfSize;
+    final AtomicInteger tailAllocRef = _tailAlloc;
+    final AtomicInteger tailRef = _tail;
+    final T []ring = _ring;
+    // int ringLength = ring.length;
+    final int mask = _mask;
+    // int halfSize = _halfSize;
 
-    loop:
-    while (! item.isRingValue()) {
-      int tailAlloc = tailAllocRef.get();
-      int tail = tailRef.get();
+    while (true) {
+      final int tail = tailRef.get();
+      final int tailAlloc = tailAllocRef.get();
       
-      if (tailAlloc == tail) {
+      if (tail == tailAlloc) {
         break;
       }
-      
-      /*
-      if (halfSize < ((index + ringLength - tail) & mask)) {
-        // someone else acked us
-        break;
-      }
-      */
       
       if (! ring[tail].isRingValue()) {
         int nextTail = (tail + 1) & mask;
@@ -200,19 +194,26 @@ public class RingQueue<T extends RingItem> {
           break;
         }
       }
+      
+      if (((tail + ring.length - index) & mask) < _updateSize) {
+        // someone else acked us
+        return;
+      }
     }
     
     wakeEmpty();
   }
   
-  private void waitForEmpty()
+  private void waitForEmpty(int headAlloc, int tail)
   {
+    _isWait.set(true);
+    
     synchronized (_isWait) {
-      _isWait.set(true);
-      
-      if (isFull()) {
+      if (_headAlloc.get() == headAlloc
+          && _tail.get() == tail
+          && _isWait.get()) {
         try {
-          _isWait.wait();
+          _isWait.wait(100);
         } catch (Exception e) {
           log.log(Level.FINER, e.toString(), e);
         }
