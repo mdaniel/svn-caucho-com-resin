@@ -75,7 +75,9 @@ public class RepositoryRoot
   
   public void update()
   {
-    if (! exists()) {
+    if (!_repository.isActive()) {
+    }
+    else if (! exists()) {
       deleteLocalCopy();
     } else if (isModified()) {
       try {

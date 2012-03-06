@@ -250,4 +250,7 @@ public interface RepositorySpi
    * repository.
    */
   public void setRepositoryRootHash(String rootCommitHash);
+
+
+  public abstract boolean isActive();
 }
