@@ -17,8 +17,13 @@ Project Goal:
 
 Status: 
 
-
   Current Status:
+    Midway to adding STOMP support to JAMP. Going to build send/query/reply/error/reply-error on top of STOMP/HTTP(Servlet)/WebSocket
+    STOMP server code is just for testing.
+    STOMP client code only implements text no binary (not needed until Hessian)
+    
+
+  Old Status:
    The list handling handles List generics, Sets, and arrays (tested manually, really needs some good unit tests).
    If a prop can't be found in a setter method, it looks for a field in current class, and then keeps moving up super class tree.
   
@@ -126,7 +131,10 @@ Status:
 
      JampServlet not generic. It could and should be.
      JampListener (implements WebSocketListener) not generic either.
+     
+     http://stomp.github.com/stomp-specification-1.1.html#Augmented_BNF
      WebSocketMessageSender, STOMPMessageSender are not implemented.
+     
      JavaDocs mostly missing.
      Resin coding style, mostly ignored for now, which may be ok if this is published tutorial/cookbook as it uses more common { placements.
      Code quality prototype mode (error checking minimal, no logging, etc.)
