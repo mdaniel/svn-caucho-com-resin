@@ -219,11 +219,12 @@ public final class ActorQueue<T extends RingItem>
       if (head == headAlloc) {
         break;
       }
-      
+      /*
       if (((head - index) & mask) < halfSize) {
         // someone else acked us
         break;
       }
+      */
       
       if (ring[head].isRingValue()) {
         int nextHead = (head + 1) & mask;

@@ -120,24 +120,24 @@ public class RingQueue<T extends RingItem> {
     while (item.isRingValue()) {
       int headAlloc = _headAlloc.get();
       int head = _head.get();
+
+      if (head == headAlloc) {
+        return;
+      }
       
+      /*
       if (_halfSize < ((index + _ring.length - head) & _mask)) {
         // someone else acked us
         return;
       }
+      */
       
-      while (head != headAlloc && _ring[head].isRingValue() ) {
+      if (_ring[head].isRingValue() ) {
         int nextHead = (head + 1) & _mask;
         
-        if (! _head.compareAndSet(head, nextHead)) {
-          break;
-        }
-      
-        if (head == index) {
+        if (_head.compareAndSet(head, nextHead) && head == index) {
           return;
         }
-        
-        head = nextHead;
       }
     }
   }
@@ -182,23 +182,23 @@ public class RingQueue<T extends RingItem> {
       int tailAlloc = tailAllocRef.get();
       int tail = tailRef.get();
       
+      if (tailAlloc == tail) {
+        break;
+      }
+      
+      /*
       if (halfSize < ((index + ringLength - tail) & mask)) {
         // someone else acked us
         break;
       }
+      */
       
-      while (tail != tailAlloc && ! ring[tail].isRingValue() ) {
+      if (! ring[tail].isRingValue()) {
         int nextTail = (tail + 1) & mask;
         
-        if (! tailRef.compareAndSet(tail, nextTail)) {
+        if (tailRef.compareAndSet(tail, nextTail) && tail == index) {
           break;
         }
-      
-        if (tail == index) {
-          break loop;
-        }
-        
-        tail = nextTail;
       }
     }
     
