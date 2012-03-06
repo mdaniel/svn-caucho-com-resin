@@ -51,12 +51,12 @@ class KeepaliveRequestTask extends ConnectionTask {
   {
     SocketLinkThreadLauncher launcher = getLauncher();
     
-    launcher.onChildThreadResume();
+    launcher.onChildThreadResumeBegin();
 
     try {
       super.run();
     } finally {
-      launcher.onChildThreadEnd();
+      launcher.onChildThreadResumeEnd();
     }
   }
 

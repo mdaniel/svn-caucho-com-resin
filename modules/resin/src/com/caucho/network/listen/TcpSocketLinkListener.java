@@ -1207,8 +1207,9 @@ public class TcpSocketLinkListener
       return ss;
     }
 
-    if (_isTcpNoDelay)
-      ss.setTcpNoDelay(_isTcpNoDelay);
+    ss.setTcpNoDelay(_isTcpNoDelay);
+    ss.setTcpKeepalive(_isTcpKeepalive);
+    ss.setTcpCork(_isTcpCork);
 
     ss.setConnectionSocketTimeout((int) getSocketTimeout());
 

@@ -471,7 +471,7 @@ public class ProxyCacheFilterChain extends AbstractCacheFilterChain
     }
     else if (entry._maxAge > 0) {
       // HTTP/1.0 browsers should be gone
-      response.addDateHeader("Expires", now + entry._maxAge);
+      // response.addDateHeader("Expires", now + entry._maxAge);
     }
 
     String method = req.getMethod();
@@ -1008,7 +1008,7 @@ public class ProxyCacheFilterChain extends AbstractCacheFilterChain
       }
     }
     else if (now < entry._expireDate) {
-      res.setDateHeader("Expires", entry._expireDate);
+      // res.setDateHeader("Expires", entry._expireDate);
     }
 
     entry._lastModified = lastModified;
@@ -1025,7 +1025,7 @@ public class ProxyCacheFilterChain extends AbstractCacheFilterChain
 
       // server/1319
       if (entry._maxAge > 0) { // && ! req.getVaryCookies())
-        res.setDateHeader("Expires", now + entry._maxAge);
+        // res.setDateHeader("Expires", now + entry._maxAge);
       }
 
       // Only cache internally for 5 seconds so we see updates

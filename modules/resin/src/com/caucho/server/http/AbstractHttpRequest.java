@@ -1772,7 +1772,7 @@ public abstract class AbstractHttpRequest
         getServer().freeHttpBuffer(httpBuffer);
     }
   }
-  
+  /*
   public void beginThreadIdle()
   {
     TcpSocketLink tcpConn = _tcpConn;
@@ -1790,6 +1790,7 @@ public abstract class AbstractHttpRequest
       tcpConn.endThreadIdle();
     }
   }
+  */
 
   @Override
   public void onCloseConnection()

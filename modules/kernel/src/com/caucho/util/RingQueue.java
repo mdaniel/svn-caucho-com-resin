@@ -40,13 +40,14 @@ public class RingQueue<T extends RingItem> {
   
   private final T [] _ring;
   
-  private final AtomicBoolean _isHeadAlloc = new AtomicBoolean();
+  private final AtomicInteger _headAlloc = new AtomicInteger();
   private final AtomicInteger _head = new AtomicInteger();
   
-  private final AtomicBoolean _isTailAlloc = new AtomicBoolean();
+  private final AtomicInteger _tailAlloc = new AtomicInteger();
   private final AtomicInteger _tail = new AtomicInteger();
   
   private final int _mask;
+  private final int _halfSize;
   
   private final AtomicBoolean _isWait = new AtomicBoolean();
   
@@ -60,6 +61,7 @@ public class RingQueue<T extends RingItem> {
     
     _ring = (T[]) new RingItem[size];
     _mask = size - 1;
+    _halfSize = size >> 1;
     
     for (int i = 0; i < _ring.length; i++) {
       _ring[i] = itemFactory.createItem(i);
@@ -84,90 +86,120 @@ public class RingQueue<T extends RingItem> {
     // offer must allow only one thread to succeed, because 
     // completeOffer must be single threaded. A multi-threaded
     // completeOffer creates too much contention and spinning.
-    int head;
-    int nextHead;
-    int tail;
     
-    AtomicBoolean isHeadAlloc = _isHeadAlloc;
+    AtomicInteger headAllocRef = _headAlloc;
     
     while (true) {
-      while (! isHeadAlloc.compareAndSet(false, true)) {
-      }
+      int head = headAllocRef.get();
           
-      head = _head.get();
-      nextHead = (head + 1) & _mask;
+      int nextHead = (head + 1) & _mask;
       
-      tail = _tail.get();
+      int tail = _tail.get();
       
-      if (nextHead != tail) {
-        return _ring[head];
+      if (nextHead == tail) {
+        if (isWait) {
+          waitForEmpty();
+        }
+        else {
+          return null;
+        }
       }
-      
-      isHeadAlloc.set(false);
-      
-      if (isWait) {
-        waitForEmpty();
-      }
-      else {
-        return null;
+      else {  
+        if (headAllocRef.compareAndSet(head, nextHead)) {
+          return _ring[head];
+        }
       }
     }
   }
   
   public final void completeOffer(T item)
   {
-    // completeOffer must be single-threaded to avoid unnecessary
-    // contention
-    
-    int head = item.getIndex();
-    int nextHead = (head + 1) & _mask;
-    
-    if (! _head.compareAndSet(head, nextHead)) {
-      System.out.println("INVALID_HEAD");
-    }
-    
-    if (! _isHeadAlloc.compareAndSet(true, false)) {
-      System.out.println("INVALID_COMPLETE");
+    item.setRingValue();
+    int index = item.getIndex();
+
+    while (item.isRingValue()) {
+      int headAlloc = _headAlloc.get();
+      int head = _head.get();
+      
+      if (_halfSize < ((index + _ring.length - head) & _mask)) {
+        // someone else acked us
+        return;
+      }
+      
+      while (head != headAlloc && _ring[head].isRingValue() ) {
+        int nextHead = (head + 1) & _mask;
+        
+        if (! _head.compareAndSet(head, nextHead)) {
+          break;
+        }
+      
+        if (head == index) {
+          return;
+        }
+        
+        head = nextHead;
+      }
     }
   }
  
-  public final T beginTake()
+  public final T beginPoll()
   {
-    int head;
-    int tail;
     int nextTail;
+    int tailAlloc;
     
-    AtomicBoolean isTailAlloc = _isTailAlloc;
+    final AtomicInteger tailAllocRef = _tailAlloc;
+    final AtomicInteger headRef = _head;
+    final int mask = _mask;
     
-    while (! isTailAlloc.compareAndSet(false, true)) {
+    do {
+      tailAlloc = tailAllocRef.get();
+      int head = headRef.get();
       
-    }
+      if (head == tailAlloc) {
+        return null;
+      }
+      
+      nextTail = (tailAlloc + 1) & mask;
+    } while (! tailAllocRef.compareAndSet(tailAlloc, nextTail));
     
-    tail = _tail.get();
-    head = _head.get();
-      
-    if (head != tail) {
-      return _ring[tail];
-    }
-    else {
-      isTailAlloc.set(false);
-      
-      return null;
-    }
+    return _ring[tailAlloc];
   }
   
-  public final void completeTake(T item)
+  public final void completePoll(T item)
   {
-    int tail = item.getIndex();
-    int nextTail = (tail + 1) & _mask;
+    item.clearRingValue();
+    int index = item.getIndex();
     
-    if (! _tail.compareAndSet(tail, nextTail)) {
-      System.out.println("INVALID_TAKE:" + this);
-    }
-    
-    if (! _isTailAlloc.compareAndSet(true, false)) {
-      _isTailAlloc.set(false);
-      System.out.println("INVALID_TAKE-SET:" + this);
+    AtomicInteger tailAllocRef = _tailAlloc;
+    AtomicInteger tailRef = _tail;
+    T []ring = _ring;
+    int ringLength = ring.length;
+    int mask = _mask;
+    int halfSize = _halfSize;
+
+    loop:
+    while (! item.isRingValue()) {
+      int tailAlloc = tailAllocRef.get();
+      int tail = tailRef.get();
+      
+      if (halfSize < ((index + ringLength - tail) & mask)) {
+        // someone else acked us
+        break;
+      }
+      
+      while (tail != tailAlloc && ! ring[tail].isRingValue() ) {
+        int nextTail = (tail + 1) & mask;
+        
+        if (! tailRef.compareAndSet(tail, nextTail)) {
+          break;
+        }
+      
+        if (tail == index) {
+          break loop;
+        }
+        
+        tail = nextTail;
+      }
     }
     
     wakeEmpty();

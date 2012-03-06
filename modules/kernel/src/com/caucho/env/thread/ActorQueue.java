@@ -49,12 +49,13 @@ public final class ActorQueue<T extends RingItem>
   
   private final int _size;
   private final int _mask;
+  private final int _halfSize;
   private final T []_itemRing;
   
   private final ActorWorker<? super T> _firstWorker;
   
-  // private final AtomicInteger _headAlloc = new AtomicInteger();
-  private final AtomicBoolean _isHeadAlloc = new AtomicBoolean();
+  //private final AtomicBoolean _isHeadAlloc = new AtomicBoolean();
+  private final AtomicInteger _headAllocRef = new AtomicInteger();
   private final AtomicInteger _headRef = new AtomicInteger();
   // private volatile int _head;
   
@@ -76,8 +77,8 @@ public final class ActorQueue<T extends RingItem>
     }
     
     _size = size;
-    
     _mask = size - 1;
+    _halfSize = _size >> 2;
     
     _itemRing = createRing(size);
     
@@ -164,85 +165,81 @@ public final class ActorQueue<T extends RingItem>
   
   public final T startOffer(boolean isWait)
   {
-    // final AtomicInteger headAlloc = _headAlloc;
-    final AtomicBoolean isHeadAlloc = _isHeadAlloc;
-    final AtomicInteger headRef = _headRef;
+    final AtomicInteger headAllocRef = _headAllocRef;
+    // final AtomicBoolean isHeadAlloc = _isHeadAlloc;
+    // final AtomicInteger headRef = _headRef;
     final AtomicInteger tailRef = _tailRef;
-    final T []itemRing = _itemRing;
+    final T []ring = _itemRing;
     final int mask = _mask;
     
-    int head;
-    T item;
-    int nextHead;
+    // int head;
+    // T item;
+    // int nextHead;
     
     while (true) {
-      while (! isHeadAlloc.compareAndSet(false, true)) {
-      }
+      int head = headAllocRef.get();
+          
+      int nextHead = (head + 1) & mask;
       
-      head = headRef.get(); // _head
-      nextHead = (head + 1) & mask;
-      
-      item = itemRing[head];
-      
-      // check for full queue
       int tail = tailRef.get();
       
-      if (nextHead != tail) {
-        return item;
+      if (nextHead == tail) {
+        if (isWait) {
+          waitForQueue(head, tail);
+        }
+        else {
+          return null;
+        }
       }
-      
-      isHeadAlloc.set(false);
-      
-      if (isWait) {
-        waitForQueue(head, tail);
-      }
-      else {
-        return null;
+      else {  
+        if (headAllocRef.compareAndSet(head, nextHead)) {
+          return ring[head];
+        }
       }
     }
       // } while (! isHeadAlloc.compareAndSet(head, nextHead));
   }
   
-  public final void finishOffer(T item)
+  public final void finishOffer(final T item)
   {
+    item.setRingValue();
+    
+    final int index = item.getIndex();
+    final AtomicInteger headAllocRef = _headAllocRef;
+    final AtomicInteger headRef = _headRef;
+    final T []ring = _itemRing;
+    final int mask = _mask;
+    final int halfSize = _halfSize;
+
+    loop:
+    while (item.isRingValue()) {
+      int headAlloc = headAllocRef.get();
+      int head = headRef.get();
+      
+      if (head == headAlloc) {
+        break;
+      }
+      
+      if (((head - index) & mask) < halfSize) {
+        // someone else acked us
+        break;
+      }
+      
+      if (ring[head].isRingValue()) {
+        int nextHead = (head + 1) & mask;
+        
+        if (headRef.compareAndSet(head, nextHead) && head == index) {
+          break;
+        }
+      }
+    }
     // completeOffer must be single-threaded to avoid unnecessary
     // contention
-    
-     // item.setSequence(_sequence + 1);
-    
-    final int head = item.getIndex();
-    final int nextHead = (head + 1) & _mask;
-    
-    final AtomicInteger headRef = _headRef;
-    // final AtomicIntegerFieldUpdater<ActorQueue<?>> headUpdater = _headUpdater;
-    
-    /*
-    if (head != _headRef.get()) {
-      System.out.println("HA: " + _headRef.get() + " " + head);
-    }
-    */
-    /*
-    
-    
-    while (! headUpdater.compareAndSet(this, head, nextHead)) {
-    }
-    */
-    
-    // _head = nextHead;
-    if (! headRef.compareAndSet(head, nextHead)) {
-      System.out.println("BROKEN: " + headRef.get() + " " + head + " " + nextHead);
-      headRef.set(nextHead);
-    }
-    
-    if (! _isHeadAlloc.compareAndSet(true, false)) {
-      System.out.println("ALLOC: fail");
-      _isHeadAlloc.set(false);
-    }
 
     // wake mask
     // _firstWorker.wake();
     
-    if ((_headRef.get() & 0x3f) == 0) {
+    if ((headRef.get() & 0x3f) == 0) {
       _firstWorker.wake();
     }
   }
@@ -252,9 +249,10 @@ public final class ActorQueue<T extends RingItem>
     synchronized (_isWaitRef) {
       _isWaitRef.set(true);
       
-      while (_headRef.get() == head 
-             && _tailRef.get() == tail
-             && _isWaitRef.get()) {
+      if (_headRef.get() == head 
+          && _tailRef.get() == tail
+          && head != tail
+          && _isWaitRef.get()) {
         _firstWorker.wake();
         
         try {
@@ -314,17 +312,19 @@ public final class ActorQueue<T extends RingItem>
     
     private final void consumeAll()
     {
-      try {
-        doConsume();
-      } catch (Exception e) {
-        log.log(Level.FINER, e.toString(), e);
-      }
+      do {
+        try {
+          doConsume();
+        } catch (Exception e) {
+          log.log(Level.FINER, e.toString(), e);
+        }
 
-      if (_nextWorker != null) {
-        _nextWorker.wake();
-      }
+        if (_nextWorker != null) {
+          _nextWorker.wake();
+        }
           
-      wakeQueue();
+        forceWakeQueue();
+      } while (_headRef.get() != _tailRef.get());
     }
     
     private final boolean doConsume()
@@ -363,6 +363,8 @@ public final class ActorQueue<T extends RingItem>
             tail = (tail + 1) & mask;
             
             processor.process(item);
+            
+            item.clearRingValue();
           }
 
           tailRef.set(tail);
@@ -421,6 +423,20 @@ public final class ActorQueue<T extends RingItem>
       }
     }
     
+    private void forceWakeQueue()
+    {
+      AtomicBoolean isWaitRef = _isWaitRef;
+      
+      if (isWaitRef == null)
+        return;
+      
+      synchronized (isWaitRef) {
+        if (isWaitRef.getAndSet(false)) {
+          isWaitRef.notifyAll();
+        }
+      }
+    }
+
     @Override
     public String toString()
     {

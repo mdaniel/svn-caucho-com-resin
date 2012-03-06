@@ -59,14 +59,14 @@ class DuplexReadTask extends ConnectionTask {
     
     SocketLinkThreadLauncher launcher = getLauncher();
     
-    launcher.onChildThreadResume();
+    launcher.onChildThreadResumeBegin();
     
     try {
       thread.setContextClassLoader(getSocketLink().getListener().getClassLoader());
       
       super.run();
     } finally {
-      launcher.onChildThreadEnd();
+      launcher.onChildThreadResumeEnd();
       
       thread.setContextClassLoader(loader);
     }

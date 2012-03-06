@@ -524,6 +524,9 @@ r_port-Parameters =
    & (attribute suspend-reaper-timeout { r_period-Type }
       | element suspend-reaper-timeout { r_period-Type })?
 
+   & (attribute tcp-cork { r_boolean-Type }
+      | element tcp-cork { r_boolean-Type })?
+
    & (attribute tcp-keepalive { r_boolean-Type }
       | element tcp-keepalive { r_boolean-Type })?
 

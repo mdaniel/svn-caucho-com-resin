@@ -67,16 +67,16 @@ public class RingValueQueue<T> extends RingQueue<RingValueItem<T>> {
     return true;
   }
  
-  public T take()
+  public final T poll()
   {
-    RingValueItem<T> item = beginTake();
+    final RingValueItem<T> item = beginPoll();
     
     if (item == null)
       return null;
     
-    T value = item.getAndClearValue();
+    final T value = item.getAndClearValue();
     
-    completeTake(item);
+    completePoll(item);
     
     return value;
   }

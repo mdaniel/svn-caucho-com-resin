@@ -665,7 +665,7 @@ public class ThreadPool2 {
   {
     ResinThread2 thread;
     
-    while ((thread = _idleThreadRing.take()) != null) {
+    while ((thread = _idleThreadRing.poll()) != null) {
       thread.close();
     }
   }
@@ -767,7 +767,7 @@ public class ThreadPool2 {
     
     private boolean invokeUnpark()
     {
-      Thread thread = _unparkQueue.take();
+      Thread thread = _unparkQueue.poll();
       
       if (thread != null) {
         LockSupport.unpark(thread);
@@ -783,7 +783,7 @@ public class ThreadPool2 {
         return false;
       }
        
-      ResinThread2 thread = _idleThreadRing.take();
+      ResinThread2 thread = _idleThreadRing.poll();
         
       if (thread == null) {
         _launcher.wake();
@@ -811,7 +811,7 @@ public class ThreadPool2 {
         return true;
       }
        
-      ResinThread2 thread = _idleThreadRing.take();
+      ResinThread2 thread = _idleThreadRing.poll();
         
       if (thread == null) {
         _launcher.wake();

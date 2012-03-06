@@ -53,11 +53,13 @@ class AcceptTask extends ConnectionTask {
     thread.setName(getSocketLink().getDebugId());
 
     try {
-      launcher.onChildThreadBegin();
+      launcher.onChildIdleBegin();
+      launcher.onChildThreadLaunchBegin();
       
       super.run();
     } finally {
-      launcher.onChildThreadEnd();
+      launcher.onChildThreadLaunchEnd();
+      launcher.onChildIdleEnd();
       
       thread.setName(oldThreadName);
     }
@@ -70,6 +72,6 @@ class AcceptTask extends ConnectionTask {
   final RequestState doTask()
     throws IOException
   {
-    return getSocketLink().handleAcceptTask();
+    return getSocketLink().handleAcceptTaskImpl();
   }
 }

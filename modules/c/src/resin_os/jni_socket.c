@@ -153,6 +153,7 @@ resin_tcp_cork(connection_t *conn)
   result = setsockopt(fd, IPPROTO_TCP, TCP_CORK,
                       (char *) &flag, sizeof(int));
 
+
   return result;
 #else
   return 1;
@@ -1304,7 +1305,7 @@ Java_com_caucho_vfs_JniServerSocketImpl_nativeSetTcpCork(JNIEnv *env,
 
 #ifdef TCP_CORK
   if (! ss->ssl_config) {
-    ss->tcp_cork = 1;
+    ss->tcp_cork = enable;
   }
 #endif  
 }

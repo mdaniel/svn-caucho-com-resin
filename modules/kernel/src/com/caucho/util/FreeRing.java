@@ -58,7 +58,7 @@ public final class FreeRing<T> {
    */
   public T allocate()
   {
-    return _ringQueue.take();
+    return _ringQueue.poll();
   }
   
   

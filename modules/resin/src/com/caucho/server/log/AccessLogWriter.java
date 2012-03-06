@@ -110,9 +110,7 @@ public class AccessLogWriter extends AbstractRolloverLog
 
   void writeBuffer(LogBuffer buffer)
   {
-    synchronized (_offerLock) {
-      _logWriterTask.offer(buffer);
-    }
+    _logWriterTask.offer(buffer);
   }
 
   // must be synchronized by _bufferLock.

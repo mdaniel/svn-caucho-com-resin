@@ -533,7 +533,7 @@ public class TcpSocketLink extends AbstractSocketLink
   }
 
   /**
-   * Returns the current keepalive task
+   * Returns the accept task. Only called from the launcher.
    */
   private Runnable getAcceptTask()
   {
@@ -545,10 +545,12 @@ public class TcpSocketLink extends AbstractSocketLink
    */
   private ConnectionTask getKeepaliveTask()
   {
-    if (_state.isDuplex())
+    if (_state.isDuplex()) {
       return _duplexReadTask;
-    else
+    }
+    else {
       return _keepaliveTask;
+    }
   }
 
   /**
@@ -866,9 +868,23 @@ public class TcpSocketLink extends AbstractSocketLink
                          + " " + reqState + " " + _requestStateRef.get() + " " + this);
     }
   }
+  private RequestState handleAcceptTask()
+    throws IOException
+  {
+    getLauncher().onChildIdleBegin();
+    try {
+      return handleAcceptTaskImpl();
+    } finally {
+      getLauncher().onChildIdleEnd();
+    }
+  }
 
+  /**
+   * Called in the idle state. Only called from the acceptTask and from
+   * handleAcceptTask
+   */
   @Friend(AcceptTask.class)
-  RequestState handleAcceptTask()
+  RequestState handleAcceptTaskImpl()
     throws IOException
   {
     TcpSocketLinkListener listener = getListener();
@@ -901,7 +917,6 @@ public class TcpSocketLink extends AbstractSocketLink
       try {
         result = handleRequests(Task.ACCEPT);
       } finally {
-        // XXX: possibly finish
         launcher.onChildIdleBegin();
       }
     }
@@ -1429,7 +1444,7 @@ public class TcpSocketLink extends AbstractSocketLink
   //
   // idle management (for logging)
   //
-  
+  /*
   public void beginThreadIdle()
   {
     _listener.getLauncher().onChildIdleBegin();
@@ -1439,6 +1454,7 @@ public class TcpSocketLink extends AbstractSocketLink
   {
     _listener.getLauncher().onChildIdleEnd();
   }
+  */
 
   //
   // async/comet state transitions

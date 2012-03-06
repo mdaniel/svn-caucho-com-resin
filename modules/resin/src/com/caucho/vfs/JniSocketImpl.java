@@ -59,6 +59,8 @@ public final class JniSocketImpl extends QSocket {
   private Object _readLock = new Object();
   private Object _writeLock = new Object();
   
+  private boolean _isNativeFlushRequired;
+  
   private long _socketTimeout;
   private long _requestExpireTime;
   
@@ -438,6 +440,8 @@ public final class JniSocketImpl extends QSocket {
       long now = CurrentTime.getCurrentTimeActual();
       long expires = _socketTimeout + now;
       
+      _isNativeFlushRequired = true;
+      
       do {
         result = writeNative(_socketFd, buffer, offset, length);
         
@@ -513,6 +517,8 @@ public final class JniSocketImpl extends QSocket {
       long now = CurrentTime.getCurrentTimeActual();
       long expires = _socketTimeout + now;
     
+      _isNativeFlushRequired = true;
+      
       do {
         result = writeMmapNative(_socketFd, 
                                  mmapAddress, mmapBlocks, mmapOffset, mmapLength);
@@ -546,6 +552,8 @@ public final class JniSocketImpl extends QSocket {
       long now = CurrentTime.getCurrentTimeActual();
       long expires = _socketTimeout + now;
       
+      _isNativeFlushRequired = true;
+      
       do {
         result = writeSendfileNative(_socketFd, fileName, nameLength, fileLength);
         
@@ -569,7 +577,12 @@ public final class JniSocketImpl extends QSocket {
     throws IOException
   {
     // XXX: only on cork
+    if (! _isNativeFlushRequired) {
+      return 0;
+    }
+    
     synchronized (_writeLock) {
+      _isNativeFlushRequired = false;
       return flushNative(_socketFd);
     }
   }

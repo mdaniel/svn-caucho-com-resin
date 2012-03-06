@@ -29,16 +29,8 @@
 
 package com.caucho.env.thread;
 
-import java.util.concurrent.atomic.AtomicInteger;
-import java.util.concurrent.atomic.AtomicLong;
-import java.util.logging.Logger;
-
-import com.caucho.config.ConfigException;
 import com.caucho.env.thread2.AbstractThreadLauncher2;
 import com.caucho.inject.Module;
-import com.caucho.lifecycle.Lifecycle;
-import com.caucho.util.Alarm;
-import com.caucho.util.L10N;
 
 @Module
 abstract public class AbstractThreadLauncher extends AbstractThreadLauncher2 {

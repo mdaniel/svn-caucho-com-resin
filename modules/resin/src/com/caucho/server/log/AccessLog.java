@@ -384,7 +384,7 @@ public class AccessLog extends AbstractAccessLog implements AlarmListener
     LogBuffer logBuffer = _logWriter.allocateBuffer();
     
     // logging is treated as idle for thread launching purposes
-    TcpSocketLink tcpLink = absRequest.getTcpSocketLink();
+    // TcpSocketLink tcpLink = absRequest.getTcpSocketLink();
     
     /*
     if (tcpLink != null) {

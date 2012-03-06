@@ -35,6 +35,7 @@ package com.caucho.util;
 public class RingItem
 {
   private final int _index;
+  private volatile boolean _isRingValue;
   
   protected RingItem(int index)
   {
@@ -44,6 +45,21 @@ public class RingItem
   public int getIndex()
   {
     return _index;
+  }
+  
+  public final boolean isRingValue()
+  {
+    return _isRingValue;
+  }
+  
+  public void setRingValue()
+  {
+    _isRingValue = true;
+  }
+  
+  public void clearRingValue()
+  {
+    _isRingValue = false;
   }
 
   @Override

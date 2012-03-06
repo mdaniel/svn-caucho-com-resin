@@ -32,7 +32,7 @@ package com.caucho.util;
 /**
  * Item for the disruptor.
  */
-public class RingValueItem<T> extends RingItem
+public final class RingValueItem<T> extends RingItem
 {
   private T _value;
   
@@ -41,12 +41,12 @@ public class RingValueItem<T> extends RingItem
     super(index);
   }
 
-  public void setValue(T value)
+  public final void setValue(T value)
   {
     _value = value;
   }
   
-  public T getAndClearValue()
+  public final T getAndClearValue()
   {
     T value = _value;
     _value = null;

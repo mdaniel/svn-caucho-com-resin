@@ -432,7 +432,7 @@ std_accept(server_socket_t *ss, connection_t *conn)
   if (sock < 0)
     return 0;
 
-  if (ss->tcp_no_delay) { /* && ! ss->tcp_cork) { */
+  if (ss->tcp_no_delay) {/* && ! ss->tcp_cork) { */
     int flag = 1;
 
     setsockopt(sock, IPPROTO_TCP, TCP_NODELAY, (char *) &flag, sizeof(int));
@@ -443,8 +443,8 @@ std_accept(server_socket_t *ss, connection_t *conn)
   if (ss->tcp_cork) {
     int flag = 1;
     int result;
-
-    result = setsockopt(sock, IPPROTO_TCP, TCP_CORK, (char *) &flag, sizeof(int));
+    /*
+      result = setsockopt(sock, IPPROTO_TCP, TCP_CORK, (char *) &flag, sizeof(int));*/
     conn->tcp_cork = 1;
   }
 #endif  

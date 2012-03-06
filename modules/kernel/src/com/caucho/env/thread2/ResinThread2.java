@@ -114,13 +114,15 @@ final class ResinThread2 extends Thread {
   public void run()
   {
     try {
-      _launcher.onChildThreadBegin();
+      _launcher.onChildIdleBegin();
+      _launcher.onChildThreadLaunchBegin();
       
       runTasks();
     } catch (Throwable e) {
       log.log(Level.WARNING, e.toString(), e);
     } finally {
-      _launcher.onChildThreadEnd();
+      _launcher.onChildIdleEnd();
+      _launcher.onChildThreadLaunchEnd();
     }
   }
 
