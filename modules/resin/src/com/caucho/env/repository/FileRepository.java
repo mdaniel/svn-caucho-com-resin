@@ -332,6 +332,12 @@ public class FileRepository extends AbstractRepository
     }
   }
 
+  @Override
+  public boolean isActive()
+  {
+    return true;
+  }
+
   /**
    * Expands the repository to the filesystem.
    */
