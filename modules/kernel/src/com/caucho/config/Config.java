@@ -86,6 +86,9 @@ public class Config {
 
   private static final EnvironmentLocal<ConfigProperties> _envProperties
     = new EnvironmentLocal<ConfigProperties>();
+  
+  private static final EnvironmentLocal<ConfigAdmin> _configAdmin = 
+    new EnvironmentLocal<ConfigAdmin>();
 
   // the context class loader of the config
   private ClassLoader _classLoader;
@@ -443,9 +446,11 @@ public class Config {
     builder.init(doc);
     String systemId = null;
     String filename = null;
+    Path path = null;
     if (is instanceof ReadStream) {
-      systemId = ((ReadStream) is).getPath().getURL();
-      filename = ((ReadStream) is).getPath().getUserPath();
+      path = ((ReadStream) is).getPath();
+      systemId = path.getURL();
+      filename = path.getUserPath();
     }
 
     doc.setSystemId(systemId);
@@ -476,6 +481,10 @@ public class Config {
     else {
       xml.setContentHandler(builder);
       xml.parse(in);
+    }
+    
+    if (path != null) {
+      getAdmin().addPath(path);
     }
 
     return doc;
@@ -885,6 +894,23 @@ public class Config {
       if (is != null)
         is.close();
     }
+  }
+  
+  private ConfigAdmin getAdmin()
+  {
+    ConfigAdmin admin = _configAdmin.getLevel(_classLoader);
+    if (admin == null) {
+      admin = new ConfigAdmin();
+      admin.register();
+      _configAdmin.set(admin, _classLoader);
+    }
+      
+    return admin;
+  }
+  
+  public static ConfigAdmin getAdmin(ClassLoader loader)
+  {
+    return _configAdmin.get(loader);
   }
 
   static class ConfigProperties {

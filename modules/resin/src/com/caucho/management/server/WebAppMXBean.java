@@ -59,6 +59,9 @@ public interface WebAppMXBean extends DeployControllerMXBean {
    */
   @Description("The web-app's session manager")
   public SessionManagerMXBean getSessionManager();
+  
+  @Description("The web-app's config MBean")
+  public ConfigMXBean getConfig();
 
   //
   // Configuration attributes
