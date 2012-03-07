@@ -100,6 +100,24 @@ read_exception_status(connection_t *conn, int error)
 }
 
 static int
+resin_tcp_set_recv_timeout(connection_t *conn, int timeout_ms)
+{
+  int fd = conn->fd;
+  int result = 0;
+  struct timeval timeout;
+
+#ifdef HAS_SOCK_TIMEOUT
+  timeout.tv_sec = timeout_ms / 1000;
+  timeout.tv_usec = timeout_ms % 1000 * 1000;
+  
+  result = setsockopt(fd, SOL_SOCKET, SO_RCVTIMEO,
+                      (char *) &timeout, sizeof(timeout));
+#endif  
+
+  return result;
+}
+
+static int
 std_read_nonblock(connection_t *conn, char *buf, int len)
 {
   int fd;
@@ -217,6 +235,7 @@ std_read(connection_t *conn, char *buf, int len, int timeout)
   int result;
   int retry = 3;
   int poll_result;
+  int poll_timeout;
 
   if (! conn) {
     return -1;
@@ -229,14 +248,21 @@ std_read(connection_t *conn, char *buf, int len, int timeout)
   }
 
   if (timeout >= 0) {
-    poll_result = poll_read(fd, timeout);
+    poll_timeout = timeout;
+  }
+  else {
+    poll_timeout = conn->socket_timeout;
+  }
 
-    if (poll_result <= 0) {
-      return calculate_poll_result(conn, poll_result);
+  if (timeout > 0 && conn->is_recv_timeout) {
+    if (conn->recv_timeout != poll_timeout) {
+      conn->recv_timeout = poll_timeout;
+
+      resin_tcp_set_recv_timeout(conn, poll_timeout);
     }
   }
-  else if (! conn->is_recv_timeout) {
-    poll_result = poll_read(fd, conn->socket_timeout);
+  else {
+    poll_result = poll_read(fd, poll_timeout);
 
     if (poll_result <= 0) {
       return calculate_poll_result(conn, poll_result);
@@ -450,6 +476,8 @@ std_init(connection_t *conn)
   struct timeval timeout;
   int sin_len;
 
+  conn->socket_timeout = ss->conn_socket_timeout;
+
   if (ss->tcp_no_delay) {/* && ! ss->tcp_cork) { */
     int flag = 1;
 
@@ -479,28 +507,26 @@ std_init(connection_t *conn)
   conn->is_recv_timeout = 0;
 
 #ifdef HAS_SOCK_TIMEOUT
-  timeout.tv_sec = ss->conn_socket_timeout / 1000;
-  timeout.tv_usec = ss->conn_socket_timeout % 1000 * 1000;
+  timeout.tv_sec = conn->socket_timeout / 1000;
+  timeout.tv_usec = conn->socket_timeout % 1000 * 1000;
 
   if (setsockopt(sock, SOL_SOCKET, SO_RCVTIMEO,
                  (char *) &timeout, sizeof(timeout)) == 0) {
     conn->is_recv_timeout = 1;
+    conn->recv_timeout = conn->socket_timeout;
 
-    timeout.tv_sec = ss->conn_socket_timeout / 1000;
-    timeout.tv_usec = ss->conn_socket_timeout % 1000 * 1000;
+    timeout.tv_sec = conn->socket_timeout / 1000;
+    timeout.tv_usec = conn->socket_timeout % 1000 * 1000;
 
     setsockopt(sock, SOL_SOCKET, SO_SNDTIMEO,
                (char *) &timeout, sizeof(timeout));
   }
 #endif
 
-  conn->ss = ss;
-  conn->socket_timeout = ss->conn_socket_timeout;
   conn->ssl_lock = &ss->ssl_lock;
-
-  conn->fd = sock;
   conn->ssl_sock = 0;
   conn->ops = &std_ops;
+  
   /*
   conn->client_sin = (struct sockaddr *) &conn->client_data;
   memcpy(conn->client_sin, sin, sizeof(conn->client_data));

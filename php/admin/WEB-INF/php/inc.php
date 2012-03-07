@@ -794,10 +794,19 @@ function display_pages()
 
   foreach ($names as $name) {
     $page_name = gettext($name);
+    $img = "";
+
+    if (file_exists("images/${page_name}_16.png")) {
+      $img = "<img src='images/${page_name}_16.png' width='16' height='16' alt='${page_name}' />&nbsp;";
+    }
+    else {
+      $img = "<img src='images/pixel.png' width='16' height='16' noborder alt='${page_name}' />&nbsp;";
+    }
+
     if ($g_page == $name) {
-      echo "<li class='selected'>$page_name</li>";
+      echo "<li class='selected'>$img$page_name</li>";
     } else {
-      echo "<li><a href='?q=$name&amp;s=$g_server_index'>$page_name</a></li>";
+      echo "<li><a href='?q=$name&amp;s=$g_server_index'>$img$page_name</a></li>";
     }
   }
 }

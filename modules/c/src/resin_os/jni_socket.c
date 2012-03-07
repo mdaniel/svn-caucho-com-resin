@@ -179,7 +179,7 @@ Java_com_caucho_vfs_JniSocketImpl_readNative(JNIEnv *env,
 					     jbyteArray buf,
 					     jint offset,
 					     jint length,
-					     jlong timeout)
+					     jlong timeout_ms)
 {
   connection_t *conn = (connection_t *) (PTR) conn_fd;
   int sublen;
@@ -197,7 +197,7 @@ Java_com_caucho_vfs_JniSocketImpl_readNative(JNIEnv *env,
   else
     sublen = STACK_BUFFER_SIZE;
 
-  sublen = conn->ops->read(conn, buffer, sublen, (int) timeout);
+  sublen = conn->ops->read(conn, buffer, sublen, (int) timeout_ms);
 
   /* Should probably have a different response for EINTR */
   if (sublen < 0) {
@@ -1658,7 +1658,7 @@ Java_com_caucho_vfs_JniSocketImpl_nativeConnect(JNIEnv *env,
   }
 
   conn->fd = sock;
-  conn->socket_timeout = 10000;
+  conn->socket_timeout = ss->conn_socket_timeout;
 
 #ifdef HAS_SOCK_TIMEOUT
   timeout.tv_sec = conn->socket_timeout / 1000;
@@ -1667,6 +1667,7 @@ Java_com_caucho_vfs_JniSocketImpl_nativeConnect(JNIEnv *env,
   if (setsockopt(sock, SOL_SOCKET, SO_RCVTIMEO,
                  (char *) &timeout, sizeof(timeout)) == 0) {
     conn->is_recv_timeout = 1;
+    conn->recv_timeout = conn->socket_timeout;
   }
 
   timeout.tv_sec = conn->socket_timeout / 1000;

@@ -80,6 +80,7 @@ struct connection_t {
   int sent_data;
 
   int is_recv_timeout;
+  int recv_timeout;
   int is_read_shutdown;
   int tcp_cork;
   int is_cork;

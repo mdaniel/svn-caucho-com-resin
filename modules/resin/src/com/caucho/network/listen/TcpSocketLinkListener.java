@@ -1421,8 +1421,11 @@ public class TcpSocketLinkListener
       return false;
     else if (_keepaliveMax <= _keepaliveAllocateCount.get())
       return false;
-    else if (_launcher.isThreadMax() && _launcher.isIdleLow())
+    else if (_launcher.isThreadMax()
+             && _launcher.isIdleLow()
+             && ! isKeepaliveSelectEnabled()) {
       return false;
+    }
     else
       return true;
   }
@@ -1456,8 +1459,9 @@ public class TcpSocketLinkListener
   int keepaliveThreadRead(ReadStream is)
     throws IOException
   {
-    if (isClosed())
+    if (isClosed()) {
       return -1;
+    }
 
     int available = is.getBufferAvailable();
     
@@ -1467,17 +1471,30 @@ public class TcpSocketLinkListener
 
     long timeout = getKeepaliveTimeout();
 
+    if (getSocketTimeout() < timeout)
+      timeout = getSocketTimeout();
+    
+    // server/2l02
+    int keepaliveThreadCount = _keepaliveThreadCount.incrementAndGet();
+
     // boolean isSelectManager = getServer().isSelectManagerEnabled();
 
     if (isKeepaliveSelectEnabled() && _selectManager != null) {
       long selectTimeout = getBlockingTimeoutForSelect();
       
-      if (selectTimeout < timeout)
+      if (selectTimeout < timeout) {
         timeout = selectTimeout;
+      }
+      
+      if (keepaliveThreadCount > 32) {
+        if (getLauncher().isThreadMax() && timeout >= 10) {
+          timeout = 10;
+        }
+        else if (timeout >= 100) {
+          timeout = 100;
+        }
+      }
     }
-
-    if (getSocketTimeout() < timeout)
-      timeout = getSocketTimeout();
 
     /*
     if (timeout < 0)
@@ -1487,14 +1504,6 @@ public class TcpSocketLinkListener
     if (timeout <= 0)
       return 0;
     
-    
-    // server/2l02
-
-    int keepaliveThreadCount = _keepaliveThreadCount.incrementAndGet();
-    
-    if (keepaliveThreadCount > 16 && timeout >= 100) {
-      timeout = 50;
-    }
 
     try {
       int result;
