@@ -1,10 +1,10 @@
 package com.caucho.encoder;
 
-public class JSONStringDecoder implements Decoder {
+public class JSONStringDecoder implements Decoder<String, String> {
 
 	@Override
-	public Object decodeObject(Object obj) throws Exception {
-		String string = (String) obj;
+	public String decodeObject(String string) throws Exception {
+		
 		char[] cs = string.toCharArray();
 		StringBuilder builder = new StringBuilder(cs.length);
 		for (int index=0; index < cs.length; index++) {

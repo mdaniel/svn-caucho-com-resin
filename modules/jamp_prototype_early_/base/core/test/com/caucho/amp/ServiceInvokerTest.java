@@ -23,7 +23,7 @@ public class ServiceInvokerTest {
     public void invokerTest() throws Exception {
         Object methodEncodedAsMessage = getMethodEncodedAsMessage();
         System.out.println(methodEncodedAsMessage);
-        ServiceInvoker serviceInvoker = new ServiceInvoker(EmployeeServiceImpl.class);
+        SkeletonServiceInvoker serviceInvoker = AmpFactory.factory().createJampServerSkeleton(EmployeeServiceImpl.class);
         serviceInvoker.invokeMessage(methodEncodedAsMessage);
         
     }

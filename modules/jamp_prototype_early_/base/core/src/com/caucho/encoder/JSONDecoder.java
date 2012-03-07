@@ -7,8 +7,10 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-/** Converts an input JSON String into Java objects. */
-public class JSONDecoder implements Decoder{
+/** Converts an input JSON String into Java objects works with Reader or String as input.
+ *  Produces an Object which can be any of the basic JSON types mapped to Java.
+ *  */
+public class JSONDecoder implements Decoder<Object, Object>{
 	
     private Reader reader;
 	private String str; 
@@ -80,7 +82,18 @@ public class JSONDecoder implements Decoder{
 	        reader = (Reader) obj;
 	    }
 	    
-		return decodeValue("root");
+		Object root = decodeValue("root");
+		
+	    reader=null;
+	    str=null; 
+	    charArray=null; 
+	    __index=0; 
+	    line =0;
+	    lastLineStart =0;
+	    ch = (char)0;
+	    lastChar =0;
+		
+		return root;
 	}
 	
 	public void debug() {

@@ -4,12 +4,13 @@ import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileReader;
 
-import com.caucho.amp.ServiceInvoker;
-import com.caucho.test.EmployeeServiceImpl;
+import com.caucho.amp.AmpFactory;
+import com.caucho.amp.SkeletonServiceInvoker;
+import com.caucho.test.EmployeeService;
 
 public class JampFileProcessorMain {
 	
-    static ServiceInvoker serviceInvoker = new ServiceInvoker(EmployeeServiceImpl.class);
+    static SkeletonServiceInvoker serviceInvoker = AmpFactory.factory().createJampServerSkeleton(EmployeeService.class);
 
 
 	private static String readPayload(File file) throws Exception {

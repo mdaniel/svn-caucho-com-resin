@@ -13,10 +13,11 @@ import com.caucho.encoder.MethodEncoder;
  *  The encoder encodes the method via Hessian, JSON or BSON.
  **/
 public class AmpProxyCreator {
-	private MethodEncoder methodEncoder;
+	@SuppressWarnings("rawtypes")
+    private MethodEncoder methodEncoder;
 	private AmpMessageSender invoker;
 	
-	public AmpProxyCreator(MethodEncoder methodEncoder, AmpMessageSender invoker) {
+	public AmpProxyCreator(@SuppressWarnings("rawtypes") MethodEncoder methodEncoder, AmpMessageSender invoker) {
 		this.methodEncoder = methodEncoder;
 		this.invoker = invoker;
 	}

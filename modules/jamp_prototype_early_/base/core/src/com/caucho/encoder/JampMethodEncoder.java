@@ -4,12 +4,13 @@ import java.lang.reflect.Method;
 
 
 /** Convert method into JAMP method. */
-public class JampMethodEncoder implements MethodEncoder{
+public class JampMethodEncoder implements MethodEncoder<String>{
 	
-	private Encoder encoder = new JSONEncoder();
+    /* If we support Jackson we have to make this pluggable. */
+	private Encoder<String, Object> encoder = new JSONEncoder();
 
 	@Override
-	public Object encodeMethodForSend(final Method method, final Object[] method_params, final String toURL, final String fromURL) throws Exception {
+	public String encodeMethodForSend(final Method method, final Object[] method_params, final String toURL, final String fromURL) throws Exception {
 		StringBuilder builder = new StringBuilder(255);
 		
 		builder.append(String.format("[\"send\",\"%s\",\"%s\",\"%s\"",toURL, fromURL, method.getName()));

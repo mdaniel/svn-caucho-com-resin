@@ -2,10 +2,12 @@ package com.caucho.encoder;
 
 import java.io.BufferedReader;
 
+import com.caucho.amp.Message;
+
 
 
 /** Encodes an JAMP input object (bufferedreader) into a Message. */
-public class JampMessageReaderDecoder implements Decoder {
+public class JampMessageReaderDecoder implements Decoder <Message, BufferedReader> {
 	
     private static String readPayload(BufferedReader reader) throws Exception {
         StringBuilder builder = new StringBuilder();
@@ -26,8 +28,7 @@ public class JampMessageReaderDecoder implements Decoder {
 
 
     @Override
-    public Object decodeObject(Object objPayload) throws Exception {
-        BufferedReader reader = (BufferedReader) objPayload;
+    public Message decodeObject(BufferedReader reader) throws Exception {
         JampMessageDecoder decoder = new JampMessageDecoder();
 
         String str = readPayload(reader);

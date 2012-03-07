@@ -3,15 +3,13 @@ package com.caucho.encoder;
 import com.caucho.amp.Message;
 
 /** Encodes an JAMP input object (now just string) into a Message. */
-public class JampMessageDecoder implements Decoder {
+public class JampMessageDecoder implements Decoder<Message, String>{
 	enum ParseMode{messageType, to, from, methodName, done};
 	
 
     @Override
-    public Object decodeObject(Object objPayload) throws Exception {
+    public Message decodeObject(String payload) throws Exception {
         ParseMode mode = ParseMode.messageType;
-
-        String payload = (String) objPayload;
         char[] cs = payload.toCharArray();
         if(cs[0]!='[' || cs[1]!='"' || cs[cs.length-1]!=']') {
             throw new IllegalStateException("Not JSON JAMP format " + payload);

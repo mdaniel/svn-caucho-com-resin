@@ -1,9 +1,6 @@
 package com.caucho.encoder;
 
-import java.lang.reflect.Array;
 import java.lang.reflect.Method;
-import java.nio.charset.Charset;
-import java.nio.charset.CharsetEncoder;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
@@ -11,7 +8,7 @@ import java.util.List;
 /** Converts a Java object into a JSON string. 
  * I opted for ASCII safe encodig after reading this: http://stackoverflow.com/questions/583562/json-character-encoding
  * */
-public class JSONEncoder implements Encoder {
+public class JSONEncoder implements Encoder<String, Object> {
     
     /* Not sure of the speed of this. */
     //private final static CharsetEncoder asciiEncoder = 
@@ -82,7 +79,7 @@ public class JSONEncoder implements Encoder {
 		return builder.toString();
 	}
 	
-	public Object encodeObject(Object obj) throws Exception {
+	public String encodeObject(Object obj) throws Exception {
 		if (obj==null) {
 			return "null";
 		}
@@ -156,7 +153,7 @@ public class JSONEncoder implements Encoder {
 		}
 	}
 
-	private Object encodeArray(Object[] array) throws Exception {
+	private String encodeArray(Object[] array) throws Exception {
 		StringBuilder builder = new StringBuilder();
 		builder.append("[");
 		for (int index = 0; index < array.length; index++) {

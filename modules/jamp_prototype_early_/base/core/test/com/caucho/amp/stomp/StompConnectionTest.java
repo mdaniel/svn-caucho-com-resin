@@ -9,14 +9,14 @@ public class StompConnectionTest {
 
     @Test
     public void testProtocolOnlyStomp () throws IOException {
-        StompConnection connection = new StompConnection();
+        StompConnectionImpl connection = new StompConnectionImpl();
         connection.connect("stomp://localhost:6666/foo");
         connection.close();
     }
     
     @Test(timeout=15000)    
     public void testSend () throws IOException {
-        StompConnection connection = new StompConnection();
+        MessageQueueConnection connection = new StompConnectionImpl();
         connection.connect("stomp://localhost:6666/foo");
         
         connection.send("queue/bob", "love_rocket");
