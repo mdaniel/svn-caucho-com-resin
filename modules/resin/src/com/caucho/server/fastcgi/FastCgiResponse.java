@@ -47,7 +47,8 @@ import com.caucho.vfs.WriteStream;
  * a web server plugin.
  */
 public class FastCgiResponse extends AbstractHttpResponse {
-  private FastCgiRequest _req;
+  private final FastCgiRequest _req;
+  private final CharBuffer _cb = new CharBuffer();
 
   FastCgiResponse(FastCgiRequest request, WriteStream rawWrite)
   {

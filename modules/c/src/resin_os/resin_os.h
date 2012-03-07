@@ -52,6 +52,7 @@
 typedef struct connection_t connection_t;
 
 typedef struct connection_ops_t {
+  int (*init) (connection_t *conn);
   int (*read) (connection_t *conn, char *buf, int len, int timeout);
   int (*read_nonblock) (connection_t *conn, char *buf, int len);
   int (*write) (connection_t *conn, char *buf, int len);

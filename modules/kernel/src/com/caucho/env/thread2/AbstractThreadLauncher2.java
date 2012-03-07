@@ -122,6 +122,10 @@ abstract public class AbstractThreadLauncher2 extends AbstractTaskWorker2 {
    */
   public void setThreadMax(int max)
   {
+    if (max <= 0) {
+      max = DEFAULT_THREAD_MAX;
+    }
+    
     if (max < _idleMin)
       throw new ConfigException(L.l("IdleMin ({0}) must be less than ThreadMax ({1})", _idleMin, max));
     if (max < 1)
@@ -146,6 +150,10 @@ abstract public class AbstractThreadLauncher2 extends AbstractTaskWorker2 {
    */
   public void setIdleMin(int min)
   {
+    if (min <= 0) {
+      min = DEFAULT_IDLE_MIN;
+    }
+    
     if (_threadMax < min)
       throw new ConfigException(L.l("IdleMin ({0}) must be less than ThreadMax ({1})", min, _threadMax));
     if (min <= 0)
@@ -169,7 +177,10 @@ abstract public class AbstractThreadLauncher2 extends AbstractTaskWorker2 {
    */
   public void setIdleMax(int max)
   {
-    if (_threadMax < max)
+    if (max <= 0) {
+      max = DEFAULT_IDLE_MAX;
+    }
+        if (_threadMax < max)
       throw new ConfigException(L.l("IdleMax ({0}) must be less than ThreadMax ({1})", max, _threadMax));
     if (max <= 0)
       throw new ConfigException(L.l("IdleMax ({0}) must be greater than 0.", max));
@@ -369,6 +380,11 @@ abstract public class AbstractThreadLauncher2 extends AbstractTaskWorker2 {
     }
     
     return false;
+  }
+  
+  public boolean isIdleLow()
+  {
+    return _idleCount.get() < _idleMin;
   }
   
   /**

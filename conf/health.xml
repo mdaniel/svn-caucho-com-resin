@@ -453,6 +453,10 @@
   </health:AnomalyAnalyzer>
 
   <health:AnomalyAnalyzer>
+    <meter>Resin|Port|Throttle Disconnect Count</meter>
+  </health:AnomalyAnalyzer>
+
+  <health:AnomalyAnalyzer>
     <meter>Resin|Http|400</meter>
   </health:AnomalyAnalyzer>
 
@@ -486,6 +490,10 @@
       <meter>Resin|Http|500</meter>
       <meter>Resin|Http|503</meter>
       <meter>Resin|Http|5xx</meter>
+    </graph>
+
+    <graph name="Throttle Disconnect">
+      <meter>Resin|Port|Throttle Disconnect Count</meter>
     </graph>
 
     <!-- row 2 -->

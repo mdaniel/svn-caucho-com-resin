@@ -512,6 +512,9 @@ r_port-Parameters =
    & (attribute keepalive-timeout { r_period-Type }
       | element keepalive-timeout { r_period-Type })?
 
+   & (attribute port-thread-max { r_int-Type }
+      | element port-thread-max { r_int-Type })?
+
    & (attribute secure { r_boolean-Type }
       | element secure { r_boolean-Type })?
 

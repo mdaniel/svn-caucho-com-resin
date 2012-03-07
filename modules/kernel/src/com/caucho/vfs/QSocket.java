@@ -40,6 +40,9 @@ import com.caucho.inject.Module;
  */
 @Module
 abstract public class QSocket {
+  abstract public int acceptInitialRead(byte []buffer, int offset, int length)
+    throws IOException;
+  
   /**
    * Returns the server inet address that accepted the request.
    */

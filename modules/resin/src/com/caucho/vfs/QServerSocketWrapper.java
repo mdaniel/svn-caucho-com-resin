@@ -107,6 +107,9 @@ public class QServerSocketWrapper extends QServerSocket {
     if (socket == null)
       return false;
 
+    s.init(socket);
+
+    /*
     // XXX:
     if (isTcpNoDelay())
       socket.setTcpNoDelay(true);
@@ -118,9 +121,37 @@ public class QServerSocketWrapper extends QServerSocket {
       socket.setSoTimeout(_connectionSocketTimeout);
 
     s.init(socket);
+    */
 
     return true;
   }
+
+  /**
+   * Accepts a new socket.
+   */
+  /*
+  @Override
+  public int acceptInitialRead(QSocket qSocket,
+                               byte []buffer, int offset, int length)
+    throws IOException
+  {
+    QSocketWrapper s = (QSocketWrapper) qSocket;
+
+    Socket socket = s.getSocket();
+
+    // XXX:
+    if (isTcpNoDelay())
+      socket.setTcpNoDelay(true);
+    
+    if (isTcpKeepalive())
+      socket.setKeepAlive(true);
+
+    if (_connectionSocketTimeout > 0)
+      socket.setSoTimeout(_connectionSocketTimeout);
+
+    return socket.getInputStream().read(buffer, offset, length);
+  }
+  */
   
   /**
    * Creates a new socket object.

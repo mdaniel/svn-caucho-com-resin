@@ -85,6 +85,16 @@ public class QSocketChannelWrapper extends QSocket {
     return _channel.socket();
   }
 
+  /* (non-Javadoc)
+   * @see com.caucho.vfs.QSocket#acceptInitialRead(byte[], int, int)
+   */
+  @Override
+  public int acceptInitialRead(byte[] buffer, int offset, int length)
+      throws IOException
+  {
+    throw new UnsupportedOperationException(getClass().getName());
+  } 
+
   /**
    * Sets the socket timeout.
    */
@@ -350,6 +360,6 @@ public class QSocketChannelWrapper extends QSocket {
     sslKeySizes.put("SSL_DSA_EXPORT_WITH_RC4_40_MD5", 40);
     sslKeySizes.put("SSL_DSA_WITH_NULL_MD5", 0);
     sslKeySizes.put("SSL_DSA_WITH_NULL_SHA", 0);
-  } 
+  }
 }
 

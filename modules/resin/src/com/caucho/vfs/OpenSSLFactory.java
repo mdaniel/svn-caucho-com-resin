@@ -435,6 +435,7 @@ public class OpenSSLFactory extends QServerSocket implements SSLFactory {
     _stdServerSocket.listen(backlog);
   }
 
+  @Override
   public boolean accept(QSocket socket)
     throws IOException
   {
@@ -459,6 +460,18 @@ public class OpenSSLFactory extends QServerSocket implements SSLFactory {
       return true;
     }
   }
+
+  /*
+  @Override
+  public int acceptInitialRead(QSocket socket, 
+                               byte []buffer, int offset, int length)
+    throws IOException
+  {
+    JniSocketImpl jniSocket = (JniSocketImpl) socket;
+
+    return jniSocket.acceptInit(buffer, offset, length);
+  }
+  */
   
   public QSocket createSocket()
     throws IOException

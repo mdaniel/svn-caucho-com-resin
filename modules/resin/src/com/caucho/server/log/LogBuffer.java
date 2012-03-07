@@ -35,15 +35,20 @@ package com.caucho.server.log;
  * Resin can recycle the buffers during keepalives to keep the memory
  * consumption low.
  */
-final class LogBuffer
+public final class LogBuffer
 {
+  private final boolean _isPrivate;
   private final byte []_logBuffer = new byte[1024];
   private int _length;
 
-  private LogBuffer _next;
-
-  LogBuffer()
+  public LogBuffer(boolean isPrivate)
   {
+    _isPrivate = isPrivate;
+  }
+
+  public boolean isPrivate()
+  {
+    return _isPrivate;
   }
 
   public final byte []getBuffer()
@@ -59,16 +64,6 @@ final class LogBuffer
   public final int getLength()
   {
     return _length;
-  }
-
-  public final LogBuffer getNext()
-  {
-    return _next;
-  }
-
-  public final void setNext(LogBuffer next)
-  {
-    _next = next;
   }
 
   @Override

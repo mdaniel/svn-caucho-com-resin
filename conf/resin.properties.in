@@ -47,6 +47,13 @@ setuid_group  : @SETUID_GROUP@
 http          : @HTTP_PORT@
 # https         : @HTTPS_PORT@
 
+# throttle the number of active threads for a port
+port_thread_max   : 256
+accept_thread_max : 32
+accept_thread_min : 4
+
+tcp_cork : true
+
 # OpenSSL certificate configuration
 # openssl_file : keys/test.crt
 # openssl_key : keys/test.key

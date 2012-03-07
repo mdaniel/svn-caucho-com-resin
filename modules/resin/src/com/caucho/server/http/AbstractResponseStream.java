@@ -473,14 +473,17 @@ public abstract class AbstractResponseStream
     { 
       throw new IllegalStateException(toString());
     }
+    
     State toCommitted()
     {
       throw new IllegalStateException(toString());
     }
+    
     State toClosing()
     {
       throw new IllegalStateException(toString());
     }
+    
     State toClose()
     { 
       throw new IllegalStateException(toString());

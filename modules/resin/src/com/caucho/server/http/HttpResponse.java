@@ -68,12 +68,16 @@ public class HttpResponse extends AbstractHttpResponse
   private final byte []_resinServerBytes;
 
   private final HttpRequest _request;
-
+  private final CharBuffer _cb = new CharBuffer();
+  
+  /*
   private final byte []_dateBuffer = new byte[256];
   private final CharBuffer _dateCharBuffer = new CharBuffer();
 
   private int _dateBufferLength;
   private long _lastDate;
+  */
+  
   private boolean _isChunked;
 
   private WriteStream _rawWrite;
@@ -467,7 +471,16 @@ public class HttpResponse extends AbstractHttpResponse
       if (debug)
         log.fine(_request.dbgId() + "Transfer-Encoding: chunked");
     }
+    
+    byte []dateBuffer = fillDateBuffer(now);
+    int dateBufferLength = getDateBufferLength();
+    
+    if (_isChunked)
+      os.write(dateBuffer, 0, dateBufferLength - 2);
+    else
+      os.write(dateBuffer, 0, dateBufferLength);
 
+    /*
     if (_lastDate / 1000 != now / 1000) {
       fillDate(now);
     }
@@ -476,8 +489,24 @@ public class HttpResponse extends AbstractHttpResponse
       os.write(_dateBuffer, 0, _dateBufferLength - 2);
     else
       os.write(_dateBuffer, 0, _dateBufferLength);
+      */
 
     return _isChunked;
+  }
+  
+  /*
+  public byte []fillDateBuffer(long now)
+  {
+    if (_lastDate / 1000 != now / 1000) {
+      fillDate(now);
+    }
+    
+    return _dateBuffer;
+  }
+  
+  public int getDateBufferLength()
+  {
+    return _dateBufferLength;
   }
 
   private void fillDate(long now)
@@ -522,6 +551,7 @@ public class HttpResponse extends AbstractHttpResponse
 
     _dateBufferLength = len + 4;
   }
+  */
 
   @Override
   public String toString()

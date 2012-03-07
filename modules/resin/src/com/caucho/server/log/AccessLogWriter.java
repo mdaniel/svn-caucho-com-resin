@@ -176,7 +176,7 @@ public class AccessLogWriter extends AbstractRolloverLog
     LogBuffer buffer = _freeList.allocate();
 
     if (buffer == null) {
-      buffer = new LogBuffer();
+      buffer = new LogBuffer(false);
     }
 
     return buffer;
@@ -191,8 +191,11 @@ public class AccessLogWriter extends AbstractRolloverLog
       _semaphoreProbe.release();
 */
     // logBuffer.setNext(null);
-
-    _freeList.free(logBuffer);
+    logBuffer.setLength(0);
+    
+    if (! logBuffer.isPrivate()) {
+      _freeList.free(logBuffer);
+    }
   }
 
   @Override

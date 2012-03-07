@@ -114,6 +114,42 @@ Java_com_caucho_vfs_JniSocketImpl_nativeAllocate(JNIEnv *env,
 }
 
 static int
+resin_tcp_nodelay(connection_t *conn)
+{
+  int fd = conn->fd;
+  int flag = 1;
+  int result;
+
+  result = setsockopt(fd, IPPROTO_TCP, TCP_NODELAY,
+                      (char *) &flag, sizeof(int));
+
+  return result;
+}
+
+static int
+resin_tcp_cork(connection_t *conn)
+{
+#ifdef TCP_CORK  
+  int fd = conn->fd;
+  int flag = 1;
+  int result;
+
+  if (! conn->tcp_cork || conn->is_cork) {
+    return;
+  }
+
+  conn->is_cork = 1;
+  result = setsockopt(fd, IPPROTO_TCP, TCP_CORK,
+                      (char *) &flag, sizeof(int));
+
+
+  return result;
+#else
+  return 1;
+#endif
+}
+
+static int
 resin_tcp_uncork(connection_t *conn)
 {
 #ifdef TCP_CORK  
@@ -136,30 +172,6 @@ resin_tcp_uncork(connection_t *conn)
 #endif
 }
 
-static int
-resin_tcp_cork(connection_t *conn)
-{
-#ifdef TCP_CORK  
-  int fd = conn->fd;
-  int flag = 1;
-  int result;
-
-  if (! conn->tcp_cork || conn->is_cork) {
-    return;
-  }
-
-  conn->is_cork = 1;
-
-  result = setsockopt(fd, IPPROTO_TCP, TCP_CORK,
-                      (char *) &flag, sizeof(int));
-
-
-  return result;
-#else
-  return 1;
-#endif
-}
-
 JNIEXPORT jint JNICALL
 Java_com_caucho_vfs_JniSocketImpl_readNative(JNIEnv *env,
 					     jobject obj,
@@ -174,8 +186,9 @@ Java_com_caucho_vfs_JniSocketImpl_readNative(JNIEnv *env,
   char buffer[STACK_BUFFER_SIZE];
   char *temp_buf;
 
-  if (! conn || conn->fd < 0 || ! buf)
+  if (! conn || conn->fd < 0 || ! buf) {
     return -1;
+  }
 
   conn->jni_env = env;
 
@@ -233,24 +246,25 @@ JNIEXPORT jint JNICALL
 Java_com_caucho_vfs_JniSocketImpl_writeNative(JNIEnv *env,
 					      jobject obj,
 					      jlong conn_fd,
-					      jbyteArray buf,
+					      jbyteArray j_buf,
 					      jint offset,
 					      jint length)
 {
   connection_t *conn = (connection_t *) (PTR) conn_fd;
   char buffer[STACK_BUFFER_SIZE];
+  char *c_buf;
   int sublen;
   int write_length = 0;
   int result;
     
-  if (! conn || conn->fd < 0 || ! buf) {
+  if (! conn || conn->fd < 0 || ! j_buf) {
     return -1;
   }
   
   conn->jni_env = env;
-
+  /*
   resin_tcp_cork(conn);
-
+  */
   while (length > 0) {
     jbyte *cBuf;
 
@@ -259,12 +273,13 @@ Java_com_caucho_vfs_JniSocketImpl_writeNative(JNIEnv *env,
     else
       sublen = sizeof(buffer);
 
-    resin_get_byte_array_region(env, buf, offset, sublen, buffer);
+    resin_get_byte_array_region(env, j_buf, offset, sublen, buffer);
 
     result = conn->ops->write(conn, buffer, sublen);
     
-    if (result == length)
+    if (result == length) {
       return result + write_length;
+    }
     else if (result < 0) {
       /*
       fprintf(stdout, "write-ops: write result=%d errno=%d\n", 
@@ -379,8 +394,6 @@ Java_com_caucho_vfs_JniSocketImpl_writeMmapNative(JNIEnv *env,
     return -1;
   }
   
-  resin_tcp_cork(conn);
-
   conn->jni_env = env;
 
   blocks_len = (*env)->GetArrayLength(env, mmap_blocks_arr);
@@ -389,6 +402,8 @@ Java_com_caucho_vfs_JniSocketImpl_writeMmapNative(JNIEnv *env,
   if (! mmap_blocks) {
     return -1;
   }
+
+  resin_tcp_cork(conn);
 
   i = 0;
   for (; mmap_length > 0; mmap_length -= block_size, i++) {
@@ -419,6 +434,8 @@ Java_com_caucho_vfs_JniSocketImpl_writeMmapNative(JNIEnv *env,
       break;
     }
   }
+
+  resin_tcp_uncork(conn);
 
   (*env)->ReleaseLongArrayElements(env, mmap_blocks_arr, mmap_blocks, 0);
 
@@ -469,6 +486,9 @@ JNIEXPORT jint JNICALL
 Java_com_caucho_vfs_JniSocketImpl_writeSendfileNative(JNIEnv *env,
                                                       jobject obj,
                                                       jlong conn_fd,
+                                                      jbyteArray j_buf,
+                                                      jint offset,
+                                                      jint length,
                                                       jbyteArray name,
                                                       jint name_length,
                                                       jlong file_length)
@@ -486,6 +506,11 @@ Java_com_caucho_vfs_JniSocketImpl_writeSendfileNative(JNIEnv *env,
 
   resin_tcp_cork(conn);
 
+  if (length > 0) {
+    Java_com_caucho_vfs_JniSocketImpl_writeNative(env, obj, conn_fd,
+                                                  j_buf, offset, length);
+  }
+
   conn->jni_env = env;
 
   fd = jni_open_file(env, name, name_length);
@@ -495,11 +520,15 @@ Java_com_caucho_vfs_JniSocketImpl_writeSendfileNative(JNIEnv *env,
     return -1;
   }
   
+  resin_tcp_cork(conn);
+
   sendfile_offset = 0;
 
   result = sendfile(conn->fd, fd, &sendfile_offset, file_length);
 
   close(fd);
+
+  resin_tcp_uncork(conn);
 
   if (result < 0) {
     if (errno != EAGAIN && errno != ECONNRESET && errno != EPIPE) {
@@ -563,6 +592,8 @@ Java_com_caucho_vfs_JniSocketImpl_writeSendfileNative(JNIEnv *env,
     fd_length -= sublen;
   }
 
+  // resin_tcp_uncork(conn);
+
   return write_length + result;
 }
 
@@ -596,7 +627,7 @@ Java_com_caucho_vfs_JniSocketImpl_writeNativeNio(JNIEnv *env,
     return -1;
   }
   
-  resin_tcp_cork(conn);
+  /* resin_tcp_cork(conn); */
   
   conn->jni_env = env;
 
@@ -668,7 +699,7 @@ Java_com_caucho_vfs_JniSocketImpl_writeNative2(JNIEnv *env,
   if (! conn || conn->fd < 0 || ! buf1 || ! buf2)
     return -1;
   
-  resin_tcp_cork(conn);
+  /* resin_tcp_cork(conn); */
 
   conn->jni_env = env;
 
@@ -1509,22 +1540,66 @@ Java_com_caucho_vfs_JniSocketImpl_nativeAccept(JNIEnv *env,
   connection_t *conn = (connection_t *) (PTR) conn_fd;
   jboolean value;
 
-  if (! ss || ! conn || ! env || ! obj)
-    return 0;
+  if (! ss || ! conn || ! env || ! obj) {
+    return -1;
+  }
 
   if (conn->fd >= 0) {
     resin_throw_exception(env, "java/lang/IllegalStateException",
                           "unclosed socket in accept");
-    return 0;
+    return -1;
   }
 
-  if (! ss->accept(ss, conn))
-    return 0;
+  if (! ss->accept(ss, conn)) {
+    return -1;
+  }
+
+  conn->ss = ss;
+
+  /*
+  conn->ops->init(conn);
 
   socket_fill_address(env, obj, ss, conn, local_addr, remote_addr);
+  */
 
   return 1;
 }
+
+JNIEXPORT jint JNICALL
+Java_com_caucho_vfs_JniSocketImpl_nativeAcceptInit(JNIEnv *env,
+                                                   jobject obj,
+                                                   jlong conn_fd,
+                                                   jbyteArray local_addr,
+                                                   jbyteArray remote_addr,
+                                                   jbyteArray buf,
+                                                   jint offset,
+                                                   jint length)
+{
+  connection_t *conn = (connection_t *) (PTR) conn_fd;
+  server_socket_t *ss;
+  jboolean value;
+
+  if (! conn || ! env || ! obj) {
+    return -1;
+  }
+
+  ss = conn->ss;
+
+  if (! ss) {
+    fprintf(stderr, "BADSS\n");
+    return -1;
+  }
+
+  conn->ops->init(conn);
+
+  socket_fill_address(env, obj, ss, conn, local_addr, remote_addr);
+
+  return Java_com_caucho_vfs_JniSocketImpl_readNative(env,
+                                                      obj, conn_fd,
+                                                      buf, offset, length,
+                                                      -1);
+}
+
 
 JNIEXPORT jboolean JNICALL
 Java_com_caucho_vfs_JniSocketImpl_nativeConnect(JNIEnv *env,

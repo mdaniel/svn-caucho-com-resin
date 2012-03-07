@@ -81,6 +81,12 @@ public interface PortMXBean extends ManagedObjectMXBean {
   public int getAcceptThreadMax();
 
   /**
+   * Returns the active threads for the port.
+   */
+  @Description("The maximum number of active threads for hte port")
+  public int getPortThreadMax();
+
+  /**
    * Returns the operating system listen backlog
    */
   @Description("The operating system listen backlog")
@@ -258,6 +264,14 @@ public interface PortMXBean extends ManagedObjectMXBean {
   @Description("The total number of connections that have"
                + " terminated with a client disconnect")
   public long getClientDisconnectCountTotal();
+
+  /**
+   * The total number of connections that have been disconnected
+   * by throttling.
+   */
+  @Description("The total number of connections that have"
+               + " been throttled by disconnectin")
+  public long getThrottleDisconnectCountTotal();
 
   /**
    * Returns the total duration in milliseconds that requests serviced by

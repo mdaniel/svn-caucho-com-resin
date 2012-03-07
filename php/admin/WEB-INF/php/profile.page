@@ -25,7 +25,7 @@ else  {
     sleep(2);
   }
   else if ($_POST['action'] == 'start') {
-    if ($_POST['period'] >= 10) {
+    if ($_POST['period'] >= 1) {
       $profile->setPeriod($_POST['period']);
     }
 
@@ -75,7 +75,7 @@ else  {
     echo gettext('Sampling Rate');
     echo "</label>: <select name='period' id='period'>";
 
-    $PERIODS = Array(10, 25, 100, 250, 1000, 2500, 10000);
+    $PERIODS = Array(1, 10, 25, 100, 250, 1000, 2500, 10000);
 
     if (!isset($_POST['period']) || 
         !is_numeric($_POST['period']) ||

@@ -237,7 +237,8 @@ public final class HttpServletResponseImpl extends AbstractCauchoResponse
    * Returns true if some data has actually been send to the client.  The
    * data will be sent if the buffer overflows or if it's explicitly flushed.
    */
-  public boolean isCommitted()
+  @Override
+  public final boolean isCommitted()
   {
     return _response.isCommitted();
   }
@@ -781,6 +782,7 @@ public final class HttpServletResponseImpl extends AbstractCauchoResponse
    * setContentType("text/html; charset=UTF-8");
    * </pre></code>
    */
+  @Override
   public void setContentType(String value)
   {
     if (isCommitted())
@@ -800,8 +802,9 @@ public final class HttpServletResponseImpl extends AbstractCauchoResponse
     // server/172k
     // _setCharEncoding = encoding;
 
-    if (encoding != null)
+    if (encoding != null) {
       setCharacterEncoding(encoding);
+    }
 
     // XXX: conflict with servlet exception throwing order?
     try {
@@ -840,26 +843,35 @@ public final class HttpServletResponseImpl extends AbstractCauchoResponse
   /**
    * Gets the character encoding.
    */
+  @Override
   public String getCharacterEncoding()
   {
-    if (_charEncoding == null) {
-      _charEncoding = _setCharEncoding;
+    String charEncoding = _charEncoding;
+    
+    if (charEncoding == null) {
+      charEncoding = _setCharEncoding;
 
-      WebApp webApp = _request.getWebApp();
+      if (charEncoding == null) {
+        WebApp webApp = _request.getWebApp();
 
-      if (_charEncoding == null && webApp != null && webApp.getJsp() != null)
-        _charEncoding = webApp.getJsp().getCharacterEncoding();
+        if (webApp != null) {
+          if (webApp.getJsp() != null)
+            charEncoding = webApp.getJsp().getCharacterEncoding();
 
-      if (_charEncoding == null && webApp != null)
-        _charEncoding = webApp.getCharacterEncoding();
+          if (charEncoding == null)
+            charEncoding = webApp.getCharacterEncoding();
+        }
 
-      if (_charEncoding == null) {
-        // server/085a
-        _charEncoding = "utf-8";
+        if (charEncoding == null) {
+          // server/085a
+          charEncoding = "utf-8";
+        }
       }
+      
+      _charEncoding = charEncoding;
     }
 
-    return _charEncoding;
+    return charEncoding;
   }
 
   /**
@@ -870,24 +882,28 @@ public final class HttpServletResponseImpl extends AbstractCauchoResponse
     // server/172d
     // server/2u00
     
-    if (_setCharEncoding != null)
-      return _setCharEncoding;
+    String setCharEncoding = _setCharEncoding;
+    if (setCharEncoding != null) {
+      return setCharEncoding;
+    }
     
-    String contentType = getContentType();
+    String contentType = getContentTypeImpl();
     
     if (contentType == null
-        || getContentType().startsWith("text/")
-        || getContentType().startsWith("multipart/")) {
+        || contentType.startsWith("text/")
+        || contentType.startsWith("multipart/")) {
       // server/1b5a, #4778
       return getCharacterEncoding();
     }
-    else
+    else {
       return null;
+    }
   }
 
   /**
    * Sets the character encoding.
    */
+  @Override
   public void setCharacterEncoding(String encoding)
   {
     if (isCommitted())

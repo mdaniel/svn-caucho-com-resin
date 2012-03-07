@@ -199,11 +199,6 @@ public final class ReadStream extends InputStream
     return _readOffset;
   }
 
-  public int getLength()
-  {
-    return _readLength;
-  }
-
   public void setOffset(int offset)
   {
     if (offset < 0)
@@ -212,6 +207,19 @@ public final class ReadStream extends InputStream
     _readOffset = offset;
   }
 
+  public int getLength()
+  {
+    return _readLength;
+  }
+
+  public void setLength(int length)
+  {
+    if (length< 0 || _readBuffer.length < length)
+      throw new IllegalStateException("illegal length=" + length);
+
+    _readLength = length;
+  }
+  
   /**
    * Returns the read position.
    */

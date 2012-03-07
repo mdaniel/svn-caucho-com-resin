@@ -39,6 +39,7 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashSet;
 import java.util.Set;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.atomic.AtomicLong;
@@ -51,6 +52,8 @@ import com.caucho.config.ConfigException;
 import com.caucho.config.Configurable;
 import com.caucho.config.program.ConfigProgram;
 import com.caucho.config.types.Period;
+import com.caucho.env.meter.CountMeter;
+import com.caucho.env.meter.MeterService;
 import com.caucho.env.thread.ThreadPool;
 import com.caucho.lifecycle.Lifecycle;
 import com.caucho.management.server.PortMXBean;
@@ -63,7 +66,6 @@ import com.caucho.util.CurrentTime;
 import com.caucho.util.FreeList;
 import com.caucho.util.Friend;
 import com.caucho.util.L10N;
-import com.caucho.vfs.JniServerSocketImpl;
 import com.caucho.vfs.JsseSSLFactory;
 import com.caucho.vfs.OpenSSLFactory;
 import com.caucho.vfs.QJniServerSocket;
@@ -90,6 +92,9 @@ public class TcpSocketLinkListener
   private static final long ACCEPT_THROTTLE_SLEEP_TIME = 0;
   
   private static final int KEEPALIVE_MAX = 65536;
+  
+  private static final CountMeter _throttleDisconnectMeter
+    = MeterService.createCountMeter("Resin|Port|Throttle Disconnect Count");
 
   private final AtomicInteger _connectionCount = new AtomicInteger();
 
@@ -154,7 +159,7 @@ public class TcpSocketLinkListener
 
   private boolean _isTcpNoDelay = true;
   private boolean _isTcpKeepalive;
-  private boolean _isTcpCork = true;
+  private boolean _isTcpCork;
   
   private boolean _isEnableJni = true;
 
@@ -173,8 +178,8 @@ public class TcpSocketLinkListener
   private AbstractSelectManager _selectManager;
 
   // active set of all connections
-  private Set<TcpSocketLink> _activeConnectionSet
-    = Collections.synchronizedSet(new HashSet<TcpSocketLink>());
+  private ConcurrentHashMap<TcpSocketLink,TcpSocketLink> _activeConnectionSet
+    = new ConcurrentHashMap<TcpSocketLink,TcpSocketLink>();
 
   private final AtomicInteger _activeConnectionCount = new AtomicInteger();
 
@@ -197,6 +202,7 @@ public class TcpSocketLinkListener
   private final AtomicLong _lifetimeRequestTime = new AtomicLong();
   private final AtomicLong _lifetimeReadBytes = new AtomicLong();
   private final AtomicLong _lifetimeWriteBytes = new AtomicLong();
+  private final AtomicLong _lifetimeThrottleDisconnectCount = new AtomicLong();
 
   // total keepalive
   private AtomicInteger _keepaliveAllocateCount = new AtomicInteger();
@@ -501,7 +507,18 @@ public class TcpSocketLinkListener
     return _launcher.getIdleMax();
   }
 
-  /**
+  @Configurable
+  public void setPortThreadMax(int max)
+  {
+    _launcher.setThreadMax(max);
+  }
+  
+  public int getPortThreadMax()
+  {
+    return _launcher.getThreadMax();
+  }
+  
+    /**
    * Sets the minimum spare idle timeout.
    */
   @Configurable
@@ -520,6 +537,7 @@ public class TcpSocketLinkListener
     return _launcher.getIdleTimeout();
   }
   
+
   //
   // launcher throttle configuration
   //
@@ -1291,7 +1309,7 @@ public class TcpSocketLinkListener
     TcpSocketLink []connections;
 
     connections = new TcpSocketLink[_activeConnectionSet.size()];
-    _activeConnectionSet.toArray(connections);
+    _activeConnectionSet.keySet().toArray(connections);
 
     long now = CurrentTime.getExactTime();
     TcpConnectionInfo []infoList = new TcpConnectionInfo[connections.length];
@@ -1333,15 +1351,26 @@ public class TcpSocketLinkListener
   boolean accept(QSocket socket)
   {
     try {
+      SocketLinkThreadLauncher launcher = getLauncher();
+      
       while (! isClosed()) {
         Thread.interrupted();
 
         if (_serverSocket.accept(socket)) {
           //System.out.println("REMOTE: " + socket.getRemotePort());
-          if (_throttle.accept(socket)) {
+          if (launcher.isThreadMax()
+              && launcher.getIdleCount() <= 1) {
+            // System.out.println("CLOSED:");
+            _throttleDisconnectMeter.start();
+            _lifetimeThrottleDisconnectCount.incrementAndGet();
+            socket.close();
+          }
+          else if (_throttle.accept(socket)) {
             return true;
           }
           else {
+            _throttleDisconnectMeter.start();
+            _lifetimeThrottleDisconnectCount.incrementAndGet();
             socket.close();
           }
         }
@@ -1391,6 +1420,8 @@ public class TcpSocketLinkListener
     else if (connectionStartTime + _keepaliveTimeMax < CurrentTime.getCurrentTime())
       return false;
     else if (_keepaliveMax <= _keepaliveAllocateCount.get())
+      return false;
+    else if (_launcher.isThreadMax() && _launcher.isIdleLow())
       return false;
     else
       return true;
@@ -1459,7 +1490,11 @@ public class TcpSocketLinkListener
     
     // server/2l02
 
-    _keepaliveThreadCount.incrementAndGet();
+    int keepaliveThreadCount = _keepaliveThreadCount.incrementAndGet();
+    
+    if (keepaliveThreadCount > 16 && timeout >= 100) {
+      timeout = 50;
+    }
 
     try {
       int result;
@@ -1613,6 +1648,11 @@ public class TcpSocketLinkListener
   {
     return _lifetimeWriteBytes.get();
   }
+  
+  long getLifetimeThrottleDisconnectCount()
+  {
+    return _lifetimeThrottleDisconnectCount.get();
+  }
 
   /**
    * Find the TcpConnection based on the thread id (for admin)
@@ -1620,7 +1660,7 @@ public class TcpSocketLinkListener
   public TcpSocketLink findConnectionByThreadId(long threadId)
   {
     ArrayList<TcpSocketLink> connList
-      = new ArrayList<TcpSocketLink>(_activeConnectionSet);
+      = new ArrayList<TcpSocketLink>(_activeConnectionSet.keySet());
 
     for (TcpSocketLink conn : connList) {
       if (conn.getThreadId() == threadId)
@@ -1642,7 +1682,7 @@ public class TcpSocketLinkListener
       startConn = new TcpSocketLink(connId, this, socket);
     }
     
-    _activeConnectionSet.add(startConn);
+    _activeConnectionSet.put(startConn,startConn);
     _activeConnectionCount.incrementAndGet();
     
     return startConn;
@@ -1654,7 +1694,7 @@ public class TcpSocketLinkListener
   @Friend(TcpSocketLink.class)
   void closeConnection(TcpSocketLink conn)
   {
-    if (_activeConnectionSet.remove(conn)) {
+    if (_activeConnectionSet.remove(conn) != null) {
       _activeConnectionCount.decrementAndGet();
     }
     else if (! isClosed()){
@@ -1740,7 +1780,7 @@ public class TcpSocketLinkListener
     Set<TcpSocketLink> activeSet;
 
     synchronized (_activeConnectionSet) {
-      activeSet = new HashSet<TcpSocketLink>(_activeConnectionSet);
+      activeSet = new HashSet<TcpSocketLink>(_activeConnectionSet.keySet());
     }
 
     for (TcpSocketLink conn : activeSet) {

@@ -41,6 +41,7 @@
 
 #include "resin_os.h"
 
+static int std_init(connection_t *conn);
 static int std_read(connection_t *conn, char *buf, int len, int timeout);
 static int std_read_nonblock(connection_t *conn, char *buf, int len);
 static int std_write(connection_t *conn, char *buf, int len);
@@ -50,6 +51,7 @@ void std_free(connection_t *conn);
 static int std_read_client_certificate(connection_t *conn, char *buf, int len);
 
 struct connection_ops_t std_ops = {
+  std_init,
   std_read,
   std_read_nonblock,
   std_write,
@@ -246,11 +248,13 @@ std_read(connection_t *conn, char *buf, int len, int timeout)
     result = recv(fd, buf, len, 0);
 
     //    fprintf(stderr, "rcv %d\n", result);
-
-    if (result > 0)
+    if (result > 0) {
       return result;
-    else if (result == 0)
+    }
+    else if (result == 0) {
+      /* recv returns 0 on end of file */
       return -1;
+    }
 
     if (errno == EINTR) {
       /* EAGAIN is returned by a timeout */
@@ -392,7 +396,6 @@ std_accept(server_socket_t *ss, connection_t *conn)
   struct sockaddr *sin = (struct sockaddr *) &sin_data;
   unsigned int sin_len;
   int poll_result;
-  struct timeval timeout;
   int result;
 
   if (! ss || ! conn)
@@ -429,8 +432,23 @@ std_accept(server_socket_t *ss, connection_t *conn)
   ReleaseMutex(ss->accept_lock);
 #endif
   
-  if (sock < 0)
+  if (sock < 0) {
     return 0;
+  }
+
+  conn->ss = ss;
+  conn->fd = sock;
+
+  return 1;
+}
+
+int
+std_init(connection_t *conn)
+{
+  server_socket_t *ss = conn->ss;
+  int sock = conn->fd;
+  struct timeval timeout;
+  int sin_len;
 
   if (ss->tcp_no_delay) {/* && ! ss->tcp_cork) { */
     int flag = 1;

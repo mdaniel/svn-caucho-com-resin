@@ -381,7 +381,12 @@ public class AccessLog extends AbstractAccessLog implements AlarmListener
       }
     }
 
-    LogBuffer logBuffer = _logWriter.allocateBuffer();
+    LogBuffer logBuffer = response.getLogBuffer();
+    
+    if (logBuffer.getLength() > 0) {
+      // if currently queued, create a new one
+      logBuffer = _logWriter.allocateBuffer();
+    }
     
     // logging is treated as idle for thread launching purposes
     // TcpSocketLink tcpLink = absRequest.getTcpSocketLink();
@@ -426,11 +431,11 @@ public class AccessLog extends AbstractAccessLog implements AlarmListener
    */
   private int log(HttpServletRequestImpl request,
                   HttpServletResponseImpl responseFacade,
-                  AbstractHttpResponse response,
+                  final AbstractHttpResponse response,
                   byte []buffer, int offset, int length)
     throws IOException
   {
-    AbstractHttpRequest absRequest = request.getAbstractHttpRequest();
+    final AbstractHttpRequest absRequest = request.getAbstractHttpRequest();
 
     int len = _segments.length;
     for (int i = 0; i < len; i++) {
@@ -570,20 +575,25 @@ public class AccessLog extends AbstractAccessLog implements AlarmListener
         }
 
       case 't':
-        long date = CurrentTime.getCurrentTime();
+      {
+        int dateOffset;
+        long now = CurrentTime.getCurrentTime();
 
-        if (date / 1000 != _lastTime / 1000)
+        /*
+        if (date / 1000 != _lastTime / 1000) {
           fillTime(date);
-
-        sublen = _timeBuffer.getLength();
-        data = _timeBuffer.getBuffer();
-
-        synchronized (_timeBuffer) {
-          System.arraycopy(data, 0, buffer, offset, sublen);
         }
+        */
+
+        data = response.fillDateBuffer(now);
+        dateOffset = response.getRawDateBufferOffset();
+        sublen = response.getRawDateBufferLength();
+
+        System.arraycopy(data, dateOffset, buffer, offset, sublen);
 
         offset += sublen;
         break;
+      }
 
       case 'T':
         {

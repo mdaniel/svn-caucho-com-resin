@@ -1560,15 +1560,18 @@ implements LockableStream, SendfileOutputStream
                             long fileLength)
     throws IOException
   {
-    if (_writeLength > 0) {
-      int writeLength = _writeLength;
+    int writeLength = _writeLength;
+    
+    if (writeLength > 0) {
       _writeLength = 0;
       _position += writeLength;
       
-      _source.write(_writeBuffer, 0, writeLength, false);
+      // _source.write(_writeBuffer, 0, writeLength, false);
     }
     
-    _source.writeSendfile(fileName, nameLength, fileLength);
+    _source.writeSendfile(_writeBuffer, 0, writeLength,
+                          fileName, nameLength, fileLength);
+    
     _isFlushRequired = true;
     
     _position += fileLength;

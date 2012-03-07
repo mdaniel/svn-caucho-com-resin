@@ -110,6 +110,12 @@ public class SocketLinkAdmin extends AbstractManagedObject
   }
 
   @Override
+  public int getPortThreadMax()
+  {
+    return _port.getPortThreadMax();
+  }
+
+  @Override
   public int getKeepaliveMax()
   {
     return _port.getKeepaliveMax();
@@ -239,6 +245,12 @@ public class SocketLinkAdmin extends AbstractManagedObject
   public long getClientDisconnectCountTotal()
   {
     return _port.getLifetimeClientDisconnectCount();
+  }
+  
+  @Override
+  public long getThrottleDisconnectCountTotal()
+  {
+    return _port.getLifetimeThrottleDisconnectCount();
   }
 
   @Override

@@ -82,6 +82,30 @@ public class QSocketWrapper extends QSocket {
   }
 
   /**
+   * Accepts a new socket.
+   */
+  @Override
+  public int acceptInitialRead(byte []buffer, int offset, int length)
+    throws IOException
+  {
+    Socket socket = getSocket();
+
+    /*
+    // XXX:
+    if (isTcpNoDelay())
+      socket.setTcpNoDelay(true);
+    
+    if (isTcpKeepalive())
+      socket.setKeepAlive(true);
+
+    if (_connectionSocketTimeout > 0)
+      socket.setSoTimeout(_connectionSocketTimeout);
+      */
+
+    return socket.getInputStream().read(buffer, offset, length);
+  }
+
+  /**
    * Sets the socket timeout.
    */
   public void setReadTimeout(int ms)

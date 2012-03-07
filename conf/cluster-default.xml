@@ -76,6 +76,14 @@
       <user-name>${setuid_user}</user-name>
       <group-name>${setuid_group}</group-name>
 
+      <port-default>
+        <port-thread-max>${port_thread_max}</port-thread-max>
+        <accept-thread-min>${accept_thread_min}</accept-thread-min>
+        <accept-thread-max>${accept_thread_max}</accept-thread-max>
+
+        <tcp-cork>${tcp_cork}</tcp-cork>
+      </port-default>
+
       <!-- The http port -->
       <http address="*" port="${http}"/>
 

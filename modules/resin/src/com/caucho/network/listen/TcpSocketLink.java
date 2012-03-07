@@ -906,15 +906,15 @@ public class TcpSocketLink extends AbstractSocketLink
         return RequestState.EXIT;
       }
 
-      toStartConnection();
-
-      if (log.isLoggable(Level.FINER)) {
-        log.finer(this + " accept from "
-                  + getRemoteHost() + ":" + getRemotePort());
-      }
-
       launcher.onChildIdleEnd();
       try {
+        toStartConnection();
+
+        if (log.isLoggable(Level.FINER)) {
+          log.finer(this + " accept from "
+                    + getRemoteHost() + ":" + getRemotePort());
+        }
+
         result = handleRequests(Task.ACCEPT);
       } finally {
         launcher.onChildIdleBegin();
@@ -1294,7 +1294,7 @@ public class TcpSocketLink extends AbstractSocketLink
     else {
       available = 0;
     }
-    
+
     if (available > 0) {
       return RequestState.REQUEST_COMPLETE;
     }
@@ -1399,7 +1399,15 @@ public class TcpSocketLink extends AbstractSocketLink
 
     // ReadStream cannot use getWriteStream or auto-flush
     // because of duplex mode
-    getReadStream().init(_socket.getStream(), null);
+    ReadStream is = getReadStream();
+    is.init(_socket.getStream(), null);
+    
+    byte []buffer = is.getBuffer();
+    int len = _socket.acceptInitialRead(buffer, 0, buffer.length);
+    
+    if (len > 0) {
+      is.setLength(len);
+    }
 
     if (log.isLoggable(Level.FINE)) {
       log.fine(dbgId() + "starting connection " + this
@@ -1579,29 +1587,11 @@ public class TcpSocketLink extends AbstractSocketLink
       return;
     }
 
-    TcpSocketLinkListener port = getListener();
-    
-    QSocket socket = _socket;
-    
     // detach any comet
     /*
     if (state.isComet() || state.isCometSuspend())
       port.cometDetach(this);
       */
-
-    try {
-      getRequest().onCloseConnection();
-    } catch (Throwable e) {
-      log.log(Level.WARNING, e.toString(), e);
-    }
-
-    if (log.isLoggable(Level.FINER)) {
-      if (port != null)
-        log.finer(dbgId() + "closing connection " + this
-                  + ", total=" + port.getConnectionCount());
-      else
-        log.finer(dbgId() + "closing connection " + this);
-    }
 
     try {
       getWriteStream().close();
@@ -1615,6 +1605,10 @@ public class TcpSocketLink extends AbstractSocketLink
       log.log(Level.FINER, e.toString(), e);
     }
 
+    TcpSocketLinkListener port = getListener();
+    
+    QSocket socket = _socket;
+    
     if (port != null) {
       port.closeSocket(socket);
     }
@@ -1623,6 +1617,20 @@ public class TcpSocketLink extends AbstractSocketLink
       socket.close();
     } catch (Throwable e) {
       log.log(Level.FINER, e.toString(), e);
+    }
+
+    try {
+      getRequest().onCloseConnection();
+    } catch (Throwable e) {
+      log.log(Level.WARNING, e.toString(), e);
+    }
+
+    if (log.isLoggable(Level.FINER)) {
+      if (port != null)
+        log.finer(dbgId() + "closing connection " + this
+                  + ", total=" + port.getConnectionCount());
+      else
+        log.finer(dbgId() + "closing connection " + this);
     }
   }
 

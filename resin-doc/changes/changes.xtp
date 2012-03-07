@@ -10,6 +10,16 @@
 <li><a href="http://caucho.com/resin-3.1/changes/changes.xtp">Resin 3.1 changes</a></li>
 </ul>
 
+<s2 title="4.0.27 - snapshot">
+<ul>
+<li>meter: added "Resin|Port|Throttle Disconnect Count"</li>
+<li>port: throttle keepalives when port-thread-max is hit</li>
+<li>port: fixed thread launcher housekeeping</li>
+<li>port: added &lt;port-thread-max> for throttling</li>
+<li>threading: updated ring-queue for improved concurrency</li>
+</ul>
+</s2>
+
 <s2 title="4.0.26 - Feb 29, 2012">
 <ul>
 <li>cli: added config-undeploy command</li>

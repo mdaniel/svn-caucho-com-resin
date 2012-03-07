@@ -48,6 +48,7 @@ import com.caucho.vfs.WriteStream;
  */
 public class HmuxResponse extends AbstractHttpResponse {
   private final HmuxRequest _req;
+  private final CharBuffer _cb = new CharBuffer();
 
   HmuxResponse(HmuxRequest request, WriteStream rawWrite)
   {

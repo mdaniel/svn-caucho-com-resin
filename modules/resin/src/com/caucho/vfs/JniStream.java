@@ -191,11 +191,13 @@ public class JniStream extends StreamImpl {
   }
   
   @Override
-  public void writeSendfile(byte []fileName, int nameLength,
+  public void writeSendfile(byte []buffer, int offset, int length,
+                            byte []fileName, int nameLength,
                             long fileLength)
     throws IOException
   {
-    _socket.writeSendfile(fileName, nameLength, fileLength);
+    _socket.writeSendfile(buffer, offset, length,
+                          fileName, nameLength, fileLength);
   }
 
   @Override

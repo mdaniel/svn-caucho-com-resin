@@ -768,6 +768,7 @@ public class HttpRequest extends AbstractHttpRequest
     boolean isInvocation = false;
 
     ServletService server = getServer();
+    // Thread thread = getTcpSocketLink().getCurrentThread();
     Thread thread = Thread.currentThread();
     ClassLoader oldLoader = thread.getContextClassLoader();
     long startTime = 0;
