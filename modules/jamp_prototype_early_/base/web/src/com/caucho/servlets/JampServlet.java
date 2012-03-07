@@ -7,9 +7,9 @@ import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
+import com.caucho.amp.AmpFactory;
 import com.caucho.amp.Message;
-import com.caucho.amp.ServiceInvoker;
-import com.caucho.encoder.JampMessageReaderDecoder;
+import com.caucho.amp.SkeletonServiceInvoker;
 import com.caucho.websocket.WebSocketListener;
 import com.caucho.websocket.WebSocketServletRequest;
 
@@ -19,14 +19,13 @@ import com.caucho.websocket.WebSocketServletRequest;
 @WebServlet("/JampServlet")
 public class JampServlet extends HttpServlet {
 	private static final long serialVersionUID = 1L;
-	private ServiceInvoker serviceInvoker;
+	private SkeletonServiceInvoker serviceInvoker;
 
     /**
      * Default constructor. 
      */
     public JampServlet() {
-        serviceInvoker = new ServiceInvoker(EmployeeServiceImpl.class);
-        serviceInvoker.setMessageDecoder(new JampMessageReaderDecoder());
+        serviceInvoker = AmpFactory.factory().createJampServerSkeleton(EmployeeServiceImpl.class);
     }
 
 
@@ -45,7 +44,7 @@ public class JampServlet extends HttpServlet {
 	        
 	      System.out.println("___________ WEBSOCKET ________________ " + protocol);
 
-	      listener = new JampListener();
+	      listener = new JampWebSocketListener();
 	      response.setHeader("Sec-WebSocket-Protocol", "employee-add-protocol");
 	      WebSocketServletRequest wsRequest = (WebSocketServletRequest) request;
 	      wsRequest.startWebSocket(listener);

@@ -7,19 +7,18 @@ import java.io.InputStream;
 import java.io.PrintWriter;
 import java.io.Reader;
 
+import com.caucho.amp.AmpFactory;
 import com.caucho.amp.Message;
-import com.caucho.amp.ServiceInvoker;
-import com.caucho.encoder.JampMessageReaderDecoder;
+import com.caucho.amp.SkeletonServiceInvoker;
 import com.caucho.websocket.WebSocketContext;
 import com.caucho.websocket.WebSocketListener;
 
-public class JampListener implements WebSocketListener {
+public class JampWebSocketListener implements WebSocketListener {
     
-    private ServiceInvoker serviceInvoker;
+    private SkeletonServiceInvoker serviceInvoker;
     
-    public JampListener() {
-        serviceInvoker = new ServiceInvoker(EmployeeServiceImpl.class);
-        serviceInvoker.setMessageDecoder(new JampMessageReaderDecoder());
+    public JampWebSocketListener() {
+        serviceInvoker = AmpFactory.factory().createJampServerSkeleton(EmployeeServiceImpl.class);
     }
     
     
