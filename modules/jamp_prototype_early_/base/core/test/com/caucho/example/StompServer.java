@@ -101,7 +101,7 @@ public class StompServer {
         String destination;
 
         public void handleMessage(String message) throws IOException {
-            connection.sendMessage(message);
+            connection.sendMessage(message, id);
         }
 
         @Override
@@ -127,8 +127,8 @@ public class StompServer {
 
         }
 
-        public void sendMessage(String message) throws IOException {
-            this.sendCommandWithBody("MESSAGE", message);
+        public void sendMessage(String message, String id) throws IOException {
+            this.sendCommandWithBody("MESSAGE", message, String.format("subscription:%s",id));
         }
 
         @Override
@@ -139,6 +139,10 @@ public class StompServer {
                 out = new PrintStream(socket.getOutputStream());
                 String line = null;
                 while ((line = reader.readLine()) != null) {
+                    
+                    if ("".equals(line)) {
+                        continue;
+                    }
                     if ("CONNECT".equals(line) && !connected) {
                         handleConnect();
                         if (!connected) {
@@ -156,6 +160,7 @@ public class StompServer {
                         //ACK, NACK, BEGIN, COMMIT, ABORT, are not supported yet
                         //They will be when the client supports them and I need something to test.
                         //I don't plan on ever supporting BEGIN, COMMIT or ABORT.
+                        if (connected)
                         error("NOT SUPPORTED YET (ACK, NACK, BEGIN, COMMIT, ABORT are not supported) unknown command: " + line);
                     }
                 }
@@ -182,14 +187,20 @@ public class StompServer {
 
         private void handleDisconnect() throws IOException {
             this.connected = false;
-            this.out.flush();
             
             Properties headers = this.readHeaders();
             String receiptId = headers.getProperty("receipt");
             
             if (receiptId!=null) {
                 sendCommand("RECEIPT", String.format("receipt-id:%s",receiptId));
+                if (debug)System.out.printf("receipt found = %s\n", receiptId);
+
+            } else {
+                if (debug)System.out.println("receipt not found");
             }
+            
+            this.out.flush();
+
         }
 
         private void handleUnsubscribe() throws IOException {

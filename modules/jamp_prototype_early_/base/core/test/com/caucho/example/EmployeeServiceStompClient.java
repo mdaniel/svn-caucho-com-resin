@@ -4,21 +4,20 @@ import java.util.ArrayList;
 import java.util.List;
 
 import com.caucho.amp.AmpProxyCreator;
-import com.caucho.amp.HttpMessageSender;
-import com.caucho.encoder.JampMethodEncoder;
+import com.caucho.amp.StompMessageSender;
 import com.caucho.test.AddressBook;
 import com.caucho.test.Employee;
 import com.caucho.test.EmployeeService;
 
-public class JampURLSenderMain {
-	
-
-	public static void main (String [] args) throws Exception {
-		
-		AmpProxyCreator ampProxy = new AmpProxyCreator(new JampMethodEncoder(), new HttpMessageSender("http://localhost:8080/jamp_servlet/JampServlet") );
-		
-		EmployeeService service = (EmployeeService) ampProxy.createProxy(EmployeeService.class, "to", "from");
-
+public class EmployeeServiceStompClient {
+    
+    public static void main (String [] args) throws Exception {
+        
+        AmpProxyCreator ampProxy = new AmpProxyCreator(new StompMessageSender("stomp://localhost:6666/foo", 
+                "rick", "rick", "queue/empService") );
+        
+        EmployeeService service = (EmployeeService) ampProxy.createProxy(EmployeeService.class, "to", "from");
+        
         List<AddressBook> books = new ArrayList<AddressBook>();
         books.add(new AddressBook("a"));
         books.add(new AddressBook("b"));
@@ -31,5 +30,7 @@ public class JampURLSenderMain {
         service.addEmployee(new Employee("Rick5", "5205551216", books), 7, 9.99f, 8, "eleven");
         service.addEmployee(new Employee("Rick6", "5205551217", books), 7, 9.99f, 8, "twelve");
 
-	}
+    }
+
+
 }

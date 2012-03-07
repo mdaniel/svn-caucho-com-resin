@@ -1,8 +1,8 @@
 package com.caucho.amp.stomp;
 
-interface  MessageListener {
+public interface  MessageListener {
     
-    void onTextMessage(String text);
+    void onTextMessage(String text) throws Exception;
     
-    void onBinaryMessage(String text);
+    void onBinaryMessage(String text) throws Exception;
 }

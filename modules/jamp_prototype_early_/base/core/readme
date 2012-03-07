@@ -17,7 +17,80 @@ Project Goal:
 
 Status: 
 
-  Current Status:
+  Current Status: 
+     For the JampBinding I created a StompMessageSender. This allows one to proxy interfaces and send the method calls over jamp+stomp://somehost:6666.
+     I also created a StompMessageReceiver for the SOA server side. It allows you to bind any service interface to jamp+stomp://somehost:6666.
+     
+     Implemented a partial StompServer (Stomp broker) for testing. It handles most but not all of the Stomp semantics. 
+     StompServer only works with text streams only (no binary, but using it for JSON so seems good for what I am doing).
+     StompServer implements, SEND, SUBSCRIBE, UNSUBSCRIBE, CONNECT, protocol version negotiation, DISCONNECT (with receipt).
+     I did not implement ACK, BEGIN, COMMIT, or SUBSCRIBE/RECEIPT.     
+     
+     Implemented a StompClient (called StompConnection) that listens to messages, manages subscriptions, and can send messages.
+     It also is only text oriented which is all it needs to be for now.
+     
+     Created a full working prototype that goes end to end.
+     EmployeeServiceStompClient uses StompConnection to send message every time the EmployeeService.addEmployee proxy method is called.
+     StompConnection connects to running StompServer to send said method calls in JAMP format.
+     
+     EmployeeServiceStompSOAServer uses StompConnection to subscribe to messages send from EmployeeServiceStompClient.
+     StompConnection connects to running StompServer to subscribe to methods.
+     
+    Prototype.....    
+     Client code looks like this:
+     
+        AmpProxyCreator ampProxy = new AmpProxyCreator(new StompMessageSender("stomp://localhost:6666/foo", 
+                "rick", "rick", "queue/empService") );
+        
+        EmployeeService service = (EmployeeService) ampProxy.createProxy(EmployeeService.class, "to", "from");
+        
+        service.addEmployee(new Employee("Rick Hightower", "5205551212", books), 7, 9.99f, 8, "love's love but no love says");
+        service.addEmployee(new Employee("Rick6", "5205551212", books), 7, 9.99f, 8, "rocket");
+     
+        EmployeeService is a plain old Java interface with no annotations or nothing special. Employee is a POJO.
+        
+     
+     The SOA server code looks like this:
+    
+        new StompMessageReceiver("stomp://localhost:6666/foo", 
+                "rick", "rick", "queue/empService", EmployeeServiceImpl.class, null);
+    
+        
+     The EmployeeService interface looks likes this:
+   
+       public interface EmployeeService {
+          void addEmployee(Employee emp, int salary, float rate, Integer rank, String description);
+       }
+        
+     
+     The EmployeeServiceImpl (used by the server) looks like this:
+     
+     public class EmployeeServiceImpl implements EmployeeService{
+
+        public void addEmployee(Employee emp, int salary, float rate, Integer rank,
+            String description) {
+            System.out.printf("Employee Service %s %s  %s %s\n", emp, salary, rate, rank);
+        
+        }
+
+     }
+     
+     
+     So they are just POJOs and POJIs....
+     
+     The JSON messages look like this.
+     
+         ["send","to","from","addEmployee",[{"name":"Rick Hightower","books":[{"foo":"a"},{"foo":"b"}],"old":false,"phoneNumber":"5205551212","books2":null,"books3":null},7,9.99,8,"love's love but no love says"]]
+
+
+     The output from the EmployeeServiceImpl class looks like this:
+     
+         Employee Service Employee [name=Rick6, phoneNumber=5205551217, old=false, books=[AddressBook [foo=a], AddressBook [foo=b]], books2=null, books3=null] 7  9.99 8
+     
+     
+      A lot of code cleanup. Added Generics and such
+ 
+  Old Status:
     Midway to adding STOMP support to JAMP. Going to build send/query/reply/error/reply-error on top of STOMP/HTTP(Servlet)/WebSocket
     STOMP server code is just for testing.
     STOMP client code only implements text no binary (not needed until Hessian)

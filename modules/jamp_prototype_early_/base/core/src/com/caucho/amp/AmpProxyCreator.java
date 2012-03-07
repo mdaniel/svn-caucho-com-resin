@@ -4,6 +4,7 @@ import java.lang.reflect.InvocationHandler;
 import java.lang.reflect.Method;
 import java.lang.reflect.Proxy;
 
+import com.caucho.encoder.JampMethodEncoder;
 import com.caucho.encoder.MethodEncoder;
 
 /** Creates a proxy object around an interface to expose method to send to remote hosts via STOMP, REST or websockets. 
@@ -17,16 +18,21 @@ public class AmpProxyCreator {
     private MethodEncoder methodEncoder;
 	private AmpMessageSender invoker;
 	
+	public AmpProxyCreator (AmpMessageSender invoker) {
+        this.methodEncoder = new JampMethodEncoder();
+        this.invoker = invoker;
+ 	    
+	}
 	public AmpProxyCreator(@SuppressWarnings("rawtypes") MethodEncoder methodEncoder, AmpMessageSender invoker) {
 		this.methodEncoder = methodEncoder;
 		this.invoker = invoker;
 	}
 	
-	public Object createProxy(final String interface_, final String encoding, final String protocol, final String toURL, final String fromURL) throws Exception {
-		return createProxy(Class.forName(interface_), encoding, protocol, toURL, fromURL);
+	public Object createProxy(final String interface_, final String toURL, final String fromURL) throws Exception {
+		return createProxy(Class.forName(interface_), toURL, fromURL);
 	}
 	
-	public Object createProxy(final Class<?> interface_, final String encoding, final String protocol, final String toURL, final String fromURL) throws Exception {
+	public Object createProxy(final Class<?> interface_, final String toURL, final String fromURL) throws Exception {
 
 		InvocationHandler handler = new InvocationHandler() {
 			@Override

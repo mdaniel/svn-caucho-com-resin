@@ -16,7 +16,7 @@ public class JampFileSenderMain {
 	public static void main (String [] args) throws Exception {
 		
 		AmpProxyCreator ampProxy = new AmpProxyCreator(new JampMethodEncoder(), new FileMessageSender("/Users/rick/test/file_invoker") );
-        EmployeeService service = (EmployeeService) ampProxy.createProxy(EmployeeService.class, "jamp", "file", "to", "from");
+        EmployeeService service = (EmployeeService) ampProxy.createProxy(EmployeeService.class, "to", "from");
 		
         List<AddressBook> books = new ArrayList<AddressBook>();
         books.add(new AddressBook("a"));
