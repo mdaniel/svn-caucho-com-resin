@@ -21,7 +21,9 @@ echo "<div id='summary-tabs'>\n";
 echo "<ul>\n";
 
 echo "<li><a href='#overview-tab'>" . gettext('Overview') . "</a></li>\n";
+/*
 echo "<li><a href='#meter-tab'>" . gettext('Meters') . "</a></li>\n";
+*/
 echo "<li><a href='#table-tab'>" . gettext('Tables') . "</a></li>\n";
 echo "<li><a href='#log-tab'>" . gettext('Logs') . " </a></li>\n";
 echo "<li><a href='#pdf-tab'>" . gettext('PDF') . "</a></li>\n";
@@ -38,13 +40,13 @@ display_health_status($g_server->SelfServer);
 print_overview_graphs();
 
 echo "</div>";
-
+/*
 echo "<div id='meter-tab'>\n";
 
 print_graphs();
 
 echo "</div><!-- meter-tab -->\n";
-
+*/
 echo "<div id='table-tab'>\n";
 
 print_threads();
@@ -56,7 +58,7 @@ echo "</div>\n";
 
 echo "<div id='log-tab'>";
 
-recent_messages();
+recent_messages(40);
 
 echo "</div>";
 
@@ -305,7 +307,7 @@ function print_graphs()
     meter_display_page($page);  
 }
 
-function recent_messages()
+function recent_messages($max)
 {
   global $g_mbean_server;
 
@@ -341,6 +343,10 @@ function recent_messages()
     if (! empty($messages)) {
       
       $messages = array_reverse($messages);
+
+      if ($max < sizeof($messages)) {
+        $messages = array_slice($array, 0, $max);
+      }
 
       echo "<tbody class='scroll'>\n";
       

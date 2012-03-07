@@ -1487,6 +1487,7 @@ public class TcpSocketLinkListener
       }
       
       if (keepaliveThreadCount > 32) {
+        // throttle the thread keepalive when heavily loaded to save threads
         if (getLauncher().isThreadMax() && timeout >= 10) {
           timeout = 10;
         }

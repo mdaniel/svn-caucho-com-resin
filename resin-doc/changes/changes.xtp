@@ -12,7 +12,8 @@
 
 <s2 title="4.0.27 - snapshot">
 <ul>
-<li>meter: added "Resin|Port|Throttle Disconnect Count"</li>
+<li>health: remove meters from /resin-admin summary page, in meters page</li>
+<li>health: add meter for "Resin|Port|Throttle Disconnect Count"</li>
 <li>port: throttle keepalives when port-thread-max is hit</li>
 <li>port: fixed thread launcher housekeeping</li>
 <li>port: added &lt;port-thread-max> for throttling</li>
