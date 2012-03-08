@@ -57,6 +57,13 @@ class SocketLinkThreadLauncher extends AbstractThreadLauncher
     else
       return super.isEnable();
   }
+
+  public void init()
+  {
+    _threadName = ("resin-port-"
+                   + _listener.getAddress()
+                   + ":" + _listener.getPort());
+  }
   
   @Override
   protected String getThreadName()

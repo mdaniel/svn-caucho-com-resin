@@ -52,6 +52,7 @@ import com.caucho.config.ConfigException;
 import com.caucho.config.Configurable;
 import com.caucho.config.program.ConfigProgram;
 import com.caucho.config.types.Period;
+import com.caucho.env.meter.ActiveMeter;
 import com.caucho.env.meter.CountMeter;
 import com.caucho.env.meter.MeterService;
 import com.caucho.env.thread.ThreadPool;
@@ -95,6 +96,12 @@ public class TcpSocketLinkListener
   
   private static final CountMeter _throttleDisconnectMeter
     = MeterService.createCountMeter("Resin|Port|Throttle Disconnect Count");
+  
+  private static final CountMeter _keepaliveMeter
+    = MeterService.createCountMeter("Resin|Port|Keepalive Count");
+  
+  private static final ActiveMeter _keepaliveThreadMeter
+    = MeterService.createActiveMeter("Resin|Port|Keepalive Thread");
 
   private final AtomicInteger _connectionCount = new AtomicInteger();
 
@@ -198,6 +205,7 @@ public class TcpSocketLinkListener
 
   private final AtomicLong _lifetimeRequestCount = new AtomicLong();
   private final AtomicLong _lifetimeKeepaliveCount = new AtomicLong();
+  private final AtomicLong _lifetimeKeepaliveSelectCount = new AtomicLong();
   private final AtomicLong _lifetimeClientDisconnectCount = new AtomicLong();
   private final AtomicLong _lifetimeRequestTime = new AtomicLong();
   private final AtomicLong _lifetimeReadBytes = new AtomicLong();
@@ -1023,6 +1031,8 @@ public class TcpSocketLinkListener
   {
     if (! _lifecycle.toInit())
       return;
+    
+    _launcher.init();
   }
   
   public String getUrl()
@@ -1510,15 +1520,20 @@ public class TcpSocketLinkListener
         return 0;
       }
       
+      _keepaliveThreadMeter.start();
       
-      if (false && _keepaliveThreadCount.get() < 32) {
-        // benchmark perf with memcache
-        result = is.fillWithTimeout(-1);
+      try {
+        if (false && _keepaliveThreadCount.get() < 32) {
+          // benchmark perf with memcache
+          result = is.fillWithTimeout(-1);
+        }
+        else {
+          result = is.fillWithTimeout(timeout);
+        }
+      } finally {
+        _keepaliveThreadMeter.end();
       }
-      else {
-        result = is.fillWithTimeout(timeout);
-      }
-
+      
       if (isClosed()) {
         return -1;
       }
@@ -1613,12 +1628,23 @@ public class TcpSocketLinkListener
 
   void addLifetimeKeepaliveCount()
   {
+    _keepaliveMeter.start();
     _lifetimeKeepaliveCount.incrementAndGet();
   }
 
   public long getLifetimeKeepaliveCount()
   {
     return _lifetimeKeepaliveCount.get();
+  }
+
+  void addLifetimeKeepaliveSelectCount()
+  {
+    _lifetimeKeepaliveSelectCount.incrementAndGet();
+  }
+
+  public long getLifetimeKeepaliveSelectCount()
+  {
+    return _lifetimeKeepaliveSelectCount.get();
   }
 
   void addLifetimeClientDisconnectCount()

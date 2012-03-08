@@ -84,9 +84,9 @@ abstract public class AbstractHttpResponse {
   private static final CountSensor _status5xxSensor
     = MeterService.createCountMeter("Resin|Http|5xx");
   private static final CountSensor _status500Sensor
-    = MeterService.createCountMeter("Resin|HTTP|500");
+    = MeterService.createCountMeter("Resin|Http|500");
   private static final CountSensor _status503Sensor
-    = MeterService.createCountMeter("Resin|HTTP|503");
+    = MeterService.createCountMeter("Resin|Http|503");
 
   private static final CaseInsensitiveIntMap _headerCodes;
   private static final int HEADER_CACHE_CONTROL = 1;
@@ -907,29 +907,31 @@ abstract public class AbstractHttpResponse {
         _status200Sensor.start();
         break;
       default:
+        _status2xxSensor.start();
         break;
       }
       break;
     case 3:
-      _status3xxSensor.start();
       switch (statusCode) {
       case 304:
         _status304Sensor.start();
         break;
       default:
+        _status3xxSensor.start();
         break;
       }
       break;
     case 4:
-      _status4xxSensor.start();
       switch (statusCode) {
       case 400:
         _status400Sensor.start();
+        _status4xxSensor.start();
         break;
       case 404:
         _status404Sensor.start();
         break;
       default:
+        _status4xxSensor.start();
         break;
       }
       break;

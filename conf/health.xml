@@ -480,8 +480,16 @@
       
     <!-- row 1 -->
 
+    <graph name="Request Active">
+      <meter>Resin|Http|Request Active</meter>
+      <meter>Resin|Port|Keepalive Async Active</meter>
+      <meter>Resin|Port|Keepalive Thread Active</meter>
+    </graph>
+
     <graph name="Request Count">
       <meter>Resin|Http|Request Count</meter>
+      <meter>Resin|Port|Keepalive Thread Count</meter>
+      <meter>Resin|Port|Keepalive Async Count</meter>
       <meter>Resin|Http|Session Save Count</meter>
     </graph>
       

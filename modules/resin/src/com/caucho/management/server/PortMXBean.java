@@ -251,11 +251,19 @@ public interface PortMXBean extends ManagedObjectMXBean {
 
   /**
    * Returns the number of requests that have ended up in the keepalive state
-   * for this server in it's lifetime.
+   * for this server in its lifetime.
    */
   @Description("The total number of requests that have ended"
                + " up in the keepalive state")
   public long getKeepaliveCountTotal();
+
+  /**
+   * Returns the number of requests that have ended up in the 
+   * keepalive select state for this server in its lifetime.
+   */
+  @Description("The total number of requests that have ended"
+               + " up in the keepalive select state")
+  public long getKeepaliveSelectCountTotal();
 
   /**
    * The total number of connections that have terminated with

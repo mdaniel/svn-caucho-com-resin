@@ -242,6 +242,12 @@ public class SocketLinkAdmin extends AbstractManagedObject
   }
 
   @Override
+  public long getKeepaliveSelectCountTotal()
+  {
+    return _port.getLifetimeKeepaliveSelectCount();
+  }
+
+  @Override
   public long getClientDisconnectCountTotal()
   {
     return _port.getLifetimeClientDisconnectCount();

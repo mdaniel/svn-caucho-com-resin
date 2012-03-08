@@ -960,7 +960,14 @@ public class TcpSocketLink extends AbstractSocketLink
   RequestState handleKeepaliveTask()
     throws IOException
   {
-    return handleRequests(Task.KEEPALIVE);
+    RequestState state = handleRequests(Task.KEEPALIVE);
+    
+    if (state.isAcceptAllowed()) {
+      return handleAcceptTask();
+    }
+    else {
+      return state;
+    }
   }
 
   @Friend(KeepaliveTimeoutTask.class)
@@ -1032,8 +1039,8 @@ public class TcpSocketLink extends AbstractSocketLink
           //_state = _state.toKeepalive(this);
           
           closeAsync();
-        
-          return getKeepaliveTask().doTask();
+
+          return handleRequests(Task.KEEPALIVE);
         }
         else {
           closeAsync();
@@ -1344,6 +1351,8 @@ public class TcpSocketLink extends AbstractSocketLink
       if (_listener.getSelectManager().keepalive(this)) {
         if (log.isLoggable(Level.FINE))
           log.fine(dbgId() + " keepalive (select)");
+        
+        getListener().addLifetimeKeepaliveSelectCount();
 
         return RequestState.KEEPALIVE_SELECT;
       }
