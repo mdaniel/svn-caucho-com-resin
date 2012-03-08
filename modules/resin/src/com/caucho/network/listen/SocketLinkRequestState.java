@@ -80,9 +80,9 @@ enum SocketLinkRequestState {
     }
     
     @Override
-    boolean toKeepalive(AtomicReference<SocketLinkRequestState> stateRef)
+    boolean toStartKeepalive(AtomicReference<SocketLinkRequestState> stateRef)
     {
-      if (! stateRef.compareAndSet(REQUEST, KEEPALIVE)) {
+      if (! stateRef.compareAndSet(REQUEST, KEEPALIVE_START)) {
         throw new IllegalStateException(this + " to " + stateRef.get());
       }
       
@@ -101,17 +101,47 @@ enum SocketLinkRequestState {
   },
   
   /**
-   * Keepalive detached
+   * Keepalive select started, but original thread not done.
    */
-  KEEPALIVE {
+  KEEPALIVE_START {
     @Override
     boolean toWakeKeepalive(AtomicReference<SocketLinkRequestState> stateRef)
     {
-      if (! stateRef.compareAndSet(KEEPALIVE, REQUEST)) {
-        throw new IllegalStateException(this + " to " + stateRef.get());
-      }
+      while (true) {
+        if (stateRef.compareAndSet(KEEPALIVE_SUSPEND, REQUEST)) {
+          return true;
+        }
       
-      return true;
+        if (stateRef.compareAndSet(KEEPALIVE_START, KEEPALIVE_WAKE)) {
+          return false;
+        }
+      
+        SocketLinkRequestState state = stateRef.get();
+        
+        if (state != KEEPALIVE_SUSPEND && state != KEEPALIVE_START) {
+          throw new IllegalStateException(this + " to " + stateRef.get());
+        }
+      }
+    }
+    
+    @Override
+    boolean toSuspendKeepalive(AtomicReference<SocketLinkRequestState> stateRef)
+    {
+      while (true) {
+        if (stateRef.compareAndSet(KEEPALIVE_START, KEEPALIVE_SUSPEND)) {
+          return true;
+        }
+      
+        if (stateRef.compareAndSet(KEEPALIVE_WAKE, REQUEST)) {
+          return false;
+        }
+      
+        SocketLinkRequestState state = stateRef.get();
+        
+        if (state != KEEPALIVE_START && state != KEEPALIVE_WAKE) {
+          throw new IllegalStateException(this + " to " + stateRef.get());
+        }
+      }
     }
     
     @Override
@@ -124,6 +154,54 @@ enum SocketLinkRequestState {
     }
   },
   
+  /**
+   * Keepalive select/detached
+   */
+  KEEPALIVE_WAKE {
+    @Override
+    boolean toSuspendKeepalive(AtomicReference<SocketLinkRequestState> stateRef)
+    {
+      if (stateRef.compareAndSet(KEEPALIVE_WAKE, REQUEST)) {
+        return false;
+      }
+      
+      throw new IllegalStateException(this + " to " + stateRef.get());
+    }
+    
+    @Override
+    boolean toDestroy(AtomicReference<SocketLinkRequestState> stateRef)
+    {
+      if (stateRef.compareAndSet(this, DESTROY))
+        return true;
+      else
+        return stateRef.get().toDestroy(stateRef);
+    }
+  },
+  
+  /**
+   * keepalive suspended
+   */
+  KEEPALIVE_SUSPEND {
+    @Override
+    boolean toWakeKeepalive(AtomicReference<SocketLinkRequestState> stateRef)
+    {
+      if (stateRef.compareAndSet(KEEPALIVE_SUSPEND, REQUEST)) {
+        return true;
+      }
+      
+      throw new IllegalStateException(this + " to " + stateRef.get());
+    }
+    
+    @Override
+    boolean toDestroy(AtomicReference<SocketLinkRequestState> stateRef)
+    {
+      if (stateRef.compareAndSet(this, DESTROY))
+        return true;
+      else
+        return stateRef.get().toDestroy(stateRef);
+    }
+  },
+ 
   ASYNC_START {
     @Override
     public boolean isAsyncStarted()
@@ -248,7 +326,12 @@ enum SocketLinkRequestState {
     throw new IllegalStateException(toString());
   }
 
-  boolean toKeepalive(AtomicReference<SocketLinkRequestState> stateRef)
+  boolean toStartKeepalive(AtomicReference<SocketLinkRequestState> stateRef)
+  {
+    throw new IllegalStateException(toString());
+  }
+
+  boolean toSuspendKeepalive(AtomicReference<SocketLinkRequestState> stateRef)
   {
     throw new IllegalStateException(toString());
   }

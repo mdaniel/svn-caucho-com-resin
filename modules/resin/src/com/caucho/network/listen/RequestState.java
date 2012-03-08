@@ -45,6 +45,9 @@ enum RequestState {
   KEEPALIVE_SELECT {
     @Override
     public boolean isDetach() { return true; }
+    
+    @Override
+    public boolean isKeepaliveSelect() { return true; }
   },
   
   ASYNC {
@@ -87,6 +90,11 @@ enum RequestState {
   }
   
   public boolean isRequestKeepalive()
+  {
+    return false;
+  }
+  
+  public boolean isKeepaliveSelect()
   {
     return false;
   }

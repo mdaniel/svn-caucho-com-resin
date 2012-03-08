@@ -113,7 +113,7 @@ public class TcpSocketLink extends AbstractSocketLink
   // statistics state
   private String _displayState;
 
-  private Thread _thread;
+  private volatile Thread _thread;
 
   /**
    * Creates a new TcpConnection.
@@ -493,6 +493,11 @@ public class TcpSocketLink extends AbstractSocketLink
       return -1;
   }
   
+  public final Thread getThread()
+  {
+    return _thread;
+  }
+  
   //
   // connection information
 
@@ -778,7 +783,7 @@ public class TcpSocketLink extends AbstractSocketLink
   //
   
   @Friend(ConnectionTask.class)
-  void startThread(Thread thread)
+  final void startThread(final Thread thread)
   {
     if (log.isLoggable(Level.FINER)) {
       log.finer(this + " start thread " + thread.getName()
@@ -786,9 +791,11 @@ public class TcpSocketLink extends AbstractSocketLink
                 + ", idle=" + _listener.getIdleThreadCount() + ")");
     }
     
-    if (_thread != null) {
-      throw new IllegalStateException("old: " + _thread
-                                      + " current: " + thread);
+    final Thread oldThread = _thread;
+    
+    if (oldThread != null) {
+      throw new IllegalStateException("old: " + oldThread.getId() + "@" + oldThread
+                                      + " current: " + thread.getId() + "@" + thread);
     }
     
     _thread = thread;
@@ -798,13 +805,14 @@ public class TcpSocketLink extends AbstractSocketLink
    * Completion processing at the end of the thread
    */
   @Friend(ConnectionTask.class)
-  void finishThread(RequestState requestState)
+  final void finishThread(RequestState requestState)
   {
-    if (log.isLoggable(Level.FINER))
-      log.finer(this + " finish thread: " + Thread.currentThread().getName());
-    
     Thread thread = _thread;
     _thread = null;
+    
+    if (log.isLoggable(Level.FINER)) {
+      log.finer(this + " finish thread: " + Thread.currentThread().getName());
+    }
     
     Thread currentThread = Thread.currentThread();
     
@@ -846,6 +854,19 @@ public class TcpSocketLink extends AbstractSocketLink
       } catch (Throwable e) {
         log.log(Level.FINE, e.toString(), e);
       }
+    }
+    
+    if (requestState.isKeepaliveSelect() && ! state.isClosed()) {
+      // keepalive wake before the thread exits
+      if (! reqState.toSuspendKeepalive(_requestStateRef)) {
+        ThreadPool threadPool = _listener.getThreadPool();
+
+        if (! threadPool.schedule(getKeepaliveTask())) {
+          log.severe(L.l("Schedule keepalive failed for {0}", this));
+        }
+      }
+      
+      return;
     }
     
     if (requestState.isDetach() && ! state.isClosed()) {
@@ -1082,7 +1103,7 @@ public class TcpSocketLink extends AbstractSocketLink
   private RequestState handleRequests(Task taskType)
     throws IOException
   {
-    Thread thread = Thread.currentThread();
+    Thread thread = getThread();
 
     RequestState result = RequestState.EXIT;
 
@@ -1223,7 +1244,7 @@ public class TcpSocketLink extends AbstractSocketLink
   private void dispatchRequest()
     throws IOException
   {
-    Thread thread = Thread.currentThread();
+    Thread thread = getThread();
 
     try {
       thread.setContextClassLoader(_loader);
@@ -1316,7 +1337,7 @@ public class TcpSocketLink extends AbstractSocketLink
 
     // use select manager if available
     if (_listener.getSelectManager() != null) {
-      _requestStateRef.get().toKeepalive(_requestStateRef);
+      _requestStateRef.get().toStartKeepalive(_requestStateRef);
       _state = _state.toKeepaliveSelect();
       
       // keepalive to select manager succeeds
@@ -1328,7 +1349,7 @@ public class TcpSocketLink extends AbstractSocketLink
       }
       else {
         log.warning(dbgId() + " failed keepalive (select)");
-        
+        System.out.println("FAILED_KA:");
         _requestStateRef.get().toWakeKeepalive(_requestStateRef);
       }
     }

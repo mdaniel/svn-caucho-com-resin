@@ -1479,35 +1479,37 @@ public class TcpSocketLinkListener
 
     // boolean isSelectManager = getServer().isSelectManagerEnabled();
 
-    if (isKeepaliveSelectEnabled() && _selectManager != null) {
-      long selectTimeout = getBlockingTimeoutForSelect();
-      
-      if (selectTimeout < timeout) {
-        timeout = selectTimeout;
-      }
-      
-      if (keepaliveThreadCount > 32) {
-        // throttle the thread keepalive when heavily loaded to save threads
-        if (getLauncher().isThreadMax() && timeout >= 10) {
-          timeout = 10;
-        }
-        else if (timeout >= 100) {
-          timeout = 100;
-        }
-      }
-    }
-
-    /*
-    if (timeout < 0)
-      timeout = 0;
-      */
-    
-    if (timeout <= 0)
-      return 0;
-    
-
     try {
       int result;
+
+      if (isKeepaliveSelectEnabled() && _selectManager != null) {
+        long selectTimeout = getBlockingTimeoutForSelect();
+        
+        if (selectTimeout < timeout) {
+          timeout = selectTimeout;
+        }
+        
+        if (keepaliveThreadCount > 32) {
+          // throttle the thread keepalive when heavily loaded to save threads
+          if (getLauncher().isThreadMax()) {
+            // when thread max, release the thread immediately
+            return 0;
+          }
+          else if (timeout >= 100) {
+            timeout = 100;
+          }
+        }
+      }
+
+      /*
+      if (timeout < 0)
+        timeout = 0;
+        */
+      
+      if (timeout <= 0) {
+        return 0;
+      }
+      
       
       if (false && _keepaliveThreadCount.get() < 32) {
         // benchmark perf with memcache

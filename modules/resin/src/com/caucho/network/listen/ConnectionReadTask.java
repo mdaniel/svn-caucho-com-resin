@@ -91,8 +91,9 @@ abstract class ConnectionReadTask implements Runnable {
 
     RequestState result = RequestState.EXIT;
 
-    _socketLink.startThread(thread);
     Throwable e1 = null;
+    
+    _socketLink.startThread(thread);
     
     try {
       result = doTask();
