@@ -47,12 +47,16 @@ setuid_group  : @SETUID_GROUP@
 http          : @HTTP_PORT@
 # https         : @HTTPS_PORT@
 
+# Local URL for the watchdog to check to ensure the server is up
+# http_ping_urls : http://my.example.com/test.jsp
+
 # throttle the number of active threads for a port
 port_thread_max   : 256
 accept_thread_max : 32
 accept_thread_min : 4
 
 tcp_cork : true
+sendfile : true
 
 # OpenSSL certificate configuration
 # openssl_file : keys/test.crt

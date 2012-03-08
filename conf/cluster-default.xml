@@ -84,6 +84,8 @@
         <tcp-cork>${tcp_cork}</tcp-cork>
       </port-default>
 
+      <sendfile-enable>${sendfile}</sendfile-enable>
+
       <!-- The http port -->
       <http address="*" port="${http}"/>
 

@@ -123,6 +123,13 @@
   </health:LicenseHealthCheck>
   
   <!--
+     - HTTP Ping Check
+    -->
+  <health:HttpStatusHealthCheck>
+    <url-list>${http_ping_urls}</url-list>
+  </health:HttpStatusHealthCheck>
+  
+  <!--
      - JMX Meters - for graphing and anomaly detection 
     -->
   <health:JmxMeter>
