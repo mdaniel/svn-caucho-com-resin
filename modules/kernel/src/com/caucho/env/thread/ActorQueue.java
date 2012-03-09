@@ -218,7 +218,11 @@ public final class ActorQueue<T extends RingItem>
     final int mask = _mask;
     final int updateSize = _updateSize;
     
-    while (item.isRingValue()) {
+    // in high-contention, can just finish since another thread will
+    // ack us
+    int retryCount = 1024 + (index & 0x1ff);
+    
+    while (item.isRingValue() && retryCount-- >= 0) {
       int headAlloc = headAllocRef.get();
       int head = headRef.get();
       

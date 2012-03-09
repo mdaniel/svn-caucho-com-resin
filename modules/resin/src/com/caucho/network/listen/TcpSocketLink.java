@@ -1446,9 +1446,13 @@ public class TcpSocketLink extends AbstractSocketLink
     byte []buffer = is.getBuffer();
     int readLength = buffer.length;
     
-    if (true || _listener.isAsyncThrottle()) {
+    /*
+    if (_listener.isAsyncThrottle()) {
       readLength = 0;
     }
+    */
+    // faster performance by waiting for the read
+    readLength = 0;
 
     int len = _socket.acceptInitialRead(buffer, 0, readLength);
     
