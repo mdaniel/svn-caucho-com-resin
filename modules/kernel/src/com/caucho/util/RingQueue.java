@@ -121,7 +121,10 @@ public class RingQueue<T extends RingItem> {
     final T []ring = _ring;
     final int mask = _mask;
 
-    while (true) {
+    // limit retry in high-contention situation, since we've acked the entry
+    int retryCount = 1024 + (index & 0x1ff);
+    
+    while (retryCount-- >= 0) {
       int head = headRef.get();
       int headAlloc = headAllocRef.get();
 
@@ -178,8 +181,11 @@ public class RingQueue<T extends RingItem> {
     // int ringLength = ring.length;
     final int mask = _mask;
     // int halfSize = _halfSize;
+    
+    // limit retry in high-contention situation
+    int retryCount = 1024 + (index & 0x1ff);
 
-    while (true) {
+    while (retryCount-- >= 0) {
       final int tail = tailRef.get();
       final int tailAlloc = tailAllocRef.get();
       
