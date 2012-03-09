@@ -159,6 +159,7 @@ struct server_socket_t {
   void *context;
   
   int (*accept) (server_socket_t *ss, connection_t *conn);
+  int (*init) (connection_t *conn);
   void (*close) (server_socket_t *ss);
   int server_index;
 
@@ -192,6 +193,7 @@ void *cse_malloc(int size);
 extern struct connection_ops_t std_ops;
 
 int std_accept(server_socket_t *ss, connection_t *conn);
+int std_init(connection_t *conn);
 void std_close_ss(server_socket_t *ss);
 
 int conn_close(connection_t *conn);

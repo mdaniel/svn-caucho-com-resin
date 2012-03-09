@@ -37,6 +37,7 @@ import java.util.HashMap;
 
 import com.caucho.distcache.ClusterCache;
 import com.caucho.distcache.ExtCacheEntry;
+import com.caucho.network.listen.AbstractProtocolConnection;
 import com.caucho.network.listen.ProtocolConnection;
 import com.caucho.network.listen.SocketLink;
 import com.caucho.util.Alarm;
@@ -50,7 +51,7 @@ import com.caucho.vfs.WriteStream;
 /**
  * Custom serialization for the cache
  */
-public class MemcachedConnection implements ProtocolConnection
+public class MemcachedConnection extends AbstractProtocolConnection
 {
   private static final HashMap<CharBuffer,Command> _commandMap
     = new HashMap<CharBuffer,Command>();

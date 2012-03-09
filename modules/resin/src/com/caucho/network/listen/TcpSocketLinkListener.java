@@ -1441,6 +1441,16 @@ public class TcpSocketLinkListener
   }
 
   /**
+   * When true, use the async manager to wait for reads rather than
+   * blocking.
+   */
+  public boolean isAsyncThrottle()
+  {
+    return isKeepaliveSelectEnabled() && _launcher.isThreadHigh();
+  }
+
+
+  /**
    * Marks the keepalive allocation as starting.
    * Only called from ConnectionState.
    */
@@ -1501,7 +1511,7 @@ public class TcpSocketLinkListener
         
         if (keepaliveThreadCount > 32) {
           // throttle the thread keepalive when heavily loaded to save threads
-          if (getLauncher().isThreadMax()) {
+          if (getLauncher().isThreadHigh()) {
             // when thread max, release the thread immediately
             return 0;
           }
@@ -1998,5 +2008,4 @@ public class TcpSocketLinkListener
       }
     }
   }
-
 }

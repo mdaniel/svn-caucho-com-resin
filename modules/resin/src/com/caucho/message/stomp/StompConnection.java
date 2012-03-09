@@ -46,6 +46,7 @@ import com.caucho.message.broker.BrokerReceiver;
 import com.caucho.message.broker.BrokerSender;
 import com.caucho.message.broker.ReceiverMessageHandler;
 import com.caucho.message.broker.SenderSettleHandler;
+import com.caucho.network.listen.AbstractProtocolConnection;
 import com.caucho.network.listen.ProtocolConnection;
 import com.caucho.network.listen.SocketLink;
 import com.caucho.util.Alarm;
@@ -58,7 +59,7 @@ import com.caucho.vfs.WriteStream;
 /**
  * Custom serialization for the cache
  */
-public class StompConnection implements ProtocolConnection
+public class StompConnection extends AbstractProtocolConnection
 {
   private static final Logger log
     = Logger.getLogger(StompConnection.class.getName());

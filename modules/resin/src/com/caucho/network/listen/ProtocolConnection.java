@@ -49,11 +49,26 @@ public interface ProtocolConnection {
    * handling the request.
    */
   public boolean isWaitForRead();
+  
+  /**
+   * Called when the connection is attached to a thread
+   */
+  public void onAttachThread();
+  
+  /**
+   * Called when the connection is detached from a thread
+   */
+  public void onDetachThread();
 
   /**
    * Called when the connection starts, i.e. just after the accept
    */
   public void onStartConnection();
+
+  /**
+   * Handles a close event when the connection is closed.
+   */
+  public void onCloseConnection();
 
   /**
    * Handles a new request.  The controlling TcpServer may call
@@ -71,9 +86,4 @@ public interface ProtocolConnection {
    * Handles a resumption of the connection for an async/comet request.
    */
   public boolean handleResume() throws IOException;
-
-  /**
-   * Handles a close event when the connection is closed.
-   */
-  public void onCloseConnection();
 }

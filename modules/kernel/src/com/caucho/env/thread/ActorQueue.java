@@ -113,9 +113,16 @@ public final class ActorQueue<T extends RingItem>
         isWaitRef = _isWaitRef;
       }
       
+      AtomicInteger allocRef = tails[i];
+      
+      if (i == 0) {
+        allocRef = _headAllocRef;
+      }
+      
       ActorConsumer<T> consumer
         = new ActorConsumer<T>(_itemRing,
                                processors[i],
+                               allocRef,
                                tails[i],
                                tails[i + 1],
                                isWaitRef);
@@ -153,12 +160,12 @@ public final class ActorQueue<T extends RingItem>
     int head = _headRef.get();
     int tail = _tailRef.get();
     
-    return (_size + tail - head) % _size;
+    return (_size + head - tail) & _mask;
   }
   
   public final void wake()
   {
-    if (! isEmpty() || _isWaitRef.get()) {
+    if (_headAllocRef.get() != _tailRef.get() || _isWaitRef.get()) {
       _firstWorker.wake();
     }
   }
@@ -210,8 +217,7 @@ public final class ActorQueue<T extends RingItem>
     final T []ring = _itemRing;
     final int mask = _mask;
     final int updateSize = _updateSize;
-
-    loop:
+    
     while (item.isRingValue()) {
       int headAlloc = headAllocRef.get();
       int head = headRef.get();
@@ -239,7 +245,7 @@ public final class ActorQueue<T extends RingItem>
     // wake mask
     // _firstWorker.wake();
     
-    if ((headRef.get() & 0x3f) == 0) {
+    if ((index & 0x1f) == 0) {
       _firstWorker.wake();
     }
   }
@@ -272,6 +278,7 @@ public final class ActorQueue<T extends RingItem>
     
     private final ItemProcessor<? super T> _processor;
     
+    private final AtomicInteger _headAllocRef;
     private final AtomicInteger _headRef;
     private final AtomicInteger _tailRef;
     
@@ -279,10 +286,11 @@ public final class ActorQueue<T extends RingItem>
     private final AtomicBoolean _isWaitRef;
     
     ActorConsumer(T []ring,
-                     ItemProcessor<? super T> processor,
-                     AtomicInteger headRef,
-                     AtomicInteger tailRef,
-                     AtomicBoolean isWaitRef)
+                  ItemProcessor<? super T> processor,
+                  AtomicInteger headAllocRef,
+                  AtomicInteger headRef,
+                  AtomicInteger tailRef,
+                  AtomicBoolean isWaitRef)
     {
       _itemRing = ring;
       _mask = _itemRing.length - 1;
@@ -299,6 +307,7 @@ public final class ActorQueue<T extends RingItem>
       _tailChunk = tailChunk;
       
       _processor = processor;
+      _headAllocRef = headRef;
       _headRef = headRef;
       _tailRef = tailRef;
       
@@ -324,7 +333,7 @@ public final class ActorQueue<T extends RingItem>
         }
           
         forceWakeQueue();
-      } while (_headRef.get() != _tailRef.get());
+      } while (_headAllocRef.get() != _tailRef.get());
     }
     
     private final boolean doConsume()

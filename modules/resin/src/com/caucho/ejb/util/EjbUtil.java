@@ -31,6 +31,7 @@ package com.caucho.ejb.util;
 import java.io.IOException;
 import java.security.Principal;
 
+import com.caucho.network.listen.AbstractProtocolConnection;
 import com.caucho.network.listen.ProtocolConnection;
 import com.caucho.security.SecurityContext;
 import com.caucho.security.SecurityContextException;
@@ -52,7 +53,7 @@ public class EjbUtil {
   }
   
   static class AsyncProtocolConnection
-    implements ProtocolConnection, SecurityContextProvider {
+    extends AbstractProtocolConnection implements SecurityContextProvider {
     private Principal _principal;
     
     AsyncProtocolConnection(Principal principal)

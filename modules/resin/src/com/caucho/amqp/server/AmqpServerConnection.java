@@ -67,6 +67,7 @@ import com.caucho.message.broker.BrokerReceiver;
 import com.caucho.message.broker.BrokerSender;
 import com.caucho.message.broker.EnvironmentMessageBroker;
 import com.caucho.message.broker.ReceiverMessageHandler;
+import com.caucho.network.listen.AbstractProtocolConnection;
 import com.caucho.network.listen.ProtocolConnection;
 import com.caucho.network.listen.SocketLink;
 import com.caucho.util.CurrentTime;
@@ -77,7 +78,8 @@ import com.caucho.vfs.WriteStream;
 /**
  * Amqp server connection
  */
-public class AmqpServerConnection implements ProtocolConnection, AmqpFrameHandler
+public class AmqpServerConnection extends AbstractProtocolConnection
+  implements AmqpFrameHandler
 {
   private static final Logger log
     = Logger.getLogger(AmqpServerConnection.class.getName());

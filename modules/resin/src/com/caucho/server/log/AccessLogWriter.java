@@ -258,5 +258,11 @@ public class AccessLogWriter extends AbstractRolloverLog
     {
       wake();
     }
+    
+    @Override
+    public String toString()
+    {
+      return getClass().getSimpleName() + "[" + _path + "]";
+    }
   }
 }

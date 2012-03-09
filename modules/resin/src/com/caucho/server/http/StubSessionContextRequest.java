@@ -123,5 +123,25 @@ public class StubSessionContextRequest extends StubServletRequest
   public void onStartConnection()
   {
   }
+
+  /* (non-Javadoc)
+   * @see com.caucho.network.listen.ProtocolConnection#onAttachThread()
+   */
+  @Override
+  public void onAttachThread()
+  {
+    // TODO Auto-generated method stub
+    
+  }
+
+  /* (non-Javadoc)
+   * @see com.caucho.network.listen.ProtocolConnection#onDetachThread()
+   */
+  @Override
+  public void onDetachThread()
+  {
+    // TODO Auto-generated method stub
+    
+  }
 }
   

@@ -41,7 +41,7 @@
 
 #include "resin_os.h"
 
-static int std_init(connection_t *conn);
+int std_init(connection_t *conn);
 static int std_read(connection_t *conn, char *buf, int len, int timeout);
 static int std_read_nonblock(connection_t *conn, char *buf, int len);
 static int std_write(connection_t *conn, char *buf, int len);

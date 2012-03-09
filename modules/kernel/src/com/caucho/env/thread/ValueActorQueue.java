@@ -42,7 +42,7 @@ public class ValueActorQueue<T>
   private final ActorQueue<ValueItem<T>> _actorQueue;
  
   public ValueActorQueue(int capacity,
-                             ValueProcessor<T> processor)
+                         ValueProcessor<T> processor)
   {
     if (processor == null)
       throw new NullPointerException();

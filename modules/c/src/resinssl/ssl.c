@@ -45,6 +45,7 @@ typedef struct CRYPTO_dynlock_value {
 #include "../resin_os/resin_os.h"
 
 static int ssl_open(connection_t *conn, int fd);
+static int ssl_init(connection_t *conn);
 static int ssl_read(connection_t *conn, char *buf, int len, int timeout);
 static int ssl_read_nonblock(connection_t *conn, char *buf, int len);
 static int ssl_write(connection_t *conn, char *buf, int len);
@@ -53,6 +54,7 @@ static void ssl_free(connection_t *conn);
 static int ssl_read_client_certificate(connection_t *conn, char *buf, int len);
 
 struct connection_ops_t ssl_ops = {
+  ssl_init,
   ssl_read,
   ssl_read_nonblock,
   ssl_write,
@@ -796,6 +798,12 @@ ssl_open(connection_t *conn, int fd)
 }
 
 static int
+ssl_init(connection_t *conn)
+{
+  return conn->ss->init(conn);
+}
+
+static int
 ssl_read(connection_t *conn, char *buf, int len, int timeout)
 {
   int fd;
@@ -1346,8 +1354,9 @@ Java_com_caucho_vfs_OpenSSLFactory_open(JNIEnv *env,
   connection_t *conn = (connection_t *) (PTR) p_conn;
   ssl_config_t *config = (ssl_config_t *) (PTR) p_config;
 
-  if (! conn || ! config)
+  if (! conn || ! config) {
     return 0;
+  }
 
   /*
   if (! conn->context)

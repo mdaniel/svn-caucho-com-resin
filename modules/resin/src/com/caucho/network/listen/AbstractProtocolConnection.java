@@ -47,10 +47,33 @@ public abstract  class AbstractProtocolConnection implements ProtocolConnection 
   {
   }
   
+  /**
+   * Called when the connection is attached to a thread
+   */
+  @Override
+  public void onAttachThread()
+  {
+  }
+  
+  /**
+   * Called when the connection is detached from a thread
+   */
+  @Override
+  public void onDetachThread()
+  {
+  }
+
   @Override
   public void onStartConnection()
   {
-    
+  }
+
+  /**
+   * Handles a close event when the connection is closed.
+   */
+  @Override
+  public void onCloseConnection()
+  {
   }
   
   /**
@@ -81,13 +104,5 @@ public abstract  class AbstractProtocolConnection implements ProtocolConnection 
     throws IOException
   {
     throw new UnsupportedOperationException(getClass().getName());
-  }
-
-  /**
-   * Handles a close event when the connection is closed.
-   */
-  @Override
-  public void onCloseConnection()
-  {
   }
 }

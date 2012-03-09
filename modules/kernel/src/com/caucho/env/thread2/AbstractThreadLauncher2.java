@@ -275,6 +275,14 @@ abstract public class AbstractThreadLauncher2 extends AbstractTaskWorker2 {
     return _threadMax <= _threadCount.get() && _startingCount.get() == 0;
   }
   
+  public boolean isThreadHigh()
+  {
+    int threadCount = _threadCount.get();
+    int startCount = _startingCount.get();
+    
+    return _threadMax <= 2 * (threadCount + startCount);
+  }
+  
   /**
    * Callback from the launched thread's run().
    * 

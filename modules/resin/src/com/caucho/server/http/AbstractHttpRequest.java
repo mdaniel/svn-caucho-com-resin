@@ -47,6 +47,7 @@ import javax.servlet.ServletInputStream;
 import javax.servlet.http.Cookie;
 import javax.servlet.http.HttpServletResponse;
 
+import com.caucho.network.listen.AbstractProtocolConnection;
 import com.caucho.network.listen.ProtocolConnection;
 import com.caucho.network.listen.SocketLink;
 import com.caucho.network.listen.SocketLinkDuplexController;
@@ -81,8 +82,8 @@ import com.caucho.vfs.WriteStream;
  * Abstract request implementing methods common to the different
  * request implementations.
  */
-public abstract class AbstractHttpRequest
-  implements SecurityContextProvider, ProtocolConnection
+public abstract class AbstractHttpRequest extends AbstractProtocolConnection
+  implements SecurityContextProvider
 {
   private static final Logger log
     = Logger.getLogger(AbstractHttpRequest.class.getName());
@@ -1768,8 +1769,10 @@ public abstract class AbstractHttpRequest
       }
       */
 
+      /*
       if (httpBuffer != null)
         getServer().freeHttpBuffer(httpBuffer);
+        */
     }
   }
   /*

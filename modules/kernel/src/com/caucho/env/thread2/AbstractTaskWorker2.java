@@ -114,11 +114,11 @@ abstract public class AbstractTaskWorker2 implements Runnable, TaskWorker {
 
   @Override
   public final void wake()
-  {
+  {/*
     if (_taskState.get() == TASK_READY && _isActive.get()) {
       return;
     }
-    
+    */
     int oldState = _taskState.getAndSet(TASK_READY);
 
     if (_isActive.compareAndSet(false, true)) {

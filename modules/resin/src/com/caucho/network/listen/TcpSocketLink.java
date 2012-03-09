@@ -799,6 +799,8 @@ public class TcpSocketLink extends AbstractSocketLink
     }
     
     _thread = thread;
+    
+    _request.onAttachThread();
   }
 
   /**
@@ -821,6 +823,8 @@ public class TcpSocketLink extends AbstractSocketLink
       throw new IllegalStateException("old: " + thread
                                       + " current: " + currentThread);
     }
+    
+    _request.onDetachThread();
     
     if (_requestStateRef.get().isDestroyed()) {
       destroy();
@@ -936,7 +940,12 @@ public class TcpSocketLink extends AbstractSocketLink
                     + getRemoteHost() + ":" + getRemotePort());
         }
 
-        result = handleRequests(Task.ACCEPT);
+        if (_listener.isAsyncThrottle()) {
+          result = handleRequests(Task.KEEPALIVE);
+        }
+        else {
+          result = handleRequests(Task.ACCEPT);
+        }
       } finally {
         launcher.onChildIdleBegin();
       }
@@ -1433,7 +1442,13 @@ public class TcpSocketLink extends AbstractSocketLink
     is.init(_socket.getStream(), null);
     
     byte []buffer = is.getBuffer();
-    int len = _socket.acceptInitialRead(buffer, 0, buffer.length);
+    int readLength = buffer.length;
+    
+    if (_listener.isAsyncThrottle()) {
+      readLength = 0;
+    }
+
+    int len = _socket.acceptInitialRead(buffer, 0, readLength);
     
     if (len > 0) {
       is.setLength(len);
