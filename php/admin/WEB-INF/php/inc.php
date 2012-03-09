@@ -7,6 +7,8 @@
 
 require_once "WEB-INF/php/graph_flot.php";
 
+import java.lang.System;
+
 global $g_server_id;
 global $g_server_index;
 global $g_si;
@@ -244,6 +246,14 @@ function format_ago($date)
     return "";
 
   $event_time = $date->time / 1000;
+  
+  return format_ago_unixtime($event_time);
+}
+
+function format_ago_unixtime($event_time)
+{
+  if (! $event_time)
+    return "";
 
   if ($event_time < 365 * 24 * 3600)
     return "";
@@ -251,7 +261,14 @@ function format_ago($date)
   $now = time();
   $ago = $now - $event_time;
 
-  return sprintf("%dh%02d", $ago / 3600, $ago / 60 % 60);
+  return sprintf("%dh %02dm", $ago / 3600, $ago / 60 % 60);
+}
+
+// this is necessary to strip milliseconds, which strtotime doesn't handle
+function java_iso8601_to_date($iso8601) 
+{
+  $array = split('[T\.\+]', $iso8601);
+  return strtotime($array[0] . "T" . $array[1] . "+" . $array[3]);
 }
 
 function format_miss_ratio($hit, $miss)
@@ -1369,5 +1386,12 @@ function get_param($current, $name, $default=null)
   return $default;
 }
 
+function debug($obj) 
+{
+  if (is_string($obj))
+    System::out->println($obj);
+  else
+    System::out->println(var_export($obj,1));
+}
 
 ?>

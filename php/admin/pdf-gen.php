@@ -29,7 +29,6 @@ if ($g_is_snapshot || $_REQUEST["snapshot"]) {
   if ($snapshot) {
     $snapshot->snapshotJmx();
     $snapshot->snapshotHeap();
-    $snapshot->snapshotHealth();
     $snapshot->snapshotThreadDump();
 
     if ($profile_time || $_REQUEST["profile_time"]) {
@@ -150,9 +149,7 @@ else {
 
   pdf_header();
 
-  if ($mPage->isSummary()) {
-    pdf_summary();
-  }
+  pdf_summary();
 
   pdf_health();
 
@@ -176,6 +173,8 @@ else {
     pdf_write_log();
   }
 
+  pdf_config();
+  
   if ($mPage->isJmxDump()) {
     pdf_jmx_dump();
   }

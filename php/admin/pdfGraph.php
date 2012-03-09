@@ -6,8 +6,6 @@ require_once 'PdfCanvasGraph.php';
 
 //error_reporting(E_ALL);
 
-import java.lang.System;
-
 $g_pdf_colors = array(
     new RGBColor(0xff, 0x30, 0x30), // red
     new RGBColor(0x30, 0xb0, 0xff), // azure
@@ -43,11 +41,6 @@ if (! $stat) {
 }
 
 $log_mbean = $g_mbean_server->lookup("resin:type=LogService");
-
-function debug($msg) 
-{
-  System::out->println($msg);
-}
 
 function  my_error_handler($error_type, $error_msg, $errfile, $errline) 
 {
@@ -557,6 +550,166 @@ function pdf_log_messages($title,
     $g_canvas->setTextFont();
     $g_canvas->writeTextLineIndent(20, "No Logs");
   }
+}
+
+function pdf_config()
+{
+  global $g_canvas;
+  global $g_jmx_dump, $g_jmx_dump_time;
+  global $g_start, $g_end;
+  global $g_si, $g_label;
+
+  $g_canvas->writeSection("Configuration");
+  
+  $g_canvas->setFont("Courier-Bold", "8");
+  $g_canvas->writeTextLine("Timestamp: $g_jmx_dump_time");
+  $g_canvas->newLine();
+  
+  $server = $g_jmx_dump["resin:type=Server"];
+
+  $cluster_name = $server["Cluster"];
+  $cluster = $g_jmx_dump[$cluster_name];
+  
+  $cluster_server_name = $server["SelfServer"];
+  $cluster_server = $g_jmx_dump[$cluster_server_name];
+  
+  $col1 = 40;
+  $col2 = 500;
+  
+  $g_canvas->setTextFont();  
+  
+  $g_canvas->writeTextColumn($col1, 'r', "Cluster:");
+  $g_canvas->writeTextColumn($col2, 'l', $cluster["Name"]);
+  $g_canvas->newLine();
+  
+  $g_canvas->writeTextColumn($col1, 'r', "Server:");
+  $g_canvas->writeTextColumn($col2, 'l', $g_label);
+  $g_canvas->newLine();
+  
+  $g_canvas->writeSubSection("Server Configuration Files");
+  
+  $resin = $g_jmx_dump["resin:type=Resin"];
+  
+  pdf_display_configs($resin["Configs"]);
+  
+  #$g_canvas->writeSubSection("Web Applications");
+  
+  $webapps = preg_grep_keys("/type=WebApp[$,]/", $g_jmx_dump); 
+  
+  foreach($webapps as $webapp) {
+    if ($webapp["State"] == "STOPPED_IDLE")
+      continue;
+      
+     pdf_webapp($webapp);
+     $g_canvas->newLine();
+  }
+}
+
+function pdf_webapp($webapp)
+{
+  global $g_canvas, $g_jmx_dump;
+  
+  $session_manager_name = $webapp["SessionManager"];
+  debug($session_manager_name);
+  $session_manager = $g_jmx_dump[$session_manager_name];
+  debug($session_manager);
+  
+  $host_name = $webapp["Host"];
+  $host = $g_jmx_dump[$host_name];
+  
+  $host_name = empty($host["HostName"]) ? "default" : $host["HostName"];
+  
+  $col1 = 60;
+  $col2 = 90;
+  $col3 = 60;
+  $col4 = 100;
+  $col5 = 90;
+  $col6 = 90;
+  
+  $context_path = empty($webapp["ContextPath"]) ? "/" : $webapp["ContextPath"];
+  
+  $start_time = $webapp["StartTime"];
+  if ($start_time) {
+    $start_time = java_iso8601_to_date($start_time);
+    $start_time = format_ago_unixtime($start_time);
+  }
+  
+  $last_500_time = $webapp["Status500LastTime"];
+  if ($last_500_time) {
+    $last_500_time = java_iso8601_to_date($last_500_time);
+    $last_500_time = format_ago_unixtime($last_500_time);
+  }
+  
+  $g_canvas->writeSubSection("Host: $host_name, WebApp: $context_path");
+  $g_canvas->newLine();
+  
+  $g_canvas->setTextFont();
+  
+  $g_canvas->writeTextColumnHeader($col1, 'c', "State");
+  $g_canvas->writeTextColumnHeader($col2, 'c', "Startup Mode");
+  $g_canvas->writeTextColumnHeader($col3, 'c', "Uptime");
+  $g_canvas->writeTextColumnHeader($col4, 'c', "500 Errors");
+  $g_canvas->writeTextColumnHeader($col5, 'c', "Active Requests");
+  $g_canvas->writeTextColumnHeader($col6, 'c', "Active Sessions");
+  $g_canvas->newLine();
+  
+  $g_canvas->writeTextColumn($col1, 'c', $webapp["State"]);
+  $g_canvas->writeTextColumn($col2, 'c', $webapp["StartupMode"]);
+  $g_canvas->writeTextColumn($col3, 'c', $start_time);
+  $g_canvas->writeTextColumn($col4, 'c', $webapp["Status500CountTotal"] . ($last_500_time ? " (" . $last_500_time . " ago)" : ""));
+  $g_canvas->writeTextColumn($col5, 'c', $webapp["RequestCount"]);
+  $g_canvas->writeTextColumn($col6, 'c', $session_manager["SessionActiveCount"]);
+  $g_canvas->newLine();
+  
+  $configs = $webapp["Configs"];
+  if (count($configs) > 0) {
+    $g_canvas->newLine();
+    
+    $g_canvas->setFont("Helvetica-Bold", 9);
+    $g_canvas->writeTextLine("WebApp Configuration Files");
+    $g_canvas->newLine();
+    
+    $g_canvas->setTextFont();
+    
+    pdf_display_configs($webapp["Configs"]);
+  }
+}
+
+function pdf_display_configs($config_names)
+{
+  global $g_jmx_dump, $g_canvas;
+  
+  $col1 = 65;
+  $col2 = 525;
+  
+  for($i = 0; $i<count($config_names); $i++) {
+    $config = $g_jmx_dump[$config_names[$i]];
+    
+    $g_canvas->writeTextColumn($col1, 'r', "Path:");
+    $g_canvas->writeTextColumn($col2, 'l', $config["Path"]);
+    $g_canvas->newLine();
+
+    $g_canvas->writeTextColumn($col1, 'r', "Length:");
+    $g_canvas->writeTextColumn($col2, 'l', $config["Length"]);
+    $g_canvas->newLine();
+    
+    $last_modified = $config["LastModified"];
+    if ($last_modified > 0)
+      $last_modified = date("Y-m-d H:i:s", $last_modified/1000);
+    else
+      $last_modified = "Unavailable";
+    
+    $g_canvas->writeTextColumn($col1, 'r', "Last Modified:");
+    $g_canvas->writeTextColumn($col2, 'l', $last_modified);
+    $g_canvas->newLine();
+    
+    $g_canvas->writeTextColumn($col1, 'r', "CRC-64:");
+    $g_canvas->writeTextColumn($col2, 'l', $config["Crc64"]);
+    $g_canvas->newLine();
+    
+    if ($i < count($config_names)-1)
+      $g_canvas->newLine();
+  }  
 }
 
 function pdf_draw_cluster_graphs($mPage)
@@ -1614,6 +1767,16 @@ class Stat
            && $this->category == $that->category
            && $this->subcategory == $that->subcategory;
   }
+}
+
+function pdf_sort_host($a, $b)
+{
+  return strcmp($a['URL'], $b['URL']);
+}
+
+function pdf_sort_webapp($a, $b)
+{
+  return strcmp($a['ContextPath'], $b['ContextPath']);
 }
 
 ?>

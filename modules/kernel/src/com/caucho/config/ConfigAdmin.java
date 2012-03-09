@@ -27,95 +27,99 @@
  * @author Scott Ferguson
  */
 
-
 package com.caucho.config;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.logging.Level;
-import java.util.logging.Logger;
+import java.util.*;
 
+import com.caucho.loader.EnvironmentLocal;
 import com.caucho.management.server.AbstractManagedObject;
 import com.caucho.management.server.ConfigMXBean;
-import com.caucho.util.*;
-import com.caucho.vfs.*;
+import com.caucho.vfs.Path;
 
 public class ConfigAdmin extends AbstractManagedObject implements ConfigMXBean
 {
-  private static final Logger log
-    = Logger.getLogger(ConfigAdmin.class.getName());
+  public static EnvironmentLocal<Map<Path, ConfigMXBean>> _environmentConfigs = 
+    new EnvironmentLocal<Map<Path, ConfigMXBean>>();
   
-  private static final L10N L = new L10N(ConfigAdmin.class);
   
-  private List<Path> _paths = new ArrayList<Path>();
-  
-  public ConfigAdmin()
+  public static void registerPath(Path path)
   {
-    
-  }
-
-  public void addPath(Path path)
-  {
-    if (path.toString().toLowerCase().endsWith(".license"))
+    if (path.getURL().toLowerCase().endsWith(".license"))
       return;
     
-    if (! _paths.contains(path))
-      _paths.add(path);
+    Map<Path, ConfigMXBean> map = _environmentConfigs.getLevel();
+    if (map == null) {
+      map = new HashMap<Path, ConfigMXBean>();
+      _environmentConfigs.set(map);
+    }
+    
+    if (! map.containsKey(path))
+    {
+      ConfigAdmin admin = new ConfigAdmin(path);
+      admin.register();
+      
+      map.put(path, admin);
+    }
+  }
+  
+  public static Collection<ConfigMXBean> getMBeans()
+  {
+    Map<Path, ConfigMXBean> map = _environmentConfigs.get();
+    if (map == null)
+      return Collections.emptyList();
+    return Collections.unmodifiableCollection(map.values());
+  }
+  
+  public static Collection<ConfigMXBean> getMBeans(ClassLoader classLoader)
+  {
+    Map<Path, ConfigMXBean> map = _environmentConfigs.get(classLoader);
+    if (map == null)
+      return Collections.emptyList();
+    return Collections.unmodifiableCollection(map.values());
+  }
+  
+  private Path _path;
+  private String _url;
+  private long _length;
+  private long _lastModified;
+  private long _crc64 = -1;
+  
+  ConfigAdmin(Path path)
+  {
+    _path = path;
+    
+    // caching for efficiency... can Path attributes change?
+    _url = _path.getURL();
+    _length = _path.getLength();
+    _lastModified = _path.getLastModified();
+    _crc64 = _path.getCrc64();
   }
 
   @Override
-  public Path []getPaths()
+  public Path getPath()
   {
-    Path []array = new Path[_paths.size()];
-    _paths.toArray(array);
-    return array;
+    return _path;
   }
-  
-  @Override
-  public String getConfig(String pathName)
+
+  public long getLastModified()
   {
-    Path path = Vfs.lookup(pathName);
-    
-    if (! _paths.contains(path)) {
-      log.fine(L.l("Attempt to get resource denied: {0} is not a recognized config file.", 
-                   path.getNativePath()));
-      return null;
-    }
-    
-    if (! path.exists()) {
-      log.fine(L.l("Attempt to get resource failed: {0} does not exist.", 
-                   path.getNativePath()));
-      return null;
-    }
-    
-    if (! path.canRead()) {
-      log.fine(L.l("Attempt to get resource failed: {0} can not be read.", 
-                   path.getNativePath()));
-      return null;
-    }
-    
-    CharBuffer buffer = new CharBuffer(1024);
-    
-    ReadStream reader = null;
-    
-    try {
-      reader = path.openRead();
-      reader.readAll(buffer, (int)path.getLength());
-    } catch (Exception e) {
-      log.log(Level.FINE, L.l("Attempt to get resource failed: {0} can not be read.", 
-                              path.getNativePath()), e);
-      return null;
-    } finally {
-      IoUtil.close(reader);
-    }
-    
-    return buffer.toString();
+    return _lastModified;
+  }
+
+  public long getLength()
+  {
+    return _length;
+  }
+
+  public long getCrc64()
+  {
+    return _crc64;
   }
 
   @Override
   public String getName()
   {
-    return null;
+    return _url;
   }
 
   void register()

@@ -7,9 +7,8 @@
  * notice unmodified.
  *
  * Resin Open Source is free software; you can redistribute it and/or modify
- * it under the terms of the GNU General Public License as published by
- * the Free Software Foundation; either version 2 of the License, or
- * (at your option) any later version.
+ * it under the terms of the GNU General Public License version 2
+ * as published by the Free Software Foundation.
  *
  * Resin Open Source is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
@@ -24,7 +23,7 @@
  *   59 Temple Place, Suite 330
  *   Boston, MA 02111-1307  USA
  *
- * @author Sam
+ * @author Scott Ferguson
  */
 
 package com.caucho.management.server;
@@ -32,11 +31,25 @@ package com.caucho.management.server;
 import com.caucho.jmx.Description;
 import com.caucho.vfs.Path;
 
-public interface ConfigMXBean extends ManagedObjectMXBean 
+/**
+ * MBean API for a parsed Config file.
+ *
+ * <pre>
+ * resin:type=Config,name="path to file"
+ * </pre>
+ */
+@Description("A parsed Config file")
+public interface ConfigMXBean extends ManagedObjectMXBean
 {
-  @Description("The configuration path")
-  public Path []getPaths();
-  
-  @Description("The configuration contents")
-  public String getConfig(String path);
+  @Description("Path to the config")
+  public Path getPath();
+
+  @Description("Last modified date")
+  public long getLastModified();
+
+  @Description("Length of file, in bytes")
+  public long getLength();
+
+  @Description("CRC-64 of file")
+  public long getCrc64();
 }

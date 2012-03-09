@@ -32,28 +32,28 @@ echo "</ul>\n";
 <div class='section'>
 <table class="data" width='100%'>
   <tr title="<?= gettext('The server id used when starting this instance of Resin, the value of \'-server\'.')?>">
-    <th scope="row"><?= gettext('Server id:')?></th>
-    <td><?= $g_server->Id ? $g_server->Id : '""' ?></td>
+    <th width="25%" scope="row"><?= gettext('Server id:')?></th>
+    <td width="75%"><?= $g_server->Id ? $g_server->Id : '""' ?></td>
   </tr>
 
   <tr title="<?= gettext('The configuration file used when starting this instance of Resin, the value of \'-conf\'.')?>">
-    <th scope="row"><?= gettext('Version:')?></th>
-    <td><?= $g_resin->Version ?></td>
+    <th width="25%" scope="row"><?= gettext('Version:')?></th>
+    <td width="75%"><?= $g_resin->Version ?></td>
   </tr>
 
   <tr title="<?= gettext('The configuration file used when starting this instance of Resin, the value of \'-conf\'.')?>">
-    <th scope="row"><?= gettext('Config file:')?></th>
-    <td><?= $g_resin->ConfigFile ?></td>
+    <th width="25%" scope="row"><?= gettext('Config file:')?></th>
+    <td width="75%"><?= $g_resin->ConfigFile ?></td>
   </tr>
 
   <tr title="<?= gettext('The Resin home directory used when starting this instance of Resin. This is the location of the Resin program files.')?>">
-   <th scope="row"><?= gettext('Resin home:')?></th>
-    <td><?= $g_resin->ResinHome ?></td>
+   <th width="25%" scope="row"><?= gettext('Resin home:')?></th>
+    <td width="75%"><?= $g_resin->ResinHome ?></td>
   </tr>
 
   <tr title="<?= gettext('The resin root directory used when starting this instance of Resin. This is the root directory of the web server files.')?>">
-    <th scope="row"><?= gettext('Resin root:')?></th>
-    <td><?= $g_resin->RootDirectory ?></td>
+    <th width="25%" scope="row"><?= gettext('Resin root:')?></th>
+    <td width="75%"><?= $g_resin->RootDirectory ?></td>
   </tr>
   </table>
 <?php
@@ -80,14 +80,14 @@ echo "</ul>\n";
   -->
   
 <div id='server'>
-<h2><?= gettext('Configuration Files')?></h2>
-
+<h2><?= gettext('Server Configuration')?></h2>
+<div class="section">
 <!-- XML config -->
 <?php
-
-display_config($g_server);
-
+  $resin_mbean = $g_mbean_server->lookup("resin:type=Resin");
+  display_config($resin_mbean);
 ?>
+</div> <!-- section -->
 </div> <!-- server -->
 
 <!--
@@ -98,11 +98,10 @@ display_config($g_server);
 
 <?php
 $cluster = $g_server->Cluster;
-
 $cluster_name = empty($cluster->Name) ? "default" : $cluster->Name;
 
 echo "<h1>" . gettext('Cluster:') . " $cluster_name</h1>";
-echo "<div class='section'>";
+echo "<div class='section'>\n";
 
 $servers = $cluster->Servers;
 
@@ -116,7 +115,6 @@ $hosts = $g_mbean_server->query("resin:*,type=Host");
 usort($hosts, "sort_host");
 
 foreach ($hosts as $host) {
-
   $hostName = empty($host->HostName) ? "default" : $host->HostName;
 ?>
 
@@ -125,14 +123,15 @@ foreach ($hosts as $host) {
 
   <table class='data' width='100%'>
   <tr>
-    <th class='item' scope="row">root-directory</th>
-    <td><?= $host->RootDirectory ?></td>
+    <th width="25%" class='item' scope="row">root-directory</th>
+    <td width="75%"><?= $host->RootDirectory ?></td>
   </tr>
   </table>
 
 <?php
 
 echo "<h3>" . gettext('WebApps') . "</h3>\n";
+echo "<div class='section'>\n";
 
 $webapps = $host->WebApps;
 
@@ -143,31 +142,32 @@ foreach ($webapps as $webapp) {
   $persistent_store = $session->PersistentStore;
 ?>
 
-  <p />
+  <h3><span id='sw_webapp_<?= ${count} ?>' class='switch'> </span><?= $webapp->Name ?></h3>
+  <div class="toggle-sw_webapp_<?= ${count} ?>">
   <table class='data' width='100%'>
   <tr>
-  	<th class='group' scope='row'>context-path</th>
-  	<td>
+  	<th width="25%" class='group' scope='row'>context-path</th>
+  	<td width="75%">
        <?= empty($webapp->ContextPath) ? "/" : $webapp->ContextPath ?>
     </td>
   </tr>
   <tr>
-    <th class='item' width='25%' scope="row">root-directory</th>
-    <td>
+    <th width="25%" class='item' width='25%' scope="row">root-directory</th>
+    <td width="75%">
        <?= $webapp->RootDirectory ?>
     </td>
   </tr>
 
   <tr>
-    <th class='item' scope="row">session-timeout</th>
-    <td>
+    <th width="25%" class='item' scope="row">session-timeout</th>
+    <td width="75%">
        <?= $session->SessionTimeout / 1000 ?>s
     </td>
   </tr>
 
   <tr>
-    <th class='item' scope="row">session-max</th>
-    <td>
+    <th width="25%" class='item' scope="row">session-max</th>
+    <td width="75%">
        <?= $session->SessionMax ?>
     </td>
   </tr>
@@ -175,29 +175,42 @@ foreach ($webapps as $webapp) {
 <?php if ($persistent_store) { ?>
 
   <tr>
-    <th class='item' scope="row">persistent-store</th>
-    <td>
+    <th width="25%" class='item' scope="row">persistent-store</th>
+    <td width="75%">
        <?= $persistent_store->StoreType ?>
     </td>
   </tr>
 
   <tr>
-    <th class='item' scope="row">save-mode</th>
-    <td>
+    <th width="25%" class='item' scope="row">save-mode</th>
+    <td width="75%">
        <?= $session->SaveMode ?>
     </td>
   </tr>
 
 <?php } // persistent
-  echo "</table>";
-
-   } // webapps
-   echo "</div>";
+    echo "</table>";
+  
+    if ($webapp->Configs) {
+      echo "<h4>WebApp Configuration</h4>\n";
+      echo "<div class='section'>\n";
+      display_config($webapp);
+      echo "</div>";
+    }
+    
+    echo "</div>\n"; // toggle-sw_webapp    
+  
+    $count++;
+    
+  } // webapps
+  
+  echo "</div>"; // section under webapps
+  echo "</div>"; // section under host url
  } // hosts
- echo "</div>";
+ 
+ echo "</div>"; // section under cluster
 
 ?>
-
 </div> <!-- webapps -->
 
 <!--
@@ -209,6 +222,9 @@ foreach ($webapps as $webapp) {
 <?php
 
 $databases = $g_mbean_server->query("resin:type=Database,*");
+
+echo "<h2>Database Configuration</h2>\n"
+echo "<div class='section'>\n";
 
 $count = 0;
 foreach ($databases as $db) {
@@ -227,29 +243,44 @@ foreach ($databases as $db) {
 echo "</div>";
 echo "</div>";
 
-function display_config($g_server)
+function display_config($parent_mbean)
 {
-  global $g_mbean_server;
-  
-  $config_mbean = $g_mbean_server->lookup("resin:type=Config");
-  $paths = $config_mbean->Paths;
+  $configs = $parent_mbean->Configs;
   
   $count = 0;
-  foreach ($paths as $path) {
+  foreach ($configs as $config) {
     $count++;
     
-    $url = $path->getURL();
+    $path = $config->Path;
+    $hash = $config->hashCode();
     
-    $data = $config_mbean->getConfig($url);
-    
-    echo "<h3>";
-    echo "<span id='sw_config_${count}' class='switch'></span> ";
-    echo $url
+    echo "<h3><span id='sw_$hash' class='switch'></span> ";
+    echo "$path"
     echo "</h3>\n";
   
-    echo "<pre class='toggle-sw_config_${count}'>";
-    echo htmlspecialchars($data);
-    echo "</pre>";
+    echo "<div class='section toggle-sw_$hash'>";
+    ?>
+    
+    <div class="section">
+      <table class="data" width='100%'>
+        <tr title="<?= gettext('The length of the file in bytes.')?>">
+          <th width="25%" scope="row"><?= gettext('Length')?></th>
+          <td width="75%"><?= $config->Length > 0 ? $config->Length : "" ?></td>
+        </tr>
+        <tr title="<?= gettext('The last modified date of the file.')?>">
+          <th width="25%" scope="row"><?= gettext('Last Modified')?></th>
+          <td width="75%"><?= $config->LastModified> 0 ? date("Y-m-d H:i:s", $config->LastModified/1000) : gettext('Unavailable') ?></td>
+        </tr>
+        <tr title="<?= gettext('The crc of the file.')?>">
+          <th width="25%" scope="row"><?= gettext('CRC-64')?></th>
+          <td width="75%"><?= $config->Crc64 != 0 ? $config->Crc64 : gettext('Unavailable') ?></td>
+        </tr>
+      </table>
+		</div>
+		  
+    <?php
+   
+	  echo "</div>";
   }
   
 }

@@ -58,9 +58,7 @@ import com.caucho.config.types.FileVar;
 import com.caucho.config.xml.XmlConfigContext;
 import com.caucho.el.EL;
 import com.caucho.el.EnvironmentContext;
-import com.caucho.loader.Environment;
-import com.caucho.loader.EnvironmentClassLoader;
-import com.caucho.loader.EnvironmentLocal;
+import com.caucho.loader.*;
 import com.caucho.relaxng.CompactVerifierFactoryImpl;
 import com.caucho.relaxng.Schema;
 import com.caucho.relaxng.Verifier;
@@ -87,9 +85,6 @@ public class Config {
   private static final EnvironmentLocal<ConfigProperties> _envProperties
     = new EnvironmentLocal<ConfigProperties>();
   
-  private static final EnvironmentLocal<ConfigAdmin> _configAdmin = 
-    new EnvironmentLocal<ConfigAdmin>();
-
   // the context class loader of the config
   private ClassLoader _classLoader;
 
@@ -484,7 +479,7 @@ public class Config {
     }
     
     if (path != null) {
-      getAdmin().addPath(path);
+      ConfigAdmin.registerPath(path);
     }
 
     return doc;
@@ -896,23 +891,6 @@ public class Config {
     }
   }
   
-  private ConfigAdmin getAdmin()
-  {
-    ConfigAdmin admin = _configAdmin.getLevel(_classLoader);
-    if (admin == null) {
-      admin = new ConfigAdmin();
-      admin.register();
-      _configAdmin.set(admin, _classLoader);
-    }
-      
-    return admin;
-  }
-  
-  public static ConfigAdmin getAdmin(ClassLoader loader)
-  {
-    return _configAdmin.get(loader);
-  }
-
   static class ConfigProperties {
     private ConfigProperties _parent;
     private HashMap<String,Object> _properties = new HashMap<String,Object>(8);
