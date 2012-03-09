@@ -426,7 +426,8 @@ function print_pdf_select()
 {
   global $g_periods;
   global $g_period;
-  
+  global $g_server_index;
+
   $stat = get_stats_service();
   
   if (! require_professional()) {
@@ -440,6 +441,7 @@ function print_pdf_select()
  echo "<form action='pdf-gen.php' method='get' style='display:inline;'>";
   echo "<input type='hidden' name='snapshot' value='true'/>\n";
   echo "<input type='hidden' name='report' value='Snapshot'/>\n";
+  echo "<input type='hidden' name='s' value='$g_server_index'/>\n";
   echo "<div>\n";
   echo "<div style='display:inline-block;float:left;padding-right:0.5em;'>\n";
   echo "<input type='checkbox' id='profiling_enabled' value='true'/> ";
