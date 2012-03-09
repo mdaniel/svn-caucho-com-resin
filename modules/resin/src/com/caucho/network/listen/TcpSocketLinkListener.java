@@ -1511,8 +1511,9 @@ public class TcpSocketLinkListener
         
         if (keepaliveThreadCount > 32) {
           // throttle the thread keepalive when heavily loaded to save threads
-          if (getLauncher().isThreadHigh()) {
-            // when thread max, release the thread immediately
+          if (isAsyncThrottle()) {
+            // when async throttle is active move the thread to async
+            // immediately
             return 0;
           }
           else if (timeout >= 100) {

@@ -280,7 +280,7 @@ abstract public class AbstractThreadLauncher2 extends AbstractTaskWorker2 {
     int threadCount = _threadCount.get();
     int startCount = _startingCount.get();
     
-    return _threadMax <= 2 * (threadCount + startCount);
+    return _threadMax < 2 * (threadCount + startCount);
   }
   
   /**
@@ -390,7 +390,7 @@ abstract public class AbstractThreadLauncher2 extends AbstractTaskWorker2 {
     return false;
   }
   
-  public boolean isIdleLow()
+  public final boolean isIdleLow()
   {
     return _idleCount.get() < _idleMin;
   }

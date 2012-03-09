@@ -941,10 +941,12 @@ public class TcpSocketLink extends AbstractSocketLink
         }
 
         if (_listener.isAsyncThrottle()) {
-          result = handleRequests(Task.KEEPALIVE);
+          _state = _state.toActiveWithKeepalive(this);
+          
+          result = handleRequests(false);
         }
         else {
-          result = handleRequests(Task.ACCEPT);
+          result = handleRequests(true);
         }
       } finally {
         launcher.onChildIdleBegin();
@@ -969,7 +971,7 @@ public class TcpSocketLink extends AbstractSocketLink
   RequestState handleKeepaliveTask()
     throws IOException
   {
-    RequestState state = handleRequests(Task.KEEPALIVE);
+    RequestState state = handleRequests(true);
     
     if (state.isAcceptAllowed()) {
       return handleAcceptTask();
@@ -1049,7 +1051,7 @@ public class TcpSocketLink extends AbstractSocketLink
           
           closeAsync();
 
-          return handleRequests(Task.KEEPALIVE);
+          return handleRequests(false);
         }
         else {
           closeAsync();
@@ -1116,7 +1118,7 @@ public class TcpSocketLink extends AbstractSocketLink
   /**
    * Handles a new connection/socket from the client.
    */
-  private RequestState handleRequests(Task taskType)
+  private RequestState handleRequests(boolean isDataAvailable)
     throws IOException
   {
     Thread thread = getThread();
@@ -1125,9 +1127,9 @@ public class TcpSocketLink extends AbstractSocketLink
 
     try {
       // boolean isKeepalive = false; // taskType == Task.KEEPALIVE;
-      boolean isKeepalive = taskType == Task.KEEPALIVE && ! _state.isKeepalive();
+      // boolean isDataAvailable = taskType == Task.KEEPALIVE && ! _state.isKeepalive();
 
-      result = handleRequestsImpl(isKeepalive);
+      result = handleRequestsImpl(isDataAvailable);
     } catch (ClientDisconnectException e) {
       _listener.addLifetimeClientDisconnectCount();
 
@@ -1196,7 +1198,7 @@ public class TcpSocketLink extends AbstractSocketLink
   /**
    * Handles a new connection/socket from the client.
    */
-  private RequestState handleRequestsImpl(boolean isKeepalive)
+  private RequestState handleRequestsImpl(boolean isDataAvailable)
     throws IOException
   {
     RequestState result;
@@ -1211,7 +1213,7 @@ public class TcpSocketLink extends AbstractSocketLink
       // clear the interrupted flag
       Thread.interrupted();
 
-      if (isKeepalive
+      if (! isDataAvailable
           && (result = processKeepalive()) != RequestState.REQUEST_COMPLETE) {
         return result;
       }
@@ -1219,20 +1221,20 @@ public class TcpSocketLink extends AbstractSocketLink
       getListener().addLifetimeRequestCount();
       
       try {
-        result = handleRequest(isKeepalive);
+        result = handleRequest();
       } finally {
         if (! result.isAsyncOrDuplex()) {
           closeAsyncIfNotAsync();
         }
       }
       
-      isKeepalive = true;
+      isDataAvailable = false;
     } while (result.isRequestKeepalive() && _state.isKeepaliveAllocated());
 
     return result;
   }
   
-  private RequestState handleRequest(boolean isKeepalive)
+  private RequestState handleRequest()
     throws IOException
   {
     dispatchRequest();
