@@ -100,17 +100,21 @@ public class PdfReportCommand extends AbstractManagementCommand
     boolean isWatchdog = args.getArgBoolean("-watchdog", false);
     boolean isLocal = args.getArgBoolean("-local", false);
     String localDir = args.getArg("-local-dir");
+    
+    if (localDir == null)
+      localDir = System.getProperty("user.dir");
+
     boolean isReturnPdf = isLocal || localDir != null;
 
     PdfReportQueryReply result = managerClient.pdfReport(path,
-                                                           report,
-                                                           period,
-                                                           logDirectory,
-                                                           profileTime,
-                                                           samplePeriod,
-                                                           isSnapshot,
-                                                           isWatchdog,
-                                                           isReturnPdf);
+                                                         report,
+                                                         period,
+                                                         logDirectory,
+                                                         profileTime,
+                                                         samplePeriod,
+                                                         isSnapshot,
+                                                         isWatchdog,
+                                                         isReturnPdf);
 
     System.out.println(result.getMessage());
 
