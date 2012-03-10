@@ -49,6 +49,11 @@ public final class FreeRing<T> {
   {
     _ringQueue = new RingValueQueue<T>(capacity);
   }
+
+  public int getSize()
+  {
+    return _ringQueue.getSize();
+  }
   
   /**
    * Try to get an object from the free list.  Returns null if the free list

@@ -29,6 +29,7 @@
 
 package com.caucho.server.cluster;
 
+import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.atomic.AtomicLong;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -1111,12 +1112,20 @@ public class ServletService
     return _systemStore;
   }
 
+  private AtomicInteger _httpBufferCount = new AtomicInteger();
+  
   public HttpBufferStore allocateHttpBuffer()
   {
     HttpBufferStore buffer = _httpBufferFreeList.allocate();
 
     if (buffer == null) {
       buffer = new HttpBufferStore(getUrlLengthMax());
+      
+      int value = _httpBufferCount.incrementAndGet();
+      
+      if (value > 256) {
+        System.out.println("BUF: " + value);
+      }
     }
 
     return buffer;
@@ -1124,7 +1133,9 @@ public class ServletService
 
   public void freeHttpBuffer(HttpBufferStore buffer)
   {
-    _httpBufferFreeList.free(buffer);
+    if (! _httpBufferFreeList.free(buffer)) {
+      System.out.println("FREE_FAILED: " + _httpBufferFreeList.getSize());
+    }
   }
 
   /**

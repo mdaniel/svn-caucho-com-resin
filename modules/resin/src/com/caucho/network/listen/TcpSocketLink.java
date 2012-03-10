@@ -670,15 +670,10 @@ public class TcpSocketLink extends AbstractSocketLink
   void requestTimeoutKeepalive()
   {
     if (_requestStateRef.get().toWakeKeepalive(_requestStateRef)) {
-      if (! getLauncher().offerResumeTask(getKeepaliveTimeoutTask())) {
+      if (! getLauncher().submitResumeTask(getKeepaliveTimeoutTask())) {
         log.severe(L.l("Schedule failed for {0}", this));
       }
     }
-  }
-  
-  void wakeScheduler()
-  {
-    getLauncher().wakeScheduler();
   }
   
   /**
