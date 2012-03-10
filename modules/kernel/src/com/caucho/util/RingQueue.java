@@ -167,12 +167,10 @@ public class RingQueue<T extends RingItem> {
         }
       }
       
-      /*
       if (((head + ring.length - index) & mask) < _updateSize) {
         // someone else acked us
         return;
       }
-      */
     }
   }
  
@@ -185,19 +183,12 @@ public class RingQueue<T extends RingItem> {
     final AtomicInteger headRef = _head;
     final int mask = _mask;
     
-    int retryCount = 4;
-    
     while (true) {
       tailAlloc = tailAllocRef.get();
       int head = headRef.get();
       
       if (head == tailAlloc) {
-        if (head == _headAlloc.get()) {
-          return null;
-        }
-        else if (retryCount-- < 0) {
-          return null;
-        }
+        return null;
       }
       
       nextTail = (tailAlloc + 1) & mask;
@@ -241,12 +232,11 @@ public class RingQueue<T extends RingItem> {
           break;
         }
       }
-      /*
+
       if (((tail + ring.length - index) & mask) < _updateSize) {
         // someone else acked us
-        return;
+        break;
       }
-      */
     }
     
     wakeAvailable();
