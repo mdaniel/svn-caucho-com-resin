@@ -798,7 +798,7 @@ public class TcpSocketLink extends AbstractSocketLink
     }
   }
   
-  AtomicInteger _threadCount = new AtomicInteger();
+  static AtomicInteger _threadCount = new AtomicInteger();
 
   /**
    * Completion processing at the end of the thread
