@@ -189,6 +189,7 @@ public class RingQueue<T extends RingItem> {
           return null;
         }
         else {
+          completeOffer(head);
           continue;
         }
       }
