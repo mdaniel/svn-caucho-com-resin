@@ -129,7 +129,7 @@ public class RingValueQueue<T> {
       int nextHeadAlloc = (headAlloc + 1) & mask;
       
       if (nextHeadAlloc == tail) {
-        if (finishOffer()) {
+        if (finishPoll()) {
         }
         else if (expireTime <= 0) {
           return false;
@@ -213,7 +213,9 @@ public class RingValueQueue<T> {
       int head = headRef.get();
       
       if (head == tailAlloc) {
-        return null;
+        if (! finishPoll()) {
+          return null;
+        }
       }
       
       nextTail = (tailAlloc + 1) & mask;
@@ -229,7 +231,24 @@ public class RingValueQueue<T> {
       }
     }
   }
+  
+  private final boolean finishPoll()
+  {
+    final AtomicInteger tailAllocRef = _tailAlloc;
+    final AtomicInteger tailRef = _tail;
     
+    int tail = tailRef.get();
+    int headAlloc = tailAllocRef.get();
+    
+    if (tail != headAlloc && ! _ring[tail].isSet()) {
+      completePoll(tail);
+      return true;
+    }
+    else {
+      return false;
+    }
+  }
+
   private void completePoll(final int index)
   {
     final AtomicInteger tailRef = _tail;
