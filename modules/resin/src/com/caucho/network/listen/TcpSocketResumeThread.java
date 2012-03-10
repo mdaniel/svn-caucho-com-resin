@@ -59,7 +59,7 @@ class TcpSocketResumeThread implements Runnable
       launcher.onChildIdleBegin();
       launcher.onChildThreadResumeBegin();
       
-      launcher.handleTasks();
+      launcher.handleTasks(true);
     } finally {
       launcher.onChildThreadResumeEnd();
       launcher.onChildIdleEnd();

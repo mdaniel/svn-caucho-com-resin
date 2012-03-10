@@ -45,16 +45,8 @@ abstract class ConnectionResumeTask extends ConnectionTask {
   }
 
   @Override
-  public final void run()
+  protected boolean isResumeTask()
   {
-    SocketLinkThreadLauncher launcher = getLauncher();
-    
-    launcher.onChildIdleEnd();
-
-    try {
-      super.run();
-    } finally {
-      launcher.onChildIdleBegin();
-    }
+    return true;
   }
 }

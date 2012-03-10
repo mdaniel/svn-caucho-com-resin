@@ -50,6 +50,8 @@ class AcceptTask extends ConnectionTask {
   final RequestState doTask()
     throws IOException
   {
-    return getSocketLink().handleAcceptTaskImpl();
+    // return getSocketLink().handleAcceptTaskImpl();
+    
+    return RequestState.REQUEST_COMPLETE;
   }
 }

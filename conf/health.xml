@@ -482,8 +482,8 @@
 
     <graph name="Request Active">
       <meter>Resin|Http|Request Active</meter>
-      <meter>Resin|Port|Keepalive Async Active</meter>
       <meter>Resin|Port|Keepalive Thread Active</meter>
+      <meter>Resin|Port|Keepalive Async Active</meter>
     </graph>
 
     <graph name="Request Count">

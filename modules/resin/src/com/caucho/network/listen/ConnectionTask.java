@@ -68,6 +68,11 @@ abstract class ConnectionTask implements Runnable {
     return _launcher;
   }
   
+  protected boolean isResumeTask()
+  {
+    return false;
+  }
+  
   /**
    * Handles the read request for the connection
    */
@@ -75,9 +80,22 @@ abstract class ConnectionTask implements Runnable {
     throws IOException;
 
   @Override
-  public void run()
+  public final void run()
   {
-    runThread();
+    SocketLinkThreadLauncher launcher = getLauncher();
+    boolean isResume = isResumeTask();
+    
+    try {
+      if (isResume) {
+        launcher.onChildIdleEnd();
+      }
+
+      runThread();
+    } finally {
+      if (isResume) {
+        launcher.onChildIdleBegin();
+      }
+    }
   }
 
   public final void runThread()
@@ -90,6 +108,15 @@ abstract class ConnectionTask implements Runnable {
 
     try {
       result = doTask();
+      
+      if (result != null && result.isAcceptAllowed()) {
+        if (isResumeTask()) {
+          result = _socketLink.handleAcceptTask();
+        }
+        else {
+          result = _socketLink.handleAcceptTaskImpl();
+        }
+      }
     } catch (OutOfMemoryError e) {
       String msg = "TcpSocketLink OutOfMemory";
 

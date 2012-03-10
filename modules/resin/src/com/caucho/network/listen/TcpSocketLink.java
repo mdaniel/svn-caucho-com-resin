@@ -676,6 +676,11 @@ public class TcpSocketLink extends AbstractSocketLink
     }
   }
   
+  void wakeScheduler()
+  {
+    getLauncher().wakeScheduler();
+  }
+  
   /**
    * Wake a connection from a comet suspend.
    */
@@ -880,17 +885,9 @@ public class TcpSocketLink extends AbstractSocketLink
                          + " " + reqState + " " + _requestStateRef.get() + " " + this);
     }
   }
-
-  /**
-   * 
-   */
-  public void doTask()
-  {
-    // TODO Auto-generated method stub
-    
-  }
   
-  private RequestState handleAcceptTask()
+  @Friend(ConnectionTask.class)
+  RequestState handleAcceptTask()
     throws IOException
   {
     getLauncher().onChildIdleBegin();
@@ -968,6 +965,9 @@ public class TcpSocketLink extends AbstractSocketLink
   RequestState handleKeepaliveTask()
     throws IOException
   {
+    return handleRequests(true);
+    
+    /*
     RequestState state = handleRequests(true);
     
     if (state.isAcceptAllowed()) {
@@ -976,6 +976,7 @@ public class TcpSocketLink extends AbstractSocketLink
     else {
       return state;
     }
+    */
   }
 
   @Friend(KeepaliveTimeoutTask.class)
@@ -984,7 +985,9 @@ public class TcpSocketLink extends AbstractSocketLink
   {
     close();
     
-    return handleAcceptTask();
+    // return handleAcceptTask();
+    
+    return RequestState.CLOSED;
   }
 
   @Friend(DestroyTask.class)

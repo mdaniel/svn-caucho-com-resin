@@ -58,7 +58,7 @@ class TcpSocketAcceptThread implements Runnable
       launcher.onChildIdleBegin();
       launcher.onChildThreadLaunchBegin();
       
-      launcher.handleTasks();
+      launcher.handleTasks(false);
     } finally {
       launcher.onChildThreadLaunchEnd();
       launcher.onChildIdleEnd();

@@ -29,6 +29,8 @@
 
 package com.caucho.network.listen;
 
+import java.util.concurrent.atomic.AtomicInteger;
+
 import com.caucho.env.thread.AbstractThreadLauncher;
 import com.caucho.env.thread.ThreadPool;
 import com.caucho.inject.Module;
@@ -50,6 +52,8 @@ class SocketLinkThreadLauncher extends AbstractThreadLauncher
     = new RingValueQueue<ConnectionTask>(16 * 1024);
   
   private String _threadName;
+  
+  private final AtomicInteger _resumeStartCount = new AtomicInteger();
 
   SocketLinkThreadLauncher(TcpSocketLinkListener listener)
   {
@@ -74,11 +78,23 @@ class SocketLinkThreadLauncher extends AbstractThreadLauncher
   {
     _resumeTaskQueue.offer(task);
     
-    if (! isThreadMax()) {
-      _threadPool.schedule(new TcpSocketResumeThread(this));
-    }
+    wakeResumeTask(1);
     
     return true;
+  }
+  
+  boolean submitResumeTask(ConnectionTask task)
+  {
+    _resumeTaskQueue.offer(task);
+    
+    wakeResumeTask(1);
+    
+    return true;
+  }
+
+  void wakeScheduler()
+  {
+    _threadPool.wakeScheduler();
   }
   
   @Override
@@ -108,25 +124,70 @@ class SocketLinkThreadLauncher extends AbstractThreadLauncher
   /**
    * Cycles through task from a thread. 
    */
-  void handleTasks()
+  void handleTasks(boolean isResume)
   {
-    while (true) {
-      AcceptTask acceptTask = _acceptTaskQueue.poll();
+    int retryMax = 128;
+    int retryCount = retryMax;
+    
+    while (retryCount-- >= 0) {
+      ConnectionTask task = _acceptTaskQueue.poll();
       
-      if (acceptTask != null) {
-        acceptTask.run();
-        continue;
+      if (task == null) {
+        if (! isResume) {
+          isResume = true;
+          _resumeStartCount.incrementAndGet();
+        }
+        
+        task = _resumeTaskQueue.poll();
       }
       
-      ConnectionTask resumeTask = _resumeTaskQueue.poll();
-
-      if (resumeTask!= null) {
-        resumeTask.run();
-        continue;
+      if (isResume) {
+        isResume = false;
+        _resumeStartCount.decrementAndGet();
       }
       
-      return;
+      if (! _resumeTaskQueue.isEmpty()) {
+        wakeResumeTask(4);
+      }
+      
+      if (task != null) {
+        retryCount = retryMax;
+        task.run();
+      }
     }
+  }
+
+  void wakeResumeTask(int min)
+  {
+    int startCount = 0;
+
+    while (startCount < min) {
+      if (isThreadMax()) {
+        return;
+      }
+    
+      int size = _resumeTaskQueue.getSize();
+      if (size < min) {
+        min = size;
+      }
+    
+      int resumeCount = _resumeStartCount.get();
+      
+      if (min <= resumeCount) {
+        return;
+      }
+      
+      if (_resumeStartCount.compareAndSet(resumeCount, resumeCount + 1)) {
+        startCount++;
+
+        _threadPool.schedule(new TcpSocketResumeThread(this));
+      }
+    }
+  }
+  
+  void addResumeStart()
+  {
+    _resumeStartCount.incrementAndGet();
   }
 
 
