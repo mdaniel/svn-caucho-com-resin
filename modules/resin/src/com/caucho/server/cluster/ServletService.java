@@ -1113,6 +1113,7 @@ public class ServletService
   }
 
   private AtomicInteger _httpBufferCount = new AtomicInteger();
+  private AtomicInteger _httpBufferFree = new AtomicInteger();
   
   public HttpBufferStore allocateHttpBuffer()
   {
@@ -1127,6 +1128,9 @@ public class ServletService
         System.out.println("BUF: " + value);
       }
     }
+    else {
+      _httpBufferFree.decrementAndGet();
+    }
 
     return buffer;
   }
@@ -1138,7 +1142,11 @@ public class ServletService
       int head = _httpBufferFreeList.getHead();
       int tail = _httpBufferFreeList.getTail();
       
-      System.out.println("FREE_FAILED: " + size + " " + head + " " + tail);
+      System.out.println("FREE_FAILED: " + _httpBufferFree.get()
+                         + " " + size + " " + head + " " + tail);
+    }
+    else {
+      _httpBufferFree.incrementAndGet();
     }
   }
 
