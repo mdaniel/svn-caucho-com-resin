@@ -1124,7 +1124,7 @@ public class ServletService
       int free = _httpBufferFree.get();
       
       if (free > 10) {
-        System.out.println("BUF: " + value + " " + _httpBufferFree.get()
+        System.out.println("BUF: " + value + " " + free
                            + " " + _httpBufferFreeList.getHead()
                            + " " + _httpBufferFreeList.getTail());
       }

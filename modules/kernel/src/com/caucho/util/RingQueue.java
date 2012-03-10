@@ -171,18 +171,24 @@ public class RingQueue<T extends RingItem> {
     final AtomicInteger headRef = _head;
     final int mask = _mask;
     
-    do {
+    while (true) {
       tailAlloc = tailAllocRef.get();
       int head = headRef.get();
       
       if (head == tailAlloc) {
-        return null;
+        if (head == _headAlloc.get()) {
+          return null;
+        }
+        else {
+          continue;
+        }
       }
       
       nextTail = (tailAlloc + 1) & mask;
-    } while (! tailAllocRef.compareAndSet(tailAlloc, nextTail));
-    
-    return _ring[tailAlloc];
+      if (tailAllocRef.compareAndSet(tailAlloc, nextTail)) {
+        return _ring[tailAlloc];
+      }
+    }
   }
   
   public final void completePoll(final T item)
