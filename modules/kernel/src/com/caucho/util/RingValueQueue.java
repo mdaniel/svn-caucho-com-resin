@@ -129,7 +129,9 @@ public class RingValueQueue<T> {
       int nextHeadAlloc = (headAlloc + 1) & mask;
       
       if (nextHeadAlloc == tail) {
-        if (expireTime <= 0) {
+        if (finishOffer()) {
+        }
+        else if (expireTime <= 0) {
           return false;
         }
         else {
@@ -141,7 +143,7 @@ public class RingValueQueue<T> {
         item.set(value);
         
         if (! headRef.compareAndSet(headAlloc, nextHeadAlloc)) {
-          completeOffer(headAlloc);
+          finishOffer(headAlloc);
         }
         
         return true;
@@ -149,7 +151,24 @@ public class RingValueQueue<T> {
     }
   }
   
-  private void completeOffer(final int index)
+  private final boolean finishOffer()
+  {
+    final AtomicInteger headAllocRef = _headAlloc;
+    final AtomicInteger headRef = _head;
+    
+    int head = headRef.get();
+    int headAlloc = headAllocRef.get();
+    
+    if (head != headAlloc && _ring[head].isSet()) {
+      finishOffer(head);
+      return true;
+    }
+    else {
+      return false;
+    }
+  }
+
+  private void finishOffer(final int index)
   {
     final AtomicInteger headRef = _head;
     final AtomicInteger headAllocRef = _headAlloc;
