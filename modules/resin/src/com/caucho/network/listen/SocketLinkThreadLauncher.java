@@ -162,7 +162,11 @@ class SocketLinkThreadLauncher extends AbstractThreadLauncher
     int startCount = 0;
 
     while (startCount < min) {
-      if (isThreadMax()) {
+      int threadCount = getThreadCount();
+      int startingCount = getStartingCount();
+      int resumeCount = _resumeStartCount.get();
+      
+      if (getThreadMax() <= threadCount + startingCount + resumeCount) {
         return;
       }
     
@@ -170,8 +174,6 @@ class SocketLinkThreadLauncher extends AbstractThreadLauncher
       if (size < min) {
         min = size;
       }
-    
-      int resumeCount = _resumeStartCount.get();
       
       if (min <= resumeCount) {
         return;

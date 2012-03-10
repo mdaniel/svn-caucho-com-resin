@@ -1125,7 +1125,7 @@ public class ServletService
       int value = _httpBufferCount.incrementAndGet();
       
       if (value > 256) {
-        System.out.println("BUF: " + value);
+        System.out.println("BUF: " + value + " " + _httpBufferFree.get());
       }
     }
     else {

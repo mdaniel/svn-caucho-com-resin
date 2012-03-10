@@ -793,12 +793,7 @@ public class TcpSocketLink extends AbstractSocketLink
     _thread = thread;
     
     _request.onAttachThread();
-    if (_threadCount.incrementAndGet() > 250) {
-      System.out.println("THR: " + _threadCount.get());
-    }
   }
-  
-  static AtomicInteger _threadCount = new AtomicInteger();
 
   /**
    * Completion processing at the end of the thread
@@ -810,10 +805,6 @@ public class TcpSocketLink extends AbstractSocketLink
     _thread = null;
     
     _request.onDetachThread();
-    if (_threadCount.decrementAndGet() < 25) {
-      System.out.println("THR-DEC: " + _threadCount.get());
-      
-    }
     
     if (log.isLoggable(Level.FINER)) {
       log.finer(this + " finish thread: " + Thread.currentThread().getName());

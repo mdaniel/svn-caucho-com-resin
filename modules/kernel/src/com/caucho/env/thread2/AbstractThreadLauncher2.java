@@ -272,7 +272,7 @@ abstract public class AbstractThreadLauncher2 extends AbstractTaskWorker2 {
 
   public boolean isThreadMax()
   {
-    return _threadMax <= _threadCount.get() && _startingCount.get() == 0;
+    return _threadMax <= (_threadCount.get() + _startingCount.get());
   }
   
   public boolean isThreadHigh()
