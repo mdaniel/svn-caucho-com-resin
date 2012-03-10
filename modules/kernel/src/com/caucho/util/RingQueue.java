@@ -110,6 +110,7 @@ public class RingQueue<T extends RingItem> {
     final AtomicInteger headAllocRef = _headAlloc;
     final AtomicInteger tailRef = _tail;
     final int mask = _mask;
+    int retry = 256;
     
     while (true) {
       int headAlloc = headAllocRef.get();
@@ -118,14 +119,13 @@ public class RingQueue<T extends RingItem> {
       int nextHeadAlloc = (headAlloc + 1) & mask;
       
       if (nextHeadAlloc == tail) {
-        if (_tail.get() != _tailAlloc.get()) {
-          completePoll(_tail.get());
+        if (! isWait) {
+          return null;
         }
-        else if (isWait) {
-          waitForAvailable(headAlloc, tail);
+        else if (_tail.get() != _tailAlloc.get() && retry-- >= 0) {
         }
         else {
-          return null;
+          waitForAvailable(headAlloc, tail);
         }
       }
       else if (headAllocRef.compareAndSet(headAlloc, nextHeadAlloc)) {
@@ -185,7 +185,7 @@ public class RingQueue<T extends RingItem> {
     final AtomicInteger headRef = _head;
     final int mask = _mask;
     
-    int retryCount = 1024;
+    int retryCount = 4;
     
     while (true) {
       tailAlloc = tailAllocRef.get();
@@ -197,10 +197,6 @@ public class RingQueue<T extends RingItem> {
         }
         else if (retryCount-- < 0) {
           return null;
-        }
-        else {
-          completeOffer(head);
-          continue;
         }
       }
       

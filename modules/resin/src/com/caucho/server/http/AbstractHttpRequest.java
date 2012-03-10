@@ -267,6 +267,10 @@ public abstract class AbstractHttpRequest extends AbstractProtocolConnection
   {
     HttpBufferStore httpBuffer = getHttpBufferStore();
     
+    if (httpBuffer == null) {
+      _httpBuffer = getServer().allocateHttpBuffer();
+    }
+    
     _hostHeader = null;
     _expect100Continue = false;
 
@@ -1437,7 +1441,6 @@ public abstract class AbstractHttpRequest extends AbstractProtocolConnection
   @Override
   public final void onAttachThread()
   {
-    _httpBuffer = getServer().allocateHttpBuffer();
   }
   
   @Override
