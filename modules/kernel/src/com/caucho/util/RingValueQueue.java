@@ -213,7 +213,7 @@ public class RingValueQueue<T> {
       int head = headRef.get();
       
       if (head == tailAlloc) {
-        if (! finishPoll()) {
+        if (! finishOffer()) {
           return null;
         }
       }
