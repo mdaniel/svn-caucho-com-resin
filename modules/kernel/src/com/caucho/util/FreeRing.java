@@ -60,9 +60,19 @@ public final class FreeRing<T> {
     return _ringQueue.getHead();
   }
   
+  public int getHeadAlloc()
+  {
+    return _ringQueue.getHeadAlloc();
+  }
+  
   public int getTail()
   {
     return _ringQueue.getTail();
+  }
+  
+  public int getTailAlloc()
+  {
+    return _ringQueue.getTailAlloc();
   }
   
   /**

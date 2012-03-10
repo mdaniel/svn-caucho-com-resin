@@ -86,9 +86,19 @@ public class RingQueue<T extends RingItem> {
     return _head.get();
   }
   
+  public int getHeadAlloc()
+  {
+    return _headAlloc.get();
+  }
+  
   public int getTail()
   {
     return _tail.get();
+  }
+  
+  public int getTailAlloc()
+  {
+    return _tailAlloc.get();
   }
   
   public final T beginOffer(boolean isWait)
