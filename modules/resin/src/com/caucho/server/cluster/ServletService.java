@@ -1120,13 +1120,16 @@ public class ServletService
     HttpBufferStore buffer = _httpBufferFreeList.allocate();
 
     if (buffer == null) {
-      buffer = new HttpBufferStore(getUrlLengthMax());
-      
       int value = _httpBufferCount.incrementAndGet();
+      int free = _httpBufferFree.get();
       
-      if (value > 256) {
-        System.out.println("BUF: " + value + " " + _httpBufferFree.get());
+      if (free > 10) {
+        System.out.println("BUF: " + value + " " + _httpBufferFree.get()
+                           + " " + _httpBufferFreeList.getHead()
+                           + " " + _httpBufferFreeList.getTail());
       }
+      
+      buffer = new HttpBufferStore(getUrlLengthMax());
     }
     else {
       _httpBufferFree.decrementAndGet();
