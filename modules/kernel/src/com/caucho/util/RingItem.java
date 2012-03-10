@@ -29,13 +29,17 @@
 
 package com.caucho.util;
 
+import java.util.concurrent.atomic.AtomicIntegerFieldUpdater;
+
 /**
  * Item for the disruptor.
  */
 public class RingItem
 {
+  private static final AtomicIntegerFieldUpdater<RingItem> _isRingValueUpdater;
+
   private final int _index;
-  private volatile boolean _isRingValue;
+  private volatile int _isRingValue = 0;
   
   protected RingItem(int index)
   {
@@ -49,28 +53,37 @@ public class RingItem
   
   public final boolean isRingValue()
   {
-    return _isRingValue;
+    return _isRingValue != 0;
   }
   
   public final void setRingValue()
   {
-    if (_isRingValue) {
+    int oldValue = _isRingValueUpdater.getAndSet(this, 1);
+    
+    if (oldValue != 0) {
       System.out.println("BAD-SET-RING:");
     }
-    _isRingValue = true;
   }
   
   public final void clearRingValue()
   {
-    if (! _isRingValue) {
+    int oldValue = _isRingValueUpdater.getAndSet(this, 0);
+    
+    if (oldValue == 0) {
       System.out.println("BAD-CLEAR-RING:");
     }
-    _isRingValue = false;
   }
 
   @Override
   public String toString()
   {
     return getClass().getSimpleName() + "[]";
+  }
+  
+  static {
+    AtomicIntegerFieldUpdater<RingItem> isRingValueUpdater
+      = AtomicIntegerFieldUpdater.newUpdater(RingItem.class, "_isRingValue");
+    
+    _isRingValueUpdater = isRingValueUpdater;
   }
 }
