@@ -54,11 +54,17 @@ public class RingItem
   
   public final void setRingValue()
   {
+    if (_isRingValue) {
+      System.out.println("BAD-SET-RING:");
+    }
     _isRingValue = true;
   }
   
   public final void clearRingValue()
   {
+    if (! _isRingValue) {
+      System.out.println("BAD-CLEAR-RING:");
+    }
     _isRingValue = false;
   }
 
