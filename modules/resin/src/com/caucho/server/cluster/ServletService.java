@@ -1126,7 +1126,9 @@ public class ServletService
       if (free > 10) {
         System.out.println("BUF: " + value + " " + free
                            + " " + _httpBufferFreeList.getHead()
-                           + " " + _httpBufferFreeList.getTail());
+                           + ":" + _httpBufferFreeList.getHeadAlloc()
+                           + " " + _httpBufferFreeList.getTail()
+                           + ":" + _httpBufferFreeList.getTailAlloc());
       }
       
       buffer = new HttpBufferStore(getUrlLengthMax());
