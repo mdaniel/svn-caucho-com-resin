@@ -236,9 +236,11 @@ public class SocketLinkDuplexController extends AsyncController {
     */
     
     try {
+      /*
       if (conn != null) {
         conn.requestClose();
       }
+      */
 
       /*
       if (conn != null)

@@ -671,7 +671,7 @@ public class TcpSocketLink extends AbstractSocketLink
   void requestTimeoutKeepalive()
   {
     if (_requestStateRef.get().toWakeKeepalive(_requestStateRef)) {
-      if (! getLauncher().submitResumeTask(getKeepaliveTimeoutTask())) {
+      if (! getLauncher().offerResumeTask(getKeepaliveTimeoutTask())) {
         log.severe(L.l("Schedule failed for {0}", this));
       }
     }
@@ -724,11 +724,22 @@ public class TcpSocketLink extends AbstractSocketLink
       log.log(Level.FINER, e.toString(), e);
     }
   }
-  
-  void requestClose()
+
+  /**
+   * Closes the connection()
+   */
+  /*
+  public final void requestClose()
   {
-    // XXX:
+    if (_requestStateRef.get().toClose(_requestStateRef)) {
+      if (getLauncher().offerResumeTask(new CloseTask(this))) {
+        return;
+      }
+    }
+
+    requestDestroy();
   }
+  */
 
   /**
    * Destroys the connection()

@@ -76,7 +76,13 @@ class SocketLinkThreadLauncher extends AbstractThreadLauncher
   
   boolean offerResumeTask(ConnectionTask task)
   {
-    _resumeTaskQueue.put(task);
+    if (! _resumeTaskQueue.put(task)) {
+      System.out.println("FAILED_SUBMIT:");
+    }
+    
+    if (_resumeTaskQueue.getSize() > 512) {
+      System.out.println("SIZE: " + _resumeTaskQueue.getSize());
+    }
     
     wakeResumeTask(1);
     
@@ -85,7 +91,9 @@ class SocketLinkThreadLauncher extends AbstractThreadLauncher
   
   boolean submitResumeTask(ConnectionTask task)
   {
-    _resumeTaskQueue.put(task);
+    if (! _resumeTaskQueue.put(task)) {
+      System.out.println("FAILED_SUBMIT:");
+    }
     
     wakeResumeTask(1);
     

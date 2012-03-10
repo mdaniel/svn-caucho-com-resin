@@ -49,7 +49,7 @@ public class RingValueQueue<T> {
   private final int _mask;
   private final int _updateSize;
   
-  private final AtomicBoolean _isWait = new AtomicBoolean();
+  private final AtomicBoolean _isOfferWait = new AtomicBoolean();
   
   public RingValueQueue(int capacity)
   {
@@ -120,7 +120,6 @@ public class RingValueQueue<T> {
     final AtomicInteger headAllocRef = _headAlloc;
     final AtomicInteger tailRef = _tail;
     final int mask = _mask;
-    int retry = 256;
     
     while (true) {
       int headAlloc = headAllocRef.get();
@@ -145,6 +144,8 @@ public class RingValueQueue<T> {
         if (! headRef.compareAndSet(headAlloc, nextHeadAlloc)) {
           finishOffer(headAlloc);
         }
+        
+        wakeAvailable();
         
         return true;
       }
@@ -285,15 +286,15 @@ public class RingValueQueue<T> {
   
   private void waitForAvailable(int headAlloc, int tail)
   {
-    _isWait.set(true);
+    _isOfferWait.set(true);
     
     if (_headAlloc.get() == headAlloc && _tail.get() == tail) {
-      synchronized (_isWait) {
+      synchronized (_isOfferWait) {
         if (_headAlloc.get() == headAlloc
             && _tail.get() == tail
-            && _isWait.get()) {
+            && _isOfferWait.get()) {
           try {
-            _isWait.wait(100);
+            _isOfferWait.wait(100);
           } catch (Exception e) {
             log.log(Level.FINER, e.toString(), e);
           }
@@ -314,9 +315,9 @@ public class RingValueQueue<T> {
   
   private void wakeAvailable()
   {
-    if (_isWait.compareAndSet(true, false)) {
-      synchronized (_isWait) {
-        _isWait.notifyAll();
+    if (_isOfferWait.compareAndSet(true, false)) {
+      synchronized (_isOfferWait) {
+        _isOfferWait.notifyAll();
       }
     }
   }
