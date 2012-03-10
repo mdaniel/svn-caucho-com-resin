@@ -76,7 +76,7 @@ class SocketLinkThreadLauncher extends AbstractThreadLauncher
   
   boolean offerResumeTask(ConnectionTask task)
   {
-    _resumeTaskQueue.offer(task);
+    _resumeTaskQueue.put(task);
     
     wakeResumeTask(1);
     
@@ -85,7 +85,7 @@ class SocketLinkThreadLauncher extends AbstractThreadLauncher
   
   boolean submitResumeTask(ConnectionTask task)
   {
-    _resumeTaskQueue.offer(task);
+    _resumeTaskQueue.put(task);
     
     wakeResumeTask(1);
     
@@ -141,13 +141,17 @@ class SocketLinkThreadLauncher extends AbstractThreadLauncher
         task = _resumeTaskQueue.poll();
       }
       
+      if (! _resumeTaskQueue.isEmpty()) {
+        wakeResumeTask(4);
+      }
+      
       if (isResume) {
         isResume = false;
         _resumeStartCount.decrementAndGet();
       }
       
       if (! _resumeTaskQueue.isEmpty()) {
-        wakeResumeTask(4);
+        wakeResumeTask(1);
       }
       
       if (task != null) {
@@ -207,7 +211,7 @@ class SocketLinkThreadLauncher extends AbstractThreadLauncher
 
       AcceptTask acceptTask = startConn.requestAccept();
       
-      if (acceptTask != null && _acceptTaskQueue.offer(acceptTask)) {
+      if (acceptTask != null && _acceptTaskQueue.put(acceptTask)) {
         startConn = null;
         
         _threadPool.schedule(new TcpSocketAcceptThread(this));

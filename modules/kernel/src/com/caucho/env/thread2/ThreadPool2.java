@@ -645,7 +645,7 @@ public class ThreadPool2 {
       return true;
     }
     
-    if (! _idleThreadRing.offer(thread)) {
+    if (! _idleThreadRing.put(thread)) {
       System.out.println("NOFREE: " + thread);
     }
     
@@ -665,7 +665,7 @@ public class ThreadPool2 {
   {
     // LockSupport.unpark(thread);
     
-    _unparkQueue.offer(thread);
+    _unparkQueue.put(thread);
     _scheduleWorker.wake();
   }
   
@@ -832,7 +832,7 @@ public class ThreadPool2 {
         return true;
       }
 
-      _idleThreadRing.offer(thread);
+      _idleThreadRing.put(thread);
        
       return false;
     }
@@ -860,7 +860,7 @@ public class ThreadPool2 {
         return true;
       }
 
-      _idleThreadRing.offer(thread);
+      _idleThreadRing.put(thread);
        
       return false;
     }

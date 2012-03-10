@@ -95,7 +95,7 @@ public final class FreeRing<T> {
    */
   public boolean free(T value)
   {
-    return _ringQueue.offer(value, false);
+    return _ringQueue.offer(value);
   }
 
   /**
