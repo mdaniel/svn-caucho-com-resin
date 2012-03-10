@@ -55,6 +55,16 @@ public final class FreeRing<T> {
     return _ringQueue.getSize();
   }
   
+  public int getHead()
+  {
+    return _ringQueue.getHead();
+  }
+  
+  public int getTail()
+  {
+    return _ringQueue.getTail();
+  }
+  
   /**
    * Try to get an object from the free list.  Returns null if the free list
    * is empty.

@@ -81,6 +81,16 @@ public class RingQueue<T extends RingItem> {
     return (_ring.length + head - tail) & _mask;
   }
   
+  public int getHead()
+  {
+    return _head.get();
+  }
+  
+  public int getTail()
+  {
+    return _tail.get();
+  }
+  
   public final T beginOffer(boolean isWait)
   {
     // offer must allow only one thread to succeed, because 
@@ -102,7 +112,7 @@ public class RingQueue<T extends RingItem> {
           completePoll(_tail.get());
         }
         else if (isWait) {
-          waitForEmpty(headAlloc, tail);
+          waitForAvailable(headAlloc, tail);
         }
         else {
           return null;
@@ -217,21 +227,23 @@ public class RingQueue<T extends RingItem> {
       */
     }
     
-    wakeEmpty();
+    wakeAvailable();
   }
   
-  private void waitForEmpty(int headAlloc, int tail)
+  private void waitForAvailable(int headAlloc, int tail)
   {
     _isWait.set(true);
     
-    synchronized (_isWait) {
-      if (_headAlloc.get() == headAlloc
-          && _tail.get() == tail
-          && _isWait.get()) {
-        try {
-          _isWait.wait(100);
-        } catch (Exception e) {
-          log.log(Level.FINER, e.toString(), e);
+    if (_headAlloc.get() == headAlloc && _tail.get() == tail) {
+      synchronized (_isWait) {
+        if (_headAlloc.get() == headAlloc
+            && _tail.get() == tail
+            && _isWait.get()) {
+          try {
+            _isWait.wait(100);
+          } catch (Exception e) {
+            log.log(Level.FINER, e.toString(), e);
+          }
         }
       }
     }
@@ -247,11 +259,10 @@ public class RingQueue<T extends RingItem> {
     return nextHead == tail;
   }
   
-  private void wakeEmpty()
+  private void wakeAvailable()
   {
-    if (_isWait.get()) {
+    if (_isWait.compareAndSet(true, false)) {
       synchronized (_isWait) {
-        _isWait.set(false);
         _isWait.notifyAll();
       }
     }

@@ -1134,7 +1134,11 @@ public class ServletService
   public void freeHttpBuffer(HttpBufferStore buffer)
   {
     if (! _httpBufferFreeList.free(buffer)) {
-      System.out.println("FREE_FAILED: " + _httpBufferFreeList.getSize());
+      int size = _httpBufferFreeList.getSize();
+      int head = _httpBufferFreeList.getHead();
+      int tail = _httpBufferFreeList.getTail();
+      
+      System.out.println("FREE_FAILED: " + size + " " + head + " " + tail);
     }
   }
 
