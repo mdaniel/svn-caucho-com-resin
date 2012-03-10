@@ -98,7 +98,10 @@ public class RingQueue<T extends RingItem> {
       int nextHeadAlloc = (headAlloc + 1) & mask;
       
       if (nextHeadAlloc == tail) {
-        if (isWait) {
+        if (_tail.get() != _tailAlloc.get()) {
+          completePoll(_tail.get());
+        }
+        else if (isWait) {
           waitForEmpty(headAlloc, tail);
         }
         else {
@@ -122,7 +125,7 @@ public class RingQueue<T extends RingItem> {
     final int mask = _mask;
 
     // limit retry in high-contention situation, since we've acked the entry
-    int retryCount = 1024 + (index & 0x1ff);
+    int retryCount = 1024 + ((index & 0xf) << 8);
     
     while (retryCount-- >= 0) {
       int head = headRef.get();
@@ -140,10 +143,12 @@ public class RingQueue<T extends RingItem> {
         }
       }
       
+      /*
       if (((head + ring.length - index) & mask) < _updateSize) {
         // someone else acked us
         return;
       }
+      */
     }
   }
  
@@ -173,8 +178,12 @@ public class RingQueue<T extends RingItem> {
   public final void completePoll(final T item)
   {
     item.clearRingValue();
-    final int index = item.getIndex();
     
+    completePoll(item.getIndex());
+  }
+    
+  private void completePoll(final int index)
+  {
     final AtomicInteger tailAllocRef = _tailAlloc;
     final AtomicInteger tailRef = _tail;
     final T []ring = _ring;
@@ -183,7 +192,7 @@ public class RingQueue<T extends RingItem> {
     // int halfSize = _halfSize;
     
     // limit retry in high-contention situation
-    int retryCount = 1024 + (index & 0x1ff);
+    int retryCount = 1024 + ((index & 0xf) << 8);
 
     while (retryCount-- >= 0) {
       final int tail = tailRef.get();
@@ -200,11 +209,12 @@ public class RingQueue<T extends RingItem> {
           break;
         }
       }
-      
+      /*
       if (((tail + ring.length - index) & mask) < _updateSize) {
         // someone else acked us
         return;
       }
+      */
     }
     
     wakeEmpty();
