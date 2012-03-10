@@ -126,7 +126,7 @@ class SocketLinkThreadLauncher extends AbstractThreadLauncher
    */
   void handleTasks(boolean isResume)
   {
-    int retryMax = 128;
+    int retryMax = 8;
     int retryCount = retryMax;
     
     while (retryCount-- >= 0) {

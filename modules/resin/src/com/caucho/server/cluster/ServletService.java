@@ -1124,8 +1124,7 @@ public class ServletService
 
   public void freeHttpBuffer(HttpBufferStore buffer)
   {
-    if (! _httpBufferFreeList.free(buffer)) {
-    }
+    _httpBufferFreeList.free(buffer);
   }
 
   /**

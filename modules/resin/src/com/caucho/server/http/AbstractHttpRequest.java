@@ -262,11 +262,11 @@ public abstract class AbstractHttpRequest extends AbstractProtocolConnection
    *
    * @param httpBuffer the raw connection stream
    */
-  protected void startRequest(HttpBufferStore httpBuffer)
+  protected void startRequest()
     throws IOException
   {
-    _httpBuffer = httpBuffer;
-
+    HttpBufferStore httpBuffer = getHttpBufferStore();
+    
     _hostHeader = null;
     _expect100Continue = false;
 
@@ -282,7 +282,7 @@ public abstract class AbstractHttpRequest extends AbstractProtocolConnection
 
     _requestFacade = new HttpServletRequestImpl(this);
     _responseFacade = _requestFacade.getResponse();
-
+    
     _response.startRequest(httpBuffer);
 
     _startTime = -1;
@@ -306,7 +306,7 @@ public abstract class AbstractHttpRequest extends AbstractProtocolConnection
   /**
    * Returns the http buffer store
    */
-  final HttpBufferStore getHttpBufferStore()
+  protected final HttpBufferStore getHttpBufferStore()
   {
     return _httpBuffer;
   }
@@ -1433,6 +1433,23 @@ public abstract class AbstractHttpRequest extends AbstractProtocolConnection
   {
     return _httpBuffer.getLogBuffer();
   }
+  
+  @Override
+  public final void onAttachThread()
+  {
+    _httpBuffer = getServer().allocateHttpBuffer();
+  }
+  
+  @Override
+  public final void onDetachThread()
+  {
+    HttpBufferStore httpBuffer = _httpBuffer;
+    _httpBuffer = null;
+    
+    if (httpBuffer != null) {
+      getServer().freeHttpBuffer(httpBuffer);
+    }
+  }
 
   protected Invocation getInvocation(CharSequence host,
                                      byte []uri,
@@ -1759,9 +1776,6 @@ public abstract class AbstractHttpRequest extends AbstractProtocolConnection
       _requestFacade = null;
 
       _responseFacade = null;
-
-      HttpBufferStore httpBuffer = _httpBuffer;
-      _httpBuffer = null;
 
       /*
       if (_tcpConn != null) {

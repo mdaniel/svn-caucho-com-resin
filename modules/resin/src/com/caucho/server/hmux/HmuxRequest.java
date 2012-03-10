@@ -50,7 +50,6 @@ import com.caucho.server.cluster.ServletService;
 import com.caucho.server.dispatch.Invocation;
 import com.caucho.server.http.AbstractHttpRequest;
 import com.caucho.server.http.AbstractResponseStream;
-import com.caucho.server.http.HttpBufferStore;
 import com.caucho.server.http.HttpServletRequestImpl;
 import com.caucho.server.http.HttpServletResponseImpl;
 import com.caucho.server.webapp.ErrorPageManager;
@@ -363,8 +362,7 @@ public class HmuxRequest extends AbstractHttpRequest
     _filter.init(this, getRawRead(), getRawWrite());
 
     try {
-      HttpBufferStore httpBuffer = getServer().allocateHttpBuffer();
-      startRequest(httpBuffer);
+      startRequest();
 
       startInvocation();
 
@@ -551,10 +549,10 @@ public class HmuxRequest extends AbstractHttpRequest
    * Clears variables at the start of a new request.
    */
   @Override
-  protected void startRequest(HttpBufferStore httpBuffer)
+  protected void startRequest()
     throws IOException
   {
-    super.startRequest(httpBuffer);
+    super.startRequest();
 
     _method.clear();
     _methodString = null;

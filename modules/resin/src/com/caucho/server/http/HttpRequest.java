@@ -97,8 +97,6 @@ public class HttpRequest extends AbstractHttpRequest
     = new CharBuffer();
   private int _version;
 
-  private HttpBufferStore _httpBuffer;
-
   private char []_headerBuffer;
 
   private CharSegment []_headerKeys;
@@ -136,21 +134,6 @@ public class HttpRequest extends AbstractHttpRequest
   public HttpResponse createResponse()
   {
     return new HttpResponse(this, getConnection().getWriteStream());
-  }
-  
-  @Override
-  public void onAttachThread()
-  {
-    _httpBuffer = getServer().allocateHttpBuffer();
-  }
-  
-  @Override
-  public void onDetachThread()
-  {
-    HttpBufferStore httpBuffer = _httpBuffer;
-    _httpBuffer = null;
-    
-    getServer().freeHttpBuffer(httpBuffer);
   }
 
   /**
@@ -795,7 +778,7 @@ public class HttpRequest extends AbstractHttpRequest
     try {
       thread.setContextClassLoader(server.getClassLoader());
       
-      startRequest(_httpBuffer);
+      startRequest();
 
       if (! parseRequest()) {
         if (log.isLoggable(Level.FINER)) {
@@ -921,10 +904,12 @@ public class HttpRequest extends AbstractHttpRequest
    * @param s the read stream for the request
    */
   @Override
-  protected void startRequest(HttpBufferStore httpBuffer)
+  protected void startRequest()
     throws IOException
   {
-    super.startRequest(httpBuffer);
+    super.startRequest();
+    
+    HttpBufferStore httpBuffer = getHttpBufferStore();
 
     _method.clear();
     _methodString = null;
