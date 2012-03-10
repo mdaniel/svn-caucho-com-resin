@@ -128,9 +128,13 @@ public class RingQueue<T extends RingItem> {
   {
     item.setRingValue();
     
+    completeOffer(item.getIndex());
+  }
+  
+  private void completeOffer(final int index)
+  {
     final AtomicInteger headAllocRef = _headAlloc;
     final AtomicInteger headRef = _head;
-    final int index = item.getIndex();
     final T []ring = _ring;
     final int mask = _mask;
 
@@ -171,12 +175,17 @@ public class RingQueue<T extends RingItem> {
     final AtomicInteger headRef = _head;
     final int mask = _mask;
     
+    int retryCount = 1024;
+    
     while (true) {
       tailAlloc = tailAllocRef.get();
       int head = headRef.get();
       
       if (head == tailAlloc) {
         if (head == _headAlloc.get()) {
+          return null;
+        }
+        else if (retryCount-- < 0) {
           return null;
         }
         else {
