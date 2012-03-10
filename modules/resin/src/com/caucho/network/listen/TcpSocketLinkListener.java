@@ -64,7 +64,7 @@ import com.caucho.server.util.CauchoSystem;
 import com.caucho.util.Alarm;
 import com.caucho.util.AlarmListener;
 import com.caucho.util.CurrentTime;
-import com.caucho.util.FreeList;
+import com.caucho.util.FreeRing;
 import com.caucho.util.Friend;
 import com.caucho.util.L10N;
 import com.caucho.vfs.JsseSSLFactory;
@@ -107,8 +107,8 @@ public class TcpSocketLinkListener
 
   // started at 128, but that seems wasteful since the active threads
   // themselves are buffering the free connections
-  private FreeList<TcpSocketLink> _idleConn
-    = new FreeList<TcpSocketLink>(32);
+  private FreeRing<TcpSocketLink> _idleConn
+    = new FreeRing<TcpSocketLink>(32);
   
   // The owning server
   // private ProtocolDispatchServer _server;

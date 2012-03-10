@@ -569,7 +569,7 @@ public class TcpSocketLink extends AbstractSocketLink
   /**
    * Returns the comet resume task
    */
-  private Runnable getResumeTask()
+  private ConnectionTask getResumeTask()
   {
     return _resumeTask;
   }
@@ -635,21 +635,20 @@ public class TcpSocketLink extends AbstractSocketLink
   /**
    * Start a request connection from the idle state.
    */
-  void requestAccept()
+  @Friend(SocketLinkThreadLauncher.class)
+  AcceptTask requestAccept()
   {
     if (_requestStateRef.get().toAccept(_requestStateRef)) {
-      ThreadPool threadPool = _listener.getThreadPool();
-    
       if (log.isLoggable(Level.FINER)) {
         log.finer(this + " request-accept " + getName()
                   + " (count=" + _listener.getThreadCount()
                   + ", idle=" + _listener.getIdleThreadCount() + ")");
       }
-      
-      
-      if (! threadPool.start(getAcceptTask())) {
-        log.severe(L.l("Start failed for {0}", this));
-      }
+
+      return _acceptTask;
+    }
+    else {
+      return null;
     }
   }
   
@@ -659,9 +658,7 @@ public class TcpSocketLink extends AbstractSocketLink
   void requestWakeKeepalive()
   {
     if (_requestStateRef.get().toWakeKeepalive(_requestStateRef)) {
-      ThreadPool threadPool = _listener.getThreadPool();
-      
-      if (! threadPool.schedule(getKeepaliveTask())) {
+      if (! getLauncher().offerResumeTask(getKeepaliveTask())) {
         log.severe(L.l("Schedule failed for {0}", this));
       }
     }
@@ -673,9 +670,7 @@ public class TcpSocketLink extends AbstractSocketLink
   void requestTimeoutKeepalive()
   {
     if (_requestStateRef.get().toWakeKeepalive(_requestStateRef)) {
-      ThreadPool threadPool = _listener.getThreadPool();
-    
-      if (! threadPool.schedule(getKeepaliveTimeoutTask())) {
+      if (! getLauncher().offerResumeTask(getKeepaliveTimeoutTask())) {
         log.severe(L.l("Schedule failed for {0}", this));
       }
     }
@@ -687,9 +682,7 @@ public class TcpSocketLink extends AbstractSocketLink
   void requestWakeComet()
   {
     if (_requestStateRef.get().toAsyncWake(_requestStateRef)) {
-      ThreadPool threadPool = _listener.getThreadPool();
-    
-      if (! threadPool.schedule(getResumeTask())) {
+      if (! getLauncher().offerResumeTask(getResumeTask())) {
         log.severe(L.l("Schedule failed for {0}", this));
       }
     }
@@ -742,9 +735,7 @@ public class TcpSocketLink extends AbstractSocketLink
   public final void requestDestroy()
   {
     if (_requestStateRef.get().toDestroy(_requestStateRef)) {
-      ThreadPool threadPool = _listener.getThreadPool();
-    
-      if (! threadPool.schedule(new DestroyTask(this))) {
+      if (! getLauncher().offerResumeTask(new DestroyTask(this))) {
         destroy();
       }
     }
@@ -841,9 +832,7 @@ public class TcpSocketLink extends AbstractSocketLink
       }
       
       if (! reqState.toAsyncSuspend(_requestStateRef)) {
-        ThreadPool threadPool = _listener.getThreadPool();
-
-        if (! threadPool.schedule(getResumeTask())) {
+        if (! getLauncher().offerResumeTask(getResumeTask())) {
           log.severe(L.l("Schedule resume failed for {0}", this));
         }
       }
@@ -863,9 +852,7 @@ public class TcpSocketLink extends AbstractSocketLink
     if (requestState.isKeepaliveSelect() && ! state.isClosed()) {
       // keepalive wake before the thread exits
       if (! reqState.toSuspendKeepalive(_requestStateRef)) {
-        ThreadPool threadPool = _listener.getThreadPool();
-
-        if (! threadPool.schedule(getKeepaliveTask())) {
+        if (! getLauncher().offerResumeTask(getKeepaliveTask())) {
           log.severe(L.l("Schedule keepalive failed for {0}", this));
         }
       }
@@ -893,6 +880,16 @@ public class TcpSocketLink extends AbstractSocketLink
                          + " " + reqState + " " + _requestStateRef.get() + " " + this);
     }
   }
+
+  /**
+   * 
+   */
+  public void doTask()
+  {
+    // TODO Auto-generated method stub
+    
+  }
+  
   private RequestState handleAcceptTask()
     throws IOException
   {

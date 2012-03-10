@@ -35,23 +35,10 @@ import com.caucho.inject.Module;
  * Connection task handling a comet resume.
  */
 @Module
-class CometResumeTask extends ConnectionTask {
+class CometResumeTask extends ConnectionResumeTask {
   CometResumeTask(TcpSocketLink socketLink)
   {
     super(socketLink);
-  }
-  
-  @Override
-  public final void run()
-  {
-    SocketLinkThreadLauncher launcher = getLauncher();
-    
-    launcher.onChildThreadResumeBegin();
-    try {
-      super.run();
-    } finally {
-      launcher.onChildThreadResumeEnd();
-    }
   }
   
   @Override

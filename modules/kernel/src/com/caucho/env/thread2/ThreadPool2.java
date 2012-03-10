@@ -418,8 +418,9 @@ public class ThreadPool2 {
 
     boolean isPriority = false;
     boolean isQueue = true;
+    boolean isWake = true;
 
-    return scheduleImpl(task, loader, MAX_EXPIRE, isPriority, isQueue);
+    return scheduleImpl(task, loader, MAX_EXPIRE, isPriority, isQueue, isWake);
   }
 
   /**
@@ -429,8 +430,9 @@ public class ThreadPool2 {
   {
     boolean isPriority = false;
     boolean isQueue = true;
+    boolean isWake = true;
 
-    return scheduleImpl(task, loader, MAX_EXPIRE, isPriority, isQueue);
+    return scheduleImpl(task, loader, MAX_EXPIRE, isPriority, isQueue, isWake);
   }
 
   /**
@@ -449,8 +451,9 @@ public class ThreadPool2 {
 
     boolean isPriority = false;
     boolean isQueue = true;
+    boolean isWake = true;
 
-    return scheduleImpl(task, loader, expire, isPriority, isQueue);
+    return scheduleImpl(task, loader, expire, isPriority, isQueue, isWake);
   }
 
   /**
@@ -464,8 +467,9 @@ public class ThreadPool2 {
 
     boolean isPriority = true;
     boolean isQueue = true;
+    boolean isWake = true;
 
-    if (! scheduleImpl(task, loader, expire, isPriority, isQueue)) {
+    if (! scheduleImpl(task, loader, expire, isPriority, isQueue, isWake)) {
       String msg = (this + " unable to schedule priority thread " + task
                     + " pri-min=" + getPriorityIdleMin()
                     + " thread=" + getThreadCount()
@@ -492,8 +496,9 @@ public class ThreadPool2 {
 
     boolean isPriority = false;
     boolean isQueue = false;
+    boolean isWake = true;
 
-    return scheduleImpl(task, loader, MAX_EXPIRE, isPriority, isQueue);
+    return scheduleImpl(task, loader, MAX_EXPIRE, isPriority, isQueue, isWake);
   }
 
   /**
@@ -512,8 +517,9 @@ public class ThreadPool2 {
 
     boolean isPriority = false;
     boolean isQueue = false;
+    boolean isWake = true;
 
-    return scheduleImpl(task, loader, expire, isPriority, isQueue);
+    return scheduleImpl(task, loader, expire, isPriority, isQueue, isWake);
   }
 
   /**
@@ -527,8 +533,9 @@ public class ThreadPool2 {
 
     boolean isPriority = true;
     boolean isQueue = true;
+    boolean isWake = true;
 
-    if (! scheduleImpl(task, loader, expire, isPriority, isQueue)) {
+    if (! scheduleImpl(task, loader, expire, isPriority, isQueue, isWake)) {
       String msg = (this + " unable to start priority thread " + task
                     + " pri-min=" + getPriorityIdleMin()
                     + " thread=" + getThreadCount()
@@ -562,8 +569,35 @@ public class ThreadPool2 {
 
     boolean isPriority = true;
     boolean isQueue = false;
+    boolean isWake = true;
 
-    return scheduleImpl(task, loader, expire, isPriority, isQueue);
+    return scheduleImpl(task, loader, expire, isPriority, isQueue, isWake);
+  }
+
+  /**
+   * Submit a task, but do not wake the scheduler
+   */
+  public boolean submitNoWake(Runnable task)
+  {
+    ClassLoader loader = Thread.currentThread().getContextClassLoader();
+
+    boolean isPriority = false;
+    boolean isQueue = true;
+    boolean isWake = false;
+
+    return scheduleImpl(task, loader, MAX_EXPIRE, isPriority, isQueue, isWake);
+  }
+
+  /**
+   * Submit a task, but do not wake the scheduler
+   */
+  public boolean submitNoWake(Runnable task, ClassLoader loader)
+  {
+    boolean isPriority = false;
+    boolean isQueue = true;
+    boolean isWake = false;
+
+    return scheduleImpl(task, loader, MAX_EXPIRE, isPriority, isQueue, isWake);
   }
   
   /**
@@ -573,7 +607,8 @@ public class ThreadPool2 {
                                ClassLoader loader,
                                long expireTime,
                                boolean isPriority,
-                               boolean isQueueIfFull)
+                               boolean isQueueIfFull,
+                               boolean isWakeScheduler)
   {
     if (isPriority) {
       if (! _priorityQueue.offer(task, loader)) {
@@ -588,7 +623,9 @@ public class ThreadPool2 {
       }
     }
     
-    wakeScheduler();
+    if (isWakeScheduler) {
+      wakeScheduler();
+    }
 
     return true;
   }
@@ -619,7 +656,7 @@ public class ThreadPool2 {
     return false;
   }
   
-  void wakeScheduler()
+  public void wakeScheduler()
   {
     _scheduleWorker.wake();
   }

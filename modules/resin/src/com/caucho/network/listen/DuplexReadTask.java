@@ -40,7 +40,7 @@ import com.caucho.inject.Module;
  * <p>Each TcpConnection has its own thread.
  */
 @Module
-class DuplexReadTask extends ConnectionTask {
+class DuplexReadTask extends ConnectionResumeTask {
   private final SocketLinkDuplexController _duplex;
   
   DuplexReadTask(TcpSocketLink socketLink,
@@ -49,27 +49,6 @@ class DuplexReadTask extends ConnectionTask {
     super(socketLink);
 
     _duplex = duplex;
-  }
-  
-  @Override
-  public final void run()
-  {
-    Thread thread = Thread.currentThread();
-    ClassLoader loader = thread.getContextClassLoader();
-    
-    SocketLinkThreadLauncher launcher = getLauncher();
-    
-    launcher.onChildThreadResumeBegin();
-    
-    try {
-      thread.setContextClassLoader(getSocketLink().getListener().getClassLoader());
-      
-      super.run();
-    } finally {
-      launcher.onChildThreadResumeEnd();
-      
-      thread.setContextClassLoader(loader);
-    }
   }
 
   @Override

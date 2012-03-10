@@ -40,24 +40,10 @@ import com.caucho.inject.Module;
  * <p>Each TcpConnection has its own thread.
  */
 @Module
-class KeepaliveRequestTask extends ConnectionTask {
+class KeepaliveRequestTask extends ConnectionResumeTask {
   KeepaliveRequestTask(TcpSocketLink socketLink)
   {
     super(socketLink);
-  }
-
-  @Override
-  public final void run()
-  {
-    SocketLinkThreadLauncher launcher = getLauncher();
-    
-    launcher.onChildThreadResumeBegin();
-
-    try {
-      super.run();
-    } finally {
-      launcher.onChildThreadResumeEnd();
-    }
   }
 
   @Override

@@ -83,11 +83,6 @@ abstract class ConnectionTask implements Runnable {
   public final void runThread()
   {
     Thread thread = Thread.currentThread();
-    String oldThreadName = thread.getName();
-
-    thread.setName(_socketLink.getDebugId());
-
-    thread.setContextClassLoader(_listener.getClassLoader());
 
     RequestState result = RequestState.EXIT;
 
@@ -103,8 +98,6 @@ abstract class ConnectionTask implements Runnable {
       log.log(Level.WARNING, e.toString(), e);
     } finally {
       _socketLink.finishThread(result);
-      
-      thread.setName(oldThreadName);
     }
   }
 

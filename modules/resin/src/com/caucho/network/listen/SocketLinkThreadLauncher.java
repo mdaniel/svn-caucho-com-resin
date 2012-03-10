@@ -32,6 +32,7 @@ package com.caucho.network.listen;
 import com.caucho.env.thread.AbstractThreadLauncher;
 import com.caucho.env.thread.ThreadPool;
 import com.caucho.inject.Module;
+import com.caucho.util.RingValueQueue;
 
 /**
  * Represents a protocol connection.
@@ -39,8 +40,14 @@ import com.caucho.inject.Module;
 @Module
 class SocketLinkThreadLauncher extends AbstractThreadLauncher
 {
-  private ThreadPool _threadPool = ThreadPool.getThreadPool();
+  private final ThreadPool _threadPool = ThreadPool.getThreadPool();
   private TcpSocketLinkListener _listener;
+  
+  private final RingValueQueue<AcceptTask> _acceptTaskQueue
+    = new RingValueQueue<AcceptTask>(1024);
+  
+  private final RingValueQueue<ConnectionTask> _resumeTaskQueue
+    = new RingValueQueue<ConnectionTask>(16 * 1024);
   
   private String _threadName;
 
@@ -60,22 +67,68 @@ class SocketLinkThreadLauncher extends AbstractThreadLauncher
 
   public void init()
   {
-    _threadName = ("resin-port-"
-                   + _listener.getAddress()
-                   + ":" + _listener.getPort());
+    _threadName = generateThreadName() + "-launcher";
+  }
+  
+  boolean offerResumeTask(ConnectionTask task)
+  {
+    _resumeTaskQueue.offer(task);
+    
+    if (! isThreadMax()) {
+      _threadPool.schedule(new TcpSocketResumeThread(this));
+    }
+    
+    return true;
   }
   
   @Override
   protected String getThreadName()
   {
     if (_threadName == null) {
-      _threadName = ("resin-port-"
-          + _listener.getAddress()
-          + ":" + _listener.getPort());
+      _threadName = generateThreadName() + "-launcher";
     }
     
     return _threadName;
   }
+
+  String generateThreadName()
+  {
+    String address = _listener.getAddress();
+    int port = _listener.getPort();
+
+    if (address != null) {
+      return ("resin-port-" + address + ":" + port);
+    }
+    else {
+      return ("resin-port-" + port);
+    }
+  }
+ 
+
+  /**
+   * Cycles through task from a thread. 
+   */
+  void handleTasks()
+  {
+    while (true) {
+      AcceptTask acceptTask = _acceptTaskQueue.poll();
+      
+      if (acceptTask != null) {
+        acceptTask.run();
+        continue;
+      }
+      
+      ConnectionTask resumeTask = _resumeTaskQueue.poll();
+
+      if (resumeTask!= null) {
+        resumeTask.run();
+        continue;
+      }
+      
+      return;
+    }
+  }
+
 
   @Override
   protected void launchChildThread(int id)
@@ -89,9 +142,13 @@ class SocketLinkThreadLauncher extends AbstractThreadLauncher
       
       startConn = _listener.allocateConnection();
 
-      startConn.requestAccept();
+      AcceptTask acceptTask = startConn.requestAccept();
       
-      startConn = null;
+      if (acceptTask != null && _acceptTaskQueue.offer(acceptTask)) {
+        startConn = null;
+        
+        _threadPool.schedule(new TcpSocketAcceptThread(this));
+      }
     } catch (RuntimeException e) {
       throw e;
     } catch (Exception e) {

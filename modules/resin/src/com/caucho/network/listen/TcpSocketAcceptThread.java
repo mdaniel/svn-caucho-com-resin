@@ -29,29 +29,41 @@
 
 package com.caucho.network.listen;
 
-import java.io.IOException;
-
 import com.caucho.inject.Module;
 
 /**
- * A protocol-independent TcpConnection.  TcpConnection controls the
- * TCP Socket and provides buffered streams.
- *
- * <p>Each TcpConnection has its own thread.
+ * The thread task to handle a newly accepted request.
  */
 @Module
-class DestroyTask extends ConnectionResumeTask {
-  DestroyTask(TcpSocketLink socketLink)
+class TcpSocketAcceptThread implements Runnable
+{
+  private final SocketLinkThreadLauncher _launcher;
+  
+  TcpSocketAcceptThread(SocketLinkThreadLauncher launcher)
   {
-    super(socketLink);
+    _launcher = launcher;
   }
 
   @Override
-  final RequestState doTask()
-    throws IOException
+  public void run()
   {
-    TcpSocketLink socketLink = getSocketLink();
+    Thread thread = Thread.currentThread();
+    String oldThreadName = thread.getName();
     
-    return socketLink.handleDestroyTask();
+    SocketLinkThreadLauncher launcher = _launcher;
+    String threadName = launcher.generateThreadName() + "-" + thread.getId();
+    thread.setName(threadName);
+
+    try {
+      launcher.onChildIdleBegin();
+      launcher.onChildThreadLaunchBegin();
+      
+      launcher.handleTasks();
+    } finally {
+      launcher.onChildThreadLaunchEnd();
+      launcher.onChildIdleEnd();
+      
+      thread.setName(oldThreadName);
+    }
   }
 }

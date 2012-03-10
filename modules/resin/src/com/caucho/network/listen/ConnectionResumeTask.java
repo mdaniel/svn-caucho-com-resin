@@ -29,8 +29,6 @@
 
 package com.caucho.network.listen;
 
-import java.io.IOException;
-
 import com.caucho.inject.Module;
 
 /**
@@ -40,18 +38,23 @@ import com.caucho.inject.Module;
  * <p>Each TcpConnection has its own thread.
  */
 @Module
-class DestroyTask extends ConnectionResumeTask {
-  DestroyTask(TcpSocketLink socketLink)
+abstract class ConnectionResumeTask extends ConnectionTask {
+  ConnectionResumeTask(TcpSocketLink socketLink)
   {
     super(socketLink);
   }
 
   @Override
-  final RequestState doTask()
-    throws IOException
+  public final void run()
   {
-    TcpSocketLink socketLink = getSocketLink();
+    SocketLinkThreadLauncher launcher = getLauncher();
     
-    return socketLink.handleDestroyTask();
+    launcher.onChildIdleEnd();
+
+    try {
+      super.run();
+    } finally {
+      launcher.onChildIdleBegin();
+    }
   }
 }

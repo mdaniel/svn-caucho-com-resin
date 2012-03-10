@@ -43,28 +43,6 @@ class AcceptTask extends ConnectionTask {
     super(socketLink);
   }
 
-  @Override
-  public void run()
-  {
-    SocketLinkThreadLauncher launcher = getLauncher();
-
-    Thread thread = Thread.currentThread();
-    String oldThreadName = thread.getName();
-    thread.setName(getSocketLink().getDebugId());
-
-    try {
-      launcher.onChildIdleBegin();
-      launcher.onChildThreadLaunchBegin();
-      
-      super.run();
-    } finally {
-      launcher.onChildThreadLaunchEnd();
-      launcher.onChildIdleEnd();
-      
-      thread.setName(oldThreadName);
-    }
-  }
-
   /**
    * Loop to accept new connections.
    */

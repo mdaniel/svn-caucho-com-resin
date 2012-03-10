@@ -144,8 +144,9 @@ public final class ThreadPool extends ThreadPool2 {
       if (_executorTaskCount <= _executorTaskMax || _executorTaskMax < 0) {
         boolean isPriority = false;
         boolean isQueue = true;
+        boolean isWake = true;
 
-        return scheduleImpl(task, loader, MAX_EXPIRE, isPriority, isQueue);
+        return scheduleImpl(task, loader, MAX_EXPIRE, isPriority, isQueue, isWake);
       }
       else {
         ExecutorQueueItem item = new ExecutorQueueItem(task, loader);
@@ -190,8 +191,9 @@ public final class ThreadPool extends ThreadPool2 {
 
       boolean isPriority = false;
       boolean isQueue = true;
+      boolean isWake = true;
 
-      scheduleImpl(task, loader, MAX_EXPIRE, isPriority, isQueue);
+      scheduleImpl(task, loader, MAX_EXPIRE, isPriority, isQueue, isWake);
     }
   }
  
