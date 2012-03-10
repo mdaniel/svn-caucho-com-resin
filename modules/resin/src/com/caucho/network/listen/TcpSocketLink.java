@@ -34,6 +34,7 @@ import java.io.InterruptedIOException;
 import java.net.InetAddress;
 import java.security.cert.CertificateException;
 import java.security.cert.X509Certificate;
+import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.atomic.AtomicReference;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -792,7 +793,12 @@ public class TcpSocketLink extends AbstractSocketLink
     _thread = thread;
     
     _request.onAttachThread();
+    if (_threadCount.incrementAndGet() > 250) {
+      System.out.println("THR: " + _threadCount.get());
+    }
   }
+  
+  AtomicInteger _threadCount = new AtomicInteger();
 
   /**
    * Completion processing at the end of the thread
@@ -802,6 +808,12 @@ public class TcpSocketLink extends AbstractSocketLink
   {
     Thread thread = _thread;
     _thread = null;
+    
+    _request.onDetachThread();
+    if (_threadCount.decrementAndGet() < 25) {
+      System.out.println("THR-DEC: " + _threadCount.get());
+      
+    }
     
     if (log.isLoggable(Level.FINER)) {
       log.finer(this + " finish thread: " + Thread.currentThread().getName());
@@ -814,8 +826,6 @@ public class TcpSocketLink extends AbstractSocketLink
       throw new IllegalStateException("old: " + thread
                                       + " current: " + currentThread);
     }
-    
-    _request.onDetachThread();
     
     if (_requestStateRef.get().isDestroyed()) {
       destroy();
