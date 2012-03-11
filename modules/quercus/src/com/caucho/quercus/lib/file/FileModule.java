@@ -705,10 +705,10 @@ public class FileModule extends AbstractQuercusModule {
     if (filename.length() == 0)
       return BooleanValue.FALSE;
 
-    boolean useIncludePath = (flags | FILE_USE_INCLUDE_PATH) != 0;
-    boolean ignoreNewLines = (flags | FILE_IGNORE_NEW_LINES) != 0;
-    boolean skipEmptyLines = (flags | FILE_SKIP_EMPTY_LINES) != 0;
-    
+    boolean useIncludePath = (flags & FILE_USE_INCLUDE_PATH) != 0;
+    boolean ignoreNewLines = (flags & FILE_IGNORE_NEW_LINES) != 0;
+    boolean skipEmptyLines = (flags & FILE_SKIP_EMPTY_LINES) != 0;
+
     try {
       
       BinaryStream stream = fopen(env, filename, "r", useIncludePath, context);
