@@ -718,48 +718,54 @@ public class FileModule extends AbstractQuercusModule {
 
       BinaryInput is = (BinaryInput) stream;
 
-      ArrayValue result = new ArrayValueImpl();
+      ArrayValue array = new ArrayValueImpl();
 
       try {
-        while (true) {
-          StringValue bb = env.createBinaryBuilder();
-
-          int ch;
-          
-          for (ch = is.read(); ch >= 0; ch = is.read()) {
-            if (ch == '\n') {
-              if (! ignoreNewLines)
-                bb.appendByte(ch);
-              break;
-            }
-            else if (ch == '\r') {
-              if (! ignoreNewLines)
-                bb.appendByte('\r');
-
-              int ch2 = is.read();
-
-              if (ch2 == '\n') {
-                if (! ignoreNewLines)
-                  bb.appendByte('\n');
-              }
-              else
-                is.unread();
-
-              break;
-            }
-            else {
+        StringValue bb = env.createBinaryBuilder();
+        
+        for (int ch = is.read(); ch >= 0; ch = is.read()) {
+          if (ch == '\n') {
+            if (! ignoreNewLines) {
               bb.appendByte(ch);
             }
+            
+            if (bb.length() > 0 || ! skipEmptyLines) {
+              array.append(bb);
+              bb = env.createBinaryBuilder();
+            }
           }
+          else if (ch == '\r') {
+            if (! ignoreNewLines) {
+              bb.appendByte('\r');
+            }
 
-          if (ch < 0)
-            return result;
-          else if (bb.length() > 0)
-            result.append(bb);
-          else if (! skipEmptyLines) {
-            result.append(bb);
+            int ch2 = is.read();
+
+            if (ch2 == '\n') {
+              if (! ignoreNewLines) {
+                bb.appendByte('\n');
+              }
+            }
+            else {
+              is.unread();
+            }
+            
+            if (bb.length() > 0 || ! skipEmptyLines) {
+              array.append(bb);
+              bb = env.createBinaryBuilder();
+            }
+          }
+          else {
+            bb.appendByte(ch);
           }
         }
+        
+        if (bb.length() > 0) {
+          array.append(bb);
+        }
+        
+        return array;
+        
       } finally {
         is.close();
       }
