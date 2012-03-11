@@ -149,7 +149,12 @@ public abstract class AbstractHttpRequest extends AbstractProtocolConnection
   private final CharBuffer _cbValue = new CharBuffer();
   private final CharBuffer _cb = new CharBuffer();
 
-  private HttpBufferStore _httpBuffer;
+  private byte []_smallUriBuffer = new byte[256];
+  private char []_smallHeaderBuffer = new char[2048];
+  private CharSegment []_smallHeaderKeys = new CharSegment[32];
+  private CharSegment []_smallHeaderValues = new CharSegment[32];
+  
+  private HttpBufferStore _largeHttpBuffer;
 
   private HttpServletRequestImpl _requestFacade;
   private HttpServletResponseImpl _responseFacade;
@@ -195,6 +200,11 @@ public abstract class AbstractHttpRequest extends AbstractProtocolConnection
     _readStream.setReuseBuffer(true);
 
     _bufferedReader = new BufferedReaderAdapter(_readStream);
+    
+    for (int i = 0; i < _smallHeaderKeys.length; i++) {
+      _smallHeaderKeys[i] = new CharSegment();
+      _smallHeaderValues[i] = new CharSegment();
+    }
 
     _response = createResponse();
   }
@@ -214,6 +224,7 @@ public abstract class AbstractHttpRequest extends AbstractProtocolConnection
   /**
    * Initialization.
    */
+  @Override
   public void init()
   {
   }
@@ -265,11 +276,13 @@ public abstract class AbstractHttpRequest extends AbstractProtocolConnection
   protected void startRequest()
     throws IOException
   {
+    /*
     HttpBufferStore httpBuffer = getHttpBufferStore();
     
     if (httpBuffer == null) {
-      _httpBuffer = getServer().allocateHttpBuffer();
+      _largeHttpBuffer = getServer().allocateHttpBuffer();
     }
+    */
     
     _hostHeader = null;
     _expect100Continue = false;
@@ -287,7 +300,7 @@ public abstract class AbstractHttpRequest extends AbstractProtocolConnection
     _requestFacade = new HttpServletRequestImpl(this);
     _responseFacade = _requestFacade.getResponse();
     
-    _response.startRequest(httpBuffer);
+    _response.startRequest();
 
     _startTime = -1;
     _expireTime = -1;
@@ -307,12 +320,32 @@ public abstract class AbstractHttpRequest extends AbstractProtocolConnection
     return _requestFacade != null;
   }
 
+  protected final byte []getSmallUriBuffer()
+  {
+    return _smallUriBuffer;
+  }
+  
+  protected final char []getSmallHeaderBuffer()
+  {
+    return _smallHeaderBuffer;
+  }
+  
+  protected final CharSegment []getSmallHeaderKeys()
+  {
+    return _smallHeaderKeys;
+  }
+  
+  protected final CharSegment []getSmallHeaderValues()
+  {
+    return _smallHeaderValues;
+  }
+  
   /**
    * Returns the http buffer store
    */
   protected final HttpBufferStore getHttpBufferStore()
   {
-    return _httpBuffer;
+    return _largeHttpBuffer;
   }
 
   public WriteStream getRawWrite()
@@ -1433,10 +1466,12 @@ public abstract class AbstractHttpRequest extends AbstractProtocolConnection
   /**
    * Returns the log buffer.
    */
+  /*
   public final byte []getLogBuffer()
   {
     return _httpBuffer.getLogBuffer();
   }
+  */
   
   @Override
   public final void onAttachThread()
@@ -1446,8 +1481,8 @@ public abstract class AbstractHttpRequest extends AbstractProtocolConnection
   @Override
   public final void onDetachThread()
   {
-    HttpBufferStore httpBuffer = _httpBuffer;
-    _httpBuffer = null;
+    HttpBufferStore httpBuffer = _largeHttpBuffer;
+    _largeHttpBuffer = null;
     
     if (httpBuffer != null) {
       getServer().freeHttpBuffer(httpBuffer);

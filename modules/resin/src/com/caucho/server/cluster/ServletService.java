@@ -1112,29 +1112,12 @@ public class ServletService
     return _systemStore;
   }
 
-  private AtomicInteger _httpBufferCount = new AtomicInteger();
-  private AtomicInteger _httpBufferFree = new AtomicInteger();
-  
   public HttpBufferStore allocateHttpBuffer()
   {
     HttpBufferStore buffer = _httpBufferFreeList.allocate();
 
     if (buffer == null) {
-      int value = _httpBufferCount.incrementAndGet();
-      int free = _httpBufferFree.get();
-      
-      if (free > 10) {
-        System.out.println("BUF: " + value + " " + free
-                           + " " + _httpBufferFreeList.getHead()
-                           + ":" + _httpBufferFreeList.getHeadAlloc()
-                           + " " + _httpBufferFreeList.getTail()
-                           + ":" + _httpBufferFreeList.getTailAlloc());
-      }
-      
       buffer = new HttpBufferStore(getUrlLengthMax());
-    }
-    else {
-      _httpBufferFree.decrementAndGet();
     }
 
     return buffer;
@@ -1142,17 +1125,7 @@ public class ServletService
 
   public void freeHttpBuffer(HttpBufferStore buffer)
   {
-    if (! _httpBufferFreeList.free(buffer)) {
-      int size = _httpBufferFreeList.getSize();
-      int head = _httpBufferFreeList.getHead();
-      int tail = _httpBufferFreeList.getTail();
-      
-      System.out.println("FREE_FAILED: " + _httpBufferFree.get()
-                         + " " + size + " " + head + " " + tail);
-    }
-    else {
-      _httpBufferFree.incrementAndGet();
-    }
+    _httpBufferFreeList.free(buffer);
   }
 
   /**

@@ -139,7 +139,7 @@ abstract public class AbstractHttpResponse {
   private final CharBuffer _cb = new CharBuffer();
   // private final char [] _headerBuffer = new char[256];
 
-  private HttpBufferStore _bufferStore;
+  // private HttpBufferStore _bufferStore;
 
   private boolean _isHeaderWritten;
 
@@ -153,10 +153,12 @@ abstract public class AbstractHttpResponse {
     _responseStream = createResponseStream();
   }
 
+  /*
   TempBuffer getBuffer()
   {
     return _bufferStore.getTempBuffer();
   }
+  */
 
   protected final QDate getCalendar()
   {
@@ -234,10 +236,10 @@ abstract public class AbstractHttpResponse {
   /**
    * Initializes the Response at the beginning of the request.
    */
-  public void startRequest(HttpBufferStore bufferStore)
+  public void startRequest()
     throws IOException
   {
-    _bufferStore = bufferStore;
+    // _bufferStore = bufferStore;
 
     _headerKeys.clear();
     _headerValues.clear();
@@ -1266,7 +1268,7 @@ abstract public class AbstractHttpResponse {
       return;
 
     try {
-      _bufferStore = null;
+      // _bufferStore = null;
 
       AbstractHttpRequest request = _request;
 

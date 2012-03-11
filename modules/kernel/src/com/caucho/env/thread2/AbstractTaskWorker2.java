@@ -174,7 +174,7 @@ abstract public class AbstractTaskWorker2 implements Runnable, TaskWorker {
     try {
       _thread = thread;
       thread.setContextClassLoader(_classLoader);
-      _thread.setName(getThreadName());
+      thread.setName(getThreadName());
       
       onThreadStart();
 

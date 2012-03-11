@@ -216,7 +216,7 @@ public final class ActorQueue<T extends RingItem>
       finishOffer(index);
     }
     
-    if ((index & 0x1f) == 0) {
+    if ((index & 0x3f) == 0) {
       _firstWorker.wake();
     }
     

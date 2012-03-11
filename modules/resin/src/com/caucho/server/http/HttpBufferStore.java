@@ -29,9 +29,7 @@
 
 package com.caucho.server.http;
 
-import com.caucho.server.cluster.ServletService;
 import com.caucho.util.CharSegment;
-import com.caucho.util.FreeList;
 import com.caucho.vfs.TempBuffer;
 
 /**
@@ -42,7 +40,7 @@ import com.caucho.vfs.TempBuffer;
  */
 public final class HttpBufferStore
 {
-  private final byte []_logBuffer = null;//new byte[1024];
+  // private final byte []_logBuffer = null;//new byte[1024];
   
   private final byte []_uri;              // "/path/test.jsp/Junk?query=7"
   private final char []_headerBuffer;
@@ -51,7 +49,7 @@ public final class HttpBufferStore
   private final CharSegment []_headerKeys;
   private final CharSegment []_headerValues;
   
-  private final TempBuffer _tempBuffer = TempBuffer.allocate();
+  // private final TempBuffer _tempBuffer = TempBuffer.allocate();
 
   /**
    * Create a new Request.  Because the actual initialization occurs with
@@ -106,15 +104,19 @@ public final class HttpBufferStore
     return _headerValues;
   }
 
+  /*
   public final TempBuffer getTempBuffer()
   {
     return _tempBuffer;
   }
+  */
 
+  /*
   public final byte []getLogBuffer()
   {
     return _logBuffer;
   }
+  */
 
   @Override
   public String toString()

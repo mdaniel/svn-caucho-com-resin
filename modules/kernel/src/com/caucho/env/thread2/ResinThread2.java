@@ -41,7 +41,6 @@ final class ResinThread2 extends Thread {
   private static final Logger log 
     = Logger.getLogger(ResinThread2.class.getName());
   
-  private final int _id;
   private final String _name;
   
   private final ThreadPool2 _pool;
@@ -56,8 +55,7 @@ final class ResinThread2 extends Thread {
 
   ResinThread2(int id, ThreadPool2 pool, ThreadLauncher2 launcher)
   {
-    _id = id;
-    _name = "resin-" + _id;
+    _name = "resin-" + getId();
 
     _pool = pool;
     _launcher = launcher;

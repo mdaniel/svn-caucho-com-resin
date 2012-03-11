@@ -80,9 +80,11 @@ class SocketLinkThreadLauncher extends AbstractThreadLauncher
       System.out.println("FAILED_SUBMIT:");
     }
     
+    /*
     if (_resumeTaskQueue.getSize() > 512) {
       System.out.println("SIZE: " + _resumeTaskQueue.getSize());
     }
+    */
     
     wakeResumeTask(1);
     
