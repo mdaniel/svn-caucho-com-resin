@@ -151,7 +151,7 @@ public class TcpSocketLinkListener
   private long _keepaliveTimeMax = 10 * 60 * 1000L;
   private long _keepaliveTimeout = 120 * 1000L;
   
-  private boolean _isAsyncKeepaliveEnable = true;
+  private boolean _isKeepaliveAsyncEnable = true;
   private long _keepaliveSelectThreadTimeout = 1000;
   
   // default timeout
@@ -826,14 +826,14 @@ public class TcpSocketLinkListener
     _keepaliveTimeout = timeout;
   }
 
-  public boolean isAsyncKeepaliveEnabled()
+  public boolean isKeepaliveAsyncEnabled()
   {
-    return _isAsyncKeepaliveEnable;
+    return _isKeepaliveAsyncEnable;
   }
 
   public void setKeepaliveSelectEnabled(boolean isKeepaliveSelect)
   {
-    _isAsyncKeepaliveEnable = isKeepaliveSelect;
+    _isKeepaliveAsyncEnable = isKeepaliveSelect;
   }
 
   public void setKeepaliveSelectEnable(boolean isKeepaliveSelect)
@@ -1175,7 +1175,7 @@ public class TcpSocketLinkListener
     if (_serverSocket.isJni()) {
       SocketPollService pollService = SocketPollService.getCurrent();
         
-      if (pollService != null && isAsyncKeepaliveEnabled()) {
+      if (pollService != null && isKeepaliveAsyncEnabled()) {
         _selectManager = pollService.getSelectManager();
       }
     }
@@ -1369,7 +1369,7 @@ public class TcpSocketLinkListener
         if (_serverSocket.accept(socket)) {
           //System.out.println("REMOTE: " + socket.getRemotePort());
           if (launcher.isThreadMax()
-              && ! isAsyncKeepaliveEnabled()
+              && ! isKeepaliveAsyncEnabled()
               && launcher.getIdleCount() <= 1) {
             // System.out.println("CLOSED:");
             _throttleDisconnectMeter.start();
@@ -1434,7 +1434,7 @@ public class TcpSocketLinkListener
       return false;
     else if (_launcher.isThreadMax()
              && _launcher.isIdleLow()
-             && ! isAsyncKeepaliveEnabled()) {
+             && ! isKeepaliveAsyncEnabled()) {
       return false;
     }
     else
@@ -1447,7 +1447,7 @@ public class TcpSocketLinkListener
    */
   public boolean isAsyncThrottle()
   {
-    return isAsyncKeepaliveEnabled() && _launcher.isThreadHigh();
+    return isKeepaliveAsyncEnabled() && _launcher.isThreadHigh();
   }
 
 
@@ -1503,7 +1503,7 @@ public class TcpSocketLinkListener
     try {
       int result;
 
-      if (isAsyncKeepaliveEnabled() && _selectManager != null) {
+      if (isKeepaliveAsyncEnabled() && _selectManager != null) {
         long selectTimeout = getBlockingTimeoutForSelect();
         
         if (selectTimeout < timeout) {
