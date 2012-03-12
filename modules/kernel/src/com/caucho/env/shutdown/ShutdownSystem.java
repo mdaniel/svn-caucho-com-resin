@@ -38,6 +38,7 @@ import com.caucho.env.service.*;
 import com.caucho.env.warning.WarningService;
 import com.caucho.lifecycle.*;
 import com.caucho.util.*;
+import com.caucho.vfs.TempBuffer;
 
 /**
  * The ShutdownSystem manages the Resin shutdown and includes a timeout
@@ -145,6 +146,8 @@ public class ShutdownSystem extends AbstractResinSubSystem
    */
   public static void shutdownOutOfMemory(String msg)
   {
+    freeMemoryBuffers();
+    
     ShutdownSystem shutdown = _activeService.get();
     
     if (shutdown != null && ! shutdown.isShutdownOnOutOfMemory()) {
@@ -154,6 +157,15 @@ public class ShutdownSystem extends AbstractResinSubSystem
     else {
       shutdownActive(ExitCode.MEMORY, msg);
     }
+  }
+  
+  /**
+   * Attempt to free as much memory as possible for OOM handling.
+   * These calls must not allocate memory.
+   */
+  private static void freeMemoryBuffers()
+  {
+    TempBuffer.clearFreeLists();
   }
   
   public static void startFailsafe(String msg)

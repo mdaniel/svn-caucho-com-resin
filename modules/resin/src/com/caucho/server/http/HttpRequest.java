@@ -1201,9 +1201,6 @@ public class HttpRequest extends AbstractHttpRequest
       readTail = headerBuffer.length - 1;
     }
 
-    CharSegment []headerKeys = _headerKeys;
-    CharSegment []headerValues = _headerValues;
-
     boolean isLogFine = log.isLoggable(Level.FINE);
 
     while (true) {
@@ -1264,7 +1261,7 @@ public class HttpRequest extends AbstractHttpRequest
       while (true) {
         if (readTail <= readOffset) {
           if ((readTail = fillHeaderTail(s, readOffset, headerOffset)) <= 0) {
-            return;
+            break;
           }
 
           readOffset = s.getOffset();
@@ -1296,6 +1293,17 @@ public class HttpRequest extends AbstractHttpRequest
       }
       
       int headerSize = _headerSize;
+      
+      CharSegment []headerKeys = _headerKeys;
+      CharSegment []headerValues = _headerValues;
+
+      if (headerKeys.length <= headerSize) {
+        extendHeaderBuffers();
+        
+        headerBuffer = _headerBuffer;
+        headerKeys = _headerKeys;
+        headerValues = _headerValues;
+      }
 
       headerKeys[headerSize].init(headerBuffer, keyOffset, keyLength);
 
@@ -1320,6 +1328,8 @@ public class HttpRequest extends AbstractHttpRequest
                              int headerOffset)
     throws IOException
   {
+    _headerLength = headerOffset;
+    
     if (_headerBuffer.length <= headerOffset) {
       extendHeaderBuffers();
     }
@@ -1342,10 +1352,51 @@ public class HttpRequest extends AbstractHttpRequest
     return tail;
   }
   
-  private void extendHeaderBuffers()
+  protected void extendHeaderBuffers()
     throws IOException
   {
-    throw new BadRequestException(L.l("headers are too long"));
+    HttpBufferStore bufferStore = getHttpBufferStore();
+    
+    if (bufferStore != null) {
+      throw new BadRequestException(L.l("URL or HTTP headers are too long (IP={0})",
+                                        getRemoteAddr()));
+    }
+    
+    bufferStore = allocateHttpBufferStore();
+    
+    char []headerBuffer = bufferStore.getHeaderBuffer();
+    CharSegment []headerKeys = bufferStore.getHeaderKeys();
+    CharSegment []headerValues = bufferStore.getHeaderValues();
+    
+    if (headerBuffer == _headerBuffer) {
+      throw new IllegalStateException();
+    }
+    
+    System.arraycopy(_headerBuffer, 0, headerBuffer, 0, _headerLength);
+    
+    for (int i = 0; i < _headerSize; i++) {
+      headerKeys[i].init(headerBuffer,  
+                         headerKeys[i].getOffset(),
+                         _headerKeys[i].getLength());
+      
+      headerValues[i].init(headerBuffer,  
+                           headerValues[i].getOffset(),
+                           _headerValues[i].getLength());
+    }
+    
+    _headerBuffer = headerBuffer;
+    _headerKeys = headerKeys;
+    _headerValues = headerValues;
+  }
+  
+  @Override
+  public void onCloseConnection()
+  {
+    super.onCloseConnection();
+    
+    _headerBuffer = null;
+    _headerKeys = null;
+    _headerValues = null;
   }
 
   //

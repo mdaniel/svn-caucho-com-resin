@@ -360,6 +360,21 @@ public class TempBuffer implements java.io.Serializable {
       buf = next;
     }
   }
+  
+  /**
+   * Called on OOM to free buffers.
+   */
+  public static void clearFreeLists()
+  {
+    while (_freeList.allocate() != null) {
+    }
+    
+    while (_largeFreeList.allocate() != null) {
+    }
+    
+    while (_smallFreeList.allocate() != null) {
+    }
+  }
 
   private static Logger log()
   {

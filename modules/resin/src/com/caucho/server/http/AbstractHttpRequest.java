@@ -347,6 +347,17 @@ public abstract class AbstractHttpRequest extends AbstractProtocolConnection
   {
     return _largeHttpBuffer;
   }
+  
+  protected final HttpBufferStore allocateHttpBufferStore()
+  {
+    if (_largeHttpBuffer != null) {
+      throw new IllegalStateException();
+    }
+
+    _largeHttpBuffer = getServer().allocateHttpBuffer();
+    
+    return _largeHttpBuffer;
+  }
 
   public WriteStream getRawWrite()
   {
@@ -1854,6 +1865,13 @@ public abstract class AbstractHttpRequest extends AbstractProtocolConnection
       finishRequest();
     } catch (Exception e) {
       log.log(Level.FINE, e.toString(), e);
+    }
+    
+    HttpBufferStore httpBuffer = _largeHttpBuffer;
+    _largeHttpBuffer = null;
+      
+    if (httpBuffer != null) {
+      getServer().freeHttpBuffer(httpBuffer);
     }
   }
 
