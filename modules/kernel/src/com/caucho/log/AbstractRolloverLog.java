@@ -105,7 +105,7 @@ public class AbstractRolloverLog {
 
   private Path _pwd = Vfs.lookup();
 
-  protected Path _path;
+  private Path _path;
 
   protected String _pathFormat;
 
@@ -923,7 +923,12 @@ public class AbstractRolloverLog {
   @Override
   public String toString()
   {
-    return getClass().getSimpleName() + "[" + _path + "]";
+    Path path = _path;
+    
+    if (path != null)
+      return getClass().getSimpleName() + "[" + path.getTail() + "]";
+    else
+      return getClass().getSimpleName() + "[" + path + "]";
   }
 
   class RolloverWorker extends AbstractTaskWorker {

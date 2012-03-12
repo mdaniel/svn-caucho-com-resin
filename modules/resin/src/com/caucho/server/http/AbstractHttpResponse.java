@@ -129,13 +129,18 @@ abstract public class AbstractHttpResponse {
 
   private final LogBuffer _logBuffer = new LogBuffer(true); 
   private final QDate _calendar = new QDate(false);
+  private final QDate _localCalendar = new QDate(true);
 
-  private final byte []_dateBuffer = new byte[256];
+  private final byte []_dateBuffer = new byte[64];
   private final CharBuffer _dateCharBuffer = new CharBuffer();
 
   private int _dateBufferLength;
   private long _lastDate;
-
+  
+  private final byte []_logDateBuffer = new byte[64];
+  private int _logDateBufferLength;
+  private long _lastLogDate;
+  
   private final CharBuffer _cb = new CharBuffer();
   // private final char [] _headerBuffer = new char[256];
 
@@ -1166,6 +1171,65 @@ abstract public class AbstractHttpResponse {
     _dateBuffer[len + 3] = (byte) '\n';
 
     _dateBufferLength = len + 4;
+  }
+
+  public final byte []fillLogDateBuffer(long now, 
+                                        String timeFormat,
+                                        int minutesOffset,
+                                        int secondsOffset)
+  {
+    if (_lastLogDate / 1000 != now / 1000) {
+      fillLogDate(now, timeFormat, minutesOffset, secondsOffset);
+    }
+    
+    return _logDateBuffer;
+  }
+  
+  public final int getLogDateBufferLength()
+  {
+    return _logDateBufferLength;
+  }
+
+  private void fillLogDate(long now, 
+                           String timeFormat,
+                           int minutesOffset,
+                           int secondsOffset)
+  {
+    if (_lastLogDate / 60000 == now / 60000) {
+      int min = (int) (now / 60000 % 60);
+      int sec = (int) (now / 1000 % 60);
+
+      int m2 = '0' + (min / 10);
+      int m1 = '0' + (min % 10);
+
+      int s2 = '0' + (sec / 10);
+      int s1 = '0' + (sec % 10);
+
+      _dateBuffer[minutesOffset + 0] = (byte) m2;
+      _dateBuffer[minutesOffset + 1] = (byte) m1;
+
+      _dateBuffer[secondsOffset + 0] = (byte) s2;
+      _dateBuffer[secondsOffset + 1] = (byte) s1;
+
+      _lastLogDate = now;
+
+      return;
+    }
+
+    _lastLogDate = now;
+    _localCalendar.setGMTTime(now);
+    _dateCharBuffer.clear();
+
+    _localCalendar.format(_dateCharBuffer, timeFormat);
+
+    char []cb = _dateCharBuffer.getBuffer();
+    int len = _dateCharBuffer.getLength();
+
+    for (int i = len - 1; i >= 0; i--) {
+      _logDateBuffer[i] = (byte) cb[i];
+    }
+
+    _logDateBufferLength = len;
   }
 
   /**

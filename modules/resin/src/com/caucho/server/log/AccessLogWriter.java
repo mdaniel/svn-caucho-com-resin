@@ -43,6 +43,7 @@ import com.caucho.util.Alarm;
 import com.caucho.util.CurrentTime;
 import com.caucho.util.FreeRing;
 import com.caucho.util.L10N;
+import com.caucho.vfs.Path;
 import com.caucho.vfs.TempStreamApi;
 
 /**
@@ -262,7 +263,12 @@ public class AccessLogWriter extends AbstractRolloverLog
     @Override
     public String toString()
     {
-      return getClass().getSimpleName() + "[" + _path.getTail() + "]";
+      Path path = getPath();
+      
+      if (path != null)
+        return getClass().getSimpleName() + "[" + path.getTail() + "]";
+      else
+        return getClass().getSimpleName() + "[" + path + "]";
     }
   }
 }

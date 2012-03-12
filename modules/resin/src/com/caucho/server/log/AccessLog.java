@@ -585,11 +585,12 @@ public class AccessLog extends AbstractAccessLog implements AlarmListener
         }
         */
 
-        data = response.fillDateBuffer(now);
-        dateOffset = response.getRawDateBufferOffset();
-        sublen = response.getRawDateBufferLength();
+        data = response.fillLogDateBuffer(now, _timeFormat,
+                                          _timeFormatMinuteOffset,
+                                          _timeFormatSecondOffset);
+        sublen = response.getLogDateBufferLength();
 
-        System.arraycopy(data, dateOffset, buffer, offset, sublen);
+        System.arraycopy(data, 0, buffer, offset, sublen);
 
         offset += sublen;
         break;
