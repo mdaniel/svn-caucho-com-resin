@@ -29,26 +29,22 @@
 
 package com.caucho.amqp.client;
 
-import com.caucho.amqp.AmqpReceiver;
-import com.caucho.amqp.AmqpReceiverFactory;
 import com.caucho.amqp.AmqpSender;
 import com.caucho.amqp.AmqpSenderFactory;
-import com.caucho.amqp.marshal.AmqpMessageDecoder;
 import com.caucho.amqp.marshal.AmqpMessageEncoder;
-import com.caucho.amqp.marshal.AmqpStringDecoder;
 import com.caucho.amqp.marshal.AmqpStringEncoder;
 import com.caucho.message.MessageSettleListener;
+import com.caucho.message.MessageSettleMode;
+import com.caucho.message.common.AbstractMessageSenderFactory;
 
 
 /**
  * AMQP client
  */
-class AmqpClientSenderFactory implements AmqpSenderFactory {
+class AmqpClientSenderFactory extends AbstractMessageSenderFactory
+  implements AmqpSenderFactory
+{
   private AmqpClientConnectionImpl _client;
-  private boolean _isAutoSettle = true;
-  private MessageSettleListener _settleListener;
-  
-  private String _address;
   
   private AmqpMessageEncoder<?> _encoder = AmqpStringEncoder.ENCODER;
   
@@ -56,53 +52,37 @@ class AmqpClientSenderFactory implements AmqpSenderFactory {
   {
     _client = client;
   }
-  
-  public String getAddress()
+
+  @Override
+  public AmqpClientSenderFactory setAddress(String address)
   {
-    return _address;
+    super.setAddress(address);
+    
+    return this;
   }
 
   @Override
-  public AmqpSenderFactory setAddress(String address)
+  public AmqpClientSenderFactory setSettleMode(MessageSettleMode settleMode)
   {
-    _address = address;
+    super.setSettleMode(settleMode);
+    
+    return this;
+  }
+
+  @Override
+  public AmqpClientSenderFactory setSettleListener(MessageSettleListener listener)
+  {
+    super.setSettleListener(listener);
     
     return this;
   }
   
   @Override
-  public boolean isAutoSettle()
+  public AmqpClientSenderFactory setEncoder(AmqpMessageEncoder<?> encoder)
   {
-    return _isAutoSettle;
-  }
-
-  @Override
-  public AmqpSenderFactory setAutoSettle(boolean isAutoSettle)
-  {
-    _isAutoSettle = isAutoSettle;
-    
-    return this;
-  }
-  
-  @Override
-  public MessageSettleListener getSettleListener()
-  {
-    return _settleListener;
-  }
-
-  @Override
-  public AmqpSenderFactory setSettleListener(MessageSettleListener listener)
-  {
-    _settleListener = listener;
-    
-    return this;
-  }
-  
-  @Override
-  public AmqpSenderFactory setEncoder(AmqpMessageEncoder<?> encoder)
-  {
-    if (encoder == null)
+    if (encoder == null) {
       throw new NullPointerException();
+    }
     
     _encoder = encoder;
     

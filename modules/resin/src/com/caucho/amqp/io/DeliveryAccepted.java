@@ -31,6 +31,8 @@ package com.caucho.amqp.io;
 
 import java.io.IOException;
 
+import com.caucho.amqp.common.DeliveryNode;
+
 
 /**
  * AMQP delivery accepted
@@ -38,7 +40,16 @@ import java.io.IOException;
 public class DeliveryAccepted extends DeliveryState {
   public static final DeliveryAccepted VALUE
     = new DeliveryAccepted();
-  
+
+  /**
+   * Called on a disposition update.
+   */
+  @Override
+  public void update(long xid, DeliveryNode node)
+  {
+    node.onAccepted(xid);
+  }
+
   @Override
   public long getDescriptorCode()
   {

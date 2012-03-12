@@ -27,73 +27,37 @@
  * @author Scott Ferguson
  */
 
-package com.caucho.amqp.io;
+package com.caucho.amqp.common;
 
-import java.io.IOException;
+import java.io.InputStream;
 
-import com.caucho.amqp.common.DeliveryNode;
-
+import com.caucho.amqp.io.FrameAttach.Role;
+import com.caucho.message.MessageSettleMode;
 
 /**
- * AMQP delivery received
+ * link management
  */
-public class DeliveryRejected extends DeliveryState {
-  private AmqpError _error;
-  
-  public AmqpError getError()
+abstract public class AmqpSenderLink extends AmqpLink
+{
+  protected AmqpSenderLink(String name, String address)
   {
-    return _error;
+    super(name, address);
   }
-  
-  public void setError(AmqpError error)
-  {
-    _error = error;
-  }
-  
-  //
-  // action methods
-  //
-
-  /**
-   * Called on a disposition update.
-   */
-  @Override
-  public final void update(long xid, DeliveryNode node)
-  {
-    node.onRejected(xid, _error);
-  }
-  
-  //
-  // i/o methods
-  //
 
   @Override
-  public long getDescriptorCode()
+  public final Role getRole()
   {
-    return ST_MESSAGE_REJECTED;
+    return Role.SENDER;
   }
   
-  public DeliveryRejected createInstance()
+  //
+  // message transfer
+  //
+
+  public void transfer(long mid,
+                       MessageSettleMode settleMode,
+                       InputStream is)
   {
-    return new DeliveryRejected();
-  }
-  
-  @Override
-  public void readBody(AmqpReader in, int count)
-    throws IOException
-  {
-    _error = in.readObject(AmqpError.class);
-  }
-  
-  @Override
-  public int writeBody(AmqpWriter out)
-    throws IOException
-  {
-    if (_error != null)
-      _error.write(out);
-    else
-      out.writeNull();
-    
-    return 1;
+    getSession().transfer(this, mid, settleMode, is);
   }
 }

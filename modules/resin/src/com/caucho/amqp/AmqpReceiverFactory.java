@@ -30,27 +30,22 @@
 package com.caucho.amqp;
 
 import com.caucho.amqp.marshal.AmqpMessageDecoder;
+import com.caucho.message.MessageReceiverFactory;
 
 
 /**
  * AMQP client receiver factor
  */
-public interface AmqpReceiverFactory {
+public interface AmqpReceiverFactory extends MessageReceiverFactory {
+  @Override
   public AmqpReceiverFactory setAddress(String address);
-  
-  public String getAddress();
-  
-  public AmqpReceiverFactory setAckMode(boolean isAutoAck);
-  
-  public boolean getAckMode();
-  
+
+  @Override
   public AmqpReceiverFactory setPrefetch(int prefetch);
-  
-  public int getPrefetch();
   
   public AmqpReceiverFactory setDecoder(AmqpMessageDecoder<?> decoder);
   
   public AmqpMessageDecoder<?> getDecoder();
   
-  public AmqpReceiver build();
+  public AmqpReceiver<?> build();
 }

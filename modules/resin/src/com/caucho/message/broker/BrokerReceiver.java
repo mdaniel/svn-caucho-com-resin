@@ -34,18 +34,18 @@ package com.caucho.message.broker;
  */
 public interface BrokerReceiver
 {
-  public void accept(long xid, long mid);
+  public void accepted(long xid, long mid);
   
-  public void reject(long xid, long mid, String message);
+  public void rejected(long xid, long mid, String message);
   
-  public void release(long xid, long mid);
+  public void released(long xid, long mid);
   
   public void modified(long xid, 
                        long mid, 
                        boolean isFailed, 
                        boolean isUndeliverableHere);
   
-  public void flow(long xid, long deliveryCount, int credit);
+  public void flow(long deliveryCount, int credit);
   
   public void close();
 }

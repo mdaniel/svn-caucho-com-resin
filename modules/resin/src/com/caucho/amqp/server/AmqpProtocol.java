@@ -31,6 +31,10 @@ package com.caucho.amqp.server;
 
 import javax.annotation.PostConstruct;
 
+import com.caucho.amqp.common.AmqpReceiverLink;
+import com.caucho.message.broker.BrokerReceiver;
+import com.caucho.message.broker.BrokerSender;
+import com.caucho.message.broker.EnvironmentMessageBroker;
 import com.caucho.network.listen.Protocol;
 import com.caucho.network.listen.ProtocolConnection;
 import com.caucho.network.listen.SocketLink;
@@ -40,27 +44,50 @@ import com.caucho.network.listen.SocketLink;
  */
 public class AmqpProtocol implements Protocol
 {
+  private EnvironmentMessageBroker _broker;
+  
   @PostConstruct
   public void init()
   {
-    /*
+    _broker = EnvironmentMessageBroker.create();
+    
     if (_broker == null) {
-      _broker = StompEnvironmentBroker.create();
+      throw new NullPointerException();
     }
-    */
   }
-  
-  /*
-  public StompBroker getBroker()
-  {
-    return _broker;
-  }
-  */
   
   @Override
   public ProtocolConnection createConnection(SocketLink link)
   {
     return new AmqpServerConnection(this, link);
+  }
+
+  AmqpServerReceiverLink createReceiverLink(String name, String address)
+  {
+    BrokerSender sender = _broker.createSender(address);
+    
+    if (sender != null) {
+      return new AmqpServerReceiverLink(name, address, sender);
+    }
+    else {
+      return null;
+    }
+  }
+
+  AmqpServerSenderLink createSenderLink(String name, String address)
+  {
+    AmqpServerSenderLink link = new AmqpServerSenderLink(name, address);
+    
+    BrokerReceiver receiver = _broker.createReceiver(address, link.getBrokerHandler());
+    
+    if (receiver != null) {
+      link.setReceiver(receiver);
+      
+      return link;
+    }
+    else {
+      return null;
+    }
   }
 
   @Override

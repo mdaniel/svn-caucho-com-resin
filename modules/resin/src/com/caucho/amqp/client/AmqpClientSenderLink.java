@@ -29,48 +29,31 @@
 
 package com.caucho.amqp.client;
 
+import java.io.InputStream;
+
 import com.caucho.amqp.common.AmqpLink;
-import com.caucho.amqp.common.AmqpSession;
-import com.caucho.amqp.io.FrameAttach;
+import com.caucho.amqp.common.AmqpSenderLink;
+import com.caucho.message.MessageSettleMode;
 
 /**
  * link session management
  */
-public class AmqpClientLink extends AmqpLink
+public class AmqpClientSenderLink extends AmqpSenderLink
 {
-  private AmqpClientReceiver<?> _receiver;
-  private AmqpClientSender<?> _sender;
+  private final AmqpClientSender<?> _sender;
   
-  public AmqpClientLink(AmqpClientSession session, FrameAttach attach)
+  public AmqpClientSenderLink(String name,
+                              String address,
+                              AmqpClientSender<?> sender)
   {
-    super(session, attach);
-  }
-  
-  @Override
-  public AmqpClientSession getSession()
-  {
-    return (AmqpClientSession) super.getSession();
+    super(name, address);
+    
+    _sender = sender;
   }
   
   public long nextMessageId()
   {
     return 3;
-  }
-  
-  public void write(long xid, long mid, boolean isSettled,
-             boolean isDurable, int priority, long expireTime,
-             byte []buffer, int offset, int length)
-  {
-  }
-
-  public AmqpClientReceiver<?> getReceiver()
-  {
-    return _receiver;
-  }
-
-  public void setReceiver(AmqpClientReceiver<?> receiver)
-  {
-    _receiver = receiver;
   }
 
   public AmqpClientSender<?> getSender()
@@ -78,19 +61,36 @@ public class AmqpClientLink extends AmqpLink
     return _sender;
   }
 
-  public void setSender(AmqpClientSender<?> sender)
+  /**
+   * Transfers a message, returning the message id.
+   */
+  long transfer(MessageSettleMode settleMode, InputStream is)
   {
-    _sender = sender;
+    long mid = nextMessageId();
+
+    transfer(mid, settleMode, is);
+    
+    return mid;
   }
 
   /**
    * @param messageId
    */
   @Override
-  public void onAccept(long xid, long messageId)
+  public void onAccepted(long xid, long messageId)
   {
-    getSession().accepted(messageId);
+    super.onAccepted(xid, messageId);
+    // getSession().accepted(messageId);
     
     getSender().onAccept(messageId);
+  }
+
+  /**
+   * 
+   */
+  public void detach()
+  {
+    // TODO Auto-generated method stub
+    
   }
 }

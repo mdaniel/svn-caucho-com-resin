@@ -29,23 +29,23 @@
 
 package com.caucho.message.common;
 
-import com.caucho.message.MessageSenderFactory;
-import com.caucho.message.MessageSettleListener;
+import com.caucho.message.MessageReceiver;
+import com.caucho.message.MessageReceiverFactory;
 import com.caucho.message.MessageSettleMode;
 import com.caucho.util.L10N;
 
 /**
  * local connection to the message store
  */
-abstract public class AbstractMessageSenderFactory implements MessageSenderFactory {
-  private static final L10N L = new L10N(AbstractMessageSenderFactory.class);
+abstract public class AbstractMessageReceiverFactory implements MessageReceiverFactory {
+  private static final L10N L = new L10N(AbstractMessageReceiverFactory.class);
   
   private String _address;
+  private int _prefetch;
   private MessageSettleMode _settleMode = MessageSettleMode.NETWORK_EXACTLY_ONCE;
-  private MessageSettleListener _settleListener;
 
   @Override
-  public AbstractMessageSenderFactory setAddress(String address)
+  public MessageReceiverFactory setAddress(String address)
   {
     _address = address;
     
@@ -59,7 +59,21 @@ abstract public class AbstractMessageSenderFactory implements MessageSenderFacto
   }
 
   @Override
-  public AbstractMessageSenderFactory setSettleMode(MessageSettleMode settleMode)
+  public int getPrefetch()
+  {
+    return _prefetch;
+  }
+
+  @Override
+  public MessageReceiverFactory setPrefetch(int prefetch)
+  {
+    _prefetch = prefetch;
+
+    return this;
+  }
+
+  @Override
+  public MessageReceiverFactory setSettleMode(MessageSettleMode settleMode)
   {
     switch (settleMode) {
     case ALWAYS:
@@ -69,7 +83,7 @@ abstract public class AbstractMessageSenderFactory implements MessageSenderFacto
       break;
       
     default:
-      throw new IllegalArgumentException(L.l("{0} is an invalid sender settle mode.",
+      throw new IllegalArgumentException(L.l("{0} is an invalid receiver settle mode.",
                                              settleMode));
     }
     
@@ -83,16 +97,11 @@ abstract public class AbstractMessageSenderFactory implements MessageSenderFacto
   }
 
   @Override
-  public AbstractMessageSenderFactory setSettleListener(MessageSettleListener listener)
+  abstract public MessageReceiver<?> build();
+  
+  @Override 
+  public String toString()
   {
-    _settleListener = listener;
-    
-    return this;
-  }
-
-  @Override
-  public MessageSettleListener getSettleListener()
-  {
-    return _settleListener;
+    return getClass().getSimpleName() + "[" + _address + "]";
   }
 }

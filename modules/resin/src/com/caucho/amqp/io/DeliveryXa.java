@@ -31,6 +31,8 @@ package com.caucho.amqp.io;
 
 import java.io.IOException;
 
+import com.caucho.amqp.common.DeliveryNode;
+
 
 /**
  * AMQP delivery accepted
@@ -38,6 +40,21 @@ import java.io.IOException;
 public class DeliveryXa extends DeliveryState {
   private byte []_txnId; // required 32-bit binary
   private DeliveryState _outcome;
+  
+
+  /**
+   * Called on a disposition update.
+   */
+  @Override
+  public void update(long xid, DeliveryNode node)
+  {
+    node.onXa(xid, _txnId, _outcome);
+  }
+
+  
+  //
+  // i/o methods
+  //
   
   @Override
   public long getDescriptorCode()

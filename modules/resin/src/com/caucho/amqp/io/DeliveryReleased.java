@@ -31,12 +31,27 @@ package com.caucho.amqp.io;
 
 import java.io.IOException;
 
+import com.caucho.amqp.common.DeliveryNode;
+
 
 /**
  * AMQP delivery accepted
  */
 public class DeliveryReleased extends DeliveryState {
   public static final DeliveryReleased VALUE = new DeliveryReleased();
+
+  /**
+   * Called on a disposition update.
+   */
+  @Override
+  public void update(long xid, DeliveryNode node)
+  {
+    node.onReleased(xid);
+  }
+
+  //
+  // i/o methods
+  //
   
   @Override
   public long getDescriptorCode()

@@ -40,7 +40,7 @@ import com.caucho.util.L10N;
 /**
  * AMQP connection-open frame 
  */
-public class FrameOpen extends AmqpAbstractComposite {
+public class FrameOpen extends AmqpAbstractFrame {
   private static final L10N L = new L10N(FrameOpen.class);
   
   public static final int CODE = AmqpConstants.FT_CONN_OPEN;

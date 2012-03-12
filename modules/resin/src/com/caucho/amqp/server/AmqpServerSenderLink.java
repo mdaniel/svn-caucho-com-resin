@@ -29,105 +29,97 @@
 
 package com.caucho.amqp.server;
 
-import com.caucho.amqp.io.FrameAttach;
+import java.io.IOException;
+import java.io.InputStream;
+
+import com.caucho.amqp.common.AmqpSenderLink;
 import com.caucho.amqp.io.FrameFlow;
-import com.caucho.message.broker.BrokerSender;
-import com.caucho.message.broker.SenderSettleHandler;
+import com.caucho.message.MessageSettleMode;
+import com.caucho.message.broker.BrokerReceiver;
+import com.caucho.message.broker.ReceiverMessageHandler;
 
 /**
  * link session management
  */
-public class AmqpServerSenderLink extends AmqpServerLink
+public class AmqpServerSenderLink extends AmqpSenderLink
 {
-  private BrokerSender _pub;
-  private MessageSettleHandler _settleHandler;
+  private ReceiverMessageHandler _receiverHandler;
+  private BrokerReceiver _receiver;
   
-  public AmqpServerSenderLink(AmqpServerSession session,
-                              FrameAttach attach,
-                              BrokerSender pub)
+  public AmqpServerSenderLink(String name,
+                              String address)
   {
-    super(session, attach);
+    super(name, address);
     
-    _pub = pub;
+    _receiverHandler = new BrokerMessageReceiver();
   }
   
-  public long nextMessageId()
+  ReceiverMessageHandler getBrokerHandler()
   {
-    return _pub.nextMessageId();
+    return _receiverHandler;
   }
   
-  public void write(long xid, long mid, boolean isSettled,
-             boolean isDurable, int priority, long expireTime,
-             byte []buffer, int offset, int length)
+  void setReceiver(BrokerReceiver receiver)
   {
-    SenderSettleHandler handler = null;
-    
-    if (! isSettled) {
-      handler = new MessageSettleHandler(mid);
-    }
-    
-    _pub.message(xid, mid, isDurable, priority, expireTime,
-                 buffer, offset, length, null, handler);
-  }
-
-  /**
-   * @param messageId
-   */
-  public void onAccept(long xid, long messageId)
-  {
-    throw new UnsupportedOperationException(getClass().getName());
-  }
-
-  /**
-   * @param messageId
-   */
-  public void reject(long xid, long messageId, String message)
-  {
-    throw new UnsupportedOperationException(getClass().getName());
-  }
-
-  /**
-   * @param messageId
-   */
-  public void release(long xid, long messageId)
-  {
-    throw new UnsupportedOperationException(getClass().getName());
+    _receiver = receiver;
   }
   
-  public void modified(long xid,
-                       long mid, 
-                       boolean isFailed, 
-                       boolean isUndeliverableHere)
+  
+  //
+  // disposition
+  //
+
+  @Override
+  public void onAccepted(long xid, long mid)
   {
-    throw new UnsupportedOperationException(getClass().getName());
+    _receiver.accepted(xid, mid);
   }
+  
+  @Override
+  public void onReleased(long xid, long messageId)
+  {
+    _receiver.released(xid, messageId);
+  }
+  
+  @Override
+  public void onRejected(long xid, long messageId, String message)
+  {
+    _receiver.rejected(xid, messageId, message);
+  }
+  
+  @Override
+  public void onModified(long xid,
+                         long mid, 
+                         boolean isFailed, 
+                         boolean isUndeliverableHere)
+  {
+    _receiver.modified(xid, mid, isFailed, isUndeliverableHere);
+  }
+  
+  //
+  // flow control
+  //
 
   /**
    * @param flow
    */
+  @Override
   public void onFlow(FrameFlow flow)
   {
-    throw new UnsupportedOperationException(getClass().getName());
+    _receiver.flow(flow.getDeliveryCount(), flow.getLinkCredit());
   }
   
-  class MessageSettleHandler implements SenderSettleHandler {
-    private final long _deliveryId;
-    
-    MessageSettleHandler(long deliveryId)
-    {
-      _deliveryId = deliveryId;
-    }
-    
+  private class BrokerMessageReceiver implements ReceiverMessageHandler {
+    /*
+     * Receive a message from the broker, send it to the link.
+     */
     @Override
-    public void onAccepted(long mid)
+    public void onMessage(long messageId, InputStream is, long contentLength)
+      throws IOException
     {
-      getSession().onAccepted(_deliveryId);
-    }
-
-    @Override
-    public void onRejected(long mid, String msg)
-    {
-      getSession().onRejected(_deliveryId, msg);
+      MessageSettleMode settleMode = MessageSettleMode.ALWAYS;
+      
+      transfer(messageId, settleMode, is);
     }
   }
 }

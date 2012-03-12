@@ -33,6 +33,7 @@ import com.caucho.message.MessageFactory;
 import com.caucho.message.MessageSender;
 import com.caucho.message.MessageSenderFactory;
 import com.caucho.message.MessageSettleListener;
+import com.caucho.message.MessageSettleMode;
 
 /**
  * local connection to the message store
@@ -41,11 +42,24 @@ abstract public class AbstractMessageSender<T>
   extends AbstractQueueSender<T>
   implements MessageSender<T>
 {
-  private MessageSettleListener _settleListener;
+  private final MessageSettleMode _settleMode;
+  private final MessageSettleListener _settleListener;
   
   protected AbstractMessageSender(MessageSenderFactory factory)
   {
+    _settleMode = factory.getSettleMode();
     _settleListener = factory.getSettleListener();
+  }
+  
+  @Override
+  public final MessageSettleMode getSettleMode()
+  {
+    return _settleMode;
+  }
+  
+  public final MessageSettleListener getSettleListener()
+  {
+    return _settleListener;
   }
   
   @Override
@@ -55,27 +69,11 @@ abstract public class AbstractMessageSender<T>
   }
   
   @Override
-  public boolean isAutoSettle()
-  {
-    return true;
-  }
-  
-  @Override
   public int getUnsettledCount()
   {
     return 0;
   }
-  
-  public MessageSettleListener getSettleListener()
-  {
-    return _settleListener;
-  }
-  
-  public void setMessageSettleListener(MessageSettleListener listener)
-  {
-    _settleListener = listener;
-  }
-  
+
   /**
    * Offers a value to the queue.
    */

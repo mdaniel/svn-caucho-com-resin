@@ -31,6 +31,8 @@ package com.caucho.amqp.io;
 
 import java.io.IOException;
 
+import com.caucho.amqp.common.DeliveryNode;
+
 
 /**
  * AMQP delivery received
@@ -58,6 +60,22 @@ public class DeliveryReceived extends DeliveryState {
   {
     _sectionOffset = sectionOffset;
   }
+  
+  //
+  // action methods
+  //
+
+  /**
+   * Called on a disposition update.
+   */
+  @Override
+  public void update(long xid, DeliveryNode node)
+  {
+    node.onReceived(xid);
+  }
+  
+  //
+  // i/o methods
 
   @Override
   public long getDescriptorCode()

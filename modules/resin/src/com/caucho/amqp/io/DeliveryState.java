@@ -29,11 +29,15 @@
 
 package com.caucho.amqp.io;
 
-import java.io.IOException;
+import com.caucho.amqp.common.DeliveryNode;
 
 
 /**
  * message delivery state
  */
 abstract public class DeliveryState extends AmqpAbstractComposite {
+  /**
+   * Called on a disposition change.
+   */
+  abstract public void update(long xid, DeliveryNode node);
 }

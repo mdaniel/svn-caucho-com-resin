@@ -32,6 +32,8 @@ package com.caucho.amqp.io;
 import java.io.IOException;
 import java.util.Map;
 
+import com.caucho.amqp.common.DeliveryNode;
+
 
 /**
  * AMQP delivery received
@@ -59,6 +61,15 @@ public class DeliveryModified extends DeliveryState {
   public void setUndeliverableHere(boolean isUndeliverable)
   {
     _isUndeliverableHere = isUndeliverable;
+  }
+
+  /**
+   * Called on a disposition update.
+   */
+  @Override
+  public void update(long xid, DeliveryNode node)
+  {
+    node.onModified(xid, isDeliveryFailed(), isUndeliverableHere());
   }
 
   @Override

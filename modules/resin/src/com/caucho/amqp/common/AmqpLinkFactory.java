@@ -27,37 +27,14 @@
  * @author Scott Ferguson
  */
 
-package com.caucho.amqp.server;
-
-import com.caucho.amqp.common.AmqpLink;
-import com.caucho.amqp.io.FrameAttach;
+package com.caucho.amqp.common;
 
 /**
- * link session management
+ * link management
  */
-abstract class AmqpServerLink extends AmqpLink
+public interface AmqpLinkFactory
 {
-  protected AmqpServerLink(AmqpServerSession session,
-                           FrameAttach attach)
-  {
-    super(session, attach);
-  }
+  public AmqpSenderLink createSenderLink(String name, String address);
   
-  @Override
-  public AmqpServerSession getSession()
-  {
-    return (AmqpServerSession) super.getSession();
-  }
-  
-  public long nextMessageId()
-  {
-    throw new UnsupportedOperationException();
-  }
-  
-  public void write(long xid, long mid, boolean isSettled,
-             boolean isDurable, int priority, long expireTime,
-             byte []buffer, int offset, int length)
-  {
-    throw new UnsupportedOperationException();
-  }
+  public AmqpReceiverLink createReceiverLink(String name, String address);
 }

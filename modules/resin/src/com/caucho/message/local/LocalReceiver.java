@@ -88,7 +88,7 @@ public class LocalReceiver<T> extends AbstractMessageReceiver<T> {
     
     _linkCredit = _prefetch;
     if (_prefetch > 0) {
-      _sub.flow(0, -1, _prefetch);
+      _sub.flow(-1, _prefetch);
     }
   }
   
@@ -133,7 +133,7 @@ public class LocalReceiver<T> extends AbstractMessageReceiver<T> {
         int delta = _prefetch - _linkCredit;
         
         if (_linkCredit <= (_prefetch >> 2)) {
-          _sub.flow(0, -1, _prefetch);
+          _sub.flow(-1, _prefetch);
           _linkCredit = _prefetch;
         }
       }

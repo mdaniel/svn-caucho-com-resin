@@ -35,6 +35,11 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 
 import com.caucho.amqp.AmqpException;
+import com.caucho.amqp.common.AmqpConnectionHandler;
+import com.caucho.amqp.common.AmqpLink;
+import com.caucho.amqp.common.AmqpLinkFactory;
+import com.caucho.amqp.common.AmqpReceiverLink;
+import com.caucho.amqp.common.AmqpSenderLink;
 import com.caucho.amqp.common.AmqpSession;
 import com.caucho.amqp.io.AmqpConstants;
 import com.caucho.amqp.io.AmqpError;
@@ -62,6 +67,7 @@ import com.caucho.amqp.io.MessageHeader;
 import com.caucho.amqp.io.SaslMechanisms;
 import com.caucho.amqp.io.SaslOutcome;
 import com.caucho.amqp.io.FrameAttach.Role;
+import com.caucho.message.MessageSettleMode;
 import com.caucho.message.broker.MessageBroker;
 import com.caucho.message.broker.BrokerReceiver;
 import com.caucho.message.broker.BrokerSender;
@@ -79,7 +85,6 @@ import com.caucho.vfs.WriteStream;
  * Amqp server connection
  */
 public class AmqpServerConnection extends AbstractProtocolConnection
-  implements AmqpFrameHandler
 {
   private static final Logger log
     = Logger.getLogger(AmqpServerConnection.class.getName());
@@ -90,16 +95,8 @@ public class AmqpServerConnection extends AbstractProtocolConnection
   private State _state = State.NEW;
   private boolean _isSasl;
   
-  private AmqpServerSession []_sessions = new AmqpServerSession[1];
-  
-  private AmqpFrameReader _fin;
-  private AmqpReader _ain;
-  
-  private AmqpFrameWriter _fout;
-  private AmqpWriter _aout;
-  
-  private boolean _isClosed;
-  private boolean _isDisconnected;
+  private ServerLinkFactory _linkFactory;
+  private AmqpConnectionHandler _handler;
   
   AmqpServerConnection(AmqpProtocol amqp, SocketLink link)
   {
@@ -110,7 +107,7 @@ public class AmqpServerConnection extends AbstractProtocolConnection
   @Override
   public String getProtocolRequestURL()
   {
-    return "stomp:";
+    return "amqp:";
   }
   
   @Override
@@ -138,14 +135,10 @@ public class AmqpServerConnection extends AbstractProtocolConnection
   {
     _state = State.NEW;
     
-    _fin = new AmqpFrameReader();
-    _fin.init(getReadStream());
-    _ain = new AmqpReader();
-    _ain.init(_fin);
-    
-    _fout = new AmqpFrameWriter(getWriteStream());
-    _aout = new AmqpWriter();
-    _aout.initBase(_fout);
+    _linkFactory = new ServerLinkFactory();
+    _handler = new AmqpConnectionHandler(_linkFactory,
+                                         getReadStream(),
+                                         getWriteStream());
   }
 
   @Override
@@ -155,36 +148,30 @@ public class AmqpServerConnection extends AbstractProtocolConnection
     
     switch (_state) {
     case NEW:
-      if (! readVersion(is)) {
+      if (! _handler.getReader().readVersion()) {
         return false;
       }
       
       if (_isSasl) {
         System.out.println("SASL:");
         try {
-          sendSaslChallenge();
+          _handler.getWriter().sendSaslChallenge();
           System.out.println("SENDED:");
           
-          readVersion(is);
+          _handler.getReader().readVersion();
         } catch (Exception e) {
           e.printStackTrace();
         }
-        
-        int ch;
-        while ((ch = is.read()) >= 0) {
-          System.out.println("CH: " + Integer.toHexString(ch) + " " + (char) ch);
-        }
-        System.out.println("DONE-CH: " + Integer.toHexString(ch));
       }
       
-      readOpen();
-      writeOpen();
+      _handler.getReader().readOpen();
+      _handler.getWriter().writeOpen();
       
       _state = State.OPEN;
       return true;
       
     case OPEN:
-      return readFrame();
+      return _handler.getReader().readFrame();
       
     default:
       System.out.println("UNKNOWN STATE: " + _state);
@@ -194,464 +181,7 @@ public class AmqpServerConnection extends AbstractProtocolConnection
 
     return false;
   }
-  
-  private boolean readVersion(ReadStream is)
-    throws IOException
-  {
-    if (is.read() != 'A'
-        || is.read() != 'M'
-        || is.read() != 'Q'
-        || is.read() != 'P') {
-      System.out.println("ILLEGAL_HEADER:");
-      throw new IOException();
-    }
-    
-    int code = is.read();
-    
-    switch (code) {
-    case 0x00:
-      _isSasl = false;
-      break;
-    case 0x03:
-      _isSasl = true;
-      break;
-    default:
-      System.out.println("BAD_CODE: " + code);
-      throw new IOException("Unknown code");
-    }
-    
-    int major = is.read() & 0xff;
-    int minor = is.read() & 0xff;
-    int version = is.read() & 0xff;
-    
-    if (major != 0x01 || minor != 0x00 || version != 0x00) {
-      System.out.println("UNKNOWN_VERSION");
-      throw new IOException();
-    }
-    
-    WriteStream os = _link.getWriteStream();
-    
-    os.write('A');
-    os.write('M');
-    os.write('Q');
-    os.write('P');
-    os.write(code); // sasl?
-    os.write(0x01); // major
-    os.write(0x00); // minor
-    os.write(0x00); // version
-    os.flush();
-    
-    return true;
-  }
-  
-  private void sendSaslChallenge()
-    throws IOException
-  {
-    WriteStream os = _link.getWriteStream();
-    
-    AmqpFrameWriter frameOs = new AmqpFrameWriter(os);
-    
-    frameOs.startFrame(1);
-    
-    AmqpWriter out = new AmqpWriter();
-    out.initBase(frameOs);
-    
-    SaslMechanisms mechanisms = new SaslMechanisms();
-    mechanisms.write(out);
-    
-    frameOs.finishFrame();
-    os.flush();
-    
-    System.out.println("SASL_DONE:");
-    
-    frameOs.startFrame(1);
-    out.init(frameOs);
-    
-    SaslOutcome outcome = new SaslOutcome();
-    outcome.write(out);
-    
-    frameOs.finishFrame();
-    os.flush();
-    
-    System.out.println("SASL_DONE2:");
-  }
-  
-  private boolean readOpen()
-    throws IOException
-  {
-    if (! _fin.startFrame()) {
-      return false;
-    }
-    
-    FrameOpen open = _ain.readObject(FrameOpen.class);
-    
-    _fin.finishFrame();
-    
-    return true;
-  }
-  
-  private void writeOpen()
-    throws IOException
-  {
-    _fout.startFrame(0);
-    
-    FrameOpen open = new FrameOpen();
-    open.setContainerId("ResinAmqpServer");
-    
-    open.write(_aout);
-    
-    _fout.finishFrame();
-    _fout.flush();
-  }
-  
-  void writeMessage(AmqpServerReceiverLink link,
-                    long messageId,
-                    InputStream is,
-                    long length)
-    throws IOException
-  {
-    AmqpServerSession session = _sessions[0];
-    
-    long deliveryId = session.addDelivery(link, messageId, false);
-    
-    FrameTransfer transfer = new FrameTransfer();
-    transfer.setDeliveryId(deliveryId);
-    transfer.setHandle(link.getOutgoingHandle());
-    
-    _fout.startFrame(0);
-    
-    transfer.write(_aout);
-    
-    int ch;
-    
-    while ((ch = is.read()) >= 0) {
-      _fout.write(ch);
-    }
-    
-    _fout.finishFrame();
-    _fout.flush();
-  }
 
-  void onAccepted(long deliveryId)
-  {
-    try {
-      AmqpServerSession session = _sessions[0];
-    
-      FrameDisposition disposition = new FrameDisposition();
-      disposition.setFirst(deliveryId);
-      disposition.setLast(deliveryId);
-      disposition.setState(DeliveryAccepted.VALUE);
-    
-      _fout.startFrame(0);
-    
-      disposition.write(_aout);
-    
-      _fout.finishFrame();
-      _fout.flush();
-    } catch (IOException e) {
-      log.log(Level.FINER, e.toString(), e);
-    }
- 
-  }
-
-  void onRejected(long deliveryId, String msg)
-  {
-    try {
-      AmqpServerSession session = _sessions[0];
-    
-      FrameDisposition disposition = new FrameDisposition();
-      disposition.setFirst(deliveryId);
-      disposition.setLast(deliveryId);
-      AmqpError error = new AmqpError();
-      error.setDescription(msg);
-      DeliveryRejected rejected = new DeliveryRejected();
-      rejected.setError(error);
-      disposition.setState(rejected);
-    
-      _fout.startFrame(0);
-    
-      disposition.write(_aout);
-    
-      _fout.finishFrame();
-      _fout.flush();
-    } catch (IOException e) {
-      log.log(Level.FINER, e.toString(), e);
-    }
- 
-  }
-
-  private boolean readFrame()
-    throws IOException
-  {
-    if (! _fin.startFrame()) {
-      return false;
-    }
-    
-    AmqpAbstractFrame frame = _ain.readObject(AmqpAbstractFrame.class);
-    
-    frame.invoke(_ain, this);
-    
-    _fin.finishFrame();
-    
-    return true;
-  }
-  
-  @Override
-  public void onBegin(FrameBegin clientBegin)
-    throws IOException
-  {
-    _sessions[0] = new AmqpServerSession(this);
-    
-    FrameBegin serverBegin = new FrameBegin();
-    
-    sendFrame(serverBegin);
-  }
-  
-  @Override
-  public void onAttach(FrameAttach clientAttach)
-    throws IOException
-  {
-    AmqpServerSession session = _sessions[0];
-    
-    if (Role.SENDER.equals(clientAttach.getRole())) {
-      attachSender(clientAttach, session);
-    }
-    else if (Role.RECEIVER.equals(clientAttach.getRole())) {
-      attachReceiver(clientAttach, session);
-    }
-    else {
-      throw new IllegalStateException("bad role");
-    }
-  }
-
-  private void attachSender(FrameAttach clientAttach, 
-                            AmqpServerSession session)
-    throws IOException
-  {
-    String targetAddress = clientAttach.getTarget().getAddress();
-    
-    MessageBroker broker = EnvironmentMessageBroker.create();
-    
-    BrokerSender pub = broker.createSender(targetAddress);
-    
-    AmqpServerLink link = new AmqpServerSenderLink(session, clientAttach, pub);
-    
-    int incomingHandle = clientAttach.getHandle();
-    int outgoingHandle = session.nextHandle();
-    
-    session.addIncomingLink(incomingHandle, link);
-    session.addOutgoingLink(outgoingHandle, link);
-    
-    FrameAttach serverAttach = new FrameAttach();
-    
-    serverAttach.setName(clientAttach.getName());
-    serverAttach.setHandle(outgoingHandle);
-    
-    serverAttach.setRole(Role.RECEIVER);
-    
-    sendFrame(serverAttach);
-  }
-
-  private void attachReceiver(FrameAttach clientAttach, 
-                              AmqpServerSession session)
-    throws IOException
-  {
-    String sourceAddress = clientAttach.getSource().getAddress();
-    
-    MessageBroker broker = EnvironmentMessageBroker.create();
-    
-    AmqpServerReceiverLink link = new AmqpServerReceiverLink(session, clientAttach);
-    
-    BrokerReceiver sub = broker.createReceiver(sourceAddress, link);
-    
-    link.setReceiver(sub);
-    
-    int incomingHandle = clientAttach.getHandle();
-    
-    session.addIncomingLink(incomingHandle, link);
-    
-    int outgoingHandle = session.nextHandle();
-    
-    FrameAttach serverAttach = new FrameAttach();
-    
-    serverAttach.setName(clientAttach.getName());
-    serverAttach.setHandle(outgoingHandle);
-    
-    serverAttach.setRole(Role.SENDER);
-    
-    sendFrame(serverAttach);
-  }
-  
-  @Override
-  public void onTransfer(AmqpReader ain, FrameTransfer transfer)
-    throws IOException
-  {
-    AmqpServerSession session = _sessions[0];
-    
-    int handle = transfer.getHandle();
-    boolean isSettled = transfer.isSettled();
-    
-    AmqpServerLink link = session.getIncomingLink(handle);
-    
-    long desc = ain.peekDescriptor();
-    
-    MessageHeader header;
-    boolean isDurable = false;
-    int priority = -1;
-    long expireTime = 0;
-    
-    if (desc == AmqpConstants.ST_MESSAGE_HEADER) {
-      header = new MessageHeader();
-      header.read(ain);
-      
-      isDurable = header.isDurable();
-      priority = header.getPriority();
-      
-      long ttl = header.getTimeToLive();
-      
-      if (ttl >= 0) {
-        expireTime = ttl + CurrentTime.getCurrentTime();
-      }
-    }
-    
-    int len = ain.getFrameAvailable();
-    
-    TempBuffer tBuf = TempBuffer.allocate();
-    
-    ain.read(tBuf.getBuffer(), 0, len);
-    
-    long xid = 0;
-    long mid = link.nextMessageId();
-    link.write(xid, mid, isSettled, isDurable, priority, expireTime,
-               tBuf.getBuffer(), 0, len);
-    // Link link = _links.get(handle);
-  }
-  
-  @Override
-  public void onDisposition(FrameDisposition disposition)
-    throws IOException
-  {
-    AmqpServerSession session = _sessions[0];
-    
-    DeliveryState state = disposition.getState();
-    long xid = 0;
-    
-    if (state instanceof DeliveryAccepted) {
-      session.onAccept(xid);
-    }
-    else if (state instanceof DeliveryRejected) {
-      DeliveryRejected rejected = (DeliveryRejected) state;
-      
-      AmqpError error = rejected.getError();
-      
-      String message = null;
-      
-      if (error != null) {
-        message = error.getCondition() + ": " + error.getDescription();
-      }
-      
-      session.reject(xid,
-                     disposition.getFirst(),
-                     disposition.getLast(),
-                     message);
-    }
-    else if (state instanceof DeliveryModified) {
-      DeliveryModified modified = (DeliveryModified) state;
-      
-      session.modified(xid,
-                       disposition.getFirst(),
-                       disposition.getLast(),
-                       modified.isDeliveryFailed(),
-                       modified.isUndeliverableHere());
-    }
-    else if (state instanceof DeliveryReleased) {
-      session.release(xid, disposition.getFirst(), disposition.getLast());
-    }
-    else {
-      System.out.println("UNKNOWN");
-    }
-  }
-  
-  @Override
-  public void onFlow(FrameFlow flow)
-    throws IOException
-  {
-    AmqpServerSession session = _sessions[0];
-    
-    session.onFlow(flow);
-  }
-
-  @Override
-  public void onDetach(FrameDetach clientDetach)
-    throws IOException
-  {
-    FrameDetach serverDetach = new FrameDetach();
-    
-    serverDetach.setHandle(clientDetach.getHandle());
-    
-    sendFrame(serverDetach);
-  }
-
-  @Override
-  public void onEnd(FrameEnd clientEnd)
-    throws IOException
-  {
-    AmqpSession session = _sessions[0];
-    _sessions[0] = null;
-
-    if (session != null) {
-      FrameEnd serverEnd = new FrameEnd();
-    
-      sendFrame(serverEnd);
-    }
-  }
-  
-  @Override
-  public void onClose(FrameClose clientClose)
-    throws IOException
-  {
-    try {
-      FrameClose serverClose = new FrameClose();
-    
-      sendFrame(serverClose);
-    } finally {
-      disconnect();
-    }
-  }
-
-  void sendDisposition(AmqpServerSession session,
-                       long deliveryId, 
-                       DeliveryState state)
-  {
-    try {
-      FrameDisposition disposition = new FrameDisposition();
-      disposition.setFirst(deliveryId);
-      disposition.setLast(deliveryId);
-      disposition.setState(state);
-    
-      sendFrame(disposition);
-    } catch (IOException e) {
-      throw new AmqpException(e);
-    }
-    
-  }
-
-  private void disconnect()
-  {
-    _isDisconnected = true;
-  }
-
-  private void sendFrame(AmqpAbstractFrame frame)
-    throws IOException
-  {
-    _fout.startFrame(0);
-    
-    frame.write(_aout);
-    
-    _fout.finishFrame();
-    _fout.flush();
-  }
-  
   @Override
   public boolean handleResume() throws IOException
   {
@@ -667,11 +197,29 @@ public class AmqpServerConnection extends AbstractProtocolConnection
   @Override
   public void onCloseConnection()
   {
+    _handler = null;
+    _linkFactory = null;
+    
+    _handler.closeConnection();
   }
   
   private enum State {
     NEW,
     VERSION,
     OPEN;
+  }
+  
+  class ServerLinkFactory implements AmqpLinkFactory {
+    @Override
+    public AmqpReceiverLink createReceiverLink(String name, String address)
+    {
+      return _amqp.createReceiverLink(name, address);
+    }
+
+    @Override
+    public AmqpSenderLink createSenderLink(String name, String address)
+    {
+      return _amqp.createSenderLink(name, address);
+    }
   }
 }

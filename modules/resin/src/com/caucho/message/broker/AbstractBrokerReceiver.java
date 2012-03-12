@@ -36,17 +36,17 @@ package com.caucho.message.broker;
 public class AbstractBrokerReceiver implements BrokerReceiver
 {
   @Override
-  public void accept(long xid, long mid)
+  public void accepted(long xid, long mid)
   {
   }
   
   @Override
-  public void reject(long xid, long mid, String message)
+  public void rejected(long xid, long mid, String message)
   {
   }
   
   @Override
-  public void release(long xid, long mid)
+  public void released(long xid, long mid)
   {
   }
   
@@ -61,8 +61,7 @@ public class AbstractBrokerReceiver implements BrokerReceiver
   
   
   @Override
-  public void flow(long xid,
-                   long deliveryCount, 
+  public void flow(long deliveryCount, 
                    int linkCredit)
   {
   }

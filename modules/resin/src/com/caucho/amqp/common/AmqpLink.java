@@ -29,9 +29,18 @@
 
 package com.caucho.amqp.common;
 
+import java.io.IOException;
+
+import com.caucho.amqp.io.AmqpConstants;
+import com.caucho.amqp.io.AmqpError;
+import com.caucho.amqp.io.AmqpReader;
 import com.caucho.amqp.io.FrameAttach;
 import com.caucho.amqp.io.FrameFlow;
-import com.caucho.message.broker.SenderSettleHandler;
+import com.caucho.amqp.io.FrameTransfer;
+import com.caucho.amqp.io.MessageHeader;
+import com.caucho.amqp.io.FrameAttach.Role;
+import com.caucho.util.CurrentTime;
+import com.caucho.vfs.TempBuffer;
 
 /**
  * link session management
@@ -39,34 +48,45 @@ import com.caucho.message.broker.SenderSettleHandler;
 abstract public class AmqpLink
 {
   private final String _name;
+  private final String _address;
   
   private int _incomingHandle = -1;
   private int _outgoingHandle = -1;
   
-  private FrameAttach _attach;
-  
-  private AmqpSession<?> _session;
+  private AmqpSession _session;
   //private MessageSettleHandler _settleHandler;
   
-  public AmqpLink(AmqpSession<?> session,
-                  FrameAttach attach)
+  public AmqpLink(String name, String address)
   {
-    _name = attach.getName();
-    
-    _session = session;
-    _attach = attach;
-  }
-  
-  public AmqpSession<?> getSession()
-  {
-    return _session;
+    _name = name;
+    _address = address;
   }
   
   public String getName()
   {
     return _name;
   }
+
+  public String getAddress()
+  {
+    return _address;
+  }
+
+  abstract public Role getRole();
+
+  public AmqpSession getSession()
+  {
+    return _session;
+  }
   
+  void setSession(AmqpSession session)
+  {
+    if (_session != null)
+      throw new IllegalStateException();
+    
+    _session = session;
+  }
+
   public int getIncomingHandle()
   {
     return _incomingHandle;
@@ -87,42 +107,93 @@ abstract public class AmqpLink
     _outgoingHandle = handle;
   }
   
-  abstract public long nextMessageId();
-  
-  abstract public void write(long xid, long mid, boolean isSettled,
-                             boolean isDurable, int priority, long expireTime,
-                             byte []buffer, int offset, int length);
+  //
+  // message transfer
+  //
 
   /**
-   * @param messageId
+   * Message receivers implement this method to receive a
+   * message fragment from the network.
    */
-  public void onAccept(long xid, long messageId)
-  {
-    throw new UnsupportedOperationException(getClass().getName());
-  }
-
-  /**
-   * @param messageId
-   */
-  public void reject(long xid, long messageId, String message)
-  {
-    throw new UnsupportedOperationException(getClass().getName());
-  }
-
-  /**
-   * @param messageId
-   */
-  public void release(long xid, long messageId)
+  protected void onTransfer(FrameTransfer transfer, AmqpReader ain)
+    throws IOException
   {
     throw new UnsupportedOperationException(getClass().getName());
   }
   
-  public void modified(long xid,
+  //
+  // disposition
+  //
+
+  /**
+   * @param messageId
+   */
+  public void onAccepted(long xid, long messageId)
+  {
+    throw new UnsupportedOperationException(getClass().getName());
+  }
+
+  /**
+   * @param messageId
+   */
+  public void onRejected(long xid, long messageId, String message)
+  {
+    throw new UnsupportedOperationException(getClass().getName());
+  }
+
+  /**
+   * @param xid
+   * @param messageId
+   * @param error
+   */
+  public void onRejected(long xid, long messageId, AmqpError error)
+  {
+    // TODO Auto-generated method stub
+    
+  }
+
+  /**
+   * @param messageId
+   */
+  public void onReleased(long xid, long messageId)
+  {
+    throw new UnsupportedOperationException(getClass().getName());
+  }
+  
+  public void onModified(long xid,
                        long mid, 
                        boolean isFailed, 
                        boolean isUndeliverableHere)
   {
     throw new UnsupportedOperationException(getClass().getName());
+  }
+
+  /**
+   * @param mid
+   */
+  public void accepted(long mid)
+  {
+    // TODO Auto-generated method stub
+    
+  }
+
+  /**
+   * @param mid
+   * @param errorMessage
+   */
+  public void rejected(long mid, String errorMessage)
+  {
+    // TODO Auto-generated method stub
+    
+  }
+
+  /**
+   * @param mid
+   */
+  public void released(long mid)
+  {
+    // TODO Auto-generated method stub
+    
   }
 
   /**
@@ -136,6 +207,6 @@ abstract public class AmqpLink
   @Override
   public String toString()
   {
-    return getClass().getSimpleName() + "[" + _attach.getName() + "]";
+    return getClass().getSimpleName() + "[" + getName() + "]";
   }
 }

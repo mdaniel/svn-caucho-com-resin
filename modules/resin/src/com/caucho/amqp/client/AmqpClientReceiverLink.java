@@ -27,52 +27,50 @@
  * @author Scott Ferguson
  */
 
-package com.caucho.amqp.server;
+package com.caucho.amqp.client;
 
-import java.io.InputStream;
+import java.io.IOException;
 
-import com.caucho.amqp.common.AmqpSession;
-import com.caucho.amqp.io.DeliveryAccepted;
-import com.caucho.amqp.io.DeliveryState;
+import com.caucho.amqp.common.AmqpReceiverLink;
+import com.caucho.amqp.io.AmqpReader;
+import com.caucho.amqp.io.FrameTransfer;
 
 /**
- * amqp session management
+ * link session management
  */
-class AmqpServerSession extends AmqpSession<AmqpServerLink>
+public class AmqpClientReceiverLink extends AmqpReceiverLink
 {
-  private AmqpServerConnection _conn;
+  private final AmqpClientReceiver<?> _receiver;
   
-  AmqpServerSession(AmqpServerConnection conn)
+  public AmqpClientReceiverLink(String name, 
+                                String address,
+                                AmqpClientReceiver<?> receiver)
   {
-    _conn = conn;
+    super(name, address);
+    
+    _receiver = receiver;
+  }
+
+  public AmqpClientReceiver<?> getReceiver()
+  {
+    return _receiver;
   }
   
   /**
-   * @param amqpServerReceiverLink
-   * @param messageId
-   * @param bodyIs
-   * @param contentLength
+   * Receives the message from the network
    */
-  public void writeMessage(AmqpServerReceiverLink amqpServerReceiverLink,
-                           long messageId, InputStream bodyIs,
-                           long contentLength)
+  @Override
+  protected void onTransfer(FrameTransfer frameTransfer,
+                            AmqpReader ain)
+    throws IOException
   {
-    // TODO Auto-generated method stub
-    
-  }
-
-  public void onAccepted(long deliveryId)
-  {
-    DeliveryState accepted = DeliveryAccepted.VALUE;
-    
-    _conn.sendDisposition(this, deliveryId, accepted);
+    _receiver.receive(ain);
   }
 
   /**
-   * @param deliveryId
-   * @param msg
+   * 
    */
-  public void onRejected(long deliveryId, String msg)
+  public void detach()
   {
     // TODO Auto-generated method stub
     

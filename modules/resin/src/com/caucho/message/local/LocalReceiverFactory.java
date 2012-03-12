@@ -30,66 +30,39 @@
 package com.caucho.message.local;
 
 import com.caucho.amqp.marshal.AmqpMessageDecoder;
-import com.caucho.amqp.marshal.AmqpMessageEncoder;
 import com.caucho.amqp.marshal.AmqpStringDecoder;
-import com.caucho.amqp.marshal.AmqpStringEncoder;
-import com.caucho.message.MessageConnection;
 import com.caucho.message.MessageReceiver;
-import com.caucho.message.MessageReceiverFactory;
-import com.caucho.message.MessageSender;
-import com.caucho.message.MessageSenderFactory;
+import com.caucho.message.MessageSettleMode;
+import com.caucho.message.common.AbstractMessageReceiverFactory;
 
 /**
  * factory to create local receivers.
  */
-public class LocalReceiverFactory implements MessageReceiverFactory {
-  private String _address;
-  
-  private boolean _isAutoAck = true;
-  private int _prefetch = 1;
-  
+public class LocalReceiverFactory extends AbstractMessageReceiverFactory {
   private AmqpMessageDecoder<?> _decoder = new AmqpStringDecoder();
 
   @Override
   public LocalReceiverFactory setAddress(String address)
   {
-    _address = address;
+    super.setAddress(address);
     
     return this;
   }
 
   @Override
-  public String getAddress()
+  public LocalReceiverFactory setSettleMode(MessageSettleMode settleMode)
   {
-    return _address;
-  }
-
-  @Override
-  public MessageReceiverFactory setAckMode(boolean isAutoAck)
-  {
-    _isAutoAck = isAutoAck;
+    super.setSettleMode(settleMode);
     
-    return null;
-  }
-
-  @Override
-  public boolean getAckMode()
-  {
-    return _isAutoAck;
-  }
-
-  @Override
-  public MessageReceiverFactory setPrefetch(int prefetch)
-  {
-    _prefetch = prefetch;
-
     return this;
   }
 
   @Override
-  public int getPrefetch()
+  public LocalReceiverFactory setPrefetch(int prefetch)
   {
-    return _prefetch;
+    super.setPrefetch(prefetch);
+
+    return this;
   }
   
   public AmqpMessageDecoder<?> getDecoder()

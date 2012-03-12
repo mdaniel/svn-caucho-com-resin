@@ -81,7 +81,7 @@ public class NautilusBrokerSubscriber implements BrokerReceiver
   }
    
   @Override
-  public void accept(long xid, long mid)
+  public void accepted(long xid, long mid)
   {
     NautilusRingItem entry = _nautilusQueue.startOffer(true);
     
@@ -92,7 +92,7 @@ public class NautilusBrokerSubscriber implements BrokerReceiver
   }
   
   @Override
-  public void reject(long xid, long mid, String message)
+  public void rejected(long xid, long mid, String message)
   {
     System.out.println("reject: " + mid);
   }
@@ -107,13 +107,13 @@ public class NautilusBrokerSubscriber implements BrokerReceiver
   
 
   @Override
-  public void release(long xid, long mid)
+  public void released(long xid, long mid)
   {
     System.out.println("releaseE: " + mid);
   }
   
   @Override
-  public void flow(long xid, long deliveryCount, int linkCredit)
+  public void flow(long deliveryCount, int linkCredit)
   {
     NautilusRingItem entry = _nautilusQueue.startOffer(true);
     

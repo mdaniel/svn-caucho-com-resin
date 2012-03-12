@@ -29,30 +29,11 @@
 
 package com.caucho.amqp;
 
-import java.util.concurrent.BlockingQueue;
+import com.caucho.message.MessageReceiver;
 
 
 /**
  * AMQP client receiver
  */
-public interface AmqpReceiver<T> extends BlockingQueue<T> {
-  /**
-   * Accept the last message.
-   */
-  public void accepted();
-  
-  /**
-   * Reject the last message.
-   */
-  public void rejected(String errorMessage);
-  
-  /**
-   * Release the last message.
-   */
-  public void released();
-  
-  /**
-   * Returns the message as modified.
-   */
-  public void modified(boolean isFailed, boolean isUndelierableHere);
+public interface AmqpReceiver<T> extends MessageReceiver<T> {
 }

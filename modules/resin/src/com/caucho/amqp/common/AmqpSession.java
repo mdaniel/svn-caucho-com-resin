@@ -29,30 +29,113 @@
 
 package com.caucho.amqp.common;
 
+import java.io.IOException;
+import java.io.InputStream;
 import java.util.ArrayList;
 
 import com.caucho.amqp.io.AmqpError;
+import com.caucho.amqp.io.AmqpReader;
 import com.caucho.amqp.io.DeliveryAccepted;
 import com.caucho.amqp.io.DeliveryModified;
 import com.caucho.amqp.io.DeliveryRejected;
 import com.caucho.amqp.io.DeliveryReleased;
 import com.caucho.amqp.io.DeliveryState;
+import com.caucho.amqp.io.FrameAttach;
 import com.caucho.amqp.io.FrameFlow;
+import com.caucho.amqp.io.FrameTransfer;
+import com.caucho.amqp.io.LinkSource;
+import com.caucho.amqp.io.LinkTarget;
+import com.caucho.amqp.io.FrameAttach.Role;
+import com.caucho.message.MessageSettleMode;
 
 /**
  * channel session management
  */
-public class AmqpSession<L extends AmqpLink>
+public class AmqpSession
 {
-  private long _deliveryId = 1;
+  private AmqpConnectionHandler _conn;
   
-  private ArrayList<L> _incomingLinks = new ArrayList<L>();
-  private ArrayList<L> _outgoingLinks = new ArrayList<L>();
+  private ArrayList<AmqpLink> _incomingLinks = new ArrayList<AmqpLink>();
+  private ArrayList<AmqpLink> _outgoingLinks = new ArrayList<AmqpLink>();
   
-  private DeliveryNode _head;
-  private DeliveryNode _tail;
+  private TransferSettleManager<AmqpLink> _receiverSettle
+    = new TransferSettleManager<AmqpLink>();
   
-  public void addIncomingLink(int handle, L link)
+  private TransferSettleManager<AmqpLink> _senderSettle
+    = new TransferSettleManager<AmqpLink>();
+  
+  AmqpSession(AmqpConnectionHandler conn)
+  {
+    _conn = conn;
+  }
+  
+  public int getOutgoingIndex()
+  {
+    return 0;
+  }
+  
+  //
+  // link attachment
+  //
+
+  public boolean addSenderLink(AmqpSenderLink link)
+  {
+    addOutgoingLink(link);
+    
+    FrameAttach attach = new FrameAttach();
+    attach.setName(link.getName());
+    attach.setHandle(link.getOutgoingHandle());
+    attach.setRole(Role.SENDER);
+    
+    LinkSource source = new LinkSource();
+    attach.setSource(source);
+    
+    LinkTarget target = new LinkTarget();
+    target.setAddress(link.getAddress());
+    attach.setTarget(target);
+    
+    _conn.getWriter().sendFrame(attach);
+      
+    return true;
+  }
+
+  public boolean addReceiverLink(AmqpReceiverLink link)
+  {
+    addOutgoingLink(link);
+    
+    FrameAttach attach = new FrameAttach();
+    attach.setName(link.getName());
+    attach.setHandle(link.getOutgoingHandle());
+    attach.setRole(Role.RECEIVER);
+    
+    LinkSource source = new LinkSource();
+    source.setAddress(link.getAddress());
+    attach.setSource(source);
+    
+    LinkTarget target = new LinkTarget();
+    attach.setTarget(target);
+    
+    _conn.getWriter().sendFrame(attach);
+      
+    return true;
+  }
+
+  void onAttach(AmqpLink link)
+  {
+    addIncomingLink(link.getIncomingHandle(), link);
+    addOutgoingLink(link);
+    
+    FrameAttach attach = new FrameAttach();
+    
+    attach.setName(link.getName());
+    attach.setHandle(link.getOutgoingHandle());
+    
+    attach.setRole(link.getRole());
+    
+    _conn.getWriter().sendFrame(attach);
+  }
+
+  private void addIncomingLink(int handle, AmqpLink link)
   {
     while (_incomingLinks.size() <= handle) {
       _incomingLinks.add(null);
@@ -61,54 +144,160 @@ public class AmqpSession<L extends AmqpLink>
     _incomingLinks.set(handle, link);
   }
   
-  public L getIncomingLink(int handle)
+  AmqpLink getIncomingLink(int handle)
   {
     return _incomingLinks.get(handle);
   }
   
-  public int nextHandle()
+  private void addOutgoingLink(AmqpLink link)
   {
     for (int i = 0; i < _outgoingLinks.size(); i++) {
       if (_outgoingLinks.get(i) == null) {
-        return i;
+        _outgoingLinks.set(i, link);
+        link.setOutgoingHandle(i);
+        return;
       }
     }
     
-    return _outgoingLinks.size();
+    link.setOutgoingHandle(_outgoingLinks.size());
+    _outgoingLinks.add(link);
   }
   
-  public void addOutgoingLink(int handle, L link)
+  public AmqpLink detachOutgoingLink(int handle)
   {
-    while (_outgoingLinks.size() <= handle) {
-      _outgoingLinks.add(null);
-    }
-    
-    _outgoingLinks.set(handle, link);
-  }
-  
-  public L detachOutgoingLink(int handle)
-  {
-    L link = _outgoingLinks.get(handle);
+    AmqpLink link = _outgoingLinks.get(handle);
     
     _outgoingLinks.set(handle, null);
     
     return link;
   }
   
-  public L getOutgoingLink(int handle)
+  public AmqpLink getOutgoingLink(int handle)
   {
     return _outgoingLinks.get(handle);
   }
   
-  public L findOutgoingLink(String name)
+  AmqpLink findOutgoingLink(String name)
   {
-    for (L link : _outgoingLinks) {
+    for (AmqpLink link : _outgoingLinks) {
       if (link != null && name.equals(link.getName())) {
         return link;
       }
     }
     
     return null;
+  }
+  
+  //
+  // message transfer
+  //
+  
+  /**
+   * Sends a message to the network.
+   */
+  public void transfer(AmqpSenderLink link,
+                       long mid,
+                       MessageSettleMode settleMode,
+                       InputStream is)
+  {
+    long deliveryId = addSenderSettle(link, mid, settleMode);
+    
+    _conn.getWriter().transfer(this, link,
+                               deliveryId,
+                               settleMode,
+                               is);
+  }
+
+  private long addSenderSettle(AmqpLink link,
+                               long messageId, 
+                               MessageSettleMode settleMode)
+  {
+    return _senderSettle.addDelivery(link, messageId, settleMode);
+  }
+
+  /**
+   * Receive a message fragment from the network
+   */
+  void onTransfer(FrameTransfer transfer, AmqpReader ain)
+    throws IOException
+  {
+    int handle = transfer.getHandle();
+    
+    AmqpLink link = getIncomingLink(handle);
+    
+    link.onTransfer(transfer, ain);
+  }
+
+  long addReceiverSettle(AmqpLink link,
+                         long messageId, 
+                         MessageSettleMode settleMode)
+  {
+    return _receiverSettle.addDelivery(link, messageId, settleMode);
+  }
+   
+  //
+  // settle disposition
+  //
+
+  public void accepted(long deliveryId)
+  {
+    DeliveryState accepted = DeliveryAccepted.VALUE;
+    
+    _conn.getWriter().sendDisposition(this, deliveryId, accepted);
+  }
+
+  /**
+   * @param handle
+   */
+  public void rejected(long deliveryId, String errorMessage)
+  {
+    DeliveryRejected rejected = new DeliveryRejected();
+      
+    if (errorMessage != null) {
+      AmqpError error = new AmqpError();
+
+      error.setCondition("rejected");
+      error.setDescription(errorMessage);
+        
+      rejected.setError(error);
+    }
+    
+    _conn.getWriter().sendDisposition(this, deliveryId, rejected);
+  }
+
+  /**
+   * @param handle
+   */
+  public void modified(long deliveryId,
+                       boolean isFailed,
+                       boolean isUndeliverableHere)
+  {
+    DeliveryModified modified = new DeliveryModified();
+      
+    modified.setDeliveryFailed(isFailed);
+    modified.setUndeliverableHere(isUndeliverableHere);
+    
+    _conn.getWriter().sendDisposition(this, deliveryId, modified);
+  }
+
+  /**
+   * @param handle
+   */
+  public void released(long deliveryId)
+  {
+    DeliveryReleased released = DeliveryReleased.VALUE;
+    
+    _conn.getWriter().sendDisposition(this, deliveryId, released);
+  }
+ 
+  //
+  // flow
+  //
+  
+  void flow(AmqpLink link, long deliveryCount, int credit)
+  {
+    _conn.getWriter().sendFlow(this, link, deliveryCount, credit);
+    
   }
 
   public void onFlow(FrameFlow flow)
@@ -119,167 +308,30 @@ public class AmqpSession<L extends AmqpLink>
     
     link.onFlow(flow);
   }
-  
-  public long addDelivery(L link, long messageId, boolean isSettled)
+
+  public void onDisposition(long xid,
+                            DeliveryState state, 
+                            long first, long last)
   {
-    long deliveryId = _deliveryId++;
-    
-    if (! isSettled) {
-      DeliveryNode node = new DeliveryNode(deliveryId, link, messageId);
-    
-      if (_tail != null) {
-        _tail.setNext(node);
-      }
-      else {
-        _head = node;
-      }
-    }
-    
-    return deliveryId;
+    _senderSettle.onDisposition(xid, state, first, last);
   }
 
-  public void onAccept(long xid)
+  /**
+   * @param deliveryId
+   */
+  public void onAccepted(long deliveryId)
   {
-    System.out.println(this + " accept " + xid);
-    DeliveryNode node = _head;
+    // TODO Auto-generated method stub
     
-    if (node != null) {
-      _head = node.getNext();
-      
-      if (_head == null)
-        _tail = null;
-      
-      AmqpLink link = node.getLink();
-      
-      link.onAccept(xid, node.getMessageId());
-    }
   }
 
-  public void reject(long xid, long first, long last, String message)
+  /**
+   * @param deliveryId
+   * @param msg
+   */
+  public void onRejected(long deliveryId, String msg)
   {
-    DeliveryNode node = _head;
+    // TODO Auto-generated method stub
     
-    if (node != null) {
-      _head = node.getNext();
-      
-      if (_head == null)
-        _tail = null;
-      
-      AmqpLink link = node.getLink();
-      
-      link.reject(xid, node.getMessageId(), message);
-    }
-  }
-
-  public void release(long xid, long first, long last)
-  {
-    DeliveryNode node = _head;
-    
-    if (node != null) {
-      _head = node.getNext();
-      
-      if (_head == null)
-        _tail = null;
-      
-      AmqpLink link = node.getLink();
-      
-      link.release(xid, node.getMessageId());
-    }
-  }
-
-  public void modified(long xid,
-                       long first, long last,
-                       boolean isFailed,
-                       boolean isUndeliverableHere)
-  {
-    DeliveryNode node = _head;
-    
-    if (node != null) {
-      _head = node.getNext();
-      
-      if (_head == null)
-        _tail = null;
-      
-      AmqpLink link = node.getLink();
-      
-      link.modified(xid, node.getMessageId(), isFailed, isUndeliverableHere);
-    }
-  }
-  
-  public void onDisposition(long first, long last, DeliveryState state)
-  {
-    long xid = 0;
-    
-    if (state instanceof DeliveryAccepted) {
-      onAccept(xid);
-    }
-    else if (state instanceof DeliveryRejected) {
-      DeliveryRejected rejected = (DeliveryRejected) state;
-      
-      AmqpError error = rejected.getError();
-      
-      String message = null;
-      
-      if (error != null) {
-        message = error.getCondition() + ": " + error.getDescription();
-      }
-      
-      reject(xid, first, last, message);
-    }
-    else if (state instanceof DeliveryModified) {
-      DeliveryModified modified = (DeliveryModified) state;
-      
-      modified(xid, first, last,
-               modified.isDeliveryFailed(),
-               modified.isUndeliverableHere());
-    }
-    else if (state instanceof DeliveryReleased) {
-      release(xid, first, last);
-    }
-    else {
-      System.out.println("UNKNOWN");
-    }
-  }
-
-  private static class DeliveryNode {
-    private final long _deliveryId;
-    private final AmqpLink _link;
-    private final long _messageId;
-    
-    private DeliveryNode _next;
-    
-    DeliveryNode(long deliveryId, 
-                 AmqpLink link,
-                 long messageId)
-    {
-      _deliveryId = deliveryId;
-      _link = link;
-      _messageId = messageId;
-    }
-    
-    public long getDeliveryId()
-    {
-      return _deliveryId;
-    }
-    
-    public long getMessageId()
-    {
-      return _messageId;
-    }
-    
-    public AmqpLink getLink()
-    {
-      return _link;
-    }
-    
-    public void setNext(DeliveryNode next)
-    {
-      _next = next;
-    }
-    
-    public DeliveryNode getNext()
-    {
-      return _next;
-    }
   }
 }

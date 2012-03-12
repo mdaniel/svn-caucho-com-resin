@@ -30,78 +30,100 @@
 package com.caucho.amqp.server;
 
 import java.io.IOException;
-import java.io.InputStream;
 
-import com.caucho.amqp.io.FrameAttach;
-import com.caucho.amqp.io.FrameFlow;
-import com.caucho.message.broker.BrokerReceiver;
+import com.caucho.amqp.common.AmqpReceiverLink;
+import com.caucho.amqp.io.AmqpConstants;
+import com.caucho.amqp.io.AmqpReader;
+import com.caucho.amqp.io.FrameTransfer;
+import com.caucho.amqp.io.MessageHeader;
 import com.caucho.message.broker.BrokerSender;
-import com.caucho.message.broker.ReceiverMessageHandler;
+import com.caucho.message.broker.SenderSettleHandler;
+import com.caucho.util.CurrentTime;
+import com.caucho.vfs.TempBuffer;
 
 /**
  * link session management
  */
-public class AmqpServerReceiverLink extends AmqpServerLink implements ReceiverMessageHandler
+public class AmqpServerReceiverLink extends AmqpReceiverLink
 {
-  private BrokerReceiver _sub;
+  private final BrokerSender _sender;
   
-  public AmqpServerReceiverLink(AmqpServerSession session,
-                                FrameAttach attach)
+  public AmqpServerReceiverLink(String name,
+                                String address,
+                                BrokerSender sender)
   {
-    super(session, attach);
-  }
-  
-  void setReceiver(BrokerReceiver sub)
-  {
-    _sub = sub;
+    super(name, address);
+    
+    _sender = sender;
   }
 
   /**
-   * @param flow
+   * receives a message from the network
    */
   @Override
-  public void onFlow(FrameFlow flow)
-  {
-    long xid = 0;
-    
-    _sub.flow(xid, flow.getDeliveryCount(), flow.getLinkCredit());
-  }
-
-  @Override
-  public void onMessage(long messageId, 
-                        InputStream bodyIs, 
-                        long contentLength)
+  protected void onTransfer(FrameTransfer transfer, AmqpReader ain)
     throws IOException
   {
-    AmqpServerSession session = getSession();
+    boolean isSettled = transfer.isSettled();
     
-    session.writeMessage(this, messageId, bodyIs, contentLength);
+    long desc = ain.peekDescriptor();
+    
+    MessageHeader header;
+    boolean isDurable = false;
+    int priority = -1;
+    long expireTime = 0;
+    
+    if (desc == AmqpConstants.ST_MESSAGE_HEADER) {
+      header = new MessageHeader();
+      header.read(ain);
+      
+      isDurable = header.isDurable();
+      priority = header.getPriority();
+      
+      long ttl = header.getTimeToLive();
+      
+      if (ttl >= 0) {
+        expireTime = ttl + CurrentTime.getCurrentTime();
+      }
+    }
+    
+    int len = ain.getFrameAvailable();
+    
+    TempBuffer tBuf = TempBuffer.allocate();
+    
+    ain.read(tBuf.getBuffer(), 0, len);
+    
+    long xid = 0;
+    long mid = _sender.nextMessageId();
+    
+    SenderSettleHandler handler = null;
+    
+    if (! isSettled) {
+      handler = new MessageSettleHandler(mid);
+    }
+    
+    _sender.message(xid, mid, isDurable, priority, expireTime,
+                    tBuf.getBuffer(), 0, len, tBuf, handler);
   }
   
-  @Override
-  public void onAccept(long xid, long messageId)
-  {
-    _sub.accept(xid, messageId);
-  }
-  
-  @Override
-  public void reject(long xid, long messageId, String message)
-  {
-    _sub.reject(xid, messageId, message);
-  }
-  
-  @Override
-  public void modified(long xid,
-                       long mid, 
-                       boolean isFailed, 
-                       boolean isUndeliverableHere)
-  {
-    _sub.modified(xid, mid, isFailed, isUndeliverableHere);
-  }
-  
-  @Override
-  public void release(long xid, long messageId)
-  {
-    _sub.release(xid, messageId);
+  class MessageSettleHandler implements SenderSettleHandler {
+    private final long _deliveryId;
+    
+    MessageSettleHandler(long deliveryId)
+    {
+      _deliveryId = deliveryId;
+    }
+    
+    @Override
+    public void onAccepted(long mid)
+    {
+      getSession().onAccepted(_deliveryId);
+    }
+
+    @Override
+    public void onRejected(long mid, String msg)
+    {
+      getSession().onRejected(_deliveryId, msg);
+    }
   }
 }

@@ -36,8 +36,10 @@ import java.util.concurrent.ConcurrentLinkedQueue;
 import java.util.concurrent.TimeUnit;
 
 import com.caucho.amqp.AmqpReceiver;
+import com.caucho.amqp.common.AmqpSession;
 import com.caucho.amqp.io.AmqpReader;
 import com.caucho.amqp.marshal.AmqpMessageDecoder;
+import com.caucho.message.MessageSettleMode;
 
 /**
  * AMQP client
@@ -48,9 +50,9 @@ class AmqpClientReceiver<T> implements AmqpReceiver<T> {
   private final AmqpClientConnectionImpl _client;
   
   private final String _address;
-  private final AmqpClientLink _link;
+  private final AmqpClientReceiverLink _link;
   
-  private final boolean _isAutoAck;
+  private final MessageSettleMode _settleMode;
   
   private final AmqpMessageDecoder<T> _decoder;
   
@@ -61,20 +63,23 @@ class AmqpClientReceiver<T> implements AmqpReceiver<T> {
     = new ConcurrentLinkedQueue<T>();
   
   AmqpClientReceiver(AmqpClientConnectionImpl client,
-                     AmqpClientReceiverFactory builder,
-                     AmqpClientLink link)
+                     AmqpSession session,
+                     AmqpClientReceiverFactory builder)
   {
     _client = client;
     _address = builder.getAddress();
-    _link = link;
     
-    _isAutoAck = builder.getAckMode();
+    _settleMode = builder.getSettleMode();
     _decoder = (AmqpMessageDecoder) builder.getDecoder(); 
     
     _prefetch = builder.getPrefetch();
     
+    _link = new AmqpClientReceiverLink("client-" + _address, _address, this);
+    
+    session.addReceiverLink(_link);
+    
     if (_prefetch > 0) {
-      _client.flow(_link, _deliveryCount, _prefetch);
+      _link.flow(_deliveryCount, _prefetch);
     }
     
   }
@@ -110,11 +115,7 @@ class AmqpClientReceiver<T> implements AmqpReceiver<T> {
       return null;
     }
     
-    _client.flow(_link, _deliveryCount, _prefetch - _valueQueue.size());
-    
-    if (_isAutoAck) {
-      _client.dispositionAccept();
-    }
+    _link.flow(_deliveryCount, _prefetch - _valueQueue.size());
     
     return value;
   }
@@ -140,25 +141,29 @@ class AmqpClientReceiver<T> implements AmqpReceiver<T> {
   @Override
   public void accepted()
   {
-    _client.dispositionAccept();
+    long mid = 0;
+    _link.accepted(mid);
   }
   
   @Override
   public void rejected(String errorMessage)
   {
-    _client.dispositionReject(errorMessage);
+    long mid = 0;
+    _link.rejected(mid, errorMessage);
   }
   
   @Override
   public void released()
   {
-    _client.dispositionRelease();
+    long mid = 0;
+    _link.released(mid);
   }
   
   @Override
   public void modified(boolean isFailed, boolean isUndeliverableHere)
   {
-    _client.dispositionModified(isFailed, isUndeliverableHere);
+    long mid = 0;
+    _link.onModified(mid, mid, isFailed, isUndeliverableHere);
   }
 
   void setDeliveryCount(long deliveryCount)
@@ -180,7 +185,7 @@ class AmqpClientReceiver<T> implements AmqpReceiver<T> {
   
   public void close()
   {
-    _client.closeReceiver(_link);
+    _link.detach();
   }
   
   @Override

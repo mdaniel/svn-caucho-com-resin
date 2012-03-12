@@ -37,9 +37,9 @@ public interface MessageSenderFactory {
   
   public String getAddress();
   
-  public MessageSenderFactory setAutoSettle(boolean isAutoSettle);
+  public MessageSenderFactory setSettleMode(MessageSettleMode settleMode);
   
-  public boolean isAutoSettle();
+  public MessageSettleMode getSettleMode();
   
   public MessageSenderFactory setSettleListener(MessageSettleListener listener);
   

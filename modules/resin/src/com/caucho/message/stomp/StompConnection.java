@@ -273,7 +273,7 @@ public class StompConnection extends AbstractProtocolConnection
     BrokerReceiver sub = _subscriptionMap.get(sid);
     
     if (sub != null) {
-      sub.accept(_xid, mid);
+      sub.accepted(_xid, mid);
       return true;
     }
     else {
@@ -286,7 +286,7 @@ public class StompConnection extends AbstractProtocolConnection
     BrokerReceiver sub = _subscriptionMap.get(sid);
     
     if (sub != null) {
-      sub.reject(_xid, mid, null);
+      sub.rejected(_xid, mid, null);
       return true;
     }
     else {

@@ -29,41 +29,20 @@
 
 package com.caucho.amqp.client;
 
-import java.io.EOFException;
 import java.io.IOException;
-import java.net.Socket;
-import java.util.Collection;
-import java.util.Iterator;
-import java.util.concurrent.TimeUnit;
-import java.util.logging.Level;
 import java.util.logging.Logger;
 
 import com.caucho.amqp.AmqpException;
 import com.caucho.amqp.AmqpSender;
-import com.caucho.amqp.io.AmqpAbstractComposite;
-import com.caucho.amqp.io.AmqpAbstractPacket;
-import com.caucho.amqp.io.AmqpFrameHandler;
+import com.caucho.amqp.common.AmqpSession;
 import com.caucho.amqp.io.AmqpStreamWriter;
-import com.caucho.amqp.io.FrameBegin;
-import com.caucho.amqp.io.FrameOpen;
-import com.caucho.amqp.io.AmqpConstants;
-import com.caucho.amqp.io.AmqpError;
-import com.caucho.amqp.io.AmqpAbstractFrame;
-import com.caucho.amqp.io.AmqpFrameReader;
-import com.caucho.amqp.io.AmqpFrameWriter;
-import com.caucho.amqp.io.AmqpReader;
 import com.caucho.amqp.io.AmqpWriter;
 import com.caucho.amqp.io.MessageHeader;
 import com.caucho.amqp.io.MessageProperties;
 import com.caucho.amqp.marshal.AmqpMessageEncoder;
-import com.caucho.amqp.marshal.AmqpStringEncoder;
 import com.caucho.message.MessageFactory;
 import com.caucho.message.MessageSettleListener;
 import com.caucho.message.common.AbstractMessageSender;
-import com.caucho.util.L10N;
-import com.caucho.vfs.QSocket;
-import com.caucho.vfs.QSocketWrapper;
-import com.caucho.vfs.ReadStream;
 import com.caucho.vfs.TempOutputStream;
 import com.caucho.vfs.Vfs;
 import com.caucho.vfs.WriteStream;
@@ -73,31 +52,40 @@ import com.caucho.vfs.WriteStream;
  * AMQP client
  */
 class AmqpClientSender<T> extends AbstractMessageSender<T> implements AmqpSender<T> {
-  private static final long TIMEOUT_INFINITY = Long.MAX_VALUE / 2;
-  
   private static final Logger log
     = Logger.getLogger(AmqpClientSender.class.getName());
   
   private AmqpClientConnectionImpl _client;
+  private AmqpSession _session;
   
   private final String _address;
-  private boolean _isAutoSettle;
-  private AmqpClientLink _link;
+  private final AmqpMessageEncoder<T> _encoder;
   
-  private AmqpMessageEncoder<T> _encoder;
+  private AmqpClientSenderLink _link;
+  
+  private long _lastMessageId;
   
   AmqpClientSender(AmqpClientConnectionImpl client,
-                   AmqpClientSenderFactory factory,
-                   AmqpClientLink link)
+                   AmqpSession session,
+                   AmqpClientSenderFactory factory)
   {
     super(factory);
     
     _client = client;
+    _session = session;
     _address = factory.getAddress();
-    _isAutoSettle = factory.isAutoSettle();
     
-    _link = link;
-    _encoder = (AmqpMessageEncoder) factory.getEncoder();
+    _encoder = getMessageEncoder(factory);
+    
+    _link = new AmqpClientSenderLink("client-" + _address, _address, this);
+    
+    _session.addSenderLink(_link);
+  }
+  
+  @SuppressWarnings("unchecked")
+  private AmqpMessageEncoder<T> getMessageEncoder(AmqpClientSenderFactory factory)
+  {
+    return (AmqpMessageEncoder) factory.getEncoder();
   }
 
   @Override
@@ -140,12 +128,17 @@ class AmqpClientSender<T> extends AbstractMessageSender<T> implements AmqpSender
       tOut.flush();
       tOut.close();
       
-      _client.transfer(_link, _isAutoSettle, tOut.getInputStream());
+      _lastMessageId = _link.transfer(getSettleMode(), tOut.getInputStream());
       
       return true;
     } catch (IOException e) {
       throw new AmqpException(e);
     }
+  }
+  
+  public long getLastMessageId()
+  {
+    return _lastMessageId;
   }
 
   void onAccept(long messageId)
@@ -160,7 +153,7 @@ class AmqpClientSender<T> extends AbstractMessageSender<T> implements AmqpSender
   @Override
   public void close()
   {
-    _client.closeSender(_link);
+    _link.detach();
   }
   
   @Override

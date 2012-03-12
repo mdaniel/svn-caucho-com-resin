@@ -27,28 +27,48 @@
  * @author Scott Ferguson
  */
 
-package com.caucho.amqp.client;
+package com.caucho.amqp.common;
 
-import com.caucho.amqp.common.AmqpSession;
-import com.caucho.amqp.io.DeliveryAccepted;
-import com.caucho.amqp.io.DeliveryState;
+import java.io.IOException;
+
+import com.caucho.amqp.io.AmqpReader;
+import com.caucho.amqp.io.FrameTransfer;
+import com.caucho.amqp.io.FrameAttach.Role;
 
 /**
- * amqp session management
+ * link management
  */
-public class AmqpClientSession extends AmqpSession<AmqpClientLink>
+abstract public class AmqpReceiverLink extends AmqpLink
 {
-  private AmqpClientConnectionImpl _conn;
-  
-  protected AmqpClientSession(AmqpClientConnectionImpl conn)
+  protected AmqpReceiverLink(String name, String address)
   {
-    _conn = conn;
+    super(name, address);
+  }
+
+  @Override
+  public final Role getRole()
+  {
+    return Role.RECEIVER;
   }
   
-  public void accepted(long deliveryId)
+  //
+  // message transfer
+  //
+
+  /**
+   * Message receivers implement this method to receive a
+   * message fragment from the network.
+   */
+  @Override
+  abstract protected void onTransfer(FrameTransfer transfer, AmqpReader ain)
+    throws IOException;
+  
+  //
+  // message flow
+  //
+
+  public void flow(long deliveryCount, int credit)
   {
-    DeliveryState accepted = DeliveryAccepted.VALUE;
-    
-    _conn.sendDisposition(this, deliveryId, accepted);
+    getSession().flow(this, deliveryCount, credit);
   }
 }
