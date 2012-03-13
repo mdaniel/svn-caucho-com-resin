@@ -138,6 +138,7 @@ abstract public class AbstractHttpResponse {
   private long _lastDate;
   
   private final byte []_logDateBuffer = new byte[64];
+  private final CharBuffer _logDateCharBuffer = new CharBuffer();
   private int _logDateBufferLength;
   private long _lastLogDate;
   
@@ -1162,8 +1163,9 @@ abstract public class AbstractHttpResponse {
     char []cb = _dateCharBuffer.getBuffer();
     int len = _dateCharBuffer.getLength();
 
-    for (int i = len - 1; i >= 0; i--)
+    for (int i = len - 1; i >= 0; i--) {
       _dateBuffer[i] = (byte) cb[i];
+    }
 
     _dateBuffer[len] = (byte) '\r';
     _dateBuffer[len + 1] = (byte) '\n';
@@ -1218,7 +1220,7 @@ abstract public class AbstractHttpResponse {
 
     _lastLogDate = now;
     _localCalendar.setGMTTime(now);
-    _dateCharBuffer.clear();
+    _logDateCharBuffer.clear();
 
     _localCalendar.format(_dateCharBuffer, timeFormat);
 
