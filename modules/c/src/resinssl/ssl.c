@@ -812,6 +812,7 @@ ssl_read(connection_t *conn, char *buf, int len, int timeout)
   int retry = 5;
   int ssl_error = 0;
   int code;
+  int poll_timeout;
   int poll_result;
   int is_retry = 0;
   server_socket_t *ss;
@@ -824,7 +825,7 @@ ssl_read(connection_t *conn, char *buf, int len, int timeout)
   
   fd = conn->fd;
   
-  if (fd < 0)
+  if (fd < 0 || conn->is_read_shutdown)
     return -1;
 
   ss = conn->ss;
@@ -849,38 +850,45 @@ ssl_read(connection_t *conn, char *buf, int len, int timeout)
     return -1;
 
   if (timeout >= 0) {
-    if (poll_read(conn->fd, timeout) <= 0)
-      return TIMEOUT_EXN;
+    poll_timeout = timeout;
+  }
+  else {
+    poll_timeout = conn->socket_timeout;
+  }
+
+  if (timeout > 0 && conn->is_recv_timeout) {
+    if (conn->recv_timeout != poll_timeout) {
+      conn->recv_timeout = poll_timeout;
+
+      resin_tcp_set_recv_timeout(conn, poll_timeout);
+    }
+  }
+  else {
+    poll_result = poll_read(fd, poll_timeout);
+
+    if (poll_result <= 0) {
+      return calculate_poll_result(conn, poll_result);
+    }
   }
 
   do {
-    if (! conn->is_recv_timeout || is_retry > 0) {
-      if (timeout < 0)
-        timeout = conn->socket_timeout;
-
-      poll_result = poll_read(conn->fd, timeout);
-
-      if (poll_result > 0) {
-      }
-      else if (poll_result == 0) {
-        /* XXX: also EINTR */
-        return TIMEOUT_EXN;
-      }
-      else if (errno == EINTR) {
-        continue;
-      }
-      else {
-        return read_exception_status(conn, errno);
-      }
-    }
-  
     errno = 0;
 
-    /* fprintf(stderr, "ssl-read %d\n", conn->fd); */
     result = SSL_read(ssl, buf, len);
 
-    if (result >= 0)
+    if (result >= 0) {
       return result;
+    }
+
+    if (errno == EINTR) {
+      poll_result = poll_read(fd, conn->socket_timeout);
+
+      if (poll_result <= 0)
+        return calculate_poll_result(conn, poll_result);
+    }
+    else if (errno == EAGAIN) {
+      return read_exception_status(conn, errno);
+    }
 
     is_retry++;
   } while (retry-- > 0
