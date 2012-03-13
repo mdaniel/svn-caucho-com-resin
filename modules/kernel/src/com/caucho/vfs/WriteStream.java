@@ -769,8 +769,9 @@ implements LockableStream, SendfileOutputStream
   public final void printLatin1NoLf(String string)
     throws IOException
   {
-    if (_source == null)
+    if (_source == null) {
       return;
+    }
     
     if (string == null) {
       string = "null";

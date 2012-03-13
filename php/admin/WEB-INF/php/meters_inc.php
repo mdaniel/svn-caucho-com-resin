@@ -9,6 +9,8 @@ function meter_display_page($page)
 {
   global $g_period, $g_periods;
   
+  $count = 0;
+  
   enable_graph_controls();
   
   $name = preg_replace('/ /', '_', $page->name);
@@ -61,11 +63,12 @@ function meter_display_page($page)
     }
     echo "<table border='0'>\n";
 
-    $count = 0;
+    $section_graph_count = 0;
+
     foreach ($section->meterGraphs as $graph) {
       $graph_name = $page_name . "_" . $count;
 
-      if ($count % $columns == 0) {
+      if ($section_graph_count % $columns == 0) {
         if ($is_column)
           echo "</tr>";
         
@@ -81,6 +84,7 @@ function meter_display_page($page)
       }
 
       $count++;
+      $section_graph_count++;
     }
 
     if ($is_column)
