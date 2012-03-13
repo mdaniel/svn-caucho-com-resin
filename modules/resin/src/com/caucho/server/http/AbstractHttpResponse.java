@@ -1222,10 +1222,10 @@ abstract public class AbstractHttpResponse {
     _localCalendar.setGMTTime(now);
     _logDateCharBuffer.clear();
 
-    _localCalendar.format(_dateCharBuffer, timeFormat);
+    _localCalendar.format(_logDateCharBuffer, timeFormat);
 
-    char []cb = _dateCharBuffer.getBuffer();
-    int len = _dateCharBuffer.getLength();
+    char []cb = _logDateCharBuffer.getBuffer();
+    int len = _logDateCharBuffer.getLength();
 
     for (int i = len - 1; i >= 0; i--) {
       _logDateBuffer[i] = (byte) cb[i];
