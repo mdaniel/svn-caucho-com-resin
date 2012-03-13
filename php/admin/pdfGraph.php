@@ -610,9 +610,7 @@ function pdf_webapp($webapp)
   global $g_canvas, $g_jmx_dump;
   
   $session_manager_name = $webapp["SessionManager"];
-  debug($session_manager_name);
   $session_manager = $g_jmx_dump[$session_manager_name];
-  debug($session_manager);
   
   $host_name = $webapp["Host"];
   $host = $g_jmx_dump[$host_name];

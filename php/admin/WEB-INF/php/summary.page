@@ -309,7 +309,7 @@ function print_graphs()
 
 function recent_messages($max)
 {
-  global $g_mbean_server;
+  global $g_server, $g_mbean_server;
 
   $mbean = $g_mbean_server->lookup("resin:type=LogService");
   
@@ -786,6 +786,6 @@ function conn_time_cmp($conn_a, $conn_b)
   return $conn_b->requestTime - $conn_a->requestTime;
 }
 
-display_footer($g_page, $javascript. javascript_create_tab("summary-tabs"));
+display_footer($g_page, javascript_create_tab("summary-tabs"));
 
 ?>
