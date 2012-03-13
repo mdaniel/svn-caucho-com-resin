@@ -1207,11 +1207,11 @@ abstract public class AbstractHttpResponse {
       int s2 = '0' + (sec / 10);
       int s1 = '0' + (sec % 10);
 
-      _dateBuffer[minutesOffset + 0] = (byte) m2;
-      _dateBuffer[minutesOffset + 1] = (byte) m1;
+      _logDateBuffer[minutesOffset + 0] = (byte) m2;
+      _logDateBuffer[minutesOffset + 1] = (byte) m1;
 
-      _dateBuffer[secondsOffset + 0] = (byte) s2;
-      _dateBuffer[secondsOffset + 1] = (byte) s1;
+      _logDateBuffer[secondsOffset + 0] = (byte) s2;
+      _logDateBuffer[secondsOffset + 1] = (byte) s1;
 
       _lastLogDate = now;
 
