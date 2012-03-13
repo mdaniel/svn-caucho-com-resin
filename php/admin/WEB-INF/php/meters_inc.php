@@ -95,7 +95,7 @@ function meter_display_graph($name, $graph, $width, $height, $period, $mbean_ser
 //  echo " <div style='float:top;padding:.5em;'>\n"
 
   global $g_server;
-  $si = sprintf("%02d", $g_server->Index);
+  $si = sprintf("%02d", $g_server->ServerIndex);
 
   $meters = array();
 

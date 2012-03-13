@@ -817,7 +817,7 @@ function display_pages()
       $img = "<img src='images/${page_name}_16.png' width='16' height='16' alt='${page_name}' />&nbsp;";
     }
     else {
-      $img = "<img src='images/pixel.png' width='16' height='16' noborder alt='${page_name}' />&nbsp;";
+      $img = "<img src='images/pixel.gif' width='16' height='16' noborder alt='${page_name}' />&nbsp;";
     }
 
     if ($g_page == $name) {

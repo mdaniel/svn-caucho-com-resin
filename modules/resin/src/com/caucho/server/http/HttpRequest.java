@@ -941,6 +941,7 @@ public class HttpRequest extends AbstractHttpRequest
     _host = null;
 
     _headerSize = 0;
+    _headerLength = 0;
     _headerBuffer = getSmallHeaderBuffer(); // httpBuffer.getHeaderBuffer();
     _headerKeys = getSmallHeaderKeys();     // httpBuffer.getHeaderKeys();
     _headerValues = getSmallHeaderValues(); // httpBuffer.getHeaderValues();
@@ -1193,8 +1194,9 @@ public class HttpRequest extends AbstractHttpRequest
       return;
     }
 
-    if (version < HTTP_1_1)
+    if (version < HTTP_1_1) {
       killKeepalive("http client version less than 1.1: " + version);
+    }
 
     byte []readBuffer = s.getBuffer();
     int readOffset = s.getOffset();

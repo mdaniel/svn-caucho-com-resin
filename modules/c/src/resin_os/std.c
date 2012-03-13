@@ -525,7 +525,9 @@ std_init(connection_t *conn)
 
   conn->ssl_lock = &ss->ssl_lock;
   conn->ssl_sock = 0;
+  /*
   conn->ops = &std_ops;
+  */
   
   /*
   conn->client_sin = (struct sockaddr *) &conn->client_data;
@@ -536,9 +538,10 @@ std_init(connection_t *conn)
   conn->server_sin = (struct sockaddr *) &conn->server_data;
   sin_len = sizeof(conn->server_data);
   getsockname(sock, conn->server_sin, &sin_len);
-
+  /*
   conn->ssl_cipher = 0;
   conn->ssl_bits = 0;
+  */
 
   return 1;
 }

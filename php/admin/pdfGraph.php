@@ -702,7 +702,7 @@ function pdf_display_configs($config_names)
     $g_canvas->newLine();
     
     $g_canvas->writeTextColumn($col1, 'r', "CRC-64:");
-    $g_canvas->writeTextColumn($col2, 'l', $config["Crc64"]);
+    $g_canvas->writeTextColumn($col2, 'l', sprintf("%x", $config["Crc64"]));
     $g_canvas->newLine();
     
     if ($i < count($config_names)-1)

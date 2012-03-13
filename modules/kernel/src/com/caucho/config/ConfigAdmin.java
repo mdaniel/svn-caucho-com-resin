@@ -41,7 +41,23 @@ public class ConfigAdmin extends AbstractManagedObject implements ConfigMXBean
   public static EnvironmentLocal<Map<Path, ConfigMXBean>> _environmentConfigs = 
     new EnvironmentLocal<Map<Path, ConfigMXBean>>();
   
+  private Path _path;
+  private String _url;
+  private long _length;
+  private long _lastModified;
+  private long _crc64 = -1;
   
+  ConfigAdmin(Path path)
+  {
+    _path = path;
+    
+    // caching for efficiency... can Path attributes change?
+    _url = _path.getURL();
+    _length = _path.getLength();
+    _lastModified = _path.getLastModified();
+    _crc64 = _path.getCrc64();
+  }
+
   public static void registerPath(Path path)
   {
     if (path.getURL().toLowerCase().endsWith(".license"))
@@ -76,23 +92,6 @@ public class ConfigAdmin extends AbstractManagedObject implements ConfigMXBean
     if (map == null)
       return Collections.emptyList();
     return Collections.unmodifiableCollection(map.values());
-  }
-  
-  private Path _path;
-  private String _url;
-  private long _length;
-  private long _lastModified;
-  private long _crc64 = -1;
-  
-  ConfigAdmin(Path path)
-  {
-    _path = path;
-    
-    // caching for efficiency... can Path attributes change?
-    _url = _path.getURL();
-    _length = _path.getLength();
-    _lastModified = _path.getLastModified();
-    _crc64 = _path.getCrc64();
   }
 
   @Override

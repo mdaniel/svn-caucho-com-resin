@@ -1310,7 +1310,7 @@ Java_com_caucho_vfs_OpenSSLFactory_nativeInit(JNIEnv *env,
 {
   server_socket_t *ss = (server_socket_t *) (PTR) p_ss;
   ssl_config_t *config = (ssl_config_t *) (PTR) p_config;
-  
+
   if (! ss) {
     resin_throw_exception(env, "java/lang/IllegalStateException",
 			  "server socket must have valid values.");
@@ -1324,7 +1324,7 @@ Java_com_caucho_vfs_OpenSSLFactory_nativeInit(JNIEnv *env,
 
   if (! g_is_ssl_init) {
     g_is_ssl_init = 1;
-    
+    /* threading */
     OpenSSL_add_all_algorithms();
     SSL_load_error_strings();
     SSL_library_init();

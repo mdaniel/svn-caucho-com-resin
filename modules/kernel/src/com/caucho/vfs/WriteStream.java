@@ -760,8 +760,64 @@ implements LockableStream, SendfileOutputStream
   }
 
   /**
+   * Prints the character buffer to the stream encoded as latin1.
+   *
+   * @param buffer character buffer to write
+   * @param offset offset into the buffer to start writes
+   * @param length number of characters to write
+   */
+  public final void printLatin1NoLf(String string)
+    throws IOException
+  {
+    if (_source == null)
+      return;
+    
+    if (string == null) {
+      string = "null";
+    }
+
+    byte []writeBuffer = _writeBuffer;
+    int writeLength = _writeLength;
+    
+    int length = string.length();
+    int i = 0;
+
+    while (i < length) {
+      int sublen = writeBuffer.length - writeLength;
+
+      if (sublen <= 0) {
+        _source.write(writeBuffer, 0, writeLength, false);
+        _position += writeLength;
+        _isFlushRequired = true;
+        writeLength = 0;
+        sublen = writeBuffer.length - writeLength;
+      }
+      
+      int tail = i + sublen;
+      
+      if (length < tail) {
+        tail = length;
+      }
+
+      for (; i < tail; i++) {
+        byte value = (byte) string.charAt(i);
+        
+        if (value == '\r' || value == '\n') {
+          i = length;
+          break;
+        }
+        
+        writeBuffer[writeLength++] = value;
+      }
+    }
+    
+    _writeLength = writeLength;
+  }
+
+  /**
    * Prints a string.
    */
+  /*
   public final void printLatin1NoLf(String string)
     throws IOException
   {
@@ -798,6 +854,7 @@ implements LockableStream, SendfileOutputStream
       offset += sublen;
     }
   }
+  */
 
   /**
    * Prints a substring.
