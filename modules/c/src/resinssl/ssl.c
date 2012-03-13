@@ -876,7 +876,7 @@ ssl_read(connection_t *conn, char *buf, int len, int timeout)
 
     result = SSL_read(ssl, buf, len);
 
-    if (result >= 0) {
+    if (result > 0) {
       return result;
     }
 
@@ -897,8 +897,13 @@ ssl_read(connection_t *conn, char *buf, int len, int timeout)
                || code == SSL_ERROR_WANT_WRITE));
 
   ssl_error = SSL_get_error(ssl, result);
-    
-  if (ssl_error == SSL_ERROR_SYSCALL) {
+
+  if (ssl_error == SSL_ERROR_ZERO_RETURN) {
+    ssl_close(conn);
+    /* end of file */
+    return -1;
+  }    
+  else if (ssl_error == SSL_ERROR_SYSCALL) {
     return read_exception_status(conn, errno);
   }
   else if (ssl_error == SSL_ERROR_SSL
@@ -1063,7 +1068,6 @@ ssl_close(connection_t *conn)
 
   if (ssl) {
     SSL_set_app_data(ssl, 0);
-    
     ssl_safe_free(conn, fd, ssl);
   }
 

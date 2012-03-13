@@ -122,8 +122,6 @@ public class RingQueue<T extends RingItem> {
         if (! isWait) {
           return null;
         }
-        else if (_tail.get() != _tailAlloc.get() && retry-- >= 0) {
-        }
         else {
           waitForAvailable(headAlloc, tail);
         }
