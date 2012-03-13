@@ -327,6 +327,12 @@ public class OpenSSLFactory extends QServerSocket implements SSLFactory {
     if (values.length > 0)
       _protocolFlags = protocolFlags;
   }
+  
+  @Override
+  public boolean isJni()
+  {
+    return _stdServerSocket != null && _stdServerSocket.isJni();
+  }
 
   /**
    * Initialize
@@ -349,7 +355,7 @@ public class OpenSSLFactory extends QServerSocket implements SSLFactory {
   {
     synchronized (_sslInitLock) {
       if (_stdServerSocket != null)
-	throw new IOException(L.l("Can't create duplicte ssl factory."));
+        throw new IOException(L.l("Can't create duplicte ssl factory."));
 
       initConfig();
     
@@ -577,6 +583,11 @@ public class OpenSSLFactory extends QServerSocket implements SSLFactory {
    * Opens the connection for SSL.
    */
   native long open(long fd, long configFd);
+  
+  public String toString()
+  {
+    return getClass().getSimpleName() + "[" + _stdServerSocket + "]";
+  }
 
   static {
     JniTroubleshoot jniTroubleshoot = null;

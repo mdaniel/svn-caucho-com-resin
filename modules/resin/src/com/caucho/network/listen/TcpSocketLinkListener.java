@@ -833,6 +833,7 @@ public class TcpSocketLinkListener
 
   public void setKeepaliveSelectEnabled(boolean isKeepaliveSelect)
   {
+    System.out.println("ISEN: " + isKeepaliveSelect);
     _isKeepaliveAsyncEnable = isKeepaliveSelect;
   }
 

@@ -170,7 +170,9 @@ public final class JniSocketImpl extends QSocket {
 
   public int getNativeFd()
   {
-    return getNativeFd(_socketFd);
+    int fd = getNativeFd(_socketFd);
+
+    return fd;
   }
 
   /**
