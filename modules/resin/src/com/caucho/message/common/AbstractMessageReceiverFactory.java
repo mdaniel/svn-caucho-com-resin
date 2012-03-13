@@ -31,7 +31,7 @@ package com.caucho.message.common;
 
 import com.caucho.message.MessageReceiver;
 import com.caucho.message.MessageReceiverFactory;
-import com.caucho.message.MessageSettleMode;
+import com.caucho.message.SettleMode;
 import com.caucho.util.L10N;
 
 /**
@@ -42,7 +42,7 @@ abstract public class AbstractMessageReceiverFactory implements MessageReceiverF
   
   private String _address;
   private int _prefetch;
-  private MessageSettleMode _settleMode = MessageSettleMode.NETWORK_EXACTLY_ONCE;
+  private SettleMode _settleMode = SettleMode.ALWAYS;
 
   @Override
   public MessageReceiverFactory setAddress(String address)
@@ -73,25 +73,15 @@ abstract public class AbstractMessageReceiverFactory implements MessageReceiverF
   }
 
   @Override
-  public MessageReceiverFactory setSettleMode(MessageSettleMode settleMode)
+  public MessageReceiverFactory setSettleMode(SettleMode settleMode)
   {
-    switch (settleMode) {
-    case ALWAYS:
-    case NETWORK_AT_LEAST_ONCE:
-    case NETWORK_EXACTLY_ONCE:
-      _settleMode = settleMode;
-      break;
-      
-    default:
-      throw new IllegalArgumentException(L.l("{0} is an invalid receiver settle mode.",
-                                             settleMode));
-    }
+    _settleMode = settleMode;
     
     return this;
   }
 
   @Override
-  public MessageSettleMode getSettleMode()
+  public SettleMode getSettleMode()
   {
     return _settleMode;
   }

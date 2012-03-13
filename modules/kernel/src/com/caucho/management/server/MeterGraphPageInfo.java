@@ -80,7 +80,12 @@ public interface MeterGraphPageInfo {
   
   
   /**
-   * Returns the graphs on the page.
+   * Returns the sections of the page.
+   */
+  public MeterGraphSectionInfo []getMeterSections();
+  
+  /**
+   * Returns the graphs in the default section.
    */
   public MeterGraphInfo []getMeterGraphs();
 }

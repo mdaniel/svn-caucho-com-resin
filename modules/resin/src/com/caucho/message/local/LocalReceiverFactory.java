@@ -32,7 +32,7 @@ package com.caucho.message.local;
 import com.caucho.amqp.marshal.AmqpMessageDecoder;
 import com.caucho.amqp.marshal.AmqpStringDecoder;
 import com.caucho.message.MessageReceiver;
-import com.caucho.message.MessageSettleMode;
+import com.caucho.message.SettleMode;
 import com.caucho.message.common.AbstractMessageReceiverFactory;
 
 /**
@@ -50,7 +50,7 @@ public class LocalReceiverFactory extends AbstractMessageReceiverFactory {
   }
 
   @Override
-  public LocalReceiverFactory setSettleMode(MessageSettleMode settleMode)
+  public LocalReceiverFactory setSettleMode(SettleMode settleMode)
   {
     super.setSettleMode(settleMode);
     

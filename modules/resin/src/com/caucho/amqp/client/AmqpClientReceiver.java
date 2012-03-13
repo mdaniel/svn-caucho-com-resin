@@ -39,7 +39,7 @@ import com.caucho.amqp.AmqpReceiver;
 import com.caucho.amqp.common.AmqpSession;
 import com.caucho.amqp.io.AmqpReader;
 import com.caucho.amqp.marshal.AmqpMessageDecoder;
-import com.caucho.message.MessageSettleMode;
+import com.caucho.message.SettleMode;
 
 /**
  * AMQP client
@@ -52,7 +52,7 @@ class AmqpClientReceiver<T> implements AmqpReceiver<T> {
   private final String _address;
   private final AmqpClientReceiverLink _link;
   
-  private final MessageSettleMode _settleMode;
+  private final SettleMode _settleMode;
   
   private final AmqpMessageDecoder<T> _decoder;
   

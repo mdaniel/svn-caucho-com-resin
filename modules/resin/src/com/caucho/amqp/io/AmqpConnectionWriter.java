@@ -39,7 +39,7 @@ import com.caucho.amqp.common.AmqpLink;
 import com.caucho.amqp.common.AmqpSenderLink;
 import com.caucho.amqp.common.AmqpSession;
 import com.caucho.amqp.io.FrameAttach.Role;
-import com.caucho.message.MessageSettleMode;
+import com.caucho.message.SettleMode;
 import com.caucho.vfs.ReadStream;
 import com.caucho.vfs.WriteStream;
 
@@ -138,10 +138,10 @@ public class AmqpConnectionWriter
   public void transfer(AmqpSession session,
                        AmqpSenderLink link,
                        long deliveryId,
-                       MessageSettleMode settleMode, InputStream is)
+                       SettleMode settleMode, InputStream is)
   {
     try {
-      boolean isSettled = (settleMode == MessageSettleMode.ALWAYS);
+      boolean isSettled = (settleMode == SettleMode.ALWAYS);
 
       _fout.startFrame(0, session.getOutgoingIndex());
 

@@ -29,13 +29,11 @@
 
 package com.caucho.amqp;
 
-import com.caucho.message.broker.BrokerReceiver;
-
 /**
  * AMQP client connection facade
  */
 public interface AmqpConnection {
-  public AmqpReceiver createReceiver(String queueName);
+  public AmqpReceiver<?> createReceiver(String queueName);
   
   public AmqpReceiverFactory createReceiverFactory();
 }

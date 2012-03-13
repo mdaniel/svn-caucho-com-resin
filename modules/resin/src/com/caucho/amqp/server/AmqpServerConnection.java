@@ -67,7 +67,7 @@ import com.caucho.amqp.io.MessageHeader;
 import com.caucho.amqp.io.SaslMechanisms;
 import com.caucho.amqp.io.SaslOutcome;
 import com.caucho.amqp.io.FrameAttach.Role;
-import com.caucho.message.MessageSettleMode;
+import com.caucho.message.SettleMode;
 import com.caucho.message.broker.MessageBroker;
 import com.caucho.message.broker.BrokerReceiver;
 import com.caucho.message.broker.BrokerSender;

@@ -480,6 +480,8 @@
       
     <!-- row 1 -->
 
+    <section name="Requests">
+
     <graph name="Request Active">
       <meter>Resin|Http|Request Active</meter>
       <meter>Resin|Port|Keepalive Thread Active</meter>
@@ -511,7 +513,10 @@
       <meter>Resin|Port|Throttle Disconnect Count</meter>
     </graph>
 
+    </section>
+    
     <!-- row 2 -->
+    <section name="Network/CPU">
       
     <graph name="Netstat">
       <meter>OS|Network|tcp-established</meter>
@@ -536,6 +541,10 @@
     <graph name="CPU Context Switch">
       <meter>OS|CPU|Context Switch Count</meter>
     </graph>
+    
+    </section>
+
+    <section name="Memory">
 
     <!-- row 3 -->
     
@@ -576,6 +585,9 @@
       <meter>Resin|Log|Severe</meter>
     </graph>
 
+    </section>
+    
+    <section name="Threads">
     <!-- row 5 -->
 
     <graph name="JVM Threads">
@@ -599,6 +611,9 @@
       <meter>Resin|Thread|Thread Task Queue</meter>
     </graph>
 
+    </section>
+    
+    <section name="Database">
     <!-- row 6 -->
 
     <graph name="Database Connection Active">
@@ -615,6 +630,8 @@
       <meter>Resin|Database|Query Count</meter>
     </graph>
     
+    </section>
+    <section name="Caching">
     <!-- row 7 -->
 
     <graph name="Block Cache I/O">
@@ -655,6 +672,8 @@
     <graph name="Proxy Cache Cacheable Rate">
       <meter>Resin|Proxy Cache|Cacheable Rate</meter>
     </graph>
+    
+    </section>
 
   </health:MeterGraphPage>
     

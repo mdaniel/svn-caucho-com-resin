@@ -1090,6 +1090,12 @@ public class HttpRequest extends AbstractHttpRequest
         }
       }
     }
+    
+    int readTail = uriBuffer.length - uriLength - 1;
+    
+    if (readLength < readTail) {
+      readTail = readLength;
+    }
 
     // read URI
     while (! isHttpWhitespace[ch]) {
@@ -1098,13 +1104,14 @@ public class HttpRequest extends AbstractHttpRequest
       // also lets us save a bit of efficiency.
       uriBuffer[uriLength++] = (byte) ch;
 
-      if (readLength <= readOffset) {
-        readOffset = 0;
-        if ((readLength = s.fillBuffer()) < 0) {
-          _uriLength = uriLength;
-          _version = 0;
+      if (readTail <= readOffset) {
+        if ((readTail = fillUrlTail(s, readOffset, uriLength)) <= 0) {
           return true;
         }
+
+        readOffset = s.getOffset();
+        uriBuffer = _uri;
+        uriLength = _uriLength;
       }
       
       ch = readBuffer[readOffset++];
@@ -1324,6 +1331,34 @@ public class HttpRequest extends AbstractHttpRequest
     }
   }
   
+  private int fillUrlTail(ReadStream s, int readOffset,
+                          int uriOffset)
+    throws IOException
+  {
+    _uriLength = uriOffset;
+    
+    if (_uri.length <= uriOffset) {
+      extendHeaderBuffers();
+    }
+    
+    if (s.getLength() <= readOffset) {
+      if (s.fillBuffer() < 0) {
+        return -1;
+      }
+    }
+    else {
+      s.setOffset(readOffset);
+    }
+    
+    int tail = s.getLength() - s.getOffset();
+    
+    if (_uri.length - uriOffset < tail) {
+      tail = _uri.length - uriOffset;
+    }
+    
+    return tail;
+  }
+  
   private int fillHeaderTail(ReadStream s, int readOffset,
                              int headerOffset)
     throws IOException
@@ -1351,7 +1386,7 @@ public class HttpRequest extends AbstractHttpRequest
     
     return tail;
   }
-  
+
   protected void extendHeaderBuffers()
     throws IOException
   {
@@ -1364,11 +1399,14 @@ public class HttpRequest extends AbstractHttpRequest
     
     bufferStore = allocateHttpBufferStore();
     
+    byte []uri = bufferStore.getUriBuffer();
+    System.arraycopy(_uri,  0, uri, 0, _uriLength);
+    
     char []headerBuffer = bufferStore.getHeaderBuffer();
     CharSegment []headerKeys = bufferStore.getHeaderKeys();
     CharSegment []headerValues = bufferStore.getHeaderValues();
     
-    if (headerBuffer == _headerBuffer) {
+    if (headerBuffer == _headerBuffer || _uri == uri) {
       throw new IllegalStateException();
     }
     
@@ -1384,6 +1422,7 @@ public class HttpRequest extends AbstractHttpRequest
                            _headerValues[i].getLength());
     }
     
+    _uri = uri;
     _headerBuffer = headerBuffer;
     _headerKeys = headerKeys;
     _headerValues = headerValues;

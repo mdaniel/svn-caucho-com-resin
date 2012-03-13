@@ -46,7 +46,7 @@ import com.caucho.amqp.io.FrameTransfer;
 import com.caucho.amqp.io.LinkSource;
 import com.caucho.amqp.io.LinkTarget;
 import com.caucho.amqp.io.FrameAttach.Role;
-import com.caucho.message.MessageSettleMode;
+import com.caucho.message.SettleMode;
 
 /**
  * channel session management
@@ -197,7 +197,7 @@ public class AmqpSession
    */
   public void transfer(AmqpSenderLink link,
                        long mid,
-                       MessageSettleMode settleMode,
+                       SettleMode settleMode,
                        InputStream is)
   {
     long deliveryId = addSenderSettle(link, mid, settleMode);
@@ -210,7 +210,7 @@ public class AmqpSession
 
   private long addSenderSettle(AmqpLink link,
                                long messageId, 
-                               MessageSettleMode settleMode)
+                               SettleMode settleMode)
   {
     return _senderSettle.addDelivery(link, messageId, settleMode);
   }
@@ -230,7 +230,7 @@ public class AmqpSession
 
   long addReceiverSettle(AmqpLink link,
                          long messageId, 
-                         MessageSettleMode settleMode)
+                         SettleMode settleMode)
   {
     return _receiverSettle.addDelivery(link, messageId, settleMode);
   }

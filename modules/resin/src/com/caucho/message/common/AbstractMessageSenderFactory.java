@@ -31,7 +31,7 @@ package com.caucho.message.common;
 
 import com.caucho.message.MessageSenderFactory;
 import com.caucho.message.MessageSettleListener;
-import com.caucho.message.MessageSettleMode;
+import com.caucho.message.SettleMode;
 import com.caucho.util.L10N;
 
 /**
@@ -41,7 +41,7 @@ abstract public class AbstractMessageSenderFactory implements MessageSenderFacto
   private static final L10N L = new L10N(AbstractMessageSenderFactory.class);
   
   private String _address;
-  private MessageSettleMode _settleMode = MessageSettleMode.NETWORK_EXACTLY_ONCE;
+  private SettleMode _settleMode = SettleMode.ALWAYS;
   private MessageSettleListener _settleListener;
 
   @Override
@@ -59,25 +59,15 @@ abstract public class AbstractMessageSenderFactory implements MessageSenderFacto
   }
 
   @Override
-  public AbstractMessageSenderFactory setSettleMode(MessageSettleMode settleMode)
+  public AbstractMessageSenderFactory setSettleMode(SettleMode settleMode)
   {
-    switch (settleMode) {
-    case ALWAYS:
-    case NETWORK_AT_LEAST_ONCE:
-    case NETWORK_EXACTLY_ONCE:
-      _settleMode = settleMode;
-      break;
-      
-    default:
-      throw new IllegalArgumentException(L.l("{0} is an invalid sender settle mode.",
-                                             settleMode));
-    }
+    _settleMode = settleMode;
     
     return this;
   }
 
   @Override
-  public MessageSettleMode getSettleMode()
+  public SettleMode getSettleMode()
   {
     return _settleMode;
   }

@@ -41,9 +41,11 @@ public interface MessageReceiverFactory {
   
   public int getPrefetch();
   
-  public MessageReceiverFactory setSettleMode(MessageSettleMode settleMode);
+  public MessageReceiverFactory setSettleMode(SettleMode settleMode);
   
-  public MessageSettleMode getSettleMode();
+  public SettleMode getSettleMode();
+  
+  // public MessageReceiverFactory setMessageListener(MessageListener listener);
   
   public MessageReceiver<?> build();
 }

@@ -32,7 +32,7 @@ package com.caucho.amqp.common;
 import java.io.InputStream;
 
 import com.caucho.amqp.io.FrameAttach.Role;
-import com.caucho.message.MessageSettleMode;
+import com.caucho.message.SettleMode;
 
 /**
  * link management
@@ -55,7 +55,7 @@ abstract public class AmqpSenderLink extends AmqpLink
   //
 
   public void transfer(long mid,
-                       MessageSettleMode settleMode,
+                       SettleMode settleMode,
                        InputStream is)
   {
     getSession().transfer(this, mid, settleMode, is);

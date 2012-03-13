@@ -55,33 +55,39 @@ function meter_display_page($page)
   echo " <div style='float:right;font-size:smaller;font-style:italic;'>" . gettext('Period') . ": $period_name</div>\n";
   echo "</div>\n";
   
-  echo "<table border='0'>\n";
+  foreach ($page->meterSections as $section) {
+    if ($section->name) {
+      echo "<h2>" . $section->name . "</h2>";
+    }
+    echo "<table border='0'>\n";
 
-  foreach ($page->meterGraphs as $graph) {
-    $graph_name = $page_name . "_" . $count;
+    $count = 0;
+    foreach ($section->meterGraphs as $graph) {
+      $graph_name = $page_name . "_" . $count;
 
-    if ($count % $columns == 0) {
-      if ($is_column)
-        echo "</tr>";
+      if ($count % $columns == 0) {
+        if ($is_column)
+          echo "</tr>";
         
-      echo "<tr>";
+        echo "<tr>";
 
-      $is_column = true;
+        $is_column = true;
+      }
+
+      if ($graph) {
+        echo "<td valign='top'>";
+        meter_display_graph($graph_name, $graph, $width, $height, $period);
+        echo "</td>";
+      }
+
+      $count++;
     }
 
-    if ($graph) {
-      echo "<td valign='top'>";
-      meter_display_graph($graph_name, $graph, $width, $height, $period);
-      echo "</td>";
-    }
-
-    $count++;
-  }
-
-  if ($is_column)
-    echo "</tr>";
+    if ($is_column)
+      echo "</tr>";
     
-  echo "</table>";
+    echo "</table>";
+  }
 }  
 
 function meter_display_graph($name, $graph, $width, $height, $period, $mbean_server = null)

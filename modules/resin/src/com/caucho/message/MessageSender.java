@@ -40,7 +40,7 @@ public interface MessageSender<T> extends BlockingQueue<T> {
    * Auto-settle sends messages without waiting for confirmation
    * from the broker.
    */
-  public MessageSettleMode getSettleMode();
+  public SettleMode getSettleMode();
   
   public MessageSettleListener getSettleListener();
   

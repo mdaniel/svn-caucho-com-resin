@@ -33,7 +33,7 @@ import com.caucho.message.MessageFactory;
 import com.caucho.message.MessageSender;
 import com.caucho.message.MessageSenderFactory;
 import com.caucho.message.MessageSettleListener;
-import com.caucho.message.MessageSettleMode;
+import com.caucho.message.SettleMode;
 
 /**
  * local connection to the message store
@@ -42,7 +42,7 @@ abstract public class AbstractMessageSender<T>
   extends AbstractQueueSender<T>
   implements MessageSender<T>
 {
-  private final MessageSettleMode _settleMode;
+  private final SettleMode _settleMode;
   private final MessageSettleListener _settleListener;
   
   protected AbstractMessageSender(MessageSenderFactory factory)
@@ -52,7 +52,7 @@ abstract public class AbstractMessageSender<T>
   }
   
   @Override
-  public final MessageSettleMode getSettleMode()
+  public final SettleMode getSettleMode()
   {
     return _settleMode;
   }

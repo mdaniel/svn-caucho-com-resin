@@ -30,7 +30,7 @@
 package com.caucho.amqp.common;
 
 import com.caucho.amqp.io.DeliveryState;
-import com.caucho.message.MessageSettleMode;
+import com.caucho.message.SettleMode;
 
 /**
  * manages transfers and settlements.
@@ -47,11 +47,11 @@ public class TransferSettleManager<L extends AmqpLink>
   
   public long addDelivery(L link,
                           long messageId, 
-                          MessageSettleMode settleMode)
+                          SettleMode settleMode)
   {
     long deliveryId = _deliveryId++;
     
-    if (settleMode == MessageSettleMode.ALWAYS){
+    if (settleMode == SettleMode.ALWAYS){
       return deliveryId;
     }
     

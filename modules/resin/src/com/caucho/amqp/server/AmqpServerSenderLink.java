@@ -34,7 +34,7 @@ import java.io.InputStream;
 
 import com.caucho.amqp.common.AmqpSenderLink;
 import com.caucho.amqp.io.FrameFlow;
-import com.caucho.message.MessageSettleMode;
+import com.caucho.message.SettleMode;
 import com.caucho.message.broker.BrokerReceiver;
 import com.caucho.message.broker.ReceiverMessageHandler;
 
@@ -117,7 +117,7 @@ public class AmqpServerSenderLink extends AmqpSenderLink
     public void onMessage(long messageId, InputStream is, long contentLength)
       throws IOException
     {
-      MessageSettleMode settleMode = MessageSettleMode.ALWAYS;
+      SettleMode settleMode = SettleMode.ALWAYS;
       
       transfer(messageId, settleMode, is);
     }

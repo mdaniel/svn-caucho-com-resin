@@ -36,6 +36,8 @@ package com.caucho.message;
 public interface MessageConnection {
   public MessageReceiver<?> createReceiver(String queueName);
   
+  // public MessageReceiver<?> createReceiver(String queueName, listener);
+  
   public MessageReceiverFactory createReceiverFactory();
   
   public MessageSender<?> createSender(String queueName);

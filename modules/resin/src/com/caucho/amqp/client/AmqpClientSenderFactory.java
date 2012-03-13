@@ -34,7 +34,7 @@ import com.caucho.amqp.AmqpSenderFactory;
 import com.caucho.amqp.marshal.AmqpMessageEncoder;
 import com.caucho.amqp.marshal.AmqpStringEncoder;
 import com.caucho.message.MessageSettleListener;
-import com.caucho.message.MessageSettleMode;
+import com.caucho.message.SettleMode;
 import com.caucho.message.common.AbstractMessageSenderFactory;
 
 
@@ -62,7 +62,7 @@ class AmqpClientSenderFactory extends AbstractMessageSenderFactory
   }
 
   @Override
-  public AmqpClientSenderFactory setSettleMode(MessageSettleMode settleMode)
+  public AmqpClientSenderFactory setSettleMode(SettleMode settleMode)
   {
     super.setSettleMode(settleMode);
     

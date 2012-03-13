@@ -33,7 +33,7 @@ import java.io.InputStream;
 
 import com.caucho.amqp.common.AmqpLink;
 import com.caucho.amqp.common.AmqpSenderLink;
-import com.caucho.message.MessageSettleMode;
+import com.caucho.message.SettleMode;
 
 /**
  * link session management
@@ -64,7 +64,7 @@ public class AmqpClientSenderLink extends AmqpSenderLink
   /**
    * Transfers a message, returning the message id.
    */
-  long transfer(MessageSettleMode settleMode, InputStream is)
+  long transfer(SettleMode settleMode, InputStream is)
   {
     long mid = nextMessageId();
 

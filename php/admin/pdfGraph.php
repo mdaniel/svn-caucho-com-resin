@@ -1099,18 +1099,20 @@ function pdf_draw_graphs($mPage)
 {
   global $g_si, $g_label, $g_canvas;
 
-  $g_canvas->writeSection("Server Graphs: $g_label");
-  
-  $g_canvas->graph_padding_x = 25;
-  $g_canvas->allocateGraphSpace(3,2);
+  foreach ($mPage->getMeterSections() as $section) {
+    $graphs = $section->getMeterGraphs();
 
-  $graphs = $mPage->getMeterGraphs();
+    $g_canvas->writeSection("Server Graphs: $g_label : ${section->name}");
+  
+    $g_canvas->graph_padding_x = 25;
+    $g_canvas->allocateGraphSpace(3,2);
  
-  foreach ($graphs as $graphData) {
-    $meterNames = $graphData->getMeterNames();
+    foreach ($graphs as $graphData) {
+      $meterNames = $graphData->getMeterNames();
     //debug("Working on graph " . $graphData->getName() . " with " . count($meterNames) . " meters");
-    pdf_stat_graph($graphData->getName(), $meterNames, $g_si);
-  }
+      pdf_stat_graph($graphData->getName(), $meterNames, $g_si);
+    }
+  }   
 }
 
 function pdf_heap_dump()
