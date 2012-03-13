@@ -29,12 +29,16 @@
 
 package com.caucho.amqp.common;
 
+import com.caucho.message.SettleMode;
+
 /**
  * link management
  */
 public interface AmqpLinkFactory
 {
-  public AmqpSenderLink createSenderLink(String name, String address);
+  public AmqpSenderLink createSenderLink(String name, 
+                                         String address,
+                                         SettleMode settleMode);
   
   public AmqpReceiverLink createReceiverLink(String name, String address);
 }

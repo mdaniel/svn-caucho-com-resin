@@ -42,6 +42,11 @@ public interface MessageSender<T> extends BlockingQueue<T> {
    */
   public SettleMode getSettleMode();
   
+  /**
+   * Returns the most recently received message id for acknowledgement.
+   */
+  public long getLastMessageId();
+  
   public MessageSettleListener getSettleListener();
   
   public int getUnsettledCount();

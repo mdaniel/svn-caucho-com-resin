@@ -32,6 +32,7 @@ package com.caucho.amqp.server;
 import javax.annotation.PostConstruct;
 
 import com.caucho.amqp.common.AmqpReceiverLink;
+import com.caucho.message.SettleMode;
 import com.caucho.message.broker.BrokerReceiver;
 import com.caucho.message.broker.BrokerSender;
 import com.caucho.message.broker.EnvironmentMessageBroker;
@@ -74,9 +75,12 @@ public class AmqpProtocol implements Protocol
     }
   }
 
-  AmqpServerSenderLink createSenderLink(String name, String address)
+  AmqpServerSenderLink createSenderLink(String name, 
+                                        String address,
+                                        SettleMode settleMode)
   {
-    AmqpServerSenderLink link = new AmqpServerSenderLink(name, address);
+    AmqpServerSenderLink link
+      = new AmqpServerSenderLink(name, address, settleMode);
     
     BrokerReceiver receiver = _broker.createReceiver(address, link.getBrokerHandler());
     

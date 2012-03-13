@@ -45,13 +45,16 @@ public class AmqpServerSenderLink extends AmqpSenderLink
 {
   private ReceiverMessageHandler _receiverHandler;
   private BrokerReceiver _receiver;
+  private SettleMode _settleMode = SettleMode.ALWAYS;
   
   public AmqpServerSenderLink(String name,
-                              String address)
+                              String address,
+                              SettleMode settleMode)
   {
     super(name, address);
     
     _receiverHandler = new BrokerMessageReceiver();
+    _settleMode = settleMode;
   }
   
   ReceiverMessageHandler getBrokerHandler()
@@ -117,9 +120,7 @@ public class AmqpServerSenderLink extends AmqpSenderLink
     public void onMessage(long messageId, InputStream is, long contentLength)
       throws IOException
     {
-      SettleMode settleMode = SettleMode.ALWAYS;
-      
-      transfer(messageId, settleMode, is);
+      transfer(messageId, _settleMode, is);
     }
   }
 }

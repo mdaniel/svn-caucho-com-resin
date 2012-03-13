@@ -56,6 +56,7 @@ public class LocalSender<T> extends AbstractMessageSender<T> {
   private AmqpMessageEncoder<T> _encoder;
   
   private BrokerSender _publisher;
+  private long _lastMessageId;
   
   private WriteStream _os;
   
@@ -116,10 +117,12 @@ public class LocalSender<T> extends AbstractMessageSender<T> {
       tOut.close();
 
       long xid = 0;
-      long mid = 0;
+      long mid = _publisher.nextMessageId();
       boolean isDurable = false;
       int priority = 4;
       long expireTime = 0;
+      
+      _lastMessageId = mid;
       
       _publisher.message(xid, mid, isDurable, priority, expireTime,
                          tOut.getHead().getBuffer(), 0, tOut.getLength(), 
@@ -129,6 +132,12 @@ public class LocalSender<T> extends AbstractMessageSender<T> {
     } catch (IOException e) {
       throw new AmqpException(e);
     }
+  }
+  
+  @Override
+  public long getLastMessageId()
+  {
+    return _lastMessageId;
   }
 
   @Override

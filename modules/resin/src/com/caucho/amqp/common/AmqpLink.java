@@ -173,8 +173,6 @@ abstract public class AmqpLink
    */
   public void accepted(long mid)
   {
-    // TODO Auto-generated method stub
-    
   }
 
   /**

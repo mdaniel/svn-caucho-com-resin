@@ -1106,6 +1106,8 @@ public class HttpRequest extends AbstractHttpRequest
 
       if (readTail <= readOffset) {
         if ((readTail = fillUrlTail(s, readOffset, uriLength)) <= 0) {
+          _uriLength = uriLength;
+          _version = 0;
           return true;
         }
 

@@ -54,5 +54,5 @@ public enum SettleTime {
   /**
    * Application acknowledgement.
    */
-  APPLICATION_ACKNOWLEDGE;
+  CLIENT_ACK;
 }

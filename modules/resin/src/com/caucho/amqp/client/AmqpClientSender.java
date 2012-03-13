@@ -77,7 +77,11 @@ class AmqpClientSender<T> extends AbstractMessageSender<T> implements AmqpSender
     
     _encoder = getMessageEncoder(factory);
     
-    _link = new AmqpClientSenderLink("client-" + _address, _address, this);
+    int linkId = _client.nextLinkId();
+    
+    _link = new AmqpClientSenderLink("client-" + _address + "-" + linkId, 
+                                     _address, 
+                                     this);
     
     _session.addSenderLink(_link);
   }
@@ -140,8 +144,13 @@ class AmqpClientSender<T> extends AbstractMessageSender<T> implements AmqpSender
   {
     return _lastMessageId;
   }
+  
+  public void accepted(long messageId)
+  {
+    
+  }
 
-  void onAccept(long messageId)
+  void onAccepted(long messageId)
   {
     MessageSettleListener listener = getSettleListener();
     

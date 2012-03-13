@@ -45,6 +45,10 @@ public interface MessageReceiverFactory {
   
   public SettleMode getSettleMode();
   
+  public MessageReceiverFactory setSettleTime(SettleTime settleTime);
+  
+  public SettleTime getSettleTime();
+  
   // public MessageReceiverFactory setMessageListener(MessageListener listener);
   
   public MessageReceiver<?> build();

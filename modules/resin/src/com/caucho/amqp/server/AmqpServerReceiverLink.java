@@ -30,6 +30,8 @@
 package com.caucho.amqp.server;
 
 import java.io.IOException;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 import com.caucho.amqp.common.AmqpReceiverLink;
 import com.caucho.amqp.io.AmqpConstants;
@@ -46,6 +48,9 @@ import com.caucho.vfs.TempBuffer;
  */
 public class AmqpServerReceiverLink extends AmqpReceiverLink
 {
+  private static final Logger log
+    = Logger.getLogger(AmqpServerReceiverLink.class.getName());
+  
   private final BrokerSender _sender;
   
   public AmqpServerReceiverLink(String name,
@@ -102,6 +107,11 @@ public class AmqpServerReceiverLink extends AmqpReceiverLink
       handler = new MessageSettleHandler(mid);
     }
     
+    if (log.isLoggable(Level.FINER)) {
+      log.finer(this + " onTransfer(" + mid + ",len=" + len
+                + (isSettled ? ",settled" : "") + ")");
+    }
+    
     _sender.message(xid, mid, isDurable, priority, expireTime,
                     tBuf.getBuffer(), 0, len, tBuf, handler);
   }
@@ -117,7 +127,9 @@ public class AmqpServerReceiverLink extends AmqpReceiverLink
     @Override
     public void onAccepted(long mid)
     {
-      getSession().onAccepted(_deliveryId);
+      System.out.println("ON_ACCEPT: "+ mid);
+      
+      getSession().accepted(_deliveryId);
     }
 
     @Override

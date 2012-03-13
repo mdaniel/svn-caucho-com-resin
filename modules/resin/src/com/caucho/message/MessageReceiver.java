@@ -37,22 +37,29 @@ import java.util.concurrent.BlockingQueue;
  */
 public interface MessageReceiver<T> extends BlockingQueue<T> {
   /**
+   * Returns the last message id for client ack.
+   */
+  public long getLastMessageId();
+  
+  /**
    * Accept the last message.
    */
-  public void accepted();
+  public void accepted(long mid);
   
   /**
    * Reject the last message.
    */
-  public void rejected(String errorMessage);
+  public void rejected(long mid, String errorMessage);
   
   /**
    * Release the last message.
    */
-  public void released();
+  public void released(long mid);
   
   /**
    * Returns the message as modified.
    */
-  public void modified(boolean isFailed, boolean isUndeliverableHere);
+  public void modified(long mid, 
+                       boolean isFailed, 
+                       boolean isUndeliverableHere);
 }

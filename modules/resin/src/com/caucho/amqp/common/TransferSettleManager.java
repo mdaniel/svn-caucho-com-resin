@@ -55,7 +55,7 @@ public class TransferSettleManager<L extends AmqpLink>
       return deliveryId;
     }
     
-    DeliveryNode node = new DeliveryNode(deliveryId, link, messageId);
+    DeliveryNode node = new DeliveryNode(deliveryId, link, messageId, settleMode);
     
     // XXX: extend
     _unsettledList[_unsettledHead++] = node;

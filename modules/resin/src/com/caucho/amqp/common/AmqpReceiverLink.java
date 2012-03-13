@@ -64,6 +64,16 @@ abstract public class AmqpReceiverLink extends AmqpLink
     throws IOException;
   
   //
+  // message settle disposition
+  //
+  
+  @Override
+  public void accepted(long mid)
+  {
+    getSession().accepted(mid);
+  }
+  
+  //
   // message flow
   //
 

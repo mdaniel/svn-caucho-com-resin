@@ -60,11 +60,13 @@ public class AmqpConnectionReader
   {
     ReadStream is = _is;
     
-    if (is.read() != 'A'
+    int ch = is.read();
+    
+    if (ch != 'A'
         || is.read() != 'M'
         || is.read() != 'Q'
         || is.read() != 'P') {
-      System.out.println("ILLEGAL_HEADER:");
+      System.out.println("ILLEGAL_HEADER: " + (char) ch);
       throw new IOException();
     }
     

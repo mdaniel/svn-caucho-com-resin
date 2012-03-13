@@ -32,6 +32,7 @@ package com.caucho.amqp.client;
 import java.io.IOException;
 import java.net.Socket;
 import java.util.concurrent.atomic.AtomicBoolean;
+import java.util.concurrent.atomic.AtomicInteger;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -45,6 +46,7 @@ import com.caucho.amqp.common.AmqpReceiverLink;
 import com.caucho.amqp.common.AmqpSenderLink;
 import com.caucho.amqp.common.AmqpSession;
 import com.caucho.env.thread.ThreadPool;
+import com.caucho.message.SettleMode;
 import com.caucho.vfs.QSocketWrapper;
 import com.caucho.vfs.ReadStream;
 import com.caucho.vfs.WriteStream;
@@ -69,6 +71,8 @@ public class AmqpClientConnectionImpl implements AmqpConnection, AmqpLinkFactory
   private AmqpSession _session;
   
   private AmqpClientFrameReader _reader;
+  
+  private final AtomicInteger _linkId = new AtomicInteger();
   
   private final AtomicBoolean _isClosed = new AtomicBoolean();
   private boolean _isDisconnected;
@@ -112,7 +116,7 @@ public class AmqpClientConnectionImpl implements AmqpConnection, AmqpLinkFactory
       
       _session = _handler.beginSession();
       
-      _os.flush();
+      _handler.getWriter().flush();
       
       _handler.getReader().readVersion();
       
@@ -185,7 +189,9 @@ public class AmqpClientConnectionImpl implements AmqpConnection, AmqpLinkFactory
   }
 
   @Override
-  public AmqpSenderLink createSenderLink(String name, String address)
+  public AmqpSenderLink createSenderLink(String name, 
+                                         String address,
+                                         SettleMode settleMode)
   {
     throw new UnsupportedOperationException(getClass().getName());
   }
@@ -199,6 +205,14 @@ public class AmqpClientConnectionImpl implements AmqpConnection, AmqpLinkFactory
     
     _is = new ReadStream(_s.getStream());
     _os = new WriteStream(_s.getStream());
+  }
+
+  /**
+   * @return
+   */
+  public int nextLinkId()
+  {
+    return _linkId.incrementAndGet();
   }
 
   public void onClose()

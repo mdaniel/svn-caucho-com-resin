@@ -136,22 +136,21 @@ public class AmqpServerConnection extends AbstractProtocolConnection
     _state = State.NEW;
     
     _linkFactory = new ServerLinkFactory();
-    _handler = new AmqpConnectionHandler(_linkFactory,
-                                         getReadStream(),
-                                         getWriteStream());
   }
 
   @Override
   public boolean handleRequest() throws IOException
   {
-    ReadStream is = _link.getReadStream();
-    
     switch (_state) {
     case NEW:
+      _handler = new AmqpConnectionHandler(_linkFactory,
+                                           getReadStream(),
+                                           getWriteStream());
+      
       if (! _handler.getReader().readVersion()) {
         return false;
       }
-      
+      System.out.println("VERSION:");
       if (_isSasl) {
         System.out.println("SASL:");
         try {
@@ -163,6 +162,8 @@ public class AmqpServerConnection extends AbstractProtocolConnection
           e.printStackTrace();
         }
       }
+      
+      _handler.getWriter().writeVersion(0);
       
       _handler.getReader().readOpen();
       _handler.getWriter().writeOpen();
@@ -197,10 +198,13 @@ public class AmqpServerConnection extends AbstractProtocolConnection
   @Override
   public void onCloseConnection()
   {
+    AmqpConnectionHandler handler = _handler;
     _handler = null;
     _linkFactory = null;
-    
-    _handler.closeConnection();
+
+    if (handler != null) {
+      handler.closeConnection();
+    }
   }
   
   private enum State {
@@ -217,9 +221,11 @@ public class AmqpServerConnection extends AbstractProtocolConnection
     }
 
     @Override
-    public AmqpSenderLink createSenderLink(String name, String address)
+    public AmqpSenderLink createSenderLink(String name, 
+                                           String address,
+                                           SettleMode settleMode)
     {
-      return _amqp.createSenderLink(name, address);
+      return _amqp.createSenderLink(name, address, settleMode);
     }
   }
 }

@@ -30,6 +30,8 @@
 package com.caucho.amqp.client;
 
 import java.io.InputStream;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 import com.caucho.amqp.common.AmqpLink;
 import com.caucho.amqp.common.AmqpSenderLink;
@@ -40,6 +42,9 @@ import com.caucho.message.SettleMode;
  */
 public class AmqpClientSenderLink extends AmqpSenderLink
 {
+  private static final Logger log
+    = Logger.getLogger(AmqpClientSenderLink.class.getName());
+  
   private final AmqpClientSender<?> _sender;
   
   public AmqpClientSenderLink(String name,
@@ -79,10 +84,14 @@ public class AmqpClientSenderLink extends AmqpSenderLink
   @Override
   public void onAccepted(long xid, long messageId)
   {
-    super.onAccepted(xid, messageId);
+    if (log.isLoggable(Level.FINER)) {
+      log.finer(this + " onAccepted(" + messageId + ")");
+    }
+    
+    // super.onAccepted(xid, messageId);
     // getSession().accepted(messageId);
     
-    getSender().onAccept(messageId);
+    getSender().onAccepted(messageId);
   }
 
   /**

@@ -44,6 +44,11 @@ public class FrameDisposition extends AmqpAbstractFrame {
   private DeliveryState _state; // delivery-state
   private boolean _isBatchable;
   
+  public void setRole(Role role)
+  {
+    _role = role;
+  }
+  
   public Role getRole()
   {
     return _role;
@@ -72,6 +77,11 @@ public class FrameDisposition extends AmqpAbstractFrame {
   public boolean isSettled()
   {
     return _isSettled;
+  }
+  
+  public void setSettled(boolean isSettled)
+  {
+    _isSettled = isSettled;
   }
   
   public DeliveryState getState()

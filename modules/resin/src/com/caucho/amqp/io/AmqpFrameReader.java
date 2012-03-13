@@ -32,6 +32,8 @@ package com.caucho.amqp.io;
 import java.io.EOFException;
 import java.io.IOException;
 import java.io.InputStream;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 import com.caucho.util.L10N;
 import com.caucho.vfs.ReadStream;
@@ -39,6 +41,9 @@ import com.caucho.vfs.TempBuffer;
 import com.caucho.vfs.WriteStream;
 
 public class AmqpFrameReader extends InputStream {
+  private static final Logger log
+    = Logger.getLogger(AmqpFrameReader.class.getName());
+  
   private static final L10N L = new L10N(AmqpFrameReader.class);
   
   private ReadStream _is;
@@ -80,9 +85,17 @@ public class AmqpFrameReader extends InputStream {
   {
     ReadStream is = _is;
     
-    int ch = is.read();
+    int ch;
     
-    if (ch < 0) {
+    try {
+      ch = is.read();
+    
+      if (ch < 0) {
+        return false;
+      }
+    } catch (IOException e) {
+      log.log(Level.FINEST, e.toString(), e);
+      
       return false;
     }
     

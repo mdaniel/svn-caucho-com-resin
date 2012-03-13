@@ -31,6 +31,7 @@ package com.caucho.amqp.common;
 
 import com.caucho.amqp.io.AmqpError;
 import com.caucho.amqp.io.DeliveryState;
+import com.caucho.message.SettleMode;
 
 /**
  * node for an unsettled transfer
@@ -40,14 +41,17 @@ public class DeliveryNode
   private final long _deliveryId;
   private final AmqpLink _link;
   private final long _messageId;
+  private final SettleMode _settleMode;
 
   DeliveryNode(long deliveryId, 
                AmqpLink link,
-               long messageId)
+               long messageId,
+               SettleMode settleMode)
   {
     _deliveryId = deliveryId;
     _link = link;
     _messageId = messageId;
+    _settleMode = settleMode;
   }
 
   public long getDeliveryId()
@@ -67,6 +71,10 @@ public class DeliveryNode
 
   public void onAccepted(long xid)
   {
+    if (_settleMode == SettleMode.EXACTLY_ONCE) {
+      _link.getSession().outgoingAccepted(_messageId);
+    }
+    
     _link.onAccepted(xid, _messageId);
   }
 

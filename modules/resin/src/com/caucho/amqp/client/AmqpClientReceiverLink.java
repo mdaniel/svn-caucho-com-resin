@@ -64,7 +64,7 @@ public class AmqpClientReceiverLink extends AmqpReceiverLink
                             AmqpReader ain)
     throws IOException
   {
-    _receiver.receive(ain);
+    _receiver.receive(frameTransfer.getDeliveryId(), ain);
   }
 
   /**

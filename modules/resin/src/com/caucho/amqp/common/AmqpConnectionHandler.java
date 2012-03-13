@@ -37,6 +37,8 @@ import com.caucho.amqp.io.AmqpFrameHandler;
 import com.caucho.amqp.io.AmqpReader;
 import com.caucho.amqp.io.DeliveryState;
 import com.caucho.amqp.io.FrameAttach;
+import com.caucho.amqp.io.FrameAttach.ReceiverSettleMode;
+import com.caucho.amqp.io.FrameAttach.SenderSettleMode;
 import com.caucho.amqp.io.FrameBegin;
 import com.caucho.amqp.io.FrameClose;
 import com.caucho.amqp.io.FrameDetach;
@@ -45,6 +47,8 @@ import com.caucho.amqp.io.FrameEnd;
 import com.caucho.amqp.io.FrameFlow;
 import com.caucho.amqp.io.FrameTransfer;
 import com.caucho.amqp.io.FrameAttach.Role;
+import com.caucho.amqp.io.LinkSource;
+import com.caucho.message.SettleMode;
 import com.caucho.vfs.ReadStream;
 import com.caucho.vfs.WriteStream;
 
@@ -62,8 +66,8 @@ public class AmqpConnectionHandler
   private AmqpSession []_sessions = new AmqpSession[1];
   
   public AmqpConnectionHandler(AmqpLinkFactory linkFactory,
-                        ReadStream is, 
-                        WriteStream os)
+                               ReadStream is, 
+                               WriteStream os)
   {
     _linkFactory = linkFactory;
     
@@ -144,6 +148,7 @@ public class AmqpConnectionHandler
     
     if (link != null) {
       link.setIncomingHandle(attach.getHandle());
+      session.addIncomingLink(link);
       return;
     }
     
@@ -153,9 +158,24 @@ public class AmqpConnectionHandler
       link = _linkFactory.createReceiverLink(name, address);
     }
     else {
-      String address = attach.getSource().getAddress();
+      LinkSource source = attach.getSource();
+      String address = source.getAddress();
+      
+      SettleMode settleMode;
+      
+      if (attach.getSenderSettleMode() == SenderSettleMode.SETTLED
+          || attach.getSenderSettleMode() == SenderSettleMode.MIXED) {
+        settleMode = SettleMode.ALWAYS;
+      }
+      else if (attach.getReceiverSettleMode() == ReceiverSettleMode.FIRST) {
+        settleMode = SettleMode.EXACTLY_ONCE;
+      }
+      else {
+        settleMode = SettleMode.AT_LEAST_ONCE;
+      }
+      System.out.println("SM: " + settleMode);
 
-      link = _linkFactory.createSenderLink(name, address);
+      link = _linkFactory.createSenderLink(name, address, settleMode);
     }
     
     link.setIncomingHandle(attach.getHandle());
@@ -202,12 +222,6 @@ public class AmqpConnectionHandler
     AmqpSession session = _sessions[0];
     
     session.onTransfer(transfer, ain);
-    
-    int handle = transfer.getHandle();
-    
-    AmqpLink link = session.getIncomingLink(handle);
-    
-    link.onTransfer(transfer, ain);
   }
   
   //
@@ -225,7 +239,10 @@ public class AmqpConnectionHandler
     long first = disposition.getFirst();
     long last = disposition.getLast();
     
-    session.onDisposition(xid, state, first, last);
+    if (disposition.getRole() == Role.SENDER)
+      session.onReceiverDisposition(xid, state, first, last);
+    else
+      session.onReceiverDisposition(xid, state, first, last);
   }
   
   //

@@ -60,6 +60,9 @@ public class AmqpConnectionWriter
   
   public AmqpConnectionWriter(WriteStream os)
   {
+    if (os == null)
+      throw new NullPointerException();
+    
     _os = os;
     _fout = new AmqpFrameWriter(os);
     _aout = new AmqpWriter();
@@ -71,6 +74,7 @@ public class AmqpConnectionWriter
   {
     WriteStream os = _os;
     
+    System.out.println("WRITE: " + code + " " + os);
     os.write('A');
     os.write('M');
     os.write('Q');
@@ -141,6 +145,7 @@ public class AmqpConnectionWriter
                        SettleMode settleMode, InputStream is)
   {
     try {
+      System.out.println("XFER: " + deliveryId);
       boolean isSettled = (settleMode == SettleMode.ALWAYS);
 
       _fout.startFrame(0, session.getOutgoingIndex());
@@ -164,12 +169,14 @@ public class AmqpConnectionWriter
 
   public void sendDisposition(AmqpSession session,
                               long deliveryId, 
-                              DeliveryState state)
+                              DeliveryState state,
+                              boolean isSettled)
   {
     FrameDisposition disposition = new FrameDisposition();
     disposition.setFirst(deliveryId);
     disposition.setLast(deliveryId);
     disposition.setState(state);
+    disposition.setSettled(isSettled);
     
     sendFrame(disposition);
   }
@@ -209,6 +216,17 @@ public class AmqpConnectionWriter
     
       _fout.finishFrame();
       _fout.flush();
+    } catch (IOException e) {
+      throw new AmqpException(e);
+    }
+  }
+  
+  public void flush()
+  {
+    try {
+      _aout.flush();
+      _fout.flush();
+      _os.flush();
     } catch (IOException e) {
       throw new AmqpException(e);
     }

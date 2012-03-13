@@ -91,24 +91,31 @@ abstract public class AbstractMessageReceiver<T> implements MessageReceiver<T> {
   {
     return null;
   }
+  
+  public long getLastMessageId()
+  {
+    return 0;
+  }
 
   @Override
-  public void accepted()
+  public void accepted(long mid)
   {
   }
 
   @Override
-  public void rejected(String errorMessage)
+  public void rejected(long mid, String errorMessage)
   {
   }
 
   @Override
-  public void released()
+  public void released(long mid)
   {
   }
 
   @Override
-  public void modified(boolean isFailed, boolean isUndeliverableHere)
+  public void modified(long mid,
+                       boolean isFailed, 
+                       boolean isUndeliverableHere)
   {
   }
   
