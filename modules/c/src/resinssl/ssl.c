@@ -207,6 +207,35 @@ read_exception_status(connection_t *conn, int error)
 }
 
 static int
+calculate_poll_result(connection_t *conn, int poll_result)
+{
+  if (poll_result == 0) {
+    return TIMEOUT_EXN;
+  }
+  else if (poll_result < 0 && errno != EINTR) {
+    return read_exception_status(conn, errno);
+  }
+}
+
+static int
+resin_tcp_set_recv_timeout(connection_t *conn, int timeout_ms)
+{
+  int fd = conn->fd;
+  int result = 0;
+  struct timeval timeout;
+
+#ifdef HAS_SOCK_TIMEOUT
+  timeout.tv_sec = timeout_ms / 1000;
+  timeout.tv_usec = timeout_ms % 1000 * 1000;
+  
+  result = setsockopt(fd, SOL_SOCKET, SO_RCVTIMEO,
+                      (char *) &timeout, sizeof(timeout));
+#endif  
+
+  return result;
+}
+
+static int
 password_callback(char *buf, int size, int rwflag, void *userdata)
 {
   strcpy(buf, userdata);
@@ -809,7 +838,7 @@ ssl_read(connection_t *conn, char *buf, int len, int timeout)
   int fd;
   SSL *ssl;
   int result;
-  int retry = 5;
+  int retry = 32;
   int ssl_error = 0;
   int code;
   int poll_timeout;
@@ -880,30 +909,37 @@ ssl_read(connection_t *conn, char *buf, int len, int timeout)
       return result;
     }
 
-    if (errno == EINTR) {
-      poll_result = poll_read(fd, conn->socket_timeout);
+    ssl_error = SSL_get_error(ssl, result);
 
-      if (poll_result <= 0)
-        return calculate_poll_result(conn, poll_result);
+    if (ssl_error == SSL_ERROR_WANT_READ
+	|| ssl_error == SSL_ERROR_WANT_WRITE) {
+    }
+    else if (errno == EINTR) {
+      poll_result = poll_read(fd, poll_timeout);
+
+      if (poll_result <= 0) {
+	return calculate_poll_result(conn, poll_result);
+      }
+
+      errno = EINTR;
     }
     else if (errno == EAGAIN) {
-      return read_exception_status(conn, errno);
+      return TIMEOUT_EXN;
     }
 
     is_retry++;
   } while (retry-- > 0
            && (errno == EINTR
-               || (code = SSL_get_error(ssl, result)) == SSL_ERROR_WANT_READ
-               || code == SSL_ERROR_WANT_WRITE));
-
-  ssl_error = SSL_get_error(ssl, result);
+               || ssl_error == SSL_ERROR_WANT_READ
+	       || ssl_error == SSL_ERROR_WANT_WRITE));
 
   if (ssl_error == SSL_ERROR_ZERO_RETURN) {
     ssl_close(conn);
     /* end of file */
     return -1;
-  }    
-  else if (ssl_error == SSL_ERROR_SYSCALL) {
+  }
+
+  if (ssl_error == SSL_ERROR_SYSCALL) {
     return read_exception_status(conn, errno);
   }
   else if (ssl_error == SSL_ERROR_SSL
@@ -978,7 +1014,7 @@ ssl_write(connection_t *conn, char *buf, int len)
       int poll_result;
 
       poll_result = poll_write(conn->fd, timeout);
-
+      fprintf(stderr, "WRITE-poll %d\n", poll_result);
       if (poll_result > 0) {
       }
       else if (poll_result == 0) {
@@ -1006,6 +1042,7 @@ ssl_write(connection_t *conn, char *buf, int len)
     */
 
     ssl_error = SSL_get_error(ssl, result);
+    fprintf(stderr, "WRITE-error %d %d\n", errno, ssl_error);
 
     /*
     fprintf(stdout,
