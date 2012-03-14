@@ -40,7 +40,7 @@ import com.caucho.amqp.io.AmqpWriter;
 import com.caucho.amqp.io.MessageHeader;
 import com.caucho.amqp.io.MessageProperties;
 import com.caucho.amqp.marshal.AmqpMessageEncoder;
-import com.caucho.message.MessageFactory;
+import com.caucho.message.MessagePropertiesFactory;
 import com.caucho.message.MessageSettleListener;
 import com.caucho.message.common.AbstractMessageSender;
 import com.caucho.vfs.TempOutputStream;
@@ -83,7 +83,7 @@ class AmqpClientSender<T> extends AbstractMessageSender<T> implements AmqpSender
                                      _address, 
                                      this);
     
-    _session.addSenderLink(_link);
+    _session.addSenderLink(_link, factory.getSettleMode());
   }
   
   @SuppressWarnings("unchecked")
@@ -93,7 +93,7 @@ class AmqpClientSender<T> extends AbstractMessageSender<T> implements AmqpSender
   }
 
   @Override
-  protected boolean offerMicros(MessageFactory<T> factory,
+  protected boolean offerMicros(MessagePropertiesFactory<T> factory,
                                 T value,
                                 long timeoutMicros)
   {

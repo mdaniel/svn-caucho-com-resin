@@ -32,7 +32,7 @@ package com.caucho.amqp.marshal;
 import java.io.IOException;
 
 import com.caucho.amqp.io.AmqpWriter;
-import com.caucho.message.MessageFactory;
+import com.caucho.message.MessagePropertiesFactory;
 
 
 /**
@@ -41,25 +41,25 @@ import com.caucho.message.MessageFactory;
 abstract public class AbstractMessageEncoder<T> implements AmqpMessageEncoder<T>
 {
   @Override
-  public boolean isDurable(MessageFactory<T> factory, T value)
+  public boolean isDurable(MessagePropertiesFactory<T> factory, T value)
   {
     return factory.isDurable();
   }
   
   @Override
-  public int getPriority(MessageFactory<T> factory, T value)
+  public int getPriority(MessagePropertiesFactory<T> factory, T value)
   {
     return factory.getPriority();
   }
   
   @Override
-  public long getTimeToLive(MessageFactory<T> factory, T value)
+  public long getTimeToLive(MessagePropertiesFactory<T> factory, T value)
   {
     return factory.getTimeToLive();
   }
   
   @Override
-  public boolean isFirstAcquirer(MessageFactory<T> factory, T value)
+  public boolean isFirstAcquirer(MessagePropertiesFactory<T> factory, T value)
   {
     return factory.isFirstAcquirer();
   }

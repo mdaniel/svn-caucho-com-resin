@@ -32,13 +32,16 @@ package com.caucho.amqp.client;
 import java.io.IOException;
 import java.util.Collection;
 import java.util.Iterator;
+import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.ConcurrentLinkedQueue;
+import java.util.concurrent.LinkedBlockingQueue;
 import java.util.concurrent.TimeUnit;
 
 import com.caucho.amqp.AmqpReceiver;
 import com.caucho.amqp.common.AmqpSession;
 import com.caucho.amqp.io.AmqpReader;
 import com.caucho.amqp.marshal.AmqpMessageDecoder;
+import com.caucho.message.DistributionMode;
 import com.caucho.message.SettleMode;
 import com.caucho.message.common.AbstractMessageReceiver;
 
@@ -57,13 +60,14 @@ class AmqpClientReceiver<T> extends AbstractMessageReceiver<T>
   
   private final SettleMode _settleMode;
   
-  private final AmqpMessageDecoder<T> _decoder;
-  
-  private long _deliveryCount = -1;
   private int _prefetch;
+  private final AmqpMessageDecoder<T> _decoder;
 
-  private ConcurrentLinkedQueue<ValueNode<T>> _valueQueue
-    = new ConcurrentLinkedQueue<ValueNode<T>>();
+  private int _linkCredit;
+  private long _deliveryCount = -1;
+
+  private LinkedBlockingQueue<ValueNode<T>> _valueQueue
+    = new LinkedBlockingQueue<ValueNode<T>>();
 
   private long _lastMessageId;
   
@@ -76,17 +80,18 @@ class AmqpClientReceiver<T> extends AbstractMessageReceiver<T>
     
     _settleMode = builder.getSettleMode();
     _decoder = (AmqpMessageDecoder) builder.getDecoder(); 
-    
+
     _prefetch = builder.getPrefetch();
     
     _link = new AmqpClientReceiverLink("client-" + _address, _address, this);
     
-    session.addReceiverLink(_link);
-    
+    DistributionMode distMode = builder.getDistributionMode();
+    session.addReceiverLink(_link, distMode, _settleMode);
+
     if (_prefetch > 0) {
+      _linkCredit = _prefetch;
       _link.flow(_deliveryCount, _prefetch);
     }
-    
   }
   
   public int getPrefetchQueueSize()
@@ -100,9 +105,26 @@ class AmqpClientReceiver<T> extends AbstractMessageReceiver<T>
     ValueNode<T> value = _valueQueue.poll();
     
     if (value == null) {
-      return null;
+      if (_linkCredit > 0 || _prefetch > 0) {
+        return null;
+      }
+      
+      _link.flow(_deliveryCount, 1);
+      try {
+        value = _valueQueue.poll(1000, TimeUnit.MILLISECONDS);
+        
+        if (value == null) {
+          return null;
+        }
+      } catch (InterruptedException e) {
+        e.printStackTrace();
+        return null;
+      } finally {
+        // drain
+        _link.flow(_deliveryCount, 0);
+      }
     }
-    
+
     _link.flow(_deliveryCount, _prefetch - _valueQueue.size());
     
     _lastMessageId = value.getMessageId();
@@ -139,7 +161,7 @@ class AmqpClientReceiver<T> extends AbstractMessageReceiver<T>
                        boolean isFailed, 
                        boolean isUndeliverableHere)
   {
-    _link.onModified(mid, mid, isFailed, isUndeliverableHere);
+    _link.modified(mid, isFailed, isUndeliverableHere);
   }
 
   void setDeliveryCount(long deliveryCount)
@@ -153,7 +175,8 @@ class AmqpClientReceiver<T> extends AbstractMessageReceiver<T>
   void receive(long mid, AmqpReader ain)
     throws IOException
   {
-    _deliveryCount++;
+    if (_deliveryCount > 0)
+      _deliveryCount++;
     
     T value = _decoder.decode(ain, null);
     

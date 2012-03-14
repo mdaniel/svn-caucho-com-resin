@@ -33,6 +33,7 @@ import java.io.IOException;
 import java.io.InputStream;
 
 import com.caucho.amqp.common.AmqpSenderLink;
+import com.caucho.amqp.io.AmqpError;
 import com.caucho.amqp.io.FrameFlow;
 import com.caucho.message.SettleMode;
 import com.caucho.message.broker.BrokerReceiver;
@@ -45,7 +46,7 @@ public class AmqpServerSenderLink extends AmqpSenderLink
 {
   private ReceiverMessageHandler _receiverHandler;
   private BrokerReceiver _receiver;
-  private SettleMode _settleMode = SettleMode.ALWAYS;
+  private final SettleMode _settleMode;
   
   public AmqpServerSenderLink(String name,
                               String address,
@@ -53,8 +54,9 @@ public class AmqpServerSenderLink extends AmqpSenderLink
   {
     super(name, address);
     
-    _receiverHandler = new BrokerMessageReceiver();
     _settleMode = settleMode;
+    
+    _receiverHandler = new BrokerMessageReceiver();
   }
   
   ReceiverMessageHandler getBrokerHandler()
@@ -85,9 +87,9 @@ public class AmqpServerSenderLink extends AmqpSenderLink
   }
   
   @Override
-  public void onRejected(long xid, long messageId, String message)
+  public void onRejected(long xid, long messageId, AmqpError error)
   {
-    _receiver.rejected(xid, messageId, message);
+    _receiver.rejected(xid, messageId, error.getDescription());
   }
   
   @Override

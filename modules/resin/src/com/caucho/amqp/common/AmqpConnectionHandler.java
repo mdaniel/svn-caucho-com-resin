@@ -30,6 +30,8 @@
 package com.caucho.amqp.common;
 
 import java.io.IOException;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 import com.caucho.amqp.io.AmqpConnectionReader;
 import com.caucho.amqp.io.AmqpConnectionWriter;
@@ -48,6 +50,7 @@ import com.caucho.amqp.io.FrameFlow;
 import com.caucho.amqp.io.FrameTransfer;
 import com.caucho.amqp.io.FrameAttach.Role;
 import com.caucho.amqp.io.LinkSource;
+import com.caucho.message.DistributionMode;
 import com.caucho.message.SettleMode;
 import com.caucho.vfs.ReadStream;
 import com.caucho.vfs.WriteStream;
@@ -58,6 +61,9 @@ import com.caucho.vfs.WriteStream;
 public class AmqpConnectionHandler
   implements AmqpFrameHandler
 {
+  private static final Logger log
+    = Logger.getLogger(AmqpConnectionHandler.class.getName());
+  
   private final AmqpLinkFactory _linkFactory;
   
   private AmqpConnectionReader _in;
@@ -151,34 +157,39 @@ public class AmqpConnectionHandler
       session.addIncomingLink(link);
       return;
     }
+
+    String address;
+    SettleMode settleMode;
     
+    if (attach.getSenderSettleMode() == SenderSettleMode.SETTLED
+        || attach.getSenderSettleMode() == SenderSettleMode.MIXED) {
+      settleMode = SettleMode.ALWAYS;
+    }
+    else if (attach.getReceiverSettleMode() == ReceiverSettleMode.FIRST) {
+      settleMode = SettleMode.EXACTLY_ONCE;
+    }
+    else {
+      settleMode = SettleMode.AT_LEAST_ONCE;
+    }
+   
     if (attach.getRole() == Role.SENDER) {
-      String address = attach.getTarget().getAddress();
+      address = attach.getTarget().getAddress();
 
       link = _linkFactory.createReceiverLink(name, address);
     }
     else {
       LinkSource source = attach.getSource();
-      String address = source.getAddress();
-      
-      SettleMode settleMode;
-      
-      if (attach.getSenderSettleMode() == SenderSettleMode.SETTLED
-          || attach.getSenderSettleMode() == SenderSettleMode.MIXED) {
-        settleMode = SettleMode.ALWAYS;
-      }
-      else if (attach.getReceiverSettleMode() == ReceiverSettleMode.FIRST) {
-        settleMode = SettleMode.EXACTLY_ONCE;
-      }
-      else {
-        settleMode = SettleMode.AT_LEAST_ONCE;
-      }
-      System.out.println("SM: " + settleMode);
+      address = source.getAddress();
+      DistributionMode distMode = source.getDistributionMode();
 
-      link = _linkFactory.createSenderLink(name, address, settleMode);
+      link = _linkFactory.createSenderLink(name, address, distMode, settleMode);
     }
     
     link.setIncomingHandle(attach.getHandle());
+    
+    if (log.isLoggable(Level.FINER)) {
+      log.finer(link + " attach(" + address + "," + settleMode + ")");
+    }
     
     session.onAttach(link);
   }
@@ -289,8 +300,6 @@ public class AmqpConnectionHandler
     for (int i = 0; i < _sessions.length; i++) {
       AmqpSession session = _sessions[i];
       _sessions[i] = null;
-      
-      System.out.println("CS: " + session);
       
       if (session != null) {
         endSession(i);

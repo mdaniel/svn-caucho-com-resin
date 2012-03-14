@@ -32,6 +32,8 @@ package com.caucho.amqp.common;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.ArrayList;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 import com.caucho.amqp.io.AmqpError;
 import com.caucho.amqp.io.AmqpReader;
@@ -46,6 +48,7 @@ import com.caucho.amqp.io.FrameTransfer;
 import com.caucho.amqp.io.LinkSource;
 import com.caucho.amqp.io.LinkTarget;
 import com.caucho.amqp.io.FrameAttach.Role;
+import com.caucho.message.DistributionMode;
 import com.caucho.message.SettleMode;
 
 /**
@@ -53,6 +56,9 @@ import com.caucho.message.SettleMode;
  */
 public class AmqpSession
 {
+  private static final Logger log
+    = Logger.getLogger(AmqpSession.class.getName());
+  
   private AmqpConnectionHandler _conn;
   
   private ArrayList<AmqpLink> _incomingLinks = new ArrayList<AmqpLink>();
@@ -78,54 +84,25 @@ public class AmqpSession
   // link attachment
   //
 
-  public boolean addSenderLink(AmqpSenderLink link)
+  public boolean addSenderLink(AmqpSenderLink link,
+                               SettleMode settleMode)
   {
     addOutgoingLink(link);
     link.setSession(this);
     
-    FrameAttach attach = new FrameAttach();
-    attach.setName(link.getName());
-    attach.setHandle(link.getOutgoingHandle());
-    attach.setRole(Role.SENDER);
-    
-    /*
-    switch (link.getSettleMode()) {
-    
-    }
-    */
-    System.out.println("SEND: " + link.getOutgoingHandle());
-    
-    LinkSource source = new LinkSource();
-    attach.setSource(source);
-    
-    LinkTarget target = new LinkTarget();
-    target.setAddress(link.getAddress());
-    attach.setTarget(target);
-    System.out.println("SENDER:");
-    
-    _conn.getWriter().sendFrame(attach);
+    _conn.getWriter().attachSender(this, link, settleMode);
       
     return true;
   }
 
-  public boolean addReceiverLink(AmqpReceiverLink link)
+  public boolean addReceiverLink(AmqpReceiverLink link,
+                                 DistributionMode distMode,
+                                 SettleMode settleMode)
   {
     addOutgoingLink(link);
     link.setSession(this);
     
-    FrameAttach attach = new FrameAttach();
-    attach.setName(link.getName());
-    attach.setHandle(link.getOutgoingHandle());
-    attach.setRole(Role.RECEIVER);
-    
-    LinkSource source = new LinkSource();
-    source.setAddress(link.getAddress());
-    attach.setSource(source);
-    
-    LinkTarget target = new LinkTarget();
-    attach.setTarget(target);
-    
-    _conn.getWriter().sendFrame(attach);
+    _conn.getWriter().attachReceiver(this, link, distMode, settleMode);
       
     return true;
   }
@@ -143,7 +120,6 @@ public class AmqpSession
     attach.setHandle(link.getOutgoingHandle());
     
     attach.setRole(link.getRole());
-    System.out.println("ATT: " + link.getName() + " " + link.getRole() + " " + link.getIncomingHandle() + " " + link.getOutgoingHandle());
     
     _conn.getWriter().sendFrame(attach);
   }
@@ -176,7 +152,6 @@ public class AmqpSession
     
     link.setOutgoingHandle(_outgoingLinks.size());
     _outgoingLinks.add(link);
-    System.out.println("OUTGOING: " + link.getOutgoingHandle());
   }
   
   public AmqpLink detachOutgoingLink(int handle)
@@ -217,8 +192,6 @@ public class AmqpSession
                        InputStream is)
   {
     long deliveryId = addSenderSettle(link, mid, settleMode);
-    
-    System.out.println("XFER: " + deliveryId + " " + settleMode);
     
     _conn.getWriter().transfer(this, link,
                                deliveryId,
@@ -327,7 +300,6 @@ public class AmqpSession
   void flow(AmqpLink link, long deliveryCount, int credit)
   {
     _conn.getWriter().sendFlow(this, link, deliveryCount, credit);
-    
   }
 
   public void onFlow(FrameFlow flow)
@@ -335,6 +307,10 @@ public class AmqpSession
     int handle = flow.getHandle();
     
     AmqpLink link = getIncomingLink(handle);
+    
+    if (log.isLoggable(Level.FINER)) {
+      log.finer(link + " onFlow(" + flow.getDeliveryCount() + "," + flow.getLinkCredit() + ")");
+    }
     
     link.onFlow(flow);
   }
@@ -358,9 +334,6 @@ public class AmqpSession
    */
   public void onAccepted(long deliveryId)
   {
-    System.out.println("ON_ACCEPT: " + deliveryId);
-    // TODO Auto-generated method stub
-    
   }
 
   /**
@@ -369,7 +342,11 @@ public class AmqpSession
    */
   public void onRejected(long deliveryId, String msg)
   {
-    // TODO Auto-generated method stub
-    
+  }
+  
+  @Override
+  public String toString()
+  {
+    return getClass().getSimpleName() + "[" + getOutgoingIndex() + "]";
   }
 }

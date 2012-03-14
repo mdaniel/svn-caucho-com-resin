@@ -27,20 +27,41 @@
  * @author Scott Ferguson
  */
 
-package com.caucho.amqp.common;
+package com.caucho.server.spdy;
 
-import com.caucho.message.DistributionMode;
-import com.caucho.message.SettleMode;
+import java.io.IOException;
+
+import com.caucho.amqp.AmqpReceiver;
+import com.caucho.amqp.AmqpReceiverFactory;
+import com.caucho.network.listen.AbstractProtocolConnection;
+import com.caucho.network.listen.SocketLink;
+import com.caucho.network.listen.TcpSocketLink;
 
 /**
- * link management
+ * SPDY connection
  */
-public interface AmqpLinkFactory
-{
-  public AmqpSenderLink createSenderLink(String name, 
-                                         String address,
-                                         DistributionMode distMode,
-                                         SettleMode settleMode);
+class SpdyConnection extends AbstractProtocolConnection {
+  private SpdyServerProtocol _spdy;
+  private TcpSocketLink _link;
   
-  public AmqpReceiverLink createReceiverLink(String name, String address);
+  SpdyConnection(SpdyServerProtocol spdy, SocketLink link)
+  {
+    _spdy = spdy;
+    _link = (TcpSocketLink) link;
+  }
+  
+  @Override
+  public boolean isWaitForRead()
+  {
+    return true;
+  }
+
+  @Override
+  public boolean handleRequest() throws IOException
+  {
+    _link.getWriteStream().println("HELLO");
+    System.out.println("REQ!");
+    
+    return false;
+  }
 }

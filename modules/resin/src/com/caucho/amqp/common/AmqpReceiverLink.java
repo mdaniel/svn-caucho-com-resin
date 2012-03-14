@@ -73,6 +73,26 @@ abstract public class AmqpReceiverLink extends AmqpLink
     getSession().accepted(mid);
   }
   
+  @Override
+  public void rejected(long mid, String message)
+  {
+    getSession().rejected(mid, message);
+  }
+  
+  @Override
+  public void released(long mid)
+  {
+    getSession().released(mid);
+  }
+  
+  @Override
+  public void modified(long mid, 
+                       boolean isFailure, 
+                       boolean isUndeliverableHere)
+  {
+    getSession().modified(mid, isFailure, isUndeliverableHere);
+  }
+  
   //
   // message flow
   //

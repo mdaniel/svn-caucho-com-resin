@@ -33,6 +33,7 @@ import java.io.IOException;
 import java.util.List;
 import java.util.Map;
 
+import com.caucho.message.DistributionMode;
 import com.caucho.util.L10N;
 
 /**
@@ -93,6 +94,11 @@ public class LinkSource extends AmqpAbstractComposite {
     return _distributionMode;
   }
   
+  public void setDistributionMode(DistributionMode distMode)
+  {
+    _distributionMode = distMode;
+  }
+  
   public Map<String,?> getFilter()
   {
     return _filter;
@@ -138,7 +144,8 @@ public class LinkSource extends AmqpAbstractComposite {
     _isDynamic = in.readBoolean();
     _dynamicNodeProperties = in.readFieldMap();
     
-    _distributionMode = DistributionMode.find(in.readSymbol());
+    _distributionMode = 
+        DistributionMode.find(in.readSymbol());
     _filter = in.readFieldMap();
     
     _defaultOutcome = in.readSymbol();
@@ -216,35 +223,6 @@ public class LinkSource extends AmqpAbstractComposite {
         return CONNECTION_CLOSE;
       else if ("never".equals(name))
         return NEVER;
-      else
-        throw new IllegalArgumentException(L.l("unknown type: " + name));
-    }
-  }
-  
-  public enum DistributionMode {
-    MOVE("move"),
-    COPY("copy");
-    
-    private String _name;
-    
-    DistributionMode(String name)
-    {
-      _name = name;
-    }
-    
-    public String getName()
-    {
-      return _name;
-    }
-    
-    public static DistributionMode find(String name)
-    {
-      if (name == null)
-        return null;
-      else if ("move".equals(name))
-        return MOVE;
-      else if ("copy".equals(name))
-        return COPY;
       else
         throw new IllegalArgumentException(L.l("unknown type: " + name));
     }

@@ -31,6 +31,7 @@ package com.caucho.message.broker;
 
 import com.caucho.loader.Environment;
 import com.caucho.loader.EnvironmentLocal;
+import com.caucho.message.DistributionMode;
 import com.caucho.util.ConcurrentArrayList;
 import com.caucho.util.LruCache;
 
@@ -121,11 +122,12 @@ public class EnvironmentMessageBroker implements MessageBroker
   
   @Override
   public BrokerReceiver createReceiver(String name,
-                                           ReceiverMessageHandler listener)
+                                       DistributionMode distributionMode,
+                                       ReceiverMessageHandler listener)
   {
     for (MessageBroker registeredBroker : _brokerList) {
       BrokerReceiver sub
-        = registeredBroker.createReceiver(name, listener);
+        = registeredBroker.createReceiver(name, distributionMode, listener);
       
       if (sub != null) {
         return sub;

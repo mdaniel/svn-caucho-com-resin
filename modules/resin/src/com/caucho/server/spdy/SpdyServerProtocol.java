@@ -27,30 +27,27 @@
  * @author Scott Ferguson
  */
 
-package com.caucho.message;
+package com.caucho.server.spdy;
 
-import java.util.concurrent.BlockingQueue;
-
+import com.caucho.amqp.client.AmqpClientConnectionImpl;
+import com.caucho.amqp.server.AmqpProtocol;
+import com.caucho.network.listen.Protocol;
+import com.caucho.network.listen.ProtocolConnection;
+import com.caucho.network.listen.SocketLink;
 
 /**
- * message factory
+ * SPDY server protocol
  */
-public interface MessageFactory<T> extends BlockingQueue<T> {
-  public void setDurable(boolean isDurable);
-  
-  public boolean isDurable();
-  
-  public void setPriority(int priority);
+public class SpdyServerProtocol implements Protocol {
+  @Override
+  public String getProtocolName()
+  {
+    return "spdy";
+  }
 
-  public int getPriority();
-
-  public long getTimeToLive();
-  
-  public void setTimeToLive(long timeToLive);
-
-  public boolean isFirstAcquirer();
-  
-  public void setFirstAcquirer(boolean isFirst);
-  
-  public void close();
+  @Override
+  public ProtocolConnection createConnection(SocketLink link)
+  {
+    return new SpdyConnection(this, link);
+  }
 }

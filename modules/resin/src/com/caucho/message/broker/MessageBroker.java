@@ -29,6 +29,8 @@
 
 package com.caucho.message.broker;
 
+import com.caucho.message.DistributionMode;
+
 
 /**
  * Broker interface for creating nodes and subscriptions to nodes.
@@ -38,5 +40,6 @@ public interface MessageBroker
   public BrokerSender createSender(String name);
   
   public BrokerReceiver createReceiver(String name,
-                                           ReceiverMessageHandler listener);
+                                       DistributionMode distributionMode,
+                                       ReceiverMessageHandler listener);
 }

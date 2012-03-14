@@ -36,7 +36,7 @@ import com.caucho.amqp.io.AmqpStreamWriter;
 import com.caucho.amqp.io.AmqpWriter;
 import com.caucho.amqp.io.MessageProperties;
 import com.caucho.amqp.marshal.AmqpMessageEncoder;
-import com.caucho.message.MessageFactory;
+import com.caucho.message.MessagePropertiesFactory;
 import com.caucho.message.broker.BrokerSender;
 import com.caucho.message.broker.EnvironmentMessageBroker;
 import com.caucho.message.common.AbstractMessageSender;
@@ -86,7 +86,7 @@ public class LocalSender<T> extends AbstractMessageSender<T> {
   }
   
   @Override
-  protected boolean offerMicros(MessageFactory<T> factory,
+  protected boolean offerMicros(MessagePropertiesFactory<T> factory,
                                 T value,
                                 long timeoutMicros)
   {

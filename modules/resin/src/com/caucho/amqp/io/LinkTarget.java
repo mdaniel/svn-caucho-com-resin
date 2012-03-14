@@ -33,24 +33,19 @@ import java.io.IOException;
 import java.util.List;
 import java.util.Map;
 
-import com.caucho.amqp.io.LinkSource.DistributionMode;
 import com.caucho.amqp.io.LinkSource.Durability;
 import com.caucho.amqp.io.LinkSource.ExpiryPolicy;
-import com.caucho.util.L10N;
 
 /**
  * Describes the source node of a link
  */
 public class LinkTarget extends AmqpAbstractComposite {
-  private static final L10N L = new L10N(LinkTarget.class);
-  
   private String _address;
   private Durability _durable;
   private ExpiryPolicy _expiryPolicy;
   private long _timeout;  // uint seconds
   private boolean _isDynamic;
   private Map<String,?> _dynamicNodeProperties;
-  private DistributionMode _distributionMode; // symbol
   private List<String> _capabilities; // symbol
   
   public String getAddress()
@@ -88,11 +83,6 @@ public class LinkTarget extends AmqpAbstractComposite {
     return _dynamicNodeProperties;
   }
   
-  public DistributionMode getDistributionMode()
-  {
-    return _distributionMode;
-  }
-  
   public List<String> getCapabilities()
   {
     return _capabilities;
@@ -123,7 +113,6 @@ public class LinkTarget extends AmqpAbstractComposite {
     _isDynamic = in.readBoolean();
     _dynamicNodeProperties = (Map) in.readMap();
     
-    _distributionMode = DistributionMode.find(in.readSymbol());
     _capabilities = in.readSymbolArray();
   }
   
@@ -147,13 +136,8 @@ public class LinkTarget extends AmqpAbstractComposite {
     out.writeBoolean(_isDynamic);
     out.writeMap(_dynamicNodeProperties);
     
-    if (_distributionMode != null)
-      out.writeSymbol(_distributionMode.getName());
-    else
-      out.writeNull();
-    
     out.writeSymbolArray(_capabilities);
     
-    return 8;
+    return 7;
   }
 }

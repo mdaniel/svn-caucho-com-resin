@@ -31,6 +31,7 @@ package com.caucho.amqp.io;
 
 import java.io.IOException;
 import java.io.InputStream;
+import java.util.logging.Level;
 import java.util.logging.Logger;
 
 import com.caucho.amqp.AmqpException;
@@ -38,7 +39,10 @@ import com.caucho.amqp.client.AmqpClientSenderLink;
 import com.caucho.amqp.common.AmqpLink;
 import com.caucho.amqp.common.AmqpSenderLink;
 import com.caucho.amqp.common.AmqpSession;
+import com.caucho.amqp.io.FrameAttach.ReceiverSettleMode;
 import com.caucho.amqp.io.FrameAttach.Role;
+import com.caucho.amqp.io.FrameAttach.SenderSettleMode;
+import com.caucho.message.DistributionMode;
 import com.caucho.message.SettleMode;
 import com.caucho.vfs.ReadStream;
 import com.caucho.vfs.WriteStream;
@@ -74,7 +78,6 @@ public class AmqpConnectionWriter
   {
     WriteStream os = _os;
     
-    System.out.println("WRITE: " + code + " " + os);
     os.write('A');
     os.write('M');
     os.write('Q');
@@ -102,9 +105,106 @@ public class AmqpConnectionWriter
     sendFrame(begin);
   }
 
+  public void attachSender(AmqpSession session,
+                           AmqpLink link,
+                           SettleMode settleMode)
+  {
+    FrameAttach attach = new FrameAttach();
+    attach.setName(link.getName());
+    attach.setHandle(link.getOutgoingHandle());
+    attach.setRole(Role.SENDER);
+    
+    switch (settleMode) {
+    case ALWAYS:
+      attach.setSenderSettleMode(SenderSettleMode.SETTLED);
+      attach.setReceiverSettleMode(ReceiverSettleMode.FIRST);
+      break;
+      
+    case AT_LEAST_ONCE:
+      attach.setSenderSettleMode(SenderSettleMode.MIXED);
+      attach.setReceiverSettleMode(ReceiverSettleMode.FIRST);
+      break;
+      
+    case EXACTLY_ONCE:
+      attach.setSenderSettleMode(SenderSettleMode.MIXED);
+      attach.setReceiverSettleMode(ReceiverSettleMode.SECOND);
+      break;
+    }
+    /*
+    switch (link.getSettleMode()) {
+    
+    }
+    */
+    
+    LinkSource source = new LinkSource();
+    attach.setSource(source);
+    
+    LinkTarget target = new LinkTarget();
+    target.setAddress(link.getAddress());
+    attach.setTarget(target);
+    
+    if (log.isLoggable(Level.FINER)) {
+      log.finer(link + " attach(" + attach.getRole()
+                + "," + attach.getSenderSettleMode() + "," 
+                + attach.getReceiverSettleMode() + ")");
+    }
+    
+    sendFrame(attach);
+  }
+
+  public void attachReceiver(AmqpSession session,
+                             AmqpLink link,
+                             DistributionMode distMode,
+                             SettleMode settleMode)
+  {
+    FrameAttach attach = new FrameAttach();
+    attach.setName(link.getName());
+    attach.setHandle(link.getOutgoingHandle());
+    attach.setRole(Role.RECEIVER);
+    
+    switch (settleMode) {
+    case ALWAYS:
+      attach.setSenderSettleMode(SenderSettleMode.SETTLED);
+      attach.setReceiverSettleMode(ReceiverSettleMode.FIRST);
+      break;
+      
+    case AT_LEAST_ONCE:
+      attach.setSenderSettleMode(SenderSettleMode.UNSETTLED);
+      attach.setReceiverSettleMode(ReceiverSettleMode.FIRST);
+      break;
+      
+    case EXACTLY_ONCE:
+      attach.setSenderSettleMode(SenderSettleMode.UNSETTLED);
+      attach.setReceiverSettleMode(ReceiverSettleMode.SECOND);
+      break;
+    }
+    /*
+    switch (link.getSettleMode()) {
+    
+    }
+    */
+    
+    LinkSource source = new LinkSource();
+    source.setAddress(link.getAddress());
+    source.setDistributionMode(distMode);
+    attach.setSource(source);
+    
+    LinkTarget target = new LinkTarget();
+    attach.setTarget(target);
+    
+    if (log.isLoggable(Level.FINER)) {
+      log.finer(link + " attach(" + attach.getRole()
+                + "," + attach.getSenderSettleMode() + "," 
+                + attach.getReceiverSettleMode() + ")");
+    }
+    
+    sendFrame(attach);
+  }
+
   public void attachSender(FrameAttach clientAttach, 
                            AmqpLink session,
-                           AmqpLink link)
+                           AmqpLink link,
+                           SettleMode settleMode)
     throws IOException
   {
     FrameAttach serverAttach = new FrameAttach();
@@ -145,7 +245,10 @@ public class AmqpConnectionWriter
                        SettleMode settleMode, InputStream is)
   {
     try {
-      System.out.println("XFER: " + deliveryId);
+      if (log.isLoggable(Level.FINER)) {
+        log.finer(link + " transfer(" + deliveryId + "," + settleMode + ")");
+      }
+
       boolean isSettled = (settleMode == SettleMode.ALWAYS);
 
       _fout.startFrame(0, session.getOutgoingIndex());
@@ -178,6 +281,11 @@ public class AmqpConnectionWriter
     disposition.setState(state);
     disposition.setSettled(isSettled);
     
+    if (log.isLoggable(Level.FINER)) {
+      log.finer(session + " disposition(" + deliveryId + "," + state + ")");
+    }
+
+    
     sendFrame(disposition);
   }
 
@@ -193,6 +301,10 @@ public class AmqpConnectionWriter
     flow.setHandle(link.getOutgoingHandle());
     flow.setDeliveryCount(deliveryCount);
     flow.setLinkCredit(credit);
+    
+    if (log.isLoggable(Level.FINER)) {
+      log.finer(link + " flow(" + deliveryCount + "," + credit + ")");
+    }
       
     sendFrame(session.getOutgoingIndex(), flow);
   }

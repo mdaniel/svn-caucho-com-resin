@@ -29,7 +29,7 @@
 
 package com.caucho.message.common;
 
-import com.caucho.message.MessageFactory;
+import com.caucho.message.MessagePropertiesFactory;
 import com.caucho.message.MessageSender;
 import com.caucho.message.MessageSenderFactory;
 import com.caucho.message.MessageSettleListener;
@@ -63,7 +63,7 @@ abstract public class AbstractMessageSender<T>
   }
   
   @Override
-  public MessageFactory<T> createMessageFactory()
+  public MessagePropertiesFactory<T> createMessageFactory()
   {
     return new SenderMessageFactory<T>(this);
   }
@@ -77,7 +77,7 @@ abstract public class AbstractMessageSender<T>
   /**
    * Offers a value to the queue.
    */
-  abstract protected boolean offerMicros(MessageFactory<T> factory,
+  abstract protected boolean offerMicros(MessagePropertiesFactory<T> factory,
                                          T value,
                                          long timeoutMicros);
   

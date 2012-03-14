@@ -92,9 +92,19 @@ public class FrameAttach extends AmqpAbstractFrame {
     _role = role;
   }
   
+  public void setSenderSettleMode(SenderSettleMode mode)
+  {
+    _senderSettleMode = mode;
+  }
+  
   public SenderSettleMode getSenderSettleMode()
   {
     return _senderSettleMode;
+  }
+  
+  public void setReceiverSettleMode(ReceiverSettleMode mode)
+  {
+    _receiverSettleMode = mode;
   }
   
   public ReceiverSettleMode getReceiverSettleMode()

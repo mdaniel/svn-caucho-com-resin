@@ -29,7 +29,7 @@
 
 package com.caucho.message.common;
 
-import com.caucho.message.MessageFactory;
+import com.caucho.message.MessagePropertiesFactory;
 
 /**
  * message factory
@@ -44,7 +44,7 @@ public class SenderMessageFactory<T> extends AbstractMessageFactory<T>
   }
 
   @Override
-  protected boolean offerMicros(MessageFactory<T> factory, 
+  protected boolean offerMicros(MessagePropertiesFactory<T> factory, 
                                 T value,
                                 long timeoutMicros)
   {

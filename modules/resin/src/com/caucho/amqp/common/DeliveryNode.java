@@ -29,6 +29,9 @@
 
 package com.caucho.amqp.common;
 
+import java.util.logging.Level;
+import java.util.logging.Logger;
+
 import com.caucho.amqp.io.AmqpError;
 import com.caucho.amqp.io.DeliveryState;
 import com.caucho.message.SettleMode;
@@ -38,6 +41,9 @@ import com.caucho.message.SettleMode;
  */
 public class DeliveryNode
 {
+  private static final Logger log
+    = Logger.getLogger(DeliveryNode.class.getName());
+  
   private final long _deliveryId;
   private final AmqpLink _link;
   private final long _messageId;
@@ -71,6 +77,10 @@ public class DeliveryNode
 
   public void onAccepted(long xid)
   {
+    if (log.isLoggable(Level.FINER)) {
+      log.finer(_link + " onAccepted(" + _messageId + ")");
+    }
+    
     if (_settleMode == SettleMode.EXACTLY_ONCE) {
       _link.getSession().outgoingAccepted(_messageId);
     }
@@ -80,11 +90,19 @@ public class DeliveryNode
 
   public void onReleased(long xid)
   {
+    if (log.isLoggable(Level.FINER)) {
+      log.finer(_link + " onReleased(" + _messageId + ")");
+    }
+    
     _link.onReleased(xid, _messageId);
   }
 
   public void onRejected(long xid, AmqpError error)
   {
+    if (log.isLoggable(Level.FINER)) {
+      log.finer(_link + " onRejected(" + _messageId + "," + error + ")");
+    }
+    System.out.println("ONR " + _link + " " + error);
     _link.onRejected(xid, _messageId, error);
   }
 

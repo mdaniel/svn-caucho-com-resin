@@ -46,6 +46,7 @@ import com.caucho.amqp.common.AmqpReceiverLink;
 import com.caucho.amqp.common.AmqpSenderLink;
 import com.caucho.amqp.common.AmqpSession;
 import com.caucho.env.thread.ThreadPool;
+import com.caucho.message.DistributionMode;
 import com.caucho.message.SettleMode;
 import com.caucho.vfs.QSocketWrapper;
 import com.caucho.vfs.ReadStream;
@@ -191,6 +192,7 @@ public class AmqpClientConnectionImpl implements AmqpConnection, AmqpLinkFactory
   @Override
   public AmqpSenderLink createSenderLink(String name, 
                                          String address,
+                                         DistributionMode distMode,
                                          SettleMode settleMode)
   {
     throw new UnsupportedOperationException(getClass().getName());

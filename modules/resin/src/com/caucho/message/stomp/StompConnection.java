@@ -41,6 +41,7 @@ import java.util.logging.Logger;
 import com.caucho.distcache.ClusterCache;
 import com.caucho.distcache.ExtCacheEntry;
 import com.caucho.memcached.MemcachedProtocol;
+import com.caucho.message.DistributionMode;
 import com.caucho.message.broker.MessageBroker;
 import com.caucho.message.broker.BrokerReceiver;
 import com.caucho.message.broker.BrokerSender;
@@ -248,7 +249,8 @@ public class StompConnection extends AbstractProtocolConnection
     MessageBroker broker = _stomp.getBroker();
     ReceiverMessageHandler listener = new MessageListener(this, _id, _destinationName);
     
-    sub = broker.createReceiver(_destinationName, listener);
+    DistributionMode distMode = null;
+    sub = broker.createReceiver(_destinationName, distMode, listener);
     
     _subscriptionMap.put(_id, sub);
 

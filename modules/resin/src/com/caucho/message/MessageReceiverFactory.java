@@ -37,6 +37,10 @@ public interface MessageReceiverFactory {
   
   public String getAddress();
   
+  public MessageReceiverFactory setDistributionMode(DistributionMode mode);
+  
+  public DistributionMode getDistributionMode();
+  
   public MessageReceiverFactory setPrefetch(int prefetch);
   
   public int getPrefetch();

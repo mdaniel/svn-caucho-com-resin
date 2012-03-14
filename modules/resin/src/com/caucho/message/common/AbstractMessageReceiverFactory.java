@@ -29,6 +29,7 @@
 
 package com.caucho.message.common;
 
+import com.caucho.message.DistributionMode;
 import com.caucho.message.MessageReceiver;
 import com.caucho.message.MessageReceiverFactory;
 import com.caucho.message.SettleMode;
@@ -45,6 +46,7 @@ abstract public class AbstractMessageReceiverFactory implements MessageReceiverF
   private int _prefetch;
   private SettleMode _settleMode = SettleMode.ALWAYS;
   private SettleTime _settleTime = SettleTime.QUEUE_REMOVE;
+  private DistributionMode _distributionMode;
 
   @Override
   public MessageReceiverFactory setAddress(String address)
@@ -58,6 +60,20 @@ abstract public class AbstractMessageReceiverFactory implements MessageReceiverF
   public String getAddress()
   {
     return _address;
+  }
+  
+  @Override
+  public DistributionMode getDistributionMode()
+  {
+    return _distributionMode;
+  }
+  
+  @Override
+  public MessageReceiverFactory setDistributionMode(DistributionMode mode)
+  {
+    _distributionMode = mode;
+    
+    return this;
   }
 
   @Override

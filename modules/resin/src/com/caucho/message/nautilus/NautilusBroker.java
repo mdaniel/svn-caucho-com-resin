@@ -45,6 +45,7 @@ import com.caucho.db.block.BlockStore;
 import com.caucho.env.service.RootDirectorySystem;
 import com.caucho.env.thread.ActorQueue;
 import com.caucho.loader.Environment;
+import com.caucho.message.DistributionMode;
 import com.caucho.message.broker.AbstractMessageBroker;
 import com.caucho.message.broker.BrokerReceiver;
 import com.caucho.message.broker.BrokerSender;
@@ -127,7 +128,8 @@ public class NautilusBroker extends AbstractMessageBroker implements Closeable
   
   @Override
   public BrokerReceiver createReceiver(String name,
-                                         ReceiverMessageHandler handler)
+                                       DistributionMode distMode,
+                                       ReceiverMessageHandler handler)
   {
     BrokerQueue queue = getQueue(name);
     

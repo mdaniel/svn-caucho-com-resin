@@ -98,4 +98,9 @@ public class AmqpError extends AmqpAbstractComposite {
     return 3;
   }
 
+  @Override
+  public String toString()
+  {
+    return getClass().getSimpleName() + "[" + _condition + "," + _description + "]";
+  }
 }

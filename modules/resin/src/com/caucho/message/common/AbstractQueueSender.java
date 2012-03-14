@@ -34,25 +34,25 @@ import java.util.Iterator;
 import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.TimeUnit;
 
-import com.caucho.message.MessageFactory;
+import com.caucho.message.MessagePropertiesFactory;
 import com.caucho.message.MessageSender;
 
 /**
  * local connection to the message store
  */
 abstract public class AbstractQueueSender<T> implements BlockingQueue<T> {
-  private static final MessageFactory<?> NULL_FACTORY = new NullMessageFactory();
+  private static final MessagePropertiesFactory<?> NULL_FACTORY = new NullMessageFactory();
   
   /**
    * Offers a value to the queue.
    */
-  abstract protected boolean offerMicros(MessageFactory<T> factory,
+  abstract protected boolean offerMicros(MessagePropertiesFactory<T> factory,
                                          T value,
                                          long timeoutMicros);
   
-  protected MessageFactory<T> getMessageFactory()
+  protected MessagePropertiesFactory<T> getMessageFactory()
   {
-    return (MessageFactory) NULL_FACTORY;
+    return (MessagePropertiesFactory) NULL_FACTORY;
   }
 
   @Override
@@ -64,7 +64,7 @@ abstract public class AbstractQueueSender<T> implements BlockingQueue<T> {
   @Override
   public boolean offer(T value)
   {
-    MessageFactory<T> factory = getMessageFactory();
+    MessagePropertiesFactory<T> factory = getMessageFactory();
     
     return offerMicros(factory, value, 0);
   }
@@ -72,7 +72,7 @@ abstract public class AbstractQueueSender<T> implements BlockingQueue<T> {
   @Override
   public boolean offer(T value, long timeout, TimeUnit timeUnit)
   {
-    MessageFactory<T> factory = getMessageFactory();
+    MessagePropertiesFactory<T> factory = getMessageFactory();
     
     return offerMicros(factory, value, timeUnit.toMicros(timeout));
   }
@@ -80,7 +80,7 @@ abstract public class AbstractQueueSender<T> implements BlockingQueue<T> {
   @Override
   public void put(T value) throws InterruptedException
   {
-    MessageFactory<T> factory = getMessageFactory();
+    MessagePropertiesFactory<T> factory = getMessageFactory();
     
     offerMicros(factory, value, 0);
   }

@@ -27,20 +27,41 @@
  * @author Scott Ferguson
  */
 
-package com.caucho.amqp.common;
+package com.caucho.message;
 
-import com.caucho.message.DistributionMode;
-import com.caucho.message.SettleMode;
+import com.caucho.util.L10N;
 
 /**
- * link management
+ * Selects how a message should be treated when it's ackquired from the node.
+ *   "MOVE" is like a queue, it deletes the node.
+ *   "COPY" is like a topic, it copies the node.
  */
-public interface AmqpLinkFactory
-{
-  public AmqpSenderLink createSenderLink(String name, 
-                                         String address,
-                                         DistributionMode distMode,
-                                         SettleMode settleMode);
+public enum DistributionMode {
+  MOVE("move"),
+  COPY("copy");
   
-  public AmqpReceiverLink createReceiverLink(String name, String address);
+  private static final L10N L = new L10N(DistributionMode.class);
+  private String _name;
+  
+  DistributionMode(String name)
+  {
+    _name = name;
+  }
+  
+  public String getName()
+  {
+    return _name;
+  }
+  
+  public static DistributionMode find(String name)
+  {
+    if (name == null)
+      return null;
+    else if ("move".equals(name))
+      return MOVE;
+    else if ("copy".equals(name))
+      return COPY;
+    else
+      throw new IllegalArgumentException(L.l("unknown type: " + name));
+  }
 }

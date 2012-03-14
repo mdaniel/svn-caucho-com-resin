@@ -133,23 +133,9 @@ abstract public class AmqpLink
     throw new UnsupportedOperationException(getClass().getName());
   }
 
-  /**
-   * @param messageId
-   */
-  public void onRejected(long xid, long messageId, String message)
-  {
-    throw new UnsupportedOperationException(getClass().getName());
-  }
-
-  /**
-   * @param xid
-   * @param messageId
-   * @param error
-   */
   public void onRejected(long xid, long messageId, AmqpError error)
   {
-    // TODO Auto-generated method stub
-    
+    throw new UnsupportedOperationException(getClass().getName());
   }
 
   /**
@@ -161,33 +147,29 @@ abstract public class AmqpLink
   }
   
   public void onModified(long xid,
-                       long mid, 
-                       boolean isFailed, 
-                       boolean isUndeliverableHere)
+                         long mid, 
+                         boolean isFailed, 
+                         boolean isUndeliverableHere)
   {
     throw new UnsupportedOperationException(getClass().getName());
   }
 
-  /**
-   * @param mid
-   */
   public void accepted(long mid)
   {
   }
 
-  /**
-   * @param mid
-   * @param errorMessage
-   */
   public void rejected(long mid, String errorMessage)
   {
     // TODO Auto-generated method stub
     
   }
 
-  /**
-   * @param mid
-   */
+  public void modified(long mid, 
+                       boolean isFailure,
+                       boolean isUndeliverableHere)
+  {
+  }
+
   public void released(long mid)
   {
     // TODO Auto-generated method stub

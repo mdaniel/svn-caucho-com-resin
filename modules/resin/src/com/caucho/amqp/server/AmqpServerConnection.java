@@ -67,6 +67,7 @@ import com.caucho.amqp.io.MessageHeader;
 import com.caucho.amqp.io.SaslMechanisms;
 import com.caucho.amqp.io.SaslOutcome;
 import com.caucho.amqp.io.FrameAttach.Role;
+import com.caucho.message.DistributionMode;
 import com.caucho.message.SettleMode;
 import com.caucho.message.broker.MessageBroker;
 import com.caucho.message.broker.BrokerReceiver;
@@ -223,9 +224,10 @@ public class AmqpServerConnection extends AbstractProtocolConnection
     @Override
     public AmqpSenderLink createSenderLink(String name, 
                                            String address,
+                                           DistributionMode distMode,
                                            SettleMode settleMode)
     {
-      return _amqp.createSenderLink(name, address, settleMode);
+      return _amqp.createSenderLink(name, address, distMode, settleMode);
     }
   }
 }

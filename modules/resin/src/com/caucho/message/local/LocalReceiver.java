@@ -40,6 +40,7 @@ import java.util.logging.Logger;
 
 import com.caucho.amqp.io.AmqpReader;
 import com.caucho.amqp.marshal.AmqpMessageDecoder;
+import com.caucho.message.DistributionMode;
 import com.caucho.message.MessageReceiver;
 import com.caucho.message.broker.BrokerSender;
 import com.caucho.message.broker.BrokerReceiver;
@@ -78,8 +79,10 @@ public class LocalReceiver<T> extends AbstractMessageReceiver<T> {
     EnvironmentMessageBroker broker = EnvironmentMessageBroker.getCurrent();
     
     ReceiverMessageHandler handler = new LocalMessageHandler();
+    
+    DistributionMode distMode = factory.getDistributionMode();
         
-    _sub = broker.createReceiver(_address, handler);
+    _sub = broker.createReceiver(_address, distMode, handler);
     
     if (_sub == null) {
       throw new IllegalArgumentException(L.l("'{0}' is an unknown queue",

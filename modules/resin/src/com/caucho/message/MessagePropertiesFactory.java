@@ -27,20 +27,30 @@
  * @author Scott Ferguson
  */
 
-package com.caucho.amqp.common;
+package com.caucho.message;
 
-import com.caucho.message.DistributionMode;
-import com.caucho.message.SettleMode;
+import java.util.concurrent.BlockingQueue;
+
 
 /**
- * link management
+ * message factory
  */
-public interface AmqpLinkFactory
-{
-  public AmqpSenderLink createSenderLink(String name, 
-                                         String address,
-                                         DistributionMode distMode,
-                                         SettleMode settleMode);
+public interface MessagePropertiesFactory<T> extends BlockingQueue<T> {
+  public void setDurable(boolean isDurable);
   
-  public AmqpReceiverLink createReceiverLink(String name, String address);
+  public boolean isDurable();
+  
+  public void setPriority(int priority);
+
+  public int getPriority();
+
+  public long getTimeToLive();
+  
+  public void setTimeToLive(long timeToLive);
+
+  public boolean isFirstAcquirer();
+  
+  public void setFirstAcquirer(boolean isFirst);
+  
+  public void close();
 }

@@ -29,6 +29,8 @@
 
 package com.caucho.message.broker;
 
+import com.caucho.message.DistributionMode;
+
 
 /**
  * AbstractStompBroker with common routines for brokers.
@@ -43,7 +45,8 @@ abstract public class AbstractMessageBroker implements MessageBroker
   
   @Override
   public BrokerReceiver createReceiver(String name,
-                                           ReceiverMessageHandler listener)
+                                       DistributionMode distMode,
+                                       ReceiverMessageHandler listener)
   {
     return null;
   }

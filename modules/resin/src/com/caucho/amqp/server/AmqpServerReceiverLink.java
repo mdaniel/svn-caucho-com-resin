@@ -127,15 +127,13 @@ public class AmqpServerReceiverLink extends AmqpReceiverLink
     @Override
     public void onAccepted(long mid)
     {
-      System.out.println("ON_ACCEPT: "+ mid);
-      
       getSession().accepted(_deliveryId);
     }
 
     @Override
     public void onRejected(long mid, String msg)
     {
-      getSession().onRejected(_deliveryId, msg);
+      getSession().rejected(_deliveryId, msg);
     }
   }
 }
