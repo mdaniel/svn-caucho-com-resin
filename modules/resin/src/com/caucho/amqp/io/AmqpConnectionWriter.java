@@ -200,38 +200,39 @@ public class AmqpConnectionWriter
     
     sendFrame(attach);
   }
-
-  public void attachSender(FrameAttach clientAttach, 
-                           AmqpLink session,
-                           AmqpLink link,
-                           SettleMode settleMode)
-    throws IOException
-  {
-    FrameAttach serverAttach = new FrameAttach();
-    
-    serverAttach.setName(clientAttach.getName());
-    serverAttach.setHandle(link.getOutgoingHandle());
-    
-    serverAttach.setRole(Role.RECEIVER);
-    
-    sendFrame(serverAttach);
-  }
-
-  public void attachReceiver(FrameAttach clientAttach, 
-                             AmqpLink session,
-                             AmqpLink link)
-    throws IOException
-  {
-    FrameAttach serverAttach = new FrameAttach();
-    
-    serverAttach.setName(link.getName());
-    serverAttach.setHandle(link.getOutgoingHandle());
-    
-    serverAttach.setRole(Role.SENDER);
-    
-    sendFrame(serverAttach);
-  }
   
+  public void attachReply(AmqpSession session,
+                          AmqpLink link)
+  {
+    FrameAttach attach = new FrameAttach();
+    attach.setName(link.getName());
+    attach.setHandle(link.getOutgoingHandle());
+    
+    LinkSource source = new LinkSource();
+    source.setAddress(link.getAddress());
+    attach.setSource(source);
+    
+    LinkTarget target = new LinkTarget();
+    attach.setTarget(target);
+    
+    if (link.getRole() == Role.SENDER) {
+      attach.setRole(Role.RECEIVER);
+      
+      attach.setInitialDeliveryCount(link.getIncomingDeliveryCount());
+    }
+    else {
+      attach.setRole(Role.SENDER);
+    }
+    
+    if (log.isLoggable(Level.FINER)) {
+      log.finer(link + " attach(" + attach.getRole()
+                + "," + attach.getSenderSettleMode() + "," 
+                + attach.getReceiverSettleMode() + ")");
+    }
+    
+    sendFrame(session.getOutgoingIndex(), attach);
+  }
+ 
   //
   // message transfer
   //

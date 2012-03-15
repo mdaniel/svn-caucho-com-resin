@@ -144,7 +144,6 @@ public class AmqpConnectionHandler
 
   @Override
   public void onAttach(FrameAttach attach)
-    throws IOException
   {
     AmqpSession session = _sessions[0];
     
@@ -155,6 +154,8 @@ public class AmqpConnectionHandler
     if (link != null) {
       link.setIncomingHandle(attach.getHandle());
       session.addIncomingLink(link);
+      
+      onAttachAck(link, attach);
       return;
     }
 
@@ -188,10 +189,23 @@ public class AmqpConnectionHandler
     link.setIncomingHandle(attach.getHandle());
     
     if (log.isLoggable(Level.FINER)) {
-      log.finer(link + " attach(" + address + "," + settleMode + ")");
+      log.finer(link + " onAttach(" + address + "," + settleMode + ")");
     }
     
     session.onAttach(link);
+  }
+
+  private void onAttachAck(AmqpLink link, FrameAttach attach)
+  {
+    if (log.isLoggable(Level.FINER)) {
+      log.finer(link + " onAttachAck()");
+    }
+    
+    if (link.getRole() == Role.RECEIVER) {
+      AmqpReceiverLink receiver = (AmqpReceiverLink) link;
+      
+      receiver.setIncomingDeliveryCount(attach.getInitialDeliveryCount());
+    }
   }
 
   public void closeSender(AmqpLink link)

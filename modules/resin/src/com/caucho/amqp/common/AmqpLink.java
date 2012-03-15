@@ -31,16 +31,11 @@ package com.caucho.amqp.common;
 
 import java.io.IOException;
 
-import com.caucho.amqp.io.AmqpConstants;
 import com.caucho.amqp.io.AmqpError;
 import com.caucho.amqp.io.AmqpReader;
-import com.caucho.amqp.io.FrameAttach;
+import com.caucho.amqp.io.FrameAttach.Role;
 import com.caucho.amqp.io.FrameFlow;
 import com.caucho.amqp.io.FrameTransfer;
-import com.caucho.amqp.io.MessageHeader;
-import com.caucho.amqp.io.FrameAttach.Role;
-import com.caucho.util.CurrentTime;
-import com.caucho.vfs.TempBuffer;
 
 /**
  * link session management
@@ -55,6 +50,14 @@ abstract public class AmqpLink
   
   private AmqpSession _session;
   //private MessageSettleHandler _settleHandler;
+  
+  private long _incomingDeliveryCount = -1;
+  private long _incomingTransferCount;
+  private long _deliveryLimit = -1;
+  
+  private long _outgoingDeliveryCount;
+  
+  private int _outgoingLinkCredit;
   
   public AmqpLink(String name, String address)
   {
@@ -174,6 +177,45 @@ abstract public class AmqpLink
   {
     // TODO Auto-generated method stub
     
+  }
+  
+  //
+  // flow
+  //
+  
+  public long getIncomingDeliveryCount()
+  {
+    return _incomingDeliveryCount;
+  }
+  
+  public void setIncomingDeliveryCount(long deliveryCount)
+  {
+    _incomingDeliveryCount = deliveryCount;
+    _incomingTransferCount = 0;
+  }
+  
+  protected void addDeliveryCount()
+  {
+    _incomingDeliveryCount++;
+  }
+  
+  protected int getReceiveCount()
+  {
+    return (int) (_incomingDeliveryCount - _outgoingDeliveryCount);
+  }
+  
+  protected long updateDeliveryCount(int takeCount, int linkCredit)
+  {
+    long deliveryCount = _incomingDeliveryCount + _incomingTransferCount;
+    
+    _outgoingDeliveryCount = deliveryCount;
+    
+    return deliveryCount;
+  }
+  
+  protected long getOutgoingLinkCredit()
+  {
+    return _outgoingLinkCredit;
   }
 
   /**

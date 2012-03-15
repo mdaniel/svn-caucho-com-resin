@@ -147,6 +147,11 @@ public class FrameAttach extends AmqpAbstractFrame {
     return _initialDeliveryCount;
   }
   
+  public void setInitialDeliveryCount(long deliveryCount)
+  {
+    _initialDeliveryCount = deliveryCount;
+  }
+  
   public long getMaxMessageSize()
   {
     return _maxMessageSize;

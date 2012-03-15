@@ -39,6 +39,8 @@ import com.caucho.message.SettleMode;
  */
 abstract public class AmqpSenderLink extends AmqpLink
 {
+  private long _deliveryCount;
+  
   protected AmqpSenderLink(String name, String address)
   {
     super(name, address);
@@ -58,6 +60,17 @@ abstract public class AmqpSenderLink extends AmqpLink
                        SettleMode settleMode,
                        InputStream is)
   {
+    _deliveryCount++;
+    
     getSession().transfer(this, mid, settleMode, is);
+  }
+  
+  //
+  // flow
+  //
+  
+  public long getIncomingDeliveryCount()
+  {
+    return _deliveryCount;
   }
 }

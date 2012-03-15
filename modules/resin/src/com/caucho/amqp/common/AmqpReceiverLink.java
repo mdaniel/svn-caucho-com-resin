@@ -40,6 +40,11 @@ import com.caucho.amqp.io.FrameAttach.Role;
  */
 abstract public class AmqpReceiverLink extends AmqpLink
 {
+  private int _prefetch;
+  
+  private long _outgoingDeliveryCount;
+  private int _takeCount;
+  
   protected AmqpReceiverLink(String name, String address)
   {
     super(name, address);
@@ -60,8 +65,11 @@ abstract public class AmqpReceiverLink extends AmqpLink
    * message fragment from the network.
    */
   @Override
-  abstract protected void onTransfer(FrameTransfer transfer, AmqpReader ain)
-    throws IOException;
+  protected void onTransfer(FrameTransfer transfer, AmqpReader ain)
+    throws IOException
+  {
+    addDeliveryCount();
+  }
   
   //
   // message settle disposition
@@ -96,9 +104,44 @@ abstract public class AmqpReceiverLink extends AmqpLink
   //
   // message flow
   //
-
-  public void flow(long deliveryCount, int credit)
+  
+  public void updateTake()
   {
-    getSession().flow(this, deliveryCount, credit);
+    _takeCount++;
+    
+    if (_prefetch < 2 * _takeCount || _prefetch < 8) {
+      setPrefetch(_prefetch);
+    }
+  }
+  
+  public void setIncomingDeliveryCount(int count)
+  {
+    super.setIncomingDeliveryCount(count);
+    
+    // XXX: sync
+    _outgoingDeliveryCount = count;
+  }
+
+  public void setPrefetch(int prefetch)
+  {
+    _prefetch = prefetch;
+    
+    int takeCount = _takeCount;
+    _takeCount = 0;
+    
+    long deliveryCount = getIncomingDeliveryCount();
+    
+    if (deliveryCount < 0) {
+      getSession().flow(this, deliveryCount, _prefetch);
+      return;
+    }
+    
+    int received = (int) (deliveryCount - _outgoingDeliveryCount);
+    
+    received -= takeCount;
+    
+    _outgoingDeliveryCount = deliveryCount - received;
+
+    getSession().flow(this, deliveryCount, _prefetch - received);
   }
 }

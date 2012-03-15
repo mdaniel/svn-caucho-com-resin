@@ -56,6 +56,10 @@ public class AmqpClientReceiverLink extends AmqpReceiverLink
     return _receiver;
   }
   
+  //
+  // transfer callbacks
+  //
+  
   /**
    * Receives the message from the network
    */
@@ -64,6 +68,8 @@ public class AmqpClientReceiverLink extends AmqpReceiverLink
                             AmqpReader ain)
     throws IOException
   {
+    super.onTransfer(frameTransfer, ain);
+    
     _receiver.receive(frameTransfer.getDeliveryId(), ain);
   }
 

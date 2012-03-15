@@ -114,14 +114,7 @@ public class AmqpSession
     addIncomingLink(link);
     addOutgoingLink(link);
     
-    FrameAttach attach = new FrameAttach();
-    
-    attach.setName(link.getName());
-    attach.setHandle(link.getOutgoingHandle());
-    
-    attach.setRole(link.getRole());
-    
-    _conn.getWriter().sendFrame(attach);
+    _conn.getWriter().attachReply(this, link);
   }
 
   void addIncomingLink(AmqpLink link)
