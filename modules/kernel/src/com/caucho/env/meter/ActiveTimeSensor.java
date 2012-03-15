@@ -37,5 +37,5 @@ public interface ActiveTimeSensor {
   /**
    * End the active time.
    */
-  public void end(long startTime);
+  public long end(long startTime);
 }

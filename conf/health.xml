@@ -460,6 +460,10 @@
   </health:AnomalyAnalyzer>
 
   <health:AnomalyAnalyzer>
+    <meter>Resin|Http|Ping Time Max</meter>
+  </health:AnomalyAnalyzer>
+
+  <health:AnomalyAnalyzer>
     <meter>Resin|Port|Throttle Disconnect Count</meter>
   </health:AnomalyAnalyzer>
 
@@ -484,12 +488,14 @@
 
     <graph name="Request Active">
       <meter>Resin|Http|Request Active</meter>
+      <meter>Resin|Port|Request Suspend Active</meter>
       <meter>Resin|Port|Keepalive Thread Active</meter>
       <meter>Resin|Port|Keepalive Async Active</meter>
     </graph>
 
     <graph name="Request Count">
       <meter>Resin|Http|Request Count</meter>
+      <meter>Resin|Port|Request Suspend Count</meter>
       <meter>Resin|Port|Keepalive Thread Count</meter>
       <meter>Resin|Port|Keepalive Async Count</meter>
       <meter>Resin|Http|Session Save Count</meter>
@@ -511,6 +517,11 @@
 
     <graph name="Throttle Disconnect">
       <meter>Resin|Port|Throttle Disconnect Count</meter>
+    </graph>
+
+    <graph name="Http Ping Time">
+      <meter>Resin|Http|Ping Time</meter>
+      <meter>Resin|Http|Ping Time Max</meter>
     </graph>
 
     </section>

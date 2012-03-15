@@ -115,6 +115,13 @@ public class FastCgiResponse extends AbstractHttpResponse {
     else if (response.isPrivateCache()) {
       os.print("Cache-Control: private\r\n");
     }
+    
+    String serverHeader = getServerHeader();
+    if (serverHeader != null) {
+      os.print("Server: ");
+      os.printLatin1NoLf(serverHeader);
+      os.print("\r\n");
+    }
 
     int size = _headerKeys.size();
     for (int i = 0; i < size; i++) {

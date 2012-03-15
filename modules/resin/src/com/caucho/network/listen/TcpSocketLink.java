@@ -949,6 +949,16 @@ public class TcpSocketLink extends AbstractSocketLink
         else {
           result = handleRequests(true);
         }
+      } catch (IOException e) {
+        if (log.isLoggable(Level.FINER))
+          log.log(Level.FINER, this + " handleAccept: " + e, e);
+        else if (log.isLoggable(Level.FINE))
+          log.fine(this + " handleAccept: " + e);
+        
+        setStatState("close");
+        close();
+
+        return RequestState.EXIT;
       } finally {
         launcher.onChildIdleBegin();
       }

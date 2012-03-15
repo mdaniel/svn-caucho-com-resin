@@ -359,6 +359,7 @@ public final class ReadStream extends InputStream
   /**
    * Returns the next byte or -1 if at the end of file.
    */
+  @Override
   public final int read() throws IOException
   {
     if (_readLength <= _readOffset) {

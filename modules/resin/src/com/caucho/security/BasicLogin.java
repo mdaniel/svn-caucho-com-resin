@@ -36,13 +36,16 @@ import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
 import java.security.Principal;
 import java.util.logging.Level;
+import java.util.logging.Logger;
 
 /**
  * Implements the "basic" auth-method.  Basic uses the
  * HTTP authentication with WWW-Authenticate and SC_UNAUTHORIZE.
  */
 public class BasicLogin extends AbstractLogin {
-  protected String _realm;
+  private static final Logger log = Logger.getLogger(BasicLogin.class.getName());
+  
+  private String _realm;
   
   /**
    * Sets the login realm.

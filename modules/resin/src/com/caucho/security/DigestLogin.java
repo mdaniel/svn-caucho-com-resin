@@ -33,6 +33,7 @@ import java.io.IOException;
 import java.security.Principal;
 import java.text.CharacterIterator;
 import java.util.logging.Level;
+import java.util.logging.Logger;
 
 import javax.enterprise.context.ApplicationScoped;
 import javax.servlet.ServletContext;
@@ -64,7 +65,9 @@ import com.caucho.xml.XmlChar;
 
 @ApplicationScoped
 public class DigestLogin extends AbstractLogin {
-  protected String _realm;
+  private static final Logger log = Logger.getLogger(DigestLogin.class.getName());
+  
+  private String _realm;
 
   public DigestLogin()
   {

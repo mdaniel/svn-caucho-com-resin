@@ -1619,7 +1619,7 @@ Java_com_caucho_vfs_JniSocketImpl_nativeConnect(JNIEnv *env,
   int sock;
   int family = 0;
   int protocol = 0;
-  server_socket_t *ss;
+  server_socket_t *ss = 0;
   char sin_data[256];
   struct sockaddr_in *sin = (struct sockaddr_in *) sin_data;
   int sin_length = sizeof(sin_data);
@@ -1663,7 +1663,9 @@ Java_com_caucho_vfs_JniSocketImpl_nativeConnect(JNIEnv *env,
   }
 
   conn->fd = sock;
+  /*
   conn->socket_timeout = ss->conn_socket_timeout;
+  */
 
 #ifdef HAS_SOCK_TIMEOUT
   timeout.tv_sec = conn->socket_timeout / 1000;

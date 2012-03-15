@@ -58,6 +58,7 @@ public class AbstractAuthenticator
     = Logger.getLogger(AbstractAuthenticator.class.getName());
   
   private static final SingleSignon NULL_SINGLE_SIGNON = new NullSingleSignon();
+  public static final Principal NULL_USER = new BasicPrincipal("null-user");
   
   protected String _passwordDigestAlgorithm = "MD5-base64";
   protected String _passwordDigestRealm = "resin";

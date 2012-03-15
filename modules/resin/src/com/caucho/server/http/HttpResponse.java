@@ -214,6 +214,8 @@ public class HttpResponse extends AbstractHttpResponse
     String charEncoding = response.getCharacterEncodingImpl();
 
     WriteStream os = getRawWrite();
+    
+    long contentLength = getContentLengthHeader();
 
     int statusCode = response.getStatus();
     if (statusCode == 200) {
@@ -258,8 +260,13 @@ public class HttpResponse extends AbstractHttpResponse
         log.fine(_request.dbgId() + "Connection: Upgrade");
     }
 
-    if (! containsHeader("Server")) {
+    String serverHeader = getServerHeader();
+    if (serverHeader == null) {
       os.write(_resinServerBytes, 0, _resinServerBytes.length);
+    }
+    else {
+      os.printLatin1("\r\nServer: ");
+      os.printLatin1NoLf(serverHeader);
     }
 
     if (statusCode >= 400) {
@@ -388,7 +395,7 @@ public class HttpResponse extends AbstractHttpResponse
     }
 
     if (hasFooter()) {
-      _contentLength = -1;
+      contentLength = -1;
       length = -1;
     }
 
@@ -402,13 +409,13 @@ public class HttpResponse extends AbstractHttpResponse
     }
     else
     */
-    if (_contentLength >= 0) {
+    if (contentLength >= 0) {
       os.write(_contentLengthBytes, 0, _contentLengthBytes.length);
-      os.print(_contentLength);
+      os.print(contentLength);
       hasContentLength = true;
 
       if (debug)
-        log.fine(_request.dbgId() + "Content-Length: " + _contentLength);
+        log.fine(_request.dbgId() + "Content-Length: " + contentLength);
     }
     else if (statusCode == HttpServletResponse.SC_NOT_MODIFIED) {
       // #3089

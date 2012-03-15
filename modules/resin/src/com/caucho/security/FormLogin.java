@@ -47,6 +47,7 @@ import javax.servlet.http.HttpSession;
 import java.io.IOException;
 import java.security.Principal;
 import java.util.logging.Level;
+import java.util.logging.Logger;
 
 /**
  * Used to authenticate users in a servlet request.  Applications will
@@ -59,6 +60,7 @@ import java.util.logging.Level;
 public class FormLogin extends AbstractLogin
 {
   private static final L10N L = new L10N(FormLogin.class);
+  private static final Logger log = Logger.getLogger(FormLogin.class.getName());
 
   public static final String LOGIN_CHECK
     = "com.caucho.security.form.login";

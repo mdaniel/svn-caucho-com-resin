@@ -12,6 +12,7 @@
 
 <s2 title="4.0.27 - snapshot">
 <ul>
+<li>security: custom authenticators were called too many times (#4976, rep by Alan Wright)</li>
 <li>health: remove meters from /resin-admin summary page, in meters page</li>
 <li>health: add meter for "Resin|Port|Throttle Disconnect Count"</li>
 <li>port: throttle keepalives when port-thread-max is hit</li>

@@ -102,6 +102,9 @@ public class TcpSocketLinkListener
   
   private static final ActiveMeter _keepaliveThreadMeter
     = MeterService.createActiveMeter("Resin|Port|Keepalive Thread");
+  
+  private static final ActiveMeter _suspendMeter
+    = MeterService.createActiveMeter("Resin|Port|Request Suspend");
 
   private final AtomicInteger _connectionCount = new AtomicInteger();
 
@@ -1572,6 +1575,8 @@ public class TcpSocketLinkListener
   @Friend(SocketLinkState.class)
   void cometSuspend(TcpSocketLink conn)
   {
+    _suspendMeter.start();
+    
     _suspendConnectionSet.add(conn);
   }
 
@@ -1581,6 +1586,8 @@ public class TcpSocketLinkListener
   @Friend(SocketLinkState.class)
   boolean cometDetach(TcpSocketLink conn)
   {
+    _suspendMeter.end();
+    
     return _suspendConnectionSet.remove(conn);
   }
 

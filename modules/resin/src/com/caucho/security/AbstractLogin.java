@@ -82,9 +82,10 @@ import com.caucho.server.session.SessionImpl;
  * @since Resin 4.0.0
  */
 public abstract class AbstractLogin implements Login {
-  protected final static Logger log
+  private final static Logger log
     = Logger.getLogger(AbstractLogin.class.getName());
 
+  
   /**
    * The configured authenticator for the login.  Implementing classes will
    * typically delegate calls to the authenticator after extracting the
@@ -243,10 +244,33 @@ public abstract class AbstractLogin implements Login {
   @Override
   public Principal getUserPrincipal(HttpServletRequest request)
   {
+    return getUserPrincipal(request, false);
+  }
+
+  /**
+   * Returns the Principal associated with the current request.
+   * getUserPrincipal is called in response to the Request.getUserPrincipal
+   * call.  Login.getUserPrincipal can't modify the response or return
+   * an error page.
+   *
+   * <p/>authenticate is used for the security checks.
+   *
+   * @param request servlet request
+   *
+   * @return the logged in principal on success, null on failure.
+   */
+  private Principal getUserPrincipal(HttpServletRequest request, boolean isLogin)
+  {
     Principal user = (Principal) request.getAttribute(LOGIN_USER_NAME);
 
-    if (user != null)
+    if (user == null) {
+    }
+    else if (user != AbstractAuthenticator.NULL_USER) {
       return user;
+    }
+    else {
+      return null;
+    }
 
     Principal savedUser = findSavedUser(request);
 
@@ -258,10 +282,23 @@ public abstract class AbstractLogin implements Login {
     }
 
     // server/12d2
-    user = getUserPrincipalImpl(request);
+    if (isLogin)
+      user = getLoginPrincipalImpl(request);
+    else
+      user = getUserPrincipalImpl(request);
 
-    if (user != null || savedUser != null) {
+    if (user != null) {
+      request.setAttribute(LOGIN_USER_NAME, user);
+      
       saveUser(request, user);
+    }
+    else if (savedUser != null) {
+      request.setAttribute(LOGIN_USER_NAME, savedUser);
+      
+      saveUser(request, user);
+    }
+    else {
+      request.setAttribute(LOGIN_USER_NAME, AbstractAuthenticator.NULL_USER);
     }
 
     return user;
@@ -339,7 +376,10 @@ public abstract class AbstractLogin implements Login {
     // Most login classes will extract the user and password (or some other
     // credentials) from the request and call auth.login.
 
-    return getLoginPrincipalImpl(request);
+    // return getLoginPrincipalImpl(request);
+    // server/1a26
+    
+    return getUserPrincipal(request, true);
   }
   
   /**

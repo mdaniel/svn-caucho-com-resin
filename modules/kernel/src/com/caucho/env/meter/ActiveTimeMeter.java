@@ -83,7 +83,7 @@ public final class ActiveTimeMeter extends AbstractMeter implements ActiveTimeSe
   }
 
   @Override
-  public final void end(long startTime)
+  public final long end(long startTime)
   {
     _totalCount.incrementAndGet();
     _activeCount.decrementAndGet();
@@ -100,6 +100,8 @@ public final class ActiveTimeMeter extends AbstractMeter implements ActiveTimeSe
     while ((max = _max.get()) < value
            && ! _max.compareAndSet(max, value)) {
     }
+    
+    return value;
   }
 
   public AbstractMeter createActiveCount(String name)

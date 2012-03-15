@@ -56,6 +56,7 @@ import javax.servlet.http.Part;
 
 import com.caucho.i18n.CharacterEncoding;
 import com.caucho.network.listen.SocketLink;
+import com.caucho.security.AbstractAuthenticator;
 import com.caucho.security.AbstractLogin;
 import com.caucho.security.Authenticator;
 import com.caucho.security.Login;
@@ -903,8 +904,14 @@ abstract public class AbstractCauchoRequest implements CauchoRequest {
     Principal user;
     user = (Principal) getAttribute(AbstractLogin.LOGIN_USER_NAME);
 
-    if (user != null)
+    if (user == null) {
+    }
+    else if (user != AbstractAuthenticator.NULL_USER) {
       return user;
+    }
+    else {
+      return null;
+    }
 
     WebApp webApp = getWebApp();
     if (webApp == null)

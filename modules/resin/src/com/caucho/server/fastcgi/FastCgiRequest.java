@@ -807,17 +807,18 @@ public class FastCgiRequest extends AbstractHttpRequest
     _methodString = null;
     _protocol.clear();
 
+
     _uriLength = 0;
-    _uri = httpBuffer.getUriBuffer();
+    _uri = getSmallUriBuffer(); // httpBuffer.getUriBuffer();
 
     _uriHost.clear();
     _host = null;
 
     _headerSize = 0;
-    _headerOffset = 0;
-    _headerBuffer = httpBuffer.getHeaderBuffer();
-    _headerKeys = httpBuffer.getHeaderKeys();
-    _headerValues = httpBuffer.getHeaderValues();
+    _headerBuffer = getSmallHeaderBuffer(); // httpBuffer.getHeaderBuffer();
+    _headerKeys = getSmallHeaderKeys();     // httpBuffer.getHeaderKeys();
+    _headerValues = getSmallHeaderValues(); // httpBuffer.getHeaderValues();
+    
     _initAttributes = false;
   }
 

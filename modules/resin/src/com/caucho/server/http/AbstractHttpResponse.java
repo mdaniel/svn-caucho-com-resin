@@ -105,7 +105,7 @@ abstract public class AbstractHttpResponse {
   private static final CharBuffer CONTENT_LENGTH
     = new CharBuffer("content-length");
   private static final CharBuffer DATE
-    = new CharBuffer("content-length");
+    = new CharBuffer("date");
   private static final CharBuffer SERVER
     = new CharBuffer("server");
 
@@ -149,7 +149,8 @@ abstract public class AbstractHttpResponse {
 
   private boolean _isHeaderWritten;
 
-  protected long _contentLength;
+  private String _serverHeader;
+  private long _contentLength;
   private boolean _isClosed;
 
   protected AbstractHttpResponse(AbstractHttpRequest request)
@@ -259,6 +260,7 @@ abstract public class AbstractHttpResponse {
 
     _contentLength = -1;
     _isClosed = false;
+    _serverHeader = null;
   }
 
   public void startInvocation()
@@ -427,8 +429,9 @@ abstract public class AbstractHttpResponse {
    */
   public void addHeaderImpl(String key, String value)
   {
-    if (setSpecial(key, value))
+    if (setSpecial(key, value)) {
       return;
+    }
 
     _headerKeys.add(key);
     _headerValues.add(value);
@@ -454,8 +457,9 @@ abstract public class AbstractHttpResponse {
   {
     int length = key.length();
     
-    if (length == 0)
+    if (length == 0) {
       return false;
+    }
     
     int ch = key.charAt(0);
     
@@ -464,6 +468,7 @@ abstract public class AbstractHttpResponse {
     }
     
     int code = (length << 8) + ch;
+    
     /*
     if (256 <= length)
       return false;
@@ -526,10 +531,14 @@ abstract public class AbstractHttpResponse {
         return false;
       }
 
-    case HEADER_SERVER:
+    case 0x0600 + 's':
       if (SERVER.matchesIgnoreCase(key)) {
+        _serverHeader = value;
+        return true;
       }
-      return false;
+      else {
+        return false;
+      }
 
     default:
       return false;
@@ -702,9 +711,14 @@ abstract public class AbstractHttpResponse {
   /**
    * Returns the value of the content-length header.
    */
-  public long getContentLengthHeader()
+  public final long getContentLengthHeader()
   {
     return _contentLength;
+  }
+  
+  public String getServerHeader()
+  {
+    return _serverHeader;
   }
 
   /**

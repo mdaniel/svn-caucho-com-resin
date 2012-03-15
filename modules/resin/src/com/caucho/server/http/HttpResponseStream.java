@@ -194,10 +194,13 @@ public class HttpResponseStream
       if (req.isCometActive() || req.isDuplex()) {
       }
       else if (! req.isKeepalive()) {
+        // close();
+        
         if (log.isLoggable(Level.FINE)) {
           log.fine(dbgId() + "close stream");
         }
 
+        // server/2k10
         _nextStream.close();
       }
       else {
@@ -207,7 +210,7 @@ public class HttpResponseStream
           log.fine(dbgId() + "finish/keepalive");
         }
       }
-    } catch (IOException e) {
+    } catch (Exception e) {
       log.log(Level.FINER, e.toString(), e);
     }
   }

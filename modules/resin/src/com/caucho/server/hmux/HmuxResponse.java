@@ -130,9 +130,10 @@ public class HmuxResponse extends AbstractHttpResponse {
       _req.writeHeader(key, value);
     }
 
-    if (_contentLength >= 0) {
+    long contentLength = getContentLengthHeader();
+    if (contentLength >= 0) {
       cb.clear();
-      cb.append(_contentLength);
+      cb.append(contentLength);
       _req.writeHeader("Content-Length", cb);
     }
     else if (length >= 0) {
