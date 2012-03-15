@@ -75,8 +75,9 @@ function initPDF()
 function pdf_header()
 {
   global $g_start, $g_end, $g_title, $g_canvas, $g_jmx_dump_time;
-  
-  $g_canvas->writeSection("$g_title Report", false);
+  global $g_pdf_warnings;
+    
+  $g_canvas->writeSection("$g_title Report $jmx_time_warning", false);
   
   $col1 = 85;
   $col2 = 300;
@@ -93,6 +94,19 @@ function pdf_header()
   $g_canvas->writeTextColumn($col2, 'l', date("Y-m-d H:i", $g_start) . " through " . date("Y-m-d H:i", $g_end));
   $g_canvas->newLine();
   
+  if (count($g_pdf_warnings) > 0) {
+    $g_canvas->newLine();
+    $g_canvas->setFontAndColor("Helvetica-Bold", "10", "red");
+    $g_canvas->writeTextLine("WARNING");
+    
+    $g_canvas->setFontAndColor("Helvetica-Bold", "9", "black");
+    
+    foreach($g_pdf_warnings as $warning) {
+      $g_canvas->writeTextLineIndent(20, $warning);
+    }
+    
+    $g_canvas->setTextFont();
+  }
 }
 
 function pdf_summary()
@@ -347,18 +361,24 @@ function getMeterGraphPage($pdfName)
   }
 }
 
-function pdf_load_json_dump($name)
+function pdf_load_json_dump($name, $key, $start=0, $end=0)
 {
   global $g_si, $log_mbean, $g_start, $g_end;
   
+ if (! $end)
+    $end = $g_end;
+ 
+  if (! $start)
+    $start = $end - (2 * WEEK);
+    
   $key = "$g_si|$name";
   
   $times = $log_mbean->findMessageTimesByType($key,
                                               "info",
-                                              $g_start * 1000,
-                                              $g_end * 1000);
+                                              $start * 1000,
+                                              $end * 1000);
                                               
-  //debug("pdf_load_json_dump found " . count($times). " logs for $key (" . date('Y-m-d H:i', $g_start) . " - " . date('Y-m-d H:i', $g_end) . ")");
+  //debug("pdf_load_json_dump found " . count($times). " logs for $key (" . date('Y-m-d H:i', $start) . " - " . date('Y-m-d H:i', $end) . ")");
   
   if (! $times || sizeof($times) == 0)
     return;
@@ -1119,7 +1139,7 @@ function pdf_heap_dump()
   
   $g_canvas->writeSection("Heap Dump");
   
-  $dump = pdf_load_json_dump("Resin|HeapDump");
+  $dump = pdf_load_json_dump("Resin|HeapDump", true);
   if (! $dump) {
     $g_canvas->setTextFont();
     $g_canvas->newLine();

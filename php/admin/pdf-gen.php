@@ -7,6 +7,7 @@ define("STEP", 1);
 
 define("HOUR", 3600);
 define("DAY", 24 * HOUR);
+define("WEEK", 7 * DAY);
 
 global $g_report;
 global $g_title;
@@ -16,9 +17,12 @@ global $profile_time;
 global $period;
 global $g_jmx_dump;
 global $g_jmx_dump_time;
+global $g_pdf_warnings;
 global $g_start, $g_end, $g_end_unadjusted;
 global $g_canvas;
 global $g_server;
+
+$g_pdf_warnings = Array();
 
 $g_report = get_param($g_report, "report", "Snapshot");
 $g_title = get_param($g_title, "title", $g_report);
@@ -135,15 +139,23 @@ $g_start = $g_end - $period;
 $g_canvas->footer_left_text = date("Y-m-d H:i", $g_end);
 $g_canvas->footer_right_text = date("Y-m-d H:i", $g_end);
 
-$jmx_dump = pdf_load_json_dump("Resin|JmxDump", "jmx");
-if (!$jmx_dump) {
-  $g_canvas->newLine();
-  $g_canvas->writeTextLine(
-    "Error: No stored JMX snapshot was found in the timeframe "
-      . date("Y-m-d H:i", $g_start) . " through " . date("Y-m-d H:i", $g_end));
+$jmx_dump = pdf_load_json_dump("Resin|JmxDump", "jmx", $g_start, $g_end);
+if (! $jmx_dump) {
+  // a JMX dump was not found, try to find an older one
+  $jmx_dump = pdf_load_json_dump("Resin|JmxDump", "jmx");
+  
+  if ($jmx_dump) {
+    $timestamp = $jmx_dump["timestamp"]/1000;
+    
+    array_push($g_pdf_warnings, "A saved JMX snapshot not was found in the selected data range.");   
+    array_push($g_pdf_warnings, "Using an earlier JMX snapshot from  " . date("Y-m-d H:i", $timestamp));
+    array_push($g_pdf_warnings, "");
+    array_push($g_pdf_warnings, "The information included in this report may " . 
+      "be out out-of-date! Be sure to check timestamps!");
+  }
 }
-else {
 
+if ($jmx_dump) {
   $g_jmx_dump_time = create_timestamp($jmx_dump);
   $g_jmx_dump =& $jmx_dump["jmx"];
 
@@ -178,8 +190,12 @@ else {
   if ($mPage->isJmxDump()) {
     pdf_jmx_dump();
   }
-
-}
+} else {
+  $g_canvas->newLine();
+  $g_canvas->writeTextLine(
+    "Error: A saved JMX snapshot was not found in the timeframe "
+      . date("Y-m-d H:i", $g_start) . " through " . date("Y-m-d H:i", $g_end));
+}  
 
 $g_canvas->end();
 
