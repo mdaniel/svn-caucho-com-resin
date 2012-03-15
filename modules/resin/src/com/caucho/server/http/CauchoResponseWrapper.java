@@ -311,7 +311,11 @@ public class CauchoResponseWrapper extends AbstractCauchoResponse
 
   public String getHeader(String name)
   {
-    return _response.getHeader(name);
+      try {
+          return _response.getHeader(name);
+      } catch (AbstractMethodError ame) { // #4990 http://bugs.caucho.com/view.php?id=4990
+          return null;
+      }
   }
 
   public Collection<String> getHeaders(String name)
