@@ -361,7 +361,7 @@ function getMeterGraphPage($pdfName)
   }
 }
 
-function pdf_load_json_dump($name, $key, $start=0, $end=0)
+function pdf_load_json_dump($name, $start=0, $end=0)
 {
   global $g_si, $log_mbean, $g_start, $g_end;
   
@@ -1139,7 +1139,7 @@ function pdf_heap_dump()
   
   $g_canvas->writeSection("Heap Dump");
   
-  $dump = pdf_load_json_dump("Resin|HeapDump", true);
+  $dump = pdf_load_json_dump("Resin|HeapDump");
   if (! $dump) {
     $g_canvas->setTextFont();
     $g_canvas->newLine();

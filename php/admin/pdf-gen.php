@@ -139,10 +139,10 @@ $g_start = $g_end - $period;
 $g_canvas->footer_left_text = date("Y-m-d H:i", $g_end);
 $g_canvas->footer_right_text = date("Y-m-d H:i", $g_end);
 
-$jmx_dump = pdf_load_json_dump("Resin|JmxDump", "jmx", $g_start, $g_end);
+$jmx_dump = pdf_load_json_dump("Resin|JmxDump", $g_start, $g_end);
 if (! $jmx_dump) {
   // a JMX dump was not found, try to find an older one
-  $jmx_dump = pdf_load_json_dump("Resin|JmxDump", "jmx");
+  $jmx_dump = pdf_load_json_dump("Resin|JmxDump");
   
   if ($jmx_dump) {
     $timestamp = $jmx_dump["timestamp"]/1000;
