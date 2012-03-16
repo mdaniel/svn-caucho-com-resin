@@ -13,6 +13,8 @@ if (! admin_init()) {
   return;
 }
 
+print_title("thread", "Thread Dump");
+
 $jvm_thread = $g_mbean_server->lookup("java.lang:type=Threading");
 $server = $g_mbean_server->lookup("resin:type=Server");
 
@@ -57,11 +59,6 @@ foreach ($info_list as $info) {
 }
 
 usort($threads, "thread_stack_cmp");
-
-echo "<h1>";
-echo gettext('Thread Dump');
-echo print_help("Thread Dump");
-echo "</h1>\n";
 
 $thread_group = partition_threads($threads);
 $groups = array("active", "blocked", "jni", "locking",

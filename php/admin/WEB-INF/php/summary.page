@@ -12,8 +12,7 @@ if (! admin_init()) {
   return;
 }
 
-$summary_text = gettext("Summary");
-echo "<h1>$summary_text</h1>\n";
+print_title("summary", "Resin Summary");
 
 $report = "Summary";
 
@@ -24,6 +23,7 @@ echo "<li><a href='#overview-tab'>" . gettext('Overview') . "</a></li>\n";
 /*
 echo "<li><a href='#meter-tab'>" . gettext('Meters') . "</a></li>\n";
 */
+echo "<li><a href='#health-tab'>" . gettext('Health') . "</a></li>\n";
 echo "<li><a href='#table-tab'>" . gettext('Tables') . "</a></li>\n";
 echo "<li><a href='#log-tab'>" . gettext('Logs') . " </a></li>\n";
 echo "<li><a href='#pdf-tab'>" . gettext('PDF') . "</a></li>\n";
@@ -33,11 +33,16 @@ echo "<div id='overview-tab'>";
 
 print_overview();
 
+print_overview_graphs();
+
+echo "</div>";
+echo "<div id='health-tab'>";
+
 echo "<h2>" . gettext('Health'); print_Help("Health"); echo "</h2>\n";
 
 display_health_status($g_server->SelfServer);
 
-print_overview_graphs();
+display_health_status_graph($g_server->SelfServer);
 
 echo "</div>";
 /*
@@ -305,6 +310,35 @@ function print_graphs()
   $page = $stat->getMeterGraphPage("Snapshot");
   if ($page)
     meter_display_page($page);  
+}
+
+function display_health_status_graph($s)
+{
+  $si = sprintf("%02d", $s->ClusterIndex);
+  $server_id = $s->Name;
+  if ($server_id == "")
+  	$server_id = "default";
+
+  $mbean_server = new MBeanServer($server_id);
+
+  $label = "$si - $server_id";
+	
+  display_health_graph($mbean_server, $s, $si, $label);
+}
+
+function display_health_graph($mbean_server, $s, $si, $label)
+{
+  $params = new GraphParams("health_${si}", 600, 200);
+  $params->title = gettext('Server') . "${label}";
+
+  $params->alt
+    = gettext("A line graph representing the status of each health check performed on server $label over the last 24 hours.");
+  $params->alt = preg_replace('/\$label/', $label, $params->alt);
+
+  $params->labels_mbean = "resin:type=HealthSystem";
+  $params->mbean_server = $mbean_server;
+
+  stat_graph_regexp($params, "/^${si}\|Resin\|Health/");
 }
 
 function recent_messages($max)

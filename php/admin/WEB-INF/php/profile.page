@@ -9,6 +9,8 @@ if (! admin_init()) {
   return;
 }
 
+print_title("profile", "Profile");
+
 try {
   $profile = java_class("com.caucho.profile.Profile")->createProfile();
 } catch (Exception $e) {

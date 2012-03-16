@@ -754,7 +754,7 @@ else {
 </ul>
 </div>
 <div style='float: right; width: 20%; text-align: right;'>
-  <span class='status-item'><a target="caucho-wiki" href="http://wiki.caucho.com/Admin: <?= ucfirst($g_page) ?>"><?= gettext('help')?></a></span>
+  <span class='status-item'><a target="caucho-wiki" href="http://wiki4.caucho.com/Admin: <?= ucfirst($g_page) ?>"><?= gettext('help')?></a></span>
   <span class='status-item'><a href="<?= $g_next_url ?>"><?= gettext('refresh')?></a></span>
   <span class='status-item logout'><a href="?q=index.php&amp;logout=true"><?= gettext('logout')?></a></span>
 </div>
@@ -827,6 +827,23 @@ function display_pages()
     }
   }
 }
+
+function print_title_image($page_name)
+{
+  if (file_exists("images/${page_name}_32.png")) {
+    return "<img src='images/${page_name}_32.png' width='32' height='32' alt='${page_name}' />&nbsp;";
+  }
+  else {
+    return "";
+  }
+}  
+
+function print_title($page_name, $text)
+{
+  echo "<h1>" . print_title_image($page_name) . gettext($text);
+  print_help($page_name);
+  echo "</h1>\n";
+}  
 
 function display_status_log($server)
 {
@@ -1151,12 +1168,12 @@ function info($name,$wiki="")
     $wiki = $name;
 
   echo $name;
-  echo "<sup><small><a href='http://wiki.caucho.com/Admin: $wiki' target='caucho-wiki' class='info'>?</a></small></sup>";
+  echo "<sup><small><a href='http://wiki4.caucho.com/Admin: $wiki' target='caucho-wiki' class='info'>?</a></small></sup>";
 }
 
 function print_help($wiki)
 {
-  echo "<sup><small><a href='http://wiki.caucho.com/Admin: $wiki' target='caucho-wiki' class='info'>?</a></small></sup>";
+  echo "<sup><small><a href='http://wiki4.caucho.com/Admin: $wiki' target='caucho-wiki' class='info'>?</a></small></sup>";
 }
 
 function sort_host($a, $b)

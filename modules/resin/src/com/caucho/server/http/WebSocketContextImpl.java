@@ -40,6 +40,7 @@ import java.util.logging.Logger;
 
 import com.caucho.network.listen.SocketLinkDuplexController;
 import com.caucho.network.listen.SocketLinkDuplexListener;
+import com.caucho.remote.websocket.WebSocketBlockingQueue;
 import com.caucho.remote.websocket.WebSocketConstants;
 import com.caucho.remote.websocket.WebSocketInputStream;
 import com.caucho.remote.websocket.WebSocketOutputStream;
@@ -112,14 +113,22 @@ class WebSocketContextImpl
     return _controller.getIdleTimeMax();
   }
 
-  /*
   @Override
-  public InputStream getInputStream()
-  throws IOException
+  public <T> BlockingQueue<T> createOutputQueue(WebSocketEncoder<T> encoder)
   {
-    return _controller.getReadStream();
+    return new WebSocketBlockingQueue<T>(this, encoder, 256);
   }
-  */
+
+  @Override
+  public void setAutoFlush(boolean isAutoFlush)
+  {
+  }
+
+  @Override
+  public boolean isAutoFlush()
+  {
+    return false;
+  }
 
   @Override
   public OutputStream startBinaryMessage()
@@ -165,6 +174,11 @@ class WebSocketContextImpl
     out.write(bytes.length);
     out.write(bytes);
     out.flush();
+  }
+  
+  public boolean isClosed()
+  {
+    return _isWriteClosed.get();
   }
   
   @Override
@@ -422,35 +436,5 @@ class WebSocketContextImpl
   public String toString()
   {
     return getClass().getSimpleName() + "[" + _listener + "]";
-  }
-
-  /* (non-Javadoc)
-   * @see com.caucho.websocket.WebSocketContext#createOutputQueue(com.caucho.websocket.WebSocketEncoder)
-   */
-  @Override
-  public <T> BlockingQueue<T> createOutputQueue(WebSocketEncoder<T> encoder)
-  {
-    // TODO Auto-generated method stub
-    return null;
-  }
-
-  /* (non-Javadoc)
-   * @see com.caucho.websocket.WebSocketContext#setAutoFlush(boolean)
-   */
-  @Override
-  public void setAutoFlush(boolean isAutoFlush)
-  {
-    // TODO Auto-generated method stub
-    
-  }
-
-  /* (non-Javadoc)
-   * @see com.caucho.websocket.WebSocketContext#isAutoFlush()
-   */
-  @Override
-  public boolean isAutoFlush()
-  {
-    // TODO Auto-generated method stub
-    return false;
   }
 }

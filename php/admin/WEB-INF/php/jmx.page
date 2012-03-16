@@ -9,7 +9,7 @@ if (! admin_init()) {
   return;
 }
 
-echo "<h1>JMX</h1>";
+print_title("jmx", "JMX MBeans");
 
 function collect_mbean_groups()
 {

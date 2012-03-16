@@ -256,6 +256,28 @@ public class WebSocketClient implements WebSocketContext, WebSocketConstants {
       log.log(Level.WARNING, e.toString(), e);
     }
   }
+
+  @Override
+  public <T> BlockingQueue<T> createOutputQueue(WebSocketEncoder<T> encoder)
+  {
+    return new WebSocketBlockingQueue<T>(this, encoder, 256);
+  }
+
+  @Override
+  public void setAutoFlush(boolean isAutoFlush)
+  {
+  }
+
+  @Override
+  public boolean isAutoFlush()
+  {
+    return false;
+  }
+
+  @Override
+  public void flush() throws IOException
+  {
+  }
   
   public boolean isClosed()
   {
@@ -421,43 +443,4 @@ public class WebSocketClient implements WebSocketContext, WebSocketConstants {
 
   }
 
-  /* (non-Javadoc)
-   * @see com.caucho.websocket.WebSocketContext#createOutputQueue(com.caucho.websocket.WebSocketEncoder)
-   */
-  @Override
-  public <T> BlockingQueue<T> createOutputQueue(WebSocketEncoder<T> encoder)
-  {
-    // TODO Auto-generated method stub
-    return null;
-  }
-
-  /* (non-Javadoc)
-   * @see com.caucho.websocket.WebSocketContext#setAutoFlush(boolean)
-   */
-  @Override
-  public void setAutoFlush(boolean isAutoFlush)
-  {
-    // TODO Auto-generated method stub
-    
-  }
-
-  /* (non-Javadoc)
-   * @see com.caucho.websocket.WebSocketContext#isAutoFlush()
-   */
-  @Override
-  public boolean isAutoFlush()
-  {
-    // TODO Auto-generated method stub
-    return false;
-  }
-
-  /* (non-Javadoc)
-   * @see com.caucho.websocket.WebSocketContext#flush()
-   */
-  @Override
-  public void flush() throws IOException
-  {
-    // TODO Auto-generated method stub
-    
-  }
 }

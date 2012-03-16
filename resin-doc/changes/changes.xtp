@@ -12,6 +12,8 @@
 
 <s2 title="4.0.27 - snapshot">
 <ul>
+<li>health: add http_ping_urls to resin.properties</li>
+<li>websocket: added createOutputQueue and encoder</li>
 <li>security: custom authenticators were called too many times (#4976, rep by Alan Wright)</li>
 <li>health: remove meters from /resin-admin summary page, in meters page</li>
 <li>health: add meter for "Resin|Port|Throttle Disconnect Count"</li>

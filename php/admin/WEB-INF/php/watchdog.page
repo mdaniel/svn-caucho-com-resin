@@ -34,9 +34,7 @@ if (! require_professional()) {
 
 enable_graph_controls();
 
-echo "<h1>Watchdog";
-print_help("Watchdog");
-echo " Analysis</h1>\n";
+print_title("watchdog", "Watchdog Analysis");
 
 $now = time();
 $start = $now - 7 * 24 * 60 * 60;

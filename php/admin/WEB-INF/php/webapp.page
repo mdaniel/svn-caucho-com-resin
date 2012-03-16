@@ -8,7 +8,7 @@ if (!admin_init()) {
 
 $client = @new Java("com.caucho.server.admin.WebAppDeployClient");
 
-echo "<h1>" . gettext('WebApps') . "</h1>\n";
+print_title("webapp", "WebApps");
 
 $request = quercus_servlet_request();
 $is_secure = 1; //$request->isSecure();

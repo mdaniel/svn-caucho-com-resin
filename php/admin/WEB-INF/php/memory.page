@@ -9,10 +9,7 @@ if (! admin_init()) {
   return;
 }
 
-echo "<h1>";
-echo gettext('JVM Memory');
-echo print_help("Memory");
-echo "</h1>";
+print_title("memory", "JVM Memory");
 
 echo "<div id='memory-tabs'>";
 echo "<ul>";

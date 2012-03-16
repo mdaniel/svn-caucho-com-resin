@@ -14,6 +14,8 @@ if (! admin_init()) {
   return;
 }
 
+print_title("meters", "Meters");
+
 $stat_service = get_stats_service();
 
 if (! require_professional()) {

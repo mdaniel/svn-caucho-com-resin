@@ -7,9 +7,11 @@
 if (!admin_init(false)) {
   return;
 }
+
+print_title("index", "Resin Administration");
+
 ?>
 
-<h1><?= gettext('Resin Administration')?></h1>
 
 <table border='0'>
   <tr>
@@ -18,34 +20,10 @@ if (!admin_init(false)) {
       <h2><a href="?q=summary"><?= gettext('Summary')?></a></h2>
       <p><?= gettext('A summary of the server\'s state.')?></p>
     </td>
-    <!-- Cache -->
-    <td>
-      <h2><a href="?q=cache"><?= gettext('Cache')?></a></h2>
-      <p><?= gettext('Describes the proxy cache state.')?></p>
-    </td>
-  </tr>
-  <tr>
-    <!-- Config -->
-    <td>
-      <h2><a href="?q=config"><?= gettext('Config')?></a></h2>
-      <p><?= gettext('Review of the server\'s configuration as parsed by the current Resin instance.')?></p>
-    </td>
     <!-- Deploy -->
     <td>
       <h2><a href="?q=deploy"><?= gettext('Deploy')?></a></h2>
       <p><?= gettext('Deploy and update new applications throughout the cluster.')?></p>
-    </td>
-  </tr>
-  <tr>
-    <!-- Graphs -->
-    <td>
-      <h2><a href="?q=graphs"><?= gettext('Graphs')?></a></h2>
-      <p><?= gettext('Custom graphing of internal Resin statistics. Requires Resin-Pro and a HTML 5 browser like Firefox 3.5.')?></p>
-    </td>
-    <!-- Health -->
-    <td>
-      <h2><a href="?q=health"><?= gettext('Health')?></a></h2>
-      <p><?= gettext('Health check overview of the servers.')?></p>
     </td>
   </tr>
   <tr>

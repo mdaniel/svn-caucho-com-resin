@@ -39,6 +39,6 @@ public interface WebSocketEncoder<T>
   public void encode(WebSocketContext ws, T value)
     throws IOException;
   
-  public void flush()
+  public void flush(WebSocketContext ws)
     throws IOException;
 }
