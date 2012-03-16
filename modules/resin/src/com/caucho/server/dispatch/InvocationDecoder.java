@@ -348,8 +348,8 @@ public class InvocationDecoder {
 
     int len = uri.length();
 
-    if (len > _maxURILength)
-      throw new BadRequestException(L.l("The request contains an illegal URL."));
+    if (_maxURILength < len)
+      throw new BadRequestException(L.l("The request contains an illegal URL because it is too long."));
 
     char ch;
     if (len == 0 || (ch = uri.charAt(0)) != '/' && ch != '\\')

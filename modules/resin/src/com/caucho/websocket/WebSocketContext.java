@@ -32,6 +32,7 @@ package com.caucho.websocket;
 import java.io.IOException;
 import java.io.OutputStream;
 import java.io.PrintWriter;
+import java.util.concurrent.BlockingQueue;
 
 /**
  * Bidirectional TCP connection based on a HTTP upgrade, e.g. WebSocket.
@@ -40,6 +41,12 @@ import java.io.PrintWriter;
  * thread normally is the only thread reading from the input stream.
  */
 public interface WebSocketContext {
+  /**
+   * Creates a thread-safe queue, which applications can send objects to be
+   * marshaled.
+   */
+  public <T> BlockingQueue<T> createOutputQueue(WebSocketEncoder<T> encoder);
+  
   /**
    * Returns the output stream for a binary message.
    * The message will complete when the OutputStream is closed.
@@ -63,6 +70,21 @@ public interface WebSocketContext {
    * Gets the read timeout.
    */
   public long getTimeout();
+  
+  /**
+   * auto-flush after each message is sent.
+   */
+  public void setAutoFlush(boolean isAutoFlush);
+  
+  /**
+   * returns the current flush mode.
+   */
+  public boolean isAutoFlush();
+  
+  /**
+   * flushes the output stream
+   */
+  public void flush() throws IOException;
 
   /**
    * gracefully close the connection, waiting for unread messages.

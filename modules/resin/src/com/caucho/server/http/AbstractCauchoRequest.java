@@ -768,7 +768,7 @@ abstract public class AbstractCauchoRequest implements CauchoRequest {
       throw new ServletException(L.l("Authentication mechanism '{0}' does not support password authentication", login));
 
     removeAttribute(Login.LOGIN_USER_NAME);
-    removeAttribute(Login.LOGIN_USER_PRINCIPAL);
+    removeAttribute(Login.LOGIN_USER);
     removeAttribute(Login.LOGIN_PASSWORD);
 
     Principal principal = login.getUserPrincipal(this);
@@ -778,7 +778,7 @@ abstract public class AbstractCauchoRequest implements CauchoRequest {
 
     setAttribute(Login.LOGIN_USER_NAME, username);
     setAttribute(Login.LOGIN_PASSWORD, password);
-
+    
     try {
       login.login(this, getResponse(), false);
     }
@@ -788,9 +788,10 @@ abstract public class AbstractCauchoRequest implements CauchoRequest {
     }
 
     principal = login.getUserPrincipal(this);
-
-    if (principal == null)
+    
+    if (principal == null) {
       throw new ServletException("can't authenticate a user");
+    }
   }
   
   @Override
@@ -824,7 +825,7 @@ abstract public class AbstractCauchoRequest implements CauchoRequest {
         Principal user = login.login(this, getResponse(), isFail);
 
         if (user != null) {
-          setAttribute(Login.LOGIN_USER_PRINCIPAL, user);
+          setAttribute(Login.LOGIN_USER, user);
           
           return true;
         }
@@ -885,7 +886,7 @@ abstract public class AbstractCauchoRequest implements CauchoRequest {
     Principal principal = login.login(this, response, true);
 
     if (principal != null) {
-      setAttribute(Login.LOGIN_USER_PRINCIPAL, principal);
+      setAttribute(Login.LOGIN_USER, principal);
     
       return true;
     }

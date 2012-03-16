@@ -540,8 +540,9 @@ public class HttpRequest extends AbstractHttpRequest
         }
       }
 
-      if (j == length)
+      if (j == length) {
         return i;
+      }
     }
 
     return -1;
@@ -977,7 +978,7 @@ public class HttpRequest extends AbstractHttpRequest
         readOffset = 0;
       }
 
-      ch = readBuffer[readOffset++];
+      ch = readBuffer[readOffset++] & 0xff;
     } while (isHttpWhitespace[ch]);
 
     char []buffer = _method.getBuffer();
@@ -1054,7 +1055,7 @@ public class HttpRequest extends AbstractHttpRequest
         readOffset = 0;
       }
 
-      int ch1 = readBuffer[readOffset++];
+      int ch1 = readBuffer[readOffset++] & 0xff;
 
       if (ch1 != '/') {
         uriBuffer[uriLength++] = (byte) ch;
@@ -1072,7 +1073,7 @@ public class HttpRequest extends AbstractHttpRequest
             }
             readOffset = 0;
           }
-          ch = readBuffer[readOffset++];
+          ch = readBuffer[readOffset++] & 0xff;
 
           switch (ch) {
           case ' ': case '\t': case '\n': case '\r':
@@ -1117,7 +1118,7 @@ public class HttpRequest extends AbstractHttpRequest
         uriLength = _uriLength;
       }
       
-      ch = readBuffer[readOffset++];
+      ch = readBuffer[readOffset++] & 0xff;
     }
     
     _uriLength = uriLength;
@@ -1130,7 +1131,7 @@ public class HttpRequest extends AbstractHttpRequest
         if ((readLength = s.fillBuffer()) < 0)
           return true;
       }
-      ch = readBuffer[readOffset++];
+      ch = readBuffer[readOffset++] & 0xff;
     }
 
     buffer = _protocol.getBuffer();
@@ -1150,7 +1151,7 @@ public class HttpRequest extends AbstractHttpRequest
           return true;
         }
       }
-      ch = readBuffer[readOffset++];
+      ch = readBuffer[readOffset++] & 0xff;
     }
 
     _protocol.setLength(offset);
@@ -1309,6 +1310,7 @@ public class HttpRequest extends AbstractHttpRequest
       CharSegment []headerValues = _headerValues;
 
       if (headerKeys.length <= headerSize) {
+        _headerLength = headerOffset;
         extendHeaderBuffers();
         
         headerBuffer = _headerBuffer;
@@ -1418,11 +1420,11 @@ public class HttpRequest extends AbstractHttpRequest
     
     for (int i = 0; i < _headerSize; i++) {
       headerKeys[i].init(headerBuffer,  
-                         headerKeys[i].getOffset(),
+                         _headerKeys[i].getOffset(),
                          _headerKeys[i].getLength());
       
       headerValues[i].init(headerBuffer,  
-                           headerValues[i].getOffset(),
+                           _headerValues[i].getOffset(),
                            _headerValues[i].getLength());
     }
     

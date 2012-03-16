@@ -191,26 +191,17 @@ abstract public class AmqpLink
   public void setIncomingDeliveryCount(long deliveryCount)
   {
     _incomingDeliveryCount = deliveryCount;
-    _incomingTransferCount = 0;
   }
   
   protected void addDeliveryCount()
   {
     _incomingDeliveryCount++;
+    _incomingTransferCount++;
   }
   
-  protected int getReceiveCount()
+  protected long getTransferCount()
   {
-    return (int) (_incomingDeliveryCount - _outgoingDeliveryCount);
-  }
-  
-  protected long updateDeliveryCount(int takeCount, int linkCredit)
-  {
-    long deliveryCount = _incomingDeliveryCount + _incomingTransferCount;
-    
-    _outgoingDeliveryCount = deliveryCount;
-    
-    return deliveryCount;
+    return _incomingTransferCount;
   }
   
   protected long getOutgoingLinkCredit()

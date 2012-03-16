@@ -43,7 +43,8 @@ abstract public class AmqpReceiverLink extends AmqpLink
   private int _prefetch;
   
   private long _outgoingDeliveryCount;
-  private int _takeCount;
+  private long _deliveryLimit;
+  private long _takeCount;
   
   protected AmqpReceiverLink(String name, String address)
   {
@@ -109,7 +110,10 @@ abstract public class AmqpReceiverLink extends AmqpLink
   {
     _takeCount++;
     
-    if (_prefetch < 2 * _takeCount || _prefetch < 8) {
+    long limit = _deliveryLimit;
+    long available = limit - _takeCount;
+    
+    if (2 * available < _prefetch || _prefetch < 8) {
       setPrefetch(_prefetch);
     }
   }
@@ -119,29 +123,20 @@ abstract public class AmqpReceiverLink extends AmqpLink
     super.setIncomingDeliveryCount(count);
     
     // XXX: sync
-    _outgoingDeliveryCount = count;
+   // _outgoingDeliveryCount = count;
   }
 
   public void setPrefetch(int prefetch)
   {
     _prefetch = prefetch;
     
-    int takeCount = _takeCount;
-    _takeCount = 0;
+    long receiveCount = getTransferCount();
+    int delta = (int) (receiveCount - _takeCount);
     
     long deliveryCount = getIncomingDeliveryCount();
     
-    if (deliveryCount < 0) {
-      getSession().flow(this, deliveryCount, _prefetch);
-      return;
-    }
-    
-    int received = (int) (deliveryCount - _outgoingDeliveryCount);
-    
-    received -= takeCount;
-    
-    _outgoingDeliveryCount = deliveryCount - received;
+    _deliveryLimit = _takeCount + prefetch;
 
-    getSession().flow(this, deliveryCount, _prefetch - received);
+    getSession().flow(this, deliveryCount, prefetch - delta);
   }
 }

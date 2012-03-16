@@ -151,7 +151,7 @@ public class AmqpServerConnection extends AbstractProtocolConnection
       if (! _handler.getReader().readVersion()) {
         return false;
       }
-      System.out.println("VERSION:");
+
       if (_isSasl) {
         System.out.println("SASL:");
         try {

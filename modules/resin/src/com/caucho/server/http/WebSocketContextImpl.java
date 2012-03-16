@@ -33,6 +33,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.io.PrintWriter;
+import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -52,6 +53,7 @@ import com.caucho.vfs.ReadStream;
 import com.caucho.vfs.TempBuffer;
 import com.caucho.vfs.WriteStream;
 import com.caucho.websocket.WebSocketContext;
+import com.caucho.websocket.WebSocketEncoder;
 import com.caucho.websocket.WebSocketListener;
 
 /**
@@ -219,7 +221,8 @@ class WebSocketContextImpl
     _listener.onStart(this);
   }
   
-  void flush()
+  @Override
+  public void flush()
     throws IOException
   {
     WriteStream out = _controller.getWriteStream();
@@ -419,5 +422,35 @@ class WebSocketContextImpl
   public String toString()
   {
     return getClass().getSimpleName() + "[" + _listener + "]";
+  }
+
+  /* (non-Javadoc)
+   * @see com.caucho.websocket.WebSocketContext#createOutputQueue(com.caucho.websocket.WebSocketEncoder)
+   */
+  @Override
+  public <T> BlockingQueue<T> createOutputQueue(WebSocketEncoder<T> encoder)
+  {
+    // TODO Auto-generated method stub
+    return null;
+  }
+
+  /* (non-Javadoc)
+   * @see com.caucho.websocket.WebSocketContext#setAutoFlush(boolean)
+   */
+  @Override
+  public void setAutoFlush(boolean isAutoFlush)
+  {
+    // TODO Auto-generated method stub
+    
+  }
+
+  /* (non-Javadoc)
+   * @see com.caucho.websocket.WebSocketContext#isAutoFlush()
+   */
+  @Override
+  public boolean isAutoFlush()
+  {
+    // TODO Auto-generated method stub
+    return false;
   }
 }
