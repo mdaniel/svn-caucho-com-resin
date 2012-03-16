@@ -1490,8 +1490,9 @@ public class TcpSocketLink extends AbstractSocketLink
     
     TcpAsyncController async = _async;
     
-    if (async != null)
+    if (async != null) {
       async.complete();
+    }
   }
   /**
    * Kills the keepalive, so the end of the request is the end of the
@@ -1639,7 +1640,9 @@ public class TcpSocketLink extends AbstractSocketLink
   private void close()
   {
     setStatState(null);
-    
+  
+    closeAsync();
+      
     closeConnection();
   }
   

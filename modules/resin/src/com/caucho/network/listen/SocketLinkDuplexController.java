@@ -216,11 +216,10 @@ public class SocketLinkDuplexController extends AsyncController {
   public void onClose()
   {
     _isCompleteRequested = true;
-    
+
     // ReadStream is = _is;
     _is = null;
     
-    TcpSocketLink conn = _conn;
     _conn = null;
     
     SocketLinkDuplexListener listener = _listener;
