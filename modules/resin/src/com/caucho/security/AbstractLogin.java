@@ -321,27 +321,21 @@ public abstract class AbstractLogin implements Login {
                          HttpServletResponse response,
                          boolean isFail)
   {
-    Principal user = (Principal) request.getAttribute(LOGIN_USER);
-    
-    if (user != null && user != AbstractAuthenticator.NULL_USER)
-      return user;
-    
-    Principal savedUser = findSavedUser(request);
-
-    // server/12c9 - new login overrides old
-    if (savedUser != null && isSavedUserValid(request, savedUser)) {
-      request.setAttribute(LOGIN_USER, savedUser);
-      
-      return savedUser;
-    }
-
-    user = login(request, response);
-    
-    if (user != null) {
-      request.setAttribute(LOGIN_USER, user);
-    }
-
     try {
+      // server/123c, 1a25, 1as0
+      Principal savedUser = null;
+      
+      savedUser = findSavedUser(request);
+
+      // server/12c9 - new login overrides old
+      if (savedUser != null && isSavedUserValid(request, savedUser)) {
+        request.setAttribute(LOGIN_USER, savedUser);
+
+        return savedUser;
+      }
+
+      Principal user = login(request, response);
+
       if (user != null || savedUser != null) {
         // server/12h7
         saveUser(request, user);
@@ -355,7 +349,7 @@ public abstract class AbstractLogin implements Login {
 
       if (isFail) {
         log.fine(this + " sending login challenge");
-        
+
         loginChallenge(request, response);
       }
     } catch (RuntimeException e) {
@@ -380,7 +374,20 @@ public abstract class AbstractLogin implements Login {
 
     // return getLoginPrincipalImpl(request);
     // server/1a26
-    
+    // server/123c, 1a25, 1as0
+    /*
+    Principal user = (Principal) request.getAttribute(LOGIN_USER);
+
+    if (user == null) {
+      return getUserPrincipal(request, true);
+    }
+    else if (user == AbstractAuthenticator.NULL_USER) {
+      return null;
+    }
+    else {
+      return user;
+    }
+    */
     return getUserPrincipal(request, true);
   }
   
@@ -457,7 +464,7 @@ public abstract class AbstractLogin implements Login {
       session.setAttribute(LOGIN_USER, user);
       
       if (log.isLoggable(Level.FINER))
-        log.finer(this + " save user '" + user + "' in session " + singleSignon);
+        log.finer(this + " save user '" + user + "' in session " + session);
     }
   }
 
@@ -549,6 +556,8 @@ public abstract class AbstractLogin implements Login {
     
     if (session != null)
       session.removeAttribute(LOGIN_USER);
+    
+    request.removeAttribute(LOGIN_USER);
 
     SingleSignon singleSignon = getSingleSignon();
 

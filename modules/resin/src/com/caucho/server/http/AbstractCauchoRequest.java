@@ -776,6 +776,7 @@ abstract public class AbstractCauchoRequest implements CauchoRequest {
     if (principal != null)
       throw new ServletException(L.l("UserPrincipal object has already been established"));
 
+    removeAttribute(Login.LOGIN_USER);
     setAttribute(Login.LOGIN_USER_NAME, username);
     setAttribute(Login.LOGIN_PASSWORD, password);
     
@@ -824,13 +825,7 @@ abstract public class AbstractCauchoRequest implements CauchoRequest {
       if (login != null) {
         Principal user = login.login(this, getResponse(), isFail);
 
-        if (user != null) {
-          setAttribute(Login.LOGIN_USER, user);
-          
-          return true;
-        }
-        else
-          return false;
+        return (user != null);
       }
       else if (isFail) {
         if (log.isLoggable(Level.FINE))
@@ -886,8 +881,6 @@ abstract public class AbstractCauchoRequest implements CauchoRequest {
     Principal principal = login.login(this, response, true);
 
     if (principal != null) {
-      setAttribute(Login.LOGIN_USER, principal);
-    
       return true;
     }
 
@@ -902,22 +895,12 @@ abstract public class AbstractCauchoRequest implements CauchoRequest {
   {
     requestLogin();
 
-    Principal user;
-    user = (Principal) getAttribute(AbstractLogin.LOGIN_USER_NAME);
-
-    if (user == null) {
-    }
-    else if (user != AbstractAuthenticator.NULL_USER) {
-      return user;
-    }
-    else {
-      return null;
-    }
-
     WebApp webApp = getWebApp();
     if (webApp == null)
       return null;
 
+    Principal user = null;
+    
     // If the authenticator can find the user, return it.
     Login login = webApp.getLogin();
 
