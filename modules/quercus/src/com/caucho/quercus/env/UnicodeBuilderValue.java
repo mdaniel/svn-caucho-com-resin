@@ -152,7 +152,7 @@ public class UnicodeBuilderValue
   public UnicodeBuilderValue(StringBuilderValue v, boolean isCopy)
   {
     byte []vBuffer = v.getBuffer();
-    int vOffset = v.getOffset();
+    int vOffset = v.length();
     
     _buffer = new char[vBuffer.length];
     
@@ -633,25 +633,17 @@ public class UnicodeBuilderValue
   }
 
   /**
-   * Returns the offset.
-   */
-  public int getOffset()
-  {
-    return _length;
-  }
-
-  /**
    * Sets the offset.
    */
-  public void setOffset(int offset)
+  public final void setLength(int length)
   {
-    _length = offset;
+    _length = length;
   }
 
   /**
    * Returns the current capacity.
    */
-  public int getLength()
+  public final int getBufferLength()
   {
     return _buffer.length;
   }
@@ -777,7 +769,7 @@ public class UnicodeBuilderValue
   /**
    * Returns the length of the string.
    */
-  public int length()
+  public final int length()
   {
     return _length;
   }

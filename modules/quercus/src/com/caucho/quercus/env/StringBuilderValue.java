@@ -30,10 +30,16 @@
 package com.caucho.quercus.env;
 
 import com.caucho.util.CharBuffer;
-import com.caucho.vfs.*;
+import com.caucho.vfs.TempCharBuffer;
+import com.caucho.vfs.WriteStream;
 import com.caucho.quercus.QuercusModuleException;
 
-import java.io.*;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.ObjectInputStream;
+import java.io.ObjectOutputStream;
+import java.io.OutputStream;
+import java.io.Reader;
 import java.util.IdentityHashMap;
 import java.util.zip.CRC32;
 
@@ -298,6 +304,7 @@ public class StringBuilderValue
     ch = buffer[i];
 
     if (ch == '.') {
+      // XXX: this doesn't look right 2012-03-15
       for (i++; i < len && '0' <= (ch = buffer[i]) && ch <= '9'; i++) {
         return ValueType.DOUBLE_CMP;
       }
@@ -728,7 +735,7 @@ public class StringBuilderValue
    * Returns the length of the string.
    */
   @Override
-  public int length()
+  public final int length()
   {
     return _length;
   }
@@ -1578,17 +1585,9 @@ public class StringBuilderValue
   }
 
   /**
-   * Returns the offset.
+   * Sets the length.
    */
-  public int getOffset()
-  {
-    return _length;
-  }
-
-  /**
-   * Sets the offset.
-   */
-  public void setOffset(int offset)
+  public final void setLength(int offset)
   {
     _length = offset;
   }
@@ -1596,7 +1595,7 @@ public class StringBuilderValue
   /**
    * Returns the current capacity.
    */
-  public int getBufferLength()
+  public final int getBufferLength()
   {
     return _buffer.length;
   }

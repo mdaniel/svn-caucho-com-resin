@@ -56,7 +56,7 @@ public class ConstStringValue
 
   public ConstStringValue(StringBuilderValue sb)
   {
-    super(sb.getBuffer(), 0, sb.getOffset());
+    super(sb.getBuffer(), 0, sb.length());
   }
 
   public ConstStringValue(byte []buffer, int offset, int length)
@@ -259,13 +259,6 @@ public class ConstStringValue
       printJavaChar(out, charAt(0));
       out.print("'))");
     }
-    /*
-    else if (len < maxSublen) {
-      out.print("(new ConstStringValue(\"");
-      printJavaString(out, this);
-      out.print("\"))");
-    }
-    */
     else if (len < maxSublen) {
       out.print("(new CompiledConstStringValue (\"");
       printJavaString(out, this);

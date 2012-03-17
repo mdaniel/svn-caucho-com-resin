@@ -31,13 +31,16 @@ package com.caucho.quercus.servlet;
 
 import com.caucho.config.ConfigException;
 import com.caucho.quercus.QuercusContext;
+import com.caucho.quercus.QuercusModuleException;
 import com.caucho.quercus.QuercusRuntimeException;
+import com.caucho.quercus.lib.db.JavaSqlDriverWrapper;
+import com.caucho.quercus.lib.db.QuercusDataSource;
 import com.caucho.quercus.module.QuercusModule;
 import com.caucho.util.L10N;
-import com.caucho.vfs.Path;
 
 import javax.naming.Context;
 import javax.naming.InitialContext;
+import javax.naming.NamingException;
 import javax.servlet.ServletConfig;
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServlet;
@@ -73,7 +76,9 @@ public class QuercusServlet
   private boolean _isCompileFailover = true;
   private double _profileProbability;
   private boolean _isRequireSource = true;
+  
   private DataSource _database;
+  
   private boolean _isStrict;
   private boolean _isLooseParse = true;
   private int _pageCacheSize = -1;
@@ -112,14 +117,11 @@ public class QuercusServlet
 
     if (isResin) {
       try {
-        Class<?> cl = Class.forName(
-            "com.caucho.quercus.servlet.ProResinQuercusServlet");
-
+        Class<?> cl = Class.forName("com.caucho.quercus.servlet.ProResinQuercusServlet");
         Constructor<?> cons = cl.getConstructor(File.class);
 
         impl = (QuercusServletImpl) cons.newInstance(_licenseDirectory);
 
-        //impl = (QuercusServletImpl) cl.newInstance();
       } catch (ConfigException e) {
         log.log(Level.FINEST, e.toString(), e);
         log.info("Quercus compiled mode requires Resin "
@@ -132,8 +134,7 @@ public class QuercusServlet
 
       if (impl == null) {
         try {
-          Class<?> cl = Class.forName(
-              "com.caucho.quercus.servlet.ResinQuercusServlet");
+          Class<?> cl = Class.forName("com.caucho.quercus.servlet.ResinQuercusServlet");
           impl = (QuercusServletImpl) cl.newInstance();
         } catch (Exception e) {
           log.log(Level.FINEST, e.toString(), e);
@@ -143,14 +144,11 @@ public class QuercusServlet
 
     if (impl == null) {
       try {
-        Class<?> cl = Class.forName(
-            "com.caucho.quercus.servlet.ProQuercusServlet");
+        Class<?> cl = Class.forName("com.caucho.quercus.servlet.ProQuercusServlet");
 
         Constructor<?> cons = cl.getConstructor(java.io.File.class);
-
         impl = (QuercusServletImpl) cons.newInstance(_licenseDirectory);
 
-        //impl = (QuercusServletImpl) cl.newInstance();
       } catch (ConfigException e) {
         log.log(Level.FINEST, e.toString(), e);
         log.info("Quercus compiled mode requires "
@@ -162,8 +160,9 @@ public class QuercusServlet
       }
     }
 
-    if (impl == null)
+    if (impl == null) {
       impl = new QuercusServletImpl();
+    }
     
     log.info("QuercusServlet starting as " + impl.getClass().getSimpleName());
 
@@ -453,31 +452,7 @@ public class QuercusServlet
       setCompile(paramValue);
     }
     else if ("database".equals(paramName)) {
-      try {
-        Context ic = new InitialContext();
-        DataSource ds;
-
-        if (! paramValue.startsWith("java:comp")) {
-          try {
-            ds = (DataSource) ic.lookup("java:comp/env/" + paramValue);
-          }
-          catch (Exception e) {
-            // for glassfish
-            ds = (DataSource) ic.lookup(paramValue);
-          }
-        }
-        else {
-          ds = (DataSource) ic.lookup(paramValue);
-        }
-
-        if (ds == null)
-          throw new ServletException(L.l(
-              "database '{0}' is not valid", paramValue));
-
-        setDatabase(ds);
-      } catch (Exception e) {
-        throw new ServletException(e);
-      }
+      setJndiDatabase(paramValue);
     }
     else if ("ini-file".equals(paramName)) {
       setIniFile(paramValue);
@@ -517,16 +492,79 @@ public class QuercusServlet
       throw new ServletException(
           L.l("'{0}' is not a recognized init-param", paramName));
   }
+  
+  private void setJndiDatabase(String value)
+    throws ServletException
+  {
+    try {
+      Context ic = new InitialContext();
+      DataSource ds;
+
+      if (! value.startsWith("java:comp")) {
+        try {
+          ds = (DataSource) ic.lookup("java:comp/env/" + value);
+        }
+        catch (Exception e) {
+          // for glassfish
+          ds = (DataSource) ic.lookup(value);
+        }
+      }
+      else {
+        ds = (DataSource) ic.lookup(value);
+      }
+
+      if (ds == null)
+        throw new ServletException(L.l("database '{0}' is not valid", value));
+
+      setDatabase(new QuercusDataSource(ds, null, null, false));
+    } catch (NamingException e) {
+      throw new ServletException(e);
+    }
+  }
+  
+  private void setJdbcDatabase(String driver, String url)
+    throws ServletException
+  {
+    try {
+      ClassLoader loader = Thread.currentThread().getContextClassLoader();
+
+      Class<?> cls = loader.loadClass(driver);
+      Object obj = cls.newInstance();
+
+      DataSource ds;
+      
+      if (obj instanceof DataSource) {
+        ds = (DataSource) obj;
+      }
+      else if (obj instanceof java.sql.Driver) {
+        ds = new JavaSqlDriverWrapper((java.sql.Driver) obj, url);
+      }
+      else {
+        throw new ServletException(L.l("jdbc driver must be a DataSource or Driver, saw {0}",
+                                       obj.getClass()));
+      }
+
+      setDatabase(ds);
+      
+    } catch (ClassNotFoundException e) {
+      throw new ServletException(e);
+    } catch (InstantiationException e) {
+      throw new ServletException(e);
+    } catch (IllegalAccessException e) {
+      throw new ServletException(e);
+    }
+  }
 
   private void initImpl(ServletConfig config)
     throws ServletException
   {
-    Class configClass = config.getClass();
+    Class<?> configClass = config.getClass();
 
     _impl = getQuercusServlet(configClass.getName().startsWith("com.caucho"));
 
-    if (isUnicodeSemantics())
+    if (isUnicodeSemantics()) {
       _impl.getQuercus().setUnicodeSemantics(true);
+    }
 
     _impl.init(config);
     
@@ -617,10 +655,6 @@ public class QuercusServlet
   public static class PhpIni {
     HashMap<String,String> _propertyMap
       = new HashMap<String,String>();
-
-    PhpIni()
-    {
-    }
 
     /**
      * Sets an arbitrary property.

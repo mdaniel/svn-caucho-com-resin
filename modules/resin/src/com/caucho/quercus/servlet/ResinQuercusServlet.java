@@ -133,11 +133,10 @@ public class ResinQuercusServlet extends QuercusServletImpl
   @Override
   protected QuercusContext getQuercus()
   {
-    synchronized (this) {
-      if (_quercus == null)
-        _quercus = new ResinQuercus();
+    if (_quercus == null) {
+      _quercus = new ResinQuercus();
     }
-
+    
     return _quercus;
   }
 }

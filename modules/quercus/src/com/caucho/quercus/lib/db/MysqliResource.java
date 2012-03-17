@@ -33,9 +33,6 @@ import com.caucho.quercus.annotation.Optional;
 import com.caucho.quercus.annotation.ResourceType;
 import com.caucho.quercus.env.Env;
 import com.caucho.quercus.env.StringValue;
-import com.caucho.util.L10N;
-
-import java.util.logging.Logger;
 
 /**
  * mysqli object oriented API facade
@@ -43,9 +40,6 @@ import java.util.logging.Logger;
  */
 @ResourceType("mysql link")
 public class MysqliResource extends Mysqli {
-  private static final Logger log = Logger
-    .getLogger(MysqliResource.class.getName());
-  private static final L10N L = new L10N(MysqliResource.class);
 
   /**
     * This is the constructor for the mysqli class.
@@ -68,7 +62,6 @@ public class MysqliResource extends Mysqli {
    * accepts String arguments and supports additional
    * arguments not available in the mysqli constructor.
    */
-
   MysqliResource(Env env,
                  String host,
                  String user,
@@ -81,10 +74,9 @@ public class MysqliResource extends Mysqli {
                  String url,
                  boolean isNewLink)
   {
-    super(
-      env, 
-      host, user, password,
-      db, port, socket, flags, driver, url, isNewLink);
+    super(env, 
+          host, user, password,
+          db, port, socket, flags, driver, url, isNewLink);
   }
 
   protected MysqliResource(Env env)

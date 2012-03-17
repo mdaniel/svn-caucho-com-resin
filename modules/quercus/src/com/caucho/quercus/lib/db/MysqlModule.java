@@ -128,10 +128,10 @@ public class MysqlModule extends AbstractQuercusModule {
    */
 
   public static boolean mysql_change_user(Env env,
-                               StringValue user,
-                               StringValue pass,
-                               @Optional StringValue database,
-                               @Optional Mysqli conn)
+                                          StringValue user,
+                                          StringValue pass,
+                                          @Optional StringValue database,
+                                          @Optional Mysqli conn)
   {
     return false;
   }
@@ -188,8 +188,8 @@ public class MysqlModule extends AbstractQuercusModule {
    * Creates a database.
    */
   public static boolean mysql_create_db(Env env,
-                                 @NotNull StringValue name,
-                                 @Optional Mysqli conn)
+                                        @NotNull StringValue name,
+                                        @Optional Mysqli conn)
   {
     if (name.length() == 0)
       return false;
@@ -248,9 +248,9 @@ public class MysqlModule extends AbstractQuercusModule {
    * Retrieves the database name after a call to mysql_list_dbs()
    */
   public static Value mysql_db_name(Env env,
-                             @NotNull MysqliResult result,
-                             int row,
-                             @Optional("0") Value field)
+                                    @NotNull MysqliResult result,
+                                    int row,
+                                    @Optional("0") Value field)
   {
     if (result == null)
       return BooleanValue.FALSE;
@@ -262,8 +262,8 @@ public class MysqlModule extends AbstractQuercusModule {
    * Deprecated alias for mysql_db_name
    */
   public static Value mysql_dbname(Env env,
-                             @NotNull MysqliResult result,
-                             int row)
+                                   @NotNull MysqliResult result,
+                                   int row)
   {
     return mysql_db_name(env, result, row,
                          env.createString("0"));
@@ -273,9 +273,9 @@ public class MysqlModule extends AbstractQuercusModule {
    * Returns the value of one field in the result set. FALSE on failure.
    */
   public static Value mysql_result(Env env,
-                            @NotNull MysqliResult result,
-                            int row,
-                            @Optional("0") Value field)
+                                   @NotNull MysqliResult result,
+                                   int row,
+                                   @Optional("0") Value field)
   {
     if (result == null)
       return BooleanValue.FALSE;
@@ -287,8 +287,8 @@ public class MysqlModule extends AbstractQuercusModule {
    * Drops a database.
    */
   public static boolean mysql_drop_db(Env env,
-                               @NotNull StringValue databaseName,
-                               @Optional Mysqli conn)
+                                      @NotNull StringValue databaseName,
+                                      @Optional Mysqli conn)
   {
     if (databaseName.length() == 0)
       return false;
@@ -304,8 +304,8 @@ public class MysqlModule extends AbstractQuercusModule {
    * Deprecated alias for mysql_drop_db.
    */
   public static boolean mysql_dropdb(Env env,
-                             @NotNull StringValue databaseName,
-                             @Optional Mysqli conn)
+                                     @NotNull StringValue databaseName,
+                                     @Optional Mysqli conn)
   {
     return mysql_drop_db(env, databaseName, conn);
   }
@@ -422,8 +422,8 @@ public class MysqlModule extends AbstractQuercusModule {
    * Returns a row from the connection
    */
   public static Value mysql_fetch_array(Env env,
-                                 @NotNull MysqliResult result,
-                                 @Optional("MYSQL_BOTH") int type)
+                                        @NotNull MysqliResult result,
+                                        @Optional("MYSQL_BOTH") int type)
   {
     if (result == null)
       return BooleanValue.FALSE;
@@ -648,8 +648,8 @@ public class MysqlModule extends AbstractQuercusModule {
    * Returns a numerical row from the result, FALSE if no more rows.
    */
   @ReturnNullAsFalse
-  public static ArrayValue mysql_fetch_row(
-      Env env, @NotNull MysqliResult result)
+  public static ArrayValue mysql_fetch_row(Env env,
+                                           @NotNull MysqliResult result)
   {
     if (result == null)
       return null;
@@ -678,8 +678,8 @@ public class MysqlModule extends AbstractQuercusModule {
    * </ul>
    */
   public static Value mysql_field_flags(Env env,
-                                 @NotNull MysqliResult result,
-                                 int fieldOffset)
+                                        @NotNull MysqliResult result,
+                                        int fieldOffset)
   {
     if (result == null)
       return BooleanValue.FALSE;
@@ -720,8 +720,8 @@ public class MysqlModule extends AbstractQuercusModule {
    * Returns field name at given offset.
    */
   public static Value mysql_field_name(Env env,
-                                @NotNull MysqliResult result,
-                                int fieldOffset)
+                                       @NotNull MysqliResult result,
+                                       int fieldOffset)
   {
     if (result == null)
       return BooleanValue.FALSE;
@@ -743,8 +743,8 @@ public class MysqlModule extends AbstractQuercusModule {
    */
 
   public static Value mysql_fieldname(Env env,
-                               @NotNull MysqliResult result,
-                               int fieldOffset)
+                                      @NotNull MysqliResult result,
+                                      int fieldOffset)
   {
     return mysql_field_name(env, result, fieldOffset);
   }
@@ -754,8 +754,8 @@ public class MysqlModule extends AbstractQuercusModule {
    * is used as the default for the next call to {@link #mysql_fetch_field}.
    */
   public static boolean mysql_field_seek(Env env,
-                                  @NotNull MysqliResult result,
-                                  int fieldOffset)
+                                         @NotNull MysqliResult result,
+                                         int fieldOffset)
   {
     if (result == null)
       return false;
@@ -767,8 +767,8 @@ public class MysqlModule extends AbstractQuercusModule {
    * Returns the table corresponding to the field.
    */
   public static Value mysql_field_table(Env env,
-                                 @NotNull MysqliResult result,
-                                 int fieldOffset)
+                                        @NotNull MysqliResult result,
+                                        int fieldOffset)
   {
     if (result == null)
       return BooleanValue.FALSE;
@@ -780,8 +780,8 @@ public class MysqlModule extends AbstractQuercusModule {
    * Deprecated alias for mysql_field_table.
    */
   public static Value mysql_fieldtable(Env env,
-                                 @NotNull MysqliResult result,
-                                 int fieldOffset)
+                                       @NotNull MysqliResult result,
+                                       int fieldOffset)
   {
     return mysql_field_table(env, result, fieldOffset);
   }
@@ -807,8 +807,8 @@ public class MysqlModule extends AbstractQuercusModule {
    * Deprecated alias for mysql_field_type.
    */
   public static Value mysql_fieldtype(Env env,
-                                     @NotNull MysqliResult result,
-                                     Value fieldOffset)
+                                      @NotNull MysqliResult result,
+                                      Value fieldOffset)
   {
     return mysql_field_type(env, result, fieldOffset);
   }
@@ -977,9 +977,9 @@ public class MysqlModule extends AbstractQuercusModule {
    */
 
   public static Value mysql_listfields(Env env,
-                                        String databaseName,
-                                        StringValue tableName,
-                                        @Optional Mysqli conn)
+                                       String databaseName,
+                                       StringValue tableName,
+                                       @Optional Mysqli conn)
   {
     return mysql_list_fields(env, databaseName, tableName, conn);
   }
@@ -1005,8 +1005,8 @@ public class MysqlModule extends AbstractQuercusModule {
    * Selects the database
    */
   public static boolean mysql_select_db(Env env,
-                                         String dbName,
-                                         @Optional Mysqli conn)
+                                        String dbName,
+                                        @Optional Mysqli conn)
   {
     if (dbName == null || dbName.length() == 0)
       return false;
@@ -1021,8 +1021,8 @@ public class MysqlModule extends AbstractQuercusModule {
    * Retrieves a list of table names from a MySQL database.
    */
   public static Object mysql_list_tables(Env env,
-                                  StringValue databaseName,
-                                  @Optional Mysqli conn)
+                                         StringValue databaseName,
+                                         @Optional Mysqli conn)
   {
     return mysql_query(env,
                        env.createString("SHOW TABLES FROM " + databaseName),
@@ -1092,82 +1092,90 @@ public class MysqlModule extends AbstractQuercusModule {
   /**
    * Returns a new mysql connection.
    */
-  public static Value mysql_connect(
-      Env env,
-      @Optional StringValue host,
-      @Optional StringValue userName,
-      @Optional StringValue password,
-      @Optional boolean isNewLink,
-      @Optional int flags) {
+  public static Value mysql_connect(Env env,
+                                    @Optional StringValue host,
+                                    @Optional StringValue userName,
+                                    @Optional StringValue password,
+                                    @Optional boolean isNewLink,
+                                    @Optional int flags) {
     int port = 3306;
     String socketStr = "";
-    String hostStr = host.toString();
-    int length = host.length();
-
-    if (length == 0) {
+    
+    String hostStr;
+    String url = null;
+    
+    if (host.length() == 0) {
       hostStr = env.getIniString("mysql.default_host");
-      if (hostStr == null)
-        hostStr = "localhost";
     }
+    else {
+      hostStr = host.toString();
+    }
+    
+    if (hostStr == null || hostStr.length() == 0) {
+      hostStr = "localhost";
+    }
+    else if (hostStr.startsWith("jdbc:")) {
+    }
+    else {
+      // host string could contain just a host name,
+      // or it could contain a host name
+      // and a port number, or it could contain
+      // a host name and local socket name, or all 3.
+      //
+      // "localhost"
+      // "localhost:3306"
+      // ":3306"
+      // ":/tmp/mysql.sock"
+      // "localhost:/tmp/mysql.sock"
+      // "localhost:3306:/tmp/mysql.sock"
 
-    // host string could contain just a host name,
-    // or it could contain a host name
-    // and a port number, or it could contain
-    // a host name and local socket name, or all 3.
-    //
-    // "localhost"
-    // "localhost:3306"
-    // ":3306"
-    // ":/tmp/mysql.sock"
-    // "localhost:/tmp/mysql.sock"
-    // "localhost:3306:/tmp/mysql.sock"
+      int sepIndex = hostStr.indexOf(':');
 
-    int sepIndex = hostStr.indexOf(':');
+      if (sepIndex > -1) {
+        String tmp;
+        String portStr;
 
-    if (sepIndex > -1) {
-      String tmp;
-      String portStr;
+        tmp = hostStr;
+        hostStr = tmp.substring(0, sepIndex);
+        if (hostStr.length() == 0) {
+          hostStr = "localhost";
+        }
+        sepIndex++;
+        tmp = tmp.substring(sepIndex);
 
-      tmp = hostStr;
-      hostStr = tmp.substring(0, sepIndex);
-      if (hostStr.length() == 0) {
-        hostStr = "localhost";
-      }
-      sepIndex++;
-      tmp = tmp.substring(sepIndex);
+        if ((tmp.length() > 0) && (tmp.charAt(0) != '/')) {
+          sepIndex = tmp.indexOf(':');
 
-      if ((tmp.length() > 0) && (tmp.charAt(0) != '/')) {
-        sepIndex = tmp.indexOf(':');
+          if (sepIndex > -1) {
+            portStr = tmp.substring(0, sepIndex);
+            sepIndex++;
+            socketStr = tmp.substring(sepIndex);
+          } else {
+            portStr = tmp;
+          }
 
-        if (sepIndex > -1) {
-          portStr = tmp.substring(0, sepIndex);
-          sepIndex++;
-          socketStr = tmp.substring(sepIndex);
+          try {
+            port = Integer.parseInt(portStr);
+          } catch (NumberFormatException ex) {
+            // Use default port in case of invalid port number
+          }
         } else {
-          portStr = tmp;
+          socketStr = tmp;
         }
-
-        try {
-          port = Integer.parseInt(portStr);
-        } catch (NumberFormatException ex) {
-          // Use default port in case of invalid port number
-        }
-      } else {
-        socketStr = tmp;
       }
+
+      /*
+      String catalog = (String) env.getQuercus().getSpecial("mysql.catalog");
+
+      if (catalog == null)
+        catalog = "";
+      */
     }
-
-    /*
-    String catalog = (String) env.getQuercus().getSpecial("mysql.catalog");
-
-    if (catalog == null)
-      catalog = "";
-    */
 
     Mysqli mysqli = new MysqliResource(env, hostStr, userName.toString(),
                                        password.toString(), "",
                                        port, socketStr, flags,
-                                       null, null, isNewLink);
+                                       null, url, isNewLink);
 
     if (! mysqli.isConnected())
       return BooleanValue.FALSE;

@@ -41,7 +41,6 @@ import com.caucho.quercus.env.Env;
 import com.caucho.quercus.env.QuercusValueException;
 import com.caucho.quercus.env.StringValue;
 import com.caucho.quercus.page.QuercusPage;
-import com.caucho.util.Alarm;
 import com.caucho.util.CurrentTime;
 import com.caucho.util.L10N;
 import com.caucho.vfs.FilePath;
@@ -151,7 +150,6 @@ public class QuercusServletImpl extends HttpServlet
 
         return;
       }
-
 
       ws = openWrite(response);
       
@@ -298,12 +296,11 @@ public class QuercusServletImpl extends HttpServlet
    * Returns the Quercus instance.
    */
   protected QuercusContext getQuercus()
-  {
-    synchronized (this) {
-      if (_quercus == null)
-        _quercus = new QuercusContext();
+  { 
+    if (_quercus == null) {
+      _quercus = new QuercusContext();
     }
-
+    
     return _quercus;
   }
 

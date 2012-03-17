@@ -50,7 +50,7 @@ public class IniDefinition {
   private final Value _deflt;
   private final Type _type;
 
-  public enum Type { BOOLEAN, STRING, LONG };
+  public enum Type { BOOLEAN, STRING, LONG, ARRAY };
 
   public IniDefinition(String name, Type type, Value deflt, int scope)
   {
@@ -203,8 +203,9 @@ public class IniDefinition {
     else if (_type == Type.LONG)
       map.put(_name, toLongValue(value));
     */
-    else
+    else {
       map.put(_name, value);
+    }
   }
 
   private Value get(HashMap<String, Value> envMap,

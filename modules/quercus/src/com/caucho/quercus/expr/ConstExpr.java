@@ -32,7 +32,6 @@ package com.caucho.quercus.expr;
 import com.caucho.quercus.Location;
 import com.caucho.quercus.env.Env;
 import com.caucho.quercus.env.StringBuilderValue;
-import com.caucho.quercus.env.UnicodeValueImpl;
 import com.caucho.quercus.env.Value;
 import com.caucho.quercus.parser.QuercusParser;
 
@@ -106,9 +105,14 @@ public class ConstExpr extends Expr {
     String specialClassName = getSpecialClassName();
 
     if ("self".equals(specialClassName)) {
-      className = parser.getSelfClassName();
-      
-      return factory.createClassField(className, name);
+      if ("this".equals(name)) {
+        return factory.createThis(parser.getClassDef());
+      }
+      else {
+        className = parser.getSelfClassName();
+        
+        return factory.createClassField(className, name);
+      }
     }
     else if ("parent".equals(specialClassName)) {
       className = parser.getParentClassName();

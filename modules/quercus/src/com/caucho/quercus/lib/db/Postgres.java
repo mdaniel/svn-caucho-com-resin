@@ -35,11 +35,9 @@ import com.caucho.quercus.env.ConnectionEntry;
 import com.caucho.quercus.env.Env;
 import com.caucho.quercus.env.LongValue;
 import com.caucho.quercus.env.StringValue;
-import com.caucho.quercus.env.Value;
 import com.caucho.util.L10N;
 
 import java.lang.reflect.Method;
-import java.sql.Connection;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
@@ -85,17 +83,17 @@ public class Postgres extends JdbcConnectionResource {
    * Connects to the underlying database.
    */
   @Override
-    protected ConnectionEntry connectImpl(Env env,
-                                          String host,
-                                          String userName,
-                                          String password,
-                                          String dbname,
-                                          int port,
-                                          String socket,
-                                          int flags,
-                                          String driver,
-                                          String url,
-                                          boolean isNewLink)
+  protected ConnectionEntry connectImpl(Env env,
+                                        String host,
+                                        String userName,
+                                        String password,
+                                        String dbname,
+                                        int port,
+                                        String socket,
+                                        int flags,
+                                        String driver,
+                                        String url,
+                                        boolean isNewLink)
   {
     if (isConnected()) {
       env.warning(L.l("Connection is already opened to '{0}'", this));

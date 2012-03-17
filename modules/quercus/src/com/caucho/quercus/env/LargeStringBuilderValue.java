@@ -29,12 +29,14 @@
 
 package com.caucho.quercus.env;
 
-import java.io.*;
-import java.util.*;
-
-import com.caucho.vfs.*;
 import com.caucho.quercus.QuercusRuntimeException;
-import com.caucho.util.*;
+import com.caucho.vfs.WriteStream;
+
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.OutputStream;
+import java.io.Reader;
+import java.util.IdentityHashMap;
 
 /**
  * Represents a 8-bit PHP 5 style binary builder (unicode.semantics = off),
@@ -51,7 +53,6 @@ public class LargeStringBuilderValue
   protected int _length;
 
   private int _hashCode;
-  private String _value;
 
   public LargeStringBuilderValue()
   {
@@ -309,6 +310,10 @@ public class LargeStringBuilderValue
       return StringBuilderValue.create((char) (data & 0xff));
     }
   }
+  
+  public final void setLength(int len) {
+    _length = len;
+  }
 
   //
   // CharSequence
@@ -329,6 +334,12 @@ public class LargeStringBuilderValue
   @Override
   public char charAt(int index)
   {
+    int len = _length;
+    
+    if (index < 0 || len <= index) {
+      throw new ArrayIndexOutOfBoundsException(_length + ", " + index);
+    }
+    
     int data = _bufferList[index / SIZE][index % SIZE] & 0xff;
     
     return (char) data;

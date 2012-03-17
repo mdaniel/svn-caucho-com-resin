@@ -30,26 +30,22 @@
 package com.caucho.quercus.lib.db;
 
 import com.caucho.quercus.QuercusException;
-import com.caucho.quercus.UnimplementedException;
 import com.caucho.quercus.annotation.Optional;
-import com.caucho.quercus.annotation.ResourceType;
 import com.caucho.quercus.annotation.ReturnNullAsFalse;
 import com.caucho.quercus.env.BooleanValue;
 import com.caucho.quercus.env.ConnectionEntry;
 import com.caucho.quercus.env.Env;
 import com.caucho.quercus.env.LongValue;
 import com.caucho.quercus.env.StringValue;
-import com.caucho.quercus.env.UnicodeValueImpl;
+import com.caucho.quercus.env.UnsetValue;
 import com.caucho.quercus.env.Value;
 import com.caucho.util.L10N;
 import com.caucho.util.SQLExceptionWrapper;
 
-import java.io.UnsupportedEncodingException;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.sql.Connection;
 import java.sql.DataTruncation;
-import java.sql.DatabaseMetaData;
 import java.sql.Driver;
 import java.sql.DriverManager;
 import java.sql.ResultSet;
@@ -57,6 +53,7 @@ import java.sql.SQLException;
 import java.sql.SQLWarning;
 import java.sql.Statement;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.Locale;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -68,7 +65,16 @@ public class Mysqli extends JdbcConnectionResource {
   private static final Logger log = Logger.getLogger(Mysqli.class.getName());
   private static final L10N L = new L10N(Mysqli.class);
 
-  protected static final String DRIVER = "com.mysql.jdbc.Driver";
+  protected static final String DEFAULT_DRIVER = "com.mysql.jdbc.Driver";
+  
+  private static HashMap<String,String> _DEFAULT_JDBC_DRIVER_MAP
+    = new HashMap<String,String>();
+  
+  static {
+    _DEFAULT_JDBC_DRIVER_MAP.put("mysql", DEFAULT_DRIVER);
+    _DEFAULT_JDBC_DRIVER_MAP.put("google:rdbms",
+                                 "com.google.appengine.api.rdbms.AppEngineDriver");
+  }
 
   // Because _checkedDriverVersion is static, it affects spy output
   // for various qa's.  If running them individually, there is an
@@ -78,7 +84,6 @@ public class Mysqli extends JdbcConnectionResource {
   // the assumption that _checkedDriverVersion has already been set,
   // i.e. without the getMetaData call.
   private static volatile String _checkedDriverVersion = null;
-  private static Object _checkDriverLock = new Object();
 
   private static MysqlMetaDataMethod _lastMetaDataMethod;
 
@@ -203,12 +208,33 @@ public class Mysqli extends JdbcConnectionResource {
       if (host == null || host.equals("")) {
         host = "localhost";
       }
+      else if (host.startsWith("jdbc:")) {
+        int slashPos = host.indexOf("://");
+        
+        if (slashPos > 0) {
+          String protocol = host.substring(5, slashPos);
+          
+          Value driverMap = env.getConfigVar("quercus.jdbc_drivers");
+                    
+          if (driverMap.isArray()) {
+            Value driverValue = driverMap.get(env.createString(protocol));
+            
+            if (driverValue != UnsetValue.UNSET) {
+              driver = driverValue.toString();
+            }
+          }
+          
+          if (driver == null) {
+            driver = _DEFAULT_JDBC_DRIVER_MAP.get(protocol);
+          }
+          
+          url = host;
+        }
+      }
 
       if (driver == null || driver.equals("")) {
         if (env.getIniBoolean("quercus-mysql-driver"))
           driver = "com.caucho.quercus.mysql.QuercusMysqlDriver";
-        else
-          driver = DRIVER;
       }
 
       if (url == null || url.equals("")) {
@@ -233,24 +259,19 @@ public class Mysqli extends JdbcConnectionResource {
 
       return jConn;
     } catch (SQLException e) {
-      env.warning(
-          L.l("A link to the server could not be established.\n  "
-              + "url={0}\n  driver={1}\n  {2}", url, driver, e.toString()), e);
+      env.warning(L.l("A link to the server could not be established.\n  "
+                      + "url={0}\n  driver={1}\n  {2}", url, driver, e.toString()), e);
 
-      env.setSpecialValue(
-          "mysqli.connectErrno", LongValue.create(e.getErrorCode()));
-      env.setSpecialValue(
-          "mysqli.connectError", env.createString(e.getMessage()));
+      env.setSpecialValue("mysqli.connectErrno", LongValue.create(e.getErrorCode()));
+      env.setSpecialValue("mysqli.connectError", env.createString(e.getMessage()));
 
       return null;
     } catch (Exception e) {
       env.warning(
-          L.l(
-              "A link to the server could not be established.\n  url={0}\n  "
-                  + "driver={1}\n  {2}", url, driver, e.toString()), e);
-      env.setSpecialValue(
-          "mysqli.connectError", env.createString(e.toString()));
-
+          L.l("A link to the server could not be established.\n  url={0}\n  "
+              + "driver={1}\n  {2}", url, driver, e.toString()), e);
+      env.setSpecialValue("mysqli.connectError", env.createString(e.toString()));
+      
       return null;
     }
   }
@@ -360,7 +381,7 @@ public class Mysqli extends JdbcConnectionResource {
       if (isConnected()) {
         Connection conn = getJavaConnection();
 
-        Class cls = conn.getClass();
+        Class<?> cls = conn.getClass();
 
         Method method = cls.getMethod("changeUser", String.class, String.class);
 
@@ -1518,7 +1539,7 @@ public class Mysqli extends JdbcConnectionResource {
   /**
    * Returns the mysql getColumnCharacterSet method
    */
-  Method getColumnCharacterSetMethod(Class metaDataClass)
+  Method getColumnCharacterSetMethod(Class<?> metaDataClass)
   {
     if (_metaDataMethod == null) {
       MysqlMetaDataMethod metaDataMethod = _lastMetaDataMethod;
@@ -1535,6 +1556,7 @@ public class Mysqli extends JdbcConnectionResource {
     return _metaDataMethod.getColumnCharacterSetMethod();
   }
 
+  /*
   private static String checkDriverVersionImpl(Env env, Connection conn)
     throws SQLException
   {
@@ -1615,6 +1637,7 @@ public class Mysqli extends JdbcConnectionResource {
 
     return checkedDriverVersion;
   }
+  */
 
   // Invoked to close a connection.
 
@@ -1634,7 +1657,7 @@ public class Mysqli extends JdbcConnectionResource {
   public String toString()
   {
     if (_conn != null && _conn.getConnection() != null) {
-      Class cls = _conn.getConnection().getClass();
+      Class<?> cls = _conn.getConnection().getClass();
 
       Method []methods = cls.getDeclaredMethods();
 
@@ -1657,10 +1680,10 @@ public class Mysqli extends JdbcConnectionResource {
   };
 
   static class MysqlMetaDataMethod {
-    private Class _resultSetMetaDataClass;
+    private Class<?> _resultSetMetaDataClass;
     private Method _getColumnCharacterSetMethod;
 
-    MysqlMetaDataMethod(Class resultSetMetaDataClass)
+    MysqlMetaDataMethod(Class<?> resultSetMetaDataClass)
     {
       _resultSetMetaDataClass = resultSetMetaDataClass;
 
@@ -1673,7 +1696,7 @@ public class Mysqli extends JdbcConnectionResource {
       }
     }
 
-    Class getMetaDataClass()
+    Class<?> getMetaDataClass()
     {
       return _resultSetMetaDataClass;
     }

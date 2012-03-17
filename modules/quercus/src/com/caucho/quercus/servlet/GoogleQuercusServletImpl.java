@@ -274,9 +274,8 @@ public class GoogleQuercusServletImpl extends QuercusServletImpl
   @Override
   protected QuercusContext getQuercus()
   {
-    synchronized (this) {
-      if (_quercus == null)
-        _quercus = new GoogleQuercus();
+    if (_quercus == null) {
+      _quercus = new GoogleQuercus();
     }
 
     return _quercus;

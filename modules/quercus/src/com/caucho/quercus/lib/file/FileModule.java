@@ -35,16 +35,12 @@ import com.caucho.quercus.annotation.Optional;
 import com.caucho.quercus.annotation.ReturnNullAsFalse;
 import com.caucho.quercus.env.*;
 import com.caucho.quercus.lib.MiscModule;
-import com.caucho.quercus.lib.UrlModule;
 import com.caucho.quercus.lib.string.StringModule;
 import com.caucho.quercus.module.AbstractQuercusModule;
 import com.caucho.quercus.module.IniDefinitions;
 import com.caucho.quercus.module.IniDefinition;
 import com.caucho.quercus.resources.StreamContextResource;
-import com.caucho.util.Alarm;
 import com.caucho.util.L10N;
-import com.caucho.vfs.FilePath;
-import com.caucho.vfs.NotFoundPath;
 import com.caucho.vfs.Path;
 import com.caucho.vfs.ReadStream;
 import com.caucho.vfs.WriteStream;
@@ -2371,188 +2367,10 @@ public class FileModule extends AbstractQuercusModule {
 
   private static ArrayValue parseIni(Env env,
                                      ReadStream is,
-                                     boolean processSections)
+                                     boolean isProcessSections)
     throws IOException
   {
-    ArrayValue top = new ArrayValueImpl();
-    ArrayValue section = top;
-
-    int ch;
-
-    while ((ch = is.read()) >= 0) {
-      if (Character.isWhitespace(ch)) {
-      }
-      else if (ch == ';') {
-        for (; ch >= 0 && ch != '\r' && ch != '\n'; ch = is.read()) {
-        }
-      }
-      else if (ch == '[') {
-        StringBuilder sb = new StringBuilder();
-
-        for (ch = is.read(); ch >= 0 && ch != ']'; ch = is.read()) {
-          sb.append((char) ch);
-        }
-
-        String name = sb.toString().trim();
-
-        if (processSections) {
-          section = new ArrayValueImpl();
-          top.put(env.createString(name), section);
-        }
-      }
-      else if (isValidIniKeyChar((char) ch)) {
-        StringBuilder sb = new StringBuilder();
-
-        for (; isValidIniKeyChar((char) ch); ch = is.read()) {
-          sb.append((char) ch);
-        }
-
-        String key = sb.toString().trim();
-
-        for (; ch >= 0 && ch != '='; ch = is.read()) {
-        }
-
-        for (ch = is.read(); ch == ' ' || ch == '\t'; ch = is.read()) {
-        }
-
-        Value value = parseIniValue(env, ch, is);
-
-        section.put(env.createString(key), value);
-      }
-    }
-
-    return top;
-  }
-
-  private static Value parseIniValue(Env env, int ch, ReadStream is)
-    throws IOException
-  {
-    if (ch == '\r' || ch == '\n')
-      return NullValue.NULL;
-
-    if (ch == '"') {
-      StringValue sb = env.createUnicodeBuilder();
-
-      for (ch = is.read(); ch >= 0 && ch != '"'; ch = is.read()) {
-        sb.append((char) ch);
-      }
-
-      skipToEndOfLine(ch, is);
-
-      return sb;
-    }
-    else if (ch == '\'') {
-      StringValue sb = env.createUnicodeBuilder();
-
-      for (ch = is.read(); ch >= 0 && ch != '\''; ch = is.read()) {
-        sb.append((char) ch);
-      }
-
-      skipToEndOfLine(ch, is);
-      
-      return sb;
-    }
-    else {
-      StringBuilder sb = new StringBuilder();
-
-      for (;
-           ch >= 0 && ch != '\r' && ch != '\n';
-           ch = is.read()) {
-
-        if (ch == ';') {
-          skipToEndOfLine(ch, is);
-          break;
-        }
-        else if (ch == '$') {
-          int peek = is.read();
-
-          if (peek == '{') {
-            StringBuilder var = new StringBuilder();
-
-            for (ch = is.read();
-                 ch >= 0 && ch != '\r' && ch != '\n' && ch != '}';
-                 ch = is.read()) {
-              var.append((char) ch);
-            }
-
-            Value value = env.getIni(var.toString());
-
-            if (value != null)
-              sb.append(value);
-          }
-          else {
-            sb.append('$');
-            is.unread();
-          }
-
-        }
-        else if (ch == '"') {
-          StringValue result = env.createUnicodeBuilder();
-          
-          String value = sb.toString().trim();
-
-          result.append(getIniConstant(env, value));
-
-          for (ch = is.read(); ch >= 0 && ch != '"'; ch = is.read()) {
-            result.append((char) ch);
-          }
-
-          skipToEndOfLine(ch, is);
-          
-          return result;
-        }
-        else
-          sb.append((char) ch);
-      }
-
-      String value = sb.toString().trim();
-
-      return env.createString(getIniConstant(env, value));
-    }
-  }
-  
-  private static String getIniConstant(Env env, String value)
-  {
-    if (value.equalsIgnoreCase("null"))
-      return "";
-    else if (value.equalsIgnoreCase("true")
-             || value.equalsIgnoreCase("yes"))
-      return "1";
-    else if (value.equalsIgnoreCase("false")
-             || value.equalsIgnoreCase("no"))
-      return "";
-    else if (env.isDefined(value))
-      return env.getConstant(value).toString();
-    else
-      return value;
-  }
-
-  private static boolean isValidIniKeyChar(char ch)
-  {
-    if (ch <= 0
-        || ch == '='
-        || ch == ';'
-        || ch == '{'
-        || ch == '}'
-        || ch == '|'
-        || ch == '&'
-        || ch == '~'
-        || ch == '!'
-        || ch == '['
-        || ch == '('
-        || ch == ')'
-        || ch == '"')
-      return false;
-    else
-      return true;
-  }
-
-
-  private static void skipToEndOfLine(int ch, ReadStream is)
-    throws IOException
-  {
-    for (; ch > 0 && ch != '\r' && ch != '\n'; ch = is.read()) {
-    }
+    return IniParser.parse(env, is, isProcessSections);
   }
 
   /**

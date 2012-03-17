@@ -233,12 +233,12 @@ public class MysqliModule extends AbstractQuercusModule {
    */
   @ReturnNullAsFalse
   public static Mysqli mysqli_connect(Env env,
-              @Optional("localhost") StringValue host,
-              @Optional StringValue userName,
-              @Optional StringValue password,
-              @Optional String dbname,
-              @Optional("3306") int port,
-              @Optional StringValue socket)
+                                      @Optional("localhost") StringValue host,
+                                      @Optional StringValue userName,
+                                      @Optional StringValue password,
+                                      @Optional String dbname,
+                                      @Optional("3306") int port,
+                                      @Optional StringValue socket)
     throws IllegalStateException
   {
     Mysqli mysqli = new Mysqli(env,

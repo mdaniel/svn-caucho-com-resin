@@ -2215,7 +2215,7 @@ abstract public class StringValue
         buffer[i] = Character.toLowerCase(ch);
     }
 
-    string.setOffset(length);
+    string.setLength(length);
 
     return string;
   }
@@ -2243,7 +2243,7 @@ abstract public class StringValue
         buffer[i] = Character.toUpperCase(ch);
     }
 
-    string.setOffset(length);
+    string.setLength(length);
 
     return string;
   }

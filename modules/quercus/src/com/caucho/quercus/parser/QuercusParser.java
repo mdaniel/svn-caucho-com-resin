@@ -3635,18 +3635,18 @@ public class QuercusParser {
     }
     else if (token == '$') {
       token = parseToken();
-      
-      if (isIdentifier(token)) {
+
+      if (isIdentifier(token)) {      
         return classNameExpr.createClassField(this, _lexeme);
       }
-      else if (token == '{') {
+      else if (token == '{') {        
         Expr expr = parseExpr();
         
         expect('}');
         
         return classNameExpr.createClassField(this, expr);
       }
-      else {
+      else {        
         _peekToken = token;
         
         return classNameExpr.createClassField(this, parseTermBase());
@@ -3819,6 +3819,10 @@ public class QuercusParser {
       throw error(L.l("'self' is not valid because there is no active class."));
     
     return _classDef.getName();
+  }
+  
+  public InterpretedClassDef getClassDef() {
+    return _classDef;
   }
 
   public String getParentClassName()
@@ -5252,11 +5256,9 @@ public class QuercusParser {
 
         if (_heredocEnd == null || ! _sb.endsWith(_heredocEnd)) {
         }
-        else if (
-            _sb.length() == _heredocEnd.length()
-            || _sb.charAt(_sb.length() - _heredocEnd.length() - 1) == '\n'
-            || _sb.charAt(_sb.length() - _heredocEnd.length() - 1) == '\r'
-            ) {
+        else if (_sb.length() == _heredocEnd.length()
+                 || _sb.charAt(_sb.length() - _heredocEnd.length() - 1) == '\n'
+                 || _sb.charAt(_sb.length() - _heredocEnd.length() - 1) == '\r') {
           _sb.setLength(_sb.length() - _heredocEnd.length());
 
           if (_sb.length() > 0 && _sb.charAt(_sb.length() - 1) == '\n')

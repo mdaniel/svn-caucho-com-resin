@@ -29,8 +29,10 @@
 
 package com.caucho.quercus.expr;
 
-import com.caucho.quercus.Location;
-import com.caucho.quercus.env.*;
+import com.caucho.quercus.env.Env;
+import com.caucho.quercus.env.StringValue;
+import com.caucho.quercus.env.Value;
+import com.caucho.quercus.env.Var;
 import com.caucho.quercus.program.InterpretedClassDef;
 import com.caucho.util.L10N;
 
@@ -51,6 +53,7 @@ public class ThisExpr extends AbstractVarExpr {
   {
     return _quercusClass;
   }
+  
   /**
    * Creates a field ref
    */

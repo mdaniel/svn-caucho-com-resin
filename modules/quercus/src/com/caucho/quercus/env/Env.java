@@ -1125,11 +1125,7 @@ public class Env
 
     DataSource database = _quercus.getDatabase();
 
-    if (database != null) {
-      userName = null;
-      password = null;
-    }
-    else {
+    if (database == null) {
       database = findDatabase(driver, url);
 
       if (database == null)

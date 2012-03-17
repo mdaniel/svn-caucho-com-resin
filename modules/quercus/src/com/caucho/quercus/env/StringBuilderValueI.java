@@ -24,21 +24,14 @@
  *   59 Temple Place, Suite 330
  *   Boston, MA 02111-1307  USA
  *
- * @author Scott Ferguson
+ * @author Nam Nguyen
  */
 
-package com.caucho.quercus.lib.db;
-
-import java.sql.ResultSet;
-import java.sql.SQLException;
+package com.caucho.quercus.env;
 
 /**
- * Extra ResultSet metadata for a Quercus Mysql connection.
+ * XXX: rename
  */
-public interface QuercusResultSet extends ResultSet {
-  public int getStringLength(int column)
-    throws SQLException;
-
-  public void getString(int column, byte []buffer, int offset)
-    throws SQLException;
+public interface StringBuilderValueI {
+  public abstract void setLength(int length);
 }

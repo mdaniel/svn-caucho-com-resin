@@ -29,8 +29,10 @@
 
 package com.caucho.quercus;
 
+import com.caucho.quercus.env.ArrayValueImpl;
 import com.caucho.quercus.env.Env;
 import com.caucho.quercus.env.GoogleEnv;
+import com.caucho.quercus.env.Value;
 import com.caucho.quercus.page.QuercusPage;
 import com.caucho.quercus.module.ModuleContext;
 import com.caucho.util.*;
@@ -62,6 +64,29 @@ public class GoogleQuercus extends QuercusContext
 
     setPwd(Vfs.lookup());
     // setWorkDir(WorkDir.getLocalWorkDir());
+  }
+  
+  @Override
+  public void init() {
+    super.init();
+    
+    Value array = getIniValue("quercus.jdbc_drivers");
+    Value key = createString("google:rdbms");
+    
+    if (array.isArray()) {
+      if (! array.isset(key)) {
+        array.put(key,
+                  createString("com.google.appengine.api.rdbms.AppEngineDriver"));
+      }
+    }
+    else {
+      array = new ArrayValueImpl();
+      
+      array.put(key,
+                createString("com.google.appengine.api.rdbms.AppEngineDriver"));
+      
+      setIni("quercus.jdbc_drivers", array);
+    }
   }
 
   /*

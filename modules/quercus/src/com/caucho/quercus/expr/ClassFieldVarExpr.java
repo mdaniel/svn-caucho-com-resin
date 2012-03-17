@@ -50,15 +50,11 @@ public class ClassFieldVarExpr extends AbstractVarExpr {
   protected final String _className;
   protected final Expr _varName;
 
-  private StringValue _prefix;
-
   public ClassFieldVarExpr(String className, Expr varName)
   {
     _className = className;
     
     _varName = varName;
-    
-    _prefix = new StringBuilderValue(_className).append("::");
   }
   
   //
@@ -92,10 +88,8 @@ public class ClassFieldVarExpr extends AbstractVarExpr {
   public Value eval(Env env)
   {
     StringValue varName = _varName.evalStringValue(env);
-    
-    StringValue var = _prefix.toStringBuilder().append(varName);
-    
-    return env.getStaticValue(var);
+        
+    return env.getClass(_className).getStaticFieldValue(env, varName);
   }
   
   /**
@@ -109,10 +103,8 @@ public class ClassFieldVarExpr extends AbstractVarExpr {
   public Var evalVar(Env env)
   {
     StringValue varName = _varName.evalStringValue(env);
-    
-    StringValue var = _prefix.toStringBuilder().append(varName);
-    
-    return env.getStaticVar(var);
+        
+    return env.getClass(_className).getStaticFieldVar(env, varName);
   }
   
   /**
@@ -127,9 +119,7 @@ public class ClassFieldVarExpr extends AbstractVarExpr {
   {
     StringValue varName = _varName.evalStringValue(env);
     
-    StringValue var = _prefix.toStringBuilder().append(varName);
-    
-    env.setStaticRef(var, value);
+    env.getClass(_className).setStaticFieldRef(env, varName, value);
     
     return value;
   }

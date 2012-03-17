@@ -624,7 +624,7 @@ public class QuercusContext
 
         ClassLoader loader = Thread.currentThread().getContextClassLoader();
 
-        Class cls = loader.loadClass(driver);
+        Class<?> cls = loader.loadClass(driver);
 
         Object ds = cls.newInstance();
 
@@ -646,7 +646,7 @@ public class QuercusContext
     }
   }
 
-  /*
+  /**
    * Marks the connection for removal from the connection pool.
    */
   public void markForPoolRemoval(Connection conn)
@@ -783,7 +783,7 @@ public class QuercusContext
   /**
    * Adds a java class
    */
-  public void addJavaClass(String name, Class type)
+  public void addJavaClass(String name, Class<?> type)
     throws ConfigException
   {
     try {
@@ -801,24 +801,22 @@ public class QuercusContext
    */
   public void addJavaClass(String phpName, String className)
   {
-    Class type;
-
     try {
-      type = Class.forName(className, false, _loader);
+      Class<?> type = Class.forName(className, false, _loader);
+      
+      addJavaClass(phpName, type);
     }
     catch (ClassNotFoundException e) {
       throw new QuercusRuntimeException(L.l("`{0}' not valid: {1}",
                                             className,
                                             e.toString()), e);
     }
-
-    addJavaClass(phpName, type);
   }
 
   /**
    * Adds a impl class
    */
-  public void addImplClass(String name, Class type)
+  public void addImplClass(String name, Class<?> type)
     throws ConfigException
   {
     throw new UnsupportedOperationException(
@@ -925,7 +923,7 @@ public class QuercusContext
         ArrayValue array = (ArrayValue) result;
 
         for (Map.Entry<Value,Value> entry : array.entrySet()) {
-          setIni(entry.getKey().toString(), entry.getValue().toString());
+          setIni(entry.getKey().toString(), entry.getValue());
         }
       }
 
@@ -963,7 +961,7 @@ public class QuercusContext
   /**
    * Sets an ini value.
    */
-  public void setIni(String name, StringValue value)
+  public void setIni(String name, Value value)
   {
     _iniDefinitions.get(name).set(this, value);
   }
@@ -2226,8 +2224,7 @@ public class QuercusContext
   public static final IniDefinition INI_REGISTER_LONG_ARRAYS
     = _ini.add("register_long_arrays", true, IniDefinition.PHP_INI_PERDIR);
   public static final IniDefinition INI_ALWAYS_POPULATE_RAW_POST_DATA
-    = _ini.add(
-    "always_populate_raw_post_data", false, IniDefinition.PHP_INI_PERDIR);
+    = _ini.add("always_populate_raw_post_data", false, IniDefinition.PHP_INI_PERDIR);
 
   // unicode ini
   public static final IniDefinition INI_UNICODE_SEMANTICS
@@ -2237,8 +2234,7 @@ public class QuercusContext
   public static final IniDefinition INI_UNICODE_FROM_ERROR_MODE
     = _ini.add("unicode.from_error_mode", "2", IniDefinition.PHP_INI_ALL);
   public static final IniDefinition INI_UNICODE_FROM_ERROR_SUBST_CHAR
-    = _ini.add(
-    "unicode.from_error_subst_char", "3f", IniDefinition.PHP_INI_ALL);
+    = _ini.add("unicode.from_error_subst_char", "3f", IniDefinition.PHP_INI_ALL);
   public static final IniDefinition INI_UNICODE_HTTP_INPUT_ENCODING
     = _ini.add("unicode.http_input_encoding", null, IniDefinition.PHP_INI_ALL);
   public static final IniDefinition INI_UNICODE_OUTPUT_ENCODING

@@ -51,14 +51,11 @@ public class GoogleQuercusServlet extends QuercusServlet
     QuercusServletImpl impl = null;
 
     try {
-      Class cl = Class.forName(
-          "com.caucho.quercus.servlet.ProGoogleQuercusServlet");
-      
-      Constructor cons = cl.getConstructor(java.io.File.class);
+      Class<?> cl = Class.forName("com.caucho.quercus.servlet.ProGoogleQuercusServlet");
+      Constructor<?> cons = cl.getConstructor(java.io.File.class);
       
       impl = (QuercusServletImpl) cons.newInstance(_licenseDirectory);
-      
-      //impl = (QuercusServletImpl) cl.newInstance();
+
     } catch (ConfigException e) {
       log.log(Level.FINEST, e.toString(), e);
       log.info(
@@ -69,8 +66,11 @@ public class GoogleQuercusServlet extends QuercusServlet
       log.log(Level.FINEST, e.toString(), e);
     }
 
-    if (impl == null)
+    if (impl == null) {
       impl = new GoogleQuercusServletImpl();
+      
+      impl.getQuercus();
+    }
     
     return impl;
   }

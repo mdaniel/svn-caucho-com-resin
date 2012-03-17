@@ -861,7 +861,7 @@ public class PDO implements EnvCleanup {
     if (password != null)
       _password = password;
 
-    String driver = Mysqli.DRIVER;
+    String driver = Mysqli.DEFAULT_DRIVER;
     
     // XXX: mysql options?
     String url = Mysqli.getUrl(host, port, dbname, ENCODING,
