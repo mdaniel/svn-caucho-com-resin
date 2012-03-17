@@ -36,6 +36,8 @@ public class UnsetBinaryValue
   private UnsetBinaryValue()
   {
     super("");
+    
+    setLength(-1);
   }
   
   /**
@@ -45,14 +47,6 @@ public class UnsetBinaryValue
   public boolean isset()
   {
     return false;
-  }
-  
-  /**
-   * Returns the length of the string.
-   */
-  public int length()
-  {
-    return -1;
   }
   
   /**

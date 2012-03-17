@@ -559,7 +559,7 @@ public class QuercusServlet
     throws ServletException
   {
     Class<?> configClass = config.getClass();
-
+    
     _impl = getQuercusServlet(configClass.getName().startsWith("com.caucho"));
 
     if (isUnicodeSemantics()) {
