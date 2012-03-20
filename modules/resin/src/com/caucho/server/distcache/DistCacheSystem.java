@@ -31,12 +31,10 @@ package com.caucho.server.distcache;
 
 import java.util.concurrent.ConcurrentHashMap;
 
-import javax.cache.CacheManager;
-import javax.cache.Caching;
 import javax.sql.DataSource;
 
-import com.caucho.distcache.jcache.CacheBuilderImpl;
-import com.caucho.env.service.*;
+import com.caucho.env.service.AbstractResinSubSystem;
+import com.caucho.env.service.ResinSystem;
 import com.caucho.loader.Environment;
 
 /**

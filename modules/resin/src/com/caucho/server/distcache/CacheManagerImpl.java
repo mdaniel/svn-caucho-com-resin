@@ -32,13 +32,6 @@ package com.caucho.server.distcache;
 import java.io.Closeable;
 import java.util.concurrent.ConcurrentHashMap;
 
-import javax.cache.CacheBuilder;
-import javax.enterprise.context.ApplicationScoped;
-
-import com.caucho.config.Configurable;
-import com.caucho.distcache.AbstractCache;
-import com.caucho.distcache.ClusterCache;
-import com.caucho.distcache.jcache.CacheBuilderImpl;
 import com.caucho.distcache.jcache.CacheManagerFacade;
 import com.caucho.loader.Environment;
 
