@@ -1339,7 +1339,7 @@ public final class SessionManager implements SessionCookieConfig, AlarmListener
       return null;
 
     SessionImpl session = _sessions.get(sessionId);
-    
+
     if (session != null && ! session.isValid())
       session = null;
     

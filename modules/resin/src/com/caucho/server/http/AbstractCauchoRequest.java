@@ -1026,8 +1026,9 @@ abstract public class AbstractCauchoRequest implements CauchoRequest {
       }
     }
 
-    if (session != null)
+    if (session != null) {
       session.finishRequest();
+    }
 
     if (_removeOnExit != null) {
       for (int i = _removeOnExit.size() - 1; i >= 0; i--) {
