@@ -271,6 +271,25 @@ public class MysqliStatement extends JdbcStatementResource {
       log.log(Level.FINE, e.toString(), e);
     }
   }
+  
+  /**
+   * Returns the MysqliResult
+   */
+  public MysqliResult get_result(Env env) {
+    try {
+
+      if (getResultSet() != null) {
+        return new MysqliResult(env,
+                                getPreparedStatement(),
+                                getResultSet(),
+                                (Mysqli) validateConnection());
+      } else
+        return null;
+
+    } catch (Exception e) {
+      throw new QuercusModuleException(e);
+    }
+  }
 
   /**
    * Quercus function to get the field 'num_rows'.

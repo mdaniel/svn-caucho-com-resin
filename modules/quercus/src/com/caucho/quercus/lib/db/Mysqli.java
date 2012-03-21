@@ -233,23 +233,29 @@ public class Mysqli extends JdbcConnectionResource {
       }
 
       if (driver == null || driver.equals("")) {
-        if (env.getIniBoolean("quercus-mysql-driver"))
+        if (env.getIniBoolean("quercus-mysql-driver")) {
           driver = "com.caucho.quercus.mysql.QuercusMysqlDriver";
+        }
+        else {
+          driver = DEFAULT_DRIVER;
+        }
       }
-
+      
       if (url == null || url.equals("")) {
         url = getUrl(host, port, dbname, ENCODING,
                      (flags & MysqliModule.MYSQL_CLIENT_INTERACTIVE) != 0,
                      (flags & MysqliModule.MYSQL_CLIENT_COMPRESS) != 0,
                      (flags & MysqliModule.MYSQL_CLIENT_SSL) != 0);
       }
-
+      
       ConnectionEntry jConn
         = env.getConnection(driver, url, userName, password, ! isNewLink);
 
       Connection conn = jConn.getConnection();
 
-      if (! (conn instanceof QuercusConnection)) {
+      // nam: calling SET NAMES blows up google (2012-03-20)
+      if (! (conn instanceof QuercusConnection)
+          && ! (conn.getClass().getName().startsWith("com.google.cloud.sql"))) {
         Statement stmt = conn.createStatement();
 
         // php/1465
@@ -267,9 +273,8 @@ public class Mysqli extends JdbcConnectionResource {
 
       return null;
     } catch (Exception e) {
-      env.warning(
-          L.l("A link to the server could not be established.\n  url={0}\n  "
-              + "driver={1}\n  {2}", url, driver, e.toString()), e);
+      env.warning(L.l("A link to the server could not be established.\n  url={0}\n  "
+                      + "driver={1}\n  {2}", url, driver, e.toString()), e);
       env.setSpecialValue("mysqli.connectError", env.createString(e.toString()));
       
       return null;
