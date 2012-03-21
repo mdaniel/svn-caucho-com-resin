@@ -111,6 +111,7 @@ public class ListJmxAction extends AbstractJmxAction implements AdminAction
               = new ListJmxQueryReply.Attribute();
 
             attr.setName(attribute.getName());
+            attr.setInfo(attribute.toString());
 
             if (isPrintValues) {
               try {

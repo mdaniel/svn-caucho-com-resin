@@ -109,7 +109,7 @@ public class JmxListCommand extends JmxCommand
         message.append("  attributes:\n");
 
         for (ListJmxQueryReply.Attribute attribute : bean.getAttributes()) {
-          message.append("    ").append(attribute.getName());
+          message.append("    ").append(attribute.getInfo());
 
           if (isPrintValues) {
             message.append('=');

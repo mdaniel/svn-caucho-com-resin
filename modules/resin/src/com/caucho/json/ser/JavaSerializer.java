@@ -109,7 +109,7 @@ public class JavaSerializer extends AbstractJsonSerializer {
       if (i++ > 0)
         out.writeMapComma();
 
-      out.writeMapEntry(field.getName(), fieldValue);
+      out.writeMapEntry(field.getName(), fieldValue, annotated);
     }
     out.writeMapEnd();
   }

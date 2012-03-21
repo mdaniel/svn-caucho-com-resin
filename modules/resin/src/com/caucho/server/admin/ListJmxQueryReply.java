@@ -29,6 +29,7 @@
 package com.caucho.server.admin;
 
 import com.caucho.json.Json;
+import com.caucho.json.Transient;
 
 import java.io.Serializable;
 import java.util.ArrayList;
@@ -100,6 +101,9 @@ public class ListJmxQueryReply extends ManagementQueryReply
     @Json(name = "name")
     private String _name;
 
+    @Transient
+    private String _info;
+
     @Json(name = "value")
     private Object _value;
 
@@ -121,6 +125,16 @@ public class ListJmxQueryReply extends ManagementQueryReply
     public void setValue(Object value)
     {
       _value = value;
+    }
+
+    public String getInfo()
+    {
+      return _info;
+    }
+
+    public void setInfo(String info)
+    {
+      _info = info;
     }
   }
 
