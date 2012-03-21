@@ -56,8 +56,6 @@ import javax.servlet.http.Part;
 
 import com.caucho.i18n.CharacterEncoding;
 import com.caucho.network.listen.SocketLink;
-import com.caucho.security.AbstractAuthenticator;
-import com.caucho.security.AbstractLogin;
 import com.caucho.security.Authenticator;
 import com.caucho.security.Login;
 import com.caucho.security.RoleMapManager;
@@ -101,6 +99,7 @@ abstract public class AbstractCauchoRequest implements CauchoRequest {
 
   abstract public CauchoResponse getResponse();
 
+  @Override
   public RequestDispatcher getRequestDispatcher(String path)
   {
     if (path == null || path.length() == 0)
@@ -262,7 +261,8 @@ abstract public class AbstractCauchoRequest implements CauchoRequest {
 
   public abstract AbstractHttpRequest getAbstractHttpRequest();
 
-  public ServletService getServer() {
+  public ServletService getServer()
+  {
     return getAbstractHttpRequest().getServer();
   }
 
@@ -466,7 +466,7 @@ abstract public class AbstractCauchoRequest implements CauchoRequest {
   }
 
   public final void mergeParameters(Map<String, String[]> source,
-                              Map<String, String[]> target)
+                                    Map<String, String[]> target)
   {
     Set<Map.Entry<String, String[]>> sourceEntries = source.entrySet();
 
@@ -510,6 +510,7 @@ abstract public class AbstractCauchoRequest implements CauchoRequest {
     return getAbstractHttpRequest().getStream();
   }
 
+  @Override
   public String getRealPath(String uri)
   {
     WebApp webApp = getWebApp();
@@ -520,6 +521,7 @@ abstract public class AbstractCauchoRequest implements CauchoRequest {
   /**
    * Returns the URL for the request
    */
+  @Override
   public StringBuffer getRequestURL()
   {
     StringBuffer sb = new StringBuffer();
@@ -545,6 +547,7 @@ abstract public class AbstractCauchoRequest implements CauchoRequest {
   /**
    * Returns the real path of pathInfo.
    */
+  @Override
   public String getPathTranslated()
   {
     // server/106w
@@ -556,6 +559,7 @@ abstract public class AbstractCauchoRequest implements CauchoRequest {
       return getRealPath(pathInfo);
   }
 
+  @Override
   public boolean isTop()
   {
     return false;
@@ -574,6 +578,7 @@ abstract public class AbstractCauchoRequest implements CauchoRequest {
   /**
    * Returns the memory session.
    */
+  @Override
   public HttpSession getMemorySession()
   {
     if (_session != null && _session.isValid())
@@ -587,6 +592,7 @@ abstract public class AbstractCauchoRequest implements CauchoRequest {
    * Sessions are a convenience for keeping user state
    * across requests.
    */
+  @Override
   public HttpSession getSession()
   {
     return getSession(true);
@@ -606,8 +612,9 @@ abstract public class AbstractCauchoRequest implements CauchoRequest {
       if (_session.isValid())
         return _session;
     }
-    else if (! create && _sessionIsLoaded)
+    else if (! create && _sessionIsLoaded) {
       return null;
+    }
 
     _sessionIsLoaded = true;
 
@@ -633,6 +640,7 @@ abstract public class AbstractCauchoRequest implements CauchoRequest {
    * Returns true if the HTTP request's session id refers to a valid
    * session.
    */
+  @Override
   public boolean isRequestedSessionIdValid()
   {
     String id = getRequestedSessionId();
@@ -653,11 +661,11 @@ abstract public class AbstractCauchoRequest implements CauchoRequest {
    *
    * XXX: duplicated in RequestAdapter
    *
-   * @param create true if a new session should be created
+   * @param isCreate true if a new session should be created
    *
    * @return the current session
    */
-  private SessionImpl createSession(boolean create)
+  private SessionImpl createSession(boolean isCreate)
   {
     SessionManager manager = getSessionManager();
 
@@ -669,7 +677,7 @@ abstract public class AbstractCauchoRequest implements CauchoRequest {
     long now = CurrentTime.getCurrentTime();
 
     SessionImpl session
-      = manager.createSession(create, this, id, now,
+      = manager.createSession(isCreate, this, id, now,
                               isSessionIdFromCookie());
 
     if (session != null

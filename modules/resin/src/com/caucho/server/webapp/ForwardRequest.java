@@ -29,11 +29,10 @@
 
 package com.caucho.server.webapp;
 
-import com.caucho.server.dispatch.Invocation;
-import com.caucho.server.http.CauchoRequestWrapper;
-import com.caucho.util.HashMapImpl;
-import com.caucho.util.IntMap;
-import com.caucho.util.L10N;
+import java.io.IOException;
+import java.util.Collections;
+import java.util.Enumeration;
+import java.util.Map;
 
 import javax.servlet.AsyncContext;
 import javax.servlet.DispatcherType;
@@ -41,12 +40,14 @@ import javax.servlet.RequestDispatcher;
 import javax.servlet.ServletContext;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
-import java.io.IOException;
-import java.util.Collections;
-import java.util.Enumeration;
-import java.util.Map;
 
-public class ForwardRequest extends CauchoRequestWrapper {
+import com.caucho.server.dispatch.Invocation;
+import com.caucho.server.http.CauchoDispatchRequest;
+import com.caucho.util.HashMapImpl;
+import com.caucho.util.IntMap;
+import com.caucho.util.L10N;
+
+public class ForwardRequest extends CauchoDispatchRequest {
   private static final IntMap _forwardAttributeMap = new IntMap();
   private static final L10N L = new L10N(ForwardRequest.class);
 

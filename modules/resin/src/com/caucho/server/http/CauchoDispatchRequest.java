@@ -32,15 +32,11 @@ package com.caucho.server.http;
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.UnsupportedEncodingException;
-import java.security.Principal;
-import java.util.Collection;
 import java.util.Enumeration;
 import java.util.Locale;
-import java.util.Map;
 
 import javax.servlet.AsyncContext;
 import javax.servlet.DispatcherType;
-import javax.servlet.RequestDispatcher;
 import javax.servlet.ServletContext;
 import javax.servlet.ServletException;
 import javax.servlet.ServletInputStream;
@@ -49,16 +45,12 @@ import javax.servlet.ServletRequestWrapper;
 import javax.servlet.ServletResponse;
 import javax.servlet.http.Cookie;
 import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
-import javax.servlet.http.Part;
 
-import com.caucho.network.listen.SocketLink;
 import com.caucho.server.webapp.WebApp;
-import com.caucho.util.CharBuffer;
 import com.caucho.vfs.ReadStream;
 
-public class CauchoRequestWrapper implements CauchoRequest {
+public class CauchoDispatchRequest extends AbstractCauchoRequest {
   // the wrapped request
   private HttpServletRequest _request;
   private CauchoResponse _response;
@@ -67,11 +59,11 @@ public class CauchoRequestWrapper implements CauchoRequest {
   // ServletRequest
   //
   
-  public CauchoRequestWrapper()
+  public CauchoDispatchRequest()
   {
   }
   
-  public CauchoRequestWrapper(HttpServletRequest request)
+  public CauchoDispatchRequest(HttpServletRequest request)
   {
     if (request == null)
       throw new IllegalArgumentException();
@@ -175,6 +167,7 @@ public class CauchoRequestWrapper implements CauchoRequest {
     return _request.getLocalPort();
   }
   
+  /*
   @Override
   public String getParameter(String name)
   {
@@ -198,6 +191,7 @@ public class CauchoRequestWrapper implements CauchoRequest {
   {
     return _request.getParameterNames();
   }
+  */
   
   @Override
   public ServletInputStream getInputStream()
@@ -280,6 +274,7 @@ public class CauchoRequestWrapper implements CauchoRequest {
     _request.removeAttribute(name);
   }
   
+  /*
   @Override
   public RequestDispatcher getRequestDispatcher(String path)
   {
@@ -311,6 +306,7 @@ public class CauchoRequestWrapper implements CauchoRequest {
       return null;
     }
   }
+  */
 
   /*
   public String getRealPath(String uri)
@@ -393,6 +389,7 @@ public class CauchoRequestWrapper implements CauchoRequest {
   /**
    * Returns the URL for the request
    */
+  /*
   @Override
   public StringBuffer getRequestURL()
   {
@@ -415,6 +412,7 @@ public class CauchoRequestWrapper implements CauchoRequest {
 
     return sb;
   }
+  */
   
   @Override
   public String getContextPath()
@@ -437,6 +435,7 @@ public class CauchoRequestWrapper implements CauchoRequest {
   /**
    * Returns the real path of pathInfo.
    */
+  /*
   @Override
   public String getPathTranslated()
   {
@@ -448,6 +447,7 @@ public class CauchoRequestWrapper implements CauchoRequest {
     else
       return getRealPath(pathInfo);
   }
+  */
   
   @Override
   public String getQueryString()
@@ -497,11 +497,13 @@ public class CauchoRequestWrapper implements CauchoRequest {
     return _request.getRequestedSessionId();
   }
 
+  /*
   @Override
   public boolean isRequestedSessionIdValid()
   {
     return _request.isRequestedSessionIdValid();
   }
+  */
   
   @Override
   public boolean isRequestedSessionIdFromCookie()
@@ -579,6 +581,7 @@ public class CauchoRequestWrapper implements CauchoRequest {
   }
   */
 
+  /*
   @Override
   public Part getPart(String name)
     throws IOException, ServletException
@@ -592,9 +595,9 @@ public class CauchoRequestWrapper implements CauchoRequest {
   {
     return _request.getParts();
   }
+  */
   
-  @Override
-  public boolean isMultipartEnabled()
+  protected boolean isDelegateMultipartEnabled()
   {
     if (_request instanceof CauchoRequest) {
       return ((CauchoRequest) _request).isMultipartEnabled();
@@ -603,6 +606,7 @@ public class CauchoRequestWrapper implements CauchoRequest {
     return false;
   }
 
+  // XXX: this needs to be integrated with AbstractCauchoRequest
   @Override
   public void logout()
     throws ServletException
@@ -781,7 +785,7 @@ public class CauchoRequestWrapper implements CauchoRequest {
     else
       return false;
   }
-  
+
   @Override
   public HttpSession getMemorySession()
   {
@@ -931,75 +935,6 @@ public class CauchoRequestWrapper implements CauchoRequest {
     if (request instanceof CauchoRequest)
       return (CauchoRequest) request;
 
-    return null;
-  }
-
-  @Override
-  public HttpSession getSession(boolean create)
-  {
-    return _request.getSession(create);
-  }
-
-  @Override
-  public HttpSession getSession()
-  {
-    return getSession(true);
-  }
-
-  @Override
-  public boolean isUserInRole(String role)
-  {
-    return _request.isUserInRole(role);
-  }
-
-  @Override
-  public Principal getUserPrincipal()
-  {
-    return _request.getUserPrincipal();
-  }
-
-  @Override
-  public boolean authenticate(HttpServletResponse response)
-    throws IOException, ServletException
-  {
-    return _request.authenticate(response);
-  }
-
-  @Override
-  public void login(String username, String password)
-    throws ServletException
-  {
-    _request.login(username,  password);
-  }
-
-  @Override
-  @SuppressWarnings("deprecation")
-  public String getRealPath(String uri)
-  {
-    return _request.getRealPath(uri);
-  }
-
-  @Override
-  public boolean login(boolean isFail)
-  {
-    CauchoRequest request = getCauchoRequest();
-    
-    if (request != null) {
-      return request.login(isFail);
-    }
-    
-    return false;
-  }
-
-  @Override
-  public SocketLink getSocketLink()
-  {
-    CauchoRequest request = getCauchoRequest();
-    
-    if (request != null) {
-      return request.getSocketLink();
-    }
-    
     return null;
   }
 

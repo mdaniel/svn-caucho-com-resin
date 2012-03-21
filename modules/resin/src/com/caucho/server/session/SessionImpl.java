@@ -264,8 +264,9 @@ public class SessionImpl implements HttpSession, CacheListener {
   {
     long maxIdleTime = _idleTimeout;
 
-    if (inUse())
+    if (isInUse()) {
       return false;
+    }
     else if (now < _lastUseTime + maxIdleTime) {
       return false;
     }
@@ -308,9 +309,14 @@ public class SessionImpl implements HttpSession, CacheListener {
   /**
    * Returns true if the session is in use.
    */
-  public boolean inUse()
+  public boolean isInUse()
   {
     return _useCount.get() > 0;
+  }
+  
+  protected int getUseCount()
+  {
+    return _useCount.get();
   }
 
   //

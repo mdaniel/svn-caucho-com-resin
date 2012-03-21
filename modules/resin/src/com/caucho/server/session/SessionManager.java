@@ -1339,9 +1339,10 @@ public final class SessionManager implements SessionCookieConfig, AlarmListener
       return null;
 
     SessionImpl session = _sessions.get(sessionId);
-
-    if (session != null && ! session.isValid())
+    
+    if (session != null && ! session.isValid()) {
       session = null;
+    }
     
     boolean isNew = false;
 
@@ -1358,7 +1359,7 @@ public final class SessionManager implements SessionCookieConfig, AlarmListener
     }
 
     if (session != null) {
-      if (session.isTimeout()) {
+      if (session.isTimeout(now)) {
         session.invalidateTimeout();
         session = null;
       }

@@ -39,26 +39,26 @@ import java.util.logging.*;
 import javax.servlet.*;
 import javax.servlet.http.*;
 
-public class CauchoResponseWrapper implements CauchoResponse {
+public class CauchoDispatchResponse extends AbstractCauchoResponse {
   private static final Logger log
-    = Logger.getLogger(CauchoResponseWrapper.class.getName());
+    = Logger.getLogger(CauchoDispatchResponse.class.getName());
 
   private final CauchoRequest _request;
 
   // the wrapped response
   private HttpServletResponse _response;
 
-  public CauchoResponseWrapper()
+  public CauchoDispatchResponse()
   {
     _request = null;
   }
 
-  public CauchoResponseWrapper(CauchoRequest request)
+  public CauchoDispatchResponse(CauchoRequest request)
   {
     _request = request;
   }
 
-  public CauchoResponseWrapper(CauchoRequest request,
+  public CauchoDispatchResponse(CauchoRequest request,
                                HttpServletResponse response)
   {
     _request = request;
@@ -505,11 +505,6 @@ public class CauchoResponseWrapper implements CauchoResponse {
   public boolean isForwardEnclosed()
   {
     return false;
-  }
-
-  @Override
-  public void writeHeaders(int length) throws IOException
-  {
   }
 
   @Override

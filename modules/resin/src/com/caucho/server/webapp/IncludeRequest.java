@@ -31,6 +31,7 @@ package com.caucho.server.webapp;
 
 import com.caucho.inject.Module;
 import com.caucho.server.dispatch.Invocation;
+import com.caucho.server.http.CauchoDispatchRequest;
 import com.caucho.server.http.CauchoRequestWrapper;
 import com.caucho.server.http.Form;
 import com.caucho.util.HashMapImpl;
@@ -50,7 +51,7 @@ import java.util.Map;
 import java.util.NoSuchElementException;
 
 @Module
-public class IncludeRequest extends CauchoRequestWrapper {
+public class IncludeRequest extends CauchoDispatchRequest {
   private static final IntMap _includeAttributeMap = new IntMap();
 
   private static Enumeration<String> _emptyEnum;
