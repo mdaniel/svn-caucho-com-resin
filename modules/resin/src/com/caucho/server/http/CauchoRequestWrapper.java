@@ -84,6 +84,17 @@ public class CauchoRequestWrapper extends AbstractCauchoRequest {
     _request = request;
   }
   
+
+  public HttpSession getSession()
+  {
+    CauchoRequest cRequest = getCauchoRequest();
+
+    if (cRequest != null)
+	return cRequest.getSession();
+    else
+	return null;
+  }
+
   @Override
   public HttpServletRequest getRequest()
   {
