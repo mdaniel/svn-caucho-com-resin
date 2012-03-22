@@ -303,14 +303,35 @@ class WatchdogChildProcess
       case 3:
         type = "SIGQUIT";
         break;
+      case 4:
+        type = "SIGILL";
+        break;
+      case 5:
+        type = "SIGTRAP";
+        break;
+      case 6:
+        type = "SIGABRT";
+        break;
       case 7:
         type = "SIGBUS";
+        break;
+      case 8:
+        type = "SIGFPE";
         break;
       case 9:
         type = "SIGKILL";
         break;
+      case 10:
+        type = "SIGUSR1";
+        break;
       case 11:
         type = "SIGSEGV";
+        break;
+      case 12:
+        type = "SIGUSR2";
+        break;
+      case 13:
+        type = "SIGPIPE";
         break;
       case 14:
         type = "SIGALRM";

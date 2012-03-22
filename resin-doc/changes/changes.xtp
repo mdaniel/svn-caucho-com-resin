@@ -10,8 +10,9 @@
 <li><a href="http://caucho.com/resin-3.1/changes/changes.xtp">Resin 3.1 changes</a></li>
 </ul>
 
-<s2 title="4.0.27 - snapshot">
+<s2 title="4.0.27 - Mar 22, 2012">
 <ul>
+<li>servlet: split CauchoWrapper from AbstractCauchoRequest (#4993, rep by Leonid Kaminsky)</li>
 <li>health: add "Resin|Http|Ping|Ping Time" and anomaly analyzer</li>
 <li>health: add http_ping_urls to resin.properties</li>
 <li>websocket: added createOutputQueue and encoder</li>

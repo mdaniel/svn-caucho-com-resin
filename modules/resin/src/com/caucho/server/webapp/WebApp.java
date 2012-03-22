@@ -2688,14 +2688,22 @@ public class WebApp extends ServletContextImpl
       if (_tempDir == null)
         _tempDir = (Path) Environment.getLevelAttribute("caucho.temp-dir");
 
-      if (_tempDir == null) {
-        _tempDir = getRootDirectory().lookup("WEB-INF/tmp");
+      try {
+        if (_tempDir == null) {
+          _tempDir = getRootDirectory().lookup("WEB-INF/tmp");
 
-        if (getRootDirectory().lookup("WEB-INF").isDirectory())
+          if (getRootDirectory().lookup("WEB-INF").isDirectory()) {
+            _tempDir.mkdirs();
+          }
+        }
+        else
           _tempDir.mkdirs();
+      } catch (IOException e) {
+        log.warning(e.toString());
+        
+        if (log.isLoggable(Level.FINER))
+          log.log(Level.FINER, e.toString(), e);
       }
-      else
-        _tempDir.mkdirs();
 
       setAttribute("javax.servlet.context.tempdir", new File(_tempDir.getNativePath()));
 

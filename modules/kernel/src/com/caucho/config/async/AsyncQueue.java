@@ -43,7 +43,7 @@ public class AsyncQueue extends AbstractTaskWorker {
   private static final Logger log = Logger.getLogger(AsyncQueue.class.getName());
   
   private final ArrayBlockingQueue<Runnable> _queue
-    = new ArrayBlockingQueue<Runnable>(256);
+    = new ArrayBlockingQueue<Runnable>(1024);
   
   public void offer(Runnable task)
   {

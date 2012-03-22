@@ -187,7 +187,7 @@ public class Management
    */
   public Object createPing()
   {
-    return createService("com.caucho.server.admin.PingThread");
+    return createService("com.caucho.server.admin.HttpPingThread");
   }
 
   /**
