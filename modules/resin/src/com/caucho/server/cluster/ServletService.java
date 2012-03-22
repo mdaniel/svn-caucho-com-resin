@@ -1586,7 +1586,7 @@ public class ServletService
       */
 
       try {
-        ThreadPool.getThreadPool().interrupt();
+        ThreadPool.getThreadPool().clearIdleThreads();
       } catch (Throwable e) {
         log.log(Level.WARNING, e.toString(), e);
       }

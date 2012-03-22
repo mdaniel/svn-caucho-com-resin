@@ -294,7 +294,7 @@ public class ProxyCacheFilterChain extends AbstractCacheFilterChain
     entry = getVaryEntry(entry, req);
 
     // If the entry isn't valid, don't use it
-    if (entry == null || ! entry._isValid) {
+    if (entry == null || ! entry.isValid()) {
       return null;
     }
 
@@ -427,8 +427,9 @@ public class ProxyCacheFilterChain extends AbstractCacheFilterChain
   {
     ProxyCacheEntry entry = (ProxyCacheEntry) abstractEntry;
 
-    if (! entry._isValid)
+    if (! entry._isValid) {
       return false;
+    }
 
     if (resetResponse(entry, response) == ResetResponse.FAIL) {
       log.warning(this + " unable to reset " + req + " " + response);
@@ -451,8 +452,12 @@ public class ProxyCacheFilterChain extends AbstractCacheFilterChain
 
     String range = req.getHeader("Range");
     
-    if (range != null && ! entry._allowRange)
+    if (range != null && ! entry._allowRange) {
+      if (log.isLoggable(Level.FINE))
+        log.fine(this + " cannot fill with range");
+      
       return false;
+    }
     
     if (entry._contentType != null)
       response.setContentType(entry._contentType);
@@ -483,6 +488,9 @@ public class ProxyCacheFilterChain extends AbstractCacheFilterChain
 
     ProxyCacheInode inode = entry.getInode();
     if (inode == null || ! inode.allocate()) {
+      log.fine(this + " invalid inode: " + inode);
+      System.out.println("BAD-INODE: " + inode);
+      
       return false;
     }
 
@@ -511,6 +519,10 @@ public class ProxyCacheFilterChain extends AbstractCacheFilterChain
 
         // inode may be cleared.
         if (! inode.writeToStream(response.getResponseStream())) {
+          if (log.isLoggable(Level.FINE))
+            log.fine(this + " cannot write inode: " + inode);
+          
+          System.out.println("BAD_WRITE:");
           return false;
         }
       }

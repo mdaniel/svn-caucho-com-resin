@@ -53,6 +53,11 @@ class ProxyCacheInode {
   {
     return _length;
   }
+  
+  boolean isValid()
+  {
+    return _blockArray != null && _useCount.get() > 0;
+  }
 
   boolean isClosed()
   {
@@ -199,7 +204,6 @@ class ProxyCacheInode {
     
     if (mmapAddress <= 0) {
       //throw new IllegalStateException(L.l("Invalid mmap call"));
-      System.out.println("MMAP: " + mmapAddress);
       return false;
     }
     
@@ -385,6 +389,7 @@ class ProxyCacheInode {
     {
     }
 
+    @Override
     public void close()
     {
       if (_blockList == null)
@@ -439,10 +444,12 @@ class ProxyCacheInode {
       }
     }
 
+    @Override
     public void flush()
     {
     }
 
+    @Override
     public void close()
     {
       synchronized (this) {

@@ -698,7 +698,7 @@ public class ThreadPool2 {
   /**
    * interrupts all the idle threads.
    */
-  public void interrupt()
+  public void clearIdleThreads()
   {
     ResinThread2 thread;
     
@@ -716,7 +716,7 @@ public class ThreadPool2 {
     _launcher.close();
     _scheduleWorker.close();
     
-    interrupt();
+    clearIdleThreads();
   }
 
   @Override

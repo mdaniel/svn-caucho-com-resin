@@ -169,7 +169,7 @@ public class ProxyCacheResponse extends CauchoResponseWrapper
     _isResponseSent = true;
     
     boolean isFill = false;
-    
+    System.out.println("FFC:");
     if (_proxyChain.fillFromCache(_request, this, 
                                   _request.getProxyCacheEntry())) {
       isFill = true;

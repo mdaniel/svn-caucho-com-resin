@@ -81,6 +81,13 @@ public class ProxyCacheEntry extends AbstractCacheEntry {
     _allowRange = cache.isEnableRange();
   }
   
+  boolean isValid()
+  {
+    ProxyCacheInode inode = _inode;
+    
+    return _isValid && inode != null && inode.isValid();
+  }
+  
   /**
    * If the response discovers that the page hasn't changed,
    * update the cache time.

@@ -18,7 +18,7 @@ report 4.0.27 bugs at
 
 </s1>
 
-<s1 title="110,000 requests per second: performance improvements">
+<s1 title="100,000 requests per second: performance improvements">
 
 <p>Resin's performance and threading scalability have been improved
 considerably in Resin 4.0.27.</p>

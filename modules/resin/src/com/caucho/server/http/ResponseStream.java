@@ -719,8 +719,12 @@ abstract public class ResponseStream extends ToByteResponseStream {
       return;
 
     if (_cacheMaxLength < _contentLength) {
+      //server/2h0o
+      killCaching();
+      /*
       _cacheStream = null;
-      // XXX: _response.killCache();
+      _response.killCache();
+      */
     }
     else {
       _cacheStream.write(buf, offset, length);
@@ -747,16 +751,17 @@ abstract public class ResponseStream extends ToByteResponseStream {
     HttpServletResponseImpl res = _response.getRequest().getResponseFacade();
     HttpServletRequestImpl req = _response.getRequest().getRequestFacade();
     
-    if (req == null)
+    if (req == null) {
       return;
+    }
     
     // server/1la7
-    if (req.isAsyncStarted())
+    if (req.isAsyncStarted()) {
       return;
+    }
 
     try {
       _isComplete = true;
-      
       closeBuffer();
       
       if (! isNextValid()) {
