@@ -565,7 +565,7 @@
        - resin.jar
       -->
     <jar destfile="${dist.build}/lib/resin.jar"
-         manifest="${resin.modules}/resin/src/manifest">
+         manifest="${resin.modules}/resin/src/manifest.dist">
       <fileset dir="${resin.modules}/resin/classes">
         <exclude name="**/.*"/>
       </fileset>

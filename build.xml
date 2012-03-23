@@ -393,6 +393,14 @@
         <filter token="VERSION" value="${version}"/>
       </filterset>
     </copy>
+    <copy tofile="modules/resin/src/manifest.dist"
+          file="modules/resin/src/manifest.dist.in"
+          preservelastmodified="true"
+          overwrite="true">
+      <filterset>
+        <filter token="VERSION" value="${version}"/>
+      </filterset>
+    </copy>
   </target>
   
   <target name="script" depends="init">
