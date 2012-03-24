@@ -41,19 +41,13 @@ public class EnableCommand extends AbstractScalingCommand
   @Override
   public String getDescription()
   {
-    return "enable a Resin server to receive load-balance requests";
+    return L.l("enable a Resin server to receive load-balance requests");
   }
 
   @Override
   public int doCommand(WatchdogArgs args, WatchdogClient client)
     throws BootArgumentException
   {
-    if (! isPro()) {
-      System.out.println("command 'enable' is only available with Resin Pro");
-
-      return 3;
-    }
-
     ResinScalingClient scalingClient = getScalingClient(args, client);
 
     String server = args.getDefaultArg();
@@ -62,7 +56,7 @@ public class EnableCommand extends AbstractScalingCommand
       server = args.getServerId();
 
     if (server == null)
-      throw new ConfigException("server is not specified");
+      throw new ConfigException(L.l("server is not specified"));
 
     CloudServerState state = scalingClient.enable(server);
 

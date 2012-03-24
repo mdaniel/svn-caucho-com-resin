@@ -121,6 +121,18 @@ public class WebAppAdmin extends DeployControllerAdmin<WebAppController>
   {
     return getController().getManifestAttributes();
   }
+  
+  //
+  // lifecycle statistics
+  //
+  
+  @Override
+  public boolean isEnabled()
+  {
+    WebApp webApp = getWebApp();
+    
+    return webApp != null && webApp.isEnabled();
+  }
 
   //
   // error statistics

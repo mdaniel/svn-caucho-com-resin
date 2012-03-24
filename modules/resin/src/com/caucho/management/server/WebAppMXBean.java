@@ -90,6 +90,12 @@ public interface WebAppMXBean extends DeployControllerMXBean {
   //
   
   /**
+   * Returns true if the web-app is enabled.
+   */
+  @Description("Returns true when the web-app is enabled")
+  public boolean isEnabled();
+  
+  /**
    * Returns the number of 500 status requests
    */
   @Description("The total number of 500 status errors")

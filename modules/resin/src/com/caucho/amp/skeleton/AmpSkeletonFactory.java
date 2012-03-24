@@ -27,34 +27,20 @@
  * @author Scott Ferguson
  */
 
-package com.caucho.mpc.skeleton;
+package com.caucho.amp.skeleton;
 
-import java.lang.reflect.Proxy;
-
-import com.caucho.mpc.stream.MpcStream;
+import com.caucho.amp.actor.AmpActor;
+import com.caucho.amp.router.AmpRouter;
 
 /**
  * Creates MPC skeletons and stubs.
  */
-public class MpcReflectionSkeletonFactory implements MpcSkeletonFactory
+public interface AmpSkeletonFactory
 {
-  @Override
-  public MpcStream createSkeleton(Object bean)
-  {
-    return new MpcReflectionSkeleton(bean);
-  }
+  AmpActor createSkeleton(Object bean, String address);
   
-  @Override
-  @SuppressWarnings("unchecked")
-  public <T> T createStub(Class<T> api,
-                          MpcStream broker,
-                          String to,
-                          String from)
-  {
-    MpcReflectionHandler handler = new MpcReflectionHandler(api, broker, to, from);
-    
-    return (T) Proxy.newProxyInstance(api.getClassLoader(),
-                                      new Class<?>[] { api },
-                                      handler);
-  }
+  <T> T createStub(Class<T> api,
+                   AmpRouter router,
+                   String to,
+                   String from);
 }

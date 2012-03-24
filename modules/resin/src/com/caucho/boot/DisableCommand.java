@@ -48,12 +48,6 @@ public class DisableCommand extends AbstractScalingCommand
   public int doCommand(WatchdogArgs args, WatchdogClient client)
     throws BootArgumentException
   {
-    if (! isPro()) {
-      System.out.println("command 'disable' is only available with Resin Pro");
-
-      return 3;
-    }
-
     ResinScalingClient scalingClient = getScalingClient(args, client);
 
     String server = args.getDefaultArg();
@@ -90,22 +84,4 @@ public class DisableCommand extends AbstractScalingCommand
   {
     return true;
   }
-
-  /*
-  @Override
-  public void usage()
-  {
-    System.err.println(L.l("usage: bin/resin.sh [-conf <file>] -server <triad-server> disable -address <address> -port <port> -user <user> -password <password> <server>"));
-    System.err.println(L.l(""));
-    System.err.println(L.l("description:"));
-    System.err.println(L.l("   disables specified in <server> argument server" ));
-    System.err.println(L.l(""));
-    System.err.println(L.l("options:"));
-    System.err.println(L.l("   -server <triad-server> : one of the servers in the triad"));
-    System.err.println(L.l("   -address <address>     : ip or host name of the server"));
-    System.err.println(L.l("   -port <port>           : server http port"));
-    System.err.println(L.l("   -user <user>           : user name used for authentication to the server"));
-    System.err.println(L.l("   -password <password>   : password used for authentication to the server"));
-  }
-  */
 }

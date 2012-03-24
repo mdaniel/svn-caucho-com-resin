@@ -408,6 +408,7 @@ public class WebApp extends ServletContextImpl
   private long _idleTime = 2 * 3600 * 1000L;
   
   private boolean _isStartDisabled;
+  private boolean _isEnabled = true;
 
   private final Lifecycle _lifecycle;
 
@@ -898,6 +899,16 @@ public class WebApp extends ServletContextImpl
   public void setDisableStart(boolean isDisable)
   {
     _isStartDisabled = isDisable;
+  }
+  
+  public void setEnabled(boolean isEnabled)
+  {
+    _isEnabled = isEnabled;
+  }
+  
+  public boolean isEnabled()
+  {
+    return _isEnabled && _server.isEnabled();
   }
 
   public boolean isMetadataComplete()
@@ -3785,6 +3796,16 @@ public class WebApp extends ServletContextImpl
 
         return invocation;
       }
+      else if (! isEnabled()) {
+        if (log.isLoggable(Level.FINE))
+          log.fine(this + " is disabled '" + invocation.getRawURI() + "'");
+        int code = HttpServletResponse.SC_SERVICE_UNAVAILABLE;
+        chain = new ErrorFilterChain(code);
+        invocation.setFilterChain(chain);
+        invocation.setDependency(AlwaysModified.create());
+
+        return invocation;
+      }
       else if (! _lifecycle.waitForActive(_activeWaitTime)) {
         if (log.isLoggable(Level.FINE))
           log.fine(this + " returned 503 busy for '" + invocation.getRawURI() + "'");
@@ -4026,9 +4047,15 @@ public class WebApp extends ServletContextImpl
     thread.setContextClassLoader(getClassLoader());
     try {
       FilterChain chain;
-
+      System.out.println("INVOK: " + invocation + " " + isEnabled());
       if (_configException != null) {
         chain = new ExceptionFilterChain(_configException);
+        invocation.setDependency(AlwaysModified.create());
+      }
+      else if (! isEnabled()) {
+        Exception exn = new UnavailableException(L.l("'{0}' is not currently available.",
+                                                     getContextPath()));
+        chain = new ExceptionFilterChain(exn);
         invocation.setDependency(AlwaysModified.create());
       }
       else if (! _lifecycle.waitForActive(_activeWaitTime)) {
@@ -4277,7 +4304,11 @@ public class WebApp extends ServletContextImpl
       decoder.splitQuery(loginInvocation, rawURI);
       decoder.splitQuery(errorInvocation, rawURI);
 
-      if (! _lifecycle.waitForActive(_activeWaitTime)) {
+      if (! isEnabled()) {
+        throw new IllegalStateException(L.l("'{0}' is disable and unavailable to receive requests",
+                                            getVersionContextPath()));
+      }
+      else if (! _lifecycle.waitForActive(_activeWaitTime)) {
         throw new IllegalStateException(L.l("'{0}' is restarting and it not yet ready to receive requests",
                                             getVersionContextPath()));
       }
@@ -4313,6 +4344,7 @@ public class WebApp extends ServletContextImpl
   /**
    * Returns a dispatcher for the named servlet.
    */
+  @Override
   public RequestDispatcher getNamedDispatcher(String servletName)
   {
     try {

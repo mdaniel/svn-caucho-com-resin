@@ -27,7 +27,7 @@
  * @author Scott Ferguson
  */
 
-package com.caucho.mpc.stream;
+package com.caucho.amp.stream;
 
 /**
  * Primary stream handling all message packets.
@@ -41,7 +41,7 @@ package com.caucho.mpc.stream;
  * <li>query - RPC call/reply packets
  * </ul>
  */
-public class AbstractMpcStream implements MpcStream
+public class AbstractAmpStream implements AmpStream
 {
   @Override
   public String getAddress()
@@ -58,21 +58,23 @@ public class AbstractMpcStream implements MpcStream
   }
 
   @Override
-  public void message(String to, 
-                      String from,
-                      String methodName,
-                      Object ...args)
+  public void send(String to, 
+                   String from,
+                   AmpHeaders headers,
+                   AmpEncoder encoder,
+                   String methodName,
+                   Object ...args)
   {
     // TODO Auto-generated method stub
     
   }
 
   @Override
-  public void messageError(String to,
-                           String from,
-                           String methodName,
-                           Object[] args,
-                           MpcError error)
+  public void error(String to,
+                    String from,
+                    AmpHeaders headers,
+                    AmpEncoder encoder,
+                    AmpError error)
   {
     // TODO Auto-generated method stub
     
@@ -82,6 +84,8 @@ public class AbstractMpcStream implements MpcStream
   public void query(long id, 
                     String to, 
                     String from,
+                    AmpHeaders headers,
+                    AmpEncoder encoder,
                     String methodName,
                     Object ...args)
   {
@@ -89,23 +93,24 @@ public class AbstractMpcStream implements MpcStream
   }
 
   @Override
-  public void queryError(long id,
-                         String to,
-                         String from,
-                         String methodName,
-                         Object[] args,
-                         MpcError error)
+  public void queryResult(long id, 
+                          String to,
+                          String from,
+                          AmpHeaders headers,
+                          AmpEncoder encoder,
+                          Object result)
   {
     // TODO Auto-generated method stub
     
   }
 
   @Override
-  public void queryResult(long id, 
-                          String to,
-                          String from,
-                          String methodName,
-                          Object result)
+  public void queryError(long id,
+                         String to,
+                         String from,
+                         AmpHeaders headers,
+                         AmpEncoder encoder,
+                         AmpError error)
   {
     // TODO Auto-generated method stub
     

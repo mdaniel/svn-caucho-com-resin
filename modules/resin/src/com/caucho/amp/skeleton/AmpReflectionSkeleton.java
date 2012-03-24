@@ -27,24 +27,28 @@
  * @author Scott Ferguson
  */
 
-package com.caucho.mpc.skeleton;
+package com.caucho.amp.skeleton;
 
 import java.lang.reflect.Method;
 import java.util.HashMap;
 
-import com.caucho.mpc.stream.AbstractMpcStream;
+import com.caucho.amp.actor.AbstractAmpActor;
+import com.caucho.amp.stream.AmpEncoder;
+import com.caucho.amp.stream.AmpHeaders;
 
 /**
  * Creates MPC skeletons and stubs.
  */
-class MpcReflectionSkeleton extends AbstractMpcStream
+class AmpReflectionSkeleton extends AbstractAmpActor
 {
   private HashMap<String,Method> _methodMap = new HashMap<String,Method>();
   
+  private final String _address;
   private final Object _bean;
   
-  MpcReflectionSkeleton(Object bean)
+  AmpReflectionSkeleton(Object bean, String address)
   {
+    _address = address;
     _bean = bean;
     
     for (Class<?> api : bean.getClass().getInterfaces()) {
@@ -53,17 +57,27 @@ class MpcReflectionSkeleton extends AbstractMpcStream
       }
     }
   }
+  
+  @Override
+  public String getAddress()
+  {
+    return _address;
+  }
 
   @Override
-  public void message(String to,
-                      String from,
-                      String methodName,
-                      Object ...args)
+  public void send(String to,
+                   String from,
+                   AmpHeaders headers,
+                   AmpEncoder encoder,
+                   String methodName,
+                   Object ...args)
   {
-    invokeMethod(methodName, args);
+    invokeMethod(encoder, methodName, args);
   }
   
-  private Object invokeMethod(String methodName, Object []args)
+  private Object invokeMethod(AmpEncoder encoder,
+                              String methodName, 
+                              Object []args)
   {
     Method method = _methodMap.get(methodName);
     

@@ -27,13 +27,10 @@
  * @author Scott Ferguson
  */
 
-package com.caucho.mpc.stream;
+package com.caucho.amp.stream;
 
 /**
- * Primary stream handling all message packets.
- *
- * {@link com.caucho.bam.actor.ActorHolder Actors} send packets to the 
- * {@link com.caucho.bam.broker.Broker} for delivery to other Actors.
+ * Primary stream handling all messages.
  *
  * Messages are divided into two groups:
  * <ul>
@@ -41,7 +38,7 @@ package com.caucho.mpc.stream;
  * <li>query - RPC call/reply packets
  * </ul>
  */
-public interface MpcStream
+public interface AmpStream
 {
   /**
    * Returns the address of the {@link com.caucho.bam.actor.ActorHolder} at the end
@@ -53,11 +50,6 @@ public interface MpcStream
    * Tests if the stream is closed.
    */
   public boolean isClosed();
-  
-  /**
-   * Returns the owning broker
-   */
-  // public Broker getBroker();
   
   //
   // messages
@@ -71,10 +63,12 @@ public interface MpcStream
    * @param from the source actor's address
    * @param payload the message payload
    */
-  public void message(String to, 
-                      String from,
-                      String methodName,
-                      Object ...args);
+  public void send(String to, 
+                   String from,
+                   AmpHeaders headers,
+                   AmpEncoder encoder,
+                   String methodName,
+                   Object ...args);
   
   /**
    * Sends a message error to an {@link com.caucho.bam.actor.ActorHolder},
@@ -89,11 +83,11 @@ public interface MpcStream
    * @param payload the message payload
    * @param error the message error
    */
-  public void messageError(String to,
-                           String from,
-                           String methodName,
-                           Object []args,
-                           MpcError error);
+  public void error(String to,
+                    String from,
+                    AmpHeaders headers,
+                    AmpEncoder encoder,
+                    AmpError error);
 
   //
   // queries (iq)
@@ -118,6 +112,8 @@ public interface MpcStream
   public void query(long id,
                     String to,
                     String from,
+                    AmpHeaders headers,
+                    AmpEncoder encoder,
                     String methodName,
                     Object ...args);
 
@@ -132,7 +128,8 @@ public interface MpcStream
   public void queryResult(long id,
                           String to,
                           String from,
-                          String methodName,
+                          AmpHeaders headers,
+                          AmpEncoder encoder,
                           Object result);
   
   /**
@@ -147,7 +144,7 @@ public interface MpcStream
   public void queryError(long id,
                          String to,
                          String from,
-                         String methodName,
-                         Object []args,
-                         MpcError error);
+                         AmpHeaders headers,
+                         AmpEncoder encoder,
+                         AmpError error);
 }

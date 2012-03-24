@@ -140,6 +140,7 @@ public class ServletService
 
   private String _stage = "production";
   private boolean _isPreview;
+  private boolean _isEnabled = true;
 
   private String _serverHeader;
 
@@ -532,6 +533,21 @@ public class ServletService
   public boolean isPreview()
   {
     return _isPreview;
+  }
+  
+  /**
+   * Returns true for an enabled service.
+   */
+  public boolean isEnabled()
+  {
+    return _isEnabled;
+  }
+  
+  public void setEnabled(boolean isEnabled)
+  {
+    _isEnabled = isEnabled;
+    
+    clearCache();
   }
 
   /**

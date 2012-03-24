@@ -27,33 +27,29 @@
  * @author Scott Ferguson
  */
 
-package com.caucho.mpc.skeleton;
+package com.caucho.amp;
 
-import java.lang.reflect.InvocationHandler;
-import java.lang.reflect.Method;
-import java.util.HashMap;
-
-import com.caucho.mpc.stream.MpcStream;
+import com.caucho.amp.actor.AmpActor;
+import com.caucho.amp.router.AmpRouter;
 
 /**
- * Creates MPC skeletons and stubs.
+ * Manages an amp domain.
  */
-class MpcReflectionStub implements InvocationHandler
+public interface AmpManager
 {
-  private HashMap<String,Method> _methodMap = new HashMap<String,Method>();
+  /**
+   * Returns the domain's router.
+   */
+  public AmpRouter getRouter();
   
-  private final Object _bean;
+  /**
+   * Creates a client proxy to an api.
+   */
+  public <T> T createClient(Class<T> api, String to);
   
-  MpcReflectionStub(Object bean)
-  {
-    _bean = bean;
-  }
-
-  @Override
-  public Object invoke(Object bean, Method arg1, Object[] arg2)
-    throws Throwable
-  {
-    // TODO Auto-generated method stub
-    return null;
-  }
+  /**
+   * Adds an actor stream, creating the mailbox for it 
+   * using the default factory.
+   */
+  public void addActor(AmpActor actor);
 }

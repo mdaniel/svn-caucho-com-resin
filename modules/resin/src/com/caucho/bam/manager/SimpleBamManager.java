@@ -41,6 +41,8 @@ import com.caucho.bam.mailbox.Mailbox;
 import com.caucho.bam.mailbox.MailboxType;
 import com.caucho.bam.mailbox.MultiworkerMailbox;
 import com.caucho.bam.mailbox.PassthroughMailbox;
+import com.caucho.bam.proxy.BamProxyFactory;
+import com.caucho.bam.proxy.ProxyActor;
 import com.caucho.bam.query.QuerySender;
 import com.caucho.bam.stream.MessageStream;
 import com.caucho.bam.stream.NullActor;
@@ -88,9 +90,6 @@ public class SimpleBamManager implements BamManager
     getBroker().removeMailbox(mailbox);
   }
 
-  /* (non-Javadoc)
-   * @see com.caucho.bam.manager.BrokerManager#addActor(com.caucho.bam.actor.Actor)
-   */
   @Override
   public void addActor(String address,
                        ManagedActor actor)
@@ -102,6 +101,24 @@ public class SimpleBamManager implements BamManager
                                     actor.getActor(), 
                                     MailboxType.DEFAULT);
     actor.setMailbox(mailbox);
+    
+    addMailbox(mailbox);
+  }
+  
+  /**
+   * Creates a skeleton actor.
+   */
+  public void addActorBean(String address, Object bean)
+  {
+    ProxyActor<?> actor = new ProxyActor(bean, address, getBroker());
+    
+    System.out.println("ACTOR: " +actor);
+
+    Mailbox mailbox = createMailbox(address, 
+                                    actor,
+                                    MailboxType.DEFAULT);
+    
+    // actor.setMailbox(mailbox);
     
     addMailbox(mailbox);
   }
@@ -215,6 +232,11 @@ public class SimpleBamManager implements BamManager
     addActor(address, actor);
     
     return actor.getSender();
+  }
+  
+  public <T> T createProxy(Class<T> api, String to)
+  {
+    return BamProxyFactory.createProxy(api, to, getBroker());
   }
 
   @Override

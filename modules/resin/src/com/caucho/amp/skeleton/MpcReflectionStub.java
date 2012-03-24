@@ -27,58 +27,33 @@
  * @author Scott Ferguson
  */
 
-package com.caucho.mpc.skeleton;
+package com.caucho.amp.skeleton;
 
 import java.lang.reflect.InvocationHandler;
 import java.lang.reflect.Method;
 import java.util.HashMap;
 
-import com.caucho.mpc.stream.MpcStream;
+import com.caucho.amp.stream.AmpStream;
 
 /**
  * Creates MPC skeletons and stubs.
  */
-class MpcReflectionHandler implements InvocationHandler
+class MpcReflectionStub implements InvocationHandler
 {
-  private Class<?> _api;
-  private MpcStream _broker;
-  private String _to;
-  private String _from;
   private HashMap<String,Method> _methodMap = new HashMap<String,Method>();
   
-  MpcReflectionHandler(Class<?> api, 
-                       MpcStream broker,
-                       String to,
-                       String from)
+  private final Object _bean;
+  
+  MpcReflectionStub(Object bean)
   {
-    if (! api.isInterface())
-      throw new IllegalArgumentException();
-    
-    _api = api;
-    _broker = broker;
-    _to = to;
-    _from = from;
-    
-    for (Method method : api.getMethods()) {
-      _methodMap.put(method.getName(), method);
-    }
+    _bean = bean;
   }
 
   @Override
-  public Object invoke(Object bean,
-                       Method method,
-                       Object []args)
+  public Object invoke(Object bean, Method arg1, Object[] arg2)
     throws Throwable
   {
-    String methodName = method.getName();
-    Method targetMethod = _methodMap.get(methodName);
-    
-    if (targetMethod != null) {
-      _broker.message(_to, _from, methodName, args);
-      return null;
-    }
-    else {
-      throw new UnsupportedOperationException(getClass().getName());
-    }
+    // TODO Auto-generated method stub
+    return null;
   }
 }

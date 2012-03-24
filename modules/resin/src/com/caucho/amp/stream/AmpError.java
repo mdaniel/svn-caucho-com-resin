@@ -27,7 +27,7 @@
  * @author Scott Ferguson
  */
 
-package com.caucho.mpc.stream;
+package com.caucho.amp.stream;
 
 /**
  * Primary stream handling all message packets.
@@ -41,6 +41,6 @@ package com.caucho.mpc.stream;
  * <li>query - RPC call/reply packets
  * </ul>
  */
-public class MpcError
+public class AmpError
 {
 }
