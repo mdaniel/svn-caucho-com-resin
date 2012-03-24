@@ -66,12 +66,12 @@ public class ProxySkeleton<S>
 
   private Class<?> _cl;
 
-  private final HashMap<Class<?>, Method> _messageHandlers
-    = new HashMap<Class<?>, Method>();
+  private final HashMap<String, Method> _messageHandlers
+    = new HashMap<String, Method>();
   private final HashMap<Class<?>, Method> _messageErrorHandlers
     = new HashMap<Class<?>, Method>();
-  private final HashMap<Class<?>, QueryInvoker> _queryHandlers
-    = new HashMap<Class<?>, QueryInvoker>();
+  private final HashMap<String, QueryInvoker> _queryHandlers
+    = new HashMap<String, QueryInvoker>();
   private final HashMap<Class<?>, Method> _queryResultHandlers
     = new HashMap<Class<?>, Method>();
   private final HashMap<Class<?>, Method> _queryErrorHandlers
@@ -90,7 +90,7 @@ public class ProxySkeleton<S>
   public static <T> ProxySkeleton<T>
   getSkeleton(Class<T> cl)
   {
-    return null;
+    return new ProxySkeleton(cl);
     /*
     synchronized(_skeletonRefMap) {
       SoftReference<ProxySkeleton<?>> skeletonRef = _skeletonRefMap.get(cl);
@@ -119,21 +119,26 @@ public class ProxySkeleton<S>
                       String from,
                       Serializable payload)
   {
-    Method handler;
-
-    if (payload != null)
-      handler = _messageHandlers.get(payload.getClass());
-    else
-      handler = null;
+    if (! (payload instanceof CallPayload)) {
+      if (log.isLoggable(Level.FINER)) {
+        log.finer(actor + " message " + payload + " is unsupported");
+      }
+      
+      return;
+    }
+    
+    CallPayload call = (CallPayload) payload;
+    
+    Method handler = _messageHandlers.get(call.getName());
 
     if (handler != null) {
       if (log.isLoggable(Level.FINEST)) {
-        log.finest(actor + " message " + payload
+        log.finest(actor + " message " + call
                    + " {from:" + from + ", to:" + to + "}");
       }
 
       try {
-        handler.invoke(actor, to, from, payload);
+        handler.invoke(actor, call.getArgs());
       }
       catch (RuntimeException e) {
         throw e;
@@ -200,14 +205,20 @@ public class ProxySkeleton<S>
                     String from,
                     Serializable payload)
   {
-    QueryInvoker handler;
-
-    if (payload != null)
-      handler = _queryHandlers.get(payload.getClass());
-    else {
-      handler = null;
+    System.out.println("QQQ: " + actor + " " + payload);
+    if (! (payload instanceof CallPayload)) {
+      if (log.isLoggable(Level.FINER)) {
+        log.finer(actor + " message " + payload + " is unsupported");
+      }
+      
+      return;
     }
+    
+    CallPayload call = (CallPayload) payload;
 
+    QueryInvoker handler = _queryHandlers.get(call.getName());
+
+    System.out.println("HANDL:E" + handler + " " + call.getName());
     if (handler != null) {
       if (log.isLoggable(Level.FINEST)) {
         log.finest(actor + " query " + payload
@@ -215,7 +226,7 @@ public class ProxySkeleton<S>
       }
 
       try {
-        handler.invoke(actor, broker, id, to, from, payload);
+        handler.invoke(actor, broker, id, to, from, call.getName(), call.getArgs());
       }
       catch (RuntimeException e) {
         // broker.queryError(id, from, to, payload, ActorError.create(e));
@@ -323,7 +334,7 @@ public class ProxySkeleton<S>
 
   protected void introspect(Class<?> cl)
   {
-    if (cl == null)
+    if (cl == null || cl == Object.class)
       return;
 
     introspect(cl.getSuperclass());
@@ -332,70 +343,17 @@ public class ProxySkeleton<S>
 
     for (int i = 0; i < methods.length; i++) {
       Method method = methods[i];
-
-      Class<?> payloadType = getPayloadType(Message.class, method);
-
-      if (payloadType != null) {
-        log.log(Level.ALL, L.l("{0} introspect @Message {1} method={2}",
-                    this, payloadType.getName(), method));
-
+      
+      if (void.class.equals(method.getReturnType())) {
         method.setAccessible(true);
 
-        _messageHandlers.put(payloadType, method);
+        _messageHandlers.put(method.getName(), method);
         continue;
       }
-
-      payloadType = getPayloadType(MessageError.class, method);
-
-      if (payloadType != null) {
-        log.log(Level.ALL, L.l("{0} introspect @MessageError {1} method={2}",
-                       this, payloadType.getName(), method));
-
+      else {
         method.setAccessible(true);
 
-        _messageErrorHandlers.put(payloadType, method);
-        continue;
-      }
-
-      payloadType = getQueryPayloadType(Query.class, method);
-
-      if (payloadType != null) {
-        log.log(Level.ALL, L.l("{0} @Query {1} method={2}",
-                               this, payloadType.getName(), method));
-
-        method.setAccessible(true);
-        
-        if (method.getParameterTypes().length == 1)
-          _queryHandlers.put(payloadType, new QueryShortMethodInvoker(method));
-        else if (method.getParameterTypes().length == 4)
-          _queryHandlers.put(payloadType, new QueryMethodInvoker(method));
-        else 
-          throw new IllegalStateException(String.valueOf(method));
-        
-        continue;
-      }
-
-      payloadType = getQueryPayloadType(QueryResult.class, method);
-
-      if (payloadType != null) {
-        log.log(Level.ALL, L.l("{0} @QueryResult {1} method={2}",
-                       this, payloadType.getName(), method));
-
-        method.setAccessible(true);
-
-        _queryResultHandlers.put(payloadType, method);
-        continue;
-      }
-
-      payloadType = getQueryErrorPayloadType(QueryError.class, method);
-
-      if (payloadType != null) {
-        log.log(Level.ALL, L.l("{0} @QueryError {1} method={2}",
-                       this, payloadType.getName(), method));
-
-        method.setAccessible(true);
-
-        _queryErrorHandlers.put(payloadType, method);
+        _queryHandlers.put(method.getName(), new QueryMethodInvoker(method));
         continue;
       }
     }
@@ -480,7 +438,8 @@ public class ProxySkeleton<S>
                                 long id, 
                                 String to, 
                                 String from,
-                                Serializable payload)
+                                String name,
+                                Object []args)
     throws IllegalAccessException, InvocationTargetException;
   }
   
@@ -498,10 +457,13 @@ public class ProxySkeleton<S>
                        long id, 
                        String to, 
                        String from,
-                       Serializable payload)
+                       String name,
+                       Object []args)
       throws IllegalAccessException, InvocationTargetException
     {
-      _method.invoke(actor, id, to, from, payload);
+      Object result = _method.invoke(actor, args);
+      
+      broker.queryResult(id, from, to, new ReplyPayload(result));
     }
   }
   
@@ -519,12 +481,13 @@ public class ProxySkeleton<S>
                        long id, 
                        String to, 
                        String from,
-                       Serializable payload)
+                       String methodName,
+                       Object []args)
       throws IllegalAccessException, InvocationTargetException
     {
-      Object result = _method.invoke(actor, payload);
+      Object result = _method.invoke(actor, args);
       
-      broker.queryResult(id, from, to, (Serializable) result);
+      broker.queryResult(id, from, to, new ReplyPayload(result));
     }
   }
 }

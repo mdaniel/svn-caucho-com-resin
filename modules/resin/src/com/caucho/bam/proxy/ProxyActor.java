@@ -30,29 +30,12 @@
 package com.caucho.bam.proxy;
 
 import java.io.Serializable;
-import java.lang.annotation.Annotation;
-import java.lang.ref.SoftReference;
-import java.lang.reflect.InvocationTargetException;
-import java.lang.reflect.Method;
-import java.util.HashMap;
-import java.util.WeakHashMap;
-import java.util.logging.Level;
 import java.util.logging.Logger;
 
 import com.caucho.bam.BamError;
-import com.caucho.bam.BamException;
-import com.caucho.bam.Message;
-import com.caucho.bam.MessageError;
-import com.caucho.bam.Query;
-import com.caucho.bam.QueryError;
-import com.caucho.bam.QueryResult;
 import com.caucho.bam.actor.Actor;
-import com.caucho.bam.actor.SimpleActor;
-import com.caucho.bam.actor.SkeletonActorFilter;
-import com.caucho.bam.actor.SkeletonInvocationException;
 import com.caucho.bam.broker.Broker;
 import com.caucho.bam.stream.MessageStream;
-import com.caucho.util.L10N;
 
 /**
  * The Skeleton introspects and dispatches messages for a
@@ -61,6 +44,9 @@ import com.caucho.util.L10N;
  */
 public class ProxyActor<T> implements Actor
 {
+  private static final Logger log
+    = Logger.getLogger(ProxyActor.class.getName());
+  
   private String _address;
   private T _bean;
   private Broker _broker;
@@ -94,14 +80,12 @@ public class ProxyActor<T> implements Actor
     return false;
   }
 
-  /* (non-Javadoc)
-   * @see com.caucho.bam.stream.MessageStream#message(java.lang.String, java.lang.String, java.io.Serializable)
-   */
   @Override
   public void message(String to, String from, Serializable payload)
   {
-    // TODO Auto-generated method stub
+    MessageStream fallback = null;
     
+    _skeleton.message(_bean, fallback, to, from, payload);
   }
 
   /* (non-Javadoc)
@@ -121,8 +105,9 @@ public class ProxyActor<T> implements Actor
   @Override
   public void query(long id, String to, String from, Serializable payload)
   {
-    // TODO Auto-generated method stub
+    MessageStream fallback = null;
     
+    _skeleton.query(_bean, fallback, getBroker(), id, to, from, payload);
   }
 
   /* (non-Javadoc)

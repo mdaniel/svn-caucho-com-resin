@@ -236,7 +236,16 @@ public class SimpleBamManager implements BamManager
   
   public <T> T createProxy(Class<T> api, String to)
   {
-    return BamProxyFactory.createProxy(api, to, getBroker());
+    String address = ("urn:client:/" + api.getSimpleName()
+                      + "/" + _sequence.incrementAndGet());
+    /*
+    ProxyActor actor
+      = BamProxyFactory.createProxyActor(api, to, address, getBroker());
+    
+    return actor.getProxy();
+    */
+    
+    return null;
   }
 
   @Override

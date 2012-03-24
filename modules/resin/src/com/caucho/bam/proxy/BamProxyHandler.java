@@ -110,8 +110,8 @@ class BamProxyHandler implements InvocationHandler
     Object invoke(ActorSender sender, String to, Object []args)
     {
       CallPayload payload = new CallPayload(_name, args);
-      
-      return null;
+      System.out.println("NVOK: " + to + " " + sender);
+      return sender.query(to, payload);
     }
   }
   
@@ -127,13 +127,13 @@ class BamProxyHandler implements InvocationHandler
     Object invoke(ActorSender sender, String to, Object []args)
     {
       CallPayload payload = new CallPayload(_name, args);
-      System.out.println("SEND: " + sender + " " + to);
+
       sender.message(to, payload);
       
       return null;
     }
   }
-  
+
   static class ProxySender extends AbstractActorSender {
     private String _address;
     private Broker _broker;
