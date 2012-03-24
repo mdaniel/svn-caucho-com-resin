@@ -89,7 +89,7 @@ class AmqpClientReceiver<T> extends AbstractMessageReceiver<T>
 
     if (_prefetch > 0) {
       _linkCredit = _prefetch;
-      _link.setPrefetch(_prefetch);
+      _link.updatePrefetch(_prefetch);
     }
   }
   
@@ -109,7 +109,7 @@ class AmqpClientReceiver<T> extends AbstractMessageReceiver<T>
       }
       
       if (_prefetch == 0) {
-        _link.setPrefetch(1);
+        _link.updatePrefetch(1);
       }
       try {
         value = _valueQueue.poll(1000, TimeUnit.MILLISECONDS);
@@ -123,7 +123,7 @@ class AmqpClientReceiver<T> extends AbstractMessageReceiver<T>
       } finally {
         if (_prefetch == 0) {
           // drain
-          _link.setPrefetch(0);
+          _link.updatePrefetch(0);
         }
       }
     }

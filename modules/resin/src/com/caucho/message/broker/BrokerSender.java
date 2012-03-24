@@ -38,6 +38,8 @@ public interface BrokerSender
 {
   public long nextMessageId();
   
+  public int getPrefetch();
+  
   public void message(long xid,
                       long mid,
                       boolean isDurable,

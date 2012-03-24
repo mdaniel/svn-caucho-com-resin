@@ -115,6 +115,8 @@ public class AmqpSession
     addOutgoingLink(link);
     
     _conn.getWriter().attachReply(this, link);
+    
+    link.afterAttach();
   }
 
   void addIncomingLink(AmqpLink link)

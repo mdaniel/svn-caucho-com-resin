@@ -204,7 +204,7 @@ public class AmqpConnectionHandler
     if (link.getRole() == Role.RECEIVER) {
       AmqpReceiverLink receiver = (AmqpReceiverLink) link;
       
-      receiver.setIncomingDeliveryCount(attach.getInitialDeliveryCount());
+      receiver.setPeerDeliveryCount(attach.getInitialDeliveryCount());
     }
   }
 

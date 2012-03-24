@@ -36,6 +36,12 @@ import com.caucho.vfs.TempBuffer;
  */
 public class AbstractBrokerSender implements BrokerSender
 {
+  @Override
+  public int getPrefetch()
+  {
+    return 256;
+  }
+  
   public long nextMessageId()
   {
     return 0;

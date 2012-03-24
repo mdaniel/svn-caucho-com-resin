@@ -98,6 +98,10 @@ class AmqpClientSender<T> extends AbstractMessageSender<T> implements AmqpSender
                                 long timeoutMicros)
   {
     try {
+      if (! waitForAvailable(timeoutMicros)) {
+        return false;
+      }
+      
       TempOutputStream tOut = new TempOutputStream();
       WriteStream os = Vfs.openWrite(tOut);
       AmqpStreamWriter sout = new AmqpStreamWriter(os);
@@ -113,18 +117,8 @@ class AmqpClientSender<T> extends AbstractMessageSender<T> implements AmqpSender
       header.setDeliveryCount(0);
       
       header.write(aout);
-      
-      String contentType = _encoder.getContentType(value);
-      
-      if (contentType != null) {
-        MessageProperties properties = new MessageProperties();
-        
-        properties.setContentType(contentType);
-        
-        properties.write(aout);
-      }
     
-      _encoder.encode(aout, value);
+      _encoder.encode(aout, factory, value);
       
       sout.flush();
       os.flush();
@@ -138,6 +132,21 @@ class AmqpClientSender<T> extends AbstractMessageSender<T> implements AmqpSender
     } catch (IOException e) {
       throw new AmqpException(e);
     }
+  }
+  
+  private boolean waitForAvailable(long micros)
+  {
+    if (remainingCapacity() <= 0) {
+      return false;
+    }
+    
+    return true;
+  }
+  
+  @Override
+  public int remainingCapacity()
+  {
+    return _link.getLinkCredit();
   }
   
   public long getLastMessageId()

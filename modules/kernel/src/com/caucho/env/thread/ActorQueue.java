@@ -159,6 +159,11 @@ public final class ActorQueue<T extends RingItem>
     return (_headRef.get() - _tailRef.get() + _size) & _mask;
   }
   
+  public final int getAvailable()
+  {
+    return _size - 1 - getSize();
+  }
+  
   public final void wake()
   {
     if (_headAllocRef.get() != _tailRef.get() || _isOfferWaitRef.get()) {

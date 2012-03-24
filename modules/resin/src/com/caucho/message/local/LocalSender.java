@@ -97,18 +97,8 @@ public class LocalSender<T> extends AbstractMessageSender<T> {
       AmqpStreamWriter sout = new AmqpStreamWriter(os);
       AmqpWriter aout = new AmqpWriter();
       aout.initBase(sout);
-      
-      String contentType = _encoder.getContentType(value);
-      
-      if (contentType != null) {
-        MessageProperties properties = new MessageProperties();
-        
-        properties.setContentType(contentType);
-        
-        properties.write(aout);
-      }
     
-      _encoder.encode(aout, value);
+      _encoder.encode(aout, factory, value);
       
       sout.flush();
       os.flush();
@@ -119,7 +109,7 @@ public class LocalSender<T> extends AbstractMessageSender<T> {
       long xid = 0;
       long mid = _publisher.nextMessageId();
       boolean isDurable = false;
-      int priority = 4;
+      int priority = factory.getPriority();
       long expireTime = 0;
       
       _lastMessageId = mid;

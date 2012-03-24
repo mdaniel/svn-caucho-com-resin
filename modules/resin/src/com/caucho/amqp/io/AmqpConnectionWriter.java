@@ -218,7 +218,7 @@ public class AmqpConnectionWriter
     if (link.getRole() == Role.SENDER) {
       attach.setRole(Role.RECEIVER);
       
-      attach.setInitialDeliveryCount(link.getIncomingDeliveryCount());
+      attach.setInitialDeliveryCount(link.getDeliveryCount());
     }
     else {
       attach.setRole(Role.SENDER);

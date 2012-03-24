@@ -42,9 +42,13 @@ abstract public class AmqpReceiverLink extends AmqpLink
 {
   private int _prefetch;
   
-  private long _outgoingDeliveryCount;
-  private long _deliveryLimit;
+  private long _transferCount;
+  private long _transferCountSnapshot;
   private long _takeCount;
+  
+  private long _peerDeliveryCount;
+  
+  private long _deliveryLimit;
   
   protected AmqpReceiverLink(String name, String address)
   {
@@ -58,6 +62,24 @@ abstract public class AmqpReceiverLink extends AmqpLink
   }
   
   //
+  // after attachment
+  //
+
+  /**
+   * Called after the attach has been sent to the peer.
+   */
+  @Override
+  public void afterAttach()
+  {
+    sendPrefetch(_prefetch);
+  }
+  
+  protected int getPrefetchAvailable()
+  {
+    return _prefetch;
+  }
+
+  //
   // message transfer
   //
 
@@ -69,7 +91,12 @@ abstract public class AmqpReceiverLink extends AmqpLink
   protected void onTransfer(FrameTransfer transfer, AmqpReader ain)
     throws IOException
   {
-    addDeliveryCount();
+    updateTransfer();
+  }
+  
+  protected final void updateTransfer()
+  {
+    _transferCount++;
   }
   
   //
@@ -108,35 +135,50 @@ abstract public class AmqpReceiverLink extends AmqpLink
   
   public void updateTake()
   {
-    _takeCount++;
+    long takeCount = ++_takeCount;
+    
+    int prefetch = _prefetch;
     
     long limit = _deliveryLimit;
-    long available = limit - _takeCount;
+    long available = limit - _transferCount;
     
-    if (2 * available < _prefetch || _prefetch < 8) {
-      setPrefetch(_prefetch);
+    if ((takeCount & 0x3f) == 0 || 2 * available < prefetch || prefetch < 8) {
+      sendPrefetch(_prefetch);
     }
   }
-  
-  public void setIncomingDeliveryCount(int count)
+
+  @Override
+  public void setPeerDeliveryCount(long deliveryCount)
   {
-    super.setIncomingDeliveryCount(count);
-    
-    // XXX: sync
-   // _outgoingDeliveryCount = count;
+    _peerDeliveryCount = deliveryCount;
+    _transferCountSnapshot = _transferCount;
   }
 
-  public void setPrefetch(int prefetch)
+  public final void setPrefetch(int prefetch)
   {
     _prefetch = prefetch;
-    
-    long receiveCount = getTransferCount();
-    int delta = (int) (receiveCount - _takeCount);
-    
-    long deliveryCount = getIncomingDeliveryCount();
-    
-    _deliveryLimit = _takeCount + prefetch;
+  }
 
-    getSession().flow(this, deliveryCount, prefetch - delta);
+  public void updatePrefetch(int prefetch)
+  {
+    setPrefetch(prefetch);
+    
+    sendPrefetch(prefetch);
+  }
+  
+  private void sendPrefetch(int prefetch)
+  {
+    long receiveCount = _transferCount;
+    long receiveCountSnapshot = _transferCountSnapshot;
+    
+    int localQueueSize = (int) (receiveCount - _takeCount);
+    
+    long receiveDelta = receiveCount - receiveCountSnapshot;
+    
+    long peerDeliveryCount = _peerDeliveryCount + receiveDelta;
+    
+    _deliveryLimit = receiveCount + prefetch;
+
+    getSession().flow(this, peerDeliveryCount, prefetch - localQueueSize);
   }
 }

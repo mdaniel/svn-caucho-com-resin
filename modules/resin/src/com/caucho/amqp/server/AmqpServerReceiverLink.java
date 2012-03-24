@@ -52,6 +52,7 @@ public class AmqpServerReceiverLink extends AmqpReceiverLink
     = Logger.getLogger(AmqpServerReceiverLink.class.getName());
   
   private final BrokerSender _sender;
+  private final SenderSettleHandler _flowHandler;
   
   public AmqpServerReceiverLink(String name,
                                 String address,
@@ -60,6 +61,9 @@ public class AmqpServerReceiverLink extends AmqpReceiverLink
     super(name, address);
     
     _sender = sender;
+    _flowHandler = new FlowSettleHandler();
+    
+    setPrefetch(sender.getPrefetch());
   }
 
   /**
@@ -69,6 +73,8 @@ public class AmqpServerReceiverLink extends AmqpReceiverLink
   protected void onTransfer(FrameTransfer transfer, AmqpReader ain)
     throws IOException
   {
+    super.onTransfer(transfer, ain);
+    
     boolean isSettled = transfer.isSettled();
     
     long desc = ain.peekDescriptor();
@@ -101,10 +107,13 @@ public class AmqpServerReceiverLink extends AmqpReceiverLink
     long xid = 0;
     long mid = _sender.nextMessageId();
     
-    SenderSettleHandler handler = null;
+    SenderSettleHandler handler;
     
     if (! isSettled) {
       handler = new MessageSettleHandler(mid);
+    }
+    else {
+      handler = _flowHandler;
     }
     
     if (log.isLoggable(Level.FINER)) {
@@ -116,12 +125,48 @@ public class AmqpServerReceiverLink extends AmqpReceiverLink
                     tBuf.getBuffer(), 0, len, tBuf, handler);
   }
   
-  class MessageSettleHandler implements SenderSettleHandler {
+  //
+  // flow/credit
+  //
+  
+  @Override
+  protected int getPrefetchAvailable()
+  {
+    return _sender.getPrefetch();
+  }
+
+  class FlowSettleHandler implements SenderSettleHandler {
+    @Override
+    public boolean isSettled()
+    {
+      return true;
+    }
+    
+    @Override
+    public void onAccepted(long mid)
+    {
+      updateTake();
+    }
+
+    @Override
+    public void onRejected(long mid, String msg)
+    {
+      updateTake();
+    }
+  }
+
+  class MessageSettleHandler extends FlowSettleHandler {
     private final long _deliveryId;
     
     MessageSettleHandler(long deliveryId)
     {
       _deliveryId = deliveryId;
+    }
+    
+    @Override
+    public boolean isSettled()
+    {
+      return false;
     }
     
     @Override

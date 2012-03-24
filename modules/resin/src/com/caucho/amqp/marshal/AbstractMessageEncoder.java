@@ -32,6 +32,7 @@ package com.caucho.amqp.marshal;
 import java.io.IOException;
 
 import com.caucho.amqp.io.AmqpWriter;
+import com.caucho.amqp.io.MessageProperties;
 import com.caucho.message.MessagePropertiesFactory;
 
 
@@ -69,6 +70,35 @@ abstract public class AbstractMessageEncoder<T> implements AmqpMessageEncoder<T>
   {
     return null;
   }
+  
+  @Override
+  public void encode(AmqpWriter out, 
+                     MessagePropertiesFactory<T> factory,
+                     T value)
+    throws IOException
+  {
+    // header taken care of prior to call
+    encodeProperties(out, factory, value);
+    
+    encode(out, value);
+  }
+  
+  protected void encodeProperties(AmqpWriter out, 
+                                  MessagePropertiesFactory<T> factory,
+                                  T value)
+    throws IOException
+  {
+    String contentType = getContentType(value);
+      
+    if (contentType != null) {
+      MessageProperties properties = new MessageProperties();
+        
+      properties.setContentType(contentType);
+        
+      properties.write(out);
+    }
+  }
+  
   
   @Override
   abstract public void encode(AmqpWriter out, T value)

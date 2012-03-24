@@ -39,6 +39,12 @@ import com.caucho.vfs.TempBuffer;
 public class NullSender implements BrokerSender
 {
   @Override
+  public int getPrefetch()
+  {
+    return 0;
+  }
+  
+  @Override
   public long nextMessageId()
   {
     return 0;

@@ -596,6 +596,12 @@ public class StompConnection extends AbstractProtocolConnection
     }
     
     @Override
+    public boolean isSettled()
+    {
+      return true;
+    }
+    
+    @Override
     public void onAccepted(long mid)
     {
       _conn.receipt(_receipt);

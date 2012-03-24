@@ -52,4 +52,9 @@ public interface AmqpMessageEncoder<T>
   
   public void encode(AmqpWriter out, T value)
     throws IOException;
+  
+  public void encode(AmqpWriter out, 
+                     MessagePropertiesFactory<T> factory,
+                     T value)
+    throws IOException;
 }

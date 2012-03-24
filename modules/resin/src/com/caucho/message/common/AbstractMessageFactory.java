@@ -43,7 +43,23 @@ public class AbstractMessageFactory<T>
   private int _priority = -1;
   private long _ttl = -1;
   private boolean _isFirstAcquirer = true;
+  
+  // properties
+  private Object _messageId; // type=message-id
+  private String _userId; // type=binary
+  private String _to; // type=address
+  private String _subject;
+  private String _replyTo; // type=address
+  private Object _correlationId; // type=message-id
+  private String _contentType; // type=contentType
+  private String _contentEncoding; // type=symbol
+  private long _expiryTime = -1; // type=timestamp
+  private long _creationTime = -1; // type=timestamp
+  private String _groupId;
+  private long _groupSequence = -1; // type=sequence
+  private String _replyToGroupId;
 
+  @Override
   public void setDurable(boolean isDurable)
   {
     _isDurable = isDurable;
@@ -89,6 +105,162 @@ public class AbstractMessageFactory<T>
   public void setFirstAcquirer(boolean isFirst)
   {
     _isFirstAcquirer = isFirst;
+  }
+  
+  //
+  // properties
+  //
+  
+  public Object getMessageId()
+  {
+    return _messageId;
+  }
+  
+  public void setMessageId(Object value)
+  {
+    _messageId = value;
+  }
+  
+  public String getUserId()
+  {
+    return _userId;
+  }
+  
+  public void setUserId(String value)
+  {
+    _userId = value;
+  }
+  
+  @Override
+  public String getTo()
+  {
+    return _to;
+  }
+  
+  @Override
+  public void setTo(String to)
+  {
+    _to = to;
+  }
+
+  @Override
+  public String getSubject()
+  {
+    return _subject;
+  }
+
+  @Override
+  public void setSubject(String subject)
+  {
+    _subject = subject;
+  }
+  
+  @Override
+  public String getReplyTo()
+  {
+    return _replyTo;
+  }
+  
+  @Override
+  public void setReplyTo(String value)
+  {
+    _replyTo = value;
+  }
+  
+  @Override
+  public Object getCorrelationId()
+  {
+    return _correlationId;
+  }
+  
+  @Override
+  public void setCorrelationId(Object value)
+  {
+    _correlationId = value;
+  }
+  
+  @Override
+  public String getContentType()
+  {
+    return _contentType;
+  }
+  
+  @Override
+  public void setContentType(String value)
+  {
+    _contentType = value;
+  }
+  
+  @Override
+  public String getContentEncoding()
+  {
+    return _contentEncoding;
+  }
+  
+  @Override
+  public void setContentEncoding(String value)
+  {
+    _contentEncoding = value;
+  }
+  
+  @Override
+  public long getExpiryTime()
+  {
+    return _expiryTime;
+  }
+  
+  @Override
+  public void setExpiryTime(long value)
+  {
+    _expiryTime = value;
+  }
+  
+  @Override
+  public long getCreationTime()
+  {
+    return _creationTime;
+  }
+  
+  @Override
+  public void setCreationTime(long value)
+  {
+    _creationTime = value;
+  }
+  
+  @Override
+  public String getGroupId()
+  {
+    return _groupId;
+  }
+  
+  @Override
+  public void setGroupId(String value)
+  {
+    _groupId = value;
+  }
+  
+  @Override
+  public long getGroupSequence()
+  {
+    return _groupSequence;
+  }
+  
+  @Override
+  public void setGroupSequence(long value)
+  {
+    _groupSequence = value;
+  }
+  
+  @Override
+  public String getReplyToGroupId()
+  {
+    return _replyToGroupId;
+  }
+  
+  @Override
+  public void setReplyToGroupId(String value)
+  {
+    _replyToGroupId = value;
   }
 
   @Override

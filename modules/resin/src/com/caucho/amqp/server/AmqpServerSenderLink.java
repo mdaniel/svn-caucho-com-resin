@@ -111,6 +111,8 @@ public class AmqpServerSenderLink extends AmqpSenderLink
   @Override
   public void onFlow(FrameFlow flow)
   {
+    super.onFlow(flow);
+    
     _receiver.flow(flow.getDeliveryCount(), flow.getLinkCredit());
   }
   

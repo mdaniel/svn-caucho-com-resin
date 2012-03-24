@@ -51,6 +51,11 @@ public class NautilusBrokerPublisher implements BrokerSender
     _nautilusQueue = actorQueue;
   }
   
+  public int getPrefetch()
+  {
+    return _nautilusQueue.getAvailable();
+  }
+  
   @Override
   public long nextMessageId()
   {

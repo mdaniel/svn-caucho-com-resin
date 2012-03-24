@@ -33,7 +33,6 @@ import java.io.InputStream;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
-import com.caucho.amqp.common.AmqpLink;
 import com.caucho.amqp.common.AmqpSenderLink;
 import com.caucho.message.SettleMode;
 

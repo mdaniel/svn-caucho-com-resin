@@ -348,6 +348,22 @@ public class AmqpWriter implements AmqpConstants {
       writeNull();
   }
   
+  public void writeObject(Object value)
+    throws IOException
+  {
+    if (value == null) {
+      writeNull();
+      return;
+    }
+
+    if (value instanceof Long) {
+      writeLong((Long) value);
+    }
+    else {
+      writeString((String) value);
+    }
+  }
+  
   public void writeList(List<?> list)
     throws IOException
   {

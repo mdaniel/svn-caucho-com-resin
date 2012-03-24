@@ -31,6 +31,7 @@ package com.caucho.amqp.common;
 
 import java.io.InputStream;
 
+import com.caucho.amqp.io.FrameFlow;
 import com.caucho.amqp.io.FrameAttach.Role;
 import com.caucho.message.SettleMode;
 
@@ -40,6 +41,9 @@ import com.caucho.message.SettleMode;
 abstract public class AmqpSenderLink extends AmqpLink
 {
   private long _deliveryCount;
+  private long _deliveryLimit;
+  
+  private int _peerLinkCredit;
   
   protected AmqpSenderLink(String name, String address)
   {
@@ -50,6 +54,18 @@ abstract public class AmqpSenderLink extends AmqpLink
   public final Role getRole()
   {
     return Role.SENDER;
+  }
+  
+  public final long getDeliveryCount()
+  {
+    return _deliveryCount;
+  }
+  
+  public final int getLinkCredit()
+  {
+    long linkCredit = _deliveryLimit - _deliveryCount;
+    
+    return Math.max((int) linkCredit, 0);
   }
   
   //
@@ -66,11 +82,27 @@ abstract public class AmqpSenderLink extends AmqpLink
   }
   
   //
-  // flow
+  // flow control
   //
-  
-  public long getIncomingDeliveryCount()
+
+  /**
+   * When peer sends its link credit, update deliveryLimit. 
+   */
+  @Override
+  public void onFlow(FrameFlow flow)
   {
-    return _deliveryCount;
+    long peerDeliveryCount = flow.getDeliveryCount();
+    int peerLinkCredit = flow.getLinkCredit();
+    
+    long deliveryCount = _deliveryCount;
+    if (peerDeliveryCount < 0) {
+      _deliveryLimit = deliveryCount + peerLinkCredit; 
+    }
+    else {
+      long delta = Math.max(deliveryCount - peerDeliveryCount, 0);
+      long linkCredit = Math.max(peerLinkCredit - delta, 0);
+      
+      _deliveryLimit = _deliveryCount + linkCredit;
+    }
   }
 }

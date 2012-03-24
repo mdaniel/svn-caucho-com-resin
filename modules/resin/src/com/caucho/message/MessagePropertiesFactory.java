@@ -36,6 +36,10 @@ import java.util.concurrent.BlockingQueue;
  * message factory
  */
 public interface MessagePropertiesFactory<T> extends BlockingQueue<T> {
+  //
+  // amqp header
+  //
+  
   public void setDurable(boolean isDurable);
   
   public boolean isDurable();
@@ -52,5 +56,67 @@ public interface MessagePropertiesFactory<T> extends BlockingQueue<T> {
   
   public void setFirstAcquirer(boolean isFirst);
   
+  //
+  // amqp properties
+  //
+  
+  public Object getMessageId();
+  
+  public void setMessageId(Object messageId);
+  
+  public String getUserId();
+  
+  public void setUserId(String userId);
+  
+  public String getTo();
+  
+  public void setTo(String to);
+  
+  public String getSubject();
+  
+  public void setSubject(String subject);
+  
+  public String getReplyTo();
+  
+  public void setReplyTo(String replyTo);
+  
+  public Object getCorrelationId();
+  
+  public void setCorrelationId(Object value);
+  
+  public String getContentType();
+  
+  public void setContentType(String contentType);
+  
+  public String getContentEncoding();
+  
+  public void setContentEncoding(String contentEncoding);
+  
+  public long getExpiryTime();
+  
+  public void setExpiryTime(long expiryTime);
+  
+  public long getCreationTime();
+  
+  public void setCreationTime(long value);
+  
+  public String getGroupId();
+  
+  public void setGroupId(String value);
+  
+  public long getGroupSequence();
+  
+  public void setGroupSequence(long value);
+  
+  public String getReplyToGroupId();
+  
+  public void setReplyToGroupId(String value);
+  
+  
+  //
+  // lifecycle
+  //
+  
   public void close();
+
 }

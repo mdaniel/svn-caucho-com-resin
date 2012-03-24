@@ -27,17 +27,46 @@
  * @author Scott Ferguson
  */
 
-package com.caucho.message.broker;
-
+package com.caucho.amqp.marshal;
 
 /**
- * Callback for a message receipt from the broker.
+ * Envelope for the amqp value.
  */
-public interface SenderSettleHandler
-{
-  public boolean isSettled();
+public interface AmqpEnvelope {
+  //
+  // properties
+  //
   
-  public void onAccepted(long mid);
+  public Object getMessageId();
   
-  public void onRejected(long mid, String msg);
+  public String getUserId();
+  
+  public String getTo();
+  
+  public String getSubject();
+  
+  public String getReplyTo();
+  
+  public Object getCorrelationId();
+  
+  public String getContentType();
+  
+  public String getContentEncoding();
+  
+  public long getExpiryTime();
+  
+  public long getCreationTime();
+  
+  public String getGroupId();
+  
+  public long getGroupSequence();
+  
+  public String getReplyToGroupId();
+  
+  //
+  // value
+  //
+  
+  public Object getValue();
+
 }
