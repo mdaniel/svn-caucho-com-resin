@@ -10,6 +10,12 @@
 <li><a href="http://caucho.com/resin-3.1/changes/changes.xtp">Resin 3.1 changes</a></li>
 </ul>
 
+<s2 title="4.0.28 - snapshot">
+<ul>
+<li>jsf: restored Mojarra12InjectionProvider (#4996, rep by igor)</li>
+</ul>
+</s2>
+
 <s2 title="4.0.27 - Mar 22, 2012">
 <ul>
 <li>servlet: split CauchoWrapper from AbstractCauchoRequest (#4993, rep by Leonid Kaminsky)</li>

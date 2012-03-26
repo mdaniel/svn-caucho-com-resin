@@ -106,9 +106,18 @@ public class Mojarra12InjectionProvider
     InjectionTarget target = getInjectionTarget(cl);
 
     if (log.isLoggable(Level.FINEST))
-      log.fine(L.l("{0} PreDestroy bean '{1}'", this, o));
+      log.fine(L.l("{0} PostConstruct bean '{1}'", this, o));
 
     target.postConstruct(o);
+  }
+
+  @Override
+  public String toString()
+  {
+    return Mojarra12InjectionProvider.class.getSimpleName()
+           + "["
+           + _context
+           + "]";
   }
 
   private <X> InjectionTarget<X> getInjectionTarget(Class<X> cl)
