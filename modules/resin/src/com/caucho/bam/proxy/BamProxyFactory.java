@@ -31,6 +31,7 @@ package com.caucho.bam.proxy;
 
 import java.lang.reflect.Proxy;
 
+import com.caucho.bam.actor.ActorSender;
 import com.caucho.bam.broker.Broker;
 
 /**
@@ -42,13 +43,28 @@ public class BamProxyFactory
 {
   public static <T> T createProxy(Class<T> api, 
                                   String to,
+                                  String from,
                                   Broker broker)
   {
-    BamProxyHandler handler = new BamProxyHandler(api, to, broker);
+    BamProxyHandler handler = new BamProxyHandler(api, to, from, broker);
     
     ClassLoader loader = Thread.currentThread().getContextClassLoader();
     
-    return (T) Proxy.newProxyInstance(loader, new Class[] { api },
-                                  handler);
+    return (T) Proxy.newProxyInstance(loader, 
+                                      new Class[] { api },
+                                      handler);
+  }
+  
+  public static <T> T createProxy(Class<T> api,
+                                  String to,
+                                  ActorSender sender)
+  {
+    BamProxyHandler handler = new BamProxyHandler(api, to, sender);
+    
+    ClassLoader loader = Thread.currentThread().getContextClassLoader();
+    
+    return (T) Proxy.newProxyInstance(loader, 
+                                      new Class[] { api },
+                                      handler);
   }
 }

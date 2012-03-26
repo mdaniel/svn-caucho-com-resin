@@ -34,17 +34,10 @@ import com.caucho.vfs.Path;
 abstract public class ResinELContext
 {
   private final JavaVar _javaVar = new JavaVar();
-  private final ResinVar _resinVar;
+  private ResinVar _resinVar;
 
   public ResinELContext()
   {
-    _resinVar = new ResinVar(getServerId(),
-                             getResinHome(),
-                             getRootDirectory(),
-                             getLogDirectory(),
-                             getResinConf(),
-                             isResinProfessional(),
-                             null);
   }
 
   public JavaVar getJavaVar()
@@ -54,6 +47,16 @@ abstract public class ResinELContext
 
   public ResinVar getResinVar()
   {
+    if (_resinVar == null) {
+      _resinVar = new ResinVar(getServerId(),
+                               getResinHome(),
+                               getRootDirectory(),
+                               getLogDirectory(),
+                               getResinConf(),
+                               isResinProfessional(),
+                               null);
+    }
+    
     return _resinVar;
   }
 

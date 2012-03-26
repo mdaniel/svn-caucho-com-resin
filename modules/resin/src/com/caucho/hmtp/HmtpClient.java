@@ -40,6 +40,7 @@ import com.caucho.bam.actor.ActorHolder;
 import com.caucho.bam.actor.RemoteActorSender;
 import com.caucho.bam.broker.Broker;
 import com.caucho.bam.client.LinkClient;
+import com.caucho.bam.proxy.BamProxyFactory;
 import com.caucho.bam.query.QueryCallback;
 import com.caucho.bam.query.QueryManager;
 import com.caucho.bam.stream.NullActor;
@@ -260,6 +261,7 @@ public class HmtpClient implements RemoteActorSender
   /**
    * Returns the address
    */
+  @Override
   public String getAddress()
   {
     return _address;
@@ -369,6 +371,11 @@ public class HmtpClient implements RemoteActorSender
   public QueryManager getQueryManager()
   {
     return _linkClient.getSender().getQueryManager();
+  }
+  
+  public <T> T createProxy(Class<T> api, String to)
+  {
+    return BamProxyFactory.createProxy(api,  to, _linkClient.getSender());
   }
 
   @Override

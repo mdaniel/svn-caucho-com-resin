@@ -32,6 +32,7 @@ import com.caucho.bam.RemoteConnectionFailedException;
 import com.caucho.bam.RemoteListenerUnavailableException;
 import com.caucho.bam.ServiceUnavailableException;
 import com.caucho.bam.actor.ActorSender;
+import com.caucho.bam.proxy.BamProxyFactory;
 import com.caucho.hmtp.HmtpClient;
 import com.caucho.server.cluster.ServletService;
 import com.caucho.util.L10N;
@@ -52,10 +53,12 @@ public class ManagerClient
 
   private static final long MANAGER_TIMEOUT = 600 * 1000L;
 
+  private String _url;
+
   private ActorSender _bamClient;
   private String _managerAddress;
-
-  private String _url;
+  
+  private ManagerProxyApi _managerProxy;
 
   public ManagerClient()
   {
@@ -67,6 +70,8 @@ public class ManagerClient
     _bamClient = server.createAdminClient(getClass().getSimpleName());
 
     _managerAddress = "manager@resin.caucho";
+    
+    initImpl();
   }
 
   public ManagerClient(String serverId)
@@ -79,6 +84,8 @@ public class ManagerClient
     _bamClient = server.createAdminClient(getClass().getSimpleName());
 
     _managerAddress = "manager@" + serverId + ".resin.caucho";
+    
+    initImpl();
   }
   
   public ManagerClient(ActorSender bamClient)
@@ -87,6 +94,8 @@ public class ManagerClient
 
     _managerAddress = "manager@resin.caucho";
     // _managerAddress = bamClient.getAddress();
+    
+    initImpl();
   }
 
   public ManagerClient(String host, int serverPort, int httpPort,
@@ -143,6 +152,14 @@ public class ManagerClient
                                                     url, e.getMessage()),
                                                 e);
     }
+    
+    initImpl();
+  }
+  
+  private void initImpl()
+  {
+    _managerProxy = createAgentProxy(ManagerProxyApi.class,
+                                     "manager-proxy@resin.caucho");
   }
   
   public String getUrl()
@@ -153,6 +170,16 @@ public class ManagerClient
   public ActorSender getSender()
   {
     return _bamClient;
+  }
+  
+  public <T> T createAgentProxy(Class<T> api, String address)
+  {
+    return BamProxyFactory.createProxy(api, address, getSender());
+  }
+  
+  private ManagerProxyApi getManagerProxy()
+  {
+    return _managerProxy;
   }
 
   public AddUserQueryReply addUser(String user,
@@ -315,6 +342,24 @@ public class ManagerClient
     StatsQuery query = new StatsQuery(meters, from, to);
 
     return (StatServiceValuesQueryReply) query(query);
+  }
+  
+  //
+  // enable/disable
+  //
+  
+  public String enable(String serverId)
+  {
+    ManagerProxyApi manager = getManagerProxy();
+    
+    return manager.enable();
+  }
+  
+  public String disable(String serverId)
+  {
+    ManagerProxyApi manager = getManagerProxy();
+    
+    return manager.disable();
   }
 
   protected Serializable query(Serializable query)

@@ -85,9 +85,9 @@ public interface ManagementMXBean extends ManagedObjectMXBean
   @MXAction(value = "config-ls", method = "GET")
   @MXContentType
   public String []configLs(@MXParam(name = "server") String serverId,
-                         @MXParam(name = "name") String name,
-                         @MXParam(name = "stage") String stage,
-                         @MXParam(name = "version") String version)
+                           @MXParam(name = "name") String name,
+                           @MXParam(name = "stage") String stage,
+                           @MXParam(name = "version") String version)
   throws ReflectionException;
 
   @Description("undeploy configuration")
@@ -349,4 +349,8 @@ public interface ManagementMXBean extends ManagedObjectMXBean
   @MXContentType
   public StringQueryReply getStatus(@MXParam(name = "server") String value)
     throws ReflectionException;
+
+  @Description("Enables a server")
+  @MXAction("enable")
+  public boolean enable(@MXParam(name = "server") String value);
 }

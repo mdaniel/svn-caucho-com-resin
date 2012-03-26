@@ -29,6 +29,12 @@
 
 package com.caucho.server.admin;
 
+import java.util.concurrent.atomic.AtomicBoolean;
+
+import com.caucho.bam.broker.ManagedBroker;
+import com.caucho.bam.mailbox.MultiworkerMailbox;
+import com.caucho.bam.proxy.ProxyActor;
+import com.caucho.cloud.bam.BamSystem;
 import com.caucho.config.Service;
 import com.caucho.loader.EnvironmentLocal;
 
@@ -37,13 +43,22 @@ import javax.annotation.PostConstruct;
 @Service
 public class ManagerService
 {
-  private static EnvironmentLocal<ManagerActor> _localManagerActor
-    = new EnvironmentLocal<ManagerActor>();
+  private static EnvironmentLocal<ManagerService> _localManagerService
+    = new EnvironmentLocal<ManagerService>();
+  
+  private AtomicBoolean _isInit = new AtomicBoolean();
+  
+  private ManagerActor _managerActor;
+  private ManagerProxyActor _managerProxyBean;
 
   public ManagerService()
   {
-    if (_localManagerActor.get() == null)
-      _localManagerActor.set(new ManagerActor());
+    if (_localManagerService.get() == null) {
+      _managerActor = new ManagerActor();
+      _managerProxyBean = new ManagerProxyActor();
+      
+      _localManagerService.set(this);
+    }
   }
 
   public void setHprofDir(String dir)
@@ -53,12 +68,39 @@ public class ManagerService
   
   public ManagerActor getCurrentManagerActor()
   {
-    return _localManagerActor.get();
+    return _localManagerService.get().getManagerActor();
+  }
+  
+  private ManagerActor getManagerActor()
+  {
+    return _managerActor;
   }
   
   @PostConstruct
   public void init()
   {
-    _localManagerActor.get().init();
+    _localManagerService.get().initActors();
+  }
+  
+  private void initActors()
+  {
+    if (_isInit.getAndSet(true)) {
+      return;
+    }
+    
+    ManagedBroker broker = BamSystem.getCurrentBroker();
+    
+    ManagerActor managerActor = _managerActor;
+    
+    managerActor.init();
+    
+    ProxyActor actor = new ProxyActor(_managerProxyBean, 
+                                      "manager-proxy@resin.caucho",
+                                      broker);
+    MultiworkerMailbox mailbox
+      = new MultiworkerMailbox(actor.getAddress(),
+                               actor, broker, 2);
+
+    broker.addMailbox(mailbox);
   }
 }

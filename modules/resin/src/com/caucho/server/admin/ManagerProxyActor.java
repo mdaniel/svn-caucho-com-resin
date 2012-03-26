@@ -27,52 +27,39 @@
  * @author Alex Rojkov
  */
 
-package com.caucho.boot;
+package com.caucho.server.admin;
 
-import com.caucho.config.ConfigException;
-import com.caucho.server.admin.ManagerClient;
+import com.caucho.server.cluster.ServletService;
 import com.caucho.util.L10N;
 
-public class DisableCommand extends AbstractManagementCommand
+public class ManagerProxyActor
 {
-  private static final L10N L = new L10N(DisableCommand.class);
-
-  @Override
-  public String getDescription()
+  private static final L10N L = new L10N(ManagerProxyActor.class);
+  
+  public ManagerProxyActor()
   {
-    return "disables a server for http/load-balancing";
   }
-
-  @Override
-  public int doCommand(WatchdogArgs args, 
-                       WatchdogClient client,
-                       ManagerClient manager)
-    throws BootArgumentException
+  
+  public String hello()
   {
-    String serverId = args.getDefaultArg();
-    
-    if (serverId == null)
-      serverId = args.getServerId();
-
-    if (serverId == null)
-      throw new ConfigException(L.l("{0}: -server is not specified", getName()));
-    
-    String result = manager.disable(serverId);
-    
-    System.out.println(result);
-
-    return 0;
+    return "hello, world";
   }
-
-  @Override
-  public String getUsageArgs()
+  
+  public String enable()
   {
-    return " <server>";
+    ServletService server = ServletService.getCurrent();
+    
+    server.setEnabled(true);
+    
+    return L.l("Server '{0}' is enabled.", server.getServerId());
   }
-
-  @Override
-  public boolean isDefaultArgsAccepted()
+  
+  public String disable()
   {
-    return true;
+    ServletService server = ServletService.getCurrent();
+    
+    server.setEnabled(false);
+    
+    return L.l("Server '{0}' is disabled.", server.getServerId());
   }
 }

@@ -53,6 +53,7 @@ import com.caucho.server.admin.JsonQueryReply;
 import com.caucho.server.admin.ListJmxQueryReply;
 import com.caucho.server.admin.ListUsersQueryReply;
 import com.caucho.server.admin.ManagerClient;
+import com.caucho.server.admin.ManagerProxyApi;
 import com.caucho.server.admin.PdfReportQueryReply;
 import com.caucho.server.admin.RemoveUserQueryReply;
 import com.caucho.server.admin.StatServiceValuesQueryReply;
@@ -408,7 +409,11 @@ public class ManagementAdmin extends AbstractManagedObject
 
     return managerClient.callJmx(pattern, operation, operationIndex, params);
   }
-
+  
+  //
+  // deploy
+  //
+  
   @Override
   public ControllerStateActionQueryReply startWebApp(String serverId,
                                                       String tag,
@@ -637,6 +642,23 @@ public class ManagementAdmin extends AbstractManagedObject
 
     return result;
   }
+  
+  //
+  // enable/disable
+  //
+  
+  @Override
+  public boolean enable(String serverId)
+  {
+    System.out.println("ENABLE:" + serverId);
+    
+    return false;
+  }
+
+  
+  //
+  // jmx dump
+  //
 
   @Override
   public JsonQueryReply doJmxDump(String serverId)
@@ -645,6 +667,10 @@ public class ManagementAdmin extends AbstractManagedObject
 
     return managerClient.doJmxDump();
   }
+  
+  //
+  // user admin
+  //
 
   @Override
   public AddUserQueryReply addUser(String serverId,
@@ -800,7 +826,29 @@ public class ManagementAdmin extends AbstractManagedObject
     return params.toArray(new String[params.size()]);
   }
 
-  private ManagerClient getManagerClient(String serverId) {
+  private ManagerProxyApi getManagerProxy(String serverId)
+  {
+    CloudServer server = getServer(serverId);
+
+    if (server == null)
+      throw ConfigException.create(new IllegalArgumentException(L.l("unknown server '{0}'", serverId)));
+    
+    ManagerProxyApi proxy = server.getData(ManagerProxyApi.class);
+    
+    if (proxy == null) {
+      ManagerClient client = getManagerClient(serverId);
+      
+      proxy = client.createAgentProxy(ManagerProxyApi.class,
+                                      "manager-proxy@resin.caucho");
+      
+      proxy = server.putDataIfAbsent(proxy);
+    }
+
+    return proxy;
+  }
+
+  private ManagerClient getManagerClient(String serverId)
+  {
     final ActorSender sender;
 
     CloudServer server = getServer(serverId);

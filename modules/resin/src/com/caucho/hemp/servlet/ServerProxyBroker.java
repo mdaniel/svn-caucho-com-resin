@@ -130,9 +130,9 @@ public class ServerProxyBroker extends AbstractBroker {
    */
   @Override
   public void query(long id,
-                       String to,
-                       String from,
-                       Serializable payload)
+                    String to,
+                    String from,
+                    Serializable payload)
   {
     try {
       if (to == null)
@@ -146,6 +146,12 @@ public class ServerProxyBroker extends AbstractBroker {
     } catch (Throwable e) {
      getLinkMailbox().queryError(id, from, to, payload, BamError.create(e));
     }
+  }
+  
+  @Override
+  protected MessageStream getQueryErrorStream(String from)
+  {
+    return getLinkMailbox();
   }
 
   /**

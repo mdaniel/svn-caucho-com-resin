@@ -205,7 +205,6 @@ public class ProxySkeleton<S>
                     String from,
                     Serializable payload)
   {
-    System.out.println("QQQ: " + actor + " " + payload);
     if (! (payload instanceof CallPayload)) {
       if (log.isLoggable(Level.FINER)) {
         log.finer(actor + " message " + payload + " is unsupported");
@@ -218,7 +217,6 @@ public class ProxySkeleton<S>
 
     QueryInvoker handler = _queryHandlers.get(call.getName());
 
-    System.out.println("HANDL:E" + handler + " " + call.getName());
     if (handler != null) {
       if (log.isLoggable(Level.FINEST)) {
         log.finest(actor + " query " + payload

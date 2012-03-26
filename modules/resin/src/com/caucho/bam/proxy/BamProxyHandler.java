@@ -36,6 +36,7 @@ import java.util.HashMap;
 import com.caucho.bam.actor.AbstractActorSender;
 import com.caucho.bam.actor.ActorSender;
 import com.caucho.bam.broker.Broker;
+import com.caucho.util.L10N;
 
 /**
  * The Skeleton introspects and dispatches messages for a
@@ -44,17 +45,23 @@ import com.caucho.bam.broker.Broker;
  */
 class BamProxyHandler implements InvocationHandler
 {
+  private static final L10N L = new L10N(BamProxyHandler.class);
+  
   private HashMap<Method,Call> _callMap = new HashMap<Method,Call>();
   
   private String _to;
-  private ProxySender _sender; 
+  private ActorSender _sender; 
   
-  BamProxyHandler(Class<?> api, String to, Broker broker)
+  BamProxyHandler(Class<?> api, String to, String from, Broker broker)
+  {
+    this(api, to, new ProxySender(from, broker));
+  }
+    
+  BamProxyHandler(Class<?> api, String to, ActorSender sender)
   {
     _to = to;
-    String from = "from";
-    _sender = new ProxySender(from, broker);
-    
+    _sender = sender;
+      
     for (Method m : api.getMethods()) {
       if (m.getDeclaringClass() == Object.class) {
         continue;
@@ -110,8 +117,18 @@ class BamProxyHandler implements InvocationHandler
     Object invoke(ActorSender sender, String to, Object []args)
     {
       CallPayload payload = new CallPayload(_name, args);
-      System.out.println("NVOK: " + to + " " + sender);
-      return sender.query(to, payload);
+
+      Object result = sender.query(to, payload);
+      
+      if (result instanceof ReplyPayload) {
+        return ((ReplyPayload) result).getValue();
+      }
+      else if (result == null) {
+        return null;
+      }
+      else
+        throw new IllegalStateException(L.l("'{0}' is an unexpected bam proxy result class.",
+                                            result.getClass().getName()));
     }
   }
   

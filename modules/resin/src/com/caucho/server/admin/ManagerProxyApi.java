@@ -27,40 +27,11 @@
  * @author Alex Rojkov
  */
 
-package com.caucho.boot;
+package com.caucho.server.admin;
 
-import com.caucho.config.ConfigException;
-import com.caucho.server.admin.ManagerClient;
-import com.caucho.util.L10N;
-
-public class EnableCommand extends AbstractManagementCommand
+public interface ManagerProxyApi
 {
-  private static final L10N L = new L10N(EnableCommand.class);
-
-  @Override
-  public String getDescription()
-  {
-    return "disables a server for http/load-balancing";
-  }
-
-  @Override
-  public int doCommand(WatchdogArgs args, 
-                       WatchdogClient client,
-                       ManagerClient manager)
-    throws BootArgumentException
-  {
-    String serverId = args.getDefaultArg();
-    
-    if (serverId == null)
-      serverId = args.getServerId();
-
-    if (serverId == null)
-      throw new ConfigException(L.l("{0}: -server is not specified", getName()));
-    
-    String result = manager.enable(serverId);
-    
-    System.out.println(result);
-
-    return 0;
-  }
+  public String enable();
+  
+  public String disable();
 }

@@ -88,20 +88,13 @@ public class ProxyActor<T> implements Actor
     _skeleton.message(_bean, fallback, to, from, payload);
   }
 
-  /* (non-Javadoc)
-   * @see com.caucho.bam.stream.MessageStream#messageError(java.lang.String, java.lang.String, java.io.Serializable, com.caucho.bam.BamError)
-   */
   @Override
   public void messageError(String to, String from, Serializable payload,
                            BamError error)
   {
-    // TODO Auto-generated method stub
-    
+    throw new UnsupportedOperationException(getClass().getName());
   }
 
-  /* (non-Javadoc)
-   * @see com.caucho.bam.stream.MessageStream#query(long, java.lang.String, java.lang.String, java.io.Serializable)
-   */
   @Override
   public void query(long id, String to, String from, Serializable payload)
   {
@@ -110,25 +103,17 @@ public class ProxyActor<T> implements Actor
     _skeleton.query(_bean, fallback, getBroker(), id, to, from, payload);
   }
 
-  /* (non-Javadoc)
-   * @see com.caucho.bam.stream.MessageStream#queryResult(long, java.lang.String, java.lang.String, java.io.Serializable)
-   */
   @Override
   public void queryResult(long id, String to, String from, Serializable payload)
   {
-    // TODO Auto-generated method stub
-    
+    throw new UnsupportedOperationException(getClass().getName());
   }
 
-  /* (non-Javadoc)
-   * @see com.caucho.bam.stream.MessageStream#queryError(long, java.lang.String, java.lang.String, java.io.Serializable, com.caucho.bam.BamError)
-   */
   @Override
   public void queryError(long id, String to, String from, Serializable payload,
                          BamError error)
   {
-    // TODO Auto-generated method stub
-    
+    throw new UnsupportedOperationException(getClass().getName());
   }
   
   public String toString()

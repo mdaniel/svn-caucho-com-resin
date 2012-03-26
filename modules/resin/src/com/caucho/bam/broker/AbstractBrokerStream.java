@@ -204,10 +204,16 @@ abstract public class AbstractBrokerStream implements MessageStream
                                       BamError.ITEM_NOT_FOUND,
                                       msg);
 
-    MessageStream fromStream = getMailbox(from);
+    MessageStream fromStream = getQueryErrorStream(from);
 
-    if (fromStream != null)
+    if (fromStream != null) {
       fromStream.queryError(id, from, to, payload, error);
+    }
+  }
+  
+  protected MessageStream getQueryErrorStream(String from)
+  {
+    return getMailbox(from);
   }
   
   /**
