@@ -31,6 +31,7 @@ package com.caucho.amqp.client;
 
 import java.io.IOException;
 import java.net.Socket;
+import java.util.Map;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.logging.Level;
@@ -184,7 +185,9 @@ public class AmqpClientConnectionImpl implements AmqpConnection, AmqpLinkFactory
   }
 
   @Override
-  public AmqpReceiverLink createReceiverLink(String name, String address)
+  public AmqpReceiverLink createReceiverLink(String name, 
+                                             String address,
+                                             Map<String,Object> nodeProperties)
   {
     throw new UnsupportedOperationException(getClass().getName());
   }
@@ -193,7 +196,8 @@ public class AmqpClientConnectionImpl implements AmqpConnection, AmqpLinkFactory
   public AmqpSenderLink createSenderLink(String name, 
                                          String address,
                                          DistributionMode distMode,
-                                         SettleMode settleMode)
+                                         SettleMode settleMode,
+                                         Map<String,Object> nodeProperties)
   {
     throw new UnsupportedOperationException(getClass().getName());
   }

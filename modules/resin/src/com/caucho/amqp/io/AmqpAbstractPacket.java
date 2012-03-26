@@ -30,7 +30,6 @@
 package com.caucho.amqp.io;
 
 import java.io.IOException;
-import java.util.HashMap;
 
 import com.caucho.util.L10N;
 

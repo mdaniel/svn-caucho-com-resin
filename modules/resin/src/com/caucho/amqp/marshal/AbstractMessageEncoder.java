@@ -78,9 +78,32 @@ abstract public class AbstractMessageEncoder<T> implements AmqpMessageEncoder<T>
     throws IOException
   {
     // header taken care of prior to call
-    encodeProperties(out, factory, value);
     
-    encode(out, value);
+    encodeDeliveryAnnotations(out, factory, value);
+    
+    encodeMessageAnnotations(out, factory, value);
+    
+    encodeApplicationProperties(out, factory, value);
+    
+    encodeData(out, value);
+    
+    encodeFooters(out, factory, value);
+  }
+  
+  protected void 
+  encodeDeliveryAnnotations(AmqpWriter out, 
+                            MessagePropertiesFactory<T> factory,
+                            T value)
+    throws IOException
+  {
+  }
+  
+  protected void 
+  encodeMessageAnnotations(AmqpWriter out, 
+                           MessagePropertiesFactory<T> factory,
+                           T value)
+    throws IOException
+  {
   }
   
   protected void encodeProperties(AmqpWriter out, 
@@ -99,8 +122,25 @@ abstract public class AbstractMessageEncoder<T> implements AmqpMessageEncoder<T>
     }
   }
   
-  
+  protected void 
+  encodeApplicationProperties(AmqpWriter out, 
+                              MessagePropertiesFactory<T> factory,
+                              T value)
+    throws IOException
+  {
+    
+  }
+
   @Override
-  abstract public void encode(AmqpWriter out, T value)
+  abstract public void encodeData(AmqpWriter out, T value)
     throws IOException;
+  
+  
+  protected void 
+  encodeFooters(AmqpWriter out, 
+                MessagePropertiesFactory<T> factory,
+                T value)
+    throws IOException
+  {
+  }
 }

@@ -29,10 +29,29 @@
 
 package com.caucho.amqp.marshal;
 
+import java.util.Iterator;
+import java.util.Map;
+
 /**
  * Envelope for the amqp value.
  */
 public interface AmqpEnvelope {
+  //
+  // delivery annotations
+  //
+  
+  public Object getDeliveryAnnotation(String name);
+  
+  public Iterator<Map.Entry<String,Object>> getDeliveryAnnotations();
+  
+  //
+  // message annotations
+  //
+  
+  public Object getMessageAnnotation(String name);
+  
+  public Iterator<Map.Entry<String,Object>> getMessageAnnotations();
+  
   //
   // properties
   //
@@ -63,10 +82,22 @@ public interface AmqpEnvelope {
   
   public String getReplyToGroupId();
   
+  public Object getProperty(String name);
+  
+  public Iterator<Map.Entry<String,Object>> getProperties();
+  
   //
   // value
   //
   
   public Object getValue();
 
+  
+  //
+  // footers
+  //
+  
+  public Object getFooter(String name);
+  
+  public Iterator<Map.Entry<String,Object>> getFooters();
 }

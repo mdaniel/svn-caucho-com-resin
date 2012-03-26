@@ -45,7 +45,7 @@ public class LinkTarget extends AmqpAbstractComposite {
   private ExpiryPolicy _expiryPolicy;
   private long _timeout;  // uint seconds
   private boolean _isDynamic;
-  private Map<String,?> _dynamicNodeProperties;
+  private Map<String,Object> _dynamicNodeProperties;
   private List<String> _capabilities; // symbol
   
   public String getAddress()
@@ -78,7 +78,12 @@ public class LinkTarget extends AmqpAbstractComposite {
     return _isDynamic;
   }
   
-  public Map<String,?> getDynamicNodeProperties()
+  public void setDynamicNodeProperties(Map<String,Object> props)
+  {
+    _dynamicNodeProperties = props;
+  }
+  
+  public Map<String,Object> getDynamicNodeProperties()
   {
     return _dynamicNodeProperties;
   }
@@ -134,7 +139,7 @@ public class LinkTarget extends AmqpAbstractComposite {
     
     out.writeUint((int) _timeout);
     out.writeBoolean(_isDynamic);
-    out.writeMap(_dynamicNodeProperties);
+    out.writeFieldsMap(_dynamicNodeProperties);
     
     out.writeSymbolArray(_capabilities);
     

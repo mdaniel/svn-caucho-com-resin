@@ -29,10 +29,26 @@
 
 package com.caucho.amqp.marshal;
 
+import java.util.HashMap;
+import java.util.Iterator;
+import java.util.Map;
+
+import com.caucho.util.NullIterator;
+
 /**
  * Envelope for the amqp value.
  */
 public class AmqpEnvelopeImpl implements AmqpEnvelope {
+  // delivery annotations
+  
+  private HashMap<String,Object> _deliveryAnnotationMap;
+  
+  // message annotations
+  
+  private HashMap<String,Object> _messageAnnotationMap;
+  
+  // properties
+  
   private Object _messageId;
   private String _userId;
   private String _to;
@@ -49,8 +65,86 @@ public class AmqpEnvelopeImpl implements AmqpEnvelope {
   private long _groupSequence = -1;
   private String _replyToGroupId;
   
+  // app properties
+  
+  private HashMap<String,Object> _propertyMap;
+  
   private Object _value;
   
+  // message annotations
+  
+  private HashMap<String,Object> _footerMap;
+
+  //
+  // delivery annotations
+  //
+  
+  @Override
+  public Object getDeliveryAnnotation(String name)
+  {
+    if (_deliveryAnnotationMap != null) {
+      return _deliveryAnnotationMap.get(name);
+    }
+    else {
+      return null;
+    }
+  }
+  
+  public void setDeliveryAnnotation(String name, Object value)
+  {
+    if (_deliveryAnnotationMap == null) {
+      _deliveryAnnotationMap = new HashMap<String,Object>();
+    }
+    
+    _deliveryAnnotationMap.put(name, value);
+  }
+  
+  @Override
+  public Iterator<Map.Entry<String,Object>> getDeliveryAnnotations()
+  {
+    if (_deliveryAnnotationMap != null) {
+      return _deliveryAnnotationMap.entrySet().iterator();
+    }
+    else {
+      return NullIterator.create();
+    }
+  }
+  
+  //
+  // message annotations
+  //
+  
+  @Override
+  public Object getMessageAnnotation(String name)
+  {
+    if (_messageAnnotationMap != null) {
+      return _messageAnnotationMap.get(name);
+    }
+    else {
+      return null;
+    }
+  }
+  
+  public void setMessageAnnotation(String name, Object value)
+  {
+    if (_messageAnnotationMap == null) {
+      _messageAnnotationMap = new HashMap<String,Object>();
+    }
+    
+    _messageAnnotationMap.put(name, value);
+  }
+  
+  @Override
+  public Iterator<Map.Entry<String,Object>> getMessageAnnotations()
+  {
+    if (_messageAnnotationMap != null) {
+      return _messageAnnotationMap.entrySet().iterator();
+    }
+    else {
+      return NullIterator.create();
+    }
+  }
+
   public void setMessageId(Object messageId)
   {
     _messageId = messageId;
@@ -194,6 +288,41 @@ public class AmqpEnvelopeImpl implements AmqpEnvelope {
   }
   
   //
+  // application properties
+  //
+  
+  @Override
+  public Object getProperty(String name)
+  {
+    if (_propertyMap != null) {
+      return _propertyMap.get(name);
+    }
+    else {
+      return null;
+    }
+  }
+  
+  public void setProperty(String name, Object value)
+  {
+    if (_propertyMap == null) {
+      _propertyMap = new HashMap<String,Object>();
+    }
+    
+    _propertyMap.put(name, value);
+  }
+  
+  @Override
+  public Iterator<Map.Entry<String,Object>> getProperties()
+  {
+    if (_propertyMap != null) {
+      return _propertyMap.entrySet().iterator();
+    }
+    else {
+      return NullIterator.create();
+    }
+  }
+  
+  //
   // value
   //
 
@@ -206,5 +335,40 @@ public class AmqpEnvelopeImpl implements AmqpEnvelope {
   public Object getValue()
   {
     return _value;
+  }
+  
+  //
+  // footers
+  //
+  
+  @Override
+  public Object getFooter(String name)
+  {
+    if (_footerMap != null) {
+      return _footerMap.get(name);
+    }
+    else {
+      return null;
+    }
+  }
+  
+  public void setFooter(String name, Object value)
+  {
+    if (_footerMap == null) {
+      _footerMap = new HashMap<String,Object>();
+    }
+    
+    _footerMap.put(name, value);
+  }
+  
+  @Override
+  public Iterator<Map.Entry<String,Object>> getFooters()
+  {
+    if (_footerMap != null) {
+      return _footerMap.entrySet().iterator();
+    }
+    else {
+      return NullIterator.create();
+    }
   }
 }

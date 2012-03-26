@@ -33,6 +33,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.util.Collection;
 import java.util.Iterator;
+import java.util.Map;
 import java.util.concurrent.LinkedBlockingQueue;
 import java.util.concurrent.TimeUnit;
 import java.util.logging.Level;
@@ -81,8 +82,9 @@ public class LocalReceiver<T> extends AbstractMessageReceiver<T> {
     ReceiverMessageHandler handler = new LocalMessageHandler();
     
     DistributionMode distMode = factory.getDistributionMode();
-        
-    _sub = broker.createReceiver(_address, distMode, handler);
+    
+    Map<String,Object> nodeProperties = null;
+    _sub = broker.createReceiver(_address, distMode, nodeProperties, handler);
     
     if (_sub == null) {
       throw new IllegalArgumentException(L.l("'{0}' is an unknown queue",

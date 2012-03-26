@@ -31,6 +31,7 @@ package com.caucho.message.nautilus;
 
 import java.io.Closeable;
 import java.io.IOException;
+import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.atomic.AtomicLong;
 import java.util.logging.Level;
@@ -119,7 +120,8 @@ public class NautilusBroker extends AbstractMessageBroker implements Closeable
   }
   
   @Override
-  public BrokerSender createSender(String name)
+  public BrokerSender createSender(String name,
+                                   Map<String,Object> nodeProperties)
   {
     BrokerQueue queue = getQueue(name);
     
@@ -129,6 +131,7 @@ public class NautilusBroker extends AbstractMessageBroker implements Closeable
   @Override
   public BrokerReceiver createReceiver(String name,
                                        DistributionMode distMode,
+                                       Map<String,Object> nodeProperties,
                                        ReceiverMessageHandler handler)
   {
     BrokerQueue queue = getQueue(name);

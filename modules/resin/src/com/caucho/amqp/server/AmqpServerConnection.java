@@ -31,6 +31,7 @@ package com.caucho.amqp.server;
 
 import java.io.IOException;
 import java.io.InputStream;
+import java.util.Map;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -216,18 +217,22 @@ public class AmqpServerConnection extends AbstractProtocolConnection
   
   class ServerLinkFactory implements AmqpLinkFactory {
     @Override
-    public AmqpReceiverLink createReceiverLink(String name, String address)
+    public AmqpReceiverLink createReceiverLink(String name,
+                                               String address,
+                                               Map<String,Object> targetProperties)
     {
-      return _amqp.createReceiverLink(name, address);
+      return _amqp.createReceiverLink(name, address, targetProperties);
     }
 
     @Override
     public AmqpSenderLink createSenderLink(String name, 
                                            String address,
                                            DistributionMode distMode,
-                                           SettleMode settleMode)
+                                           SettleMode settleMode,
+                                           Map<String,Object> sourceProperties)
     {
-      return _amqp.createSenderLink(name, address, distMode, settleMode);
+      return _amqp.createSenderLink(name, address, distMode, settleMode,
+                                    sourceProperties);
     }
   }
 }

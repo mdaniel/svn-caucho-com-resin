@@ -30,6 +30,7 @@
 package com.caucho.amqp.client;
 
 import java.io.IOException;
+import java.util.Map;
 
 import com.caucho.amqp.common.AmqpReceiverLink;
 import com.caucho.amqp.io.AmqpReader;
@@ -54,6 +55,24 @@ public class AmqpClientReceiverLink extends AmqpReceiverLink
   public AmqpClientReceiver<?> getReceiver()
   {
     return _receiver;
+  }
+  
+  @Override
+  public Map<String,Object> getAttachProperties()
+  {
+    return _receiver.getAttachProperties();
+  }
+  
+  @Override
+  public Map<String,Object> getSourceProperties()
+  {
+    return _receiver.getSourceProperties();
+  }
+  
+  @Override
+  public Map<String,Object> getTargetProperties()
+  {
+    return _receiver.getTargetProperties();
   }
   
   //

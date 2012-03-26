@@ -30,6 +30,7 @@
 package com.caucho.amqp.common;
 
 import java.io.IOException;
+import java.util.Map;
 
 import com.caucho.amqp.io.AmqpError;
 import com.caucho.amqp.io.AmqpReader;
@@ -67,6 +68,21 @@ abstract public class AmqpLink
   }
 
   abstract public Role getRole();
+
+  public Map<String,Object> getAttachProperties()
+  {
+    return null;
+  }
+
+  public Map<String,Object> getSourceProperties()
+  {
+    return null;
+  }
+
+  public Map<String,Object> getTargetProperties()
+  {
+    return null;
+  }
 
   public AmqpSession getSession()
   {

@@ -30,9 +30,15 @@
 package com.caucho.amqp.marshal;
 
 import java.io.IOException;
+import java.util.Iterator;
+import java.util.Map;
 
 import com.caucho.amqp.io.AmqpConstants;
 import com.caucho.amqp.io.AmqpWriter;
+import com.caucho.amqp.io.MessageAnnotations;
+import com.caucho.amqp.io.MessageAppProperties;
+import com.caucho.amqp.io.MessageDeliveryAnnotations;
+import com.caucho.amqp.io.MessageFooter;
 import com.caucho.amqp.io.MessageProperties;
 import com.caucho.message.MessagePropertiesFactory;
 
@@ -45,6 +51,52 @@ public class AmqpEnvelopeEncoder extends AbstractMessageEncoder<AmqpEnvelope>
 {
   public static final AmqpEnvelopeEncoder ENCODER = new AmqpEnvelopeEncoder();
   
+  //
+  // delivery annotations
+  //
+
+  @Override
+  protected void
+  encodeDeliveryAnnotations(AmqpWriter out, 
+                            MessagePropertiesFactory<AmqpEnvelope> factory,
+                            AmqpEnvelope envelope)
+    throws IOException
+  {
+    Iterator<Map.Entry<String,Object>> envIter = envelope.getDeliveryAnnotations();
+    // Iterator<Map.Entry<String,Object>> envIter = envelope.getProperties();
+    
+    if (envIter.hasNext()) {
+      MessageDeliveryAnnotations annotations = new MessageDeliveryAnnotations();
+
+      annotations.putAll(envIter);
+      
+      annotations.write(out);
+    }
+  }
+  
+  //
+  // message annotations
+  //
+
+  @Override
+  protected void
+  encodeMessageAnnotations(AmqpWriter out, 
+                           MessagePropertiesFactory<AmqpEnvelope> factory,
+                           AmqpEnvelope envelope)
+    throws IOException
+  {
+    Iterator<Map.Entry<String,Object>> envIter = envelope.getMessageAnnotations();
+    // Iterator<Map.Entry<String,Object>> envIter = envelope.getProperties();
+    
+    if (envIter.hasNext()) {
+      MessageAnnotations annotations = new MessageAnnotations();
+
+      annotations.putAll(envIter);
+      
+      annotations.write(out);
+    }
+  }
+
   protected Object getMessageId(MessagePropertiesFactory<AmqpEnvelope> factory,
                                 AmqpEnvelope envelope)
   {
@@ -211,6 +263,7 @@ public class AmqpEnvelopeEncoder extends AbstractMessageEncoder<AmqpEnvelope>
     return "text/plain";
   }
 
+  @Override
   protected void encodeProperties(AmqpWriter out, 
                                   MessagePropertiesFactory<AmqpEnvelope> factory,
                                   AmqpEnvelope envelope)
@@ -303,10 +356,54 @@ public class AmqpEnvelopeEncoder extends AbstractMessageEncoder<AmqpEnvelope>
   }
 
   @Override
-  public void encode(AmqpWriter out, AmqpEnvelope envelope)
+  protected void
+  encodeApplicationProperties(AmqpWriter out, 
+                              MessagePropertiesFactory<AmqpEnvelope> factory,
+                              AmqpEnvelope envelope)
+    throws IOException
+  {
+    Iterator<Map.Entry<String,Object>> envIter = envelope.getProperties();
+    // Iterator<Map.Entry<String,Object>> envIter = envelope.getProperties();
+    
+    if (envIter.hasNext()) {
+      MessageAppProperties properties = new MessageAppProperties();
+
+      properties.putAll(envIter);
+      
+      properties.write(out);
+    }
+  }
+
+  @Override
+  public void encodeData(AmqpWriter out, AmqpEnvelope envelope)
     throws IOException
   {
     out.writeDescriptor(AmqpConstants.ST_MESSAGE_VALUE);
     out.writeString(String.valueOf(envelope.getValue()));
   }
+  
+  
+  //
+  // message annotations
+  //
+
+  @Override
+  protected void
+  encodeFooters(AmqpWriter out, 
+                MessagePropertiesFactory<AmqpEnvelope> factory,
+                AmqpEnvelope envelope)
+    throws IOException
+  {
+    Iterator<Map.Entry<String,Object>> envIter = envelope.getFooters();
+    // Iterator<Map.Entry<String,Object>> envIter = envelope.getProperties();
+    
+    if (envIter.hasNext()) {
+      MessageFooter footers = new MessageFooter();
+
+      footers.putAll(envIter);
+      
+      footers.write(out);
+    }
+  }
+
 }

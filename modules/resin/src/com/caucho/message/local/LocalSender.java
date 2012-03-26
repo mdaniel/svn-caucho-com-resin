@@ -30,6 +30,7 @@
 package com.caucho.message.local;
 
 import java.io.IOException;
+import java.util.Map;
 
 import com.caucho.amqp.AmqpException;
 import com.caucho.amqp.io.AmqpStreamWriter;
@@ -69,7 +70,8 @@ public class LocalSender<T> extends AbstractMessageSender<T> {
     
     EnvironmentMessageBroker broker = EnvironmentMessageBroker.getCurrent();
         
-    _publisher = broker.createSender(_address);
+    Map<String,Object> nodeProperties = null;
+    _publisher = broker.createSender(_address, nodeProperties);
     
     if (_publisher == null) {
       throw new IllegalArgumentException(L.l("'{0}' is an unknown queue",

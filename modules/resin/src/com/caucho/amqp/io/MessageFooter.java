@@ -27,25 +27,21 @@
  * @author Scott Ferguson
  */
 
-package com.caucho.amqp.common;
-
-import java.util.Map;
-
-import com.caucho.message.DistributionMode;
-import com.caucho.message.SettleMode;
+package com.caucho.amqp.io;
 
 /**
- * link management
+ * The message properties header.
  */
-public interface AmqpLinkFactory
-{
-  public AmqpSenderLink createSenderLink(String name, 
-                                         String address,
-                                         DistributionMode distMode,
-                                         SettleMode settleMode,
-                                         Map<String,Object> sourceProperties);
+public final class MessageFooter extends AmqpAbstractAnnotations {
+  @Override
+  public long getDescriptorCode()
+  {
+    return ST_MESSAGE_FOOTER;
+  }
   
-  public AmqpReceiverLink createReceiverLink(String name, 
-                                             String address,
-                                             Map<String,Object> targetProperties);
+  @Override
+  public MessageFooter createInstance()
+  {
+    return new MessageFooter();
+  }
 }

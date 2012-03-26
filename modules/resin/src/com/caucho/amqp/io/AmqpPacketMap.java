@@ -73,7 +73,11 @@ public final class AmqpPacketMap {
     addType(new DeliveryModified());
 
     addType(new MessageHeader());
+    addType(new MessageDeliveryAnnotations());
+    addType(new MessageAnnotations());
     addType(new MessageProperties());
+    addType(new MessageAppProperties());
+    addType(new MessageFooter());
 
     addType(new AmqpError());
   }

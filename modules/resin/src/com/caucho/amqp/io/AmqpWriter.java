@@ -34,6 +34,7 @@ import java.io.OutputStream;
 import java.util.List;
 import java.util.Map;
 
+import com.caucho.util.L10N;
 import com.caucho.vfs.Vfs;
 import com.caucho.vfs.WriteStream;
 
@@ -47,6 +48,8 @@ import com.caucho.vfs.WriteStream;
  * </pre>
  */
 public class AmqpWriter implements AmqpConstants {
+  private static final L10N L = new L10N(AmqpWriter.class);
+  
   private AmqpBaseWriter _os;
   
   public void init(OutputStream os)
@@ -483,14 +486,97 @@ public class AmqpWriter implements AmqpConstants {
   {
     AmqpBaseWriter os = _os;
     
-    if (map == null) {
+    if (map == null || map.isEmpty()) {
       os.write(E_NULL);
       return;
     }
     
-    throw new UnsupportedOperationException();
+    int startOffset = startMap();
+    
+    for (Map.Entry<?,?> entry : map.entrySet()) {
+      writeObject(entry.getKey());
+      writeObject(entry.getValue());
+    }
+    
+    finishMap(startOffset, map.size());
   }
   
+  public void writeAnnotationsMap(Map<?,?> map)
+    throws IOException
+  {
+    AmqpBaseWriter os = _os;
+    
+    if (map == null || map.isEmpty()) {
+      os.write(E_NULL);
+      return;
+    }
+    
+    int startOffset = startMap();
+    
+    for (Map.Entry<?,?> entry : map.entrySet()) {
+      Object key = entry.getKey();
+
+      if (key instanceof String) {
+        writeSymbol((String) key);
+      }
+      else if (key instanceof Number) {
+        writeUlong(((Number) key).longValue());
+      }
+      else {
+        throw new IllegalArgumentException(L.l("'{0}' is an invalid amqp annotations key",
+                                               key.getClass().getName()));
+      }
+
+      writeObject(entry.getValue());
+    }
+    
+    finishMap(startOffset, map.size());
+  }
+  
+  public void writeFieldsMap(Map<?,?> map)
+    throws IOException
+  {
+    AmqpBaseWriter os = _os;
+    
+    if (map == null || map.isEmpty()) {
+      os.write(E_NULL);
+      return;
+    }
+    
+    int startOffset = startMap();
+    
+    for (Map.Entry<?,?> entry : map.entrySet()) {
+      Object key = entry.getKey();
+
+      writeSymbol((String) key);
+      writeObject(entry.getValue());
+    }
+    
+    finishMap(startOffset, map.size());
+  }
+
+  public int startMap()
+    throws IOException
+  {
+    AmqpBaseWriter os = _os;
+    
+    os.write(E_MAP_1);
+    os.write(0xff);
+    os.write(0xff);
+    
+    return os.getOffset();
+  }
+  
+  public void finishMap(int startOffset, int count)
+  {
+    AmqpBaseWriter os = _os;
+    
+    int finishOffset = os.getOffset();
+
+    os.writeByte(startOffset - 2, (finishOffset - startOffset));
+    os.writeByte(startOffset - 1, count);
+  }
+
   public void flush()
     throws IOException
   {

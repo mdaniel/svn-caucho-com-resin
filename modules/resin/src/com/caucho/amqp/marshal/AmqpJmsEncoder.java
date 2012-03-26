@@ -55,7 +55,7 @@ public class AmqpJmsEncoder extends AbstractMessageEncoder<Message>
   }
   
   @Override
-  public void encode(AmqpWriter out,
+  public void encodeData(AmqpWriter out,
                      Message msg)
     throws IOException
   {

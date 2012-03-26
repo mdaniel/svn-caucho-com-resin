@@ -29,18 +29,7 @@
 
 package com.caucho.amqp.io;
 
-import java.io.IOException;
 import java.io.OutputStream;
-import java.util.List;
-import java.util.Map;
-
-import javax.annotation.PostConstruct;
-
-import com.caucho.network.listen.Protocol;
-import com.caucho.network.listen.ProtocolConnection;
-import com.caucho.network.listen.SocketLink;
-import com.caucho.vfs.TempBuffer;
-import com.caucho.vfs.WriteStream;
 
 abstract public class AmqpBaseWriter extends OutputStream {
   abstract public int getOffset();

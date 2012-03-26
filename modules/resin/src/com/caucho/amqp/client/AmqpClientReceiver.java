@@ -31,7 +31,9 @@ package com.caucho.amqp.client;
 
 import java.io.IOException;
 import java.util.Collection;
+import java.util.HashMap;
 import java.util.Iterator;
+import java.util.Map;
 import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.ConcurrentLinkedQueue;
 import java.util.concurrent.LinkedBlockingQueue;
@@ -62,6 +64,10 @@ class AmqpClientReceiver<T> extends AbstractMessageReceiver<T>
   
   private int _prefetch;
   private final AmqpMessageDecoder<T> _decoder;
+  
+  private final Map<String,Object> _attachProperties;
+  private final Map<String,Object> _sourceProperties;
+  private final Map<String,Object> _targetProperties;
 
   private int _linkCredit;
 
@@ -78,7 +84,22 @@ class AmqpClientReceiver<T> extends AbstractMessageReceiver<T>
     _address = builder.getAddress();
     
     _settleMode = builder.getSettleMode();
-    _decoder = (AmqpMessageDecoder) builder.getDecoder(); 
+    _decoder = (AmqpMessageDecoder) builder.getDecoder();
+    
+    if (builder.getAttachProperties() != null)
+      _attachProperties = new HashMap<String,Object>(builder.getAttachProperties());
+    else
+      _attachProperties = null;
+    
+    if (builder.getSourceProperties() != null)
+      _sourceProperties = new HashMap<String,Object>(builder.getSourceProperties());
+    else
+      _sourceProperties = null;
+    
+    if (builder.getTargetProperties() != null)
+      _targetProperties = new HashMap<String,Object>(builder.getTargetProperties());
+    else
+      _targetProperties = null;
 
     _prefetch = builder.getPrefetch();
     
@@ -91,6 +112,21 @@ class AmqpClientReceiver<T> extends AbstractMessageReceiver<T>
       _linkCredit = _prefetch;
       _link.updatePrefetch(_prefetch);
     }
+  }
+  
+  Map<String,Object> getAttachProperties()
+  {
+    return _attachProperties;
+  }
+  
+  Map<String,Object> getSourceProperties()
+  {
+    return _sourceProperties;
+  }
+  
+  Map<String,Object> getTargetProperties()
+  {
+    return _targetProperties;
   }
   
   public int getPrefetchQueueSize()

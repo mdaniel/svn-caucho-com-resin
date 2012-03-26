@@ -32,6 +32,7 @@ package com.caucho.amqp.io;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -476,6 +477,14 @@ public class AmqpReader implements AmqpConstants {
     case E_UTF8_4:
       len = readIntImpl();
       return readUtf8(len);
+      
+    case E_SYMBOL_1:
+      len = read() & 0xff;
+      return readSymbol(len);
+      
+    case E_SYMBOL_4:
+      len = readIntImpl();
+      return readSymbol(len);
           
     default:
       throw new IllegalStateException("unknown code: 0x" + Integer.toHexString(code));
@@ -554,7 +563,7 @@ public class AmqpReader implements AmqpConstants {
     }
   }
   
-  public Map<String,?> readFieldMap()
+  public Map<String,Object> readFieldMap()
     throws IOException
   {
     return (Map) readMap();
@@ -570,6 +579,20 @@ public class AmqpReader implements AmqpConstants {
     switch (code) {
     case E_NULL:
       return null;
+      
+    case E_MAP_1:
+    {
+      int length = read() & 0xff;
+      int size = read() & 0xff;
+      
+      HashMap<Object,Object> map = new HashMap<Object,Object>();
+      
+      for (int i = 0; i < size; i++) {
+        map.put(readObject(), readObject());
+      }
+      
+      return map;
+    }
       
     default:
       throw new IOException("unknown map code: " + Integer.toHexString(code));

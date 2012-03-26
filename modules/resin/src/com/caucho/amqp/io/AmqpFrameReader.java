@@ -37,8 +37,6 @@ import java.util.logging.Logger;
 
 import com.caucho.util.L10N;
 import com.caucho.vfs.ReadStream;
-import com.caucho.vfs.TempBuffer;
-import com.caucho.vfs.WriteStream;
 
 public class AmqpFrameReader extends InputStream {
   private static final Logger log

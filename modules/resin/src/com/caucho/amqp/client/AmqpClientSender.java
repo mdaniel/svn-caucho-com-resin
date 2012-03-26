@@ -30,6 +30,8 @@
 package com.caucho.amqp.client;
 
 import java.io.IOException;
+import java.util.HashMap;
+import java.util.Map;
 import java.util.logging.Logger;
 
 import com.caucho.amqp.AmqpException;
@@ -61,21 +63,40 @@ class AmqpClientSender<T> extends AbstractMessageSender<T> implements AmqpSender
   private final String _address;
   private final AmqpMessageEncoder<T> _encoder;
   
+  private final Map<String,Object> _attachProperties;
+  private final Map<String,Object> _sourceProperties;
+  private final Map<String,Object> _targetProperties;
+  
   private AmqpClientSenderLink _link;
   
   private long _lastMessageId;
   
   AmqpClientSender(AmqpClientConnectionImpl client,
                    AmqpSession session,
-                   AmqpClientSenderFactory factory)
+                   AmqpClientSenderFactory builder)
   {
-    super(factory);
+    super(builder);
     
     _client = client;
     _session = session;
-    _address = factory.getAddress();
+    _address = builder.getAddress();
     
-    _encoder = getMessageEncoder(factory);
+    _encoder = getMessageEncoder(builder);
+    
+    if (builder.getAttachProperties() != null)
+      _attachProperties = new HashMap<String,Object>(builder.getAttachProperties());
+    else
+      _attachProperties = null;
+    
+    if (builder.getSourceProperties() != null)
+      _sourceProperties = new HashMap<String,Object>(builder.getSourceProperties());
+    else
+      _sourceProperties = null;
+    
+    if (builder.getTargetProperties() != null)
+      _targetProperties = new HashMap<String,Object>(builder.getTargetProperties());
+    else
+      _targetProperties = null;
     
     int linkId = _client.nextLinkId();
     
@@ -83,7 +104,22 @@ class AmqpClientSender<T> extends AbstractMessageSender<T> implements AmqpSender
                                      _address, 
                                      this);
     
-    _session.addSenderLink(_link, factory.getSettleMode());
+    _session.addSenderLink(_link, builder.getSettleMode());
+  }
+  
+  Map<String,Object> getAttachProperties()
+  {
+    return _attachProperties;
+  }
+  
+  Map<String,Object> getSourceProperties()
+  {
+    return _sourceProperties;
+  }
+  
+  Map<String,Object> getTargetProperties()
+  {
+    return _targetProperties;
   }
   
   @SuppressWarnings("unchecked")

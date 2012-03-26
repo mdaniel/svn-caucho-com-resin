@@ -39,6 +39,12 @@ import com.caucho.message.MessageReceiverFactory;
 public interface AmqpReceiverFactory extends MessageReceiverFactory {
   @Override
   public AmqpReceiverFactory setAddress(String address);
+  
+  public AmqpReceiverFactory setAttachProperty(String key, Object value);
+  
+  public AmqpReceiverFactory setSourceProperty(String key, Object value);
+  
+  public AmqpReceiverFactory setTargetProperty(String key, Object value);
 
   @Override
   public AmqpReceiverFactory setPrefetch(int prefetch);

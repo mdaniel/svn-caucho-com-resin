@@ -50,7 +50,7 @@ public class AmqpStringEncoder extends AbstractMessageEncoder<String>
   }
   
   @Override
-  public void encode(AmqpWriter out, String value)
+  public void encodeData(AmqpWriter out, String value)
     throws IOException
   {
     out.writeDescriptor(AmqpConstants.ST_MESSAGE_VALUE);

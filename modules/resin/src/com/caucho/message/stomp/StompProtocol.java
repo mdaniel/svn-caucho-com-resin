@@ -29,6 +29,8 @@
 
 package com.caucho.message.stomp;
 
+import java.util.Map;
+
 import javax.annotation.PostConstruct;
 
 import com.caucho.message.broker.MessageBroker;
@@ -77,6 +79,8 @@ public class StompProtocol implements Protocol
   
   public BrokerSender createDestination(String name)
   {
-    return _broker.createSender(name);
+    Map<String,Object> nodeProperties = null;
+    
+    return _broker.createSender(name, nodeProperties);
   }
 }

@@ -29,6 +29,8 @@
 
 package com.caucho.message.broker;
 
+import java.util.Map;
+
 import com.caucho.message.DistributionMode;
 
 
@@ -37,9 +39,11 @@ import com.caucho.message.DistributionMode;
  */
 public interface MessageBroker
 {
-  public BrokerSender createSender(String name);
+  public BrokerSender createSender(String name,
+                                   Map<String,Object> properties);
   
   public BrokerReceiver createReceiver(String name,
                                        DistributionMode distributionMode,
+                                       Map<String,Object> properties,
                                        ReceiverMessageHandler listener);
 }

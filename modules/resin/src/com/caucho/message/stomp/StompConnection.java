@@ -35,6 +35,7 @@ import java.io.InputStream;
 import java.io.OutputStream;
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.Map;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -250,7 +251,10 @@ public class StompConnection extends AbstractProtocolConnection
     ReceiverMessageHandler listener = new MessageListener(this, _id, _destinationName);
     
     DistributionMode distMode = null;
-    sub = broker.createReceiver(_destinationName, distMode, listener);
+    Map<String,Object> nodeProperties = null;
+    
+    sub = broker.createReceiver(_destinationName, distMode, nodeProperties,
+                                listener);
     
     _subscriptionMap.put(_id, sub);
 

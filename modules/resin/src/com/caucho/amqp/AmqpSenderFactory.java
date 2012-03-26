@@ -45,5 +45,11 @@ public interface AmqpSenderFactory extends MessageSenderFactory {
   
   public AmqpMessageEncoder<?> getEncoder();
   
+  public AmqpSenderFactory setAttachProperty(String key, Object value);
+  
+  public AmqpSenderFactory setSourceProperty(String key, Object value);
+  
+  public AmqpSenderFactory setTargetProperty(String key, Object value);
+  
   public AmqpSender<?> build();
 }

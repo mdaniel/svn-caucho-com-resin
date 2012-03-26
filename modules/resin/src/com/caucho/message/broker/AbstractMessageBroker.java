@@ -29,6 +29,8 @@
 
 package com.caucho.message.broker;
 
+import java.util.Map;
+
 import com.caucho.message.DistributionMode;
 
 
@@ -38,7 +40,8 @@ import com.caucho.message.DistributionMode;
 abstract public class AbstractMessageBroker implements MessageBroker
 {
   @Override
-  public BrokerSender createSender(String name)
+  public BrokerSender createSender(String name,
+                                   Map<String,Object> nodeProperties)
   {
     return null;
   }
@@ -46,6 +49,7 @@ abstract public class AbstractMessageBroker implements MessageBroker
   @Override
   public BrokerReceiver createReceiver(String name,
                                        DistributionMode distMode,
+                                       Map<String,Object> nodeProperties,
                                        ReceiverMessageHandler listener)
   {
     return null;

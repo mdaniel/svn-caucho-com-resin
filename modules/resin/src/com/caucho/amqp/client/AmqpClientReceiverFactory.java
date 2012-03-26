@@ -29,6 +29,9 @@
 
 package com.caucho.amqp.client;
 
+import java.util.HashMap;
+import java.util.Map;
+
 import com.caucho.amqp.AmqpReceiver;
 import com.caucho.amqp.AmqpReceiverFactory;
 import com.caucho.amqp.marshal.AmqpMessageDecoder;
@@ -46,6 +49,10 @@ class AmqpClientReceiverFactory extends AbstractMessageReceiverFactory
   private AmqpClientConnectionImpl _client;
   
   private AmqpMessageDecoder<?> _decoder = AmqpStringDecoder.DECODER;
+  
+  private HashMap<String,Object> _attachProperties;
+  private HashMap<String,Object> _sourceProperties;
+  private HashMap<String,Object> _targetProperties;
   
   AmqpClientReceiverFactory(AmqpClientConnectionImpl client)
   {
@@ -91,6 +98,57 @@ class AmqpClientReceiverFactory extends AbstractMessageReceiverFactory
   public AmqpMessageDecoder<?> getDecoder()
   {
     return _decoder;
+  }
+
+  @Override
+  public AmqpReceiverFactory setAttachProperty(String key, Object value)
+  {
+    if (_attachProperties == null) {
+      _attachProperties = new HashMap<String,Object>();
+    }
+    
+    _attachProperties.put(key, value);
+    
+    return this;
+  }
+  
+  Map<String,Object> getAttachProperties()
+  {
+    return _attachProperties;
+  }
+
+  @Override
+  public AmqpReceiverFactory setSourceProperty(String key, Object value)
+  {
+    if (_sourceProperties == null) {
+      _sourceProperties = new HashMap<String,Object>();
+    }
+    
+    _sourceProperties.put(key, value);
+    
+    return this;
+  }
+  
+  Map<String,Object> getSourceProperties()
+  {
+    return _sourceProperties;
+  }
+
+  @Override
+  public AmqpReceiverFactory setTargetProperty(String key, Object value)
+  {
+    if (_targetProperties == null) {
+      _targetProperties = new HashMap<String,Object>();
+    }
+    
+    _targetProperties.put(key, value);
+    
+    return this;
+  }
+  
+  Map<String,Object> getTargetProperties()
+  {
+    return _targetProperties;
   }
 
   @Override

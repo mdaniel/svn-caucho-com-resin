@@ -167,6 +167,11 @@ public class FrameAttach extends AmqpAbstractFrame {
     return _desiredCapabilities;
   }
   
+  public void setProperties(Map<String,?> properties)
+  {
+    _properties = properties;
+  }
+  
   public Map<String,?> getProperties()
   {
     return _properties;
@@ -225,7 +230,7 @@ public class FrameAttach extends AmqpAbstractFrame {
     
     out.writeSymbolArray(_offeredCapabilities);
     out.writeSymbolArray(_desiredCapabilities);
-    out.writeMap(_properties);
+    out.writeFieldsMap(_properties);
     
     return 14;
   }

@@ -30,6 +30,7 @@
 package com.caucho.amqp.client;
 
 import java.io.InputStream;
+import java.util.Map;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -63,6 +64,24 @@ public class AmqpClientSenderLink extends AmqpSenderLink
   public AmqpClientSender<?> getSender()
   {
     return _sender;
+  }
+  
+  @Override
+  public Map<String,Object> getAttachProperties()
+  {
+    return _sender.getAttachProperties();
+  }
+  
+  @Override
+  public Map<String,Object> getSourceProperties()
+  {
+    return _sender.getSourceProperties();
+  }
+  
+  @Override
+  public Map<String,Object> getTargetProperties()
+  {
+    return _sender.getTargetProperties();
   }
 
   /**

@@ -29,6 +29,8 @@
 
 package com.caucho.amqp.server;
 
+import java.util.Map;
+
 import javax.annotation.PostConstruct;
 
 import com.caucho.amqp.common.AmqpReceiverLink;
@@ -64,9 +66,11 @@ public class AmqpProtocol implements Protocol
     return new AmqpServerConnection(this, link);
   }
 
-  AmqpServerReceiverLink createReceiverLink(String name, String address)
+  AmqpServerReceiverLink createReceiverLink(String name, 
+                                            String address,
+                                            Map<String,Object> nodeProperties)
   {
-    BrokerSender sender = _broker.createSender(address);
+    BrokerSender sender = _broker.createSender(address, nodeProperties);
     
     if (sender != null) {
       return new AmqpServerReceiverLink(name, address, sender);
@@ -79,13 +83,15 @@ public class AmqpProtocol implements Protocol
   AmqpServerSenderLink createSenderLink(String name, 
                                         String address,
                                         DistributionMode distMode,
-                                        SettleMode settleMode)
+                                        SettleMode settleMode,
+                                        Map<String,Object> nodeProperties)
   {
     AmqpServerSenderLink link
       = new AmqpServerSenderLink(name, address, settleMode);
-    
+
     BrokerReceiver receiver = _broker.createReceiver(address, 
                                                      distMode,
+                                                     nodeProperties,
                                                      link.getBrokerHandler());
     
     if (receiver != null) {

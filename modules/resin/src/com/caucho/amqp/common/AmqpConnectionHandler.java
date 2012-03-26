@@ -30,6 +30,7 @@
 package com.caucho.amqp.common;
 
 import java.io.IOException;
+import java.util.Map;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -48,6 +49,7 @@ import com.caucho.amqp.io.FrameDisposition;
 import com.caucho.amqp.io.FrameEnd;
 import com.caucho.amqp.io.FrameFlow;
 import com.caucho.amqp.io.FrameTransfer;
+import com.caucho.amqp.io.LinkTarget;
 import com.caucho.amqp.io.FrameAttach.Role;
 import com.caucho.amqp.io.LinkSource;
 import com.caucho.message.DistributionMode;
@@ -174,16 +176,25 @@ public class AmqpConnectionHandler
     }
    
     if (attach.getRole() == Role.SENDER) {
-      address = attach.getTarget().getAddress();
+      LinkTarget target = attach.getTarget();
+      address = target.getAddress();
+      
+      Map<String,Object> targetProperties;
+      targetProperties = target.getDynamicNodeProperties();
 
-      link = _linkFactory.createReceiverLink(name, address);
+      link = _linkFactory.createReceiverLink(name, address, targetProperties);
     }
     else {
       LinkSource source = attach.getSource();
       address = source.getAddress();
       DistributionMode distMode = source.getDistributionMode();
+      
+      Map<String,Object> sourceProperties;
+      sourceProperties = source.getDynamicNodeProperties();
 
-      link = _linkFactory.createSenderLink(name, address, distMode, settleMode);
+      link = _linkFactory.createSenderLink(name, address, distMode, 
+                                           settleMode,
+                                           sourceProperties);
     }
     
     link.setIncomingHandle(attach.getHandle());

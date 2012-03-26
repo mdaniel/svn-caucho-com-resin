@@ -29,6 +29,8 @@
 
 package com.caucho.message.broker;
 
+import java.util.Map;
+
 import com.caucho.loader.Environment;
 import com.caucho.loader.EnvironmentLocal;
 import com.caucho.message.DistributionMode;
@@ -101,15 +103,16 @@ public class EnvironmentMessageBroker implements MessageBroker
   }
   
   @Override
-  public BrokerSender createSender(String name)
+  public BrokerSender createSender(String name,
+                                   Map<String,Object> properties)
   {
     MessageBroker broker = _brokerMap.get(name);
     
     if (broker != null)
-      return broker.createSender(name);
+      return broker.createSender(name, properties);
     
     for (MessageBroker registeredBroker : _brokerList) {
-      BrokerSender dest = registeredBroker.createSender(name);
+      BrokerSender dest = registeredBroker.createSender(name, properties);
       
       if (dest != null) {
         _brokerMap.put(name, registeredBroker);
@@ -123,11 +126,15 @@ public class EnvironmentMessageBroker implements MessageBroker
   @Override
   public BrokerReceiver createReceiver(String name,
                                        DistributionMode distributionMode,
+                                       Map<String,Object> properties,
                                        ReceiverMessageHandler listener)
   {
     for (MessageBroker registeredBroker : _brokerList) {
       BrokerReceiver sub
-        = registeredBroker.createReceiver(name, distributionMode, listener);
+        = registeredBroker.createReceiver(name, 
+                                          distributionMode,
+                                          properties,
+                                          listener);
       
       if (sub != null) {
         return sub;
