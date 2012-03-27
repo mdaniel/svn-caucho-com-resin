@@ -49,7 +49,7 @@ public class LongValue extends NumberValue
   public static final int STATIC_MIN = -1024;
   public static final int STATIC_MAX = 16 * 1024;
 
-  public static final LongCacheValue[]STATIC_VALUES;
+  public static final LongCacheValue []STATIC_VALUES;
 
   private final long _value;
 
@@ -74,6 +74,17 @@ public class LongValue extends NumberValue
       return LongValue.create(value.longValue());
   }
 
+  public static int numberOfDigits(long value) {
+    int len = 1;
+    
+    long v = value;
+    while ((v /= 10) > 0) {
+      len++;
+    }
+        
+    return len;
+  }
+  
   /**
    * Returns the type.
    */

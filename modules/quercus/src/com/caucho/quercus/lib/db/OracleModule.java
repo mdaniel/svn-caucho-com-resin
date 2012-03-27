@@ -1299,16 +1299,7 @@ public class OracleModule extends AbstractQuercusModule {
   public static boolean oci_free_statement(Env env,
                                            @NotNull OracleStatement stmt)
   {
-    try {
-
-      stmt.close();
-
-      return true;
-
-    } catch (Exception ex) {
-      log.log(Level.FINE, ex.toString(), ex);
-      return false;
-    }
+    return stmt.close();
   }
 
   /**

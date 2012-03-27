@@ -122,9 +122,9 @@ public class DateModule extends AbstractQuercusModule {
   /**
    * Returns the formatted date.
    */
-  public String date(Env env,
-                     String format,
-                     @Optional("time()") long time)
+  public StringValue date(Env env,
+                          StringValue format,
+                          @Optional("time()") long time)
   {
     return date(env, format, time, false);
   }
@@ -133,65 +133,63 @@ public class DateModule extends AbstractQuercusModule {
    * Returns the formatted date as an int.
    */
   public Value idate(Env env,
-                     String format,
+                     StringValue format,
                      @Optional("time()") long time)
   {
     if (format.length() != 1) {
-      log.log(Level.FINE,
-          L.l(
-              "idate format '{0}' needs to be of length one and only one",
-              format));
-      env.warning(L.l(
-          "idate format '{0}' needs to be of length one and only one",
-          format));
+      log.log(Level.FINE, L.l("idate format '{0}' needs to be of length one and only one",
+                              format));
+      
+      env.warning(L.l("idate format '{0}' needs to be of length one and only one",
+                      format));
 
       return BooleanValue.FALSE;
     }
     
     switch (format.charAt(0)) {
-    case 'B':
-    case 'd':
-    case 'h': case 'H':
-    case 'i':
-    case 'I':
-    case 'L':
-    case 'm':
-    case 's':
-    case 't':
-    case 'U':
-    case 'w':
-    case 'W':
-    case 'y':
-    case 'Y':
-    case 'z':
-    case 'Z':
-      String dateString = date(env, format, time, false);
+      case 'B':
+      case 'd':
+      case 'h': case 'H':
+      case 'i':
+      case 'I':
+      case 'L':
+      case 'm':
+      case 's':
+      case 't':
+      case 'U':
+      case 'w':
+      case 'W':
+      case 'y':
+      case 'Y':
+      case 'z':
+      case 'Z':
+        StringValue dateString = date(env, format, time, false);
 
-      int sign = 1;
-      long result = 0;
-      int length = dateString.length();
-        
-      for (int i = 0; i < length; i++) {
-        char ch = dateString.charAt(i);
+        int sign = 1;
+        long result = 0;
+        int length = dateString.length();
           
-        if ('0' <= ch && ch <= '9')
-          result = result * 10 + ch - '0';
-        else if (ch == '-' && i == 0)
-          sign = -1;
-        else {
-          log.log(Level.FINEST, L.l(
-              "error parsing idate string '{0}'", dateString));
-          break;
+        for (int i = 0; i < length; i++) {
+          char ch = dateString.charAt(i);
+            
+          if ('0' <= ch && ch <= '9')
+            result = result * 10 + ch - '0';
+          else if (ch == '-' && i == 0)
+            sign = -1;
+          else {
+            log.log(Level.FINEST, L.l(
+                "error parsing idate string '{0}'", dateString));
+            break;
+          }
         }
-      }
 
-      return LongValue.create(result * sign);
+        return LongValue.create(result * sign);
 
-    default:
-      log.log(Level.FINE, L.l("'{0}' is not a valid idate format", format));
-      env.warning(L.l("'{0}' is not a valid idate format", format));
-        
-      return BooleanValue.FALSE;
+      default:
+        log.log(Level.FINE, L.l("'{0}' is not a valid idate format", format));
+        env.warning(L.l("'{0}' is not a valid idate format", format));
+          
+        return BooleanValue.FALSE;
     }
   }
 
@@ -308,9 +306,9 @@ public class DateModule extends AbstractQuercusModule {
   /**
    * Returns the formatted date.
    */
-  public String gmdate(Env env,
-                       String format,
-                       @Optional("time()") long time)
+  public StringValue gmdate(Env env,
+                            StringValue format,
+                            @Optional("time()") long time)
   {
     return date(env, format, time, true);
   }
@@ -376,33 +374,37 @@ public class DateModule extends AbstractQuercusModule {
     return (c + day + e + f - 1524.5);
   }
 
-  private String date(Env env, String format, long time, boolean isGMT)
+  private StringValue date(Env env,
+                           StringValue format,
+                           long time,
+                           boolean isGMT)
   {
     if (format == null)
       return null;
     
     if (isGMT) {
-      return dateImpl(format, time, env.getGmtDate());
+      return dateImpl(env, format, time, env.getGmtDate());
     }
     else {
       QDate calendar = env.getDate();
 
-      return dateImpl(format, time, calendar);
+      return dateImpl(env, format, time, calendar);
     }
   }
   
   /**
    * Returns the formatted date.
    */
-  protected static String dateImpl(String format,
-                                   long time,
-                                   QDate calendar)
+  protected static StringValue dateImpl(Env env,
+                                        StringValue format,
+                                        long time,
+                                        QDate calendar)
   {
     long now = 1000 * time;
     
     calendar.setGMTTime(now);
 
-    CharBuffer sb = new CharBuffer();
+    CharBuffer sb = CharBuffer.allocate();
     int len = format.length();
 
     for (int i = 0; i < len; i++) {
@@ -791,8 +793,10 @@ public class DateModule extends AbstractQuercusModule {
           break;
       }
     }
+    
+    char[] buffer = sb.getBuffer();
 
-    return sb.toString();
+    return env.createString(buffer, 0, sb.getLength());
   }
 
   /**
@@ -1057,9 +1061,13 @@ public class DateModule extends AbstractQuercusModule {
   }
 
   public static DateTime date_create(Env env,
-                                     @Optional("now") String time,
+                                     @Optional Value time,
                                      @Optional DateTimeZone dateTimeZone)
   {
+    if (time.isDefault()) {
+      time = env.createString("now");
+    }
+        
     return DateTime.__construct(env, time, dateTimeZone);
   }
   
@@ -1085,9 +1093,11 @@ public class DateModule extends AbstractQuercusModule {
     return true;
   }
   
-  public static String date_format(DateTime dateTime, String format) 
+  public static StringValue date_format(Env env,
+                                        DateTime dateTime,
+                                        StringValue format) 
   {
-    return dateTime.format(format);
+    return dateTime.format(env, format);
   }
   
   public static void date_isodate_set(DateTime dateTime,
@@ -1098,7 +1108,7 @@ public class DateModule extends AbstractQuercusModule {
     dateTime.setISODate(year, week, day);
   }
   
-  public static void date_modify(DateTime dateTime, String modify)
+  public static void date_modify(DateTime dateTime, StringValue modify)
   {
     dateTime.modify(modify);
   }
@@ -1108,7 +1118,7 @@ public class DateModule extends AbstractQuercusModule {
     return dateTime.getOffset();
   }
   
-  public static Value date_parse(Env env, String date)
+  public static Value date_parse(Env env, StringValue date)
   {
     DateTime dateTime = new DateTime(env, date);
     QDate qDate = dateTime.getQDate();
@@ -1284,7 +1294,7 @@ public class DateModule extends AbstractQuercusModule {
 
     private QDate _date;
 
-    private String _s;
+    private CharSequence _s;
     private int _index;
     private int _length;
 
@@ -1300,7 +1310,7 @@ public class DateModule extends AbstractQuercusModule {
     private boolean _hasDate;
     private boolean _hasTime;
 
-    DateParser(String s, QDate date)
+    DateParser(CharSequence s, QDate date)
     {
       _date = date;
       _s = s;
@@ -1417,9 +1427,9 @@ public class DateModule extends AbstractQuercusModule {
 
     private void parseISODate(int value1)
     {
-      int year = _date.getYear();
-      int month = 0;
-      int day = 0;
+      //int year = _date.getYear();
+      //int month = 0;
+      //int day = 0;
 
       if (value1 < 0)
         value1 = - value1;
@@ -1472,9 +1482,9 @@ public class DateModule extends AbstractQuercusModule {
 
     private void parseUSDate(int value1)
     {
-      int year = _date.getYear();
-      int month = 0;
-      int day = 0;
+      //int year = _date.getYear();
+      //int month = 0;
+      //int day = 0;
 
       if (value1 < 0)
         value1 = - value1;
@@ -1528,9 +1538,9 @@ public class DateModule extends AbstractQuercusModule {
 
     private void parseDayMonthDate(int value1)
     {
-      int year = _date.getYear();
-      int month = 0;
-      int day = 0;
+      //int year = _date.getYear();
+      //int month = 0;
+      //int day = 0;
 
       if (value1 < 0)
         value1 = - value1;
@@ -1717,7 +1727,7 @@ public class DateModule extends AbstractQuercusModule {
         return;
       }
 
-      int offset = 0;
+      //int offset = 0;
 
       token = nextToken();
       if (token != INT) {

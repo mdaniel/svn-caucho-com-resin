@@ -131,53 +131,44 @@ public class JdbcStatementResource {
   }
 
   /**
-   * Associate (bind) columns in the result set to variables.
-   * <p/>
-   * NB: we assume that the statement has been executed and
-   * compare the # of outParams w/ the # of columns in the
-   * resultset because we cannot know in advance how many
-   * columns "SELECT * FROM TableName" can return.
-   * <p/>
-   * PHP 5.0 seems to provide some rudimentary checking on # of
-   * outParams even before the statement has been executed
-   * and only issues a warning in the case of "SELECT * FROM TableName".
-   * <p/>
-   * Our implementation REQUIRES the execute happen first.
-   *
-   * @param env the PHP executing environment
-   * @param outParams the output variables
-   * @return true on success or false on failure
+   * XXX: MySQL returns the table metadata on preparation of a statement,
+   * but the java.sql doesn't support that feature.
    */
-  public boolean bindResults(Env env,
-                             Value[] outParams)
-  {
-    final int size = outParams.length;
-    int numColumns;
-
+  public boolean bindResults(Env env, Value[] outParams)
+  {    
+    int size = outParams.length;
+    int numColumns = -1;
+    
+    ResultSetMetaData md = null;
+    
     try {
-      ResultSetMetaData md = getMetaData();
-
-      numColumns = md.getColumnCount();
-    } catch (SQLException e) {
+      md = getMetaData();
+      
+      if (md != null) {
+        numColumns = md.getColumnCount();
+      }
+    }
+    catch (SQLException e) {
       log.log(Level.FINE, e.toString(), e);
       return false;
     }
+    
+    if (numColumns >= 0) {
+      for (int i = 0; i < size; i++) {
+        Value val = outParams[i];
 
-    for (int i = 0; i < size; i++) {
-      Value val = outParams[i];
+        if (! (val instanceof Var)) {
+          env.error(L.l("Only variables can be passed by reference"));
+          return false;
+        }
+      }
 
-      if (! (val instanceof Var)) {
-        env.error(L.l("Only variables can be passed by reference"));
+      if ((size == 0) || (size != numColumns)) {
+        env.warning(L.l("number of bound variables does not equal number of columns"));
         return false;
       }
     }
-
-    if ((size == 0) || (size != numColumns)) {
-      env.warning(
-          L.l("number of bound variables does not equal number of columns"));
-      return false;
-    }
-
+    
     _results = new Value[size];
 
     System.arraycopy(outParams, 0, _results, 0, size);
@@ -188,7 +179,7 @@ public class JdbcStatementResource {
   /**
    * Closes the result set, if any, and closes this statement.
    */
-  public void close()
+  public boolean close()
   {
     try {
       ResultSet rs = _rs;
@@ -199,11 +190,15 @@ public class JdbcStatementResource {
 
       if (_stmt != null)
         _stmt.close();
-
-    } catch (SQLException e) {
+      
+      return true;
+    }
+    catch (SQLException e) {
       _errorMessage = e.getMessage();
       _errorCode = e.getErrorCode();
       log.log(Level.FINE, e.toString(), e);
+      
+      return false;
     }
   }
 
@@ -298,7 +293,8 @@ public class JdbcStatementResource {
       }
 
       return true;
-    } catch (SQLException e) {
+    }
+    catch (SQLException e) {
       _errorMessage = e.getMessage();
       _errorCode = e.getErrorCode();
       throw e;
@@ -313,8 +309,9 @@ public class JdbcStatementResource {
   public Value fetch(Env env)
   {
     try {
-      if (_rs == null)
+      if (_rs == null) {
         return NullValue.NULL;
+      }
       
       if (_rs.next()) {
         if (_metaData == null)
@@ -324,14 +321,18 @@ public class JdbcStatementResource {
         int size = _results.length;
 
         for (int i = 0; i < size; i++) {
-          _results[i].set(_resultResource.getColumnValue(
-              env, _rs, _metaData, i + 1));
+          Value value = _resultResource.getColumnValue(env, _rs, _metaData, i + 1);
+          
+          _results[i].set(value);
         }
+        
         return BooleanValue.TRUE;
-      } else {
+      }
+      else {
         return NullValue.NULL;
       }
-    } catch (SQLException e) {
+    }
+    catch (SQLException e) {
       log.log(Level.FINE, e.toString(), e);
       return BooleanValue.FALSE;
     }
@@ -355,11 +356,14 @@ public class JdbcStatementResource {
         _resultResource.close();
         _resultResource = null;
       }
+      
       return true;
-    } catch (SQLException e) {
+    }
+    catch (SQLException e) {
       _errorMessage = e.getMessage();
       _errorCode = e.getErrorCode();
       log.log(Level.FINE, e.toString(), e);
+      
       return false;
     }
   }
@@ -372,8 +376,9 @@ public class JdbcStatementResource {
   protected ResultSetMetaData getMetaData()
     throws SQLException
   {
-    if (_metaData == null)
+    if (_metaData == null && _rs != null) {
       _metaData = _rs.getMetaData();
+    }
 
     return _metaData;
   }
@@ -529,29 +534,34 @@ public class JdbcStatementResource {
 
       _query = query.toString();
 
-      if (_query.length() == 0)
+      if (_query.length() == 0) {
         return false;
+      }
 
       Connection conn = _conn.getConnection(env);
       
-      if (conn == null)
+      if (conn == null) {
         return false;
+      }
       
       if (this instanceof OracleStatement) {
         _stmt = conn.prepareCall(_query,
                                  ResultSet.TYPE_SCROLL_INSENSITIVE,
                                  ResultSet.CONCUR_READ_ONLY);
-      } else if (_conn.isSeekable()) {
+      }
+      else if (_conn.isSeekable()) {
         _stmt = conn.prepareStatement(_query,
                                       ResultSet.TYPE_SCROLL_INSENSITIVE,
                                       ResultSet.CONCUR_READ_ONLY);
-      } else {
+      }
+      else {
         _stmt = conn.prepareStatement(_query);
       }
 
       return true;
 
-    } catch (SQLException e) {
+    }
+    catch (SQLException e) {
       log.log(Level.FINE, e.toString(), e);
       _errorMessage = e.getMessage();
       _errorCode = e.getErrorCode();

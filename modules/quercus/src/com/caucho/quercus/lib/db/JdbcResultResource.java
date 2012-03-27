@@ -31,13 +31,10 @@ package com.caucho.quercus.lib.db;
 
 import com.caucho.quercus.env.*;
 import com.caucho.util.L10N;
-import com.caucho.util.Log;
 
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.Reader;
-import java.nio.charset.Charset;
-import java.nio.charset.CharsetEncoder;
 import java.sql.ResultSet;
 import java.sql.ResultSetMetaData;
 import java.sql.SQLException;
@@ -458,7 +455,7 @@ public class JdbcResultResource {
             if (rs.wasNull())
               return NullValue.NULL;
             else
-              return _env.createString(value);
+              return env.createString(value);
           }
           // else fall to boolean
         }
@@ -482,7 +479,7 @@ public class JdbcResultResource {
           if (rs.wasNull())
             return NullValue.NULL;
           else
-            return _env.createString(String.valueOf(value));
+            return env.createString(value);
         }
       case Types.REAL:
       case Types.DOUBLE:
@@ -512,26 +509,12 @@ public class JdbcResultResource {
 
       case Types.BLOB:
         {
-          Object object = rs.getBlob(column);
-          if (object.getClass().getName().equals("oracle.sql.BLOB")) {
-            OracleOciLob ociLob = new OracleOciLob((Oracle) _conn,
-                                                   OracleModule.OCI_D_LOB);
-            ociLob.setLob(object);
-            object = ociLob;
-          }
-          return env.wrapJava(object);
+          return getBlobValue(env, rs, metaData, column);
         }
 
       case Types.CLOB:
         {
-          Object object = rs.getClob(column);
-          if (object.getClass().getName().equals("oracle.sql.CLOB")) {
-            OracleOciLob ociLob = new OracleOciLob((Oracle) _conn,
-                                                   OracleModule.OCI_D_LOB);
-            ociLob.setLob(object);
-            object = ociLob;
-          }
-          return env.wrapJava(object);
+          return getClobValue(env, rs, metaData, column);
         }
 
       case Types.LONGVARBINARY:
@@ -592,6 +575,24 @@ public class JdbcResultResource {
 
       return NullValue.NULL;
     }
+  }
+  
+  protected Value getBlobValue(Env env,
+                               ResultSet rs,
+                               ResultSetMetaData metaData,
+                               int column)
+    throws SQLException
+  {
+    return getColumnString(env, rs, metaData, column);
+  }
+  
+  protected Value getClobValue(Env env,
+                               ResultSet rs,
+                               ResultSetMetaData metaData,
+                               int column)
+    throws SQLException
+  {
+    return getColumnString(env, rs, metaData, column);
   }
 
   protected Value getUnicodeColumnString(Env env,
@@ -1006,38 +1007,38 @@ public class JdbcResultResource {
   protected String getFieldType(int fieldOffset, int jdbcType)
   {
     switch (jdbcType) {
-    case Types.BIGINT:
-    case Types.BIT:
-    case Types.INTEGER:
-    case Types.SMALLINT:
-    case Types.TINYINT:
+      case Types.BIGINT:
+      case Types.BIT:
+      case Types.INTEGER:
+      case Types.SMALLINT:
+      case Types.TINYINT:
         return INTEGER;
 
-    case Types.LONGVARBINARY:
-    case Types.LONGVARCHAR:
+      case Types.LONGVARBINARY:
+      case Types.LONGVARCHAR:
         return BLOB;
 
-    case Types.CHAR:
-    case Types.VARCHAR:
-    case Types.BINARY:
-    case Types.VARBINARY:
+      case Types.CHAR:
+      case Types.VARCHAR:
+      case Types.BINARY:
+      case Types.VARBINARY:
         return STRING;
 
-    case Types.TIME:
+      case Types.TIME:
         return TIME;
 
-    case Types.DATE:
+      case Types.DATE:
         return DATE;
 
-    case Types.TIMESTAMP:
+      case Types.TIMESTAMP:
         return DATETIME;
 
-    case Types.DECIMAL:
-    case Types.DOUBLE:
-    case Types.REAL:
+      case Types.DECIMAL:
+      case Types.DOUBLE:
+      case Types.REAL:
         return REAL;
 
-    default:
+      default:
         return UNKNOWN;
     }
   }

@@ -29,13 +29,6 @@
 
 package com.caucho.quercus.env;
 
-import com.caucho.quercus.marshal.Marshal;
-import com.caucho.vfs.WriteStream;
-
-import java.io.IOException;
-import java.io.PrintWriter;
-import java.util.IdentityHashMap;
-
 /**
  * Represents a PHP long value.
  */
@@ -44,6 +37,8 @@ public class LongCacheValue extends LongValue
 {
   private transient LongValue _prev;
   private transient final LongValue _next;
+  
+  private transient StringValue _strValue;
   
   public LongCacheValue(long value, LongValue next)
   {
@@ -109,6 +104,19 @@ public class LongCacheValue extends LongValue
   public Value postdecr()
   {
     return _prev;
+  }
+  
+  /**
+   * Converts to a StringValue.
+   */
+  @Override
+  public StringValue toStringValue(Env env)
+  {
+    if (_strValue == null) {
+      _strValue = env.createString(toLong());
+    }
+    
+    return _strValue;
   }
 
   /**

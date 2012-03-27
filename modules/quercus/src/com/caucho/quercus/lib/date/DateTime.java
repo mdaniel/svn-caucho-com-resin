@@ -32,6 +32,8 @@ package com.caucho.quercus.lib.date;
 import com.caucho.quercus.UnimplementedException;
 import com.caucho.quercus.annotation.Optional;
 import com.caucho.quercus.env.Env;
+import com.caucho.quercus.env.StringValue;
+import com.caucho.quercus.env.Value;
 import com.caucho.quercus.lib.date.DateModule.DateParser;
 import com.caucho.util.QDate;
 
@@ -55,12 +57,12 @@ public class DateTime
   private QDate _qDate;
   private DateTimeZone _dateTimeZone;
   
-  protected DateTime(Env env, String timeString)
+  protected DateTime(Env env, StringValue timeString)
   {
     this(env, timeString, null);
   }
   
-  protected DateTime(Env env, String timeString, DateTimeZone dateTimeZone)
+  protected DateTime(Env env, StringValue timeString, DateTimeZone dateTimeZone)
   {
     if (dateTimeZone == null)
       dateTimeZone = new DateTimeZone(env);
@@ -71,7 +73,7 @@ public class DateTime
     init(env, timeString);
   }
   
-  private void init(Env env, String timeString)
+  private void init(Env env, StringValue timeString)
   {
     long now = env.getCurrentTime();
     _qDate.setGMTTime(now);
@@ -90,27 +92,34 @@ public class DateTime
   }
   
   public static DateTime __construct(Env env,
-                                     @Optional("now") String time,
+                                     @Optional Value time,
                                      @Optional DateTimeZone timeZone)
   {
-    if (time == null)
-      time = "now";
+    StringValue timeStr = null;
+    
+    if (time.isDefault()) {
+      timeStr = env.createString("now");
+    }
+    else {
+      timeStr = time.toStringValue(env);
+    }
+    
     if (timeZone == null)
-      return new DateTime(env, time);
+      return new DateTime(env, timeStr);
     else
-      return new DateTime(env, time, timeZone);
+      return new DateTime(env, timeStr, timeZone);
   }
   
-  public String format(String format)
+  public StringValue format(Env env, StringValue format)
   {
     long time = _qDate.getGMTTime() / 1000;
     
     QDate calendar = new QDate(_qDate.getLocalTimeZone());
 
-    return DateModule.dateImpl(format, time, calendar);
+    return DateModule.dateImpl(env, format, time, calendar);
   }
   
-  public void modify(String modify)
+  public void modify(StringValue modify)
   {
     DateParser parser = new DateParser(modify, _qDate);
     
@@ -177,6 +186,8 @@ public class DateTime
   
   public String toString()
   {
-    return format("now");
+    Env env = Env.getInstance();
+    
+    return format(env, env.createString("now")).toString();
   }
 }

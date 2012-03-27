@@ -32,9 +32,13 @@ package com.caucho.quercus.lib.db;
 import com.caucho.util.L10N;
 
 import com.caucho.quercus.env.Env;
+import com.caucho.quercus.env.Value;
 
+import java.sql.Blob;
+import java.sql.Clob;
 import java.sql.ResultSet;
 import java.sql.ResultSetMetaData;
+import java.sql.SQLException;
 import java.sql.Statement;
 import java.util.logging.Logger;
 
@@ -73,5 +77,35 @@ public class OracleResult extends JdbcResultResource {
                       Oracle conn)
   {
     super(env, metaData, conn);
+  }
+  
+  @Override
+  protected Value getBlobValue(Env env,
+                               ResultSet rs,
+                               ResultSetMetaData metaData,
+                               int column)
+    throws SQLException
+  {
+    Blob object = rs.getBlob(column);
+    OracleOciLob ociLob = new OracleOciLob((Oracle) getConnection(),
+                                           OracleModule.OCI_D_LOB);
+    ociLob.setLob(object);
+      
+    return env.wrapJava(ociLob);
+  }
+  
+  @Override
+  protected Value getClobValue(Env env,
+                               ResultSet rs,
+                               ResultSetMetaData metaData,
+                               int column)
+    throws SQLException
+  {
+    Clob clob = rs.getClob(column);
+    OracleOciLob ociLob = new OracleOciLob((Oracle) getConnection(),
+                                           OracleModule.OCI_D_LOB);
+    ociLob.setLob(clob);
+    
+    return env.wrapJava(ociLob);
   }
 }

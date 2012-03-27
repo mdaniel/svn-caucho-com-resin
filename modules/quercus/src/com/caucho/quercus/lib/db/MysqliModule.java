@@ -1178,9 +1178,7 @@ public class MysqliModule extends AbstractQuercusModule {
     if (stmt == null)
       return false;
 
-    stmt.close();
-
-    return true;
+    return stmt.close();
   }
 
   /**

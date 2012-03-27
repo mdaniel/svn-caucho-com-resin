@@ -587,9 +587,16 @@ abstract public class Expr {
    */
   public Value evalArrayAssign(Env env, Value index, Value value)
   {
-    Value var = evalVar(env);
-
-    return var.put(index, value);
+    // php/03mk, php/03mm, php/03mn, php/04b3
+    // overrided in ThisFieldExpr and ThisFieldVarExpr
+    //Value var = eval(env);
+    //
+    //return var.put(index, value);
+    
+    Value array = evalArray(env);
+    array.put(index, value);
+    
+    return array.get(index); // php/03mm php/03mn
   }
 
   /**

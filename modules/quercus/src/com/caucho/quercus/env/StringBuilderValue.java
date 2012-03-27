@@ -65,10 +65,18 @@ public class StringBuilderValue
   {
     _buffer = new byte[MIN_LENGTH];
   }
-
+  
   public StringBuilderValue(int capacity)
   {
     if (capacity < MIN_LENGTH)
+      capacity = MIN_LENGTH;
+
+    _buffer = new byte[capacity];
+  }
+  
+  public StringBuilderValue(int capacity, boolean isAbsolute)
+  {
+    if (! isAbsolute && capacity < MIN_LENGTH)
       capacity = MIN_LENGTH;
 
     _buffer = new byte[capacity];

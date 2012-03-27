@@ -596,7 +596,7 @@ abstract public class Value implements java.io.Serializable
    */
   public StringValue toString(Env env)
   {
-    return toStringValue();
+    return toStringValue(env);
   }
 
   /**
@@ -983,7 +983,7 @@ abstract public class Value implements java.io.Serializable
     return toStringValue(Env.getInstance());
   }
 
-  /*
+  /**
    * Converts to a StringValue.
    */
   public StringValue toStringValue(Env env)

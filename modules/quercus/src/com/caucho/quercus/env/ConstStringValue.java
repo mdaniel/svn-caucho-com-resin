@@ -84,7 +84,32 @@ public class ConstStringValue
 
   public ConstStringValue(char ch)
   {
-    super(ch);
+    super(1, true);
+    setLength(1);
+    
+    byte[] buffer = getBuffer();
+    buffer[0] = (byte) (ch & 0xff);
+  }
+  
+  public ConstStringValue(byte ch) {
+    super(1, true);
+    setLength(1);
+
+    byte[] buffer = getBuffer();
+    buffer[0] = (byte) (ch & 0xff);
+  }
+  
+  public ConstStringValue(long value, int digits) {
+    super(digits, true);
+    setLength(digits);
+    
+    byte[] buffer = getBuffer();
+    
+    for (int i = digits - 1; i >= 0; i--) {
+      buffer[i] = (byte) (value % 10 + '0');
+      
+      value = value / 10;
+    }
   }
 
   public ConstStringValue(String s)

@@ -4459,7 +4459,7 @@ public class Env
       return ConstStringValue.EMPTY;
   }
 
-  /*
+  /**
    * Creates an empty string builder.
    */
   public StringValue createStringBuilder()
@@ -4502,6 +4502,18 @@ public class Env
     else
       return new ConstStringValue(buffer, offset, length);
   }
+  
+  /**
+   * Creates a PHP string from a long.
+   */
+  public StringValue createString(long value) {
+    int numberOfDigits = LongValue.numberOfDigits(value);
+    
+    if (_isUnicodeSemantics)
+      return new UnicodeValueImpl(String.valueOf(value));
+    else
+      return new ConstStringValue(value, numberOfDigits);
+  }
 
   /**
    * Creates a PHP string from a java String.
@@ -4519,8 +4531,9 @@ public class Env
       else
         return ConstStringValue.create(s.charAt(0));
     }
-    else if (_isUnicodeSemantics)
+    else if (_isUnicodeSemantics) {
       return new UnicodeBuilderValue(s);
+    }
     else if (s.length() < 256) {
       StringValue stringValue = _internStringMap.get(s);
 
