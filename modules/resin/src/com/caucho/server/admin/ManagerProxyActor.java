@@ -33,7 +33,6 @@ import com.caucho.cloud.topology.CloudServer;
 import com.caucho.server.cluster.ServletService;
 import com.caucho.server.resin.Resin;
 import com.caucho.util.L10N;
-import org.eclipse.persistence.transaction.resin.ResinTransactionController;
 
 public class ManagerProxyActor
 {
