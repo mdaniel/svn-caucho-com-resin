@@ -343,7 +343,14 @@ public class ManagerClient
 
     return (StatServiceValuesQueryReply) query(query);
   }
-  
+
+  public StringQueryReply status()
+  {
+    ServerStatusQuery status = new ServerStatusQuery();
+
+    return (StringQueryReply) query(status);
+  }
+
   //
   // enable/disable
   //

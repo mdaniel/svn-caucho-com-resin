@@ -351,6 +351,17 @@ public interface ManagementMXBean extends ManagedObjectMXBean
     throws ReflectionException;
 
   @Description("Enables a server")
-  @MXAction("enable")
-  public boolean enable(@MXParam(name = "server") String value);
+  @MXAction(value = "enable", method = "POST")
+  public String enable(@MXParam(name = "server") String serverId)
+    throws ReflectionException;
+
+  @Description("Disables a server")
+  @MXAction(value = "disable", method = "POST")
+  public String disable(@MXParam(name = "server") String serverId)
+    throws ReflectionException;
+
+  @Description("Disables a server from accepting any new sessions")
+  @MXAction(value = "disable-soft", method = "POST")
+  public String disableSoft(@MXParam(name = "server") String serverId)
+    throws ReflectionException;
 }

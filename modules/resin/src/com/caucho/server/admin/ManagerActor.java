@@ -46,6 +46,7 @@ import com.caucho.admin.action.ThreadDumpAction;
 import com.caucho.bam.Query;
 import com.caucho.bam.actor.SimpleActor;
 import com.caucho.bam.mailbox.MultiworkerMailbox;
+import com.caucho.boot.ResinGUI;
 import com.caucho.cloud.bam.BamSystem;
 import com.caucho.cloud.network.NetworkClusterSystem;
 import com.caucho.cloud.topology.CloudServer;
@@ -54,6 +55,7 @@ import com.caucho.env.service.ResinSystem;
 import com.caucho.security.AdminAuthenticator;
 import com.caucho.security.PasswordUser;
 import com.caucho.server.cluster.ServletService;
+import com.caucho.server.resin.Resin;
 import com.caucho.util.CurrentTime;
 import com.caucho.util.L10N;
 import com.caucho.vfs.Path;
@@ -492,5 +494,26 @@ public class ManagerActor extends SimpleActor
     getBroker().queryResult(id, from, to, result);
 
     return result;
+  }
+  
+  @Query
+  public StringQueryReply status(long id,
+                                 String to,
+                                 String from,
+                                 ServerStatusQuery query)
+  {
+    Resin resin = Resin.getCurrent();
+
+    CloudServer cloudServer = resin.getSelfServer();
+
+    String status = L.l("Server {0} : {1}",
+                        cloudServer,
+                        cloudServer.getState());
+
+    final StringQueryReply reply = new StringQueryReply(status);
+
+    getBroker().queryResult(id, from, to, reply);
+
+    return reply;
   }
 }

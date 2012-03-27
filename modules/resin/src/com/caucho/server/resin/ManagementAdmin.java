@@ -370,7 +370,7 @@ public class ManagementAdmin extends AbstractManagedObject
     Date to = new Date(CurrentTime.getCurrentTime());
 
     ManagerClient managerClient = getManagerClient(serverId);
-    
+
     long period = Period.toPeriod(periodStr);
 
     Date from = new Date(to.getTime() - period);
@@ -409,11 +409,11 @@ public class ManagementAdmin extends AbstractManagedObject
 
     return managerClient.callJmx(pattern, operation, operationIndex, params);
   }
-  
+
   //
   // deploy
   //
-  
+
   @Override
   public ControllerStateActionQueryReply startWebApp(String serverId,
                                                       String tag,
@@ -642,20 +642,32 @@ public class ManagementAdmin extends AbstractManagedObject
 
     return result;
   }
-  
-  //
-  // enable/disable
-  //
-  
+
   @Override
-  public boolean enable(String serverId)
+  public String enable(String serverId)
   {
-    System.out.println("ENABLE:" + serverId);
-    
-    return false;
+    ManagerProxyApi proxy = getManagerProxy(serverId);
+
+    return proxy.enable();
   }
 
-  
+  @Override
+  public String disable(String serverId)
+  {
+    ManagerProxyApi proxy = getManagerProxy(serverId);
+
+    return proxy.disable();
+  }
+
+  @Override
+  public String disableSoft(String serverId)
+    throws javax.management.ReflectionException
+  {
+    ManagerProxyApi proxy = getManagerProxy(serverId);
+
+    return proxy.disableSoft();
+  }
+
   //
   // jmx dump
   //
@@ -667,7 +679,7 @@ public class ManagementAdmin extends AbstractManagedObject
 
     return managerClient.doJmxDump();
   }
-  
+
   //
   // user admin
   //
@@ -712,7 +724,9 @@ public class ManagementAdmin extends AbstractManagedObject
   @Override
   public StringQueryReply getStatus(String serverId)
   {
-    return null;
+    ManagerClient managerClient = getManagerClient(serverId);
+    
+    return managerClient.status();
   }
 
   private String makeTag(String name,
@@ -832,16 +846,18 @@ public class ManagementAdmin extends AbstractManagedObject
 
     if (server == null)
       throw ConfigException.create(new IllegalArgumentException(L.l("unknown server '{0}'", serverId)));
-    
+
     ManagerProxyApi proxy = server.getData(ManagerProxyApi.class);
-    
+
     if (proxy == null) {
       ManagerClient client = getManagerClient(serverId);
-      
+
       proxy = client.createAgentProxy(ManagerProxyApi.class,
                                       "manager-proxy@resin.caucho");
       
-      proxy = server.putDataIfAbsent(proxy);
+      ManagerProxyApi presentProxy = server.putDataIfAbsent(proxy);
+
+/*      proxy = server.putDataIfAbsent(proxy);*/
     }
 
     return proxy;

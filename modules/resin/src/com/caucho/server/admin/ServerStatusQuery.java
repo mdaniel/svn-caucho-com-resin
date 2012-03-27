@@ -24,16 +24,20 @@
  *   59 Temple Place, Suite 330
  *   Boston, MA 02111-1307  USA
  *
- * @author Alex Rojkov
  */
 
 package com.caucho.server.admin;
 
-public interface ManagerProxyApi
+@SuppressWarnings("serial")
+public class ServerStatusQuery implements java.io.Serializable
 {
-  public String enable();
-  
-  public String disable();
-  
-  public String disableSoft();
+  public ServerStatusQuery()
+  {
+  }
+
+  @Override
+  public String toString()
+  {
+    return getClass().getSimpleName() + "[]";
+  }
 }

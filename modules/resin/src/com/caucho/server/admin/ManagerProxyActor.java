@@ -29,8 +29,11 @@
 
 package com.caucho.server.admin;
 
+import com.caucho.cloud.topology.CloudServer;
 import com.caucho.server.cluster.ServletService;
+import com.caucho.server.resin.Resin;
 import com.caucho.util.L10N;
+import org.eclipse.persistence.transaction.resin.ResinTransactionController;
 
 public class ManagerProxyActor
 {
@@ -59,7 +62,17 @@ public class ManagerProxyActor
     ServletService server = ServletService.getCurrent();
     
     server.setEnabled(false);
-    
+
     return L.l("Server '{0}' is disabled.", server.getServerId());
+  }
+  
+  public String disableSoft() {
+    Resin resin = Resin.getCurrent();
+
+    CloudServer cloudServer = resin.getSelfServer();
+
+    cloudServer.disableSoft();
+
+    return L.l("Server '{0}' is soft-disabled.", cloudServer.getId());
   }
 }
