@@ -33,6 +33,8 @@ import java.lang.reflect.InvocationHandler;
 import java.lang.reflect.Method;
 import java.util.HashMap;
 
+import com.caucho.amp.actor.ActorContextImpl;
+import com.caucho.amp.router.AmpBroker;
 import com.caucho.amp.stream.AmpStream;
 import com.caucho.amp.stream.NullEncoder;
 import com.caucho.amp.stream.NullHeaders;
@@ -43,13 +45,14 @@ import com.caucho.amp.stream.NullHeaders;
 class AmpReflectionHandler implements InvocationHandler
 {
   private Class<?> _api;
-  private AmpStream _broker;
+  private AmpBroker _broker;
   private String _to;
   private String _from;
   private HashMap<String,Method> _methodMap = new HashMap<String,Method>();
   
   AmpReflectionHandler(Class<?> api, 
-                       AmpStream broker,
+                       AmpBroker broker,
+                       ActorContextImpl sender,
                        String to,
                        String from)
   {
@@ -83,6 +86,36 @@ class AmpReflectionHandler implements InvocationHandler
     }
     else {
       throw new UnsupportedOperationException(getClass().getName());
+    }
+  }
+  
+  abstract static class Call {
+    abstract void call(AmpStream broker,
+                       String to, String from, String methodName, Object...args);
+  }
+  
+  static class Send extends Call {
+    void call(AmpStream broker,
+              String to, 
+              String from, 
+              String methodName, 
+              Object...args)
+    {
+      broker.send(to, from, NullHeaders.HEADERS, NullEncoder.ENCODER,
+                  methodName, args);
+    }
+    
+  }
+  
+  static class Query extends Call {
+    void call(AmpStream broker,
+              String to, 
+              String from, 
+              String methodName, 
+              Object...args)
+    {
+      broker.send(to, from, NullHeaders.HEADERS, NullEncoder.ENCODER,
+                  methodName, args);
     }
   }
 }

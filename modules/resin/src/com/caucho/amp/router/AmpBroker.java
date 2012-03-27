@@ -27,34 +27,43 @@
  * @author Scott Ferguson
  */
 
-package com.caucho.amp;
+package com.caucho.amp.router;
 
-import com.caucho.amp.actor.AmpActor;
-import com.caucho.amp.router.AmpBroker;
+import com.caucho.amp.mailbox.AmpMailbox;
+import com.caucho.amp.stream.AmpStream;
 
 /**
- * Manages an AMP domain.
+ * AmpRouter routes messages to mailboxes.
  */
-public interface AmpManager
+public interface AmpBroker extends AmpStream
 {
   /**
-   * Returns the domain's router.
+   * Returns the mailbox to the router itself.
    */
-  public AmpBroker getRouter();
+  public AmpMailbox getRouterMailbox();
   
   /**
-   * Creates a client proxy to an api.
+   * Returns a mailbox for the given address, 
+   * or null if the mailbox does not exist.
+   * 
+   * @param address the address of the mailbox
+   * 
+   * @return the mailbox with the given address or null
    */
-  public <T> T createActorProxy(Class<T> api, String address);
+  public AmpMailbox getMailbox(String address);
   
   /**
-   * Adds a bean to be proxied as an actor.
+   * Adds a mailbox (optional operation).
    */
-  public void addActor(Object bean, String address);
+  public void addMailbox(AmpMailbox mailbox);
   
   /**
-   * Adds an actor stream, creating the mailbox for it 
-   * using the default factory.
+   * Removes a mailbox (optional operation).
    */
-  public void addActor(AmpActor actor);
+  public void removeMailbox(AmpMailbox mailbox);
+  
+  /**
+   * Close the router.
+   */
+  public void close();
 }

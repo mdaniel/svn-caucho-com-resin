@@ -27,43 +27,33 @@
  * @author Scott Ferguson
  */
 
-package com.caucho.amp.router;
+package com.caucho.amp.skeleton;
 
-import com.caucho.amp.mailbox.AmpMailbox;
+import java.lang.reflect.InvocationHandler;
+import java.lang.reflect.Method;
+import java.util.HashMap;
+
 import com.caucho.amp.stream.AmpStream;
 
 /**
- * AmpRouter routes messages to mailboxes.
+ * Creates MPC skeletons and stubs.
  */
-public interface AmpRouter extends AmpStream
+class AmpReflectionStub implements InvocationHandler
 {
-  /**
-   * Returns the mailbox to the router itself.
-   */
-  public AmpMailbox getRouterMailbox();
+  private HashMap<String,Method> _methodMap = new HashMap<String,Method>();
   
-  /**
-   * Returns a mailbox for the given address, 
-   * or null if the mailbox does not exist.
-   * 
-   * @param address the address of the mailbox
-   * 
-   * @return the mailbox with the given address or null
-   */
-  public AmpMailbox getMailbox(String address);
+  private final Object _bean;
   
-  /**
-   * Adds a mailbox (optional operation).
-   */
-  public void addMailbox(AmpMailbox mailbox);
-  
-  /**
-   * Removes a mailbox (optional operation).
-   */
-  public void removeMailbox(AmpMailbox mailbox);
-  
-  /**
-   * Close the router.
-   */
-  public void close();
+  AmpReflectionStub(Object bean)
+  {
+    _bean = bean;
+  }
+
+  @Override
+  public Object invoke(Object bean, Method arg1, Object[] arg2)
+    throws Throwable
+  {
+    // TODO Auto-generated method stub
+    return null;
+  }
 }

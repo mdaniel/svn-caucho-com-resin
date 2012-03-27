@@ -29,8 +29,9 @@
 
 package com.caucho.amp.skeleton;
 
+import com.caucho.amp.actor.ActorContextImpl;
 import com.caucho.amp.actor.AmpActor;
-import com.caucho.amp.router.AmpRouter;
+import com.caucho.amp.router.AmpBroker;
 
 /**
  * Creates MPC skeletons and stubs.
@@ -40,7 +41,8 @@ public interface AmpSkeletonFactory
   AmpActor createSkeleton(Object bean, String address);
   
   <T> T createStub(Class<T> api,
-                   AmpRouter router,
+                   AmpBroker router,
+                   ActorContextImpl actorContext,
                    String to,
                    String from);
 }

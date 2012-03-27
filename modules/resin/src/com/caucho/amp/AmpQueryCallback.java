@@ -29,32 +29,18 @@
 
 package com.caucho.amp;
 
-import com.caucho.amp.actor.AmpActor;
-import com.caucho.amp.router.AmpBroker;
+
+import com.caucho.amp.stream.AmpError;
 
 /**
- * Manages an AMP domain.
+ * callback for a query
  */
-public interface AmpManager
-{
-  /**
-   * Returns the domain's router.
-   */
-  public AmpBroker getRouter();
+public interface AmpQueryCallback {
+  public void onQueryResult(String to, 
+                            String from, 
+                            Object result);
   
-  /**
-   * Creates a client proxy to an api.
-   */
-  public <T> T createActorProxy(Class<T> api, String address);
-  
-  /**
-   * Adds a bean to be proxied as an actor.
-   */
-  public void addActor(Object bean, String address);
-  
-  /**
-   * Adds an actor stream, creating the mailbox for it 
-   * using the default factory.
-   */
-  public void addActor(AmpActor actor);
+  public void onQueryError(String to,
+                           String from,
+                           AmpError error);
 }

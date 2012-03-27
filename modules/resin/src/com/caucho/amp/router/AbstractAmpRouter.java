@@ -37,7 +37,7 @@ import com.caucho.amp.stream.AmpHeaders;
 /**
  * AmpRouter routes messages to mailboxes.
  */
-public class AbstractAmpRouter implements AmpRouter
+public class AbstractAmpRouter implements AmpBroker
 {
   @Override
   public void send(String to, 

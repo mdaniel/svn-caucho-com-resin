@@ -51,10 +51,8 @@ class AmpReflectionSkeleton extends AbstractAmpActor
     _address = address;
     _bean = bean;
     
-    for (Class<?> api : bean.getClass().getInterfaces()) {
-      for (Method method : api.getMethods()) {
-        _methodMap.put(method.getName(), method);
-      }
+    for (Method method : bean.getClass().getDeclaredMethods()) {
+      _methodMap.put(method.getName(), method);
     }
   }
   

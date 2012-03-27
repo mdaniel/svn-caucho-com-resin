@@ -27,33 +27,17 @@
  * @author Scott Ferguson
  */
 
-package com.caucho.amp.skeleton;
+package com.caucho.amp.mailbox;
 
-import java.lang.reflect.InvocationHandler;
-import java.lang.reflect.Method;
-import java.util.HashMap;
-
-import com.caucho.amp.stream.AmpStream;
+import com.caucho.amp.actor.AmpActor;
 
 /**
- * Creates MPC skeletons and stubs.
+ * Creates mailboxes for actors.
  */
-class MpcReflectionStub implements InvocationHandler
+public interface AmpMailboxFactory
 {
-  private HashMap<String,Method> _methodMap = new HashMap<String,Method>();
-  
-  private final Object _bean;
-  
-  MpcReflectionStub(Object bean)
-  {
-    _bean = bean;
-  }
-
-  @Override
-  public Object invoke(Object bean, Method arg1, Object[] arg2)
-    throws Throwable
-  {
-    // TODO Auto-generated method stub
-    return null;
-  }
+  /**
+   * Creates a mailbox for an actor.
+   */
+  public AmpMailbox createMailbox(AmpActor actor);
 }

@@ -31,8 +31,9 @@ package com.caucho.amp.skeleton;
 
 import java.lang.reflect.Proxy;
 
+import com.caucho.amp.actor.ActorContextImpl;
 import com.caucho.amp.actor.AmpActor;
-import com.caucho.amp.router.AmpRouter;
+import com.caucho.amp.router.AmpBroker;
 
 /**
  * Creates MPC skeletons and stubs.
@@ -48,11 +49,12 @@ public class AmpReflectionSkeletonFactory implements AmpSkeletonFactory
   @Override
   @SuppressWarnings("unchecked")
   public <T> T createStub(Class<T> api,
-                          AmpRouter router,
+                          AmpBroker router,
+                          ActorContextImpl sender,
                           String to,
                           String from)
   {
-    AmpReflectionHandler handler = new AmpReflectionHandler(api, router, to, from);
+    AmpReflectionHandler handler = new AmpReflectionHandler(api, router, sender, to, from);
     
     return (T) Proxy.newProxyInstance(api.getClassLoader(),
                                       new Class<?>[] { api },

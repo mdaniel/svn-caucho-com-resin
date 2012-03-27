@@ -1,0 +1,424 @@
+/*
+ * Copyright (c) 1998-2012 Caucho Technology -- all rights reserved
+ *
+ * This file is part of Resin(R) Open Source
+ *
+ * Each copy or derived work must preserve the copyright notice and this
+ * notice unmodified.
+ *
+ * Resin Open Source is free software; you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation; either version 2 of the License, or
+ * (at your option) any later version.
+ *
+ * Resin Open Source is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE, or any warranty
+ * of NON-INFRINGEMENT.  See the GNU General Public License for more
+ * details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with Resin Open Source; if not, write to the
+ *
+ *   Free Software Foundation, Inc.
+ *   59 Temple Place, Suite 330
+ *   Boston, MA 02111-1307  USA
+ *
+ * @author Scott Ferguson
+ */
+
+package com.caucho.amp.actor;
+
+import com.caucho.amp.AmpQueryCallback;
+import com.caucho.amp.mailbox.AmpMailbox;
+import com.caucho.amp.mailbox.AmpMailboxFactory;
+import com.caucho.amp.stream.AmpEncoder;
+import com.caucho.amp.stream.AmpError;
+import com.caucho.amp.stream.AmpHeaders;
+import com.caucho.amp.stream.AmpStream;
+import com.caucho.util.Alarm;
+import com.caucho.util.AlarmListener;
+import com.caucho.util.CurrentTime;
+import com.caucho.util.ExpandableArray;
+import com.caucho.util.WeakAlarm;
+
+/**
+ * Handles the context for an actor, primarily including its
+ * query map.
+ */
+public final class ActorContextImpl implements AmpActor, AlarmListener {
+  private final AmpStream _actorStream;
+  private final AmpMailbox _mailbox;
+  
+  private long _timeout = 15 * 60 * 1000L;
+  
+  private long _qId;
+
+  private final ExpandableArray<QueryItem> _queryMap
+    = new ExpandableArray<QueryItem>();
+  
+  private Alarm _alarm = new WeakAlarm(this);
+
+  ActorContextImpl(AmpStream actorStream, AmpMailboxFactory mailboxFactory)
+  {
+    _actorStream = actorStream;
+    _mailbox = mailboxFactory.createMailbox(this);
+    
+    _qId = CurrentTime.getCurrentTime() << 16;
+  }
+  
+  public long getQueryTimeout()
+  {
+    return _timeout;
+  }
+  
+  public void setQueryTimeout(long timeout)
+  {
+    _timeout = timeout;
+  }
+  
+  //
+  // message filters
+  //
+
+  @Override
+  public final void send(String to,
+                         String from, 
+                         AmpHeaders headers,
+                         AmpEncoder encoder, 
+                         String methodName, 
+                         Object... args)
+  {
+    _actorStream.send(to, from, headers, encoder, methodName, args);
+  }
+
+  @Override
+  public void error(String to, 
+                    String from, 
+                    AmpHeaders headers,
+                    AmpEncoder encoder, 
+                    AmpError error)
+  {
+    _actorStream.error(to, from, headers, encoder, error);
+  }
+
+  @Override
+  public void query(long id, 
+                    String to, 
+                    String from, 
+                    AmpHeaders headers,
+                    AmpEncoder encoder, 
+                    String methodName, 
+                    Object... args)
+  {
+    _actorStream.query(id, to, from, headers, encoder, methodName, args);
+  }
+  
+  @Override
+  public void queryResult(long id, 
+                          String to, 
+                          String from, 
+                          AmpHeaders headers,
+                          AmpEncoder encoder, 
+                          Object result)
+  {
+    QueryItem queryItem = extractQuery(id);
+    
+    if (queryItem != null) {
+      queryItem.onQueryResult(to, from, headers, encoder, result);
+    }
+    else {
+      _actorStream.queryResult(id, to, from, headers, encoder, result);
+    }
+  }
+
+  @Override
+  public void queryError(long id, 
+                         String to, 
+                         String from, 
+                         AmpHeaders headers,
+                         AmpEncoder encoder, 
+                         AmpError error)
+  {
+    QueryItem queryItem = extractQuery(id);
+
+    if (queryItem != null) {
+      queryItem.onQueryError(to,  from, error);
+    }
+    else {
+      _actorStream.queryError(id, to, from, headers, encoder, error);
+    }
+  }
+  
+  //
+  // query/sender methods
+  //
+  
+  /**
+   * Adds a query callback to handle a later message.
+   *
+   * @param id the unique query identifier
+   * @param callback the application's callback for the result
+   */
+  long addQueryCallback(AmpQueryCallback callback,
+                        long timeout)
+  {
+    long id = _qId++;
+    
+    QueryItem item = new QueryItem(id, callback, timeout);
+    
+    _queryMap.add(item);
+
+    Alarm alarm = _alarm;
+
+    long expireTime = timeout + CurrentTime.getCurrentTime();
+    
+    if (alarm != null 
+        && (! alarm.isQueued() 
+            || expireTime < alarm.getWakeTime())) {
+      alarm.queueAt(expireTime);
+    }
+    
+    return id;
+  }
+  
+  private QueryItem extractQuery(long id)
+  {
+    QueryItem []queries = _queryMap.getArray();
+    int size = _queryMap.getSize();
+    
+    for (int i = 0; i < size; i++) {
+      QueryItem query = queries[i];
+      
+      if (query.getId() == id) {
+        _queryMap.remove(i);
+        
+        return query;
+      }
+    }
+    
+    return null;
+  }
+
+  /**
+   * Registers a callback future.
+   */
+  /*
+  QueryFuture addQueryFuture(long id, 
+                             String to,
+                             String from,
+                             Serializable payload,
+                             long timeout)
+  {
+    QueryFutureImpl future
+      = new QueryFutureImpl(id, to, from, payload, timeout);
+
+    _queryMap.add(id, future, timeout);
+
+    return future;
+  }
+  */
+
+  public void close()
+  {
+    Alarm alarm = _alarm;
+    _alarm = null;
+    
+    if (alarm != null)
+      alarm.dequeue();
+  }
+
+  
+  @Override
+  public String toString()
+  {
+    return getClass().getSimpleName() + "[]";
+  }
+
+  static final class QueryItem {
+    private final long _id;
+    private final AmpQueryCallback _callback;
+    private final long _expires;
+
+    QueryItem(long id, AmpQueryCallback callback, long expires)
+    {
+      _id = id;
+      _callback = callback;
+      _expires = expires;
+    }
+
+    final long getId()
+    {
+      return _id;
+    }
+    
+    final long getExpires()
+    {
+      return _expires;
+    }
+
+    void onQueryResult(String to, 
+                       String from,
+                       AmpHeaders headers,
+                       AmpEncoder encoder,
+                       Object value)
+    {
+      _callback.onQueryResult(to, from, value);
+    }
+
+    void onQueryError(String to,
+                      String from,
+                      AmpError error)
+    {
+      _callback.onQueryError(to, from, error);
+    }
+
+    @Override
+    public String toString()
+    {
+      return getClass().getSimpleName() + "[" + _id + "," + _callback + "]";
+    }
+  }
+
+  /*
+  static final class QueryFutureImpl implements QueryCallback, QueryFuture {
+    private final long _id;
+    private final String _to;
+    private final String _from;
+    private final Serializable _payload;
+    private final long _timeout;
+
+    private volatile Serializable _result;
+    private volatile BamError _error;
+    private final AtomicBoolean _isResult = new AtomicBoolean();
+    private volatile Thread _thread;
+
+    QueryFutureImpl(long id,
+                    String to,
+                    String from,
+                    Serializable payload,
+                    long timeout)
+    {
+      _id = id;
+      _to = to;
+      _from = from;
+      _payload = payload;
+      _timeout = timeout;
+    }
+
+    public Serializable getResult()
+    {
+      return _result;
+    }
+
+    @Override
+    public Serializable get()
+      throws TimeoutException, BamException
+    {
+      if (! waitFor(_timeout)) {
+        throw new TimeoutException(this + " query timeout " + _payload
+                                   + " {to:" + _to + "}");
+      }
+      else if (getError() != null) {
+        ErrorPacketException exn = getError().createException();
+        
+        if (exn.getSourceException() instanceof RuntimeException)
+          throw (RuntimeException) exn.getSourceException();
+        else
+          throw exn;
+      }
+      else
+        return getResult();
+    }
+
+    public BamError getError()
+    {
+      return _error;
+    }
+
+    boolean waitFor(long timeout)
+    {
+      _thread = Thread.currentThread();
+      long now = CurrentTime.getCurrentTimeActual();
+      long expires = now + timeout;
+
+      while (! _isResult.get() && CurrentTime.getCurrentTimeActual() < expires) {
+        try {
+          Thread.interrupted();
+          LockSupport.parkUntil(expires);
+        } catch (Exception e) {
+        }
+      }
+      
+      _thread = null;
+
+      return _isResult.get();
+    }
+
+    public void onQueryResult(String to,
+                              String from,
+                              AmpHeaders headers,
+                              AmpEncoder encoder,
+                              Object result)
+    {
+      _result = payload;
+      _isResult.set(true);
+
+      Thread thread = _thread;
+      if (thread != null)
+        LockSupport.unpark(thread);
+    }
+
+    @Override
+    public void onQueryError(String fromAddress, String toAddress,
+                             Serializable payload, BamError error)
+    {
+      _error = error;
+      _isResult.set(true);
+
+      Thread thread = _thread;
+      if (thread != null)
+        LockSupport.unpark(thread);
+    }
+    
+    @Override
+    public String toString()
+    {
+      return (getClass().getSimpleName()
+              + "[to=" + _to 
+              + ",from=" + _from
+              + ",payload=" + _payload + "]");
+    }
+  }
+  */
+
+  /* (non-Javadoc)
+   * @see com.caucho.util.AlarmListener#handleAlarm(com.caucho.util.Alarm)
+   */
+  @Override
+  public void handleAlarm(Alarm alarm)
+  {
+    // TODO Auto-generated method stub
+    
+  }
+
+  /* (non-Javadoc)
+   * @see com.caucho.amp.stream.AmpStream#getAddress()
+   */
+  @Override
+  public String getAddress()
+  {
+    // TODO Auto-generated method stub
+    return null;
+  }
+
+  /* (non-Javadoc)
+   * @see com.caucho.amp.stream.AmpStream#isClosed()
+   */
+  @Override
+  public boolean isClosed()
+  {
+    // TODO Auto-generated method stub
+    return false;
+  }
+}
