@@ -163,7 +163,11 @@ public class LoadBalanceBuilder
    */
   public LoadBalanceManager create()
   {
-    return new SingleLoadBalanceManager(getMeterCategory());
+    ClientSocketFactory socketFactory = null;
+    if (getClientList().size() > 0)
+      socketFactory = getClientList().get(0);
+
+    return new SingleLoadBalanceManager(socketFactory, getMeterCategory());
   }
 
   protected ClientSocketFactory createClientSocketFactory(String address)

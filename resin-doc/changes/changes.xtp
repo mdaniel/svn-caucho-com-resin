@@ -12,6 +12,7 @@
 
 <s2 title="4.0.28 - snapshot">
 <ul>
+<li>resin: fixed Resin OS Proxy Servlet (5002, rep by lewellyn)</li>
 <li>debian: dpkg shouldn't override /etc/resin/resin.properties (#5000, rep by lewellyn)</li>
 <li>jsf: restored Mojarra12InjectionProvider (#4996, rep by igor)</li>
 </ul>

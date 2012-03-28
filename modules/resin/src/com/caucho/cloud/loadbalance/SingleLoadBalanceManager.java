@@ -42,6 +42,14 @@ public class SingleLoadBalanceManager extends CustomLoadBalanceManager {
 
   private ClientSocketFactory _serverPool;
 
+  public SingleLoadBalanceManager(ClientSocketFactory serverPool,
+                                   String probeCategory)
+  {
+    super(probeCategory);
+
+    _serverPool = serverPool;
+  }
+  
   public SingleLoadBalanceManager(String probeCategory)
   {
     super(probeCategory);
