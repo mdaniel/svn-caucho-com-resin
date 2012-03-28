@@ -2434,6 +2434,19 @@ abstract public class Value implements java.io.Serializable
       return array;
     }
   }
+  
+  /**
+   * Appends a value to an array that is a field of an object.
+   */
+  public Value putThisFieldArray(Env env,
+                                   Value obj,
+                                   StringValue fieldName,
+                                   Value index,
+                                   Value value)
+  {
+    // php/03mm
+    return put(index, value);
+  }
 
   /**
    * Initializes a new field, does not call __set if it is defined.

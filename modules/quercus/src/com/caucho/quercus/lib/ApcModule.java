@@ -35,7 +35,6 @@ import com.caucho.quercus.env.*;
 import com.caucho.quercus.module.AbstractQuercusModule;
 import com.caucho.quercus.module.IniDefinitions;
 import com.caucho.quercus.module.IniDefinition;
-import com.caucho.util.Alarm;
 import com.caucho.util.L10N;
 import com.caucho.util.LruCache;
 import com.caucho.vfs.Path;
@@ -303,6 +302,22 @@ public class ApcModule extends AbstractQuercusModule
 
     return value;
   }
+  
+  public Value apc_add(Env env,
+                       String key,
+                       Value value,
+                       @Optional("0") int ttl) {
+    LruCache<String,Entry> cache = getCache(env);
+
+    if (cache.get(key) == null) {
+      cache.put(key, new Entry(env, value, ttl));
+      
+      return BooleanValue.TRUE;
+    }
+    else {
+      return BooleanValue.FALSE;
+    }
+  }
 
   /**
    * Returns a value.
@@ -310,18 +325,28 @@ public class ApcModule extends AbstractQuercusModule
   public Value apc_store(Env env, String key, Value value,
                          @Optional("0") int ttl)
   {
-    if (_cache == null) {
-      long size = env.getIniLong("apc.user_entries_hint");
-
-      if (size <= 0)
-        size = _defaultSize;
-
-      _cache = new LruCache<String,Entry>((int) size);
-    }
+    LruCache<String,Entry> cache = getCache(env);
     
-    _cache.put(key, new Entry(env, value, ttl));
+    cache.put(key, new Entry(env, value, ttl));
 
     return BooleanValue.TRUE;
+  }
+  
+  private LruCache<String,Entry> getCache(Env env) {
+    if (_cache == null) {
+      long size = env.getIniLong("apc.user_entries_hint");
+      
+      if (size <= 0)
+        size = _defaultSize;
+      
+      synchronized (this) {
+        if (_cache == null) {
+          _cache = new LruCache<String,Entry>((int) size);
+        }
+      }
+    }
+    
+    return _cache;
   }
 
   static class Entry extends UnserializeCacheEntry {

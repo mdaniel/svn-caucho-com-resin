@@ -1139,7 +1139,7 @@ public class Env
 
     if (isReuse)
       oldEntry = _connMap.get(entry);
-
+    
     if (oldEntry != null && oldEntry.isReusable())
       return oldEntry;
 

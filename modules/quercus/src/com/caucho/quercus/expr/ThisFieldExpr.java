@@ -205,10 +205,10 @@ public class ThisFieldExpr extends AbstractVarExpr {
     if (obj.isNull())
       cannotUseThisError(env);
     
-    Value fieldVar = obj.getThisFieldVar(env, _name);
-
-    // php/03mm
-    return fieldVar.put(index, value);
+    // php/044i
+    Value fieldVar = obj.getThisFieldArray(env, _name);
+    
+    return fieldVar.putThisFieldArray(env, obj, _name, index, value);
   }
 
   /**

@@ -164,10 +164,10 @@ public class ThisFieldVarExpr extends AbstractVarExpr {
     
     StringValue name = _nameExpr.evalStringValue(env);
     
-    Value fieldVar = obj.getThisFieldVar(env, name);
-
+    Value fieldVar = obj.getThisFieldArray(env, name);
+    
     // php/03mn
-    return fieldVar.put(index, value);
+    return fieldVar.putThisFieldArray(env, obj, name, index, value);
   }
 
   /**

@@ -942,6 +942,27 @@ abstract public class StringValue
     else
       return this;
   }
+  
+  /**
+   * Appends a value to an array that is a field of an object.
+   */
+  @Override
+  public Value putThisFieldArray(Env env,
+                                 Value obj,
+                                 StringValue fieldName,
+                                 Value index,
+                                 Value value)
+  {
+    // php/03mm
+    
+    Value newFieldValue = setCharValueAt(index.toLong(), value);
+    
+    if (newFieldValue != this) {
+      obj.putThisField(env, fieldName, newFieldValue);
+    }
+    
+    return newFieldValue.get(index);
+  }
 
   // Operations
 

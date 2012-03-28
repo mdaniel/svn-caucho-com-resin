@@ -1120,8 +1120,9 @@ public class JdbcResultResource {
     }
     */
 
-    if (_metaData == null && _rs != null)
+    if (_metaData == null && _rs != null) {
       _metaData = _rs.getMetaData();
+    }
 
     return _metaData;
   }

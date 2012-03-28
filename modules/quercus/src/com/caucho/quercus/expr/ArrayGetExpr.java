@@ -189,7 +189,7 @@ public class ArrayGetExpr extends AbstractVarExpr {
    */
   @Override
   public Value evalAssignValue(Env env, Value value)
-  {
+  {    
     // php/03mk, php/03mm, php/03mn, php/04b3
     Value array = _expr.evalArrayAssign(env, _index.eval(env), value);
     
