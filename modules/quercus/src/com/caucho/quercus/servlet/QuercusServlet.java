@@ -31,9 +31,7 @@ package com.caucho.quercus.servlet;
 
 import com.caucho.config.ConfigException;
 import com.caucho.quercus.QuercusContext;
-import com.caucho.quercus.QuercusModuleException;
 import com.caucho.quercus.QuercusRuntimeException;
-import com.caucho.quercus.lib.db.JavaSqlDriverWrapper;
 import com.caucho.quercus.lib.db.QuercusDataSource;
 import com.caucho.quercus.module.QuercusModule;
 import com.caucho.util.L10N;
@@ -48,10 +46,7 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.sql.DataSource;
 
-import java.io.File;
 import java.io.IOException;
-import java.lang.reflect.Constructor;
-import java.util.logging.Level;
 import java.util.logging.Logger;
 import java.util.ArrayList;
 import java.util.Enumeration;
@@ -89,8 +84,6 @@ public class QuercusServlet
   private String _mysqlVersion;
   private String _phpVersion;
 
-  protected File _licenseDirectory;
-
   private ArrayList<QuercusModule> _moduleList
     = new ArrayList<QuercusModule>();
 
@@ -113,55 +106,13 @@ public class QuercusServlet
 
   protected QuercusServletImpl getQuercusServlet(boolean isResin)
   {
-    QuercusServletImpl impl = null;
+    QuercusServletImpl impl;
 
     if (isResin) {
-      try {
-        Class<?> cl = Class.forName("com.caucho.quercus.servlet.ProResinQuercusServlet");
-        Constructor<?> cons = cl.getConstructor(File.class);
-
-        impl = (QuercusServletImpl) cons.newInstance(_licenseDirectory);
-
-      } catch (ConfigException e) {
-        log.log(Level.FINEST, e.toString(), e);
-        log.info("Quercus compiled mode requires Resin "
-            + "personal or professional licenses");
-        log.info(e.getMessage());
-
-      } catch (Exception e) {
-        log.log(Level.FINEST, e.toString(), e);
-      }
-
-      if (impl == null) {
-        try {
-          Class<?> cl = Class.forName("com.caucho.quercus.servlet.ResinQuercusServlet");
-          impl = (QuercusServletImpl) cl.newInstance();
-        } catch (Exception e) {
-          log.log(Level.FINEST, e.toString(), e);
-        }
-      }
+      impl = new ProResinQuercusServlet();
     }
-
-    if (impl == null) {
-      try {
-        Class<?> cl = Class.forName("com.caucho.quercus.servlet.ProQuercusServlet");
-
-        Constructor<?> cons = cl.getConstructor(java.io.File.class);
-        impl = (QuercusServletImpl) cons.newInstance(_licenseDirectory);
-
-      } catch (ConfigException e) {
-        log.log(Level.FINEST, e.toString(), e);
-        log.info("Quercus compiled mode requires "
-            + "valid Quercus professional licenses");
-        log.info(e.getMessage());
-
-      } catch (Exception e) {
-        log.log(Level.FINEST, e.toString(), e);
-      }
-    }
-
-    if (impl == null) {
-      impl = new QuercusServletImpl();
+    else {
+      impl = new ProQuercusServlet();
     }
     
     log.info("QuercusServlet starting as " + impl.getClass().getSimpleName());
@@ -196,10 +147,9 @@ public class QuercusServlet
     } else if ("lazy".equals(isCompile)) {
       _isLazyCompile = true;
     } else
-      throw new ConfigException(L.l(
-        "'{0}' is an unknown compile value. "
-            + "Values are 'true', 'false', or 'lazy'.",
-        isCompile));
+      throw new ConfigException(L.l("'{0}' is an unknown compile value. "
+                                      + "Values are 'true', 'false', or 'lazy'.",
+                                    isCompile));
   }
 
   /**
@@ -213,10 +163,9 @@ public class QuercusServlet
     } else if ("false".equals(isCompileFailover)) {
       _isCompileFailover = false;
     } else
-      throw new ConfigException(L.l(
-        "'{0}' is an unknown compile-failover value. "
-            + " Values are 'true' or 'false'.",
-        isCompileFailover));
+      throw new ConfigException(L.l("'{0}' is an unknown compile-failover value. "
+                                      + " Values are 'true' or 'false'.",
+                                    isCompileFailover));
   }
 
   /**
@@ -358,7 +307,7 @@ public class QuercusServlet
   public boolean isUnicodeSemantics()
   {
     for (PhpIni ini : _phpIniList) {
-      String value = ini._propertyMap.get("unicode.semantics");
+      String value = ini.getPropertyMap().get("unicode.semantics");
 
       if (value != null
           && ! value.equals("0")
@@ -376,14 +325,6 @@ public class QuercusServlet
    */
   public void setIniFile(String relPath)
   {
-    /*
-    Quercus quercus = getQuercus();
-
-    String realPath = getServletContext().getRealPath(relPath);
-
-    Path path = quercus.getPwd().lookup(realPath);
-    */
-
     _iniPath = relPath;
   }
 
@@ -410,14 +351,6 @@ public class QuercusServlet
   public void setPhpVersion(String version)
   {
     _phpVersion = version;
-  }
-
-  /**
-   * Sets the directory for Resin/Quercus licenses.
-   */
-  public void setLicenseDirectory(String relPath)
-  {
-    _licenseDirectory = new File(getServletContext().getRealPath(relPath));
   }
 
   /**
@@ -485,9 +418,6 @@ public class QuercusServlet
     else if ("require-source".equals(paramName)) {
       setRequireSource("true".equals(paramValue));
     }
-    else if ("license-directory".equals(paramName)) {
-      setLicenseDirectory(paramValue);
-    }
     else
       throw new ServletException(
           L.l("'{0}' is not a recognized init-param", paramName));
@@ -518,39 +448,6 @@ public class QuercusServlet
 
       setDatabase(new QuercusDataSource(ds, null, null, false));
     } catch (NamingException e) {
-      throw new ServletException(e);
-    }
-  }
-  
-  private void setJdbcDatabase(String driver, String url)
-    throws ServletException
-  {
-    try {
-      ClassLoader loader = Thread.currentThread().getContextClassLoader();
-
-      Class<?> cls = loader.loadClass(driver);
-      Object obj = cls.newInstance();
-
-      DataSource ds;
-      
-      if (obj instanceof DataSource) {
-        ds = (DataSource) obj;
-      }
-      else if (obj instanceof java.sql.Driver) {
-        ds = new JavaSqlDriverWrapper((java.sql.Driver) obj, url);
-      }
-      else {
-        throw new ServletException(L.l("jdbc driver must be a DataSource or Driver, saw {0}",
-                                       obj.getClass()));
-      }
-
-      setDatabase(ds);
-      
-    } catch (ClassNotFoundException e) {
-      throw new ServletException(e);
-    } catch (InstantiationException e) {
-      throw new ServletException(e);
-    } catch (IllegalAccessException e) {
       throw new ServletException(e);
     }
   }
@@ -609,14 +506,14 @@ public class QuercusServlet
     }
 
     for (PhpIni ini : _phpIniList) {
-      for (Map.Entry<String,String> entry : ini._propertyMap.entrySet()) {
+      for (Map.Entry<String,String> entry : ini.getPropertyMap().entrySet()) {
         quercus.setIni(entry.getKey(), entry.getValue());
       }
     }
 
     for (ServerEnv serverEnv : _serverEnvList) {
       for (Map.Entry<String,String> entry
-           : serverEnv._propertyMap.entrySet()) {
+           : serverEnv.getPropertyMap().entrySet()) {
         quercus.setServerEnv(entry.getKey(), entry.getValue());
       }
     }
@@ -653,8 +550,7 @@ public class QuercusServlet
   }
 
   public static class PhpIni {
-    HashMap<String,String> _propertyMap
-      = new HashMap<String,String>();
+    private HashMap<String,String> _propertyMap = new HashMap<String,String>();
 
     /**
      * Sets an arbitrary property.
@@ -665,15 +561,14 @@ public class QuercusServlet
 
       _propertyMap.put(key, value);
     }
+    
+    public HashMap<String,String> getPropertyMap() {
+      return _propertyMap;
+    }
   }
 
   public static class ServerEnv {
-    HashMap<String,String> _propertyMap
-      = new HashMap<String,String>();
-
-    ServerEnv()
-    {
-    }
+    private HashMap<String,String> _propertyMap = new HashMap<String,String>();
 
     /**
      * Sets an arbitrary property.
@@ -683,6 +578,10 @@ public class QuercusServlet
       //_quercus.setServerEnv(key, value);
 
       _propertyMap.put(key, value);
+    }
+    
+    public HashMap<String,String> getPropertyMap() {
+      return _propertyMap;
     }
   }
 }

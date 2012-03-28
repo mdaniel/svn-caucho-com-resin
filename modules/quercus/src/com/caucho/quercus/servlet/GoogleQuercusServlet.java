@@ -29,11 +29,8 @@
 
 package com.caucho.quercus.servlet;
 
-import com.caucho.config.ConfigException;
 import com.caucho.util.L10N;
 
-import java.lang.reflect.Constructor;
-import java.util.logging.Level;
 import java.util.logging.Logger;
 
 /**
@@ -48,29 +45,7 @@ public class GoogleQuercusServlet extends QuercusServlet
   @Override
   protected QuercusServletImpl getQuercusServlet(boolean isResin)
   {
-    QuercusServletImpl impl = null;
-
-    try {
-      Class<?> cl = Class.forName("com.caucho.quercus.servlet.ProGoogleQuercusServlet");
-      Constructor<?> cons = cl.getConstructor(java.io.File.class);
-      
-      impl = (QuercusServletImpl) cons.newInstance(_licenseDirectory);
-
-    } catch (ConfigException e) {
-      log.log(Level.FINEST, e.toString(), e);
-      log.info(
-          "Quercus compiled mode requires valid Quercus professional licenses");
-      log.info(e.getMessage());
-      
-    } catch (Exception e) {
-      log.log(Level.FINEST, e.toString(), e);
-    }
-
-    if (impl == null) {
-      impl = new GoogleQuercusServletImpl();
-      
-      impl.getQuercus();
-    }
+    QuercusServletImpl impl = new ProGoogleQuercusServlet();
     
     return impl;
   }
