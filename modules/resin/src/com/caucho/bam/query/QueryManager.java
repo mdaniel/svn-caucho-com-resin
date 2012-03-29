@@ -38,6 +38,7 @@ import com.caucho.bam.BamError;
 import com.caucho.bam.BamException;
 import com.caucho.bam.ErrorPacketException;
 import com.caucho.bam.TimeoutException;
+import com.caucho.bam.stream.MessageStream;
 import com.caucho.util.Alarm;
 import com.caucho.util.AlarmListener;
 import com.caucho.util.CurrentTime;
@@ -127,6 +128,41 @@ public class QueryManager {
     _queryMap.add(id, future, timeout);
 
     return future;
+  }
+  
+  /**
+   * Queries through to a stream.
+   */
+  public void query(MessageStream stream,
+                    String to,
+                    String from,
+                    Serializable payload,
+                    QueryCallback cb,
+                    long timeout)
+  {
+    long id = nextQueryId();
+    
+    addQueryCallback(id, cb, timeout);
+    
+    stream.query(id, to, from, payload);
+  }
+  
+  /**
+   * Queries through to a stream.
+   */
+  public Serializable query(MessageStream stream,
+                            String to,
+                            String from,
+                            Serializable payload,
+                            long timeout)
+  {
+    long id = nextQueryId();
+    
+    QueryFuture future = addQueryFuture(id, to, from, payload, timeout);
+    
+    stream.query(id, to, from, payload);
+    
+    return future.get();
   }
 
   //

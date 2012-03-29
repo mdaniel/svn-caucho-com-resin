@@ -45,7 +45,7 @@ public class QueryMessageStreamFilter implements MessageStream {
   private final QueryManager _queryManager;
   
   public QueryMessageStreamFilter(MessageStream next, 
-                                QueryManager queryManager)
+                                  QueryManager queryManager)
   {
     _next = next;
     _queryManager = queryManager;

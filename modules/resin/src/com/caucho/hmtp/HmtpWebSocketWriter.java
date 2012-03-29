@@ -38,9 +38,6 @@ import java.util.logging.Logger;
 import com.caucho.bam.BamError;
 import com.caucho.bam.ProtocolException;
 import com.caucho.bam.broker.AbstractBroker;
-import com.caucho.bam.broker.Broker;
-import com.caucho.bam.mailbox.Mailbox;
-import com.caucho.bam.stream.MessageStream;
 import com.caucho.remote.websocket.WebSocketOutputStream;
 
 /**
@@ -60,6 +57,7 @@ public class HmtpWebSocketWriter extends AbstractBroker
     throws IOException
   {
     _wsOut = new WebSocketOutputStream(os, new byte[1024]);
+    _wsOut.setAutoFlush(false);
     _hOut = new HmtpWriter();
   }
   

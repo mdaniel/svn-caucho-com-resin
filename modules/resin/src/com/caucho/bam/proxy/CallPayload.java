@@ -40,7 +40,7 @@ public class CallPayload implements Serializable
   private String _name;
   private Object []_args;
   
-  public CallPayload(String name, Object []args)
+  public CallPayload(String name, Object ...args)
   {
     _name = name;
     _args = args;

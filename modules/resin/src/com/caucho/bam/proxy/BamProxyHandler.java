@@ -29,13 +29,18 @@
 
 package com.caucho.bam.proxy;
 
+import java.io.Serializable;
 import java.lang.reflect.InvocationHandler;
 import java.lang.reflect.Method;
 import java.util.HashMap;
 
+import com.caucho.bam.BamError;
 import com.caucho.bam.actor.AbstractActorSender;
 import com.caucho.bam.actor.ActorSender;
 import com.caucho.bam.broker.Broker;
+import com.caucho.bam.query.QueryCallback;
+import com.caucho.bam.query.QueryManager;
+import com.caucho.bam.stream.MessageStream;
 import com.caucho.util.L10N;
 
 /**
@@ -50,17 +55,35 @@ class BamProxyHandler implements InvocationHandler
   private HashMap<Method,Call> _callMap = new HashMap<Method,Call>();
   
   private String _to;
-  private ActorSender _sender; 
+  private String _from;
+  private MessageStream _stream;
+  private QueryManager _queryManager;
+  private long _timeout = 60000; 
   
   BamProxyHandler(Class<?> api, String to, String from, Broker broker)
   {
     this(api, to, new ProxySender(from, broker));
   }
-    
+  
   BamProxyHandler(Class<?> api, String to, ActorSender sender)
   {
+    this(api, 
+         to, 
+         sender.getAddress(),
+         sender.getBroker(), 
+         sender.getQueryManager());
+  }
+    
+  BamProxyHandler(Class<?> api, 
+                  String to,
+                  String from,
+                  MessageStream stream,
+                  QueryManager queryManager)
+  {
     _to = to;
-    _sender = sender;
+    _from = from;
+    _stream = stream;
+    _queryManager = queryManager;
       
     for (Method m : api.getMethods()) {
       if (m.getDeclaringClass() == Object.class) {
@@ -69,8 +92,14 @@ class BamProxyHandler implements InvocationHandler
       
       Call call = null;
       
+      Class<?> []param = m.getParameterTypes();
+      
       if (void.class.equals(m.getReturnType())) {
         call = new MessageCall(m.getName());
+      }
+      else if (param.length > 0
+               && QueryCallback.class.isAssignableFrom(param[param.length - 1])) {
+        call = new QueryCallbackCall(m.getName(), param.length - 1);
       }
       else {
         call = new QueryCall(m.getName());
@@ -87,7 +116,7 @@ class BamProxyHandler implements InvocationHandler
     Call call = _callMap.get(method);
     
     if (call != null) {
-      return call.invoke(_sender, _to, args);
+      return call.invoke(_stream, _queryManager, _to, _from, args, _timeout);
     }
     
     String name = method.getName();
@@ -102,7 +131,12 @@ class BamProxyHandler implements InvocationHandler
   }
   
   abstract static class Call {
-    abstract Object invoke(ActorSender sender, String to, Object []args);
+    abstract Object invoke(MessageStream stream, 
+                           QueryManager queryManager,
+                           String to,
+                           String from,
+                           Object []args,
+                           long timeout);
   }
   
   static class QueryCall extends Call {
@@ -114,11 +148,16 @@ class BamProxyHandler implements InvocationHandler
     }
     
     @Override
-    Object invoke(ActorSender sender, String to, Object []args)
+    Object invoke(MessageStream stream,
+                  QueryManager queryManager, 
+                  String to, 
+                  String from,
+                  Object []args,
+                  long timeout)
     {
       CallPayload payload = new CallPayload(_name, args);
 
-      Object result = sender.query(to, payload);
+      Object result = queryManager.query(stream, to, from, payload, timeout);
       
       if (result instanceof ReplyPayload) {
         return ((ReplyPayload) result).getValue();
@@ -132,6 +171,39 @@ class BamProxyHandler implements InvocationHandler
     }
   }
   
+  static class QueryCallbackCall extends Call {
+    private final String _name;
+    private final int _paramLen;
+    
+    QueryCallbackCall(String name, int paramLen)
+    {
+      _name = name;
+      _paramLen = paramLen;
+    }
+    
+    @Override
+    Object invoke(MessageStream stream,
+                  QueryManager queryManager,
+                  String to, 
+                  String from,
+                  Object []args,
+                  long timeout)
+    {
+      Object []param = new Object[args.length - 1];
+      System.arraycopy(args, 0, param, 0, param.length);
+      
+      QueryCallback cb = (QueryCallback) args[_paramLen];
+      
+      CallPayload payload = new CallPayload(_name, param);
+      
+      CallQueryCallback callCb = new CallQueryCallback(cb);
+
+      queryManager.query(stream, to, from, payload, callCb, timeout);
+      
+      return null;
+    }
+  }
+
   static class MessageCall extends Call {
     private final String _name;
     
@@ -141,11 +213,16 @@ class BamProxyHandler implements InvocationHandler
     }
 
     @Override
-    Object invoke(ActorSender sender, String to, Object []args)
+    Object invoke(MessageStream broker,
+                  QueryManager manager,
+                  String to,
+                  String from,
+                  Object []args,
+                  long timeout)
     {
       CallPayload payload = new CallPayload(_name, args);
 
-      sender.message(to, payload);
+      broker.message(to, from, payload);
       
       return null;
     }
@@ -171,6 +248,41 @@ class BamProxyHandler implements InvocationHandler
     public Broker getBroker()
     {
       return _broker;
+    }
+  }
+  
+  static class CallQueryCallback implements QueryCallback {
+    private QueryCallback _delegate;
+    
+    CallQueryCallback(QueryCallback delegate)
+    {
+      _delegate = delegate;
+    }
+
+    @Override
+    public void onQueryResult(String to, String from, Serializable payload)
+    {
+      if (payload == null) {
+        _delegate.onQueryResult(to, from, payload);
+      }
+      else if (payload instanceof ReplyPayload) {
+        ReplyPayload reply = (ReplyPayload) payload;
+        
+        _delegate.onQueryResult(to, from, (Serializable) reply.getValue());
+      }
+      else {
+        _delegate.onQueryResult(to, from, payload);
+      }
+
+    }
+
+    @Override
+    public void onQueryError(String to, 
+                             String from, 
+                             Serializable payload,
+                             BamError error)
+    {
+      _delegate.onQueryError(to,  from, payload, error);
     }
   }
 }

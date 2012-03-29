@@ -134,13 +134,15 @@ public class TreeLoader extends JarListLoader implements Dependency
 
     fillJars();
 
-    for (int i = 0; i < _jarList.size(); i++)
+    for (int i = 0; i < _jarList.size(); i++) { 
       getClassLoader().addURL(_jarList.get(i).getJarPath());
+    }
   }
   
   /**
    * True if the classes in the directory have changed.
    */
+  @Override
   public boolean logModified(Logger log)
   {
     if (isModified()) {

@@ -333,7 +333,7 @@ public class DeployClient implements Repository
 
     SendQueryCallback cb = new SendQueryCallback(files, commit);
     
-    for (int i = 0; ! cb.isEmpty() && i < 5; i++) {
+    for (int i = 0; ! cb.isEmpty() && i < 16; i++) {
       cb.sendNext();
     }
     
@@ -674,8 +674,9 @@ public class DeployClient implements Repository
     public void onQueryError(String to, String from, Serializable payload,
                              BamError error)
     {
-      if (_error == null)
+      if (_error == null) {
         _error = error;
+      }
       
       onDone();
     }
@@ -687,8 +688,9 @@ public class DeployClient implements Repository
       
       _inProgressCount.decrementAndGet();
       
-      if (_inProgressCount.get() == 0)
+      if (_inProgressCount.get() == 0) {
         onDone();
+      }
     }
     
     boolean isEmpty()

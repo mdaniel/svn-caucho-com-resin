@@ -27,25 +27,49 @@
  * @author Scott Ferguson
  */
 
-package com.caucho.server.spdy;
+package com.caucho.server.httpproxy;
 
-import com.caucho.network.listen.Protocol;
-import com.caucho.network.listen.ProtocolConnection;
-import com.caucho.network.listen.SocketLink;
+import java.io.IOException;
+import java.net.Socket;
+import java.net.UnknownHostException;
+
+import com.caucho.vfs.ReadStream;
+import com.caucho.vfs.SocketStream;
+import com.caucho.vfs.WriteStream;
 
 /**
- * SPDY server protocol
+ * HTTP messaging proxy connection
  */
-public class SpdyServerProtocol implements Protocol {
-  @Override
-  public String getProtocolName()
+public class HttpProxyClient {
+  private Socket _s;
+  private ReadStream _is;
+  private WriteStream _os;
+  
+  public HttpProxyClient(String host, int port)
+        throws UnknownHostException, IOException
   {
-    return "spdy";
+    _s = new Socket(host, port);
+    
+    SocketStream source = new SocketStream(_s);
+    
+    _is = new ReadStream(source);
+    _os = new WriteStream(source);
+    
+    initConnection();
   }
-
-  @Override
-  public ProtocolConnection createConnection(SocketLink link)
+  
+  private void initConnection()
+    throws IOException
   {
-    return new SpdyConnection(this, link);
+    _os.write('P');
+    _os.write(0);
+    _os.write(4);
+    
+    _os.write(0);
+    _os.write(0);
+    _os.write(1);
+    _os.write(4);
+    
+    _os.flush();
   }
 }

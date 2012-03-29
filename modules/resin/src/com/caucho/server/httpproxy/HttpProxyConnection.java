@@ -27,25 +27,40 @@
  * @author Scott Ferguson
  */
 
-package com.caucho.server.spdy;
+package com.caucho.server.httpproxy;
 
-import com.caucho.network.listen.Protocol;
-import com.caucho.network.listen.ProtocolConnection;
+import java.io.IOException;
+
+import com.caucho.amqp.AmqpReceiver;
+import com.caucho.amqp.AmqpReceiverFactory;
+import com.caucho.network.listen.AbstractProtocolConnection;
 import com.caucho.network.listen.SocketLink;
+import com.caucho.network.listen.TcpSocketLink;
+import com.caucho.server.spdy.SpdyServerProtocol;
+import com.caucho.vfs.ReadStream;
 
 /**
- * SPDY server protocol
+ * HTTP messaging proxy connection
  */
-public class SpdyServerProtocol implements Protocol {
-  @Override
-  public String getProtocolName()
+public class HttpProxyConnection extends AbstractProtocolConnection {
+  private TcpSocketLink _link;
+  
+  public HttpProxyConnection(TcpSocketLink link)
   {
-    return "spdy";
+    _link = (TcpSocketLink) link;
+  }
+  
+  @Override
+  public boolean isWaitForRead()
+  {
+    return true;
   }
 
   @Override
-  public ProtocolConnection createConnection(SocketLink link)
+  public boolean handleRequest() throws IOException
   {
-    return new SpdyConnection(this, link);
+    System.out.println("HELLO< HELLO");
+
+    return true;
   }
 }

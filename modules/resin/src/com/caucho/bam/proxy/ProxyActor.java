@@ -34,6 +34,8 @@ import java.util.logging.Logger;
 
 import com.caucho.bam.BamError;
 import com.caucho.bam.actor.Actor;
+import com.caucho.bam.actor.ActorSender;
+import com.caucho.bam.actor.SimpleActorSender;
 import com.caucho.bam.broker.Broker;
 import com.caucho.bam.stream.MessageStream;
 
@@ -51,6 +53,7 @@ public class ProxyActor<T> implements Actor
   private T _bean;
   private Broker _broker;
   private ProxySkeleton<T> _skeleton;
+  private SimpleActorSender _sender;
   
   public ProxyActor(T bean,
                     String address,
@@ -60,6 +63,8 @@ public class ProxyActor<T> implements Actor
     _bean = bean;
     _broker = broker;
     _skeleton = ProxySkeleton.getSkeleton((Class<T>) bean.getClass());
+    
+    _sender = new SimpleActorSender(this, _broker);
   }
 
   @Override
@@ -67,11 +72,21 @@ public class ProxyActor<T> implements Actor
   {
     return _address;
   }
+  
+  public ActorSender getSender()
+  {
+    return _sender;
+  }
 
   @Override
   public Broker getBroker()
   {
     return _broker;
+  }
+  
+  public Actor getActor()
+  {
+    return _sender.getActor();
   }
 
   @Override

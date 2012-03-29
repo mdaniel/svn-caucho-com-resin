@@ -4047,7 +4047,7 @@ public class WebApp extends ServletContextImpl
     thread.setContextClassLoader(getClassLoader());
     try {
       FilterChain chain;
-      System.out.println("INVOK: " + invocation + " " + isEnabled());
+
       if (_configException != null) {
         chain = new ExceptionFilterChain(_configException);
         invocation.setDependency(AlwaysModified.create());

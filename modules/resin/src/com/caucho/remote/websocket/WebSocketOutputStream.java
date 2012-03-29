@@ -73,6 +73,11 @@ public class WebSocketOutputStream extends OutputStream
     this(os, TempBuffer.allocate().getBuffer());
   }
   
+  public void setAutoFlush(boolean isAutoFlush)
+  {
+    _isAutoFlush = isAutoFlush;
+  }
+  
   public void init()
   {
     if (_state != MessageState.IDLE)
@@ -164,8 +169,9 @@ public class WebSocketOutputStream extends OutputStream
     
     _state = MessageState.IDLE;
     
-    if (_isAutoFlush)
+    if (_isAutoFlush) {
       _os.flush();
+    }
   }
 
   private void complete(boolean isFinal)

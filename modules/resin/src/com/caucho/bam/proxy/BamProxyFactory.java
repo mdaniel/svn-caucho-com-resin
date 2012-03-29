@@ -31,8 +31,11 @@ package com.caucho.bam.proxy;
 
 import java.lang.reflect.Proxy;
 
+import com.caucho.bam.actor.Actor;
 import com.caucho.bam.actor.ActorSender;
 import com.caucho.bam.broker.Broker;
+import com.caucho.bam.query.QueryManager;
+import com.caucho.bam.stream.MessageStream;
 
 /**
  * The Skeleton introspects and dispatches messages for a
@@ -47,6 +50,22 @@ public class BamProxyFactory
                                   Broker broker)
   {
     BamProxyHandler handler = new BamProxyHandler(api, to, from, broker);
+    
+    ClassLoader loader = Thread.currentThread().getContextClassLoader();
+    
+    return (T) Proxy.newProxyInstance(loader, 
+                                      new Class[] { api },
+                                      handler);
+  }
+  
+  public static <T> T createProxy(Class<T> api,
+                                  String to,
+                                  String from,
+                                  MessageStream stream,
+                                  QueryManager queryManager)
+  {
+    BamProxyHandler handler = new BamProxyHandler(api, to, from,
+                                                  stream, queryManager);
     
     ClassLoader loader = Thread.currentThread().getContextClassLoader();
     
