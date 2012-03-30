@@ -10,16 +10,15 @@
 	<classpathentry combineaccessrules="false" kind="src" path="/quercus"/>
 	<classpathentry combineaccessrules="false" kind="src" path="/servlet16"/>
 	<classpathentry combineaccessrules="false" kind="src" path="/webbeans"/>
-	<classpathentry kind="lib" path="/Users/scottferguson/ws/resin/lib/webservices-api.jar"/>
-	<classpathentry kind="lib" path="/Users/scottferguson/ws/resin/lib/webservices-extra-api.jar"/>
 	<classpathentry combineaccessrules="false" kind="src" path="/jpa"/>
-	<classpathentry kind="lib" path="/Users/scottferguson/ws/resin/lib/jsf-api.jar"/>
-	<classpathentry kind="lib" path="/Users/scottferguson/ws/resin/lib/jsf-impl.jar"/>
-	<classpathentry kind="lib" path="/Users/scottferguson/ws/resin/lib/jsr88.jar"/>
-	<classpathentry kind="lib" path="/Users/scottferguson/ws/resin/lib/jsr173_1.0_api.jar"/>
 	<classpathentry combineaccessrules="false" kind="src" path="/jca"/>
 	<classpathentry combineaccessrules="false" kind="src" path="/jms"/>
-	<classpathentry kind="lib" path="/Users/scottferguson/ws/resin/lib/javamail-141.jar"/>
 	<classpathentry combineaccessrules="false" kind="src" path="/jcache"/>
+	<classpathentry kind="var" path="RESIN_SRC_HOME/modules/ext/javamail-141.jar"/>
+	<classpathentry kind="var" path="RESIN_SRC_HOME/modules/ext/jsr88.jar"/>
+	<classpathentry kind="var" path="RESIN_SRC_HOME/modules/ext/jsf-mojarra-2.1.3.jar"/>
+	<classpathentry kind="var" path="RESIN_SRC_HOME/modules/ext/webservices-api.jar"/>
+	<classpathentry kind="var" path="RESIN_SRC_HOME/modules/ext/webservices-extra-api.jar"/>
+	<classpathentry kind="var" path="RESIN_SRC_HOME/modules/ext/validation-api-1.0.0.GA.jar"/>
 	<classpathentry kind="output" path="bin"/>
 </classpath>
