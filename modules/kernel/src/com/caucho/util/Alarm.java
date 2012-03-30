@@ -404,7 +404,7 @@ public class Alarm implements ThreadTask, ClassLoaderListener {
   {
     // return _heapIndex != 0;
     // return _wakeTime != 0;
-    return _bucket != 0;
+    return _bucket >= 0;
   }
 
   /**

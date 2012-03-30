@@ -105,7 +105,7 @@ public class QueryManager {
     Alarm alarm = _alarm;
 
     long expireTime = timeout + CurrentTime.getCurrentTime();
-    
+
     if (alarm != null 
         && (! alarm.isQueued() 
             || expireTime < alarm.getWakeTime())) {
@@ -125,7 +125,7 @@ public class QueryManager {
     QueryFutureImpl future
       = new QueryFutureImpl(id, to, from, payload, timeout);
 
-    _queryMap.add(id, future, timeout);
+    addQueryCallback(id, future, timeout);
 
     return future;
   }
@@ -487,7 +487,7 @@ public class QueryManager {
     {
       try {
         long now = CurrentTime.getCurrentTime();
-        
+
         checkTimeout(now);
       } finally {
         if (_alarm == alarm && ! isEmpty()) {

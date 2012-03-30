@@ -57,7 +57,6 @@ public class HmtpWebSocketWriter extends AbstractBroker
     throws IOException
   {
     _wsOut = new WebSocketOutputStream(os, new byte[1024]);
-    _wsOut.setAutoFlush(false);
     _hOut = new HmtpWriter();
   }
   
@@ -76,6 +75,11 @@ public class HmtpWebSocketWriter extends AbstractBroker
   public void setAddress(String address)
   {
     _address = address;
+  }
+  
+  public void setAutoFlush(boolean isFlush)
+  {
+    _wsOut.setAutoFlush(isFlush);
   }
 
   //

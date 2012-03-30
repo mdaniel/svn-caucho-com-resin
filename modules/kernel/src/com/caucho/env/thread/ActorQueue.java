@@ -440,13 +440,8 @@ public final class ActorQueue<T extends RingItem>
       int mask = _mask;
       
       int size = (head - tail + mask + 1) & mask;
-      
-      if (size < tailChunk) {
-        return (tail + size) & mask;
-      }
-      else {
-        return (tail + tailChunk) & mask;
-      }
+
+      return (tail + Math.min(size,  tailChunk)) & mask;
     }
     
     private void wakeOfferWait(AtomicBoolean isWaitRef)
