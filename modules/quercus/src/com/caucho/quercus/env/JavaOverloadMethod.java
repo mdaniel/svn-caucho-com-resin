@@ -140,7 +140,7 @@ public class JavaOverloadMethod extends AbstractJavaMethod {
   @Override
   public AbstractFunction getActualFunction(Expr []args)
   {
-    if (args.length <= _methodTable.length) {
+    if (args.length < _methodTable.length) {
       AbstractJavaMethod []methods = _methodTable[args.length];
 
       if (methods != null) {
@@ -374,6 +374,6 @@ public class JavaOverloadMethod extends AbstractJavaMethod {
 
   public String toString()
   {
-    return "JavaOverloadMethod[" + getName() + "]";
+    return getClass().getSimpleName() + "[" + getName() + "]";
   }
 }

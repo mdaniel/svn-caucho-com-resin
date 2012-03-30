@@ -119,7 +119,7 @@ public class ProGooglePageManager extends PageManager
     QuercusGenerator gen = new QuercusGenerator(getQuercus());
 
     try {
-      Class pageClass = gen.preload(program);
+      Class<?> pageClass = gen.preload(program);
 
       if (pageClass == null)
         return null;
@@ -145,7 +145,7 @@ public class ProGooglePageManager extends PageManager
     QuercusGenerator gen = new QuercusGenerator(getQuercus());
 
     try {
-      Class pageClass = gen.preload(className);
+      Class<?> pageClass = gen.preload(className);
 
       if (pageClass == null)
         return null;
@@ -166,7 +166,7 @@ public class ProGooglePageManager extends PageManager
 
   private QuercusPage createPage(Path path,
                                  QuercusProgram program,
-                                 Class pageClass)
+                                 Class<?> pageClass)
   {
     try {
       QuercusPage page = createPage(path, pageClass);

@@ -2943,12 +2943,12 @@ public class FileModule extends AbstractQuercusModule {
 
   static {
     ProtocolWrapper zlibProtocolWrapper = new ZlibProtocolWrapper();
-    StreamModule.stream_wrapper_register(new ConstStringValue("compress.zlib"),
-                                         zlibProtocolWrapper);
-    StreamModule.stream_wrapper_register(new ConstStringValue("zlib"),
-                                         zlibProtocolWrapper);
-    StreamModule.stream_wrapper_register(new ConstStringValue("php"),
-                                         new PhpProtocolWrapper());
+    StreamModule.streamWrapperRegister(new ConstStringValue("compress.zlib"),
+                                       zlibProtocolWrapper);
+    StreamModule.streamWrapperRegister(new ConstStringValue("zlib"),
+                                       zlibProtocolWrapper);
+    StreamModule.streamWrapperRegister(new ConstStringValue("php"),
+                                       new PhpProtocolWrapper());
 
     addConstant(_constMap, "SEEK_SET", SEEK_SET);
     addConstant(_constMap, "SEEK_CUR", SEEK_CUR);

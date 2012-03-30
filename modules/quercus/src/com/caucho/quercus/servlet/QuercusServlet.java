@@ -32,6 +32,7 @@ package com.caucho.quercus.servlet;
 import com.caucho.config.ConfigException;
 import com.caucho.quercus.QuercusContext;
 import com.caucho.quercus.QuercusRuntimeException;
+import com.caucho.quercus.lib.db.JdbcConnectionResource;
 import com.caucho.quercus.lib.db.QuercusDataSource;
 import com.caucho.quercus.module.QuercusModule;
 import com.caucho.util.L10N;
@@ -123,8 +124,6 @@ public class QuercusServlet
       impl = new ProQuercusServlet();
     }
     
-    log.info("QuercusServlet starting as " + impl.getClass().getSimpleName());
-
     return impl;
   }
 
@@ -467,6 +466,8 @@ public class QuercusServlet
     
     _impl = getQuercusServlet(configClass.getName().startsWith("com.caucho"));
 
+    log.info("QuercusServlet starting as " + _impl.getClass().getSimpleName());
+    
     if (isUnicodeSemantics()) {
       _impl.getQuercus().setUnicodeSemantics(true);
     }
@@ -534,7 +535,7 @@ public class QuercusServlet
                       HttpServletResponse response)
     throws ServletException, IOException
   {
-    _impl.service(request, response);        
+    _impl.service(request, response);
   }
 
   /**

@@ -12,11 +12,17 @@ import com.caucho.make.VersionDependency;
 import com.caucho.quercus.QuercusContext;
 import com.caucho.quercus.program.QuercusProgram;
 import com.caucho.vfs.Path;
+
+import java.util.logging.Level;
+import java.util.logging.Logger;
   
 /**
  * Generator.
  */
 public class QuercusGenerator {
+  private static final Logger log
+    = Logger.getLogger(QuercusGenerator.class.getName());
+  
   private final QuercusContext _quercus;
 
   public QuercusGenerator(QuercusContext quercus)
@@ -63,7 +69,7 @@ public class QuercusGenerator {
     JavaClassGenerator gen = createGenerator(true);
 
     String className = _quercus.getClassName(program.getSourcePath());
-
+    
     Class<?> pageClass = gen.preload(className);
     
     return pageClass;

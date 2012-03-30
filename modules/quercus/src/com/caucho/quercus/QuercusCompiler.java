@@ -333,7 +333,7 @@ public class QuercusCompiler
   private void load(QuercusGenerator gen, CompileItem item)
   {
     try {
-      Class pageClass = gen.preload(item.getProgram());
+      Class<?> pageClass = gen.preload(item.getProgram());
 
     } catch (ClassFormatError e) {
       item.getProgram().setCompilable(false);
