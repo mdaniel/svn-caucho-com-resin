@@ -489,9 +489,7 @@ public final class ReadStream extends InputStream
       readLength = _readLength;
     }
 
-    int sublen = readLength - readOffset;
-    if (length < sublen)
-      sublen = length;
+    int sublen = Math.min(length, readLength - readOffset);
 
     System.arraycopy(_readBuffer, readOffset, buf, offset, sublen);
 
@@ -518,8 +516,9 @@ public final class ReadStream extends InputStream
     while (length > 0) {
       int sublen = read(buf, offset, length);
 
-      if (sublen < 0)
+      if (sublen < 0) {
         return readLength == 0 ? -1 : readLength;
+      }
 
       offset += sublen;
       readLength += sublen;
@@ -600,19 +599,18 @@ public final class ReadStream extends InputStream
     int readOffset = _readOffset;
     int readLength = _readLength;
 
-    int sublen = readLength - readOffset;
+    int sublen = Math.min(length, readLength - readOffset);
 
-    if (sublen <= 0) {
+    if (readLength <= readOffset) {
       if (! readBuffer()) {
         return -1;
       }
+      
       readLength = _readLength;
       readOffset = _readOffset;
-      sublen = readLength - readOffset;
+      
+      sublen = Math.min(length, readLength - readOffset);
     }
-
-    if (length < sublen)
-      sublen = length;
 
     for (int i = sublen - 1; i >= 0; i--)
       buf[offset + i] = (char) (readBuffer[readOffset + i] & 0xff);
@@ -786,9 +784,7 @@ public final class ReadStream extends InputStream
     while (true) {
       int readOffset = _readOffset;
 
-      int sublen = _readLength - readOffset;
-      if (capacity - offset < sublen)
-        sublen = capacity - offset;
+      int sublen = Math.min(capacity - offset, _readLength - readOffset);
 
       for (; sublen > 0; sublen--) {
         int ch = readBuffer[readOffset++] & 0xff;
@@ -866,9 +862,7 @@ public final class ReadStream extends InputStream
     while (true) {
       int readOffset = _readOffset;
 
-      int sublen = _readLength - readOffset;
-      if (sublen < length)
-        sublen = length;
+      int sublen = Math.min(length, _readLength - readOffset);
 
       for (; sublen > 0; sublen--) {
         int ch = readBuffer[readOffset++] & 0xff;
@@ -1041,9 +1035,7 @@ public final class ReadStream extends InputStream
           return;
       }
 
-      int sublen = _readLength - _readOffset;
-      if (len < sublen)
-        sublen = len;
+      int sublen = Math.min(len, _readLength - _readOffset);
 
       os.write(_readBuffer, _readOffset, sublen);
       _readOffset += sublen;
@@ -1059,8 +1051,10 @@ public final class ReadStream extends InputStream
   public void writeToWriter(Writer out) throws IOException
   {
     int ch;
-    while ((ch = readChar()) >= 0)
+    
+    while ((ch = readChar()) >= 0) {
       out.write((char) ch);
+    }
   }
 
   /**

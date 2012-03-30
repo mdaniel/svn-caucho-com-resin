@@ -94,12 +94,12 @@ class BamProxyHandler implements InvocationHandler
       
       Class<?> []param = m.getParameterTypes();
       
-      if (void.class.equals(m.getReturnType())) {
-        call = new MessageCall(m.getName());
-      }
-      else if (param.length > 0
-               && QueryCallback.class.isAssignableFrom(param[param.length - 1])) {
+      if (param.length > 0
+          && QueryCallback.class.isAssignableFrom(param[param.length - 1])) {
         call = new QueryCallbackCall(m.getName(), param.length - 1);
+      }
+      else if (void.class.equals(m.getReturnType())) {
+        call = new MessageCall(m.getName());
       }
       else {
         call = new QueryCall(m.getName());

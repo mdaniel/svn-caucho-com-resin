@@ -443,10 +443,12 @@ public class ProxySkeleton<S>
   
   static class QueryMethodInvoker extends QueryInvoker {
     private final Method _method;
+    private final Class<?> []_paramTypes;
     
     QueryMethodInvoker(Method method)
     {
       _method = method;
+      _paramTypes = method.getParameterTypes();
     }
 
     @Override
@@ -459,6 +461,11 @@ public class ProxySkeleton<S>
                        Object []args)
       throws IllegalAccessException, InvocationTargetException
     {
+      if (args != null && args.length != _paramTypes.length) {
+        throw new IllegalArgumentException(L.l("'{0}' has an incorrect number of arguments",
+                                               name));
+      }
+      
       Object result = _method.invoke(actor, args);
       
       broker.queryResult(id, from, to, new ReplyPayload(result));

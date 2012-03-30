@@ -466,12 +466,12 @@ public class CacheImpl<K,V>
     return true;
   }
 
-  public void compareAndPut(HashKey key, 
+  public boolean compareAndPut(HashKey key, 
                             HashKey value,
                             long valueLength,
                             long version)
   {
-    getDistCacheEntry(key).compareAndPut(version, value, valueLength, _config);
+    return getDistCacheEntry(key).compareAndPut(version, value, valueLength, _config);
   }
 
   @Override

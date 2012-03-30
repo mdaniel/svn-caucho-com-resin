@@ -122,9 +122,7 @@ public enum TriadOwner
   {
     long value = 0;
 
-    int len = hash.length;
-    if (len > 4)
-      len = 4;
+    int len = Math.min(4, hash.length);
 
     for (int i = 0; i < len; i++)
       value = 256 * value + (hash[i] & 0xff);
@@ -142,10 +140,7 @@ public enum TriadOwner
     if (value == null)
       return 0;
 
-    int len = value.length();
-
-    if (len > 16)
-      len = 16;
+    int len = Math.min(16, value.length());
 
     long hash = 0;
 

@@ -111,6 +111,15 @@ public class CloudPod
   {
     return _index;
   }
+  
+  /**
+   * Returns true if this is the main/primary pod.
+   */
+  public final boolean isPrimary()
+  {
+    return _index == 0;
+  }
+  
 
   /**
    * Returns the pod's cluster

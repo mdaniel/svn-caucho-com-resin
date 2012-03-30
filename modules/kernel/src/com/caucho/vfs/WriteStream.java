@@ -718,7 +718,7 @@ implements LockableStream, SendfileOutputStream
     }
 
     while (length > 0) {
-      int sublen = length < _charsLength ? length : _charsLength;
+      int sublen = Math.min(length, _charsLength);
 
       string.getChars(offset, offset + sublen, chars, 0);
 
@@ -748,7 +748,7 @@ implements LockableStream, SendfileOutputStream
     }
 
     while (length > 0) {
-      int sublen = length < _charsLength ? length : _charsLength;
+      int sublen = Math.min(length, _charsLength);
 
       string.getChars(offset, offset + sublen, chars, 0);
 
@@ -781,35 +781,44 @@ implements LockableStream, SendfileOutputStream
     int writeLength = _writeLength;
     
     int length = string.length();
-    int i = 0;
-
-    while (i < length) {
-      int sublen = writeBuffer.length - writeLength;
+    int offset = 0;
+    
+    int charsLength = _charsLength;
+    char []chars = _chars;
+    if (chars == null) {
+      _chars = new char[charsLength];
+      chars = _chars;
+    }
+    
+    while (length > 0) {
+      int sublen = Math.min(charsLength, writeBuffer.length - writeLength);
 
       if (sublen <= 0) {
         _source.write(writeBuffer, 0, writeLength, false);
         _position += writeLength;
         _isFlushRequired = true;
         writeLength = 0;
-        sublen = writeBuffer.length - writeLength;
+        
+        sublen = Math.min(charsLength,  writeBuffer.length - writeLength);
       }
       
-      int tail = i + sublen;
+      sublen = Math.min(length, sublen);
       
-      if (length < tail) {
-        tail = length;
-      }
+      string.getChars(offset, sublen, chars, 0);
 
-      for (; i < tail; i++) {
-        byte value = (byte) string.charAt(i);
+      for (int i = 0; i < sublen; i++) {
+        byte value = (byte) chars[i];
         
         if (value == '\r' || value == '\n') {
-          i = length;
+          length = 0;
           break;
         }
         
         writeBuffer[writeLength++] = value;
       }
+      
+      offset += sublen;
+      length -= sublen;
     }
     
     _writeLength = writeLength;
@@ -827,12 +836,6 @@ implements LockableStream, SendfileOutputStream
 
     int length = string.length();
     int offset = 0;
-
-    char []chars = _chars;
-    if (chars == null) {
-      _chars = new char[_charsLength];
-      chars = _chars;
-    }
 
     while (length > 0) {
       int sublen = length < _charsLength ? length : _charsLength;
@@ -870,14 +873,15 @@ implements LockableStream, SendfileOutputStream
     if (string == null)
       string = "null";
 
+    int charsLength = _charsLength;
     char []chars = _chars;
     if (chars == null) {
-      _chars = new char[_charsLength];
+      _chars = new char[charsLength];
       chars = _chars;
     }
 
     while (length > 0) {
-      int sublen = length < _charsLength ? length : _charsLength;
+      int sublen = Math.min(length, charsLength);
 
       string.getChars(offset, offset + sublen, chars, 0);
 
@@ -920,16 +924,17 @@ implements LockableStream, SendfileOutputStream
     if (i >= 1000000000)
       length = 9;
     else {
-      for (; i >= exp; length++)
+      for (; i >= exp; length++) {
         exp = 10 * exp;
+      }
     }
 
     byte []buffer = _writeBuffer;
-    int writeLength = this._writeLength;
+    int writeLength = _writeLength;
 
     if (writeLength + length < buffer.length) {
       writeLength += length;
-      this._writeLength = writeLength + 1;
+      _writeLength = writeLength + 1;
 
       for (int j = 0; j <= length; j++) {
         buffer[writeLength - j] = (byte) (i % 10 + '0');
@@ -938,8 +943,9 @@ implements LockableStream, SendfileOutputStream
       return;
     }
 
-    if (_bytes == null)
+    if (_bytes == null) {
       _bytes = new byte[32];
+    }
 
     int j = 31;
 
@@ -1253,10 +1259,7 @@ implements LockableStream, SendfileOutputStream
     }
 
     while (totalLength > 0) {
-      int sublen = length - _writeLength;
-
-      if (totalLength < sublen)
-        sublen = totalLength;
+      int sublen = Math.min(totalLength, length - _writeLength);
 
       sublen = source.read(_writeBuffer, _writeLength, sublen);
       if (sublen < 0)
@@ -1264,6 +1267,7 @@ implements LockableStream, SendfileOutputStream
 
       _writeLength += sublen;
       totalLength -= sublen;
+      
       if (length <= _writeLength) {
         int tmplen = _writeLength;
         _writeLength = 0;
@@ -1273,8 +1277,9 @@ implements LockableStream, SendfileOutputStream
       }
     }
 
-    if (_isFlushOnNewline || _implicitFlush)
+    if (_isFlushOnNewline || _implicitFlush) {
       flush();
+    }
   }
 
 
@@ -1292,7 +1297,7 @@ implements LockableStream, SendfileOutputStream
     int len;
     int length = _writeBuffer.length;
 
-    if (_writeLength >= length) {
+    if (length <= _writeLength) {
       int tmplen = _writeLength;
       _writeLength = 0;
       _source.write(_writeBuffer, 0, tmplen, false);
