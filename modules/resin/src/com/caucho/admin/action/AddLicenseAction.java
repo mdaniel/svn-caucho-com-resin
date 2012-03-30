@@ -35,9 +35,16 @@ import java.util.logging.Logger;
 import com.caucho.config.ConfigException;
 import com.caucho.env.shutdown.ExitCode;
 import com.caucho.env.shutdown.ShutdownSystem;
+import com.caucho.jmx.Jmx;
 import com.caucho.license.LicenseCheck;
+import com.caucho.management.server.LicenseStoreMXBean;
 import com.caucho.server.resin.Resin;
+import com.caucho.server.resin.ResinDelegate;
 import com.caucho.util.*;
+import com.caucho.vfs.Path;
+import com.caucho.vfs.Vfs;
+import com.caucho.vfs.WriteStream;
+import com.caucho.vfs.WriterStreamImpl;
 
 public class AddLicenseAction implements AdminAction
 {
@@ -59,32 +66,22 @@ public class AddLicenseAction implements AdminAction
     catch (ClassNotFoundException e) {
       throw new ConfigException(L.l("add-license requires Resin Professional"), e);
     }
-    
-    String licenseDirStr = null;
-    
-    try {
-      LicenseCheck licenseCheck = Resin.getCurrent().getLicenseCheck();
-      licenseDirStr = licenseCheck.getLicenseDirectory();
-    } catch (Exception e) {
-      throw new ConfigException(L.l("add-license could not lookup the Resin license directory"), e);
-    }
-    
-    File licenseDir = new File(licenseDirStr);
-    if (! licenseDir.exists())
-      licenseDir.mkdir();
-      
+
+    File licenseDir = Resin.getCurrent().getLicenseStore().getLicenseDirectory();
+
     File licenseFile = new File(licenseDir, fileName);
     if (licenseFile.exists() && ! overwrite) {
-      log.log(Level.FINE, 
-              L.l("add-license will not overwrite {0} (use -overwrite)", 
+      log.log(Level.FINE,
+              L.l("add-license will not overwrite {0} (use -overwrite)",
                   licenseFile));
-      return L.l("add-license will not overwrite {0} (use -overwrite)", 
+      return L.l("add-license will not overwrite {0} (use -overwrite)",
                  licenseFile);
     }
-    
-    
+
+    if (! licenseDir.exists())
+      licenseDir.mkdir();
+
     FileWriter out = null;
-    
     try {
       out = new FileWriter(licenseFile);
       out.write(licenseContent);

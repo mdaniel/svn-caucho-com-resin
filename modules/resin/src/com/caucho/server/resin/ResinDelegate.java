@@ -29,6 +29,7 @@
 
 package com.caucho.server.resin;
 
+import java.io.IOException;
 import java.lang.reflect.Constructor;
 import java.lang.reflect.InvocationTargetException;
 import java.util.logging.Level;
@@ -51,6 +52,7 @@ import com.caucho.env.shutdown.ExitCode;
 import com.caucho.env.shutdown.ShutdownSystem;
 import com.caucho.env.warning.WarningService;
 import com.caucho.license.LicenseCheck;
+import com.caucho.license.LicenseStore;
 import com.caucho.server.admin.Management;
 import com.caucho.server.admin.StatSystem;
 import com.caucho.server.cluster.ClusterPod;
@@ -72,6 +74,7 @@ public class ResinDelegate
 
   private final Resin _resin;
   private String _licenseErrorMessage;
+  protected LicenseStore _licenseStore;
 
   /**
    * Creates a new resin server.
@@ -79,6 +82,22 @@ public class ResinDelegate
   public ResinDelegate(Resin resin)
   {
     _resin = resin;
+  }
+
+  public void init() {
+    _licenseStore = new LicenseStore();
+
+    try {
+      _licenseStore.init(null);
+    } catch (IOException e) {
+      log.log(Level.FINER, e.getMessage(), e);
+    } catch (ConfigException e) {
+      log.log(Level.FINER, e.getMessage(), e);
+    }
+  }
+
+  public LicenseStore getLicenseStore() {
+    return _licenseStore;
   }
 
   /**
@@ -151,6 +170,7 @@ public class ResinDelegate
 
       delegate = new ResinDelegate(resin);
       delegate.setLicenseErrorMessage(licenseErrorMessage);
+      delegate.init();
     }
 
     return delegate;

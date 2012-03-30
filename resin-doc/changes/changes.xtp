@@ -12,6 +12,7 @@
 
 <s2 title="4.0.28 - snapshot">
 <ul>
+<li>resin: license-add command fix for unlicensed pro server (#5008, rep by rickHigh)</li>
 <li>resin: mac osx case insensitive servlet mapping fix (#4980, rep by Alex Rojkov)</li>
 <li>resin: fixed Resin OS Proxy Servlet (5002, rep by lewellyn)</li>
 <li>debian: dpkg shouldn't override /etc/resin/resin.properties (#5000, rep by lewellyn)</li>

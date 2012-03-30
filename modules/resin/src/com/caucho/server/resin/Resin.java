@@ -68,6 +68,7 @@ import com.caucho.env.shutdown.ShutdownSystem;
 import com.caucho.env.vfs.RepositoryScheme;
 import com.caucho.java.WorkDir;
 import com.caucho.license.LicenseCheck;
+import com.caucho.license.LicenseStore;
 import com.caucho.lifecycle.Lifecycle;
 import com.caucho.lifecycle.LifecycleState;
 import com.caucho.loader.Environment;
@@ -1120,6 +1121,11 @@ public class Resin
   ResinDelegate getDelegate()
   {
     return _resinDelegate;
+  }
+
+  public LicenseStore getLicenseStore()
+  {
+    return _resinDelegate.getLicenseStore();
   }
 
   public LicenseCheck getLicenseCheck() {
