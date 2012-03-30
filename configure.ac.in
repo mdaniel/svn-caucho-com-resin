@@ -987,7 +987,7 @@ esac
 case "$target_os" in
   linux*)
 	jni_os=linux
-        PROXY_LIBS="-lpthread -lc"
+        PROXY_LIBS="-lpthread -lrt -lc"
 	;;
 
   *solaris*)
