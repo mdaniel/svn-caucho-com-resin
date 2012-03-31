@@ -747,8 +747,8 @@ public class DBPool
     _connectionPool.setLocalTransaction(_poolImpl.isLocalTransaction());
 
     ManagedConnectionFactory mcf = _poolImpl.getManagedConnectionFactory();
-    
-    
+
+
     _dataSource = (DataSource) _connectionPool.init(mcf);
     _connectionPool.start();
 
@@ -765,10 +765,10 @@ public class DBPool
     BeanBuilder<?> factory = manager.createBeanFactory(DataSource.class);
 
     String name = _name;
-    
+
     if (name == null)
       name = _jndiName;
-    
+
     if (name == null)
       name = _var;
 
@@ -778,7 +778,7 @@ public class DBPool
     else {
       if (name != null)
         factory.qualifier(Names.create(name));
-      
+
       factory.qualifier(CurrentLiteral.CURRENT);
     }
 
@@ -788,7 +788,7 @@ public class DBPool
     // factory.stereotype(CauchoDeployment.class);
 
     manager.addBean(factory.singleton(this));
-    
+
 
     _queryAdmin.register();
     _databaseAdmin.register();
@@ -823,11 +823,11 @@ public class DBPool
   public void closeIdleConnections()
   {
     ConnectionPool connectionPool = _connectionPool;
-    
+
     if (connectionPool != null)
       connectionPool.clear();
   }
-  
+
   /*
    * Closes the specified connection and removes from the pool.
    */
@@ -932,7 +932,7 @@ public class DBPool
   {
     return _serializationHandle;
   }
-  
+
   public void close()
   {
     _databaseAdmin.close();

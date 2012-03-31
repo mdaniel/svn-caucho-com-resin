@@ -39,9 +39,9 @@ public class ConnectionEntry implements EnvCleanup
 {
   private static final Logger log
     = Logger.getLogger(ConnectionEntry.class.getName());
-  
+
   private Env _env;
-  
+
   private DataSource _ds;
   private String _user;
   private String _password;
@@ -67,11 +67,13 @@ public class ConnectionEntry implements EnvCleanup
       throw new IllegalStateException();
 
     _isReuse = isReuse;
-      
-    if (_user != null)
+
+    if (_user != null && ! "".equals(_user)) {
       _conn = _ds.getConnection(_user, _password);
-    else
+    }
+    else {
       _conn = _ds.getConnection();
+    }
 
     _env.addCleanup(this);
   }
@@ -97,7 +99,7 @@ public class ConnectionEntry implements EnvCleanup
   public int hashCode()
   {
     int hash = _ds.hashCode();
-      
+
     if (_user == null)
       return hash;
     else

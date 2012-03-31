@@ -286,7 +286,7 @@ public class DriverConfig
   {
     _init.addProgram(program);
   }
-  
+
   public void setProperty(String name, Object value)
   {
     _init.addProgram(new PropertyValueProgram(name, value));
@@ -334,7 +334,7 @@ public class DriverConfig
   public void setInitParam(InitParam initParam)
   {
     validateInitParam();
-    
+
     HashMap<String,String> paramMap = initParam.getParameters();
 
     Iterator<String> iter = paramMap.keySet().iterator();
@@ -478,12 +478,12 @@ public class DriverConfig
   {
     _profilerPoint = profilerPoint;
   }
-  
+
   public void setIndex(int index)
   {
     _index = index;
   }
-  
+
   public int getIndex()
   {
     return _index;
@@ -513,7 +513,7 @@ public class DriverConfig
   {
     if (! _lifecycle.toActive())
       return;
-    
+
     if (_xaDataSource == null && _poolDataSource == null) {
       initDriver();
 
@@ -551,7 +551,7 @@ public class DriverConfig
       }
       */
     }
-    
+
     spyId = spyId + ".d" + _index;
 
     if (! isSpy) {
@@ -677,7 +677,7 @@ public class DriverConfig
   {
     if (! _lifecycle.isActive())
       return null;
-    
+
     if (_xaDataSource != null || _poolDataSource != null)
       throw new IllegalStateException();
 
@@ -718,7 +718,7 @@ public class DriverConfig
     } catch (SQLException e) {
       _connectionFailCountTotal.incrementAndGet();
       _lastFailTime = CurrentTime.getCurrentTime();
-      
+
       throw e;
     }
   }
@@ -752,7 +752,7 @@ public class DriverConfig
       setType(driverClass);
     }
   }
-  
+
   /**
    * Initializes the JDBC driver.
    */
@@ -784,7 +784,7 @@ public class DriverConfig
         }
       }
     }
-    
+
     if (_user != null) {
       if (! configType.setProperty(driverObject, USER, _user)) {
         if (! (driverObject instanceof Driver)) {
@@ -793,7 +793,7 @@ public class DriverConfig
         }
       }
     }
-    
+
     if (_password != null) {
       if (! configType.setProperty(driverObject, PASSWORD, _password)) {
         if (! (driverObject instanceof Driver)) {
@@ -846,7 +846,7 @@ public class DriverConfig
   {
     ClassLoader loader = Thread.currentThread().getContextClassLoader();
     InputStream is = null;
-    
+
     try {
       is = serviceURL.openStream();
 
@@ -885,7 +885,7 @@ public class DriverConfig
   //
   // statistics
   //
-  
+
   /**
    * Returns the total number of connections made.
    */
@@ -893,7 +893,7 @@ public class DriverConfig
   {
     return _connectionCountTotal;
   }
-  
+
   /**
    * Returns the total number of failing connections
    */
@@ -901,7 +901,7 @@ public class DriverConfig
   {
     return _connectionFailCountTotal.get();
   }
-  
+
   /**
    * Returns the time of the last connection
    */
