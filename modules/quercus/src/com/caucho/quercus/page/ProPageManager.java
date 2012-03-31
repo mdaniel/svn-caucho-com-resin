@@ -6,10 +6,8 @@
 
 package com.caucho.quercus.page;
 
-import com.caucho.vfs.*;
-
-import com.caucho.util.Alarm;
 import com.caucho.util.L10N;
+import com.caucho.vfs.Path;
 
 import com.caucho.env.thread.ThreadPool;
 import com.caucho.java.JavaCompileException;
@@ -237,7 +235,7 @@ public class ProPageManager extends PageManager
 
   private QuercusPage createPage(Path path,
                                  QuercusProgram program,
-                                 Class pageClass)
+                                 Class<?> pageClass)
   {
     try {
       QuercusPage page = createPage(path, pageClass);
@@ -254,7 +252,7 @@ public class ProPageManager extends PageManager
     }
   }
 
-  private QuercusPage createPage(Path path, Class pageClass)
+  private QuercusPage createPage(Path path, Class<?> pageClass)
   {
     try {
       QuercusPage page = (QuercusPage) pageClass.newInstance();
@@ -459,7 +457,7 @@ public class ProPageManager extends PageManager
     private void load(QuercusGenerator gen, CompileItem item)
     {
       try {
-        Class pageClass = gen.load(item.getProgram());
+        Class<?> pageClass = gen.load(item.getProgram());
 
         if (pageClass == null)
           throw new IllegalStateException(L.l("can't load '{0}'", item.getProgram()));

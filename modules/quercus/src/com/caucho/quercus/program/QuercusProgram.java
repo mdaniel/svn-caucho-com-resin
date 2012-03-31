@@ -185,7 +185,7 @@ public class QuercusProgram {
     return _statement;
   }
 
-  /*
+  /**
    * Start compiling
    */
   public boolean startCompiling()
@@ -193,8 +193,8 @@ public class QuercusProgram {
     return _isCompiling.compareAndSet(false, true);
   }
 
-  /*
-   * Set to true if this page is being compiled.
+  /**
+   * Notifies waiting listeners that compilation has finished.
    */
   public void finishCompiling()
   {
@@ -205,7 +205,7 @@ public class QuercusProgram {
     }
   }
 
-  /*
+  /**
    * Set to true if this page is being compiled.
    */
   public void waitForCompile()
@@ -221,7 +221,7 @@ public class QuercusProgram {
     }
   }
 
-  /*
+  /**
    * Returns true if this page is being compiled.
    */
   public boolean isCompiling()
@@ -229,7 +229,7 @@ public class QuercusProgram {
     return _isCompiling.get();
   }
 
-  /*
+  /**
    * Set to false if page cannot be compiled.
    */
   public void setCompilable(boolean isCompilable)
@@ -237,7 +237,7 @@ public class QuercusProgram {
     _isCompilable = isCompilable;
   }
 
-  /*
+  /**
    * Returns true if the page can be compiled or it is unknown.
    */
   public boolean isCompilable()
@@ -245,7 +245,7 @@ public class QuercusProgram {
     return _isCompilable;
   }
 
-  public void setCompileException(Exception e)
+  public void setCompileException(Throwable e)
   {
     if (e == null) {
       _compileException = null;
@@ -262,7 +262,7 @@ public class QuercusProgram {
     _compileException = new QuercusException(msg);
   }
 
-  public Exception getCompileException()
+  public Throwable getCompileException()
   {
     return _compileException;
   }

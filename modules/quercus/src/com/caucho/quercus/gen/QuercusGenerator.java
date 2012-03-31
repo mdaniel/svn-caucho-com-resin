@@ -13,7 +13,6 @@ import com.caucho.quercus.QuercusContext;
 import com.caucho.quercus.program.QuercusProgram;
 import com.caucho.vfs.Path;
 
-import java.util.logging.Level;
 import java.util.logging.Logger;
   
 /**

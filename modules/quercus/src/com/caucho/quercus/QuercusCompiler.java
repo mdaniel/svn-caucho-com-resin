@@ -6,11 +6,12 @@
 
 package com.caucho.quercus;
 
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+import java.util.regex.Pattern;
 
-import com.caucho.java.JavaCompileException;
 import com.caucho.java.JavaCompilerUtil;
 import com.caucho.java.JavacConfig;
 import com.caucho.java.WorkDir;
@@ -31,7 +32,13 @@ public class QuercusCompiler
   
   private ProQuercus _quercus;
   private Path _workDir;
+  
+  private ArrayList<String> _pathList = new ArrayList<String>();
 
+  private Pattern _includePattern = Pattern.compile(".*\\.php$");
+  
+  private Level _loggingLevel = Level.FINE;
+  
   public QuercusCompiler()
   {
     _quercus = new ProQuercus();
@@ -70,43 +77,74 @@ public class QuercusCompiler
     _quercus.setRequireSource(isRequireSource);
   }
   
+  public void setIncludePattern(String pattern)
+  {
+    _includePattern = Pattern.compile(pattern);
+  }
+  
+  public void addCompilePath(String path) {
+    _pathList.add(path);
+  }
+  
+  public void setVerbose() {
+    _loggingLevel = Level.INFO;
+  }
+  
   public static void main(String []args)
     throws Exception
   {
     if (args.length == 0) {
-      System.out.println("usage: com.caucho.quercus.QuercusCompiler [flags] php1 php2 ...");
-      System.out.println(" -output-dir      : The directory to use for output (default /tmp/caucho).");
-      System.out.println(" -compiler        : Sets the javac.");
-      System.out.println(" -script-encoding : The encoding of the source files (default ISO-8859-1).");
-      System.out.println(" -require-source  : Whether or not the source files are required (default false).");
+      System.out.println("usage: java -Xmx1024m " + QuercusCompiler.class + " [flags] php1 php2 ...");
+      System.out.println(" -output-dir      : the directory to use for output (default /tmp/<user>).");
+      System.out.println(" -compiler        : sets the javac.");
+      System.out.println(" -script-encoding : the encoding of the source files (default ISO-8859-1).");
+      System.out.println(" -require-source  : whether or not the source files are required (default false).");
+      System.out.println(" -include-pattern : compile files that match this Java regexp Pattern (default '.*\\.php$').");
+      System.out.println(" -verbose         : sets logging level to INFO.");
+      
       System.exit(1);
     }
 
-    try {
-      QuercusCompiler compiler = new QuercusCompiler();
-
-      int i = compiler.configureFromArgs(args);
-        
-      System.out.println("Scanning for PHP files to compile");
-
-      ArrayList<CompileItem> pendingClasses = new ArrayList<CompileItem>();
-
-      if (i == args.length) {
-        compiler.generate(pendingClasses, ".");
-      }
-
-      for (; i < args.length; i++) {
-        String uri = args[i];
-
-        compiler.generate(pendingClasses, uri);
-      }
-
-      compiler.compile(pendingClasses);
-    } finally {
-    }
+    QuercusCompiler compiler = new QuercusCompiler();
+    configure(compiler, args);
+    
+    ArrayList<CompileItem> brokenItems = compiler.compile();
   }
   
-  private int configureFromArgs(String []args)
+  public ArrayList<CompileItem> compile()
+    throws IOException
+  {
+    long start = System.currentTimeMillis();
+
+    if (log.isLoggable(_loggingLevel)) {
+      log.log(_loggingLevel, L.l("Parsing files matching Java Pattern '{0}'",
+                                 _includePattern));
+    }
+    
+    ArrayList<CompileItem> pendingClasses = new ArrayList<CompileItem>();
+
+    for (String uri : _pathList) {      
+      generate(pendingClasses, uri);
+    }
+
+    if (log.isLoggable(_loggingLevel)) {
+      log.log(_loggingLevel, L.l("Compiling {0} PHP files.",
+                                 pendingClasses.size()));
+    }
+    
+    ArrayList<CompileItem> brokenList = compile(pendingClasses);
+    
+    long end = System.currentTimeMillis();
+    
+    if (log.isLoggable(_loggingLevel)) {
+      log.log(_loggingLevel, L.l("Compilation finished in {0} ms.",
+                                 (end - start)));
+    }
+    
+    return brokenList;
+  }
+  
+  private static void configure(QuercusCompiler compiler, String []args)
   {
     int i = 0;
     
@@ -117,7 +155,7 @@ public class QuercusCompiler
         if (path != null)
           path = path.lookup("WEB-INF/classes");
         
-        setWorkDir(path);
+        compiler.setWorkDir(path);
         i += 2;
       }
       else if (args[i].equals("-compiler")) {
@@ -126,58 +164,80 @@ public class QuercusCompiler
         i += 2;
       }
       else if (args[i].equals("-script-encoding")) {
-        setScriptEncoding(args[i + 1]);
-      }
-      else if (args[i].equals("-require-source")) {
-        setRequireSource("true".equals(args[i + 1]));
+        compiler.setScriptEncoding(args[i + 1]);
         
         i += 2;
       }
-      else
+      else if (args[i].equals("-require-source")) {
+        compiler.setRequireSource("true".equals(args[i + 1]));
+        
+        i += 2;
+      }
+      else if (args[i].equals("-include-pattern")) {
+        String pattern = args[i + 1];
+        
+        compiler.setIncludePattern(pattern);
+        
+        i += 2;
+      }
+      else if (args[i].equals("-verbose")) {
+        compiler.setVerbose();
+        
+        i++;
+      }
+      else {
         break;
+      }
     }
     
-    return i;
+    if (i == args.length) {
+      compiler.addCompilePath(".");
+    }
+    else {
+      for (; i < args.length; i++) {
+        compiler.addCompilePath(args[i]);
+      }
+    }
   }
   
   public void generate(ArrayList<CompileItem> pendingClasses, String uri)
-    throws Exception
+    throws IOException
   {
-    try {
-      Path path = Vfs.lookup(uri);
+    Path path = Vfs.lookup(uri);
 
-      if (path.isDirectory())
-        generateDirectory(path, this, pendingClasses);
-      else
-        generatePhp(path, this, pendingClasses);
-    } finally {
+    if (path.isDirectory())
+      generateDirectory(pendingClasses, path);
+    else {
+      generateFile(pendingClasses, path);
     }
   }
   
-  private void generateDirectory(Path path,
-                                 QuercusCompiler compiler,
-                                 ArrayList<CompileItem> pendingClasses)
-    throws Exception
+  private void generateDirectory(ArrayList<CompileItem> pendingClasses,
+                                 Path path)
+    throws IOException
   {
-    if (path.isDirectory()) {
-      String []list = path.list();
+    String []list = path.list();
 
-      for (int i = 0; i < list.length; i++) {
-        Path subpath = path.lookup(list[i]);
+    for (int i = 0; i < list.length; i++) {
+      Path subPath = path.lookup(list[i]);
 
-        generateDirectory(subpath, compiler, pendingClasses);
+      if (subPath.isDirectory()) {
+        generateDirectory(pendingClasses, subPath);
+      }
+      else {
+        generateFile(pendingClasses, subPath);
       }
     }
-    else if (path.getPath().endsWith(".php")) {
-      generatePhp(path, compiler, pendingClasses);
-    }
   }
   
-  private void generatePhp(Path path,
-                           QuercusCompiler compiler,
-                           ArrayList<CompileItem> pendingClasses)
-    throws Exception
+  private void generateFile(ArrayList<CompileItem> pendingClasses,
+                            Path path)
+    throws IOException
   {
+    if (! _includePattern.matcher(path.getPath()).matches()) {
+      return;
+    }
+    
     QuercusProgram program = QuercusParser.parse(_quercus,
                                                  path,
                                                  _quercus.getScriptEncoding(),
@@ -186,8 +246,9 @@ public class QuercusCompiler
 
     CompileItem item = new CompileItem(program, path);
     
-    if (compiler.generateCode(item))
+    if (generateCode(item)) {
       pendingClasses.add(item);
+    }
   }
 
   private boolean generateCode(CompileItem item)
@@ -204,26 +265,12 @@ public class QuercusCompiler
       item.setPendingFiles(files);
 
       return true;
-    } catch (JavaCompileException e) {
-      //log.log(Level.FINE, L.l("Quercus[{0}] loading interpreted page instead because of compile error",
-      //                        item.getPath()), e);
-      
-      item.getProgram().setCompilable(false);
-      item.getProgram().setCompileException(e);
-      
-      System.out.println("Cannot generate " + item.getPath() + " : " + e.getMessage());
-      
-    } catch (Exception e) {
-      //log.log(Level.FINE, L.l("Quercus[{0}] loading interpreted page instead because of compile error",
-      //    item.getPath()), e);
-
-      item.getProgram().setCompilable(false);
-      item.getProgram().setCompileException(e);
-      
-      System.out.println("Cannot generate " + item.getPath() + " : " + e.getMessage());
     }
-
-    return false;
+    catch (Exception e) {
+      log.log(Level.WARNING, L.l("Cannot generate code for {0} : {1}", item.getPath(), e.getMessage()));
+      
+      return false;
+    }
   }
   
   /**
@@ -277,52 +324,41 @@ public class QuercusCompiler
     QuercusGenerator gen = new QuercusGenerator(_quercus);
 
     ArrayList<String> pendingFileList = new ArrayList<String>();
+    ArrayList<CompileItem> brokenItems = new ArrayList<CompileItem>();
 
     for (CompileItem item : itemList) {
       for (String file : item.getPendingFiles())
         pendingFileList.add(file);
     }
 
-    System.out.println("Compiling " + pendingFileList.size() + " files");
-
     String []pendingFiles = new String[pendingFileList.size()];
     pendingFileList.toArray(pendingFiles);
 
-    ArrayList<CompileItem> brokenItems = new ArrayList<CompileItem>();
-
+    // compile the files in one batch
     try {
       gen.compile(pendingFiles);
 
       for (CompileItem item : itemList) {
+        // ensure class file is there and valid
         load(gen, item);
       }
-
+      
       return brokenItems;
-    } catch (Exception e) {
-      log.log(Level.FINE, L.l("Quercus compilation failed because of compile error"), e);
-
-      System.out.println("Cannot compile " + itemList.get(0).getPath() + " : " + e.getMessage());
-
-      itemList.get(0).getProgram().setCompileException(e);
-  
-      if (itemList.size() == 1) {
-        itemList.get(0).getProgram().setCompilable(false);
-        return itemList;
-      }
     }
-
+    catch (Throwable e) {
+    }
+    
+    // need to find the files that failed to compile
     for (CompileItem item : itemList) {
       try {
         gen.compile(item.getPendingFiles());
 
+        // ensure class file is there and valid
         load(gen, item);
-      } catch (Exception e) {
-        log.log(Level.FINE, L.l("Quercus compilation failed because of compile error"), e);
-
-        System.out.println("Cannot compile " + itemList.get(0).getPath() + " : " + e.getMessage());
-        
-        item.getProgram().setCompilable(false);
-        
+      }
+      catch (Throwable e) {
+        log.log(Level.WARNING, L.l("Cannot compile {0} : {1}", itemList.get(0).getPath(), e.getMessage()));
+                
         brokenItems.add(item);
       }
     }
@@ -331,20 +367,9 @@ public class QuercusCompiler
   }
   
   private void load(QuercusGenerator gen, CompileItem item)
+    throws Exception
   {
-    try {
-      Class<?> pageClass = gen.preload(item.getProgram());
-
-    } catch (ClassFormatError e) {
-      item.getProgram().setCompilable(false);
-      log.log(Level.WARNING, e.toString(), e);
-
-    } catch (Exception e) {
-      log.log(Level.WARNING, e.toString(), e);
-      item.getProgram().setCompilable(false);
-    } finally {
-      item.getProgram().finishCompiling();
-    }
+    Class<?> pageClass = gen.preload(item.getProgram());
   }
   
   static class CompileItem {
