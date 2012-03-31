@@ -52,7 +52,6 @@ import com.caucho.server.http.AbstractHttpRequest;
 import com.caucho.server.http.AbstractResponseStream;
 import com.caucho.server.http.HttpServletRequestImpl;
 import com.caucho.server.http.HttpServletResponseImpl;
-import com.caucho.server.httpproxy.HttpProxyConnection;
 import com.caucho.server.webapp.ErrorPageManager;
 import com.caucho.util.ByteBuffer;
 import com.caucho.util.CharBuffer;
@@ -939,16 +938,6 @@ public class HmuxRequest extends AbstractHttpRequest
         result = HMUX_QUIT;
       else
         result = HMUX_EXIT;
-    }
-    else if (value == HMUX_HTTP_PROXY_PROTOCOL) {
-      if (log.isLoggable(Level.FINE))
-        log.fine(dbgId() + (char) code + "-r: http-proxy protocol");
-
-      _subProtocol = new HttpProxyConnection(getTcpSocketLink());
-      
-      _subProtocol.handleRequest();
-      
-      return;
     }
     else {
       HmuxExtension ext = _hmuxProtocol.getExtension(value);

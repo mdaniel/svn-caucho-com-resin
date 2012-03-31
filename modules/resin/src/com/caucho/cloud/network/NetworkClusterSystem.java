@@ -376,7 +376,7 @@ public class NetworkClusterSystem extends AbstractResinSubSystem
       listener.setKeepaliveTimeoutMillis(idleTime);
       listener.setSocketTimeoutMillis(idleTime);
       
-      listener.setProtocol(new HmuxProtocol());
+      listener.setProtocol(HmuxProtocol.create());
       listener.init();
       
       validateClusterServer(listener, clusterServer);
