@@ -76,6 +76,7 @@ public class QuercusServletImpl extends HttpServlet
   /**
    * initialize the script manager.
    */
+  @Override
   public final void init(ServletConfig config)
     throws ServletException
   {

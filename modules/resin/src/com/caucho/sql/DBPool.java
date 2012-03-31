@@ -797,6 +797,7 @@ public class DBPool
   /**
    * Returns a new or pooled connection.
    */
+  @Override
   public Connection getConnection() throws SQLException
   {
     return getDataSource().getConnection();
@@ -811,6 +812,7 @@ public class DBPool
    * @param password database password
    * @return a database connection
    */
+  @Override
   public Connection getConnection(String user, String password)
     throws SQLException
   {
