@@ -366,7 +366,7 @@ public class VariableModule extends AbstractQuercusModule {
     
     // XXX: this needs to be made OO through Value
     
-    if (v instanceof StringValue) {
+    if (v.isString()) {
       if (nameRef != null)
         nameRef.set(v);
 
@@ -375,17 +375,19 @@ public class VariableModule extends AbstractQuercusModule {
       else
         return env.findFunction(v.toString()) != null;
     }
-    else if (v instanceof ArrayValue) {
+    else if (v.isArray()) {
       Value obj = v.get(LongValue.ZERO);
       Value name = v.get(LongValue.ONE);
 
-      if (! (name instanceof StringValue))
+      if (! (name.isString()))
         return false;
+      
+      StringValue nameStr = name.toStringValue(env);
 
       if (nameRef != null)
-        nameRef.set(name);
+        nameRef.set(nameStr);
 
-      if (obj instanceof StringValue) {
+      if (obj.isString()) {
         if (isSyntaxOnly)
           return true;
 
@@ -393,14 +395,13 @@ public class VariableModule extends AbstractQuercusModule {
         if (cl == null)
           return false;
 
-        return (cl.findFunction(name.toString()) != null);
+        return (cl.findFunction(nameStr) != null);
       }
       else if (obj.isObject()) {
-        System.out.println("OBJ: " + obj.findFunction(name.toString()) + " " + isSyntaxOnly);
         if (isSyntaxOnly)
           return true;
 
-        return obj.findFunction(name.toString()) != null;
+        return obj.findFunction(nameStr) != null;
       }
       else
         return false;

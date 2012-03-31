@@ -683,6 +683,7 @@ abstract public class JavaAdapter extends ArrayValue
   /**
    * Returns the method.
    */
+  @Override
   public AbstractFunction findFunction(StringValue methodName)
   {
     return _classDef.findFunction(methodName);

@@ -141,7 +141,7 @@ public class ArrayTailExprPro extends ArrayTailExpr
       {
         // quercus/3d1i
         getExpr().generateRef(out);
-        out.print(".putArray()");
+        out.print(".putArray(env)");
       }
 
       /**

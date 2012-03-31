@@ -29,12 +29,9 @@
 
 package com.caucho.quercus.env;
 
-import com.caucho.quercus.expr.Expr;
-import com.caucho.quercus.expr.LiteralStringExpr;
 import com.caucho.quercus.function.AbstractFunction;
 import com.caucho.util.CurrentTime;
 import com.caucho.util.Primes;
-import com.caucho.util.Alarm;
 import com.caucho.vfs.WriteStream;
 
 import java.io.IOException;
@@ -793,7 +790,7 @@ public class ObjectExtValue extends ObjectValue
    * Finds the method name.
    */
   @Override
-  public AbstractFunction findFunction(String methodName)
+  public AbstractFunction findFunction(StringValue methodName)
   {
     return _quercusClass.findFunction(methodName);
   }

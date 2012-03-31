@@ -29,14 +29,6 @@
 
 package com.caucho.quercus.env;
 
-import java.io.IOException;
-
-import java.lang.annotation.Annotation;
-import java.lang.reflect.InvocationTargetException;
-
-import com.caucho.quercus.QuercusContext;
-import com.caucho.quercus.QuercusException;
-import com.caucho.quercus.expr.ParamDefaultExpr;
 import com.caucho.quercus.expr.Expr;
 import com.caucho.quercus.function.AbstractFunction;
 import com.caucho.util.L10N;
@@ -70,12 +62,12 @@ abstract public class AbstractJavaMethod extends AbstractFunction
 
   abstract public int getMarshalingCost(Expr []args);
 
-  public Class getJavaDeclaringClass()
+  public Class<?> getJavaDeclaringClass()
   {
     return null;
   }
 
-  public Class []getJavaParameterTypes()
+  public Class<?> []getJavaParameterTypes()
   {
     return null;
   }
@@ -108,8 +100,8 @@ abstract public class AbstractJavaMethod extends AbstractFunction
   private boolean isSameMethod(AbstractJavaMethod funA,
                                AbstractJavaMethod funB)
   {
-    Class []paramTypesA = funA.getJavaParameterTypes();
-    Class []paramTypesB = funB.getJavaParameterTypes();
+    Class<?> []paramTypesA = funA.getJavaParameterTypes();
+    Class<?> []paramTypesB = funB.getJavaParameterTypes();
 
     if (paramTypesA == null || paramTypesB == null)
       return false;

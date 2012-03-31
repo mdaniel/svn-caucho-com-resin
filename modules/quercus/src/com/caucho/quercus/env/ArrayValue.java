@@ -359,13 +359,15 @@ abstract public class ArrayValue extends Value {
       return false;
     }
 
-    String name = nameV.toString();
+    StringValue nameStr = nameV.toStringValue(env);
 
     if (obj.isObject()) {
-      int p = name.indexOf("::");
+      int p = nameStr.indexOf("::");
 
       // php/09lf
       if (p > 0) {
+        String name = nameStr.toString();
+        
         String clsName = name.substring(0, p);
         name = name.substring(p + 2);
 
@@ -374,10 +376,12 @@ abstract public class ArrayValue extends Value {
         if (cls == null) {
           return false;
         }
+        
+        nameStr = env.createString(name);
       }
 
       // php/1270
-      return obj.findFunction(name) != null;
+      return obj.findFunction(nameStr) != null;
     }
     else {
       QuercusClass cl = env.findClass(obj.toString());

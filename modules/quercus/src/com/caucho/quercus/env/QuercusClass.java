@@ -148,7 +148,7 @@ public class QuercusClass extends NullValue {
       AbstractFunction cons = cls.getConstructor();
       
       if (cons != null) {
-        addMethod(new StringBuilderValue(cls.getName()), cons);
+        addMethod(cls.getName(), cons);
       }
     }
 
@@ -206,8 +206,8 @@ public class QuercusClass extends NullValue {
     // php/093n
     if (_constructor != null
         && ! _constructor.getName().equals("__construct")) {
-      addMethodIfNotExist(new StringBuilderValue("__construct"), _constructor);
-      addMethodIfNotExist(new StringBuilderValue(_className), _constructor);
+      addMethodIfNotExist("__construct", _constructor);
+      addMethodIfNotExist(_className, _constructor);
     }
 
     if (_destructor == null && parent != null)
@@ -612,19 +612,11 @@ public class QuercusClass extends NullValue {
   {
     return _methodMap.values();
   }
-
-  /**
-   * Adds a method.
-   */
-  public void addMethod(String name, AbstractFunction fun)
-  {
-    addMethod(new StringBuilderValue(name), fun);
-  }
  
   /**
    * Adds a method.
    */
-  public void addMethod(StringValue name, AbstractFunction fun)
+  public void addMethod(String name, AbstractFunction fun)
   {
     if (fun == null)
       throw new NullPointerException(L.l("'{0}' is a null function", name));
@@ -635,17 +627,17 @@ public class QuercusClass extends NullValue {
     AbstractFunction existingFun = _methodMap.getRaw(name);
     
     if (existingFun == null || ! fun.isAbstract())
-      _methodMap.put(name.toString(), fun);
-    else if (! existingFun.isAbstract() && fun.isAbstract())
-      Env.getInstance()
-        .error(L.l("cannot make non-abstract function {0}:{1}() abstract",
-                   getName(), name));
+      _methodMap.put(name, fun);
+    else if (! existingFun.isAbstract() && fun.isAbstract()) {
+      Env.getInstance().error(L.l("cannot make non-abstract function {0}:{1}() abstract",
+                                  getName(), name));
+    }
   }
   
-  /*
+  /**
    * Adds a method if it does not exist.
    */
-  public void addMethodIfNotExist(StringValue name, AbstractFunction fun)
+  public void addMethodIfNotExist(String name, AbstractFunction fun)
   {
     if (fun == null)
       throw new NullPointerException(L.l("'{0}' is a null function", name));
@@ -656,7 +648,7 @@ public class QuercusClass extends NullValue {
     AbstractFunction existingFun = _methodMap.getRaw(name);
 
     if (existingFun == null && ! fun.isAbstract())
-      _methodMap.put(name.toString(), fun);
+      _methodMap.put(name, fun);
   }
 
   /**
@@ -1221,16 +1213,14 @@ public class QuercusClass extends NullValue {
     return _methodMap.get(methodName, methodName.hashCodeCaseInsensitive());
   }
 
-
   /**
    * Finds the matching function.
    */
-  @Override
   public final AbstractFunction findFunction(String methodName)
   {
-    return _methodMap.getRaw(new StringBuilderValue(methodName));
+    return _methodMap.getRaw(methodName);
   }
-
+  
   /**
    * Finds the matching function.
    */

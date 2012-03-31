@@ -624,7 +624,7 @@ abstract public class Value implements java.io.Serializable
   public ArrayValue toArrayValue(Env env)
   {
     env.warning(L.l("'{0}' ({1}) is not assignable to ArrayValue",
-                  this, getType()));
+                    this, getType()));
 
     return null;
   }
@@ -1351,7 +1351,7 @@ abstract public class Value implements java.io.Serializable
   /**
    * Finds the method name.
    */
-  public AbstractFunction findFunction(String methodName)
+  public AbstractFunction findFunction(StringValue methodName)
   {
     return null;
   }
@@ -2672,6 +2672,18 @@ abstract public class Value implements java.io.Serializable
     return new Var();
   }
 
+  /**
+   * Appends a new array.
+   */
+  public Value putArray(Env env)
+  {
+    Value value = new ArrayValueImpl();
+    
+    put(value);
+    
+    return value;
+  }
+  
   /**
    * Appends a new object
    */

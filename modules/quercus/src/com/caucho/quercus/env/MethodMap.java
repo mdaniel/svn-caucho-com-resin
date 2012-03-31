@@ -56,11 +56,15 @@ public final class MethodMap<V>
     _quercusClass = quercusClass;
     _classDef = classDef;
   }
-    
-  public void put(String methodName, V value)
-  {
+  
+  public void put(String methodName, V value) {
     StringValue name = MethodIntern.intern(methodName);
     
+    put(name, value);
+  }
+    
+  public void put(StringValue name, V value)
+  {
     if (_entries.length <= _size * 4)
       resize();
     
@@ -142,6 +146,12 @@ public final class MethodMap<V>
     
     throw new IllegalStateException(L.l("Call to undefined function {0}",
                                         key));
+  }
+  
+  public V getRaw(String key) {
+    StringValue keyV = MethodIntern.intern(key);
+    
+    return getRaw(keyV);
   }
 
   public V getRaw(StringValue key)

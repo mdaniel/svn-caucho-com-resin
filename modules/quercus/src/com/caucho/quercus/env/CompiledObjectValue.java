@@ -267,7 +267,7 @@ public class CompiledObjectValue extends ObjectValue
    * Finds the method name.
    */
   @Override
-  public AbstractFunction findFunction(String methodName)
+  public AbstractFunction findFunction(StringValue methodName)
   {
     return _quercusClass.findFunction(methodName);
   }

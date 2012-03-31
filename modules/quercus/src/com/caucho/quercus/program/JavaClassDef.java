@@ -752,16 +752,16 @@ public class JavaClassDef extends ClassDef {
 
     if (_cons != null) {
       cl.setConstructor(_cons);
-      cl.addMethod(new StringBuilderValue("__construct"), _cons);
+      cl.addMethod("__construct", _cons);
     }
     
     if (__construct != null) {
       cl.setConstructor(__construct);
-      cl.addMethod(new StringBuilderValue("__construct"), __construct);
+      cl.addMethod("__construct", __construct);
     }
 
     for (AbstractJavaMethod value : _functionMap.values()) {
-      cl.addMethod(new StringBuilderValue(value.getName()), value);
+      cl.addMethod(value.getName(), value);
     }
 
     if (__fieldGet != null)
@@ -774,7 +774,7 @@ public class JavaClassDef extends ClassDef {
       cl.setCall(__call);
     
     if (__toString != null) {
-      cl.addMethod(new StringBuilderValue("__toString"), __toString);
+      cl.addMethod("__toString", __toString);
     }
 
     if (_arrayDelegate != null)
@@ -1068,7 +1068,7 @@ public class JavaClassDef extends ClassDef {
   /**
    * Introspects the Java class.
    */
-  private void introspectFields(ModuleContext moduleContext, Class type)
+  private void introspectFields(ModuleContext moduleContext, Class<?> type)
   {
     if (type == null)
       return;
@@ -1216,7 +1216,7 @@ public class JavaClassDef extends ClassDef {
   /**
    * Introspects the Java class.
    */
-  private void introspectConstants(Class type)
+  private void introspectConstants(Class<?> type)
   {
     if (type == null)
       return;
@@ -1311,7 +1311,7 @@ public class JavaClassDef extends ClassDef {
             L.l("{0}: use @Name instead", method.getName()));
         
         JavaMethod newFun = new JavaMethod(moduleContext, method);
-        StringValue funName = new StringBuilderValue(newFun.getName());
+        String funName = newFun.getName();
         AbstractJavaMethod fun = _functionMap.getRaw(funName);
 
         if (fun != null)
@@ -1319,7 +1319,7 @@ public class JavaClassDef extends ClassDef {
         else
           fun = newFun;
 
-        _functionMap.put(funName.toString(), fun);
+        _functionMap.put(funName, fun);
       }
     }
     

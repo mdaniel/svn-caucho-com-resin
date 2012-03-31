@@ -3885,37 +3885,6 @@ public class Env
   }
 
   //
-  // method handling
-  //
-
-  /**
-   * Finds the java reflection method for the function with the given name.
-   *
-   * @param className the class name
-   * @param methodName the method name
-   * @return the found method or null if no method found.
-   */
-  public AbstractFunction findMethod(String className, String methodName)
-  {
-    QuercusClass cl = findClass(className);
-
-    if (cl == null) {
-      error(L.l("'{0}' is an unknown class.", className));
-      return null;
-    }
-
-    AbstractFunction fun = cl.findFunction(methodName);
-
-    if (fun == null) {
-      error(L.l("'{0}::{1}' is an unknown method.",
-                className, methodName));
-      return null;
-    }
-
-    return fun;
-  }
-
-  //
   // evaluation
   //
 
