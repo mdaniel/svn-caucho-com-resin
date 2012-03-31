@@ -101,7 +101,6 @@ public class Postgres extends JdbcConnectionResource {
     }
 
     try {
-
       if (host == null || host.equals("")) {
         host = "localhost";
       }
@@ -115,7 +114,7 @@ public class Postgres extends JdbcConnectionResource {
       }
 
       ConnectionEntry jConn;
-      
+
       jConn = env.getConnection(driver, url, userName, password, ! isNewLink);
 
       return jConn;

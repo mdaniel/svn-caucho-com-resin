@@ -1125,7 +1125,12 @@ public class Env
 
     DataSource database = _quercus.getDatabase();
 
-    if (database == null) {
+    if (database != null) {
+      // php/4360 - if configured database, don't use PHP names
+      userName = null;
+      password = null;
+    }
+    else {
       database = findDatabase(driver, url);
 
       if (database == null)
@@ -1137,16 +1142,19 @@ public class Env
 
     ConnectionEntry oldEntry = null;
 
-    if (isReuse)
+    if (isReuse) {
       oldEntry = _connMap.get(entry);
+    }
     
-    if (oldEntry != null && oldEntry.isReusable())
+    if (oldEntry != null && oldEntry.isReusable()) { 
       return oldEntry;
+    }
 
     entry.connect(isReuse);
 
-    if (isReuse)
+    if (isReuse) {
       _connMap.put(entry, entry);
+    }
 
     return entry;
   }
