@@ -81,7 +81,7 @@ public class Zlib {
 
     Value val = null;
     // FileModule.fopen(env, filename, mode, useIncludePath, null);
-    
+
     if (val != BooleanValue.FALSE)
       _fileValue = (FileValue)val;
 
@@ -158,7 +158,7 @@ public class Zlib {
       log.log(Level.FINE, e.getMessage(), e);
       env.warning(L.l(e.getMessage()));
     }
-    
+
     TempBuffer.free(tb);
     return inputSize;
   }
@@ -179,7 +179,7 @@ public class Zlib {
         _gzout.close();
         _gzout = null;
       }
-      
+
       if (_in != null) {
         _in.close();
         _in = null;
@@ -273,7 +273,7 @@ public class Zlib {
   public ArrayValue gzfile()
   {
     Value line;
-    int oldLength = 0; 
+    int oldLength = 0;
 
     ArrayValue array = new ArrayValueImpl();
 
@@ -338,29 +338,34 @@ public class Zlib {
    * @throws DataFormatException
    */
   @ReturnNullAsFalse
-  public StringValue gzgetss(int length,
+  public StringValue gzgetss(Env env,
+                             int length,
                              @Optional StringValue allowedTags)
   {
     try {
-      if (_in == null)
+      if (_in == null) {
         return null;
+      }
 
-      UnicodeBuilderValue sbv = new UnicodeBuilderValue();
+      StringValue sb = env.createStringBuilder();
       int readChar;
       for (int i = 0; i < length; i++) {
         readChar = _in.read();
         if (readChar >= 0) {
-          sbv.append((char)readChar);
+          sb.append((char)readChar);
           if (readChar == '\n' || readChar == '\r')
             break;
         } else
           break;
       }
-      if (sbv.length() > 0)
-        return StringModule.strip_tags(sbv, allowedTags);
-      else
+      if (sb.length() > 0) {
+        return StringModule.strip_tags(env, sb, allowedTags);
+      }
+      else {
         return null;
-    } catch (Exception e) {
+      }
+    }
+    catch (Exception e) {
       throw QuercusModuleException.create(e);
     }
   }

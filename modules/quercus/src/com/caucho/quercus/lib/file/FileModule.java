@@ -678,7 +678,7 @@ public class FileModule extends AbstractQuercusModule {
       StringValue value = is.readLine(length);
 
       if (value != null)
-        return StringModule.strip_tags(value, allowedTags);
+        return StringModule.strip_tags(env, value, allowedTags);
       else
         return BooleanValue.FALSE;
     } catch (IOException e) {

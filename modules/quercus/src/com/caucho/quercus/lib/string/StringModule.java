@@ -3787,7 +3787,8 @@ public class StringModule extends AbstractQuercusModule {
    * @param needleV the substring argument to check
    * @param offsetV optional starting position
    */
-  public static Value stripos(Env env, StringValue haystack,
+  public static Value stripos(Env env,
+                              StringValue haystack,
                               Value needleV,
                               @Optional int offset)
   {
@@ -3799,8 +3800,8 @@ public class StringModule extends AbstractQuercusModule {
       return BooleanValue.FALSE;
     }
 
-    if (needleV instanceof StringValue)
-      needle = (StringValue) needleV;
+    if (needleV.isString())
+      needle = needleV.toStringValue(env);
     else
       needle = StringValue.create((char) needleV.toInt());
 
@@ -3852,13 +3853,14 @@ public class StringModule extends AbstractQuercusModule {
    * @param needleV the string to search for
    * @return the trailing match or FALSE
    */
-  public static Value stristr(StringValue haystack,
+  public static Value stristr(Env env,
+                              StringValue haystack,
                               Value needleV)
   {
     CharSequence needleLower;
 
-    if (needleV instanceof StringValue) {
-      needleLower = ((StringValue) needleV).toLowerCase();
+    if (needleV.isString()) {
+      needleLower = needleV.toStringValue(env).toLowerCase();
     }
     else {
       char lower = Character.toLowerCase((char) needleV.toLong());
@@ -4182,14 +4184,14 @@ public class StringModule extends AbstractQuercusModule {
 
     String needle;
 
-    if (needleV instanceof StringValue)
+    if (needleV.isString())
       needle = needleV.toString();
     else
       needle = String.valueOf((char) needleV.toInt());
 
     int offset;
 
-    if (offsetV instanceof DefaultValue)
+    if (offsetV.isDefault())
       offset = haystack.length();
     else {
       offset = offsetV.toInt();
@@ -4335,7 +4337,7 @@ public class StringModule extends AbstractQuercusModule {
 
     String needle;
 
-    if (needleV instanceof StringValue) {
+    if (needleV.isString()) {
       needle = needleV.toString();
     }
     else {
