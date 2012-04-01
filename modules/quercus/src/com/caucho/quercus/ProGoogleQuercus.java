@@ -82,7 +82,7 @@ public class ProGoogleQuercus extends GoogleQuercus
 	//    && RandomUtil.nextDouble() <= _profileProbability)
     //  return new ProfileEnv(this, page, out, request, response);
     //else
-      return new ProGoogleEnv(this, page, out, request, response);
+    return new ProGoogleEnv(this, page, out, request, response);
   }
   
   /**
@@ -114,16 +114,10 @@ public class ProGoogleQuercus extends GoogleQuercus
    */
   public ClassLoader getCompileClassLoader()
   {
-    if (_compileClassLoader == null)
-      _compileClassLoader = SimpleLoader.create(WorkDir.getLocalWorkDir());
-    
-    /*
     if (_compileClassLoader == null) {
-      _compileClassLoader
-        = SimpleLoader.create(getPwd().lookup("WEB-INF/work"));
+      _compileClassLoader = SimpleLoader.create(WorkDir.getLocalWorkDir());
     }
-    */
-                                                
+    
     return _compileClassLoader;
   }
 

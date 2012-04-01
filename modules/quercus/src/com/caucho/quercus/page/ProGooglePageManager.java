@@ -32,7 +32,7 @@ public class ProGooglePageManager extends PageManager
 
   /**
    * Constructor.
-   */ 
+   */
   public ProGooglePageManager(QuercusContext quercus)
   {
     super(quercus);
@@ -55,7 +55,7 @@ public class ProGooglePageManager extends PageManager
   {
     if (path == null)
       return "tmp.eval";
-    
+
     String pathName = path.getFullPath();
     String pwdName = getPwd().getFullPath();
 
@@ -79,13 +79,13 @@ public class ProGooglePageManager extends PageManager
         if (page != null) {
           if (log.isLoggable(Level.FINE))
             log.log(Level.FINE, L.l("Quercus[{0}] loading precompiled page", path));
-                  
+
           return page;
         }
-        
+
         if (log.isLoggable(Level.FINE))
-          log.log(Level.FINE, L.l("Quercus[{0}] cannot find precompiled page", path));     
-          
+          log.log(Level.FINE, L.l("Quercus[{0}] cannot find precompiled page", path));
+
         return new InterpretedPage(program);
       }
     } catch (Exception e) {
@@ -107,10 +107,26 @@ public class ProGooglePageManager extends PageManager
   public boolean precompileExists(Path path)
   {
     String className = getClassName(path);
-    
+
     QuercusGenerator gen = new QuercusGenerator(getQuercus());
 
-    return gen.preloadExists(className);
+    // preloadExists() checks to see if the class file is in the work dir
+    // (usually WEB-INF/work)
+    if (gen.preloadExists(className)) {
+      return true;
+    }
+
+    // files may also be precompiled offline and included into the classpath
+    Class<?> pageClass = null;
+
+    try {
+      pageClass = gen.preload(className);
+    }
+    catch (Exception e) {
+      log.log(Level.FINER, e.toString(), e);
+    }
+
+    return pageClass != null;
   }
 
   protected QuercusPage preloadPage(QuercusProgram program, Path path)
@@ -122,12 +138,12 @@ public class ProGooglePageManager extends PageManager
 
       if (pageClass == null)
         return null;
-      
+
       QuercusPage page = createPage(path, program, pageClass);
 
       if (page == null)
         return null;
-      
+
       return page;
     } catch (Exception e) {
       log.log(Level.FINER, e.toString(), e);
@@ -140,7 +156,7 @@ public class ProGooglePageManager extends PageManager
   protected QuercusProgram preloadProgram(Path path, String fileName)
   {
     String className = getClassName(path);
-    
+
     QuercusGenerator gen = new QuercusGenerator(getQuercus());
 
     try {
@@ -148,17 +164,16 @@ public class ProGooglePageManager extends PageManager
 
       if (pageClass == null)
         return null;
-      
+
       QuercusPage page = createPage(path, pageClass);
 
       QuercusProgram program = new QuercusProgram(getQuercus(), path, page);
 
       return program;
-    } catch (ClassNotFoundException e) {
-      return null;
-    } catch (Exception e) {
+    }
+    catch (Exception e) {
       log.log(Level.FINER, e.toString(), e);
-      
+
       return null;
     }
   }
@@ -171,7 +186,7 @@ public class ProGooglePageManager extends PageManager
       QuercusPage page = createPage(path, pageClass);
 
       program.setCompiledPage(page);
-      
+
       return page;
     } catch (RuntimeException e) {
       throw e;
@@ -188,10 +203,10 @@ public class ProGooglePageManager extends PageManager
       QuercusPage page = (QuercusPage) pageClass.newInstance();
 
       page.init(getQuercus());
-      
+
       Method selfPath = pageClass.getMethod("quercus_setSelfPath",
                                             new Class[] { Path.class });
-      
+
       selfPath.invoke(null, path);
 
       return page;

@@ -86,7 +86,7 @@ public class QuercusServletImpl extends HttpServlet
     checkServletAPIVersion();
     
     Path pwd = new FilePath(_servletContext.getRealPath("/"));
-    
+        
     getQuercus().setPwd(pwd);
 
     // need to set these for non-Resin containers
@@ -94,6 +94,8 @@ public class QuercusServletImpl extends HttpServlet
       Vfs.setPwd(pwd);
       WorkDir.setLocalWorkDir(pwd.lookup("WEB-INF/work"));
     }
+    
+    initImpl(config);
 
     getQuercus().init();
     getQuercus().start();
@@ -128,8 +130,8 @@ public class QuercusServletImpl extends HttpServlet
    * Service.
    */
   @Override
-  public void service(HttpServletRequest request,
-                      HttpServletResponse response)
+  public final void service(HttpServletRequest request,
+                            HttpServletResponse response)
     throws ServletException, IOException
   {
     Env env = null;
@@ -254,8 +256,14 @@ public class QuercusServletImpl extends HttpServlet
       throw e;
     }
     catch (Throwable e) {
-      throw new ServletException(e);
+      handleThrowable(response, e);
     }
+  }
+  
+  protected void handleThrowable(HttpServletResponse response, Throwable e)
+    throws IOException, ServletException
+  {
+    throw new ServletException(e);
   }
 
   protected WriteStream openWrite(HttpServletResponse response)

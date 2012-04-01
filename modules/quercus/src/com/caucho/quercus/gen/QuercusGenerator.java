@@ -14,14 +14,14 @@ import com.caucho.quercus.program.QuercusProgram;
 import com.caucho.vfs.Path;
 
 import java.util.logging.Logger;
-  
+
 /**
  * Generator.
  */
 public class QuercusGenerator {
   private static final Logger log
     = Logger.getLogger(QuercusGenerator.class.getName());
-  
+
   private final QuercusContext _quercus;
 
   public QuercusGenerator(QuercusContext quercus)
@@ -30,14 +30,12 @@ public class QuercusGenerator {
   }
 
   public Class<?> preload(GenClass cl)
-    throws Exception
   {
     return preload(cl.getFullClassName());
   }
 
 
   public Class<?> preload(String className)
-    throws Exception
   {
     JavaClassGenerator gen = createGenerator(true);
 
@@ -56,7 +54,7 @@ public class QuercusGenerator {
   public Path getClassFilePath(QuercusProgram program)
   {
     String className = _quercus.getClassName(program.getSourcePath());
-    
+
     JavaClassGenerator gen = createGenerator(true);
 
     return gen.getClassFilePath(className);
@@ -68,9 +66,9 @@ public class QuercusGenerator {
     JavaClassGenerator gen = createGenerator(true);
 
     String className = _quercus.getClassName(program.getSourcePath());
-    
+
     Class<?> pageClass = gen.preload(className);
-    
+
     return pageClass;
   }
 
@@ -82,7 +80,7 @@ public class QuercusGenerator {
     String className = _quercus.getClassName(program.getSourcePath());
 
     Class<?> pageClass = gen.load(className);
-    
+
     return pageClass;
   }
 
@@ -120,16 +118,16 @@ public class QuercusGenerator {
   {
     if (isLazy)
       program.waitForRuntimeFunctionList(2000);
-    
+
     JavaClassGenerator gen = createGenerator(false);
 
     String className = _quercus.getClassName(program.getSourcePath());
 
     if (isProfile)
       className = className + "__prof";
-    
+
     GenClass cl = new GenClass(className);
-    
+
     // Java generation code
     cl.setSuperClassName("com.caucho.quercus.page.QuercusPage");
 
@@ -140,18 +138,18 @@ public class QuercusGenerator {
     cl.addImport("com.caucho.quercus.function.*");
     cl.addImport("com.caucho.quercus.program.*");
     cl.addImport("com.caucho.quercus.lib.*");
-    
+
     QuercusMain main = new QuercusMain(program, className);
     main.setProfile(isProfile);
     main.setUserPath(userPath);
-    
+
     cl.addComponent(main);
 
     cl.addDependencyComponent().addDependency(new VersionDependency());
     cl.addDependencyComponent().addDependencyList(program.getDependencyList());
 
     // gen.setEncoding("JAVA");
-    
+
     gen.generate(cl);
 
     return gen.getPendingFiles();
@@ -174,7 +172,7 @@ public class QuercusGenerator {
       gen.setLoader(_quercus.getCompileClassLoader());
     gen.setSearchPath(_quercus.getPwd());
     gen.setWorkDir(_quercus.getWorkDir());
-    
+
     return gen;
   }
 }

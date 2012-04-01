@@ -228,7 +228,7 @@ public class PageManager
    * @throws IOException
    */
   public QuercusPage parse(Path path, String fileName, int line)
-  throws IOException
+    throws IOException
   {
     String fullName = path.getFullPath();
     
@@ -254,10 +254,7 @@ public class PageManager
     throws IOException
   {
     try {
-      
-      SoftReference<QuercusProgram> programRef;
-
-      programRef = _programCache.get(path);
+      SoftReference<QuercusProgram> programRef = _programCache.get(path);
       
       QuercusProgram  program = programRef != null ? programRef.get() : null;
 

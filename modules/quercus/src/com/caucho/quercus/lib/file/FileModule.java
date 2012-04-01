@@ -706,7 +706,7 @@ public class FileModule extends AbstractQuercusModule {
     boolean skipEmptyLines = (flags & FILE_SKIP_EMPTY_LINES) != 0;
 
     try {
-      
+
       BinaryStream stream = fopen(env, filename, "r", useIncludePath, context);
 
       if (stream == null)
@@ -718,13 +718,13 @@ public class FileModule extends AbstractQuercusModule {
 
       try {
         StringValue bb = env.createBinaryBuilder();
-        
+
         for (int ch = is.read(); ch >= 0; ch = is.read()) {
           if (ch == '\n') {
             if (! ignoreNewLines) {
               bb.appendByte(ch);
             }
-            
+
             if (bb.length() > 0 || ! skipEmptyLines) {
               array.append(bb);
               bb = env.createBinaryBuilder();
@@ -745,7 +745,7 @@ public class FileModule extends AbstractQuercusModule {
             else {
               is.unread();
             }
-            
+
             if (bb.length() > 0 || ! skipEmptyLines) {
               array.append(bb);
               bb = env.createBinaryBuilder();
@@ -755,13 +755,13 @@ public class FileModule extends AbstractQuercusModule {
             bb.appendByte(ch);
           }
         }
-        
+
         if (bb.length() > 0) {
           array.append(bb);
         }
-        
+
         return array;
-        
+
       } finally {
         is.close();
       }
@@ -968,13 +968,12 @@ public class FileModule extends AbstractQuercusModule {
    * @param context the resource context
    */
   @ReturnNullAsFalse
-  public static StringValue
-    file_get_contents(Env env,
-                      StringValue filename,
-                      @Optional boolean useIncludePath,
-                      @Optional Value context,
-                      @Optional long offset,
-                      @Optional("4294967296") long maxLen)
+  public static StringValue file_get_contents(Env env,
+                                              StringValue filename,
+                                              @Optional boolean useIncludePath,
+                                              @Optional Value context,
+                                              @Optional long offset,
+                                              @Optional("4294967296") long maxLen)
   {
     if (filename.length() == 0) {
       env.warning(L.l("file name must not be null"));
@@ -2097,7 +2096,7 @@ public class FileModule extends AbstractQuercusModule {
   {
     if (path == null || ! path.exists())
       return false;
-    
+
     if (Path.isWindows()) {
       // XXX: PHP appears to be looking for the "MZ" magic number in the header
       String tail = path.getTail();
@@ -2298,7 +2297,7 @@ public class FileModule extends AbstractQuercusModule {
     String tail = src.getTail();
 
     src = env.getUploadDirectory().lookup(tail);
-    
+
     try {
       if (src.canRead()) {
         return src.renameTo(dst);
@@ -2480,9 +2479,9 @@ public class FileModule extends AbstractQuercusModule {
       }
 
       args[2] = command;
-      
+
       ProcessBuilder builder = new ProcessBuilder();
-      
+
       builder.command(args);
       builder.redirectErrorStream(true);
 

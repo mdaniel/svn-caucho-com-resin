@@ -701,7 +701,7 @@ public class QuercusContext
     return _isLooseParse;
   }
 
-  /*
+  /**
    * Gets the max size of the page cache.
    */
   public int getPageCacheSize()
@@ -709,7 +709,7 @@ public class QuercusContext
     return _pageManager.getPageCacheSize();
   }
 
-  /*
+  /**
    * Sets the capacity of the page cache.
    */
   public void setPageCacheSize(int size)
@@ -717,7 +717,7 @@ public class QuercusContext
     _pageManager.setPageCacheSize(size);
   }
 
-  /*
+  /**
    * Gets the max size of the regexp cache.
    */
   public int getRegexpCacheSize()
@@ -725,7 +725,7 @@ public class QuercusContext
     return RegexpModule.getRegexpCacheSize();
   }
 
-  /*
+  /**
    * Sets the capacity of the regexp cache.
    */
   public void setRegexpCacheSize(int size)
@@ -733,7 +733,7 @@ public class QuercusContext
     RegexpModule.setRegexpCacheSize(size);
   }
 
-  /*
+  /**
    * Set to true if compiled pages need to be backed by php source files.
    */
   public void setRequireSource(boolean isRequireSource)
@@ -741,7 +741,7 @@ public class QuercusContext
     _isRequireSource = isRequireSource;
   }
 
-  /*
+  /**
    * Returns whether the php source is required for compiled files.
    */
   public boolean isRequireSource()
@@ -749,7 +749,7 @@ public class QuercusContext
     return _isRequireSource;
   }
 
-  /*
+  /**
    * Turns connection pooling on or off.
    */
   public void setConnectionPool(boolean isEnable)
@@ -757,7 +757,7 @@ public class QuercusContext
     _isConnectionPool = isEnable;
   }
 
-  /*
+  /**
    * Returns true if connections should be pooled.
    */
   public boolean isConnectionPool()

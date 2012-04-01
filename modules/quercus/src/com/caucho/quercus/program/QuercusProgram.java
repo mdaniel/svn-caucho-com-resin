@@ -101,7 +101,8 @@ public class QuercusProgram {
    * @param sourceFile the path to the source file
    * @param statement the top-level statement
    */
-  public QuercusProgram(QuercusContext quercus, Path sourceFile,
+  public QuercusProgram(QuercusContext quercus,
+                        Path sourceFile,
                         HashMap<String,Function> functionMap,
                         ArrayList<Function> functionList,
                         HashMap<String,InterpretedClassDef> classMap,

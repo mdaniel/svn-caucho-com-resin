@@ -34,8 +34,7 @@ public class ProGoogleQuercusServlet extends GoogleQuercusServletImpl
     if (_quercus == null) {
       _quercus = new ProGoogleQuercus();
     }
-    
+
     return _quercus;
   }
 }
-
