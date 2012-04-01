@@ -74,17 +74,6 @@ public class LongValue extends NumberValue
       return LongValue.create(value.longValue());
   }
 
-  public static int numberOfDigits(long value) {
-    int len = 1;
-    
-    long v = value;
-    while ((v /= 10) > 0) {
-      len++;
-    }
-        
-    return len;
-  }
-  
   /**
    * Returns the type.
    */
@@ -284,7 +273,7 @@ public class LongValue extends NumberValue
   {
     return new Long(_value);
   }
-  
+
   /*
   @Override
   public Value toAutoArray()
@@ -321,7 +310,7 @@ public class LongValue extends NumberValue
   public Value addOne()
   {
     long newValue = _value + 1;
-    
+
     return LongValue.create(newValue);
   }
 
@@ -332,7 +321,7 @@ public class LongValue extends NumberValue
   public Value subOne()
   {
     long newValue = _value - 1;
-    
+
     return LongValue.create(newValue);
   }
 
@@ -343,7 +332,7 @@ public class LongValue extends NumberValue
   public Value preincr()
   {
     long newValue = _value + 1;
-    
+
     return LongValue.create(newValue);
   }
 
@@ -354,7 +343,7 @@ public class LongValue extends NumberValue
   public Value predecr()
   {
     long newValue = _value - 1;
-    
+
     return LongValue.create(newValue);
   }
 
@@ -365,7 +354,7 @@ public class LongValue extends NumberValue
   public Value postincr()
   {
     long newValue = _value + 1;
-    
+
     return LongValue.create(newValue);
   }
 
@@ -376,7 +365,7 @@ public class LongValue extends NumberValue
   public Value postdecr()
   {
     long newValue = _value - 1;
-    
+
     return LongValue.create(newValue);
   }
 
@@ -387,7 +376,7 @@ public class LongValue extends NumberValue
   public Value increment(int incr)
   {
     long newValue = _value + incr;
-    
+
     return LongValue.create(newValue);
   }
 
@@ -640,23 +629,23 @@ public class LongValue extends NumberValue
 
   static {
     STATIC_VALUES = new LongCacheValue[STATIC_MAX - STATIC_MIN + 1];
-    
+
     try {
 
     for (int i = STATIC_MAX; i >= STATIC_MIN; i--) {
       LongCacheValue value = new LongCacheValue(i, create(i + 1));
 
       STATIC_VALUES[i - STATIC_MIN] = value;
-      
+
       if (i < STATIC_MAX)
         STATIC_VALUES[i - STATIC_MIN + 1].setPrev(value);
     }
-    
+
     STATIC_VALUES[0].setPrev(create(STATIC_MIN - 1));
     } catch (Exception e) {
       e.printStackTrace();
     }
-    
+
     ZERO = create(0);
     ONE = create(1);
     MINUS_ONE = create(-1);

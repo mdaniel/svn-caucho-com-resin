@@ -58,7 +58,7 @@ public class ZipModule extends AbstractQuercusModule {
 
   public String []getLoadedExtensions()
   {
-    return new String[] {  "zip" };
+    return new String[] { "zip" };
   }
 
   /**
