@@ -38,7 +38,9 @@ import com.caucho.amp.router.AmpBroker;
  */
 public interface AmpSkeletonFactory
 {
-  AmpActor createSkeleton(Object bean, String address);
+  AmpActor createSkeleton(Object bean, 
+                          String address,
+                          AmpBroker broker);
   
   <T> T createStub(Class<T> api,
                    AmpBroker router,

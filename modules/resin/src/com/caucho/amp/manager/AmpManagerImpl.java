@@ -34,8 +34,11 @@ import java.util.concurrent.atomic.AtomicLong;
 import com.caucho.amp.AmpManager;
 import com.caucho.amp.actor.ActorContextImpl;
 import com.caucho.amp.actor.AmpActor;
+import com.caucho.amp.actor.AmpProxyActor;
 import com.caucho.amp.mailbox.AmpMailbox;
+import com.caucho.amp.mailbox.AmpMailboxFactory;
 import com.caucho.amp.mailbox.SimpleAmpMailbox;
+import com.caucho.amp.mailbox.SimpleMailboxFactory;
 import com.caucho.amp.router.AmpBroker;
 import com.caucho.amp.router.HashMapAmpRouter;
 import com.caucho.amp.skeleton.AmpReflectionSkeletonFactory;
@@ -48,6 +51,7 @@ public class AmpManagerImpl implements AmpManager
   private final AtomicLong _clientId = new AtomicLong();
   
   private HashMapAmpRouter _router = new HashMapAmpRouter();
+  private AmpMailboxFactory _mailboxFactory = new SimpleMailboxFactory();
   
   @Override
   public AmpBroker getRouter()
@@ -67,9 +71,14 @@ public class AmpManagerImpl implements AmpManager
   {
     AmpReflectionSkeletonFactory factory = new AmpReflectionSkeletonFactory();
     
-    ActorContextImpl actorContext = null;
+    AmpProxyActor proxyActor = new AmpProxyActor(from, _mailboxFactory);
     
-    return factory.createStub(api, getRouter(), actorContext, to, from);
+    getRouter().addMailbox(proxyActor.getActorContext().getMailbox());
+
+    return factory.createStub(api, 
+                              getRouter(), 
+                              proxyActor.getActorContext(),
+                              to, from);
   }
 
   @Override
@@ -83,7 +92,9 @@ public class AmpManagerImpl implements AmpManager
   {
     AmpReflectionSkeletonFactory factory = new AmpReflectionSkeletonFactory();
     
-    AmpActor actor = factory.createSkeleton(bean, address);
+    AmpActor actor = factory.createSkeleton(bean, 
+                                            address,
+                                            getRouter());
     
     addActor(actor);
   }

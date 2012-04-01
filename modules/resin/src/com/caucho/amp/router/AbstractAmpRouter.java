@@ -29,6 +29,8 @@
 
 package com.caucho.amp.router;
 
+import java.util.logging.Logger;
+
 import com.caucho.amp.mailbox.AmpMailbox;
 import com.caucho.amp.stream.AmpEncoder;
 import com.caucho.amp.stream.AmpError;
@@ -39,6 +41,9 @@ import com.caucho.amp.stream.AmpHeaders;
  */
 public class AbstractAmpRouter implements AmpBroker
 {
+  private static final Logger log
+    = Logger.getLogger(AbstractAmpRouter.class.getName());
+  
   @Override
   public void send(String to, 
                    String from, 
@@ -65,26 +70,37 @@ public class AbstractAmpRouter implements AmpBroker
     
   }
 
-  /* (non-Javadoc)
-   * @see com.caucho.amp.stream.AmpStream#query(long, java.lang.String, java.lang.String, com.caucho.amp.stream.AmpHeaders, com.caucho.amp.stream.AmpEncoder, java.lang.String, java.lang.Object[])
-   */
   @Override
-  public void query(long id, String to, String from, AmpHeaders headers,
-                    AmpEncoder encoder, String methodName, Object... args)
+  public void query(long id, 
+                    String to, 
+                    String from, 
+                    AmpHeaders headers,
+                    AmpEncoder encoder, 
+                    String methodName, 
+                    Object... args)
   {
-    // TODO Auto-generated method stub
+    AmpMailbox mailbox = getMailbox(to);
     
+    if (mailbox != null) {
+      mailbox.query(id, to, from, headers, encoder, methodName, args);
+    }
+    else {
+      queryError(id, from, to, headers, encoder, new AmpError());
+    }
   }
 
-  /* (non-Javadoc)
-   * @see com.caucho.amp.stream.AmpStream#queryResult(long, java.lang.String, java.lang.String, com.caucho.amp.stream.AmpHeaders, com.caucho.amp.stream.AmpEncoder, java.lang.Object)
-   */
   @Override
   public void queryResult(long id, String to, String from, AmpHeaders headers,
                           AmpEncoder encoder, Object result)
   {
-    // TODO Auto-generated method stub
+    AmpMailbox mailbox = getMailbox(to);
     
+    if (mailbox != null) {
+      mailbox.queryResult(id, to, from, headers, encoder, result);
+    }
+    else {
+      log.warning(this + " queryResult to=" + to + " is an unknown mailbox");
+    }
   }
 
   /* (non-Javadoc)

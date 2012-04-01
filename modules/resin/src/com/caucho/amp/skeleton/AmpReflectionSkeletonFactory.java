@@ -41,9 +41,11 @@ import com.caucho.amp.router.AmpBroker;
 public class AmpReflectionSkeletonFactory implements AmpSkeletonFactory
 {
   @Override
-  public AmpActor createSkeleton(Object bean, String address)
+  public AmpActor createSkeleton(Object bean, 
+                                 String address,
+                                 AmpBroker broker)
   {
-    return new AmpReflectionSkeleton(bean, address);
+    return new AmpReflectionSkeleton(bean, address, broker);
   }
   
   @Override
@@ -54,7 +56,8 @@ public class AmpReflectionSkeletonFactory implements AmpSkeletonFactory
                           String to,
                           String from)
   {
-    AmpReflectionHandler handler = new AmpReflectionHandler(api, router, sender, to, from);
+    AmpReflectionHandler handler
+      = new AmpReflectionHandler(api, router, sender, to, from);
     
     return (T) Proxy.newProxyInstance(api.getClassLoader(),
                                       new Class<?>[] { api },

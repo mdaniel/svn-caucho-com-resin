@@ -36,6 +36,7 @@ import com.caucho.amp.stream.AmpEncoder;
 import com.caucho.amp.stream.AmpError;
 import com.caucho.amp.stream.AmpHeaders;
 import com.caucho.amp.stream.AmpStream;
+import com.caucho.amp.stream.NullEncoder;
 import com.caucho.util.Alarm;
 import com.caucho.util.AlarmListener;
 import com.caucho.util.CurrentTime;
@@ -55,16 +56,22 @@ public final class ActorContextImpl implements AmpActor, AlarmListener {
   private long _qId;
 
   private final ExpandableArray<QueryItem> _queryMap
-    = new ExpandableArray<QueryItem>();
+    = new ExpandableArray<QueryItem>(QueryItem.class);
   
   private Alarm _alarm = new WeakAlarm(this);
 
-  ActorContextImpl(AmpStream actorStream, AmpMailboxFactory mailboxFactory)
+  public ActorContextImpl(AmpStream actorStream, 
+                          AmpMailboxFactory mailboxFactory)
   {
     _actorStream = actorStream;
     _mailbox = mailboxFactory.createMailbox(this);
     
     _qId = CurrentTime.getCurrentTime() << 16;
+  }
+  
+  public AmpMailbox getMailbox()
+  {
+    return _mailbox;
   }
   
   public long getQueryTimeout()
@@ -75,6 +82,12 @@ public final class ActorContextImpl implements AmpActor, AlarmListener {
   public void setQueryTimeout(long timeout)
   {
     _timeout = timeout;
+  }
+
+  @Override
+  public String getAddress()
+  {
+    return _actorStream.getAddress();
   }
   
   //
@@ -123,7 +136,7 @@ public final class ActorContextImpl implements AmpActor, AlarmListener {
                           Object result)
   {
     QueryItem queryItem = extractQuery(id);
-    
+
     if (queryItem != null) {
       queryItem.onQueryResult(to, from, headers, encoder, result);
     }
@@ -153,7 +166,20 @@ public final class ActorContextImpl implements AmpActor, AlarmListener {
   //
   // query/sender methods
   //
-  
+
+  public void query(AmpStream stream, 
+                    String to, 
+                    String from, 
+                    String methodName,
+                    Object[] args,
+                    AmpQueryCallback cb, 
+                    long timeout)
+  {
+    long id = addQueryCallback(cb, timeout);
+
+    stream.query(id, to, from, null, NullEncoder.ENCODER, methodName, args);
+  }
+
   /**
    * Adds a query callback to handle a later message.
    *
@@ -186,7 +212,7 @@ public final class ActorContextImpl implements AmpActor, AlarmListener {
   {
     QueryItem []queries = _queryMap.getArray();
     int size = _queryMap.getSize();
-    
+
     for (int i = 0; i < size; i++) {
       QueryItem query = queries[i];
       
@@ -400,16 +426,6 @@ public final class ActorContextImpl implements AmpActor, AlarmListener {
   {
     // TODO Auto-generated method stub
     
-  }
-
-  /* (non-Javadoc)
-   * @see com.caucho.amp.stream.AmpStream#getAddress()
-   */
-  @Override
-  public String getAddress()
-  {
-    // TODO Auto-generated method stub
-    return null;
   }
 
   /* (non-Javadoc)

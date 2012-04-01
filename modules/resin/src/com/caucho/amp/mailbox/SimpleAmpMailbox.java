@@ -96,26 +96,18 @@ public class SimpleAmpMailbox implements AmpMailbox
                            methodName, args);
   }
 
-  /* (non-Javadoc)
-   * @see com.caucho.amp.stream.AmpStream#queryResult(long, java.lang.String, java.lang.String, com.caucho.amp.stream.AmpHeaders, com.caucho.amp.stream.AmpEncoder, java.lang.Object)
-   */
   @Override
   public void queryResult(long id, String to, String from, AmpHeaders headers,
                           AmpEncoder encoder, Object result)
   {
-    // TODO Auto-generated method stub
-    
+    getActorStream().queryResult(id, to, from, headers, encoder, result);
   }
 
-  /* (non-Javadoc)
-   * @see com.caucho.amp.stream.AmpStream#queryError(long, java.lang.String, java.lang.String, com.caucho.amp.stream.AmpHeaders, com.caucho.amp.stream.AmpEncoder, com.caucho.amp.stream.AmpError)
-   */
   @Override
   public void queryError(long id, String to, String from, AmpHeaders headers,
                          AmpEncoder encoder, AmpError error)
   {
-    // TODO Auto-generated method stub
-    
+    getActorStream().queryError(id, to, from, headers, encoder, error);
   }
 
   @Override
@@ -131,5 +123,10 @@ public class SimpleAmpMailbox implements AmpMailbox
   public void close()
   {
     
+  }
+  
+  public String toString()
+  {
+    return getClass().getSimpleName() + "[" + _actor + "]";
   }
 }

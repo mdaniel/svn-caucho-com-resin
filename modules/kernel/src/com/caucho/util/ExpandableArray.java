@@ -28,6 +28,8 @@
 
 package com.caucho.util;
 
+import java.lang.reflect.Array;
+
 /**
  * Expandable array which allows access to the underlying array.
  */
@@ -36,11 +38,14 @@ public final class ExpandableArray<T> {
   private final int INITIAL_SIZE = 8;
   private final int CHUNK_SIZE = 8192;
   
+  private final Class<T> _type;
+  
   private T []_data;
   private int _size;
   
-  public ExpandableArray()
+  public ExpandableArray(Class<T> type)
   {
+    _type = type;
     _data = createArray(INITIAL_SIZE);
   }
   
@@ -74,7 +79,7 @@ public final class ExpandableArray<T> {
     
     data[size] = value;
     
-    _size = size - 1;
+    _size = size + 1;
   }
   
   public final void remove(int index)
@@ -112,6 +117,6 @@ public final class ExpandableArray<T> {
   @SuppressWarnings("unchecked")
   private T []createArray(int size)
   {
-    return (T []) new Object[size];
+    return (T []) Array.newInstance(_type, size);
   }
 }

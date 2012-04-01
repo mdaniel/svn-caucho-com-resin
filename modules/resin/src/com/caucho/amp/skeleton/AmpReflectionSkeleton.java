@@ -29,27 +29,41 @@
 
 package com.caucho.amp.skeleton;
 
+import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.util.HashMap;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 import com.caucho.amp.actor.AbstractAmpActor;
+import com.caucho.amp.router.AmpBroker;
 import com.caucho.amp.stream.AmpEncoder;
+import com.caucho.amp.stream.AmpError;
 import com.caucho.amp.stream.AmpHeaders;
+import com.caucho.amp.stream.NullEncoder;
 
 /**
  * Creates MPC skeletons and stubs.
  */
 class AmpReflectionSkeleton extends AbstractAmpActor
 {
+  private static final Logger log
+    = Logger.getLogger(AmpReflectionSkeleton.class.getName());
+  
   private HashMap<String,Method> _methodMap = new HashMap<String,Method>();
   
   private final String _address;
   private final Object _bean;
   
-  AmpReflectionSkeleton(Object bean, String address)
+  private final AmpBroker _broker;
+  
+  AmpReflectionSkeleton(Object bean,
+                        String address,
+                        AmpBroker broker)
   {
     _address = address;
     _bean = bean;
+    _broker = broker;
     
     for (Method method : bean.getClass().getDeclaredMethods()) {
       _methodMap.put(method.getName(), method);
@@ -70,22 +84,51 @@ class AmpReflectionSkeleton extends AbstractAmpActor
                    String methodName,
                    Object ...args)
   {
-    invokeMethod(encoder, methodName, args);
+    try {
+      invokeMethod(encoder, methodName, args);
+    } catch (Throwable e) {
+      log.log(Level.FINER, e.toString(), e);
+      
+      _broker.error(from, to, headers, NullEncoder.ENCODER, new AmpError());
+    }
+  }
+
+  @Override
+  public void query(long id,
+                    String to,
+                    String from,
+                    AmpHeaders headers,
+                    AmpEncoder encoder,
+                    String methodName,
+                    Object ...args)
+  {
+    try {
+      Object result = invokeMethod(encoder, methodName, args);
+    
+      _broker.queryResult(id, from, to, headers, NullEncoder.ENCODER, result);
+    } catch (Throwable e) {
+      log.log(Level.FINER, e.toString(), e);
+      
+      _broker.queryError(id,  from, to, headers, NullEncoder.ENCODER, new AmpError());
+    }
   }
   
   private Object invokeMethod(AmpEncoder encoder,
                               String methodName, 
                               Object []args)
+    throws IllegalArgumentException, IllegalAccessException, InvocationTargetException
   {
     Method method = _methodMap.get(methodName);
     
     if (method == null)
       throw new IllegalStateException("unknown method: " + methodName);
     
-    try {
-      return method.invoke(_bean, args);
-    } catch (Exception e) {
-      throw new IllegalStateException(e);
-    }
+    return method.invoke(_bean, args);
+  }
+  
+  @Override
+  public String toString()
+  {
+    return getClass().getSimpleName() + "[" + _bean + "]";
   }
 }
