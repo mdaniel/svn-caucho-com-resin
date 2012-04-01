@@ -81,7 +81,7 @@ public class ProPageManager extends PageManager
       relPath = pathName.substring(pwdName.length());
     else
       relPath = pathName;
-    
+
     // php/3b23
     if (! relPath.startsWith("/"))
       relPath = "/" + relPath;
@@ -224,9 +224,8 @@ public class ProPageManager extends PageManager
       }
 
       return program;
-    } catch (ClassNotFoundException e) {
-      return null;
-    } catch (Exception e) {
+    }
+    catch (Exception e) {
       log.log(Level.FINER, e.toString(), e);
 
       return null;
@@ -358,9 +357,7 @@ public class ProPageManager extends PageManager
 
       } catch (Exception e) {
         log.log(Level.FINE, L.l("Quercus[{0}] loading interpreted page instead because of compile error",
-            item.getPath()), e);
-        
-        e.printStackTrace();
+                                item.getPath()), e);
 
         item.getProgram().setCompilable(false);
         item.getProgram().setCompileException(e);
