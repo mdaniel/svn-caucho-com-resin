@@ -185,7 +185,7 @@ public class AccessLog extends AbstractAccessLog implements AlarmListener
   /**
    * Sets the log rollover size, rounded up to the megabyte.
    *
-   * @param size maximum size of the log file
+   * @param bytes buffer
    */
   @Configurable
   public void setRolloverSize(Bytes bytes)
@@ -480,7 +480,11 @@ public class AccessLog extends AbstractAccessLog implements AlarmListener
           buffer[offset++] = (byte) '-';
         else {
           _cb.clear();
-          response.fillCookie(_cb, (Cookie) cookies.get(0), 0, 0, false);
+          response.fillCookie(_cb,
+                              cookies.get(0),
+                              CurrentTime.getCurrentTime(),
+                              0,
+                              false);
 
           offset = print(buffer, offset, _cb.getBuffer(), 0, _cb.getLength());
         }
@@ -698,7 +702,7 @@ public class AccessLog extends AbstractAccessLog implements AlarmListener
    *
    * @param buffer receiving byte buffer.
    * @param offset offset into the receiving buffer.
-   * @param s the new string to be logged.
+   * @param cb the new string to be logged.
    * @return the new offset into the byte buffer.
    */
   private int print(byte []buffer, int offset,

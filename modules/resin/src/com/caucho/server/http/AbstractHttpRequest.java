@@ -106,7 +106,7 @@ public abstract class AbstractHttpRequest extends AbstractProtocolConnection
   private static final char []CLOSE = "close".toCharArray();
   private static final char []KEEPALIVE = "keep-alive".toCharArray();
 
-  private static final boolean []TOKEN;
+  public static final boolean []TOKEN;
   private static final boolean []VALUE;
 
   private static final Cookie []NULL_COOKIES = new Cookie[0];
