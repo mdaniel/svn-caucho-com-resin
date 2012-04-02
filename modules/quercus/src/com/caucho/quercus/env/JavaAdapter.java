@@ -30,7 +30,6 @@
 package com.caucho.quercus.env;
 
 import com.caucho.quercus.UnimplementedException;
-import com.caucho.quercus.expr.Expr;
 import com.caucho.quercus.function.AbstractFunction;
 import com.caucho.quercus.marshal.Marshal;
 import com.caucho.quercus.marshal.MarshalFactory;
@@ -58,7 +57,7 @@ abstract public class JavaAdapter extends ArrayValue
 
   private WeakReference<Env> _envRef;
   private Object _object;
-  
+
   private JavaClassDef _classDef;
 
   protected JavaAdapter(Object object, JavaClassDef def)
@@ -76,15 +75,16 @@ abstract public class JavaAdapter extends ArrayValue
   {
     return Env.getCurrent();
   }
-  
+
   public Value wrapJava(Object obj)
   {
     return getEnv().wrapJava(obj);
   }
-  
+
   /**
    * Converts to an object.
    */
+  @Override
   public Object toObject()
   {
     return null;
@@ -98,7 +98,7 @@ abstract public class JavaAdapter extends ArrayValue
   {
     return _object;
   }
-  
+
   /**
    * Converts to a java object.
    */
@@ -111,11 +111,11 @@ abstract public class JavaAdapter extends ArrayValue
     else {
       env.warning(L.l("Can't assign {0} to {1}",
               _object.getClass().getName(), type.getName()));
-    
+
       return null;
     }
   }
-  
+
   //
   // Conversions
   //
@@ -123,6 +123,7 @@ abstract public class JavaAdapter extends ArrayValue
   /**
    * Converts to an object.
    */
+  @Override
   public Value toObject(Env env)
   {
     Value obj = env.createObject();
@@ -146,7 +147,7 @@ abstract public class JavaAdapter extends ArrayValue
   public Collection toJavaCollection(Env env, Class type)
   {
     Collection coll = null;
-    
+
     if (type.isAssignableFrom(HashSet.class)) {
       coll = new HashSet();
     }
@@ -164,14 +165,14 @@ abstract public class JavaAdapter extends ArrayValue
         return null;
       }
     }
-    
+
    for (Map.Entry entry : objectEntrySet()) {
       coll.add(entry.getValue());
     }
 
     return coll;
   }
-  
+
   /**
    * Converts to a java List object.
    */
@@ -179,7 +180,7 @@ abstract public class JavaAdapter extends ArrayValue
   public List toJavaList(Env env, Class type)
   {
     List list = null;
-    
+
     if (type.isAssignableFrom(ArrayList.class)) {
       list = new ArrayList();
     }
@@ -200,14 +201,14 @@ abstract public class JavaAdapter extends ArrayValue
         return null;
       }
     }
-    
+
    for (Map.Entry entry : objectEntrySet()) {
       list.add(entry.getValue());
     }
 
     return list;
   }
-  
+
   /**
    * Converts to a java object.
    */
@@ -245,39 +246,45 @@ abstract public class JavaAdapter extends ArrayValue
   /**
    * Copy for assignment.
    */
+  @Override
   abstract public Value copy();
-  
+
   /**
    * Copy for serialization
    */
+  @Override
   abstract public Value copy(Env env, IdentityHashMap<Value,Value> map);
 
   /**
    * Returns the size.
    */
+  @Override
   abstract public int getSize();
 
   /**
    * Clears the array
    */
+  @Override
   abstract public void clear();
 
   /**
    * Adds a new value.
    */
+  @Override
   public final Value put(Value value)
   {
     return put(createTailKey(), value);
   }
-  
+
   /**
    * Adds a new value.
    */
+  @Override
   public final Value put(Value key, Value value)
-  { 
+  {
     return putImpl(key, value);
   }
-  
+
   /**
    * Adds a new value.
    */
@@ -286,6 +293,7 @@ abstract public class JavaAdapter extends ArrayValue
   /**
    * Add to front.
    */
+  @Override
   public ArrayValue unshift(Value value)
   {
     throw new UnsupportedOperationException();
@@ -294,6 +302,7 @@ abstract public class JavaAdapter extends ArrayValue
   /**
    * Splices.
    */
+  @Override
   public ArrayValue splice(int begin, int end, ArrayValue replace)
   {
     throw new UnsupportedOperationException();
@@ -311,6 +320,7 @@ abstract public class JavaAdapter extends ArrayValue
   /**
    * Sets the array ref.
    */
+  @Override
   public Var putVar()
   {
     throw new UnsupportedOperationException();
@@ -319,6 +329,7 @@ abstract public class JavaAdapter extends ArrayValue
   /**
    * Creatse a tail index.
    */
+  @Override
   abstract public Value createTailKey();
 
   /**
@@ -332,24 +343,27 @@ abstract public class JavaAdapter extends ArrayValue
   /**
    * Gets a new value.
    */
+  @Override
   abstract public Value get(Value key);
 
   /**
    * Removes a value.
    */
+  @Override
   abstract public Value remove(Value key);
 
   /**
    * Returns the array ref.
    */
+  @Override
   public Var getVar(Value index)
   {
     // php/0ceg - Since Java does not support references, the adapter
     // just creates a new Var, but modifying the var will not modify
     // the field
-    
+
     Var var = new Var(new JavaAdapterVar(this, index));
-    
+
     return var;
   }
 
@@ -365,16 +379,18 @@ abstract public class JavaAdapter extends ArrayValue
   /**
    * Returns a set of all the entries.
    */
+  @Override
   abstract public Set<Map.Entry<Value,Value>> entrySet();
-  
+
   /**
    * Returns a java object set of all the entries.
    */
   abstract public Set<Map.Entry<Object,Object>> objectEntrySet();
-  
+
   /**
    * Returns a collection of the values.
    */
+  @Override
   public Collection<Value> values()
   {
     throw new UnimplementedException();
@@ -385,6 +401,7 @@ abstract public class JavaAdapter extends ArrayValue
    *
    * XXX: change name to appendArg
    */
+  @Override
   public ArrayValue append(Value key, Value value)
   {
     put(key, value);
@@ -396,6 +413,7 @@ abstract public class JavaAdapter extends ArrayValue
   /**
    * Pops the top value.
    */
+  @Override
   public Value pop(Env env)
   {
     throw new UnsupportedOperationException();
@@ -413,6 +431,7 @@ abstract public class JavaAdapter extends ArrayValue
   /**
    * Returns the head.
    */
+  @Override
   public Entry getHead()
   {
     throw new UnsupportedOperationException();
@@ -421,6 +440,7 @@ abstract public class JavaAdapter extends ArrayValue
   /**
    * Returns the tail.
    */
+  @Override
   protected Entry getTail()
   {
     throw new UnsupportedOperationException();
@@ -429,6 +449,7 @@ abstract public class JavaAdapter extends ArrayValue
   /**
    * Returns the current value.
    */
+  @Override
   public Value current()
   {
     throw new UnsupportedOperationException();
@@ -437,6 +458,7 @@ abstract public class JavaAdapter extends ArrayValue
   /**
    * Returns the current key
    */
+  @Override
   public Value key()
   {
     throw new UnsupportedOperationException();
@@ -445,6 +467,7 @@ abstract public class JavaAdapter extends ArrayValue
   /**
    * Returns true if there are more elements.
    */
+  @Override
   public boolean hasCurrent()
   {
     throw new UnsupportedOperationException();
@@ -453,6 +476,7 @@ abstract public class JavaAdapter extends ArrayValue
   /**
    * Returns the next value.
    */
+  @Override
   public Value next()
   {
     throw new UnsupportedOperationException();
@@ -461,6 +485,7 @@ abstract public class JavaAdapter extends ArrayValue
   /**
    * Returns the previous value.
    */
+  @Override
   public Value prev()
   {
     throw new UnsupportedOperationException();
@@ -469,6 +494,7 @@ abstract public class JavaAdapter extends ArrayValue
   /**
    * The each iterator
    */
+  @Override
   public Value each()
   {
     throw new UnsupportedOperationException();
@@ -477,6 +503,7 @@ abstract public class JavaAdapter extends ArrayValue
   /**
    * Returns the first value.
    */
+  @Override
   public Value reset()
   {
     return BooleanValue.FALSE;
@@ -485,6 +512,7 @@ abstract public class JavaAdapter extends ArrayValue
   /**
    * Returns the last value.
    */
+  @Override
   public Value end()
   {
     return BooleanValue.FALSE;
@@ -499,6 +527,7 @@ abstract public class JavaAdapter extends ArrayValue
    *
    * @throws NullPointerException
    */
+  @Override
   public Value contains(Value value)
   {
     for (Map.Entry<Value,Value> entry : entrySet()) {
@@ -516,6 +545,7 @@ abstract public class JavaAdapter extends ArrayValue
    *
    * @return the key if it is found in the array, NULL otherwise
    */
+  @Override
   public Value containsStrict(Value value)
   {
     for (Map.Entry<Value,Value> entry : entrySet()) {
@@ -533,6 +563,7 @@ abstract public class JavaAdapter extends ArrayValue
    *
    * @return the value if it is found in the array, NULL otherwise
    */
+  @Override
   public Value containsKey(Value key)
   {
     throw new UnsupportedOperationException(getClass().getName());
@@ -544,6 +575,7 @@ abstract public class JavaAdapter extends ArrayValue
    *
    * @return an object array of this array
    */
+  @Override
   public Map.Entry<Value, Value>[] toEntryArray()
   {
     throw new UnsupportedOperationException();
@@ -556,6 +588,7 @@ abstract public class JavaAdapter extends ArrayValue
    * @param resetKeys  true if the keys should not be preserved
    * @param strict  true if alphabetic keys should not be preserved
    */
+  @Override
   public void sort(Comparator<Map.Entry<Value, Value>> comparator,
                    boolean resetKeys, boolean strict)
   {
@@ -588,6 +621,7 @@ abstract public class JavaAdapter extends ArrayValue
   /**
    * Serializes the value.
    */
+  @Override
   public void serialize(Env env, StringBuilder sb)
   {
     throw new UnsupportedOperationException();
@@ -596,7 +630,8 @@ abstract public class JavaAdapter extends ArrayValue
   /**
    * Exports the value.
    */
-  public void varExport(StringBuilder sb)
+  @Override
+  protected void varExportImpl(StringValue sb, int level)
   {
     throw new UnsupportedOperationException();
   }
@@ -607,6 +642,7 @@ abstract public class JavaAdapter extends ArrayValue
    * @param base  the initial index
    * @param strict  if true, string keys are also reset
    */
+  @Override
   public boolean keyReset(long base, boolean strict)
   {
     throw new UnsupportedOperationException();
@@ -615,16 +651,17 @@ abstract public class JavaAdapter extends ArrayValue
   /**
    * Takes the values of this array and puts them in a java array
    */
+  @Override
   public Value[] valuesToArray()
   {
     Value[] values = new Value[getSize()];
-    
+
     int i = 0;
-    
+
     for (Map.Entry<Value,Value> entry : entrySet()) {
       values[i++] = entry.getValue();
     }
-    
+
     return values;
   }
 
@@ -652,7 +689,7 @@ abstract public class JavaAdapter extends ArrayValue
 
     return array;
   }
-  
+
   @Override
   public Value getField(Env env, StringValue name)
   {
@@ -674,7 +711,8 @@ abstract public class JavaAdapter extends ArrayValue
   {
     return _classDef.getName();
   }
-  
+
+  @Override
   public boolean isA(String name)
   {
     return _classDef.isA(name);
@@ -841,7 +879,7 @@ abstract public class JavaAdapter extends ArrayValue
     return _classDef.callMethod(env, this, methodName, hash,
                                 a1, a2, a3, a4, a5);
   }
-  
+
   @Override
   public void varDumpImpl(Env env,
                           WriteStream out,
@@ -858,7 +896,7 @@ abstract public class JavaAdapter extends ArrayValue
       out.print("[");
 
       Value key = mapEntry.getKey();
-      
+
       if (key.isString())
         out.print("\"" + key + "\"");
       else
@@ -867,7 +905,7 @@ abstract public class JavaAdapter extends ArrayValue
       out.println("]=>");
 
       printDepth(out, nestedDepth * 2);
-      
+
       mapEntry.getValue().varDump(env, out, nestedDepth, valueSet);
 
       out.println();
@@ -888,7 +926,7 @@ abstract public class JavaAdapter extends ArrayValue
     out.println("Array");
     printDepth(out, 8 * depth);
     out.println("(");
-    
+
     for (Map.Entry<Value,Value> mapEntry : entrySet()) {
       printDepth(out, 8 * depth);
 
@@ -906,27 +944,27 @@ abstract public class JavaAdapter extends ArrayValue
     printDepth(out, 8 * depth);
     out.println(")");
   }
-  
+
   //
   // Java Serialization
   //
-  
+
   private void writeObject(ObjectOutputStream out)
     throws IOException
   {
     out.writeObject(_object);
     out.writeObject(_classDef.getName());
   }
-  
+
   private void readObject(ObjectInputStream in)
     throws ClassNotFoundException, IOException
   {
     _envRef = new WeakReference<Env>(Env.getInstance());
-    
+
     _object = in.readObject();
     _classDef = getEnv().getJavaClassDefinition((String) in.readObject());
   }
-  
+
   /**
    * Converts to a string.
    */
@@ -934,10 +972,10 @@ abstract public class JavaAdapter extends ArrayValue
   {
     return String.valueOf(_object);
   }
-  
+
   public class KeySet extends AbstractSet<Value> {
     Env _env;
-    
+
     KeySet(Env env)
     {
       _env = env;

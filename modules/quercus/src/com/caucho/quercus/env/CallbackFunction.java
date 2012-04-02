@@ -67,7 +67,7 @@ public class CallbackFunction extends Callback {
   {
     _fun = fun;
   }
-  
+
   @Override
   public boolean isValid(Env env)
   {
@@ -78,19 +78,19 @@ public class CallbackFunction extends Callback {
 
     //return _isInvalid;
   }
-  
+
   /**
    * Serializes the value.
    */
   public void serialize(Env env, StringBuilder sb)
   {
     String name;
-    
+
     if (_fun != null)
       name = _fun.getName();
     else
       name = _funName;
-    
+
     sb.append("S:");
     sb.append(name.length());
     sb.append(":\"");
@@ -190,11 +190,12 @@ public class CallbackFunction extends Callback {
   {
     return getFunction(env) instanceof JavaInvoker;
   }
-  
+
   /**
    * Exports the value.
    */
-  public void varExport(StringBuilder sb)
+  @Override
+  protected void varExportImpl(StringValue sb, int level)
   {
     sb.append("'' . \"\\0\" . '" + _funName.substring(1) + "'");
   }

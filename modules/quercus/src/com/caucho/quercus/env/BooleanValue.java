@@ -350,7 +350,7 @@ public class BooleanValue extends Value
    * Exports the value.
    */
   @Override
-  public void varExport(StringBuilder sb)
+  protected void varExportImpl(StringValue sb, int level)
   {
     sb.append(_value ? "true" : "false");
   }

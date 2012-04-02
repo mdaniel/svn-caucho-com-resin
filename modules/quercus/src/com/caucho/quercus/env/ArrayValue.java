@@ -193,12 +193,12 @@ abstract public class ArrayValue extends Value {
   {
     return this;
   }
-  
+
   protected Entry getCurrent()
   {
     return _current;
   }
-  
+
   protected void setCurrent(Entry entry)
   {
     _current = entry;
@@ -367,7 +367,7 @@ abstract public class ArrayValue extends Value {
       // php/09lf
       if (p > 0) {
         String name = nameStr.toString();
-        
+
         String clsName = name.substring(0, p);
         name = name.substring(p + 2);
 
@@ -376,7 +376,7 @@ abstract public class ArrayValue extends Value {
         if (cls == null) {
           return false;
         }
-        
+
         nameStr = env.createString(name);
       }
 
@@ -405,7 +405,7 @@ abstract public class ArrayValue extends Value {
     if (! nameV.isString()) {
       env.warning(L.l("'{0}' ({1}) is an unknown callback name",
                       nameV, nameV.getClass().getSimpleName()));
-    
+
       return super.toCallable(env);
     }
 
@@ -430,7 +430,7 @@ abstract public class ArrayValue extends Value {
 
           return super.toCallable(env);
         }
-        
+
         return new CallbackClassMethod(cls, env.createString(name), obj);
       }
 
@@ -450,12 +450,12 @@ abstract public class ArrayValue extends Value {
       return new CallbackObjectMethod(env, cl, env.createString(name));
     }
   }
-  
+
   public final Value callCallback(Env env, Callable callback, Value key)
   {
     Value result;
     Value value = getRaw(key);
-    
+
     if (value instanceof Var) {
       value = new ArgRef((Var) value);
 
@@ -467,20 +467,20 @@ abstract public class ArrayValue extends Value {
       result = callback.call(env, aVar);
 
       Value aNew = aVar.toValue();
-      
+
       if (aNew != value)
         put(key, aNew);
     }
 
     return result;
   }
-  
+
   public final Value callCallback(Env env, Callable callback, Value key,
                                   Value a2)
   {
     Value result;
     Value value = getRaw(key);
-    
+
     if (value instanceof Var) {
       value = new ArgRef((Var) value);
 
@@ -492,20 +492,20 @@ abstract public class ArrayValue extends Value {
       result = callback.call(env, aVar, a2);
 
       Value aNew = aVar.toValue();
-      
+
       if (aNew != value)
         put(key, aNew);
     }
 
     return result;
   }
-  
+
   public final Value callCallback(Env env, Callable callback, Value key,
                                   Value a2, Value a3)
   {
     Value result;
     Value value = getRaw(key);
-    
+
     if (value instanceof Var) {
       value = new ArgRef((Var) value);
 
@@ -517,14 +517,14 @@ abstract public class ArrayValue extends Value {
       result = callback.call(env, aVar, a2, a3);
 
       Value aNew = aVar.toValue();
-      
+
       if (aNew != value)
         put(key, aNew);
     }
 
     return result;
   }
-  
+
   /**
    * Returns true for an array.
    */
@@ -696,7 +696,7 @@ abstract public class ArrayValue extends Value {
 
     return value;
   }
-  
+
 
   /**
    * Adds a new value.
@@ -1309,18 +1309,36 @@ abstract public class ArrayValue extends Value {
    * Exports the value.
    */
   @Override
-  public void varExport(StringBuilder sb)
+  protected void varExportImpl(StringValue sb, int level)
   {
-    sb.append("array (");
-    sb.append("\n");
+    if (level != 0) {
+      sb.append('\n');
+    }
 
-    //boolean isFirst = true;
-    for (Entry entry = getHead(); entry != null; entry = entry._next) {
+    for (int i = 0; i < level; i++) {
       sb.append("  ");
-      entry.getKey().varExport(sb);
+    }
+
+    sb.append("array (");
+    sb.append('\n');
+
+    for (Entry entry = getHead(); entry != null; entry = entry._next) {
+      Value key = entry.getKey();
+      Value value = entry.getValue();
+
+      for (int i = 0; i < level + 1; i++) {
+        sb.append("  ");
+      }
+
+      key.varExportImpl(sb, level + 1);
       sb.append(" => ");
-      entry.getValue().varExport(sb);
+
+      value.varExportImpl(sb, level + 1);
       sb.append(",\n");
+    }
+
+    for (int i = 0; i < level; i++) {
+      sb.append("  ");
     }
 
     sb.append(")");
@@ -1605,7 +1623,7 @@ abstract public class ArrayValue extends Value {
     {
       return _next;
     }
-    
+
     public final void setNext(final Entry next)
     {
       _next = next;
@@ -1615,17 +1633,17 @@ abstract public class ArrayValue extends Value {
     {
       return _prev;
     }
-    
+
     public final void setPrev(final Entry prev)
     {
       _prev = prev;
     }
-    
+
     public final Entry getNextHash()
     {
       return _nextHash;
     }
-    
+
     public final void setNextHash(Entry next)
     {
       _nextHash = next;
@@ -1664,7 +1682,7 @@ abstract public class ArrayValue extends Value {
 
       return var;
     }
-    
+
     /**
      * Argument used/declared as a ref.
      */

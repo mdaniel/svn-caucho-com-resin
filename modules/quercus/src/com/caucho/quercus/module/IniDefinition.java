@@ -76,7 +76,7 @@ public class IniDefinition {
   {
     return _name;
   }
-  
+
   /**
    * Returns the default value of the ini definition.
    */
@@ -120,7 +120,7 @@ public class IniDefinition {
     else
       return BooleanValue.TRUE;
   }
-  
+
   /*
   private LongValue toLongValue(Value value)
   {
@@ -128,23 +128,23 @@ public class IniDefinition {
       return (LongValue) value;
     else if (! (value instanceof StringValue))
       return LongValue.create(value.toLong());
-    
+
     String valueAsString = value.toString().trim();
-    
+
     if (valueAsString.length() == 0)
       return LongValue.ZERO;
-    
+
     char suffix = valueAsString.charAt(valueAsString.length() - 1);
-    
+
     long val = value.toLong();
-    
+
     if (suffix == 'G')
       val = 1024 * 1024 * val;
     else if (suffix == 'M')
       val = 1024 * 1024 * val;
     else if (suffix == 'K')
       val = 1024 * val;
-    
+
     return LongValue.create(val);
   }
   */
@@ -160,9 +160,15 @@ public class IniDefinition {
   /**
    * Set the ini value for the given scope.
    */
-  public void set(QuercusContext quercus, String value)
+  public void set(QuercusContext quercus, String s)
   {
-    set(quercus, new ConstStringValue(value));
+    StringValue value = null;
+
+    if (s != null) {
+      value = new ConstStringValue(s);
+    }
+
+    set(quercus, value);
   }
 
   /**
@@ -405,7 +411,7 @@ public class IniDefinition {
                     Value value)
     {
       Env env = Env.getInstance();
-      
+
       // php/1a17
       // XXX: Env may not be around yet, so need another way to notify user
       //      of unsupported options

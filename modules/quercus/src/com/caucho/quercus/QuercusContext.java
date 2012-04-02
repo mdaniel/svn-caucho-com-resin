@@ -216,7 +216,7 @@ public class QuercusContext
 
   private ConcurrentHashMap<String,DataSource> _databaseMap
     = new ConcurrentHashMap<String,DataSource>();
-  
+
   private ConcurrentHashMap<Env,Env> _activeEnvSet
     = new ConcurrentHashMap<Env,Env>();
 
@@ -226,16 +226,16 @@ public class QuercusContext
   private Path _workDir;
 
   private ServletContext _servletContext;
-  
+
   private QuercusTimer _quercusTimer;
-  
+
   private EnvTimeoutThread _envTimeoutThread;
   protected long _envTimeout = 60000L;
-  
+
   // how long to sleep the env timeout thread,
   // for fast, complete tomcat undeploys
   protected static final long ENV_TIMEOUT_UPDATE_INTERVAL = 1000L;
-  
+
   private boolean _isClosed;
 
   /**
@@ -246,7 +246,7 @@ public class QuercusContext
     _loader = Thread.currentThread().getContextClassLoader();
 
     _moduleContext = getLocalContext();
-    
+
     _pageManager = createPageManager();
 
     _sessionManager = createSessionManager();
@@ -256,7 +256,7 @@ public class QuercusContext
                          createString(entry.getValue()));
     }
   }
-  
+
   /**
    * Returns the current time.
    */
@@ -264,7 +264,7 @@ public class QuercusContext
   {
     return _quercusTimer.getCurrentTime();
   }
-  
+
   /**
    * Returns the current time in nanoseconds.
    */
@@ -272,7 +272,7 @@ public class QuercusContext
   {
     return _quercusTimer.getExactTimeNanoseconds();
   }
-  
+
   /**
    * Returns the exact current time in milliseconds.
    */
@@ -360,7 +360,7 @@ public class QuercusContext
   {
     return "apache";
   }
-  
+
   public boolean isRegisterArgv() {
     return getIniBoolean("register_argc_argv");
   }
@@ -456,7 +456,7 @@ public class QuercusContext
   {
     _isUnicodeSemantics = isUnicode;
   }
-  
+
   /**
    * Returns true if unicode.semantics is on.
    */
@@ -803,7 +803,7 @@ public class QuercusContext
   {
     try {
       Class<?> type = Class.forName(className, false, _loader);
-      
+
       addJavaClass(phpName, type);
     }
     catch (ClassNotFoundException e) {
@@ -1319,7 +1319,7 @@ public class QuercusContext
   {
     if (! isStrict())
       name = name.toLowerCase(Locale.ENGLISH);
-    
+
     if (name.startsWith("\\")) {
       // php/0m18
       name = name.substring(1);
@@ -1341,7 +1341,7 @@ public class QuercusContext
       id = _functionNameMap.size() + 1;
 
       _functionNameMap.put(name, id);
-      
+
       extendFunctionMap(name, id);
     }
 
@@ -1356,7 +1356,7 @@ public class QuercusContext
                        functionMap, 0, _functionMap.length);
       _functionMap = functionMap;
     }
-    
+
     int globalId = -1;
     int ns = name.lastIndexOf('\\');
     if (ns > 0) {
@@ -1373,7 +1373,7 @@ public class QuercusContext
   {
     if (! isStrict())
       name = name.toLowerCase(Locale.ENGLISH);
-    
+
     if (name.startsWith("\\"))
       name = name.substring(1);
 
@@ -1415,12 +1415,12 @@ public class QuercusContext
 
     if (id >= 0)
       return id;
-    
+
     if (className.startsWith("\\"))
       className = className.substring(1);
-    
+
     id = _classNameMap.get(className);
-    
+
     if (id >= 0)
       return id;
 
@@ -1941,7 +1941,7 @@ public class QuercusContext
   {
     return null;
   }
-  
+
   public void setSessionTimeout(long sessionTimeout)
   {
   }
@@ -2043,7 +2043,7 @@ public class QuercusContext
   {
     try {
       _quercusTimer = new QuercusTimer();
-      
+
       _envTimeoutThread = new EnvTimeoutThread();
       _envTimeoutThread.start();
     } catch (Exception e) {
@@ -2063,7 +2063,7 @@ public class QuercusContext
   {
     return new ExprFactory();
   }
-  
+
   protected Map<Env,Env> getActiveEnvSet()
   {
     return _activeEnvSet;
@@ -2073,12 +2073,12 @@ public class QuercusContext
   {
     _activeEnvSet.put(env, env);
   }
-  
+
   public void completeEnv(Env env)
   {
     _activeEnvSet.remove(env);
   }
-  
+
   protected boolean isClosed()
   {
     return _isClosed;
@@ -2087,13 +2087,13 @@ public class QuercusContext
   public void close()
   {
     _isClosed = true;
-    
+
     _sessionManager.close();
     _pageManager.close();
-    
+
     if (_envTimeoutThread != null)
       _envTimeoutThread.shutdown();
-    
+
     if (_quercusTimer != null) {
       _quercusTimer.shutdown();
     }
@@ -2141,13 +2141,13 @@ public class QuercusContext
               && _scriptPwd.equals(key._scriptPwd));
     }
   }
-  
+
   class EnvTimeoutThread extends Thread {
     private volatile boolean _isRunnable = true;
     private final long _timeout = _envTimeout;
-    
+
     private long _quantumCount;
-    
+
     EnvTimeoutThread()
     {
       super("quercus-env-timeout");
@@ -2155,11 +2155,11 @@ public class QuercusContext
       setDaemon(true);
       //setPriority(Thread.MAX_PRIORITY);
     }
-    
+
     public void shutdown()
     {
       _isRunnable = false;
-      
+
       LockSupport.unpark(this);
     }
 
@@ -2168,11 +2168,11 @@ public class QuercusContext
       while (_isRunnable) {
         if (_quantumCount >= _timeout) {
           _quantumCount = 0;
-          
+
           try {
             ArrayList<Env> activeEnv
               = new ArrayList<Env>(_activeEnvSet.keySet());
-            
+
             for (Env env : activeEnv) {
               env.updateTimeout();
             }

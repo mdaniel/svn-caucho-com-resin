@@ -300,7 +300,7 @@ public class DoubleValue extends NumberValue
   public Value subOne()
   {
     double next = _value - 1;
-    
+
     /*
     if (next == (long) next)
       return LongValue.create(next);
@@ -477,7 +477,8 @@ public class DoubleValue extends NumberValue
   /**
    * Exports the value.
    */
-  public void varExport(StringBuilder sb)
+  @Override
+  protected void varExportImpl(StringValue sb, int level)
   {
     sb.append(toString());
   }

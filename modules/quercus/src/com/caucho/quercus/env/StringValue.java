@@ -802,11 +802,11 @@ abstract public class StringValue
     if (ch == '-') {
       if (len == 1)
         return this;
-      
+
       sign = -1;
       i++;
     }
-    
+
     for (; i < len; i++) {
       ch = charAt(i);
 
@@ -847,7 +847,7 @@ abstract public class StringValue
   {
     return toString();
   }
-  
+
   /**
    * Takes the values of this array, unmarshalls them to objects of type
    * <i>elementType</i>, and puts them in a java array.
@@ -895,7 +895,7 @@ abstract public class StringValue
       return null;
     }
   }
-  
+
   /**
    * Converts to a callable object
    */
@@ -921,7 +921,7 @@ abstract public class StringValue
       if (cl == null) {
         env.warning(L.l("can't find class {0}",
                         className));
-        
+
         return super.toCallable(env);
       }
 
@@ -942,7 +942,7 @@ abstract public class StringValue
     else
       return this;
   }
-  
+
   /**
    * Appends a value to an array that is a field of an object.
    */
@@ -954,13 +954,13 @@ abstract public class StringValue
                                  Value value)
   {
     // php/03mm
-    
+
     Value newFieldValue = setCharValueAt(index.toLong(), value);
-    
+
     if (newFieldValue != this) {
       obj.putThisField(env, fieldName, newFieldValue);
     }
-    
+
     return newFieldValue.get(index);
   }
 
@@ -1773,7 +1773,7 @@ abstract public class StringValue
       TempBuffer.free(tBuf);
     }
   }
-  
+
   /**
    * Append from an input stream, reading from the input stream until
    * end of file or the length is reached.
@@ -1881,14 +1881,13 @@ abstract public class StringValue
    * Exports the value.
    */
   @Override
-  public void varExport(StringBuilder sb)
+  protected void varExportImpl(StringValue sb, int level)
   {
     sb.append("'");
 
-    String value = toString();
-    int len = value.length();
+    int len = length();
     for (int i = 0; i < len; i++) {
-      char ch = value.charAt(i);
+      char ch = charAt(i);
 
       switch (ch) {
       case '\'':
@@ -1901,6 +1900,7 @@ abstract public class StringValue
         sb.append(ch);
       }
     }
+
     sb.append("'");
   }
 
@@ -2420,7 +2420,7 @@ abstract public class StringValue
   //
   // ByteAppendable methods
   //
-  
+
   public void write(int value)
   {
     throw new UnsupportedOperationException(getClass().getName());
@@ -2433,7 +2433,7 @@ abstract public class StringValue
   {
     throw new UnsupportedOperationException(getClass().getName());
   }
-  
+
   //
   // java.lang.Object methods
   //
@@ -2453,7 +2453,7 @@ abstract public class StringValue
 
     return hash;
   }
-  
+
   /**
    * Returns the case-insensitive hash code
    */
@@ -2465,10 +2465,10 @@ abstract public class StringValue
 
     for (int i = length - 1; i >= 0; i--) {
       int ch = charAt(i);
-      
+
       if ('A' <= ch && ch <= 'Z')
         ch = ch + 'a' - 'A';
-      
+
       hash = 65521 * hash + ch;
     }
 
@@ -2525,7 +2525,7 @@ abstract public class StringValue
 
     if (aLength != bLength)
       return false;
-    
+
     for (int i = aLength - 1; i >= 0; i--) {
       int chA = charAt(i);
       int chB = s.charAt(i);
@@ -2535,7 +2535,7 @@ abstract public class StringValue
       else {
         if ('A' <= chA && chA <= 'Z')
           chA += 'a' - 'A';
-        
+
         if ('A' <= chB && chB <= 'Z')
           chB += 'a' - 'A';
 
@@ -2543,7 +2543,7 @@ abstract public class StringValue
           return false;
       }
     }
-    
+
     return true;
   }
 

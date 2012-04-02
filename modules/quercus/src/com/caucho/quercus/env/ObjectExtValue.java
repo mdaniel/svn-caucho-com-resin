@@ -1136,18 +1136,39 @@ public class ObjectExtValue extends ObjectValue
    * Exports the value.
    */
   @Override
-  public void varExport(StringBuilder sb)
+  protected void varExportImpl(StringValue sb, int level)
   {
+    if (level != 0) {
+      sb.append('\n');
+    }
+
+    for (int i = 0; i < level; i++) {
+      sb.append("  ");
+    }
+
     sb.append(getName());
     sb.append("::__set_state(array(\n");
 
     for (Map.Entry<Value,Value> entry : entrySet()) {
+      Value key = entry.getKey();
+      Value value = entry.getValue();
+
+      for (int i = 0; i < level; i++) {
+        sb.append("  ");
+      }
+
       sb.append("   ");
-      entry.getKey().varExport(sb);
+
+      key.varExportImpl(sb, level + 1);
 
       sb.append(" => ");
-      entry.getValue().varExport(sb);
+
+      value.varExportImpl(sb, level + 1);
       sb.append(",\n");
+    }
+
+    for (int i = 0; i < level; i++) {
+      sb.append("  ");
     }
 
     sb.append("))");
@@ -1210,7 +1231,7 @@ public class ObjectExtValue extends ObjectValue
   public StringValue toString(Env env)
   {
     AbstractFunction toString = _quercusClass.getToString();
-    
+
     if (toString != null)
       return toString.callMethod(env, _quercusClass, this).toStringValue();
     else
@@ -1754,12 +1775,12 @@ public class ObjectExtValue extends ObjectValue
     {
       return _key;
     }
-    
+
     public Entry getNext()
     {
       return _next;
     }
-    
+
     public void setNext(Entry next)
     {
       _next = next;
