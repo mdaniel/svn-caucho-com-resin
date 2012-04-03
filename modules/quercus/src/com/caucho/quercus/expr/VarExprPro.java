@@ -73,7 +73,7 @@ public class VarExprPro extends VarExpr
   {
     return _var.isValue();
   }
-  
+
   /**
    * Copy for things like $a .= "test";
    * @param location
@@ -202,7 +202,7 @@ public class VarExprPro extends VarExpr
       {
         return _var.getType();
       }
-      
+
       @Override
       public boolean isVar()
       {
@@ -297,10 +297,20 @@ public class VarExprPro extends VarExpr
         _type = ExprType.VALUE;
 
         // php/3492
-        if (isString())
+        if (isString()) {
           getVarInfo().setVar();
-        
+        }
+
         getVarInfo().setArrayModified(true);
+
+        VarExprPro var = info.getVar(getName());
+
+        if (var != null) {
+          setVarState(var.getVarState()); // php/323i
+        }
+        else {
+          setVarState(VarState.UNSET); // php/323j
+        }
 
         // php/39o3
         // getVarInfo().setVar();
@@ -338,8 +348,9 @@ public class VarExprPro extends VarExpr
         // php/322a
         // _var.setVar();
 
-        if (var != null)
+        if (var != null) {
           info.addVar(var.analyzeVarState(VarState.UNSET));
+        }
       }
 
       /**
@@ -889,10 +900,10 @@ public class VarExprPro extends VarExpr
         //if (_var.isGlobal() || _var.isVarVar()) {
         if (_var.isLocalVar()) {
           // php/3475, php/3243
-          
+
           out.print(getJavaVar());
           out.print(" = ");
-          
+
           if (valueGen.isVar()) {
             valueGen.generateVar(out);
           }
@@ -916,7 +927,7 @@ public class VarExprPro extends VarExpr
         }
         else if (_var.isSymbolVar()) {
           out.print("_v[" + _var.getSymbolName() + "] = ");
-          
+
           if (valueGen.isVar()) {
             valueGen.generateVar(out);
           }
@@ -941,7 +952,7 @@ public class VarExprPro extends VarExpr
 
         // XXX: handle the .toValue()
       }
-      
+
       /**
        * Generates code for an array assignment $a[$index] = $value.
        */
@@ -957,17 +968,17 @@ public class VarExprPro extends VarExpr
         else {
           generateArray(out);
         }
-        
+
         if (isTop) {
           out.print(".append(");
         }
         else {
           out.print(".put(");
         }
-        
+
         index.generate(out);
         out.print(", ");
-        
+
         value.generateCopy(out); // php/3a5k
         out.print(")");
       }

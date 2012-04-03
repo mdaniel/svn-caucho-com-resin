@@ -21,26 +21,26 @@ public class InfoVarPro extends VarInfo {
   private int _argumentIndex;
 
   private boolean _isSuperGlobal;
-  
+
   // a function argument, foo($a)
   private boolean _isArgument;
   // a function ref argument, foo(&$a)
   private boolean _isRefArgument;
-  
+
   // the expected argument class
   private String _expectedClass;
   // true if has a default value
   private boolean _isDefaultArg;
-  
+
   // true if the variable must be a Var, not a Value
   private boolean _isVar;
-  
+
   // assigned in the function, $a = 3; or foo($a);
   private boolean _isAssigned;
 
   // true if the var is initialized explicitly before any implicit use
   private boolean _isInitializedVar;
-  
+
   // true if the vars contents may be modified as an array
   private boolean _isArrayModified;
 
@@ -64,7 +64,7 @@ public class InfoVarPro extends VarInfo {
       _type = ExprType.VALUE;
     }
   }
-  
+
   public InfoVarPro(VarInfo var)
   {
     this(var.getName(), var.getFunction());
@@ -160,9 +160,9 @@ public class InfoVarPro extends VarInfo {
   public boolean isReadOnly()
   {
     // php/3a43
-    
+
     return ! isAssigned();
-    
+
     // return _function.isReadOnly();
   }
 
@@ -176,7 +176,7 @@ public class InfoVarPro extends VarInfo {
 
   /**
    * True if the variable is assigned in the function, e.g.
-   * 
+   *
    * $a = 3;
    * foo($a);  // assuming foo(&$x)
    */
@@ -190,7 +190,7 @@ public class InfoVarPro extends VarInfo {
 
   /**
    * True if the variable is initialized directly
-   * 
+   *
    * function foo()
    * {
    *   global $a;
@@ -203,7 +203,7 @@ public class InfoVarPro extends VarInfo {
 
   /**
    * True if the variable is initialized directly
-   * 
+   *
    * function foo()
    * {
    *   global $a;
@@ -248,14 +248,14 @@ public class InfoVarPro extends VarInfo {
     _type = ExprType.VALUE;
     _isVar = true;
   }
-  
+
   /**
    * Variables must be stored as Var if they are used as references or
    * grabbed from the symbol table.
-   * 
+   *
    * $b = &$a;
    * $b = 3;
-   * 
+   *
    * In this case, $a and $b must be a Var, never a Value since
    * modifying $b will modify $a.
    */
@@ -276,7 +276,7 @@ public class InfoVarPro extends VarInfo {
     // php/3435
     return ! isVar();
   }
- 
+
   /**
    * Var variables stored as Java variables.
    */
@@ -284,7 +284,7 @@ public class InfoVarPro extends VarInfo {
   {
     return isVar() && ! isEnvVar();
   }
-  
+
   /**
    * True if the variable is used from the symbol table, e.g. $$v or
    * an include or main
@@ -292,7 +292,7 @@ public class InfoVarPro extends VarInfo {
   public boolean isEnvVar()
   {
     FunctionInfo fun = getFunction();
-    
+
     // php/3251
     if (fun == null)
       return true;
@@ -301,7 +301,7 @@ public class InfoVarPro extends VarInfo {
     else
       return false;
   }
- 
+
   /**
    * Var variables stored as Java variables.
    */
@@ -314,12 +314,12 @@ public class InfoVarPro extends VarInfo {
   {
     return isLocalVar() && _type == ExprType.LONG;
   }
-  
+
   public boolean isArrayModified()
   {
     return _isArrayModified;
   }
-  
+
   public void setArrayModified(boolean isArrayModified)
   {
     _isArrayModified = isArrayModified;
@@ -339,7 +339,7 @@ public class InfoVarPro extends VarInfo {
   public ExprType withType(ExprType type)
   {
     _type = _type.withType(type);
-    
+
     return _type;
   }
 
@@ -383,10 +383,12 @@ public class InfoVarPro extends VarInfo {
   {
     if (isValue()) {
       if (isArgument()) {
-        if (isArrayModified())
+        if (isArrayModified()) {
           out.println(varName + " = " + argName + ".toLocalValue();");
-        else
+        }
+        else {
           out.println(varName + " = " + argName + ".toLocalValueReadOnly();");
+        }
       }
       else if (_type == ExprType.LONG)
         out.println(varName + " = 0;");
@@ -416,7 +418,7 @@ public class InfoVarPro extends VarInfo {
       out.print(varName + " = env.getEnvVar(");
       out.printString(getName());
       out.println(");");
-      
+
       if (isRefArgument())
 	out.println(varName + ".setRef(" + argName + ".toLocalVarDeclAsRef());");
       else if (isArgument())

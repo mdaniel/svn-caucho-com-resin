@@ -38,12 +38,12 @@ public class ArrayGetExprPro extends ArrayGetExpr
       {
         return ((ExprPro) _index).getGenerator();
       }
-      
+
       @Override
       public boolean isVar()
       {
         // php/33lo
-        
+
         return true;
       }
 
@@ -74,6 +74,19 @@ public class ArrayGetExprPro extends ArrayGetExpr
         getExpr().analyzeSetReference(info);
 
         return ExprType.VALUE;
+      }
+
+      /**
+       * Analyze the statement as a reference
+       */
+      @Override
+      public void analyzeUnset(AnalyzeInfo info)
+      {
+        // php/3a69
+        getExpr().analyzeSetModified(info);
+
+        // php/322c
+        getIndex().analyze(info);
       }
 
       /**
@@ -259,12 +272,12 @@ public class ArrayGetExprPro extends ArrayGetExpr
         ExprGenerator valueGen = ((ExprPro) value).getGenerator();
 
         getExpr().generateArrayAssign(out, getIndex(), valueGen, isTop);
-                
+
         return;
-        
+
         /*
         if (_expr instanceof ThisFieldExprPro
-            || _expr instanceof ThisFieldVarExprPro) {          
+            || _expr instanceof ThisFieldVarExprPro) {
           getExpr().generateArray(out);
           out.print(".put(");
           getIndex().generate(out);
@@ -272,7 +285,7 @@ public class ArrayGetExprPro extends ArrayGetExpr
           valueGen.generateCopy(out);  // php/3a5k
           out.print(")");
         }
-        //else if (isTop 
+        //else if (isTop
         //         && _expr instanceof VarExprPro
         //         && ((VarExprPro) _expr).isValue()) {
         //  // getExpr().generateAssignOpen(out);
@@ -295,7 +308,7 @@ public class ArrayGetExprPro extends ArrayGetExpr
             out.print(".append(");
           else
             out.print(".put(");
-          
+
           getIndex().generate(out);
           out.print(", ");
           valueGen.generateCopy(out);  // php/3a5k

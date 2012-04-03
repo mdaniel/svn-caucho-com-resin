@@ -34,7 +34,7 @@ public class VarUnsetExprPro extends VarUnsetExpr
       public ExprType analyze(AnalyzeInfo info)
       {
         ExprGenerator varGen = ((ExprPro) _var).getGenerator();
-        
+
         varGen.analyzeUnset(info);
 
         return ExprType.VALUE;

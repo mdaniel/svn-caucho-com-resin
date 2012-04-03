@@ -60,7 +60,7 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 /**
- * PHP misc functiomn.
+ * PHP misc functions.
  */
 public class MiscModule extends AbstractQuercusModule {
   private static final L10N L = new L10N(MiscModule.class);
@@ -505,7 +505,7 @@ public class MiscModule extends AbstractQuercusModule {
   {
     try {
       ArrayList<PackSegment> segments = parsePackFormat(env, format, false);
-      
+
       if (segments == null)
         return BooleanValue.FALSE;
 
@@ -529,10 +529,10 @@ public class MiscModule extends AbstractQuercusModule {
   {
     if (format == null)
       return NullValue.NULL;
-    
+
     try {
       ArrayList<PackSegment> segments = parsePackFormat(env, format, true);
-      
+
       if (segments == null)
         return BooleanValue.FALSE;
 
@@ -692,7 +692,7 @@ public class MiscModule extends AbstractQuercusModule {
         is.close();
 
         int status = process.waitFor();
-        
+
         if (result != null)
           result.set(LongValue.create(status));
       }
