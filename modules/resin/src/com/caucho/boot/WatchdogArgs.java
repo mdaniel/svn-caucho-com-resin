@@ -1056,9 +1056,7 @@ class WatchdogArgs
         _isResinProfessional = true;
 
         // license.doLogging(1);
-      } catch (Exception e) {        
-        e.printStackTrace();
-
+      } catch (Exception e) {
         log.log(Level.FINER, e.toString(), e);
       }
     }
