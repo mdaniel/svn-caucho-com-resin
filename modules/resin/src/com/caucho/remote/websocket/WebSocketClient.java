@@ -36,6 +36,7 @@ import com.caucho.websocket.WebSocketEncoder;
 import com.caucho.websocket.WebSocketListener;
 
 import java.io.*;
+import java.net.InetSocketAddress;
 import java.net.Socket;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
@@ -56,6 +57,8 @@ public class WebSocketClient implements WebSocketContext, WebSocketConstants {
   private String _host;
   private int _port;
   private String _path;
+  
+  private long _connectTimeout;
   
   private String _virtualHost;
   private boolean _isMasked;
@@ -96,6 +99,11 @@ public class WebSocketClient implements WebSocketContext, WebSocketConstants {
   public void setVirtualHost(String virtualHost)
   {
     _virtualHost = virtualHost;
+  }
+  
+  public void setConnectTimeout(long timeout)
+  {
+    _connectTimeout = timeout;
   }
   
   public void setMasked(boolean isMasked)
@@ -156,8 +164,14 @@ public class WebSocketClient implements WebSocketContext, WebSocketConstants {
   {
     if (_listener == null)
       throw new IllegalStateException("missing websocket listener");
+
+    int connectTimeout = (int) _connectTimeout;
+    _s = new Socket();
     
-    _s = new Socket(_host, _port);
+    if (connectTimeout > 0)
+      _s.connect(new InetSocketAddress(_host, _port), connectTimeout);
+    else
+      _s.connect(new InetSocketAddress(_host, _port));
 
     _is = Vfs.openRead(_s.getInputStream());
     _os = Vfs.openWrite(_s.getOutputStream());

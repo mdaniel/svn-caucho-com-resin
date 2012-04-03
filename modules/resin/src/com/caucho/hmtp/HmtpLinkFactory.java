@@ -132,9 +132,9 @@ class HmtpLinkFactory implements LinkConnectionFactory {
       
       if (_virtualHost != null)
         _webSocketClient.setVirtualHost(_virtualHost);
+      _webSocketClient.setConnectTimeout(15000);
       
       _webSocketClient.setMasked(_isMasked);
-      
       _webSocketClient.connect();
       
       return new HmtpLinkConnection(_webSocketClient, webSocketHandler);
@@ -259,8 +259,9 @@ class HmtpLinkFactory implements LinkConnectionFactory {
       log.fine(this + " close");
 
     // super.close();
-    
-    _webSocketClient.close(1000, "ok");
+
+    if (_webSocketClient != null)
+      _webSocketClient.close(1000, "ok");
    }
 
   /* (non-Javadoc)
