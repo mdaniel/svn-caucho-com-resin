@@ -31,15 +31,16 @@ package javax.servlet.http;
 
 import javax.servlet.GenericServlet;
 import javax.servlet.ServletException;
+import javax.servlet.ServletOutputStream;
 import javax.servlet.ServletRequest;
 import javax.servlet.ServletResponse;
-import javax.servlet.ServletOutputStream;
 import java.io.IOException;
-import java.io.Serializable;
 import java.io.PrintWriter;
+import java.io.Serializable;
 import java.io.UnsupportedEncodingException;
-import java.io.OutputStreamWriter;
-import java.util.ResourceBundle;
+import java.util.Enumeration;
+import java.util.HashSet;
+import java.util.Set;
 
 /**
  * HttpServlet is a convenient abstract class for creating servlets.
@@ -321,15 +322,46 @@ public abstract class HttpServlet extends GenericServlet
   protected void doOptions(HttpServletRequest req, HttpServletResponse res)
     throws ServletException, IOException
   {
-    String protocol = req.getProtocol();
-    String msg = req.getMethod() + " not supported";
-    if (protocol.endsWith("1.1")) {
-      res.sendError(HttpServletResponse.SC_METHOD_NOT_ALLOWED, msg);
-    } else {
-      res.sendError(HttpServletResponse.SC_BAD_REQUEST, msg);
-    }
-  }
+    Set<String> methods = new HashSet<String>();
+    Class []parameters
+      = new Class[]{HttpServletRequest.class, HttpServletResponse.class};
 
+    final String []options
+      = new String[]{"doGet", "doPost", "doDelete", "doPut"};
+
+    Class servletClass = this.getClass();
+    do {
+      for (String option : options) {
+        if (methods.contains(option))
+          continue;
+
+        try {
+          servletClass.getDeclaredMethod(option, parameters);
+          methods.add(option);
+        } catch (NoSuchMethodException e) {
+        }
+      }
+      servletClass = servletClass.getSuperclass();
+    } while (!HttpServlet.class.equals(servletClass));
+
+    StringBuilder builder = new StringBuilder();
+
+    if (methods.contains("doGet"))
+      builder.append("GET,HEAD,");
+
+    if (methods.contains("doPost"))
+      builder.append("POST,");
+
+    if (methods.contains("doPut"))
+      builder.append("PUT,");
+
+    if (methods.contains("doDelete"))
+      builder.append("DELETE,");
+
+    builder.append("TRACE,OPTIONS");
+
+    res.setHeader("Allow", builder.toString());
+  }
 
   /**
    * Process a TRACE request
@@ -340,12 +372,15 @@ public abstract class HttpServlet extends GenericServlet
   protected void doTrace(HttpServletRequest req, HttpServletResponse res)
     throws ServletException, IOException
   {
-    String protocol = req.getProtocol();
-    String msg = req.getMethod() + " not supported";
-    if (protocol.endsWith("1.1")) {
-      res.sendError(HttpServletResponse.SC_METHOD_NOT_ALLOWED, msg);
-    } else {
-      res.sendError(HttpServletResponse.SC_BAD_REQUEST, msg);
+    res.setContentType("message/http");
+    PrintWriter out = res.getWriter();
+    Enumeration<String> headers = req.getHeaderNames();
+
+    while (headers.hasMoreElements()) {
+      String header = headers.nextElement();
+      out.print(header);
+      out.print(" : ");
+      out.println(req.getHeader(header));
     }
   }
 }
