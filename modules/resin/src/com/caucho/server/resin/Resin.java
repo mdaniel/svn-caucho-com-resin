@@ -642,8 +642,10 @@ public class Resin
 
       getDelegate().addPreTopologyServices();
 
-      // server/p603
-      initRepository();
+      if (! isWatchdog()) {
+        // server/p603
+        initRepository();
+      }
 
       // watchdog/0212
       // else

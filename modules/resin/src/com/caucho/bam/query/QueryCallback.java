@@ -38,7 +38,9 @@ import com.caucho.bam.BamError;
  * callback for a query
  */
 public interface QueryCallback {
-  public void onQueryResult(String to, String from, Serializable payload);
+  public void onQueryResult(String to, 
+                            String from, 
+                            Serializable payload);
   
   public void onQueryError(String to,
                            String from,

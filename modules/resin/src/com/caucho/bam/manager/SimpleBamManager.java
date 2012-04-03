@@ -112,13 +112,9 @@ public class SimpleBamManager implements BamManager
   {
     ProxyActor<?> actor = new ProxyActor(bean, address, getBroker());
     
-    System.out.println("ACTOR: " +actor);
-
     Mailbox mailbox = createMailbox(address, 
                                     actor,
                                     MailboxType.DEFAULT);
-    
-    // actor.setMailbox(mailbox);
     
     addMailbox(mailbox);
   }
@@ -238,14 +234,8 @@ public class SimpleBamManager implements BamManager
   {
     String address = ("urn:client:/" + api.getSimpleName()
                       + "/" + _sequence.incrementAndGet());
-    /*
-    ProxyActor actor
-      = BamProxyFactory.createProxyActor(api, to, address, getBroker());
     
-    return actor.getProxy();
-    */
-    
-    return null;
+    return BamProxyFactory.createProxy(api, to, address, getBroker());
   }
 
   @Override

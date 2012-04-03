@@ -246,9 +246,12 @@ abstract public class ExpandDeployController<I extends DeployInstance>
     
     if (isAllowRepository()) {
       RepositorySystem repositoryService = RepositorySystem.getCurrent();
-      _repository = repositoryService.getRepository();
-      _repository.addListener(getId(), this);
-      _repositorySpi = repositoryService.getRepositorySpi();
+      
+      if (repositoryService != null) {
+        _repository = repositoryService.getRepository();
+        _repository.addListener(getId(), this);
+        _repositorySpi = repositoryService.getRepositorySpi();
+      }
     }
       
     DeployControllerService deployService = DeployControllerService.getCurrent();
@@ -627,11 +630,13 @@ abstract public class ExpandDeployController<I extends DeployInstance>
     if (getArchivePath() != null)
       _depend.add(new Depend(getArchivePath()));
 
-    String value = _repositorySpi.getTagContentHash(getId());
-    _depend.add(new RepositoryDependency(getId(), value));
+    if (_repositorySpi != null) {
+      String value = _repositorySpi.getTagContentHash(getId());
+      _depend.add(new RepositoryDependency(getId(), value));
     
-    value = _repositorySpi.getTagContentHash(getAutoDeployTag());
-    _depend.add(new RepositoryDependency(getAutoDeployTag(), value));
+      value = _repositorySpi.getTagContentHash(getAutoDeployTag());
+      _depend.add(new RepositoryDependency(getAutoDeployTag(), value));
+    }
   }
   
   public Dependency getVersionDependency()

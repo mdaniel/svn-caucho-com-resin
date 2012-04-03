@@ -52,6 +52,9 @@ class BamProxyHandler implements InvocationHandler
 {
   private static final L10N L = new L10N(BamProxyHandler.class);
   
+  private static final HashMap<Class<?>,Object> _nullResultMap
+    = new HashMap<Class<?>,Object>();
+  
   private HashMap<Method,Call> _callMap = new HashMap<Method,Call>();
   
   private String _to;
@@ -94,15 +97,21 @@ class BamProxyHandler implements InvocationHandler
       
       Class<?> []param = m.getParameterTypes();
       
+      Object nullResult = _nullResultMap.get(m.getReturnType());
+      
       if (param.length > 0
-          && QueryCallback.class.isAssignableFrom(param[param.length - 1])) {
+          && ReplyCallback.class.isAssignableFrom(param[param.length - 1])) {
+        call = new ReplyCallbackCall(m.getName(), param.length - 1);
+      }
+      else if (param.length > 0
+            && QueryCallback.class.isAssignableFrom(param[param.length - 1])) {
         call = new QueryCallbackCall(m.getName(), param.length - 1);
       }
       else if (void.class.equals(m.getReturnType())) {
         call = new MessageCall(m.getName());
       }
       else {
-        call = new QueryCall(m.getName());
+        call = new QueryCall(m.getName(), nullResult);
       }
       
       _callMap.put(m, call);
@@ -141,10 +150,12 @@ class BamProxyHandler implements InvocationHandler
   
   static class QueryCall extends Call {
     private final String _name;
+    private final Object _nullResult;
     
-    QueryCall(String name)
+    QueryCall(String name, Object nullResult)
     {
       _name = name;
+      _nullResult = nullResult;
     }
     
     @Override
@@ -163,11 +174,44 @@ class BamProxyHandler implements InvocationHandler
         return ((ReplyPayload) result).getValue();
       }
       else if (result == null) {
-        return null;
+        return _nullResult;
       }
       else
         throw new IllegalStateException(L.l("'{0}' is an unexpected bam proxy result class.",
                                             result.getClass().getName()));
+    }
+  }
+  
+  static class ReplyCallbackCall extends Call {
+    private final String _name;
+    private final int _paramLen;
+    
+    ReplyCallbackCall(String name, int paramLen)
+    {
+      _name = name;
+      _paramLen = paramLen;
+    }
+    
+    @Override
+    Object invoke(MessageStream stream,
+                  QueryManager queryManager,
+                  String to, 
+                  String from,
+                  Object []args,
+                  long timeout)
+    {
+      Object []param = new Object[args.length - 1];
+      System.arraycopy(args, 0, param, 0, param.length);
+      
+      ReplyCallback cb = (ReplyCallback) args[_paramLen];
+      
+      CallPayload payload = new CallPayload(_name, param);
+      
+      CallReplyCallback callCb = new CallReplyCallback(cb);
+
+      queryManager.query(stream, to, from, payload, callCb, timeout);
+      
+      return null;
     }
   }
   
@@ -195,10 +239,8 @@ class BamProxyHandler implements InvocationHandler
       QueryCallback cb = (QueryCallback) args[_paramLen];
       
       CallPayload payload = new CallPayload(_name, param);
-      
-      CallQueryCallback callCb = new CallQueryCallback(cb);
 
-      queryManager.query(stream, to, from, payload, callCb, timeout);
+      queryManager.query(stream, to, from, payload, cb, timeout);
       
       return null;
     }
@@ -251,10 +293,10 @@ class BamProxyHandler implements InvocationHandler
     }
   }
   
-  static class CallQueryCallback implements QueryCallback {
-    private QueryCallback _delegate;
+  static class CallReplyCallback implements QueryCallback {
+    private final ReplyCallback _delegate;
     
-    CallQueryCallback(QueryCallback delegate)
+    CallReplyCallback(ReplyCallback delegate)
     {
       _delegate = delegate;
     }
@@ -263,15 +305,15 @@ class BamProxyHandler implements InvocationHandler
     public void onQueryResult(String to, String from, Serializable payload)
     {
       if (payload == null) {
-        _delegate.onQueryResult(to, from, payload);
+        _delegate.onReply(null);
       }
       else if (payload instanceof ReplyPayload) {
         ReplyPayload reply = (ReplyPayload) payload;
         
-        _delegate.onQueryResult(to, from, (Serializable) reply.getValue());
+        _delegate.onReply(reply.getValue());
       }
       else {
-        _delegate.onQueryResult(to, from, payload);
+        _delegate.onReply(payload);
       }
 
     }
@@ -282,7 +324,18 @@ class BamProxyHandler implements InvocationHandler
                              Serializable payload,
                              BamError error)
     {
-      _delegate.onQueryError(to,  from, payload, error);
+      _delegate.onError(error);
     }
+  }
+  
+  static {
+    _nullResultMap.put(boolean.class, Boolean.FALSE); 
+    _nullResultMap.put(byte.class, new Byte((byte) 0));
+    _nullResultMap.put(char.class, new Character((char) 0));
+    _nullResultMap.put(short.class, new Short((short) 0));
+    _nullResultMap.put(int.class, new Integer(0));
+    _nullResultMap.put(long.class, new Long(0));
+    _nullResultMap.put(float.class, new Float(0));
+    _nullResultMap.put(double.class, new Double(0));
   }
 }

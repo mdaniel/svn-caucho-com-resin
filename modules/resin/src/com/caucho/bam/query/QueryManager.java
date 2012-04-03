@@ -448,7 +448,8 @@ public class QueryManager {
     }
 
     @Override
-    public void onQueryResult(String fromAddress, String toAddress,
+    public void onQueryResult(String fromAddress,
+                              String toAddress,
                               Serializable payload)
     {
       _result = payload;

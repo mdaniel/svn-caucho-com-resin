@@ -31,7 +31,6 @@ package com.caucho.bam.proxy;
 
 import java.lang.reflect.Proxy;
 
-import com.caucho.bam.actor.Actor;
 import com.caucho.bam.actor.ActorSender;
 import com.caucho.bam.broker.Broker;
 import com.caucho.bam.query.QueryManager;
