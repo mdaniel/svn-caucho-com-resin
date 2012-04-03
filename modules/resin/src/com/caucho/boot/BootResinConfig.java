@@ -77,8 +77,9 @@ public class BootResinConfig // implements EnvironmentBean
   private Path _resinDataDirectory;
   
   private BootManagementConfig _management;
-  private String _resinSystemKey;
+  private String _clusterSystemKey;
   private String _homeCluster;
+  private String _homeServer;
   
   BootResinConfig(ResinSystem system,
                   WatchdogArgs args)
@@ -138,22 +139,27 @@ public class BootResinConfig // implements EnvironmentBean
       return getRootDirectory().lookup("resin-data");
   }
   
-  public void setResinSystemAuthKey(String digest)
+  public void setClusterSystemKey(String digest)
   {
     if (digest == null || "".equals(digest))
       return;
     
-    _resinSystemKey = digest;
+    _clusterSystemKey = digest;
     
     SecurityService security = SecurityService.getCurrent();
     
     if (security != null)
       security.setSignatureSecret(digest);
   }
-  
-  public String getResinSystemAuthKey()
+
+  public void setResinSystemAuthKey(String key)
   {
-    return _resinSystemKey;
+    setClusterSystemKey(key);
+  }
+
+  public String getClusterSystemKey()
+  {
+    return _clusterSystemKey;
   }
   
   @Configurable
@@ -185,6 +191,17 @@ public class BootResinConfig // implements EnvironmentBean
     return _classLoader;
   }
   */
+  
+  @Configurable
+  public void setHomeServer(String homeServer)
+  {
+    _homeServer = homeServer;
+  }
+  
+  public String getHomeServer()
+  {
+    return _homeServer;
+  }
 
   public void add(AdminAuthenticator auth)
   {
@@ -235,6 +252,10 @@ public class BootResinConfig // implements EnvironmentBean
   WatchdogClient findClient(String serverId, WatchdogArgs args)
   {
     WatchdogClient client = null;
+    
+    if (serverId == null) {
+      serverId = getHomeServer();
+    }
 
     if (serverId != null) {
       client = findClient(serverId);
@@ -272,7 +293,7 @@ public class BootResinConfig // implements EnvironmentBean
     if (client != null)
       return client;
     
-    ArrayList<WatchdogClient> clientList = findLocalClients();
+    ArrayList<WatchdogClient> clientList = findLocalClients(serverId);
     
     if (clientList.size() == 1) {
       client = clientList.get(0);
@@ -309,9 +330,19 @@ public class BootResinConfig // implements EnvironmentBean
     return client;
   }
 
-  public ArrayList<WatchdogClient> findLocalClients()
+  public ArrayList<WatchdogClient> findLocalClients(String serverId)
   {
     ArrayList<WatchdogClient> clientList = new ArrayList<WatchdogClient>();
+    
+    if (serverId != null) {
+      // server/6e27
+      WatchdogClient client = _watchdogMap.get(serverId);
+      
+      if (client != null) {
+        clientList.add(client);
+        return clientList;
+      }
+    }
     
     fillLocalClients(clientList);
     
@@ -430,8 +461,9 @@ public class BootResinConfig // implements EnvironmentBean
 
     String clusterId = args.getClusterId();
     
-    if (clusterId == null)
+    if (clusterId == null) {
       clusterId = getHomeCluster();
+    }
     
     String address = args.getDynamicAddress();
     int port = args.getDynamicPort();

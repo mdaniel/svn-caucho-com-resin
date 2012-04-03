@@ -120,7 +120,7 @@ public abstract class AbstractRepositoryCommand extends AbstractRemoteCommand {
     
     if (user == null || "".equals(user)) {
       user = "";
-      password = client.getResinSystemAuthKey();
+      password = client.getClusterSystemKey();
     }
     
     return createBamClient(client, address, port, user, password);

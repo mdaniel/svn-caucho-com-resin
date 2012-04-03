@@ -58,7 +58,7 @@ public class BootResinConfig implements SchemaBean, DependencyBean
   
   private ResinSystem _resinSystem;
   
-  private String _resinSystemAuthKey;
+  private String _clusterSystemKey;
   
   private ContainerProgram _resinProgram
     = new ContainerProgram();
@@ -91,15 +91,24 @@ public class BootResinConfig implements SchemaBean, DependencyBean
     return "com/caucho/server/resin/resin.rnc";
   }
   
+  /**
+   * Obsolete
+   */
   @Configurable
   public void setResinSystemAuthKey(String key)
   {
-    _resinSystemAuthKey = key;
+    setClusterSystemKey(key);
   }
   
-  public String getResinSystemAuthKey()
+  @Configurable
+  public void setClusterSystemKey(String key)
   {
-    return _resinSystemAuthKey;
+    _clusterSystemKey = key;
+  }
+  
+  public String getClusterSystemKey()
+  {
+    return _clusterSystemKey;
   }
   
   /**

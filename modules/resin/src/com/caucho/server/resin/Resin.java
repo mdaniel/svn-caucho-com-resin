@@ -123,7 +123,7 @@ public class Resin
   private String _dynamicAddress;
   private int _dynamicPort;
   
-  private String _resinSystemAuthKey;
+  private String _clusterSystemKey;
   
   private String _stage = "production";
 
@@ -390,14 +390,14 @@ public class Resin
     return _homeCluster;
   }
   
-  public String getResinSystemAuthKey()
+  public String getClusterSystemKey()
   {
-    return _resinSystemAuthKey;
+    return _clusterSystemKey;
   }
   
-  void setResinSystemAuthKey(String key)
+  void setClusterSystemKey(String key)
   {
-    _resinSystemAuthKey = key;
+    _clusterSystemKey = key;
   }
   
   /**
@@ -879,7 +879,7 @@ public class Resin
     
     BootResinConfig bootResin = _bootResinConfig;
     
-    _resinSystemAuthKey = bootResin.getResinSystemAuthKey();
+    _clusterSystemKey = bootResin.getClusterSystemKey();
     
     String serverId = _serverId;
     

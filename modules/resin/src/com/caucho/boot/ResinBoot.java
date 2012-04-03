@@ -190,13 +190,25 @@ public class ResinBoot
       initClient();
   }
   
+  public String getServerId()
+  {
+    String serverId = _args.getServerId();
+    
+    if (serverId == null) {
+      serverId = _resinConfig.getHomeServer();
+    }
+    
+    return serverId;
+  }
+  
   private void initClient()
   {
     if (! (_args.isDynamicServer() || _resinConfig.isHomeCluster()))
       return;
     
-    if (_args.getServerId() != null)
+    if (getServerId() != null) {
       return;
+    }
 
     if (findLocalClients().isEmpty()) {
       WatchdogClient client = _resinConfig.addDynamicClient(_args);
@@ -218,7 +230,7 @@ public class ResinBoot
  
   ArrayList<WatchdogClient> findLocalClients()
   {
-    return _resinConfig.findLocalClients();
+    return _resinConfig.findLocalClients(getServerId());
   }
 
   BootCommand getCommand()

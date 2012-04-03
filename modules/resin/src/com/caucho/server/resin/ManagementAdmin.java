@@ -876,7 +876,7 @@ public class ManagementAdmin extends AbstractManagedObject
       sender = new LocalActorSender(BamSystem.getCurrentBroker(), "");
     }
     else {
-      String authKey = Resin.getCurrent().getResinSystemAuthKey();
+      String authKey = Resin.getCurrent().getClusterSystemKey();
 
       HmuxClientFactory hmuxFactory
         = new HmuxClientFactory(server.getAddress(),
@@ -903,7 +903,7 @@ public class ManagementAdmin extends AbstractManagedObject
       sender = new LocalActorSender(BamSystem.getCurrentBroker(), "");
     }
     else {
-      String authKey = Resin.getCurrent().getResinSystemAuthKey();
+      String authKey = Resin.getCurrent().getClusterSystemKey();
 
       HmuxClientFactory hmuxFactory
         = new HmuxClientFactory(server.getAddress(),

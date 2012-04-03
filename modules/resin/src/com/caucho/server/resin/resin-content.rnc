@@ -134,6 +134,10 @@ r_cluster-port = element cluster-port {
   r_port-Content
 }
 
+r_cluster-system-key =
+  attribute cluster-system-key { string }
+  | element cluster-system-key { string }
+
 r_deploy-service = element deploy-service {
   r_enable?
 }
@@ -585,21 +589,23 @@ r_resin-Content =
 
   & r_cluster-default*
 
+  & r_cluster-system-key?
+
   & (attribute environment-system-properties { r_boolean-Type }
      | element environment-system-properties { r_boolean-Type })?
 
   & (attribute home-cluster { string }
      | element home-cluster { string })?
 
-  & (attribute home-cluster { string }
-     | element home-cluster { string })?
+  & (attribute home-server { string }
+     | element home-server { string })?
 
   & r_management?
 
   & r_module-repository?
 
   & r_resin-system-auth-key?
-
+  
   & r_root-directory?
 
   & r_security-manager?

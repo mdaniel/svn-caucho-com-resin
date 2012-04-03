@@ -84,7 +84,7 @@ public abstract class AbstractRemoteCommand extends AbstractBootCommand {
     
     if (user == null || "".equals(user)) {
       user = "";
-      password = client.getResinSystemAuthKey();
+      password = client.getClusterSystemKey();
     }
     
     return createBamClient(client, address, port, user, password);

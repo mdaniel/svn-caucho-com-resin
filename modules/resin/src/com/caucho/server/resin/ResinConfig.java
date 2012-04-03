@@ -54,7 +54,6 @@ import com.caucho.log.LoggerConfig;
 import com.caucho.server.admin.Management;
 import com.caucho.server.admin.TransactionManager;
 import com.caucho.server.httpcache.TempFileManager;
-import com.caucho.util.Alarm;
 import com.caucho.util.CurrentTime;
 import com.caucho.util.L10N;
 import com.caucho.vfs.Path;
@@ -85,8 +84,9 @@ public class ResinConfig implements EnvironmentBean
     _resin = resin;
     _system = resin.getResinSystem();
     
-    if (resin.getResinSystemAuthKey() != null)
-      setResinSystemAuthKey(resin.getResinSystemAuthKey());
+    if (resin.getClusterSystemKey() != null) {
+      setClusterSystemKey(resin.getClusterSystemKey());
+    }
   }
 
   /**
@@ -102,10 +102,19 @@ public class ResinConfig implements EnvironmentBean
    * Sets the resin system key
    */
   @Configurable
-  public void setResinSystemAuthKey(String key)
+  public void setClusterSystemKey(String key)
   {
     SecurityService security = SecurityService.getCurrent();
     security.setSignatureSecret(key);
+  }
+  
+  /**
+   * Obsolete version of ClusterSystemKey
+   */
+  @Configurable
+  public void setResinSystemAuthKey(String key)
+  {
+    setClusterSystemKey(key);
   }
 
   @Configurable
@@ -183,6 +192,11 @@ public class ResinConfig implements EnvironmentBean
   
   @Configurable
   public void setHomeCluster(String homeCluster)
+  {
+  }
+  
+  @Configurable
+  public void setHomeServer(String homeServer)
   {
   }
   
