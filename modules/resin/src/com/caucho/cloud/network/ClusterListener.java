@@ -30,12 +30,12 @@
 package com.caucho.cloud.network;
 
 import com.caucho.config.ConfigException;
-import com.caucho.network.listen.TcpSocketLinkListener;
+import com.caucho.network.listen.TcpPort;
 
 /**
  * Represents a protocol connection.
  */
-public class ClusterListener extends TcpSocketLinkListener {
+public class ClusterListener extends TcpPort {
   public ClusterListener(ClusterServer server)
   {
     try {

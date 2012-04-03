@@ -39,9 +39,9 @@ import com.caucho.management.server.TcpConnectionInfo;
 public class SocketLinkAdmin extends AbstractManagedObject
   implements PortMXBean
 {
-  private TcpSocketLinkListener _port;
+  private TcpPort _port;
 
-  public SocketLinkAdmin(TcpSocketLinkListener port)
+  public SocketLinkAdmin(TcpPort port)
   {
     _port = port;
   }

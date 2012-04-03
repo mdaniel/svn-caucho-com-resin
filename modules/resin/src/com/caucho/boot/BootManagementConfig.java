@@ -77,10 +77,7 @@ public class BootManagementConfig
 
   public String getAdminCookie()
   {
-    if (_auth != null)
-      return _auth.getHash();
-    else
-      return null;
+    return null;
   }
 
   public void addPath(ConfigProgram program)

@@ -42,7 +42,7 @@ import com.caucho.bam.actor.RemoteActorSender;
 import com.caucho.config.ConfigException;
 import com.caucho.env.repository.CommitBuilder;
 import com.caucho.hmtp.HmtpClient;
-import com.caucho.network.listen.TcpSocketLinkListener;
+import com.caucho.network.listen.TcpPort;
 import com.caucho.server.admin.HmuxClientFactory;
 import com.caucho.server.admin.WebAppDeployClient;
 import com.caucho.util.L10N;
@@ -267,7 +267,7 @@ public abstract class AbstractRepositoryCommand extends AbstractRemoteCommand {
   
   private int findPort(WatchdogClient client)
   {
-    for (TcpSocketLinkListener listener : client.getConfig().getPorts()) {
+    for (TcpPort listener : client.getConfig().getPorts()) {
       if (listener instanceof OpenPort) {
         OpenPort openPort = (OpenPort) listener;
         

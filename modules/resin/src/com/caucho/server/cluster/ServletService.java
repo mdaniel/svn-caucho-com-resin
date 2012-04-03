@@ -466,9 +466,11 @@ public class ServletService
         thread.setContextClassLoader(getClassLoader());
 
         _adminAuth = _cdiManager.getReference(AdminAuthenticator.class);
-        
+
+        /*
         if (_adminAuth != null)
           _adminAuth.initCache();
+          */
       } catch (Exception e) {
         e.printStackTrace();
         if (log.isLoggable(Level.FINEST))
@@ -477,7 +479,7 @@ public class ServletService
           log.finer(e.toString());
 
         _adminAuth = new AdminAuthenticator();
-        _adminAuth.initCache();
+        // _adminAuth.initCache();
       } finally {
         thread.setContextClassLoader(oldLoader);
       }

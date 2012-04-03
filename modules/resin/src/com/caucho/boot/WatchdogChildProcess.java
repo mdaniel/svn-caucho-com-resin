@@ -56,7 +56,7 @@ import com.caucho.lifecycle.Lifecycle;
 import com.caucho.loader.EnvironmentClassLoader;
 import com.caucho.log.RotateLog;
 import com.caucho.log.RotateStream;
-import com.caucho.network.listen.TcpSocketLinkListener;
+import com.caucho.network.listen.TcpPort;
 import com.caucho.server.util.CauchoSystem;
 import com.caucho.util.Alarm;
 import com.caucho.util.CurrentTime;
@@ -525,7 +525,7 @@ class WatchdogChildProcess
 
       try {
         if (_watchdog.getUserName() != null) {
-          for (TcpSocketLinkListener port : _watchdog.getPorts()) {
+          for (TcpPort port : _watchdog.getPorts()) {
             QServerSocket ss = port.bindForWatchdog();
 
             if (ss == null)

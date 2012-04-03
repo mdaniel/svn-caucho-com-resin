@@ -60,10 +60,13 @@ public class AddUserAction implements AdminAction
 
   public PasswordUser execute()
   {
+    /*
     _adminAuth.addUser(_user, _password, _roles);
 
     PasswordUser user = _adminAuth.getUserMap().get(_user);
 
     return user;
+    */
+    return null;
   }
 }

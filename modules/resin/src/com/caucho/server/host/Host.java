@@ -56,7 +56,7 @@ import com.caucho.loader.EnvironmentClassLoader;
 import com.caucho.loader.EnvironmentLocal;
 import com.caucho.make.AlwaysModified;
 import com.caucho.management.server.HostMXBean;
-import com.caucho.network.listen.TcpSocketLinkListener;
+import com.caucho.network.listen.TcpPort;
 import com.caucho.rewrite.DispatchRule;
 import com.caucho.rewrite.RewriteFilter;
 import com.caucho.server.cluster.ServletService;
@@ -313,7 +313,7 @@ public class Host
       NetworkListenSystem listenService 
         = resinSystem.getService(NetworkListenSystem.class);
 
-      for (TcpSocketLinkListener port : listenService.getListeners()) {
+      for (TcpPort port : listenService.getListeners()) {
         if ("http".equals(port.getProtocolName())) {
           String address = port.getAddress();
 
@@ -324,7 +324,7 @@ public class Host
         }
       }
 
-      for (TcpSocketLinkListener port : listenService.getListeners()) {
+      for (TcpPort port : listenService.getListeners()) {
         if ("https".equals(port.getProtocolName())) {
           String address = port.getAddress();
           if (address == null || address.equals(""))

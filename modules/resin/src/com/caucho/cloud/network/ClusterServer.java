@@ -50,7 +50,7 @@ import com.caucho.config.types.Period;
 import com.caucho.management.server.ClusterServerMXBean;
 import com.caucho.network.balance.ClientSocketFactory;
 import com.caucho.network.listen.AbstractProtocol;
-import com.caucho.network.listen.TcpSocketLinkListener;
+import com.caucho.network.listen.TcpPort;
 import com.caucho.server.cluster.ProtocolPort;
 import com.caucho.server.cluster.ProtocolPortConfig;
 import com.caucho.server.http.HttpProtocol;
@@ -109,8 +109,8 @@ public final class ClusterServer {
   private String _stage;
   private ArrayList<String> _pingUrls = new ArrayList<String>();
   
-  private ArrayList<TcpSocketLinkListener> _listeners
-    = new ArrayList<TcpSocketLinkListener>();
+  private ArrayList<TcpPort> _listeners
+    = new ArrayList<TcpPort>();
 
   // runtime
   
@@ -415,10 +415,10 @@ public final class ClusterServer {
   
   
   @Configurable
-  public TcpSocketLinkListener createHttp()
+  public TcpPort createHttp()
     throws ConfigException
   {
-    TcpSocketLinkListener listener = new TcpSocketLinkListener();
+    TcpPort listener = new TcpPort();
     
     applyPortDefaults(listener);
 
@@ -430,7 +430,7 @@ public final class ClusterServer {
     return listener;
   }
   
-  public void addHttp(TcpSocketLinkListener listener)
+  public void addHttp(TcpPort listener)
   {
     if (listener.getPort() <= 0) {
       log.fine(listener + " skipping because port is 0.");
@@ -441,7 +441,7 @@ public final class ClusterServer {
   }
 
   @Configurable
-  public TcpSocketLinkListener createProtocol()
+  public TcpPort createProtocol()
   {
     ProtocolPortConfig port = new ProtocolPortConfig();
 
@@ -451,14 +451,14 @@ public final class ClusterServer {
   }
 
   @Configurable
-  public TcpSocketLinkListener createListen()
+  public TcpPort createListen()
   {
     ProtocolPortConfig listener = new ProtocolPortConfig();
 
     return listener;
   }
   
-  public void addListen(TcpSocketLinkListener listener)
+  public void addListen(TcpPort listener)
   {
     if (listener.getPort() <= 0) {
       log.fine(listener + " skipping because port is 0.");
@@ -471,7 +471,7 @@ public final class ClusterServer {
   @Configurable
   public void add(ProtocolPort protocolPort)
   {
-    TcpSocketLinkListener listener = new TcpSocketLinkListener();
+    TcpPort listener = new TcpPort();
 
     AbstractProtocol protocol = protocolPort.getProtocol();
     listener.setProtocol(protocol);
@@ -483,7 +483,7 @@ public final class ClusterServer {
     _listeners.add(listener);
   }
   
-  public ArrayList<TcpSocketLinkListener> getListeners()
+  public ArrayList<TcpPort> getListeners()
   {
     return _listeners;
   }
@@ -506,7 +506,7 @@ public final class ClusterServer {
     _portDefaults.addProgram(program);
   }
 
-  private void applyPortDefaults(TcpSocketLinkListener port)
+  private void applyPortDefaults(TcpPort port)
   {
     _portDefaults.configure(port);
     

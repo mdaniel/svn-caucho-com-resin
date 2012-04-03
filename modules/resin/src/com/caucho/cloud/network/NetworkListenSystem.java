@@ -53,10 +53,10 @@ public class NetworkListenSystem extends AbstractResinSubSystem
   
   private final CloudServer _cloudServer;
   
-  private TcpSocketLinkListener _clusterListener;
+  private TcpPort _clusterListener;
   
-  private final ArrayList<TcpSocketLinkListener> _listeners
-    = new ArrayList<TcpSocketLinkListener>();
+  private final ArrayList<TcpPort> _listeners
+    = new ArrayList<TcpPort>();
 
   private boolean _isBindPortsAtEnd = true;
   
@@ -98,12 +98,12 @@ public class NetworkListenSystem extends AbstractResinSubSystem
   /**
    * Returns the cluster listener, if in a clustered environment.
    */
-  public TcpSocketLinkListener getClusterListener()
+  public TcpPort getClusterListener()
   {
    return _clusterListener;
   }
 
-  public void addListener(TcpSocketLinkListener listener)
+  public void addListener(TcpPort listener)
   {
     try {
       if (! _listeners.contains(listener))
@@ -138,9 +138,9 @@ public class NetworkListenSystem extends AbstractResinSubSystem
   }
 
   /**
-   * Returns the {@link TcpSocketLinkListener}s for this server.
+   * Returns the {@link TcpPort}s for this server.
    */
-  public Collection<TcpSocketLinkListener> getListeners()
+  public Collection<TcpPort> getListeners()
   {
     return Collections.unmodifiableList(_listeners);
   }
@@ -152,7 +152,7 @@ public class NetworkListenSystem extends AbstractResinSubSystem
       address = null;
 
     for (int i = 0; i < _listeners.size(); i++) {
-      TcpSocketLinkListener serverPort = _listeners.get(i);
+      TcpPort serverPort = _listeners.get(i);
 
       if (port != serverPort.getPort())
         continue;
@@ -175,7 +175,7 @@ public class NetworkListenSystem extends AbstractResinSubSystem
    */
   public TcpSocketLink findConnectionByThreadId(long threadId)
   {
-    for (TcpSocketLinkListener listener : getListeners()) {
+    for (TcpPort listener : getListeners()) {
       TcpSocketLink conn = listener.findConnectionByThreadId(threadId);
 
       if (conn != null)
@@ -206,7 +206,7 @@ public class NetworkListenSystem extends AbstractResinSubSystem
   {
     boolean isFirst = true;
 
-    for (TcpSocketLinkListener listener : _listeners) {
+    for (TcpPort listener : _listeners) {
       if (listener == _clusterListener)
         continue;
 
@@ -254,7 +254,7 @@ public class NetworkListenSystem extends AbstractResinSubSystem
   public void handleAlarm(Alarm alarm)
   {
     try {
-      for (TcpSocketLinkListener listener : _listeners) {
+      for (TcpPort listener : _listeners) {
         if (listener.isClosed()) {
           log.severe("Resin restarting due to closed listener: " + listener);
           // destroy();
@@ -285,7 +285,7 @@ public class NetworkListenSystem extends AbstractResinSubSystem
     if (alarm != null)
       alarm.dequeue();
 
-    for (TcpSocketLinkListener listener : _listeners) {
+    for (TcpPort listener : _listeners) {
       try {
         if (listener != _clusterListener) {
           listener.close();

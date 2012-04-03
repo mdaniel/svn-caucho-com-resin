@@ -53,10 +53,13 @@ public class RemoveUserAction implements AdminAction
 
   public PasswordUser execute()
   {
+    /*
     PasswordUser user = _adminAuth.getUserMap().get(_user);
 
     _adminAuth.removeUser(_user);
 
     return user;
+    */
+    return null;
   }
 }

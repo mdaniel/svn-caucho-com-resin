@@ -1772,7 +1772,7 @@ public abstract class AbstractHttpRequest extends AbstractProtocolConnection
     TcpSocketLink tcpConn = _tcpConn;
     
     if (tcpConn != null) {
-      long requestTimeout = tcpConn.getListener().getRequestTimeout();
+      long requestTimeout = tcpConn.getPort().getRequestTimeout();
     
       if (requestTimeout > 0)
         _expireTime = _startTime + requestTimeout;

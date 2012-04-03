@@ -59,7 +59,7 @@ import com.caucho.loader.DynamicClassLoader;
 import com.caucho.log.EnvironmentStream;
 import com.caucho.log.LogHandlerConfig;
 import com.caucho.log.RotateStream;
-import com.caucho.network.listen.TcpSocketLinkListener;
+import com.caucho.network.listen.TcpPort;
 import com.caucho.security.AdminAuthenticator;
 import com.caucho.security.Authenticator;
 import com.caucho.server.cluster.ServletService;
@@ -97,7 +97,7 @@ class WatchdogManager implements AlarmListener {
   private final ResinSystem _system;
 
   private ServletService _server;
-  private TcpSocketLinkListener _httpPort;
+  private TcpPort _httpPort;
 
   private HashMap<String,WatchdogChild> _watchdogMap
     = new HashMap<String,WatchdogChild>();
@@ -253,7 +253,7 @@ class WatchdogManager implements AlarmListener {
     NetworkListenSystem listenService 
       = _system.getService(NetworkListenSystem.class);
     
-    _httpPort = new TcpSocketLinkListener();
+    _httpPort = new TcpPort();
     _httpPort.setProtocol(new HttpProtocol());
 
     if (_watchdogPort > 0)

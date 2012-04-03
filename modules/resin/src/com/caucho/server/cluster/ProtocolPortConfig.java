@@ -39,13 +39,13 @@ import com.caucho.config.inject.InjectManager;
 import com.caucho.config.program.ContainerProgram;
 import com.caucho.network.listen.AbstractProtocol;
 import com.caucho.network.listen.Protocol;
-import com.caucho.network.listen.TcpSocketLinkListener;
+import com.caucho.network.listen.TcpPort;
 import com.caucho.util.L10N;
 
 /**
  * Represents a protocol connection.
  */
-public class ProtocolPortConfig extends TcpSocketLinkListener
+public class ProtocolPortConfig extends TcpPort
 {
   private static final L10N L = new L10N(ProtocolPortConfig.class);
 

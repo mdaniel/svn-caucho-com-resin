@@ -39,7 +39,7 @@ import com.caucho.env.service.ResinSystem;
 import com.caucho.env.shutdown.ExitCode;
 import com.caucho.management.server.AbstractManagedObject;
 import com.caucho.management.server.WatchdogMXBean;
-import com.caucho.network.listen.TcpSocketLinkListener;
+import com.caucho.network.listen.TcpPort;
 import com.caucho.util.Alarm;
 import com.caucho.util.CurrentTime;
 import com.caucho.util.L10N;
@@ -237,7 +237,7 @@ class WatchdogChild
     return _config.getWatchdogAddress();
   }
 
-  Iterable<TcpSocketLinkListener> getPorts()
+  Iterable<TcpPort> getPorts()
   {
     return _config.getPorts();
   }

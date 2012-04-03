@@ -72,7 +72,7 @@ enum SocketLinkState {
     @Override
     SocketLinkState toActiveWithKeepalive(TcpSocketLink conn) 
     { 
-      conn.getListener().keepaliveAllocate();
+      conn.getPort().keepaliveAllocate();
       
       return REQUEST_ACTIVE_KA;
     }
@@ -106,7 +106,7 @@ enum SocketLinkState {
     @Override
     SocketLinkState toActiveNoKeepalive(TcpSocketLink conn) 
     { 
-      conn.getListener().keepaliveFree();
+      conn.getPort().keepaliveFree();
       
       return REQUEST_ACTIVE_NKA;
     }
@@ -114,7 +114,7 @@ enum SocketLinkState {
     @Override
     SocketLinkState toKillKeepalive(TcpSocketLink conn)
     {
-      conn.getListener().keepaliveFree();
+      conn.getPort().keepaliveFree();
       
       return REQUEST_ACTIVE_NKA;
     }
@@ -134,7 +134,7 @@ enum SocketLinkState {
     @Override
     SocketLinkState toDuplex(TcpSocketLink conn)
     {
-      conn.getListener().keepaliveFree();
+      conn.getPort().keepaliveFree();
       
       return DUPLEX;
     }
@@ -142,7 +142,7 @@ enum SocketLinkState {
     @Override
     SocketLinkState toClosed(TcpSocketLink conn)
     {
-      conn.getListener().keepaliveFree();
+      conn.getPort().keepaliveFree();
       
       return CLOSED;
     }
@@ -187,7 +187,7 @@ enum SocketLinkState {
     @Override
     SocketLinkState toActiveNoKeepalive(TcpSocketLink conn) 
     {
-      conn.getListener().keepaliveFree();
+      conn.getPort().keepaliveFree();
       
       return REQUEST_ACTIVE_NKA; 
     }
@@ -201,7 +201,7 @@ enum SocketLinkState {
     @Override
     SocketLinkState toClosed(TcpSocketLink conn)
     {
-      conn.getListener().keepaliveFree();
+      conn.getPort().keepaliveFree();
 
       return CLOSED;
     }
@@ -223,7 +223,7 @@ enum SocketLinkState {
     @Override
     SocketLinkState toActiveNoKeepalive(TcpSocketLink conn) 
     {
-      conn.getListener().keepaliveFree();
+      conn.getPort().keepaliveFree();
 
       return REQUEST_ACTIVE_NKA; 
     }
@@ -231,7 +231,7 @@ enum SocketLinkState {
     @Override
     SocketLinkState toClosed(TcpSocketLink conn)
     {
-      conn.getListener().keepaliveFree();
+      conn.getPort().keepaliveFree();
 
       return CLOSED;
     }
@@ -256,7 +256,7 @@ enum SocketLinkState {
     @Override
     SocketLinkState toCometSuspend(TcpSocketLink conn)
     {
-      conn.getListener().cometSuspend(conn);
+      conn.getPort().cometSuspend(conn);
       
       return COMET_SUSPEND_KA;
     }
@@ -271,7 +271,7 @@ enum SocketLinkState {
     @Override
     SocketLinkState toKillKeepalive(TcpSocketLink conn)
     {
-      conn.getListener().keepaliveFree();
+      conn.getPort().keepaliveFree();
       
       return COMET_NKA;
     }
@@ -279,7 +279,7 @@ enum SocketLinkState {
     @Override
     SocketLinkState toClosed(TcpSocketLink conn)
     {
-      conn.getListener().keepaliveFree();
+      conn.getPort().keepaliveFree();
       
       return CLOSED;
     }
@@ -298,7 +298,7 @@ enum SocketLinkState {
     @Override
     SocketLinkState toCometSuspend(TcpSocketLink conn)
     {
-      conn.getListener().cometSuspend(conn);
+      conn.getPort().cometSuspend(conn);
       
       return COMET_SUSPEND_NKA;
     }
@@ -326,7 +326,7 @@ enum SocketLinkState {
     @Override
     SocketLinkState toKillKeepalive(TcpSocketLink conn)
     {
-      conn.getListener().keepaliveFree();
+      conn.getPort().keepaliveFree();
       
       return COMET_SUSPEND_NKA;
     }
@@ -334,7 +334,7 @@ enum SocketLinkState {
     @Override
     SocketLinkState toCometResume(TcpSocketLink conn)
     {
-      conn.getListener().cometDetach(conn);
+      conn.getPort().cometDetach(conn);
       
       return REQUEST_ACTIVE_KA;
     }
@@ -342,7 +342,7 @@ enum SocketLinkState {
     @Override
     SocketLinkState toClosed(TcpSocketLink conn)
     {
-      conn.getListener().cometDetach(conn);
+      conn.getPort().cometDetach(conn);
       
       throw new IllegalStateException(this + " " + conn);
     }
@@ -350,7 +350,7 @@ enum SocketLinkState {
     @Override
     SocketLinkState toDestroy(TcpSocketLink conn)
     {
-      conn.getListener().cometDetach(conn);
+      conn.getPort().cometDetach(conn);
       
       throw new IllegalStateException(this + " " + conn);
     }
@@ -369,7 +369,7 @@ enum SocketLinkState {
     @Override
     SocketLinkState toCometResume(TcpSocketLink conn)
     {
-      conn.getListener().cometDetach(conn);
+      conn.getPort().cometDetach(conn);
       
       return REQUEST_ACTIVE_NKA;
     }
@@ -377,7 +377,7 @@ enum SocketLinkState {
     @Override
     SocketLinkState toClosed(TcpSocketLink conn)
     {
-      conn.getListener().cometDetach(conn);
+      conn.getPort().cometDetach(conn);
       
       throw new IllegalStateException(this + " " + conn);
     }
@@ -385,7 +385,7 @@ enum SocketLinkState {
     @Override
     SocketLinkState toDestroy(TcpSocketLink conn)
     {
-      conn.getListener().cometDetach(conn);
+      conn.getPort().cometDetach(conn);
       
       throw new IllegalStateException(this + " " + conn);
     }
@@ -410,7 +410,7 @@ enum SocketLinkState {
     @Override
     SocketLinkState toActiveNoKeepalive(TcpSocketLink conn) 
     { 
-      conn.getListener().keepaliveFree();
+      conn.getPort().keepaliveFree();
       
       return REQUEST_ACTIVE_NKA;
     }
@@ -418,7 +418,7 @@ enum SocketLinkState {
     @Override
     SocketLinkState toKillKeepalive(TcpSocketLink conn)
     {
-      conn.getListener().keepaliveFree();
+      conn.getPort().keepaliveFree();
       
       return COMET_COMPLETE_NKA;
     }
@@ -438,7 +438,7 @@ enum SocketLinkState {
     @Override
     SocketLinkState toClosed(TcpSocketLink conn)
     {
-      conn.getListener().keepaliveFree();
+      conn.getPort().keepaliveFree();
       
       return CLOSED;
     }
@@ -465,7 +465,7 @@ enum SocketLinkState {
     @Override
     SocketLinkState toKeepalive(TcpSocketLink conn)
     {
-      conn.getListener().duplexKeepaliveBegin();
+      conn.getPort().duplexKeepaliveBegin();
 
       return DUPLEX_KEEPALIVE;
     }
@@ -493,7 +493,7 @@ enum SocketLinkState {
     @Override
     SocketLinkState toDuplexActive(TcpSocketLink conn)
     {
-      conn.getListener().duplexKeepaliveEnd();
+      conn.getPort().duplexKeepaliveEnd();
 
       return DUPLEX;
     }
@@ -501,7 +501,7 @@ enum SocketLinkState {
     @Override
     SocketLinkState toClosed(TcpSocketLink conn)
     {
-      conn.getListener().duplexKeepaliveEnd();
+      conn.getPort().duplexKeepaliveEnd();
 
       return CLOSED;
     }
@@ -694,7 +694,7 @@ enum SocketLinkState {
    */
   SocketLinkState toActive(TcpSocketLink conn, long connectionStartTime)
   {
-    if (conn.getListener().isKeepaliveAllowed(connectionStartTime))
+    if (conn.getPort().isKeepaliveAllowed(connectionStartTime))
       return toActiveWithKeepalive(conn);
     else {
       if (log.isLoggable(Level.FINE))
@@ -810,7 +810,7 @@ enum SocketLinkState {
   {
     toClosed(conn);
 
-    conn.getListener().closeConnection(conn);
+    conn.getPort().closeConnection(conn);
 
     return DESTROYED;
   }

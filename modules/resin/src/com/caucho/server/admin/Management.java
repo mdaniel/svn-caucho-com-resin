@@ -124,6 +124,7 @@ public class Management
   /**
    * Returns the management cookie.
    */
+  /*
   public String getRemoteCookie()
   {
     if (_auth != null)
@@ -131,6 +132,7 @@ public class Management
     else
       return null;
   }
+  */
 
   /**
    * Returns the admin broker

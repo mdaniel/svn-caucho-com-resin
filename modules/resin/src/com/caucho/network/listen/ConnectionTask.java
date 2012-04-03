@@ -42,14 +42,14 @@ abstract class ConnectionTask implements Runnable {
   private static final Logger log 
     = Logger.getLogger(ConnectionTask.class.getName());
   
-  private final TcpSocketLinkListener _listener;
+  private final TcpPort _listener;
   private final TcpSocketLink _socketLink;
   private SocketLinkThreadLauncher _launcher;
   
   ConnectionTask(TcpSocketLink socketLink)
   {
     _socketLink = socketLink;
-    _listener = _socketLink.getListener();
+    _listener = _socketLink.getPort();
     _launcher = _listener.getLauncher();
   }
   
@@ -58,7 +58,7 @@ abstract class ConnectionTask implements Runnable {
     return _socketLink;
   }
   
-  protected final TcpSocketLinkListener getListener()
+  protected final TcpPort getListener()
   {
     return _listener;
   }

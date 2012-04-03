@@ -365,7 +365,9 @@ public class ResinDelegate
     
     SecurityService.createAndAddService();
 
-    createDistCacheService();
+    if (! getResin().isWatchdog()) {
+      createDistCacheService();
+    }
   }
 
   @Override

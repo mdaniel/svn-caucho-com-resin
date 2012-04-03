@@ -52,8 +52,11 @@ public class ListUsersAction implements AdminAction
 
   public Hashtable<String,PasswordUser> execute()
   {
+    /*
     Hashtable<String,PasswordUser> userMap = _adminAuth.getUserMap();
 
     return userMap;
+    */
+    return null;
   }
 }

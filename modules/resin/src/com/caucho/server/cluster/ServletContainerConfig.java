@@ -46,7 +46,7 @@ import com.caucho.env.service.ResinSystem;
 import com.caucho.env.thread.ThreadPool;
 import com.caucho.loader.EnvironmentBean;
 import com.caucho.loader.EnvironmentClassLoader;
-import com.caucho.network.listen.TcpSocketLinkListener;
+import com.caucho.network.listen.TcpPort;
 import com.caucho.rewrite.DispatchRule;
 import com.caucho.server.admin.Management;
 import com.caucho.server.distcache.PersistentStoreConfig;
@@ -775,7 +775,7 @@ public class ServletContainerConfig implements EnvironmentBean, SchemaBean
       return _server.getId();
     }
 
-    private int getPort(TcpSocketLinkListener port)
+    private int getPort(TcpPort port)
     {
       if (port == null)
         return 0;
@@ -783,7 +783,7 @@ public class ServletContainerConfig implements EnvironmentBean, SchemaBean
       return port.getPort();
     }
 
-    private String getAddress(TcpSocketLinkListener port)
+    private String getAddress(TcpPort port)
     {
       if (port == null)
         return null;
@@ -796,13 +796,13 @@ public class ServletContainerConfig implements EnvironmentBean, SchemaBean
       return address;
     }
 
-    private TcpSocketLinkListener getFirstPort(String protocol, boolean isSSL)
+    private TcpPort getFirstPort(String protocol, boolean isSSL)
     {
       ResinSystem resinSystem = getResinSystem();
       NetworkListenSystem listenService 
         = resinSystem.getService(NetworkListenSystem.class);
       
-      for (TcpSocketLinkListener port : listenService.getListeners()) {
+      for (TcpPort port : listenService.getListeners()) {
         if (protocol.equals(port.getProtocolName()) && (port.isSSL() == isSSL))
           return port;
       }

@@ -43,7 +43,7 @@ import com.caucho.util.RingValueQueue;
 class SocketLinkThreadLauncher extends AbstractThreadLauncher
 {
   private final ThreadPool _threadPool = ThreadPool.getThreadPool();
-  private TcpSocketLinkListener _listener;
+  private TcpPort _listener;
   
   private final RingValueQueue<AcceptTask> _acceptTaskQueue
     = new RingValueQueue<AcceptTask>(1024);
@@ -55,7 +55,7 @@ class SocketLinkThreadLauncher extends AbstractThreadLauncher
   
   private final AtomicInteger _resumeStartCount = new AtomicInteger();
 
-  SocketLinkThreadLauncher(TcpSocketLinkListener listener)
+  SocketLinkThreadLauncher(TcpPort listener)
   {
     _listener = listener;
   }

@@ -79,12 +79,12 @@ import com.caucho.vfs.SSLFactory;
  * Represents a protocol connection.
  */
 @Configurable
-public class TcpSocketLinkListener
+public class TcpPort
 {
-  private static final L10N L = new L10N(TcpSocketLinkListener.class);
+  private static final L10N L = new L10N(TcpPort.class);
 
   private static final Logger log
-    = Logger.getLogger(TcpSocketLinkListener.class.getName());
+    = Logger.getLogger(TcpPort.class.getName());
   
   private static final int ACCEPT_IDLE_MIN = 4;
   private static final int ACCEPT_IDLE_MAX = 64;
@@ -226,7 +226,7 @@ public class TcpSocketLinkListener
   // The port lifecycle
   private final Lifecycle _lifecycle = new Lifecycle();
 
-  public TcpSocketLinkListener()
+  public TcpPort()
   {
     if (CauchoSystem.is64Bit()) {
       // on 64-bit machines we can use more threads before parking in nio
@@ -1795,16 +1795,6 @@ public class TcpSocketLinkListener
     QServerSocket serverSocket = _serverSocket;
     _serverSocket = null;
 
-    _selectManager = null;
-    AbstractSelectManager selectManager = null;
-
-    /*
-    if (_server != null) {
-      selectManager = _server.getSelectManager();
-      _server.initSelectManager(null);
-    }
-    */
-
     InetAddress localAddress = null;
     int localPort = 0;
     if (serverSocket != null) {
@@ -1827,12 +1817,14 @@ public class TcpSocketLinkListener
       }
     }
 
+    /*
     if (selectManager != null) {
       try {
-        selectManager.close();
+        selectManager.onPortClose(this);
       } catch (Throwable e) {
       }
     }
+    */
 
     Set<TcpSocketLink> activeSet;
 
@@ -1891,6 +1883,13 @@ public class TcpSocketLinkListener
     while ((conn = _idleConn.allocate()) != null) {
       conn.requestDestroy();
     }
+
+    // cloud/0550
+    /*
+    // clearning the select manager must be after the conn.requestDestroy
+    AbstractSelectManager selectManager = _selectManager;
+    _selectManager = null;
+    */
 
     log.finest(this + " closed");
   }

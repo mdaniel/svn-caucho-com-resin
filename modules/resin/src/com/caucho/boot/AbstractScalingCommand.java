@@ -31,7 +31,7 @@ package com.caucho.boot;
 
 import com.caucho.cloud.scaling.ResinScalingClient;
 import com.caucho.config.ConfigException;
-import com.caucho.network.listen.TcpSocketLinkListener;
+import com.caucho.network.listen.TcpPort;
 import com.caucho.util.L10N;
 
 import java.lang.reflect.Constructor;
@@ -103,7 +103,7 @@ public abstract class AbstractScalingCommand extends AbstractBootCommand
 
   private int findPort(WatchdogClient client)
   {
-    for (TcpSocketLinkListener listener : client.getConfig().getPorts()) {
+    for (TcpPort listener : client.getConfig().getPorts()) {
       if (listener instanceof OpenPort) {
         OpenPort openPort = (OpenPort) listener;
 

@@ -72,6 +72,10 @@ abstract public class AbstractSelectManager {
    */
   abstract public boolean keepalive(TcpSocketLink conn);
 
+  public void closeKeepalive(TcpSocketLink tcpSocketLink)
+  {
+  }
+
   /**
    * Returns the select count.
    */
@@ -86,6 +90,10 @@ abstract public class AbstractSelectManager {
   public int getFreeKeepalive()
   {
     return Integer.MAX_VALUE / 2;
+  }
+
+  public void onPortClose(TcpPort port)
+  {
   }
 
   /**

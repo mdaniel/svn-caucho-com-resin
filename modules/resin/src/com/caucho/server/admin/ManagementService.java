@@ -63,7 +63,7 @@ abstract public class ManagementService
   private final Management _management;
   private final String _serviceName;
 
-  private String _password;
+  // private String _password;
 
   private InetNetwork[]_allowedNetworks;
 
@@ -75,12 +75,14 @@ abstract public class ManagementService
 
   public void start()
   {
+    /*
     _password = _management.getRemoteCookie();
     
     if (_password == null) {
       log.warning(L.l("jmx-remote disabled.  jmx-remote requires at least one enabled management <user>"));
       return;
     }
+    */
     
     HostConfig hostConfig = _management.getHostConfig();
 
