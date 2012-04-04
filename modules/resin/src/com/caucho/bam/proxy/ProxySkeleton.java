@@ -342,7 +342,15 @@ public class ProxySkeleton<S>
     for (int i = 0; i < methods.length; i++) {
       Method method = methods[i];
       
-      if (void.class.equals(method.getReturnType())) {
+      Class<?> []paramTypes = method.getParameterTypes();
+      
+      if (paramTypes.length > 0 && paramTypes[paramTypes.length - 1].isAssignableFrom(ReplyCallback.class)) {
+        method.setAccessible(true);
+
+        _queryHandlers.put(method.getName(), new QueryShortReplyMethodInvoker(method));
+        continue;
+      }
+      else if (void.class.equals(method.getReturnType())) {
         method.setAccessible(true);
 
         _messageHandlers.put(method.getName(), method);
@@ -493,6 +501,62 @@ public class ProxySkeleton<S>
       Object result = _method.invoke(actor, args);
       
       broker.queryResult(id, from, to, new ReplyPayload(result));
+    }
+  }
+  
+  static class QueryShortReplyMethodInvoker extends QueryInvoker {
+    private final Method _method;
+    
+    QueryShortReplyMethodInvoker(Method method)
+    {
+      _method = method;
+    }
+
+    @Override
+    public void invoke(Object actor,
+                       Broker broker,
+                       long id, 
+                       String to, 
+                       String from,
+                       String methodName,
+                       Object []args)
+      throws IllegalAccessException, InvocationTargetException
+    {
+      Object []param = new Object[args.length + 1];
+      System.arraycopy(args, 0, param, 0, args.length);
+      
+      param[args.length] = new QueryReplyCallback(id, to, from, broker);
+      
+      _method.invoke(actor, param);
+    }
+  }
+  
+  static class QueryReplyCallback implements ReplyCallback<Object> {
+    private final long _id;
+    private final String _to;
+    private final String _from;
+    private final Broker _broker;
+    
+    QueryReplyCallback(long id, String to, String from, Broker broker)
+    {
+      _id = id;
+      _to = to;
+      _from = from;
+      _broker = broker;
+    }
+
+    @Override
+    public void onReply(Object result)
+    {
+      ReplyPayload reply = new ReplyPayload(result);
+      
+      _broker.queryResult(_id, _from, _to, reply);
+    }
+    
+    @Override
+    public void onError(BamError error)
+    {
+      _broker.queryError(_id, _from, _to, null, error);
     }
   }
 }

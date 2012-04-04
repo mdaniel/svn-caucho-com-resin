@@ -4030,6 +4030,14 @@ public final class InjectManager
   {
   }
 
+  /**
+   * @return
+   */
+  public boolean isClosed()
+  {
+    return _beanMap == null;
+  }
+
   public String toString()
   {
     if (_classLoader != null)

@@ -35,8 +35,8 @@ import com.caucho.bam.actor.ManagedActor;
 import com.caucho.bam.broker.Broker;
 import com.caucho.bam.mailbox.Mailbox;
 import com.caucho.bam.mailbox.MailboxType;
-import com.caucho.bam.query.QuerySender;
 import com.caucho.bam.stream.MessageStream;
+import com.caucho.server.admin.DeployActorProxyImpl;
 
 
 /**
@@ -74,6 +74,14 @@ public interface BamManager
    */
   public Agent createAgent(MessageStream actorStream,
                            MailboxType mailboxType);
+
+  /**
+   * @param proxyAddress
+   * @param deployActorProxyImpl
+   * @return
+   */
+  public Mailbox createService(String address,
+                               Object bean);
 
   /**
    * @param actorStream

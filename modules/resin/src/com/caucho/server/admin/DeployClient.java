@@ -43,6 +43,8 @@ import com.caucho.bam.RemoteListenerUnavailableException;
 import com.caucho.bam.ServiceUnavailableException;
 import com.caucho.bam.actor.ActorSender;
 import com.caucho.bam.broker.Broker;
+import com.caucho.bam.proxy.CallPayload;
+import com.caucho.bam.proxy.ReplyPayload;
 import com.caucho.bam.query.QueryCallback;
 import com.caucho.cloud.deploy.CopyTagQuery;
 import com.caucho.cloud.deploy.RemoveTagQuery;
@@ -472,6 +474,20 @@ public class DeployClient implements Repository
     ControllerRestartQuery query = new ControllerRestartQuery(tag);
 
     return (ControllerStateActionQueryReply) query(query);
+  }
+
+  /**
+   * Starts a controller based on a deployment tag: wars/foo.com/my-war
+   *
+   * @param tag the encoded controller name
+   *
+   */
+  public ControllerStateActionQueryReply restartCluster(String tag)
+  {
+    CallPayload call = new CallPayload("restartCluster", tag);
+    ReplyPayload reply = (ReplyPayload) query(call);
+
+    return (ControllerStateActionQueryReply) reply.getValue(); 
   }
 
   /**

@@ -616,7 +616,6 @@ public class MemcachedConnection extends AbstractProtocolConnection
       long unique = getCasKey(valueKey);
       
       if (hash != 0 && hash == unique) {
-        System.out.println("NOM: " + key.length());
         // out.print("NOT_MODIFIED\r\n");
         // get-if-modified
         return;

@@ -179,6 +179,9 @@ public class InjectionTargetBuilder<X> implements InjectionTarget<X>
   public Set<InjectionPoint> getInjectionPoints()
   {
     if (_producer == null) {
+      if (_cdiManager.isClosed()) {
+        return new HashSet();
+      }
       _producer = build();
       
       // bind();
@@ -295,7 +298,7 @@ public class InjectionTargetBuilder<X> implements InjectionTarget<X>
       
     try {
       thread.setContextClassLoader(getBeanManager().getClassLoader());
-
+      
       introspect();
       
       Class<X> cl = _rawClass;

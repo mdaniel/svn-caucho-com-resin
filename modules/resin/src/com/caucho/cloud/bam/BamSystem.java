@@ -105,6 +105,11 @@ public class BamSystem extends AbstractResinSubSystem
     return getCurrent().getBroker();
   }
   
+  public static BamManager getCurrentManager()
+  {
+    return getCurrent().getBrokerManager();
+  }
+  
   public String getAddress()
   {
     return _address;

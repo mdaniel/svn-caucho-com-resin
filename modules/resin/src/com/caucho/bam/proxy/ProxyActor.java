@@ -38,6 +38,7 @@ import com.caucho.bam.actor.ActorSender;
 import com.caucho.bam.actor.SimpleActorSender;
 import com.caucho.bam.broker.Broker;
 import com.caucho.bam.stream.MessageStream;
+import com.caucho.bam.stream.NullMessageStream;
 
 /**
  * The Skeleton introspects and dispatches messages for a
@@ -54,6 +55,7 @@ public class ProxyActor<T> implements Actor
   private Broker _broker;
   private ProxySkeleton<T> _skeleton;
   private SimpleActorSender _sender;
+  private MessageStream _fallback;
   
   public ProxyActor(T bean,
                     String address,
@@ -63,6 +65,7 @@ public class ProxyActor<T> implements Actor
     _bean = bean;
     _broker = broker;
     _skeleton = ProxySkeleton.getSkeleton((Class<T>) bean.getClass());
+    _fallback = new NullMessageStream(address, broker);
     
     _sender = new SimpleActorSender(this, _broker);
   }
@@ -98,9 +101,7 @@ public class ProxyActor<T> implements Actor
   @Override
   public void message(String to, String from, Serializable payload)
   {
-    MessageStream fallback = null;
-    
-    _skeleton.message(_bean, fallback, to, from, payload);
+    _skeleton.message(_bean, _fallback, to, from, payload);
   }
 
   @Override
@@ -113,9 +114,7 @@ public class ProxyActor<T> implements Actor
   @Override
   public void query(long id, String to, String from, Serializable payload)
   {
-    MessageStream fallback = null;
-    
-    _skeleton.query(_bean, fallback, getBroker(), id, to, from, payload);
+    _skeleton.query(_bean, _fallback, getBroker(), id, to, from, payload);
   }
 
   @Override
@@ -131,6 +130,7 @@ public class ProxyActor<T> implements Actor
     throw new UnsupportedOperationException(getClass().getName());
   }
   
+  @Override
   public String toString()
   {
     return getClass().getSimpleName() + "[" + _address + "," + _bean + "]";

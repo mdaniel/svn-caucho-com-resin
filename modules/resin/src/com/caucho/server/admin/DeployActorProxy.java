@@ -24,34 +24,18 @@
  *   59 Temple Place, Suite 330
  *   Boston, MA 02111-1307  USA
  *
- * @author Emil Ong
+ * @author Scott Ferguson
  */
 
-package com.caucho.bam.proxy;
+package com.caucho.server.admin;
 
-import java.io.Serializable;
+import com.caucho.bam.proxy.ReplyCallback;
 
-/**
- * Payload for an RPC-style call.
- */
-@SuppressWarnings("serial")
-public class ReplyPayload implements Serializable
+public interface DeployActorProxy
 {
-  private Object _value;
-  
-  public ReplyPayload(Object value)
-  {
-    _value = value;
-  }
-  
-  public Object getValue()
-  {
-    return _value;
-  }
-  
-  @Override
-  public String toString()
-  {
-    return getClass().getSimpleName() + "[" + getValue() + "]";
-  }
+  public void
+  restartCluster(String tag, ReplyCallback<ControllerStateActionQueryReply> cb);
+
+  public void
+  controllerRestart(String tag, ReplyCallback<ControllerStateActionQueryReply> cb);
 }

@@ -169,7 +169,7 @@ class BamProxyHandler implements InvocationHandler
       CallPayload payload = new CallPayload(_name, args);
 
       Object result = queryManager.query(stream, to, from, payload, timeout);
-      
+
       if (result instanceof ReplyPayload) {
         return ((ReplyPayload) result).getValue();
       }

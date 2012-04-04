@@ -31,6 +31,7 @@ package com.caucho.server.admin;
 
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
@@ -45,8 +46,14 @@ import java.util.regex.Pattern;
 import javax.annotation.PostConstruct;
 
 import com.caucho.bam.Query;
+import com.caucho.bam.actor.BamSkeleton;
 import com.caucho.bam.actor.SimpleActor;
+import com.caucho.bam.broker.Broker;
 import com.caucho.bam.mailbox.MultiworkerMailbox;
+import com.caucho.bam.manager.BamManager;
+import com.caucho.bam.proxy.CallPayload;
+import com.caucho.bam.proxy.ProxyActor;
+import com.caucho.bam.stream.MessageStream;
 import com.caucho.cloud.bam.BamSystem;
 import com.caucho.cloud.deploy.CopyTagQuery;
 import com.caucho.cloud.deploy.RemoveTagQuery;
@@ -76,6 +83,8 @@ import com.caucho.vfs.Vfs;
 
 public class DeployActor extends SimpleActor
 {
+  private static final String UID = "deploy";
+  
   public static final String address = "deploy@resin.caucho";
 
   private static final Logger log
@@ -88,10 +97,35 @@ public class DeployActor extends SimpleActor
   private RepositorySpi _repository;
 
   private AtomicBoolean _isInit = new AtomicBoolean();
+  
+  private DeployActorProxyImpl _deployActorProxyImpl;
+  private MessageStream _deployActorProxyStream;
 
   public DeployActor()
   {
     super(address, BamSystem.getCurrentBroker());
+    
+    _deployActorProxyImpl = createProxy();
+    
+    Broker broker = BamSystem.getCurrentBroker();
+    BamManager bamManager = BamSystem.getCurrentManager();
+    
+    String proxyAddress = UID + '@' + broker.getAddress();
+
+    /*
+    _deployActorProxyStream = new ProxyActor(_deployActorProxyImpl,
+                                             proxyAddress,
+                                             broker);
+                                             */
+    
+    _deployActorProxyStream = bamManager.createService(proxyAddress,
+                                                       _deployActorProxyImpl);
+    
+  }
+  
+  protected DeployActorProxyImpl createProxy()
+  {
+    return new DeployActorProxyImpl(this);
   }
   
   /*
@@ -143,6 +177,18 @@ public class DeployActor extends SimpleActor
     getBroker().queryResult(id, from, to, resultList);
 
     return true;
+  }
+
+  @Override
+  public void query(long id, String to, String from,
+                    Serializable payload)
+  {
+    if (payload instanceof CallPayload) {
+      _deployActorProxyStream.query(id, to, from, payload);
+    }
+    else {
+      super.query(id, to, from, payload);
+    }
   }
 
   @Query
