@@ -12,7 +12,8 @@
 
 <s2 title="4.0.28 - snapshot">
 <ul>
-<li>resin: fixed doOptions and doTrace HttpSerlvet methods.(#5020, rep by Andy Paladino)</li>
+<li>servlet: fixed Part.getHeader case sensitivity issue.(#5018, rep by ralscha)</li>
+<li>servlet: fixed doOptions and doTrace HttpSerlvet methods.(#5020, rep by Andy Paladino)</li>
 <li>resin: fixed access-log@web-tier not reporting cookies problem.(#4965, rep by Chris Hart)</li>
 <li>resin: home-server for EC2/cloud configuration</li>
 <li>resin: license-add command fix for unlicensed pro server (#5008, rep by rickHigh)</li>

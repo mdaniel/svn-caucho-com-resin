@@ -1098,6 +1098,8 @@ abstract public class AbstractCauchoRequest implements CauchoRequest {
 
     public String getHeader(String name)
     {
+      name = name.toLowerCase(Locale.ENGLISH);
+
       List<String> values = _headers.get(name);
 
       if (values != null && values.size() > 0)
@@ -1113,6 +1115,7 @@ abstract public class AbstractCauchoRequest implements CauchoRequest {
 
     public Collection<String> getHeaders(String name)
     {
+      name = name.toLowerCase(Locale.ENGLISH);
       return _headers.get(name);
     }
 
