@@ -162,14 +162,14 @@ namespace Caucho
         else if ("-verbose".Equals(arguments[argsIdx]))
         {
           IsVerbose = true;
-
-          resinArgs.Append(' ').Append(arguments[argsIdx++]);
+          argsIdx++;
+          resinArgs.Append(" -verbose ");
         }
         else if (arguments[argsIdx].StartsWith("-J")
                  || arguments[argsIdx].StartsWith("-D")
                  || arguments[argsIdx].StartsWith("-X"))
         {
-          resinArgs.Append(' ').Append(arguments[argsIdx++]);
+          resinArgs.Append(' ').Append(arguments[argsIdx++]).Append(' ');
         }
         else if ("-java_home".Equals(arguments[argsIdx])
                    || "-java-home".Equals(arguments[argsIdx]))
@@ -314,6 +314,7 @@ namespace Caucho
                      || "config-cat".Equals(arguments[argsIdx])
                      || "config-deploy".Equals(arguments[argsIdx])
                      || "config-ls".Equals(arguments[argsIdx])
+                     || "config-undeploy".Equals(arguments[argsIdx])
                      || "console".Equals(arguments[argsIdx])
                      || "deploy".Equals(arguments[argsIdx])
                      || "deploy-copy".Equals(arguments[argsIdx])

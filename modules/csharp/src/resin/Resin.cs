@@ -178,8 +178,12 @@ namespace Caucho
       arguments.Append("\"" + _resinHome + "\\lib\\resin.jar\"");
       arguments.Append(" -resin-home \"").Append(_resinHome).Append("\" ");
       arguments.Append(" -root-directory \"").Append(_rootDirectory).Append("\" ");
-      if (ResinArgs.Server != null)
+
+      if ("".Equals(ResinArgs.Server))
+        arguments.Append(" -server \"\"");
+      else if (ResinArgs.Server != null)
         arguments.Append(" -server ").Append(ResinArgs.Server);
+
           /*
       else if (ResinArgs.DynamicServer != null)
         arguments.Append(" -dynamic-server ").Append(ResinArgs.DynamicServer);
