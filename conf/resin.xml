@@ -59,9 +59,9 @@
   </resin:AdminAuthenticator>
 
   <!--
-     - For clustered systems, create a password in as system_key
+     - For clustered systems, create a password in as cluster_system_key
     -->
-  <resin-system-auth-key>${system_key}</resin-system-auth-key>
+  <cluster-system-key>${cluster_system_key}</cluster-system-key>
 
   <!--
      - For production sites, change dependency-check-interval to something

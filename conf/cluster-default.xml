@@ -65,6 +65,10 @@
     
     <resin:AdminServices/>
 
+    <resin:if test="${elastic_cloud_enable}">
+      <resin:ElasticCloudService/>
+    </resin:if>
+
     <!-- defaults for each server, i.e. JVM -->
     <server-default>
       <jvm-arg-line>${jvm_args}</jvm-arg-line>

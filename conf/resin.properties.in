@@ -87,7 +87,10 @@ session_store : true
 
 # Set a global password to prevent foreign Resin instances from connecting.
 # Must be identical between web, app, and cache clusters.
-# system_key : changeme
+# cluster_system_key : changeme
+
+# Enable dynamic spoke servers
+# elastic_cloud_enable : true
 
 # Enable command-line remote admin (required for remote deploy)
 # remote_cli_enable : true

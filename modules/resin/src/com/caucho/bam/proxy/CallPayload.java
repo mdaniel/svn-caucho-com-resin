@@ -59,6 +59,6 @@ public class CallPayload implements Serializable
   @Override
   public String toString()
   {
-    return getClass().getName() + "[" + getName() + "]";
+    return getClass().getSimpleName() + "[" + getName() + "]";
   }
 }
