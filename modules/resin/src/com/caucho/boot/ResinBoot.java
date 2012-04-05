@@ -81,11 +81,12 @@ public class ResinBoot
 
     Path resinHome = _args.getResinHome();
 
+    // required for license check
+    System.setProperty("resin.home", resinHome.getNativePath());
+
     ClassLoader loader = ProLoader.create(resinHome, _args.is64Bit());
 
     if (loader != null) {
-      System.setProperty("resin.home", resinHome.getNativePath());
-
       Thread.currentThread().setContextClassLoader(loader);
 
       Environment.init();
@@ -99,16 +100,6 @@ public class ResinBoot
     else {
       Environment.init();
     }
-    
-    String jvmVersion = System.getProperty("java.runtime.version");
-    
-    if ("1.6".compareTo(jvmVersion) > 0) {
-      throw new ConfigException(L().l("Resin requires Java 1.6 or later but was started with {0}",
-                                      jvmVersion));
-    }
-
-    // required for license check
-    System.setProperty("resin.home", resinHome.getNativePath());
 
     // watchdog/0210
     // Vfs.setPwd(_rootDirectory);
@@ -286,6 +277,13 @@ public class ResinBoot
    */
   public static void main(String []argv)
   {
+    final String jvmVersion = System.getProperty("java.runtime.version");
+
+    if ("1.6".compareTo(jvmVersion) > 0) {
+      throw new ConfigException(L().l("Resin requires Java 1.6 or later but was started with {0}",
+                                      jvmVersion));
+    }
+
     if (System.getProperty("log.level") != null) {
       Logger.getLogger("").setLevel(Level.FINER);
     }

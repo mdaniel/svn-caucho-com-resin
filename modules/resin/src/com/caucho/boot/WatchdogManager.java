@@ -207,6 +207,9 @@ class WatchdogManager implements AlarmListener {
       
     if (server == null)
       server = _watchdogMap.get(serverId);
+
+    if (server == null && "".equals(serverId))
+      server = _watchdogMap.get("default");
     
     if (server == null) {
       if (serverId == null) {
@@ -462,7 +465,7 @@ class WatchdogManager implements AlarmListener {
       
       serverId = getServerId(serverId, args);
       WatchdogChild watchdog = _watchdogMap.get(serverId);
-      
+
       if (watchdog == null) {
         // env/0fp7
         watchdog = _watchdogMap.get("default");

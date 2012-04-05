@@ -493,7 +493,12 @@ class WatchdogClient
 
     list.add(_config.getJavaExe());
 
+    /**
+     * list.add("-Xdebug");
+     * list.add("-Xrunjdwp:transport=dt_socket,server=y,suspend=y,address=4948");
+    */
     // #3759 - user args are first so they're displayed by ps
+
     list.addAll(_config.getWatchdogJvmArgs());
 
     list.add("-Dresin.watchdog=" + _id);
