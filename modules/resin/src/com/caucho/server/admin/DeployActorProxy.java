@@ -29,13 +29,56 @@
 
 package com.caucho.server.admin;
 
+import java.util.HashMap;
+import java.util.Map;
+
 import com.caucho.bam.proxy.ReplyCallback;
+import com.caucho.bam.query.QueryCallback;
+import com.caucho.vfs.StreamSource;
 
 public interface DeployActorProxy
 {
-  public void
-  restartCluster(String tag, ReplyCallback<ControllerStateActionQueryReply> cb);
+  public String[] getCommitList(String[] commitList);
 
+  public void sendFile(String sha1, StreamSource source,
+                       QueryCallback callback);
+  
+  public StreamSource getFile(String tagName, String fileName);
+
+  public String[] listFiles(String tagName, String fileName);
+  
+  //
+  // tag methods
+  //
+
+  public boolean putTag(String tag, String contentHash,
+                        HashMap<String, String> attributeCopy);
+
+  public Boolean copyTag(String targetId, String sourceId,
+                         Map<String, String> attributes);
+
+  public TagResult[] queryTags(String pattern);
+  
+  public boolean removeTag(String tag, Map<String, String> attributes);
+
+  public TagStateQuery getTagState(String tag);
+
+  
+  //
+  // start/restart
+  //
+
+  public ControllerStateActionQueryReply start(String tag);
+  
+  public ControllerStateActionQueryReply restart(String tag);
+  
+  public ControllerStateActionQueryReply stop(String tag);
+  
   public void
   controllerRestart(String tag, ReplyCallback<ControllerStateActionQueryReply> cb);
+  /*
+  public void
+  restartCluster(String tag, ReplyCallback<ControllerStateActionQueryReply> cb);
+*/
+  public ControllerStateActionQueryReply restartCluster(String tag);
 }

@@ -27,47 +27,26 @@
  * @author Scott Ferguson
  */
 
-package com.caucho.j2ee.deployclient;
+package com.caucho.bam.mailbox;
 
-import javax.enterprise.deploy.spi.Target;
-import javax.enterprise.deploy.spi.TargetModuleID;
-import javax.enterprise.deploy.spi.status.ProgressObject;
-import java.io.InputStream;
+import com.caucho.bam.broker.Broker;
+import com.caucho.bam.stream.MessageStream;
 
 /**
- * Interface for the deployment manager.
+ * mailbox for BAM messages waiting to be sent to the Actor.
  */
-public interface DeploymentProxyAPI {
-  /**
-   * Returns the targets for the server.
-   */
-  public TargetImpl []getTargets();
-
-  /**
-   * Gets the current modules.
-   */
-  public TargetModuleID []getAvailableModules(String moduleType);
-
-  /**
-   * Distributes the archive.
-   */
-  public ProgressObject distribute(Target []targets,
-                                   InputStream deploymentPlan,
-                                   InputStream archiveIs);
-  /**
-   * Starts the archive.
-   */
-  public ProgressObject start(TargetModuleID []ids);
-
-  /**
-   * Stops the archive.
-   */
-  public ProgressObject stop(TargetModuleID []ids);
-
-  /**
-   * Undeploys the archive.
-   */
-  public ProgressObject undeploy(TargetModuleID []ids);
-
+public class ActorMailbox extends MultiworkerMailbox
+{
+  public ActorMailbox(MessageStream actorStream,
+                      Broker broker)
+  {
+    this(null, actorStream, broker);
+  }
+  
+  public ActorMailbox(String address,
+                      MessageStream actorStream,
+                      Broker broker)
+  {
+    super(address, actorStream, broker, 1);
+  }
 }
-

@@ -38,6 +38,7 @@ import com.caucho.bam.actor.ManagedActor;
 import com.caucho.bam.actor.SimpleActor;
 import com.caucho.bam.actor.SimpleActorSender;
 import com.caucho.bam.broker.ManagedBroker;
+import com.caucho.bam.mailbox.ActorMailbox;
 import com.caucho.bam.mailbox.Mailbox;
 import com.caucho.bam.mailbox.MailboxType;
 import com.caucho.bam.mailbox.MultiworkerMailbox;
@@ -180,6 +181,12 @@ public class SimpleBamManager implements BamManager
     case NON_QUEUED:
       return new PassthroughMailbox(address, actorStream, getBroker());
       
+    case ACTOR:
+      return new ActorMailbox(address, actorStream, getBroker());
+
+    case MULTI_WORKER:
+      return new MultiworkerMailbox(address, actorStream, getBroker(), 5);
+      
     default:
       return new MultiworkerMailbox(address, actorStream, getBroker(), 5);
     }
@@ -248,13 +255,20 @@ public class SimpleBamManager implements BamManager
     return actor.getSender();
   }
   
-  public <T> T createProxy(Class<T> api, String to)
+  @Override
+  public <T> T createProxy(String to, Class<T> api)
   {
     String address = ("urn:client:/" + api.getSimpleName()
                       + "/" + _sequence.incrementAndGet());
     
     ActorSender sender = createClient(address);
     
+    return BamProxyFactory.createProxy(api, to, sender);
+  }
+  
+  @Override
+  public <T> T createProxy(String to, Class<T> api, ActorSender sender)
+  {
     return BamProxyFactory.createProxy(api, to, sender);
   }
   

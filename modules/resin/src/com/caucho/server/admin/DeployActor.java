@@ -104,28 +104,16 @@ public class DeployActor extends SimpleActor
   public DeployActor()
   {
     super(address, BamSystem.getCurrentBroker());
-    
-    _deployActorProxyImpl = createProxy();
-    
-    Broker broker = BamSystem.getCurrentBroker();
-    BamManager bamManager = BamSystem.getCurrentManager();
-    
-    String proxyAddress = UID + '@' + broker.getAddress();
-
-    /*
-    _deployActorProxyStream = new ProxyActor(_deployActorProxyImpl,
-                                             proxyAddress,
-                                             broker);
-                                             */
-    
-    _deployActorProxyStream = bamManager.createService(proxyAddress,
-                                                       _deployActorProxyImpl);
-    
   }
   
   protected DeployActorProxyImpl createProxy()
   {
-    return new DeployActorProxyImpl(this);
+    return new DeployActorProxyImpl(getRepository(), this);
+  }
+  
+  protected RepositorySpi getRepository()
+  {
+    return _repository;
   }
   
   /*
@@ -151,13 +139,32 @@ public class DeployActor extends SimpleActor
     _repository = RepositorySystem.getCurrentRepositorySpi();
 
     setBroker(getBroker());
+    
     MultiworkerMailbox mailbox
       = new MultiworkerMailbox(getActor().getAddress(), 
                                getActor(), getBroker(), 2);
     
     getBroker().addMailbox(mailbox);
+    
+    _deployActorProxyImpl = createProxy();
+    
+    Broker broker = BamSystem.getCurrentBroker();
+    BamManager bamManager = BamSystem.getCurrentManager();
+    
+    String proxyAddress = UID + '@' + broker.getAddress();
+
+    /*
+    _deployActorProxyStream = new ProxyActor(_deployActorProxyImpl,
+                                             proxyAddress,
+                                             broker);
+                                             */
+    
+    _deployActorProxyStream = bamManager.createService(proxyAddress,
+                                                       _deployActorProxyImpl);
+    
   }
 
+  /*
   @Query
   public boolean commitList(long id, String to, String from,
                             DeployCommitListQuery commitList)
@@ -178,6 +185,7 @@ public class DeployActor extends SimpleActor
 
     return true;
   }
+  */
 
   @Override
   public void query(long id, String to, String from,
@@ -191,6 +199,7 @@ public class DeployActor extends SimpleActor
     }
   }
 
+  /*
   @Query
   public void getFile(long id, String to, String from,
                          DeployGetFileQuery getFile)
@@ -258,7 +267,9 @@ public class DeployActor extends SimpleActor
    
     return findFile(childSha1, fullFilename, tail);
   }
+  */
 
+  /*
   @Query
   public void getFileList(long id, String to, String from,
                       DeployListFilesQuery listFile)
@@ -324,7 +335,9 @@ public class DeployActor extends SimpleActor
       listFiles(files, tree.getHash(key), name);
     }
   }
+  */
   
+  /*
   @Query
   public void tagCopy(long id,
                       String to,
@@ -341,13 +354,6 @@ public class DeployActor extends SimpleActor
 
       throw new DeployException(L.l("deploy-copy: '{0}' is an unknown source tag.",
                                     query.getSourceTag()));
-      /*
-      getBroker().queryError(id, from, to, query,
-                             new BamError(BamError.TYPE_CANCEL,
-                                          BamError.ITEM_NOT_FOUND,
-                             "unknown tag"));
-      return;
-      */
     }
 
     log.fine(this + " copy dst='" + query.getTag() + "' src='" + query.getSourceTag() + "'");
@@ -368,6 +374,7 @@ public class DeployActor extends SimpleActor
 
     getBroker().queryResult(id, from, to, result);
   }
+  */
 
   @Query
   public void tagState(long id,
@@ -416,6 +423,7 @@ public class DeployActor extends SimpleActor
     return _repository.removeTag(query.getTag(), commitMetaData);
   }
 
+  /*
   @Query
   public boolean sendFileQuery(long id, String to, String from,
                                DeploySendQuery query)
@@ -442,7 +450,9 @@ public class DeployActor extends SimpleActor
 
     return true;
   }
+  */
 
+  /*
   @Query
   public boolean setTagQuery(long id, String to, String from, SetTagQuery query)
   {
@@ -469,7 +479,9 @@ public class DeployActor extends SimpleActor
 
     return true;
   }
+  */
 
+  /*
   @Query
   public boolean queryTags(long id,
                            String to,
@@ -493,10 +505,12 @@ public class DeployActor extends SimpleActor
 
     return true;
   }
+  */
 
   /**
    * @deprecated
    */
+  /*
   @Query
   public boolean controllerDeploy(long id,
                                   String to,
@@ -511,17 +525,21 @@ public class DeployActor extends SimpleActor
 
     return true;
   }
+  */
 
+  /*
   private String deploy(String gitPath)
   {
     LifecycleState state = start(gitPath);
 
     return state.getStateName();
   }
+  */
 
   /**
    * @deprecated
    */
+  /*
   @Query
   public ControllerStateActionQueryReply controllerStart(long id,
                                                           String to,
@@ -539,6 +557,7 @@ public class DeployActor extends SimpleActor
 
     return result;
   }
+  */
 
   private LifecycleState start(String tag)
   {
@@ -558,6 +577,7 @@ public class DeployActor extends SimpleActor
   /**
    * @deprecated
    */
+  /*
   @Query
   public ControllerStateActionQueryReply controllerStop(long id,
                                                          String to,
@@ -575,7 +595,9 @@ public class DeployActor extends SimpleActor
 
     return result;
   }
+  */
 
+  /*
   private LifecycleState stop(String tag)
   {
     DeployControllerService service = DeployControllerService.getCurrent();
@@ -589,7 +611,9 @@ public class DeployActor extends SimpleActor
 
     return controller.getState();
   }
+  */
 
+  /*
   @Query
   public ControllerStateActionQueryReply controllerRestart(long id,
                                                             String to,
@@ -626,10 +650,12 @@ public class DeployActor extends SimpleActor
 
     return controller.getState();
   }
+  */
 
   /**
    * @deprecated
    */
+  /*
   @Query
   public boolean controllerUndeploy(long id,
                                     String to,
@@ -644,10 +670,12 @@ public class DeployActor extends SimpleActor
 
     return true;
   }
+  */
 
   /**
    * @deprecated
    */
+  /*
   private String undeploy(String tag)
   {
     DeployControllerMXBean controller = findController(tag);
@@ -674,10 +702,12 @@ public class DeployActor extends SimpleActor
       return e.toString();
     }
   }
+  */
 
   /**
    * @deprecated
    */
+  /*
   @Query
   public boolean controllerUndeploy(long id,
                                     String to,
@@ -695,7 +725,9 @@ public class DeployActor extends SimpleActor
 
     return true;
   }
+  */
 
+  /*
   private String undeploy(String tag, Map<String,String> commitMetaData)
   {
     DeployControllerMXBean controller = findController(tag);
@@ -734,10 +766,12 @@ public class DeployActor extends SimpleActor
       return e.toString();
     }
   }
+  */
 
   /**
    * @deprecated
    */
+  /*
   @Query
   public boolean sendAddFileQuery(long id, String to, String from,
                                   DeployAddFileQuery query)
@@ -779,10 +813,12 @@ public class DeployActor extends SimpleActor
       return true;
     }
   }
+  */
 
   /**
    * @deprecated
    **/
+  /*
   @Query
   public boolean listWebApps(long id,
                              String to,
@@ -820,10 +856,12 @@ public class DeployActor extends SimpleActor
 
     return true;
   }
+  */
 
   /**
    * @deprecated
    **/
+  /*
   @Query
   public boolean listTags(long id,
                           String to,
@@ -852,10 +890,12 @@ public class DeployActor extends SimpleActor
 
     return true;
   }
+  */
 
   /**
    * @deprecated
    **/
+  /*
   @Query
   public boolean listHosts(long id,
                            String to,
@@ -879,10 +919,12 @@ public class DeployActor extends SimpleActor
 
     return true;
   }
+  */
 
   /**
    * @deprecated
    **/
+  /*
   @Query
   public boolean status(long id,
                         String to,
@@ -900,7 +942,9 @@ public class DeployActor extends SimpleActor
 
     return true;
   }
+  */
 
+  /*
   private String statusMessage(String tag)
   {
     int p = tag.indexOf('/');
@@ -959,7 +1003,9 @@ public class DeployActor extends SimpleActor
 
     return errorMessage;
   }
+  */
 
+  /*
   private DeployControllerMXBean findController(String tag)
   {
     int p = tag.indexOf('/');
@@ -1007,6 +1053,7 @@ public class DeployActor extends SimpleActor
 
     return null;
   }
+  */
   
   static class BlobStreamSource extends StreamSource {
     private RepositorySpi _repository;

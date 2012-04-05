@@ -94,4 +94,8 @@ public interface BamManager
                               String resource);
   
   public ActorSender createClient(String uid, String resource);
+  
+  public <T> T createProxy(String to, Class<T> api);
+  
+  public <T> T createProxy(String to, Class<T> api, ActorSender sender);
 }

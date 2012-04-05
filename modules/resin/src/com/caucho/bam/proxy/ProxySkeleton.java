@@ -470,8 +470,13 @@ public class ProxySkeleton<S>
       throws IllegalAccessException, InvocationTargetException
     {
       if (args != null && args.length != _paramTypes.length) {
-        throw new IllegalArgumentException(L.l("'{0}' has an incorrect number of arguments",
-                                               name));
+        System.out.println("METHOD:" + _method);
+        throw new IllegalArgumentException(L.l("'{0}.{1}' has an incorrect number of arguments (received {2} but expected {3})\n  {4}",
+                                               actor.getClass().getSimpleName(),
+                                               name,
+                                               args != null ? args.length : 0,
+                                               _paramTypes.length,
+                                               _method));
       }
       
       Object result = _method.invoke(actor, args);

@@ -27,15 +27,21 @@
  * @author Scott Ferguson
  */
 
-package com.caucho.bam.mailbox;
+package com.caucho.bam.query;
+
+import java.io.Serializable;
+
+import com.caucho.bam.BamException;
+import com.caucho.bam.TimeoutException;
 
 /**
- * Mailbox types for a mailbox.
+ * QueryFutureCallback is used to wait
+ * for query callbacks.
  */
-public enum MailboxType
-{
-  DEFAULT,
-  ACTOR,
-  MULTI_WORKER,
-  NON_QUEUED;
+public class QueryFutureCallback extends AbstractQueryCallback {
+  public Serializable get()
+    throws TimeoutException, BamException
+  {
+    throw new UnsupportedOperationException(getClass().getName());
+  }
 }
