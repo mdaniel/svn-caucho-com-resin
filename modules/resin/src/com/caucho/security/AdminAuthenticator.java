@@ -79,4 +79,9 @@ public class AdminAuthenticator extends XmlAuthenticator
   {
     return "resin-admin";
   }
+  
+  public boolean isComplete()
+  {
+    return false;
+  }
 }
