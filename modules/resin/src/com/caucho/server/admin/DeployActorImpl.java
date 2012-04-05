@@ -90,6 +90,7 @@ public class DeployActorImpl
     _repository = repository;
   }
 
+  /*
   public DeployGetFileQuery getFile(String tag, String fileName)
     throws IOException
   {
@@ -117,6 +118,7 @@ public class DeployActorImpl
     
     return new DeployGetFileQuery(tag, sha1, source);
   }
+  */
   
   private String findFile(String sha1, String fullFilename, String fileName)
     throws IOException

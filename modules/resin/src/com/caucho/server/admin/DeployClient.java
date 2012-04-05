@@ -281,13 +281,6 @@ public class DeployClient implements Repository
     String targetId = target.getId();
     String sourceId = source.getId();
 
-    /*
-    CopyTagQuery query
-      = new CopyTagQuery(targetId, sourceId, target.getAttributes());
-      */
-
-    // return (Boolean) query(query);
-    
     return _deployProxy.copyTag(targetId, sourceId, target.getAttributes());
   }
 
@@ -305,11 +298,6 @@ public class DeployClient implements Repository
     String tag = commit.getId();
 
     return _deployProxy.removeTag(tag, commit.getAttributes());
-    /*
-    RemoveTagQuery query = new RemoveTagQuery(tag, commit.getAttributes());
-
-    return (Boolean) query(query);
-    */
   }
   
   /**
@@ -317,8 +305,6 @@ public class DeployClient implements Repository
    */
   public String getTagState(String tag)
   {
-    // TagStateQuery query = new TagStateQuery(tag);
-    
     TagStateQuery query = _deployProxy.getTagState(tag);
     
     if (query != null)
@@ -332,8 +318,6 @@ public class DeployClient implements Repository
    */
   public Throwable getTagException(String tag)
   {
-    // TagStateQuery query = new TagStateQuery(tag);
-    
     TagStateQuery query = _deployProxy.getTagState(tag); // (TagStateQuery) query(query);
     
     if (query != null)
@@ -383,41 +367,17 @@ public class DeployClient implements Repository
 
     QueryFutureCallback future = new QueryFutureCallback();
     _deployProxy.sendFile(sha1, source, future);
-    /*
-    DeploySendQuery query = new DeploySendQuery(sha1, source);
-
-    query(query);
-    */
   }
 
   public String []getCommitList(String []commitList)
   {
     return _deployProxy.getCommitList(commitList);
-    //return (String []) queryCall("getCommitList", new Object[] { commitList });
-    /*
-    DeployCommitListQuery query = new DeployCommitListQuery(commitList);
-    
-    DeployCommitListQuery result = (DeployCommitListQuery) query(query);
-    
-    if (result != null)
-      return result.getCommitList();
-    else
-      return null;
-      */
   }
 
   public boolean getFile(String tagName, String fileName, OutputStream os)
     throws IOException
   {
     StreamSource fileSource = _deployProxy.getFile(tagName, fileName);
-    /*
-    DeployGetFileQuery query = new DeployGetFileQuery(tagName, fileName);
-    
-    DeployGetFileQuery result = (DeployGetFileQuery) query(query);
-
-    if (result.isValid()) {
-      StreamSource source = result.getStream();
-    */
     
     if (fileSource != null) {
       ReadStream is = null;
@@ -444,13 +404,6 @@ public class DeployClient implements Repository
     throws IOException
   {
     return _deployProxy.listFiles(tagName, fileName);
-    /*
-    DeployListFilesQuery query = new DeployListFilesQuery(tagName, fileName);
-    
-    DeployListFilesQuery result = (DeployListFilesQuery) query(query);
-    
-    return result.getFileList();
-    */
   }
 
   public String calculateFileDigest(InputStream is, long length)
@@ -458,14 +411,6 @@ public class DeployClient implements Repository
   {
     return GitCommitTree.calculateBlobDigest(is, length);
   }
-
-  /*
-  private String addDeployFile(String tag, String name, String sha1)
-  {
-    DeployAddFileQuery query = new DeployAddFileQuery(tag, name, sha1);
-
-    return (String) query(query);
-  }*/
 
   private boolean putTag(String tag,
                          String contentHash,
@@ -483,27 +428,11 @@ public class DeployClient implements Repository
     else
       attributeCopy = new HashMap<String,String>();
     
-    /*
-    // server/2o66
-    SetTagQuery query
-      = new SetTagQuery(tag, contentHash, attributeCopy);
-
-    query(query);
-    
-    return true;
-    */
-    
     return _deployProxy.putTag(tag, contentHash, attributeCopy);
   }
   
   public TagResult []queryTags(String pattern)
   {
-    /*
-    QueryTagsQuery query = new QueryTagsQuery(pattern);
-
-    return (TagResult []) query(query);
-    */
-    
     return _deployProxy.queryTags(pattern);
   }
 
@@ -525,12 +454,6 @@ public class DeployClient implements Repository
    */
   public ControllerStateActionQueryReply restart(String tag)
   {
-    /*
-    ControllerRestartQuery query = new ControllerRestartQuery(tag);
-
-    return (ControllerStateActionQueryReply) query(query);
-    */
-    
     return _deployProxy.restart(tag);
   }
 
@@ -543,13 +466,6 @@ public class DeployClient implements Repository
   public ControllerStateActionQueryReply restartCluster(String tag)
   {
     return _deployProxy.restartCluster(tag);
-    
-    /*
-    CallPayload call = new CallPayload("restartCluster", tag);
-    ReplyPayload reply = (ReplyPayload) query(call);
-
-    return (ControllerStateActionQueryReply) reply.getValue();
-    */ 
   }
 
   /**
@@ -560,11 +476,6 @@ public class DeployClient implements Repository
   public ControllerStateActionQueryReply start(String tag)
   {
     return _deployProxy.start(tag);
-    /*
-    ControllerStartQuery query = new ControllerStartQuery(tag);
-
-    return (ControllerStateActionQueryReply) query(query);
-    */
   }
 
   /**
@@ -575,96 +486,7 @@ public class DeployClient implements Repository
   public ControllerStateActionQueryReply stop(String tag)
   {
     return _deployProxy.stop(tag);
-
-    //ControllerStopQuery query = new ControllerStopQuery(tag);
-
-    //return (ControllerStateActionQueryReply) query(query);
   }
-
-  /**
-   * Deploy controller based on a deployment tag: wars/default/foo.com/my-war
-   *
-   * @param tag the encoded controller name
-   *
-   * @deprecated
-   */
-  /*
-  public Boolean deploy(String tag)
-  {
-    ControllerDeployQuery query = new ControllerDeployQuery(tag);
-
-    return (Boolean) query(query);
-  }
-  */
-
-  /**
-   * @deprecated
-   **/
-  /*
-  public StatusQuery status(String tag)
-  {
-    StatusQuery query = new StatusQuery(tag);
-
-    return (StatusQuery) query(query);
-  }
-  */
-
-  /**
-   * @deprecated
-   **/
-  /*
-  public HostQuery []listHosts()
-  {
-    ListHostsQuery query = new ListHostsQuery();
-
-    return (HostQuery []) query(query);
-  }
-  */
-
-  /**
-   * @deprecated
-   **/
-  /*
-  public WebAppQuery []listWebApps(String host)
-  {
-    return (WebAppQuery []) query(new ListWebAppsQuery(host));
-  }
-  */
-  /**
-   * @deprecated
-   **/
-  /*
-  public TagQuery []listTags(String host)
-  {
-    return (TagQuery []) query(new ListTagsQuery(host));
-  }
-  */
-
-  /*
-  protected Serializable query(Serializable query)
-  {
-    try {
-      return _bamClient.query(_deployAddress, query);
-    } catch (ServiceUnavailableException e) {
-      throw new ServiceUnavailableException("Deploy service is not available, possibly because the resin.xml is missing a <resin:AdminServices> or a <resin:DeployService> tag\n  " + e.getMessage(),
-                                            e);
-    }
-  }
-
-  protected Object queryCall(String methodName, Object...args)
-  {
-    try {
-      CallPayload call = new CallPayload(methodName, args);
-      
-      ReplyPayload reply = (ReplyPayload) _bamClient.query(_deployAddress, call);
-      
-      return reply.getValue();
-    } catch (ServiceUnavailableException e) {
-      throw new ServiceUnavailableException("Deploy service is not available, possibly because the resin.xml is missing a <resin:AdminServices> or a <resin:DeployService> tag\n  " + e.getMessage(),
-                                            e);
-    }
-  }
-  */
 
   public void close()
   {
