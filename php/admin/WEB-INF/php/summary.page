@@ -390,7 +390,7 @@ function recent_messages($max)
         echo strftime("%Y-%m-%d&nbsp;%H:%M:%S", $message->timestamp / 1000);
         echo "</td>";
         echo "  <td class='level'>{$message->level}</td>";
-        echo "  <td class='message'>" . htmlspecialchars(wordwrap($message->message, 90));
+        echo "  <td class='message'>" . nl2br(htmlspecialchars(wordwrap($message->message, 90)));
         echo "  </td>";
         echo "</tr>";
       }

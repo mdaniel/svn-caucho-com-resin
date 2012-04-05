@@ -1325,7 +1325,7 @@ function display_health_status($s)
       echo $s_health->Name;
       echo "</td>";
       echo "<td>";
-      echo $s_health->Message;
+      echo nl2br(htmlspecialchars(wordwrap($s_health->Message, 90)));
       echo "</td>";
       echo "</tr>";
     }
