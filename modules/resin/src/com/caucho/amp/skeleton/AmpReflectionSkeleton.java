@@ -36,6 +36,7 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 
 import com.caucho.amp.actor.AbstractAmpActor;
+import com.caucho.amp.actor.AmpActorRef;
 import com.caucho.amp.router.AmpBroker;
 import com.caucho.amp.stream.AmpEncoder;
 import com.caucho.amp.stream.AmpError;
@@ -55,31 +56,20 @@ class AmpReflectionSkeleton extends AbstractAmpActor
   private final String _address;
   private final Object _bean;
   
-  private final AmpBroker _broker;
-  
-  AmpReflectionSkeleton(Object bean,
-                        String address,
-                        AmpBroker broker)
+  AmpReflectionSkeleton(String address,
+                        Object bean)
   {
     _address = address;
     _bean = bean;
-    _broker = broker;
     
     for (Method method : bean.getClass().getDeclaredMethods()) {
       _methodMap.put(method.getName(), method);
     }
   }
-  
-  @Override
-  public String getAddress()
-  {
-    return _address;
-  }
 
   @Override
-  public void send(String to,
-                   String from,
-                   AmpHeaders headers,
+  public void send(AmpActorRef to,
+                   AmpActorRef from,
                    AmpEncoder encoder,
                    String methodName,
                    Object ...args)
@@ -89,15 +79,14 @@ class AmpReflectionSkeleton extends AbstractAmpActor
     } catch (Throwable e) {
       log.log(Level.FINER, e.toString(), e);
       
-      _broker.error(from, to, headers, NullEncoder.ENCODER, new AmpError());
+      from.error(from, NullEncoder.ENCODER, new AmpError());
     }
   }
 
   @Override
   public void query(long id,
-                    String to,
-                    String from,
-                    AmpHeaders headers,
+                    AmpActorRef to,
+                    AmpActorRef from,
                     AmpEncoder encoder,
                     String methodName,
                     Object ...args)
@@ -105,11 +94,11 @@ class AmpReflectionSkeleton extends AbstractAmpActor
     try {
       Object result = invokeMethod(encoder, methodName, args);
     
-      _broker.queryResult(id, from, to, headers, NullEncoder.ENCODER, result);
+      from.reply(id, to, NullEncoder.ENCODER, result);
     } catch (Throwable e) {
       log.log(Level.FINER, e.toString(), e);
       
-      _broker.queryError(id,  from, to, headers, NullEncoder.ENCODER, new AmpError());
+      from.queryError(id, to, NullEncoder.ENCODER, new AmpError());
     }
   }
   
@@ -129,6 +118,6 @@ class AmpReflectionSkeleton extends AbstractAmpActor
   @Override
   public String toString()
   {
-    return getClass().getSimpleName() + "[" + _bean + "]";
+    return getClass().getSimpleName() + "[" + _address + "," + _bean + "]";
   }
 }

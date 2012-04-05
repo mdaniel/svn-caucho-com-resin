@@ -27,25 +27,29 @@
  * @author Scott Ferguson
  */
 
-package com.caucho.amp.skeleton;
+package com.caucho.amp;
 
-import com.caucho.amp.actor.ActorContextImpl;
-import com.caucho.amp.actor.AmpActor;
-import com.caucho.amp.actor.AmpActorRef;
-import com.caucho.amp.router.AmpBroker;
+import com.caucho.amp.actor.AmpActorContext;
+import com.caucho.amp.manager.AmpProviderImpl;
+import com.caucho.amp.spi.AmpProvider;
+import com.caucho.amp.spi.AmpSpi;
 
 /**
- * Creates MPC skeletons and stubs.
+ * Manages an AMP domain.
  */
-public interface AmpSkeletonFactory
+public final class Amp
 {
-  AmpActor createSkeleton(Object bean, 
-                          String address,
-                          AmpBroker broker);
+  private Amp() {}
   
-  <T> T createStub(Class<T> api,
-                   AmpBroker router,
-                   ActorContextImpl actorContext,
-                   AmpActorRef to,
-                   AmpActorRef from);
+  public static AmpManager newManager()
+  {
+    AmpProvider provider = getProvider();
+    
+    return provider.createManager();
+  }
+  
+  private static AmpProvider getProvider()
+  {
+    return new AmpProviderImpl();
+  }
 }

@@ -29,10 +29,10 @@
 
 package com.caucho.amp.mailbox;
 
-import com.caucho.amp.actor.AmpActor;
+import com.caucho.amp.actor.AmpActorContext;
+import com.caucho.amp.actor.AmpActorRef;
 import com.caucho.amp.stream.AmpEncoder;
 import com.caucho.amp.stream.AmpError;
-import com.caucho.amp.stream.AmpHeaders;
 import com.caucho.amp.stream.AmpStream;
 
 /**
@@ -40,9 +40,9 @@ import com.caucho.amp.stream.AmpStream;
  */
 public class SimpleAmpMailbox implements AmpMailbox
 {
-  private AmpActor _actor;
+  private final AmpActorContext _actor;
   
-  public SimpleAmpMailbox(AmpActor actor)
+  public SimpleAmpMailbox(AmpActorContext actor)
   {
     _actor = actor;
   }
@@ -53,67 +53,78 @@ public class SimpleAmpMailbox implements AmpMailbox
   @Override
   public AmpStream getActorStream()
   {
-    return _actor;
+    return _actor.getStream();
   }
 
   @Override
-  public String getAddress()
+  public void send(final AmpActorRef to, 
+                   final AmpActorRef from,
+                   final AmpEncoder encoder, 
+                   final String methodName, 
+                   final Object... args)
   {
-    return getActorStream().getAddress();
+    _actor.runAs(new Runnable() {
+      public void run() {
+        getActorStream().send(to, from, encoder, methodName, args);
+      }
+    });
   }
 
   @Override
-  public void send(String to, 
-                   String from, 
-                   AmpHeaders headers,
-                   AmpEncoder encoder, 
-                   String methodName, 
-                   Object... args)
+  public void query(final long id, 
+                    final AmpActorRef to, 
+                    final AmpActorRef from,
+                    final AmpEncoder encoder, 
+                    final String methodName, 
+                    final Object... args)
   {
-    getActorStream().send(to, from, headers, encoder, methodName, args);
+    _actor.runAs(new Runnable() {
+      public void run() {
+        getActorStream().query(id, to, from, encoder,
+                               methodName, args);
+      }
+    });
   }
 
   @Override
-  public void error(String to, 
-                    String from, 
-                    AmpHeaders headers,
-                    AmpEncoder encoder, 
-                    AmpError error)
+  public void queryResult(final long id, 
+                          final AmpActorRef to, 
+                          final AmpActorRef from,
+                          final AmpEncoder encoder, 
+                          final Object result)
   {
-    getActorStream().error(to, from, headers, encoder, error);
+    _actor.runAs(new Runnable() {
+      public void run() {
+        getActorStream().queryResult(id, to, from, encoder, result);
+      }
+    });
   }
 
   @Override
-  public void query(long id, 
-                    String to, 
-                    String from, 
-                    AmpHeaders headers,
-                    AmpEncoder encoder, 
-                    String methodName, 
-                    Object... args)
+  public void queryError(final long id, 
+                         final AmpActorRef to, 
+                         final AmpActorRef from, 
+                         final AmpEncoder encoder, 
+                         final AmpError error)
   {
-    getActorStream().query(id, to, from, headers, encoder,
-                           methodName, args);
+    _actor.runAs(new Runnable() {
+      public void run() {
+        getActorStream().queryError(id, to, from, encoder, error);
+      }
+    });
   }
 
   @Override
-  public void queryResult(long id, String to, String from, AmpHeaders headers,
-                          AmpEncoder encoder, Object result)
+  public void error(final AmpActorRef to, 
+                    final AmpActorRef from,
+                    final AmpEncoder encoder, 
+                    final AmpError error)
   {
-    getActorStream().queryResult(id, to, from, headers, encoder, result);
-  }
-
-  @Override
-  public void queryError(long id, String to, String from, AmpHeaders headers,
-                         AmpEncoder encoder, AmpError error)
-  {
-    getActorStream().queryError(id, to, from, headers, encoder, error);
-  }
-
-  @Override
-  public boolean isClosed()
-  {
-    return false;
+    _actor.runAs(new Runnable() {
+      public void run() {
+        getActorStream().error(to, from, encoder, error);
+      }
+    });
   }
 
   /**

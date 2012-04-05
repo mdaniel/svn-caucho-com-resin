@@ -31,19 +31,10 @@ package com.caucho.amp.actor;
 
 import java.util.logging.Logger;
 
-import com.caucho.amp.AmpQueryCallback;
-import com.caucho.amp.mailbox.AmpMailbox;
 import com.caucho.amp.mailbox.AmpMailboxFactory;
 import com.caucho.amp.stream.AmpEncoder;
 import com.caucho.amp.stream.AmpError;
-import com.caucho.amp.stream.AmpHeaders;
 import com.caucho.amp.stream.AmpStream;
-import com.caucho.amp.stream.NullEncoder;
-import com.caucho.util.Alarm;
-import com.caucho.util.AlarmListener;
-import com.caucho.util.CurrentTime;
-import com.caucho.util.ExpandableArray;
-import com.caucho.util.WeakAlarm;
 
 /**
  * Handles the context for an actor, primarily including its
@@ -53,22 +44,12 @@ public final class AmpProxyActor implements AmpActor {
   private static final Logger log
     = Logger.getLogger(AmpProxyActor.class.getName());
 
-  private final String _address;
-
   private final ActorContextImpl _actorContext;
 
-  public AmpProxyActor(String address, 
+  public AmpProxyActor(String address,
                        AmpMailboxFactory mailboxFactory)
   {
-    _address = address;
-    
-    _actorContext = new ActorContextImpl(this, mailboxFactory);
-  }
-
-  @Override
-  public String getAddress()
-  {
-    return _address;
+    _actorContext = new ActorContextImpl(address, this, mailboxFactory);
   }
   
   public ActorContextImpl getActorContext()
@@ -77,54 +58,53 @@ public final class AmpProxyActor implements AmpActor {
   }
 
   @Override
-  public void send(String to, String from, AmpHeaders headers,
-                   AmpEncoder encoder, String methodName, Object... args)
+  public void send(AmpActorRef to, 
+                   AmpActorRef from,
+                   AmpEncoder encoder,
+                   String methodName,
+                   Object... args)
   {
     log.warning(this + " send from " + from);
   }
 
   @Override
-  public void error(String to, String from, AmpHeaders headers,
-                    AmpEncoder encoder, AmpError error)
+  public void error(AmpActorRef to, 
+                    AmpActorRef from,
+                    AmpEncoder encoder, 
+                    AmpError error)
   {
-    log.finer(this + " error from " + from);
+    log.finer(this + " error from " + from.getAddress());
   }
 
   @Override
   public void query(long id, 
-                    String to, String from, 
-                    AmpHeaders headers,
+                    AmpActorRef to, 
+                    AmpActorRef from,
                     AmpEncoder encoder, 
-                    String methodName, Object... args)
+                    String methodName,
+                    Object... args)
   {
-    log.warning(this + " query from " + from);
+    log.warning(this + " query from " + from.getAddress());
   }
 
   @Override
   public void queryResult(long id, 
-                          String to, 
-                          String from, 
-                          AmpHeaders headers,
+                          AmpActorRef to, 
+                          AmpActorRef from,
                           AmpEncoder encoder,
                           Object result)
   {
-    log.warning(this + " query error");
+    Thread.dumpStack();
+    log.warning(this + " query result");
   }
 
   @Override
   public void queryError(long id, 
-                         String to, 
-                         String from, 
-                         AmpHeaders headers,
+                         AmpActorRef to, 
+                         AmpActorRef from,
                          AmpEncoder encoder, 
                          AmpError error)
   {
     log.warning(this + " query error");
-  }
-
-  @Override
-  public boolean isClosed()
-  {
-    return false;
   }
 }

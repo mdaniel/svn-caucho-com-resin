@@ -29,6 +29,11 @@
 
 package com.caucho.amp.stream;
 
+import java.util.logging.Level;
+import java.util.logging.Logger;
+
+import com.caucho.amp.actor.AmpActorRef;
+
 /**
  * Primary stream handling all message packets.
  *
@@ -43,76 +48,70 @@ package com.caucho.amp.stream;
  */
 public class AbstractAmpStream implements AmpStream
 {
+  private static final Logger log
+    = Logger.getLogger(AbstractAmpStream.class.getName());
+  
   @Override
-  public String getAddress()
-  {
-    // TODO Auto-generated method stub
-    return null;
-  }
-
-  @Override
-  public boolean isClosed()
-  {
-    // TODO Auto-generated method stub
-    return false;
-  }
-
-  @Override
-  public void send(String to, 
-                   String from,
-                   AmpHeaders headers,
+  public void send(AmpActorRef to, 
+                   AmpActorRef from,
                    AmpEncoder encoder,
                    String methodName,
                    Object ...args)
   {
-    // TODO Auto-generated method stub
+    if (log.isLoggable(Level.FINER)) { 
+      log.finer(this + " send '" + methodName + "' from=" + from + " is ignored");
+    }
     
-  }
-
-  @Override
-  public void error(String to,
-                    String from,
-                    AmpHeaders headers,
-                    AmpEncoder encoder,
-                    AmpError error)
-  {
-    // TODO Auto-generated method stub
-    
+    from.error(to, NullEncoder.ENCODER, new AmpError());
   }
 
   @Override
   public void query(long id, 
-                    String to, 
-                    String from,
-                    AmpHeaders headers,
+                    AmpActorRef to, 
+                    AmpActorRef from,
                     AmpEncoder encoder,
                     String methodName,
                     Object ...args)
   {
-
+    if (log.isLoggable(Level.FINER)) { 
+      log.finer(this + " query-result from=" + from + " is ignored");
+    }
+    
+    from.queryError(id, to, NullEncoder.ENCODER, new AmpError());
   }
 
   @Override
   public void queryResult(long id, 
-                          String to,
-                          String from,
-                          AmpHeaders headers,
+                          AmpActorRef to,
+                          AmpActorRef from,
                           AmpEncoder encoder,
                           Object result)
   {
-    // TODO Auto-generated method stub
-    
+    if (log.isLoggable(Level.FINER)) { 
+      log.finer(this + " query-result from=" + from + " is ignored");
+    }
   }
 
   @Override
   public void queryError(long id,
-                         String to,
-                         String from,
-                         AmpHeaders headers,
+                         AmpActorRef to,
+                         AmpActorRef from,
                          AmpEncoder encoder,
                          AmpError error)
   {
-    // TODO Auto-generated method stub
-    
+    if (log.isLoggable(Level.FINER)) { 
+      log.finer(this + " query-error from=" + from + " is ignored");
+    }
+  }
+
+  @Override
+  public void error(AmpActorRef to,
+                    AmpActorRef from,
+                    AmpEncoder encoder,
+                    AmpError error)
+  {
+    if (log.isLoggable(Level.FINER)) { 
+      log.finer(this + " error from=" + from + " is ignored");
+    }
   }
 }

@@ -27,25 +27,40 @@
  * @author Scott Ferguson
  */
 
-package com.caucho.amp.skeleton;
+package com.caucho.amp.actor;
 
-import com.caucho.amp.actor.ActorContextImpl;
-import com.caucho.amp.actor.AmpActor;
-import com.caucho.amp.actor.AmpActorRef;
-import com.caucho.amp.router.AmpBroker;
+import com.caucho.amp.stream.AmpEncoder;
+import com.caucho.amp.stream.AmpError;
 
 /**
- * Creates MPC skeletons and stubs.
+ * Sender for an actor ref.
  */
-public interface AmpSkeletonFactory
+public interface AmpActorRef
 {
-  AmpActor createSkeleton(Object bean, 
-                          String address,
-                          AmpBroker broker);
+  public String getAddress();
   
-  <T> T createStub(Class<T> api,
-                   AmpBroker router,
-                   ActorContextImpl actorContext,
-                   AmpActorRef to,
-                   AmpActorRef from);
+  public void send(AmpActorRef from, 
+                   AmpEncoder encoder,
+                   String methodName, 
+                   Object...args);
+  
+  public void query(long id,
+                    AmpActorRef from, 
+                    AmpEncoder encoder,
+                    String methodName, 
+                    Object...args);
+  
+  public void reply(long id,
+                    AmpActorRef from, 
+                    AmpEncoder encoder,
+                    Object result);
+  
+  public void queryError(long id,
+                         AmpActorRef from, 
+                         AmpEncoder encoder,
+                         AmpError error);
+  
+  public void error(AmpActorRef from, 
+                    AmpEncoder encoder,
+                    AmpError error);
 }

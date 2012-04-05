@@ -27,25 +27,14 @@
  * @author Scott Ferguson
  */
 
-package com.caucho.amp.skeleton;
+package com.caucho.amp.spi;
 
-import com.caucho.amp.actor.ActorContextImpl;
-import com.caucho.amp.actor.AmpActor;
-import com.caucho.amp.actor.AmpActorRef;
-import com.caucho.amp.router.AmpBroker;
+import com.caucho.amp.actor.AmpActorContext;
 
 /**
- * Creates MPC skeletons and stubs.
+ * Internal SPI for managing the current context.
  */
-public interface AmpSkeletonFactory
+public interface AmpSpi
 {
-  AmpActor createSkeleton(Object bean, 
-                          String address,
-                          AmpBroker broker);
-  
-  <T> T createStub(Class<T> api,
-                   AmpBroker router,
-                   ActorContextImpl actorContext,
-                   AmpActorRef to,
-                   AmpActorRef from);
+  public AmpActorContext setActorContext(AmpActorContext cxt);
 }

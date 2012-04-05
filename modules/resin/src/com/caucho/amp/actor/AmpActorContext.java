@@ -27,25 +27,37 @@
  * @author Scott Ferguson
  */
 
-package com.caucho.amp.skeleton;
+package com.caucho.amp.actor;
 
-import com.caucho.amp.actor.ActorContextImpl;
-import com.caucho.amp.actor.AmpActor;
-import com.caucho.amp.actor.AmpActorRef;
-import com.caucho.amp.router.AmpBroker;
+import com.caucho.amp.stream.AmpStream;
 
 /**
- * Creates MPC skeletons and stubs.
+ * Context for an actor.
  */
-public interface AmpSkeletonFactory
+abstract public class AmpActorContext
 {
-  AmpActor createSkeleton(Object bean, 
-                          String address,
-                          AmpBroker broker);
+  private static final ThreadLocal<AmpActorContext> _currentContext
+    = new ThreadLocal<AmpActorContext>();
   
-  <T> T createStub(Class<T> api,
-                   AmpBroker router,
-                   ActorContextImpl actorContext,
-                   AmpActorRef to,
-                   AmpActorRef from);
+  public static final AmpActorContext getCurrent()
+  {
+    return _currentContext.get();
+  }
+  
+  abstract public String getAddress();
+  
+  abstract public AmpStream getStream();
+  
+  public final void runAs(Runnable task)
+  {
+    AmpActorContext prev = _currentContext.get();
+    
+    try {
+      _currentContext.set(this);
+      
+      task.run();
+    } finally {
+      _currentContext.set(prev);
+    }
+  }
 }

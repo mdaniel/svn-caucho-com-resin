@@ -35,6 +35,7 @@ import java.util.HashMap;
 
 import com.caucho.amp.AmpQueryCallback;
 import com.caucho.amp.actor.ActorContextImpl;
+import com.caucho.amp.actor.AmpActorRef;
 import com.caucho.amp.actor.AmpQueryFuture;
 import com.caucho.amp.router.AmpBroker;
 import com.caucho.amp.stream.AmpStream;
@@ -47,8 +48,8 @@ class AmpReflectionHandler implements InvocationHandler
 {
   private HashMap<Method,Call> _callMap = new HashMap<Method,Call>();
   
-  private String _to;
-  private String _from;
+  private AmpActorRef _to;
+  private AmpActorRef _from;
   private AmpBroker _broker;
   private ActorContextImpl _queryManager;
   private long _timeout = 60000; 
@@ -56,8 +57,8 @@ class AmpReflectionHandler implements InvocationHandler
   AmpReflectionHandler(Class<?> api, 
                        AmpBroker broker,
                        ActorContextImpl actorContext, 
-                       String to,
-                       String from)
+                       AmpActorRef to,
+                       AmpActorRef from)
   {
     _to = to;
     _from = from;
@@ -103,7 +104,7 @@ class AmpReflectionHandler implements InvocationHandler
     Call call = _callMap.get(method);
 
     if (call != null) {
-      return call.invoke(_broker, _queryManager, _to, _from, args, _timeout);
+      return call.invoke(_queryManager, _to, _from, args, _timeout);
     }
     
     String name = method.getName();
@@ -118,10 +119,9 @@ class AmpReflectionHandler implements InvocationHandler
   }
   
   abstract static class Call {
-    abstract Object invoke(AmpStream stream, 
-                           ActorContextImpl queryManager,
-                           String to,
-                           String from,
+    abstract Object invoke(ActorContextImpl queryManager,
+                           AmpActorRef to,
+                           AmpActorRef from,
                            Object []args,
                            long timeout);
   }
@@ -135,16 +135,15 @@ class AmpReflectionHandler implements InvocationHandler
     }
     
     @Override
-    Object invoke(AmpStream stream,
-                  ActorContextImpl queryManager, 
-                  String to, 
-                  String from,
+    Object invoke(ActorContextImpl actorContext, 
+                  AmpActorRef to, 
+                  AmpActorRef from,
                   Object []args,
                   long timeout)
     {
       AmpQueryFuture future = new AmpQueryFuture(timeout);
       
-      queryManager.query(stream, to, from, _name, args, future, timeout);
+      actorContext.query(to, _name, args, future, timeout);
       
       return future.get();
     }
@@ -161,10 +160,9 @@ class AmpReflectionHandler implements InvocationHandler
     }
     
     @Override
-    Object invoke(AmpStream stream,
-                  ActorContextImpl queryManager,
-                  String to, 
-                  String from,
+    Object invoke(ActorContextImpl actorContext,
+                  AmpActorRef to, 
+                  AmpActorRef from,
                   Object []args,
                   long timeout)
     {
@@ -173,7 +171,7 @@ class AmpReflectionHandler implements InvocationHandler
       
       AmpQueryCallback cb = (AmpQueryCallback) args[_paramLen];
       
-      queryManager.query(stream, to, from, _name, args, cb, timeout);
+      actorContext.query(to, _name, args, cb, timeout);
       
       return null;
     }
@@ -188,14 +186,13 @@ class AmpReflectionHandler implements InvocationHandler
     }
 
     @Override
-    Object invoke(AmpStream broker,
-                  ActorContextImpl manager,
-                  String to,
-                  String from,
+    Object invoke(ActorContextImpl manager,
+                  AmpActorRef to,
+                  AmpActorRef from,
                   Object []args,
                   long timeout)
     {
-      broker.send(to, from, null, NullEncoder.ENCODER, _name, args);
+      to.send(from, NullEncoder.ENCODER, _name, args);
       
       return null;
     }

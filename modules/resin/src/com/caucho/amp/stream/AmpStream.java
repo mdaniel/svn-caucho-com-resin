@@ -29,6 +29,8 @@
 
 package com.caucho.amp.stream;
 
+import com.caucho.amp.actor.AmpActorRef;
+
 /**
  * Primary stream handling all messages.
  *
@@ -41,21 +43,6 @@ package com.caucho.amp.stream;
 public interface AmpStream
 {
   /**
-   * Returns the address of the {@link com.caucho.bam.actor.ActorHolder} at the end
-   * of the stream.
-   */
-  public String getAddress();
-
-  /**
-   * Tests if the stream is closed.
-   */
-  public boolean isClosed();
-  
-  //
-  // messages
-  //
-  
-  /**
    * Sends a unidirectional message to an {@link com.caucho.bam.actor.ActorHolder},
    * addressed by the Actor's address.
    * 
@@ -63,9 +50,8 @@ public interface AmpStream
    * @param from the source actor's address
    * @param payload the message payload
    */
-  public void send(String to, 
-                   String from,
-                   AmpHeaders headers,
+  public void send(AmpActorRef to, 
+                   AmpActorRef from,
                    AmpEncoder encoder,
                    String methodName,
                    Object ...args);
@@ -83,9 +69,8 @@ public interface AmpStream
    * @param payload the message payload
    * @param error the message error
    */
-  public void error(String to,
-                    String from,
-                    AmpHeaders headers,
+  public void error(AmpActorRef to,
+                    AmpActorRef from,
                     AmpEncoder encoder,
                     AmpError error);
 
@@ -110,9 +95,8 @@ public interface AmpStream
    * @param payload the query payload
    */
   public void query(long id,
-                    String to,
-                    String from,
-                    AmpHeaders headers,
+                    AmpActorRef to,
+                    AmpActorRef from,
                     AmpEncoder encoder,
                     String methodName,
                     Object ...args);
@@ -126,11 +110,10 @@ public interface AmpStream
    * @param payload the result payload
    */
   public void queryResult(long id,
-                          String to,
-                          String from,
-                          AmpHeaders headers,
-                          AmpEncoder encoder,
-                          Object result);
+                    AmpActorRef to,
+                    AmpActorRef from,
+                    AmpEncoder encoder,
+                    Object result);
   
   /**
    * Sends a query error from a failed query.
@@ -142,9 +125,8 @@ public interface AmpStream
    * @param error additional error information
    */
   public void queryError(long id,
-                         String to,
-                         String from,
-                         AmpHeaders headers,
+                         AmpActorRef to,
+                         AmpActorRef from,
                          AmpEncoder encoder,
                          AmpError error);
 }

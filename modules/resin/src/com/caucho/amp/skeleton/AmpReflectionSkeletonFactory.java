@@ -33,6 +33,7 @@ import java.lang.reflect.Proxy;
 
 import com.caucho.amp.actor.ActorContextImpl;
 import com.caucho.amp.actor.AmpActor;
+import com.caucho.amp.actor.AmpActorRef;
 import com.caucho.amp.router.AmpBroker;
 
 /**
@@ -45,7 +46,7 @@ public class AmpReflectionSkeletonFactory implements AmpSkeletonFactory
                                  String address,
                                  AmpBroker broker)
   {
-    return new AmpReflectionSkeleton(bean, address, broker);
+    return new AmpReflectionSkeleton(address, bean);
   }
   
   @Override
@@ -53,8 +54,8 @@ public class AmpReflectionSkeletonFactory implements AmpSkeletonFactory
   public <T> T createStub(Class<T> api,
                           AmpBroker router,
                           ActorContextImpl sender,
-                          String to,
-                          String from)
+                          AmpActorRef to,
+                          AmpActorRef from)
   {
     AmpReflectionHandler handler
       = new AmpReflectionHandler(api, router, sender, to, from);

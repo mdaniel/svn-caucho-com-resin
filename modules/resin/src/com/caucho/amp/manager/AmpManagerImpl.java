@@ -33,15 +33,19 @@ import java.util.concurrent.atomic.AtomicLong;
 
 import com.caucho.amp.AmpManager;
 import com.caucho.amp.actor.ActorContextImpl;
+import com.caucho.amp.actor.ActorRefImpl;
 import com.caucho.amp.actor.AmpActor;
+import com.caucho.amp.actor.AmpActorContext;
+import com.caucho.amp.actor.AmpActorRef;
 import com.caucho.amp.actor.AmpProxyActor;
 import com.caucho.amp.mailbox.AmpMailbox;
 import com.caucho.amp.mailbox.AmpMailboxFactory;
 import com.caucho.amp.mailbox.SimpleAmpMailbox;
 import com.caucho.amp.mailbox.SimpleMailboxFactory;
 import com.caucho.amp.router.AmpBroker;
-import com.caucho.amp.router.HashMapAmpRouter;
+import com.caucho.amp.router.HashMapAmpBroker;
 import com.caucho.amp.skeleton.AmpReflectionSkeletonFactory;
+import com.caucho.amp.spi.AmpSpi;
 
 /**
  * Creates MPC skeletons and stubs.
@@ -50,17 +54,21 @@ public class AmpManagerImpl implements AmpManager
 {
   private final AtomicLong _clientId = new AtomicLong();
   
-  private HashMapAmpRouter _router = new HashMapAmpRouter();
+  private HashMapAmpBroker _broker = new HashMapAmpBroker();
   private AmpMailboxFactory _mailboxFactory = new SimpleMailboxFactory();
   
-  @Override
-  public AmpBroker getRouter()
+  public AmpManagerImpl()
   {
-    return _router;
+  }
+  
+  @Override
+  public AmpBroker getBroker()
+  {
+    return _broker;
   }
 
   @Override
-  public <T> T createActorProxy(Class<T> api, String to)
+  public <T> T createActorProxy(String to, Class<T> api)
   {
     String from = "urn:amp:client:/" + api.getSimpleName() + "/" + _clientId.incrementAndGet();
     
@@ -73,34 +81,49 @@ public class AmpManagerImpl implements AmpManager
     
     AmpProxyActor proxyActor = new AmpProxyActor(from, _mailboxFactory);
     
-    getRouter().addMailbox(proxyActor.getActorContext().getMailbox());
+    AmpMailbox mailbox = proxyActor.getActorContext().getMailbox();
+    
+    AmpActorRef toRef = getBroker().getActorRef(to);
+    AmpActorRef fromRef = proxyActor.getActorContext().getActorRef();
+    
+    getBroker().addMailbox(from, mailbox);
 
     return factory.createStub(api, 
-                              getRouter(), 
+                              getBroker(), 
                               proxyActor.getActorContext(),
-                              to, from);
+                              toRef, fromRef);
   }
 
   @Override
-  public void addActor(AmpActor actor)
+  public void addActor(String address, AmpActor actor)
   {
-    getRouter().addMailbox(createMailbox(actor));
+    getBroker().addMailbox(address, createMailbox(address, actor));
   }
   
   @Override
-  public void addActor(Object bean, String address)
+  public void addActor(String address, Object bean)
   {
     AmpReflectionSkeletonFactory factory = new AmpReflectionSkeletonFactory();
     
     AmpActor actor = factory.createSkeleton(bean, 
                                             address,
-                                            getRouter());
+                                            getBroker());
     
-    addActor(actor);
+    addActor(address, actor);
   }
   
-  protected AmpMailbox createMailbox(AmpActor actor)
+  protected AmpMailbox createMailbox(String address, AmpActor actor)
   {
-    return new SimpleAmpMailbox(actor);
+    return new SimpleAmpMailbox(createActorContext(address, actor));
+  }
+  
+  protected AmpActorContext createActorContext(String address, AmpActor actor)
+  {
+    return new ActorContextImpl(address, actor, getMailboxFactory());
+  }
+  
+  protected AmpMailboxFactory getMailboxFactory()
+  {
+    return new SimpleMailboxFactory();
   }
 }

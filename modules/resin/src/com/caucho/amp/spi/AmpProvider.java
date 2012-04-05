@@ -27,38 +27,14 @@
  * @author Scott Ferguson
  */
 
-package com.caucho.amp.router;
+package com.caucho.amp.spi;
 
-import java.util.concurrent.ConcurrentHashMap;
-
-import com.caucho.amp.mailbox.AmpMailbox;
-import com.caucho.amp.stream.AmpEncoder;
-import com.caucho.amp.stream.AmpError;
-import com.caucho.amp.stream.AmpHeaders;
+import com.caucho.amp.AmpManager;
 
 /**
- * AmpRouter routes messages to mailboxes.
+ * Internal SPI for managing the current context.
  */
-public class HashMapAmpRouter extends AbstractAmpRouter
+public interface AmpProvider
 {
-  private final ConcurrentHashMap<String,AmpMailbox> _mailboxMap
-    = new ConcurrentHashMap<String,AmpMailbox>();
-
-  @Override
-  public AmpMailbox getMailbox(String address)
-  {
-    return _mailboxMap.get(address);
-  }
-
-  @Override
-  public void addMailbox(AmpMailbox mailbox)
-  {
-    _mailboxMap.put(mailbox.getAddress(), mailbox);
-  }
-  
-  @Override
-  public void removeMailbox(AmpMailbox mailbox)
-  {
-    _mailboxMap.remove(mailbox.getAddress());
-  }
+  public AmpManager createManager();
 }

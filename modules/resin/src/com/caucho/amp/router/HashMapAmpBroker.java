@@ -27,25 +27,41 @@
  * @author Scott Ferguson
  */
 
-package com.caucho.amp.skeleton;
+package com.caucho.amp.router;
 
-import com.caucho.amp.actor.ActorContextImpl;
-import com.caucho.amp.actor.AmpActor;
+import java.util.concurrent.ConcurrentHashMap;
+
+import com.caucho.amp.actor.ActorRefImpl;
 import com.caucho.amp.actor.AmpActorRef;
-import com.caucho.amp.router.AmpBroker;
+import com.caucho.amp.mailbox.AmpMailbox;
 
 /**
- * Creates MPC skeletons and stubs.
+ * AmpRouter routes messages to mailboxes.
  */
-public interface AmpSkeletonFactory
+public class HashMapAmpBroker extends AbstractAmpBroker
 {
-  AmpActor createSkeleton(Object bean, 
-                          String address,
-                          AmpBroker broker);
+  private final ConcurrentHashMap<String,AmpMailbox> _mailboxMap
+    = new ConcurrentHashMap<String,AmpMailbox>();
+
+  @Override
+  public AmpActorRef getActorRef(String address)
+  {
+    AmpMailbox mailbox = _mailboxMap.get(address);
+    
+    return new ActorRefImpl(address, mailbox);
+  }
+
+  @Override
+  public void addMailbox(String address, AmpMailbox mailbox)
+  {
+    _mailboxMap.put(address, mailbox);
+  }
   
-  <T> T createStub(Class<T> api,
-                   AmpBroker router,
-                   ActorContextImpl actorContext,
-                   AmpActorRef to,
-                   AmpActorRef from);
+  /*
+  @Override
+  public void removeMailbox(String address)
+  {
+    _mailboxMap.remove(address);
+  }
+  */
 }

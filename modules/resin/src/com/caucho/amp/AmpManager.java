@@ -38,23 +38,23 @@ import com.caucho.amp.router.AmpBroker;
 public interface AmpManager
 {
   /**
-   * Returns the domain's router.
+   * Returns the domain's broker.
    */
-  public AmpBroker getRouter();
+  public AmpBroker getBroker();
   
   /**
    * Creates a client proxy to an api.
    */
-  public <T> T createActorProxy(Class<T> api, String address);
+  public <T> T createActorProxy(String address, Class<T> api);
   
   /**
    * Adds a bean to be proxied as an actor.
    */
-  public void addActor(Object bean, String address);
+  public void addActor(String address, Object bean);
   
   /**
    * Adds an actor stream, creating the mailbox for it 
    * using the default factory.
    */
-  public void addActor(AmpActor actor);
+  public void addActor(String address, AmpActor actor);
 }

@@ -29,7 +29,7 @@
 
 package com.caucho.amp.mailbox;
 
-import com.caucho.amp.actor.AmpActor;
+import com.caucho.amp.actor.AmpActorContext;
 
 /**
  * Creates mailboxes for actors.
@@ -39,5 +39,5 @@ public interface AmpMailboxFactory
   /**
    * Creates a mailbox for an actor.
    */
-  public AmpMailbox createMailbox(AmpActor actor);
+  public AmpMailbox createMailbox(AmpActorContext actor);
 }

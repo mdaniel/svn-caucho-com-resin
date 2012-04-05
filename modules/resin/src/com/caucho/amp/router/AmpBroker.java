@@ -29,13 +29,15 @@
 
 package com.caucho.amp.router;
 
+import com.caucho.amp.actor.AmpActorRef;
 import com.caucho.amp.mailbox.AmpMailbox;
+import com.caucho.amp.stream.AmpEncoder;
 import com.caucho.amp.stream.AmpStream;
 
 /**
  * AmpRouter routes messages to mailboxes.
  */
-public interface AmpBroker extends AmpStream
+public interface AmpBroker
 {
   /**
    * Returns the mailbox to the router itself.
@@ -50,17 +52,30 @@ public interface AmpBroker extends AmpStream
    * 
    * @return the mailbox with the given address or null
    */
-  public AmpMailbox getMailbox(String address);
+  public AmpActorRef getActorRef(String address);
   
   /**
    * Adds a mailbox (optional operation).
    */
-  public void addMailbox(AmpMailbox mailbox);
+  public void addMailbox(String address, AmpMailbox mailbox);
   
   /**
    * Removes a mailbox (optional operation).
    */
-  public void removeMailbox(AmpMailbox mailbox);
+  public void removeMailbox(String address, AmpMailbox mailbox);
+  
+  
+  public void send(String to, String from, AmpEncoder encoder,
+                   String methodName, Object ...args);
+  
+  public void query(long id, String to, String from, AmpEncoder encoder,
+                    String methodName, Object ...args);
+  
+  public void reply(long id, 
+                    String to, 
+                    String from, 
+                    AmpEncoder encoder,
+                    Object result);
   
   /**
    * Close the router.

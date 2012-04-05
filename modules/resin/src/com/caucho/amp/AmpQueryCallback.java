@@ -30,17 +30,18 @@
 package com.caucho.amp;
 
 
+import com.caucho.amp.actor.AmpActorRef;
 import com.caucho.amp.stream.AmpError;
 
 /**
  * callback for a query
  */
 public interface AmpQueryCallback {
-  public void onQueryResult(String to, 
-                            String from, 
+  public void onQueryResult(AmpActorRef to, 
+                            AmpActorRef from, 
                             Object result);
   
-  public void onQueryError(String to,
-                           String from,
+  public void onQueryError(AmpActorRef to,
+                           AmpActorRef from,
                            AmpError error);
 }

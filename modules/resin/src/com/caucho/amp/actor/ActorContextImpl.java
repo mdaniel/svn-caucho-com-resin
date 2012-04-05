@@ -32,6 +32,7 @@ package com.caucho.amp.actor;
 import com.caucho.amp.AmpQueryCallback;
 import com.caucho.amp.mailbox.AmpMailbox;
 import com.caucho.amp.mailbox.AmpMailboxFactory;
+import com.caucho.amp.spi.AmpSpi;
 import com.caucho.amp.stream.AmpEncoder;
 import com.caucho.amp.stream.AmpError;
 import com.caucho.amp.stream.AmpHeaders;
@@ -47,9 +48,13 @@ import com.caucho.util.WeakAlarm;
  * Handles the context for an actor, primarily including its
  * query map.
  */
-public final class ActorContextImpl implements AmpActor, AlarmListener {
+public final class ActorContextImpl extends AmpActorContext 
+  implements AmpActor, AlarmListener
+{
+  private final String _address;
   private final AmpStream _actorStream;
   private final AmpMailbox _mailbox;
+  private final AmpActorRef _from;
   
   private long _timeout = 15 * 60 * 1000L;
   
@@ -60,18 +65,39 @@ public final class ActorContextImpl implements AmpActor, AlarmListener {
   
   private Alarm _alarm = new WeakAlarm(this);
 
-  public ActorContextImpl(AmpStream actorStream, 
+  public ActorContextImpl(String address,
+                          AmpStream actorStream, 
                           AmpMailboxFactory mailboxFactory)
   {
+    _address = address;
     _actorStream = actorStream;
     _mailbox = mailboxFactory.createMailbox(this);
     
+    _from = new ActorRefImpl(address, _mailbox);
+    
     _qId = CurrentTime.getCurrentTime() << 16;
+  }
+
+  @Override
+  public String getAddress()
+  {
+    return _address;
   }
   
   public AmpMailbox getMailbox()
   {
     return _mailbox;
+  }
+  
+  public AmpActorRef getActorRef()
+  {
+    return _from;
+  }
+  
+  @Override
+  public AmpStream getStream()
+  {
+    return this;
   }
   
   public long getQueryTimeout()
@@ -83,83 +109,72 @@ public final class ActorContextImpl implements AmpActor, AlarmListener {
   {
     _timeout = timeout;
   }
-
-  @Override
-  public String getAddress()
-  {
-    return _actorStream.getAddress();
-  }
   
   //
   // message filters
   //
 
   @Override
-  public final void send(String to,
-                         String from, 
-                         AmpHeaders headers,
+  public final void send(AmpActorRef to,
+                         AmpActorRef from,
                          AmpEncoder encoder, 
                          String methodName, 
                          Object... args)
   {
-    _actorStream.send(to, from, headers, encoder, methodName, args);
+    _actorStream.send(to, from, encoder, methodName, args);
   }
 
   @Override
-  public void error(String to, 
-                    String from, 
-                    AmpHeaders headers,
+  public void error(AmpActorRef to, 
+                    AmpActorRef from,
                     AmpEncoder encoder, 
                     AmpError error)
   {
-    _actorStream.error(to, from, headers, encoder, error);
+    _actorStream.error(to, from, encoder, error);
   }
 
   @Override
   public void query(long id, 
-                    String to, 
-                    String from, 
-                    AmpHeaders headers,
+                    AmpActorRef to, 
+                    AmpActorRef from,
                     AmpEncoder encoder, 
                     String methodName, 
                     Object... args)
   {
-    _actorStream.query(id, to, from, headers, encoder, methodName, args);
+    _actorStream.query(id, to, from, encoder, methodName, args);
   }
   
   @Override
   public void queryResult(long id, 
-                          String to, 
-                          String from, 
-                          AmpHeaders headers,
+                          AmpActorRef to, 
+                          AmpActorRef from,
                           AmpEncoder encoder, 
                           Object result)
   {
     QueryItem queryItem = extractQuery(id);
 
     if (queryItem != null) {
-      queryItem.onQueryResult(to, from, headers, encoder, result);
+      queryItem.onQueryResult(to, from, encoder, result);
     }
     else {
-      _actorStream.queryResult(id, to, from, headers, encoder, result);
+      _actorStream.queryResult(id, to, from, encoder, result);
     }
   }
 
   @Override
   public void queryError(long id, 
-                         String to, 
-                         String from, 
-                         AmpHeaders headers,
+                         AmpActorRef to, 
+                         AmpActorRef from,
                          AmpEncoder encoder, 
                          AmpError error)
   {
     QueryItem queryItem = extractQuery(id);
 
     if (queryItem != null) {
-      queryItem.onQueryError(to,  from, error);
+      queryItem.onQueryError(to, from, error);
     }
     else {
-      _actorStream.queryError(id, to, from, headers, encoder, error);
+      _actorStream.queryError(id, to, from, encoder, error);
     }
   }
   
@@ -167,9 +182,7 @@ public final class ActorContextImpl implements AmpActor, AlarmListener {
   // query/sender methods
   //
 
-  public void query(AmpStream stream, 
-                    String to, 
-                    String from, 
+  public void query(AmpActorRef to,
                     String methodName,
                     Object[] args,
                     AmpQueryCallback cb, 
@@ -177,7 +190,7 @@ public final class ActorContextImpl implements AmpActor, AlarmListener {
   {
     long id = addQueryCallback(cb, timeout);
 
-    stream.query(id, to, from, null, NullEncoder.ENCODER, methodName, args);
+    to.query(id, _from, NullEncoder.ENCODER, methodName, args);
   }
 
   /**
@@ -283,17 +296,16 @@ public final class ActorContextImpl implements AmpActor, AlarmListener {
       return _expires;
     }
 
-    void onQueryResult(String to, 
-                       String from,
-                       AmpHeaders headers,
+    void onQueryResult(AmpActorRef to, 
+                       AmpActorRef from,
                        AmpEncoder encoder,
                        Object value)
     {
       _callback.onQueryResult(to, from, value);
     }
 
-    void onQueryError(String to,
-                      String from,
+    void onQueryError(AmpActorRef to,
+                      AmpActorRef from,
                       AmpError error)
     {
       _callback.onQueryError(to, from, error);
@@ -426,15 +438,5 @@ public final class ActorContextImpl implements AmpActor, AlarmListener {
   {
     // TODO Auto-generated method stub
     
-  }
-
-  /* (non-Javadoc)
-   * @see com.caucho.amp.stream.AmpStream#isClosed()
-   */
-  @Override
-  public boolean isClosed()
-  {
-    // TODO Auto-generated method stub
-    return false;
   }
 }

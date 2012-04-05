@@ -45,7 +45,7 @@ public final class AmpQueryFuture implements AmpQueryCallback {
 
   private volatile Object _result;
   private volatile AmpError _error;
-  private volatile ResultState _resultState;
+  private volatile ResultState _resultState = ResultState.UNSET;
   private volatile Thread _thread;
 
   public AmpQueryFuture(long timeout)
@@ -112,7 +112,9 @@ public final class AmpQueryFuture implements AmpQueryCallback {
   }
 
   @Override
-  public void onQueryResult(String to, String from, Object result)
+  public void onQueryResult(AmpActorRef to, 
+                            AmpActorRef from, 
+                            Object result)
   {
     _result = result;
     _resultState = ResultState.RESULT;
@@ -123,8 +125,8 @@ public final class AmpQueryFuture implements AmpQueryCallback {
   }
 
   @Override
-  public void onQueryError(String to,
-                           String from,
+  public void onQueryError(AmpActorRef to,
+                           AmpActorRef from,
                            AmpError error)
   {
     _error = error;

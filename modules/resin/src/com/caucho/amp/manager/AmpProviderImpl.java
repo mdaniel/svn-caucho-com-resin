@@ -27,25 +27,32 @@
  * @author Scott Ferguson
  */
 
-package com.caucho.amp.skeleton;
+package com.caucho.amp.manager;
 
+import java.util.concurrent.atomic.AtomicLong;
+
+import com.caucho.amp.AmpManager;
 import com.caucho.amp.actor.ActorContextImpl;
 import com.caucho.amp.actor.AmpActor;
-import com.caucho.amp.actor.AmpActorRef;
+import com.caucho.amp.actor.AmpProxyActor;
+import com.caucho.amp.mailbox.AmpMailbox;
+import com.caucho.amp.mailbox.AmpMailboxFactory;
+import com.caucho.amp.mailbox.SimpleAmpMailbox;
+import com.caucho.amp.mailbox.SimpleMailboxFactory;
 import com.caucho.amp.router.AmpBroker;
+import com.caucho.amp.router.HashMapAmpBroker;
+import com.caucho.amp.skeleton.AmpReflectionSkeletonFactory;
+import com.caucho.amp.spi.AmpProvider;
+import com.caucho.amp.spi.AmpSpi;
 
 /**
- * Creates MPC skeletons and stubs.
+ * Default AMP provider.
  */
-public interface AmpSkeletonFactory
+public class AmpProviderImpl implements AmpProvider
 {
-  AmpActor createSkeleton(Object bean, 
-                          String address,
-                          AmpBroker broker);
-  
-  <T> T createStub(Class<T> api,
-                   AmpBroker router,
-                   ActorContextImpl actorContext,
-                   AmpActorRef to,
-                   AmpActorRef from);
+  @Override
+  public AmpManager createManager()
+  {
+    return new AmpManagerImpl();
+  }
 }
