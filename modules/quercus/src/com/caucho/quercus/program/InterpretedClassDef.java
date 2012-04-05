@@ -49,12 +49,12 @@ public class InterpretedClassDef extends ClassDef
   protected boolean _isAbstract;
   protected boolean _isInterface;
   protected boolean _isFinal;
-  
+
   protected boolean _hasNonPublicMethods;
 
   // true if defined in the top scope of a page
   private boolean _isTopScope;
-  
+
   protected final HashMap<String,AbstractFunction> _functionMap
     = new HashMap<String,AbstractFunction>();
 
@@ -76,11 +76,11 @@ public class InterpretedClassDef extends ClassDef
   protected AbstractFunction _call;
   protected AbstractFunction _invoke;
   protected AbstractFunction _toString;
-  
+
   protected int _parseIndex;
-  
+
   protected String _comment;
-  
+
   public InterpretedClassDef(Location location,
                              String name,
                              String parentName,
@@ -130,7 +130,7 @@ public class InterpretedClassDef extends ClassDef
   {
     return _isInterface;
   }
-  
+
   /*
    * True for a final class.
    */
@@ -138,7 +138,7 @@ public class InterpretedClassDef extends ClassDef
   {
     _isFinal = isFinal;
   }
-  
+
   /*
    * Returns true for a final class.
    */
@@ -146,7 +146,7 @@ public class InterpretedClassDef extends ClassDef
   {
     return _isFinal;
   }
-  
+
   /*
    * Returns true if class has protected or private methods.
    */
@@ -170,7 +170,7 @@ public class InterpretedClassDef extends ClassDef
   {
     _isTopScope = isTopScope;
   }
-  
+
   /*
    * Unique name to use for compilation.
    */
@@ -179,7 +179,7 @@ public class InterpretedClassDef extends ClassDef
     String name = getName();
     name = name.replace("__", "___");
     name = name.replace("\\", "__");
-    
+
     return name + "_" + _parseIndex;
   }
 
@@ -194,24 +194,24 @@ public class InterpretedClassDef extends ClassDef
       // php/093o
       //cl.addMethod("__construct", _constructor);
     }
-    
+
     if (_destructor != null) {
       cl.setDestructor(_destructor);
       cl.addMethod("__destruct", _destructor);
     }
-    
+
     if (_getField != null)
       cl.setFieldGet(_getField);
-    
+
     if (_setField != null)
       cl.setFieldSet(_setField);
-    
+
     if (_call != null)
       cl.setCall(_call);
-    
+
     if (_invoke != null)
       cl.setInvoke(_invoke);
-    
+
     if (_toString != null)
       cl.setToString(_toString);
 
@@ -222,14 +222,14 @@ public class InterpretedClassDef extends ClassDef
       cl.setUnset(_unset);
 
     cl.addInitializer(this);
-    
+
     for (Map.Entry<String,AbstractFunction> entry : _functionMap.entrySet()) {
       cl.addMethod(entry.getKey(), entry.getValue());
     }
-    
+
     for (Map.Entry<StringValue,FieldEntry> entry : _fieldMap.entrySet()) {
       FieldEntry fieldEntry = entry.getValue();
-      
+
       cl.addField(entry.getKey(),
                   fieldEntry.getValue(),
                   fieldEntry.getVisibility());
@@ -240,7 +240,7 @@ public class InterpretedClassDef extends ClassDef
       Map.Entry<String, StaticFieldEntry> entry : _staticFieldMap.entrySet()
       ) {
       StaticFieldEntry field = entry.getValue();
-      
+
       cl.addStaticFieldExpr(className, entry.getKey(), field.getValue());
     }
 
@@ -256,14 +256,14 @@ public class InterpretedClassDef extends ClassDef
   {
     _constructor = fun;
   }
-  
+
   /**
    * Adds a function.
    */
   public void addFunction(String name, Function fun)
   {
     _functionMap.put(name.intern(), fun);
-    
+
     if (! fun.isPublic()) {
       _hasNonPublicMethods = true;
     }
@@ -305,7 +305,7 @@ public class InterpretedClassDef extends ClassDef
   {
     _staticFieldMap.put(name.toString(), new StaticFieldEntry(value, comment));
   }
-  
+
   /**
    * Adds a const value.
    */
@@ -329,12 +329,12 @@ public class InterpretedClassDef extends ClassDef
   {
     _fieldMap.put(name.toStringValue(), new FieldEntry(value, visibility));
   }
-  
+
   /**
    * Adds a value.
    */
   public void addValue(Value name,
-                       Expr value, 
+                       Expr value,
                        FieldVisibility visibility,
                        String comment)
   {
@@ -369,14 +369,14 @@ public class InterpretedClassDef extends ClassDef
   public void init(Env env)
   {
     QuercusClass qClass = env.getClass(getName());
-    
+
     for (
       Map.Entry<String,StaticFieldEntry> entry : _staticFieldMap.entrySet()
       ) {
       String name = entry.getKey();
 
       StaticFieldEntry field = entry.getValue();
-      
+
       qClass.getStaticFieldVar(env, env.createString(name))
         .set(field.getValue().eval(env).copy());
     }
@@ -388,7 +388,7 @@ public class InterpretedClassDef extends ClassDef
   public void initInstance(Env env, Value value)
   {
     ObjectValue object = (ObjectValue) value;
-    
+
     for (Map.Entry<StringValue,FieldEntry> entry : _fieldMap.entrySet()) {
       FieldEntry fieldEntry = entry.getValue();
 
@@ -408,7 +408,7 @@ public class InterpretedClassDef extends ClassDef
   {
     return _constructor;
   }
-  
+
   /**
    * Sets the documentation for this class.
    */
@@ -416,7 +416,7 @@ public class InterpretedClassDef extends ClassDef
   {
     _comment = comment;
   }
-  
+
   /**
    * Returns the documentation for this class.
    */
@@ -425,7 +425,7 @@ public class InterpretedClassDef extends ClassDef
   {
     return _comment;
   }
-  
+
   /**
    * Returns the comment for the specified field.
    */
@@ -433,13 +433,13 @@ public class InterpretedClassDef extends ClassDef
   public String getFieldComment(StringValue name)
   {
     FieldEntry field = _fieldMap.get(name);
-    
+
     if (field != null)
       return field.getComment();
     else
       return null;
   }
-  
+
   /**
    * Returns the comment for the specified field.
    */
@@ -447,7 +447,7 @@ public class InterpretedClassDef extends ClassDef
   public String getStaticFieldComment(String name)
   {
     StaticFieldEntry field = _staticFieldMap.get(name);
-    
+
     if (field != null)
       return field.getComment();
     else
@@ -458,12 +458,12 @@ public class InterpretedClassDef extends ClassDef
   {
     return _fieldMap.entrySet();
   }
-  
+
   public Set<Map.Entry<String, StaticFieldEntry>> staticFieldSet()
   {
     return _staticFieldMap.entrySet();
   }
-  
+
   public Set<Map.Entry<String, AbstractFunction>> functionSet()
   {
     return _functionMap.entrySet();

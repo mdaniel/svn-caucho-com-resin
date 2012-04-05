@@ -787,15 +787,6 @@ public class ObjectExtValue extends ObjectValue
   //
 
   /**
-   * Finds the method name.
-   */
-  @Override
-  public AbstractFunction findFunction(StringValue methodName)
-  {
-    return _quercusClass.findFunction(methodName);
-  }
-
-  /**
    * Evaluates a method.
    */
   @Override
@@ -1046,23 +1037,27 @@ public class ObjectExtValue extends ObjectValue
   {
     ObjectExtValue newObject = new ObjectExtValue(_quercusClass);
 
+    clone(env, newObject);
+
+    return newObject;
+  }
+
+  protected void clone(Env env, ObjectExtValue obj) {
     Iterator<Entry> iter = new EntryIterator(_entries);
 
     while (iter.hasNext()) {
       Entry entry = iter.next();
 
-      Entry copy = newObject.createEntry(entry.getKey(),
-                                         entry.getVisibility());
+      Entry copy = obj.createEntry(entry.getKey(),
+                                   entry.getVisibility());
 
       copy.setValue(entry.getValue().copy());
     }
-
-    return newObject;
   }
 
   // XXX: need to check the other copy, e.g. for sessions
 
-  /*
+  /**
    * Serializes the value.
    *
    * @param sb holds result of serialization
@@ -1070,7 +1065,8 @@ public class ObjectExtValue extends ObjectValue
    */
   @Override
   public void serialize(Env env,
-                        StringBuilder sb, SerializeMap serializeMap)
+                        StringBuilder sb,
+                        SerializeMap serializeMap)
   {
     Integer index = serializeMap.get(this);
 
@@ -1446,12 +1442,6 @@ public class ObjectExtValue extends ObjectValue
     if (fun != null)
       fun.callMethod(env, qClass, this);
   }
-
-  private static String toMethod(char []key, int keyLength)
-  {
-    return new String(key, 0, keyLength);
-  }
-
 
   @Override
   public boolean issetField( StringValue name) {

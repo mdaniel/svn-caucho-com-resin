@@ -70,18 +70,18 @@ public class JavaClassDef extends ClassDef {
   private final ModuleContext _moduleContext;
 
   private final String _name;
-  private final Class _type;
+  private final Class<?> _type;
 
   private QuercusClass _quercusClass;
 
   private HashSet<String> _instanceOfSet;
   private HashSet<String> _instanceOfSetLowerCase;
-  
+
   private final boolean _isAbstract;
   private final boolean _isInterface;
   private final boolean _isDelegate;
   private boolean _isPhpClass;
-  
+
   private String _resourceType;
 
   private JavaClassDef _componentDef;
@@ -90,7 +90,7 @@ public class JavaClassDef extends ClassDef {
 
   private final HashMap<String, Value> _constMap
     = new HashMap<String, Value>();
-  
+
   private final HashMap<String, Object> _constJavaMap
     = new HashMap<String, Object>();
 
@@ -110,13 +110,13 @@ public class JavaClassDef extends ClassDef {
 
   private AbstractJavaMethod _cons;
   private AbstractJavaMethod __construct;
-  
+
   private JavaMethod __fieldGet;
   private JavaMethod __fieldSet;
-  
+
   private FunctionArrayDelegate _funArrayDelegate;
   private ArrayDelegate _arrayDelegate;
-  
+
   private JavaMethod __call;
   private JavaMethod __toString;
 
@@ -131,7 +131,7 @@ public class JavaClassDef extends ClassDef {
   private Method _iteratorMethod;
 
   private Marshal _marshal;
-  
+
   private String _extension;
 
   public JavaClassDef(ModuleContext moduleContext, String name, Class type)
@@ -141,7 +141,7 @@ public class JavaClassDef extends ClassDef {
     _moduleContext = moduleContext;
     _name = name;
     _type = type;
-    
+
     _isAbstract = Modifier.isAbstract(type.getModifiers());
     _isInterface = type.isInterface();
     _isDelegate = type.isAnnotationPresent(ClassImplementation.class);
@@ -150,7 +150,7 @@ public class JavaClassDef extends ClassDef {
       throw new IllegalStateException(
         L.l("'{0}' needs to be called with JavaArrayClassDef", type));
   }
-  
+
   public JavaClassDef(ModuleContext moduleContext,
                       String name,
                       Class type,
@@ -159,7 +159,7 @@ public class JavaClassDef extends ClassDef {
     this(moduleContext, name, type);
 
     _extension = extension;
-    
+
     moduleContext.addExtensionClass(extension, name);
   }
 
@@ -167,14 +167,14 @@ public class JavaClassDef extends ClassDef {
   {
     if (type == null)
       return;
-    
+
     if (isTop && _isDelegate) {
       _instanceOfSet.add(_name);
       _instanceOfSetLowerCase.add(_name.toLowerCase(Locale.ENGLISH));
     }
     else {
       String name = type.getSimpleName();
-      
+
       _instanceOfSet.add(name);
       _instanceOfSetLowerCase.add(name.toLowerCase(Locale.ENGLISH));
     }
@@ -242,11 +242,11 @@ public class JavaClassDef extends ClassDef {
     return _type.getSimpleName();
   }
 
-  public Class getType()
+  public Class<?> getType()
   {
     return _type;
   }
-  
+
   /*
    * Returns the type of this resource.
    */
@@ -259,7 +259,7 @@ public class JavaClassDef extends ClassDef {
   {
     return _moduleContext;
   }
-  
+
   /*
    * Returns the name of the extension that this class is part of.
    */
@@ -275,10 +275,10 @@ public class JavaClassDef extends ClassDef {
     if (_instanceOfSet == null) {
       _instanceOfSet = new HashSet<String>();
       _instanceOfSetLowerCase = new HashSet<String>();
-      
+
       fillInstanceOfSet(_type, true);
     }
-    
+
     return (_instanceOfSet.contains(name)
             || _instanceOfSetLowerCase.contains(name.toLowerCase(Locale.ENGLISH)));
   }
@@ -298,7 +298,7 @@ public class JavaClassDef extends ClassDef {
   {
     if (type == null)
       return;
-    
+
     interfaceSet.add(_name.toLowerCase(Locale.ENGLISH));
     interfaceSet.add(type.getSimpleName().toLowerCase(Locale.ENGLISH));
 
@@ -350,12 +350,12 @@ public class JavaClassDef extends ClassDef {
   {
     return _isDelegate;
   }
-  
+
   public void setPhpClass(boolean isPhpClass)
   {
     _isPhpClass = isPhpClass;
   }
-  
+
   public boolean isPhpClass()
   {
     return _isPhpClass;
@@ -367,7 +367,7 @@ public class JavaClassDef extends ClassDef {
       Class compType = getType().getComponentType();
       _componentDef = _moduleContext.getJavaClassDefinition(compType.getName());
     }
-    
+
     return _componentDef;
   }
 
@@ -375,7 +375,7 @@ public class JavaClassDef extends ClassDef {
   {
     if (! _isInit)
       init();
-    
+
     if (_resourceType != null)
       return new JavaResourceValue(env, obj, this);
     else
@@ -471,7 +471,7 @@ public class JavaClassDef extends ClassDef {
         return null;
       }
     }
-    
+
     FieldMarshalPair fieldPair = _fieldMap.get(name);
     if (fieldPair != null) {
       try {
@@ -483,13 +483,13 @@ public class JavaClassDef extends ClassDef {
         return null;
       }
     }
-    
+
     AbstractFunction phpGet = qThis.getQuercusClass().getFieldGet();
-    
+
     if (phpGet != null) {
       return phpGet.callMethod(env, getQuercusClass(), qThis, name);
     }
-    
+
     if (__fieldGet != null) {
       try {
         return __fieldGet.callMethod(env, getQuercusClass(), qThis, name);
@@ -535,22 +535,22 @@ public class JavaClassDef extends ClassDef {
         return NullValue.NULL;
       }
     }
-    
+
     if (! qThis.isFieldInit()) {
       AbstractFunction phpSet = qThis.getQuercusClass().getFieldSet();
-      
+
       if (phpSet != null) {
         qThis.setFieldInit(true);
-        
+
         try {
           return phpSet.callMethod(env, getQuercusClass(), qThis, name, value);
-          
+
         } finally {
           qThis.setFieldInit(false);
         }
       }
     }
-    
+
 
     if (__fieldSet != null) {
       try {
@@ -611,7 +611,7 @@ public class JavaClassDef extends ClassDef {
         Value value = _cons.call(env, Value.NULL_ARGS);
 
         __construct.callMethod(env, __construct.getQuercusClass(), value, args);
-        
+
         return value;
       }
       else {
@@ -631,7 +631,7 @@ public class JavaClassDef extends ClassDef {
   {
     return __call;
   }
-  
+
   @Override
   public AbstractFunction getCall()
   {
@@ -754,7 +754,7 @@ public class JavaClassDef extends ClassDef {
       cl.setConstructor(_cons);
       cl.addMethod("__construct", _cons);
     }
-    
+
     if (__construct != null) {
       cl.setConstructor(__construct);
       cl.addMethod("__construct", __construct);
@@ -772,7 +772,7 @@ public class JavaClassDef extends ClassDef {
 
     if (__call != null)
       cl.setCall(__call);
-    
+
     if (__toString != null) {
       cl.addMethod("__toString", __toString);
     }
@@ -797,7 +797,7 @@ public class JavaClassDef extends ClassDef {
     for (Map.Entry<String,Value> entry : _constMap.entrySet()) {
       cl.addConstant(entry.getKey(), new LiteralExpr(entry.getValue()));
     }
-    
+
     for (Map.Entry<String,Object> entry : _constJavaMap.entrySet()) {
       cl.addJavaConstant(entry.getKey(), entry.getValue());
     }
@@ -846,7 +846,7 @@ public class JavaClassDef extends ClassDef {
   {
     if (_isInit)
       return;
-    
+
     synchronized (this) {
       if (_isInit)
         return;
@@ -893,17 +893,17 @@ public class JavaClassDef extends ClassDef {
     _marshal = new JavaMarshal(this, false);
 
     AbstractJavaMethod consMethod = getConsMethod();
-    
+
     if (consMethod != null) {
       if (consMethod.isStatic())
         _cons = consMethod;
       else
         __construct = consMethod;
     }
-    
-    
+
+
     //Method consMethod = getConsMethod(_type);
-    
+
     /*
     if (consMethod != null) {
       if (Modifier.isStatic(consMethod.getModifiers()))
@@ -912,7 +912,7 @@ public class JavaClassDef extends ClassDef {
         __construct = new JavaMethod(_moduleContext, consMethod);
     }
     */
-    
+
     if (_cons == null) {
       Constructor []cons = _type.getConstructors();
 
@@ -937,7 +937,7 @@ public class JavaClassDef extends ClassDef {
       } else
         _cons = null;
     }
-    
+
     if (_cons != null)
       _cons.setConstructor(true);
 
@@ -1031,7 +1031,7 @@ public class JavaClassDef extends ClassDef {
     catch (IllegalAccessException e) {
       throw new QuercusModuleException(e);
     }
-    
+
     return true;
   }
 
@@ -1047,21 +1047,21 @@ public class JavaClassDef extends ClassDef {
         continue;
       if (! Modifier.isPublic(method.getModifiers()))
         continue;
-      
+
       return method;
     }
 
     return null;
   }
   */
-  
+
   private AbstractJavaMethod getConsMethod()
   {
     for (AbstractJavaMethod method : _functionMap.values()) {
       if (method.getName().equals("__construct"))
         return method;
     }
-    
+
     return null;
   }
 
@@ -1083,7 +1083,7 @@ public class JavaClassDef extends ClassDef {
     for (Method method : methods) {
       if (Modifier.isStatic(method.getModifiers()))
         continue;
-      
+
       if (method.isAnnotationPresent(Hide.class))
         continue;
 
@@ -1097,30 +1097,30 @@ public class JavaClassDef extends ClassDef {
 
           AbstractJavaMethod existingGetter = _getMap.get(quercusName);
           AbstractJavaMethod newGetter = new JavaMethod(moduleContext, method);
-          
+
           if (existingGetter != null) {
             newGetter = existingGetter.overload(newGetter);
           }
-          
+
           _getMap.put(quercusName, newGetter);
         }
         else if (methodName.startsWith("is")) {
           StringValue quercusName
             = javaToQuercusConvert(methodName.substring(2, length));
-          
+
           AbstractJavaMethod existingGetter = _getMap.get(quercusName);
           AbstractJavaMethod newGetter = new JavaMethod(moduleContext, method);
-          
+
           if (existingGetter != null) {
             newGetter = existingGetter.overload(newGetter);
           }
-          
+
           _getMap.put(quercusName, newGetter);
         }
         else if (methodName.startsWith("set")) {
           StringValue quercusName
             = javaToQuercusConvert(methodName.substring(3, length));
-          
+
           AbstractJavaMethod existingSetter = _setMap.get(quercusName);
           AbstractJavaMethod newSetter = new JavaMethod(moduleContext, method);
 
@@ -1136,13 +1136,13 @@ public class JavaClassDef extends ClassDef {
         } else if ("__set".equals(methodName)) {
           if (_funArrayDelegate == null)
             _funArrayDelegate = new FunctionArrayDelegate();
-          
+
           _funArrayDelegate.setArrayPut(new JavaMethod(moduleContext, method));
         } else if ("__count".equals(methodName)) {
           FunctionCountDelegate delegate = new FunctionCountDelegate();
-          
+
           delegate.setCount(new JavaMethod(moduleContext, method));
-          
+
           _countDelegate = delegate;
         } else if ("__getField".equals(methodName)) {
           __fieldGet = new JavaMethod(moduleContext, method);
@@ -1160,7 +1160,7 @@ public class JavaClassDef extends ClassDef {
     /*
     if (__fieldGet != null)
       _getMap.clear();
-    
+
     if (__fieldSet != null)
       _setMap.clear();
     */
@@ -1176,7 +1176,7 @@ public class JavaClassDef extends ClassDef {
 
       MarshalFactory factory = moduleContext.getMarshalFactory();
       Marshal marshal = factory.create(field.getType(), false);
-      
+
       _fieldMap.put(new ConstStringValue(field.getName()),
                     new FieldMarshalPair(field, marshal));
     }
@@ -1250,7 +1250,7 @@ public class JavaClassDef extends ClassDef {
 
       try {
         Object obj = field.get(null);
-        
+
         Value value = QuercusContext.objectToValue(obj);
 
         if (value != null)
@@ -1264,7 +1264,7 @@ public class JavaClassDef extends ClassDef {
 
     //introspectConstants(type.getSuperclass());
   }
-  
+
   /**
    * Introspects the Java class.
    */
@@ -1279,13 +1279,13 @@ public class JavaClassDef extends ClassDef {
     for (Method method : methods) {
       if (! Modifier.isPublic(method.getModifiers()))
         continue;
-      
+
       if (method.isAnnotationPresent(Hide.class))
         continue;
 
       if (_isPhpClass && method.getDeclaringClass() == Object.class)
         continue;
-      
+
       if ("iterator".equals(method.getName())
           && method.getParameterTypes().length == 0
           && Iterator.class.isAssignableFrom(method.getReturnType())) {
@@ -1309,7 +1309,7 @@ public class JavaClassDef extends ClassDef {
         if (method.getName().startsWith("quercus_"))
           throw new UnsupportedOperationException(
             L.l("{0}: use @Name instead", method.getName()));
-        
+
         JavaMethod newFun = new JavaMethod(moduleContext, method);
         String funName = newFun.getName();
         AbstractJavaMethod fun = _functionMap.getRaw(funName);
@@ -1322,7 +1322,7 @@ public class JavaClassDef extends ClassDef {
         _functionMap.put(funName, fun);
       }
     }
-    
+
     /* Class.getMethods() is recursive
     introspectMethods(moduleContext, type.getSuperclass());
 
@@ -1333,7 +1333,7 @@ public class JavaClassDef extends ClassDef {
     }
     */
   }
-  
+
   public JavaMethod getToString()
   {
     return __toString;
@@ -1348,23 +1348,23 @@ public class JavaClassDef extends ClassDef {
     return __toString.callMethod(
       env, getQuercusClass(), value, new Expr[0]).toStringValue();
   }
-  
+
   public boolean jsonEncode(Env env, Object obj, StringValue sb)
   {
     if (_jsonEncode == null)
       return false;
-    
+
     try {
       _jsonEncode.invoke(obj, env, sb);
       return true;
-      
+
     } catch (InvocationTargetException e) {
       throw new QuercusRuntimeException(e);
     } catch (IllegalAccessException e) {
       throw new QuercusRuntimeException(e);
     }
   }
-  
+
   /**
    *
    * @return false if printRImpl not implemented
@@ -1413,24 +1413,24 @@ public class JavaClassDef extends ClassDef {
       throw new QuercusRuntimeException(e);
     }
   }
-  
+
   private class JavaTraversableDelegate
     implements TraversableDelegate
   {
     private Method _iteratorMethod;
-    
+
     public JavaTraversableDelegate(Method iterator)
     {
       _iteratorMethod = iterator;
     }
-    
+
     public Iterator<Map.Entry<Value, Value>>
       getIterator(Env env, ObjectValue qThis)
     {
       try {
         Iterator iterator
           = (Iterator) _iteratorMethod.invoke(qThis.toJavaObject());
-        
+
         return new JavaIterator(env, iterator);
       } catch (InvocationTargetException e) {
         throw new QuercusRuntimeException(e);
@@ -1444,7 +1444,7 @@ public class JavaClassDef extends ClassDef {
       try {
         Iterator iterator =
           (Iterator) _iteratorMethod.invoke(qThis.toJavaObject());
-        
+
         return new JavaKeyIterator(iterator);
       } catch (InvocationTargetException e) {
         throw new QuercusRuntimeException(e);
@@ -1452,7 +1452,7 @@ public class JavaClassDef extends ClassDef {
         throw new QuercusRuntimeException(e);
       }
     }
-    
+
     public Iterator<Value> getValueIterator(Env env, ObjectValue qThis)
     {
       try {
@@ -1473,24 +1473,24 @@ public class JavaClassDef extends ClassDef {
   {
     private Iterator _iterator;
     private int _index;
-    
+
     public JavaKeyIterator(Iterator iterator)
     {
       _iterator = iterator;
     }
-    
+
     public Value next()
     {
       _iterator.next();
 
       return LongValue.create(_index++);
     }
-    
+
     public boolean hasNext()
     {
       return _iterator.hasNext();
     }
-    
+
     public void remove()
     {
       throw new UnsupportedOperationException();
@@ -1502,18 +1502,18 @@ public class JavaClassDef extends ClassDef {
   {
     private Env _env;
     private Iterator _iterator;
-    
+
     public JavaValueIterator(Env env, Iterator iterator)
     {
       _env = env;
       _iterator = iterator;
     }
-    
+
     public Value next()
     {
       return _env.wrapJava(_iterator.next());
     }
-    
+
     public boolean hasNext()
     {
       if (_iterator != null)
@@ -1521,7 +1521,7 @@ public class JavaClassDef extends ClassDef {
       else
         return false;
     }
-    
+
     public void remove()
     {
       throw new UnsupportedOperationException();
@@ -1533,23 +1533,23 @@ public class JavaClassDef extends ClassDef {
   {
     private Env _env;
     private Iterator _iterator;
-    
+
     private int _index;
-    
+
     public JavaIterator(Env env, Iterator iterator)
     {
       _env = env;
       _iterator = iterator;
     }
-    
+
     public Map.Entry<Value, Value> next()
     {
       Object next = _iterator.next();
       int index = _index++;
-      
+
       if (next instanceof Map.Entry) {
         Map.Entry entry = (Map.Entry) next;
-        
+
         if (entry.getKey() instanceof Value
             && entry.getValue() instanceof Value)
         {
@@ -1558,7 +1558,7 @@ public class JavaClassDef extends ClassDef {
         else {
           Value key = _env.wrapJava(entry.getKey());
           Value val = _env.wrapJava(entry.getValue());
-          
+
           return new JavaEntry(key, val);
         }
       }
@@ -1566,7 +1566,7 @@ public class JavaClassDef extends ClassDef {
         return new JavaEntry(LongValue.create(index), _env.wrapJava(next));
       }
     }
-    
+
     public boolean hasNext()
     {
       if (_iterator != null)
@@ -1574,7 +1574,7 @@ public class JavaClassDef extends ClassDef {
       else
         return false;
     }
-    
+
     public void remove()
     {
       throw new UnsupportedOperationException();
@@ -1586,23 +1586,23 @@ public class JavaClassDef extends ClassDef {
   {
     private Value _key;
     private Value _value;
-    
+
     public JavaEntry(Value key, Value value)
     {
       _key = key;
       _value = value;
     }
-    
+
     public Value getKey()
     {
       return _key;
     }
-    
+
     public Value getValue()
     {
       return _value;
     }
-    
+
     public Value setValue(Value value)
     {
       throw new UnsupportedOperationException();
@@ -1632,7 +1632,7 @@ public class JavaClassDef extends ClassDef {
       _marshal = marshal;
     }
   }
-  
+
   private static class LongClassDef extends JavaClassDef {
     LongClassDef(ModuleContext module)
     {
@@ -1645,7 +1645,7 @@ public class JavaClassDef extends ClassDef {
       return LongValue.create(((Number) obj).longValue());
     }
   }
-  
+
   private static class DoubleClassDef extends JavaClassDef {
     DoubleClassDef(ModuleContext module)
     {
@@ -1658,7 +1658,7 @@ public class JavaClassDef extends ClassDef {
       return new DoubleValue(((Number) obj).doubleValue());
     }
   }
-  
+
   private static class BigIntegerClassDef extends JavaClassDef {
     BigIntegerClassDef(ModuleContext module)
     {
@@ -1671,7 +1671,7 @@ public class JavaClassDef extends ClassDef {
       return new BigIntegerValue(env, (BigInteger) obj, this);
     }
   }
-  
+
   private static class BigDecimalClassDef extends JavaClassDef {
     BigDecimalClassDef(ModuleContext module)
     {
@@ -1684,7 +1684,7 @@ public class JavaClassDef extends ClassDef {
       return new BigDecimalValue(env, (BigDecimal) obj, this);
     }
   }
-  
+
   private static class StringClassDef extends JavaClassDef {
     StringClassDef(ModuleContext module)
     {
@@ -1697,7 +1697,7 @@ public class JavaClassDef extends ClassDef {
       return env.createString((String) obj);
     }
   }
-  
+
   private static class BooleanClassDef extends JavaClassDef {
     BooleanClassDef(ModuleContext module)
     {
@@ -1713,7 +1713,7 @@ public class JavaClassDef extends ClassDef {
         return BooleanValue.FALSE;
     }
   }
-  
+
   private static class CalendarClassDef extends JavaClassDef {
     CalendarClassDef(ModuleContext module)
     {
@@ -1726,7 +1726,7 @@ public class JavaClassDef extends ClassDef {
       return new JavaCalendarValue(env, (Calendar)obj, this);
     }
   }
-  
+
   private static class DateClassDef extends JavaClassDef {
     DateClassDef(ModuleContext module)
     {
@@ -1739,7 +1739,7 @@ public class JavaClassDef extends ClassDef {
       return new JavaDateValue(env, (Date)obj, this);
     }
   }
-  
+
   private static class URLClassDef extends JavaClassDef {
     URLClassDef(ModuleContext module)
     {

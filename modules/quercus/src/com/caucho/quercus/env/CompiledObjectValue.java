@@ -97,7 +97,7 @@ public class CompiledObjectValue extends ObjectValue
       if (index >= 0)
         return _fields[index].toValue();
     }
-    
+
     if (_object != null) {
       return _object.getField(env, key);
     }
@@ -125,7 +125,7 @@ public class CompiledObjectValue extends ObjectValue
 
     if (_object == null)
       _object = new ObjectExtValue(_quercusClass);
-    
+
     return _object.getFieldVar(env, key);
   }
 
@@ -149,7 +149,7 @@ public class CompiledObjectValue extends ObjectValue
 
     if (_object == null)
       _object = new ObjectExtValue(_quercusClass);
-    
+
     return _object.getFieldArg(env, key, isTop);
   }
 
@@ -173,7 +173,7 @@ public class CompiledObjectValue extends ObjectValue
 
     if (_object == null)
       _object = new ObjectExtValue(_quercusClass);
-    
+
     return _object.getFieldArgRef(env, key);
   }
 
@@ -195,7 +195,7 @@ public class CompiledObjectValue extends ObjectValue
 
     if (_object == null)
       _object = new ObjectExtValue(_quercusClass);
-    
+
     return _object.getFieldArray(env, key);
   }
 
@@ -217,7 +217,7 @@ public class CompiledObjectValue extends ObjectValue
 
     if (_object == null)
       _object = new ObjectExtValue(_quercusClass);
-    
+
     return _object.getFieldObject(env, key);
   }
 
@@ -236,7 +236,7 @@ public class CompiledObjectValue extends ObjectValue
         return value;
       }
     }
-    
+
     if (_object == null)
       _object = new ObjectExtValue(_quercusClass);
 
@@ -258,18 +258,9 @@ public class CompiledObjectValue extends ObjectValue
         return;
       }
     }
-    
+
     if (_object != null)
       _object.unsetField(key);
-  }
-
-  /**
-   * Finds the method name.
-   */
-  @Override
-  public AbstractFunction findFunction(StringValue methodName)
-  {
-    return _quercusClass.findFunction(methodName);
   }
 
   /**
@@ -525,7 +516,7 @@ public class CompiledObjectValue extends ObjectValue
     sb.append(":{");
 
     HashMap<StringValue,ClassField> names = _quercusClass.getClassFields();
-    
+
     if (names != null) {
       int index = 0;
 
@@ -655,18 +646,18 @@ public class CompiledObjectValue extends ObjectValue
 
   private void writeObject(ObjectOutputStream out)
     throws IOException
-  { 
+  {
     out.writeObject(_fields);
     out.writeObject(_object);
     out.writeObject(_quercusClass.getName());
   }
-  
+
   private void readObject(ObjectInputStream in)
     throws ClassNotFoundException, IOException
-  { 
+  {
     _fields = (Value []) in.readObject();
     _object = (ObjectExtValue) in.readObject();
-    
+
     Env env = Env.getInstance();
     String name = (String) in.readObject();
 
@@ -677,9 +668,9 @@ public class CompiledObjectValue extends ObjectValue
     }
     else {
       cl = env.getQuercus().getStdClass();
-      
+
       setQuercusClass(cl);
-      
+
       setIncompleteObjectName(name);
     }
   }

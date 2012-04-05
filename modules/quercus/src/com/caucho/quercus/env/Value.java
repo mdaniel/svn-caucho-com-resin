@@ -120,10 +120,7 @@ abstract public class Value implements java.io.Serializable
    */
   final public boolean isA(Value value)
   {
-    if (value.isObject())
-      return isA(value.getClassName());
-    else
-      return isA(value.toString());
+    return isA(value.getClassName());
   }
 
   /**
@@ -1140,7 +1137,7 @@ abstract public class Value implements java.io.Serializable
   /**
    * Returns true for a callable object.
    */
-  public boolean isCallable(Env env)
+  public boolean isCallable(Env env, boolean isCheckSyntaxOnly, Value nameRef)
   {
     return false;
   }

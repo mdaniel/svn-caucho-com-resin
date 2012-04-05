@@ -37,23 +37,23 @@ import com.caucho.quercus.program.Function;
  */
 public class Closure extends Callback {
   private static final Value []NULL_ARGS = new Value[0];
-  
+
   private static final StringValue INVOKE = MethodIntern.intern("__invoke");
-  
+
   private Function _fun;
   private Value []_args;
 
   public Closure(Env env, Function fun)
   {
     _fun = fun;
-    
+
     Arg []args = fun.getClosureUseArgs();
     if (args != null && args.length > 0) {
       _args = new Value[args.length];
-      
+
       for (int i = 0; i < args.length; i++) {
         Arg arg = args[i];
-        
+
         if (arg.isReference())
           _args[i] = env.getRef(arg.getName());
         else
@@ -61,30 +61,37 @@ public class Closure extends Callback {
       }
     }
   }
-  
-  public boolean isCallable(Env env, boolean isSyntax)
+
+  @Override
+  public boolean isCallable(Env env, boolean isCheckSyntaxOnly, Value nameRef)
   {
+    if (nameRef != null) {
+      StringValue sb = env.createString("Closure::__invoke");
+
+      nameRef.set(sb);
+    }
+
     return true;
   }
-  
+
   @Override
   public Callable toCallable(Env env)
   {
     return this;
   }
-  
+
   @Override
   public boolean isObject()
   {
-    return true;    
+    return true;
   }
-  
+
   @Override
   public String getType()
   {
     return "object";
   }
-  
+
   @Override
   public Value call(Env env, Value []args)
   {
@@ -108,14 +115,14 @@ public class Closure extends Callback {
   {
     return true;
   }
-  
+
   //
   // special methods
   //
-  
+
   @Override
-  public Value callMethod(Env env, 
-                          StringValue methodName, int hash, 
+  public Value callMethod(Env env,
+                          StringValue methodName, int hash,
                           Value []args)
   {
     if (methodName == INVOKE || INVOKE.equals(methodName))

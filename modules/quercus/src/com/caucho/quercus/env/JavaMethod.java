@@ -59,10 +59,10 @@ public class JavaMethod extends JavaInvoker {
           method.getParameterAnnotations(),
           method.getAnnotations(),
           method.getReturnType());
-    
+
     _method = method;
     _isStatic = Modifier.isStatic(method.getModifiers());
-    
+
     // php/069a
     // Java 6 fixes the need to do this for methods of inner classes
     _method.setAccessible(true);
@@ -81,7 +81,7 @@ public class JavaMethod extends JavaInvoker {
 
     return name;
   }
-  
+
   @Override
   public String getDeclaringClassName()
   {
@@ -99,13 +99,13 @@ public class JavaMethod extends JavaInvoker {
   }
 
   @Override
-  public Class []getJavaParameterTypes()
+  public Class<?> []getJavaParameterTypes()
   {
     return _method.getParameterTypes();
   }
 
   @Override
-  public Class getJavaDeclaringClass()
+  public Class<?> getJavaDeclaringClass()
   {
     return _method.getDeclaringClass();
   }
@@ -117,14 +117,14 @@ public class JavaMethod extends JavaInvoker {
       return _method.invoke(obj, args);
     } catch (InvocationTargetException e) {
       Throwable e1 = e.getCause();
-      
+
       // php/0g0h
       if (e1 instanceof QuercusException)
         throw (QuercusException) e1;
 
       if (e1 instanceof QuercusException)
         throw (QuercusException) e1;
-      
+
       String methodName = (_method.getDeclaringClass().getName() + "."
                            + _method.getName());
 
@@ -132,7 +132,15 @@ public class JavaMethod extends JavaInvoker {
     } catch (Exception e) {
       String methodName = (_method.getDeclaringClass().getName() + "."
                            + _method.getName());
-      
+
+      System.err.println("JavaMethod0: " + args.length);
+      for (int i = 0; i < args.length; i++ ){
+        System.err.println("\t" + args[i] + " . " + args[i].getClass());
+      }
+
+      System.err.println("JavaMethod1: " + _method);
+      System.err.println("JavaMethod2: " + obj);
+
       throw new QuercusException(methodName + ": " + e.getMessage(), e);
     }
   }

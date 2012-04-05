@@ -317,7 +317,7 @@ abstract public class ArrayValue extends Value {
    * Converts to a java object.
    */
   @Override
-  public Map toJavaMap(Env env, Class type)
+  public Map toJavaMap(Env env, Class<?> type)
   {
     Map map = null;
 
@@ -350,21 +350,52 @@ abstract public class ArrayValue extends Value {
   }
 
   @Override
-  public boolean isCallable(Env env)
+  public boolean isCallable(Env env, boolean isCheckSyntaxOnly, Value nameRef)
   {
+    //XXX: refactor to use toCallable()
+
     Value obj = get(LongValue.ZERO);
     Value nameV = get(LongValue.ONE);
+
+    if (nameRef != null) {
+      nameRef.set(NullValue.NULL);
+    }
 
     if (! nameV.isString()) {
       return false;
     }
+    else if (isCheckSyntaxOnly) {
+      if (obj.isObject() || obj.isString()) {
+        if (nameRef != null) {
+          StringValue sb = env.createStringBuilder();
 
-    StringValue nameStr = nameV.toStringValue(env);
+          if (obj.isObject()) {
+            sb.append(obj.getClassName());
+          }
+          else {
+            sb.append(obj);
+          }
+
+          sb.append("::");
+          sb.append(nameV);
+
+          nameRef.set(sb);
+        }
+
+        return true;
+      }
+      else {
+        return false;
+      }
+    }
+
+    AbstractFunction fun;
 
     if (obj.isObject()) {
+      StringValue nameStr = nameV.toStringValue(env);
+
       int p = nameStr.indexOf("::");
 
-      // php/09lf
       if (p > 0) {
         String name = nameStr.toString();
 
@@ -376,23 +407,48 @@ abstract public class ArrayValue extends Value {
         if (cls == null) {
           return false;
         }
+        else if (! obj.isA(cls)) {
+          return false;
+        }
 
         nameStr = env.createString(name);
-      }
 
-      // php/1270
-      return obj.findFunction(nameStr) != null;
+        fun = cls.findFunction(nameStr);
+      }
+      else {
+        fun = obj.findFunction(nameStr);
+      }
     }
     else {
-      QuercusClass cl = env.findClass(obj.toString());
+      String clsName = obj.toString();
+      QuercusClass cls = env.findClass(clsName);
 
-      if (cl == null) {
+      if (cls == null) {
         return false;
+      }
+
+      StringValue nameStr = nameV.toStringValue(env);
+      fun = cls.findFunction(nameStr);
+    }
+
+    if (fun != null && fun.isPublic()) {
+      if (nameRef != null) {
+        StringValue sb = env.createStringBuilder();
+
+        sb.append(fun.getDeclaringClass().getName());
+        sb.append("::");
+        sb.append(fun.getName());
+
+        nameRef.set(sb);
       }
 
       return true;
     }
+    else {
+      return false;
+    }
   }
+
   /**
    * Converts to a callable object.
    */

@@ -218,14 +218,6 @@ abstract public class StringValue
     return true;
   }
 
-  /*
-   * Returns true if this is a PHP5 string.
-   */
-  public boolean isPHP5String()
-  {
-    return false;
-  }
-
   /**
    * Returns true if the value is empty
    */
@@ -233,6 +225,19 @@ abstract public class StringValue
   public boolean isEmpty()
   {
     return length() == 0 || length() == 1 && charAt(0) == '0';
+  }
+
+  @Override
+  public boolean isCallable(Env env, boolean isCheckSyntaxOnly, Value nameRef) {
+    if (nameRef != null) {
+      nameRef.set(this);
+    }
+
+    if (isCheckSyntaxOnly) {
+      return true;
+    }
+
+    return env.findFunction(this.toString()) != null;
   }
 
   //

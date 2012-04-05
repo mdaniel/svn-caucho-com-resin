@@ -43,98 +43,98 @@ import com.caucho.quercus.env.Value;
 /**
  * Date functions.
  */
-public class DateTimeZone
+public class DateTimeZone implements Cloneable
 {
   private TimeZone _timeZone;
-  
+
   protected DateTimeZone(Env env)
   {
     TimeZone timeZone = env.getDefaultTimeZone();
-    
+
     if (timeZone == null)
       timeZone = TimeZone.getDefault();
-    
+
     _timeZone = timeZone;
   }
-  
+
   protected DateTimeZone(String id)
   {
     _timeZone = TimeZone.getTimeZone(id);
   }
-  
+
   public static DateTimeZone __construct(String id)
   {
     return new DateTimeZone(id);
   }
-  
+
   public static ArrayValue listAbbreviations()
   {
     ArrayValue array = new ArrayValueImpl();
-    
+
     String []ids = TimeZone.getAvailableIDs();
-    
+
     for (int i = 0; i < ids.length; i++) {
       TimeZone tz = TimeZone.getTimeZone(ids[i]);
-      
+
       addAbbreviation(array, tz, false);
-      
+
       if (tz.useDaylightTime())
         addAbbreviation(array, tz, true);
     }
-    
+
     return array;
   }
-  
+
   private static void addAbbreviation(ArrayValue array,
                                       TimeZone tz,
                                       boolean isDST)
   {
     ArrayValueImpl zone = new ArrayValueImpl();
-    
+
     zone.put("dst", isDST);
-    
+
     int offset = tz.getRawOffset() / 1000;
-    
+
     if (isDST)
       offset += tz.getDSTSavings() / 1000;
-      
+
     zone.put("offset", offset);
     zone.put("timezone_id", tz.getID());
-    
+
     String name = tz.getDisplayName(isDST, TimeZone.SHORT);
     Value nameV = StringValue.create(name.toLowerCase(Locale.ENGLISH));
-    
+
     Value zones = array.get(nameV);
-    
+
     if (zones.isNull()) {
       zones = new ArrayValueImpl();
-      
+
       array.put(nameV, zones);
     }
-    
+
     zones.put(zone);
   }
-  
+
   public static ArrayValue listIdentifiers()
   {
     ArrayValue array = new ArrayValueImpl();
-    
+
     String []ids = TimeZone.getAvailableIDs();
-    
+
     java.util.Arrays.sort(ids);
-    
+
     for (int i = 0; i < ids.length; i++) {
       array.put(ids[i]);
     }
 
     return array;
   }
-  
+
   public String getName()
   {
     return _timeZone.getID();
   }
-  
+
   public long getOffset(DateTime dateTime)
   {
     return _timeZone.getOffset(dateTime.getTime()) / 1000L;
@@ -147,19 +147,19 @@ public class DateTimeZone
     throw new UnimplementedException("DateTimeZone->getTransitions()");
   }
   */
-  
+
   protected TimeZone getTimeZone()
   {
     return _timeZone;
   }
-  
+
   protected static Value findTimeZone(StringValue abbr)
   {
     // Can't use TimeZone.getTimeZone() because that function returns
     // GMT timezone by default if not found
-    
+
     ArrayValue array = listAbbreviations();
-    
+
     Value zones = array.get(abbr.toLowerCase());
 
     if (zones.isset())
@@ -167,18 +167,18 @@ public class DateTimeZone
     else
       return BooleanValue.FALSE;
   }
-  
+
   protected static Value findTimeZone(StringValue abbr,
                                       int offset,
                                       boolean isDST)
   {
     ArrayValue array = listAbbreviations();
-    
+
     Value zones = array.get(abbr.toLowerCase());
-    
+
     if (zones.isset() && zones.isArray()) {
       Value offsetStr = StringValue.create("offset");
-      
+
       for (Value zone : ((ArrayValue)zones).values()) {
         if (zone.get(offsetStr).toInt() == offset)
           return zone.get(StringValue.create("timezone_id"));
@@ -187,12 +187,12 @@ public class DateTimeZone
 
     return findTimeZone(offset, isDST);
   }
-  
+
   protected static Value findTimeZone(int offset,
                                       boolean isDST)
   {
     String []zoneIDs = TimeZone.getAvailableIDs(offset * 1000);
-    
+
     for (int i = 0; i < zoneIDs.length; i++) {
       TimeZone zone = TimeZone.getTimeZone(zoneIDs[i]);
 
@@ -202,7 +202,12 @@ public class DateTimeZone
 
     return BooleanValue.FALSE;
   }
-  
+
+  @Override
+  public Object clone() {
+    return this;
+  }
+
   public String toString()
   {
     return _timeZone.getID();

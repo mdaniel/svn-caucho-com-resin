@@ -29,12 +29,18 @@
 
 package com.caucho.quercus.env;
 
+import com.caucho.quercus.QuercusException;
+import com.caucho.quercus.env.ObjectExtValue.Entry;
+import com.caucho.quercus.env.ObjectExtValue.EntryIterator;
 import com.caucho.quercus.program.JavaClassDef;
 import com.caucho.vfs.WriteStream;
 
 import java.io.IOException;
 import java.io.Serializable;
+import java.lang.reflect.InvocationTargetException;
+import java.lang.reflect.Method;
 import java.util.IdentityHashMap;
+import java.util.Iterator;
 
 /**
  * Represents a PHP object which extends a Java value.
@@ -44,8 +50,9 @@ public class ObjectExtJavaValue extends ObjectExtValue
 {
   private Object _object;
   private final JavaClassDef _javaClassDef;
-  
-  public ObjectExtJavaValue(QuercusClass cl, Object object,
+
+  public ObjectExtJavaValue(QuercusClass cl,
+                            Object object,
                             JavaClassDef javaClassDef)
   {
     super(cl);
@@ -53,7 +60,7 @@ public class ObjectExtJavaValue extends ObjectExtValue
     _object = object;
     _javaClassDef = javaClassDef;
   }
-  
+
   public ObjectExtJavaValue(QuercusClass cl,
                             JavaClassDef javaClassDef)
   {
@@ -61,7 +68,7 @@ public class ObjectExtJavaValue extends ObjectExtValue
 
     _javaClassDef = javaClassDef;
   }
-  
+
   //
   // field
   //
@@ -75,6 +82,7 @@ public class ObjectExtJavaValue extends ObjectExtValue
     if (_object == null) {
       _object = createJavaObject(env);
     }
+
     Value parentValue = super.getFieldExt(env, name);
     if(parentValue != NullValue.NULL && parentValue != UnsetValue.UNSET)
         return parentValue;
@@ -101,7 +109,7 @@ public class ObjectExtJavaValue extends ObjectExtValue
     if (_object == null) {
       createJavaObject(env);
     }
-    
+
     return _javaClassDef.putField(env, this, name, value);
   }
 
@@ -114,10 +122,10 @@ public class ObjectExtJavaValue extends ObjectExtValue
     if (_object == null) {
       _object = createJavaObject(Env.getInstance());
     }
-    
+
     return _object;
   }
-  
+
   /**
    * Binds a Java object to this object.
    */
@@ -127,7 +135,7 @@ public class ObjectExtJavaValue extends ObjectExtValue
     if (_object == null)
       _object = value.toJavaObject();
   }
-  
+
   /**
    * Creats a backing Java object for this php object.
    */
@@ -136,7 +144,7 @@ public class ObjectExtJavaValue extends ObjectExtValue
     Value javaWrapper = _javaClassDef.callNew(env, Value.NULL_ARGS);
     return javaWrapper.toJavaObject();
   }
-  
+
   public void varDumpImpl(Env env,
                           WriteStream out,
                           int depth,
@@ -146,7 +154,7 @@ public class ObjectExtJavaValue extends ObjectExtValue
     if (_object == null) {
       _object = createJavaObject(Env.getInstance());
     }
-    
+
     if (! _javaClassDef.varDumpImpl(env, this, _object, out, depth, valueSet))
       super.varDumpImpl(env, out, depth, valueSet);
   }
@@ -161,8 +169,49 @@ public class ObjectExtJavaValue extends ObjectExtValue
     if (_object == null) {
       _object = createJavaObject(Env.getInstance());
     }
-    
+
     _javaClassDef.printRImpl(env, _object, out, depth, valueSet);
+  }
+
+  /**
+   * Clone the object
+   */
+  @Override
+  public Value clone(Env env)
+  {
+    Object obj = null;
+
+    if (_object != null) {
+      if (! (_object instanceof Cloneable)) {
+        return env.error(L.l("Java class {0} does not implement Cloneable",
+                             _object.getClass().getName()));
+      }
+
+      Class<?> cls = _javaClassDef.getType();
+
+      try {
+        Method method = cls.getMethod("clone", new Class[0]);
+        method.setAccessible(true);
+
+        obj = method.invoke(_object);
+      }
+      catch (NoSuchMethodException e) {
+        throw new QuercusException(e);
+      }
+      catch (InvocationTargetException e) {
+        throw new QuercusException(e.getCause());
+      }
+      catch (IllegalAccessException e) {
+        throw new QuercusException(e);
+      }
+    }
+
+    ObjectExtValue newObject
+      = new ObjectExtJavaValue(_quercusClass, obj, _javaClassDef);
+
+    clone(env, newObject);
+
+    return newObject;
   }
 }
 

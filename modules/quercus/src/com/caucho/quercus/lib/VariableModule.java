@@ -356,62 +356,15 @@ public class VariableModule extends AbstractQuercusModule {
    * Returns the type string for the variable
    */
   public static boolean is_callable(Env env,
-                                    Value v,
-                                    @Optional boolean isSyntaxOnly,
+                                    @ReadOnly Value v,
+                                    @Optional boolean isCheckSyntaxOnly,
                                     @Optional @Reference Value nameRef)
   {
-    if (v.isCallable(env)) {
-      return true;
+    if (nameRef.isDefault()) {
+      nameRef = null;
     }
 
-    // XXX: this needs to be made OO through Value
-
-    if (v.isString()) {
-      if (nameRef != null)
-        nameRef.set(v);
-
-      if (isSyntaxOnly)
-        return true;
-      else
-        return env.findFunction(v.toString()) != null;
-    }
-    else if (v.isArray()) {
-      Value obj = v.get(LongValue.ZERO);
-      Value name = v.get(LongValue.ONE);
-
-      if (! (name.isString()))
-        return false;
-
-      StringValue nameStr = name.toStringValue(env);
-
-      if (nameRef != null)
-        nameRef.set(nameStr);
-
-      if (obj.isString()) {
-        if (isSyntaxOnly)
-          return true;
-
-        QuercusClass cl = env.findClass(obj.toString());
-        if (cl == null)
-          return false;
-
-        return (cl.findFunction(nameStr) != null);
-      }
-      else if (obj.isObject()) {
-        if (isSyntaxOnly)
-          return true;
-
-        return obj.findFunction(nameStr) != null;
-      }
-      else
-        return false;
-    }
-    else if (v instanceof AbstractFunction)
-      return true;
-    else if (v instanceof Closure)
-      return true;
-    else
-      return false;
+    return v.isCallable(env, isCheckSyntaxOnly, nameRef);
   }
 
   /**

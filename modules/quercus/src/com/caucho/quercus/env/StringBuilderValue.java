@@ -65,7 +65,7 @@ public class StringBuilderValue
   {
     _buffer = new byte[MIN_LENGTH];
   }
-  
+
   public StringBuilderValue(int capacity)
   {
     if (capacity < MIN_LENGTH)
@@ -73,7 +73,7 @@ public class StringBuilderValue
 
     _buffer = new byte[capacity];
   }
-  
+
   public StringBuilderValue(int capacity, boolean isAbsolute)
   {
     if (! isAbsolute && capacity < MIN_LENGTH)
@@ -364,15 +364,6 @@ public class StringBuilderValue
     return true;
   }
 
-  /*
-   * Returns true if this is a PHP5 string.
-   */
-  @Override
-  public boolean isPHP5String()
-  {
-    return true;
-  }
-
   /**
    * Converts to a boolean.
    */
@@ -649,7 +640,7 @@ public class StringBuilderValue
     if (ch == '-') {
       if (len == 1)
         return this;
-      
+
       sign = -1;
       i++;
     }
@@ -699,7 +690,7 @@ public class StringBuilderValue
   public Value put(Value index, Value value)
   {
     setCharValueAt(index.toLong(), value);
-    
+
     return value;
   }
 

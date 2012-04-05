@@ -142,21 +142,40 @@ abstract public class ObjectValue extends Value {
   }
 
   /**
-   * The object is callable if it has an __invoke method
-   */
-  @Override
-  public boolean isCallable(Env env)
-  {
-    return _quercusClass.getInvoke() != null;
-  }
-  
-  /**
    * Returns the type.
    */
   @Override
   public String getType()
   {
     return "object";
+  }
+
+  /**
+   * The object is callable if it has an __invoke method
+   */
+  @Override
+  public boolean isCallable(Env env, boolean isCheckSyntaxOnly, Value nameRef)
+  {
+    // php/127c, isCheckSyntaxOnly is not used
+
+    if (_quercusClass.getInvoke() == null) {
+      if (nameRef != null) {
+        nameRef.set(NullValue.NULL);
+      }
+
+      return false;
+    }
+
+    if (nameRef != null) {
+      StringValue sb = env.createStringBuilder();
+      sb.append(_quercusClass.getName());
+      sb.append("::");
+      sb.append("__invoke");
+
+      nameRef.set(sb);
+    }
+
+    return true;
   }
 
   /**
@@ -511,7 +530,16 @@ abstract public class ObjectValue extends Value {
       return 0;
     }
   }
-  
+
+  /**
+   * Finds the method name.
+   */
+  @Override
+  public final AbstractFunction findFunction(StringValue methodName)
+  {
+    return _quercusClass.findFunction(methodName);
+  }
+
   /**
    * Call for callable.
    */
@@ -519,7 +547,7 @@ abstract public class ObjectValue extends Value {
   public Value call(Env env, Value []args)
   {
     AbstractFunction fun = _quercusClass.getInvoke();
-    
+
     if (fun != null)
       return fun.callMethod(env, _quercusClass, this, args);
     else
