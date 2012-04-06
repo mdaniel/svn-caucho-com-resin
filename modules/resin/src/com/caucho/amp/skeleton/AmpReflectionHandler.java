@@ -36,9 +36,9 @@ import java.util.HashMap;
 import com.caucho.amp.AmpQueryCallback;
 import com.caucho.amp.actor.ActorContextImpl;
 import com.caucho.amp.actor.AmpActorRef;
+import com.caucho.amp.actor.AmpMethodRef;
 import com.caucho.amp.actor.AmpQueryFuture;
 import com.caucho.amp.router.AmpBroker;
-import com.caucho.amp.stream.AmpStream;
 import com.caucho.amp.stream.NullEncoder;
 
 /**
@@ -78,19 +78,21 @@ class AmpReflectionHandler implements InvocationHandler
         continue;
       }
       
+      AmpMethodRef methodRef = _to.getMethod(m.getName(), NullEncoder.ENCODER);
+      
       Call call = null;
       
       Class<?> []param = m.getParameterTypes();
       
       if (param.length > 0
           && AmpQueryCallback.class.isAssignableFrom(param[param.length - 1])) {
-        call = new QueryCallbackCall(m.getName(), param.length - 1);
+        call = new QueryCallbackCall(methodRef, param.length - 1);
       }
       else if (void.class.equals(m.getReturnType())) {
-        call = new MessageCall(m.getName());
+        call = new MessageCall(methodRef);
       }
       else {
-        call = new QueryCall(m.getName());
+        call = new QueryCall(methodRef);
       }
       
       _callMap.put(m, call);
@@ -127,11 +129,11 @@ class AmpReflectionHandler implements InvocationHandler
   }
   
   static class QueryCall extends Call {
-    private final String _name;
+    private final AmpMethodRef _methodRef;
     
-    QueryCall(String name)
+    QueryCall(AmpMethodRef methodRef)
     {
-      _name = name;
+      _methodRef = methodRef;
     }
     
     @Override
@@ -143,19 +145,19 @@ class AmpReflectionHandler implements InvocationHandler
     {
       AmpQueryFuture future = new AmpQueryFuture(timeout);
       
-      actorContext.query(to, _name, args, future, timeout);
+      actorContext.query(_methodRef, args, future, timeout);
       
       return future.get();
     }
   }
   
   static class QueryCallbackCall extends Call {
-    private final String _name;
+    private final AmpMethodRef _methodRef;
     private final int _paramLen;
     
-    QueryCallbackCall(String name, int paramLen)
+    QueryCallbackCall(AmpMethodRef methodRef, int paramLen)
     {
-      _name = name;
+      _methodRef = methodRef;
       _paramLen = paramLen;
     }
     
@@ -171,18 +173,18 @@ class AmpReflectionHandler implements InvocationHandler
       
       AmpQueryCallback cb = (AmpQueryCallback) args[_paramLen];
       
-      actorContext.query(to, _name, args, cb, timeout);
+      actorContext.query(_methodRef, args, cb, timeout);
       
       return null;
     }
   }
 
   static class MessageCall extends Call {
-    private final String _name;
+    private final AmpMethodRef _methodRef;
     
-    MessageCall(String name)
+    MessageCall(AmpMethodRef methodRef)
     {
-      _name = name;
+      _methodRef = methodRef;
     }
 
     @Override
@@ -192,7 +194,7 @@ class AmpReflectionHandler implements InvocationHandler
                   Object []args,
                   long timeout)
     {
-      to.send(from, NullEncoder.ENCODER, _name, args);
+      _methodRef.send(from, args);
       
       return null;
     }

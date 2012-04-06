@@ -29,6 +29,7 @@
 
 package com.caucho.amp.mailbox;
 
+import com.caucho.amp.actor.AmpActorContext;
 import com.caucho.amp.stream.AmpStream;
 
 /**
@@ -40,6 +41,8 @@ public interface AmpMailbox extends AmpStream
    * Returns the delegated actor stream for the actor itself.
    */
   public AmpStream getActorStream();
+
+  public AmpActorContext getActorContext();
   
   /**
    * Closes the mailbox

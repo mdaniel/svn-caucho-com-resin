@@ -52,7 +52,7 @@ public final class ActorContextImpl extends AmpActorContext
   implements AmpActor, AlarmListener
 {
   private final String _address;
-  private final AmpStream _actorStream;
+  private final AmpActor _actor;
   private final AmpMailbox _mailbox;
   private final AmpActorRef _from;
   
@@ -66,14 +66,14 @@ public final class ActorContextImpl extends AmpActorContext
   private Alarm _alarm = new WeakAlarm(this);
 
   public ActorContextImpl(String address,
-                          AmpStream actorStream, 
+                          AmpActor actorStream, 
                           AmpMailboxFactory mailboxFactory)
   {
     _address = address;
-    _actorStream = actorStream;
+    _actor = actorStream;
     _mailbox = mailboxFactory.createMailbox(this);
     
-    _from = new ActorRefImpl(address, _mailbox);
+    _from = new ActorRefImpl(address, _mailbox, this);
     
     _qId = CurrentTime.getCurrentTime() << 16;
   }
@@ -100,6 +100,12 @@ public final class ActorContextImpl extends AmpActorContext
     return this;
   }
   
+  @Override
+  public AmpMethodRef getMethod(String methodName, AmpEncoder encoder)
+  {
+    return _actor.getMethod(methodName, encoder);
+  }
+  
   public long getQueryTimeout()
   {
     return _timeout;
@@ -121,7 +127,7 @@ public final class ActorContextImpl extends AmpActorContext
                          String methodName, 
                          Object... args)
   {
-    _actorStream.send(to, from, encoder, methodName, args);
+    _actor.send(to, from, encoder, methodName, args);
   }
 
   @Override
@@ -130,7 +136,7 @@ public final class ActorContextImpl extends AmpActorContext
                     AmpEncoder encoder, 
                     AmpError error)
   {
-    _actorStream.error(to, from, encoder, error);
+    _actor.error(to, from, encoder, error);
   }
 
   @Override
@@ -141,7 +147,7 @@ public final class ActorContextImpl extends AmpActorContext
                     String methodName, 
                     Object... args)
   {
-    _actorStream.query(id, to, from, encoder, methodName, args);
+    _actor.query(id, to, from, encoder, methodName, args);
   }
   
   @Override
@@ -157,7 +163,7 @@ public final class ActorContextImpl extends AmpActorContext
       queryItem.onQueryResult(to, from, encoder, result);
     }
     else {
-      _actorStream.queryResult(id, to, from, encoder, result);
+      _actor.queryResult(id, to, from, encoder, result);
     }
   }
 
@@ -174,7 +180,7 @@ public final class ActorContextImpl extends AmpActorContext
       queryItem.onQueryError(to, from, error);
     }
     else {
-      _actorStream.queryError(id, to, from, encoder, error);
+      _actor.queryError(id, to, from, encoder, error);
     }
   }
   
@@ -182,15 +188,14 @@ public final class ActorContextImpl extends AmpActorContext
   // query/sender methods
   //
 
-  public void query(AmpActorRef to,
-                    String methodName,
+  public void query(AmpMethodRef methodRef,
                     Object[] args,
                     AmpQueryCallback cb, 
                     long timeout)
   {
     long id = addQueryCallback(cb, timeout);
 
-    to.query(id, _from, NullEncoder.ENCODER, methodName, args);
+    methodRef.query(id, _from, args);
   }
 
   /**

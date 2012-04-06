@@ -66,6 +66,7 @@ public class AmpManagerImpl implements AmpManager
   {
     return _broker;
   }
+  
 
   @Override
   public <T> T createActorProxy(String to, Class<T> api)

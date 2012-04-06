@@ -156,7 +156,7 @@ public final class ActorQueue<T extends RingItem>
   
   public final int getSize()
   {
-    return (_headRef.get() - _tailRef.get() + _size) & _mask;
+    return _headRef.get() - _tailRef.get();
   }
   
   public final int getAvailable()
@@ -187,11 +187,11 @@ public final class ActorQueue<T extends RingItem>
     while (true) {
       int headAlloc = headAllocRef.get();
           
-      int nextHeadAlloc = (headAlloc + 1) & mask;
+      int nextHeadAlloc = headAlloc + 1;
       
       int tail = tailRef.get();
       
-      if (nextHeadAlloc == tail) {
+      if ((nextHeadAlloc & mask) == (tail & mask)) {
         if (finishOffer()) {
         }
         else if (isWait) {
@@ -203,7 +203,7 @@ public final class ActorQueue<T extends RingItem>
       }
       else {  
         if (headAllocRef.compareAndSet(headAlloc, nextHeadAlloc)) {
-          return ring[headAlloc];
+          return ring[headAlloc & mask];
         }
       }
     }
@@ -215,7 +215,7 @@ public final class ActorQueue<T extends RingItem>
     
     final int index = item.getIndex();
     
-    int nextHead = (index + 1) & _mask;
+    final int nextHead = index + 1;
     
     if (! _headRef.compareAndSet(index, nextHead)) {
       finishOffer(index);
@@ -233,10 +233,11 @@ public final class ActorQueue<T extends RingItem>
     final AtomicInteger headAllocRef = _headAllocRef;
     final AtomicInteger headRef = _headRef;
     
-    int head = headRef.get();
-    int headAlloc = headAllocRef.get();
+    final int head = headRef.get();
+    final int headAlloc = headAllocRef.get();
+    final int mask = _mask;
     
-    if (head != headAlloc && _itemRing[head].isRingValue()) {
+    if (head != headAlloc && _itemRing[head & mask].isRingValue()) {
       finishOffer(head);
       return true;
     }
@@ -251,7 +252,6 @@ public final class ActorQueue<T extends RingItem>
     final AtomicInteger headRef = _headRef;
     final T []ring = _itemRing;
     final int mask = _mask;
-    final int updateSize = _updateSize;
     
     // in high-contention, can just finish since another thread will
     // ack us
@@ -266,8 +266,8 @@ public final class ActorQueue<T extends RingItem>
         return;
       }
       
-      if (ring[head].isRingValue()) {
-        int nextHead = (head + 1) & mask;
+      if (ring[head & mask].isRingValue()) {
+        int nextHead = head + 1;
         
         if (headRef.compareAndSet(head, nextHead) && count-- <= 0) {
           return;
@@ -281,11 +281,14 @@ public final class ActorQueue<T extends RingItem>
     _firstWorker.wake();
     
     synchronized (_isOfferWaitRef) {
+      if (_tailRef.get() != tail) {
+        return;
+      }
+      
       _isOfferWaitRef.set(true);
       
       if (_headAllocRef.get() == headAlloc 
-          && _tailRef.get() == tail
-          && _isOfferWaitRef.get()) {
+          && _tailRef.get() == tail) {
         try {
           _isOfferWaitRef.wait(100);
         } catch (Exception e) {
@@ -393,16 +396,16 @@ public final class ActorQueue<T extends RingItem>
       int nextTail = nextTailChunk(head, tail, tailChunk);
       
       final ItemProcessor<? super T> processor = _processor;
-      final ActorWorker<T> nextWorker = _nextWorker;
+      // final ActorWorker<T> nextWorker = _nextWorker;
       
-      final AtomicBoolean isWait = _isWaitRef;
+      // final AtomicBoolean isWait = _isWaitRef;
 
       try {
         while (true) {
           while (tail != nextTail) {
-            T item = itemRing[tail];
+            T item = itemRing[tail & mask];
           
-            tail = (tail + 1) & mask;
+            tail++;
             
             processor.process(item);
             
@@ -437,11 +440,9 @@ public final class ActorQueue<T extends RingItem>
     
     private int nextTailChunk(int head, int tail, int tailChunk)
     {
-      int mask = _mask;
-      
-      int size = (head - tail + mask + 1) & mask;
+      int size = head - tail;
 
-      return (tail + Math.min(size,  tailChunk)) & mask;
+      return tail + Math.min(size, tailChunk);
     }
     
     private void wakeOfferWait(AtomicBoolean isWaitRef)

@@ -35,8 +35,10 @@ import java.util.HashMap;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
+import com.caucho.amp.AmpException;
 import com.caucho.amp.actor.AbstractAmpActor;
 import com.caucho.amp.actor.AmpActorRef;
+import com.caucho.amp.actor.AmpMethodRef;
 import com.caucho.amp.router.AmpBroker;
 import com.caucho.amp.stream.AmpEncoder;
 import com.caucho.amp.stream.AmpError;
@@ -67,6 +69,20 @@ class AmpReflectionSkeleton extends AbstractAmpActor
     }
   }
 
+  @Override
+  public AmpMethodRef getMethod(String methodName, AmpEncoder encoder)
+  {
+    Method method = _methodMap.get(methodName);
+    
+    if (method == null) {
+      throw new NullPointerException(methodName);
+    }
+    
+    AmpActorRef to = null;
+    
+    return new SkeletonMethodRef(to, _bean, method);
+  }
+  
   @Override
   public void send(AmpActorRef to,
                    AmpActorRef from,
@@ -119,5 +135,44 @@ class AmpReflectionSkeleton extends AbstractAmpActor
   public String toString()
   {
     return getClass().getSimpleName() + "[" + _address + "," + _bean + "]";
+  }
+  
+  static class SkeletonMethodRef implements AmpMethodRef {
+    private final AmpActorRef _to;
+    private final Object _bean;
+    private final Method _method;
+
+    SkeletonMethodRef(AmpActorRef to, Object bean, Method method)
+    {
+      _to = to;
+      _bean = bean;
+      _method = method;
+    }
+    
+    @Override
+    public void send(AmpActorRef from, Object... args)
+    {
+      try {
+        _method.invoke(_bean, args);
+      } catch (Throwable e) {
+        log.log(Level.FINER, e.toString(), e);
+        
+        from.error(null, NullEncoder.ENCODER, new AmpError());
+      }
+    }
+
+    @Override
+    public void query(long id, AmpActorRef from, Object... args)
+    {
+      try {
+        Object result = _method.invoke(_bean, args);
+      
+        from.reply(id, _to, NullEncoder.ENCODER, result);
+      } catch (Throwable e) {
+        log.log(Level.FINER, e.toString(), e);
+        
+        from.queryError(id, _to, NullEncoder.ENCODER, new AmpError());
+      }
+    }
   }
 }

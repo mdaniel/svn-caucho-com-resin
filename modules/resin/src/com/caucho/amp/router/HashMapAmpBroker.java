@@ -48,7 +48,7 @@ public class HashMapAmpBroker extends AbstractAmpBroker
   {
     AmpMailbox mailbox = _mailboxMap.get(address);
     
-    return new ActorRefImpl(address, mailbox);
+    return new ActorRefImpl(address, mailbox, mailbox.getActorContext());
   }
 
   @Override

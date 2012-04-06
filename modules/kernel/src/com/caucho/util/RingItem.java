@@ -36,10 +36,11 @@ import java.util.concurrent.atomic.AtomicIntegerFieldUpdater;
  */
 public class RingItem
 {
-   private static final AtomicIntegerFieldUpdater<RingItem> _isRingValueUpdater;
+  // private static final AtomicIntegerFieldUpdater<RingItem> _isRingValueUpdater;
 
   private final int _index;
-  private volatile int _isRingValue;
+  // private volatile int _isRingValue;
+  private volatile boolean _isRingValue;
   
   protected RingItem(int index)
   {
@@ -53,29 +54,34 @@ public class RingItem
   
   public final boolean isRingValue()
   {
-    return _isRingValue != 0;
+    // return _isRingValue != 0;
+    return _isRingValue;
   }
   
   public final void setRingValue()
   {
-      //    _isRingValue = true;
+    _isRingValue = true;
 
+    /*
     int oldValue = _isRingValueUpdater.getAndSet(this, 1);
     
     if (oldValue != 0) {
       System.out.println("BAD-SET-RING:");
     }
+    */
   }
   
   public final void clearRingValue()
   {
-      //    _isRingValue = false;
+    _isRingValue = false;
 
+    /*
     int oldValue = _isRingValueUpdater.getAndSet(this, 0);
     
     if (oldValue == 0) {
       System.out.println("BAD-CLEAR-RING:");
     }
+    */
   }
 
   @Override
@@ -83,11 +89,12 @@ public class RingItem
   {
     return getClass().getSimpleName() + "[]";
   }
-  
+  /*
   static {
     AtomicIntegerFieldUpdater<RingItem> isRingValueUpdater
       = AtomicIntegerFieldUpdater.newUpdater(RingItem.class, "_isRingValue");
     
     _isRingValueUpdater = isRingValueUpdater;
   }
+  */
 }

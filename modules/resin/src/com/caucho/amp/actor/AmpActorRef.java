@@ -39,6 +39,9 @@ public interface AmpActorRef
 {
   public String getAddress();
   
+  public AmpMethodRef getMethod(String methodName,
+                                AmpEncoder encoder);
+  
   public void send(AmpActorRef from, 
                    AmpEncoder encoder,
                    String methodName, 

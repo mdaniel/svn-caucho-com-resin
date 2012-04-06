@@ -29,6 +29,7 @@
 
 package com.caucho.amp.actor;
 
+import com.caucho.amp.stream.AmpEncoder;
 import com.caucho.amp.stream.AmpStream;
 
 /**
@@ -48,16 +49,19 @@ abstract public class AmpActorContext
   
   abstract public AmpStream getStream();
   
-  public final void runAs(Runnable task)
+  abstract public AmpMethodRef getMethod(String methodName, AmpEncoder encoder);
+  
+  public final AmpActorContext beginCurrentActor()
   {
-    AmpActorContext prev = _currentContext.get();
+    final AmpActorContext prev = _currentContext.get();
     
-    try {
-      _currentContext.set(this);
-      
-      task.run();
-    } finally {
-      _currentContext.set(prev);
-    }
+    _currentContext.set(this);
+    
+    return prev;
+  }
+  
+  public final void endCurrentActor(AmpActorContext prev)
+  {
+    _currentContext.set(prev);
   }
 }

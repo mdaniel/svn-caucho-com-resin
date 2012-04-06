@@ -34,7 +34,6 @@ import java.util.logging.Logger;
 import com.caucho.amp.mailbox.AmpMailboxFactory;
 import com.caucho.amp.stream.AmpEncoder;
 import com.caucho.amp.stream.AmpError;
-import com.caucho.amp.stream.AmpStream;
 
 /**
  * Handles the context for an actor, primarily including its
@@ -94,7 +93,6 @@ public final class AmpProxyActor implements AmpActor {
                           AmpEncoder encoder,
                           Object result)
   {
-    Thread.dumpStack();
     log.warning(this + " query result");
   }
 
@@ -106,5 +104,11 @@ public final class AmpProxyActor implements AmpActor {
                          AmpError error)
   {
     log.warning(this + " query error");
+  }
+
+  @Override
+  public AmpMethodRef getMethod(String methodName, AmpEncoder encoder)
+  {
+    throw new UnsupportedOperationException(getClass().getName());
   }
 }

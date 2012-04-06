@@ -29,21 +29,15 @@
 
 package com.caucho.amp.actor;
 
-import com.caucho.amp.stream.AmpEncoder;
-import com.caucho.amp.stream.AmpStream;
-
 /**
- * An AMP Actor sends and receives messages as the core class in a
- * service-oriented architecture.
- *
- * <h2>Core API</h2>
- *
- * Each actor has a unique address, which is the address for messages sent to
- * the actor.  addresses are typically URLs.
- *
+ * handle to an actor method.
  */
-public interface AmpActor extends AmpStream
+public interface AmpMethodRef
 {
-
-  public AmpMethodRef getMethod(String methodName, AmpEncoder encoder);
+  public void send(AmpActorRef from,
+                   Object...args);
+  
+  public void query(long id,
+                    AmpActorRef from,
+                    Object...args);
 }

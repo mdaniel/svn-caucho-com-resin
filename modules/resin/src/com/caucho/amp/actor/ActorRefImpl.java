@@ -41,18 +41,28 @@ public final class ActorRefImpl implements AmpActorRef
 {
   private final String _address;
   private final AmpMailbox _mailbox;
+  private final AmpActorContext _actor;
 
   public ActorRefImpl(String address,
-                      AmpMailbox mailbox)
+                      AmpMailbox mailbox,
+                      AmpActorContext actor)
   {
     _address = address;
     _mailbox = mailbox;
+    _actor = actor;
   }
 
   @Override
   public String getAddress()
   {
     return _address;
+  }
+  
+  @Override
+  public AmpMethodRef getMethod(String methodName, 
+                                AmpEncoder encoder)
+  {
+    return _actor.getMethod(methodName, encoder);
   }
 
   @Override

@@ -55,6 +55,12 @@ public class SimpleAmpMailbox implements AmpMailbox
   {
     return _actor.getStream();
   }
+  
+  @Override
+  public AmpActorContext getActorContext()
+  {
+    return _actor;
+  }
 
   @Override
   public void send(final AmpActorRef to, 
@@ -63,11 +69,13 @@ public class SimpleAmpMailbox implements AmpMailbox
                    final String methodName, 
                    final Object... args)
   {
-    _actor.runAs(new Runnable() {
-      public void run() {
-        getActorStream().send(to, from, encoder, methodName, args);
-      }
-    });
+    AmpActorContext prev = _actor.beginCurrentActor();
+    
+    try {
+      getActorStream().send(to, from, encoder, methodName, args);
+    } finally {
+      _actor.endCurrentActor(prev);
+    }
   }
 
   @Override
@@ -78,12 +86,13 @@ public class SimpleAmpMailbox implements AmpMailbox
                     final String methodName, 
                     final Object... args)
   {
-    _actor.runAs(new Runnable() {
-      public void run() {
-        getActorStream().query(id, to, from, encoder,
-                               methodName, args);
-      }
-    });
+    AmpActorContext prev = _actor.beginCurrentActor();
+    
+    try {
+      getActorStream().query(id, to, from, encoder, methodName, args);
+    } finally {
+      _actor.endCurrentActor(prev);
+    }
   }
 
   @Override
@@ -93,11 +102,13 @@ public class SimpleAmpMailbox implements AmpMailbox
                           final AmpEncoder encoder, 
                           final Object result)
   {
-    _actor.runAs(new Runnable() {
-      public void run() {
-        getActorStream().queryResult(id, to, from, encoder, result);
-      }
-    });
+    AmpActorContext prev = _actor.beginCurrentActor();
+    
+    try {
+      getActorStream().queryResult(id, to, from, encoder, result);
+    } finally {
+      _actor.endCurrentActor(prev);
+    }
   }
 
   @Override
@@ -107,11 +118,13 @@ public class SimpleAmpMailbox implements AmpMailbox
                          final AmpEncoder encoder, 
                          final AmpError error)
   {
-    _actor.runAs(new Runnable() {
-      public void run() {
-        getActorStream().queryError(id, to, from, encoder, error);
-      }
-    });
+    AmpActorContext prev = _actor.beginCurrentActor();
+    
+    try {
+      getActorStream().queryError(id, to, from, encoder, error);
+    } finally {
+      _actor.endCurrentActor(prev);
+    }
   }
 
   @Override
@@ -120,11 +133,13 @@ public class SimpleAmpMailbox implements AmpMailbox
                     final AmpEncoder encoder, 
                     final AmpError error)
   {
-    _actor.runAs(new Runnable() {
-      public void run() {
-        getActorStream().error(to, from, encoder, error);
-      }
-    });
+    AmpActorContext prev = _actor.beginCurrentActor();
+    
+    try {
+      getActorStream().error(to, from, encoder, error);
+    } finally {
+      _actor.endCurrentActor(prev);
+    }
   }
 
   /**

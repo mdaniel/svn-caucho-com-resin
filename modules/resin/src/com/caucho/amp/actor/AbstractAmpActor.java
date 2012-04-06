@@ -30,10 +30,49 @@
 package com.caucho.amp.actor;
 
 import com.caucho.amp.stream.AbstractAmpStream;
+import com.caucho.amp.stream.AmpEncoder;
+import com.caucho.amp.stream.AmpError;
+import com.caucho.amp.stream.NullEncoder;
 
 /**
  * Abstract stream for an actor.
  */
 public class AbstractAmpActor extends AbstractAmpStream implements AmpActor
 {
+  @Override
+  public AmpMethodRef getMethod(String methodName, AmpEncoder encoder)
+  {
+    System.out.println("THIS: " + this);
+    Thread.dumpStack();
+
+    return new AbstractMethodRef(this, methodName, encoder);
+  }
+  
+  static class AbstractMethodRef implements AmpMethodRef {
+    private AbstractAmpActor _actor;
+    private String _methodName;
+    private AmpEncoder _encoder;
+    
+    public AbstractMethodRef(AbstractAmpActor actor,
+                             String methodName, 
+                             AmpEncoder encoder)
+    {
+      _actor = actor;
+      _methodName = methodName;
+      _encoder = encoder;
+    }
+
+    @Override
+    public void send(AmpActorRef from, Object... args)
+    {
+      // TODO Auto-generated method stub
+      
+    }
+
+    @Override
+    public void query(long id, AmpActorRef from, Object... args)
+    {
+      from.queryError(id, null, NullEncoder.ENCODER, new AmpError());
+    }
+  }
 }
