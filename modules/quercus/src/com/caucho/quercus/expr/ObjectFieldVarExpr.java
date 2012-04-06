@@ -52,17 +52,17 @@ public class ObjectFieldVarExpr extends AbstractVarExpr {
   {
     super(location);
     _objExpr = objExpr;
-    
+
     _nameExpr = nameExpr;
   }
 
   public ObjectFieldVarExpr(Expr objExpr, Expr nameExpr)
   {
     _objExpr = objExpr;
-    
+
     _nameExpr = nameExpr;
   }
-  
+
   //
   // function call creation
   //
@@ -77,7 +77,7 @@ public class ObjectFieldVarExpr extends AbstractVarExpr {
     throws IOException
   {
     ExprFactory factory = parser.getExprFactory();
-    
+
     return factory.createMethodCall(location, _objExpr, _nameExpr, args);
   }
 
@@ -112,7 +112,7 @@ public class ObjectFieldVarExpr extends AbstractVarExpr {
 
     return value.getFieldVar(env, _nameExpr.evalStringValue(env));
   }
-  
+
   /**
    * Evaluates the expression.
    *
@@ -126,7 +126,7 @@ public class ObjectFieldVarExpr extends AbstractVarExpr {
 
     return obj.getField(env, _nameExpr.evalStringValue(env));
   }
-  
+
   /**
    * Evaluates the expression.
    *
@@ -140,10 +140,10 @@ public class ObjectFieldVarExpr extends AbstractVarExpr {
     Value obj = _objExpr.evalObject(env);
 
     obj.putField(env, _nameExpr.evalStringValue(env), value);
-    
+
     return value;
   }
-  
+
   /**
    * Evaluates the expression.
    *
@@ -157,7 +157,7 @@ public class ObjectFieldVarExpr extends AbstractVarExpr {
     Value obj = _objExpr.evalObject(env);
 
     obj.putField(env, _nameExpr.evalStringValue(env), value);
-    
+
     return value;
   }
 
@@ -188,7 +188,7 @@ public class ObjectFieldVarExpr extends AbstractVarExpr {
 
     return obj.getFieldObject(env, _nameExpr.evalStringValue(env));
   }
-  
+
   /**
    * Evaluates the expression.
    *
@@ -202,7 +202,7 @@ public class ObjectFieldVarExpr extends AbstractVarExpr {
 
     obj.unsetField(_nameExpr.evalStringValue(env));
   }
-  
+
   public String toString()
   {
     return _objExpr + "->{" + _nameExpr + "}";

@@ -116,30 +116,22 @@ public class JavaMethod extends JavaInvoker {
     try {
       return _method.invoke(obj, args);
     } catch (InvocationTargetException e) {
-      Throwable e1 = e.getCause();
+      Throwable cause = e.getCause();
 
       // php/0g0h
-      if (e1 instanceof QuercusException)
-        throw (QuercusException) e1;
+      if (cause instanceof QuercusException)
+        throw (QuercusException) cause;
 
-      if (e1 instanceof QuercusException)
-        throw (QuercusException) e1;
+      if (cause instanceof QuercusException)
+        throw (QuercusException) cause;
 
       String methodName = (_method.getDeclaringClass().getName() + "."
                            + _method.getName());
 
-      throw new QuercusException(methodName + ": " + e1.getMessage(), e1);
+      throw new QuercusException(methodName + ": " + cause.getMessage(), cause);
     } catch (Exception e) {
       String methodName = (_method.getDeclaringClass().getName() + "."
                            + _method.getName());
-
-      System.err.println("JavaMethod0: " + args.length);
-      for (int i = 0; i < args.length; i++ ){
-        System.err.println("\t" + args[i] + " . " + args[i].getClass());
-      }
-
-      System.err.println("JavaMethod1: " + _method);
-      System.err.println("JavaMethod2: " + obj);
 
       throw new QuercusException(methodName + ": " + e.getMessage(), e);
     }

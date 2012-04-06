@@ -105,7 +105,7 @@ public class ImageModule extends AbstractQuercusModule {
   public static final int IMG_FILTER_SELECTIVE_BLUR = 8;
   public static final int IMG_FILTER_MEAN_REMOVAL = 9;
   public static final int IMG_FILTER_SMOOTH = 10;
-  
+
   private static LruCache<StringValue,Font> _fontMap
     = new LruCache<StringValue,Font>(4096);
 
@@ -150,12 +150,13 @@ public class ImageModule extends AbstractQuercusModule {
   /**
    * Returns the environment value.
    */
-  public Value getimagesize(Env env,
-                            Path file,
-                            @Optional ArrayValue imageArray)
+  public static Value getimagesize(Env env,
+                                   Path file,
+                                   @Optional ArrayValue imageArray)
   {
-    if (! file.canRead())
+    if (! file.canRead()) {
       return BooleanValue.FALSE;
+    }
 
     ImageInfo info = new ImageInfo();
 
@@ -169,9 +170,13 @@ public class ImageModule extends AbstractQuercusModule {
     } catch (Exception e) {
       log.log(Level.FINE, e.toString(), e);
 
+      e.printStackTrace();
+
       return BooleanValue.FALSE;
     } finally {
-      is.close();
+      if (is != null) {
+        is.close();
+      }
     }
 
     if (imageArray == null)
