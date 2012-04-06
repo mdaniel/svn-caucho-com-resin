@@ -27,7 +27,7 @@
  * @author Scott Ferguson
  */
 
-package com.caucho.server.admin;
+package com.caucho.server.deploy;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -57,28 +57,28 @@ public interface DeployActorProxy
   public Boolean copyTag(String targetId, String sourceId,
                          Map<String, String> attributes);
 
-  public TagResult[] queryTags(String pattern);
+  public DeployTagResult[] queryTags(String pattern);
   
   public boolean removeTag(String tag, Map<String, String> attributes);
 
-  public TagStateQuery getTagState(String tag);
+  public DeployTagStateQuery getTagState(String tag);
 
   
   //
   // start/restart
   //
 
-  public ControllerState start(String tag);
+  public DeployControllerState start(String tag);
   
-  public ControllerState restart(String tag);
+  public DeployControllerState restart(String tag);
   
-  public ControllerState stop(String tag);
+  public DeployControllerState stop(String tag);
   
   public void
-  controllerRestart(String tag, ReplyCallback<ControllerState> cb);
+  controllerRestart(String tag, ReplyCallback<DeployControllerState> cb);
   /*
   public void
   restartCluster(String tag, ReplyCallback<ControllerStateActionQueryReply> cb);
 */
-  public ControllerState restartCluster(String tag);
+  public DeployControllerState restartCluster(String tag);
 }

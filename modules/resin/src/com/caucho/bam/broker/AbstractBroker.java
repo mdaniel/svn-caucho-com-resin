@@ -74,7 +74,7 @@ abstract public class AbstractBroker
   }
   
   @Override
-  public void addMailbox(Mailbox mailbox)
+  public void addMailbox(String address, Mailbox mailbox)
   {
     throw new UnsupportedOperationException(getClass().getName());
   }

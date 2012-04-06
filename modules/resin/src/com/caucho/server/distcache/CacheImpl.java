@@ -1245,7 +1245,9 @@ public class CacheImpl<K,V>
     public void entryUpdated(CacheEntryEvent<? extends K,? extends V> event)
         throws CacheEntryListenerException
     {
-      if (_filter.evaluate(event)) {
+      Filter filter = _filter;
+      
+      if (filter == null || filter.evaluate(event)) {
         _listener.entryUpdated(event);
       }
     }

@@ -27,7 +27,7 @@
  * @author Scott Ferguson
  */
 
-package com.caucho.server.admin;
+package com.caucho.server.deploy;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -42,6 +42,7 @@ import java.util.logging.Logger;
 import java.util.regex.Pattern;
 
 import com.caucho.bam.broker.Broker;
+import com.caucho.bam.mailbox.Mailbox;
 import com.caucho.bam.manager.BamManager;
 import com.caucho.bam.proxy.ReplyCallback;
 import com.caucho.cloud.bam.BamSystem;
@@ -80,7 +81,7 @@ public class DeployActor
     _serverId = ResinSystem.getCurrentId();
   }
 
-  protected void init()
+  public void init()
   {
     if (_isInit.getAndSet(true))
       return;
@@ -90,9 +91,10 @@ public class DeployActor
     Broker broker = BamSystem.getCurrentBroker();
     BamManager bamManager = BamSystem.getCurrentManager();
     
-    String proxyAddress = UID + '@' + broker.getAddress();
+    Mailbox mailbox = bamManager.createService(ADDRESS, this);
     
-    bamManager.createService(proxyAddress, this);
+    String proxyAddress = UID + '@' + broker.getAddress();
+    bamManager.addMailbox(proxyAddress, mailbox);
   }
 
   
@@ -287,7 +289,7 @@ public class DeployActor
                               commitMetaData);
   }
 
-  public boolean tagCopy(String tag, 
+  public boolean copyTag(String tag, 
                          String sourceTag, 
                          Map<String,String> attributes)
   {
@@ -298,13 +300,6 @@ public class DeployActor
 
       throw new DeployException(L.l("deploy-copy: '{0}' is an unknown source tag.",
                                     sourceTag));
-      /*
-      getBroker().queryError(id, from, to, query,
-                             new BamError(BamError.TYPE_CANCEL,
-                                          BamError.ITEM_NOT_FOUND,
-                             "unknown tag"));
-      return;
-      */
     }
 
     log.fine(this + " copy dst='" + tag + "' src='" + sourceTag + "'");
@@ -322,9 +317,9 @@ public class DeployActor
     return _repository.putTag(tag, entry.getRoot(), metaDataMap);
   }
 
-  public TagResult []queryTags(String regexp)
+  public DeployTagResult []queryTags(String regexp)
   {
-    ArrayList<TagResult> tags = new ArrayList<TagResult>();
+    ArrayList<DeployTagResult> tags = new ArrayList<DeployTagResult>();
 
     Pattern pattern = Pattern.compile(regexp);
 
@@ -333,14 +328,14 @@ public class DeployActor
       String tag = entry.getKey();
 
       if (pattern.matcher(tag).matches()) {
-        tags.add(new TagResult(tag, entry.getValue().getRoot()));
+        tags.add(new DeployTagResult(tag, entry.getValue().getRoot()));
       }
     }
 
-    return tags.toArray(new TagResult[tags.size()]);
+    return tags.toArray(new DeployTagResult[tags.size()]);
   }
 
-  public TagStateQuery getTagState(String tag)
+  public DeployTagStateQuery getTagState(String tag)
   {
     // XXX: just ping the tag?
     // updateDeploy();
@@ -354,7 +349,7 @@ public class DeployActor
     }
     
     if (item != null) {
-      return new TagStateQuery(tag, item.getStateName(),
+      return new DeployTagStateQuery(tag, item.getStateName(),
                                item.getDeployException());
     }
     else {
@@ -384,12 +379,12 @@ public class DeployActor
   // start/restart
   //
 
-  public ControllerState start(String tag)
+  public DeployControllerState start(String tag)
   {
     LifecycleState state = startImpl(tag);
 
-    ControllerState result
-      = new ControllerState(tag, state);
+    DeployControllerState result
+      = new DeployControllerState(tag, state);
 
     log.fine(this
              + " start '"
@@ -418,13 +413,13 @@ public class DeployActor
   /**
    * @deprecated
    */
-  public ControllerState stop(String tag)
+  public DeployControllerState stop(String tag)
   {
     LifecycleState state = stopImpl(tag);
 
     log.fine(this + " stop '" + tag + "' -> " + state.getStateName());
 
-    return new ControllerState(tag, state);
+    return new DeployControllerState(tag, state);
   }
 
   private LifecycleState stopImpl(String tag)
@@ -441,17 +436,17 @@ public class DeployActor
     return controller.getState();
   }
 
-  public ControllerState controllerRestart(String tag)
+  public DeployControllerState controllerRestart(String tag)
   {
     return controllerRestart(tag);
   }
 
-  public ControllerState restart(String tag)
+  public DeployControllerState restart(String tag)
   {
     LifecycleState state = restartImpl(tag);
 
-    ControllerState result
-      = new ControllerState(tag, state);
+    DeployControllerState result
+      = new DeployControllerState(tag, state);
 
     log.fine(this
              + " restart '"
@@ -462,7 +457,7 @@ public class DeployActor
     return result;
   }
 
-  public void restartCluster(String tag, ReplyCallback<ControllerState> cb)
+  public void restartCluster(String tag, ReplyCallback<DeployControllerState> cb)
   {
     throw new UnsupportedOperationException(getClass().getName());
   }

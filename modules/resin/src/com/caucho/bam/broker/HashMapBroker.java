@@ -81,10 +81,8 @@ public class HashMapBroker extends AbstractManagedBroker
    * Adds a new actor to the broker.
    */
   @Override
-  public void addMailbox(Mailbox mailbox)
+  public void addMailbox(String address, Mailbox mailbox)
   {
-    String address = mailbox.getAddress();
-    
     if (address == null)
       throw new NullPointerException(String.valueOf(mailbox) + " has a null address");
     

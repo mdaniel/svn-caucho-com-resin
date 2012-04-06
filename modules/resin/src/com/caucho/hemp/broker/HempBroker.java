@@ -217,10 +217,8 @@ public class HempBroker extends AbstractManagedBroker
    * Registers a actor
    */
   @Override
-  public void addMailbox(Mailbox mailbox)
+  public void addMailbox(String address, Mailbox mailbox)
   {
-    String address = mailbox.getAddress();
-
     synchronized (_actorMap) {
       Mailbox oldMailbox = _actorMap.get(address);
 
@@ -634,7 +632,7 @@ public class HempBroker extends AbstractManagedBroker
       mailbox = new PassthroughMailbox(address, actor, this);
     }
 
-    addMailbox(mailbox);
+    addMailbox(address, mailbox);
 
     Environment.addCloseListener(new ActorClose(mailbox));
   }
@@ -702,7 +700,7 @@ public class HempBroker extends AbstractManagedBroker
       bamActor.setMailbox(mailbox);
     }
 
-    addMailbox(mailbox);
+    addMailbox(address, mailbox);
 
     Environment.addCloseListener(new ActorClose(mailbox));
   }

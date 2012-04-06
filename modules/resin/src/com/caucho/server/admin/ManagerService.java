@@ -97,10 +97,11 @@ public class ManagerService
     ProxyActor actor = new ProxyActor(_managerProxyBean, 
                                       "manager-proxy@resin.caucho",
                                       broker);
+    String address = actor.getAddress();
     MultiworkerMailbox mailbox
       = new MultiworkerMailbox(actor.getAddress(),
                                actor, broker, 2);
 
-    broker.addMailbox(mailbox);
+    broker.addMailbox(address, mailbox);
   }
 }

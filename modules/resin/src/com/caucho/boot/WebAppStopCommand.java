@@ -29,8 +29,8 @@
 
 package com.caucho.boot;
 
-import com.caucho.server.admin.ControllerState;
 import com.caucho.server.admin.WebAppDeployClient;
+import com.caucho.server.deploy.DeployControllerState;
 import com.caucho.util.L10N;
 
 public class WebAppStopCommand extends WebAppCommand
@@ -54,7 +54,7 @@ public class WebAppStopCommand extends WebAppCommand
   protected int doCommand(WebAppDeployClient deployClient,
                           String tag)
   {
-    ControllerState result = deployClient.stop(tag);
+    DeployControllerState result = deployClient.stop(tag);
 
     System.out.println(L.l("'{0}' is stopped", tag));
 

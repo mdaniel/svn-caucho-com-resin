@@ -7,9 +7,8 @@
  * notice unmodified.
  *
  * Resin Open Source is free software; you can redistribute it and/or modify
- * it under the terms of the GNU General Public License as published by
- * the Free Software Foundation; either version 2 of the License, or
- * (at your option) any later version.
+ * it under the terms of the GNU General Public License version 2
+ * as published by the Free Software Foundation.
  *
  * Resin Open Source is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
@@ -24,28 +23,46 @@
  *   59 Temple Place, Suite 330
  *   Boston, MA 02111-1307  USA
  *
- * @author Scott Ferguson
+ * @author Alex Rojkov
  */
 
-package com.caucho.server.admin;
+package com.caucho.server.deploy;
 
-public class UndeployQuery implements java.io.Serializable
+import com.caucho.json.Json;
+import com.caucho.lifecycle.LifecycleState;
+import com.caucho.server.admin.ManagementQueryReply;
+
+/**
+ * This class is used with web-app-stop, web-app-start, web-app-restart,
+ *
+ */
+@SuppressWarnings("serial")
+public class DeployControllerState extends ManagementQueryReply
 {
-  private String _tag;
-  private String _user;
-  private String _message;
+  @Json(name = "state")
+  private LifecycleState _state;
 
-  private UndeployQuery()
+  @Json(name = "tag")
+  private String _tag;
+
+  public DeployControllerState()
   {
   }
 
-  public UndeployQuery(String tag,
-                       String user,
-                       String message)
+  public DeployControllerState(String tag, LifecycleState state)
   {
     _tag = tag;
-    _user = user;
-    _message = message;
+    _state = state;
+  }
+
+  public LifecycleState getState()
+  {
+    return _state;
+  }
+
+  public void setState(LifecycleState state)
+  {
+    _state = state;
   }
 
   public String getTag()
@@ -53,19 +70,8 @@ public class UndeployQuery implements java.io.Serializable
     return _tag;
   }
 
-  public String getMessage()
+  public void setTag(String tag)
   {
-    return _message;
-  }
-
-  public String getUser()
-  {
-    return _user;
-  }
-
-  @Override
-  public String toString()
-  {
-    return getClass().getSimpleName() + "[" + _tag + "," + _user + "]";
+    _tag = tag;
   }
 }

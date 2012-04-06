@@ -36,7 +36,7 @@ import com.caucho.bam.broker.Broker;
 import com.caucho.bam.mailbox.Mailbox;
 import com.caucho.bam.mailbox.MailboxType;
 import com.caucho.bam.stream.MessageStream;
-import com.caucho.server.admin.DeployActor;
+import com.caucho.server.deploy.DeployActor;
 
 
 /**
@@ -52,7 +52,7 @@ public interface BamManager
   /**
    * Adds a mailbox to the broker.
    */
-  void addMailbox(Mailbox mailbox);
+  void addMailbox(String address, Mailbox mailbox);
   
   /**
    * Removes a mailbox

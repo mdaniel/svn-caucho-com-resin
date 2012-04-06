@@ -43,7 +43,7 @@ public interface ManagedBroker extends Broker
   /**
    * Adds a mailbox
    */
-  public void addMailbox(Mailbox mailbox);
+  public void addMailbox(String address, Mailbox mailbox);
   
   /**
    * Removes a mailbox

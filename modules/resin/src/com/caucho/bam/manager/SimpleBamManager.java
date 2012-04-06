@@ -78,9 +78,9 @@ public class SimpleBamManager implements BamManager
    * Adds a mailbox.
    */
   @Override
-  public void addMailbox(Mailbox mailbox)
+  public void addMailbox(String address, Mailbox mailbox)
   {
-    getBroker().addMailbox(mailbox);
+    getBroker().addMailbox(address, mailbox);
   }
   
   /**
@@ -104,7 +104,7 @@ public class SimpleBamManager implements BamManager
                                     MailboxType.DEFAULT);
     actor.setMailbox(mailbox);
     
-    addMailbox(mailbox);
+    addMailbox(address, mailbox);
   }
   
   /**
@@ -118,7 +118,7 @@ public class SimpleBamManager implements BamManager
                                     actor,
                                     MailboxType.DEFAULT);
     
-    addMailbox(mailbox);
+    addMailbox(address, mailbox);
   }
   
   /**
@@ -133,7 +133,7 @@ public class SimpleBamManager implements BamManager
                                     actor,
                                     MailboxType.MULTI_WORKER);
     
-    addMailbox(mailbox);
+    addMailbox(address, mailbox);
     
     return mailbox;
   }
@@ -154,15 +154,17 @@ public class SimpleBamManager implements BamManager
   public Agent createAgent(MessageStream actorStream,
                            MailboxType mailboxType)
   {
-    Mailbox mailbox = createMailbox(actorStream.getAddress(),
+    String address = actorStream.getAddress();
+    
+    Mailbox mailbox = createMailbox(address,
                                     actorStream, 
                                     mailboxType);
     
-    Agent agent = new AbstractAgent(actorStream.getAddress(),
+    Agent agent = new AbstractAgent(address,
                                     mailbox,
                                     getBroker());
     
-    addMailbox(mailbox);
+    addMailbox(address, mailbox);
     
     return agent;
   }
@@ -219,7 +221,7 @@ public class SimpleBamManager implements BamManager
    
     Mailbox mailbox = new PassthroughMailbox(address, next, getBroker());
     
-    addMailbox(mailbox);
+    addMailbox(address, mailbox);
     
     return mailbox;
   }

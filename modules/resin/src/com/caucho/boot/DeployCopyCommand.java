@@ -31,8 +31,8 @@ package com.caucho.boot;
 
 import com.caucho.config.ConfigException;
 import com.caucho.env.repository.CommitBuilder;
-import com.caucho.server.admin.DeployClient;
 import com.caucho.server.admin.WebAppDeployClient;
+import com.caucho.server.deploy.DeployClient;
 import com.caucho.util.L10N;
 
 public class DeployCopyCommand extends AbstractRepositoryCommand {

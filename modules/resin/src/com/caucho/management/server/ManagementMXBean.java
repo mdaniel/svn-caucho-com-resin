@@ -34,7 +34,6 @@ import com.caucho.jmx.MXAction;
 import com.caucho.jmx.MXContentType;
 import com.caucho.jmx.MXParam;
 import com.caucho.server.admin.AddUserQueryReply;
-import com.caucho.server.admin.ControllerState;
 import com.caucho.server.admin.JmxCallQueryReply;
 import com.caucho.server.admin.JmxSetQueryReply;
 import com.caucho.server.admin.JsonQueryReply;
@@ -44,7 +43,8 @@ import com.caucho.server.admin.PdfReportQueryReply;
 import com.caucho.server.admin.RemoveUserQueryReply;
 import com.caucho.server.admin.StatServiceValuesQueryReply;
 import com.caucho.server.admin.StringQueryReply;
-import com.caucho.server.admin.TagResult;
+import com.caucho.server.deploy.DeployControllerState;
+import com.caucho.server.deploy.DeployTagResult;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -221,7 +221,7 @@ public interface ManagementMXBean extends ManagedObjectMXBean
   @Description("starts a deployed application")
   @MXAction(value = "web-app-start", method = "POST")
   @MXContentType
-  public ControllerState startWebApp(
+  public DeployControllerState startWebApp(
     @MXParam(name = "server") String serverId,
     @MXParam(name = "tag") String tag,
     @MXParam(name = "context") String context,
@@ -237,7 +237,7 @@ public interface ManagementMXBean extends ManagedObjectMXBean
   @Description("stops a deployed application")
   @MXAction(value = "web-app-stop", method = "POST")
   @MXContentType
-  public ControllerState stopWebApp(
+  public DeployControllerState stopWebApp(
     @MXParam(name = "server") String serverId,
     @MXParam(name = "tag") String tag,
     @MXParam(name = "context") String context,
@@ -253,7 +253,7 @@ public interface ManagementMXBean extends ManagedObjectMXBean
   @Description("restarts a deployed application")
   @MXAction(value = "web-app-restart", method = "POST")
   @MXContentType
-  public ControllerState restartWebApp(
+  public DeployControllerState restartWebApp(
     @MXParam(name = "server") String serverId,
     @MXParam(name = "tag") String tag,
     @MXParam(name = "context") String context,
@@ -302,7 +302,7 @@ public interface ManagementMXBean extends ManagedObjectMXBean
   @Description("lists deployed applications")
   @MXAction("deploy-list")
   @MXContentType
-  public TagResult[] deployList(@MXParam(name = "server") String serverId,
+  public DeployTagResult[] deployList(@MXParam(name = "server") String serverId,
                                 @MXParam(name = "pattern", defaultValue = ".*")
                                 String pattern)
     throws ReflectionException;

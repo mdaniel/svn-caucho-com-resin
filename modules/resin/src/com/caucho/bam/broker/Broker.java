@@ -55,7 +55,7 @@ public interface Broker extends MessageStream
   /**
    * Adds a mailbox (optional operation).
    */
-  public void addMailbox(Mailbox mailbox);
+  public void addMailbox(String address, Mailbox mailbox);
   
   /**
    * Removes a mailbox (optional operation).

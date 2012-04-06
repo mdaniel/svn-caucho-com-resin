@@ -26,7 +26,7 @@
  * @author Scott Ferguson
  */
 
-package com.caucho.server.admin;
+package com.caucho.server.deploy;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -56,6 +56,7 @@ import com.caucho.env.repository.RepositoryException;
 import com.caucho.env.repository.RepositoryTagEntry;
 import com.caucho.env.repository.RepositoryTagListener;
 import com.caucho.hmtp.HmtpClient;
+import com.caucho.server.admin.GitJarStreamSource;
 import com.caucho.server.cluster.ServletService;
 import com.caucho.util.CurrentTime;
 import com.caucho.util.IoUtil;
@@ -305,7 +306,7 @@ public class DeployClient implements Repository
    */
   public String getTagState(String tag)
   {
-    TagStateQuery query = _deployProxy.getTagState(tag);
+    DeployTagStateQuery query = _deployProxy.getTagState(tag);
     
     if (query != null)
       return query.getState();
@@ -318,7 +319,7 @@ public class DeployClient implements Repository
    */
   public Throwable getTagException(String tag)
   {
-    TagStateQuery query = _deployProxy.getTagState(tag); // (TagStateQuery) query(query);
+    DeployTagStateQuery query = _deployProxy.getTagState(tag); // (TagStateQuery) query(query);
     
     if (query != null)
       return query.getThrowable();
@@ -431,7 +432,7 @@ public class DeployClient implements Repository
     return _deployProxy.putTag(tag, contentHash, attributeCopy);
   }
   
-  public TagResult []queryTags(String pattern)
+  public DeployTagResult []queryTags(String pattern)
   {
     return _deployProxy.queryTags(pattern);
   }
@@ -452,7 +453,7 @@ public class DeployClient implements Repository
    * @param tag the encoded controller name
    *
    */
-  public ControllerState restart(String tag)
+  public DeployControllerState restart(String tag)
   {
     return _deployProxy.restart(tag);
   }
@@ -463,7 +464,7 @@ public class DeployClient implements Repository
    * @param tag the encoded controller name
    *
    */
-  public ControllerState restartCluster(String tag)
+  public DeployControllerState restartCluster(String tag)
   {
     return _deployProxy.restartCluster(tag);
   }
@@ -473,7 +474,7 @@ public class DeployClient implements Repository
    *
    * @param tag the encoded controller name
    */
-  public ControllerState start(String tag)
+  public DeployControllerState start(String tag)
   {
     return _deployProxy.start(tag);
   }
@@ -483,7 +484,7 @@ public class DeployClient implements Repository
    *
    * @param tag the encoded controller name
    */
-  public ControllerState stop(String tag)
+  public DeployControllerState stop(String tag)
   {
     return _deployProxy.stop(tag);
   }

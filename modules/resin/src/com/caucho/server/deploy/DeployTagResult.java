@@ -23,23 +23,57 @@
  *   59 Temple Place, Suite 330
  *   Boston, MA 02111-1307  USA
  *
- * @author Alex Rojkov
+ * @author Emil Ong
  */
 
-package com.caucho.server.admin;
+package com.caucho.server.deploy;
+
+import com.caucho.json.Json;
+import com.caucho.json.Transient;
 
 import java.io.Serializable;
 
-public class HostQuery implements Serializable {
-  private String _name;
+@SuppressWarnings("serial")
+public class DeployTagResult implements Serializable {
 
-  public String getName()
+  @Json(name = "tag")
+  private String _tag;
+
+  @Transient
+  private String _root;
+
+  public DeployTagResult()
   {
-    return _name;
   }
 
-  public void setName(String name)
+  public DeployTagResult(String tag, String root)
   {
-    this._name = name;
+    _tag = tag;
+    _root = root;
+  }
+
+  public String getTag()
+  {
+    return _tag;
+  }
+
+  public void setTag(String tag)
+  {
+    _tag = tag;
+  }
+
+  public String getRoot()
+  {
+    return _root;
+  }
+
+  public void setRoot(String root)
+  {
+    _root = root;
+  }
+
+  public String toString()
+  {
+    return (getClass().getSimpleName() + "[" + _tag + ",root=" + _root + "]");
   }
 }

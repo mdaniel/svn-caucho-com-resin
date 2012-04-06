@@ -51,7 +51,6 @@ import com.caucho.distcache.ExtCacheEntry;
 import com.caucho.env.distcache.CacheDataBacking;
 import com.caucho.env.service.ResinSystem;
 import com.caucho.inject.Module;
-import com.caucho.util.Alarm;
 import com.caucho.util.CurrentTime;
 import com.caucho.util.FreeList;
 import com.caucho.util.HashKey;

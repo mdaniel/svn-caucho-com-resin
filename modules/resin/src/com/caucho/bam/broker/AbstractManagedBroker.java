@@ -54,7 +54,7 @@ abstract public class AbstractManagedBroker
    * Adds a mailbox.
    */
   @Override
-  public void addMailbox(Mailbox mailbox)
+  public void addMailbox(String address, Mailbox mailbox)
   {
     throw new UnsupportedOperationException(getClass().getName());
   }
@@ -84,7 +84,9 @@ abstract public class AbstractManagedBroker
   public Agent createAgent(MessageStream actorStream,
                            MailboxType mailboxType)
   {
-    Mailbox mailbox = createMailbox(actorStream.getAddress(),
+    String address = actorStream.getAddress();
+    
+    Mailbox mailbox = createMailbox(address,
                                     actorStream, 
                                     mailboxType);
     
@@ -92,7 +94,7 @@ abstract public class AbstractManagedBroker
                                     mailbox,
                                     this);
 
-    addMailbox(mailbox);
+    addMailbox(address, mailbox);
     
     return agent;
   }
@@ -143,7 +145,7 @@ abstract public class AbstractManagedBroker
    
     Mailbox mailbox = new PassthroughMailbox(address, next, this);
     
-    addMailbox(mailbox);
+    addMailbox(address, mailbox);
     
     return mailbox;
   }

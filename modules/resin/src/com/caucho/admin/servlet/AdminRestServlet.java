@@ -37,7 +37,6 @@ import com.caucho.json.JsonOutput;
 import com.caucho.management.server.ManagementMXBean;
 import com.caucho.management.server.StatServiceValue;
 import com.caucho.server.admin.AddUserQueryReply;
-import com.caucho.server.admin.ControllerState;
 import com.caucho.server.admin.JmxCallQueryReply;
 import com.caucho.server.admin.JmxSetQueryReply;
 import com.caucho.server.admin.JsonQueryReply;
@@ -47,8 +46,9 @@ import com.caucho.server.admin.PdfReportQueryReply;
 import com.caucho.server.admin.RemoveUserQueryReply;
 import com.caucho.server.admin.StatServiceValuesQueryReply;
 import com.caucho.server.admin.StringQueryReply;
-import com.caucho.server.admin.TagResult;
 import com.caucho.server.admin.UserQueryReply;
+import com.caucho.server.deploy.DeployControllerState;
+import com.caucho.server.deploy.DeployTagResult;
 import com.caucho.util.L10N;
 import com.caucho.vfs.Vfs;
 import com.caucho.vfs.WriteStream;
@@ -551,12 +551,12 @@ public class AdminRestServlet extends HttpServlet
   }
   
   static class ControllerStateActionQueryReplyMarshal
-    extends Marshal<ControllerState>
+    extends Marshal<DeployControllerState>
   {
     @Override
     public Object marshal(HttpServletRequest request,
                           String name,
-                          ControllerState defaultValue)
+                          DeployControllerState defaultValue)
       throws IOException
     {
       throw new AbstractMethodError();
@@ -564,7 +564,7 @@ public class AdminRestServlet extends HttpServlet
 
     @Override
     public void unmarshal(HttpServletResponse response,
-                          ControllerState value)
+                          DeployControllerState value)
       throws IOException
     {
       JsonOutput out = new JsonOutput(response.getWriter());
@@ -688,18 +688,18 @@ public class AdminRestServlet extends HttpServlet
     }
   }
 
-  static class TagReplyMarshal extends Marshal<TagResult[]>
+  static class TagReplyMarshal extends Marshal<DeployTagResult[]>
   {
     @Override
     public Object marshal(HttpServletRequest request,
                           String name,
-                          TagResult []defaultValue) throws IOException
+                          DeployTagResult []defaultValue) throws IOException
     {
       throw new AbstractMethodError(getClass().getName());
     }
 
     @Override
-    public void unmarshal(HttpServletResponse response, TagResult []value)
+    public void unmarshal(HttpServletResponse response, DeployTagResult []value)
       throws IOException
     {
       JsonOutput out = new JsonOutput(response.getWriter());
@@ -878,7 +878,7 @@ public class AdminRestServlet extends HttpServlet
     _marshalMap.put(StringQueryReply.class, new StringQueryReplyMarshal());
     _marshalMap.put(JsonQueryReply.class, new JsonQueryReplyMarshal());
     _marshalMap.put(AddUserQueryReply.class, new AddUserQueryReplyMarshal());
-    _marshalMap.put(TagResult[].class, new TagReplyMarshal());
+    _marshalMap.put(DeployTagResult[].class, new TagReplyMarshal());
 
     _marshalMap.put(StatServiceValuesQueryReply.class,
                     new StatServiceValuesQueryReplytMarshal());
@@ -898,7 +898,7 @@ public class AdminRestServlet extends HttpServlet
     _marshalMap.put(JmxCallQueryReply.class,
                     new JmxCallQueryReplyMarshal());
 
-    _marshalMap.put(ControllerState.class,
+    _marshalMap.put(DeployControllerState.class,
                     new ControllerStateActionQueryReplyMarshal());
 
     _marshalMap.put(PdfReportQueryReply.class,

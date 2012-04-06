@@ -29,8 +29,8 @@
 
 package com.caucho.boot;
 
-import com.caucho.server.admin.TagResult;
 import com.caucho.server.admin.WebAppDeployClient;
+import com.caucho.server.deploy.DeployTagResult;
 import com.caucho.util.L10N;
 
 public class DeployListCommand extends AbstractRepositoryCommand
@@ -52,9 +52,9 @@ public class DeployListCommand extends AbstractRepositoryCommand
     if (pattern == null)
       pattern = ".*";
 
-    TagResult[] tags = deployClient.queryTags(pattern);
+    DeployTagResult[] tags = deployClient.queryTags(pattern);
 
-    for (TagResult tag : tags) {
+    for (DeployTagResult tag : tags) {
       System.out.println(tag.getTag());
     }
 

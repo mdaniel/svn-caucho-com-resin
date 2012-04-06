@@ -7,8 +7,9 @@
  * notice unmodified.
  *
  * Resin Open Source is free software; you can redistribute it and/or modify
- * it under the terms of the GNU General Public License version 2
- * as published by the Free Software Foundation.
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation; either version 2 of the License, or
+ * (at your option) any later version.
  *
  * Resin Open Source is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
@@ -23,57 +24,56 @@
  *   59 Temple Place, Suite 330
  *   Boston, MA 02111-1307  USA
  *
- * @author Emil Ong
+ * @author Scott Ferguson
  */
 
-package com.caucho.server.admin;
+package com.caucho.server.deploy;
 
-import com.caucho.json.Json;
-import com.caucho.json.Transient;
+import com.caucho.inject.Module;
 
-import java.io.Serializable;
-
+@Module
 @SuppressWarnings("serial")
-public class TagResult implements Serializable {
-
-  @Json(name = "tag")
+public class DeployTagStateQuery implements java.io.Serializable
+{
   private String _tag;
+  private String _state;
+  private Throwable _exn;
 
-  @Transient
-  private String _root;
-
-  public TagResult()
+  @SuppressWarnings("unused")
+  private DeployTagStateQuery()
   {
   }
-
-  public TagResult(String tag, String root)
+  
+  public DeployTagStateQuery(String tag)
   {
     _tag = tag;
-    _root = root;
   }
-
+  
+  public DeployTagStateQuery(String tag, String state, Throwable exn)
+  {
+    _tag = tag;
+    _state = state;
+    _exn = exn;
+  }
+  
   public String getTag()
   {
     return _tag;
   }
-
-  public void setTag(String tag)
+  
+  public String getState()
   {
-    _tag = tag;
+    return _state;
+  }
+  
+  public Throwable getThrowable()
+  {
+    return _exn;
   }
 
-  public String getRoot()
-  {
-    return _root;
-  }
-
-  public void setRoot(String root)
-  {
-    _root = root;
-  }
-
+  @Override
   public String toString()
   {
-    return (getClass().getSimpleName() + "[" + _tag + ",root=" + _root + "]");
+    return getClass().getSimpleName() + "[" + _tag + "," + _state + "]";
   }
 }

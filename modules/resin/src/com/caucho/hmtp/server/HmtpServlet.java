@@ -105,8 +105,9 @@ public class HmtpServlet extends HttpServlet implements ActorHolder, Actor
     _skeleton = BamSkeleton.getSkeleton(getClass());
     
     Mailbox servletMailbox = createServletMailbox();
+    String address = servletMailbox.getAddress();
     
-    _broker.addMailbox(servletMailbox);
+    _broker.addMailbox(address, servletMailbox);
   }
   
   @Override

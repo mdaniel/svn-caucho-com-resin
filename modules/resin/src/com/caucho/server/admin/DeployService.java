@@ -36,6 +36,7 @@ import javax.annotation.PostConstruct;
 
 import com.caucho.config.Service;
 import com.caucho.loader.EnvironmentLocal;
+import com.caucho.server.deploy.DeployActor;
 
 @Service
 public class DeployService

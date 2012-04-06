@@ -108,12 +108,14 @@ public class ManagerActor extends SimpleActor
 
     _adminAuthenticator = _server.getAdminAuthenticator();
 
+    String address = getActor().getAddress();
+    
     setBroker(getBroker());
     MultiworkerMailbox mailbox
-      = new MultiworkerMailbox(getActor().getAddress(),
+      = new MultiworkerMailbox(address,
                                getActor(), getBroker(), 2);
 
-    getBroker().addMailbox(mailbox);
+    getBroker().addMailbox(address, mailbox);
   }
 
   public Path getHprofDir()
