@@ -102,7 +102,7 @@ public class DeployClient implements Repository
     
 
     //_deployAddress = "deploy@" + serverId + ".resin.caucho";
-    _deployAddress = DeployActor.address;
+    _deployAddress = DeployActor.ADDRESS;
     
     BamManager bamManager = server.getAdminBrokerManager();
     
@@ -117,7 +117,7 @@ public class DeployClient implements Repository
     
     _url = url;
 
-    _deployAddress = DeployActor.address;
+    _deployAddress = DeployActor.ADDRESS;
   }
   
   public DeployClient(String host, int port,
@@ -135,7 +135,7 @@ public class DeployClient implements Repository
 
       _bamClient = client;
     
-      _deployAddress = DeployActor.address;
+      _deployAddress = DeployActor.ADDRESS;
       
       /*
       BamManager bamManager = server.getAdminBrokerManager();
@@ -452,7 +452,7 @@ public class DeployClient implements Repository
    * @param tag the encoded controller name
    *
    */
-  public ControllerStateActionQueryReply restart(String tag)
+  public ControllerState restart(String tag)
   {
     return _deployProxy.restart(tag);
   }
@@ -463,7 +463,7 @@ public class DeployClient implements Repository
    * @param tag the encoded controller name
    *
    */
-  public ControllerStateActionQueryReply restartCluster(String tag)
+  public ControllerState restartCluster(String tag)
   {
     return _deployProxy.restartCluster(tag);
   }
@@ -473,7 +473,7 @@ public class DeployClient implements Repository
    *
    * @param tag the encoded controller name
    */
-  public ControllerStateActionQueryReply start(String tag)
+  public ControllerState start(String tag)
   {
     return _deployProxy.start(tag);
   }
@@ -483,7 +483,7 @@ public class DeployClient implements Repository
    *
    * @param tag the encoded controller name
    */
-  public ControllerStateActionQueryReply stop(String tag)
+  public ControllerState stop(String tag)
   {
     return _deployProxy.stop(tag);
   }

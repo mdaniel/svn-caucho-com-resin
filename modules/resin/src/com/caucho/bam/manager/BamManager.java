@@ -36,7 +36,7 @@ import com.caucho.bam.broker.Broker;
 import com.caucho.bam.mailbox.Mailbox;
 import com.caucho.bam.mailbox.MailboxType;
 import com.caucho.bam.stream.MessageStream;
-import com.caucho.server.admin.DeployActorProxyImpl;
+import com.caucho.server.admin.DeployActor;
 
 
 /**

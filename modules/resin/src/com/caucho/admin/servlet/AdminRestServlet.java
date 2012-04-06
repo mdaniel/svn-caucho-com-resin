@@ -37,7 +37,7 @@ import com.caucho.json.JsonOutput;
 import com.caucho.management.server.ManagementMXBean;
 import com.caucho.management.server.StatServiceValue;
 import com.caucho.server.admin.AddUserQueryReply;
-import com.caucho.server.admin.ControllerStateActionQueryReply;
+import com.caucho.server.admin.ControllerState;
 import com.caucho.server.admin.JmxCallQueryReply;
 import com.caucho.server.admin.JmxSetQueryReply;
 import com.caucho.server.admin.JsonQueryReply;
@@ -551,12 +551,12 @@ public class AdminRestServlet extends HttpServlet
   }
   
   static class ControllerStateActionQueryReplyMarshal
-    extends Marshal<ControllerStateActionQueryReply>
+    extends Marshal<ControllerState>
   {
     @Override
     public Object marshal(HttpServletRequest request,
                           String name,
-                          ControllerStateActionQueryReply defaultValue)
+                          ControllerState defaultValue)
       throws IOException
     {
       throw new AbstractMethodError();
@@ -564,7 +564,7 @@ public class AdminRestServlet extends HttpServlet
 
     @Override
     public void unmarshal(HttpServletResponse response,
-                          ControllerStateActionQueryReply value)
+                          ControllerState value)
       throws IOException
     {
       JsonOutput out = new JsonOutput(response.getWriter());
@@ -898,7 +898,7 @@ public class AdminRestServlet extends HttpServlet
     _marshalMap.put(JmxCallQueryReply.class,
                     new JmxCallQueryReplyMarshal());
 
-    _marshalMap.put(ControllerStateActionQueryReply.class,
+    _marshalMap.put(ControllerState.class,
                     new ControllerStateActionQueryReplyMarshal());
 
     _marshalMap.put(PdfReportQueryReply.class,

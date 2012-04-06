@@ -304,8 +304,9 @@ public class BootResinConfig // implements EnvironmentBean
     }
 
     // server/6e10
-    if (args.isDynamicServer() || getHomeCluster() != null)
+    if (isDynamicServer(args)) {
       return null;
+    }
 
     /*
     if (client == null && _args.getCommand().isShutdown()) {
@@ -328,6 +329,35 @@ public class BootResinConfig // implements EnvironmentBean
     }
     
     return client;
+  }
+  
+  boolean isDynamicServer(WatchdogArgs args)
+  {
+    if (args.getServerId() != null) {
+      return false;
+    }
+    else if (args.isDynamicServer()) {
+      return true;
+    }
+    else if (getHomeCluster() != null) {
+      return true;
+    }
+    else if (args.getClusterId() != null) {
+      return true;
+    }
+    else {
+      return false;
+    }
+  }
+  
+  String getClusterId(WatchdogArgs args)
+  {
+    if (args.getClusterId() != null) {
+      return args.getClusterId();
+    }
+    else {
+      return getHomeCluster();
+    }
   }
 
   public ArrayList<WatchdogClient> findLocalClients(String serverId)

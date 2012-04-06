@@ -50,6 +50,7 @@ import com.caucho.bam.actor.SimpleActor;
 import com.caucho.bam.actor.SkeletonActorFilter;
 import com.caucho.bam.actor.SkeletonInvocationException;
 import com.caucho.bam.broker.Broker;
+import com.caucho.bam.query.QueryCallback;
 import com.caucho.bam.stream.MessageStream;
 import com.caucho.util.L10N;
 
@@ -207,7 +208,7 @@ public class ProxySkeleton<S>
   {
     if (! (payload instanceof CallPayload)) {
       if (log.isLoggable(Level.FINER)) {
-        log.finer(actor + " message " + payload + " is unsupported");
+        log.finer(actor + " query " + payload + " is unsupported");
       }
       
       return;
@@ -348,6 +349,12 @@ public class ProxySkeleton<S>
         method.setAccessible(true);
 
         _queryHandlers.put(method.getName(), new QueryShortReplyMethodInvoker(method));
+        continue;
+      }
+      else if (paramTypes.length > 0 && paramTypes[paramTypes.length - 1].isAssignableFrom(QueryCallback.class)) {
+        method.setAccessible(true);
+
+        _queryHandlers.put(method.getName(), new QueryShortQueryMethodInvoker(method));
         continue;
       }
       else if (void.class.equals(method.getReturnType())) {
@@ -562,6 +569,61 @@ public class ProxySkeleton<S>
     public void onError(BamError error)
     {
       _broker.queryError(_id, _from, _to, null, error);
+    }
+  }
+  
+  static class QueryShortQueryMethodInvoker extends QueryInvoker {
+    private final Method _method;
+    
+    QueryShortQueryMethodInvoker(Method method)
+    {
+      _method = method;
+    }
+
+    @Override
+    public void invoke(Object actor,
+                       Broker broker,
+                       long id, 
+                       String to, 
+                       String from,
+                       String methodName,
+                       Object []args)
+      throws IllegalAccessException, InvocationTargetException
+    {
+      Object []param = new Object[args.length + 1];
+      System.arraycopy(args, 0, param, 0, args.length);
+      
+      param[args.length] = new QueryQueryCallback(id, to, from, broker);
+      
+      _method.invoke(actor, param);
+    }
+  }
+  
+  static class QueryQueryCallback implements QueryCallback {
+    private final long _id;
+    private final String _to;
+    private final String _from;
+    private final Broker _broker;
+    
+    QueryQueryCallback(long id, String to, String from, Broker broker)
+    {
+      _id = id;
+      _to = to;
+      _from = from;
+      _broker = broker;
+    }
+
+    @Override
+    public void onQueryResult(String to, String from, Serializable payload)
+    {
+      _broker.queryResult(_id, _from, _to, payload);
+    }
+    
+    @Override
+    public void onQueryError(String to, String from, Serializable payload,
+                             BamError error)
+    {
+      _broker.queryError(_id, _from, _to, payload, error);
     }
   }
 }

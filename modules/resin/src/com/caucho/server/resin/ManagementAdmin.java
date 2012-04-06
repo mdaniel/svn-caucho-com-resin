@@ -44,7 +44,7 @@ import com.caucho.management.server.AbstractManagedObject;
 import com.caucho.management.server.ManagementMXBean;
 import com.caucho.quercus.lib.reflection.ReflectionException;
 import com.caucho.server.admin.AddUserQueryReply;
-import com.caucho.server.admin.ControllerStateActionQueryReply;
+import com.caucho.server.admin.ControllerState;
 import com.caucho.server.admin.DeployClient;
 import com.caucho.server.admin.HmuxClientFactory;
 import com.caucho.server.admin.JmxCallQueryReply;
@@ -415,7 +415,7 @@ public class ManagementAdmin extends AbstractManagedObject
   //
 
   @Override
-  public ControllerStateActionQueryReply startWebApp(String serverId,
+  public ControllerState startWebApp(String serverId,
                                                       String tag,
                                                       String context,
                                                       String stage,
@@ -434,13 +434,13 @@ public class ManagementAdmin extends AbstractManagedObject
 
     WebAppDeployClient deployClient = getWebappDeployClient(serverId);
 
-    ControllerStateActionQueryReply result = deployClient.start(tag);
+    ControllerState result = deployClient.start(tag);
 
     return result;
   }
 
   @Override
-  public ControllerStateActionQueryReply stopWebApp(String serverId,
+  public ControllerState stopWebApp(String serverId,
                                                      String tag,
                                                      String context,
                                                      String stage,
@@ -459,13 +459,13 @@ public class ManagementAdmin extends AbstractManagedObject
 
     WebAppDeployClient deployClient = getWebappDeployClient(serverId);
 
-    ControllerStateActionQueryReply result = deployClient.stop(tag);
+    ControllerState result = deployClient.stop(tag);
 
     return result;
   }
 
   @Override
-  public ControllerStateActionQueryReply restartWebApp(String serverId,
+  public ControllerState restartWebApp(String serverId,
                                                         String tag,
                                                         String context,
                                                         String stage,
@@ -484,7 +484,7 @@ public class ManagementAdmin extends AbstractManagedObject
 
     WebAppDeployClient deployClient = getWebappDeployClient(serverId);
 
-    ControllerStateActionQueryReply result = deployClient.restart(tag);
+    ControllerState result = deployClient.restart(tag);
 
     return result;
   }

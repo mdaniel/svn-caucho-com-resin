@@ -68,17 +68,17 @@ public interface DeployActorProxy
   // start/restart
   //
 
-  public ControllerStateActionQueryReply start(String tag);
+  public ControllerState start(String tag);
   
-  public ControllerStateActionQueryReply restart(String tag);
+  public ControllerState restart(String tag);
   
-  public ControllerStateActionQueryReply stop(String tag);
+  public ControllerState stop(String tag);
   
   public void
-  controllerRestart(String tag, ReplyCallback<ControllerStateActionQueryReply> cb);
+  controllerRestart(String tag, ReplyCallback<ControllerState> cb);
   /*
   public void
   restartCluster(String tag, ReplyCallback<ControllerStateActionQueryReply> cb);
 */
-  public ControllerStateActionQueryReply restartCluster(String tag);
+  public ControllerState restartCluster(String tag);
 }

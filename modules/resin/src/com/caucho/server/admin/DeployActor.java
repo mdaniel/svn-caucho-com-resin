@@ -31,11 +31,9 @@ package com.caucho.server.admin;
 
 import java.io.IOException;
 import java.io.InputStream;
-import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 import java.util.TreeMap;
 import java.util.concurrent.atomic.AtomicBoolean;
@@ -43,21 +41,10 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 import java.util.regex.Pattern;
 
-import javax.annotation.PostConstruct;
-
-import com.caucho.bam.Query;
-import com.caucho.bam.actor.BamSkeleton;
-import com.caucho.bam.actor.SimpleActor;
 import com.caucho.bam.broker.Broker;
-import com.caucho.bam.mailbox.MultiworkerMailbox;
 import com.caucho.bam.manager.BamManager;
-import com.caucho.bam.proxy.CallPayload;
-import com.caucho.bam.proxy.ProxyActor;
-import com.caucho.bam.stream.MessageStream;
+import com.caucho.bam.proxy.ReplyCallback;
 import com.caucho.cloud.bam.BamSystem;
-import com.caucho.cloud.deploy.CopyTagQuery;
-import com.caucho.cloud.deploy.RemoveTagQuery;
-import com.caucho.cloud.deploy.SetTagQuery;
 import com.caucho.config.ConfigException;
 import com.caucho.env.deploy.DeployControllerService;
 import com.caucho.env.deploy.DeployException;
@@ -66,150 +53,75 @@ import com.caucho.env.git.GitTree;
 import com.caucho.env.repository.RepositorySpi;
 import com.caucho.env.repository.RepositorySystem;
 import com.caucho.env.repository.RepositoryTagEntry;
-import com.caucho.jmx.Jmx;
+import com.caucho.env.service.ResinSystem;
+import com.caucho.env.thread.ThreadPool;
 import com.caucho.lifecycle.LifecycleState;
-import com.caucho.management.server.DeployControllerMXBean;
-import com.caucho.management.server.EAppMXBean;
-import com.caucho.management.server.WebAppMXBean;
-import com.caucho.server.cluster.ServletService;
-import com.caucho.server.host.HostController;
-import com.caucho.server.webapp.WebAppContainer;
-import com.caucho.server.webapp.WebAppController;
 import com.caucho.util.IoUtil;
 import com.caucho.util.L10N;
-import com.caucho.vfs.Path;
 import com.caucho.vfs.StreamSource;
-import com.caucho.vfs.Vfs;
 
-public class DeployActor extends SimpleActor
+public class DeployActor
 {
-  private static final String UID = "deploy";
+  private static final L10N L = new L10N(DeployActor.class);
   
-  public static final String address = "deploy@resin.caucho";
-
   private static final Logger log
     = Logger.getLogger(DeployActor.class.getName());
-
-  private static final L10N L = new L10N(DeployActor.class);
-
-  private ServletService _server;
-
-  private RepositorySpi _repository;
-
-  private AtomicBoolean _isInit = new AtomicBoolean();
   
-  private DeployActorProxyImpl _deployActorProxyImpl;
-  private MessageStream _deployActorProxyStream;
+  private static final String UID = "deploy";
+  public static final String ADDRESS = UID + '@' + "resin.caucho";
+  
+  private String _serverId;
+  private RepositorySpi _repository;
+  
+  private final AtomicBoolean _isInit = new AtomicBoolean();
 
   public DeployActor()
   {
-    super(address, BamSystem.getCurrentBroker());
+    _serverId = ResinSystem.getCurrentId();
   }
-  
-  protected DeployActorProxyImpl createProxy()
-  {
-    return new DeployActorProxyImpl(getRepository(), this);
-  }
-  
-  protected RepositorySpi getRepository()
-  {
-    return _repository;
-  }
-  
-  /*
-  @Override
-  public ManagedBroker getBroker()
-  {
-    return _server.getAdminBroker();
-  }
-  */
 
-  @PostConstruct
-  public void init()
+  protected void init()
   {
     if (_isInit.getAndSet(true))
       return;
 
-    _server = ServletService.getCurrent();
-
-    if (_server == null)
-      throw new ConfigException(L.l("resin:DeployService requires an active Server.\n  {0}",
-                                    Thread.currentThread().getContextClassLoader()));
-
     _repository = RepositorySystem.getCurrentRepositorySpi();
 
-    setBroker(getBroker());
-    
-    MultiworkerMailbox mailbox
-      = new MultiworkerMailbox(getActor().getAddress(), 
-                               getActor(), getBroker(), 2);
-    
-    getBroker().addMailbox(mailbox);
-    
-    _deployActorProxyImpl = createProxy();
-    
     Broker broker = BamSystem.getCurrentBroker();
     BamManager bamManager = BamSystem.getCurrentManager();
     
     String proxyAddress = UID + '@' + broker.getAddress();
-
-    /*
-    _deployActorProxyStream = new ProxyActor(_deployActorProxyImpl,
-                                             proxyAddress,
-                                             broker);
-                                             */
     
-    _deployActorProxyStream = bamManager.createService(proxyAddress,
-                                                       _deployActorProxyImpl);
-    
+    bamManager.createService(proxyAddress, this);
   }
 
-  /*
-  @Query
-  public boolean commitList(long id, String to, String from,
-                            DeployCommitListQuery commitList)
+  
+  public String []getCommitList(String []commitList)
   {
     ArrayList<String> uncommittedList = new ArrayList<String>();
-
-    if (commitList.getCommitList() != null) {
-      for (String commit : commitList.getCommitList()) {
+    
+    if (commitList != null) {
+      for (String commit : commitList) {
         if (! _repository.exists(commit))
           uncommittedList.add(commit);
       }
     }
+    
+    String []result = new String[uncommittedList.size()];
+    uncommittedList.toArray(result);
 
-    DeployCommitListQuery resultList
-      = new DeployCommitListQuery(uncommittedList);
-
-    getBroker().queryResult(id, from, to, resultList);
-
-    return true;
-  }
-  */
-
-  @Override
-  public void query(long id, String to, String from,
-                    Serializable payload)
-  {
-    if (payload instanceof CallPayload) {
-      _deployActorProxyStream.query(id, to, from, payload);
-    }
-    else {
-      super.query(id, to, from, payload);
-    }
+    return result;
   }
 
-  /*
-  @Query
-  public void getFile(long id, String to, String from,
-                         DeployGetFileQuery getFile)
+  /**
+   * Returns a file to the client.
+   */
+  public StreamSource getFile(String tag, String fileName)
     throws IOException
   {
-    String tag = getFile.getTag();
-    String fileName = getFile.getFileName();
-    
-    if (log.isLoggable(Level.FINER))
-      log.finer(this + " query " + getFile + "\n  to:" + to + " from:" + from);
+    if (log.isLoggable(Level.FINER)) {
+      log.finer(this + " getFile(" + tag + "," + fileName + ")");
+    }
     
     while (fileName.startsWith("/")) {
       fileName = fileName.substring(1);
@@ -228,11 +140,7 @@ public class DeployActor extends SimpleActor
 
     BlobStreamSource iss = new BlobStreamSource(_repository, fileSha);
     
-    StreamSource source = new StreamSource(iss);
-    
-    DeployGetFileQuery resultFile = new DeployGetFileQuery(tag, sha1, source);
-    
-    getBroker().queryResult(id, from, to, resultFile);
+    return new StreamSource(iss);
   }
   
   private String findFile(String sha1, String fullFilename, String fileName)
@@ -267,19 +175,40 @@ public class DeployActor extends SimpleActor
    
     return findFile(childSha1, fullFilename, tail);
   }
-  */
 
-  /*
-  @Query
-  public void getFileList(long id, String to, String from,
-                      DeployListFilesQuery listFile)
+  /**
+   * Receives a file from the client.
+   * 
+   * @param sha1 the hash identifier for the file
+   * @param source the binary stream content
+   */
+  public boolean sendFile(String sha1, StreamSource source)
+  {
+    if (log.isLoggable(Level.FINER))
+      log.finer(this + " sendFile sha1=" + sha1);
+
+    InputStream is = null;
+    try {
+      is = source.getInputStream();
+
+      _repository.writeRawGitFile(sha1, is);
+    } catch (Exception e) {
+      log.log(Level.WARNING, e.toString(), e);
+
+      return false;
+    } finally {
+      IoUtil.close(is);
+    }
+
+    return true;
+  }
+
+  public String []getFileList(String tag, String fileName)
     throws IOException
   {
-    String tag = listFile.getTag();
-    String fileName = listFile.getFileName();
-    
-    if (log.isLoggable(Level.FINER))
-      log.finer(this + " query " + listFile + "\n  to:" + to + " from:" + from);
+    if (log.isLoggable(Level.FINER)) {
+      log.finer(this + " getFileList(" + tag + "," + fileName + ")");
+    }
     
     RepositoryTagEntry entry = _repository.getTagMap().get(tag);
     
@@ -299,11 +228,8 @@ public class DeployActor extends SimpleActor
     String []files = new String[fileList.size()];
     
     fileList.toArray(files);
-    
-    DeployListFilesQuery result
-      = new DeployListFilesQuery(tag, fileName, files);
-    
-    getBroker().queryResult(id, from, to, result);
+
+    return files;
   }
   
   private void listFiles(ArrayList<String> files, 
@@ -335,57 +261,89 @@ public class DeployActor extends SimpleActor
       listFiles(files, tree.getHash(key), name);
     }
   }
-  */
   
-  /*
-  @Query
-  public void tagCopy(long id,
-                      String to,
-                      String from,
-                      CopyTagQuery query)
-  {
-    String tag = query.getTag();
-    String sourceTag = query.getSourceTag();
+  //
+  // tag methods
+  //
 
+  public boolean putTag(String tagName, 
+                        String contentHash,
+                        Map<String,String> attributes)
+  {
+    if (contentHash == null)
+      throw new NullPointerException();
+
+    String server = "default";
+    
+    TreeMap<String,String> commitMetaData = new TreeMap<String,String>();
+    
+    if (attributes != null)
+      commitMetaData.putAll(attributes);
+    
+    commitMetaData.put("server", server);
+    
+    return _repository.putTag(tagName, 
+                              contentHash,
+                              commitMetaData);
+  }
+
+  public boolean tagCopy(String tag, 
+                         String sourceTag, 
+                         Map<String,String> attributes)
+  {
     RepositoryTagEntry entry = _repository.getTagMap().get(sourceTag);
 
     if (entry == null) {
-      log.fine(this + " copyError dst='" + query.getTag() + "' src='" + query.getSourceTag() + "'");
+      log.fine(this + " copyError dst='" + tag + "' src='" + sourceTag + "'");
 
       throw new DeployException(L.l("deploy-copy: '{0}' is an unknown source tag.",
-                                    query.getSourceTag()));
+                                    sourceTag));
+      /*
+      getBroker().queryError(id, from, to, query,
+                             new BamError(BamError.TYPE_CANCEL,
+                                          BamError.ITEM_NOT_FOUND,
+                             "unknown tag"));
+      return;
+      */
     }
 
-    log.fine(this + " copy dst='" + query.getTag() + "' src='" + query.getSourceTag() + "'");
+    log.fine(this + " copy dst='" + tag + "' src='" + sourceTag + "'");
     
     String server = "default";
     
     TreeMap<String,String> metaDataMap = new TreeMap<String,String>();
     
-    if (query.getAttributes() != null)
-      metaDataMap.putAll(query.getAttributes());
+    if (attributes != null)
+      metaDataMap.putAll(attributes);
     
     if (server != null)
       metaDataMap.put("server", server);
 
-    boolean result = _repository.putTag(tag,
-                                        entry.getRoot(),
-                                        metaDataMap);
-
-    getBroker().queryResult(id, from, to, result);
+    return _repository.putTag(tag, entry.getRoot(), metaDataMap);
   }
-  */
 
-  @Query
-  public void tagState(long id,
-                       String to,
-                       String from,
-                       TagStateQuery query)
+  public TagResult []queryTags(String regexp)
+  {
+    ArrayList<TagResult> tags = new ArrayList<TagResult>();
+
+    Pattern pattern = Pattern.compile(regexp);
+
+    for (Map.Entry<String, RepositoryTagEntry> entry :
+         _repository.getTagMap().entrySet()) {
+      String tag = entry.getKey();
+
+      if (pattern.matcher(tag).matches()) {
+        tags.add(new TagResult(tag, entry.getValue().getRoot()));
+      }
+    }
+
+    return tags.toArray(new TagResult[tags.size()]);
+  }
+
+  public TagStateQuery getTagState(String tag)
   {
     // XXX: just ping the tag?
     // updateDeploy();
-    
-    String tag = query.getTag();
     
     DeployControllerService deploy = DeployControllerService.getCurrent();
     DeployTagItem item = null;
@@ -396,170 +354,53 @@ public class DeployActor extends SimpleActor
     }
     
     if (item != null) {
-      TagStateQuery result = new TagStateQuery(tag, item.getStateName(),
-                                               item.getDeployException());
-      
-      getBroker().queryResult(id, from, to, result);
+      return new TagStateQuery(tag, item.getStateName(),
+                               item.getDeployException());
     }
-    else
-      getBroker().queryResult(id, from, to, null);
+    else {
+      return null;
+    }
   }
 
-  @Query
-  public Boolean removeTag(RemoveTagQuery query)
+  public boolean removeTag(String tag, Map<String,String> attributes)
   {
     if (log.isLoggable(Level.FINE))
-      log.fine(this + " query " + query);
+      log.fine(this + " removeTag " + tag);
     
     String server = "default";
     
     HashMap<String,String> commitMetaData = new HashMap<String,String>();
     
-    if (query.getAttributes() != null)
-      commitMetaData.putAll(query.getAttributes());
+    if (attributes != null) {
+      commitMetaData.putAll(attributes);
+    }
     
     commitMetaData.put("server", server);
 
-    return _repository.removeTag(query.getTag(), commitMetaData);
+    return _repository.removeTag(tag, commitMetaData);
   }
 
-  /*
-  @Query
-  public boolean sendFileQuery(long id, String to, String from,
-                               DeploySendQuery query)
+  //
+  // start/restart
+  //
+
+  public ControllerState start(String tag)
   {
-    String sha1 = query.getSha1();
+    LifecycleState state = startImpl(tag);
 
-    if (log.isLoggable(Level.FINER))
-      log.finer(this + " sendFileQuery sha1=" + sha1);
+    ControllerState result
+      = new ControllerState(tag, state);
 
-    InputStream is = null;
-    try {
-      is = query.getInputStream();
-
-      _repository.writeRawGitFile(sha1, is);
-
-      getBroker().queryResult(id, from, to, true);
-    } catch (Exception e) {
-      log.log(Level.WARNING, e.toString(), e);
-
-      getBroker().queryResult(id, from, to, false);
-    } finally {
-      IoUtil.close(is);
-    }
-
-    return true;
-  }
-  */
-
-  /*
-  @Query
-  public boolean setTagQuery(long id, String to, String from, SetTagQuery query)
-  {
-    String tagName = query.getTag();
-    String contentHash = query.getContentHash();
-    
-    if (contentHash == null)
-      throw new NullPointerException();
-
-    String server = "default";
-    
-    TreeMap<String,String> commitMetaData = new TreeMap<String,String>();
-    
-    if (query.getAttributes() != null)
-      commitMetaData.putAll(query.getAttributes());
-    
-    commitMetaData.put("server", server);
-    
-    boolean result = _repository.putTag(tagName, 
-                                        contentHash,
-                                        commitMetaData);
-
-    getBroker().queryResult(id, from, to, String.valueOf(result));
-
-    return true;
-  }
-  */
-
-  /*
-  @Query
-  public boolean queryTags(long id,
-                           String to,
-                           String from,
-                           QueryTagsQuery tagsQuery)
-  {
-    ArrayList<TagResult> tags = new ArrayList<TagResult>();
-
-    Pattern pattern = Pattern.compile(tagsQuery.getPattern());
-
-    for (Map.Entry<String, RepositoryTagEntry> entry :
-         _repository.getTagMap().entrySet()) {
-      String tag = entry.getKey();
-
-      if (pattern.matcher(tag).matches())
-        tags.add(new TagResult(tag, entry.getValue().getRoot()));
-    }
-
-    getBroker()
-      .queryResult(id, from, to, tags.toArray(new TagResult[tags.size()]));
-
-    return true;
-  }
-  */
-
-  /**
-   * @deprecated
-   */
-  /*
-  @Query
-  public boolean controllerDeploy(long id,
-                                  String to,
-                                  String from,
-                                  ControllerDeployQuery query)
-  {
-    String status = deploy(query.getTag());
-
-    log.fine(this + " deploy '" + query.getTag() + "' -> " + status);
-
-    getBroker().queryResult(id, from, to, true);
-
-    return true;
-  }
-  */
-
-  /*
-  private String deploy(String gitPath)
-  {
-    LifecycleState state = start(gitPath);
-
-    return state.getStateName();
-  }
-  */
-
-  /**
-   * @deprecated
-   */
-  /*
-  @Query
-  public ControllerStateActionQueryReply controllerStart(long id,
-                                                          String to,
-                                                          String from,
-                                                          ControllerStartQuery query)
-  {
-    LifecycleState state = start(query.getTag());
-
-    ControllerStateActionQueryReply result
-      = new ControllerStateActionQueryReply(query.getTag(), state);
-
-    log.fine(this + " start '" + query.getTag() + "' -> " + state.getStateName());
-
-    getBroker().queryResult(id, from, to, result);
+    log.fine(this
+             + " start '"
+             + tag
+             + "' -> "
+             + state.getStateName());
 
     return result;
   }
-  */
 
-  private LifecycleState start(String tag)
+  private LifecycleState startImpl(String tag)
   {
     DeployControllerService service = DeployControllerService.getCurrent();
     
@@ -577,28 +418,16 @@ public class DeployActor extends SimpleActor
   /**
    * @deprecated
    */
-  /*
-  @Query
-  public ControllerStateActionQueryReply controllerStop(long id,
-                                                         String to,
-                                                         String from,
-                                                         ControllerStopQuery query)
+  public ControllerState stop(String tag)
   {
-    LifecycleState state = stop(query.getTag());
+    LifecycleState state = stopImpl(tag);
 
-    ControllerStateActionQueryReply result
-      = new ControllerStateActionQueryReply(query.getTag(), state);
+    log.fine(this + " stop '" + tag + "' -> " + state.getStateName());
 
-    log.fine(this + " stop '" + query.getTag() + "' -> " + state.getStateName());
-
-    getBroker().queryResult(id, from, to, result);
-
-    return result;
+    return new ControllerState(tag, state);
   }
-  */
 
-  /*
-  private LifecycleState stop(String tag)
+  private LifecycleState stopImpl(String tag)
   {
     DeployControllerService service = DeployControllerService.getCurrent();
 
@@ -611,449 +440,62 @@ public class DeployActor extends SimpleActor
 
     return controller.getState();
   }
-  */
 
-  /*
-  @Query
-  public ControllerStateActionQueryReply controllerRestart(long id,
-                                                            String to,
-                                                            String from,
-                                                            ControllerRestartQuery query)
+  public ControllerState controllerRestart(String tag)
   {
-    LifecycleState state = restart(query.getTag());
+    return controllerRestart(tag);
+  }
 
-    ControllerStateActionQueryReply result
-      = new ControllerStateActionQueryReply(query.getTag(), state);
+  public ControllerState restart(String tag)
+  {
+    LifecycleState state = restartImpl(tag);
+
+    ControllerState result
+      = new ControllerState(tag, state);
 
     log.fine(this
              + " restart '"
-             + query.getTag()
+             + tag
              + "' -> "
              + state.getStateName());
-
-    getBroker().queryResult(id, from, to, result);
 
     return result;
   }
 
-  private LifecycleState restart(String tag)
+  public void restartCluster(String tag, ReplyCallback<ControllerState> cb)
+  {
+    throw new UnsupportedOperationException(getClass().getName());
+  }
+
+  private LifecycleState restartImpl(String tag)
   {
     DeployControllerService service = DeployControllerService.getCurrent();
 
-    DeployTagItem controller = service.getTagItem(tag);
+    final DeployTagItem controller = service.getTagItem(tag);
 
     if (controller == null)
       throw new IllegalArgumentException(L.l("'{0}' is an unknown controller",
                                              tag));
 
-    controller.toRestart();
+    ThreadPool.getCurrent().schedule(new Runnable() {
+      public void run() {
+        controller.toRestart();
+      }
+    });
 
     return controller.getState();
   }
-  */
-
-  /**
-   * @deprecated
-   */
-  /*
-  @Query
-  public boolean controllerUndeploy(long id,
-                                    String to,
-                                    String from,
-                                    ControllerUndeployQuery query)
+  
+  public String getUid()
   {
-    String status = undeploy(query.getTag());
-
-    log.fine(this + " undeploy '" + query.getTag() + "' -> " + status);
-
-    getBroker().queryResult(id, from, to, true);
-
-    return true;
+    return UID;
   }
-  */
-
-  /**
-   * @deprecated
-   */
-  /*
-  private String undeploy(String tag)
+  
+  @Override
+  public String toString()
   {
-    DeployControllerMXBean controller = findController(tag);
-
-    if (controller == null)
-      return L.l("'{0}' is an unknown controller", controller);
-
-    try {
-      Path root = Vfs.lookup(controller.getRootDirectory());
-
-      root.removeAll();
-
-      controller.stop();
-
-      if (controller.destroy())
-        return "undeployed";
-      else
-        return L.l("'{0}' failed to undeploy application '{1}'",
-                   controller,
-                   tag);
-    } catch (Exception e) {
-      log.log(Level.FINE, e.toString(), e);
-
-      return e.toString();
-    }
+    return getClass().getSimpleName() + "[" + _serverId + "]";
   }
-  */
-
-  /**
-   * @deprecated
-   */
-  /*
-  @Query
-  public boolean controllerUndeploy(long id,
-                                    String to,
-                                    String from,
-                                    UndeployQuery query)
-  {
-    if (true)
-      throw new UnsupportedOperationException();
-    
-    String status = null;//undeploy(query.getTag(), query.getUser(), query.getMessage());
-
-    log.fine(this + " undeploy '" + query.getTag() + "' -> " + status);
-
-    getBroker().queryResult(id, from, to, true);
-
-    return true;
-  }
-  */
-
-  /*
-  private String undeploy(String tag, Map<String,String> commitMetaData)
-  {
-    DeployControllerMXBean controller = findController(tag);
-
-    if (controller == null)
-      return L.l("'{0}' is an unknown controller", controller);
-
-    try {
-      Path root = Vfs.lookup(controller.getRootDirectory());
-
-      root.removeAll();
-
-      controller.stop();
-
-      if (controller.destroy()) {
-        String server = "default";
-        
-        HashMap<String,String> metaDataCopy = new HashMap<String,String>();
-        
-        if (commitMetaData != null)
-          metaDataCopy.putAll(commitMetaData);
-        
-        metaDataCopy.put("server", server);
-        
-        _repository.removeTag(tag, metaDataCopy);
-
-        return "undeployed";
-      }
-      else
-        return L.l("'{0}' failed to remove application '{1}'",
-                   controller,
-                   tag);
-    } catch (Exception e) {
-      log.log(Level.FINE, e.toString(), e);
-
-      return e.toString();
-    }
-  }
-  */
-
-  /**
-   * @deprecated
-   */
-  /*
-  @Query
-  public boolean sendAddFileQuery(long id, String to, String from,
-                                  DeployAddFileQuery query)
-  {
-    String tag = query.getTag();
-    String name = query.getName();
-    String contentHash = query.getHex();
-
-    try {
-      DeployControllerMXBean deploy = findController(tag);
-
-      if (deploy == null) {
-        if (log.isLoggable(Level.FINE))
-          log.fine(this + " sendAddFileQuery '" + tag + "' is an unknown DeployController");
-
-        getBroker().queryResult(id, from, to, "no-deploy: " + tag);
-
-        return true;
-      }
-
-      Path root = Vfs.lookup(deploy.getRootDirectory());
-      root = root.createRoot();
-
-      Path path = root.lookup(name);
-
-      if (! path.getParent().exists())
-        path.getParent().mkdirs();
-
-      _repository.expandToPath(contentHash, path);
-
-      getBroker().queryResult(id, from, to, "ok");
-
-      return true;
-    } catch (Exception e) {
-      log.log(Level.FINE, e.toString(), e);
-
-      getBroker().queryResult(id, from, to, "fail");
-
-      return true;
-    }
-  }
-  */
-
-  /**
-   * @deprecated
-   **/
-  /*
-  @Query
-  public boolean listWebApps(long id,
-                             String to,
-                             String from,
-                             ListWebAppsQuery listQuery)
-  {
-    ArrayList<WebAppQuery> apps = new ArrayList<WebAppQuery>();
-
-    String stage = _server.getStage();
-
-    for (HostController host : _server.getHostControllers()) {
-      if (listQuery.getHost().equals(host.getName())) {
-        WebAppContainer webAppContainer
-          = host.getDeployInstance().getWebAppContainer();
-        
-        for (WebAppController webApp : webAppContainer.getWebAppList()) {
-          WebAppQuery q = new WebAppQuery();
-          String name = webApp.getId();
-
-          if (name.startsWith("/"))
-            name = name.substring(1);
-
-          q.setTag("wars/" + stage + "/" + host.getName() + "/" + name);
-
-          q.setHost(host.getName());
-          q.setUrl(webApp.getURL());
-
-          apps.add(q);
-        }
-      }
-    }
-
-    getBroker()
-      .queryResult(id, from, to, apps.toArray(new WebAppQuery[apps.size()]));
-
-    return true;
-  }
-  */
-
-  /**
-   * @deprecated
-   **/
-  /*
-  @Query
-  public boolean listTags(long id,
-                          String to,
-                          String from,
-                          ListTagsQuery listQuery)
-  {
-    ArrayList<TagQuery> tags = new ArrayList<TagQuery>();
-
-    for (String tag : _repository.getTagMap().keySet()) {
-      if (tag.startsWith("wars/default") || tag.startsWith("ears/default")) {
-        int p = "wars/default/".length();
-        int q = tag.indexOf('/', p + 1);
-
-        if (q < 0)
-          continue;
-
-        String host = tag.substring(p, q);
-        // String name = tag.substring(q + 1);
-
-        tags.add(new TagQuery(host, tag));
-      }
-    }
-
-    getBroker()
-      .queryResult(id, from, to, tags.toArray(new TagQuery[tags.size()]));
-
-    return true;
-  }
-  */
-
-  /**
-   * @deprecated
-   **/
-  /*
-  @Query
-  public boolean listHosts(long id,
-                           String to,
-                           String from,
-                           ListHostsQuery query)
-  {
-    List<HostQuery> hosts = new ArrayList<HostQuery>();
-
-    for (HostController controller : _server.getHostControllers()) {
-      if ("admin.resin".equals(controller.getName()))
-         continue;
-
-      HostQuery q = new HostQuery();
-      q.setName(controller.getName());
-
-      hosts.add(q);
-    }
-
-    getBroker()
-      .queryResult(id, from, to, hosts.toArray(new HostQuery[hosts.size()]));
-
-    return true;
-  }
-  */
-
-  /**
-   * @deprecated
-   **/
-  /*
-  @Query
-  public boolean status(long id,
-                        String to,
-                        String from,
-                        StatusQuery query)
-  {
-    String tag = query.getTag();
-
-    String errorMessage = statusMessage(tag);
-    String state = null;
-
-    StatusQuery result = new StatusQuery(tag, state, errorMessage);
-
-    getBroker().queryResult(id, from, to, result);
-
-    return true;
-  }
-  */
-
-  /*
-  private String statusMessage(String tag)
-  {
-    int p = tag.indexOf('/');
-    int q = tag.indexOf('/', p + 1);
-    int r = tag.lastIndexOf('/');
-
-    if (p < 0 || q < 0 || r < 0)
-      return L.l("'{0}' is an unknown type", tag);
-
-    String type = tag.substring(0, p);
-    // String stage = tag.substring(p + 1, q);
-    String host = tag.substring(q + 1, r);
-    String name = tag.substring(r + 1);
-
-    // String state = null;
-    String errorMessage = tag + " is an unknown resource";
-
-    try {
-      if (type.equals("ears")) {
-        String pattern
-          = "resin:type=EApp,Host=" + host + ",name=" + name;
-
-        EAppMXBean ear = (EAppMXBean) Jmx.findGlobal(pattern);
-
-        if (ear != null) {
-          ear.update();
-          // state = ear.getState();
-          errorMessage = ear.getErrorMessage();
-
-          return errorMessage;
-        }
-        else
-          return L.l("'{0}' is an unknown ear", tag);
-      }
-      else if (type.equals("wars")) {
-        String pattern
-          = "resin:type=WebApp,Host=" + host + ",name=/" + name;
-
-        WebAppMXBean war = (WebAppMXBean) Jmx.findGlobal(pattern);
-
-        if (war != null) {
-          war.update();
-          // state = war.getState();
-          errorMessage = war.getErrorMessage();
-
-          return errorMessage;
-        }
-        else
-          return L.l("'{0}' is an unknown war", tag);
-      }
-      else
-        return L.l("'{0}' is an unknown tag", tag);
-    } catch (Exception e) {
-      log.log(Level.FINE, e.toString(), e);
-    }
-
-    return errorMessage;
-  }
-  */
-
-  /*
-  private DeployControllerMXBean findController(String tag)
-  {
-    int p = tag.indexOf('/');
-    int q = tag.indexOf('/', p + 1);
-    int r = tag.lastIndexOf('/');
-
-    if (p < 0 || q < 0 || r < 0)
-      return null;
-
-    String type = tag.substring(0, p);
-    // String stage = tag.substring(p + 1, q);
-
-    String host;
-    String name;
-
-    if (q < r) {
-      host = tag.substring(q + 1, r);
-      name = tag.substring(r + 1);
-    }
-    else {
-      host = tag.substring(q + 1);
-      name = "";
-    }
-
-    try {
-      if (type.equals("ears")) {
-        String pattern
-          = "resin:type=EApp,Host=" + host + ",name=" + name;
-
-        EAppMXBean ear = (EAppMXBean) Jmx.findGlobal(pattern);
-
-        return ear;
-      }
-      else if (type.equals("wars")) {
-        String pattern
-          = "resin:type=WebApp,Host=" + host + ",name=/" + name;
-
-        WebAppMXBean war = (WebAppMXBean) Jmx.findGlobal(pattern);
-
-        return war;
-      }
-    } catch (Exception e) {
-      log.log(Level.FINEST, e.toString(), e);
-    }
-
-    return null;
-  }
-  */
   
   static class BlobStreamSource extends StreamSource {
     private RepositorySpi _repository;

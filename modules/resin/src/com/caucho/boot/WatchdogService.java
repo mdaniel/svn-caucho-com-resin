@@ -40,51 +40,45 @@ import java.util.logging.*;
 /**
  * BAM service managing the watchdog
  */
-class WatchdogService extends SimpleActor
+class WatchdogService
 {
   private static final L10N L = new L10N(WatchdogService.class);
   private static final Logger log
     = Logger.getLogger(WatchdogService.class.getName());
 
   private final WatchdogManager _manager;
-  private final String _address;
+  // private final String _address;
 
-  WatchdogService(WatchdogManager manager,
-                  String address,
-                  Broker broker)
+  WatchdogService(WatchdogManager manager)
   {
     _manager = manager;
-    _address = address;
+    // _address = address;
     
-    setBroker(broker);
+    // setBroker(broker);
   }
 
   /**
    * Returns the server id of the watchdog.
    */
+  /*
   @Override
   public String getAddress()
   {
     return _address;
   }
+  */
 
   /**
    * Start queries
    */
-  @Query
-  public boolean watchdogStart(long id, String to, String from,
-                               WatchdogStartQuery start)
+  public ResultStatus start(String []argv)
   {
-    String serverId = start.getServerId();
-    String []argv = start.getArgv();
-
     try {
-      _manager.startServer(serverId, argv);
+      String serverId = _manager.startServer(argv);
 
       String msg = L.l("{0}: started server '{1}'", this, serverId);
     
-      getBroker().queryResult(id, from, to,
-                                    new ResultStatus(true, msg));
+      return new ResultStatus(true, msg);
     } catch (Exception e) {
       log.log(Level.WARNING, e.toString(), e);
 
@@ -96,168 +90,145 @@ class WatchdogService extends SimpleActor
         msg = L.l("{0}: start server failed because of exception\n  {1}'",
                   this, e.toString());
     
-      getBroker().queryResult(id, from, to,
-                                    new ResultStatus(false, msg));
+      return new ResultStatus(false, msg);
     }
-    
-    return true;
   }
 
   /**
    * Status queries
    */
-  @Query
-  public boolean watchdogStatus(long id, String to, String from,
-                                WatchdogStatusQuery status)
+  public ResultStatus status()
   {
     try {
       String result = _manager.status();
     
-      getBroker().queryResult(id, from, to,
-                              new ResultStatus(true, result));
+      return new ResultStatus(true, result);
     } catch (Exception e) {
       log.log(Level.WARNING, e.toString(), e);
       
       String msg = L.l("{0}: status failed because of exception\n{1}'",
                        this, e.toString());
     
-      getBroker().queryResult(id, from, to,
-                              new ResultStatus(false, msg));
+      return new ResultStatus(false, msg);
     }
-    
-    return true;
   }
 
   /**
    * Handles stop queries
    */
-  @Query
-  public boolean watchdogStop(long id, String to, String from,
-                              WatchdogStopQuery stop)
+  public ResultStatus stop(String serverId)
   {
-    String serverId = stop.getServerId();
-
+    ResultStatus result;
+    
     try {
       _manager.stopServer(serverId);
 
       String msg = L.l("{0}: stopped server='{1}'", this, serverId);
     
-      getBroker().queryResult(id, from, to,
-                                    new ResultStatus(true, msg));
+      result = new ResultStatus(true, msg);
     } catch (Exception e) {
       log.log(Level.WARNING, e.toString(), e);
       
       String msg = L.l("{0}: stop server='{1}' failed because of exception\n{2}'",
                        this, serverId, e.toString());
     
-      getBroker().queryResult(id, from, to,
-                                    new ResultStatus(false, msg));
+      result = new ResultStatus(false, msg);
     }
     
     if (_manager.isEmpty()) {
       new Thread(new Shutdown()).start();
     }
     
-    return true;
+    return result;
   }
 
   /**
    * Handles stop queries
    */
-  @Query
-  public boolean watchdogRestart(long id, String to, String from,
-                                 WatchdogRestartQuery restart)
+  public ResultStatus restart(String serverId, String []argv)
   {
-    String serverId = restart.getServerId();
-    String []argv = restart.getArgv();
-
+    ResultStatus result;
+    
     try {
       _manager.restartServer(serverId, argv);
 
       String msg = L.l("{0}: restarted server='{1}'", this, serverId);
     
-      getBroker().queryResult(id, from, to,
-                                    new ResultStatus(true, msg));
+      result = new ResultStatus(true, msg);
     } catch (Exception e) {
       log.log(Level.WARNING, e.toString(), e);
       
       String msg = L.l("{0}: restart server='{1}' failed because of exception\n{2}'",
                        this, serverId, e.toString());
     
-      getBroker().queryResult(id, from, to,
-                                    new ResultStatus(false, msg));
+      result = new ResultStatus(false, msg);
     }
     
     if (_manager.isEmpty()) {
       new Thread(new Shutdown()).start();
     }
     
-    return true;
+    return result;
   }
 
   /**
    * Handles kill queries
    */
   @Query
-  public boolean watchdogKill(long id, String to, String from,
-                              WatchdogKillQuery kill)
+  public ResultStatus watchdogKill(String serverId)
   {
-    String serverId = kill.getServerId();
+    ResultStatus result;
 
     try {
       _manager.killServer(serverId);
 
       String msg = L.l("{0}: killed server='{1}'", this, serverId);
     
-      getBroker().queryResult(id, from, to,
-                                    new ResultStatus(true, msg));
+      result = new ResultStatus(true, msg);
     } catch (Exception e) {
       log.log(Level.WARNING, e.toString(), e);
       
       String msg = L.l("{0}: kill server='{1}' failed because of exception\n{2}'",
                        this, serverId, e.toString());
     
-      getBroker().queryResult(id, from, to,
-                                    new ResultStatus(false, msg));
+      result = new ResultStatus(false, msg);
     }
     
     if (_manager.isEmpty()) {
       new Thread(new Shutdown()).start();
     }
     
-    return true;
+    return result;
   }
 
   /**
    * Handles shutdown queries
    */
   @Query
-  public boolean watchdogShutdown(long id, String to, String from,
-                                  WatchdogShutdownQuery shutdown)
+  public ResultStatus shutdown()
   {
     try {
+      String from = " unknown"; // XXX:
+      
       log.info(this + " shutdown from " + from);
 
       String msg = L.l("{0}: shutdown", this);
     
       new Thread(new Shutdown()).start();
       
-      getBroker().queryResult(id, from, to,
-                                    new ResultStatus(true, msg));
+      return new ResultStatus(true, msg);
     } catch (Exception e) {
       log.log(Level.WARNING, e.toString(), e);
       
       String msg = L.l("{0}: shutdown failed because of exception\n{2}'",
                        this, e.toString());
     
-      getBroker().queryResult(id, from, to,
-                                    new ResultStatus(false, msg));
+      return new ResultStatus(false, msg);
     }
-    
-    return true;
   }
 
   static class Shutdown implements Runnable {
+    @Override
     public void run()
     {
       try {

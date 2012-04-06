@@ -51,6 +51,8 @@ import com.caucho.bam.broker.Broker;
 import com.caucho.bam.mailbox.Mailbox;
 import com.caucho.bam.mailbox.MultiworkerMailbox;
 import com.caucho.bam.mailbox.PassthroughMailbox;
+import com.caucho.bam.manager.BamManager;
+import com.caucho.bam.manager.SimpleBamManager;
 import com.caucho.bam.packet.Message;
 import com.caucho.bam.packet.MessageError;
 import com.caucho.bam.packet.Packet;
@@ -89,6 +91,7 @@ public class HempBroker extends AbstractManagedBroker
 
   private HempBrokerManager _manager;
   private DomainManager _domainManager;
+  private BamManager _bamManager;
 
   // actors and clients
   private final
@@ -121,6 +124,7 @@ public class HempBroker extends AbstractManagedBroker
   {
     _resinSystem = manager.getResinSystem();
     _manager = manager;
+    _bamManager = new SimpleBamManager(this);
     
     Environment.addCloseListener(this);
 
@@ -142,6 +146,11 @@ public class HempBroker extends AbstractManagedBroker
   public static HempBroker getCurrent()
   {
     return _localBroker.get();
+  }
+
+  public BamManager getBamManager()
+  {
+    return _bamManager;
   }
   
   public void setDomainManager(DomainManager domainManager)

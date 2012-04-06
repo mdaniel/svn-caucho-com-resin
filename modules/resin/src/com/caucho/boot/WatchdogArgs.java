@@ -188,8 +188,10 @@ class WatchdogArgs
 
   void setDynamicServerId(String serverId)
   {
-    if (serverId != null)
+    if (serverId != null) {
+      _isDynamicServer = true;
       _serverId = serverId;
+    }
   }
 
   String getClusterId()
@@ -204,7 +206,7 @@ class WatchdogArgs
 
   boolean isDynamicServer()
   {
-    return _isDynamicServer;
+    return _isDynamicServer || getServerId() == null && getClusterId() != null;
   }
 
   String getDynamicAddress()

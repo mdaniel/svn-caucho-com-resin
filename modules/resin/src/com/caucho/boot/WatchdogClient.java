@@ -41,12 +41,13 @@ import java.util.logging.Logger;
 
 import com.caucho.VersionFactory;
 import com.caucho.bam.RemoteConnectionFailedException;
+import com.caucho.bam.RemoteListenerUnavailableException;
 import com.caucho.bam.actor.ActorSender;
+import com.caucho.bam.proxy.BamProxyFactory;
 import com.caucho.config.ConfigException;
 import com.caucho.env.service.ResinSystem;
 import com.caucho.hmtp.HmtpClient;
 import com.caucho.server.util.CauchoSystem;
-import com.caucho.util.Alarm;
 import com.caucho.util.CurrentTime;
 import com.caucho.util.L10N;
 import com.caucho.vfs.Path;
@@ -224,8 +225,9 @@ class WatchdogClient
     ActorSender conn = getConnection();
 
     try {
-      ResultStatus status = (ResultStatus)
-        conn.query(WATCHDOG_ADDRESS, new WatchdogStatusQuery());
+      WatchdogProxy watchdogProxy = getWatchdogProxy(conn);
+      
+      ResultStatus status = watchdogProxy.status();
 
       if (status.isSuccess())
         return status.getMessage();
@@ -270,21 +272,24 @@ class WatchdogClient
     try {
       conn = getConnection();
       
-      String serverId = getId();
+      WatchdogProxy watchdogProxy = getWatchdogProxy(conn);
+      
+      // String serverId = getId();
 
-      ResultStatus status = (ResultStatus)
-        conn.query(WATCHDOG_ADDRESS,
-                   new WatchdogStartQuery(serverId, argv),
-                   BAM_TIMEOUT);
+      ResultStatus status = watchdogProxy.start(argv);
 
-      if (status.isSuccess())
+      if (status.isSuccess()) {
         return null;
+      }
 
       throw new ConfigException(L.l("{0}: watchdog start failed because of '{1}'",
                                     this, status.getMessage()));
     } catch (RemoteConnectionFailedException e) {
       log.log(Level.FINE, e.toString(), e);
+    } catch (RemoteListenerUnavailableException e) {
+      log.log(Level.FINE, e.toString(), e);
     } catch (RuntimeException e) {
+      log.log(Level.FINE, e.toString(), e);
       throw e;
     } finally {
       if (conn != null)
@@ -333,10 +338,9 @@ class WatchdogClient
     ActorSender conn = getConnection();
 
     try {
-      ResultStatus status = (ResultStatus)
-        conn.query(WATCHDOG_ADDRESS, 
-                   new WatchdogStopQuery(serverId),
-                   BAM_TIMEOUT);
+      WatchdogProxy watchdogProxy = getWatchdogProxy(conn);
+      
+      ResultStatus status = watchdogProxy.stop(serverId);
 
       if (! status.isSuccess())
         throw new RuntimeException(L.l("{0}: watchdog '{1}' stop failed because of '{2}'",
@@ -354,8 +358,9 @@ class WatchdogClient
     ActorSender conn = getConnection();
 
     try {
-      ResultStatus status = (ResultStatus)
-        conn.query(WATCHDOG_ADDRESS, new WatchdogKillQuery(serverId), BAM_TIMEOUT);
+      WatchdogProxy watchdogProxy = getWatchdogProxy(conn);
+      
+      ResultStatus status = watchdogProxy.kill(serverId);
 
       if (! status.isSuccess())
         throw new RuntimeException(L.l("{0}: watchdog kill failed because of '{1}'",
@@ -364,6 +369,8 @@ class WatchdogClient
       throw e;
     } catch (Exception e) {
       log.log(Level.FINE, e.toString(), e);
+    } finally {
+      conn.close();
     }
   }
 
@@ -374,13 +381,12 @@ class WatchdogClient
     ActorSender conn = getConnection();
     
     try {
+      WatchdogProxy watchdogProxy = getWatchdogProxy(conn);
+      
       String id = getId();
       
-      ResultStatus status = (ResultStatus)
-      conn.query(WATCHDOG_ADDRESS, 
-                 new WatchdogRestartQuery(id, argv),
-                 BAM_TIMEOUT);
-
+      ResultStatus status = watchdogProxy.restart(id, argv);
+      
       if (! status.isSuccess())
         throw new RuntimeException(L.l("{0}: watchdog restart failed because of '{1}'",
                                        this, status.getMessage()));
@@ -388,6 +394,8 @@ class WatchdogClient
       throw e;
     } catch (Exception e) {
       log.log(Level.FINE, e.toString(), e);
+    } finally {
+      conn.close();
     }
   }
 
@@ -397,8 +405,9 @@ class WatchdogClient
     ActorSender conn = getConnection();
 
     try {
-      ResultStatus status = (ResultStatus)
-        conn.query(WATCHDOG_ADDRESS, new WatchdogShutdownQuery(), BAM_TIMEOUT);
+      WatchdogProxy watchdogProxy = getWatchdogProxy(conn);
+
+      ResultStatus status = watchdogProxy.shutdown();
 
       if (! status.isSuccess())
         throw new RuntimeException(L.l("{0}: watchdog shutdown failed because of '{1}'",
@@ -407,11 +416,20 @@ class WatchdogClient
       throw e;
     } catch (Exception e) {
       log.log(Level.FINE, e.toString(), e);
+    } finally {
+      conn.close();
     }
 
     return true;
   }
 
+  private WatchdogProxy getWatchdogProxy(ActorSender conn)
+  {
+    String to = WATCHDOG_ADDRESS;
+    
+    return BamProxyFactory.createProxy(WatchdogProxy.class, to, conn);
+  }
+  
   private ActorSender getConnection()
   {
     synchronized (this) {

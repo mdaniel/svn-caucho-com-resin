@@ -36,7 +36,7 @@ import com.caucho.lifecycle.LifecycleState;
  *
  */
 @SuppressWarnings("serial")
-public class ControllerStateActionQueryReply extends ManagementQueryReply
+public class ControllerState extends ManagementQueryReply
 {
   @Json(name = "state")
   private LifecycleState _state;
@@ -44,11 +44,11 @@ public class ControllerStateActionQueryReply extends ManagementQueryReply
   @Json(name = "tag")
   private String _tag;
 
-  public ControllerStateActionQueryReply()
+  public ControllerState()
   {
   }
 
-  public ControllerStateActionQueryReply(String tag, LifecycleState state)
+  public ControllerState(String tag, LifecycleState state)
   {
     _tag = tag;
     _state = state;

@@ -304,8 +304,9 @@ class WatchdogManager implements AlarmListener {
 
       HempBroker broker = HempBroker.getCurrent();
       
-      WatchdogService service
-        = new WatchdogService(this, "watchdog@admin.resin.caucho", broker);
+      WatchdogService service = new WatchdogService(this);
+      
+      broker.getBamManager().createService("watchdog@admin.resin.caucho", service);
 
 
       /*
@@ -313,7 +314,7 @@ class WatchdogManager implements AlarmListener {
       broker.setAllowNullAdminAuthenticator(true);
       */
 
-      broker.createAgent(service.getActor());
+      // broker.createAgent(service.getActor());
 
       ResinSystem.getCurrent().start();
 
@@ -446,9 +447,11 @@ class WatchdogManager implements AlarmListener {
    *
    * @param argv the command-line arguments to start the server
    */
-  void startServer(String serverId, String []argv)
+  String startServer(String []argv)
     throws ConfigException
   {
+    String serverId = null;
+    
     synchronized (_watchdogMap) {
       WatchdogArgs args = new WatchdogArgs(argv, false);
 
@@ -477,6 +480,8 @@ class WatchdogManager implements AlarmListener {
 
       watchdog.start();
     }
+    
+    return serverId;
   }
 
   /**
@@ -573,7 +578,7 @@ class WatchdogManager implements AlarmListener {
       if (server != null)
         server.restart();
       else
-        startServer(serverId, argv);
+        startServer(argv);
     }
   }
 
@@ -619,19 +624,15 @@ class WatchdogManager implements AlarmListener {
       client = resin.findClient(serverId);
     else
       client = resin.findClient(serverId, args); 
-    
+
     //resin.findClient(serverId);
     if (client != null)
       serverConfig = client.getConfig();
     else
       serverConfig = resin.findServer(serverId);
 
-    if (serverConfig == null 
-        && (args.isDynamicServer() || resin.isHomeCluster())) {
-      String clusterId = resin.getHomeCluster();
-      
-      if (args.isDynamicServer())
-        clusterId = args.getClusterId();
+    if (serverConfig == null && resin.isDynamicServer(args)) {
+      String clusterId = resin.getClusterId(args);
       
       String address = args.getDynamicAddress();
       int port = args.getDynamicPort();
@@ -764,7 +765,7 @@ class WatchdogManager implements AlarmListener {
       JniCauchoSystem.create().initJniBackground();
 
       WatchdogManager manager = new WatchdogManager(argv);
-      manager.startServer(null, argv);
+      manager.startServer(argv);
 
       isValid = manager.isActive() && manager.isValid();
 
