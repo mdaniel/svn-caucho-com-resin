@@ -574,6 +574,8 @@ class WatchdogClient
         list.add(resinHome.lookup(argv[i + 1]).getNativePath());
         i++;
       }
+      else if ("".equals(argv[i]) && CauchoSystem.isWindows())
+        list.add("\"\"");
       else
         list.add(argv[i]);
     }
