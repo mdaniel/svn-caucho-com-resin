@@ -326,6 +326,12 @@ class BamProxyHandler implements InvocationHandler
     {
       _delegate.onError(error);
     }
+    
+    @Override
+    public String toString()
+    {
+      return getClass().getSimpleName() + "[" + _delegate + "]";
+    }
   }
   
   static {
