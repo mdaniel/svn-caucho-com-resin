@@ -34,6 +34,7 @@ import java.lang.annotation.Annotation;
 import java.lang.ref.SoftReference;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
+import java.lang.reflect.Modifier;
 import java.util.HashMap;
 import java.util.WeakHashMap;
 import java.util.logging.Level;
@@ -136,6 +137,18 @@ public class ProxySkeleton<S>
       if (log.isLoggable(Level.FINEST)) {
         log.finest(actor + " message " + call
                    + " {from:" + from + ", to:" + to + "}");
+      }
+      
+      Object []args = call.getArgs();
+      Class<?> []paramTypes = handler.getParameterTypes();
+      if (args != null && args.length != paramTypes.length) {
+        System.out.println("BAD-METHOD:" + handler);
+        throw new IllegalArgumentException(L.l("'{0}.{1}' has an incorrect number of arguments (received {2} but expected {3})\n  {4}",
+                                               actor.getClass().getSimpleName(),
+                                               handler.getName(),
+                                               args != null ? args.length : 0,
+                                               paramTypes.length,
+                                               handler));
       }
 
       try {
@@ -343,6 +356,14 @@ public class ProxySkeleton<S>
     for (int i = 0; i < methods.length; i++) {
       Method method = methods[i];
       
+      if (! Modifier.isPublic(method.getModifiers())) {
+        continue;
+      }
+      
+      if (Modifier.isStatic(method.getModifiers())) {
+        continue;
+      }
+      
       Class<?> []paramTypes = method.getParameterTypes();
       
       if (paramTypes.length > 0 && paramTypes[paramTypes.length - 1].isAssignableFrom(ReplyCallback.class)) {
@@ -367,6 +388,7 @@ public class ProxySkeleton<S>
         method.setAccessible(true);
 
         _queryHandlers.put(method.getName(), new QueryMethodInvoker(method));
+        _messageHandlers.put(method.getName(), method);
         continue;
       }
     }
@@ -477,7 +499,7 @@ public class ProxySkeleton<S>
       throws IllegalAccessException, InvocationTargetException
     {
       if (args != null && args.length != _paramTypes.length) {
-        System.out.println("METHOD:" + _method);
+        System.out.println("BAD-METHOD:" + _method);
         throw new IllegalArgumentException(L.l("'{0}.{1}' has an incorrect number of arguments (received {2} but expected {3})\n  {4}",
                                                actor.getClass().getSimpleName(),
                                                name,

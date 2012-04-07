@@ -33,6 +33,23 @@ package com.caucho.cloud.topology;
  * Selects one of the triad members, given the triad owner.
  */
 public class TriadDispatcher<X> {
+  
+  public static <T> TriadDispatcher<T> create(T a, T b, T c)
+  {
+    if (a == null) {
+      return new TriadDispatcher<T>();
+    }
+    else if (b == null) {
+      return new TriadDispatcherSingle<T>(a);
+    }
+    else if (c == null) {
+      return new TriadDispatcherDouble<T>(a, b);
+    }
+    else {
+      return new TriadDispatcherTriple<T>(a, b, c);
+    }
+  }
+  
   /**
    * Returns member A
    */

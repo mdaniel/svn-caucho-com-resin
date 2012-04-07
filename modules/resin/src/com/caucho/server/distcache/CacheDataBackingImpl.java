@@ -133,7 +133,7 @@ public class CacheDataBackingImpl implements CacheDataBacking {
   public boolean putLocalValue(MnodeEntry mnodeValue,
                                HashKey key,
                                MnodeEntry oldEntryValue,
-                               MnodeUpdate mnodeUpdate)
+                               MnodeValue mnodeUpdate)
   {
     if (oldEntryValue == null
         || oldEntryValue.isImplicitNull()

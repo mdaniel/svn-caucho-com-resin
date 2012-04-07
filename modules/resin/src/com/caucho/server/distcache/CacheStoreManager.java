@@ -307,16 +307,10 @@ public final class CacheStoreManager
     if (mnodeValue == null) {
       reloadValue(entry, config, now);
     }
-    else if (! isExact 
-             && ! isLocalExpired(config, entry.getKeyHash(), mnodeValue, now)) {
-    }
-    else { // if (! isLazy) {
+    else if (isExact 
+             || isLocalExpired(config, entry.getKeyHash(), mnodeValue, now)) {
       reloadValue(entry, config, now);
-    }/*
-    else {
-      lazyValueUpdate(entry, config);
     }
-    */
 
     mnodeValue = entry.getMnodeEntry();
 
@@ -464,8 +458,8 @@ public final class CacheStoreManager
     
     mnodeValue = putLocalValue(entry, 
                                mnodeUpdate, value,
-                               config.getLeaseExpireTimeout(),
-                               leaseOwner);
+                               leaseOwner,
+                               config.getLeaseExpireTimeout());
 
     if (mnodeValue == null)
       return;
@@ -530,8 +524,8 @@ public final class CacheStoreManager
     int leaseOwner = (mnodeValue != null) ? mnodeValue.getLeaseOwner() : -1;
     
     mnodeValue = putLocalValue(entry, mnodeUpdate, null,
-                               config.getLeaseExpireTimeout(),
-                               leaseOwner);
+                               leaseOwner,
+                               config.getLeaseExpireTimeout());
 
     if (mnodeValue == null)
       return null;
@@ -638,8 +632,8 @@ public final class CacheStoreManager
 
     MnodeEntry mnodeValue = putLocalValue(entry, 
                                           mnodeUpdate, value,
-                                          leaseTimeout,
-                                          leaseOwner);
+                                          leaseOwner, 
+                                          leaseTimeout);
 
     return oldValueHash;
   }
@@ -731,8 +725,8 @@ public final class CacheStoreManager
 
     mnodeValue = putLocalValue(entry, 
                                mnodeUpdate, null,
-                               leaseTimeout,
-                               leaseOwner);
+                               leaseOwner,
+                               leaseTimeout);
 
     if (mnodeValue != null)
       return oldValueHash;
@@ -774,8 +768,8 @@ public final class CacheStoreManager
     
     mnodeValue = putLocalValue(entry,
                                mnodeUpdate, null,
-                               config.getLeaseExpireTimeout(),
-                               leaseOwner);
+                               leaseOwner,
+                               config.getLeaseExpireTimeout());
     
     if (mnodeValue == null)
       return false;
@@ -1007,8 +1001,8 @@ public final class CacheStoreManager
 
     mnodeEntry = putLocalValue(entry, 
                                mnodeUpdate, null,
-                               leaseTimeout,
-                               leaseOwner);
+                               leaseOwner,
+                               leaseTimeout);
 
     if (mnodeEntry == null)
       return oldValueHash != null;
@@ -1046,7 +1040,7 @@ public final class CacheStoreManager
     mnodeValue = putLocalValue(entry,
                                mnodeUpdate,
                                null,
-                               leaseTimeout, leaseOwner);
+                               leaseOwner, leaseTimeout);
 
     if (mnodeValue == null)
       return oldValueHash != null;
@@ -1060,10 +1054,10 @@ public final class CacheStoreManager
    * Sets a cache entry
    */
   public final MnodeEntry putLocalValue(DistCacheEntry entry,
-                                        MnodeUpdate mnodeUpdate,
+                                        MnodeValue mnodeUpdate,
                                         Object value,
-                                        long leaseTimeout,
-                                        int leaseOwner)
+                                        int leaseOwner,
+                                        long leaseTimeout)
   {
     HashKey key = entry.getKeyHash();
     
