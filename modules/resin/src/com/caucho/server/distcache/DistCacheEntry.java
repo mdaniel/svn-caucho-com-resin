@@ -364,7 +364,7 @@ public class DistCacheEntry implements ExtCacheEntry {
   public boolean readData(OutputStream os, CacheConfig config)
     throws IOException
   {
-    return _cacheService.readData(getMnodeEntry(), os, config);
+    return _cacheService.readData(getKeyHash(), getMnodeEntry(), os, config);
     /*
     MnodeEntry entry = getMnodeEntry();
     

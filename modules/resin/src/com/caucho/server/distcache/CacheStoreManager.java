@@ -240,7 +240,8 @@ public final class CacheStoreManager
 
     updateAccessTime(entry, mnodeValue, now);
 
-    value = readData(valueHash,
+    value = readData(entry.getKeyHash(),
+                     valueHash,
                      config.getValueSerializer(),
                      config);
     
@@ -278,7 +279,7 @@ public final class CacheStoreManager
     if (valueHash == null || valueHash == HashManager.NULL)
       return false;
 
-    boolean isData = readData(mnodeValue, os, config);
+    boolean isData = readData(entry.getKeyHash(), mnodeValue, os, config);
     
     if (! isData) {
       log.warning("Missing or corrupted data for getStream " + mnodeValue
@@ -601,7 +602,8 @@ public final class CacheStoreManager
     if (oldHash.equals(valueHash) && oldValue != null)
       return oldValue;
     
-    oldValue = readData(oldHash,
+    oldValue = readData(entry.getKeyHash(),
+                        oldHash,
                         config.getValueSerializer(),
                         config);
 
@@ -649,7 +651,8 @@ public final class CacheStoreManager
       return null;
     }
     else {
-      return readData(result,
+      return readData(entry.getKeyHash(),
+                      result,
                       config.getValueSerializer(),
                       config);
     }
@@ -1241,7 +1244,8 @@ public final class CacheStoreManager
     }
   }
 
-  final protected Object readData(HashKey valueKey,
+  final protected Object readData(HashKey key,
+                                  HashKey valueKey,
                                   CacheSerializer serializer,
                                   CacheConfig config)
   {
@@ -1256,7 +1260,7 @@ public final class CacheStoreManager
       WriteStream out = Vfs.openWrite(os);
 
       if (! getDataBacking().loadData(valueKey, out)) {
-        if (! loadClusterData(valueKey, config)) {
+        if (! loadClusterData(key, valueKey, config)) {
           log.warning(this + " cannot load data for " + valueKey + " from triad");
           
           out.close();
@@ -1297,7 +1301,8 @@ public final class CacheStoreManager
     }
   }
 
-  final protected boolean readData(MnodeEntry mnodeValue,
+  final protected boolean readData(HashKey key,
+                                   MnodeEntry mnodeValue,
                                    OutputStream os,
                                    CacheConfig config)
     throws IOException
@@ -1325,7 +1330,7 @@ public final class CacheStoreManager
         return true;
       }
 
-      if (! loadClusterData(valueKey, config)) {
+      if (! loadClusterData(key, valueKey, config)) {
         log.warning(this + " cannot load cluster value " + valueKey);
 
         // XXX: error?  since we have the value key, it should exist
@@ -1390,10 +1395,11 @@ public final class CacheStoreManager
   /**
    * Load the cluster data from the triad.
    */
-  protected boolean loadClusterData(HashKey valueKey, 
+  protected boolean loadClusterData(HashKey key,
+                                    HashKey valueKey, 
                                     CacheConfig config)
   {
-    return config.getEngine().loadData(valueKey, config.getFlags());
+    return config.getEngine().loadData(key, valueKey, config.getFlags());
   }
 
   /**

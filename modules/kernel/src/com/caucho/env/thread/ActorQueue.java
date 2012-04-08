@@ -370,7 +370,8 @@ public final class ActorQueue<T extends RingItem>
           _nextWorker.wake();
         }
         
-        forceWakeQueue();
+        // forceWakeQueue();
+        wakeQueue();
       } while (_headRef.get() != _tailRef.get());
     }
     
@@ -424,6 +425,8 @@ public final class ActorQueue<T extends RingItem>
           }
           */
           
+          wakeQueue();
+          
           head = headRef.get();
           if (head == tail) {
             return true;
@@ -449,6 +452,20 @@ public final class ActorQueue<T extends RingItem>
     {
       synchronized (isWaitRef) {
         if (isWaitRef.compareAndSet(true, false)) {
+          isWaitRef.notifyAll();
+        }
+      }
+    }
+    
+    private void wakeQueue()
+    {
+      AtomicBoolean isWaitRef = _isWaitRef;
+      
+      if (isWaitRef == null)
+        return;
+      
+      if (isWaitRef.compareAndSet(true, false)) {
+        synchronized (isWaitRef) {
           isWaitRef.notifyAll();
         }
       }

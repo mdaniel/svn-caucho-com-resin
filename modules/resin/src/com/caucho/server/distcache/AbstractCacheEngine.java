@@ -56,7 +56,7 @@ public class AbstractCacheEngine implements CacheEngine
   }
 
   @Override
-  public boolean loadData(HashKey valueKey, int flags)
+  public boolean loadData(HashKey key, HashKey valueKey, int flags)
   {
     return true;
   }
