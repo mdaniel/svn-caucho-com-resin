@@ -65,7 +65,8 @@ public class IntQueue {
     _size++;
   }
 
-  public int remove() {
+  public int remove()
+  {
     if (_size == 0) {
       throw new RuntimeException("queue is empty");
     }
@@ -78,11 +79,13 @@ public class IntQueue {
     return value;
   }
 
-  public int size() {
+  public int size()
+  {
     return _size;
   }
 
-  public int capacity() {
+  public int capacity()
+  {
     return _capacity;
   }
 
