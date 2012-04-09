@@ -522,13 +522,15 @@ public class ResinSystem
         
         thread.setContextClassLoader(_classLoader);
         
-        if (log.isLoggable(Level.FINE))
-          log.fine(service + " starting");
+        if (log.isLoggable(Level.FINEST)) {
+          log.finest(service + " starting");
+        }
 
         service.start();
         
-        if (log.isLoggable(Level.FINER))
-          log.finer(service + " active");
+        if (log.isLoggable(Level.FINEST)) {
+          log.finest(service + " active");
+        }
       }
     } catch (RuntimeException e) {
       log.log(Level.WARNING, e.toString(), e);
@@ -574,8 +576,9 @@ public class ResinSystem
         try {
           thread.setContextClassLoader(_classLoader);
 
-          if (log.isLoggable(Level.FINE))
-            log.fine(service + " stopping");
+          if (log.isLoggable(Level.FINEST)) {
+            log.finest(service + " stopping");
+          }
           
           service.stop();
         } catch (Exception e) {

@@ -28,11 +28,11 @@
 
 package com.caucho.db.sql;
 
+import java.sql.SQLException;
+
 import com.caucho.db.jdbc.GeneratedKeysResultSet;
 import com.caucho.db.table.Column;
 import com.caucho.db.table.Table;
-import java.sql.SQLException;
-import java.util.logging.Logger;
 
 class AutoIncrementExpr extends Expr {
   private Table _table;
@@ -45,7 +45,8 @@ class AutoIncrementExpr extends Expr {
   /**
    * Returns the type of the expression.
    */
-  public Class getType()
+  @Override
+  public Class<?> getType()
   {
     return long.class;
   }
@@ -57,6 +58,7 @@ class AutoIncrementExpr extends Expr {
    *
    * @return the long value
    */
+  @Override
   public long evalLong(QueryContext context)
     throws SQLException
   {
@@ -67,8 +69,8 @@ class AutoIncrementExpr extends Expr {
     if (keysRS != null) {
       Column column = _table.getAutoIncrementColumn();
 
-      keysRS.setColumn(1, column);
-      keysRS.setLong(1, value);
+      keysRS.setColumn(2, column);
+      keysRS.setLong(2, value);
     }
 
     return value;

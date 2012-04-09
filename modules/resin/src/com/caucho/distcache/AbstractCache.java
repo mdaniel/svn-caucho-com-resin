@@ -955,21 +955,21 @@ public class AbstractCache
     _config.setGuid(_guid);
   }
   
-  public boolean loadData(HashKey valueHash, WriteStream os)
+  public boolean loadData(HashKey valueHash, long valueIndex, WriteStream os)
     throws IOException
   {
-    return _delegate.loadData(valueHash, os);
+    return _delegate.loadData(valueHash, valueIndex, os);
   }
 
-  public boolean saveData(HashKey valueHash, StreamSource source, int length)
+  public long saveData(HashKey valueHash, StreamSource source, int length)
     throws IOException
   {
     return _delegate.saveData(valueHash, source, length);
   }
 
-  public boolean isDataAvailable(HashKey valueKey)
+  public boolean isDataAvailable(HashKey valueKey, long valueIndex)
   {
-    return _delegate.isDataAvailable(valueKey);
+    return _delegate.isDataAvailable(valueKey, valueIndex);
   }
 
   //

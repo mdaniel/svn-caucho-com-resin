@@ -45,7 +45,7 @@ import java.sql.Blob;
  */
 public final class MnodeEntry extends MnodeValue implements ExtCacheEntry {
   public static final MnodeEntry NULL
-    = new MnodeEntry(null, 0, 0, null, null, 0, 0, 0, 0, 0, 0, false, true);
+    = new MnodeEntry(null, 0, 0, 0, null, null, 0, 0, 0, 0, 0, 0, false, true);
   
   public static final HashKey NULL_KEY = new HashKey(new byte[32]);
   public static final HashKey ANY_KEY = createAnyKey(32);
@@ -71,6 +71,7 @@ public final class MnodeEntry extends MnodeValue implements ExtCacheEntry {
   private transient Blob _blob;
 
   public MnodeEntry(HashKey valueHash,
+                    long valueIndex,
                     long valueLength,
                     long version,
                     Object value,
@@ -84,7 +85,7 @@ public final class MnodeEntry extends MnodeValue implements ExtCacheEntry {
                     boolean isServerVersionValid,
                     boolean isImplicitNull)
   {
-    super(HashKey.getHash(valueHash), valueLength, version,
+    super(HashKey.getHash(valueHash), valueIndex, valueLength, version,
           HashKey.getHash(cacheHash),
           flags,
           accessedExpireTimeout, modifiedExpireTimeout);
@@ -130,6 +131,7 @@ public final class MnodeEntry extends MnodeValue implements ExtCacheEntry {
                     long lastUpdateTime)
   {
     super(oldMnodeValue.getValueHash(),
+          oldMnodeValue.getValueIndex(),
           oldMnodeValue.getValueLength(),
           oldMnodeValue.getVersion(),
           oldMnodeValue.getCacheHash(),

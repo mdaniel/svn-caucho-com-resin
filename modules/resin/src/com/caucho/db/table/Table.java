@@ -34,6 +34,7 @@ import com.caucho.db.block.Block;
 import com.caucho.db.block.BlockStore;
 import com.caucho.db.index.BTree;
 import com.caucho.db.index.KeyCompare;
+import com.caucho.db.jdbc.GeneratedKeysResultSet;
 // import com.caucho.db.lock.Lock;
 import com.caucho.db.sql.CreateQuery;
 import com.caucho.db.sql.Expr;
@@ -107,6 +108,7 @@ public class Table extends BlockStore {
 
   private final Constraint[]_constraints;
 
+  private final Column _identityColumn;
   private final Column _autoIncrementColumn;
 
   private long _entries;
@@ -151,13 +153,21 @@ public class Table extends BlockStore {
 
     Column []columns = _row.getColumns();
     Column autoIncrementColumn = null;
+    Column identityColumn = null;
+    
     for (int i = 0; i < columns.length; i++) {
       columns[i].setTable(this);
 
       if (columns[i].getAutoIncrement() >= 0)
         autoIncrementColumn = columns[i];
+      
+      if (columns[i] instanceof IdentityColumn) {
+        identityColumn = columns[i];
+      }
     }
+    
     _autoIncrementColumn = autoIncrementColumn;
+    _identityColumn = identityColumn;
 
     //new Lock("table-insert:" + name);
     //new Lock("table-alloc:" + name);
@@ -900,9 +910,18 @@ public class Table extends BlockStore {
               _autoIncrementValue = value;
           }
         }
-
+        
         block.setDirty(rowOffset, rowOffset + _rowLength);
         _entries++;
+        
+        if (_identityColumn != null) {
+          GeneratedKeysResultSet rs = queryContext.getGeneratedKeysResultSet();
+          
+          if (rs != null) {
+            rs.setColumn(1, _identityColumn);
+            rs.setLong(1, rowAddr);
+          }
+        }
 
         isOkay = true;
       } catch (SQLException e) {

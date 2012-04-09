@@ -109,9 +109,14 @@ public class DataStore {
     if (_tableName == null)
       throw new NullPointerException();
 
+    /*
     _loadQuery = ("SELECT data"
                   + " FROM " + _tableName
                   + " WHERE id=?");
+                  */
+    _loadQuery = ("SELECT data"
+        + " FROM " + _tableName
+        + " WHERE _resin_oid=?");
 
     _dataAvailableQuery = ("SELECT 1"
                            + " FROM " + _tableName
@@ -235,10 +240,10 @@ public class DataStore {
    *
    * @return true on successful load
    */
-  public boolean load(HashKey id, WriteStream os)
+  public boolean load(HashKey id, long valueIndex, WriteStream os)
   {
     try {
-      Blob blob = loadBlob(id);
+      Blob blob = loadBlob(id, valueIndex);
 
       if (blob != null) {
         InputStream is = blob.getBinaryStream();
@@ -281,7 +286,7 @@ public class DataStore {
    *
    * @return true on successful load
    */
-  public Blob loadBlob(HashKey id)
+  public Blob loadBlob(HashKey id, long valueIndex)
   {
     DataConnection conn = null;
     ResultSet rs = null;
@@ -290,7 +295,8 @@ public class DataStore {
       conn = getConnection();
 
       PreparedStatement pstmt = conn.prepareLoad();
-      pstmt.setBytes(1, id.getHash());
+      // pstmt.setBytes(1, id.getHash());
+      pstmt.setLong(1, valueIndex);
 
       rs = pstmt.executeQuery();
 
@@ -376,7 +382,7 @@ public class DataStore {
    *
    * @return true on successful load
    */
-  public boolean isDataAvailable(HashKey id)
+  public boolean isDataAvailable(HashKey id, long valueIndex)
   {
     DataConnection conn = null;
     ResultSet rs = null;
@@ -385,7 +391,8 @@ public class DataStore {
       conn = getConnection();
 
       PreparedStatement pstmt = conn.prepareLoad();
-      pstmt.setBytes(1, id.getHash());
+      // pstmt.setBytes(1, id.getHash());
+      pstmt.setLong(1, valueIndex);
       rs = pstmt.executeQuery();
       
       if (rs.next()) {
@@ -411,7 +418,8 @@ public class DataStore {
    *
    * @return true on successful load
    */
-  public InputStream openInputStream(HashKey id)
+  public InputStream openInputStream(HashKey id,
+                                     long valueIndex)
   {
     DataConnection conn = null;
     ResultSet rs = null;
@@ -420,7 +428,8 @@ public class DataStore {
       conn = getConnection();
 
       PreparedStatement pstmt = conn.prepareLoad();
-      pstmt.setBytes(1, id.getHash());
+      // pstmt.setBytes(1, id.getHash());
+      pstmt.setLong(1, valueIndex);
 
       rs = pstmt.executeQuery();
 
@@ -451,22 +460,26 @@ public class DataStore {
    * @param is the input stream to the serialized object
    * @param length the length object the serialized object
    */
-  public boolean save(HashKey id, StreamSource source, int length)
+  public long save(HashKey id, StreamSource source, int length)
     throws IOException
   {
     // try updating first to avoid the exception for an insert
-    if (updateExpires(id)) {
+    
+    long oldIndex = 1;
+    long dataIndex;
+    
+    if ((dataIndex = updateExpires(id, oldIndex)) > 0) {
       source.close();
       
-      return true;
+      return dataIndex;
     }
-    else if (insert(id, source.openInputStream(), length)) {
-      return true;
+    else if ((dataIndex = insert(id, source.openInputStream(), length)) > 0) {
+      return dataIndex;
     }
     else {
       log.warning(this + " can't save data '" + id + "'");
 
-      return false;
+      return -1;
     }
   }
 
@@ -477,20 +490,22 @@ public class DataStore {
    * @param is the input stream to the serialized object
    * @param length the length object the serialized object
    */
-  public boolean save(HashKey id, InputStream is, int length)
+  public long save(HashKey id, long oldIndex, InputStream is, int length)
     throws IOException
   {
+    long dataIndex;
+    
     // try updating first to avoid the exception for an insert
-    if (updateExpires(id)) {
-      return true;
+    if ((dataIndex = updateExpires(id, oldIndex)) > 0) {
+      return dataIndex;
     }
-    else if (insert(id, is, length)) {
-      return true;
+    else if ((dataIndex = insert(id, is, length)) > 0) {
+      return dataIndex;
     }
     else {
       log.warning(this + " can't save data '" + id + "'");
 
-      return false;
+      return dataIndex;
     }
   }
 
@@ -501,8 +516,12 @@ public class DataStore {
    * @param is the input stream to the serialized object
    * @param length the length object the serialized object
    */
-  private boolean insert(HashKey id, InputStream is, int length)
+  private long insert(HashKey id, InputStream is, int length)
   {
+    if (is == null) {
+      throw new NullPointerException();
+    }
+    
     DataConnection conn = null;
 
     try {
@@ -512,28 +531,39 @@ public class DataStore {
       stmt.setBytes(1, id.getHash());
       stmt.setLong(2, _expireTimeout + CurrentTime.getCurrentTime());
       stmt.setBinaryStream(3, is, length);
-
-      if (is == null)
-        Thread.dumpStack();
       
       int count = stmt.executeUpdate();
 
-      if (log.isLoggable(Level.FINER))
+      if (log.isLoggable(Level.FINER)) {
         log.finer(this + " insert " + id + " length:" + length);
+      }
 
       // System.out.println("INSERT: " + id);
       
       if (count > 0) {
         _entryCount.addAndGet(1);
+        
+        ResultSet keys = stmt.getGeneratedKeys();
+        if (keys.next()) {
+          long dataIndex = keys.getLong("_resin_oid");
+          
+          // System.out.println("INDEX: " + dataIndex);
+          
+          return dataIndex;
+        }
+        
+        throw new IllegalStateException();
       }
-
-      return count > 0;
+      else {
+        return 0;
+      }
     } catch (SqlIndexAlreadyExistsException e) {
       // the data already exists in the cache, so this is okay
       log.finer(this + " " + e.toString());
       log.log(Level.FINEST, e.toString(), e);
 
-      return true;
+      System.out.println("EXISTS:");
+      return 1;
     } catch (SQLException e) {
       e.printStackTrace();
       log.finer(this + " " + e.toString());
@@ -543,7 +573,7 @@ public class DataStore {
         conn.close();
     }
 
-    return false;
+    return 0;
   }
 
   /**
@@ -553,7 +583,7 @@ public class DataStore {
    *
    * @return true if the database contains the id
    */
-  public boolean updateExpires(HashKey id)
+  public long updateExpires(HashKey id, long oldIndex)
   {
     DataConnection conn = null;
 
@@ -571,7 +601,10 @@ public class DataStore {
       if (log.isLoggable(Level.FINER))
         log.finer(this + " updateExpires " + id);
 
-      return count > 0;
+      if (count > 0)
+        return oldIndex;
+      else
+        return 0;
       /*
     } catch (LockTimeoutException e) {
       if (log.isLoggable(Level.FINER))
@@ -587,7 +620,7 @@ public class DataStore {
         conn.close();
     }
 
-    return false;
+    return 0;
   }
 
   /**
@@ -813,6 +846,10 @@ public class DataStore {
       _conn = conn;
       _rs = rs;
       _is = is;
+      
+      if (is == null) {
+        throw new NullPointerException();
+      }
     }
 
     public int read()
@@ -888,8 +925,10 @@ public class DataStore {
     PreparedStatement prepareInsert()
       throws SQLException
     {
-      if (_insertStatement == null)
-        _insertStatement = _conn.prepareStatement(_insertQuery);
+      if (_insertStatement == null) {
+        _insertStatement = _conn.prepareStatement(_insertQuery,
+                                                  Statement.RETURN_GENERATED_KEYS);
+      }
 
       return _insertStatement;
     }

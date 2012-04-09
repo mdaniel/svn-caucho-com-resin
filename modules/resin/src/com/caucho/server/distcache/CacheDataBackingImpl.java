@@ -179,32 +179,35 @@ public class CacheDataBackingImpl implements CacheDataBacking {
   }
 
   @Override
-  public boolean loadData(HashKey valueHash, WriteStream os)
+  public boolean loadData(HashKey valueHash, 
+                          long valueIndex,
+                          WriteStream os)
     throws IOException
   {
-    return _dataStore.load(valueHash, os);
+    return _dataStore.load(valueHash, valueIndex, os);
   }
 
   @Override
-  public java.sql.Blob loadBlob(HashKey valueHash)
+  public java.sql.Blob loadBlob(HashKey valueHash, long valueIndex)
   {
-    return _dataStore.loadBlob(valueHash);
+    return _dataStore.loadBlob(valueHash, valueIndex);
   }
   
   @Override
-  public boolean saveData(HashKey valueHash, StreamSource source, int length)
+  public long saveData(HashKey valueHash,
+                       StreamSource source, int length)
     throws IOException
   {
     return _dataStore.save(valueHash, source, length);
   }
 
   @Override
-  public boolean isDataAvailable(HashKey valueKey)
+  public boolean isDataAvailable(HashKey valueKey, long valueIndex)
   {
     if (valueKey == null || valueKey == HashManager.NULL)
       return false;
 
-    return _dataStore.isDataAvailable(valueKey);
+    return _dataStore.isDataAvailable(valueKey, valueIndex);
   }
 
   /**

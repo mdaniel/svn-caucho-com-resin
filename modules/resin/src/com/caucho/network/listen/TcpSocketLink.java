@@ -755,8 +755,9 @@ public class TcpSocketLink extends AbstractSocketLink
   
   private void destroy()
   {
-    if (log.isLoggable(Level.FINER))
-      log.finer(this + " destroying connection");
+    if (log.isLoggable(Level.FINEST)) {
+      log.finest(this + " destroying connection");
+    }
     
     try {
       _socket.forceShutdown();
@@ -788,10 +789,10 @@ public class TcpSocketLink extends AbstractSocketLink
   @Friend(ConnectionTask.class)
   final void startThread(final Thread thread)
   {
-    if (log.isLoggable(Level.FINER)) {
-      log.finer(this + " start thread " + thread.getName()
-                + " (count=" + _port.getThreadCount()
-                + ", idle=" + _port.getIdleThreadCount() + ")");
+    if (log.isLoggable(Level.FINEST)) {
+      log.finest(this + " start thread " + thread.getName()
+                 + " (count=" + _port.getThreadCount()
+                 + ", idle=" + _port.getIdleThreadCount() + ")");
     }
     
     final Thread oldThread = _thread;
@@ -817,8 +818,8 @@ public class TcpSocketLink extends AbstractSocketLink
     
     _request.onDetachThread();
     
-    if (log.isLoggable(Level.FINER)) {
-      log.finer(this + " finish thread: " + Thread.currentThread().getName());
+    if (log.isLoggable(Level.FINEST)) {
+      log.finest(this + " finish thread: " + Thread.currentThread().getName());
     }
     
     Thread currentThread = Thread.currentThread();
@@ -1477,9 +1478,9 @@ public class TcpSocketLink extends AbstractSocketLink
       is.setLength(len);
     }
 
-    if (log.isLoggable(Level.FINE)) {
-      log.fine(dbgId() + "starting connection " + this
-               + ", total=" + _port.getConnectionCount());
+    if (log.isLoggable(Level.FINEST)) {
+      log.finest(dbgId() + "starting connection " + this
+                 + ", total=" + _port.getConnectionCount());
     }
   }
   

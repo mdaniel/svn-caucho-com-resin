@@ -63,6 +63,7 @@ import com.caucho.network.balance.ClientSocket;
 import com.caucho.network.balance.ClientSocketFactory;
 import com.caucho.server.distcache.CacheConfig;
 import com.caucho.server.distcache.CacheImpl;
+import com.caucho.server.distcache.CacheStoreManager.DataItem;
 import com.caucho.server.distcache.DistCacheEntry;
 import com.caucho.server.distcache.DistCacheSystem;
 import com.caucho.server.distcache.MnodeUpdate;
@@ -335,7 +336,7 @@ public class MemcachedClient implements Cache
 
         MnodeUpdate update = new MnodeUpdate(entry.getKeyHash().getHash(),
                                              null,
-                                             0,
+                                             0, 0,
                                              version,
                                              config);
 
@@ -369,11 +370,13 @@ public class MemcachedClient implements Cache
 
       GetInputStream gis = new GetInputStream(is, length);
       
-      HashKey valueKey = cache.saveData(gis);
-      
+      DataItem dataItem = cache.saveData(gis);
+      HashKey valueKey = dataItem.getValue();
+      long valueIndex = dataItem.getDataIndex();
 
       MnodeUpdate update = new MnodeUpdate(entry.getKeyHash().getHash(),
                                            valueKey.getHash(),
+                                           valueIndex,
                                            length,
                                            version,
                                            config);
@@ -523,7 +526,9 @@ public class MemcachedClient implements Cache
       out.setDisableClose(true);
       
       //out.print(value);
-      boolean v = cache.loadData(HashKey.create(update.getValueHash()), out);
+      boolean v = cache.loadData(HashKey.create(update.getValueHash()),
+                                                update.getValueIndex(),
+                                                out);
       
       out.setDisableClose(false);
       

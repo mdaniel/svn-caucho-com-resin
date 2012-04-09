@@ -275,8 +275,9 @@ public class QueryContext {
   {
     _isReturnGeneratedKeys = isReturnGeneratedKeys;
 
-    if (_isReturnGeneratedKeys && _generatedKeys != null)
+    if (_isReturnGeneratedKeys && _generatedKeys != null) {
       _generatedKeys.init();
+    }
   }
 
   /**

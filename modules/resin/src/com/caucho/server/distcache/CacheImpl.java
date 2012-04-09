@@ -468,10 +468,11 @@ public class CacheImpl<K,V>
 
   public boolean compareAndPut(HashKey key, 
                             HashKey value,
+                            long valueIndex,
                             long valueLength,
                             long version)
   {
-    return getDistCacheEntry(key).compareAndPut(version, value, valueLength, _config);
+    return getDistCacheEntry(key).compareAndPut(version, value, valueIndex, valueLength, _config);
   }
 
   @Override
@@ -823,21 +824,21 @@ public class CacheImpl<K,V>
     
   }
   
-  public boolean loadData(HashKey valueHash, WriteStream os)
+  public boolean loadData(HashKey valueHash, long valueIndex, WriteStream os)
     throws IOException
   {
-    return getDataBacking().loadData(valueHash, os);
+    return getDataBacking().loadData(valueHash, valueIndex, os);
   }
 
-  public boolean saveData(HashKey valueHash, StreamSource source, int length)
+  public long saveData(HashKey valueHash, StreamSource source, int length)
     throws IOException
   {
     return getDataBacking().saveData(valueHash, source, length);
   }
 
-  public boolean isDataAvailable(HashKey valueKey)
+  public boolean isDataAvailable(HashKey valueKey, long valueIndex)
   {
-    return getDataBacking().isDataAvailable(valueKey);
+    return getDataBacking().isDataAvailable(valueKey, valueIndex);
   }
   
   private CacheDataBacking getDataBacking()
@@ -877,12 +878,10 @@ public class CacheImpl<K,V>
                                              _config.getValueSerializer());
   }
   
-  public HashKey saveData(InputStream is)
+  public DataItem saveData(InputStream is)
     throws IOException
   {
-    DataItem dataItem = ((CacheStoreManager) _manager).writeData(null, is);
-    
-    return dataItem.getValue();
+    return ((CacheStoreManager) _manager).writeData(null, 0, is);
   }
 
   /*

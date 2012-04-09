@@ -41,6 +41,7 @@ public class MnodeUpdate extends MnodeValue {
   
   public MnodeUpdate(byte []keyHash,
                      byte []valueHash,
+                     long valueIndex,
                      long valueLength,
                      long version,
                      byte []cacheHash,
@@ -48,7 +49,7 @@ public class MnodeUpdate extends MnodeValue {
                      long accessedExpireTime,
                      long modifiedExpireTime)
   {
-    super(valueHash, valueLength, version,
+    super(valueHash, valueIndex, valueLength, version,
           cacheHash, 
           flags, 
           accessedExpireTime, modifiedExpireTime);
@@ -58,10 +59,11 @@ public class MnodeUpdate extends MnodeValue {
   
   public MnodeUpdate(byte []keyHash,
                      byte []valueHash,
+                     long valueIndex,
                      long valueLength,
                      long version)
   {
-    super(valueHash, valueLength, version);
+    super(valueHash, valueIndex, valueLength, version);
     
     _keyHash = keyHash;
   }
@@ -83,34 +85,38 @@ public class MnodeUpdate extends MnodeValue {
 
   public MnodeUpdate(byte []keyHash,
                      byte []valueHash,
+                     long valueIndex,
                      long valueLength,
                      long version,
                      CacheConfig config)
   {
-    super(valueHash, valueLength, version, config);
+    super(valueHash, valueIndex, valueLength, version, config);
     
     _keyHash = keyHash;
   }
 
   public MnodeUpdate(byte []keyHash,
                      byte []valueHash,
+                     long valueIndex,
                      long valueLength,
                      long version,
                      MnodeValue oldValue)
   {
-    super(valueHash, valueLength, version, oldValue);
+    super(valueHash, valueIndex, valueLength, version, oldValue);
     
     _keyHash = keyHash;
   }
   
   public MnodeUpdate(HashKey keyHash,
                      HashKey valueHash,
+                     long valueIndex,
                      long valueLength,
                      long version,
                      CacheConfig config)
   {
     this(HashKey.getHash(keyHash),
          HashKey.getHash(valueHash),
+         valueIndex,
          valueLength,
          version,
          config);

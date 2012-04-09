@@ -68,24 +68,28 @@ public class GeneratedKeysResultSet extends AbstractResultSet {
   /**
    * Returns the statement associated with the keys.
    */
+  @Override
   public java.sql.Statement getStatement()
     throws SQLException
   {
     return _stmt;
   }
 
+  @Override
   public java.sql.ResultSetMetaData getMetaData()
     throws SQLException
   {
     return null;
   }
 
+  @Override
   public boolean next()
     throws SQLException
   {
     return _row++ == 0;
   }
 
+  @Override
   public boolean wasNull()
     throws SQLException
   {
@@ -95,6 +99,7 @@ public class GeneratedKeysResultSet extends AbstractResultSet {
   /**
    * Returns the index for the given column name.
    */
+  @Override
   public int findColumn(String columnName)
     throws SQLException
   {
@@ -121,6 +126,7 @@ public class GeneratedKeysResultSet extends AbstractResultSet {
   /**
    * Returns the generated string key.
    */
+  @Override
   public String getString(int columnIndex)
     throws SQLException
   {
@@ -143,6 +149,7 @@ public class GeneratedKeysResultSet extends AbstractResultSet {
   /**
    * Returns the generated integer key.
    */
+  @Override
   public int getInt(int columnIndex)
     throws SQLException
   {
@@ -165,6 +172,7 @@ public class GeneratedKeysResultSet extends AbstractResultSet {
   /**
    * Returns the generated long key.
    */
+  @Override
   public long getLong(int columnIndex)
     throws SQLException
   {

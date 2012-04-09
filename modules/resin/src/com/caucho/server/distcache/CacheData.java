@@ -43,6 +43,7 @@ public final class CacheData extends MnodeValue {
 
   public CacheData(HashKey key,
                    HashKey value,
+                   long valueIndex,
                    long valueLength,
                    long version,
                    HashKey cacheKey,
@@ -51,7 +52,7 @@ public final class CacheData extends MnodeValue {
                    long accessedTimeout,
                    long modifiedTimeout)
   {
-    super(HashKey.getHash(value), valueLength, version,
+    super(HashKey.getHash(value), valueIndex, valueLength, version,
           HashKey.getHash(cacheKey),
           flags,
           accessedTimeout, modifiedTimeout);

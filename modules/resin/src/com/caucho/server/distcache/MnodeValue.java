@@ -38,6 +38,7 @@ import com.caucho.util.Hex;
 @SuppressWarnings("serial")
 public class MnodeValue implements java.io.Serializable {
   private final byte[] _valueHash;
+  private final long _valueIndex;
   private final long _valueLength;
   
   private final byte[] _cacheHash;
@@ -50,6 +51,7 @@ public class MnodeValue implements java.io.Serializable {
   private final long _version;
   
   public MnodeValue(byte []valueHash,
+                    long valueIndex,
                     long valueLength,
                     long version,
                     byte []cacheHash,
@@ -58,6 +60,7 @@ public class MnodeValue implements java.io.Serializable {
                     long modifiedExpireTimeout)
   {
     _valueHash = valueHash;
+    _valueIndex = valueIndex;
     _valueLength = valueLength;
     
     _cacheHash = cacheHash;
@@ -71,15 +74,17 @@ public class MnodeValue implements java.io.Serializable {
   }
   
   public MnodeValue(byte []valueHash, 
+                    long valueIndex,
                     long valueLength,
                     long version)
   {
-    this(valueHash, valueLength, version, null, 0, 0, 0);
+    this(valueHash, valueIndex, valueLength, version, null, 0, 0, 0);
   }
   
   public MnodeValue(MnodeValue mnodeValue)
   {
     _valueHash = mnodeValue._valueHash;
+    _valueIndex = mnodeValue._valueIndex;
     _valueLength = mnodeValue._valueLength;
     
     _cacheHash = mnodeValue._cacheHash;
@@ -93,11 +98,13 @@ public class MnodeValue implements java.io.Serializable {
   }
   
   public MnodeValue(byte []valueHash,
+                    long valueIndex,
                     long valueLength,
                     long version,
                     MnodeValue oldValue)
   {
     _valueHash = valueHash;
+    _valueIndex = valueIndex;
     _valueLength = valueLength;
     
     _version = version;
@@ -117,11 +124,13 @@ public class MnodeValue implements java.io.Serializable {
   }
 
   public MnodeValue(byte []valueHash,
+                    long valueIndex,
                     long valueLength,
                     long version,
                     CacheConfig config)
   {
     _valueHash = valueHash;
+    _valueIndex= valueIndex;
     _valueLength = valueLength;
     
     _version = version;
@@ -135,11 +144,13 @@ public class MnodeValue implements java.io.Serializable {
   }
   
   public MnodeValue(HashKey valueHash,
+                    long valueIndex,
                     long valueLength,
                     long version,
                     CacheConfig config)
   {
     this(HashKey.getHash(valueHash),
+         valueIndex,
          valueLength,
          version,
          config);
@@ -156,6 +167,11 @@ public class MnodeValue implements java.io.Serializable {
   public final byte []getValueHash()
   {
     return _valueHash;
+  }
+
+  public long getValueIndex()
+  {
+    return _valueIndex;
   }
   
   public final long getValueLength()
@@ -199,6 +215,7 @@ public class MnodeValue implements java.io.Serializable {
     return (getClass().getSimpleName()
             + "["
             + ",value=" + Hex.toHex(getValueHash(), 0, 4)
+            + ",index=" + Long.toHexString(getValueIndex())
             + ",flags=" + Long.toHexString(getFlags())
             + ",version=" + Long.toHexString(getVersion())
             + "]");

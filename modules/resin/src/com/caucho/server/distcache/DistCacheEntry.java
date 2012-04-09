@@ -285,10 +285,13 @@ public class DistCacheEntry implements ExtCacheEntry {
    */
   public boolean compareAndPut(long version,
                                HashKey value,
+                               long valueIndex,
                                long valueLength,
                                CacheConfig config)
   {
-    return _cacheService.compareAndPut(this, version, value, valueLength, config);
+    return _cacheService.compareAndPut(this, version, 
+                                       value, valueIndex, valueLength, 
+                                       config);
   }
 
   /**
@@ -403,6 +406,26 @@ public class DistCacheEntry implements ExtCacheEntry {
       return entry.isExpired(now);
     else
       return false;
+  }
+  
+  public boolean isModified(MnodeValue newValue)
+  {
+    MnodeEntry oldValue = getMnodeEntry();
+    
+    if (oldValue == null) {
+      return true;
+    }
+    
+    if (oldValue.getVersion() < newValue.getVersion()) {
+      return true;
+    }
+    else if (newValue.getVersion() < oldValue.getVersion()) {
+      return false;
+    }
+    else {
+      // XXX: need to check hash.
+      return true;
+    }
   }
 
   @Override

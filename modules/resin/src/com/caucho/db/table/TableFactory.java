@@ -43,6 +43,7 @@ public class TableFactory {
 
   private String _name;
   private Row _row;
+  private boolean _isIdentityColumn;
 
   private ArrayList<Constraint> _constraints = new ArrayList<Constraint>();
 
@@ -170,6 +171,8 @@ public class TableFactory {
    */
   public Column addIdentity(String name)
   {
+    _isIdentityColumn = true;
+    
     _row.allocateColumn();
 
     return _row.addColumn(new IdentityColumn(_row, name));
@@ -382,6 +385,10 @@ public class TableFactory {
   public void create()
     throws java.sql.SQLException, IOException
   {
+    if (! _isIdentityColumn) {
+      addIdentity("_resin_oid");
+    }
+    
     Table table = new Table(_database, _name, _row, getConstraints());
 
     table.create();

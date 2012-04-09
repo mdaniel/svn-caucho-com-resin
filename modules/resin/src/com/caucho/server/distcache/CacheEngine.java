@@ -50,7 +50,11 @@ public interface CacheEngine
   
   public MnodeEntry get(DistCacheEntry entry, CacheConfig config);
   
-  public boolean loadData(HashKey key, HashKey valueKey, int flags);
+  /*
+  public boolean loadData(HashKey key, 
+                          HashKey valueKey, long valueIndex,
+                          int flags);
+                          */
 
   public void put(HashKey key, 
                   MnodeUpdate mnodeUpdate,

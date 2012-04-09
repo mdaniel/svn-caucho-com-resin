@@ -55,11 +55,15 @@ public class AbstractCacheEngine implements CacheEngine
     return mnodeEntry.isExpired(now);
   }
 
+  /*
   @Override
-  public boolean loadData(HashKey key, HashKey valueKey, int flags)
+  public boolean loadData(HashKey key, 
+                          HashKey valueKey, long valueIndex,
+                          int flags)
   {
     return true;
   }
+  */
 
   @Override
   public MnodeEntry get(DistCacheEntry entry, CacheConfig config)
