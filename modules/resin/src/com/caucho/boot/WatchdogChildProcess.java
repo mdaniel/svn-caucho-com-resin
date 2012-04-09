@@ -828,6 +828,9 @@ class WatchdogChildProcess
       }
       else if (argv[i].equals("-d64") || argv[i].startsWith("-d32")) {
       }
+      else if (CauchoSystem.isWindows() && "".equals(argv[i])) {
+        resinArgs.add("\"\"");
+      }
       else
         resinArgs.add(argv[i]);
     }
