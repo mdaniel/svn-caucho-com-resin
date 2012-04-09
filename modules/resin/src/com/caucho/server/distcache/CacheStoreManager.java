@@ -675,25 +675,31 @@ public final class CacheStoreManager
                                  HashKey testValue,
                                  Object value, 
                                  CacheConfig config)
-    {
+  {
     DataItem dataItem = writeData(entry.getMnodeEntry(), 
                                   value,
                                   config.getValueSerializer());
     
     HashKey valueHash = dataItem.getValue();
-    long valueIndex = dataItem.getDataIndex();
+    long dataId = dataItem.getDataIndex();
     long valueLength = dataItem.getLength();
     
-    long version = getNewVersion(entry.getMnodeEntry());
+    try {
+      long version = getNewVersion(entry.getMnodeEntry());
     
-    MnodeUpdate mnodeUpdate = new MnodeUpdate(entry.getKeyHash(),
-                                              valueHash,
-                                              valueIndex,
-                                              valueLength,
-                                              version,
-                                              config);
+      MnodeUpdate mnodeUpdate = new MnodeUpdate(entry.getKeyHash(),
+                                                valueHash,
+                                                dataId,
+                                                valueLength,
+                                                version,
+                                                config);
     
-    return compareAndPut(entry, testValue, mnodeUpdate, value, config);
+      return compareAndPut(entry, testValue, mnodeUpdate, value, config);
+    } finally {
+      if (entry.getMnodeEntry().getValueIndex() != dataId) {
+        _dataBacking.removeData(dataId);
+      }
+    }
   }
 
   protected HashKey compareAndPut(DistCacheEntry entry,
@@ -1127,7 +1133,7 @@ public final class CacheStoreManager
     getDataBacking().putLocalValue(mnodeValue, key,  
                                    oldEntryValue,
                                    mnodeUpdate);
-
+    
     if (mnodeValue.getCacheHash() != null && _isCacheListen) {
       HashKey cacheKey = HashKey.create(mnodeValue.getCacheHash());
       

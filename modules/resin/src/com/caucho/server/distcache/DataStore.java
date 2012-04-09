@@ -29,9 +29,6 @@
 
 package com.caucho.server.distcache;
 
-import static java.sql.ResultSet.CONCUR_UPDATABLE;
-import static java.sql.ResultSet.TYPE_FORWARD_ONLY;
-
 import java.io.IOException;
 import java.io.InputStream;
 import java.sql.Blob;
@@ -50,9 +47,7 @@ import com.caucho.db.index.SqlIndexAlreadyExistsException;
 import com.caucho.util.Alarm;
 import com.caucho.util.AlarmListener;
 import com.caucho.util.ConcurrentArrayList;
-import com.caucho.util.CurrentTime;
 import com.caucho.util.FreeList;
-import com.caucho.util.HashKey;
 import com.caucho.util.IoUtil;
 import com.caucho.util.JdbcUtil;
 import com.caucho.vfs.StreamSource;
@@ -75,17 +70,18 @@ public class DataStore {
   // remove unused data after 15 minutes
   // server/60i0
   // private long _expireTimeout = 60 * 60L * 1000L;
-  private long _expireTimeout = 60 * 60L * 1000L;
+  // private long _expireTimeout = 60 * 60L * 1000L;
 
   private DataSource _dataSource;
 
   private final String _insertQuery;
   private final String _loadQuery;
   private final String _dataAvailableQuery;
-  private final String _updateExpiresQuery;
-  private final String _updateAllExpiresQuery;
+  // private final String _updateExpiresQuery;
+  // private final String _updateAllExpiresQuery;
   private final String _selectOrphanQuery;
-  private final String _deleteTimeoutQuery;
+  private final String _deleteQuery;
+  // private final String _deleteTimeoutQuery;
   private final String _validateQuery;
 
   private final String _countQuery;
@@ -115,21 +111,23 @@ public class DataStore {
                   + " WHERE id=?");
                   */
     _loadQuery = ("SELECT data"
-        + " FROM " + _tableName
-        + " WHERE _resin_oid=?");
+                  + " FROM " + _tableName
+                  + " WHERE id=?");
 
     _dataAvailableQuery = ("SELECT 1"
                            + " FROM " + _tableName
                            + " WHERE id=?");
 
     _insertQuery = ("INSERT into " + _tableName
-                    + " (id,expire_time,data) "
-                    + "VALUES(?,?,?)");
+                    + " (data) "
+                    + "VALUES(?)");
 
+    /*
     // XXX: add random component to expire time?
     _updateExpiresQuery = ("UPDATE " + _tableName
                            + " SET expire_time=?"
                            + " WHERE id=?");
+                           */
 
     /*
     _updateAllExpiresQuery = ("SELECT d.expire_time, d.resin_oid, m.value"
@@ -137,18 +135,23 @@ public class DataStore {
                               + "  " + _tableName + " AS d"
                               + " WHERE m.value = d.id");
                               */
+    /*
     _updateAllExpiresQuery = ("SELECT d.expire_time, d.resin_oid, m.value"
                               + " FROM " + _mnodeTableName + " AS m"
                               + " LEFT JOIN " + _tableName + " AS d"
                               + " ON(m.value = d.id)");
+                              */
 
-    _selectOrphanQuery = ("SELECT m.value, d.id"
+    _selectOrphanQuery = ("SELECT m.value_index, d.id"
                               + " FROM " + _mnodeTableName + " AS m"
                               + " LEFT JOIN " + _tableName + " AS d"
-                              + " ON(m.value=d.id)");
-
+                              + " ON(m.value_index=d.id)");
+    /*
     _deleteTimeoutQuery = ("DELETE FROM " + _tableName
                            + " WHERE expire_time < ?");
+                           */
+    _deleteQuery = ("DELETE FROM " + _tableName
+                    + " WHERE id = ?");
 
     _validateQuery = ("VALIDATE " + _tableName);
 
@@ -171,7 +174,7 @@ public class DataStore {
       _entryCount.set(count);
     }
 
-    _alarm = new Alarm(new ExpireAlarm());
+    _alarm = new Alarm(new DeleteAlarm());
     // _alarm.queue(_expireTimeout);
 
     _alarm.queue(0);
@@ -187,19 +190,37 @@ public class DataStore {
 
     try {
       Statement stmt = conn.createStatement();
+      
+      boolean isOld = false;
 
       try {
-        String sql = ("SELECT id, expire_time, data"
+        String sql = ("SELECT expire_time"
                       + " FROM " + _tableName + " WHERE 1=0");
 
         ResultSet rs = stmt.executeQuery(sql);
         rs.next();
         rs.close();
-
-        return;
+        
+        isOld = true;
       } catch (Exception e) {
         log.log(Level.FINEST, e.toString(), e);
         log.finer(this + " " + e.toString());
+      }
+
+      if (! isOld) {
+        try {
+          String sql = ("SELECT id, data"
+              + " FROM " + _tableName + " WHERE 1=0");
+
+          ResultSet rs = stmt.executeQuery(sql);
+          rs.next();
+          rs.close();
+
+          return;
+        } catch (Exception e) {
+          log.log(Level.FINEST, e.toString(), e);
+          log.finer(this + " " + e.toString());
+        }
       }
 
       try {
@@ -209,8 +230,7 @@ public class DataStore {
       }
 
       String sql = ("CREATE TABLE " + _tableName + " (\n"
-                    + "  id BINARY(32) PRIMARY KEY,\n"
-                    + "  expire_time BIGINT,\n"
+                    + "  id IDENTITY,\n"
                     + "  data BLOB)");
 
 
@@ -240,10 +260,10 @@ public class DataStore {
    *
    * @return true on successful load
    */
-  public boolean load(HashKey id, long valueIndex, WriteStream os)
+  public boolean load(long id, WriteStream os)
   {
     try {
-      Blob blob = loadBlob(id, valueIndex);
+      Blob blob = loadBlob(id);
 
       if (blob != null) {
         InputStream is = blob.getBinaryStream();
@@ -268,7 +288,7 @@ public class DataStore {
       }
 
       if (log.isLoggable(Level.FINER))
-        log.finer(this + " no data loaded for " + id);
+        log.finer(this + " no data loaded for " + Long.toHexString(id));
     } catch (SQLException e) {
       log.log(Level.FINE, e.toString(), e);
     } catch (IOException e) {
@@ -286,7 +306,7 @@ public class DataStore {
    *
    * @return true on successful load
    */
-  public Blob loadBlob(HashKey id, long valueIndex)
+  public Blob loadBlob(long id)
   {
     DataConnection conn = null;
     ResultSet rs = null;
@@ -296,7 +316,7 @@ public class DataStore {
 
       PreparedStatement pstmt = conn.prepareLoad();
       // pstmt.setBytes(1, id.getHash());
-      pstmt.setLong(1, valueIndex);
+      pstmt.setLong(1, id);
 
       rs = pstmt.executeQuery();
 
@@ -321,68 +341,13 @@ public class DataStore {
   }
 
   /**
-   * Reads the object from the data store.
-   *
-   * @param id the hash identifier for the data
-   * @param os the WriteStream to hold the data
-   *
-   * @return true on successful load
-   */
-  public boolean load(HashKey id, LoadDataCallback cb)
-  {
-    DataConnection conn = null;
-    ResultSet rs = null;
-
-    try {
-      conn = getConnection();
-
-      PreparedStatement pstmt = conn.prepareLoad();
-      pstmt.setBytes(1, id.getHash());
-
-      rs = pstmt.executeQuery();
-
-      if (rs.next()) {
-        InputStream is = rs.getBinaryStream(1);
-
-        if (is == null)
-          return false;
-
-        try {
-          cb.onLoad(id, is);
-        } finally {
-          is.close();
-        }
-
-        if (log.isLoggable(Level.FINER))
-          log.finer(this + " load " + id + " " + cb);
-
-        return true;
-      }
-
-      if (log.isLoggable(Level.FINER))
-        log.finer(this + " no callback data loaded for " + id);
-    } catch (SQLException e) {
-      log.log(Level.FINE, e.toString(), e);
-    } catch (IOException e) {
-      log.log(Level.FINE, e.toString(), e);
-    } finally {
-      JdbcUtil.close(rs);
-      
-      if (conn != null)
-        conn.close();
-    }
-
-    return false;
-  }
-
-  /**
    * Checks if we have the data
    *
    * @param id the hash identifier for the data
    *
    * @return true on successful load
    */
-  public boolean isDataAvailable(HashKey id, long valueIndex)
+  public boolean isDataAvailable(long id)
   {
     DataConnection conn = null;
     ResultSet rs = null;
@@ -392,7 +357,7 @@ public class DataStore {
 
       PreparedStatement pstmt = conn.prepareLoad();
       // pstmt.setBytes(1, id.getHash());
-      pstmt.setLong(1, valueIndex);
+      pstmt.setLong(1, id);
       rs = pstmt.executeQuery();
       
       if (rs.next()) {
@@ -418,8 +383,7 @@ public class DataStore {
    *
    * @return true on successful load
    */
-  public InputStream openInputStream(HashKey id,
-                                     long valueIndex)
+  public InputStream openInputStream(long id)
   {
     DataConnection conn = null;
     ResultSet rs = null;
@@ -429,7 +393,7 @@ public class DataStore {
 
       PreparedStatement pstmt = conn.prepareLoad();
       // pstmt.setBytes(1, id.getHash());
-      pstmt.setLong(1, valueIndex);
+      pstmt.setLong(1, id);
 
       rs = pstmt.executeQuery();
 
@@ -460,27 +424,10 @@ public class DataStore {
    * @param is the input stream to the serialized object
    * @param length the length object the serialized object
    */
-  public long save(HashKey id, StreamSource source, int length)
+  public long save(StreamSource source, int length)
     throws IOException
   {
-    // try updating first to avoid the exception for an insert
-    
-    long oldIndex = 1;
-    long dataIndex;
-    
-    if ((dataIndex = updateExpires(id, oldIndex)) > 0) {
-      source.close();
-      
-      return dataIndex;
-    }
-    else if ((dataIndex = insert(id, source.openInputStream(), length)) > 0) {
-      return dataIndex;
-    }
-    else {
-      log.warning(this + " can't save data '" + id + "'");
-
-      return -1;
-    }
+    return insert(source.openInputStream(), length);
   }
 
   /**
@@ -490,23 +437,10 @@ public class DataStore {
    * @param is the input stream to the serialized object
    * @param length the length object the serialized object
    */
-  public long save(HashKey id, long oldIndex, InputStream is, int length)
+  public long save(InputStream is, int length)
     throws IOException
   {
-    long dataIndex;
-    
-    // try updating first to avoid the exception for an insert
-    if ((dataIndex = updateExpires(id, oldIndex)) > 0) {
-      return dataIndex;
-    }
-    else if ((dataIndex = insert(id, is, length)) > 0) {
-      return dataIndex;
-    }
-    else {
-      log.warning(this + " can't save data '" + id + "'");
-
-      return dataIndex;
-    }
+    return insert(is, length);
   }
 
   /**
@@ -516,7 +450,7 @@ public class DataStore {
    * @param is the input stream to the serialized object
    * @param length the length object the serialized object
    */
-  private long insert(HashKey id, InputStream is, int length)
+  private long insert(InputStream is, int length)
   {
     if (is == null) {
       throw new NullPointerException();
@@ -528,15 +462,10 @@ public class DataStore {
       conn = getConnection();
 
       PreparedStatement stmt = conn.prepareInsert();
-      stmt.setBytes(1, id.getHash());
-      stmt.setLong(2, _expireTimeout + CurrentTime.getCurrentTime());
-      stmt.setBinaryStream(3, is, length);
+      stmt.setBinaryStream(1, is, length);
       
       int count = stmt.executeUpdate();
 
-      if (log.isLoggable(Level.FINER)) {
-        log.finer(this + " insert " + id + " length:" + length);
-      }
 
       // System.out.println("INSERT: " + id);
       
@@ -545,11 +474,15 @@ public class DataStore {
         
         ResultSet keys = stmt.getGeneratedKeys();
         if (keys.next()) {
-          long dataIndex = keys.getLong("_resin_oid");
+          long id = keys.getLong("id");
           
           // System.out.println("INDEX: " + dataIndex);
+          if (log.isLoggable(Level.FINER)) {
+            log.finer(this + " insert " + Long.toHexString(id)
+                      + " length:" + length);
+          }
           
-          return dataIndex;
+          return id;
         }
         
         throw new IllegalStateException();
@@ -577,55 +510,52 @@ public class DataStore {
   }
 
   /**
-   * Updates the expires time for the data.
+   * Removes the data, returning true on success
    *
-   * @param id the hash identifier for the data
-   *
-   * @return true if the database contains the id
+   * @param id the data's unique id.
    */
-  public long updateExpires(HashKey id, long oldIndex)
+  public boolean remove(long id)
   {
+    if (id <= 0) {
+      throw new IllegalStateException();
+    }
+
     DataConnection conn = null;
 
     try {
       conn = getConnection();
-      PreparedStatement pstmt = conn.prepareUpdateExpires();
 
-      long expireTime = _expireTimeout + CurrentTime.getCurrentTime();
+      PreparedStatement stmt = conn.prepareDelete();
+      stmt.setLong(1, id);
+      
+      int count = stmt.executeUpdate();
 
-      pstmt.setLong(1, expireTime);
-      pstmt.setBytes(2, id.getHash());
-
-      int count = pstmt.executeUpdate();
-
-      if (log.isLoggable(Level.FINER))
-        log.finer(this + " updateExpires " + id);
-
-      if (count > 0)
-        return oldIndex;
-      else
-        return 0;
-      /*
-    } catch (LockTimeoutException e) {
-      if (log.isLoggable(Level.FINER))
-        log.log(Level.FINER, e.toString(), e);
-      else
-        log.info(e.toString());
-      */
+      // System.out.println("INSERT: " + id);
+      
+      if (count > 0) {
+        _entryCount.addAndGet(-1);
+        
+        return true;
+      }
+      else {
+        return false;
+      }
     } catch (SQLException e) {
       e.printStackTrace();
-      log.log(Level.FINE, e.toString(), e);
+      log.finer(this + " " + e.toString());
+      log.log(Level.FINEST, e.toString(), e);
     } finally {
       if (conn != null)
         conn.close();
     }
 
-    return 0;
+    return false;
   }
 
   /**
    * Clears the expired data
    */
+  /*
   public void removeExpiredData()
   {
     validateDatabase();
@@ -662,11 +592,12 @@ public class DataStore {
         conn.close();
     }
   }
+  */
 
   /**
    * Update used expire times.
    */
-  private void updateExpire(long now)
+  private void deleteOrphans()
   {
     DataConnection conn = null;
     ResultSet rs = null;
@@ -676,26 +607,21 @@ public class DataStore {
     try {
       conn = getConnection();
 
-      PreparedStatement pstmt = conn.prepareUpdateAllExpires();
-
-      long expires = now + _expireTimeout;
+      PreparedStatement pstmt = conn.prepareSelectOrphan();
 
       rs = pstmt.executeQuery();
 
       try {
         while (rs.next()) {
+          long id= 0;
           long oid = rs.getLong(2);
           
-          if (oid > 0) {
-            rs.updateLong(1, expires);
-          }
-          else {
-            try {
-              notifyOrphan(rs.getBytes(3));
-            } catch (Exception e) {
-              e.printStackTrace();
-              log.log(Level.WARNING, e.toString(), e);
+          if (oid <= 0) {
+            if (log.isLoggable(Level.FINER)) {
+              log.finer(this + " delete orphan " + Long.toHexString(id));
             }
+            
+            rs.deleteRow();
           }
         }
       } finally {
@@ -717,6 +643,7 @@ public class DataStore {
     }
   }
   
+  /*
   private void notifyOrphan(byte []valueHash)
   {
     if (valueHash == null)
@@ -726,6 +653,7 @@ public class DataStore {
       listener.onOrphanValue(new HashKey(valueHash));
     }
   }
+  */
 
   /**
    * Clears the expired data
@@ -823,15 +751,11 @@ public class DataStore {
     return getClass().getSimpleName() +  "[" + _tableName + "]";
   }
 
-  class ExpireAlarm implements AlarmListener {
+  class DeleteAlarm implements AlarmListener {
     public void handleAlarm(Alarm alarm)
     {
       if (_dataSource != null) {
-        try {
-          removeExpiredData();
-        } finally {
-          alarm.queue(_expireTimeout / 2);
-        }
+        deleteOrphans();
       }
     }
   }
@@ -895,6 +819,7 @@ public class DataStore {
     private PreparedStatement _selectOrphanStatement;
     private PreparedStatement _updateExpiresStatement;
     private PreparedStatement _deleteTimeoutStatement;
+    private PreparedStatement _deleteStatement;
     private PreparedStatement _validateStatement;
 
     private PreparedStatement _countStatement;
@@ -933,6 +858,7 @@ public class DataStore {
       return _insertStatement;
     }
 
+    /*
     PreparedStatement prepareUpdateAllExpires()
       throws SQLException
     {
@@ -943,6 +869,7 @@ public class DataStore {
 
       return _updateAllExpiresStatement;
     }
+    */
 
     PreparedStatement prepareSelectOrphan()
       throws SQLException
@@ -953,6 +880,7 @@ public class DataStore {
       return _selectOrphanStatement;
     }
 
+    /*
     PreparedStatement prepareUpdateExpires()
       throws SQLException
     {
@@ -969,6 +897,16 @@ public class DataStore {
         _deleteTimeoutStatement = _conn.prepareStatement(_deleteTimeoutQuery);
 
       return _deleteTimeoutStatement;
+    }
+    */
+
+    PreparedStatement prepareDelete()
+      throws SQLException
+    {
+      if (_deleteStatement == null)
+        _deleteStatement = _conn.prepareStatement(_deleteQuery);
+
+      return _deleteStatement;
     }
 
     PreparedStatement prepareValidate()

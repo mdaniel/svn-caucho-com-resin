@@ -42,18 +42,17 @@ import java.util.logging.Logger;
 import javax.sql.DataSource;
 
 import com.caucho.db.jdbc.DataSourceImpl;
-import com.caucho.util.Alarm;
-import com.caucho.util.AlarmListener;
 import com.caucho.util.CurrentTime;
 import com.caucho.util.FreeList;
 import com.caucho.util.HashKey;
+import com.caucho.util.Hex;
 import com.caucho.util.JdbcUtil;
 
 
 /**
  * Manages backing for the cache map.
  */
-public class MnodeStore implements AlarmListener {
+public class MnodeStore {
   private static final Logger log
     = Logger.getLogger(MnodeStore.class.getName());
 
@@ -76,17 +75,17 @@ public class MnodeStore implements AlarmListener {
   private String _updateVersionQuery;
 
   private String _expireQuery;
+  private String _selectExpireQuery;
 
   private String _countQuery;
   private String _updatesSinceQuery;
   private String _remoteUpdatesSinceQuery;
+  private String _deleteQuery;
 
   private long _serverVersion;
   private long _startupLastUpdateTime;
   
   private AtomicLong _entryCount = new AtomicLong();
-  
-  private Alarm _alarm;
   
   // private long _expireReaperTimeout = 60 * 60 * 1000L;
   private long _expireReaperTimeout = 15 * 60 * 1000L;
@@ -210,6 +209,13 @@ public class MnodeStore implements AlarmListener {
                      + " WHERE update_time + 5 * access_timeout / 4 < ?"
                      + " OR update_time + update_timeout < ?");
 
+    _selectExpireQuery = ("SELECT id,value_index FROM " + _tableName
+                          + " WHERE update_time + 5 * access_timeout / 4 < ?"
+                          + " OR update_time + update_timeout < ?");
+
+    _deleteQuery = ("DELETE FROM " + _tableName
+                    + " WHERE id=?");
+
     _countQuery = "SELECT count(*) FROM " + _tableName;
 
     _updatesSinceQuery = ("SELECT id,value,value_index,value_length,cache_id,flags,item_version,update_time,access_timeout,update_timeout"
@@ -233,9 +239,6 @@ public class MnodeStore implements AlarmListener {
     if (initCount > 0) {
       _entryCount.set(initCount);
     }
-
-    _alarm = new Alarm(this);
-    handleAlarm(_alarm);
   }
 
   /**
@@ -350,11 +353,6 @@ public class MnodeStore implements AlarmListener {
 
   public void close()
   {
-    Alarm alarm = _alarm;
-    _alarm = null;
-
-    if (alarm != null)
-      alarm.close();
   }
 
   /**
@@ -715,27 +713,69 @@ public class MnodeStore implements AlarmListener {
   }
 
   /**
+   * Reads the object from the data store.
+   *
+   * @param id the hash identifier for the data
+   * @return true on successful load
+   */
+  public boolean remove(byte []key)
+  {
+    CacheMapConnection conn = null;
+    ResultSet rs = null;
+
+    try {
+      conn = getConnection();
+
+      PreparedStatement pstmt = conn.prepareDelete();
+      pstmt.setBytes(1, key);
+
+      int count = pstmt.executeUpdate();
+      
+      if (count > 0) {
+        _entryCount.addAndGet(-1);
+        
+        return true;
+      }
+      else {
+        return false;
+      }
+    } catch (SQLException e) {
+      log.log(Level.FINE, e.toString(), e);
+    } finally {
+      JdbcUtil.close(rs);
+      
+      if (conn != null)
+        conn.close();
+    }
+
+    return false;
+  }
+
+  /**
    * Clears the expired data
    */
-  public void removeExpiredData()
+  public ArrayList<ExpiredMnode> selectExpiredData()
   {
+    ArrayList<ExpiredMnode> expireList = new ArrayList<ExpiredMnode>();
+    
     CacheMapConnection conn = null;
  
     try {
       conn = getConnection();
-      PreparedStatement pstmt = conn.prepareExpire();
+      PreparedStatement pstmt = conn.prepareSelectExpire();
 
       long now = CurrentTime.getCurrentTime();
 
       pstmt.setLong(1, now);
       pstmt.setLong(2, now);
       
-      int count = pstmt.executeUpdate();
-
-      if (count > 0) {
-        log.finer(this + " expired " + count + " old data");
+      ResultSet rs = pstmt.executeQuery();
       
-        _entryCount.addAndGet(-count);
+      while (rs.next()) {
+        byte []key = rs.getBytes(1);
+        long dataId = rs.getLong(2);
+        
+        expireList.add(new ExpiredMnode(key, dataId));
       }
     } catch (Exception e) {
       e.printStackTrace();
@@ -743,6 +783,8 @@ public class MnodeStore implements AlarmListener {
     } finally {
       conn.close();
     }
+    
+    return expireList;
   }
 
   //
@@ -785,28 +827,10 @@ public class MnodeStore implements AlarmListener {
     return -1;
   }
 
-  @Override
-  public void handleAlarm(Alarm alarm)
-  {
-    if (_dataSource != null) {
-      try {
-        removeExpiredData();
-      } finally {
-        alarm.queue(_expireReaperTimeout);
-      }
-    }
-  }
-
   public void destroy()
   {
     _dataSource = null;
     _freeConn = null;
-
-    Alarm alarm = _alarm;
-    _alarm = null;
-
-    if (alarm != null)
-      alarm.dequeue();
   }
 
   private CacheMapConnection getConnection()
@@ -840,6 +864,8 @@ public class MnodeStore implements AlarmListener {
     private PreparedStatement _updateVersionStatement;
 
     private PreparedStatement _expireStatement;
+    private PreparedStatement _selectExpireStatement;
+    private PreparedStatement _deleteStatement;
 
     private PreparedStatement _countStatement;
 
@@ -904,6 +930,24 @@ public class MnodeStore implements AlarmListener {
       return _expireStatement;
     }
 
+    PreparedStatement prepareSelectExpire()
+      throws SQLException
+    {
+      if (_selectExpireStatement == null)
+        _selectExpireStatement = _conn.prepareStatement(_selectExpireQuery);
+
+      return _selectExpireStatement;
+    }
+
+    PreparedStatement prepareDelete()
+      throws SQLException
+    {
+      if (_deleteStatement == null)
+        _deleteStatement = _conn.prepareStatement(_deleteQuery);
+
+      return _deleteStatement;
+    }
+
     PreparedStatement prepareCount()
       throws SQLException
     {
@@ -923,6 +967,34 @@ public class MnodeStore implements AlarmListener {
         } catch (SQLException e) {
         }
       }
+    }
+  }
+  
+  public static final class ExpiredMnode {
+    private final byte []_key;
+    private final long _dataId;
+    
+    ExpiredMnode(byte []key, long dataId)
+    {
+      _key = key;
+      _dataId = dataId;
+    }
+    
+    public final byte []getKey()
+    {
+      return _key;
+    }
+    
+    public final long getDataId()
+    {
+      return _dataId;
+    }
+    
+    public String toString()
+    {
+      return (getClass().getSimpleName()
+          + "[" + Hex.toHex(_key, 0, 4)
+          + "," + Long.toHexString(_dataId) + "]");
     }
   }
 }

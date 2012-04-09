@@ -30,6 +30,7 @@
 package com.caucho.server.distcache;
 
 import java.io.IOException;
+import java.sql.PreparedStatement;
 import java.util.ArrayList;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -42,6 +43,11 @@ import com.caucho.env.distcache.CacheDataBacking;
 import com.caucho.env.health.HealthSystemFacade;
 import com.caucho.env.service.ResinSystem;
 import com.caucho.env.service.RootDirectorySystem;
+import com.caucho.server.distcache.MnodeStore.CacheMapConnection;
+import com.caucho.server.distcache.MnodeStore.ExpiredMnode;
+import com.caucho.util.Alarm;
+import com.caucho.util.AlarmListener;
+import com.caucho.util.CurrentTime;
 import com.caucho.util.HashKey;
 import com.caucho.vfs.Path;
 import com.caucho.vfs.StreamSource;
@@ -56,6 +62,9 @@ public class CacheDataBackingImpl implements CacheDataBacking {
   
   private DataStore _dataStore;
   private MnodeStore _mnodeStore;
+  
+  private Alarm _reaperAlarm = new Alarm(new ReaperListener());
+  private long _reaperTimeout = 3600 * 1000;
   
   public CacheDataBackingImpl()
   {
@@ -100,6 +109,7 @@ public class CacheDataBackingImpl implements CacheDataBacking {
                                      MnodeEntry mnodeUpdate,
                                      MnodeEntry oldEntryValue)
   {
+    System.out.println("INSERT:" + key);
     // MnodeUpdate mnodeUpdate = new MnodeUpdate(mnodeValue);
     
     if (oldEntryValue == null
@@ -135,35 +145,46 @@ public class CacheDataBackingImpl implements CacheDataBacking {
                                MnodeEntry oldEntryValue,
                                MnodeValue mnodeUpdate)
   {
+    boolean isSave = false;
+    
     if (oldEntryValue == null
         || oldEntryValue.isImplicitNull()
         || oldEntryValue == MnodeEntry.NULL) {
       if (_mnodeStore.insert(key, mnodeUpdate)) {
-        return true;
+        isSave = true;
       } else {
         log.fine(this + " db insert failed due to timing conflict"
                  + "(key=" + key + ", version=" + mnodeUpdate.getVersion() + ")");
       }
     } else {
       if (_mnodeStore.updateSave(key.getHash(), mnodeUpdate)) {
-        return true;
+        isSave = true;
       }
       else if (_mnodeStore.insert(key, mnodeUpdate)) {
-        return true;
+        isSave = true;
       }
       else {
         log.fine(this + " db update failed due to timing conflict"
                  + "(key=" + key + ", version=" + mnodeUpdate.getVersion() + ")");
       }
     }
+    
+    if (isSave && oldEntryValue != null) {
+      long oldDataId = oldEntryValue.getValueIndex();
+      
+      // XXX: create delete queue?
+      if (oldDataId > 0 && mnodeUpdate.getValueIndex() != oldDataId) {
+        _dataStore.remove(oldDataId);
+      }
+    }
 
-    return false;
+    return isSave;
   }
   
   @Override
-  public  MnodeEntry saveLocalUpdateTime(HashKey keyHash,
-                                         MnodeEntry mnodeValue,
-                                         MnodeEntry oldMnodeValue)
+  public MnodeEntry saveLocalUpdateTime(HashKey keyHash,
+                                        MnodeEntry mnodeValue,
+                                        MnodeEntry oldMnodeValue)
   {
     if (_mnodeStore.updateUpdateTime(keyHash,
                                      mnodeValue.getVersion(),
@@ -184,13 +205,13 @@ public class CacheDataBackingImpl implements CacheDataBacking {
                           WriteStream os)
     throws IOException
   {
-    return _dataStore.load(valueHash, valueIndex, os);
+    return _dataStore.load(valueIndex, os);
   }
 
   @Override
   public java.sql.Blob loadBlob(HashKey valueHash, long valueIndex)
   {
-    return _dataStore.loadBlob(valueHash, valueIndex);
+    return _dataStore.loadBlob(valueIndex);
   }
   
   @Override
@@ -198,16 +219,24 @@ public class CacheDataBackingImpl implements CacheDataBacking {
                        StreamSource source, int length)
     throws IOException
   {
-    return _dataStore.save(valueHash, source, length);
+    return _dataStore.save(source, length);
+  }
+  
+  public boolean removeData(long dataId)
+  {
+    return _dataStore.remove(dataId);
   }
 
   @Override
   public boolean isDataAvailable(HashKey valueKey, long valueIndex)
   {
+    return valueIndex > 0;
+    /*
     if (valueKey == null || valueKey == HashManager.NULL)
       return false;
 
     return _dataStore.isDataAvailable(valueKey, valueIndex);
+    */
   }
 
   /**
@@ -291,6 +320,8 @@ public class CacheDataBackingImpl implements CacheDataBacking {
     } catch (Exception e) {
       throw ConfigException.create(e);
     }
+    
+    _reaperAlarm.queue(0);
   }
   
   private DataSource createDataSource(Path dataDirectory, String serverId)
@@ -316,9 +347,36 @@ public class CacheDataBackingImpl implements CacheDataBacking {
       throw new RuntimeException(e);
     }
   }
+  
+
+  /**
+   * Clears the expired data
+   */
+  private void removeExpiredData()
+  {
+    for (ExpiredMnode data : _mnodeStore.selectExpiredData()) {
+      try {
+        removeData(data.getKey(), data.getDataId());
+      } catch (Exception e) {
+        log.log(Level.FINER, e.toString(), e);
+      }
+    }
+  }
+  private void removeData(byte []key, long dataId)
+  {
+    _mnodeStore.remove(key);
+    
+    if (dataId > 0) {
+      _dataStore.remove(dataId);
+    }
+  }
+
+  
   @Override
   public void close()
   {
+    _reaperAlarm.dequeue();
+
     MnodeStore mnodeStore = _mnodeStore;
     _mnodeStore = null;
     
@@ -330,5 +388,20 @@ public class CacheDataBackingImpl implements CacheDataBacking {
     
     if (dataStore != null)
       dataStore.destroy();
+  }
+  
+  class ReaperListener implements AlarmListener {
+    @Override
+    public void handleAlarm(Alarm alarm)
+    {
+      try {
+        removeExpiredData();
+      } finally {
+        if (_mnodeStore != null) {
+          alarm.queue(_reaperTimeout);
+        }
+      }
+    }
+    
   }
 }
