@@ -528,10 +528,10 @@ public class JavaValue extends ObjectValue
    * Converts to a java object.
    */
   @Override
-  public final Object toJavaObject(Env env, Class type)
+  public final Object toJavaObject(Env env, Class<?> type)
   {
     final Object object = _object;
-    final Class objectClass = _object.getClass();
+    final Class<?> objectClass = _object.getClass();
 
     if (type == objectClass || type.isAssignableFrom(objectClass)) {
       return object;
@@ -547,9 +547,9 @@ public class JavaValue extends ObjectValue
    * Converts to a java object.
    */
   @Override
-  public Object toJavaObjectNotNull(Env env, Class type)
+  public Object toJavaObjectNotNull(Env env, Class<?> type)
   {
-    Class objClass = _object.getClass();
+    Class<?> objClass = _object.getClass();
 
     if (objClass == type || type.isAssignableFrom(objClass)) {
       return _object;
@@ -565,10 +565,10 @@ public class JavaValue extends ObjectValue
    * Converts to a java object.
    */
   @Override
-  public Map toJavaMap(Env env, Class type)
+  public Map<?,?> toJavaMap(Env env, Class<?> type)
   {
     if (type.isAssignableFrom(_object.getClass())) {
-      return (Map) _object;
+      return (Map<?,?>) _object;
     } else {
       env.warning(L.l("Can't assign {0} to {1}",
                       _object.getClass().getName(), type.getName()));

@@ -27,29 +27,54 @@
  * @author Scott Ferguson
  */
 
-package com.caucho.quercus.lib;
+package com.caucho.quercus.lib.image;
 
 import com.caucho.quercus.QuercusException;
-import com.caucho.quercus.QuercusModuleException;
 import com.caucho.quercus.annotation.NotNull;
 import com.caucho.quercus.annotation.Optional;
 import com.caucho.quercus.annotation.ReturnNullAsFalse;
-import com.caucho.quercus.env.*;
+import com.caucho.quercus.env.ArrayValue;
+import com.caucho.quercus.env.ArrayValueImpl;
+import com.caucho.quercus.env.BooleanValue;
+import com.caucho.quercus.env.DoubleValue;
+import com.caucho.quercus.env.Env;
+import com.caucho.quercus.env.LongValue;
+import com.caucho.quercus.env.NullValue;
+import com.caucho.quercus.env.StringValue;
+import com.caucho.quercus.env.Value;
 import com.caucho.quercus.module.AbstractQuercusModule;
 import com.caucho.util.L10N;
-import com.caucho.util.LruCache;
 import com.caucho.vfs.Path;
 import com.caucho.vfs.ReadStream;
 import com.caucho.vfs.WriteStream;
 
 import javax.imageio.ImageIO;
-import java.awt.*;
+
+import java.awt.AlphaComposite;
+import java.awt.BasicStroke;
+import java.awt.Font;
+import java.awt.Graphics2D;
+import java.awt.Polygon;
+import java.awt.RenderingHints;
+import java.awt.Shape;
+import java.awt.Stroke;
 import java.awt.color.ColorSpace;
-import java.awt.geom.*;
-import java.awt.image.*;
-import java.io.*;
-import java.util.*;
-import java.util.logging.*;
+import java.awt.geom.AffineTransform;
+import java.awt.geom.Arc2D;
+import java.awt.geom.Ellipse2D;
+import java.awt.geom.Line2D;
+import java.awt.geom.Rectangle2D;
+import java.awt.image.BufferedImage;
+import java.awt.image.BufferedImageOp;
+import java.awt.image.ColorConvertOp;
+import java.awt.image.ConvolveOp;
+import java.awt.image.Kernel;
+import java.awt.image.RescaleOp;
+import java.io.IOException;
+import java.io.InputStream;
+import java.util.Iterator;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 /**
  * PHP image
@@ -105,9 +130,6 @@ public class ImageModule extends AbstractQuercusModule {
   public static final int IMG_FILTER_SELECTIVE_BLUR = 8;
   public static final int IMG_FILTER_MEAN_REMOVAL = 9;
   public static final int IMG_FILTER_SMOOTH = 10;
-
-  private static LruCache<StringValue,Font> _fontMap
-    = new LruCache<StringValue,Font>(4096);
 
   public String []getLoadedExtensions()
   {
@@ -168,9 +190,7 @@ public class ImageModule extends AbstractQuercusModule {
       if (! parseImageSize(is, info))
         return BooleanValue.FALSE;
     } catch (Exception e) {
-      log.log(Level.FINE, e.toString(), e);
-
-      e.printStackTrace();
+      env.warning(L.l(e.getMessage()));
 
       return BooleanValue.FALSE;
     } finally {
@@ -182,20 +202,28 @@ public class ImageModule extends AbstractQuercusModule {
     if (imageArray == null)
       imageArray = new ArrayValueImpl();
 
-    imageArray.put(LongValue.create(info._width));
-    imageArray.put(LongValue.create(info._height));
-    imageArray.put(LongValue.create(info._type));
-    imageArray.put(env.createString("width=\"" + info._width
-        + "\" height=\"" + info._height + "\""));
+    imageArray.put(LongValue.create(info.getWidth()));
+    imageArray.put(LongValue.create(info.getHeight()));
+    imageArray.put(LongValue.create(info.getType()));
 
-    if (info._bits >= 0)
-      imageArray.put(env.createString("bits"), LongValue.create(info._bits));
+    StringValue sb = env.createStringBuilder();
 
-    if (info._type == IMAGETYPE_JPEG)
+    sb.append("width=\"");
+    sb.append(info.getWidth());
+    sb.append("\" height=\"");
+    sb.append(info.getHeight());
+    sb.append("\"");
+
+    imageArray.put(sb);
+
+    if (info.getBits() >= 0)
+      imageArray.put(env.createString("bits"), LongValue.create(info.getBits()));
+
+    if (info.getType() == IMAGETYPE_JPEG)
       imageArray.put("channels", 3);
 
-    if (info._mime != null)
-      imageArray.put("mime", info._mime);
+    if (info.getMimeType() != null)
+      imageArray.put("mime", info.getMimeType());
 
     return imageArray;
   }
@@ -344,7 +372,7 @@ public class ImageModule extends AbstractQuercusModule {
                                   int x, int y, String c, int color)
   {
     Graphics2D g = image.getGraphics();
-    g.setColor(intToColor(color));
+    g.setColor(QuercusImage.intToColor(color));
     Font awtfont = image.getFont(font);
     int height = image.getGraphics().getFontMetrics(awtfont).getAscent();
     g.setFont(awtfont);
@@ -360,7 +388,7 @@ public class ImageModule extends AbstractQuercusModule {
   {
     Graphics2D g = (Graphics2D)image.getGraphics().create();
     g.rotate(-1 * Math.PI / 2);
-    g.setColor(intToColor(color));
+    g.setColor(QuercusImage.intToColor(color));
     Font awtfont = image.getFont(font);
     int height = image.getGraphics().getFontMetrics(awtfont).getAscent();
     g.setFont(awtfont);
@@ -550,10 +578,10 @@ public class ImageModule extends AbstractQuercusModule {
                                            ConvolveOp.EDGE_NO_OP,
                                            null);
 
-    BufferedImage bufferedImage =
-      convolveOp.filter(image._bufferedImage, null);
+    BufferedImage bufferedImage
+      = convolveOp.filter(image.getBufferedImage(), null);
 
-    image._bufferedImage.getGraphics().drawImage(bufferedImage, 1, 0, null);
+    image.getBufferedImage().getGraphics().drawImage(bufferedImage, 1, 0, null);
     return true;
   }
 
@@ -564,7 +592,7 @@ public class ImageModule extends AbstractQuercusModule {
   public static boolean imagecopy(QuercusImage dest, QuercusImage src,
                                   int dx, int dy, int sx, int sy, int w, int h)
   {
-    dest.getGraphics().drawImage(src._bufferedImage,
+    dest.getGraphics().drawImage(src.getBufferedImage(),
                                  dx, dy, dx + w, dy + h,
                                  sx, sy, sx + w, sy + h, null);
     return true;
@@ -580,7 +608,7 @@ public class ImageModule extends AbstractQuercusModule {
     BufferedImage rgba =
       new BufferedImage(dest.getWidth(), dest.getHeight(),
                         BufferedImage.TYPE_INT_ARGB);
-    rgba.getGraphics().drawImage(src._bufferedImage, 0, 0, null);
+    rgba.getGraphics().drawImage(src.getBufferedImage(), 0, 0, null);
     BufferedImageOp rescaleOp =
       new RescaleOp(new float[] { 1, 1, 1, ((float)pct) / 100 },
                     new float[] { 0, 0, 0, 0 },
@@ -605,7 +633,7 @@ public class ImageModule extends AbstractQuercusModule {
     BufferedImage rgba =
       new BufferedImage(dest.getWidth(), dest.getHeight(),
                         BufferedImage.TYPE_INT_ARGB);
-    rgba.getGraphics().drawImage(src._bufferedImage, 0, 0, null);
+    rgba.getGraphics().drawImage(src.getBufferedImage(), 0, 0, null);
     BufferedImageOp rescaleOp =
       new RescaleOp(new float[] { 1, 1, 1, ((float)pct) / 100 },
                     new float[] { 0, 0, 0, 0 },
@@ -615,7 +643,7 @@ public class ImageModule extends AbstractQuercusModule {
 
     ColorConvertOp colorConvertOp =
       new ColorConvertOp(ColorSpace.getInstance(ColorSpace.CS_GRAY), null);
-    colorConvertOp.filter(dest._bufferedImage, dest._bufferedImage);
+    colorConvertOp.filter(dest.getBufferedImage(), dest.getBufferedImage());
 
     Graphics2D g = (Graphics2D)dest.getGraphics().create();
     g.setComposite(AlphaComposite.SrcOver);
@@ -635,7 +663,7 @@ public class ImageModule extends AbstractQuercusModule {
     Graphics2D g = (Graphics2D)dest.getGraphics().create();
     g.setRenderingHint(RenderingHints.KEY_RENDERING,
                        RenderingHints.VALUE_RENDER_QUALITY);
-    g.drawImage(src._bufferedImage,
+    g.drawImage(src.getBufferedImage(),
                 dx, dy, dx + dw, dy + dh,
                 sx, sy, sx + sw, sy + sh, null);
     g.setRenderingHint(RenderingHints.KEY_RENDERING,
@@ -651,7 +679,7 @@ public class ImageModule extends AbstractQuercusModule {
                                          int dw, int dh, int sw, int sh)
   {
     Graphics2D g = (Graphics2D)dest.getGraphics().create();
-    g.drawImage(src._bufferedImage,
+    g.drawImage(src.getBufferedImage(),
                 dx, dy, dx + dw, dy + dh,
                 sx, sy, sx + sw, sy + sh, null);
     return true;
@@ -781,7 +809,7 @@ public class ImageModule extends AbstractQuercusModule {
   {
     Graphics2D g = image.getGraphics();
     Stroke stroke = g.getStroke();
-    g.setColor(intToColor(color));
+    g.setColor(QuercusImage.intToColor(color));
     g.setStroke(new BasicStroke(1, BasicStroke.JOIN_ROUND,
                                 BasicStroke.CAP_ROUND, 1,
                                 new float[] { 5, 5 }, 0));
@@ -807,8 +835,11 @@ public class ImageModule extends AbstractQuercusModule {
                                      double width, double height,
                                      int color)
   {
-    Shape shape = new Ellipse2D.Double(
-        cx - width / 2, cy - height / 2, width, height);
+    Shape shape = new Ellipse2D.Double(cx - width / 2,
+                                       cy - height / 2,
+                                       width,
+                                       height);
+
     image.stroke(shape, color);
     return true;
   }
@@ -1091,7 +1122,7 @@ public class ImageModule extends AbstractQuercusModule {
   {
     try {
       Graphics2D g = image.getGraphics();
-      g.setColor(intToColor(color));
+      g.setColor(QuercusImage.intToColor(color));
 
       Font font = image.getTrueTypeFont(env, fontFile);
 
@@ -1182,13 +1213,13 @@ public class ImageModule extends AbstractQuercusModule {
         WriteStream os = path.openWrite();
 
         try {
-          ImageIO.write(image._bufferedImage, "gif", os);
+          ImageIO.write(image.getBufferedImage(), "gif", os);
         } finally {
           os.close();
         }
       }
       else
-        ImageIO.write(image._bufferedImage, "gif", env.getOut());
+        ImageIO.write(image.getBufferedImage(), "gif", env.getOut());
 
       return true;
     }
@@ -1236,13 +1267,13 @@ public class ImageModule extends AbstractQuercusModule {
         WriteStream os = path.openWrite();
 
         try {
-          ImageIO.write(image._bufferedImage, "jpeg", os);
+          ImageIO.write(image.getBufferedImage(), "jpeg", os);
         } finally {
           os.close();
         }
       }
       else
-        ImageIO.write(image._bufferedImage, "jpeg", env.getOut());
+        ImageIO.write(image.getBufferedImage(), "jpeg", env.getOut());
 
       return true;
     }
@@ -1303,13 +1334,13 @@ public class ImageModule extends AbstractQuercusModule {
         WriteStream os = path.openWrite();
 
         try {
-          ImageIO.write(image._bufferedImage, "png", os);
+          ImageIO.write(image.getBufferedImage(), "png", os);
         } finally {
           os.close();
         }
       }
       else
-        ImageIO.write(image._bufferedImage, "png", env.getOut());
+        ImageIO.write(image.getBufferedImage(), "png", env.getOut());
 
       return true;
     }
@@ -1489,7 +1520,7 @@ public class ImageModule extends AbstractQuercusModule {
                                   int x, int y, String s, int color)
   {
     Graphics2D g = image.getGraphics();
-    g.setColor(intToColor(color));
+    g.setColor(QuercusImage.intToColor(color));
     Font awtfont = image.getFont(font);
     int height = image.getGraphics().getFontMetrics(awtfont).getAscent();
     g.setFont(awtfont);
@@ -1511,7 +1542,7 @@ public class ImageModule extends AbstractQuercusModule {
     g.translate(x, y);
     //    g.rotate(-1 * Math.PI / 2);
     g.rotate(-1 * Math.PI / 2);
-    g.setColor(intToColor(color));
+    g.setColor(QuercusImage.intToColor(color));
     Font awtfont = image.getFont(font);
     int height = image.getGraphics().getFontMetrics(awtfont).getAscent();
     g.setFont(awtfont);
@@ -1705,19 +1736,6 @@ public class ImageModule extends AbstractQuercusModule {
     return polygon;
   }
 
-  private static Color intToColor(int argb)
-  {
-    // don't forget: PHP alpha channel is only 7 bits
-    int alpha = argb >> 24;
-    alpha <<= 1;
-    alpha |= ((alpha & 0x2) >> 1);  // copy bit #2 to LSB
-
-    return new Color((argb >> 16) & 0xff,
-                     (argb >>  8) & 0xff,
-                     (argb >>  0) & 0xff,
-                     alpha);
-  }
-
   /**
    * Parses the image size from the file.
    */
@@ -1783,13 +1801,13 @@ public class ImageModule extends AbstractQuercusModule {
         int filter = is.read() & 0xff;
         int interlace = is.read() & 0xff;
 
-        info._width = width;
-        info._height = height;
-        info._type = IMAGETYPE_PNG;
+        info.setWidth(width);
+        info.setHeight(height);
+        info.setType(IMAGETYPE_PNG);
 
-        info._bits = depth;
+        info.setBits(depth);
 
-        info._mime = "image/png";
+        info.setMimeType("image/png");
 
         return true;
       }
@@ -1819,13 +1837,13 @@ public class ImageModule extends AbstractQuercusModule {
 
     int flags = is.read() & 0xff;
 
-    info._width = width;
-    info._height = height;
-    info._type = IMAGETYPE_GIF;
+    info.setWidth(width);
+    info.setHeight(height);
+    info.setType(IMAGETYPE_GIF);
 
-    info._bits = flags & 0x7;
+    info.setBits(flags & 0x7);
 
-    info._mime = "image/gif";
+    info.setMimeType("image/gif");
 
     return true;
   }
@@ -1857,13 +1875,13 @@ public class ImageModule extends AbstractQuercusModule {
         int height = 256 * is.read() + is.read();
         int width = 256 * is.read() + is.read();
 
-        info._width = width;
-        info._height = height;
-        info._type = IMAGETYPE_JPEG;
+        info.setWidth(width);
+        info.setHeight(height);
+        info.setType(IMAGETYPE_JPEG);
 
-        info._bits = bits;
+        info.setBits(bits);
 
-        info._mime = "image/jpeg";
+        info.setMimeType("image/jpeg");
 
         return true;
       }
@@ -1894,412 +1912,5 @@ public class ImageModule extends AbstractQuercusModule {
         | ((is.read() & 0xff) << 8)
         | ((is.read() & 0xff)));
   }
-
-  // Inner Classes ////////////////////////////////////////////////////////
-
-  static class ImageInfo {
-    int _width;
-    int _height;
-    int _type;
-
-    int _bits;
-
-    String _mime;
-  }
-
-  public static class QuercusImage extends ResourceValue {
-    private Font []_fontArray = new Font[6];
-
-    private int _width;
-    private int _height;
-    BufferedImage _bufferedImage;
-    private Graphics2D _graphics;
-    private boolean _isInterlace;
-
-    private BufferedImage _brush;
-    private int[] _style;
-    private int _thickness;
-
-    private boolean _isToFill = false;
-
-    public QuercusImage(int width, int height)
-    {
-      _width = width;
-      _height = height;
-      _bufferedImage = new BufferedImage(width, height,
-                                         BufferedImage.TYPE_INT_RGB);
-      _graphics = (Graphics2D)_bufferedImage.getGraphics();
-    }
-
-    public QuercusImage(InputStream inputStream)
-    {
-      try {
-        _bufferedImage = ImageIO.read(inputStream);
-        _width = _bufferedImage.getWidth(null);
-        _height = _bufferedImage.getHeight(null);
-        _graphics = (Graphics2D)_bufferedImage.getGraphics();
-      }
-      catch (IOException e) {
-        throw new QuercusException(e);
-      }
-    }
-
-    public QuercusImage(Env env, Path filename)
-    {
-      try {
-        _bufferedImage = ImageIO.read(filename.openRead());
-        _width = _bufferedImage.getWidth(null);
-        _height = _bufferedImage.getHeight(null);
-        _graphics = (Graphics2D)_bufferedImage.getGraphics();
-      }
-      catch (IOException e) {
-        throw new QuercusException(e);
-      }
-    }
-
-    public String toString()
-    {
-      return "resource(Image)";
-    }
-
-    public void setInterlace(boolean isInterlace)
-    {
-      _isInterlace = isInterlace;
-    }
-
-    public boolean isInterlace()
-    {
-      return _isInterlace;
-    }
-
-    public int getPixel(int x, int y)
-    {
-      return _bufferedImage.getRGB(x, y);
-    }
-
-    public void setPixel(int x, int y, int color)
-    {
-      _bufferedImage.setRGB(x, y, color);
-    }
-
-    public Graphics2D getGraphics()
-    {
-      return _graphics;
-    }
-
-    public Font getFont(int fontIndex)
-    {
-      if (fontIndex < 0)
-        fontIndex = 0;
-      else if (fontIndex > 5)
-        fontIndex = 5;
-
-      Font font = _fontArray[fontIndex];
-
-      if (font == null) {
-        switch (fontIndex) {
-          case 0: case 1:
-            font = new Font("sansserif", 0, 8);
-            break;
-          case 2:
-            font = new Font("sansserif", 0, 10);
-            break;
-          case 3:
-            font = new Font("sansserif", 0, 11);
-            break;
-          case 4:
-            font = new Font("sansserif", 0, 12);
-            break;
-          default:
-            font = new Font("sansserif", 0, 14);
-            break;
-        }
-
-        _fontArray[fontIndex] = font;
-      }
-
-      return font;
-    }
-
-    public Font getTrueTypeFont(Env env, StringValue fontPath)
-      throws FontFormatException,
-             IOException
-    {
-      Font font = _fontMap.get(fontPath);
-
-      if (font != null)
-        return font;
-
-      Path path = env.lookupPwd(fontPath);
-
-      if (path.canRead()) {
-        ReadStream is = path.openRead();
-
-        try {
-          font = Font.createFont(Font.TRUETYPE_FONT, is);
-        } finally {
-          is.close();
-        }
-
-        _fontMap.put(fontPath, font);
-
-        return font;
-      }
-
-      if (fontPath.length() > 0 && fontPath.charAt(0) == '/')
-        return null;
-
-      StringValue gdFontPathKey = env.createString("GDFONTPATH");
-
-      StringValue gdFontPath
-        = OptionsModule.getenv(env, gdFontPathKey).toStringValue();
-
-      int start = 0;
-      int len = gdFontPath.length();
-
-      while (start < len) {
-        int i = gdFontPath.indexOf(':', start);
-
-        if (i >= 0 && i + 1 < len && gdFontPath.charAt(i + 1) == ';') {
-          StringValue item = gdFontPath.substring(start, i);
-
-          path = env.lookupPwd(item);
-
-          start = i + 2;
-        }
-        else {
-          StringValue item = gdFontPath.substring(start);
-
-          path = env.lookupPwd(item);
-
-          start = len;
-        }
-
-        if (path.canRead()) {
-          ReadStream is = path.openRead();
-
-          try {
-            font = Font.createFont(Font.TRUETYPE_FONT, is);
-          } finally {
-            is.close();
-          }
-
-          _fontMap.put(fontPath, font);
-
-          return font;
-        }
-
-      }
-
-      return null;
-    }
-
-    public int getWidth()
-    {
-      return _bufferedImage.getWidth(null);
-    }
-
-    public int getHeight()
-    {
-      return _bufferedImage.getHeight(null);
-    }
-
-    public void fill(Shape shape, int color)
-    {
-      _graphics.setColor(intToColor(color));
-      _graphics.fill(shape);
-    }
-
-    public void stroke(Shape shape, int color)
-    {
-      switch(color)
-        {
-          case IMG_COLOR_STYLED:
-            strokeStyled(shape);
-            break;
-          case IMG_COLOR_BRUSHED:
-            strokeBrushed(shape);
-            break;
-          default:
-            _graphics.setColor(intToColor(color));
-            _graphics.setStroke(new BasicStroke(_thickness));
-            _graphics.draw(shape);
-            break;
-        }
-    }
-
-    private void strokeStyled(Shape shape)
-    {
-      for (int i = 0; i < _style.length; i++) {
-          _graphics.setColor(intToColor(_style[i]));
-          Stroke stroke =
-            new BasicStroke(_thickness,
-                            BasicStroke.JOIN_ROUND, BasicStroke.CAP_ROUND, 1,
-                new float[]{1, _style.length - 1},
-                            i);
-          _graphics.setStroke(stroke);
-          _graphics.draw(shape);
-        }
-    }
-
-    private void strokeBrushed(Shape shape)
-    {
-      // XXX: support "styled brushes" (see imagesetstyle() example on php.net)
-      Graphics2D g = _graphics;
-      FlatteningPathIterator fpi =
-        new FlatteningPathIterator(shape.getPathIterator(g.getTransform()), 1);
-      float[] floats = new float[6];
-      fpi.currentSegment(floats);
-      float last_x = floats[0];
-      float last_y = floats[1];
-      while (! fpi.isDone())
-        {
-          fpi.currentSegment(floats);
-          int distance = (int) Math.sqrt(
-              (floats[0] - last_x) * (floats[0] - last_x)
-                  + (floats[1] - last_y) * (floats[1] - last_y));
-          if (distance <= 1) distance = 1;
-          for (int i = 1; i <= distance; i++)
-            {
-              int x = (int)
-                  (floats[0] * i + last_x * (distance - i)) / distance;
-              x -= _brush.getWidth() / 2;
-              int y = (int)
-                  (floats[1] * i + last_y * (distance - i)) / distance;
-              y -= _brush.getHeight() / 2;
-              g.drawImage(_brush, x, y, null);
-            }
-          last_x = floats[0];
-          last_y = floats[1];
-          fpi.next();
-        }
-    }
-
-    public void setThickness(int thickness)
-    {
-      _style = null;
-      _thickness = thickness;
-    }
-
-    public void setStyle(Env env, ArrayValue colors)
-    {
-      _style = new int[colors.getSize()];
-
-      Iterator<Value> iter = colors.getValueIterator(env);
-
-      for (int i = 0; i < _style.length; i++) {
-            _style[i] = iter.next().toInt();
-          }
-    }
-
-    public void setBrush(QuercusImage image)
-    {
-      _brush = image._bufferedImage;
-    }
-
-    public BufferedImage getBrush()
-    {
-      return _brush;
-    }
-
-    public void setToFill(boolean isToFill)
-    {
-      _isToFill = isToFill;
-    }
-
-    public long allocateColor(int r, int g, int b)
-    {
-      int color = ((0x7f << 24)
-          | ((r & 0xff) << 16)
-          | ((g & 0xff) <<  8)
-          | ((b & 0xff) <<  0));
-
-      if (_isToFill) {
-        _isToFill = false;
-        flood(0, 0, color);
-      }
-
-      return color;
-    }
-
-    public void flood(int x, int y, int color)
-    {
-      flood(x, y, color, 0, false);
-    }
-
-    public void flood(int x, int y, int color, int border)
-    {
-      flood(x, y, color, border, true);
-    }
-
-    private void flood(
-        int startx, int starty, int color, int border, boolean useBorder)
-    {
-      java.util.Queue<Integer> xq = new LinkedList<Integer>();
-      java.util.Queue<Integer> yq = new LinkedList<Integer>();
-      xq.add(startx);
-      yq.add(starty);
-      color &= 0x00ffffff;
-      border &= 0x00ffffff;
-
-      int height = getHeight();
-
-      while (xq.size() > 0)
-      {
-        int x = xq.poll();
-        int y = yq.poll();
-        int p = (getPixel(x, y) & 0x00ffffff);
-        if (useBorder ? (p == border || p == color) : (p != 0)) continue;
-        setPixel(x, y, color);
-
-        for (int i = x - 1; i >= 0; i--)
-        {
-          p = (getPixel(i, y) & 0x00ffffff);
-          if (useBorder ? (p == border || p == color) : (p != 0)) break;
-          setPixel(i, y, color);
-
-          if (y + 1 < height) {
-            xq.add(i);
-            yq.add(y + 1);
-          }
-
-          if (y - 1 >= 0) {
-            xq.add(i);
-            yq.add(y - 1);
-          }
-        }
-
-        for (int i = x + 1; i < getWidth(); i++)
-        {
-          p = (getPixel(i, y) & 0x00ffffff);
-          if (useBorder ? (p == border || p == color) : (p != 0)) break;
-          setPixel(i, y, color);
-
-          if (y + 1 < height) {
-            xq.add(i);
-            yq.add(y + 1);
-          }
-
-          if (y - 1 >= 0) {
-            xq.add(i);
-            yq.add(y - 1);
-          }
-        }
-
-        if (y + 1 < height) {
-          xq.add(x);
-          yq.add(y + 1);
-        }
-
-        if (y - 1 >= 0) {
-          xq.add(x);
-          yq.add(y - 1);
-        }
-      }
-    }
-
-  }
-
-
 }
 

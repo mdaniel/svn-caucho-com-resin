@@ -106,12 +106,12 @@ abstract public class JavaInvoker
                      Method method)
   {
     Name nameAnn = method.getAnnotation(Name.class);
-    
+
     if (nameAnn != null)
       _name = nameAnn.value();
     else
       _name = method.getName();
-    
+
     _moduleContext = moduleContext;
     _method = method;
     _param = method.getParameterTypes();
@@ -133,7 +133,7 @@ abstract public class JavaInvoker
 
       MarshalFactory marshalFactory = _moduleContext.getMarshalFactory();
       ExprFactory exprFactory = _moduleContext.getExprFactory();
-      
+
       Annotation [][]paramAnn = getParamAnnImpl();
       Annotation []methodAnn = getMethodAnn();
 
@@ -200,13 +200,13 @@ abstract public class JavaInvoker
           boolean isPassThru = false;
 
           boolean isNotNull = false;
-          
+
           boolean isExpectString = false;
           boolean isExpectNumeric = false;
           boolean isExpectBoolean = false;
 
           Class<?> argType = _param[i + envOffset];
-          
+
           for (Annotation ann : paramAnn[i + envOffset]) {
             if (Optional.class.isAssignableFrom(ann.annotationType())) {
               _minArgumentLength--;
@@ -228,14 +228,14 @@ abstract public class JavaInvoker
                 throw new QuercusException(
                   L.l("reference must be Value or Var for {0}", _name));
               }
-              
+
               isReference = true;
             } else if (PassThru.class.isAssignableFrom(ann.annotationType())) {
               if (! Value.class.equals(argType)) {
                 throw new QuercusException(
                   L.l("pass thru must be Value for {0}", _name));
               }
-              
+
               isPassThru = true;
             } else if (NotNull.class.isAssignableFrom(ann.annotationType())) {
               isNotNull = true;
@@ -245,9 +245,9 @@ abstract public class JavaInvoker
                   "Expect type must be Value for {0}",
                   _name));
               }
-              
+
               Expect.Type type = ((Expect) ann).type();
-              
+
               if (type == Expect.Type.STRING) {
                 isExpectString = true;
               }
@@ -448,10 +448,10 @@ abstract public class JavaInvoker
   {
     if (! _isInit)
       init();
-    
+
     return getParamAnnImpl();
   }
-  
+
   private Annotation [][]getParamAnnImpl()
   {
     if (_paramAnn != null)
@@ -625,6 +625,16 @@ abstract public class JavaInvoker
   }
 
   @Override
+  public Value callMethodRef(Env env,
+                             QuercusClass qClass,
+                             Value qThis,
+                             Value []args)
+  {
+    // php/3cl3
+    return callMethod(env, qClass, qThis, args);
+  }
+
+  @Override
   public Value callMethod(Env env,
                           QuercusClass qClass,
                           Value qThis,
@@ -651,7 +661,7 @@ abstract public class JavaInvoker
     else if (! isStatic() && ! isConstructor()) {
       obj = qThis != null ? qThis.toJavaObject() : null;
     }
-    
+
     String warnMessage = null;
     for (int i = 0; i < _marshalArgs.length; i++) {
       if (i < args.length && args[i] != null)

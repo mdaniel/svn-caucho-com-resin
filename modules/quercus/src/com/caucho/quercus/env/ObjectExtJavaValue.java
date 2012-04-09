@@ -30,8 +30,6 @@
 package com.caucho.quercus.env;
 
 import com.caucho.quercus.QuercusException;
-import com.caucho.quercus.env.ObjectExtValue.Entry;
-import com.caucho.quercus.env.ObjectExtValue.EntryIterator;
 import com.caucho.quercus.program.JavaClassDef;
 import com.caucho.vfs.WriteStream;
 
@@ -40,7 +38,6 @@ import java.io.Serializable;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.util.IdentityHashMap;
-import java.util.Iterator;
 
 /**
  * Represents a PHP object which extends a Java value.

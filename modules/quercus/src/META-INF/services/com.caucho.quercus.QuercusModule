@@ -15,7 +15,7 @@ com.caucho.quercus.lib.gettext.GettextModule
 com.caucho.quercus.lib.HashModule
 com.caucho.quercus.lib.HtmlModule
 com.caucho.quercus.lib.HttpModule
-com.caucho.quercus.lib.ImageModule
+com.caucho.quercus.lib.image.ImageModule
 com.caucho.quercus.lib.JavaModule
 com.caucho.quercus.lib.json.JsonModule
 com.caucho.quercus.lib.mail.MailModule

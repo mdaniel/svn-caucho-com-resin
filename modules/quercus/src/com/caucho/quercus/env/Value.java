@@ -657,7 +657,7 @@ abstract public class Value implements java.io.Serializable
   /**
    * Converts to a java object.
    */
-  public Object toJavaObject(Env env, Class type)
+  public Object toJavaObject(Env env, Class<?> type)
   {
     env.warning(L.l("Can't convert {0} to Java {1}",
                     getClass().getName(), type.getName()));
@@ -668,7 +668,7 @@ abstract public class Value implements java.io.Serializable
   /**
    * Converts to a java object.
    */
-  public Object toJavaObjectNotNull(Env env, Class type)
+  public Object toJavaObjectNotNull(Env env, Class<?> type)
   {
     env.warning(L.l("Can't convert {0} to Java {1}",
                     getClass().getName(), type.getName()));
@@ -2733,7 +2733,7 @@ abstract public class Value implements java.io.Serializable
    * Takes the values of this array, unmarshalls them to objects of type
    * <i>elementType</i>, and puts them in a java array.
    */
-  public Object valuesToArray(Env env, Class elementType)
+  public Object valuesToArray(Env env, Class<?> elementType)
   {
     env.error(L.l("Can't assign {0} with type {1} to {2}[]",
                   this,

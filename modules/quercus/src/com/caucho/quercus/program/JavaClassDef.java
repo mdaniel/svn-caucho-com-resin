@@ -134,7 +134,7 @@ public class JavaClassDef extends ClassDef {
 
   private String _extension;
 
-  public JavaClassDef(ModuleContext moduleContext, String name, Class type)
+  public JavaClassDef(ModuleContext moduleContext, String name, Class<?> type)
   {
     super(null, name, null, new String[] {});
 
@@ -153,7 +153,7 @@ public class JavaClassDef extends ClassDef {
 
   public JavaClassDef(ModuleContext moduleContext,
                       String name,
-                      Class type,
+                      Class<?> type,
                       String extension)
   {
     this(moduleContext, name, type);
@@ -163,7 +163,7 @@ public class JavaClassDef extends ClassDef {
     moduleContext.addExtensionClass(extension, name);
   }
 
-  private void fillInstanceOfSet(Class type, boolean isTop)
+  private void fillInstanceOfSet(Class<?> type, boolean isTop)
   {
     if (type == null)
       return;
@@ -181,9 +181,9 @@ public class JavaClassDef extends ClassDef {
 
     fillInstanceOfSet(type.getSuperclass(), false);
 
-    Class []ifaceList = type.getInterfaces();
+    Class<?> []ifaceList = type.getInterfaces();
     if (ifaceList != null) {
-      for (Class iface : ifaceList)
+      for (Class<?> iface : ifaceList)
         fillInstanceOfSet(iface, false);
     }
   }
@@ -312,7 +312,7 @@ public class JavaClassDef extends ClassDef {
     addInterfaces(interfaceSet, type.getSuperclass(), false);
   }
 
-  private boolean hasInterface(String name, Class type)
+  private boolean hasInterface(String name, Class<?> type)
   {
     Class<?>[] interfaces = type.getInterfaces();
 
@@ -364,7 +364,7 @@ public class JavaClassDef extends ClassDef {
   public JavaClassDef getComponentDef()
   {
     if (_componentDef == null) {
-      Class compType = getType().getComponentType();
+      Class<?> compType = getType().getComponentType();
       _componentDef = _moduleContext.getJavaClassDefinition(compType.getName());
     }
 
@@ -863,14 +863,14 @@ public class JavaClassDef extends ClassDef {
     }
   }
 
-  private void initInterfaceList(Class type)
+  private void initInterfaceList(Class<?> type)
   {
-    Class[] ifaces = type.getInterfaces();
+    Class<?>[] ifaces = type.getInterfaces();
 
     if (ifaces == null)
       return;
 
-    for (Class iface : ifaces) {
+    for (Class<?> iface : ifaces) {
       JavaClassDef javaClassDef = _moduleContext.getJavaClassDefinition(iface);
 
       if (javaClassDef != null)
@@ -914,7 +914,7 @@ public class JavaClassDef extends ClassDef {
     */
 
     if (_cons == null) {
-      Constructor []cons = _type.getConstructors();
+      Constructor<?> []cons = _type.getConstructors();
 
       if (cons.length > 0) {
         int i;
@@ -947,7 +947,7 @@ public class JavaClassDef extends ClassDef {
     introspectAnnotations(_type);
   }
 
-  private void introspectAnnotations(Class type)
+  private void introspectAnnotations(Class<?> type)
   {
     try {
       if (type == null)
@@ -963,9 +963,9 @@ public class JavaClassDef extends ClassDef {
       // this
       for (Annotation annotation : type.getAnnotations()) {
         if (annotation.annotationType() == Delegates.class) {
-          Class[] delegateClasses = ((Delegates) annotation).value();
+          Class<?>[] delegateClasses = ((Delegates) annotation).value();
 
-          for (Class cl : delegateClasses) {
+          for (Class<?> cl : delegateClasses) {
             boolean isDelegate = addDelegate(cl);
 
             if (! isDelegate)
@@ -986,7 +986,7 @@ public class JavaClassDef extends ClassDef {
     }
   }
 
-  private boolean addDelegate(Class cl)
+  private boolean addDelegate(Class<?> cl)
     throws InstantiationException, IllegalAccessException
   {
     boolean isDelegate = false;
@@ -1428,8 +1428,9 @@ public class JavaClassDef extends ClassDef {
       getIterator(Env env, ObjectValue qThis)
     {
       try {
-        Iterator iterator
-          = (Iterator) _iteratorMethod.invoke(qThis.toJavaObject());
+        Object javaObj = qThis.toJavaObject();
+
+        Iterator<?> iterator = (Iterator<?>) _iteratorMethod.invoke(javaObj);
 
         return new JavaIterator(env, iterator);
       } catch (InvocationTargetException e) {
@@ -1442,8 +1443,9 @@ public class JavaClassDef extends ClassDef {
     public Iterator<Value> getKeyIterator(Env env, ObjectValue qThis)
     {
       try {
-        Iterator iterator =
-          (Iterator) _iteratorMethod.invoke(qThis.toJavaObject());
+        Object javaObj = qThis.toJavaObject();
+
+        Iterator<?> iterator = (Iterator<?>) _iteratorMethod.invoke(javaObj);
 
         return new JavaKeyIterator(iterator);
       } catch (InvocationTargetException e) {
@@ -1456,8 +1458,9 @@ public class JavaClassDef extends ClassDef {
     public Iterator<Value> getValueIterator(Env env, ObjectValue qThis)
     {
       try {
-        Iterator iterator =
-          (Iterator) _iteratorMethod.invoke(qThis.toJavaObject());
+        Object javaObj = qThis.toJavaObject();
+
+        Iterator<?> iterator = (Iterator<?>) _iteratorMethod.invoke(javaObj);
 
         return new JavaValueIterator(env, iterator);
       } catch (InvocationTargetException e) {
@@ -1471,10 +1474,10 @@ public class JavaClassDef extends ClassDef {
   private class JavaKeyIterator
     implements Iterator<Value>
   {
-    private Iterator _iterator;
+    private Iterator<?> _iterator;
     private int _index;
 
-    public JavaKeyIterator(Iterator iterator)
+    public JavaKeyIterator(Iterator<?> iterator)
     {
       _iterator = iterator;
     }
@@ -1501,9 +1504,9 @@ public class JavaClassDef extends ClassDef {
     implements Iterator<Value>
   {
     private Env _env;
-    private Iterator _iterator;
+    private Iterator<?> _iterator;
 
-    public JavaValueIterator(Env env, Iterator iterator)
+    public JavaValueIterator(Env env, Iterator<?> iterator)
     {
       _env = env;
       _iterator = iterator;
@@ -1532,11 +1535,11 @@ public class JavaClassDef extends ClassDef {
     implements Iterator<Map.Entry<Value, Value>>
   {
     private Env _env;
-    private Iterator _iterator;
+    private Iterator<?> _iterator;
 
     private int _index;
 
-    public JavaIterator(Env env, Iterator iterator)
+    public JavaIterator(Env env, Iterator<?> iterator)
     {
       _env = env;
       _iterator = iterator;

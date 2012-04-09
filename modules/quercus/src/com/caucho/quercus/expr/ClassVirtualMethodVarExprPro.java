@@ -9,7 +9,6 @@ package com.caucho.quercus.expr;
 import com.caucho.quercus.Location;
 import com.caucho.quercus.gen.AnalyzeInfo;
 import com.caucho.quercus.gen.PhpWriter;
-import com.caucho.quercus.env.MethodMap;
 
 import java.io.IOException;
 import java.util.ArrayList;
@@ -22,8 +21,8 @@ public class ClassVirtualMethodVarExprPro
   implements ExprPro
 {
   public ClassVirtualMethodVarExprPro(Location location,
-                                                 Expr nameExpr,
-                                                 ArrayList<Expr> args)
+                                      Expr nameExpr,
+                                      ArrayList<Expr> args)
   {
     super(location, nameExpr, args);
   }
@@ -39,30 +38,30 @@ public class ClassVirtualMethodVarExprPro
        */
       public ExprType analyze(AnalyzeInfo info)
       {
-	_isMethod = info.getFunction().isMethod();
-	
-	ExprPro name = (ExprPro) _methodName;
-	  
-	ExprGenerator nameGen = name.getGenerator();
-	nameGen.analyze(info);
-    
-	for (int i = 0; i < _args.length; i++) {
-	  ExprPro arg = (ExprPro) _args[i];
-	  
-	  ExprGenerator argGen = arg.getGenerator();
-	  argGen.analyze(info);
+        _isMethod = info.getFunction().isMethod();
 
-	  // php/344y
-	  argGen.analyzeSetReference(info);
-	  argGen.analyzeSetModified(info);
-	}
+        ExprPro name = (ExprPro) _methodName;
 
-	return ExprType.VALUE;
+        ExprGenerator nameGen = name.getGenerator();
+        nameGen.analyze(info);
+
+        for (int i = 0; i < _args.length; i++) {
+          ExprPro arg = (ExprPro) _args[i];
+
+          ExprGenerator argGen = arg.getGenerator();
+          argGen.analyze(info);
+
+          // php/344y
+          argGen.analyzeSetReference(info);
+          argGen.analyzeSetModified(info);
+        }
+
+        return ExprType.VALUE;
       }
 
       private boolean isMethod()
       {
-	return _isMethod;
+        return _isMethod;
       }
 
       /**
@@ -71,9 +70,9 @@ public class ClassVirtualMethodVarExprPro
        * @param out the writer to the Java source code.
        */
       public void generate(PhpWriter out)
-	throws IOException
+        throws IOException
       {
-	generate(out, false);
+        generate(out, false);
       }
 
       /**
@@ -82,9 +81,9 @@ public class ClassVirtualMethodVarExprPro
        * @param out the writer to the Java source code.
        */
       public void generateRef(PhpWriter out)
-	throws IOException
+        throws IOException
       {
-	generate(out, true);
+        generate(out, true);
       }
 
       /**
@@ -111,7 +110,7 @@ public class ClassVirtualMethodVarExprPro
         else
           out.print("NullThisValue.NULL");
           */
-        
+
         out.print("q_this");
 
         out.print(", ");
@@ -121,21 +120,21 @@ public class ClassVirtualMethodVarExprPro
 
         for (int i = 0; i < args.length; i++) {
           ExprPro arg = (ExprPro) args[i];
-              
+
           if (i != 0)
             out.print(", ");
-          
+
           arg.getGenerator().generateArg(out, true);
         }
-          
+
         out.print("})");
       }
 
       public void generateCopy(PhpWriter out)
-	throws IOException
+        throws IOException
       {
-	generate(out);
-	out.print(".copyReturn()"); // php/3a5y
+        generate(out);
+        out.print(".copyReturn()"); // php/3a5y
       }
     };
 }

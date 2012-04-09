@@ -64,12 +64,14 @@ public class QuercusCompiler
     return _workDir;
   }
 
-  public void setRootDir(Path path) {
+  public void setRootDir(Path path)
+  {
     _rootDir = path;
     _quercus.setPwd(path);
   }
 
-  public Path getRootDir() {
+  public Path getRootDir()
+  {
     return _rootDir;
   }
 
@@ -88,15 +90,18 @@ public class QuercusCompiler
     _includePattern = Pattern.compile(pattern);
   }
 
-  public void addCompilePath(String path) {
+  public void addCompilePath(String path)
+  {
     _pathList.add(path);
   }
 
-  public ArrayList<String> getCompilePathList() {
+  public ArrayList<String> getCompilePathList()
+  {
     return _pathList;
   }
 
-  public void setVerbose() {
+  public void setVerbose()
+  {
     _loggingLevel = Level.INFO;
   }
 
@@ -121,7 +126,8 @@ public class QuercusCompiler
     ArrayList<CompileItem> brokenItems = compiler.compile();
   }
 
-  private static void printUsage() {
+  private static void printUsage()
+  {
     System.out.println("usage: java -Xmx1024m " + QuercusCompiler.class.getName() + " [flags] php1 php2 ...");
     System.out.println(" -output-dir      : the directory to use for output (default /tmp/<user>/WEB-INF/classes).");
     System.out.println(" -app-dir         : public root directory (/) of the local files (default common directory).");
@@ -199,7 +205,8 @@ public class QuercusCompiler
     return rootPath;
   }
 
-  private static Path getCommonPath(Path dir0, Path dir1) {
+  private static Path getCommonPath(Path dir0, Path dir1)
+  {
     String s0 = dir0.getNativePath();
     String s1 = dir1.getNativePath();
 
@@ -487,7 +494,8 @@ public class QuercusCompiler
     Class<?> pageClass = gen.preload(item.getProgram());
   }
 
-  static class CompileItem {
+  static class CompileItem
+  {
     private QuercusProgram _program;
     private Path _path;
     private String []_javaFiles;
