@@ -399,6 +399,11 @@ public class DataStore {
 
       if (rs.next()) {
         InputStream is = rs.getBinaryStream(1);
+        
+        if (is == null) {
+          System.out.println("ID: " + id);
+          return null;
+        }
 
         InputStream dataInputStream = new DataInputStream(conn, rs, is);
         conn = null;

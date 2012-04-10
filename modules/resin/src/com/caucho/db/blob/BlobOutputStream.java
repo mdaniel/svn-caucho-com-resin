@@ -160,8 +160,9 @@ public class BlobOutputStream extends OutputStream {
 
       sublen = is.read(_buffer, _offset, sublen);
 
-      if (sublen < 0)
+      if (sublen <= 0) {
         return;
+      }
 
       _offset += sublen;
     }
