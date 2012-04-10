@@ -1001,6 +1001,8 @@ public class TcpSocketLink extends AbstractSocketLink
   RequestState handleKeepaliveTimeoutTask()
     throws IOException
   {
+    _state = _state.toActiveNoKeepalive(this);
+    
     close();
     
     // return handleAcceptTask();

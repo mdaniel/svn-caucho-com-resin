@@ -63,7 +63,7 @@ implements LockableStream, SendfileOutputStream
   private static String _sysNewline;
   private static byte []_sysNewlineBytes;
 
-  private static final int _charsLength = 256;
+  private static final int CHARS_LENGTH = 256;
 
   static {
     _sysNewline = Path.getNewlineString();
@@ -79,7 +79,7 @@ implements LockableStream, SendfileOutputStream
   private StreamImpl _source;
   private long _position;
 
-  private char []_chars;
+  private final char []_chars = new char[CHARS_LENGTH];
   private byte []_bytes;
 
   private EncodingWriter _writeEncoding;
@@ -712,13 +712,15 @@ implements LockableStream, SendfileOutputStream
     int offset = 0;
 
     char []chars = _chars;
+    /*
     if (chars == null) {
-      _chars = new char[_charsLength];
+      _chars = new char[CHARS_LENGTH];
       chars = _chars;
     }
+    */
 
     while (length > 0) {
-      int sublen = Math.min(length, _charsLength);
+      int sublen = Math.min(length, CHARS_LENGTH);
 
       string.getChars(offset, offset + sublen, chars, 0);
 
@@ -742,13 +744,15 @@ implements LockableStream, SendfileOutputStream
     int offset = 0;
 
     char []chars = _chars;
+    /*
     if (chars == null) {
-      _chars = new char[_charsLength];
+      _chars = new char[CHARS_LENGTH];
       chars = _chars;
     }
+    */
 
     while (length > 0) {
-      int sublen = Math.min(length, _charsLength);
+      int sublen = Math.min(length, CHARS_LENGTH);
 
       string.getChars(offset, offset + sublen, chars, 0);
 
@@ -783,12 +787,14 @@ implements LockableStream, SendfileOutputStream
     int length = string.length();
     int offset = 0;
     
-    int charsLength = _charsLength;
+    int charsLength = CHARS_LENGTH;
     char []chars = _chars;
+    /*
     if (chars == null) {
       _chars = new char[charsLength];
       chars = _chars;
     }
+    */
     
     while (length > 0) {
       int sublen = Math.min(charsLength, writeBuffer.length - writeLength);
@@ -873,12 +879,14 @@ implements LockableStream, SendfileOutputStream
     if (string == null)
       string = "null";
 
-    int charsLength = _charsLength;
+    int charsLength = CHARS_LENGTH;
     char []chars = _chars;
+    /*
     if (chars == null) {
       _chars = new char[charsLength];
       chars = _chars;
     }
+    */
 
     while (length > 0) {
       int sublen = Math.min(length, charsLength);
@@ -1225,13 +1233,15 @@ implements LockableStream, SendfileOutputStream
       return;
 
     char []chars = _chars;
+    /*
     if (chars == null) {
-      _chars = new char[_charsLength];
+      _chars = new char[CHARS_LENGTH];
       chars = _chars;
     }
+    */
 
     int len;
-    while ((len = reader.read(chars, 0, _charsLength)) > 0) {
+    while ((len = reader.read(chars, 0, CHARS_LENGTH)) > 0) {
       print(chars, 0, len);
     }
   }
