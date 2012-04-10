@@ -30,6 +30,7 @@
 package com.caucho.jca;
 
 import com.caucho.log.Log;
+import com.caucho.sql.ManagedConnectionImpl;
 import com.caucho.util.Alarm;
 import com.caucho.util.L10N;
 
@@ -95,6 +96,8 @@ class PoolItem implements ConnectionEventListener, XAResource {
     
   // true if in local transaction
   private boolean _isLocalTransaction;
+
+  private boolean _isPastActiveTimeout;
 
   private IllegalStateException _allocationStackTrace;
 
@@ -297,6 +300,8 @@ class PoolItem implements ConnectionEventListener, XAResource {
     else if (isActive &&
 	     0 < maxActiveTime && _poolEventTime + maxActiveTime < now) {
       isDead = true;
+      _isPastActiveTimeout = true;
+
       log.warning("closing pool item from active timeout:" + this);
     }
 
@@ -307,7 +312,12 @@ class PoolItem implements ConnectionEventListener, XAResource {
     else
       return true;
   }
-  
+
+  public boolean isPastActiveTimeout()
+  {
+    return _isPastActiveTimeout;
+  }
+
   /**
    * Use the item only if it's already been used for the current transaction
    * and is available.  allocateXA returns the same connection for the
@@ -327,7 +337,6 @@ class PoolItem implements ConnectionEventListener, XAResource {
    *
    * <p>Nested connections are not reused.
    *
-   * @param xid the current transaction id
    *
    * @return true if the pool item has been allocated
    */
@@ -1105,6 +1114,12 @@ class PoolItem implements ConnectionEventListener, XAResource {
 
     if (mConn == null)
       return;
+
+    if (! _isPastActiveTimeout) {
+    }
+    else if (ManagedConnectionImpl.class.isAssignableFrom(mConn.getClass())) {
+      ((ManagedConnectionImpl) mConn).setPastActiveTime(_isPastActiveTimeout);
+    }
 
     UserPoolItem userItem = _shareHead;
 

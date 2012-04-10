@@ -121,6 +121,8 @@ public class ManagedConnectionImpl
   // old value for getTypeMap
   private Map _typeMap;
 
+  private boolean _isPastActiveTime;
+
   ManagedConnectionImpl(ManagedFactoryImpl factory,
 			DriverConfig driver,
 			ConnectionConfig connConfig,
@@ -794,6 +796,16 @@ public class ManagedConnectionImpl
     }
   }
 
+  public boolean isPastActiveTime()
+  {
+    return _isPastActiveTime;
+  }
+
+  public void setPastActiveTime(boolean pastActiveTime)
+  {
+    _isPastActiveTime = pastActiveTime;
+  }
+
   /**
    * Destroys the physical connection.
    */
@@ -818,6 +830,23 @@ public class ManagedConnectionImpl
 
 	item.destroy();
       }
+    }
+
+    try {
+      if (! _isPastActiveTime) {
+      }
+      else if (driverConn == null) {
+      }
+      else if (driverConn.getAutoCommit()) {
+        log.finer("committing closed from active expired " + this);
+        driverConn.commit();
+      }
+      else {
+        log.finer("rolling back closed from active expired " + this);
+        driverConn.rollback();
+      }
+    } catch (SQLException e) {
+      throw new ResourceException(e);
     }
 
     try {
