@@ -1657,7 +1657,7 @@ public class TcpSocketLink extends AbstractSocketLink
 
     AbstractSelectManager selectManager = _port.getSelectManager();
     
-    if (selectManager != null) {
+    if (selectManager != null && state.isKeepalive()) {
       selectManager.closeKeepalive(this);
     }
     
