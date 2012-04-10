@@ -10,6 +10,7 @@ com.caucho.quercus.lib.dom.QuercusDOMModule
 com.caucho.quercus.lib.ErrorModule
 com.caucho.quercus.lib.ExifModule
 com.caucho.quercus.lib.file.FileModule
+com.caucho.quercus.lib.filter.FilterModule
 com.caucho.quercus.lib.FunctionModule
 com.caucho.quercus.lib.gettext.GettextModule
 com.caucho.quercus.lib.HashModule

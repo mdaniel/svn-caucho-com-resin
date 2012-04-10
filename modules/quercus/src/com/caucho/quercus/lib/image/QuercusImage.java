@@ -125,7 +125,7 @@ public class QuercusImage extends ResourceValue
 
   public int getPixel(int x, int y)
   {
-    return _bufferedImage.getRGB(x, y);
+    return _bufferedImage.getRGB(x, y) & 0x00ffffff;
   }
 
   public void setPixel(int x, int y, int color)
@@ -399,10 +399,18 @@ public class QuercusImage extends ResourceValue
 
     color &= 0x00ffffff;
 
+    for (int i = 0; i < width; i++) {
+      for (int j = 0; j < height; j++) {
+        setPixel(i, j, color);
+      }
+    }
+
+    /*
     Rectangle rect = new Rectangle(width, height);
 
     _graphics.setColor(intToColor(color));
     _graphics.fill(rect);
+    */
   }
 
   private void flood(int startX, int startY,

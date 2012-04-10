@@ -425,9 +425,19 @@ public class ImageModule extends AbstractQuercusModule {
   /**
    * Get the index of the color of a pixel
    */
-  public static long imagecolorat(QuercusImage image, int x, int y)
+  public static Value imagecolorat(Env env, QuercusImage image, int x, int y)
   {
-    return image.getPixel(x, y);
+    int width = image.getWidth();
+    int height = image.getHeight();
+
+    if (width <= x || height <= y) {
+      env.warning(L.l("({0},{1}) is out of bounds: ({2},{3})",
+                      x, y, width, height));
+
+      return BooleanValue.FALSE;
+    }
+
+    return LongValue.create(image.getPixel(x, y));
   }
 
   /**
