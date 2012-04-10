@@ -770,7 +770,7 @@ implements LockableStream, SendfileOutputStream
    * @param offset offset into the buffer to start writes
    * @param length number of characters to write
    */
-  public final void printLatin1NoLf(String string)
+  public final void XprintLatin1NoLf(String string)
     throws IOException
   {
     if (_source == null) {
@@ -789,12 +789,11 @@ implements LockableStream, SendfileOutputStream
     
     int charsLength = CHARS_LENGTH;
     char []chars = _chars;
-    /*
-    if (chars == null) {
-      _chars = new char[charsLength];
-      chars = _chars;
-    }
-    */
+    
+    //if (chars == null) {
+    //  _chars = new char[charsLength];
+    //  chars = _chars;
+    //}
     
     while (length > 0) {
       int sublen = Math.min(charsLength, writeBuffer.length - writeLength);
@@ -833,7 +832,6 @@ implements LockableStream, SendfileOutputStream
   /**
    * Prints a string.
    */
-  /*
   public final void printLatin1NoLf(String string)
     throws IOException
   {
@@ -842,9 +840,11 @@ implements LockableStream, SendfileOutputStream
 
     int length = string.length();
     int offset = 0;
+    
+    char []chars = _chars;
 
     while (length > 0) {
-      int sublen = length < _charsLength ? length : _charsLength;
+      int sublen = Math.min(length, chars.length);
 
       string.getChars(offset, offset + sublen, chars, 0);
       
@@ -864,7 +864,6 @@ implements LockableStream, SendfileOutputStream
       offset += sublen;
     }
   }
-  */
 
   /**
    * Prints a substring.
