@@ -40,8 +40,8 @@ public class MnodeUpdate extends MnodeValue {
   private final byte []_keyHash;
   
   public MnodeUpdate(byte []keyHash,
-                     byte []valueHash,
-                     long valueIndex,
+                     long valueHash,
+                     long valueDataId,
                      long valueLength,
                      long version,
                      byte []cacheHash,
@@ -49,7 +49,7 @@ public class MnodeUpdate extends MnodeValue {
                      long accessedExpireTime,
                      long modifiedExpireTime)
   {
-    super(valueHash, valueIndex, valueLength, version,
+    super(valueHash, valueDataId, valueLength, version,
           cacheHash, 
           flags, 
           accessedExpireTime, modifiedExpireTime);
@@ -58,12 +58,12 @@ public class MnodeUpdate extends MnodeValue {
   }
   
   public MnodeUpdate(byte []keyHash,
-                     byte []valueHash,
-                     long valueIndex,
+                     long valueHash,
+                     long valueDataId,
                      long valueLength,
                      long version)
   {
-    super(valueHash, valueIndex, valueLength, version);
+    super(valueHash, valueDataId, valueLength, version);
     
     _keyHash = keyHash;
   }
@@ -84,39 +84,39 @@ public class MnodeUpdate extends MnodeValue {
   }
 
   public MnodeUpdate(byte []keyHash,
-                     byte []valueHash,
-                     long valueIndex,
+                     long valueHash,
+                     long valueDataId,
                      long valueLength,
                      long version,
                      CacheConfig config)
   {
-    super(valueHash, valueIndex, valueLength, version, config);
+    super(valueHash, valueDataId, valueLength, version, config);
     
     _keyHash = keyHash;
   }
 
   public MnodeUpdate(byte []keyHash,
-                     byte []valueHash,
-                     long valueIndex,
+                     long valueHash,
+                     long valueDataId,
                      long valueLength,
                      long version,
                      MnodeValue oldValue)
   {
-    super(valueHash, valueIndex, valueLength, version, oldValue);
+    super(valueHash, valueDataId, valueLength, version, oldValue);
     
     _keyHash = keyHash;
   }
   
   public MnodeUpdate(HashKey keyHash,
-                     HashKey valueHash,
-                     long valueIndex,
+                     long valueHash,
+                     long valueDataId,
                      long valueLength,
                      long version,
                      CacheConfig config)
   {
     this(HashKey.getHash(keyHash),
-         HashKey.getHash(valueHash),
-         valueIndex,
+         valueHash,
+         valueDataId,
          valueLength,
          version,
          config);
@@ -132,7 +132,7 @@ public class MnodeUpdate extends MnodeValue {
   {
     return (getClass().getSimpleName()
         + "[key=" + Hex.toHex(getKeyHash(), 0, 4)
-        + ",value=" + Hex.toHex(getValueHash(), 0, 4)
+        + ",value=" + Long.toHexString(getValueHash())
         + ",len=" + getValueLength()
         + ",flags=" + Long.toHexString(getFlags())
         + ",version=" + getVersion()

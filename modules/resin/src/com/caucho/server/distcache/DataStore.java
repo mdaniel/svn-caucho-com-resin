@@ -142,10 +142,10 @@ public class DataStore {
                               + " ON(m.value = d.id)");
                               */
 
-    _selectOrphanQuery = ("SELECT m.value_index, d.id"
+    _selectOrphanQuery = ("SELECT m.value_data_id, d.id"
                               + " FROM " + _mnodeTableName + " AS m"
                               + " LEFT JOIN " + _tableName + " AS d"
-                              + " ON(m.value_index=d.id)");
+                              + " ON(m.value_data_id=d.id)");
     /*
     _deleteTimeoutQuery = ("DELETE FROM " + _tableName
                            + " WHERE expire_time < ?");

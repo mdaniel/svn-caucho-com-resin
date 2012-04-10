@@ -29,26 +29,23 @@
 
 package com.caucho.server.distcache;
 
-import com.caucho.distcache.ExtCacheEntry;
-import com.caucho.util.Alarm;
-import com.caucho.util.CurrentTime;
-import com.caucho.util.HashKey;
-import com.caucho.util.Hex;
-import com.caucho.vfs.WriteStream;
-
 import java.io.OutputStream;
 import java.lang.ref.SoftReference;
 import java.sql.Blob;
+
+import com.caucho.distcache.ExtCacheEntry;
+import com.caucho.util.CurrentTime;
+import com.caucho.util.HashKey;
 
 /**
  * An entry in the cache map
  */
 public final class MnodeEntry extends MnodeValue implements ExtCacheEntry {
   public static final MnodeEntry NULL
-    = new MnodeEntry(null, 0, 0, 0, null, null, 0, 0, 0, 0, 0, 0, false, true);
+    = new MnodeEntry(0, 0, 0, 0, null, null, 0, 0, 0, 0, 0, 0, false, true);
   
-  public static final HashKey NULL_KEY = new HashKey(new byte[32]);
-  public static final HashKey ANY_KEY = createAnyKey(32);
+  public static final long NULL_KEY = 0;
+  public static final long ANY_KEY = createAnyKey();
   
   private final long _leaseTimeout;
 
@@ -70,8 +67,8 @@ public final class MnodeEntry extends MnodeValue implements ExtCacheEntry {
   private SoftReference<Object> _valueRef;
   private transient Blob _blob;
 
-  public MnodeEntry(HashKey valueHash,
-                    long valueIndex,
+  public MnodeEntry(long valueHash,
+                    long valueDataId,
                     long valueLength,
                     long version,
                     Object value,
@@ -85,7 +82,7 @@ public final class MnodeEntry extends MnodeValue implements ExtCacheEntry {
                     boolean isServerVersionValid,
                     boolean isImplicitNull)
   {
-    super(HashKey.getHash(valueHash), valueIndex, valueLength, version,
+    super(valueHash, valueDataId, valueLength, version,
           HashKey.getHash(cacheHash),
           flags,
           accessedExpireTimeout, modifiedExpireTimeout);
@@ -131,7 +128,7 @@ public final class MnodeEntry extends MnodeValue implements ExtCacheEntry {
                     long lastUpdateTime)
   {
     super(oldMnodeValue.getValueHash(),
-          oldMnodeValue.getValueIndex(),
+          oldMnodeValue.getValueDataId(),
           oldMnodeValue.getValueLength(),
           oldMnodeValue.getVersion(),
           oldMnodeValue.getCacheHash(),
@@ -347,7 +344,7 @@ public final class MnodeEntry extends MnodeValue implements ExtCacheEntry {
   @Override
   public boolean isValueNull()
   {
-    return getValueHash() == null;
+    return getValueHash() == 0;
   }
 
   /**
@@ -380,12 +377,6 @@ public final class MnodeEntry extends MnodeValue implements ExtCacheEntry {
   public boolean readData(OutputStream os, CacheConfig config)
   {
     throw new UnsupportedOperationException(getClass().getName());
-  }
-
-  @Override
-  public HashKey getValueHashKey()
-  {
-    return HashKey.create(getValueHash());
   }
 
   public HashKey getCacheHashKey()
@@ -424,10 +415,10 @@ public final class MnodeEntry extends MnodeValue implements ExtCacheEntry {
       return -1;
     else if (mnode.getVersion() < getVersion())
       return 1;
-    else if (getValueHashKey() == null)
+    else if (getValueHash() == 0)
       return -1;
     else
-      return getValueHashKey().compareTo(mnode.getValueHashKey());
+      return (int) (getValueHash() - mnode.getValueHash());
   }
   
   //
@@ -487,22 +478,16 @@ public final class MnodeEntry extends MnodeValue implements ExtCacheEntry {
     return _hits;
   }
   
-  private static HashKey createAnyKey(int len)
+  private static long createAnyKey()
   {
-    byte []value = new byte[len];
-    
-    for (int i = 0; i < len; i++) {
-      value[i] = (byte) 0xff;
-    }
-    
-    return new HashKey(value); 
+    return -1;
   }
 
   @Override
   public String toString()
   {
     return (getClass().getSimpleName()
-            + "[value=" + Hex.toHex(getValueHash(), 0, 4)
+            + "[value=" + Long.toHexString(getValueHash())
             + ",flags=0x" + Long.toHexString(getFlags())
             + ",version=" + getVersion()
             + ",lease=" + _leaseOwner

@@ -664,11 +664,10 @@ public class SessionImpl implements HttpSession, CacheListener {
       }
       
       if (entry != null && cacheEntry != null
-          && cacheEntry.getValueHashKey() != null
-          && cacheEntry.getValueHashKey().equals(entry.getValueHashKey())) {
+          && cacheEntry.getValueHash() == entry.getValueHash()) {
         if (log.isLoggable(Level.FINE)) {
           log.fine(this + " session load-same valueHash="
-                   + (entry != null ? entry.getValueHashKey() : null));
+                   + (entry != null ? entry.getValueHash() : null));
         }
         
         return true;
@@ -683,7 +682,7 @@ public class SessionImpl implements HttpSession, CacheListener {
 
         if (log.isLoggable(Level.FINE)) {
           log.fine(this + " session load valueHash="
-                   + (entry != null ? entry.getValueHashKey() : null));
+                   + (entry != null ? entry.getValueHash() : null));
         }
 
         load(in);
@@ -861,7 +860,7 @@ public class SessionImpl implements HttpSession, CacheListener {
 
       if (log.isLoggable(Level.FINE)) {
         log.fine(this + " session save valueHash="
-                 + (_cacheEntry != null ? _cacheEntry.getValueHashKey() : null));
+                 + (_cacheEntry != null ? _cacheEntry.getValueHash() : null));
       }
 
       os.close();

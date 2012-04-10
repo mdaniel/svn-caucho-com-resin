@@ -36,7 +36,6 @@ import javax.cache.Cache;
 
 import com.caucho.server.distcache.CacheConfig;
 import com.caucho.util.HashKey;
-import com.caucho.vfs.WriteStream;
 
 /**
  * Provides additional information about an entry in a {@link javax.cache.Cache}.
@@ -61,7 +60,7 @@ public interface ExtCacheEntry<K,V> extends Cache.Entry<K,V>
   /**
    * Returns the value key
    */
-  public HashKey getValueHashKey();
+  public long getValueHash();
   
   /**
    * Returns the value length

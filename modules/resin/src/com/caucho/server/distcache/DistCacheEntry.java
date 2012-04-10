@@ -205,12 +205,12 @@ public class DistCacheEntry implements ExtCacheEntry {
     return _cacheService.getStream(this, os, config);
   }
 
-  public HashKey getValueHash(Object value, CacheConfig config)
+  public long getValueHash(Object value, CacheConfig config)
   {
     if (value == null)
-      return null;
+      return 0;
     else
-      return _cacheService.getValueHash(value, config).getValue();
+      return _cacheService.getValueHash(value, config).getValueHash();
   }
  
   /**
@@ -263,9 +263,9 @@ public class DistCacheEntry implements ExtCacheEntry {
   /**
    * Sets the current value
    */
-  public HashKey compareAndPut(HashKey testValue, 
-                               Object value, 
-                               CacheConfig config)
+  public long compareAndPut(long testValue, 
+                            Object value, 
+                            CacheConfig config)
   {
     return _cacheService.compareAndPut(this, testValue, value, config);
   }
@@ -273,7 +273,7 @@ public class DistCacheEntry implements ExtCacheEntry {
   /**
    * Sets the current value
    */
-  public Object getAndReplace(HashKey testValue, 
+  public Object getAndReplace(long testValue, 
                                Object value, 
                                CacheConfig config)
   {
@@ -284,13 +284,13 @@ public class DistCacheEntry implements ExtCacheEntry {
    * Sets the current value
    */
   public boolean compareAndPut(long version,
-                               HashKey value,
+                               long valueHash,
                                long valueIndex,
                                long valueLength,
                                CacheConfig config)
   {
     return _cacheService.compareAndPut(this, version, 
-                                       value, valueIndex, valueLength, 
+                                       valueHash, valueIndex, valueLength, 
                                        config);
   }
 
@@ -339,19 +339,14 @@ public class DistCacheEntry implements ExtCacheEntry {
   }
 
   @Override
-  public HashKey getValueHashKey()
+  public long getValueHash()
   {
     MnodeEntry entry = getMnodeEntry();
     
     if (entry != null)
-      return entry.getValueHashKey();
+      return entry.getValueHash();
     else
-      return null;
-  }
-
-  public byte []getValueHashArray()
-  {
-    return getMnodeEntry().getValueHash();
+      return 0;
   }
 
   @Override

@@ -178,12 +178,12 @@ public class MnodeStore {
   protected void init()
     throws Exception
   {
-    _loadQuery = ("SELECT value,value_index,value_length,cache_id,flags,server_version,item_version,access_timeout,update_timeout,update_time"
+    _loadQuery = ("SELECT value_hash,value_data_id,value_length,cache_id,flags,server_version,item_version,access_timeout,update_timeout,update_time"
                   + " FROM " + _tableName
                   + " WHERE id=?");
 
     _insertQuery = ("INSERT into " + _tableName
-                    + " (id,value,value_index,value_length,cache_id,flags,"
+                    + " (id,value_hash,value_data_id,value_length,cache_id,flags,"
                     + "  item_version,server_version,"
                     + "  access_timeout,update_timeout,"
                     + "  update_time)"
@@ -191,7 +191,7 @@ public class MnodeStore {
 
     _updateSaveQuery
       = ("UPDATE " + _tableName
-         + " SET value=?,value_index=?,value_length=?,"
+         + " SET value_hash=?,value_data_id=?,value_length=?,"
          + "     server_version=?,item_version=?,"
          + "     access_timeout=?,update_time=?"
          + " WHERE id=? AND item_version<=?");
@@ -209,7 +209,7 @@ public class MnodeStore {
                      + " WHERE update_time + 5 * access_timeout / 4 < ?"
                      + " OR update_time + update_timeout < ?");
 
-    _selectExpireQuery = ("SELECT id,value_index FROM " + _tableName
+    _selectExpireQuery = ("SELECT id,value_data_id FROM " + _tableName
                           + " WHERE update_time + 5 * access_timeout / 4 < ?"
                           + " OR update_time + update_timeout < ?");
 
@@ -218,13 +218,13 @@ public class MnodeStore {
 
     _countQuery = "SELECT count(*) FROM " + _tableName;
 
-    _updatesSinceQuery = ("SELECT id,value,value_index,value_length,cache_id,flags,item_version,update_time,access_timeout,update_timeout"
+    _updatesSinceQuery = ("SELECT id,value_hash,value_data_id,value_length,cache_id,flags,item_version,update_time,access_timeout,update_timeout"
                           + " FROM " + _tableName
                           + " WHERE ? <= update_time"
                           + "   AND bitand(flags, " + CacheConfig.FLAG_TRIPLICATE + ") <> 0"
                           + " LIMIT 1024");
 
-    _remoteUpdatesSinceQuery = ("SELECT id,value,value_index,value_length,cache_id,flags,item_version,update_time,access_timeout,update_timeout"
+    _remoteUpdatesSinceQuery = ("SELECT id,value_hash,value_data_id,value_length,cache_id,flags,item_version,update_time,access_timeout,update_timeout"
                                 + " FROM " + _tableName
                                 + " WHERE ? = cache_id AND ? <= update_time"
                                 + " LIMIT 1024");
@@ -253,7 +253,7 @@ public class MnodeStore {
       Statement stmt = conn.createStatement();
 
       try {
-        String sql = ("SELECT id, value, value_index, value_length, cache_id, flags,"
+        String sql = ("SELECT id, value_hash, value_data_id, value_length, cache_id, flags,"
                       + "     access_timeout, update_timeout,"
                       + "     update_time,"
                       + "     server_version, item_version"
@@ -278,8 +278,8 @@ public class MnodeStore {
 
       String sql = ("CREATE TABLE " + _tableName + " (\n"
                     + "  id BINARY(32) PRIMARY KEY,\n"
-                    + "  value BINARY(32),\n"
-                    + "  value_index BIGINT,\n"
+                    + "  value_hash BIGINT,\n"
+                    + "  value_data_id BIGINT,\n"
                     + "  value_length BIGINT,\n"
                     + "  cache_id BINARY(32),\n"
                     + "  access_timeout BIGINT,\n"
@@ -388,7 +388,7 @@ public class MnodeStore {
       rs.relative(offset);
       while (rs.next()) {
         byte []keyHash = rs.getBytes(1);
-        byte []valueHash = rs.getBytes(2);
+        long valueHash = rs.getLong(2);
         long valueIndex = rs.getLong(3);
         long valueLength = rs.getLong(4);
         byte []cacheHash = rs.getBytes(5);
@@ -398,14 +398,13 @@ public class MnodeStore {
         long accessTimeout = rs.getLong(9);
         long updateTimeout = rs.getLong(10);
 
-        HashKey value = valueHash != null ? new HashKey(valueHash) : null;
         HashKey cacheKey = cacheHash != null ? new HashKey(cacheHash) : null;
 
         if (keyHash == null)
           continue;
 
         entryList.add(new CacheData(new HashKey(keyHash),
-                                    value, valueIndex, valueLength, version,
+                                    valueHash, valueIndex, valueLength, version,
                                     cacheKey,
                                     flags,
                                     itemUpdateTime,
@@ -457,7 +456,7 @@ public class MnodeStore {
       while (rs.next()) {
         byte []keyHash = rs.getBytes(1);
 
-        byte []valueHash = rs.getBytes(2);
+        long valueHash = rs.getLong(2);
         long valueIndex = rs.getLong(3);
         long valueLength = rs.getLong(4);
         byte []cacheHash = rs.getBytes(5);
@@ -467,7 +466,6 @@ public class MnodeStore {
         long accessTimeout = rs.getLong(9);
         long updateTimeout = rs.getLong(10);
         
-        HashKey value = valueHash != null ? new HashKey(valueHash) : null;
         /*
         HashKey cacheKey = cacheHash != null ? new HashKey(cacheHash) : null;
         */
@@ -476,7 +474,7 @@ public class MnodeStore {
           continue;
 
         entryList.add(new CacheData(new HashKey(keyHash),
-                                    value,
+                                    valueHash,
                                     valueIndex,
                                     valueLength,
                                     version,
@@ -521,8 +519,8 @@ public class MnodeStore {
       rs = pstmt.executeQuery();
 
       if (rs.next()) {
-        byte []valueHash = rs.getBytes(1);
-        long valueIndex = rs.getLong(2);
+        long valueHash = rs.getLong(1);
+        long valueDataId = rs.getLong(2);
         long valueLength = rs.getLong(3);
 
         byte []cacheHash = rs.getBytes(4);
@@ -537,13 +535,10 @@ public class MnodeStore {
         HashKey cacheHashKey
           = cacheHash != null ? new HashKey(cacheHash) : null;
 
-        HashKey valueHashKey
-          = valueHash != null ? new HashKey(valueHash) : null;
-          
-          long leaseTimeout = 0;
+        long leaseTimeout = 0;
 
         MnodeEntry entry;
-        entry = new MnodeEntry(valueHashKey, valueIndex, valueLength, 
+        entry = new MnodeEntry(valueHash, valueDataId, valueLength, 
                                itemVersion, null,
                                cacheHashKey,
                                flags,
@@ -593,8 +588,8 @@ public class MnodeStore {
       PreparedStatement stmt = conn.prepareInsert();
       stmt.setBytes(1, id.getHash());
 
-      stmt.setBytes(2, mnodeUpdate.getValueHash());
-      stmt.setLong(3, mnodeUpdate.getValueIndex());
+      stmt.setLong(2, mnodeUpdate.getValueHash());
+      stmt.setLong(3, mnodeUpdate.getValueDataId());
       stmt.setLong(4, mnodeUpdate.getValueLength());
       stmt.setBytes(5, mnodeUpdate.getCacheHash());
 
@@ -643,8 +638,8 @@ public class MnodeStore {
 
       PreparedStatement stmt = conn.prepareUpdateSave();
       
-      stmt.setBytes(1, mnodeUpdate.getValueHash());
-      stmt.setLong(2, mnodeUpdate.getValueIndex());
+      stmt.setLong(1, mnodeUpdate.getValueHash());
+      stmt.setLong(2, mnodeUpdate.getValueDataId());
       stmt.setLong(3, mnodeUpdate.getValueLength());
       
       stmt.setLong(4, _serverVersion);

@@ -955,21 +955,21 @@ public class AbstractCache
     _config.setGuid(_guid);
   }
   
-  public boolean loadData(HashKey valueHash, long valueIndex, WriteStream os)
+  public boolean loadData(long valueIndex, WriteStream os)
     throws IOException
   {
-    return _delegate.loadData(valueHash, valueIndex, os);
+    return _delegate.loadData(valueIndex, os);
   }
 
-  public long saveData(HashKey valueHash, StreamSource source, int length)
+  public long saveData(StreamSource source, int length)
     throws IOException
   {
-    return _delegate.saveData(valueHash, source, length);
+    return _delegate.saveData(source, length);
   }
 
-  public boolean isDataAvailable(HashKey valueKey, long valueIndex)
+  public boolean isDataAvailable(long valueDataId)
   {
-    return _delegate.isDataAvailable(valueKey, valueIndex);
+    return _delegate.isDataAvailable(valueDataId);
   }
 
   //
@@ -981,7 +981,7 @@ public class AbstractCache
     return _delegate.getKeyHash(name);
   }
   
-  public byte []getValueHash(Object value)
+  public long getValueHash(Object value)
   {
     return _delegate.getValueHash(value);
   }

@@ -74,7 +74,7 @@ public class MemcachedCacheEngine extends AbstractCacheEngine
     String key = cb.toString();
     
     MnodeUpdate update = _client.getResinIfModified(key, 
-                                                    entry.getValueHashKey(),
+                                                    entry.getValueHash(),
                                                     entry,
                                                     config);
     

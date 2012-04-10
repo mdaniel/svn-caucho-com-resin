@@ -262,7 +262,7 @@ public class MemcachedClient implements Cache
   }
   
   MnodeUpdate getResinIfModified(String key, 
-                                 HashKey oldValue,
+                                 long oldValue,
                                  DistCacheEntry entry,
                                  CacheConfig config)
     throws CacheException
@@ -283,7 +283,7 @@ public class MemcachedClient implements Cache
   }
   
   private MnodeUpdate resinGetIfModifiedImpl(String key,
-                                             HashKey oldValue,
+                                             long oldValueHash,
                                              DistCacheEntry entry,
                                              CacheConfig config)
     throws IOException
@@ -311,12 +311,10 @@ public class MemcachedClient implements Cache
       WriteStream out = client.getOutputStream();
       ReadStream is = client.getInputStream();
       
-      long hash = getCasKey(oldValue);
-      
       out.print("get_if_modified ");
       out.print(key);
       out.print(" ");
-      out.print(hash);
+      out.print(oldValueHash);
       out.print("\r\n");
       out.flush();
       
@@ -335,8 +333,7 @@ public class MemcachedClient implements Cache
         isValid = true;
 
         MnodeUpdate update = new MnodeUpdate(entry.getKeyHash().getHash(),
-                                             null,
-                                             0, 0,
+                                             0, 0, 0,
                                              version,
                                              config);
 
@@ -371,12 +368,12 @@ public class MemcachedClient implements Cache
       GetInputStream gis = new GetInputStream(is, length);
       
       DataItem dataItem = cache.saveData(gis);
-      HashKey valueKey = dataItem.getValue();
-      long valueIndex = dataItem.getDataIndex();
+      long valueHash = dataItem.getValueHash();
+      long valueDataId = dataItem.getValueDataId();
 
       MnodeUpdate update = new MnodeUpdate(entry.getKeyHash().getHash(),
-                                           valueKey.getHash(),
-                                           valueIndex,
+                                           valueHash,
+                                           valueDataId,
                                            length,
                                            version,
                                            config);
@@ -526,9 +523,7 @@ public class MemcachedClient implements Cache
       out.setDisableClose(true);
       
       //out.print(value);
-      boolean v = cache.loadData(HashKey.create(update.getValueHash()),
-                                                update.getValueIndex(),
-                                                out);
+      boolean v = cache.loadData(update.getValueDataId(), out);
       
       out.setDisableClose(false);
       
@@ -539,7 +534,7 @@ public class MemcachedClient implements Cache
 
       if (log.isLoggable(Level.FINER)) {
         log.finer(this + " resin_set " + key
-                  + " " + HashKey.create(update.getValueHash())
+                  + " " + Long.toHexString(update.getValueHash())
                   + "\n  " + client
                   + "\n  " + _cb);
       }

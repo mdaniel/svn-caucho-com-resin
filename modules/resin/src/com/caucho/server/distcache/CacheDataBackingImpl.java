@@ -30,6 +30,7 @@
 package com.caucho.server.distcache;
 
 import java.io.IOException;
+import java.io.InputStream;
 import java.sql.PreparedStatement;
 import java.util.ArrayList;
 import java.util.logging.Level;
@@ -170,10 +171,10 @@ public class CacheDataBackingImpl implements CacheDataBacking {
     }
     
     if (isSave && oldEntryValue != null) {
-      long oldDataId = oldEntryValue.getValueIndex();
+      long oldDataId = oldEntryValue.getValueDataId();
       
       // XXX: create delete queue?
-      if (oldDataId > 0 && mnodeUpdate.getValueIndex() != oldDataId) {
+      if (oldDataId > 0 && mnodeUpdate.getValueDataId() != oldDataId) {
         _dataStore.remove(oldDataId);
       }
     }
@@ -200,26 +201,33 @@ public class CacheDataBackingImpl implements CacheDataBacking {
   }
 
   @Override
-  public boolean loadData(HashKey valueHash, 
-                          long valueIndex,
+  public boolean loadData(long valueDataId,
                           WriteStream os)
     throws IOException
   {
-    return _dataStore.load(valueIndex, os);
+    return _dataStore.load(valueDataId, os);
   }
 
   @Override
-  public java.sql.Blob loadBlob(HashKey valueHash, long valueIndex)
+  public java.sql.Blob loadBlob(long valueDataId)
   {
-    return _dataStore.loadBlob(valueIndex);
+    return _dataStore.loadBlob(valueDataId);
+  }
+  
+  public long saveData(StreamSource source, int length)
+  {
+    try {
+      return _dataStore.save(source, length);
+    } catch (IOException e) {
+      throw new RuntimeException(e);
+    }
   }
   
   @Override
-  public long saveData(HashKey valueHash,
-                       StreamSource source, int length)
+  public long saveData(InputStream is, int length)
     throws IOException
   {
-    return _dataStore.save(source, length);
+    return _dataStore.save(is, length);
   }
   
   public boolean removeData(long dataId)
@@ -228,7 +236,7 @@ public class CacheDataBackingImpl implements CacheDataBacking {
   }
 
   @Override
-  public boolean isDataAvailable(HashKey valueKey, long valueIndex)
+  public boolean isDataAvailable(long valueIndex)
   {
     return valueIndex > 0;
     /*

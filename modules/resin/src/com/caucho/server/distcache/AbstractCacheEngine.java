@@ -88,18 +88,18 @@ public class AbstractCacheEngine implements CacheEngine
   {
   }
   @Override
-  public HashKey compareAndPut(DistCacheEntry entry, HashKey testValue,
+  public long compareAndPut(DistCacheEntry entry, long testValue,
                                MnodeUpdate mnodeUpdate, Object value,
                                CacheConfig config)
   {
-    return null;
+    return 0;
   }
 
   @Override
-  public HashKey getAndPut(DistCacheEntry entry, MnodeUpdate mnodeUpdate,
+  public long getAndPut(DistCacheEntry entry, MnodeUpdate mnodeUpdate,
                            Object value, long leaseTimeout, int leaseOwner)
   {
-    return null;
+    return 0;
   }
 
 }

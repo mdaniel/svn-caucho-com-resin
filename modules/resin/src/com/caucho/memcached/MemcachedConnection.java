@@ -603,7 +603,7 @@ public class MemcachedConnection extends AbstractProtocolConnection
         return;
       }
       
-      HashKey valueKey = entry.getValueHashKey();
+      long valueHash = entry.getValueHash();
       
       long now = CurrentTime.getCurrentTime();
       
@@ -613,7 +613,7 @@ public class MemcachedConnection extends AbstractProtocolConnection
       }
       
       // HashKey valueKey = entry.getValueHashKey();
-      long unique = getCasKey(valueKey);
+      long unique = valueHash;
       
       if (hash != 0 && hash == unique) {
         // out.print("NOT_MODIFIED\r\n");

@@ -58,6 +58,8 @@ import com.caucho.util.L10N;
 import com.caucho.util.LruCache;
 import com.caucho.util.NullOutputStream;
 import com.caucho.util.Sha256OutputStream;
+import com.caucho.vfs.Crc64InputStream;
+import com.caucho.vfs.Crc64OutputStream;
 import com.caucho.vfs.StreamSource;
 import com.caucho.vfs.TempOutputStream;
 import com.caucho.vfs.Vfs;
@@ -233,16 +235,17 @@ public final class CacheStoreManager
       return value;
     }
 
-    HashKey valueHash = mnodeValue.getValueHashKey();
+    long valueHash = mnodeValue.getValueHash();
 
-    if (valueHash == null || valueHash == HashManager.NULL)
+    if (valueHash == 0) {
       return null;
+    }
 
     updateAccessTime(entry, mnodeValue, now);
 
     value = readData(entry.getKeyHash(),
                      valueHash,
-                     mnodeValue.getValueIndex(),
+                     mnodeValue.getValueDataId(),
                      config.getValueSerializer(),
                      config);
     
@@ -275,10 +278,11 @@ public final class CacheStoreManager
 
     updateAccessTime(entry, mnodeValue, now);
 
-    HashKey valueHash = mnodeValue.getValueHashKey();
+    long valueHash = mnodeValue.getValueHash();
 
-    if (valueHash == null || valueHash == HashManager.NULL)
+    if (valueHash == 0) {
       return false;
+    }
 
     boolean isData = readData(entry.getKeyHash(), mnodeValue, os, config);
     
@@ -398,7 +402,7 @@ public final class CacheStoreManager
         }
       }
 
-      MnodeEntry nullMnodeValue = new MnodeEntry(null, 0, 0, 0, null, null,
+      MnodeEntry nullMnodeValue = new MnodeEntry(0, 0, 0, 0, null, null,
                                                  0,
                                                  config.getAccessedExpireTimeout(),
                                                  config.getModifiedExpireTimeout(),
@@ -448,8 +452,8 @@ public final class CacheStoreManager
     DataItem dataItem = writeData(mnodeValue, value,
                                   config.getValueSerializer());
     
-    HashKey valueHash = dataItem.getValue();
-    long valueIndex = dataItem.getDataIndex();
+    long valueHash = dataItem.getValueHash();
+    long valueIndex = dataItem.getValueDataId();
     long valueLength = dataItem.getLength();
 
     long newVersion = getNewVersion(mnodeValue);
@@ -490,22 +494,10 @@ public final class CacheStoreManager
     HashKey key = entry.getKeyHash();
     MnodeEntry mnodeValue = loadMnodeValue(entry);
 
-    HashKey oldValueHash = (mnodeValue != null
-                            ? mnodeValue.getValueHashKey()
-                            : null);
+    DataItem valueItem = writeData(is);
     
-    long oldValueIndex = (mnodeValue != null
-                          ? mnodeValue.getValueIndex()
-                          : 0);
-
-    DataItem valueItem = writeData(oldValueHash, oldValueIndex, is);
-    
-    HashKey valueHash = valueItem.getValue();
-    long valueIndex = valueItem.getDataIndex();
-
-    if (valueHash != null && valueHash.equals(oldValueHash)) {
-      return mnodeValue;
-    }
+    long valueHash = valueItem.getValueHash();
+    long valueDataId = valueItem.getValueDataId();
     
     long valueLength = valueItem.getLength();
     long newVersion = getNewVersion(mnodeValue);
@@ -519,8 +511,8 @@ public final class CacheStoreManager
       modifiedExpireTime = config.getModifiedExpireTimeout();
 
     MnodeUpdate mnodeUpdate = new MnodeUpdate(key.getHash(),
-                                              valueHash.getHash(),
-                                              valueIndex,
+                                              valueHash,
+                                              valueDataId,
                                               valueLength,
                                               newVersion,
                                               HashKey.getHash(config.getCacheKey()),
@@ -586,14 +578,14 @@ public final class CacheStoreManager
     DataItem dataItem = writeData(mnodeValue, value,
                                   config.getValueSerializer());
     
-    HashKey valueHash = dataItem.getValue();
-    long valueIndex = dataItem.getDataIndex();
+    long valueHash = dataItem.getValueHash();
+    long valueDataId = dataItem.getValueDataId();
     long valueLength = dataItem.getLength();
     
     long version = getNewVersion(mnodeValue);
     
     MnodeUpdate mnodeUpdate = new MnodeUpdate(entry.getKeyHash(),
-                                              valueHash, valueIndex, valueLength,
+                                              valueHash, valueDataId, valueLength,
                                               version, 
                                               config);
     
@@ -601,21 +593,21 @@ public final class CacheStoreManager
 
     int leaseOwner = mnodeValue != null ? mnodeValue.getLeaseOwner() : -1;
 
-    HashKey oldHash = getAndPut(entry, 
-                                mnodeUpdate, value,
-                                config.getLeaseExpireTimeout(),
-                                leaseOwner,
-                                config);
+    long oldHash = getAndPut(entry, 
+                             mnodeUpdate, value,
+                             config.getLeaseExpireTimeout(),
+                             leaseOwner,
+                             config);
 
-    if (oldHash == null)
+    if (oldHash == 0)
       return null;
     
-    if (oldHash.equals(valueHash) && oldValue != null)
+    if (oldHash == valueHash && oldValue != null)
       return oldValue;
     
     oldValue = readData(entry.getKeyHash(),
                         oldHash,
-                        mnodeValue.getValueIndex(),
+                        mnodeValue.getValueDataId(),
                         config.getValueSerializer(),
                         config);
 
@@ -625,24 +617,24 @@ public final class CacheStoreManager
   /**
    * Sets a cache entry
    */
-  protected HashKey getAndPut(DistCacheEntry entry,
-                              MnodeUpdate mnodeUpdate,
-                              Object value,
-                              long leaseTimeout,
-                              int leaseOwner,
-                              CacheConfig config)
+  protected long getAndPut(DistCacheEntry entry,
+                           MnodeUpdate mnodeUpdate,
+                           Object value,
+                           long leaseTimeout,
+                           int leaseOwner,
+                           CacheConfig config)
   {
     return config.getEngine().getAndPut(entry, mnodeUpdate, value,
                                         leaseTimeout, leaseOwner);
   }
   
-  public HashKey getAndPutLocal(DistCacheEntry entry,
-                                MnodeUpdate mnodeUpdate,
-                                Object value,
-                                long leaseTimeout,
-                                int leaseOwner)
+  public long getAndPutLocal(DistCacheEntry entry,
+                             MnodeUpdate mnodeUpdate,
+                             Object value,
+                             long leaseTimeout,
+                             int leaseOwner)
   {
-    HashKey oldValueHash = entry.getValueHashKey();
+    long oldValueHash = entry.getValueHash();
 
     MnodeEntry mnodeValue = putLocalValue(entry, 
                                           mnodeUpdate, value,
@@ -653,35 +645,35 @@ public final class CacheStoreManager
   }
 
   public Object getAndReplace(DistCacheEntry entry, 
-                               HashKey testValue,
-                               Object value, 
-                               CacheConfig config)
+                              long testValue,
+                              Object value, 
+                              CacheConfig config)
   {
-    HashKey result = compareAndPut(entry, testValue, value, config);
+    long result = compareAndPut(entry, testValue, value, config);
     
-    if (result == null || result.isNull()) {
+    if (result == 0) {
       return null;
     }
     else {
       return readData(entry.getKeyHash(),
                       result,
-                      entry.getMnodeEntry().getValueIndex(),
+                      entry.getMnodeEntry().getValueDataId(),
                       config.getValueSerializer(),
                       config);
     }
   }
   
-  public HashKey compareAndPut(DistCacheEntry entry, 
-                                 HashKey testValue,
-                                 Object value, 
-                                 CacheConfig config)
+  public long compareAndPut(DistCacheEntry entry, 
+                            long testValue,
+                            Object value, 
+                            CacheConfig config)
   {
     DataItem dataItem = writeData(entry.getMnodeEntry(), 
                                   value,
                                   config.getValueSerializer());
     
-    HashKey valueHash = dataItem.getValue();
-    long dataId = dataItem.getDataIndex();
+    long valueHash = dataItem.getValueHash();
+    long valueDataId = dataItem.getValueDataId();
     long valueLength = dataItem.getLength();
     
     try {
@@ -689,60 +681,59 @@ public final class CacheStoreManager
     
       MnodeUpdate mnodeUpdate = new MnodeUpdate(entry.getKeyHash(),
                                                 valueHash,
-                                                dataId,
+                                                valueDataId,
                                                 valueLength,
                                                 version,
                                                 config);
     
       return compareAndPut(entry, testValue, mnodeUpdate, value, config);
     } finally {
-      if (entry.getMnodeEntry().getValueIndex() != dataId) {
-        _dataBacking.removeData(dataId);
+      MnodeValue newMnodeValue = entry.getMnodeEntry();
+      
+      if (newMnodeValue == null
+          || newMnodeValue.getValueDataId() != valueDataId) {
+        _dataBacking.removeData(valueDataId);
       }
     }
   }
 
-  protected HashKey compareAndPut(DistCacheEntry entry,
-                                  HashKey testValue,
-                                  MnodeUpdate mnodeUpdate,
-                                  Object value,
-                                  CacheConfig config)
+  protected long compareAndPut(DistCacheEntry entry,
+                               long testValue,
+                               MnodeUpdate mnodeUpdate,
+                               Object value,
+                               CacheConfig config)
   {
     CacheEngine engine = config.getEngine();
     
     return engine.compareAndPut(entry, testValue, mnodeUpdate, value, config);
   }
   
-  public final HashKey compareAndPutLocal(DistCacheEntry entry,
-                                          HashKey testValue,
-                                          MnodeUpdate mnodeUpdate,
-                                          Object value,
-                                          long leaseTimeout,
-                                          int leaseOwner)
+  public final long compareAndPutLocal(DistCacheEntry entry,
+                                       long testValue,
+                                       MnodeUpdate mnodeUpdate,
+                                       Object value,
+                                       long leaseTimeout,
+                                       int leaseOwner)
   {
     MnodeEntry mnodeValue = loadMnodeValue(entry);
 
-    HashKey oldValueHash = (mnodeValue != null
-                            ? mnodeValue.getValueHashKey()
-                            : null);
+    long oldValueHash = (mnodeValue != null
+                         ? mnodeValue.getValueHash()
+                         : 0);
 
-    if (testValue == null) {
+    if (testValue == 0) {
     }
-    else if (testValue.equals(oldValueHash)) {
-      
+    else if (testValue == oldValueHash) {
     }
-    else if (testValue.isNull()) {
-      if (oldValueHash != null && ! oldValueHash.isNull())
-        return null;
-      
-      oldValueHash = MnodeEntry.NULL_KEY;
+    /*
+    else if (testValue == MnodeValue.ANY) {
+      if (oldValueHash == 0) {
+        return 0;
+      }
     }
-    else if (testValue.isAny()) {
-      if (oldValueHash == null || oldValueHash.isNull())
-        return null;
-    }
+    */
     else {
-      return null;
+      return 0;
     }
     
     // long newVersion = getNewVersion(mnodeValue);
@@ -755,12 +746,12 @@ public final class CacheStoreManager
     if (mnodeValue != null)
       return oldValueHash;
     else
-      return null;
+      return 0;
   }
 
   public boolean compareAndPut(DistCacheEntry entry,
                                long version,
-                               HashKey valueHash,
+                               long valueHash,
                                long valueIndex,
                                long valueLength,
                                CacheConfig config)
@@ -768,15 +759,15 @@ public final class CacheStoreManager
     HashKey key = entry.getKeyHash();
     MnodeEntry mnodeValue = loadMnodeValue(entry);
 
-    HashKey oldValueHash = (mnodeValue != null
-                            ? mnodeValue.getValueHashKey()
-                            : null);
+    long oldValueHash = (mnodeValue != null
+                         ? mnodeValue.getValueHash()
+                         : null);
     long oldVersion = mnodeValue != null ? mnodeValue.getVersion() : 0;
 
     if (version <= oldVersion)
       return false;
 
-    if (valueHash != null && valueHash.equals(oldValueHash)) {
+    if (valueHash == oldValueHash) {
       return true;
     }
     
@@ -1008,7 +999,7 @@ public final class CacheStoreManager
     HashKey key = entry.getKeyHash();
 
     MnodeEntry mnodeEntry = loadMnodeValue(entry);
-    HashKey oldValueHash = mnodeEntry != null ? mnodeEntry.getValueHashKey() : null;
+    long oldValueHash = mnodeEntry != null ? mnodeEntry.getValueHash() : 0;
 
     long newVersion = getNewVersion(mnodeEntry);
 
@@ -1020,10 +1011,11 @@ public final class CacheStoreManager
     MnodeUpdate mnodeUpdate;
     
     if (mnodeEntry != null)
-      mnodeUpdate = new MnodeUpdate(key.getHash(), (byte[]) null, 0, 0, newVersion, mnodeEntry);
+      mnodeUpdate = new MnodeUpdate(key.getHash(), 0, 0, 0, 
+                                    newVersion, mnodeEntry);
     else
       mnodeUpdate = new MnodeUpdate(key.getHash(),
-                                    (byte[]) null, 0, 0, newVersion, config);
+                                    0, 0, 0, newVersion, config);
 
     mnodeEntry = putLocalValue(entry, 
                                mnodeUpdate, null,
@@ -1031,7 +1023,7 @@ public final class CacheStoreManager
                                leaseTimeout);
 
     if (mnodeEntry == null)
-      return oldValueHash != null;
+      return oldValueHash != 0;
 
     config.getEngine().remove(key, mnodeUpdate, mnodeEntry);
     
@@ -1041,7 +1033,7 @@ public final class CacheStoreManager
       writer.delete(entry.getKey());
     }
 
-    return oldValueHash != null;
+    return oldValueHash != 0;
   }
 
   /**
@@ -1052,7 +1044,7 @@ public final class CacheStoreManager
     DistCacheEntry entry = getCacheEntry(key);
     MnodeEntry mnodeValue = entry.getMnodeEntry();
 
-    HashKey oldValueHash = mnodeValue != null ? mnodeValue.getValueHashKey() : null;
+    long oldValueHash = mnodeValue != null ? mnodeValue.getValueHash() : 0;
 
     long newVersion = getNewVersion(mnodeValue);
 
@@ -1060,7 +1052,7 @@ public final class CacheStoreManager
     int leaseOwner = mnodeValue != null ? mnodeValue.getLeaseOwner() : -1;
 
     MnodeUpdate mnodeUpdate = new MnodeUpdate(key.getHash(),
-                                              (byte[]) null, 0, 0, newVersion,
+                                              0, 0, 0, newVersion,
                                               mnodeValue);
     
     mnodeValue = putLocalValue(entry,
@@ -1068,12 +1060,13 @@ public final class CacheStoreManager
                                null,
                                leaseOwner, leaseTimeout);
 
-    if (mnodeValue == null)
-      return oldValueHash != null;
+    if (mnodeValue == null) {
+      return oldValueHash != 0;
+    }
     
     config.getEngine().put(key, null, mnodeValue);
 
-    return oldValueHash != null;
+    return oldValueHash != 0;
   }
 
   /**
@@ -1087,7 +1080,7 @@ public final class CacheStoreManager
   {
     HashKey key = entry.getKeyHash();
     
-    HashKey valueHash = HashKey.create(mnodeUpdate.getValueHash());
+    long valueHash = mnodeUpdate.getValueHash();
     long version = mnodeUpdate.getVersion();
     
     MnodeEntry oldEntryValue;
@@ -1096,16 +1089,16 @@ public final class CacheStoreManager
     do {
       oldEntryValue = loadMnodeValue(entry);
     
-      HashKey oldValueHash
-        = oldEntryValue != null ? oldEntryValue.getValueHashKey() : null;
+      long oldValueHash
+        = oldEntryValue != null ? oldEntryValue.getValueHash() : 0;
 
       long oldVersion = oldEntryValue != null ? oldEntryValue.getVersion() : 0;
       long now = CurrentTime.getCurrentTime();
       
       if (version < oldVersion
           || (version == oldVersion
-              && valueHash != null
-              && valueHash.compareTo(oldValueHash) <= 0)) {
+              && valueHash != 0
+              && valueHash <= oldValueHash)) {
         // lease ownership updates even if value doesn't
         if (oldEntryValue != null) {
           oldEntryValue.setLeaseOwner(leaseOwner, now);
@@ -1150,34 +1143,32 @@ public final class CacheStoreManager
                                   Object value,
                                   CacheSerializer serializer)
   {
-    byte [] oldValueHash = (mnodeValue != null
-                            ? mnodeValue.getValueHash()
-                            : null);
+    long oldValueHash = (mnodeValue != null
+                         ? mnodeValue.getValueHash()
+                         : 0);
     
     TempOutputStream os = null;
 
     try {
       os = new TempOutputStream();
 
-      byte[] hash = writeDataStream(os, value, serializer);
-
-      HashKey valueHash = new HashKey(hash);
+      long newValueHash = writeDataStream(os, value, serializer);
 
       int length = os.getLength();
 
-      if (HashKey.equals(hash, oldValueHash)) {
-        return new DataItem(valueHash, mnodeValue.getValueIndex(), length);
+      if (newValueHash == oldValueHash) {
+        return new DataItem(newValueHash, mnodeValue.getValueDataId(), length);
       }
 
       StreamSource source = new StreamSource(os);
-      long valueIndex = getDataBacking().saveData(valueHash, source, length);
+      long valueIndex = getDataBacking().saveData(source, length);
       
       if (valueIndex <= 0) {
         throw new IllegalStateException(L.l("Can't save the data '{0}'",
-                                       valueHash));
+                                            newValueHash));
       }
 
-      return new DataItem(valueHash, valueIndex, length);
+      return new DataItem(newValueHash, valueIndex, length);
     } catch (Exception e) {
       throw new RuntimeException(e);
     } finally {
@@ -1189,8 +1180,8 @@ public final class CacheStoreManager
   /**
    * Used by QA
    */
-  final public byte[] calculateValueHash(Object value,
-                                         CacheConfig config)
+  final public long calculateValueHash(Object value,
+                                       CacheConfig config)
   {
     // TempOutputStream os = null;
     
@@ -1203,12 +1194,12 @@ public final class CacheStoreManager
     }
   }
   
-  private byte []writeDataStream(OutputStream os, 
-                                 Object value, 
-                                 CacheSerializer serializer)
+  private long writeDataStream(OutputStream os, 
+                               Object value, 
+                               CacheSerializer serializer)
     throws IOException
   {
-    Sha256OutputStream mOut = new Sha256OutputStream(os);
+    Crc64OutputStream mOut = new Crc64OutputStream(os);
     //DeflaterOutputStream gzOut = new DeflaterOutputStream(mOut);
     //ResinDeflaterOutputStream gzOut = new ResinDeflaterOutputStream(mOut);
 
@@ -1219,49 +1210,24 @@ public final class CacheStoreManager
     //gzOut.close();
     mOut.close();
     
-    byte []hash = mOut.getDigest();
+    long hash = mOut.getDigest();
     
     return hash;
   }
 
-  final public DataItem writeData(HashKey oldValueHash,
-                                  long oldValueIndex,
-                                  InputStream is)
+  final public DataItem writeData(InputStream is)
     throws IOException
   {
     TempOutputStream os = null;
 
     try {
-      os = new TempOutputStream();
-
-      Sha256OutputStream mOut = new Sha256OutputStream(os);
-
-      WriteStream out = Vfs.openWrite(mOut);
-
-      out.writeStream(is);
-
-      out.close();
-
-      mOut.close();
-
-      byte[] hash = mOut.getDigest();
-
-      HashKey valueHash = new HashKey(hash);
-
-      int length = os.getLength();
+      Crc64InputStream mIn = new Crc64InputStream(is);
       
-      if (valueHash.equals(oldValueHash)) {
-        return new DataItem(valueHash, oldValueIndex, length);
-      }
-      
-      StreamSource source = new StreamSource(os);
-      
-      long valueIndex = getDataBacking().saveData(valueHash, source, length);
+      long valueIndex = getDataBacking().saveData(mIn, -1);
 
-      if (valueIndex <= 0) {
-        throw new RuntimeException(L.l("Can't save the data '{0}'",
-                                       valueHash));
-      }
+      long valueHash = mIn.getDigest();
+
+      long length = mIn.getLength();
       
       return new DataItem(valueHash, valueIndex, length);
     } catch (RuntimeException e) {
@@ -1275,12 +1241,12 @@ public final class CacheStoreManager
   }
 
   final protected Object readData(HashKey key,
-                                  HashKey valueKey,
-                                  long valueIndex,
+                                  long valueHash,
+                                  long valueDataId,
                                   CacheSerializer serializer,
                                   CacheConfig config)
   {
-    if (valueKey == null || valueKey == HashManager.NULL)
+    if (valueHash == 0)
       return null;
 
     TempOutputStream os = null;
@@ -1290,8 +1256,8 @@ public final class CacheStoreManager
 
       WriteStream out = Vfs.openWrite(os);
 
-      if (! getDataBacking().loadData(valueKey, valueIndex, out)) {
-        log.warning(this + " cannot load data for " + valueKey + " from triad");
+      if (! getDataBacking().loadData(valueDataId, out)) {
+        log.warning(this + " cannot load data for key=" + key + " from triad");
         
         out.close();
         
@@ -1346,11 +1312,11 @@ public final class CacheStoreManager
                                    CacheConfig config)
     throws IOException
   {
-    HashKey valueKey = mnodeValue.getValueHashKey();
-    long valueIndex = mnodeValue.getValueIndex();
+    long valueDataId = mnodeValue.getValueDataId();
     
-    if (valueKey == null || valueKey == HashManager.NULL)
+    if (valueDataId <= 0) {
       throw new IllegalStateException(L.l("readData may not be called with a null value"));
+    }
 
     WriteStream out = Vfs.openWrite(os);
 
@@ -1358,7 +1324,7 @@ public final class CacheStoreManager
       Blob blob = mnodeValue.getBlob();
       
       if (blob == null) {
-        blob = getDataBacking().loadBlob(valueKey, valueIndex);
+        blob = getDataBacking().loadBlob(valueDataId);
         
         if (blob != null)
           mnodeValue.setBlob(blob);
@@ -1385,7 +1351,7 @@ public final class CacheStoreManager
       }
       */
 
-      log.warning(this + " unexpected load failure in readValue " + valueKey);
+      log.warning(this + " unexpected load failure in readValue key=" + key);
 
       // XXX: error?  since we have the value key, it should exist
 
@@ -1640,13 +1606,13 @@ public final class CacheStoreManager
   }
   
   public static class DataItem {
-    private HashKey _value;
+    private long _valueHash;
     private long _dataIndex;
     private long _length;
     
-    DataItem(HashKey value, long dataIndex, long length)
+    DataItem(long valueHash, long dataIndex, long length)
     {
-      _value = value;
+      _valueHash = valueHash;
       _dataIndex = dataIndex;
       _length = length;
     }
@@ -1654,14 +1620,14 @@ public final class CacheStoreManager
     /**
      * @return
      */
-    public long getDataIndex()
+    public long getValueDataId()
     {
       return _dataIndex;
     }
 
-    public HashKey getValue()
+    public long getValueHash()
     {
-      return _value;
+      return _valueHash;
     }
     
     public long getLength()

@@ -467,23 +467,23 @@ public class CacheImpl<K,V>
   }
 
   public boolean compareAndPut(HashKey key, 
-                            HashKey value,
-                            long valueIndex,
-                            long valueLength,
-                            long version)
+                               long valueHash,
+                               long valueIndex,
+                               long valueLength,
+                               long version)
   {
-    return getDistCacheEntry(key).compareAndPut(version, value, valueIndex, valueLength, _config);
+    return getDistCacheEntry(key).compareAndPut(version, valueHash, valueIndex, valueLength, _config);
   }
 
   @Override
   public boolean putIfAbsent(Object key, Object value) throws CacheException
   {
-    HashKey NULL = MnodeEntry.NULL_KEY;
+    long testHash = 0;
     
-    HashKey result
-      = getDistCacheEntry(key).compareAndPut(NULL, value, _config);
+    long result
+      = getDistCacheEntry(key).compareAndPut(testHash, value, _config);
     
-    return result != null && result.isNull();
+    return result != 0;
   }
 
   @Override
@@ -492,18 +492,11 @@ public class CacheImpl<K,V>
   {
     DistCacheEntry entry = getDistCacheEntry(key);
     
-    HashKey oldHash = entry.getValueHash(oldValue, _config);
+    long oldHash = entry.getValueHash(oldValue, _config);
     
-    HashKey result = entry.compareAndPut(oldHash, value, _config);
+    long result = entry.compareAndPut(oldHash, value, _config);
     
-    boolean isChanged;
-    
-    if (oldHash == null || oldHash.isNull()) {
-      isChanged = (result == null || result.isNull());
-    }
-    else {
-      isChanged = oldHash.equals(result);
-    }
+    boolean isChanged = oldHash == result;
     
     return isChanged;
   }
@@ -513,11 +506,11 @@ public class CacheImpl<K,V>
   {
     DistCacheEntry entry = getDistCacheEntry(key);
     
-    HashKey oldHash = MnodeEntry.ANY_KEY;
+    long oldHash = MnodeEntry.ANY_KEY;
     
-    HashKey result = entry.compareAndPut(oldHash, value, _config);
+    long result = entry.compareAndPut(oldHash, value, _config);
     
-    boolean isChanged = result != null && ! result.isNull();
+    boolean isChanged = result != 0;
     
     if (isChanged)
       entryUpdate((K) key, (V) value);
@@ -530,7 +523,7 @@ public class CacheImpl<K,V>
   {
     DistCacheEntry entry = getDistCacheEntry(key);
     
-    HashKey oldHash = MnodeEntry.ANY_KEY;
+    long oldHash = MnodeEntry.ANY_KEY;
     
     return entry.getAndReplace(oldHash, value, _config);
   }
@@ -824,21 +817,21 @@ public class CacheImpl<K,V>
     
   }
   
-  public boolean loadData(HashKey valueHash, long valueIndex, WriteStream os)
+  public boolean loadData(long valueDataId, WriteStream os)
     throws IOException
   {
-    return getDataBacking().loadData(valueHash, valueIndex, os);
+    return getDataBacking().loadData(valueDataId, os);
   }
 
-  public long saveData(HashKey valueHash, StreamSource source, int length)
+  public long saveData(StreamSource source, int length)
     throws IOException
   {
-    return getDataBacking().saveData(valueHash, source, length);
+    return getDataBacking().saveData(source, length);
   }
 
-  public boolean isDataAvailable(HashKey valueKey, long valueIndex)
+  public boolean isDataAvailable(long valueDataId)
   {
-    return getDataBacking().isDataAvailable(valueKey, valueIndex);
+    return getDataBacking().isDataAvailable(valueDataId);
   }
   
   private CacheDataBacking getDataBacking()
@@ -855,7 +848,7 @@ public class CacheImpl<K,V>
     return getDistCacheEntry(name).getKeyHash().getHash();
   }
   
-  public byte []getValueHash(Object value)
+  public long getValueHash(Object value)
   {
     return _manager.calculateValueHash(value, _config);
   }
@@ -881,7 +874,7 @@ public class CacheImpl<K,V>
   public DataItem saveData(InputStream is)
     throws IOException
   {
-    return ((CacheStoreManager) _manager).writeData(null, 0, is);
+    return ((CacheStoreManager) _manager).writeData(is);
   }
 
   /*

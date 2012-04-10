@@ -66,15 +66,15 @@ public interface CacheEngine
                      MnodeUpdate mnodeUpdate,
                      MnodeEntry mnodeEntry);
 
-  public HashKey getAndPut(DistCacheEntry entry, 
-                           MnodeUpdate mnodeUpdate,
-                           Object value, 
-                           long leaseTimeout, 
-                           int leaseOwner);
+  public long getAndPut(DistCacheEntry entry, 
+                        MnodeUpdate mnodeUpdate,
+                        Object value, 
+                        long leaseTimeout, 
+                        int leaseOwner);
 
-  public HashKey compareAndPut(DistCacheEntry entry, 
-                               HashKey testValue,
-                               MnodeUpdate mnodeUpdate, 
-                               Object value,
-                               CacheConfig config);
+  public long compareAndPut(DistCacheEntry entry, 
+                            long testValue,
+                            MnodeUpdate mnodeUpdate, 
+                            Object value,
+                            CacheConfig config);
 }
