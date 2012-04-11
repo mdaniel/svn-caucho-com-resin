@@ -247,6 +247,31 @@ public class UserPreparedStatement extends UserStatement
     }
   }
 
+  @Override
+  @SuppressWarnings("unchecked")
+  public <T> T unwrap(Class<T> iface)
+    throws SQLException
+  {
+    if (iface.isAssignableFrom(this.getClass()))
+      return (T) this;
+    else if (iface.isAssignableFrom(_pstmt.getClass()))
+      return (T) _pstmt;
+    else
+      return _pstmt.unwrap(iface);
+  }
+
+  @Override
+  public boolean isWrapperFor(Class<?> iface)
+    throws SQLException
+  {
+    if (iface.isAssignableFrom(this.getClass()))
+      return true;
+    else if (iface.isAssignableFrom(_pstmt.getClass()))
+      return true;
+    else
+      return _pstmt.isWrapperFor(iface);
+  }
+
   /**
    * Sets the parameter as a null.
    */

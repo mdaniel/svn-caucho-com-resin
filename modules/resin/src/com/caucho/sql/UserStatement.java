@@ -912,8 +912,10 @@ public class UserStatement implements Statement {
   public <T> T unwrap(Class<T> iface)
     throws SQLException
   {
-    if (iface.isAssignableFrom(_stmt.getClass()))
-      return (T)_stmt;
+    if (iface.isAssignableFrom(this.getClass()))
+      return (T) this;
+    else if (iface.isAssignableFrom(_stmt.getClass()))
+      return (T) _stmt;
     else
       return _stmt.unwrap(iface);
   }
@@ -922,7 +924,9 @@ public class UserStatement implements Statement {
   public boolean isWrapperFor(Class<?> iface)
     throws SQLException
   {
-    if (iface.isAssignableFrom(_stmt.getClass()))
+    if (iface.isAssignableFrom(this.getClass()))
+      return true;
+    else if (iface.isAssignableFrom(_stmt.getClass()))
       return true;
     else
       return _stmt.isWrapperFor(iface);

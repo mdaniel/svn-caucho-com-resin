@@ -63,8 +63,7 @@ public class UserConnection implements java.sql.Connection {
   /**
    * Creates a new PooledConnection.
    *
-   * @param pool the pool the connection belongs to.
-   * @param conn the underlying connection.
+   * @param mConn the underlying connection.
    */
   UserConnection(ManagedConnectionImpl mConn)
   {
@@ -1157,16 +1156,31 @@ public class UserConnection implements java.sql.Connection {
   public <T> T unwrap(Class<T> iface)
     throws SQLException
   {
-    return (T) getConnection();
+    if (iface.isAssignableFrom(this.getClass()))
+      return (T) this;
+
+    Connection conn = getConnection();
+
+    if (iface.isAssignableFrom(conn.getClass()))
+      return (T)conn;
+    else
+      return conn.unwrap(iface);
   }
 
   @Override
   public boolean isWrapperFor(Class<?> iface)
     throws SQLException
   {
-    return iface.isAssignableFrom(getConnection().getClass());
-  }
+    if (iface.isAssignableFrom(this.getClass()))
+      return true;
 
+    Connection conn = getConnection();
+
+    if (iface.isAssignableFrom(conn.getClass()))
+      return true;
+    else
+      return conn.isWrapperFor(iface);
+  }
   /**
    * Returns true if the connection is closed.
    */

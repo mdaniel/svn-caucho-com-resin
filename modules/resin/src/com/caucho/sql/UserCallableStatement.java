@@ -2229,4 +2229,29 @@ public class UserCallableStatement extends UserPreparedStatement
       throw e;
     }
   }
+
+  @Override
+  @SuppressWarnings("unchecked")
+  public <T> T unwrap(Class<T> iface)
+    throws SQLException
+  {
+    if (iface.isAssignableFrom(this.getClass()))
+      return (T) this;
+    else if (iface.isAssignableFrom(_cstmt.getClass()))
+      return (T) _cstmt;
+    else
+      return _cstmt.unwrap(iface);
+  }
+
+  @Override
+  public boolean isWrapperFor(Class<?> iface)
+    throws SQLException
+  {
+    if (iface.isAssignableFrom(this.getClass()))
+      return true;
+    else if (iface.isAssignableFrom(_cstmt.getClass()))
+      return true;
+    else
+      return _cstmt.isWrapperFor(iface);
+  }
 }
