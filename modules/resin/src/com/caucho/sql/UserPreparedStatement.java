@@ -199,6 +199,27 @@ public class UserPreparedStatement extends UserStatement
     }
   }
 
+  @Override
+  @SuppressWarnings("unchecked")
+  public <T> T unwrap(Class<T> iface)
+    throws SQLException
+  {
+    if (iface.isAssignableFrom(_pstmt.getClass()))
+      return (T)_pstmt;
+    else
+      return _pstmt.unwrap(iface);
+  }
+
+  @Override
+  public boolean isWrapperFor(Class<?> iface)
+    throws SQLException
+  {
+    if (iface.isAssignableFrom(_pstmt.getClass()))
+      return true;
+    else
+      return _pstmt.isWrapperFor(iface);
+  }
+
   /**
    * Sets the parameter as a null.
    */
@@ -731,80 +752,256 @@ public class UserPreparedStatement extends UserStatement
       _cacheItem.toIdle();
   }
 
+  public void setRowId(int parameterIndex, RowId x) throws SQLException
+  {
+    try {
+      _pstmt.setRowId(parameterIndex, x);
+    } catch (RuntimeException e) {
+      killPool();
+      throw e;
+    } catch (SQLException e) {
+      killPool();
+      throw e;
+    }
+
+  }
+
+  public void setNString(int parameterIndex, String value) throws SQLException
+  {
+    try {
+      _pstmt.setNString(parameterIndex, value);
+    } catch (RuntimeException e) {
+      killPool();
+      throw e;
+    } catch (SQLException e) {
+      killPool();
+      throw e;
+    }
+  }
+
+  public void setNCharacterStream(int parameterIndex, Reader value, long length)
+    throws SQLException
+  {
+    try {
+      _pstmt.setNCharacterStream(parameterIndex, value, length);
+    } catch (RuntimeException e) {
+      killPool();
+      throw e;
+    } catch (SQLException e) {
+      killPool();
+      throw e;
+    }
+  }
+
+  public void setNClob(int parameterIndex, NClob value) throws SQLException
+  {
+    try {
+      _pstmt.setNClob(parameterIndex, value);
+    } catch (RuntimeException e) {
+      killPool();
+      throw e;
+    } catch (SQLException e) {
+      killPool();
+      throw e;
+    }
+  }
+
+  public void setClob(int parameterIndex, Reader reader, long length)
+    throws SQLException
+  {
+    try {
+      _pstmt.setClob(parameterIndex, reader, length);
+    } catch (RuntimeException e) {
+      killPool();
+      throw e;
+    } catch (SQLException e) {
+      killPool();
+      throw e;
+    }
+  }
+
+  public void setBlob(int parameterIndex, InputStream inputStream, long length)
+    throws SQLException
+  {
+    try {
+      _pstmt.setBlob(parameterIndex, inputStream, length);
+    } catch (RuntimeException e) {
+      killPool();
+      throw e;
+    } catch (SQLException e) {
+      killPool();
+      throw e;
+    }
+  }
+
+  public void setNClob(int parameterIndex, Reader reader, long length)
+    throws SQLException
+  {
+    try {
+      _pstmt.setNClob(parameterIndex, reader, length);
+    } catch (RuntimeException e) {
+      killPool();
+      throw e;
+    } catch (SQLException e) {
+      killPool();
+      throw e;
+    }
+  }
+
+  public void setSQLXML(int parameterIndex, SQLXML xmlObject)
+    throws SQLException
+  {
+    try {
+      _pstmt.setSQLXML(parameterIndex, xmlObject);
+    } catch (RuntimeException e) {
+      killPool();
+      throw e;
+    } catch (SQLException e) {
+      killPool();
+      throw e;
+    }
+  }
+
+  public void setAsciiStream(int parameterIndex, InputStream x, long length)
+    throws SQLException
+  {
+    try {
+      _pstmt.setAsciiStream(parameterIndex, x, length);
+    } catch (RuntimeException e) {
+      killPool();
+      throw e;
+    } catch (SQLException e) {
+      killPool();
+      throw e;
+    }
+  }
+
+  public void setBinaryStream(int parameterIndex, InputStream x, long length)
+    throws SQLException
+  {
+    try {
+      _pstmt.setBinaryStream(parameterIndex, x, length);
+    } catch (RuntimeException e) {
+      killPool();
+      throw e;
+    } catch (SQLException e) {
+      killPool();
+      throw e;
+    }
+  }
+
+  public void setCharacterStream(int parameterIndex, Reader reader, long length)
+    throws SQLException
+  {
+    try {
+      _pstmt.setCharacterStream(parameterIndex, reader, length);
+    } catch (RuntimeException e) {
+      killPool();
+      throw e;
+    } catch (SQLException e) {
+      killPool();
+      throw e;
+    }
+  }
+
+  public void setAsciiStream(int parameterIndex, InputStream x)
+    throws SQLException
+  {
+    try {
+      _pstmt.setAsciiStream(parameterIndex, x);
+    } catch (RuntimeException e) {
+      killPool();
+      throw e;
+    } catch (SQLException e) {
+      killPool();
+      throw e;
+    }
+  }
+
+  public void setBinaryStream(int parameterIndex, InputStream x)
+    throws SQLException
+  {
+    try {
+      _pstmt.setBinaryStream(parameterIndex, x);
+    } catch (RuntimeException e) {
+      killPool();
+      throw e;
+    } catch (SQLException e) {
+      killPool();
+      throw e;
+    }
+  }
+
+  public void setCharacterStream(int parameterIndex, Reader reader)
+    throws SQLException
+  {
+    try {
+      _pstmt.setCharacterStream(parameterIndex,  reader);
+    } catch (RuntimeException e) {
+      killPool();
+      throw e;
+    } catch (SQLException e) {
+      killPool();
+      throw e;
+    }
+  }
+
+  public void setNCharacterStream(int parameterIndex, Reader value)
+    throws SQLException
+  {
+    try {
+      _pstmt.setNCharacterStream(parameterIndex, value);
+    } catch (RuntimeException e) {
+      killPool();
+      throw e;
+    } catch (SQLException e) {
+      killPool();
+      throw e;
+    }
+  }
+
+  public void setClob(int parameterIndex, Reader reader) throws SQLException
+  {
+    try {
+      _pstmt.setClob(parameterIndex, reader);
+    } catch (RuntimeException e) {
+      killPool();
+      throw e;
+    } catch (SQLException e) {
+      killPool();
+      throw e;
+    }
+  }
+
+  public void setBlob(int parameterIndex, InputStream inputStream)
+    throws SQLException
+  {
+    try {
+      _pstmt.setBlob(parameterIndex, inputStream);
+    } catch (RuntimeException e) {
+      killPool();
+      throw e;
+    } catch (SQLException e) {
+      killPool();
+      throw e;
+    }
+  }
+
+  public void setNClob(int parameterIndex, Reader reader) throws SQLException
+  {
+    try {
+      setNClob(parameterIndex, reader);
+    } catch (RuntimeException e) {
+      killPool();
+      throw e;
+    } catch (SQLException e) {
+      killPool();
+      throw e;
+    }
+  }
+
   public String toString()
   {
     return "UserPreparedStatement[" + _pstmt + "]";
   }
-
-    public void setRowId(int parameterIndex, RowId x) throws SQLException {
-        throw new UnsupportedOperationException("Not supported yet.");
-    }
-
-    public void setNString(int parameterIndex, String value) throws SQLException {
-        throw new UnsupportedOperationException("Not supported yet.");
-    }
-
-    public void setNCharacterStream(int parameterIndex, Reader value, long length) throws SQLException {
-        throw new UnsupportedOperationException("Not supported yet.");
-    }
-
-    public void setNClob(int parameterIndex, NClob value) throws SQLException {
-        throw new UnsupportedOperationException("Not supported yet.");
-    }
-
-    public void setClob(int parameterIndex, Reader reader, long length) throws SQLException {
-        throw new UnsupportedOperationException("Not supported yet.");
-    }
-
-    public void setBlob(int parameterIndex, InputStream inputStream, long length) throws SQLException {
-        throw new UnsupportedOperationException("Not supported yet.");
-    }
-
-    public void setNClob(int parameterIndex, Reader reader, long length) throws SQLException {
-        throw new UnsupportedOperationException("Not supported yet.");
-    }
-
-    public void setSQLXML(int parameterIndex, SQLXML xmlObject) throws SQLException {
-        throw new UnsupportedOperationException("Not supported yet.");
-    }
-
-    public void setAsciiStream(int parameterIndex, InputStream x, long length) throws SQLException {
-        throw new UnsupportedOperationException("Not supported yet.");
-    }
-
-    public void setBinaryStream(int parameterIndex, InputStream x, long length) throws SQLException {
-        throw new UnsupportedOperationException("Not supported yet.");
-    }
-
-    public void setCharacterStream(int parameterIndex, Reader reader, long length) throws SQLException {
-        throw new UnsupportedOperationException("Not supported yet.");
-    }
-
-    public void setAsciiStream(int parameterIndex, InputStream x) throws SQLException {
-        throw new UnsupportedOperationException("Not supported yet.");
-    }
-
-    public void setBinaryStream(int parameterIndex, InputStream x) throws SQLException {
-        throw new UnsupportedOperationException("Not supported yet.");
-    }
-
-    public void setCharacterStream(int parameterIndex, Reader reader) throws SQLException {
-        throw new UnsupportedOperationException("Not supported yet.");
-    }
-
-    public void setNCharacterStream(int parameterIndex, Reader value) throws SQLException {
-        throw new UnsupportedOperationException("Not supported yet.");
-    }
-
-    public void setClob(int parameterIndex, Reader reader) throws SQLException {
-        throw new UnsupportedOperationException("Not supported yet.");
-    }
-
-    public void setBlob(int parameterIndex, InputStream inputStream) throws SQLException {
-        throw new UnsupportedOperationException("Not supported yet.");
-    }
-
-    public void setNClob(int parameterIndex, Reader reader) throws SQLException {
-        throw new UnsupportedOperationException("Not supported yet.");
-    }
 }

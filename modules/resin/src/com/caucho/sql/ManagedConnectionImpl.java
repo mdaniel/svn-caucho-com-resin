@@ -132,7 +132,7 @@ public class ManagedConnectionImpl
     _factory = factory;
     _dbPool = factory.getDBPool();
     _id = _dbPool.newSpyId();
-      
+
     _driver = driver;
     _connConfig = connConfig;
     _credentials = credentials;
@@ -837,7 +837,7 @@ public class ManagedConnectionImpl
       }
       else if (driverConn == null) {
       }
-      else if (driverConn.getAutoCommit()) {
+      else if (_dbPool.isActiveTimeExpireCommit()) {
         log.finer("committing closed from active expired " + this);
         driverConn.commit();
       }

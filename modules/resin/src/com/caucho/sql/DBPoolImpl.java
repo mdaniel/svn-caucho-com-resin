@@ -195,6 +195,9 @@ public class DBPoolImpl implements AlarmListener, EnvironmentListener {
   private int _preparedStatementCacheSize = 0;
 
   private boolean _isWrapStatements = true;
+
+  // commit or rollback when max active time expires
+  private boolean _isActiveTimeExpireCommit;
   
   // The connections currently in the pool.
   // transient ArrayList<PoolItem> _connections = new ArrayList<PoolItem>();
@@ -1094,6 +1097,16 @@ public class DBPoolImpl implements AlarmListener, EnvironmentListener {
 
     if (log.isLoggable(Level.FINE))
       log.fine("closing pool " + getName());
+  }
+
+  public void setActiveTimeExpireCommit(boolean commit)
+  {
+    _isActiveTimeExpireCommit = commit;
+  }
+
+  public boolean isActiveTimeExpireCommit()
+  {
+    return _isActiveTimeExpireCommit;
   }
 
   /**

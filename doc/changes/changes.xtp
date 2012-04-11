@@ -12,6 +12,7 @@
 
 <s2 title="3.1.13 snapshot">
 <ul>
+<li>database: introduced new active-time-expire-commit tag to manage expired connections.(#4926, rep by T. Fukuda)</li>
 <li>servlet: fixed doOptions and doTrace HttpSerlvet methods.(#5021, rep by Andy Paladino)</li>
 <li>servlet: form-parameter-max limit for hash collisions (#4912, rep by georgbuschbeck)</li>
 <li>xa: rollback/forget (#4799)</li>

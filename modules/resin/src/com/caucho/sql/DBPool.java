@@ -468,6 +468,11 @@ public class DBPool
     _connectionPool.setMaxActiveTime(maxActiveTime.getPeriod());
   }
 
+  public void setActiveTimeExpireCommit(boolean commit)
+  {
+    getPool().setActiveTimeExpireCommit(commit);
+  }
+
   /**
    * Get the table to 'ping' to see if the connection is still live.
    */

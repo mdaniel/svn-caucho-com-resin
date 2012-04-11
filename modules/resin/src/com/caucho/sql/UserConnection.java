@@ -62,8 +62,7 @@ public class UserConnection implements java.sql.Connection {
   /**
    * Creates a new PooledConnection.
    *
-   * @param pool the pool the connection belongs to.
-   * @param conn the underlying connection.
+   * @param mConn the underlying connection.
    */
   UserConnection(ManagedConnectionImpl mConn)
   {
@@ -886,81 +885,78 @@ public class UserConnection implements java.sql.Connection {
       mConn.killPool();
   }
 
-  protected void finalize()
-    throws Exception
-  {
-    close();
-  }
-
-  public String toString()
-  {
-    return "UserConnection[" + _mConn + "]";
-  }
-
   public Clob createClob()
     throws SQLException
   {
-    throw new UnsupportedOperationException("Not supported yet.");
+    return getDriverConnection().createClob();
   }
 
   public Blob createBlob()
     throws SQLException
   {
-    throw new UnsupportedOperationException("Not supported yet.");
+    return getDriverConnection().createBlob();
   }
 
   public NClob createNClob()
     throws SQLException
   {
-    throw new UnsupportedOperationException("Not supported yet.");
+    return getDriverConnection().createNClob();
   }
 
   public SQLXML createSQLXML()
     throws SQLException
   {
-    throw new UnsupportedOperationException("Not supported yet.");
+    return getDriverConnection().createSQLXML();
   }
 
   public boolean isValid(int timeout)
     throws SQLException
   {
-    throw new UnsupportedOperationException("Not supported yet.");
+    return getDriverConnection().isValid(timeout);
   }
 
   public void setClientInfo(String name, String value)
     throws SQLClientInfoException
   {
-    throw new UnsupportedOperationException("Not supported yet.");
+    try {
+      getDriverConnection().setClientInfo(name, value);
+    } catch (SQLException e) {
+      throw new SQLClientInfoException(null, e);
+    }
   }
 
   public void setClientInfo(Properties properties)
     throws SQLClientInfoException
   {
-    throw new UnsupportedOperationException("Not supported yet.");
+    try {
+      getDriverConnection().setClientInfo(properties);
+    } catch (SQLException e) {
+      throw new SQLClientInfoException(null, e);
+    }
   }
 
   public String getClientInfo(String name)
     throws SQLException
   {
-    throw new UnsupportedOperationException("Not supported yet.");
+    return getDriverConnection().getClientInfo(name);
   }
 
   public Properties getClientInfo()
     throws SQLException
   {
-    throw new UnsupportedOperationException("Not supported yet.");
+    return getDriverConnection().getClientInfo();
   }
 
   public Array createArrayOf(String typeName, Object[] elements)
     throws SQLException
   {
-    throw new UnsupportedOperationException("Not supported yet.");
+    return getDriverConnection().createArrayOf(typeName,  elements);
   }
 
   public Struct createStruct(String typeName, Object[] attributes)
     throws SQLException
   {
-    throw new UnsupportedOperationException("Not supported yet.");
+    return createStruct(typeName, attributes);
   }
 
   public <T> T unwrap(Class<T> iface)
@@ -973,5 +969,16 @@ public class UserConnection implements java.sql.Connection {
     throws SQLException
   {
     return iface.isAssignableFrom(getConnection().getClass());
+  }
+
+  protected void finalize()
+    throws Exception
+  {
+    close();
+  }
+
+  public String toString()
+  {
+    return "UserConnection[" + _mConn + "]";
   }
 }
