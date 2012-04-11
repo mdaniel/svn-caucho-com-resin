@@ -35,7 +35,6 @@ import com.caucho.config.types.Period;
 import com.caucho.loader.Environment;
 import com.caucho.loader.EnvironmentClassLoader;
 import com.caucho.loader.EnvironmentListener;
-import com.caucho.log.Log;
 import com.caucho.util.Alarm;
 import com.caucho.util.AlarmListener;
 import com.caucho.util.L10N;
@@ -197,7 +196,7 @@ public class DBPoolImpl implements AlarmListener, EnvironmentListener {
   private boolean _isWrapStatements = true;
 
   // commit or rollback when max active time expires
-  private boolean _isActiveTimeExpireCommit;
+  private boolean _isCommitOnTimeout;
   
   // The connections currently in the pool.
   // transient ArrayList<PoolItem> _connections = new ArrayList<PoolItem>();
@@ -1099,14 +1098,14 @@ public class DBPoolImpl implements AlarmListener, EnvironmentListener {
       log.fine("closing pool " + getName());
   }
 
-  public void setActiveTimeExpireCommit(boolean commit)
+  public void setCommitOnTimeout(boolean commit)
   {
-    _isActiveTimeExpireCommit = commit;
+    _isCommitOnTimeout = commit;
   }
 
-  public boolean isActiveTimeExpireCommit()
+  public boolean isCommitOnTimeout()
   {
-    return _isActiveTimeExpireCommit;
+    return _isCommitOnTimeout;
   }
 
   /**

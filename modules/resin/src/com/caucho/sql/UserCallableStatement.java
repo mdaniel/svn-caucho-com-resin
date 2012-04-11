@@ -490,8 +490,10 @@ public class UserCallableStatement extends UserPreparedStatement
   public <T> T unwrap(Class<T> iface)
     throws SQLException
   {
-    if (iface.isAssignableFrom(_cstmt.getClass()))
-      return (T)_cstmt;
+    if (iface.isAssignableFrom(this.getClass()))
+      return (T) this;
+    else if (iface.isAssignableFrom(_cstmt.getClass()))
+      return (T) _cstmt;
     else
       return _cstmt.unwrap(iface);
   }
@@ -500,7 +502,9 @@ public class UserCallableStatement extends UserPreparedStatement
   public boolean isWrapperFor(Class<?> iface)
     throws SQLException
   {
-    if (iface.isAssignableFrom(_cstmt.getClass()))
+    if (iface.isAssignableFrom(this.getClass()))
+      return true;
+    else if (iface.isAssignableFrom(_cstmt.getClass()))
       return true;
     else
       return _cstmt.isWrapperFor(iface);
@@ -1125,5 +1129,10 @@ public class UserCallableStatement extends UserPreparedStatement
   public void setNClob(String parameterName, Reader reader) throws SQLException
   {
     _cstmt.setNClob(parameterName, reader);
+  }
+
+  public String toString()
+  {
+    return this.getClass().getSimpleName() + "[" + _pstmt + "]";
   }
 }

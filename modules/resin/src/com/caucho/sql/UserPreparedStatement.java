@@ -204,8 +204,10 @@ public class UserPreparedStatement extends UserStatement
   public <T> T unwrap(Class<T> iface)
     throws SQLException
   {
-    if (iface.isAssignableFrom(_pstmt.getClass()))
-      return (T)_pstmt;
+    if (iface.isAssignableFrom(this.getClass()))
+      return (T) this;
+    else if (iface.isAssignableFrom(_pstmt.getClass()))
+      return (T) _pstmt;
     else
       return _pstmt.unwrap(iface);
   }
@@ -214,7 +216,9 @@ public class UserPreparedStatement extends UserStatement
   public boolean isWrapperFor(Class<?> iface)
     throws SQLException
   {
-    if (iface.isAssignableFrom(_pstmt.getClass()))
+    if (iface.isAssignableFrom(this.getClass()))
+      return true;
+    else if (iface.isAssignableFrom(_pstmt.getClass()))
       return true;
     else
       return _pstmt.isWrapperFor(iface);

@@ -837,7 +837,7 @@ public class ManagedConnectionImpl
       }
       else if (driverConn == null) {
       }
-      else if (_dbPool.isActiveTimeExpireCommit()) {
+      else if (_dbPool.isCommitOnTimeout()) {
         log.finer("committing closed from active expired " + this);
         driverConn.commit();
       }

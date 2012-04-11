@@ -94,7 +94,7 @@ element database {
   &amp; driver+
   &amp; connection-wait-time
   &amp; max-active-time
-  &amp; active-time-expire-commit
+  &amp; commit-on-timeout
   &amp; max-close-statements
   &amp; max-connections
   &amp; max-create-connections
@@ -132,10 +132,10 @@ also automatically close a connection at the end of a request.</p>
 <default>6h</default>
 </defun>
 
-<defun title="&lt;active-time-expire-commit>" version="Resin 3.1">
+<defun title="&lt;commit-on-timeout>" version="Resin 3.1">
   <parents>database</parents>
 
-  <p>&lt;active-time-expire-commit> configures commit or rollback action to
+  <p>&lt;commit-on-timeout> configures commit or rollback action to
   issue before closing connection that remained active past its configured
   max-active-time.</p>
 

@@ -35,7 +35,6 @@ import com.caucho.config.types.Period;
 import com.caucho.jca.ConnectionPool;
 import com.caucho.jca.ResourceManagerImpl;
 import com.caucho.loader.EnvironmentLocal;
-import com.caucho.log.Log;
 import com.caucho.management.j2ee.J2EEManagedObject;
 import com.caucho.management.j2ee.JDBCDataSource;
 import com.caucho.management.j2ee.JDBCResource;
@@ -468,9 +467,9 @@ public class DBPool
     _connectionPool.setMaxActiveTime(maxActiveTime.getPeriod());
   }
 
-  public void setActiveTimeExpireCommit(boolean commit)
+  public void setCommitOnTimeout(boolean commit)
   {
-    getPool().setActiveTimeExpireCommit(commit);
+    getPool().setCommitOnTimeout(commit);
   }
 
   /**

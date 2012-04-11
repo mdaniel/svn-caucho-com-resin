@@ -959,16 +959,33 @@ public class UserConnection implements java.sql.Connection {
     return createStruct(typeName, attributes);
   }
 
+  @SuppressWarnings("unchecked")
   public <T> T unwrap(Class<T> iface)
     throws SQLException
   {
-    return (T) getConnection();
+    if (iface.isAssignableFrom(this.getClass()))
+      return (T) this;
+
+    Connection conn = getConnection();
+
+    if (iface.isAssignableFrom(conn.getClass()))
+      return (T)conn;
+    else
+      return conn.unwrap(iface);
   }
 
   public boolean isWrapperFor(Class<?> iface)
     throws SQLException
   {
-    return iface.isAssignableFrom(getConnection().getClass());
+    if (iface.isAssignableFrom(this.getClass()))
+      return true;
+
+    Connection conn = getConnection();
+
+    if (iface.isAssignableFrom(conn.getClass()))
+      return true;
+    else
+      return conn.isWrapperFor(iface);
   }
 
   protected void finalize()
