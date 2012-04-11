@@ -124,6 +124,8 @@ public class ManagedConnectionImpl
   
   // returns true if a ping is required
   private boolean _isPingRequired;
+  
+  private boolean _isPastActiveTime;
 
   ManagedConnectionImpl(ManagedFactoryImpl factory,
                         DriverConfig driver,
@@ -890,6 +892,23 @@ public class ManagedConnectionImpl
     }
 
     try {
+      if (! _isPastActiveTime) {
+      }
+      else if (driverConn == null) {
+      }
+      else if (_dbPool.isCommitOnTimeout()) {
+        log.finer("committing closed from active expired " + this);
+        driverConn.commit();
+      }
+      else {
+        log.finer("rolling back closed from active expired " + this);
+        driverConn.rollback();
+      }
+    } catch (SQLException e) {
+      throw new ResourceException(e);
+    }
+
+    try {
       if (poolConn != null) {
         poolConn.close();
         // env/11m0
@@ -911,6 +930,11 @@ public class ManagedConnectionImpl
   public String toString()
   {
     return getClass().getSimpleName() + "[" + _id + "]";
+  }
+
+  public void setPastActiveTime(boolean isPastActiveTime)
+  {
+    _isPastActiveTime = isPastActiveTime;
   }
 
   class LocalTransactionImpl implements LocalTransaction {

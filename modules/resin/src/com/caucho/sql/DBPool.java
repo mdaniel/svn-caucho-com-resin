@@ -545,6 +545,11 @@ public class DBPool
     _connectionPool.setMaxActiveTime(maxActiveTime.getPeriod());
   }
 
+  public void setCommitOnTimeout(boolean commitOnTimeout)
+  {
+    getPool().setCommitOnTimeout(commitOnTimeout);
+  }
+
   /**
    * Get the table to 'ping' to see if the connection is still live.
    */

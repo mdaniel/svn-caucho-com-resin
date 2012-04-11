@@ -29,6 +29,7 @@
 
 package com.caucho.env.dbpool;
 
+import com.caucho.sql.ManagedConnectionImpl;
 import com.caucho.transaction.ManagedResource;
 import com.caucho.transaction.ManagedXAResource;
 import com.caucho.transaction.UserTransactionImpl;
@@ -91,6 +92,7 @@ class ManagedPoolItem implements ConnectionEventListener, ManagedXAResource {
   private ManagedPoolItem _xaNext;
 
   private boolean _hasConnectionError;
+  private boolean _isPastActiveTime;
 
   private long _poolStartTime;
   private long _poolEventTime;
@@ -323,6 +325,7 @@ class ManagedPoolItem implements ConnectionEventListener, ManagedXAResource {
       else if (isActive &&
                0 < maxActiveTime && _poolEventTime + maxActiveTime < now) {
         isDead = true;
+        _isPastActiveTime = true;
         log.warning("closing pool item from active timeout:" + this);
       }
 
@@ -354,7 +357,6 @@ class ManagedPoolItem implements ConnectionEventListener, ManagedXAResource {
    *
    * <p>Nested connections are not reused.
    *
-   * @param xid the current transaction id
    *
    * @return true if the pool item has been allocated
    */
@@ -657,6 +659,14 @@ class ManagedPoolItem implements ConnectionEventListener, ManagedXAResource {
   public boolean isConnectionError()
   {
     return _hasConnectionError;
+  }
+
+  /**
+   * Returns true if connection exceeded max-active-time
+   */
+  public boolean isPastActiveTime()
+  {
+    return _isPastActiveTime;
   }
 
   /**
@@ -1123,6 +1133,12 @@ class ManagedPoolItem implements ConnectionEventListener, ManagedXAResource {
 
     if (mConn == null)
       return;
+
+    if (!_isPastActiveTime) {
+    }
+    else if (ManagedConnectionImpl.class.isAssignableFrom(mConn.getClass())) {
+      ((ManagedConnectionImpl) mConn).setPastActiveTime(_isPastActiveTime);
+    }
 
     _cm.removeItem(this, mConn);
 

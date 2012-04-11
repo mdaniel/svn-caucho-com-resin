@@ -149,6 +149,8 @@ public class DBPoolImpl implements AlarmListener, EnvironmentListener {
   private long _maxIdleTime = MAX_IDLE_TIME;
   // max time a connection is allowed to be active (6 hr)
   private long _maxActiveTime = 6L * 3600L * 1000L;
+  // commit or rollback when max active time expires
+  private boolean _isCommitOnTimeout;
   // max time a connection is allowed in the pool
   private long _maxPoolTime = 24L * 3600L * 1000L;
 
@@ -612,6 +614,16 @@ public class DBPoolImpl implements AlarmListener, EnvironmentListener {
       return -1;
     else
       return _maxActiveTime;
+  }
+
+  public void setCommitOnTimeout(boolean commitOnTimeout)
+  {
+    _isCommitOnTimeout = commitOnTimeout;
+  }
+
+  public boolean isCommitOnTimeout()
+  {
+    return _isCommitOnTimeout;
   }
 
   /**
