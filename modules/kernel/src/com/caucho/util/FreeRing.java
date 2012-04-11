@@ -55,22 +55,22 @@ public final class FreeRing<T> {
     return _ringQueue.getSize();
   }
   
-  public int getHead()
+  public long getHead()
   {
     return _ringQueue.getHead();
   }
   
-  public int getHeadAlloc()
+  public long getHeadAlloc()
   {
     return _ringQueue.getHeadAlloc();
   }
   
-  public int getTail()
+  public long getTail()
   {
     return _ringQueue.getTail();
   }
   
-  public int getTailAlloc()
+  public long getTailAlloc()
   {
     return _ringQueue.getTailAlloc();
   }

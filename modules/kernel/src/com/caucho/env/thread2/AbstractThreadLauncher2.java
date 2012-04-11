@@ -31,6 +31,7 @@ package com.caucho.env.thread2;
 
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.atomic.AtomicLong;
+import java.util.logging.Level;
 import java.util.logging.Logger;
 
 import com.caucho.config.ConfigException;
@@ -588,11 +589,13 @@ abstract public class AbstractThreadLauncher2 extends AbstractTaskWorker2 {
     if (! _isThrottle) {
       _isThrottle = true;
       
-      String msg = (this + " " + _throttleCount
-                    + " threads created in " + _throttlePeriod + "ms"
-                    + " sleep=" + _throttleSleep + "ms");
+      if (_throttleSleep > 0 || log.isLoggable(Level.FINE)) {
+        String msg = (this + " " + _throttleCount
+                      + " threads created in " + _throttlePeriod + "ms"
+                      + " sleep=" + _throttleSleep + "ms");
       
-      onThrottle(msg);
+        onThrottle(msg);
+      }
     }
     
     if (_throttleSleep > 0) {

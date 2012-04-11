@@ -306,8 +306,9 @@ implements LockableStream, SendfileOutputStream
     int writeLength = _writeLength;
     
     StreamImpl source = _source;
-    if (source == null)
+    if (source == null) {
       return;
+    }
 
     if (bufferLength <= length) {
       /*
@@ -320,6 +321,7 @@ implements LockableStream, SendfileOutputStream
       if (writeLength > 0) {
         source.write(buffer, 0, writeLength, false);
       }
+      
       source.write(buf, offset, length, false);
       _writeLength = 0;
       _position += length;
@@ -328,10 +330,7 @@ implements LockableStream, SendfileOutputStream
     }
     
     while (length > 0) {
-      int sublen = bufferLength - writeLength;
-
-      if (length < sublen)
-        sublen = length;
+      int sublen = Math.min(length, bufferLength - writeLength);
 
       System.arraycopy(buf, offset, buffer, writeLength, sublen);
 
@@ -348,7 +347,6 @@ implements LockableStream, SendfileOutputStream
     }
 
     _writeLength = writeLength;
-
  
     if (_implicitFlush)
       flush();
@@ -623,8 +621,7 @@ implements LockableStream, SendfileOutputStream
         sublen = writeBuffer.length - writeLength;
       }
       
-      if (length < sublen)
-        sublen = length;
+      sublen = Math.min(sublen, length);
 
       for (int i = sublen - 1; i >= 0; i--) {
         writeBuffer[writeLength + i] = (byte) buffer[offset + i];

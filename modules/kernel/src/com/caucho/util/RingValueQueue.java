@@ -31,6 +31,7 @@ package com.caucho.util;
 
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicInteger;
+import java.util.concurrent.atomic.AtomicLong;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -46,8 +47,8 @@ public class RingValueQueue<T> {
   private final AtomicInteger _tailAlloc = new AtomicInteger();
   private final AtomicInteger _tail = new AtomicInteger();
   
+  private final int _size;
   private final int _mask;
-  private final int _updateSize;
   
   private final AtomicBoolean _isOfferWait = new AtomicBoolean();
   
@@ -59,44 +60,44 @@ public class RingValueQueue<T> {
       size *= 2;
     }
     
+    _size = size;
     _ring = new Item[size];
     _mask = size - 1;
-    _updateSize = size >> 2;
     
     for (int i = 0; i < _ring.length; i++) {
       _ring[i] = new Item<T>();
     }
   }
   
-  public boolean isEmpty()
+  public final boolean isEmpty()
   {
     return _head.get() == _tail.get();
   }
   
-  public int getSize()
+  public final int getSize()
   {
     int head = _head.get();
     int tail = _tail.get();
     
-    return (_ring.length + head - tail) & _mask;
+    return (head + _size - tail) & _mask;
   }
   
-  public int getHead()
+  public final int getHead()
   {
     return _head.get();
   }
   
-  public int getHeadAlloc()
+  public final int getHeadAlloc()
   {
     return _headAlloc.get();
   }
   
-  public int getTail()
+  public final int getTail()
   {
     return _tail.get();
   }
   
-  public int getTailAlloc()
+  public final int getTailAlloc()
   {
     return _tailAlloc.get();
   }
@@ -138,7 +139,7 @@ public class RingValueQueue<T> {
         }
       }
       else if (headAllocRef.compareAndSet(headAlloc, nextHeadAlloc)) {
-        Item<T> item = _ring[headAlloc];
+        Item<T> item = get(headAlloc);
         item.set(value);
         
         if (! headRef.compareAndSet(headAlloc, nextHeadAlloc)) {
@@ -154,13 +155,10 @@ public class RingValueQueue<T> {
   
   private final boolean finishOffer()
   {
-    final AtomicInteger headAllocRef = _headAlloc;
-    final AtomicInteger headRef = _head;
+    final int head = _head.get();
+    final int headAlloc = _headAlloc.get();
     
-    int head = headRef.get();
-    int headAlloc = headAllocRef.get();
-    
-    if (head != headAlloc && _ring[head].isSet()) {
+    if (head != headAlloc && get(head).isSet()) {
       finishOffer(head);
       return true;
     }
@@ -174,11 +172,10 @@ public class RingValueQueue<T> {
     final AtomicInteger headRef = _head;
     final AtomicInteger headAllocRef = _headAlloc;
     final int mask = _mask;
-    
-    final Item<T> []ring = _ring;
 
     // limit retry in high-contention situation, since we've acked the entry
-    int retryCount = 1024 + ((index & 0xf) << 8);
+    final int retryMax = ((index & 0xf) + 1) << 4;
+    int retryCount = retryMax;
     int count = 4;
     
     while (retryCount-- >= 0) {
@@ -189,28 +186,29 @@ public class RingValueQueue<T> {
         return;
       }
       
-      if (ring[head].isSet()) {
+      if (get(head).isSet()) {
         int nextHead = (head + 1) & mask;
         
         if (headRef.compareAndSet(head, nextHead) && count-- <= 0) {
           return;
         }
+        
+        retryCount = retryMax;
       }
     }
   }
  
   public final T poll()
   {
-    int nextTail;
-    int tailAlloc;
+    // long nextTail;
+    // long tailAlloc;
     
     final AtomicInteger tailAllocRef = _tailAlloc;
     final AtomicInteger tailRef = _tail;
     final AtomicInteger headRef = _head;
-    final int mask = _mask;
     
     while (true) {
-      tailAlloc = tailAllocRef.get();
+      int tailAlloc = tailAllocRef.get();
       int head = headRef.get();
       
       if (head == tailAlloc) {
@@ -219,10 +217,11 @@ public class RingValueQueue<T> {
         }
       }
       
-      nextTail = (tailAlloc + 1) & mask;
+      final int nextTail = (tailAlloc + 1) & _mask;
       if (tailAllocRef.compareAndSet(tailAlloc, nextTail)) {
-        Item<T> item = _ring[tailAlloc];
-        T value = item.getAndClear();
+        final Item<T> item = get(tailAlloc);
+        
+        final T value = item.getAndClear();
         
         if (! tailRef.compareAndSet(tailAlloc, nextTail)) {
           completePoll(tailAlloc);
@@ -235,13 +234,10 @@ public class RingValueQueue<T> {
   
   private final boolean finishPoll()
   {
-    final AtomicInteger tailAllocRef = _tailAlloc;
-    final AtomicInteger tailRef = _tail;
+    final int tail = _tail.get();
+    final int headAlloc = _tailAlloc.get();
     
-    int tail = tailRef.get();
-    int headAlloc = tailAllocRef.get();
-    
-    if (tail != headAlloc && ! _ring[tail].isSet()) {
+    if (tail != headAlloc && ! get(tail).isSet()) {
       completePoll(tail);
       return true;
     }
@@ -254,14 +250,13 @@ public class RingValueQueue<T> {
   {
     final AtomicInteger tailRef = _tail;
     final AtomicInteger tailAllocRef = _tailAlloc;
-    final int mask = _mask;
-    final Item<T> []ring = _ring;
     
     // int ringLength = ring.length;
     // int halfSize = _halfSize;
     
     // limit retry in high-contention situation
-    int retryCount = 1024 + ((index & 0xf) << 8);
+    final int retryMax = ((index & 0xf) + 1) << 4;
+    int retryCount = retryMax;
     int count = 4;
 
     while (retryCount-- >= 0) {
@@ -273,26 +268,27 @@ public class RingValueQueue<T> {
         return;
       }
       
-      if (! ring[tail].isSet()) {
-        int nextTail = (tail + 1) & mask;
+      if (! get(tail).isSet()) {
+        final int nextTail = (tail + 1) & _mask;
         
         if (tailRef.compareAndSet(tail, nextTail) && count-- <= 0) {
           wakeAvailable();
           return;
         }
+        
+        retryCount = retryMax;
       }
     }
   }
   
   private void waitForAvailable(int headAlloc, int tail)
   {
-    _isOfferWait.set(true);
-    
     if (_headAlloc.get() == headAlloc && _tail.get() == tail) {
       synchronized (_isOfferWait) {
         if (_headAlloc.get() == headAlloc
-            && _tail.get() == tail
-            && _isOfferWait.get()) {
+            && _tail.get() == tail) {
+          _isOfferWait.set(true);
+
           try {
             _isOfferWait.wait(100);
           } catch (Exception e) {
@@ -305,12 +301,12 @@ public class RingValueQueue<T> {
   
   private boolean isFull()
   {
-    int head = _head.get();
-    int tail = _tail.get();
-    
-    int nextHead = (head + 1) & _mask;
-    
-    return nextHead == tail;
+    return ((_head.get() + 1) & _mask) == _tail.get();
+  }
+  
+  private Item<T> get(int index)
+  {
+    return _ring[index];
   }
   
   private void wakeAvailable()
