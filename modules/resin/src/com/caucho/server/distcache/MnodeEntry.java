@@ -36,6 +36,7 @@ import java.sql.Blob;
 import com.caucho.distcache.ExtCacheEntry;
 import com.caucho.util.CurrentTime;
 import com.caucho.util.HashKey;
+import com.caucho.vfs.StreamSource;
 
 /**
  * An entry in the cache map
@@ -362,7 +363,7 @@ public final class MnodeEntry extends MnodeValue implements ExtCacheEntry {
     else
       return null;
   }
-
+  
   public Blob getBlob()
   {
     return _blob;
@@ -373,10 +374,16 @@ public final class MnodeEntry extends MnodeValue implements ExtCacheEntry {
     _blob = blob;
   }
   
+  @Override
+  public StreamSource getValueStream()
+  {
+    throw new UnsupportedOperationException(getClass().getName());
+  }
+  
   /**
    * Creates an update with local data removed for remote update.
    */
-  public MnodeUpdate createRemoteUpdate()
+  public MnodeUpdate getRemoteUpdate()
   {
     return new MnodeUpdate(getValueHash(), 0, getValueLength(), getVersion(),
                            this,

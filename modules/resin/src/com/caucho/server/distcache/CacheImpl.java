@@ -456,14 +456,12 @@ public class CacheImpl<K,V>
    * @return true if the update succeeds, false if it fails
    */
   @Override
-  public boolean compareVersionAndPut(Object key,
-                               long version,
-                               InputStream inputStream)
+  public boolean putIfNew(Object key,
+                          MnodeUpdate update,
+                          InputStream is)
     throws IOException
   {
-    // put(key, inputStream);
-
-    return true;
+    return getDistCacheEntry(key).putIfNew(update, is);
   }
 
   /*

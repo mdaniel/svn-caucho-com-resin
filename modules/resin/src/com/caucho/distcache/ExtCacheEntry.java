@@ -35,7 +35,9 @@ import java.io.OutputStream;
 import javax.cache.Cache;
 
 import com.caucho.server.distcache.CacheConfig;
+import com.caucho.server.distcache.MnodeUpdate;
 import com.caucho.util.HashKey;
+import com.caucho.vfs.StreamSource;
 
 /**
  * Provides additional information about an entry in a {@link javax.cache.Cache}.
@@ -55,6 +57,7 @@ public interface ExtCacheEntry<K,V> extends Cache.Entry<K,V>
   /**
    * Returns the item's value
    */
+  @Override
   public V getValue();
 
   /**
@@ -66,6 +69,8 @@ public interface ExtCacheEntry<K,V> extends Cache.Entry<K,V>
    * Returns the value length
    */
   public long getValueLength();
+  
+  public StreamSource getValueStream();
 
   /**
    * Returns the idle timeout
@@ -115,6 +120,8 @@ public interface ExtCacheEntry<K,V> extends Cache.Entry<K,V>
    * @return
    */
   public long getVersion();
+
+  public MnodeUpdate getRemoteUpdate();
   
   /**
    * Loads the data to the output stream.

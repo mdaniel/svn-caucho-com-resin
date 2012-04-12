@@ -235,6 +235,12 @@ public class WebSocketBlockingQueue<T> implements BlockingQueue<T>
       _ws = ws;
       _encoder = encoder;
     }
+    
+    @Override
+    public String getThreadName()
+    {
+      return toString();
+    }
 
     @Override
     public void process(T value) throws Exception

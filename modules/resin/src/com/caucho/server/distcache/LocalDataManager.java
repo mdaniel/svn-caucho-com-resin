@@ -93,6 +93,25 @@ final class LocalDataManager
                            update);
   }
 
+  MnodeUpdate writeData(MnodeValue update, 
+                       long version,
+                       InputStream is)
+  {
+    try {
+      long valueHash = update.getValueHash();
+      long valueLength = update.getValueLength();
+      long valueDataId = getDataBacking().saveData(is, (int) valueLength);
+    
+      return new MnodeUpdate(valueHash,
+                             valueDataId,
+                             valueLength,
+                             version,
+                             update);
+    } catch (IOException e) {
+      throw new RuntimeException(e);
+    }
+  }
+
   final public MnodeUpdate writeValue(MnodeEntry mnodeValue,
                                       Object value,
                                       CacheConfig config)
@@ -256,6 +275,16 @@ final class LocalDataManager
     }
   }
   
+  DataStreamSource createDataSource(long valueDataId)
+  {
+    DataStore dataStore = getDataBacking().getDataStore();
+    
+    if (valueDataId > 0)
+      return new DataStreamSource(valueDataId, dataStore);
+    else
+      return null;
+  }
+
   private void loadData(Blob blob, WriteStream out)
     throws IOException
   {

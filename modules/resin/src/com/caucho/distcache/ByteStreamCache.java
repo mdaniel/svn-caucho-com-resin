@@ -33,6 +33,8 @@ import java.io.InputStream;
 import java.io.OutputStream;
 import java.io.IOException;
 
+import com.caucho.server.distcache.MnodeUpdate;
+
 /**
  * Interface for a distributed cache.
  */
@@ -90,9 +92,26 @@ public interface ByteStreamCache
    *
    * @return true if the update succeeds, false if it fails
    */
+  /*
   public boolean compareVersionAndPut(Object key,
                                long oldVersion,
                                InputStream is)
+    throws IOException;
+    */
+  
+  /**
+   * Updates the cache if the old value hash matches the current value.
+   * A null value for the old value hash only adds the entry if it's new
+   *
+   * @param key the key to compare
+   * @param oldVersion the version of the old value, returned by getEntry
+   * 
+   *
+   * @return true if the update succeeds, false if it fails
+   */
+  public boolean putIfNew(Object key,
+                          MnodeUpdate update,
+                          InputStream is)
     throws IOException;
 
   /**

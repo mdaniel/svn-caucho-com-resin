@@ -98,6 +98,8 @@ public class ValueActorQueue<T>
   }
   
   public interface ValueProcessor<T> {
+    public String getThreadName();
+    
     public void process(T value) throws Exception;
     
     public void onProcessComplete() throws Exception;
@@ -142,6 +144,12 @@ public class ValueActorQueue<T>
     ValueItemProcessor(ValueProcessor<T> processor)
     {
       _processor = processor;
+    }
+
+    @Override
+    public String getThreadName()
+    {
+      return _processor.getThreadName();
     }
     
     @Override

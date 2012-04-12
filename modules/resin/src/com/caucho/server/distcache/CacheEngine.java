@@ -48,7 +48,7 @@ public interface CacheEngine
                                 MnodeEntry mnodeEntry, 
                                 long now);
   
-  public MnodeEntry get(DistCacheEntry entry, CacheConfig config);
+  public MnodeValue get(DistCacheEntry entry, CacheConfig config);
   
   /*
   public boolean loadData(HashKey key, 
@@ -58,7 +58,7 @@ public interface CacheEngine
 
   public void put(HashKey key, 
                   MnodeUpdate mnodeUpdate,
-                  MnodeEntry mnodeValue);
+                  MnodeValue mnodeValue);
 
   public void updateTime(HashKey key, MnodeEntry mnodeValue);
 

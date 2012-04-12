@@ -59,6 +59,12 @@ class NautilusCheckpointPublisher
   
   class CheckpointProcessor implements ValueProcessor<Long> {
     @Override
+    public String getThreadName()
+    {
+      return toString();
+    }
+    
+    @Override
     public void process(Long blockAddress) throws Exception
     {
       NautilusRingItem entry = _nautilusQueue.startOffer(true);

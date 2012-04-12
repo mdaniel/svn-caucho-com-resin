@@ -41,10 +41,19 @@ public class JournalWriteActor
   implements ItemProcessor<JournalRingItem>
 {
   private final JournalFile _journalFile;
+  private String _threadName;
   
   public JournalWriteActor(JournalFile journalFile)
   {
     _journalFile = journalFile;
+    
+    _threadName = toString();
+  }
+  
+  @Override
+  public String getThreadName()
+  {
+    return _threadName;
   }
 
   @Override

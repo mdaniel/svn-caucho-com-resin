@@ -225,9 +225,19 @@ public class AccessLogWriter extends AbstractRolloverLog
   }
 
   class LogWriterTask extends AbstractWorkerQueue<LogBuffer> {
+    private final String _threadName;
+    
     LogWriterTask()
     {
       super(16 * 1024);
+      
+      _threadName = toString();
+    }
+    
+    @Override
+    public String getThreadName()
+    {
+      return _threadName;
     }
 
     @Override

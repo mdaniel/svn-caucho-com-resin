@@ -492,7 +492,7 @@ public final class ActorQueue<T extends RingItem>
     @Override
     protected String getThreadName()
     {
-      return String.valueOf(_consumer._processor);
+      return _consumer._processor.getThreadName();
     }
     
     @Override
@@ -511,6 +511,8 @@ public final class ActorQueue<T extends RingItem>
   }
   
   public interface ItemProcessor<T extends RingItem> {
+    public String getThreadName();
+    
     public void process(T item) throws Exception;
     
     public void onProcessComplete() throws Exception;

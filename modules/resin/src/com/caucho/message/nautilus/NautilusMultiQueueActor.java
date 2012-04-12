@@ -60,6 +60,8 @@ class NautilusMultiQueueActor
   
   private static final long C_OP = 0x1f;
   
+  private String _threadName;
+  
   private HashMap<Long,NautilusQueue> _queueMap
     = new HashMap<Long,NautilusQueue>();
   
@@ -73,6 +75,11 @@ class NautilusMultiQueueActor
   private long _lastCheckpoint;
   
   private int _size;
+  
+  public NautilusMultiQueueActor()
+  {
+    _threadName = toString();
+  }
 
   void setNautilusCheckpointPublisher(NautilusCheckpointPublisher pub)
   {
@@ -92,6 +99,12 @@ class NautilusMultiQueueActor
   public long getDequeueCount()
   {
     return _dequeueCount;
+  }
+  
+  @Override
+  public String getThreadName()
+  {
+    return _threadName;
   }
 
   @Override

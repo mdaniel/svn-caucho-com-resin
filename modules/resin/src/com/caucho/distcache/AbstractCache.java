@@ -67,6 +67,7 @@ import com.caucho.server.distcache.DataStore;
 import com.caucho.server.distcache.DistCacheSystem;
 import com.caucho.server.distcache.CacheEngine;
 import com.caucho.server.distcache.MnodeStore;
+import com.caucho.server.distcache.MnodeUpdate;
 import com.caucho.util.HashKey;
 import com.caucho.util.L10N;
 import com.caucho.util.LruCache;
@@ -643,6 +644,23 @@ public class AbstractCache
   }
 
   /**
+   * Puts a new item in the cache with a custom idle
+   * timeout (used for sessions).
+   *
+   * @param key         the key of the item to put
+   * @param is          the value of the item to put
+   * @param idleTimeout the idle timeout for the item
+   */
+  @Override
+  public boolean putIfNew(Object key,
+                          MnodeUpdate update,
+                          InputStream is)
+    throws IOException
+  {
+    return _delegate.putIfNew(key, update, is);
+  }
+
+  /**
    * Puts a new item in the cache.
    *
    * @param key   the key of the item to put
@@ -680,6 +698,7 @@ public class AbstractCache
    * @param inputStream the new value
    * @return true if the update succeeds, false if it fails
    */
+  /*
   @Override
   public boolean compareVersionAndPut(Object key,
                                       long version,
@@ -688,6 +707,7 @@ public class AbstractCache
   {
     return _delegate.compareVersionAndPut(key, version, inputStream);
   }
+  */
   
   /**
    * Returns the entry for the given key, returning the live item.

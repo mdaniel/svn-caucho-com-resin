@@ -66,6 +66,14 @@ abstract public class AbstractWorkerQueue<T> implements ValueProcessor<T>
   }
   
   @Override
+  public String getThreadName()
+  {
+    long id = Thread.currentThread().getId();
+    
+    return _queueConsumer.toString() + "-" + id;
+  }
+  
+  @Override
   abstract public void process(T value);
   
   @Override

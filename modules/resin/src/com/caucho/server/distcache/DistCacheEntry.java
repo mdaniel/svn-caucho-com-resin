@@ -42,6 +42,7 @@ import com.caucho.util.Alarm;
 import com.caucho.util.CurrentTime;
 import com.caucho.util.HashKey;
 import com.caucho.util.Hex;
+import com.caucho.vfs.StreamSource;
 
 /**
  * An entry in the cache map
@@ -187,6 +188,18 @@ public class DistCacheEntry implements ExtCacheEntry {
   }
 
   /**
+   * Returns the value of the cache entry.
+   */
+  public StreamSource getValueStream()
+  {
+    try {
+      return _cacheService.getValueStream(this);
+    } catch (IOException e) {
+      throw new RuntimeException(e);
+    }
+  }
+
+  /**
    * Returns the object for the given key, checking the backing if necessary
    */
   public MnodeEntry getMnodeValue(CacheConfig config)
@@ -253,6 +266,16 @@ public class DistCacheEntry implements ExtCacheEntry {
   }
 
   /**
+   * Sets the value by an input stream
+   */
+  public boolean putIfNew(MnodeUpdate update,
+                          InputStream is)
+    throws IOException
+  {
+    return _cacheService.putIfNew(this, update, is);
+  }
+
+  /**
    * Sets the current value
    */
   public Object getAndPut(Object value, CacheConfig config)
@@ -279,22 +302,6 @@ public class DistCacheEntry implements ExtCacheEntry {
   {
     return _cacheService.getAndReplace(this, testValue, value, config);
   }
-
-  /**
-   * Sets the current value
-   */
-  /*
-  public boolean compareAndPut(long version,
-                               long valueHash,
-                               long valueIndex,
-                               long valueLength,
-                               CacheConfig config)
-  {
-    return _cacheService.compareAndPut(this, version, 
-                                       valueHash, valueIndex, valueLength, 
-                                       config);
-  }
-  */
 
   /**
    * Remove the value
@@ -475,6 +482,7 @@ public class DistCacheEntry implements ExtCacheEntry {
     return getMnodeEntry().getLastModifiedTime();
   }
 
+  @Override
   public long getVersion()
   {
     MnodeEntry entry = getMnodeEntry();
@@ -483,6 +491,17 @@ public class DistCacheEntry implements ExtCacheEntry {
       return entry.getVersion();
     else
       return 0;
+  }
+
+  @Override
+  public MnodeUpdate getRemoteUpdate()
+  {
+    MnodeEntry entry = getMnodeEntry();
+    
+    if (entry != null)
+      return entry.getRemoteUpdate();
+    else
+      return null;
   }
 
   public boolean isValid()

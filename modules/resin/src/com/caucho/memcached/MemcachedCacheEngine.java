@@ -35,6 +35,7 @@ import com.caucho.server.distcache.CacheStoreManager;
 import com.caucho.server.distcache.DistCacheEntry;
 import com.caucho.server.distcache.MnodeEntry;
 import com.caucho.server.distcache.MnodeUpdate;
+import com.caucho.server.distcache.MnodeValue;
 import com.caucho.util.Base64;
 import com.caucho.util.CharBuffer;
 import com.caucho.util.HashKey;
@@ -65,7 +66,7 @@ public class MemcachedCacheEngine extends AbstractCacheEngine
   }
 
   @Override
-  public MnodeEntry get(DistCacheEntry entry, CacheConfig config)
+  public MnodeValue get(DistCacheEntry entry, CacheConfig config)
   {
     CharBuffer cb = new CharBuffer();
     
@@ -87,7 +88,7 @@ public class MemcachedCacheEngine extends AbstractCacheEngine
   @Override
   public void put(HashKey hashKey, 
                   MnodeUpdate mnodeUpdate,
-                  MnodeEntry mnodeValue)
+                  MnodeValue mnodeValue)
   {
     CharBuffer cb = new CharBuffer();
     

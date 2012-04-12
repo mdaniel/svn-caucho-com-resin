@@ -324,6 +324,16 @@ public class MultiworkerMailbox implements Mailbox, Closeable
   }
   
   private class PacketProcessor implements ValueProcessor<Packet> {
+    PacketProcessor()
+    {
+    }
+
+    @Override
+    public String getThreadName()
+    {
+      return _name + "-" + Thread.currentThread().getId();
+    }
+    
     @Override
     public void process(Packet packet) throws Exception
     {
