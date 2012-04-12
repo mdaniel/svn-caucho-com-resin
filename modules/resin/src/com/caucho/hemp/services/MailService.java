@@ -95,12 +95,22 @@ public class MailService
     _toList.add(address);
   }
   
+  public Address[] getToAddresses()
+  {
+    return _to;
+  }
+
   /**
    * Adds a 'from' value
    */
   public void addFrom(Address address)
   {
     _fromList.add(address);
+  }
+  
+  public Address[] getFromAddresses()
+  {
+    return _from;
   }
 
   /**

@@ -507,19 +507,69 @@ function pdf_health()
     }
   }
   
-  pdf_log_messages("Recent Warnings",
-                   "/^com.caucho.health.analysis/",
-                   false,
-                   $g_start, $g_end,
-                   5);
-  
-  
-  pdf_log_messages("Recent Anomalies",
-                   "/^com.caucho.health.analysis/",
-                   true,
-                   $g_start, $g_end,
-                   5);
+  pdf_health_events($g_start, $g_end);
 }
+
+function pdf_health_events($start, $end)
+{
+  global $g_canvas;
+  
+  $g_canvas->newLine();
+  $g_canvas->writeSubSection("Recent Health Events");
+  
+  $messages = get_health_logs($start * 1000, $end * 1000, 50);
+  
+  if (count($messages) > 0) {
+    $w1 = 95;
+    $w2 = 85;
+    $w3 = 100;
+    $w4 = 245;
+  
+    $g_canvas->setFont("Courier-Bold", "8");
+    
+    $g_canvas->writeTextColumnHeader($w1, 'c', "Date");
+    $g_canvas->writeTextColumnHeader($w2, 'c', "Event Type");
+    $g_canvas->writeTextColumnHeader($w3, 'c', "Source");
+    $g_canvas->writeTextColumnHeader($w4, 'c', "Message");
+    $g_canvas->newLine();
+    $g_canvas->newLine();
+    
+    $g_canvas->setFont("Courier", "8");
+    
+    foreach ($messages as $message) {
+      $ts = strftime("%Y-%m-%d %H:%M:%S", $message->timestamp / 1000);
+      
+      $was_restart = false;
+      $type = $message->type;
+      if (preg_match("/Resin\|Health\|Anomaly/", $type)) {
+        $type = gettext("Anomaly Detected");
+      } else if (preg_match("/Resin\|Health\|Action/", $type)) {
+        $type = gettext("Health Action");
+      } else if (preg_match("/Resin\|Health\|Check/", $type)) {
+        $type = gettext("Health Issue");
+      } else if (preg_match("/Resin\|Startup/", $type)) {
+        $type = gettext("Startup Message");
+      } else if (preg_match("/Resin\|StartTime/", $type)) {
+        $type = gettext("Resin Startup");
+        $was_restart = true;
+      }
+      
+      $g_canvas->writeTextColumn($w1, 'l', $ts);
+      $g_canvas->writeTextColumn($w2, 'c', $type);
+      $g_canvas->writeTextColumn($w3, 'c', $message->name);
+      $g_canvas->writeTextColumn($w4, 'l', $message->message);
+      $g_canvas->newLine();
+      
+      if ($was_restart) {
+        $g_canvas->writeHrule(0, .5, "grey");
+        $g_canvas->newLine();
+      }
+    }    
+  } else {
+    $g_canvas->setTextFont();
+    $g_canvas->writeTextLineIndent(20, "No Events");
+  }
+} 
 
 function pdf_log_messages($title,
                           $regexp,

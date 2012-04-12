@@ -8,6 +8,7 @@
 require_once "WEB-INF/php/graph_flot.php";
 
 import java.lang.System;
+import com.caucho.management.server.*;
 
 global $g_server_id;
 global $g_server_index;
@@ -991,6 +992,45 @@ function display_health()
     echo "</ul>";
     echo "</span>";
   }
+}
+
+function get_health_logs($start, $end, $max=100)
+{
+  global $g_si, $g_server, $g_mbean_server;
+  
+  $stat_service = get_stats_service();
+  if ($stat_service)
+    $start_times = $stat_service->getStartTimes($g_server_index, $start, $end);
+    
+  $starts = array();
+  foreach ($start_times as $start_time) {
+    $log = new LogMessage();
+    $log->timestamp = $start_time;
+    $log->type = $g_si . "|Resin|StartTime";
+    array_push($starts, $log);
+  }
+    
+  $log_service = $g_mbean_server->lookup("resin:type=LogService");
+  if (! $log_service)
+    return;
+  
+  $start_logs   = $log_service->findMessagesByType("Resin|Startup", "info", $start, $end);
+  $check_logs   = $log_service->findMessagesByType("Resin|Health|Check", "info", $start, $end);
+  $actions_logs = $log_service->findMessagesByType("Resin|Health|Action", "info", $start, $end);
+  $anomaly_logs = $log_service->findMessagesByType("Resin|Health|Anomaly", "info", $start, $end);
+  
+  $logs = array_merge($starts, $start_logs, $check_logs, $actions_logs, $anomaly_logs);
+  
+  usort($logs, "sort_by_timestamp");
+  $logs = array_reverse($logs);
+  $logs = array_slice($logs, 0, $max);
+
+  return $logs;
+}
+
+function sort_by_timestamp($a, $b)
+{
+  return $a->timestamp - $b->timestamp;
 }
 
 function display_servers($server)

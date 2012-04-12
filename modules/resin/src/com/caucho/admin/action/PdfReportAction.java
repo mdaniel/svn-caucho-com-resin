@@ -6,6 +6,12 @@
 
 package com.caucho.admin.action;
 
+import java.io.IOException;
+
+import javax.mail.internet.InternetAddress;
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
+
 import com.caucho.config.ConfigException;
 import com.caucho.hemp.services.MailService;
 import com.caucho.quercus.QuercusContext;
@@ -15,23 +21,8 @@ import com.caucho.quercus.page.QuercusPage;
 import com.caucho.server.http.StubServletRequest;
 import com.caucho.server.http.StubServletResponse;
 import com.caucho.server.resin.Resin;
-import com.caucho.util.Alarm;
-import com.caucho.util.CurrentTime;
-import com.caucho.util.IoUtil;
-import com.caucho.util.L10N;
-import com.caucho.util.QDate;
-import com.caucho.vfs.Path;
-import com.caucho.vfs.TempOutputStream;
-import com.caucho.vfs.TempStream;
-import com.caucho.vfs.Vfs;
-import com.caucho.vfs.WriteStream;
-import com.caucho.vfs.WriterStreamImpl;
-import sun.misc.IOUtils;
-
-import javax.mail.internet.InternetAddress;
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
-import java.io.IOException;
+import com.caucho.util.*;
+import com.caucho.vfs.*;
 
 public class PdfReportAction implements AdminAction
 {
@@ -155,10 +146,20 @@ public class PdfReportAction implements AdminAction
     _logDirectory = logDirectory;
   }
   
+  public String getMailTo()
+  {
+    return _mailTo;
+  }
+  
   public void setMailTo(String mailTo)
   {
     if (! "".equals(mailTo))
       _mailTo = mailTo;
+  }
+  
+  public String getMailFrom()
+  {
+    return _mailFrom;
   }
   
   public void setMailFrom(String mailFrom)
@@ -341,7 +342,9 @@ public class PdfReportAction implements AdminAction
       Value result = env.executeTop();
 
       if (! result.toString().equals("ok")) {
-        throw new RuntimeException(L.l("generation failed: {0}", result.toString()));
+        throw new RuntimeException(L.l("{0} report generation failed: {1}", 
+                                       calculateReport(), 
+                                       result.toString()));
       }
 
       ws.flush();
@@ -349,7 +352,9 @@ public class PdfReportAction implements AdminAction
       if (_mailTo != null && ! "".equals(_mailTo)) {
         mailPdf(ts);
 
-        String message = L.l("{0} mailed to {1}", calculateTitle(), _mailTo);
+        String message = L.l("{0} report mailed to {1}", 
+                             calculateReport(), 
+                             _mailTo);
 
         PdfReportActionResult actionResult =
           new PdfReportActionResult(message, null, null);
@@ -364,7 +369,9 @@ public class PdfReportAction implements AdminAction
         ts.writeToStream(pdfOut);
       }
 
-      String message = L.l("generated {0}", path);
+      String message = L.l("{0} report generated at {1}", 
+                           calculateReport(),
+                           path);
 
       PdfReportActionResult actionResult
         = new PdfReportActionResult(message, path.getPath(), pdfOut);

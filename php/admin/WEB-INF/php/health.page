@@ -2,8 +2,6 @@
 
 require_once "WEB-INF/php/inc.php";
 
-import com.caucho.management.server.*;
-
 if (! admin_init()) {
   return;
 }
@@ -273,16 +271,17 @@ function display_health_logs()
   }
   
   $now = time();
-  $start = ($now - 24 * 3600) * 1000;
-  $end = $now * 1000;
+  $start = ($now - 24 * 3600);
+  $end = $now;
   
-  $messages = get_health_logs($start, $end, 100);
+  $messages = get_health_logs($start * 1000, $end * 1000, 100);
   
-  echo "<h2>" . gettext('Recent Health Logs') . "</h2>\n";
+  echo "<h2>" . gettext('Recent Health Events') . "</h2>\n";
   echo "<table class='data'>\n";
   echo "<thead>\n";
   echo "<tr><th scope='col' class='date'>" . gettext('Date') . "</th>";
-  echo "    <th scope='col' class='event'>" . gettext('Event') . "</th>";
+  echo "    <th scope='col' class='event'>" . gettext('Event Type') . "</th>";
+  echo "    <th scope='col' class='event'>" . gettext('Source') . "</th>";
   echo "    <th scope='col' class='message'>" . gettext('Message') . "</th></tr>\n";
   echo "</thead>\n";
 
@@ -297,30 +296,27 @@ function display_health_logs()
         $type = gettext("Anomaly Detected");
         $icon = "anomaly";
       } else if (preg_match("/Resin\|Health\|Action/", $type)) {
-        $type = gettext("Health Action Executed");
+        $type = gettext("Health Action");
         $icon = "action";
       } else if (preg_match("/Resin\|Health\|Check/", $type)) {
-        $type = gettext("Health Issue Detected");
+        $type = gettext("Health Issue");
         $icon = "check";
       } else if (preg_match("/Resin\|Startup/", $type)) {
         $type = gettext("Startup Message");
         $icon = "message";
       } else if (preg_match("/Resin\|StartTime/", $type)) {
-        $type = gettext("Server Restart");
+        $type = gettext("Resin Startup");
         $icon = "restart";
         $style = "border-bottom: 3px solid black;"
       }
       
-      if ($icon == "restart")
-        echo "<tr>\n";
-      else 
-        echo "<tr>\n";
+      echo "<tr>\n";
       echo "  <td class='date' style='${style}'>";
       echo strftime("%Y-%m-%d&nbsp;%H:%M:%S", $message->timestamp / 1000);
       echo "</td>\n";
-      echo "  <td class='event' style='${style}'><img src='images/${icon}_16.png' width='16' height='16' alt='${type}'/>&nbsp;$type</td>\n";
-      echo "  <td class='message' style='${style}'>" . nl2br(htmlspecialchars(wordwrap($message->message, 90)));
-      echo "  </td>\n";
+      echo "  <td class='event' style='${style}'><img src='images/${icon}_16.png' align='top' width='16' height='16' alt='${type}'/>&nbsp;$type</td>\n";
+      echo "  <td class='source' style='${style}'>" . $message->name . "</td>\n";
+      echo "  <td class='message' style='${style}'>" . nl2br(htmlspecialchars(wordwrap($message->message, 90))) . "</td>\n"; 
       echo "</tr>\n";
     }
       
@@ -332,46 +328,6 @@ function display_health_logs()
   }
       
   echo "</table>\n";
-}
-
-
-function get_health_logs($start, $end, $max)
-{
-  global $g_si, $g_server, $g_mbean_server;
-  
-  $stat_service = get_stats_service();
-  if ($stat_service)
-    $start_times = $stat_service->getStartTimes($g_server_index, $start, $end);
-    
-  $starts = array();
-  foreach ($start_times as $start_time) {
-    $log = new LogMessage();
-    $log->timestamp = $start_time;
-    $log->type = $g_si . "|Resin|StartTime";
-    array_push($starts, $log);
-  }
-    
-  $log_service = $g_mbean_server->lookup("resin:type=LogService");
-  if (! $log_service)
-    return;
-  
-  $start_logs   = $log_service->findMessagesByType("Resin|Startup", "info", $start, $end);
-  $check_logs   = $log_service->findMessagesByType("Resin|Health|Check", "info", $start, $end);
-  $actions_logs = $log_service->findMessagesByType("Resin|Health|Action", "info", $start, $end);
-  $anomaly_logs = $log_service->findMessagesByType("Resin|Health|Anomaly", "info", $start, $end);
-  
-  $logs = array_merge($starts, $start_logs, $check_logs, $actions_logs, $anomaly_logs);
-  
-  usort($logs, "sort_by_timestamp");
-  $logs = array_reverse($logs);
-  $logs = array_slice($logs, 0, $max);
-
-  return $logs;
-}
-
-function sort_by_timestamp($a, $b)
-{
-  return $a->timestamp - $b->timestamp;
 }
 
 display_footer($g_page, javascript_create_tab("health-tabs"));
