@@ -35,7 +35,7 @@ import com.caucho.quercus.env.Value;
 public class DefaultFilter implements Filter
 {
   @Override
-  public Value filter(Env env, Value value, int flags)
+  public Value filter(Env env, Value value, Value flagV)
   {
     return value;
   }
