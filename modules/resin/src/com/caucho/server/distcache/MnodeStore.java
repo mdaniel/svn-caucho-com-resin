@@ -587,8 +587,12 @@ public class MnodeStore {
 
       PreparedStatement stmt = conn.prepareInsert();
       stmt.setBytes(1, id.getHash());
-
       stmt.setLong(2, mnodeUpdate.getValueHash());
+      /*
+      System.out.println("V-HASH: " + mnodeUpdate.getValueDataId());
+      if (mnodeUpdate.getValueDataId() == 16384)
+        Thread.dumpStack();
+        */
       stmt.setLong(3, mnodeUpdate.getValueDataId());
       stmt.setLong(4, mnodeUpdate.getValueLength());
       stmt.setBytes(5, mnodeUpdate.getCacheHash());

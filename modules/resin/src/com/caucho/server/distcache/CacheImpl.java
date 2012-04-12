@@ -437,9 +437,9 @@ public class CacheImpl<K,V>
    * @return true if the update succeeds, false if it fails
    */
   @Override
-  public boolean compareAndPut(Object key,
-                               long version,
-                               Object value)
+  public boolean compareVersionAndPut(Object key,
+                                      long version,
+                                      Object value)
   {
     put((K) key, (V) value);
 
@@ -456,7 +456,7 @@ public class CacheImpl<K,V>
    * @return true if the update succeeds, false if it fails
    */
   @Override
-  public boolean compareAndPut(Object key,
+  public boolean compareVersionAndPut(Object key,
                                long version,
                                InputStream inputStream)
     throws IOException
@@ -466,6 +466,7 @@ public class CacheImpl<K,V>
     return true;
   }
 
+  /*
   public boolean compareAndPut(HashKey key, 
                                long valueHash,
                                long valueIndex,
@@ -474,16 +475,14 @@ public class CacheImpl<K,V>
   {
     return getDistCacheEntry(key).compareAndPut(version, valueHash, valueIndex, valueLength, _config);
   }
+  */
 
   @Override
   public boolean putIfAbsent(Object key, Object value) throws CacheException
   {
     long testHash = 0;
     
-    long result
-      = getDistCacheEntry(key).compareAndPut(testHash, value, _config);
-    
-    return result != 0;
+    return getDistCacheEntry(key).compareAndPut(testHash, value, _config);
   }
 
   @Override
@@ -494,11 +493,7 @@ public class CacheImpl<K,V>
     
     long oldHash = entry.getValueHash(oldValue, _config);
     
-    long result = entry.compareAndPut(oldHash, value, _config);
-    
-    boolean isChanged = oldHash == result;
-    
-    return isChanged;
+    return entry.compareAndPut(oldHash, value, _config);
   }
 
   @Override
@@ -508,12 +503,11 @@ public class CacheImpl<K,V>
     
     long oldHash = MnodeEntry.ANY_KEY;
     
-    long result = entry.compareAndPut(oldHash, value, _config);
+    boolean isChanged = entry.compareAndPut(oldHash, value, _config);
     
-    boolean isChanged = result != 0;
-    
-    if (isChanged)
+    if (isChanged) {
       entryUpdate((K) key, (V) value);
+    }
     
     return isChanged;
   }
@@ -863,18 +857,6 @@ public class CacheImpl<K,V>
   public DataStore getDataStore()
   {
     return ((CacheStoreManager) _manager).getDataStore();
-  }
-  
-  public void saveData(Object value)
-  {
-    ((CacheStoreManager) _manager).writeData(null, value, 
-                                             _config.getValueSerializer());
-  }
-  
-  public DataItem saveData(InputStream is)
-    throws IOException
-  {
-    return ((CacheStoreManager) _manager).writeData(is);
   }
 
   /*

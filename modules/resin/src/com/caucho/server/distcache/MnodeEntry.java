@@ -373,6 +373,17 @@ public final class MnodeEntry extends MnodeValue implements ExtCacheEntry {
     _blob = blob;
   }
   
+  /**
+   * Creates an update with local data removed for remote update.
+   */
+  public MnodeUpdate createRemoteUpdate()
+  {
+    return new MnodeUpdate(getValueHash(), 0, getValueLength(), getVersion(),
+                           this,
+                           getLeaseOwner(),
+                           getLeaseTimeout());
+  }
+  
   @Override
   public boolean readData(OutputStream os, CacheConfig config)
   {

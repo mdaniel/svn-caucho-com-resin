@@ -79,7 +79,7 @@ public class MemcachedCacheEngine extends AbstractCacheEngine
                                                     config);
     
     if (update != null)
-      return _cacheService.putLocalValue(entry, update, null, 0, 0);
+      return _cacheService.putLocalValue(entry, update, null);
     else
       return entry.getMnodeEntry();
   }

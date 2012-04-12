@@ -664,11 +664,11 @@ public class AbstractCache
    * @return true if the update succeeds, false if it fails
    */
   @Override
-  public boolean compareAndPut(Object key,
-                               long version,
-                               Object value)
+  public boolean compareVersionAndPut(Object key,
+                                      long version,
+                                      Object value)
   {
-    return _delegate.compareAndPut(key, version, value);
+    return _delegate.compareVersionAndPut(key, version, value);
   }
 
   /**
@@ -681,12 +681,12 @@ public class AbstractCache
    * @return true if the update succeeds, false if it fails
    */
   @Override
-  public boolean compareAndPut(Object key,
-                               long version,
-                               InputStream inputStream)
+  public boolean compareVersionAndPut(Object key,
+                                      long version,
+                                      InputStream inputStream)
     throws IOException
   {
-    return _delegate.compareAndPut(key, version, inputStream);
+    return _delegate.compareVersionAndPut(key, version, inputStream);
   }
   
   /**
@@ -994,11 +994,6 @@ public class AbstractCache
   public DataStore getDataStore()
   {
     return _delegate.getDataStore();
-  }
-  
-  public void saveData(Object value)
-  {
-    _delegate.saveData(value);
   }
   
   public CacheImpl createIfAbsent()

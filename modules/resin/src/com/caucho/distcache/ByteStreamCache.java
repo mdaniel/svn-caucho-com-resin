@@ -90,7 +90,7 @@ public interface ByteStreamCache
    *
    * @return true if the update succeeds, false if it fails
    */
-  public boolean compareAndPut(Object key,
+  public boolean compareVersionAndPut(Object key,
                                long oldVersion,
                                InputStream is)
     throws IOException;

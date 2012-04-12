@@ -210,7 +210,7 @@ public class DistCacheEntry implements ExtCacheEntry {
     if (value == null)
       return 0;
     else
-      return _cacheService.getValueHash(value, config).getValueHash();
+      return _cacheService.calculateValueHash(value, config);
   }
  
   /**
@@ -263,9 +263,9 @@ public class DistCacheEntry implements ExtCacheEntry {
   /**
    * Sets the current value
    */
-  public long compareAndPut(long testValue, 
-                            Object value, 
-                            CacheConfig config)
+  public boolean compareAndPut(long testValue, 
+                               Object value, 
+                               CacheConfig config)
   {
     return _cacheService.compareAndPut(this, testValue, value, config);
   }
@@ -274,8 +274,8 @@ public class DistCacheEntry implements ExtCacheEntry {
    * Sets the current value
    */
   public Object getAndReplace(long testValue, 
-                               Object value, 
-                               CacheConfig config)
+                              Object value, 
+                              CacheConfig config)
   {
     return _cacheService.getAndReplace(this, testValue, value, config);
   }
@@ -283,6 +283,7 @@ public class DistCacheEntry implements ExtCacheEntry {
   /**
    * Sets the current value
    */
+  /*
   public boolean compareAndPut(long version,
                                long valueHash,
                                long valueIndex,
@@ -293,6 +294,7 @@ public class DistCacheEntry implements ExtCacheEntry {
                                        valueHash, valueIndex, valueLength, 
                                        config);
   }
+  */
 
   /**
    * Remove the value

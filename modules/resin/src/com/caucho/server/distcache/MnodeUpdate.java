@@ -37,54 +37,57 @@ import com.caucho.util.Hex;
  */
 @SuppressWarnings("serial")
 public class MnodeUpdate extends MnodeValue {
-  private final byte []_keyHash;
+  private final int _leaseOwner;
+  private final long _leaseTimeout;
   
-  public MnodeUpdate(byte []keyHash,
-                     long valueHash,
+  public MnodeUpdate(long valueHash,
                      long valueDataId,
                      long valueLength,
                      long version,
                      byte []cacheHash,
                      long flags,
                      long accessedExpireTime,
-                     long modifiedExpireTime)
+                     long modifiedExpireTime,
+                     int leaseOwner,
+                     long leaseTimeout)
   {
     super(valueHash, valueDataId, valueLength, version,
           cacheHash, 
           flags, 
           accessedExpireTime, modifiedExpireTime);
     
-    _keyHash = keyHash;
+    _leaseOwner = leaseOwner;
+    _leaseTimeout = leaseTimeout;
   }
   
-  public MnodeUpdate(byte []keyHash,
-                     long valueHash,
+  public MnodeUpdate(long valueHash,
                      long valueDataId,
                      long valueLength,
                      long version)
   {
     super(valueHash, valueDataId, valueLength, version);
     
-    _keyHash = keyHash;
+    _leaseOwner = -1;
+    _leaseTimeout = -1;
   }
   
-  public MnodeUpdate(MnodeUpdate mnodeUpdate)
+  public MnodeUpdate(MnodeUpdate update)
   {
-    super(mnodeUpdate);
+    super(update);
     
-    _keyHash = mnodeUpdate._keyHash;
+    _leaseOwner = update._leaseOwner;
+    _leaseTimeout = update._leaseTimeout;
   }
   
-  public MnodeUpdate(byte []keyHash,
-                     MnodeValue mnodeValue)
+  public MnodeUpdate(MnodeValue mnodeValue)
   {
     super(mnodeValue);
     
-    _keyHash = keyHash;
+    _leaseOwner = -1;
+    _leaseTimeout = -1;
   }
 
-  public MnodeUpdate(byte []keyHash,
-                     long valueHash,
+  public MnodeUpdate(long valueHash,
                      long valueDataId,
                      long valueLength,
                      long version,
@@ -92,11 +95,25 @@ public class MnodeUpdate extends MnodeValue {
   {
     super(valueHash, valueDataId, valueLength, version, config);
     
-    _keyHash = keyHash;
+    _leaseOwner = -1;
+    _leaseTimeout = -1;
   }
 
-  public MnodeUpdate(byte []keyHash,
-                     long valueHash,
+  public MnodeUpdate(long valueHash,
+                     long valueDataId,
+                     long valueLength,
+                     long version,
+                     CacheConfig config,
+                     int leaseOwner,
+                     long leaseTimeout)
+  {
+    super(valueHash, valueDataId, valueLength, version, config);
+    
+    _leaseOwner = leaseOwner;
+    _leaseTimeout = leaseTimeout;
+  }
+
+  public MnodeUpdate(long valueHash,
                      long valueDataId,
                      long valueLength,
                      long version,
@@ -104,35 +121,62 @@ public class MnodeUpdate extends MnodeValue {
   {
     super(valueHash, valueDataId, valueLength, version, oldValue);
     
-    _keyHash = keyHash;
+    _leaseOwner = -1;
+    _leaseTimeout = -1;
   }
-  
-  public MnodeUpdate(HashKey keyHash,
-                     long valueHash,
+
+  public MnodeUpdate(long valueHash,
                      long valueDataId,
                      long valueLength,
                      long version,
-                     CacheConfig config)
+                     MnodeValue oldValue,
+                     int leaseOwner,
+                     long leaseTimeout)
   {
-    this(HashKey.getHash(keyHash),
-         valueHash,
-         valueDataId,
-         valueLength,
-         version,
-         config);
+    super(valueHash, valueDataId, valueLength, version, oldValue);
+    
+    _leaseOwner = leaseOwner;
+    _leaseTimeout = leaseTimeout;
   }
   
-  public final byte []getKeyHash()
+  public static MnodeUpdate createNull(long version, MnodeValue oldValue)
   {
-    return _keyHash;
+    return new MnodeUpdate(0, 0, 0, version, oldValue);
+  }
+  
+  public static MnodeUpdate createNull(long version, CacheConfig config)
+  {
+    return new MnodeUpdate(0, 0, 0, version, config);
+  }
+  
+  /**
+   * Create an update that removes the local information for sending to a
+   * remote server.
+   */
+  public MnodeUpdate createRemote()
+  {
+    return new MnodeUpdate(getValueHash(),
+                           0,
+                           getValueLength(),
+                           getVersion(),
+                           this);
+  }
+  
+  public final int getLeaseOwner()
+  {
+    return _leaseOwner;
+  }
+  
+  public final long getLeaseTimeout()
+  {
+    return _leaseTimeout;
   }
 
   @Override
   public String toString()
   {
     return (getClass().getSimpleName()
-        + "[key=" + Hex.toHex(getKeyHash(), 0, 4)
-        + ",value=" + Long.toHexString(getValueHash())
+        + "[value=" + Long.toHexString(getValueHash())
         + ",len=" + getValueLength()
         + ",flags=" + Long.toHexString(getFlags())
         + ",version=" + getVersion()

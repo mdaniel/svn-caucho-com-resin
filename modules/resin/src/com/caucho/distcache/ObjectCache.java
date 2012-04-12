@@ -53,7 +53,7 @@ public interface ObjectCache<K,V> extends Cache<K,V>
    *
    * @return true if the update succeeds, false if it fails
    */
-  public boolean compareAndPut(K key, long version, Object value);
+  public boolean compareVersionAndPut(K key, long version, Object value);
 
   /**
    * Removes the entry from the cache if the current entry's version

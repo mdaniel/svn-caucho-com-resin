@@ -332,8 +332,7 @@ public class MemcachedClient implements Cache
         skipToEndOfLine(is);
         isValid = true;
 
-        MnodeUpdate update = new MnodeUpdate(entry.getKeyHash().getHash(),
-                                             0, 0, 0,
+        MnodeUpdate update = new MnodeUpdate(0, 0, 0,
                                              version,
                                              config);
 
@@ -367,16 +366,15 @@ public class MemcachedClient implements Cache
 
       GetInputStream gis = new GetInputStream(is, length);
       
-      DataItem dataItem = cache.saveData(gis);
-      long valueHash = dataItem.getValueHash();
-      long valueDataId = dataItem.getValueDataId();
+      MnodeUpdate update = null; // cache.saveData(gis, length, version, config);
+      /*
 
-      MnodeUpdate update = new MnodeUpdate(entry.getKeyHash().getHash(),
-                                           valueHash,
+      MnodeUpdate update = new MnodeUpdate(valueHash,
                                            valueDataId,
                                            length,
                                            version,
                                            config);
+                                           */
 
       /*
       _cb.clear();

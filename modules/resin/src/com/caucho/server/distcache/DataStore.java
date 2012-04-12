@@ -401,7 +401,8 @@ public class DataStore {
         InputStream is = rs.getBinaryStream(1);
         
         if (is == null) {
-          System.out.println("ID: " + id);
+          System.out.println("MISSING-DATA FOR ID: " + id);
+
           return null;
         }
 

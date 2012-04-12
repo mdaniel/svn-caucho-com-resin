@@ -88,16 +88,16 @@ public class AbstractCacheEngine implements CacheEngine
   {
   }
   @Override
-  public long compareAndPut(DistCacheEntry entry, long testValue,
-                               MnodeUpdate mnodeUpdate, Object value,
-                               CacheConfig config)
+  public boolean compareAndPut(DistCacheEntry entry, long testValue,
+                               MnodeUpdate mnodeUpdate, Object value)
   {
-    return 0;
+    return false;
   }
 
   @Override
-  public long getAndPut(DistCacheEntry entry, MnodeUpdate mnodeUpdate,
-                           Object value, long leaseTimeout, int leaseOwner)
+  public long getAndPut(DistCacheEntry entry, 
+                        MnodeUpdate mnodeUpdate,
+                        Object value)
   {
     return 0;
   }
