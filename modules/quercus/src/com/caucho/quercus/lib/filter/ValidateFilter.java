@@ -29,15 +29,18 @@
 
 package com.caucho.quercus.lib.filter;
 
+import com.caucho.quercus.env.ArrayValue;
 import com.caucho.quercus.env.BooleanValue;
 import com.caucho.quercus.env.Env;
 import com.caucho.quercus.env.Value;
 
+import java.util.Map;
+
 public abstract class ValidateFilter implements Filter
 {
-  public final Value filter(Env env, Value value, int flags)
+  public final Value filter(Env env, Value value, Value flagV)
   {
-    if (isValid(env, value, flags)) {
+    if (isValid(env, value, flagV)) {
       return value;
     }
     else {
@@ -45,5 +48,28 @@ public abstract class ValidateFilter implements Filter
     }
   }
 
-  protected abstract boolean isValid(Env env, Value value, int flags);
+  protected boolean isValid(Env env, Value value, Value flagsV)
+  {
+    int flags = 0;
+
+    if (flagsV.isNull()) {
+    }
+    else if (flagsV.isArray()) {
+      ArrayValue array = flagsV.toArrayValue(env);
+
+      for (Map.Entry<Value,Value> entry : array.entrySet()) {
+        flags |= entry.getValue().toInt();
+      }
+    }
+    else {
+      flags = flagsV.toInt();
+    }
+
+    return isValid(env, value, flags);
+  }
+
+  protected boolean isValid(Env env, Value value, int flags)
+  {
+    throw new UnsupportedOperationException();
+  }
 }

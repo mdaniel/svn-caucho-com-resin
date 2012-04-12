@@ -213,7 +213,7 @@ abstract public class StringValue
    * Returns true for StringValue
    */
   @Override
-  public boolean isString()
+  public final boolean isString()
   {
     return true;
   }

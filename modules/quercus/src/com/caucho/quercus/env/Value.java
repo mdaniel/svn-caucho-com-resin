@@ -1075,7 +1075,7 @@ abstract public class Value implements java.io.Serializable
    */
   public InputStream toInputStream()
   {
-    return new StringInputStream(toString());
+    return new CharSequenceInputStream(toString());
   }
 
   /**

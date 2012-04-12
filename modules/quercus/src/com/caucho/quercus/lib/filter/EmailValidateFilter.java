@@ -34,12 +34,12 @@ import com.caucho.quercus.env.StringValue;
 import com.caucho.quercus.env.Value;
 
 /**
- * Coded to RFC 822 specifications.
+ * Coded to RFC822 specifications. XXX: RFC2822.
  */
 public class EmailValidateFilter extends ValidateFilter
 {
   @Override
-  public boolean isValid(Env env, Value value, int flags)
+  protected boolean isValid(Env env, Value value, Value flagV)
   {
     StringValue str = value.toStringValue(env);
 

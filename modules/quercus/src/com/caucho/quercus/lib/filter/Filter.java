@@ -34,5 +34,5 @@ import com.caucho.quercus.env.Value;
 
 public interface Filter
 {
-  public Value filter(Env env, Value value, int flags);
+  public Value filter(Env env, Value value, Value flagV);
 }

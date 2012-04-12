@@ -126,6 +126,8 @@ public class PDO implements EnvCleanup {
 
   public static final int FETCH_PROPS_LATE = 1048576;
 
+  public static final int MYSQL_ATTR_USE_BUFFERED_QUERY = 1000;
+
   public static final int NULL_NATURAL = 0;
   public static final int NULL_EMPTY_STRING = 1;
   public static final int NULL_TO_STRING = 2;
@@ -161,7 +163,7 @@ public class PDO implements EnvCleanup {
   private String _lastInsertId;
 
   private boolean _inTransaction;
-  
+
   private static String ENCODING = "ISO8859_1";
 
   public PDO(Env env,
@@ -407,15 +409,15 @@ public class PDO implements EnvCleanup {
   public static ArrayValue getAvailableDrivers()
   {
     ArrayValue array = new ArrayValueImpl();
-    
+
     array.put("mysql");
     array.put("pgsql");
     array.put("java");
     array.put("jdbc");
-    
+
     return array;
   }
-  
+
   /**
    * Returns the auto commit value for the connection.
    */
@@ -524,7 +526,7 @@ public class PDO implements EnvCleanup {
 
       PDOStatement pdoStatement
         = new PDOStatement(_env, _conn, statement, true, driverOptions);
-      
+
       _lastPDOStatement = pdoStatement;
 
       return pdoStatement;
@@ -837,7 +839,7 @@ public class PDO implements EnvCleanup {
       host = "localhost";
 
     int port = 3306;
-    
+
     if (portStr != null) {
       try {
         port = Integer.parseInt(portStr);
@@ -862,11 +864,11 @@ public class PDO implements EnvCleanup {
       _password = password;
 
     String driver = Mysqli.DEFAULT_DRIVER;
-    
+
     // XXX: mysql options?
     String url = Mysqli.getUrl(host, port, dbname, ENCODING,
                                false, false, false);
-    
+
     return env.getDataSource(driver, url);
   }
 

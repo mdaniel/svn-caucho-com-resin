@@ -32,8 +32,11 @@ package com.caucho.quercus.lib.filter;
 import com.caucho.quercus.env.Env;
 import com.caucho.quercus.env.Value;
 
-public abstract class SanitizeFilter implements Filter
+public class DefaultFilter implements Filter
 {
   @Override
-  public abstract Value filter(Env env, Value value, Value flagV);
+  public Value filter(Env env, Value value, int flags)
+  {
+    return value;
+  }
 }

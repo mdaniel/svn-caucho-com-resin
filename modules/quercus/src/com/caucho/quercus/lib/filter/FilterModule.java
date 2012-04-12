@@ -50,7 +50,12 @@ public class FilterModule extends AbstractQuercusModule
   public static final int FILTER_VALIDATE_EMAIL = 256 + 16 + 2; // 274
   public static final int FILTER_VALIDATE_IP = 256 + 16 + 2 + 1; // 275
   public static final int FILTER_DEFAULT = 512 + 4; // 516
-  public static final int FILTER_FLAG_NO_RES_RANGE = 4 * 1 << 20; // 4194304
+
+  public static final int FILTER_FLAG_IPV4 = 1 << 20;
+  public static final int FILTER_FLAG_IPV6 = FILTER_FLAG_IPV4 * 2;
+  public static final int FILTER_FLAG_NO_RES_RANGE = FILTER_FLAG_IPV4 * 4;
+  public static final int FILTER_FLAG_NO_PRIV_RANGE = FILTER_FLAG_IPV4 * 8;
+
 
   public static HashMap<Integer,Filter> _filterMap
    =  new HashMap<Integer,Filter>();
@@ -63,8 +68,12 @@ public class FilterModule extends AbstractQuercusModule
   public static Value filter_var(Env env,
                                  @ReadOnly Value value,
                                  @Optional("FILTER_DEFAULT") int filterId,
-                                 @Optional Value options)
+                                 @Optional Value flagV)
   {
+    if (value.isArray()) {
+      return BooleanValue.FALSE;
+    }
+
     Filter filter = _filterMap.get(filterId);
 
     if (filter == null) {
@@ -73,16 +82,12 @@ public class FilterModule extends AbstractQuercusModule
       return BooleanValue.FALSE;
     }
 
-    if (! options.isDefault()) {
-      env.warning(L.l("Filter flags not implemented"));
-
-      return BooleanValue.FALSE;
-    }
-
-    return filter.filter(env, value, -1);
+    return filter.filter(env, value, flagV);
   }
 
   static {
+    _filterMap.put(FILTER_DEFAULT, new DefaultFilter());
     _filterMap.put(FILTER_VALIDATE_EMAIL, new EmailValidateFilter());
+    _filterMap.put(FILTER_VALIDATE_IP, new IpValidateFilter());
   }
 }
