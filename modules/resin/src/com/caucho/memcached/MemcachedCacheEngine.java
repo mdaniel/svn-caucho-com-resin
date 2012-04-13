@@ -87,8 +87,7 @@ public class MemcachedCacheEngine extends AbstractCacheEngine
 
   @Override
   public void put(HashKey hashKey, 
-                  MnodeUpdate mnodeUpdate,
-                  MnodeValue mnodeValue)
+                  MnodeUpdate mnodeUpdate)
   {
     CharBuffer cb = new CharBuffer();
     

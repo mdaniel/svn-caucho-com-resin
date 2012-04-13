@@ -325,12 +325,12 @@ public class CacheImpl<K,V>
   @Override
   public ExtCacheEntry getExtCacheEntry(Object key)
   {
-    return getDistCacheEntry(key).getMnodeValue(_config);
+    return getDistCacheEntry(key).loadMnodeValue(_config);
   }
   
   public ExtCacheEntry getExtCacheEntry(HashKey key)
   {
-    return getDistCacheEntry(key).getMnodeValue(_config);
+    return getDistCacheEntry(key).loadMnodeValue(_config);
   }
 
   /**

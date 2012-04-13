@@ -29,16 +29,12 @@
 
 package com.caucho.server.distcache;
 
+import com.caucho.util.HashKey;
 
 /**
- * Manages the distributed cache
+ * Creates a new DistCacheEntry.
  */
-final class LocalMnodeManager
+public interface CacheEntryFactory
 {
-  private final CacheStoreManager _storeManager;
-  
-  LocalMnodeManager(CacheStoreManager storeManager)
-  {
-    _storeManager = storeManager;
-  }
+  public DistCacheEntry createCacheEntry(HashKey key);
 }

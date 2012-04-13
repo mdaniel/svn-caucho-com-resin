@@ -121,6 +121,7 @@ public class CacheUpdateWithSource extends MnodeUpdate implements java.io.Serial
         + ",value=" + Long.toHexString(getValueHash())
         + ",flags=" + Long.toHexString(getFlags())
         + ",version=" + getVersion()
+        + ",lease=" + getLeaseOwner()
         + ",source=" + _source
         + "]");
   }

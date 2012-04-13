@@ -59,7 +59,7 @@ import com.caucho.vfs.StreamSource;
  * Manages the distributed cache
  */
 @Module
-public final class CacheStoreManager
+public final class CacheStoreManager implements CacheEntryFactory
 {
   private static final Logger log
     = Logger.getLogger(CacheStoreManager.class.getName());
@@ -85,8 +85,7 @@ public final class CacheStoreManager
   
   private boolean _isCacheListen;
   
-  private final LruCache<HashKey, DistCacheEntry> _entryCache
-    = new LruCache<HashKey, DistCacheEntry>(64 * 1024);
+  private final CacheEntryManager _cacheEntryManager;
   
   private boolean _isClosed;
   
@@ -99,10 +98,17 @@ public final class CacheStoreManager
     _resinSystem = resinSystem;
     // new AdminPersistentStore(this);
     
+    _cacheEntryManager = new CacheEntryManager(this);
+    
     _localMnodeManager = new LocalMnodeManager(this);
     _localDataManager = new LocalDataManager(this);
     
     _localStoreManager = new LocalStoreManager(this);
+  }
+  
+  public final CacheEntryManager getCacheEntryManager()
+  {
+    return _cacheEntryManager;
   }
 
   public void setCacheEngine(CacheEngine cacheEngine)
@@ -151,42 +157,12 @@ public final class CacheStoreManager
   {
     HashKey hashKey = createHashKey(key, config);
 
-    DistCacheEntry cacheEntry = _entryCache.get(hashKey);
-
-    while (cacheEntry == null) {
-      cacheEntry = createCacheEntry(key, hashKey);
-
-      cacheEntry = _entryCache.putIfNew(cacheEntry.getKeyHash(), cacheEntry);
-    }
-
-    return cacheEntry;
-  }
-
-  /**
-   * Returns the key entry.
-   */
-  public final DistCacheEntry getCacheEntry(HashKey hashKey, 
-                                            CacheConfig config)
-  {
-    DistCacheEntry cacheEntry = _entryCache.get(hashKey);
-
-    while (cacheEntry == null) {
-      cacheEntry = createCacheEntry(null, hashKey);
-
-      cacheEntry = _entryCache.putIfNew(cacheEntry.getKeyHash(), cacheEntry);
-    }
-
-    return cacheEntry;
-  }
-
-  /**
-   * Returns the key entry.
-   */
-  public DistCacheEntry createCacheEntry(Object key, HashKey hashKey)
-  {
-    TriadOwner owner = TriadOwner.getHashOwner(hashKey.getHash());
-
-    return new DistCacheEntry(this, key, hashKey, owner);
+    DistCacheEntry entry = _cacheEntryManager.createCacheEntry(hashKey);
+    
+    if (key != null)
+      entry.setKey(key);
+    
+    return entry;
   }
 
   /**
@@ -194,85 +170,27 @@ public final class CacheStoreManager
    */
   final public DistCacheEntry getCacheEntry(HashKey hashKey)
   {
-    DistCacheEntry cacheEntry = _entryCache.get(hashKey);
+    return _cacheEntryManager.createCacheEntry(hashKey);
+  }
 
-    while (cacheEntry == null) {
-      cacheEntry = createCacheEntry(null, hashKey);
+  /**
+   * Returns the key entry.
+   */
+  @Override
+  public DistCacheEntry createCacheEntry(HashKey hashKey)
+  {
+    TriadOwner owner = TriadOwner.getHashOwner(hashKey.getHash());
 
-      if (! _entryCache.compareAndPut(null,
-                                      cacheEntry.getKeyHash(),
-                                      cacheEntry)) {
-        cacheEntry = _entryCache.get(hashKey);
-      }
-    }
-
-    return cacheEntry;
+    return new DistCacheEntry(this, hashKey, owner);
   }
   
   final public boolean load(DistCacheEntry entry,
                             CacheConfig config,
                             long now)
   {
-    MnodeEntry mnodeValue = getMnodeValue(entry, config, now); // , false);
+    MnodeEntry mnodeValue = entry.loadMnodeValue(config, now); // , false);
     
     return mnodeValue != null;
-  }
-
-  final public Object get(DistCacheEntry entry,
-                          CacheConfig config,
-                          long now)
-  {
-    return get(entry, config, now, false);
-  }
-
-  final public Object getExact(DistCacheEntry entry,
-                               CacheConfig config,
-                               long now)
-  {
-    return get(entry, config, now, true);
-  }
-
-  final public Object get(DistCacheEntry entry,
-                          CacheConfig config,
-                          long now,
-                          boolean isExact)
-  {
-    MnodeEntry mnodeValue = getMnodeValue(entry, config, now, isExact);
-
-    if (mnodeValue == null) {
-      return null;
-    }
-
-    Object value = mnodeValue.getValue();
-
-    if (value != null) {
-      return value;
-    }
-
-    long valueHash = mnodeValue.getValueHash();
-
-    if (valueHash == 0) {
-      return null;
-    }
-
-    updateAccessTime(entry, mnodeValue, now);
-
-    value = _localDataManager.readData(entry.getKeyHash(),
-                                       valueHash,
-                                       mnodeValue.getValueDataId(),
-                                       config.getValueSerializer(),
-                                       config);
-    
-    if (value == null) {
-      // Recovery from dropped or corrupted data
-      log.warning("Missing or corrupted data in get for " 
-                  + mnodeValue + " " + entry);
-      remove(entry, config);
-    }
-
-    mnodeValue.setObjectValue(value);
-
-    return value;
   }
 
   /**
@@ -285,12 +203,12 @@ public final class CacheStoreManager
   {
     long now = CurrentTime.getCurrentTime();
 
-    MnodeEntry mnodeValue = getMnodeValue(entry, config, now); // , false);
+    MnodeEntry mnodeValue = entry.loadMnodeValue(config, now); // , false);
 
     if (mnodeValue == null)
       return false;
 
-    updateAccessTime(entry, mnodeValue, now);
+    entry.updateAccessTime(mnodeValue, now);
 
     long valueHash = mnodeValue.getValueHash();
 
@@ -316,8 +234,6 @@ public final class CacheStoreManager
   final public StreamSource getValueStream(DistCacheEntry entry)
     throws IOException
   {
-    long now = CurrentTime.getCurrentTime();
-
     MnodeEntry mnodeValue = entry.getMnodeEntry();
 
     if (mnodeValue == null)
@@ -326,174 +242,6 @@ public final class CacheStoreManager
     // updateAccessTime(entry, mnodeValue, now);
 
     return _localDataManager.createDataSource(mnodeValue.getValueDataId());
-  }
-
-  final public MnodeEntry getMnodeValue(DistCacheEntry entry,
-                                        CacheConfig config,
-                                        long now)
-  {
-    return getMnodeValue(entry, config, now, false);
-  }
-
-  final public MnodeEntry getMnodeValue(DistCacheEntry entry,
-                                        CacheConfig config,
-                                        long now,
-                                        boolean isForceLoad)
-  {
-    MnodeEntry mnodeValue = _localMnodeManager.loadMnodeValue(entry);
-
-    if (mnodeValue == null
-        || isForceLoad
-        || isLocalExpired(config, entry.getKeyHash(), mnodeValue, now)) {
-      reloadValue(entry, config, now);
-    }
-
-    mnodeValue = entry.getMnodeEntry();
-
-    // server/016q
-    if (mnodeValue != null) {
-      updateAccessTime(entry, mnodeValue);
-    }
-
-    mnodeValue = entry.getMnodeEntry();
-    
-
-    return mnodeValue;
-  }
-
-  private void reloadValue(DistCacheEntry entry,
-                           CacheConfig config,
-                           long now)
-  {
-    // only one thread may update the expired data
-    if (entry.startReadUpdate()) {
-      try {
-        loadExpiredValue(entry, config, now);
-      } finally {
-        entry.finishReadUpdate();
-      }
-    }
-  }
-  
-  // XXX: needs to be moved
-  protected void lazyValueUpdate(DistCacheEntry entry, CacheConfig config)
-  {
-    reloadValue(entry, config, CurrentTime.getCurrentTime());
-  }
-
-  protected boolean isLocalExpired(CacheConfig config,
-                                  HashKey key,
-                                  MnodeEntry mnodeValue,
-                                  long now)
-  {
-    return config.getEngine().isLocalExpired(config, key, mnodeValue, now);
-  }
-
-  private void updateAccessTime(DistCacheEntry entry,
-                                MnodeEntry mnodeValue,
-                                long now)
-  {
-    if (mnodeValue != null) {
-      long idleTimeout = mnodeValue.getAccessedExpireTimeout();
-      long updateTime = mnodeValue.getLastModifiedTime();
-
-      if (idleTimeout < CacheConfig.TIME_INFINITY
-          && updateTime + mnodeValue.getAccessExpireTimeoutWindow() < now) {
-        // XXX:
-        mnodeValue.setLastAccessTime(now);
-
-        saveUpdateTime(entry, mnodeValue);
-      }
-    }
-  }
-
-  private void loadExpiredValue(DistCacheEntry entry,
-                                CacheConfig config,
-                                long now)
-  {
-    MnodeEntry mnodeEntry = entry.getMnodeEntry();
-    
-    entry.addLoadCount();
-    
-    CacheEngine engine = config.getEngine();
-    
-    MnodeValue mnodeValue = engine.get(entry, config);
-    
-    mnodeEntry = entry.getMnodeEntry();
-
-    if (mnodeEntry== null || mnodeEntry.isExpired(now)) {
-      CacheLoader loader = config.getCacheLoader();
-
-      if (loader != null && config.isReadThrough() && entry.getKey() != null) {
-        Object arg = null;
-        
-        Cache.Entry loaderEntry = loader.load(entry.getKey());
-
-        if (entry != null) {
-          put(entry, loaderEntry.getValue(), config, now, mnodeEntry);
-
-          return;
-        }
-      }
-
-      MnodeEntry nullMnodeValue = new MnodeEntry(0, 0, 0, 0, null, null,
-                                                 0,
-                                                 config.getAccessedExpireTimeout(),
-                                                 config.getModifiedExpireTimeout(),
-                                                 config.getLeaseExpireTimeout(),
-                                                 now, now,
-                                                 true, true);
-
-      entry.compareAndSet(mnodeEntry, nullMnodeValue);
-    }
-    else {
-      mnodeEntry.setLastAccessTime(now);
-    }
-  }
-  
- /**
-   * Sets a cache entry
-   */
-  final public void put(DistCacheEntry entry,
-                        Object value,
-                        CacheConfig config)
-  {
-    long now = CurrentTime.getCurrentTime();
-
-    // server/60a0 - on server '4', need to read update from triad
-    MnodeEntry mnodeValue = getMnodeValue(entry, config, now); // , false);
-
-    put(entry, value, config, now, mnodeValue);
-  }
-
-  /**
-   * Sets a cache entry
-   */
-  protected final void put(DistCacheEntry entry,
-                           Object value,
-                           CacheConfig config,
-                           long now,
-                           MnodeEntry mnodeValue)
-  {
-    // long idleTimeout = config.getIdleTimeout() * 5L / 4;
-    HashKey key = entry.getKeyHash();
-
-    MnodeUpdate update = _localDataManager.writeValue(mnodeValue, value, config);
-    
-    mnodeValue = putLocalValue(entry, update, value);
-
-    if (mnodeValue == null)
-      return;
-
-    config.getEngine().put(key, update, mnodeValue);
-    
-    CacheWriter writer = config.getCacheWriter();
-    
-    if (writer != null && config.isWriteThrough()) {
-      writer.write(entry);
-    }
-
-    return;
   }
 
   public final ExtCacheEntry putStream(DistCacheEntry entry,
@@ -505,7 +253,7 @@ public final class CacheStoreManager
     throws IOException
   {
     HashKey key = entry.getKeyHash();
-    MnodeEntry mnodeEntry = _localMnodeManager.loadMnodeValue(entry);
+    MnodeEntry mnodeEntry = entry.loadLocalMnodeValue();
 
     DataItem valueItem = _localDataManager.writeData(is);
     
@@ -543,10 +291,12 @@ public final class CacheStoreManager
     
     MnodeValue mnodeValue = putLocalValue(entry, mnodeUpdate, null);
 
-    if (mnodeEntry == null)
+    if (mnodeEntry == null) {
+      // XXX: remove contention?
       return null;
+    }
     
-    config.getEngine().put(key, mnodeUpdate, mnodeValue);
+    config.getEngine().put(key, mnodeUpdate);
 
     return mnodeEntry;
   }
@@ -571,7 +321,7 @@ public final class CacheStoreManager
     long now = CurrentTime.getCurrentTime();
 
     // server/60a0 - on server '4', need to read update from triad
-    MnodeEntry mnodeValue = getMnodeValue(entry, config, now); // , false);
+    MnodeEntry mnodeValue = entry.loadMnodeValue(config, now); // , false);
 
     return getAndPut(entry, value, config, now, mnodeValue);
   }
@@ -585,7 +335,7 @@ public final class CacheStoreManager
     long now = CurrentTime.getCurrentTime();
 
     // server/60a0 - on server '4', need to read update from triad
-    MnodeEntry mnodeValue = getMnodeValue(entry, config, now); // , false);
+    MnodeEntry mnodeValue = entry.loadMnodeValue(config, now); // , false);
 
     return getAndPut(entry, null, config, now, mnodeValue);
   }
@@ -646,8 +396,7 @@ public final class CacheStoreManager
   {
     long oldValueHash = entry.getValueHash();
 
-    MnodeEntry mnodeValue = putLocalValue(entry, 
-                                          mnodeUpdate, value);
+    putLocalValue(entry, mnodeUpdate, value);
 
     return oldValueHash;
   }
@@ -680,7 +429,7 @@ public final class CacheStoreManager
       = _localDataManager.writeValue(entry.getMnodeEntry(), value, config);
     
     try {
-      return _localMnodeManager.compareAndPut(entry, testValue, update, value);
+      return entry.compareAndPutLocal(testValue, update, value);
     } finally {
       MnodeValue newMnodeValue = entry.getMnodeEntry();
       
@@ -704,7 +453,7 @@ public final class CacheStoreManager
     Object value = null;
     
     try {
-      return _localMnodeManager.compareAndPut(entry, testValue, newUpdate, value);
+      return entry.compareAndPutLocal(testValue, newUpdate, value);
     } finally {
       MnodeValue newMnodeValue = entry.getMnodeEntry();
       
@@ -726,61 +475,6 @@ public final class CacheStoreManager
     return engine.compareAndPut(entry, testValue, mnodeUpdate, value);
   }
 
-  /*
-  protected boolean compareAndPut(DistCacheEntry entry,
-                                  long testValue,
-                                  MnodeUpdate mnodeUpdate,
-                                  Object value)
-  {
-    CacheEngine engine = config.getEngine();
-    
-    return engine.compareAndPut(entry, testValue, mnodeUpdate, value, config);
-  }
-  */
-
-  /*
-  public boolean compareAndPut(DistCacheEntry entry,
-                               long version,
-                               long valueHash,
-                               long valueIndex,
-                               long valueLength,
-                               CacheConfig config)
-  {
-    HashKey key = entry.getKeyHash();
-    MnodeEntry mnodeValue = _localMnodeManager.loadMnodeValue(entry);
-
-    long oldValueHash = (mnodeValue != null
-                         ? mnodeValue.getValueHash()
-                         : null);
-    long oldVersion = mnodeValue != null ? mnodeValue.getVersion() : 0;
-
-    if (version <= oldVersion)
-      return false;
-
-    if (valueHash == oldValueHash) {
-      return true;
-    }
-    
-    long newVersion = version;
-    
-    MnodeUpdate mnodeUpdate = new MnodeUpdate(valueHash, valueIndex, valueLength,
-                                              newVersion,
-                                              config);
-
-    // add 25% window for update efficiency
-    // idleTimeout = idleTimeout * 5L / 4;
-
-    mnodeValue = putLocalValue(entry, mnodeUpdate, null);
-    
-    if (mnodeValue == null)
-      return false;
-    
-    config.getEngine().put(key, mnodeUpdate, mnodeValue);
-
-    return true;
-  }
-  */
-
   final DistCacheEntry getLocalEntry(HashKey key)
   {
     if (key == null)
@@ -798,12 +492,7 @@ public final class CacheStoreManager
 
     DistCacheEntry entry = getCacheEntry(key);
 
-    long now = CurrentTime.getCurrentTime();
-
-    if (entry.getMnodeEntry() == null
-        || entry.getMnodeEntry().isExpired(now)) {
-      _localMnodeManager.forceLoadMnodeValue(entry);
-    }
+    entry.loadLocalEntry();
 
     return entry;
   }
@@ -812,71 +501,10 @@ public final class CacheStoreManager
   {
     DistCacheEntry entry = getLocalEntry(key);
 
-    MnodeEntry mnodeValue = entry.getMnodeEntry();
-
-    if (mnodeValue != null) {
-      updateAccessTime(entry, mnodeValue);
-    }
-
+    entry.updateAccessTime();
+    
     return entry;
   }
-
-  final protected void updateAccessTime(DistCacheEntry entry,
-                                        MnodeEntry mnodeValue)
-  {
-    long accessedExpireTimeout = mnodeValue.getAccessedExpireTimeout();
-    long accessedTime = mnodeValue.getLastAccessedTime();
-
-    long now = CurrentTime.getCurrentTime();
-                       
-    if (accessedExpireTimeout < CacheConfig.TIME_INFINITY
-        && accessedTime + mnodeValue.getAccessExpireTimeoutWindow() < now) {
-      mnodeValue.setLastAccessTime(now);
-
-      saveUpdateTime(entry, mnodeValue);
-    }
-  }
-
-  /**
-   * Gets a cache entry
-   */
-  /*
-  final public MnodeEntry loadMnodeValue(DistCacheEntry cacheEntry)
-  {
-    HashKey key = cacheEntry.getKeyHash();
-    MnodeEntry mnodeValue = cacheEntry.getMnodeEntry();
-
-    if (mnodeValue == null || mnodeValue.isImplicitNull()) {
-      MnodeEntry newMnodeValue = getDataBacking().loadLocalEntryValue(key);
-
-      // cloud/6811
-      cacheEntry.compareAndSet(mnodeValue, newMnodeValue);
-
-      mnodeValue = cacheEntry.getMnodeEntry();
-    }
-
-    return mnodeValue;
-  }
-  */
-
-  /**
-   * Gets a cache entry
-   */
-  /*
-  private MnodeEntry forceLoadMnodeValue(DistCacheEntry cacheEntry)
-  {
-    HashKey key = cacheEntry.getKeyHash();
-    MnodeEntry mnodeValue = cacheEntry.getMnodeEntry();
-
-    MnodeEntry newMnodeValue = getDataBacking().loadLocalEntryValue(key);
-
-    cacheEntry.compareAndSet(mnodeValue, newMnodeValue);
-
-    mnodeValue = cacheEntry.getMnodeEntry();
-
-    return mnodeValue;
-  }
-  */
 
   /**
    * Sets a cache entry
@@ -885,41 +513,7 @@ public final class CacheStoreManager
   {
     DistCacheEntry entry = getCacheEntry(key);
 
-    long timeout = 60000L;
-
-    MnodeEntry oldEntryValue = entry.getMnodeEntry();
-
-    if (oldEntryValue != null && mnodeValue.compareTo(oldEntryValue) <= 0) {
-      return oldEntryValue;
-    }
-
-    // the failure cases are not errors because this put() could
-    // be immediately followed by an overwriting put()
-    if (! entry.compareAndSet(oldEntryValue, mnodeValue)) {
-      log.fine(this + " mnodeValue update failed due to timing conflict"
-        + " (key=" + key + ")");
-
-      return entry.getMnodeEntry();
-    }
-
-    return getDataBacking().insertLocalValue(key, mnodeValue,
-                                             oldEntryValue);
-  }
-  
-  /**
-   * Sets a cache entry
-   */
-  final MnodeEntry saveUpdateTime(DistCacheEntry entryKey,
-                                  MnodeEntry mnodeValue)
-  {
-    MnodeEntry newEntryValue = saveLocalUpdateTime(entryKey, mnodeValue);
-
-    if (newEntryValue.getVersion() != mnodeValue.getVersion())
-      return newEntryValue;
-
-    getCacheEngine().updateTime(entryKey.getKeyHash(), mnodeValue);
-
-    return mnodeValue;
+    return entry.putLocalValue(mnodeValue);
   }
 
   /**
@@ -930,7 +524,7 @@ public final class CacheStoreManager
                                         long accessTimeout,
                                         long updateTime)
   {
-    DistCacheEntry entry = _entryCache.get(key);
+    DistCacheEntry entry = _cacheEntryManager.getCacheEntry(key);
 
     if (entry == null)
       return;
@@ -943,41 +537,7 @@ public final class CacheStoreManager
     MnodeEntry mnodeValue
       = new MnodeEntry(oldEntryValue, accessTimeout, updateTime);
 
-    saveLocalUpdateTime(entry, mnodeValue);
-  }
-
-  /**
-   * Sets a cache entry
-   */
-  final MnodeEntry saveLocalUpdateTime(DistCacheEntry entry,
-                                       MnodeEntry mnodeValue)
-  {
-    MnodeEntry oldEntryValue = entry.getMnodeEntry();
-
-    if (oldEntryValue != null
-        && mnodeValue.getVersion() < oldEntryValue.getVersion()) {
-      return oldEntryValue;
-    }
-    
-    if (oldEntryValue != null
-        && mnodeValue.getLastAccessedTime() == oldEntryValue.getLastAccessedTime()
-        && mnodeValue.getLastModifiedTime() == oldEntryValue.getLastModifiedTime()) {
-      return oldEntryValue;
-    }
-
-    // the failure cases are not errors because this put() could
-    // be immediately followed by an overwriting put()
-
-    if (! entry.compareAndSet(oldEntryValue, mnodeValue)) {
-      log.fine(this + " mnodeValue updateTime failed due to timing conflict"
-               + " (key=" + entry.getKeyHash() + ")");
-
-      return entry.getMnodeEntry();
-    }
-
-    return getDataBacking().saveLocalUpdateTime(entry.getKeyHash(),
-                                                 mnodeValue,
-                                                 oldEntryValue);
+    entry.saveLocalUpdateTime(mnodeValue);
   }
 
   /**
@@ -987,7 +547,7 @@ public final class CacheStoreManager
   {
     HashKey key = entry.getKeyHash();
 
-    MnodeEntry mnodeEntry = _localMnodeManager.loadMnodeValue(entry);
+    MnodeEntry mnodeEntry = entry.loadLocalMnodeValue();
     long oldValueHash = mnodeEntry != null ? mnodeEntry.getValueHash() : 0;
 
     long newVersion = getNewVersion(mnodeEntry);
@@ -1045,7 +605,7 @@ public final class CacheStoreManager
       return oldValueHash != 0;
     }
     
-    config.getEngine().put(key, null, mnodeValue);
+    config.getEngine().put(key, mnodeUpdate);
 
     return oldValueHash != 0;
   }
@@ -1062,9 +622,7 @@ public final class CacheStoreManager
     // long valueHash = mnodeUpdate.getValueHash();
     // long version = mnodeUpdate.getVersion();
     
-    MnodeEntry mnodeValue = _localMnodeManager.putLocalValue(entry,
-                                                             mnodeUpdate,
-                                                             value);
+    MnodeEntry mnodeValue = entry.putLocalValue(mnodeUpdate, value);
     
     notifyPutListeners(key, mnodeUpdate, mnodeValue);
     
@@ -1083,7 +641,7 @@ public final class CacheStoreManager
     // long valueHash = mnodeUpdate.getValueHash();
     // long version = mnodeUpdate.getVersion();
     
-    MnodeValue mnodeValue = localUpdate(entry, mnodeUpdate, is);
+    MnodeValue mnodeValue = entry.localUpdate(mnodeUpdate, is);
 
     notifyPutListeners(key, mnodeUpdate, mnodeValue);
     
@@ -1099,52 +657,13 @@ public final class CacheStoreManager
   {
     try {
       HashKey key = new HashKey(keyHash);
-      long valueHash = update.getValueHash();
 
       DistCacheEntry cacheEntry = loadLocalEntry(key);
     
-      return localUpdate(cacheEntry, update, source.getInputStream());
+      return cacheEntry.localUpdate(update, source.getInputStream());
     } catch (IOException e) {
       throw new RuntimeException(e);
     }
-  }
-  
-  public MnodeUpdate localUpdate(DistCacheEntry cacheEntry,
-                                 MnodeUpdate update,
-                                 InputStream is)
-  {
-    MnodeEntry oldEntryValue = cacheEntry.getMnodeEntry();
-    long oldEntryHash = (oldEntryValue != null
-                         ? oldEntryValue.getValueHash()
-                         : 0);
-    
-    if (update.getValueHash() == 0) {
-    }
-    else if (oldEntryValue == null
-             || (oldEntryValue.getVersion() <= update.getVersion()
-                 && update.getValueHash() != oldEntryHash)) {
-      try {
-        if (is != null) {
-          update = _localDataManager.writeData(update,
-                                               update.getVersion(),
-                                               is);
-        }
-      } finally {
-        IoUtil.close(is);
-      }
-    }
-    
-    _localMnodeManager.putLocalValue(cacheEntry, update, null);
-    
-    /*
-    int server = 0;
-    CacheUpdateWithSource result = loadCacheSource(key,
-                                                   update.getVersion(),
-                                                   server,
-                                                   false);
-                                                   */
-    
-    return cacheEntry.getMnodeEntry().getRemoteUpdate();
   }
 
   private void notifyPutListeners(HashKey key,
@@ -1185,26 +704,11 @@ public final class CacheStoreManager
   }
 
   /**
-   * Load the cluster data from the triad.
-   */
-  /*
-  protected boolean loadClusterData(HashKey key,
-                                    HashKey valueKey,
-                                    long valueIndex,
-                                    CacheConfig config)
-  {
-    return config.getEngine().loadData(key, 
-                                       valueKey, valueIndex,
-                                       config.getFlags());
-  }
-  */
-
-  /**
    * Clears leases on server start/stop
    */
   final public void clearLeases()
   {
-    Iterator<DistCacheEntry> iter = _entryCache.values();
+    Iterator<DistCacheEntry> iter = _cacheEntryManager.getEntries();
 
     while (iter.hasNext()) {
       DistCacheEntry entry = iter.next();
@@ -1222,7 +726,7 @@ public final class CacheStoreManager
   
   public Iterator<DistCacheEntry> getEntries()
   {
-    return _entryCache.values();
+    return _cacheEntryManager.getEntries();
   }
   
   public void start()
@@ -1239,6 +743,7 @@ public final class CacheStoreManager
     
     _cacheEngine.start();
   }
+  
   public boolean readData(HashKey keyHash, MnodeEntry mnodeEntry,
                           OutputStream os, CacheConfig config)
     throws IOException
@@ -1271,16 +776,19 @@ public final class CacheStoreManager
   /**
    * Sets a cache entry
    */
+  /*
   public void put(HashKey hashKey,
                   Object value,
                   CacheConfig config)
   {
     throw new UnsupportedOperationException(getClass().getName());
   }
+  */
 
   /**
    * Sets a cache entry
    */
+  /*
   public ExtCacheEntry put(HashKey hashKey,
                            InputStream is,
                            CacheConfig config,
@@ -1289,6 +797,7 @@ public final class CacheStoreManager
   {
     throw new UnsupportedOperationException(getClass().getName());
   }
+  */
 
   /**
    * Called when a cache initializes.

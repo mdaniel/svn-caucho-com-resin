@@ -39,7 +39,6 @@ import com.caucho.server.distcache.MnodeEntry;
 import com.caucho.server.distcache.MnodeStore;
 import com.caucho.server.distcache.MnodeValue;
 import com.caucho.util.HashKey;
-import com.caucho.vfs.Crc64InputStream;
 import com.caucho.vfs.StreamSource;
 import com.caucho.vfs.WriteStream;
 

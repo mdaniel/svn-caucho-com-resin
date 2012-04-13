@@ -73,8 +73,7 @@ public class AbstractCacheEngine implements CacheEngine
 
   @Override
   public void put(HashKey key, 
-                  MnodeUpdate mnodeUpdate,
-                  MnodeValue mnodeValue)
+                  MnodeUpdate mnodeUpdate)
   {
   }
 

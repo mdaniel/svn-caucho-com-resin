@@ -57,8 +57,7 @@ public interface CacheEngine
                           */
 
   public void put(HashKey key, 
-                  MnodeUpdate mnodeUpdate,
-                  MnodeValue mnodeValue);
+                  MnodeUpdate mnodeUpdate);
 
   public void updateTime(HashKey key, MnodeEntry mnodeValue);
 

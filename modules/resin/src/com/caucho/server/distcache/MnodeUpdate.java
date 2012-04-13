@@ -29,14 +29,14 @@
 
 package com.caucho.server.distcache;
 
-import com.caucho.util.HashKey;
-import com.caucho.util.Hex;
-
 /**
  * An entry in the cache map
  */
 @SuppressWarnings("serial")
 public class MnodeUpdate extends MnodeValue {
+  public static final MnodeUpdate NULL
+    = new MnodeUpdate(0, 0, 0, 0, null, 0, 0, 0, -1, -1);
+  
   private final int _leaseOwner;
   private final long _leaseTimeout;
   
@@ -159,7 +159,9 @@ public class MnodeUpdate extends MnodeValue {
                            0,
                            getValueLength(),
                            getVersion(),
-                           this);
+                           this,
+                           getLeaseOwner(),
+                           getLeaseTimeout());
   }
   
   public final int getLeaseOwner()
@@ -180,6 +182,7 @@ public class MnodeUpdate extends MnodeValue {
         + ",len=" + getValueLength()
         + ",flags=" + Long.toHexString(getFlags())
         + ",version=" + getVersion()
+        + ",lease=" + getLeaseOwner()
         + "]");
   }
 }
