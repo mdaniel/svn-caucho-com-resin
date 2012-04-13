@@ -34,6 +34,7 @@ import java.net.Socket;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
+import com.caucho.bam.BamException;
 import com.caucho.bam.NotAuthorizedException;
 import com.caucho.bam.RemoteConnectionFailedException;
 import com.caucho.bam.RemoteListenerUnavailableException;
@@ -67,16 +68,40 @@ public abstract class AbstractRepositoryCommand extends AbstractRemoteCommand {
       deployClient = getDeployClient(args, client);
 
       return doCommand(args, client, deployClient);
+    } catch (ConfigException e) {
+      if (args.isVerbose()) {
+        e.printStackTrace();
+      }
+      
+      System.out.println(e.toString());
+      
+      return 2;
+    } catch (NotAuthorizedException e) {
+      if (args.isVerbose()) {
+        e.printStackTrace();
+      }
+      
+      System.out.println(e.toString());
+      
+      return 1;
+    } catch (BamException e) {
+      if (args.isVerbose()) {
+        e.printStackTrace();
+      }
+      
+      System.out.println(e.toString());
+      
+      return 2;
     } catch (Exception e) {
+      /*
       if (args.isVerbose())
         e.printStackTrace();
       else
         System.out.println(e.toString());
+        */
+      e.printStackTrace();
 
-      if (e instanceof NotAuthorizedException)
-        return 1;
-      else
-        return 2;
+      return 2;
     } finally {
       if (deployClient != null)
         deployClient.close();

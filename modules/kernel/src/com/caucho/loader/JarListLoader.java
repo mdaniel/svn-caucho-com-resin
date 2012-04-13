@@ -148,7 +148,7 @@ abstract public class JarListLoader extends Loader implements Dependency {
                   + " path=" + jar.getNativePath() + ")");
       return;
     }
-    
+
     JarPath jarPath = JarPath.create(jar);
     JarEntry jarEntry = new JarEntry(jarPath);
 

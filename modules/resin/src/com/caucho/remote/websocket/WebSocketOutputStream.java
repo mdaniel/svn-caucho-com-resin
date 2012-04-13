@@ -80,8 +80,9 @@ public class WebSocketOutputStream extends OutputStream
   
   public void init()
   {
-    if (_state != MessageState.IDLE)
+    if (_state != MessageState.IDLE) {
       throw new IllegalStateException(String.valueOf(_state));
+    }
     
     _state = MessageState.FIRST;
     

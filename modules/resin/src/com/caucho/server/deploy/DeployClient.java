@@ -83,7 +83,7 @@ public class DeployClient implements Repository
   private Broker _broker;
   private ActorSender _bamClient;
   private String _deployAddress;
-  private DeployActorProxy _deployProxy;
+  private final DeployActorProxy _deployProxy;
   
   private String _url;
 
@@ -119,6 +119,11 @@ public class DeployClient implements Repository
     _url = url;
 
     _deployAddress = DeployActor.ADDRESS;
+    
+    _deployProxy = BamProxyFactory.createProxy(DeployActorProxy.class,
+                                               _deployAddress, 
+                                               _bamClient);
+
   }
   
   public DeployClient(String host, int port,

@@ -97,6 +97,7 @@ public class ConfigPath extends Path {
   /**
    * Returns the scheme.
    */
+  @Override
   public String getScheme()
   {
     Path path = Vfs.lookup();

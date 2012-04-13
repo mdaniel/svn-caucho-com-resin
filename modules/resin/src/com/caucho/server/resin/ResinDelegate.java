@@ -84,7 +84,8 @@ public class ResinDelegate
     _resin = resin;
   }
 
-  public void init() {
+  public void init()
+  {
     _licenseStore = new LicenseStore();
 
     try {

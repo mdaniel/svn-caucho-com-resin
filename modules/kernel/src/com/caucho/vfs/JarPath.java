@@ -72,8 +72,11 @@ public class JarPath extends FilesystemPath {
    */
   public static JarPath create(Path backing)
   {
-    if (backing instanceof JarPath)
+    backing = backing.unwrap();
+    
+    if (backing instanceof JarPath) {
       return (JarPath) backing;
+    }
     
     JarPath path = _jarCache.get(backing);
 

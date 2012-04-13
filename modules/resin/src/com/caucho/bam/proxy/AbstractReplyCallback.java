@@ -52,4 +52,10 @@ public class AbstractReplyCallback<T> implements ReplyCallback<T> {
   {
     log.log(Level.FINER, this + " onError() -> " + error);
   }
+  
+  @Override
+  public String toString()
+  {
+    return getClass().getSimpleName() + "[]";
+  }
 }

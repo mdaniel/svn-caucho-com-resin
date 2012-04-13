@@ -203,8 +203,8 @@ public class DataStore {
         
         isOld = true;
       } catch (Exception e) {
-        log.log(Level.FINEST, e.toString(), e);
-        log.finer(this + " " + e.toString());
+        log.log(Level.ALL, e.toString(), e);
+        log.finest(this + " " + e.toString());
       }
 
       if (! isOld) {

@@ -1577,7 +1577,12 @@ public abstract class Path implements Comparable<Path> {
   {
     return this;
   }
-
+  
+  public Path unwrap()
+  {
+    return this;
+  }
+  
   /**
    * Copy for caching.
    */

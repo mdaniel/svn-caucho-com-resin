@@ -91,7 +91,7 @@ public class RepositoryPath extends Path
   @Override
   public String getScheme()
   {
-    return "config";
+    return "cloud";
   }
 
   @Override
@@ -191,8 +191,9 @@ public class RepositoryPath extends Path
     throws IOException
   {
     update();
+    String []list = _physicalPath.list();
     
-    return _physicalPath.list();
+    return list;
   }
   
   //
@@ -206,6 +207,12 @@ public class RepositoryPath extends Path
     update();
     
     return _physicalPath.openReadImpl();
+  }
+  
+  @Override
+  public Path unwrap()
+  {
+    return _physicalPath.unwrap();
   }
   
   private void update()
