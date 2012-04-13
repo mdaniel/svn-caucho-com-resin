@@ -338,15 +338,13 @@ public final class CacheStoreManager
   final public MnodeEntry getMnodeValue(DistCacheEntry entry,
                                         CacheConfig config,
                                         long now,
-                                        boolean isExact)
+                                        boolean isForceLoad)
   {
     MnodeEntry mnodeValue = _localMnodeManager.loadMnodeValue(entry);
 
-    if (mnodeValue == null) {
-      reloadValue(entry, config, now);
-    }
-    else if (isExact 
-             || isLocalExpired(config, entry.getKeyHash(), mnodeValue, now)) {
+    if (mnodeValue == null
+        || isForceLoad
+        || isLocalExpired(config, entry.getKeyHash(), mnodeValue, now)) {
       reloadValue(entry, config, now);
     }
 
@@ -416,8 +414,14 @@ public final class CacheStoreManager
     MnodeEntry mnodeEntry = entry.getMnodeEntry();
     
     entry.addLoadCount();
+    
+    CacheEngine engine = config.getEngine();
+    
+    MnodeValue mnodeValue = engine.get(entry, config);
+    
+    mnodeEntry = entry.getMnodeEntry();
 
-    if (mnodeEntry == null || mnodeEntry.isExpired(now)) {
+    if (mnodeEntry== null || mnodeEntry.isExpired(now)) {
       CacheLoader loader = config.getCacheLoader();
 
       if (loader != null && config.isReadThrough() && entry.getKey() != null) {
