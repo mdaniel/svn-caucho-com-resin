@@ -40,9 +40,6 @@ abstract public class AbstractJavaMethod extends AbstractFunction
 {
   private static final L10N L = new L10N(AbstractJavaMethod.class);
 
-  private static final Object [] NULL_ARGS = new Object[0];
-  private static final Value [] NULL_VALUES = new Value[0];
-
   /**
    * Returns the minimally required number of arguments.
    */
@@ -61,6 +58,12 @@ abstract public class AbstractJavaMethod extends AbstractFunction
   abstract public int getMarshalingCost(Value []args);
 
   abstract public int getMarshalingCost(Expr []args);
+
+  @Override
+  public boolean isJavaMethod()
+  {
+    return true;
+  }
 
   public Class<?> getJavaDeclaringClass()
   {
@@ -118,9 +121,9 @@ abstract public class AbstractJavaMethod extends AbstractFunction
   }
 
   @Override
-  abstract public Value callMethod(Env env, 
+  abstract public Value callMethod(Env env,
                                    QuercusClass qClass,
-                                   Value qThis, 
+                                   Value qThis,
                                    Value []args);
 
   /**
@@ -148,14 +151,14 @@ abstract public class AbstractJavaMethod extends AbstractFunction
   @Override
   public Value call(Env env, Value a1)
   {
-    return callMethod(env, getQuercusClass(), (Value) null, 
+    return callMethod(env, getQuercusClass(), (Value) null,
                       new Value[] {a1});
   }
 
   @Override
   public Value call(Env env, Value a1, Value a2)
   {
-    return callMethod(env, getQuercusClass(), (Value) null, 
+    return callMethod(env, getQuercusClass(), (Value) null,
                       new Value[] {a1, a2});
   }
 
@@ -170,7 +173,7 @@ abstract public class AbstractJavaMethod extends AbstractFunction
   public Value call(Env env,
                     Value a1, Value a2, Value a3, Value a4)
   {
-    return callMethod(env, getQuercusClass(), (Value) null, 
+    return callMethod(env, getQuercusClass(), (Value) null,
                       new Value[] {a1, a2, a3, a4});
   }
 

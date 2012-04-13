@@ -68,17 +68,18 @@ public class PDOStatement
   //private static final Value FETCH_EXHAUSTED = new NullValue() {};
   //private static final Value FETCH_CONTINUE = new NullValue() {};
   //private static final Value FETCH_SUCCESS = new NullValue() {};
-  
+
   private static final int FETCH_FAILURE = 0;
   private static final int FETCH_EXHAUSTED = 1;
   private static final int FETCH_CONTINUE = 2;
   private static final int FETCH_SUCCESS = 3;
-  
+
   private int _fetchErrorCode;
 
   private final Env _env;
   private final PDOError _error;
 
+  // XXX: need to make public @Name("queryString")
   private final String _query;
 
   private Statement _statement;
@@ -95,9 +96,12 @@ public class PDOStatement
   private ArrayList<BindParam> _bindParams;
   private IntMap _parameterNameMap;
 
-  PDOStatement(Env env, Connection conn,
-               String query, boolean isPrepared,
-               ArrayValue options)
+  // protected so it's not callable by PHP code
+  protected PDOStatement(Env env,
+                         Connection conn,
+                         String query,
+                         boolean isPrepared,
+                         ArrayValue options)
     throws SQLException
   {
     _env = env;
@@ -242,8 +246,9 @@ public class PDOStatement
     }
   }
 
-  public boolean bindColumn(
-      Value column, @Reference Value var, @Optional("-1") int type)
+  public boolean bindColumn(Value column,
+                            @Reference Value var,
+                            @Optional("-1") int type)
   {
     if (_bindColumns == null)
       _bindColumns = new ArrayList<BindColumn>();
@@ -358,12 +363,11 @@ public class PDOStatement
     }
   }
 
-  public BindParam createBindParam(
-      Value parameter,
-      Value value,
-      int dataType,
-      int length,
-      Value driverOptions)
+  public BindParam createBindParam(Value parameter,
+                                   Value value,
+                                   int dataType,
+                                   int length,
+                                   Value driverOptions)
   {
     return new BindParam(parameter, value, dataType, length, driverOptions);
   }
@@ -508,13 +512,13 @@ public class PDOStatement
    * are no more rows or an error occurs.
    */
   public Value fetch(@Optional int fetchMode,
-                     @Optional("-1") int cursorOrientation,
-                     @Optional("-1") int cursorOffset)
+                     @Optional("0") int cursorOrientation,
+                     @Optional("0") int cursorOffset)
   {
-    if (cursorOrientation != -1)
+    if (cursorOrientation != 0)
       throw new UnimplementedException("fetch with cursorOrientation");
 
-    if (cursorOffset != -1)
+    if (cursorOffset != 0)
       throw new UnimplementedException("fetch with cursorOffset");
 
     return fetchImpl(fetchMode, -1);
@@ -525,8 +529,8 @@ public class PDOStatement
    * @param fetchMode
    * @param columnIndex 0-based column index when fetchMode is FETCH_BOTH
    */
-  public Value fetchAll(
-      @Optional("0") int fetchMode, @Optional("-1") int columnIndex)
+  public Value fetchAll(@Optional("0") int fetchMode,
+                        @Optional("-1") int columnIndex)
   {
     int effectiveFetchMode;
 
@@ -592,15 +596,15 @@ public class PDOStatement
     try {
       if (!advanceResultSet()) {
         _fetchErrorCode = FETCH_EXHAUSTED;
-        
+
         return BooleanValue.FALSE;
       }
 
       if (_fetchModeArgs.length != 0) {
         _error.notice(L.l("unexpected arguments"));
-        
+
         _fetchErrorCode = FETCH_FAILURE;
-        
+
         return BooleanValue.FALSE;
       }
 
@@ -619,9 +623,9 @@ public class PDOStatement
     }
     catch (SQLException ex) {
       _error.error(ex);
-      
+
       _fetchErrorCode = FETCH_FAILURE;
-      
+
       return BooleanValue.FALSE;
     }
   }
@@ -631,15 +635,15 @@ public class PDOStatement
     try {
       if (! advanceResultSet()) {
         _fetchErrorCode = FETCH_EXHAUSTED;
-        
+
         return BooleanValue.FALSE;
       }
 
       if (_fetchModeArgs.length != 0) {
         _error.notice(L.l("unexpected arguments"));
-        
+
         _fetchErrorCode = FETCH_FAILURE;
-        
+
         return BooleanValue.FALSE;
       }
 
@@ -659,9 +663,9 @@ public class PDOStatement
     }
     catch (SQLException ex) {
       _error.error(ex);
-      
+
       _fetchErrorCode = FETCH_FAILURE;
-      
+
       return BooleanValue.FALSE;
     }
   }
@@ -670,12 +674,12 @@ public class PDOStatement
   {
     if (!advanceResultSet()) {
       _fetchErrorCode = FETCH_EXHAUSTED;
-      
+
       return BooleanValue.FALSE;
     }
 
     _fetchErrorCode = FETCH_SUCCESS;
-    
+
     return BooleanValue.TRUE;
   }
 
@@ -718,7 +722,7 @@ public class PDOStatement
   {
     if (!advanceResultSet()) {
       _fetchErrorCode = FETCH_EXHAUSTED;
-      
+
       return BooleanValue.FALSE;
     }
 
@@ -728,7 +732,7 @@ public class PDOStatement
     try {
       if (column < 0 || column >= getResultSetMetaData().getColumnCount()) {
         _fetchErrorCode = FETCH_CONTINUE;
-        
+
         return BooleanValue.FALSE;
       }
 
@@ -736,9 +740,9 @@ public class PDOStatement
     }
     catch (SQLException ex) {
       _error.error(ex);
-      
+
       _fetchErrorCode = FETCH_FAILURE;
-      
+
       return BooleanValue.FALSE;
     }
   }
@@ -779,7 +783,7 @@ public class PDOStatement
     fetchMode = fetchMode & (~(PDO.FETCH_CLASSTYPE | PDO.FETCH_SERIALIZE));
 
     _fetchErrorCode = FETCH_SUCCESS;
-    
+
     switch (fetchMode) {
       case PDO.FETCH_ASSOC:
         return fetchAssoc();
@@ -830,7 +834,7 @@ public class PDOStatement
 
     if (!advanceResultSet()) {
       _fetchErrorCode = FETCH_EXHAUSTED;
-      
+
       return BooleanValue.FALSE;
     }
 
@@ -846,9 +850,9 @@ public class PDOStatement
     }
     catch (SQLException ex) {
       _error.error(ex);
-      
+
       _fetchErrorCode = FETCH_FAILURE;
-      
+
       return BooleanValue.FALSE;
     }
 
@@ -866,7 +870,7 @@ public class PDOStatement
     try {
       if (! advanceResultSet()) {
         _fetchErrorCode = FETCH_EXHAUSTED;
-        
+
         return BooleanValue.FALSE;
       }
 
@@ -900,7 +904,7 @@ public class PDOStatement
     catch (SQLException ex) {
       _error.error(ex);
       _fetchErrorCode = FETCH_FAILURE;
-      
+
       return BooleanValue.FALSE;
     }
   }
@@ -910,15 +914,15 @@ public class PDOStatement
     try {
       if (!advanceResultSet()) {
         _fetchErrorCode = FETCH_EXHAUSTED;
-        
+
         return BooleanValue.FALSE;
       }
 
       if (_fetchModeArgs.length != 0) {
         _error.notice(L.l("unexpected arguments"));
-        
+
         _fetchErrorCode = FETCH_FAILURE;
-        
+
         return BooleanValue.FALSE;
       }
 
@@ -937,7 +941,7 @@ public class PDOStatement
     catch (SQLException ex) {
       _error.error(ex);
       _fetchErrorCode = FETCH_FAILURE;
-      
+
       return BooleanValue.FALSE;
     }
   }
@@ -969,7 +973,7 @@ public class PDOStatement
 
     if (!advanceResultSet()) {
       _fetchErrorCode = FETCH_EXHAUSTED;
-      
+
       return BooleanValue.FALSE;
     }
 
@@ -995,7 +999,7 @@ public class PDOStatement
     catch (Throwable ex) {
       _error.error(ex);
       _fetchErrorCode = FETCH_FAILURE;
-      
+
       return BooleanValue.FALSE;
     }
 

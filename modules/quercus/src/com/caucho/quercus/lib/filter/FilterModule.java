@@ -29,6 +29,7 @@
 
 package com.caucho.quercus.lib.filter;
 
+import com.caucho.quercus.UnimplementedException;
 import com.caucho.quercus.annotation.Optional;
 import com.caucho.quercus.annotation.ReadOnly;
 import com.caucho.quercus.env.BooleanValue;
@@ -77,9 +78,7 @@ public class FilterModule extends AbstractQuercusModule
     Filter filter = _filterMap.get(filterId);
 
     if (filter == null) {
-      env.warning(L.l("Unknown filter or filter not implemented: {0}", filterId));
-
-      return BooleanValue.FALSE;
+      throw new UnimplementedException(L.l("filter not implemented: {0}"));
     }
 
     return filter.filter(env, value, flagV);

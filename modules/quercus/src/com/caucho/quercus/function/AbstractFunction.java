@@ -104,6 +104,11 @@ abstract public class AbstractFunction extends Callback {
     return true;
   }
 
+  public boolean isJavaMethod()
+  {
+    return false;
+  }
+
   public final String getCompilationName()
   {
     String compName = getName() + "_" + _parseIndex;

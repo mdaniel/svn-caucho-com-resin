@@ -38,6 +38,7 @@ import com.caucho.quercus.env.BooleanValue;
 import com.caucho.quercus.env.Env;
 import com.caucho.quercus.env.EnvCleanup;
 import com.caucho.quercus.env.LongValue;
+import com.caucho.quercus.env.QuercusClass;
 import com.caucho.quercus.env.StringValue;
 import com.caucho.quercus.env.Value;
 import com.caucho.util.L10N;
@@ -165,6 +166,9 @@ public class PDO implements EnvCleanup {
   private boolean _inTransaction;
 
   private static String ENCODING = "ISO8859_1";
+
+  private String _statementClassName;
+  private Value[] _statementClassArgs;
 
   public PDO(Env env,
              String dsn,
@@ -514,12 +518,13 @@ public class PDO implements EnvCleanup {
   /**
    * Prepares a statement for execution.
    */
-  @ReturnNullAsFalse
-  public PDOStatement prepare(String statement,
-                              @Optional ArrayValue driverOptions)
+  public Value prepare(Env env,
+                       String statement,
+                       @Optional ArrayValue driverOptions)
   {
-    if (_conn == null)
-      return null;
+    if (_conn == null) {
+      return BooleanValue.FALSE;
+    }
 
     try {
       closeStatements();
@@ -529,11 +534,20 @@ public class PDO implements EnvCleanup {
 
       _lastPDOStatement = pdoStatement;
 
-      return pdoStatement;
-    } catch (SQLException e) {
+      if (_statementClassName != null) {
+        QuercusClass cls = env.getClass(_statementClassName);
+
+        Value phpObject = cls.callNew(env, pdoStatement, _statementClassArgs);
+
+        return phpObject;
+      }
+
+      return env.wrapJava(pdoStatement);
+    }
+    catch (SQLException e) {
       _error.error(e);
 
-      return null;
+      return BooleanValue.FALSE;
     }
   }
 
@@ -641,12 +655,13 @@ public class PDO implements EnvCleanup {
     }
   }
 
-  public boolean setAttribute(int attribute, Value value)
+  public boolean setAttribute(Env env, int attribute, Value value)
   {
-    return setAttribute(attribute, value, false);
+    return setAttribute(env, attribute, value, false);
   }
 
-  private boolean setAttribute(int attribute, Value value, boolean isInit)
+  private boolean setAttribute(Env env,
+                               int attribute, Value value, boolean isInit)
   {
     switch (attribute) {
       case ATTR_AUTOCOMMIT:
@@ -665,7 +680,13 @@ public class PDO implements EnvCleanup {
         return setStringifyFetches(value.toBoolean());
 
       case ATTR_STATEMENT_CLASS:
-        return setStatementClass(value);
+        if (! value.isArray()) {
+          env.warning(L.l("ATTR_STATEMENT_CLASS attribute must be an array"));
+
+          return false;
+        }
+
+        return setStatementClass(env, value.toArrayValue(env));
     }
 
     if (isInit) {
@@ -773,9 +794,27 @@ public class PDO implements EnvCleanup {
    *
    * @return true on success, false on error.
    */
-  private boolean setStatementClass(Value value)
+  private boolean setStatementClass(Env env, ArrayValue value)
   {
-    throw new UnimplementedException("ATTR_STATEMENT_CLASS");
+    Value className = value.get(LongValue.ZERO);
+
+    if (! className.isString()) {
+      return false;
+    }
+
+    _statementClassName = className.toStringValue(env).toString();
+
+    Value argV = value.get(LongValue.ONE);
+
+    if (argV.isArray()) {
+      ArrayValue array = argV.toArrayValue(env);
+      _statementClassArgs = array.valuesToArray();;
+    }
+    else {
+      _statementClassArgs = Value.NULL_ARGS;
+    }
+
+    return true;
   }
 
   /**

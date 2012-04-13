@@ -909,6 +909,46 @@ public class QuercusClass extends NullValue {
     }
   }
 
+  public Value callNew(Env env, Object parentJavaObject, Value ...args)
+  {
+    QuercusClass oldCallingClass = env.setCallingClass(this);
+
+    try {
+      if (_classDef.isAbstract()) {
+        throw env.createErrorException(L.l(
+          "abstract class '{0}' cannot be instantiated.",
+          _className));
+      }
+      else if (_classDef.isInterface()) {
+        throw env.createErrorException(L.l(
+          "interface '{0}' cannot be instantiated.",
+          _className));
+      }
+
+      ObjectValue objectValue
+        = new ObjectExtJavaValue(this, parentJavaObject, _javaClassDef);
+
+      initObject(env, objectValue);
+
+      AbstractFunction fun = findConstructor();
+
+      // don't want to call the Java constructor to create another java object
+      // php/0cl4, php/0cl5
+      if (fun != null && ! fun.isJavaMethod()) {
+        fun.callMethod(env, this, objectValue, args);
+      }
+      else {
+        //  if expr
+      }
+
+      return objectValue;
+
+    }
+    finally {
+      env.setCallingClass(oldCallingClass);
+    }
+  }
+
   /**
    * Creates a new instance.
    */
