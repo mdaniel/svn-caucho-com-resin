@@ -27,34 +27,16 @@
  * @author Scott Ferguson
  */
 
-package com.caucho.amp;
+package com.caucho.amp.broker;
 
-import com.caucho.amp.impl.AmpProviderImpl;
-import com.caucho.amp.spi.AmpProvider;
 
 /**
- * Manages an AMP domain.
+ * Factory for AMP brokers.
  */
-public final class Amp
+public interface AmpBrokerFactory
 {
-  private Amp() {}
-  
-  public static AmpManager newManager()
-  {
-    AmpManagerBuilder builder = newManagerBuilder();
-    
-    return builder.create();
-  }
-  
-  public static AmpManagerBuilder newManagerBuilder()
-  {
-    AmpProvider provider = getProvider();
-    
-    return provider.createManagerBuilder();
-  }
-  
-  private static AmpProvider getProvider()
-  {
-    return new AmpProviderImpl();
-  }
+  /**
+   * Creates a new broker instance.
+   */
+  public AmpBroker createBroker();
 }

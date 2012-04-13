@@ -32,7 +32,7 @@ package com.caucho.amp.skeleton;
 import com.caucho.amp.actor.ActorContextImpl;
 import com.caucho.amp.actor.AmpActor;
 import com.caucho.amp.actor.AmpActorRef;
-import com.caucho.amp.router.AmpBroker;
+import com.caucho.amp.broker.AmpBroker;
 
 /**
  * Creates MPC skeletons and stubs.

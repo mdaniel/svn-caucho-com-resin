@@ -29,30 +29,11 @@
 
 package com.caucho.amp.manager;
 
-import java.util.concurrent.atomic.AtomicLong;
-
 import com.caucho.amp.AmpManager;
-import com.caucho.amp.actor.ActorContextImpl;
-import com.caucho.amp.actor.AmpActor;
-import com.caucho.amp.actor.AmpProxyActor;
-import com.caucho.amp.mailbox.AmpMailbox;
-import com.caucho.amp.mailbox.AmpMailboxFactory;
-import com.caucho.amp.mailbox.SimpleAmpMailbox;
-import com.caucho.amp.mailbox.SimpleMailboxFactory;
-import com.caucho.amp.router.AmpBroker;
-import com.caucho.amp.router.HashMapAmpBroker;
-import com.caucho.amp.skeleton.AmpReflectionSkeletonFactory;
-import com.caucho.amp.spi.AmpProvider;
-import com.caucho.amp.spi.AmpSpi;
 
 /**
- * Default AMP provider.
+ * Creates AMP actors and proxies.
  */
-public class AmpProviderImpl implements AmpProvider
+abstract public class AbstractAmpManager implements AmpManager
 {
-  @Override
-  public AmpManager createManager()
-  {
-    return new AmpManagerImpl();
-  }
 }

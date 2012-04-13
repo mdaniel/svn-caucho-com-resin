@@ -42,9 +42,6 @@ public class AbstractAmpActor extends AbstractAmpStream implements AmpActor
   @Override
   public AmpMethodRef getMethod(String methodName, AmpEncoder encoder)
   {
-    System.out.println("THIS: " + this);
-    Thread.dumpStack();
-
     return new AbstractMethodRef(this, methodName, encoder);
   }
   

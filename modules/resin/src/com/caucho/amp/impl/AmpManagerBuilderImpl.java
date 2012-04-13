@@ -27,34 +27,24 @@
  * @author Scott Ferguson
  */
 
-package com.caucho.amp;
+package com.caucho.amp.impl;
 
-import com.caucho.amp.impl.AmpProviderImpl;
-import com.caucho.amp.spi.AmpProvider;
+import com.caucho.amp.AmpManager;
+import com.caucho.amp.manager.AbstractAmpManagerBuilder;
 
 /**
- * Manages an AMP domain.
+ * Default AMP provider.
  */
-public final class Amp
+public class AmpManagerBuilderImpl extends AbstractAmpManagerBuilder
 {
-  private Amp() {}
-  
-  public static AmpManager newManager()
+  public AmpManagerBuilderImpl()
   {
-    AmpManagerBuilder builder = newManagerBuilder();
-    
-    return builder.create();
+    super.setBrokerFactory(new HashMapBrokerFactory());
   }
   
-  public static AmpManagerBuilder newManagerBuilder()
+  @Override
+  public AmpManager create()
   {
-    AmpProvider provider = getProvider();
-    
-    return provider.createManagerBuilder();
-  }
-  
-  private static AmpProvider getProvider()
-  {
-    return new AmpProviderImpl();
+    return new AmpManagerImpl(this);
   }
 }

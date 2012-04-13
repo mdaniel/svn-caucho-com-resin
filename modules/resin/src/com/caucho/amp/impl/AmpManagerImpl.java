@@ -27,23 +27,23 @@
  * @author Scott Ferguson
  */
 
-package com.caucho.amp.manager;
+package com.caucho.amp.impl;
 
 import java.util.concurrent.atomic.AtomicLong;
 
 import com.caucho.amp.AmpManager;
+import com.caucho.amp.AmpManagerBuilder;
 import com.caucho.amp.actor.ActorContextImpl;
 import com.caucho.amp.actor.ActorRefImpl;
 import com.caucho.amp.actor.AmpActor;
 import com.caucho.amp.actor.AmpActorContext;
 import com.caucho.amp.actor.AmpActorRef;
 import com.caucho.amp.actor.AmpProxyActor;
+import com.caucho.amp.broker.AmpBroker;
+import com.caucho.amp.broker.AmpBrokerFactory;
 import com.caucho.amp.mailbox.AmpMailbox;
+import com.caucho.amp.mailbox.AmpMailboxBuilder;
 import com.caucho.amp.mailbox.AmpMailboxFactory;
-import com.caucho.amp.mailbox.SimpleAmpMailbox;
-import com.caucho.amp.mailbox.SimpleMailboxFactory;
-import com.caucho.amp.router.AmpBroker;
-import com.caucho.amp.router.HashMapAmpBroker;
 import com.caucho.amp.skeleton.AmpReflectionSkeletonFactory;
 import com.caucho.amp.spi.AmpSpi;
 
@@ -54,11 +54,23 @@ public class AmpManagerImpl implements AmpManager
 {
   private final AtomicLong _clientId = new AtomicLong();
   
-  private HashMapAmpBroker _broker = new HashMapAmpBroker();
-  private AmpMailboxFactory _mailboxFactory = new SimpleMailboxFactory();
+  private final AmpBroker _broker;
+  private AmpMailboxBuilder _mailboxFactory = new QueueMailboxBuilder();
   
-  public AmpManagerImpl()
+  public AmpManagerImpl(AmpManagerBuilder builder)
   {
+    AmpBrokerFactory brokerFactory = builder.getBrokerFactory();
+    AmpBroker broker = null;
+    
+    if (brokerFactory != null) {
+      broker = brokerFactory.createBroker();
+    }
+    
+    if (broker == null) {
+      broker = new HashMapAmpBroker();
+    }
+    
+    _broker = broker;
   }
   
   @Override
@@ -98,7 +110,11 @@ public class AmpManagerImpl implements AmpManager
   @Override
   public void addActor(String address, AmpActor actor)
   {
-    getBroker().addMailbox(address, createMailbox(address, actor));
+    AmpActorContext actorContext = createActorContext(address, actor);
+    
+    AmpMailbox mailbox = getMailboxFactory().createMailbox(actorContext);
+    
+    getBroker().addMailbox(address, mailbox);
   }
   
   @Override
@@ -113,10 +129,12 @@ public class AmpManagerImpl implements AmpManager
     addActor(address, actor);
   }
   
+  /*
   protected AmpMailbox createMailbox(String address, AmpActor actor)
   {
     return new SimpleAmpMailbox(createActorContext(address, actor));
   }
+  */
   
   protected AmpActorContext createActorContext(String address, AmpActor actor)
   {
@@ -125,6 +143,6 @@ public class AmpManagerImpl implements AmpManager
   
   protected AmpMailboxFactory getMailboxFactory()
   {
-    return new SimpleMailboxFactory();
+    return _mailboxFactory;
   }
 }

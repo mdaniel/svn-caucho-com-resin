@@ -27,41 +27,19 @@
  * @author Scott Ferguson
  */
 
-package com.caucho.amp.router;
+package com.caucho.amp.impl;
 
-import java.util.concurrent.ConcurrentHashMap;
-
-import com.caucho.amp.actor.ActorRefImpl;
-import com.caucho.amp.actor.AmpActorRef;
-import com.caucho.amp.mailbox.AmpMailbox;
+import com.caucho.amp.broker.AbstractAmpBrokerFactory;
+import com.caucho.amp.broker.AmpBroker;
 
 /**
- * AmpRouter routes messages to mailboxes.
+ * The broker factory creates a broker when the manager is created.
  */
-public class HashMapAmpBroker extends AbstractAmpBroker
+public class HashMapBrokerFactory extends AbstractAmpBrokerFactory
 {
-  private final ConcurrentHashMap<String,AmpMailbox> _mailboxMap
-    = new ConcurrentHashMap<String,AmpMailbox>();
-
   @Override
-  public AmpActorRef getActorRef(String address)
+  public AmpBroker createBroker()
   {
-    AmpMailbox mailbox = _mailboxMap.get(address);
-    
-    return new ActorRefImpl(address, mailbox, mailbox.getActorContext());
+    return new HashMapAmpBroker();
   }
-
-  @Override
-  public void addMailbox(String address, AmpMailbox mailbox)
-  {
-    _mailboxMap.put(address, mailbox);
-  }
-  
-  /*
-  @Override
-  public void removeMailbox(String address)
-  {
-    _mailboxMap.remove(address);
-  }
-  */
 }

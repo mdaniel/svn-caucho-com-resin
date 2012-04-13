@@ -30,7 +30,7 @@
 package com.caucho.amp;
 
 import com.caucho.amp.actor.AmpActor;
-import com.caucho.amp.router.AmpBroker;
+import com.caucho.amp.broker.AmpBroker;
 
 /**
  * Manages an AMP domain.

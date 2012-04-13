@@ -31,7 +31,7 @@ package com.caucho.amp.actor;
 
 import java.util.logging.Logger;
 
-import com.caucho.amp.mailbox.AmpMailboxFactory;
+import com.caucho.amp.mailbox.AmpMailboxBuilder;
 import com.caucho.amp.stream.AmpEncoder;
 import com.caucho.amp.stream.AmpError;
 
@@ -46,7 +46,7 @@ public final class AmpProxyActor implements AmpActor {
   private final ActorContextImpl _actorContext;
 
   public AmpProxyActor(String address,
-                       AmpMailboxFactory mailboxFactory)
+                       AmpMailboxBuilder mailboxFactory)
   {
     _actorContext = new ActorContextImpl(address, this, mailboxFactory);
   }

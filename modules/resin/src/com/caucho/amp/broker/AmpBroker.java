@@ -27,7 +27,7 @@
  * @author Scott Ferguson
  */
 
-package com.caucho.amp.router;
+package com.caucho.amp.broker;
 
 import com.caucho.amp.actor.AmpActorRef;
 import com.caucho.amp.mailbox.AmpMailbox;
@@ -42,7 +42,7 @@ public interface AmpBroker
   /**
    * Returns the mailbox to the router itself.
    */
-  public AmpMailbox getRouterMailbox();
+  public AmpActorRef getBrokerActor();
   
   /**
    * Returns a mailbox for the given address, 
@@ -54,15 +54,9 @@ public interface AmpBroker
    */
   public AmpActorRef getActorRef(String address);
   
-  /**
-   * Adds a mailbox (optional operation).
-   */
-  public void addMailbox(String address, AmpMailbox mailbox);
-  
-  /**
-   * Removes a mailbox (optional operation).
-   */
-  public void removeMailbox(String address, AmpMailbox mailbox);
+  //
+  // gateway methods to send directly.
+  //
   
   
   public void send(String to, String from, AmpEncoder encoder,
@@ -78,7 +72,17 @@ public interface AmpBroker
                     Object result);
   
   /**
-   * Close the router.
+   * Adds a mailbox (optional operation).
+   */
+  public void addMailbox(String address, AmpMailbox mailbox);
+  
+  /**
+   * Removes a mailbox (optional operation).
+   */
+  public void removeMailbox(String address, AmpMailbox mailbox);
+  
+  /**
+   * Close the broker.
    */
   public void close();
 }

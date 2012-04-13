@@ -39,7 +39,7 @@ import com.caucho.amp.AmpException;
 import com.caucho.amp.actor.AbstractAmpActor;
 import com.caucho.amp.actor.AmpActorRef;
 import com.caucho.amp.actor.AmpMethodRef;
-import com.caucho.amp.router.AmpBroker;
+import com.caucho.amp.broker.AmpBroker;
 import com.caucho.amp.stream.AmpEncoder;
 import com.caucho.amp.stream.AmpError;
 import com.caucho.amp.stream.AmpHeaders;

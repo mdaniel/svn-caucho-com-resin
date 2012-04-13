@@ -29,6 +29,7 @@
 
 package com.caucho.env.thread2;
 
+import java.util.concurrent.Executor;
 import java.util.concurrent.atomic.AtomicLong;
 import java.util.concurrent.atomic.AtomicReference;
 import java.util.concurrent.locks.LockSupport;
@@ -48,7 +49,7 @@ import com.caucho.util.RingValueQueue;
 /**
  * A generic pool of threads available for Alarms and Work tasks.
  */
-public class ThreadPool2 {
+public class ThreadPool2 implements Executor {
   private static final L10N L = new L10N(ThreadPool2.class);
   
   private static final Logger log
@@ -408,6 +409,12 @@ public class ThreadPool2 {
   //
   // Scheduling methods
   //
+
+  @Override
+  public void execute(Runnable task)
+  {
+    schedule(task);
+  }
 
   /**
    * Schedules a new task.

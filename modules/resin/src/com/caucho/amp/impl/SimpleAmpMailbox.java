@@ -27,10 +27,11 @@
  * @author Scott Ferguson
  */
 
-package com.caucho.amp.mailbox;
+package com.caucho.amp.impl;
 
 import com.caucho.amp.actor.AmpActorContext;
 import com.caucho.amp.actor.AmpActorRef;
+import com.caucho.amp.mailbox.AbstractAmpMailbox;
 import com.caucho.amp.stream.AmpEncoder;
 import com.caucho.amp.stream.AmpError;
 import com.caucho.amp.stream.AmpStream;
@@ -38,7 +39,7 @@ import com.caucho.amp.stream.AmpStream;
 /**
  * Mailbox for an actor
  */
-public class SimpleAmpMailbox implements AmpMailbox
+public class SimpleAmpMailbox extends AbstractAmpMailbox
 {
   private final AmpActorContext _actor;
   

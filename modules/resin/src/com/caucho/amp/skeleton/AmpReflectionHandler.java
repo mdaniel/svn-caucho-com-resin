@@ -38,7 +38,7 @@ import com.caucho.amp.actor.ActorContextImpl;
 import com.caucho.amp.actor.AmpActorRef;
 import com.caucho.amp.actor.AmpMethodRef;
 import com.caucho.amp.actor.AmpQueryFuture;
-import com.caucho.amp.router.AmpBroker;
+import com.caucho.amp.broker.AmpBroker;
 import com.caucho.amp.stream.NullEncoder;
 
 /**

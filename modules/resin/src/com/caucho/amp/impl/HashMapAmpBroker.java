@@ -27,34 +27,45 @@
  * @author Scott Ferguson
  */
 
-package com.caucho.amp;
+package com.caucho.amp.impl;
 
-import com.caucho.amp.impl.AmpProviderImpl;
-import com.caucho.amp.spi.AmpProvider;
+import java.util.concurrent.ConcurrentHashMap;
+
+import com.caucho.amp.actor.ActorRefImpl;
+import com.caucho.amp.actor.AmpActorRef;
+import com.caucho.amp.actor.NullActorRef;
+import com.caucho.amp.broker.AbstractAmpBroker;
+import com.caucho.amp.mailbox.AmpMailbox;
 
 /**
- * Manages an AMP domain.
+ * AmpRouter routes messages to mailboxes.
  */
-public final class Amp
+public class HashMapAmpBroker extends AbstractAmpBroker
 {
-  private Amp() {}
-  
-  public static AmpManager newManager()
+  private final ConcurrentHashMap<String,AmpMailbox> _mailboxMap
+    = new ConcurrentHashMap<String,AmpMailbox>();
+
+  @Override
+  public AmpActorRef getActorRef(String address)
   {
-    AmpManagerBuilder builder = newManagerBuilder();
+    AmpMailbox mailbox = getMailbox(address);
     
-    return builder.create();
+    if (mailbox != null) {
+      return new ActorRefImpl(address, mailbox, mailbox.getActorContext());
+    }
+    else {
+      return new NullActorRef(address);
+    }
+  }
+
+  @Override
+  public void addMailbox(String address, AmpMailbox mailbox)
+  {
+    _mailboxMap.put(address, mailbox);
   }
   
-  public static AmpManagerBuilder newManagerBuilder()
+  protected AmpMailbox getMailbox(String address)
   {
-    AmpProvider provider = getProvider();
-    
-    return provider.createManagerBuilder();
-  }
-  
-  private static AmpProvider getProvider()
-  {
-    return new AmpProviderImpl();
+    return _mailboxMap.get(address);
   }
 }

@@ -31,6 +31,7 @@ package com.caucho.amp.actor;
 
 import com.caucho.amp.AmpQueryCallback;
 import com.caucho.amp.mailbox.AmpMailbox;
+import com.caucho.amp.mailbox.AmpMailboxBuilder;
 import com.caucho.amp.mailbox.AmpMailboxFactory;
 import com.caucho.amp.spi.AmpSpi;
 import com.caucho.amp.stream.AmpEncoder;

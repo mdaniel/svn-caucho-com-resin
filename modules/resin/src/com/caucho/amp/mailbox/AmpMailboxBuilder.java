@@ -27,34 +27,12 @@
  * @author Scott Ferguson
  */
 
-package com.caucho.amp;
+package com.caucho.amp.mailbox;
 
-import com.caucho.amp.impl.AmpProviderImpl;
-import com.caucho.amp.spi.AmpProvider;
 
 /**
- * Manages an AMP domain.
+ * Creates mailboxes for actors.
  */
-public final class Amp
+public interface AmpMailboxBuilder extends AmpMailboxFactory
 {
-  private Amp() {}
-  
-  public static AmpManager newManager()
-  {
-    AmpManagerBuilder builder = newManagerBuilder();
-    
-    return builder.create();
-  }
-  
-  public static AmpManagerBuilder newManagerBuilder()
-  {
-    AmpProvider provider = getProvider();
-    
-    return provider.createManagerBuilder();
-  }
-  
-  private static AmpProvider getProvider()
-  {
-    return new AmpProviderImpl();
-  }
 }

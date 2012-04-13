@@ -27,7 +27,7 @@
  * @author Scott Ferguson
  */
 
-package com.caucho.amp.router;
+package com.caucho.amp.broker;
 
 import java.util.logging.Logger;
 
@@ -42,37 +42,24 @@ import com.caucho.amp.stream.AmpHeaders;
  */
 public class AbstractAmpBroker implements AmpBroker
 {
-  private static final Logger log
-    = Logger.getLogger(AbstractAmpBroker.class.getName());
-
   @Override
   public AmpActorRef getActorRef(String to)
   {
     throw new UnsupportedOperationException(getClass().getName());
   }
 
-  /* (non-Javadoc)
-   * @see com.caucho.amp.router.AmpRouter#addMailbox(com.caucho.amp.mailbox.AmpMailbox)
-   */
   @Override
   public void addMailbox(String address, AmpMailbox mailbox)
   {
-    // TODO Auto-generated method stub
-    
+    throw new UnsupportedOperationException(getClass().getName());
   }
 
-  /* (non-Javadoc)
-   * @see com.caucho.amp.router.AmpRouter#removeMailbox(com.caucho.amp.mailbox.AmpMailbox)
-   */
   @Override
   public void removeMailbox(String address, AmpMailbox mailbox)
   {
-    // TODO Auto-generated method stub
-    
+    throw new UnsupportedOperationException(getClass().getName());
   }
-  /* (non-Javadoc)
-   * @see com.caucho.amp.router.AmpRouter#close()
-   */
+  
   @Override
   public void close()
   {
@@ -80,13 +67,9 @@ public class AbstractAmpBroker implements AmpBroker
     
   }
 
-  /* (non-Javadoc)
-   * @see com.caucho.amp.router.AmpBroker#getRouterMailbox()
-   */
   @Override
-  public AmpMailbox getRouterMailbox()
+  public AmpActorRef getBrokerActor()
   {
-    // TODO Auto-generated method stub
     return null;
   }
 

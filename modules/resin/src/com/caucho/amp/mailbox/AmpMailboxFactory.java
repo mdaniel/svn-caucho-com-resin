@@ -39,5 +39,5 @@ public interface AmpMailboxFactory
   /**
    * Creates a mailbox for an actor.
    */
-  public AmpMailbox createMailbox(AmpActorContext actor);
+  public AmpMailbox createMailbox(AmpActorContext actorContext);
 }

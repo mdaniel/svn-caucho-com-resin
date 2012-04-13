@@ -29,12 +29,12 @@
 
 package com.caucho.amp.spi;
 
-import com.caucho.amp.AmpManager;
+import com.caucho.amp.AmpManagerBuilder;
 
 /**
  * Internal SPI for managing the current context.
  */
 public interface AmpProvider
 {
-  public AmpManager createManager();
+  public AmpManagerBuilder createManagerBuilder();
 }
