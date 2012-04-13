@@ -512,14 +512,17 @@ function pdf_health()
 
 function pdf_health_events($start, $end)
 {
-  global $g_canvas;
+  global $g_canvas, $g_mbean_server;
   
   $g_canvas->newLine();
   $g_canvas->writeSubSection("Recent Health Events");
   
-  $messages = get_health_logs($start * 1000, $end * 1000, 50);
+  $health_service = $g_mbean_server->lookup("resin:type=HealthSystem");
+  if ($health_service)
+    $events = $health_service->findEvents($g_server_index, 
+                                          $start * 1000, $end * 1000, 50);
   
-  if (count($messages) > 0) {
+  if (count($events) > 0) {
     $w1 = 95;
     $w2 = 85;
     $w3 = 100;
@@ -536,31 +539,16 @@ function pdf_health_events($start, $end)
     
     $g_canvas->setFont("Courier", "8");
     
-    foreach ($messages as $message) {
-      $ts = strftime("%Y-%m-%d %H:%M:%S", $message->timestamp / 1000);
-      
-      $was_restart = false;
-      $type = $message->type;
-      if (preg_match("/Resin\|Health\|Anomaly/", $type)) {
-        $type = gettext("Anomaly Detected");
-      } else if (preg_match("/Resin\|Health\|Action/", $type)) {
-        $type = gettext("Health Action");
-      } else if (preg_match("/Resin\|Health\|Check/", $type)) {
-        $type = gettext("Health Issue");
-      } else if (preg_match("/Resin\|Startup/", $type)) {
-        $type = gettext("Startup Message");
-      } else if (preg_match("/Resin\|StartTime/", $type)) {
-        $type = gettext("Resin Startup");
-        $was_restart = true;
-      }
+    foreach ($events as $event) {
+      $ts = strftime("%Y-%m-%d %H:%M:%S", $events->timestamp / 1000);
       
       $g_canvas->writeTextColumn($w1, 'l', $ts);
-      $g_canvas->writeTextColumn($w2, 'c', $type);
-      $g_canvas->writeTextColumn($w3, 'c', $message->name);
-      $g_canvas->writeTextColumn($w4, 'l', $message->message);
+      $g_canvas->writeTextColumn($w2, 'l', $event->typeDescription);
+      $g_canvas->writeTextColumn($w3, 'l', $event->source);
+      $g_canvas->writeTextColumn($w4, 'l', $event->message);
       $g_canvas->newLine();
       
-      if ($was_restart) {
+      if ($event->type == "START_TIME") {
         $g_canvas->writeHrule(0, .5, "grey");
         $g_canvas->newLine();
       }

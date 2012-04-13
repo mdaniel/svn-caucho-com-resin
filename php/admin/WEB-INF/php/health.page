@@ -274,49 +274,36 @@ function display_health_logs()
   $start = ($now - 24 * 3600);
   $end = $now;
   
-  $messages = get_health_logs($start * 1000, $end * 1000, 100);
+  $health_service = $g_mbean_server->lookup("resin:type=HealthSystem");
+  if ($health_service) {
   
-  echo "<h2>" . gettext('Recent Health Events') . "</h2>\n";
-  echo "<table class='data'>\n";
-  echo "<thead>\n";
-  echo "<tr><th scope='col' class='date'>" . gettext('Date') . "</th>";
-  echo "    <th scope='col' class='event'>" . gettext('Event Type') . "</th>";
-  echo "    <th scope='col' class='event'>" . gettext('Source') . "</th>";
-  echo "    <th scope='col' class='message'>" . gettext('Message') . "</th></tr>\n";
-  echo "</thead>\n";
+    $events = $health_service->findEvents($g_server_index, 
+                                          $start * 1000, $end * 1000, 50);
+  
+    echo "<h2>" . gettext('Recent Health Events') . "</h2>\n";
+    echo "<table class='data'>\n";
+    echo "<thead>\n";
+    echo "<tr><th scope='col' class='date'>" . gettext('Date') . "</th>";
+    echo "    <th scope='col' class='event'>" . gettext('Event Type') . "</th>";
+    echo "    <th scope='col' class='event'>" . gettext('Source') . "</th>";
+    echo "    <th scope='col' class='message'>" . gettext('Message') . "</th></tr>\n";
+    echo "</thead>\n";
 
-  if (! empty($messages)) {
-    echo "<tbody class='scroll'>\n";
+    if (! empty($events))
+      echo "<tbody class='scroll'>\n";
       
-    foreach ($messages as $message) {
-      $type = $message->type;
-      $icon = "";
+    foreach ($events as $event) {
+      
+      $type = strtolower($event->type);
       $style = "";
-      if (preg_match("/Resin\|Health\|Anomaly/", $type)) {
-        $type = gettext("Anomaly Detected");
-        $icon = "anomaly";
-      } else if (preg_match("/Resin\|Health\|Action/", $type)) {
-        $type = gettext("Health Action");
-        $icon = "action";
-      } else if (preg_match("/Resin\|Health\|Check/", $type)) {
-        $type = gettext("Health Issue");
-        $icon = "check";
-      } else if (preg_match("/Resin\|Startup/", $type)) {
-        $type = gettext("Startup Message");
-        $icon = "message";
-      } else if (preg_match("/Resin\|StartTime/", $type)) {
-        $type = gettext("Resin Startup");
-        $icon = "restart";
-        $style = "border-bottom: 3px solid black;"
-      }
+      if ($type == "start_time")
+        $style = "border-bottom: 3px solid black;";
       
       echo "<tr>\n";
-      echo "  <td class='date' style='${style}'>";
-      echo strftime("%Y-%m-%d&nbsp;%H:%M:%S", $message->timestamp / 1000);
-      echo "</td>\n";
-      echo "  <td class='event' style='${style}'><img src='images/${icon}_16.png' align='top' width='16' height='16' alt='${type}'/>&nbsp;$type</td>\n";
-      echo "  <td class='source' style='${style}'>" . $message->name . "</td>\n";
-      echo "  <td class='message' style='${style}'>" . nl2br(htmlspecialchars(wordwrap($message->message, 90))) . "</td>\n"; 
+      echo "  <td class='date' style='${style}'>" . strftime("%Y-%m-%d&nbsp;%H:%M:%S", $event->timestamp / 1000) . " </td>\n";
+      echo "  <td class='event' style='${style}'><img src='images/${type}_16.png' align='top' width='16' height='16' alt='${type}'/>&nbsp;" . $event->typeDescription . "</td>\n";
+      echo "  <td class='source' style='${style}'>" . $event->source . "</td>\n";
+      echo "  <td class='message' style='${style}'>" . nl2br(htmlspecialchars(wordwrap($event->message, 90))) . "</td>\n"; 
       echo "</tr>\n";
     }
       

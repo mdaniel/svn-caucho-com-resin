@@ -73,4 +73,9 @@ public interface HealthSystemMXBean extends ManagedObjectMXBean
 
   @Description("The lifecycle of the service")
   public String getState();
+  
+  @Description("Query for health events that have occured in the time period")
+  public HealthEventLog []findEvents(int serverIndex, 
+                                     long minTime, long maxTime,
+                                     int limit);
 }
