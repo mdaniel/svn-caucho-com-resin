@@ -32,6 +32,7 @@ package com.caucho.amp.manager;
 import com.caucho.amp.AmpManager;
 import com.caucho.amp.AmpManagerBuilder;
 import com.caucho.amp.broker.AmpBrokerFactory;
+import com.caucho.amp.mailbox.AmpMailboxBuilderFactory;
 
 /**
  * Factory for creating an AMP manager.
@@ -39,6 +40,7 @@ import com.caucho.amp.broker.AmpBrokerFactory;
 abstract public class AbstractAmpManagerBuilder implements AmpManagerBuilder
 {
   private AmpBrokerFactory _brokerFactory;
+  private AmpMailboxBuilderFactory _mailboxBuilderFactory;
 
   @Override
   public AmpBrokerFactory getBrokerFactory()
@@ -50,6 +52,20 @@ abstract public class AbstractAmpManagerBuilder implements AmpManagerBuilder
   public AmpManagerBuilder setBrokerFactory(AmpBrokerFactory factory)
   {
     _brokerFactory = factory;
+
+    return this;
+  }
+
+  @Override
+  public AmpMailboxBuilderFactory getMailboxBuilderFactory()
+  {
+    return _mailboxBuilderFactory;
+  }
+
+  @Override
+  public AmpManagerBuilder setMailboxBuilderFactory(AmpMailboxBuilderFactory factory)
+  {
+    _mailboxBuilderFactory = factory;
 
     return this;
   }

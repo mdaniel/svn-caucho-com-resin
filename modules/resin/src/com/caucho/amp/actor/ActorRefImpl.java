@@ -113,4 +113,10 @@ public final class ActorRefImpl implements AmpActorRef
   {
     return _mailbox;
   }
+  
+  @Override
+  public String toString()
+  {
+    return getClass().getSimpleName() + "[" + getAddress() + "]";
+  }
 }

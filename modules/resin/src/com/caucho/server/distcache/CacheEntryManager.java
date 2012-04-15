@@ -84,6 +84,20 @@ public final class CacheEntryManager
     return _entryCache.values();
   }
 
+  /**
+   * Clears leases on server start/stop
+   */
+  final public void clearLeases()
+  {
+    Iterator<DistCacheEntry> iter = _entryCache.values();
+
+    while (iter.hasNext()) {
+      DistCacheEntry entry = iter.next();
+
+      entry.clearLease();
+    }
+  }
+
   @Override
   public String toString()
   {

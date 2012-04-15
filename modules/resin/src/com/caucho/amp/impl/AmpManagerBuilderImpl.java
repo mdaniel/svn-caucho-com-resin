@@ -40,6 +40,7 @@ public class AmpManagerBuilderImpl extends AbstractAmpManagerBuilder
   public AmpManagerBuilderImpl()
   {
     super.setBrokerFactory(new HashMapBrokerFactory());
+    super.setMailboxBuilderFactory(new QueueMailboxBuilderFactory());
   }
   
   @Override

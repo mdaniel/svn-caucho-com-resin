@@ -27,47 +27,12 @@
  * @author Scott Ferguson
  */
 
-package com.caucho.distcache;
-
-import javax.cache.Cache;
+package com.caucho.amp.mailbox;
 
 /**
- * Interface for a distributed cache.
+ * Creates mailboxes for actors.
  */
-public interface ObjectCache<K,V> extends Cache<K,V>
+abstract public class AbstractAmpMailboxBuilderFactory 
+  implements AmpMailboxBuilderFactory
 {
-  /**
-   * Returns the extended entry
-   */
-  public ExtCacheEntry<K,V> getExtCacheEntry(K key);
-  
-  // public V getExact(K key);
-
-  /**
-   * Updates the cache if the old value hash matches the current value.
-   * A null value for the old value hash only adds the entry if it's new
-   *
-   * @param key the key to compare
-   * @param version the version of the old value returned by getEntry
-   * @param value the new value
-   *
-   * @return true if the update succeeds, false if it fails
-   */
-  public boolean compareVersionAndPut(K key, long version, Object value);
-
-  /**
-   * Removes the entry from the cache if the current entry's version
-   * matches.
-   */
-  public boolean compareAndRemove(K key, long version);
-
-  /**
-   * Returns true if the cache is closed
-   */
-  public boolean isClosed();
-  
-  //
-  // for statistics
-  //
-  public ExtCacheEntry<K,V> getStatCacheEntry(K key);
 }

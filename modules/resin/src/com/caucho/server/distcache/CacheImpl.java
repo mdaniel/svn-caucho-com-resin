@@ -69,7 +69,6 @@ import com.caucho.env.distcache.CacheDataBacking;
 import com.caucho.env.thread.AbstractWorkerQueue;
 import com.caucho.loader.Environment;
 import com.caucho.management.server.AbstractManagedObject;
-import com.caucho.server.distcache.CacheStoreManager.DataItem;
 import com.caucho.util.ConcurrentArrayList;
 import com.caucho.util.CurrentTime;
 import com.caucho.util.HashKey;
@@ -238,7 +237,7 @@ public class CacheImpl<K,V>
       if (_config.getEngine() == null)
         _config.setEngine(_manager.getCacheEngine());
 
-      _config.setCacheKey(_manager.createSelfHashKey(_config.getGuid(),
+      _config.setCacheKey(_manager.getKeyManager().createSelfHashKey(_config.getGuid(),
                                                      _config.getKeySerializer()));
 
       // _entryCache = new LruCache<Object,DistCacheEntry>(512);
@@ -258,7 +257,7 @@ public class CacheImpl<K,V>
   {
     DistCacheEntry cacheEntry = getDistCacheEntry(key);
 
-    return (cacheEntry != null) ? cacheEntry.peek() : null;
+    return (cacheEntry != null) ? cacheEntry.getMnodeEntry().getValue() : null;
   }
   
   /**
@@ -279,7 +278,7 @@ public class CacheImpl<K,V>
     DistCacheEntry entry = getDistCacheEntry(key);
 
     _getCount.incrementAndGet();
-    if (! entry.isValueNull()) {
+    if (! entry.getMnodeEntry().isValueNull()) {
       _hitCount.incrementAndGet();
     }
     else {
@@ -299,6 +298,7 @@ public class CacheImpl<K,V>
    * Returns the object with the given key always checking the backing
    * store .
    */
+  /*
   @Override
   public Object getExact(Object key)
   {
@@ -308,6 +308,7 @@ public class CacheImpl<K,V>
     
     return value;
   }
+  */
 
   /**
    * Fills an output stream with the value for a key.
@@ -344,7 +345,7 @@ public class CacheImpl<K,V>
   
   public ExtCacheEntry getStatCacheEntry(Object key)
   {
-    return getDistCacheEntry(key);
+    return new ExtCacheEntryFacade(getDistCacheEntry(key));
   }
 
   /**
@@ -387,10 +388,14 @@ public class CacheImpl<K,V>
                            int flags)
     throws IOException
   {
-      return getDistCacheEntry(key).put(is, _config, 
-                                        accessedExpireTimeout,
-                                        modifiedExpireTimeout,
-                                        flags);
+    DistCacheEntry entry = getDistCacheEntry(key);
+    
+    entry.put(is, _config, 
+              accessedExpireTimeout,
+              modifiedExpireTimeout,
+              flags);
+    
+    return getExtCacheEntry(entry);
   }
 
   /**
@@ -408,9 +413,13 @@ public class CacheImpl<K,V>
                            long modifiedExpireTimeout)
     throws IOException
   {
-    return getDistCacheEntry(key).put(is, _config, 
-                                      accessedExpireTimeout,
-                                      modifiedExpireTimeout);
+    DistCacheEntry entry = getDistCacheEntry(key);
+    
+    entry.put(is, _config, 
+              accessedExpireTimeout,
+              modifiedExpireTimeout);
+    
+    return getExtCacheEntry(entry);
   }
 
   /**
@@ -565,7 +574,7 @@ public class CacheImpl<K,V>
   {
     DistCacheEntry cacheEntry = getDistCacheEntry(key);
 
-    if (cacheEntry.getVersion() == version) {
+    if (cacheEntry.getMnodeEntry().getVersion() == version) {
       remove(key);
 
       return true;
@@ -581,11 +590,17 @@ public class CacheImpl<K,V>
   {
     DistCacheEntry distEntry = getDistCacheEntry(key);
    
-    long now = CurrentTime.getCurrentTime();
+    //long now = CurrentTime.getCurrentTime();
     
-    _manager.load(distEntry, _config, now);
+    distEntry.loadMnodeValue(_config);
+    //_manager.load(distEntry, _config, now);
     
-    return distEntry;
+    return getExtCacheEntry(distEntry);
+  }
+  
+  private ExtCacheEntryFacade getExtCacheEntry(DistCacheEntry distEntry)
+  {
+    return new ExtCacheEntryFacade(distEntry);
   }
 
   /**
@@ -750,7 +765,7 @@ public class CacheImpl<K,V>
   {
     DistCacheEntry entry = getDistCacheEntry(key);
     
-    return entry != null && entry.isValid();
+    return entry != null && entry.getMnodeEntry().isValid();
   }
 
   public boolean isBackup()
@@ -902,7 +917,7 @@ public class CacheImpl<K,V>
   {
     DistCacheEntry entry = getDistCacheEntry(key);
     
-    if (entry == null || entry.isValueNull())
+    if (entry == null || entry.getMnodeEntry().isValueNull())
       return null;
     
     return entryProcessor.process(new MutableEntry(entry));
@@ -1086,7 +1101,7 @@ public class CacheImpl<K,V>
     @Override
     public boolean exists()
     {
-      return ! _entry.isValueNull();
+      return ! _entry.getMnodeEntry().isValueNull();
     }
 
     @Override
@@ -1110,7 +1125,7 @@ public class CacheImpl<K,V>
     @Override
     public Object getValue()
     {
-      return _entry.getValue();
+      return _entry.getMnodeEntry().getValue();
     }
   }
   
@@ -1138,13 +1153,13 @@ public class CacheImpl<K,V>
     @Override
     public Entry<K, V> next()
     {
-      Entry entry = _next;
+      DistCacheEntry entry = _next;
       
       _next = null;
       
       findNext();
       
-      return entry;
+      return new ExtCacheEntryFacade(entry);
     }
 
     @Override
@@ -1157,7 +1172,7 @@ public class CacheImpl<K,V>
       while (_storeIterator.hasNext()) {
         DistCacheEntry entry = _storeIterator.next();
         
-        if (_cacheKey.equals(entry.getCacheHash())) {
+        if (_cacheKey.equals(entry.getMnodeEntry().getCacheHash())) {
           _next = entry;
           return;
         }

@@ -83,6 +83,8 @@ public interface CacheDataBacking {
 
   public long saveData(StreamSource source, int length);
   
+  public boolean removeData(long valueDataId);
+  
   public boolean isDataAvailable(long valueDataId);
 
   /**
@@ -111,5 +113,6 @@ public interface CacheDataBacking {
    * Close the backing.
    */
   public void close();
+
 
 }

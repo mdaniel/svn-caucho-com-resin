@@ -43,6 +43,7 @@ import com.caucho.amp.broker.AmpBroker;
 import com.caucho.amp.broker.AmpBrokerFactory;
 import com.caucho.amp.mailbox.AmpMailbox;
 import com.caucho.amp.mailbox.AmpMailboxBuilder;
+import com.caucho.amp.mailbox.AmpMailboxBuilderFactory;
 import com.caucho.amp.mailbox.AmpMailboxFactory;
 import com.caucho.amp.skeleton.AmpReflectionSkeletonFactory;
 import com.caucho.amp.spi.AmpSpi;
@@ -55,22 +56,31 @@ public class AmpManagerImpl implements AmpManager
   private final AtomicLong _clientId = new AtomicLong();
   
   private final AmpBroker _broker;
-  private AmpMailboxBuilder _mailboxFactory = new QueueMailboxBuilder();
+  private final AmpMailboxBuilderFactory _mailboxBuilderFactory;
+  private final AmpMailboxBuilder _mailboxFactory;
   
   public AmpManagerImpl(AmpManagerBuilder builder)
   {
     AmpBrokerFactory brokerFactory = builder.getBrokerFactory();
-    AmpBroker broker = null;
     
-    if (brokerFactory != null) {
-      broker = brokerFactory.createBroker();
-    }
-    
+    AmpBroker broker = brokerFactory.createBroker();
+
     if (broker == null) {
-      broker = new HashMapAmpBroker();
+      throw new NullPointerException();
     }
-    
+
     _broker = broker;
+    
+    AmpMailboxBuilderFactory mailboxBuilderFactory
+      = builder.getMailboxBuilderFactory();
+    
+    if (mailboxBuilderFactory == null) {
+      throw new NullPointerException();
+    }
+
+    _mailboxBuilderFactory = mailboxBuilderFactory;
+    
+    _mailboxFactory = _mailboxBuilderFactory.createMailboxBuilder();
   }
   
   @Override

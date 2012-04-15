@@ -30,6 +30,7 @@
 package com.caucho.amp;
 
 import com.caucho.amp.broker.AmpBrokerFactory;
+import com.caucho.amp.mailbox.AmpMailboxBuilderFactory;
 
 /**
  * Creates a AMP domain.
@@ -45,6 +46,16 @@ public interface AmpManagerBuilder
    * Sets the domain's broker.
    */
   public AmpManagerBuilder setBrokerFactory(AmpBrokerFactory factory);
+  
+  /**
+   * The factory for creating mailbox builders.
+   */
+  public AmpMailboxBuilderFactory getMailboxBuilderFactory();
+  
+  /**
+   * The factory for creating mailbox builders.
+   */
+  public AmpManagerBuilder setMailboxBuilderFactory(AmpMailboxBuilderFactory factory);
   
   /**
    * Creates the manager.

@@ -31,7 +31,6 @@ package com.caucho.memcached;
 
 import java.io.IOException;
 import java.io.InputStream;
-import java.util.Collection;
 import java.util.Iterator;
 import java.util.Map;
 import java.util.Set;
@@ -55,26 +54,22 @@ import com.caucho.cloud.loadbalance.LoadBalanceBuilder;
 import com.caucho.cloud.loadbalance.LoadBalanceManager;
 import com.caucho.cloud.loadbalance.LoadBalanceService;
 import com.caucho.cloud.loadbalance.StickyRequestHashGenerator;
-import com.caucho.distcache.ExtCacheEntry;
 import com.caucho.distcache.LocalCache;
 import com.caucho.hessian.io.Hessian2Input;
 import com.caucho.hessian.io.Hessian2Output;
 import com.caucho.network.balance.ClientSocket;
-import com.caucho.network.balance.ClientSocketFactory;
 import com.caucho.server.distcache.CacheConfig;
 import com.caucho.server.distcache.CacheImpl;
-import com.caucho.server.distcache.CacheStoreManager.DataItem;
 import com.caucho.server.distcache.DistCacheEntry;
 import com.caucho.server.distcache.DistCacheSystem;
 import com.caucho.server.distcache.MnodeUpdate;
-import com.caucho.util.Alarm;
 import com.caucho.util.CharBuffer;
 import com.caucho.util.CurrentTime;
 import com.caucho.util.HashKey;
 import com.caucho.util.L10N;
 import com.caucho.vfs.ReadStream;
-import com.caucho.vfs.WriteStream;
 import com.caucho.vfs.TempStream;
+import com.caucho.vfs.WriteStream;
 
 /**
  * Custom serialization for the cache
@@ -290,7 +285,7 @@ public class MemcachedClient implements Cache
   {
     CacheImpl cache = getLocalCache();
   
-    long version = entry.getVersion();
+    long version = entry.getMnodeEntry().getVersion();
   
     long now = CurrentTime.getCurrentTime();
   

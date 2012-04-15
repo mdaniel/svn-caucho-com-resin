@@ -43,6 +43,7 @@ import javax.cache.CacheWriter;
 
 import com.caucho.cloud.topology.TriadOwner;
 import com.caucho.distcache.ExtCacheEntry;
+import com.caucho.server.distcache.LocalDataManager.DataItem;
 import com.caucho.util.CurrentTime;
 import com.caucho.util.HashKey;
 import com.caucho.util.Hex;
@@ -52,7 +53,7 @@ import com.caucho.vfs.StreamSource;
 /**
  * An entry in the cache map
  */
-public class DistCacheEntry implements ExtCacheEntry {
+public class DistCacheEntry {
   private static final Logger log
     = Logger.getLogger(DistCacheEntry.class.getName());
   
@@ -82,7 +83,6 @@ public class DistCacheEntry implements ExtCacheEntry {
   /**
    * Returns the key for this entry in the Cache.
    */
-  @Override
   public final Object getKey()
   {
     return _key;
@@ -93,11 +93,15 @@ public class DistCacheEntry implements ExtCacheEntry {
     if (_key == null)
       _key = key;
   }
+  
+  private LocalDataManager getLocalDataManager()
+  {
+    return _cacheService.getLocalDataManager();
+  }
 
   /**
    * Returns the keyHash
    */
-  @Override
   public final HashKey getKeyHash()
   {
     return _keyHash;
@@ -120,52 +124,6 @@ public class DistCacheEntry implements ExtCacheEntry {
   }
 
   /**
-   * Returns the value of the cache entry.
-   */
-  @Override
-  public Object getValue()
-  {
-    return getMnodeEntry().getValue();
-  }
-
-  /**
-   * Returns true if the value is null.
-   */
-  @Override
-  public boolean isValueNull()
-  {
-    MnodeEntry entry = getMnodeEntry();
-    
-    return entry == null || entry.isValueNull();
-  }
-
-  /**
-   * Returns the cacheHash
-   */
-  public final HashKey getCacheHash()
-  {
-    return getMnodeEntry().getCacheHashKey();
-  }
-  
-  public final int getUserFlags()
-  {
-    return getMnodeEntry().getUserFlags();
-  }
-
-  /**
-   * Peeks the current value without checking the backing store.
-   */
-  public Object peek()
-  {
-    MnodeEntry entry = getMnodeEntry();
-    
-    if (entry != null)
-      return entry.getValue();
-    else
-      return null;
-  }
-
-  /**
    * Returns the object for the given key, checking the backing if necessary.
    * If it is not found, the optional cacheLoader is invoked, if present.
    */
@@ -173,31 +131,21 @@ public class DistCacheEntry implements ExtCacheEntry {
   {
     long now = CurrentTime.getCurrentTime();
 
-    return get(config, now, true);
+    return get(config, now);
   }
 
   /**
    * Returns the object for the given key, checking the backing if necessary.
    * If it is not found, the optional cacheLoader is invoked, if present.
    */
+  /*
   public Object getExact(CacheConfig config)
   {
     long now = CurrentTime.getCurrentTime();
 
     return get(config, now, true);
   }
-
-  /**
-   * Returns the value of the cache entry.
-   */
-  public StreamSource getValueStream()
-  {
-    try {
-      return _cacheService.getValueStream(this);
-    } catch (IOException e) {
-      throw new RuntimeException(e);
-    }
-  }
+  */
 
   /**
    * Returns the object for the given key, checking the backing if necessary
@@ -210,12 +158,15 @@ public class DistCacheEntry implements ExtCacheEntry {
   }
 
   /**
-   * Fills the value with a stream
+   * Gets a cache entry as a stream
    */
-  public boolean getStream(OutputStream os, CacheConfig config)
-    throws IOException
+  final public StreamSource getValueStream()
   {
-    return _cacheService.getStream(this, os, config);
+    MnodeEntry mnodeValue = getMnodeEntry();
+
+    updateAccessTime();
+
+    return getLocalDataManager().createDataSource(mnodeValue.getValueDataId());
   }
 
   public long getValueHash(Object value, CacheConfig config)
@@ -243,33 +194,127 @@ public class DistCacheEntry implements ExtCacheEntry {
   /**
    * Sets the value by an input stream
    */
-  public ExtCacheEntry put(InputStream is,
-                           CacheConfig config,
-                           long accessedExpireTimeout,
-                           long modifiedExpireTimeout)
+  public void put(InputStream is,
+                  CacheConfig config,
+                  long accessedExpireTimeout,
+                  long modifiedExpireTimeout)
     throws IOException
   {
-    return _cacheService.putStream(this, is, config, 
-                                   accessedExpireTimeout,
-                                   modifiedExpireTimeout, 
-                                   0);
+    putStream(is, config, 
+              accessedExpireTimeout,
+              modifiedExpireTimeout, 
+              0);
   }
 
   /**
    * Sets the value by an input stream
    */
-  public ExtCacheEntry put(InputStream is,
-                           CacheConfig config,
-                           long accessedExpireTimeout,
-                           long modifiedExpireTimeout,
-                           int flags)
+  public void put(InputStream is,
+                  CacheConfig config,
+                  long accessedExpireTimeout,
+                  long modifiedExpireTimeout,
+                  int flags)
     throws IOException
   {
-    return _cacheService.putStream(this, is, config, 
-                                   accessedExpireTimeout, 
-                                   modifiedExpireTimeout,
-                                   flags);
+    putStream(is, config, 
+              accessedExpireTimeout, 
+              modifiedExpireTimeout,
+              flags);
   }
+
+  private final void putStream(InputStream is,
+                               CacheConfig config,
+                               long accessedExpireTime,
+                               long modifiedExpireTime,
+                               int userFlags)
+    throws IOException
+  {
+    loadLocalMnodeValue();
+
+    DataItem valueItem = getLocalDataManager().writeData(is);
+    
+    long valueHash = valueItem.getValueHash();
+    long valueDataId = valueItem.getValueDataId();
+    
+    long valueLength = valueItem.getLength();
+    long newVersion = getNewVersion(getMnodeEntry());
+    
+    long flags = config.getFlags() | ((long) userFlags) << 32;
+    
+    if (accessedExpireTime < 0)
+      accessedExpireTime = config.getAccessedExpireTimeout();
+    
+    if (modifiedExpireTime < 0)
+      modifiedExpireTime = config.getModifiedExpireTimeout();
+
+    
+    int leaseOwner = getMnodeEntry().getLeaseOwner();
+    long leaseTimeout = config.getLeaseExpireTimeout();
+    
+    MnodeUpdate mnodeUpdate = new MnodeUpdate(valueHash,
+                                              valueDataId,
+                                              valueLength,
+                                              newVersion,
+                                              HashKey.getHash(config.getCacheKey()),
+                                              flags,
+                                              accessedExpireTime,
+                                              modifiedExpireTime,
+                                              leaseOwner,
+                                              leaseTimeout);
+
+    // add 25% window for update efficiency
+    // idleTimeout = idleTimeout * 5L / 4;
+    
+    putLocalValue(mnodeUpdate, null);
+    
+    config.getEngine().put(getKeyHash(), mnodeUpdate);
+  }
+
+  /**
+   * Sets a cache entry
+   */
+  public final boolean remove(CacheConfig config)
+  {
+    HashKey key = getKeyHash();
+
+    MnodeEntry mnodeEntry = loadLocalMnodeValue();
+    long oldValueHash = mnodeEntry != null ? mnodeEntry.getValueHash() : 0;
+
+    long newVersion = getNewVersion(mnodeEntry);
+
+    /*
+    long leaseTimeout = (mnodeEntry != null
+                         ? mnodeEntry.getLeaseTimeout()
+                         : config.getLeaseExpireTimeout());
+    int leaseOwner = (mnodeEntry != null ? mnodeEntry.getLeaseOwner() : -1);
+    */
+    
+    MnodeUpdate mnodeUpdate;
+    
+    if (mnodeEntry != null)
+      mnodeUpdate = MnodeUpdate.createNull(newVersion, mnodeEntry);
+    else
+      mnodeUpdate = MnodeUpdate.createNull(newVersion, config);
+
+    putLocalValueImpl(mnodeUpdate, null);
+
+    if (mnodeEntry == null)
+      return oldValueHash != 0;
+
+    config.getEngine().remove(key, mnodeUpdate, mnodeEntry);
+    
+    CacheWriter writer = config.getCacheWriter();
+    
+    if (writer != null && config.isWriteThrough()) {
+      writer.delete(getKey());
+    }
+
+    return oldValueHash != 0;
+  }
+  
+  //
+  // atomic operations
+  //
 
   /**
    * Sets the value by an input stream
@@ -278,7 +323,96 @@ public class DistCacheEntry implements ExtCacheEntry {
                           InputStream is)
     throws IOException
   {
-    return _cacheService.putIfNew(this, update, is);
+    MnodeValue newValue = putLocalValue(update, is);
+
+    return newValue.getValueHash() == update.getValueHash();
+  }
+  
+
+  //
+  // compare and put
+  //
+  
+  public boolean compareAndPut(long testValue,
+                               Object value, 
+                               CacheConfig config)
+  {
+    MnodeUpdate update
+      = getLocalDataManager().writeValue(getMnodeEntry(), value, config);
+    
+    try {
+      return compareAndPutLocal(testValue, update, value);
+    } finally {
+      MnodeValue newMnodeValue = getMnodeEntry();
+      
+      if (newMnodeValue == null
+          || newMnodeValue.getValueDataId() != update.getValueDataId()) {
+        getLocalDataManager().removeData(update.getValueDataId());
+      }
+    }
+  }
+  
+  public final boolean compareAndPutLocal(long testValue,
+                                          MnodeUpdate update,
+                                          StreamSource source)
+  {
+    long version = getNewVersion(getMnodeEntry());
+    
+    MnodeUpdate newUpdate
+      = getLocalDataManager().writeData(update, version, source);
+    
+    Object value = null;
+    
+    try {
+      return compareAndPutLocal(testValue, newUpdate, value);
+    } finally {
+      MnodeValue newMnodeValue = getMnodeEntry();
+      
+      if (newMnodeValue.getValueDataId() != newUpdate.getValueDataId()) {
+        getLocalDataManager().removeData(newUpdate.getValueDataId());
+      }
+    }
+  }
+
+  protected boolean compareAndPut(DistCacheEntry entry,
+                                  long testValue,
+                                  MnodeUpdate mnodeUpdate,
+                                  Object value,
+                                  CacheConfig config)
+  {
+    CacheEngine engine = config.getEngine();
+    
+    return engine.compareAndPut(entry, testValue, mnodeUpdate, value);
+  }
+  
+  //
+  // get and put
+  //
+
+  /**
+   * Remove the value
+   */
+  public Object getAndRemove(CacheConfig config)
+  {
+    return getAndPut(null, config);
+  }
+
+  public Object getAndReplace(long testValue,
+                              Object value, 
+                              CacheConfig config)
+  {
+    if (compareAndPut(testValue, value, config)) {
+      long result = -1;
+      
+      return getLocalDataManager().readData(getKeyHash(),
+                                            result,
+                                            getMnodeEntry().getValueDataId(),
+                                            config.getValueSerializer(),
+                                            config);
+    }
+    else {
+      return null;
+    }
   }
 
   /**
@@ -286,102 +420,98 @@ public class DistCacheEntry implements ExtCacheEntry {
    */
   public Object getAndPut(Object value, CacheConfig config)
   {
-    return _cacheService.getAndPut(this, value, config);
+    long now = CurrentTime.getCurrentTime();
+
+    // server/60a0 - on server '4', need to read update from triad
+    MnodeEntry mnodeValue = loadMnodeValue(config, now); // , false);
+
+    return getAndPut(value, config, now, mnodeValue);
   }
 
   /**
-   * Sets the current value
+   * Sets a cache entry
    */
-  public boolean compareAndPut(long testValue, 
-                               Object value, 
-                               CacheConfig config)
+  protected final Object getAndPut(Object value,
+                                   CacheConfig config,
+                                   long now,
+                                   MnodeEntry mnodeValue)
   {
-    return _cacheService.compareAndPut(this, testValue, value, config);
+    MnodeUpdate mnodeUpdate
+      = getLocalDataManager().writeValue(mnodeValue, value, config);
+    
+    Object oldValue = mnodeValue != null ? mnodeValue.getValue() : null;
+
+    int leaseOwner = mnodeValue != null ? mnodeValue.getLeaseOwner() : -1;
+
+    long oldHash = getAndPut(mnodeUpdate, value,
+                             config.getLeaseExpireTimeout(),
+                             leaseOwner,
+                             config);
+
+    if (oldHash == 0)
+      return null;
+    
+    if (oldHash == mnodeUpdate.getValueHash() && oldValue != null)
+      return oldValue;
+    
+    oldValue = getLocalDataManager().readData(getKeyHash(),
+                                              oldHash,
+                                              mnodeValue.getValueDataId(),
+                                              config.getValueSerializer(),
+                                              config);
+
+    return oldValue;
+  }
+  
+  public long getAndPutLocal(DistCacheEntry entry,
+                             MnodeUpdate mnodeUpdate,
+                             Object value)
+  {
+    long oldValueHash = entry.getMnodeEntry().getValueHash();
+
+    entry.putLocalValue(mnodeUpdate, value);
+
+    return oldValueHash;
   }
 
   /**
-   * Sets the current value
+   * Sets a cache entry
    */
-  public Object getAndReplace(long testValue, 
-                              Object value, 
-                              CacheConfig config)
+  private long getAndPut(MnodeUpdate mnodeUpdate,
+                         Object value,
+                         long leaseTimeout,
+                         int leaseOwner,
+                         CacheConfig config)
   {
-    return _cacheService.getAndReplace(this, testValue, value, config);
+    return config.getEngine().getAndPut(this, mnodeUpdate, value);
   }
-
-  /**
-   * Remove the value
-   */
-  public boolean remove(CacheConfig config)
-  {
-    return _cacheService.remove(this, config);
-  }
-
-  /**
-   * Remove the value
-   */
-  public Object getAndRemove(CacheConfig config)
-  {
-    return _cacheService.getAndRemove(this, config);
-  }
+  
+  //
+  // utility
+  //
 
   /**
    * Sets the current value.
    */
-  public final boolean compareAndSet(MnodeEntry oldMnodeValue,
-                                     MnodeEntry mnodeValue)
+  public final boolean compareAndSetEntry(MnodeEntry oldMnodeValue,
+                                          MnodeEntry mnodeValue)
   {
     if (mnodeValue == null)
       throw new NullPointerException();
     
     return _mnodeEntry.compareAndSet(oldMnodeValue, mnodeValue);
   }
-
-  @Override
-  public long getValueHash()
-  {
-    return getMnodeEntry().getValueHash();
-  }
-
-  @Override
-  public long getValueLength()
-  {
-    return getMnodeEntry().getValueLength();
-  }
   
   /**
    * Writes the data to a stream.
    */
-  @Override
   public boolean readData(OutputStream os, CacheConfig config)
     throws IOException
   {
-    return _cacheService.readData(getKeyHash(), getMnodeEntry(), os, config);
+    return getLocalDataManager().readData(getKeyHash(), getMnodeEntry(),
+                                          os, config);
   }
 
-  @Override
-  public long getAccessedExpireTimeout()
-  {
-    return getMnodeEntry().getAccessedExpireTimeout();
-  }
-
-  @Override
-  public long getModifiedExpireTimeout()
-  {
-    return getMnodeEntry().getModifiedExpireTimeout();
-  }
-  
-  @Override
-  public boolean isExpired(long now)
-  {
-    MnodeEntry entry = getMnodeEntry();
-    
-    if (entry != null)
-      return entry.isExpired(now);
-    else
-      return false;
-  }
-  
   public boolean isModified(MnodeValue newValue)
   {
     MnodeEntry oldValue = getMnodeEntry();
@@ -397,17 +527,24 @@ public class DistCacheEntry implements ExtCacheEntry {
       return true;
     }
   }
-
-  @Override
-  public long getLeaseTimeout()
+  
+  private long getNewVersion(MnodeValue mnodeValue)
   {
-    return getMnodeEntry().getLeaseTimeout();
+    long version = mnodeValue != null ? mnodeValue.getVersion() : 0;
+    
+    return getNewVersion(version);
   }
-
-  @Override
-  public int getLeaseOwner()
+  
+  private long getNewVersion(long version)
   {
-    return getMnodeEntry().getLeaseOwner();
+    long newVersion = version + 1;
+
+    long now = CurrentTime.getCurrentTime();
+  
+    if (newVersion < now)
+      return now;
+    else
+      return newVersion;
   }
 
   public void clearLease()
@@ -422,64 +559,15 @@ public class DistCacheEntry implements ExtCacheEntry {
   {
     return 0;
   }
-
-  public long getCreationTime()
-  {
-    return getMnodeEntry().getCreationTime();
-  }
-
-  public long getExpirationTime()
-  {
-    return getMnodeEntry().getExpirationTime();
-  }
-
-  public int getHits()
-  {
-    return getMnodeEntry().getHits();
-  }
-
-  public long getLastAccessedTime()
-  {
-    return getMnodeEntry().getLastAccessedTime();
-  }
-
-  public long getLastModifiedTime()
-  {
-    return getMnodeEntry().getLastModifiedTime();
-  }
-
-  @Override
-  public long getVersion()
-  {
-    return getMnodeEntry().getVersion();
-  }
-
-  @Override
-  public MnodeUpdate getRemoteUpdate()
-  {
-    return getMnodeEntry().getRemoteUpdate();
-  }
-
-  public boolean isValid()
-  {
-    return getMnodeEntry().isValid();
-  }
-
-
-  public Object setValue(Object value)
-  {
-    return getMnodeEntry().setValue(value);
-  }
   
   //
-  // operations
+  // get/load operations
   //
 
   private Object get(CacheConfig config,
-                     long now,
-                     boolean isForceLoad)
+                     long now)
   {
-    MnodeEntry mnodeValue = loadMnodeValue(config, now, isForceLoad);
+    MnodeEntry mnodeValue = loadMnodeValue(config, now);
 
     if (mnodeValue == null) {
       return null;
@@ -509,7 +597,7 @@ public class DistCacheEntry implements ExtCacheEntry {
       // Recovery from dropped or corrupted data
       log.warning("Missing or corrupted data in get for " 
                   + mnodeValue + " " + this);
-      _cacheService.remove(this, config);
+      remove(config);
     }
 
     mnodeValue.setObjectValue(value);
@@ -517,20 +605,11 @@ public class DistCacheEntry implements ExtCacheEntry {
     return value;
   }
 
-  final public MnodeEntry loadMnodeValue(CacheConfig config,
-                                         long now)
-  {
-    return loadMnodeValue(config, now, false);
-  }
-
-  final public MnodeEntry loadMnodeValue(CacheConfig config,
-                                        long now,
-                                        boolean isForceLoad)
+  final private MnodeEntry loadMnodeValue(CacheConfig config, long now)
   {
     MnodeEntry mnodeValue = loadLocalMnodeValue();
 
     if (mnodeValue == null
-        || isForceLoad
         || isLocalExpired(config, getKeyHash(), mnodeValue, now)) {
       reloadValue(config, now);
     }
@@ -563,26 +642,7 @@ public class DistCacheEntry implements ExtCacheEntry {
       }
     }
   }
-
-  /**
-   * Conditionally starts an update of a cache item, allowing only a
-   * single thread to update the data.
-   *
-   * @return true if the thread is allowed to update
-   */
-  private final boolean startReadUpdate()
-  {
-    return _isReadUpdate.compareAndSet(false, true);
-  }
-
-  /**
-   * Completes an update of a cache item.
-   */
-  private final void finishReadUpdate()
-  {
-    _isReadUpdate.set(false);
-  }
-
+  
   private void loadExpiredValue(CacheConfig config,
                                 long now)
   {
@@ -611,7 +671,7 @@ public class DistCacheEntry implements ExtCacheEntry {
                                                  now, now,
                                                  true, true);
 
-      compareAndSet(mnodeEntry, nullMnodeValue);
+      compareAndSetEntry(mnodeEntry, nullMnodeValue);
     }
   }
   
@@ -657,11 +717,42 @@ public class DistCacheEntry implements ExtCacheEntry {
       = _cacheService.getDataBacking().loadLocalEntryValue(key);
     
     if (newMnodeValue != null) {
-      compareAndSet(mnodeValue, newMnodeValue);
+      compareAndSetEntry(mnodeValue, newMnodeValue);
     }
 
     return getMnodeEntry();
   }
+
+  /**
+   * Gets a cache entry as a stream
+   */
+  final public boolean getStream(OutputStream os,
+                                 CacheConfig config)
+    throws IOException
+  {
+    long now = CurrentTime.getCurrentTime();
+
+    MnodeEntry mnodeValue = loadMnodeValue(config); // , false);
+
+    if (mnodeValue == null)
+      return false;
+
+    updateAccessTime(mnodeValue, now);
+
+    long valueHash = mnodeValue.getValueHash();
+
+    if (valueHash == 0) {
+      return false;
+    }
+
+    getLocalDataManager().readData(getKeyHash(), mnodeValue, os, config);
+    
+    return true;
+  }
+  
+  //
+  // put methods
+  //
 
   public MnodeUpdate localUpdate(MnodeUpdate update,
                                  InputStream is)
@@ -686,7 +777,7 @@ public class DistCacheEntry implements ExtCacheEntry {
       }
     }
     
-    putLocalValue(update, null);
+    putLocalValueImpl(update, null);
     
     return getMnodeEntry().getRemoteUpdate();
   }
@@ -694,7 +785,41 @@ public class DistCacheEntry implements ExtCacheEntry {
   /**
    * Sets a cache entry
    */
-  final MnodeEntry putLocalValue(MnodeUpdate mnodeUpdate,
+  public final MnodeValue putLocalValue(MnodeUpdate mnodeUpdate,
+                                        InputStream is)
+  {
+    HashKey key = getKeyHash();
+    
+    // long valueHash = mnodeUpdate.getValueHash();
+    // long version = mnodeUpdate.getVersion();
+    
+    MnodeValue mnodeValue = localUpdate(mnodeUpdate, is);
+
+    _cacheService.notifyPutListeners(getKeyHash(), mnodeUpdate, mnodeValue);
+    
+    return mnodeValue;
+  }
+
+  /**
+   * Sets a cache entry
+   */
+  public final MnodeEntry putLocalValue(MnodeUpdate mnodeUpdate,
+                                        Object value)
+  {
+    // long valueHash = mnodeUpdate.getValueHash();
+    // long version = mnodeUpdate.getVersion();
+    
+    MnodeEntry mnodeValue = putLocalValueImpl(mnodeUpdate, value);
+    
+    _cacheService.notifyPutListeners(getKeyHash(), mnodeUpdate, mnodeValue);
+    
+    return mnodeValue;
+  }
+
+  /**
+   * Sets a cache entry
+   */
+  final MnodeEntry putLocalValueImpl(MnodeUpdate mnodeUpdate,
                                  Object value)
   {
     HashKey key = getKeyHash();
@@ -740,7 +865,7 @@ public class DistCacheEntry implements ExtCacheEntry {
                                   updateTime,
                                   true,
                                   false);
-    } while (! compareAndSet(oldEntryValue, mnodeValue));
+    } while (! compareAndSetEntry(oldEntryValue, mnodeValue));
 
     //MnodeValue newValue
     _cacheService.getDataBacking().putLocalValue(mnodeValue, key,  
@@ -764,7 +889,7 @@ public class DistCacheEntry implements ExtCacheEntry {
     MnodeUpdate update
       = _cacheService.getLocalDataManager().writeValue(mnodeValue, value, config);
     
-    mnodeValue = putLocalValue(update, value);
+    mnodeValue = putLocalValueImpl(update, value);
 
     if (mnodeValue == null)
       return;
@@ -774,7 +899,8 @@ public class DistCacheEntry implements ExtCacheEntry {
     CacheWriter writer = config.getCacheWriter();
     
     if (writer != null && config.isWriteThrough()) {
-      writer.write(this);
+      // XXX: save facade?
+      writer.write(new ExtCacheEntryFacade(this));
     }
 
     return;
@@ -793,7 +919,7 @@ public class DistCacheEntry implements ExtCacheEntry {
 
     // the failure cases are not errors because this put() could
     // be immediately followed by an overwriting put()
-    if (! compareAndSet(oldEntryValue, mnodeValue)) {
+    if (! compareAndSetEntry(oldEntryValue, mnodeValue)) {
       log.fine(this + " mnodeValue update failed due to timing conflict"
         + " (key=" + getKeyHash() + ")");
 
@@ -821,7 +947,7 @@ public class DistCacheEntry implements ExtCacheEntry {
     // add 25% window for update efficiency
     // idleTimeout = idleTimeout * 5L / 4;
 
-    mnodeValue = putLocalValue(update, value);
+    mnodeValue = putLocalValueImpl(update, value);
     
     return (mnodeValue != null);
   }
@@ -844,7 +970,7 @@ public class DistCacheEntry implements ExtCacheEntry {
       }
       
       // cloud/6811
-      compareAndSet(mnodeValue, newMnodeValue);
+      compareAndSetEntry(mnodeValue, newMnodeValue);
 
       mnodeValue = getMnodeEntry();
     }
@@ -922,7 +1048,7 @@ public class DistCacheEntry implements ExtCacheEntry {
     // the failure cases are not errors because this put() could
     // be immediately followed by an overwriting put()
 
-    if (! compareAndSet(oldEntryValue, mnodeValue)) {
+    if (! compareAndSetEntry(oldEntryValue, mnodeValue)) {
       log.fine(this + " mnodeValue updateTime failed due to timing conflict"
                + " (key=" + getKeyHash() + ")");
 
@@ -936,6 +1062,25 @@ public class DistCacheEntry implements ExtCacheEntry {
     return getMnodeEntry();
   }
 
+  /**
+   * Conditionally starts an update of a cache item, allowing only a
+   * single thread to update the data.
+   *
+   * @return true if the thread is allowed to update
+   */
+  private final boolean startReadUpdate()
+  {
+    return _isReadUpdate.compareAndSet(false, true);
+  }
+
+  /**
+   * Completes an update of a cache item.
+   */
+  private final void finishReadUpdate()
+  {
+    _isReadUpdate.set(false);
+  }
+
   //
   // statistics
   //
@@ -945,7 +1090,6 @@ public class DistCacheEntry implements ExtCacheEntry {
     _loadCount.incrementAndGet();
   }
   
-  @Override
   public int getLoadCount()
   {
     return _loadCount.get();

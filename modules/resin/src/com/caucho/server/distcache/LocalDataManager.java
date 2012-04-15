@@ -40,7 +40,6 @@ import java.util.logging.Logger;
 import com.caucho.db.blob.BlobInputStream;
 import com.caucho.distcache.CacheSerializer;
 import com.caucho.env.distcache.CacheDataBacking;
-import com.caucho.server.distcache.CacheStoreManager.DataItem;
 import com.caucho.util.CurrentTime;
 import com.caucho.util.HashKey;
 import com.caucho.util.L10N;
@@ -304,6 +303,11 @@ final class LocalDataManager
     }
   }
   
+  void removeData(long valueHash)
+  {
+    getDataBacking().removeData(valueHash);
+  }
+  
   private long getNewVersion(MnodeEntry mnodeValue)
   {
     long version = mnodeValue != null ? mnodeValue.getVersion() : 0;
@@ -383,6 +387,37 @@ final class LocalDataManager
     } finally {
       if (os != null)
         os.destroy();
+    }
+  }
+  
+  public static class DataItem {
+    private long _valueHash;
+    private long _dataIndex;
+    private long _length;
+    
+    DataItem(long valueHash, long dataIndex, long length)
+    {
+      _valueHash = valueHash;
+      _dataIndex = dataIndex;
+      _length = length;
+    }
+    
+    /**
+     * @return
+     */
+    public long getValueDataId()
+    {
+      return _dataIndex;
+    }
+
+    public long getValueHash()
+    {
+      return _valueHash;
+    }
+    
+    public long getLength()
+    {
+      return _length;
     }
   }
 }
