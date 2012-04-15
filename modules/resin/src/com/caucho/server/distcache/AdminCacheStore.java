@@ -94,4 +94,8 @@ public class AdminCacheStore extends AbstractManagedObject
   {
     return 0;
   }
+
+  public void unregister()
+  {
+  }
 }
