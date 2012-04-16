@@ -42,7 +42,7 @@ import com.caucho.vfs.Path;
 public interface ConfigMXBean extends ManagedObjectMXBean
 {
   @Description("Path to the config")
-  public Path getPath();
+  public String getPath();
 
   @Description("Last modified date")
   public long getLastModified();

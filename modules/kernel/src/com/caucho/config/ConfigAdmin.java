@@ -95,9 +95,9 @@ public class ConfigAdmin extends AbstractManagedObject implements ConfigMXBean
   }
 
   @Override
-  public Path getPath()
+  public String getPath()
   {
-    return _path;
+    return _path.getFullPath();
   }
 
   public long getLastModified()
