@@ -60,13 +60,14 @@ public class CacheUpdateWithSource extends MnodeUpdate implements java.io.Serial
    * Create a new CachePut message
    */
   public CacheUpdateWithSource(MnodeUpdate mnodeUpdate,
-                  StreamSource source)
+                               StreamSource source)
   {
     super(mnodeUpdate.getValueHash(),
           0,
           mnodeUpdate.getValueLength(),
           mnodeUpdate.getVersion(),
-          mnodeUpdate);
+          mnodeUpdate,
+          mnodeUpdate.getLeaseOwner());
     
     _source = source;
   }
@@ -75,13 +76,15 @@ public class CacheUpdateWithSource extends MnodeUpdate implements java.io.Serial
    * Create a new CachePut message
    */
   public CacheUpdateWithSource(MnodeValue mnodeValue,
-                  StreamSource source)
+                               StreamSource source,
+                               int leaseOwner)
   {
     super(mnodeValue.getValueHash(),
           0,
           mnodeValue.getValueLength(),
           mnodeValue.getVersion(),
-          mnodeValue);
+          mnodeValue,
+          leaseOwner);
     
     _source = source;
   }

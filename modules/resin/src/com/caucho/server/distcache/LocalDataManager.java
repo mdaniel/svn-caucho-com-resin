@@ -143,7 +143,7 @@ final class LocalDataManager
                              newVersion,
                              config,
                              mnodeValue.getLeaseOwner(),
-                             mnodeValue.getLeaseTimeout());
+                             mnodeValue.getLeaseExpireTimeout());
     } catch (Exception e) {
       throw new RuntimeException(e);
     } finally {

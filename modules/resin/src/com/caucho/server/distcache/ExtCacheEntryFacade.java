@@ -155,9 +155,9 @@ public final class ExtCacheEntryFacade implements ExtCacheEntry {
   }
 
   @Override
-  public long getLeaseTimeout()
+  public long getLeaseExpireTimeout()
   {
-    return _entry.getMnodeEntry().getLeaseTimeout();
+    return _entry.getMnodeEntry().getLeaseExpireTimeout();
   }
 
   @Override

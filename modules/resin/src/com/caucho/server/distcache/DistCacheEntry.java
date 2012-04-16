@@ -176,7 +176,39 @@ public class DistCacheEntry {
 
     return _cacheService.calculateValueHash(value, config);
   }
- 
+  
+  public CacheUpdateWithSource loadCacheStream(long requestVersion,
+                                               boolean isValueStream)
+  {
+    MnodeEntry mnodeEntry = getMnodeEntry();
+
+    if (mnodeEntry.getVersion() <= requestVersion) {
+      return new CacheUpdateWithSource(mnodeEntry, null, 
+                                       mnodeEntry.getLeaseOwner());
+    }
+    else if (mnodeEntry.isImplicitNull()) {
+      return new CacheUpdateWithSource(mnodeEntry, null, 
+                                       mnodeEntry.getLeaseOwner());
+    }
+
+    StreamSource source = null;
+      
+    if (isValueStream) {
+      long valueDataId = mnodeEntry.getValueDataId();
+      
+      DataStreamSource dataSource
+          = getLocalDataManager().createDataSource(valueDataId);
+
+      if (dataSource != null) {
+        source = new StreamSource(dataSource);
+      }
+
+      // XXX: updateLease(entryKey, mnodeEntry, leaseOwner);
+    }
+
+    return new CacheUpdateWithSource(mnodeEntry, source, mnodeEntry.getLeaseOwner());
+  }
+
  /**
    * Sets a cache entry
    */
@@ -249,7 +281,7 @@ public class DistCacheEntry {
 
     
     int leaseOwner = getMnodeEntry().getLeaseOwner();
-    long leaseTimeout = config.getLeaseExpireTimeout();
+    long leaseExpireTimeout = config.getLeaseExpireTimeout();
     
     MnodeUpdate mnodeUpdate = new MnodeUpdate(valueHash,
                                               valueDataId,
@@ -259,8 +291,8 @@ public class DistCacheEntry {
                                               flags,
                                               accessedExpireTime,
                                               modifiedExpireTime,
-                                              leaseOwner,
-                                              leaseTimeout);
+                                              leaseExpireTimeout,
+                                              leaseOwner);
 
     // add 25% window for update efficiency
     // idleTimeout = idleTimeout * 5L / 4;
@@ -549,10 +581,19 @@ public class DistCacheEntry {
 
   public void clearLease()
   {
-    MnodeEntry mnodeValue = getMnodeEntry();
+    getMnodeEntry().clearLease();
+  }
+  
+  public boolean isLeaseExpired()
+  {
+    return getMnodeEntry().isLeaseExpired(CurrentTime.getCurrentTime());
+  }
+  
+  public void updateLease(int leaseOwner)
+  {
+    long now = CurrentTime.getCurrentTime();
 
-    if (mnodeValue != null)
-      mnodeValue.clearLease();
+    getMnodeEntry().setLeaseOwner(leaseOwner, now);
   }
 
   public long getCost()
@@ -648,7 +689,7 @@ public class DistCacheEntry {
   {
     MnodeEntry mnodeEntry = getMnodeEntry();
     
-    addLoadCount();
+    _loadCount.incrementAndGet();
     
     CacheEngine engine = config.getEngine();
     
@@ -788,11 +829,6 @@ public class DistCacheEntry {
   public final MnodeValue putLocalValue(MnodeUpdate mnodeUpdate,
                                         InputStream is)
   {
-    HashKey key = getKeyHash();
-    
-    // long valueHash = mnodeUpdate.getValueHash();
-    // long version = mnodeUpdate.getVersion();
-    
     MnodeValue mnodeValue = localUpdate(mnodeUpdate, is);
 
     _cacheService.notifyPutListeners(getKeyHash(), mnodeUpdate, mnodeValue);
@@ -819,8 +855,8 @@ public class DistCacheEntry {
   /**
    * Sets a cache entry
    */
-  final MnodeEntry putLocalValueImpl(MnodeUpdate mnodeUpdate,
-                                 Object value)
+  private final MnodeEntry putLocalValueImpl(MnodeUpdate mnodeUpdate,
+                                             Object value)
   {
     HashKey key = getKeyHash();
     
@@ -856,15 +892,14 @@ public class DistCacheEntry {
 
       long accessTime = now;
       long updateTime = accessTime;
-      long leaseTimeout = mnodeUpdate.getLeaseTimeout();
 
       mnodeValue = new MnodeEntry(mnodeUpdate,
                                   value,
-                                  leaseTimeout,
                                   accessTime,
                                   updateTime,
                                   true,
-                                  false);
+                                  false,
+                                  mnodeUpdate.getLeaseOwner());
     } while (! compareAndSetEntry(oldEntryValue, mnodeValue));
 
     //MnodeValue newValue
@@ -1085,11 +1120,7 @@ public class DistCacheEntry {
   // statistics
   //
   
-  public void addLoadCount()
-  {
-    _loadCount.incrementAndGet();
-  }
-  
+
   public int getLoadCount()
   {
     return _loadCount.get();

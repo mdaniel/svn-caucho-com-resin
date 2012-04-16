@@ -38,7 +38,6 @@ public class MnodeUpdate extends MnodeValue {
     = new MnodeUpdate(0, 0, 0, 0, null, 0, 0, 0, -1, -1);
   
   private final int _leaseOwner;
-  private final long _leaseTimeout;
   
   public MnodeUpdate(long valueHash,
                      long valueDataId,
@@ -48,16 +47,15 @@ public class MnodeUpdate extends MnodeValue {
                      long flags,
                      long accessedExpireTime,
                      long modifiedExpireTime,
-                     int leaseOwner,
-                     long leaseTimeout)
+                     long leaseExpireTime,
+                     int leaseOwner)
   {
     super(valueHash, valueDataId, valueLength, version,
           cacheHash, 
           flags, 
-          accessedExpireTime, modifiedExpireTime);
+          accessedExpireTime, modifiedExpireTime, leaseExpireTime);
     
     _leaseOwner = leaseOwner;
-    _leaseTimeout = leaseTimeout;
   }
   
   public MnodeUpdate(long valueHash,
@@ -68,7 +66,6 @@ public class MnodeUpdate extends MnodeValue {
     super(valueHash, valueDataId, valueLength, version);
     
     _leaseOwner = -1;
-    _leaseTimeout = -1;
   }
   
   public MnodeUpdate(MnodeUpdate update)
@@ -76,7 +73,6 @@ public class MnodeUpdate extends MnodeValue {
     super(update);
     
     _leaseOwner = update._leaseOwner;
-    _leaseTimeout = update._leaseTimeout;
   }
   
   public MnodeUpdate(MnodeValue mnodeValue)
@@ -84,7 +80,6 @@ public class MnodeUpdate extends MnodeValue {
     super(mnodeValue);
     
     _leaseOwner = -1;
-    _leaseTimeout = -1;
   }
 
   public MnodeUpdate(long valueHash,
@@ -96,7 +91,6 @@ public class MnodeUpdate extends MnodeValue {
     super(valueHash, valueDataId, valueLength, version, config);
     
     _leaseOwner = -1;
-    _leaseTimeout = -1;
   }
 
   public MnodeUpdate(long valueHash,
@@ -110,7 +104,6 @@ public class MnodeUpdate extends MnodeValue {
     super(valueHash, valueDataId, valueLength, version, config);
     
     _leaseOwner = leaseOwner;
-    _leaseTimeout = leaseTimeout;
   }
 
   public MnodeUpdate(long valueHash,
@@ -122,7 +115,6 @@ public class MnodeUpdate extends MnodeValue {
     super(valueHash, valueDataId, valueLength, version, oldValue);
     
     _leaseOwner = -1;
-    _leaseTimeout = -1;
   }
 
   public MnodeUpdate(long valueHash,
@@ -130,13 +122,11 @@ public class MnodeUpdate extends MnodeValue {
                      long valueLength,
                      long version,
                      MnodeValue oldValue,
-                     int leaseOwner,
-                     long leaseTimeout)
+                     int leaseOwner)
   {
     super(valueHash, valueDataId, valueLength, version, oldValue);
     
     _leaseOwner = leaseOwner;
-    _leaseTimeout = leaseTimeout;
   }
   
   public static MnodeUpdate createNull(long version, MnodeValue oldValue)
@@ -160,18 +150,12 @@ public class MnodeUpdate extends MnodeValue {
                            getValueLength(),
                            getVersion(),
                            this,
-                           getLeaseOwner(),
-                           getLeaseTimeout());
+                           getLeaseOwner());
   }
   
   public final int getLeaseOwner()
   {
     return _leaseOwner;
-  }
-  
-  public final long getLeaseTimeout()
-  {
-    return _leaseTimeout;
   }
 
   @Override

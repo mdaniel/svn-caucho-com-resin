@@ -397,6 +397,8 @@ public class MnodeStore {
         long itemUpdateTime = rs.getLong(8);
         long accessTimeout = rs.getLong(9);
         long updateTimeout = rs.getLong(10);
+        
+        long leaseTimeout = 30000;
 
         HashKey cacheKey = cacheHash != null ? new HashKey(cacheHash) : null;
 
@@ -409,7 +411,8 @@ public class MnodeStore {
                                     flags,
                                     itemUpdateTime,
                                     accessTimeout,
-                                    updateTimeout));
+                                    updateTimeout,
+                                    leaseTimeout));
       }
 
       if (entryList.size() > 0)
@@ -466,6 +469,8 @@ public class MnodeStore {
         long accessTimeout = rs.getLong(9);
         long updateTimeout = rs.getLong(10);
         
+        long leaseTimeout = 30000;
+        
         /*
         HashKey cacheKey = cacheHash != null ? new HashKey(cacheHash) : null;
         */
@@ -482,7 +487,8 @@ public class MnodeStore {
                                     flags,
                                     itemUpdateTime,
                                     accessTimeout,
-                                    updateTimeout));
+                                    updateTimeout,
+                                    leaseTimeout));
       }
 
       if (entryList.size() > 0)

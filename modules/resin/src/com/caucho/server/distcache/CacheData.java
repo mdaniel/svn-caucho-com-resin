@@ -49,12 +49,13 @@ public final class CacheData extends MnodeValue {
                    long flags,
                    long accessTime,
                    long accessedTimeout,
-                   long modifiedTimeout)
+                   long modifiedTimeout,
+                   long leaseTimeout)
   {
     super(valueHash, valueDataId, valueLength, version,
           HashKey.getHash(cacheKey),
           flags,
-          accessedTimeout, modifiedTimeout);
+          accessedTimeout, modifiedTimeout, leaseTimeout);
     
     _key = key;
     

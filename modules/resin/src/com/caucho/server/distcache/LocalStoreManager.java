@@ -56,42 +56,6 @@ public final class LocalStoreManager
     _localMnodeManager = cacheStore.getLocalMnodeManager();
     _localDataManager = cacheStore.getLocalDataManager();
   }
-  
-  public CacheUpdateWithSource loadCacheStream(HashKey keyHash,
-                                               long requestVersion,
-                                               boolean isValueStream)
-  {
-    DistCacheEntry entryKey = _cacheManager.loadLocalEntry(keyHash);
-
-    MnodeEntry mnodeEntry = entryKey.getMnodeEntry();
-
-    if (mnodeEntry == null) {
-      return null;
-    }
-    else if (mnodeEntry.getVersion() <= requestVersion) {
-      return null;
-    }
-    else if (mnodeEntry.isImplicitNull()) {
-      return new CacheUpdateWithSource(mnodeEntry, null);
-    }
-
-    StreamSource source = null;
-      
-    if (isValueStream) {
-      long valueDataId = mnodeEntry.getValueDataId();
-      
-      DataStreamSource dataSource
-          = _localDataManager.createDataSource(valueDataId);
-
-      if (dataSource != null) {
-        source = new StreamSource(dataSource);
-      }
-
-      // XXX: updateLease(entryKey, mnodeEntry, leaseOwner);
-    }
-    
-    return new CacheUpdateWithSource(mnodeEntry, source);
-  }
 
   public StreamSource loadDataSource(byte[] keyHash)
   {

@@ -85,7 +85,7 @@ public interface ExtCacheEntry<K,V> extends Cache.Entry<K,V>
   /**
    * Returns the lease timeout
    */
-  public long getLeaseTimeout();
+  public long getLeaseExpireTimeout();
 
   /**
    * @return
