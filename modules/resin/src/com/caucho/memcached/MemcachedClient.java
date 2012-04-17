@@ -327,9 +327,7 @@ public class MemcachedClient implements Cache
         skipToEndOfLine(is);
         isValid = true;
 
-        MnodeUpdate update = new MnodeUpdate(0, 0, 0,
-                                             version,
-                                             config);
+        MnodeUpdate update = new MnodeUpdate(0, 0, version, config);
 
         return update;
       }
@@ -479,7 +477,9 @@ public class MemcachedClient implements Cache
     }
   }
   
-  void putResin(String key, MnodeUpdate update) throws CacheException
+  void putResin(String key,
+                MnodeUpdate update,
+                long valueDataId) throws CacheException
   {
     ClientSocket client = null;
     long idleStartTime = CurrentTime.getCurrentTime();
@@ -516,7 +516,7 @@ public class MemcachedClient implements Cache
       out.setDisableClose(true);
       
       //out.print(value);
-      boolean v = cache.loadData(update.getValueDataId(), out);
+      boolean v = cache.loadData(valueDataId, out);
       
       out.setDisableClose(false);
       

@@ -47,12 +47,15 @@ import com.caucho.util.FreeList;
 import com.caucho.util.HashKey;
 import com.caucho.util.Hex;
 import com.caucho.util.JdbcUtil;
+import com.caucho.util.L10N;
 
 
 /**
  * Manages backing for the cache map.
  */
 public class MnodeStore {
+  private static final L10N L = new L10N(MnodeStore.class);
+  
   private static final Logger log
     = Logger.getLogger(MnodeStore.class.getName());
 
@@ -542,18 +545,20 @@ public class MnodeStore {
           = cacheHash != null ? new HashKey(cacheHash) : null;
 
         long leaseTimeout = 0;
-
+        
         MnodeEntry entry;
-        entry = new MnodeEntry(valueHash, valueDataId, valueLength, 
-                               itemVersion, null,
+        entry = new MnodeEntry(valueHash, valueLength, 
+                               itemVersion,
                                cacheHashKey,
                                flags,
                                accessedExpireTimeout, modifiedExpireTimeout,
                                leaseTimeout,
+                               valueDataId,
+                               null,
                                accessTime, updateTime,
                                serverVersion == _serverVersion,
                                false);
-        
+
         if (log.isLoggable(Level.FINER))
           log.finer(this + " load " + id + " " + entry);
         
@@ -584,13 +589,20 @@ public class MnodeStore {
    * @param idleTimeout the item's timeout
    */
   public boolean insert(HashKey id,
-                        MnodeValue mnodeUpdate)
+                        MnodeValue mnodeUpdate,
+                        long valueDataId)
   {
+    if ((valueDataId == 0) != (mnodeUpdate.getValueHash() == 0)) {
+      throw new IllegalStateException(L.l("data {0} vs hash {1} mismatch for cache mnode {2}",
+                                          valueDataId,
+                                          mnodeUpdate.getValueHash(),
+                                          id));
+    }
     CacheMapConnection conn = null;
 
     try {
       conn = getConnection();
-
+      
       PreparedStatement stmt = conn.prepareInsert();
       stmt.setBytes(1, id.getHash());
       stmt.setLong(2, mnodeUpdate.getValueHash());
@@ -599,7 +611,7 @@ public class MnodeStore {
       if (mnodeUpdate.getValueDataId() == 16384)
         Thread.dumpStack();
         */
-      stmt.setLong(3, mnodeUpdate.getValueDataId());
+      stmt.setLong(3, valueDataId);
       stmt.setLong(4, mnodeUpdate.getValueLength());
       stmt.setBytes(5, mnodeUpdate.getCacheHash());
 
@@ -639,7 +651,8 @@ public class MnodeStore {
    * @param idleTimeout the item's timeout
    */
   public boolean updateSave(byte []key,
-                            MnodeValue mnodeUpdate)
+                            MnodeValue mnodeUpdate,
+                            long valueDataId)
   {
     CacheMapConnection conn = null;
 
@@ -649,7 +662,7 @@ public class MnodeStore {
       PreparedStatement stmt = conn.prepareUpdateSave();
       
       stmt.setLong(1, mnodeUpdate.getValueHash());
-      stmt.setLong(2, mnodeUpdate.getValueDataId());
+      stmt.setLong(2, valueDataId);
       stmt.setLong(3, mnodeUpdate.getValueLength());
       
       stmt.setLong(4, _serverVersion);

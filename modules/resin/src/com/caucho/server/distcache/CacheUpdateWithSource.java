@@ -51,7 +51,7 @@ public class CacheUpdateWithSource extends MnodeUpdate implements java.io.Serial
    */
   protected CacheUpdateWithSource()
   {
-    super(0, 0, 0, 0);
+    super(0, 0, 0);
     
     _source = null;
   }
@@ -63,7 +63,6 @@ public class CacheUpdateWithSource extends MnodeUpdate implements java.io.Serial
                                StreamSource source)
   {
     super(mnodeUpdate.getValueHash(),
-          0,
           mnodeUpdate.getValueLength(),
           mnodeUpdate.getVersion(),
           mnodeUpdate,
@@ -80,7 +79,6 @@ public class CacheUpdateWithSource extends MnodeUpdate implements java.io.Serial
                                int leaseOwner)
   {
     super(mnodeValue.getValueHash(),
-          0,
           mnodeValue.getValueLength(),
           mnodeValue.getVersion(),
           mnodeValue,
@@ -91,7 +89,7 @@ public class CacheUpdateWithSource extends MnodeUpdate implements java.io.Serial
 
   public CacheUpdateWithSource(long oldValueHash, long version)
   {
-    super(oldValueHash, 0, 0, version);
+    super(oldValueHash, 0, version);
     
     _source = null;
   }

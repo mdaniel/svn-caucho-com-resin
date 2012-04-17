@@ -50,6 +50,7 @@ import com.caucho.util.ConcurrentArrayList;
 import com.caucho.util.FreeList;
 import com.caucho.util.IoUtil;
 import com.caucho.util.JdbcUtil;
+import com.caucho.util.L10N;
 import com.caucho.vfs.StreamSource;
 import com.caucho.vfs.WriteStream;
 
@@ -58,6 +59,8 @@ import com.caucho.vfs.WriteStream;
  * Manages the backing for the file database objects
  */
 public class DataStore {
+  private static final L10N L = new L10N(DataStore.class);
+  
   private static final Logger log
     = Logger.getLogger(DataStore.class.getName());
 
@@ -487,7 +490,7 @@ public class DataStore {
             log.finer(this + " insert " + Long.toHexString(id)
                       + " length:" + length);
           }
-          
+
           return id;
         }
         
@@ -523,7 +526,7 @@ public class DataStore {
   public boolean remove(long id)
   {
     if (id <= 0) {
-      throw new IllegalStateException();
+      throw new IllegalStateException(L.l("remove of 0 value"));
     }
 
     DataConnection conn = null;

@@ -199,7 +199,10 @@ public final class CacheStoreManager implements CacheEntryFactory
       return;
 
     MnodeEntry mnodeValue
-      = new MnodeEntry(oldEntryValue, accessTimeout, updateTime);
+      = new MnodeEntry(oldEntryValue,
+                       oldEntryValue.getValueDataId(),
+                       accessTimeout, 
+                       updateTime);
 
     entry.saveLocalUpdateTime(mnodeValue);
   }

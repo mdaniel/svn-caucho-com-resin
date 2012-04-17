@@ -77,43 +77,46 @@ final class LocalDataManager
     return getStoreManager().getDataBacking();
   }
 
-  MnodeUpdate writeData(MnodeValue update, 
-                       long version,
-                       StreamSource source)
+  DataItem writeData(MnodeValue update, 
+                     long version,
+                     StreamSource source)
   {
     long valueHash = update.getValueHash();
     long valueLength = update.getValueLength();
-    long valueDataId = getDataBacking().saveData(source, (int) valueLength);
+    long valueDataId;
     
-    return new MnodeUpdate(valueHash,
-                           valueDataId,
-                           valueLength,
-                           version,
-                           update);
+    if (valueHash == 0 && valueLength == 0 && source == null) {
+      return new DataItem(0, 0, 0);
+    }
+    
+    if (source != null)
+      valueDataId = getDataBacking().saveData(source, (int) valueLength);
+    else
+      throw new IllegalStateException(L.l("writeData called without a stream or saved value"));
+    
+    return new DataItem(valueHash,
+                        valueDataId,
+                        valueLength);
   }
 
-  MnodeUpdate writeData(MnodeValue update, 
-                       long version,
-                       InputStream is)
+  DataItem writeData(MnodeValue update, 
+                     long version,
+                     InputStream is)
   {
     try {
       long valueHash = update.getValueHash();
       long valueLength = update.getValueLength();
       long valueDataId = getDataBacking().saveData(is, (int) valueLength);
     
-      return new MnodeUpdate(valueHash,
-                             valueDataId,
-                             valueLength,
-                             version,
-                             update);
+      return new DataItem(valueHash, valueLength, valueDataId);
     } catch (IOException e) {
       throw new RuntimeException(e);
     }
   }
 
-  final public MnodeUpdate writeValue(MnodeEntry mnodeValue,
-                                      Object value,
-                                      CacheConfig config)
+  final public DataItem writeValue(MnodeEntry mnodeValue,
+                                   Object value,
+                                   CacheConfig config)
   {
     TempOutputStream os = null;
     CacheSerializer serializer = config.getValueSerializer();
@@ -121,7 +124,7 @@ final class LocalDataManager
     try {
       os = new TempOutputStream();
 
-      long newValueHash = writeDataStream(os, value, serializer);
+      long valueHash = writeDataStream(os, value, serializer);
 
       int length = os.getLength();
 
@@ -130,20 +133,13 @@ final class LocalDataManager
       
       if (valueDataId <= 0) {
         throw new IllegalStateException(L.l("Can't save the data '{0}'",
-                                            newValueHash));
+                                            valueHash));
       }
-      
-      long newVersion = getNewVersion(mnodeValue);
       
       // XXX: request owner?
 
-      return new MnodeUpdate(newValueHash,
-                             valueDataId,
-                             length, 
-                             newVersion,
-                             config,
-                             mnodeValue.getLeaseOwner(),
-                             mnodeValue.getLeaseExpireTimeout());
+      return new DataItem(valueHash, valueDataId, length);
+
     } catch (Exception e) {
       throw new RuntimeException(e);
     } finally {
@@ -307,25 +303,6 @@ final class LocalDataManager
   {
     getDataBacking().removeData(valueHash);
   }
-  
-  private long getNewVersion(MnodeEntry mnodeValue)
-  {
-    long version = mnodeValue != null ? mnodeValue.getVersion() : 0;
-    
-    return getNewVersion(version);
-  }
-  
-  private long getNewVersion(long version)
-  {
-    long newVersion = version + 1;
-
-    long now = CurrentTime.getCurrentTime();
-  
-    if (newVersion < now)
-      return now;
-    else
-      return newVersion;
-  }
 
   /**
    * Used by QA
@@ -392,13 +369,13 @@ final class LocalDataManager
   
   public static class DataItem {
     private long _valueHash;
-    private long _dataIndex;
+    private long _dataId;
     private long _length;
     
-    DataItem(long valueHash, long dataIndex, long length)
+    DataItem(long valueHash, long dataId, long length)
     {
       _valueHash = valueHash;
-      _dataIndex = dataIndex;
+      _dataId = dataId;
       _length = length;
     }
     
@@ -407,7 +384,7 @@ final class LocalDataManager
      */
     public long getValueDataId()
     {
-      return _dataIndex;
+      return _dataId;
     }
 
     public long getValueHash()

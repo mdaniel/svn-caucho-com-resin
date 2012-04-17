@@ -29,6 +29,7 @@
 
 package com.caucho.server.distcache;
 
+import com.caucho.server.distcache.LocalDataManager.DataItem;
 import com.caucho.util.HashKey;
 
 /**
@@ -57,7 +58,8 @@ public interface CacheEngine
                           */
 
   public void put(HashKey key, 
-                  MnodeUpdate mnodeUpdate);
+                  MnodeUpdate mnodeUpdate,
+                  long valueDataId);
 
   public void updateTime(HashKey key, MnodeEntry mnodeValue);
 
@@ -66,11 +68,12 @@ public interface CacheEngine
                      MnodeEntry mnodeEntry);
 
   public long getAndPut(DistCacheEntry entry, 
-                        MnodeUpdate mnodeUpdate,
+                        MnodeValue mnodeValue,
                         Object value);
 
   public boolean compareAndPut(DistCacheEntry entry, 
                                long testValue,
-                               MnodeUpdate mnodeUpdate, 
+                               MnodeUpdate update,
+                               long valueDataId,
                                Object value);
 }

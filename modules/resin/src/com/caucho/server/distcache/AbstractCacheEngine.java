@@ -73,7 +73,8 @@ public class AbstractCacheEngine implements CacheEngine
 
   @Override
   public void put(HashKey key, 
-                  MnodeUpdate mnodeUpdate)
+                  MnodeUpdate mnodeUpdate,
+                  long valueDataId)
   {
   }
 
@@ -88,15 +89,18 @@ public class AbstractCacheEngine implements CacheEngine
   {
   }
   @Override
-  public boolean compareAndPut(DistCacheEntry entry, long testValue,
-                               MnodeUpdate mnodeUpdate, Object value)
+  public boolean compareAndPut(DistCacheEntry entry,
+                               long testValue,
+                               MnodeUpdate mnodeUpdate,
+                               long valueDataId,
+                               Object value)
   {
     return false;
   }
 
   @Override
   public long getAndPut(DistCacheEntry entry, 
-                        MnodeUpdate mnodeUpdate,
+                        MnodeValue mnodeValue,
                         Object value)
   {
     return 0;

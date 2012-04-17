@@ -32,11 +32,14 @@ package com.caucho.bam.proxy;
 import java.util.concurrent.locks.LockSupport;
 
 import com.caucho.bam.BamError;
+import com.caucho.util.L10N;
 
 /**
  * callback for a proxy rpc.
  */
 public class ReplyFutureCallback<T> implements ReplyCallback<T> {
+  private static final L10N L = new L10N(ReplyFutureCallback.class);
+  
   private volatile ResultStateEnum _state = ResultStateEnum.WAITING;
   private volatile T _result;
   private volatile BamError _error;
@@ -90,7 +93,7 @@ public class ReplyFutureCallback<T> implements ReplyCallback<T> {
       case ERROR:
         throw _error.createException();
       default:
-        throw new IllegalStateException();
+        throw new IllegalStateException(L.l("future timeout"));
       }
     }
     }

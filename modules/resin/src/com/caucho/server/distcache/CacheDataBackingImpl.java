@@ -116,7 +116,7 @@ public class CacheDataBackingImpl implements CacheDataBacking {
     if (oldEntryValue == null
         || oldEntryValue.isImplicitNull()
         || oldEntryValue == MnodeEntry.NULL) {
-      if (_mnodeStore.insert(key, mnodeUpdate)) {
+      if (_mnodeStore.insert(key, mnodeUpdate, mnodeUpdate.getValueDataId())) {
         return mnodeUpdate;
       } else {
         log.fine(this + " db insert failed due to timing conflict"
@@ -125,10 +125,13 @@ public class CacheDataBackingImpl implements CacheDataBacking {
         return oldEntryValue;
       }
     } else {
-      if (_mnodeStore.updateSave(key.getHash(), mnodeUpdate)) {
+      if (_mnodeStore.updateSave(key.getHash(), 
+                                 mnodeUpdate,
+                                 mnodeUpdate.getValueDataId())) {
         return mnodeUpdate;
       }
-      else if (_mnodeStore.insert(key, mnodeUpdate)) {
+      else if (_mnodeStore.insert(key, mnodeUpdate, 
+                                  mnodeUpdate.getValueDataId())) {
         return mnodeUpdate;
       }
       else {
@@ -141,27 +144,31 @@ public class CacheDataBackingImpl implements CacheDataBacking {
   }
 
   @Override
-  public boolean putLocalValue(MnodeEntry mnodeValue,
+  public boolean putLocalValue(MnodeEntry mnodeEntry,
                                HashKey key,
-                               MnodeEntry oldEntryValue,
+                               MnodeEntry oldEntryEntry,
                                MnodeValue mnodeUpdate)
   {
     boolean isSave = false;
     
-    if (oldEntryValue == null
-        || oldEntryValue.isImplicitNull()
-        || oldEntryValue == MnodeEntry.NULL) {
-      if (_mnodeStore.insert(key, mnodeUpdate)) {
+    if (oldEntryEntry == null
+        || oldEntryEntry.isImplicitNull()
+        || oldEntryEntry == MnodeEntry.NULL) {
+      if (_mnodeStore.insert(key, mnodeUpdate, mnodeEntry.getValueDataId())) {
         isSave = true;
       } else {
         log.fine(this + " db insert failed due to timing conflict"
                  + "(key=" + key + ", version=" + mnodeUpdate.getVersion() + ")");
       }
     } else {
-      if (_mnodeStore.updateSave(key.getHash(), mnodeUpdate)) {
+      if (_mnodeStore.updateSave(key.getHash(), 
+                                 mnodeUpdate,
+                                 mnodeEntry.getValueDataId())) {
         isSave = true;
       }
-      else if (_mnodeStore.insert(key, mnodeUpdate)) {
+      else if (_mnodeStore.insert(key, 
+                                  mnodeUpdate,
+                                  mnodeEntry.getValueDataId())) {
         isSave = true;
       }
       else {
@@ -170,11 +177,11 @@ public class CacheDataBackingImpl implements CacheDataBacking {
       }
     }
     
-    if (isSave && oldEntryValue != null) {
-      long oldDataId = oldEntryValue.getValueDataId();
-      
+    if (isSave && oldEntryEntry != null) {
+      long oldDataId = oldEntryEntry.getValueDataId();
+
       // XXX: create delete queue?
-      if (oldDataId > 0 && mnodeUpdate.getValueDataId() != oldDataId) {
+      if (oldDataId > 0 && mnodeEntry.getValueDataId() != oldDataId) {
         _dataStore.remove(oldDataId);
       }
     }

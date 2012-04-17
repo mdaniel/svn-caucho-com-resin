@@ -38,6 +38,7 @@ import com.caucho.util.HashKey;
 public final class CacheData extends MnodeValue {
   private final HashKey _key;
 
+  private final long _valueDataId;
   private final long _accessTime;
 
   public CacheData(HashKey key,
@@ -52,13 +53,14 @@ public final class CacheData extends MnodeValue {
                    long modifiedTimeout,
                    long leaseTimeout)
   {
-    super(valueHash, valueDataId, valueLength, version,
+    super(valueHash, valueLength, version,
           HashKey.getHash(cacheKey),
           flags,
           accessedTimeout, modifiedTimeout, leaseTimeout);
     
     _key = key;
     
+    _valueDataId = valueDataId;
     _accessTime = accessTime;
   }
 
@@ -70,5 +72,10 @@ public final class CacheData extends MnodeValue {
   public long getAccessTime()
   {
     return _accessTime;
+  }
+  
+  public long getValueDataId()
+  {
+    return _valueDataId;
   }
 }

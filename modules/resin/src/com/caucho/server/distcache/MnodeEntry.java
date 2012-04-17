@@ -40,10 +40,12 @@ import com.caucho.util.HashKey;
  */
 public final class MnodeEntry extends MnodeValue {
   public static final MnodeEntry NULL
-    = new MnodeEntry(0, 0, 0, 0, null, null, 0, 0, 0, 0, 0, 0, false, true);
+    = new MnodeEntry(0, 0, 0, null, 0, 0, 0, 0, 0, null, 0, 0, false, true);
   
   public static final long NULL_KEY = 0;
   public static final long ANY_KEY = createAnyKey();
+  
+  private final long _valueDataId;
   
   private final boolean _isServerVersionValid;
 
@@ -64,24 +66,26 @@ public final class MnodeEntry extends MnodeValue {
   private transient Blob _blob;
 
   public MnodeEntry(long valueHash,
-                    long valueDataId,
                     long valueLength,
                     long version,
-                    Object value,
                     HashKey cacheHash,
                     long flags,
                     long accessedExpireTimeout,
                     long modifiedExpireTimeout,
                     long leaseExpireTimeout,
+                    long valueDataId,
+                    Object value,
                     long lastAccessTime,
                     long lastUpdateTime,
                     boolean isServerVersionValid,
                     boolean isImplicitNull)
   {
-    super(valueHash, valueDataId, valueLength, version,
+    super(valueHash, valueLength, version,
           HashKey.getHash(cacheHash),
           flags,
           accessedExpireTimeout, modifiedExpireTimeout, leaseExpireTimeout);
+    
+    _valueDataId = valueDataId;
     
     _lastRemoteAccessTime = lastAccessTime;
     _lastModifiedTime = lastUpdateTime;
@@ -96,6 +100,7 @@ public final class MnodeEntry extends MnodeValue {
   }
 
   public MnodeEntry(MnodeValue mnodeValue,
+                    long valueDataId,
                     Object value,
                     long lastAccessTime,
                     long lastUpdateTime,
@@ -104,6 +109,8 @@ public final class MnodeEntry extends MnodeValue {
                     int leaseOwner)
   {
     super(mnodeValue);
+    
+    _valueDataId = valueDataId;
     
     _lastRemoteAccessTime = lastAccessTime;
     _lastModifiedTime = lastUpdateTime;
@@ -120,11 +127,11 @@ public final class MnodeEntry extends MnodeValue {
   }
 
   public MnodeEntry(MnodeEntry oldMnodeValue,
+                    long valueDataId,
                     long accessTimeout,
                     long lastUpdateTime)
   {
     super(oldMnodeValue.getValueHash(),
-          oldMnodeValue.getValueDataId(),
           oldMnodeValue.getValueLength(),
           oldMnodeValue.getVersion(),
           oldMnodeValue.getCacheHash(),
@@ -132,6 +139,8 @@ public final class MnodeEntry extends MnodeValue {
           accessTimeout,
           oldMnodeValue.getModifiedExpireTimeout(),
           oldMnodeValue.getLeaseExpireTimeout());
+    
+    _valueDataId = valueDataId;
     
     _lastRemoteAccessTime = lastUpdateTime;
     _lastModifiedTime = lastUpdateTime;
@@ -148,6 +157,11 @@ public final class MnodeEntry extends MnodeValue {
     
     if (value != null)
       _valueRef = new SoftReference<Object>(value);
+  }
+  
+  public long getValueDataId()
+  {
+    return _valueDataId;
   }
   
   /**
@@ -354,7 +368,7 @@ public final class MnodeEntry extends MnodeValue {
    */
   public MnodeUpdate getRemoteUpdate()
   {
-    return new MnodeUpdate(getValueHash(), 0, getValueLength(), getVersion(),
+    return new MnodeUpdate(getValueHash(), getValueLength(), getVersion(),
                            this,
                            getLeaseOwner());
   }

@@ -75,6 +75,9 @@ public final class CacheEntryManager
 
       cacheEntry = _entryCache.putIfNew(cacheEntry.getKeyHash(), cacheEntry);
     }
+    
+    // cloud/60n2
+    cacheEntry.loadLocalEntry();
 
     return cacheEntry;
   }

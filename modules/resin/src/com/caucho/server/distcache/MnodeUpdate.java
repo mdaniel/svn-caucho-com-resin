@@ -35,12 +35,11 @@ package com.caucho.server.distcache;
 @SuppressWarnings("serial")
 public class MnodeUpdate extends MnodeValue {
   public static final MnodeUpdate NULL
-    = new MnodeUpdate(0, 0, 0, 0, null, 0, 0, 0, -1, -1);
+    = new MnodeUpdate(0, 0, 0, null, 0, 0, 0, -1, -1);
   
   private final int _leaseOwner;
   
   public MnodeUpdate(long valueHash,
-                     long valueDataId,
                      long valueLength,
                      long version,
                      byte []cacheHash,
@@ -50,7 +49,7 @@ public class MnodeUpdate extends MnodeValue {
                      long leaseExpireTime,
                      int leaseOwner)
   {
-    super(valueHash, valueDataId, valueLength, version,
+    super(valueHash, valueLength, version,
           cacheHash, 
           flags, 
           accessedExpireTime, modifiedExpireTime, leaseExpireTime);
@@ -59,11 +58,10 @@ public class MnodeUpdate extends MnodeValue {
   }
   
   public MnodeUpdate(long valueHash,
-                     long valueDataId,
                      long valueLength,
                      long version)
   {
-    super(valueHash, valueDataId, valueLength, version);
+    super(valueHash, valueLength, version);
     
     _leaseOwner = -1;
   }
@@ -83,60 +81,56 @@ public class MnodeUpdate extends MnodeValue {
   }
 
   public MnodeUpdate(long valueHash,
-                     long valueDataId,
                      long valueLength,
                      long version,
                      CacheConfig config)
   {
-    super(valueHash, valueDataId, valueLength, version, config);
+    super(valueHash, valueLength, version, config);
     
     _leaseOwner = -1;
   }
 
   public MnodeUpdate(long valueHash,
-                     long valueDataId,
                      long valueLength,
                      long version,
                      CacheConfig config,
                      int leaseOwner,
                      long leaseTimeout)
   {
-    super(valueHash, valueDataId, valueLength, version, config);
+    super(valueHash, valueLength, version, config);
     
     _leaseOwner = leaseOwner;
   }
 
   public MnodeUpdate(long valueHash,
-                     long valueDataId,
                      long valueLength,
                      long version,
                      MnodeValue oldValue)
   {
-    super(valueHash, valueDataId, valueLength, version, oldValue);
+    super(valueHash, valueLength, version, oldValue);
     
     _leaseOwner = -1;
   }
 
   public MnodeUpdate(long valueHash,
-                     long valueDataId,
                      long valueLength,
                      long version,
                      MnodeValue oldValue,
                      int leaseOwner)
   {
-    super(valueHash, valueDataId, valueLength, version, oldValue);
+    super(valueHash, valueLength, version, oldValue);
     
     _leaseOwner = leaseOwner;
   }
   
   public static MnodeUpdate createNull(long version, MnodeValue oldValue)
   {
-    return new MnodeUpdate(0, 0, 0, version, oldValue);
+    return new MnodeUpdate(0, 0, version, oldValue);
   }
   
   public static MnodeUpdate createNull(long version, CacheConfig config)
   {
-    return new MnodeUpdate(0, 0, 0, version, config);
+    return new MnodeUpdate(0, 0, version, config);
   }
   
   /**
@@ -146,7 +140,6 @@ public class MnodeUpdate extends MnodeValue {
   public MnodeUpdate createRemote()
   {
     return new MnodeUpdate(getValueHash(),
-                           0,
                            getValueLength(),
                            getVersion(),
                            this,

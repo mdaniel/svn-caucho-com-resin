@@ -87,7 +87,8 @@ public class MemcachedCacheEngine extends AbstractCacheEngine
 
   @Override
   public void put(HashKey hashKey, 
-                  MnodeUpdate mnodeUpdate)
+                  MnodeUpdate mnodeUpdate,
+                  long valueDataId)
   {
     CharBuffer cb = new CharBuffer();
     
@@ -95,7 +96,7 @@ public class MemcachedCacheEngine extends AbstractCacheEngine
     
     String key = cb.toString();
     
-    _client.putResin(key, mnodeUpdate);
+    _client.putResin(key, mnodeUpdate, valueDataId);
   }
   
   @Override

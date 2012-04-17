@@ -61,8 +61,10 @@ public final class LocalStoreManager
   {
     HashKey key = HashKey.create(keyHash);
     
-    DistCacheEntry entryKey = _cacheManager.loadLocalEntry(key);
+    DistCacheEntry entry = _cacheManager.loadLocalEntry(key);
 
+    return entry.getValueStream();
+    /*
     MnodeEntry mnodeEntry = entryKey.getMnodeEntry();
     
     DataStreamSource dataSource
@@ -74,5 +76,6 @@ public final class LocalStoreManager
     else {
       return null;
     }
+    */
   }
 }
