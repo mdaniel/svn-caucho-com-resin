@@ -33,6 +33,8 @@ import java.io.IOException;
 import java.util.Iterator;
 import java.util.concurrent.ConcurrentHashMap;
 
+import com.caucho.cloud.network.NetworkClusterSystem;
+import com.caucho.cloud.topology.CloudServer;
 import com.caucho.cloud.topology.TriadOwner;
 import com.caucho.env.distcache.CacheDataBacking;
 import com.caucho.env.service.ResinSystem;
@@ -140,8 +142,9 @@ public final class CacheStoreManager implements CacheEntryFactory
 
     DistCacheEntry entry = _cacheEntryManager.createCacheEntry(hashKey);
     
-    if (key != null)
+    if (key != null) {
       entry.setKey(key);
+    }
     
     return entry;
   }

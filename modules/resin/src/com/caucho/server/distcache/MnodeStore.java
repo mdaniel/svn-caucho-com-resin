@@ -544,7 +544,7 @@ public class MnodeStore {
         HashKey cacheHashKey
           = cacheHash != null ? new HashKey(cacheHash) : null;
 
-        long leaseTimeout = 0;
+        long leaseTimeout = 300000;
         
         MnodeEntry entry;
         entry = new MnodeEntry(valueHash, valueLength, 

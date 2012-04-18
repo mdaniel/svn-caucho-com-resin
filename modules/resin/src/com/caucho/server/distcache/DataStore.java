@@ -331,6 +331,8 @@ public class DataStore {
 
       if (log.isLoggable(Level.FINER))
         log.finer(this + " no blob data loaded for " + id);
+      
+      // Thread.dumpStack();
     } catch (SQLException e) {
       log.log(Level.FINE, e.toString(), e);
     } finally {
@@ -622,7 +624,7 @@ public class DataStore {
 
       try {
         while (rs.next()) {
-          long id= 0;
+          long id = rs.getLong(1);
           long oid = rs.getLong(2);
           
           if (oid <= 0) {

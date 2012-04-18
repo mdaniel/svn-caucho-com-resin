@@ -69,15 +69,17 @@ public final class CacheEntryManager
   public final DistCacheEntry createCacheEntry(HashKey key)
   {
     DistCacheEntry cacheEntry = _entryCache.get(key);
-
-    while (cacheEntry == null) {
-      cacheEntry = _cacheEntryFactory.createCacheEntry(key);
-
-      cacheEntry = _entryCache.putIfNew(cacheEntry.getKeyHash(), cacheEntry);
+    
+    if (cacheEntry != null) {
+      return cacheEntry;
     }
+
+    cacheEntry = _cacheEntryFactory.createCacheEntry(key);
+
+    cacheEntry = _entryCache.putIfNew(cacheEntry.getKeyHash(), cacheEntry);
     
     // cloud/60n2
-    cacheEntry.loadLocalEntry();
+    cacheEntry.loadLocalMnodeValue();
 
     return cacheEntry;
   }

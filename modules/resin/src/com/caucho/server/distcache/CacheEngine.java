@@ -44,6 +44,8 @@ public interface CacheEngine
 
   public void initCache(CacheImpl cache);
 
+  public int getServerIndex();
+
   public boolean isLocalExpired(CacheConfig config,
                                 HashKey key,
                                 MnodeEntry mnodeEntry, 

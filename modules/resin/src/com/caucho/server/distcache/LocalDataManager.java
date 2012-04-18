@@ -40,7 +40,7 @@ import java.util.logging.Logger;
 import com.caucho.db.blob.BlobInputStream;
 import com.caucho.distcache.CacheSerializer;
 import com.caucho.env.distcache.CacheDataBacking;
-import com.caucho.util.CurrentTime;
+import com.caucho.env.service.ResinSystem;
 import com.caucho.util.HashKey;
 import com.caucho.util.L10N;
 import com.caucho.util.NullOutputStream;
@@ -60,10 +60,13 @@ final class LocalDataManager
   private static final Logger log
     = Logger.getLogger(LocalDataManager.class.getName());
   
+  private final String _serverId;
   private final CacheStoreManager _storeManager;
   
   LocalDataManager(CacheStoreManager storeManager)
   {
+    _serverId = ResinSystem.getCurrentId();
+    
     _storeManager = storeManager;
   }
   
@@ -108,7 +111,7 @@ final class LocalDataManager
       long valueLength = update.getValueLength();
       long valueDataId = getDataBacking().saveData(is, (int) valueLength);
     
-      return new DataItem(valueHash, valueLength, valueDataId);
+      return new DataItem(valueHash, valueDataId, valueLength);
     } catch (IOException e) {
       throw new RuntimeException(e);
     }
@@ -350,13 +353,13 @@ final class LocalDataManager
     try {
       Crc64InputStream mIn = new Crc64InputStream(is);
       
-      long valueIndex = getDataBacking().saveData(mIn, -1);
+      long valueDataId = getDataBacking().saveData(mIn, -1);
 
       long valueHash = mIn.getDigest();
 
       long length = mIn.getLength();
       
-      return new DataItem(valueHash, valueIndex, length);
+      return new DataItem(valueHash, valueDataId, length);
     } catch (RuntimeException e) {
       throw e;
     } catch (Exception e) {
@@ -367,12 +370,18 @@ final class LocalDataManager
     }
   }
   
+  @Override
+  public String toString()
+  {
+    return getClass().getSimpleName() + "[" + _serverId + "]";
+  }
+  
   public static class DataItem {
     private long _valueHash;
     private long _dataId;
     private long _length;
     
-    DataItem(long valueHash, long dataId, long length)
+    private DataItem(long valueHash, long dataId, long length)
     {
       _valueHash = valueHash;
       _dataId = dataId;

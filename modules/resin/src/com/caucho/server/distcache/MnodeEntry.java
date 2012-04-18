@@ -40,7 +40,7 @@ import com.caucho.util.HashKey;
  */
 public final class MnodeEntry extends MnodeValue {
   public static final MnodeEntry NULL
-    = new MnodeEntry(0, 0, 0, null, 0, 0, 0, 0, 0, null, 0, 0, false, true);
+  = new MnodeEntry(0, 0, 0, null, 0, 0, 0, 0, 0, null, 0, 0, false, true);
   
   public static final long NULL_KEY = 0;
   public static final long ANY_KEY = createAnyKey();
@@ -94,7 +94,7 @@ public final class MnodeEntry extends MnodeValue {
 
     _isImplicitNull = isImplicitNull;
     _isServerVersionValid = isServerVersionValid;
-
+    
     if (value != null)
       _valueRef = new SoftReference<Object>(value);
   }
@@ -120,7 +120,9 @@ public final class MnodeEntry extends MnodeValue {
     _isImplicitNull = isImplicitNull;
     _isServerVersionValid = isServerVersionValid;
     
-    _leaseOwner = leaseOwner;
+    long now = CurrentTime.getCurrentTime();
+    
+    setLeaseOwner(leaseOwner, now);
 
     if (value != null)
       _valueRef = new SoftReference<Object>(value);
@@ -157,6 +159,23 @@ public final class MnodeEntry extends MnodeValue {
     
     if (value != null)
       _valueRef = new SoftReference<Object>(value);
+  }
+  
+  public static MnodeEntry createInitialNull()
+  {
+    long accessedExpireTimeout = 0;
+    long modifiedExpireTimeout = 0;
+    long leaseExpireTimeout = 0;
+    
+    long now = 0;//CurrentTime.getCurrentTime();
+    
+    return new MnodeEntry(0, 0, 0, null, 
+                          0, 
+                          accessedExpireTimeout, 
+                          modifiedExpireTimeout,
+                          leaseExpireTimeout,
+                          0, null,
+                          now, now, false, true);
   }
   
   public long getValueDataId()
@@ -212,36 +231,41 @@ public final class MnodeEntry extends MnodeValue {
     return _lastModifiedTime + getModifiedExpireTimeout();
   }
 
+  /**
+   * Returns true if the local (unchecked) expire time.
+   */
+  public final boolean isLocalExpired(int serverIndex, 
+                                      long now, 
+                                      CacheConfig config)
+  {
+    return isLocalExpired(serverIndex, now, config.getLocalExpireTimeout());
+  }
+
   public final boolean isLocalExpired(int serverIndex, 
                                       long now,
                                       long localExpireTimeout)
   {
-    if (! _isServerVersionValid)
+    if (! _isServerVersionValid) {
       return true;
-    else if (now <= _lastAccessTime + localExpireTimeout)
-      return false;
-    else if (_leaseOwner == serverIndex && now <= _leaseExpireTime)
-      return false;
-    else
+    }
+    else if (isExpired(now)) {
       return true;
+    }
+    else if (now <= _lastAccessTime + localExpireTimeout) {
+      return false;
+    }
+    else if (serverIndex <= 2 && getLeaseExpireTimeout() > 0
+             || _leaseOwner == serverIndex && now <= _leaseExpireTime) {
+      return false;
+    }
+    else {
+      return true;
+    }
   }
 
   public final boolean isLeaseExpired(long now)
   {
     return _leaseExpireTime <= now;
-  }
-
-  /**
-   * Returns true if the local (unchecked) expire time.
-   */
-  public final boolean isLocalExpired(long now, CacheConfig config)
-  {
-    if (isExpired(now))
-      return true;
-    else if (_lastAccessTime + config.getLocalExpireTimeout() <= now)
-      return true;
-    else
-      return false;
   }
   
   /**
@@ -293,7 +317,7 @@ public final class MnodeEntry extends MnodeValue {
       _leaseExpireTime = 0;
       
       // server/0b10
-      _lastAccessTime = 0;
+      // _lastAccessTime = 0;
     }
   }
 

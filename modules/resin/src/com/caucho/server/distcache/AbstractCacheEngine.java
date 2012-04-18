@@ -45,6 +45,12 @@ public class AbstractCacheEngine implements CacheEngine
   public void initCache(CacheImpl cache)
   {
   }
+  
+  @Override
+  public int getServerIndex()
+  {
+    return -1;
+  }
 
   @Override
   public boolean isLocalExpired(CacheConfig config,

@@ -56,6 +56,7 @@ public class MemcachedCacheEngine extends AbstractCacheEngine
   }
   
 
+  /*
   @Override
   public boolean isLocalExpired(CacheConfig config,
                                   HashKey key,
@@ -64,6 +65,7 @@ public class MemcachedCacheEngine extends AbstractCacheEngine
   {
     return mnodeEntry.isLocalExpired(now, config);
   }
+  */
 
   @Override
   public MnodeValue get(DistCacheEntry entry, CacheConfig config)
