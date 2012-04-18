@@ -33,6 +33,7 @@ import java.beans.FeatureDescriptor;
 import java.util.ArrayList;
 import java.util.Enumeration;
 import java.util.Iterator;
+import java.util.MissingResourceException;
 import java.util.ResourceBundle;
 import java.util.logging.Logger;
 
@@ -106,22 +107,37 @@ public class ResourceBundleELResolver extends ELResolver {
                          Object base,
                          Object property)
   {
-    if (base instanceof ResourceBundle) {
+    if (context == null)
+      throw new NullPointerException();
+
+    if (base instanceof ResourceBundle)
       context.setPropertyResolved(true);
-      
-      ResourceBundle bundle = (ResourceBundle) base;
-      
-      String key = String.valueOf(property);
+    else
+      return null;
 
-      String value = bundle.getString(key);
+    if (property == null)
+      return null;
 
-      if (value != null)
-        return value;
-      else
-        return "???" + key + "???";
+    final String key;
+    try {
+      key = String.valueOf(property);
+    } catch (Exception e) {
+      throw new ELException("Can't convert property of class "
+                            + property.getClass()
+                            + " to String", e);
     }
-    
-    return null;
+
+    ResourceBundle bundle = (ResourceBundle) base;
+    Object value = null;
+    try {
+      value = bundle.getObject(key);
+    } catch (MissingResourceException e) {
+    }
+
+    if (value != null)
+      return value;
+    else
+      return "???" + key + "???";
   }
 
   @Override

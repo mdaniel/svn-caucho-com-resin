@@ -12,6 +12,7 @@
 
 <s2 title="4.0.28 - snapshot">
 <ul>
+<li>jsp: fixed ResourceBundleELResolver handling of MissingResourceException (#5035, rep by mate)</li>
 <li>cloud: fixes for .jar support in deploy-config</li>
 <li>database: introduced new commit-on-timeout tag to manage expired connections.(#4926, rep by T. Fukuda)</li>
 <li>resin: fixed start issue with -server "" arguments on windows.(#5005, rep by K. Ding)</li>
