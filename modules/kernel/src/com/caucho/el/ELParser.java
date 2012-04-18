@@ -62,6 +62,7 @@ public class ELParser
 
   protected final ELContext _elContext;
   protected final boolean _isMethodExpr;
+  protected boolean _isParsingArgs;
 
   private boolean _checkEscape = true;
 
@@ -233,7 +234,7 @@ public class ELParser
     while (true) {
       int token = scanToken();
 
-      if (_isMethodExpr) {
+      if (_isMethodExpr && ! _isParsingArgs) {
         switch (token) {
         case '?':
         case Expr.COND_BINARY:
@@ -496,6 +497,10 @@ public class ELParser
 
         while (ch > 0 && ch != ')') {
           unread();
+
+
+          _isParsingArgs = true;
+
           argList.add(parseExpr());
           
           token = scanToken();
@@ -510,6 +515,8 @@ public class ELParser
         
         if (ch != ')')
           throw error(L.l("Expected `)' at {0}.  All functions must have matching closing parenthesis.", badChar(ch)));
+
+        _isParsingArgs = false;
 
         // token = scanToken();
 
@@ -570,7 +577,7 @@ public class ELParser
     case '0': case '1': case '2': case '3': case '4':
     case '5': case '6': case '7': case '8': case '9':
       {
-        if (_isMethodExpr)
+        if (_isMethodExpr && ! _isParsingArgs)
           throw new ELParseException(L.l("Invalid method expression `{0}'",
                                          _string));
 
@@ -621,7 +628,7 @@ public class ELParser
       }
 
     case '-': {
-      if (_isMethodExpr)
+      if (_isMethodExpr && ! _isParsingArgs)
         throw new ELParseException(L.l("Invalid method expression `{0}'",
                                        _string));
       
@@ -629,7 +636,7 @@ public class ELParser
     }
 
     case '!': {
-      if (_isMethodExpr)
+      if (_isMethodExpr &&  ! _isParsingArgs)
         throw new ELParseException(L.l("Invalid method expression `{0}'",
                                        _string));
 
@@ -637,7 +644,7 @@ public class ELParser
     }
 
     case '+': {
-      if (_isMethodExpr)
+      if (_isMethodExpr && ! _isParsingArgs)
         throw new ELParseException(L.l("Invalid method expression `{0}'",
                                        _string));
 
