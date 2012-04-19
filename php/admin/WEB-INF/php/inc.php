@@ -1412,4 +1412,53 @@ function debug($obj)
     System::out->println(var_export($obj,1));
 }
 
+function format_seconds($seconds) 
+{
+  if (round($seconds) == 0)
+    return "0 seconds";
+  
+  $minute = 60;
+  $hour = $minute * 60;
+  $day = $hour * 24;
+  $week = $day * 7;
+  
+  $weeks = floor($seconds/$week);
+  $seconds -= $weeks * $week;
+  
+  $days = floor($seconds/$day);
+  $seconds -= $days * $day;
+  
+  $hours = floor($seconds/$hour);
+  $seconds -= $hours * $hour;
+  
+  $minutes = floor($seconds/$minute);
+  $seconds -= $minutes * $minute;
+  
+  $seconds = round($seconds);
+  
+  $sb = "";
+  if ($weeks == 1)
+    $sb .= $weeks . " week ";
+  if ($weeks > 1)
+    $sb .= $weeks . " weeks ";
+  if ($days == 1)
+    $sb .= $days . " day ";
+  if ($days > 1)
+    $sb .= $days . " days ";
+  if ($hours == 1)
+    $sb .= $hours . " hour ";
+  if ($hours > 1)
+    $sb .= $hours . " hours ";
+  if ($minutes == 1)
+    $sb .= $minutes . " minute ";
+  if ($minutes > 1)
+    $sb .= $minutes . " minutes ";
+  if ($seconds == 1)
+    $sb .= $seconds . " second";
+  if ($seconds > 1)
+    $sb .= $seconds . " seconds";
+    
+  return $sb;
+}
+
 ?>

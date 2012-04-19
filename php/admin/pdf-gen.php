@@ -164,6 +164,8 @@ if ($jmx_dump) {
   pdf_summary();
 
   pdf_health();
+  
+  pdf_availability();
 
   pdf_draw_cluster_graphs($mPage);
 
@@ -190,6 +192,7 @@ if ($jmx_dump) {
   if ($mPage->isJmxDump()) {
     pdf_jmx_dump();
   }
+  
 } else {
   $g_canvas->newLine();
   $g_canvas->writeTextLine(

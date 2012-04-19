@@ -34,10 +34,7 @@ import com.caucho.config.types.Period;
 import com.caucho.env.meter.AbstractMeter;
 import com.caucho.env.service.AbstractResinSubSystem;
 import com.caucho.env.service.ResinSystem;
-import com.caucho.management.server.BaselineQueryResult;
-import com.caucho.management.server.MeterGraphInfo;
-import com.caucho.management.server.MeterGraphPageInfo;
-import com.caucho.management.server.StatServiceValue;
+import com.caucho.management.server.*;
 import com.caucho.util.Crc64;
 
 import java.util.ArrayList;
@@ -202,6 +199,11 @@ public class StatSystem extends AbstractResinSubSystem
   }
 
   public long[] getStartTimes(int index, long startTime, long endTime)
+  {
+    throw new AbstractMethodError();
+  }
+  
+  public DownTime []getDownTimes(int index, long beginTime, long endTime)
   {
     throw new AbstractMethodError();
   }

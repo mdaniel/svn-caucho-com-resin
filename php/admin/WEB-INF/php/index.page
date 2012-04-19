@@ -16,55 +16,59 @@ print_title("index", "Resin Administration");
 <table border='0'>
   <tr>
     <!-- Summary -->
-    <td width='50%'>
+    <td width='50%' valign="top">
       <h2><a href="?q=summary"><?= gettext('Summary')?></a></h2>
       <p><?= gettext('A summary of the server\'s state.')?></p>
     </td>
     <!-- Deploy -->
-    <td>
+    <td width='50%' valign="top">
       <h2><a href="?q=deploy"><?= gettext('Deploy')?></a></h2>
       <p><?= gettext('Deploy and update new applications throughout the cluster.')?></p>
     </td>
   </tr>
   <tr>
+    <td width='50%' valign="top">
+      <h2><a href="?q=health"><?= gettext('Health')?></a></h2>
+      <p><?= gettext('Health check overview of the servers.')?></p>
+    </td>
     <!-- JMX -->
-    <td>
+    <td width='50%' valign="top">
       <h2><a href="?q=jmx"><?= gettext('JMX')?></a></h2>
       <p><?= gettext('Table-based view of all JMX beans registered with the JVM.')?></p>
     </td>
+  </tr>
+  <tr>
     <!-- Memory -->
-    <td>
+    <td width='50%' valign="top">
       <h2><a href="?q=memory"><?= gettext('Memory')?></a></h2>
       <p><?= gettext('Heap dump to debug memory leaks and memory overview. The heap dump requires Resin-Pro.')?></p>
     </td>
-  </tr>
-  <tr>
     <!-- Watchdog -->
-    <td>
+    <td width='50%' valign="top">
       <h2><a href="?q=watchdog"><?= gettext('Watchdog')?></a></h2>
       <p><?= gettext('A report to aid in debugging server restarts.')?>
       </p>
-    </td>
+    </td>	
+  </tr>
+  <tr>
     <!-- Profile -->
-    <td>
+    <td width='50%' valign="top">
       <h2><a href="?q=profile"><?= gettext('CPU Profile')?></a></h2>
       <p><?= gettext('CPU profiling of the running instance. Because the profiling is lightweight and sample-based, it can be used in a runtime environment.')?></p>
     </td>
-  </tr>
-  <tr>
     <!-- Thread -->
-    <td>
+    <td width='50%' valign="top">
       <h2><a href="?q=thread"><?= gettext('Thread Dump')?></a></h2>
       <p><?= gettext('Provides thread dumps to check the current status of a Resin instance.')?></p>
     </td>
+  </tr>
+  <tr>
     <!-- Web-App -->
-    <td>
+    <td width='50%' valign="top">
       <h2><a href="?q=webapp"><?= gettext('WebApp')?></a></h2>
       <p><?= gettext('Overview of the web-apps running in the Resin instance.')?></p>
     </td>
-  </tr>
-  <tr>
-    <td>
+    <td width='50%' valign="top">
       <h2><a href="rest.php"><?= gettext('REST')?></a></h2>
       <p><?= gettext('REST pages for programmatic access')?></p>
 <?php

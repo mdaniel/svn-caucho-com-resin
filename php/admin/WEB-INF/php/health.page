@@ -22,6 +22,7 @@ echo "<ul>";
 echo "<li><a href='#health'>" . gettext('Health') . "</a></li>\n";
 echo "<li><a href='#health-graph'>" . gettext('Graphs') . "</a></li>\n";
 echo "<li><a href='#health-logs'>" . gettext('Health Logs') . "</a></li>\n";
+echo "<li><a href='#health-availability'>" . gettext('Availability') . "</a></li>\n";
 echo "</ul>";
 
 echo "<div id='health'>\n";
@@ -34,6 +35,10 @@ echo "</div>\n";
 
 echo "<div id='health-logs'>\n";
 display_health_logs();
+echo "</div>\n";
+
+echo "<div id='health-availability'>\n";
+display_health_availability();
 echo "</div>\n";
 
 echo "</div>\n";
@@ -264,15 +269,15 @@ function do_triad($s, $triad, $triad_mbean_server)
 
 function display_health_logs()
 {
+  global $g_period, $g_offset;
   global $g_server_index, $g_server, $g_mbean_server;
 
   if (! require_professional()) {
     return;
   }
   
-  $now = time();
-  $start = ($now - 24 * 3600);
-  $end = $now;
+  $end = time() - $g_offset;
+  $start = ($end - $g_period);
   
   $health_service = $g_mbean_server->lookup("resin:type=HealthSystem");
   if ($health_service) {
@@ -280,7 +285,7 @@ function display_health_logs()
     $events = $health_service->findEvents($g_server_index, 
                                           $start * 1000, $end * 1000, 50);
   
-    echo "<h2>" . gettext('Recent Health Events') . "</h2>\n";
+    echo "<h2>" . gettext('Health Events') . "</h2>\n";
     echo "<table class='data'>\n";
     echo "<thead>\n";
     echo "<tr><th scope='col' class='date'>" . gettext('Date') . "</th>";
@@ -314,6 +319,104 @@ function display_health_logs()
     echo "</tbody>\n";
   }
       
+  echo "</table>\n";
+}
+
+function display_health_availability()
+{
+  global $g_period, $g_offset;
+  global $g_si, $g_server_index, $g_mbean_server, $g_label;
+
+  if (! require_professional()) {
+    return;
+  }
+  
+	$stat = get_stats_service();
+  if (! $stat) {
+    return;
+  }
+  
+  $end = time() - $g_offset;
+  $start = ($end - $g_period);
+      
+  $downtimes = $stat->getDownTimes($g_server_index, $start * 1000, $end * 1000);
+  if (count($downtimes) == 0) {
+    echo gettext("No data available");
+    return; 
+  }
+  
+  $params = new GraphParams("downtime_${g_si}", 600, 200);
+  $params->title = $g_label . " " . gettext('Uptime');
+  $params->alt
+    = gettext("A line graph representing the availability of the server.");
+  $params->mbean_server = $mbean_server;
+  $params->labels = array("DOWN","","","UP");
+
+  stat_graph($params, array("$g_si|Resin|Uptime|Up"));
+  
+  echo "<h2>" . gettext('Availability Summary') . "</h2>\n";
+  
+  $downtimes = array_reverse($downtimes);
+  
+  $total = 0;
+  $count = 0;
+  
+  foreach($downtimes as $downtime) {
+    $et = $downtime->ET;
+    if ($et > 0) {
+      $total += $et;
+      $count++;
+    }
+  }
+  
+  $total /= 1000;
+  $avg = 0;
+  if ($count > 0)
+    $avg = $total / $count;
+  $uptime = 100 - (($total / $g_period) * 100);
+  
+  echo "<table class='data'>\n";
+  echo "<tr><th scope='row'>" . gettext('Report Period') . "</th>";
+  echo "<td>" . format_seconds($g_period) . "</td></tr>\n";
+  echo "<tr><th scope='row'>" . gettext('Start Time') . "</th>";
+  echo "<td>" . strftime("%Y-%m-%d&nbsp;%H:%M:%S", $start) . "</td></tr>\n";
+  echo "<tr><th scope='row'>" . gettext('End Time') . "</th>";
+  echo "<td>" . strftime("%Y-%m-%d&nbsp;%H:%M:%S", $end) . "</td></tr>\n";
+  echo "<tr><th scope='row'>" . gettext('Number of Downtimes') . "</th>";
+  echo "<td>${count}</td></tr>\n";
+  echo "<tr><th scope='row'>" . gettext('Total Downtime') . "</th>";
+  echo "<td>" . format_seconds($total) . "</td></tr>\n";
+  echo "<tr><th scope='row'>" . gettext('Average Downtime Period') . "</th>";
+  echo "<td>" . format_seconds($avg) . "</td></tr>\n";
+  echo "<tr><th scope='row'>" . gettext('Availability') . "</th>";
+  echo "<td>" . number_format($uptime, 4) . "%</td></tr>\n";
+  echo "</table>\n";
+  
+  echo "<h2>" . gettext('Downtimes') . "</h2>\n";
+  echo "<table class='data'>\n";
+  echo "<thead>\n";
+  echo "<tr><th scope='col'>" . gettext('Start Time') . "</th>";
+  echo "    <th scope='col'>" . gettext('End Time') . "</th>";
+  echo "    <th scope='col'>" . gettext('Elapsed Time') . "</th></tr>";
+  echo "</thead>\n";
+  
+  echo "<tbody class='scroll'>\n";
+  foreach($downtimes as $downtime) {
+    echo "<tr>\n";
+    $et = $downtime->ET/1000;
+    if ($et > 0)
+      echo "  <td>" . strftime("%Y-%m-%d&nbsp;%H:%M:%S", $downtime->startTime / 1000) . " </td>\n";
+    else
+      echo "  <td>-</td>\n";
+    echo "  <td>" . strftime("%Y-%m-%d&nbsp;%H:%M:%S", $downtime->endTime / 1000) . " </td>\n";
+    if ($et > 0) 
+      echo "  <td>" . format_seconds($et) . " </td>\n";
+    else
+      echo "  <td>&nbsp;</td>\n";
+    echo "</tr>\n";
+  }
+  echo "</tbody>\n";
+  
   echo "</table>\n";
 }
 

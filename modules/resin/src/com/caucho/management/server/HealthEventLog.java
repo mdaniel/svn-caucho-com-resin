@@ -48,7 +48,7 @@ public class HealthEventLog
     RECHECK("Resin|Health|Recheck", "Recheck"),
     RECOVER("Resin|Health|Recover", "Health Recovery"),
     ACTION("Resin|Health|Action", "Health Action"),
-    ANONMALY("Resin|Health|Anomaly", "Anomaly Detected");
+    ANOMALY("Resin|Health|Anomaly", "Anomaly Detected");
     
     private final String _name;
     private final String _description;
