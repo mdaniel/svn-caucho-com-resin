@@ -32,8 +32,10 @@ package com.caucho.server.session;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
+import java.io.OutputStreamWriter;
 import java.io.PrintWriter;
 import java.io.StringWriter;
+import java.nio.charset.Charset;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.logging.Level;
@@ -59,6 +61,8 @@ import com.caucho.env.meter.AverageSensor;
 import com.caucho.env.meter.MeterService;
 import com.caucho.hessian.io.HessianDebugInputStream;
 import com.caucho.hessian.io.SerializerFactory;
+import com.caucho.json.JsonOutput;
+import com.caucho.json.ser.JsonSerializer;
 import com.caucho.management.server.SessionManagerMXBean;
 import com.caucho.security.Authenticator;
 import com.caucho.server.cluster.ServletService;
@@ -197,6 +201,7 @@ public final class SessionManager implements SessionCookieConfig, AlarmListener
   private volatile long _sessionInvalidateCount;
 
   private final AverageSensor _sessionSaveSample;
+  private final Charset UTF_8 = Charset.forName("UTF-8");
 
   /**
    * Creates and initializes a new session manager
@@ -1700,6 +1705,45 @@ public final class SessionManager implements SessionCookieConfig, AlarmListener
     }
 
     return null;
+  }
+
+  public String getSessionAsJsonString(String id) {
+    SessionImpl session = getSession(id);
+
+    if (session == null)
+      return null;
+
+    TempOutputStream buffer = new TempOutputStream();
+
+    PrintWriter out = new PrintWriter(new OutputStreamWriter(buffer, UTF_8));
+
+    JsonOutput jsonOutput = new JsonOutput(out);
+
+    try {
+      jsonOutput.writeObject(session, true);
+
+      jsonOutput.flush();
+
+      jsonOutput.close();
+
+      return new String(buffer.toByteArray(), UTF_8);
+    } catch (IOException e) {
+      if (log.isLoggable(Level.FINE))
+        log.log(Level.FINE, L.l("can't serialize session {0} due to {1}", session, e), e);
+    }
+
+    return null;
+  }
+
+  public long getEstimatedMemorySize()
+  {
+    Iterator<SessionImpl> sessions = _sessions.values();
+    long l = 0;
+
+    while (sessions.hasNext())
+      l += sessions.next().getLastSaveLength();
+
+    return l;
   }
 
   /**

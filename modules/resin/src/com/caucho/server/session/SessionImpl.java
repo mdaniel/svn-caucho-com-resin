@@ -108,6 +108,8 @@ public class SessionImpl implements HttpSession, CacheListener {
   // to protect for threading
   private final AtomicInteger _useCount = new AtomicInteger();
 
+  private int _lastSaveLength;
+
   /**
    * Create a new session object.
    *
@@ -597,6 +599,11 @@ public class SessionImpl implements HttpSession, CacheListener {
     _accessTime = now;
   }
 
+  public int getLastSaveLength()
+  {
+    return _lastSaveLength;
+  }
+
   /**
    * Cleaning up session stuff at the end of a request.
    *
@@ -852,7 +859,11 @@ public class SessionImpl implements HttpSession, CacheListener {
 
       out.close();
 
-      _manager.addSessionSaveSample(os.getLength());
+      final int length = os.getLength();
+
+      _manager.addSessionSaveSample(length);
+
+      _lastSaveLength = length;
 
       _cacheEntry = _manager.getCache().put(_id, os.getInputStream(),
                                             _idleTimeout,

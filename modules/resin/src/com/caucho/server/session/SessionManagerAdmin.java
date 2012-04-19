@@ -295,7 +295,19 @@ public class SessionManagerAdmin extends AbstractManagedObject
   {
     return _manager.getSessionSerializationDebug(id);
   }
-  
+
+  @Override
+  public String getSessionAsJsonString(String id)
+  {
+    return _manager.getSessionAsJsonString(id);
+  }
+
+  @Override
+  public long getEstimatedMemorySize()
+  {
+    return _manager.getEstimatedMemorySize();
+  }
+
   /**
    * Unregisters the object with JMX.
    */

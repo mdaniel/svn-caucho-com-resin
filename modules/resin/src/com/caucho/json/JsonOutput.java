@@ -73,12 +73,12 @@ public class JsonOutput {
     _os = os;
   }
 
-  public void writeObject(Serializable value) throws IOException
+  public void writeObject(Object value) throws IOException
   {
     writeObject(value, false);
   }
 
-  public void writeObject(Serializable value, boolean annotated)
+  public void writeObject(Object value, boolean annotated)
     throws IOException
   {
     PrintWriter os = _os;
