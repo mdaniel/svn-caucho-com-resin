@@ -103,8 +103,7 @@ public class MemcachedCacheEngine extends AbstractCacheEngine
   
   @Override
   public void remove(HashKey hashKey, 
-                     MnodeUpdate mnodeUpdate,
-                     MnodeEntry mnodeEntry)
+                     MnodeUpdate mnodeUpdate)
   {
     CharBuffer cb = new CharBuffer();
     

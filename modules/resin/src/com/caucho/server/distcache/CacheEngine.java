@@ -66,8 +66,7 @@ public interface CacheEngine
   public void updateTime(HashKey key, MnodeEntry mnodeValue);
 
   public void remove(HashKey key, 
-                     MnodeUpdate mnodeUpdate,
-                     MnodeEntry mnodeEntry);
+                     MnodeUpdate mnodeUpdate);
 
   public long getAndPut(DistCacheEntry entry, 
                         MnodeValue mnodeValue,

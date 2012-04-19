@@ -84,8 +84,10 @@ public class ReplyFutureCallback<T> implements ReplyCallback<T> {
     default:
     {
       _thread = Thread.currentThread();
-      
+
       LockSupport.parkNanos(timeout * 1000000L);
+      
+      _thread = null;
       
       switch (_state) {
       case REPLY:

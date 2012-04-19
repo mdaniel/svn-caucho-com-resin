@@ -232,7 +232,6 @@ public final class CacheStoreManager implements CacheEntryFactory
                           MnodeUpdate update,
                           MnodeValue mnodeValue)
   {
-    
     if (mnodeValue != null
         && mnodeValue.getValueHash() == update.getValueHash()
         && mnodeValue.getCacheHash() != null
@@ -241,8 +240,9 @@ public final class CacheStoreManager implements CacheEntryFactory
       
       CacheMnodeListener listener = _cacheListenMap.get(cacheKey);
 
-      if (listener != null)
+      if (listener != null) {
         listener.onPut(key, mnodeValue);
+      }
     }
   }
 
@@ -284,9 +284,11 @@ public final class CacheStoreManager implements CacheEntryFactory
     _admin.unregister();
   }
 
-  public void closeCache(String guid)
+  public void closeCache(String guid, HashKey cacheKey)
   {
     _keyManager.closeCache(guid);
+    
+    _cacheListenMap.remove(cacheKey);
   }
 
   /**

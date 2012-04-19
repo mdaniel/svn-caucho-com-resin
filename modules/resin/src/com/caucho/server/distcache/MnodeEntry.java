@@ -473,7 +473,7 @@ public final class MnodeEntry extends MnodeValue {
     return (getClass().getSimpleName()
             + "[value=" + Long.toHexString(getValueHash())
             + ",flags=0x" + Long.toHexString(getFlags())
-            + ",version=" + getVersion()
+            + ",version=" + Long.toHexString(getVersion())
             + ",lease=" + _leaseOwner
             + "]");
   }

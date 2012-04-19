@@ -85,8 +85,7 @@ public class AbstractCacheEngine implements CacheEngine
   }
 
   @Override
-  public void remove(HashKey key, MnodeUpdate mnodeUpdate,
-                            MnodeEntry mnodeEntry)
+  public void remove(HashKey key, MnodeUpdate mnodeUpdate)
   {
   }
 

@@ -91,11 +91,12 @@ final class LocalDataManager
     if (valueHash == 0 && valueLength == 0 && source == null) {
       return new DataItem(0, 0, 0);
     }
-    
+
     if (source != null)
       valueDataId = getDataBacking().saveData(source, (int) valueLength);
     else
-      throw new IllegalStateException(L.l("writeData called without a stream or saved value"));
+      throw new IllegalStateException(L.l("writeData called without a stream or saved value {0}",
+                                          update));
     
     return new DataItem(valueHash,
                         valueDataId,
@@ -342,6 +343,10 @@ final class LocalDataManager
     
     long hash = mOut.getDigest();
     
+    if (hash == 0 || hash == MnodeEntry.ANY_KEY) {
+      return 1;
+    }
+    
     return hash;
   }
 
@@ -404,6 +409,15 @@ final class LocalDataManager
     public long getLength()
     {
       return _length;
+    }
+    
+    @Override
+    public String toString()
+    {
+      return (getClass().getSimpleName()
+              + "[id=" + _dataId
+              + ",hash=" + _valueHash
+              + ",length=" + _length + "]");
     }
   }
 }

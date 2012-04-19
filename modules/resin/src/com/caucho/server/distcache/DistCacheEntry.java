@@ -47,12 +47,15 @@ import com.caucho.util.CurrentTime;
 import com.caucho.util.HashKey;
 import com.caucho.util.Hex;
 import com.caucho.util.IoUtil;
+import com.caucho.util.L10N;
 import com.caucho.vfs.StreamSource;
 
 /**
  * An entry in the cache map
  */
 public class DistCacheEntry {
+  private static final L10N L = new L10N(DistCacheEntry.class);
+  
   private static final Logger log
     = Logger.getLogger(DistCacheEntry.class.getName());
   
@@ -297,7 +300,7 @@ public class DistCacheEntry {
     // add 25% window for update efficiency
     // idleTimeout = idleTimeout * 5L / 4;
     
-    putLocalValue(mnodeUpdate, null);
+    putLocalValue(mnodeUpdate, valueDataId, null);
     
     config.getEngine().put(getKeyHash(), mnodeUpdate, valueDataId);
   }
@@ -330,10 +333,11 @@ public class DistCacheEntry {
 
     putLocalValueImpl(mnodeUpdate, 0, null);
 
-    if (mnodeEntry == null)
+    if (mnodeEntry == null) {
       return oldValueHash != 0;
-
-    config.getEngine().remove(key, mnodeUpdate, mnodeEntry);
+    }
+    
+    config.getEngine().remove(key, mnodeUpdate);
     
     CacheWriter writer = config.getCacheWriter();
     
@@ -383,8 +387,9 @@ public class DistCacheEntry {
       MnodeUpdate update = new MnodeUpdate(dataItem.getValueHash(),
                                            dataItem.getLength(),
                                            newVersion,
-                                           oldMnodeEntry);
-
+                                           config);
+//                                           oldMnodeEntry);
+      
       return config.getEngine().compareAndPut(this, testValue, update, 
                                               valueDataId, value);
     } finally {
@@ -403,18 +408,18 @@ public class DistCacheEntry {
   
   public final boolean compareAndPutLocal(long testValue,
                                           MnodeUpdate update,
-                                          long valueDataId,
                                           StreamSource source)
   {
     long prevDataItem = getMnodeEntry().getValueDataId();
-    
+
     // long version = getNewVersion(getMnodeEntry());
     long version = update.getVersion();
+    
 
     // cloud/60r0
     DataItem dataItem = getLocalDataManager().writeData(update, version, source);
     
-    valueDataId = dataItem.getValueDataId();
+    long valueDataId = dataItem.getValueDataId();
     
     Object value = null;
     
@@ -711,7 +716,6 @@ public class DistCacheEntry {
     
     int server = config.getEngine().getServerIndex();
 
-
     if (mnodeEntry == null || mnodeEntry.isLocalExpired(server, now, config)) {
       reloadValue(config, now);
     }
@@ -916,10 +920,11 @@ public class DistCacheEntry {
     // long valueHash = mnodeUpdate.getValueHash();
     // long version = mnodeUpdate.getVersion();
     
+
     MnodeEntry mnodeValue = putLocalValueImpl(mnodeUpdate, valueDataId, value);
     
     _cacheService.notifyPutListeners(getKeyHash(), mnodeUpdate, mnodeValue);
-    
+
     return mnodeValue;
   }
 
@@ -1007,8 +1012,14 @@ public class DistCacheEntry {
     mnodeEntry = putLocalValueImpl(update,
                                    dataItem.getValueDataId(), value);
 
-    if (mnodeEntry == null)
+    if (mnodeEntry == null) {
       return;
+    }
+    
+    if ((update.getValueHash() != 0) != (dataItem.getValueDataId() != 0)) {
+      throw new IllegalStateException(L.l("{0}: update: {1} dataItem: {2}",
+                                          this, update, dataItem));
+    }
 
     config.getEngine().put(key, update, dataItem.getValueDataId());
     

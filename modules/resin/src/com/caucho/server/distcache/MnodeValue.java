@@ -81,18 +81,14 @@ public class MnodeValue implements java.io.Serializable {
   
   public MnodeValue(MnodeValue mnodeValue)
   {
-    _valueHash = mnodeValue._valueHash;
-    _valueLength = mnodeValue._valueLength;
-    
-    _cacheHash = mnodeValue._cacheHash;
-    
-    _flags = mnodeValue._flags;
-    
-    _modifiedExpireTimeout = mnodeValue._modifiedExpireTimeout;
-    _accessedExpireTimeout = mnodeValue._accessedExpireTimeout;
-    _leaseExpireTimeout = mnodeValue._leaseExpireTimeout;
-    
-    _version = mnodeValue._version;
+    this(mnodeValue._valueHash,
+         mnodeValue._valueLength,
+         mnodeValue._version,
+         mnodeValue._cacheHash,
+         mnodeValue._flags,
+         mnodeValue._accessedExpireTimeout,
+         mnodeValue._modifiedExpireTimeout,
+         mnodeValue._leaseExpireTimeout);
   }
   
   public MnodeValue(long valueHash,
@@ -126,18 +122,14 @@ public class MnodeValue implements java.io.Serializable {
                     long version,
                     CacheConfig config)
   {
-    _valueHash = valueHash;
-    _valueLength = valueLength;
-    
-    _version = version;
-    
-    _cacheHash = HashKey.getHash(config.getCacheKey());
-    
-    _flags = config.getFlags();
-    
-    _modifiedExpireTimeout = config.getModifiedExpireTimeout();
-    _accessedExpireTimeout = config.getAccessedExpireTimeout();
-    _leaseExpireTimeout = config.getLeaseExpireTimeout();
+    this(valueHash,
+         valueLength,
+         version,
+         HashKey.getHash(config.getCacheKey()),
+         config.getFlags(),
+         config.getAccessedExpireTimeout(),
+         config.getModifiedExpireTimeout(),
+         config.getLeaseExpireTimeout());
   }
   
   /*

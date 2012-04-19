@@ -67,6 +67,7 @@ import com.caucho.distcache.ExtCacheEntry;
 import com.caucho.distcache.ObjectCache;
 import com.caucho.env.distcache.CacheDataBacking;
 import com.caucho.env.thread.AbstractWorkerQueue;
+import com.caucho.env.thread.ThreadPool;
 import com.caucho.loader.Environment;
 import com.caucho.management.server.AbstractManagedObject;
 import com.caucho.util.ConcurrentArrayList;
@@ -93,6 +94,8 @@ public class CacheImpl<K,V>
   private final String _guid;
 
   private final CacheConfig _config;
+  
+  private CacheMnodeListenerImpl _mnodeListener;
 
   private ConcurrentArrayList<ReadListener<K,V>> _readListeners;
   private ConcurrentArrayList<UpdatedListener<K,V>> _updatedListeners;
@@ -238,7 +241,7 @@ public class CacheImpl<K,V>
         _config.setEngine(_manager.getCacheEngine());
 
       _config.setCacheKey(_manager.getKeyManager().createSelfHashKey(_config.getGuid(),
-                                                     _config.getKeySerializer()));
+                                                                     _config.getKeySerializer()));
 
       // _entryCache = new LruCache<Object,DistCacheEntry>(512);
       
@@ -246,6 +249,10 @@ public class CacheImpl<K,V>
     }
     
     _manager.initCache(this);
+    
+    _mnodeListener = new CacheMnodeListenerImpl();
+    
+    _manager.addCacheListener(getCacheKey(), _mnodeListener);
     
     _admin.register();
   }
@@ -830,8 +837,7 @@ public class CacheImpl<K,V>
     
     _localManager.remove(_guid);
     
-    _manager.closeCache(_guid);
-    
+    _manager.closeCache(_guid, getCacheKey());
   }
   
   public boolean loadData(long valueDataId, WriteStream os)
@@ -1022,6 +1028,31 @@ public class CacheImpl<K,V>
     for (ReadListener<K,V> listener : readListeners) {
       listener.entryRead(event);
     }
+  }
+  
+  private void mnodeOnPutUpdate(final HashKey key, MnodeValue value)
+  {
+    ConcurrentArrayList<UpdatedListener<K,V>> updatedListeners = _updatedListeners;
+    
+    if (updatedListeners == null || updatedListeners.size() == 0)
+      return;
+
+    scheduleUpdate(key);
+  }
+  
+  private void scheduleUpdate(final HashKey key)
+  {
+    // must be run outside of thread, because the callback is single threaded
+    ThreadPool.getCurrent().schedule(new Runnable() {
+      public void run()
+      {
+        DistCacheEntry entry = _manager.getCacheEntry(key);
+    
+        if (entry != null) {
+          entryUpdate(entry.getKey(), (V) entry.get(_config));
+        }
+      }
+    });
   }
   
   private void entryUpdate(Object key, V value)
@@ -1535,6 +1566,14 @@ public class CacheImpl<K,V>
     @Override
     public void clearStatistics()
     {
+    }
+  }
+  
+  private class CacheMnodeListenerImpl implements CacheMnodeListener {
+    @Override
+    public void onPut(HashKey key, MnodeValue value)
+    {
+      mnodeOnPutUpdate(key, value);
     }
   }
 }

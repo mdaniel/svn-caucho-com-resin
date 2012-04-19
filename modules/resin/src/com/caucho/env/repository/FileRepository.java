@@ -282,7 +282,9 @@ public class FileRepository extends AbstractRepository
   public void writeRawGitFile(String sha1, InputStream is)
     throws IOException
   {
-    _git.writeRawGitFile(sha1, is);
+    synchronized (_git) {
+      _git.writeRawGitFile(sha1, is);
+    }
   }
 
   /**
