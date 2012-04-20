@@ -332,7 +332,7 @@ public class DataStore {
       if (log.isLoggable(Level.FINER))
         log.finer(this + " no blob data loaded for " + id);
       
-      // Thread.dumpStack();
+      Thread.dumpStack();
     } catch (SQLException e) {
       log.log(Level.FINE, e.toString(), e);
     } finally {
@@ -729,6 +729,11 @@ public class DataStore {
     }
 
     return -1;
+  }
+  
+  public boolean isClosed()
+  {
+    return _dataSource == null;
   }
 
   public void destroy()

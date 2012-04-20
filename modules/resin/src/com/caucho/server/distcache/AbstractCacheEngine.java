@@ -29,6 +29,8 @@
 
 package com.caucho.server.distcache;
 
+import java.io.InputStream;
+
 import com.caucho.util.HashKey;
 
 /**
@@ -97,18 +99,16 @@ public class AbstractCacheEngine implements CacheEngine
   public boolean compareAndPut(DistCacheEntry entry,
                                long testValue,
                                MnodeUpdate mnodeUpdate,
-                               long valueDataId,
-                               Object value)
+                               long valueDataId)
   {
     return false;
   }
 
   @Override
-  public long getAndPut(DistCacheEntry entry, 
-                        MnodeValue mnodeValue,
-                        Object value)
+  public InputStream getAndPut(DistCacheEntry entry, 
+                               MnodeUpdate mnodeValue,
+                               long valueDataId)
   {
-    return 0;
+    throw new UnsupportedOperationException(getClass().getName());
   }
-
 }

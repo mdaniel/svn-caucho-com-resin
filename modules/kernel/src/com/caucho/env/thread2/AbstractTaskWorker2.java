@@ -189,16 +189,24 @@ abstract public class AbstractTaskWorker2 implements Runnable, TaskWorker {
       else
         expires = 0;
       
+      boolean isExpireRetry= false;
+      
       do {
+        isExpireRetry = false;
+        
         while (_taskState.getAndSet(TASK_SLEEP) == TASK_READY) {
           thread.setContextClassLoader(_classLoader);
-
+          
+          isExpireRetry = false;
+          
           long delta = runTask();
           
           now = getCurrentTimeActual();
           
           if (delta > 0) {
             expires = now + delta;
+
+            isExpireRetry = true;
           }
           else if (idleTimeout > 0) {
             expires = now + idleTimeout;
@@ -216,12 +224,13 @@ abstract public class AbstractTaskWorker2 implements Runnable, TaskWorker {
           LockSupport.parkUntil(expires);
         }
         
-        if (isPermanent()) {
+        if (isPermanent() || isExpireRetry) {
           expires = getCurrentTimeActual() + idleTimeout;
           _taskState.set(TASK_READY);
         }
       } while (_taskState.get() == TASK_READY
                || isPermanent()
+               || isExpireRetry
                || getCurrentTimeActual() < expires);
     } catch (Throwable e) {
       System.out.println("EXN: " + e);

@@ -57,6 +57,7 @@ public class BitandExpr extends FunExpr {
     _right = right;
   }
   
+  @Override
   protected void addArg(Expr expr)
     throws SQLException
   {
@@ -71,7 +72,7 @@ public class BitandExpr extends FunExpr {
   /**
    * Returns the expected result type of the expression.
    */
-  public Class getType()
+  public Class<?> getType()
   {
     return long.class;
   }
@@ -79,6 +80,7 @@ public class BitandExpr extends FunExpr {
   /**
    * Binds the expression to the actual tables.
    */
+  @Override
   public Expr bind(Query query)
     throws SQLException
   {
@@ -91,6 +93,7 @@ public class BitandExpr extends FunExpr {
   /**
    * Returns the cost based on the given FromList.
    */
+  @Override
   public long subCost(ArrayList<FromItem> fromList)
   {
     return _left.subCost(fromList) + _right.subCost(fromList);
@@ -103,6 +106,7 @@ public class BitandExpr extends FunExpr {
    *
    * @return true if null
    */
+  @Override
   public boolean isNull(QueryContext context)
     throws SQLException
   {
@@ -116,6 +120,7 @@ public class BitandExpr extends FunExpr {
    *
    * @return the double value
    */
+  @Override
   public double evalDouble(QueryContext context)
     throws SQLException
   {
@@ -129,6 +134,7 @@ public class BitandExpr extends FunExpr {
    *
    * @return the long value
    */
+  @Override
   public long evalLong(QueryContext context)
     throws SQLException
   {
@@ -142,12 +148,14 @@ public class BitandExpr extends FunExpr {
    *
    * @return the string value
    */
+  @Override
   public String evalString(QueryContext context)
     throws SQLException
   {
     return String.valueOf(evalLong(context));
   }
 
+  @Override
   public String toString()
   {
     return "bitand(" + _left + ", " + _right + ")";

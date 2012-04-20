@@ -29,8 +29,6 @@
 package com.caucho.db.sql;
 
 import java.sql.SQLException;
-import java.util.ArrayList;
-import java.util.logging.Logger;
 
 final class DoubleLeExpr extends AbstractBinaryBooleanExpr {
   private final Expr _left;

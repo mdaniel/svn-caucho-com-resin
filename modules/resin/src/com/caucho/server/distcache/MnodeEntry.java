@@ -34,11 +34,14 @@ import java.sql.Blob;
 
 import com.caucho.util.CurrentTime;
 import com.caucho.util.HashKey;
+import com.caucho.util.L10N;
 
 /**
  * An entry in the cache map
  */
 public final class MnodeEntry extends MnodeValue {
+  private static final L10N L = new L10N(MnodeEntry.class);
+  
   public static final MnodeEntry NULL
   = new MnodeEntry(0, 0, 0, null, 0, 0, 0, 0, 0, null, 0, 0, false, true);
   
@@ -68,7 +71,7 @@ public final class MnodeEntry extends MnodeValue {
   public MnodeEntry(long valueHash,
                     long valueLength,
                     long version,
-                    HashKey cacheHash,
+                    byte []cacheHash,
                     long flags,
                     long accessedExpireTimeout,
                     long modifiedExpireTimeout,
@@ -81,7 +84,7 @@ public final class MnodeEntry extends MnodeValue {
                     boolean isImplicitNull)
   {
     super(valueHash, valueLength, version,
-          HashKey.getHash(cacheHash),
+          cacheHash,
           flags,
           accessedExpireTimeout, modifiedExpireTimeout, leaseExpireTimeout);
     
@@ -97,6 +100,12 @@ public final class MnodeEntry extends MnodeValue {
     
     if (value != null)
       _valueRef = new SoftReference<Object>(value);
+    
+    if ((valueDataId != 0) != (valueHash != 0)) {
+      throw new IllegalStateException(L.l("mismatch dataId {0} and valueHash {1}",
+                                          _valueDataId, this));
+    }
+    
   }
 
   public MnodeEntry(MnodeValue mnodeValue,
@@ -108,24 +117,24 @@ public final class MnodeEntry extends MnodeValue {
                     boolean isImplicitNull,
                     int leaseOwner)
   {
-    super(mnodeValue);
-    
-    _valueDataId = valueDataId;
-    
-    _lastRemoteAccessTime = lastAccessTime;
-    _lastModifiedTime = lastUpdateTime;
-    
-    _lastAccessTime = CurrentTime.getCurrentTime();
-
-    _isImplicitNull = isImplicitNull;
-    _isServerVersionValid = isServerVersionValid;
+    this(mnodeValue.getValueHash(),
+         mnodeValue.getValueLength(),
+         mnodeValue.getVersion(),
+         mnodeValue.getCacheHash(),
+         mnodeValue.getFlags(),
+         mnodeValue.getAccessedExpireTimeout(),
+         mnodeValue.getModifiedExpireTimeout(),
+         mnodeValue.getLeaseExpireTimeout(),
+         valueDataId,
+         value,
+         lastAccessTime,
+         lastUpdateTime,
+         isServerVersionValid,
+         isImplicitNull);
     
     long now = CurrentTime.getCurrentTime();
     
     setLeaseOwner(leaseOwner, now);
-
-    if (value != null)
-      _valueRef = new SoftReference<Object>(value);
   }
 
   public MnodeEntry(MnodeEntry oldMnodeValue,
@@ -473,7 +482,7 @@ public final class MnodeEntry extends MnodeValue {
     return (getClass().getSimpleName()
             + "[value=" + Long.toHexString(getValueHash())
             + ",flags=0x" + Long.toHexString(getFlags())
-            + ",version=" + Long.toHexString(getVersion())
+            + ",version=" + getVersion()
             + ",lease=" + _leaseOwner
             + "]");
   }

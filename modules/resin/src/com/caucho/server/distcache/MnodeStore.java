@@ -75,7 +75,7 @@ public class MnodeStore {
   private String _updateSaveQuery;
   private String _updateUpdateTimeQuery;
 
-  private String _updateVersionQuery;
+  // private String _updateVersionQuery;
 
   private String _expireQuery;
   private String _selectExpireQuery;
@@ -91,7 +91,7 @@ public class MnodeStore {
   private AtomicLong _entryCount = new AtomicLong();
   
   // private long _expireReaperTimeout = 60 * 60 * 1000L;
-  private long _expireReaperTimeout = 15 * 60 * 1000L;
+  // private long _expireReaperTimeout = 15 * 60 * 1000L;
 
   public MnodeStore(DataSource dataSource,
                     String tableName,
@@ -204,10 +204,11 @@ public class MnodeStore {
          + " SET access_timeout=?,update_time=?"
          + " WHERE id=? AND item_version=?");
 
+/*
     _updateVersionQuery = ("UPDATE " + _tableName
                            + " SET update_time=?, server_version=?"
                            + " WHERE id=? AND value=?");
-
+*/
     _expireQuery = ("DELETE FROM " + _tableName
                      + " WHERE update_time + 5 * access_timeout / 4 < ?"
                      + " OR update_time + update_timeout < ?");
@@ -379,7 +380,7 @@ public class MnodeStore {
              + " WHERE ?<=update_time"
              + " LIMIT 1024");
       */
-
+      
       PreparedStatement pstmt = conn.prepareStatement(sql);
 
       pstmt.setLong(1, updateTime);
@@ -541,15 +542,12 @@ public class MnodeStore {
         long updateTime = rs.getLong(10);
         long accessTime = CurrentTime.getCurrentTime();
         
-        HashKey cacheHashKey
-          = cacheHash != null ? new HashKey(cacheHash) : null;
-
         long leaseTimeout = 300000;
         
         MnodeEntry entry;
         entry = new MnodeEntry(valueHash, valueLength, 
                                itemVersion,
-                               cacheHashKey,
+                               cacheHash,
                                flags,
                                accessedExpireTimeout, modifiedExpireTimeout,
                                leaseTimeout,
@@ -675,8 +673,12 @@ public class MnodeStore {
 
       int count = stmt.executeUpdate();
 
-      if (log.isLoggable(Level.FINER))
-        log.finer(this + " save " + HashKey.create(key) + " " + mnodeUpdate);
+      if (log.isLoggable(Level.FINER)) {
+        if (count > 0)
+          log.finer(this + " updateSave " + HashKey.create(key) + " " + mnodeUpdate);
+        else
+          log.finer(this + " updateSave-failed " + HashKey.create(key) + " " + mnodeUpdate);
+      }
 
       return count > 0;
     } catch (SQLException e) {
@@ -751,6 +753,10 @@ public class MnodeStore {
       
       if (count > 0) {
         _entryCount.addAndGet(-1);
+        
+        if (log.isLoggable(Level.FINER)) {
+          log.finer(this + " remove " + HashKey.create(key));
+        }
         
         return true;
       }
@@ -930,6 +936,7 @@ public class MnodeStore {
       return _updateUpdateTimeStatement;
     }
 
+    /*
     PreparedStatement prepareUpdateVersion()
       throws SQLException
     {
@@ -938,6 +945,7 @@ public class MnodeStore {
 
       return _updateVersionStatement;
     }
+    */
 
     PreparedStatement prepareExpire()
       throws SQLException

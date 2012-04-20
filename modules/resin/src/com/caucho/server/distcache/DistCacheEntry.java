@@ -313,7 +313,7 @@ public class DistCacheEntry {
     HashKey key = getKeyHash();
 
     MnodeEntry mnodeEntry = loadLocalMnodeValue();
-    long oldValueHash = mnodeEntry != null ? mnodeEntry.getValueHash() : 0;
+    long oldValueHash = mnodeEntry.getValueHash();
 
     long newVersion = getNewVersion(mnodeEntry);
 
@@ -324,18 +324,16 @@ public class DistCacheEntry {
     int leaseOwner = (mnodeEntry != null ? mnodeEntry.getLeaseOwner() : -1);
     */
     
-    MnodeUpdate mnodeUpdate;
-    
+    MnodeUpdate mnodeUpdate = MnodeUpdate.createNull(newVersion, config);
+
+    /*
     if (mnodeEntry != null)
       mnodeUpdate = MnodeUpdate.createNull(newVersion, mnodeEntry);
     else
       mnodeUpdate = MnodeUpdate.createNull(newVersion, config);
+      */
 
     putLocalValueImpl(mnodeUpdate, 0, null);
-
-    if (mnodeEntry == null) {
-      return oldValueHash != 0;
-    }
     
     config.getEngine().remove(key, mnodeUpdate);
     
@@ -390,8 +388,9 @@ public class DistCacheEntry {
                                            config);
 //                                           oldMnodeEntry);
       
-      return config.getEngine().compareAndPut(this, testValue, update, 
-                                              valueDataId, value);
+      return config.getEngine().compareAndPut(this, testValue,
+                                              update, 
+                                              valueDataId);
     } finally {
       MnodeValue newMnodeValue = getMnodeEntry();
       
@@ -476,8 +475,7 @@ public class DistCacheEntry {
   {
     CacheEngine engine = config.getEngine();
 
-    return engine.compareAndPut(entry, testValue, mnodeUpdate, 
-                                valueDataId, value);
+    return engine.compareAndPut(entry, testValue, mnodeUpdate, valueDataId);
   }
   
   //
@@ -534,28 +532,40 @@ public class DistCacheEntry {
     DataItem dataItem
       = getLocalDataManager().writeValue(mnodeValue, value, config);
     
-    Object oldValue = mnodeValue != null ? mnodeValue.getValue() : null;
+    long version = getNewVersion(getMnodeEntry());
+    
+    MnodeUpdate update = new MnodeUpdate(dataItem.getValueHash(),
+                                         dataItem.getLength(),
+                                         version,
+                                         config);
+    // int leaseOwner = mnodeValue.getLeaseOwner();
 
-    int leaseOwner = mnodeValue != null ? mnodeValue.getLeaseOwner() : -1;
+    InputStream is = getAndPut(update,
+                               dataItem.getValueDataId(),
+                               config);
 
-    long oldHash = getAndPut(mnodeValue, value,
-                             config.getLeaseExpireTimeout(),
-                             leaseOwner,
-                             config);
-
-    if (oldHash == 0)
+    if (is == null)
       return null;
     
-    if (oldHash == dataItem.getValueHash() && oldValue != null)
-      return oldValue;
-    
-    oldValue = getLocalDataManager().readData(getKeyHash(),
-                                              oldHash,
-                                              mnodeValue.getValueDataId(),
-                                              config.getValueSerializer(),
-                                              config);
+    Object oldValue = getLocalDataManager().decodeValue(is, config.getValueSerializer());
 
     return oldValue;
+  }
+  
+  public long getAndPutLocal(MnodeUpdate mnodeUpdate,
+                             StreamSource source)
+  {
+    long oldValueDataId = getMnodeEntry().getValueDataId();
+    
+    DataItem dataItem = getLocalDataManager().writeData(source);
+    
+    long valueDataId = dataItem.getValueDataId();
+    
+    Object value = null;
+
+    putLocalValue(mnodeUpdate, valueDataId, value);
+
+    return oldValueDataId;
   }
   
   public long getAndPutLocal(DistCacheEntry entry,
@@ -573,13 +583,11 @@ public class DistCacheEntry {
   /**
    * Sets a cache entry
    */
-  private long getAndPut(MnodeValue mnodeValue,
-                         Object value,
-                         long leaseTimeout,
-                         int leaseOwner,
-                         CacheConfig config)
+  private InputStream getAndPut(MnodeUpdate mnodeValue,
+                                long valueDataId,
+                                CacheConfig config)
   {
-    return config.getEngine().getAndPut(this, mnodeValue, value);
+    return config.getEngine().getAndPut(this, mnodeValue, valueDataId);
   }
   
   //
@@ -689,7 +697,7 @@ public class DistCacheEntry {
     if (valueHash == 0) {
       return null;
     }
-
+    
     updateAccessTime(mnodeEntry, now);
 
     value = _cacheService.getLocalDataManager().readData(getKeyHash(),

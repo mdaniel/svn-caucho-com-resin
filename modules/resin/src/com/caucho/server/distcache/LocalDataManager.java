@@ -42,6 +42,7 @@ import com.caucho.distcache.CacheSerializer;
 import com.caucho.env.distcache.CacheDataBacking;
 import com.caucho.env.service.ResinSystem;
 import com.caucho.util.HashKey;
+import com.caucho.util.IoUtil;
 import com.caucho.util.L10N;
 import com.caucho.util.NullOutputStream;
 import com.caucho.vfs.Crc64InputStream;
@@ -54,7 +55,7 @@ import com.caucho.vfs.WriteStream;
 /**
  * Manages the distributed cache
  */
-final class LocalDataManager
+public final class LocalDataManager
 {
   private static final L10N L = new L10N(LocalDataManager.class);
   private static final Logger log
@@ -218,6 +219,28 @@ final class LocalDataManager
     }
   }
 
+  final protected Object decodeValue(InputStream is,
+                                     CacheSerializer serializer)
+  {
+    if (is == null)
+      return null;
+
+    try {
+      // InflaterInputStream gzIn = new InflaterInputStream(is);
+
+      // Object value = serializer.deserialize(gzIn);
+      return serializer.deserialize(is);
+
+      // gzIn.close();
+    } catch (Exception e) {
+      log.log(Level.WARNING, e.toString(), e);
+      
+      return null;
+    } finally {
+      IoUtil.close(is);
+    }
+  }
+
   final protected boolean readData(HashKey key,
                                    MnodeEntry mnodeValue,
                                    OutputStream os,
@@ -274,7 +297,7 @@ final class LocalDataManager
     }
   }
   
-  DataStreamSource createDataSource(long valueDataId)
+  public DataStreamSource createDataSource(long valueDataId)
   {
     DataStore dataStore = getDataBacking().getDataStore();
     
@@ -348,6 +371,26 @@ final class LocalDataManager
     }
     
     return hash;
+  }
+  
+  final public DataItem writeData(StreamSource source)
+  {
+    if (source == null) {
+      return new DataItem(0, 0, 0);
+    }
+    
+    InputStream is = null;
+    try {
+      is = source.getInputStream();
+      
+      return writeData(is);
+    } catch (IOException e) {
+      log.log(Level.FINE, e.toString(), e);
+      
+      return new DataItem(0, 0, 0);
+    } finally {
+      IoUtil.close(is);
+    }
   }
 
   final public DataItem writeData(InputStream is)

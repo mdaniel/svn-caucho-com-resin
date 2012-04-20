@@ -64,6 +64,7 @@ public class CacheDataBackingImpl implements CacheDataBacking {
   private DataStore _dataStore;
   private MnodeStore _mnodeStore;
   
+  private DataRemoveActor _removeActor;
   private Alarm _reaperAlarm = new Alarm(new ReaperListener());
   private long _reaperTimeout = 3600 * 1000;
   
@@ -110,7 +111,6 @@ public class CacheDataBackingImpl implements CacheDataBacking {
                                      MnodeEntry mnodeUpdate,
                                      MnodeEntry oldEntryValue)
   {
-    System.out.println("INSERT:" + key);
     // MnodeUpdate mnodeUpdate = new MnodeUpdate(mnodeValue);
     
     if (oldEntryValue == null
@@ -182,7 +182,7 @@ public class CacheDataBackingImpl implements CacheDataBacking {
 
       // XXX: create delete queue?
       if (oldDataId > 0 && mnodeEntry.getValueDataId() != oldDataId) {
-        _dataStore.remove(oldDataId);
+        removeData(oldDataId);
       }
     }
 
@@ -237,9 +237,14 @@ public class CacheDataBackingImpl implements CacheDataBacking {
     return _dataStore.save(is, length);
   }
   
+  @Override
   public boolean removeData(long dataId)
   {
-    return _dataStore.remove(dataId);
+    // return _dataStore.remove(dataId);
+    
+    _removeActor.offer(dataId);
+    
+    return true;
   }
 
   @Override
@@ -332,6 +337,8 @@ public class CacheDataBackingImpl implements CacheDataBacking {
       
       _dataStore = new DataStore(serverId, _mnodeStore);
       _dataStore.init();
+      
+      _removeActor = new DataRemoveActor(_dataStore);
     } catch (Exception e) {
       throw ConfigException.create(e);
     }
@@ -382,7 +389,7 @@ public class CacheDataBackingImpl implements CacheDataBacking {
     _mnodeStore.remove(key);
     
     if (dataId > 0) {
-      _dataStore.remove(dataId);
+      removeData(dataId);
     }
   }
 
@@ -397,6 +404,12 @@ public class CacheDataBackingImpl implements CacheDataBacking {
     
     DataStore dataStore = _dataStore;
     _dataStore = null;
+    
+    DataRemoveActor removeActor = _removeActor;
+    _removeActor = null;
+    
+    if (removeActor != null)
+      removeActor.close();
     
     if (mnodeStore != null)
       mnodeStore.close();

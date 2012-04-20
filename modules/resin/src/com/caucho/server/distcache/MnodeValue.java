@@ -192,7 +192,7 @@ public class MnodeValue implements java.io.Serializable {
             + "["
             + ",value=" + Long.toHexString(getValueHash())
             + ",flags=" + Long.toHexString(getFlags())
-            + ",version=" + Long.toHexString(getVersion())
+            + ",version=" + getVersion()
             + "]");
   }
 }
