@@ -460,15 +460,43 @@ namespace Caucho
     {
       try {
         Util.TestDotNetCapability();
-      } catch (Exception) {
-        MessageBox.Show(".NET Version 3.5 is required.");
+      } catch (Exception e) {
+        String message = ".NET Version 3.5 is required.";
+        LogStartupError(message, e);
+        MessageBox.Show(message);
         Environment.Exit(1);
       }
-      Application.EnableVisualStyles();
-      Application.SetCompatibleTextRenderingDefault(false);
-      SetupForm setupForm = new SetupForm(new Setup());
-      Application.Run(setupForm);
+      try
+      {
+        Application.EnableVisualStyles();
+        Application.SetCompatibleTextRenderingDefault(false);
+        SetupForm setupForm = new SetupForm(new Setup());
+        Application.Run(setupForm);
+      } catch (Exception e)
+      {
+        LogStartupError(null, e);
+      }
     }
+
+    public static void LogStartupError(String message, Exception e)
+    {
+      StringBuilder text = new StringBuilder();
+      text.Append(DateTime.Now.ToString());
+      if (message != null) {
+        text.Append(message);
+        text.Append("\r\n");
+      }
+
+      if (e != null) {
+        text.Append(e.Message);
+        text.Append("\r\n");
+        text.Append(e.StackTrace);
+      }
+
+      text.Append("\r\n").Append("\r\n");
+
+      File.AppendAllText("setup-err.log", text.ToString(), Encoding.UTF8);
+     }
 
     public static Hashtable FakeState()
     {
