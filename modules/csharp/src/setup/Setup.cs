@@ -131,14 +131,13 @@ namespace Caucho
       }
 
       String currentResin = Util.GetCurrentResinFromRegistry();
+      Resin resinInRegistry = null;
       if (currentResin != null) {
         currentResin = Util.Canonicalize(currentResin);
-        Resin resin = new Resin(currentResin);
+        resinInRegistry = new Resin(currentResin);
 
-        Resin = resin;
-
-        if (!HasResin(resin))
-          AddResin(resin);
+        if (!HasResin(resinInRegistry))
+          AddResin(resinInRegistry);
       }
 
       RegistryKey services = Registry.LocalMachine.OpenSubKey(Setup.REG_SERVICES);
@@ -183,8 +182,12 @@ namespace Caucho
         }          
       }
 
+      if (Resin == null && resinInRegistry != null)
+        Resin = resinInRegistry;
+
       if (Resin == null){
         Resin = new Resin(resinHome);
+
         AddResin(Resin);
       }
     }
