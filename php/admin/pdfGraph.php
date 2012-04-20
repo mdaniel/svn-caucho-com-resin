@@ -605,8 +605,10 @@ function pdf_availability()
   }
   
   $total /= 1000;
-  $avg = $total/$count;
-  $uptime = 100 - (($total / $g_period) * 100);
+  $avg = 0;
+  if ($count > 0)
+    $avg = $total / $count;
+  $uptime = 100 - (($total / $g_period) * 100);  
   
   $g_canvas->writeSubsection("Summary");
   
@@ -633,7 +635,7 @@ function pdf_availability()
   $g_canvas->writeTextColumn($col2, 'l', format_seconds($avg));
   $g_canvas->newLine();
   
-  $g_canvas->writeTextColumn($col1, 'r', "Availability:");
+  $g_canvas->writeTextColumn($col1, 'r', "Availability: ");
   $g_canvas->writeTextColumn($col2, 'l', number_format($uptime, 4) . "%");
   $g_canvas->newLine();
   

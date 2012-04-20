@@ -15,6 +15,7 @@ global $g_is_watchdog;
 global $g_is_snapshot;
 global $profile_time;
 global $period;
+global $g_period;
 global $g_jmx_dump;
 global $g_jmx_dump_time;
 global $g_pdf_warnings;
@@ -84,6 +85,8 @@ if (!$period) {
   $period = $_REQUEST['period'] ? (int)$_REQUEST['period'] :
     ($mPage->period / 1000);
 }
+
+$g_period = $period;
 
 if ($period < HOUR) {
   $majorTicks = HOUR / 6;
