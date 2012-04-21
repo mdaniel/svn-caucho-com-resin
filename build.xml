@@ -12,7 +12,7 @@
   <property name="eclipse.home" value="${user.home}/eclipse"/>
 
   <target name="compile" 
-          depends="init, hessian, javaee, jaxstream, portlet, script, resin-kernel, quercus, resin, ecmascript, cdi, webutil, conf, ext, j2ee-management,   resin-eclipselink">
+          depends="init, hessian, javaee, jaxstream, portlet, script, resin-kernel, quercus, resin, ecmascript, cdi, webutil, conf, ext, j2ee-management, resin-eclipselink, gae">
   </target>
 
   <!--
@@ -130,6 +130,15 @@
     <antcall target="module" inheritRefs="true">
       <param name="module.name" value="eclipselink"/>
       <param name="module.jar" value="resin-eclipselink.jar"/>
+    </antcall>
+  </target>
+
+  <!-- gae APIs for quercus testing -->
+  <target name="gae" depends="init">
+    <antcall target="module" inheritRefs="true">
+      <param name="module.name" value="gae"/>
+      <param name="module.dist" value="${lib}"/>
+      <param name="module.jar" value="gae.jar"/>
     </antcall>
   </target>
 
@@ -580,7 +589,7 @@
     </antcall>
   </target>
 
-  <target name="quercus-dev" depends="init">
+  <target name="quercus-dev" depends="init, gae">
     <antcall target="module" inheritRefs="true">
       <param name="module.name" value="quercus"/>
       <param name="module.dist" value="${lib}"/>
