@@ -24,22 +24,55 @@
  *   59 Temple Place, Suite 330
  *   Boston, MA 02111-1307  USA
  *
- * @author Scott Ferguson
+ * @author Nam Nguyen
  */
 
 package com.caucho.quercus.lib.db;
 
-import java.sql.ResultSet;
-import java.sql.SQLException;
+import com.caucho.quercus.env.Value;
 
-/**
- * Extra ResultSet metadata for a Quercus Mysql connection.
- */
-public interface QuercusResultSet extends ResultSet
-{
-  public int getStringLength(int column)
-    throws SQLException;
+import java.sql.Types;
 
-  public void getString(int column, byte []buffer, int offset)
-    throws SQLException;
+public enum ColumnType {
+  STRING(Types.VARCHAR),
+  BLOB(Types.BLOB),
+  LONG(Types.INTEGER),
+  DOUBLE(Types.DOUBLE),
+  BOOLEAN(Types.BOOLEAN),
+  NULL(Types.NULL),
+  LOB(Types.LONGVARCHAR);
+
+  private final int _type;
+
+  private ColumnType(int type)
+  {
+    _type = type;
+  }
+
+  public static ColumnType getColumnType(Value value)
+  {
+    if (value.isString()) {
+      return STRING;
+    }
+    else if (value.isBoolean()) {
+      return BOOLEAN;
+    }
+    else if (value.isLong()) {
+      return LONG;
+    }
+    else if (value.isDouble()) {
+      return DOUBLE;
+    }
+    else if (value.isNull()) {
+      return NULL;
+    }
+    else {
+      return null;
+    }
+  }
+
+  public int getType()
+  {
+    return _type;
+  }
 }

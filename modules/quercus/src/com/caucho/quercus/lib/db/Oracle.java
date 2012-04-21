@@ -33,11 +33,8 @@ import com.caucho.quercus.annotation.Optional;
 import com.caucho.quercus.env.ConnectionEntry;
 import com.caucho.quercus.env.Env;
 import com.caucho.quercus.env.LongValue;
-import com.caucho.quercus.env.StringValue;
-import com.caucho.quercus.env.UnicodeValueImpl;
 import com.caucho.util.L10N;
 
-import java.sql.Connection;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
@@ -108,9 +105,9 @@ public class Oracle extends JdbcConnectionResource {
       }
 
       ConnectionEntry jConn;
-      
+
       jConn = env.getConnection(driver, url, userName, password, ! isNewLink);
-      
+
       return jConn;
 
     } catch (SQLException e) {
@@ -138,9 +135,9 @@ public class Oracle extends JdbcConnectionResource {
   /**
    * returns a prepared statement
    */
-  public OracleStatement prepare(Env env, StringValue query)
+  public OracleStatement prepare(Env env, String query)
   {
-    OracleStatement stmt = new OracleStatement((Oracle) validateConnection());
+    OracleStatement stmt = new OracleStatement((Oracle) validateConnection(env));
 
     stmt.prepare(env, query);
 
@@ -150,11 +147,11 @@ public class Oracle extends JdbcConnectionResource {
   /**
    * Creates a database-specific result.
    */
-  protected JdbcResultResource createResult(Env env,
-                                            Statement stmt,
+  @Override
+  protected JdbcResultResource createResult(Statement stmt,
                                             ResultSet rs)
   {
-    return new OracleResult(env, stmt, rs, this);
+    return new OracleResult(rs, this);
   }
 
 

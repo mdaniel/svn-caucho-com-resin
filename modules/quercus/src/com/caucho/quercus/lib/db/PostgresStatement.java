@@ -36,18 +36,18 @@ import com.caucho.quercus.env.UnsetValue;
 import com.caucho.quercus.env.Value;
 import com.caucho.util.L10N;
 
+import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-
 /**
  * Postgres statement class. Since Postgres has no object oriented API,
  * this is essentially a JdbcStatementResource.
  */
-public class PostgresStatement extends JdbcStatementResource {
+public class PostgresStatement extends JdbcPreparedStatementResource {
   private static final Logger log = Logger.getLogger(
       PostgresStatement.class.getName());
   private static final L10N L = new L10N(PostgresStatement.class);
@@ -67,42 +67,28 @@ public class PostgresStatement extends JdbcStatementResource {
     super(conn);
   }
 
-  /**
-   * Executes a prepared Postgres Query.
-   *
-   * @param env the PHP executing environment
-   * @return true on success or false on failure
-   */
-  public boolean execute(Env env)
+  @Override
+  protected boolean prepareForExecute(Env env)
+    throws SQLException
   {
-    try {
+    int size = _preparedMapping.size();
 
-      int size = _preparedMapping.size();
+    for (int i = 0; i < size; i++) {
+      LongValue param = _preparedMapping.get(i);
 
-      int matches = 0;
+      Value paramV = getParam(param.toInt() - 1);
 
-      for (int i = 0; i < size; i++) {
-        LongValue param = _preparedMapping.get(i);
-
-        Value paramV = getParam(param.toInt() - 1);
-
-        if (paramV.equals(UnsetValue.UNSET)) {
-          env.warning(L.l("Not all parameters are bound"));
-          return false;
-        }
-
-        Object object = paramV.toJavaObject();
-
-        setObject(i + 1, object);
+      if (paramV.equals(UnsetValue.UNSET)) {
+        env.warning(L.l("Not all parameters are bound"));
+        return false;
       }
 
-      return executeStatement();
+      Object object = paramV.toJavaObject();
 
-    } catch (Exception e) {
-      env.warning(L.l(e.toString()));
-      log.log(Level.FINE, e.toString(), e);
-      return false;
+      setObject(i + 1, object);
     }
+
+    return true;
   }
 
   /**
@@ -111,46 +97,36 @@ public class PostgresStatement extends JdbcStatementResource {
    * @param query SQL query
    * @return true on success or false on failure
    */
-  public boolean prepare(Env env, StringValue query)
+  @Override
+  public boolean prepare(Env env, String query)
   {
-    try {
-      String queryStr = query.toString();
+    String queryStr = query.toString();
 
-      _preparedMapping.clear();
+    _preparedMapping.clear();
 
-      // Map any unsorted or duplicated params.
-      // Ex: INSERT INTO test VALUES($2, $1) or
-      //     INSERT INTO test VALUES($1, $1)
-      Pattern pattern = Pattern.compile("\\$([0-9]+)");
-      Matcher matcher = pattern.matcher(queryStr);
-      while (matcher.find()) {
-        int phpParam;
-        try {
-          phpParam = Integer.parseInt(matcher.group(1));
-        } catch (Exception ex) {
-          _preparedMapping.clear();
-          return false;
-        }
-        _preparedMapping.add(LongValue.create(phpParam));
+    // Map any unsorted or duplicated params.
+    // Ex: INSERT INTO test VALUES($2, $1) or
+    //     INSERT INTO test VALUES($1, $1)
+    Pattern pattern = Pattern.compile("\\$([0-9]+)");
+    Matcher matcher = pattern.matcher(queryStr);
+    while (matcher.find()) {
+      int phpParam;
+      try {
+        phpParam = Integer.parseInt(matcher.group(1));
+      } catch (Exception ex) {
+        _preparedMapping.clear();
+        return false;
       }
-
-      // Make the PHP query a JDBC like query
-      // replacing ($1 -> ?) with question marks.
-      // XXX: replace this with Matcher.appendReplacement
-      // above when StringBuilder is supported.
-      queryStr = queryStr.replaceAll("\\$[0-9]+", "?");
-
-      // Prepare the JDBC query
-      return super.prepare(env, env.createString(queryStr));
-
-    } catch (Exception e) {
-      log.log(Level.FINE, e.toString(), e);
-      return false;
+      _preparedMapping.add(LongValue.create(phpParam));
     }
-  }
 
-  protected int getPreparedMappingSize()
-  {
-    return _preparedMapping.size();
+    // Make the PHP query a JDBC like query
+    // replacing ($1 -> ?) with question marks.
+    // XXX: replace this with Matcher.appendReplacement
+    // above when StringBuilder is supported.
+    queryStr = queryStr.replaceAll("\\$[0-9]+", "?");
+
+    // Prepare the JDBC query
+    return super.prepare(env, queryStr);
   }
 }

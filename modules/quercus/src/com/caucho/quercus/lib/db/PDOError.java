@@ -26,20 +26,19 @@
  * @author Sam
  */
 
-
 package com.caucho.quercus.lib.db;
 
 import com.caucho.quercus.env.ArrayValue;
 import com.caucho.quercus.env.ArrayValueImpl;
 import com.caucho.quercus.env.Env;
-import com.caucho.quercus.QuercusRuntimeException;
 import com.caucho.util.L10N;
 
 import java.sql.SQLException;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
-class PDOError {
+class PDOError
+{
   private final static L10N L = new L10N(PDOError.class);
   private final static Logger log = Logger.getLogger(PDOError.class.getName());
 
@@ -50,16 +49,13 @@ class PDOError {
   private static final String ERR_NONE = PDO.ERR_NONE;
   private static final String ERR_GENERAL = "HY000";
 
-  private final Env _env;
-
   private int _errmode;
   private boolean _isError;
   private String _errorCode = ERR_NONE;
   private ArrayValue _errorInfo;
 
-  public PDOError(Env env)
+  public PDOError()
   {
-    _env = env;
   }
 
   /**
@@ -72,7 +68,10 @@ class PDOError {
     _errorInfo = null;
   }
 
-  private void error(String errorCode, int driverError, String errorMessage)
+  private void error(Env env,
+                     String errorCode,
+                     int driverError,
+                     String errorMessage)
   {
     _isError = true;
 
@@ -85,10 +84,12 @@ class PDOError {
     _errorInfo.put(driverError);
     _errorInfo.put(errorMessage);
 
-    if (level == ERRMODE_WARNING)
-      _env.warning("SQLSTATE[" + errorCode + "]: " + errorMessage);
-    else if (level == ERRMODE_EXCEPTION)
+    if (level == ERRMODE_WARNING) {
+      env.warning("SQLSTATE[" + errorCode + "]: " + errorMessage);
+    }
+    else if (level == ERRMODE_EXCEPTION) {
       throw new PDOException(errorCode, errorMessage);
+    }
   }
   /**
    * Save an error for subsequent calls to
@@ -96,7 +97,7 @@ class PDOError {
    * and depending on the value of {@link #setErrmode}
    * show nothing, show a warning, or throw an exception.
    */
-  public void error(Throwable exception)
+  public void error(Env env, Throwable exception)
   {
     log.log(Level.FINE, exception.toString(), exception);
 
@@ -116,15 +117,15 @@ class PDOError {
       driverError = 0;
     }
 
-    error(errorCode, driverError, errorMessage);
+    error(env, errorCode, driverError, errorMessage);
   }
 
-  public String errorCode()
+  public String getErrorCode()
   {
     return _errorCode;
   }
 
-  public ArrayValue errorInfo()
+  public ArrayValue getErrorInfo()
   {
     if (_errorInfo == null) {
       _errorInfo = new ArrayValueImpl();
@@ -148,7 +149,7 @@ class PDOError {
    * Show a notice and return a "HY000" general error for subsequent calls to
    * {@link #errorCode} and {@link #errorInfo}.
    */
-  public void notice(String message)
+  public void notice(Env env, String message)
   {
     _isError = true;
 
@@ -159,7 +160,7 @@ class PDOError {
     _errorInfo.put(2050);
     _errorInfo.put("");
 
-    _env.notice(message);
+    env.notice(message);
   }
 
   /**
@@ -173,7 +174,7 @@ class PDOError {
    *
    * @return true on success, false on error.
    */
-  public boolean setErrmode(int value)
+  public boolean setErrmode(Env env, int value)
   {
     switch (value) {
       case ERRMODE_SILENT:
@@ -183,7 +184,7 @@ class PDOError {
         return true;
 
       default:
-        warning(L.l("invalid error mode"));
+        warning(env, L.l("invalid error mode"));
         return false;
     }
   }
@@ -192,7 +193,7 @@ class PDOError {
    * Show a warning and return a "HY000" general error for subsequent calls to
    * {@link #errorCode} and {@link #errorInfo}.
    */
-  public void warning(String message)
+  public void warning(Env env, String message)
   {
     _isError = true;
 
@@ -205,17 +206,17 @@ class PDOError {
       throw new PDOException(_errorCode, message);
     }
     else {
-      _env.warning("SQLSTATE[" + _errorCode + "]: " + message);
+      env.warning("SQLSTATE[" + _errorCode + "]: " + message);
     }
   }
 
-  public void unsupportedAttribute(int attribute)
+  public void unsupportedAttribute(Env env, int attribute)
   {
-    error("IM001", 0, L.l("attribute `{0}' is not supported", attribute));
+    error(env, "IM001", 0, L.l("attribute `{0}' is not supported", attribute));
   }
 
-  public void unsupportedAttributeValue(Object value)
+  public void unsupportedAttributeValue(Env env, Object value)
   {
-    error("IM001", 0, L.l("attribute value `{0}' is not supported", value));
+    error(env, "IM001", 0, L.l("attribute value `{0}' is not supported", value));
   }
 }

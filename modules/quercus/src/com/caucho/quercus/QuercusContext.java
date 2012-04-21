@@ -531,7 +531,7 @@ public class QuercusContext
     _scriptEncoding = encoding;
   }
 
-  /*
+  /**
    * Returns the mysql version to report to to PHP applications.
    * It is user set-able to allow cloaking of the underlying mysql
    * JDBC driver version for application compatibility.
@@ -541,7 +541,7 @@ public class QuercusContext
     return _mySqlVersion;
   }
 
-  /*
+  /**
    * Sets the mysql version to report to applications.  This cloaks
    * the underlying JDBC driver version, so that when an application
    * asks for the mysql version, this version string is returned instead.

@@ -48,46 +48,46 @@ public class MysqlResultSetMetaData
     = Logger.getLogger(MysqlResultSetMetaData.class.getName());
   private static final L10N L
     = new L10N(MysqlResultSetMetaData.class);
-  
+
   private ResultSetMetaData _resultSetMetaData;
-  
+
   private String []_columnEncodings;
-  
+
   protected MysqlResultSetMetaData(ResultSetMetaData metaData)
   {
     _resultSetMetaData = metaData;
-    
+
     try {
       _columnEncodings = new String[metaData.getColumnCount()];
     } catch (SQLException e) {
       throw new QuercusException(e);
     }
   }
-  
+
   public String getColumnCharacterEncoding(int column)
   {
     String encoding = _columnEncodings[column - 1];
-    
+
     if (encoding == null) {
       encoding = getColumnCharacterEncodingImpl(column);
-      
+
       _columnEncodings[column - 1] = encoding;
     }
-    
+
     return encoding;
   }
-  
+
   private String getColumnCharacterEncodingImpl(int column)
   {
-    Class cls = _resultSetMetaData.getClass();
-    
+    Class<?> cls = _resultSetMetaData.getClass();
+
     try {
       Method method = cls.getMethod("getColumnCharacterEncoding", int.class);
-      
+
       Object result = method.invoke(_resultSetMetaData, column);
-      
+
       return (String) result;
-      
+
     } catch (NoSuchMethodException e) {
       throw new QuercusException(e);
     } catch (InvocationTargetException e) {

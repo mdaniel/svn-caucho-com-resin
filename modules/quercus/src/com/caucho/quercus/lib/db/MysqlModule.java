@@ -45,7 +45,6 @@ import java.sql.Types;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
-
 /**
  * PHP mysql routines.
  */
@@ -108,7 +107,7 @@ public class MysqlModule extends AbstractQuercusModule {
     if (conn == null)
       conn = getConnection(env);
 
-    return conn.affected_rows();
+    return conn.affected_rows(env);
   }
 
   /**
@@ -172,7 +171,7 @@ public class MysqlModule extends AbstractQuercusModule {
       env.removeSpecialValue("caucho.mysql");
 
     if (conn.isConnected()) {
-      conn.close(env);
+      conn.close();
 
       return true;
     }
@@ -202,7 +201,7 @@ public class MysqlModule extends AbstractQuercusModule {
     // XXX: move implementation
     try {
       try {
-        Connection sqlConn = conn.validateConnection().getConnection(env);
+        Connection sqlConn = conn.validateConnection(env).getConnection(env);
 
         if (sqlConn == null)
           return false;
@@ -415,7 +414,7 @@ public class MysqlModule extends AbstractQuercusModule {
     if (conn == null)
       conn = getConnection(env);
 
-    return conn.real_escape_string(unescapedString);
+    return conn.real_escape_string(env, unescapedString);
   }
 
   /**
@@ -425,26 +424,29 @@ public class MysqlModule extends AbstractQuercusModule {
                                         @NotNull MysqliResult result,
                                         @Optional("MYSQL_BOTH") int type)
   {
-    if (result == null)
+    if (result == null) {
       return BooleanValue.FALSE;
+    }
 
     Value value = result.fetch_array(env, type);
 
-    if (value != null)
+    if (value != null) {
       return value;
-    else
+    }
+    else {
       return BooleanValue.FALSE;
+    }
   }
 
   /**
    * Returns a row from the connection
    */
-  @ReturnNullAsFalse
-  public static ArrayValue mysql_fetch_assoc(Env env,
-                                             @NotNull MysqliResult result)
+  public static Value mysql_fetch_assoc(Env env,
+                                        @NotNull MysqliResult result)
   {
-    if (result == null)
-      return null;
+    if (result == null) {
+      return BooleanValue.FALSE;
+    }
 
     return result.fetch_array(env, MYSQL_ASSOC);
   }
@@ -517,7 +519,7 @@ public class MysqlModule extends AbstractQuercusModule {
       JdbcColumnMetaData columnMd = null;
 
       if (qMd == null) {
-        JdbcConnectionResource conn = getConnection(env).validateConnection();
+        JdbcConnectionResource conn = getConnection(env).validateConnection(env);
 
         // php/141p
         JdbcTableMetaData tableMd
@@ -619,8 +621,9 @@ public class MysqlModule extends AbstractQuercusModule {
    */
   public static Value mysql_fetch_lengths(Env env, @NotNull MysqliResult result)
   {
-    if (result == null)
+    if (result == null) {
       return BooleanValue.FALSE;
+    }
 
     return result.fetch_lengths();
   }
@@ -629,12 +632,16 @@ public class MysqlModule extends AbstractQuercusModule {
    * Returns an object with properties that correspond to the fetched row
    * and moves the data pointer ahead.
    */
-  public static Value mysql_fetch_object(Env env, @NotNull MysqliResult result)
+  public static Value mysql_fetch_object(Env env,
+                                         @NotNull MysqliResult result,
+                                         @Optional String className,
+                                         @Optional Value[] args)
   {
-    if (result == null)
+    if (result == null) {
       return BooleanValue.FALSE;
+    }
 
-    Value value = result.fetch_object(env);
+    Value value = result.fetch_object(env, className, args);
 
     // php/142t
     // must return FALSE for mediawiki
@@ -647,12 +654,12 @@ public class MysqlModule extends AbstractQuercusModule {
   /**
    * Returns a numerical row from the result, FALSE if no more rows.
    */
-  @ReturnNullAsFalse
-  public static ArrayValue mysql_fetch_row(Env env,
-                                           @NotNull MysqliResult result)
+  public static Value mysql_fetch_row(Env env,
+                                      @NotNull MysqliResult result)
   {
-    if (result == null)
-      return null;
+    if (result == null) {
+      return BooleanValue.FALSE;
+    }
 
     return result.fetch_row(env);
   }
@@ -703,7 +710,7 @@ public class MysqlModule extends AbstractQuercusModule {
 
     Mysqli conn = getConnection(env);
 
-    Value resultV = conn.validateConnection().realQuery(env, sql);
+    Value resultV = conn.validateConnection(env).realQuery(env, sql);
 
     Object metaResult = resultV.toJavaObject();
 
@@ -958,7 +965,7 @@ public class MysqlModule extends AbstractQuercusModule {
     if (conn == null)
       conn = getConnection(env);
 
-    if (! conn.select_db(database))
+    if (! conn.select_db(env, database))
       return BooleanValue.FALSE;
 
     Value result = conn.query(env,
@@ -995,7 +1002,7 @@ public class MysqlModule extends AbstractQuercusModule {
     if (conn == null)
       conn = getConnection(env);
 
-    if (! conn.select_db(databaseName))
+    if (! conn.select_db(env, databaseName))
       return BooleanValue.FALSE;
 
     return conn.query(env, query, 1);
@@ -1014,7 +1021,7 @@ public class MysqlModule extends AbstractQuercusModule {
     if (conn == null)
       conn = getConnection(env, dbName);
 
-    return conn.select_db(dbName);
+    return conn.select_db(env, dbName);
   }
 
   /**
@@ -1100,17 +1107,17 @@ public class MysqlModule extends AbstractQuercusModule {
                                     @Optional int flags) {
     int port = 3306;
     String socketStr = "";
-    
+
     String hostStr;
     String url = null;
-    
+
     if (host.length() == 0) {
       hostStr = env.getIniString("mysql.default_host");
     }
     else {
       hostStr = host.toString();
     }
-    
+
     if (hostStr == null || hostStr.length() == 0) {
       hostStr = "localhost";
     }

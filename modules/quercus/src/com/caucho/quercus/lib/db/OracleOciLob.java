@@ -78,8 +78,8 @@ public class OracleOciLob {
   private Writer _writer;
 
   // Cache classes and methods for oracle.sql.BLOB and oracle.sql.CLOB
-  private static Class classOracleBLOB;
-  private static Class classOracleCLOB;
+  private static Class<?> classOracleBLOB;
+  private static Class<?> classOracleCLOB;
   private static Method createTemporaryBLOB;
   private static Method createTemporaryCLOB;
   private static int BLOB_DURATION_CALL;
@@ -925,7 +925,7 @@ public class OracleOciLob {
 
       if (length < 0)
         length = Integer.MAX_VALUE;
-      
+
       bb.appendReadAll(is, length);
 
       is.close();

@@ -30,7 +30,6 @@
 package com.caucho.quercus.lib.db;
 
 import com.caucho.quercus.env.Env;
-import com.caucho.util.Alarm;
 
 import java.sql.DatabaseMetaData;
 import java.sql.ResultSet;
@@ -44,11 +43,11 @@ import java.util.logging.*;
 public class JdbcTableMetaData {
   private static final Logger log
     = Logger.getLogger(JdbcTableMetaData.class.getName());
-  
+
   private final String _catalog;
   private final String _schema;
   private final String _name;
-  
+
   private final long _lastModified;
 
   private long _maxIdleTime = 10000L;

@@ -29,19 +29,23 @@
 
 package com.caucho.quercus.lib.db;
 
+import com.caucho.quercus.env.Env;
 import com.caucho.quercus.env.Value;
 import com.caucho.util.L10N;
 
 import java.sql.CallableStatement;
+import java.sql.Connection;
+import java.sql.ResultSet;
+import java.sql.SQLException;
 import java.util.HashMap;
+import java.util.logging.Level;
 import java.util.logging.Logger;
-
 
 /**
  * Oracle statement class. Since Oracle has no object oriented API,
  * this is essentially a JdbcStatementResource.
  */
-public class OracleStatement extends JdbcStatementResource {
+public class OracleStatement extends JdbcPreparedStatementResource {
   private static final Logger log = Logger.getLogger(
       OracleStatement.class.getName());
   private static final L10N L = new L10N(OracleStatement.class);
@@ -89,6 +93,131 @@ public class OracleStatement extends JdbcStatementResource {
     super(conn);
     _fetchedRows = 0;
     _outParameter = null;
+  }
+
+  protected boolean execute(Env env, int mode)
+  {
+    try {
+
+      //  Scenarios for oci_execute.
+      //
+      //
+      //  1. Simple query: oci_parse / oci_execute
+      //
+      //  $query = 'SELECT * FROM TEST';
+      //
+      //  $stmt = oci_parse($conn, $query);
+      //
+      //  oci_execute($stmt, OCI_DEFAULT);
+      //
+      //  $result = oci_fetch_array($stid, OCI_BOTH);
+      //
+      //
+      //  2. Define by name: oci_parse / oci_define_by_name / oci_execute
+      //
+      //  $stmt = oci_parse($conn, "SELECT id, data FROM test");
+      //
+      //  /* the define MUST be done BEFORE oci_execute! */
+      //
+      //  oci_define_by_name($stmt, "ID", $myid);
+      //  oci_define_by_name($stmt, "DATA", $mydata);
+      //
+      //  oci_execute($stmt, OCI_DEFAULT);
+      //
+      //  while ($row = oci_fetch($stmt)) {
+      //     echo "id:" . $myid . "\n";
+      //     echo "data:" . $mydata . "\n";
+      //  }
+      //
+      //
+      //  3. Cursors: oci_new_cursor / oci_parse /
+      //     oci_bind_by_name / oci_execute($stmt) / oci_execute($cursor)
+      //
+      //  $stmt = oci_parse($conn,
+      //  "CREATE OR REPLACE PACKAGE cauchopkgtestoci AS ".
+      //  "TYPE refcur IS REF CURSOR; ".
+      //  "PROCEDURE testproc (var_result out cauchopkgtestoci.refcur); ".
+      //  "END cauchopkgtestoci; ");
+      //
+      //  oci_execute($stmt);
+      //
+      //  $stmt = oci_parse($conn,
+      //  "CREATE OR REPLACE PACKAGE BODY cauchopkgtestoci IS ".
+      //  "PROCEDURE testproc (var_result out cauchopkgtestoci.refcur) IS ".
+      //  "BEGIN ".
+      //  "OPEN var_result FOR SELECT data FROM caucho.test; ".
+      //  "END testproc; ".
+      //  "END; ");
+      //
+      //  oci_execute($stmt);
+      //
+      //  $curs = oci_new_cursor($conn);
+      //
+      //  $stmt = oci_parse($conn,
+      //     "begin cauchopkgtestoci.testproc(:dataCursor); end;");
+      //
+      //  oci_bind_by_name($stmt, "dataCursor", $curs, 255, SQLT_RSET);
+      //
+      //  oci_execute($stmt);
+      //
+      //  oci_execute($curs);
+      //
+      //  while ($data = oci_fetch_row($curs)) {
+      //     var_dump($data);
+      //  }
+
+      // Get the underlying JDBC connection.
+      Connection conn = getJavaConnection(env);
+
+      // Large Objects can not be used in auto-commit mode.
+      conn.setAutoCommit(false);
+
+      // Use the underlying callable statement to check different scenarios.
+      CallableStatement callableStatement = getCallableStatement();
+
+      // Check for case (3) oci_execute($cursor);
+      // A previous statement has been executed and holds the result set.
+      Object cursorResult = null;
+      try {
+        cursorResult = callableStatement.getObject(1);
+        if ((cursorResult != null) && (cursorResult instanceof ResultSet)) {
+          ResultSet rs = (ResultSet) cursorResult;
+
+          setResultSet(rs);
+          return true;
+        }
+      } catch (Exception e) {
+        // We assume this is not case (3). No error.
+      }
+
+      // Case (1) or executing a more complex query.
+      execute(env);
+
+      OracleOciLob ociLob = getOutParameter();
+      if (ociLob != null) {
+        // Ex: java.sql.Clob outParameter = callableStatement.getClob(1);
+        ociLob.setLob(callableStatement.getObject(1));
+      }
+
+      // Fetch and assign values to corresponding binded variables
+      // This is necessary for LOB support and
+      // should be reworked calling a private fetch method instead.
+      // oci_fetch(env, stmt);
+
+      if (mode == OracleModule.OCI_COMMIT_ON_SUCCESS) {
+        conn.commit();
+      }
+
+      return true;
+    }
+    catch (SQLException ex) {
+      log.log(Level.FINE, ex.toString(), ex);
+
+      resetBindingVariables();
+      resetByNameVariables();
+
+      return false;
+    }
   }
 
   /**

@@ -29,24 +29,15 @@
 
 package com.caucho.quercus.program;
 
-import com.caucho.quercus.annotation.*;
-import com.caucho.quercus.expr.*;
-import com.caucho.quercus.env.*;
+import com.caucho.quercus.env.Env;
+import com.caucho.quercus.env.QuercusClass;
+import com.caucho.quercus.env.Value;
 import com.caucho.quercus.function.AbstractFunction;
-import com.caucho.quercus.marshal.Marshal;
-import com.caucho.quercus.marshal.ProMarshal;
-import com.caucho.quercus.marshal.ProReferenceMarshal;
-import com.caucho.quercus.gen.AnalyzeInfo;
-import com.caucho.quercus.gen.PhpWriter;
 import com.caucho.quercus.module.ModuleContext;
 import com.caucho.quercus.module.QuercusModule;
-import com.caucho.quercus.module.StaticFunction;
 import com.caucho.util.L10N;
 
-import java.io.IOException;
-import java.lang.annotation.Annotation;
 import java.lang.reflect.Method;
-import java.lang.reflect.Modifier;
 import java.util.logging.Logger;
 
 /**
@@ -78,8 +69,8 @@ public class ProByteCodeStaticFunction extends ProStaticFunction
 
   @Override
   public Value callMethod(Env env,
-                          QuercusClass qClass, 
-                          Value qThis, 
+                          QuercusClass qClass,
+                          Value qThis,
                           Value []args)
   {
     return _function.call(env, args);

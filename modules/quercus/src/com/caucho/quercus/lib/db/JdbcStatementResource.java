@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 1998-2012 Caucho Technology -- all rights reserved
+ * Copyright (c) 1998-2010 Caucho Technology -- all rights reserved
  *
  * This file is part of Resin(R) Open Source
  *
@@ -24,51 +24,38 @@
  *   59 Temple Place, Suite 330
  *   Boston, MA 02111-1307  USA
  *
- * @author Charles Reich
+ * @author Nam Nguyen
  */
 
 package com.caucho.quercus.lib.db;
 
-import com.caucho.quercus.env.BooleanValue;
 import com.caucho.quercus.env.Env;
 import com.caucho.quercus.env.NullValue;
-import com.caucho.quercus.env.StringValue;
-import com.caucho.quercus.env.UnsetValue;
 import com.caucho.quercus.env.Value;
 import com.caucho.quercus.env.Var;
-import com.caucho.quercus.env.StringValue;
 import com.caucho.util.L10N;
 import com.caucho.util.Log;
 
-import java.lang.reflect.Constructor;
-import java.lang.reflect.Method;
 import java.sql.Connection;
-import java.sql.PreparedStatement;
 import java.sql.ResultSet;
+import java.sql.Statement;
 import java.sql.ResultSetMetaData;
 import java.sql.SQLException;
-import java.sql.Types;
 import java.util.Locale;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
-
-/**
- * Represents a JDBC Statement value.
- */
-public class JdbcStatementResource {
+public class JdbcStatementResource
+{
   private static final Logger log = Log.open(JdbcStatementResource.class);
   private static final L10N L = new L10N(JdbcStatementResource.class);
 
   private JdbcConnectionResource _conn;
-  private ResultSet _rs;
+  private JdbcResultResource _rs;
   private String _query;
-  private PreparedStatement _stmt;
-  private ResultSetMetaData _metaData;
-  private JdbcResultResource _resultResource = null;
 
-  private char[] _types;
-  private Value[] _params;
+  private Statement _stmt;
+
   private Value[] _results;
 
   private String _errorMessage = "";
@@ -79,372 +66,19 @@ public class JdbcStatementResource {
   // DROP, ALTER, BEGIN, DECLARE, UNKNOWN)
   private String _stmtType;
 
-  /**
-   * Constructor for JdbcStatementResource
-   *
-   * @param connV a JdbcConnectionResource connection
-   */
-  public JdbcStatementResource(JdbcConnectionResource connV)
+  public JdbcStatementResource(JdbcConnectionResource conn)
   {
-    _conn = connV;
+    _conn = conn;
   }
 
-  /**
-   * Creates _types and _params array for this prepared statement.
-   *
-   * @param types  = string of i,d,s,b (ie: "idds")
-   * @param params = array of values (probably Vars)
-   * @return true on success ir false on failure
-   */
-  protected boolean bindParams(Env env,
-                               String types,
-                               Value[] params)
+  protected String getQuery()
   {
-    // This will create the _types and _params arrays
-    // for this prepared statement.
-
-    final int size = types.length();
-
-    // Check to see that types and params have the same length
-    if (params.length == 0 || size != params.length) {
-      env.warning(L.l("number of types does not match number of parameters"));
-      return false;
-    }
-
-    // Check to see that types only contains i,d,s,b
-    for (int i = 0; i < size; i++) {
-      if ("idsb".indexOf(types.charAt(i)) < 0) {
-        env.warning(L.l("invalid type string {0}", types));
-        return false;
-      }
-    }
-
-    _types = new char[size];
-    _params = new Value[size];
-
-    for (int i = 0; i < size; i++) {
-      _types[i] = types.charAt(i);
-      _params[i] = params[i];
-    }
-
-    return true;
+    return _query;
   }
 
-  /**
-   * XXX: MySQL returns the table metadata on preparation of a statement,
-   * but the java.sql doesn't support that feature.
-   */
-  public boolean bindResults(Env env, Value[] outParams)
-  {    
-    int size = outParams.length;
-    int numColumns = -1;
-    
-    ResultSetMetaData md = null;
-    
-    try {
-      md = getMetaData();
-      
-      if (md != null) {
-        numColumns = md.getColumnCount();
-      }
-    }
-    catch (SQLException e) {
-      log.log(Level.FINE, e.toString(), e);
-      return false;
-    }
-    
-    if (numColumns >= 0) {
-      for (int i = 0; i < size; i++) {
-        Value val = outParams[i];
-
-        if (! (val instanceof Var)) {
-          env.error(L.l("Only variables can be passed by reference"));
-          return false;
-        }
-      }
-
-      if ((size == 0) || (size != numColumns)) {
-        env.warning(L.l("number of bound variables does not equal number of columns"));
-        return false;
-      }
-    }
-    
-    _results = new Value[size];
-
-    System.arraycopy(outParams, 0, _results, 0, size);
-
-    return true;
-  }
-
-  /**
-   * Closes the result set, if any, and closes this statement.
-   */
-  public boolean close()
+  protected void setQuery(String query)
   {
-    try {
-      ResultSet rs = _rs;
-      _rs = null;
-      
-      if (rs != null)
-        rs.close();
-
-      if (_stmt != null)
-        _stmt.close();
-      
-      return true;
-    }
-    catch (SQLException e) {
-      _errorMessage = e.getMessage();
-      _errorCode = e.getErrorCode();
-      log.log(Level.FINE, e.toString(), e);
-      
-      return false;
-    }
-  }
-
-  /**
-   * Advance the cursor the number of rows given by offset.
-   *
-   * @param offset the number of rows to move the cursor
-   * @return true on success or false on failure
-   */
-  protected boolean dataSeek(int offset)
-  {
-    return JdbcResultResource.setRowNumber(_rs, offset);
-  }
-
-  /**
-   * Returns the error number for the last error.
-   *
-   * @return the error number
-   */
-  public int errorCode()
-  {
-    return _errorCode;
-  }
-
-  /**
-   * Returns the error message for the last error.
-   *
-   * @return the error message
-   */
-  public String errorMessage()
-  {
-    return _errorMessage;
-  }
-
-  /**
-   * Executes a prepared Query.
-   *
-   * @param env the PHP executing environment
-   * @return true on success or false on failure
-   */
-  public boolean execute(Env env)
-  {
-    try {
-      if (_types != null) {
-        int size = _types.length;
-        for (int i = 0; i < size; i++) {
-          switch (_types[i]) {
-          case 'i':
-            _stmt.setInt(i + 1, _params[i].toInt());
-            break;
-          case 'd':
-            _stmt.setDouble(i + 1, _params[i].toDouble());
-            break;
-            // XXX: blob needs to be redone
-            // Currently treated as a string
-          case 'b':
-            _stmt.setString(i + 1, _params[i].toString());
-            break;
-          case 's':
-            _stmt.setString(i + 1, _params[i].toString());
-            break;
-          default:
-            break;
-          }
-        }
-      }
-
-      return executeStatement();
-
-    } catch (SQLException e) {
-      env.warning(L.l(e.toString()));
-      log.log(Level.FINE, e.toString(), e);
-      _errorMessage = e.getMessage();
-      _errorCode = e.getErrorCode();
-      return false;
-    }
-  }
-
-  /**
-   * Executes underlying statement
-   * Known subclasses: see PostgresStatement.execute
-   */
-  protected boolean executeStatement()
-    throws SQLException
-  {
-    try {
-      if (_stmt.execute()) {
-        _conn.setAffectedRows(0);
-        _rs = _stmt.getResultSet();
-      } else {
-        _conn.setAffectedRows(_stmt.getUpdateCount());
-      }
-
-      return true;
-    }
-    catch (SQLException e) {
-      _errorMessage = e.getMessage();
-      _errorCode = e.getErrorCode();
-      throw e;
-    }
-  }
-
-  /**
-   * Fetch results from a prepared statement into bound variables.
-   *
-   * @return true on success, false on error, null if no more rows
-   */
-  public Value fetch(Env env)
-  {
-    try {
-      if (_rs == null) {
-        return NullValue.NULL;
-      }
-      
-      if (_rs.next()) {
-        if (_metaData == null)
-          _metaData = _rs.getMetaData();
-
-        JdbcResultResource resultResource = getResultMetadata();
-        int size = _results.length;
-
-        for (int i = 0; i < size; i++) {
-          Value value = _resultResource.getColumnValue(env, _rs, _metaData, i + 1);
-          
-          _results[i].set(value);
-        }
-        
-        return BooleanValue.TRUE;
-      }
-      else {
-        return NullValue.NULL;
-      }
-    }
-    catch (SQLException e) {
-      log.log(Level.FINE, e.toString(), e);
-      return BooleanValue.FALSE;
-    }
-  }
-
-  /**
-   * Frees the associated result.
-   *
-   * @return true on success or false on failure
-   */
-  public boolean freeResult()
-  {
-    try {
-      ResultSet rs = _rs;
-      _rs = null;
-
-      if (rs != null)
-        rs.close();
-
-      if (_resultResource != null) {
-        _resultResource.close();
-        _resultResource = null;
-      }
-      
-      return true;
-    }
-    catch (SQLException e) {
-      _errorMessage = e.getMessage();
-      _errorCode = e.getErrorCode();
-      log.log(Level.FINE, e.toString(), e);
-      
-      return false;
-    }
-  }
-
-  /**
-   * Returns the meta data for corresponding to the current result set.
-   *
-   * @return the result set meta data
-   */
-  protected ResultSetMetaData getMetaData()
-    throws SQLException
-  {
-    if (_metaData == null && _rs != null) {
-      _metaData = _rs.getMetaData();
-    }
-
-    return _metaData;
-  }
-
-  /**
-   * Returns the number of rows in the result set.
-   *
-   * @return the number of rows in the result set
-   */
-  public int getNumRows()
-    throws SQLException
-  {
-    if (_rs != null)
-      return JdbcResultResource.getNumRows(_rs);
-    else
-      return 0;
-  }
-
-  /**
-   * Returns the internal prepared statement.
-   *
-   * @return the internal prepared statement
-   */
-  protected PreparedStatement getPreparedStatement()
-  {
-    return _stmt;
-  }
-
-  /**
-   * Resets _fieldOffset in _resultResource
-   *
-   * @return null if _resultResource == null, otherwise _resultResource
-   */
-  public JdbcResultResource getResultMetadata()
-  {
-    if (_resultResource != null) {
-      _resultResource.setFieldOffset(0);
-      return _resultResource;
-    }
-
-    if (_stmt == null || _rs == null)
-      return null;
-
-    _resultResource
-      = new JdbcResultResource(_conn.getEnv(), _stmt, _rs, _conn);
-    return _resultResource;
-  }
-
-  /**
-   * Returns the internal result set.
-   *
-   * @return the internal result set
-   */
-  protected ResultSet getResultSet()
-  {
-    return _rs;
-  }
-
-  /**
-   * Returns the underlying SQL connection
-   * associated to this statement.
-   */
-  protected Connection getJavaConnection()
-    throws SQLException
-  {
-    return validateConnection().getJavaConnection();
+    _query = query;
   }
 
   /**
@@ -461,13 +95,13 @@ public class JdbcStatementResource {
     // (SELECT, UPDATE, DELETE, INSERT, CREATE, DROP,
     // ALTER, BEGIN, DECLARE, UNKNOWN)
 
-    _stmtType = _query;
-    _stmtType = _stmtType.replaceAll("\\s+.*", "");
-    
-    if (_stmtType.length() == 0)
+    String query = getQuery();
+    query = query.replaceAll("\\s+.*", "");
+
+    if (query.length() == 0)
       _stmtType = "UNKNOWN";
     else {
-      _stmtType = _stmtType.toUpperCase(Locale.ENGLISH);
+      _stmtType = query.toUpperCase(Locale.ENGLISH);
       String s = _stmtType.replaceAll(
           "(SELECT|UPDATE|DELETE|INSERT|CREATE|DROP|ALTER|BEGIN|DECLARE)", "");
       if (! s.equals(""))
@@ -478,171 +112,233 @@ public class JdbcStatementResource {
   }
 
   /**
-   * Counts the number of parameter markers in the query string.
-   *
-   * @return the number of parameter markers in the query string
+   * XXX: MySQL returns the table metadata on preparation of a statement,
+   * but java.sql doesn't support this feature.
    */
-  public int paramCount()
+  public boolean bindResults(Env env, Value[] outParams)
   {
-    if (_query == null)
-      return -1;
+    int size = outParams.length;
+    int numColumns = getColumnCount(env);
 
-    int count = 0;
-    int length = _query.length();
-    boolean inQuotes = false;
-    char c;
+    if (numColumns < 0) {
+      return false;
+    }
 
-    for (int i = 0; i < length; i++) {
-      c = _query.charAt(i);
+    for (int i = 0; i < size; i++) {
+      Value val = outParams[i];
 
-      if (c == '\\') {
-        if (i < length - 1)
-          i++;
-        continue;
-      }
-
-      if (inQuotes) {
-        if (c == '\'')
-          inQuotes = false;
-        continue;
-      }
-
-      if (c == '\'') {
-        inQuotes = true;
-        continue;
-      }
-
-      if (c == '?') {
-        count++;
+      if (! (val instanceof Var)) {
+        env.error(L.l("Only variables can be passed by reference"));
+        return false;
       }
     }
 
-    return count;
+    if ((size == 0) || (size != numColumns)) {
+      env.warning(L.l("number of bound variables do not equal number of columns"));
+      return false;
+    }
+
+    _results = new Value[size];
+    System.arraycopy(outParams, 0, _results, 0, size);
+
+    return true;
+  }
+
+  protected int getColumnCount(Env env)
+  {
+    try {
+      ResultSetMetaData md = getMetaData();
+
+      if (md == null) {
+        return -1;
+      }
+
+      return md.getColumnCount();
+    }
+    catch (SQLException e) {
+      setError(env, e);
+
+      return -1;
+    }
   }
 
   /**
-   * Prepares this statement with the given query.
-   *
-   * @param query SQL query
-   * @return true on success or false on failure
+   * Closes the result set, if any, and closes this statement.
    */
-  public boolean prepare(Env env, StringValue query)
+  protected boolean close()
   {
     try {
-      if (_stmt != null)
+      JdbcResultResource rs = _rs;
+      _rs = null;
+
+      if (rs != null) {
+        rs.close();
+      }
+
+      if (_stmt != null) {
         _stmt.close();
-
-      _query = query.toString();
-
-      if (_query.length() == 0) {
-        return false;
-      }
-
-      Connection conn = _conn.getConnection(env);
-      
-      if (conn == null) {
-        return false;
-      }
-      
-      if (this instanceof OracleStatement) {
-        _stmt = conn.prepareCall(_query,
-                                 ResultSet.TYPE_SCROLL_INSENSITIVE,
-                                 ResultSet.CONCUR_READ_ONLY);
-      }
-      else if (_conn.isSeekable()) {
-        _stmt = conn.prepareStatement(_query,
-                                      ResultSet.TYPE_SCROLL_INSENSITIVE,
-                                      ResultSet.CONCUR_READ_ONLY);
-      }
-      else {
-        _stmt = conn.prepareStatement(_query);
       }
 
       return true;
-
     }
     catch (SQLException e) {
       log.log(Level.FINE, e.toString(), e);
-      _errorMessage = e.getMessage();
-      _errorCode = e.getErrorCode();
+
       return false;
     }
   }
 
   /**
-   * Prepares statement with the given query.
+   * Advance the cursor the number of rows given by offset.
    *
-   * @param query SQL query
+   * @param offset the number of rows to move the cursor
    * @return true on success or false on failure
    */
-  public boolean prepareStatement(Env env, String query)
+  protected boolean dataSeek(int offset)
   {
+    return _rs.setRowNumber(offset);
+  }
+
+  /**
+   * Returns the error number for the last error.
+   *
+   * @return the error number
+   */
+  protected int getErrorCode()
+  {
+    return _errorCode;
+  }
+
+  /**
+   * Returns the error message for the last error.
+   *
+   * @return the error message
+   */
+  protected String getErrorMessage()
+  {
+    return _errorMessage;
+  }
+
+  protected final boolean execute(Env env) {
     try {
-      if (_stmt != null)
-        _stmt.close();
+      return execute(env, true);
+    }
+    catch (SQLException e) {
+      throw new RuntimeException(e);
+    }
+  }
 
-      _query = query;
+  protected final boolean execute(Env env, boolean isCatchException)
+    throws SQLException
+  {
+    if (_stmt == null) {
+      return false;
+    }
 
-      Connection conn = _conn.getConnection(env);
-      
-      if (conn == null)
-        return false;
-      
-      if (this instanceof OracleStatement) {
-        _stmt = conn.prepareCall(query,
-                                 ResultSet.TYPE_SCROLL_INSENSITIVE,
-                                 ResultSet.CONCUR_READ_ONLY);
+    try {
+      prepareForExecute(env);
+
+      if (executeImpl(env)) {
+        _conn.setAffectedRows(0);
+
+        ResultSet resultSet = _stmt.getResultSet();
+        _rs = createResultSet(resultSet);
+
       } else {
-        _stmt = conn.prepareStatement(query,
-                                      ResultSet.TYPE_SCROLL_INSENSITIVE,
-                                      ResultSet.CONCUR_READ_ONLY);
+        _conn.setAffectedRows(_stmt.getUpdateCount());
       }
 
       return true;
+    }
+    catch (SQLException e) {
+      if (isCatchException) {
+        setError(env, e);
 
-    } catch (SQLException e) {
-      log.log(Level.FINE, e.toString(), e);
-      _errorMessage = e.getMessage();
-      _errorCode = e.getErrorCode();
-      return false;
+        return false;
+      }
+
+      throw e;
     }
   }
 
-  /**
-   * Returns a parameter value
-   * Known subclasses: see PostgresStatement.execute
-   */
-  protected Value getParam(int i)
-  {
-    if (i >= _params.length)
-      return UnsetValue.UNSET;
+  protected void setError(Env env, SQLException e) {
+    log.log(Level.FINE, e.getMessage(), e);
 
-    return _params[i];
+    _errorMessage = e.getMessage();
+    _errorCode = e.getErrorCode();
+  }
+
+  protected boolean prepareForExecute(Env env)
+    throws SQLException
+  {
+    return true;
+  }
+
+  protected boolean executeImpl(Env env)
+    throws SQLException
+  {
+    return _stmt.execute(_query);
+  }
+
+  protected JdbcResultResource createResultSet(ResultSet rs)
+  {
+    return new JdbcResultResource(rs);
+  }
+
+  protected Value fetch(Env env)
+  {
+    if (_rs == null) {
+      return NullValue.NULL;
+    }
+
+    return _rs.fetchBound(env, _results);
   }
 
   /**
-   * Returns the number of parameters available to binding
-   * Known subclasses: see PostgresStatement.execute
+   * Frees the associated result.
+   *
+   * @return true on success or false on failure
    */
-  protected int getParamLength()
+  public boolean freeResult()
   {
-    return _params.length;
+    JdbcResultResource rs = _rs;
+    _rs = null;
+
+    if (rs != null) {
+      rs.close();
+    }
+
+    return true;
   }
 
   /**
-   * Changes the internal statement.
+   * Returns the meta data for corresponding to the current result set.
+   *
+   * @return the result set meta data
    */
-  protected void setPreparedStatement(PreparedStatement stmt)
+  protected ResultSetMetaData getMetaData()
+    throws SQLException
   {
-    _stmt = stmt;
+    if (_rs == null) {
+      return null;
+    }
+
+    return _rs.getMetaData();
   }
 
   /**
-   * Changes the internal result set.
+   * Returns the number of rows in the result set.
+   *
+   * @return the number of rows in the result set
    */
-  protected void setResultSet(ResultSet rs)
+  public int getNumRows()
+    throws SQLException
   {
-    _rs = rs;
+    if (_rs == null) {
+      return 0;
+    }
+
+    return _rs.getNumRows();
   }
 
   /**
@@ -653,125 +349,97 @@ public class JdbcStatementResource {
    */
   public int getFieldCount()
   {
-    if (_resultResource == null)
+    if (_rs == null) {
       return 0;
+    }
 
-    return _resultResource.getFieldCount();
+    return _rs.getFieldCount();
   }
 
-  /**
-   * Sets the given parameter
-   * Known subclasses: see PostgresStatement.execute
-   */
-  protected void setObject(int i, Object param)
-    throws Exception
+  protected String lastInsertId(Env env)
+    throws SQLException
   {
+    Statement stmt = _stmt;
+
+    if (stmt == null) {
+      return null;
+    }
+
+    String lastInsertId = null;
+    ResultSet resultSet = null;
+
     try {
-      // See php/4358, php/43b8, php/43d8, and php/43p8.
-      java.sql.ParameterMetaData pmd = _stmt.getParameterMetaData();
-      int type = pmd.getParameterType(i);
+      resultSet = stmt.getGeneratedKeys();
 
-      switch (type) {
-
-      case Types.OTHER:
-        {
-          // See php/43b8
-          String typeName = pmd.getParameterTypeName(i);
-          if (typeName.equals("interval")) {
-            _stmt.setObject(i, param);
-          } else {
-            Class cl = Class.forName("org.postgresql.util.PGobject");
-            Constructor constructor = cl.getDeclaredConstructor(null);
-            Object object = constructor.newInstance();
-
-            Method method = cl.getDeclaredMethod(
-                "setType", new Class[] {String.class});
-            method.invoke(object, new Object[] {typeName});
-
-            method = cl.getDeclaredMethod(
-                "setValue", new Class[] {String.class});
-            method.invoke(object, new Object[] {param});
-
-            _stmt.setObject(i, object, type);
-          }
-          break;
-        }
-
-      case Types.DOUBLE:
-        {
-          // See php/43p8.
-          String typeName = pmd.getParameterTypeName(i);
-          if (typeName.equals("money")) {
-            String s = param.toString();
-
-            if (s.length() == 0) {
-              throw new IllegalArgumentException(
-                  L.l("argument `{0}' cannot be empty", param));
-            } else {
-
-              String money = s;
-
-              if (s.charAt(0) == '$')
-                s = s.substring(1);
-              else
-                money = "$" + money;
-
-              try {
-                // This will throw an exception if not double while
-                // trying to setObject() would not. The error would
-                // come late, otherwise. See php/43p8.
-                Double.parseDouble(s);
-              } catch (Exception ex) {
-                throw new IllegalArgumentException(L.l(
-                    "cannot convert argument `{0}' to money", param));
-              }
-
-              Class cl = Class.forName("org.postgresql.util.PGmoney");
-              Constructor constructor = cl.getDeclaredConstructor(
-                  new Class[] {String.class});
-              Object object = constructor.newInstance(new Object[] {money});
-
-              _stmt.setObject(i, object, Types.OTHER);
-
-              break;
-            }
-          }
-          // else falls to default case
-        }
-
-      default:
-        _stmt.setObject(i, param, type);
+      if (resultSet.next()) {
+        lastInsertId = resultSet.getString(1);
       }
     }
-    catch (SQLException e) {
-      _errorMessage = e.getMessage();
-      _errorCode = e.getErrorCode();
-      throw e;
+    finally {
+      try {
+        if (resultSet != null) {
+          resultSet.close();
+        }
+      }
+      catch (SQLException ex) {
+      }
     }
-    catch (Exception e) {
-      _stmt.clearParameters();
-      throw e;
-    }
+
+    return lastInsertId;
   }
 
-  /**
-   * Returns a string representation for this object.
-   *
-   * @return the string representation for this object
-   */
+  protected void setStatement(Statement stmt)
+  {
+    _stmt = stmt;
+  }
+
+  public JdbcResultResource getResultSet()
+  {
+    if (_rs == null) {
+      return null;
+    }
+
+    return _rs;
+  }
+
+  protected void setResultSet(JdbcResultResource rs)
+  {
+    _rs = rs;
+  }
+
+  protected void setResultSet(ResultSet rs)
+  {
+    _rs = createResultSet(rs);
+  }
+
+  protected final JdbcConnectionResource getConnection()
+  {
+    return _conn;
+  }
+
+  protected Connection getJavaConnection(Env env)
+    throws SQLException
+  {
+    return _conn.getJavaConnection(env);
+  }
+
+  protected void setErrorMessage(String msg)
+  {
+    _errorMessage = msg;
+  }
+
+  protected void setErrorCode(int code)
+  {
+    _errorCode = code;
+  }
+
+  protected boolean isFetchFieldIndexBeforeFieldName()
+  {
+    return true;
+  }
+
   public String toString()
   {
     return getClass().getName() + "[" + _conn + "]";
   }
-
-  /**
-   * Validates the connection resource.
-   *
-   * @return the validated connection resource
-   */
-  public JdbcConnectionResource validateConnection()
-  {
-    return _conn;
-  }
 }
-

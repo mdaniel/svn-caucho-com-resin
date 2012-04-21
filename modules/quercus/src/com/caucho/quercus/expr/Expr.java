@@ -209,7 +209,7 @@ abstract public class Expr {
   {
     return false;
   }
-  
+
   /**
    * Returns true if the expression is a var/left-hand-side.
    */
@@ -217,7 +217,7 @@ abstract public class Expr {
   {
     return false;
   }
-  
+
   //
   // expression creation functions
   //
@@ -233,7 +233,7 @@ abstract public class Expr {
     else
       throw new IOException(msg);
   }
-  
+
   /**
    * Creates an assignment using this value as the right hand side.
    */
@@ -241,7 +241,7 @@ abstract public class Expr {
                                AbstractVarExpr leftHandSide)
   {
     ExprFactory factory = parser.getExprFactory();
-    
+
     return factory.createAssign(leftHandSide, this);
   }
 
@@ -326,41 +326,41 @@ abstract public class Expr {
   {
     return factory.createFieldVarGet(this, name);
   }
-  
+
   //
   // class field refs $class::$bar
   //
-  
+
   /**
    * Creates a class field $class::foo
    */
   public Expr createClassConst(QuercusParser parser, String name)
   {
     ExprFactory factory = parser.getExprFactory();
-    
+
     return factory.createClassConst(this, name);
   }
-  
+
   /**
    * Creates a class field $class::$foo
    */
   public Expr createClassField(QuercusParser parser, String name)
   {
     ExprFactory factory = parser.getExprFactory();
-    
+
     return factory.createClassField(this, name);
   }
-  
+
   /**
    * Creates a class field $class::${foo}
    */
   public Expr createClassField(QuercusParser parser, Expr name)
   {
     ExprFactory factory = parser.getExprFactory();
-    
+
     return factory.createClassField(this, name);
   }
-  
+
   //
   // unary operations
   //
@@ -384,7 +384,7 @@ abstract public class Expr {
     throw new IOException(L.l("{0} is an illegal value to isset",
                               this));
   }
-  
+
   //
   // function call creation
   //
@@ -398,10 +398,10 @@ abstract public class Expr {
     throws IOException
   {
     ExprFactory factory = parser.getExprFactory();
-    
+
     return factory.createVarFunction(location, this, args);
   }
-  
+
   //
   // evaluation
   //
@@ -484,7 +484,7 @@ abstract public class Expr {
 
   /**
    * Evaluates the expression as a copy.
-   * 
+   *
    * The default is not to copy because the absence of copying is more
    * testable.
    *
@@ -510,7 +510,7 @@ abstract public class Expr {
   {
     return eval(env);
   }
-  
+
   /**
    * Evaluates the expression.
    *
@@ -592,10 +592,10 @@ abstract public class Expr {
     //Value var = eval(env);
     //
     //return var.put(index, value);
-    
+
     Value array = evalArray(env);
     array.put(index, value);
-    
+
     return array.get(index); // php/03mm php/03mn
   }
 
@@ -631,9 +631,9 @@ abstract public class Expr {
     Value value = eval(env);
 
     if (value.isObject())
-      return value.toString(env).toString();
+      return value.toString(env).toJavaString();
     else
-      return value.toString();
+      return value.toJavaString();
   }
 
   /**
@@ -713,18 +713,18 @@ abstract public class Expr {
 
     array.remove(index);
   }
-  
+
   /**
    * Evaluates arguments
    */
   public static Value []evalArgs(Env env, Expr []exprs)
   {
     Value []args = new Value[exprs.length];
-    
+
     for (int i = 0; i < args.length; i++) {
       args[i] = exprs[i].evalArg(env, true);
     }
-    
+
     return args;
   }
 

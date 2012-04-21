@@ -29,29 +29,20 @@
 
 package com.caucho.quercus.servlet;
 
-import com.caucho.quercus.*;
-import com.caucho.quercus.env.Env;
-import com.caucho.quercus.env.QuercusValueException;
-import com.caucho.quercus.env.StringBuilderValue;
-import com.caucho.quercus.env.StringValue;
-import com.caucho.quercus.env.Value;
-import com.caucho.quercus.page.QuercusPage;
+import com.caucho.quercus.QuercusContext;
+import com.caucho.quercus.ResinQuercus;
 import com.caucho.server.http.CauchoResponse;
 import com.caucho.server.resin.Resin;
 import com.caucho.server.webapp.WebApp;
 import com.caucho.util.L10N;
-import com.caucho.vfs.Path;
 import com.caucho.vfs.Vfs;
 import com.caucho.vfs.WriteStream;
 
 import javax.servlet.ServletConfig;
 import javax.servlet.ServletException;
-import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
-import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.OutputStream;
-import java.util.logging.Level;
 import java.util.logging.Logger;
 
 /**
@@ -75,7 +66,7 @@ public class ResinQuercusServlet extends QuercusServletImpl
     _webApp = (WebApp) config.getServletContext();
 
     ResinQuercus quercus = (ResinQuercus) getQuercus();
-    
+
     quercus.setWebApp(_webApp);
     getQuercus().setPwd(Vfs.lookup());
 
@@ -87,7 +78,7 @@ public class ResinQuercusServlet extends QuercusServletImpl
     throws IOException
   {
     WriteStream ws;
-    
+
     // XXX: check if correct.  PHP doesn't expect the lower levels
     // to deal with the encoding, so this may be okay
     if (response instanceof CauchoResponse) {
@@ -136,7 +127,7 @@ public class ResinQuercusServlet extends QuercusServletImpl
     if (_quercus == null) {
       _quercus = new ResinQuercus();
     }
-    
+
     return _quercus;
   }
 }

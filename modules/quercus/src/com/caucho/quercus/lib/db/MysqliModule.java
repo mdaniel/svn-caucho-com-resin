@@ -151,23 +151,27 @@ public class MysqliModule extends AbstractQuercusModule {
   /**
    * Returns the number of affected rows.
    */
-  public static int mysqli_affected_rows(@NotNull Mysqli conn)
+  public static int mysqli_affected_rows(Env env, @NotNull Mysqli conn)
   {
-    if (conn == null)
+    if (conn == null) {
       return -1;
+    }
 
-    return conn.affected_rows();
+    return conn.affected_rows(env);
   }
 
   /**
    * Turns auto-commit on or off.
    */
-  public static boolean mysqli_autocommit(@NotNull Mysqli conn, boolean mode)
+  public static boolean mysqli_autocommit(Env env,
+                                          @NotNull Mysqli conn,
+                                          boolean mode)
   {
-    if (conn == null)
+    if (conn == null) {
       return false;
+    }
 
-    return conn.autocommit(mode);
+    return conn.autocommit(env, mode);
   }
 
   /**
@@ -225,7 +229,9 @@ public class MysqliModule extends AbstractQuercusModule {
       return false;
     }
 
-    return conn.close(env);
+    conn.close();
+
+    return true;
   }
 
   /**
@@ -483,24 +489,26 @@ public class MysqliModule extends AbstractQuercusModule {
    * Indicates if one or more result sets are available from
    * a previous call to mysqli_multi_query.
    */
-  public static boolean mysqli_more_results(@NotNull Mysqli conn)
+  public static boolean mysqli_more_results(Env env, @NotNull Mysqli conn)
   {
-    if (conn == null)
+    if (conn == null) {
       return false;
+    }
 
-    return conn.more_results();
+    return conn.more_results(env);
   }
 
   /**
    * Prepares next result set from a previous call to
    * mysqli_multi_query.
    */
-  public static boolean mysqli_next_result(@NotNull Mysqli conn)
+  public static boolean mysqli_next_result(Env env, @NotNull Mysqli conn)
   {
-    if (conn == null)
+    if (conn == null) {
       return false;
+    }
 
-    return conn.next_result();
+    return conn.next_result(env);
   }
 
   /**
@@ -542,24 +550,25 @@ public class MysqliModule extends AbstractQuercusModule {
   /**
    * Returns the number of columns for the most recent query.
    */
-  public static int mysqli_field_count(@NotNull Mysqli conn)
+  public static int mysqli_field_count(Env env, @NotNull Mysqli conn)
   {
-    if (conn == null)
+    if (conn == null) {
       return 0;
+    }
 
-    return conn.field_count();
+    return conn.field_count(env);
   }
 
   /**
    * Returns a row for the result.
    */
-  @ReturnNullAsFalse
-  public static ArrayValue mysqli_fetch_array(Env env,
-                                              @NotNull MysqliResult result,
-                                              @Optional("MYSQLI_BOTH") int type)
+  public static Value mysqli_fetch_array(Env env,
+                                         @NotNull MysqliResult result,
+                                         @Optional("MYSQLI_BOTH") int type)
   {
-    if (result == null)
-      return null;
+    if (result == null) {
+      return BooleanValue.FALSE;
+    }
 
     return result.fetch_array(env, type);
   }
@@ -567,12 +576,12 @@ public class MysqliModule extends AbstractQuercusModule {
   /**
    * Returns an associative array from the result.
    */
-  @ReturnNullAsFalse
-  public static ArrayValue mysqli_fetch_assoc(Env env,
-                                              @NotNull MysqliResult result)
+  public static Value mysqli_fetch_assoc(Env env,
+                                         @NotNull MysqliResult result)
   {
-    if (result == null)
-      return null;
+    if (result == null) {
+      return BooleanValue.FALSE;
+    }
 
     return result.fetch_assoc(env);
   }
@@ -581,11 +590,12 @@ public class MysqliModule extends AbstractQuercusModule {
    * Returns a row for the result. Return NULL if there are no more rows.
    */
 
-  public static ArrayValue mysqli_fetch_row(Env env,
-                                            @NotNull MysqliResult result)
+  public static Value mysqli_fetch_row(Env env,
+                                       @NotNull MysqliResult result)
   {
-    if (result == null)
-      return null;
+    if (result == null) {
+      return BooleanValue.FALSE;
+    }
 
     return result.fetch_row(env);
   }
@@ -600,12 +610,15 @@ public class MysqliModule extends AbstractQuercusModule {
    * row or NULL if there are no more rows in resultset
    */
   public static Value mysqli_fetch_object(Env env,
-                                          @NotNull MysqliResult result)
+                                          @NotNull MysqliResult result,
+                                          @Optional String className,
+                                          @Optional Value[] args)
   {
-    if (result == null)
+    if (result == null) {
       return NullValue.NULL;
+    }
 
-    return result.fetch_object(env);
+    return result.fetch_object(env, className, args);
   }
 
   /**
@@ -671,12 +684,13 @@ public class MysqliModule extends AbstractQuercusModule {
   /**
    * Returns a number that represents the MySQL server version.
    */
-  public static Value mysqli_get_server_version(@NotNull Mysqli conn)
+  public static Value mysqli_get_server_version(Env env, @NotNull Mysqli conn)
   {
-    if (conn == null)
+    if (conn == null) {
       return NullValue.NULL;
+    }
 
-    return LongValue.create(conn.get_server_version());
+    return LongValue.create(conn.get_server_version(env));
   }
 
   /**
@@ -783,7 +797,7 @@ public class MysqliModule extends AbstractQuercusModule {
    */
   public static boolean mysqli_stmt_prepare(Env env,
                                             @NotNull MysqliStatement stmt,
-                                            StringValue query)
+                                            String query)
   {
     if (stmt == null)
       return false;
@@ -988,14 +1002,14 @@ public class MysqliModule extends AbstractQuercusModule {
     if (unescapedString.length() == 0)
       return env.getEmptyString();
 
-    StringBuilder buf = new StringBuilder();
+    StringValue sb = env.createStringBuilder();
 
-    escapeString(buf, unescapedString.toString());
+    escapeString(sb, unescapedString.toString());
 
-    return env.createString(buf.toString());
+    return sb;
   }
 
-  static void escapeString(StringBuilder buf, String unescapedString)
+  static void escapeString(StringValue sb, CharSequence unescapedString)
   {
     char c;
 
@@ -1005,35 +1019,35 @@ public class MysqliModule extends AbstractQuercusModule {
       c = unescapedString.charAt(i);
       switch (c) {
       case '\u0000':
-        buf.append('\\');
-        buf.append('\u0000');
+        sb.append('\\');
+        sb.append('\u0000');
         break;
       case '\n':
-        buf.append('\\');
-        buf.append('n');
+        sb.append('\\');
+        sb.append('n');
         break;
       case '\r':
-        buf.append('\\');
-        buf.append('r');
+        sb.append('\\');
+        sb.append('r');
         break;
       case '\\':
-        buf.append('\\');
-        buf.append('\\');
+        sb.append('\\');
+        sb.append('\\');
         break;
       case '\'':
-        buf.append('\\');
-        buf.append('\'');
+        sb.append('\\');
+        sb.append('\'');
         break;
       case '"':
-        buf.append('\\');
-        buf.append('\"');
+        sb.append('\\');
+        sb.append('\"');
         break;
       case '\032':
-        buf.append('\\');
-        buf.append('Z');
+        sb.append('\\');
+        sb.append('Z');
         break;
       default:
-        buf.append(c);
+        sb.append(c);
         break;
       }
     }
@@ -1049,8 +1063,9 @@ public class MysqliModule extends AbstractQuercusModule {
                                           @NotNull Mysqli conn,
                                           StringValue query)
   {
-    if (conn == null)
+    if (conn == null) {
       return false;
+    }
 
     return conn.real_query(env, query);
   }
@@ -1059,48 +1074,47 @@ public class MysqliModule extends AbstractQuercusModule {
    * Execute a query with arguments and return a result.
    */
   static Value mysqli_query(Env env,
-                             Mysqli conn,
-                             StringValue query,
-                             Object ... args)
+                            Mysqli conn,
+                            StringValue query,
+                            Object ... args)
   {
-    StringBuilder buf = new StringBuilder();
+    StringValue sb = env.createStringBuilder();
 
     int size = query.length();
 
     int argIndex = 0;
 
     for (int i = 0; i < size; i++) {
-      char ch = buf.charAt(i);
+      char ch = query.charAt(i);
 
       if (ch == '?') {
         Object arg = args[argIndex++];
 
         if (arg == null)
-          throw new IllegalArgumentException(
-              L.l("argument `{0}' cannot be null", arg));
+          throw new IllegalArgumentException(L.l("argument `{0}' cannot be null", arg));
 
-        buf.append('\'');
-        escapeString(buf, String.valueOf(arg));
-        buf.append('\'');
+        sb.append('\'');
+        escapeString(sb, String.valueOf(arg));
+        sb.append('\'');
       }
       else
-        buf.append(ch);
+        sb.append(ch);
     }
 
-    return query(env, conn,
-                 env.createString(buf.toString()));
+    return query(env, conn, sb);
   }
 
 
   /**
    * Select the database for a connection.
    */
-  public static boolean mysqli_select_db(Mysqli conn, String dbName)
+  public static boolean mysqli_select_db(Env env, Mysqli conn, String dbName)
   {
-    if (conn == null)
+    if (conn == null) {
       return false;
+    }
 
-    return conn.select_db(dbName);
+    return conn.select_db(env, dbName);
   }
 
   /**
@@ -1109,8 +1123,9 @@ public class MysqliModule extends AbstractQuercusModule {
    */
   public static Value mysqli_stat(Env env, @NotNull Mysqli conn)
   {
-    if (conn == null)
+    if (conn == null) {
       return BooleanValue.FALSE;
+    }
 
     return conn.stat(env);
   }
@@ -1123,11 +1138,13 @@ public class MysqliModule extends AbstractQuercusModule {
   public static int mysqli_stmt_affected_rows(Env env,
                                               @NotNull MysqliStatement stmt)
   {
-    if (stmt == null)
+    if (stmt == null) {
       return -1;
+    }
 
-    if (stmt.errno() != 0)
+    if (stmt.errno() != 0) {
       return -1;
+    }
 
     return stmt.affected_rows(env);
   }
@@ -1151,8 +1168,9 @@ public class MysqliModule extends AbstractQuercusModule {
                                                StringValue types,
                                                @Reference Value[] params)
   {
-    if (stmt == null)
+    if (stmt == null) {
       return false;
+    }
 
     return stmt.bind_param(env, types, params);
   }
@@ -1164,8 +1182,9 @@ public class MysqliModule extends AbstractQuercusModule {
                                                 @NotNull MysqliStatement stmt,
                                                 @Reference Value[] outParams)
   {
-    if (stmt == null)
+    if (stmt == null) {
       return false;
+    }
 
     return stmt.bind_result(env, outParams);
   }
@@ -1173,10 +1192,11 @@ public class MysqliModule extends AbstractQuercusModule {
   /**
    * Closes the statement.
    */
-  public boolean mysql_stmt_close(MysqliStatement stmt)
+  public boolean mysql_stmt_close(Env env, MysqliStatement stmt)
   {
-    if (stmt == null)
+    if (stmt == null) {
       return false;
+    }
 
     return stmt.close();
   }
@@ -1190,8 +1210,9 @@ public class MysqliModule extends AbstractQuercusModule {
                                      @NotNull MysqliStatement stmt,
                                      int offset)
   {
-    if (stmt == null)
+    if (stmt == null) {
       return BooleanValue.FALSE;
+    }
 
     return stmt.data_seek(env, offset);
   }
@@ -1202,10 +1223,12 @@ public class MysqliModule extends AbstractQuercusModule {
   public int mysql_stmt_errno(Env env,
                               MysqliStatement stmt)
   {
-    if (stmt != null)
+    if (stmt != null) {
       return stmt.errno();
-    else
+    }
+    else {
       return 0;
+    }
   }
 
   /**
@@ -1214,8 +1237,9 @@ public class MysqliModule extends AbstractQuercusModule {
   public StringValue mysql_stmt_error(Env env,
                                  MysqliStatement stmt)
   {
-    if (stmt == null)
+    if (stmt == null) {
       return null;
+    }
 
     return stmt.error(env);
   }
@@ -1228,8 +1252,9 @@ public class MysqliModule extends AbstractQuercusModule {
   public static boolean mysqli_stmt_execute(Env env,
                                             @NotNull MysqliStatement stmt)
   {
-    if (stmt == null)
+    if (stmt == null) {
       return false;
+    }
 
     return stmt.execute(env);
   }
@@ -1241,8 +1266,9 @@ public class MysqliModule extends AbstractQuercusModule {
   public static Value mysqli_stmt_fetch(Env env,
                                         @NotNull MysqliStatement stmt)
   {
-    if (stmt == null)
+    if (stmt == null) {
       return BooleanValue.FALSE;
+    }
 
     return stmt.fetch(env);
   }
@@ -1253,8 +1279,9 @@ public class MysqliModule extends AbstractQuercusModule {
   public static boolean mysqli_stmt_free_result(Env env,
                                                 MysqliStatement stmt)
   {
-    if (stmt == null)
+    if (stmt == null) {
       return false;
+    }
 
     stmt.free_result(env);
 
@@ -1275,15 +1302,17 @@ public class MysqliModule extends AbstractQuercusModule {
   /**
    * Changes the user and database.
    */
-  public static boolean mysqli_change_user(@NotNull Mysqli mysqli,
+  public static boolean mysqli_change_user(Env env,
+                                           @NotNull Mysqli mysqli,
                                            String user,
                                            String password,
                                            String db)
   {
-    if (mysqli == null)
+    if (mysqli == null) {
       return false;
+    }
 
-    return mysqli.change_user(user, password, db);
+    return mysqli.change_user(env, user, password, db);
   }
 
   /**
@@ -1299,9 +1328,8 @@ public class MysqliModule extends AbstractQuercusModule {
    * Deprecated alias for {@link #mysqli_stmt_result_metadata}.
    */
   @ReturnNullAsFalse
-  public static JdbcResultResource mysqli_get_metadata(
-      Env env,
-      @NotNull MysqliStatement stmt) {
+  public static JdbcResultResource mysqli_get_metadata(Env env,
+                                                       @NotNull MysqliStatement stmt) {
     return mysqli_stmt_result_metadata(env, stmt);
   }
 
@@ -1319,10 +1347,11 @@ public class MysqliModule extends AbstractQuercusModule {
   @ReturnNullAsFalse
   public static MysqliStatement mysqli_prepare(Env env,
                                                @NotNull Mysqli conn,
-                                               StringValue query)
+                                               String query)
   {
-    if (conn == null)
+    if (conn == null) {
       return null;
+    }
 
     return conn.prepare(env, query);
   }
@@ -1333,10 +1362,11 @@ public class MysqliModule extends AbstractQuercusModule {
   public static boolean mysqli_stmt_close(Env env,
                                           @NotNull MysqliStatement stmt)
   {
-    if (stmt == null)
+    if (stmt == null) {
       return false;
+    }
 
-    return stmt.close(env);
+    return stmt.close();
   }
 
   /**
@@ -1345,8 +1375,9 @@ public class MysqliModule extends AbstractQuercusModule {
   public static MysqliStatement mysqli_stmt_init(Env env,
                                                  @NotNull Mysqli conn)
   {
-    if (conn == null)
+    if (conn == null) {
       return null;
+    }
 
     return conn.stmt_init(env);
   }
@@ -1356,8 +1387,9 @@ public class MysqliModule extends AbstractQuercusModule {
    */
   public static Value mysqli_info(Env env, @Optional Mysqli conn)
   {
-    if (conn == null)
+    if (conn == null) {
       return null;
+    }
 
     return conn.info(env);
   }
@@ -1368,8 +1400,9 @@ public class MysqliModule extends AbstractQuercusModule {
   public static int mysqli_stmt_field_count(Env env,
                                             @NotNull MysqliStatement stmt)
   {
-    if (stmt == null)
+    if (stmt == null) {
       return -1;
+    }
 
     return stmt.field_count(env);
   }
@@ -1382,8 +1415,9 @@ public class MysqliModule extends AbstractQuercusModule {
   public static Value mysqli_thread_id(Env env,
                                        @NotNull Mysqli conn)
   {
-    if (conn == null)
+    if (conn == null) {
       return BooleanValue.FALSE;
+    }
 
     return conn.thread_id(env);
   }
@@ -1399,8 +1433,9 @@ public class MysqliModule extends AbstractQuercusModule {
                                     @NotNull Mysqli conn,
                                     int threadId)
   {
-    if (conn == null)
+    if (conn == null) {
       return false;
+    }
 
     return conn.kill(env, threadId);
   }

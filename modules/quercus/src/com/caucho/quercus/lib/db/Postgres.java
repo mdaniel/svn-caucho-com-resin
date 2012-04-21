@@ -49,7 +49,8 @@ import java.util.logging.Logger;
  * postgres connection class (postgres has NO object oriented API)
  */
 @ResourceType("pgsql link")
-public class Postgres extends JdbcConnectionResource {
+public class Postgres extends JdbcConnectionResource
+{
   private static final Logger log = Logger.getLogger(Postgres.class.getName());
   private static final L10N L = new L10N(Postgres.class);
 
@@ -143,10 +144,10 @@ public class Postgres extends JdbcConnectionResource {
   /**
    * returns a prepared statement
    */
-  public PostgresStatement prepare(Env env, StringValue query)
+  public PostgresStatement prepare(Env env, String query)
   {
-    PostgresStatement stmt = new PostgresStatement(
-      (Postgres)validateConnection());
+    PostgresStatement stmt
+      = new PostgresStatement((Postgres) validateConnection(env));
 
     stmt.prepare(env, query);
 
@@ -166,7 +167,7 @@ public class Postgres extends JdbcConnectionResource {
     SqlParseToken tok = parseSqlToken(sql, null);
 
     if (tok != null
-        && tok.matchesFirstChar('S', 's') 
+        && tok.matchesFirstChar('S', 's')
         && tok.matchesToken("SET")) {
       // Check for "SET CLIENT_ENCODING TO ..."
 
@@ -187,21 +188,20 @@ public class Postgres extends JdbcConnectionResource {
     }
 
     Object result = realQuery(env, sql).toJavaObject();
-    
+
     if (! (result instanceof PostgresResult))
       return null;
-    
+
     return (PostgresResult) result;
   }
 
   /**
    * Creates a database-specific result.
    */
-  protected JdbcResultResource createResult(Env env,
-                                            Statement stmt,
-                                            ResultSet rs)
+  @Override
+  protected JdbcResultResource createResult(Statement stmt, ResultSet rs)
   {
-    return new PostgresResult(env, stmt, rs, this);
+    return new PostgresResult(this, stmt, rs);
   }
 
   public void setAsynchronousResult(PostgresResult asyncResult)
@@ -224,8 +224,7 @@ public class Postgres extends JdbcConnectionResource {
     _asyncStmt = asyncStmt;
   }
 
-  public void putStatement(String name,
-                           PostgresStatement stmt)
+  public void putStatement(String name, PostgresStatement stmt)
   {
     _stmtTable.put(name, stmt);
   }
@@ -244,15 +243,17 @@ public class Postgres extends JdbcConnectionResource {
    * This function is overriden in Postgres to keep
    * result set references for php/430a (see also php/1f33)
    */
+  @Override
   protected void keepResourceValues(Statement stmt)
   {
-    setResultResource(createResult(getEnv(), stmt, null));
+    setResultResource(createResult(stmt, null));
   }
 
   /**
    * This function is overriden in Postgres to keep
    * statement references for php/430a
    */
+  @Override
   protected boolean keepStatementOpen()
   {
     return true;
@@ -337,10 +338,11 @@ public class Postgres extends JdbcConnectionResource {
       super.saveErrors(e);
 
       // Get the postgres specific server error message
-      Class cl = Class.forName("org.postgresql.util.PSQLException");
+      Class<?> cl = Class.forName("org.postgresql.util.PSQLException");
       Method method = cl.getDeclaredMethod("getServerErrorMessage", null);
       _serverErrorMessage = method.invoke(e, new Object[] {});
-    } catch (Exception ex) {
+    }
+    catch (Exception ex) {
       log.log(Level.FINE, ex.toString(), ex);
     }
   }

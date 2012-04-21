@@ -54,6 +54,9 @@ public class PostgresResult extends JdbcResultResource {
   // See PostgresModule.pg_fetch_array()
   private boolean _passedNullRow = false;
 
+  private Postgres _conn;
+  private Statement _stmt;
+
   /**
    * Constructor for PostgresResult
    *
@@ -61,12 +64,12 @@ public class PostgresResult extends JdbcResultResource {
    * @param rs the corresponding result set
    * @param conn the corresponding connection
    */
-  public PostgresResult(Env env,
-                        Statement stmt,
-                        ResultSet rs,
-                        Postgres conn)
+  public PostgresResult(Postgres conn, Statement stmt, ResultSet rs)
   {
-    super(env, stmt, rs, conn);
+    super(rs);
+
+    _conn = conn;
+    _stmt = stmt;
   }
 
   /**
@@ -75,11 +78,11 @@ public class PostgresResult extends JdbcResultResource {
    * @param metaData the corresponding result set meta data
    * @param conn the corresponding connection
    */
-  public PostgresResult(Env env,
-                        ResultSetMetaData metaData,
-                        Postgres conn)
+  public PostgresResult(Postgres conn, ResultSetMetaData metaData)
   {
-    super(env, metaData, conn);
+    super(metaData);
+
+    _conn = conn;
   }
 
   /**
@@ -106,7 +109,7 @@ public class PostgresResult extends JdbcResultResource {
   }
 
   /* php/43c? - postgres times and dates can have timezones, so the
-   * string representation conforms to the php representation, but 
+   * string representation conforms to the php representation, but
    * the java.sql.Date representation does not.
    */
 
@@ -115,7 +118,7 @@ public class PostgresResult extends JdbcResultResource {
     throws SQLException
   {
     Time time = rs.getTime(column);
-    
+
     if (time == null)
       return NullValue.NULL;
     else
@@ -127,7 +130,7 @@ public class PostgresResult extends JdbcResultResource {
     throws SQLException
   {
     Date date = rs.getDate(column);
-    
+
     if (date == null)
       return NullValue.NULL;
     else
@@ -145,5 +148,15 @@ public class PostgresResult extends JdbcResultResource {
     else {
       return env.createString(rs.getString(column));
     }
+  }
+
+  protected Postgres getConnection()
+  {
+    return _conn;
+  }
+
+  protected Statement getJavaStatement(Env env)
+  {
+    return env.getQuercus().getStatement(_stmt);
   }
 }

@@ -48,7 +48,7 @@ import java.util.logging.Logger;
 /**
  * mysqli object oriented API facade
  */
-public class MysqliStatement extends JdbcStatementResource {
+public class MysqliStatement extends JdbcPreparedStatementResource {
   private static final Logger log = Logger
     .getLogger(MysqliStatement.class.getName());
   private static final L10N L = new L10N(MysqliStatement.class);
@@ -86,7 +86,7 @@ public class MysqliStatement extends JdbcStatementResource {
    */
   public int affected_rows(Env env)
   {
-    return validateConnection().getAffectedRows();
+    return getConnection().getAffectedRows();
   }
 
   /**
@@ -98,10 +98,35 @@ public class MysqliStatement extends JdbcStatementResource {
    * @return true on success or false on failure
    */
   public boolean bind_param(Env env,
-                            StringValue types,
+                            StringValue typeStr,
                             @Reference Value[] params)
   {
-    return bindParams(env, types.toString(), params);
+    int len = typeStr.length();
+
+    ColumnType[] types = new ColumnType[len];
+
+    for (int i = 0; i < len; i++) {
+      char ch = typeStr.charAt(i);
+
+      if (ch == 's') {
+        types[i] = ColumnType.STRING;
+      }
+      else if (ch == 'b') {
+        types[i] = ColumnType.BLOB;
+      }
+      else if (ch == 'i') {
+        types[i] = ColumnType.LONG;
+      }
+      else if (ch == 'd') {
+        types[i] = ColumnType.DOUBLE;
+      }
+      else {
+        env.warning(L.l("invalid param type '{0}' in string '{1}'", ch, typeStr));
+        return false;
+      }
+    }
+
+    return bindParams(env, types, params);
   }
 
   /**
@@ -123,7 +148,8 @@ public class MysqliStatement extends JdbcStatementResource {
    * @param env the PHP executing environment
    * @return true on success or false on failure
    */
-  public boolean close(Env env)
+  @Override
+  public boolean close()
   {
     return super.close();
   }
@@ -153,7 +179,7 @@ public class MysqliStatement extends JdbcStatementResource {
    */
   public int errno()
   {
-    return errorCode();
+    return getErrorCode();
   }
 
   /**
@@ -173,7 +199,7 @@ public class MysqliStatement extends JdbcStatementResource {
    */
   public StringValue error(Env env)
   {
-    return env.createString(errorMessage());
+    return env.createString(getErrorMessage());
   }
 
   /**
@@ -184,18 +210,6 @@ public class MysqliStatement extends JdbcStatementResource {
   public StringValue geterror(Env env)
   {
     return error(env);
-  }
-
-  /**
-   * Executes a prepared Query. The statement has
-   * been prepared using mysqli_prepare.
-   *
-   * @param env the PHP executing environment
-   * @return true on success or false on failure
-   */
-  public boolean execute(Env env)
-  {
-    return super.execute(env);
   }
 
   /**
@@ -219,20 +233,13 @@ public class MysqliStatement extends JdbcStatementResource {
   {
     freeResult();
   }
-  
+
   /**
    * Returns the MysqliResult
    */
-  public MysqliResult get_result(Env env) {
-    if (getResultSet() != null) {
-      return new MysqliResult(env,
-                              getPreparedStatement(),
-                              getResultSet(),
-                              (Mysqli) validateConnection());
-    }
-    else {
-      return null;
-    }
+  public JdbcResultResource get_result(Env env)
+  {
+    return getResultSet();
   }
 
   /**
@@ -251,8 +258,10 @@ public class MysqliStatement extends JdbcStatementResource {
    */
   public Value num_rows(Env env)
   {
-    if (getResultSet() != null)
-      return LongValue.create(JdbcResultResource.getNumRows(getResultSet()));
+    JdbcResultResource rs = getResultSet();
+
+    if (rs != null)
+      return LongValue.create(rs.getNumRows());
     else
       return BooleanValue.FALSE;
   }
@@ -283,7 +292,8 @@ public class MysqliStatement extends JdbcStatementResource {
    * @param query SQL query
    * @return true on success or false on failure
    */
-  public boolean prepare(Env env, StringValue query)
+  @Override
+  public boolean prepare(Env env, String query)
   {
     return super.prepare(env, query);
   }
@@ -347,8 +357,7 @@ public class MysqliStatement extends JdbcStatementResource {
   {
     try {
       if (getResultSet() != null) {
-        return new MysqliResult(env, getMetaData(),
-                                (Mysqli) validateConnection());
+        return new MysqliResult(getMetaData(), (Mysqli) getConnection());
       } else
         return null;
 
@@ -391,7 +400,7 @@ public class MysqliStatement extends JdbcStatementResource {
   public StringValue sqlstate(Env env)
   {
     int code = errno();
-    
+
     return env.createString(Mysqli.lookupSqlstate(code));
   }
 
@@ -432,7 +441,7 @@ public class MysqliStatement extends JdbcStatementResource {
 
   public Value insert_id(Env env)
   {
-    return ((Mysqli) validateConnection()).insert_id(env);
+    return ((Mysqli) getConnection()).insert_id(env);
   }
 }
 

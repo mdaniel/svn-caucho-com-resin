@@ -63,7 +63,7 @@ public class StaticFunction extends JavaInvoker {
     _argLength = method.getParameterTypes().length;
     _quercusModule = quercusModule;
   }
-  
+
   /*
    * Returns true for a static function.
    */
@@ -72,7 +72,7 @@ public class StaticFunction extends JavaInvoker {
   {
     return true;
   }
-  
+
   @Override
   public String getDeclaringClassName()
   {
@@ -137,7 +137,7 @@ public class StaticFunction extends JavaInvoker {
   private String toString(Method method, Object []javaArgs)
   {
     StringBuilder sb = new StringBuilder();
-    
+
     sb.append(method.getDeclaringClass().getName());
     sb.append(".");
     sb.append(method.getName());
@@ -149,7 +149,7 @@ public class StaticFunction extends JavaInvoker {
 
       sb.append(javaArgs[i]);
     }
-      
+
     sb.append(")");
 
     return sb.toString();

@@ -29,7 +29,7 @@
 
 package com.caucho.quercus.lib.db;
 
-import java.sql.*;
+import java.sql.Connection;
 
 /**
  * Extra connection metadata for a Quercus Mysql connection.

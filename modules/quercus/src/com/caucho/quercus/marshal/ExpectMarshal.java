@@ -30,8 +30,6 @@
 package com.caucho.quercus.marshal;
 
 import com.caucho.quercus.env.Env;
-import com.caucho.quercus.env.NullValue;
-import com.caucho.quercus.env.UnexpectedValue;
 import com.caucho.quercus.env.Value;
 import com.caucho.quercus.expr.Expr;
 
@@ -42,19 +40,19 @@ public class ExpectMarshal extends Marshal
   }
 
   private Type _type;
-  
+
   public static final Marshal MARSHAL_EXPECT_STRING
     = new ExpectMarshal(Type.STRING);
   public static final Marshal MARSHAL_EXPECT_NUMERIC
     = new ExpectMarshal(Type.NUMERIC);
   public static final Marshal MARSHAL_EXPECT_BOOLEAN
     = new ExpectMarshal(Type.BOOLEAN);
-  
+
   protected ExpectMarshal(Type type)
   {
     _type = type;
   }
-  
+
   protected Value expect(Env env, Value value)
   {
     if (_type == Type.STRING)

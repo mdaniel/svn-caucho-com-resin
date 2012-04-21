@@ -61,15 +61,16 @@ import java.util.logging.Logger;
 /**
  * mysqli object oriented API facade
  */
-public class Mysqli extends JdbcConnectionResource {
+public class Mysqli extends JdbcConnectionResource
+{
   private static final Logger log = Logger.getLogger(Mysqli.class.getName());
   private static final L10N L = new L10N(Mysqli.class);
 
   protected static final String DEFAULT_DRIVER = "com.mysql.jdbc.Driver";
-  
+
   private static HashMap<String,String> _DEFAULT_JDBC_DRIVER_MAP
     = new HashMap<String,String>();
-  
+
   static {
     _DEFAULT_JDBC_DRIVER_MAP.put("mysql", DEFAULT_DRIVER);
     _DEFAULT_JDBC_DRIVER_MAP.put("google:rdbms",
@@ -129,14 +130,7 @@ public class Mysqli extends JdbcConnectionResource {
   {
     super(env);
 
-    String hostStr;
-
-    if (host.length() == 0)
-      hostStr = "localhost";
-    else
-      hostStr = host.toString();
-
-    connectInternal(env, hostStr, user.toString(), password.toString(),
+    connectInternal(env, host.toString(), user.toString(), password.toString(),
                     db, port, socket.toString(),
                     0, null, null, true);
   }
@@ -148,24 +142,15 @@ public class Mysqli extends JdbcConnectionResource {
    * arguments not available in the mysqli constructor.
    */
 
-  Mysqli(Env env,
-         String host,
-         String user,
-         String password,
-         String db,
-         int port,
-         String socket,
-         int flags,
-         String driver,
-         String url,
-         boolean isNewLink)
+  Mysqli(Env env, String host, String user, String pass, String db, int port,
+         String socket, int flags, String driver, String url, boolean isNewLink)
   {
     super(env);
 
     if (host == null || host.length() == 0)
       host = "localhost";
 
-    connectInternal(env, host, user, password, db, port, socket,
+    connectInternal(env, host, user, pass, db, port, socket,
                     flags, driver, url, isNewLink);
   }
 
@@ -185,8 +170,8 @@ public class Mysqli extends JdbcConnectionResource {
   @Override
   protected ConnectionEntry connectImpl(Env env,
                                         String host,
-                                        String userName,
-                                        String password,
+                                        String user,
+                                        String pass,
                                         String dbname,
                                         int port,
                                         String socket,
@@ -210,24 +195,24 @@ public class Mysqli extends JdbcConnectionResource {
       }
       else if (host.startsWith("jdbc:")) {
         int slashPos = host.indexOf("://");
-        
+
         if (slashPos > 0) {
           String protocol = host.substring(5, slashPos);
-          
+
           Value driverMap = env.getConfigVar("quercus.jdbc_drivers");
-                    
+
           if (driverMap.isArray()) {
             Value driverValue = driverMap.get(env.createString(protocol));
-            
+
             if (driverValue != UnsetValue.UNSET) {
               driver = driverValue.toString();
             }
           }
-          
+
           if (driver == null) {
             driver = _DEFAULT_JDBC_DRIVER_MAP.get(protocol);
           }
-          
+
           url = host;
         }
       }
@@ -240,16 +225,16 @@ public class Mysqli extends JdbcConnectionResource {
           driver = DEFAULT_DRIVER;
         }
       }
-      
+
       if (url == null || url.equals("")) {
         url = getUrl(host, port, dbname, ENCODING,
                      (flags & MysqliModule.MYSQL_CLIENT_INTERACTIVE) != 0,
                      (flags & MysqliModule.MYSQL_CLIENT_COMPRESS) != 0,
                      (flags & MysqliModule.MYSQL_CLIENT_SSL) != 0);
       }
-      
+
       ConnectionEntry jConn
-        = env.getConnection(driver, url, userName, password, ! isNewLink);
+        = env.getConnection(driver, url, user, pass, ! isNewLink);
 
       Connection conn = jConn.getConnection();
 
@@ -276,7 +261,7 @@ public class Mysqli extends JdbcConnectionResource {
       env.warning(L.l("A link to the server could not be established.\n  url={0}\n  "
                       + "driver={1}\n  {2}", url, driver, e.toString()), e);
       env.setSpecialValue("mysqli.connectError", env.createString(e.toString()));
-      
+
       return null;
     }
   }
@@ -350,25 +335,25 @@ public class Mysqli extends JdbcConnectionResource {
    * Quercus function to get the field 'affected_rows'.
    */
 
-  public int getaffected_rows()
+  public int getaffected_rows(Env env)
   {
-    return affected_rows();
+    return affected_rows(env);
   }
 
   /**
    * returns the number of affected rows.
    */
-  public int affected_rows()
+  public int affected_rows(Env env)
   {
-    return validateConnection().getAffectedRows();
+    return validateConnection(env).getAffectedRows();
   }
 
   /**
    * sets the autocommit mode
    */
-  public boolean autocommit(boolean isAutoCommit)
+  public boolean autocommit(Env env, boolean isAutoCommit)
   {
-    return validateConnection().setAutoCommit(isAutoCommit);
+    return validateConnection(env).setAutoCommit(isAutoCommit);
   }
 
   /**
@@ -378,13 +363,14 @@ public class Mysqli extends JdbcConnectionResource {
    * @param password the new password
    * @param db the new database
    */
-  public boolean change_user(String user,
+  public boolean change_user(Env env,
+                             String user,
                              String password,
                              String db)
   {
     try {
       if (isConnected()) {
-        Connection conn = getJavaConnection();
+        Connection conn = getJavaConnection(env);
 
         Class<?> cls = conn.getClass();
 
@@ -393,7 +379,7 @@ public class Mysqli extends JdbcConnectionResource {
         if (method != null) {
           method.invoke(conn, user, password);
 
-          select_db(db);
+          select_db(env, db);
 
           return true;
         }
@@ -405,7 +391,7 @@ public class Mysqli extends JdbcConnectionResource {
     } catch (IllegalAccessException e) {
       throw new QuercusException(e);
     } catch (SQLException e) {
-      getEnv().warning(L.l("unable to change user to '{0}'", user));
+      env.warning(L.l("unable to change user to '{0}'", user));
 
       return false;
     }
@@ -414,9 +400,9 @@ public class Mysqli extends JdbcConnectionResource {
     // if new user authorization fails,
     // then the existing user perms are retained.
 
-    close(getEnv());
+    close();
 
-    return connectInternal(getEnv(), _host, user, password,
+    return connectInternal(env, _host, user, password,
                            db, _port, _socket, _flags, _driver, _url, false);
   }
 
@@ -469,9 +455,9 @@ public class Mysqli extends JdbcConnectionResource {
   /**
    * Escapes the string
    */
-  public StringValue escape_string(StringValue str)
+  public StringValue escape_string(Env env, StringValue str)
   {
-    return real_escape_string(str);
+    return real_escape_string(env, str);
   }
 
   /**
@@ -538,7 +524,7 @@ public class Mysqli extends JdbcConnectionResource {
    */
   public Value get_dbname(Env env)
   {
-    return getCatalog();
+    return env.createString(getCatalog());
   }
 
   /**
@@ -585,7 +571,8 @@ public class Mysqli extends JdbcConnectionResource {
    * it should since it is an acceptable compromise.
    */
 
-  Value info(Env env) {
+  Value info(Env env)
+  {
     if (getResultResource() != null) {
       // Last SQL statement was a SELECT
 
@@ -597,9 +584,9 @@ public class Mysqli extends JdbcConnectionResource {
     // ALTER TABLE result: "Records: 60 Duplicates: 0 Warnings: 0"
     // UPDATE result:      "Rows matched: 1  Changed: 1  Warnings: 0"
 
-    StringBuilder buff = new StringBuilder();
+    StringValue sb = env.createStringBuilder();
 
-    int matched = affected_rows();
+    int matched = affected_rows(env);
     int changed = matched;
     int duplicates = 0;
     int warnings = 0;
@@ -611,28 +598,28 @@ public class Mysqli extends JdbcConnectionResource {
     }
 
     if (_lastSql == LastSqlType.UPDATE)
-      buff.append("Rows matched: ");
+      sb.append("Rows matched: ");
     else
-      buff.append("Records: ");
+      sb.append("Records: ");
 
-    buff.append(matched);
+    sb.append(matched);
 
     if (_lastSql == LastSqlType.UPDATE) {
-      buff.append("  Changed: "); // PHP adds 2 spaces before Changed:
-      buff.append(changed);
+      sb.append("  Changed: "); // PHP adds 2 spaces before Changed:
+      sb.append(changed);
     } else {
-      buff.append(" Duplicates: ");
-      buff.append(duplicates);
+      sb.append(" Duplicates: ");
+      sb.append(duplicates);
     }
 
     if (_lastSql == LastSqlType.UPDATE)
-      buff.append("  Warnings: "); // Only update has 2 spaces here
+      sb.append("  Warnings: "); // Only update has 2 spaces here
     else
-      buff.append(" Warnings: ");
+      sb.append(" Warnings: ");
 
-    buff.append(warnings);
+    sb.append(warnings);
 
-    return env.createString(buff.toString());
+    return sb;
   }
 
   /**
@@ -678,7 +665,7 @@ public class Mysqli extends JdbcConnectionResource {
       return env.createString(version);
 
     try {
-      return env.createString(validateConnection().getServerInfo());
+      return env.createString(validateConnection(env).getServerInfo());
     } catch (SQLException e) {
       return env.getEmptyString();
     }
@@ -687,21 +674,23 @@ public class Mysqli extends JdbcConnectionResource {
   /**
    * Quercus function to get the field 'server_version'.
    */
-  public int getserver_version()
+  public int getserver_version(Env env)
   {
-    return get_server_version();
+    return get_server_version(env);
   }
 
   /**
    * Returns the server information.
    */
-  public int get_server_version()
+  public int get_server_version(Env env)
   {
     try {
-      String info = validateConnection().getServerInfo();
+      String info = validateConnection(env).getServerInfo();
 
       return infoToVersion(info);
     } catch (SQLException e) {
+      env.warning(e);
+
       return 0;
     }
   }
@@ -709,17 +698,17 @@ public class Mysqli extends JdbcConnectionResource {
   /**
    * Quercus function to get the field 'field_count'.
    */
-  public int getfield_count()
+  public int getfield_count(Env env)
   {
-    return field_count();
+    return field_count(env);
   }
 
   /**
    * Returns the number of columns in the last query.
    */
-  public int field_count()
+  public int field_count(Env env)
   {
-    return validateConnection().getFieldCount();
+    return validateConnection(env).getFieldCount();
   }
 
   /**
@@ -739,7 +728,7 @@ public class Mysqli extends JdbcConnectionResource {
   public Value insert_id(Env env)
   {
     try {
-      JdbcConnectionResource connV = validateConnection();
+      JdbcConnectionResource connV = validateConnection(env);
       Connection conn = connV.getConnection(env);
 
       if (conn == null)
@@ -767,17 +756,17 @@ public class Mysqli extends JdbcConnectionResource {
   }
 
   @ReturnNullAsFalse
-  public JdbcResultResource list_dbs()
+  public JdbcResultResource list_dbs(Env env)
   {
-    return validateConnection().getCatalogs();
+    return validateConnection(env).getCatalogs(env);
   }
 
   /**
    * Check for more results in a multi-query
    */
-  public boolean more_results()
+  public boolean more_results(Env env)
   {
-    return ((Mysqli) validateConnection()).moreResults();
+    return ((Mysqli) validateConnection(env)).moreResults();
   }
 
   /**
@@ -786,16 +775,16 @@ public class Mysqli extends JdbcConnectionResource {
    */
   public boolean multi_query(Env env, StringValue query)
   {
-    return ((Mysqli) validateConnection()).multiQuery(env, query);
+    return ((Mysqli) validateConnection(env)).multiQuery(env, query);
   }
 
   /**
    * prepares next result set from a previous call to
    * mysqli_multi_query
    */
-  public boolean next_result()
+  public boolean next_result(Env env)
   {
-    return ((Mysqli) validateConnection()).nextResult();
+    return ((Mysqli) validateConnection(env)).nextResult();
   }
 
   /**
@@ -872,7 +861,7 @@ public class Mysqli extends JdbcConnectionResource {
             if (tok != null) {
               String dbname = tok.toUnquotedString();
 
-              setCatalog(dbname);
+              setCatalog(env, dbname);
 
               return BooleanValue.TRUE;
             }
@@ -945,9 +934,9 @@ public class Mysqli extends JdbcConnectionResource {
   /**
    * returns a prepared statement or null on error.
    */
-  public MysqliStatement prepare(Env env, StringValue query)
+  public MysqliStatement prepare(Env env, String query)
   {
-    MysqliStatement stmt = new MysqliStatement((Mysqli) validateConnection());
+    MysqliStatement stmt = new MysqliStatement((Mysqli) validateConnection(env));
 
     boolean result = stmt.prepare(env, query);
 
@@ -987,9 +976,9 @@ public class Mysqli extends JdbcConnectionResource {
   /**
    * Escapes the string
    */
-  public StringValue real_escape_string(StringValue str)
+  public StringValue real_escape_string(Env env, StringValue str)
   {
-    return realEscapeString(str);
+    return realEscapeString(env, str);
   }
 
   /**
@@ -1005,11 +994,11 @@ public class Mysqli extends JdbcConnectionResource {
    *
    * @param dbname the name of the database to select.
    */
-  public boolean select_db(String db)
+  public boolean select_db(Env env, String db)
   {
     try {
       if (isConnected()) {
-        validateConnection().setCatalog(db);
+        validateConnection(env).setCatalog(env, db);
 
         return true;
       }
@@ -1052,7 +1041,7 @@ public class Mysqli extends JdbcConnectionResource {
    */
   public StringValue sqlstate(Env env)
   {
-    int code = validateConnection().getErrorCode();
+    int code = validateConnection(env).getErrorCode();
     return env.createString(lookupSqlstate(code));
   }
 
@@ -1074,7 +1063,7 @@ public class Mysqli extends JdbcConnectionResource {
   public Value stat(Env env)
   {
     try {
-      JdbcConnectionResource connV = validateConnection();
+      JdbcConnectionResource connV = validateConnection(env);
 
       Connection conn = connV.getConnection(env);
 
@@ -1148,7 +1137,7 @@ public class Mysqli extends JdbcConnectionResource {
    */
   public MysqliStatement stmt_init(Env env)
   {
-    return new MysqliStatement((Mysqli) validateConnection());
+    return new MysqliStatement((Mysqli) validateConnection(env));
   }
 
   /**
@@ -1160,7 +1149,7 @@ public class Mysqli extends JdbcConnectionResource {
   @ReturnNullAsFalse
   public JdbcResultResource store_result(Env env)
   {
-    return ((Mysqli) validateConnection()).storeResult();
+    return ((Mysqli) validateConnection(env)).storeResult();
   }
 
   /**
@@ -1181,7 +1170,7 @@ public class Mysqli extends JdbcConnectionResource {
   Value thread_id(Env env)
   {
     try {
-      JdbcConnectionResource connV = validateConnection();
+      JdbcConnectionResource connV = validateConnection(env);
       Connection conn = connV.getConnection(env);
 
       if (conn == null)
@@ -1216,7 +1205,7 @@ public class Mysqli extends JdbcConnectionResource {
   public boolean kill(Env env, int threadId)
   {
     try {
-      JdbcConnectionResource connV = validateConnection();
+      JdbcConnectionResource connV = validateConnection(env);
       Connection conn = connV.getConnection(env);
 
       if (conn == null)
@@ -1230,22 +1219,26 @@ public class Mysqli extends JdbcConnectionResource {
 
         _conn.markForPoolRemoval();
 
-        ResultSet rs = stmt.executeQuery("KILL CONNECTION " + threadId);
+        stmt.executeQuery("KILL CONNECTION " + threadId);
 
         result = true;
 
         // close the underlying java.sql connection, not Mysqli itself
         conn.close();
 
-      } catch (SQLException e) {
+      }
+      catch (SQLException e) {
         // exception thrown if cannot find specified thread id
-      } finally {
-        if (stmt != null)
+      }
+      finally {
+        if (stmt != null) {
           stmt.close();
+        }
       }
 
       return result;
-    } catch (SQLException e) {
+    }
+    catch (SQLException e) {
       log.log(Level.FINE, e.toString(), e);
       return false;
     }
@@ -1268,7 +1261,7 @@ public class Mysqli extends JdbcConnectionResource {
   @ReturnNullAsFalse
   public JdbcResultResource use_result(Env env)
   {
-    return ((Mysqli) validateConnection()).storeResult();
+    return ((Mysqli) validateConnection(env)).storeResult();
   }
 
   /**
@@ -1287,18 +1280,17 @@ public class Mysqli extends JdbcConnectionResource {
    */
   public int warning_count(Env env)
   {
-    return ((Mysqli) validateConnection()).getWarningCount(env);
+    return ((Mysqli) validateConnection(env)).getWarningCount(env);
   }
 
   /**
    * Creates a database-specific result.
    */
   @Override
-  protected JdbcResultResource createResult(Env env,
-                                            Statement stmt,
+  protected JdbcResultResource createResult(Statement stmt,
                                             ResultSet rs)
   {
-    return new MysqliResult(env, stmt, rs, this);
+    return new MysqliResult(stmt, rs, this);
   }
 
   /**
@@ -1308,13 +1300,11 @@ public class Mysqli extends JdbcConnectionResource {
    */
   private int getWarningCount(Env env)
   {
-    JdbcResultResource warningResult;
-    warningResult = metaQuery(env, "SHOW WARNINGS", getCatalog().toString());
+    JdbcResultResource rs = metaQuery(env, "SHOW WARNINGS", getCatalog());
     int warningCount = 0;
 
-    if (warningResult != null) {
-      warningCount
-        = JdbcResultResource.getNumRows(warningResult.getResultSet());
+    if (rs != null) {
+      warningCount = rs.getNumRows();
     }
 
     if (warningCount >= 0)
@@ -1337,7 +1327,7 @@ public class Mysqli extends JdbcConnectionResource {
   {
     clearErrors();
 
-    Value currentCatalog = getCatalog();
+    String currentCatalog = getCatalog();
 
     try {
       Connection conn = getConnection(env);
@@ -1354,11 +1344,11 @@ public class Mysqli extends JdbcConnectionResource {
 
       if (stmt.execute(sql)) {
         MysqliResult result
-          = (MysqliResult) createResult(getEnv(), stmt, stmt.getResultSet());
-        conn.setCatalog(currentCatalog.toString());
+          = (MysqliResult) createResult(stmt, stmt.getResultSet());
+        conn.setCatalog(currentCatalog);
         return result;
       } else {
-        conn.setCatalog(currentCatalog.toString());
+        conn.setCatalog(currentCatalog);
         return null;
       }
     } catch (SQLException e) {
@@ -1423,7 +1413,7 @@ public class Mysqli extends JdbcConnectionResource {
         stmt.setEscapeProcessing(false);
         if (stmt.execute(s)) {
           setAffectedRows(0);
-          setResultResource(createResult(getEnv(), stmt, stmt.getResultSet()));
+          setResultResource(createResult(stmt, stmt.getResultSet()));
           _resultValues.add(getResultResource());
           setWarnings(stmt.getWarnings());
         } else {
@@ -1644,16 +1634,15 @@ public class Mysqli extends JdbcConnectionResource {
   }
   */
 
-  // Invoked to close a connection.
-
-  public boolean close(Env env)
+  @Override
+  public void close()
   {
     /*
     if (_isPersistent)
       return true;
     */
 
-    return super.close(env);
+    super.close();
   }
 
   /**
