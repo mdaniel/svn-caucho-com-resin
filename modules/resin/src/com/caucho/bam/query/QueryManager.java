@@ -141,7 +141,7 @@ public class QueryManager {
                     long timeout)
   {
     long id = nextQueryId();
-    
+
     addQueryCallback(id, cb, timeout);
     
     stream.query(id, to, from, payload);
@@ -200,7 +200,7 @@ public class QueryManager {
                                     BamError error)
   {
     QueryItem item = _queryMap.remove(id);
-
+    
     if (item != null) {
       item.onQueryError(to, from, payload, error);
 
@@ -262,7 +262,7 @@ public class QueryManager {
             if (item != null) {
               QueryCallback cb = item._callback;
               
-              Exception exn = new TimeoutException();
+              Exception exn = new TimeoutException(item._id + " " + cb);
               BamError error = BamError.create(exn);
               
               cb.onQueryError(null, null, null, error);

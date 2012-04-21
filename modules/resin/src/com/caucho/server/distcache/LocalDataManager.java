@@ -404,6 +404,10 @@ public final class LocalDataManager
       long valueDataId = getDataBacking().saveData(mIn, -1);
 
       long valueHash = mIn.getDigest();
+      
+      if (valueHash == 0 || valueHash == MnodeEntry.ANY_KEY) {
+        valueHash = 1;
+      }
 
       long length = mIn.getLength();
       

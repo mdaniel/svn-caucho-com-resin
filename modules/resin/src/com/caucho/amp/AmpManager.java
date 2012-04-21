@@ -30,6 +30,8 @@
 package com.caucho.amp;
 
 import com.caucho.amp.actor.AmpActor;
+import com.caucho.amp.actor.AmpActorContext;
+import com.caucho.amp.actor.AmpActorRef;
 import com.caucho.amp.broker.AmpBroker;
 
 /**
@@ -48,13 +50,24 @@ public interface AmpManager
   public <T> T createActorProxy(String address, Class<T> api);
   
   /**
-   * Adds a bean to be proxied as an actor.
+   * Creates a client proxy to an api.
    */
-  public void addActor(String address, Object bean);
+  public <T> T createActorProxy(AmpActorRef actorRef, Class<T> api);
+  
+  /**
+   * Adds a bean to be proxied as an actor.
+   * @return 
+   */
+  public AmpActorRef addActor(String address, Object bean);
   
   /**
    * Adds an actor stream, creating the mailbox for it 
    * using the default factory.
    */
-  public void addActor(String address, AmpActor actor);
+  public AmpActorRef addActor(String address, AmpActor actor);
+
+  /**
+   * @return
+   */
+  public AmpActorContext getSystemContext();
 }

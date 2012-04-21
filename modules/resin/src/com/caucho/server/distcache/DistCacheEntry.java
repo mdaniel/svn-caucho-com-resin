@@ -494,12 +494,14 @@ public class DistCacheEntry {
                               Object value, 
                               CacheConfig config)
   {
+    long prevDataId = getMnodeEntry().getValueDataId();
+    
     if (compareAndPut(testValue, value, config)) {
       long result = -1;
       
       return getLocalDataManager().readData(getKeyHash(),
                                             result,
-                                            getMnodeEntry().getValueDataId(),
+                                            prevDataId,
                                             config.getValueSerializer(),
                                             config);
     }
@@ -876,13 +878,15 @@ public class DistCacheEntry {
     MnodeEntry oldEntryValue = getMnodeEntry();
     
     long oldEntryHash = oldEntryValue.getValueHash();
+    long oldValueDataId = oldEntryValue.getValueDataId();
     DataItem data = null;
     
     if (update.getValueHash() == 0) {
     }
     else if (oldEntryValue == null
-             || (oldEntryValue.getVersion() <= update.getVersion()
-                 && update.getValueHash() != oldEntryHash)) {
+             || oldEntryValue.getVersion() < update.getVersion()
+             || (oldEntryValue.getVersion() == update.getVersion()
+                 && update.getValueHash() < oldEntryHash)) {
       try {
         if (is != null) {
           data = _cacheService.getLocalDataManager().writeData(update,
@@ -899,7 +903,8 @@ public class DistCacheEntry {
       putLocalValueImpl(update, data.getValueDataId(), null);
     }
     else {
-      putLocalValueImpl(update, 0, null);
+      // XXX: avoid update if no change?
+      putLocalValueImpl(update, oldValueDataId, null);
     }
     
     return getMnodeEntry().getRemoteUpdate();
@@ -928,10 +933,14 @@ public class DistCacheEntry {
     // long valueHash = mnodeUpdate.getValueHash();
     // long version = mnodeUpdate.getVersion();
     
+    MnodeEntry prevMnodeValue = getMnodeEntry();
+    
 
     MnodeEntry mnodeValue = putLocalValueImpl(mnodeUpdate, valueDataId, value);
     
-    _cacheService.notifyPutListeners(getKeyHash(), mnodeUpdate, mnodeValue);
+    if (mnodeValue.getValueHash() != prevMnodeValue.getValueHash()) {
+      _cacheService.notifyPutListeners(getKeyHash(), mnodeUpdate, mnodeValue);
+    }
 
     return mnodeValue;
   }

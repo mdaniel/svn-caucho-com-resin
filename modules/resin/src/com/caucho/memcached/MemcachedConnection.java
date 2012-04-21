@@ -605,6 +605,10 @@ public class MemcachedConnection extends AbstractProtocolConnection
       
       long valueHash = entry.getValueHash();
       
+      if (valueHash == 0) {
+        return;
+      }
+      
       long now = CurrentTime.getCurrentTime();
       
       if (entry.isExpired(now)) {

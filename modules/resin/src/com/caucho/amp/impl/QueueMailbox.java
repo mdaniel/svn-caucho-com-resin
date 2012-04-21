@@ -106,6 +106,8 @@ public class QueueMailbox extends AbstractAmpMailbox
                           final Object result)
   {
     _queue.offer(new QueryReply(id, to, from, encoder, result));
+    
+    _worker.wake();
   }
 
   @Override

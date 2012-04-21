@@ -165,6 +165,10 @@ class AmpReflectionSkeleton extends AbstractAmpActor
     public void query(long id, AmpActorRef from, Object... args)
     {
       try {
+        if (log.isLoggable(Level.FINER)) {
+          log.finer(_bean + " " + _method.getName() + " call " + id + " from " + from);
+        }
+        
         Object result = _method.invoke(_bean, args);
       
         from.reply(id, _to, NullEncoder.ENCODER, result);
@@ -173,6 +177,12 @@ class AmpReflectionSkeleton extends AbstractAmpActor
         
         from.queryError(id, _to, NullEncoder.ENCODER, new AmpError());
       }
+    }
+    
+    @Override
+    public String toString()
+    {
+      return getClass().getSimpleName() + "[" + _method.getName() + ",to=" + _to + "]";
     }
   }
 }

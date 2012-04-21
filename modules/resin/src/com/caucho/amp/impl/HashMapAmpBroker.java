@@ -59,9 +59,11 @@ public class HashMapAmpBroker extends AbstractAmpBroker
   }
 
   @Override
-  public void addMailbox(String address, AmpMailbox mailbox)
+  public AmpActorRef addMailbox(String address, AmpMailbox mailbox)
   {
     _mailboxMap.put(address, mailbox);
+    
+    return new ActorRefImpl(address, mailbox, mailbox.getActorContext());
   }
   
   protected AmpMailbox getMailbox(String address)

@@ -29,6 +29,7 @@
 
 package com.caucho.amp.actor;
 
+import com.caucho.amp.AmpQueryCallback;
 import com.caucho.amp.stream.AmpEncoder;
 import com.caucho.amp.stream.AmpStream;
 
@@ -45,7 +46,19 @@ abstract public class AmpActorContext
     return _currentContext.get();
   }
   
+  public static final AmpActorContext getCurrent(AmpActorContext systemContext)
+  {
+    AmpActorContext context = _currentContext.get();
+    
+    if (context != null)
+      return context;
+    else
+      return systemContext;
+  }
+  
   abstract public String getAddress();
+  
+  abstract public AmpActorRef getActorRef();
   
   abstract public AmpStream getStream();
   
@@ -63,5 +76,15 @@ abstract public class AmpActorContext
   public final void endCurrentActor(AmpActorContext prev)
   {
     _currentContext.set(prev);
+  }
+
+  abstract public void query(AmpMethodRef methodRef,
+                             Object[] args,
+                             AmpQueryCallback cb, 
+                             long timeout);
+
+  public void send(AmpMethodRef methodRef, Object[] args)
+  {
+    methodRef.send(getActorRef(), args);
   }
 }

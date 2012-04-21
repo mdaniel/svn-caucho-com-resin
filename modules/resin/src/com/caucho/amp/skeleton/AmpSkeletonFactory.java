@@ -29,8 +29,8 @@
 
 package com.caucho.amp.skeleton;
 
-import com.caucho.amp.actor.ActorContextImpl;
 import com.caucho.amp.actor.AmpActor;
+import com.caucho.amp.actor.AmpActorContext;
 import com.caucho.amp.actor.AmpActorRef;
 import com.caucho.amp.broker.AmpBroker;
 
@@ -44,8 +44,6 @@ public interface AmpSkeletonFactory
                           AmpBroker broker);
   
   <T> T createStub(Class<T> api,
-                   AmpBroker router,
-                   ActorContextImpl actorContext,
                    AmpActorRef to,
-                   AmpActorRef from);
+                   AmpActorContext systemContext);
 }

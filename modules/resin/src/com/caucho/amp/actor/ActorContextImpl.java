@@ -189,6 +189,7 @@ public final class ActorContextImpl extends AmpActorContext
   // query/sender methods
   //
 
+  @Override
   public void query(AmpMethodRef methodRef,
                     Object[] args,
                     AmpQueryCallback cb, 

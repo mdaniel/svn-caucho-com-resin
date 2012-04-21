@@ -33,6 +33,7 @@ import java.lang.reflect.Proxy;
 
 import com.caucho.amp.actor.ActorContextImpl;
 import com.caucho.amp.actor.AmpActor;
+import com.caucho.amp.actor.AmpActorContext;
 import com.caucho.amp.actor.AmpActorRef;
 import com.caucho.amp.broker.AmpBroker;
 
@@ -52,13 +53,12 @@ public class AmpReflectionSkeletonFactory implements AmpSkeletonFactory
   @Override
   @SuppressWarnings("unchecked")
   public <T> T createStub(Class<T> api,
-                          AmpBroker router,
-                          ActorContextImpl sender,
                           AmpActorRef to,
-                          AmpActorRef from)
+                          AmpActorContext systemContext)
+
   {
     AmpReflectionHandler handler
-      = new AmpReflectionHandler(api, router, sender, to, from);
+      = new AmpReflectionHandler(api, to, systemContext);
     
     return (T) Proxy.newProxyInstance(api.getClassLoader(),
                                       new Class<?>[] { api },

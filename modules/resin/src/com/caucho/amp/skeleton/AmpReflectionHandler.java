@@ -35,6 +35,7 @@ import java.util.HashMap;
 
 import com.caucho.amp.AmpQueryCallback;
 import com.caucho.amp.actor.ActorContextImpl;
+import com.caucho.amp.actor.AmpActorContext;
 import com.caucho.amp.actor.AmpActorRef;
 import com.caucho.amp.actor.AmpMethodRef;
 import com.caucho.amp.actor.AmpQueryFuture;
@@ -49,27 +50,17 @@ class AmpReflectionHandler implements InvocationHandler
   private HashMap<Method,Call> _callMap = new HashMap<Method,Call>();
   
   private AmpActorRef _to;
-  private AmpActorRef _from;
-  private AmpBroker _broker;
-  private ActorContextImpl _queryManager;
+  private AmpActorContext _systemContext;
   private long _timeout = 60000; 
     
   AmpReflectionHandler(Class<?> api, 
-                       AmpBroker broker,
-                       ActorContextImpl actorContext, 
                        AmpActorRef to,
-                       AmpActorRef from)
+                       AmpActorContext systemContext)
   {
     _to = to;
-    _from = from;
-    _broker = broker;
-    _queryManager = actorContext;
+    _systemContext = systemContext;
     
-    if (broker == null) {
-      throw new NullPointerException();
-    }
-    
-    if (actorContext == null) {
+    if (systemContext == null) {
       throw new NullPointerException();
     }
       
@@ -106,7 +97,7 @@ class AmpReflectionHandler implements InvocationHandler
     Call call = _callMap.get(method);
 
     if (call != null) {
-      return call.invoke(_queryManager, _to, _from, args, _timeout);
+      return call.invoke(_systemContext, _to, args, _timeout);
     }
     
     String name = method.getName();
@@ -121,9 +112,8 @@ class AmpReflectionHandler implements InvocationHandler
   }
   
   abstract static class Call {
-    abstract Object invoke(ActorContextImpl queryManager,
+    abstract Object invoke(AmpActorContext systemContext,
                            AmpActorRef to,
-                           AmpActorRef from,
                            Object []args,
                            long timeout);
   }
@@ -137,15 +127,16 @@ class AmpReflectionHandler implements InvocationHandler
     }
     
     @Override
-    Object invoke(ActorContextImpl actorContext, 
+    Object invoke(AmpActorContext systemContext,
                   AmpActorRef to, 
-                  AmpActorRef from,
                   Object []args,
                   long timeout)
     {
       AmpQueryFuture future = new AmpQueryFuture(timeout);
+
+      AmpActorContext context = AmpActorContext.getCurrent(systemContext);
       
-      actorContext.query(_methodRef, args, future, timeout);
+      context.query(_methodRef, args, future, timeout);
       
       return future.get();
     }
@@ -162,9 +153,8 @@ class AmpReflectionHandler implements InvocationHandler
     }
     
     @Override
-    Object invoke(ActorContextImpl actorContext,
+    Object invoke(AmpActorContext systemContext,
                   AmpActorRef to, 
-                  AmpActorRef from,
                   Object []args,
                   long timeout)
     {
@@ -173,7 +163,9 @@ class AmpReflectionHandler implements InvocationHandler
       
       AmpQueryCallback cb = (AmpQueryCallback) args[_paramLen];
       
-      actorContext.query(_methodRef, args, cb, timeout);
+      AmpActorContext context = AmpActorContext.getCurrent(systemContext);
+      
+      context.query(_methodRef, args, cb, timeout);
       
       return null;
     }
@@ -188,13 +180,14 @@ class AmpReflectionHandler implements InvocationHandler
     }
 
     @Override
-    Object invoke(ActorContextImpl manager,
+    Object invoke(AmpActorContext systemContext,
                   AmpActorRef to,
-                  AmpActorRef from,
                   Object []args,
                   long timeout)
     {
-      _methodRef.send(from, args);
+      AmpActorContext context = AmpActorContext.getCurrent(systemContext);
+      
+      context.send(_methodRef, args);
       
       return null;
     }

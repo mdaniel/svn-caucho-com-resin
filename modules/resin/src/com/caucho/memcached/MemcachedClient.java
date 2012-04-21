@@ -54,6 +54,8 @@ import com.caucho.cloud.loadbalance.LoadBalanceBuilder;
 import com.caucho.cloud.loadbalance.LoadBalanceManager;
 import com.caucho.cloud.loadbalance.LoadBalanceService;
 import com.caucho.cloud.loadbalance.StickyRequestHashGenerator;
+import com.caucho.config.Configurable;
+import com.caucho.config.types.Period;
 import com.caucho.distcache.LocalCache;
 import com.caucho.hessian.io.Hessian2Input;
 import com.caucho.hessian.io.Hessian2Output;
@@ -90,6 +92,8 @@ public class MemcachedClient implements Cache
   
   private Boolean _isResin;
   
+  private long _modifiedExpireTimeout = 3600 * 1000L;
+  
   private AtomicReference<CacheImpl> _localCache
     = new AtomicReference<CacheImpl>();
   
@@ -118,7 +122,7 @@ public class MemcachedClient implements Cache
     _loadBalanceBuilder.setStickyRequestHashGenerator(new StickyGenerator());
     _loadBalanceBuilder.setMeterCategory("Resin|WebSocket");
     _loadBalanceBuilder.setIdleTimeout(120 * 1000);
-    // _loadBalancer = builder.create();
+    // _loadBalancer = builquerder.create();
   }
   
   public MemcachedClient(String name)
@@ -146,6 +150,12 @@ public class MemcachedClient implements Cache
   public void setPort(int port)
   {
     _loadBalanceBuilder.setTargetPort(port);
+  }
+  
+  @Configurable
+  public void setModifiedExpireTimeout(Period timeout)
+  {
+    _modifiedExpireTimeout = timeout.getPeriod();
   }
 
   @Override
@@ -442,7 +452,7 @@ public class MemcachedClient implements Cache
       out.print(" ");
       out.print(flags);
       out.print(" ");
-      long expTime = 0;
+      long expTime = _modifiedExpireTimeout;
       out.print(expTime);
       out.print(" ");
       // out.print(ts.getLength());
@@ -651,7 +661,7 @@ public class MemcachedClient implements Cache
     if (cache == null) {
       LocalCache localCache = new LocalCache();
       localCache.setName("memcache:" + _name);
-      localCache.setModifiedExpireTimeoutMillis(3600 * 1000);
+      localCache.setModifiedExpireTimeoutMillis(_modifiedExpireTimeout);
       localCache.setLocalExpireTimeoutMillis(1000);
       localCache.setEngine(_cacheEngine);
       

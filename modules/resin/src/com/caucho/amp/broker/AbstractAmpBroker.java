@@ -29,13 +29,9 @@
 
 package com.caucho.amp.broker;
 
-import java.util.logging.Logger;
-
 import com.caucho.amp.actor.AmpActorRef;
 import com.caucho.amp.mailbox.AmpMailbox;
 import com.caucho.amp.stream.AmpEncoder;
-import com.caucho.amp.stream.AmpError;
-import com.caucho.amp.stream.AmpHeaders;
 
 /**
  * AmpRouter routes messages to mailboxes.
@@ -49,7 +45,7 @@ public class AbstractAmpBroker implements AmpBroker
   }
 
   @Override
-  public void addMailbox(String address, AmpMailbox mailbox)
+  public AmpActorRef addMailbox(String address, AmpMailbox mailbox)
   {
     throw new UnsupportedOperationException(getClass().getName());
   }

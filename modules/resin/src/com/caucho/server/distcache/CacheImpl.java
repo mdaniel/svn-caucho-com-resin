@@ -1212,8 +1212,8 @@ public class CacheImpl<K,V>
     {
       while (_storeIterator.hasNext()) {
         DistCacheEntry entry = _storeIterator.next();
-        
-        if (_cacheKey.equals(entry.getMnodeEntry().getCacheHash())) {
+
+        if (_cacheKey.equals(entry.getMnodeEntry().getCacheHashKey())) {
           _next = entry;
           return;
         }

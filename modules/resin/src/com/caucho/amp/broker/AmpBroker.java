@@ -74,7 +74,7 @@ public interface AmpBroker
   /**
    * Adds a mailbox (optional operation).
    */
-  public void addMailbox(String address, AmpMailbox mailbox);
+  public AmpActorRef addMailbox(String address, AmpMailbox mailbox);
   
   /**
    * Removes a mailbox (optional operation).

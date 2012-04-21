@@ -33,6 +33,7 @@ import java.util.concurrent.atomic.AtomicLong;
 
 import com.caucho.amp.AmpManager;
 import com.caucho.amp.AmpManagerBuilder;
+import com.caucho.amp.actor.AbstractAmpActor;
 import com.caucho.amp.actor.ActorContextImpl;
 import com.caucho.amp.actor.ActorRefImpl;
 import com.caucho.amp.actor.AmpActor;
@@ -58,6 +59,7 @@ public class AmpManagerImpl implements AmpManager
   private final AmpBroker _broker;
   private final AmpMailboxBuilderFactory _mailboxBuilderFactory;
   private final AmpMailboxBuilder _mailboxFactory;
+  private final AmpActorContext _systemContext;
   
   public AmpManagerImpl(AmpManagerBuilder builder)
   {
@@ -81,6 +83,9 @@ public class AmpManagerImpl implements AmpManager
     _mailboxBuilderFactory = mailboxBuilderFactory;
     
     _mailboxFactory = _mailboxBuilderFactory.createMailboxBuilder();
+    
+    AmpActor nullStream = new AbstractAmpActor();
+    _systemContext = new ActorContextImpl("system", nullStream, _mailboxFactory);
   }
   
   @Override
@@ -89,13 +94,28 @@ public class AmpManagerImpl implements AmpManager
     return _broker;
   }
   
-
+  @Override
+  public AmpActorContext getSystemContext()
+  {
+    return _systemContext;
+  }
+  
   @Override
   public <T> T createActorProxy(String to, Class<T> api)
   {
     String from = "urn:amp:client:/" + api.getSimpleName() + "/" + _clientId.incrementAndGet();
     
     return createClient(api, to, from);
+  }
+
+  @Override
+  public <T> T createActorProxy(AmpActorRef to, Class<T> api)
+  {
+    AmpReflectionSkeletonFactory factory = new AmpReflectionSkeletonFactory();
+    
+    return factory.createStub(api, 
+                              to,
+                              _systemContext);
   }
   
   public <T> T createClient(Class<T> api, String to, String from)
@@ -107,28 +127,26 @@ public class AmpManagerImpl implements AmpManager
     AmpMailbox mailbox = proxyActor.getActorContext().getMailbox();
     
     AmpActorRef toRef = getBroker().getActorRef(to);
-    AmpActorRef fromRef = proxyActor.getActorContext().getActorRef();
     
     getBroker().addMailbox(from, mailbox);
-
+    
     return factory.createStub(api, 
-                              getBroker(), 
-                              proxyActor.getActorContext(),
-                              toRef, fromRef);
+                              toRef,
+                              _systemContext);
   }
 
   @Override
-  public void addActor(String address, AmpActor actor)
+  public AmpActorRef addActor(String address, AmpActor actor)
   {
     AmpActorContext actorContext = createActorContext(address, actor);
     
     AmpMailbox mailbox = getMailboxFactory().createMailbox(actorContext);
     
-    getBroker().addMailbox(address, mailbox);
+    return getBroker().addMailbox(address, mailbox);
   }
   
   @Override
-  public void addActor(String address, Object bean)
+  public AmpActorRef addActor(String address, Object bean)
   {
     AmpReflectionSkeletonFactory factory = new AmpReflectionSkeletonFactory();
     
@@ -136,7 +154,7 @@ public class AmpManagerImpl implements AmpManager
                                             address,
                                             getBroker());
     
-    addActor(address, actor);
+    return addActor(address, actor);
   }
   
   /*
