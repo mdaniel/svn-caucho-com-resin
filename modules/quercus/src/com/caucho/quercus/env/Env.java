@@ -3211,9 +3211,6 @@ public class Env
       }
   }
 
-  /*
-   * Returns the calling class.
-   */
   public QuercusClass getCallingClass()
   {
     return _callingClass;

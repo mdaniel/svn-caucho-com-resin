@@ -839,12 +839,12 @@ public class ExprFactoryPro extends ExprFactory {
                          ArrayList<Expr> args)
   {
     Location loc = parser.getLocation();
-    
+
     String systemName = parser.getSystemFunctionName(name);
-    
+
     if (systemName != null)
       name = systemName;
-    
+
     if ("isset".equals(name) && args.size() == 1)
       return new FunIssetExprPro(args.get(0));
     else if ("empty".equals(name) && args.size() == 1)
@@ -869,7 +869,7 @@ public class ExprFactoryPro extends ExprFactory {
       return new FunGetClassExprPro(parser);
     else if ("each".equals(name) && args.size() == 1) {
       Expr arg = args.get(0);
-      
+
       return new FunEachExprPro(arg);
     }
     else if ("define".equals(name)
@@ -919,10 +919,17 @@ public class ExprFactoryPro extends ExprFactory {
    */
   @Override
   public ObjectNewExpr createNew(Location loc,
-                           String name,
-                           ArrayList<Expr> args)
+                                 String name,
+                                 ArrayList<Expr> args)
   {
     return new ObjectNewExprPro(loc, name, args);
+  }
+
+  @Override
+  public ObjectNewStaticExpr createNewStatic(Location loc,
+                                             ArrayList<Expr> args)
+  {
+    return new ObjectNewStaticExprPro(loc, args);
   }
 
   /**

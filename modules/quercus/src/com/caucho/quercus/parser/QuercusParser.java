@@ -3496,6 +3496,15 @@ public class QuercusParser {
         else
           return parseConstant(name);
       }
+    case STATIC:
+      {
+        if (_classDef == null) {
+          throw error(L.l("cannot use new {0}() outside of a class context.",
+                          tokenName(token)));
+        }
+
+        return parseConstant(_lexeme.toString());
+      }
 
     case '(':
       {
@@ -3889,10 +3898,18 @@ public class QuercusParser {
 
     Expr expr;
 
-    if (name != null)
-      expr =  _factory.createNew(getLocation(), name, args);
-    else
+    if (name != null) {
+      if (name.equals("static")) {
+        // php/039q
+        expr = _factory.createNewStatic(getLocation(), args);
+      }
+      else {
+        expr =  _factory.createNew(getLocation(), name, args);
+      }
+    }
+    else {
       expr = _factory.createVarNew(getLocation(), nameExpr, args);
+    }
 
     return expr;
   }

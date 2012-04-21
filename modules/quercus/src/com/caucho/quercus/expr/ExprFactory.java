@@ -219,7 +219,7 @@ public class ExprFactory {
   {
     return new ObjectFieldVarExpr(base, name);
   }
-  
+
   //
   // $this expressions
   //
@@ -235,7 +235,7 @@ public class ExprFactory {
   /**
    * Creates a "$this->foo" expression.
    */
-  public ThisFieldExpr createThisField(ThisExpr qThis, 
+  public ThisFieldExpr createThisField(ThisExpr qThis,
                                        StringValue name)
   {
     return new ThisFieldExpr(qThis, name);
@@ -964,7 +964,7 @@ public class ExprFactory {
                          ArrayList<Expr> args)
   {
     Location loc = parser.getLocation();
-    
+
     if ("isset".equals(name) && args.size() == 1)
       return new FunIssetExpr(args.get(0));
     else if ("get_called_class".equals(name) && args.size() == 0)
@@ -973,7 +973,7 @@ public class ExprFactory {
       return new FunGetClassExpr(parser);
     else if ("each".equals(name) && args.size() == 1) {
       Expr arg = args.get(0);
-      
+
       if (! arg.isVar()) {
         parser.error(L.l("each() argument must be a variable at '{0}'", arg));
       }
@@ -1149,8 +1149,8 @@ public class ExprFactory {
    * Creates a new function call new foo(...).
    */
   public ObjectNewExpr createNew(Location loc,
-                           String name,
-                           ArrayList<Expr> args)
+                                 String name,
+                                 ArrayList<Expr> args)
   {
     return new ObjectNewExpr(loc, name, args);
   }
@@ -1163,6 +1163,15 @@ public class ExprFactory {
                                  ArrayList<Expr> args)
   {
     return new ObjectNewVarExpr(loc, name, args);
+  }
+
+  /**
+   * Creates a new function call new static(...).
+   */
+  public ObjectNewStaticExpr createNewStatic(Location loc,
+                                             ArrayList<Expr> args)
+  {
+    return new ObjectNewStaticExpr(loc, args);
   }
 
   /**
@@ -1493,7 +1502,7 @@ public class ExprFactory {
   /**
    * Creates a new FunctionInfo
    */
-  public FunctionInfo createFunctionInfo(QuercusContext quercus, 
+  public FunctionInfo createFunctionInfo(QuercusContext quercus,
                                          ClassDef classDef,
                                          String name)
   {
