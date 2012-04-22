@@ -464,7 +464,7 @@ public abstract class JdbcConnectionResource
   /**
    * returns the server version
    */
-  public String getServerInfo()
+  protected String getServerInfo()
     throws SQLException
   {
     return getMetaData().getDatabaseProductVersion();
@@ -516,7 +516,7 @@ public abstract class JdbcConnectionResource
     return _dmd;
   }
 
-  static int infoToVersion(String info)
+  protected static int infoToVersion(String info)
   {
     String[] result = info.split("[.a-z-]");
 

@@ -6594,8 +6594,9 @@ public class Env
                                         + getCodeName(mask)
                                         + msg);
       }
-      else
+      else {
         exn = new QuercusErrorException(msg);
+      }
 
       exn.fillInStackTrace();
 

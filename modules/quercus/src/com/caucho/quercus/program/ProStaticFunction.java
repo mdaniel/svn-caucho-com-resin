@@ -29,11 +29,16 @@
 
 package com.caucho.quercus.program;
 
-import com.caucho.quercus.annotation.*;
-import com.caucho.quercus.expr.*;
 import com.caucho.quercus.marshal.Marshal;
 import com.caucho.quercus.marshal.ProMarshal;
 import com.caucho.quercus.marshal.ProReferenceMarshal;
+import com.caucho.quercus.annotation.ReadOnly;
+import com.caucho.quercus.annotation.UsesSymbolTable;
+import com.caucho.quercus.annotation.VariableArguments;
+import com.caucho.quercus.expr.Expr;
+import com.caucho.quercus.expr.ExprGenerator;
+import com.caucho.quercus.expr.ExprPro;
+import com.caucho.quercus.expr.LiteralNullExprPro;
 import com.caucho.quercus.gen.AnalyzeInfo;
 import com.caucho.quercus.gen.PhpWriter;
 import com.caucho.quercus.module.ModuleContext;

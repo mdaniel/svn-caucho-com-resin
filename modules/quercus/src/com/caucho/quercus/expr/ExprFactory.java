@@ -62,7 +62,7 @@ public class ExprFactory {
       return new ExprFactory();
 
     try {
-      Class cl = Class.forName("com.caucho.quercus.expr.ExprFactoryPro");
+      Class<?> cl = Class.forName("com.caucho.quercus.expr.ExprFactoryPro");
 
       return (ExprFactory) cl.newInstance();
     } catch (Exception e) {
@@ -1038,7 +1038,12 @@ public class ExprFactory {
                                     String methodName,
                                     ArrayList<Expr> args)
   {
-    return new ClassMethodExpr(loc, className, methodName, args);
+    if ("__construct".equals(methodName)) {
+      return new ClassConstructExpr(loc, className, args);
+    }
+    else {
+      return new ClassMethodExpr(loc, className, methodName, args);
+    }
   }
 
   /**

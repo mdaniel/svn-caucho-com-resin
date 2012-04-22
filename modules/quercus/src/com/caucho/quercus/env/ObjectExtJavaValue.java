@@ -30,6 +30,7 @@
 package com.caucho.quercus.env;
 
 import com.caucho.quercus.QuercusException;
+import com.caucho.quercus.function.AbstractFunction;
 import com.caucho.quercus.program.JavaClassDef;
 import com.caucho.vfs.WriteStream;
 
@@ -127,10 +128,9 @@ public class ObjectExtJavaValue extends ObjectExtValue
    * Binds a Java object to this object.
    */
   @Override
-  public void setJavaObject(Value value)
+  public void setJavaObject(Object obj)
   {
-    if (_object == null)
-      _object = value.toJavaObject();
+    _object = obj;
   }
 
   /**

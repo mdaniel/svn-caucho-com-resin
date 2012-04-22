@@ -141,14 +141,6 @@ public class QuercusClass extends NullValue {
       _isJavaWrapper = ! javaClassDef.isDelegate();
     }
 
-    for (QuercusClass cls = parent; cls != null; cls = cls.getParent()) {
-      AbstractFunction cons = cls.getConstructor();
-
-      if (cons != null) {
-        addMethod(cls.getName(), cons);
-      }
-    }
-
     ClassDef []classDefList;
 
     if (_parent != null) {
@@ -197,14 +189,12 @@ public class QuercusClass extends NullValue {
       classDef.initClass(this);
     }
 
-    if (_constructor == null && parent != null)
-      _constructor = parent.getConstructor();
-
-    // php/093n
-    if (_constructor != null
-        && ! _constructor.getName().equals("__construct")) {
-      addMethodIfNotExist("__construct", _constructor);
-      addMethodIfNotExist(_className, _constructor);
+    if (_constructor != null && parent != null) {
+      if (! _constructor.getName().equals("__construct")
+          && ! _className.equals(_constructor.getDeclaringClassName())) {
+        // php/093j, php/093n
+        addMethod(_className, _constructor);
+      }
     }
 
     if (_destructor == null && parent != null)
@@ -636,8 +626,9 @@ public class QuercusClass extends NullValue {
    */
   public void addMethodIfNotExist(String name, AbstractFunction fun)
   {
-    if (fun == null)
+    if (fun == null) {
       throw new NullPointerException(L.l("'{0}' is a null function", name));
+    }
 
     //php/09j9
     // XXX: this is a hack to get Zend Framework running, the better fix is
@@ -881,9 +872,11 @@ public class QuercusClass extends NullValue {
       objectValue = new ObjectExtValue(this);
     }
     else if (_javaClassDef != null && _javaClassDef.isPhpClass()) {
+      Object object = null;
+
       // Java objects always need to call the constructor?
-      Value javaWrapper = _javaClassDef.callNew(env, Value.NULL_ARGS);
-      Object object = javaWrapper.toJavaObject();
+      //Value javaWrapper = _javaClassDef.callNew(env, Value.NULL_ARGS);
+      //object = javaWrapper.toJavaObject();
 
       objectValue = new ObjectExtJavaValue(this, object, _javaClassDef);
     }
@@ -979,9 +972,11 @@ public class QuercusClass extends NullValue {
         objectValue = new ObjectExtValue(this);
       }
       else if (_javaClassDef != null && _javaClassDef.isPhpClass()) {
-        // php/0k3-
-        Value javaWrapper = _javaClassDef.callNew(env, args);
-        Object object = javaWrapper.toJavaObject();
+        Object object = null;
+
+        // php/0k3-, php/0k4-
+        //Value javaWrapper = _javaClassDef.callNew(env, args);
+        //object = javaWrapper.toJavaObject();
 
         objectValue = new ObjectExtJavaValue(this, object, _javaClassDef);
       }
@@ -997,7 +992,7 @@ public class QuercusClass extends NullValue {
       AbstractFunction fun = findConstructor();
 
       if (fun != null)
-        fun.callMethod(env, this, objectValue, args);
+        fun.callNew(env, this, objectValue, args);
       else {
         //  if expr
       }
@@ -1024,7 +1019,7 @@ public class QuercusClass extends NullValue {
     return _instanceofSet.contains(name.toLowerCase(Locale.ENGLISH));
   }
 
-  /*
+  /**
    * Returns an array of the interfaces that this class and its parents
    * implements.
    */
@@ -1274,22 +1269,48 @@ public class QuercusClass extends NullValue {
   public final AbstractFunction getFunction(StringValue methodName, int hash)
   {
     return _methodMap.get(methodName, methodName.hashCode());
+  }
 
-    /*
-    AbstractFunction fun = _methodMap.get(methodName, hash);
+  /**
+   * Calls the A::__construct constructor.
+   */
+  public Value callConstructor(Env env,
+                               Value qThis,
+                               Value ...args)
+  {
+    AbstractFunction cons = getConstructor();
 
-    if (fun != null)
-      return fun;
-    else if (_className.equalsIgnoreCase(toMethod(name, nameLen))
-             && _parent != null) {
-      // php/093j
-      return _parent.getFunction(_parent.getName());
+    if (cons == null) {
+      env.error(L.l("cannot call constructor for class {0}", getName()));
     }
-    else {
-      throw new QuercusRuntimeException(L.l("{0}::{1} is an unknown method",
-                                       getName(), toMethod(name, nameLen)));
+    else if (qThis.isNull()) {
+      env.error(L.l("{0}::{1}() cannot be called statically",
+                    getName(),
+                    cons.getName()));
     }
-    */
+
+    return getConstructor().callMethod(env, this, qThis, args);
+  }
+
+  /**
+   * Calls the A::__construct constructor.
+   */
+  public Value callConstructorRef(Env env,
+                                  Value qThis,
+                                  Value ...args)
+  {
+    AbstractFunction cons = getConstructor();
+
+    if (cons == null) {
+      env.error(L.l("cannot call constructor for class {0}", getName()));
+    }
+    else if (qThis.isNull()) {
+      env.error(L.l("{0}::{1}() cannot be called statically",
+                    getName(),
+                    cons.getName()));
+    }
+
+    return cons.callMethodRef(env, this, qThis, args);
   }
 
   /**
@@ -1300,8 +1321,9 @@ public class QuercusClass extends NullValue {
                           StringValue methodName, int hash,
                           Value []args)
   {
-    if (qThis.isNull())
+    if (qThis.isNull()) {
       qThis = this;
+    }
 
     AbstractFunction fun = _methodMap.get(methodName, hash);
 

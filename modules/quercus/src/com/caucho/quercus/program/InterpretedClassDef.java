@@ -192,7 +192,9 @@ public class InterpretedClassDef extends ClassDef
       cl.setConstructor(_constructor);
 
       // php/093o
-      //cl.addMethod("__construct", _constructor);
+      //if (_functionMap.get("__construct") == null) {
+      //  cl.addMethod("__construct", _constructor);
+      //}
     }
 
     if (_destructor != null) {
@@ -236,9 +238,7 @@ public class InterpretedClassDef extends ClassDef
     }
 
     String className = getName();
-    for (
-      Map.Entry<String, StaticFieldEntry> entry : _staticFieldMap.entrySet()
-      ) {
+    for (Map.Entry<String, StaticFieldEntry> entry : _staticFieldMap.entrySet()) {
       StaticFieldEntry field = entry.getValue();
 
       cl.addStaticFieldExpr(className, entry.getKey(), field.getValue());

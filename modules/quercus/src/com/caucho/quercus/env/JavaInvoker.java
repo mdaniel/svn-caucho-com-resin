@@ -37,6 +37,8 @@ import com.caucho.quercus.marshal.Marshal;
 import com.caucho.quercus.marshal.MarshalFactory;
 import com.caucho.quercus.module.ModuleContext;
 import com.caucho.quercus.parser.QuercusParser;
+import com.caucho.quercus.program.ClassDef;
+import com.caucho.quercus.program.JavaClassDef;
 import com.caucho.util.L10N;
 
 import java.lang.annotation.Annotation;
@@ -54,8 +56,10 @@ abstract public class JavaInvoker
   private static final Value []NULL_VALUES = new Value[0];
 
   private final ModuleContext _moduleContext;
+  private final JavaClassDef _classDef;
+
   private final String _name;
-  private final Method _method;
+  protected final Method _method;
   private final Class<?> [] _param;
   private final Class<?> _retType;
   private final Annotation [][] _paramAnn;
@@ -82,6 +86,8 @@ abstract public class JavaInvoker
    * Creates the statically introspected function.
    */
   public JavaInvoker(ModuleContext moduleContext,
+                     JavaClassDef classDef,
+                     Method method,
                      String name,
                      Class<?> []param,
                      Annotation [][]paramAnn,
@@ -94,7 +100,9 @@ abstract public class JavaInvoker
     _paramAnn = paramAnn;
     _methodAnn = methodAnn;
     _retType = retType;
-    _method = null;
+
+    _classDef = classDef;
+    _method = method;
 
     // init();
   }
@@ -103,6 +111,7 @@ abstract public class JavaInvoker
    * Creates the statically introspected function.
    */
   public JavaInvoker(ModuleContext moduleContext,
+                     JavaClassDef classDef,
                      Method method)
   {
     Name nameAnn = method.getAnnotation(Name.class);
@@ -113,6 +122,7 @@ abstract public class JavaInvoker
       _name = method.getName();
 
     _moduleContext = moduleContext;
+    _classDef = classDef;
     _method = method;
     _param = method.getParameterTypes();
     _paramAnn = null;
@@ -130,6 +140,12 @@ abstract public class JavaInvoker
     synchronized (this) {
       if (_isInit)
         return;
+
+      if (_method != null) {
+        // php/069a
+        // Java 6 fixes the need to do this for methods of inner classes
+        _method.setAccessible(true);
+      }
 
       MarshalFactory marshalFactory = _moduleContext.getMarshalFactory();
       ExprFactory exprFactory = _moduleContext.getExprFactory();
@@ -290,6 +306,15 @@ abstract public class JavaInvoker
   }
 
   /**
+   * Returns the implementing class.
+   */
+  @Override
+  public ClassDef getDeclaringClass()
+  {
+    return _classDef;
+  }
+
+  /**
    * Returns the minimally required number of arguments.
    */
   @Override
@@ -311,6 +336,17 @@ abstract public class JavaInvoker
       init();
 
     return _maxArgumentLength;
+  }
+
+  @Override
+  public Class<?> getJavaDeclaringClass()
+  {
+    if (_method != null) {
+      return _method.getDeclaringClass();
+    }
+    else {
+      return null;
+    }
   }
 
   /**
@@ -640,8 +676,47 @@ abstract public class JavaInvoker
                           Value qThis,
                           Value []args)
   {
-    if (! _isInit)
+    Object result = callJavaMethod(env, qClass, qThis, args);
+
+    // php/0k45
+    if (qThis != null && isConstructor()) {
+      String parentName = qThis.getQuercusClass().getParentName();
+
+      if (parentName != null) {
+        ClassDef classDef = getDeclaringClass();
+
+        if (classDef != null && qThis.isA(classDef.getName())) {
+          qThis.setJavaObject(result);
+        }
+      }
+    }
+
+    Value value = _unmarshalReturn.unmarshal(env, result);
+
+    return value;
+  }
+
+  @Override
+  public Value callNew(Env env,
+                       QuercusClass qClass,
+                       Value qThis,
+                       Value []args)
+  {
+    Object result = callJavaMethod(env, qClass, qThis, args);
+
+    qThis.setJavaObject(result);
+
+    return qThis;
+  }
+
+  private Object callJavaMethod(Env env,
+                                QuercusClass qClass,
+                                Value qThis,
+                                Value[] args)
+  {
+    if (! _isInit) {
       init();
+    }
 
     int len = _param.length;
 
@@ -727,9 +802,7 @@ abstract public class JavaInvoker
 
     Object result = invoke(obj, javaArgs);
 
-    Value value = _unmarshalReturn.unmarshal(env, result);
-
-    return value;
+    return result;
   }
 
   abstract public Object invoke(Object obj, Object []args);

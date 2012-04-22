@@ -24,7 +24,7 @@
  *   59 Temple Place, Suite 330
  *   Boston, MA 02111-1307  USA
  *
- * @author Scott Ferguson
+ * @author Nam Nguyen
  */
 
 package com.caucho.quercus.expr;
@@ -33,48 +33,39 @@ import java.util.ArrayList;
 
 import com.caucho.quercus.Location;
 import com.caucho.quercus.env.Env;
-import com.caucho.quercus.env.MethodIntern;
 import com.caucho.quercus.env.QuercusClass;
-import com.caucho.quercus.env.StringValue;
 import com.caucho.quercus.env.Value;
 import com.caucho.util.L10N;
 
 /**
- * A Foo::bar(...) method call expression.
+ * A Foo::__construct(...) method call expression.
  */
-public class ClassMethodExpr extends AbstractMethodExpr {
-  private static final L10N L = new L10N(ClassMethodExpr.class);
+public class ClassConstructExpr extends AbstractMethodExpr {
+  private static final L10N L = new L10N(ClassConstructExpr.class);
 
   protected final String _className;
-  protected final StringValue _methodName;
-  protected final int _hash;
   protected final Expr []_args;
 
   protected boolean _isMethod;
 
-  public ClassMethodExpr(Location location, String className,
-                         String methodName,
-                         ArrayList<Expr> args)
+  public ClassConstructExpr(Location location,
+                            String className,
+                            ArrayList<Expr> args)
   {
     super(location);
     _className = className.intern();
-
-    _methodName = MethodIntern.intern(methodName);
-    _hash = _methodName.hashCodeCaseInsensitive();
 
     _args = new Expr[args.size()];
     args.toArray(_args);
   }
 
-  public ClassMethodExpr(Location location, String className,
-                         String methodName, Expr []args)
+  public ClassConstructExpr(Location location,
+                            String className,
+                            Expr []args)
   {
     super(location);
 
     _className = className.intern();
-
-    _methodName = MethodIntern.intern(methodName);
-    _hash = _methodName.hashCodeCaseInsensitive();
 
     _args = args;
   }
@@ -90,9 +81,9 @@ public class ClassMethodExpr extends AbstractMethodExpr {
   {
     QuercusClass cl = env.findClass(_className);
 
-    if (cl == null)
-      throw env.createErrorException(L.l("{0} is an unknown class",
-                                         _className));
+    if (cl == null) {
+      env.error(getLocation(), L.l("no matching class {0}", _className));
+    }
 
     Value []values = evalArgs(env, _args);
 
@@ -100,34 +91,22 @@ public class ClassMethodExpr extends AbstractMethodExpr {
 
     // php/09qe
     Value qThis = oldThis;
-    /*
-    if (oldThis.isNull()) {
-      qThis = cl;
-      env.setThis(qThis);
-    }
-    else
-      qThis = oldThis;
-      */
-    // php/024b
-    // qThis = cl;
 
     env.pushCall(this, cl, values);
-    // QuercusClass oldClass = env.setCallingClass(cl);
 
     try {
       env.checkTimeout();
 
-      return cl.callMethod(env, qThis, _methodName, _hash, values);
+      return cl.callConstructor(env, qThis, values);
     } finally {
       env.popCall();
       env.setThis(oldThis);
-      // env.setCallingClass(oldClass);
     }
   }
 
   public String toString()
   {
-    return _className + "::" + _methodName + "()";
+    return _className + "::__construct()";
   }
 }
 

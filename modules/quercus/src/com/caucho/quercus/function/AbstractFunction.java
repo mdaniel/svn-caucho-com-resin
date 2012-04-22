@@ -153,7 +153,7 @@ abstract public class AbstractFunction extends Callback {
     return _bindingClass;
   }
 
-  /*
+  /**
    * Returns the implementing class.
    */
   public ClassDef getDeclaringClass()
@@ -573,6 +573,17 @@ abstract public class AbstractFunction extends Callback {
       env.setCallingClass(oldClass);
     }
     */
+  }
+
+  /**
+   * Evaluates the new() method call.
+   */
+  public Value callNew(Env env,
+                       QuercusClass qClass,
+                       Value qThis,
+                       Value []args)
+  {
+    return callMethod(env, qClass, qThis, args);
   }
 
   /**

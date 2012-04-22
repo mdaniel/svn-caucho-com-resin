@@ -1822,33 +1822,6 @@ abstract public class Value implements java.io.Serializable
   }
 
   //
-  // Methods from StringValue
-  //
-
-  /**
-   * Evaluates a method.
-   */
-  private Value callClassMethod(Env env, AbstractFunction fun, Value []args)
-  {
-    return NullValue.NULL;
-  }
-
-  private Value errorNoMethod(Env env, char []name, int nameLen)
-  {
-    String methodName =  new String(name, 0, nameLen);
-
-    if (isNull()) {
-      return env.error(L.l("Method call '{0}' is not allowed for a null value.",
-                           methodName));
-    }
-    else {
-      return env.error(L.l("'{0}' is an unknown method of {1}.",
-                           methodName,
-                           toDebugString()));
-    }
-  }
-
-  //
   // Arithmetic operations
   //
 
@@ -2837,8 +2810,10 @@ abstract public class Value implements java.io.Serializable
   /**
    * Binds a Java object to this object.
    */
-  public void setJavaObject(Value value)
+  public void setJavaObject(Object obj)
   {
+    // XXX: nam: do nothing for now, need to refactor the PHP-Java interface
+    //throw new UnsupportedOperationException(getClass().getName());
   }
 
   //

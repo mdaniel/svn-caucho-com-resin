@@ -941,7 +941,12 @@ public class ExprFactoryPro extends ExprFactory {
                                     String name,
                                     ArrayList<Expr> args)
   {
-    return new ClassMethodExprPro(loc, className, name, args);
+    if ("__construct".equals(name)) {
+      return new ClassConstructExprPro(loc, className, args);
+    }
+    else {
+      return new ClassMethodExprPro(loc, className, name, args);
+    }
   }
 
   /**

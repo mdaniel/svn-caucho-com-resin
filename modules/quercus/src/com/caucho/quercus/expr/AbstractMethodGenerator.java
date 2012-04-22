@@ -90,10 +90,10 @@ abstract public class AbstractMethodGenerator extends ExprGenerator
    *
    * @param out the writer to the Java source code.
    */
-  protected abstract void generateImpl(PhpWriter out, 
+  protected abstract void generateImpl(PhpWriter out,
                                        boolean isRef)
     throws IOException;
-  
+
   protected void generateArgs(PhpWriter out, Expr []args)
     throws IOException
   {

@@ -1,7 +1,7 @@
 /*
  * Copyright (c) 1998-2012 Caucho Technology -- all rights reserved
  *
- * @author Scott Ferguson
+ * @author Nam Nguyen
  */
 
 package com.caucho.quercus.expr;
@@ -14,17 +14,16 @@ import java.io.IOException;
 import java.util.ArrayList;
 
 /**
- * Represents a PHP parent:: method call expression.
+ * Represents a PHP A::__construct method call expression.
  */
-public class ClassMethodExprPro extends ClassMethodExpr
+public class ClassConstructExprPro extends ClassConstructExpr
   implements ExprPro
 {
-  public ClassMethodExprPro(Location location,
-			    String className,
-			    String methodName,
-			    ArrayList<Expr> args)
+  public ClassConstructExprPro(Location location,
+                               String className,
+                               ArrayList<Expr> args)
   {
-    super(location, className, methodName, args);
+    super(location, className, args);
   }
 
   public ExprGenerator getGenerator()
@@ -38,17 +37,17 @@ public class ClassMethodExprPro extends ClassMethodExpr
        */
       public ExprType analyze(AnalyzeInfo info)
       {
-        _isMethod = info.getFunction().isMethod();
+        //_isMethod = info.getFunction().isMethod();
 
         analyzeArgs(info, _args);
 
         return ExprType.VALUE;
       }
 
-      private boolean isMethod()
-      {
-        return _isMethod;
-      }
+      //private boolean isMethod()
+      //{
+      //  return _isMethod;
+      //}
 
       /**
        * Generates code to recreate the expression.
@@ -62,16 +61,12 @@ public class ClassMethodExprPro extends ClassMethodExpr
 
         out.print("env.getClass(\"");
         out.printJavaString(_className);
-        out.print("\").callMethod" + ref + "(env, ");
+        out.print("\").callConstructor" + ref + "(env, ");
 
         // php/09q3, php/324b, php/3953
 
-        if (isMethod())
-          out.print("q_this, ");
-
-        String nameConst = out.addStringValue(_methodName);
-
-        out.print(nameConst + ", " + _methodName.hashCodeCaseInsensitive());
+        //if (isMethod())
+          out.print("q_this");
 
         generateArgs(out, _args);
 
@@ -80,7 +75,7 @@ public class ClassMethodExprPro extends ClassMethodExpr
 
       public String toString()
       {
-        return _className + "::" + _methodName + "()";
+        return _className + "::__construct()";
       }
     };
 }

@@ -38,7 +38,6 @@ import com.caucho.quercus.env.Env;
 import com.caucho.quercus.env.EnvCleanup;
 import com.caucho.quercus.env.LongValue;
 import com.caucho.quercus.env.QuercusClass;
-import com.caucho.quercus.env.StringValue;
 import com.caucho.quercus.env.Value;
 import com.caucho.util.L10N;
 
@@ -321,9 +320,9 @@ public class PDO implements EnvCleanup {
       case ATTR_PREFETCH:
         return LongValue.create(getPrefetch());
       case ATTR_SERVER_INFO:
-        return StringValue.create(getServerInfo());
+        return getServerInfo(env);
       case ATTR_SERVER_VERSION:
-        return StringValue.create(getServerVersion());
+        return getServerVersion(env);
       case ATTR_TIMEOUT:
         return LongValue.create(getTimeout());
 
@@ -380,15 +379,28 @@ public class PDO implements EnvCleanup {
     throw new UnimplementedException();
   }
 
-  private String getServerInfo()
+  private Value getServerInfo(Env env)
   {
-    throw new UnimplementedException();
+    throw new UnimplementedException("PDO::ATTR_SERVER_INFO");
   }
 
   // XXX: might be int return
-  private String getServerVersion()
+  private Value getServerVersion(Env env)
   {
-    throw new UnimplementedException();
+    if (_conn == null) {
+      return BooleanValue.FALSE;
+    }
+
+    try {
+      String info = _conn.getServerInfo();
+
+      return env.createString(info);
+    }
+    catch (SQLException e) {
+      _error.error(env, e);
+
+      return BooleanValue.FALSE;
+    }
   }
 
   private int getTimeout()

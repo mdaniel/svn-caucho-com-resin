@@ -924,12 +924,13 @@ public class JavaClassDef extends ClassDef {
         }
 
         if (i < cons.length) {
-          _cons = new JavaConstructor(_moduleContext, cons[i]);
+          _cons = new JavaConstructor(_moduleContext, this, cons[i]);
         }
         else {
-          _cons = new JavaConstructor(_moduleContext, cons[0]);
+          _cons = new JavaConstructor(_moduleContext, this, cons[0]);
           for (i = 1; i < cons.length; i++) {
             _cons = _cons.overload(new JavaConstructor(_moduleContext,
+                                                       this,
                                                        cons[i]));
           }
         }
@@ -1096,7 +1097,8 @@ public class JavaClassDef extends ClassDef {
             = javaToQuercusConvert(methodName.substring(3, length));
 
           AbstractJavaMethod existingGetter = _getMap.get(quercusName);
-          AbstractJavaMethod newGetter = new JavaMethod(moduleContext, method);
+          AbstractJavaMethod newGetter
+            = new JavaMethod(moduleContext, this, method);
 
           if (existingGetter != null) {
             newGetter = existingGetter.overload(newGetter);
@@ -1109,7 +1111,8 @@ public class JavaClassDef extends ClassDef {
             = javaToQuercusConvert(methodName.substring(2, length));
 
           AbstractJavaMethod existingGetter = _getMap.get(quercusName);
-          AbstractJavaMethod newGetter = new JavaMethod(moduleContext, method);
+          AbstractJavaMethod newGetter
+            = new JavaMethod(moduleContext, this, method);
 
           if (existingGetter != null) {
             newGetter = existingGetter.overload(newGetter);
@@ -1122,7 +1125,8 @@ public class JavaClassDef extends ClassDef {
             = javaToQuercusConvert(methodName.substring(3, length));
 
           AbstractJavaMethod existingSetter = _setMap.get(quercusName);
-          AbstractJavaMethod newSetter = new JavaMethod(moduleContext, method);
+          AbstractJavaMethod newSetter
+            = new JavaMethod(moduleContext, this, method);
 
           if (existingSetter != null)
             newSetter = existingSetter.overload(newSetter);
@@ -1132,26 +1136,26 @@ public class JavaClassDef extends ClassDef {
           if (_funArrayDelegate == null)
             _funArrayDelegate = new FunctionArrayDelegate();
 
-          _funArrayDelegate.setArrayGet(new JavaMethod(moduleContext, method));
+          _funArrayDelegate.setArrayGet(new JavaMethod(moduleContext, this, method));
         } else if ("__set".equals(methodName)) {
           if (_funArrayDelegate == null)
             _funArrayDelegate = new FunctionArrayDelegate();
 
-          _funArrayDelegate.setArrayPut(new JavaMethod(moduleContext, method));
+          _funArrayDelegate.setArrayPut(new JavaMethod(moduleContext, this, method));
         } else if ("__count".equals(methodName)) {
           FunctionCountDelegate delegate = new FunctionCountDelegate();
 
-          delegate.setCount(new JavaMethod(moduleContext, method));
+          delegate.setCount(new JavaMethod(moduleContext, this, method));
 
           _countDelegate = delegate;
         } else if ("__getField".equals(methodName)) {
-          __fieldGet = new JavaMethod(moduleContext, method);
+          __fieldGet = new JavaMethod(moduleContext, this, method);
         } else if ("__setField".equals(methodName)) {
-          __fieldSet = new JavaMethod(moduleContext, method);
+          __fieldSet = new JavaMethod(moduleContext, this, method);
         } else if ("__fieldGet".equals(methodName)) {
-          __fieldGet = new JavaMethod(moduleContext, method);
+          __fieldGet = new JavaMethod(moduleContext, this, method);
         } else if ("__fieldSet".equals(methodName)) {
-          __fieldSet = new JavaMethod(moduleContext, method);
+          __fieldSet = new JavaMethod(moduleContext, this, method);
         }
       }
     }
@@ -1301,16 +1305,16 @@ public class JavaClassDef extends ClassDef {
       } else if (method.isAnnotationPresent(EntrySet.class)) {
         _entrySet = method;
       } else if ("__call".equals(method.getName())) {
-        __call = new JavaMethod(moduleContext, method);
+        __call = new JavaMethod(moduleContext, this, method);
       } else if ("__toString".equals(method.getName())) {
-        __toString = new JavaMethod(moduleContext, method);
+        __toString = new JavaMethod(moduleContext, this, method);
         _functionMap.put(method.getName(), __toString);
       } else {
         if (method.getName().startsWith("quercus_"))
           throw new UnsupportedOperationException(
             L.l("{0}: use @Name instead", method.getName()));
 
-        JavaMethod newFun = new JavaMethod(moduleContext, method);
+        JavaMethod newFun = new JavaMethod(moduleContext, this, method);
         String funName = newFun.getName();
         AbstractJavaMethod fun = _functionMap.getRaw(funName);
 

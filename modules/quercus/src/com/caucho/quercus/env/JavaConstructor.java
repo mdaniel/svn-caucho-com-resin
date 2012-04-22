@@ -32,17 +32,19 @@ package com.caucho.quercus.env;
 import com.caucho.quercus.QuercusException;
 import com.caucho.quercus.annotation.Name;
 import com.caucho.quercus.module.ModuleContext;
+import com.caucho.quercus.program.JavaClassDef;
 import com.caucho.util.L10N;
 
-import java.lang.reflect.*;
+import java.lang.reflect.Constructor;
+import java.lang.reflect.InvocationTargetException;
 
 /**
  * Represents the introspected static function information.
  */
 public class JavaConstructor extends JavaInvoker {
   private static final L10N L = new L10N(JavaConstructor.class);
-  
-  private final Constructor _constructor;
+
+  private final Constructor<?> _constructor;
   private final int _argLength;
 
   /**
@@ -51,9 +53,12 @@ public class JavaConstructor extends JavaInvoker {
    * @param method the introspected method.
    */
   public JavaConstructor(ModuleContext moduleContext,
-                         Constructor cons)
-  {    
+                         JavaClassDef classDef,
+                         Constructor<?> cons)
+  {
     super(moduleContext,
+          classDef,
+          null,
           getName(cons),
           cons.getParameterTypes(),
           cons.getParameterAnnotations(),
@@ -63,11 +68,17 @@ public class JavaConstructor extends JavaInvoker {
     _constructor = cons;
     _argLength = cons.getParameterTypes().length;
   }
-  
+
   @Override
   public String getDeclaringClassName()
   {
     return getName();
+  }
+
+  @Override
+  public Class<?> getJavaDeclaringClass()
+  {
+    return _constructor.getDeclaringClass();
   }
 
   private static String getName(Constructor<?> cons)
@@ -83,14 +94,14 @@ public class JavaConstructor extends JavaInvoker {
       Name clNameAnn =  (Name) cl.getAnnotation(Name.class);
 
       if (clNameAnn != null)
-        name = nameAnn.value();
+        name = clNameAnn.value();
       else
         name = cl.getSimpleName();
     }
 
     return name;
   }
-  
+
   @Override
   public boolean isConstructor()
   {
@@ -106,7 +117,7 @@ public class JavaConstructor extends JavaInvoker {
   {
     try {
       obj = _constructor.newInstance(args);
-      
+
       return obj;
     } catch (RuntimeException e) {
       throw e;
