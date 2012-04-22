@@ -62,12 +62,22 @@ public class GoogleQuercus extends QuercusContext
   {
     super();
 
-    setPwd(Vfs.lookup());
+    // setPwd(Vfs.lookup());
     // setWorkDir(WorkDir.getLocalWorkDir());
+    
   }
   
   @Override
-  public void init() {
+  public void init()
+  {
+    String gsBucket = getIniString("quercus.gs_bucket");
+    
+    GoogleStorePath gsPath = new GoogleStorePath(gsBucket);
+    Path pwd = Vfs.lookup();
+    MergePath mergePwd = new MergePath(gsPath, pwd);
+
+    setPwd(mergePwd);
+    
     super.init();
     
     Value array = getIniValue("quercus.jdbc_drivers");
@@ -115,6 +125,7 @@ public class GoogleQuercus extends QuercusContext
     return new ModuleContext(parent, loader);
   }
 
+  @Override
   public Env createEnv(QuercusPage page,
                        WriteStream out,
                        HttpServletRequest request,

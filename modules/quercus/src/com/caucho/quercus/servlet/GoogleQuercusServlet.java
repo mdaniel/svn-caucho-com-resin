@@ -29,19 +29,12 @@
 
 package com.caucho.quercus.servlet;
 
-import com.caucho.util.L10N;
-
-import java.util.logging.Logger;
-
 /**
  * Servlet to call PHP through javax.script.
  */
+@SuppressWarnings("serial")
 public class GoogleQuercusServlet extends QuercusServlet
 {
-  private static final L10N L = new L10N(GoogleQuercusServlet.class);
-  private static final Logger log
-    = Logger.getLogger(GoogleQuercusServlet.class.getName());
-
   @Override
   protected QuercusServletImpl getQuercusServlet(boolean isResin)
   {

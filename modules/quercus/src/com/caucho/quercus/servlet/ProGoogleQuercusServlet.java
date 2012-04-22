@@ -17,10 +17,6 @@ import java.util.logging.Logger;
  */
 public class ProGoogleQuercusServlet extends GoogleQuercusServletImpl
 {
-  private static final L10N L = new L10N(ProGoogleQuercusServlet.class);
-  private static final Logger log
-    = Logger.getLogger(ProGoogleQuercusServlet.class.getName());
-
   public ProGoogleQuercusServlet()
   {
   }

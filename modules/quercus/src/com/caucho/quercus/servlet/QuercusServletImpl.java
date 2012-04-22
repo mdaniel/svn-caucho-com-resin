@@ -162,6 +162,10 @@ public class QuercusServletImpl extends HttpServlet
       QuercusContext quercus = getQuercus();
       
       env = quercus.createEnv(page, ws, request, response);
+      
+      // php/8150
+      env.setPwd(path.getParent());
+      
       quercus.setServletContext(_servletContext);
       
       try {
@@ -283,7 +287,8 @@ public class QuercusServletImpl extends HttpServlet
     String scriptPath = QuercusRequestAdapter.getPageServletPath(req);
     String pathInfo = QuercusRequestAdapter.getPagePathInfo(req);
 
-    Path pwd = Vfs.lookup();
+    // php/8150
+    Path pwd = getQuercus().getPwd();
 
     Path path = pwd.lookup(req.getRealPath(scriptPath));
 

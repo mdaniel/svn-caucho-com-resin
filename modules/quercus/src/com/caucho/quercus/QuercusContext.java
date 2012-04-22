@@ -999,6 +999,14 @@ public class QuercusContext
   }
 
   /**
+   * Returns an ini value.
+   */
+  public String getIniString(String name)
+  {
+    return _iniDefinitions.get(name).getValue(this).toJavaString();
+  }
+
+  /**
    * Sets a server env value.
    */
   public void setServerEnv(String name, String value)

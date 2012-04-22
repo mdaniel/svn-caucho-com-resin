@@ -1470,6 +1470,7 @@ public class Env
   public void setPwd(Path path)
   {
     _pwd = path;
+    
     _lookupCache.clear();
   }
 
@@ -5569,6 +5570,7 @@ public class Env
 
     if (path == null) {
       path = getPwd().lookup(normalizePath(relPath));
+
       _lookupCache.put(relPath, path);
     }
 
