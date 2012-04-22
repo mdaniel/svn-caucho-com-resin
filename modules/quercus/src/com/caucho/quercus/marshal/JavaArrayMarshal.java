@@ -35,23 +35,25 @@ import com.caucho.quercus.expr.Expr;
 
 public class JavaArrayMarshal extends Marshal
 {
-  private Class _expectedClass;
-  
+  private Class<?> _expectedClass;
+
   public JavaArrayMarshal()
   {
     _expectedClass = Object[].class;
   }
-  
-  public JavaArrayMarshal(Class expectedClass)
+
+  public JavaArrayMarshal(Class<?> expectedClass)
   {
     _expectedClass = expectedClass;
   }
-  
+
+  @Override
   public Object marshal(Env env, Expr expr, Class expectedClass)
   {
     return marshal(env, expr.eval(env), expectedClass);
   }
 
+  @Override
   public Object marshal(Env env, Value value, Class expectedClass)
   {
     /*
@@ -75,15 +77,16 @@ public class JavaArrayMarshal extends Marshal
         shortName(expectedClass)));
     }
     */
-    
+
     return array;
   }
 
+  @Override
   public Value unmarshal(Env env, Object value)
   {
     return env.wrapJava(value);
   }
-  
+
   @Override
   protected int getMarshalingCostImpl(Value argValue)
   {
@@ -97,7 +100,7 @@ public class JavaArrayMarshal extends Marshal
     else
       return Marshal.FOUR;
   }
-  
+
   @Override
   public Class getExpectedClass()
   {

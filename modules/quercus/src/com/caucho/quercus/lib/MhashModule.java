@@ -142,13 +142,15 @@ public class MhashModule extends AbstractQuercusModule {
 
   public Value mhash(Env env, int hash, StringValue data, @Optional String key)
   {
-    if (key.length() > 0)
-      throw new UnsupportedOperationException("key"); // XXX:
-    
+    if (key != null) {
+      throw new UnsupportedOperationException("key");
+    }
+
     MhashAlgorithm algorithm = _algorithmMap.get(hash);
 
-    if (algorithm == null)
+    if (algorithm == null) {
       return BooleanValue.FALSE;
+    }
 
     MessageDigest messageDigest = algorithm.createMessageDigest();
 
@@ -295,7 +297,7 @@ public class MhashModule extends AbstractQuercusModule {
     {
       return
         "MhashAlgorithm[name=" + _name
-            + " java-name=" + _javaName 
+            + " java-name=" + _javaName
             + " java-provider=" + _javaProvider
             + "]";
     }

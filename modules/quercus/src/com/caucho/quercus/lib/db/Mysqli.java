@@ -1634,15 +1634,16 @@ public class Mysqli extends JdbcConnectionResource
   }
   */
 
-  @Override
-  public void close()
+  public boolean close(Env env)
   {
     /*
     if (_isPersistent)
       return true;
     */
 
-    super.close();
+    close();
+
+    return true;
   }
 
   /**

@@ -33,18 +33,15 @@ import com.caucho.quercus.env.Env;
 import com.caucho.quercus.env.JavaValue;
 import com.caucho.quercus.env.Value;
 import com.caucho.quercus.expr.Expr;
-import com.caucho.quercus.lib.file.BinaryInput;
 import com.caucho.quercus.lib.file.BinaryOutput;
-import com.caucho.quercus.lib.file.ReadStreamInput;
 import com.caucho.quercus.lib.file.WriteStreamOutput;
 
-import java.io.InputStream;
 import java.io.OutputStream;
 
 public class BinaryOutputMarshal extends Marshal
 {
   public static final Marshal MARSHAL = new BinaryOutputMarshal();
-  
+
   public boolean isReadOnly()
   {
     return true;
@@ -57,47 +54,36 @@ public class BinaryOutputMarshal extends Marshal
 
   public Object marshal(Env env, Value value, Class expectedClass)
   {
-    if (value == null)
+    if (value == null) {
       return null;
-    else if (value instanceof BinaryOutput)
+    }
+    else if (value instanceof BinaryOutput) {
       return (BinaryOutput) value;
+    }
 
     Object javaObj = value.toJavaObject();
 
-    if (javaObj == null)
+    if (javaObj == null) {
       return null;
-    else if (javaObj instanceof BinaryOutput)
+    }
+    else if (javaObj instanceof BinaryOutput) {
       return (BinaryOutput) javaObj;
-    else if (javaObj instanceof OutputStream)
+    }
+    else if (javaObj instanceof OutputStream) {
       return new WriteStreamOutput((OutputStream) javaObj);
-    else
-      throw new IllegalStateException(L.l("Cannot marshal {0} to BinaryOutput",
-                                          javaObj));
-  }
+    }
+    else {
+      unexpectedType(env, value, javaObj.getClass(), expectedClass);
 
-  public static BinaryOutput marshal(Env env, Value value)
-  {
-    if (value == null)
       return null;
-    else if (value instanceof BinaryOutput)
-      return (BinaryOutput) value;
-
-    Object javaObj = value.toJavaObject();
-
-    if (javaObj instanceof BinaryOutput)
-      return (BinaryOutput) javaObj;
-    else if (javaObj instanceof OutputStream)
-      return new WriteStreamOutput((OutputStream) javaObj);
-    else
-      throw new IllegalStateException(L.l("Cannot marshal {0} to BinaryOutput",
-                                          javaObj));
+    }
   }
 
   public Value unmarshal(Env env, Object value)
   {
     return (Value) value;
   }
-  
+
   @Override
   protected int getMarshalingCostImpl(Value argValue)
   {
@@ -108,7 +94,7 @@ public class BinaryOutputMarshal extends Marshal
     else
       return Marshal.FOUR;
   }
-  
+
   @Override
   public Class getExpectedClass()
   {

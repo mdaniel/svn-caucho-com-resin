@@ -31,11 +31,9 @@ package com.caucho.quercus.marshal;
 
 import com.caucho.quercus.env.Env;
 import com.caucho.quercus.env.JavaListAdapter;
-import com.caucho.quercus.env.JavaValue;
 import com.caucho.quercus.env.Value;
 import com.caucho.quercus.program.JavaClassDef;
 import com.caucho.util.L10N;
-import com.caucho.vfs.Path;
 
 /**
  * Code for marshalling arguments.
@@ -56,12 +54,12 @@ public class JavaListMarshal extends JavaMarshal {
     super(def, isNotNull, isUnmarshalNullAsFalse);
   }
 
+  @Override
   public Object marshal(Env env, Value value, Class argClass)
   {
     if (! value.isset()) {
       if (_isNotNull) {
-        env.warning(L.l("null is an unexpected argument, expected {0}",
-                        shortName(argClass)));
+        unexpectedNull(env, argClass);
       }
 
       return null;
@@ -71,30 +69,25 @@ public class JavaListMarshal extends JavaMarshal {
 
     if (obj == null) {
       if (_isNotNull) {
-        env.warning(L.l("null is an unexpected argument, expected {0}",
-                        shortName(argClass)));
+        unexpectedNull(env, argClass);
       }
 
       return null;
     }
     else if (! argClass.isAssignableFrom(obj.getClass())) {
-      env.warning(L.l(
-        "'{0}' of type '{1}' is an unexpected argument, expected {2}",
-        value,
-        shortName(value.getClass()),
-        shortName(argClass)));
+      unexpectedType(env, value, obj.getClass(), argClass);
+
       return null;
     }
 
     return obj;
   }
-  
+
   @Override
   protected int getMarshalingCostImpl(Value argValue)
   {
     if (argValue instanceof JavaListAdapter
-        && getExpectedClass()
-      .isAssignableFrom(argValue.toJavaObject().getClass()))
+        && getExpectedClass().isAssignableFrom(argValue.toJavaObject().getClass()))
       return Marshal.ZERO;
     else if (argValue.isArray())
       return Marshal.THREE;

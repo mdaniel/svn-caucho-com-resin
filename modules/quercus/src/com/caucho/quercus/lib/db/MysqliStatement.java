@@ -63,6 +63,10 @@ public class MysqliStatement extends JdbcPreparedStatementResource {
     super(conn);
   }
 
+  @Override
+  public boolean execute(Env env) {
+    return super.execute(env);
+  }
 
   /**
    * Quercus function to get the field 'affected_rows'.

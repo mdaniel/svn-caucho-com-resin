@@ -219,7 +219,7 @@ public class JdbcStatementResource
     return _errorMessage;
   }
 
-  protected final boolean execute(Env env) {
+  protected boolean execute(Env env) {
     try {
       return execute(env, true);
     }

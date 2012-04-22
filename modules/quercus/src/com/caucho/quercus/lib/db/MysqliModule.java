@@ -594,7 +594,7 @@ public class MysqliModule extends AbstractQuercusModule {
                                        @NotNull MysqliResult result)
   {
     if (result == null) {
-      return BooleanValue.FALSE;
+      return NullValue.NULL;
     }
 
     return result.fetch_row(env);

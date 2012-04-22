@@ -150,7 +150,7 @@ public class JdbcResultResource
   {
     try {
       if (_rs == null) {
-        return BooleanValue.FALSE;
+        return NullValue.NULL;
       }
 
       if (_rs.next()) {
@@ -198,12 +198,12 @@ public class JdbcResultResource
         return array;
       }
       else {
-        return BooleanValue.FALSE;
+        return NullValue.NULL;
       }
     }
     catch (SQLException e) {
       log.log(Level.FINE, e.toString(), e);
-      return BooleanValue.FALSE;
+      return NullValue.NULL;
     }
   }
 
@@ -327,10 +327,7 @@ public class JdbcResultResource
 
         Value result;
 
-
         if (className != null) {
-          System.err.println("fetchObject0: " + className + " . " + className.length());
-
           QuercusClass cls = env.findClass(className);
 
           if (args == null) {

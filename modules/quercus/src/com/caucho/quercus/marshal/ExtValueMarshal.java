@@ -39,13 +39,14 @@ import com.caucho.quercus.expr.Expr;
  */
 public class ExtValueMarshal extends Marshal
 {
-  private Class _expectedClass;
-  
-  public ExtValueMarshal(Class expectedClass)
+  private Class<?> _expectedClass;
+
+  public ExtValueMarshal(Class<?> expectedClass)
   {
     _expectedClass = expectedClass;
   }
-  
+
+  @Override
   public boolean isReadOnly()
   {
     return false;
@@ -59,12 +60,14 @@ public class ExtValueMarshal extends Marshal
   {
     return true;
   }
-  
+
+  @Override
   public Object marshal(Env env, Expr expr, Class expectedClass)
   {
     return marshal(env, expr.eval(env), expectedClass);
   }
 
+  @Override
   public Object marshal(Env env, Value value, Class expectedClass)
   {
     if (value == null || ! value.isset())
@@ -73,32 +76,22 @@ public class ExtValueMarshal extends Marshal
     // XXX: need QA, added for mantis view bug page
     value = value.toValue();
 
-    if (expectedClass.isAssignableFrom(value.getClass()))
+    if (expectedClass.isAssignableFrom(value.getClass())) {
       return value;
+    }
     else {
-      String className = expectedClass.getName();
-      int p = className.lastIndexOf('.');
-      className = className.substring(p + 1);
-
-      String valueClassName = value.getClass().getName();
-      p = valueClassName.lastIndexOf('.');
-      valueClassName = valueClassName.substring(p + 1);
-
-      env.warning(L.l(
-        "'{0}' of type `{1}' is an unexpected argument, expected {2}",
-        value,
-        valueClassName,
-        className));
+      unexpectedType(env, value, value.getClass(), expectedClass);
 
       return null;
     }
   }
 
+  @Override
   public Value unmarshal(Env env, Object value)
   {
     return (Value) value;
   }
-  
+
   @Override
   protected int getMarshalingCostImpl(Value argValue)
   {
@@ -107,7 +100,7 @@ public class ExtValueMarshal extends Marshal
     else
       return Marshal.FOUR;
   }
-  
+
   @Override
   public Class getExpectedClass()
   {

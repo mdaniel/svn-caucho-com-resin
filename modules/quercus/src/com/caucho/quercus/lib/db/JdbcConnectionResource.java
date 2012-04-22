@@ -547,7 +547,7 @@ public abstract class JdbcConnectionResource
   /**
    * Closes the connection.
    */
-  public void close()
+  protected void close()
   {
     // php/1418
     // cleanup();

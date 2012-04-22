@@ -203,19 +203,20 @@ public class ObjectExtValue extends ObjectValue
   public final Value getField(Env env, StringValue name)
   {
     Value returnValue = getFieldExt(env, name);
-    if(returnValue == UnsetValue.UNSET)
+
+    if (returnValue == UnsetValue.UNSET)
     {
-        // __get didn't work, lets look in the class itself
-        int hash = (name.hashCode() & 0x7fffffff) % _prime;
+      // __get didn't work, lets look in the class itself
+      int hash = (name.hashCode() & 0x7fffffff) % _prime;
 
-        for (Entry entry = _entries[hash]; entry != null; entry = entry._next) {
-          StringValue entryKey = entry._key;
+      for (Entry entry = _entries[hash]; entry != null; entry = entry._next) {
+        StringValue entryKey = entry._key;
 
-          if (name == entryKey || name.equals(entryKey)) {
-            // php/09ks vs php/091m
-            returnValue = entry._value.toValue();
-          }
+        if (name == entryKey || name.equals(entryKey)) {
+          // php/09ks vs php/091m
+          returnValue = entry._value.toValue();
         }
+      }
     }
 
     return returnValue;
@@ -241,9 +242,11 @@ public class ObjectExtValue extends ObjectValue
    */
   protected Value getFieldExt(Env env, StringValue name)
   {
-      Entry e = this.getEntry(env, name);
-      if(e != null && e._value != NullValue.NULL && e._value != UnsetValue.UNSET)
-        return e._value;
+    Entry e = this.getEntry(env, name);
+
+    if(e != null && e._value != NullValue.NULL && e._value != UnsetValue.UNSET) {
+      return e._value;
+    }
 
     return _quercusClass.getField(env, this, name);
   }
@@ -1444,36 +1447,40 @@ public class ObjectExtValue extends ObjectValue
   }
 
   @Override
-  public boolean issetField( StringValue name) {
+  public boolean issetField(StringValue name)
+  {
+    Env env = Env.getCurrent();
 
-    Value returnValue = _quercusClass.issetField(Env.getCurrent(),this,name);
-    if(returnValue == UnsetValue.UNSET)
+    Value returnValue = _quercusClass.issetField(env, this, name);
+
+    if (returnValue == UnsetValue.UNSET)
     {
-        // setter didn't work, lets look in the class itself
-        int hash = (name.hashCode() & 0x7fffffff) % _prime;
+      // setter didn't work, lets look in the class itself
+      int hash = (name.hashCode() & 0x7fffffff) % _prime;
 
-        for (Entry entry = _entries[hash]; entry != null; entry = entry._next) {
-          StringValue entryKey = entry._key;
+      for (Entry entry = _entries[hash]; entry != null; entry = entry._next) {
+        StringValue entryKey = entry._key;
 
-          if ((name == entryKey || name.equals(entryKey)) && entry._value != NullValue.NULL ) {
-            // php/09ks vs php/091m
-              return true;
-          }
+        if (name.equals(entryKey)) {
+          // php/091m
+          return true;
+        }
+      }
+
+      if (isA("arrayaccess"))
+      {
+        // TODO: This should probably be in ArrayAccessDelegate
+        Value v = this.getObject(env).getArray().get(name);
+
+        if( v != null && v != NullValue.NULL && v != UnsetValue.UNSET) {
+          return true;
         }
 
-        if(this.isA("arrayaccess"))
-        {
-            // TODO: This should probably be in ArrayAccessDelegate
-            Env _env = Env.getCurrent();
-            Value v = this.getObject(_env).getArray().get(name);
-            if( v != null && v != NullValue.NULL && v != UnsetValue.UNSET)
-                return true;
-            return false;
-        }
+        return false;
+      }
     }
 
-    return returnValue.toBoolean();
-
+    return returnValue != UnsetValue.UNSET;
   }
 
   @Override

@@ -224,5 +224,22 @@ abstract public class Marshal {
   {
     throw new UnsupportedOperationException(getClass().toString());
   }
+
+  protected void unexpectedType(Env env,
+                                Value value,
+                                Class<?> actual,
+                                Class<?> expected)
+  {
+    env.warning(L.l("'{0}' of type '{1}' is an unexpected argument, expected {2}",
+                    value,
+                    actual.getSimpleName(),
+                    expected.getSimpleName()));
+  }
+
+  protected void unexpectedNull(Env env, Class<?> expected)
+  {
+    env.warning(L.l("null is an unexpected argument, expected {0}",
+                    expected.getSimpleName()));
+  }
 }
 

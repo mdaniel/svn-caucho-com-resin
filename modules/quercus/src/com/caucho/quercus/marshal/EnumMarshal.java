@@ -29,14 +29,10 @@
 
 package com.caucho.quercus.marshal;
 
-import java.lang.reflect.*;
-import java.math.BigDecimal;
-import java.net.URL;
-
-import com.caucho.quercus.env.*;
+import com.caucho.quercus.env.Env;
+import com.caucho.quercus.env.NullValue;
+import com.caucho.quercus.env.Value;
 import com.caucho.quercus.expr.Expr;
-import com.caucho.quercus.program.JavaClassDef;
-import com.caucho.util.L10N;
 
 /**
  * Code for marshalling arguments.
@@ -55,14 +51,14 @@ public class EnumMarshal extends Marshal {
 
     return Enum.valueOf(_enumClass, name);
   }
-  
+
   public Object marshal(Env env, Value value, Class argClass)
   {
     String name = value.toString();
 
     return Enum.valueOf(_enumClass, name);
   }
-  
+
   public Value unmarshal(Env env, Object value)
   {
     if (value == null)
@@ -70,7 +66,7 @@ public class EnumMarshal extends Marshal {
     else
       return env.createString(value.toString());
   }
-  
+
   @Override
   public Class getExpectedClass()
   {

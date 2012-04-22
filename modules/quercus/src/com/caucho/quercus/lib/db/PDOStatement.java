@@ -535,15 +535,15 @@ public class PDOStatement
     return rows;
   }
 
-  private Value fetchBoth(Env env)
+  private Value fetchBoth(Env env, JdbcResultResource rs)
   {
-    JdbcResultResource rs = getResultSet();
+    Value value = rs.fetchBoth(env, false);
 
-    if (rs == null) {
+    if (value == NullValue.NULL) {
       return BooleanValue.FALSE;
     }
 
-    return rs.fetchBoth(env, false);
+    return value;
   }
 
   private Value fetchBound(Env env, JdbcResultResource rs)
@@ -572,13 +572,14 @@ public class PDOStatement
     }
   }
 
-  private Value fetchClass(Env env)
+  private Value fetchClass(Env env, JdbcResultResource rs)
   {
     String className;
     Value[] ctorArgs;
 
-    if (_fetchModeArgs.length == 0 || _fetchModeArgs.length > 2)
-      return fetchBoth(env);
+    if (_fetchModeArgs.length == 0 || _fetchModeArgs.length > 2) {
+      return fetchBoth(env, rs);
+    }
 
     className = _fetchModeArgs[0].toString();
 
@@ -596,10 +597,11 @@ public class PDOStatement
           ctorArgs[i++] = argsArray.getVar(key);
       }
       else
-        return fetchBoth(env);
+        return fetchBoth(env, rs);
     }
-    else
+    else {
       ctorArgs = NULL_VALUES;
+    }
 
     return fetchObject(env, className, ctorArgs);
   }
@@ -678,10 +680,10 @@ public class PDOStatement
 
     switch (fetchMode) {
       case PDO.FETCH_ASSOC:
-        value = rs.fetchAssoc(env);
+        value = fetchAssoc(env, rs);
         break;
       case PDO.FETCH_BOTH:
-        value = fetchBoth(env);
+        value = fetchBoth(env, rs);
         break;
       case PDO.FETCH_BOUND:
         value = fetchBound(env, rs);
@@ -690,7 +692,7 @@ public class PDOStatement
         value = fetchColumn(env, columnIndex);
         break;
       case PDO.FETCH_CLASS:
-        value = fetchClass(env);
+        value = fetchClass(env, rs);
         break;
       case PDO.FETCH_FUNC:
         value = fetchFunc(env);
@@ -705,7 +707,7 @@ public class PDOStatement
         value = fetchNamed(env);
         break;
       case PDO.FETCH_NUM:
-        value = rs.fetchNum(env);
+        value = fetchNum(env, rs);
         break;
       case PDO.FETCH_OBJ:
         value = fetchObject(env, rs);
@@ -730,7 +732,30 @@ public class PDOStatement
     }
   }
 
-  private Value fetchObject(Env env, JdbcResultResource rs) {
+  private Value fetchNum(Env env, JdbcResultResource rs)
+  {
+    Value value = rs.fetchNum(env);
+
+    if (value == NullValue.NULL) {
+      return BooleanValue.FALSE;
+    }
+
+    return value;
+  }
+
+  private Value fetchAssoc(Env env, JdbcResultResource rs)
+  {
+    Value value = rs.fetchAssoc(env);
+
+    if (value == NullValue.NULL) {
+      return BooleanValue.FALSE;
+    }
+
+    return value;
+  }
+
+  private Value fetchObject(Env env, JdbcResultResource rs)
+  {
     Value value = rs.fetchObject(env, null, Value.NULL_ARGS);
 
     if (value == NullValue.NULL) {
@@ -795,7 +820,6 @@ public class PDOStatement
         Value existingValue = array.get(name);
 
         if (! (existingValue instanceof UnsetValue)) {
-
           if (! existingValue.isArray()) {
             ArrayValue arrayValue = new ArrayValueImpl();
             arrayValue.put(existingValue);
