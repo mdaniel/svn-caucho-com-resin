@@ -35,6 +35,7 @@ import com.caucho.bam.actor.ManagedActor;
 import com.caucho.bam.broker.Broker;
 import com.caucho.bam.mailbox.Mailbox;
 import com.caucho.bam.mailbox.MailboxType;
+import com.caucho.bam.router.BamRouter;
 import com.caucho.bam.stream.MessageStream;
 import com.caucho.server.deploy.DeployActor;
 
@@ -98,4 +99,6 @@ public interface BamManager
   public <T> T createProxy(String to, Class<T> api);
   
   public <T> T createProxy(String to, Class<T> api, ActorSender sender);
+  
+  public <T> T createProxy(BamRouter router, Class<T> api);
 }

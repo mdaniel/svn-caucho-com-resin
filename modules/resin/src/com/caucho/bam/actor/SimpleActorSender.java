@@ -40,9 +40,6 @@ import com.caucho.bam.query.QueryCallback;
 import com.caucho.bam.query.QueryFuture;
 import com.caucho.bam.query.QueryManager;
 import com.caucho.bam.stream.MessageStream;
-import com.caucho.util.Alarm;
-import com.caucho.util.AlarmListener;
-import com.caucho.util.WeakAlarm;
 
 /**
  * ActorClient is a convenience API for sending messages to other Actors,
@@ -305,6 +302,9 @@ public class SimpleActorSender implements ActorSender {
     long id = _queryManager.nextQueryId();
     
     _queryManager.addQueryCallback(id, callback, timeout);
+
+    if ("cluster-cache-mnode".equals(to))
+      Thread.dumpStack();
     
     linkStream.query(id, to, getAddress(), payload);
   }

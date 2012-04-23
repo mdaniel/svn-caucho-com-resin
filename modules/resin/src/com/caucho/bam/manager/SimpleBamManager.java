@@ -46,6 +46,7 @@ import com.caucho.bam.mailbox.PassthroughMailbox;
 import com.caucho.bam.proxy.BamProxyFactory;
 import com.caucho.bam.proxy.ProxyActor;
 import com.caucho.bam.query.QuerySender;
+import com.caucho.bam.router.BamRouter;
 import com.caucho.bam.stream.MessageStream;
 import com.caucho.bam.stream.NullActor;
 import com.caucho.util.Alarm;
@@ -272,6 +273,12 @@ public class SimpleBamManager implements BamManager
   public <T> T createProxy(String to, Class<T> api, ActorSender sender)
   {
     return BamProxyFactory.createProxy(api, to, sender);
+  }
+  
+  @Override
+  public <T> T createProxy(BamRouter router, Class<T> api)
+  {
+    return BamProxyFactory.createProxy(api, router);
   }
   
   public ActorSender createClient(String address)

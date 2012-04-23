@@ -114,7 +114,6 @@ public class QueryActorFilter implements Actor {
                          BamError error)
   {
     if (! _queryManager.onQueryError(id, to, from, payload, error)) {
-      System.out.println("OQE: " + id + " "+ to + " " + from + " " + payload + " " + error);
       _next.queryError(id, to, from, payload, error);
     }
   }
