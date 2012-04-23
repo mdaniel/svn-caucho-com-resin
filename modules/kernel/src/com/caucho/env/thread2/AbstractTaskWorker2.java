@@ -29,6 +29,7 @@
 
 package com.caucho.env.thread2;
 
+import java.io.Closeable;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.atomic.AtomicLong;
@@ -38,13 +39,16 @@ import java.util.logging.Logger;
 
 import com.caucho.env.thread.TaskWorker;
 import com.caucho.env.warning.WarningService;
+import com.caucho.loader.Environment;
 import com.caucho.util.Alarm;
 import com.caucho.util.CurrentTime;
 
 /**
  * A generic pool of threads available for Alarms and Work tasks.
  */
-abstract public class AbstractTaskWorker2 implements Runnable, TaskWorker {
+abstract public class AbstractTaskWorker2
+  implements Runnable, TaskWorker, Closeable
+{
   private static final Logger log
     = Logger.getLogger(AbstractTaskWorker2.class.getName());
   
@@ -72,6 +76,8 @@ abstract public class AbstractTaskWorker2 implements Runnable, TaskWorker {
   protected AbstractTaskWorker2(ClassLoader classLoader)
   {
     _classLoader = classLoader;
+    
+    Environment.addCloseListener(this, classLoader);
   }
 
   protected boolean isPermanent()
@@ -189,7 +195,7 @@ abstract public class AbstractTaskWorker2 implements Runnable, TaskWorker {
       else
         expires = 0;
       
-      boolean isExpireRetry= false;
+      boolean isExpireRetry = false;
       
       do {
         isExpireRetry = false;
@@ -216,8 +222,9 @@ abstract public class AbstractTaskWorker2 implements Runnable, TaskWorker {
           }
         }
 
-        if (isClosed())
+        if (isClosed()) {
           return;
+        }
         
         if (expires > 0 && _taskState.compareAndSet(TASK_SLEEP, TASK_PARK)) {
           Thread.interrupted();
