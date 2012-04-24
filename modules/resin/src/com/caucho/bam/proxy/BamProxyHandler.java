@@ -61,7 +61,7 @@ class BamProxyHandler implements InvocationHandler
   private String _from;
   private MessageStream _stream;
   private QueryManager _queryManager;
-  private long _timeout = 60000; 
+  private long _timeout = 120000; 
   
   BamProxyHandler(Class<?> api, String to, String from, Broker broker)
   {

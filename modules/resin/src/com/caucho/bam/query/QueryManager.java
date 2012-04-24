@@ -124,7 +124,7 @@ public class QueryManager {
   {
     QueryFutureImpl future
       = new QueryFutureImpl(id, to, from, payload, timeout);
-
+    
     addQueryCallback(id, future, timeout);
 
     return future;
@@ -408,7 +408,7 @@ public class QueryManager {
       throws TimeoutException, BamException
     {
       if (! waitFor(_timeout)) {
-        throw new TimeoutException(this + " query timeout " + _payload
+        throw new TimeoutException(this + " query timeout " + _timeout + "ms for " + _payload
                                    + " {to:" + _to + "}");
       }
       else if (getError() != null) {

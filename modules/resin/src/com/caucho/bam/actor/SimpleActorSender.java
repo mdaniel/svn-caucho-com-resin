@@ -89,8 +89,9 @@ public class SimpleActorSender implements ActorSender {
                                              broker, 
                                              1);
 
-    MessageStream stream = broker.createClient(mailbox, uid, resource);
-    _clientAddress = stream.getAddress();
+    // MessageStream stream = broker.createClient(mailbox, uid, resource);
+    // _clientAddress = stream.getAddress();
+    broker.addMailbox(next.getAddress(), mailbox);
   }
   
   public SimpleActorSender(ManagedBroker broker,
