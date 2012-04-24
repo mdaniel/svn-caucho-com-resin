@@ -64,7 +64,7 @@ public class AppEngineFile
     return _namePart;
   }
   
-  public String getFullName()
+  public String getFullPath()
   {
     return "/" + getFileSystem().getName() + "/" + getNamePart();
   }
@@ -81,7 +81,7 @@ public class AppEngineFile
   
   public String toString()
   {
-    return getClass().getSimpleName() + "[" + getFullName() + "]";
+    return getClass().getSimpleName() + "[" + getFullPath() + "]";
   }
   
   public static enum FileSystem {

@@ -35,6 +35,10 @@ package com.caucho.quercus.servlet;
 @SuppressWarnings("serial")
 public class GoogleQuercusServlet extends QuercusServlet
 {
+  public GoogleQuercusServlet()
+  {
+  }
+  
   @Override
   protected QuercusServletImpl getQuercusServlet(boolean isResin)
   {

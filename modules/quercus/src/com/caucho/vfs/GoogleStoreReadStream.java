@@ -31,6 +31,7 @@ package com.caucho.vfs;
 
 import java.io.IOException;
 import java.nio.ByteBuffer;
+import java.util.logging.Logger;
 
 import com.caucho.util.L10N;
 import com.google.appengine.api.files.FileReadChannel;
@@ -41,6 +42,9 @@ import com.google.appengine.api.files.FileWriteChannel;
  * Writing to a google stream.
  */
 class GoogleStoreReadStream extends StreamImpl {
+  private static final Logger log
+    = Logger.getLogger(GoogleStoreReadStream.class.getName());
+  
   private static final L10N L = new L10N(GoogleStoreReadStream.class);
   
   private final GoogleStorePath _path;
@@ -48,9 +52,16 @@ class GoogleStoreReadStream extends StreamImpl {
   private final ByteBuffer _buf = ByteBuffer.allocate(1024);
   
   GoogleStoreReadStream(GoogleStorePath path, FileReadChannel is)
+    throws IOException
   {
     _path = path;
     _is = is;
+    
+    _buf.clear();
+    
+    int sublen = _is.read(_buf);
+    
+    _buf.flip();
   }
   
   @Override
@@ -63,16 +74,18 @@ class GoogleStoreReadStream extends StreamImpl {
   public int read(byte []buffer, int offset, int length)
     throws IOException
   {
-    _buf.clear();
+    if (! _buf.hasRemaining()) {
+      _buf.clear();
     
-    int sublen = Math.min(_buf.capacity(), length);
+      int result = _is.read(_buf);
     
-    sublen = _is.read(_buf);
+      if (result <= 0)
+        return result;
     
-    if (sublen <= 0)
-      return sublen;
+      _buf.flip();
+    }
     
-    _buf.flip();
+    int sublen = Math.min(length, _buf.remaining());
     
     _buf.get(buffer, offset, sublen);
     

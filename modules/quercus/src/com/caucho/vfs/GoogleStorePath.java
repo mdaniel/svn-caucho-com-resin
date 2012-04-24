@@ -86,7 +86,8 @@ public class GoogleStorePath extends FilesystemPath {
 
     try {
       _root = this;
-
+      
+      _inode = new GoogleStoreInode("", FileType.DIRECTORY, 0, 0);
       _fileService = FileServiceFactory.getFileService();
 
       if (bucket == null)
@@ -109,10 +110,16 @@ public class GoogleStorePath extends FilesystemPath {
    */
   @Override
   public Path fsWalk(String userPath,
-                        Map<String,Object> attributes,
-                        String path)
+                     Map<String,Object> attributes,
+                     String path)
   {
-    return new GoogleStorePath(_root, userPath, path);
+    log.warning("WALK: [" + path + "]");
+    if ("".equals(path) || "/".equals(path)) {
+      return _root;
+    }
+    else {
+      return new GoogleStorePath(_root, userPath, path);
+    }
   }
   
   @Override
@@ -339,8 +346,8 @@ public class GoogleStorePath extends FilesystemPath {
   public StreamImpl openReadImpl() throws IOException
   {
     AppEngineFile file = getGsFile();
-    
-    boolean isLock = true;
+    log.warning("OPEN_READ_IMPL: " + file);
+    boolean isLock = false;
     FileReadChannel is = _fileService.openReadChannel(file, isLock);
 
     return new GoogleStoreReadStream(this, is);
@@ -352,9 +359,19 @@ public class GoogleStorePath extends FilesystemPath {
     GSFileOptionsBuilder builder = new GSFileOptionsBuilder();
     builder.setMimeType("binary/octet-stream");
     builder.setBucket(_bucket);
-    builder.setKey(getFullPath().substring(1));
+    
+    String key = getFullPath();
+    
+    key = key.substring(1);
+
+    if (key.equals("")) {
+      key = "/";
+    }
+
+    builder.setKey(key);
     
     AppEngineFile file = _fileService.createNewGSFile(builder.build());
+    // AppEngineFile file = getGsFile();
     
     boolean isLock = true;
     FileWriteChannel os = _fileService.openWriteChannel(file, isLock);
@@ -378,14 +395,24 @@ public class GoogleStorePath extends FilesystemPath {
   {
     HashMap<String,GoogleStoreInode> dirMap = getDir();
     
-    if (dirMap != null)
-      return dirMap.get(name);
-    else
-      return null;
+    GoogleStoreInode gsInode = null;
+    if (dirMap != null) {
+      gsInode = dirMap.get(name);
+    }
+    
+    if (gsInode == null) {
+      gsInode = new GoogleStoreInode(name, FileType.NONE, -1, -1);
+    }
+    
+    return gsInode;
   }
   
   private HashMap<String,GoogleStoreInode> getDir()
   {
+    if (! isDirectory()) {
+      return null;
+    }
+    
     if (_dirMap == null) {
       _dirMap = readDirMap();
     }
@@ -418,18 +445,22 @@ public class GoogleStorePath extends FilesystemPath {
   
   void updateDir(GoogleStoreInode inode)
   {
+    log.warning("UPPERDIR: " + inode);
     HashMap<String,GoogleStoreInode> map = readDirMap();
     
     if (map == null) {
       map = new HashMap<String,GoogleStoreInode>();
     }
     
+    log.warning("MAPPER: " + inode);
     map.put(inode.getName(), inode);
     
     GoogleStoreInode dirInode = _inode;
     
     if (dirInode == null || ! dirInode.exists()) {
       dirInode = new GoogleStoreInode(getTail(), FileType.DIRECTORY, 0, 0);
+      
+      _inode = dirInode;
       
       if (! equals(_root)) {
         writeGsInode(dirInode);
@@ -438,7 +469,7 @@ public class GoogleStorePath extends FilesystemPath {
         setGsInode(dirInode);
       }
     }
-    
+
     WriteStream out = null;
     try {
       out = openWrite();
@@ -466,7 +497,9 @@ public class GoogleStorePath extends FilesystemPath {
     
     setGsInode(inode);
     
-    if (oldInode == null || ! oldInode.isDirectory()) {
+    if (this == _root) {
+    }
+    else if (oldInode == null || ! oldInode.isDirectory()) {
       GoogleStorePath parent = (GoogleStorePath) getParent();
     
       parent.updateDir(inode);
@@ -484,7 +517,12 @@ public class GoogleStorePath extends FilesystemPath {
   
   public AppEngineFile getGsFile()
   {
-    return new AppEngineFile(getNativePath());
+    String path = getNativePath();
+    
+
+    AppEngineFile file = new AppEngineFile(path);
+    
+    return file;
   }
 
   @Override

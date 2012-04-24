@@ -363,6 +363,7 @@ public class QuercusServlet
   /**
    * Initializes the servlet.
    */
+  @Override
   public void init(ServletConfig config)
     throws ServletException
   {
@@ -531,6 +532,7 @@ public class QuercusServlet
   /**
    * Service.
    */
+  @Override
   public void service(HttpServletRequest request,
                       HttpServletResponse response)
     throws ServletException, IOException

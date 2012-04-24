@@ -357,18 +357,22 @@ public class MergePath extends FilesystemPath {
    */
   public String getScheme()
   {
-    return getBestPath().getScheme();
+    // return getBestPath().getScheme();
+    return "file:";
   }
 
   /**
    * Returns the full path name of the best path.
    */
+  /*
+  @Override
   public String getFullPath()
   {
     Path path = getBestPath();
 
     return path.getFullPath();
   }
+  */
 
   /**
    * Returns the full native path name of the best path.
@@ -383,12 +387,14 @@ public class MergePath extends FilesystemPath {
   /**
    * Returns the URL of the best path.
    */
+  @Override
   public String getURL()
   {
     Path path = getBestPath();
 
-    if (! path.exists())
+    if (! path.exists()) {
       path = getWritePath();
+    }
 
     return path.getURL();
   }
@@ -540,7 +546,8 @@ public class MergePath extends FilesystemPath {
 
       if (path.isDirectory()) {
         String[]subList = path.list();
-        for (int j = 0; j < subList.length; j++) {
+        
+        for (int j = 0; subList != null && j < subList.length; j++) {
           if (! list.contains(subList[j]))
             list.add(subList[j]);
         }
