@@ -40,6 +40,7 @@ import java.util.concurrent.atomic.AtomicInteger;
 import com.caucho.bam.BamError;
 import com.caucho.bam.RemoteConnectionFailedException;
 import com.caucho.bam.RemoteListenerUnavailableException;
+import com.caucho.bam.ServiceUnavailableException;
 import com.caucho.bam.actor.ActorSender;
 import com.caucho.bam.broker.Broker;
 import com.caucho.bam.manager.BamManager;
@@ -377,7 +378,12 @@ public class DeployClient implements Repository
 
   public String []getCommitList(String []commitList)
   {
-    return _deployProxy.getCommitList(commitList);
+    try {
+      return _deployProxy.getCommitList(commitList);
+    } catch (ServiceUnavailableException e) {
+      throw new ServiceUnavailableException(L.l("Deploy service is not available, possibly because the resin.xml is missing a <resin:AdminServices> or a <resin:DeployService> tag.\n  {0}",
+                                                e.getMessage()));
+    }
   }
 
   public boolean getFile(String tagName, String fileName, OutputStream os)

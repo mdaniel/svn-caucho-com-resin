@@ -438,7 +438,7 @@ public class DeployActor
 
   public DeployControllerState controllerRestart(String tag)
   {
-    return controllerRestart(tag);
+    return restart(tag);
   }
 
   public DeployControllerState restart(String tag)
@@ -457,7 +457,8 @@ public class DeployActor
     return result;
   }
 
-  public void restartCluster(String tag, ReplyCallback<DeployControllerState> cb)
+  public void restartCluster(String tag,
+                             ReplyCallback<DeployControllerState> cb)
   {
     throw new UnsupportedOperationException(getClass().getName());
   }

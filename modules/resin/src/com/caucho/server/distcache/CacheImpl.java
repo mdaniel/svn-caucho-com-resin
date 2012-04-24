@@ -487,7 +487,7 @@ public class CacheImpl<K,V>
                           InputStream is)
     throws IOException
   {
-    return getDistCacheEntry(key).putIfNew(update, is);
+    return getDistCacheEntry(key).putIfNew(update, is, _config);
   }
 
   /*

@@ -236,10 +236,10 @@ public class DistCacheEntry {
                   long modifiedExpireTimeout)
     throws IOException
   {
-    putStream(is, config, 
-              accessedExpireTimeout,
-              modifiedExpireTimeout, 
-              0);
+      putStream(is, config, 
+                accessedExpireTimeout,
+                modifiedExpireTimeout, 
+                0);
   }
 
   /**
@@ -354,10 +354,23 @@ public class DistCacheEntry {
    * Sets the value by an input stream
    */
   public boolean putIfNew(MnodeUpdate update,
-                          InputStream is)
+                          InputStream is,
+                          CacheConfig config)
     throws IOException
   {
+    MnodeEntry entry = getMnodeEntry();
+    
+    if (update.getVersion() < entry.getVersion()) {
+      return false;
+    }
+    
     MnodeValue newValue = putLocalValue(update, is);
+    
+    entry = getMnodeEntry();
+    
+    if (newValue.getValueHash() == update.getValueHash()) {
+      config.getEngine().put(getKeyHash(), update, entry.getValueDataId());
+    }
 
     return newValue.getValueHash() == update.getValueHash();
   }

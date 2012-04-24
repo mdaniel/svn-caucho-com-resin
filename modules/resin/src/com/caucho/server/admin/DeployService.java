@@ -70,7 +70,7 @@ public class DeployService
     try {
       ClassLoader loader = Thread.currentThread().getContextClassLoader();
       
-      Class<?> cl = Class.forName("com.caucho.server.admin.ProDeployActor",
+      Class<?> cl = Class.forName("com.caucho.server.deploy.ProDeployActor",
                                   false,
                                   loader);
       

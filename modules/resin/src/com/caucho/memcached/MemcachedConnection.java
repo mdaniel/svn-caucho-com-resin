@@ -773,9 +773,11 @@ public class MemcachedConnection extends AbstractProtocolConnection
     {
       ExtCacheEntry entry = cache.getExtCacheEntry(key);
       
+      boolean isValue = (entry != null && ! entry.isValueNull());
+
       cache.remove(key);
       
-      return (entry != null && ! entry.isValueNull());
+      return isValue;
     }
   }
   

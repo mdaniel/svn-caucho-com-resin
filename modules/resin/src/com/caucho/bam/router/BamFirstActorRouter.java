@@ -135,12 +135,21 @@ public class BamFirstActorRouter implements BamRouter
     void start()
     {
       if (! nextQuery()) {
-        _broker.queryError(_id, _from, _sender.getAddress(),
-                           _payload, 
-                           new BamError(BamError.TYPE_CANCEL,
-                                        BamError.REMOTE_CONNECTION_FAILED,
-                                        "no valid actors"));
+        fail();
       }
+    }
+    
+    private void fail()
+    {
+      /*
+      _broker.queryError(_id, _from, _sender.getAddress(),
+                         _payload, 
+                         new BamError(BamError.TYPE_CANCEL,
+                                      BamError.REMOTE_CONNECTION_FAILED,
+                                      "no valid actors"));
+                                      */
+      
+      _broker.queryResult(_id, _from, _sender.getAddress(), null);
     }
 
     @Override
