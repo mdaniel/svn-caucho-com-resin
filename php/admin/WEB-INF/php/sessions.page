@@ -19,17 +19,8 @@ function display_webapp_summary_page($g_mbean_server)
 {
   echo "<div id='webapp-tabs' style='display: none'>\n";
 
-  echo "<ul>\n";
-  echo " <li><a href='#webapp-active'>" . gettext('Active') . "</a></li>\n";
-  echo " <li><a href='#webapp-idle'>" . gettext('Idle') . "</a></li>\n";
-  echo "</ul>\n";
-
   echo "<div id='webapp-active'>\n";
   display_webapp_summary($g_mbean_server, false);
-  echo "</div>\n";
-
-  echo "<div id='webapp-idle'>\n";
-  display_webapp_summary($g_mbean_server, true);
   echo "</div>\n";
 
   echo "</div>\n";
@@ -116,7 +107,7 @@ function display_webapp_summary($g_mbean_server, $is_idle)
       echo " </tr>\n";
 
       echo " <tr class='" . row_style($count++) . "'>";
-      echo "  <td><span id='${id}' class='js-command'></span></td>\n";
+      echo "  <td><span id='${id}' class='switch'></span></td>\n";
 
       display_session_manager($webapp);
 
@@ -178,8 +169,8 @@ function display_sessions($webapp, $host)
 
   $manager_suffix = $hostName . preg_replace('/^//', "", $context);
 
-  echo "<div>";
-  echo "<a id='sessions-refresh-${manager_suffix}'>show sessions</a>";
+  echo "<div class='refresh-sessions'>";
+  echo "<a class='refresh-sessions' id='sessions-refresh-${manager_suffix}'>show sessions</a>";
   echo "</div>";
 
   echo "<div id='sessions-list-${manager_suffix}'>";
@@ -195,7 +186,9 @@ function display_sessions($webapp, $host)
     var sessionsDiv = $(this).parent().next();
 
     var link ="sessions.php?host=${hostName}&webapp=${webapp->ContextPath}&manager-suffix=${manager_suffix}";
-    alert(link);
+
+    $(this).text('refresh sessions');
+
     sessionsDiv.load(link);
   });
 

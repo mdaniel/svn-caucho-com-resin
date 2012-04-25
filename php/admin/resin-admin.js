@@ -164,76 +164,6 @@ function initializeToggleSwitches() {
   });
 }
 
-//alex
-function JSCommand(context) {
-  // right triangle -- e == east
-  this.toggleShowIcon = "ui-icon-circle-triangle-e";
-  // down triangle -- s == south
-  this.toggleHideIcon = "ui-icon-circle-triangle-s";
-
-  this.state = "hidden";
-  this.context = context;
-  this.contextId = this.context.attr("id");
-  this.jsCommand = $("<span></span>");
-
-  this.jsCommand.addClass("ui-icon");
-  this.jsCommand.css("display", "inline-block");
-  this.jsCommand.addClass(this.toggleShowIcon);
-  this.context.prepend(this.jsCommand);
-
-  this.toggleTargets = $(".toggle-" + this.contextId);
-
-  this.hideTargets();
-}
-
-JSCommand.prototype.init = function() {
-  var _ = this;
-
-  this.context.click(function() {
-    _.handleClick();
-  });
-};
-
-JSCommand.prototype.setShownState = function() {
-  this.jsCommand.removeClass(this.toggleShowIcon);
-  this.jsCommand.addClass(this.toggleHideIcon);
-  this.state = "shown";
-};
-
-JSCommand.prototype.showTargets = function() {
-  this.toggleTargets.show();
-};
-
-JSCommand.prototype.setHiddenState = function() {
-  this.jsCommand.removeClass(this.toggleHideIcon);
-  this.jsCommand.addClass(this.toggleShowIcon);
-  this.state = "hidden";
-};
-
-JSCommand.prototype.hideTargets = function() {
-  this.toggleTargets.hide();
-};
-
-JSCommand.prototype.handleClick = function() {
-  if (this.state == "hidden") {
-    this.setShownState();
-    this.showTargets();
-  }
-  else {
-    this.setHiddenState();
-    this.hideTargets();
-  }
-
-  this.toggleTargets.trigger("toggle", this);
-};
-
-function initializeJSCommands() {
-  $(".js-command").each(function() {
-    var jsCommand = new JSCommand($(this));
-    jsCommand.init();
-  });
-}
-//alex
 
 function initializeValidators() {
   $("form").each(function() {
@@ -261,7 +191,6 @@ function initializeValidators() {
 function init() {
   initializeValidators();
   initializeToggleSwitches();
-  initializeJSCommands();
 }
 
 function color_revscale(o, c, d)
@@ -281,7 +210,7 @@ function color_baseline(o)
   return o.add("a", -0.6);
 }
 
-function format_memory(val)
+function formatMemory(val)
 {
   if (val >= 1e9)
     return (val / 1e9).toFixed(1) + 'G';
@@ -293,7 +222,7 @@ function format_memory(val)
   return val + "B";
 }
 
-function format_date(val) {
+function formatDate(val) {
   var now = new Date(Date.now());
   var date = new Date(val);
 
@@ -317,7 +246,7 @@ var lhour = 1000 * 60 * 60;
 var lmin = 1000 * 60;
 var lsec = 1000;
 
-function format_timeout(ms) {
+function formatTimeout(ms) {
   var days = Math.floor(ms / lday);
   var hours = Math.floor((ms - lday * days) / lhour);
   var minutes = Math.floor((ms - lday * days - lhour * hours) / lmin);

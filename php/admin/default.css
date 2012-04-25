@@ -1180,3 +1180,20 @@ of log entries*/
   font-size: .5em;
   z-index: 2;
 }
+
+div.refresh-sessions {
+  height: 2em;
+}
+
+a.refresh-sessions {
+  color : #e5a122;
+}
+
+a.refresh-sessions:visited {
+  color : #e5a122;
+}
+
+a.refresh-sessions:hover {
+  color : #e5a122;
+  cursor: pointer;
+}

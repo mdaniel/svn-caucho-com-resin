@@ -35,6 +35,11 @@ $properties
   "IdleTimeout", "IdleIsSet", "New", "Valid",
   "UseCount", "LastSaveLength");
 
+$properties_text
+  = array("Session Id", "Creation Time", "Access Time", "Last UseTime",
+  "Idle Timeout", "IdleIsSet", "New", "Valid",
+  "Use Count", "Last Save Length");
+
 $properties_format = array("CreationTime" => "date",
   "AccessTime" => "date",
   "LastUseTime" => "date",
@@ -48,7 +53,7 @@ $properties_header = array (
 echo "<table id='${session_table_id}' class='data session-data'>\n";
 echo " <tr>\n";
 
-foreach ($properties as $property) {
+foreach ($properties_text as $property) {
   echo"  <th scope='col' title='" . gettext('$property') . "'>";
   echo gettext("$property");
   echo "  </th>\n";
@@ -71,11 +76,11 @@ foreach ($properties as $property) {
   $format = $properties_format[$property];
 
   if ($format === "date")
-    echo ("  data += format_date(session.${property});\n");
+    echo ("  data += formatDate(session.${property});\n");
   else if ($format === "memory")
-    echo ("  data += format_memory(session.${property});\n");
+    echo ("  data += formatMemory(session.${property});\n");
   else if ($format === "timeout")
-    echo ("  data += format_timeout(session.${property});\n");
+    echo ("  data += formatTimeout(session.${property});\n");
   else
     echo ("  data += session.${property};\n");
   echo ("  data += '</td>';\n");
