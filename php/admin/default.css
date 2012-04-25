@@ -1108,9 +1108,9 @@ div.form-input-help {
 }
 
 .webapp-expand {
-	border : 1px solid grey; 
-	padding : 0em 1em 1em 1em;
-	width: 58em;
+  border: 1px solid grey;
+  padding: 0em 1em 1em 1em;
+  width: 58em;
 }
 
 .webapp-data {
@@ -1121,6 +1121,12 @@ div.form-input-help {
   text-align: center;
   white-space: nowrap;
   width: 15em;
+}
+
+.sessions-expand {
+  border: 1px solid grey;
+  padding: 0em 1em 1em 1em;
+  width: 58em;
 }
 
 .top-header {

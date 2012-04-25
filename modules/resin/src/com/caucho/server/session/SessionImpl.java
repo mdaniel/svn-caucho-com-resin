@@ -29,6 +29,27 @@
 
 package com.caucho.server.session;
 
+import com.caucho.distcache.ByteStreamCache;
+import com.caucho.distcache.ExtCacheEntry;
+import com.caucho.json.Json;
+import com.caucho.json.Transient;
+import com.caucho.security.Login;
+import com.caucho.server.webapp.WebApp;
+import com.caucho.util.CacheListener;
+import com.caucho.util.CurrentTime;
+import com.caucho.util.L10N;
+import com.caucho.vfs.IOExceptionWrapper;
+import com.caucho.vfs.TempOutputStream;
+
+import javax.servlet.ServletContext;
+import javax.servlet.http.HttpSession;
+import javax.servlet.http.HttpSessionActivationListener;
+import javax.servlet.http.HttpSessionAttributeListener;
+import javax.servlet.http.HttpSessionBindingEvent;
+import javax.servlet.http.HttpSessionBindingListener;
+import javax.servlet.http.HttpSessionContext;
+import javax.servlet.http.HttpSessionEvent;
+import javax.servlet.http.HttpSessionListener;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.NotSerializableException;
@@ -43,27 +64,6 @@ import java.util.concurrent.atomic.AtomicInteger;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
-import javax.servlet.ServletContext;
-import javax.servlet.http.HttpSession;
-import javax.servlet.http.HttpSessionActivationListener;
-import javax.servlet.http.HttpSessionAttributeListener;
-import javax.servlet.http.HttpSessionBindingEvent;
-import javax.servlet.http.HttpSessionBindingListener;
-import javax.servlet.http.HttpSessionContext;
-import javax.servlet.http.HttpSessionEvent;
-import javax.servlet.http.HttpSessionListener;
-
-import com.caucho.distcache.ByteStreamCache;
-import com.caucho.distcache.ExtCacheEntry;
-import com.caucho.security.Login;
-import com.caucho.server.webapp.WebApp;
-import com.caucho.util.Alarm;
-import com.caucho.util.CacheListener;
-import com.caucho.util.CurrentTime;
-import com.caucho.util.L10N;
-import com.caucho.vfs.IOExceptionWrapper;
-import com.caucho.vfs.TempOutputStream;
-
 /**
  * Implements a HTTP session.
  */
@@ -73,41 +73,57 @@ public class SessionImpl implements HttpSession, CacheListener {
   private static final L10N L = new L10N(SessionImpl.class);
 
   // the session's identifier
+  @Json(name = "SessionId")
   private String _id;
 
   // the owning session manager
+  @Transient
   protected SessionManager _manager;
   // the session objectStore
 
   // Map containing the actual values.
+  @Transient
   protected Map<String,Object> _values;
 
   // time the session was created
+  @Json(name = "CreationTime")
   private long _creationTime;
   // time the session was last accessed
+  @Json(name = "AccessTime")
   private long _accessTime;
   // maximum time the session may stay alive.
+  @Json(name = "LastUseTime")
   private long _lastUseTime;
+  @Json(name = "IdleTimeout")
   private long _idleTimeout;
+  @Json(name = "IdleIsSet")
   private boolean _isIdleSet;
 
   // true if the session is new
+  @Json(name = "New")
   private boolean _isNew = true;
   // true if the application has modified the data
+  @Transient
   private boolean _isModified = false;
   // true if the session is still valid, i.e. not invalidated
+  @Json(name = "Valid")
   private boolean _isValid = true;
   // true if the session is closing
+  @Transient
   private boolean _isClosing = false;
   // true if the session is being closed from an invalidation
+  @Transient
   private boolean _isInvalidating = false;
 
   // the cache entry saved in the session
+  @Transient
   private ExtCacheEntry _cacheEntry;
 
   // to protect for threading
+  @Json(name = "UseCount")
   private final AtomicInteger _useCount = new AtomicInteger();
 
+  @Json(name = "LastSaveLength")
   private int _lastSaveLength;
 
   /**

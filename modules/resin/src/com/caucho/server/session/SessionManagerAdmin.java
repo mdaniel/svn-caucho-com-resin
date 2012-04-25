@@ -303,6 +303,12 @@ public class SessionManagerAdmin extends AbstractManagedObject
   }
 
   @Override
+  public String getSessionsAsJsonString()
+  {
+    return _manager.getSessionsAsJsonString();
+  }
+
+  @Override
   public long getEstimatedMemorySize()
   {
     return _manager.getEstimatedMemorySize();

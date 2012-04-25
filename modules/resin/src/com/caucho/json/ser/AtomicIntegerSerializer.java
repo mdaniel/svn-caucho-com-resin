@@ -24,32 +24,29 @@
  *   59 Temple Place, Suite 330
  *   Boston, MA 02111-1307  USA
  *
- * @author Scott Ferguson
+ * @author Alex Rojkov
  */
 
 package com.caucho.json.ser;
 
 import com.caucho.json.JsonOutput;
 
-import java.io.*;
+import java.io.IOException;
+import java.util.concurrent.atomic.AtomicInteger;
 
-public class ObjectArraySerializer extends AbstractJsonSerializer<Object[]> {
-  static final JsonSerializer SER = new ObjectArraySerializer();
+public class AtomicIntegerSerializer
+  extends AbstractJsonSerializer<AtomicInteger>
+{
+  static final JsonSerializer SER = new AtomicIntegerSerializer();
 
-  private ObjectArraySerializer() {}
-  
-  public void write(JsonOutput out, Object[] value, boolean annotated)
+  private AtomicIntegerSerializer()
+  {
+  }
+
+  @Override
+  public void write(JsonOutput out, AtomicInteger value, boolean annotated)
     throws IOException
   {
-    int i = 0;
-    
-    out.writeArrayBegin();
-    for (Object child : value) {
-      if (i != 0)
-        out.writeArrayComma();
-      i++;
-      out.writeObject(child, annotated);
-    }
-    out.writeArrayEnd();
+    out.writeDouble(value.get());
   }
 }

@@ -32,7 +32,7 @@ if (function_exists('header')) {
   header("Pragma: No-Cache");
 }  
 
-function admin_init($query="", $is_refresh=false)
+function admin_init($query="", $is_refresh=false, $fragment = false)
 {
   global $g_server_id;
   global $g_server_index;
@@ -59,7 +59,10 @@ function admin_init($query="", $is_refresh=false)
   else
     $title = "Resin: $g_page";
 
-  return display_header($g_page, $title, $g_server, $query, $is_refresh, true);
+  if ($fragment)
+    return true;
+  else
+    return display_header($g_page, $title, $g_server, $query, $is_refresh, true);
 }  
 
 function mbean_init()
@@ -335,6 +338,8 @@ function uri_nocache($path)
   else
     $rand = "&.rand=" . mt_rand();
   */
+
+  $rand = "";
 
   if (strncmp($path, "/", 1) === 0)
     return $path . $rand;

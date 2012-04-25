@@ -38,6 +38,7 @@ import java.io.StringWriter;
 import java.nio.charset.Charset;
 import java.util.ArrayList;
 import java.util.Iterator;
+import java.util.List;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -1726,6 +1727,8 @@ public final class SessionManager implements SessionCookieConfig, AlarmListener
 
       jsonOutput.close();
 
+      out.flush();
+
       return new String(buffer.toByteArray(), UTF_8);
     } catch (IOException e) {
       if (log.isLoggable(Level.FINE))
@@ -1734,6 +1737,50 @@ public final class SessionManager implements SessionCookieConfig, AlarmListener
 
     return null;
   }
+
+  public String getSessionsAsJsonString() {
+
+    List<SessionImpl> sessionList;
+    synchronized (_sessions) {
+
+      sessionList = new ArrayList<SessionImpl>(_sessions.size());
+
+      Iterator<LruCache.Entry<String, SessionImpl>> sessionsIterator
+        = _sessions.iterator();
+
+      while (sessionsIterator.hasNext()) {
+        sessionList.add(sessionsIterator.next().getValue());
+      }
+    }
+
+    SessionImpl []sessions = new SessionImpl[sessionList.size()];
+
+    sessionList.toArray(sessions);
+
+    TempOutputStream buffer = new TempOutputStream();
+
+    PrintWriter out = new PrintWriter(new OutputStreamWriter(buffer, UTF_8));
+
+    JsonOutput jsonOutput = new JsonOutput(out);
+
+    try {
+      jsonOutput.writeObject(sessions, true);
+
+      jsonOutput.flush();
+
+      jsonOutput.close();
+
+      out.flush();
+
+      return new String(buffer.toByteArray(), UTF_8);
+    } catch (IOException e) {
+      if (log.isLoggable(Level.FINE))
+        log.log(Level.FINE, L.l("can't serialize sessions due to {0}", e), e);
+    }
+
+    return null;
+  }
+
 
   public long getEstimatedMemorySize()
   {

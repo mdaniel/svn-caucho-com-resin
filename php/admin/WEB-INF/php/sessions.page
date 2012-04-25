@@ -46,14 +46,11 @@ function display_webapp_summary($g_mbean_server, $is_idle)
   echo "<h1>" . gettext('Cluster') . ": $cluster_name</h1>";
   echo "<div class='section'>\n";
 
-  $servers = $cluster->Servers;
-
   $webapp_id = 0;
 
   $hosts = $g_mbean_server->query("resin:*,type=Host");
   usort($hosts, "sort_host");
   foreach ($hosts as $host) {
-
     $hostName = empty($host->HostName) ? "default" : $host->HostName;
 
     echo "<h2>" . gettext('Host') . ": $hostName</h2>\n";
@@ -81,49 +78,55 @@ function display_webapp_summary($g_mbean_server, $is_idle)
       echo " <tr>\n";
       echo "	<th scope='col' title='Expand'></th>\n";
 
-      echo "  <th scope='col' title='" . gettext('The context root of the application') . "'>";
+      echo"  <th scope='col' title='"
+        . gettext('The context root of the application') . "'>";
       echo gettext('Path');
       echo "  </th>\n";
 
-      echo "  <th scope='col' title='" . gettext('The current number of active sessions') . "'>";
+      echo"  <th scope='col' title='"
+        . gettext('The current number of active sessions') . "'>";
       echo gettext('Active Sessions');
       echo "  </th>\n";
 
-      echo "  <th scope='col' title='" . gettext('Total number of sessions that have been created') . "'>";
+      echo"  <th scope='col' title='"
+        . gettext('Total number of sessions that have been created') . "'>";
       echo gettext('Total Sessions Created');
       echo "  </th>\n";
 
-      echo "  <th scope='col' title='" . gettext('Total number of sessions invalidated') . "'>";
+      echo"  <th scope='col' title='"
+        . gettext('Total number of sessions invalidated') . "'>";
       echo gettext('Invalidated Sessions');
       echo "  </th>\n";
 
-      echo "  <th scope='col' title='" . gettext('Total number of timed out sessions') . "'>";
+      echo"  <th scope='col' title='"
+        . gettext('Total number of timed out sessions') . "'>";
       echo gettext('Timed Out Sessions');
       echo "  </th>\n";
 
-      echo "  <th scope='col' title='" . gettext('Estimated memory consumed') . "'>";
+      echo"  <th scope='col' title='" . gettext('Estimated memory consumed')
+        . "'>";
       echo gettext('Estimated Memory Size');
       echo "  </th>\n";
 
-      echo "  <th scope='col' title='" . gettext('Requests Currently Active / Serving') . "'>";
+      echo"  <th scope='col' title='"
+        . gettext('Requests Currently Active / Serving') . "'>";
       echo gettext('Active Requests');
       echo "  </th>\n";
 
       echo " </tr>\n";
 
       echo " <tr class='" . row_style($count++) . "'>";
-      echo "  <td><span id='${id}' class='switch'></span></td>\n";
+      echo "  <td><span id='${id}' class='js-command'></span></td>\n";
 
-      $is_deploy_valid = true;
-      display_webapp($webapp, $is_deploy_valid);
+      display_session_manager($webapp);
 
       echo " </tr>\n";
       echo "</table>\n";
 
       echo "<br/>\n";
 
-      echo "<div class='toggle-${id} webapp-expand'>\n";
-      display_sessions($webapp);
+      echo "<div class='toggle-${id} sessions-expand'>\n";
+      display_sessions($webapp, $host);
       echo "</div>\n";
     }
 
@@ -133,11 +136,10 @@ function display_webapp_summary($g_mbean_server, $is_idle)
   echo "</div>\n";
 }
 
-function display_webapp($webapp)
+function display_session_manager($webapp)
 {
   $sessionManager = $webapp->SessionManager;
   $context_path = empty($webapp->ContextPath) ? "/" : $webapp->ContextPath;
-  $disabled = "";
 
   echo "<td class='item'>$context_path</td>\n";
 
@@ -166,22 +168,39 @@ function display_webapp($webapp)
   echo " </td>\n";
 }
 
-function display_sessions($webapp)
+function display_sessions($webapp, $host)
 {
-  return;
+  $hostName = $host->HostName;
+  $context = $webapp->ContextPath;
 
-  global $g_mbean_server;
+  if ($context === "")
+    $context = "ROOT";
 
-  $session = $webapp->SessionManager;
+  $manager_suffix = $hostName . preg_replace('/^//', "", $context);
 
-  $exp = mbean_explode($webapp->mbean_name);
+  echo "<div>";
+  echo "<a id='sessions-refresh-${manager_suffix}'>show sessions</a>";
+  echo "</div>";
 
-  $query = "resin:*,Host=" . $exp['Host'] . ",WebApp=" . $exp['name'];
-  $beans = $g_mbean_server->query($query);
+  echo "<div id='sessions-list-${manager_suffix}'>";
+  echo "</div>";
 
-  array_push($beans, $webapp);
+  echo <<<END
+<script language="javascript">
+  var showLink = $("#sessions-refresh-${manager_suffix}");
+  showLink.click(function(context, event)
+   {
+    var parent = showLink.parent();
 
-  display_jmx($g_mbean_server, $beans);
+    var sessionsDiv = $(this).parent().next();
+
+    var link ="sessions.php?host=${hostName}&webapp=${webapp->ContextPath}&manager-suffix=${manager_suffix}";
+    alert(link);
+    sessionsDiv.load(link);
+  });
+
+</script>
+END;
 }
 
 $javascript = javascript_create_tab("webapp-tabs");

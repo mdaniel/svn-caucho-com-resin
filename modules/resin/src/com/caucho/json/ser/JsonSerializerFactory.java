@@ -35,6 +35,7 @@ import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.atomic.AtomicInteger;
 
 public class JsonSerializerFactory {
   private static final HashMap<Class,JsonSerializer> _staticSerMap
@@ -85,6 +86,9 @@ public class JsonSerializerFactory {
 
     if (cl.isArray())
       return ObjectArraySerializer.SER;
+
+    if (AtomicInteger.class.isAssignableFrom(cl))
+      return AtomicIntegerSerializer.SER;
 
     if(Enum.class.isAssignableFrom(cl))
       return EnumSerializer.SER;

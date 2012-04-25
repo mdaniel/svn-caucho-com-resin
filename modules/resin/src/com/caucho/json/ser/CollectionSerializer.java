@@ -49,7 +49,7 @@ public class CollectionSerializer extends AbstractJsonSerializer<Collection> {
       if (i != 0)
         out.writeArrayComma();
       i++;
-      out.writeObject((Serializable) child, annotated);
+      out.writeObject(child, annotated);
     }
     out.writeArrayEnd();
   }
