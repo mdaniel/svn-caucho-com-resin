@@ -38,6 +38,7 @@ import java.io.*;
  */
 public class StreamSourceHessianSerializer extends AbstractStreamSerializer
 {
+  @Override
   protected InputStream getInputStream(Object obj)
     throws IOException
   {

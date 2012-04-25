@@ -95,11 +95,17 @@ public class HashKey implements Serializable {
 
   public static String toString(byte []hash)
   {
+    if (hash == null)
+      return "null";
+    
     return toString(hash, hash.length);
   }
   
   public static String toString(byte []hash, int len)
   {
+    if (hash == null)
+      return "null";
+    
     StringBuilder sb = new StringBuilder();
 
     for (int i = 0; i < len; i++) {

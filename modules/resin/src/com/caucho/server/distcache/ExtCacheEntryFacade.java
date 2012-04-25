@@ -57,10 +57,12 @@ public final class ExtCacheEntryFacade implements ExtCacheEntry {
     = Logger.getLogger(ExtCacheEntryFacade.class.getName());
   
   private final DistCacheEntry _entry;
+  private final MnodeEntry _mnodeEntry;
 
   ExtCacheEntryFacade(DistCacheEntry entry)
   {
     _entry = entry;
+    _mnodeEntry = entry.getMnodeEntry();
   }
 
   /**
@@ -87,7 +89,7 @@ public final class ExtCacheEntryFacade implements ExtCacheEntry {
   @Override
   public Object getValue()
   {
-    return _entry.getMnodeEntry().getValue();
+    return _mnodeEntry.getValue();
   }
 
   /**
@@ -96,13 +98,13 @@ public final class ExtCacheEntryFacade implements ExtCacheEntry {
   @Override
   public boolean isValueNull()
   {
-    return _entry.getMnodeEntry().isValueNull();
+    return _mnodeEntry.isValueNull();
   }
 
   @Override
   public final int getUserFlags()
   {
-    return _entry.getMnodeEntry().getUserFlags();
+    return _mnodeEntry.getUserFlags();
   }
 
   /**
@@ -117,13 +119,13 @@ public final class ExtCacheEntryFacade implements ExtCacheEntry {
   @Override
   public long getValueHash()
   {
-    return _entry.getMnodeEntry().getValueHash();
+    return _mnodeEntry.getValueHash();
   }
 
   @Override
   public long getValueLength()
   {
-    return _entry.getMnodeEntry().getValueLength();
+    return _mnodeEntry.getValueLength();
   }
   
   /**
@@ -139,61 +141,61 @@ public final class ExtCacheEntryFacade implements ExtCacheEntry {
   @Override
   public long getAccessedExpireTimeout()
   {
-    return _entry.getMnodeEntry().getAccessedExpireTimeout();
+    return _mnodeEntry.getAccessedExpireTimeout();
   }
 
   @Override
   public long getModifiedExpireTimeout()
   {
-    return _entry.getMnodeEntry().getModifiedExpireTimeout();
+    return _mnodeEntry.getModifiedExpireTimeout();
   }
   
   @Override
   public boolean isExpired(long now)
   {
-    return _entry.getMnodeEntry().isExpired(now);
+    return _mnodeEntry.isExpired(now);
   }
 
   @Override
   public long getLeaseExpireTimeout()
   {
-    return _entry.getMnodeEntry().getLeaseExpireTimeout();
+    return _mnodeEntry.getLeaseExpireTimeout();
   }
 
   @Override
   public int getLeaseOwner()
   {
-    return _entry.getMnodeEntry().getLeaseOwner();
+    return _mnodeEntry.getLeaseOwner();
   }
 
   @Override
   public long getLastAccessedTime()
   {
-    return _entry.getMnodeEntry().getLastAccessedTime();
+    return _mnodeEntry.getLastAccessedTime();
   }
 
   @Override
   public long getLastModifiedTime()
   {
-    return _entry.getMnodeEntry().getLastModifiedTime();
+    return _mnodeEntry.getLastModifiedTime();
   }
 
   @Override
   public long getVersion()
   {
-    return _entry.getMnodeEntry().getVersion();
+    return _mnodeEntry.getVersion();
   }
 
   @Override
   public MnodeUpdate getRemoteUpdate()
   {
-    return _entry.getMnodeEntry().getRemoteUpdate();
+    return _mnodeEntry.getRemoteUpdate();
   }
 
   @Override
   public boolean isValid()
   {
-    return _entry.getMnodeEntry().isValid();
+    return _mnodeEntry.isValid();
   }
 
   //
@@ -209,6 +211,6 @@ public final class ExtCacheEntryFacade implements ExtCacheEntry {
   @Override
   public String toString()
   {
-    return (getClass().getSimpleName() + "[" + _entry + "]");
+    return (getClass().getSimpleName() + "[" + _mnodeEntry + "]");
   }
 }
