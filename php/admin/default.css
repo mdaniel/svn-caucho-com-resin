@@ -1197,3 +1197,40 @@ a.refresh-sessions:hover {
   color : #e5a122;
   cursor: pointer;
 }
+
+table.data-detail {
+  font-size: 100%;
+  color: black;
+  border-collapse: collapse;
+  empty-cells: hide;
+}
+
+.data-detail td {
+  padding: 3px 4px 3px 4px;
+  border: thin solid grey;
+}
+/* old background: #e0e6f8; */
+
+.data-detail th {
+  padding: 3px 4px 3px 4px;
+  background: #EBD7B2;
+  text-align: center;
+  border: thin solid grey;
+}
+
+/*  background : #d0e4ff; */
+.data-detail td.group {
+  background : #EBD7B2;
+  font-weight : bold;
+}
+
+/* background : #e0e6f8; */
+.data-detail td.item {
+  background : #EBD7B2;
+  font-weight : bold;
+}
+
+.data-detail td.itemfail {
+  font-weight : bold;
+  background : #f99;
+}

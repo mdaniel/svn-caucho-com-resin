@@ -24,6 +24,12 @@ $webapp = $beans[0];
 
 $session_manager = $webapp->SessionManager;
 
+if ($session_manager->SessionActiveCount == 0) {
+  echo "No Active Sessions";
+
+  return;
+}
+
 $sessions_json = $session_manager->getSessionsAsJsonString();
 
 //[{"AccessTime":1335326457442,"CreationTime":1335326237342,"IdleIsSet":false,"IdleTimeout":1800000,"LastSaveLength":112,"LastUseTime":1335326459502,"New":false,"SessionId":"aaacRWFwH0LzGcuiiiGBt","UseCount":1.0,"Valid":true}]
@@ -50,7 +56,7 @@ $properties_format = array("CreationTime" => "date",
 $properties_header = array (
 );
 
-echo "<table id='${session_table_id}' class='data session-data'>\n";
+echo "<table id='${session_table_id}' class='data-detail'>\n";
 echo " <tr>\n";
 
 foreach ($properties_text as $property) {
