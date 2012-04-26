@@ -12,6 +12,7 @@
 
 <s2 title="4.0.28 - snapshot">
 <ul>
+<li>servlet: fixed Resin schema constraint for async-supported servlet element.(#5044, rep by Naohisa Ohshima)</li>
 <li>jsp: fixed ELParser to accept expressions as argument to method calls.(#5034, rep by mate)</li>
 <li>jsp: fixed ResourceBundleELResolver handling of MissingResourceException (#5035, rep by mate)</li>
 <li>cloud: fixes for .jar support in deploy-config</li>
