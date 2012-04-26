@@ -1112,7 +1112,7 @@ abstract public class AbstractHttpResponse {
     if (cookie.isHttpOnly()) {
       cb.append("; HttpOnly");
     }
-
+    
     return true;
   }
 

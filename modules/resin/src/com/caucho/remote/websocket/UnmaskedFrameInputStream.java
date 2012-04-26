@@ -151,7 +151,8 @@ public class UnmaskedFrameInputStream extends FrameInputStream
     int rsv = frame1 & 0x70;
     
     if (rsv != 0) {
-      getContext().close(CLOSE_ERROR, "illegal request");
+      if (getContext() != null)
+        getContext().close(CLOSE_ERROR, "illegal request");
       return false;
     }
 

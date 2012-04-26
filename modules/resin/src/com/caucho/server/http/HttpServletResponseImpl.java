@@ -1291,8 +1291,9 @@ public final class HttpServletResponseImpl extends AbstractCauchoResponse
     // server/003a
     if (_sessionId != null
         && webApp != null
-        && webApp.getSessionManager().enableSessionCookies())
+        && webApp.getSessionManager().enableSessionCookies()) {
       addCookie(createServletCookie(webApp));
+    }
   }
 
   protected Cookie createServletCookie(WebApp webApp)
