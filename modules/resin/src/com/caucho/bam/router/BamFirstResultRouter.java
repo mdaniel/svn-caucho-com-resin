@@ -138,7 +138,9 @@ public class BamFirstResultRouter implements BamRouter
       if (! nextQuery()) {
         _broker.queryError(_id, _from, _sender.getAddress(),
                            _payload, 
-                           new BamError("no active actors"));
+                           new BamError(BamError.TYPE_CANCEL,
+                                        BamError.REMOTE_CONNECTION_FAILED,
+                                        "no valid results"));
       }
     }
 

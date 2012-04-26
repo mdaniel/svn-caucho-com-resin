@@ -690,7 +690,7 @@ public class SessionImpl implements HttpSession, CacheListener {
           && cacheEntry.getValueHash() == entry.getValueHash()) {
         if (log.isLoggable(Level.FINE)) {
           log.fine(this + " session load-same valueHash="
-                   + (entry != null ? entry.getValueHash() : null));
+                   + (entry != null ? Long.toHexString(entry.getValueHash()) : null));
         }
         
         return true;
@@ -705,7 +705,7 @@ public class SessionImpl implements HttpSession, CacheListener {
 
         if (log.isLoggable(Level.FINE)) {
           log.fine(this + " session load valueHash="
-                   + (entry != null ? entry.getValueHash() : null));
+                   + (entry != null ? Long.toHexString(entry.getValueHash()) : null));
         }
 
         load(in);
