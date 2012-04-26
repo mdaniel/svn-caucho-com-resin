@@ -199,11 +199,13 @@ javaee_servlet = element servlet {
   (element servlet-class { javaee_fully-qualified-class }
    | element jsp-file { string }),
 
-  element async-supported { javaee_boolean }?, 
-
   javaee_init-param*,
 
   element load-on-startup { string }?,
+
+  element enabled { javaee_boolean }?,
+
+  element async-supported { javaee_boolean }?,
 
   element run-as { string }?,
 

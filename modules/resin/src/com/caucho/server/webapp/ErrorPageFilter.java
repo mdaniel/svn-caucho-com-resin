@@ -42,15 +42,8 @@ import javax.servlet.ServletResponse;
  */
 public class ErrorPageFilter implements Filter {
   
-  public static String STATUS_CODE = "javax.servlet.error.status_code";
-  public static String EXCEPTION_TYPE = "javax.servlet.error.exception_type";
   public static String MESSAGE = "javax.servlet.error.message";
-  public static String EXCEPTION = "javax.servlet.error.exception";
-  public static String ERROR_URI = "javax.servlet.error.request_uri";
-  public static String SERVLET_NAME = "javax.servlet.error.servlet_name";
-  
-  public static String JSP_EXCEPTION = "javax.servlet.jsp.jspException";
-  
+
   public static String SHUTDOWN = "com.caucho.shutdown";
   
   private ErrorPageManager _errorPageManager;

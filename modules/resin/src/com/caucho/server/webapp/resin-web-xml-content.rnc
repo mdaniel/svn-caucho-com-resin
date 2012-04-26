@@ -176,8 +176,8 @@ r_filter = element filter {
    & (attribute filter-class { r_class-Type }
       | element filter-class { r_class-Type })
 
-   & (attribute async-supported { r_class-Type }
-      | element async-supported { r_class-Type })?
+   & (attribute async-supported { r_boolean-Type }
+      | element async-supported { r_boolean-Type })?
 
    & r_init*
    & r_init-param*
@@ -880,10 +880,7 @@ r_servlet = element servlet {
 }
 
 r_servlet-Content =
-   (attribute async-supported { r_boolean-Type }
-      | element async-supported { r_boolean-Type })?
-
-   & r_jndi-name?
+   r_jndi-name?
 
    & r_var?
 
@@ -894,13 +891,19 @@ r_servlet-Content =
    & (attribute load-on-startup { string }
       | element load-on-startup { string })?
 
-   & r_multipart-config?
+   & (attribute enabled { r_boolean-Type }
+      | element enabled { r_boolean-Type })?
+
+   & (attribute async-supported { r_boolean-Type }
+      | element async-supported { r_boolean-Type })?
 
    & r_protocol-Servlet?
 
    & r_servlet-run-as?
 
    & r_security-role-ref*
+
+   & r_multipart-config?
 
    & (r_cron | r_run-at)?
 
