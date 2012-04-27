@@ -48,12 +48,17 @@ class GoogleStoreWriteStream extends StreamImpl {
   private FileWriteChannel _os;
   private final ByteBuffer _buf = ByteBuffer.allocate(1024);
   
+  private GoogleStoreInode _inode;
+  
   private long _length;
   
-  GoogleStoreWriteStream(GoogleStorePath path, FileWriteChannel os)
+  GoogleStoreWriteStream(GoogleStorePath path,
+                         FileWriteChannel os,
+                         GoogleStoreInode inode)
   {
     _path = path;
     _os = os;
+    _inode = inode;
   }
   
   @Override
@@ -96,11 +101,14 @@ class GoogleStoreWriteStream extends StreamImpl {
     if (os != null) {
       os.closeFinally();
       
-      GoogleStoreInode inode
-        = new GoogleStoreInode(_path.getTail(),
-                               FileType.FILE,
-                               _length,
-                               CurrentTime.getCurrentTime());
+      GoogleStoreInode inode = _inode;
+      
+      if (inode == null || ! inode.isDirectory()) {
+        inode = new GoogleStoreInode(_path.getTail(),
+                                     FileType.FILE,
+                                     _length,
+                                     CurrentTime.getCurrentTime());
+      }
       
       _path.writeGsInode(inode);
     }

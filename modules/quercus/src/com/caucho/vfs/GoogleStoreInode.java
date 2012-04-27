@@ -30,6 +30,7 @@
 package com.caucho.vfs;
 
 import java.io.Serializable;
+import java.util.HashMap;
 
 /**
  * Inode representing the meta-data of the GS file.
@@ -40,6 +41,7 @@ public final class GoogleStoreInode implements Serializable {
   private final FileType _type;
   private final long _length;
   private final long _lastModified;
+  private transient HashMap<String,GoogleStoreInode> _dirMap;
   
   @SuppressWarnings("unused")
   private GoogleStoreInode()
@@ -89,6 +91,16 @@ public final class GoogleStoreInode implements Serializable {
   public final long getLastModified()
   {
     return _lastModified;
+  }
+  
+  public HashMap<String,GoogleStoreInode> getDirMap()
+  {
+    return _dirMap;
+  }
+  
+  public void setDirMap(HashMap<String,GoogleStoreInode> map)
+  {
+    _dirMap = map;
   }
   
   @Override

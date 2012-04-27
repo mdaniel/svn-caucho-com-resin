@@ -52,13 +52,14 @@ import com.google.appengine.api.files.GSFileOptions.GSFileOptionsBuilder;
  */
 public class GoogleStorePath extends FilesystemPath {
   private static Logger log = Logger.getLogger(GoogleStorePath.class.getName());
+  
+  private static final String QUERCUS_ROOT_PATH = "caucho-quercus-root";
 
   private final FileService _fileService;
   private final String _bucket;
 
   private GoogleStorePath _parent;
   private GoogleStoreInode _inode;
-  private HashMap<String,GoogleStoreInode> _dirMap;
 
   /**
    * @param path canonical path
@@ -87,15 +88,23 @@ public class GoogleStorePath extends FilesystemPath {
     try {
       _root = this;
       
-      _inode = new GoogleStoreInode("", FileType.DIRECTORY, 0, 0);
       _fileService = FileServiceFactory.getFileService();
 
-      if (bucket == null)
+      if (bucket == null) {
         bucket = _fileService.getDefaultGsBucketName();
+      }
 
       _bucket = bucket;
+      
+      _inode = new GoogleStoreInode("", FileType.DIRECTORY, 0, 0);
     } catch (IOException e) {
       throw new IllegalStateException(e);
+    }
+    
+    if (readDirMap() == null) {
+      _inode.setDirMap(new HashMap<String,GoogleStoreInode>());
+      
+      writeDir(_inode.getDirMap());
     }
   }
 
@@ -113,7 +122,6 @@ public class GoogleStorePath extends FilesystemPath {
                      Map<String,Object> attributes,
                      String path)
   {
-    log.warning("WALK: [" + path + "]");
     if ("".equals(path) || "/".equals(path)) {
       return _root;
     }
@@ -185,7 +193,7 @@ public class GoogleStorePath extends FilesystemPath {
   public boolean isDirectory()
   {
     GoogleStoreInode inode = getGsInode();
-    
+
     return inode != null && inode.isDirectory();
   }
 
@@ -346,7 +354,7 @@ public class GoogleStorePath extends FilesystemPath {
   public StreamImpl openReadImpl() throws IOException
   {
     AppEngineFile file = getGsFile();
-    log.warning("OPEN_READ_IMPL: " + file);
+
     boolean isLock = false;
     FileReadChannel is = _fileService.openReadChannel(file, isLock);
 
@@ -365,7 +373,7 @@ public class GoogleStorePath extends FilesystemPath {
     key = key.substring(1);
 
     if (key.equals("")) {
-      key = "/";
+      key = QUERCUS_ROOT_PATH;
     }
 
     builder.setKey(key);
@@ -376,7 +384,7 @@ public class GoogleStorePath extends FilesystemPath {
     boolean isLock = true;
     FileWriteChannel os = _fileService.openWriteChannel(file, isLock);
 
-    return new GoogleStoreWriteStream(this, os);
+    return new GoogleStoreWriteStream(this, os, _inode);
   }
   
   @Override
@@ -388,13 +396,19 @@ public class GoogleStorePath extends FilesystemPath {
   @Override
   public String getNativePath()
   {
-    return "/gs/" + _bucket + getFullPath();
+    String fullPath = getFullPath();
+    
+    if ("".equals(fullPath) || "/".equals(fullPath)) {
+      fullPath = "/" + QUERCUS_ROOT_PATH;
+    }
+    
+    return "/gs/" + _bucket + fullPath;
   }
   
   private GoogleStoreInode getGsInode(String name)
   {
     HashMap<String,GoogleStoreInode> dirMap = getDir();
-    
+
     GoogleStoreInode gsInode = null;
     if (dirMap != null) {
       gsInode = dirMap.get(name);
@@ -413,11 +427,11 @@ public class GoogleStorePath extends FilesystemPath {
       return null;
     }
     
-    if (_dirMap == null) {
-      _dirMap = readDirMap();
+    if (_inode.getDirMap() == null) {
+      _inode.setDirMap(readDirMap());
     }
     
-    return _dirMap;
+    return _inode.getDirMap();
   }
   
   private HashMap<String,GoogleStoreInode> readDirMap()
@@ -432,7 +446,7 @@ public class GoogleStorePath extends FilesystemPath {
       HashMap map = (HashMap) hIn.readObject();
       
       hIn.close();
-      
+
       return map;
     } catch (Exception e) {
       log.log(Level.FINER, e.toString(), e);
@@ -445,22 +459,18 @@ public class GoogleStorePath extends FilesystemPath {
   
   void updateDir(GoogleStoreInode inode)
   {
-    log.warning("UPPERDIR: " + inode);
     HashMap<String,GoogleStoreInode> map = readDirMap();
     
     if (map == null) {
       map = new HashMap<String,GoogleStoreInode>();
     }
     
-    log.warning("MAPPER: " + inode);
     map.put(inode.getName(), inode);
     
     GoogleStoreInode dirInode = _inode;
     
-    if (dirInode == null || ! dirInode.exists()) {
+    if (dirInode == null || ! dirInode.exists() || ! dirInode.isDirectory()) {
       dirInode = new GoogleStoreInode(getTail(), FileType.DIRECTORY, 0, 0);
-      
-      _inode = dirInode;
       
       if (! equals(_root)) {
         writeGsInode(dirInode);
@@ -469,7 +479,14 @@ public class GoogleStorePath extends FilesystemPath {
         setGsInode(dirInode);
       }
     }
-
+    
+    dirInode.setDirMap(map);
+    
+    writeDir(map);
+  }
+  
+  private void writeDir(HashMap<String,GoogleStoreInode> map)
+  {
     WriteStream out = null;
     try {
       out = openWrite();
@@ -499,7 +516,9 @@ public class GoogleStorePath extends FilesystemPath {
     
     if (this == _root) {
     }
-    else if (oldInode == null || ! oldInode.isDirectory()) {
+    else if (oldInode == null 
+             || ! oldInode.isDirectory()
+             || ! getParent().isDirectory()) {
       GoogleStorePath parent = (GoogleStorePath) getParent();
     
       parent.updateDir(inode);
@@ -518,7 +537,6 @@ public class GoogleStorePath extends FilesystemPath {
   public AppEngineFile getGsFile()
   {
     String path = getNativePath();
-    
 
     AppEngineFile file = new AppEngineFile(path);
     
