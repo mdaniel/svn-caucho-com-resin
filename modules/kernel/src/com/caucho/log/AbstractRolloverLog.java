@@ -34,6 +34,7 @@ import com.caucho.config.types.Bytes;
 import com.caucho.config.types.CronType;
 import com.caucho.config.types.Period;
 import com.caucho.env.thread.AbstractTaskWorker;
+import com.caucho.loader.Environment;
 import com.caucho.util.Alarm;
 import com.caucho.util.AlarmListener;
 import com.caucho.util.CurrentTime;
@@ -48,6 +49,7 @@ import com.caucho.vfs.TempStreamApi;
 import com.caucho.vfs.Vfs;
 import com.caucho.vfs.WriteStream;
 
+import java.io.Closeable;
 import java.io.IOException;
 import java.io.OutputStream;
 import java.util.ArrayList;
@@ -64,7 +66,7 @@ import java.util.zip.ZipOutputStream;
 /**
  * Abstract class for a log that rolls over based on size or period.
  */
-public class AbstractRolloverLog {
+public class AbstractRolloverLog implements Closeable {
   private static final L10N L = new L10N(AbstractRolloverLog.class);
   private static final Logger log
     = Logger.getLogger(AbstractRolloverLog.class.getName());
@@ -138,6 +140,8 @@ public class AbstractRolloverLog {
   {
     _rolloverListener = new RolloverAlarm();
     _rolloverAlarm = new WeakAlarm(_rolloverListener);
+    
+    Environment.addCloseListener(this);
   }
 
 

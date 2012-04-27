@@ -201,6 +201,8 @@ public class HmtpRequest extends AbstractProtocolConnection
       if (! in.readPacket(broker)) {
         return false;
       }
+      
+      _bamService.addExternalMessageRead();
     } while (in.isDataAvailable());
 
     return true;

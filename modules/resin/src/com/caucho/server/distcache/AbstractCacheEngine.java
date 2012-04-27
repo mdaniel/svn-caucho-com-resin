@@ -111,4 +111,9 @@ public class AbstractCacheEngine implements CacheEngine
   {
     throw new UnsupportedOperationException(getClass().getName());
   }
+
+  @Override
+  public void notifyLease(HashKey key, int leaseOwner)
+  {
+  }
 }

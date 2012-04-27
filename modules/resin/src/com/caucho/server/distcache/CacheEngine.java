@@ -78,4 +78,6 @@ public interface CacheEngine
                                long testValue,
                                MnodeUpdate update,
                                long valueDataId);
+
+  public void notifyLease(HashKey key, int leaseOwner);
 }

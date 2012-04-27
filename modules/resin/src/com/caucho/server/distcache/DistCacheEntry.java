@@ -947,7 +947,6 @@ public class DistCacheEntry {
     // long version = mnodeUpdate.getVersion();
     
     MnodeEntry prevMnodeValue = getMnodeEntry();
-    
 
     MnodeEntry mnodeValue = putLocalValueImpl(mnodeUpdate, valueDataId, value);
     
@@ -1014,6 +1013,8 @@ public class DistCacheEntry {
     _cacheService.getDataBacking().putLocalValue(mnodeValue, key,  
                                                  oldEntryValue,
                                                  mnodeUpdate);
+    
+    _cacheService.getCacheEngine().notifyLease(key, oldEntryValue.getLeaseOwner());
     
     return mnodeValue;
   }

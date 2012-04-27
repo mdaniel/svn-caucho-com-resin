@@ -29,6 +29,8 @@
 
 package com.caucho.cloud.bam;
 
+import java.util.concurrent.atomic.AtomicLong;
+
 import com.caucho.bam.broker.ManagedBroker;
 import com.caucho.bam.manager.BamManager;
 import com.caucho.bam.manager.SimpleBamManager;
@@ -59,6 +61,9 @@ public class BamSystem extends AbstractResinSubSystem
   private final HempBrokerManager _hempBrokerManager;
   private final HempBroker _broker;
   private final BamManager _brokerManager;
+  
+  private final AtomicLong _externalMessageReadCount = new AtomicLong();
+  private final AtomicLong _externalMessageWriteCount = new AtomicLong();
   
   private ServerAuthManager _linkManager;
   
@@ -147,9 +152,35 @@ public class BamSystem extends AbstractResinSubSystem
   }
   
   @Override
+  public void start()
+  {
+    new BamServiceAdmin(this).register();
+  }
+  
+  @Override
   public void stop()
   {
     _broker.close();
+  }
+
+  public void addExternalMessageRead()
+  {
+    _externalMessageReadCount.incrementAndGet();
+  }
+  
+  public long getExternalMessageReadCount()
+  {
+    return _externalMessageReadCount.get();
+  }
+
+  public void addExternalMessageWrite()
+  {
+    _externalMessageWriteCount.incrementAndGet();
+  }
+  
+  public long getExternalMessageWriteCount()
+  {
+    return _externalMessageWriteCount.get();
   }
   
   @Override

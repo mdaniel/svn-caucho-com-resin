@@ -53,6 +53,7 @@ import com.caucho.bam.actor.SkeletonInvocationException;
 import com.caucho.bam.broker.Broker;
 import com.caucho.bam.query.QueryCallback;
 import com.caucho.bam.stream.MessageStream;
+import com.caucho.util.Hex;
 import com.caucho.util.L10N;
 
 /**
@@ -134,9 +135,8 @@ public class ProxySkeleton<S>
     Method handler = _messageHandlers.get(call.getName());
 
     if (handler != null) {
-      if (log.isLoggable(Level.FINEST)) {
-        log.finest(actor + " message " + call
-                   + " {from:" + from + ", to:" + to + "}");
+      if (log.isLoggable(Level.FINER)) {
+        logCall(-1, to, from, call);
       }
       
       Object []args = call.getArgs();
@@ -232,9 +232,8 @@ public class ProxySkeleton<S>
     QueryInvoker handler = _queryHandlers.get(call.getName());
 
     if (handler != null) {
-      if (log.isLoggable(Level.FINEST)) {
-        log.finest(actor + " query " + payload
-                   + " {id: " + id + ", from:" + from + ", to:" + to + "}");
+      if (log.isLoggable(Level.FINER)) {
+        logCall(id, to, from, call);
       }
 
       try {
@@ -261,6 +260,44 @@ public class ProxySkeleton<S>
     else {
       fallback.query(id, to, from, payload);
     }
+  }
+  
+  private void logCall(long id, String to, String from, CallPayload call)
+  {
+    StringBuilder sb = new StringBuilder();
+    
+    sb.append("BAM ");
+    sb.append(call.getName());
+    sb.append(" (");
+    
+    Object []args = call.getArgs();
+    for (int i = 0; args != null && i < args.length; i++) {
+      if (i != 0)
+        sb.append(", ");
+      
+      Object arg = args[i];
+      
+      if (arg instanceof byte []) {
+        sb.append("byte[")
+          .append(Hex.toHex((byte []) args[i], 0, 4))
+          .append("...]");
+      }
+      else {
+        sb.append(args[i]);
+      }
+    }
+    
+    sb.append(")");
+    
+    
+    sb.append("\n  {");
+    
+    if (id >= 0)
+      sb.append("id: " + id + ", ");
+
+    sb.append("from:" + from + ", to:" + to + "}");
+    
+    log.finer(sb.toString());
   }
 
   public void queryResult(S actor,
