@@ -37,8 +37,10 @@ import java.util.HashMap;
 import com.caucho.bam.BamError;
 import com.caucho.bam.actor.AbstractActorSender;
 import com.caucho.bam.actor.ActorSender;
+import com.caucho.bam.actor.BamActorRef;
 import com.caucho.bam.broker.Broker;
 import com.caucho.bam.query.QueryCallback;
+import com.caucho.bam.query.QueryFutureCallback;
 import com.caucho.bam.query.QueryManager;
 import com.caucho.bam.stream.MessageStream;
 import com.caucho.util.L10N;
@@ -55,38 +57,20 @@ class BamProxyHandler implements InvocationHandler
   private static final HashMap<Class<?>,Object> _nullResultMap
     = new HashMap<Class<?>,Object>();
   
-  private HashMap<Method,Call> _callMap = new HashMap<Method,Call>();
+  private final HashMap<Method,Call> _callMap = new HashMap<Method,Call>();
   
-  private String _to;
-  private String _from;
-  private MessageStream _stream;
-  private QueryManager _queryManager;
-  private long _timeout = 120000; 
+  private final ActorSender _sender;
+  private final BamActorRef _to;
+  private final long _timeout;
   
-  BamProxyHandler(Class<?> api, String to, String from, Broker broker)
+  BamProxyHandler(Class<?> api,
+                  ActorSender sender,
+                  BamActorRef to,
+                  long timeout)
   {
-    this(api, to, new ProxySender(from, broker));
-  }
-  
-  BamProxyHandler(Class<?> api, String to, ActorSender sender)
-  {
-    this(api, 
-         to, 
-         sender.getAddress(),
-         sender.getBroker(), 
-         sender.getQueryManager());
-  }
-    
-  BamProxyHandler(Class<?> api, 
-                  String to,
-                  String from,
-                  MessageStream stream,
-                  QueryManager queryManager)
-  {
+    _sender = sender;
     _to = to;
-    _from = from;
-    _stream = stream;
-    _queryManager = queryManager;
+    _timeout = timeout;
       
     for (Method m : api.getMethods()) {
       if (m.getDeclaringClass() == Object.class) {
@@ -125,7 +109,7 @@ class BamProxyHandler implements InvocationHandler
     Call call = _callMap.get(method);
     
     if (call != null) {
-      return call.invoke(_stream, _queryManager, _to, _from, args, _timeout);
+      return call.invoke(_sender, _to, args, _timeout);
     }
     
     String name = method.getName();
@@ -140,10 +124,8 @@ class BamProxyHandler implements InvocationHandler
   }
   
   abstract static class Call {
-    abstract Object invoke(MessageStream stream, 
-                           QueryManager queryManager,
-                           String to,
-                           String from,
+    abstract Object invoke(ActorSender sender,
+                           BamActorRef to,
                            Object []args,
                            long timeout);
   }
@@ -159,16 +141,18 @@ class BamProxyHandler implements InvocationHandler
     }
     
     @Override
-    Object invoke(MessageStream stream,
-                  QueryManager queryManager, 
-                  String to, 
-                  String from,
+    Object invoke(ActorSender sender,
+                  BamActorRef to,
                   Object []args,
                   long timeout)
     {
       CallPayload payload = new CallPayload(_name, args);
-
-      Object result = queryManager.query(stream, to, from, payload, timeout);
+      
+      QueryFutureCallback cb = new QueryFutureCallback();
+      
+      sender.query(to, payload, cb);
+      
+      Object result = cb.get(timeout);
 
       if (result instanceof ReplyPayload) {
         return ((ReplyPayload) result).getValue();
@@ -193,10 +177,8 @@ class BamProxyHandler implements InvocationHandler
     }
     
     @Override
-    Object invoke(MessageStream stream,
-                  QueryManager queryManager,
-                  String to, 
-                  String from,
+    Object invoke(ActorSender sender,
+                  BamActorRef to,
                   Object []args,
                   long timeout)
     {
@@ -209,7 +191,7 @@ class BamProxyHandler implements InvocationHandler
       
       CallReplyCallback callCb = new CallReplyCallback(cb);
 
-      queryManager.query(stream, to, from, payload, callCb, timeout);
+      sender.query(to, payload, callCb);
       
       return null;
     }
@@ -226,10 +208,8 @@ class BamProxyHandler implements InvocationHandler
     }
     
     @Override
-    Object invoke(MessageStream stream,
-                  QueryManager queryManager,
-                  String to, 
-                  String from,
+    Object invoke(ActorSender sender,
+                  BamActorRef to, 
                   Object []args,
                   long timeout)
     {
@@ -240,7 +220,7 @@ class BamProxyHandler implements InvocationHandler
       
       CallPayload payload = new CallPayload(_name, param);
 
-      queryManager.query(stream, to, from, payload, cb, timeout);
+      sender.query(to, payload, cb);
       
       return null;
     }
@@ -255,16 +235,14 @@ class BamProxyHandler implements InvocationHandler
     }
 
     @Override
-    Object invoke(MessageStream broker,
-                  QueryManager manager,
-                  String to,
-                  String from,
+    Object invoke(ActorSender sender,
+                  BamActorRef to,
                   Object []args,
                   long timeout)
     {
       CallPayload payload = new CallPayload(_name, args);
 
-      broker.message(to, from, payload);
+      sender.message(to, payload);
       
       return null;
     }

@@ -400,6 +400,11 @@ public class ServletService
     return _selfServer.getPod();
   }
 
+  public BamManager getBamManager()
+  {
+    return _bamService.getBamManager();
+  }
+  
   /**
    * Returns the bam broker.
    */
@@ -421,7 +426,7 @@ public class ServletService
    */
   public BamManager getAdminBrokerManager()
   {
-    return _bamService.getBrokerManager();
+    return _bamService.getBamManager();
   }
   
   /**

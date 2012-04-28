@@ -44,6 +44,7 @@ import com.caucho.bam.ServiceUnavailableException;
 import com.caucho.bam.actor.ActorSender;
 import com.caucho.bam.broker.Broker;
 import com.caucho.bam.manager.BamManager;
+import com.caucho.bam.manager.SimpleBamManager;
 import com.caucho.bam.proxy.BamProxyFactory;
 import com.caucho.bam.query.QueryCallback;
 import com.caucho.bam.query.QueryFutureCallback;
@@ -88,6 +89,8 @@ public class DeployClient implements Repository
   
   private String _url;
 
+  private SimpleBamManager _bamManager;
+
   public DeployClient()
   {
     this(null);
@@ -108,22 +111,24 @@ public class DeployClient implements Repository
     
     BamManager bamManager = server.getAdminBrokerManager();
     
-    _deployProxy = bamManager.createProxy(_deployAddress, 
-                                          DeployActorProxy.class,
+    _deployProxy = bamManager.createProxy(DeployActorProxy.class,
+                                          _deployAddress,
                                           _bamClient);
   }
   
-  public DeployClient(String url, ActorSender client)
+  public DeployClient(String url, 
+                      ActorSender client)
   {
     _bamClient = client;
+    _bamManager = new SimpleBamManager(client.getBroker());
     
     _url = url;
 
     _deployAddress = DeployActor.ADDRESS;
     
-    _deployProxy = BamProxyFactory.createProxy(DeployActorProxy.class,
-                                               _deployAddress, 
-                                               _bamClient);
+    _deployProxy = _bamManager.createProxy(DeployActorProxy.class,
+                                           _deployAddress, 
+                                           _bamClient);
 
   }
   
@@ -141,6 +146,7 @@ public class DeployClient implements Repository
       client.connect(userName, password);
 
       _bamClient = client;
+      _bamManager = new SimpleBamManager(_bamClient.getBroker());
     
       _deployAddress = DeployActor.ADDRESS;
       
@@ -148,9 +154,9 @@ public class DeployClient implements Repository
       BamManager bamManager = server.getAdminBrokerManager();
       return BamProxyFactory.createProxy(api, to, sender);
 */
-      _deployProxy = BamProxyFactory.createProxy(DeployActorProxy.class,
-                                                 _deployAddress, 
-                                                 _bamClient);
+      _deployProxy = _bamManager.createProxy(DeployActorProxy.class,
+                                             _deployAddress, 
+                                             _bamClient);
     } catch (RemoteConnectionFailedException e) {
       throw new RemoteConnectionFailedException(L.l("Connection to '{0}' failed for remote deploy. Check the server and make sure the server has started and that <resin:RemoteAdminService> is enabled in the resin.xml.\n  {1}",
                                                     url, e.getMessage()),

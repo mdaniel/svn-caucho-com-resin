@@ -40,7 +40,7 @@ import com.caucho.bam.query.QueryCallback;
 /**
  * Sends a message to the first available actor.
  */
-public class BamFirstActorRouter implements BamRouter
+public class BamFirstActorRouter extends AbstractBamRouter
 {
   private final Broker _broker;
   private final ActorSender _sender;
@@ -56,7 +56,23 @@ public class BamFirstActorRouter implements BamRouter
   @Override
   public String getAddress()
   {
-    return _actors[0].getAddress();
+    return getActors()[0].getAddress();
+  }
+  
+  protected BamActorRef []getActors()
+  {
+    return _actors;
+  }
+  
+  public boolean isActive()
+  {
+    for (BamActorRef actor : getActors()) {
+      if (actor.isActive()) {
+        return true;
+      }
+    }
+    
+    return false;
   }
   
   @Override
@@ -64,21 +80,9 @@ public class BamFirstActorRouter implements BamRouter
   {
     return _sender;
   }
-  
-  @Override
-  public boolean isClosed()
-  {
-    return false;
-  }
-  
-  @Override
-  public Broker getBroker()
-  {
-    return _broker;
-  }
 
   @Override
-  public void message(String to, String from, Serializable payload)
+  public void message(String from, Serializable payload)
   {
     for (BamActorRef actor : _actors) {
       if (actor.isActive()) {
@@ -89,31 +93,9 @@ public class BamFirstActorRouter implements BamRouter
   }
 
   @Override
-  public void query(long id, String to, String from, Serializable payload)
+  public void query(long id, String from, Serializable payload)
   {
     new FirstMethodCallback(id, from, payload).start();
-  }
-
-  @Override
-  public void messageError(String to, String from, 
-                           Serializable payload, 
-                           BamError error)
-  {
-    throw new UnsupportedOperationException(getClass().getName());
-  }
-
-  @Override
-  public void queryResult(long id, String to, String from, Serializable payload)
-  {
-    throw new UnsupportedOperationException(getClass().getName());
-  }
-
-  @Override
-  public void queryError(long id, String to, String from, 
-                         Serializable payload,
-                         BamError error)
-  {
-    throw new UnsupportedOperationException(getClass().getName());
   }
   
   class FirstMethodCallback implements QueryCallback {
@@ -141,15 +123,15 @@ public class BamFirstActorRouter implements BamRouter
     
     private void fail()
     {
-      /*
       _broker.queryError(_id, _from, _sender.getAddress(),
                          _payload, 
                          new BamError(BamError.TYPE_CANCEL,
                                       BamError.REMOTE_CONNECTION_FAILED,
                                       "no valid actors"));
-                                      */
-      
+
+      /*
       _broker.queryResult(_id, _from, _sender.getAddress(), null);
+      */
     }
 
     @Override

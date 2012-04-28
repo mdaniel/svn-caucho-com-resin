@@ -32,6 +32,10 @@ import com.caucho.bam.RemoteConnectionFailedException;
 import com.caucho.bam.RemoteListenerUnavailableException;
 import com.caucho.bam.ServiceUnavailableException;
 import com.caucho.bam.actor.ActorSender;
+import com.caucho.bam.actor.RemoteActorSender;
+import com.caucho.bam.broker.ManagedBroker;
+import com.caucho.bam.manager.BamManager;
+import com.caucho.bam.manager.SimpleBamManager;
 import com.caucho.bam.proxy.BamProxyFactory;
 import com.caucho.hmtp.HmtpClient;
 import com.caucho.server.cluster.ServletService;
@@ -52,6 +56,8 @@ public class ManagerClient
   private static final L10N L = new L10N(ManagerClient.class);
 
   private static final long MANAGER_TIMEOUT = 600 * 1000L;
+  
+  private BamManager _bamManager;
 
   private String _url;
 
@@ -67,6 +73,7 @@ public class ManagerClient
     if (server == null)
       throw new IllegalStateException(L.l("ManagerClient was not called in a Resin context. For external clients, use the ManagerClient constructor with host,port arguments."));
 
+    _bamManager = server.getBamManager();
     _bamClient = server.createAdminClient(getClass().getSimpleName());
 
     _managerAddress = "manager@resin.caucho";
@@ -81,6 +88,7 @@ public class ManagerClient
     if (server == null)
       throw new IllegalStateException(L.l("ManagerClient was not called in a Resin context. For external clients, use the ManagerClient constructor with host,port arguments."));
 
+    _bamManager = server.getBamManager();
     _bamClient = server.createAdminClient(getClass().getSimpleName());
 
     _managerAddress = "manager@" + serverId + ".resin.caucho";
@@ -90,6 +98,13 @@ public class ManagerClient
   
   public ManagerClient(ActorSender bamClient)
   {
+    this(new SimpleBamManager(bamClient.getBroker()), bamClient);
+  }
+  
+  public ManagerClient(BamManager bamManager,
+                       ActorSender bamClient)
+  {
+    _bamManager = bamManager;
     _bamClient = bamClient;
 
     _managerAddress = "manager@resin.caucho";
@@ -104,9 +119,15 @@ public class ManagerClient
     RuntimeException exn = null;
     
     try {
-      if (serverPort > 0)
-        _bamClient 
-          = new HmuxClientFactory(host, serverPort, userName, password).create();
+      if (serverPort > 0) {
+        HmuxClientFactory clientFactory
+          = new HmuxClientFactory(host, serverPort, userName, password);
+        
+        RemoteActorSender remoteClient = clientFactory.create();
+        
+        _bamManager = new SimpleBamManager((ManagedBroker) remoteClient.getBroker());
+        _bamClient = clientFactory.create();
+      }
     
       _managerAddress = "manager@resin.caucho";
       
@@ -140,6 +161,7 @@ public class ManagerClient
 
       client.connect(userName, password);
 
+      _bamManager = new SimpleBamManager((ManagedBroker) client.getBroker());
       _bamClient = client;
     
       _managerAddress = "manager@resin.caucho";
@@ -174,7 +196,9 @@ public class ManagerClient
   
   public <T> T createAgentProxy(Class<T> api, String address)
   {
-    return BamProxyFactory.createProxy(api, address, getSender());
+    return _bamManager.createProxy(api,
+                                   _bamManager.createActorRef(address),
+                                   getSender());
   }
   
   private ManagerProxyApi getManagerProxy()

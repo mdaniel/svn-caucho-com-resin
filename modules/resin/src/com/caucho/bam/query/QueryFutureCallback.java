@@ -30,18 +30,85 @@
 package com.caucho.bam.query;
 
 import java.io.Serializable;
+import java.util.concurrent.locks.LockSupport;
 
-import com.caucho.bam.BamException;
-import com.caucho.bam.TimeoutException;
+import com.caucho.bam.BamError;
+import com.caucho.util.L10N;
 
 /**
  * QueryFutureCallback is used to wait
  * for query callbacks.
  */
 public class QueryFutureCallback extends AbstractQueryCallback {
-  public Serializable get()
-    throws TimeoutException, BamException
+  private static final L10N L = new L10N(QueryFutureCallback.class);
+  
+  private volatile ResultStateEnum _state = ResultStateEnum.WAITING;
+  private volatile Serializable _result;
+  private volatile BamError _error;
+  
+  private volatile Thread _thread;
+
+  @Override
+  public void onQueryResult(String to, String from, Serializable result)
   {
-    throw new UnsupportedOperationException(getClass().getName());
+    _result = result;
+    _state = ResultStateEnum.REPLY;
+    
+    Thread thread = _thread;
+    
+    if (thread != null) {
+      LockSupport.unpark(thread);
+    }
+  }
+
+  @Override
+  public void onQueryError(String to,
+                           String from,
+                           Serializable payload,
+                           BamError error)
+  {
+    _error = error;
+    _state = ResultStateEnum.ERROR;
+    
+    Thread thread = _thread;
+    
+    if (thread != null) {
+      LockSupport.unpark(thread);
+    }
+  }
+  
+  public Serializable get(long timeout)
+  {
+    switch (_state) {
+    case REPLY:
+      return _result;
+      
+    case ERROR:
+      throw _error.createException();
+      
+    default:
+    {
+      _thread = Thread.currentThread();
+
+      LockSupport.parkNanos(timeout * 1000000L);
+      
+      _thread = null;
+      
+      switch (_state) {
+      case REPLY:
+        return _result;
+      case ERROR:
+        throw _error.createException();
+      default:
+        throw new IllegalStateException(L.l("future timeout"));
+      }
+    }
+    }
+  }
+  
+  static enum ResultStateEnum {
+    WAITING,
+    REPLY,
+    ERROR;
   }
 }

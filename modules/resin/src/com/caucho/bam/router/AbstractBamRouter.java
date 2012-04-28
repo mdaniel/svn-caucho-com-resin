@@ -27,33 +27,17 @@
  * @author Scott Ferguson
  */
 
-package com.caucho.bam.actor;
+package com.caucho.bam.router;
 
 import java.io.Serializable;
 
 import com.caucho.bam.BamError;
-import com.caucho.bam.broker.Broker;
 
 /**
- * Abstract implementation of a BAM actor.
+ * Sends a message to the first available actor.
  */
-public class SimpleActorRef implements BamActorRef
+abstract public class AbstractBamRouter implements BamRouter
 {
-  private final Broker _broker;
-  private final String _address;
-  
-  public SimpleActorRef(String address, Broker broker)
-  {
-    _address = address;
-    _broker = broker;
-  }
-  
-  @Override
-  public String getAddress()
-  {
-    return _address;
-  }
-
   @Override
   public boolean isActive()
   {
@@ -61,34 +45,25 @@ public class SimpleActorRef implements BamActorRef
   }
 
   @Override
-  public void message(String from, Serializable payload)
+  public void messageError(String from, 
+                           Serializable payload, 
+                           BamError error)
   {
-    _broker.message(_address, from, payload);
-  }
-
-  @Override
-  public void messageError(String from, Serializable payload, BamError error)
-  {
-    _broker.messageError(_address, from, payload, error);
-  }
-
-  @Override
-  public void query(long id, String from, Serializable payload)
-  {
-    _broker.query(id, _address, from, payload);
+    throw new UnsupportedOperationException(getClass().getName());
   }
 
   @Override
   public void queryResult(long id, String from, Serializable payload)
   {
-    _broker.queryResult(id, _address, from, payload);
+    throw new UnsupportedOperationException(getClass().getName());
   }
 
   @Override
-  public void queryError(long id, String from, Serializable payload,
+  public void queryError(long id, String from, 
+                         Serializable payload,
                          BamError error)
   {
-    _broker.queryError(id, _address, from, payload, error);
+    throw new UnsupportedOperationException(getClass().getName());
   }
   
   @Override

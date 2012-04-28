@@ -45,14 +45,10 @@ import com.caucho.bam.stream.MessageStream;
  * ActorClient is a convenience API for sending messages to other Actors,
  * which always using the actor's address as the "from" parameter.
  */
-public class SimpleActorSender implements ActorSender {
+public class SimpleActorSender extends AbstractActorSender implements ActorSender {
   private Actor _actor;
   private Broker _broker;
   private String _clientAddress;
-
-  private final QueryManager _queryManager = new QueryManager();
-  
-  private long _timeout = 120000L;
 
   public SimpleActorSender(String address, Broker broker)
   {
@@ -71,7 +67,7 @@ public class SimpleActorSender implements ActorSender {
     if (next == null)
       next = new DefaultActor();
     
-    _actor = new QueryActorFilter(next, _queryManager);
+    _actor = new QueryActorFilter(next, getQueryManager());
     _broker = broker;
     
     _clientAddress  = next.getAddress();
@@ -152,179 +148,6 @@ public class SimpleActorSender implements ActorSender {
   protected ManagedBroker getManagedBroker()
   {
     return (ManagedBroker) getBroker();
-  }
-  
-  //
-  // message handling
-  //
-
-  /**
-   * Sends a unidirectional message to an {@link com.caucho.bam.actor.ActorHolder},
-   * addressed by the Actor's address.
-   *
-   * @param to the target actor's address
-   * @param payload the message payload
-   */
-  @Override
-  public void message(String to, Serializable payload)
-  {
-    MessageStream broker = getBroker();
-
-    if (broker == null)
-      throw new IllegalStateException(this + " can't send a message because the link is closed.");
-
-    broker.message(to, getAddress(), payload);
-  }
-
-  //
-  // query handling
-  //
-
-  @Override
-  public long nextQueryId()
-  {
-    return _queryManager.nextQueryId();
-  }
-  
-  
-  @Override
-  public QueryManager getQueryManager()
-  {
-    return _queryManager;
-  }
-  /**
-   * Sends a query information call (get) to an actor,
-   * blocking until the actor responds with a result or an error.
-   *
-   * The target actor of a <code>queryGet</code> acts as a service and the
-   * caller acts as a client.  Because BAM Actors are symmetrical, all
-   * Actors can act as services and clients for different RPC calls.
-   *
-   * The target actor MUST send a <code>queryResult</code> or
-   * <code>queryError</code> to the client using the same <code>id</code>,
-   * because RPC clients rely on a response.
-   *
-   * @param to the target actor's address
-   * @param payload the query payload
-   */
-  @Override
-  public Serializable query(String to,
-                            Serializable payload)
-  {
-    return query(to, payload, _timeout);
-  }
-
-  /**
-   * Sends a query information call (get) to an actor,
-   * blocking until the actor responds with a result or an error.
-   *
-   * The target actor of a <code>queryGet</code> acts as a service and the
-   * caller acts as a client.  Because BAM Actors are symmetrical, all
-   * Actors can act as services and clients for different RPC calls.
-   *
-   * The target actor MUST send a <code>queryResult</code> or
-   * <code>queryError</code> to the client using the same <code>id</code>,
-   * because RPC clients rely on a response.
-   *
-   * @param to the target actor's address
-   * @param payload the query payload
-   */
-  @Override
-  public Serializable query(String to,
-                            Serializable payload,
-                            long timeout)
-  {
-    MessageStream linkStream = getBroker();
-
-    if (linkStream == null)
-      throw new IllegalStateException(this + " can't send a query because the link is closed.");
-
-    long id = _queryManager.nextQueryId();
-    
-    QueryFuture future
-      = _queryManager.addQueryFuture(id, to, getAddress(), payload, timeout);
-
-    linkStream.query(id, to, getAddress(), payload);
-    
-    return future.get();
-  }
-
-
-  /**
-   * Sends a query information call (get) to an actor,
-   * providing a callback to receive the result or error.
-   *
-   * The target actor of a <code>queryGet</code> acts as a service and the
-   * caller acts as a client.  Because BAM Actors are symmetrical, all
-   * Actors can act as services and clients for different RPC calls.
-   *
-   * The target actor MUST send a <code>queryResult</code> or
-   * <code>queryError</code> to the client using the same <code>id</code>,
-   * because RPC clients rely on a response.
-   *
-   * @param to the target actor's address
-   * @param payload the query payload
-   * @param callback the application's callback for the result
-   */
-  @Override
-  public void query(String to,
-                    Serializable payload,
-                    QueryCallback callback)
-  {
-    query(to, payload, callback, _timeout);
-  }
-
-  /**
-   * Sends a query information call (get) to an actor,
-   * providing a callback to receive the result or error.
-   *
-   * The target actor of a <code>queryGet</code> acts as a service and the
-   * caller acts as a client.  Because BAM Actors are symmetrical, all
-   * Actors can act as services and clients for different RPC calls.
-   *
-   * The target actor MUST send a <code>queryResult</code> or
-   * <code>queryError</code> to the client using the same <code>id</code>,
-   * because RPC clients rely on a response.
-   *
-   * @param to the target actor's address
-   * @param payload the query payload
-   * @param callback the application's callback for the result
-   */
-  public void query(String to,
-                    Serializable payload,
-                    QueryCallback callback,
-                    long timeout)
-  {
-    MessageStream linkStream = getBroker();
-
-    if (linkStream == null)
-      throw new IllegalStateException(this + " can't send a query because the link is closed.");
-
-    long id = _queryManager.nextQueryId();
-    
-    _queryManager.addQueryCallback(id, callback, timeout);
-
-    if ("cluster-cache-mnode".equals(to))
-      Thread.dumpStack();
-    
-    linkStream.query(id, to, getAddress(), payload);
-  }
-
-  /**
-   * Returns true if the client is closed
-   */
-  public boolean isClosed()
-  {
-    return false;
-  }
-
-  /**
-   * Closes the client
-   */
-  @Override
-  public void close()
-  {
-    _queryManager.close();
   }
 
   @Override

@@ -30,12 +30,13 @@
 package com.caucho.bam.router;
 
 import com.caucho.bam.actor.ActorSender;
+import com.caucho.bam.actor.BamActorRef;
 import com.caucho.bam.stream.MessageStream;
 
 /**
  * Sends a message to the first available actor.
  */
-public interface BamRouter extends MessageStream
+public interface BamRouter extends BamActorRef
 {
   public ActorSender getSender();
 }

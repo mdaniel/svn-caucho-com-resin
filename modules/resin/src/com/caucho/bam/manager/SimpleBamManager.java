@@ -34,10 +34,14 @@ import java.util.concurrent.atomic.AtomicLong;
 import com.caucho.bam.actor.AbstractAgent;
 import com.caucho.bam.actor.ActorSender;
 import com.caucho.bam.actor.Agent;
+import com.caucho.bam.actor.BamActorRef;
 import com.caucho.bam.actor.ManagedActor;
 import com.caucho.bam.actor.SimpleActor;
+import com.caucho.bam.actor.SimpleActorRef;
 import com.caucho.bam.actor.SimpleActorSender;
+import com.caucho.bam.broker.Broker;
 import com.caucho.bam.broker.ManagedBroker;
+import com.caucho.bam.broker.ManagedBrokerAdapter;
 import com.caucho.bam.mailbox.ActorMailbox;
 import com.caucho.bam.mailbox.Mailbox;
 import com.caucho.bam.mailbox.MailboxType;
@@ -60,6 +64,12 @@ public class SimpleBamManager implements BamManager
   private final AtomicLong _sequence = new AtomicLong(CurrentTime.getCurrentTime());
   
   private ManagedBroker _broker;
+  private long _timeout = 120 * 1000L;
+  
+  public SimpleBamManager(Broker broker)
+  {
+    this(new ManagedBrokerAdapter(broker));
+  }
   
   public SimpleBamManager(ManagedBroker broker)
   {
@@ -73,6 +83,11 @@ public class SimpleBamManager implements BamManager
   public ManagedBroker getBroker()
   {
     return _broker;
+  }
+  
+  public long getTimeout()
+  {
+    return _timeout;
   }
   
   /**
@@ -257,28 +272,34 @@ public class SimpleBamManager implements BamManager
     
     return actor.getSender();
   }
-  
+
   @Override
-  public <T> T createProxy(String to, Class<T> api)
+  public BamActorRef createActorRef(String to)
   {
-    String address = ("urn:client:/" + api.getSimpleName()
-                      + "/" + _sequence.incrementAndGet());
+    return new SimpleActorRef(to, getBroker());
+  }
+
+  @Override
+  public <T> T createProxy(Class<T> api, String to)
+  {
+    ActorSender sender = createClient(api.getSimpleName(), null);
     
-    ActorSender sender = createClient(address);
-    
-    return BamProxyFactory.createProxy(api, to, sender);
+    return createProxy(api, createActorRef(to), sender);
   }
   
   @Override
-  public <T> T createProxy(String to, Class<T> api, ActorSender sender)
+  public <T> T createProxy(Class<T> api, BamActorRef to, ActorSender sender)
   {
-    return BamProxyFactory.createProxy(api, to, sender);
+    return BamProxyFactory.createProxy(api, to, sender, getTimeout());
   }
   
   @Override
-  public <T> T createProxy(BamRouter router, Class<T> api)
+  public <T> T createProxy(Class<T> api, String to, ActorSender sender)
   {
-    return BamProxyFactory.createProxy(api, router);
+    return BamProxyFactory.createProxy(api, 
+                                       createActorRef(to),
+                                       sender,
+                                       getTimeout());
   }
   
   public ActorSender createClient(String address)

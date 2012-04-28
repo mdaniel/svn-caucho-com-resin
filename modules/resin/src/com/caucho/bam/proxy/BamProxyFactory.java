@@ -32,10 +32,7 @@ package com.caucho.bam.proxy;
 import java.lang.reflect.Proxy;
 
 import com.caucho.bam.actor.ActorSender;
-import com.caucho.bam.broker.Broker;
-import com.caucho.bam.query.QueryManager;
-import com.caucho.bam.router.BamRouter;
-import com.caucho.bam.stream.MessageStream;
+import com.caucho.bam.actor.BamActorRef;
 
 /**
  * The Skeleton introspects and dispatches messages for a
@@ -44,6 +41,22 @@ import com.caucho.bam.stream.MessageStream;
  */
 public class BamProxyFactory
 {
+  
+  public static <T> T createProxy(Class<T> api,
+                                  BamActorRef to,
+                                  ActorSender sender,
+                                  long timeout)
+  {
+    BamProxyHandler handler = new BamProxyHandler(api, sender, to, timeout);
+    
+    ClassLoader loader = Thread.currentThread().getContextClassLoader();
+    
+    return (T) Proxy.newProxyInstance(loader, 
+                                      new Class[] { api },
+                                      handler);
+  }
+  
+  /*
   public static <T> T createProxy(Class<T> api, 
                                   String to,
                                   String from,
@@ -75,33 +88,10 @@ public class BamProxyFactory
   }
   
   public static <T> T createProxy(Class<T> api,
-                                  String to,
-                                  ActorSender sender)
+                                  BamRouter router,
+                                  long timeout)
   {
-    BamProxyHandler handler = new BamProxyHandler(api, to, sender);
-    
-    ClassLoader loader = Thread.currentThread().getContextClassLoader();
-    
-    return (T) Proxy.newProxyInstance(loader, 
-                                      new Class[] { api },
-                                      handler);
+    return createProxy(api, router.getSender(), router, timeout);
   }
-  
-  public static <T> T createProxy(Class<T> api,
-                                  BamRouter router)
-  {
-    ActorSender sender = router.getSender();
-    
-    BamProxyHandler handler = new BamProxyHandler(api, 
-                                                  router.getAddress(),
-                                                  sender.getAddress(),
-                                                  router,
-                                                  sender.getQueryManager());
-    
-    ClassLoader loader = Thread.currentThread().getContextClassLoader();
-    
-    return (T) Proxy.newProxyInstance(loader, 
-                                      new Class[] { api },
-                                      handler);
-  }
+  */
 }

@@ -31,7 +31,6 @@ package com.caucho.server.admin;
 import java.lang.reflect.Constructor;
 import java.lang.reflect.InvocationTargetException;
 
-import com.caucho.bam.actor.ActorSender;
 import com.caucho.bam.actor.RemoteActorSender;
 
 /**
