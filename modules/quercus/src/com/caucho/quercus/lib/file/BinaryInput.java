@@ -33,7 +33,6 @@ import com.caucho.quercus.env.StringValue;
 
 import java.io.IOException;
 import java.io.InputStream;
-import java.io.UnsupportedEncodingException;
 
 /**
  * Interface for a Quercus binary input stream
@@ -49,13 +48,13 @@ public interface BinaryInput extends BinaryStream {
    */
   public BinaryInput openCopy()
     throws IOException;
-  
+
   /**
    * Reads the next byte, returning -1 on eof.
    */
   public int read()
     throws IOException;
-  
+
   /**
    * Unreads the last byte.
    */
@@ -79,7 +78,7 @@ public interface BinaryInput extends BinaryStream {
    */
   public boolean readOptionalLinefeed()
     throws IOException;
-  
+
   /**
    * Reads a line from the buffer.
    */

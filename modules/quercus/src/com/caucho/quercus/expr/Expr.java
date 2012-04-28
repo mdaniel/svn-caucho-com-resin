@@ -30,7 +30,10 @@
 package com.caucho.quercus.expr;
 
 import com.caucho.quercus.Location;
-import com.caucho.quercus.env.*;
+import com.caucho.quercus.env.Env;
+import com.caucho.quercus.env.StringValue;
+import com.caucho.quercus.env.Value;
+import com.caucho.quercus.env.Var;
 import com.caucho.quercus.parser.QuercusParser;
 import com.caucho.quercus.statement.Statement;
 import com.caucho.util.L10N;
@@ -47,6 +50,7 @@ abstract public class Expr {
   private static final Logger log = Logger.getLogger(Expr.class.getName());
 
   public static final int COMPILE_ARG_MAX = 5;
+  public static final Expr[] NULL_ARGS = new Expr[0];
 
   private final Location _location;
 

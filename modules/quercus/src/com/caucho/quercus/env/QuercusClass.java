@@ -193,7 +193,7 @@ public class QuercusClass extends NullValue {
       if (! _constructor.getName().equals("__construct")
           && ! _className.equals(_constructor.getDeclaringClassName())) {
         // php/093j, php/093n
-        addMethod(_className, _constructor);
+        addMethodIfNotExist(_className, _constructor);
       }
     }
 
@@ -1112,7 +1112,7 @@ public class QuercusClass extends NullValue {
   {
     // php/09km, php/09kn
     // push/pop to prevent infinite recursion
-    if(issetField(name) && _fieldMap.get(name).isPublic())
+    if(issetField(env, name) && _fieldMap.get(name).isPublic())
     {
         Value v_current = this.get(name); // TODO: move to ObjectExtValue if possible
 
@@ -1143,37 +1143,37 @@ public class QuercusClass extends NullValue {
    * Implements the __isset method call.
    * __isset() is triggered by calling isset() or empty()  on inaccessible properties.
   */
-  public Value issetField(Env env, Value qThis, StringValue name)
+  public boolean issetField(Env env, Value qThis, StringValue name)
   {
-    if(issetField(name) && _fieldMap.get(name).isPublic())
-    {
-        // php/09c3
-        Value v_current = this.get(name); // TODO: move to ObjectExtValue if possible
-        if(v_current != NullValue.NULL && v_current != UnsetValue.UNSET)
-            return BooleanValue.TRUE;
+    ClassField field = _fieldMap.get(name);
+
+    if (field != null && field.isPublic()) {
+      return true;
     }
 
-    // basically a copy of the __get code with slightly different semantics
     if (_isset != null) {
       if (! env.pushFieldGet(Env.OVERLOADING_TYPES.ISSET, qThis.getClassName(), name))
-        return UnsetValue.UNSET;
+        return false;
 
       try {
-          return _isset.callMethod(env, this, qThis, name);
-      } finally {
+          Value result = _isset.callMethod(env, this, qThis, name);
+
+          return result.toBoolean();
+      }
+      finally {
         env.popFieldGet(Env.OVERLOADING_TYPES.ISSET);
       }
     }
-    else
-    {
-      return UnsetValue.UNSET;
-    }
+
+    return false;
   }
 
   @Override
-  public boolean issetField(StringValue name) {
-    if(_fieldMap.containsKey(name))
+  public boolean issetField(Env env, StringValue name) {
+    if(_fieldMap.containsKey(name)) {
       return true;
+    }
+
     return false;
   }
 
@@ -1189,7 +1189,7 @@ public class QuercusClass extends NullValue {
    */
   public Value unsetField(Env env, Value qThis, StringValue name)
   {
-    if(issetField(name) && _fieldMap.get(name).isPublic()){
+    if(issetField(env, name) && _fieldMap.get(name).isPublic()){
       // TODO: move to ObjectExtValue if possible
       unsetField(name);
       return NullValue.NULL;
@@ -1274,9 +1274,7 @@ public class QuercusClass extends NullValue {
   /**
    * Calls the A::__construct constructor.
    */
-  public Value callConstructor(Env env,
-                               Value qThis,
-                               Value ...args)
+  public Value callConstructor(Env env, Value qThis, Value ...args)
   {
     AbstractFunction cons = getConstructor();
 
@@ -1290,27 +1288,6 @@ public class QuercusClass extends NullValue {
     }
 
     return getConstructor().callMethod(env, this, qThis, args);
-  }
-
-  /**
-   * Calls the A::__construct constructor.
-   */
-  public Value callConstructorRef(Env env,
-                                  Value qThis,
-                                  Value ...args)
-  {
-    AbstractFunction cons = getConstructor();
-
-    if (cons == null) {
-      env.error(L.l("cannot call constructor for class {0}", getName()));
-    }
-    else if (qThis.isNull()) {
-      env.error(L.l("{0}::{1}() cannot be called statically",
-                    getName(),
-                    cons.getName()));
-    }
-
-    return cons.callMethodRef(env, this, qThis, args);
   }
 
   /**
@@ -1707,8 +1684,8 @@ public class QuercusClass extends NullValue {
    */
   @Override
   public Value callMethod(Env env,
-                                StringValue methodName, int hash,
-                                Value a1, Value a2, Value a3)
+                          StringValue methodName, int hash,
+                          Value a1, Value a2, Value a3)
   {
     return callMethod(env, this, methodName, hash,
                       a1, a2, a3);

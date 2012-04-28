@@ -43,15 +43,15 @@ public abstract class NumberValue extends Value {
     if (rValue.isBoolean() || rValue.isNull()) {
       boolean lBool = toBoolean();
       boolean rBool = rValue.toBoolean();
-      
+
       if (! lBool && rBool)
         return -1;
       if (lBool && ! rBool)
         return 1;
-      
+
       return 0;
     }
-    
+
     double l = toDouble();
     double r = rValue.toDouble();
 
@@ -84,12 +84,12 @@ public abstract class NumberValue extends Value {
     if (lLong > rLong) return 1;
     return 0;
   }
-  
+
   /**
    * Encodes the value in JSON.
    */
   @Override
-  public void jsonEncode(Env env, StringValue sb)
+  public void jsonEncode(Env env, JsonEncodeContext context, StringValue sb)
   {
     sb.append(toStringValue());
   }

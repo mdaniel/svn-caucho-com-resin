@@ -87,14 +87,6 @@ public class JdbcPreparedStatementResource
                                ColumnType[] types,
                                Value[] params)
   {
-    int size = types.length;
-
-    // Check to see that types and params have the same length
-    if (params.length == 0 || params.length != size) {
-      env.warning(L.l("number of types does not match number of parameters"));
-      return false;
-    }
-
     _types = types;
     _params = params;
 

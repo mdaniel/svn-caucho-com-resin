@@ -370,15 +370,14 @@ public class InterpretedClassDef extends ClassDef
   {
     QuercusClass qClass = env.getClass(getName());
 
-    for (
-      Map.Entry<String,StaticFieldEntry> entry : _staticFieldMap.entrySet()
-      ) {
+    for (Map.Entry<String,StaticFieldEntry> entry : _staticFieldMap.entrySet()) {
       String name = entry.getKey();
 
       StaticFieldEntry field = entry.getValue();
 
-      qClass.getStaticFieldVar(env, env.createString(name))
-        .set(field.getValue().eval(env).copy());
+      Var var = qClass.getStaticFieldVar(env, env.createString(name));
+
+      var.set(field.getValue().eval(env).copy());
     }
   }
 

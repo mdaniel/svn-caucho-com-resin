@@ -29,37 +29,14 @@
 
 package com.caucho.quercus.lib.simplexml;
 
-import com.caucho.quercus.annotation.Name;
-import com.caucho.quercus.annotation.Optional;
-import com.caucho.quercus.annotation.ReturnNullAsFalse;
-import com.caucho.quercus.annotation.EntrySet;
-import com.caucho.quercus.env.*;
-import com.caucho.quercus.program.JavaClassDef;
-import com.caucho.util.L10N;
-import com.caucho.vfs.Path;
-import com.caucho.vfs.ReadStream;
-import com.caucho.vfs.WriteStream;
+import com.caucho.quercus.env.Env;
+import com.caucho.quercus.env.JsonEncodeContext;
+import com.caucho.quercus.env.NullValue;
+import com.caucho.quercus.env.QuercusClass;
+import com.caucho.quercus.env.StringValue;
+import com.caucho.quercus.env.Value;
 
-import org.w3c.dom.Attr;
-import org.w3c.dom.Document;
-import org.w3c.dom.NamedNodeMap;
-import org.w3c.dom.Node;
-import org.w3c.dom.NodeList;
-import org.xml.sax.InputSource;
-import org.xml.sax.SAXException;
-
-import javax.xml.parsers.DocumentBuilder;
-import javax.xml.parsers.DocumentBuilderFactory;
-import javax.xml.parsers.ParserConfigurationException;
-import javax.xml.xpath.XPath;
-import javax.xml.xpath.XPathConstants;
-import javax.xml.xpath.XPathExpressionException;
-import javax.xml.xpath.XPathFactory;
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.StringReader;
-import java.util.*;
-import java.util.logging.*;
+import java.util.Iterator;
 
 /**
  * SimpleXMLElement object oriented API facade.
@@ -74,7 +51,7 @@ public class SimpleXMLAttribute extends SimpleXMLElement
   {
     super(env, cls, parent, name);
   }
-  
+
   protected SimpleXMLAttribute(Env env,
                                QuercusClass cls,
                                SimpleXMLElement parent,
@@ -104,7 +81,7 @@ public class SimpleXMLAttribute extends SimpleXMLElement
     if (_parent != null)
       _parent.addNamespaceAttribute(env, name, namespace);
   }
-  
+
   /**
    * Required for 'foreach'. When only values are specified in
    * the loop <code>foreach($a as $b)</code>, this method
@@ -123,19 +100,19 @@ public class SimpleXMLAttribute extends SimpleXMLElement
     else
       return null;
   }
-  
+
   /**
    * Converts node tree to a valid xml string.
-   * 
+   *
    * @return xml string
    */
-  @Override  
+  @Override
   public StringValue asXML(Env env)
   {
     StringValue sb = env.createStringBuilder();
 
     toXMLImpl(sb);
-    
+
     return sb;
   }
 
@@ -148,14 +125,14 @@ public class SimpleXMLAttribute extends SimpleXMLElement
       sb.append(_prefix);
       sb.append(":");
     }
-    
+
     sb.append(_name);
     sb.append("=\"");
     if (_text != null)
       sb.append(_text);
     sb.append("\"");
   }
-  
+
   /**
    * Implementation for getting the indices of this class.
    * i.e. <code>$a->foo[0]</code>
@@ -164,9 +141,9 @@ public class SimpleXMLAttribute extends SimpleXMLElement
   {
     if (indexV.isString()) {
       String name = indexV.toString();
-      
+
       SimpleXMLElement attr = getAttribute(name);
-      
+
       if (attr != null)
         return wrapJava(env, _cls, attr);
       else
@@ -183,22 +160,25 @@ public class SimpleXMLAttribute extends SimpleXMLElement
     else
       return NullValue.NULL;
   }
-  
+
   @Override
-  protected void jsonEncodeImpl(Env env, StringValue sb, boolean isTop)
+  protected void jsonEncodeImpl(Env env,
+                                JsonEncodeContext context,
+                                StringValue sb,
+                                boolean isTop)
   {
     sb.append('"');
-    
+
     if (_prefix != null && ! "".equals(_prefix)) {
       sb.append(_prefix);
       sb.append(":");
     }
-    
+
     sb.append(_name);
     sb.append('"');
-    
+
     sb.append(':');
-    
+
     sb.append('"');
     if (_text != null)
       sb.append(_text);

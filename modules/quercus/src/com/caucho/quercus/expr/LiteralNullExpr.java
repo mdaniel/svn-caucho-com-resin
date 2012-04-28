@@ -45,7 +45,7 @@ public class LiteralNullExpr extends Expr {
   {
     super(location);
   }
-  
+
   protected LiteralNullExpr()
   {
   }
@@ -77,7 +77,7 @@ public class LiteralNullExpr extends Expr {
    */
   public Value eval(Env env)
   {
-    return NullValue.create();
+    return NullValue.NULL;
   }
 
   //

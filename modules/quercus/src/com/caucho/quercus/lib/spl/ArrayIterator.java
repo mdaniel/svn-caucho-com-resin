@@ -29,8 +29,6 @@
 
 package com.caucho.quercus.lib.spl;
 
-import com.caucho.quercus.annotation.Hide;
-import com.caucho.quercus.annotation.Name;
 import com.caucho.quercus.annotation.Optional;
 import com.caucho.quercus.annotation.This;
 import com.caucho.quercus.env.ArrayValue;
@@ -55,7 +53,7 @@ public class ArrayIterator
 {
   public static final int STD_PROP_LIST = 0x00000001;
   public static final int ARRAY_AS_PROPS = 0x00000002;
-  
+
   private static final StringValue _rewind
     = MethodIntern.intern("rewind");
 
@@ -66,24 +64,20 @@ public class ArrayIterator
 
   private java.util.Iterator<Map.Entry<Value,Value>> _iterator;
   private Map.Entry<Value, Value> _current;
-  
-  @Name("__construct")
-  public Value __construct(Env env,
-                           @This Value qThis,
-                           @Optional Value value,
-                           @Optional int flags)
+
+  public ArrayIterator(Env env,
+                       @This Value qThis,
+                       @Optional Value value,
+                       @Optional int flags)
   {
-    
     _env = env;
     _qThis = qThis;
 
     if (value == null)
       value = NullValue.NULL;
-    
+
     _value = value;
     _flags = flags;
-
-    return qThis;
   }
 
   public void append(Value value)
@@ -152,7 +146,7 @@ public class ArrayIterator
   {
     if (_iterator == null)
       rewind();
-    
+
     if (_iterator.hasNext())
       _current = _iterator.next();
     else
@@ -192,7 +186,7 @@ public class ArrayIterator
   {
     // php/4as8
     _iterator = _value.getBaseIterator(_env);
-    
+
     if (_iterator.hasNext())
       _current = _iterator.next();
     else
@@ -235,7 +229,7 @@ public class ArrayIterator
   {
     if (_iterator == null)
       rewind();
-    
+
     return _current != null;
   }
 
@@ -255,10 +249,10 @@ public class ArrayIterator
     throws IOException
   {
     String name = "ArrayIterator";
-    
+
     if (obj != null)
       name = obj.getClassName();
-    
+
     if ((_flags & STD_PROP_LIST) != 0) {
       // XXX:  env.getThis().varDumpObject(env, out, depth, valueSet);
     }

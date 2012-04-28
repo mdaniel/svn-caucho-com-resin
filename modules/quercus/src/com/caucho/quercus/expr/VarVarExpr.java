@@ -42,8 +42,6 @@ import com.caucho.quercus.env.Var;
  * Represents a PHP variable expression.
  */
 public class VarVarExpr extends AbstractVarExpr {
-  private static final NullValue NULL = NullValue.create();
-
   protected final Expr _var;
 
   public VarVarExpr(Location location, Expr var)
@@ -78,7 +76,7 @@ public class VarVarExpr extends AbstractVarExpr {
     if (value != null)
       return value;
     else
-      return NULL;
+      return NullValue.NULL;
   }
 
   /**
@@ -95,7 +93,7 @@ public class VarVarExpr extends AbstractVarExpr {
 
     // php/0d63
     env.setRef(varName, value);
-    
+
     return value;
   }
 
@@ -146,7 +144,7 @@ public class VarVarExpr extends AbstractVarExpr {
     if (value != null)
       return value;
     else
-      return NULL;
+      return NullValue.NULL;
   }
 
   /**

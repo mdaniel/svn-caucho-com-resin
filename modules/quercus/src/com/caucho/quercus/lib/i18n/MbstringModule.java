@@ -776,7 +776,7 @@ public class MbstringModule
    * Returns and/or sets the internal encoding.
    */
   public static Value mb_internal_encoding(Env env,
-                              @Optional String encoding)
+                                           @Optional String encoding)
   {
     if (encoding == null) {
       return env.createString(getEncoding(env));
@@ -908,7 +908,7 @@ public class MbstringModule
    * Returns and/or sets encoding for mb regular expressions.
    */
   public static Value mb_regex_encoding(Env env,
-                              @Optional("") String encoding)
+                                        @Optional String encoding)
   {
     return mb_internal_encoding(env, encoding);
   }
@@ -917,7 +917,7 @@ public class MbstringModule
    * XXX: what does this actually do?
    */
   public static StringValue mb_regex_set_options(Env env,
-                              @Optional String options)
+                                                 @Optional String options)
   {
     throw new UnimplementedException("mb_regex_set_options");
   }
@@ -926,11 +926,11 @@ public class MbstringModule
    * Multibyte version of mail.
    */
   public static BooleanValue mb_send_mail(Env env,
-                              StringValue to,
-                              StringValue subject,
-                              StringValue message,
-                              @Optional StringValue additionalHeaders,
-                              @Optional StringValue additionalParameters)
+                                          StringValue to,
+                                          StringValue subject,
+                                          StringValue message,
+                                          @Optional StringValue additionalHeaders,
+                                          @Optional StringValue additionalParameters)
   {
     //XXX: not correct
 

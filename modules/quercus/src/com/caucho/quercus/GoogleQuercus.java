@@ -50,11 +50,11 @@ public class GoogleQuercus extends QuercusContext
   private static L10N L = new L10N(GoogleQuercus.class);
   private static final Logger log
     = Logger.getLogger(GoogleQuercus.class.getName());
-  
+
   private ModuleContext _localModuleContext;
 
   private long _dependencyCheckInterval = 2000L;
-  
+
   /**
    * Constructor.
    */
@@ -66,7 +66,7 @@ public class GoogleQuercus extends QuercusContext
     // setWorkDir(WorkDir.getLocalWorkDir());
     
   }
-  
+
   @Override
   public void init()
   {
@@ -80,10 +80,10 @@ public class GoogleQuercus extends QuercusContext
     setPwd(pwd);
     
     super.init();
-    
+
     Value array = getIniValue("quercus.jdbc_drivers");
     Value key = createString("google:rdbms");
-    
+
     if (array.isArray()) {
       if (! array.isset(key)) {
         array.put(key,
@@ -92,10 +92,10 @@ public class GoogleQuercus extends QuercusContext
     }
     else {
       array = new ArrayValueImpl();
-      
+
       array.put(key,
                 createString("com.google.appengine.api.rdbms.AppEngineDriver"));
-      
+
       setIni("quercus.jdbc_drivers", array);
     }
   }
@@ -106,7 +106,7 @@ public class GoogleQuercus extends QuercusContext
   {
     Thread thread = Thread.currentThread();
     ClassLoader currentLoader = thread.getContextClassLoader();
-    
+
     synchronized (this) {
       if (_localModuleContext == null) {
         _localModuleContext = createModuleContext(null, currentLoader);

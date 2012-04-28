@@ -42,16 +42,26 @@ public class BinaryOutputMarshal extends Marshal
 {
   public static final Marshal MARSHAL = new BinaryOutputMarshal();
 
+  @Override
   public boolean isReadOnly()
   {
     return true;
   }
 
+  // php/161k
+  // XXX: push this down to the Value class
+  public static BinaryOutput marshal(Env env, Value value)
+  {
+    return (BinaryOutput) MARSHAL.marshal(env, value, MARSHAL.getExpectedClass());
+  }
+
+  @Override
   public Object marshal(Env env, Expr expr, Class expectedClass)
   {
     return marshal(env, expr.eval(env), expectedClass);
   }
 
+  @Override
   public Object marshal(Env env, Value value, Class expectedClass)
   {
     if (value == null) {
@@ -79,6 +89,7 @@ public class BinaryOutputMarshal extends Marshal
     }
   }
 
+  @Override
   public Value unmarshal(Env env, Object value)
   {
     return (Value) value;

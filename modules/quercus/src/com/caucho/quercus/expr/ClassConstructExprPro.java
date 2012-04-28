@@ -57,11 +57,9 @@ public class ClassConstructExprPro extends ClassConstructExpr
       public void generateImpl(PhpWriter out, boolean isRef)
         throws IOException
       {
-        String ref = isRef ? "Ref" : "";
-
         out.print("env.getClass(\"");
         out.printJavaString(_className);
-        out.print("\").callConstructor" + ref + "(env, ");
+        out.print("\").callConstructor(env, ");
 
         // php/09q3, php/324b, php/3953
 

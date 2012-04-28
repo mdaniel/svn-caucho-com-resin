@@ -488,6 +488,20 @@ public class LongValue extends NumberValue
   }
 
   /**
+   * Encodes the value in JSON.
+   */
+  @Override
+  public void jsonEncode(Env env, JsonEncodeContext context, StringValue sb)
+  {
+    if (_value > Integer.MAX_VALUE && context.isBigIntAsString()) {
+      toStringValue(env).jsonEncode(env, context, sb);
+    }
+    else {
+      sb.append(toStringValue(env));
+    }
+  }
+
+  /**
    * Prints the value.
    * @param env
    */

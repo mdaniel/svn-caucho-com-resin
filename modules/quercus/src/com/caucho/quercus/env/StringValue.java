@@ -1201,8 +1201,21 @@ abstract public class StringValue
    * Encodes the value in JSON.
    */
   @Override
-  public void jsonEncode(Env env, StringValue sb)
+  public void jsonEncode(Env env, JsonEncodeContext context, StringValue sb)
   {
+    if (context.isCheckNumeric()) {
+      if (isLongConvertible()) {
+        toLongValue().jsonEncode(env, context, sb);
+
+        return;
+      }
+      else if (isDoubleConvertible()) {
+        toDoubleValue().jsonEncode(env, context, sb);
+
+        return;
+      }
+    }
+
     sb.append('"');
 
     int len = length();
@@ -1235,8 +1248,13 @@ abstract public class StringValue
         sb.append('\\');
         break;
       case '"':
-        sb.append('\\');
-        sb.append('"');
+        if (context.isEscapeQuote()) {
+          sb.append("\\u0022");
+        }
+        else {
+          sb.append('\\');
+          sb.append('"');
+        }
         break;
       case '/':
         sb.append('\\');
@@ -1244,10 +1262,10 @@ abstract public class StringValue
         break;
       default:
         if (c <= 0x1f) {
-          addUnicode(sb, c);
+          jsonEncodeUnicode(sb, c);
         }
         else if (c < 0x80) {
-          sb.append(c);
+          jsonEncodeAscii(context, sb, c);
         }
         else if ((c & 0xe0) == 0xc0 && i + 1 < len) {
           int c1 = charAt(i + 1);
@@ -1255,7 +1273,7 @@ abstract public class StringValue
 
           int ch = ((c & 0x1f) << 6) + (c1 & 0x3f);
 
-          addUnicode(sb, ch);
+          jsonEncodeUnicode(sb, ch);
         }
         else if ((c & 0xf0) == 0xe0 && i + 2 < len) {
           int c1 = charAt(i + 1);
@@ -1265,11 +1283,11 @@ abstract public class StringValue
 
           int ch = ((c & 0x0f) << 12) + ((c1 & 0x3f) << 6) + (c2 & 0x3f);
 
-          addUnicode(sb, ch);
+          jsonEncodeUnicode(sb, ch);
         }
         else {
           // technically illegal
-          addUnicode(sb, c);
+          jsonEncodeUnicode(sb, c);
         }
 
         break;
@@ -1279,7 +1297,7 @@ abstract public class StringValue
     sb.append('"');
   }
 
-  private void addUnicode(StringValue sb, int c)
+  private void jsonEncodeUnicode(StringValue sb, int c)
   {
     sb.append('\\');
     sb.append('u');
@@ -1307,6 +1325,61 @@ abstract public class StringValue
       sb.append((char) ('0' + d));
     else
       sb.append((char) ('a' + d - 10));
+  }
+
+  private void jsonEncodeAscii(JsonEncodeContext context,
+                               StringValue sb,
+                               char ch)
+  {
+    switch (ch) {
+      case '<':
+        if (context.isEscapeTag()) {
+          sb.append("\\u003C");
+        }
+        else {
+          sb.append(ch);
+        }
+        break;
+
+      case '>':
+        if (context.isEscapeTag()) {
+          sb.append("\\u003E");
+        }
+        else {
+          sb.append(ch);
+        }
+        break;
+
+      case '&':
+        if (context.isEscapeAmp()) {
+          sb.append("\\u0026");
+        }
+        else {
+          sb.append(ch);
+        }
+        break;
+
+      case '\'':
+        if (context.isEscapeApos()) {
+          sb.append("\\u0027");
+        }
+        else {
+          sb.append(ch);
+        }
+        break;
+
+      case '"':
+        if (context.isEscapeQuote()) {
+          sb.append("\\u0022");
+        }
+        else {
+          sb.append(ch);
+        }
+        break;
+
+      default:
+        sb.append(ch);
+    }
   }
 
   /*

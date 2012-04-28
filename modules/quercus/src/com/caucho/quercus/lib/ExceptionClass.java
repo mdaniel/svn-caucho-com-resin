@@ -53,7 +53,7 @@ public class ExceptionClass
   private static final StringValue TRACE = new ConstStringValue("trace");
   private static final StringValue JAVA_EXCEPTION
     = new ConstStringValue("__javaException");
-  
+
   /**
    * Create a new exception API object.
    */
@@ -63,8 +63,8 @@ public class ExceptionClass
                                   @Optional("0") int code)
   {
     value.putField(env, "message", message);
-    
-    if (! value.issetField(env.createString("code"))) {
+
+    if (! value.issetField(env, env.createString("code"))) {
       value.putField(env, "code", LongValue.create(code));
     }
 
@@ -79,10 +79,10 @@ public class ExceptionClass
       value.putField(env, "line", LongValue.create(location.getLineNumber()));
     }
 
-    value.putField(env, "trace", ErrorModule.debug_backtrace(env));
+    value.putField(env, "trace", ErrorModule.debug_backtrace(env, 0));
     QuercusException e = new QuercusException();
     e.fillInStackTrace();
-    
+
     value.putField(env, "_quercusException", env.wrapJava(e));
 
     return value;
@@ -94,13 +94,13 @@ public class ExceptionClass
   public static Value __toString(Env env, @This ObjectValue value)
   {
     StringValue sb = env.createUnicodeBuilder();
-    
+
     sb.append("ExceptionClass[" + value.getName() + "]\n");
     sb.append(getMessage(env, value));
     sb.append("\n");
     sb.append(getTraceAsString(env, value));
     sb.append("\n");
-    
+
     return sb;
   }
 
@@ -158,7 +158,7 @@ public class ExceptionClass
   public static Value getTraceAsString(Env env, @This Value obj)
   {
     Value trace = getTrace(env, obj);
-    
+
     StringValue sb = env.createUnicodeBuilder();
     sb.append("<trace>");
 

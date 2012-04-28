@@ -32,17 +32,12 @@ package com.caucho.quercus.lib.file;
 import com.caucho.quercus.env.Env;
 import com.caucho.quercus.env.EnvCleanup;
 import com.caucho.quercus.env.Value;
-import com.caucho.quercus.resources.StreamContextResource;
-import com.caucho.vfs.HttpPath;
-import com.caucho.vfs.HttpStreamWrapper;
 import com.caucho.vfs.Path;
 import com.caucho.vfs.ReadStream;
 import com.caucho.vfs.LockableStream;
 
 import java.io.IOException;
-import java.util.Iterator;
-import java.util.Map;
-import java.util.logging.*;
+import java.util.logging.Logger;
 
 /**
  * Represents a Quercus file open for reading
@@ -56,16 +51,16 @@ public class FileInput extends ReadStreamInput
   protected Env _env;
   protected Path _path;
   protected ReadStream _is;
-  
+
   public FileInput(Env env, Path path)
     throws IOException
   {
     super(env);
-    
+
     _env = env;
 
     env.addCleanup(this);
-    
+
     _path = path;
 
     _is = path.openRead();

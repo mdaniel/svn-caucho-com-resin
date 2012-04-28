@@ -197,7 +197,7 @@ public class ProGooglePageManager extends PageManager
     }
   }
 
-  private QuercusPage createPage(Path path, Class pageClass)
+  private QuercusPage createPage(Path path, Class<?> pageClass)
   {
     try {
       QuercusPage page = (QuercusPage) pageClass.newInstance();

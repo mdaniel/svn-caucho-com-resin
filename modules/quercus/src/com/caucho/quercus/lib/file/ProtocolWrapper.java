@@ -49,7 +49,7 @@ public class ProtocolWrapper {
     _qClass = qClass;
   }
 
-  public BinaryStream fopen(Env env, StringValue path, StringValue mode, 
+  public BinaryStream fopen(Env env, StringValue path, StringValue mode,
                             LongValue options)
   {
     return new WrappedStream(env, _qClass, path, mode, options);
@@ -85,15 +85,22 @@ public class ProtocolWrapper {
     return function.call(env, path_from, path_to).toBoolean();
   }
 
-  public boolean mkdir(Env env, 
+  public boolean mkdir(Env env,
                        StringValue path, LongValue mode, LongValue options)
   {
-    AbstractFunction function = _qClass.getStaticFunction("mkdir");
+    // creating an uninitialized object makes no sense but it's here
+    // to match PHP 5.3.8 behavior for drupal-7.12
+    // php/1e22
+    Value obj = _qClass.createObject(env);
+    AbstractFunction function = _qClass.findFunction("mkdir");
 
-    if (function == null)
+    if (function == null) {
       return false;
+    }
 
-    return function.call(env, path, mode, options).toBoolean();
+    Value result = function.callMethod(env, _qClass, obj, path, mode, options);
+
+    return result.toBoolean();
   }
 
   public boolean rmdir(Env env, StringValue path, LongValue options)
@@ -116,4 +123,9 @@ public class ProtocolWrapper {
     return function.call(env, path, flags);
   }
 
+  @Override
+  public String toString()
+  {
+    return getClass().getSimpleName() + "[" + _qClass + "]";
+  }
 }

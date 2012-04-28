@@ -61,7 +61,7 @@ public class ProClassDef extends InterpretedClassDef
   {
     for (AbstractFunction fun : _functionMap.values()) {
       FunctionGenerator funGen = ((CompilingFunction) fun).getGenerator();
-      
+
       funGen.analyze(program);
     }
   }
@@ -82,21 +82,21 @@ public class ProClassDef extends InterpretedClassDef
       implClass = isAbstract() ? "CompiledAbstractClassDef" : "CompiledClassDef";
 
     String javaClassName = getCompilationName();
-    
+
     String oldClassName = out.getCurrentClassName();
     out.setCurrentClassName("quercus_" + javaClassName);
-    
+
     out.println();
     out.println("private static LazyClassDef q_cl_" + javaClassName + " = ");
     out.print("  new LazyClassDef(\"");
     out.printJavaString(getName());
     out.print("\", " + out.getClassName() + ".class");
     out.println(", \"quercus_" + javaClassName + "\");");
-    
+
     out.println();
     out.println("public static class quercus_" + javaClassName + " extends CompiledClassDef implements InstanceInitializer, CompiledClass {");
     out.pushDepth();
-    
+
     out.println("public quercus_" + javaClassName + "()");
     out.println("{");
     out.pushDepth();
@@ -135,12 +135,12 @@ public class ProClassDef extends InterpretedClassDef
       out.printJavaString(ifaceList[i]);
       out.print("\"");
     }
-    
+
     out.print("}");
-    
+
     if (isFinal())
       out.print(", true");
-    
+
     out.println(");");
 
     out.popDepth();
@@ -153,43 +153,52 @@ public class ProClassDef extends InterpretedClassDef
 
     out.println("cl.addInitializer(this);");
     out.println();
-    
+
     if (_constructor != null) {
       // php/393g
       // php/393i
       out.println("cl.setConstructor(fun_" + _constructor.getCompilationName() + ".toFun(cl));");
-      
+
       // php/393o
       //out.println("cl.addMethod(\"__construct\", fun_" + _constructor.getCompilationName() + ".toFun(cl));");
       out.println();
     }
-    
+
     if (_getField != null) {
       out.println("cl.setFieldGet(fun_" + _getField.getCompilationName() + ".toFun(cl));");
       out.println();
     }
-    
+
     if (_setField != null) {
       out.println("cl.setFieldSet(fun_" + _setField.getCompilationName() + ".toFun(cl));");
       out.println();
     }
-    
+
     if (_call != null) {
       out.println("cl.setCall(fun_" + _call.getCompilationName() + ".toFun(cl));");
       out.println();
     }
-    
+
     if (_invoke != null) {
       out.println("cl.setInvoke(fun_" + _invoke.getCompilationName() + ".toFun(cl));");
       out.println();
     }
-    
+
     if (_toString != null) {
       out.println("cl.setToString(fun_" + _toString.getCompilationName() + ".toFun(cl));");
       out.println();
     }
 
-    out.println();
+    // php/39ku
+    if (_isset != null) {
+      out.println("cl.setIsset(fun_" + _isset.getCompilationName() + ".toFun(cl));");
+      out.println();
+    }
+
+    if (_unset != null) {
+      out.println("cl.setUnset(fun_" + _unset.getCompilationName() + ".toFun(cl));");
+      out.println();
+    }
 
     for (Map.Entry<String,AbstractFunction> entry : _functionMap.entrySet()) {
       /* XXX: abstract methods need to be added to QuercusClass
@@ -222,9 +231,9 @@ public class ProClassDef extends InterpretedClassDef
     for (Map.Entry<String,StaticFieldEntry> entry
          : _staticFieldMap.entrySet()) {
       StaticFieldEntry field = entry.getValue();
-      
+
       ExprGenerator exprGen = ((ExprPro) field.getValue()).getGenerator();
-      
+
       out.print("cl.addStaticFieldExpr(\"");
       out.printJavaString(getName());
       out.print("\", \"");
@@ -236,14 +245,14 @@ public class ProClassDef extends InterpretedClassDef
 
     for (Map.Entry<String,Expr> entry : _constMap.entrySet()) {
       ExprGenerator exprGen = ((ExprPro) entry.getValue()).getGenerator();
-      
+
       out.print("cl.addConstant(\"");
       out.printJavaString(entry.getKey());
       out.print("\", ");
       exprGen.generateExpr(out);
       out.println(");");
     }
-    
+
     out.popDepth();
     out.println("}");
 
@@ -271,7 +280,7 @@ public class ProClassDef extends InterpretedClassDef
       StringValue key = entry.getKey();
       FieldEntry fieldEntry = entry.getValue();
       Expr value = fieldEntry.getValue();
-      
+
       ExprGenerator valueGen = ((ExprPro) value).getGenerator();
 
       out.print("value.initField(");
@@ -289,7 +298,7 @@ public class ProClassDef extends InterpretedClassDef
       fun.generateInit(out);
     }
     */
-    
+
     out.popDepth();
     out.println("}");
 
@@ -308,12 +317,12 @@ public class ProClassDef extends InterpretedClassDef
     out.print("QuercusClass qClass = env.getClass(\"");
     out.printJavaString(getName());
     out.println("\");");
-    
+
     for (Map.Entry<String,StaticFieldEntry> entry
          : _staticFieldMap.entrySet()) {
-      
+
       StaticFieldEntry field = entry.getValue();
-      
+
       ExprGenerator varGen = ((ExprPro) field.getValue()).getGenerator();
 
       out.print("qClass.getStaticFieldVar(env, ");
@@ -322,38 +331,38 @@ public class ProClassDef extends InterpretedClassDef
       varGen.generate(out);
       out.println(");");
     }
-    
+
     out.popDepth();
     out.println("}");
-    
+
     out.println();
     generateProperties(out);
     out.println();
-    
+
     generateFieldProperties(out);
-    
+
     out.println();
 
     out.popDepth();
     out.println("}");
-    
+
     out.setCurrentClassName(oldClassName);
   }
-  
+
   public void generateInit(PhpWriter out, boolean useEnv)
     throws IOException
   {
     // XXX: test case for useEnv?
-    
+
     out.print("env.");
     out.print("addClass(q_cl_" + getCompilationName());
     out.print(", " + out.addClassId(getName()));
-    
+
     if (getParentName() != null)
       out.print(", " + out.addClassId(getParentName()));
     else
       out.print(", -1");
-    
+
     out.println(");");
   }
 
@@ -365,7 +374,7 @@ public class ProClassDef extends InterpretedClassDef
   {
     generateInit(out, false);
   }
-  
+
   /**
    * Generates the properties for this class.
    */
@@ -381,7 +390,7 @@ public class ProClassDef extends InterpretedClassDef
       out.popDepth();
       out.println("}");
     }
-    
+
     if (isInterface()) {
       out.println("@Override");
       out.println("public boolean isInterface()");
@@ -391,7 +400,7 @@ public class ProClassDef extends InterpretedClassDef
       out.popDepth();
       out.println("}");
     }
-    
+
     if (isAbstract()) {
       out.println("@Override");
       out.println("public boolean isAbstract()");
@@ -401,7 +410,7 @@ public class ProClassDef extends InterpretedClassDef
       out.popDepth();
       out.println("}");
     }
-    
+
     if (getComment() != null) {
       out.println("@Override");
       out.println("public String getComment()");
@@ -414,7 +423,7 @@ public class ProClassDef extends InterpretedClassDef
       out.println("}");
     }
   }
-  
+
   /**
    * Generates the field properties.
    */
@@ -430,16 +439,16 @@ public class ProClassDef extends InterpretedClassDef
     for (Map.Entry<StringValue,FieldEntry> entry : _fieldMap.entrySet()) {
       StringValue key = entry.getKey();
       FieldEntry fieldEntry = entry.getValue();
-      
+
       if (fieldEntry.getComment() != null) {
         if (isFirst) {
           isFirst = false;
-          
+
           out.print("if ");
         }
         else
           out.print("else if ");
-        
+
         out.print("(name.equals(");
         out.print(key);
         out.println("))");
@@ -450,25 +459,25 @@ public class ProClassDef extends InterpretedClassDef
         out.popDepth();
       }
     }
-    
+
     out.println();
     out.println("return null;");
 
     out.popDepth();
     out.println("}");
-    
+
     out.println();
     out.println("@Override");
     out.println("public String getStaticFieldComment(String name)");
     out.println("{");
     out.pushDepth();
-    
+
     isFirst = true;
-    
+
     for (Map.Entry<String,StaticFieldEntry> entry
          : _staticFieldMap.entrySet()) {
       StaticFieldEntry field = entry.getValue();
-      
+
       if (field.getComment() != null) {
         if (isFirst) {
           isFirst = false;
@@ -476,7 +485,7 @@ public class ProClassDef extends InterpretedClassDef
         }
         else
           out.print("else if ");
-        
+
         out.print("(name.equals(\"");
         out.printJavaString(entry.getKey());
         out.println("\"))");
@@ -487,15 +496,15 @@ public class ProClassDef extends InterpretedClassDef
         out.popDepth();
       }
     }
-    
+
     out.println();
     out.println("return null;");
-    
+
     out.popDepth();
     out.println("}");
-    
+
   }
-  
+
   public String toString()
   {
     return "ProClassDef[" + getName() + "]";

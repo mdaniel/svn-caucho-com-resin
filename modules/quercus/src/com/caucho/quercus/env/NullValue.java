@@ -607,7 +607,7 @@ public class NullValue extends Value
    * Encodes the value in JSON.
    */
   @Override
-  public void jsonEncode(Env env, StringValue sb)
+  public void jsonEncode(Env env, JsonEncodeContext context, StringValue sb)
   {
     sb.append("null");
   }

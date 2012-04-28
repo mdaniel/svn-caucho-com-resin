@@ -72,15 +72,15 @@ public class PDOException
   {
     return getMessage();
   }
-  
+
   /**
    * Converts the exception to a Value.
    */
   @Override
   public Value toValue(Env env)
   {
-    Value e = env.createException("PDOException", _message);
-    
+    Value e = env.createException("PDOException", _code, _message);
+
     return e;
   }
 }

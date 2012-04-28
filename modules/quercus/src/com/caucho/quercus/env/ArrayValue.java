@@ -1400,11 +1400,8 @@ abstract public class ArrayValue extends Value {
     sb.append(")");
   }
 
-  /**
-   * Encodes the value in JSON.
-   */
   @Override
-  public void jsonEncode(Env env, StringValue sb)
+  public void jsonEncode(Env env, JsonEncodeContext context, StringValue sb)
   {
     long length = 0;
 
@@ -1414,9 +1411,10 @@ abstract public class ArrayValue extends Value {
       Value key = keyIter.next();
 
       if ((! key.isLongConvertible()) || key.toLong() != length) {
-        jsonEncodeAssociative(env, sb);
+        jsonEncodeAssociative(env, context, sb);
         return;
       }
+
       length++;
     }
 
@@ -1424,16 +1422,20 @@ abstract public class ArrayValue extends Value {
 
     length = 0;
     for (Value value : values()) {
-      if (length > 0)
+      if (length > 0) {
         sb.append(',');
-      value.jsonEncode(env, sb);
+      }
+
+      value.jsonEncode(env, context, sb);
       length++;
     }
 
     sb.append(']');
   }
 
-  private void jsonEncodeAssociative(Env env, StringValue sb)
+  public void jsonEncodeAssociative(Env env,
+                                    JsonEncodeContext context,
+                                    StringValue sb)
   {
     sb.append('{');
 
@@ -1447,9 +1449,9 @@ abstract public class ArrayValue extends Value {
       if (length > 0)
         sb.append(',');
 
-      entry.getKey().toStringValue().jsonEncode(env, sb);
+      entry.getKey().toStringValue(env).jsonEncode(env, context, sb);
       sb.append(':');
-      entry.getValue().jsonEncode(env, sb);
+      entry.getValue().jsonEncode(env, context, sb);
       length++;
     }
 

@@ -1346,20 +1346,26 @@ public class JavaClassDef extends ClassDef {
   public StringValue toString(Env env,
                               JavaValue value)
   {
-    if (__toString == null)
+    if (__toString == null) {
       return null;
+    }
 
-    return __toString.callMethod(
-      env, getQuercusClass(), value, new Expr[0]).toStringValue();
+    QuercusClass cls = getQuercusClass();
+    Value str = __toString.callMethod(env, cls, value, Expr.NULL_ARGS);
+
+    return str.toStringValue(env);
   }
 
-  public boolean jsonEncode(Env env, Object obj, StringValue sb)
+  public boolean jsonEncode(Env env,
+                            Object obj,
+                            JsonEncodeContext context,
+                            StringValue sb)
   {
     if (_jsonEncode == null)
       return false;
 
     try {
-      _jsonEncode.invoke(obj, env, sb);
+      _jsonEncode.invoke(obj, env, context, sb);
       return true;
 
     } catch (InvocationTargetException e) {

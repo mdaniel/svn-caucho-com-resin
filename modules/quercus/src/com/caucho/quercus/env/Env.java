@@ -1470,7 +1470,7 @@ public class Env
   public void setPwd(Path path)
   {
     _pwd = path;
-    
+
     _lookupCache.clear();
   }
 
@@ -1508,13 +1508,16 @@ public class Env
       String realPath = getIniString("upload_tmp_dir");
 
       if (realPath != null) {
+        _uploadPath = _quercus.getPwd().lookup(realPath);
       }
-      else if (getRequest() != null)
-        realPath = "WEB-INF/upload";
-      else
+      else if (getRequest() != null) {
+        _uploadPath = _quercus.getWebInfDir().lookup("upload");
+      }
+      else {
         realPath = WorkDir.getTmpWorkDir().lookup("upload").getNativePath();
 
-      _uploadPath = _quercus.getPwd().lookup(realPath);
+        _uploadPath = _quercus.getPwd().lookup(realPath);
+      }
 
       try {
         if (! _uploadPath.isDirectory())
@@ -4318,7 +4321,7 @@ public class Env
    */
   boolean isSpecialVar(StringValue name)
   {
-    if (_quercus.isSuperGlobal(name))
+    if (QuercusContext.isSuperGlobal(name))
       return true;
     else if (_scriptGlobalMap.get(name) != null)
       return true;
@@ -4569,7 +4572,28 @@ public class Env
 
     value.putField(this, "file", createString(location.getFileName()));
     value.putField(this, "line", LongValue.create(location.getLineNumber()));
-    value.putField(this, "trace", ErrorModule.debug_backtrace(this));
+    value.putField(this, "trace", ErrorModule.debug_backtrace(this, 0));
+
+    return value;
+  }
+
+  public Value createException(String exceptionClass, String ...args)
+  {
+    QuercusClass cls = getClass(exceptionClass);
+
+    Value[] argsV = new Value[args.length];
+
+    for (int i = 0; i < args.length; i++) {
+      argsV[i] = createString(args[i]);
+    }
+
+    Value value = cls.callNew(this, argsV);
+
+    Location location = getLocation();
+
+    value.putField(this, "file", createString(location.getFileName()));
+    value.putField(this, "line", LongValue.create(location.getLineNumber()));
+    value.putField(this, "trace", ErrorModule.debug_backtrace(this, 0));
 
     return value;
   }
@@ -4590,7 +4614,7 @@ public class Env
 
     value.putField(this, "file", createString(elt.getFileName()));
     value.putField(this, "line", LongValue.create(elt.getLineNumber()));
-    value.putField(this, "trace", ErrorModule.debug_backtrace(this));
+    value.putField(this, "trace", ErrorModule.debug_backtrace(this, 0));
 
     if ((e instanceof QuercusException) && e.getCause() != null)
       e = e.getCause();
@@ -5950,7 +5974,7 @@ public class Env
   /**
    * Handles exit/die
    */
-  public Value cast(Class cl, Value value)
+  public Value cast(Class<?> cl, Value value)
   {
     value = value.toValue();
 
@@ -6197,7 +6221,7 @@ public class Env
 
     error(B_ERROR, location, fullMsg);
 
-    String exMsg = prefix + fullMsg;
+    //String exMsg = prefix + fullMsg;
 
     return new QuercusRuntimeException(fullMsg);
   }
@@ -6501,6 +6525,9 @@ public class Env
    */
   public Value error(int code, Location location, String loc, String msg)
   {
+    //Thread.dumpStack();
+    //System.err.println("Env->error0: " + location + " . " + loc + " . " + msg);
+
     int mask = 1 << code;
 
     int errorMask = getErrorMask();

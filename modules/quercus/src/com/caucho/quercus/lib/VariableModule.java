@@ -520,11 +520,12 @@ public class VariableModule extends AbstractQuercusModule {
   /**
    * Returns the type string for the variable
    */
-  public static boolean isset(@ReadOnly Value ... vList)
+  public static boolean isset(@ReadOnly Value ... values)
   {
-    for (Value v : vList) {
-      if (! v.isset())
+    for (Value v : values) {
+      if (! v.isset()) {
         return false;
+      }
     }
 
     return true;
@@ -658,6 +659,10 @@ public class VariableModule extends AbstractQuercusModule {
    */
   public static Value unserialize(Env env, StringValue s)
   {
+    if (s.length() == 0) {
+      return BooleanValue.FALSE;
+    }
+
     Value v = null;
 
     UnserializeKey key = new UnserializeKey(s);

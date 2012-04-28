@@ -50,13 +50,13 @@ public final class UnserializeReader {
 
   private int _index;
   private StringKey _key = new StringKey();
-  
+
   private ArrayList<Value> _valueList
     = new ArrayList<Value>();
-  
+
   private ArrayList<Boolean> _referenceList
     = new ArrayList<Boolean>();
-  
+
   private boolean _useReference;
 
   public UnserializeReader(StringValue s)
@@ -64,7 +64,7 @@ public final class UnserializeReader {
   {
     _buffer = s.toCharArray();
     _length = _buffer.length;
-    
+
     if (s.indexOf("R:") >= 0
         || s.indexOf("r:") >= 0)
       initReferenceList();
@@ -75,13 +75,13 @@ public final class UnserializeReader {
   {
     _buffer = s.toCharArray();
     _length = _buffer.length;
-    
+
     if (s.indexOf("R:") >= 0
         || s.indexOf("r:") >= 0)
       initReferenceList();
   }
 
-  boolean useReference()
+  protected boolean useReference()
   {
     return _useReference;
   }
@@ -97,12 +97,12 @@ public final class UnserializeReader {
         expect(':');
         long v = readInt();
         expect(';');
-        
+
         Value value = v == 0 ? BooleanValue.FALSE : BooleanValue.TRUE;
-        
+
         if (_useReference)
           value = createReference(value);
-        
+
         return value;
       }
 
@@ -118,12 +118,12 @@ public final class UnserializeReader {
           env.notice(L.l("expected string length of {0}", len));
           return BooleanValue.FALSE;
         }
-        
+
         Value value = readStringValue(env, len);
 
         expect('"');
         expect(';');
-        
+
         if (_useReference)
           value = createReference(value);
 
@@ -141,12 +141,12 @@ public final class UnserializeReader {
           env.notice(L.l("expected string length of {0}", len));
           return BooleanValue.FALSE;
         }
-        
+
         Value value = readUnicodeValue(env, len);
 
         expect('"');
         expect(';');
-        
+
         if (_useReference)
           value = createReference(value);
 
@@ -160,9 +160,9 @@ public final class UnserializeReader {
         long l = readInt();
 
         expect(';');
-        
-        Value value = LongValue.create(l); 
-        
+
+        Value value = LongValue.create(l);
+
         if (_useReference)
           value = createReference(value);
 
@@ -182,10 +182,10 @@ public final class UnserializeReader {
           throw new IOException(L.l("expected ';'"));
 
         Value value = new DoubleValue(Double.parseDouble(sb.toString()));
-        
+
         if (_useReference)
           value = createReference(value);
-        
+
         return value;
       }
 
@@ -195,12 +195,12 @@ public final class UnserializeReader {
         int len = (int) readInt();
         expect(':');
         expect('{');
-        
+
         Value array = new ArrayValueImpl(len);
 
         if (_useReference)
           array = createReference(array);
-        
+
         for (int i = 0; i < len; i++) {
           Value key = unserializeKey(env);
           Value value = unserialize(env);
@@ -209,7 +209,7 @@ public final class UnserializeReader {
         }
 
         expect('}');
-          
+
         return array;
       }
 
@@ -222,7 +222,7 @@ public final class UnserializeReader {
 
         if (! isValidString(len))
           return BooleanValue.FALSE;
-        
+
         String className = readString(len);
 
         expect('"');
@@ -239,18 +239,18 @@ public final class UnserializeReader {
         else {
           log.fine(L.l("{0} is an undefined class in unserialize",
                    className));
-          
+
           obj = env.createIncompleteObject(className);
         }
-        
+
         Value ref = null;
-        
+
         if (_useReference)
           ref = createReference(obj);
 
         for (int i = 0; i < count; i++) {
           StringValue key = unserializeKey(env).toStringValue();
-          
+
           FieldVisibility visibility = FieldVisibility.PUBLIC;
 
           if (key.length() > 3 && key.charAt(0) == 0) {
@@ -266,23 +266,23 @@ public final class UnserializeReader {
                     L.l("field visibility modifier is not valid: 0x{0}",
                                           Integer.toHexString(key.charAt(2))));
             }
-            
+
             if (key.charAt(2) != 0) {
               throw new IOException(
                   L.l("end of field visibility modifier is not valid: 0x{0}",
                                         Integer.toHexString(key.charAt(2))));
             }
-            
+
             key = key.substring(3);
           }
-          
+
           Value value = unserialize(env);
 
           obj.initField(key, value, visibility);
         }
 
         expect('}');
-        
+
         if (ref != null)
           return ref;
         else
@@ -292,9 +292,9 @@ public final class UnserializeReader {
     case 'N':
       {
         expect(';');
-        
+
         Value value = NullValue.NULL;
-        
+
         if (_useReference)
           value = createReference(value);
 
@@ -307,14 +307,14 @@ public final class UnserializeReader {
         int index = (int) readInt();
 
         expect(';');
-        
+
         if (index - 1 >= _valueList.size()) {
           throw new IOException(
               L.l("reference out of range: {0}, size {1}, index {2}",
                                     index - 1, _valueList.size(), _index));
           //return BooleanValue.FALSE;
         }
-        
+
         Value ref = _valueList.get(index - 1);
 
         return ref;
@@ -326,21 +326,21 @@ public final class UnserializeReader {
         int index = (int) readInt();
 
         expect(';');
-        
+
         if (index - 1 >= _valueList.size()) {
           throw new IOException(
               L.l("reference out of range: {0}, size {1}, index {2}",
                                     index - 1, _valueList.size(), _index));
           //return BooleanValue.FALSE;
         }
-        
+
         Value value = _valueList.get(index - 1).copy();
-        
+
         if (_useReference)
           value = createReference(value);
-        
+
         return value;
-        
+
       }
 
     default:
@@ -349,21 +349,21 @@ public final class UnserializeReader {
                                 String.valueOf((char) ch),
                                 Integer.toHexString(ch),
                                 _index));
-      
+
       //return BooleanValue.FALSE;
     }
   }
-  
+
   public Value createReference(Value value)
   {
     if (_referenceList.get(_valueList.size()) == Boolean.FALSE) {
-      
+
       _valueList.add(value);
       return value;
     }
     else {
       Var var = new Var(value);
-      
+
       _valueList.add(var);
       return var;
     }
@@ -373,10 +373,10 @@ public final class UnserializeReader {
     throws IOException
   {
     populateReferenceList();
-    
+
     _index = 0;
   }
-  
+
   private void populateReferenceList()
     throws IOException
   {
@@ -386,11 +386,11 @@ public final class UnserializeReader {
       case 'b':
       {
         _referenceList.add(Boolean.FALSE);
-        
+
         expect(':');
         for (ch = read(); ch >= 0 && ch != ';'; ch = read()) {
         }
-        
+
         return;
       }
 
@@ -398,7 +398,7 @@ public final class UnserializeReader {
       case 'S':
       {
         _referenceList.add(Boolean.FALSE);
-        
+
         expect(':');
         int len = (int) readInt();
         expect(':');
@@ -408,14 +408,14 @@ public final class UnserializeReader {
 
         expect('"');
         expect(';');
-        
+
         return;
       }
       case 'u':
       case 'U':
       {
         _referenceList.add(Boolean.FALSE);
-        
+
         expect(':');
         int len = (int) readInt();
         expect(':');
@@ -425,38 +425,38 @@ public final class UnserializeReader {
 
         expect('"');
         expect(';');
-        
+
         return;
       }
 
       case 'i':
       {
         _referenceList.add(Boolean.FALSE);
-        
+
         expect(':');
 
         for (ch = read(); ch >= 0 && ch != ';'; ch = read()) {
         }
-        
+
         return;
       }
 
       case 'd':
       {
         _referenceList.add(Boolean.FALSE);
-        
+
         expect(':');
 
         for (ch = read(); ch >= 0 && ch != ';'; ch = read()) {
         }
-        
+
         return;
       }
 
       case 'a':
       {
         _referenceList.add(Boolean.FALSE);
-        
+
         expect(':');
         int len = (int) readInt();
         expect(':');
@@ -476,9 +476,9 @@ public final class UnserializeReader {
 
               expect('"');
               expect(';');
-              
+
               break;
-              
+
             }
 
           case 'i':
@@ -487,7 +487,7 @@ public final class UnserializeReader {
 
               for (ch = read(); ch >= 0 && ch != ';'; ch = read()) {
               }
-              
+
               break;
             }
           }
@@ -496,14 +496,14 @@ public final class UnserializeReader {
         }
 
         expect('}');
-        
+
         return;
       }
 
       case 'O':
       {
         _referenceList.add(Boolean.FALSE);
-        
+
         expect(':');
         int len = (int) readInt();
         expect(':');
@@ -531,7 +531,7 @@ public final class UnserializeReader {
 
               expect('"');
               expect(';');
-                
+
               break;
             }
 
@@ -541,7 +541,7 @@ public final class UnserializeReader {
 
               for (ch = read(); ch >= 0 && ch != ';'; ch = read()) {
               }
-                
+
               break;
             }
           }
@@ -550,40 +550,40 @@ public final class UnserializeReader {
         }
 
         expect('}');
-        
+
         return;
       }
 
       case 'N':
       {
         _referenceList.add(Boolean.FALSE);
-        
+
         expect(';');
-        
+
         return;
       }
 
       case 'R':
       {
         _referenceList.add(Boolean.FALSE);
-        
+
         _useReference = true;
-        
+
         expect(':');
 
         int value = (int) readInt();
 
         expect(';');
-        
+
         _referenceList.set(value - 1, Boolean.TRUE);
-        
+
         return;
       }
-      
+
       case 'r':
       {
         _referenceList.add(Boolean.FALSE);
-        
+
         _useReference = true;
 
         expect(':');
@@ -591,7 +591,7 @@ public final class UnserializeReader {
         int value = (int) readInt();
 
         expect(';');
-        
+
         return;
       }
     }
@@ -659,7 +659,7 @@ public final class UnserializeReader {
     throws IOException
   {
     int ch = read();
-    
+
     if (ch != 's' && ch != 'S') {
       throw new IOException(L.l("expected 's' at '{1}' (0x{2})",
                                 String.valueOf((char) ch),
@@ -690,12 +690,12 @@ public final class UnserializeReader {
 
     if (ch != expectCh) {
       String context = String.valueOf((char) ch);
-      
+
       if (_index - 2 >= 0)
         context = _buffer[_index - 2] + context;
       if (_index < _buffer.length)
         context += _buffer[_index];
-      
+
       throw new IOException(
           L.l("expected '{0}' at '{1}' (0x{2}) (context '{3}', index {4})",
                                 String.valueOf((char) expectCh),
@@ -729,12 +729,12 @@ public final class UnserializeReader {
 
     return sign * value;
   }
-  
+
   public final boolean isValidString(int len)
   {
     if (_index + len >= _buffer.length)
       return false;
-    
+
     return true;
   }
 
@@ -755,7 +755,7 @@ public final class UnserializeReader {
 
     return s;
   }
-  
+
   public final StringValue readUnicodeValue(Env env, int len)
   {
     StringValue s = new UnicodeBuilderValue(_buffer, _index, len);

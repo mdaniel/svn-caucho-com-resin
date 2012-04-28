@@ -389,21 +389,15 @@ public class UrlModule
                                          StringValue numeric_prefix,
                                          StringValue separator)
   {
-    Set<Map.Entry<Value,Value>> entrySet;
+    Set<? extends Map.Entry<Value,Value>> entrySet;
 
-    if (formdata.isArray())
-      entrySet = ((ArrayValue)formdata).entrySet();
+    if (formdata.isArray()) {
+      entrySet = ((ArrayValue) formdata).entrySet();
+    }
     else if (formdata.isObject()) {
-      Set<? extends Map.Entry<Value,Value>> stringEntrySet
-        = ((ObjectValue)formdata).entrySet();
-
-      LinkedHashMap<Value,Value> valueMap = new LinkedHashMap<Value,Value>();
-
-      for (Map.Entry<Value,Value> entry : stringEntrySet)
-        valueMap.put(entry.getKey(), entry.getValue());
-
-      entrySet = valueMap.entrySet();
-    } else {
+      entrySet = ((ObjectValue) formdata).entrySet();
+    }
+    else {
       env.warning(L.l("formdata must be an array or object"));
 
       return;

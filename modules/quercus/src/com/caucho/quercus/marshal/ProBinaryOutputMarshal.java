@@ -16,7 +16,7 @@ public class ProBinaryOutputMarshal extends BinaryOutputMarshal
   implements ProMarshal
 {
   public static final Marshal MARSHAL = new ProBinaryOutputMarshal();
-  
+
   public void generate(PhpWriter out, ExprGenerator expr, Class argClass)
     throws IOException
   {

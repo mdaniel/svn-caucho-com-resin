@@ -402,11 +402,6 @@ public class JdbcStatementResource
     return _rs;
   }
 
-  protected void setResultSet(JdbcResultResource rs)
-  {
-    _rs = rs;
-  }
-
   protected void setResultSet(ResultSet rs)
   {
     _rs = createResultSet(rs);

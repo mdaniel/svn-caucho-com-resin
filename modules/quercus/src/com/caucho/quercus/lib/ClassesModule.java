@@ -352,13 +352,16 @@ public class ClassesModule extends AbstractQuercusModule {
                                       Value obj,
                                       StringValue name)
   {
-    QuercusClass cls;
-
     if (obj.isString()) {
-      cls = env.findClass(obj.toString());
+      QuercusClass cls = env.findClass(obj.toString());
+
+      if (cls != null && cls.getClassField(name) != null)
+        return BooleanValue.TRUE;
+      else
+        return BooleanValue.FALSE;
     }
     else if (obj.isObject()) {
-      boolean result = obj.issetField(name);
+      boolean result = obj.isFieldExists(env, name);
 
       return BooleanValue.create(result);
     }
@@ -366,11 +369,6 @@ public class ClassesModule extends AbstractQuercusModule {
       env.warning("must pass in object or name of class");
       return NullValue.NULL;
     }
-
-    if (cls != null && cls.getClassField(name) != null)
-      return BooleanValue.TRUE;
-    else
-      return BooleanValue.FALSE;
   }
 
 }

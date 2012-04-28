@@ -31,6 +31,7 @@ package com.caucho.quercus.lib.db;
 
 import com.caucho.quercus.UnimplementedException;
 import com.caucho.quercus.annotation.Optional;
+import com.caucho.quercus.annotation.ReadOnly;
 import com.caucho.quercus.env.ArrayValue;
 import com.caucho.quercus.env.ArrayValueImpl;
 import com.caucho.quercus.env.BooleanValue;
@@ -158,14 +159,22 @@ public class PDO implements EnvCleanup {
   private String _statementClassName;
   private Value[] _statementClassArgs;
 
+  private int _columnCase = JdbcResultResource.COLUMN_CASE_NATURAL;
+
   public PDO(Env env,
              String dsn,
-             @Optional("null") String user,
-             @Optional("null") String pass,
-             @Optional ArrayValue options)
+             @Optional String user,
+             @Optional String pass,
+             @Optional @ReadOnly ArrayValue options)
   {
     _dsn = dsn;
     _error = new PDOError();
+
+    if (options != null) {
+      for (Map.Entry<Value,Value> entry : options.entrySet()) {
+        setAttribute(env, entry.getKey().toInt(), entry.getValue());
+      }
+    }
 
     // XXX: following would be better as annotation on destroy() method
     env.addCleanup(this);
@@ -274,6 +283,11 @@ public class PDO implements EnvCleanup {
     return _error.getErrorInfo();
   }
 
+  protected int getColumnCase()
+  {
+    return _columnCase;
+  }
+
   /**
    * Executes a statement, returning the number of rows.
    */
@@ -286,7 +300,7 @@ public class PDO implements EnvCleanup {
     }
 
     try {
-      PDOStatement stmt = new PDOStatement(env, this, query, false, null);
+      PDOStatement stmt = new PDOStatement(env, this, _error, query, false, null, true);
       _lastExecutedStatement = stmt;
 
       return LongValue.create(conn.getAffectedRows());
@@ -450,7 +464,7 @@ public class PDO implements EnvCleanup {
       closeStatements();
 
       PDOStatement pdoStatement
-        = new PDOStatement(env, this, query, true, driverOptions);
+        = new PDOStatement(env, this, _error, query, true, driverOptions, true);
 
       _lastPDOStatement = pdoStatement;
 
@@ -475,7 +489,10 @@ public class PDO implements EnvCleanup {
   /**
    * Queries the database
    */
-  public Value query(Env env, String query)
+  public Value query(Env env,
+                     String query,
+                     @Optional int mode,
+                     @Optional @ReadOnly Value[] args)
   {
     JdbcConnectionResource conn = getConnection();
 
@@ -487,7 +504,11 @@ public class PDO implements EnvCleanup {
       closeStatements();
 
       PDOStatement pdoStatement
-         = new PDOStatement(env, this, query, false, null);
+         = new PDOStatement(env, this, _error, query, false, null, true);
+
+      if (mode != 0) {
+        pdoStatement.setFetchMode(env, mode, args);
+      }
 
       _lastPDOStatement = pdoStatement;
 
@@ -664,9 +685,16 @@ public class PDO implements EnvCleanup {
   {
     switch (value) {
       case CASE_LOWER:
+        _columnCase = JdbcResultResource.COLUMN_CASE_LOWER;
+        return true;
+
       case CASE_NATURAL:
+        _columnCase = JdbcResultResource.COLUMN_CASE_NATURAL;
+        return true;
+
       case CASE_UPPER:
-        throw new UnimplementedException();
+        _columnCase = JdbcResultResource.COLUMN_CASE_UPPER;
+        return true;
 
       default:
         _error.unsupportedAttributeValue(env, env);

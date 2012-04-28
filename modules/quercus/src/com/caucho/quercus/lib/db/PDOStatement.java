@@ -45,6 +45,7 @@ import com.caucho.quercus.env.Value;
 import com.caucho.util.IntMap;
 import com.caucho.util.L10N;
 
+import java.sql.ResultSet;
 import java.sql.ResultSetMetaData;
 import java.sql.SQLException;
 import java.util.Collections;
@@ -52,7 +53,6 @@ import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Map;
 import java.util.Set;
-import java.util.logging.Logger;
 
 /**
  * PDO object oriented API facade.
@@ -61,7 +61,6 @@ public class PDOStatement
   extends JdbcPreparedStatementResource
   implements Iterable<Value>, EnvCleanup
 {
-  private static final Logger log = Logger.getLogger(PDOStatement.class.getName());
   private static final L10N L = new L10N(PDOStatement.class);
 
   private static final Value[] NULL_VALUES = new Value[0];
@@ -70,6 +69,7 @@ public class PDOStatement
   private final PDOError _error;
 
   // XXX: need to make public @Name("queryString")
+  public final String queryString;
 
   private int _fetchMode = PDO.FETCH_BOTH;
   private Value[] _fetchModeArgs = NULL_VALUES;
@@ -83,16 +83,18 @@ public class PDOStatement
   // protected so it's not callable by PHP code
   protected PDOStatement(Env env,
                          PDO pdo,
+                         PDOError error,
                          String query,
                          boolean isPrepared,
-                         ArrayValue options)
+                         ArrayValue options,
+                         boolean isCatchException)
     throws SQLException
   {
     super(pdo.getConnection());
     env.addCleanup(this);
 
     _pdo = pdo;
-    _error = new PDOError();
+    _error = error;
 
     if (options != null && options.getSize() > 0) {
       env.notice(L.l("PDOStatement options unsupported"));
@@ -108,9 +110,22 @@ public class PDOStatement
     }
     else {
       setQuery(query);
-      setStatement(pdo.getConnection().createStatement(env));
-      execute(env, false);
+
+      try {
+        setStatement(pdo.getConnection().createStatement(env));
+        execute(env, false);
+      }
+      catch (SQLException e) {
+        if (isCatchException) {
+          _error.error(env, e);
+        }
+        else {
+          throw e;
+        }
+      }
     }
+
+    this.queryString = query;
   }
 
   //side-effect, updates _parameterNameMap
@@ -439,7 +454,14 @@ public class PDOStatement
       bindParams(env, types, values);
     }
 
-    return execute(env);
+    try {
+      return execute(env, false);
+    }
+    catch (SQLException e) {
+      _error.error(env, e);
+
+      return false;
+    }
   }
 
   @Override
@@ -449,6 +471,12 @@ public class PDOStatement
     _pdo.setLastExecutedStatement(this);
 
     return super.executeImpl(env);
+  }
+
+  @Override
+  protected JdbcResultResource createResultSet(ResultSet rs)
+  {
+    return new JdbcResultResource(rs, _pdo.getColumnCase());
   }
 
   /**
@@ -704,7 +732,7 @@ public class PDOStatement
         value = fetchLazy(env);
         break;
       case PDO.FETCH_NAMED:
-        value = fetchNamed(env);
+        value = fetchNamed(env, rs);
         break;
       case PDO.FETCH_NUM:
         value = fetchNum(env, rs);
@@ -785,7 +813,7 @@ public class PDOStatement
       int columnCount = getMetaData().getColumnCount();
 
       for (int i = 1; i <= columnCount; i++) {
-        String name = getMetaData().getColumnName(i);
+        String name = rs.getColumnLabel(i);
         Value value = getColumnValue(env, i);
 
         var.putField(env, name, value);
@@ -806,7 +834,7 @@ public class PDOStatement
     return fetchObject(env, null, NULL_VALUES);
   }
 
-  private Value fetchNamed(Env env)
+  private Value fetchNamed(Env env, JdbcResultResource rs)
   {
     try {
       ArrayValue array = new ArrayValueImpl();
@@ -814,7 +842,7 @@ public class PDOStatement
       int columnCount = getMetaData().getColumnCount();
 
       for (int i = 1; i <= columnCount; i++) {
-        Value name = env.createString(getMetaData().getColumnName(i));
+        Value name = env.createString(rs.getColumnLabel(i));
         Value value = getColumnValue(env, i);
 
         Value existingValue = array.get(name);

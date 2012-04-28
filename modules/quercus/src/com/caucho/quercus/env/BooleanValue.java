@@ -338,7 +338,7 @@ public class BooleanValue extends Value
    * Encodes the value in JSON.
    */
   @Override
-  public void jsonEncode(Env env, StringValue sb)
+  public void jsonEncode(Env env, JsonEncodeContext context, StringValue sb)
   {
     if (_value)
       sb.append("true");

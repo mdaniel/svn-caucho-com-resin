@@ -34,7 +34,7 @@ public class ObjectFieldVarExprPro extends ObjectFieldVarExpr
     {
       return true;
     }
-    
+
     /**
      * Analyze the statement
      */
@@ -55,7 +55,7 @@ public class ObjectFieldVarExprPro extends ObjectFieldVarExpr
      * @param out the writer to the Java source code.
      */
     public void generate(PhpWriter out)
-    throws IOException
+      throws IOException
     {
       ExprGenerator objGen = ((ExprPro) _objExpr).getGenerator();
       ExprGenerator nameGen = ((ExprPro) _nameExpr).getGenerator();
@@ -72,7 +72,7 @@ public class ObjectFieldVarExprPro extends ObjectFieldVarExpr
      * @param out the writer to the Java source code.
      */
     public void generateArg(PhpWriter out, boolean isTop)
-    throws IOException
+      throws IOException
     {
       ExprGenerator objGen = ((ExprPro) _objExpr).getGenerator();
       ExprGenerator nameGen = ((ExprPro) _nameExpr).getGenerator();
@@ -89,7 +89,7 @@ public class ObjectFieldVarExprPro extends ObjectFieldVarExpr
      * @param out the writer to the Java source code.
      */
     public void generateRef(PhpWriter out)
-    throws IOException
+      throws IOException
     {
       ExprGenerator objGen = ((ExprPro) _objExpr).getGenerator();
       ExprGenerator nameGen = ((ExprPro) _nameExpr).getGenerator();
@@ -106,7 +106,7 @@ public class ObjectFieldVarExprPro extends ObjectFieldVarExpr
      * @param out the writer to the Java source code.
      */
     public void generateAssign(PhpWriter out, Expr value, boolean isTop)
-    throws IOException
+      throws IOException
     {
       ExprGenerator objGen = ((ExprPro) _objExpr).getGenerator();
       ExprGenerator nameGen = ((ExprPro) _nameExpr).getGenerator();
@@ -126,7 +126,7 @@ public class ObjectFieldVarExprPro extends ObjectFieldVarExpr
      * @param out the writer to the Java source code.
      */
     public void generateAssignRef(PhpWriter out, Expr value, boolean isTop)
-    throws IOException
+      throws IOException
     {
       ExprGenerator objGen = ((ExprPro) _objExpr).getGenerator();
       ExprGenerator nameGen = ((ExprPro) _nameExpr).getGenerator();
@@ -142,7 +142,7 @@ public class ObjectFieldVarExprPro extends ObjectFieldVarExpr
 
     @Override
     public void generateAssignOpen(PhpWriter out)
-    throws IOException
+      throws IOException
     {
       ExprGenerator objGen = ((ExprPro) _objExpr).getGenerator();
       ExprGenerator nameGen = ((ExprPro) _nameExpr).getGenerator();
@@ -155,7 +155,7 @@ public class ObjectFieldVarExprPro extends ObjectFieldVarExpr
 
     @Override
     public void generateAssignClose(PhpWriter out)
-    throws IOException
+      throws IOException
     {
       out.print(")");
     }
@@ -166,7 +166,7 @@ public class ObjectFieldVarExprPro extends ObjectFieldVarExpr
      * @param out the writer to the Java source code.
      */
     public void generateObject(PhpWriter out)
-    throws IOException
+      throws IOException
     {
       ExprGenerator objGen = ((ExprPro) _objExpr).getGenerator();
       ExprGenerator nameGen = ((ExprPro) _nameExpr).getGenerator();
@@ -183,7 +183,7 @@ public class ObjectFieldVarExprPro extends ObjectFieldVarExpr
      * @param out the writer to the Java source code.
      */
     public void generateArray(PhpWriter out)
-    throws IOException
+      throws IOException
     {
       ExprGenerator objGen = ((ExprPro) _objExpr).getGenerator();
       ExprGenerator nameGen = ((ExprPro) _nameExpr).getGenerator();
@@ -200,13 +200,49 @@ public class ObjectFieldVarExprPro extends ObjectFieldVarExpr
      * @param out the writer to the Java source code.
      */
     public void generateUnset(PhpWriter out)
-    throws IOException
+      throws IOException
     {
       ExprGenerator objGen = ((ExprPro) _objExpr).getGenerator();
       ExprGenerator nameGen = ((ExprPro) _nameExpr).getGenerator();
 
       objGen.generate(out);
       out.print(".unsetField(");
+      nameGen.generateStringValue(out);
+      out.print(")");
+    }
+
+    /**
+     * Generates code to unset the expression
+     *
+     * @param out the writer to the Java source code.
+     */
+    public void generateUnsetArray(PhpWriter out, ExprGenerator index)
+      throws IOException
+    {
+      ExprGenerator objGen = ((ExprPro) _objExpr).getGenerator();
+      ExprGenerator nameGen = ((ExprPro) _nameExpr).getGenerator();
+
+      objGen.generate(out);
+      out.print(".unsetArray(env, ");
+      nameGen.generateStringValue(out);
+      out.print(", ");
+
+      index.generate(out);
+      out.print(")");
+    }
+
+    /**
+     * Generates an expression for isset().
+     */
+    @Override
+    public void generateIsset(PhpWriter out)
+      throws IOException
+    {
+      ExprGenerator objGen = ((ExprPro) _objExpr).getGenerator();
+      ExprGenerator nameGen = ((ExprPro) _nameExpr).getGenerator();
+
+      objGen.generate(out);
+      out.print(".issetField(env, ");
       nameGen.generateStringValue(out);
       out.print(")");
     }

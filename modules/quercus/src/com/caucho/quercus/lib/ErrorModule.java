@@ -70,6 +70,9 @@ public class ErrorModule extends AbstractQuercusModule {
   public static final int E_STRICT = Env.E_STRICT;
   public static final int E_RECOVERABLE_ERROR = Env.E_RECOVERABLE_ERROR;
 
+  public static final int DEBUG_BACKTRACE_PROVIDE_OBJECT = 1;
+  public static final int DEBUG_BACKTRACE_IGNORE_ARGS = 2;
+
   public static final StringValue ARGS = new ConstStringValue("args");
   public static final StringValue CLASS = new ConstStringValue("class");
   public static final StringValue FILE = new ConstStringValue("file");
@@ -95,14 +98,17 @@ public class ErrorModule extends AbstractQuercusModule {
     else
       return env.die();
   }
-  
+
   /**
    * Produces a backtrace
    */
-  public static Value debug_backtrace(Env env)
+  public static Value debug_backtrace(Env env,
+                                      @Optional("DEBUG_BACKTRACE_PROVIDE_OBJECT") int options)
   {
+    boolean isPrintArgs = (options & DEBUG_BACKTRACE_IGNORE_ARGS) == 0;
+
     ArrayValue result = new ArrayValueImpl();
-    
+
     Exception e = new Exception();
     e.fillInStackTrace();
 
@@ -123,7 +129,7 @@ public class ErrorModule extends AbstractQuercusModule {
         String path = unmangleFile(className);
         String fileName = env
             .getQuercus().getPwd().lookup("./" + path).getNativePath();
-        
+
         String fun = findFunction(stack, i);
 
         if (fun == null || fun.equals("debug_backtrace"))
@@ -138,26 +144,30 @@ public class ErrorModule extends AbstractQuercusModule {
 
         call.put(FUNCTION, env.createString(fun));
 
-        call.put(ARGS, new ArrayValueImpl());
+        if (isPrintArgs) {
+          call.put(ARGS, new ArrayValueImpl());
+        }
       }
       else if (className.startsWith("_quercus._")
                && name.equals("callMethod")) {
         String path = unmangleFile(className);
         String fileName = env
             .getQuercus().getPwd().lookup("./" + path).getNativePath();
-        
+
         ArrayValue call = new ArrayValueImpl();
         result.put(call);
 
         call.put(FILE, env.createString(fileName));
         call.put(LINE, LongValue.create(
             env.getSourceLine(className, elt.getLineNumber())));
-        
+
         call.put(FUNCTION, env.createString(unmangleFunction(className)));
         call.put(CLASS, env.createString(unmangleClass(className)));
         call.put(TYPE, env.createString("->"));
 
-        call.put(ARGS, new ArrayValueImpl());
+        if (isPrintArgs) {
+          call.put(ARGS, new ArrayValueImpl());
+        }
       }
       else if (className.startsWith("_quercus._")
                && name.equals("execute")) {
@@ -169,19 +179,19 @@ public class ErrorModule extends AbstractQuercusModule {
             .getQuercus().getPwd().lookup("./" + path).getNativePath();
 
         ArrayValue call = new ArrayValueImpl();
-        
+
         call.put(FILE, env.createString(fileName));
         call.put(LINE, LongValue.create(
             env.getSourceLine(className, elt.getLineNumber())));
 
         if (methodName.equals("includeOnce")) {
           call.put(FUNCTION, env.createString("include_once"));
-          
+
           result.put(call);
         }
         else if (methodName.equals("include")) {
           call.put(FUNCTION, env.createString("include"));
-          
+
           result.put(call);
         }
         else if (methodName.equals("callNew")) {
@@ -190,12 +200,12 @@ public class ErrorModule extends AbstractQuercusModule {
         }
         else {
           String fun = findFunction(stack, i);
-          
+
           if (fun == null || fun.equals("debug_backtrace")) {
           }
           else {
             call.put(FUNCTION, env.createString(fun));
-            
+
             result.put(call);
           }
         }
@@ -205,32 +215,32 @@ public class ErrorModule extends AbstractQuercusModule {
         if (stack[i - 1].getMethodName().equals("evalArguments")) {
         }
         else
-          addInterpreted(env, result, depth++);
+          addInterpreted(env, result, depth++, isPrintArgs);
       }
       else if (className.equals("com.caucho.quercus.expr.MethodCallExpr")
                && name.equals("eval")) {
         if (stack[i - 1].getMethodName().equals("evalArguments")) {
         }
         else
-          addInterpreted(env, result, depth++);
+          addInterpreted(env, result, depth++, isPrintArgs);
       }
       else if (className.equals("com.caucho.quercus.expr.NewExpr")
                && name.equals("eval")) {
         if (stack[i - 1].getMethodName().equals("evalArguments")) {
         }
         else
-          addInterpreted(env, result, depth++);
+          addInterpreted(env, result, depth++, isPrintArgs);
       }
       else if (className.equals("com.caucho.quercus.expr.IncludeExpr")
                && name.equals("eval")) {
-        addInterpreted(env, result, depth++);
+        addInterpreted(env, result, depth++, isPrintArgs);
       }
       else if (className.equals("com.caucho.quercus.expr.IncludeOnceExpr")
                && name.equals("eval")) {
-        addInterpreted(env, result, depth++);
+        addInterpreted(env, result, depth++, isPrintArgs);
       }
       else if (className.equals("com.caucho.quercus.expr.CallExpr")) {
-        addInterpreted(env, result, depth++);
+        addInterpreted(env, result, depth++, isPrintArgs);
       }
       else if (className.equals("com.caucho.quercus.env.Env")
                && name.equals("close")) {
@@ -246,25 +256,27 @@ public class ErrorModule extends AbstractQuercusModule {
 
         call.put(FILE, env.createString(elt.getFileName()));
         call.put(LINE, LongValue.create(elt.getLineNumber()));
-        
+
         call.put(FUNCTION, env.createString(elt.getMethodName()));
         call.put(CLASS, env.createString(elt.getClassName()));
 
-        call.put(ARGS, new ArrayValueImpl());
+        if (isPrintArgs) {
+          call.put(ARGS, new ArrayValueImpl());
+        }
       }
     }
 
     return result;
   }
-  
+
   private static String findFunction(StackTraceElement []stack, int i)
   {
     String className = stack[i].getClassName();
     String methodName = stack[i].getMethodName();
-    
+
     if (i == 0)
       return unmangleFunction(className);
-    
+
     String prevClassName = stack[i - 1].getClassName();
     String prevMethodName = stack[i - 1].getMethodName();
 
@@ -277,8 +289,8 @@ public class ErrorModule extends AbstractQuercusModule {
     else
       return null;
   }
-  
-  private static void addInterpreted(Env env, ArrayValue result, int i)
+
+  private static void addInterpreted(Env env, ArrayValue result, int i, boolean isPrintArgs)
   {
     Expr expr = env.peekCall(i);
 
@@ -288,10 +300,10 @@ public class ErrorModule extends AbstractQuercusModule {
       String functionName = callExpr.getName();
       if ("debug_backtrace".equals(functionName))
         return;
-        
+
       ArrayValue call = new ArrayValueImpl();
       result.put(call);
-      
+
       if (callExpr.getFileName() != null) {
         call.put(FILE,
                  env.createString(callExpr.getFileName()));
@@ -308,16 +320,18 @@ public class ErrorModule extends AbstractQuercusModule {
       // php/180q
       //ArrayValueImpl args = evalArgsArray(env, callExpr);
 
-      ArrayValueImpl args = new ArrayValueImpl(env.peekArgs(i));
-      
-      call.put(ARGS, args);
+      if (isPrintArgs) {
+        ArrayValueImpl args = new ArrayValueImpl(env.peekArgs(i));
+
+        call.put(ARGS, args);
+      }
     }
     else if (expr instanceof ObjectMethodExpr) {
       ObjectMethodExpr callExpr = (ObjectMethodExpr) expr;
 
       ArrayValue call = new ArrayValueImpl();
       result.put(call);
-      
+
       if (callExpr.getFileName() != null) {
         call.put(FILE,
                  env.createString(callExpr.getFileName()));
@@ -333,12 +347,14 @@ public class ErrorModule extends AbstractQuercusModule {
 
       call.put(TYPE, env.createString("->"));
 
-      call.put(ARGS, new ArrayValueImpl());
+      if (isPrintArgs) {
+        call.put(ARGS, new ArrayValueImpl());
+      }
     }
     else if (expr instanceof FunIncludeExpr) {
       ArrayValue call = new ArrayValueImpl();
       result.put(call);
-      
+
       if (expr.getFileName() != null) {
         call.put(FILE, env.createString(expr.getFileName()));
         call.put(LINE, LongValue.create(expr.getLine()));
@@ -348,22 +364,22 @@ public class ErrorModule extends AbstractQuercusModule {
     }
     else if (expr instanceof FunIncludeOnceExpr) {
       boolean isRequire = ((FunIncludeOnceExpr) expr).isRequire();
-      
+
       ArrayValue call = new ArrayValueImpl();
       result.put(call);
-      
+
       if (expr.getFileName() != null) {
         call.put(FILE, env.createString(expr.getFileName()));
         call.put(LINE, LongValue.create(expr.getLine()));
       }
-    
+
       String name;
-      
+
       if (isRequire)
         name = "require_once";
       else
         name = "include_once";
-      
+
       call.put(FUNCTION, env.createString(name));
     }
   }
@@ -395,7 +411,7 @@ public class ErrorModule extends AbstractQuercusModule {
 
     if (end < 0)
       end = className.length();
-    
+
     StringBuilder sb = new StringBuilder();
 
     for (; i < end; i++) {
@@ -447,7 +463,7 @@ public class ErrorModule extends AbstractQuercusModule {
       className = className.substring(p + "$quercus_".length(), q);
 
     int i = className.lastIndexOf("_");
-    
+
     if (i >= 0)
       return className.substring(0, i);
     else
@@ -529,7 +545,7 @@ public class ErrorModule extends AbstractQuercusModule {
 
     if (! levelV.isDefault())
       env.setIni("error_reporting", levelV);
-    
+
     return oldMask;
   }
 

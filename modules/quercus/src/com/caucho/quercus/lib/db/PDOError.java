@@ -37,14 +37,10 @@ import java.sql.SQLException;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
-class PDOError
+public class PDOError
 {
   private final static L10N L = new L10N(PDOError.class);
   private final static Logger log = Logger.getLogger(PDOError.class.getName());
-
-  private static final int ERRMODE_SILENT = PDO.ERRMODE_SILENT;
-  private static final int ERRMODE_WARNING = PDO.ERRMODE_WARNING;
-  private static final int ERRMODE_EXCEPTION = PDO.ERRMODE_EXCEPTION;
 
   private static final String ERR_NONE = PDO.ERR_NONE;
   private static final String ERR_GENERAL = "HY000";
@@ -75,7 +71,7 @@ class PDOError
   {
     _isError = true;
 
-    int level = Math.max(_errmode, ERRMODE_SILENT);
+    int level = Math.max(_errmode, PDO.ERRMODE_SILENT);
 
     _errorCode = errorCode;
 
@@ -84,10 +80,10 @@ class PDOError
     _errorInfo.put(driverError);
     _errorInfo.put(errorMessage);
 
-    if (level == ERRMODE_WARNING) {
+    if (level == PDO.ERRMODE_WARNING) {
       env.warning("SQLSTATE[" + errorCode + "]: " + errorMessage);
     }
-    else if (level == ERRMODE_EXCEPTION) {
+    else if (level == PDO.ERRMODE_EXCEPTION) {
       throw new PDOException(errorCode, errorMessage);
     }
   }
@@ -177,9 +173,9 @@ class PDOError
   public boolean setErrmode(Env env, int value)
   {
     switch (value) {
-      case ERRMODE_SILENT:
-      case ERRMODE_WARNING:
-      case ERRMODE_EXCEPTION:
+      case PDO.ERRMODE_SILENT:
+      case PDO.ERRMODE_WARNING:
+      case PDO.ERRMODE_EXCEPTION:
         _errmode = value;
         return true;
 
@@ -202,7 +198,7 @@ class PDOError
     _errorInfo = new ArrayValueImpl();
     _errorInfo.put(_errorCode);
 
-    if (_errmode == ERRMODE_EXCEPTION) {
+    if (_errmode == PDO.ERRMODE_EXCEPTION) {
       throw new PDOException(_errorCode, message);
     }
     else {

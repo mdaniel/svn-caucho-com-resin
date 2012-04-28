@@ -103,7 +103,8 @@ public class JavaMethod extends JavaInvoker {
   {
     try {
       return _method.invoke(obj, args);
-    } catch (InvocationTargetException e) {
+    }
+    catch (InvocationTargetException e) {
       Throwable cause = e.getCause();
 
       // php/0g0h

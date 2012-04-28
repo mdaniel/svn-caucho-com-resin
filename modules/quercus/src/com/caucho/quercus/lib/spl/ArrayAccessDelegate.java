@@ -46,11 +46,11 @@ public class ArrayAccessDelegate implements ArrayDelegate
     = new ConstStringValue("offsetUnset");
   private static final StringValue OFFSET_EXISTS
     = new ConstStringValue("offsetExists");
-  
+
   public Value get(ObjectValue qThis, Value index)
   {
     Env env = Env.getInstance();
-    
+
     return qThis.callMethod(env, OFFSET_GET, index);
   }
 
@@ -64,29 +64,30 @@ public class ArrayAccessDelegate implements ArrayDelegate
   public Value put(ObjectValue qThis, Value index)
   {
     Env env = Env.getInstance();
-    
+
     return qThis.callMethod(env, OFFSET_SET, UnsetValue.UNSET, index);
   }
 
   public boolean isset(ObjectValue qThis, Value index)
   {
     Env env = Env.getInstance();
-    Value returnValue = qThis.getQuercusClass().issetField(env,qThis,index.toString(env));
-    
-    if (returnValue == UnsetValue.UNSET) {
+
+    boolean result = qThis.issetField(env, index.toStringValue(env));
+
+    if (! result) {
       return qThis.callMethod(env, OFFSET_EXISTS, index).toBoolean();
     }
     else
-      return returnValue.toBoolean();
+      return true;
   }
 
   public Value unset(ObjectValue qThis, Value index)
   {
     Env env = Env.getInstance();
-    
+
     return qThis.callMethod(env, OFFSET_UNSET, index);
   }
-  
+
   @Override
   public long count(ObjectValue qThis)
   {

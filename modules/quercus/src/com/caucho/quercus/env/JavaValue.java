@@ -496,12 +496,13 @@ public class JavaValue extends ObjectValue
   /**
    * Encodes the value in JSON.
    */
-  public void jsonEncode(Env env, StringValue sb)
+  @Override
+  public void jsonEncode(Env env, JsonEncodeContext context, StringValue sb)
   {
-    if (_classDef.jsonEncode(env, _object, sb))
+    if (_classDef.jsonEncode(env, _object, context, sb))
       return;
     else
-      super.jsonEncode(env, sb);
+      super.jsonEncode(env, context, sb);
   }
 
   /**

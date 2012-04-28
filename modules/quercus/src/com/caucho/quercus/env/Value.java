@@ -2309,9 +2309,16 @@ abstract public class Value implements java.io.Serializable
   }
 
   /**
+   * Returns true if the object has this field.
+   */
+  public boolean isFieldExists(Env env, StringValue name) {
+    return getField(env, name) == UnsetValue.UNSET;
+  }
+
+  /**
    * Returns true if the field is set
    */
-  public boolean issetField(StringValue name)
+  public boolean issetField(Env env, StringValue name)
   {
     return false;
   }
@@ -2455,9 +2462,9 @@ abstract public class Value implements java.io.Serializable
   /**
    * Returns true if the field is set
    */
-  public boolean issetThisField(StringValue name)
+  public boolean issetThisField(Env env, StringValue name)
   {
-    return issetField(name);
+    return issetField(env, name);
   }
 
   /**
@@ -2772,7 +2779,7 @@ abstract public class Value implements java.io.Serializable
   /**
    * Encodes the value in JSON.
    */
-  public void jsonEncode(Env env, StringValue sb)
+  public void jsonEncode(Env env, JsonEncodeContext context, StringValue sb)
   {
     env.warning(L.l("type is unsupported; json encoded as null"));
 

@@ -63,7 +63,7 @@ public class ObjectFieldExpr extends AbstractVarExpr {
 
     _name = name;
   }
-  
+
   //
   // function call creation
   //
@@ -78,7 +78,7 @@ public class ObjectFieldExpr extends AbstractVarExpr {
     throws IOException
   {
     ExprFactory factory = parser.getExprFactory();
-    
+
     return factory.createMethodCall(location, _objExpr, _name.toString(), args);
   }
 
@@ -107,7 +107,7 @@ public class ObjectFieldExpr extends AbstractVarExpr {
   public Var evalVar(Env env)
   {
     Value obj = _objExpr.evalVar(env);
-    
+
     obj = obj.toAutoObject(env);
 
     return obj.getFieldVar(env, _name);
@@ -150,12 +150,12 @@ public class ObjectFieldExpr extends AbstractVarExpr {
     Value obj = _objExpr.evalVar(env);
 
     obj = obj.toAutoObject(env);
-    
+
     obj.putField(env, _name, value);
-    
+
     return value;
   }
-  
+
   /**
    * Handles post increments.
    */
@@ -163,16 +163,16 @@ public class ObjectFieldExpr extends AbstractVarExpr {
   public Value evalPostIncrement(Env env, int incr)
   {
     // php/09kp
-    
+
     Value obj = _objExpr.evalObject(env);
     Value value = obj.getField(env, _name);
-    
+
     value = value.postincr(incr);
     obj.putField(env, _name, value);
-    
+
     return value;
   }
-  
+
   /**
    * Handles post increments.
    */
@@ -180,13 +180,13 @@ public class ObjectFieldExpr extends AbstractVarExpr {
   public Value evalPreIncrement(Env env, int incr)
   {
     // php/09kq
-    
+
     Value obj = _objExpr.evalObject(env);
     Value value = obj.getField(env, _name);
-    
+
     value = value.preincr(incr);
     obj.putField(env, _name, value);
-    
+
     return value;
   }
 
@@ -234,7 +234,7 @@ public class ObjectFieldExpr extends AbstractVarExpr {
     Value obj = _objExpr.eval(env);
     obj.unsetField(_name);
   }
-  
+
   /**
    * Evaluates the expression as an array index unset
    */
@@ -256,7 +256,8 @@ public class ObjectFieldExpr extends AbstractVarExpr {
   public boolean evalIsset(Env env)
   {
     Value object = _objExpr.eval(env);
-    return object.issetField(_name);
+
+    return object.issetField(env, _name);
   }
 }
 

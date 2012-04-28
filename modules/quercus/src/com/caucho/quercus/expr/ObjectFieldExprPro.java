@@ -6,7 +6,6 @@
 
 package com.caucho.quercus.expr;
 
-import com.caucho.quercus.Location;
 import com.caucho.quercus.gen.AnalyzeInfo;
 import com.caucho.quercus.gen.PhpWriter;
 import com.caucho.quercus.env.StringValue;
@@ -35,7 +34,7 @@ public class ObjectFieldExprPro extends ObjectFieldExpr
     {
       return true;
     }
-    
+
       /**
        * Analyze the statement
        */
@@ -298,10 +297,25 @@ public class ObjectFieldExprPro extends ObjectFieldExpr
 
         objGen.generate(out);
         out.print(".unsetArray(env, ");
-        out.print(_name);
+        out.printIntern(_name);
         out.print(", ");
 
         index.generate(out);
+        out.print(")");
+      }
+
+      /**
+       * Generates an expression for isset().
+       */
+      @Override
+      public void generateIsset(PhpWriter out)
+        throws IOException
+      {
+        ExprGenerator objGen = ((ExprPro) _objExpr).getGenerator();
+
+        objGen.generate(out);
+        out.print(".issetField(env, ");
+        out.printIntern(_name);
         out.print(")");
       }
 
@@ -320,9 +334,7 @@ public class ObjectFieldExprPro extends ObjectFieldExpr
         objGen.generateExpr(out);
 
         out.print(", \"");
-
         out.printJavaString(_name.toString());
-
         out.print("\")");
       }
     };

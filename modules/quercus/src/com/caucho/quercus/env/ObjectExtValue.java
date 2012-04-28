@@ -1380,7 +1380,7 @@ public class ObjectExtValue extends ObjectValue
    * Encodes the value in JSON.
    */
   @Override
-  public void jsonEncode(Env env, StringValue sb)
+  public void jsonEncode(Env env, JsonEncodeContext context, StringValue sb)
   {
     sb.append('{');
 
@@ -1397,9 +1397,9 @@ public class ObjectExtValue extends ObjectValue
       if (length > 0)
         sb.append(',');
 
-      entry.getKey().toStringValue().jsonEncode(env, sb);
+      entry.getKey().toStringValue(env).jsonEncode(env, context, sb);
       sb.append(':');
-      entry.getValue().jsonEncode(env, sb);
+      entry.getValue().jsonEncode(env, context, sb);
       length++;
     }
 
@@ -1447,40 +1447,38 @@ public class ObjectExtValue extends ObjectValue
   }
 
   @Override
-  public boolean issetField(StringValue name)
+  public boolean issetField(Env env, StringValue name)
   {
-    Env env = Env.getCurrent();
+    Entry entry = getThisEntry(name);
 
-    Value returnValue = _quercusClass.issetField(env, this, name);
+    if (entry != null && entry.isPublic()) {
+      return entry._value.isset();
+    }
 
-    if (returnValue == UnsetValue.UNSET)
+    boolean result = getQuercusClass().issetField(env, this, name);
+
+    if (result) {
+      return true;
+    }
+
+    if (isA("arrayaccess"))
     {
-      // setter didn't work, lets look in the class itself
-      int hash = (name.hashCode() & 0x7fffffff) % _prime;
+      // TODO: This should probably be in ArrayAccessDelegate
+      Value v = get(name);
 
-      for (Entry entry = _entries[hash]; entry != null; entry = entry._next) {
-        StringValue entryKey = entry._key;
-
-        if (name.equals(entryKey)) {
-          // php/091m
-          return true;
-        }
-      }
-
-      if (isA("arrayaccess"))
-      {
-        // TODO: This should probably be in ArrayAccessDelegate
-        Value v = this.getObject(env).getArray().get(name);
-
-        if( v != null && v != NullValue.NULL && v != UnsetValue.UNSET) {
-          return true;
-        }
-
-        return false;
+      if(v != UnsetValue.UNSET) {
+        return true;
       }
     }
 
-    return returnValue != UnsetValue.UNSET;
+    return false;
+  }
+
+  @Override
+  public boolean isFieldExists(Env env, StringValue name) {
+    Entry entry = getThisEntry(name);
+
+    return entry != null;
   }
 
   @Override
@@ -1788,7 +1786,12 @@ public class ObjectExtValue extends ObjectValue
       return _visibility;
     }
 
-    public final boolean isPrivate()
+    public boolean isPublic()
+    {
+      return _visibility == FieldVisibility.PUBLIC;
+    }
+
+    public boolean isPrivate()
     {
       return _visibility == FieldVisibility.PRIVATE;
     }

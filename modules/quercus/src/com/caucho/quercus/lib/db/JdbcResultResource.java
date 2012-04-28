@@ -78,12 +78,18 @@ public class JdbcResultResource
   public static final String UNKNOWN = "unknown";
   public static final String YEAR = "year";
 
+  protected static final int COLUMN_CASE_NATURAL = 0;
+  protected static final int COLUMN_CASE_UPPER = 1;
+  protected static final int COLUMN_CASE_LOWER = 2;
+
   protected ResultSet _rs;
   private boolean _isValid;
   private int _fieldOffset;
 
   protected ResultSetMetaData _metaData;
   private Value[] _columnNames;
+
+  private int _columnCase = COLUMN_CASE_NATURAL;
 
   private int _affectedRows;
 
@@ -99,6 +105,13 @@ public class JdbcResultResource
     _rs = rs;
   }
 
+  public JdbcResultResource(ResultSet rs, int columnCase)
+  {
+    _rs = rs;
+
+    _columnCase = columnCase;
+  }
+
   /**
    * Constructor for JdbcResultResource
    *
@@ -109,6 +122,14 @@ public class JdbcResultResource
   {
     _metaData = metaData;
   }
+
+  public JdbcResultResource(ResultSetMetaData metaData, int columnCase)
+  {
+    _metaData = metaData;
+
+    _columnCase = columnCase;
+  }
+
 
   /**
    * Closes the result set.
@@ -166,7 +187,7 @@ public class JdbcResultResource
           _columnNames = new Value[count];
 
           for (int i = 0; i < count; i++) {
-            String columnName = md.getColumnLabel(i + 1);
+            String columnName = getColumnLabel(md, i + 1);
 
             _columnNames[i] = env.createString(columnName);
           }
@@ -345,7 +366,7 @@ public class JdbcResultResource
         int count = md.getColumnCount();
 
         for (int i = 0; i < count; i++) {
-          String name = md.getColumnLabel(i + 1);
+          String name = getColumnLabel(md, i + 1);
           Value value = getColumnValue(env, i + 1);
 
           result.putField(env, name, value);
@@ -471,14 +492,14 @@ public class JdbcResultResource
    * @return the column number (0-based) or -1 on error
    */
   private int getColumnNumber(String colName,
-                              ResultSetMetaData rsmd)
+                              ResultSetMetaData md)
     throws SQLException
   {
-    int numColumns = rsmd.getColumnCount();
+    int numColumns = md.getColumnCount();
 
     if (colName.indexOf('.') == -1) {
       for (int i = 1; i <= numColumns; i++) {
-        if (colName.equals(rsmd.getColumnLabel(i)))
+        if (colName.equals(getColumnLabel(md, i)))
           return (i - 1);
       }
 
@@ -486,7 +507,7 @@ public class JdbcResultResource
     }
     else {
       for (int i = 1; i <= numColumns; i++) {
-        if (colName.equals(rsmd.getTableName(i) + '.' + rsmd.getColumnLabel(i)))
+        if (colName.equals(md.getTableName(i) + '.' + md.getColumnLabel(i)))
           return (i - 1);
       }
 
@@ -890,7 +911,7 @@ public class JdbcResultResource
         return BooleanValue.FALSE;
       }
       else
-        return env.createString(md.getColumnLabel(fieldOffset + 1));
+        return env.createString(getColumnLabel(md, fieldOffset + 1));
     } catch (Exception e) {
       log.log(Level.FINE, e.toString(), e);
       return BooleanValue.FALSE;
@@ -912,7 +933,7 @@ public class JdbcResultResource
       if (md.getColumnCount() <= fieldOffset || fieldOffset < 0)
         return BooleanValue.FALSE;
       else
-        return env.createString(md.getColumnLabel(fieldOffset + 1));
+        return env.createString(getColumnLabel(md, fieldOffset + 1));
     } catch (Exception e) {
       log.log(Level.FINE, e.toString(), e);
       return BooleanValue.FALSE;
@@ -1297,6 +1318,28 @@ public class JdbcResultResource
     } catch (SQLException e) {
       log.log(Level.FINE, e.toString(), e);
       return BooleanValue.FALSE;
+    }
+  }
+
+  protected String getColumnLabel(int index)
+    throws SQLException
+  {
+    return getColumnLabel(_rs.getMetaData(), index);
+  }
+
+  private String getColumnLabel(ResultSetMetaData md, int index)
+    throws SQLException
+  {
+    String name = md.getColumnLabel(index);
+
+    switch (_columnCase) {
+      case COLUMN_CASE_LOWER:
+        return name.toLowerCase();
+      case COLUMN_CASE_UPPER:
+        return name.toUpperCase();
+      case COLUMN_CASE_NATURAL:
+      default:
+        return name;
     }
   }
 

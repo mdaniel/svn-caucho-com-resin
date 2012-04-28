@@ -224,6 +224,7 @@ public class QuercusContext
 
   private Path _pwd;
   private Path _workDir;
+  private Path _webInfDir;
 
   private ServletContext _servletContext;
 
@@ -300,10 +301,24 @@ public class QuercusContext
     _pwd = path;
   }
 
+  public Path getWebInfDir()
+  {
+    if (_webInfDir == null) {
+      _webInfDir = getPwd().lookup("WEB-INF");
+    }
+
+    return _webInfDir;
+  }
+
+  public void setWebInfDir(Path path)
+  {
+    _webInfDir = path;
+  }
+
   public Path getWorkDir()
   {
     if (_workDir == null)
-      _workDir = getPwd().lookup("WEB-INF/work");
+      _workDir = getWebInfDir().lookup("work");
 
     return _workDir;
   }

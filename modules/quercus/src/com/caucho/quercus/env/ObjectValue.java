@@ -622,7 +622,7 @@ abstract public class ObjectValue extends Value {
    * Encodes the value in JSON.
    */
   @Override
-  public void jsonEncode(Env env, StringValue sb)
+  public void jsonEncode(Env env, JsonEncodeContext context, StringValue sb)
   {
     sb.append('{');
 
@@ -636,9 +636,9 @@ abstract public class ObjectValue extends Value {
       if (length > 0)
         sb.append(',');
 
-      entry.getKey().toStringValue().jsonEncode(env, sb);
+      entry.getKey().toStringValue(env).jsonEncode(env, context, sb);
       sb.append(':');
-      entry.getValue().jsonEncode(env, sb);
+      entry.getValue().jsonEncode(env, context, sb);
       length++;
     }
 

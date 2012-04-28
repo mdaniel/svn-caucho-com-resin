@@ -45,7 +45,7 @@ import java.util.logging.Logger;
 /**
  * pdf object oriented API facade
  */
-public class PDF 
+public class PDF
 {
   private static final Logger log = Logger.getLogger(PDF.class.getName());
   private static final L10N L = new L10N(PDF.class);
@@ -71,7 +71,7 @@ public class PDF
   private int _pageCount;
 
   private PDFOutline _outline = null;
-  
+
   private int _catalogId;
 
   private int _rootId;
@@ -95,7 +95,7 @@ public class PDF
     _tempStream = new TempStream();
     _tempStream.openWrite();
     _os = new WriteStream(_tempStream);
-    
+
     _out = new PDFWriter(_os);
     _out.beginDocument();
 
@@ -132,12 +132,12 @@ public class PDF
   {
     return begin_page(width, height);
   }
-  
+
   public int add_page_to_outline(String title)
   {
     return add_page_to_outline(title, -1);
   }
-  
+
   public int add_page_to_outline(String title, int parentId)
   {
     return add_page_to_outline(title, _page.getHeight(), parentId);
@@ -149,16 +149,16 @@ public class PDF
       int outlineId = _out.allocateId(1);
       _outline = new PDFOutline(outlineId);
     }
-    
+
     int id = _out.allocateId(1);
-    
-    PDFDestination dest = new PDFDestination(id, 
-                                             title, 
-                                             _page.getId(), 
+
+    PDFDestination dest = new PDFDestination(id,
+                                             title,
+                                             _page.getId(),
                                              pos);
-    
+
     _outline.addDestination(dest, parentId);
-    
+
     return id;
   }
 
@@ -324,7 +324,7 @@ public class PDF
       Font face = _faceMap.get(name);
 
       if (face == null) {
-        Path p = _env.getQuercus().getPwd().lookup("WEB-INF/lib/");
+        Path p = _env.getQuercus().getWebInfDir().lookup("lib");
         face = new AfmParser().parse(String.valueOf(p), name);
 
         _faceMap.put(name, face);
@@ -488,33 +488,33 @@ public class PDF
 
     return size * font.stringWidth(string) / 1000.0;
   }
-  
+
   public double stringheight(String string, @NotNull PDFFont font, double size)
   {
     boolean hasCap = false;
-    
+
     for(char c : string.toCharArray()) {
       if (Character.isUpperCase(c)) {
         hasCap = true;
         break;
       }
     }
-    
+
     double fontHeight = hasCap ? font.getCapHeight() : font.getXHeight();
-    
+
     return size * fontHeight / 1000.0;
   }
-  
+
   /*
-   * An ESTIMATE of the number of chars that will fit in the space based 
+   * An ESTIMATE of the number of chars that will fit in the space based
    * on the avg glyph size.  This only works properly with fixed-width fonts!
-   * 
+   *
    */
   public int charCount(double width, @NotNull PDFFont font, double size)
   {
     if (font == null)
       return 0;
-    
+
     return (int) Math.round(width / (font.getAvgCharWidth() / 1000 * size));
   }
 
@@ -950,14 +950,14 @@ public class PDF
     PDFEmbeddedFile file = new PDFEmbeddedFile(path);
 
     file.setId(_out.allocateId(1));
-    
+
     _out.addPendingObject(file);
-    
+
     PDFFileImage img = new PDFFileImage(file.getId(), width, height);
     img.setId(_out.allocateId(1));
 
     _out.addPendingObject(img);
-    
+
     _page.addResource(img.getResourceName(), img.getResource());
 
     _stream.save();
@@ -1119,25 +1119,25 @@ public class PDF
       // output stream already closed;
       return false;
     }
-    
+
     if (_pageGroup.size() > 0) {
       _out.writePageGroup(_pageParentId, _rootId, _pageGroup);
       _pageGroup.clear();
 
       _pagesGroupList.add(_pageParentId);
     }
-    
+
     int outlineId = -1;
-    
+
     if (_outline != null) {
       outlineId = _outline.getId();
       _out.writeOutline(_outline);
     }
 
-    _out.writeCatalog(_catalogId, 
-                      _rootId, 
+    _out.writeCatalog(_catalogId,
+                      _rootId,
                       outlineId,
-                      _pagesGroupList, 
+                      _pagesGroupList,
                       _pageCount);
 
     _out.endDocument();

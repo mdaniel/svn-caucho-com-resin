@@ -1762,11 +1762,13 @@ public class FileModule extends AbstractQuercusModule {
                              @Optional("0x7fffffff") int length)
   {
     try {
-      if (os == null)
+      if (os == null) {
         return BooleanValue.FALSE;
+      }
 
       return LongValue.create(os.write(value, length));
-    } catch (IOException e) {
+    }
+    catch (IOException e) {
       throw new QuercusModuleException(e);
     }
   }
@@ -2234,7 +2236,7 @@ public class FileModule extends AbstractQuercusModule {
     if (wrapper != null)
       // XXX flags?
       return wrapper.url_stat(env, filename,
-          LongValue.create(StreamModule.STREAM_URL_STAT_LINK));
+                              LongValue.create(StreamModule.STREAM_URL_STAT_LINK));
 
     Path path = env.lookupPwd(filename);
 
@@ -2251,7 +2253,7 @@ public class FileModule extends AbstractQuercusModule {
    */
   public static boolean mkdir(Env env,
                               StringValue dirname,
-                              @Optional int mode,
+                              @Optional("") int mode,
                               @Optional boolean recursive,
                               @Optional Value context)
   {
