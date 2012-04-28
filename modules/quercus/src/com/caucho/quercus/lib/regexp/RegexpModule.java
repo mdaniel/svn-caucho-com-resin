@@ -286,12 +286,12 @@ public class RegexpModule
 
     if (cacheItem == null) {
       cacheItem = new RegexpCacheItem(regexpValue);
-        
+
       _regexpCache.putIfNew(regexpValue, cacheItem);
-        
+
       cacheItem = _regexpCache.get(regexpValue);
     }
-      
+
     return cacheItem.get();
   }
 
@@ -664,8 +664,7 @@ public class RegexpModule
     }
     else {
       if ((flags & PREG_SET_ORDER) != 0) {
-        env.warning((
-            L.l("Cannot combine PREG_PATTER_ORDER and PREG_SET_ORDER")));
+        env.warning(L.l("Cannot combine PREG_PATTER_ORDER and PREG_SET_ORDER"));
         return BooleanValue.FALSE;
       }
     }
@@ -1193,7 +1192,7 @@ public class RegexpModule
         if (group != null && ! group.isEmpty()) {
           /* PHP's preg_replace_callback does not return empty groups */
           // php/154b, c
-          
+
           for (int j = lastGroup + 1; j < i; j++) {
             regs.put(empty);
           }
@@ -2490,18 +2489,18 @@ public class RegexpModule
         && _encoding.equals(ereg._encoding);
     }
   }
-  
+
   static final class RegexpCacheItem {
     private final StringValue _pattern;
-    
+
     private Regexp _regexp;
     private IllegalRegexpException _exn;
-    
+
     RegexpCacheItem(StringValue pattern)
     {
       _pattern = pattern;
     }
-    
+
     public Regexp get()
       throws IllegalRegexpException
     {
@@ -2509,15 +2508,15 @@ public class RegexpModule
         return _regexp;
       else if (_exn != null)
         throw _exn;
-      
+
       synchronized (this) {
         try {
           _regexp = new Regexp(_pattern);
-          
+
           return _regexp;
         } catch (IllegalRegexpException e) {
           _exn = e;
-          
+
           throw e;
         }
       }

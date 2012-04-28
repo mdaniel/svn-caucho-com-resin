@@ -96,6 +96,8 @@ public class ArrayGetExprPro extends ArrayGetExpr
       public void analyzeSetModified(AnalyzeInfo info)
       {
         getExpr().analyzeSetModified(info);
+
+        getIndex().analyze(info);
       }
 
       /**
@@ -106,6 +108,8 @@ public class ArrayGetExprPro extends ArrayGetExpr
       {
         // php/3a69
         getExpr().analyzeSetReference(info);
+
+        getIndex().analyze(info);
       }
 
       /**

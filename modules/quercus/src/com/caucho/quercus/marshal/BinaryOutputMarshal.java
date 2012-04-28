@@ -49,7 +49,7 @@ public class BinaryOutputMarshal extends Marshal
   }
 
   // php/161k
-  // XXX: push this down to the Value class
+  // XXX: push this down to the Value class?
   public static BinaryOutput marshal(Env env, Value value)
   {
     return (BinaryOutput) MARSHAL.marshal(env, value, MARSHAL.getExpectedClass());

@@ -3,6 +3,7 @@ com.caucho.quercus.lib.ApcModule
 com.caucho.quercus.lib.ArrayModule
 com.caucho.quercus.lib.BcmathModule
 com.caucho.quercus.lib.ClassesModule
+com.caucho.quercus.lib.CoreModule
 com.caucho.quercus.lib.CtypeModule
 com.caucho.quercus.lib.curl.CurlModule
 com.caucho.quercus.lib.date.DateModule

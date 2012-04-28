@@ -24,59 +24,45 @@
  *   59 Temple Place, Suite 330
  *   Boston, MA 02111-1307  USA
  *
- * @author Scott Ferguson
+ * @author Nam Nguyen
  */
 
-package com.caucho.quercus.env;
+package com.caucho.quercus.lib;
+
+import com.caucho.quercus.env.BooleanValue;
+import com.caucho.quercus.env.NullValue;
+import com.caucho.quercus.env.StringBuilderValue;
+import com.caucho.quercus.env.StringValue;
+import com.caucho.quercus.env.Value;
+import com.caucho.quercus.module.AbstractQuercusModule;
+
+import java.util.HashMap;
+import java.util.Map;
 
 /**
- * Encapsulates an environment entry for a variable.  The EnvVar is a
- * container for Vars.
+ * To represent "core" constants and functions.
  */
-public final class EnvVarImpl extends EnvVar
+public class CoreModule extends AbstractQuercusModule
 {
-  private Var _var;
-
-  public EnvVarImpl(Var var)
-  {
-    if (var == null)
-      throw new NullPointerException();
-
-    _var = var;
-  }
+  private static final HashMap<StringValue,Value> CONST_MAP
+    = new HashMap<StringValue,Value>();
 
   /**
-   * Returns the current value.
+   * Returns the extensions loaded by the module.
    */
-  public Value get()
+  public String []getLoadedExtensions()
   {
-    return _var.toValue();
+    return new String[] { "Core" };
   }
 
-  /**
-   * Sets the current value.
-   */
-  public Value set(Value value)
+  public Map<StringValue,Value> getConstMap()
   {
-    return _var.set(value);
+    return CONST_MAP;
   }
 
-  /**
-   * Returns the current Var.
-   */
-  public Var getVar()
-  {
-    return _var;
-  }
-
-  /**
-   * Sets the var.
-   */
-  public Var setVar(Var var)
-  {
-    _var = var;
-
-    return var;
+  static {
+    CONST_MAP.put(new StringBuilderValue("TRUE"), BooleanValue.TRUE);
+    CONST_MAP.put(new StringBuilderValue("FALSE"), BooleanValue.FALSE);
+    CONST_MAP.put(new StringBuilderValue("NULL"), NullValue.NULL);
   }
 }
-

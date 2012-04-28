@@ -64,12 +64,13 @@ public class GoogleQuercus extends QuercusContext
 
     // setPwd(Vfs.lookup());
     // setWorkDir(WorkDir.getLocalWorkDir());
-    
+
   }
 
   @Override
   public void init()
   {
+
     String gsBucket = getIniString("quercus.gs_bucket");
 
     Path stdPwd = Vfs.lookup();
@@ -78,7 +79,8 @@ public class GoogleQuercus extends QuercusContext
     Path pwd = mergePwd;
 
     setPwd(pwd);
-    
+
+
     super.init();
 
     Value array = getIniValue("quercus.jdbc_drivers");
@@ -86,15 +88,13 @@ public class GoogleQuercus extends QuercusContext
 
     if (array.isArray()) {
       if (! array.isset(key)) {
-        array.put(key,
-                  createString("com.google.appengine.api.rdbms.AppEngineDriver"));
+        array.put(key, createString("com.google.appengine.api.rdbms.AppEngineDriver"));
       }
     }
     else {
       array = new ArrayValueImpl();
 
-      array.put(key,
-                createString("com.google.appengine.api.rdbms.AppEngineDriver"));
+      array.put(key, createString("com.google.appengine.api.rdbms.AppEngineDriver"));
 
       setIni("quercus.jdbc_drivers", array);
     }

@@ -263,20 +263,27 @@ public class ModuleInfo {
 
   public static Value objectToValue(Object obj)
   {
-    if (obj == null)
+    if (obj == null) {
       return NullValue.NULL;
-    else if (Byte.class.equals(obj.getClass())
-             || Short.class.equals(obj.getClass())
-             || Integer.class.equals(obj.getClass())
-             || Long.class.equals(obj.getClass())) {
+    }
+
+    Class<?> cls = obj.getClass();
+
+    if (Byte.class.equals(cls)
+        || Short.class.equals(cls)
+        || Integer.class.equals(cls)
+        || Long.class.equals(cls)) {
       return LongValue.create(((Number) obj).longValue());
-    } else if (Float.class.equals(obj.getClass())
-               || Double.class.equals(obj.getClass())) {
+    }
+    else if (Float.class.equals(cls)
+               || Double.class.equals(cls)) {
       return DoubleValue.create(((Number) obj).doubleValue());
-    } else if (String.class.equals(obj.getClass())) {
+    }
+    else if (String.class.equals(cls)) {
       // XXX: need unicode semantics check
       return new StringBuilderValue((String) obj);
-    } else {
+    }
+    else {
       // XXX: unknown types, e.g. Character?
 
       return null;

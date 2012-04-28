@@ -6525,8 +6525,8 @@ public class Env
    */
   public Value error(int code, Location location, String loc, String msg)
   {
-    //Thread.dumpStack();
     //System.err.println("Env->error0: " + location + " . " + loc + " . " + msg);
+    //Thread.dumpStack();
 
     int mask = 1 << code;
 

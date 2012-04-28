@@ -258,7 +258,6 @@ public class ArrayValueImpl extends ArrayValue
     
     Entry prev = null;
     for (Entry ptr = _head; ptr != null; ptr = ptr.getNext()) {
-      // Entry ptrCopy = new Entry(ptr._key, ptr._value.copyArrayItem());
       Entry ptrCopy = new Entry(ptr);
 
       if (entries != null) {

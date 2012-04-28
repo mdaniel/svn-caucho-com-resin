@@ -98,10 +98,10 @@ public class ModuleContext
   private ModuleContext(ClassLoader loader)
   {
     _loader = loader;
-    
+
     _marshalFactory = new MarshalFactory(this);
     _exprFactory = new ExprFactory();
-    
+
     _stdClassDef = new InterpretedClassDef("stdClass", null, new String[0]);
     _stdClass = new QuercusClass(this, _stdClassDef, null);
 
@@ -232,7 +232,7 @@ public class ModuleContext
         if (def == null)
           def = createDefaultJavaClassDef(name, type, extension);
       }
-      
+
       def.setPhpClass(true);
 
       _javaClassWrappers.put(name, def);
@@ -257,7 +257,7 @@ public class ModuleContext
   public JavaClassDef getJavaClassDefinition(Class<?> type, String className)
   {
     JavaClassDef def;
-    
+
     synchronized (_javaClassWrappers) {
       def = _javaClassWrappers.get(className);
 
@@ -275,7 +275,7 @@ public class ModuleContext
 
     return def;
   }
-  
+
   /**
    * Adds a java class
    */
@@ -293,7 +293,7 @@ public class ModuleContext
 
       try {
         Class<?> type;
-        
+
         try {
           type = Class.forName(className, false, _loader);
         }
@@ -336,7 +336,6 @@ public class ModuleContext
     }
   }
 
-
   protected JavaClassDef createDefaultJavaClassDef(String className,
                                                    Class type)
   {
@@ -345,7 +344,7 @@ public class ModuleContext
     else
       return new JavaClassDef(this, className, type);
   }
-  
+
   protected JavaClassDef createDefaultJavaClassDef(String className,
                                                    Class type,
                                                    String extension)
@@ -355,7 +354,7 @@ public class ModuleContext
     else
       return new JavaClassDef(this, className, type, extension);
   }
-  
+
   /**
    * Finds the java class wrapper.
    */
@@ -382,7 +381,7 @@ public class ModuleContext
   {
     return _exprFactory;
   }
-  
+
   public Marshal createMarshal(Class type,
                                boolean isNotNull,
                                boolean isNullAsFalse)
@@ -481,22 +480,22 @@ public class ModuleContext
   {
     return _extensionSet;
   }
-  
+
   /*
    * Adds a class to the extension's list of classes.
    */
   public void addExtensionClass(String ext, String clsName)
   {
     HashSet<String> list = _extensionClasses.get(ext);
-    
+
     if (list == null) {
       list = new HashSet<String>();
       _extensionClasses.put(ext, list);
     }
-    
+
     list.add(clsName);
   }
-  
+
   /*
    * Returns the list of the classes that are part of this extension.
    */
@@ -518,7 +517,7 @@ public class ModuleContext
   {
     initStaticFunctions();
     initStaticClassServices();
-    
+
     //initStaticClasses();
   }
 
@@ -532,11 +531,11 @@ public class ModuleContext
 
     try {
       setContextClassLoader(_loader);
-      
+
       String quercusModule
         = "META-INF/services/com.caucho.quercus.QuercusModule";
       Enumeration<URL> urls = _loader.getResources(quercusModule);
-      
+
       HashSet<URL> urlSet = new HashSet<URL>();
 
       // gets rid of duplicate entries found by different classloaders
@@ -653,8 +652,8 @@ public class ModuleContext
       if (_moduleInfoMap.get(cl.getName()) != null)
         return;
 
-      log.finest(getClass().getSimpleName() 
-                 + " loading module " 
+      log.finest(getClass().getSimpleName()
+                 + " loading module "
                  + cl.getName());
 
       QuercusModule module = (QuercusModule) cl.newInstance();
@@ -682,7 +681,7 @@ public class ModuleContext
                : info.getFunctions().entrySet()) {
           String funName = entry.getKey();
           AbstractFunction fun = entry.getValue();
-      
+
           _staticFunctionMap.put(funName, fun);
 
           // _lowerFunMap.put(funName.toLowerCase(Locale.ENGLISH), fun);
@@ -707,7 +706,7 @@ public class ModuleContext
       String quercusModule
         = "META-INF/services/com.caucho.quercus.QuercusClass";
       Enumeration<URL> urls = loader.getResources(quercusModule);
-      
+
       HashSet<URL> urlSet = new HashSet<URL>();
 
       // gets rid of duplicate entries found by different classloaders

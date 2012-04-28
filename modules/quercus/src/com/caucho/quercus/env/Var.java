@@ -916,7 +916,7 @@ public class Var extends Value
   @Override
   public Value copyArrayItem()
   {
-    // php/041d
+    // php/041d, php/041k, php/041l
     return this;
   }
 
