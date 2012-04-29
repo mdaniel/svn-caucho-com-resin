@@ -3257,6 +3257,17 @@ public class Env
 
     return oldCallingClass;
   }
+  
+  public String getStackTraceAsString()
+  {
+    StringBuilder sb = new StringBuilder();
+    
+    for (String item : getStackTrace()) {
+      sb.append("\n  ").append(item);
+    }
+    
+    return sb.toString();
+  }
 
   public ArrayList<String> getStackTrace()
   {
@@ -5946,7 +5957,7 @@ public class Env
    */
   public Value exit()
   {
-    throw new QuercusExitException();
+    throw new QuercusExitException(String.valueOf(getLocation()));
   }
 
   /**
@@ -6240,9 +6251,9 @@ public class Env
 
     error(B_ERROR, location, fullMsg);
 
-    String exMsg = prefix + fullMsg;
+    String exMsg = prefix + fullMsg + getStackTraceAsString();
 
-    return new QuercusRuntimeException(fullMsg, e);
+    return new QuercusRuntimeException(exMsg, e);
   }
 
   /**
@@ -6254,13 +6265,25 @@ public class Env
 
     if ((getErrorMask() & mask) != 0) {
       if (log.isLoggable(Level.FINER)) {
-        QuercusException e = new QuercusException(msg);
+        QuercusException e = new QuercusException(getExceptionLocation(msg));
 
         log.log(Level.FINER, e.toString(), e);
       }
     }
 
     return error(B_WARNING, "", msg + getFunctionLocation());
+  }
+  
+  private String getExceptionLocation(String msg)
+  {
+    Location loc = getLocation();
+    
+    if (loc != null && ! loc.isUnknown())
+      return (loc.getFileName() + ":" + loc.getLineNumber() + ": " + msg
+              + getFunctionLocation()
+              + getStackTraceAsString());
+    else
+      return msg;
   }
 
   /**

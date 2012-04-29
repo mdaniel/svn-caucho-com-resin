@@ -8,9 +8,6 @@ package com.caucho.quercus.servlet;
 
 import com.caucho.quercus.ProGoogleQuercus;
 import com.caucho.quercus.QuercusContext;
-import com.caucho.util.L10N;
-
-import java.util.logging.Logger;
 
 /**
  * Servlet to call PHP through javax.script.

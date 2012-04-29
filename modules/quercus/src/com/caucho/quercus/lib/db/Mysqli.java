@@ -196,7 +196,7 @@ public class Mysqli extends JdbcConnectionResource
       else if (host.startsWith("jdbc:")) {
         int slashPos = host.indexOf("://");
 
-        if (slashPos > 0) {
+        if (slashPos > 5) {
           String protocol = host.substring(5, slashPos);
 
           Value driverMap = env.getConfigVar("quercus.jdbc_drivers");
@@ -252,6 +252,7 @@ public class Mysqli extends JdbcConnectionResource
     } catch (SQLException e) {
       env.warning(L.l("A link to the server could not be established.\n  "
                       + "url={0}\n  driver={1}\n  {2}", url, driver, e.toString()), e);
+      
 
       env.setSpecialValue("mysqli.connectErrno", LongValue.create(e.getErrorCode()));
       env.setSpecialValue("mysqli.connectError", env.createString(e.getMessage()));

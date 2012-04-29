@@ -94,9 +94,9 @@ public class MergePath extends FilesystemPath {
   /**
    * @param path canonical path
    */
-  private MergePath(MergePath root,
-                    String userPath, Map<String,Object> attributes,
-                    String path)
+  protected MergePath(MergePath root,
+                      String userPath, Map<String,Object> attributes,
+                      String path)
   {
     super(root, userPath, path);
   }
@@ -120,7 +120,7 @@ public class MergePath extends FilesystemPath {
     if (length <= offset || filePath.charAt(offset) != '(')
       return super.schemeWalk(userPath, attributes, filePath, offset);
 
-    MergePath mergePath = new MergePath();
+    MergePath mergePath = createMergePath();
     mergePath.setUserPath(userPath);
 
     int head = ++offset;
@@ -175,6 +175,11 @@ public class MergePath extends FilesystemPath {
     }
 
     return new NotFoundPath(getSchemeMap(), filePath);
+  }
+  
+  protected MergePath createMergePath()
+  {
+    return new MergePath();
   }
 
   /**
@@ -357,8 +362,7 @@ public class MergePath extends FilesystemPath {
    */
   public String getScheme()
   {
-    // return getBestPath().getScheme();
-    return "file:";
+    return getBestPath().getScheme();
   }
 
   /**

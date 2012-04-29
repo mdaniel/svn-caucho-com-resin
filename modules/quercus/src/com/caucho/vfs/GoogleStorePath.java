@@ -149,14 +149,16 @@ public class GoogleStorePath extends FilesystemPath {
     return true;
   }
 
+  @Override
   public String getScheme()
   {
-    return "gsfile";
+    return "file";
   }
 
   /**
    * Returns the full url for the given path.
    */
+  @Override
   public String getURL()
   {
     return escapeURL(getScheme() + ":" + getFullPath());
@@ -202,7 +204,7 @@ public class GoogleStorePath extends FilesystemPath {
   {
     GoogleStoreInode inode = getGsInode();
     
-    return inode != null && inode.isDirectory();
+    return inode != null && inode.isFile();
   }
 
   @Override
@@ -232,13 +234,13 @@ public class GoogleStorePath extends FilesystemPath {
   @Override
   public boolean canRead()
   {
-    return isFile();
+    return exists();
   }
 
   @Override
   public boolean canWrite()
   {
-    return isFile();
+    return exists();
   }
 
   /**
@@ -261,40 +263,46 @@ public class GoogleStorePath extends FilesystemPath {
     return list;
   }
 
-  /*
+  @Override
   public boolean mkdir()
     throws IOException
   {
-    boolean value = getFile().mkdir();
+    if (exists()) {
+      return false;
+    }
+    
+    Path parent = getParent();
+    
+    if (parent.isFile()) {
+      return false;
+    }
 
-    if (! value && ! getFile().isDirectory())
-      throw new IOException("cannot create directory");
-
-    return value;
+    GoogleStoreInode inode
+      = new GoogleStoreInode(getTail(), FileType.DIRECTORY, 0, 0);
+    
+    writeGsInode(inode);
+    
+    return true;
   }
-  */
 
-  /*
   @Override
   public boolean mkdirs()
     throws IOException
   {
-    File file = getFile();
-
-    boolean value;
-
-    synchronized (file) {
-      value = file.mkdirs();
+    if (exists()) {
+      return false;
     }
-
-    clearStatusCache();
-
-    if (! value && ! file.isDirectory())
-      throw new IOException("Cannot create directory: " + getFile());
-
-    return value;
+    
+    Path parent = getParent();
+    
+    parent.mkdirs();
+    
+    if (! parent.isDirectory()) {
+      return false;
+    }
+    
+    return mkdir();
   }
-  */
 
   /*
   @Override
@@ -510,6 +518,8 @@ public class GoogleStorePath extends FilesystemPath {
     
   void writeGsInode(GoogleStoreInode inode)
   {
+    clearStatusCache();
+    
     GoogleStoreInode oldInode = _inode;
     
     setGsInode(inode);
