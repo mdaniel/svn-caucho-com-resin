@@ -69,6 +69,7 @@ import com.caucho.vfs.Vfs;
  */
 public class ResinBoot
 {
+  private static final Logger log = Logger.getLogger(ResinBoot.class.getName());
   private static L10N _L;
 
   private WatchdogArgs _args;
@@ -314,6 +315,10 @@ public class ResinBoot
       System.exit(ExitCode.OK.ordinal());
     } catch (BootArgumentException e) {
       System.err.println(e.getMessage());
+      
+      if (log.isLoggable(Level.FINER)) {
+        e.printStackTrace();
+      }
 
       if (command != null)
         command.usage();
@@ -321,6 +326,10 @@ public class ResinBoot
       System.exit(ExitCode.UNKNOWN_ARGUMENT.ordinal());
     } catch (ConfigException e) {
       System.err.println(e.getMessage());
+      
+      if (log.isLoggable(Level.FINER)) {
+        e.printStackTrace();
+      }
 
       System.exit(ExitCode.BAD_CONFIG.ordinal());
     } catch (Exception e) {

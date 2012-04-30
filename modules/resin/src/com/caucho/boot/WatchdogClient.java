@@ -45,8 +45,7 @@ import com.caucho.bam.RemoteListenerUnavailableException;
 import com.caucho.bam.actor.ActorSender;
 import com.caucho.bam.actor.BamActorRef;
 import com.caucho.bam.manager.BamManager;
-import com.caucho.bam.proxy.BamProxyFactory;
-import com.caucho.cloud.bam.BamSystem;
+import com.caucho.bam.manager.SimpleBamManager;
 import com.caucho.config.ConfigException;
 import com.caucho.env.service.ResinSystem;
 import com.caucho.hmtp.HmtpClient;
@@ -430,7 +429,7 @@ class WatchdogClient
   {
     String to = WATCHDOG_ADDRESS;
     
-    BamManager bamManager = BamSystem.getCurrentManager();
+    BamManager bamManager = new SimpleBamManager(conn.getBroker());
     
     BamActorRef toRef = bamManager.createActorRef(to);
 
