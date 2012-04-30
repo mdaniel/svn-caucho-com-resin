@@ -68,11 +68,14 @@ public class ArrayAccessDelegate implements ArrayDelegate
     return qThis.callMethod(env, OFFSET_SET, UnsetValue.UNSET, index);
   }
 
+  @Override
   public boolean isset(ObjectValue qThis, Value index)
   {
     Env env = Env.getInstance();
 
-    boolean result = qThis.issetField(env, index.toStringValue(env));
+    // php/4a28 - XXX: what is the issetField for?
+    // boolean result = qThis.issetField(env, index.toStringValue(env));
+    boolean result = false;
 
     if (! result) {
       return qThis.callMethod(env, OFFSET_EXISTS, index).toBoolean();

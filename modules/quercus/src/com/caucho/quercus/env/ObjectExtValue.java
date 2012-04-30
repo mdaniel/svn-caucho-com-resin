@@ -1461,12 +1461,11 @@ public class ObjectExtValue extends ObjectValue
       return true;
     }
 
-    if (isA("arrayaccess"))
-    {
+    if (isA("arrayaccess")) {
       // TODO: This should probably be in ArrayAccessDelegate
       Value v = get(name);
 
-      if(v != UnsetValue.UNSET) {
+      if (v != UnsetValue.UNSET) {
         return true;
       }
     }
@@ -1475,7 +1474,8 @@ public class ObjectExtValue extends ObjectValue
   }
 
   @Override
-  public boolean isFieldExists(Env env, StringValue name) {
+  public boolean isFieldExists(Env env, StringValue name)
+  {
     Entry entry = getThisEntry(name);
 
     return entry != null;
