@@ -68,7 +68,7 @@ public class SimpleBamManager implements BamManager
   
   public SimpleBamManager(Broker broker)
   {
-    this(new ManagedBrokerAdapter(broker));
+    this(ManagedBrokerAdapter.create(broker));
   }
   
   public SimpleBamManager(ManagedBroker broker)

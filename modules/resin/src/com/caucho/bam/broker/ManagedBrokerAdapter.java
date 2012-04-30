@@ -45,6 +45,14 @@ public class ManagedBrokerAdapter extends AbstractManagedBroker
   {
     _broker = broker;
   }
+  
+  public static ManagedBroker create(Broker broker)
+  {
+    if (broker instanceof ManagedBroker)
+      return (ManagedBroker) broker;
+    else
+      return new ManagedBrokerAdapter(broker);
+  }
 
   @Override
   public String getAddress()
