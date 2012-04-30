@@ -34,8 +34,8 @@ import com.caucho.quercus.env.Value;
 import java.sql.Types;
 
 public enum ColumnType {
-  STRING(Types.VARCHAR),
   BLOB(Types.BLOB),
+  STRING(Types.VARCHAR),
   LONG(Types.INTEGER),
   DOUBLE(Types.DOUBLE),
   BOOLEAN(Types.BOOLEAN),
@@ -67,7 +67,7 @@ public enum ColumnType {
       return NULL;
     }
     else {
-      return null;
+      return STRING;
     }
   }
 

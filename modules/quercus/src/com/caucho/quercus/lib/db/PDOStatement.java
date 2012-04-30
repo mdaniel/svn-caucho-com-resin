@@ -42,7 +42,6 @@ import com.caucho.quercus.env.EnvCleanup;
 import com.caucho.quercus.env.NullValue;
 import com.caucho.quercus.env.UnsetValue;
 import com.caucho.quercus.env.Value;
-import com.caucho.util.IntMap;
 import com.caucho.util.L10N;
 
 import java.sql.ResultSet;
@@ -75,7 +74,7 @@ public class PDOStatement
   private Value[] _fetchModeArgs = NULL_VALUES;
   private HashMap<Value,BoundColumn> _boundColumnMap;
 
-  private IntMap _parameterNameMap;
+  private HashMap<String,Integer> _parameterNameMap;
 
   private HashMap<Integer,ColumnType> _paramTypes;
   private HashMap<Integer,Value> _paramValues;
@@ -179,10 +178,11 @@ public class PDOStatement
             String name = query.substring(start, i);
 
             if (_parameterNameMap == null) {
-              _parameterNameMap = new IntMap();
+              _parameterNameMap = new HashMap<String,Integer>();
             }
 
-            _parameterNameMap.put(name, parameterCount++);
+            Integer index = Integer.valueOf(parameterCount++);
+            _parameterNameMap.put(name, index);
 
             sb.append('?');
 
@@ -277,7 +277,14 @@ public class PDOStatement
       if (true) throw new UnimplementedException("PARAM_INPUT_OUTPUT");
     }
 
-    int index = resolveParameter(parameter);
+    Integer index = resolveParameter(parameter);
+
+    if (index == null) {
+      _error.warning(env, L.l("unknown parameter: '{0}'", parameter));
+
+      return false;
+    }
+
     ColumnType type;
 
     switch (dataType) {
@@ -299,7 +306,7 @@ public class PDOStatement
       case PDO.PARAM_STMT:
         throw new UnimplementedException(L.l("PDO::PARAM_STMT"));
       default:
-        _error.warning(env, L.l("unknown dataType `{0}'", dataType));
+        _error.warning(env, L.l("unknown dataType '{0}'", dataType));
         return false;
     }
 
@@ -308,10 +315,8 @@ public class PDOStatement
       _paramValues = new HashMap<Integer,Value>();
     }
 
-    Integer key = Integer.valueOf(index);
-
-    _paramTypes.put(key, type);
-    _paramValues.put(key, value);
+    _paramTypes.put(index, type);
+    _paramValues.put(index, value);
 
     return true;
   }
@@ -935,26 +940,27 @@ public class PDOStatement
     throw new UnimplementedException();
   }
 
-  private int resolveParameter(Value parameter)
+  private Integer resolveParameter(Value parameter)
   {
-    int index = -1;
+    Integer index = null;
 
     if (parameter.isLong()) {
       // slight optimization for normal case
-      index = parameter.toInt() - 1;
+      index = Integer.valueOf(parameter.toInt() - 1);
     }
     else {
       String name = parameter.toString();
 
       if (name.length() > 1 && name.charAt(0) == ':') {
         name = name.substring(1);
-
-        if (_parameterNameMap != null) {
-          index = _parameterNameMap.get(name);
-        }
       }
-      else
-        index = parameter.toInt();
+
+      if (_parameterNameMap != null) {
+        index = _parameterNameMap.get(name);
+      }
+      else {
+        index = Integer.valueOf(parameter.toInt());
+      }
     }
 
     return index;

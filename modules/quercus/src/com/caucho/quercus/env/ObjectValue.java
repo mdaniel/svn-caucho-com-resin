@@ -102,6 +102,16 @@ abstract public class ObjectValue extends Value {
     _incompleteObjectName = null;
   }
 
+  public final void cleanup(Env env)
+  {
+    QuercusClass qClass = getQuercusClass();
+    AbstractFunction fun = qClass.getDestructor();
+
+    if (fun != null) {
+      fun.callMethod(env, qClass, this);
+    }
+  }
+
   /**
    * Returns the value's class name.
    */
@@ -230,16 +240,18 @@ abstract public class ObjectValue extends Value {
   @Override
   public Value get(Value key)
   {
+    Env env = Env.getInstance();
+
     ArrayDelegate delegate = _quercusClass.getArrayDelegate();
 
-    if (delegate != null)
-      return delegate.get(this, key);
+    if (delegate != null) {
+      return delegate.get(env, this, key);
+    }
     else {
       // php/3d94
 
       // return getField(Env.getInstance(), key.toStringValue());
-      return Env.getInstance().error(L.l("Can't use object '{0}' as array",
-                                         getName()));
+      return env.error(L.l("Can't use object '{0}' as array", getName()));
     }
   }
 
@@ -249,17 +261,19 @@ abstract public class ObjectValue extends Value {
   @Override
   public Value put(Value key, Value value)
   {
+    Env env = Env.getInstance();
+
     ArrayDelegate delegate = _quercusClass.getArrayDelegate();
 
     // php/0d94
 
-    if (delegate != null)
-      return delegate.put(this, key, value);
+    if (delegate != null) {
+      return delegate.put(env, this, key, value);
+    }
     else {
       // php/0d94
 
-      return Env.getInstance().error(L.l("Can't use object '{0}' as array",
-                                         getName()));
+      return env.error(L.l("Can't use object '{0}' as array", getName()));
       // return super.put(key, value);
     }
   }
@@ -270,17 +284,18 @@ abstract public class ObjectValue extends Value {
   @Override
   public Value put(Value value)
   {
+    Env env = Env.getInstance();
+
     ArrayDelegate delegate = _quercusClass.getArrayDelegate();
 
     // php/0d94
 
     if (delegate != null)
-      return delegate.put(this, value);
+      return delegate.put(env, this, value);
     else {
       // php/0d97
 
-      return Env.getInstance().error(L.l("Can't use object '{0}' as array",
-                                         getName()));
+      return env.error(L.l("Can't use object '{0}' as array", getName()));
       // return super.put(key, value);
     }
   }
@@ -305,10 +320,14 @@ abstract public class ObjectValue extends Value {
   {
     ArrayDelegate delegate = _quercusClass.getArrayDelegate();
 
-    if (delegate != null)
-      return delegate.isset(this, key);
-    else
-      return getField(Env.getInstance(), key.toStringValue()).isset();
+    if (delegate != null) {
+      Env env = Env.getInstance();
+
+      return delegate.isset(env, this, key);
+    }
+    else {
+      return false;
+    }
   }
 
   /**
@@ -319,8 +338,11 @@ abstract public class ObjectValue extends Value {
   {
     ArrayDelegate delegate = _quercusClass.getArrayDelegate();
 
-    if (delegate != null)
-      return delegate.unset(this, key);
+    if (delegate != null) {
+      Env env = Env.getInstance();
+
+      return delegate.unset(env, this, key);
+    }
     else
       return super.remove(key);
   }

@@ -29,10 +29,12 @@
 
 package com.caucho.quercus.program;
 
-import java.util.Map;
-import java.util.Iterator;
-
-import com.caucho.quercus.env.*;
+import com.caucho.quercus.env.ArrayDelegate;
+import com.caucho.quercus.env.Env;
+import com.caucho.quercus.env.JavaInvoker;
+import com.caucho.quercus.env.ObjectValue;
+import com.caucho.quercus.env.UnsetValue;
+import com.caucho.quercus.env.Value;
 
 /**
  * A delegate that performs Array operations for Quercus objects.
@@ -69,16 +71,17 @@ public class FunctionArrayDelegate implements ArrayDelegate {
   {
     _arrayCount = arrayCount;
   }
-  
+
   /**
    * Returns the value for the specified key.
    */
-  public Value get(ObjectValue qThis, Value key)
+  @Override
+  public Value get(Env env, ObjectValue qThis, Value key)
   {
     if (_arrayGet != null) {
-      return _arrayGet.callMethod(Env.getInstance(),
+      return _arrayGet.callMethod(env,
                                   _arrayGet.getQuercusClass(),
-                                  qThis, 
+                                  qThis,
                                   new Value[] { key });
     }
     else
@@ -88,10 +91,11 @@ public class FunctionArrayDelegate implements ArrayDelegate {
   /**
    * Sets the value for the spoecified key.
    */
-  public Value put(ObjectValue qThis, Value key, Value value)
+  @Override
+  public Value put(Env env, ObjectValue qThis, Value key, Value value)
   {
     if (_arrayPut != null)
-      return _arrayPut.callMethod(Env.getInstance(),
+      return _arrayPut.callMethod(env,
                                   _arrayPut.getQuercusClass(),
                                   qThis, key, value);
     else
@@ -101,10 +105,11 @@ public class FunctionArrayDelegate implements ArrayDelegate {
   /**
    * Appends a value.
    */
-  public Value put(ObjectValue qThis, Value value)
+  @Override
+  public Value put(Env env, ObjectValue qThis, Value value)
   {
     if (_arrayPut != null)
-      return _arrayPut.callMethod(Env.getInstance(), 
+      return _arrayPut.callMethod(env,
                                   _arrayPut.getQuercusClass(),
                                   qThis, value);
     else
@@ -114,27 +119,29 @@ public class FunctionArrayDelegate implements ArrayDelegate {
   /**
    * Returns true if the value is set
    */
-  public boolean isset(ObjectValue qThis, Value key)
+  @Override
+  public boolean isset(Env env, ObjectValue qThis, Value key)
   {
-    return get(qThis, key).isset();
+    return get(env, qThis, key).isset();
   }
 
   /**
    * Removes the value at the speified key.
    */
-  public Value unset(ObjectValue qThis, Value key)
+  @Override
+  public Value unset(Env env, ObjectValue qThis, Value key)
   {
     return UnsetValue.UNSET;
   }
-  
+
   /**
    * Returns the value for the specified key.
    */
   @Override
-  public long count(ObjectValue qThis)
+  public long count(Env env, ObjectValue qThis)
   {
     if (_arrayCount!= null) {
-      return _arrayCount .callMethod(Env.getInstance(),
+      return _arrayCount .callMethod(env,
                                      _arrayGet.getQuercusClass(),
                                      qThis).toLong();
     }

@@ -199,6 +199,8 @@ public class InterpretedClassDef extends ClassDef
 
     if (_destructor != null) {
       cl.setDestructor(_destructor);
+
+      // XXX: make sure we need to do this (test case), also look at ProClassDef
       cl.addMethod("__destruct", _destructor);
     }
 
@@ -396,8 +398,9 @@ public class InterpretedClassDef extends ClassDef
                        fieldEntry.getVisibility());
     }
 
-    if (_destructor != null && value instanceof ObjectExtValue)
-      env.addObjectCleanup((ObjectExtValue) object);
+    if (_destructor != null) {
+      env.addObjectCleanup(object);
+    }
   }
 
   /**

@@ -264,7 +264,7 @@ public class Env
   private int _iniCount = 1;
 
   private ArrayList<EnvCleanup> _cleanupList;
-  private ArrayList<ObjectExtValue> _objCleanupList;
+  private ArrayList<ObjectValue> _objCleanupList;
   private ArrayList<Shutdown> _shutdownList;
 
   private String _defaultIncludePath;
@@ -1048,10 +1048,10 @@ public class Env
    * add an object with a destructor to the list of references that are
    * cleaned up when finished with this environment.
    */
-  public void addObjectCleanup(ObjectExtValue objCleanup)
+  public void addObjectCleanup(ObjectValue objCleanup)
   {
     if (_objCleanupList == null)
-      _objCleanupList = new ArrayList<ObjectExtValue>();
+      _objCleanupList = new ArrayList<ObjectValue>();
 
     _objCleanupList.add(objCleanup);
   }
@@ -6548,7 +6548,7 @@ public class Env
    */
   public Value error(int code, Location location, String loc, String msg)
   {
-    //System.err.println("Env->error0: " + location + " . " + loc + " . " + msg);
+    //System.err.println("Env->error0: " + getLocation() + " . " + location + " . " + loc + " . " + msg);
     //Thread.dumpStack();
 
     int mask = 1 << code;
@@ -7149,7 +7149,7 @@ public class Env
 
     if (_objCleanupList != null) {
       for (int i = _objCleanupList.size() - 1; i >= 0; i--) {
-        ObjectExtValue objCleanup = _objCleanupList.get(i);
+        ObjectValue objCleanup = _objCleanupList.get(i);
         try {
           if (objCleanup != null)
             objCleanup.cleanup(this);

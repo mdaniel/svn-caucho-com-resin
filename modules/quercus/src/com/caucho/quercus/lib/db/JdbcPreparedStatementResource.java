@@ -171,32 +171,35 @@ public class JdbcPreparedStatementResource
     }
 
     int size = _types.length;
+
     for (int i = 0; i < size; i++) {
-      switch (_types[i]) {
-        case BOOLEAN:
-          _preparedStmt.setBoolean(i + 1, _params[i].toBoolean());
-          break;
-        case NULL:
-          _preparedStmt.setNull(i + 1, Types.NULL);
-          break;
-        case LONG:
-          _preparedStmt.setLong(i + 1, _params[i].toInt());
-          break;
-        case DOUBLE:
-          _preparedStmt.setDouble(i + 1, _params[i].toDouble());
-          break;
-          // XXX: blob needs to be redone
-          // Currently treated as a string
-        case BLOB:
-          _preparedStmt.setString(i + 1, _params[i].toString());
-          break;
-        case STRING:
-          _preparedStmt.setString(i + 1, _params[i].toString());
-          break;
-        case LOB:
-          setLobParameter(env, i + 1, _params[i]);
-        default:
-          break;
+      ColumnType type = _types[i];
+
+      if (type == ColumnType.BOOLEAN) {
+        _preparedStmt.setBoolean(i + 1, _params[i].toBoolean());
+      }
+      else if (type == ColumnType.NULL) {
+        _preparedStmt.setNull(i + 1, Types.NULL);
+      }
+      else if (type == ColumnType.LONG) {
+        _preparedStmt.setLong(i + 1, _params[i].toInt());
+      }
+      else if (type == ColumnType.DOUBLE) {
+        _preparedStmt.setDouble(i + 1, _params[i].toDouble());
+      }
+      else if (type == ColumnType.BLOB) {
+        // XXX: blob needs to be redone
+        // Currently treated as a string
+        _preparedStmt.setString(i + 1, _params[i].toString());
+      }
+      else if (type == ColumnType.STRING) {
+        _preparedStmt.setString(i + 1, _params[i].toString());
+      }
+      else if (type == ColumnType.LOB) {
+        setLobParameter(env, i + 1, _params[i]);
+      }
+      else {
+        throw new SQLException("unknown type: " + type);
       }
     }
 

@@ -1436,16 +1436,6 @@ public class ObjectExtValue extends ObjectValue
     }
   }
 
-  public void cleanup(Env env)
-  {
-    QuercusClass qClass = getQuercusClass();
-
-    AbstractFunction fun = qClass.getDestructor();
-
-    if (fun != null)
-      fun.callMethod(env, qClass, this);
-  }
-
   @Override
   public boolean issetField(Env env, StringValue name)
   {
@@ -1457,20 +1447,7 @@ public class ObjectExtValue extends ObjectValue
 
     boolean result = getQuercusClass().issetField(env, this, name);
 
-    if (result) {
-      return true;
-    }
-
-    if (isA("arrayaccess")) {
-      // TODO: This should probably be in ArrayAccessDelegate
-      Value v = get(name);
-
-      if (v != UnsetValue.UNSET) {
-        return true;
-      }
-    }
-
-    return false;
+    return result;
   }
 
   @Override

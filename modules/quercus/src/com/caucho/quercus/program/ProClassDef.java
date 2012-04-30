@@ -32,6 +32,7 @@ package com.caucho.quercus.program;
 import com.caucho.quercus.expr.ExprPro;
 import com.caucho.quercus.expr.Expr;
 import com.caucho.quercus.expr.ExprGenerator;
+import com.caucho.quercus.env.ObjectExtValue;
 import com.caucho.quercus.env.StringValue;
 import com.caucho.quercus.function.AbstractFunction;
 import com.caucho.quercus.gen.PhpWriter;
@@ -162,6 +163,13 @@ public class ProClassDef extends InterpretedClassDef
       // php/393o
       //out.println("cl.addMethod(\"__construct\", fun_" + _constructor.getCompilationName() + ".toFun(cl));");
       out.println();
+    }
+
+    if (_destructor != null) {
+      out.println("cl.setDestructor(fun_" + _destructor.getCompilationName() + ".toFun(cl));");
+
+      // XXX: make sure we need to do this (test case), also look at InterpretedClassDef
+      out.println("cl.addMethod(\"__destruct\", fun_" + _destructor.getCompilationName() + ".toFun(cl));");
     }
 
     if (_getField != null) {
@@ -298,6 +306,10 @@ public class ProClassDef extends InterpretedClassDef
       fun.generateInit(out);
     }
     */
+
+    if (_destructor != null) {
+      out.println("env.addObjectCleanup(value);");
+    }
 
     out.popDepth();
     out.println("}");
