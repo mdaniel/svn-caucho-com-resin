@@ -930,22 +930,26 @@ public class HttpRequest extends AbstractHttpRequest
     super.startRequest();
     
     // HttpBufferStore httpBuffer = getHttpBufferStore();
+    HttpBufferStore bufferStore = getHttpBufferStore();
 
     _method.clear();
     _methodString = null;
     _protocol.clear();
 
     _uriLength = 0;
-    _uri = getSmallUriBuffer(); // httpBuffer.getUriBuffer();
+    if (bufferStore == null) {
+      _uri = getSmallUriBuffer(); // httpBuffer.getUriBuffer();
+      
+      _headerBuffer = getSmallHeaderBuffer(); // httpBuffer.getHeaderBuffer();
+      _headerKeys = getSmallHeaderKeys();     // httpBuffer.getHeaderKeys();
+      _headerValues = getSmallHeaderValues(); // httpBuffer.getHeaderValues();
+    }
 
     _uriHost.clear();
     _host = null;
 
     _headerSize = 0;
     _headerLength = 0;
-    _headerBuffer = getSmallHeaderBuffer(); // httpBuffer.getHeaderBuffer();
-    _headerKeys = getSmallHeaderKeys();     // httpBuffer.getHeaderKeys();
-    _headerValues = getSmallHeaderValues(); // httpBuffer.getHeaderValues();
   }
 
   /**

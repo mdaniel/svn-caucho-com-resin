@@ -274,7 +274,7 @@ public final class MnodeEntry extends MnodeValue {
 
   public final boolean isLeaseExpired(long now)
   {
-    return _leaseExpireTime <= now;
+    return _leaseOwner <= 0 || _leaseExpireTime <= now;
   }
   
   /**
@@ -315,7 +315,7 @@ public final class MnodeEntry extends MnodeValue {
    */
   public final void setLeaseOwner(int leaseOwner, long now)
   {
-    if (leaseOwner > 2) {
+    if (leaseOwner > 2 && getLeaseExpireTimeout() > 0) {
       _leaseOwner = leaseOwner;
 
       _leaseExpireTime = now + getLeaseExpireTimeout();

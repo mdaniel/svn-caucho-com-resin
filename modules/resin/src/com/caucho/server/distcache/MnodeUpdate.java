@@ -79,6 +79,14 @@ public class MnodeUpdate extends MnodeValue {
     
     _leaseOwner = -1;
   }
+  
+  public MnodeUpdate(MnodeValue mnodeValue,
+                     int leaseOwner)
+  {
+    super(mnodeValue);
+    
+    _leaseOwner = leaseOwner;
+  }
 
   public MnodeUpdate(long valueHash,
                      long valueLength,

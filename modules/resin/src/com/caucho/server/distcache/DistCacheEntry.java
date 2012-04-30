@@ -969,8 +969,10 @@ public class DistCacheEntry {
     long valueHash = mnodeUpdate.getValueHash();
     long version = mnodeUpdate.getVersion();
 
-    MnodeEntry oldEntryValue;
+    MnodeEntry oldEntryValue = getMnodeEntry();
     MnodeEntry mnodeValue;
+    
+    int oldLeaseOwner = oldEntryValue.getLeaseOwner();
 
     do {
       oldEntryValue = loadLocalMnodeValue();
@@ -986,7 +988,7 @@ public class DistCacheEntry {
               && valueHash != 0
               && valueHash <= oldValueHash)) {
         // lease ownership updates even if value doesn't
-        if (oldEntryValue != null) {
+        if (oldEntryValue.isLeaseExpired(now)) {
           oldEntryValue.setLeaseOwner(mnodeUpdate.getLeaseOwner(), now);
 
           // XXX: access time?
@@ -998,6 +1000,13 @@ public class DistCacheEntry {
 
       long accessTime = now;
       long updateTime = accessTime;
+      
+      int leaseOwner;
+      
+      if (oldEntryValue.isLeaseExpired(now))
+        leaseOwner = mnodeUpdate.getLeaseOwner();
+      else
+        leaseOwner = oldLeaseOwner;
 
       mnodeValue = new MnodeEntry(mnodeUpdate,
                                   valueDataId,
@@ -1006,7 +1015,7 @@ public class DistCacheEntry {
                                   updateTime,
                                   true,
                                   false,
-                                  mnodeUpdate.getLeaseOwner());
+                                  leaseOwner);
     } while (! compareAndSetEntry(oldEntryValue, mnodeValue));
 
     //MnodeValue newValue
@@ -1014,7 +1023,9 @@ public class DistCacheEntry {
                                                  oldEntryValue,
                                                  mnodeUpdate);
     
-    _cacheService.getCacheEngine().notifyLease(key, oldEntryValue.getLeaseOwner());
+    if (oldLeaseOwner != mnodeUpdate.getLeaseOwner()) {
+      _cacheService.getCacheEngine().notifyLease(key, oldLeaseOwner);
+    }
     
     return mnodeValue;
   }
