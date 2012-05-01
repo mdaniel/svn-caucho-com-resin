@@ -540,7 +540,8 @@ public class MnodeStore {
         long accessedExpireTimeout = rs.getLong(8);
         long modifiedExpireTimeout = rs.getLong(9);
         long updateTime = rs.getLong(10);
-        long accessTime = CurrentTime.getCurrentTime();
+        // long accessTime = CurrentTime.getCurrentTime();
+        long accessTime = updateTime;
         
         long leaseTimeout = 300000;
         

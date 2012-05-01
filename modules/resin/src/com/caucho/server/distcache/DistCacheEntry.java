@@ -286,6 +286,7 @@ public class DistCacheEntry {
     
     int leaseOwner = getMnodeEntry().getLeaseOwner();
     long leaseExpireTimeout = config.getLeaseExpireTimeout();
+    long now = CurrentTime.getCurrentTime();
     
     MnodeUpdate mnodeUpdate = new MnodeUpdate(valueHash,
                                               valueLength,
@@ -295,7 +296,8 @@ public class DistCacheEntry {
                                               accessedExpireTime,
                                               modifiedExpireTime,
                                               leaseExpireTimeout,
-                                              leaseOwner);
+                                              leaseOwner,
+                                              now);
 
     // add 25% window for update efficiency
     // idleTimeout = idleTimeout * 5L / 4;
@@ -998,8 +1000,9 @@ public class DistCacheEntry {
         return oldEntryValue;
       }
 
+      // long accessTime = now;
       long accessTime = now;
-      long updateTime = accessTime;
+      long updateTime = mnodeUpdate.getLastModifiedTime();
       
       int leaseOwner;
       

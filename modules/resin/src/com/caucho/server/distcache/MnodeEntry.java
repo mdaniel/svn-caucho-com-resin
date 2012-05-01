@@ -93,7 +93,9 @@ public final class MnodeEntry extends MnodeValue {
     _lastRemoteAccessTime = lastAccessTime;
     _lastModifiedTime = lastUpdateTime;
     
-    _lastAccessTime = CurrentTime.getCurrentTime();
+    // server/0165
+    // _lastAccessTime = CurrentTime.getCurrentTime();
+    _lastAccessTime = lastAccessTime;
 
     _isImplicitNull = isImplicitNull;
     _isServerVersionValid = isServerVersionValid;
