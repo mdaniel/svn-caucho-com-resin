@@ -31,11 +31,11 @@ package com.caucho.db.sql;
 
 import java.sql.SQLException;
 
-final class DoubleLtNonNullExpr extends AbstractBinaryBooleanExpr {
+final class LongLtExpr extends AbstractBinaryBooleanExpr {
   private final Expr _left;
   private final Expr _right;
 
-  DoubleLtNonNullExpr(Expr left, Expr right)
+  LongLtExpr(Expr left, Expr right)
   {
     _left = left;
     _right = right;
@@ -56,21 +56,36 @@ final class DoubleLtNonNullExpr extends AbstractBinaryBooleanExpr {
   @Override
   public Expr create(Expr left, Expr right)
   {
-    return new DoubleLtNonNullExpr(left, right);
+    return new LongLtExpr(left, right);
   }
 
+  /**
+   * True if the current row matches this expression.
+   */
   @Override
   public final boolean isSelect(final QueryContext context)
     throws SQLException
   {
-    return (_left.evalDouble(context) < _right.evalDouble(context));
+    final Expr left = _left;
+    final Expr right = _right;
+    
+    if (left.isNull(context) || right.isNull(context))
+      return false;
+
+    return (left.evalLong(context) < right.evalLong(context));
   }
 
   @Override
   public final int evalBoolean(final QueryContext context)
     throws SQLException
   {
-    if (_left.evalDouble(context) < _right.evalDouble(context))
+    final Expr left = _left;
+    final Expr right = _right;
+    
+    if (left.isNull(context) || right.isNull(context))
+      return UNKNOWN;
+
+    if (left.evalLong(context) < right.evalLong(context))
       return TRUE;
     else
       return FALSE;

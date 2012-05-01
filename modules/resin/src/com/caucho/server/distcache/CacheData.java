@@ -39,7 +39,9 @@ public final class CacheData extends MnodeValue {
   private final HashKey _key;
 
   private final long _valueDataId;
+  
   private final long _accessTime;
+  private final long _modifiedTime;
 
   public CacheData(HashKey key,
                    long valueHash,
@@ -48,10 +50,11 @@ public final class CacheData extends MnodeValue {
                    long version,
                    HashKey cacheKey,
                    long flags,
-                   long accessTime,
                    long accessedTimeout,
                    long modifiedTimeout,
-                   long leaseTimeout)
+                   long leaseTimeout,
+                   long accessTime,
+                   long modifiedTime)
   {
     super(valueHash, valueLength, version,
           HashKey.getHash(cacheKey),
@@ -62,6 +65,7 @@ public final class CacheData extends MnodeValue {
     
     _valueDataId = valueDataId;
     _accessTime = accessTime;
+    _modifiedTime = modifiedTime;
   }
 
   public HashKey getKey()
@@ -72,6 +76,11 @@ public final class CacheData extends MnodeValue {
   public long getAccessTime()
   {
     return _accessTime;
+  }
+
+  public long getModifiedTime()
+  {
+    return _modifiedTime;
   }
   
   public long getValueDataId()

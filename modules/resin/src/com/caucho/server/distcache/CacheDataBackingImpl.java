@@ -61,6 +61,7 @@ public class CacheDataBackingImpl implements CacheDataBacking {
   private static final Logger log
     = Logger.getLogger(CacheDataBackingImpl.class.getName());
   
+  private CacheStoreManager _manager;
   private DataStore _dataStore;
   private MnodeStore _mnodeStore;
   
@@ -68,8 +69,9 @@ public class CacheDataBackingImpl implements CacheDataBacking {
   private Alarm _reaperAlarm = new Alarm(new ReaperListener());
   private long _reaperTimeout = 3600 * 1000;
   
-  public CacheDataBackingImpl()
+  public CacheDataBackingImpl(CacheStoreManager storeManager)
   {
+    _manager = storeManager;
   }
   
   public void setDataStore(DataStore dataStore)
@@ -194,10 +196,10 @@ public class CacheDataBackingImpl implements CacheDataBacking {
                                         MnodeEntry mnodeValue,
                                         MnodeEntry oldMnodeValue)
   {
-    if (_mnodeStore.updateUpdateTime(keyHash,
+    if (_mnodeStore.updateAccessTime(keyHash,
                                      mnodeValue.getVersion(),
                                      mnodeValue.getAccessedExpireTimeout(),
-                                     mnodeValue.getLastModifiedTime())) {
+                                     mnodeValue.getLastAccessedTime())) {
       return mnodeValue;
     } else {
       log.fine(this + " db updateTime failed due to timing conflict"
@@ -386,6 +388,10 @@ public class CacheDataBackingImpl implements CacheDataBacking {
   }
   private void removeData(byte []key, long dataId)
   {
+    DistCacheEntry distEntry = _manager.getCacheEntry(HashKey.create(key));
+    
+    distEntry.clear();
+
     _mnodeStore.remove(key);
     
     if (dataId > 0) {

@@ -58,7 +58,7 @@ public class MnodeStore {
   
   private static final Logger log
     = Logger.getLogger(MnodeStore.class.getName());
-
+  
   private FreeList<CacheMapConnection> _freeConn
     = new FreeList<CacheMapConnection>(32);
 
@@ -73,7 +73,7 @@ public class MnodeStore {
 
   private String _insertQuery;
   private String _updateSaveQuery;
-  private String _updateUpdateTimeQuery;
+  private String _updateAccessTimeQuery;
 
   // private String _updateVersionQuery;
 
@@ -86,7 +86,7 @@ public class MnodeStore {
   private String _deleteQuery;
 
   private long _serverVersion;
-  private long _startupLastUpdateTime;
+  private long _startupLastAccessTime;
   
   private AtomicLong _entryCount = new AtomicLong();
   
@@ -135,7 +135,7 @@ public class MnodeStore {
    */
   public long getStartupLastUpdateTime()
   {
-    return _startupLastUpdateTime;
+    return _startupLastAccessTime;
   }
 
   /**
@@ -181,27 +181,32 @@ public class MnodeStore {
   protected void init()
     throws Exception
   {
-    _loadQuery = ("SELECT value_hash,value_data_id,value_length,cache_id,flags,server_version,item_version,access_timeout,update_timeout,update_time"
+    _loadQuery = ("SELECT value_hash,value_data_id,value_length,"
+                  + "     cache_id,flags,"
+                  + "     item_version,server_version,"
+                  + "     access_timeout,modified_timeout,"
+                  + "     access_time,modified_time"
                   + " FROM " + _tableName
                   + " WHERE id=?");
 
     _insertQuery = ("INSERT into " + _tableName
                     + " (id,value_hash,value_data_id,value_length,cache_id,flags,"
                     + "  item_version,server_version,"
-                    + "  access_timeout,update_timeout,"
-                    + "  update_time)"
-                    + " VALUES (?,?,?,?,?,?,?,?,?,?,?)");
+                    + "  access_timeout,modified_timeout,"
+                    + "  access_time,modified_time)"
+                    + " VALUES (?,?,?,?,?,?,?,?,?,?,?,?)");
 
     _updateSaveQuery
       = ("UPDATE " + _tableName
-         + " SET value_hash=?,value_data_id=?,value_length=?,"
-         + "     server_version=?,item_version=?,"
-         + "     access_timeout=?,update_time=?"
+         + " SET value_hash=?,value_data_id=?,value_length=?,cache_id=?,flags=?,"
+         + "     item_version=?,server_version=?,"
+         + "     access_timeout=?,modified_timeout=?,"
+         + "     access_time=?,modified_time=?"
          + " WHERE id=? AND item_version<=?");
 
-    _updateUpdateTimeQuery
+    _updateAccessTimeQuery
       = ("UPDATE " + _tableName
-         + " SET access_timeout=?,update_time=?"
+         + " SET access_timeout=?,access_time=?"
          + " WHERE id=? AND item_version=?");
 
 /*
@@ -210,33 +215,39 @@ public class MnodeStore {
                            + " WHERE id=? AND value=?");
 */
     _expireQuery = ("DELETE FROM " + _tableName
-                     + " WHERE update_time + 5 * access_timeout / 4 < ?"
-                     + " OR update_time + update_timeout < ?");
+                     + " WHERE access_time + 5 * access_timeout / 4 < ?"
+                     + " OR modified_time + modified_timeout < ?");
 
     _selectExpireQuery = ("SELECT id,value_data_id FROM " + _tableName
-                          + " WHERE update_time + 5 * access_timeout / 4 < ?"
-                          + " OR update_time + update_timeout < ?");
+                          + " WHERE access_time + 5 * access_timeout / 4 < ?"
+                          + " OR modified_time + modified_timeout < ?");
 
     _deleteQuery = ("DELETE FROM " + _tableName
                     + " WHERE id=?");
 
     _countQuery = "SELECT count(*) FROM " + _tableName;
 
-    _updatesSinceQuery = ("SELECT id,value_hash,value_data_id,value_length,cache_id,flags,item_version,update_time,access_timeout,update_timeout"
+    _updatesSinceQuery = ("SELECT id,value_hash,value_data_id,value_length,"
+                          + "cache_id,flags,item_version,"
+                          + "     access_timeout,modified_timeout,"
+                          + "     access_time,modified_time"
                           + " FROM " + _tableName
-                          + " WHERE ? <= update_time"
+                          + " WHERE ? <= access_time"
                           + "   AND bitand(flags, " + CacheConfig.FLAG_TRIPLICATE + ") <> 0"
                           + " LIMIT 1024");
 
-    _remoteUpdatesSinceQuery = ("SELECT id,value_hash,value_data_id,value_length,cache_id,flags,item_version,update_time,access_timeout,update_timeout"
+    _remoteUpdatesSinceQuery = ("SELECT id,value_hash,value_data_id,value_length,"
+                                + "     cache_id,flags,item_version,"
+                                + "     access_timeout,modified_timeout,"
+                                +"      access_time,modified_time"
                                 + " FROM " + _tableName
-                                + " WHERE ? = cache_id AND ? <= update_time"
+                                + " WHERE ? = cache_id AND ? <= access_time"
                                 + " LIMIT 1024");
 
     initDatabase();
 
     _serverVersion = initVersion();
-    _startupLastUpdateTime = initLastUpdateTime();
+    _startupLastAccessTime = initLastAccessTime();
     
     long initCount = getCountImpl();
     
@@ -258,8 +269,8 @@ public class MnodeStore {
 
       try {
         String sql = ("SELECT id, value_hash, value_data_id, value_length, cache_id, flags,"
-                      + "     access_timeout, update_timeout,"
-                      + "     update_time,"
+                      + "     access_timeout, modified_timeout,"
+                      + "     access_time, modified_time"
                       + "     server_version, item_version"
                       + " FROM " + _tableName + " WHERE 1=0");
 
@@ -282,13 +293,14 @@ public class MnodeStore {
 
       String sql = ("CREATE TABLE " + _tableName + " (\n"
                     + "  id BINARY(32) PRIMARY KEY,\n"
+                    + "  cache_id BINARY(32),\n"
                     + "  value_hash BIGINT,\n"
                     + "  value_data_id BIGINT,\n"
                     + "  value_length BIGINT,\n"
-                    + "  cache_id BINARY(32),\n"
                     + "  access_timeout BIGINT,\n"
-                    + "  update_timeout BIGINT,\n"
-                    + "  update_time BIGINT,\n"
+                    + "  modified_timeout BIGINT,\n"
+                    + "  access_time BIGINT,\n"
+                    + "  modified_time BIGINT,\n"
                     + "  item_version BIGINT,\n"
                     + "  flags BIGINT,\n"
                     + "  server_version INTEGER)");
@@ -331,7 +343,7 @@ public class MnodeStore {
   /**
    * Returns the maximum update time on startup
    */
-  private long initLastUpdateTime()
+  private long initLastAccessTime()
     throws Exception
   {
     Connection conn = _dataSource.getConnection();
@@ -340,7 +352,7 @@ public class MnodeStore {
     try {
       Statement stmt = conn.createStatement();
 
-      String sql = ("SELECT MAX(update_time)"
+      String sql = ("SELECT MAX(access_time)"
                     + " FROM " + _tableName);
 
       rs = stmt.executeQuery(sql);
@@ -398,9 +410,10 @@ public class MnodeStore {
         byte []cacheHash = rs.getBytes(5);
         long flags = rs.getLong(6);
         long version = rs.getLong(7);
-        long itemUpdateTime = rs.getLong(8);
-        long accessTimeout = rs.getLong(9);
-        long updateTimeout = rs.getLong(10);
+        long accessTimeout = rs.getLong(8);
+        long modifiedTimeout = rs.getLong(9);
+        long accessTime = rs.getLong(10);
+        long modifiedTime = rs.getLong(11);
         
         long leaseTimeout = 30000;
 
@@ -413,10 +426,11 @@ public class MnodeStore {
                                     valueHash, valueIndex, valueLength, version,
                                     cacheKey,
                                     flags,
-                                    itemUpdateTime,
                                     accessTimeout,
-                                    updateTimeout,
-                                    leaseTimeout));
+                                    modifiedTimeout,
+                                    leaseTimeout,
+                                    accessTime,
+                                    modifiedTime));
       }
 
       if (entryList.size() > 0)
@@ -469,9 +483,10 @@ public class MnodeStore {
         byte []cacheHash = rs.getBytes(5);
         long flags = rs.getLong(6);
         long version = rs.getLong(7);
-        long itemUpdateTime = rs.getLong(8);
-        long accessTimeout = rs.getLong(9);
-        long updateTimeout = rs.getLong(10);
+        long accessTimeout = rs.getLong(8);
+        long modifiedTimeout = rs.getLong(9);
+        long accessTime = rs.getLong(10);
+        long modifiedTime = rs.getLong(11);
         
         long leaseTimeout = 30000;
         
@@ -489,10 +504,11 @@ public class MnodeStore {
                                     version,
                                     HashKey.create(cacheHash),
                                     flags,
-                                    itemUpdateTime,
                                     accessTimeout,
-                                    updateTimeout,
-                                    leaseTimeout));
+                                    modifiedTimeout,
+                                    leaseTimeout,
+                                    accessTime,
+                                    modifiedTime));
       }
 
       if (entryList.size() > 0)
@@ -535,13 +551,13 @@ public class MnodeStore {
 
         byte []cacheHash = rs.getBytes(4);
         long flags = rs.getLong(5);
-        long serverVersion = rs.getLong(6);
-        long itemVersion = rs.getLong(7);
+        long itemVersion = rs.getLong(6);
+        long serverVersion = rs.getLong(7);
         long accessedExpireTimeout = rs.getLong(8);
         long modifiedExpireTimeout = rs.getLong(9);
-        long updateTime = rs.getLong(10);
+        long accessTime = rs.getLong(10);
+        long modifiedTime = rs.getLong(11);
         // long accessTime = CurrentTime.getCurrentTime();
-        long accessTime = updateTime;
         
         long leaseTimeout = 300000;
         
@@ -554,7 +570,7 @@ public class MnodeStore {
                                leaseTimeout,
                                valueDataId,
                                null,
-                               accessTime, updateTime,
+                               accessTime, modifiedTime,
                                serverVersion == _serverVersion,
                                false);
 
@@ -619,8 +635,11 @@ public class MnodeStore {
       stmt.setLong(8, _serverVersion);
       stmt.setLong(9, mnodeUpdate.getAccessedExpireTimeout());
       stmt.setLong(10, mnodeUpdate.getModifiedExpireTimeout());
-      stmt.setLong(11, CurrentTime.getCurrentTime());
       
+      long now = CurrentTime.getCurrentTime();
+      stmt.setLong(11, now);
+      stmt.setLong(12, now);
+
       int count = stmt.executeUpdate();
 
       if (log.isLoggable(Level.FINER)) {
@@ -663,14 +682,26 @@ public class MnodeStore {
       stmt.setLong(1, mnodeUpdate.getValueHash());
       stmt.setLong(2, valueDataId);
       stmt.setLong(3, mnodeUpdate.getValueLength());
+      stmt.setBytes(4, mnodeUpdate.getCacheHash());
+      stmt.setLong(5, mnodeUpdate.getFlags());
       
-      stmt.setLong(4, _serverVersion);
-      stmt.setLong(5, mnodeUpdate.getVersion());
-      stmt.setLong(6, mnodeUpdate.getAccessedExpireTimeout());
-      stmt.setLong(7, CurrentTime.getCurrentTime());
+      stmt.setLong(6, mnodeUpdate.getVersion());
+      stmt.setLong(7, _serverVersion);
+      stmt.setLong(8, mnodeUpdate.getAccessedExpireTimeout());
+      stmt.setLong(9, mnodeUpdate.getModifiedExpireTimeout());
+      
+      
+      long now = CurrentTime.getCurrentTime();
+      stmt.setLong(10, now);
+      stmt.setLong(11, now);
+      /*
+      + " SET value_hash=?,value_data_id=?,value_length=?,cache_id=?,flags=?,"
+      + "     item_version=?,server_version=?,"
+      + "     access_timeout=?,update_timeout=?,update_time=?"
+      */
 
-      stmt.setBytes(8, key);
-      stmt.setLong(9, mnodeUpdate.getVersion());
+      stmt.setBytes(12, key);
+      stmt.setLong(13, mnodeUpdate.getVersion());
 
       int count = stmt.executeUpdate();
 
@@ -700,20 +731,20 @@ public class MnodeStore {
    * @param idleTimeout the item's timeout
    * @param updateTime the item's timeout
    */
-  public boolean updateUpdateTime(HashKey id,
+  public boolean updateAccessTime(HashKey id,
                                   long itemVersion,
                                   long accessTimeout,
-                                  long updateTime)
+                                  long accessTime)
   {
     CacheMapConnection conn = null;
 
     try {
       conn = getConnection();
 
-      PreparedStatement stmt = conn.prepareUpdateUpdateTime();
+      PreparedStatement stmt = conn.preparedUpdateAccessTime();
       stmt.setLong(1, accessTimeout);
-      stmt.setLong(2, updateTime);
-
+      stmt.setLong(2, accessTime);
+      
       stmt.setBytes(3, id.getHash());
       stmt.setLong(4, itemVersion);
 
@@ -884,7 +915,7 @@ public class MnodeStore {
 
     private PreparedStatement _insertStatement;
     private PreparedStatement _updateSaveStatement;
-    private PreparedStatement _updateUpdateTimeStatement;
+    private PreparedStatement _updateAccessTimeStatement;
 
     private PreparedStatement _updateVersionStatement;
 
@@ -926,15 +957,15 @@ public class MnodeStore {
       return _updateSaveStatement;
     }
 
-    PreparedStatement prepareUpdateUpdateTime()
+    PreparedStatement preparedUpdateAccessTime()
       throws SQLException
     {
-      if (_updateUpdateTimeStatement == null) {
-        _updateUpdateTimeStatement
-          = _conn.prepareStatement(_updateUpdateTimeQuery);
+      if (_updateAccessTimeStatement == null) {
+        _updateAccessTimeStatement
+          = _conn.prepareStatement(_updateAccessTimeQuery);
       }
 
-      return _updateUpdateTimeStatement;
+      return _updateAccessTimeStatement;
     }
 
     /*

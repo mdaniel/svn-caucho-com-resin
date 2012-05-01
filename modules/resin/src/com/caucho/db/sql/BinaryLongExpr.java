@@ -72,7 +72,7 @@ class BinaryLongExpr extends AbstractBinaryExpr {
   /**
    * Returns the type of the expression.
    */
-  public Class getType()
+  public Class<?> getType()
   {
     return long.class;
   }
@@ -92,6 +92,7 @@ class BinaryLongExpr extends AbstractBinaryExpr {
    *
    * @return the long value
    */
+  @Override
   public long evalLong(QueryContext context)
     throws SQLException
   {

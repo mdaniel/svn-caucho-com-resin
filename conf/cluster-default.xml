@@ -91,7 +91,7 @@
       <sendfile-enable>${sendfile}</sendfile-enable>
 
       <!-- The http port -->
-      <http address="*" port="${http}"/>
+      <http address="${http_address?:'*'}" port="${http}"/>
 
       <!-- SSL port configuration: -->
       <resin:choose>

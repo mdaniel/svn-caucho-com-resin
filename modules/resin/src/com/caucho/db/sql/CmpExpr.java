@@ -65,32 +65,62 @@ class CmpExpr extends AbstractBinaryExpr {
   public Expr bind(Query query)
     throws SQLException
   {
-    _left = _left.bind(query);
-    _right = _right.bind(query);
+    final Expr left = _left.bind(query);
+    final Expr right = _right.bind(query);
+    
+    _left = left;
+    _right = right;
+    
+    
 
     /*
     if (_left.isLong() && _right.isLong())
       return new LongCmpExpr(_op, _left, _right);
     */
+    
+    boolean isLong = false;
+    
+    if (left.isLong() && right.isLong())
+      isLong = true;
+    else if (left.isLong() && right.isParam())
+      isLong = true;
+    else if (left.isParam() && right.isLong())
+      isLong = true;
+    
+    boolean isNullable = left.isNullable() || right.isNullable();
 
     switch (_op) {
     case Parser.LT:
-      if (_left.isNullable() || _right.isNullable())
-        return new DoubleLtExpr(_left, _right);
-      else
-        return new DoubleLtNonNullExpr(_left, _right);
+      if (isNullable) {
+        return (isLong
+                ? new LongLtExpr(left, right)
+                : new DoubleLtExpr(left, right));
+      }
+      else {
+        return new DoubleLtNonNullExpr(left, right);
+      }
 
     case Parser.LE:
-      if (_left.isNullable() || _right.isNullable()) {
-        return new DoubleLeExpr(_left, _right);
+      if (isNullable) {
+        return new DoubleLeExpr(left, right);
       }
-      else
-        return new DoubleLeNonNullExpr(_left, _right);
+      else {
+        return new DoubleLeNonNullExpr(left, right);
+      }
 
     case Parser.GT:
-      return new DoubleGtExpr(_left, _right);
+      return new DoubleGtExpr(left, right);
+      
     case Parser.GE:
-      return new DoubleGeExpr(_left, _right);
+      return new DoubleGeExpr(left, right);
+    }
+    
+    if (isLong) {
+      switch (_op) {
+      case Parser.EQ:
+        return new LongEqExpr(left, right);
+      }
+      
     }
 
     if (_left.isDouble() || _right.isDouble()) {

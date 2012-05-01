@@ -1213,6 +1213,14 @@ public class DistCacheEntry {
 
     return getMnodeEntry();
   }
+  
+  /**
+   * Invalidates the entry
+   */
+  public void clear()
+  {
+    _mnodeEntry.set(MnodeEntry.NULL);
+  }
 
   /**
    * Conditionally starts an update of a cache item, allowing only a

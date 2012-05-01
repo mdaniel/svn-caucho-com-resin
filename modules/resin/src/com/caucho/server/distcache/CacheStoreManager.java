@@ -140,7 +140,8 @@ public final class CacheStoreManager implements CacheEntryFactory
   {
     HashKey hashKey = _keyManager.createHashKey(key, config);
 
-    DistCacheEntry entry = _cacheEntryManager.createCacheEntry(hashKey);
+    DistCacheEntry entry
+      = _cacheEntryManager.createCacheEntry(hashKey);
     
     if (key != null) {
       entry.setKey(key);
@@ -189,7 +190,7 @@ public final class CacheStoreManager implements CacheEntryFactory
   public final void saveLocalUpdateTime(HashKey key,
                                         long version,
                                         long accessTimeout,
-                                        long updateTime)
+                                        long lastAccessTime)
   {
     DistCacheEntry entry = _cacheEntryManager.getCacheEntry(key);
 
@@ -205,7 +206,7 @@ public final class CacheStoreManager implements CacheEntryFactory
       = new MnodeEntry(oldEntryValue,
                        oldEntryValue.getValueDataId(),
                        accessTimeout, 
-                       updateTime);
+                       lastAccessTime);
 
     entry.saveLocalUpdateTime(mnodeValue);
   }
@@ -269,7 +270,7 @@ public final class CacheStoreManager implements CacheEntryFactory
   public void start()
   {
     if (_dataBacking == null)
-      _dataBacking = new CacheDataBackingImpl();
+      _dataBacking = new CacheDataBackingImpl(this);
     
     if (getDataBacking() == null)
       throw new NullPointerException();

@@ -32,7 +32,6 @@ package com.caucho.env.repository;
 import java.util.HashMap;
 import java.util.Map;
 
-import com.caucho.util.Alarm;
 import com.caucho.util.CurrentTime;
 import com.caucho.util.L10N;
 import com.caucho.util.QDate;

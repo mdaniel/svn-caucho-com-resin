@@ -406,7 +406,7 @@ public class DataStore {
         InputStream is = rs.getBinaryStream(1);
         
         if (is == null) {
-          System.out.println("MISSING-DATA FOR ID: " + id);
+          System.out.println(Thread.currentThread().getName() + " MISSING-DATA FOR ID: " + Long.toHexString(id));
 
           return null;
         }
@@ -542,7 +542,7 @@ public class DataStore {
       int count = stmt.executeUpdate();
 
       // System.out.println("INSERT: " + id);
-      
+
       if (count > 0) {
         _entryCount.addAndGet(-1);
         

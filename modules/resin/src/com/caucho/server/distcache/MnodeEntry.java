@@ -79,7 +79,7 @@ public final class MnodeEntry extends MnodeValue {
                     long valueDataId,
                     Object value,
                     long lastAccessTime,
-                    long lastUpdateTime,
+                    long lastModifiedTime,
                     boolean isServerVersionValid,
                     boolean isImplicitNull)
   {
@@ -91,7 +91,7 @@ public final class MnodeEntry extends MnodeValue {
     _valueDataId = valueDataId;
     
     _lastRemoteAccessTime = lastAccessTime;
-    _lastModifiedTime = lastUpdateTime;
+    _lastModifiedTime = lastModifiedTime;
     
     // server/0165
     // _lastAccessTime = CurrentTime.getCurrentTime();
@@ -114,7 +114,7 @@ public final class MnodeEntry extends MnodeValue {
                     long valueDataId,
                     Object value,
                     long lastAccessTime,
-                    long lastUpdateTime,
+                    long lastModifiedTime,
                     boolean isServerVersionValid,
                     boolean isImplicitNull,
                     int leaseOwner)
@@ -130,7 +130,7 @@ public final class MnodeEntry extends MnodeValue {
          valueDataId,
          value,
          lastAccessTime,
-         lastUpdateTime,
+         lastModifiedTime,
          isServerVersionValid,
          isImplicitNull);
     
@@ -142,7 +142,7 @@ public final class MnodeEntry extends MnodeValue {
   public MnodeEntry(MnodeEntry oldMnodeValue,
                     long valueDataId,
                     long accessTimeout,
-                    long lastUpdateTime)
+                    long lastAccessTime)
   {
     super(oldMnodeValue.getValueHash(),
           oldMnodeValue.getValueLength(),
@@ -155,10 +155,10 @@ public final class MnodeEntry extends MnodeValue {
     
     _valueDataId = valueDataId;
     
-    _lastRemoteAccessTime = lastUpdateTime;
-    _lastModifiedTime = lastUpdateTime;
-    
+    _lastRemoteAccessTime = lastAccessTime;
     _lastAccessTime = CurrentTime.getCurrentTime();
+    
+    _lastModifiedTime = oldMnodeValue._lastModifiedTime;
 
     _leaseExpireTime = oldMnodeValue._leaseExpireTime;
     _leaseOwner = oldMnodeValue._leaseOwner;

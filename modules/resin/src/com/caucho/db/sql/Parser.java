@@ -30,6 +30,7 @@ package com.caucho.db.sql;
 
 import com.caucho.db.Database;
 import com.caucho.db.table.Column;
+import com.caucho.db.table.Column.ColumnType;
 import com.caucho.db.table.Table;
 import com.caucho.db.table.TableFactory;
 import com.caucho.inject.Module;
@@ -1056,10 +1057,11 @@ public class Parser {
       token = scanToken();
     }
     else {
-      Column []columnArray = table.getColumns();
-
-      for (int i = 0; i < columnArray.length; i++)
-        columns.add(columnArray[i]);
+      for (Column column : table.getColumns()) {
+        if (column.getTypeCode() != ColumnType.IDENTITY) {
+          columns.add(column);
+        }
+      }
     }
 
     if (token != VALUES)

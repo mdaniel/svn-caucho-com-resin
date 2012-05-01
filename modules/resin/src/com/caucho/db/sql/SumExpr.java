@@ -61,7 +61,7 @@ public class SumExpr extends FunExpr implements GroupExpr {
     return this;
   }
 
-  public Class getType()
+  public Class<?> getType()
   {
     if (_expr.isLong())
       return long.class;
