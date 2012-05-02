@@ -75,9 +75,6 @@ public class MnodeStore {
   private String _updateSaveQuery;
   private String _updateAccessTimeQuery;
 
-  // private String _updateVersionQuery;
-
-  private String _expireQuery;
   private String _selectExpireQuery;
 
   private String _countQuery;
@@ -208,15 +205,6 @@ public class MnodeStore {
       = ("UPDATE " + _tableName
          + " SET access_timeout=?,access_time=?"
          + " WHERE id=? AND item_version=?");
-
-/*
-    _updateVersionQuery = ("UPDATE " + _tableName
-                           + " SET update_time=?, server_version=?"
-                           + " WHERE id=? AND value=?");
-*/
-    _expireQuery = ("DELETE FROM " + _tableName
-                     + " WHERE access_time + 5 * access_timeout / 4 < ?"
-                     + " OR modified_time + modified_timeout < ?");
 
     _selectExpireQuery = ("SELECT id,value_data_id FROM " + _tableName
                           + " WHERE access_time + 5 * access_timeout / 4 < ?"
@@ -908,7 +896,7 @@ public class MnodeStore {
     return getClass().getSimpleName() +  "[" + _serverName + "]";
   }
 
-  class CacheMapConnection {
+  private class CacheMapConnection {
     private Connection _conn;
 
     private PreparedStatement _loadStatement;
@@ -917,9 +905,6 @@ public class MnodeStore {
     private PreparedStatement _updateSaveStatement;
     private PreparedStatement _updateAccessTimeStatement;
 
-    private PreparedStatement _updateVersionStatement;
-
-    private PreparedStatement _expireStatement;
     private PreparedStatement _selectExpireStatement;
     private PreparedStatement _deleteStatement;
 
@@ -966,26 +951,6 @@ public class MnodeStore {
       }
 
       return _updateAccessTimeStatement;
-    }
-
-    /*
-    PreparedStatement prepareUpdateVersion()
-      throws SQLException
-    {
-      if (_updateVersionStatement == null)
-        _updateVersionStatement = _conn.prepareStatement(_updateVersionQuery);
-
-      return _updateVersionStatement;
-    }
-    */
-
-    PreparedStatement prepareExpire()
-      throws SQLException
-    {
-      if (_expireStatement == null)
-        _expireStatement = _conn.prepareStatement(_expireQuery);
-
-      return _expireStatement;
     }
 
     PreparedStatement prepareSelectExpire()

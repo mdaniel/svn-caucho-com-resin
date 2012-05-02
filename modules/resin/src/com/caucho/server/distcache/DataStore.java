@@ -79,12 +79,8 @@ public class DataStore {
 
   private final String _insertQuery;
   private final String _loadQuery;
-  private final String _dataAvailableQuery;
-  // private final String _updateExpiresQuery;
-  // private final String _updateAllExpiresQuery;
   private final String _selectOrphanQuery;
   private final String _deleteQuery;
-  // private final String _deleteTimeoutQuery;
   private final String _validateQuery;
 
   private final String _countQuery;
@@ -117,33 +113,9 @@ public class DataStore {
                   + " FROM " + _tableName
                   + " WHERE id=?");
 
-    _dataAvailableQuery = ("SELECT 1"
-                           + " FROM " + _tableName
-                           + " WHERE id=?");
-
     _insertQuery = ("INSERT into " + _tableName
                     + " (data) "
                     + "VALUES(?)");
-
-    /*
-    // XXX: add random component to expire time?
-    _updateExpiresQuery = ("UPDATE " + _tableName
-                           + " SET expire_time=?"
-                           + " WHERE id=?");
-                           */
-
-    /*
-    _updateAllExpiresQuery = ("SELECT d.expire_time, d.resin_oid, m.value"
-                              + " FROM " + _mnodeTableName + " AS m,"
-                              + "  " + _tableName + " AS d"
-                              + " WHERE m.value = d.id");
-                              */
-    /*
-    _updateAllExpiresQuery = ("SELECT d.expire_time, d.resin_oid, m.value"
-                              + " FROM " + _mnodeTableName + " AS m"
-                              + " LEFT JOIN " + _tableName + " AS d"
-                              + " ON(m.value = d.id)");
-                              */
 
     _selectOrphanQuery = ("SELECT m.value_data_id, d.id"
                               + " FROM " + _mnodeTableName + " AS m"
@@ -564,48 +536,6 @@ public class DataStore {
   }
 
   /**
-   * Clears the expired data
-   */
-  /*
-  public void removeExpiredData()
-  {
-    validateDatabase();
-
-    long now = CurrentTime.getCurrentTime();
-
-    updateExpire(now);
-    
-    // selectOrphans();
-
-    DataConnection conn = null;
-
-    try {
-      conn = getConnection();
-
-      PreparedStatement pstmt = conn.prepareDeleteTimeout();
-
-      pstmt.setLong(1, now);
-
-      int count = pstmt.executeUpdate();
-
-      if (count > 0) {
-        log.finer(this + " expired " + count + " old data");
-      
-        _entryCount.addAndGet(-count);
-      }
-
-      // System.out.println(this + " EXPIRE: " + count);
-    } catch (SQLException e) {
-      e.printStackTrace();
-      log.log(Level.FINE, e.toString(), e);
-    } finally {
-      if (conn != null)
-        conn.close();
-    }
-  }
-  */
-
-  /**
    * Update used expire times.
    */
   private void deleteOrphans()
@@ -825,16 +755,12 @@ public class DataStore {
     }
   }
 
-  class DataConnection {
+  private class DataConnection {
     private Connection _conn;
 
     private PreparedStatement _loadStatement;
-    private PreparedStatement _dataAvailableStatement;
     private PreparedStatement _insertStatement;
-    private PreparedStatement _updateAllExpiresStatement;
     private PreparedStatement _selectOrphanStatement;
-    private PreparedStatement _updateExpiresStatement;
-    private PreparedStatement _deleteTimeoutStatement;
     private PreparedStatement _deleteStatement;
     private PreparedStatement _validateStatement;
 
@@ -854,15 +780,6 @@ public class DataStore {
       return _loadStatement;
     }
 
-    PreparedStatement prepareDataAvailable()
-      throws SQLException
-    {
-      if (_dataAvailableStatement == null)
-        _dataAvailableStatement = _conn.prepareStatement(_dataAvailableQuery);
-
-      return _dataAvailableStatement;
-    }
-
     PreparedStatement prepareInsert()
       throws SQLException
     {
@@ -874,19 +791,6 @@ public class DataStore {
       return _insertStatement;
     }
 
-    /*
-    PreparedStatement prepareUpdateAllExpires()
-      throws SQLException
-    {
-      if (_updateAllExpiresStatement == null)
-        _updateAllExpiresStatement = _conn.prepareStatement(_updateAllExpiresQuery,
-                                                            TYPE_FORWARD_ONLY,
-                                                            CONCUR_UPDATABLE);
-
-      return _updateAllExpiresStatement;
-    }
-    */
-
     PreparedStatement prepareSelectOrphan()
       throws SQLException
     {
@@ -895,26 +799,6 @@ public class DataStore {
 
       return _selectOrphanStatement;
     }
-
-    /*
-    PreparedStatement prepareUpdateExpires()
-      throws SQLException
-    {
-      if (_updateExpiresStatement == null)
-        _updateExpiresStatement = _conn.prepareStatement(_updateExpiresQuery);
-
-      return _updateExpiresStatement;
-    }
-
-    PreparedStatement prepareDeleteTimeout()
-      throws SQLException
-    {
-      if (_deleteTimeoutStatement == null)
-        _deleteTimeoutStatement = _conn.prepareStatement(_deleteTimeoutQuery);
-
-      return _deleteTimeoutStatement;
-    }
-    */
 
     PreparedStatement prepareDelete()
       throws SQLException

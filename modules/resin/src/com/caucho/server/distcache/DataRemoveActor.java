@@ -31,6 +31,7 @@ package com.caucho.server.distcache;
 
 import java.util.concurrent.LinkedBlockingQueue;
 
+import com.caucho.env.service.ResinSystem;
 import com.caucho.env.thread.AbstractTaskWorker;
 import com.caucho.util.CurrentTime;
 
@@ -39,12 +40,14 @@ import com.caucho.util.CurrentTime;
  */
 public class DataRemoveActor extends AbstractTaskWorker {
   private final DataStore _dataStore;
+  private final String _serverId;
   
   private final LinkedBlockingQueue<RemoveItem> _queue
     = new LinkedBlockingQueue<RemoveItem>();
   
   DataRemoveActor(DataStore dataStore)
   {
+    _serverId = ResinSystem.getCurrentId();
     _dataStore = dataStore;
   }
   
@@ -82,6 +85,12 @@ public class DataRemoveActor extends AbstractTaskWorker {
     }
     
     return 0;
+  }
+  
+  @Override
+  public String toString()
+  {
+    return getClass().getSimpleName() + "[" + _serverId + "]";
   }
   
   static final class RemoveItem {

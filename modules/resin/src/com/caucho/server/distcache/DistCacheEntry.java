@@ -365,6 +365,10 @@ public class DistCacheEntry {
     if (update.getVersion() < entry.getVersion()) {
       return false;
     }
+    else if (update.getVersion() == entry.getVersion()
+             && update.getValueHash() == entry.getValueHash()) {
+      return false;
+    }
     
     MnodeValue newValue = putLocalValue(update, is);
     
