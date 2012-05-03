@@ -94,6 +94,7 @@ public class Jar implements CacheListener {
   // cached zip file to read jar entries
   private final AtomicReference<SoftReference<ZipFile>> _zipFileRef
     = new AtomicReference<SoftReference<ZipFile>>();
+  private ZipFile _lastIncarnate;
     
   private Boolean _isSigned;
 
@@ -515,13 +516,20 @@ public class Jar implements CacheListener {
     if (zipFileRef != null)
       zipFile = zipFileRef.get();
 
-    try {
-      // System.out.println("Clear: " + zipFile + " " + this);
-      if (zipFile != null) {
-        zipFile.close();
+    ZipFile lastIncarnate = _lastIncarnate;
+    _lastIncarnate = null;
+
+    if (lastIncarnate != null)
+      try {
+        lastIncarnate.close();
+      } catch (Exception e) {
       }
-    } catch (Exception e) {
-    }
+
+    if (zipFile != null && lastIncarnate != zipFile)
+      try {
+        zipFile.close();
+      } catch (Exception e) {
+      }
   }
 
   public ZipEntry getZipEntry(String path)
@@ -673,7 +681,7 @@ public class Jar implements CacheListener {
       return;
 
     SoftReference<ZipFile> oldZipFileRef = _zipFileRef.get();
-    
+
     if (false) {
       
     }
@@ -681,6 +689,8 @@ public class Jar implements CacheListener {
       SoftReference<ZipFile> zipFileRef = new SoftReference<ZipFile>(zipFile);
       
       if (_zipFileRef.compareAndSet(oldZipFileRef, zipFileRef)) {
+        _lastIncarnate = zipFile;
+
         return;
       }
     }
