@@ -85,7 +85,9 @@ class BamProxyHandler implements InvocationHandler
       
       if (param.length > 0
           && ReplyCallback.class.isAssignableFrom(param[param.length - 1])) {
-        call = new ReplyCallbackCall(m.getName(), param.length - 1);
+        call = new ReplyCallbackCall(m.getName(), 
+                                     param.length - 1,
+                                     nullResult);
       }
       else if (param.length > 0
             && QueryCallback.class.isAssignableFrom(param[param.length - 1])) {
@@ -169,11 +171,13 @@ class BamProxyHandler implements InvocationHandler
   static class ReplyCallbackCall extends Call {
     private final String _name;
     private final int _paramLen;
+    private final Object _nullResult;
     
-    ReplyCallbackCall(String name, int paramLen)
+    ReplyCallbackCall(String name, int paramLen, Object nullResult)
     {
       _name = name;
       _paramLen = paramLen;
+      _nullResult = nullResult;
     }
     
     @Override
@@ -193,7 +197,7 @@ class BamProxyHandler implements InvocationHandler
 
       sender.query(to, payload, callCb);
       
-      return null;
+      return _nullResult;
     }
   }
   
