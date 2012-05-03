@@ -48,14 +48,13 @@ import java.util.logging.Logger;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipFile;
 
+import com.caucho.loader.Environment;
 import com.caucho.loader.EnvironmentLocal;
 import com.caucho.make.CachedDependency;
-import com.caucho.util.Alarm;
 import com.caucho.util.CacheListener;
 import com.caucho.util.CurrentTime;
 import com.caucho.util.IoUtil;
 import com.caucho.util.L10N;
-import com.caucho.util.Log;
 import com.caucho.util.LruCache;
 
 /**
@@ -596,6 +595,8 @@ public class Jar implements CacheListener {
     
     try {
       jarFile = new JarFile(_backing.getNativePath());
+
+      Environment.addCloseListener(jarFile);
         
         /*
         if (_backing.getNativePath().indexOf("cssparser.jar") > 0)
@@ -648,6 +649,8 @@ public class Jar implements CacheListener {
     if (_backingIsFile) {
       try {
         zipFile = new ZipFile(_backing.getNativePath());
+
+        Environment.addCloseListener(zipFile);
        
         /*
         if (_backing.getNativePath().indexOf("cssparser") >= 0) {

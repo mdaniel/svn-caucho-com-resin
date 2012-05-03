@@ -74,4 +74,8 @@ public class DeployControllerState extends ManagementQueryReply
   {
     _tag = tag;
   }
+
+  public String toString() {
+    return this.getClass().getSimpleName() + "[" + _tag + ", " + _state + "]";
+  }
 }
