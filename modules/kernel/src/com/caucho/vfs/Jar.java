@@ -32,7 +32,6 @@ package com.caucho.vfs;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStream;
-import java.lang.ref.SoftReference;
 import java.security.cert.Certificate;
 import java.util.ArrayList;
 import java.util.Iterator;
@@ -92,16 +91,15 @@ public class Jar implements CacheListener {
   private long _lastTime;
 
   // cached zip file to read jar entries
-  private final AtomicReference<SoftReference<ZipFile>> _zipFileRef
-    = new AtomicReference<SoftReference<ZipFile>>();
-  private ZipFile _lastIncarnate;
-    
+  private final AtomicReference<ZipFile> _zipFileRef
+    = new AtomicReference<ZipFile>();
+
   private Boolean _isSigned;
 
   /**
    * Creates a new Jar.
    *
-   * @param path canonical path
+   * @param backing canonical path
    */
   private Jar(Path backing)
   {
@@ -257,9 +255,8 @@ public class Jar implements CacheListener {
   }
 
   /**
-   * Returns true if the entry is a file in the jar.
+   * Returns Manifest
    *
-   * @param path the path name inside the jar.
    */
   public Manifest getManifest()
     throws IOException
@@ -510,22 +507,9 @@ public class Jar implements CacheListener {
    */
   public void clearCache()
   {
-    SoftReference<ZipFile> zipFileRef = _zipFileRef.getAndSet(null);
+    ZipFile zipFile = _zipFileRef.getAndSet(null);
 
-    ZipFile zipFile = null;
-    if (zipFileRef != null)
-      zipFile = zipFileRef.get();
-
-    ZipFile lastIncarnate = _lastIncarnate;
-    _lastIncarnate = null;
-
-    if (lastIncarnate != null)
-      try {
-        lastIncarnate.close();
-      } catch (Exception e) {
-      }
-
-    if (zipFile != null && lastIncarnate != zipFile)
+    if (zipFile != null)
       try {
         zipFile.close();
       } catch (Exception e) {
@@ -637,20 +621,13 @@ public class Jar implements CacheListener {
   public ZipFile getZipFile()
     throws IOException
   {
-    ZipFile zipFile = null;
-
     isCacheValid();
-    
-    SoftReference<ZipFile> zipFileRef = _zipFileRef.getAndSet(null);
 
-    if (zipFileRef != null) {
-      zipFile = zipFileRef.get();
+    ZipFile zipFile = _zipFileRef.getAndSet(null);
 
-      if (zipFile != null) {
-        return zipFile;
-      }
-    }
-    
+    if (zipFile != null)
+      return zipFile;
+
     if (_backingIsFile) {
       try {
         zipFile = new ZipFile(_backing.getNativePath());
@@ -680,21 +657,9 @@ public class Jar implements CacheListener {
     if (zipFile == null)
       return;
 
-    SoftReference<ZipFile> oldZipFileRef = _zipFileRef.get();
+    if (_zipFileRef.compareAndSet(null, zipFile))
+      return;
 
-    if (false) {
-      
-    }
-    else if (oldZipFileRef == null || oldZipFileRef.get() == null) {
-      SoftReference<ZipFile> zipFileRef = new SoftReference<ZipFile>(zipFile);
-      
-      if (_zipFileRef.compareAndSet(oldZipFileRef, zipFileRef)) {
-        _lastIncarnate = zipFile;
-
-        return;
-      }
-    }
-    
     try {
       /*
       if (_backing.getNativePath().indexOf("cssparser") >= 0)
@@ -710,7 +675,6 @@ public class Jar implements CacheListener {
   /**
    * Returns the last modified time for the path.
    *
-   * @param path path into the jar.
    *
    * @return the last modified time of the jar in milliseconds.
    */
@@ -724,7 +688,6 @@ public class Jar implements CacheListener {
   /**
    * Returns the last modified time for the path.
    *
-   * @param path path into the jar.
    *
    * @return the last modified time of the jar in milliseconds.
    */
@@ -836,9 +799,10 @@ public class Jar implements CacheListener {
     /**
      * Create the new stream  impl.
      *
+     * @param zipFile
+     * @param zipEntry
      * @param zis the underlying zip stream.
-     * @param is the backing stream.
-     * @param path the path to the jar entry.
+     * @param pathName
      */
     ZipStreamImpl(ZipFile zipFile,
                   ZipEntry zipEntry,
@@ -929,7 +893,7 @@ public class Jar implements CacheListener {
     /**
      * Create a new dependency.
      *
-     * @param source the source file
+     * @param depend the source file
      */
     JarDepend(Depend depend)
     {
@@ -939,7 +903,7 @@ public class Jar implements CacheListener {
     /**
      * Create a new dependency.
      *
-     * @param source the source file
+     * @param depend the source file
      */
     JarDepend(Depend depend, long digest)
     {
@@ -1007,7 +971,7 @@ public class Jar implements CacheListener {
     /**
      * Create a new dependency.
      *
-     * @param source the source file
+     * @param jarDepend the source file
      */
     JarDigestDepend(JarDepend jarDepend, long digest)
     {
