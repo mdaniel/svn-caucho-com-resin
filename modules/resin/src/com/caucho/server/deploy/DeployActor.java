@@ -205,7 +205,7 @@ public class DeployActor
     return true;
   }
 
-  public String []getFileList(String tag, String fileName)
+  public String []listFiles(String tag, String fileName)
     throws IOException
   {
     if (log.isLoggable(Level.FINER)) {
@@ -323,11 +323,11 @@ public class DeployActor
 
     Pattern pattern = Pattern.compile(regexp);
 
-    for (Map.Entry<String, RepositoryTagEntry> entry :
-         _repository.getTagMap().entrySet()) {
+    for (Map.Entry<String, RepositoryTagEntry> entry
+          :  _repository.getTagMap().entrySet()) {
       String tag = entry.getKey();
 
-      if (pattern.matcher(tag).matches()) {
+      if (pattern.matcher(tag).find()) {
         tags.add(new DeployTagResult(tag, entry.getValue().getRoot()));
       }
     }

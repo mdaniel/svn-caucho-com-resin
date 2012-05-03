@@ -49,7 +49,8 @@ public class HmuxProtocol extends AbstractHttpProtocol {
   private HashMap<Integer,HmuxExtension> _extensionMap
     = new HashMap<Integer,HmuxExtension>();
 
-  private HmuxProtocol()
+  // public for server/69g0
+  public HmuxProtocol()
   {
     setProtocolName("server");
 

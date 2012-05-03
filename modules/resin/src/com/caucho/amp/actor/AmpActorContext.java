@@ -30,6 +30,7 @@
 package com.caucho.amp.actor;
 
 import com.caucho.amp.AmpQueryCallback;
+import com.caucho.amp.mailbox.AmpMailbox;
 import com.caucho.amp.stream.AmpEncoder;
 import com.caucho.amp.stream.AmpStream;
 
@@ -55,8 +56,10 @@ abstract public class AmpActorContext
     else
       return systemContext;
   }
-  
+ 
   abstract public String getAddress();
+  
+  abstract public AmpMailbox getMailbox();
   
   abstract public AmpActorRef getActorRef();
   

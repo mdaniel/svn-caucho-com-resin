@@ -64,7 +64,7 @@ public class AddLicenseAction implements AdminAction
       cl = Class.forName("com.caucho.license.LicenseCheckImpl");
     }
     catch (ClassNotFoundException e) {
-      throw new ConfigException(L.l("add-license requires Resin Professional"), e);
+      throw new ConfigException(L.l("add-license requires the Resin Professional download"), e);
     }
 
     File licenseDir = Resin.getCurrent().getLicenseStore().getLicenseDirectory();

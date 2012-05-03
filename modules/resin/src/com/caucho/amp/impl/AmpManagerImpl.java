@@ -140,9 +140,9 @@ public class AmpManagerImpl implements AmpManager
   {
     AmpActorContext actorContext = createActorContext(address, actor);
     
-    AmpMailbox mailbox = getMailboxFactory().createMailbox(actorContext);
+    // AmpMailbox mailbox = getMailboxFactory().createMailbox(actorContext);
     
-    return getBroker().addMailbox(address, mailbox);
+    return getBroker().addMailbox(address, actorContext.getMailbox());
   }
   
   @Override

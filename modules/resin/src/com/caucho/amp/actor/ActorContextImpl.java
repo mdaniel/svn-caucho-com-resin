@@ -278,7 +278,7 @@ public final class ActorContextImpl extends AmpActorContext
   @Override
   public String toString()
   {
-    return getClass().getSimpleName() + "[]";
+    return getClass().getSimpleName() + "[" + getAddress() + "]";
   }
 
   static final class QueryItem {
@@ -324,118 +324,6 @@ public final class ActorContextImpl extends AmpActorContext
       return getClass().getSimpleName() + "[" + _id + "," + _callback + "]";
     }
   }
-
-  /*
-  static final class QueryFutureImpl implements QueryCallback, QueryFuture {
-    private final long _id;
-    private final String _to;
-    private final String _from;
-    private final Serializable _payload;
-    private final long _timeout;
-
-    private volatile Serializable _result;
-    private volatile BamError _error;
-    private final AtomicBoolean _isResult = new AtomicBoolean();
-    private volatile Thread _thread;
-
-    QueryFutureImpl(long id,
-                    String to,
-                    String from,
-                    Serializable payload,
-                    long timeout)
-    {
-      _id = id;
-      _to = to;
-      _from = from;
-      _payload = payload;
-      _timeout = timeout;
-    }
-
-    public Serializable getResult()
-    {
-      return _result;
-    }
-
-    @Override
-    public Serializable get()
-      throws TimeoutException, BamException
-    {
-      if (! waitFor(_timeout)) {
-        throw new TimeoutException(this + " query timeout " + _payload
-                                   + " {to:" + _to + "}");
-      }
-      else if (getError() != null) {
-        ErrorPacketException exn = getError().createException();
-        
-        if (exn.getSourceException() instanceof RuntimeException)
-          throw (RuntimeException) exn.getSourceException();
-        else
-          throw exn;
-      }
-      else
-        return getResult();
-    }
-
-    public BamError getError()
-    {
-      return _error;
-    }
-
-    boolean waitFor(long timeout)
-    {
-      _thread = Thread.currentThread();
-      long now = CurrentTime.getCurrentTimeActual();
-      long expires = now + timeout;
-
-      while (! _isResult.get() && CurrentTime.getCurrentTimeActual() < expires) {
-        try {
-          Thread.interrupted();
-          LockSupport.parkUntil(expires);
-        } catch (Exception e) {
-        }
-      }
-      
-      _thread = null;
-
-      return _isResult.get();
-    }
-
-    public void onQueryResult(String to,
-                              String from,
-                              AmpHeaders headers,
-                              AmpEncoder encoder,
-                              Object result)
-    {
-      _result = payload;
-      _isResult.set(true);
-
-      Thread thread = _thread;
-      if (thread != null)
-        LockSupport.unpark(thread);
-    }
-
-    @Override
-    public void onQueryError(String fromAddress, String toAddress,
-                             Serializable payload, BamError error)
-    {
-      _error = error;
-      _isResult.set(true);
-
-      Thread thread = _thread;
-      if (thread != null)
-        LockSupport.unpark(thread);
-    }
-    
-    @Override
-    public String toString()
-    {
-      return (getClass().getSimpleName()
-              + "[to=" + _to 
-              + ",from=" + _from
-              + ",payload=" + _payload + "]");
-    }
-  }
-  */
 
   /* (non-Javadoc)
    * @see com.caucho.util.AlarmListener#handleAlarm(com.caucho.util.Alarm)

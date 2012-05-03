@@ -565,6 +565,16 @@ public class DeployClient implements Repository
   }
 
   /* (non-Javadoc)
+   * @see com.caucho.env.repository.Repository#removeNotificationListener(java.lang.String, com.caucho.env.repository.RepositoryTagListener)
+   */
+  @Override
+  public void removeListener(String tagName, RepositoryTagListener listener)
+  {
+    // TODO Auto-generated method stub
+    
+  }
+
+  /* (non-Javadoc)
    * @see com.caucho.env.repository.Repository#getTagMap()
    */
   @Override
@@ -574,16 +584,6 @@ public class DeployClient implements Repository
     return null;
   }
 
-  /* (non-Javadoc)
-   * @see com.caucho.env.repository.Repository#removeNotificationListener(java.lang.String, com.caucho.env.repository.RepositoryTagListener)
-   */
-  @Override
-  public void removeListener(String tagName, RepositoryTagListener listener)
-  {
-    // TODO Auto-generated method stub
-    
-  }
-  
   class SendQueryCallback implements QueryCallback {
     private ArrayList<String> _list;
     

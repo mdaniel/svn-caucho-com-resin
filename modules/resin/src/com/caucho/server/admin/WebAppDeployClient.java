@@ -29,12 +29,8 @@
 package com.caucho.server.admin;
 
 import com.caucho.bam.actor.ActorSender;
-import com.caucho.bam.actor.RemoteActorSender;
-import com.caucho.config.ConfigException;
-import com.caucho.env.repository.CommitBuilder;
 import com.caucho.server.deploy.DeployClient;
 import com.caucho.server.resin.Resin;
-import com.caucho.util.L10N;
 import com.caucho.util.QDate;
 
 /**
@@ -42,8 +38,6 @@ import com.caucho.util.QDate;
  */
 public class WebAppDeployClient extends DeployClient
 {
-  private static final L10N L = new L10N(WebAppDeployClient.class);
-
   public WebAppDeployClient()
   {
     super(Resin.getCurrentServerId());

@@ -104,9 +104,14 @@ public class CloudServer {
     _pod = pod;
     _index = index;
     
-    if (index < 0 || index >= 64)
+    if (index < 0) {
       throw new IllegalArgumentException(L.l("'{0}' is an invalid server index because it must be between 0 and 64",
                                             index));
+    }
+    else if (index >= 64) {
+      throw new IllegalArgumentException(L.l("'{0}' is an invalid server index because it would configure more than 64 servers to the pod. Clusters with more than 64 servers must be split into multiple pods.",
+                                            index));
+    }
     
     if (! isStatic.isStatic() && index == 0)
       throw new IllegalArgumentException(L.l("The first server must be static."));

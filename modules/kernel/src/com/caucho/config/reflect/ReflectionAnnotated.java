@@ -72,8 +72,10 @@ public class ReflectionAnnotated implements Annotated, BaseTypeAnnotated
         }
       }
 
-      _annArray = new Annotation[_annSet.size()];
-      _annSet.toArray(_annArray);
+      Annotation []annArray = new Annotation[_annSet.size()];
+      _annSet.toArray(annArray);
+      
+      _annArray = annArray;
     }
     else {
       _annSet = _emptyAnnSet;
@@ -137,6 +139,7 @@ public class ReflectionAnnotated implements Annotated, BaseTypeAnnotated
   /**
    * Returns the matching annotation
    */
+  @Override
   public <T extends Annotation> T getAnnotation(Class<T> annType)
   {
     for (Annotation ann : _annArray) {
@@ -160,8 +163,10 @@ public class ReflectionAnnotated implements Annotated, BaseTypeAnnotated
 
     synchronized (_annSet) {
       _annSet.add(ann);
-      _annArray = new Annotation[_annSet.size()];
-      _annSet.toArray(_annArray);
+      Annotation []annArray = new Annotation[_annSet.size()];
+      _annSet.toArray(annArray);
+      
+      _annArray = annArray;
     }
   }
 

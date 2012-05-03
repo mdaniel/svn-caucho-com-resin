@@ -40,7 +40,7 @@ public class EnableCommand extends AbstractManagementCommand
   @Override
   public String getDescription()
   {
-    return "disables a server for http/load-balancing";
+    return "enables a server for http/load-balancing";
   }
 
   @Override
