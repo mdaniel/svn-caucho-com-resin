@@ -64,7 +64,7 @@ namespace Caucho
         if (addressList == null)
           continue;
 
-        addresses = addressList.Split(';');
+        addresses = addressList.Split(new Char[] {';' , ' '});
 
         for (int i = 0; i < addresses.Length; i++)
         {
