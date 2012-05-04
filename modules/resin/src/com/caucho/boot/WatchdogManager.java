@@ -466,24 +466,34 @@ class WatchdogManager implements AlarmListener {
         throw ConfigException.create(e);
       }
       
-      serverId = getServerId(serverId, args);
-      WatchdogChild watchdog = _watchdogMap.get(serverId);
-
-      if (watchdog == null) {
-        // env/0fp7
-        watchdog = _watchdogMap.get("default");
-      }
-
-      if (watchdog == null)
-        throw new ConfigException(L().l("No matching <server> found for start -server '{0}' in '{1}'",
-                                        serverId, _args.getResinConf()));
-
-      watchdog.start();
+      startServer(serverId, args);
     }
     
     return serverId;
   }
 
+  void startServer(String serverId, WatchdogArgs args)
+  {
+    // server/6e09
+    String defaultServerId = getServerId(serverId, args);
+    WatchdogChild watchdog = getWatchdog(defaultServerId);
+
+    if (watchdog == null) {
+      watchdog = getWatchdog(serverId);
+      // env/0fp7
+      
+      if (watchdog == null) {
+        watchdog = _watchdogMap.get("default");
+      }
+    }
+
+    if (watchdog == null)
+      throw new ConfigException(L().l("No matching <server> found for start -server '{0}' in '{1}'",
+                                      serverId, _args.getResinConf()));
+
+    watchdog.start();
+
+  }
   /**
    * Called from the hessian API to gracefully stop a Resin instance
    *
@@ -527,7 +537,7 @@ class WatchdogManager implements AlarmListener {
         && _watchdogMap.size() == 1) {
       watchdog = _watchdogMap.values().iterator().next();
     }
-    
+
     return watchdog;
   }
 

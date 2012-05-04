@@ -295,7 +295,8 @@ public class BootResinConfig // implements EnvironmentBean
     
     ArrayList<WatchdogClient> clientList = findLocalClients(serverId);
     
-    if (clientList.size() == 1) {
+    if (clientList.size() == 1
+        || clientList.size() > 0 && _args.getCommand().isStart()) {
       client = clientList.get(0);
       
       // server/6e10
@@ -322,13 +323,21 @@ public class BootResinConfig // implements EnvironmentBean
     }
 
     if (client == null) {
-      throw new ConfigException(L.l("Resin/{0}: default server cannot find a unique <server> or <server-multi>\nin {2}.",
+      throw new ConfigException(L.l("Resin/{0}: server '{1}' does not match a unique <server> or <server-multi>\nin {2}.",
                                     VersionFactory.getVersion(), 
-                                    _args.getServerId(), 
+                                    getDisplayServerName(_args.getServerId()), 
                                     _args.getResinConf()));
     }
     
     return client;
+  }
+  
+  private String getDisplayServerName(String name)
+  {
+    if (name == null || "".equals(name))
+      return "default";
+    else
+      return name;
   }
   
   boolean isDynamicServer(WatchdogArgs args)

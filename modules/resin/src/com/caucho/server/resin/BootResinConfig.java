@@ -60,6 +60,9 @@ public class BootResinConfig implements SchemaBean, DependencyBean
   
   private String _clusterSystemKey;
   
+  private String _homeServer;
+  private String _homeCluster;
+  
   private ContainerProgram _resinProgram
     = new ContainerProgram();
 
@@ -111,6 +114,26 @@ public class BootResinConfig implements SchemaBean, DependencyBean
     return _clusterSystemKey;
   }
   
+  public void setHomeServer(String homeServer)
+  {
+    _homeServer = homeServer;
+  }
+  
+  public String getHomeServer()
+  {
+    return _homeServer;
+  }
+  
+  public void setHomeCluster(String homeCluster)
+  {
+    _homeCluster = homeCluster;
+  }
+  
+  public String getHomeCluster()
+  {
+    return _homeCluster;
+  }
+  
   /**
    * Adds a <cluster-default> for default cluster configuration.
    */
@@ -151,6 +174,10 @@ public class BootResinConfig implements SchemaBean, DependencyBean
 
   public BootClusterConfig findCluster(String id)
   {
+    if (id == null) {
+      return null;
+    }
+    
     for (BootClusterConfig cluster : _clusters) {
       if (id.equals(cluster.getId())) {
         return cluster;

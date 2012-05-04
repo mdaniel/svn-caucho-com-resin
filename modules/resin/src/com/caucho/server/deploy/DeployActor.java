@@ -436,13 +436,17 @@ public class DeployActor
     return controller.getState();
   }
 
-  public DeployControllerState controllerRestart(String tag)
+  public void controllerRestart(String tag,
+                                ReplyCallback<DeployControllerState> cb)
   {
-    return restart(tag);
+    restart(tag, cb);
   }
 
-  public DeployControllerState restart(String tag)
+  public void restart(String tag,
+                      ReplyCallback<DeployControllerState> cb)
   {
+    restartImpl(tag, cb);
+    /*
     LifecycleState state = restartImpl(tag);
 
     DeployControllerState result
@@ -455,6 +459,7 @@ public class DeployActor
              + state.getStateName());
 
     return result;
+    */
   }
 
   public void restartCluster(String tag,
@@ -463,7 +468,8 @@ public class DeployActor
     throw new UnsupportedOperationException(getClass().getName());
   }
 
-  private LifecycleState restartImpl(String tag)
+  private void restartImpl(final String tag,
+                           final ReplyCallback<DeployControllerState> cb)
   {
     DeployControllerService service = DeployControllerService.getCurrent();
 
@@ -474,12 +480,17 @@ public class DeployActor
                                              tag));
 
     ThreadPool.getCurrent().schedule(new Runnable() {
+      @Override
       public void run() {
-        controller.toRestart();
+        try {
+          controller.toRestart();
+        } finally {
+          cb.onReply(new DeployControllerState(tag, controller.getState()));
+        }
       }
     });
 
-    return controller.getState();
+    // return controller.getState();
   }
   
   public String getUid()

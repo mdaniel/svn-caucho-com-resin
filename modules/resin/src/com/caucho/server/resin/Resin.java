@@ -387,7 +387,12 @@ public class Resin
    */
   public String getHomeCluster()
   {
-    return _homeCluster;
+    if (_homeCluster != null)
+      return _homeCluster;
+    else if (_bootResinConfig != null)
+      return _bootResinConfig.getHomeCluster();
+    else
+      return null;
   }
   
   public String getClusterSystemKey()
@@ -942,7 +947,7 @@ public class Resin
   
   private BootServerConfig joinCluster(CloudSystem cloudSystem)
   {
-    String clusterId = _homeCluster;
+    String clusterId = getHomeCluster();
     
     BootResinConfig bootResin = _bootResinConfig;
     

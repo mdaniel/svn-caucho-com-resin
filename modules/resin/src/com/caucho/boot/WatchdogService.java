@@ -226,6 +226,11 @@ class WatchdogService
       return new ResultStatus(false, msg);
     }
   }
+  
+  public String toString()
+  {
+    return getClass().getSimpleName() + "[]";
+  }
 
   static class Shutdown implements Runnable {
     @Override
