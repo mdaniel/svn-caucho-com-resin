@@ -395,10 +395,6 @@ public class JdbcStatementResource
 
   public JdbcResultResource getResultSet()
   {
-    if (_rs == null) {
-      return null;
-    }
-
     return _rs;
   }
 

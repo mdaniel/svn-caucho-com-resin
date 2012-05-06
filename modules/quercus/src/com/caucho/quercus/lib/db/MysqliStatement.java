@@ -41,6 +41,7 @@ import com.caucho.quercus.env.StringValue;
 import com.caucho.quercus.env.Value;
 import com.caucho.util.L10N;
 
+import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.logging.Logger;
 
@@ -244,6 +245,12 @@ public class MysqliStatement extends JdbcPreparedStatementResource {
   public JdbcResultResource get_result(Env env)
   {
     return getResultSet();
+  }
+
+  @Override
+  protected JdbcResultResource createResultSet(ResultSet rs)
+  {
+    return new MysqliResult(getPreparedStatement(), rs, (Mysqli) getConnection());
   }
 
   /**
