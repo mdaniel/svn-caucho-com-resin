@@ -415,7 +415,8 @@ public class InfoVarPro extends VarInfo {
         out.println(varName + " = new Var();");
     }
     else if (isEnvVar()) {
-      out.print(varName + " = env.getEnvVar(");
+      // php/3205
+      out.print(varName + " = env.getLazyEnvVar(");
       out.printString(getName());
       out.println(");");
 

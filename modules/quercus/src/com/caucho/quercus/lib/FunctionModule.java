@@ -34,6 +34,8 @@ import com.caucho.quercus.QuercusException;
 import com.caucho.quercus.annotation.Optional;
 import com.caucho.quercus.annotation.VariableArguments;
 import com.caucho.quercus.env.*;
+import com.caucho.quercus.expr.CallExpr;
+import com.caucho.quercus.expr.Expr;
 import com.caucho.quercus.module.AbstractQuercusModule;
 import com.caucho.quercus.function.AbstractFunction;
 import com.caucho.util.L10N;
@@ -52,7 +54,7 @@ public class FunctionModule extends AbstractQuercusModule {
 
   private static final Logger log
     = Logger.getLogger(FunctionModule.class.getName());
-  
+
   /**
    * Calls a user function
    */
@@ -71,8 +73,7 @@ public class FunctionModule extends AbstractQuercusModule {
                                            Value arg)
   {
     if (function == null) {
-      env.warning(
-          "call_user_func_array: first argument is not a valid function");
+      env.warning("call_user_func_array: first argument is not a valid function");
       return NullValue.NULL;
     }
 
@@ -89,17 +90,29 @@ public class FunctionModule extends AbstractQuercusModule {
       args = new Value[argArray.getSize()];
 
       int i = 0;
-      
+
       for (Map.Entry<Value,Value> entry : argArray.entrySet()) {
         ArrayValue.Entry arrayEntry = (ArrayValue.Entry) entry;
-        
+
         args[i++] = arrayEntry.getRawValue();
       }
     }
-    else
+    else {
       args = new Value[0];
+    }
 
-    return function.call(env, args).copyReturn();
+    // nam: 2012-04-30 this works for interpreted, but need to also work for compiled
+    //QuercusClass oldCallingClass = env.getCallingClass();
+    //env.pushCall(new CallExpr(function.getCallbackName(), Expr.NULL_ARGS), null, args);
+
+    try {
+      return function.call(env, args).copyReturn();
+    }
+    finally {
+      //env.popCall();
+
+      //env.setCallingClass(oldCallingClass);
+    }
   }
 
   /**
@@ -111,7 +124,7 @@ public class FunctionModule extends AbstractQuercusModule {
   {
     try {
       AbstractFunction fun = env.createAnonymousFunction(args, code);
-      
+
       return new CallbackFunction(fun, fun.getName());
     } catch (IOException e) {
       env.warning(e.getMessage());

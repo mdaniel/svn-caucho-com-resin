@@ -53,9 +53,9 @@ public class VarVarExprPro extends VarVarExpr
   private ExprGenerator GENERATOR = new ExprGenerator(getLocation()) {
       private ExprGenerator getVar()
       {
-	return ((ExprPro) _var).getGenerator();
+        return ((ExprPro) _var).getGenerator();
       }
-      
+
       /**
        * Analyze the expression
        */
@@ -66,25 +66,25 @@ public class VarVarExprPro extends VarVarExpr
 
         getVar().analyze(info);
         */
-        
+
         // php/3d71
         analyzeAssign(info, getVar());
 
-	return ExprType.VALUE;
+        return ExprType.VALUE;
       }
       /**
        * Analyze the expression
        */
       public ExprType analyzeAssign(AnalyzeInfo info, ExprGenerator expr)
       {
-	info.getFunction().setVariableVar(true);
+        info.getFunction().setVariableVar(true);
 
-	getVar().analyzeAssign(info, expr);
+        getVar().analyzeAssign(info, expr);
 
-	// php/3253
-	info.clear();
+        // php/3253
+        info.clear();
 
-	return ExprType.VALUE;
+        return ExprType.VALUE;
       }
 
       /**
@@ -134,7 +134,7 @@ public class VarVarExprPro extends VarVarExpr
         throws IOException
       {
         ExprGenerator valueGen = ((ExprPro) value).getGenerator();
-        
+
         out.print("env.getVar(");
         getVar().generateString(out);
         out.print(").set(");
@@ -148,17 +148,17 @@ public class VarVarExprPro extends VarVarExpr
        * @param out the writer to the Java source code.
        */
       public void generateAssignRef(PhpWriter out, Expr value, boolean isTop)
-	throws IOException
+        throws IOException
       {
-	ExprGenerator valueGen = ((ExprPro) value).getGenerator();
+        ExprGenerator valueGen = ((ExprPro) value).getGenerator();
 
-	// getVar().generateAssignRef(out, value, isTop);
+        // getVar().generateAssignRef(out, value, isTop);
 
-	out.print("env.setRef(");
-	getVar().generateStringValue(out);
-	out.print(", ");
-	valueGen.generateRef(out);
-	out.print(")");
+        out.print("env.setRef(");
+        getVar().generateStringValue(out);
+        out.print(", ");
+        valueGen.generateRef(out);
+        out.print(")");
       }
 
       /**
@@ -167,12 +167,12 @@ public class VarVarExprPro extends VarVarExpr
        * @param out the writer to the Java source code.
        */
       public void generateUnset(PhpWriter out)
-	throws IOException
+        throws IOException
       {
-	out.print("env.unsetVar(");
-	getVar().generateStringValue(out);
-	out.print(")");
+        out.print("env.unsetVar(");
+        getVar().generateStringValue(out);
+        out.print(")");
       }
-    };
+  };
 }
 

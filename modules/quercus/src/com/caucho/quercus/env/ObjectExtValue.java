@@ -649,31 +649,30 @@ public class ObjectExtValue extends ObjectValue
       StringValue entryKey = entry._key;
 
       if (name == entryKey || name.equals(entryKey)) {
-
-
         if (entry._visibility == FieldVisibility.PRIVATE) {
           QuercusClass cls = env.getCallingClass();
 
           // XXX: this really only checks access from outside of class scope
           // php/091m
           if (cls != _quercusClass) {
-                env.notice(L.l("Can't access private field '{0}::${1}'",
-                        _quercusClass.getName(), name));
+            env.notice(L.l("Can't access private field '{0}::${1}'",
+                           _quercusClass.getName(), name));
+
+            return null;
+          }
+        }
+        /* nam: 2012-04-29 this doesn't work, commented out for drupal-7.12
+        else if (entry._visibility == FieldVisibility.PROTECTED) {
+          QuercusClass cls = env.getCallingClass();
+
+          if (cls == null || (cls != _quercusClass && ! cls.isA(_quercusClass.getName()))) {
+              env.notice(L.l("Can't access protected field '{0}::${1}'",
+                             _quercusClass.getName(), name));
+
               return null;
           }
-        } else if (entry._visibility == FieldVisibility.PROTECTED)
-        {
-            QuercusClass cls = env.getCallingClass();
-
-            if (cls == null || (cls != _quercusClass && !cls.isA(_quercusClass.getName())))
-            {
-                env.notice(L.l("Can't access protected field '{0}::${1}'",
-                        _quercusClass.getName(), name
-                        ));
-                return null;
-            }
         }
-
+        */
 
         return entry;
       }

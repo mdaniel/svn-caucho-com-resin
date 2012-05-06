@@ -32,11 +32,8 @@ package com.caucho.quercus.expr;
 import com.caucho.quercus.Location;
 import com.caucho.quercus.env.ArrayValueImpl;
 import com.caucho.quercus.env.Env;
-import com.caucho.quercus.env.MethodIntern;
-import com.caucho.quercus.env.NullValue;
 import com.caucho.quercus.env.Value;
 import com.caucho.quercus.env.StringValue;
-import com.caucho.quercus.env.ConstStringValue;
 import com.caucho.quercus.env.Var;
 import com.caucho.quercus.parser.QuercusParser;
 
@@ -54,7 +51,7 @@ public class VarExpr
   protected VarExpr(Location location, VarInfo var)
   {
     super(location);
-    
+
     _var = var;
     _name = var.getName();
   }
@@ -141,7 +138,7 @@ public class VarExpr
   {
     return env.getValue(_name, false, true);
   }
-  
+
   /**
    * Evaluates the expression.
    *
@@ -153,7 +150,7 @@ public class VarExpr
   {
     return env.getValue(_name, false, false);
   }
-  
+
   /**
    * Evaluates the expression as an isset() statement.
    */
@@ -290,7 +287,7 @@ public class VarExpr
   {
     // php/0232
     env.setValue(_name, value);
-    
+
     return value;
   }
 
@@ -303,7 +300,7 @@ public class VarExpr
   public Value evalAssignRef(Env env, Value value)
   {
     env.setRef(_name, value);
-    
+
     return value;
   }
 

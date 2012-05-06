@@ -1358,9 +1358,9 @@ public class FileModule extends AbstractQuercusModule {
     if (p < 0)
       return null;
 
-    String scheme = pathName.substring(0, p).toString();
+    StringValue scheme = pathName.substring(0, p);
 
-    return StreamModule.getWrapper(scheme.toString());
+    return env.getStreamWrapper(scheme);
   }
 
   /**
@@ -2943,14 +2943,6 @@ public class FileModule extends AbstractQuercusModule {
   }
 
   static {
-    ProtocolWrapper zlibProtocolWrapper = new ZlibProtocolWrapper();
-    StreamModule.streamWrapperRegister(new ConstStringValue("compress.zlib"),
-                                       zlibProtocolWrapper);
-    StreamModule.streamWrapperRegister(new ConstStringValue("zlib"),
-                                       zlibProtocolWrapper);
-    StreamModule.streamWrapperRegister(new ConstStringValue("php"),
-                                       new PhpProtocolWrapper());
-
     addConstant(_constMap, "SEEK_SET", SEEK_SET);
     addConstant(_constMap, "SEEK_CUR", SEEK_CUR);
     addConstant(_constMap, "SEEK_END", SEEK_END);

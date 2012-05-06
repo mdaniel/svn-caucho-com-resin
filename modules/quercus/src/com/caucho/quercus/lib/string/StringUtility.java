@@ -37,6 +37,7 @@ import com.caucho.quercus.env.ArrayValueImpl;
 import com.caucho.quercus.env.Env;
 import com.caucho.quercus.env.NullValue;
 import com.caucho.quercus.env.Post;
+import com.caucho.quercus.env.StringValue;
 import com.caucho.quercus.env.Value;
 import com.caucho.quercus.lib.ArrayModule;
 import com.caucho.util.L10N;
@@ -56,7 +57,7 @@ public class StringUtility
                     env.getIniBoolean("magic_quotes_gpc"),
                     Env.DEFAULT_QUERY_SEPARATOR_MAP);
   }
-  
+
   public static Value parseStr(Env env,
                                CharSequence str,
                                ArrayValue result,
@@ -67,10 +68,10 @@ public class StringUtility
   {
     try {
       ByteToChar byteToChar = env.getByteToChar();
-      
+
       if (encoding != null)
         byteToChar.setEncoding(encoding);
-      
+
       int len = str.length();
 
       for (int i = 0; i < len; i++) {
@@ -81,7 +82,7 @@ public class StringUtility
              i < len && isSeparator(querySeparatorMap, ch = str.charAt(i));
              i++) {
         }
-      
+
         for (; i < len && (ch = str.charAt(i)) != '='
              && ! isSeparator(querySeparatorMap, ch); i++) {
           i = addQueryChar(byteToChar, str, len, i, ch);
@@ -116,7 +117,7 @@ public class StringUtility
           if (openBracketIndex > 0) {
             String arrayName = key.substring(0, openBracketIndex);
             arrayName = arrayName.replaceAll("\\.", "_");
-            
+
             Value v = env.getVar(arrayName).getRawValue();
             if (v instanceof ArrayValue) {
               //Check to make sure valid string (ie: foo[...])
@@ -126,8 +127,8 @@ public class StringUtility
               }
 
               if (closeBracketIndex > openBracketIndex + 1) {
-                String index = key
-                    .substring(key.indexOf('[') + 1, key.indexOf(']'));
+                String index = key.substring(key.indexOf('[') + 1,
+                                             key.indexOf(']'));
                 v.put(env.createString(index), env.createString(value));
               } else {
                 v.put(env.createString(value));
@@ -154,7 +155,7 @@ public class StringUtility
       throw new QuercusModuleException(e);
     }
   }
-  
+
   private static boolean isSeparator(int []sep, int ch)
   {
     return (ch < sep.length && sep[ch] > 0);
@@ -201,10 +202,10 @@ public class StringUtility
   {
     if (key == null)
       key = "";
-    
+
     if (valueStr == null)
       valueStr = "";
-    
+
     int p;
 
     Value value = env.createString(valueStr);
@@ -213,14 +214,14 @@ public class StringUtility
       String index = key.substring(p + 1, key.length() - 1);
       key = key.substring(0, p);
 
-      Value keyValue = env.createString(key);
+      StringValue keyValue = env.createString(key);
 
       Value part;
 
       if (array != null)
         part = array.get(keyValue);
       else
-        part = env.getVar(key);
+        part = env.getVar(keyValue);
 
       if (! part.isArray())
         part = new ArrayValueImpl();

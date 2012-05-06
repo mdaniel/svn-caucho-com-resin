@@ -13,6 +13,7 @@ com.caucho.quercus.lib.ExifModule
 com.caucho.quercus.lib.file.FileModule
 com.caucho.quercus.lib.filter.FilterModule
 com.caucho.quercus.lib.FunctionModule
+com.caucho.quercus.lib.gae.GaeUserServiceModule
 com.caucho.quercus.lib.gettext.GettextModule
 com.caucho.quercus.lib.HashModule
 com.caucho.quercus.lib.HtmlModule

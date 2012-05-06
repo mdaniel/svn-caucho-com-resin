@@ -88,7 +88,7 @@ public class ClassesModule extends AbstractQuercusModule {
   /**
    * returns true if the class exists.
    */
-  public boolean class_exists(Env env,
+  public static boolean class_exists(Env env,
                               String className,
                               @Optional("true") boolean useAutoload)
   {
@@ -104,7 +104,7 @@ public class ClassesModule extends AbstractQuercusModule {
   /**
    * Returns the object's class name
    */
-  public Value get_class(Env env, Value value)
+  public static Value get_class(Env env, Value value)
   {
     if (value instanceof ObjectValue) {
       ObjectValue obj = (ObjectValue) value;
@@ -116,15 +116,18 @@ public class ClassesModule extends AbstractQuercusModule {
 
       return env.createString(obj.getClassName());
     }
-    else
+    else {
+      env.warning(L.l("expected an object, but saw {0}", value.getType()));
+
       return BooleanValue.FALSE;
+    }
   }
 
   /*
    * Returns the calling class name.
    */
   @ReturnNullAsFalse
-  public String get_called_class(Env env)
+  public static String get_called_class(Env env)
   {
     Value qThis = env.getThis();
 

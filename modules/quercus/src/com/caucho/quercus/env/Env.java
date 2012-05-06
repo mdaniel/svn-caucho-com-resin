@@ -69,9 +69,13 @@ import com.caucho.quercus.lib.ErrorModule;
 import com.caucho.quercus.lib.OptionsModule;
 import com.caucho.quercus.lib.VariableModule;
 import com.caucho.quercus.lib.file.FileModule;
+import com.caucho.quercus.lib.file.PhpProtocolWrapper;
 import com.caucho.quercus.lib.file.PhpStderr;
 import com.caucho.quercus.lib.file.PhpStdin;
 import com.caucho.quercus.lib.file.PhpStdout;
+import com.caucho.quercus.lib.file.ProtocolWrapper;
+import com.caucho.quercus.lib.file.StreamModule;
+import com.caucho.quercus.lib.file.ZlibProtocolWrapper;
 import com.caucho.quercus.lib.regexp.RegexpState;
 import com.caucho.quercus.lib.string.StringModule;
 import com.caucho.quercus.lib.string.StringUtility;
@@ -362,6 +366,8 @@ public class Env
   private SessionCallback _sessionCallback;
 
   private StreamContextResource _defaultStreamContext;
+  private HashMap<StringValue,ProtocolWrapper> _wrappedStreamMap;
+  private HashMap<StringValue,ProtocolWrapper> _unregisteredWrappedStreamMap;
 
   private int _objectId = 0;
 
@@ -2052,7 +2058,18 @@ public class Env
 
   public final EnvVar getEnvVar(StringValue name)
   {
-    return getEnvVar(name, true, false);
+    return getEnvVar(name, true, true);
+  }
+
+  public final EnvVar getLazyEnvVar(StringValue name)
+  {
+    EnvVar var = getEnvVar(name, false, false);
+
+    if (var == null) {
+      var = new LazyEnvVar(name);
+    }
+
+    return var;
   }
 
   /**
@@ -2070,24 +2087,28 @@ public class Env
     if (envVar != null)
       return envVar;
 
-    if (_map == _globalMap)
+    if (_map == _globalMap) {
       return getGlobalEnvVar(name, isAutoCreate, isOutputNotice);
+    }
 
     envVar = getSuperGlobalRef(name, true, false);
 
     // php/0809
-    if (envVar != null)
+    if (envVar != null) {
       _globalMap.put(name, envVar);
+    }
     else {
-      if (! isAutoCreate) {
-        // php/0206
-        if (isOutputNotice)
-          notice(L.l("${0} is an undefined variable", name));
+      // php/0205, php/0206
+      // XXX: optimize: don't create a string when the error is just going to be ignored
+      if (isOutputNotice) {
+        notice(L.l("${0} is an undefined variable", name));
+      }
 
+      if (! isAutoCreate) {
         return null;
       }
-      else
-        envVar = new EnvVarImpl(new Var());
+
+      envVar = new EnvVarImpl(new Var());
     }
 
     _map.put(name, envVar);
@@ -2117,8 +2138,9 @@ public class Env
   {
     EnvVar envVar = _globalMap.get(name);
 
-    if (envVar != null)
+    if (envVar != null) {
       return envVar;
+    }
 
     envVar = getSuperGlobalRef(name, true);
 
@@ -2137,11 +2159,11 @@ public class Env
       envVar = getGlobalScriptContextRef(name);
 
     if (envVar == null) {
+      if (isOutputNotice) {
+        notice(L.l("${0} is an undefined variable", name));
+      }
+
       if (! isAutoCreate) {
-
-        if (isOutputNotice)
-          notice(L.l("${0} is an undefined variable", name));
-
         return null;
       }
 
@@ -2901,12 +2923,13 @@ public class Env
   {
     return getVar(createString(name));
   }
+
   /**
    * Gets a value.
    */
   public Var getVar(StringValue name)
   {
-    EnvVar envVar = getEnvVar(name);
+    EnvVar envVar = getEnvVar(name, true, false);
 
     return envVar.getVar();
   }
@@ -2941,7 +2964,7 @@ public class Env
    */
   public Value setValue(StringValue name, Value value)
   {
-    EnvVar envVar = getEnvVar(name);
+    EnvVar envVar = getEnvVar(name, true, false);
 
     envVar.set(value);
 
@@ -2953,7 +2976,7 @@ public class Env
    */
   public Var setVar(StringValue name, Var var)
   {
-    EnvVar envVar = getEnvVar(name);
+    EnvVar envVar = getEnvVar(name, true, false);
 
     envVar.setVar(var);
 
@@ -2965,7 +2988,7 @@ public class Env
    */
   public Var setRef(StringValue name, Value value)
   {
-    EnvVar envVar = getEnvVar(name);
+    EnvVar envVar = getEnvVar(name, true, false);
 
     return envVar.setRef(value);
   }
@@ -3257,15 +3280,15 @@ public class Env
 
     return oldCallingClass;
   }
-  
+
   public String getStackTraceAsString()
   {
     StringBuilder sb = new StringBuilder();
-    
+
     for (String item : getStackTrace()) {
       sb.append("\n  ").append(item);
     }
-    
+
     return sb.toString();
   }
 
@@ -3646,6 +3669,71 @@ public class Env
       _defaultStreamContext = new StreamContextResource();
 
     return _defaultStreamContext;
+  }
+
+  public HashMap<StringValue,ProtocolWrapper> getStreamWrappers()
+  {
+    if (_wrappedStreamMap == null) {
+      _wrappedStreamMap = new HashMap<StringValue,ProtocolWrapper>();
+
+      ProtocolWrapper zlibProtocolWrapper = new ZlibProtocolWrapper();
+      _wrappedStreamMap.put(createString("compress.zlib"), zlibProtocolWrapper);
+      _wrappedStreamMap.put(createString("zlib"), zlibProtocolWrapper);
+      _wrappedStreamMap.put(createString("php"), new PhpProtocolWrapper());
+    }
+
+    return _wrappedStreamMap;
+  }
+
+  public void addStreamWrapper(StringValue name, ProtocolWrapper wrapper)
+  {
+    HashMap<StringValue,ProtocolWrapper> streamMap = getStreamWrappers();
+
+    streamMap.put(name, wrapper);
+  }
+
+  public ProtocolWrapper getStreamWrapper(StringValue name)
+  {
+    HashMap<StringValue,ProtocolWrapper> wrapperMap = getStreamWrappers();
+
+    return wrapperMap.get(name);
+  }
+
+  public boolean unregisterStreamWrapper(StringValue name)
+  {
+    HashMap<StringValue,ProtocolWrapper> wrapperMap = getStreamWrappers();
+
+    ProtocolWrapper wrapper = wrapperMap.remove(name);
+
+    if (wrapper == null) {
+      return false;
+    }
+
+    if (_unregisteredWrappedStreamMap == null) {
+      _unregisteredWrappedStreamMap = new HashMap<StringValue,ProtocolWrapper>();
+    }
+
+    _unregisteredWrappedStreamMap.put(name, wrapper);
+    return true;
+  }
+
+  public boolean restoreStreamWrapper(StringValue name)
+  {
+    if (_unregisteredWrappedStreamMap == null) {
+      return false;
+    }
+
+    ProtocolWrapper wrapper = _unregisteredWrappedStreamMap.remove(name);
+
+    if (wrapper == null) {
+      return false;
+    }
+
+    HashMap<StringValue,ProtocolWrapper> wrapperMap = getStreamWrappers();
+
+    wrapperMap.put(name, wrapper);
+
+    return true;
   }
 
   //
@@ -6273,11 +6361,11 @@ public class Env
 
     return error(B_WARNING, "", msg + getFunctionLocation());
   }
-  
+
   private String getExceptionLocation(String msg)
   {
     Location loc = getLocation();
-    
+
     if (loc != null && ! loc.isUnknown())
       return (loc.getFileName() + ":" + loc.getLineNumber() + ": " + msg
               + getFunctionLocation()
@@ -6527,7 +6615,7 @@ public class Env
     _exceptionHandler = _prevExceptionHandler;
   }
 
-  /*
+  /**
    * Writes an error.
    */
   public Value error(int code, String locString, String msg)
@@ -6535,7 +6623,7 @@ public class Env
     return error(code, null, locString, msg);
   }
 
-  /*
+  /**
    * Writes an error.
    */
   public Value error(int code, Location location, String msg)
@@ -6548,7 +6636,7 @@ public class Env
    */
   public Value error(int code, Location location, String loc, String msg)
   {
-    //System.err.println("Env->error0: " + getLocation() + " . " + location + " . " + loc + " . " + msg);
+    //System.err.println("Env->error0: " + code + " . " + getLocation() + " . " + location + " . " + loc + " . " + msg);
     //Thread.dumpStack();
 
     int mask = 1 << code;

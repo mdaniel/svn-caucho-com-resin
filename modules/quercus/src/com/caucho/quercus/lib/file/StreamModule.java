@@ -36,7 +36,6 @@ import com.caucho.quercus.annotation.ReturnNullAsFalse;
 import com.caucho.quercus.env.ArrayValue;
 import com.caucho.quercus.env.ArrayValueImpl;
 import com.caucho.quercus.env.BooleanValue;
-import com.caucho.quercus.env.ConstStringValue;
 import com.caucho.quercus.env.Env;
 import com.caucho.quercus.env.QuercusClass;
 import com.caucho.quercus.env.StringValue;
@@ -84,14 +83,6 @@ public class StreamModule extends AbstractQuercusModule {
 
   private static final HashMap<StringValue,Value> _constMap
     = new HashMap<StringValue,Value>();
-
-  private static final HashMap<String,ProtocolWrapper> _wrapperMap
-    = new HashMap<String,ProtocolWrapper>();
-
-  private static final HashMap<String,ProtocolWrapper> _unregisteredWrapperMap
-    = new HashMap<String,ProtocolWrapper>();
-
-  private static final ArrayValue _wrapperArray = new ArrayValueImpl();
 
   /**
    * Adds the constant to the PHP engine's constant map.
@@ -270,7 +261,7 @@ public class StreamModule extends AbstractQuercusModule {
       if (in == null)
         return BooleanValue.FALSE;
 
-      StringBuilder sb = new StringBuilder();
+      StringValue sb = env.createStringBuilder();
 
       int ch;
 
@@ -284,7 +275,7 @@ public class StreamModule extends AbstractQuercusModule {
         sb.append((char) ch);
       }
 
-      return env.createString(sb.toString());
+      return sb;
     } catch (IOException e) {
       env.warning(e);
 
@@ -307,7 +298,6 @@ public class StreamModule extends AbstractQuercusModule {
         length = Integer.MAX_VALUE;
 
       StringValue line = file.readLine(length);
-
 
       if (line == null)
         return BooleanValue.FALSE;
@@ -375,7 +365,21 @@ public class StreamModule extends AbstractQuercusModule {
    */
   public static Value stream_get_wrappers(Env env)
   {
-    return _wrapperArray;
+    ArrayValue array = new ArrayValueImpl();
+
+    HashMap<StringValue,ProtocolWrapper> streamMap = env.getStreamWrappers();
+
+    for (StringValue name : streamMap.keySet()) {
+      array.append(name);
+    }
+
+    // XXX: 2012-05-05 nam: do we need to do this?
+    array.append(env.createString("quercus"));
+    array.append(env.createString("file"));
+    array.append(env.createString("http"));
+    array.append(env.createString("ftp"));
+
+    return array;
   }
 
   public static boolean stream_register_wrapper(Env env,
@@ -523,14 +527,6 @@ public class StreamModule extends AbstractQuercusModule {
     }
   }
 
-  protected static void streamWrapperRegister(StringValue protocol,
-                                              ProtocolWrapper wrapper)
-  {
-    _wrapperMap.put(protocol.toString(), wrapper);
-
-    _wrapperArray.append(protocol);
-  }
-
   /**
    * Register a wrapper for a protocol.
    */
@@ -539,12 +535,15 @@ public class StreamModule extends AbstractQuercusModule {
                                                 String className,
                                                 @Optional int flags)
   {
-    if (_wrapperMap.containsKey(protocol.toString()))
+    HashMap<StringValue,ProtocolWrapper> wrapperMap = env.getStreamWrappers();
+
+    if (wrapperMap.containsKey(protocol)) {
       return false;
+    }
 
     QuercusClass qClass = env.getClass(className);
 
-    streamWrapperRegister(protocol, new ProtocolWrapper(qClass));
+    env.addStreamWrapper(protocol, new ProtocolWrapper(qClass));
 
     return true;
   }
@@ -552,45 +551,17 @@ public class StreamModule extends AbstractQuercusModule {
   /**
    * Register a wrapper for a protocol.
    */
-  public static boolean stream_wrapper_restore(Env env, StringValue protocol)
+  public static boolean stream_wrapper_restore(Env env, StringValue name)
   {
-    if (! _unregisteredWrapperMap.containsKey(protocol.toString()))
-      return false;
-
-    ProtocolWrapper oldWrapper =
-      _unregisteredWrapperMap.remove(protocol.toString());
-
-    streamWrapperRegister(protocol, oldWrapper);
-
-    return true;
+    return env.restoreStreamWrapper(name);
   }
 
   /**
    * Register a wrapper for a protocol.
    */
-  public static boolean stream_wrapper_unregister(Env env, StringValue protocol)
+  public static boolean stream_wrapper_unregister(Env env, StringValue name)
   {
-    if (! _wrapperMap.containsKey(protocol.toString()))
-      return false;
-
-    _unregisteredWrapperMap.put(protocol.toString(),
-                                _wrapperMap.remove(protocol.toString()));
-
-    _wrapperArray.remove(protocol);
-
-    return true;
-  }
-
-  protected static ProtocolWrapper getWrapper(String protocol)
-  {
-    return _wrapperMap.get(protocol);
-  }
-
-  static {
-    _wrapperArray.append(new ConstStringValue("quercus"));
-    _wrapperArray.append(new ConstStringValue("file"));
-    _wrapperArray.append(new ConstStringValue("http"));
-    _wrapperArray.append(new ConstStringValue("ftp"));
+    return env.unregisterStreamWrapper(name);
   }
 
   static {
