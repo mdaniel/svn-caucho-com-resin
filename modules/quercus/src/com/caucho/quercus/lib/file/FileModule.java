@@ -706,7 +706,6 @@ public class FileModule extends AbstractQuercusModule {
     boolean skipEmptyLines = (flags & FILE_SKIP_EMPTY_LINES) != 0;
 
     try {
-
       BinaryStream stream = fopen(env, filename, "r", useIncludePath, context);
 
       if (stream == null)

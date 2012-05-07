@@ -29,6 +29,7 @@
 
 package com.caucho.quercus.lib.session;
 
+import com.caucho.quercus.annotation.Hide;
 import com.caucho.quercus.annotation.Optional;
 import com.caucho.quercus.env.*;
 import com.caucho.quercus.lib.OutputModule;
@@ -46,7 +47,7 @@ import java.util.Iterator;
 /**
  * Quercus session handling
  */
-public class SessionModule extends AbstractQuercusModule 
+public class SessionModule extends AbstractQuercusModule
   implements ModuleStartupListener {
   private static final L10N L = new L10N(SessionModule.class);
   private static final Logger log
@@ -67,6 +68,7 @@ public class SessionModule extends AbstractQuercusModule
     return new String[] { "session" };
   }
 
+  @Hide
   public void startup(Env env)
   {
     if (env.getConfigVar("session.auto_start").toBoolean())
@@ -190,13 +192,23 @@ public class SessionModule extends AbstractQuercusModule
 
     String oldValue;
 
-    if (sessionIdValue != null)
+    if (sessionIdValue != null) {
       oldValue = sessionIdValue.toString();
-    else
+    }
+    else {
       oldValue = "";
+    }
 
-    if (id != null && id.length() > 0)
+    if (id != null && id.length() > 0) {
       env.setSpecialValue("caucho.session_id", env.createString(id));
+
+      SessionArrayValue session = env.getSession();
+
+      // php/1k6y
+      if (session != null) {
+        session.setId(id);
+      }
+    }
 
     return oldValue;
   }
@@ -207,7 +219,7 @@ public class SessionModule extends AbstractQuercusModule
   public static boolean session_is_registered(Env env, StringValue name)
   {
     SessionArrayValue session = env.getSession();
-    
+
     return session != null && session.get(name).isset();
   }
 
@@ -239,11 +251,11 @@ public class SessionModule extends AbstractQuercusModule
 
   /**
    * Regenerates the session id.
-   * 
+   *
    * This function first creates a new session id.  The old session
    * values are migrated to this new session.  Then a new session cookie
    * is sent (XXX: send only if URL rewriting is off?).  Changing the
-   * session ID should be transparent. 
+   * session ID should be transparent.
    * Therefore, session callbacks should not be called.
    */
   public static boolean session_regenerate_id(Env env,
@@ -252,9 +264,9 @@ public class SessionModule extends AbstractQuercusModule
     // php/1k82, php/1k83
     if (env.getSession() == null)
       return ! deleteOld;
-    
+
     String sessionId = env.generateSessionId();
-    
+
     if (deleteOld) {
       session_destroy(env);
 
@@ -262,7 +274,7 @@ public class SessionModule extends AbstractQuercusModule
     }
     else {
       SessionArrayValue session = env.getSession();
-      
+
       session.setId(sessionId);
     }
 
@@ -334,7 +346,7 @@ public class SessionModule extends AbstractQuercusModule
       // XXX: should we create work directory if does not exist?
       value = env.createString(env.getWorkDir().getPath());
     }
-    
+
     return value;
   }
 
@@ -357,7 +369,7 @@ public class SessionModule extends AbstractQuercusModule
       env.setIni("session.cookie_domain", domain.toString());
 
     if (isSecure.isset())
-      env.setIni("session.cookie_secure", 
+      env.setIni("session.cookie_secure",
                  isSecure.toBoolean() ? "1" : "0");
 
     return NullValue.NULL;
@@ -371,12 +383,12 @@ public class SessionModule extends AbstractQuercusModule
                                           Callable close,
                                           Callable read,
                                           Callable write,
-                                          Callable directory,
+                                          Callable destroy,
                                           Callable gc)
 
   {
     SessionCallback cb
-      = new SessionCallback(open, close, read, write, directory, gc);
+      = new SessionCallback(open, close, read, write, destroy, gc);
 
     env.setSessionCallback(cb);
 
@@ -415,7 +427,7 @@ public class SessionModule extends AbstractQuercusModule
 
     //
     // Use cookies to transmit session id
-    // 
+    //
     if (env.getIni("session.use_cookies").toBoolean()) {
       if (sessionIdValue != null)
         sessionId = sessionIdValue.toString();
@@ -457,15 +469,15 @@ public class SessionModule extends AbstractQuercusModule
       env.removeConstant("SID");
       env.addConstant("SID", env.createString(cookieName + '=' + sessionId),
                       false);
-      
+
       OutputModule.pushUrlRewriter(env);
     }
-    
+
     if (sessionId == null || "".equals(sessionId)) {
       sessionId = env.generateSessionId();
       create = true;
     }
-    
+
     HttpServletResponse response = env.getResponse();
 
     if (response == null) {
@@ -522,7 +534,7 @@ public class SessionModule extends AbstractQuercusModule
       generateSessionCookie(env, sessionId);
     }
     env.setSpecialValue("caucho.session_id", env.createString(sessionId));
-    
+
     return true;
   }
 
@@ -530,17 +542,15 @@ public class SessionModule extends AbstractQuercusModule
    * Sends a new session cookie.
    */
   private static void generateSessionCookie(Env env, String sessionId)
-  { 
+  {
     final HttpServletResponse response = env.getResponse();
-   
+
     String cookieName = env.getIni("session.name").toString();
-    
+
     StringValue cookieValue
       = env.createString(cookieName + '=' + sessionId);
     env.removeConstant("SID");
-    env.addConstant("SID", 
-                            cookieValue,
-                            false);
+    env.addConstant("SID", cookieValue, false);
 
     Cookie cookie = new Cookie(cookieName, sessionId);
     // #2649
@@ -549,8 +559,7 @@ public class SessionModule extends AbstractQuercusModule
       cookie.setVersion(1);
 
     if (response.isCommitted()) {
-      env.warning(
-          L.l("cannot send session cookie because response is committed"));
+      env.warning(L.l("cannot send session cookie because response is committed"));
     }
     else {
       Value path = env.getIni("session.cookie_path");
@@ -568,7 +577,7 @@ public class SessionModule extends AbstractQuercusModule
       if (domain.length() > 0) {
         cookie.setDomain(domain.toString());
       }
-      
+
       Value secure = env.getIni("session.cookie_secure");
       cookie.setSecure(secure.toBoolean());
 
@@ -582,7 +591,7 @@ public class SessionModule extends AbstractQuercusModule
   public boolean session_unregister(Env env, Value key)
   {
     SessionArrayValue session = env.getSession();
-    
+
     if (session == null)
       return false;
 

@@ -46,13 +46,13 @@ import java.util.ArrayList;
  */
 public class CallExpr extends Expr {
   private static final L10N L = new L10N(CallExpr.class);
-  
+
   protected final String _name;
   protected final String _nsName;
   protected final Expr []_args;
-  
+
   private int _funId;
-  
+
   protected boolean _isRef;
 
   public CallExpr(Location location, String name, ArrayList<Expr> args)
@@ -60,9 +60,9 @@ public class CallExpr extends Expr {
     // quercus/120o
     super(location);
     _name = name.intern();
-    
+
     int ns = _name.lastIndexOf('\\');
-    
+
     if (ns > 0) {
       _nsName = _name.substring(ns + 1);
     }
@@ -78,9 +78,9 @@ public class CallExpr extends Expr {
     // quercus/120o
     super(location);
     _name = name.intern();
-    
+
     int ns = _name.lastIndexOf('\\');
-    
+
     if (ns > 0) {
       _nsName = _name.substring(ns + 1);
     }
@@ -107,7 +107,7 @@ public class CallExpr extends Expr {
   {
     return _name;
   }
-  
+
   /**
    * Returns the location if known.
    */
@@ -137,7 +137,7 @@ public class CallExpr extends Expr {
   {
     return this;
   }
-  
+
   /**
    * Evaluates the expression.
    *
@@ -150,7 +150,7 @@ public class CallExpr extends Expr {
   {
     return evalImpl(env, false, false);
   }
-  
+
   /**
    * Evaluates the expression.
    *
@@ -163,7 +163,7 @@ public class CallExpr extends Expr {
   {
     return evalImpl(env, false, true);
   }
-  
+
   /**
    * Evaluates the expression.
    *
@@ -176,8 +176,8 @@ public class CallExpr extends Expr {
   {
     return evalImpl(env, true, true);
   }
-  
-  
+
+
   /**
    * Evaluates the expression.
    *
@@ -189,11 +189,11 @@ public class CallExpr extends Expr {
   {
     if (_funId <= 0) {
       _funId = env.findFunctionId(_name);
-    
+
       if (_funId <= 0) {
         if (_nsName != null)
           _funId = env.findFunctionId(_nsName);
-      
+
         if (_funId <= 0) {
           env.error(getLocationLine(),
                     L.l("'{0}' is an unknown function.", _name));
@@ -202,9 +202,9 @@ public class CallExpr extends Expr {
         }
       }
     }
-    
+
     AbstractFunction fun = env.findFunction(_funId);
-    
+
     if (fun == null) {
       env.error(getLocationLine(), L.l("'{0}' is an unknown function.", _name));
 
@@ -214,10 +214,10 @@ public class CallExpr extends Expr {
     Value []args = evalArgs(env, _args);
 
     env.pushCall(this, NullValue.NULL, args);
-    
+
     // php/0249
     QuercusClass oldCallingClass = env.setCallingClass(null);
-    
+
     // XXX: qa/1d14 Value oldThis = env.setThis(UnsetValue.NULL);
     try {
       env.checkTimeout();
@@ -230,7 +230,7 @@ public class CallExpr extends Expr {
       else
         return fun.call(env, args);
         */
-      
+
       if (isRef)
         return fun.callRef(env, args);
       else if (isCopy)

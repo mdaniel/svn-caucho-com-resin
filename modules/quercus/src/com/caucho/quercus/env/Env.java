@@ -1016,8 +1016,9 @@ public class Env
     HashSet<ModuleStartupListener> listeners
       = _quercus.getModuleStartupListeners();
 
-    for (ModuleStartupListener listener : listeners)
+    for (ModuleStartupListener listener : listeners) {
       listener.startup(this);
+    }
 
     _quercus.startEnv(this);
   }

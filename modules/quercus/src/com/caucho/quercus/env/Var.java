@@ -2133,6 +2133,15 @@ public class Var extends Value
     _value.varDump(env, out, depth, valueSet);
   }
 
+  protected void printRImpl(Env env,
+                            WriteStream out,
+                            int depth,
+                            IdentityHashMap<Value, String> valueSet)
+    throws IOException
+  {
+    _value.printRImpl(env, out, depth, valueSet);
+  }
+
   //
   // Java Serialization
   //
