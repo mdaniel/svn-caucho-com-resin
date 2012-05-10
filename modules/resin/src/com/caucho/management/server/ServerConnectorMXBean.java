@@ -153,6 +153,18 @@ public interface ServerConnectorMXBean extends ManagedObjectMXBean {
   public int getConnectionIdleCount();
 
   /**
+   * Returns the number starting connections to the target server.
+   */
+  @Description("The current number of starting connections in the connection pool")
+  public int getConnectionStartingCount();
+  
+  /**
+   * Returns the number connections to the target server.
+   */
+  @Description("The number of connections to the target server")
+  public int getConnectionCount();
+
+  /**
    * Returns the number of connections that have been made to the target server.
    */
   @Description("The total number of new connections that have been made" +

@@ -60,6 +60,11 @@ public class TextWidget
   {
     super( parent, id );
   }
+  
+  public Object put(Object key, Object value)
+  {
+    throw new UnsupportedOperationException();
+  }
 
   protected TextWidgetState createState( WidgetConnection connection )
     throws WidgetException

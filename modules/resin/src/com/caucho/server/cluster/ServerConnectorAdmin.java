@@ -165,6 +165,16 @@ public class ServerConnectorAdmin extends AbstractManagedObject
   {
     return _client.getIdleCount();
   }
+  
+  public int getConnectionStartingCount()
+  {
+    return _client.getStartingCount();
+  }
+  
+  public int getConnectionCount()
+  {
+    return _client.getConnectionCount();
+  }
 
   public long getConnectionNewCountTotal()
   {

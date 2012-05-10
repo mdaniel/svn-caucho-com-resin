@@ -325,6 +325,16 @@ public class ServerConnector
   {
     return (_idleHead - _idleTail + _idle.length) % _idle.length;
   }
+  
+  public int getStartingCount()
+  {
+    return _startingCount;
+  }
+  
+  public int getConnectionCount()
+  {
+    return getIdleCount() + getStartingCount() + getActiveCount();
+  }
 
   /**
    * Returns the number of load balance allocations
@@ -489,7 +499,7 @@ public class ServerConnector
       return false;
 
     case ST_FAIL:
-      return (_failTime + _failRecoverTime <= Alarm.getCurrentTime());
+      return ! isFailed(Alarm.getCurrentTime());
       
     default:
       return false;
@@ -502,6 +512,33 @@ public class ServerConnector
   public boolean isDead()
   {
     return ! isActive();
+  }
+  
+  public boolean isFailed(long now)
+  {
+    if (now < _failTime + _failRecoverTime) {
+      // we are in a possible failure and recover has not yet expired
+      if (_lastFailConnectTime >= _failTime) {
+        // it was a connect failure, fail immediately
+        logFinest("isFailed true: connect failure");
+        return true;  
+      } 
+      if (_failTime > _lastSuccessTime) {
+        // only fail for a read if there were no more recent successful reads
+        logFinest("isFailed true: no recent successes");
+        return true;  
+      }
+      logFinest("isFailed false: within window");
+    } else {
+      logFinest("isFailed false: not within window");
+    }
+    
+    return false;
+  }
+
+  public boolean isBusy(long now)
+  {
+    return (now < _lastBusyTime + _failRecoverTime);
   }
 
   /**
@@ -566,22 +603,38 @@ public class ServerConnector
   {
     int state = _state;
 
-    if (state == ST_ACTIVE)
+    if (state == ST_ACTIVE) {
+      logFinest("canOpenSoft true: active");
       return true;
+    }
     else if (ST_STARTING <= state && state < ST_ACTIVE) {
       long now = Alarm.getCurrentTime();
 
-      if (now < _lastFailConnectTime + _dynamicFailRecoverTime) {
-	return false;
+//      if (now < _lastFailConnectTime + _dynamicFailRecoverTime) {
+//        logFinest("canOpenSoft false: connect failure");
+//	return false;
+//      }
+      
+      if (isFailed(now)) {
+        logFinest("canOpenSoft false: isFailed");
+        return false;
       }
-
+      
+      updateWarmup();
       int warmupState = _warmupState;
 
       if (warmupState < 0) {
-	return (_failTime - warmupState * _failChunkTime < now);
+        boolean canOpen = (_failTime - warmupState * _failChunkTime < now);
+        logFinest("canOpenSoft " + canOpen + " : " + _failTime + " - " + warmupState + " * " + _failChunkTime + " < " + now);
+        return canOpen;
+        //boolean failed = isFailed(now);
+        //logFinest("canOpenSoft " + (!failed) + " : isFailed = " + failed);
+	//return ! failed;
       }
-      else if (WARMUP_MAX <= warmupState)
+      else if (WARMUP_MAX <= warmupState) {
+        logFinest("canOpenSoft true : WARMUP_MAX <= " + warmupState);
 	return true;
+      }
 
       int connectionMax = WARMUP_CONNECTION_MAX[warmupState];
 
@@ -589,11 +642,26 @@ public class ServerConnector
       int activeCount = _activeCount + _startingCount;
       int totalCount = activeCount + idleCount;
       
-      return totalCount < connectionMax;
+      boolean canOpen = totalCount < connectionMax;
+      logFinest("canOpenSoft " + canOpen + " : " + totalCount + " < " + connectionMax);
+      return canOpen;
     }
     else {
+      logFinest("canOpenSoft false : state == " + state);
       return false;
     }
+  }
+  
+  private void logFiner(String s)
+  {
+    if (log.isLoggable(Level.FINER))
+      log.finer(getDebugId() + " " + s);
+  }
+
+  private void logFinest(String s)
+  {
+    if (log.isLoggable(Level.FINEST))
+      log.finest(getDebugId() + " " + s);
   }
 
   /**
@@ -610,7 +678,7 @@ public class ServerConnector
   {
     synchronized (this) {
       if (_state < ST_CLOSED)
-	_state = ST_ACTIVE;
+        _state = ST_ACTIVE;
     }
   }
   
@@ -623,7 +691,7 @@ public class ServerConnector
       _busyCountTotal++;
       
       if (_state < ST_CLOSED)
-	_state = ST_BUSY;
+        _state = ST_BUSY;
     }
   }
   
@@ -646,19 +714,22 @@ public class ServerConnector
   /**
    * Called when the socket read/write fails.
    */
-  public void failSocket()
+  public void failSocket(long time)
   {
     synchronized (this) {
       _failCountTotal++;
       
-      long now = Alarm.getCurrentTime();
       _firstSuccessTime = 0;
 
       // only degrade one per 100ms
-      if (now - _failTime >= 100) {
-	_warmupState--;
-	_failTime = now;
+      if (time > _failTime) {
+        if (time - _failTime >= 100)
+          _warmupState--;
+        
+	_failTime = time;
 	_lastFailTime = _failTime;
+	
+	log.warning("Socket read failure on " + this.getDebugId());
       }
 
       if (_warmupState < WARMUP_MIN)
@@ -688,6 +759,8 @@ public class ServerConnector
       _dynamicFailRecoverTime *= 2;
       if (_failRecoverTime < _dynamicFailRecoverTime)
 	_dynamicFailRecoverTime = _failRecoverTime;
+      
+      log.warning("Socket connect failure on " + this.getDebugId());
 
       if (_warmupState < WARMUP_MIN)
 	_warmupState = WARMUP_MIN;
@@ -711,6 +784,8 @@ public class ServerConnector
 	_warmupState = 0;
     
       _busyCountTotal++;
+      
+      log.warning("Busy on " + this.getDebugId());
       
       if (_state < ST_CLOSED)
 	_state = ST_BUSY;
@@ -766,7 +841,6 @@ public class ServerConnector
     }
 
     ClusterStream stream = openRecycle();
-
     if (stream != null)
       return stream;
 
@@ -790,13 +864,10 @@ public class ServerConnector
     }
 
     ClusterStream stream = openRecycle();
-
     if (stream != null)
       return stream;
 
-    long now = Alarm.getCurrentTime();
-
-    if (now < _failTime + _failRecoverTime) {
+    if (isFailed(Alarm.getCurrentTime())) {
       return null;
     }
 
@@ -812,21 +883,23 @@ public class ServerConnector
   {
     int state = _state;
     if (! (ST_SESSION_ONLY <= state && state < ST_CLOSED)) {
+      logFiner("openForSession no: state is " + state);
       return null;
     }
 
     ClusterStream stream = openRecycle();
-
     if (stream != null)
       return stream;
 
     long now = Alarm.getCurrentTime();
 
-    if (now < _failTime + _failRecoverTime) {
+    if (isFailed(now)) {
+      logFiner("openForSession no: isFailed");
       return null;
     }
     
-    if (now < _lastBusyTime + _failRecoverTime) {
+    if (isBusy(now)) {
+      logFiner("openForSession no: isBusy");
       return null;
     }
 
@@ -1039,7 +1112,7 @@ public class ServerConnector
       int warmupState = _warmupState;
 
       if (warmupState >= 0 && _firstSuccessTime > 0) {
-	warmupState = (int) ((now - _firstSuccessTime) / _warmupChunkTime);
+        warmupState = (int) ((now - _firstSuccessTime) / _warmupChunkTime);
 
 	// reset the connection fail recover time
 	_dynamicFailRecoverTime = 1000L;

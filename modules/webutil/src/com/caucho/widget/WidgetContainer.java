@@ -110,6 +110,11 @@ public class WidgetContainer
 
     return _childMap.put( id, value );
   }
+  
+  public Object put(Object key, Object value)
+  {
+    throw new UnsupportedOperationException();
+  }
 
   public Widget remove( String id )
   {

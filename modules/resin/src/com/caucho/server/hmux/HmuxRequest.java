@@ -454,7 +454,6 @@ public class HmuxRequest extends AbstractHttpRequest
 	_response.setHeaderWritten(true);
       
       try {
-	finish();
 	_response.finish();
       } catch (ClientDisconnectException e) {
         throw e;
@@ -481,6 +480,13 @@ public class HmuxRequest extends AbstractHttpRequest
 	_readStream.close();
       } catch (Exception e) {
 	killKeepalive();
+        log.log(Level.FINE, dbgId() + e, e);
+      }
+      
+      try {
+        finishHmux();
+      } catch (Exception e) {
+        killKeepalive();
         log.log(Level.FINE, dbgId() + e, e);
       }
     }
@@ -538,7 +544,24 @@ public class HmuxRequest extends AbstractHttpRequest
       log.log(Level.FINE, e.toString(), e);
     }
   }
-
+  
+  public void finishSession()
+    throws IOException
+  {
+    // override to prevent early session saving from WebAppFilterChain
+  }
+  
+  public void finish()
+  {
+    // override to prevent early session saving from WebAppFilterChain
+  }
+  
+  public void finishHmux()
+    throws IOException
+  {
+    super.finish();
+  }
+  
   /**
    * Returns true for the top-level request, but false for any include()
    * or forward()
@@ -1554,7 +1577,7 @@ public class HmuxRequest extends AbstractHttpRequest
         else
           _os.write(HMUX_EXIT);
       }
-
+      
       if (keepalive)
         _os.flush();
       else

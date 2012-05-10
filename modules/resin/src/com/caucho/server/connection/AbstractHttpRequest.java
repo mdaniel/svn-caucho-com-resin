@@ -2512,7 +2512,7 @@ public abstract class AbstractHttpRequest
     _server.update();
   }
 
-  void saveSession()
+  protected void saveSession()
   {
     SessionImpl session = _session;
     if (session != null)

@@ -90,6 +90,11 @@ public class PortAdmin extends AbstractManagedObject
   {
     return _port.getAcceptListenBacklog();
   }
+  
+  public int getConnectionCount()
+  {
+    return _port.getConnectionCount();
+  }
 
   public int getConnectionMax()
   {

@@ -34,6 +34,7 @@ import com.caucho.config.ConfigException;
 import com.caucho.config.program.*;
 import com.caucho.config.types.*;
 import com.caucho.lifecycle.Lifecycle;
+import com.caucho.lifecycle.LifecycleListener;
 import com.caucho.loader.Environment;
 import com.caucho.loader.EnvironmentBean;
 import com.caucho.loader.EnvironmentClassLoader;
@@ -66,7 +67,7 @@ import java.util.ArrayList;
  * Represents a protocol connection.
  */
 public class Port
-  implements EnvironmentListener, Runnable
+  implements EnvironmentListener, Runnable, LifecycleListener
 {
   private static final L10N L = new L10N(Port.class);
 
@@ -178,10 +179,12 @@ public class Port
 
   public Port()
   {
+    _lifecycle.addListener(this);
   }
 
   public Port(ClusterServer server)
   {
+    this();
   }
 
   /**
@@ -1752,6 +1755,16 @@ public class Port
       } finally {
 	if (! isClosed())
 	  alarm.queue(60000);
+      }
+    }
+  }
+
+  @Override
+  public void lifecycleEvent(int oldState, int newState)
+  {
+    if (newState == Lifecycle.IS_ACTIVE) {
+      synchronized (this) {
+        notifyAll();
       }
     }
   }

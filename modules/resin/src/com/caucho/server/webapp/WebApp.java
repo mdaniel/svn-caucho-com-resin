@@ -93,6 +93,8 @@ import java.util.Iterator;
 import java.util.Locale;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 /**
  * Resin's webApp implementation.
@@ -297,6 +299,7 @@ public class WebApp extends ServletContextImpl
 
   private int _requestCount;
   private long _lastRequestTime = Alarm.getCurrentTime();
+  private Pattern _cookieDomainPattern = null;
 
   //
   // statistics
@@ -1793,6 +1796,11 @@ public class WebApp extends ServletContextImpl
 
       if (getSessionManager() != null)
         getSessionManager().init();
+      
+      if (_sessionManager.getCookieDomainRegexp() != null) {
+        _cookieDomainPattern
+          = Pattern.compile(_sessionManager.getCookieDomainRegexp());
+      }
 
       _characterEncoding = CharacterEncoding.getLocalEncoding();
 
@@ -2720,6 +2728,26 @@ public class WebApp extends ServletContextImpl
       return manager.getActiveSessionCount();
     else
       return 0;
+  }
+  
+  public String generateCookieDomain(HttpServletRequest request)
+  {
+    String serverName = request.getServerName();
+
+    if (_cookieDomainPattern == null)
+      return _sessionManager.getCookieDomain();
+
+    String domain;
+    Matcher matcher = _cookieDomainPattern.matcher(serverName);
+
+    // XXX: performance?
+    if (matcher.find()) {
+      domain = matcher.group();
+    } else {
+      domain = null;
+    }
+
+    return domain;
   }
 
   void updateStatistics(long time,
