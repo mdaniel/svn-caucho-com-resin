@@ -322,7 +322,9 @@ public class OptionsModule extends AbstractQuercusModule {
    */
   public static Value getmyuid(Env env)
   {
-    return FileModule.fileowner(env, env.getSelfPath());
+    String str = env.getSelfPath().getFullPath();
+
+    return FileModule.fileowner(env, env.createString(str));
   }
 
   /**
@@ -597,12 +599,12 @@ public class OptionsModule extends AbstractQuercusModule {
   private static void phpinfoGeneral(Env env)
   {
     String quercusName;
-    
+
     if (env.getQuercus().isPro())
       quercusName = "Quercus Pro";
     else
       quercusName = "Quercus";
-    
+
     if (hasRequest(env))
       env.println("<h1>" + quercusName + "</h1>");
     else
@@ -830,7 +832,7 @@ public class OptionsModule extends AbstractQuercusModule {
   {
     return "2.0.4";
   }
-  
+
   /**
    * JVM takes care of circular reference collection.
    */
@@ -838,11 +840,11 @@ public class OptionsModule extends AbstractQuercusModule {
   {
     return true;
   }
-  
+
   public static void gc_enable()
   {
   }
-  
+
   public static void gc_disable()
   {
   }
