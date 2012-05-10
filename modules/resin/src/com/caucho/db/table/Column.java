@@ -552,8 +552,13 @@ abstract public class Column {
                    rowAddr,
                    xa);
     */
+    System.out.println("SET_INDEX: " + Long.toHexString(rowAddr)
+                       + " " + this + " " + getTable()
+                       + this.getIndexKeyCompare().toString(block, rowOffset + getColumnOffset(), getLength()));
+    
     index.insert(block, rowOffset + getColumnOffset(), getLength(),
                  rowAddr, false);
+    
   }
   
   /**
@@ -603,11 +608,12 @@ abstract public class Column {
       = index.lookup(block, rowOffset + getColumnOffset(), getLength());
 
     if (value != rowAddr)
-      throw new IllegalStateException(L.l("{0}: invalid index (key={1}, index value={2}, row addr={3})",
+      throw new IllegalStateException(L.l("{0}: invalid index (key={1}, index value={2}, row addr={3}, {4})",
                                           this, 
                                           getIndexKeyCompare().toString(block, rowOffset + getColumnOffset(), getLength()),
                                           Long.toHexString(value), 
-                                          Long.toHexString(rowAddr)));
+                                          Long.toHexString(rowAddr),
+                                          _table));
   }
   
   /**
@@ -633,11 +639,12 @@ abstract public class Column {
       index.close();
   }
 
+  @Override
   public String toString()
   {
     if (getIndex() != null)
-      return getClass().getName() + "[" + _name + ",index]";
+      return getClass().getSimpleName() + "[" + _name + ",index]";
     else
-      return getClass().getName() + "[" + _name + "]";
+      return getClass().getSimpleName() + "[" + _name + "]";
   }
 }

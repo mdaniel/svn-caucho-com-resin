@@ -512,6 +512,17 @@ public class TableIterator {
     _table.delete(_xa, _block, _buffer, _rowOffset, true);
   }
   
+  /**
+   * Delete but do not delete any indexes (for rebuilding).
+   */
+
+  public void deleteRowOnly()
+    throws SQLException
+  {
+    setDirty();
+    _table.delete(_xa, _block, _buffer, _rowOffset, false);
+  }
+  
   public void setDirty()
     throws SQLException
   {

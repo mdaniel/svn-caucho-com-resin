@@ -36,7 +36,7 @@ public class KeyCompare {
    * Compares the key to the block data.
    */
   public int compare(byte []keyBuffer, int keyOffset,
-                      byte []block, int offset, int length)
+                     byte []block, int offset, int length)
   {
     for (; length > 0; length--) {
       byte keyByte = keyBuffer[keyOffset++];

@@ -43,6 +43,7 @@ public class BinaryKeyCompare extends KeyCompare {
   /**
    * Compares the key to the block data.
    */
+  @Override
   public int compare(byte []keyBuffer, int keyOffset,
                      byte []block, int offset, int length)
   {

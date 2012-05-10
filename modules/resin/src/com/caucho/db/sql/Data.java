@@ -139,6 +139,9 @@ public class Data {
 
     case BINARY:
       return _bytes;
+      
+    case VARCHAR:
+      return _stringData.getBytes();
 
     default:
       throw new UnsupportedOperationException(_type + " " + toString());

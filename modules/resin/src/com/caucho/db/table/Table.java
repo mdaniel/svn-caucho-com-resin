@@ -44,6 +44,7 @@ import com.caucho.db.xa.DbTransaction;
 import com.caucho.env.thread.AbstractTaskWorker;
 import com.caucho.inject.Module;
 import com.caucho.util.Alarm;
+import com.caucho.util.BitsUtil;
 import com.caucho.util.CurrentTime;
 import com.caucho.util.L10N;
 import com.caucho.util.SQLExceptionWrapper;
@@ -85,7 +86,7 @@ public class Table extends BlockStore {
   private final static L10N L = new L10N(Table.class);
 
   private final static int ROOT_DATA_OFFSET = STORE_CREATE_END;
-  private final static int INDEX_ROOT_OFFSET = ROOT_DATA_OFFSET + 32;
+  private final static int INDEX_ROOT_OFFSET = ROOT_DATA_OFFSET + 768;
 
   private final static int ROOT_DATA_END = ROOT_DATA_OFFSET + 1024;
 
@@ -97,9 +98,11 @@ public class Table extends BlockStore {
   public final static byte ROW_ALLOC = 0x2;
   public final static byte ROW_MASK = 0x3;
 
-  private final static String DB_VERSION = "Resin-DB 4.0.25";
-  private final static String MIN_VERSION = "Resin-DB 4.0.25";
+  private final static String DB_VERSION = "Resin-DB 4.0.28";
+  private final static String MIN_VERSION = "Resin-DB 4.0.28";
 
+  private static final int FREE_ROW_BLOCK_SIZE = 256;
+  
   private final Row _row;
 
   private final int _rowLength;
@@ -110,10 +113,9 @@ public class Table extends BlockStore {
 
   private final Column _identityColumn;
   private final Column _autoIncrementColumn;
+  
+  private int _indexRootOffset;
 
-  private long _entries;
-
-  private static final int FREE_ROW_BLOCK_SIZE = 256;
   private final AtomicLongArray _insertFreeRowBlockArray
     = new AtomicLongArray(FREE_ROW_BLOCK_SIZE);
   private final AtomicInteger _insertFreeRowBlockHead
@@ -331,12 +333,15 @@ public class Table extends BlockStore {
                                 factory.getConstraints());
 
         table.init();
-
-        //if (! table.validateIndexesSafe()) {
+        
+        if (! table.readIndexes() || ! table.validateIndexesSafe()) {
+          log.warning(L.l("rebuilding indexes for '{0}' because they did not properly validate on startup.",
+                          table));
+          
           table.clearIndexes();
-          table.initIndexes();
+          table.createIndexes();
           table.rebuildIndexes();
-        //}
+        }
 
         return table;
       } catch (Exception e) {
@@ -359,7 +364,7 @@ public class Table extends BlockStore {
   {
     super.create();
 
-    initIndexes();
+    createIndexes();
 
     byte []tempBuffer = new byte[BLOCK_SIZE];
 
@@ -404,11 +409,13 @@ public class Table extends BlockStore {
   }
 
   /**
-   * Initialize the indexes
+   * Creates the indexes
    */
-  private void initIndexes()
+  private void createIndexes()
     throws IOException, SQLException
   {
+    int indexCount = 0;
+    
     Column []columns = _row.getColumns();
     for (int i = 0; i < columns.length; i++) {
       Column column = columns[i];
@@ -429,7 +436,70 @@ public class Table extends BlockStore {
                               keyCompare);
 
       column.setIndex(btree);
+      
+      long metaBlockAddress = DATA_START;
+      Block metaBlock = readBlock(metaBlockAddress);
+      try {
+        byte []buffer = metaBlock.getBuffer();
+        
+        int newIndexCount = indexCount++;
+        
+        int offset = newIndexCount * 8 + INDEX_ROOT_OFFSET;
+        
+        BitsUtil.writeLong(buffer, offset, rootBlockId);
+      } finally {
+        metaBlock.free();
+      }
     }
+  }
+
+  /**
+   * Creates the indexes
+   */
+  private boolean readIndexes()
+    throws IOException, SQLException
+  {
+    int indexCount = 0;
+    
+    Column []columns = _row.getColumns();
+    for (int i = 0; i < columns.length; i++) {
+      Column column = columns[i];
+
+      if (! column.isUnique())
+        continue;
+
+      KeyCompare keyCompare = column.getIndexKeyCompare();
+
+      if (keyCompare == null)
+        continue;
+      
+      long rootBlockId = -1;
+      
+      long metaBlockAddress = DATA_START;
+      Block metaBlock = readBlock(metaBlockAddress);
+      try {
+        byte []buffer = metaBlock.getBuffer();
+        
+        int newIndexCount = indexCount++;
+        
+        int offset = newIndexCount * 8 + INDEX_ROOT_OFFSET;
+        
+        rootBlockId = BitsUtil.readLong(buffer, offset);
+        
+        if (! isIndexBlock(rootBlockId)) {
+          return false;
+        }
+      } finally {
+        metaBlock.free();
+      }
+
+      BTree btree = new BTree(this, rootBlockId, column.getLength(),
+                              keyCompare);
+
+      column.setIndex(btree);
+    }
+    
+    return true;
   }
 
   /**
@@ -487,16 +557,17 @@ public class Table extends BlockStore {
       iter.init(xa);
 
       Column []columns = _row.getColumns();
-
+      
       while (iter.nextBlock()) {
         iter.initRow();
 
         byte []blockBuffer = iter.getBuffer();
 
         while (iter.nextRow()) {
+          long rowAddress = iter.getRowAddress();
+          int rowOffset = iter.getRowOffset();
+          
           try {
-            long rowAddress = iter.getRowAddress();
-            int rowOffset = iter.getRowOffset();
             
             if (! isValid(blockBuffer, rowOffset, columns)) {
               log.warning(this + ": removing corrupted row"
@@ -505,7 +576,7 @@ public class Table extends BlockStore {
               iter.delete();
               continue;
             }
-
+            
             for (int i = 0; i < columns.length; i++) {
               Column column = columns[i];
 
@@ -517,7 +588,15 @@ public class Table extends BlockStore {
               column.setIndex(xa, blockBuffer, rowOffset, rowAddress, null);
             }
           } catch (Exception e) {
-            log.log(Level.WARNING, e.toString(), e);
+            log.warning(this + " deleting row because of index rebuild failure: "
+                        + Long.toHexString(rowAddress)
+                        + "\n  " + e);
+            
+            if (log.isLoggable(Level.FINER)) {
+              log.log(Level.FINER, e.toString(), e);
+            }
+            
+            iter.deleteRowOnly();
           }
         }
       }
@@ -555,7 +634,9 @@ public class Table extends BlockStore {
   private boolean validateIndexesSafe()
   {
     try {
-      validateIndexes();
+      if (! validateIndexes()) {
+        return false;
+      }
       
       return true;
     } catch (Exception e) {
@@ -571,6 +652,31 @@ public class Table extends BlockStore {
   private boolean validateIndexes()
     throws IOException, SQLException
   {
+    final Column []columns = _row.getColumns();
+    
+    boolean isIndex = false;
+    
+    for (Column column : columns) {
+      if (column.getIndex() != null)
+        isIndex = true;
+    }
+    
+    if (! isIndex) {
+      return true;
+    }
+    
+    return validateIndexByRow();
+  }
+  
+    
+  /*
+   * Rebuilds the indexes
+   */
+  private boolean validateIndexByRow()
+    throws IOException, SQLException
+  {
+    final Column []columns = _row.getColumns();
+    
     boolean isValid = false;
     
     DbTransaction xa = DbTransaction.create();
@@ -582,8 +688,6 @@ public class Table extends BlockStore {
       iter = createTableIterator();
 
       iter.init(xa);
-
-      Column []columns = _row.getColumns();
 
       while (iter.nextBlock()) {
         iter.initRow();
@@ -912,7 +1016,6 @@ public class Table extends BlockStore {
         }
         
         block.setDirty(rowOffset, rowOffset + _rowLength);
-        _entries++;
         
         if (_identityColumn != null) {
           GeneratedKeysResultSet rs = queryContext.getGeneratedKeysResultSet();

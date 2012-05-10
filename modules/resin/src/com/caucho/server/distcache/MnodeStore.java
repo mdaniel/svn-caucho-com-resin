@@ -536,7 +536,7 @@ public class MnodeStore {
         long valueHash = rs.getLong(1);
         long valueDataId = rs.getLong(2);
         long valueLength = rs.getLong(3);
-
+        
         byte []cacheHash = rs.getBytes(4);
         long flags = rs.getLong(5);
         long itemVersion = rs.getLong(6);
@@ -567,7 +567,7 @@ public class MnodeStore {
         
         return entry;
       }
-
+      
       if (log.isLoggable(Level.FINEST))
         log.finest(this + " load: no mnode for cache key " + id);
 

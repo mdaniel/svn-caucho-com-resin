@@ -165,7 +165,9 @@ public final class BTree {
     throws IOException, SQLException
   {
     try {
-      return lookup(keyBuffer, keyOffset, keyLength, _rootBlockId);
+      long value = lookup(keyBuffer, keyOffset, keyLength, _rootBlockId);
+      
+      return value;
     } catch (InterruptedException e) {
       throw new IllegalStateException(e);
     }
@@ -273,11 +275,13 @@ public final class BTree {
       validateIndex(block);
         
       if (isRead && insertReadChild(keyBuffer, keyOffset, keyLength,
-                                    value, isOverride, block))
+                                    value, isOverride, block)) {
         return true;
-      else
+      }
+      else {
         return insertWriteChild(keyBuffer, keyOffset, keyLength,
                                 value, isOverride, block);
+      }
     } finally {
       block.free();
     }
@@ -350,7 +354,7 @@ public final class BTree {
         // return false if the block needs to be split
         return false;
       }
-
+      
       if (isLeaf(buffer, block)) {
         insertValue(keyBuffer, keyOffset, keyLength,
                     value, isOverride, block);
@@ -418,7 +422,6 @@ public final class BTree {
     int tupleSize = _tupleSize;
     int length = getLength(buffer);
 
-    int sublen = length;
     int min = 0;
     int max = length;
     int offset = HEADER_SIZE;
@@ -436,10 +439,11 @@ public final class BTree {
         if (! isOverride) {
           long oldValue = getPointer(buffer, offset);
 
-          if (value != oldValue)
+          if (value != oldValue) {
             throw new SqlIndexAlreadyExistsException(L.l("'{0}' insert of key '{1}' fails index uniqueness.",
                                                          _store,
                                                          _keyCompare.toString(keyBuffer, keyOffset, keyLength)));
+          }
         }
 
         setPointer(buffer, offset, value);
@@ -1531,7 +1535,7 @@ public final class BTree {
     int end = HEADER_SIZE + length * tupleSize;
 
     long value;
-
+    
     while (length > 0) {
       int tail = offset + tupleSize * length;
       int delta = tupleSize * (length / 2);
@@ -1548,7 +1552,7 @@ public final class BTree {
 
       int cmp = _keyCompare.compare(keyBuffer, keyOffset,
                                     buffer, PTR_SIZE + newOffset, keyLength);
-      
+
       if (cmp == 0) {
         value = getPointer(buffer, newOffset);
 

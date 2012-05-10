@@ -384,9 +384,12 @@ class BinaryColumn extends Column {
     BTree index = getIndex();
 
     if (index != null) {
+      System.out.println("BINSERT: " + Long.toHexString(rowAddr) + ":" + rowOffset
+                         + " " + getDebugString(block, rowOffset));
+      Thread.dumpStack();
       try {
         index.insert(block,
-                     rowOffset + _columnOffset, getLength(),
+                     rowOffset + getColumnOffset(), getLength(),
                      rowAddr,
                      false);
       } catch (SqlIndexAlreadyExistsException e) {

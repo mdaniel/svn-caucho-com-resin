@@ -661,6 +661,43 @@ public class StringModule extends AbstractQuercusModule {
   }
 
   /**
+   * Converts a binary value to a hex value.
+   */
+  public static StringValue hex2bin(Env env, StringValue s)
+  {
+    StringValue sb = env.createBinaryBuilder();
+      
+    int len = s.length();
+      
+    for (int i = 0; i + 1 < len; i += 2) {
+      int d1 = hexDigit(s.charAt(i));
+      int d2 = hexDigit(s.charAt(i + 1));
+        
+      int d = d1 * 16 + d2;
+        
+      sb.append((char) d);
+    }
+      
+    return sb;
+  }
+  
+  private static int hexDigit(int c)
+  {
+    if ('0' <= c && c <= '9') {
+      return c - '0';
+    }
+    else if ('a' <= c && c <= 'f') {
+      return c - 'a' + 10;
+    }
+    else if ('A' <= c && c <= 'F') {
+      return c - 'A' + 10;
+    }
+    else {
+      return 0;
+    }
+  }
+
+  /**
    * implodes an array into a string
    *
    * @param glueV the separator string
