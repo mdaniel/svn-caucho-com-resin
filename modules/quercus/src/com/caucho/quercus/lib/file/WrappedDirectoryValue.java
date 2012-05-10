@@ -29,7 +29,13 @@
 
 package com.caucho.quercus.lib.file;
 
-import com.caucho.quercus.env.*;
+import com.caucho.quercus.env.ConstStringValue;
+import com.caucho.quercus.env.Env;
+import com.caucho.quercus.env.LongValue;
+import com.caucho.quercus.env.QuercusClass;
+import com.caucho.quercus.env.StringValue;
+import com.caucho.quercus.env.UnicodeBuilderValue;
+import com.caucho.quercus.env.Value;
 
 /**
  * Represents a PHP directory listing
@@ -43,7 +49,7 @@ public class WrappedDirectoryValue extends DirectoryValue {
     = new ConstStringValue("dir_readdir");
   private static final ConstStringValue DIR_REWINDDIR
     = new ConstStringValue("dir_rewinddir");
-  
+
   private static final UnicodeBuilderValue DIR_CLOSEDIR_U
     = new UnicodeBuilderValue("dir_closedir");
   private static final UnicodeBuilderValue DIR_OPENDIR_U
@@ -52,14 +58,14 @@ public class WrappedDirectoryValue extends DirectoryValue {
     = new UnicodeBuilderValue("dir_readdir");
   private static final UnicodeBuilderValue DIR_REWINDDIR_U
     = new UnicodeBuilderValue("dir_rewinddir");
-  
+
   private Env _env;
   private Value _wrapper;
 
   public WrappedDirectoryValue(Env env, QuercusClass qClass)
   {
     super(env);
-    
+
     _env = env;
     _wrapper = qClass.callNew(_env, Value.NULL_ARGS);
   }

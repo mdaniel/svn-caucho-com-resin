@@ -61,7 +61,7 @@ public class TryStatement extends Statement {
   public void addCatch(String id, AbstractVarExpr lhs, Statement block)
   {
     _catchList.add(new Catch(id, lhs, block));
-    
+
     block.setParent(this);
   }
 
@@ -71,7 +71,7 @@ public class TryStatement extends Statement {
       return _block.execute(env);
     } catch (QuercusLanguageException e) {
       Value value = null;
-      
+
       try {
         value = e.toValue(env);
       } catch (Throwable e1) {
@@ -80,20 +80,20 @@ public class TryStatement extends Statement {
 
       for (int i = 0; i < _catchList.size(); i++) {
         Catch item = _catchList.get(i);
-        
+
         if (value != null && value.isA(item.getId())
             || item.getId().equals("Exception")) {
           if (value != null)
             item.getExpr().evalAssignValue(env, value);
           else
             item.getExpr().evalAssignValue(env, NullValue.NULL);
-              
+
           return item.getBlock().execute(env);
         }
       }
 
       throw e;
-      
+
     } catch (QuercusDieException e) {
       for (int i = 0; i < _catchList.size(); i++) {
         Catch item = _catchList.get(i);
@@ -104,9 +104,9 @@ public class TryStatement extends Statement {
           return item.getBlock().execute(env);
         }
       }
-      
+
       throw e;
-      
+
     } catch (QuercusExitException e) {
       for (int i = 0; i < _catchList.size(); i++) {
         Catch item = _catchList.get(i);
@@ -117,7 +117,7 @@ public class TryStatement extends Statement {
           return item.getBlock().execute(env);
         }
       }
-      
+
       throw e;
 
     } catch (Exception e) {
@@ -126,16 +126,16 @@ public class TryStatement extends Statement {
 
         if (item.getId().equals("Exception")) {
           Throwable cause = e;
-          
+
           //if (e instanceof QuercusException && e.getCause() != null)
             //cause = e.getCause();
-          
+
           item.getExpr().evalAssignValue(env, env.createException(cause));
 
           return item.getBlock().execute(env);
         }
       }
-      
+
       if (e instanceof QuercusException)
         throw (QuercusException) e;
       else

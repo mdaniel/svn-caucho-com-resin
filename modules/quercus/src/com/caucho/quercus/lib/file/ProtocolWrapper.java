@@ -67,22 +67,32 @@ public class ProtocolWrapper {
 
   public boolean unlink(Env env, StringValue path)
   {
-    AbstractFunction function = _qClass.getStaticFunction("unlink");
+    // php/1e23
+    Value obj = _qClass.createObject(env);
+    AbstractFunction function = _qClass.findFunction("unlink");
 
-    if (function == null)
+    if (function == null) {
       return false;
+    }
 
-    return function.call(env, path).toBoolean();
+    Value result = function.callMethod(env, _qClass, obj, path);
+
+    return result.toBoolean();
   }
 
-  public boolean rename(Env env, StringValue path_from, StringValue path_to)
+  public boolean rename(Env env, StringValue from, StringValue to)
   {
-    AbstractFunction function = _qClass.getStaticFunction("rename");
+    // php/1e24
+    Value obj = _qClass.createObject(env);
+    AbstractFunction function = _qClass.findFunction("rename");
 
-    if (function == null)
+    if (function == null) {
       return false;
+    }
 
-    return function.call(env, path_from, path_to).toBoolean();
+    Value result = function.callMethod(env, _qClass, obj, from, to);
+
+    return result.toBoolean();
   }
 
   public boolean mkdir(Env env,
@@ -105,22 +115,32 @@ public class ProtocolWrapper {
 
   public boolean rmdir(Env env, StringValue path, LongValue options)
   {
-    AbstractFunction function = _qClass.getStaticFunction("rmdir");
+    // php/1e25
+    Value obj = _qClass.createObject(env);
+    AbstractFunction function = _qClass.findFunction("rmdir");
 
-    if (function == null)
+    if (function == null) {
       return false;
+    }
 
-    return function.call(env, path, options).toBoolean();
+    Value result = function.callMethod(env, _qClass, obj, path, options);
+
+    return result.toBoolean();
   }
 
   public Value url_stat(Env env, StringValue path, LongValue flags)
   {
-    AbstractFunction function = _qClass.getStaticFunction("url_stat");
+    // php/1e26
+    Value obj = _qClass.createObject(env);
+    AbstractFunction function = _qClass.findFunction("url_stat");
 
-    if (function == null)
+    if (function == null) {
       return BooleanValue.FALSE;
+    }
 
-    return function.call(env, path, flags);
+    Value result = function.callMethod(env, _qClass, obj, path, flags);
+
+    return result;
   }
 
   @Override

@@ -46,8 +46,10 @@ import com.caucho.vfs.ReadStream;
 import com.caucho.vfs.WriteStream;
 import com.caucho.vfs.LockableStream;
 
+import java.io.FilePermission;
 import java.io.IOException;
 import java.io.InputStream;
+import java.security.AccessControlException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
@@ -865,10 +867,29 @@ public class FileModule extends AbstractQuercusModule {
    *
    * @param path the path to check
    */
-  public static Value fileowner(Env env, Path path)
+  public static Value fileowner(Env env, StringValue filename)
   {
-    if (! path.canRead()) {
-      env.warning(L.l("{0} cannot be read", path.getFullPath()));
+    ProtocolWrapper wrapper = getProtocolWrapper(env, filename);
+
+    if (wrapper != null) {
+      Value array = wrapper.url_stat(env, filename, LongValue.ZERO);
+
+      if (! array.isArray()) {
+        return BooleanValue.FALSE;
+      }
+
+      Value owner = array.get(env.createString("uid"));
+
+      if (owner != UnsetValue.UNSET) {
+        return owner.toLongValue();
+      }
+
+      return BooleanValue.FALSE;
+    }
+
+    Path path = env.lookupPwd(filename);
+
+    if (path == null) {
       return BooleanValue.FALSE;
     }
 
@@ -951,8 +972,18 @@ public class FileModule extends AbstractQuercusModule {
    *
    * @param path the path to check
    */
-  public static boolean file_exists(@NotNull Path path)
+  public static boolean file_exists(Env env, StringValue filename)
   {
+    ProtocolWrapper wrapper = getProtocolWrapper(env, filename);
+
+    if (wrapper != null) {
+      Value array = wrapper.url_stat(env, filename, LongValue.ZERO);
+
+      return array.isArray();
+    }
+
+    Path path = env.lookupPwd(filename);
+
     if (path != null)
       return path.exists();
     else
@@ -1388,9 +1419,9 @@ public class FileModule extends AbstractQuercusModule {
 
     StreamContextResource context = null;
 
-    if (contextV instanceof StreamContextResource)
+    if (contextV instanceof StreamContextResource) {
       context = (StreamContextResource) contextV;
-
+    }
 
     // XXX: context
     try {
@@ -1502,11 +1533,18 @@ public class FileModule extends AbstractQuercusModule {
       env.warning(L.l("bad mode `{0}'", mode));
 
       return null;
-    } catch (IOException e) {
+    }
+    catch (IOException e) {
       log.log(Level.FINE, e.toString(), e);
 
-      env.warning(L.l("{0} can't be opened.\n{1}",
-            filename, e.toString()));
+      env.warning(L.l("{0} can't be opened.\n{1}", filename, e.toString()));
+
+      return null;
+    }
+    catch (SecurityException e) {
+      log.log(Level.FINE, e.toString(), e);
+
+      env.warning(L.l("{0} can't be opened.\n{1}", filename, e.toString()));
 
       return null;
     }
@@ -2079,10 +2117,21 @@ public class FileModule extends AbstractQuercusModule {
    *
    * @param path the path to check
    */
-  public static boolean is_dir(@NotNull Path path)
+  public static boolean is_dir(Env env, StringValue filename)
   {
-    if (path == null)
+    ProtocolWrapper wrapper = getProtocolWrapper(env, filename);
+
+    if (wrapper != null) {
+      Value array = wrapper.url_stat(env, filename, LongValue.ZERO);
+
+      return array.isArray();
+    }
+
+    Path path = env.lookupPwd(filename);
+
+    if (path == null) {
       return false;
+    }
 
     return path.isDirectory();
   }
@@ -2168,8 +2217,9 @@ public class FileModule extends AbstractQuercusModule {
   {
     // php/1663, php/1664
 
-    if (path == null)
+    if (path == null) {
       return false;
+    }
 
     String tail = path.getTail();
 
@@ -2181,10 +2231,24 @@ public class FileModule extends AbstractQuercusModule {
    *
    * @param path the path to check
    */
-  public static boolean is_writable(Path path)
+  public static boolean is_writable(Env env, StringValue filename)
   {
-    if (path == null)
+    ProtocolWrapper wrapper = getProtocolWrapper(env, filename);
+
+    if (wrapper != null) {
+      LongValue flag = LongValue.create(StreamModule.STREAM_URL_STAT_QUIET);
+
+      Value array = wrapper.url_stat(env, filename, flag);
+
+      // XXX: not sure what it's checking
+      return array.isArray();
+    }
+
+    Path path = env.lookupPwd(filename);
+
+    if (path == null) {
       return false;
+    }
 
     return path.canWrite();
   }
@@ -2194,12 +2258,9 @@ public class FileModule extends AbstractQuercusModule {
    *
    * @param path the path to check
    */
-  public static boolean is_writeable(Path path)
+  public static boolean is_writeable(Env env, StringValue filename)
   {
-    if (path == null)
-      return false;
-
-    return is_writable(path);
+    return is_writable(env, filename);
   }
 
   /**
@@ -2265,12 +2326,24 @@ public class FileModule extends AbstractQuercusModule {
 
     Path path = env.lookupPwd(dirname);
 
+    if (path == null) {
+      return false;
+    }
+
     try {
-      if (recursive)
+      if (recursive) {
         return path.mkdirs();
-      else
+      }
+      else {
         return path.mkdir();
-    } catch (IOException e) {
+      }
+    }
+    catch (IOException e) {
+      log.log(Level.FINE, e.toString(), e);
+
+      return false;
+    }
+    catch (AccessControlException e) {
       log.log(Level.FINE, e.toString(), e);
 
       return false;
@@ -2737,9 +2810,10 @@ public class FileModule extends AbstractQuercusModule {
   {
     ProtocolWrapper wrapper = getProtocolWrapper(env, filename);
 
-    if (wrapper != null)
+    if (wrapper != null) {
       // XXX flags?
       return wrapper.url_stat(env, filename, LongValue.ZERO);
+    }
 
     Path path = env.getPwd().lookup(filename.toString());
 
@@ -2770,22 +2844,22 @@ public class FileModule extends AbstractQuercusModule {
     result.put(path.getBlockSize());
     result.put(path.getBlockCount());
 
-    result.put("dev", path.getDevice());
-    result.put("ino", path.getInode());
+    result.put(env, "dev", path.getDevice());
+    result.put(env, "ino", path.getInode());
 
-    result.put("mode", path.getMode());
-    result.put("nlink", path.getNumberOfLinks());
-    result.put("uid", path.getUser());
-    result.put("gid", path.getGroup());
-    result.put("rdev", path.getDeviceId());
+    result.put(env, "mode", path.getMode());
+    result.put(env, "nlink", path.getNumberOfLinks());
+    result.put(env, "uid", path.getUser());
+    result.put(env, "gid", path.getGroup());
+    result.put(env, "rdev", path.getDeviceId());
 
-    result.put("size", path.getLength());
+    result.put(env, "size", path.getLength());
 
-    result.put("atime", path.getLastAccessTime() / 1000L);
-    result.put("mtime", path.getLastModified() / 1000L);
-    result.put("ctime", path.getLastStatusChangeTime() / 1000L);
-    result.put("blksize", path.getBlockSize());
-    result.put("blocks", path.getBlockCount());
+    result.put(env, "atime", path.getLastAccessTime() / 1000L);
+    result.put(env, "mtime", path.getLastModified() / 1000L);
+    result.put(env, "ctime", path.getLastStatusChangeTime() / 1000L);
+    result.put(env, "blksize", path.getBlockSize());
+    result.put(env, "blocks", path.getBlockCount());
 
     return result;
   }
@@ -2908,13 +2982,13 @@ public class FileModule extends AbstractQuercusModule {
                                @Optional Value context)
   {
     // quercus/160p
-
     // XXX: safe_mode
     try {
       ProtocolWrapper wrapper = getProtocolWrapper(env, filename);
 
-      if (wrapper != null)
+      if (wrapper != null) {
         return wrapper.unlink(env, filename);
+      }
 
       Path path = env.lookupPwd(filename);
 

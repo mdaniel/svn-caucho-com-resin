@@ -300,7 +300,7 @@ public class CurlModule
    * @param curl
    */
   public static void curl_close(Env env,
-                              @NotNull CurlResource curl)
+                                @NotNull CurlResource curl)
   {
     if (curl == null)
       return;
@@ -316,7 +316,7 @@ public class CurlModule
    */
   @ReturnNullAsFalse
   public static CurlResource curl_copy_handle(Env env,
-                              @NotNull CurlResource curl)
+                                              @NotNull CurlResource curl)
   {
     if (curl == null)
       return null;
@@ -331,7 +331,7 @@ public class CurlModule
    * @param curl
    */
   public static Value curl_errno(Env env,
-                              @NotNull CurlResource curl)
+                                 @NotNull CurlResource curl)
   {
     if (curl == null)
       return BooleanValue.FALSE;
@@ -346,7 +346,7 @@ public class CurlModule
    * @param curl
    */
   public static Value curl_error(Env env,
-                              @NotNull CurlResource curl)
+                                 @NotNull CurlResource curl)
   {
     if (curl == null)
       return BooleanValue.FALSE;
@@ -383,10 +383,10 @@ public class CurlModule
 
     if (curl == null)
       return BooleanValue.FALSE;
-    
+
     if (option.isDefault()) {
       ArrayValue array = new ArrayValueImpl();
-      
+
       putInfo(env, curl, array, "url", CURLINFO_EFFECTIVE_URL);
       putInfo(env, curl, array, "http_code", CURLINFO_HTTP_CODE);
       putInfo(env, curl, array, "header_size", CURLINFO_HEADER_SIZE);
@@ -410,13 +410,13 @@ public class CurlModule
       putInfo(env, curl, array,
               "starttransfer_time", CURLINFO_STARTTRANSFER_TIME);
       putInfo(env, curl, array, "redirect_time", CURLINFO_REDIRECT_TIME);
-      
+
       return array;
     }
 
     return getInfo(env, curl, option.toInt());
   }
-  
+
   private static void putInfo(Env env,
                               CurlResource curl,
                               ArrayValue array,
@@ -427,8 +427,8 @@ public class CurlModule
   }
 
   private static Value getInfo(Env env,
-                              CurlResource curl,
-                              int option)
+                               CurlResource curl,
+                               int option)
   {
     switch (option) {
       case CURLINFO_EFFECTIVE_URL:
@@ -472,7 +472,7 @@ public class CurlModule
         break;
       case CURLINFO_REDIRECT_TIME:
         break;
-      
+
       case CURLINFO_HEADER_OUT:
         return curl.getHeader();
       case CURLINFO_CONTENT_TYPE:
@@ -526,15 +526,15 @@ public class CurlModule
       curl.setURL("http://" + url);
       return;
     }
-    
+
     int slashIndex = url.indexOf('/', j + 3);
     if (0 < slashIndex && slashIndex < atSignIndex) {
       curl.setURL(url);
       return;
     }
-    
+
     j += 3;
-    
+
     String protocol = url.substring(0, j);
     int colonIndex = url.indexOf(':', j);
 
@@ -542,7 +542,7 @@ public class CurlModule
       curl.setURL(url);
       return;
     }
-    
+
     curl.setUsername(url.substring(j, colonIndex++));
     curl.setPassword(url.substring(colonIndex, atSignIndex++));
     curl.setURL(protocol + url.substring(atSignIndex));
@@ -556,8 +556,8 @@ public class CurlModule
    * @param curl
    */
   public static LongValue curl_multi_add_handle(Env env,
-                              Value curls,
-                              Value curl)
+                                                Value curls,
+                                                Value curl)
   {
     throw new UnimplementedException("curl_multi_add_handle");
   }
@@ -569,7 +569,7 @@ public class CurlModule
    * @param curls
    */
   public static LongValue curl_multi_close(Env env,
-                              Value curls)
+                                           Value curls)
   {
     throw new UnimplementedException("curl_multi_close");
   }
@@ -582,8 +582,8 @@ public class CurlModule
    * @param stillRunning
    */
   public static LongValue curl_multi_exec(Env env,
-                              Value curls,
-                              @Reference Value stillRunning)
+                                          Value curls,
+                                          @Reference Value stillRunning)
   {
     throw new UnimplementedException("curl_multi_exec");
   }
@@ -595,7 +595,7 @@ public class CurlModule
    * @param curl
    */
   public static StringValue curl_multi_getcontent(Env env,
-                              Value curl)
+                                                  Value curl)
   {
     throw new UnimplementedException("curl_multi_getcontent");
   }
@@ -607,7 +607,7 @@ public class CurlModule
    * @param curls
    */
   public static ArrayValue curl_multi_info_read(Env env,
-                              Value curls)
+                                                Value curls)
   {
     throw new UnimplementedException("curl_multi_info_read");
   }
@@ -630,8 +630,8 @@ public class CurlModule
    * @param curl
    */
   public static LongValue curl_multi_remove_handle(Env env,
-                              Value curls,
-                              Value curl)
+                                                   Value curls,
+                                                   Value curl)
   {
     throw new UnimplementedException("curl_multi_remove_handle");
   }
@@ -644,8 +644,8 @@ public class CurlModule
    * @param timeout
    */
   public static LongValue curl_multi_select(Env env,
-                              Value curls,
-                              @Optional Value timeout)
+                                            Value curls,
+                                            @Optional Value timeout)
   {
     throw new UnimplementedException("curl_multi_select");
   }
@@ -658,8 +658,8 @@ public class CurlModule
    * @param options
    */
   public static BooleanValue curl_setopt_array(Env env,
-                              @NotNull CurlResource curl,
-                              ArrayValue options)
+                                               @NotNull CurlResource curl,
+                                               ArrayValue options)
   {
     if (curl == null)
       return BooleanValue.FALSE;
@@ -683,9 +683,9 @@ public class CurlModule
    * @return true if successful
    */
   public static BooleanValue curl_setopt(Env env,
-                              @NotNull CurlResource curl,
-                              int option,
-                              Value value)
+                                         @NotNull CurlResource curl,
+                                         int option,
+                                         Value value)
   {
     if (curl == null)
       return BooleanValue.FALSE;
@@ -697,9 +697,9 @@ public class CurlModule
   }
 
   private static boolean setOption(Env env,
-                              CurlResource curl,
-                              int option,
-                              Value value)
+                                   CurlResource curl,
+                                   int option,
+                                   Value value)
   {
     int i;
 
@@ -867,7 +867,7 @@ public class CurlModule
       case CURLOPT_TIMEVALUE:
         long time = value.toLong() * 1000L;
         String format = "%a, %d %b %Y %H:%M:%S %Z";
-        
+
         String date = QDate.formatGMT(time, format);
 
         curl.setModifiedTime(date);
@@ -971,12 +971,12 @@ public class CurlModule
 
         for (Map.Entry<Value,Value> entry : array.entrySet()) {
           String header = entry.getValue().toString();
-          
+
           String name = header;
           String body = "";
-          
+
           i = header.indexOf(':');
-          
+
           if (i >= 0) {
             name = header.substring(0, i).trim();
             body = header.substring(i + 1).trim();
@@ -1030,7 +1030,7 @@ public class CurlModule
       default:
         env.warning(L.l("CURL option '{0}' unknown or unimplemented",
                         option));
-        
+
         log.fine(L.l("CURL option '{0}' unknown or unimplemented",
                      option));
         return false;
@@ -1049,7 +1049,7 @@ public class CurlModule
                                         @Optional Value age)
   {
     ArrayValue array = new ArrayValueImpl();
-    
+
     // dummy values
     array.put(env, "version_number", 462848);
     array.put(env, "age", 2);
@@ -1059,14 +1059,14 @@ public class CurlModule
     array.put(env, "host", "i386-pc-java");
     array.put(env, "ssl_version", " OpenSSL/0.9.8g");
     array.put(env, "libz_version", "1.2.3");
-    
+
     // supported protocols
     ArrayValue protocols = new ArrayValueImpl();
     protocols.put(env.createString("http"));
     protocols.put(env.createString("https"));
-    
+
     array.put(env.createString("protocols"), protocols);
-    
+
     return array;
   }
 

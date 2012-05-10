@@ -70,7 +70,7 @@ public class GoogleQuercus extends QuercusContext
   @Override
   public void init()
   {
-
+    /*
     String gsBucket = getIniString("quercus.gs_bucket");
 
     Path stdPwd = Vfs.lookup();
@@ -79,7 +79,7 @@ public class GoogleQuercus extends QuercusContext
     Path pwd = mergePwd;
 
     setPwd(pwd);
-
+    */
 
     super.init();
 

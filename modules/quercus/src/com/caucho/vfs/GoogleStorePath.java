@@ -52,7 +52,7 @@ import com.google.appengine.api.files.GSFileOptions.GSFileOptionsBuilder;
  */
 public class GoogleStorePath extends FilesystemPath {
   private static Logger log = Logger.getLogger(GoogleStorePath.class.getName());
-  
+
   private static final String QUERCUS_ROOT_PATH = "caucho-quercus-root";
 
   private final FileService _fileService;
@@ -67,11 +67,11 @@ public class GoogleStorePath extends FilesystemPath {
   protected GoogleStorePath(FilesystemPath root, String userPath, String path)
   {
     super(root, userPath, path);
-    
+
     _separatorChar = getFileSeparatorChar();
-    
+
     GoogleStorePath gsRoot = (GoogleStorePath) root;
-    
+
     _fileService = gsRoot._fileService;
     _bucket = gsRoot._bucket;
   }
@@ -80,14 +80,14 @@ public class GoogleStorePath extends FilesystemPath {
   {
     this(null);
   }
-  
+
   public GoogleStorePath(String bucket)
   {
     super(null, "/", "/");
 
     try {
       _root = this;
-      
+
       _fileService = FileServiceFactory.getFileService();
 
       if (bucket == null) {
@@ -95,15 +95,15 @@ public class GoogleStorePath extends FilesystemPath {
       }
 
       _bucket = bucket;
-      
+
       _inode = new GoogleStoreInode("", FileType.DIRECTORY, 0, 0);
     } catch (IOException e) {
       throw new IllegalStateException(e);
     }
-    
+
     if (readDirMap() == null) {
       _inode.setDirMap(new HashMap<String,GoogleStoreInode>());
-      
+
       writeDir(_inode.getDirMap());
     }
   }
@@ -129,14 +129,14 @@ public class GoogleStorePath extends FilesystemPath {
       return new GoogleStorePath(_root, userPath, path);
     }
   }
-  
+
   @Override
   public GoogleStorePath getParent()
   {
     if (_parent == null) {
       _parent = (GoogleStorePath) super.getParent();
     }
-    
+
     return _parent;
   }
 
@@ -168,7 +168,7 @@ public class GoogleStorePath extends FilesystemPath {
   public boolean exists()
   {
     GoogleStoreInode inode = getGsInode();
-    
+
     return inode != null && inode.exists();
   }
 
@@ -203,7 +203,7 @@ public class GoogleStorePath extends FilesystemPath {
   public boolean isFile()
   {
     GoogleStoreInode inode = getGsInode();
-    
+
     return inode != null && inode.isFile();
   }
 
@@ -211,7 +211,7 @@ public class GoogleStorePath extends FilesystemPath {
   public long getLength()
   {
     GoogleStoreInode inode = getGsInode();
-    
+
     return inode != null ? inode.getLength() : -1;
   }
 
@@ -219,7 +219,7 @@ public class GoogleStorePath extends FilesystemPath {
   public long getLastModified()
   {
     GoogleStoreInode inode = getGsInode();
-    
+
     return inode != null ? inode.getLastModified() : -1;
   }
 
@@ -250,14 +250,14 @@ public class GoogleStorePath extends FilesystemPath {
   public String []list() throws IOException
   {
     HashMap<String,GoogleStoreInode> dir = getDir();
-      
+
     if (dir == null) {
       return null;
     }
 
     String []list = new String[dir.size()];
     dir.keySet().toArray(list);
-      
+
     Arrays.sort(list);
 
     return list;
@@ -270,18 +270,18 @@ public class GoogleStorePath extends FilesystemPath {
     if (exists()) {
       return false;
     }
-    
+
     Path parent = getParent();
-    
+
     if (parent.isFile()) {
       return false;
     }
 
     GoogleStoreInode inode
       = new GoogleStoreInode(getTail(), FileType.DIRECTORY, 0, 0);
-    
+
     writeGsInode(inode);
-    
+
     return true;
   }
 
@@ -292,15 +292,15 @@ public class GoogleStorePath extends FilesystemPath {
     if (exists()) {
       return false;
     }
-    
+
     Path parent = getParent();
-    
+
     parent.mkdirs();
-    
+
     if (! parent.isDirectory()) {
       return false;
     }
-    
+
     return mkdir();
   }
 
@@ -375,9 +375,9 @@ public class GoogleStorePath extends FilesystemPath {
     GSFileOptionsBuilder builder = new GSFileOptionsBuilder();
     builder.setMimeType("binary/octet-stream");
     builder.setBucket(_bucket);
-    
+
     String key = getFullPath();
-    
+
     key = key.substring(1);
 
     if (key.equals("")) {
@@ -385,34 +385,34 @@ public class GoogleStorePath extends FilesystemPath {
     }
 
     builder.setKey(key);
-    
+
     AppEngineFile file = _fileService.createNewGSFile(builder.build());
     // AppEngineFile file = getGsFile();
-    
+
     boolean isLock = true;
     FileWriteChannel os = _fileService.openWriteChannel(file, isLock);
 
     return new GoogleStoreWriteStream(this, os, _inode);
   }
-  
+
   @Override
   protected Path copy()
   {
     return new GoogleStorePath(getRoot(), getUserPath(), getPath());
   }
-  
+
   @Override
   public String getNativePath()
   {
     String fullPath = getFullPath();
-    
+
     if ("".equals(fullPath) || "/".equals(fullPath)) {
       fullPath = "/" + QUERCUS_ROOT_PATH;
     }
-    
+
     return "/gs/" + _bucket + fullPath;
   }
-  
+
   private GoogleStoreInode getGsInode(String name)
   {
     HashMap<String,GoogleStoreInode> dirMap = getDir();
@@ -421,65 +421,65 @@ public class GoogleStorePath extends FilesystemPath {
     if (dirMap != null) {
       gsInode = dirMap.get(name);
     }
-    
+
     if (gsInode == null) {
       gsInode = new GoogleStoreInode(name, FileType.NONE, -1, -1);
     }
-    
+
     return gsInode;
   }
-  
+
   private HashMap<String,GoogleStoreInode> getDir()
   {
     if (! isDirectory()) {
       return null;
     }
-    
+
     if (_inode.getDirMap() == null) {
       _inode.setDirMap(readDirMap());
     }
-    
+
     return _inode.getDirMap();
   }
-  
+
   private HashMap<String,GoogleStoreInode> readDirMap()
   {
     ReadStream is = null;
-    
+
     try {
       is = openRead();
-      
+
       Hessian2Input hIn = new Hessian2Input(is);
-      
+
       HashMap map = (HashMap) hIn.readObject();
-      
+
       hIn.close();
 
       return map;
     } catch (Exception e) {
       log.log(Level.FINER, e.toString(), e);
-      
+
       return null;
     } finally {
       IoUtil.close(is);
     }
   }
-  
+
   void updateDir(GoogleStoreInode inode)
   {
     HashMap<String,GoogleStoreInode> map = readDirMap();
-    
+
     if (map == null) {
       map = new HashMap<String,GoogleStoreInode>();
     }
-    
+
     map.put(inode.getName(), inode);
-    
+
     GoogleStoreInode dirInode = _inode;
-    
+
     if (dirInode == null || ! dirInode.exists() || ! dirInode.isDirectory()) {
       dirInode = new GoogleStoreInode(getTail(), FileType.DIRECTORY, 0, 0);
-      
+
       if (! equals(_root)) {
         writeGsInode(dirInode);
       }
@@ -487,22 +487,22 @@ public class GoogleStorePath extends FilesystemPath {
         setGsInode(dirInode);
       }
     }
-    
+
     dirInode.setDirMap(map);
-    
+
     writeDir(map);
   }
-  
+
   private void writeDir(HashMap<String,GoogleStoreInode> map)
   {
     WriteStream out = null;
     try {
       out = openWrite();
-      
+
       Hessian2Output hOut = new Hessian2Output(out);
-      
+
       hOut.writeObject(map);
-      
+
       hOut.close();
     } catch (IOException e) {
       log.log(Level.FINER, e.toString(), e);
@@ -515,41 +515,41 @@ public class GoogleStorePath extends FilesystemPath {
   {
     _inode = inode;
   }
-    
+
   void writeGsInode(GoogleStoreInode inode)
   {
     clearStatusCache();
-    
+
     GoogleStoreInode oldInode = _inode;
-    
+
     setGsInode(inode);
-    
+
     if (this == _root) {
     }
-    else if (oldInode == null 
+    else if (oldInode == null
              || ! oldInode.isDirectory()
              || ! getParent().isDirectory()) {
       GoogleStorePath parent = (GoogleStorePath) getParent();
-    
+
       parent.updateDir(inode);
     }
   }
-  
+
   private GoogleStoreInode getGsInode()
   {
     if (_inode == null) {
       _inode = getParent().getGsInode(getTail());
     }
-    
+
     return _inode;
   }
-  
+
   public AppEngineFile getGsFile()
   {
     String path = getNativePath();
 
     AppEngineFile file = new AppEngineFile(path);
-    
+
     return file;
   }
 
@@ -572,7 +572,7 @@ public class GoogleStorePath extends FilesystemPath {
 
     return getFullPath().equals(file.getFullPath());
   }
-  
+
   @Override
   public String toString()
   {
