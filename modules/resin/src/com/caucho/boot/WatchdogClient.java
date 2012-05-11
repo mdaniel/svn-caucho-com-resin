@@ -276,9 +276,9 @@ class WatchdogClient
       
       WatchdogProxy watchdogProxy = getWatchdogProxy(conn);
       
-      // String serverId = getId();
+      String serverId = getId();
 
-      ResultStatus status = watchdogProxy.start(argv);
+      ResultStatus status = watchdogProxy.start(serverId, argv);
 
       if (status.isSuccess()) {
         return null;

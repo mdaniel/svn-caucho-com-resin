@@ -110,14 +110,41 @@ public abstract class AbstractBootCommand implements BootCommand {
   {
     WatchdogClient client = boot.findClient(args.getServerId(), args);
     
-    if (client == null)
-      client = boot.findShutdownClient(args);
+    if (client == null) {
+      client = findLocalClient(boot, args);
+    }
+    
+    if (client == null) {
+      client = findShutdownClient(boot, args);
+    }
     
     if (client == null) {
       throw new ConfigException(L.l("No <server> can be found listening to a local IP address"));
     }
     
     return doCommand(args, client);
+  }
+  
+  protected WatchdogClient findLocalClient(ResinBoot boot, WatchdogArgs args)
+  {
+    ArrayList<WatchdogClient> clients = boot.findLocalClients();
+    
+    if (clients == null) {
+      return null;
+    }
+    
+    for (WatchdogClient client : clients) {
+      if (! client.getConfig().isRequireExplicitId()) {
+        return client;
+      }
+    }
+    
+    return null;
+  }
+  
+  protected WatchdogClient findShutdownClient(ResinBoot boot, WatchdogArgs args)
+  {
+    return boot.findShutdownClient(args);
   }
   
   protected int doCommand(WatchdogArgs args, WatchdogClient client)

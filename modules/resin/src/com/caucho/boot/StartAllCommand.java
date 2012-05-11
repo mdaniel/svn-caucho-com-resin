@@ -68,10 +68,16 @@ public class StartAllCommand extends AbstractStartCommand
       System.out.println(L().l("Resin/{0} cannot find any local servers to start in the configuration.",
                                VersionFactory.getVersion()));
     }
-    
+
+    boolean isFirst = true;
     for (WatchdogClient client : clientList) {
       try {
+        if (! isFirst)
+          Thread.sleep(2000);
+        
         client.startWatchdog(args.getArgv());
+        
+        isFirst = false;
 
         System.out.println(L().l("Resin/{0} started -server '{1}' for watchdog at {2}:{3}",
                                  VersionFactory.getVersion(),

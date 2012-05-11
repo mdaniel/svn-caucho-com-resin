@@ -33,7 +33,7 @@ package com.caucho.boot;
  * Proxy API for communicating with the watchdog.
  */
 public interface WatchdogProxy {
-  public ResultStatus start(String[] argv);
+  public ResultStatus start(String serverId, String[] argv);
 
   public ResultStatus stop(String serverId);
 

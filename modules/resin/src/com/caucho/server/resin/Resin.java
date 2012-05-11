@@ -916,7 +916,6 @@ public class Resin
     else if (_serverId != null && getHomeCluster() == null) {
       throw new ConfigException(L().l("-server '{0}' is an unknown server in the configuration file.",
                                       _serverId));
-      
     }
     else if ((_bootServerConfig = bootResin.findLocalServer()) != null) {
     }

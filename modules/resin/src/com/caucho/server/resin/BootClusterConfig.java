@@ -200,7 +200,8 @@ public class BootClusterConfig implements SchemaBean
         server.setAllowNonReservedIp(true);
       }
       
-      server.addBuilderProgram(multiServer.getServerProgram());
+      multiServer.getServerProgram().configure(server);
+      // server.addBuilderProgram(multiServer.getServerProgram());
       // server.init();
       
       addServer(server);

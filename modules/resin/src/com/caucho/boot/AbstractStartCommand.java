@@ -88,6 +88,13 @@ public abstract class AbstractStartCommand extends AbstractBootCommand
     */
   }
   
+  @Override
+  protected WatchdogClient findShutdownClient(ResinBoot boot, WatchdogArgs args)
+  {
+    // server/6e09
+    return null;
+  }
+
   protected String getServerUsageArg(WatchdogArgs args, String clientId)
   {
     if (args.getServerId() != null)

@@ -71,10 +71,10 @@ class WatchdogService
   /**
    * Start queries
    */
-  public ResultStatus start(String []argv)
+  public ResultStatus start(String serverId, String []argv)
   {
     try {
-      String serverId = _manager.startServer(argv);
+      serverId = _manager.startServer(serverId, argv);
 
       String msg = L.l("{0}: started server '{1}'", this, serverId);
     

@@ -447,10 +447,10 @@ class WatchdogManager implements AlarmListener {
    *
    * @param argv the command-line arguments to start the server
    */
-  String startServer(String []argv)
+  String startServer(String cliServerId, String []argv)
     throws ConfigException
   {
-    String serverId = null;
+    String serverId = cliServerId;
     
     synchronized (_watchdogMap) {
       WatchdogArgs args = new WatchdogArgs(argv, false);
@@ -459,37 +459,44 @@ class WatchdogManager implements AlarmListener {
       
       if (serverId == null)
         serverId = args.getServerId();
+      
+      WatchdogChild server;
 
       try {
-        readConfig(serverId, args);
+        server = readConfig(serverId, args);
       } catch (Exception e) {
         throw ConfigException.create(e);
       }
       
-      startServer(serverId, args);
+      startServer(server, serverId, args);
     }
     
     return serverId;
   }
 
-  void startServer(String serverId, WatchdogArgs args)
+  void startServer(WatchdogChild watchdog,
+                   String serverId,
+                   WatchdogArgs args)
   {
     // server/6e09
     String defaultServerId = getServerId(serverId, args);
-    WatchdogChild watchdog = getWatchdog(defaultServerId);
+    
+    if (watchdog == null) {
+      watchdog = getWatchdog(defaultServerId);
+    }
 
     if (watchdog == null) {
       watchdog = getWatchdog(serverId);
       // env/0fp7
       
       if (watchdog == null) {
-        watchdog = _watchdogMap.get("default");
+        watchdog = _watchdogMap.get(defaultServerId);
       }
     }
 
     if (watchdog == null)
       throw new ConfigException(L().l("No matching <server> found for start -server '{0}' in '{1}'",
-                                      serverId, _args.getResinConf()));
+                                      defaultServerId, _args.getResinConf()));
 
     watchdog.start();
 
@@ -519,13 +526,22 @@ class WatchdogManager implements AlarmListener {
     if (serverId == null)
       serverId = args.getServerId();
 
-    if (args.isDynamicServer())
+    if (isDynamicServer(args)) {
       serverId = args.getDynamicServerId();
+    }
     
     if (serverId == null)
       serverId = "default";
 
     return serverId;
+  }
+  
+  private boolean isDynamicServer(WatchdogArgs args)
+  {
+    if (args.isDynamicServer())
+      return true;
+    else
+      return false;
   }
   
   private WatchdogChild getWatchdog(String serverId)
@@ -537,6 +553,7 @@ class WatchdogManager implements AlarmListener {
         && _watchdogMap.size() == 1) {
       watchdog = _watchdogMap.values().iterator().next();
     }
+    System.out.println("MAP: " + serverId + " " + _watchdogMap);
 
     return watchdog;
   }
@@ -588,7 +605,7 @@ class WatchdogManager implements AlarmListener {
       if (server != null)
         server.restart();
       else
-        startServer(argv);
+        startServer(serverId, argv);
     }
   }
 
@@ -774,8 +791,9 @@ class WatchdogManager implements AlarmListener {
 
       JniCauchoSystem.create().initJniBackground();
 
+      String serverId = null;
       WatchdogManager manager = new WatchdogManager(argv);
-      manager.startServer(argv);
+      manager.startServer(serverId, argv);
 
       isValid = manager.isActive() && manager.isValid();
 

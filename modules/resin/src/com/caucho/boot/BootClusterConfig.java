@@ -110,8 +110,9 @@ public class BootClusterConfig {
                            _resin.getRootDirectory(),
                            _serverList.size());
 
-    for (int i = 0; i < _serverDefaultList.size(); i++)
+    for (int i = 0; i < _serverDefaultList.size(); i++) {
       _serverDefaultList.get(i).configure(config);
+    }
 
     return config;
   }

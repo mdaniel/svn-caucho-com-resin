@@ -36,7 +36,10 @@ public abstract class AbstractStopCommand extends AbstractBootCommand
     addFlagOption("verbose", "log command-line and environment information");
     addValueOption("server", "id", "select a configured server");
     addIntValueOption("watchdog-port", "port", "set watchdog port to listen to");
-  }
+    
+    addValueOption("user", "user", "admin user name for authentication");
+    addValueOption("password", "password", "admin password for authentication");
+   }
 
   @Override
   public boolean isRetry()

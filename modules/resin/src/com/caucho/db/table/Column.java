@@ -552,9 +552,6 @@ abstract public class Column {
                    rowAddr,
                    xa);
     */
-    System.out.println("SET_INDEX: " + Long.toHexString(rowAddr)
-                       + " " + this + " " + getTable()
-                       + this.getIndexKeyCompare().toString(block, rowOffset + getColumnOffset(), getLength()));
     
     index.insert(block, rowOffset + getColumnOffset(), getLength(),
                  rowAddr, false);
