@@ -29,6 +29,7 @@
 
 package com.caucho.vfs;
 
+import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.util.Arrays;
 import java.util.HashMap;
@@ -361,12 +362,21 @@ public class GoogleStorePath extends FilesystemPath {
   @Override
   public StreamImpl openReadImpl() throws IOException
   {
-    AppEngineFile file = getGsFile();
+    try {
+      AppEngineFile file = getGsFile();
 
-    boolean isLock = false;
-    FileReadChannel is = _fileService.openReadChannel(file, isLock);
+      boolean isLock = false;
+      FileReadChannel is = _fileService.openReadChannel(file, isLock);
 
-    return new GoogleStoreReadStream(this, is);
+      return new GoogleStoreReadStream(this, is);
+    } catch (FileNotFoundException e) {
+      throw e;
+    } catch (IOException e) {
+      FileNotFoundException e1 = new FileNotFoundException(getURL() + ": " + e);
+      e1.initCause(e);
+      
+      throw e1;
+    }
   }
 
   @Override

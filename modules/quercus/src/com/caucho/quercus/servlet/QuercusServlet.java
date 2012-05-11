@@ -473,8 +473,6 @@ public class QuercusServlet
       _impl.getQuercus().setUnicodeSemantics(true);
     }
 
-    _impl.init(config);
-    
     QuercusContext quercus = getQuercus();
 
     quercus.setCompile(_isCompile);
@@ -527,6 +525,8 @@ public class QuercusServlet
         quercus.setServerEnv(entry.getKey(), entry.getValue());
       }
     }
+    
+    _impl.init(config);
   }
 
   /**

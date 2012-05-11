@@ -62,9 +62,9 @@ public class GoogleQuercusServletImpl extends QuercusServletImpl
   protected void initImpl(ServletConfig config)
     throws ServletException
   {
-    //_webApp = config.getServletContext();
+    _webApp = config.getServletContext();
 
-    //_quercus.setPwd(Vfs.lookup(_webApp.getRealPath(".")));
+    _quercus.setPwd(Vfs.lookup(_webApp.getRealPath(".")));
   }
 
   protected QuercusServletImpl getQuercusServlet()
