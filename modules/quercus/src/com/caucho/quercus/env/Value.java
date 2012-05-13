@@ -120,7 +120,11 @@ abstract public class Value implements java.io.Serializable
    */
   final public boolean isA(Value value)
   {
-    return isA(value.getClassName());
+    // php/03p7
+    if (value.isObject())
+      return isA(value.getClassName());
+    else
+      return isA(value.toJavaString());
   }
 
   /**

@@ -217,7 +217,7 @@ public class QuercusClass extends NullValue {
       cl = Env.getInstance().findClass(iface,
                                        ! isJavaClassDef,
                                        true);
-
+      
       if (cl == null)
         throw new QuercusRuntimeException(L.l("cannot find interface {0}",
                                               iface));
@@ -1014,6 +1014,7 @@ public class QuercusClass extends NullValue {
   /**
    * Returns true for an implementation of a class
    */
+  @Override
   public boolean isA(String name)
   {
     return _instanceofSet.contains(name.toLowerCase(Locale.ENGLISH));

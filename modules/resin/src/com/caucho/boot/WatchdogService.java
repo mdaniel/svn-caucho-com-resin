@@ -175,7 +175,7 @@ class WatchdogService
    * Handles kill queries
    */
   @Query
-  public ResultStatus watchdogKill(String serverId)
+  public ResultStatus kill(String serverId)
   {
     ResultStatus result;
 

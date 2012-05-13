@@ -65,9 +65,9 @@ public class KillCommand extends AbstractStopCommand
         client.getWatchdogPort()));
     } catch (Exception e) {
       System.out.println(L().l(
-        "Resin/{0} can't kill -server '{1}' (client {2}) for watchdog at {3}:{4}.\n{4}",
+        "Resin/{0} can't kill -server '{1}' (client {2}) for watchdog at {3}:{4}.\n{5}",
         VersionFactory.getVersion(),
-        args.getServerId(), client.getId(),
+        args.getServerId(), client,
         client.getWatchdogAddress(),
         client.getWatchdogPort(),
         e.toString()));

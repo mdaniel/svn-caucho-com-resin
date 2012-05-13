@@ -553,7 +553,6 @@ class WatchdogManager implements AlarmListener {
         && _watchdogMap.size() == 1) {
       watchdog = _watchdogMap.values().iterator().next();
     }
-    System.out.println("MAP: " + serverId + " " + _watchdogMap);
 
     return watchdog;
   }

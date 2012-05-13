@@ -65,6 +65,7 @@ public class BinaryInstanceOfExpr extends AbstractUnaryExpr {
   /**
    * Evaluates the equality as a boolean.
    */
+  @Override
   public Value eval(Env env)
   {
     return evalBoolean(env) ? BooleanValue.TRUE : BooleanValue.FALSE;
