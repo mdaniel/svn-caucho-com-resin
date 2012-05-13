@@ -198,6 +198,11 @@ public class PDO implements EnvCleanup {
     return _conn;
   }
 
+  protected boolean isConnected()
+  {
+    return _conn != null && _conn.isConnected();
+  }
+
   protected void setLastExecutedStatement(PDOStatement stmt)
   {
     _lastExecutedStatement = stmt;
@@ -210,7 +215,7 @@ public class PDO implements EnvCleanup {
   {
     JdbcConnectionResource conn = getConnection();
 
-    if (conn == null)
+    if (! isConnected())
       return false;
 
     if (_inTransaction) {
@@ -295,7 +300,7 @@ public class PDO implements EnvCleanup {
   {
     JdbcConnectionResource conn = getConnection();
 
-    if (conn == null) {
+    if (! conn.isConnected()) {
       return BooleanValue.FALSE;
     }
 
@@ -456,7 +461,7 @@ public class PDO implements EnvCleanup {
   {
     JdbcConnectionResource conn = getConnection();
 
-    if (conn == null) {
+    if (! conn.isConnected()) {
       return BooleanValue.FALSE;
     }
 
@@ -496,7 +501,7 @@ public class PDO implements EnvCleanup {
   {
     JdbcConnectionResource conn = getConnection();
 
-    if (conn == null) {
+    if (! conn.isConnected()) {
       return BooleanValue.FALSE;
     }
 

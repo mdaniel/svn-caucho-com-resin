@@ -55,10 +55,10 @@ public interface Iterator
   /**
    * Rewinds the iterator so it is at the first row.
    */
-  public void rewind();
+  public void rewind(Env env);
 
   /**
    * Returns true if the iterator currently points to a valid row.
    */
-  public boolean valid();
+  public boolean valid(Env env);
 }

@@ -145,7 +145,7 @@ public class ArrayIterator
   public void next(Env env)
   {
     if (_iterator == null)
-      rewind();
+      rewind(env);
 
     if (_iterator.hasNext())
       _current = _iterator.next();
@@ -178,11 +178,11 @@ public class ArrayIterator
     if (_qThis != null)
       _qThis.callMethod(env, _rewind);
     else
-      rewind();
+      rewind(env);
   }
 
   @Override
-  public void rewind()
+  public void rewind(Env env)
   {
     // php/4as8
     _iterator = _value.getBaseIterator(_env);
@@ -225,10 +225,10 @@ public class ArrayIterator
   }
 
   @Override
-  public boolean valid()
+  public boolean valid(Env env)
   {
     if (_iterator == null)
-      rewind();
+      rewind(env);
 
     return _current != null;
   }

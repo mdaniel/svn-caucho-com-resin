@@ -81,6 +81,8 @@ public class StreamModule extends AbstractQuercusModule {
   public static final int STREAM_URL_STAT_LINK = 1;
   public static final int STREAM_URL_STAT_QUIET = 2;
 
+  public static final int PHP_STREAM_META_TOUCH = 1;
+
   private static final HashMap<StringValue,Value> _constMap
     = new HashMap<StringValue,Value>();
 

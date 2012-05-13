@@ -77,6 +77,18 @@ public class DirectoryIterator
   @Override
   public Value current(Env env)
   {
+    DirectoryIterator current = getCurrent(env);
+
+    return current != null ? env.wrapJava(current) : UnsetValue.UNSET;
+  }
+
+  protected DirectoryIterator createCurrentIterator(Env env, Path path)
+  {
+    return new DirectoryIterator(path);
+  }
+
+  protected DirectoryIterator getCurrent(Env env)
+  {
     if (_current == null && _index < _list.length) {
       String name = _list[_index];
 
@@ -85,17 +97,17 @@ public class DirectoryIterator
       _current = createCurrentIterator(env, child);
     }
 
-    return _current != null ? env.wrapJava(_current) : UnsetValue.UNSET;
+    return _current;
   }
 
-  protected DirectoryIterator createCurrentIterator(Env env, Path path)
-  {
-    return new DirectoryIterator(path);
-  }
-
-  protected DirectoryIterator getCurrent()
+  protected DirectoryIterator getCurrentRaw()
   {
     return _current;
+  }
+
+  protected int getKey()
+  {
+    return _index;
   }
 
   @Override
@@ -108,16 +120,18 @@ public class DirectoryIterator
   public void next(Env env)
   {
     _index++;
+
+    _current = null;
   }
 
   @Override
-  public void rewind()
+  public void rewind(Env env)
   {
     _index = 0;
   }
 
   @Override
-  public boolean valid()
+  public boolean valid(Env env)
   {
     return _index < _list.length;
   }

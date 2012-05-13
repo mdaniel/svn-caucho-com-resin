@@ -186,7 +186,7 @@ public class SplFileInfo
     }
   }
 
-  public boolean isDir()
+  public boolean isDir(Env env)
   {
     return _path.isDirectory();
   }

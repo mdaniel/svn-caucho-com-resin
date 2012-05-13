@@ -29,10 +29,8 @@
 
 package com.caucho.quercus.lib.spl;
 
-import com.caucho.quercus.env.Value;
-
 public interface OuterIterator
   extends Iterator
 {
-  public Value getInnerIterator();
+  public Iterator getInnerIterator();
 }

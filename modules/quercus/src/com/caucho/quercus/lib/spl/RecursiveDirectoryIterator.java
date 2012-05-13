@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 1998-2010 Caucho Technology -- all rights reserved
+ * Copyright (c) 1998-2012 Caucho Technology -- all rights reserved
  *
  * This file is part of Resin(R) Open Source
  *
@@ -51,26 +51,31 @@ public class RecursiveDirectoryIterator
   }
 
   @Override
-  public boolean hasChildren()
+  public boolean hasChildren(Env env)
   {
-    DirectoryIterator current = getCurrent();
+    DirectoryIterator current = getCurrent(env);
 
     if (current == null) {
       return false;
     }
 
-    return current.isDir();
+    return current.isDir(env);
   }
 
   @Override
-  public RecursiveIterator getChildren()
+  public RecursiveIterator getChildren(Env env)
   {
-    return (RecursiveIterator) getCurrent();
+    return (RecursiveIterator) getCurrent(env);
   }
 
   @Override
   protected DirectoryIterator createCurrentIterator(Env env, Path path)
   {
-    return new RecursiveDirectoryIterator(path, getFlags());
+    if (path.isDirectory()) {
+      return new RecursiveDirectoryIterator(path, getFlags());
+    }
+    else {
+      return super.createCurrentIterator(env, path);
+    }
   }
 }

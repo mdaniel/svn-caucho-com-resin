@@ -31,6 +31,8 @@ package com.caucho.quercus.lib.file;
 
 import com.caucho.quercus.QuercusModuleException;
 import com.caucho.quercus.env.*;
+import com.caucho.quercus.function.AbstractFunction;
+import com.caucho.quercus.program.Function;
 import com.caucho.vfs.TempBuffer;
 
 import java.io.IOException;
@@ -166,10 +168,28 @@ public class WrappedStream implements BinaryInput, BinaryOutput {
 
   public void close()
   {
-    if (_env.isUnicodeSemantics())
-      _wrapper.callMethod(_env, STREAM_CLOSE_U);
-    else
-      _wrapper.callMethod(_env, STREAM_CLOSE);
+    QuercusClass cls = _wrapper.getQuercusClass();
+
+    if (cls != null) {
+      StringValue funName;
+
+      if (_env.isUnicodeSemantics()) {
+        funName = STREAM_CLOSE_U;
+      }
+      else {
+        funName = STREAM_CLOSE;
+      }
+
+      AbstractFunction fun = cls.findFunction(funName);
+
+      if (fun == null) {
+        //_env.warning(L.l("{0}::{1} is not implemented", cls.getName(), funName));
+
+        return;
+      }
+
+      _wrapper.callMethod(_env, funName);
+    }
   }
 
   /**
@@ -207,7 +227,7 @@ public class WrappedStream implements BinaryInput, BinaryOutput {
 
   public int read(byte []buffer, int offset, int length)
   {
-    // XXX: shgould be reimplemented
+    // XXX: should be reimplemented
 
     Value output;
 
@@ -218,9 +238,7 @@ public class WrappedStream implements BinaryInput, BinaryOutput {
       output = _wrapper.callMethod(_env, STREAM_READ,
                                    LongValue.create(length));
 
-    // XXX "0"?
-
-    if (! output.toBoolean())
+    if (output.length() == 0)
       return -1;
 
     byte []outputBytes = output.toString().getBytes();
@@ -246,9 +264,7 @@ public class WrappedStream implements BinaryInput, BinaryOutput {
       output = _wrapper.callMethod(_env, STREAM_READ,
                                    LongValue.create(length));
 
-    // XXX "0"?
-
-    if (! output.toBoolean())
+    if (output.length() == 0)
       return -1;
 
     byte []outputBytes = output.toString().getBytes();

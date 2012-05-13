@@ -57,12 +57,12 @@ public class ProtocolWrapper {
 
   public Value opendir(Env env, StringValue path, LongValue flags)
   {
-    WrappedDirectoryValue value = new WrappedDirectoryValue(env, _qClass);
+    WrappedDirectory value = new WrappedDirectory(env, _qClass);
 
-    if (! value.opendir(path, flags))
+    if (! value.open(env, path, flags))
       return BooleanValue.FALSE;
     else
-      return value;
+      return env.wrapJava(value);
   }
 
   public boolean unlink(Env env, StringValue path)
@@ -141,6 +141,21 @@ public class ProtocolWrapper {
     Value result = function.callMethod(env, _qClass, obj, path, flags);
 
     return result;
+  }
+
+  public boolean stream_metadata(Env env, StringValue path,
+                                 LongValue options, Value arg)
+  {
+    Value obj = _qClass.createObject(env);
+    AbstractFunction function = _qClass.findFunction("stream_metadata");
+
+    if (function == null) {
+      return false;
+    }
+
+    Value result = function.callMethod(env, _qClass, obj, path, options, arg);
+
+    return result.toBoolean();
   }
 
   @Override

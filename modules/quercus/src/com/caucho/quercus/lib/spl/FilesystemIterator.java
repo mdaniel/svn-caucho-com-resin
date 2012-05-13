@@ -32,6 +32,8 @@ package com.caucho.quercus.lib.spl;
 import com.caucho.quercus.annotation.Optional;
 import com.caucho.quercus.env.Env;
 import com.caucho.quercus.env.StringValue;
+import com.caucho.quercus.env.UnsetValue;
+import com.caucho.quercus.env.Value;
 import com.caucho.vfs.Path;
 
 public class FilesystemIterator extends DirectoryIterator
@@ -79,5 +81,37 @@ public class FilesystemIterator extends DirectoryIterator
   public void setFlags(int flags)
   {
     _flags = flags;
+  }
+
+  @Override
+  public Value key(Env env)
+  {
+    int flags = _flags;
+
+    if ((flags & KEY_AS_PATHNAME) == KEY_AS_PATHNAME) {
+      DirectoryIterator current = getCurrent(env);
+
+      if (current == null) {
+        return UnsetValue.UNSET;
+      }
+
+      String path = current.getPathname();
+
+      return env.createString(path);
+    }
+    else if ((flags & KEY_AS_FILENAME) == KEY_AS_FILENAME) {
+      DirectoryIterator current = getCurrent(env);
+
+      if (current == null) {
+        return UnsetValue.UNSET;
+      }
+
+      String path = current.getFilename();
+
+      return env.createString(path);
+    }
+    else {
+      return super.key(env);
+    }
   }
 }

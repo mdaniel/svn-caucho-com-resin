@@ -29,42 +29,64 @@
 
 package com.caucho.quercus.lib.file;
 
+import com.caucho.quercus.env.BooleanValue;
 import com.caucho.quercus.env.Env;
 import com.caucho.quercus.env.Value;
 import com.caucho.vfs.Path;
 
 import java.io.IOException;
 
-public class Directory {
-  public DirectoryValue handle;
+public class Directory
+{
+  public Directory handle;
   public String path;
 
-  protected Directory(Env env, Path path)
+  private String []_list;
+  private int _index;
+
+  protected Directory()
+  {
+    handle = this;
+  }
+
+  protected Directory(Env env, Path dir)
     throws IOException
   {
-    handle = new DirectoryValue(env, path);
-    env.addCleanup(handle);
+    handle = this;
 
-    this.path = path.toString();
+    this.path = dir.toString();
+
+    _list = dir.list();
+  }
+
+  public void open(Env env)
+  {
   }
 
   public Value read(Env env)
   {
-    return handle.readdir();
+    if (_index < _list.length)
+      return env.createString(_list[_index++]);
+    else
+      return BooleanValue.FALSE;
   }
 
-  public void rewind()
+  public void rewind(Env env)
   {
-    handle.rewinddir();
+    _index = 0;
   }
 
-  public void close()
+  public void close(Env env)
   {
-    handle.close();
+  }
+
+  public final void cleanup()
+  {
+    close(Env.getInstance());
   }
 
   public String toString()
   {
-    return "Directory[]";
+    return getClass().getSimpleName() + "[" + path + "]";
   }
 }

@@ -66,8 +66,6 @@ public class ZlibModule extends AbstractQuercusModule {
   public static final int FORCE_GZIP = 0x1;
   public static final int FORCE_DEFLATE = 0x2;
 
-  private int _dbg;
-
   public String []getLoadedExtensions()
   {
     return new String[] { "zlib" };
@@ -240,7 +238,7 @@ public class ZlibModule extends AbstractQuercusModule {
   {
     if (os == null)
       return false;
-    
+
     os.close();
 
     return true;
@@ -438,7 +436,7 @@ public class ZlibModule extends AbstractQuercusModule {
     byte []buffer = tempBuf.getBuffer();
 
     Deflater deflater = null;
-    
+
     try {
       deflater = new Deflater(level, true);
       Adler32 crc = new Adler32();
@@ -481,7 +479,7 @@ public class ZlibModule extends AbstractQuercusModule {
       }
 
       long value = crc.getValue();
-    
+
       buffer[0] = (byte) (value >> 24);
       buffer[1] = (byte) (value >> 16);
       buffer[2] = (byte) (value >> 8);
@@ -540,7 +538,7 @@ public class ZlibModule extends AbstractQuercusModule {
       }
     }
   }
-  
+
   /**
    *
    * @param level
@@ -552,7 +550,7 @@ public class ZlibModule extends AbstractQuercusModule {
     TempBuffer tempBuf = TempBuffer.allocate();
     byte []buffer = tempBuf.getBuffer();
     Deflater deflater = null;
-    
+
     try {
       deflater = new Deflater(level, true);
 
@@ -602,7 +600,7 @@ public class ZlibModule extends AbstractQuercusModule {
   {
     if (length <= 0)
       length = Integer.MAX_VALUE;
-    
+
     TempBuffer tempBuf = TempBuffer.allocate();
     byte []buffer = tempBuf.getBuffer();
     Inflater inflater = null;
@@ -613,13 +611,13 @@ public class ZlibModule extends AbstractQuercusModule {
 
       while (true) {
         int sublen = Math.min(length, buffer.length);
-          
+
         sublen = data.read(buffer, 0, sublen);
 
         if (sublen > 0) {
           inflater.setInput(buffer, 0, sublen);
           length -= sublen;
-          
+
           int inflatedLength;
           while ((inflatedLength = inflater.inflate(buffer, 0, sublen)) > 0) {
             sb.append(buffer, 0, inflatedLength);
@@ -740,11 +738,11 @@ public class ZlibModule extends AbstractQuercusModule {
   {
     for (int i = input.length() - 1; i >= 0; i--) {
       char ch = input.charAt(i);
-      
+
       if (ch >= '0' && ch <= '9')
         return ch - '0';
     }
-    
+
     return Deflater.DEFAULT_COMPRESSION;
   }
 
@@ -756,7 +754,7 @@ public class ZlibModule extends AbstractQuercusModule {
   {
     for (int i = input.length() - 1; i >= 0; i--) {
       char ch = input.charAt(i);
-      
+
       switch (ch) {
       case 'f':
         return Deflater.FILTERED;
@@ -765,7 +763,7 @@ public class ZlibModule extends AbstractQuercusModule {
         return Deflater.HUFFMAN_ONLY;
       }
     }
-    
+
     return Deflater.DEFAULT_STRATEGY;
   }
 }

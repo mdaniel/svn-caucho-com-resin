@@ -298,7 +298,9 @@ public class OptionsModule extends AbstractQuercusModule {
    */
   public static Value getlastmod(Env env)
   {
-    return FileModule.filemtime(env, env.getSelfPath());
+    String path = env.getSelfPath().getNativePath();
+
+    return FileModule.filemtime(env, env.createString(path));
   }
 
   /**

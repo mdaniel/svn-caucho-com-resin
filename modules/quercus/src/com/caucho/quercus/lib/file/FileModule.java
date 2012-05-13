@@ -40,16 +40,16 @@ import com.caucho.quercus.module.AbstractQuercusModule;
 import com.caucho.quercus.module.IniDefinitions;
 import com.caucho.quercus.module.IniDefinition;
 import com.caucho.quercus.resources.StreamContextResource;
+import com.caucho.util.ByteBuffer;
 import com.caucho.util.L10N;
 import com.caucho.vfs.Path;
 import com.caucho.vfs.ReadStream;
+import com.caucho.vfs.TempBuffer;
 import com.caucho.vfs.WriteStream;
 import com.caucho.vfs.LockableStream;
 
-import java.io.FilePermission;
 import java.io.IOException;
 import java.io.InputStream;
-import java.security.AccessControlException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
@@ -314,35 +314,104 @@ public class FileModule extends AbstractQuercusModule {
    * @param src the source path
    * @param dst the destination path
    */
-  public static boolean copy(Env env, Path src, Path dst)
+  public static boolean copy(Env env, StringValue src, StringValue dst)
   {
-    // quercus/1603
+    ProtocolWrapper srcWrapper = getProtocolWrapper(env, src);
+
+    BinaryInput is = null;
+    BinaryOutput os = null;
+
+    TempBuffer tempBuffer = null;
+
     try {
-      if (! src.canRead() || ! src.isFile()) {
-        env.warning(L.l("'{0}' cannot be read", src.getFullPath()));
+      if (srcWrapper != null) {
+        BinaryStream bis = srcWrapper.fopen(env, src, env.createString("rb"), LongValue.ZERO);
 
-        return false;
+        if (! (bis instanceof BinaryInput)) {
+          return false;
+        }
+
+        is = (BinaryInput) bis;
       }
-      // php/1603
-      else if (dst.getScheme().equals("error")) {
-        env.warning(L.l("'{0}' cannot be written to", dst.getFullPath()));
+      else {
+        Path srcPath = env.lookupPwd(src);
 
-        return false;
+        if (srcPath == null) {
+          env.warning(L.l("path cannot be read"));
+
+          return false;
+        }
+
+        if (! srcPath.canRead() || ! srcPath.isFile()) {
+          env.warning(L.l("'{0}' cannot be read", srcPath.getFullPath()));
+
+          return false;
+        }
+
+        is = new ReadStreamInput(env, srcPath.openRead());
       }
 
-      WriteStream os = dst.openWrite();
+      ProtocolWrapper dstWrapper = getProtocolWrapper(env, dst);
 
-      try {
-        src.writeToStream(os);
-      } finally {
-        os.close();
+      if (dstWrapper != null) {
+        BinaryStream bos = dstWrapper.fopen(env, dst, env.createString("wb"), LongValue.ZERO);
+
+        if (! (bos instanceof BinaryOutput)) {
+          return false;
+        }
+
+        os = (BinaryOutput) bos;
+      }
+      else {
+        Path dstPath = env.lookupPwd(dst);
+
+        // php/1603
+        if (dstPath.isDirectory() || dstPath.getScheme().equals("error")) {
+          env.warning(L.l("'{0}' cannot be written to", dstPath.getFullPath()));
+
+          return false;
+        }
+
+        os = new WriteStreamOutput(dstPath.openWrite());
+      }
+
+      tempBuffer = TempBuffer.allocate();
+
+      byte[] buffer = tempBuffer.getBuffer();
+
+      int len;
+
+      while ((len = is.read(buffer, 0, buffer.length)) > 0) {
+        os.write(buffer, 0, len);
       }
 
       return true;
-    } catch (IOException e) {
+    }
+    catch (IOException e) {
       log.log(Level.FINE, e.toString(), e);
 
       return false;
+    }
+    catch (SecurityException e) {
+      log.log(Level.FINE, e.toString(), e);
+
+      return false;
+    }
+    finally {
+      if (tempBuffer != null) {
+        TempBuffer.free(tempBuffer);
+      }
+
+      try {
+        if (is != null) {
+          is.close();
+        }
+      }
+      finally {
+        if (os != null) {
+          os.close();
+        }
+      }
     }
   }
 
@@ -351,26 +420,42 @@ public class FileModule extends AbstractQuercusModule {
    *
    * @param path the path to change to
    */
-  @ReturnNullAsFalse
-  public static Directory dir(Env env, Path path)
+  public static Value dir(Env env, StringValue filename)
   {
+    ProtocolWrapper wrapper = getProtocolWrapper(env, filename);
+
+    if (wrapper != null) {
+      // XXX flags?
+      return wrapper.opendir(env, filename, LongValue.ZERO);
+    }
+
+    Path path = env.lookupPwd(filename);
+
+    if (path == null) {
+      return BooleanValue.FALSE;
+    }
+
     try {
       if (! path.isDirectory()) {
         env.warning(L.l("{0} is not a directory", path.getFullPath()));
 
-        return null;
+        return BooleanValue.FALSE;
       }
 
-      return new Directory(env, path);
+      Directory dir = new Directory(env, path);
 
-/*
-      DirectoryValue dir = new DirectoryValue(path);
+      return env.wrapJava(dir);
 
-      env.addClose(dir);
+      //DirectoryValue dir = new DirectoryValue(path);
 
-      return dir;
-*/
-    } catch (IOException e) {
+      //env.addClose(dir);
+      //return dir;
+
+    }
+    catch (IOException e) {
+      throw new QuercusModuleException(e);
+    }
+    catch (SecurityException e) {
       throw new QuercusModuleException(e);
     }
   }
@@ -383,7 +468,7 @@ public class FileModule extends AbstractQuercusModule {
     int len = path.length();
 
     if (len == 0)
-      return env.createString(".");
+      return env.getEmptyString();
     else if (len == 1 && path.charAt(0) == '/')
       return path;
 
@@ -776,8 +861,26 @@ public class FileModule extends AbstractQuercusModule {
    *
    * @param path the path to check
    */
-  public static Value fileatime(Env env, Path path)
+  public static Value fileatime(Env env, StringValue filename)
   {
+    ProtocolWrapper wrapper = getProtocolWrapper(env, filename);
+
+    if (wrapper != null) {
+      Value array = wrapper.url_stat(env, filename, LongValue.ZERO);
+
+      if (! array.isArray()) {
+        return BooleanValue.FALSE;
+      }
+
+      return array.get(env.createString("atime"));
+    }
+
+    Path path = env.lookupPwd(filename);
+
+    if (path == null) {
+      return BooleanValue.FALSE;
+    }
+
     if (! path.canRead()) {
       env.warning(L.l("{0} cannot be read", path.getFullPath()));
       return BooleanValue.FALSE;
@@ -796,8 +899,26 @@ public class FileModule extends AbstractQuercusModule {
    *
    * @param path the path to check
    */
-  public static Value filectime(Env env, Path path)
+  public static Value filectime(Env env, StringValue filename)
   {
+    ProtocolWrapper wrapper = getProtocolWrapper(env, filename);
+
+    if (wrapper != null) {
+      Value array = wrapper.url_stat(env, filename, LongValue.ZERO);
+
+      if (! array.isArray()) {
+        return BooleanValue.FALSE;
+      }
+
+      return array.get(env.createString("ctime"));
+    }
+
+    Path path = env.lookupPwd(filename);
+
+    if (path == null) {
+      return BooleanValue.FALSE;
+    }
+
     if (! path.canRead()) {
       env.warning(L.l("{0} cannot be read", path.getFullPath()));
       return BooleanValue.FALSE;
@@ -805,10 +926,12 @@ public class FileModule extends AbstractQuercusModule {
 
     long time = path.getCreateTime();
 
-    if (time <= 24 * 3600 * 1000L)
+    if (time <= 24 * 3600 * 1000L) {
       return BooleanValue.FALSE;
-    else
+    }
+    else {
       return new LongValue(time / 1000L);
+    }
   }
 
   /**
@@ -846,8 +969,26 @@ public class FileModule extends AbstractQuercusModule {
    *
    * @param path the path to check
    */
-  public static Value filemtime(Env env, Path path)
+  public static Value filemtime(Env env, StringValue filename)
   {
+    ProtocolWrapper wrapper = getProtocolWrapper(env, filename);
+
+    if (wrapper != null) {
+      Value array = wrapper.url_stat(env, filename, LongValue.ZERO);
+
+      if (! array.isArray()) {
+        return BooleanValue.FALSE;
+      }
+
+      return array.get(env.createString("mtime"));
+    }
+
+    Path path = env.lookupPwd(filename);
+
+    if (path == null) {
+      return BooleanValue.FALSE;
+    }
+
     long time = path.getLastModified();
 
     if (24 * 3600 * 1000L < time)
@@ -917,8 +1058,22 @@ public class FileModule extends AbstractQuercusModule {
    *
    * @param path the path to check
    */
-  public static Value filesize(Env env, Path path)
+  public static Value filesize(Env env, StringValue filename)
   {
+    ProtocolWrapper wrapper = getProtocolWrapper(env, filename);
+
+    if (wrapper != null) {
+      Value array = wrapper.url_stat(env, filename, LongValue.ZERO);
+
+      if (! array.isArray()) {
+        return BooleanValue.FALSE;
+      }
+
+      return array.get(env.createString("size"));
+    }
+
+    Path path = env.lookupPwd(filename);
+
     if (path == null) {
       env.warning(L.l("path cannot be read"));
 
@@ -1010,7 +1165,7 @@ public class FileModule extends AbstractQuercusModule {
       return null;
     }
 
-    BinaryStream s = fopen(env, filename, "r", useIncludePath, context);
+    BinaryStream s = fopen(env, filename, "rb", useIncludePath, context);
 
     if (! (s instanceof BinaryInput))
       return null;
@@ -1066,6 +1221,7 @@ public class FileModule extends AbstractQuercusModule {
         long dataWritten = 0;
 
         if (data instanceof ArrayValue) {
+
           for (Value item : ((ArrayValue) data).values()) {
             InputStream is = item.toInputStream();
 
@@ -2122,9 +2278,14 @@ public class FileModule extends AbstractQuercusModule {
     ProtocolWrapper wrapper = getProtocolWrapper(env, filename);
 
     if (wrapper != null) {
-      Value array = wrapper.url_stat(env, filename, LongValue.ZERO);
+      LongValue flags = LongValue.create(StreamModule.STREAM_URL_STAT_QUIET);
 
-      return array.isArray();
+      Value array = wrapper.url_stat(env, filename, flags);
+
+      int mode = array.get(env.createString("mode")).toInt();
+
+      // XXX: php 5.3.8 appears to check 040000 instead of 01000
+      return (mode & 01000) != 0;
     }
 
     Path path = env.lookupPwd(filename);
@@ -2236,9 +2397,9 @@ public class FileModule extends AbstractQuercusModule {
     ProtocolWrapper wrapper = getProtocolWrapper(env, filename);
 
     if (wrapper != null) {
-      LongValue flag = LongValue.create(StreamModule.STREAM_URL_STAT_QUIET);
+      LongValue flags = LongValue.create(StreamModule.STREAM_URL_STAT_QUIET);
 
-      Value array = wrapper.url_stat(env, filename, flag);
+      Value array = wrapper.url_stat(env, filename, flags);
 
       // XXX: not sure what it's checking
       return array.isArray();
@@ -2293,10 +2454,11 @@ public class FileModule extends AbstractQuercusModule {
   {
     ProtocolWrapper wrapper = getProtocolWrapper(env, filename);
 
-    if (wrapper != null)
-      // XXX flags?
-      return wrapper.url_stat(env, filename,
-                              LongValue.create(StreamModule.STREAM_URL_STAT_LINK));
+    if (wrapper != null) {
+      LongValue flags = LongValue.create(StreamModule.STREAM_URL_STAT_LINK);
+
+      return wrapper.url_stat(env, filename, flags);
+    }
 
     Path path = env.lookupPwd(filename);
 
@@ -2343,7 +2505,7 @@ public class FileModule extends AbstractQuercusModule {
 
       return false;
     }
-    catch (AccessControlException e) {
+    catch (SecurityException e) {
       log.log(Level.FINE, e.toString(), e);
 
       return false;
@@ -2402,8 +2564,11 @@ public class FileModule extends AbstractQuercusModule {
     try {
       Path path = env.lookupPwd(pathName);
 
-      if (path.isDirectory())
-        return new DirectoryValue(env, path);
+      if (path.isDirectory()) {
+        Directory dir = new Directory(env, path);
+
+        return env.wrapJava(dir);
+      }
       else {
         env.warning(L.l("{0} is not a directory", path.getFullPath()));
 
@@ -2577,12 +2742,12 @@ public class FileModule extends AbstractQuercusModule {
    *
    * @param dirV the directory resource
    */
-  public static Value readdir(Env env, @NotNull DirectoryValue dir)
+  public static Value readdir(Env env, @NotNull Directory dir)
   {
     if (dir == null)
       return BooleanValue.FALSE;
 
-    return dir.readdir();
+    return dir.read(env);
   }
 
   /**
@@ -2696,12 +2861,12 @@ public class FileModule extends AbstractQuercusModule {
    *
    * @param dirV the directory resource
    */
-  public static void rewinddir(Env env, @NotNull DirectoryValue dir)
+  public static void rewinddir(Env env, @NotNull Directory dir)
   {
     if (dir == null)
       return;
 
-    dir.rewinddir();
+    dir.rewind(env);
   }
 
   /**
@@ -2741,10 +2906,11 @@ public class FileModule extends AbstractQuercusModule {
    *
    * @param dirV the directory resource
    */
-  public static Value closedir(Env env, @NotNull DirectoryValue dirV)
+  public static Value closedir(Env env, @NotNull Directory dir)
   {
-    if (dirV != null)
-      dirV.close();
+    if (dir != null) {
+      dir.close(env);
+    }
 
     return NullValue.NULL;
   }
@@ -2940,11 +3106,25 @@ public class FileModule extends AbstractQuercusModule {
    * sets the time to the current time
    */
   public static boolean touch(Env env,
-                              Path path,
+                              StringValue filename,
                               @Optional int time,
                               @Optional int atime)
   {
     // XXX: atime not implemented (it might be > time)
+
+    ProtocolWrapper wrapper = getProtocolWrapper(env, filename);
+
+    if (wrapper != null) {
+      LongValue option = LongValue.create(StreamModule.PHP_STREAM_META_TOUCH);
+
+      ArrayValue array = new ArrayValueImpl();
+      array.put(LongValue.create(time));
+      array.put(LongValue.create(atime));
+
+      return wrapper.stream_metadata(env, filename, option, array);
+    }
+
+    Path path = env.lookupPwd(filename);
 
     try {
       if (path.exists()) {
@@ -2954,6 +3134,10 @@ public class FileModule extends AbstractQuercusModule {
           path.setLastModified(env.getCurrentTime());
       }
       else {
+        //path.createNewFile();
+
+        //return path.exists();
+
         WriteStream ws = path.openWrite();
         ws.close();
       }

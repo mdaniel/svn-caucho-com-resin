@@ -35,6 +35,7 @@ com.caucho.quercus.lib.spl.IteratorAggregate provides SPL
 com.caucho.quercus.lib.spl.OuterIterator provides SPL
 com.caucho.quercus.lib.spl.RecursiveDirectoryIterator provides SPL
 com.caucho.quercus.lib.spl.RecursiveIterator provides SPL
+com.caucho.quercus.lib.spl.RecursiveIteratorIterator provides SPL
 com.caucho.quercus.lib.spl.SeekableIterator provides SPL
 com.caucho.quercus.lib.spl.Serializable provides SPL
 com.caucho.quercus.lib.spl.SplFileInfo provides SPL

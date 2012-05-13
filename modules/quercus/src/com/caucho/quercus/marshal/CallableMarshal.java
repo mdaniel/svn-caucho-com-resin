@@ -31,7 +31,6 @@ package com.caucho.quercus.marshal;
 
 import com.caucho.quercus.env.Callback;
 import com.caucho.quercus.env.CallbackFunction;
-import com.caucho.quercus.env.DefaultValue;
 import com.caucho.quercus.env.Env;
 import com.caucho.quercus.env.Value;
 import com.caucho.quercus.expr.Expr;
@@ -39,7 +38,7 @@ import com.caucho.quercus.expr.Expr;
 public class CallableMarshal extends Marshal
 {
   public static final Marshal MARSHAL = new CallableMarshal();
-  
+
   public boolean isReadOnly()
   {
     return true;
@@ -50,10 +49,11 @@ public class CallableMarshal extends Marshal
     return marshal(env, expr.eval(env), expectedClass);
   }
 
-  public Object marshal(Env env, Value value, Class expectedClass)
+  @Override
+  protected Object marshalImpl(Env env, Value value, Class<?> expectedClass)
   {
     Object callable = value.toCallable(env);
-    
+
     return callable;
   }
 
@@ -61,7 +61,7 @@ public class CallableMarshal extends Marshal
   {
     throw new UnsupportedOperationException();
   }
-  
+
   @Override
   protected int getMarshalingCostImpl(Value argValue)
   {
@@ -72,7 +72,7 @@ public class CallableMarshal extends Marshal
     else
       return Marshal.FOUR;
   }
-  
+
   @Override
   public Class getExpectedClass()
   {

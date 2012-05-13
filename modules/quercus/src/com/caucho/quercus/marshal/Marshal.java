@@ -192,6 +192,11 @@ abstract public class Marshal {
 
   public Object marshal(Env env, Value value, Class argClass)
   {
+    return marshalImpl(env, value.toValue(), argClass);
+  }
+
+  protected Object marshalImpl(Env env, Value value, Class<?> argClass)
+  {
     return value;
   }
 

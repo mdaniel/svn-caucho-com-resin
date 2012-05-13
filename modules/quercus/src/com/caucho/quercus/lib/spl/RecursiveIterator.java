@@ -29,9 +29,11 @@
 
 package com.caucho.quercus.lib.spl;
 
+import com.caucho.quercus.env.Env;
+
 public interface RecursiveIterator
   extends Iterator
 {
-  public boolean hasChildren();
-  public RecursiveIterator getChildren();
+  public boolean hasChildren(Env env);
+  public RecursiveIterator getChildren(Env env);
 }

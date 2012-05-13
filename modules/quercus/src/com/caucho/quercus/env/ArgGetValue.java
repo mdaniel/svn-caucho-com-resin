@@ -29,12 +29,7 @@
 
 package com.caucho.quercus.env;
 
-import java.io.IOException;
 import java.io.Serializable;
-import java.util.IdentityHashMap;
-
-import com.caucho.quercus.Location;
-import com.caucho.vfs.WriteStream;
 
 /**
  * Represents an array-get argument which might be a call to a reference.
@@ -52,7 +47,7 @@ public class ArgGetValue extends ArgValue
     _obj = obj;
     _index = index;
   }
-  
+
   public Value toRefValue()
   {
     // php/0425
@@ -86,16 +81,16 @@ public class ArgGetValue extends ArgValue
   public Var toLocalVarDeclAsRef()
   {
     // php/3d55, php/3d49, php/3921
-    
+
     return _obj.toAutoArray().getVar(_index).toLocalVarDeclAsRef();
   }
-  
+
   @Override
   public Value toAutoArray()
   {
     return _obj.toAutoArray().getVar(_index).toAutoArray();
   }
-  
+
   @Override
   public Value toAutoObject(Env env)
   {
@@ -117,7 +112,7 @@ public class ArgGetValue extends ArgValue
   @Override
   public Value toLocalValue()
   {
-    return _obj.get(_index);
+    return _obj.get(_index).copy();
   }
 
   /**
@@ -126,13 +121,13 @@ public class ArgGetValue extends ArgValue
   @Override
   public Value toLocalRef()
   {
-    return _obj.get(_index);
+    return _obj.get(_index).copy(); // php/0d14, php/04b4
   }
-  
+
   //
   // Java Serialization
   //
-  
+
   public Object writeReplace()
   {
     return toValue();
