@@ -32,6 +32,7 @@ package com.caucho.quercus.lib.date;
 import com.caucho.quercus.UnimplementedException;
 import com.caucho.quercus.annotation.Optional;
 import com.caucho.quercus.annotation.NotNull;
+import com.caucho.quercus.annotation.ReturnNullAsFalse;
 import com.caucho.quercus.env.*;
 import com.caucho.quercus.module.AbstractQuercusModule;
 import com.caucho.util.CharBuffer;
@@ -1183,8 +1184,6 @@ public class DateModule extends AbstractQuercusModule {
                                          @NotNull DateTime dateTime)
   {
     if (dateTime == null) {
-      env.warning("DateTime parameter must not be null");
-
       return BooleanValue.FALSE;
     }
 
@@ -1198,25 +1197,32 @@ public class DateModule extends AbstractQuercusModule {
                                         long time)
   {
     if (dateTime == null) {
-      env.warning("DateTime parameter must not be null");
-
       return;
     }
 
     dateTime.setTimestamp(time);
   }
 
-  public static void date_timezone_set(Env env,
-                                       @NotNull DateTime dateTime,
-                                       @NotNull DateTimeZone dateTimeZone)
+  public static DateTimeZone date_timezone_get(Env env,
+                                               @NotNull DateTime dateTime)
   {
-    if (dateTime == null || dateTimeZone == null) {
-      env.warning("parameters must not be null");
-
-      return;
+    if (dateTime == null) {
+      return null;
     }
 
-    dateTime.setTimeZone(env, dateTimeZone);
+    return dateTime.getTimeZone();
+  }
+
+  @ReturnNullAsFalse
+  public static DateTime date_timezone_set(Env env,
+                                           @NotNull DateTime dateTime,
+                                           @NotNull DateTimeZone dateTimeZone)
+  {
+    if (dateTime == null || dateTimeZone == null) {
+      return null;
+    }
+
+    return dateTime.setTimeZone(env, dateTimeZone);
   }
 
   public static ArrayValue timezone_abbreviations_list()

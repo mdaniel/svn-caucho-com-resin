@@ -171,7 +171,7 @@ public class DateTime implements Cloneable
     return _dateTimeZone;
   }
 
-  public void setTimeZone(Env env, DateTimeZone dateTimeZone)
+  public DateTime setTimeZone(Env env, DateTimeZone dateTimeZone)
   {
     _dateTimeZone = dateTimeZone;
 
@@ -179,6 +179,8 @@ public class DateTime implements Cloneable
 
     _qDate = new QDate(dateTimeZone.getTimeZone(), env.getCurrentTime());
     _qDate.setGMTTime(time);
+
+    return this;
   }
 
   public long getOffset()

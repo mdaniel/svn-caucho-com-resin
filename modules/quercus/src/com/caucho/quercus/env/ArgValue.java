@@ -74,6 +74,12 @@ abstract public class ArgValue extends Value
   }
 
   @Override
+  public Object toJavaObject()
+  {
+    return toLocalValue().toJavaObject();
+  }
+
+  @Override
   public boolean toBoolean()
   {
     return toLocalValue().toBoolean();
