@@ -627,6 +627,7 @@ public class MergePath extends FilesystemPath {
    * Opens the best path for reading and writing.  XXX: If the best path
    * doesn't exist, this should probably create the file in the first path.
    */
+  @Override
   public StreamImpl openReadWriteImpl() throws IOException
   {
     StreamImpl stream = getWritePath().openReadWriteImpl();
@@ -638,10 +639,22 @@ public class MergePath extends FilesystemPath {
    * Opens the best path for appending.  XXX: If the best path
    * doesn't exist, this should probably create the file in the first path.
    */
+  @Override
   public StreamImpl openAppendImpl() throws IOException
   {
     StreamImpl stream = getWritePath().openAppendImpl();
     stream.setPath(this);
+    return stream;
+  }
+
+  /**
+   * Opens the best path for random access.
+   */
+  @Override
+  public RandomAccessStream openFileRandomAccess() throws IOException
+  {
+    RandomAccessStream stream = getWritePath().openFileRandomAccess();
+    // stream.setPath(this);
     return stream;
   }
 

@@ -71,13 +71,22 @@ public class GoogleQuercus extends QuercusContext
   public void init()
   {
     String gsBucket = getIniString("quercus.gs_bucket");
-    System.out.println("GS: " + gsBucket);
+
     if (gsBucket != null) {
       Path stdPwd = getPwd();
-      GoogleStorePath gsPath = new GoogleStorePath(gsBucket);
+      
+      GoogleStorePath gsPath;
+      
+      if ("default".equals(gsBucket)) {
+        gsPath = new GoogleStorePath(null);
+      }
+      else {
+        gsPath = new GoogleStorePath(gsBucket);
+      }
+        
       MergePath mergePwd = new MergePath(gsPath, stdPwd);
       Path pwd = mergePwd;
-System.out.println("PWD: " + pwd + " " + gsPath);
+
       setPwd(pwd);
     }
 

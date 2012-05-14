@@ -3289,6 +3289,10 @@ public class Env
     for (String item : getStackTrace()) {
       sb.append("\n  ").append(item);
     }
+    
+    if (sb.length() == 0) {
+      return String.valueOf(getLocation());
+    }
 
     return sb.toString();
   }
@@ -6038,7 +6042,8 @@ public class Env
       log.log(Level.WARNING, e.toString(), e);
     }
 
-    throw new QuercusExitException(msg.toString());
+    throw new QuercusExitException(msg.toString() 
+                                   + "\n" + getStackTraceAsString());
   }
 
   /**
@@ -6046,7 +6051,7 @@ public class Env
    */
   public Value exit()
   {
-    throw new QuercusExitException(String.valueOf(getLocation()));
+    throw new QuercusExitException(getStackTraceAsString());
   }
 
   /**
@@ -6060,7 +6065,7 @@ public class Env
       log.log(Level.WARNING, e.toString(), e);
     }
 
-    throw new QuercusDieException(msg);
+    throw new QuercusDieException(msg + "\n" + getStackTraceAsString());
   }
 
   /**
@@ -6068,7 +6073,7 @@ public class Env
    */
   public Value die()
   {
-    throw new QuercusDieException();
+    throw new QuercusDieException(getStackTraceAsString());
   }
 
   /**

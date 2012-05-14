@@ -491,6 +491,10 @@ public class QuercusServlet
       String realPath = getServletContext().getRealPath(_iniPath);
       quercus.setIniFile(getQuercus().getPwd().lookup(realPath));
     }
+    else {
+      String realPath = getServletContext().getRealPath("WEB-INF/php.ini");
+      quercus.setIniFile(getQuercus().getPwd().lookup(realPath));
+    }
     
     if (_scriptEncoding != null)
       quercus.setScriptEncoding(_scriptEncoding);

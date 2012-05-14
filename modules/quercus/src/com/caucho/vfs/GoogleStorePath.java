@@ -406,6 +406,12 @@ public class GoogleStorePath extends FilesystemPath {
   }
 
   @Override
+  public RandomAccessStream openFileRandomAccess() throws IOException
+  {
+    return new GoogleStoreRandomAccessStream(this, openWriteImpl());
+  }
+
+  @Override
   protected Path copy()
   {
     return new GoogleStorePath(getRoot(), getUserPath(), getPath());

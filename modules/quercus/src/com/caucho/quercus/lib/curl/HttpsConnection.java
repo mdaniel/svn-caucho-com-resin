@@ -73,19 +73,27 @@ public class HttpsConnection
   {
     Proxy proxy = getProxy();
 
-    HttpsURLConnection conn;
+    URLConnection conn;
+    
+    HttpsURLConnection httpsConn = null;
 
     if (proxy != null)
-      conn = (HttpsURLConnection) getURL().openConnection(proxy);
+      conn = getURL().openConnection(proxy);
     else
-      conn = (HttpsURLConnection) getURL().openConnection();
+      conn = getURL().openConnection();
+    
+    if (conn instanceof HttpsURLConnection) {
+      httpsConn = (HttpsURLConnection) conn;
+    }
 
     HostnameVerifier hostnameVerifier
       = CurlHostnameVerifier.create(curl.getIsVerifySSLPeer(),
                                     curl.getIsVerifySSLCommonName(),
                                     curl.getIsVerifySSLHostname());
     
-    conn.setHostnameVerifier(hostnameVerifier);
+    if (httpsConn != null) {
+      httpsConn.setHostnameVerifier(hostnameVerifier);
+    }
 
     setConnection(conn);
   }

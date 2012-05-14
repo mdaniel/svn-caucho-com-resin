@@ -126,8 +126,10 @@ public class CurlHttpRequest
   {
     if (_conn == null || _curl == null)
       return false;
-    
-    _conn.setRequestMethod(_curl.getRequestMethod());
+
+    if (! "GET".equals(_curl.getRequestMethod())) {
+      _conn.setRequestMethod(_curl.getRequestMethod());
+    }
 
     HashMap<String,String> _properties = _curl.getRequestPropertiesMap();
 
@@ -256,7 +258,7 @@ public class CurlHttpRequest
   {
     return _curl;
   }
-
+  
   protected final CurlHttpConnection getHttpConnection()
   {
     return _conn;

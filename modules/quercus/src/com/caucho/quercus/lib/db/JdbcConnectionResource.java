@@ -1083,6 +1083,8 @@ public abstract class JdbcConnectionResource
   protected void saveErrors(SQLException e)
   {
     _exception = e;
+    
+    e.printStackTrace();
 
     _errorMessage = e.getMessage();
     if (_errorMessage == null || "".equals(_errorMessage))

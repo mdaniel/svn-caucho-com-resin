@@ -997,7 +997,7 @@ public class DateModule extends AbstractQuercusModule {
       QDate date = env.getDate();
       date.setGMTTime(now);
 
-      if (timeString.equals("")) {
+      if (timeString == null || timeString.equals("")) {
         date.setHour(0);
         date.setMinute(0);
         date.setSecond(0);
@@ -1009,7 +1009,8 @@ public class DateModule extends AbstractQuercusModule {
 
       return new LongValue(parser.parse() / 1000L);
     } catch (Exception e) {
-      env.warning(e.getMessage());
+      // env.warning(e.getMessage());
+      env.warning(e);
 
       return BooleanValue.FALSE;
     }

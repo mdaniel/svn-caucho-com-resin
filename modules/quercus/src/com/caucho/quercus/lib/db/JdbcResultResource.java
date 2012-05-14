@@ -378,6 +378,8 @@ public class JdbcResultResource
         return NullValue.NULL;
       }
     } catch (SQLException e) {
+      System.out.println("XXEXN:" + e);
+      e.printStackTrace();
       log.log(Level.FINE, e.toString(), e);
       return NullValue.NULL;
     }
@@ -386,7 +388,7 @@ public class JdbcResultResource
   /**
    * Returns an array representing the row.
    *
-   * @return an array containing the fecthed row
+   * @return an array containing the fetched row
    */
   protected Value fetchRow(Env env)
   {
