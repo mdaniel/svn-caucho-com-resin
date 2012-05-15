@@ -74,7 +74,6 @@ import com.caucho.quercus.lib.file.PhpStderr;
 import com.caucho.quercus.lib.file.PhpStdin;
 import com.caucho.quercus.lib.file.PhpStdout;
 import com.caucho.quercus.lib.file.ProtocolWrapper;
-import com.caucho.quercus.lib.file.StreamModule;
 import com.caucho.quercus.lib.file.ZlibProtocolWrapper;
 import com.caucho.quercus.lib.regexp.RegexpState;
 import com.caucho.quercus.lib.string.StringModule;

@@ -79,7 +79,7 @@ public final class ReadStream extends InputStream
   private Reader _readEncoding;
   private String _readEncodingName;
   private CharBuffer _cb;
-  
+
   private boolean _disableClose;
   private boolean _isDisableCloseSource;
   private boolean _reuseBuffer;
@@ -219,7 +219,7 @@ public final class ReadStream extends InputStream
 
     _readLength = length;
   }
-  
+
   /**
    * Returns the read position.
    */
@@ -235,7 +235,7 @@ public final class ReadStream extends InputStream
   {
     if (! _isEnableReadTime)
       throw new UnsupportedOperationException("last read-time is disabled");
-    
+
     return _readTime;
   }
 
@@ -246,7 +246,7 @@ public final class ReadStream extends InputStream
   {
     _readTime = 0;
   }
-  
+
   /**
    * Enables setting the read time on every reads.
    */
@@ -474,7 +474,7 @@ public final class ReadStream extends InputStream
 
         if (len > 0) {
           _position += len;
-          
+
           if (_isEnableReadTime)
             _readTime = CurrentTime.getCurrentTime();
         }
@@ -605,10 +605,10 @@ public final class ReadStream extends InputStream
       if (! readBuffer()) {
         return -1;
       }
-      
+
       readLength = _readLength;
       readOffset = _readOffset;
-      
+
       sublen = Math.min(length, readLength - readOffset);
     }
 
@@ -705,13 +705,13 @@ public final class ReadStream extends InputStream
   public String readLine() throws IOException
   {
     CharBuffer cb = _cb;
-    
+
     if (cb == null) {
       cb = _cb = new CharBuffer();
     }
 
     String result;
-    
+
     if (readLine(cb, true)) {
       result = cb.toString();
       cb.clear();
@@ -722,7 +722,7 @@ public final class ReadStream extends InputStream
       result = cb.toString();
       cb.clear();
     }
-    
+
     return result;
   }
 
@@ -1051,7 +1051,7 @@ public final class ReadStream extends InputStream
   public void writeToWriter(Writer out) throws IOException
   {
     int ch;
-    
+
     while ((ch = readChar()) >= 0) {
       out.write((char) ch);
     }
@@ -1094,7 +1094,7 @@ public final class ReadStream extends InputStream
     if (readLength > 0) {
       _readLength = readLength;
       _position += readLength;
-      
+
       if (_isEnableReadTime)
         _readTime = CurrentTime.getCurrentTime();
 
@@ -1142,10 +1142,10 @@ public final class ReadStream extends InputStream
     if (readLength > 0) {
       _readLength = readLength;
       _position += readLength;
-      
+
       if (_isEnableReadTime)
         _readTime = CurrentTime.getCurrentTime();
-      
+
       return readLength;
     }
     else if (readLength == READ_TIMEOUT) {
@@ -1200,7 +1200,7 @@ public final class ReadStream extends InputStream
     if (readLength >= 0) {
       _readLength += readLength;
       _position += readLength;
-      
+
       if (_isEnableReadTime)
         _readTime = CurrentTime.getCurrentTime();
       return true;
@@ -1243,7 +1243,7 @@ public final class ReadStream extends InputStream
     if (readLength > 0) {
       _readLength = readLength;
       _position += readLength;
-      
+
       if (_isEnableReadTime)
         _readTime = CurrentTime.getCurrentTime();
       return true;

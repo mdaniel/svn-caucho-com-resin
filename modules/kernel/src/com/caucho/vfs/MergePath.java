@@ -79,11 +79,11 @@ public class MergePath extends FilesystemPath {
     _root = this;
     _pathList = new ArrayList<Path>();
   }
-  
+
   public MergePath(Path ... paths)
   {
     this();
-    
+
     if (paths != null) {
       for (Path path : paths) {
         addMergePath(path);
@@ -176,7 +176,7 @@ public class MergePath extends FilesystemPath {
 
     return new NotFoundPath(getSchemeMap(), filePath);
   }
-  
+
   protected MergePath createMergePath()
   {
     return new MergePath();
@@ -550,7 +550,7 @@ public class MergePath extends FilesystemPath {
 
       if (path.isDirectory()) {
         String[]subList = path.list();
-        
+
         for (int j = 0; subList != null && j < subList.length; j++) {
           if (! list.contains(subList[j]))
             list.add(subList[j]);
@@ -617,9 +617,9 @@ public class MergePath extends FilesystemPath {
   {
     StreamImpl stream = getWritePath().openWriteImpl();
     stream.setPath(this);
-    
+
     _bestPath = null;
-    
+
     return stream;
   }
 
@@ -709,7 +709,7 @@ public class MergePath extends FilesystemPath {
     ArrayList<Path> pathList = getPathList();
     for (int i = 0; i < pathList.size(); i++) {
       Path path = pathList.get(i);
-      
+
       if (path.exists()) {
         return path;
       }
@@ -721,7 +721,7 @@ public class MergePath extends FilesystemPath {
 
     return new NotFoundPath(getSchemeMap(), _userPath);
   }
-  
+
   private ArrayList<Path> getPathList()
   {
     if (_pathList == null) {
@@ -731,7 +731,7 @@ public class MergePath extends FilesystemPath {
         pathname = "." + pathname;
 
       ArrayList<Path> pathList = new ArrayList<Path>();
-      
+
       ArrayList<Path> rootPathList = ((MergePath) _root)._pathList;
       for (int i = 0; i < rootPathList.size(); i++) {
         Path rootPath = rootPathList.get(i);
@@ -741,10 +741,10 @@ public class MergePath extends FilesystemPath {
 
         pathList.add(realPath);
       }
-    
+
       _pathList = pathList;
     }
-    
+
     return _pathList;
   }
 

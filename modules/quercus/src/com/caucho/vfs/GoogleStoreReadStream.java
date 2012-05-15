@@ -35,75 +35,122 @@ import java.util.logging.Logger;
 
 import com.caucho.util.L10N;
 import com.google.appengine.api.files.FileReadChannel;
-import com.google.appengine.api.files.FileWriteChannel;
-
 
 /**
- * Writing to a google stream.
+ * Reading from a google stream.
  */
 class GoogleStoreReadStream extends StreamImpl {
   private static final Logger log
     = Logger.getLogger(GoogleStoreReadStream.class.getName());
-  
+
   private static final L10N L = new L10N(GoogleStoreReadStream.class);
-  
+
   private final GoogleStorePath _path;
   private FileReadChannel _is;
   private final ByteBuffer _buf = ByteBuffer.allocate(1024);
-  
+
   GoogleStoreReadStream(GoogleStorePath path, FileReadChannel is)
     throws IOException
   {
     _path = path;
     _is = is;
-    
+
     _buf.clear();
-    
+
     int sublen = _is.read(_buf);
-    
+
     _buf.flip();
   }
-  
+
   @Override
   public boolean canRead()
   {
     return true;
   }
-  
+
   @Override
   public int read(byte []buffer, int offset, int length)
     throws IOException
   {
     if (! _buf.hasRemaining()) {
       _buf.clear();
-    
+
       int result = _is.read(_buf);
-    
+
       if (result <= 0)
         return result;
-    
+
       _buf.flip();
     }
-    
+
     int sublen = Math.min(length, _buf.remaining());
-    
+
     _buf.get(buffer, offset, sublen);
-    
+
     return sublen;
   }
-  
+
+  /**
+   * Seeks based on the start.
+   */
+  public void seekStart(long offset)
+    throws IOException
+  {
+    _is.position(offset);
+
+    _buf.rewind();
+    _buf.flip();
+  }
+
+  /**
+   * Returns true if the stream implements skip.
+   */
+  public boolean hasSkip()
+  {
+    return true;
+  }
+
+  /**
+   * Skips a number of bytes, returning the bytes skipped.
+   *
+   * @param n the number of types to skip.
+   *
+   * @return the actual bytes skipped.
+   */
+  public long skip(long n)
+    throws IOException
+  {
+    long remaining = _buf.remaining();
+
+    if (n < remaining) {
+      _buf.position(_buf.position() + (int) n);
+
+      return n;
+    }
+
+    _buf.rewind();
+    _buf.flip();
+
+    long toSkip = n - remaining;
+
+    long pos = _is.position();
+    _is.position(pos + toSkip);
+
+    return _is.position();
+  }
+
   @Override
   public void close()
     throws IOException
   {
     FileReadChannel is = _is;
     _is = null;
-    
+
     if (is != null) {
       is.close();
     }
   }
-  
+
   @Override
   public String toString()
   {
