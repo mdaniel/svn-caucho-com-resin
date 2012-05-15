@@ -549,8 +549,12 @@ public class ZlibModule extends AbstractQuercusModule {
   public Value gzdeflate(Env env, InputStream data,
                          @Optional("6") int level)
   {
-    TempBuffer tempBuf = TempBuffer.allocate();
-    byte []buffer = tempBuf.getBuffer();
+    TempBuffer tempInput = TempBuffer.allocate();
+    byte []inputBuffer = tempInput.getBuffer();
+
+    TempBuffer tempOutput = TempBuffer.allocate();
+    byte []outputBuffer = tempOutput.getBuffer();
+
     Deflater deflater = null;
 
     try {
@@ -562,31 +566,35 @@ public class ZlibModule extends AbstractQuercusModule {
       int len;
       while (! isFinished) {
         if (! isFinished && deflater.needsInput()) {
-          len = data.read(buffer, 0, buffer.length);
+          len = data.read(inputBuffer, 0, inputBuffer.length);
 
           if (len > 0)
-            deflater.setInput(buffer, 0, len);
+            deflater.setInput(inputBuffer, 0, len);
           else {
             isFinished = true;
             deflater.finish();
           }
         }
 
-        while ((len = deflater.deflate(buffer, 0, buffer.length)) > 0) {
-          out.write(buffer, 0, len, false);
+        while ((len = deflater.deflate(outputBuffer, 0, outputBuffer.length)) > 0) {
+          out.write(outputBuffer, 0, len, false);
         }
       }
+
       deflater.end();
 
       return env.createBinaryString(out.getHead());
-
-    } catch (Exception e) {
+    }
+    catch (Exception e) {
       throw QuercusModuleException.create(e);
-    } finally {
-      TempBuffer.free(tempBuf);
+    }
+    finally {
+      TempBuffer.free(tempInput);
+      TempBuffer.free(tempOutput);
 
-      if (deflater != null)
+      if (deflater != null) {
         deflater.end();
+      }
     }
   }
 
