@@ -136,7 +136,7 @@ class GoogleStoreReadStream extends StreamImpl {
     long pos = _is.position();
     _is.position(pos + toSkip);
 
-    return _is.position();
+    return pos - _is.position();
   }
 
   @Override
