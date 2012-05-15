@@ -32,7 +32,6 @@ package com.caucho.quercus.servlet;
 import com.caucho.config.ConfigException;
 import com.caucho.quercus.QuercusContext;
 import com.caucho.quercus.QuercusRuntimeException;
-import com.caucho.quercus.lib.db.JdbcConnectionResource;
 import com.caucho.quercus.lib.db.QuercusDataSource;
 import com.caucho.quercus.module.QuercusModule;
 import com.caucho.util.L10N;
@@ -72,9 +71,9 @@ public class QuercusServlet
   private boolean _isCompileFailover = true;
   private double _profileProbability;
   private boolean _isRequireSource = true;
-  
+
   private DataSource _database;
-  
+
   private boolean _isStrict;
   private boolean _isLooseParse = true;
   private int _pageCacheSize = -1;
@@ -112,18 +111,18 @@ public class QuercusServlet
     if (isResin) {
       try {
         Class<?> cls = Class.forName("com.caucho.quercus.servlet.ProResinQuercusServlet");
-      
+
         impl = (QuercusServletImpl) cls.newInstance();
       }
       catch (Exception e) {
         log.finest(e.getMessage());
       }
     }
-    
+
     if (impl == null) {
       impl = new ProQuercusServlet();
     }
-    
+
     return impl;
   }
 
@@ -430,7 +429,7 @@ public class QuercusServlet
       throw new ServletException(
           L.l("'{0}' is not a recognized init-param", paramName));
   }
-  
+
   private void setJndiDatabase(String value)
     throws ServletException
   {
@@ -464,11 +463,11 @@ public class QuercusServlet
     throws ServletException
   {
     Class<?> configClass = config.getClass();
-    
+
     _impl = getQuercusServlet(configClass.getName().startsWith("com.caucho"));
 
     log.info("QuercusServlet starting as " + _impl.getClass().getSimpleName());
-    
+
     if (isUnicodeSemantics()) {
       _impl.getQuercus().setUnicodeSemantics(true);
     }
@@ -495,7 +494,7 @@ public class QuercusServlet
       String realPath = getServletContext().getRealPath("WEB-INF/php.ini");
       quercus.setIniFile(getQuercus().getPwd().lookup(realPath));
     }
-    
+
     if (_scriptEncoding != null)
       quercus.setScriptEncoding(_scriptEncoding);
 
@@ -529,7 +528,7 @@ public class QuercusServlet
         quercus.setServerEnv(entry.getKey(), entry.getValue());
       }
     }
-    
+
     _impl.init(config);
   }
 
@@ -576,7 +575,7 @@ public class QuercusServlet
 
       _propertyMap.put(key, value);
     }
-    
+
     public HashMap<String,String> getPropertyMap() {
       return _propertyMap;
     }
@@ -594,7 +593,7 @@ public class QuercusServlet
 
       _propertyMap.put(key, value);
     }
-    
+
     public HashMap<String,String> getPropertyMap() {
       return _propertyMap;
     }

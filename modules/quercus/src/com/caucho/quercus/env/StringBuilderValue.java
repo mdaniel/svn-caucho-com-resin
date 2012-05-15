@@ -485,7 +485,7 @@ public class StringBuilderValue
   public String toString()
   {
     if (_length == 1)
-      return String.valueOf((char) (_buffer[0] & 0xFF));
+      return String.valueOf((char) (_buffer[0] & 0xff));
     else {
       CharBuffer buf = CharBuffer.allocate();
       buf.append(_buffer, 0, _length);
@@ -1645,7 +1645,7 @@ public class StringBuilderValue
     sb.append(":\"");
 
     for (int i = 0; i < _length; i++) {
-      sb.append((char) (_buffer[i] & 0xFF));
+      sb.append((char) (_buffer[i] & 0xff));
     }
 
     sb.append("\";");
@@ -1888,7 +1888,7 @@ public class StringBuilderValue
         return false;
 
       for (int i = len - 1; i >= 0; i--) {
-        if (_buffer[i] != rString.charAt(i))
+        if ((_buffer[i] & 0xff) != rString.charAt(i))
           return false;
       }
 
@@ -2010,7 +2010,7 @@ public class StringBuilderValue
     public int read()
     {
       if (_offset < _length)
-        return _buffer[_offset++] & 0xFF;
+        return _buffer[_offset++] & 0xff;
       else
         return -1;
     }
@@ -2044,7 +2044,7 @@ public class StringBuilderValue
     public int read()
     {
       if (_index < _length)
-        return _buffer[_index++] & 0xFF;
+        return _buffer[_index++] & 0xff;
       else
         return -1;
     }

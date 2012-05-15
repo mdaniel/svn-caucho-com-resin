@@ -3289,7 +3289,7 @@ public class Env
     for (String item : getStackTrace()) {
       sb.append("\n  ").append(item);
     }
-    
+
     if (sb.length() == 0) {
       return String.valueOf(getLocation());
     }
@@ -6042,7 +6042,7 @@ public class Env
       log.log(Level.WARNING, e.toString(), e);
     }
 
-    throw new QuercusExitException(msg.toString() 
+    throw new QuercusExitException(msg.toString()
                                    + "\n" + getStackTraceAsString());
   }
 
@@ -6642,7 +6642,7 @@ public class Env
    */
   public Value error(int code, Location location, String loc, String msg)
   {
-    //System.err.println("Env->error0: " + code + " . " + getLocation() + " . " + location + " . " + loc + " . " + msg);
+    //System.err.println("Env->error0: " + code + " . " + getErrorMask() + " . " + getLocation() + " . " + location + " . " + loc + " . " + msg);
     //Thread.dumpStack();
 
     int mask = 1 << code;

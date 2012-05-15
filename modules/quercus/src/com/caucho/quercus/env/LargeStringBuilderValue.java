@@ -46,9 +46,9 @@ public class LargeStringBuilderValue
   extends StringValue
 {
   public static final StringValue EMPTY = StringBuilderValue.EMPTY;
-  
+
   public static final int SIZE = 4 * 1024;
-  
+
   protected byte [][]_bufferList;
   protected int _length;
 
@@ -65,14 +65,14 @@ public class LargeStringBuilderValue
     _bufferList = bufferList;
     _length = length;
   }
-  
+
   public LargeStringBuilderValue(StringValue s)
   {
     this();
-    
+
     s.appendTo(this);
   }
-  
+
   /**
    * Creates an empty string builder of the same type.
    */
@@ -193,7 +193,7 @@ public class LargeStringBuilderValue
 
     byte [][]bufferList = _bufferList;
     for (int i = _length - 1; i >= 0; i--) {
-      buffer[i] = (char) bufferList[i / SIZE][i % SIZE];
+      buffer[i] = (char) (bufferList[i / SIZE][i % SIZE] & 0xff);
     }
 
     return new String(buffer, 0, _length);
@@ -215,7 +215,7 @@ public class LargeStringBuilderValue
   public StringValue toStringBuilder()
   {
     // XXX: can this just return this, or does it need to return a copy?
-    
+
     return new LargeStringBuilderValue(_bufferList, _length);
   }
 
@@ -236,7 +236,7 @@ public class LargeStringBuilderValue
   {
     return this;
   }
-  
+
   /**
    * Append to a string builder.
    */
@@ -306,11 +306,11 @@ public class LargeStringBuilderValue
       return UnsetStringValue.UNSET;
     else {
       int data = _bufferList[(int) (index / SIZE)][(int) (index % SIZE)];
-      
+
       return StringBuilderValue.create((char) (data & 0xff));
     }
   }
-  
+
   public final void setLength(int len) {
     _length = len;
   }
@@ -335,13 +335,13 @@ public class LargeStringBuilderValue
   public char charAt(int index)
   {
     int len = _length;
-    
+
     if (index < 0 || len <= index) {
       throw new ArrayIndexOutOfBoundsException(_length + ", " + index);
     }
-    
+
     int data = _bufferList[index / SIZE][index % SIZE] & 0xff;
-    
+
     return (char) data;
   }
 
@@ -355,14 +355,14 @@ public class LargeStringBuilderValue
       return StringBuilderValue.EMPTY;
 
     StringValue stringValue;
-    
+
     if (end - start < 1024)
       stringValue = new StringBuilderValue(end - start);
     else
       stringValue = new LargeStringBuilderValue();
 
     int endChunk = end / SIZE;
-      
+
     while (start < end) {
       int startChunk = start / SIZE;
       int startOffset = start % SIZE;
@@ -393,7 +393,7 @@ public class LargeStringBuilderValue
   public StringValue toLowerCase()
   {
     int length = _length;
-    
+
     StringValue string = new LargeStringBuilderValue();
 
     byte [][]bufferList = _bufferList;
@@ -409,7 +409,7 @@ public class LargeStringBuilderValue
 
     return string;
   }
-  
+
   /**
    * Convert to lower case.
    */
@@ -417,7 +417,7 @@ public class LargeStringBuilderValue
   public StringValue toUpperCase()
   {
     int length = _length;
-    
+
     StringValue string = new LargeStringBuilderValue();
 
     byte [][]bufferList = _bufferList;
@@ -473,7 +473,7 @@ public class LargeStringBuilderValue
   {
     return append(buf, offset, length);
   }
-  
+
   /**
    * Append a Java string to the value.
    */
@@ -481,36 +481,36 @@ public class LargeStringBuilderValue
   public StringValue append(String s)
   {
     int len = s.length();
-    
+
     ensureCapacity(_length + len);
-    
+
     for (int i = 0; i < len; i++) {
       _bufferList[_length / SIZE][_length % SIZE] = (byte) s.charAt(i);
-      
+
       _length++;
     }
-    
+
     return this;
   }
-  
+
   /**
    * Append a Java buffer to the value.
    */
   public StringValue append(CharSequence buf, int head, int tail)
   {
     int len = tail - head;
-    
+
     ensureCapacity(_length + len);
-    
+
     for (int i = 0; i < len; i++) {
       _bufferList[_length / SIZE][_length % SIZE] = (byte) buf.charAt(i);
-      
+
       _length++;
     }
-    
+
     return this;
   }
-  
+
   /**
    * Append a Java buffer to the value.
    */
@@ -521,7 +521,7 @@ public class LargeStringBuilderValue
 
     for (int i = offset; i < length + offset; i++) {
       _bufferList[_length / SIZE][_length % SIZE] = (byte) buf[i];
-      
+
       _length++;
     }
 
@@ -549,7 +549,7 @@ public class LargeStringBuilderValue
       length -= sublen;
       _length += sublen;
     }
-      
+
     return this;
   }
 
@@ -608,7 +608,7 @@ public class LargeStringBuilderValue
   public StringValue append(long v)
   {
     // XXX: this probably is frequent enough to special-case
-    
+
     return append(String.valueOf(v));
   }
 
@@ -620,7 +620,7 @@ public class LargeStringBuilderValue
   {
     return append(String.valueOf(v));
   }
-  
+
   /**
    * Append a Java value to the value.
    */
@@ -644,7 +644,7 @@ public class LargeStringBuilderValue
       if (offset == 0) {
         ensureCapacity(_length + SIZE);
       }
-      
+
       byte []buffer = _bufferList[_length / SIZE];
       int sublen = SIZE - offset;
 
@@ -672,7 +672,7 @@ public class LargeStringBuilderValue
   public int appendReadAll(InputStream is, long length)
   {
     int readLength = 0;
-    
+
     while (length > 0) {
       int sublen = appendRead(is, length);
 
@@ -685,7 +685,7 @@ public class LargeStringBuilderValue
 
     return readLength;
   }
-  
+
   /**
    * Append to a string builder.
    */
@@ -693,12 +693,12 @@ public class LargeStringBuilderValue
   {
     if (length() == 0)
       return sb;
-    
+
     Env env = Env.getInstance();
 
     try {
       Reader reader = env.getRuntimeEncodingFactory().create(toInputStream());
-      
+
       if (reader != null) {
         sb.append(reader);
 
@@ -779,7 +779,7 @@ public class LargeStringBuilderValue
       Thread.dumpStack();
       throw new IllegalStateException();
     }
-    
+
     int chunk = _length / SIZE;
     int endChunk = newCapacity / SIZE;
 
@@ -803,7 +803,7 @@ public class LargeStringBuilderValue
   {
     if (_hashCode != 0)
       return _hashCode;
-    
+
     int hash = 37;
 
     int length = _length;
@@ -853,7 +853,7 @@ public class LargeStringBuilderValue
 
     if (length < 0)
         length = 0;
-    
+
     out.print("string(");
     out.print(length);
     out.print(") \"");
@@ -865,7 +865,7 @@ public class LargeStringBuilderValue
     }
 
     out.print("\"");
-    
+
     /*
     int length = length();
 
@@ -873,7 +873,7 @@ public class LargeStringBuilderValue
         length = 0;
 
     out.print("string");
-    
+
     out.print("(");
     out.print(length);
     out.print(") \"");
@@ -901,7 +901,7 @@ public class LargeStringBuilderValue
 
   class BuilderInputStream extends InputStream {
     private int _index;
-    
+
     /**
      * Reads the next byte.
      */

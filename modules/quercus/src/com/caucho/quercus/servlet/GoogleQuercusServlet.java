@@ -29,22 +29,42 @@
 
 package com.caucho.quercus.servlet;
 
+import javax.servlet.ServletException;
+
 /**
  * Servlet to call PHP through javax.script.
  */
 @SuppressWarnings("serial")
 public class GoogleQuercusServlet extends QuercusServlet
 {
+  private String _gsBucket;
+
   public GoogleQuercusServlet()
   {
   }
-  
+
   @Override
   protected QuercusServletImpl getQuercusServlet(boolean isResin)
   {
-    QuercusServletImpl impl = new ProGoogleQuercusServlet();
-    
+    QuercusServletImpl impl = new ProGoogleQuercusServlet(_gsBucket);
+
     return impl;
+  }
+
+  /**
+   * Sets a named init-param to the passed value.
+   *
+   * @throws ServletException if the init-param is not recognized
+   */
+  protected void setInitParam(String paramName, String paramValue)
+    throws ServletException
+  {
+    if ("gs-bucket".equals(paramName)) {
+      _gsBucket = paramValue;
+    }
+    else {
+      super.setInitParam(paramName, paramValue);
+    }
   }
 }
 

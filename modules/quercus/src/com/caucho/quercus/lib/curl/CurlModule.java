@@ -993,13 +993,13 @@ public class CurlModule
         Object outputFile = value.toJavaObject();
 
         if (outputFile instanceof BinaryOutput)
-          curl.setOutputFile((BinaryOutput)outputFile);
+          curl.setOutputFile((BinaryOutput) outputFile);
         break;
       case CURLOPT_INFILE:
         Object uploadFile = value.toJavaObject();
 
         if (uploadFile instanceof BinaryInput)
-          curl.setUploadFile((BinaryInput)uploadFile);
+          curl.setUploadFile((BinaryInput) uploadFile);
         break;
       case CURLOPT_STDERR:
         //XXX

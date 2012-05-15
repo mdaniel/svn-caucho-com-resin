@@ -30,6 +30,7 @@
 package com.caucho.quercus.env;
 
 import java.io.IOException;
+import java.io.InputStream;
 import java.io.Serializable;
 import java.util.IdentityHashMap;
 
@@ -65,6 +66,12 @@ abstract public class ArgValue extends Value
   public StringValue toStringValue(Env env)
   {
     return toLocalValue().toStringValue(env);
+  }
+
+  @Override
+  public char toChar()
+  {
+    return toLocalValue().toChar();
   }
 
   @Override
@@ -107,6 +114,12 @@ abstract public class ArgValue extends Value
   public Value toAutoObject(Env env)
   {
     return toLocalValue().toObject(env);
+  }
+
+  @Override
+  public InputStream toInputStream()
+  {
+    return toLocalValue().toInputStream();
   }
 
   @Override

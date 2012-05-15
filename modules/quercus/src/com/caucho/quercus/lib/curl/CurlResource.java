@@ -76,7 +76,7 @@ public class CurlResource extends ResourceValue
   private boolean _isVerifySSLPeer = true;
   private boolean _isVerifySSLCommonName = true;
   private boolean _isVerifySSLHostname = true;
-  
+
   private boolean _ifModifiedSince = true;
   private String _modifiedTime;
 
@@ -250,7 +250,7 @@ public class CurlResource extends ResourceValue
   {
     _header = header;
   }
-  
+
   /*
    * Returns the header callback.
    */
@@ -347,12 +347,12 @@ public class CurlResource extends ResourceValue
   {
     _isVerbose = verbose;
   }
-  
+
   public boolean getIsVerifySSLPeer()
   {
     return _isVerifySSLPeer;
   }
-  
+
   public void setIsVerifySSLPeer(boolean isVerify)
   {
     _isVerifySSLPeer = isVerify;
@@ -362,22 +362,22 @@ public class CurlResource extends ResourceValue
   {
     return _isVerifySSLCommonName;
   }
-  
+
   public void setIsVerifySSLCommonName(boolean isVerify)
   {
     _isVerifySSLCommonName = isVerify;
   }
-  
+
   public boolean getIsVerifySSLHostname()
   {
     return _isVerifySSLHostname;
   }
-  
+
   public void setIsVerifySSLHostname(boolean isVerify)
   {
     _isVerifySSLHostname = isVerify;
   }
-  
+
   /**
    * Sets the modified time request property.
    */
@@ -457,7 +457,7 @@ public class CurlResource extends ResourceValue
   {
     _postBody = body;
   }
-  
+
   /**
    * Returns the password to use for proxy authentication.
    */
@@ -545,7 +545,7 @@ public class CurlResource extends ResourceValue
   {
     return _readCallback;
   }
-  
+
   /**
    * Sets the callback to read the body.
    */
@@ -793,9 +793,6 @@ public class CurlResource extends ResourceValue
       data = bb;
     }
 
-    if (_isReturningData)
-      return data;
-
     if (_outputHeaderFile != null) {
       FileModule.fwrite(env,
                         _outputHeaderFile,
@@ -810,11 +807,15 @@ public class CurlResource extends ResourceValue
                         Integer.MAX_VALUE);
 
     }
+
+    if (_isReturningData) {
+      return data;
+    }
     else {
       env.print(data);
-    }
 
-    return BooleanValue.TRUE;
+      return BooleanValue.TRUE;
+    }
   }
 
   /**

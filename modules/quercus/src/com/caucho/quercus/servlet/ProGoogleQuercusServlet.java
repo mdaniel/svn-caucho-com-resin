@@ -14,8 +14,16 @@ import com.caucho.quercus.QuercusContext;
  */
 public class ProGoogleQuercusServlet extends GoogleQuercusServletImpl
 {
+  private final String _gsBucket;
+
   public ProGoogleQuercusServlet()
   {
+    this(null);
+  }
+
+  public ProGoogleQuercusServlet(String gsBucket)
+  {
+    _gsBucket = gsBucket;
   }
 
   /**
@@ -26,6 +34,10 @@ public class ProGoogleQuercusServlet extends GoogleQuercusServletImpl
   {
     if (_quercus == null) {
       _quercus = new ProGoogleQuercus();
+
+      if (_gsBucket != null) {
+        _quercus.setIni("quercus.gs_bucket", _gsBucket);
+      }
     }
 
     return _quercus;

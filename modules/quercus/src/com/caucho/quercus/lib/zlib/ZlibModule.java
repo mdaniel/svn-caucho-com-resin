@@ -46,6 +46,8 @@ import com.caucho.vfs.TempBuffer;
 import com.caucho.vfs.TempStream;
 import com.caucho.vfs.WriteStream;
 
+import java.io.FileInputStream;
+import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.logging.Level;
@@ -598,47 +600,57 @@ public class ZlibModule extends AbstractQuercusModule {
                          InputStream data,
                          @Optional("0") int length)
   {
-    if (length <= 0)
+    if (length <= 0) {
       length = Integer.MAX_VALUE;
+    }
 
-    TempBuffer tempBuf = TempBuffer.allocate();
-    byte []buffer = tempBuf.getBuffer();
+    TempBuffer tempInput = TempBuffer.allocate();
+    byte []inputBuffer = tempInput.getBuffer();
+
+    TempBuffer tempOutput = TempBuffer.allocate();
+    byte []outputBuffer = tempOutput.getBuffer();
+
     Inflater inflater = null;
 
     try {
       inflater = new Inflater(true);
       StringValue sb = env.createBinaryBuilder();
 
-      while (true) {
-        int sublen = Math.min(length, buffer.length);
+      while (length > 0) {
+        int sublen = Math.min(length, inputBuffer.length);
 
-        sublen = data.read(buffer, 0, sublen);
+        sublen = data.read(inputBuffer, 0, sublen);
 
-        if (sublen > 0) {
-          inflater.setInput(buffer, 0, sublen);
-          length -= sublen;
-
-          int inflatedLength;
-          while ((inflatedLength = inflater.inflate(buffer, 0, sublen)) > 0) {
-            sb.append(buffer, 0, inflatedLength);
-          }
-        }
-        else
+        if (sublen <= 0) {
           break;
+        }
+
+        inflater.setInput(inputBuffer, 0, sublen);
+        length -= sublen;
+
+        int inflatedLength;
+        while ((inflatedLength = inflater.inflate(outputBuffer, 0, sublen)) > 0) {
+          sb.append(outputBuffer, 0, inflatedLength);
+        }
       }
 
       return sb;
-    } catch (OutOfMemoryError e) {
+    }
+    catch (OutOfMemoryError e) {
       env.warning(e);
       return BooleanValue.FALSE;
-    } catch (Exception e) {
+    }
+    catch (Exception e) {
       env.warning(e);
       return BooleanValue.FALSE;
-    } finally {
-      TempBuffer.free(tempBuf);
+    }
+    finally {
+      TempBuffer.free(tempInput);
+      TempBuffer.free(tempOutput);
 
-      if (inflater != null)
+      if (inflater != null) {
         inflater.end();
+      }
     }
   }
 

@@ -40,7 +40,7 @@ import com.caucho.vfs.Path;
 public class InputStreamMarshal extends Marshal
 {
   public static final Marshal MARSHAL = new InputStreamMarshal();
-  
+
   public boolean isReadOnly()
   {
     return true;
@@ -58,9 +58,9 @@ public class InputStreamMarshal extends Marshal
 
   public Value unmarshal(Env env, Object value)
   {
-    return env.wrapJava((InputStream)value);
+    return env.wrapJava((InputStream) value);
   }
-  
+
   @Override
   protected int getMarshalingCostImpl(Value argValue)
   {
@@ -71,7 +71,7 @@ public class InputStreamMarshal extends Marshal
     else
       return Marshal.FOUR;
   }
-  
+
   @Override
   public Class getExpectedClass()
   {
