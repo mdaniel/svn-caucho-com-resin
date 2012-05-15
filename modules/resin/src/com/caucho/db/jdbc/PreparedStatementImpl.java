@@ -318,6 +318,7 @@ public class PreparedStatementImpl extends StatementImpl
   {
   }
 
+  @Override
   public java.sql.ResultSet executeQuery()
     throws SQLException
   {
@@ -329,6 +330,7 @@ public class PreparedStatementImpl extends StatementImpl
       throw new SQLException("missing result set");
   }
 
+  @Override
   public int executeUpdate()
     throws SQLException
   {
