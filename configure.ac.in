@@ -962,7 +962,6 @@ if test -r "${resin_pro}/modules/c/src/resin/mmap_file.c"; then
    resin_pro_plugin="resin"
 fi
 echo "PRO: ${resin_pro} ${resin_pro_plugin}"	
-resin_ssl_plugin="resinssl"
 
 resin_pro_plugins="$resin_pro_plugin"
 
@@ -1394,6 +1393,8 @@ else
 
   if test "$?" != 0; then
     AC_MSG_WARN(Can't execute SSL.  Check that load version in the library path: ${LD_LIBRARY_PATH} matches the expected version.)
+  else
+    resin_ssl_plugin="resinssl"
   fi
 fi  
 	
