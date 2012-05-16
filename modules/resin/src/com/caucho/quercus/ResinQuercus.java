@@ -65,8 +65,7 @@ public class ResinQuercus extends QuercusContext
   private CacheImpl _sessionCache;
 
   private WebApp _webApp;
-  private long _dependencyCheckInterval = 2000L;
-  
+
   /**
    * Constructor.
    */
@@ -78,8 +77,9 @@ public class ResinQuercus extends QuercusContext
     setWorkDir(WorkDir.getLocalWorkDir());
 
     EnvironmentClassLoader loader = Environment.getEnvironmentClassLoader();
-    if (loader != null)
-      _dependencyCheckInterval = loader.getDependencyCheckInterval();
+    if (loader != null) {
+      setDependencyCheckInterval(loader.getDependencyCheckInterval());
+    }
   }
 
   public void setWebApp(WebApp webApp)
@@ -91,7 +91,7 @@ public class ResinQuercus extends QuercusContext
   {
     return _webApp;
   }
-  
+
   /**
    * Returns the current time.
    */
@@ -100,7 +100,7 @@ public class ResinQuercus extends QuercusContext
   {
     return CurrentTime.getCurrentTime();
   }
-  
+
   /**
    * Returns the current time in nanoseconds.
    */
@@ -109,7 +109,7 @@ public class ResinQuercus extends QuercusContext
   {
     return CurrentTime.getExactTimeNanoseconds();
   }
-  
+
   /**
    * Returns the exact current time in milliseconds.
    */
@@ -129,7 +129,7 @@ public class ResinQuercus extends QuercusContext
         ClassLoader envLoader = Environment.getEnvironmentClassLoader(loader);
 
         ModuleContext parent = null;
-    
+
         if (envLoader != null) {
           parent = getLocalContext(envLoader.getParent());
         }
@@ -173,17 +173,17 @@ public class ResinQuercus extends QuercusContext
 
       _sessionCache = cache.createIfAbsent();
     }
-    
+
     return _sessionCache;
   }
-  
+
   @Override
   public void setSessionTimeout(long sessionTimeout)
   {
     if (_sessionCache == null) {
       getSessionCache();
     }
-    
+
     // XXX: _sessionCache.setIdleTimeoutMillis(sessionTimeout);
   }
 
@@ -193,12 +193,6 @@ public class ResinQuercus extends QuercusContext
       return _webApp.getSessionManager();
     else
       return null;
-  }
-
-  @Override
-  public long getDependencyCheckInterval()
-  {
-    return _dependencyCheckInterval;
   }
 
   @Override
@@ -242,7 +236,7 @@ public class ResinQuercus extends QuercusContext
       throw new QuercusModuleException(e);
     }
   }
-  
+
   /**
    * Marks the connection for removal from the connection pool.
    */
@@ -250,12 +244,12 @@ public class ResinQuercus extends QuercusContext
   public void markForPoolRemoval(Connection conn)
   {
     ManagedConnectionImpl mConn = ((UserConnection) conn).getMConn();
-    
+
     String url = mConn.getURL();
     String driver = mConn.getDriverClass().getCanonicalName();
-    
+
     DataSource ds = findDatabase(driver, url);
-    
+
     ((DBPool) ds).markForPoolRemoval(mConn);
   }
 
@@ -266,7 +260,7 @@ public class ResinQuercus extends QuercusContext
   {
     return ((UserStatement) stmt).getStatement();
   }
-  
+
   /**
    * Returns true if Quercus is running under Resin.
    */
@@ -280,16 +274,16 @@ public class ResinQuercus extends QuercusContext
   public void start()
   {
     new Alarm(getQuercusSessionManager()).queue(60000);
-    
+
     new WeakAlarm(new EnvTimeoutAlarmListener()).queue(_envTimeout);
   }
-  
+
   class EnvTimeoutAlarmListener implements AlarmListener {
     public void handleAlarm(Alarm alarm)
     {
       try {
         ArrayList<Env> activeEnv = new ArrayList<Env>(getActiveEnvSet().keySet());
-      
+
         for (Env env : activeEnv) {
           env.updateTimeout();
         }
