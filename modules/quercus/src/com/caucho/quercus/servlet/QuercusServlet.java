@@ -31,6 +31,7 @@ package com.caucho.quercus.servlet;
 
 import com.caucho.config.ConfigException;
 import com.caucho.quercus.QuercusContext;
+import com.caucho.quercus.QuercusRequestAdapter;
 import com.caucho.quercus.QuercusRuntimeException;
 import com.caucho.quercus.lib.db.QuercusDataSource;
 import com.caucho.quercus.module.QuercusModule;
@@ -84,6 +85,8 @@ public class QuercusServlet
   private String _mysqlVersion;
   private String _phpVersion;
 
+  private Long _dependencyCheckInterval;
+
   private ArrayList<QuercusModule> _moduleList
     = new ArrayList<QuercusModule>();
 
@@ -98,6 +101,8 @@ public class QuercusServlet
 
   private ArrayList<ServerEnv> _serverEnvList
     = new ArrayList<ServerEnv>();
+
+  private String[] _staticFileExtensions;
 
   public QuercusServlet()
   {
@@ -189,6 +194,31 @@ public class QuercusServlet
   public void setRequireSource(boolean isRequireSource)
   {
     _isRequireSource = isRequireSource;
+  }
+
+  public void setDependencyCheckInterval(long ms)
+  {
+    _dependencyCheckInterval = ms;
+  }
+
+  public void setStaticFileExtensions(String list)
+  {
+    ArrayList<String> extensionList = new ArrayList<String>();
+
+    String[] tokens = list.split(",");
+
+    for (int i = 0; i < tokens.length; i++) {
+      String token = tokens[i];
+
+      if (token.length() > 0) {
+        extensionList.add(token);
+      }
+    }
+
+    String[] extensions = new String[extensionList.size()];
+    extensionList.toArray(extensions);
+
+    _staticFileExtensions = extensions;
   }
 
   /**
@@ -425,6 +455,12 @@ public class QuercusServlet
     else if ("require-source".equals(paramName)) {
       setRequireSource("true".equals(paramValue));
     }
+    else if ("dependency-check-interval".equals(paramName)) {
+      setDependencyCheckInterval(Long.parseLong(paramValue));
+    }
+    else if ("static-file-extensions".equals(paramName)) {
+      setStaticFileExtensions(paramValue);
+    }
     else
       throw new ServletException(
           L.l("'{0}' is not a recognized init-param", paramName));
@@ -486,6 +522,10 @@ public class QuercusServlet
     quercus.setRegexpCacheSize(_regexpCacheSize);
     quercus.setConnectionPool(_isConnectionPool);
 
+    if (_dependencyCheckInterval != null) {
+      quercus.setDependencyCheckInterval(_dependencyCheckInterval);
+    }
+
     if (_iniPath != null) {
       String realPath = getServletContext().getRealPath(_iniPath);
       quercus.setIniFile(getQuercus().getPwd().lookup(realPath));
@@ -540,6 +580,22 @@ public class QuercusServlet
                       HttpServletResponse response)
     throws ServletException, IOException
   {
+    String[] staticFileExtensions = _staticFileExtensions;
+    
+    if (staticFileExtensions != null) {
+      String scriptPath = QuercusRequestAdapter.getPageServletPath(request);
+
+      for (int i = 0; i < staticFileExtensions.length; i++) {
+        String extension = staticFileExtensions[i];
+
+        if (scriptPath.endsWith(extension)) {          
+          _impl.serviceStatic(request, response);
+          
+          return;
+        }
+      }
+    }
+
     _impl.service(request, response);
   }
 

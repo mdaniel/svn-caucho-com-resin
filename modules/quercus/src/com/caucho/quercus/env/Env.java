@@ -3959,10 +3959,10 @@ public class Env
 
     // PHP naming style for anonymous functions
     String name = "\u0000lambda_" + (_anonymousFunMap.size() + 1);
-    
+
     if (args == null)
       args = "";
-    
+
     if (code == null)
       code = "";
 

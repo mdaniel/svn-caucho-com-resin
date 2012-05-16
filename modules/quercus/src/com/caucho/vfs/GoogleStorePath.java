@@ -225,18 +225,31 @@ public class GoogleStorePath extends FilesystemPath {
   @Override
   public long getLastModified()
   {
-    GoogleStoreInode inode = getGsInode();
+    long value = getLastModified2();
 
-    return inode != null ? inode.getLastModified() : -1;
+    return value;
   }
 
-  /*
+  public long getLastModified2()
+  {
+    GoogleStoreInode inode = getGsInode();
+
+    if (inode == null) {
+      return -1;
+    }
+
+    return inode.getLastModified();
+  }
+
   @Override
   public void setLastModified(long time)
   {
-    getFile().setLastModified(time);
+    GoogleStoreInode inode = getGsInode();
+
+    inode.setLastModified(time);
+
+    writeGsInode(inode);
   }
-  */
 
   @Override
   public boolean canRead()
@@ -406,7 +419,7 @@ public class GoogleStorePath extends FilesystemPath {
     } catch (IOException e) {
       FileNotFoundException e1 = new FileNotFoundException(getURL() + ": " + e);
       e1.initCause(e);
-      
+
       throw e1;
     }
   }

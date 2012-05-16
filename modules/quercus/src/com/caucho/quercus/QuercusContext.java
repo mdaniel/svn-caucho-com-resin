@@ -237,6 +237,8 @@ public class QuercusContext
   // for fast, complete tomcat undeploys
   protected static final long ENV_TIMEOUT_UPDATE_INTERVAL = 1000L;
 
+  private long _dependencyCheckInterval = 2000L;
+
   private boolean _isClosed;
 
   /**
@@ -333,9 +335,14 @@ public class QuercusContext
     return "JSESSIONID";
   }
 
-  public long getDependencyCheckInterval()
+  public final long getDependencyCheckInterval()
   {
-    return 2000L;
+    return _dependencyCheckInterval;
+  }
+
+  public final void setDependencyCheckInterval(long ms)
+  {
+    _dependencyCheckInterval = ms;
   }
 
   public int getIncludeCacheMax()

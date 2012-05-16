@@ -345,10 +345,11 @@ public final class UnserializeReader {
 
     default:
       throw new IOException(
-          L.l("option not recognized '{0}' (0x{1}) at index {2}",
+          L.l("option not recognized '{0}' (0x{1}) at index {2} ({3})",
                                 String.valueOf((char) ch),
                                 Integer.toHexString(ch),
-                                _index));
+                                _index,
+                                String.valueOf(_buffer)));
 
       //return BooleanValue.FALSE;
     }

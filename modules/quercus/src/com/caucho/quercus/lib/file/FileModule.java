@@ -1843,7 +1843,7 @@ public class FileModule extends AbstractQuercusModule {
 
     StringValue sb = env.createBinaryBuilder();
 
-    sb.appendRead(is, length);
+    sb.appendReadAll(is, length);
 
     return sb;
   }

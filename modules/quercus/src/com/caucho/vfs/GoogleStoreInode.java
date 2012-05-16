@@ -40,9 +40,9 @@ public final class GoogleStoreInode implements Serializable {
   private final String _name;
   private final FileType _type;
   private final long _length;
-  private final long _lastModified;
+  private long _lastModified;
   private transient HashMap<String,GoogleStoreInode> _dirMap;
-  
+
   @SuppressWarnings("unused")
   private GoogleStoreInode()
   {
@@ -51,10 +51,10 @@ public final class GoogleStoreInode implements Serializable {
     _length = -1;
     _lastModified = -1;
   }
-  
-  public GoogleStoreInode(String name, 
-                          FileType type, 
-                          long length, 
+
+  public GoogleStoreInode(String name,
+                          FileType type,
+                          long length,
                           long lastModified)
   {
     _name = name;
@@ -62,53 +62,58 @@ public final class GoogleStoreInode implements Serializable {
     _length = length;
     _lastModified = lastModified;
   }
-  
+
   public final String getName()
   {
     return _name;
   }
-  
+
   public final boolean exists()
   {
     return _type == FileType.FILE || _type == FileType.DIRECTORY;
   }
-  
+
   public final boolean isFile()
   {
     return _type == FileType.FILE;
   }
-  
+
   public final boolean isDirectory()
   {
     return _type == FileType.DIRECTORY;
   }
-  
+
   public final long getLength()
   {
     return _length;
   }
-  
+
   public final long getLastModified()
   {
     return _lastModified;
   }
-  
+
+  public void setLastModified(long time)
+  {
+    _lastModified = time;
+  }
+
   public HashMap<String,GoogleStoreInode> getDirMap()
   {
     return _dirMap;
   }
-  
+
   public void setDirMap(HashMap<String,GoogleStoreInode> map)
   {
     _dirMap = map;
   }
-  
+
   @Override
   public String toString()
   {
     return getClass().getSimpleName() + "[" + _name + "," + _type + "," + _length + "]";
   }
-  
+
   public static enum FileType {
     NONE,
     FILE,

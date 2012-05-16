@@ -309,8 +309,8 @@ public class StringModule extends AbstractQuercusModule {
    * @return the trimmed string
    */
   public static StringValue chop(Env env,
-                                                 StringValue str,
-                                                 @Optional String charset)
+                                 StringValue str,
+                                 @Optional String charset)
   {
     return rtrim(env, str, charset);
   }
@@ -666,21 +666,21 @@ public class StringModule extends AbstractQuercusModule {
   public static StringValue hex2bin(Env env, StringValue s)
   {
     StringValue sb = env.createBinaryBuilder();
-      
+
     int len = s.length();
-      
+
     for (int i = 0; i + 1 < len; i += 2) {
       int d1 = hexDigit(s.charAt(i));
       int d2 = hexDigit(s.charAt(i + 1));
-        
+
       int d = d1 * 16 + d2;
-        
+
       sb.append((char) d);
     }
-      
+
     return sb;
   }
-  
+
   private static int hexDigit(int c)
   {
     if ('0' <= c && c <= '9') {

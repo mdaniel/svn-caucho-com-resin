@@ -44,17 +44,17 @@ import com.google.appengine.api.files.FileWriteChannel;
  */
 class GoogleStoreWriteStream extends StreamImpl {
   private static final L10N L = new L10N(GoogleStoreWriteStream.class);
-  
+
   private final GoogleStorePath _path;
   private FileWriteChannel _os;
   private final ByteBuffer _buf = ByteBuffer.allocate(1024);
-  
+
   // private final ByteArrayOutputStream _bout = new ByteArrayOutputStream();
-  
+
   private GoogleStoreInode _inode;
-  
+
   private long _length;
-  
+
   GoogleStoreWriteStream(GoogleStorePath path,
                          FileWriteChannel os,
                          GoogleStoreInode inode)
@@ -63,60 +63,69 @@ class GoogleStoreWriteStream extends StreamImpl {
     _os = os;
     _inode = inode;
   }
-  
+
   @Override
   public boolean canWrite()
   {
     return true;
   }
-    
+
+  @Override
   public void write(byte []buffer, int offset, int length, boolean isEnd)
       throws IOException
   {
+    String s = new String(buffer, offset, length);
+
+    /*
+    System.out.println("XX-WRITE:[[" + s + "]]");
+    if (s.indexOf("images/multi-wide.gif") >= 0)
+      Thread.dumpStack();
+      */
     while (length > 0) {
       int sublen = Math.min(_buf.capacity(), length);
-      
+
       _buf.rewind();
-      
+
       _buf.put(buffer, offset, sublen);
       _buf.flip();
+
       sublen = _os.write(_buf);
 
-      
       if (sublen <= 0)
         throw new IOException(L.l("{0}: Unable to write", this));
 
-      // System.out.println("XX_WRITE: " + new String(buffer, offset, sublen));
-      
       length -= sublen;
       offset += sublen;
-      
+
       _length += sublen;
     }
   }
-  
+
   public void close()
     throws IOException
   {
     FileWriteChannel os = _os;
     _os = null;
-    
+
     if (os != null) {
       os.closeFinally();
-      
+
       GoogleStoreInode inode = _inode;
-      
+
       if (inode == null || ! inode.isDirectory()) {
+        long time = CurrentTime.getCurrentTime();
+        inode.setLastModified(time);
+
         inode = new GoogleStoreInode(_path.getTail(),
                                      FileType.FILE,
                                      _length,
-                                     CurrentTime.getCurrentTime());
+                                     time);
       }
-      
+
       _path.writeGsInode(inode);
     }
   }
-  
+
   @Override
   public String toString()
   {

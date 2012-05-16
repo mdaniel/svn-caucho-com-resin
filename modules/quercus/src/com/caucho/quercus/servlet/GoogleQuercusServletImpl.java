@@ -32,12 +32,14 @@ package com.caucho.quercus.servlet;
 import com.caucho.quercus.GoogleQuercus;
 import com.caucho.quercus.QuercusContext;
 import com.caucho.util.L10N;
+import com.caucho.vfs.Path;
 import com.caucho.vfs.Vfs;
 import com.caucho.vfs.WriteStream;
 
 import javax.servlet.ServletConfig;
 import javax.servlet.ServletContext;
 import javax.servlet.ServletException;
+import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
 import java.io.OutputStream;
@@ -70,6 +72,35 @@ public class GoogleQuercusServletImpl extends QuercusServletImpl
   protected QuercusServletImpl getQuercusServlet()
   {
     return this;
+  }
+
+  public void serviceStatic(HttpServletRequest request,
+                            HttpServletResponse response)
+    throws ServletException, IOException
+  {
+    Path path = getPath(request);
+
+    if (! path.exists()) {
+      response.sendError(HttpServletResponse.SC_NOT_FOUND);
+
+      return;
+    }
+
+    String uri = request.getRequestURI();
+
+    String mimeType = _webApp.getMimeType(uri);
+
+    if (mimeType != null) {
+      response.setContentType(mimeType);
+    }
+
+    response.setContentLength((int) path.getLength());
+
+    WriteStream ws = openWrite(response);
+
+    path.writeToStream(ws);
+
+    ws.flush();
   }
 
   @Override

@@ -35,26 +35,19 @@ import com.caucho.quercus.env.GoogleEnv;
 import com.caucho.quercus.env.Value;
 import com.caucho.quercus.page.QuercusPage;
 import com.caucho.quercus.module.ModuleContext;
-import com.caucho.util.*;
-import com.caucho.vfs.*;
+import com.caucho.vfs.GoogleStorePath;
+import com.caucho.vfs.MergePath;
+import com.caucho.vfs.Path;
+import com.caucho.vfs.WriteStream;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
-import java.util.logging.Logger;
 
 /**
  * Facade for the PHP language.
  */
 public class GoogleQuercus extends QuercusContext
 {
-  private static L10N L = new L10N(GoogleQuercus.class);
-  private static final Logger log
-    = Logger.getLogger(GoogleQuercus.class.getName());
-
-  private ModuleContext _localModuleContext;
-
-  private long _dependencyCheckInterval = 2000L;
-
   /**
    * Constructor.
    */
@@ -74,16 +67,16 @@ public class GoogleQuercus extends QuercusContext
 
     if (gsBucket != null) {
       Path stdPwd = getPwd();
-      
+
       GoogleStorePath gsPath;
-      
+
       if ("default".equals(gsBucket)) {
         gsPath = new GoogleStorePath(null);
       }
       else {
         gsPath = new GoogleStorePath(gsBucket);
       }
-        
+
       MergePath mergePwd = new MergePath(gsPath, stdPwd);
       Path pwd = mergePwd;
 

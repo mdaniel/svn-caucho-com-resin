@@ -41,6 +41,7 @@ import com.caucho.quercus.function.AbstractFunction;
 import com.caucho.quercus.module.AbstractQuercusModule;
 import com.caucho.util.L10N;
 import com.caucho.util.LruCache;
+import com.caucho.vfs.StderrStream;
 import com.caucho.vfs.StringWriter;
 import com.caucho.vfs.WriteStream;
 
@@ -735,6 +736,42 @@ public class VariableModule extends AbstractQuercusModule {
           }
         }
       }
+
+      return NullValue.NULL;
+    } catch (IOException e) {
+      throw new QuercusModuleException(e);
+    }
+  }
+
+  public static Value stderr_var_dump(Env env,
+                                      @PassThru @ReadOnly Value v,
+                                      Value []args)
+  {
+    WriteStream out = new WriteStream(StderrStream.create());
+
+    try {
+      if (v == null)
+        out.print("NULL#java");
+      else {
+        v.varDump(env, out, 0,  new IdentityHashMap<Value,String>());
+
+        out.println();
+      }
+
+      if (args != null) {
+        for (Value value : args) {
+          if (value == null)
+            out.print("NULL#java");
+          else {
+            value.varDump(env, out, 0,
+                          new IdentityHashMap<Value,String>());
+
+            out.println();
+          }
+        }
+      }
+
+      out.flush();
 
       return NullValue.NULL;
     } catch (IOException e) {

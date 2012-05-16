@@ -88,10 +88,10 @@ class GoogleStoreReadStream extends StreamImpl {
 
       int result = _is.read(_buf);
 
+      _buf.flip();
+
       if (result <= 0)
         return result;
-
-      _buf.flip();
     }
 
     int sublen = Math.min(length, _buf.remaining());
@@ -109,11 +109,11 @@ class GoogleStoreReadStream extends StreamImpl {
     throws IOException
   {
     _is.position(offset);
-    
+
     _buf.rewind();
     _buf.flip();
   }
-  
+
   @Override
   public long getReadPosition()
   {
