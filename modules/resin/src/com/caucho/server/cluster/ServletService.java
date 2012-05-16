@@ -88,7 +88,6 @@ import com.caucho.server.host.HostController;
 import com.caucho.server.host.HostExpandDeployGenerator;
 import com.caucho.server.http.HttpBufferStore;
 import com.caucho.server.httpcache.AbstractProxyCache;
-import com.caucho.server.httpcache.ProxyCache;
 import com.caucho.server.log.AccessLog;
 import com.caucho.server.resin.Resin;
 import com.caucho.server.rewrite.RewriteDispatch;
@@ -758,13 +757,9 @@ public class ServletService
   
   protected AbstractProxyCache instantiateProxyCache()
   {
-    /*
     log.warning(L.l("<proxy-cache> requires Resin Professional.  Please see http://www.caucho.com for Resin Professional information and licensing."));
 
     return new AbstractProxyCache();
-    */
-    
-    return new ProxyCache();
   }
   
   /**
