@@ -50,10 +50,12 @@
     <!--
        - Enables the proxy cache (available in Resin Professional) 
       -->
-    <proxy-cache memory-size="${proxy_cache_size}">
-     <!-- Vary header rewriting for IE -->
-      <rewrite-vary-as-private/>
-    </proxy-cache>
+    <resin:if test="${proxy_cache_enable}">
+      <proxy-cache memory-size="${proxy_cache_size}">
+       <!-- Vary header rewriting for IE -->
+        <rewrite-vary-as-private/>
+      </proxy-cache>
+    </resin:if>
     
     <!--
        - Admin services
@@ -96,7 +98,7 @@
       <!-- SSL port configuration: -->
       <resin:choose>
       <resin:when test="${openssl_file != null}">
-        <http port="${https}">
+        <http address="${http_address?:'*'}" port="${https}">
           <openssl>
             <certificate-file>${openssl_file}</certificate-file>
             <certificate-key-file>${openssl_key}</certificate-key-file>
@@ -107,7 +109,7 @@
         </http>
       </resin:when>
       <resin:when test="${jsse_keystore_file != null}">
-        <http address="*" port="${https}">
+        <http address="${http_address?:'*'}" port="${https}">
           <jsse-ssl>
             <key-store-type>${jsse_keystore_type?:'jks'}</key-store-type>
             <key-store-file>${jsse_keystore_file}</key-store-file>
@@ -118,7 +120,7 @@
         </http>
       </resin:when>
       <resin:when test="${class_exists('sun.security.x509.CertAndKeyGen')}">
-        <http address="*" port="${https}">
+        <http address="${http_address?:'*'}" port="${https}">
           <jsse-ssl self-signed-certificate-name="resin@localhost"/>
         </http>
       </resin:when>
@@ -186,7 +188,7 @@
           <servlet-mapping url-pattern="/*"
                            servlet-class="com.caucho.admin.servlet.AdminRestServlet">
             <init>
-              <require-secure>${rest_admin_secure}</require-secure>
+              <require-secure>${rest_admin_ssl}</require-secure>
             </init>
           </servlet-mapping>
         </web-app>

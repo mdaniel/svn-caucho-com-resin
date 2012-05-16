@@ -21,20 +21,34 @@ dev_mode      : true
 # Enable /resin-doc Resin documentation
 resin_doc     : true
 
-# The cluster that elastic nodes should join.  
-# Use a separate resin.properties file for each cluster.
-home_cluster : app
+# List Triad server ip-addresses:hmux-port for each tier, space separated
+# App tier Triad servers must be listed to enable web-tier to app-tier load-balancing
 
-# List cluster Triad server ip-addresses, space separated.
-# notes; triad servers, must be listed for web to find app
-
+# web-tier Triad servers: web-0 web-1 web-2
 # web_servers      :
 
-app_servers      : 127.0.0.1
+# app-tier Triad servers: app-0 app-1 app-2
+app_servers      : 127.0.0.1:6800
 
-# Configures Resin as a memcached server
+# Configures Resin for a memcached server tier
+# memcached-tier Triad servers: memcached-0 memcached-1 memcached-2
 # memcached_servers    :
 # memcached_port : 11211
+
+# Allow elastic nodes to join the cluster (enable for cloud mode)
+# elastic_cloud_enable : true
+
+# The cluster that elastic nodes should join - each will contact a Triad server
+# Use a separate resin.properties file for each cluster
+home_cluster : app
+
+# Set HTTP and HTTPS bind address
+# http_address  : *
+
+# Set HTTP and HTTPS ports.
+# Use overrides for individual server control, for example: app-0.http : 8081
+http          : @HTTP_PORT@
+# https         : @HTTPS_PORT@
 
 # For security, Resin can switch to a non-root user after binding to port 80
 setuid_user   : @SETUID_USER@
@@ -43,18 +57,15 @@ setuid_group  : @SETUID_GROUP@
 # Arg passed directly to the JVM
 # jvm_args  : -Xmx2048m -XX:MaxPermSize=256m
 
-# Set HTTP and HTTPS ports
-http          : @HTTP_PORT@
-# https         : @HTTPS_PORT@
+# Local URLs for the watchdog to check to ensure the server is up, space separated
+# http_ping_urls : http://127.0.0.1/test.jsp
 
-# Local URL for the watchdog to check to ensure the server is up
-# http_ping_urls : http://my.example.com/test.jsp
-
-# throttle the number of active threads for a port
+# Throttle the number of active threads for a port
 port_thread_max   : 256
 accept_thread_max : 32
 accept_thread_min : 4
 
+# Enable JNI TCP speed optimizations
 tcp_cork : true
 sendfile : true
 
@@ -68,12 +79,16 @@ sendfile : true
 # jsse_keystore_file : keys/server.keystore
 # jsse_keystore_password : changeme
 
-# Resin will fallback to using a self-signed dev certificate for HTTPS
+# In absence of a signed certificate, Resin will fallback to using a 
+# self-signed development certificate if HTTPS is enabled
+
+# Enable the proxy-cache - for caching static content in memory
+proxy_cache_enable: false
 
 # Sets the proxy cache memory size
 # proxy_cache_size : 256m
 
-# Enable clustered persistent sessions
+# Enable clustered persistent sessions (for failover)
 session_store : true
 
 # Web-apps named with numeric suffixes, e.g. foo-10.0.war and can be browsed as 
@@ -88,9 +103,6 @@ session_store : true
 # Set a global password to prevent foreign Resin instances from connecting.
 # Must be identical between web, app, and cache clusters.
 # cluster_system_key : changeme
-
-# Enable dynamic spoke servers
-# elastic_cloud_enable : true
 
 # Enable command-line remote admin (required for remote deploy)
 # remote_cli_enable : true
@@ -108,9 +120,8 @@ web_admin_enable : true
 # rest_admin_enable : true
 
 # Require SSL for REST Admin
-rest_admin_secure : true
+# rest_admin_ssl : true
 
-#
 # Access to /resin-admin and remote CLI is password restricted.
 # Use "resinctl generate-password" and copy/paste here to set the admin
 # admin_user : admin

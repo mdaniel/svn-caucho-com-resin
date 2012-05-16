@@ -12038,6 +12038,11 @@ information about distributed sessions and persistence.</p>
   <td>Domain for session cookies</td>
   <td>none</td>
 </tr>
+<tr>
+  <td>cookie-domain-regexp</td>
+  <td>Regex for cookies-domain for multi-domain webapps</td>
+  <td>none</td>
+</tr>
 <tr> 
   <td>cookie-max-age</td>
   <td>Max age for persistent session cookies</td>
@@ -12102,6 +12107,7 @@ element session-config {
   &amp; always-save-session?
   &amp; cookie-append-server-index?
   &amp; cookie-domain?
+  &amp; cookie-domain-regexp?
   &amp; cookie-length?
   &amp; cookie-max-age?
   &amp; cookie-port?
