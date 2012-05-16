@@ -12,8 +12,12 @@
 
 <s2 title="3.1.13 snapshot">
 <ul>
-<li>database: introduced new commit-on-timeout tag to manage expired connections.(#4926, rep by T. Fukuda)</li>
-<li>servlet: fixed doOptions and doTrace HttpSerlvet methods.(#5021, rep by Andy Paladino)</li>
+<li>session: load-balance response is delayed for session persistence (#5055, rep by IHG)</li>
+<li>load-balance: the load-balancer should not fail-over for a read timeout if there are other more recent successful reads (#5054, rep by IHG)</li>
+<li>performance: fixed occasional 60s startup delay (#5069)</li>
+<li>webapp: backported cookie-domain-regexp from 4.0 for multi-domain webapp cookie handling (#5056, rep by IHG)</li>
+<li>database: introduced new commit-on-timeout tag to manage expired connections (#4926, rep by T. Fukuda)</li>
+<li>servlet: fixed doOptions and doTrace HttpSerlvet methods (#5021, rep by Andy Paladino)</li>
 <li>servlet: form-parameter-max limit for hash collisions (#4912, rep by georgbuschbeck)</li>
 <li>xa: rollback/forget (#4799)</li>
 </ul>

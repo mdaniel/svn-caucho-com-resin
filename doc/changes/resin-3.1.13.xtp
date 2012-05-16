@@ -1,0 +1,23 @@
+<document>
+  <header>
+    <product>resin</product>
+    <title>Resin 3.1.13 Release Notes</title>
+  </header>
+
+<body>
+
+<localtoc/>
+
+<s1 title="Resin 3.1.x">
+
+<p>Resin 3.1.13 is primarily a bug fix release.  
+Please consider migrating to Resin 4.x. </p>
+
+</s1>
+
+<s1 title="Bugs">
+  <p>See <a href='changes.xtp'>Changes</a>.</p>
+</s1>
+
+</body>
+</document>
