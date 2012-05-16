@@ -31,8 +31,8 @@ package com.caucho.vfs;
 import java.io.IOException;
 
 public class StringStream extends StreamImpl {
-  private String _string;
-  private int _length;
+  private final String _string;
+  private final int _length;
   private int _index;
 
   StringStream(String string)

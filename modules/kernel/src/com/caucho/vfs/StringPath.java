@@ -31,13 +31,16 @@ package com.caucho.vfs;
 import java.util.Map;
 
 public class StringPath extends Path {
-  private String _string;
+  private final String _string;
 
   public StringPath(String string)
   {
     super(SchemeMap.getNullSchemeMap());
 
     _string = string;
+    
+    if (string == null)
+      throw new NullPointerException();
   }
 
   public Path schemeWalk(String userPath, Map<String,Object> attributes,

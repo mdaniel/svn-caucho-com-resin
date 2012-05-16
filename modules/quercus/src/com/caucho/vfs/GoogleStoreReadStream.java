@@ -93,18 +93,30 @@ class GoogleStoreReadStream extends StreamImpl {
   /**
    * Seeks based on the start.
    */
+  @Override
   public void seekStart(long offset)
     throws IOException
   {
     _is.position(offset);
-
+    
     _buf.rewind();
     _buf.flip();
+  }
+  
+  @Override
+  public long getReadPosition()
+  {
+    try {
+      return _is.position();
+    } catch (IOException e) {
+      throw new RuntimeException(e);
+    }
   }
 
   /**
    * Returns true if the stream implements skip.
    */
+  @Override
   public boolean hasSkip()
   {
     return true;
@@ -117,12 +129,13 @@ class GoogleStoreReadStream extends StreamImpl {
    *
    * @return the actual bytes skipped.
    */
+  @Override
   public long skip(long n)
     throws IOException
   {
     long remaining = _buf.remaining();
 
-    if (n < remaining) {
+    if (n <= remaining) {
       _buf.position(_buf.position() + (int) n);
 
       return n;
@@ -136,7 +149,7 @@ class GoogleStoreReadStream extends StreamImpl {
     long pos = _is.position();
     _is.position(pos + toSkip);
 
-    return pos - _is.position();
+    return _is.position() - pos + remaining;
   }
 
   @Override

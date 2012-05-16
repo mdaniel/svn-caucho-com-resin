@@ -382,6 +382,8 @@ public class GoogleStorePath extends FilesystemPath {
   @Override
   public StreamImpl openWriteImpl() throws IOException
   {
+    // System.out.println("XX-WRITE: " + getFullPath());
+
     GSFileOptionsBuilder builder = new GSFileOptionsBuilder();
     builder.setMimeType("binary/octet-stream");
     builder.setBucket(_bucket);
@@ -408,6 +410,7 @@ public class GoogleStorePath extends FilesystemPath {
   @Override
   public RandomAccessStream openFileRandomAccess() throws IOException
   {
+    // System.out.println("XX-RANDOM_ACCESS: " + getFullPath());
     return new GoogleStoreRandomAccessStream(this, openWriteImpl());
   }
 
@@ -472,6 +475,10 @@ public class GoogleStorePath extends FilesystemPath {
       hIn.close();
 
       return map;
+    } catch (FileNotFoundException e) {
+      log.log(Level.ALL, e.toString(), e);
+
+      return null;
     } catch (Exception e) {
       log.log(Level.FINER, e.toString(), e);
 

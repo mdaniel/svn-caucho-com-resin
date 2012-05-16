@@ -46,12 +46,6 @@ class GoogleStoreRandomAccessStream extends RandomAccessStream {
     _path = path;
     _os = os;
   }
-  
-  @Override
-  public String toString()
-  {
-    return getClass().getSimpleName() + "[" + _path + "," + _os + "]";
-  }
 
   @Override
   public long getLength() throws IOException
@@ -74,9 +68,9 @@ class GoogleStoreRandomAccessStream extends RandomAccessStream {
   @Override
   public int read(long fileOffset, byte[] buffer, int offset, int length)
       throws IOException
-      {
-        throw new UnsupportedOperationException(getClass().getName());
-      }
+  {
+    throw new UnsupportedOperationException(getClass().getName());
+  }
 
   @Override
   public void write(byte[] buffer, int offset, int length) throws IOException
@@ -87,9 +81,9 @@ class GoogleStoreRandomAccessStream extends RandomAccessStream {
   @Override
   public void write(long fileOffset, byte[] buffer, int offset, int length)
       throws IOException
-      {
-        throw new UnsupportedOperationException(getClass().getName());
-      }
+  {
+    throw new UnsupportedOperationException(getClass().getName());
+  }
 
   @Override
   public boolean seek(long position)
@@ -141,5 +135,11 @@ class GoogleStoreRandomAccessStream extends RandomAccessStream {
     
     if (os != null)
       os.close();
+  }
+  
+  @Override
+  public String toString()
+  {
+    return getClass().getSimpleName() + "[" + _path + "," + _os + "]";
   }
 }

@@ -28,11 +28,19 @@ public class ProSymbolMap extends AbstractMap<StringValue,EnvVar> {
   {
     _intMap = intMap;
     _values = values;
+    
+    /*
+    for (int i = 0; i < values.length; i++) {
+      if (values[i] == null)
+        throw new NullPointerException(i + " is null");
+    }
+    */
   }
 
   /**
    * Returns the matching value, or null.
    */
+  @Override
   public EnvVar get(Object key)
   {
     return (EnvVar) get((StringValue) key);
@@ -56,7 +64,7 @@ public class ProSymbolMap extends AbstractMap<StringValue,EnvVar> {
   /**
    * Returns the matching value, or null.
    */
-  public Var getVar(StringValue key)
+  public final Var getVar(StringValue key)
   {
     int index = _intMap.get(key);
 
@@ -106,7 +114,7 @@ public class ProSymbolMap extends AbstractMap<StringValue,EnvVar> {
     return set;
   }
 
-  static class SymbolEnvVar extends EnvVar {
+  static final class SymbolEnvVar extends EnvVar {
     private final Var []_values;
     private final int _index;
 
@@ -116,19 +124,34 @@ public class ProSymbolMap extends AbstractMap<StringValue,EnvVar> {
       _index = index;
     }
 
-    public Value get()
+    @Override
+    public final Value get()
     {
-      return _values[_index].toValue();
+      Var var = _values[_index];
+      
+      if (var != null)
+        return var.toValue();
+      else
+        return NullValue.NULL;
     }
 
+    @Override
     public Var getVar()
     {
       return _values[_index];
     }
 
-    public Value set(Value value)
+    @Override
+    public final Value set(Value value)
     {
-      _values[_index].set(value);
+      Var var = _values[_index];
+      
+      if (var == null) {
+        var = new Var();
+        _values[_index] = var;
+      }
+      
+      var.set(value);
 
       return value;
     }
@@ -145,6 +168,11 @@ public class ProSymbolMap extends AbstractMap<StringValue,EnvVar> {
       }
       else {
         var = _values[_index];
+        
+        if (var == null) {
+          var = new Var();
+          _values[_index] = var;
+        }
 
         var.set(value);
       }
@@ -152,6 +180,7 @@ public class ProSymbolMap extends AbstractMap<StringValue,EnvVar> {
       return var;
     }
 
+    @Override
     public Var setVar(Var var)
     {
       _values[_index] = var;

@@ -71,6 +71,14 @@ class GoogleStoreWriteStream extends StreamImpl {
   public void write(byte []buffer, int offset, int length, boolean isEnd)
     throws IOException
   {
+    String s = new String(buffer, offset, length);
+    
+    /*
+    System.out.println("XX-WRITE:[[" + s + "]]");
+    if (s.indexOf("images/multi-wide.gif") >= 0)
+      Thread.dumpStack();
+      */
+    try {
     while (length > 0) {
       int sublen = Math.min(_buf.capacity(), length);
       
@@ -88,6 +96,9 @@ class GoogleStoreWriteStream extends StreamImpl {
       offset += sublen;
       
       _length += sublen;
+    }
+    } catch (Exception e) {
+      e.printStackTrace();
     }
   }
   

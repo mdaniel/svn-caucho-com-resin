@@ -29,15 +29,14 @@
 
 package com.caucho.quercus.lib.file;
 
+import java.io.IOException;
+
 import com.caucho.quercus.env.Env;
 import com.caucho.quercus.env.EnvCleanup;
 import com.caucho.quercus.env.Value;
+import com.caucho.vfs.LockableStream;
 import com.caucho.vfs.Path;
 import com.caucho.vfs.ReadStream;
-import com.caucho.vfs.LockableStream;
-
-import java.io.IOException;
-import java.util.logging.Logger;
 
 /**
  * Represents a Quercus file open for reading
@@ -45,12 +44,9 @@ import java.util.logging.Logger;
 public class FileInput extends ReadStreamInput
     implements LockableStream, EnvCleanup
 {
-  private static final Logger log
-    = Logger.getLogger(FileInput.class.getName());
-
-  protected Env _env;
-  protected Path _path;
-  protected ReadStream _is;
+  private Env _env;
+  private Path _path;
+  private ReadStream _is;
 
   public FileInput(Env env, Path path)
     throws IOException
@@ -79,6 +75,7 @@ public class FileInput extends ReadStreamInput
   /**
    * Opens a copy.
    */
+  @Override
   public BinaryInput openCopy()
     throws IOException
   {
@@ -93,23 +90,24 @@ public class FileInput extends ReadStreamInput
     return getPath().getLength();
   }
 
+  @Override
   public long seek(long offset, int whence)
   {
     long position;
 
     switch (whence) {
-      case BinaryStream.SEEK_CUR:
-        position = getPosition() + offset;
-        break;
-      case BinaryStream.SEEK_END:
-        position = getLength() + offset;
-        break;
-      case BinaryStream.SEEK_SET:
-      default:
-        position = offset;
-        break;
+    case BinaryStream.SEEK_CUR:
+      position = getPosition() + offset;
+      break;
+    case BinaryStream.SEEK_END:
+      position = getLength() + offset;
+      break;
+    case BinaryStream.SEEK_SET:
+    default:
+      position = offset;
+      break;
     }
-
+    
     if (! setPosition(position))
       return -1L;
     else
@@ -119,6 +117,7 @@ public class FileInput extends ReadStreamInput
   /**
    * Lock the shared advisory lock.
    */
+  @Override
   public boolean lock(boolean shared, boolean block)
   {
     return _is.lock(shared, block);
@@ -127,16 +126,19 @@ public class FileInput extends ReadStreamInput
   /**
    * Unlock the advisory lock.
    */
+  @Override
   public boolean unlock()
   {
     return _is.unlock();
   }
 
+  @Override
   public Value stat()
   {
     return FileModule.statImpl(_env, getPath());
   }
 
+  @Override
   public void close()
   {
     _env.removeCleanup(this);
@@ -147,6 +149,7 @@ public class FileInput extends ReadStreamInput
   /**
    * Implements the EnvCleanup interface.
    */
+  @Override
   public void cleanup()
   {
     super.close();
@@ -155,9 +158,10 @@ public class FileInput extends ReadStreamInput
   /**
    * Converts to a string.
    */
+  @Override
   public String toString()
   {
-    return "FileInput[" + getPath() + "]";
+    return getClass().getSimpleName() + "[" + getPath() + "]";
   }
 }
 
