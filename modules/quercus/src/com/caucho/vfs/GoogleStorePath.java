@@ -31,6 +31,7 @@ package com.caucho.vfs;
 
 import java.io.FileNotFoundException;
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Map;
@@ -139,6 +140,11 @@ public class GoogleStorePath extends FilesystemPath {
     }
 
     return _parent;
+  }
+  
+  private boolean isRoot()
+  {
+    return getTail().equals("");
   }
 
   /**
@@ -255,9 +261,17 @@ public class GoogleStorePath extends FilesystemPath {
     if (dir == null) {
       return null;
     }
+    
+    ArrayList<String> names = new ArrayList<String>();
+    
+    for (GoogleStoreInode inode : dir.values()) {
+      if (inode.exists()) {
+        names.add(inode.getName());
+      }
+    }
 
-    String []list = new String[dir.size()];
-    dir.keySet().toArray(list);
+    String []list = new String[names.size()];
+    names.toArray(list);
 
     Arrays.sort(list);
 
@@ -305,19 +319,27 @@ public class GoogleStorePath extends FilesystemPath {
     return mkdir();
   }
 
-  /*
   @Override
   public boolean remove()
   {
-    if (getFile().delete()) {
-      clearStatusCache();
-
-      return true;
+    GoogleStorePath parent = (GoogleStorePath) getParent();
+    
+    if (! parent.isDirectory()) {
+      return false;
     }
+    
+    GoogleStoreInode inode = parent.getGsInode(getTail());
+    
+    if (inode == null || ! inode.exists()) {
+      return false;
+    }
+    
+    inode = new GoogleStoreInode(getTail(), FileType.NONE, -1, -1);
+    
+    parent.updateDir(inode);
 
-    return false;
+    return true;
   }
-  */
 
   /*
   @Override
@@ -363,7 +385,17 @@ public class GoogleStorePath extends FilesystemPath {
   public StreamImpl openReadImpl() throws IOException
   {
     try {
+      if (! isRoot()) {
+        GoogleStoreInode inode = getParent().getGsInode(getTail());
+        
+        if (inode == null || ! inode.exists()) {
+          // php/8134
+          throw new FileNotFoundException(getFullPath());
+        }
+      }
+      
       AppEngineFile file = getGsFile();
+      // AppEngineFile file = getBlobFile();
 
       boolean isLock = false;
       FileReadChannel is = _fileService.openReadChannel(file, isLock);
@@ -385,7 +417,7 @@ public class GoogleStorePath extends FilesystemPath {
     // System.out.println("XX-WRITE: " + getFullPath());
 
     GSFileOptionsBuilder builder = new GSFileOptionsBuilder();
-    builder.setMimeType("binary/octet-stream");
+    builder.setMimeType("application/octet-stream");
     builder.setBucket(_bucket);
 
     String key = getFullPath();
@@ -400,10 +432,10 @@ public class GoogleStorePath extends FilesystemPath {
 
     AppEngineFile file = _fileService.createNewGSFile(builder.build());
     // AppEngineFile file = getGsFile();
+    // AppEngineFile file = getBlobFile();
 
     boolean isLock = true;
     FileWriteChannel os = _fileService.openWriteChannel(file, isLock);
-
     return new GoogleStoreWriteStream(this, os, _inode);
   }
 
@@ -430,6 +462,8 @@ public class GoogleStorePath extends FilesystemPath {
     }
 
     return "/gs/" + _bucket + fullPath;
+    
+    //return "/blobstore" + fullPath;
   }
 
   private GoogleStoreInode getGsInode(String name)
@@ -568,6 +602,15 @@ public class GoogleStorePath extends FilesystemPath {
   }
 
   public AppEngineFile getGsFile()
+  {
+    String path = getNativePath();
+
+    AppEngineFile file = new AppEngineFile(path);
+
+    return file;
+  }
+
+  public AppEngineFile getBlobFile()
   {
     String path = getNativePath();
 

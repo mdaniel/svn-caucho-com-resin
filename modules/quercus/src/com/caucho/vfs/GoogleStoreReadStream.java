@@ -68,6 +68,17 @@ class GoogleStoreReadStream extends StreamImpl {
     return true;
   }
 
+  /**
+   * Returns the number of bytes available without blocking.  Depending on
+   * the stream, this may return less than the actual bytes, but will always
+   * return a number > 0 if there is any data available.
+   */
+  @Override
+  public int getAvailable() throws IOException
+  {
+    return 1;
+  }
+
   @Override
   public int read(byte []buffer, int offset, int length)
     throws IOException

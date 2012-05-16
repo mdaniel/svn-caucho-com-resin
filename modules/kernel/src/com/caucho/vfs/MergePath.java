@@ -381,16 +381,20 @@ public class MergePath extends FilesystemPath {
   /**
    * Returns the full native path name of the best path.
    */
+  /*
+  @Override
   public String getNativePath()
   {
     Path path = getBestPath();
 
     return path.getNativePath();
   }
+  */
 
   /**
    * Returns the URL of the best path.
    */
+  /*
   @Override
   public String getURL()
   {
@@ -402,6 +406,7 @@ public class MergePath extends FilesystemPath {
 
     return path.getURL();
   }
+  */
 
   /**
    * Returns the relative path into the merge path.
@@ -467,7 +472,9 @@ public class MergePath extends FilesystemPath {
    */
   public boolean canWrite()
   {
-    return getBestPath().canWrite();
+    // overriding by shadowing
+    // return getBestPath().canWrite();
+    return getBestPath().canRead();
   }
 
   /**

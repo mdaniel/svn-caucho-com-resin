@@ -29,6 +29,7 @@
 
 package com.caucho.vfs;
 
+import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.nio.ByteBuffer;
 
@@ -48,6 +49,8 @@ class GoogleStoreWriteStream extends StreamImpl {
   private FileWriteChannel _os;
   private final ByteBuffer _buf = ByteBuffer.allocate(1024);
   
+  // private final ByteArrayOutputStream _bout = new ByteArrayOutputStream();
+  
   private GoogleStoreInode _inode;
   
   private long _length;
@@ -66,43 +69,32 @@ class GoogleStoreWriteStream extends StreamImpl {
   {
     return true;
   }
-  
-  @Override
-  public void write(byte []buffer, int offset, int length, boolean isEnd)
-    throws IOException
-  {
-    String s = new String(buffer, offset, length);
     
-    /*
-    System.out.println("XX-WRITE:[[" + s + "]]");
-    if (s.indexOf("images/multi-wide.gif") >= 0)
-      Thread.dumpStack();
-      */
-    try {
+  public void write(byte []buffer, int offset, int length, boolean isEnd)
+      throws IOException
+  {
     while (length > 0) {
       int sublen = Math.min(_buf.capacity(), length);
       
-      _buf.clear();
+      _buf.rewind();
       
       _buf.put(buffer, offset, sublen);
       _buf.flip();
-      
       sublen = _os.write(_buf);
+
       
       if (sublen <= 0)
         throw new IOException(L.l("{0}: Unable to write", this));
+
+      // System.out.println("XX_WRITE: " + new String(buffer, offset, sublen));
       
       length -= sublen;
       offset += sublen;
       
       _length += sublen;
     }
-    } catch (Exception e) {
-      e.printStackTrace();
-    }
   }
   
-  @Override
   public void close()
     throws IOException
   {
