@@ -141,7 +141,7 @@ public class GoogleStorePath extends FilesystemPath {
 
     return _parent;
   }
-  
+
   private boolean isRoot()
   {
     return getTail().equals("");
@@ -274,9 +274,9 @@ public class GoogleStorePath extends FilesystemPath {
     if (dir == null) {
       return null;
     }
-    
+
     ArrayList<String> names = new ArrayList<String>();
-    
+
     for (GoogleStoreInode inode : dir.values()) {
       if (inode.exists()) {
         names.add(inode.getName());
@@ -332,27 +332,29 @@ public class GoogleStorePath extends FilesystemPath {
     return mkdir();
   }
 
+  /* nam: commented out for now for wordpress themes installation
   @Override
   public boolean remove()
   {
     GoogleStorePath parent = (GoogleStorePath) getParent();
-    
+
     if (! parent.isDirectory()) {
       return false;
     }
-    
+
     GoogleStoreInode inode = parent.getGsInode(getTail());
-    
+
     if (inode == null || ! inode.exists()) {
       return false;
     }
-    
+
     inode = new GoogleStoreInode(getTail(), FileType.NONE, -1, -1);
-    
+
     parent.updateDir(inode);
 
     return true;
   }
+  */
 
   /*
   @Override
@@ -400,13 +402,13 @@ public class GoogleStorePath extends FilesystemPath {
     try {
       if (! isRoot()) {
         GoogleStoreInode inode = getParent().getGsInode(getTail());
-        
+
         if (inode == null || ! inode.exists()) {
           // php/8134
           throw new FileNotFoundException(getFullPath());
         }
       }
-      
+
       AppEngineFile file = getGsFile();
       // AppEngineFile file = getBlobFile();
 
@@ -475,7 +477,7 @@ public class GoogleStorePath extends FilesystemPath {
     }
 
     return "/gs/" + _bucket + fullPath;
-    
+
     //return "/blobstore" + fullPath;
   }
 
