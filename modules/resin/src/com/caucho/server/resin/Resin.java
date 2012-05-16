@@ -462,6 +462,8 @@ public class Resin
 
       if (_serverDataDirectory == null) {
         String serverName = getDisplayServerId();
+
+        serverName = serverName.replace(':', '_');
   
         _serverDataDirectory = dataDirectory.lookup("./" + serverName);
       }
