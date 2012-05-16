@@ -1113,9 +1113,9 @@ class WatchdogArgs
     addCommand(new ThreadDumpCommand());
 
     addCommand(new UndeployCommand());
-    addCommand(new UserAddCommand());
-    addCommand(new UserListCommand());
-    addCommand(new UserRemoveCommand());
+    //addCommand(new UserAddCommand());
+    //addCommand(new UserListCommand());
+    //addCommand(new UserRemoveCommand());
 
     addCommand(new WatchdogCommand());
 

@@ -320,7 +320,7 @@ public interface ManagementMXBean extends ManagedObjectMXBean
     throws ReflectionException;
 
   @Description("adds an administration user and password")
-  @MXAction(value = "user-add", method = "POST")
+  //@MXAction(value = "user-add", method = "POST")
   @MXContentType
   public AddUserQueryReply addUser(@MXParam(name = "server") String serverId,
                                     @MXParam(name = "user", required = true)
@@ -330,14 +330,14 @@ public interface ManagementMXBean extends ManagedObjectMXBean
     throws ReflectionException;
 
   @Description("lists the administration user")
-  @MXAction(value = "user-list", method = "GET")
+  //@MXAction(value = "user-list", method = "GET")
   @MXContentType
   public ListUsersQueryReply listUsers(
     @MXParam(name = "server") String serverId)
     throws ReflectionException;
 
   @Description("removes an administration user")
-  @MXAction(value = "user-remove", method = "POST")
+  //@MXAction(value = "user-remove", method = "POST")
   @MXContentType
   public RemoveUserQueryReply removeUser(
     @MXParam(name = "server") String serverId,
