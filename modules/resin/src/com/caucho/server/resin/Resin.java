@@ -182,8 +182,13 @@ public class Resin
     _startTime = CurrentTime.getCurrentTime();
     
     _args = args;
-    
-    _resinSystem = new ResinSystem(args.getServerId());
+
+    String serverId = args.getServerId();
+
+    if (serverId == null && args.getHomeCluster() != null)
+      serverId = "dyn-"+ args.getServerAddress() + ':' + args.getServerPort();
+
+    _resinSystem = new ResinSystem(serverId);
 
     // _licenseErrorMessage = licenseErrorMessage;
     
@@ -191,7 +196,7 @@ public class Resin
 
     Environment.init();
  
-    _serverId = args.getServerId();
+    _serverId = serverId;//args.getServerId();
     
     _resinHome = args.getResinHome();
     
