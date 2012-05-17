@@ -332,7 +332,6 @@ public class GoogleStorePath extends FilesystemPath {
     return mkdir();
   }
 
-  /* nam: commented out for now for wordpress themes installation
   @Override
   public boolean remove()
   {
@@ -354,7 +353,6 @@ public class GoogleStorePath extends FilesystemPath {
 
     return true;
   }
-  */
 
   /*
   @Override

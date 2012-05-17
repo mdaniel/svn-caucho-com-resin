@@ -29,7 +29,6 @@
 
 package com.caucho.vfs;
 
-import com.caucho.util.Alarm;
 import com.caucho.util.CharBuffer;
 import com.caucho.util.CurrentTime;
 
