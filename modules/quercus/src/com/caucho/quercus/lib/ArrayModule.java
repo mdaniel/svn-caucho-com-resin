@@ -260,6 +260,28 @@ public class ArrayModule
     return array;
   }
 
+  public Value array_copy_recursive(Value value)
+  {
+    value = value.toValue();
+    
+    if (! value.isArray()) {
+      return value;
+    }
+
+    ArrayValue array = (ArrayValue) value;
+    ArrayValue copy = new ArrayValueImpl();
+
+    for (Map.Entry<Value, Value> entry : array.entrySet()) {
+      Value entryValue = entry.getValue();
+      Value entryKey = entry.getKey();
+      
+      copy.put(entryKey, array_copy_recursive(entryValue));
+    }
+    
+    return copy;
+  }
+
+
   /**
    * Counts the values
    */

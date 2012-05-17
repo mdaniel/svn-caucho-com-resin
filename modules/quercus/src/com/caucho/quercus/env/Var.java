@@ -1323,6 +1323,16 @@ public class Var extends Value
   }
 
   /**
+   * Returns a reference to the array value.
+   */
+  @Override
+  public Value getRef(Value index)
+  {
+    // php/066z
+    return _value.getRef(index);
+  }
+
+  /**
    * Returns the array ref.
    */
   @Override

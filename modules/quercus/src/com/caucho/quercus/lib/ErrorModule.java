@@ -102,8 +102,9 @@ public class ErrorModule extends AbstractQuercusModule {
   /**
    * Produces a backtrace
    */
-  public static Value debug_backtrace(Env env,
-                                      @Optional("DEBUG_BACKTRACE_PROVIDE_OBJECT") int options)
+  public static ArrayValue 
+  debug_backtrace(Env env,
+                  @Optional("DEBUG_BACKTRACE_PROVIDE_OBJECT") int options)
   {
     boolean isPrintArgs = (options & DEBUG_BACKTRACE_IGNORE_ARGS) == 0;
 

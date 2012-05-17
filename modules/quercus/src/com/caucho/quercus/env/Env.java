@@ -3285,8 +3285,22 @@ public class Env
   {
     StringBuilder sb = new StringBuilder();
 
-    for (String item : getStackTrace()) {
-      sb.append("\n  ").append(item);
+    ArrayValue value = ErrorModule.debug_backtrace(this, 0);
+    
+    for (Value item : value.values()) {
+      String function = item.get(ErrorModule.FUNCTION).toJavaString();
+      String file = item.get(ErrorModule.FILE).toJavaString();
+      int line = item.get(ErrorModule.LINE).toInt();
+      
+      if (function == null || "".equals(function))
+        continue;
+      
+      sb.append("\n  at ");
+      sb.append(function);
+      
+      if (file != null && ! "".equals(file)) {
+        sb.append(" (" + file + ":" + line + ")");
+      }
     }
 
     if (sb.length() == 0) {
@@ -6377,12 +6391,16 @@ public class Env
   {
     Location loc = getLocation();
 
-    if (loc != null && ! loc.isUnknown())
+    if (loc != null && ! loc.isUnknown()) {
       return (loc.getFileName() + ":" + loc.getLineNumber() + ": " + msg
+          + getFunctionLocation()
+          + getStackTraceAsString());
+    }
+    else {
+      return (msg
               + getFunctionLocation()
               + getStackTraceAsString());
-    else
-      return msg;
+    }
   }
 
   /**
@@ -6661,8 +6679,9 @@ public class Env
     }
 
     if ((errorMask & mask) != 0) {
-      if (log.isLoggable(Level.FINE))
-        log.fine(this + " " + loc + msg);
+      if (log.isLoggable(Level.FINE)) {
+        log.fine(this + " " + loc + getExceptionLocation(msg));
+      }
     }
 
     if (code >= 0 && code < _errorHandlers.length
@@ -6707,8 +6726,18 @@ public class Env
 
     if ((errorMask & mask) != 0) {
       try {
-        String fullMsg = (getLocationPrefix(location, loc)
-                          + getCodeName(mask) + msg);
+        String fullMsg;
+        
+        if (log.isLoggable(Level.FINE)) {
+          fullMsg = (getLocationPrefix(location, loc)
+              + getCodeName(mask)
+              + getExceptionLocation(msg));
+        }
+        else {
+          fullMsg = (getLocationPrefix(location, loc)
+              + getCodeName(mask)
+              + msg);
+        }
 
         if (getIniBoolean("track_errors"))
           setGlobalValue("php_errormsg", createString(fullMsg));
@@ -6743,10 +6772,10 @@ public class Env
         */
         exn = new QuercusErrorException(locPrefix
                                         + getCodeName(mask)
-                                        + msg);
+                                        + getExceptionLocation(msg));
       }
       else {
-        exn = new QuercusErrorException(msg);
+        exn = new QuercusErrorException(getExceptionLocation(msg));
       }
 
       exn.fillInStackTrace();
