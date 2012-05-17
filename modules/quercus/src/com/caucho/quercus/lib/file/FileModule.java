@@ -316,6 +316,7 @@ public class FileModule extends AbstractQuercusModule {
    */
   public static boolean copy(Env env, StringValue src, StringValue dst)
   {
+    // System.out.println("XXX-COPY: " + src + " " + dst);
     ProtocolWrapper srcWrapper = getProtocolWrapper(env, src);
 
     BinaryInput is = null;

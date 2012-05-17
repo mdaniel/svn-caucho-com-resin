@@ -90,8 +90,9 @@ class GoogleStoreReadStream extends StreamImpl {
 
       _buf.flip();
 
-      if (result <= 0)
+      if (result <= 0) {
         return result;
+      }
     }
 
     int sublen = Math.min(length, _buf.remaining());
@@ -110,7 +111,7 @@ class GoogleStoreReadStream extends StreamImpl {
   {
     _is.position(offset);
 
-    _buf.rewind();
+    _buf.clear();
     _buf.flip();
   }
 
@@ -152,7 +153,7 @@ class GoogleStoreReadStream extends StreamImpl {
       return n;
     }
 
-    _buf.rewind();
+    _buf.clear();
     _buf.flip();
 
     long toSkip = n - remaining;

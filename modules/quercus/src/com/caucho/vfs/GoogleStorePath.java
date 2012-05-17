@@ -272,7 +272,7 @@ public class GoogleStorePath extends FilesystemPath {
     HashMap<String,GoogleStoreInode> dir = getDir();
 
     if (dir == null) {
-      return null;
+      return new String[0];
     }
 
     ArrayList<String> names = new ArrayList<String>();
@@ -295,6 +295,8 @@ public class GoogleStorePath extends FilesystemPath {
   public boolean mkdir()
     throws IOException
   {
+    // System.out.println("XX-MKDIR: " + getFullPath());
+    
     if (exists()) {
       return false;
     }
@@ -335,21 +337,31 @@ public class GoogleStorePath extends FilesystemPath {
   @Override
   public boolean remove()
   {
-    GoogleStorePath parent = (GoogleStorePath) getParent();
+    // System.out.println("XX-REMOVE: " + getFullPath());
+    /*
+    if (getFullPath().equals("/wp-content/pandora.tmp"))
+      return false;
+      */
 
-    if (! parent.isDirectory()) {
+    if (! exists()) {
       return false;
     }
-
-    GoogleStoreInode inode = parent.getGsInode(getTail());
-
-    if (inode == null || ! inode.exists()) {
-      return false;
+    else if (isDirectory()) {
+      try {
+        if (list().length > 0) {
+          return false;
+        }
+      } catch (IOException e) {
+        log.log(Level.FINER, e.toString(), e);
+        
+        return false;
+      }
     }
 
-    inode = new GoogleStoreInode(getTail(), FileType.NONE, -1, -1);
+    GoogleStoreInode inode = new GoogleStoreInode(getTail(), FileType.NONE, -1, -1);
+    // System.out.println("XX-REMOVE-OK: " + getFullPath());
 
-    parent.updateDir(inode);
+    getParent().updateDir(inode);
 
     return true;
   }
@@ -375,21 +387,12 @@ public class GoogleStorePath extends FilesystemPath {
   }
   */
 
-  /*
   @Override
   public boolean renameTo(Path path)
   {
-    if (! (path instanceof GoogleStorePath))
-      return false;
-
-    GoogleStorePath file = (GoogleStorePath) path;
-
-    clearStatusCache();
-    file.clearStatusCache();
-
-    return this.getFile().renameTo(file.getFile());
+    // System.out.println("XX-RENAME:" + getFullPath());
+    throw new UnsupportedOperationException();
   }
-  */
 
   /**
    * Returns the stream implementation for a read stream.
@@ -428,6 +431,12 @@ public class GoogleStorePath extends FilesystemPath {
   public StreamImpl openWriteImpl() throws IOException
   {
     // System.out.println("XX-WRITE: " + getFullPath());
+    if (! getParent().isDirectory() && ! getParent().mkdirs()) {
+      System.out.println("XX-WRITE-FAIL: " + getFullPath());
+      Thread.dumpStack();
+      throw new IOException(L.l("{0} must have a directory parent", 
+                                getParent()));
+    }
 
     GSFileOptionsBuilder builder = new GSFileOptionsBuilder();
     builder.setMimeType("application/octet-stream");
@@ -449,7 +458,7 @@ public class GoogleStorePath extends FilesystemPath {
 
     boolean isLock = true;
     FileWriteChannel os = _fileService.openWriteChannel(file, isLock);
-    return new GoogleStoreWriteStream(this, os, _inode);
+    return new GoogleStoreWriteStream(this, os, getGsInode());
   }
 
   @Override
@@ -500,12 +509,14 @@ public class GoogleStorePath extends FilesystemPath {
     if (! isDirectory()) {
       return null;
     }
+    
+    GoogleStoreInode inode = getGsInode();
 
-    if (_inode.getDirMap() == null) {
-      _inode.setDirMap(readDirMap());
+    if (inode.getDirMap() == null) {
+      inode.setDirMap(readDirMap());
     }
 
-    return _inode.getDirMap();
+    return inode.getDirMap();
   }
 
   private HashMap<String,GoogleStoreInode> readDirMap()
@@ -537,6 +548,7 @@ public class GoogleStorePath extends FilesystemPath {
 
   void updateDir(GoogleStoreInode inode)
   {
+    // System.out.println("UPDATE: " + inode + " " + inode.getLength());
     HashMap<String,GoogleStoreInode> map = readDirMap();
 
     if (map == null) {
@@ -545,16 +557,16 @@ public class GoogleStorePath extends FilesystemPath {
 
     map.put(inode.getName(), inode);
 
-    GoogleStoreInode dirInode = _inode;
+    GoogleStoreInode dirInode = getGsInode();
 
     if (dirInode == null || ! dirInode.exists() || ! dirInode.isDirectory()) {
       dirInode = new GoogleStoreInode(getTail(), FileType.DIRECTORY, 0, 0);
 
-      if (! equals(_root)) {
-        writeGsInode(dirInode);
+      if (isRoot()) {
+        setGsInode(dirInode);
       }
       else {
-        setGsInode(dirInode);
+        writeGsInode(dirInode);
       }
     }
 
@@ -590,11 +602,10 @@ public class GoogleStorePath extends FilesystemPath {
   {
     clearStatusCache();
 
-    GoogleStoreInode oldInode = _inode;
+    GoogleStoreInode oldInode = getGsInode();
 
-    setGsInode(inode);
-
-    if (this == _root) {
+    if (isRoot()) {
+      setGsInode(inode);
     }
     else if (oldInode == null
              || ! oldInode.isDirectory()
@@ -607,11 +618,12 @@ public class GoogleStorePath extends FilesystemPath {
 
   private GoogleStoreInode getGsInode()
   {
-    if (_inode == null) {
-      _inode = getParent().getGsInode(getTail());
+    if (_inode != null) {
+      return _inode;
     }
-
-    return _inode;
+    else {
+      return getParent().getGsInode(getTail());
+    }
   }
 
   public AppEngineFile getGsFile()

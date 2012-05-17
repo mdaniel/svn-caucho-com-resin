@@ -74,7 +74,7 @@ class GoogleStoreWriteStream extends StreamImpl {
   public void write(byte []buffer, int offset, int length, boolean isEnd)
       throws IOException
   {
-    String s = new String(buffer, offset, length);
+    // String s = new String(buffer, offset, length);
 
     /*
     System.out.println("XX-WRITE:[[" + s + "]]");
@@ -84,7 +84,7 @@ class GoogleStoreWriteStream extends StreamImpl {
     while (length > 0) {
       int sublen = Math.min(_buf.capacity(), length);
 
-      _buf.rewind();
+      _buf.clear();
 
       _buf.put(buffer, offset, sublen);
       _buf.flip();

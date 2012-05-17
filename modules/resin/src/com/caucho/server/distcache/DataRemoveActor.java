@@ -42,6 +42,8 @@ public class DataRemoveActor extends AbstractTaskWorker {
   private final DataStore _dataStore;
   private final String _serverId;
   
+  private final int _queueMax = 8192;
+  
   private final LinkedBlockingQueue<RemoveItem> _queue
     = new LinkedBlockingQueue<RemoveItem>();
   
@@ -69,7 +71,7 @@ public class DataRemoveActor extends AbstractTaskWorker {
     long now = CurrentTime.getCurrentTime();
     
     while ((item = _queue.peek()) != null) {
-      if (now < item.getExpireTime()) {
+      if (now < item.getExpireTime() && _queue.size() < _queueMax) {
         return item.getExpireTime() - now;
       }
       

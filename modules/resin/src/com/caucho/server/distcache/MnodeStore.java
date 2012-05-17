@@ -85,7 +85,7 @@ public class MnodeStore {
   private long _serverVersion;
   private long _startupLastAccessTime;
   
-  private AtomicLong _entryCount = new AtomicLong();
+  private final AtomicLong _entryCount = new AtomicLong();
   
   // private long _expireReaperTimeout = 60 * 60 * 1000L;
   // private long _expireReaperTimeout = 15 * 60 * 1000L;
@@ -208,7 +208,8 @@ public class MnodeStore {
 
     _selectExpireQuery = ("SELECT id,value_data_id FROM " + _tableName
                           + " WHERE access_time + 5 * access_timeout / 4 < ?"
-                          + " OR modified_time + modified_timeout < ?");
+                          + " OR modified_time + modified_timeout < ?"
+                          + " LIMIT 4096");
 
     _deleteQuery = ("DELETE FROM " + _tableName
                     + " WHERE id=?");
