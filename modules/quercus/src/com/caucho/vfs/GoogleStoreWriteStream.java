@@ -114,7 +114,10 @@ class GoogleStoreWriteStream extends StreamImpl {
 
       if (inode == null || ! inode.isDirectory()) {
         long time = CurrentTime.getCurrentTime();
-        inode.setLastModified(time);
+
+        if (inode != null) {
+          inode.setLastModified(time);
+        }
 
         inode = new GoogleStoreInode(_path.getTail(),
                                      FileType.FILE,
