@@ -392,6 +392,8 @@ public class PDOStatement
    */
   public boolean execute(Env env, @Optional @ReadOnly Value inputParameters)
   {
+    _error.clear();
+
     ArrayValue parameters;
 
     if (inputParameters.isArray()) {

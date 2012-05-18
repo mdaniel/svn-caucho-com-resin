@@ -210,6 +210,8 @@ public class SessionModule extends AbstractQuercusModule
       }
     }
 
+    System.err.println("SessionModule->session_id0: " + oldValue + " . " + id);
+
     return oldValue;
   }
 

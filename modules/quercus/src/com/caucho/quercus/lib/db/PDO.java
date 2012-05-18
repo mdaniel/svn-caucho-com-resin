@@ -298,6 +298,8 @@ public class PDO implements EnvCleanup {
    */
   public Value exec(Env env, String query)
   {
+    _error.clear();
+
     JdbcConnectionResource conn = getConnection();
 
     if (! conn.isConnected()) {
@@ -499,6 +501,8 @@ public class PDO implements EnvCleanup {
                      @Optional int mode,
                      @Optional @ReadOnly Value[] args)
   {
+    _error.clear();
+
     JdbcConnectionResource conn = getConnection();
 
     if (! conn.isConnected()) {
