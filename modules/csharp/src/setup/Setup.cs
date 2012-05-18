@@ -162,7 +162,7 @@ namespace Caucho
               resin = new Resin(home);
           }
 
-          if (resin != null && ! HasResin(resin))
+          if (resin != null && !HasResin(resin))
             AddResin(resin);
         }
 
@@ -174,22 +174,24 @@ namespace Caucho
       String resinHome = Util.GetResinHome(null, System.Reflection.Assembly.GetExecutingAssembly().Location);
 
       foreach (Resin resin in _resinList) {
-        if (resin.Home.Equals(resinHome))
-        {
+        if (resin.Home.Equals(resinHome)) {
           Resin = resin;
 
-          break;
-        }          
+          return;
+        }
       }
 
       if (Resin == null && resinInRegistry != null)
         Resin = resinInRegistry;
 
-      if (Resin == null){
+      if (Resin == null && resinHome != null) {
         Resin = new Resin(resinHome);
 
         AddResin(Resin);
       }
+
+      if (Resin == null && _resinList.Count > 0)
+        Resin = _resinList[_resinList.Count - 1];
     }
 
     public void FindResinServices()
@@ -469,14 +471,12 @@ namespace Caucho
         MessageBox.Show(message);
         Environment.Exit(1);
       }
-      try
-      {
+      try {
         Application.EnableVisualStyles();
         Application.SetCompatibleTextRenderingDefault(false);
         SetupForm setupForm = new SetupForm(new Setup());
         Application.Run(setupForm);
-      } catch (Exception e)
-      {
+      } catch (Exception e) {
         LogStartupError(null, e);
       }
     }
@@ -499,7 +499,7 @@ namespace Caucho
       text.Append("\r\n").Append("\r\n");
 
       File.AppendAllText("setup-err.log", text.ToString(), Encoding.UTF8);
-     }
+    }
 
     public static Hashtable FakeState()
     {
@@ -625,7 +625,7 @@ namespace Caucho
     public String JavaHome { get; set; }
     public String Server { get; set; }
     public bool DynamicServer { get; set; }
-    public String Cluster { get; set; } 
+    public String Cluster { get; set; }
     public int DebugPort { get; set; }
     public int JmxPort { get; set; }
     public int WatchdogPort { get; set; }

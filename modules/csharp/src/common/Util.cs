@@ -120,14 +120,15 @@ namespace Caucho
 
       resinHome = GetParent(GetCanonicalPath(path), 1);
 
-      if (File.Exists(resinHome + "\\lib\\resin.jar"))
-        return Canonicalize(resinHome);
+      DirectoryInfo pathInfo = new DirectoryInfo(resinHome);
 
-      resinHome = GetParent(resinHome, 1);
+      while (pathInfo != null && pathInfo.Exists) {
+        if (File.Exists(pathInfo.FullName + "\\lib\\resin.jar"))
+          return pathInfo.FullName;
 
-      if (File.Exists(resinHome + "\\lib\\resin.jar"))
-        return Canonicalize(resinHome);
-
+        pathInfo = pathInfo.Parent;
+      }
+   
       resinHome = GetCurrentResinFromRegistry();
 
       if (resinHome != null)

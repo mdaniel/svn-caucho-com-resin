@@ -44,8 +44,7 @@ namespace Caucho
 
       XPathNodeIterator multi = _docNavigator.Select("caucho:resin/caucho:cluster/caucho:server-multi", _xmlnsMgr);
 
-      while (multi.MoveNext())
-      {
+      while (multi.MoveNext()) {
         String idPrefix = multi.Current.GetAttribute("id-prefix", "");
         String addressList = multi.Current.GetAttribute("address-list", "");
 
@@ -55,19 +54,17 @@ namespace Caucho
 
         String[] addresses = null;
 
-        if (addressList.StartsWith("${"))
-        {
+        if (addressList.StartsWith("${")) {
           String addressListKey = addressList.Substring(2, addressList.Length - 3);
           addressList = (String)getProperties()[addressListKey];
         }
-        
+
         if (addressList == null)
           continue;
 
-        addresses = addressList.Split(new Char[] {';' , ' '});
+        addresses = addressList.Split(new Char[] { ';', ' ' });
 
-        for (int i = 0; i < addresses.Length; i++)
-        {
+        for (int i = 0; i < addresses.Length; i++) {
           ResinConfServer server = new ResinConfServer();
           server.ID = idPrefix + i;
           server.Cluster = cluster;
@@ -141,8 +138,7 @@ namespace Caucho
     {
       XPathNavigator navigator = _docNavigator.SelectSingleNode("caucho:resin/caucho:cluster[@id='" + cluster + "']", _xmlnsMgr);
 
-      if (navigator != null && navigator.MoveToFirstChild())
-      {
+      if (navigator != null && navigator.MoveToFirstChild()) {
         if ("ElasticCloudService".Equals(navigator.LocalName))
           return true;
 
@@ -153,8 +149,7 @@ namespace Caucho
 
       navigator = _docNavigator.SelectSingleNode("caucho:resin/caucho:cluster-default", _xmlnsMgr);
 
-      if (navigator != null && navigator.MoveToFirstChild())
-      {
+      if (navigator != null && navigator.MoveToFirstChild()) {
         if ("ElasticCloudService".Equals(navigator.LocalName))
           return true;
 
@@ -162,6 +157,11 @@ namespace Caucho
           if ("ElasticCloudService".Equals(navigator.LocalName))
             return true;
       }
+
+      Hashtable properties = getProperties();
+
+      if (properties != null && "true".Equals((String)properties["elastic_cloud_enable"], StringComparison.CurrentCultureIgnoreCase))
+        return true;
 
       return false;
     }
@@ -214,10 +214,8 @@ namespace Caucho
 
       String propertiesFile;
       XPathNavigator nav = _docNavigator.SelectSingleNode("caucho:resin", _xmlnsMgr);
-      if (nav.MoveToFirstChild())
-      {
-        do
-        {
+      if (nav.MoveToFirstChild()) {
+        do {
           if ("properties".Equals(nav.LocalName)) {
             String path = nav.GetAttribute("path", "");
             parse(path, _resinConf, _properties);
@@ -242,12 +240,10 @@ namespace Caucho
 
       TextReader reader = null;
 
-      try
-      {
+      try {
         reader = File.OpenText(file);
         String line;
-        while ((line = reader.ReadLine()) != null)
-        {
+        while ((line = reader.ReadLine()) != null) {
           if (line.StartsWith("#"))
             continue;
 
@@ -261,8 +257,7 @@ namespace Caucho
 
           properties.Add(key.Trim(), value.Trim());
         }
-      } finally
-      {
+      } finally {
         if (file != null)
           reader.Close();
       }
@@ -270,7 +265,7 @@ namespace Caucho
 
     static public ResinConfServer ParseDynamic(String value)
     { //dynamic:app-tier:name
-      String []values = value.Split(':');
+      String[] values = value.Split(':');
       String cluster = values[1];
       String id = values[2];
       if (values.Length == 4)
