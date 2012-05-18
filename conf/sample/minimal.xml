@@ -12,7 +12,7 @@
        xmlns:resin="urn:java:com.caucho.resin">
 
   <cluster-default>
-    <resin:import path="${__DIR__}/app-default.xml"/>
+    <resin:import path="classpath:META-INF/caucho/app-default.xml"/>
   </cluster-default>
 
   <cluster id="">
