@@ -581,16 +581,16 @@ public class QuercusServlet
     throws ServletException, IOException
   {
     String[] staticFileExtensions = _staticFileExtensions;
-    
+
     if (staticFileExtensions != null) {
       String scriptPath = QuercusRequestAdapter.getPageServletPath(request);
 
       for (int i = 0; i < staticFileExtensions.length; i++) {
         String extension = staticFileExtensions[i];
 
-        if (scriptPath.endsWith(extension)) {          
+        if (scriptPath.endsWith(extension)) {
           _impl.serviceStatic(request, response);
-          
+
           return;
         }
       }

@@ -62,7 +62,7 @@ import java.util.logging.Logger;
 /**
  * Represents an introspected Java class.
  */
-public class JavaClassDef extends ClassDef {
+public class JavaClassDef extends ClassDef implements InstanceInitializer {
   private final static Logger log
     = Logger.getLogger(JavaClassDef.class.getName());
   private final static L10N L = new L10N(JavaClassDef.class);
@@ -110,6 +110,7 @@ public class JavaClassDef extends ClassDef {
 
   private AbstractJavaMethod _cons;
   private AbstractJavaMethod __construct;
+  private AbstractJavaMethod __destruct;
 
   private JavaMethod __fieldGet;
   private JavaMethod __fieldSet;
@@ -760,6 +761,11 @@ public class JavaClassDef extends ClassDef {
       cl.addMethod("__construct", __construct);
     }
 
+    if (__destruct != null) {
+      cl.setDestructor(__destruct);
+      cl.addMethod("__destruct", __destruct);
+    }
+
     for (AbstractJavaMethod value : _functionMap.values()) {
       cl.addMethod(value.getName(), value);
     }
@@ -801,6 +807,8 @@ public class JavaClassDef extends ClassDef {
     for (Map.Entry<String,Object> entry : _constJavaMap.entrySet()) {
       cl.addJavaConstant(entry.getKey(), entry.getValue());
     }
+
+    cl.addInitializer(this);
   }
 
   /**
@@ -816,6 +824,13 @@ public class JavaClassDef extends ClassDef {
    */
   public void initInstance(Env env, Value value)
   {
+    if (value instanceof ObjectValue) {
+      ObjectValue object = (ObjectValue) value;
+
+      if (__destruct != null) {
+        env.addObjectCleanup(object);
+      }
+    }
   }
 
   /**
@@ -1309,6 +1324,9 @@ public class JavaClassDef extends ClassDef {
       } else if ("__toString".equals(method.getName())) {
         __toString = new JavaMethod(moduleContext, this, method);
         _functionMap.put(method.getName(), __toString);
+      } else if ("__destruct".equals(method.getName())) {
+        __destruct = new JavaMethod(moduleContext, this, method);
+        _functionMap.put(method.getName(), __destruct);
       } else {
         if (method.getName().startsWith("quercus_"))
           throw new UnsupportedOperationException(

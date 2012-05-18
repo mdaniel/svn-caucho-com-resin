@@ -400,6 +400,12 @@ public class SessionModule extends AbstractQuercusModule
    */
   public static boolean session_start(Env env)
   {
+    if (env.getRequest() == null) {
+      env.notice(L.l("cannot start session without a request context"));
+
+      return false;
+    }
+
     if (env.getSession() != null) {
       env.notice(L.l("session has already been started"));
       return true;

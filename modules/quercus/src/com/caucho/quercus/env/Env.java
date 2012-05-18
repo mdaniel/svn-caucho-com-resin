@@ -3284,25 +3284,25 @@ public class Env
   public String getStackTraceAsString()
   {
     ArrayValue value = ErrorModule.debug_backtrace(this, 0);
-    
+
     return getStackTraceAsString(value, getLocation());
   }
-  
+
   public String getStackTraceAsString(ArrayValue value, Location location)
   {
     StringBuilder sb = new StringBuilder();
-    
+
     for (Value item : value.values()) {
       String function = item.get(ErrorModule.FUNCTION).toJavaString();
       String file = item.get(ErrorModule.FILE).toJavaString();
       int line = item.get(ErrorModule.LINE).toInt();
-      
+
       if (function == null || "".equals(function))
         continue;
-      
+
       sb.append("\n  at ");
       sb.append(function);
-      
+
       if (file != null && ! "".equals(file)) {
         sb.append(" (" + file + ":" + line + ")");
       }
@@ -6732,7 +6732,7 @@ public class Env
     if ((errorMask & mask) != 0) {
       try {
         String fullMsg;
-        
+
         if (log.isLoggable(Level.FINE)) {
           fullMsg = (getLocationPrefix(location, loc)
               + getCodeName(mask)
@@ -7280,19 +7280,6 @@ public class Env
   {
     // cleanup is in reverse order of creation
 
-    if (_objCleanupList != null) {
-      for (int i = _objCleanupList.size() - 1; i >= 0; i--) {
-        ObjectValue objCleanup = _objCleanupList.get(i);
-        try {
-          if (objCleanup != null)
-            objCleanup.cleanup(this);
-        }
-        catch (Throwable e) {
-          log.log(Level.FINER, e.toString(), e);
-        }
-      }
-    }
-
     if (_shutdownList != null) {
       for (int i = 0; i < _shutdownList.size(); i++) {
         try {
@@ -7308,6 +7295,19 @@ public class Env
       sessionWriteClose();
     } catch (Throwable e) {
       log.log(Level.FINE, e.toString(), e);
+    }
+
+    if (_objCleanupList != null) {
+      for (int i = _objCleanupList.size() - 1; i >= 0; i--) {
+        ObjectValue objCleanup = _objCleanupList.get(i);
+        try {
+          if (objCleanup != null)
+            objCleanup.cleanup(this);
+        }
+        catch (Throwable e) {
+          log.log(Level.FINER, e.toString(), e);
+        }
+      }
     }
 
     if (_cleanupList != null) {

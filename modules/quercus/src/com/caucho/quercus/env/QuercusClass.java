@@ -217,7 +217,7 @@ public class QuercusClass extends NullValue {
       cl = Env.getInstance().findClass(iface,
                                        ! isJavaClassDef,
                                        true);
-      
+
       if (cl == null)
         throw new QuercusRuntimeException(L.l("cannot find interface {0}",
                                               iface));

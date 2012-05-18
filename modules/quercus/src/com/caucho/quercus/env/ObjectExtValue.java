@@ -1045,6 +1045,8 @@ public class ObjectExtValue extends ObjectValue
   }
 
   protected void clone(Env env, ObjectExtValue obj) {
+    _quercusClass.initObject(env, obj);
+
     Iterator<Entry> iter = new EntryIterator(_entries);
 
     while (iter.hasNext()) {
