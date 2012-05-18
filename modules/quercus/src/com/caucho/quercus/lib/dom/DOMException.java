@@ -45,7 +45,7 @@ public class DOMException
   */
   public DOMException(String message)
   {
-      super(StringValue.create(message));
+    super(StringValue.create(message));
   }
 
   public DOMException(DOMImplementation impl, org.w3c.dom.DOMException delegate)

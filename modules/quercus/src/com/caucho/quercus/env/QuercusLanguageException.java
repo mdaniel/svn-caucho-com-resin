@@ -31,6 +31,7 @@ package com.caucho.quercus.env;
 
 import com.caucho.quercus.Location;
 import com.caucho.quercus.QuercusException;
+import com.caucho.quercus.lib.ErrorModule;
 
 /**
  * Parent of PHP exceptions
@@ -41,6 +42,7 @@ public class QuercusLanguageException extends QuercusException
   private static final StringValue LINE = new ConstStringValue("line");
   private static final StringValue MESSAGE = new ConstStringValue("message");
 
+  private ArrayValue _trace;
   private Value _value;
 
   protected QuercusLanguageException()
@@ -53,6 +55,15 @@ public class QuercusLanguageException extends QuercusException
     super(value.toString());
 
     _value = value;
+  }
+  
+  public Value toException(Env env)
+  {
+    // php/0g0j
+    if (_value.isA("Exception"))
+      return _value;
+    else
+      return env.wrapJava(this);
   }
 
   /**
@@ -78,10 +89,14 @@ public class QuercusLanguageException extends QuercusException
   {
     Value field = _value.getField(env, MESSAGE);
 
+    String msg;
+    
     if (field != null)
-      return field.toString();
+      msg = field.toString();
     else
-      return "";
+      msg = getMessage();
+    
+    return msg + env.getStackTraceAsString(getTrace(env), getLocation(env));
   }
 
   /**
@@ -96,5 +111,24 @@ public class QuercusLanguageException extends QuercusException
       return Location.UNKNOWN;
     else
       return new Location(file.toString(), line.toInt(), null, null);
+  }
+  
+  public int getLine(Env env)
+  {
+    return getLocation(env).getLineNumber();
+  }
+  
+  public String getFile(Env env)
+  {
+    return getLocation(env).getFileName();
+  }
+  
+  public ArrayValue getTrace(Env env)
+  {
+    if (_trace == null) {
+      _trace = ErrorModule.debug_backtrace_exception(env, this, 0);
+    }
+    
+    return _trace;
   }
 }

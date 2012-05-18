@@ -3283,9 +3283,14 @@ public class Env
 
   public String getStackTraceAsString()
   {
-    StringBuilder sb = new StringBuilder();
-
     ArrayValue value = ErrorModule.debug_backtrace(this, 0);
+    
+    return getStackTraceAsString(value, getLocation());
+  }
+  
+  public String getStackTraceAsString(ArrayValue value, Location location)
+  {
+    StringBuilder sb = new StringBuilder();
     
     for (Value item : value.values()) {
       String function = item.get(ErrorModule.FUNCTION).toJavaString();
@@ -4095,7 +4100,7 @@ public class Env
 
       if (getExceptionHandler() != null) {
         try {
-          getExceptionHandler().call(this, e.getValue());
+          getExceptionHandler().call(this, e.toException(this));
         }
         catch (QuercusLanguageException e2) {
           uncaughtExceptionError(e2);

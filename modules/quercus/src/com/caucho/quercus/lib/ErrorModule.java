@@ -106,12 +106,20 @@ public class ErrorModule extends AbstractQuercusModule {
   debug_backtrace(Env env,
                   @Optional("DEBUG_BACKTRACE_PROVIDE_OBJECT") int options)
   {
+    Exception e = new Exception();
+    e.fillInStackTrace();
+    
+    return debug_backtrace_exception(env, e, options);
+  }
+  
+  public static ArrayValue
+  debug_backtrace_exception(Env env,
+                            Exception e,
+                            int options)
+  {
     boolean isPrintArgs = (options & DEBUG_BACKTRACE_IGNORE_ARGS) == 0;
 
     ArrayValue result = new ArrayValueImpl();
-
-    Exception e = new Exception();
-    e.fillInStackTrace();
 
     StackTraceElement []stack = e.getStackTrace();
     int depth = 0;

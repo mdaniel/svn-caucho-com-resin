@@ -44,8 +44,6 @@ public class PDOException
 
   public PDOException(String code, String message)
   {
-    super(NullValue.NULL);
-
     _code = code;
     _message = "SQLSTATE[" + code + "]: " + message;
 
