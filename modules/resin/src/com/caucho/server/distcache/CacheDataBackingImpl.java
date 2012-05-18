@@ -421,9 +421,11 @@ public class CacheDataBackingImpl implements CacheDataBacking {
       log.fine(this + " removed " + removeCount + " expired entries");
     }
         
+    /*
     System.out.println("REMOVED: " + removeCount
                        + " pre " + preCount
                        + " entries " + _mnodeStore.getCount());
+                       */
     
   }
   private boolean removeData(byte []key, long dataId)

@@ -41,10 +41,10 @@ import java.sql.SQLException;
 /**
  * Represents an Amber delete query
  */
-public class DeleteQuery extends AbstractQuery {
+public class AmberDeleteQuery extends AbstractQuery {
   private String _sql;
 
-  DeleteQuery(String query, JdbcMetaData metaData)
+  AmberDeleteQuery(String query, JdbcMetaData metaData)
   {
     super(query, metaData);
   }

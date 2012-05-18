@@ -61,6 +61,7 @@ class DeleteQuery extends Query {
   /**
    * Executes the query.
    */
+  @Override
   public void execute(QueryContext context, DbTransaction xa)
     throws SQLException
   {

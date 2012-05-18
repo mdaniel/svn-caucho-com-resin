@@ -860,7 +860,7 @@ public class QueryParser {
   private AbstractQuery parseDelete()
     throws QueryParseException
   {
-    DeleteQuery query = new DeleteQuery(_sql, getMetaData());
+    AmberDeleteQuery query = new AmberDeleteQuery(_sql, getMetaData());
     _query = query;
 
     int token = peekToken();

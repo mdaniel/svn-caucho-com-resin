@@ -68,12 +68,13 @@ public class Crc64OutputStream extends OutputStream {
    * @param
    * @Override isEnd true when the write is flushing a close.
    */
+  @Override
   public void write(byte []buffer, int offset, int length)
     throws IOException
   {
-      _crc = Crc64.generate(_crc, buffer, offset, length);
+    _crc = Crc64.generate(_crc, buffer, offset, length);
       
-      _next.write(buffer, offset, length);
+    _next.write(buffer, offset, length);
   }
 
   /**
