@@ -1844,7 +1844,9 @@ public class FileModule extends AbstractQuercusModule {
 
     StringValue sb = env.createBinaryBuilder();
 
-    sb.appendReadAll(is, length);
+    // fread is not "readAll". For example, socket reads.
+    // sb.appendReadAll(is, length);
+    sb.appendRead(is, length);
 
     return sb;
   }

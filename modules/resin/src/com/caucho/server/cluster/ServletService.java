@@ -745,7 +745,7 @@ public class ServletService
   /**
    * Creates the http cache.
    */
-  public AbstractProxyCache createProxyCache()
+  public final AbstractProxyCache createProxyCache()
     throws ConfigException
   {
     if (_proxyCache == null) {

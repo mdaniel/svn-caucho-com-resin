@@ -21,7 +21,6 @@ function meter_display_page($page)
   $period_name;
   
   if ($period > 0) {
-  
     if (! array_key_exists($period, $g_periods)) {
       echo "<script language='javascript' type='text/javascript'>\n";
       echo "<!-- \n";
@@ -31,7 +30,10 @@ function meter_display_page($page)
     }
   }
   
-  if (isset($_REQUEST["p"]) || $period <= 0) {
+  if (isset($_REQUEST["p"])) {
+    $period = $_REQUEST["p"];
+  }
+  else if ($period <= 0) {
     $period = $g_period;
   } 
   

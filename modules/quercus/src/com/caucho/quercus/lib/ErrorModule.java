@@ -114,7 +114,7 @@ public class ErrorModule extends AbstractQuercusModule {
   
   public static ArrayValue
   debug_backtrace_exception(Env env,
-                            Exception e,
+                            Throwable e,
                             int options)
   {
     boolean isPrintArgs = (options & DEBUG_BACKTRACE_IGNORE_ARGS) == 0;

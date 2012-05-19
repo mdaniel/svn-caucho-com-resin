@@ -30,7 +30,8 @@ $g_periods = array(2 * 7 * 24 * 60 * 60	=> "2 Weeks",
                    
 $g_time = 0;
 $g_offset = 0;
-$g_period = (6 * 60 * 60);
+// $g_period = (6 * 60 * 60);
+$g_period = (60 * 60);
 $g_labels;
 
 class GraphParams {

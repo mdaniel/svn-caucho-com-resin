@@ -555,7 +555,9 @@ public class ServletContainerConfig implements EnvironmentBean, SchemaBean
   public AbstractProxyCache createProxyCache()
     throws ConfigException
   {
-    return _servletContainer.createProxyCache();
+    AbstractProxyCache cache = _servletContainer.createProxyCache();
+    
+    return cache;
   }
 
   /**

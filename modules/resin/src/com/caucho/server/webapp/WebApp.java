@@ -303,7 +303,7 @@ public class WebApp extends ServletContextImpl
   private int _formParameterMax = 10000;
 
   // The cache
-  private AbstractProxyCache _cache;
+  private AbstractProxyCache _proxyCache;
 
   private LruCache<String,FilterChainEntry> _filterChainCache
     = new LruCache<String,FilterChainEntry>(256);
@@ -2726,8 +2726,9 @@ public class WebApp extends ServletContextImpl
       }
       */
 
-      if (_server != null)
-        _cache = _server.getProxyCache();
+      if (_server != null) {
+        _proxyCache = _server.getProxyCache();
+      }
 
       for (int i = 0; i < _appGenerators.size(); i++)
         _parent.addDeploy(_appGenerators.get(i));
@@ -3945,9 +3946,10 @@ public class WebApp extends ServletContextImpl
     // top-level filter elements
     // server/021h - cache not logging
 
-    if (_cache != null)
-      chain = _cache.createFilterChain(chain, this);
-
+    if (_proxyCache != null) {
+      chain = _proxyCache.createFilterChain(chain, this);
+    }
+    
     WebAppFilterChain webAppChain = new WebAppFilterChain(chain, this);
 
     // webAppChain.setSecurityRoleMap(invocation.getSecurityRoleMap());
@@ -4095,8 +4097,8 @@ public class WebApp extends ServletContextImpl
           chain = new DispatchFilterChain(chain, this); // invocation);
         */
 
-        if (_cache != null && filterMapper == _includeFilterMapper) {
-          chain = _cache.createFilterChain(chain, this);
+        if (_proxyCache != null && filterMapper == _includeFilterMapper) {
+          chain = _proxyCache.createFilterChain(chain, this);
         }
       }
 
@@ -4634,7 +4636,7 @@ public class WebApp extends ServletContextImpl
    */
   public long getCacheMaxLength()
   {
-    return _cache.getMaxEntrySize();
+    return _proxyCache.getMaxEntrySize();
   }
 
   /**

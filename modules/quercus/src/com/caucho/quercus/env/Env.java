@@ -3283,9 +3283,21 @@ public class Env
 
   public String getStackTraceAsString()
   {
+    return getStackTraceAsString(getLocation());
+  }
+
+  public String getStackTraceAsString(Location loc)
+  {
     ArrayValue value = ErrorModule.debug_backtrace(this, 0);
 
-    return getStackTraceAsString(value, getLocation());
+    return getStackTraceAsString(value, loc);
+  }
+
+  public String getStackTraceAsString(Throwable e, Location loc)
+  {
+    ArrayValue value = ErrorModule.debug_backtrace_exception(this, e, 0);
+
+    return getStackTraceAsString(value, loc);
   }
 
   public String getStackTraceAsString(ArrayValue value, Location location)
@@ -3308,8 +3320,8 @@ public class Env
       }
     }
 
-    if (sb.length() == 0) {
-      return String.valueOf(getLocation());
+    if (sb.length() == 0 && location != null) {
+      return "\n  " + String.valueOf(location);
     }
 
     return sb.toString();
@@ -6369,7 +6381,7 @@ public class Env
 
     error(B_ERROR, location, fullMsg);
 
-    String exMsg = prefix + fullMsg + getStackTraceAsString();
+    String exMsg = prefix + fullMsg + getStackTraceAsString(e, null);
 
     return new QuercusRuntimeException(exMsg, e);
   }
@@ -6394,12 +6406,15 @@ public class Env
 
   private String getExceptionLocation(String msg)
   {
-    Location loc = getLocation();
-
+    return getExceptionLocation(msg, getLocation());
+  }
+  
+  private String getExceptionLocation(String msg, Location loc)
+  {
     if (loc != null && ! loc.isUnknown()) {
       return (loc.getFileName() + ":" + loc.getLineNumber() + ": " + msg
           + getFunctionLocation()
-          + getStackTraceAsString());
+          + getStackTraceAsString(null));
     }
     else {
       return (msg
@@ -6777,10 +6792,10 @@ public class Env
         */
         exn = new QuercusErrorException(locPrefix
                                         + getCodeName(mask)
-                                        + getExceptionLocation(msg));
+                                        + getExceptionLocation(msg, location));
       }
       else {
-        exn = new QuercusErrorException(getExceptionLocation(msg));
+        exn = new QuercusErrorException(getExceptionLocation(msg, location));
       }
 
       exn.fillInStackTrace();
