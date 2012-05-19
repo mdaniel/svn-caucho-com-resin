@@ -7297,12 +7297,30 @@ public class Env
       log.log(Level.FINE, e.toString(), e);
     }
 
+    int count = 0;
+
     if (_objCleanupList != null) {
-      for (int i = _objCleanupList.size() - 1; i >= 0; i--) {
-        ObjectValue objCleanup = _objCleanupList.get(i);
+      int size;
+
+      // may result in an infinite loop but that would be user error
+      while ((size = _objCleanupList.size()) > 0) {
+        count++;
+
+        if (count % 100 == 0){
+          updateTimeout();
+
+          if (_isTimeout) {
+            log.log(Level.WARNING, "script has timed out while calling __destruct()");
+
+            break;
+          }
+        }
+
+        ObjectValue obj = _objCleanupList.remove(size - 1);
+
         try {
-          if (objCleanup != null)
-            objCleanup.cleanup(this);
+          if (obj != null)
+            obj.cleanup(this);
         }
         catch (Throwable e) {
           log.log(Level.FINER, e.toString(), e);

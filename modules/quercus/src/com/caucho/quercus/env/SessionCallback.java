@@ -61,7 +61,7 @@ public class SessionCallback extends Value {
     _write = write;
     _destroy = destroy;
     _gc = gc;
-    
+
     if (open == null)
       throw new NullPointerException("open cannot be null");
   }
@@ -118,5 +118,16 @@ public class SessionCallback extends Value {
     } catch (Throwable e) {
       log.log(Level.FINE, e.toString(), e);
     }
+  }
+
+  @Override
+  public String toString()
+  {
+    return getClass().getSimpleName() + "[" + _open + ","
+                                            + _close  + ","
+                                            + _read + ","
+                                            + _write + ","
+                                            + _destroy + ","
+                                            + _gc + "]";
   }
 }
