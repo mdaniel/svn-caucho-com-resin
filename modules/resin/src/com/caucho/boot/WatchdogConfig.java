@@ -293,7 +293,7 @@ class WatchdogConfig
     if ("".equals(_id))
       name = "jvm-default.log";
     else
-      name = "jvm-" + _id + ".log";
+      name = "jvm-" + _id.replace(':', '_') + ".log";
 
     return getLogDirectory().lookup(name);
   }
@@ -593,7 +593,7 @@ class WatchdogConfig
     /**
      * Initialize a log with the watchdog-log parameters
      * 
-     * @param log the log to initialize
+     * @param stream the log to initialize
      */
     void logInit(RotateStream stream)
     {

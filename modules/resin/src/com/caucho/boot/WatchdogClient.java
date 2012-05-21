@@ -568,9 +568,17 @@ class WatchdogClient
 
     list.add("com.caucho.boot.WatchdogManager");
 
+/*
     if (("".equals(args.getServerId()) || args.getServerId() == null)
         && ! args.isDynamicServer()
         && ! "".equals(getId())) {
+      list.add("-server");
+      list.add(getId());
+    }
+*/
+    //server/6f05
+    if (("".equals(args.getServerId()) || args.getServerId() == null)
+        && ! args.isDynamicServer()) {
       list.add("-server");
       list.add(getId());
     }
