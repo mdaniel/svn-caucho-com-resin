@@ -523,13 +523,24 @@ class WatchdogManager implements AlarmListener {
   
   private String getServerId(String serverId, WatchdogArgs args)
   {
+    /*
     if (serverId == null)
       serverId = args.getServerId();
 
     if (isDynamicServer(args)) {
       serverId = args.getDynamicServerId();
     }
-    
+
+    if (serverId == null)
+      serverId = "default";
+
+    return serverId;
+    */
+    if (serverId == null && ! isDynamicServer(args))
+      serverId = args.getServerId();
+    else if (serverId == null && isDynamicServer(args))
+      serverId = args.getDynamicServerId();
+
     if (serverId == null)
       serverId = "default";
 
