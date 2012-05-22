@@ -35,6 +35,8 @@ import java.io.PrintWriter;
 import java.io.UnsupportedEncodingException;
 import java.util.Collection;
 import java.util.Locale;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 import javax.servlet.ServletOutputStream;
 import javax.servlet.ServletResponse;
@@ -53,6 +55,9 @@ import com.caucho.vfs.FlushBuffer;
  */
 public class CauchoResponseWrapper extends ResponseWrapper
   implements CauchoResponse {
+  private static final Logger log
+    = Logger.getLogger(CauchoResponseWrapper.class.getName());
+  
   private FlushBuffer _flushBuffer;
   
   private final FilterWrapperResponseStream _originalStream;
@@ -252,7 +257,13 @@ public class CauchoResponseWrapper extends ResponseWrapper
   @Override
   public String getHeader(String key)
   {
-    return null;
+    try {
+      return _response.getHeader(key);
+    } catch (AbstractMethodError e) {
+      log.log(Level.FINEST, e.toString(), e);
+      
+      return null;
+    }
   }
   
   public boolean disableHeaders(boolean disable)

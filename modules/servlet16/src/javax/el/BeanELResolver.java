@@ -146,15 +146,21 @@ public class BeanELResolver extends ELResolver {
     BeanProperty prop = props.getBeanProperty(fieldName);
 
     context.setPropertyResolved(true);
+    
+    // #5080, jsp/30cl
+    if (prop == null) {
+    }
+    else if (prop.getWriteMethod() != null) {
+      return prop.getWriteMethod().getParameterTypes()[0];
+    }
+    else if (prop.getReadMethod() != null) {
+      return prop.getReadMethod().getReturnType();
+    }
 
-    if (prop == null || prop.getWriteMethod() == null)
-      throw new PropertyNotFoundException("'" +
-                                          property +
-                                          "' is an unknown bean property of '" +
-                                          base.getClass().getName() +
-                                          "'");
-
-    return prop.getWriteMethod().getParameterTypes()[0];
+    throw new PropertyNotFoundException("'" + property
+                                        + "' is an unknown bean property of '"
+                                        + base.getClass().getName()
+                                        + "'");
   }
 
   @Override

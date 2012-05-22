@@ -29,35 +29,8 @@
 
 package com.caucho.db.table;
 
-import com.caucho.db.Database;
-import com.caucho.db.block.Block;
-import com.caucho.db.block.BlockStore;
-import com.caucho.db.index.BTree;
-import com.caucho.db.index.KeyCompare;
-import com.caucho.db.jdbc.GeneratedKeysResultSet;
-// import com.caucho.db.lock.Lock;
-import com.caucho.db.sql.CreateQuery;
-import com.caucho.db.sql.Expr;
-import com.caucho.db.sql.Parser;
-import com.caucho.db.sql.QueryContext;
-import com.caucho.db.xa.DbTransaction;
-import com.caucho.env.thread.AbstractTaskWorker;
-import com.caucho.inject.Module;
-import com.caucho.util.Alarm;
-import com.caucho.util.BitsUtil;
-import com.caucho.util.CurrentTime;
-import com.caucho.util.Friend;
-import com.caucho.util.L10N;
-import com.caucho.util.SQLExceptionWrapper;
-import com.caucho.vfs.Path;
-import com.caucho.vfs.ReadStream;
-import com.caucho.vfs.TempBuffer;
-import com.caucho.vfs.TempStream;
-import com.caucho.vfs.WriteStream;
-
 import java.io.IOException;
 import java.sql.SQLException;
-import java.util.ArrayList;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.atomic.AtomicLong;
@@ -65,6 +38,13 @@ import java.util.concurrent.atomic.AtomicLongArray;
 import java.util.concurrent.locks.Lock;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+
+import com.caucho.db.block.Block;
+import com.caucho.db.block.BlockStore;
+import com.caucho.db.xa.DbTransaction;
+import com.caucho.env.thread.AbstractTaskWorker;
+import com.caucho.inject.Module;
+import com.caucho.util.Friend;
 
 /**
  * Table format:
@@ -84,7 +64,6 @@ import java.util.logging.Logger;
 class TableRowAllocator extends AbstractTaskWorker {
   private final static Logger log
     = Logger.getLogger(TableRowAllocator.class.getName());
-  private final static L10N L = new L10N(TableRowAllocator.class);
 
   private static final int FREE_ROW_BLOCK_SIZE = 256;
 
@@ -193,8 +172,9 @@ class TableRowAllocator extends AbstractTaskWorker {
 
   private void fillFreeRows()
   {
-    if (_rowTailOffset.get() < _rowTailTop && ! isClosed())
+    if (_rowTailOffset.get() < _rowTailTop || isClosed()) {
       return;
+    }
     
     while (scanClock()) {
       if (! resetClock()) {

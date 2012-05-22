@@ -12,6 +12,14 @@
 
 <s2 title="4.0.28 - snapshot">
 <ul>
+<li>cloud: cross-pod deployment (#4807)</li>
+<li>servlet: isMultipartEnable() NPE (#4995)</li>
+<li>class-loader: sort tree-loader before adding to classpath (#5006)</li>
+<li>jsp-el: method calls (rep by mate, #5011, #5087)</li>
+<li>http: header/url length limits for keepalive (rep by alex, #4999)</li>
+<li>jsp-el: coerceToType handling Class (rep by mate, #5061)</li>
+<li>jsp-el: BeanELResolver getType() for getValue w/o setValue (rep by mate, #5039)</li>
+<li>hessian: NullFieldDeserializer must extend FieldSerializer (rep by Thomas Poppe)</li>
 <li>db/distcache: fsync/timestamp on shutdown to avoid index revalidation when clean</li>
 <li>distcache: reworked cache data management to simplify and stale data cleanup.</li>
 <li>cloud: deploy timeout needs to adjust for long deployments that are progressing.</li>

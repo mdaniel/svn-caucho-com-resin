@@ -118,6 +118,10 @@ public class BamAllActorRouter extends AbstractBamRouter
                                             "Can't contact server: " + actor.getAddress()));
       }
     }
+    
+    if (actors.length == 0) {
+      scoreboard.complete(0, null);
+    }
   }
   
   private class AllMethodScoreboard {

@@ -938,6 +938,7 @@ public class HttpRequest extends AbstractHttpRequest
 
     _uriLength = 0;
     if (bufferStore == null) {
+      // server/05h8
       _uri = getSmallUriBuffer(); // httpBuffer.getUriBuffer();
       
       _headerBuffer = getSmallHeaderBuffer(); // httpBuffer.getHeaderBuffer();

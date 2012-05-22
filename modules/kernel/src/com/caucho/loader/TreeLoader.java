@@ -29,6 +29,8 @@
 package com.caucho.loader;
 
 import java.io.IOException;
+import java.util.ArrayList;
+import java.util.Collections;
 import java.util.logging.Logger;
 
 import javax.annotation.PostConstruct;
@@ -168,6 +170,22 @@ public class TreeLoader extends JarListLoader implements Dependency
    */
   private void fillJars(Path dir)
   {
+    ArrayList<Path> paths = new ArrayList<Path>();
+    
+    fillJars(paths, dir);
+    
+    Collections.sort(paths);
+    
+    for (Path path : paths) {
+      addJar(path);
+    }
+  }
+  
+  /**
+   * Find all the jars in this directory and add them to jarList.
+   */
+  private void fillJars(ArrayList<Path> paths, Path dir)
+  {
     try {
       String []list = dir.list();
 
@@ -175,10 +193,10 @@ public class TreeLoader extends JarListLoader implements Dependency
         Path path = dir.lookup(list[j]);
 
         if (list[j].endsWith(".jar") || list[j].endsWith(".zip")) {
-          addJar(path);
+          paths.add(path);
         }
         else if (path.isDirectory()) {
-          fillJars(path);
+          fillJars(paths, path);
         }
       }
       
