@@ -32,6 +32,7 @@ package com.caucho.quercus.lib.db;
 import com.caucho.quercus.env.Env;
 import com.caucho.quercus.env.UnsetValue;
 import com.caucho.quercus.env.Value;
+import com.caucho.quercus.lib.db.JdbcConnectionResource.SqlParseToken;
 import com.caucho.quercus.lib.file.FileReadValue;
 import com.caucho.util.L10N;
 import com.caucho.util.Log;
@@ -330,50 +331,31 @@ public class JdbcPreparedStatementResource
     }
   }
 
-  /**
-   * Prepares statement with the given query.
-   *
-   * @param query SQL query
-   * @return true on success or false on failure
-   */
-  /*
-  public boolean prepareStatement(Env env, String query)
+  protected boolean isPreparable(String query)
   {
-    try {
-      if (_preparedStmt != null) {
-        _preparedStmt.close();
-      }
+    // for Google
+    SqlParseToken token = getConnection().parseSqlToken(query, null);
 
-      setQuery(query);
-
-      Connection conn = getJavaConnection(env);
-
-      if (conn == null) {
-        return false;
-      }
-
-      if (this instanceof OracleStatement) {
-        _preparedStmt = conn.prepareCall(query,
-                                         ResultSet.TYPE_SCROLL_INSENSITIVE,
-                                         ResultSet.CONCUR_READ_ONLY);
-      } else {
-        _preparedStmt = conn.prepareStatement(query,
-                                              ResultSet.TYPE_SCROLL_INSENSITIVE,
-                                              ResultSet.CONCUR_READ_ONLY);
-      }
-
-      return true;
-
-    }
-    catch (SQLException e) {
-      log.log(Level.FINE, e.toString(), e);
-
-      setErrorMessage(e.getMessage());
-      setErrorCode(e.getErrorCode());
+    if (token == null) {
       return false;
     }
+
+    switch (token.getFirstChar()) {
+      case 'S':
+      case 's':
+        return ! token.matchesToken("SAVEPOINT");
+      case 'R':
+      case 'r':
+        if (token.matchesToken("RELEASE")) {
+          return false;
+        }
+        else {
+          return ! token.matchesToken("ROLLBACK");
+        }
+      default:
+        return true;
+    }
   }
-  */
 
   /**
    * Returns a parameter value

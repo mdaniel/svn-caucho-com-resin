@@ -33,39 +33,45 @@ import com.caucho.quercus.QuercusModuleException;
 import com.caucho.quercus.env.Env;
 import com.caucho.quercus.lib.file.BinaryInput;
 import com.caucho.quercus.lib.file.ReadStreamInput;
-import com.caucho.vfs.*;
+import com.caucho.vfs.ReadStream;
+import com.caucho.vfs.VfsStream;
 
 import java.io.IOException;
 
 /**
  * Input from a compressed stream.
  *
- * 
+ *
  */
 public class ZlibInputStream extends ReadStreamInput
 {
   private Env _env;
-  
+
   private BinaryInput _in;
   private GZInputStream _gzIn;
-  
+
+  private ReadStream _rs;
+
   public ZlibInputStream(Env env, BinaryInput in) throws IOException
   {
     super(env);
 
     _env = env;
-    
+
     init(in);
   }
 
-  protected void init(BinaryInput in)
+  private void init(BinaryInput in)
     throws IOException
   {
     _in = in;
 
     _gzIn = new GZInputStream(in.getInputStream());
-    ReadStream rs = new ReadStream(new VfsStream(_gzIn, null));
 
+    ReadStream rs = new ReadStream(new VfsStream(_gzIn, null));
+    _rs = rs;
+
+    // calls parent init(ReadStream)
     init(rs);
   }
 
@@ -84,31 +90,33 @@ public class ZlibInputStream extends ReadStreamInput
   public boolean setPosition(long offset)
   {
     try {
-      BinaryInput newIn = _in.openCopy();
-      
-      /*
-      _gzIn.close();
-      getInputStream().close();
-      
-      _in.close();
-      _in = null;
-      _gzIn = null;
-      */
-      
+      long pos = _rs.getPosition();
+
+      if (pos <= offset) {
+        if (_rs.setPosition(offset)) {
+          return true;
+        }
+      }
+
+      // temp workaround: need to close before open for Google
       close();
-      _in.close();
-      
+      //_in.close();
+
+      BinaryInput newIn = _in.openCopy();
       init(newIn);
 
-      return skip(offset) == offset;
+      long skipped = skip(offset);
+      return skipped == offset;
+    }
+    catch (IOException e) {
+      e.printStackTrace();
 
-    } catch (IOException e) {
       throw new QuercusModuleException(e);
     }
   }
 
   public String toString()
   {
-    return "ZlibInputStream[]";
+    return getClass().getSimpleName() + "[" + _in + "]";
   }
 }

@@ -37,11 +37,11 @@ import java.io.OutputStream;
 /**
  * Writing to a google stream.
  */
-class GoogleStoreRandomAccessStream extends RandomAccessStream {
+class GoogleRandomAccessStream extends RandomAccessStream {
   private final Path _path;
   private StreamImpl _os;
   
-  GoogleStoreRandomAccessStream(Path path, StreamImpl os)
+  GoogleRandomAccessStream(Path path, StreamImpl os)
   {
     _path = path;
     _os = os;

@@ -39,17 +39,17 @@ import com.google.appengine.api.files.FileReadChannel;
 /**
  * Reading from a google stream.
  */
-class GoogleStoreReadStream extends StreamImpl {
+class GoogleReadStream extends StreamImpl {
   private static final Logger log
-    = Logger.getLogger(GoogleStoreReadStream.class.getName());
+    = Logger.getLogger(GoogleReadStream.class.getName());
 
-  private static final L10N L = new L10N(GoogleStoreReadStream.class);
+  private static final L10N L = new L10N(GoogleReadStream.class);
 
-  private final GoogleStorePath _path;
+  private final GooglePath _path;
   private FileReadChannel _is;
-  private final ByteBuffer _buf = ByteBuffer.allocate(1024);
+  private final ByteBuffer _buf = ByteBuffer.allocate(1024 * 8);
 
-  GoogleStoreReadStream(GoogleStorePath path, FileReadChannel is)
+  GoogleReadStream(GooglePath path, FileReadChannel is)
     throws IOException
   {
     _path = path;
@@ -163,7 +163,7 @@ class GoogleStoreReadStream extends StreamImpl {
 
     return _is.position() - pos + remaining;
   }
-
+  
   @Override
   public void close()
     throws IOException

@@ -29,64 +29,62 @@
 
 package com.caucho.vfs;
 
-import com.caucho.util.IoUtil;
+import com.google.appengine.api.blobstore.BlobKey;
+import com.google.appengine.api.blobstore.BlobstoreFailureException;
+import com.google.appengine.api.blobstore.BlobstoreService;
+import com.google.appengine.api.blobstore.BlobstoreServiceFactory;
 import com.google.appengine.api.files.AppEngineFile;
 import com.google.appengine.api.files.FileWriteChannel;
-import com.google.appengine.api.files.GSFileOptions.GSFileOptionsBuilder;
 
 import java.io.IOException;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
-public class GoogleStorePath extends GooglePath
+//
+// XXX: doesn't work, needs a datastore-backed metadata
+//
+public class GoogleBlobStorePath extends GooglePath
 {
-  private final String _bucket;
+  private static Logger log = Logger.getLogger(GoogleBlobStorePath.class.getName());
 
-  public GoogleStorePath(FilesystemPath root, String userPath, String path)
+  public GoogleBlobStorePath(FilesystemPath root,
+                             String userPath,
+                             String path)
   {
     super(root, userPath, path);
-
-    GoogleStorePath gsRoot = (GoogleStorePath) root;
-
-    _bucket = gsRoot._bucket;
   }
 
-  public GoogleStorePath()
-  {
-    this(null);
-  }
-
-  public GoogleStorePath(String bucket)
+  public GoogleBlobStorePath()
   {
     super();
-
-    try {
-      if (bucket == null) {
-        bucket = _fileService.getDefaultGsBucketName();
-      }
-
-      _bucket = bucket;
-
-    }
-    catch (IOException e) {
-      throw new IllegalStateException(e);
-    }
 
     init();
   }
 
-  public String getBucket()
-  {
-    return _bucket;
-  }
-
   @Override
-  public GooglePath createInstance(FilesystemPath root, String userPath, String path)
+  protected GooglePath createInstance(FilesystemPath root,
+                                      String userPath,
+                                      String path)
   {
-    return new GoogleStorePath(root, userPath, path);
+    return new GoogleBlobStorePath(root, userPath, path);
   }
 
   @Override
   protected boolean removeImpl()
   {
+    BlobstoreService service = BlobstoreServiceFactory.getBlobstoreService();
+
+    BlobKey key = new BlobKey(getNativePath());
+
+    try {
+      service.delete(key);
+    }
+    catch (BlobstoreFailureException e) {
+      log.log(Level.FINER, e.toString(), e);
+
+      return false;
+    }
+
     return true;
   }
 
@@ -109,39 +107,31 @@ public class GoogleStorePath extends GooglePath
       fullPath = "/" + QUERCUS_ROOT_PATH;
     }
 
-    return "/gs/" + _bucket + fullPath;
+    return "/blobstore" + fullPath;
   }
 
   @Override
   public StreamImpl openWriteImpl() throws IOException
   {
-    // System.out.println("XX-WRITE: " + getFullPath());
     if (! getParent().isDirectory() && ! getParent().mkdirs()) {
-      System.out.println("XX-WRITE-FAIL: " + getFullPath());
-      Thread.dumpStack();
       throw new IOException(L.l("{0} must have a directory parent",
                                 getParent()));
     }
 
-    GSFileOptionsBuilder builder = new GSFileOptionsBuilder();
-    builder.setMimeType("application/octet-stream");
-    builder.setBucket(_bucket);
+    //if (exists()) {
+    //  remove();
+    //}
 
-    String key = getFullPath();
-
-    key = key.substring(1);
-
-    if (key.equals("")) {
-      key = QUERCUS_ROOT_PATH;
-    }
-
-    builder.setKey(key);
-
-    AppEngineFile file = _fileService.createNewGSFile(builder.build());
+    AppEngineFile file = getAppEngineFile();
 
     boolean isLock = true;
-    FileWriteChannel os = _fileService.openWriteChannel(file, isLock);
+    try {
+      FileWriteChannel os = _fileService.openWriteChannel(file, isLock);
 
-    return new GoogleWriteStream(this, os, getGoogleInode());
+      return new GoogleWriteStream(this, os, getGoogleInode());
+    }
+    catch (IOException e) {
+      throw e;
+    }
   }
 }

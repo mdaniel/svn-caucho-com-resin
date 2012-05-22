@@ -36,15 +36,15 @@ import java.util.HashMap;
  * Inode representing the meta-data of the GS file.
  */
 @SuppressWarnings("serial")
-public final class GoogleStoreInode implements Serializable {
+public final class GoogleInode implements Serializable {
   private final String _name;
   private final FileType _type;
   private final long _length;
   private long _lastModified;
-  private transient HashMap<String,GoogleStoreInode> _dirMap;
+  private transient HashMap<String,GoogleInode> _dirMap;
 
   @SuppressWarnings("unused")
-  private GoogleStoreInode()
+  private GoogleInode()
   {
     _name = null;
     _type = FileType.NONE;
@@ -52,7 +52,7 @@ public final class GoogleStoreInode implements Serializable {
     _lastModified = -1;
   }
 
-  public GoogleStoreInode(String name,
+  public GoogleInode(String name,
                           FileType type,
                           long length,
                           long lastModified)
@@ -98,12 +98,12 @@ public final class GoogleStoreInode implements Serializable {
     _lastModified = time;
   }
 
-  public HashMap<String,GoogleStoreInode> getDirMap()
+  public HashMap<String,GoogleInode> getDirMap()
   {
     return _dirMap;
   }
 
-  public void setDirMap(HashMap<String,GoogleStoreInode> map)
+  public void setDirMap(HashMap<String,GoogleInode> map)
   {
     _dirMap = map;
   }

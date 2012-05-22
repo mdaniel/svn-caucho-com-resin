@@ -580,6 +580,11 @@ public class QuercusServlet
                       HttpServletResponse response)
     throws ServletException, IOException
   {
+    //System.err.println("QuercusServlet->service0: ---------------------------------------------------------------");
+    //System.err.println("QuercusServlet->service1: " + request.getRequestURI() + " . " + request.getQueryString());
+
+    //long start = System.currentTimeMillis();
+
     String[] staticFileExtensions = _staticFileExtensions;
 
     if (staticFileExtensions != null) {
@@ -597,6 +602,11 @@ public class QuercusServlet
     }
 
     _impl.service(request, response);
+
+    //long end = System.currentTimeMillis();
+
+    //System.err.println("QuercusServlet->service2: " + request.getRequestURI() + " . " + request.getQueryString());
+    //System.err.println("QuercusServlet->service3: " + (end - start) + "ms ===============================================================");
   }
 
   /**

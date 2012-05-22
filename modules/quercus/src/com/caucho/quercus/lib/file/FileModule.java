@@ -382,7 +382,7 @@ public class FileModule extends AbstractQuercusModule {
 
       int len;
 
-      while ((len = is.read(buffer, 0, buffer.length)) > 0) {
+      while ((len = is.read(buffer, 0, buffer.length)) >= 0) {
         os.write(buffer, 0, len);
       }
 
@@ -2523,27 +2523,46 @@ public class FileModule extends AbstractQuercusModule {
    */
   public static boolean move_uploaded_file(Env env,
                                            @NotNull Path src,
-                                           @NotNull Path dst)
+                                           StringValue dst)
   {
     // php/1665, php/1666
 
-    if (src == null)
+    if (src == null) {
       return false;
+    }
 
-    if (dst == null)
+    if (dst.length() == 0) {
       return false;
+    }
 
     String tail = src.getTail();
-
     src = env.getUploadDirectory().lookup(tail);
 
+    if (! src.canRead()) {
+      return false;
+    }
+
+    ProtocolWrapper wrapper = getProtocolWrapper(env, dst);
+
     try {
-      if (src.canRead()) {
-        return src.renameTo(dst);
+      if (wrapper != null) {
+        StringValue path = env.createString(src.getNativePath());
+
+        boolean result = copy(env, path, dst);
+
+        if (! result) {
+          return false;
+        }
+
+        return src.remove();
       }
-      else
-        return false;
-    } catch (IOException e) {
+      else {
+        Path path = env.lookupPwd(dst);
+
+        return src.renameTo(path);
+      }
+    }
+    catch (IOException e) {
       env.warning(e);
 
       return false;

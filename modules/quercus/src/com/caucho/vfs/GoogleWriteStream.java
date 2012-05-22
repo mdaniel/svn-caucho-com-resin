@@ -29,35 +29,31 @@
 
 package com.caucho.vfs;
 
-import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.nio.ByteBuffer;
 
 import com.caucho.util.CurrentTime;
 import com.caucho.util.L10N;
-import com.caucho.vfs.GoogleStoreInode.FileType;
+import com.caucho.vfs.GoogleInode.FileType;
 import com.google.appengine.api.files.FileWriteChannel;
-
 
 /**
  * Writing to a google stream.
  */
-class GoogleStoreWriteStream extends StreamImpl {
-  private static final L10N L = new L10N(GoogleStoreWriteStream.class);
+class GoogleWriteStream extends StreamImpl {
+  private static final L10N L = new L10N(GoogleWriteStream.class);
 
-  private final GoogleStorePath _path;
+  private final GooglePath _path;
   private FileWriteChannel _os;
-  private final ByteBuffer _buf = ByteBuffer.allocate(1024);
+  private final ByteBuffer _buf = ByteBuffer.allocate(1024 * 8);
 
   // private final ByteArrayOutputStream _bout = new ByteArrayOutputStream();
 
-  private GoogleStoreInode _inode;
+  private GoogleInode _inode;
 
   private long _length;
 
-  GoogleStoreWriteStream(GoogleStorePath path,
-                         FileWriteChannel os,
-                         GoogleStoreInode inode)
+  GoogleWriteStream(GooglePath path, FileWriteChannel os, GoogleInode inode)
   {
     _path = path;
     _os = os;
@@ -110,7 +106,7 @@ class GoogleStoreWriteStream extends StreamImpl {
     if (os != null) {
       os.closeFinally();
 
-      GoogleStoreInode inode = _inode;
+      GoogleInode inode = _inode;
 
       if (inode == null || ! inode.isDirectory()) {
         long time = CurrentTime.getCurrentTime();
@@ -119,13 +115,12 @@ class GoogleStoreWriteStream extends StreamImpl {
           inode.setLastModified(time);
         }
 
-        inode = new GoogleStoreInode(_path.getTail(),
-                                     FileType.FILE,
-                                     _length,
-                                     time);
+        inode = new GoogleInode(_path.getTail(), FileType.FILE, _length, time);
+
+        _inode = inode;
       }
 
-      _path.writeGsInode(inode);
+      _path.writeInode(inode);
     }
   }
 

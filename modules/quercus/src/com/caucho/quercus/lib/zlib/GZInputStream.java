@@ -29,6 +29,8 @@
 
 package com.caucho.quercus.lib.zlib;
 
+import com.caucho.util.IoUtil;
+
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.PushbackInputStream;
@@ -96,12 +98,6 @@ public class GZInputStream extends InputStream
     return 1;
   }
 
-  public void close()
-    throws IOException
-  {
-    _inflater.end();
-  }
-
   /**
    * mark() and reset() are not supported by this class.
    * @return false always
@@ -121,7 +117,7 @@ public class GZInputStream extends InputStream
     int n = read(b);
     if (n < 0)
       return -1;
-    
+
     return b[0];
   }
 
@@ -160,6 +156,7 @@ public class GZInputStream extends InputStream
       while (length < len) {
         if (_inflater.needsInput()) {
           _readBufferSize = _in.read(_readBuffer, 0, _readBuffer.length);
+
           if (_readBufferSize < 0)
             break;
 
@@ -167,22 +164,22 @@ public class GZInputStream extends InputStream
         }
 
        sublen = _inflater.inflate(b, off + length, len - length);
-       
+
         _crc.update(b, off + length, sublen);
        _inputSize += sublen;
        _totalInputSize += sublen;
-       
+
        length += sublen;
 
         // Unread gzip trailer and possibly beginning of appended gzip data.
         if (_inflater.finished()) {
           int remaining = _inflater.getRemaining();
           _in.unread(_readBuffer, _readBufferSize - remaining, remaining);
-          
+
           readTrailer();
-          
+
           int secondPart = read(b, off + length, len - length);
-          
+
           return secondPart > 0 ? length + secondPart : length;
         }
       }
@@ -190,7 +187,7 @@ public class GZInputStream extends InputStream
       return length;
     }
     catch (DataFormatException e) {
-      throw new IOException(e.getMessage());
+      throw new IOException(e);
     }
   }
 
@@ -204,15 +201,15 @@ public class GZInputStream extends InputStream
   {
     if (_eof || n <= 0)
       return 0;
-    
+
     long remaining = n;
     while (remaining > 0) {
       int length = (int)Math.min(_tbuffer.length, remaining);
-      
+
       int sublen = read(_tbuffer, 0, length);
       if (sublen < 0)
         break;
-      
+
       remaining -= sublen;
     }
     return (n - remaining);
@@ -242,7 +239,7 @@ public class GZInputStream extends InputStream
       _in.unread(_tbuffer, 0, length);
       return;
     }
-    
+
     if (_tbuffer[0] != (byte)0x1f || _tbuffer[1] != (byte)0x8b) {
       _isGzip = false;
       _in.unread(_tbuffer, 0, length);
@@ -278,7 +275,7 @@ public class GZInputStream extends InputStream
       while (c != 0) {
         if (c < 0)
           throw new IOException("Bad GZIP (FCOMMENT) header.");
-        
+
         c = _in.read();
       }
     }
@@ -331,12 +328,12 @@ public class GZInputStream extends InputStream
     // Check to see if this gzip stream is appended with a valid gzip stream.
     // If it is appended, then can continue reading from stream.
     int c = _in.read();
-    
+
     if (c < 0)
       _eof = true;
     else {
       _in.unread(c);
-      
+
       init();
 
       if (!_isGzip)
@@ -344,11 +341,27 @@ public class GZInputStream extends InputStream
     }
   }
 
-  /*
+  /**
    * Returns true if stream is in gzip format.
    */
   public boolean isGzip()
   {
     return _isGzip;
+  }
+
+  @Override
+  public void close()
+  {
+    _eof = true;
+
+    InputStream is = _in;
+    _in = null;
+
+    IoUtil.close(is);
+
+    Inflater inflater = _inflater;
+    _inflater = null;
+
+    inflater.end();
   }
 }

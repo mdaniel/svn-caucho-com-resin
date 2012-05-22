@@ -56,53 +56,53 @@ public class GoogleStoreServlet extends GenericServlet
   public GoogleStoreServlet()
   {
   }
-  
+
   @Override
   public void init()
   {
     _gsBucket = getInitParameter("gs_bucket");
-    
+
     if (Boolean.valueOf(getInitParameter("enable"))) {
       _path = new GoogleStorePath(_gsBucket);
     }
   }
-  
+
   @Override
   public void service(ServletRequest request, ServletResponse response)
     throws IOException, ServletException
   {
     HttpServletRequest req = (HttpServletRequest) request;
     HttpServletResponse res = (HttpServletResponse) response;
-    
+
     res.setContentType("text/html");
-    
+
     if (_path == null) {
       res.sendError(HttpServletResponse.SC_FORBIDDEN);
       return;
     }
-    
+
     String fileName = req.getParameter("file");
-    
+
     if (fileName != null) {
       printFile(fileName, req, res);
       return;
     }
-    
+
     PrintWriter out = res.getWriter();
     out.println("<pre>");
-    
+
     printPath(out, _path, 0);
-    
+
     out.println("</pre>");
   }
-  
+
   private void printFile(String fileName,
                          HttpServletRequest req,
                          HttpServletResponse res)
     throws IOException
   {
     String mimeType = getServletContext().getMimeType(fileName);
-    
+
     if (fileName.endsWith(".php")
         || fileName.endsWith(".inc")
         || fileName.endsWith(".js")
@@ -114,22 +114,22 @@ public class GoogleStoreServlet extends GenericServlet
     else if (mimeType != null) {
       res.setContentType(mimeType);
     }
-    
+
     OutputStream os = res.getOutputStream();
-    
+
     Path path = _path.lookup(fileName);
-    
+
     path.writeToStream(os);
   }
-  
+
   private void printPath(PrintWriter out, Path path, int depth)
     throws IOException
   {
     if (path == null || ! path.exists())
       return;
-    
+
     printDepth(out, depth);
-    
+
     if (path.isDirectory()) {
       out.print(path.getFullPath());
       out.print("/");
@@ -142,27 +142,27 @@ public class GoogleStoreServlet extends GenericServlet
     else {
       out.print(path.getTail());
     }
-    
+
     out.print(" ");
     out.print(" len=" + path.getLength());
     out.println();
-    
+
     if (path.isDirectory()) {
       String []names = path.list();
-      
+
       if (names == null)
         return;
-      
+
       Arrays.sort(names);
-      
+
       for (String name : names) {
         Path subPath = path.lookup(name);
-        
+
         printPath(out, subPath, depth + 1);
       }
     }
   }
-  
+
   private void printDepth(PrintWriter out, int depth)
     throws IOException
   {

@@ -99,7 +99,7 @@ public class PDOStatement
       env.notice(L.l("PDOStatement options unsupported"));
     }
 
-    if (isPrepared) {
+    if (isPrepared && isPreparable(query)) {
       query = parseQueryString(env, query);
 
       prepare(env, query);
