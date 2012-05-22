@@ -274,6 +274,25 @@ public class BlockReadWrite {
   }
 
   /**
+   * sync the output stream with the filesystem when possible.
+   */
+  public void fsync()
+      throws IOException
+  {
+    boolean isPriority = true;
+    
+    RandomAccessWrapper wrapper = openRowFile(isPriority, 0);
+
+    try {
+      RandomAccessStream os = wrapper.getFile();
+
+      os.fsync();
+    } finally {
+      closeRowFile(wrapper, isPriority);
+    }
+  }
+
+  /**
    * Opens the underlying file to the database.
    */
   private RandomAccessWrapper openRowFile(boolean isPriority,

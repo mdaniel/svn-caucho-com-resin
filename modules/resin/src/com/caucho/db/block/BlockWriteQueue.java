@@ -133,13 +133,13 @@ public class BlockWriteQueue {
     return null;
   }
  
-  void waitForComplete(long timeout)
+  boolean waitForComplete(long timeout)
   {
     long expireTime = CurrentTime.getCurrentTimeActual() + timeout;
     
     while (CurrentTime.getCurrentTimeActual() < expireTime) {
       if (isEmpty())
-        return;
+        return true;
       
       _isWait = true;
         
@@ -148,6 +148,8 @@ public class BlockWriteQueue {
       } catch (Exception e) {
       }
     }
+    
+    return false;
   }
   
   boolean isEmpty()

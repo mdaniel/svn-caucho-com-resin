@@ -105,6 +105,7 @@ abstract public class AbstractTaskWorker2
   
   abstract public long runTask();
 
+  @Override
   public void close()
   {
     _isClosed = true;

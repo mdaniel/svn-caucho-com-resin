@@ -126,7 +126,7 @@ public class BlockStore {
   public final static int MINI_FRAG_ALLOC_OFFSET
     = MINI_FRAG_PER_BLOCK * MINI_FRAG_SIZE;
 
-  public final static long DATA_START = BLOCK_SIZE;
+  public final static long METADATA_START = BLOCK_SIZE;
 
   public final static int STORE_CREATE_END = 1024;
   
@@ -1847,7 +1847,26 @@ public class BlockStore {
       _blockManager.freeStoreId(id);
     }
   }
-  
+
+  /**
+   * Closes the store.
+   */
+  public boolean fsync()
+    throws IOException
+  {
+    log.finer(this + " fsync");
+    
+    flush();
+    
+    _writer.wake();
+    
+    boolean isValid = _writer.waitForComplete(60000);
+
+    _readWrite.fsync();
+    
+    return isValid;
+  }
+
   /*
   @Override
   public void finalize()

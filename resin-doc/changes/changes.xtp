@@ -12,6 +12,9 @@
 
 <s2 title="4.0.28 - snapshot">
 <ul>
+<li>db/distcache: fsync/timestamp on shutdown to avoid index revalidation when clean</li>
+<li>distcache: reworked cache data management to simplify and stale data cleanup.</li>
+<li>cloud: deploy timeout needs to adjust for long deployments that are progressing.</li>
 <li>resin: fixed directory naming for dynamic server on windows.(#5023, #5026)</li>
 <li>resin: fixed directory naming for dynamic server.(#5079)</li>
 <li>resin: fixed WEB-INF/lib/*.jar not being released on application stop problem.(#5059)</li>

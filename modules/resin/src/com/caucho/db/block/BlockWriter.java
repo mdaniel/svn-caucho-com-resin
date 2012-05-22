@@ -134,33 +134,11 @@ public class BlockWriter extends AbstractTaskWorker {
     // return super.isClosed() && _blockWriteQueue.isEmpty();
   }
   
-  void waitForComplete(long timeout)
+  boolean waitForComplete(long timeout)
   {
     wake();
     
-    _blockWriteQueue.waitForComplete(timeout);
-/*
-    long expires = Alarm.getCurrentTimeActual() + timeout;
-    
-    synchronized (_writeQueue) {
-      while (_writeQueue.size() > 0) {
-        wake();
-        
-        long now = Alarm.getCurrentTimeActual();
-        
-        long delta = expires - now;
-        
-        if (delta <= 0)
-          return;
-        
-        try {
-          _writeQueue.wait(delta);
-        } catch (Exception e) {
-          
-        }
-      }
-    }
-      */
+    return _blockWriteQueue.waitForComplete(timeout);
   }
   
   @Override

@@ -141,6 +141,10 @@ abstract public class RandomAccessStream
     throw new UnsupportedOperationException(getClass().getName());
   }
   
+  public void fsync() throws IOException
+  {
+  }
+  
   public final boolean isOpen()
   {
     return _useCount.get() > 0;

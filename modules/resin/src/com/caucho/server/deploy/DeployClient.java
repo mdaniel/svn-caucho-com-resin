@@ -36,6 +36,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.concurrent.atomic.AtomicInteger;
+import java.util.concurrent.atomic.AtomicLong;
 
 import com.caucho.bam.BamError;
 import com.caucho.bam.RemoteConnectionFailedException;
@@ -80,7 +81,7 @@ public class DeployClient implements Repository
   public static final String MESSAGE_ATTRIBUTE = "message";
   public static final String VERSION_ATTRIBUTE = "version";
   
-  private static final long DEPLOY_TIMEOUT = 600 * 1000L;
+  private static final long DEPLOY_TIMEOUT = 10 * 60 * 1000L;
 
   private Broker _broker;
   private ActorSender _bamClient;
@@ -592,6 +593,8 @@ public class DeployClient implements Repository
     
     private AtomicInteger _inProgressCount = new AtomicInteger();
     
+    private AtomicLong _lastUpdate = new AtomicLong();
+    
     private volatile boolean _isDone;
     
     SendQueryCallback(String []hashList,
@@ -620,6 +623,8 @@ public class DeployClient implements Repository
     @Override
     public void onQueryResult(String to, String from, Serializable payload)
     {
+      _lastUpdate.set(CurrentTime.getCurrentTimeActual());
+      
       sendNext();
       
       _inProgressCount.decrementAndGet();
@@ -684,13 +689,12 @@ public class DeployClient implements Repository
     
     boolean waitForDone(long timeout)
     {
-      long expires = CurrentTime.getCurrentTimeActual() + timeout;
+      _lastUpdate.set(CurrentTime.getCurrentTimeActual());
 
       synchronized (this) {
         long delta;
         
-        while (! isDone()
-               && (delta = (expires - CurrentTime.getCurrentTimeActual())) > 0) {
+        while (! isDone() && (delta = getTimeDelta(timeout)) > 0) {
           try {
             Thread.interrupted();
             wait(delta);
@@ -703,6 +707,15 @@ public class DeployClient implements Repository
         throw _error.createException();
       
       return _isDone;
+    }
+    
+    /**
+     * The timeout is calculated based on the last valid response received
+     * to cover large deployments where each sub-file is a slow upload.
+     */
+    private long getTimeDelta(long timeout)
+    {
+      return _lastUpdate.get() + timeout - CurrentTime.getCurrentTimeActual();
     }
   }
 }

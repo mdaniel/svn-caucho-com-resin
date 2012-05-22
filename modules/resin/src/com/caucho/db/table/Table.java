@@ -63,13 +63,12 @@ import com.caucho.vfs.WriteStream;
  *
  * <pre>
  * Block 0: allocation table
- * Block 1: fragment table
- * Block 2: table definition
+ * Block 1: table definition
  *   0    - store data
  *   1024 - table data
  *    1024 - index pointers
  *   2048 - CREATE text
- * Block 3: first data
+ * Block 2: first data
  * </pre>
  */
 @Module
@@ -78,7 +77,14 @@ public class Table extends BlockStore {
     = Logger.getLogger(Table.class.getName());
   private final static L10N L = new L10N(Table.class);
 
-  private final static int ROOT_DATA_OFFSET = STORE_CREATE_END;
+  private final static int TABLE_DATA_OFFSET = STORE_CREATE_END;
+  
+  private final static int STARTUP_TIMESTAMP_OFFSET = TABLE_DATA_OFFSET;
+  private final static int SHUTDOWN_TIMESTAMP_OFFSET = TABLE_DATA_OFFSET + 8;
+  private final static int TABLE_DATA_END = SHUTDOWN_TIMESTAMP_OFFSET + 8;
+  
+  private final static int ROOT_DATA_OFFSET = TABLE_DATA_END;
+  
   private final static int INDEX_ROOT_OFFSET = ROOT_DATA_OFFSET + 768;
 
   private final static int ROOT_DATA_END = ROOT_DATA_OFFSET + 1024;
@@ -102,6 +108,8 @@ public class Table extends BlockStore {
 
   private final Column _identityColumn;
   private final Column _autoIncrementColumn;
+  
+  private long _startupTimestamp;
 
   private final TableRowAllocator _rowAllocator;
   
@@ -256,7 +264,7 @@ public class Table extends BlockStore {
     ReadStream is = path.openRead();
     try {
       // skip allocation table and fragment table
-      is.skip(DATA_START + ROOT_DATA_OFFSET);
+      is.skip(METADATA_START + ROOT_DATA_OFFSET);
 
       StringBuilder sb = new StringBuilder();
       int ch;
@@ -283,7 +291,7 @@ public class Table extends BlockStore {
     is = path.openRead();
     try {
       // skip allocation table and fragment table
-      is.skip(DATA_START + ROOT_DATA_END);
+      is.skip(METADATA_START + ROOT_DATA_END);
 
       StringBuilder cb = new StringBuilder();
 
@@ -310,14 +318,21 @@ public class Table extends BlockStore {
 
         table.init();
         
-        if (! table.readIndexes() || ! table.validateIndexesSafe()) {
-          log.warning(L.l("rebuilding indexes for '{0}' because they did not properly validate on startup.",
-                          table));
+        if (! table.isShutdownTimestampValid()) {
+          log.info(L.l("{0} validating indexes due to unclean shutdown.",
+                       table));
+
+          if (! table.readIndexes() || ! table.validateIndexesSafe()) {
+            log.warning(L.l("rebuilding indexes for '{0}' because they did not properly validate on startup.",
+                            table));
           
-          table.clearIndexes();
-          table.createIndexes();
-          table.rebuildIndexes();
+            table.clearIndexes();
+            table.createIndexes();
+            table.rebuildIndexes();
+          }
         }
+        
+        table.writeStartupTimestamp();
 
         return table;
       } catch (Exception e) {
@@ -382,7 +397,71 @@ public class Table extends BlockStore {
     getReadWrite().writeBlock(BLOCK_SIZE, tempBuffer, 0, BLOCK_SIZE, isPriority);
 
     _database.addTable(this);
+    
+    writeStartupTimestamp();
   }
+  
+  private void writeStartupTimestamp()
+    throws IOException
+  {
+    _startupTimestamp = CurrentTime.getCurrentTime();
+    int offset = STARTUP_TIMESTAMP_OFFSET;
+    
+    writeTimestamp(offset, _startupTimestamp);
+  }
+  
+  private void writeShutdownTimestamp()
+    throws IOException
+  {
+    int offset = SHUTDOWN_TIMESTAMP_OFFSET;
+    
+    writeTimestamp(offset, _startupTimestamp);
+  }
+  
+  private void writeTimestamp(int offset, long timestamp)
+    throws IOException
+  {
+    long metaBlockAddress = METADATA_START;
+    Block metaBlock = readBlock(metaBlockAddress);
+    try {
+      byte []buffer = metaBlock.getBuffer();
+      
+      _startupTimestamp = CurrentTime.getCurrentTime();
+      
+      BitsUtil.writeLong(buffer, offset, timestamp);
+      
+      metaBlock.setDirty(offset, offset + 8);
+      
+      metaBlock.commit();
+    } finally {
+      metaBlock.free();
+    }
+  }
+  
+  private boolean isShutdownTimestampValid()
+    throws IOException
+  {
+    long metaBlockAddress = METADATA_START;
+    Block metaBlock = readBlock(metaBlockAddress);
+    
+    try {
+      byte []buffer = metaBlock.getBuffer();
+      
+      int startupOffset = STARTUP_TIMESTAMP_OFFSET;
+      
+      long startupTimestamp
+        = BitsUtil.readLong(buffer, STARTUP_TIMESTAMP_OFFSET);
+      
+      long shutdownTimestamp
+        = BitsUtil.readLong(buffer, SHUTDOWN_TIMESTAMP_OFFSET);
+      
+      
+      return startupTimestamp == shutdownTimestamp && startupTimestamp != 0;
+    } finally {
+      metaBlock.free();
+    }
+  }
+
 
   /**
    * Creates the indexes
@@ -413,7 +492,7 @@ public class Table extends BlockStore {
 
       column.setIndex(btree);
       
-      long metaBlockAddress = DATA_START;
+      long metaBlockAddress = METADATA_START;
       Block metaBlock = readBlock(metaBlockAddress);
       try {
         byte []buffer = metaBlock.getBuffer();
@@ -451,7 +530,7 @@ public class Table extends BlockStore {
       
       long rootBlockId = -1;
       
-      long metaBlockAddress = DATA_START;
+      long metaBlockAddress = METADATA_START;
       Block metaBlock = readBlock(metaBlockAddress);
       try {
         byte []buffer = metaBlock.getBuffer();
@@ -1057,6 +1136,14 @@ public class Table extends BlockStore {
   @Override
   public void close()
   {
+    try {
+      if (fsync()) {
+        writeShutdownTimestamp();
+      }
+    } catch (Exception e) {
+      log.log(Level.FINE, e.toString(), e);
+    }
+    
     _row.close();
 
     super.close();
