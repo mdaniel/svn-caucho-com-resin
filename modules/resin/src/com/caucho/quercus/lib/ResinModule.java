@@ -27,7 +27,6 @@
  * @author Sam
  */
 
-
 package com.caucho.quercus.lib;
 
 import java.io.IOException;
@@ -56,9 +55,6 @@ import javax.naming.NamingException;
 import javax.transaction.UserTransaction;
 
 import com.caucho.VersionFactory;
-import com.caucho.config.inject.InjectManager;
-import com.caucho.distcache.AbstractCache;
-import com.caucho.naming.Jndi;
 import com.caucho.quercus.QuercusModuleException;
 import com.caucho.quercus.annotation.NotNull;
 import com.caucho.quercus.annotation.Optional;
@@ -73,9 +69,6 @@ import com.caucho.quercus.env.StringBuilderValue;
 import com.caucho.quercus.env.StringValue;
 import com.caucho.quercus.env.Value;
 import com.caucho.quercus.module.AbstractQuercusModule;
-import com.caucho.server.distcache.CacheImpl;
-import com.caucho.server.distcache.CacheManagerImpl;
-import com.caucho.server.distcache.DistCacheSystem;
 import com.caucho.util.L10N;
 import com.caucho.util.LruCache;
 import com.caucho.vfs.Vfs;
@@ -101,10 +94,10 @@ public class ResinModule
   public final static int XA_STATUS_ROLLING_BACK = 9;
 
   private static LruCache<String,SaveState> _saveState;
-  
+
   private static WeakHashMap<ClassLoader,SoftReference<BeanManager>> _beanManagerMap
     = new WeakHashMap<ClassLoader,SoftReference<BeanManager>>();
-  
+
   public ResinModule()
   {
   }
@@ -137,7 +130,7 @@ public class ResinModule
   public Object java_bean(String name)
   {
     BeanManager beanManager = getBeanManager();
-    
+
     if (beanManager == null)
       return null;
 
@@ -151,26 +144,26 @@ public class ResinModule
 
     return beanManager.getReference(bean, bean.getBeanClass(), env);
   }
-  
+
   private BeanManager getBeanManager()
   {
     ClassLoader loader = Thread.currentThread().getContextClassLoader();
-    
+
     SoftReference<BeanManager> beanManagerRef = _beanManagerMap.get(loader);
 
     BeanManager beanManager;
-    
+
     if (beanManagerRef != null)
       beanManager = beanManagerRef.get();
     else
       beanManager = null;
-    
+
     if (beanManager == null) {
       try {
         beanManager = (BeanManager) new InitialContext().lookup("java:comp/BeanManager");
-        
+
         beanManagerRef = new SoftReference<BeanManager>(beanManager);
-        
+
         _beanManagerMap.put(loader, beanManagerRef);
       } catch (Exception e) {
         log.log(Level.FINER, e.toString(), e);
@@ -192,15 +185,15 @@ public class ResinModule
   {
     if (! name.startsWith("java:") && ! name.startsWith("/"))
       name = "java:comp/env/" + name;
-    
+
     try {
       Context ic = new InitialContext();
-      
+
       return ic.lookup(name);
     } catch (NamingException e) {
       log.log(Level.FINER, e.toString(), e);
     }
-    
+
     return null;
   }
 
@@ -400,7 +393,7 @@ public class ResinModule
       throw new QuercusModuleException(e);
     }
   }
-  
+
   /**
    * Prints a debug version of the variable
    *
@@ -411,10 +404,10 @@ public class ResinModule
   public static boolean resin_dump_stack(Env env)
   {
     Thread.dumpStack();
-    
+
     return true;
   }
-  
+
   /**
    * Prints a debug version of the variable
    *
@@ -442,11 +435,12 @@ public class ResinModule
       out.close();
 
       return NullValue.NULL;
-    } catch (IOException e) {
+    }
+    catch (IOException e) {
       throw new QuercusModuleException(e);
     }
   }
-  
+
 
   /**
    * Restore the current state
@@ -521,7 +515,7 @@ public class ResinModule
   public static QuercusDistcache resin_create_distcache(Env env, String name)
   {
     CacheManager manager = Caching.getCacheManager();
-    
+
     CacheBuilder builder = manager.createCacheBuilder(name);
 
     return new QuercusDistcache(builder.build());

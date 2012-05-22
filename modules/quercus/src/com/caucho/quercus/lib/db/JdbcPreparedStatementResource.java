@@ -50,6 +50,7 @@ import java.sql.ParameterMetaData;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.sql.Statement;
 import java.sql.Types;
 import java.util.logging.Logger;
 
@@ -303,6 +304,14 @@ public class JdbcPreparedStatementResource
 
       if (conn == null) {
         return false;
+      }
+
+      if (! isPreparable(query)) {
+        Statement stmt = javaConn.createStatement();
+
+        setStatement(stmt);
+
+        return true;
       }
 
       if (this instanceof OracleStatement) {

@@ -53,9 +53,9 @@ public final class GoogleInode implements Serializable {
   }
 
   public GoogleInode(String name,
-                          FileType type,
-                          long length,
-                          long lastModified)
+                     FileType type,
+                     long length,
+                     long lastModified)
   {
     _name = name;
     _type = type;

@@ -189,6 +189,12 @@ abstract public class GooglePath extends FilesystemPath {
   }
 
   @Override
+  public boolean isExecutable()
+  {
+    return true;
+  }
+
+  @Override
   public boolean isDirectory()
   {
     GoogleInode inode = getGoogleInode();

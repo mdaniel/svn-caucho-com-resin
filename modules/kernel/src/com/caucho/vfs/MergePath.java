@@ -67,8 +67,6 @@ import java.util.Map;
 public class MergePath extends FilesystemPath {
   private ArrayList<Path> _pathList;
 
-  private Path _bestPath;
-
   /**
    * Creates a new merge path.
    */
@@ -428,6 +426,24 @@ public class MergePath extends FilesystemPath {
   }
 
   /**
+   * Returns equivalent of struct stat.st_mode if appropriate.
+   */
+  @Override
+  public int getMode()
+  {
+    return getBestPath().getMode();
+  }
+
+  /**
+   * Tests if the path is marked as executable
+   */
+  @Override
+  public boolean isExecutable()
+  {
+    return getBestPath().isExecutable();
+  }
+
+  /**
    * True if the best path is a directory.
    */
   public boolean isDirectory()
@@ -626,8 +642,6 @@ public class MergePath extends FilesystemPath {
   {
     StreamImpl stream = getWritePath().openWriteImpl();
     stream.setPath(this);
-
-    _bestPath = null;
 
     return stream;
   }

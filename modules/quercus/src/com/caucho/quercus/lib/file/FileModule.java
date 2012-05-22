@@ -2308,8 +2308,9 @@ public class FileModule extends AbstractQuercusModule {
   public static boolean is_executable(Env env,
                                       @NotNull Path path)
   {
-    if (path == null || ! path.exists())
+    if (path == null || ! path.exists()) {
       return false;
+    }
 
     if (Path.isWindows()) {
       // XXX: PHP appears to be looking for the "MZ" magic number in the header
@@ -2321,6 +2322,10 @@ public class FileModule extends AbstractQuercusModule {
              || tail.endsWith(".cmd");
     }
     else {
+      return path.isExecutable();
+    }
+    /*
+    else {
       String cmd = "if [ -x "
                    + path.getNativePath()
                    + " ]; then echo 1; else echo 0; fi";
@@ -2331,6 +2336,7 @@ public class FileModule extends AbstractQuercusModule {
 
       return result.length() == 1 && result.charAt(0) == '1';
     }
+    */
   }
 
   /**

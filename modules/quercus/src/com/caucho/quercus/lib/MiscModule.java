@@ -648,9 +648,9 @@ public class MiscModule extends AbstractQuercusModule {
       int status = process.waitFor();
 
       return sb;
-    } catch (Exception e) {
-
-      log.log(Level.FINE, e.getMessage(), e);
+    }
+    catch (Throwable e) {
+      // Throwables thrown by SecurityManager
       env.warning(e.getMessage(), e);
 
       return NullValue.NULL;
@@ -699,12 +699,14 @@ public class MiscModule extends AbstractQuercusModule {
       finally {
         process.destroy();
       }
-    } catch (Exception e) {
+    }
+    catch (Throwable e) {
+      // Throwables thrown by SecurityManager
       env.warning(e.getMessage(), e);
     }
   }
 
-  /*
+  /**
    * Basic implementation of proc_open.
    * XXX: options
    */
@@ -837,16 +839,16 @@ public class MiscModule extends AbstractQuercusModule {
 
       return new ProcOpenResource(env, process, in, out, es, command);
 
-    } catch (Exception e) {
-
-      log.log(Level.FINE, e.getMessage(), e);
+    }
+    catch (Throwable e) {
+      // Throwables thrown by SecurityManager
       env.warning(e);
 
       return null;
     }
   }
 
-  /*
+  /**
    * Closes the process opened by proc_open.
    */
   public static int proc_close(Env env,
@@ -861,7 +863,7 @@ public class MiscModule extends AbstractQuercusModule {
    return stream.pclose();
   }
 
-  /*
+  /**
    * Forcibly terminates the process opened by proc_open.
    */
   public static boolean proc_terminate(Env env,

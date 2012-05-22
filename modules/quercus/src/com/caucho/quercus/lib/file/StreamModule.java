@@ -532,6 +532,11 @@ public class StreamModule extends AbstractQuercusModule {
 
       return null;
     }
+    catch (NoClassDefFoundError e) {
+      errorStr.set(env.createString(e.getMessage()));
+
+      return null;
+    }
   }
 
   /**

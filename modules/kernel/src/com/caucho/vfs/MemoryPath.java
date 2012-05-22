@@ -29,7 +29,6 @@
 
 package com.caucho.vfs;
 
-import com.caucho.util.Alarm;
 import com.caucho.util.ByteBuffer;
 import com.caucho.util.CurrentTime;
 import com.caucho.util.L10N;
@@ -667,7 +666,7 @@ public class MemoryPath extends FilesystemPath {
     public void flushToDisk()
     {
     }
-    
+
     public String toString()
     {
       return getClass().getSimpleName() + "[" + _node + "]";
