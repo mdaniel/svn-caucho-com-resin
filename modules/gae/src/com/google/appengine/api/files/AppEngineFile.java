@@ -46,44 +46,44 @@ public class AppEngineFile
   public AppEngineFile(String fullPath)
   {
     int p = fullPath.indexOf('/', 1);
-    
+
     String fsName = fullPath.substring(1, p);
-    
+
     _fileSystem = FileSystem.fromName(fsName);
     _namePart = fullPath.substring(p + 1);
   }
 
-  
+
   public FileSystem getFileSystem()
   {
-    return _fileSystem; 
+    return _fileSystem;
   }
-  
+
   public String getNamePart()
   {
     return _namePart;
   }
-  
+
   public String getFullPath()
   {
     return "/" + getFileSystem().getName() + "/" + getNamePart();
   }
-  
+
   public boolean isReadable()
   {
     throw new UnsupportedOperationException();
   }
-  
+
   public boolean isWritable()
   {
     throw new UnsupportedOperationException();
   }
-  
+
   public String toString()
   {
     return getClass().getSimpleName() + "[" + getFullPath() + "]";
   }
-  
+
   public static enum FileSystem {
     BLOBSTORE {
       public String getName()
@@ -97,19 +97,19 @@ public class AppEngineFile
         return "gs";
       }
     };
-    
+
     abstract public String getName();
-    
+
     public static FileSystem fromName(String name)
     {
-      
+
       if (name.equals("blobstore"))
         return FileSystem.BLOBSTORE;
       else if (name.equals("gs"))
         return FileSystem.GS;
       else
         throw new IllegalArgumentException();
-     
+
     }
   }
 }
