@@ -12,6 +12,7 @@
 
 <s2 title="4.0.28 - snapshot">
 <ul>
+<li>ioc: processInjectionTarget should only be called on scanning, not createInjectionTarget</li>
 <li>cloud: cross-pod deployment (#4807)</li>
 <li>servlet: isMultipartEnable() NPE (#4995)</li>
 <li>class-loader: sort tree-loader before adding to classpath (#5006)</li>
