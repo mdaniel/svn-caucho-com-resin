@@ -193,6 +193,13 @@ namespace Caucho
       else if (ResinArgs.RawArgs.Count == 1)
         arguments.Append(' ').Append("gui");
 
+      bool isStart = "start".Equals(command)
+                     || "gui".Equals(command)
+                     || "console".Equals(command);
+
+      if (isStart && ResinArgs.Cluster != null)
+        arguments.Append(" -cluster ").Append(ResinArgs.Cluster);
+
       arguments.Append(' ').Append(ResinArgs.ResinArguments);
 
       startInfo.Arguments = arguments.ToString();

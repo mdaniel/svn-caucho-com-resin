@@ -662,8 +662,10 @@ namespace Caucho
       if (DynamicServer)
         sb.Append(" -cluster ").Append(Cluster);
 
-      if (Server != null && !"".Equals(Server))
+      if (DynamicServer) {
+      } else if (Server != null && !"".Equals(Server)) {
         sb.Append(" -server ").Append(Server);
+      }
 
       if (IsPreview)
         sb.Append(" -preview");
@@ -703,8 +705,8 @@ namespace Caucho
 
       if (Server != null)
         result.Append("-server ").Append(Server);
-      else if (DynamicServer != null)
-        result.Append("-dynamic:").Append(DynamicServer);
+      else if (DynamicServer)
+        result.Append("dynamic server");
       else
         result.Append("default server");
 

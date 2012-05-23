@@ -231,18 +231,12 @@ namespace Caucho
         {
           argsIdx += 2;
         }
-        else if ("-join-cluster".Equals(arguments[argsIdx])) {
+        else if ("-join-cluster".Equals(arguments[argsIdx])
+                  || "--join-cluster".Equals(arguments[argsIdx])
+                  || "-cluster".Equals(arguments[argsIdx]) 
+                  || "--cluster".Equals(arguments[argsIdx])) {
           DynamicServer = true;
           Cluster = arguments[argsIdx + 1];
-          resinArgs.Append("-cluster ").Append(Cluster).Append(' ');
-
-          argsIdx += 2;
-        }
-        else if ("-cluster".Equals(arguments[argsIdx]))
-        {
-          DynamicServer = true;
-          Cluster = arguments[argsIdx + 1];
-          resinArgs.Append("-cluster ").Append(Cluster).Append(' ');
 
           argsIdx += 2;
         }
@@ -346,9 +340,6 @@ namespace Caucho
                      || "stop".Equals(arguments[argsIdx])
                      || "thread-dump".Equals(arguments[argsIdx])
                      || "undeploy".Equals(arguments[argsIdx])
-                     || "user-add".Equals(arguments[argsIdx])
-                     || "user-list".Equals(arguments[argsIdx])
-                     || "user-remove".Equals(arguments[argsIdx])
                      || "watchdog".Equals(arguments[argsIdx])
                      || "web-app-deploy".Equals(arguments[argsIdx])
                      || "web-app-restart".Equals(arguments[argsIdx])

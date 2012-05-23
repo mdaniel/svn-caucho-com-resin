@@ -240,7 +240,6 @@ namespace Caucho
 
       _properties = new Hashtable();
 
-      String propertiesFile;
       XPathNavigator nav = _docNavigator.SelectSingleNode("caucho:resin", _xmlnsMgr);
       if (nav.MoveToFirstChild()) {
         do {
