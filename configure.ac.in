@@ -961,7 +961,6 @@ resin_pro_plugin=
 if test -r "${resin_pro}/modules/c/src/resin/mmap_file.c"; then
    resin_pro_plugin="resin"
 fi
-echo "PRO: ${resin_pro} ${resin_pro_plugin}"	
 
 resin_pro_plugins="$resin_pro_plugin"
 
@@ -1455,19 +1454,19 @@ init.d/resin
 bin/resinctl
 ], [])
 
-#if test -n "${resin_pro_plugins}"; then
-#  AC_OUTPUT([
-#    ${resin_pro}/modules/c/src/Makefile
-#    ${resin_pro}/modules/c/src/resin/Makefile
-#    ${resin_pro}/modules/c/src/resinssl/Makefile
-#  ])
-#fi
-
 if test -n "${resin_pro_plugins}"; then
   AC_OUTPUT([
-    modules/c/src/resin/Makefile
+    ${resin_pro}/modules/c/src/Makefile
+    ${resin_pro}/modules/c/src/resin/Makefile
+    ${resin_pro}/modules/c/src/resinssl/Makefile
   ])
 fi
+
+#if test -n "${resin_pro_plugins}"; then
+#  AC_OUTPUT([
+#    modules/c/src/resin/Makefile
+#  ])
+#fi
 
 echo ""
 echo ""
