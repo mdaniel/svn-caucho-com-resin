@@ -104,6 +104,10 @@ public class ToCharResponseAdapter extends ResponseAdapter {
   }
 
   class ToCharResponseStreamWrapper extends ToCharResponseStream {
+    ToCharResponseStreamWrapper()
+    {
+    }
+    
     @Override
     public String getEncoding()
     {

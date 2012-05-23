@@ -919,7 +919,7 @@ public class Table extends BlockStore {
     } catch (IOException e) {
       throw new SQLExceptionWrapper(e);
     }
-
+    
     synchronized (this) {
       if (_autoIncrementValue < max)
         _autoIncrementValue = max;
@@ -1029,24 +1029,31 @@ public class Table extends BlockStore {
         buffer[rowOffset] = (byte) ((buffer[rowOffset] & ~ROW_MASK) | ROW_VALID);
 
         xa.addUpdateBlock(block);
+        
+        long autoId = 0;
 
         if (_autoIncrementColumn != null) {
           long blockId = iter.getBlockId();
           
-          long value = _autoIncrementColumn.getLong(blockId, buffer, rowOffset);
+          autoId = _autoIncrementColumn.getLong(blockId, buffer, rowOffset);
 
           synchronized (this) {
-            if (_autoIncrementValue < value)
-              _autoIncrementValue = value;
+            if (_autoIncrementValue < autoId)
+              _autoIncrementValue = autoId;
           }
         }
         
         block.setDirty(rowOffset, rowOffset + _rowLength);
         
-        if (_identityColumn != null) {
-          GeneratedKeysResultSet rs = queryContext.getGeneratedKeysResultSet();
-          
-          if (rs != null) {
+        GeneratedKeysResultSet rs = queryContext.getGeneratedKeysResultSet();
+        
+        if (rs != null) {
+          if (_autoIncrementColumn != null) {
+            rs.setColumn(1, _autoIncrementColumn);
+            rs.setLong(1, autoId);
+            
+          }
+          else if (_identityColumn != null) {
             rs.setColumn(1, _identityColumn);
             rs.setLong(1, rowAddr);
           }
