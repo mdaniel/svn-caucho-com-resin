@@ -1411,14 +1411,13 @@ fi
 # final cleanup
 #
 
+resin_pro_plugins="$resin_pro_plugins $resin_ssl_plugin"
 plugins="$plugins"
 
 if test -z "${is_dev}"; then
   plugins="$plugins $resin_pro_plugin"
   resin_pro_plugins="$plugins"
 fi
-
-echo "XRESIN-PRO2: $resin_pro_plugins"
 
 AC_OUTPUT([
 Makefile
