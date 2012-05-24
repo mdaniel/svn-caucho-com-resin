@@ -148,12 +148,12 @@ AC_ARG_WITH(java-home,
 [JAVA_HOME=${withval}])
 
 if test -n "$JAVA_HOME"; then
-  a=b
+  JAVA_EXE="$JAVA_HOME/bin/java"
 elif test -x "/usr/libexec/java_home"; then
   JAVA_HOME=`/usr/libexec/java_home`
 else
   java=`which java 2>/dev/null`
-  if test $? = "0"; then
+  if test -x "$java"; then
     while test -h "$java"
     do
       head=`dirname $java`
@@ -200,20 +200,27 @@ fi
 
 AC_SUBST(JAVA_HOME)
 
-#JAVA_EXE="$JAVA_HOME/bin/java"
-JAVA_EXE=`which java`
+if test -z "$JAVA_EXE"; then
+  java=`which java 2>/dev/null`
+  if test -x "$java"; then
+    JAVA_EXE="$java"
+  fi
+fi
 
 if test -z "$JAVA_EXE"; then
   JAVA_EXE="$JAVA_HOME/bin/java"
 fi
 
-$JAVA_EXE -d64 -version 1>/dev/null 2>/dev/null
+AC_SUBST(JAVA_EXE)
 
+JAVA_ARGS=
+
+$JAVA_EXE -d64 -version 1>/dev/null 2>/dev/null
 if test $? = "0"; then
-  JAVA_EXE="$JAVA_EXE -d64"
+  JAVA_ARGS="-d64"
 fi
 
-AC_SUBST(JAVA_EXE)
+AC_SUBST(JAVA_ARGS)
 
 #
 # libtool stuff
@@ -649,7 +656,7 @@ fi
 
 echo $ECHO_N "checking if ${JAVA_EXE} is Java 1.6... "
 
-tmpname="/tmp/java$$.out"
+tmpname="/tmp/6.out"
 	       	
 $JAVA_EXE -version 2> $tmpname
 
@@ -662,61 +669,25 @@ fi
 
 echo "yes"
 
+rm -f $tmpname  
+
 #
 # 64bit heuristics
 #
-echo $ECHO_N "checking if Java is 64-bit... "
+echo $ECHO_N "checking if ${JAVA_EXE} is 64-bit... "
 
-tmpname="/tmp/java$$.out"
-	       	
-#$JAVA_HOME/bin/java -version 2> $tmpname
-
-$JAVA_EXE -version 2> $tmpname
-
-grep "64-Bit" $tmpname 1> /dev/null
-if test "$?" = "0"; then
+$JAVA_EXE -d64 -version 1>/dev/null 2>/dev/null
+if test $? = "0"; then
    b64_jni=true
 fi
 
-grep "amd64-64" $tmpname 1> /dev/null
-if test "$?" = "0"; then
-   b64_jni=true
-fi
-
-grep "x86_64" $tmpname 1> /dev/null
-if test "$?" = "0"; then
-   b64_jni=true
-fi
-
-grep "s390x-64" $tmpname 1> /dev/null
-if test "$?" = "0"; then
-   b64_jni=true
-fi
-               	
-$JAVA_HOME/bin/sparcv9/java -version 2> $tmpname
-grep "64-Bit" $tmpname 1> /dev/null
-     
-if test "$?" = "0"; then
-   b64_jni=true
-fi
-
-# Require user to use --enable-64bit if the version is optional
-# in the javac  
-#  
-#$JAVA_HOME/bin/java -d64 -version 2> $tmpname
-#grep "64-Bit" $tmpname 1> /dev/null
-    
-#if test "$?" = "0"; then
-#   b64_jni=true
-#fi
+# Require user to use --enable-64bit if the version is optional in the javac  
 
 if test -n "$b64_jni"; then	
    echo "yes"
 else   
    echo "no"
 fi
-
-rm -f $tmpname	
 
 #
 # --enable-64bit

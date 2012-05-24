@@ -15,6 +15,7 @@
 # use "unix# /sbin/chkconfig resin on"
 
 JAVA="@JAVA_EXE@"
+JAVA_ARGS="@JAVA_ARGS@"
 RESIN_HOME="@resin_home@"
 resin_root="@resin_root@"
 resin_conf="@resin_conf@"
@@ -32,13 +33,13 @@ if test -n "${resin_log}"; then
   args="$args -log-directory $resin_log"
 fi
 
-if test -z "${JAVA_EXE}"; then
-  JAVA_EXE="${JAVA}"
+if test -z "$JAVA_EXE"; then
+  JAVA_EXE="$JAVA"
 fi
 
-if test ! -x "${JAVA_EXE}"; then
-  if test -n "${JAVA_HOME}"; then
-    JAVA_EXE=$JAVA_HOME/bin/java
+if test ! -x "$JAVA_EXE"; then
+  if test -n "$JAVA_HOME"; then
+    JAVA_EXE="$JAVA_HOME/bin/java"
   fi
 fi
 
@@ -61,4 +62,4 @@ if test -z "${RESIN_HOME}"; then
   RESIN_HOME="$bin/.."
 fi  
 
-exec $JAVA_EXE -jar ${RESIN_HOME}/lib/resin.jar $args $*
+exec $JAVA_EXE $JAVA_ARGS -jar ${RESIN_HOME}/lib/resin.jar $args $*
