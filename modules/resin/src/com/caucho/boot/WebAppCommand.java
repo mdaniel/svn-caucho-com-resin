@@ -46,8 +46,9 @@ public abstract class WebAppCommand extends AbstractRepositoryCommand
 
     if (tag == null) {
       String name = args.getDefaultArg();
-      if (name == null)
-        throw new ConfigException("command requires tag or name be specified");
+      
+      if (name == null || "/".equals(name))
+        name = "ROOT";
 
       String stage = args.getArg("-stage");
       if (stage == null)

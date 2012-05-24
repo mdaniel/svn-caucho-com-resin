@@ -47,6 +47,7 @@ import com.caucho.network.listen.TcpPort;
 import com.caucho.server.admin.HmuxClientFactory;
 import com.caucho.server.admin.WebAppDeployClient;
 import com.caucho.util.L10N;
+import com.caucho.vfs.Path;
 
 public abstract class AbstractRepositoryCommand extends AbstractRemoteCommand {
   private static final L10N L = new L10N(AbstractRepositoryCommand.class);
@@ -122,6 +123,33 @@ public abstract class AbstractRepositoryCommand extends AbstractRemoteCommand {
     return new WebAppDeployClient(sender.getUrl(), sender);
   }
   
+  protected String getName(WatchdogArgs args, Path path)
+  {
+    String name = args.getArg("-name");
+    
+    String webapp = args.getArg("-web-app");
+    
+    if (webapp != null)
+      name = webapp;
+    
+    if (name == null && path != null) {
+      String tail = path.getTail();
+    
+      int p = tail.lastIndexOf('.');
+
+      name = tail.substring(0, p);
+    }
+    
+    if (name == null || name.equals("/")) {
+      name = "ROOT";
+    }
+    else if (name.startsWith("/")) {
+      name = name.substring(1);
+    }
+    
+    return name;
+  }
+
   private ActorSender createBamzClient(WatchdogArgs args,
                                         WatchdogClient client)
   {

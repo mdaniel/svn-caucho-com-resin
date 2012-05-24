@@ -1328,7 +1328,7 @@ fi
 # test the open ssl
 #
 
-if test -n "${OPENSSL_LIB}"; then	
+if test -n "${SSL_LIBS}"; then	
 cat >conftest.$ac_ext <<_ACEOF
 #include <openssl/ssl.h>
 #include <openssl/rsa.h>       
@@ -1350,7 +1350,11 @@ int main(int argc, char **argv)
 }
 _ACEOF
 
-${CC} -o conftest ${CFLAGS_OPENSSL} ${CFLAGS} ${INCLUDES} conftest.$ac_ext -L${OPENSSL_LIB} ${SSL_LIBS} ${PROXY_LIBS} 1>/dev/null 2>/dev/null
+if test -n "$OPENSSL_LIB"; then
+  FLAG_OPENSSL_LIB="-L${OPENSSL_LIB}"
+fi  
+
+${CC} -o conftest ${CFLAGS_OPENSSL} ${CFLAGS} ${INCLUDES} conftest.$ac_ext ${FLAG_OPENSSL_LIB} ${SSL_LIBS} ${PROXY_LIBS} 1>/dev/null 2>/dev/null
 
 if test "$?" != 0; then
   ${CC} -o conftest ${CFLAGS_OPENSSL} ${CFLAGS} ${INCLUDES} conftest.$ac_ext -L${OPENSSL_LIB} ${SSL_LIBS} ${PROXY_LIBS}
@@ -1369,7 +1373,7 @@ else
 fi  
 	
 rm -f conftest conftest.$ac_ext
-fi   
+fi
 
 AC_SUBST(INCLUDES)
 AC_SUBST(CFLAGS_OPENSSL)
@@ -1407,12 +1411,14 @@ fi
 # final cleanup
 #
 
-plugins="$plugins $resin_ssl_plugin"
+plugins="$plugins"
 
 if test -z "${is_dev}"; then
   plugins="$plugins $resin_pro_plugin"
   resin_pro_plugins="$plugins"
 fi
+
+echo "XRESIN-PRO2: $resin_pro_plugins"
 
 AC_OUTPUT([
 Makefile
