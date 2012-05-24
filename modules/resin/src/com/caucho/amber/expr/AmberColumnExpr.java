@@ -41,7 +41,7 @@ import com.caucho.util.CharBuffer;
 /**
  * Bound identifier expression.
  */
-public class ColumnExpr extends AbstractAmberExpr {
+public class AmberColumnExpr extends AbstractAmberExpr {
   protected PathExpr _parent;
   // identifier name value
   private AmberColumn _column;
@@ -51,7 +51,7 @@ public class ColumnExpr extends AbstractAmberExpr {
   /**
    * Creates a new unbound id expression.
    */
-  public ColumnExpr(PathExpr parent, AmberColumn column)
+  public AmberColumnExpr(PathExpr parent, AmberColumn column)
   {
     _parent = parent;
     _column = column;
