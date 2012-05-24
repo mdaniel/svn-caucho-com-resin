@@ -31,7 +31,7 @@ package com.caucho.amber.field;
 
 import com.caucho.amber.cfg.AbstractConfigIntrospector;
 import com.caucho.amber.expr.AmberExpr;
-import com.caucho.amber.expr.ColumnExpr;
+import com.caucho.amber.expr.AmberColumnExpr;
 import com.caucho.amber.expr.EmbeddedExpr;
 import com.caucho.amber.expr.PathExpr;
 import com.caucho.amber.query.QueryParser;
@@ -583,6 +583,6 @@ public class PropertyField extends AbstractField {
     else
       column = getColumn();
 
-    return new ColumnExpr(parent, column);
+    return new AmberColumnExpr(parent, column);
   }
 }

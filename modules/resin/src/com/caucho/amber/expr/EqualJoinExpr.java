@@ -111,9 +111,9 @@ public class EqualJoinExpr extends JoinExpr {
     IdExpr parent = (IdExpr) id.getParent();
 
     if (parent.getFromItem() == _fromItemA)
-      return new ColumnExpr(new IdExpr(_fromItemA), id.getColumn());
+      return new AmberColumnExpr(new IdExpr(_fromItemA), id.getColumn());
     else if (parent.getFromItem() == _fromItemB)
-      return new ColumnExpr(new IdExpr(_fromItemB), id.getColumn());
+      return new AmberColumnExpr(new IdExpr(_fromItemB), id.getColumn());
     else
       return id;
   }

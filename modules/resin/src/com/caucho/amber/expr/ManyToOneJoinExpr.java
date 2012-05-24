@@ -164,7 +164,7 @@ public class ManyToOneJoinExpr extends JoinExpr {
     if (sourceColumn == null)
       throw new IllegalStateException(id.getColumn().getName());
 
-    return new ColumnExpr(_sourceFromItem.getIdExpr(), sourceColumn);
+    return new AmberColumnExpr(_sourceFromItem.getIdExpr(), sourceColumn);
   }
 
   /**

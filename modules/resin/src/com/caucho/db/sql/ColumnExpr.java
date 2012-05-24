@@ -34,6 +34,7 @@ import com.caucho.db.table.TableIterator;
 import com.caucho.db.table.Column.ColumnType;
 
 import java.sql.SQLException;
+import java.sql.Types;
 import java.util.logging.Logger;
 
 final class ColumnExpr extends Expr {
@@ -57,7 +58,7 @@ final class ColumnExpr extends Expr {
     _type = type;
   }
 
-  public Class getType()
+  public Class<?> getType()
   {
     return _type;
   }
@@ -67,6 +68,15 @@ final class ColumnExpr extends Expr {
   {
     return getColumn().getTypeCode();
   }
+
+  /**
+   * Returns the column type.
+   */
+  public int getSQLType()
+  {
+    return getColumn().getSQLType();
+  }
+
   /**
    * Returns any column name.
    */

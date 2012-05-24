@@ -33,6 +33,7 @@ import java.util.ArrayList;
 
 import com.caucho.db.table.Table;
 import com.caucho.db.table.TableIterator;
+import com.caucho.db.table.Column.ColumnType;
 
 class OidExpr extends Expr {
   private Table _table;
@@ -62,6 +63,12 @@ class OidExpr extends Expr {
   public boolean isLong()
   {
     return true;
+  }
+  
+  @Override
+  public int getSQLType()
+  {
+    return ColumnType.IDENTITY.getSQLType();
   }
 
   /**

@@ -82,6 +82,11 @@ abstract public class Expr {
   {
     return ColumnType.NONE;
   }
+  
+  public int getSQLType()
+  {
+    return getTypeCode().getSQLType();
+  }
 
   /**
    * Returns true if the expression returns a long.
@@ -145,14 +150,6 @@ abstract public class Expr {
   public String getName()
   {
     return "";
-  }
-
-  /**
-   * Returns the column type.
-   */
-  public int getSQLType()
-  {
-    return Types.VARCHAR;
   }
 
   /**

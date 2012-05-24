@@ -34,7 +34,7 @@ import com.caucho.amber.table.AmberColumn;
 /**
  * Bound identifier expression.
  */
-public class KeyColumnExpr extends ColumnExpr {
+public class KeyColumnExpr extends AmberColumnExpr {
   /**
    * Creates a new unbound id expression.
    */

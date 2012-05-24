@@ -339,6 +339,13 @@ public class SelectResult {
     case BLOB:
       return readBlobBytes();
 
+    case VARCHAR:
+      try {
+        return readString().getBytes("utf-8");
+      } catch (Exception e) {
+        throw new RuntimeException(e);
+      }
+
     default:
       throw new RuntimeException("unknown column type:" + type + " column:" + index);
     }
