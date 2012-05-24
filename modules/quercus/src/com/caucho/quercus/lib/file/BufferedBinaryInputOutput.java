@@ -88,6 +88,16 @@ abstract public class BufferedBinaryInputOutput
     }
   }
 
+  @Override
+  public int getAvailable()
+    throws IOException
+  {
+    if (_is != null)
+      return _is.available();
+    else
+      return -1;
+  }
+
   /**
    * Reads a character from a file, returning -1 on EOF.
    */

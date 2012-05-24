@@ -458,8 +458,9 @@ public final class JniSocketImpl extends QSocket {
     
     if (requestExpireTime > 0 && requestExpireTime < CurrentTime.getCurrentTime()) {
       close();
-      throw new ClientDisconnectException(L.l("{0}: request-timeout write",
-                                              getRemoteAddress()));
+      throw new ClientDisconnectException(L.l("{0}: request-timeout write exp={0}s",
+                                              getRemoteAddress(),
+                                              CurrentTime.getCurrentTime() - requestExpireTime));
     }
     
     synchronized (_writeLock) {

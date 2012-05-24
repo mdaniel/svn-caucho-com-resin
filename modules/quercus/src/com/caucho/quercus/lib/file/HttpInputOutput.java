@@ -220,6 +220,13 @@ public class HttpInputOutput extends AbstractBinaryOutput
     return _is;
   }
 
+  @Override
+  public int getAvailable()
+    throws IOException
+  {
+    return _is.available();
+  }
+  
   /**
    * Opens a copy.
    */

@@ -50,6 +50,12 @@ public interface BinaryInput extends BinaryStream {
     throws IOException;
 
   /**
+   * @return
+   */
+  public int getAvailable()
+    throws IOException;
+
+  /**
    * Reads the next byte, returning -1 on eof.
    */
   public int read()

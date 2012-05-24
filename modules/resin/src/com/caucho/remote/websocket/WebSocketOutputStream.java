@@ -166,12 +166,14 @@ public class WebSocketOutputStream extends OutputStream
     if (_state == MessageState.IDLE)
       return;
     
-    complete(true);
-    
-    _state = MessageState.IDLE;
-    
-    if (_isAutoFlush) {
-      _os.flush();
+    try {
+      complete(true);
+      
+      if (_isAutoFlush) {
+        _os.flush();
+      }
+    } finally {
+      _state = MessageState.IDLE;
     }
   }
 

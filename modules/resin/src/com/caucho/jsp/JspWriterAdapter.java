@@ -246,7 +246,7 @@ public class JspWriterAdapter extends AbstractBodyContent {
       // jsp/0504
       closeError("flush()");
     }
-    
+
     // server/2hf3
     if (_response != null) {
       _response.flushBuffer();

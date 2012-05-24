@@ -85,6 +85,13 @@ public class AbstractBinaryInput
   {
     return _is;
   }
+  
+  @Override
+  public int getAvailable()
+    throws IOException
+  {
+    return _is.getAvailable();
+  }
 
   /**
    * Opens a copy.

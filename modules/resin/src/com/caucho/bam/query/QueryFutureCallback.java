@@ -79,30 +79,33 @@ public class QueryFutureCallback extends AbstractQueryCallback {
   
   public Serializable get(long timeout)
   {
-    switch (_state) {
-    case REPLY:
-      return _result;
-      
-    case ERROR:
-      throw _error.createException();
-      
-    default:
-    {
-      _thread = Thread.currentThread();
+    _thread = Thread.currentThread();
 
-      LockSupport.parkNanos(timeout * 1000000L);
-      
-      _thread = null;
-      
+    try {
       switch (_state) {
       case REPLY:
         return _result;
+
       case ERROR:
         throw _error.createException();
+
       default:
-        throw new IllegalStateException(L.l("future timeout"));
+      {
+        LockSupport.parkNanos(timeout * 1000000L);
+
+
+        switch (_state) {
+        case REPLY:
+          return _result;
+        case ERROR:
+          throw _error.createException();
+        default:
+          throw new IllegalStateException(L.l("future timeout"));
+        }
       }
-    }
+      }
+    } finally {
+      _thread = null;
     }
   }
   

@@ -1897,21 +1897,29 @@ abstract public class StringValue
     TempBuffer tBuf = TempBuffer.allocate();
 
     try {
+      int readLength = 0;
       byte []buffer = tBuf.getBuffer();
-      int sublen = buffer.length;
-      if (length < sublen)
-        sublen = (int) length;
-      else if (length > sublen) {
-        buffer = new byte[(int) length];
-        sublen = (int) length;
+      
+      while (length > 0) {
+        int sublen = Math.min((int) length, buffer.length);
+        
+        if (readLength > 0 && is.getAvailable() <= 0) {
+          return readLength;
+        }
+
+        sublen = is.read(buffer, 0, sublen);
+
+        if (sublen > 0) {
+          append(buffer, 0, sublen);
+          readLength += sublen;
+          length -= sublen;
+        }
+        else {
+          return readLength > 0 ? readLength: sublen;
+        }
       }
-
-      sublen = is.read(buffer, 0, sublen);
-
-      if (sublen > 0)
-        append(buffer, 0, sublen);
-
-      return sublen;
+      
+      return readLength;
     } catch (IOException e) {
       throw new QuercusModuleException(e);
     } finally {

@@ -127,6 +127,13 @@ public class FileInputOutput extends AbstractBinaryOutput
       return null;
     }
   }
+  
+  @Override
+  public int getAvailable()
+    throws IOException
+  {
+    return _stream.getInputStream().available();
+  }
 
   /**
    * Returns the path.
