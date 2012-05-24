@@ -289,9 +289,7 @@ public class PdfReportAction implements AdminAction
     if (_fileName == null) {
       String date = QDate.formatLocal(CurrentTime.getCurrentTime(), "%Y%m%dT%H%M");
 
-      String serverId = _serverId;
-      if (serverId == null || serverId.isEmpty())
-        serverId = "default";
+      String serverId = Resin.getCurrent().getServerIdFilePart();
 
       _fileName = String.format("%s-%s-%s.pdf",
                                 serverId,

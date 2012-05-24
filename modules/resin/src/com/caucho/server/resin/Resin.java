@@ -255,6 +255,12 @@ public class Resin
     return _serverId;
   }
 
+  public String getServerIdFilePart() {
+    if (_serverId == null || _serverId.isEmpty())
+      return "default";
+    else return _serverId.replace(':', '_');
+  }
+
   /**
    * Sets the server id.
    */
