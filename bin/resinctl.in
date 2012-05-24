@@ -32,7 +32,7 @@ if test -n "${resin_log}"; then
   args="$args -log-directory $resin_log"
 fi
 
-if test -n "${JAVA_EXE}"; then
+if test -z "${JAVA_EXE}"; then
   JAVA_EXE="${JAVA}"
 fi
 
