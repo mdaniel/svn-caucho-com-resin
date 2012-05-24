@@ -580,7 +580,10 @@ class WatchdogClient
     if (("".equals(args.getServerId()) || args.getServerId() == null)
         && ! args.isDynamicServer()) {
       list.add("-server");
-      list.add(getId());
+      if ((getId() == null || "".equals(getId())) && CauchoSystem.isWindows())
+        list.add("\"\"");
+      else
+        list.add(getId());
     }
 
     for (int i = 0; i < argv.length; i++) {
