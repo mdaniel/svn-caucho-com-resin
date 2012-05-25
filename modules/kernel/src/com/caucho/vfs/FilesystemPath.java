@@ -82,13 +82,13 @@ abstract public class FilesystemPath extends Path {
 
     if (lastSlash < 1)
       return lookup("/");
-    
+
     if (lastSlash == length - 1) {
       lastSlash = _pathname.lastIndexOf('/', length - 2);
       if (lastSlash < 1)
         return lookup("/");
     }
-  
+
     return lookup(_pathname.substring(0, lastSlash));
   }
 
@@ -131,7 +131,7 @@ abstract public class FilesystemPath extends Path {
    * @return the matching path
    */
   abstract public Path fsWalk(String userPath,
-                              Map<String,Object> newAttributes, 
+                              Map<String,Object> newAttributes,
                               String newPath);
 
   /**
@@ -143,7 +143,7 @@ abstract public class FilesystemPath extends Path {
    *
    * @return the normalized path
    */
-  static protected String normalizePath(String oldPath, 
+  static protected String normalizePath(String oldPath,
                                         String newPath,
                                         int offset,
                                         char separatorChar)
@@ -168,7 +168,7 @@ abstract public class FilesystemPath extends Path {
    * @param newPath the relative path
    * @param offset where in the child path to start
    */
-  static protected void normalizePath(CharBuffer cb, String oldPath, 
+  static protected void normalizePath(CharBuffer cb, String oldPath,
                                       String newPath, int offset,
                                       char separatorChar)
   {
@@ -220,7 +220,7 @@ abstract public class FilesystemPath extends Path {
             break;
           }
           // the separator falls through to be treated as '/'
-            
+
           // "/./" -> "/"
         case '/':
           i += 2;
@@ -329,7 +329,7 @@ abstract public class FilesystemPath extends Path {
   public Path createRoot(SchemeMap schemeMap)
   {
     FilesystemPath restriction = (FilesystemPath) copy();
-    
+
     restriction._schemeMap = schemeMap;
     restriction._root = this;
     restriction._pathname = "/";

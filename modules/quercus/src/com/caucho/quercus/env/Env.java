@@ -6408,7 +6408,7 @@ public class Env
   {
     return getExceptionLocation(msg, getLocation());
   }
-  
+
   private String getExceptionLocation(String msg, Location loc)
   {
     if (loc != null && ! loc.isUnknown()) {

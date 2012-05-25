@@ -74,35 +74,6 @@ public class GoogleQuercusServletImpl extends QuercusServletImpl
     return this;
   }
 
-  public void serviceStatic(HttpServletRequest request,
-                            HttpServletResponse response)
-    throws ServletException, IOException
-  {
-    Path path = getPath(request);
-
-    if (! path.exists()) {
-      response.sendError(HttpServletResponse.SC_NOT_FOUND);
-
-      return;
-    }
-
-    String uri = request.getRequestURI();
-
-    String mimeType = _webApp.getMimeType(uri);
-
-    if (mimeType != null) {
-      response.setContentType(mimeType);
-    }
-
-    response.setContentLength((int) path.getLength());
-
-    WriteStream ws = openWrite(response);
-
-    path.writeToStream(ws);
-
-    ws.flush();
-  }
-
   @Override
   protected void handleThrowable(HttpServletResponse response, Throwable e)
     throws IOException, ServletException

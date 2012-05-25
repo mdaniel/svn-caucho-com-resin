@@ -771,6 +771,20 @@ public class MergePath extends FilesystemPath {
     return _pathList;
   }
 
+  @Override
+  public Path copy()
+  {
+    MergePath copy = new MergePath();
+
+    ArrayList<Path> pathList = getPathList();
+
+    for (Path path : pathList) {
+      copy.addMergePath(path.copy());
+    }
+
+    return copy;
+  }
+
   /**
    * Returns a name for the path
    */

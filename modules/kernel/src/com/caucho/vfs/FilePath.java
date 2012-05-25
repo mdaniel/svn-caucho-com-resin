@@ -320,13 +320,13 @@ public class FilePath extends FilesystemPath {
 
     for (; offset < length; offset++) {
       ch = path.charAt(offset);
-      
+
       if (ch == '/')
         cb.append(_separatorChar);
       else
         cb.append(ch);
     }
-    
+
     return cb.toString();
   }
 
@@ -620,7 +620,7 @@ public class FilePath extends FilesystemPath {
   }
 
   @Override
-  protected Path copy()
+  public Path copy()
   {
     return new FilePath(getRoot(), getUserPath(), getPath());
   }

@@ -87,6 +87,22 @@ abstract public class GooglePath extends FilesystemPath {
     _inode = new GoogleInode("", FileType.DIRECTORY, 0, 0);
   }
 
+  protected GooglePath(GooglePath path)
+  {
+    super(null, path._userPath, path._pathname);
+
+    if (path == path._root) {
+      _root = this;
+    }
+    else {
+      _root = path._root;
+    }
+
+    _fileService = path._fileService;
+
+    _inode = new GoogleInode(path._inode);
+  }
+
   protected void init()
   {
     if (readDirMap() == null) {
@@ -464,7 +480,7 @@ abstract public class GooglePath extends FilesystemPath {
   }
 
   @Override
-  protected Path copy()
+  public Path copy()
   {
     return createInstance(getRoot(), getUserPath(), getPath());
   }

@@ -63,6 +63,14 @@ public final class GoogleInode implements Serializable {
     _lastModified = lastModified;
   }
 
+  public GoogleInode(GoogleInode inode)
+  {
+    _name = inode._name;
+    _type = inode._type;
+    _length = inode._length;
+    _lastModified = inode._lastModified;
+  }
+
   public final String getName()
   {
     return _name;

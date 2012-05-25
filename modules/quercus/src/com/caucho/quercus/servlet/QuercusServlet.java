@@ -31,7 +31,6 @@ package com.caucho.quercus.servlet;
 
 import com.caucho.config.ConfigException;
 import com.caucho.quercus.QuercusContext;
-import com.caucho.quercus.QuercusRequestAdapter;
 import com.caucho.quercus.QuercusRuntimeException;
 import com.caucho.quercus.lib.db.QuercusDataSource;
 import com.caucho.quercus.module.QuercusModule;
@@ -101,8 +100,6 @@ public class QuercusServlet
 
   private ArrayList<ServerEnv> _serverEnvList
     = new ArrayList<ServerEnv>();
-
-  private String[] _staticFileExtensions;
 
   public QuercusServlet()
   {
@@ -201,26 +198,6 @@ public class QuercusServlet
     _dependencyCheckInterval = ms;
   }
 
-  public void setStaticFileExtensions(String list)
-  {
-    ArrayList<String> extensionList = new ArrayList<String>();
-
-    String[] tokens = list.split(",");
-
-    for (int i = 0; i < tokens.length; i++) {
-      String token = tokens[i];
-
-      if (token.length() > 0) {
-        extensionList.add(token);
-      }
-    }
-
-    String[] extensions = new String[extensionList.size()];
-    extensionList.toArray(extensions);
-
-    _staticFileExtensions = extensions;
-  }
-
   /**
    * Set the default data source.
    */
@@ -249,7 +226,7 @@ public class QuercusServlet
     _isLooseParse = isLooseParse;
   }
 
-  /*
+  /**
    * Sets the max size of the page cache.
    */
   public void setPageCacheEntries(int entries)
@@ -257,7 +234,7 @@ public class QuercusServlet
     _pageCacheSize = entries;
   }
 
-  /*
+  /**
    * Sets the max size of the page cache.
    */
   public void setPageCacheSize(int size)
@@ -265,7 +242,7 @@ public class QuercusServlet
     _pageCacheSize = size;
   }
 
-  /*
+  /**
    * Sets the max size of the regexp cache.
    */
   public void setRegexpCacheSize(int size)
@@ -273,7 +250,7 @@ public class QuercusServlet
     _regexpCacheSize = size;
   }
 
-  /*
+  /**
    * Turns connection pooling on or off.
    */
   public void setConnectionPool(boolean isEnable)
@@ -458,9 +435,6 @@ public class QuercusServlet
     else if ("dependency-check-interval".equals(paramName)) {
       setDependencyCheckInterval(Long.parseLong(paramValue));
     }
-    else if ("static-file-extensions".equals(paramName)) {
-      setStaticFileExtensions(paramValue);
-    }
     else
       throw new ServletException(
           L.l("'{0}' is not a recognized init-param", paramName));
@@ -584,22 +558,6 @@ public class QuercusServlet
     //System.err.println("QuercusServlet->service1: " + request.getRequestURI() + " . " + request.getQueryString());
 
     //long start = System.currentTimeMillis();
-
-    String[] staticFileExtensions = _staticFileExtensions;
-
-    if (staticFileExtensions != null) {
-      String scriptPath = QuercusRequestAdapter.getPageServletPath(request);
-
-      for (int i = 0; i < staticFileExtensions.length; i++) {
-        String extension = staticFileExtensions[i];
-
-        if (scriptPath.endsWith(extension)) {
-          _impl.serviceStatic(request, response);
-
-          return;
-        }
-      }
-    }
 
     _impl.service(request, response);
 

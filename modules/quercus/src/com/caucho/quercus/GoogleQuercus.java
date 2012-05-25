@@ -69,14 +69,7 @@ public class GoogleQuercus extends QuercusContext
     if (gsBucket != null) {
       Path stdPwd = getPwd();
 
-      GooglePath gsPath;
-
-      if ("default".equals(gsBucket)) {
-        gsPath = new GoogleStorePath(null);
-      }
-      else {
-        gsPath = new GoogleStorePath(gsBucket);
-      }
+      GooglePath gsPath = new GoogleStorePath(gsBucket);
 
       MergePath mergePwd = new MergePath(gsPath, stdPwd);
       Path pwd = mergePwd;

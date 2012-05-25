@@ -29,7 +29,6 @@
 
 package com.caucho.vfs;
 
-import com.caucho.util.IoUtil;
 import com.google.appengine.api.files.AppEngineFile;
 import com.google.appengine.api.files.FileWriteChannel;
 import com.google.appengine.api.files.GSFileOptions.GSFileOptionsBuilder;
@@ -49,11 +48,6 @@ public class GoogleStorePath extends GooglePath
     _bucket = gsRoot._bucket;
   }
 
-  public GoogleStorePath()
-  {
-    this(null);
-  }
-
   public GoogleStorePath(String bucket)
   {
     super();
@@ -71,6 +65,13 @@ public class GoogleStorePath extends GooglePath
     }
 
     init();
+  }
+
+  public GoogleStorePath(GoogleStorePath path)
+  {
+    super(path);
+
+    _bucket = path._bucket;
   }
 
   public String getBucket()
@@ -143,5 +144,11 @@ public class GoogleStorePath extends GooglePath
     FileWriteChannel os = _fileService.openWriteChannel(file, isLock);
 
     return new GoogleWriteStream(this, os, getGoogleInode());
+  }
+
+  @Override
+  public Path copy()
+  {
+    return new GoogleStorePath(this);
   }
 }

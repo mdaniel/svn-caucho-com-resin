@@ -266,13 +266,6 @@ public class QuercusServletImpl extends HttpServlet
     }
   }
 
-  public void serviceStatic(HttpServletRequest request,
-                            HttpServletResponse response)
-    throws ServletException, IOException
-  {
-    service(request, response);
-  }
-
   protected void handleThrowable(HttpServletResponse response, Throwable e)
     throws IOException, ServletException
   {

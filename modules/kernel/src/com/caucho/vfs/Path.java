@@ -145,7 +145,7 @@ public abstract class Path implements Comparable<Path> {
   public final Path lookup(URL url)
   {
     String name = URLDecoder.decode(url.toString());
-  
+
     return lookup(name, null);
   }
 
@@ -168,7 +168,7 @@ public abstract class Path implements Comparable<Path> {
       return this;
 
     Path path = getCache(userPath);
-      
+
     if (path != null)
       return path;
 
@@ -182,12 +182,12 @@ public abstract class Path implements Comparable<Path> {
 
     return path;
   }
-  
+
   protected Path getCache(String subPath)
   {
     if (! isPathCacheable())
       return null;
-    
+
     PathKey key = _key.getAndSet(null);
 
     if (key == null)
@@ -204,12 +204,12 @@ public abstract class Path implements Comparable<Path> {
     else
       return null;
   }
-  
+
   protected void putCache(String subPath, Path path)
   {
     if (! isPathCacheable())
       return;
-    
+
     Path copy = path.cacheCopy();
 
     if (copy != null) {
@@ -236,7 +236,7 @@ public abstract class Path implements Comparable<Path> {
    *
    * @return the new path or null if the scheme doesn't exist
    */
-  public Path lookupImpl(String userPath, 
+  public Path lookupImpl(String userPath,
                          Map<String,Object> newAttributes,
                          boolean isAllowRoot)
   {
@@ -247,7 +247,7 @@ public abstract class Path implements Comparable<Path> {
     if (! isAllowRoot) {
       return schemeWalk(userPath, newAttributes, userPath, 0);
     }
-      
+
     String scheme = scanScheme(userPath);
 
     if (scheme == null) {
@@ -1178,7 +1178,7 @@ public abstract class Path implements Comparable<Path> {
 
     StreamImpl impl = openReadWriteImpl();
     impl.setPath(this);
-    
+
     WriteStream writeStream = new WriteStream(impl);
     ReadStream readStream;
 
@@ -1186,7 +1186,7 @@ public abstract class Path implements Comparable<Path> {
       readStream = new ReadStream(impl, writeStream);
     else
       readStream = new ReadStream(impl, null);
-    
+
     return new ReadWritePair(readStream, writeStream);
   }
 
@@ -1224,7 +1224,7 @@ public abstract class Path implements Comparable<Path> {
   /**
    * Opens a random-access stream.
    */
-  public RandomAccessStream openMemoryMappedFile(long fileSize) 
+  public RandomAccessStream openMemoryMappedFile(long fileSize)
     throws IOException
   {
     return null;
@@ -1394,7 +1394,7 @@ public abstract class Path implements Comparable<Path> {
       is.close();
     }
   }
-  
+
   /**
    * Utility to write the contents of this path to the destination stream.
    *
@@ -1551,7 +1551,7 @@ public abstract class Path implements Comparable<Path> {
         }
         cb.append("%25");
         break;
-        
+
       case '+':
         if (cb == null) {
           cb = new CharBuffer();
@@ -1573,16 +1573,16 @@ public abstract class Path implements Comparable<Path> {
       return rawURL;
   }
 
-  protected Path copy()
+  public Path copy()
   {
     return this;
   }
-  
+
   public Path unwrap()
   {
     return this;
   }
-  
+
   /**
    * Copy for caching.
    */
@@ -1590,7 +1590,7 @@ public abstract class Path implements Comparable<Path> {
   {
     return this;
   }
-  
+
   @Override
   public int compareTo(Path path)
   {

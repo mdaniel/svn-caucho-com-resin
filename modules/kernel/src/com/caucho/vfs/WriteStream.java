@@ -54,7 +54,7 @@ import com.caucho.vfs.i18n.EncodingWriter;
  * streams.
  */
 public class WriteStream extends OutputStreamWithBuffer
-implements LockableStream, SendfileOutputStream
+  implements LockableStream, SendfileOutputStream
 {
   private static final byte []LF_BYTES = new byte[] {'\n'};
   private static final byte []CR_BYTES = new byte[] {'\r'};
@@ -73,7 +73,7 @@ implements LockableStream, SendfileOutputStream
   private TempBuffer _tempWrite;
   private byte []_writeBuffer;
   private int _writeLength;
-  
+
   private boolean _isFlushRequired;
 
   private StreamImpl _source;
@@ -144,9 +144,9 @@ implements LockableStream, SendfileOutputStream
     _position = 0;
     _writeLength = 0;
     _isFlushRequired = false;
-    
+
     _isFlushOnNewline = source.getFlushOnNewline();
-    
+
     // Possibly, this should be dependent on the source.  For example,
     // a http: stream should behave the same on Mac as on unix.
     // For now, CauchoSystem.getNewlineString() returns "\n".
@@ -156,7 +156,7 @@ implements LockableStream, SendfileOutputStream
     _writeEncoding = null;
     _writeEncodingName = "ISO-8859-1";
   }
-  
+
   public void setSysNewline()
   {
     _newline = _sysNewline;
@@ -293,7 +293,7 @@ implements LockableStream, SendfileOutputStream
     if (_implicitFlush)
       flush();
   }
-  
+
   /**
    * Writes a byte array
    */
@@ -301,10 +301,10 @@ implements LockableStream, SendfileOutputStream
   public void write(byte []buf, int offset, int length) throws IOException
   {
     byte []buffer = _writeBuffer;
-    
+
     int bufferLength = buffer.length;
     int writeLength = _writeLength;
-    
+
     StreamImpl source = _source;
     if (source == null) {
       return;
@@ -321,14 +321,14 @@ implements LockableStream, SendfileOutputStream
       if (writeLength > 0) {
         source.write(buffer, 0, writeLength, false);
       }
-      
+
       source.write(buf, offset, length, false);
       _writeLength = 0;
       _position += length;
       _isFlushRequired = true;
       return;
     }
-    
+
     while (length > 0) {
       int sublen = Math.min(length, bufferLength - writeLength);
 
@@ -347,7 +347,7 @@ implements LockableStream, SendfileOutputStream
     }
 
     _writeLength = writeLength;
- 
+
     if (_implicitFlush)
       flush();
   }
@@ -394,7 +394,7 @@ implements LockableStream, SendfileOutputStream
     int len = _writeLength;
     if (len > 0) {
       _writeLength = 0;
-      
+
       _source.write(_writeBuffer, 0, len, false);
       _isFlushRequired = true;
 
@@ -414,7 +414,7 @@ implements LockableStream, SendfileOutputStream
   {
     StreamImpl source = _source;
 
-    if (_disableFlush || source == null) { 
+    if (_disableFlush || source == null) {
       return;
     }
 
@@ -620,7 +620,7 @@ implements LockableStream, SendfileOutputStream
         writeLength = 0;
         sublen = writeBuffer.length - writeLength;
       }
-      
+
       sublen = Math.min(sublen, length);
 
       for (int i = sublen - 1; i >= 0; i--) {
@@ -631,16 +631,16 @@ implements LockableStream, SendfileOutputStream
       offset += sublen;
       length -= sublen;
     }
-    
+
     _writeLength = writeLength;
   }
-  
+
   public final void printUtf8(String value, int offset, int length)
     throws IOException
   {
     for (int i = 0; i < length; i++) {
       int ch = value.charAt(offset + i);
-      
+
       if (ch < 0x80) {
         write(ch);
       }
@@ -773,25 +773,25 @@ implements LockableStream, SendfileOutputStream
     if (_source == null) {
       return;
     }
-    
+
     if (string == null) {
       string = "null";
     }
 
     byte []writeBuffer = _writeBuffer;
     int writeLength = _writeLength;
-    
+
     int length = string.length();
     int offset = 0;
-    
+
     int charsLength = CHARS_LENGTH;
     char []chars = _chars;
-    
+
     //if (chars == null) {
     //  _chars = new char[charsLength];
     //  chars = _chars;
     //}
-    
+
     while (length > 0) {
       int sublen = Math.min(charsLength, writeBuffer.length - writeLength);
 
@@ -800,29 +800,29 @@ implements LockableStream, SendfileOutputStream
         _position += writeLength;
         _isFlushRequired = true;
         writeLength = 0;
-        
+
         sublen = Math.min(charsLength,  writeBuffer.length - writeLength);
       }
-      
+
       sublen = Math.min(length, sublen);
-      
+
       string.getChars(offset, sublen, chars, 0);
 
       for (int i = 0; i < sublen; i++) {
         byte value = (byte) chars[i];
-        
+
         if (value == '\r' || value == '\n') {
           length = 0;
           break;
         }
-        
+
         writeBuffer[writeLength++] = value;
       }
-      
+
       offset += sublen;
       length -= sublen;
     }
-    
+
     _writeLength = writeLength;
   }
 
@@ -837,17 +837,17 @@ implements LockableStream, SendfileOutputStream
 
     int length = string.length();
     int offset = 0;
-    
+
     char []chars = _chars;
 
     while (length > 0) {
       int sublen = Math.min(length, chars.length);
 
       string.getChars(offset, offset + sublen, chars, 0);
-      
+
       for (int i = sublen - 1; i >= 0; i--) {
         char value = chars[i];
-        
+
         // server/1kr8
         if (value == '\r' || value == '\n') {
           sublen = i;
@@ -1273,7 +1273,7 @@ implements LockableStream, SendfileOutputStream
 
       _writeLength += sublen;
       totalLength -= sublen;
-      
+
       if (length <= _writeLength) {
         int tmplen = _writeLength;
         _writeLength = 0;
@@ -1410,7 +1410,7 @@ implements LockableStream, SendfileOutputStream
         TempBuffer tempWrite = _tempWrite;
         _tempWrite = null;
         _writeBuffer = null;
-        
+
         if (tempWrite != null) {
           TempBuffer.free(tempWrite);
         }
@@ -1429,10 +1429,10 @@ implements LockableStream, SendfileOutputStream
     _source = null;
 
     TempBuffer tempWrite = _tempWrite;
-    
+
     _tempWrite = null;
     _writeBuffer = null;
-    
+
     if (tempWrite != null) {
       TempBuffer.free(tempWrite);
     }
@@ -1593,20 +1593,20 @@ implements LockableStream, SendfileOutputStream
       int writeLength = _writeLength;
       _writeLength = 0;
       _position += writeLength;
-      
+
       _source.write(_writeBuffer, 0, writeLength, false);
     }
 
     _source.writeMmap(mmapAddress, mmapOffset, mmapLength);
-    
+
     _position += mmapLength;
   }
   */
-  
+
   @Override
   public void writeMmap(long mmapAddress,
                         long []mmapBlocks,
-                        long mmapOffset, 
+                        long mmapOffset,
                         long mmapLength)
     throws IOException
   {
@@ -1614,13 +1614,13 @@ implements LockableStream, SendfileOutputStream
       int writeLength = _writeLength;
       _writeLength = 0;
       _position += writeLength;
-      
+
       _source.write(_writeBuffer, 0, writeLength, false);
     }
 
     _source.writeMmap(mmapAddress, mmapBlocks, mmapOffset, mmapLength);
     _isFlushRequired = true;
-    
+
     _position += mmapLength;
   }
 
@@ -1630,19 +1630,19 @@ implements LockableStream, SendfileOutputStream
     throws IOException
   {
     int writeLength = _writeLength;
-    
+
     if (writeLength > 0) {
       _writeLength = 0;
       _position += writeLength;
-      
+
       // _source.write(_writeBuffer, 0, writeLength, false);
     }
-    
+
     _source.writeSendfile(_writeBuffer, 0, writeLength,
                           fileName, nameLength, fileLength);
-    
+
     _isFlushRequired = true;
-    
+
     _position += fileLength;
   }
 
