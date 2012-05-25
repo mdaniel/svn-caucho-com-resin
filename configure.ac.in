@@ -111,8 +111,8 @@ elif test -d "/etc/rc.d"; then
   resin_init_d="/etc/rc.d"
 fi
 
-AC_ARG_WITH(resin-init.d,
-[AS_HELP_STRING([--with-resin-init.d=PATH], 
+AC_ARG_WITH(resin-init-d,
+[AS_HELP_STRING([--with-resin-init-d=PATH], 
                 [resin startup (init.d) script path])], 
 [
 case "${withval}" in
