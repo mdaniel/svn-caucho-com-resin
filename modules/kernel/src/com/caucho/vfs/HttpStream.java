@@ -839,8 +839,9 @@ class HttpStream extends StreamImpl {
 
       if (oldValue != null) {
         value = oldValue + '\n' + value;
-        _attributes.put(keyString, value);
       }
+      
+      _attributes.put(keyString, value);
     }
   }
 

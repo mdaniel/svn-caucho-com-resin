@@ -12,6 +12,8 @@
 
 <s2 title="4.0.28 - snapshot">
 <ul>
+<li>hessian: add deflate support to hessian proxy (#4151, rep by ebourg)</li>
+<li>hessian: Iterator deserializer (#4164, rep by ebourg)</li>
 <li>ioc: processInjectionTarget should only be called on scanning, not createInjectionTarget</li>
 <li>cloud: cross-pod deployment (#4807)</li>
 <li>servlet: isMultipartEnable() NPE (#4995)</li>
