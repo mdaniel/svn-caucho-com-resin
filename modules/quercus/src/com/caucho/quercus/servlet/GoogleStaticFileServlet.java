@@ -32,6 +32,7 @@ package com.caucho.quercus.servlet;
 import com.caucho.quercus.GoogleQuercus;
 import com.caucho.quercus.QuercusRequestAdapter;
 import com.caucho.vfs.FilePath;
+import com.caucho.vfs.GoogleMergePath;
 import com.caucho.vfs.GoogleStorePath;
 import com.caucho.vfs.MergePath;
 import com.caucho.vfs.Path;
@@ -77,9 +78,7 @@ public class GoogleStaticFileServlet extends GenericServlet {
     String gsBucket = quercus.getIniString("quercus.gs_bucket");
     _gsBucket = gsBucket;
 
-    GoogleStorePath gsPath = new GoogleStorePath(gsBucket);
-
-    _path = new MergePath(gsPath, pwd);
+    _path = new GoogleMergePath(pwd, gsBucket, true);
   }
 
   @Override

@@ -35,6 +35,7 @@ import com.caucho.quercus.env.GoogleEnv;
 import com.caucho.quercus.env.Value;
 import com.caucho.quercus.page.QuercusPage;
 import com.caucho.quercus.module.ModuleContext;
+import com.caucho.vfs.GoogleMergePath;
 import com.caucho.vfs.GooglePath;
 import com.caucho.vfs.GoogleStorePath;
 import com.caucho.vfs.MergePath;
@@ -69,15 +70,11 @@ public class GoogleQuercus extends QuercusContext
     if (gsBucket != null) {
       Path stdPwd = getPwd();
 
-      GooglePath gsPath = new GoogleStorePath(gsBucket);
-
-      MergePath mergePwd = new MergePath(gsPath, stdPwd);
-      Path pwd = mergePwd;
-
-      setPwd(pwd);
+      GoogleMergePath mergePwd = new GoogleMergePath(stdPwd, gsBucket, true);
+      setPwd(mergePwd);
 
       Path webInfDir = getWebInfDir();
-      Path gsWebInfDir = gsPath.lookup("WEB-INF");
+      Path gsWebInfDir = mergePwd.getGooglePath().lookup("WEB-INF");
       MergePath mergeWebInf = new MergePath(gsWebInfDir, webInfDir);
 
       setWebInfDir(mergeWebInf);

@@ -745,7 +745,7 @@ public class MergePath extends FilesystemPath {
     return new NotFoundPath(getSchemeMap(), _userPath);
   }
 
-  private ArrayList<Path> getPathList()
+  protected ArrayList<Path> getPathList()
   {
     if (_pathList == null) {
       String pathname = _pathname;

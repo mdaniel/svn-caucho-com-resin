@@ -30,6 +30,8 @@
 package com.caucho.vfs;
 
 import com.google.appengine.api.files.AppEngineFile;
+import com.google.appengine.api.files.FileService;
+import com.google.appengine.api.files.FileServiceFactory;
 import com.google.appengine.api.files.FileWriteChannel;
 import com.google.appengine.api.files.GSFileOptions.GSFileOptionsBuilder;
 
@@ -39,18 +41,36 @@ public class GoogleStorePath extends GooglePath
 {
   private final String _bucket;
 
-  public GoogleStorePath(FilesystemPath root, String userPath, String path)
+  private GoogleStorePath(FilesystemPath root, String userPath, String path,
+                          FileService fileService,
+                          GoogleInodeService inodeService)
   {
-    super(root, userPath, path);
+    super(root, userPath, path, fileService, inodeService);
 
     GoogleStorePath gsRoot = (GoogleStorePath) root;
 
     _bucket = gsRoot._bucket;
   }
 
+  public GoogleStorePath()
+  {
+    this(FileServiceFactory.getFileService(),
+         new GoogleInodeService("quercus"),
+         null);
+    }
+
   public GoogleStorePath(String bucket)
   {
-    super();
+    this(FileServiceFactory.getFileService(),
+         new GoogleInodeService("quercus_" + bucket),
+         bucket);
+  }
+
+  public GoogleStorePath(FileService fileService,
+                         GoogleInodeService inodeService,
+                         String bucket)
+  {
+    super(fileService, inodeService);
 
     try {
       if (bucket == null) {
@@ -63,11 +83,9 @@ public class GoogleStorePath extends GooglePath
     catch (IOException e) {
       throw new IllegalStateException(e);
     }
-
-    init();
   }
 
-  public GoogleStorePath(GoogleStorePath path)
+  private GoogleStorePath(GoogleStorePath path)
   {
     super(path);
 
@@ -80,9 +98,12 @@ public class GoogleStorePath extends GooglePath
   }
 
   @Override
-  public GooglePath createInstance(FilesystemPath root, String userPath, String path)
+  public GooglePath createInstance(FilesystemPath root,
+                                   String userPath,
+                                   String path)
   {
-    return new GoogleStorePath(root, userPath, path);
+    return new GoogleStorePath(root, userPath, path,
+                               _fileService, _inodeService);
   }
 
   @Override
@@ -118,8 +139,7 @@ public class GoogleStorePath extends GooglePath
   {
     // System.out.println("XX-WRITE: " + getFullPath());
     if (! getParent().isDirectory() && ! getParent().mkdirs()) {
-      System.out.println("XX-WRITE-FAIL: " + getFullPath());
-      Thread.dumpStack();
+      //System.out.println("XX-WRITE-FAIL: " + getFullPath());
       throw new IOException(L.l("{0} must have a directory parent",
                                 getParent()));
     }

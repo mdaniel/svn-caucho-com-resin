@@ -34,6 +34,7 @@ import com.google.appengine.api.blobstore.BlobstoreFailureException;
 import com.google.appengine.api.blobstore.BlobstoreService;
 import com.google.appengine.api.blobstore.BlobstoreServiceFactory;
 import com.google.appengine.api.files.AppEngineFile;
+import com.google.appengine.api.files.FileService;
 import com.google.appengine.api.files.FileWriteChannel;
 
 import java.io.IOException;
@@ -47,18 +48,21 @@ public class GoogleBlobStorePath extends GooglePath
 {
   private static Logger log = Logger.getLogger(GoogleBlobStorePath.class.getName());
 
-  public GoogleBlobStorePath(FilesystemPath root,
-                             String userPath,
-                             String path)
+  private GoogleBlobStorePath(FilesystemPath root,
+                              String userPath,
+                              String path,
+                              FileService fileService,
+                              GoogleInodeService inodeService)
   {
-    super(root, userPath, path);
+    super(root, userPath, path, fileService, inodeService);
   }
 
-  public GoogleBlobStorePath()
+  public GoogleBlobStorePath(FileService fileService,
+                             GoogleInodeService inodeService)
   {
-    super();
+    super(fileService, inodeService);
 
-    init();
+    //init();
   }
 
   @Override
@@ -66,7 +70,8 @@ public class GoogleBlobStorePath extends GooglePath
                                       String userPath,
                                       String path)
   {
-    return new GoogleBlobStorePath(root, userPath, path);
+    return new GoogleBlobStorePath(root, userPath, path,
+                                   _fileService, _inodeService);
   }
 
   @Override

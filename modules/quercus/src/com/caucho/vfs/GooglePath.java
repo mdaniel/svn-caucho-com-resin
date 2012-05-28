@@ -45,7 +45,6 @@ import com.caucho.vfs.GoogleInode.FileType;
 import com.google.appengine.api.files.AppEngineFile;
 import com.google.appengine.api.files.FileReadChannel;
 import com.google.appengine.api.files.FileService;
-import com.google.appengine.api.files.FileServiceFactory;
 
 /**
  * FilePath implements the native filesystem.
@@ -56,6 +55,7 @@ abstract public class GooglePath extends FilesystemPath {
   protected static final String QUERCUS_ROOT_PATH = "caucho-quercus-root";
 
   protected FileService _fileService;
+  protected GoogleInodeService _inodeService;
 
   protected GooglePath _parent;
   protected GoogleInode _inode;
@@ -63,26 +63,25 @@ abstract public class GooglePath extends FilesystemPath {
   /**
    * @param path canonical path
    */
-  protected GooglePath(FilesystemPath root, String userPath, String path)
+  protected GooglePath(FilesystemPath root, String userPath, String path,
+                       FileService fileService, GoogleInodeService inodeService)
   {
     super(root, userPath, path);
 
     _separatorChar = getFileSeparatorChar();
 
-    if (root != null) {
-      GooglePath gsRoot = (GooglePath) root;
-
-      _fileService = gsRoot._fileService;
-    }
+    _fileService = fileService;
+    _inodeService = inodeService;
   }
 
-  protected GooglePath()
+  protected GooglePath(FileService fileService, GoogleInodeService inodeService)
   {
     super(null, "/", "/");
 
     _root = this;
 
-    _fileService = FileServiceFactory.getFileService();
+    _fileService = fileService;
+    _inodeService = inodeService;
 
     _inode = new GoogleInode("", FileType.DIRECTORY, 0, 0);
   }
@@ -99,11 +98,15 @@ abstract public class GooglePath extends FilesystemPath {
     }
 
     _fileService = path._fileService;
+    _inodeService = path._inodeService;
 
     _inode = new GoogleInode(path._inode);
   }
 
-  protected void init()
+  /**
+   * Call to initialize the root directory structure
+   */
+  public void init()
   {
     if (readDirMap() == null) {
       _inode.setDirMap(new HashMap<String,GoogleInode>());
@@ -518,29 +521,7 @@ abstract public class GooglePath extends FilesystemPath {
 
   HashMap<String,GoogleInode> readDirMap()
   {
-    ReadStream is = null;
-
-    try {
-      is = openRead();
-
-      Hessian2Input hIn = new Hessian2Input(is);
-
-      HashMap map = (HashMap) hIn.readObject();
-
-      hIn.close();
-
-      return map;
-    } catch (FileNotFoundException e) {
-      log.log(Level.FINER, e.toString(), e);
-
-      return null;
-    } catch (Exception e) {
-      log.log(Level.FINER, e.toString(), e);
-
-      return null;
-    } finally {
-      IoUtil.close(is);
-    }
+    return _inodeService.readDirMap(this);
   }
 
   void updateDir(GoogleInode inode)
@@ -574,20 +555,7 @@ abstract public class GooglePath extends FilesystemPath {
 
   void writeDir(HashMap<String,GoogleInode> map)
   {
-    WriteStream out = null;
-    try {
-      out = openWrite();
-
-      Hessian2Output hOut = new Hessian2Output(out);
-
-      hOut.writeObject(map);
-
-      hOut.close();
-    } catch (IOException e) {
-      log.log(Level.FINER, e.toString(), e);
-    } finally {
-      IoUtil.close(out);
-    }
+    _inodeService.writeDirMap(this, map);
   }
 
   void setGoogleInode(GoogleInode inode)
