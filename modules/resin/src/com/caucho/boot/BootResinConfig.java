@@ -298,9 +298,13 @@ public class BootResinConfig // implements EnvironmentBean
     if (clientList.size() == 1
         || clientList.size() > 0 && _args.getCommand().isStart()) {
       client = clientList.get(0);
-      
+
+      // server/6e0f
+      if (serverId != null && ! serverId.equals(client.getId()))
+        client = null;
+
       // server/6e10
-      if (client.getConfig().isRequireExplicitId())
+      if (client != null && client.getConfig().isRequireExplicitId())
         client = null;
     }
 
