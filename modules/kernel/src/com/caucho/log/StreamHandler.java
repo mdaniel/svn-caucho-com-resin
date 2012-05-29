@@ -89,67 +89,71 @@ public class StreamHandler extends AbstractLogHandler {
     
     WriteStream os = _os;
 
-    try {
-      if (record == null) {
-        os.println("no record");
-          
-        if (_isNullDelimited) {
-          os.write(0);
+      synchronized (os) {
+      try {
+        if (record == null) {
+          os.println("no record");
+            
+          if (_isNullDelimited) {
+            os.write(0);
+          }
+  
+          return;
         }
-
-        return;
-      }
-
-      if (_formatter != null) {
-        String value = _formatter.format(record);
-
-        os.println(value);
-        if (_isNullDelimited) {
-          os.write(0);
+  
+        if (_formatter != null) {
+          String value = _formatter.format(record);
+  
+          os.println(value);
+          if (_isNullDelimited) {
+            os.write(0);
+          }
+          
+          return;
         }
         
-        return;
-      }
-      
-      String message = record.getMessage();
-      Throwable thrown = record.getThrown();
-      
-      if (thrown == null
-          && message != null
-          && message.indexOf("java.lang.NullPointerException") >= 0) {
-        thrown = new IllegalStateException();
-        thrown.fillInStackTrace();
-      }
-
-      if (_timestamp != null) {
-        os.print(_timestamp);
-      }
+        String message = record.getMessage();
+        Throwable thrown = record.getThrown();
+        
+        if (thrown == null
+            && message != null
+            && message.indexOf("java.lang.NullPointerException") >= 0) {
+          thrown = new IllegalStateException();
+          thrown.fillInStackTrace();
+        }
+  
+        if (_timestamp != null) {
+          os.print(_timestamp);
+        }
+            
+        if (thrown != null) {
+          if (message != null
+              && ! message.equals(thrown.toString()) 
+              && ! message.equals(thrown.getMessage())) {
+            printMessage(os, message, record.getParameters());
+          }
           
-      if (thrown != null) {
-        if (message != null
-            && ! message.equals(thrown.toString()) 
-            && ! message.equals(thrown.getMessage())) {
+          thrown.printStackTrace(os.getPrintWriter());
+        }
+        else {
           printMessage(os, message, record.getParameters());
         }
         
-        thrown.printStackTrace(os.getPrintWriter());
+        if (_isNullDelimited)
+          os.write(0);
+      } catch (Throwable e) {
+        e.printStackTrace();
       }
-      else {
-        printMessage(os, message, record.getParameters());
       }
-      
-      if (_isNullDelimited)
-        os.write(0);
-    } catch (Throwable e) {
-      e.printStackTrace();
-    }
   }
   
   @Override
   protected void processFlush()
   {
     try {
-      _os.flush();
+      synchronized (_os) {
+        _os.flush();
+      }
     } catch (Exception e) {
       e.printStackTrace();
     }

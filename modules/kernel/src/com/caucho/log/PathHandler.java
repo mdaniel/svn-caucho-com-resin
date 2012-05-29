@@ -181,42 +181,46 @@ public class PathHandler extends AbstractLogHandler {
   @Override
   protected void processPublish(LogRecord record)
   {
-    try {
-      if (_formatter != null) {
-        String value = _formatter.format(record);
-
-        _os.println(value);
-
-        return;
-      }
-
-      String message = record.getMessage();
-      Throwable thrown = record.getThrown();
-      
-      if (thrown != null) {
-        if (message != null
-            && ! message.equals(thrown.toString())
-            && ! message.equals(thrown.getMessage())) {
+    synchronized (_os) {
+      try {
+        if (_formatter != null) {
+          String value = _formatter.format(record);
+  
+          _os.println(value);
+  
+          return;
+        }
+  
+        String message = record.getMessage();
+        Throwable thrown = record.getThrown();
+        
+        if (thrown != null) {
+          if (message != null
+              && ! message.equals(thrown.toString())
+              && ! message.equals(thrown.getMessage())) {
+            printMessage(_os, message, record.getParameters());
+          }
+  
+          record.getThrown().printStackTrace(_os.getPrintWriter());
+        }
+        else {
           printMessage(_os, message, record.getParameters());
         }
-
-        record.getThrown().printStackTrace(_os.getPrintWriter());
+      } catch (Exception e) {
+        e.printStackTrace();
       }
-      else {
-        printMessage(_os, message, record.getParameters());
       }
-    } catch (Exception e) {
-      e.printStackTrace();
-    }
   }
   
   @Override
   protected void processFlush()
   {
-    try {
-      _os.flush();
-    } catch (Exception e) {
-      e.printStackTrace();
+    synchronized (_os) {
+      try {
+        _os.flush();
+      } catch (Exception e) {
+        e.printStackTrace();
+      }
     }
   }
 

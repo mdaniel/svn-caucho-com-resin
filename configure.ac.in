@@ -1411,7 +1411,9 @@ fi
 # final cleanup
 #
 
-resin_pro_plugins="$resin_pro_plugins $resin_ssl_plugin"
+if test -n "$resin_pro_plugins"; then
+  resin_pro_plugins="$resin_pro_plugins $resin_ssl_plugin"
+fi  
 plugins="$plugins"
 
 if test -z "${is_dev}"; then

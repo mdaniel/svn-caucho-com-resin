@@ -82,10 +82,10 @@ abstract public class AbstractLogHandler extends Handler {
       return;
     }
     
-    synchronized (this) {
+    //synchronized (this) {
       processPublish(record);
       processFlush();
-    }
+    //}
     
     /*
     _logQueue.offer(record);
