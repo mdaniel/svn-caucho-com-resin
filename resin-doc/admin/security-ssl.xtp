@@ -320,6 +320,16 @@ certificates (and documentation) from mod_ssl for Resin.</p>
 &lt;/resin>  
 </example>
 
+<p>The default resin configuration allows you to setup open-ssl by resin.properties.</p>
+
+
+<example title="Setting up open ssl in resin.properties">
+# OpenSSL certificate configuration
+openssl_file : key/gryffindor.crt
+openssl_key : keys/gryffindor.key
+openssl_password : my-password
+</example>
+
 </s2>
 
 <s2 title="Testing SSL with the browser">
