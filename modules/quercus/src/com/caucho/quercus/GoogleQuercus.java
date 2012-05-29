@@ -36,8 +36,6 @@ import com.caucho.quercus.env.Value;
 import com.caucho.quercus.page.QuercusPage;
 import com.caucho.quercus.module.ModuleContext;
 import com.caucho.vfs.GoogleMergePath;
-import com.caucho.vfs.GooglePath;
-import com.caucho.vfs.GoogleStorePath;
 import com.caucho.vfs.MergePath;
 import com.caucho.vfs.Path;
 import com.caucho.vfs.WriteStream;
@@ -55,11 +53,6 @@ public class GoogleQuercus extends QuercusContext
    */
   public GoogleQuercus()
   {
-    super();
-
-    // setPwd(Vfs.lookup());
-    // setWorkDir(WorkDir.getLocalWorkDir());
-
   }
 
   @Override

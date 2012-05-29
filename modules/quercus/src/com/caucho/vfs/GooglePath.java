@@ -100,7 +100,9 @@ abstract public class GooglePath extends FilesystemPath {
     _fileService = path._fileService;
     _inodeService = path._inodeService;
 
-    _inode = new GoogleInode(path._inode);
+    if (path._inode != null) {
+      _inode = new GoogleInode(path._inode);
+    }
   }
 
   /**
@@ -451,7 +453,7 @@ abstract public class GooglePath extends FilesystemPath {
   {
     try {
       if (! isRoot()) {
-        GoogleInode inode = getParent().getGsInode(getTail());
+        GoogleInode inode = getParent().getGoogleInode(getTail());
 
         if (inode == null || ! inode.exists()) {
           // php/8134
@@ -488,7 +490,7 @@ abstract public class GooglePath extends FilesystemPath {
     return createInstance(getRoot(), getUserPath(), getPath());
   }
 
-  private GoogleInode getGsInode(String name)
+  private GoogleInode getGoogleInode(String name)
   {
     HashMap<String,GoogleInode> dirMap = getDir();
 
@@ -587,7 +589,7 @@ abstract public class GooglePath extends FilesystemPath {
       return _inode;
     }
     else {
-      return getParent().getGsInode(getTail());
+      return getParent().getGoogleInode(getTail());
     }
   }
 

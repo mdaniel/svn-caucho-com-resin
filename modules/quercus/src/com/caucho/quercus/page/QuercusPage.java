@@ -50,13 +50,13 @@ import java.util.Map;
 abstract public class QuercusPage
 {
   private static final L10N L = new L10N(QuercusPage.class);
-  
+
   private HashMap<String,AbstractFunction> _funMap
     = new HashMap<String,AbstractFunction>();
-  
+
   private HashMap<String,AbstractFunction> _funMapLowerCase
     = new HashMap<String,AbstractFunction>();
-  
+
   private HashMap<String,ClassDef> _classMap
     = new HashMap<String,ClassDef>();
 
@@ -106,7 +106,7 @@ abstract public class QuercusPage
    * Returns the page's path.
    */
   abstract public Path getSelfPath(Env env);
-  
+
   /**
    * Finds a function.
    */
@@ -155,7 +155,7 @@ abstract public class QuercusPage
     try {
       if (compile != null)
         return compile.executeTop(env);
-      
+
       return execute(env);
     } catch (QuercusLanguageException e) {
       if (env.getExceptionHandler() != null) {
@@ -169,7 +169,7 @@ abstract public class QuercusPage
       else {
         uncaughtExceptionError(env, e);
       }
-      
+
       return NullValue.NULL;
     } finally {
       env.setPwd(oldPwd);
@@ -184,14 +184,14 @@ abstract public class QuercusPage
     Location location = e.getLocation(env);
     String type = e.getValue().getClassName();
     String message = e.getMessage(env);
-    
+
     env.error(location,
               L.l(
                 "Uncaught exception of type '{0}' with message '{1}'",
                 type,
                 message));
   }
-  
+
   /**
    * Returns the pwd according to the source page.
    */
@@ -237,7 +237,7 @@ abstract public class QuercusPage
       if (fun.isGlobal())
         env.addFunction(entry.getKey(), entry.getValue());
     }
-    
+
     for (Map.Entry<String,ClassDef> entry : _classMap.entrySet()) {
       env.addClassDef(entry.getKey(), entry.getValue());
     }
@@ -249,7 +249,7 @@ abstract public class QuercusPage
   protected void addFunction(String name, AbstractFunction fun)
   {
     AbstractFunction oldFun = _funMap.put(name, fun);
-    
+
     _funMapLowerCase.put(name.toLowerCase(Locale.ENGLISH), fun);
   }
 
@@ -268,7 +268,7 @@ abstract public class QuercusPage
   {
     return false;
   }
-  
+
   public String toString()
   {
     return getClass().getSimpleName() + "[]";

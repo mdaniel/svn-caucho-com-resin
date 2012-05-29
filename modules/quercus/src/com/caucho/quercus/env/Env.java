@@ -476,11 +476,11 @@ public class Env
     _request = request;
     _response = response;
 
-    if (_page != null) {
-      pageInit(_page);
+    if (page != null) {
+      pageInit(page);
     }
 
-    if (request != null && _page != null) {
+    if (request != null && page != null) {
       setPwd(page.getPwd(null));
     }
     else {

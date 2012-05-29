@@ -147,9 +147,9 @@ public class QuercusServletImpl extends HttpServlet
       try {
         page = getQuercus().parse(path);
       }
-      catch (FileNotFoundException ex) {
+      catch (FileNotFoundException e) {
         // php/2001
-        log.log(Level.FINER, ex.toString(), ex);
+        log.log(Level.FINER, e.toString(), e);
 
         response.sendError(HttpServletResponse.SC_NOT_FOUND);
 

@@ -100,6 +100,15 @@ public class MergePath extends FilesystemPath {
   }
 
   /**
+   * Return the parent Path
+   */
+  @Override
+  public Path getParent()
+  {
+    return getBestPath().getParent();
+  }
+
+  /**
    * schemeWalk is called by Path for a scheme lookup like file:/tmp/foo
    *
    * @param userPath the user's lookup() path
