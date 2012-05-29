@@ -9,112 +9,176 @@ resin_version=@resin_version@
 resin_pro=@resin_pro@
 build_dir=@build_dir@
 LIBEXEC=@LIBEXEC@
+root_subdirs=doc keys licenses project-jar webapps
+home_subdirs=@LIBEXEC@ webapp-jars bin endorsed lib
+conf_files=resin.xml resin.properties app-default.xml cluster-default.xml health.xml
 
 all	:
-	(cd modules/c/src; $(MAKE))
-	if test -r $(resin_pro)/modules/c/src/Makefile; then \
+	@ (cd modules/c/src; $(MAKE))
+	@ if test $(resin_pro) != "." -a -r $(resin_pro)/modules/c/src/Makefile; then \
 	  cd $(resin_pro)/modules/c/src; $(MAKE); \
 	fi
 
 rpm-dist	:
-	@ cp conf/resin.properties conf/resin.properties.orig
-	@ awk '/setuid_user/ { print "setuid_user : resin"; next; } \
+	cp conf/resin.properties conf/resin.properties.orig
+	awk '/setuid_user/ { print "setuid_user : resin"; next; } \
 	       /setuid_group/ { print "setuid_group : resin"; next; } \
-               { print $0; }' \
+	             { print $0; }' \
 	conf/resin.properties.orig > conf/resin.properties
 
 install	:
 	@ if test "$(resin_root)" != "$(build_dir)"; then \
-	  echo "Installing Resin root directory $(resin_root)."; \
-	  if test -e "$(resin_root)"; then \
-	    echo "-------------------------------------------------------"; \
-	    echo "Will not overwrite Resin webapps $(resin_root)/webapps"; \
-	    echo "-------------------------------------------------------"; \
+	  echo "Installing Resin root $(resin_root)."; \
+	  if test ! -e "$(resin_root)"; then \
+	    mkdir -p $(resin_root); \
+	    if test $$? != "0"; then \
+	      echo "ABORT: Resin root install failed. Ensure $(resin_root) can be created by $$USER, or run 'make install' as root."; \
+	      exit 42; \
+	    fi; \
 	  else \
-	    mkdir -p $(resin_root)/webapps; \
-	    cp -r $(CP_U_FLAG) webapps/* $(resin_root)/webapps; \
+	    if test ! -w "$(resin_root)"; then \
+	      echo "ABORT: Resin root install failed. Ensure $(resin_root) is writable by $$USER, or run 'make install' as root."; \
+	      exit 42; \
+	    fi; \
 	  fi; \
-	  mkdir -p $(resin_root)/keys; \
-	  mkdir -p $(resin_root)/licenses; \
-	  mkdir -p $(resin_root)/doc; \
-	  mkdir -p $(resin_root)/project-jars; \
-	  cp -r $(CP_U_FLAG) doc/* $(resin_root)/doc; \
-	  cp -r $(CP_U_FLAG) project-jars/* $(resin_root)/project-jars; \
+	  for subdir in $(root_subdirs); do \
+	    if test -e "$(resin_root)/$$subdir"; then \
+	      echo "Preserving existing Resin root subdir $(resin_root)/$$subdir.";\
+	    else \
+	      echo "Installing Resin root subdir $(resin_root)/$$subdir."; \
+	      mkdir -p $(resin_root)/$$subdir; \
+	      if test $$? != "0"; then \
+	        echo "ABORT: Resin root subdir creation failed. Ensure $(resin_root)/$$subdir can be created by $$USER, or run 'make install' as root."; \
+	        exit 42; \
+	      else \
+	        cp -r $$subdir/* $(resin_root)/$$subdir; \
+	      fi; \
+	    fi; \
+	  done; \
 	fi
 	@ if test "$(resin_home)" != "$(build_dir)"; then \
-	  echo "Installing Resin home directory $(resin_home)"; \
-	  mkdir -p $(resin_home)/bin; \
-	  mkdir -p $(resin_home)/lib; \
-	  mkdir -p $(resin_home)/endorsed; \
-	  mkdir -p $(resin_home)/webapp-jars; \
-	  mkdir -p $(resin_home)/$(LIBEXEC); \
-	  cp bin/* $(resin_home)/bin; \
-	  cp lib/*.jar $(resin_home)/lib; \
-	  cp -r $(CP_U_FLAG) endorsed $(resin_home); \
-	  cp -r $(CP_U_FLAG) webapp-jars/* $(resin_home)/webapp-jars; \
-	  if test -w "$(usr_share)"; then \
-	    ln -sf $(resin_version) $(usr_share)/resin; \
-	    mkdir -p $(DESTDIR)/usr/bin; \
-	    ln -sf @usr_share@/resin/bin/resinctl $(DESTDIR)/usr/bin/resinctl; \
+	  echo "Installing Resin home $(resin_home)."; \
+	  if test ! -e "$(resin_home)"; then \
+	    mkdir -p $(resin_home); \
+	    if test $$? != "0"; then \
+	      echo "ABORT: Resin home install failed. Ensure $(resin_home) can be created by $$USER, or run 'make install' as root."; \
+	      exit 42; \
+	    fi; \
+	  else \
+	    if test ! -w "$(resin_home)"; then \
+	      echo "ABORT: Resin home install failed. Ensure $(resin_home) is writable by $$USER, or run 'make install' as root."; \
+	      exit 42; \
+	    fi; \
 	  fi; \
+	  for subdir in $(home_subdirs); do \
+	    if test -e "$(resin_home)/$$subdir"; then \
+	      echo "Updating existing Resin home subdir $(resin_home)/$$subdir.";\
+	    else \
+	      echo "Installing Resin home subdir $(resin_home)/$$subdir."; \
+	      mkdir -p $(resin_home)/$$subdir; \
+	      if test $$? != "0"; then \
+	        echo "ABORT: Resin home subdir creation failed. Ensure $(resin_home)/$$subdir can be created by $$USER, or run 'make install' as root."; \
+	        exit 42; \
+	      fi; \
+	    fi; \
+	    cp -r $$subdir/* $(resin_home)/$$subdir; \
+	  done; \
 	fi
 	@ if test -e "$(resin_log)"; then \
+	  echo "Preserving existing Resin log $(resin_log)."; \
+	else \
+	  echo "Installing Resin log $(resin_log)."; \
 	  mkdir -p $(resin_log); \
+	  if test $$? != "0"; then \
+	    echo "ABORT: Resin log install failed. Ensure $(resin_log) can be created by $$USER, or run 'make install' as root."; \
+	    exit 42; \
+	  fi; \
 	fi
-	@ chmod +x $(resin_home)/bin/resinctl
+	@ if test -n "$(usr_share)"; then \
+	  echo "Installing Resin home symlink $(usr_share)/resin."; \
+	  if test ! -w "$(usr_share)"; then \
+	    echo "WARNING: Resin home symlink install failed. Ensure $(usr_share) is writable by $$USER, or run 'make install' as root."; \
+	  else \
+	    ln -sf $(resin_home) $(usr_share)/resin; \
+	    if test $$? != "0"; then \
+	      echo "WARNING: Resin home symlink creation failed. Ensure $(usr_share) is writable by $$USER, or run 'make install' as root."; \
+	    fi; \
+	  fi; \
+	  echo "Installing resinctl symlink $(DESTDIR)/usr/bin/resinctl."; \
+	  mkdir -p $(DESTDIR)/usr/bin; \
+	  ln -sf "$(resin_home)/bin/resinctl" "$(DESTDIR)/usr/bin/resinctl"; \
+	  if test $$? != "0"; then \
+	    echo "WARNING: resinctl symlink creation failed. Ensure $(DESTDIR)/usr/bin is writable by $$USER, or run 'make install' as root."; \
+	  fi; \
+	fi
+	@ if test -e "$(resin_home)/bin/resinctl"; then \
+	  if test ! -x "$(resin_home)/bin/resinctl"; then \
+	    echo "Setting $(resin_home)/bin/resinctl executable."; \
+	    chmod +x $(resin_home)/bin/resinctl; \
+	    if test $$? != "0"; then \
+	      echo "WARNING: failed to set resinctl executable. Ensure $(resin_home)/bin/resinctl is writable by $$USER, or run 'make install' as root."; \
+	    fi; \
+	  fi; \
+	else \
+	  echo "ABORT: $(resin_home)/bin/resinctl does not exist. Resin home install may have failed."; \
+	  exit 42; \
+	fi
+	@ if test -e "$(resin_home)/bin/resin.sh"; then \
+	  if test ! -x "$(resin_home)/bin/resin.sh"; then \
+	    echo "Setting $(resin_home)/bin/resin.sh executable."; \
+	    chmod +x $(resin_home)/bin/resin.sh; \
+	    if test $$? != "0"; then \
+	      echo "WARNING: failed to set resin.sh executable. Ensure $(resin_home)/bin/resin.sh is writable by $$USER, or run 'make install' as root."; \
+	    fi; \
+	  fi; \
+	else \
+	  echo "ABORT: $(resin_home)/bin/resin.sh does not exist. Resin home install may have failed."; \
+	  exit 42; \
+	fi
 	@ if test "$(resin_conf)" != "$(build_dir)/conf"; then \
-	  mkdir -p $(resin_conf); \
-	  if test -f "$(resin_conf)/resin.xml"; then \
-	    echo "-------------------------------------------------------"; \
-	    echo "Will not overwrite $(resin_conf)/resin.xml"; \
-	    echo "-------------------------------------------------------"; \
-	  else \
-	    cp conf/resin.xml $(resin_conf)/resin.xml; \
+	  echo "Installing Resin conf $(resin_conf)."; \
+	  if test ! -e "$(resin_conf)"; then \
+	    mkdir -p $(resin_conf); \
+	    if test $$? != "0"; then \
+	      echo "ABORT: Resin conf install failed. Ensure $(resin_conf) can be created by $$USER, or run 'make install' as root."; \
+	      exit 42; \
+	    fi; \
 	  fi; \
-	  if test -f "$(resin_conf)/resin.properties"; then \
-	    echo "-------------------------------------------------------"; \
-	    echo "Will not overwrite $(resin_conf)/resin.properties"; \
-	    echo "-------------------------------------------------------"; \
-	  else \
-	    cp conf/resin.properties $(resin_conf)/resin.properties; \
+	  if test ! -w "$(resin_conf)"; then \
+	    echo "ABORT: Resin conf install failed. Ensure $(resin_conf) is writable by $$USER, or run 'make install' as root."; \
+	    exit 42; \
 	  fi; \
-	  if test -f "$(resin_conf)/app-default.xml"; then \
-	    echo "-------------------------------------------------------"; \
-	    echo "Will not overwrite $(resin_conf)/app-default.xml"; \
-	    echo "-------------------------------------------------------"; \
-	  else \
-	    cp conf/app-default.xml $(resin_conf)/app-default.xml; \
-	  fi; \
-	  if test -f "$(resin_conf)/cluster-default.xml"; then \
-	    echo "-------------------------------------------------------"; \
-	    echo "Will not overwrite $(resin_conf)/cluster-default.xml"; \
-	    echo "-------------------------------------------------------"; \
-	  else \
-	    cp conf/cluster-default.xml $(resin_conf)/cluster-default.xml; \
-	  fi; \
-	  if test -f "$(resin_conf)/health.xml"; then \
-	    echo "-------------------------------------------------------"; \
-	    echo "Will not overwrite $(resin_conf)/health.xml"; \
-	    echo "-------------------------------------------------------"; \
-	  else \
-	    cp conf/health.xml $(resin_conf)/health.xml; \
-	  fi; \
-	  mkdir -p "$(resin_conf)/resin-inf"; \
+	  for file in $(conf_files); do \
+	    if test -f "$(resin_conf)/$$file"; then \
+	      echo "Preserving existing Resin conf file $(resin_conf)/$$file.";\
+	    else \
+	      echo "Installing Resin conf file $(resin_conf)/$$file."; \
+	      cp conf/$$file $(resin_conf)/$$file; \
+	    fi; \
+	  done; \
+	  mkdir -p $(resin_conf)/resin-inf; \
 	fi
-	@ if test -n "$(resin_init_d)" -a "$(resin_home)" != "$(build_dir)"; then \
+	@ if test -n "$(resin_init_d)"; then \
 	  if test -f "$(resin_init_d)"; then \
-	    echo "-------------------------------------------------------"; \
-	    echo "Will not overwrite $(resin_init_d)"; \
-	    echo "-------------------------------------------------------"; \
-	  elif test "$(resin_init_d)" != "$(DESTDIR)"; then \
-	    mkdir -p `dirname $(resin_init_d)`; \
-	    cp $(build_dir)/init.d/resin $(resin_init_d); \
-	    chmod +x $(resin_init_d) && echo "$(resin_init_d) installed."; \
+	    echo "Preserving existing Resin init.d script $(resin_init_d)."; \
+	  else \
+	    echo "Installing Resin init.d script $(resin_init_d)."; \
+	    init_dir=`dirname $(resin_init_d)`; \
+	    mkdir -p $(init_dir); \
+	    if test ! -w "$(init_dir)"; then \
+	      echo "WARNING: Resin init.d script install failed. Ensure $(init_dir) is writable by $$USER, or run 'make install' as root."; \
+	    else \
+	      cp init.d/resin $(resin_init_d); \
+	      chmod +x "$(resin_init_d)"; \
+	      if test $$? != "0"; then \
+	        echo "WARNING: failed to set Resin init.d executable. Ensure $(resin_init_d) is writable by $$USER, or run 'make install' as root."; \
+	      fi; \
+	    fi; \
 	  fi; \
 	fi
 	@ (cd modules/c/src; $(MAKE) install)
 	@ if test $(resin_pro) != "." -a -r $(resin_pro)/modules/c/src/Makefile; then \
-	  (cd $(resin_pro)/modules/c/src; $(MAKE) install); \
+	  (cd $(resin_pro)/modules/c/src; $(MAKE) install) \
 	fi
 
 clean	:
