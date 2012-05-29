@@ -36,14 +36,15 @@ mod_caucho.la	: $(OBJ_PICS)
 	$(CC) -c $(INCLUDES) $(CFLAGS) $<
 
 install	: mod_caucho.la
+	@ echo "Installing plugin mod_caucho"
 	$(LIBTOOL) --mode=install $(CP) mod_caucho.la $(apache_libexec)
-	- rm -f $(apache_libexec)/mod_caucho.la
-	- rm -f $(apache_libexec)/mod_caucho.a
-	sh install.sh -conf $(apache_conf) -libexec $(apache_libexec) \
+	@ -rm -f $(apache_libexec)/mod_caucho.la
+	@ -rm -f $(apache_libexec)/mod_caucho.a
+	@ sh install.sh -conf $(apache_conf) -libexec $(apache_libexec) \
 	   -resin_home $(resin_home)
 
 clean	:
-	- rm -r *.o *.lo *.la *.so .libs
+	-rm -r *.o *.lo *.la *.so .libs
 
 $(OBJ_PICS)	: Makefile ../common/cse.h
 mod_caucho.lo	: Makefile ../common/cse.h

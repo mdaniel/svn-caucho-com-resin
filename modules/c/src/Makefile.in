@@ -14,5 +14,7 @@ clean	:
         done
 
 install	:
-	for dir in $(plugins); do (cd $$dir; $(MAKE) install); done
-
+	@ echo "Installing configured Resin plugins $(plugins)"
+	@ for dir in $(plugins); do \
+	  (cd $$dir; $(MAKE) install); \
+	done

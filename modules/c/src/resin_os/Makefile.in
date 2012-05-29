@@ -34,13 +34,10 @@ memory.o	: Makefile resin_os.h
 std.o		: Makefile resin_os.h
 
 clean	:
-	- rm *.o *.lo *.la *.so *.jnilib *.dylib *.$(SO)
-	- rm -rf .libs
+	-rm *.o *.lo *.la *.so *.jnilib *.dylib *.$(SO)
+	-rm -rf .libs
 
 install	: libresin_os.$(SO)
-#	cp resin $(resin_home)/bin
-	- mkdir -p $(resin_home)/$(LIBEXEC)
+	@ echo "Installing plugin resin_os"
+	@ -mkdir -p $(resin_home)/$(LIBEXEC);
 	cp libresin_os.$(SO) $(resin_home)/$(LIBEXEC)
-
-
-

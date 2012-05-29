@@ -22,10 +22,11 @@ all	: $(OBJ) $(OBJ_PICS)
 	$(CC) -c $(INCLUDES) $(CFLAGS) $<
 
 install	:
+	@ echo "Installing plugin common"
 
 clean	:
-	- rm *.o *.lo *.la *.so *.jnilib *.dylib
-	- rm -rf .libs
+	-rm *.o *.lo *.la *.so *.jnilib *.dylib
+	-rm -rf .libs
 
 $(OBJ)	: Makefile cse.h
 $(OBJ_PICS)	: Makefile cse.h
