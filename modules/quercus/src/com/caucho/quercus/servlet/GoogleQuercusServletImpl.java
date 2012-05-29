@@ -32,14 +32,10 @@ package com.caucho.quercus.servlet;
 import com.caucho.quercus.GoogleQuercus;
 import com.caucho.quercus.QuercusContext;
 import com.caucho.util.L10N;
-import com.caucho.vfs.Path;
 import com.caucho.vfs.Vfs;
 import com.caucho.vfs.WriteStream;
 
-import javax.servlet.ServletConfig;
-import javax.servlet.ServletContext;
 import javax.servlet.ServletException;
-import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
 import java.io.OutputStream;
@@ -54,20 +50,6 @@ public class GoogleQuercusServletImpl extends QuercusServletImpl
   private static final L10N L = new L10N(GoogleQuercusServletImpl.class);
   private static final Logger log
     = Logger.getLogger(GoogleQuercusServletImpl.class.getName());
-
-  private ServletContext _webApp;
-
-  /**
-   * initialize the script manager.
-   */
-  @Override
-  protected void initImpl(ServletConfig config)
-    throws ServletException
-  {
-    _webApp = config.getServletContext();
-
-    _quercus.setPwd(Vfs.lookup(_webApp.getRealPath(".")));
-  }
 
   protected QuercusServletImpl getQuercusServlet()
   {
