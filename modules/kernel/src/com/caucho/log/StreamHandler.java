@@ -68,6 +68,7 @@ public class StreamHandler extends AbstractLogHandler {
   /**
    * Sets the formatter.
    */
+  @Override
   public void setFormatter(Formatter formatter)
   {
     _formatter = formatter;

@@ -82,11 +82,18 @@ abstract public class AbstractLogHandler extends Handler {
       return;
     }
     
+    synchronized (this) {
+      processPublish(record);
+      processFlush();
+    }
+    
+    /*
     _logQueue.offer(record);
     
     if (CurrentTime.isTest()) {
       waitForEmpty();
     }
+    */
   }
   
   private void waitForEmpty()
