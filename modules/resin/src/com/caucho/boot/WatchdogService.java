@@ -29,13 +29,12 @@
 
 package com.caucho.boot;
 
+import java.util.logging.Level;
+import java.util.logging.Logger;
+
 import com.caucho.bam.Query;
-import com.caucho.bam.actor.SimpleActor;
-import com.caucho.bam.broker.Broker;
 import com.caucho.config.ConfigException;
 import com.caucho.util.L10N;
-
-import java.util.logging.*;
 
 /**
  * BAM service managing the watchdog

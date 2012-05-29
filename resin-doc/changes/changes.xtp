@@ -12,6 +12,10 @@
 
 <s2 title="4.0.28 - snapshot">
 <ul>
+<li>load-balance: improve error message when open source configures a cluster</li>
+<li>logging: add formatting for entering/exiting (#5071)</li>
+<li>logging: add actor queue for logging</li>
+<li>servlet: add x-forwarded-host support for HTTP (#5092)</li>
 <li>hessian: add deflate support to hessian proxy (#4151, rep by ebourg)</li>
 <li>hessian: Iterator deserializer (#4164, rep by ebourg)</li>
 <li>ioc: processInjectionTarget should only be called on scanning, not createInjectionTarget</li>

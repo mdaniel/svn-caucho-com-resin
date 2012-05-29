@@ -538,9 +538,11 @@ class WatchdogClient
       if (argv[i].startsWith("-Djava.class.path=")) {
         // IBM JDK startup issues
       }
+      /* #5053, server/6e0f
       else if (argv[i].startsWith("-J")) {
         list.add(argv[i].substring(2));
       }
+      */
     }
 
     // #2566

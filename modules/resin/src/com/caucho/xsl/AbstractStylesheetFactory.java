@@ -834,7 +834,6 @@ abstract public class AbstractStylesheetFactory
     } catch (TransformerConfigurationException e) {
       throw e;
     } catch (IOException e) {
-      System.out.println("MP: " + ((MergePath) getSearchPath()).getMergePaths());
       throw new TransformerConfigurationExceptionWrapper(e);
     } catch (Exception e) {
       throw new TransformerConfigurationExceptionWrapper(e);

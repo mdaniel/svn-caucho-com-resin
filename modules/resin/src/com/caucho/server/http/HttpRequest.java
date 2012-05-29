@@ -229,12 +229,18 @@ public class HttpRequest extends AbstractHttpRequest
       return _host;
 
     String virtualHost = getConnection().getVirtualHost();
-    if (virtualHost != null)
+    
+    if (virtualHost != null) {
       _host = virtualHost;
-    else if (_uriHost.length() > 0)
+    }
+    else if (_uriHost.length() > 0) {
       _host = _uriHost;
-    else
-      _host = _hostHeader;
+    }
+    else if ((_host = getForwardedHostHeader()) != null) {
+    }
+    else {
+      _host = getHostHeader();
+    }
 
     return _host;
   }
@@ -256,8 +262,9 @@ public class HttpRequest extends AbstractHttpRequest
     else if (_uriHost.length() > 0) {
       _host = _uriHost;
     }
-    else if (_hostHeader != null) {
-      _host = _hostHeader;
+    else if ((_host = getForwardedHostHeader()) != null) {
+    }
+    else if ((_host = getHostHeader()) != null) {
     }
     else if (HTTP_1_1 <= getVersion())
       throw new BadRequestException("HTTP/1.1 requires a Host header (Remote IP=" + getRemoteHost() + ")");

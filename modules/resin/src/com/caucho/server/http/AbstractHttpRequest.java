@@ -101,6 +101,7 @@ public abstract class AbstractHttpRequest extends AbstractProtocolConnection
   private static final char []CONTENT_LENGTH = "content-length".toCharArray();
   private static final char []EXPECT = "expect".toCharArray();
   private static final char []HOST = "host".toCharArray();
+  private static final char []X_FORWARDED_HOST = "x-forwarded-host".toCharArray();
 
   private static final char []CONTINUE_100 = "100-continue".toCharArray();
   private static final char []CLOSE = "close".toCharArray();
@@ -162,7 +163,8 @@ public abstract class AbstractHttpRequest extends AbstractProtocolConnection
   private long _startTime;
   private long _expireTime;
 
-  protected CharSegment _hostHeader;
+  private CharSegment _hostHeader;
+  private CharSegment _xForwardedHostHeader;
   private boolean _expect100Continue;
 
   private long _contentLength;
@@ -285,6 +287,7 @@ public abstract class AbstractHttpRequest extends AbstractProtocolConnection
     */
     
     _hostHeader = null;
+    _xForwardedHostHeader = null;
     _expect100Continue = false;
 
     _cookies.clear();
@@ -420,6 +423,16 @@ public abstract class AbstractHttpRequest extends AbstractProtocolConnection
       return request.getRequestURL().toString();
     else
       return null;
+  }
+  
+  protected CharSegment getHostHeader()
+  {
+    return _hostHeader;
+  }
+  
+  protected CharSegment getForwardedHostHeader()
+  {
+    return _xForwardedHostHeader;
   }
 
   /**
@@ -749,6 +762,13 @@ public abstract class AbstractHttpRequest extends AbstractProtocolConnection
         _hostHeader = value;
       }
       return true;
+      
+    case 'x':
+      if (match(keyBuf, keyOff, keyLen, X_FORWARDED_HOST)) {
+        _xForwardedHostHeader = value;
+      }
+      return true;
+      
 
     default:
       return true;

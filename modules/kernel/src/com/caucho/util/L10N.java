@@ -30,6 +30,7 @@
 package com.caucho.util;
 
 import java.io.InputStream;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Properties;
 
@@ -411,7 +412,20 @@ public class L10N {
   public String l(String msg, Object ...objects)
   {
     msg = getTranslated(msg);
+
+    return fillMessage(getStringMap(), msg, objects);
+  }
+  
+  public static String fillMessage(String msg,
+                                   Object ...objects)
+  {
+    return fillMessage(null, msg, objects);
+  }
     
+  public static String fillMessage(Properties stringMap,
+                                   String msg,
+                                   Object ...objects)
+  {
     StringBuilder cb = new StringBuilder();
 
     int length = msg.length();
@@ -434,7 +448,13 @@ public class L10N {
         else if ('0' <= ch && ch <= '9') {
           int index = ch - '0';
           
-          cb.append(objects[index]);
+          Object value = objects[index];
+          
+          if (value != null && (value instanceof Object[]))
+            cb.append(Arrays.asList((Object[]) value));
+          else
+            cb.append(objects[index]);
+          
           i += 3;
         }
         else if (ch == '{') {
@@ -442,7 +462,7 @@ public class L10N {
           i += 2;
         }
         else {
-          i = parseString(msg, i + 1, cb);
+          i = parseString(msg, i + 1, cb, stringMap);
         }
       }
     }
@@ -450,7 +470,17 @@ public class L10N {
     return cb.toString();
   }
 
-  private int parseString(String msg, int i, StringBuilder sb)
+  private int parseString(String msg, 
+                          int i, 
+                          StringBuilder sb)
+  {
+    return parseString(msg, i, sb, getStringMap());
+  }
+
+  private static int parseString(String msg, 
+                                 int i, 
+                                 StringBuilder sb, 
+                                 Properties stringMap)
   {
     StringBuilder arg = new StringBuilder();
     int len = msg.length();
@@ -460,7 +490,7 @@ public class L10N {
       arg.append(ch);
     }
 
-    Properties stringMap = getStringMap();
+    // Properties stringMap = getStringMap();
 
     if (stringMap != null) {
       String string = (String) stringMap.get(arg.toString());

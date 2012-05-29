@@ -289,7 +289,6 @@ public final class ActorQueue<T extends RingItem>
             && _tailRef.get() == tail) {
           _isOfferWaitRef.set(true);
 
-          System.out.println("WAIT: " + headAlloc + " " + tail);
           try {
             _isOfferWaitRef.wait(100);
           } catch (Exception e) {

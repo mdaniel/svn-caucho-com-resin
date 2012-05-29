@@ -757,6 +757,12 @@ public class ServletContainerConfig implements EnvironmentBean, SchemaBean
     {
       return _servletContainer.getRootDirectory();
     }
+    
+    @Override
+    public String toString()
+    {
+      return getClass().getSimpleName() + "[" + getId() + "]";
+    }
   }
 
   public class ServerVar {

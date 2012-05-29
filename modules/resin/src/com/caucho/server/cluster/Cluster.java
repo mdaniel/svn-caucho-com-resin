@@ -491,5 +491,11 @@ abstract public class Cluster
     {
       return getRoot();
     }
+    
+    @Override
+    public String toString()
+    {
+      return getClass().getSimpleName() + "[" + getId() + "]";
+    }
   }
 }

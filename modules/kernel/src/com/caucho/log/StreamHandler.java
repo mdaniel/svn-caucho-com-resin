@@ -38,7 +38,7 @@ import java.util.logging.LogRecord;
 /**
  * Resin's rotating path-based log.
  */
-public class StreamHandler extends Handler {
+public class StreamHandler extends AbstractLogHandler {
   private static final L10N L = new L10N(StreamHandler.class);
   
   private WriteStream _os;
@@ -81,33 +81,30 @@ public class StreamHandler extends Handler {
   /**
    * Publishes the record.
    */
-  public void publish(LogRecord record)
+  protected void processPublish(LogRecord record)
   {
     if (! isLoggable(record))
       return;
+    
+    WriteStream os = _os;
 
     try {
       if (record == null) {
-        synchronized (_os) {
-          _os.println("no record");
+        os.println("no record");
           
-          if (_isNullDelimited)
-            _os.write(0);
-            
-          _os.flush();
+        if (_isNullDelimited) {
+          os.write(0);
         }
+
         return;
       }
 
       if (_formatter != null) {
         String value = _formatter.format(record);
 
-        synchronized (_os) {
-          _os.println(value);
-          if (_isNullDelimited)
-            _os.write(0);
-          
-          _os.flush();
+        os.println(value);
+        if (_isNullDelimited) {
+          os.write(0);
         }
         
         return;
@@ -123,45 +120,38 @@ public class StreamHandler extends Handler {
         thrown.fillInStackTrace();
       }
 
-      synchronized (_os) {
-        if (_timestamp != null) {
-          _os.print(_timestamp);
-        }
-          
-        if (thrown != null) {
-          if (message != null
-              && ! message.equals(thrown.toString()) 
-              && ! message.equals(thrown.getMessage()))
-            _os.println(message);
-        
-          thrown.printStackTrace(_os.getPrintWriter());
-        }
-        else {
-          _os.println(record.getMessage());
-        }
-        
-        if (_isNullDelimited)
-          _os.write(0);
-        
-        _os.flush();
+      if (_timestamp != null) {
+        os.print(_timestamp);
       }
+          
+      if (thrown != null) {
+        if (message != null
+            && ! message.equals(thrown.toString()) 
+            && ! message.equals(thrown.getMessage())) {
+          printMessage(os, message, record.getParameters());
+        }
+        
+        thrown.printStackTrace(os.getPrintWriter());
+      }
+      else {
+        printMessage(os, message, record.getParameters());
+      }
+      
+      if (_isNullDelimited)
+        os.write(0);
     } catch (Throwable e) {
       e.printStackTrace();
     }
   }
-
-  /**
-   * Flushes the buffer.
-   */
-  public void flush()
+  
+  @Override
+  protected void processFlush()
   {
-  }
-
-  /**
-   * Closes the handler.
-   */
-  public void close()
-  {
+    try {
+      _os.flush();
+    } catch (Exception e) {
+      e.printStackTrace();
+    }
   }
 
   /**
