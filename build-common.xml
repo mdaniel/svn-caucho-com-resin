@@ -732,6 +732,13 @@
         <include name="lib/webservices-extra-api.jar"/>
         <include name="lib/webservices.LICENSE"/>
 
+
+        <include name="endorsed/README"/>
+	<include name="resin-inf/README"/>
+	<include name="app-inf/README"/>
+	<include name="keys/README"/>
+	<include name="licenses/README"/>
+
 	<!--
         <include name="webapps/resin-doc.war"/>
 	-->
@@ -760,6 +767,7 @@
         <include name="hibernate-validator-4.0.2.GA.jar"/>
       </fileset>
     </copy>
+
 
     <copy todir="${dist.build}/doc/resin-doc">
       <fileset dir="${resin.doc}">

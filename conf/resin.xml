@@ -78,7 +78,7 @@
 
   <!-- For resin.properties dynamic cluster joining -->
   <home-cluster>${home_cluster}</home-cluster>
-  <home-server>${home_server}</home-server>
+  <!-- <home-server>${home_server}</home-server> -->
 
 
 

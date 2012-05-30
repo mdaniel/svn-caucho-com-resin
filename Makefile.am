@@ -12,6 +12,7 @@ LIBEXEC=@LIBEXEC@
 root_subdirs=doc keys licenses project-jars webapps webapp-jars endorsed
 home_subdirs=@LIBEXEC@ bin lib
 conf_files=resin.xml resin.properties app-default.xml cluster-default.xml health.xml
+conf_subdirs=keys licences
 
 all	:
 	@ (cd modules/c/src; $(MAKE))
@@ -148,6 +149,19 @@ install	:
 	    echo "ABORT: Resin conf install failed. Ensure $(resin_conf) is writable by $$USER, or run 'make install' as root."; \
 	    exit 42; \
 	  fi; \
+	  for subdir in $(conf_subdirs); do \
+	    if test -e "$(resin_conf)/$$subdir"; then \
+	      echo "Updating existing Resin conf subdir $(resin_conf)/$$subdir.";\
+	    else \
+	      echo "Installing Resin conf subdir $(resin_conf)/$$subdir."; \
+	      mkdir -p $(resin_conf)/$$subdir; \
+	      if test $$? != "0"; then \
+	        echo "ABORT: Resin conf subdir creation failed. Ensure $(resin_conf)/$$subdir can be created by $$USER, or run 'make install' as root."; \
+	        exit 42; \
+	      fi; \
+	    fi; \
+	    cp -r $$subdir/* $(resin_conf)/$$subdir; \
+	  done; \
 	  for file in $(conf_files); do \
 	    if test -f "$(resin_conf)/$$file"; then \
 	      echo "Preserving existing Resin conf file $(resin_conf)/$$file.";\
