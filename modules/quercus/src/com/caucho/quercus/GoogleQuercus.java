@@ -34,7 +34,6 @@ import com.caucho.quercus.env.Env;
 import com.caucho.quercus.env.GoogleEnv;
 import com.caucho.quercus.env.Value;
 import com.caucho.quercus.page.QuercusPage;
-import com.caucho.quercus.module.ModuleContext;
 import com.caucho.vfs.GoogleMergePath;
 import com.caucho.vfs.MergePath;
 import com.caucho.vfs.Path;
@@ -59,9 +58,14 @@ public class GoogleQuercus extends QuercusContext
   public void init()
   {
     boolean isGsEnabled = getIniBoolean("quercus.gs_enabled");
-    String gsBucket = getIniString("quercus.gs_bucket");
 
-    if (isGsEnabled && gsBucket != null) {
+    if (isGsEnabled) {
+      String gsBucket = getIniString("quercus.gs_bucket");
+
+      if (gsBucket == null) {
+        gsBucket = "bucket-name-not-set";
+      }
+
       Path stdPwd = getPwd();
 
       GoogleMergePath mergePwd = new GoogleMergePath(stdPwd, gsBucket, true);
