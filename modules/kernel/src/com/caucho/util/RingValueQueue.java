@@ -197,6 +197,21 @@ public class RingValueQueue<T> {
       }
     }
   }
+  
+  public final T peek()
+  {
+    final AtomicInteger tailRef = _tail;
+    final AtomicInteger headRef = _head;
+
+    int tail = tailRef.get();
+    int head = headRef.get();
+    
+    if (head != tail) {
+      return getValue(tail);
+    }
+    
+    return null;
+  }
  
   public final T poll()
   {
@@ -307,6 +322,16 @@ public class RingValueQueue<T> {
   private Item<T> get(int index)
   {
     return _ring[index];
+  }
+  
+  public T getValue(int index)
+  {
+    return _ring[index & _mask].get();
+  }
+  
+  public int nextIndex(int index)
+  {
+    return (index + 1) & _mask;
   }
   
   private void wakeAvailable()

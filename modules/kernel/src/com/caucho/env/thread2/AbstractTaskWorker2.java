@@ -201,8 +201,8 @@ abstract public class AbstractTaskWorker2
       do {
         isExpireRetry = false;
         
-        while (! isClosed() 
-            && _taskState.getAndSet(TASK_SLEEP) == TASK_READY) {
+        while (_taskState.getAndSet(TASK_SLEEP) == TASK_READY
+               && ! isClosed()) {
           thread.setContextClassLoader(_classLoader);
           
           isExpireRetry = false;

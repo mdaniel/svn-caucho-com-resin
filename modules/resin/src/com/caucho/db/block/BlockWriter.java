@@ -34,6 +34,8 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 
 import com.caucho.env.thread.AbstractTaskWorker;
+import com.caucho.util.CurrentTime;
+import com.caucho.util.RingValueQueue;
 
 /**
  * Writer thread serializing dirty blocks.
@@ -44,11 +46,11 @@ public class BlockWriter extends AbstractTaskWorker {
   
   private final BlockStore _store;
   
+  private int _queueSize = 1024;
   // private int _writeQueueMax = 256;
-  private final ArrayList<Block> _writeQueue = new ArrayList<Block>();
   
-  private final BlockWriteQueue _blockWriteQueue
-    = new BlockWriteQueue(this);
+  private final RingValueQueue<Block> _blockWriteQueue
+    = new RingValueQueue<Block>(_queueSize);
   
   BlockWriter(BlockStore store)
   {
@@ -68,68 +70,33 @@ public class BlockWriter extends AbstractTaskWorker {
    */
   void addDirtyBlockNoWake(Block block)
   {
-    boolean isWake = false;
-/*
-    synchronized (_writeQueue) {
-      if (_writeQueueMax < _writeQueue.size()) {
-        wake();
-        
-        try {
-          _writeQueue.wait(100);
-        } catch (InterruptedException e) {
-        }
-      }
-
-      _writeQueue.add(block);
-    }
-    */
-
-    synchronized (_blockWriteQueue) {
-      if (_blockWriteQueue.isFilled())
-        isWake = true;
-    
-      _blockWriteQueue.addDirtyBlock(block);
-    }
-    
-    if (isWake)
+    if (_queueSize >= 2 * _blockWriteQueue.getSize()) {
       wake();
+    }
+    
+    _blockWriteQueue.offer(block);
   }
 
   boolean copyDirtyBlock(long blockId, Block block)
   {
-    Block writeBlock = null;
-
-    /*
-    synchronized (_writeQueue) {
-      int size = _writeQueue.size();
-
-      // search from newest to oldest in case multiple writes
-      for (int i = size - 1; i >= 0; i--) {
-        Block testBlock = _writeQueue.get(i);
-
-        if (testBlock.getBlockId() == blockId) {
-          writeBlock = testBlock;
-          break;
-        }
+    int head = _blockWriteQueue.getHeadAlloc();
+    int tail = _blockWriteQueue.getTail();
+    
+    for (; head != tail; tail = _blockWriteQueue.nextIndex(tail)) {
+      Block writeBlock = _blockWriteQueue.getValue(tail);
+      
+      if (writeBlock != null && writeBlock.getBlockId() == blockId) {
+        return writeBlock.copyToBlock(block);
       }
     }
-    */
-
-    synchronized (_blockWriteQueue) {
-      writeBlock = _blockWriteQueue.findBlock(blockId);
-    }
-
     
-    if (writeBlock != null)
-      return writeBlock.copyToBlock(block);
-    else
-      return false;
+    return false;
   }
   
   @Override
   public boolean isClosed()
   {
-    return super.isClosed() && _writeQueue.size() == 0;
+    return super.isClosed() && _blockWriteQueue.isEmpty();
     
     // return super.isClosed() && _blockWriteQueue.isEmpty();
   }
@@ -138,7 +105,18 @@ public class BlockWriter extends AbstractTaskWorker {
   {
     wake();
     
-    return _blockWriteQueue.waitForComplete(timeout);
+    long expire = CurrentTime.getCurrentTimeActual() + timeout;
+    
+    while (! _blockWriteQueue.isEmpty()
+           && CurrentTime.getCurrentTimeActual() < expire) {
+      try {
+        Thread.sleep(10);
+      } catch (Exception e) {
+        
+      }
+    }
+    
+    return ! _blockWriteQueue.isEmpty();
   }
   
   @Override
@@ -195,9 +173,7 @@ public class BlockWriter extends AbstractTaskWorker {
     return null;
     */
     
-    synchronized (_blockWriteQueue) {
-      return _blockWriteQueue.peekFirstBlock();
-    }
+    return _blockWriteQueue.peek();
   }
 
   private void removeFirstBlock()
@@ -212,9 +188,7 @@ public class BlockWriter extends AbstractTaskWorker {
     }
     */
     
-    synchronized (_blockWriteQueue) {
-      _blockWriteQueue.removeFirstBlock();
-    }
+    _blockWriteQueue.poll();
   }
   
   @Override
