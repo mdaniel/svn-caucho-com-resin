@@ -116,7 +116,8 @@ public class BootResinConfig implements SchemaBean, DependencyBean
   
   public void setHomeServer(String homeServer)
   {
-    _homeServer = homeServer;
+    if (homeServer != null && ! homeServer.isEmpty())
+      _homeServer = homeServer;
   }
   
   public String getHomeServer()

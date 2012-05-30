@@ -195,7 +195,8 @@ public class BootResinConfig // implements EnvironmentBean
   @Configurable
   public void setHomeServer(String homeServer)
   {
-    _homeServer = homeServer;
+    if (homeServer != null && ! homeServer.isEmpty())
+      _homeServer = homeServer;
   }
   
   public String getHomeServer()
