@@ -49,6 +49,7 @@ import javax.persistence.PersistenceUnit;
 
 import com.caucho.config.ConfigException;
 import com.caucho.config.Names;
+import com.caucho.config.inject.AnyLiteral;
 import com.caucho.config.inject.InjectManager;
 import com.caucho.config.inject.InjectionPointHandler;
 import com.caucho.config.program.BeanValueGenerator;
@@ -155,7 +156,7 @@ public class PersistenceUnitHandler extends JavaeeInjectionHandler {
       
       if (bean == null) {
         Set<Bean<?>> beans = getManager().getBeans(EntityManagerFactory.class,
-                                                   new AnnotationLiteral<Any>() {});
+                                                   AnyLiteral.ANY);
         
         throw new ConfigException(location + L.l("unitName='{0}' is an unknown @PersistenceUnit.\n  {1}",
                                                  unitName,
@@ -173,7 +174,7 @@ public class PersistenceUnitHandler extends JavaeeInjectionHandler {
     }
     else if (! "".equals(name)) {
       Set<Bean<?>> beans = getManager().getBeans(EntityManagerFactory.class,
-                                                 new AnnotationLiteral<Any>() {});
+                                                 AnyLiteral.ANY);
       
       throw new ConfigException(location + L.l("name='{0}' is an unknown @PersistenceUnit.\n  {1}",
                                                name, beans));

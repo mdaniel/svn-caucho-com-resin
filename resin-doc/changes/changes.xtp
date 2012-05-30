@@ -12,6 +12,7 @@
 
 <s2 title="4.0.28 - snapshot">
 <ul>
+<li>load-balance: bounds check on hmux load-balance (#5058, rep by Travis Romney)</li>
 <li>load-balance: improve error message when open source configures a cluster</li>
 <li>logging: add formatting for entering/exiting (#5071)</li>
 <li>logging: add actor queue for logging</li>

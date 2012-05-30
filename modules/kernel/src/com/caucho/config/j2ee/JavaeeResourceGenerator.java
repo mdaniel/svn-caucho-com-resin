@@ -29,6 +29,7 @@
 
 package com.caucho.config.j2ee;
 
+import com.caucho.config.inject.AnyLiteral;
 import com.caucho.config.inject.InjectManager;
 import com.caucho.config.program.ValueGenerator;
 import com.caucho.config.program.ConfigProgram;
@@ -219,7 +220,7 @@ public class JavaeeResourceGenerator extends ValueGenerator {
     if (beans != null && beans.size() != 0)
       return webBeans.resolve(beans);
 
-    beans = webBeans.getBeans(type, new AnnotationLiteral<Any>() {});
+    beans = webBeans.getBeans(type, AnyLiteral.ANY);
 
     if (beans == null || beans.size() == 0)
       return null;

@@ -330,7 +330,7 @@ public class InjectionTargetBuilder<X> implements InjectionTarget<X>
               BaseTypeAnnotated baseAnnType
                 = (BaseTypeAnnotated) _annotatedType;
               
-              baseAnnType.addOverrideAnnotation(new AnnotationLiteral<NoAspect>() {});
+              baseAnnType.addOverrideAnnotation(NoAspectLiteral.ANN);
             }
           }
         }
