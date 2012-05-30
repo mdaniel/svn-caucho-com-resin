@@ -811,7 +811,7 @@ public class TcpSocketLink extends AbstractSocketLink
    * Completion processing at the end of the thread
    */
   @Friend(ConnectionTask.class)
-  final void finishThread(RequestState requestState)
+  final void finishThread(RequestState resultState)
   {
     Thread thread = _thread;
     _thread = null;
@@ -854,7 +854,7 @@ public class TcpSocketLink extends AbstractSocketLink
     }
 
     if (! (state.isComet() || state.isDuplex())
-        && ! requestState.isAsyncOrDuplex()) {
+        && ! resultState.isAsyncOrDuplex()) {
       try {
         closeAsyncIfNotAsync();
       } catch (Throwable e) {
@@ -862,7 +862,7 @@ public class TcpSocketLink extends AbstractSocketLink
       }
     }
     
-    if (requestState.isKeepaliveSelect() && ! state.isClosed()) {
+    if (resultState.isKeepaliveSelect() && ! state.isClosed()) {
       // keepalive wake before the thread exits
       if (! reqState.toSuspendKeepalive(_requestStateRef)) {
         if (! getLauncher().offerResumeTask(getKeepaliveTask())) {
@@ -873,7 +873,7 @@ public class TcpSocketLink extends AbstractSocketLink
       return;
     }
     
-    if (requestState.isDetach() && ! state.isClosed()) {
+    if (resultState.isDetach() && ! state.isClosed()) {
       return;
     }
     
@@ -888,9 +888,14 @@ public class TcpSocketLink extends AbstractSocketLink
     }
     else if (isDestroyed()) {
     }
+    else if (resultState.isClosed()) {
+      // network/0272
+      close();
+    }
     else {
-      System.out.println("NOFREE:" + requestState
-                         + " " + reqState + " " + _requestStateRef.get() + " " + this);
+      System.out.println(this + " Internal error unable to free: "
+                         + " result=" + resultState
+                         + " requestState=" + reqState + " " + _requestStateRef.get());
     }
   }
   
