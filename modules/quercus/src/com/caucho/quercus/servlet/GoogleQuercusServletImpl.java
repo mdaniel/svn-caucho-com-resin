@@ -51,11 +51,6 @@ public class GoogleQuercusServletImpl extends QuercusServletImpl
   private static final Logger log
     = Logger.getLogger(GoogleQuercusServletImpl.class.getName());
 
-  protected QuercusServletImpl getQuercusServlet()
-  {
-    return this;
-  }
-
   @Override
   protected void handleThrowable(HttpServletResponse response, Throwable e)
     throws IOException, ServletException

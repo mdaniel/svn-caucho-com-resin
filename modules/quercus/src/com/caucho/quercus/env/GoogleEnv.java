@@ -31,7 +31,6 @@ package com.caucho.quercus.env;
 
 import com.caucho.quercus.QuercusContext;
 import com.caucho.quercus.page.QuercusPage;
-import com.caucho.vfs.Path;
 import com.caucho.vfs.WriteStream;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
@@ -79,14 +78,5 @@ public class GoogleEnv extends Env {
     super.resetTimeout();
 
     _timeoutCount = 8192;
-  }
-
-  @Override
-  public void setPwd(Path path)
-  {
-    // don't want to use cached values
-    path = path.copy();
-
-    super.setPwd(path);
   }
 }

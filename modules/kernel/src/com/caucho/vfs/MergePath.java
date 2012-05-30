@@ -87,6 +87,7 @@ public class MergePath extends FilesystemPath {
         addMergePath(path);
       }
     }
+
   }
 
   /**
@@ -325,8 +326,8 @@ public class MergePath extends FilesystemPath {
    * until opening.
    */
   public Path fsWalk(String userPath,
-                        Map<String,Object> attributes,
-                        String path)
+                     Map<String,Object> attributes,
+                     String path)
   {
     ArrayList<Path> pathList = getMergePaths();
 
@@ -774,7 +775,7 @@ public class MergePath extends FilesystemPath {
   @Override
   public Path copy()
   {
-    MergePath copy = new MergePath();
+    MergePath copy = new MergePath((MergePath) _root, _userPath, null, _pathname);
 
     ArrayList<Path> pathList = getPathList();
 

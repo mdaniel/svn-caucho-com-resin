@@ -56,6 +56,13 @@ abstract public class FilesystemPath extends Path {
   {
     super(root);
 
+    init(root, userPath, pathname);
+  }
+
+  protected void init(FilesystemPath root,
+                      String userPath,
+                      String pathname)
+  {
     if (pathname == null)
       throw new NullPointerException();
 
@@ -115,7 +122,6 @@ abstract public class FilesystemPath extends Path {
     else
       canonicalPath = normalizePath(_pathname, filePath, offset,
                                     _separatorChar);
-
 
     return fsWalk(userPath, attributes, canonicalPath);
   }
@@ -291,7 +297,7 @@ abstract public class FilesystemPath extends Path {
    */
   public String getFullPath()
   {
-    if (_root == this)
+    if (_root == this || _root == null)
       return getPath();
 
     String rootPath = _root.getFullPath();

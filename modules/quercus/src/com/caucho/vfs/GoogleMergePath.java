@@ -34,6 +34,9 @@ import com.google.appengine.api.files.FileServiceFactory;
 
 import java.util.ArrayList;
 
+/**
+ * Represents the root merged path for Google.
+ */
 public class GoogleMergePath extends MergePath
 {
   private GooglePath _googlePath;

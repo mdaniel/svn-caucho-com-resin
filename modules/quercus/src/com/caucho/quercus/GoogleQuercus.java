@@ -58,9 +58,10 @@ public class GoogleQuercus extends QuercusContext
   @Override
   public void init()
   {
+    boolean isGsEnabled = getIniBoolean("quercus.gs_enabled");
     String gsBucket = getIniString("quercus.gs_bucket");
 
-    if (gsBucket != null) {
+    if (isGsEnabled && gsBucket != null) {
       Path stdPwd = getPwd();
 
       GoogleMergePath mergePwd = new GoogleMergePath(stdPwd, gsBucket, true);
@@ -110,13 +111,6 @@ public class GoogleQuercus extends QuercusContext
     return _localModuleContext;
   }
   */
-
-  @Override
-  protected ModuleContext createModuleContext(ModuleContext parent,
-                                              ClassLoader loader)
-  {
-    return new ModuleContext(parent, loader);
-  }
 
   @Override
   public Env createEnv(QuercusPage page,
