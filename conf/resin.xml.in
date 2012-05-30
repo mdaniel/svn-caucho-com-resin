@@ -9,6 +9,13 @@
   <resin:properties path="cloud:/resin.properties"
                     optional="true" recover="true"/>
 
+
+
+  <resin:if test="${properties_import_url}">
+     <resin:properties path="${properties_import_url}"
+                    optional="true" recover="true"/>
+  </resin:if>
+
   <!-- Logging configuration for the JDK logging API -->
   <log-handler name="" level="all" path="stdout:"
                timestamp="[%y-%m-%d %H:%M:%S.%s]"
@@ -71,6 +78,9 @@
 
   <!-- For resin.properties dynamic cluster joining -->
   <home-cluster>${home_cluster}</home-cluster>
+  <!-- home-server>${home_server}</home-server -->
+
+
 
   <!--
      - Configures the main application cluster.  Load-balancing configurations

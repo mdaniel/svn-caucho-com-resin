@@ -44,7 +44,7 @@ import java.util.*;
  * <code><pre>
  * ResinEmbed resin = new ResinEmbed();
  *
- * WebAppEmbed webApp = new WebAppEmbed("/foo", "/var/www/foo");
+ * WebAppEmbed webApp = new WebAppEmbed("/foo", "/var/resin/foo");
  *
  * FilterMappingEmbed myFilter
  *   = new FilterMappingEmbed("/my-filter", "*.jsp", "qa.MyFilter");

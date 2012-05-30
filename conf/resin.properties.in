@@ -127,3 +127,5 @@ web_admin_enable : true
 # admin_user : admin
 # admin_password : {SSHA}xxxxxxxx
 
+# Enable reading EC2 user data as resin properties
+# properties_import_url : http://169.254.169.254/latest/user-data

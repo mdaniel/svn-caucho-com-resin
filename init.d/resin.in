@@ -43,7 +43,7 @@ fi
 #
 #SERVER="-server app-a"
 #
-# -resin-root /var/www         -- the main data directory
+# -resin-root /var/resin         -- the main data directory
 #
 #RESIN_ROOT="-root-directory @resin_root@"
 #

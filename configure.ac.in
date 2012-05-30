@@ -56,7 +56,7 @@ AC_ARG_WITH(resin-root,
 
 if test -z "$resin_root"; then
   if test "$prefix" == "NONE"; then
-    resin_root="/var/www"
+    resin_root="/var/resin"
   else
     resin_root="$prefix"
   fi

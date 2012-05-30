@@ -44,7 +44,7 @@ import com.caucho.util.L10N;
  * <code><pre>
  * ResinEmbed resin = new ResinEmbed();
  *
- * WebAppEmbed webApp = new WebAppEmbed("/foo", "/var/www/foo");
+ * WebAppEmbed webApp = new WebAppEmbed("/foo", "/var/resin/foo");
  *
  * MyBean myBean = new MyBean();
  *

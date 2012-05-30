@@ -22,7 +22,7 @@ function apache_template_print()
 
   echo "\n";
   echo "  <cluster id=\"app-tier\">\n";
-  echo "    <root-directory>/var/www</root-directory>\n";
+  echo "    <root-directory>/var/resin</root-directory>\n";
   echo "\n";
   echo "    <server-default>\n";
   echo "      <http port=\"8080\"/>\n";

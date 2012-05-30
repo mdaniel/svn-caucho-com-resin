@@ -9,8 +9,8 @@ resin_version=@resin_version@
 resin_pro=@resin_pro@
 build_dir=@build_dir@
 LIBEXEC=@LIBEXEC@
-root_subdirs=doc keys licenses project-jar webapps
-home_subdirs=@LIBEXEC@ webapp-jars bin endorsed lib
+root_subdirs=doc keys licenses project-jars webapps webapp-jars endorsed
+home_subdirs=@LIBEXEC@ bin lib
 conf_files=resin.xml resin.properties app-default.xml cluster-default.xml health.xml
 
 all	:

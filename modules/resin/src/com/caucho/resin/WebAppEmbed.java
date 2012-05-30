@@ -48,7 +48,7 @@ import com.caucho.server.webapp.WebAppSingleDeployGenerator;
  * <code><pre>
  * ResinEmbed resin = new ResinEmbed();
  *
- * WebAppEmbed webApp = new WebAppEmbed("/foo", "/var/www/foo");
+ * WebAppEmbed webApp = new WebAppEmbed("/foo", "/var/resin/foo");
  *
  * resin.addWebApp(webApp);
  * </pre></code>

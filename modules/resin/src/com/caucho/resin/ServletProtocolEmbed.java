@@ -39,7 +39,7 @@ import com.caucho.server.dispatch.ServletProtocolConfig;
  * interface marked with a @javax.ejb.Remote annotation.
  *
  * <code><pre>
- * WebAppEmbed webApp = new WebAppEmbed("/foo", "/var/www/foo");
+ * WebAppEmbed webApp = new WebAppEmbed("/foo", "/var/resin/foo");
  *
  * ServletMappingEmbed myService
  *   = new ServletMappingEmbed("my-service", "/service", "qa.Myservice");

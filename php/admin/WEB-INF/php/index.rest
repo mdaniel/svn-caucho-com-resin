@@ -43,7 +43,7 @@ in the resin.xml like:</p>
     &lt;resin:set var="resin_admin_external" value="false"/>
     &lt;resin:set var="resin_admin_insecure" value="true"/>
     <b>&lt;resin:set var="resin_admin_ext_path"
-               value="/var/www/admin/php"/></b>
+               value="/var/resin/admin/php"/></b>
  &lt;/prologue>
 &lt;/web-app>
 </code></pre>

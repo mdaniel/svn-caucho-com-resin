@@ -1,11 +1,11 @@
 <!--
    - Minimal configuration for starting server using an apache-style
-   - document tree in /var/www/htdocs.
+   - document tree in /var/resin/htdocs.
    -
-   - unix> java -jar lib/resin.jar -root-directory /var/www \
+   - unix> java -jar lib/resin.jar -root-directory /var/resin \
    -            -conf conf/minimal.xml
    -
-   - resin.root is /var/www, documents are in /var/www/htdocs.
+   - resin.root is /var/resin, documents are in /var/resin/htdocs.
   -->
 
 <resin xmlns="http://caucho.com/ns/resin"
