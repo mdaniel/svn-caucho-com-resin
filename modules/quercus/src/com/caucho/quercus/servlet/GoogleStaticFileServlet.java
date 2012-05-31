@@ -121,23 +121,17 @@ public class GoogleStaticFileServlet extends GenericServlet {
 
   protected Path getPath(HttpServletRequest req)
   {
-    String scriptPath = QuercusRequestAdapter.getPageServletPath(req);
-    String pathInfo = QuercusRequestAdapter.getPagePathInfo(req);
-
     // don't want to use cached values
     Path pwd = _path.copy();
 
-    Path path = pwd.lookup(req.getRealPath(scriptPath));
+    String scriptPath = QuercusRequestAdapter.getPageServletPath(req);
 
-    if (path.isFile())
-      return path;
+    if (scriptPath.startsWith("/")) {
+      scriptPath = scriptPath.substring(1);
+    }
 
-    String fullPath;
-    if (pathInfo != null)
-      fullPath = scriptPath + pathInfo;
-    else
-      fullPath = scriptPath;
+    Path path = pwd.lookupChild(scriptPath);
 
-    return pwd.lookup(req.getRealPath(fullPath));
+    return path;
   }
 }
