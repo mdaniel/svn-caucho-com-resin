@@ -31,7 +31,6 @@ package com.caucho.util;
 
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicInteger;
-import java.util.concurrent.atomic.AtomicLong;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -200,17 +199,9 @@ public class RingValueQueue<T> {
   
   public final T peek()
   {
-    final AtomicInteger tailRef = _tail;
-    final AtomicInteger headRef = _head;
-
-    int tail = tailRef.get();
-    int head = headRef.get();
+    int tail = _tailAlloc.get();
     
-    if (head != tail) {
-      return getValue(tail);
-    }
-    
-    return null;
+    return getValue(tail);
   }
  
   public final T poll()
@@ -314,11 +305,6 @@ public class RingValueQueue<T> {
     }
   }
   
-  private boolean isFull()
-  {
-    return ((_head.get() + 1) & _mask) == _tail.get();
-  }
-  
   private Item<T> get(int index)
   {
     return _ring[index];
@@ -332,6 +318,11 @@ public class RingValueQueue<T> {
   public int nextIndex(int index)
   {
     return (index + 1) & _mask;
+  }
+  
+  public int prevIndex(int index)
+  {
+    return (index + _mask) & _mask;
   }
   
   private void wakeAvailable()
