@@ -61,8 +61,7 @@ an early access release.</p>
 and 4.0.2. Resin now supports the JSR-330 annotations for Java Injection.</p>
 
 <p>The main changes are repackaging and renaming of the key injection
-annotations to match JSR-299.  The
-<a href="../examples/ioc-binding/index.xtp">Java Injection Tutorial</a>
+annotations to match JSR-299.  The Java Injection Tutorial
 has been updated for the new injections.</p>
 
 </s1>

@@ -1487,8 +1487,8 @@ copied to the log.</p>
 <p>&lt;database> defines a database (i.e. DataSource)  resource.</p>
 
 <p>The <a href="admin/database.xtp">database configuration</a> section has
-more details on the configuration.  A code pattern for using databases
-is in a <a href="examples/db-jdbc/index.xtp">DataSource tutorial.</a></p>
+more details on the configuration.  
+</p>
 </description>
 
 <attributes>
@@ -8463,10 +8463,9 @@ It uses a Java interface and a URI to select the web-service.</p>
 location is typically a HTTP URL.</p>
 
 <ul>
-<li>See <a href="examples/remoting.xtp">Resin remoting</a> for more
+<li>See <a href="http://wiki4.caucho.com/Does_Resin_4_Support_Remoting%3F">Resin remoting</a> for more
 information, including how to write an adapter for Resin remoting.</li>
-<li>See the <a href="examples/remote-hello-world/">hello world tutorial</a>
-for an example.</li>
+
 </ul>
 </description>
 
@@ -11656,7 +11655,7 @@ custom @InterceptorType interceptors, and listen for @Observes events.</p>
 </tr>
 <tr>
  <td>protocol</td>
- <td>Protocol configuration for <a href="examples/remoting.xtp">Resin remoting</a>.</td>
+ <td>Protocol configuration for Resin remoting.</td>
 </tr>
 <tr>
   <td>run-at</td>
@@ -11798,7 +11797,7 @@ children, <var>url-pattern</var> and <var>servlet-name</var>.
 </tr>
 <tr>
   <td>protocol</td>
-  <td>Defines the optional <a href="examples/remoting.xtp">remoting protocol</a>.</td>
+  <td>Defines the optional remoting protocol.</td>
 </tr>
 <tr>
   <td>servlet-class</td>

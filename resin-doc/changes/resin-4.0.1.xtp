@@ -46,8 +46,8 @@ new features, it may be more unstable than the production branch.</p>
 an early access release.  Importantly, Resin's server
 push/comet support has changed to the Servlet
 <a href="http://caucho.com/resin-javadoc/javax/servlet/AsyncContext.html">AsyncContext</a> model.  Developers who have used Resin's experimental comet API
-should see the <a href="../examples/servlet-comet/index.xtp">new comet
-using AsyncContext tutorial</a>. Future Resin versions will concentrate on
+should see the new comet
+using AsyncContext tutorial. Future Resin versions will concentrate on
 the AsyncContext API and will eventually drop the experimental API.</p>
 
 </s1>

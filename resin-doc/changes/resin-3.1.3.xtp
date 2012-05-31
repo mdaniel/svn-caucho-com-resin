@@ -106,8 +106,7 @@ and
 <a href="http://caucho.com/resin-javadoc/com/caucho/servlet/comet/CometServer.html">CometServlet</a>
 </p>
 
-<p>We've also added a <a href="../examples/servlet-comet/">Comet
-example</a>.</p>
+
 
 </s1>
 

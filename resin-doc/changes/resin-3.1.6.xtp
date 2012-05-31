@@ -19,9 +19,7 @@ be applied to new versions of the 3.1.x branch.</p>
 
 <s1 title="Resin JSF">
 
-<ul>
-<li>See <a href="../examples/jsf-webbeans/">JSF demo</a></li>
-</ul>
+
 
 <p>Resin's JSF has been promoted to release status after fixing a
 large number of compatibility issues.

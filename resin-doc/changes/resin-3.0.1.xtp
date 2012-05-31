@@ -99,13 +99,11 @@ resource implements <code>ResourceAdapter</code> or
 <code>ManagedConnectionFactory</code>, Resin will call them with the
 appropriate lifecycle methods.</p>
 
-<p>The <a href="examples|jca-connection/index.xtp">Resource
-tutorials</a> show how resources can take advantage
-of these callbacks.</p>
+
 
 <s2 title="CronResource (run-at)">
 
-<p>The new <a href="examples|jca-cron/index.xtp">CronResource</a> now
+<p>The new CronResource now
 replaces the old run-at servlets.  The CronResource accepts an
 application WorkTask which it executes at specific times, configured
 following the Unix cron syntax.</p>

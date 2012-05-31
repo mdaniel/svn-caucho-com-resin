@@ -19,8 +19,9 @@ obtain connections to databases.
 
 <ul>
 <li><a href="http://wiki.caucho.com/">The Caucho Wiki</a> contains sample configurations for several database drivers
-</li><li><a href="../examples/db-jdbc/index.xtp">Basic JNDI/JDBC usage tutorial</a>
-</li><li>Using <a href="../examples/db-jdbc-ioc/index.xtp">Java Injection for Databases</a>
+</li><li>
+<a href="http://wiki4.caucho.com/Java_EE_Servlet_tutorial_:_Adding_MySQL_and_JDBC_to_bookstore_example#Configure_Resin_to_use_the_JDBC_driver">Basic JNDI/JDBC usage tutorial</a>
+</li><li>Using <a href="http://wiki4.caucho.com/Java_EE_Servlet_tutorial_:_Adding_MySQL_and_JDBC_to_bookstore_example#BookRepositoryJDBCImpl.java">Java Injection for Databases</a>
 </li></ul>
 
 </s1>
@@ -54,7 +55,7 @@ obtain connections to databases.
 <p>This &lt;database&gt; will configure a javax.sql.DataSource and
 store it in JNDI at java:comp/env/jdbc/test_mysql.  To use the data
 source, follow the database use pattern in the
-<a href="../examples/db-jdbc/index.xtp">DataSource tutorial.</a></p>
+<a href="http://wiki4.caucho.com/Java_EE_Servlet_tutorial_:_Adding_MySQL_and_JDBC_to_bookstore_example#.7E.2Fworkspace.2Fjavaee.2FServers.2F.22Resin_4.0_at_localhost-config.22.2Fresin.xml">DataSource tutorial.</a></p>
 
 <p>Although some deployments will specify driver and
 connection pool parameters, the default values will be fine for most

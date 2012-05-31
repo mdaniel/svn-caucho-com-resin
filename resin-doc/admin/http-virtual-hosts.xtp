@@ -25,7 +25,7 @@ adding virtual hosts can as easy as creating a directory
 like <code>/var/www/hosts/foo.com</code> and setting up the DNS name.
 Explicit virtual host is also possible to match existing layouts, like
 matching a <code>/var/www/htdocs</code> configuration when migrating
-a PHP mediawiki or wordpress site to use <a href="../examples/quercus.xtp">Quercus</a>
+a PHP mediawiki or wordpress site to use Quercus
 for security and performance.</p>
 
 <p>The virtual host will contain one or
@@ -229,7 +229,7 @@ and &lt;<a href="http-virtual-hosts-ref.xtp#host-default">host-default</a>&gt;.<
 virtual host configuration and configure each virtual host explicitly.
 Existing sites wanting to upgrade to Resin or sites with extra security needs
 may prefer to configure each &lt;host>  in the resin.xml. For
-example, a PHP Drupal site evaluating <a href="../examples/quercus.xtp">Quercus</a> to
+example, a PHP Drupal site evaluating Quercus to
 improve performance and security might use the explicit &lt;host> to
 point to the existing <code>/var/www/htdocs</code> directory.</p>
 
@@ -252,7 +252,7 @@ root directory, access-log and a single explicit
 <a href="deploy-ref.xtp">&lt;web-app></a> in the <code>htdocs</code>
 directory.  The default virtual host is configured just like a typical
 Apache configuration, so it can be used to upgrade an Apache/PHP site
-to use <a href="../examples/quercus.xtp">Quercus</a> for security and performance.</p>
+to use Quercus for security and performance.</p>
 
 <example title="Example: /etc/resin/resin.xml">
 &lt;resin xmlns="http://caucho.com/ns/resin"

@@ -20,9 +20,7 @@ use the Resin 3.0.x branch.</p>
 
 <s1 title="Resin JSF">
 
-<ul>
-<li>See <a href="../examples/jsf-webbeans/">JSF demo</a></li>
-</ul>
+
 
 <p>The Resin JSF implementation has cleaned up tremendously in 3.1.5.
 The jsf-12.jar is included in the resin/plugin directory.  To enable

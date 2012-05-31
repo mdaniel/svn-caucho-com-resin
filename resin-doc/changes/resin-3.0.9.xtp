@@ -30,7 +30,7 @@ to take extra care verifying Resin 3.0.9 before putting it into production.</p>
 
 <s1 title="EJB 3.0 experimental features">
 
-<p>See the <a href="examples|ejb.xtp">EJB 3.0 tutorials</a> for examples.</p>
+
 
 <p>Resin 3.0.9 includes an implementation the EJB 3.0 early-draft spec features.
 EJB 3.0 has a number of significant changes over EJB 2.1:
