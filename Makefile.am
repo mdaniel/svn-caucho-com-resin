@@ -4,6 +4,7 @@ resin_conf=$(DESTDIR)@resin_conf@
 resin_root=$(DESTDIR)@resin_root@
 resin_log=$(DESTDIR)@resin_log@
 resin_init_d=$(DESTDIR)@resin_init_d@
+initd_dir=$(DESTDIR)@initd_dir@
 usr_share=$(DESTDIR)@usr_share@
 resin_version=@resin_version@
 resin_pro=@resin_pro@
@@ -174,12 +175,11 @@ install	:
 	fi
 	@ if test -n "$(resin_init_d)"; then \
 	  if test -f "$(resin_init_d)"; then \
-	    echo "Preserving existing Resin init.d script $(resin_init_d)."; \
+	    echo "Preserving existing Resin init.d script $(resin_init_d) in $(initd_dir)."; \
 	  else \
 	    echo "Installing Resin init.d script $(resin_init_d)."; \
-	    init_dir=`dirname $(resin_init_d)`; \
-	    mkdir -p $(init_dir); \
-	    if test ! -w "$(init_dir)"; then \
+	    mkdir -p $(initd_dir); \
+	    if test ! -w "$(initd_dir)"; then \
 	      echo "WARNING: Resin init.d script install failed. Ensure $(init_dir) is writable by $$USER, or run 'make install' as root."; \
 	    else \
 	      cp init.d/resin $(resin_init_d); \

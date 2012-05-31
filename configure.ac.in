@@ -105,10 +105,13 @@ fi
 #
 if test -d "/etc/init.d/rc.d"; then
   resin_init_d="/etc/init.d/rc.d/resin"
+  initd_dir="/etc/init.d/rc.d"
 elif test -d "/etc/init.d"; then
   resin_init_d="/etc/init.d/resin"
+  initd_dir="/etc/init.d"
 elif test -d "/etc/rc.d"; then
   resin_init_d="/etc/rc.d"
+  initd_dir="/etc/"
 fi
 
 AC_ARG_WITH(resin-init-d,
