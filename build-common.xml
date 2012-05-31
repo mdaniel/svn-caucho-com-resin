@@ -1467,7 +1467,6 @@
         <include name="favicon.ico"/>
       </fileset>
     </copy>
-    <echo>hooooorayyyy ${dist.build}</echo>
 
     <copy todir="dist-debian/var/resin/resin-inf">
       <fileset dir="${dist.build}/resin-inf">
