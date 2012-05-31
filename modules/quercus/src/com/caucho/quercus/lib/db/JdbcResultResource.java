@@ -378,8 +378,6 @@ public class JdbcResultResource
         return NullValue.NULL;
       }
     } catch (SQLException e) {
-      System.out.println("XXEXN:" + e);
-      e.printStackTrace();
       log.log(Level.FINE, e.toString(), e);
       return NullValue.NULL;
     }
