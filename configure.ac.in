@@ -45,6 +45,7 @@ AC_SUBST(resin_home)
 AC_SUBST(resin_version)
 AC_SUBST(usr_share)
 AC_SUBST(build_dir)
+AC_SUBST(initd_dir)
 #
 # --with-resin-root
 #
@@ -125,6 +126,7 @@ esac
 ])
 
 AC_SUBST(resin_init_d)
+AC_SUBST(initd_dir)
 
 resin_pro="."
 resin_os="../resin_os"
