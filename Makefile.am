@@ -10,10 +10,10 @@ resin_version=@resin_version@
 resin_pro=@resin_pro@
 build_dir=@build_dir@
 LIBEXEC=@LIBEXEC@
-root_subdirs=doc keys licenses project-jars webapps webapp-jars endorsed resin-inf app-inf 
+root_subdirs=doc keys project-jars webapps webapp-jars endorsed resin-inf app-inf 
 home_subdirs=@LIBEXEC@ bin lib
 conf_files=resin.xml resin.properties app-default.xml cluster-default.xml health.xml
-conf_subdirs=keys licences
+conf_subdirs=keys licenses
 
 all	:
 	@ (cd modules/c/src; $(MAKE))

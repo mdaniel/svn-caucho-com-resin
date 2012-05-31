@@ -50,6 +50,9 @@ fi
 # -conf /etc/resin/resin.xml   -- the main configuration file
 #
 #RESIN_CONF="-conf @resin_conf@/resin.xml"
+# 
+# Licenses for Resin. TODO in progress
+# RESIN_LICENSE=" -license-directory @resin_conf@/licenses "
 #
 # -log-directory /var/log/resin -- the main log directory
 #
@@ -59,7 +62,7 @@ fi
 #
 #JOIN_CLUSTER="-join-cluster app-tier"
 
-ARGS="$RESIN_CONF $RESIN_LOG $RESIN_ROOT $JOIN_CLUSTER $SERVER"
+ARGS="$RESIN_CONF $RESIN_LOG $RESIN_ROOT $RESIN_LICENSE $JOIN_CLUSTER $SERVER"
 
 if test -r /lib/lsb/init-functions; then
   . /lib/lsb/init-functions
