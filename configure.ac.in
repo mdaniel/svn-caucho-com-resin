@@ -1394,8 +1394,21 @@ AC_ARG_WITH(perl,
 
 AC_SUBST(PERL)
 
+SKIP_CHECK_RESIN_SH=false
 #
-# --enable-debug
+# --with-check-skip
+#  
+AC_ARG_WITH(check-skip,
+[AS_HELP_STRING([--with-check-skip=checks],
+                [checks to skip])],
+[case "${withval}" in
+  *resin_sh*) SKIP_CHECK_RESIN_SH=true ;;
+esac])
+
+AC_SUBST(SKIP_CHECK_RESIN_SH)
+
+#
+# --ENABLE-debug
 #
 AC_ARG_ENABLE(debug,
 [AS_HELP_STRING([--enable-debug], [Turn on debugging])],

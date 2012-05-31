@@ -1242,6 +1242,7 @@
     <exec dir="${libexec}" executable="/bin/sh">
       <arg value="configure"/>
       <arg value="--prefix=${libexec}"/>
+      <arg value="--with-check-skip=resin_sh"/>
     </exec>
     
     <exec dir="${libexec}" executable="make">

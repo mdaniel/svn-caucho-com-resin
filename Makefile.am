@@ -10,6 +10,7 @@ resin_version=@resin_version@
 resin_pro=@resin_pro@
 build_dir=@build_dir@
 LIBEXEC=@LIBEXEC@
+skip_check_resin_sh=@SKIP_CHECK_RESIN_SH@
 root_subdirs_preserve=project-jars webapps webapp-jars endorsed resin-inf app-inf
 root_subdirs_overwrite=doc
 home_subdirs=@LIBEXEC@ bin lib
@@ -147,7 +148,7 @@ install	:
 	      echo "WARNING: failed to set resin.sh executable. Ensure $(resin_home)/bin/resin.sh is writable by $$USER, or run 'make install' as root."; \
 	    fi; \
 	  fi; \
-	else \
+	elif test "$(skip_check_resin_sh)" = "false"; then \
 	  echo "ABORT: $(resin_home)/bin/resin.sh does not exist. Resin home install may have failed."; \
 	  exit 42; \
 	fi
