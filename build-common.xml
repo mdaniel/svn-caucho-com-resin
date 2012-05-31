@@ -1253,6 +1253,7 @@
   </target>
 
   <target name="debian" depends="init,configure,dist,debian-libexec,debian-perm">
+  <!--target name="debian" depends="init"-->
     <exec executable="${basedir}/debian-perm">
       <arg value="-r"/>
     </exec>
@@ -1264,7 +1265,7 @@
     <mkdir dir="dist-debian/var/resin/webapps/ROOT"/>
     
     <mkdir dir="dist-debian/etc/resin"/>
-    <mkdir dir="dist-debian/etc/resin/resin-inf"/>
+    <!--mkdir dir="dist-debian/etc/resin/resin-inf"/-->
     <copy todir="dist-debian/etc/resin"
           preservelastmodified="true"
           overwrite="true">
@@ -1279,6 +1280,22 @@
         <!--
         <include name="local.d/**.xml"/>
         -->
+      </fileset>
+    </copy>
+
+    <copy todir="dist-debian/etc/resin/keys"
+          preservelastmodified="true"
+          overwrite="true">
+      <fileset dir="${resindir}/keys">
+        <include name="README"/>
+      </fileset>
+    </copy>
+
+    <copy todir="dist-debian/etc/resin/licenses"
+          preservelastmodified="true"
+          overwrite="true">
+      <fileset dir="${resindir}/licenses">
+	<include name="README"/>
       </fileset>
     </copy>
 
@@ -1329,9 +1346,9 @@
     </chmod>
 
     <mkdir dir="dist-debian/usr/local/share/${shortproduct}-${version}/lib"/>
-    <mkdir dir="dist-debian/usr/local/share/${shortproduct}-${version}/keys"/>
-    <mkdir dir="dist-debian/usr/local/share/${shortproduct}-${version}/licenses"/>
-    <mkdir dir="dist-debian/var/resin/licenses"/>
+    <!--mkdir dir="dist-debian/usr/local/share/${shortproduct}-${version}/keys"/-->
+    <!--mkdir dir="dist-debian/usr/local/share/${shortproduct}-${version}/licenses"/-->
+    <!--mkdir dir="dist-debian/var/resin/licenses"/-->
     <mkdir dir="dist-debian/usr/bin"/>
     
     <copy todir="dist-debian/usr/local/share/${shortproduct}-${version}"
@@ -1365,7 +1382,7 @@
         <include name="lib/license.jar"/>
         <include name="lib/pro.jar"/>
 
-        <include name="webapp-jars/**"/>
+        <!--include name="webapp-jars/**"/-->
       </fileset>
       
       <fileset dir="${resindir}">
@@ -1448,6 +1465,42 @@
       <fileset dir="${basedir}/../resin/webapps/ROOT">
         <include name="index.jsp"/>
         <include name="favicon.ico"/>
+      </fileset>
+    </copy>
+    <echo>hooooorayyyy ${dist.build}</echo>
+
+    <copy todir="dist-debian/var/resin/resin-inf">
+      <fileset dir="${dist.build}/resin-inf">
+	<include name="README"/>
+	<include name="*.jar"/>
+      </fileset>
+    </copy>
+
+    <copy todir="dist-debian/var/resin/app-inf">
+      <fileset dir="${dist.build}/app-inf">
+	<include name="README"/>
+	<include name="*.jar"/>
+      </fileset>
+    </copy>
+
+    <copy todir="dist-debian/var/resin/project-jars">
+      <fileset dir="${dist.build}/project-jars">
+	<include name="README"/>
+	<include name="*.jar"/>
+      </fileset>
+    </copy>
+
+    <copy todir="dist-debian/var/resin/webapp-jars">
+      <fileset dir="${dist.build}/webapp-jars">
+	<include name="README"/>
+        <include name="*.jar"/>
+      </fileset>
+    </copy>
+
+    <copy todir="dist-debian/var/resin/endorsed">
+      <fileset dir="${dist.build}/endorsed">
+	<include name="README"/>
+        <include name="*.jar"/>
       </fileset>
     </copy>
 
