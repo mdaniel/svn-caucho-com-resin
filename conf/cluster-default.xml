@@ -1,6 +1,12 @@
 <resin xmlns="http://caucho.com/ns/resin"
        xmlns:resin="urn:java:com.caucho.resin">
 
+  <!-- Cloud server configuration -->
+  <resin:import fileset="cloud:/resin-inf/**/*.xml" recover="true"/>
+
+  <!-- Local configuration. -->
+  <resin:import fileset="${resin.root}/resin-inf/**/*.xml"/>
+
   <!--
      - driver .jar files can be placed in ${resin.root}/resin.d/lib
      -->
@@ -22,7 +28,7 @@
     <!-- shared webapp jars for non-classloader-aware libraries -->
     <web-app-default>
       <class-loader>
-        <library-loader path="${resin.home}/webapp-jars"/>
+        <library-loader path="${resin.root}/webapp-jars"/>
         <library-loader path="${resin.root}/webapp.d/lib"/>
         <library-loader path="config:/webapp.d/lib"/>
       </class-loader>
@@ -35,7 +41,7 @@
     </class-loader>
 
     <!-- include resources config files in resources/ -->
-    <resin:import fileset="${__DIR__}/${cluster.id}-inf/**/*.xml"/>
+    <resin:import fileset="${resin.root}/${cluster.id}-inf/**/*.xml"/>
     <resin:import fileset="cloud:/${cluster.id}-inf/**/*.xml"
                   recover="true"/>
 
