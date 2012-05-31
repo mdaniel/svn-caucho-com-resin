@@ -483,13 +483,13 @@ public final class Block implements SyncCacheListener {
     if (block == this)
       return true;
     
-    // For timing reasons, the buffer cannot be freed if it's also
-    // copied.
-    _isFreeBuffer = false;
-      
     byte []buffer = _buffer;
     byte []targetBuffer = block.getBuffer();
 
+    // For timing reasons, the buffer cannot be freed if it's also
+    // copied.
+    _isFreeBuffer = false;
+    
     // XXX: need to allocate state
     boolean isValid = isValid() && buffer != null && targetBuffer != null;
     

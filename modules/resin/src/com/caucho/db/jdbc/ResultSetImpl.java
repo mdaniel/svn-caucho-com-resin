@@ -240,6 +240,15 @@ public class ResultSetImpl extends AbstractResultSet {
   }
 
   /**
+   * Returns the blob value for the column.
+   */
+  public InputStream getBinaryStream(int columnIndex)
+    throws SQLException
+  {
+    return _rs.getBinaryStream(columnIndex - 1);
+  }
+
+  /**
    * Returns the clob value for the column.
    */
   public Clob getClob(int columnIndex)

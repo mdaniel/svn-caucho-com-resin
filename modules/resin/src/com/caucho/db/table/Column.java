@@ -682,7 +682,7 @@ abstract public class Column {
     },
     BINARY {
       @Override
-      public int getSQLType() { return Types.VARBINARY; } 
+      public int getSQLType() { return Types.BINARY; } 
     },
     VARBINARY {
       @Override

@@ -482,6 +482,7 @@ abstract public class AbstractResultSet implements java.sql.ResultSet {
     return getTimestamp(findColumn(columnName), calendar);
   }
 
+  @Override
   public InputStream getBinaryStream(int columnIndex)
     throws SQLException
   {
