@@ -7,6 +7,7 @@
 package com.caucho.admin.action;
 
 import java.io.IOException;
+import java.util.logging.Logger;
 
 import javax.mail.internet.InternetAddress;
 import javax.servlet.http.HttpServletRequest;
@@ -27,6 +28,9 @@ import com.caucho.vfs.*;
 public class PdfReportAction implements AdminAction
 {
   private static final L10N L = new L10N(PdfReportAction.class);
+  private static final Logger log 
+    = Logger.getLogger(PdfReportAction.class.getName());
+  
   private static final long HOUR = 3600 * 1000L;
   private static final long DAY = 24 * 3600 * 1000L;
   
@@ -259,8 +263,9 @@ public class PdfReportAction implements AdminAction
     }
     
     if (_phpPath == null) {
-      throw new ConfigException(L.l("{0} requires a path to a PDF generating .php file",
-                                    getClass().getSimpleName()));
+      log.warning(L.l("{0} requires a 'path' attribute to a PDF generating .php file or '{1}'",
+                      getClass().getSimpleName(),
+                      resin.getResinHome().lookup("php/admin/pdf-gen.php").getNativePath()));
     }
     
     if (_logPath == null)
