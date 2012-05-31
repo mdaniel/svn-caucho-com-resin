@@ -186,7 +186,6 @@ install	:
 	      cp conf/$$file $(resin_conf)/$$file; \
 	    fi; \
 	  done; \
-	  mkdir -p $(resin_conf)/resin-inf; \
 	fi
 	@ if test -n "$(resin_init_d)"; then \
 	  if test -f "$(resin_init_d)"; then \
