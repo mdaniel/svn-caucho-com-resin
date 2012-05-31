@@ -9,12 +9,30 @@
   <resin:properties path="cloud:/resin.properties"
                     optional="true" recover="true"/>
 
-
-
   <resin:if test="${properties_import_url}">
      <resin:properties path="${properties_import_url}"
                     optional="true" recover="true"/>
   </resin:if>
+
+  <!-- Java system-properties -->
+  <system-property mail.smtp.host="${smtp_host?:'127.0.0.1'}"/>
+  <system-property mail.smtp.port="${smtp_port?:25}"/>
+  <system-property mail.smtp.from="${smtp_from}"/>
+
+  <!-- Cloud server configuration -->
+  <resin:import fileset="cloud:/resin-inf/**/*.xml" recover="true"/>
+
+  <!-- Local configuration. -->
+  <resin:import fileset="${resin.root}/resin-inf/**/*.xml"/>
+
+  <!--
+     - driver .jar files can be placed in ${resin.root}/resin-inf/
+     -->
+  <class-loader>
+    <tree-loader path="${resin.root}/ext-lib"/>
+    <tree-loader path="${resin.root}/resin-inf"/>
+    <tree-loader path="cloud:/resin-inf"/>
+  </class-loader>
 
   <!-- Logging configuration for the JDK logging API -->
   <log-handler name="" level="all" path="stdout:"
