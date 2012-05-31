@@ -10,7 +10,8 @@ resin_version=@resin_version@
 resin_pro=@resin_pro@
 build_dir=@build_dir@
 LIBEXEC=@LIBEXEC@
-root_subdirs=doc keys project-jars webapps webapp-jars endorsed resin-inf app-inf 
+root_subdirs_preserve=project-jars webapps webapp-jars endorsed resin-inf app-inf
+root_subdirs_overwrite=doc
 home_subdirs=@LIBEXEC@ bin lib
 conf_files=resin.xml resin.properties app-default.xml cluster-default.xml health.xml
 conf_subdirs=keys licenses
@@ -43,7 +44,7 @@ install	:
 	      exit 42; \
 	    fi; \
 	  fi; \
-	  for subdir in $(root_subdirs); do \
+	  for subdir in $(root_subdirs_preserve); do \
 	    if test -e "$(resin_root)/$$subdir"; then \
 	      echo "Preserving existing Resin root subdir $(resin_root)/$$subdir.";\
 	    else \
@@ -56,6 +57,19 @@ install	:
 	        cp -r $$subdir/* $(resin_root)/$$subdir; \
 	      fi; \
 	    fi; \
+	  done; \
+	  for subdir in $(root_subdirs_overwrite); do \
+	    if test -e "$(resin_root)/$$subdir"; then \
+	      echo "Updating existing Resin root subdir $(resin_root)/$$subdir.";\
+	    else \
+	      echo "Installing Resin root subdir $(resin_root)/$$subdir."; \
+	      mkdir -p $(resin_root)/$$subdir; \
+	      if test $$? != "0"; then \
+	        echo "ABORT: Resin root subdir creation failed. Ensure $(resin_root)/$$subdir can be created by $$USER, or run 'make install' as root."; \
+	        exit 42; \
+	      fi; \
+	    fi; \
+	    cp -r $$subdir/* $(resin_root)/$$subdir; \
 	  done; \
 	fi
 	@ if test "$(resin_home)" != "$(build_dir)"; then \
@@ -152,16 +166,17 @@ install	:
 	  fi; \
 	  for subdir in $(conf_subdirs); do \
 	    if test -e "$(resin_conf)/$$subdir"; then \
-	      echo "Updating existing Resin conf subdir $(resin_conf)/$$subdir.";\
+	      echo "Preserving existing Resin conf subdir $(resin_conf)/$$subdir.";\
 	    else \
 	      echo "Installing Resin conf subdir $(resin_conf)/$$subdir."; \
 	      mkdir -p $(resin_conf)/$$subdir; \
 	      if test $$? != "0"; then \
 	        echo "ABORT: Resin conf subdir creation failed. Ensure $(resin_conf)/$$subdir can be created by $$USER, or run 'make install' as root."; \
 	        exit 42; \
+	      else \
+	        cp -r $$subdir/* $(resin_conf)/$$subdir; \
 	      fi; \
 	    fi; \
-	    cp -r $$subdir/* $(resin_conf)/$$subdir; \
 	  done; \
 	  for file in $(conf_files); do \
 	    if test -f "$(resin_conf)/$$file"; then \
