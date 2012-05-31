@@ -48,12 +48,6 @@
      - health configuration
     -->
   <resin:import path="${__DIR__}/health.xml"/>
-
-  <!--
-     - local configuration files
-    -->
-  <resin:import fileset="${__DIR__}/resin-inf/*.xml"/>
-  <resin:import fileset="cloud:/resin-inf/*.xml" recover="true"/>
   
   <!--
      - Remote management requires at least one enabled admin user.

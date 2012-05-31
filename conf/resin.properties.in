@@ -70,13 +70,15 @@ tcp_cork : true
 sendfile : true
 
 # OpenSSL certificate configuration
-# openssl_file : keys/test.crt
-# openssl_key : keys/test.key
+# Keys are typically stored in the resin configuration directory.
+# openssl_file : /etc/resin/keys/test.crt
+# openssl_key : /etc/resin/keys/test.key
 # openssl_password : changeme
 
 # JSSE certificate configuration
+# Keys are typically stored in the resin configuration directory.
 # jsse_keystore_type : jks
-# jsse_keystore_file : keys/server.keystore
+# jsse_keystore_file : /etc/resin/keys/server.keystore
 # jsse_keystore_password : changeme
 
 # In absence of a signed certificate, Resin will fallback to using a 
