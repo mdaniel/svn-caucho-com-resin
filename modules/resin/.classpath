@@ -20,5 +20,6 @@
 	<classpathentry kind="var" path="RESIN_SRC_HOME/modules/ext/webservices-api.jar"/>
 	<classpathentry kind="var" path="RESIN_SRC_HOME/modules/ext/webservices-extra-api.jar"/>
 	<classpathentry kind="var" path="RESIN_SRC_HOME/modules/ext/validation-api-1.0.0.GA.jar"/>
+	<classpathentry kind="var" path="RESIN_SRC_HOME"/>
 	<classpathentry kind="output" path="bin"/>
 </classpath>

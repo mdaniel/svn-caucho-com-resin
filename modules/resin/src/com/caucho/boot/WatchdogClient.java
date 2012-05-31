@@ -482,6 +482,7 @@ class WatchdogClient
 
     Path resinHome = getResinHome();
     Path resinRoot = getRootDirectory();
+    
 
     ProcessBuilder builder = new ProcessBuilder();
 
@@ -533,7 +534,13 @@ class WatchdogClient
     list.add("-Djava.awt.headless=true");
     list.add("-Dresin.home=" + resinHome.getFullPath());
     list.add("-Dresin.root=" + resinRoot.getFullPath());
-
+    
+    String licenseDir = System.getProperty("resin.license.dir");
+    if (licenseDir==null) {
+    	licenseDir = this.getConfig().getResinConf().getParent().toString() + "/licenses";
+    }
+    list.add("-Dresin.license.dir=" + licenseDir);
+    
     for (int i = 0; i < argv.length; i++) {
       if (argv[i].startsWith("-Djava.class.path=")) {
         // IBM JDK startup issues
