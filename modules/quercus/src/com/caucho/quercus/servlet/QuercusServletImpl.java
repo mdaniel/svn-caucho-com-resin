@@ -44,6 +44,7 @@ import com.caucho.quercus.page.QuercusPage;
 import com.caucho.util.CurrentTime;
 import com.caucho.util.L10N;
 import com.caucho.vfs.FilePath;
+import com.caucho.vfs.MergePath;
 import com.caucho.vfs.Path;
 import com.caucho.vfs.Vfs;
 import com.caucho.vfs.WriteStream;
@@ -286,11 +287,25 @@ public class QuercusServletImpl extends HttpServlet
 
   protected Path getPath(HttpServletRequest req)
   {
-    String scriptPath = QuercusRequestAdapter.getPageServletPath(req);
-    String pathInfo = QuercusRequestAdapter.getPagePathInfo(req);
-
     // php/8173
     Path pwd = getQuercus().getPwd().copy();
+
+    String scriptPath = QuercusRequestAdapter.getPageServletPath(req);
+
+    if (scriptPath.startsWith("/")) {
+      scriptPath = scriptPath.substring(1);
+    }
+
+    Path path = pwd.lookupChild(scriptPath);
+
+    return path;
+
+    /* jetty getRealPath() de-references symlinks, which causes problems with MergePath
+    // php/8173
+    Path pwd = getQuercus().getPwd().copy();
+
+    String scriptPath = QuercusRequestAdapter.getPageServletPath(req);
+    String pathInfo = QuercusRequestAdapter.getPagePathInfo(req);
 
     Path path = pwd.lookup(req.getRealPath(scriptPath));
 
@@ -306,6 +321,7 @@ public class QuercusServletImpl extends HttpServlet
       fullPath = scriptPath;
 
     return pwd.lookup(req.getRealPath(fullPath));
+    */
   }
 
   /**
