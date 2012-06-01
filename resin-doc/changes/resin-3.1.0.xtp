@@ -253,13 +253,6 @@ can now write to the client APIs without worrying about proxy generation.</p>
 
 </s1>
 
-<s1 title="JAXB for Config IoC">
-
-<p>See <a href="../examples/jaxb-bean-config/index.xtp">JAXB Bean
-Configuration tutorial</a></p>
-
-</s1>
-
 <s1 title="Quercus">
 
 <p>Quercus now supports the i18n and l10n features of PHP.  This includes
