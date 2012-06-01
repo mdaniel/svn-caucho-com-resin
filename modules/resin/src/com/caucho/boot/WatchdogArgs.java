@@ -113,9 +113,10 @@ class WatchdogArgs
     if (isTop)
       setLogLevel(logLevel);
 
-    _resinHome = calculateResinHome();
-    _rootDirectory = calculateResinRoot(_resinHome);
-
+    setResinHome(calculateResinHome());
+    
+    setRootDirectory(calculateResinRoot(_resinHome));
+    
     _javaHome = Vfs.lookup(System.getProperty("java.home"));
 
     _is64bit = CauchoSystem.is64Bit();
@@ -273,6 +274,15 @@ class WatchdogArgs
   void setResinHome(Path resinHome)
   {
     _resinHome = resinHome;
+    
+    System.setProperty("resin.home", resinHome.getNativePath());
+  }
+
+  void setRootDirectory(Path resinRoot)
+  {
+    _rootDirectory = resinRoot;
+    
+    System.setProperty("resin.root", resinRoot.getNativePath());
   }
 
   boolean is64Bit()
@@ -490,12 +500,12 @@ class WatchdogArgs
         i++;
       }
       else if ("--resin-home".equals(resinArg)) {
-        _resinHome = Vfs.lookup(argv[i + 1]);
+        setResinHome(Vfs.lookup(argv[i + 1]));
         argv[i + 1] = _resinHome.getFullPath();
         i++;
       }
       else if ("--root-directory".equals(resinArg)) {
-        _rootDirectory = Vfs.lookup(argv[i + 1]);
+        setRootDirectory(Vfs.lookup(argv[i + 1]));
         argv[i + 1] = _rootDirectory.getFullPath();
         i++;
       }
@@ -1042,15 +1052,25 @@ class WatchdogArgs
         Class<?> cl = Class.forName("com.caucho.license.LicenseCheckImpl",
                                     false, loader);
         
-        Constructor<?> ctor = cl.getConstructor(File.class);
+        Constructor<?> ctor = cl.getConstructor(File[].class);
         
-        File licenseFile = null;
+        ArrayList<File> licensePath = new ArrayList<File>();
         
         if (_licenseDirectory != null) {
-          licenseFile = new File(_licenseDirectory.getNativePath());
+          licensePath.add(new File(_licenseDirectory.getNativePath()));
         }
+        
+        Path path = getResinConf().getParent().lookup("licenses");
 
-        license = (LicenseCheck) ctor.newInstance(licenseFile);
+        if (path.isDirectory()) {
+          File dir = new File(path.getNativePath());
+          licensePath.add(dir);
+        }
+        
+        File []files = new File[licensePath.size()];
+        licensePath.toArray(files);
+
+        license = (LicenseCheck) ctor.newInstance(new Object[] { files });
 
         license.requireProfessional(1);
 

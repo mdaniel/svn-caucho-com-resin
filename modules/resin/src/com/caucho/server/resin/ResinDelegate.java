@@ -97,7 +97,8 @@ public class ResinDelegate
     }
   }
 
-  public LicenseStore getLicenseStore() {
+  public LicenseStore getLicenseStore()
+  {
     return _licenseStore;
   }
 
