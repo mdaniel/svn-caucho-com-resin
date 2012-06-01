@@ -22,16 +22,16 @@ and evaluation for PHP servers to Quercus.</p>
 Resin server.  Because one JVM handles all the domains, its more memory
 and processing efficient, as well as sharing IP addresses.  With Resin,
 adding virtual hosts can as easy as creating a directory
-like <code>/var/www/hosts/foo.com</code> and setting up the DNS name.
+like <code>/var/resin/hosts/foo.com</code> and setting up the DNS name.
 Explicit virtual host is also possible to match existing layouts, like
-matching a <code>/var/www/htdocs</code> configuration when migrating
+matching a <code>/var/resin/htdocs</code> configuration when migrating
 a PHP mediawiki or wordpress site to use Quercus
 for security and performance.</p>
 
 <p>The virtual host will contain one or
 more <a href="deploy-ref.xtp">web-apps</a> to serve the host's contents.
 Simple sites will use a fixed root webapp, like the Apache-style
-<code>/var/www/htdocs</code>.  More complicated sites can use a
+<code>/var/resin/htdocs</code>.  More complicated sites can use a
 <code>webapps</code>-style directory.</p>
 
 <p>Each virtual host belongs to a
@@ -40,8 +40,8 @@ cluster has only a single server.</p>
 
 <p>For example, a Resin server might manage both the
 <code>www.gryffindor.com</code> and <code>www.slytherin.com</code> domains,
-storing the content in separate directories (/var/www/gryffindor and
-/var/www/slytherin), and using a single IP address for both domains.
+storing the content in separate directories (/var/resin/gryffindor and
+/var/resin/slytherin), and using a single IP address for both domains.
 In this scenario, both www.gryffindor.com and www.slytherin.com are
 registered with the standard domain name service registry as having the IP
 address <code>192.168.0.13</code>.  When a user types in the url
@@ -94,19 +94,19 @@ where the virtual host is handled in software, like Drupal. If the
 return <code>404 Not Found</code> for any unknown virtual hosts.</p>
 
 <example title="Example: virtual host directory structure">
-/var/www/hosts/www.gryffindor.com/
+/var/resin/hosts/www.gryffindor.com/
                                  host.xml
                                  log/access.log
                                  webapps/ROOT/index.jsp
                                  webapps/ROOT/WEB-INF/resin-web.xml
 				 
-/var/www/hosts/www.slytherin.com/
+/var/resin/hosts/www.slytherin.com/
                                 host.xml
                                 log/access.log
                                 webapps/ROOT/index.php
                                 webapps/ROOT/WEB-INF/resin-web.xml
 				 
-/var/www/hosts/default/
+/var/resin/hosts/default/
                       host.xml
                       log/access.log
                       webapps/ROOT/index.php
@@ -231,7 +231,7 @@ Existing sites wanting to upgrade to Resin or sites with extra security needs
 may prefer to configure each &lt;host>  in the resin.xml. For
 example, a PHP Drupal site evaluating Quercus to
 improve performance and security might use the explicit &lt;host> to
-point to the existing <code>/var/www/htdocs</code> directory.</p>
+point to the existing <code>/var/resin/htdocs</code> directory.</p>
 
 <p>In the explicit configuration, each virtual host has its
 own <a href="http-virtual-hosts-ref.xtp#host">host</a> block.  At the very least, each host
@@ -268,7 +268,7 @@ to use Quercus for security and performance.</p>
   &lt;resin:import path="${__DIR__}/app-default.xml"/>
 
   &lt;host id="">
-    &lt;root-directory&gt;/var/www&lt;/root-directory&gt;
+    &lt;root-directory&gt;/var/resin&lt;/root-directory&gt;
 
     &lt;access-log path="logs/access.log"/>
 
@@ -290,7 +290,7 @@ to use Quercus for security and performance.</p>
 </example>
 
 <p>Browsing http://gryffindor.caucho.com/test.php will look for
-/var/www/htdocs/test.php.</p>
+/var/resin/htdocs/test.php.</p>
 
 <p>Browsing http://slytherin.caucho.com/test.php will look for
 /var/slytherin/htdocs/test.php.</p>
@@ -351,7 +351,7 @@ to ensure consistency.</p>
 
     &lt;host id="www.gryffindor.com"&gt;
   
-      &lt;root-directory&gt;/var/www/gryffindor&lt;/root-directory&gt;
+      &lt;root-directory&gt;/var/resin/gryffindor&lt;/root-directory&gt;
 
     &lt;/host&gt;
   &lt;/cluster&gt;
@@ -361,7 +361,7 @@ to ensure consistency.</p>
 
     &lt;host id="www.slytherin.com"&gt;
   
-      &lt;root-directory&gt;/var/www/slytherin&lt;/root-directory&gt;
+      &lt;root-directory&gt;/var/resin/slytherin&lt;/root-directory&gt;
 
     &lt;/host&gt;
   &lt;/cluster&gt;

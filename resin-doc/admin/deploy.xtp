@@ -439,7 +439,7 @@ archive files should be placed, beyond the standard webapps directory.</p>
 &lt;cluster id="">
   &lt;host id="">
 
-    <b>&lt;web-app id="/foo" root-directory="/var/www/foo"
+    <b>&lt;web-app id="/foo" root-directory="/var/resin/foo"
              expand-preserve-fileset="WEB-INF/work/**"
              archive-path="/usr/local/stage/foo.war"/></b>
 

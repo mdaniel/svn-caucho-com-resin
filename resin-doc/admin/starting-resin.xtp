@@ -77,7 +77,11 @@ Finally, install Resin Professional using the following:
 unix# apt-get install resin-pro
 </example>
 <p>
-If you have a license file for Resin, save it in <var>/var/www/licenses</var>
+If you have a license file for Resin, save it in <var>/etc/resin/licenses</var>.
+You can also install the license from the command line with:
+<example>
+unix# resinctl license-add mylicense.license
+</example>
 </p>
 <p>
 Or install Resin Open Source with this command:
@@ -321,7 +325,7 @@ system tasks.</p>
 <example title="Example: generating a PDF snapshot report">
 unix> resinctl pdf-report
 
-<em>generated /var/www/log/default-Watchdog-20111010T1426.pdf</em>
+<em>generated /var/resin/log/default-Watchdog-20111010T1426.pdf</em>
 </example>
 
 <p>You can also generate a report for the most recent restart event saved by
@@ -331,7 +335,7 @@ last stopped.</p>
 <example title="Example: generating a PDF watchdog report">
 unix> resinctl pdf-report -watchdog
 
-<em>generated /var/www/log/default-Watchdog-20111010T1426.pdf</em>
+<em>generated /var/resin/log/default-Watchdog-20111010T1426.pdf</em>
 </example>
 
 </s1>

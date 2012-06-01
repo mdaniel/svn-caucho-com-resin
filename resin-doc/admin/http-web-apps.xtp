@@ -163,7 +163,7 @@ classloaders a web-app-default. Each web-app will then use the same
   &lt;web-app-default>
 
     &lt;class-loader>
-      &lt;library-loader path="/var/www/website-jars"/>
+      &lt;library-loader path="/var/resin/website-jars"/>
     &lt;/class-loader>
     
   &lt;/web-app-default>

@@ -195,7 +195,7 @@ port 6600 for commands.</p>
   &lt;resin:import path="${__DIR__}/app-default.xml"/>
 
   &lt;host id="">
-    &lt;web-app id="" path="/var/www/htdocs"/>
+    &lt;web-app id="" path="/var/resin/htdocs"/>
   &lt;/host>
 
 &lt;/cluster>
@@ -241,7 +241,7 @@ automatically.</p>
   &lt;server id="app-b" address="192.168.1.10" port="6811"/>
 
   &lt;host id="">
-    &lt;web-app id="" path="/var/www/htdocs"/>
+    &lt;web-app id="" path="/var/resin/htdocs"/>
   &lt;/host>
 
 &lt;/cluster>
@@ -302,7 +302,7 @@ will start with it's own port.</p>
   &lt;/server>
 
   &lt;host id="">
-    &lt;web-app id="" path="/var/www/htdocs"/>
+    &lt;web-app id="" path="/var/resin/htdocs"/>
   &lt;/host>
 
 &lt;/cluster>

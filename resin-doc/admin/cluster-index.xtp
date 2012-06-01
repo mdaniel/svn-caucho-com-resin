@@ -1218,7 +1218,7 @@ configured explicitly.</p>
 &lt;host regexp="([^.]+)\.foo\.com"&gt;
   &lt;host-name&gt;${host.regexp[1]}.foo.com&lt;/host-name&gt;
 
-  &lt;root-directory&gt;/var/www/hosts/www.${host.regexp[1]}.com&lt;/root-directory&gt;
+  &lt;root-directory&gt;/var/resin/hosts/www.${host.regexp[1]}.com&lt;/root-directory&gt;
 
   ...
 &lt;/host&gt;
@@ -1759,7 +1759,7 @@ element root-directory {
 <example title="Example: cluster root-directory">
 &lt;resin xmlns="http://caucho.com/ns/resin"&gt;
     &lt;cluster id="app-tier"&gt;
-        &lt;root-directory&gt;/var/www/app-tier&lt;/root-directory&gt;
+        &lt;root-directory&gt;/var/resin/app-tier&lt;/root-directory&gt;
 
         &lt;server id="a" ...&gt;
 

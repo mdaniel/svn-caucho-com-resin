@@ -22,7 +22,7 @@ a report immediately.</p>
 <example title="Example: generating a PDF report">
 unix> bin/httpd.sh pdf-report
 
-generated /var/www/log/default-Summary-20110921T1218.pdf
+generated /var/resin/log/default-Summary-20110921T1218.pdf
 </example>
 
 <s2 title="resin.xml automatic pdf report generation">

@@ -79,7 +79,7 @@ load-balance based on the virtual host or URL.</p>
   &lt;server id="app-b" address="192.168.0.11" port="6800"/&gt;
 
   &lt;host id=""&gt;
-    &lt;web-app id="" root-directory="/var/www/htdocs"/>
+    &lt;web-app id="" root-directory="/var/resin/htdocs"/>
   &lt;/host&gt;
 &lt;/cluster&gt;
 

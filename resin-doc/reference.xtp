@@ -450,8 +450,8 @@ element archive-path {
   &lt;host id="">
 
     &lt;web-app id="/foo"
-             root-directory="/var/www/foo"
-             archive-path="/var/www/wars/foo.war"/>
+             root-directory="/var/resin/foo"
+             archive-path="/var/resin/wars/foo.war"/>
 
   &lt;/host>
 &lt;/cluster>
@@ -1402,13 +1402,13 @@ element cookie-http-only {
 &lt;cluster id="">
 
   &lt;host id="www.foo.com">
-    &lt;web-app id="" root-directory="/var/www/foo">
+    &lt;web-app id="" root-directory="/var/resin/foo">
       &lt;cookie-http-only>true&lt;/cookie-http-only>
     &lt;web-app id="">
   &lt;/host>
 
   &lt;host id="www.foo.com:443">
-    &lt;web-app id="" root-directory="/var/www/foo-secure">
+    &lt;web-app id="" root-directory="/var/resin/foo-secure">
       &lt;secure/>
     &lt;web-app id="">
   &lt;/host>
@@ -5641,7 +5641,7 @@ a &lt;host-name&gt; to set the canonical name for the host.</p>
 &lt;host regexp="([^.]+)\.foo\.com"&gt;
   &lt;host-name&gt;${host.regexp[1]}.foo.com&lt;/host-name&gt;
 
-  &lt;root-directory&gt;/var/www/hosts/www.${host.regexp[1]}.com&lt;/root-directory&gt;
+  &lt;root-directory&gt;/var/resin/hosts/www.${host.regexp[1]}.com&lt;/root-directory&gt;
 
   ...
 &lt;/host&gt;
@@ -5675,7 +5675,7 @@ element host-alias {
 &lt;resin xmlns="http://caucho.com">
 &lt;cluster id="">
 
-  &lt;host id="www.foo.com" root-directory="/var/www/foo.com">
+  &lt;host id="www.foo.com" root-directory="/var/resin/foo.com">
     &lt;host-alias>foo.com&lt;/host-alias>
 
     &lt;web-app id=""/>
@@ -5685,7 +5685,7 @@ element host-alias {
 &lt;/resin>
 </example>
 
-<example title="Example: host-alias in a /var/www/hosts/foo/host.xml">
+<example title="Example: host-alias in a /var/resin/hosts/foo/host.xml">
 &lt;host xmlns="http://caucho.com">
 
   &lt;host-name>www.foo.com&lt;/host-name>
@@ -5716,7 +5716,7 @@ element host-alias-regexp {
 &lt;resin xmlns="http://caucho.com">
 &lt;cluster id="">
 
-  &lt;host id="www.foo.com" root-directory="/var/www/foo.com">
+  &lt;host id="www.foo.com" root-directory="/var/resin/foo.com">
     &lt;host-alias-regexp>.*foo.com&lt;/host-alias-regexp>
 
     &lt;web-app id=""/>
@@ -5801,16 +5801,16 @@ element host-deploy {
 </schema>
 
 <examples>
-<p>The following example configures <var>/var/www/hosts</var> as
+<p>The following example configures <var>/var/resin/hosts</var> as
 a host deployment directory.  Each virtual host will have a
 <var>webapps</var> directory for .war deployment.  So the directory
-<var>/var/www/hosts/www.foo.com/webapps/bar/test.jsp</var> would
+<var>/var/resin/hosts/www.foo.com/webapps/bar/test.jsp</var> would
 serve the URL <var>http://www.foo.com/bar/test.jsp</var>.</p>
 
 <example title="&lt;host-deploy>">
 &lt;resin xmlns="http://caucho.com/ns/resin">
   &lt;cluster id="app-tier">
-    &lt;root-directory>/var/www&lt;/root-directory>
+    &lt;root-directory>/var/resin&lt;/root-directory>
 
     &lt;host-deploy path="hosts">
       &lt;host-default>
@@ -8381,7 +8381,7 @@ element root-directory {
 <example title="Example: cluster root-directory">
 &lt;resin xmlns="http://caucho.com/ns/resin"&gt;
     &lt;cluster id="app-tier"&gt;
-        &lt;root-directory&gt;/var/www/app-tier&lt;/root-directory&gt;
+        &lt;root-directory&gt;/var/resin/app-tier&lt;/root-directory&gt;
 
         &lt;server id="a" ...&gt;
 
@@ -8572,7 +8572,7 @@ element resin {
 <example title="Example: minimal resin.xml">
 &lt;resin xmlns="http://caucho.com/ns/resin"
        xmlns:resin="http://caucho.com/ns/resin/core">
-  &lt;root-directory>/var/www&lt;/root-directory>
+  &lt;root-directory>/var/resin&lt;/root-directory>
 
   &lt;cluster id="web-tier"&gt;
     &lt;server id="">
@@ -8582,7 +8582,7 @@ element resin {
     &lt;resin:import path="app-default.xml"/&gt;
 
     &lt;host id="">
-      &lt;web-app id="" root-directory="/var/www/htdocs"/&gt;
+      &lt;web-app id="" root-directory="/var/resin/htdocs"/&gt;
     &lt;/host&gt;
   &lt;/cluster&gt;
 &lt;/resin&gt;
@@ -10088,7 +10088,7 @@ and &lt;host-alias> to customize the virtual host configuration.</p>
        xmlns:resin="http://caucho.com/ns/resin/core">
   &lt;cluster id="app-tier">
 
-    &lt;host-deploy path="/var/www/hosts">
+    &lt;host-deploy path="/var/resin/hosts">
       &lt;host-default>
         &lt;resin:import path="host.xml" optional="true"/>
 
@@ -10867,7 +10867,7 @@ element set {
 <example title="Example: resin:set in resin.xml">
 &lt;resin xmlns="http://caucho.com/ns/resin"
           xmlns:resin="http://caucho.com/ns/resin/core">
-  &lt;resin:set var="root" value="/var/www"/>
+  &lt;resin:set var="root" value="/var/resin"/>
 
   &lt;cluster id="app-tier">
     &lt;root-directory>${root}&lt;/root-directory>
