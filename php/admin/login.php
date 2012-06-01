@@ -50,19 +50,14 @@ if (! $auth || ! $auth->isComplete()) {
 if (! empty($digest)) {
   admin_init();
   $conf_dir = dirname($g_resin->getConfigFile());
-  $root_dir = dirname($g_resin->getRootDir());
+  $root_dir = $g_resin->getRootDirectory();
 
   // generate temporary config file
   try {
     $old_reporting_level = error_reporting(0);
-
-    $password_file = realpath("{$conf_dir}/admin-users.xml.generated");
+    $password_file = realpath("{$root_dir}/admin-users.xml.generated");
     $file = fopen($password_file, "w");
 
-    if (! $file) {
-      $password_file = realpath("{$root_dir}/resin-data/admin-users.xml.generated");
-      $file = fopen($password_file, "w");
-    }
     error_reporting($old_reporting_level);
 
     fwrite($file, <<<EOF
@@ -90,10 +85,15 @@ admin_user     : <?= $digest_username ?><br />
 admin_password : <?= $digest ?>
 </div>
 
-<li>
-<?= gettext('Or you can update the admin-users.xml as follows.')?>
 
-<?= gettext('A login configuration file has been written under the name <code>admin-users.xml.generated</code> in the same directory as your resin.xml file. Simply rename this file to <code>admin-users.xml</code> to install your login.')?>
+
+
+
+<li>
+Or you can do the following: A login configuration file has been written under the name 
+<code><?= $root_dir ?>/admin-users.xml.generated</code>. Simply rename this file to 
+<code><?= $conf_dir ?>/admin-users.xml</code> to install your login.
+
 </li>
 <li><?= gettext('Or cut and paste the following into the <code>admin-users.xml</code>')?>
 <?php } else {
