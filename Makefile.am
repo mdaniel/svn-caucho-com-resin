@@ -1,4 +1,5 @@
 ACLOCAL_AMFLAGS=-I m4
+abs_resin_home=@resin_home@
 resin_home=$(DESTDIR)@resin_home@
 resin_conf=$(DESTDIR)@resin_conf@
 resin_root=$(DESTDIR)@resin_root@
@@ -6,6 +7,7 @@ resin_log=$(DESTDIR)@resin_log@
 resin_init_d=$(DESTDIR)@resin_init_d@
 initd_dir=$(DESTDIR)@initd_dir@
 usr_share=$(DESTDIR)@usr_share@
+abs_usr_share=@usr_share@
 resin_version=@resin_version@
 resin_pro=@resin_pro@
 build_dir=@build_dir@
@@ -111,19 +113,19 @@ install	:
 	    exit 42; \
 	  fi; \
 	fi
-	@ if test -n "$(usr_share)"; then \
-	  echo "Installing Resin home symlink $(usr_share)/resin."; \
+	@ if test -n "$(abs_usr_share)"; then \
+	  echo "Installing Resin home symlink $(abs_usr_share)/resin."; \
 	  if test ! -w "$(usr_share)"; then \
 	    echo "WARNING: Resin home symlink install failed. Ensure $(usr_share) is writable by $$USER, or run 'make install' as root."; \
 	  else \
-	    ln -sf $(resin_home) $(usr_share)/resin; \
+	    ln -sf $(abs_resin_home) $(usr_share)/resin; \
 	    if test $$? != "0"; then \
 	      echo "WARNING: Resin home symlink creation failed. Ensure $(usr_share) is writable by $$USER, or run 'make install' as root."; \
 	    fi; \
 	  fi; \
 	  echo "Installing resinctl symlink $(DESTDIR)/usr/bin/resinctl."; \
 	  mkdir -p $(DESTDIR)/usr/bin; \
-	  ln -sf "$(resin_home)/bin/resinctl" "$(DESTDIR)/usr/bin/resinctl"; \
+	  ln -sf "$(abs_usr_share)/resin/bin/resinctl" "$(DESTDIR)/usr/bin/resinctl"; \
 	  if test $$? != "0"; then \
 	    echo "WARNING: resinctl symlink creation failed. Ensure $(DESTDIR)/usr/bin is writable by $$USER, or run 'make install' as root."; \
 	  fi; \
