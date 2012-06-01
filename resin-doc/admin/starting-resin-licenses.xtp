@@ -35,7 +35,7 @@
 <ol>
 <li>Directory specified with <code>-Dresin.license.dir</code> JVM parameter</li>
 <li><code>licenses</code> directory in your working directory, i.e. <code>System.getProperty("user.dir")</code></li>
-<li><code>licenses</code> directory in Resin Home.</li>
+<li><code>licenses</code> directory in Resin Configuration directory (typically <code>/etc/resin</code> on Unix).</li>
 </ol>
 
 </s1>

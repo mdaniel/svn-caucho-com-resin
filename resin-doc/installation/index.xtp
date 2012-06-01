@@ -149,7 +149,8 @@ sudo make install
 <p>Where ever you install Resin to, we'll refer to that directory as
 <b>resin.home</b>.</p>
 <p>
-If you have a license file for Resin, save it in <var>/usr/local/resin/licenses</var>
+If you have a license file for Resin, save it in <var>/$conf-dir/resin/licenses</var> where <var>conf-dir</var>
+is the directory that holds the main resin configuration file, <var>resin.xml</var>.
 </p>
 </s3>
 
@@ -184,7 +185,7 @@ Finally, install Resin Professional using the following:
 apt-get install resin-pro
 </example>
 <p>
-If you have a license file for Resin, save it in <var>/usr/local/resin/licenses</var>
+If you have a license file for Resin, save it in <var>/etc/resin/licenses</var>
 </p>
 <p>
 Or install Resin Open Source with this command:
