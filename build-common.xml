@@ -1734,7 +1734,7 @@
           preservelastmodified="true"
           overwrite="true">
       <filterset>
-        <filter token="RESIN_ROOT" value="${shortproduct}-${version}"/>
+        <filter token="RESIN_ROOT" value="resin-${version}"/>
       </filterset>
     </copy>
 
