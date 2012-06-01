@@ -92,7 +92,7 @@ locations on the file system:
 </p>
 <example>
 ./configure --prefix=/usr/local/resin \
-            --with-resin-root=/var/www \
+            --with-resin-root=/var/resin \
             --with-resin-log=/var/log/resin \
             --with-resin-conf=/etc/resin
 </example>
@@ -116,7 +116,7 @@ will display a summary like the following:
 Resin Configuration summary:
 
   RESIN_HOME: /usr/local/resin
-      root: /var/www
+      root: /var/resin
       conf: /etc/resin/conf
       log : /var/log/resin
       init: /etc/init.d/resin
@@ -252,7 +252,7 @@ file or web application directory to one of these webapp deploy
 directories. Resin detects the applications and deploys them
 automatically.</p>
 
-<figure src="content-directories.png" alt="/var/www = Root, webapps = Deploy Directory, ROOT,wordpress,mediawiki = Webapp Directories"/>
+<figure src="content-directories.png" alt="/var/resin = Root, webapps = Deploy Directory, ROOT,wordpress,mediawiki = Webapp Directories"/>
 
 <p>
 In the directory structure above, notice the special webapp
@@ -266,14 +266,14 @@ application.  Other webapps will map to their name.  For example,
 
 <p>Resin is configured to use the content directory structure show above
 by default.  In the examples, the Resin <b>root directory</b> is 
-<var>/var/www</var>.  This directory is also the recommended content root
+<var>/var/resin</var>.  This directory is also the recommended content root
 for Unix.  For Windows, the recommended content root is <var>C:\www</var>.
 To specify the root directory to Resin, you pass it on the
 command line when starting the server.  For example:
 </p>
 
 <example>
-java -jar ${resin.home}/lib/resin.jar --root-directory /var/www start
+java -jar ${resin.home}/lib/resin.jar --root-directory /var/resin start
 </example>
 
 <p>

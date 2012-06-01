@@ -92,14 +92,16 @@ The following command installs Resin and its files into the recommended
 locations on the file system:
 </p>
 <example>
-./configure --prefix=/usr/local/resin \
-            --with-resin-root=/var/www \
+./configure --prefix=/usr/local/share/resin \
+            --with-resin-root=/var/resin \
             --with-resin-log=/var/log/resin \
             --with-resin-conf=/etc/resin
 </example>
 
 <p>
-This will configure Resin to install in <var>/usr/local/resin</var>,
+The above configure options are the default. You don't need to specify them unless you
+decide to install Resin differently.
+This will configure Resin to install in <var>/usr/local/share/resin</var>,
 with support for OpenSSL if it was detected, but without support
 for Apache.  If you want to use Apache or another 3rd party HTTP
 server in front of Resin (unrecommended), please take a look
@@ -115,8 +117,8 @@ will display a summary like the following:
 <example>
 Resin Configuration summary:
 
-  RESIN_HOME  : /usr/local/resin
-      root    : /var/www
+  RESIN_HOME  : /usr/local/share/resin
+      root    : /var/resin
       conf    : /etc/resin
       log     : /var/log/resin
       plugins : common apache2 resin_os resin resinssl
@@ -149,11 +151,14 @@ the root user:</p>
 <example>
 sudo make install
 </example>
-<p>Wherever you install Resin to, we'll refer to that directory as
-<var>resin.home</var>.</p>
+<p>Wherever you install Resin to (using the --prefix), we'll refer to that directory as
+<var>resin.home</var> (typically <em>/usr/local/share/resin</em>). The configuration directory is called <var>resin.conf</var> (typically <em>/etc/resin</em>). The root directory
+where configuration, HTML files and war files are located is called <var>resin.root</var>
+(typically <em>/var/resin</em>).</p>
 <p>
-If you have a license file for Resin, save it in <var>/usr/local/resin/licenses</var>
+If you have a license file for Resin, save it in <var>/resin.conf/licenses</var> (typically <em>/etc/resin/licenses</em>).
 </p>
+
 </s3>
 
 <s3 title="Installing Resin using the .deb package on Ubuntu and Debian">
@@ -186,7 +191,7 @@ Finally, install Resin Professional using the following:
 apt-get install resin-pro
 </example>
 <p>
-If you have a license file for Resin, save it in <var>/usr/local/resin/licenses</var>
+If you have a license file for Resin, save it in <var>/etc/resin/licenses</var>
 </p>
 <p>
 Or install Resin Open Source with this command:
@@ -275,7 +280,7 @@ file or web application directory to one of these webapp deploy
 directories. Resin detects the applications and deploys them
 automatically.</p>
 
-<figure src="content-directories.png" alt="/var/www = Root, webapps = Deploy Directory, ROOT,wordpress,mediawiki = Webapp Directories"/>
+<figure src="content-directories.png" alt="/var/resin = Root, webapps = Deploy Directory, ROOT,wordpress,mediawiki = Webapp Directories"/>
 
 <p>
 In the directory structure above, notice the special webapp
@@ -289,14 +294,14 @@ application.  Other webapps will map to their name.  For example,
 
 <p>Resin is configured to use the content directory structure show above
 by default.  In the examples, the Resin <b>root directory</b> is 
-<var>/var/www</var>.  This directory is also the recommended content root
+<var>/var/resin</var>.  This directory is also the recommended content root
 for Unix.  For Windows, the recommended content root is <var>C:\www</var>.
 To specify the root directory to Resin, you pass it on the
 command line when starting the server.  For example:
 </p>
 
 <example>
-bin/resin.sh --root-directory /var/www start
+bin/resin.sh --root-directory /var/resin start
 </example>
 
 <p>

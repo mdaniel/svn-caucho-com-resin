@@ -203,10 +203,13 @@ unix# resinctl generate-password my-user my-password >> /etc/resin/resin.propert
 
 <ol>
 <li>Create an admin user following the prompt at /resin-admin.</li>
-<li>Copy the <em>conf/admin-users.xml.generated</em> to <em>conf/admin-users.xml</em>.</li>
+<li>Copy the <em>resin.root/admin-users.xml.generated</em> to <em>resin.conf/admin-users.xml</em>.</li>
 <li>Change the resin_admin_external to true in the resin.xml if you need access from a non-local IP address.</li>
 <li>Browse /resin-admin with an HTML 5 browser.</li>
 </ol>
+
+<p>On Linux, <var>resin.conf</var> is typically <em>/etc/resin/</em>, and 
+<var>resin.root</var> is typically <em>/var/resin</em>.</p>
 
 <p>The steps are for security reasons. Copying the admin-users.xml
 verifies that you have access to the server. And the default
