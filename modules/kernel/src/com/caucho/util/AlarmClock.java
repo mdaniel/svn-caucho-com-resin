@@ -350,7 +350,7 @@ public class AlarmClock {
   
   private int getBucket(long time)
   {
-    return (int) (time / CLOCK_INTERVAL % CLOCK_PERIOD);
+    return (int) ((time + CLOCK_INTERVAL - 1) / CLOCK_INTERVAL % CLOCK_PERIOD);
   }
 
   /**

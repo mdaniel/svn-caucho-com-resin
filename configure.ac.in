@@ -171,25 +171,29 @@ else
       fi
     done
 
-    JAVA_HOME=`dirname $java`
+    JAVA_BIN=`dirname $java`
 
     # we're in $JAVA_HOME/jre
-    if test -f "$JAVA_HOME/include/jni.h"; then
-      JAVA_HOME=$JAVA_HOME
+    if test -f "$JAVA_BIN/include/jni.h"; then
+      JAVA_HOME=$JAVA_BIN
+    elif test -f "$JAVA_BIN/../include/jni.h"; then
+      JAVA_HOME=`cd $JAVA_BIN/..; pwd`
+    elif test -f "$JAVA_BIN/../../..include/jni.h"; then
+      JAVA_HOME=`cd $JAVA_BIN/../../..; pwd`
     elif test -f "/System/Library/Frameworks/JavaVM.framework"; then
       JAVA_HOME="/System/Library/Frameworks/JavaVM.framework"
     elif test -d "/etc/alternatives/java_sdk"; then
       JAVA_HOME="/etc/alternatives/java_sdk"
-    elif test -f "$JAVA_HOME/../include/jni.h"; then
-      JAVA_HOME=`cd $JAVA_HOME/..; pwd`
-    elif test -f "$JAVA_HOME/lib/rt.jar"; then
-      JAVA_HOME=`cd $JAVA_HOME/..; pwd`
+    elif test -f "$JAVA_BIN/lib/rt.jar"; then
+      JAVA_HOME=`cd $JAVA_BIN/..; pwd`
     elif test -f "/usr/lib/jvm/java-6-openjdk/include/jni.h"; then
       JAVA_HOME="/usr/lib/jvm/java-6-openjdk"
     elif test -f "/usr/lib/jvm/java-6-sun/include/jni.h"; then
       JAVA_HOME="/usr/lib/jvm/java-6-sun"
     elif test -d "/usr/java"; then
       JAVA_HOME=/usr/java
+    else
+      JAVA_HOME="$JAVA_BIN"
     fi
   elif test -d "/usr/java"; then
     JAVA_HOME=/usr/java
