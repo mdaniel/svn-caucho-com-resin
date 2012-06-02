@@ -57,25 +57,26 @@ public class GoogleQuercus extends QuercusContext
   @Override
   public void init()
   {
-    boolean isGsEnabled = getIniBoolean("quercus.gs_enabled");
+    String mode
+      = System.getProperty("com.google.appengine.tools.development.ApplicationPreparationMode");
 
-    if (isGsEnabled) {
-      String gsBucket = getIniString("quercus.gs_bucket");
+    boolean isGsDisabled = "true".equals(mode);
 
-      if (gsBucket == null) {
-        gsBucket = "bucket-name-not-set";
+    if (! isGsDisabled) {
+      String gsBucket = getIniString("google.cloud_storage_bucket");
+
+      if (gsBucket != null) {
+        Path stdPwd = getPwd();
+
+        GoogleMergePath mergePwd = new GoogleMergePath(stdPwd, gsBucket, true);
+        setPwd(mergePwd);
+
+        Path webInfDir = getWebInfDir();
+        Path gsWebInfDir = mergePwd.getGooglePath().lookup("WEB-INF");
+        MergePath mergeWebInf = new MergePath(gsWebInfDir, webInfDir);
+
+        setWebInfDir(mergeWebInf);
       }
-
-      Path stdPwd = getPwd();
-
-      GoogleMergePath mergePwd = new GoogleMergePath(stdPwd, gsBucket, true);
-      setPwd(mergePwd);
-
-      Path webInfDir = getWebInfDir();
-      Path gsWebInfDir = mergePwd.getGooglePath().lookup("WEB-INF");
-      MergePath mergeWebInf = new MergePath(gsWebInfDir, webInfDir);
-
-      setWebInfDir(mergeWebInf);
     }
 
     super.init();

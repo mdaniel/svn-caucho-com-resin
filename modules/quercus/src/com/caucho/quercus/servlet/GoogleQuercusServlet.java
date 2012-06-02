@@ -38,7 +38,6 @@ import javax.servlet.ServletException;
 public class GoogleQuercusServlet extends QuercusServlet
 {
   private String _gsBucket;
-  private boolean _isGsEnabled = true;
 
   public GoogleQuercusServlet()
   {
@@ -47,7 +46,7 @@ public class GoogleQuercusServlet extends QuercusServlet
   @Override
   protected QuercusServletImpl getQuercusServlet(boolean isResin)
   {
-    QuercusServletImpl impl = new ProGoogleQuercusServlet(_gsBucket, _isGsEnabled);
+    QuercusServletImpl impl = new ProGoogleQuercusServlet(_gsBucket);
 
     return impl;
   }
@@ -60,11 +59,8 @@ public class GoogleQuercusServlet extends QuercusServlet
   protected void setInitParam(String paramName, String paramValue)
     throws ServletException
   {
-    if ("gs-bucket".equals(paramName)) {
+    if ("cloud-storage-bucket".equals(paramName)) {
       _gsBucket = paramValue;
-    }
-    else if ("gs-enabled".equals(paramName)) {
-      _isGsEnabled = "true".equals(paramValue);
     }
     else {
       super.setInitParam(paramName, paramValue);

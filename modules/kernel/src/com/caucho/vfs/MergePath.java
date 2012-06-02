@@ -98,6 +98,10 @@ public class MergePath extends FilesystemPath {
                       String path)
   {
     super(root, userPath, path);
+
+    if (root == null) {
+      _root = this;
+    }
   }
 
   /**
@@ -775,7 +779,16 @@ public class MergePath extends FilesystemPath {
   @Override
   public Path copy()
   {
-    MergePath copy = new MergePath((MergePath) _root, _userPath, null, _pathname);
+    MergePath root = (MergePath) _root;
+
+    if (root == this) {
+      root = null;
+    }
+    else {
+      root = (MergePath) root.copy();
+    }
+
+    MergePath copy = new MergePath(root, _userPath, null, _pathname);
 
     ArrayList<Path> pathList = getPathList();
 

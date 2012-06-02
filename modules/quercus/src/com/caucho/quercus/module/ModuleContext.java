@@ -770,7 +770,7 @@ public class ModuleContext
 
       String className = args[0];
 
-      Class cl;
+      Class<?> cl;
 
       try {
         cl = Class.forName(className, false, loader);
@@ -826,7 +826,7 @@ public class ModuleContext
         if (phpClassName == null)
           phpClassName = className.substring(className.lastIndexOf('.') + 1);
 
-        Class javaClassDefClass;
+        Class<?> javaClassDefClass;
 
         if (definedBy != null) {
           javaClassDefClass = Class.forName(definedBy, false, loader);
@@ -836,7 +836,7 @@ public class ModuleContext
 
         introspectJavaClass(phpClassName, cl, extension, javaClassDefClass);
       } catch (Exception e) {
-        log.fine("Failed loading " + className + "\n" + e.toString());
+        log.log(Level.FINE, "Failed loading " + className + "\n" + e.toString());
         log.log(Level.FINE, e.toString(), e);
       }
     }

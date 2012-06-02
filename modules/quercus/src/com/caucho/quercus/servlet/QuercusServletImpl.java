@@ -290,11 +290,23 @@ public class QuercusServletImpl extends HttpServlet
     // php/8173
     Path pwd = getQuercus().getPwd().copy();
 
-    String scriptPath = QuercusRequestAdapter.getPageServletPath(req);
+    StringBuilder sb = new StringBuilder();
+    String servletPath = QuercusRequestAdapter.getPageServletPath(req);
 
-    if (scriptPath.startsWith("/")) {
-      scriptPath = scriptPath.substring(1);
+    if (servletPath.startsWith("/")) {
+      sb.append(servletPath, 1, servletPath.length());
     }
+    else {
+      sb.append(servletPath);
+    }
+
+    String pathInfo = QuercusRequestAdapter.getPagePathInfo(req);
+
+    if (pathInfo != null) {
+      sb.append(pathInfo);
+    }
+
+    String scriptPath = sb.toString();
 
     Path path = pwd.lookupChild(scriptPath);
 

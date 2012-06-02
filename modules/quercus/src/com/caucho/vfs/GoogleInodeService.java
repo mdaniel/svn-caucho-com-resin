@@ -32,6 +32,7 @@ package com.caucho.vfs;
 import com.caucho.hessian.io.Hessian2Input;
 import com.caucho.hessian.io.Hessian2Output;
 import com.caucho.util.IoUtil;
+import com.caucho.vfs.GoogleInode.FileType;
 import com.google.appengine.api.memcache.MemcacheService;
 import com.google.appengine.api.memcache.MemcacheServiceFactory;
 
@@ -55,6 +56,24 @@ public class GoogleInodeService
   public GoogleInodeService(MemcacheService memcacheService)
   {
     _memcacheService = memcacheService;
+  }
+
+  public GoogleInode getGoogleInode(GooglePath path)
+  {
+    HashMap<String,GoogleInode> dirMap = readDirMap(path.getParent());
+
+    GoogleInode gsInode = null;
+    String name = path.getTail();
+
+    if (dirMap != null) {
+      gsInode = dirMap.get(name);
+    }
+
+    if (gsInode == null) {
+      gsInode = new GoogleInode(name, FileType.NONE, -1, -1);
+    }
+
+    return gsInode;
   }
 
   public HashMap<String,GoogleInode> readDirMap(GooglePath path)

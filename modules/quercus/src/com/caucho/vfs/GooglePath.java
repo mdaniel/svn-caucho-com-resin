@@ -593,6 +593,20 @@ abstract public class GooglePath extends FilesystemPath {
     }
   }
 
+  @Override
+  public void clearStatusCache()
+  {
+    if (_inode != null) {
+      _inode.setDirMap(null);
+    }
+
+    GooglePath parent = _parent;
+
+    if (parent != null && parent != this) {
+      parent.clearStatusCache();
+    }
+  }
+
   abstract AppEngineFile getAppEngineFile();
 
   @Override

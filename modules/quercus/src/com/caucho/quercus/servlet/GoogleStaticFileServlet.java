@@ -31,14 +31,18 @@ package com.caucho.quercus.servlet;
 
 import com.caucho.quercus.GoogleQuercus;
 import com.caucho.quercus.QuercusRequestAdapter;
+import com.caucho.util.Base64;
+import com.caucho.util.L10N;
+import com.caucho.util.LruCache;
+import com.caucho.util.QDate;
 import com.caucho.vfs.FilePath;
 import com.caucho.vfs.GoogleMergePath;
-import com.caucho.vfs.GoogleStorePath;
-import com.caucho.vfs.MergePath;
 import com.caucho.vfs.Path;
 
 import java.io.IOException;
 import java.io.OutputStream;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 import javax.servlet.GenericServlet;
 import javax.servlet.ServletConfig;
@@ -50,10 +54,16 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
 public class GoogleStaticFileServlet extends GenericServlet {
+  private static final L10N L = new L10N(GoogleStaticFileServlet.class);
+  private static final Logger log
+    = Logger.getLogger(GoogleStaticFileServlet.class.getName());
+
   private String _gsBucket;
-  private Path _path;
+  private Path _pwd;
 
   private ServletContext _context;
+
+  private LruCache<String,CacheEntry> _cache;
 
   public GoogleStaticFileServlet()
   {
@@ -65,20 +75,36 @@ public class GoogleStaticFileServlet extends GenericServlet {
     super.init(config);
 
     _context = config.getServletContext();
+    _cache = new LruCache<String,CacheEntry>(1024);
 
-    String iniPath = getInitParameter("ini-file");
+    _pwd = new FilePath(_context.getRealPath("/"));
 
-    String realPath = _context.getRealPath(iniPath);
-    Path pwd = new FilePath(_context.getRealPath("/"));
+    String mode
+      = System.getProperty("com.google.appengine.tools.development.ApplicationPreparationMode");
 
-    // don't call Quercus.init() as that will load all the modules
-    GoogleQuercus quercus = new GoogleQuercus();
-    quercus.setIniFile(pwd.lookup(realPath));
+    boolean isGsDisabled = "true".equals(mode);
 
-    String gsBucket = quercus.getIniString("quercus.gs_bucket");
-    _gsBucket = gsBucket;
+    if (! isGsDisabled) {
+      String iniPath = getInitParameter("ini-file");
 
-    _path = new GoogleMergePath(pwd, gsBucket, true);
+      if (iniPath != null) {
+        String realPath = _context.getRealPath(iniPath);
+
+        // don't call Quercus.init() as that will load all the modules for calling
+        // from PHP code, which we don't use nor want
+        GoogleQuercus quercus = new GoogleQuercus();
+        quercus.setIniFile(_pwd.lookup(realPath));
+
+        _gsBucket = quercus.getIniString("google.cloud_storage_bucket");
+
+        if (_gsBucket != null) {
+          _pwd = new GoogleMergePath(_pwd, _gsBucket, true);
+        }
+      }
+    }
+
+    log.log(Level.INFO, L.l("{0} initialized with bucket={1},pwd={2}",
+                            getClass().getSimpleName(), _gsBucket, _pwd.getUserPath()));
   }
 
   @Override
@@ -88,32 +114,104 @@ public class GoogleStaticFileServlet extends GenericServlet {
     HttpServletRequest req = (HttpServletRequest) request;
     HttpServletResponse res = (HttpServletResponse) response;
 
-    Path path = getPath(req);
+    String uri = QuercusRequestAdapter.getPageURI(req);
 
-    if (! path.exists()) {
-      res.sendError(HttpServletResponse.SC_NOT_FOUND);
+    CacheEntry entry = _cache.get(uri);
 
+    if (entry == null) {
+      Path path = getPath(req);
+      String relPath = path.getUserPath();
+
+      String mimeType = _context.getMimeType(uri);
+
+      entry = new CacheEntry(path, relPath, mimeType);
+      _cache.put(uri, entry);
+    }
+    else if (entry.isModified()) {
+      entry = new CacheEntry(entry.getPath(),
+                             entry.getRelPath(),
+                             entry.getMimeType());
+
+      _cache.put(uri, entry);
+    }
+
+    String ifMatch = req.getHeader("If-None-Match");
+    String etag = entry.getEtag();
+
+    if (ifMatch != null && ifMatch.equals(etag)) {
+      res.addHeader("ETag", etag);
+      res.sendError(HttpServletResponse.SC_NOT_MODIFIED);
       return;
     }
+
+    String lastModified = entry.getLastModifiedString();
+
+    if (ifMatch == null) {
+      String ifModified = req.getHeader("If-Modified-Since");
+
+      boolean isModified = true;
+
+      if (ifModified == null) {
+      }
+      else if (ifModified.equals(lastModified)) {
+        isModified = false;
+      }
+      else {
+        long ifModifiedTime;
+
+        QDate date = QDate.allocateLocalDate();
+
+        try {
+          ifModifiedTime = date.parseDate(ifModified);
+        } catch (Exception e) {
+          log.log(Level.FINER, e.toString(), e);
+
+          ifModifiedTime = 0;
+        }
+
+        QDate.freeLocalDate(date);
+
+        isModified = ifModifiedTime == 0
+                       || ifModifiedTime != entry.getLastModified();
+      }
+
+      if (! isModified) {
+        if (etag != null) {
+          res.addHeader("ETag", etag);
+        }
+
+        res.sendError(HttpServletResponse.SC_NOT_MODIFIED);
+        return;
+      }
+    }
+
+    res.addHeader("ETag", etag);
+    res.addHeader("Last-Modified", lastModified);
+
+    String mime = entry.getMimeType();
+    if (mime != null) {
+      res.setContentType(mime);
+    }
+
+    res.setContentLength((int) entry.getLength());
+
+    String method = req.getMethod();
+    if (method.equalsIgnoreCase("HEAD")) {
+      return;
+    }
+
+    Path path = entry.getPath();
 
     if (path.isDirectory()) {
       res.sendError(HttpServletResponse.SC_NOT_FOUND);
 
       return;
     }
+    else if (! path.canRead()) {
+      res.sendError(HttpServletResponse.SC_NOT_FOUND);
 
-    String uri = req.getRequestURI();
-    String mimeType = _context.getMimeType(uri);
-
-    if (mimeType != null) {
-      response.setContentType(mimeType);
+      return;
     }
-    else {
-      response.setContentType("text/plain");
-    }
-
-    long len = path.getLength();
-    response.setContentLength((int) len);
 
     OutputStream os = response.getOutputStream();
     path.writeToStream(os);
@@ -121,17 +219,137 @@ public class GoogleStaticFileServlet extends GenericServlet {
 
   protected Path getPath(HttpServletRequest req)
   {
-    // don't want to use cached values
-    Path pwd = _path.copy();
+    // copy to clear status cache
+    // XXX: improve caching so we don't need to do this anymore
+    Path pwd = _pwd.copy();
 
-    String scriptPath = QuercusRequestAdapter.getPageServletPath(req);
+    StringBuilder sb = new StringBuilder();
+    String servletPath = QuercusRequestAdapter.getPageServletPath(req);
 
-    if (scriptPath.startsWith("/")) {
-      scriptPath = scriptPath.substring(1);
+    if (servletPath.startsWith("/")) {
+      sb.append(servletPath, 1, servletPath.length());
     }
+    else {
+      sb.append(servletPath);
+    }
+
+    String pathInfo = QuercusRequestAdapter.getPagePathInfo(req);
+
+    if (pathInfo != null) {
+      sb.append(pathInfo);
+    }
+
+    String scriptPath = sb.toString();
 
     Path path = pwd.lookupChild(scriptPath);
 
     return path;
+  }
+
+  static class CacheEntry {
+    private Path _path;
+    private boolean _isDirectory;
+    private boolean _canRead;
+    private long _length;
+    private long _lastModified = 0xdeadbabe1ee7d00dL;
+    private String _relPath;
+    private String _etag;
+    private String _lastModifiedString;
+    private String _mimeType;
+
+    CacheEntry(Path path, String relPath, String mimeType)
+    {
+      _path = path;
+      _relPath = relPath;
+      _mimeType = mimeType;
+
+      init();
+    }
+
+    Path getPath()
+    {
+      return _path;
+    }
+
+    boolean canRead()
+    {
+      return _canRead;
+    }
+
+    boolean isDirectory()
+    {
+      return _isDirectory;
+    }
+
+    long getLength()
+    {
+      return _length;
+    }
+
+    String getRelPath()
+    {
+      return _relPath;
+    }
+
+    String getEtag()
+    {
+      return _etag;
+    }
+
+    long getLastModified()
+    {
+      return _lastModified;
+    }
+
+    String getLastModifiedString()
+    {
+      return _lastModifiedString;
+    }
+
+    String getMimeType()
+    {
+      return _mimeType;
+    }
+
+    boolean isModified()
+    {
+      // don't want to use caching because current caching is too crude
+      // XXX: improve caching
+      _path.clearStatusCache();
+
+      long lastModified = _path.getLastModified();
+      long length = _path.getLength();
+
+      return (lastModified != _lastModified || length != _length);
+    }
+
+    private void init()
+    {
+      long lastModified = _path.getLastModified();
+      long length = _path.getLength();
+
+      _lastModified = lastModified;
+      _length = length;
+      _canRead = _path.canRead();
+      _isDirectory = _path.isDirectory();
+
+      StringBuilder sb = new StringBuilder();
+      sb.append('"');
+      Base64.encode(sb, _path.getCrc64());
+      sb.append('"');
+      _etag = sb.toString();
+
+      QDate cal = QDate.allocateGmtDate();
+
+      cal.setGMTTime(lastModified);
+      _lastModifiedString = cal.printDate();
+
+      QDate.freeGmtDate(cal);
+
+      if (lastModified == 0) {
+        _canRead = false;
+        _isDirectory = false;
+      }
+    }
   }
 }
