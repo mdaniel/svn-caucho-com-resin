@@ -47,7 +47,7 @@ public class DependencyComponent extends ClassComponent {
 
   private String _initMethod = "_caucho_init";
   private String _isModifiedMethod = "_caucho_is_modified";
-  
+
   private Path _searchPath;
 
   private ArrayList<PersistentDependency> _dependList
@@ -78,7 +78,7 @@ public class DependencyComponent extends ClassComponent {
     if (! _dependList.contains(depend))
       _dependList.add(depend);
   }
-  
+
   /**
    * Generates the code for the dependencies.
    *
@@ -88,7 +88,7 @@ public class DependencyComponent extends ClassComponent {
     throws IOException
   {
     out.println("private static com.caucho.vfs.Dependency []_caucho_depend;");
-    
+
     out.println();
     out.println("public static void " + _initMethod + "(com.caucho.vfs.Path path)");
     out.println("{");
@@ -98,7 +98,7 @@ public class DependencyComponent extends ClassComponent {
                 _dependList.size() + "];");
 
     Path searchPath = _searchPath;
-    
+
     for (int i = 0; i < _dependList.size(); i++) {
       PersistentDependency dependency = _dependList.get(i);
 
@@ -107,23 +107,29 @@ public class DependencyComponent extends ClassComponent {
         Path path = depend.getPath();
 
         out.print("_caucho_depend[" + i + "] = new com.caucho.vfs.Depend(");
-        
-        // php/3b33
-        String relativePath;
-        if (searchPath != null)
-          relativePath = searchPath.lookup(path.getRelativePath()).getRelativePath();
-        else {
-          String fullPath = path.getFullPath();
-          String pwd = Vfs.lookup().getFullPath();
 
-          if (fullPath.startsWith(pwd))
-            relativePath = "./" + fullPath.substring(pwd.length());
-          else
-            relativePath = fullPath;
+        // php/3b33
+        String pwd;
+
+        if (searchPath != null) {
+          pwd = searchPath.getFullPath();
+        }
+        else {
+          pwd = Vfs.lookup().getFullPath();
+        }
+
+        String fullPath = path.getFullPath();
+
+        String relativePath;
+        if (fullPath.startsWith(pwd)) {
+          relativePath = "." + fullPath.substring(pwd.length());
+        }
+        else {
+          relativePath = fullPath;
         }
 
         out.print("path.lookup(\"" + relativePath + "\"), ");
-    
+
         out.println(depend.getDigest() + "L, "
                     + depend.getRequireSource() + ");");
       }
@@ -151,7 +157,7 @@ public class DependencyComponent extends ClassComponent {
 
     out.println();
     out.println("return false;");
-    
+
     out.popDepth();
     out.println("}");
   }

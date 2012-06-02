@@ -70,19 +70,19 @@ abstract public class StatementGenerator
     throws IOException
   {
     Location location = getLocation();
-    
+
     if (location != null) {
       out.setLocation(location.getFileName(), location.getLineNumber());
 
       if (log.isLoggable(Level.FINE)) {
         out.print("// ");
-        
+
         // windows
         String fileName = location.getFileName();
-        
+
         if (fileName != null)
           fileName = fileName.replace('\\', '/');
-        
+
         out.print(fileName);
         out.print(":");
         out.print(location.getLineNumber());
@@ -104,21 +104,6 @@ abstract public class StatementGenerator
    */
   abstract protected void generateImpl(PhpWriter out)
     throws IOException;
-
-  /**
-   * Generates the Java code for the statement.
-   *
-   * @param out the writer to the generated Java source.
-   */
-  public void generateGetOut(PhpWriter out)
-    throws IOException
-  {
-    // quercus/1l07
-    // out.print("_quercus_out");
-
-    //out.print("env.getOut()");
-    out.print("env");
-  }
 
   /**
    * Generates static/initialization code code for the statement.

@@ -6,6 +6,7 @@
 
 package com.caucho.quercus.gen;
 
+import com.caucho.java.gen.DependencyComponent;
 import com.caucho.java.gen.GenClass;
 import com.caucho.java.gen.JavaClassGenerator;
 import com.caucho.make.VersionDependency;
@@ -146,7 +147,10 @@ public class QuercusGenerator {
     cl.addComponent(main);
 
     cl.addDependencyComponent().addDependency(new VersionDependency());
-    cl.addDependencyComponent().addDependencyList(program.getDependencyList());
+
+    DependencyComponent dependency = cl.addDependencyComponent();
+    dependency.setSearchPath(_quercus.getPwd());
+    dependency.addDependencyList(program.getDependencyList());
 
     // gen.setEncoding("JAVA");
 

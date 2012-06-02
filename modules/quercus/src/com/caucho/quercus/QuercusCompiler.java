@@ -37,7 +37,7 @@ public class QuercusCompiler
 
   private Pattern _includePattern = Pattern.compile(".*\\.php$");
 
-  private Level _loggingLevel = Level.FINE;
+  private Level _loggingLevel = Level.FINER;
 
   public QuercusCompiler()
   {
@@ -389,7 +389,10 @@ public class QuercusCompiler
       return true;
     }
     catch (Exception e) {
-      log.log(Level.WARNING, L.l("Cannot generate code for {0} : {1}", item.getPath(), e.getMessage()));
+      if (log.isLoggable(_loggingLevel)) {
+        log.log(_loggingLevel, L.l("Cannot generate code for {0} : {1}",
+                                   item.getPath(), e.getMessage()));
+      }
 
       return false;
     }
@@ -479,7 +482,10 @@ public class QuercusCompiler
         load(gen, item);
       }
       catch (Throwable e) {
-        log.log(Level.WARNING, L.l("Cannot compile {0} : {1}", itemList.get(0).getPath(), e.getMessage()));
+        if (log.isLoggable(_loggingLevel)) {
+          log.log(_loggingLevel, L.l("Cannot compile {0} : {1}",
+                                     itemList.get(0).getPath(), e.getMessage()));
+        }
 
         brokenItems.add(item);
       }
