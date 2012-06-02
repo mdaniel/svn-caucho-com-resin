@@ -24,7 +24,7 @@ import com.caucho.vfs.Vfs;
 
 public class QuercusCompiler
 {
-  private static final Logger log
+  private final Logger log
     = Logger.getLogger(QuercusCompiler.class.getName());
 
   protected static final L10N L = new L10N(QuercusCompiler.class);
