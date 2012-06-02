@@ -44,11 +44,15 @@ public final class JmxDeltaMeter extends AbstractMeter {
   private MBeanServer _server;
   private ObjectName _objectName;
   private String _attribute;
+  private boolean _isOptional;
 
   private double _lastValue;
   private double _value;
 
-  public JmxDeltaMeter(String name, String objectName, String attribute)
+  public JmxDeltaMeter(String name,
+                       String objectName,
+                       String attribute,
+                       boolean isOptional)
   {
     super(name);
 
@@ -60,6 +64,7 @@ public final class JmxDeltaMeter extends AbstractMeter {
 
     _attribute = attribute;
     _server = Jmx.getGlobalMBeanServer();
+    _isOptional = isOptional;
   }
 
   /**
@@ -82,7 +87,11 @@ public final class JmxDeltaMeter extends AbstractMeter {
       
       _value = value - lastValue;
     } catch (Exception e) {
-      log.log(Level.FINE, e.toString(), e);
+      if (_isOptional
+          && e instanceof javax.management.InstanceNotFoundException)
+        log.log(Level.FINEST, e.toString(), e);
+      else
+        log.log(Level.FINE, e.toString(), e);
 
       _value = 0;
     }

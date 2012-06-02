@@ -386,21 +386,25 @@
     <name>Resin|Proxy Cache|Hit Count</name>
     <objectName>resin:type=ProxyCache</objectName>
     <attribute>HitCountTotal</attribute>
+    <optional>true</optional>
   </health:JmxDeltaMeter>
 
   <health:JmxDeltaMeter>
     <name>Resin|Proxy Cache|Miss Count</name>
     <objectName>resin:type=ProxyCache</objectName>
     <attribute>MissCountTotal</attribute>
+    <optional>true</optional>
   </health:JmxDeltaMeter>
 
   <health:JmxCalculationMeter>
     <name>Resin|Proxy Cache|Miss Rate</name>
     <rate>
       <delta objectName="resin:type=ProxyCache" 
-             attribute="MissCountTotal"/>
+             attribute="MissCountTotal"
+             optional="true"/>
       <delta objectName="resin:type=ProxyCache" 
-             attribute="HitCountTotal"/>
+             attribute="HitCountTotal"
+             optional="true"/>
     </rate>
   </health:JmxCalculationMeter>
 
@@ -408,12 +412,14 @@
     <name>Resin|Proxy Cache|Invocation Miss Count</name>
     <objectName>resin:type=ProxyCache</objectName>
     <attribute>InvocationMissCountTotal</attribute>
+    <optional>true</optional>
   </health:JmxDeltaMeter>
 
   <health:JmxDeltaMeter>
     <name>Resin|Proxy Cache|Invocation Hit Count</name>
     <objectName>resin:type=ProxyCache</objectName>
     <attribute>InvocationHitCountTotal</attribute>
+    <optional>true</optional>
   </health:JmxDeltaMeter>
 
   <health:JmxCalculationMeter>
@@ -421,15 +427,19 @@
     <ratio>
       <add>
         <delta objectName="resin:type=ProxyCache"
-               attribute="HitCountTotal"/>
+               attribute="HitCountTotal"
+               optional="true"/>
         <delta objectName="resin:type=ProxyCache"
-               attribute="MissCountTotal"/>
+               attribute="MissCountTotal"
+               optional="true"/>
       </add>
       <add>
         <delta objectName="resin:type=ProxyCache"
-               attribute="InvocationHitCountTotal"/>
+               attribute="InvocationHitCountTotal"
+                optional="true"/>
         <delta objectName="resin:type=ProxyCache"
-               attribute="InvocationMissCountTotal"/>
+               attribute="InvocationMissCountTotal"
+               optional="true"/>
       </add>
     </ratio>
   </health:JmxCalculationMeter>

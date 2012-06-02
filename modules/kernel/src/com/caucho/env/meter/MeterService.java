@@ -126,17 +126,30 @@ public class MeterService extends AbstractResinSubSystem {
                                         String objectName,
                                         String attribute)
   {
-    return create().createJmxImpl(name, objectName, attribute);
+    return createJmx(name, objectName, attribute, false);
   }
+
+  public static AbstractMeter createJmx(String name,
+                                        String objectName,
+                                        String attribute,
+                                        boolean isOptional)
+  {
+    return create().createJmxImpl(name, objectName, attribute, isOptional);
+  }
+
 
   private AbstractMeter createJmxImpl(String name, 
                                       String objectName,
-                                      String attribute)
+                                      String attribute,
+                                      boolean isOptional)
   {
     AbstractMeter meter = _meterMap.get(name);
 
     if (meter == null) {
-      meter = createMeter(new JmxAttributeMeter(name, objectName, attribute));
+      meter = createMeter(new JmxAttributeMeter(name,
+                                                objectName,
+                                                attribute,
+                                                isOptional));
     }
 
     return meter;
@@ -146,17 +159,29 @@ public class MeterService extends AbstractResinSubSystem {
                                              String objectName,
                                              String attribute)
   {
-    return create().createJmxDeltaImpl(name, objectName, attribute);
+    return createJmxDelta(name, objectName, attribute, false);
+  }
+
+  public static AbstractMeter createJmxDelta(String name,
+                                             String objectName,
+                                             String attribute,
+                                             boolean isOptional)
+  {
+    return create().createJmxDeltaImpl(name, objectName, attribute, isOptional);
   }
 
   private AbstractMeter createJmxDeltaImpl(String name,
                                            String objectName,
-                                           String attribute)
+                                           String attribute,
+                                           boolean isOptional)
   {
     AbstractMeter meter = _meterMap.get(name);
 
     if (meter == null) {
-      meter = createMeter(new JmxDeltaMeter(name, objectName, attribute));
+      meter = createMeter(new JmxDeltaMeter(name,
+                                            objectName,
+                                            attribute,
+                                            isOptional));
     }
 
     return meter;

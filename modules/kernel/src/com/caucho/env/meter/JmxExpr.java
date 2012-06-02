@@ -37,6 +37,7 @@ import javax.management.MBeanServer;
 import javax.management.ObjectName;
 
 import com.caucho.config.ConfigException;
+import com.caucho.config.Configurable;
 import com.caucho.jmx.Jmx;
 import com.caucho.util.L10N;
 
@@ -166,6 +167,7 @@ abstract public class JmxExpr {
     private MBeanServer _server;
     private ObjectName _objectName;
     private String _attribute;
+    private boolean _isOptional;
     
     private double _prevSample;
     private double _lastSample;
@@ -188,7 +190,18 @@ abstract public class JmxExpr {
     {
       _attribute = name;
     }
-    
+
+    public boolean isOptional()
+    {
+      return _isOptional;
+    }
+
+    @Configurable
+    public void setOptional(boolean optional)
+    {
+      _isOptional = optional;
+    }
+
     @PostConstruct
     public void init()
     {
@@ -217,7 +230,11 @@ abstract public class JmxExpr {
         
         _lastSample = ((Number) value).doubleValue();
       } catch (Exception e) {
-        log.log(Level.FINE, e.toString(), e);
+        if (isOptional()
+            && e instanceof javax.management.InstanceNotFoundException)
+          log.log(Level.FINEST, e.toString(), e);
+        else
+          log.log(Level.FINE, e.toString(), e);
 
         _lastSample = 0;
       }

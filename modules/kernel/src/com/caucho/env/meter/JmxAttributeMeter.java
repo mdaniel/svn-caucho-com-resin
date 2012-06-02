@@ -44,11 +44,15 @@ public final class JmxAttributeMeter extends AbstractMeter {
   private MBeanServer _server;
   private ObjectName _objectName;
   private String _attribute;
+  private boolean _isOptional;
   
   private double _lastSample;
   private double _value;
 
-  public JmxAttributeMeter(String name, String objectName, String attribute)
+  public JmxAttributeMeter(String name,
+                           String objectName,
+                           String attribute,
+                           boolean isOptional)
   {
     super(name);
 
@@ -59,6 +63,7 @@ public final class JmxAttributeMeter extends AbstractMeter {
     }
 
     _attribute = attribute;
+    _isOptional = isOptional;
     _server = Jmx.getGlobalMBeanServer();
   }
 
@@ -78,7 +83,11 @@ public final class JmxAttributeMeter extends AbstractMeter {
       
       _value = ((Number) value).doubleValue();
     } catch (Exception e) {
-      log.log(Level.FINE, e.toString(), e);
+      if (isOptional()
+          && e instanceof javax.management.InstanceNotFoundException)
+        log.log(Level.FINEST, e.toString(), e);
+      else
+        log.log(Level.FINE, e.toString(), e);
 
       _value = 0;
     }
@@ -94,5 +103,15 @@ public final class JmxAttributeMeter extends AbstractMeter {
   public double peek()
   {
     return _value;
+  }
+
+  public boolean isOptional()
+  {
+    return _isOptional;
+  }
+
+  public void setOptional(boolean optional)
+  {
+    _isOptional = optional;
   }
 }
