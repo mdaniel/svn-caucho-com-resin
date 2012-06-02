@@ -480,14 +480,14 @@ public class Env
       pageInit(page);
     }
 
-    /* php/815d, nam: not sure why we're setting the pwd here
+    /* php/815d, nam: not sure why we're setting the pwd here */
+    // we need it for running scripts like the PDF generation
     if (request != null && page != null) {
       setPwd(page.getPwd(null));
     }
     else {
       setPwd(_quercus.getPwd());
     }
-    */
 
     if (_page != null) {
       setSelfPath(_page.getSelfPath(null));
@@ -5636,7 +5636,7 @@ public class Env
   {
     try {
       Path pwd = getPwd();
-
+      
       Path path = lookupInclude(include, pwd, scriptPwd);
 
       if (path != null) {
@@ -5893,11 +5893,13 @@ public class Env
     if (pathList == null) {
       pathList = new ArrayList<Path>();
 
-      for (int i = 0; i < _includePathList.size(); i++) {
-        pathList.add(pwd.lookup(_includePathList.get(i)));
-      }
+      if (pwd != null) {
+        for (int i = 0; i < _includePathList.size(); i++) {
+          pathList.add(pwd.lookup(_includePathList.get(i)));
+        }
 
-      _includePathMap.put(pwd, pathList);
+        _includePathMap.put(pwd, pathList);
+      }
     }
 
     return pathList;

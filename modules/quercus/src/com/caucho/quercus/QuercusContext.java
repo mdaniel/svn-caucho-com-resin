@@ -2152,7 +2152,8 @@ public class QuercusContext
 
       hash = 65537 * hash + _include.hashCode();
       hash = 65537 * hash + _includePath.hashCode();
-      hash = 65537 * hash + _pwd.hashCode();
+      if (_pwd != null)
+        hash = 65537 * hash + _pwd.hashCode();
       hash = 65537 * hash + _scriptPwd.hashCode();
 
       return hash;

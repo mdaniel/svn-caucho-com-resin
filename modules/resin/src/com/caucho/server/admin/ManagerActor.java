@@ -400,8 +400,8 @@ public class ManagerActor extends SimpleActor
     try {
       action.init();
 
-      PdfReportAction.PdfReportActionResult actionResult =
-        action.execute();
+      PdfReportAction.PdfReportActionResult actionResult
+        = action.execute();
 
       StreamSource pdfSource = null;
 
