@@ -36,7 +36,7 @@ public class QuercusCompiler
   private ArrayList<String> _pathList = new ArrayList<String>();
 
   private Pattern _includePattern = Pattern.compile(".*\\.php$");
-  
+
   private boolean _isKeepJavaSource;
 
   private Level _loggingLevel = Level.FINER;
@@ -96,7 +96,7 @@ public class QuercusCompiler
   {
     _isKeepJavaSource = isKeepJavaSource;
   }
-  
+
   public void addCompilePath(String path)
   {
     _pathList.add(path);
@@ -171,12 +171,10 @@ public class QuercusCompiler
     }
 
     ArrayList<CompileItem> brokenList = compile(pendingClasses);
-    
+
     if (! _isKeepJavaSource) {
       for (CompileItem item : pendingClasses) {
         Path path = item.getPath();
-        
-        path.remove();
       }
     }
 
@@ -304,6 +302,8 @@ public class QuercusCompiler
       }
       else if (args[i].equals("-keep-java-source")) {
         compiler.setKeepJavaSource("true".equals(args[i + 1]));
+
+        i += 2;
       }
       else if (args[i].equals("-verbose")) {
         compiler.setVerbose();
