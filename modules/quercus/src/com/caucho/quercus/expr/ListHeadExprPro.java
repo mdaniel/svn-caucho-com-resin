@@ -33,7 +33,6 @@ import com.caucho.quercus.env.Env;
 import com.caucho.quercus.env.Value;
 import com.caucho.quercus.gen.AnalyzeInfo;
 import com.caucho.quercus.gen.PhpWriter;
-import com.caucho.quercus.env.StringValue;
 import com.caucho.quercus.env.ConstStringValue;
 
 import java.io.IOException;
@@ -46,7 +45,7 @@ public class ListHeadExprPro extends ListHeadExpr
   implements ExprPro
 {
   private String _varName;
-  
+
   public ListHeadExprPro(ArrayList<Expr> varList)
   {
     super(varList);
@@ -69,8 +68,7 @@ public class ListHeadExprPro extends ListHeadExpr
      */
     public ExprType analyze(AnalyzeInfo info)
     {
-      _varName
-        = "q_list_" + info.getFunction().getTempIndex();
+      _varName = "q_list_" + info.getFunction().getTempIndex();
 
       info.getFunction().addTempVar(_varName);
 
@@ -154,8 +152,7 @@ public class ListHeadExprPro extends ListHeadExpr
      */
     public ExprType analyze(AnalyzeInfo info)
     {
-      _varName
-        = "q_list_" + info.getFunction().getTempIndex();
+      _varName = "q_list_" + info.getFunction().getTempIndex();
 
       info.getFunction().addTempVar(_varName);
 
@@ -177,9 +174,9 @@ public class ListHeadExprPro extends ListHeadExpr
     @Override
     public void generateAssign(PhpWriter out, Expr value, boolean isTop)
       throws IOException
-    {      
+    {
       ExprPro valuePro = (ExprPro) value;
-      
+
       if (! valuePro.getGenerator().isVar()) {
         out.print("env.error(\"list() expression for a loop must be a variable at '");
         out.printJavaString(valuePro.toString());
@@ -188,7 +185,7 @@ public class ListHeadExprPro extends ListHeadExpr
       }
 
       out.print("((" + _varName + " = ");
-      
+
       valuePro.getGenerator().generateRef(out);
       out.print(").hasCurrent() ? ");
 
@@ -197,8 +194,8 @@ public class ListHeadExprPro extends ListHeadExpr
       if (_varList.length > 0 && _varList[0] != null) {
         ExprPro keyVar = (ExprPro) _varList[0];
         out.print(", ");
-        keyVar.getGenerator().generateAssign(out, 
-                                             new ProEachKeyExpr(_varName), 
+        keyVar.getGenerator().generateAssign(out,
+                                             new ProEachKeyExpr(_varName),
                                              false);
       }
 
@@ -243,10 +240,12 @@ public class ListHeadExprPro extends ListHeadExpr
       out.println(";");
 
       if (_varList.length > 0 && _varList[0] != null) {
+        // php/33lx
+
         ExprPro keyVar = (ExprPro) _varList[0];
-        keyVar.getGenerator().generateAssign(out, 
-                                             new ProEachKeyExpr(_varName), 
-                                             false);
+        keyVar.getGenerator().generateAssign(out,
+                                             new ProEachKeyExpr(_varName),
+                                             true);
         out.println(";");
       }
 
@@ -254,7 +253,7 @@ public class ListHeadExprPro extends ListHeadExpr
         ExprPro valueVar = (ExprPro) _varList[1];
         valueVar.getGenerator().generateAssign(out,
                                                new ProEachValueExpr(_varName),
-                                               false);
+                                               true);
         out.println(";");
       }
 
@@ -289,13 +288,13 @@ public class ListHeadExprPro extends ListHeadExpr
 
       @Override
       public void generate(PhpWriter out)
-      throws IOException
+        throws IOException
       {
         out.print(_var + ".key()");
       }
 
       public void generateExpr(PhpWriter out)
-      throws IOException
+        throws IOException
       {
         out.print("null");
       }
@@ -328,20 +327,20 @@ public class ListHeadExprPro extends ListHeadExpr
 
       @Override
       public void generate(PhpWriter out)
-      throws IOException
+        throws IOException
       {
         out.print(_var + ".current()");
       }
 
       @Override
       public void generateCopy(PhpWriter out)
-      throws IOException
+        throws IOException
       {
         out.print(_var + ".current().copy()");
       }
 
       public void generateExpr(PhpWriter out)
-      throws IOException
+        throws IOException
       {
         out.print("null");
       }
