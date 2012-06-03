@@ -31,9 +31,7 @@ package com.caucho.server.webbeans;
 
 import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
-import java.util.logging.Handler;
 import java.util.logging.Level;
-import java.util.logging.LogRecord;
 import java.util.logging.Logger;
 
 import com.caucho.config.Config;

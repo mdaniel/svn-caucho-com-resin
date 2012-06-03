@@ -71,8 +71,8 @@ sendfile : true
 
 # OpenSSL certificate configuration
 # Keys are typically stored in the resin configuration directory.
-# openssl_file : /etc/resin/keys/test.crt
-# openssl_key : /etc/resin/keys/test.key
+# openssl_file : keys/test.crt
+# openssl_key : keys/test.key
 # openssl_password : changeme
 
 # JSSE certificate configuration
