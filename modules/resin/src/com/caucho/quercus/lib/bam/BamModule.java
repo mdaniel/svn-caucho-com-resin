@@ -30,8 +30,6 @@
 package com.caucho.quercus.lib.bam;
 
 import java.io.Serializable;
-import java.util.ArrayList;
-import java.util.Iterator;
 import java.util.Locale;
 import java.util.logging.Logger;
 
@@ -40,11 +38,9 @@ import com.caucho.bam.actor.ActorSender;
 import com.caucho.bam.actor.SimpleActorSender;
 import com.caucho.bam.stream.MessageStream;
 import com.caucho.bam.stream.NullActor;
-import com.caucho.bam.stream.NullMessageStream;
 import com.caucho.hemp.broker.HempBroker;
 import com.caucho.hmtp.HmtpClient;
 import com.caucho.quercus.annotation.ClassImplementation;
-import com.caucho.quercus.annotation.Optional;
 import com.caucho.quercus.env.BooleanValue;
 import com.caucho.quercus.env.ConstStringValue;
 import com.caucho.quercus.env.Env;
@@ -65,10 +61,10 @@ public class BamModule extends AbstractQuercusModule
     = Logger.getLogger(BamModule.class.getName());
   private static final L10N L = new L10N(BamModule.class);
 
-  private static final StringValue PHP_SELF 
+  private static final StringValue PHP_SELF
     = new ConstStringValue("PHP_SELF");
 
-  private static final StringValue SERVER_NAME 
+  private static final StringValue SERVER_NAME
     = new ConstStringValue("SERVER_NAME");
 
   private static BamPhpActor getActor(Env env)
@@ -95,7 +91,7 @@ public class BamModule extends AbstractQuercusModule
 
       if (resource.indexOf('/') == 0)
         resource = resource.substring(1);
-      
+
       NullActor stream = new NullActor(address, broker);
 
       connection = new SimpleActorSender(stream, broker, address, resource);
@@ -140,9 +136,9 @@ public class BamModule extends AbstractQuercusModule
     return connection.getAddress();
   }
 
-  public static Value bam_login(Env env, 
-                                String url, 
-                                String username, 
+  public static Value bam_login(Env env,
+                                String url,
+                                String username,
                                 String password)
   {
     BamPhpActor actor = getActor(env);
@@ -173,7 +169,7 @@ public class BamModule extends AbstractQuercusModule
     BamPhpServiceManager manager = getServiceManager(env);
 
     if (manager == null)
-      return env.error("bam_service_exists must be called from " + 
+      return env.error("bam_service_exists must be called from " +
                        "service manager script");
 
     return BooleanValue.create(manager.hasChild(address));
@@ -187,7 +183,7 @@ public class BamModule extends AbstractQuercusModule
     BamPhpServiceManager manager = getServiceManager(env);
 
     if (manager == null)
-      return env.error("bam_register_service must be called from " + 
+      return env.error("bam_register_service must be called from " +
                        "service manager script");
 
     Path path = env.getSelfDirectory().lookup(script);
@@ -216,7 +212,7 @@ public class BamModule extends AbstractQuercusModule
     BamPhpServiceManager manager = getServiceManager(env);
 
     if (manager == null)
-      return env.error("bam_unregister_service must be called from " + 
+      return env.error("bam_unregister_service must be called from " +
                        "service manager script");
 
     BamPhpActor service = manager.removeChild(address);
@@ -305,17 +301,17 @@ public class BamModule extends AbstractQuercusModule
     getBrokerStream(env).message(to, getAddress(env), value);
   }
 
-  public static void bam_send_message_error(Env env, 
-                                            String to, 
-                                            Serializable value, 
+  public static void bam_send_message_error(Env env,
+                                            String to,
+                                            Serializable value,
                                             BamError error)
   {
     getBrokerStream(env).messageError(to, getAddress(env), value, error);
   }
 
-  public static Value bam_send_query(Env env, 
-                                         long id, 
-                                         String to, 
+  public static Value bam_send_query(Env env,
+                                         long id,
+                                         String to,
                                          Serializable value)
   {
     String from = getAddress(env);
@@ -324,15 +320,15 @@ public class BamModule extends AbstractQuercusModule
     return BooleanValue.TRUE;
   }
 
-  public static void bam_send_query_result(Env env, 
-                                           long id, 
+  public static void bam_send_query_result(Env env,
+                                           long id,
                                            String to,
                                            Serializable value)
   {
     getBrokerStream(env).queryResult(id, to, getAddress(env), value);
   }
 
-  public static void bam_send_query_error(Env env, 
+  public static void bam_send_query_error(Env env,
                                           long id, String to,
                                           Serializable value, BamError error)
   {
@@ -353,7 +349,7 @@ public class BamModule extends AbstractQuercusModule
 
       if (env.getGlobalValue("_quercus_bam_start_service") != null) {
         function = env.findFunction("bam_start_service");
-      } 
+      }
       else if (env.getGlobalValue("_quercus_bam_stop_service") != null) {
         function = env.findFunction("bam_stop_service");
       }
@@ -400,7 +396,7 @@ public class BamModule extends AbstractQuercusModule
       Value error = env.getGlobalValue("_quercus_bam_error");
 
       functionReturn = function.call(env, id, to, from, value, error);
-    } 
+    }
     else if (! eventType.hasId() && eventType.hasError()) {
       Value error = env.getGlobalValue("_quercus_bam_error");
 
@@ -422,12 +418,12 @@ public class BamModule extends AbstractQuercusModule
 
   /**
    * Finds the handler function for a value with the given prefix.  If there
-   * is a specific handler for a specific value type, that is returned 
+   * is a specific handler for a specific value type, that is returned
    * otherwise the generic handler (with the name of the prefix) is returned
    * if found.
    **/
-  private static AbstractFunction findFunction(Env env, 
-                                               String prefix, 
+  private static AbstractFunction findFunction(Env env,
+                                               String prefix,
                                                Value value)
   {
     if (value == null)

@@ -19,6 +19,7 @@ import com.caucho.quercus.gen.QuercusGenerator;
 import com.caucho.quercus.parser.QuercusParser;
 import com.caucho.quercus.program.QuercusProgram;
 import com.caucho.util.L10N;
+import com.caucho.vfs.FilePath;
 import com.caucho.vfs.Path;
 import com.caucho.vfs.Vfs;
 
@@ -174,7 +175,11 @@ public class QuercusCompiler
 
     if (! _isKeepJavaSource) {
       for (CompileItem item : pendingClasses) {
-        Path path = item.getPath();
+        for (String javaFile : item.getPendingFiles()) {
+          Path path = _workDir.lookup(javaFile);
+
+          path.remove();
+        }
       }
     }
 
