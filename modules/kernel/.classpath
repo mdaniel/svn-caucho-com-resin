@@ -8,7 +8,6 @@
 	<classpathentry combineaccessrules="false" kind="src" path="/servlet16"/>
 	<classpathentry combineaccessrules="false" kind="src" path="/jpa"/>
 	<classpathentry combineaccessrules="false" kind="src" path="/jcache"/>
-	<classpathentry combineaccessrules="false" kind="src" path="/hessian"/>
 	<classpathentry combineaccessrules="false" kind="src" path="/jca"/>
 	<classpathentry kind="output" path="classes"/>
 </classpath>

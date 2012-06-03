@@ -31,12 +31,17 @@ package com.caucho.server.webbeans;
 
 import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
+import java.util.logging.Handler;
 import java.util.logging.Level;
+import java.util.logging.LogRecord;
 import java.util.logging.Logger;
 
 import com.caucho.config.Config;
 import com.caucho.config.ConfigPropertiesResolver;
 import com.caucho.config.inject.InjectManager;
+import com.caucho.vfs.Path;
+import com.caucho.vfs.Vfs;
+
 
 /**
  * Library of static config functions.
@@ -44,6 +49,33 @@ import com.caucho.config.inject.InjectManager;
 public class ResinServerConfigLibrary {
   private static final Logger log
     = Logger.getLogger(ResinServerConfigLibrary.class.getName());
+  
+  public static String lookupResource(String resource, String parent) {
+	  if (log.isLoggable(Level.FINEST)) {
+		  log.finest(String.format("ResinServerConfigLibrary:lookupResource TRACE resource = %s, parent = %s", resource, parent));
+	  }
+	  
+	  if (resource == null || resource.trim().isEmpty()) 
+	  {
+		  log.finer("ResinServerConfigLibrary:lookupResource: relative resource is not set, this is a normal situation.");
+		  return null;
+	  }
+	  if (parent == null || parent.isEmpty()) {
+		  log.warning("ResinServerConfigLibrary:lookupResource: parent argument (2nd argument) should be set, and it is not.");
+		  return null;		  
+	  }
+	  Path parentPath = Vfs.lookup(parent);
+	  Path resourcePath = parentPath.lookup(resource);
+	  if (!resourcePath.exists() || !resourcePath.canRead()) 
+	  {
+		  log.warning("ResinServerConfigLibrary:lookupResource: resource does not exist or is not readable.");
+		  return null;
+	  }
+	  if (log.isLoggable(Level.FINEST)) {
+		  log.finest("ResinServerConfigLibrary:lookupResource: resource found and equal to " + resourcePath.getFullPath());
+	  }
+	  return resourcePath.getFullPath();
+  }
   
   public static Object rvar(String var)
   {
