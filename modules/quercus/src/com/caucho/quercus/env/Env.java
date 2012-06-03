@@ -4812,8 +4812,9 @@ public class Env
       }
     }
     catch (Throwable e) {
-      if (log.isLoggable(Level.FINEST))
+      if (log.isLoggable(Level.FINEST)) {
         log.log(Level.FINEST, e.toString(), e);
+      }
 
       if (useImport) {
         def = importJavaClass(className);
@@ -4821,10 +4822,6 @@ public class Env
         if (def != null)
           return def;
       }
-      /*
-      else
-        throw createErrorException(e);
-        */
     }
 
     return def;
@@ -5636,7 +5633,7 @@ public class Env
   {
     try {
       Path pwd = getPwd();
-      
+
       Path path = lookupInclude(include, pwd, scriptPwd);
 
       if (path != null) {

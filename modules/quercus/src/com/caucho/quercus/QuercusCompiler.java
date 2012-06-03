@@ -36,6 +36,8 @@ public class QuercusCompiler
   private ArrayList<String> _pathList = new ArrayList<String>();
 
   private Pattern _includePattern = Pattern.compile(".*\\.php$");
+  
+  private boolean _isKeepJavaSource;
 
   private Level _loggingLevel = Level.FINER;
 
@@ -90,6 +92,11 @@ public class QuercusCompiler
     _includePattern = Pattern.compile(pattern);
   }
 
+  public void setKeepJavaSource(boolean isKeepJavaSource)
+  {
+    _isKeepJavaSource = isKeepJavaSource;
+  }
+  
   public void addCompilePath(String path)
   {
     _pathList.add(path);
@@ -129,13 +136,14 @@ public class QuercusCompiler
   private static void printUsage()
   {
     System.out.println("usage: java -Xmx1024m " + QuercusCompiler.class.getName() + " [flags] php1 php2 ...");
-    System.out.println(" -output-dir      : the directory to use for output (default /tmp/<user>/WEB-INF/classes).");
-    System.out.println(" -app-dir         : public root directory (/) of the local files (default common directory).");
-    System.out.println(" -compiler        : sets the javac.");
-    System.out.println(" -script-encoding : the encoding of the source files (default ISO-8859-1).");
-    System.out.println(" -require-source  : whether or not the source files are required when deployed (default false).");
-    System.out.println(" -include-pattern : compile files that match this Java regexp Pattern (default \".*\\.php$\").");
-    System.out.println(" -verbose         : sets logging level to INFO.");
+    System.out.println(" -output-dir       : the directory to use for output (default /tmp/<user>/WEB-INF/classes).");
+    System.out.println(" -app-dir          : public root directory (/) of the local files (default common directory).");
+    System.out.println(" -compiler         : sets the javac.");
+    System.out.println(" -script-encoding  : the encoding of the source files (default ISO-8859-1).");
+    System.out.println(" -require-source   : whether or not the source files are required when deployed (default false).");
+    System.out.println(" -include-pattern  : compile files that match this Java regexp Pattern (default \".*\\.php$\").");
+    System.out.println(" -verbose          : sets logging level to INFO.");
+    System.out.println(" -keep-java-source : keeps .java files (default false).");
   }
 
   public ArrayList<CompileItem> compile()
@@ -163,6 +171,14 @@ public class QuercusCompiler
     }
 
     ArrayList<CompileItem> brokenList = compile(pendingClasses);
+    
+    if (! _isKeepJavaSource) {
+      for (CompileItem item : pendingClasses) {
+        Path path = item.getPath();
+        
+        path.remove();
+      }
+    }
 
     long end = System.currentTimeMillis();
 
@@ -285,6 +301,9 @@ public class QuercusCompiler
         compiler.setIncludePattern(pattern);
 
         i += 2;
+      }
+      else if (args[i].equals("-keep-java-source")) {
+        compiler.setKeepJavaSource("true".equals(args[i + 1]));
       }
       else if (args[i].equals("-verbose")) {
         compiler.setVerbose();
