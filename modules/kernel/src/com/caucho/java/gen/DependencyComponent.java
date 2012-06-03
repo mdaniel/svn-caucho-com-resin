@@ -122,7 +122,15 @@ public class DependencyComponent extends ClassComponent {
 
         String relativePath;
         if (fullPath.startsWith(pwd)) {
-          relativePath = "." + fullPath.substring(pwd.length());
+          char separatorChar = Path.getFileSeparatorChar();
+          int len = pwd.length();
+
+          if (fullPath.charAt(len) == separatorChar) {
+            relativePath = "." + fullPath.substring(len);
+          }
+          else {
+            relativePath = fullPath.substring(len);
+          }
         }
         else {
           relativePath = fullPath;
