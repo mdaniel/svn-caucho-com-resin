@@ -31,9 +31,13 @@ package com.caucho.quercus.module;
 
 import com.caucho.config.ConfigException;
 import com.caucho.quercus.QuercusRuntimeException;
-import com.caucho.quercus.env.*;
+import com.caucho.quercus.env.DoubleValue;
+import com.caucho.quercus.env.LongValue;
+import com.caucho.quercus.env.NullValue;
+import com.caucho.quercus.env.QuercusClass;
+import com.caucho.quercus.env.StringBuilderValue;
+import com.caucho.quercus.env.Value;
 import com.caucho.quercus.expr.ExprFactory;
-import com.caucho.quercus.function.AbstractFunction;
 import com.caucho.quercus.marshal.Marshal;
 import com.caucho.quercus.marshal.MarshalFactory;
 import com.caucho.quercus.program.ClassDef;
@@ -159,15 +163,7 @@ public class ModuleContext
   {
     _serviceClassUrls.add(url);
   }
-
-  /**
-   * Tests if the URL has already been loaded for the context module
-   */
-  public boolean hasServiceModule(URL url)
-  {
-    return _serviceModuleUrls.contains(url);
-  }
-
+  
   /**
    * Adds a URL for the context module
    */
@@ -536,20 +532,9 @@ public class ModuleContext
         = "META-INF/services/com.caucho.quercus.QuercusModule";
       Enumeration<URL> urls = _loader.getResources(quercusModule);
 
-      HashSet<URL> urlSet = new HashSet<URL>();
-
-      // gets rid of duplicate entries found by different classloaders
       while (urls.hasMoreElements()) {
         URL url = urls.nextElement();
-
-        if (! hasServiceModule(url)) {
-          addServiceModule(url);
-
-          urlSet.add(url);
-        }
-      }
-
-      for (URL url : urlSet) {
+        
         InputStream is = null;
         ReadStream rs = null;
         try {

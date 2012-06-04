@@ -34,6 +34,7 @@ import com.caucho.quercus.QuercusContext;
 import com.caucho.quercus.QuercusRuntimeException;
 import com.caucho.quercus.lib.db.QuercusDataSource;
 import com.caucho.quercus.module.QuercusModule;
+import com.caucho.util.CurrentTime;
 import com.caucho.util.L10N;
 
 import javax.naming.Context;
@@ -472,11 +473,14 @@ public class QuercusServlet
   private void initImpl(ServletConfig config)
     throws ServletException
   {
+    long start = CurrentTime.getCurrentTime();
+
     Class<?> configClass = config.getClass();
 
     _impl = getQuercusServlet(configClass.getName().startsWith("com.caucho"));
 
-    log.info("QuercusServlet starting as " + _impl.getClass().getSimpleName());
+    log.info(L.l("QuercusServlet starting as {0}",
+                 _impl.getClass().getSimpleName()));
 
     if (isUnicodeSemantics()) {
       _impl.getQuercus().setUnicodeSemantics(true);
@@ -544,6 +548,10 @@ public class QuercusServlet
     }
 
     _impl.init(config);
+
+    long end = CurrentTime.getCurrentTime();
+    log.info(L.l("Quercus finished initialization in {0}ms ({1}s)",
+                 (end - start), (end - start) / 1000));
   }
 
   /**
