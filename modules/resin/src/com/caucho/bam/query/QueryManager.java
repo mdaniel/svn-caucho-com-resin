@@ -49,6 +49,8 @@ import com.caucho.util.WeakAlarm;
  * for query callbacks.
  */
 public class QueryManager {
+  private final String _id;
+  
   private final AtomicLong _qId = new AtomicLong();
 
   private final QueryMap _queryMap = new QueryMap();
@@ -58,12 +60,15 @@ public class QueryManager {
   
   private long _timeout = 15 * 60 * 1000L;
 
-  public QueryManager()
+  public QueryManager(String id)
   {
+    _id = id;
   }
 
-  public QueryManager(long seed)
+  public QueryManager(String id, long seed)
   {
+    this(id);
+    
     _qId.set(seed);
   }
   
@@ -231,7 +236,7 @@ public class QueryManager {
   @Override
   public String toString()
   {
-    return getClass().getSimpleName() + "[]";
+    return getClass().getSimpleName() + "[" + _id + "]";
   }
 
   static final class QueryMap {
@@ -279,7 +284,7 @@ public class QueryManager {
       long expires = timeout + CurrentTime.getCurrentTime();
       
       int hash = (int) (id & _mask);
-
+      
       synchronized (_entries) {
         _entries[hash] = new QueryItem(id, callback, expires, _entries[hash]);
       }
@@ -288,7 +293,7 @@ public class QueryManager {
     QueryItem remove(long id)
     {
       int hash = (int) (id & _mask);
-
+      
       synchronized (_entries) {
         QueryItem prev = null;
         QueryItem next = null;

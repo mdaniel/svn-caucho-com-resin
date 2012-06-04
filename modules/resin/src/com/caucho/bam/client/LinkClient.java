@@ -65,7 +65,8 @@ public class LinkClient {
     PassthroughBroker outboundBroker = new PassthroughBroker();
     
     Actor inboundStream = actor.getActor();
-    SimpleActorSender sender = new SimpleActorSender(inboundStream, 
+    SimpleActorSender sender = new SimpleActorSender(actor.getAddress(),
+                                                     inboundStream, 
                                                      outboundBroker);
     
     _sender = sender;

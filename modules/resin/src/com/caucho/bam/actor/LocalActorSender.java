@@ -46,7 +46,7 @@ public class LocalActorSender extends SimpleActorSender {
   public LocalActorSender(Actor next,
                           ManagedBroker broker)
   {
-    super(next, broker);
+    super(next.getAddress(), next, broker);
   }
  
   @Override

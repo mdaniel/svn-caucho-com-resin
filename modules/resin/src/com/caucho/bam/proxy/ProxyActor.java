@@ -67,7 +67,7 @@ public class ProxyActor<T> implements Actor
     _skeleton = ProxySkeleton.getSkeleton((Class<T>) bean.getClass());
     _fallback = new NullMessageStream(address, broker);
     
-    _sender = new SimpleActorSender(this, _broker);
+    _sender = new SimpleActorSender(address, this, _broker);
   }
 
   @Override

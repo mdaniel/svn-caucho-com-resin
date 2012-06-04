@@ -126,7 +126,7 @@ public class ManagerClient
         RemoteActorSender remoteClient = clientFactory.create();
         
         _bamManager = new SimpleBamManager(remoteClient.getBroker());
-        _bamClient = clientFactory.create();
+        _bamClient = remoteClient;
       }
     
       _managerAddress = "manager@resin.caucho";

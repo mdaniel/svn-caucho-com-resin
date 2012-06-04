@@ -42,8 +42,18 @@ import com.caucho.bam.query.QueryManager;
  * query ids.
  */
 abstract public class AbstractActorSender implements ActorSender {
-  private QueryManager _queryManager = new QueryManager();
+  private final QueryManager _queryManager;
   private long _timeout = 120000;
+  
+  protected AbstractActorSender(String id)
+  {
+    _queryManager = new QueryManager(id);
+  }
+  
+  protected AbstractActorSender()
+  {
+    _queryManager = new QueryManager(toString());
+  }
 
   /**
    * The default query timeout.

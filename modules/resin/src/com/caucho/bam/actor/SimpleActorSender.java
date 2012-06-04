@@ -52,18 +52,20 @@ public class SimpleActorSender extends AbstractActorSender implements ActorSende
 
   public SimpleActorSender(String address, Broker broker)
   {
-    this((Actor) null, broker);
+    this(address, (Actor) null, broker);
     
     _clientAddress = address;
   }
   
   public SimpleActorSender(Actor next)
   {
-    this(next, next.getBroker());
+    this(next.getAddress(), next, next.getBroker());
   }
   
-  public SimpleActorSender(Actor next, Broker broker)
+  public SimpleActorSender(String address, Actor next, Broker broker)
   {
+    super(address);
+    
     if (next == null)
       next = new DefaultActor();
     
@@ -78,7 +80,7 @@ public class SimpleActorSender extends AbstractActorSender implements ActorSende
                            String uid, 
                            String resource)
   {
-    this(next, broker);
+    this(uid + "/" + resource, next, broker);
     
     Mailbox mailbox = new MultiworkerMailbox(next.getAddress(),
                                              _actor,
@@ -100,7 +102,7 @@ public class SimpleActorSender extends AbstractActorSender implements ActorSende
                            String uid, 
                            String resource)
   {
-    this((Actor) null, broker);
+    this(uid + "/" + resource, (Actor) null, broker);
     
     Mailbox mailbox = new MultiworkerMailbox(null,
                                              _actor,

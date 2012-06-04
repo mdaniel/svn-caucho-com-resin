@@ -102,6 +102,8 @@ public class QueryMessageStreamFilter implements MessageStream {
                           Serializable payload)
   {
     if (! _queryManager.onQueryResult(id, to, from, payload)) {
+      System.out.println("NORESULT: " + id + " " + to + " " + from + " " + payload
+                         + "\n  " + _queryManager);
       _next.queryResult(id, to, from, payload);
     }
   }

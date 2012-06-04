@@ -32,6 +32,7 @@ package com.caucho.bam.router;
 import java.io.Serializable;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicReference;
+import java.util.logging.Level;
 import java.util.logging.Logger;
 
 import com.caucho.bam.BamError;
@@ -113,9 +114,8 @@ public class BamAllActorRouter extends AbstractBamRouter
         _sender.query(actor, payload, new AllMethodCallback(scoreboard, i));
       }
       else {
-        scoreboard.complete(i, new BamError("cancel",
-                                            "service-unavailable",
-                                            "Can't contact server: " + actor.getAddress()));
+        // cloud/0350
+        scoreboard.completeNotActive(i, actor);
       }
     }
     
@@ -165,6 +165,19 @@ public class BamAllActorRouter extends AbstractBamRouter
     private void complete(int index, BamError error)
     {
       _error.compareAndSet(null, error);
+      
+      synchronized (_isComplete) {
+        _isComplete[index] = true;
+      }
+      
+      checkComplete();
+    }
+    
+    private void completeNotActive(int index, BamActorRef actor)
+    {
+      if (log.isLoggable(Level.FINER)) {
+        log.finer(this + " cannot contact " + actor + " because not active");
+      }
       
       synchronized (_isComplete) {
         _isComplete[index] = true;

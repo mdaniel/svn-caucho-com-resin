@@ -93,7 +93,6 @@ public class QueryFutureCallback extends AbstractQueryCallback {
       {
         LockSupport.parkNanos(timeout * 1000000L);
 
-
         switch (_state) {
         case REPLY:
           return _result;
