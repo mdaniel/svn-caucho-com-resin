@@ -120,7 +120,7 @@ public class BamAllActorRouter extends AbstractBamRouter
     }
     
     if (actors.length == 0) {
-      scoreboard.complete(0, null);
+      scoreboard.completeEmpty();
     }
   }
   
@@ -182,6 +182,14 @@ public class BamAllActorRouter extends AbstractBamRouter
       synchronized (_isComplete) {
         _isComplete[index] = true;
       }
+      
+      checkComplete();
+    }
+    
+    private void completeEmpty()
+    {
+      if (_isComplete.length != 0)
+        throw new IllegalStateException();
       
       checkComplete();
     }

@@ -32,6 +32,7 @@ package com.caucho.bam.proxy;
 import java.util.concurrent.locks.LockSupport;
 
 import com.caucho.bam.BamError;
+import com.caucho.util.CurrentTime;
 import com.caucho.util.L10N;
 
 /**
@@ -64,7 +65,7 @@ public class ReplyFutureCallback<T> implements ReplyCallback<T> {
   {
     _error = error;
     _state = ResultStateEnum.ERROR;
-    
+
     Thread thread = _thread;
     
     if (thread != null) {
@@ -84,8 +85,15 @@ public class ReplyFutureCallback<T> implements ReplyCallback<T> {
     default:
     {
       _thread = Thread.currentThread();
-
-      LockSupport.parkNanos(timeout * 1000000L);
+      
+      long expireTime = CurrentTime.getCurrentTimeActual() + timeout;
+      
+      while (_state == ResultStateEnum.WAITING
+             && CurrentTime.getCurrentTimeActual() <= expireTime) {
+        long delta = expireTime - CurrentTime.getCurrentTimeActual();
+        
+        LockSupport.parkNanos(delta * 1000000L);
+      }
       
       _thread = null;
       
