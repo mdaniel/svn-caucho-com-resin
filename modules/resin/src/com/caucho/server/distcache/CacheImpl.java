@@ -517,7 +517,9 @@ public class CacheImpl<K,V>
     
     long oldHash = entry.getValueHash(oldValue, _config);
     
-    return entry.compareAndPut(oldHash, value, _config);
+    boolean isReplace = entry.compareAndPut(oldHash, value, _config);
+     
+    return isReplace;
   }
 
   @Override
