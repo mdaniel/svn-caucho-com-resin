@@ -19,7 +19,6 @@ import com.caucho.quercus.gen.QuercusGenerator;
 import com.caucho.quercus.parser.QuercusParser;
 import com.caucho.quercus.program.QuercusProgram;
 import com.caucho.util.L10N;
-import com.caucho.vfs.FilePath;
 import com.caucho.vfs.Path;
 import com.caucho.vfs.Vfs;
 
@@ -131,7 +130,7 @@ public class QuercusCompiler
       System.exit(1);
     }
 
-    ArrayList<CompileItem> brokenItems = compiler.compile();
+    ArrayList<Path> brokenCompilePaths = compiler.compile();
   }
 
   private static void printUsage()
@@ -147,7 +146,7 @@ public class QuercusCompiler
     System.out.println(" -keep-java-source : keeps .java files (default false).");
   }
 
-  public ArrayList<CompileItem> compile()
+  public ArrayList<Path> compile()
     throws IOException
   {
     log.log(_loggingLevel, L.l("Public root dir (/) is '{0}'", _quercus.getPwd()));
@@ -155,32 +154,17 @@ public class QuercusCompiler
     long start = System.currentTimeMillis();
 
     if (log.isLoggable(_loggingLevel)) {
-      log.log(_loggingLevel, L.l("Parsing files matching Java Pattern '{0}'",
-                                 _includePattern));
-    }
-
-    ArrayList<CompileItem> pendingClasses = new ArrayList<CompileItem>();
-
-    for (String uri : _pathList) {
-      generate(pendingClasses, uri);
-    }
-
-    if (log.isLoggable(_loggingLevel)) {
-      log.log(_loggingLevel, L.l("Compiling {0} PHP files to {1}.",
-                                 pendingClasses.size(),
+      log.log(_loggingLevel, L.l("Compiling PHP files matching Java Pattern '{0}' to {1}",
+                                 _includePattern,
                                  _workDir));
     }
 
-    ArrayList<CompileItem> brokenList = compile(pendingClasses);
+    ArrayList<Path> brokenCompilePaths = new ArrayList<Path>();
 
-    if (! _isKeepJavaSource) {
-      for (CompileItem item : pendingClasses) {
-        for (String javaFile : item.getPendingFiles()) {
-          Path path = _workDir.lookup(javaFile);
+    for (String uri : _pathList) {
+      Path path = Vfs.lookup(uri);
 
-          path.remove();
-        }
-      }
+      compile(brokenCompilePaths, path);
     }
 
     long end = System.currentTimeMillis();
@@ -190,7 +174,7 @@ public class QuercusCompiler
                                  (end - start)));
     }
 
-    return brokenList;
+    return brokenCompilePaths;
   }
 
   private static Path getCommonRoot(ArrayList<String> _pathList)
@@ -346,44 +330,40 @@ public class QuercusCompiler
     }
   }
 
-  public void generate(ArrayList<CompileItem> pendingClasses, String uri)
+  public void compile(ArrayList<Path> brokenCompilePaths, Path path)
     throws IOException
   {
-    Path path = Vfs.lookup(uri);
+    if (path.isDirectory()) {
+      String []list = path.list();
 
-    if (path.isDirectory())
-      generateDirectory(pendingClasses, path);
+      for (int i = 0; i < list.length; i++) {
+        Path subPath = path.lookup(list[i]);
+
+        compile(brokenCompilePaths, subPath);
+      }
+    }
     else {
-      generateFile(pendingClasses, path);
-    }
-  }
-
-  private void generateDirectory(ArrayList<CompileItem> pendingClasses,
-                                 Path path)
-    throws IOException
-  {
-    String []list = path.list();
-
-    for (int i = 0; i < list.length; i++) {
-      Path subPath = path.lookup(list[i]);
-
-      if (subPath.isDirectory()) {
-        generateDirectory(pendingClasses, subPath);
+      if (! _includePattern.matcher(path.getPath()).matches()) {
+        return;
       }
-      else {
-        generateFile(pendingClasses, subPath);
+
+      try {
+        compileFile(path);
+      }
+      catch (Exception e) {
+        if (log.isLoggable(_loggingLevel)) {
+          log.log(_loggingLevel, L.l("Cannot compile {0} : {1}",
+                                     path, e.getMessage()));
+        }
+
+        brokenCompilePaths.add(path);
       }
     }
   }
 
-  private void generateFile(ArrayList<CompileItem> pendingClasses,
-                            Path path)
-    throws IOException
+  private boolean compileFile(Path path)
+    throws Exception
   {
-    if (! _includePattern.matcher(path.getPath()).matches()) {
-      return;
-    }
-
     QuercusProgram program = QuercusParser.parse(_quercus,
                                                  path,
                                                  _quercus.getScriptEncoding(),
@@ -392,34 +372,38 @@ public class QuercusCompiler
 
     CompileItem item = new CompileItem(program, path);
 
-    if (generateCode(item)) {
-      pendingClasses.add(item);
-    }
-  }
+    generateCode(item);
 
-  private boolean generateCode(CompileItem item)
-  {
     QuercusGenerator gen = new QuercusGenerator(_quercus);
 
     try {
-      String relPath = getRelativePath(item.getPath());
-
-      String []files = gen.generate(item.getProgram(),
-                                    relPath,
-                                    false);
-
-      item.setPendingFiles(files);
-
-      return true;
+      gen.compile(item.getPendingFiles());
     }
-    catch (Exception e) {
-      if (log.isLoggable(_loggingLevel)) {
-        log.log(_loggingLevel, L.l("Cannot generate code for {0} : {1}",
-                                   item.getPath(), e.getMessage()));
+    finally {
+      if (! _isKeepJavaSource) {
+        for (String javaFile : item.getPendingFiles()) {
+          Path javaPath = _workDir.lookup(javaFile);
+
+          javaPath.remove();
+        }
       }
-
-      return false;
     }
+
+    return true;
+  }
+
+  private void generateCode(CompileItem item)
+    throws Exception
+  {
+    QuercusGenerator gen = new QuercusGenerator(_quercus);
+
+    String relPath = getRelativePath(item.getPath());
+
+    String []files = gen.generate(item.getProgram(),
+                                  relPath,
+                                  false);
+
+    item.setPendingFiles(files);
   }
 
   /**
@@ -463,65 +447,6 @@ public class QuercusCompiler
   public Path getPwd()
   {
     return _quercus.getPwd();
-  }
-
-  /**
-   * Compiles the items, returning the broken items.
-   */
-  public ArrayList<CompileItem> compile(ArrayList<CompileItem> itemList)
-  {
-    QuercusGenerator gen = new QuercusGenerator(_quercus);
-
-    ArrayList<String> pendingFileList = new ArrayList<String>();
-    ArrayList<CompileItem> brokenItems = new ArrayList<CompileItem>();
-
-    for (CompileItem item : itemList) {
-      for (String file : item.getPendingFiles())
-        pendingFileList.add(file);
-    }
-
-    String []pendingFiles = new String[pendingFileList.size()];
-    pendingFileList.toArray(pendingFiles);
-
-    // compile the files in one batch
-    try {
-      gen.compile(pendingFiles);
-
-      for (CompileItem item : itemList) {
-        // ensure class file is there and valid
-        load(gen, item);
-      }
-
-      return brokenItems;
-    }
-    catch (Throwable e) {
-    }
-
-    // need to find the files that failed to compile
-    for (CompileItem item : itemList) {
-      try {
-        gen.compile(item.getPendingFiles());
-
-        // ensure class file is there and valid
-        load(gen, item);
-      }
-      catch (Throwable e) {
-        if (log.isLoggable(_loggingLevel)) {
-          log.log(_loggingLevel, L.l("Cannot compile {0} : {1}",
-                                     itemList.get(0).getPath(), e.getMessage()));
-        }
-
-        brokenItems.add(item);
-      }
-    }
-
-    return brokenItems;
-  }
-
-  private void load(QuercusGenerator gen, CompileItem item)
-    throws Exception
-  {
-    Class<?> pageClass = gen.preload(item.getProgram());
   }
 
   static class CompileItem
