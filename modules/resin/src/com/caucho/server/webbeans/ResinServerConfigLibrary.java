@@ -40,6 +40,7 @@ import com.caucho.config.ConfigPropertiesResolver;
 import com.caucho.config.inject.InjectManager;
 import com.caucho.util.L10N;
 import com.caucho.vfs.Path;
+import com.caucho.vfs.Vfs;
 
 
 /**
@@ -51,8 +52,9 @@ public class ResinServerConfigLibrary {
   private static final Logger log
     = Logger.getLogger(ResinServerConfigLibrary.class.getName());
   
-  public static Path file_lookup(String resource, Path pwd)
+  public static String file_lookup(String resource, String pwd)
   {
+	  
     if (resource == null || resource.trim().isEmpty()) {
       return null;
     }
@@ -61,7 +63,9 @@ public class ResinServerConfigLibrary {
       throw new ConfigException(L.l("file_lookup requires a pwd argument"));
     }
     
-    return pwd.lookup(resource);
+    Path pwdPath = Vfs.lookup(pwd);
+    
+    return pwdPath.lookup(resource).getFullPath();
   }     
     
   public static Object rvar(String var)
