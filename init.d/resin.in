@@ -28,11 +28,21 @@ export JAVA_HOME RESIN_HOME
 
 JAVA="@JAVA_EXE@"
 
+if test -z "$JAVA_EXE"; then
+  JAVA_EXE="$JAVA"
+fi
+
+if test ! -x "$JAVA_EXE"; then
+  if test -n "$JAVA_HOME"; then
+    JAVA_EXE="$JAVA_HOME/bin/java"
+  fi
+fi
+
 if test ! -x "${JAVA_EXE}"; then
   JAVA_EXE=java
 fi
 
-RESIN_EXE="/usr/bin/resinctl"
+RESIN_EXE="${RESIN_HOME}/bin/resinctl"
 
 if ! test -f "${RESIN_EXE}"; then
   RESIN_EXE="${JAVA_EXE} -jar ${RESIN_HOME}/lib/resin.jar"

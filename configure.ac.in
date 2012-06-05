@@ -1431,7 +1431,7 @@ echo "    log       : ${resin_log}"
 echo "    plugins   : ${plugins}"
 
 if test -n "${resin_init_d}"; then
-  echo "    init    : ${resin_init_d}"
+  echo "    init      : ${resin_init_d}"
 fi
 
 echo ""

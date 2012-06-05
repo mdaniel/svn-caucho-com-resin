@@ -131,25 +131,21 @@ install	:
 	  fi; \
 	fi
 	@ if test -e "$(resin_home)/bin/resinctl"; then \
-	  if test ! -x "$(resin_home)/bin/resinctl"; then \
-	    echo "Setting $(resin_home)/bin/resinctl executable."; \
-	    chmod +x $(resin_home)/bin/resinctl; \
-	    if test $$? != "0"; then \
-	      echo "WARNING: failed to set resinctl executable. Ensure $(resin_home)/bin/resinctl is writable by $$USER, or run 'make install' as root."; \
-	    fi; \
-	  fi; \
+    echo "Setting $(resin_home)/bin/resinctl executable."; \
+    chmod +x $(resin_home)/bin/resinctl; \
+    if test $$? != "0"; then \
+      echo "WARNING: failed to set resinctl executable. Ensure $(resin_home)/bin/resinctl is writable by $$USER, or run 'make install' as root."; \
+    fi; \
 	else \
 	  echo "ABORT: $(resin_home)/bin/resinctl does not exist. Resin home install may have failed."; \
 	  exit 42; \
 	fi
 	@ if test -e "$(resin_home)/bin/resin.sh"; then \
-	  if test ! -x "$(resin_home)/bin/resin.sh"; then \
-	    echo "Setting $(resin_home)/bin/resin.sh executable."; \
-	    chmod +x $(resin_home)/bin/resin.sh; \
-	    if test $$? != "0"; then \
-	      echo "WARNING: failed to set resin.sh executable. Ensure $(resin_home)/bin/resin.sh is writable by $$USER, or run 'make install' as root."; \
-	    fi; \
-	  fi; \
+    echo "Setting $(resin_home)/bin/resin.sh executable."; \
+    chmod +x $(resin_home)/bin/resin.sh; \
+    if test $$? != "0"; then \
+      echo "WARNING: failed to set resin.sh executable. Ensure $(resin_home)/bin/resin.sh is writable by $$USER, or run 'make install' as root."; \
+    fi; \
 	elif test "$(skip_check_resin_sh)" = "false"; then \
 	  echo "ABORT: $(resin_home)/bin/resin.sh does not exist. Resin home install may have failed."; \
 	  exit 42; \

@@ -38,11 +38,13 @@ print_overview_graphs();
 echo "</div>";
 echo "<div id='health-tab'>";
 
-echo "<h2>" . gettext('Health'); print_Help("Health"); echo "</h2>\n";
-
-display_health_status($g_server->SelfServer);
-
-display_health_status_graph($g_server->SelfServer);
+if (require_professional()) {
+  echo "<h2>" . gettext('Health'); print_Help("Health"); echo "</h2>\n";
+  
+  display_health_status($g_server->SelfServer);
+  
+  display_health_status_graph($g_server->SelfServer);
+}
 
 echo "</div>";
 /*
