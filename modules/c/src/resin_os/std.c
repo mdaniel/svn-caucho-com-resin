@@ -391,7 +391,7 @@ conn_close(connection_t *conn)
 
   fd = conn->fd;
   conn->fd = -1;
-
+  
   pipe0 = conn->pipe[0];
   pipe1 = conn->pipe[1];
 

@@ -260,7 +260,7 @@ Java_com_caucho_vfs_JniSocketImpl_writeNative(JNIEnv *env,
   if (! conn || conn->fd < 0 || ! j_buf) {
     return -1;
   }
-  
+
   conn->jni_env = env;
   /*
   resin_tcp_cork(conn);
@@ -286,6 +286,7 @@ Java_com_caucho_vfs_JniSocketImpl_writeNative(JNIEnv *env,
               result, errno);
       fflush(stdout);
       */
+
       return result;
     }
 
@@ -523,6 +524,10 @@ Java_com_caucho_vfs_JniSocketImpl_writeSendfileNative(JNIEnv *env,
   resin_tcp_cork(conn);
 
   sendfile_offset = 0;
+
+  if (conn->ssl_context) {
+    fprintf(stderr, "OpenSSL and sendfile are not allowed\n");
+  }
 
   result = sendfile(conn->fd, fd, &sendfile_offset, file_length);
 
@@ -1579,6 +1584,7 @@ Java_com_caucho_vfs_JniSocketImpl_nativeAcceptInit(JNIEnv *env,
   connection_t *conn = (connection_t *) (PTR) conn_fd;
   server_socket_t *ss;
   jboolean value;
+  jint result = 0;
 
   if (! conn || ! env || ! obj) {
     return -1;
@@ -1596,17 +1602,18 @@ Java_com_caucho_vfs_JniSocketImpl_nativeAcceptInit(JNIEnv *env,
   }
 
   conn->ops->init(conn);
-
   socket_fill_address(env, obj, ss, conn, local_addr, remote_addr);
 
   if (length <= 0) {
     return 0;
   }
 
-  return Java_com_caucho_vfs_JniSocketImpl_readNative(env,
-                                                      obj, conn_fd,
-                                                      buf, offset, length,
-                                                      -1);
+  result =  Java_com_caucho_vfs_JniSocketImpl_readNative(env,
+                                                         obj, conn_fd,
+                                                         buf, offset, length,
+                                                         -1);
+
+  return result;
 }
 
 
@@ -1667,6 +1674,7 @@ Java_com_caucho_vfs_JniSocketImpl_nativeConnect(JNIEnv *env,
   }
 
   conn->fd = sock;
+
   /*
   conn->socket_timeout = ss->conn_socket_timeout;
   */

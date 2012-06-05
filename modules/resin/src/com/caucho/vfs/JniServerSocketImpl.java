@@ -51,6 +51,8 @@ public class JniServerSocketImpl extends QServerSocket {
   private String _host;
   
   private long _socketTimeout = 120 * 1000L;
+  
+  private boolean _isSSL;
 
   /**
    * Creates the new server socket.
@@ -97,9 +99,19 @@ public class JniServerSocketImpl extends QServerSocket {
       return null;
   }
   
-  public static boolean isSendfileEnabled()
+  public static boolean isSendfileEnabledStatic()
   {
     return _isSendfileEnabled;
+  }
+  
+  public void setSSL(boolean isSSL)
+  {
+    _isSSL = isSSL;
+  }
+  
+  public boolean isSendfileEnabled()
+  {
+    return isSendfileEnabledStatic() && ! _isSSL;
   }
   
   public static boolean isTcpCorkEnabled()
@@ -251,7 +263,7 @@ public class JniServerSocketImpl extends QServerSocket {
     if (_fd == 0)
       throw new IOException("accept from closed socket");
 
-    return jniSocket.accept(_fd, _socketTimeout);
+    return jniSocket.accept(this, _fd, _socketTimeout);
   }
 
   /**

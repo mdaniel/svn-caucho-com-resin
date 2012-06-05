@@ -33,6 +33,7 @@ public final class JniSocketImpl extends QSocket {
 
   private static final JniTroubleshoot _jniTroubleshoot;
 
+  private JniServerSocketImpl _ss;
   private long _socketFd;
   private JniStream _stream;
 
@@ -117,8 +118,11 @@ public final class JniSocketImpl extends QSocket {
     }
   }
 
-  boolean accept(long serverSocketFd, long socketTimeout)
+  boolean accept(JniServerSocketImpl ss,
+                 long serverSocketFd, 
+                 long socketTimeout)
   {
+    _ss = ss;
     _localName = null;
     _localAddr = null;
     _localAddrLength = 0;
@@ -171,7 +175,7 @@ public final class JniSocketImpl extends QSocket {
   public int getNativeFd()
   {
     int fd = getNativeFd(_socketFd);
-
+    
     return fd;
   }
 
@@ -539,7 +543,7 @@ public final class JniSocketImpl extends QSocket {
       throw new ClientDisconnectException(L.l("{0}: request-timeout write",
                                               getRemoteAddress()));
     }
-  
+
     synchronized (_writeLock) {
       long now = CurrentTime.getCurrentTimeActual();
       long expires = _socketTimeout + now;
@@ -558,7 +562,8 @@ public final class JniSocketImpl extends QSocket {
   
   public boolean isSendfileEnabled()
   {
-    return JniServerSocketImpl.isSendfileEnabled();
+    return (JniServerSocketImpl.isSendfileEnabledStatic()
+            && _ss.isSendfileEnabled());
   }
 
   public int writeSendfile(byte []buffer, int offset, int length,
@@ -566,7 +571,7 @@ public final class JniSocketImpl extends QSocket {
     throws IOException
   {
     int result;
-    
+Thread.dumpStack();
     long requestExpireTime = _requestExpireTime;
     
     if (requestExpireTime > 0 && requestExpireTime < CurrentTime.getCurrentTime()) {
@@ -760,6 +765,7 @@ public final class JniSocketImpl extends QSocket {
   public void forceShutdown()
   {
     // can't be locked because of shutdown
+
     nativeCloseFd(_socketFd);
   }
 
@@ -773,10 +779,13 @@ public final class JniSocketImpl extends QSocket {
     if (_isClosed.getAndSet(true))
       return;
     
+    _ss = null;
+    
     if (_stream != null)
       _stream.close();
 
     // XXX: can't be locked because of shutdown
+
     nativeClose(_socketFd);
   }
 
@@ -888,10 +897,11 @@ public final class JniSocketImpl extends QSocket {
 
   native void nativeFree(long fd);
 
+  @Override
   public String toString()
   {
     return ("JniSocketImpl$" + System.identityHashCode(this)
-            + "[" + _socketFd + ",fd=" + getNativeFd(_socketFd) + "]");
+            + "[" + Long.toHexString(_socketFd) + ",fd=" + getNativeFd(_socketFd) + "]");
   }
 
   static {
