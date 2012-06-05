@@ -512,7 +512,6 @@
   
   <health:MeterGraphPage>
     <name>Snapshot</name>
-    <period>1h</period>
     <columns>3</columns>
       
     <!-- row 1 -->
