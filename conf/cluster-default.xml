@@ -88,8 +88,8 @@
       <resin:when test="${openssl_file != null}">
         <http address="${http_address?:'*'}" port="${https}">
           <openssl>
-            <certificate-file>${lookupResource(openssl_file,__DIR__)}</certificate-file>
-            <certificate-key-file>${lookupResource(openssl_key, __DIR__)}</certificate-key-file>
+            <certificate-file>${file_lookup(openssl_file,__DIR__)}</certificate-file>
+            <certificate-key-file>${file_lookup(openssl_key, __DIR__)}</certificate-key-file>
             <password>
               <resin:Password>${openssl_password}</resin:Password>
             </password>
