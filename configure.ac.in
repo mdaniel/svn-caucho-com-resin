@@ -1241,6 +1241,8 @@ SSL_OBJ=ssl_stub.o
 
 if test "${ENABLE_SSL}" == false; then
   echo "Openssl is not enabled"
+elif test -n "${OPENSSL_INCLUDE}"; then
+  echo "Can't find OpenSSL include '${OPENSSL_INCLUDE}'"
 elif test ! -r "${OPENSSL_INCLUDE}/openssl/ssl23.h"; then
   AC_MSG_ERROR([Can't find valid OpenSSL include in ${OPENSSL_INCLUDE}])
 else
