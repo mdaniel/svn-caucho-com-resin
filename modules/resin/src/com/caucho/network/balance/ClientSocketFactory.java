@@ -588,8 +588,10 @@ public class ClientSocketFactory implements ClientSocketFactoryApi
    */
   public boolean canOpen()
   {
-    if (getIdleCount() > 0)
+    if (getIdleCount() > 0) {
       return true;
+    }
+    
     State state = _state;
 
     if (state == State.ACTIVE)
@@ -955,6 +957,7 @@ public class ClientSocketFactory implements ClientSocketFactoryApi
   public ClientSocket open()
   {
     State state = _state;
+    
     if (! state.isInit())
       return null;
 
@@ -1031,6 +1034,7 @@ public class ClientSocketFactory implements ClientSocketFactoryApi
     _startingCount.incrementAndGet();
 
     State state = _state;
+    
     if (! state.isInit()) {
       _startingCount.decrementAndGet();
       
@@ -1039,6 +1043,10 @@ public class ClientSocketFactory implements ClientSocketFactoryApi
       log.log(Level.WARNING, e.toString(), e);
 
       throw e;
+    }
+    
+    if (getPort() <= 0) {
+      return null;
     }
 
     try {
