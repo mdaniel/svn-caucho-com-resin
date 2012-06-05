@@ -402,12 +402,15 @@ public class NetworkClusterSystem extends AbstractResinSubSystem
                                     listener.getSocketTimeout()));
     }
 
+    // server/26r0
+    /*
     if (server.getLoadBalanceSocketTimeout() <= listener.getSocketTimeout()) {
       throw new ConfigException(L.l("{0}: load-balance-socket-timeout {1} must be greater than socket-timeout {2}",
                                     server, 
                                     server.getLoadBalanceSocketTimeout(),
                                     listener.getSocketTimeout()));
     }
+    */
 
     if (listener.getKeepaliveTimeout() <= server.getLoadBalanceIdleTime()) {
       throw new ConfigException(L.l("{0}: load-balance-idle-time {1} must be less than keepalive-timeout {2}",
