@@ -535,18 +535,21 @@ class WatchdogClient
     list.add("-Dresin.home=" + resinHome.getFullPath());
     list.add("-Dresin.root=" + resinRoot.getFullPath());
     
+    /*
     String licenseDir = System.getProperty("resin.license.dir");
     if (licenseDir == null) {
-    	 Path parent = getConfig().getResinConf().getParent();
-    	 Path licenses = parent.lookup("licenses");
-    	 if ( licenses.exists() ) {
-    		 licenseDir = licenses.getFullPath();
-    	 }
+      Path parent = getConfig().getResinConf().getParent();
+      Path licenses = parent.lookup("licenses");
+      
+      if (licenses.exists()) {
+        licenseDir = licenses.getFullPath();
+      }
     }
     
     if ( licenseDir != null ) {
         list.add("-Dresin.license.dir=" + licenseDir);
     }
+    */
     
     for (int i = 0; i < argv.length; i++) {
       if (argv[i].startsWith("-Djava.class.path=")) {
