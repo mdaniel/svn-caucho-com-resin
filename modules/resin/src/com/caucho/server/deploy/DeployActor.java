@@ -433,6 +433,9 @@ public class DeployActor
                                              tag));
     controller.toStop();
 
+    //windows WEB-INF/lib/*.jar release for eclipse-plugin's web-app-stop
+    System.gc();
+
     return controller.getState();
   }
 
