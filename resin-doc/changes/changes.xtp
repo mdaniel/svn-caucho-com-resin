@@ -12,6 +12,8 @@
 
 <s2 title="4.0.28 - snapshot">
 <ul>
+<li>install: --disable-ssl does not disable SSL (#5090, rep by R. Aughenbaugh)</li>
+<li>install: --disable-jni causes make to fail (#5094, rep by R. Aughenbaugh)</li>
 <li>load-balance: bounds check on hmux load-balance (#5058, rep by Travis Romney)</li>
 <li>load-balance: improve error message when open source configures a cluster</li>
 <li>logging: add formatting for entering/exiting (#5071)</li>
