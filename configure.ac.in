@@ -177,9 +177,9 @@ else
     if test -f "$JAVA_BIN/include/jni.h"; then
       JAVA_HOME=$JAVA_BIN
     elif test -f "$JAVA_BIN/../include/jni.h"; then
-      JAVA_HOME=`cd $JAVA_BIN/..; pwd`
+      JAVA_HOME="$JAVA_BIN"
     elif test -f "$JAVA_BIN/../../include/jni.h"; then
-      JAVA_HOME=`cd $JAVA_BIN/../..; pwd`
+      JAVA_HOME="$JAVA_BIN/../.."
     elif test -f "/System/Library/Frameworks/JavaVM.framework"; then
       JAVA_HOME="/System/Library/Frameworks/JavaVM.framework"
     elif test -d "/etc/alternatives/java_sdk"; then
