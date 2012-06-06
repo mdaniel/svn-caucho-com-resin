@@ -1406,7 +1406,6 @@ modules/c/src/Makefile
 modules/c/src/common/Makefile
 modules/c/src/apache2/Makefile
 modules/c/src/resin_os/Makefile
-modules/c/src/resinssl/Makefile
 init.d/resin
 bin/resinctl
 ], [])
