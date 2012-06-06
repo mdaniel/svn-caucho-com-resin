@@ -190,6 +190,10 @@ else
       JAVA_HOME="/usr/lib/jvm/java-6-openjdk"
     elif test -f "/usr/lib/jvm/java-6-sun/include/jni.h"; then
       JAVA_HOME="/usr/lib/jvm/java-6-sun"
+    elif test -f "/usr/lib/jvm/java-openjdk/include/jni.h"; then
+      JAVA_HOME="/usr/lib/jvm/java-openjdk"
+    elif test -f "/usr/lib/jvm/java/include/jni.h"; then
+      JAVA_HOME="/usr/lib/jvm/java"
     elif test -d "/usr/java"; then
       JAVA_HOME=/usr/java
     else
