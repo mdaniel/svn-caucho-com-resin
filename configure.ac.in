@@ -1413,7 +1413,6 @@ bin/resinctl
 
 if test -r "modules/c/src/resin/mmap_file.c"; then
   AC_OUTPUT([
-    modules/c/src/Makefile
     modules/c/src/resin/Makefile
     modules/c/src/resinssl/Makefile
   ])
