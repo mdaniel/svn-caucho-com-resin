@@ -113,6 +113,8 @@ public class Resin
   private Path _resinHome;
   private Path _resinConf;
   
+  private Path _confDirectory;
+
   private Path _rootDirectory;
   private Path _resinDataDirectory;
   private Path _serverDataDirectory;
@@ -201,6 +203,9 @@ public class Resin
     _resinHome = args.getResinHome();
     
     _resinConf = args.getResinConfPath();
+    
+    if (_resinConf != null)
+      _confDirectory = _resinConf.getParent();
     
     _rootDirectory = args.getRootDirectory();
     _resinDataDirectory = args.getDataDirectory();
@@ -330,6 +335,11 @@ public class Resin
   public Path getResinConf()
   {
     return _resinConf;
+  }
+  
+  public Path getConfDirectory()
+  {
+    return _confDirectory;
   }
 
   protected String getResinName()

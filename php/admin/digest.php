@@ -80,7 +80,9 @@ is <b><i><?= $digest ?></i></b>
 
 <h3><?= gettext('Don\'t have a login yet?')?></h3>
 <p>
-<?= gettext('To access the Resin administration console, you\'ll need to generate a configuration file containing your username and password. Complete the form below to create a configuration file automatically with your login information. The next page will provide you instructions to install the configuration file.')?>
+<?= gettext('To access the Resin administration console, you\'ll need to generate a configuration file containing your username and password.')?><br/>
+<br/>
+<?= gettext('Complete the form below to create a configuration file automatically with your login information. The next page will provide you instructions to install the configuration file.')?>
 </p>
 
 <?php
@@ -93,7 +95,7 @@ is <b><i><?= $digest ?></i></b>
   if (! empty($validation_error) ) {
 ?>
 
-<tr><td colspan='2' class='error'><?= $validation_error ?></td></tr>
+<tr><td></td><td class='error'><?= $validation_error ?></td></tr>
 
 <?php
   }

@@ -1234,3 +1234,8 @@ table.data-detail {
   font-weight : bold;
   background : #f99;
 }
+
+.error {
+	font-weight : bold;
+	color: red;
+}

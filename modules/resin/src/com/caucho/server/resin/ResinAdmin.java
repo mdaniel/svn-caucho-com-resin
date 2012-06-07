@@ -114,6 +114,12 @@ public class ResinAdmin extends AbstractManagedObject
   }
 
   @Override
+  public String getConfigDirectory()
+  {
+    return _resin.getConfDirectory().getNativePath();
+  }
+
+  @Override
   public String getResinHome()
   {
     return _resin.getResinHome().getNativePath();
