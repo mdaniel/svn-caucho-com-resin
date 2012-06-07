@@ -140,5 +140,7 @@
   </ItemGroup>
   <ItemGroup>
     <None Include="app.config" />
+    <None Include="resinssl.vcproj" />
+    <None Include="resinssl_64.vcproj" />
   </ItemGroup>
 </Project>
