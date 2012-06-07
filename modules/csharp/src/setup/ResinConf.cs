@@ -265,6 +265,9 @@ namespace Caucho
         file = path;
       }
 
+      if (! File.Exists(file))
+        return;
+
       TextReader reader = null;
 
       try {
