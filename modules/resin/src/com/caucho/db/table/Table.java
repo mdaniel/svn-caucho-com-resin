@@ -695,7 +695,12 @@ public class Table extends BlockStore {
       
       return true;
     } catch (Exception e) {
-      log.log(Level.WARNING, e.toString(), e);
+      if (log.isLoggable(Level.FINER)) {
+        log.log(Level.FINER, e.toString(), e);
+      }
+      else { 
+        log.warning(e.toString());
+      }
     }
     
     return false;
