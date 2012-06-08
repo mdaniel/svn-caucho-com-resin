@@ -1227,6 +1227,7 @@ Java_com_caucho_vfs_JniServerSocketImpl_nativeOpenPort(JNIEnv *env,
   ss->conn_socket_timeout = 65000;
 
   ss->accept = &std_accept;
+  ss->init = &std_init;
   ss->close = &std_close_ss;
 
 #ifdef WIN32
@@ -1608,10 +1609,11 @@ Java_com_caucho_vfs_JniSocketImpl_nativeAcceptInit(JNIEnv *env,
     return 0;
   }
 
-  result =  Java_com_caucho_vfs_JniSocketImpl_readNative(env,
-                                                         obj, conn_fd,
-                                                         buf, offset, length,
-                                                         -1);
+  result = Java_com_caucho_vfs_JniSocketImpl_readNative(env,
+                                                        obj, conn_fd,
+                                                        buf, offset, 
+                                                        length,
+                                                        -1);
 
   return result;
 }
