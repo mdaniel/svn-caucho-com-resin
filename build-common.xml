@@ -1280,6 +1280,12 @@
     <exec executable="make"
           dir="build-debian/${shortproduct}-${version}">
       <env key="DESTDIR" value="${basedir}/dist-debian"/>
+      <arg value="rpm-dist"/>
+    </exec>
+    
+    <exec executable="make"
+          dir="build-debian/${shortproduct}-${version}">
+      <env key="DESTDIR" value="${basedir}/dist-debian"/>
       <arg value="install"/>
     </exec>
           
@@ -1349,7 +1355,7 @@
     -->
     
     <exec executable="fakeroot">
-      <arg value="debian"/>
+      <arg value="dpkg"/>
       <arg value="-b"/>
       <arg value="dist-debian"/>
       <arg value="${dist}/debian/dists/${debian.stability}/${debian.component}/binary-${debian.architecture}/${shortproduct}_${version}-${debian.architecture}.deb"/>
