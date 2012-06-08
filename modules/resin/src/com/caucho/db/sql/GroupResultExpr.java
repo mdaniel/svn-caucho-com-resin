@@ -52,8 +52,10 @@ public class GroupResultExpr extends Expr implements GroupExpr {
     _index = index;
     _expr = expr;
 
+    /*
     if (expr instanceof GroupResultExpr)
       Thread.dumpStack();
+      */
 
     if (_expr.isLong())
       _type = LONG_VALUE;

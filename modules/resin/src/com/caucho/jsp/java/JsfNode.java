@@ -42,7 +42,7 @@ abstract public class JsfNode extends JspContainerNode {
 
   public JsfNode()
   {
-    Thread.dumpStack();
+    // Thread.dumpStack();
   }
 
   /**

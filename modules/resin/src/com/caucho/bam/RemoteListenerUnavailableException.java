@@ -50,7 +50,6 @@ public class RemoteListenerUnavailableException
   public RemoteListenerUnavailableException(Throwable e)
   {
     super(e.toString(), e);
-    Thread.dumpStack();
   }
 
   public RemoteListenerUnavailableException(String msg, Throwable e)

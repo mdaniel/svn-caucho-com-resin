@@ -571,7 +571,7 @@ public final class JniSocketImpl extends QSocket {
     throws IOException
   {
     int result;
-Thread.dumpStack();
+
     long requestExpireTime = _requestExpireTime;
     
     if (requestExpireTime > 0 && requestExpireTime < CurrentTime.getCurrentTime()) {

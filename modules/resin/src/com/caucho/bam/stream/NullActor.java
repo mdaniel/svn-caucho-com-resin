@@ -45,7 +45,6 @@ public class NullActor extends NullMessageStream implements Actor, ActorHolder
   public NullActor()
   {
     this("null");
-    Thread.dumpStack();
   }
   
   public NullActor(String address)

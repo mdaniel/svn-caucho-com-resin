@@ -206,7 +206,6 @@ public abstract class AbstractGenerator {
   public void setClassDir(Path workPath)
   {
     _workPath = workPath;
-    Thread.dumpStack();
   }
   
   /**
