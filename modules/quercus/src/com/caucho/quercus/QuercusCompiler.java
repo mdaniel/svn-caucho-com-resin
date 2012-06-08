@@ -129,14 +129,14 @@ public class QuercusCompiler
 
   private static void printUsage()
   {
-    System.out.println("usage: java -Xmx1024m " + QuercusCompiler.class.getName() + " [flags] php1 php2 ...");
+    System.out.println("usage: java " + QuercusCompiler.class.getName() + " [flags] php1 php2 ...");
     System.out.println(" -output-dir       : the directory to use for output (default /tmp/<user>/WEB-INF/classes).");
     System.out.println(" -app-dir          : public root directory (/) of the local files (default common directory).");
     System.out.println(" -compiler         : sets the javac.");
     System.out.println(" -script-encoding  : the encoding of the source files (default ISO-8859-1).");
     System.out.println(" -require-source   : whether or not the source files are required when deployed (default false).");
     System.out.println(" -include-pattern  : compile files that match this Java regexp Pattern (default \".*\\.php$\").");
-    System.out.println(" -verbose          : sets logging level to INFO.");
+    System.out.println(" -verbose          : output status messages to stdout.");
     System.out.println(" -keep-java-source : keeps .java files (default false).");
   }
 
