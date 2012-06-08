@@ -8,8 +8,6 @@ package com.caucho.quercus;
 
 import java.io.IOException;
 import java.util.ArrayList;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 import java.util.regex.Pattern;
 
 import com.caucho.java.JavaCompilerUtil;
@@ -24,9 +22,6 @@ import com.caucho.vfs.Vfs;
 
 public class QuercusCompiler
 {
-  private final Logger log
-    = Logger.getLogger(QuercusCompiler.class.getName());
-
   protected static final L10N L = new L10N(QuercusCompiler.class);
 
   private ProQuercus _quercus;
@@ -38,8 +33,7 @@ public class QuercusCompiler
   private Pattern _includePattern = Pattern.compile(".*\\.php$");
 
   private boolean _isKeepJavaSource;
-
-  private Level _loggingLevel = Level.FINER;
+  private boolean _isVerbose;
 
   public QuercusCompiler()
   {
@@ -107,9 +101,9 @@ public class QuercusCompiler
     return _pathList;
   }
 
-  public void setVerbose()
+  public void setVerbose(boolean isVerbose)
   {
-    _loggingLevel = Level.INFO;
+    _isVerbose = isVerbose;
   }
 
   public static void main(String []args)
@@ -149,32 +143,91 @@ public class QuercusCompiler
   public ArrayList<Path> compile()
     throws IOException
   {
-    log.log(_loggingLevel, L.l("Public root dir (/) is '{0}'", _quercus.getPwd()));
-
     long start = System.currentTimeMillis();
 
-    if (log.isLoggable(_loggingLevel)) {
-      log.log(_loggingLevel, L.l("Compiling PHP files matching Java Pattern '{0}' to {1}",
-                                 _includePattern,
-                                 _workDir));
+    /*
+    if (_isVerbose) {
+      System.out.println(L.l("Public root dir (/) of compiled PHP files shall be '{0}'.",
+                             _quercus.getPwd()));
     }
+    */
 
-    ArrayList<Path> brokenCompilePaths = new ArrayList<Path>();
+    ArrayList<Path> compilePathList = new ArrayList<Path>();
 
     for (String uri : _pathList) {
       Path path = Vfs.lookup(uri);
 
-      compile(brokenCompilePaths, path);
+      if (_isVerbose) {
+        System.out.println(L.l("Scanning for PHP files in {0} matching regexp \"{1}\".",
+                               path, _includePattern));
+      }
+
+      scanPath(compilePathList, path);
+    }
+
+    if (_isVerbose) {
+      System.out.println(L.l("Compiling {0} PHP files to {1}.",
+                             compilePathList.size(), _workDir));
+    }
+
+    ArrayList<Path> brokenCompilePaths = new ArrayList<Path>();
+
+    int size = compilePathList.size();
+    int chunkDivisor = getChunkDivisor(size);
+    int chunkSize = size / chunkDivisor;
+
+    for (int i = 0; i < size; i++) {
+      Path path = compilePathList.get(i);
+
+      try {
+        compileFile(path);
+      }
+      catch (Exception e) {
+        /*
+        if (_isVerbose) {
+          System.out.println(L.l("Cannot compile {0}: {1} (page will be interpreted instead).",
+                                 path, e.getMessage()));
+        }
+        */
+
+        brokenCompilePaths.add(path);
+      }
+
+      if (_isVerbose) {
+        if ((i + 1) % chunkSize == 0) {
+          /*
+          int percent = (int) (((double) (i + 1)) / size * 100);
+
+          System.out.println(L.l("{0}% Compiled {1} PHP files.",
+                                 percent, i + 1));
+          */
+
+          System.out.println(L.l("Compiled {0} PHP files.", i + 1));
+        }
+      }
     }
 
     long end = System.currentTimeMillis();
 
-    if (log.isLoggable(_loggingLevel)) {
-      log.log(_loggingLevel, L.l("Compilation finished in {0} ms.",
-                                 (end - start)));
+    if (_isVerbose) {
+      System.out.println(L.l("PHP compilation finished in {0} ms.",
+                              end - start));
     }
 
     return brokenCompilePaths;
+  }
+
+  private int getChunkDivisor(int size)
+  {
+    if (size < 100) {
+      return 4;
+    }
+    else if (size < 500) {
+      return 10;
+    }
+    else {
+      return 20;
+    }
   }
 
   private static Path getCommonRoot(ArrayList<String> _pathList)
@@ -295,7 +348,7 @@ public class QuercusCompiler
         i += 2;
       }
       else if (args[i].equals("-verbose")) {
-        compiler.setVerbose();
+        compiler.setVerbose(true);
 
         i++;
       }
@@ -330,7 +383,7 @@ public class QuercusCompiler
     }
   }
 
-  public void compile(ArrayList<Path> brokenCompilePaths, Path path)
+  private void scanPath(ArrayList<Path> pathList, Path path)
     throws IOException
   {
     if (path.isDirectory()) {
@@ -339,7 +392,7 @@ public class QuercusCompiler
       for (int i = 0; i < list.length; i++) {
         Path subPath = path.lookup(list[i]);
 
-        compile(brokenCompilePaths, subPath);
+        scanPath(pathList, subPath);
       }
     }
     else {
@@ -347,17 +400,7 @@ public class QuercusCompiler
         return;
       }
 
-      try {
-        compileFile(path);
-      }
-      catch (Exception e) {
-        if (log.isLoggable(_loggingLevel)) {
-          log.log(_loggingLevel, L.l("Cannot compile {0} : {1}",
-                                     path, e.getMessage()));
-        }
-
-        brokenCompilePaths.add(path);
-      }
+      pathList.add(path);
     }
   }
 
@@ -419,7 +462,7 @@ public class QuercusCompiler
   /**
    * Returns the relative path.
    */
-  public String getRelativePath(Path path)
+  private String getRelativePath(Path path)
   {
     if (path == null)
       return "tmp.eval";
