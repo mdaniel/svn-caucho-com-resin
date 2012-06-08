@@ -1286,9 +1286,11 @@
   </target>
 
   <target name="debian-clean" depends="init,debian-perm">
+    <!--
     <exec executable="${basedir}/debian-perm">
       <arg value="-r"/>
     </exec>
+    -->
     
     <delete dir="dist-debian"/>
     <delete dir="build-debian"/>
@@ -1329,14 +1331,25 @@
 
     <chmod perm="755" file="dist-debian/DEBIAN/prerm"/>
 
+    <!--
     <exec executable="${basedir}/debian-perm"/>
+    -->
 
     <delete dir="${dist}/debian/dists/${debian.stability}/${debian.component}/binary-${debian.architecture}"
             failonerror="false"/>
 
     <mkdir dir="${dist}/debian/dists/${debian.stability}/${debian.component}/binary-${debian.architecture}"/>
-        
+
+    <!--
     <exec executable="dpkg">
+      <arg value="-b"/>
+      <arg value="dist-debian"/>
+      <arg value="${dist}/debian/dists/${debian.stability}/${debian.component}/binary-${debian.architecture}/${shortproduct}_${version}-${debian.architecture}.deb"/>
+    </exec>
+    -->
+    
+    <exec executable="fakeroot">
+      <arg value="debian"/>
       <arg value="-b"/>
       <arg value="dist-debian"/>
       <arg value="${dist}/debian/dists/${debian.stability}/${debian.component}/binary-${debian.architecture}/${shortproduct}_${version}-${debian.architecture}.deb"/>

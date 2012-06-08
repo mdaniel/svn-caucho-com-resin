@@ -1,5 +1,11 @@
 #!/bin/sh -e
 
+groupadd resin
+useradd -D -d /nonexistent -s /bin/false -M resin
+
+chown -R resin.resin /var/resin
+chown -R resin.resin /var/log/resin
+
 if [ -x "/etc/init.d/resin" ]; then
 	update-rc.d resin defaults 90 10 >/dev/null
 	if [ -x "`which invoke-rc.d 2>/dev/null`" ]; then
