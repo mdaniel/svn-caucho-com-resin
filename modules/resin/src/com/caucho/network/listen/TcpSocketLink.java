@@ -1479,7 +1479,6 @@ public class TcpSocketLink extends AbstractSocketLink
     // faster performance by waiting for the read
     readLength = 0;
     
-    
     int len = _socket.acceptInitialRead(buffer, 0, readLength);
     
     if (len > 0) {

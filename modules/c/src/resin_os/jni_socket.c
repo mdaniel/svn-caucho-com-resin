@@ -1595,7 +1595,7 @@ Java_com_caucho_vfs_JniSocketImpl_nativeAcceptInit(JNIEnv *env,
 
   if (! ss) {
     resin_printf_exception(env,
-                           "java/lang/IllegalStateException",
+                           "java/io/IOException",
                            "%s:%d server socket is not available in nativeAccept\n",
                            __FILE__, __LINE__);
     
