@@ -19,7 +19,7 @@ try {
 if (! require_professional()) {
   return;
 } else if (! isset($profile)) {
-  echo "<div class=\"req-pro-message\">This feature compiles JNI.</div>\n";
+  echo "<div class=\"req-pro-message\">This feature requires compiled JNI native libraries.</div>\n";
 }
 else  {
   if ($_POST['action'] == 'stop') {
