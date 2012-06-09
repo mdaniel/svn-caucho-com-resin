@@ -29,6 +29,9 @@
 
 package com.caucho.quercus.servlet;
 
+import java.lang.reflect.Constructor;
+import java.util.logging.Logger;
+
 import javax.servlet.ServletException;
 
 /**
@@ -37,6 +40,9 @@ import javax.servlet.ServletException;
 @SuppressWarnings("serial")
 public class GoogleQuercusServlet extends QuercusServlet
 {
+  private static final Logger log
+    = Logger.getLogger(GoogleQuercusServlet.class.getName());
+  
   private String _gsBucket;
 
   public GoogleQuercusServlet()
@@ -46,7 +52,24 @@ public class GoogleQuercusServlet extends QuercusServlet
   @Override
   protected QuercusServletImpl getQuercusServlet(boolean isResin)
   {
-    QuercusServletImpl impl = new ProGoogleQuercusServlet(_gsBucket);
+    QuercusServletImpl impl = null;
+
+    if (isResin) {
+      try {
+        Class<?> cls = Class.forName("com.caucho.quercus.servlet.ProGoogleQuercusServlet");
+        
+        Constructor<?> ctor = cls.getConstructor(String.class);
+
+        impl = (QuercusServletImpl) ctor.newInstance(_gsBucket);
+      }
+      catch (Exception e) {
+        log.finest(e.getMessage());
+      }
+    }
+
+    if (impl == null) {
+      impl = new GoogleQuercusServletImpl(_gsBucket);
+    }
 
     return impl;
   }

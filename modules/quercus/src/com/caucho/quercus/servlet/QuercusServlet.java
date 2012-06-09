@@ -123,7 +123,18 @@ public class QuercusServlet
     }
 
     if (impl == null) {
-      impl = new ProQuercusServlet();
+      try {
+        Class<?> cls = Class.forName("com.caucho.quercus.servlet.ProQuercusServlet");
+
+        impl = (QuercusServletImpl) cls.newInstance();
+      }
+      catch (Exception e) {
+        log.finest(e.getMessage());
+      }
+    }
+
+    if (impl == null) {
+      impl = new QuercusServletImpl();
     }
 
     return impl;

@@ -6,10 +6,6 @@
 
 package com.caucho.quercus.expr;
 
-import com.caucho.quercus.gen.PhpWriter;
-
-import java.io.IOException;
-
 /**
  * Analyzed types of expressions
  */

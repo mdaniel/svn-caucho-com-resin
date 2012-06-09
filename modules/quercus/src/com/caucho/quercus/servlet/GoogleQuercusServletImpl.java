@@ -50,7 +50,36 @@ public class GoogleQuercusServletImpl extends QuercusServletImpl
   private static final L10N L = new L10N(GoogleQuercusServletImpl.class);
   private static final Logger log
     = Logger.getLogger(GoogleQuercusServletImpl.class.getName());
+  
+  private final String _gsBucket;
 
+  public GoogleQuercusServletImpl(String gsBucket)
+  {
+    _gsBucket = gsBucket;
+  }
+
+  /**
+   * Returns the Quercus instance.
+   */
+  @Override
+  protected QuercusContext getQuercus()
+  {
+    if (_quercus == null) {
+      _quercus = createQuercus();
+
+      if (_gsBucket != null) {
+        _quercus.setIni("google.cloud_storage_bucket", _gsBucket);
+      }
+    }
+
+    return _quercus;
+  }
+  
+  protected QuercusContext createQuercus()
+  {
+    return new GoogleQuercus();
+  }
+  
   @Override
   protected void handleThrowable(HttpServletResponse response, Throwable e)
     throws IOException, ServletException
@@ -61,19 +90,6 @@ public class GoogleQuercusServletImpl extends QuercusServletImpl
     WriteStream out = Vfs.openWrite(os);
     out.println(e);
     out.close();
-  }
-
-  /**
-   * Returns the Quercus instance.
-   */
-  @Override
-  protected QuercusContext getQuercus()
-  {
-    if (_quercus == null) {
-      _quercus = new GoogleQuercus();
-    }
-
-    return _quercus;
   }
 }
 
