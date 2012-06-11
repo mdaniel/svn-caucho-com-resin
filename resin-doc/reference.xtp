@@ -6075,7 +6075,7 @@ In resin.xml with the javac configuration option:
 </tr>
 <tr>
   <td>compiler</td>
-  <td>the compiler name: eclipse, groovyc, internal, or a command-line</td>
+  <td>the compiler name: eclipse, internal, or a command-line</td>
   <td></td>
 </tr>
 <tr>

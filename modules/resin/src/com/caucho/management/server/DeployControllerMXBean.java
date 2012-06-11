@@ -75,6 +75,12 @@ public interface DeployControllerMXBean extends ManagedObjectMXBean
   @Units("milliseconds")
   public long getRedeployCheckInterval();
   
+  /**
+   * Returns the classpath
+   */
+  @Description("The classpath as seen by this controller")
+  public String []getClassPath();
+  
   //
   // Repository
   //

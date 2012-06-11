@@ -612,10 +612,11 @@ class WatchdogManager implements AlarmListener {
     synchronized (_watchdogMap) {
       WatchdogChild server = _watchdogMap.get(serverId);
 
-      if (server != null)
-        server.restart();
-      else
-        startServer(serverId, argv);
+      if (server != null) {
+        server.stop();
+      }
+
+      startServer(serverId, argv);
     }
   }
 

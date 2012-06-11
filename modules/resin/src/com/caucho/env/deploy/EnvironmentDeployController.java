@@ -45,6 +45,7 @@ import com.caucho.config.program.ConfigProgram;
 import com.caucho.config.types.PathBuilder;
 import com.caucho.env.repository.RepositoryTagEntry;
 import com.caucho.jmx.Jmx;
+import com.caucho.loader.DynamicClassLoader;
 import com.caucho.loader.Environment;
 import com.caucho.loader.EnvironmentClassLoader;
 import com.caucho.loader.EnvironmentListener;
@@ -547,6 +548,34 @@ abstract public class
     }
     
     return map;
+  }
+  
+  public String []getClassPath()
+  {
+    I instance = getDeployInstance();
+    
+    if (instance == null)
+      return null;
+    
+    ClassLoader loader = instance.getClassLoader();
+    
+    if (! (loader instanceof DynamicClassLoader)) {
+      log.finer(this + " " + loader + " is not a DynamicClassLoader");
+      
+      return null;
+    }
+
+    DynamicClassLoader dynLoader = (DynamicClassLoader) loader;
+    
+    ArrayList<String> classPathList = new ArrayList<String>();
+    
+    dynLoader.buildClassPath(classPathList);
+    
+    String []classPath = new String[classPathList.size()];
+    
+    classPathList.toArray(classPath);
+    
+    return classPath;
   }
 
   @Override

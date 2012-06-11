@@ -152,6 +152,12 @@ abstract public class DeployControllerAdmin<C extends EnvironmentDeployControlle
     return getController().getRepositoryMetaData();
   }
   
+  @Override
+  public String []getClassPath()
+  {
+    return getController().getClassPath();
+  }
+  
   //
   // Lifecycle
   //

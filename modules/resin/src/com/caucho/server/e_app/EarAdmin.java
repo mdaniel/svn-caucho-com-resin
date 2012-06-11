@@ -45,6 +45,7 @@ public class EarAdmin
     _eAppController = earDeployController;
   }
 
+  @Override
   public String getClientRefs()
   {
     EnterpriseApplication eApp = _eAppController.getDeployInstance();

@@ -111,6 +111,7 @@ public class ResinEmbed
   private Lifecycle _lifecycle = new Lifecycle();
   private boolean _isConfig;
   private boolean _isDevelopmentMode;
+  private boolean _isIgnoreClientDisconnect;
 
   /**
    * Creates a new resin server.
@@ -264,6 +265,11 @@ public class ResinEmbed
   {
     _isDevelopmentMode = isDevelopment;
   }
+  
+  public void setIgnoreClientDisconnect(boolean isIgnore)
+  {
+    _isIgnoreClientDisconnect = isIgnore;
+  }
 
   /**
    * Initialize the Resin environment
@@ -320,6 +326,7 @@ public class ResinEmbed
         _server.setServerHeader(_serverHeader);
       
       _server.setDevelopmentModeErrorPage(_isDevelopmentMode);
+      _server.setIgnoreClientDisconnect(_isIgnoreClientDisconnect);
 
       for (BeanEmbed beanEmbed : _beanList) {
         beanEmbed.configure();
