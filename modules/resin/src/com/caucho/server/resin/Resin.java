@@ -982,8 +982,8 @@ public class Resin
     CloudServer cloudServer = getDelegate().joinCluster(cloudSystem);
 
     if (cloudServer == null) {
-      throw new ConfigException(L().l("unable to join cluster {0}",
-                                      clusterId));
+      throw new ConfigException(L().l("{0} unable to join cluster {1}",
+                                      getDelegate(), clusterId));
     }
     
     return bootCluster.addDynamicServer(cloudServer);

@@ -220,9 +220,13 @@ class WebSocketContextImpl
   @Override
   public void disconnect()
   {
-    _controller.complete();
+    _isWriteClosed.set(true);
     
-    IoUtil.close(_is);
+    try {
+      _controller.complete();
+    } finally {
+      IoUtil.close(_is);
+    }
   }
   
   //
