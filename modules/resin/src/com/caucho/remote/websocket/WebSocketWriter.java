@@ -229,9 +229,12 @@ public class WebSocketWriter extends Writer
         code1 = OP_CONT;
 
       _state = MessageState.CONT;
-
+      
       if (isFinal)
         code1 |= FLAG_FIN;
+      
+      System.out.println(Thread.currentThread().getName() + ": code=" + 
+          Integer.toHexString(code1) + " len=" + length);
 
       if (length < 0x7e) {
         buffer[2] = (byte) code1;

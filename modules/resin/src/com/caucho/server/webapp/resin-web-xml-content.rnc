@@ -129,6 +129,8 @@ r_ear-deploy = element ear-deploy {
   & (attribute startup-mode {r_startup-mode}
      | element startup-mode {r_startup-mode})?
 
+  & r_dependency-check-interval?
+  
   & r_ear-default?
 
   & r_expand-cleanup-fileset?

@@ -130,8 +130,9 @@ public class WebSocketInputStream extends InputStream
     FrameInputStream is = _is;
     
     while (_length == 0 && ! _isFinal) {
-      if (! is.readFrameHeader())
+      if (! is.readFrameHeader()) {
         return -1;
+      }
       
       int opcode = is.getOpcode();
       

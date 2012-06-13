@@ -1410,7 +1410,7 @@ public class WriteStream extends OutputStreamWithBuffer
         TempBuffer tempWrite = _tempWrite;
         _tempWrite = null;
         _writeBuffer = null;
-
+        
         if (tempWrite != null) {
           TempBuffer.free(tempWrite);
         }

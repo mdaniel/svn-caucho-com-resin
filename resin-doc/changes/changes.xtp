@@ -12,6 +12,8 @@
 
 <s2 title="4.0.29 - snapshot">
 <ul>
+<li>deploy: ear-deploy allows dependency-check-interval (#4901)</li>
+<li>cli: "start" message with no -server and multiple ids (#4898)</li>
 <li>cli: "restart" needs to re-read configuration file (#4788)</li>
 <li>embed: add ResinEmbed.setIgnoreClientDisconnect (#4774)</li>
 <li>jmx: add getClassPath to WebAppMXBean (#5007)</li>

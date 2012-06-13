@@ -296,8 +296,11 @@ public class BootResinConfig // implements EnvironmentBean
     
     ArrayList<WatchdogClient> clientList = findLocalClients(serverId);
     
-    if (clientList.size() == 1
-        || clientList.size() > 0 && _args.getCommand().isStart()) {
+    if (clientList.size() == 0) {
+      
+    }
+    else if (clientList.size() == 1
+             || ! _args.getCommand().isStart()) {
       client = clientList.get(0);
 
       // server/6e0f
@@ -328,13 +331,30 @@ public class BootResinConfig // implements EnvironmentBean
     }
 
     if (client == null) {
-      throw new ConfigException(L.l("Resin/{0}: server '{1}' does not match a unique <server> or <server-multi>\nin {2}.",
+      throw new ConfigException(L.l("Resin/{0}: server '{1}' does not match a unique <server> or <server-multi>\nin {2}\nserver ids: {3}.",
                                     VersionFactory.getVersion(), 
                                     getDisplayServerName(_args.getServerId()), 
-                                    _args.getResinConf()));
+                                    _args.getResinConf(),
+                                    toStringList(clientList)));
     }
     
     return client;
+  }
+  
+  private String toStringList(ArrayList<WatchdogClient> clientList)
+  {
+    StringBuilder sb = new StringBuilder();
+    
+    for (int i = 0; i < clientList.size(); i++) {
+      if (i != 0)
+        sb.append(", ");
+      
+      WatchdogClient client = clientList.get(i);
+      
+      sb.append(client.getId());
+    }
+    
+    return sb.toString();
   }
   
   private String getDisplayServerName(String name)

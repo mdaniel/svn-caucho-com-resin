@@ -214,8 +214,9 @@ public class WebSocketOutputStream extends OutputStream
     
     _state = MessageState.CONT;
     
-    if (isFinal)
+    if (isFinal) {
       code1 |= FLAG_FIN;
+    }
 
     if (length < 0x7e) {
       buffer[2] = (byte) code1;

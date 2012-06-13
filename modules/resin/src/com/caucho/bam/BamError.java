@@ -377,6 +377,17 @@ public class BamError implements Serializable {
   }
 
   /**
+   * Returns a wrapped exception for the error.
+   */
+  public Throwable getException()
+  {
+    if (getData() instanceof Throwable)
+      return (Throwable) getData();
+    else
+      return null;
+  }
+  
+  /**
    * Extra information for UNDEFINED_CONDITION
    */
   public Serializable getExtra()
@@ -417,6 +428,9 @@ public class BamError implements Serializable {
       
     case SERVICE_UNAVAILABLE:
       return new ServiceUnavailableException(this);
+      
+    case INTERNAL_SERVER_ERROR:
+      return new InternalServerException(this);
 
     default:
       return new ErrorPacketException(this);
@@ -496,5 +510,7 @@ public class BamError implements Serializable {
                   ErrorGroup.SERVICE_UNAVAILABLE);
     _errorMap.put(ITEM_NOT_FOUND,
                   ErrorGroup.SERVICE_UNAVAILABLE);
+    _errorMap.put(INTERNAL_SERVER_ERROR,
+                  ErrorGroup.INTERNAL_SERVER_ERROR);
   }
 }

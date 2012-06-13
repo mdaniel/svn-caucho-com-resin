@@ -29,6 +29,8 @@
 
 package com.caucho.boot;
 
+import java.util.ArrayList;
+
 
 public abstract class AbstractStartCommand extends AbstractBootCommand
 {
@@ -87,7 +89,13 @@ public abstract class AbstractStartCommand extends AbstractBootCommand
     _intValueKeys.add("--jmx-port");
     */
   }
-  
+
+  @Override
+  protected WatchdogClient findLocalClient(ResinBoot boot, WatchdogArgs args)
+  {
+    return findUniqueLocalClient(boot, args);
+  }
+
   @Override
   protected WatchdogClient findShutdownClient(ResinBoot boot, WatchdogArgs args)
   {

@@ -142,6 +142,32 @@ public abstract class AbstractBootCommand implements BootCommand {
     return null;
   }
   
+  protected WatchdogClient findUniqueLocalClient(ResinBoot boot, WatchdogArgs args)
+  {
+    ArrayList<WatchdogClient> clients = boot.findLocalClients();
+    
+    if (clients == null) {
+      return null;
+    }
+    
+    WatchdogClient foundClient = null;
+    
+    for (WatchdogClient client : clients) {
+      if (client.getConfig().isRequireExplicitId()) {
+        continue;
+      }
+        
+      if (foundClient == null) {
+        foundClient = client;
+      }
+      else {
+        return null;
+      }
+    }
+    
+    return foundClient;
+  }
+  
   protected WatchdogClient findShutdownClient(ResinBoot boot, WatchdogArgs args)
   {
     return boot.findShutdownClient(args);

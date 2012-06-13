@@ -48,7 +48,7 @@ public class ErrorPacketException extends BamException {
 
   public ErrorPacketException(String msg, BamError error)
   {
-    super(msg);
+    super(msg, error.getException());
 
     _error = error;
   }
@@ -67,7 +67,7 @@ public class ErrorPacketException extends BamException {
 
   public ErrorPacketException(BamError error)
   {
-    super(String.valueOf(error));
+    super(String.valueOf(error), error.getException());
 
     _error = error;
   }

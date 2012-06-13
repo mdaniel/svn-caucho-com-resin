@@ -96,15 +96,21 @@ public class UnmaskedFrameInputStream extends FrameInputStream
   {
     long length = _length;
     
-    if (length > 0) {
-      int ch = _is.read();
+    if (length == 0 && ! _isFinal) {
+      readFrameHeader();
       
-      _length = length - 1;
-
-      return ch;
+      if (_length == 0)
+        return -1;
+      
+      length = _length;
     }
-    else
-      return -1;
+    
+    
+    int ch = _is.read();
+      
+    _length = length - 1;
+
+    return ch;
   }
   
   @Override

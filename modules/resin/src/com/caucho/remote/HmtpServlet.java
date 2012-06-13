@@ -237,5 +237,10 @@ public class HmtpServlet extends GenericServlet {
       // TODO Auto-generated method stub
       
     }
+    
+    public String toString()
+    {
+      return getClass().getSimpleName() + "[" + _ipAddress + "]";
+    }
   }
 }

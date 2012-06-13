@@ -62,7 +62,7 @@ repositories to use automated update tools like Synaptic and apt-get.
 To do this, add the following line to your <var>/etc/apt/sources.list</var>
 </p>
 <example>
-unix# add-apt-repository http://caucho.com/download/debian unstable multiverse
+unix# add-apt-repository http://caucho.com/download/debian
 </example>
 <p>
 After adding this line, update your local repository cache by running:
