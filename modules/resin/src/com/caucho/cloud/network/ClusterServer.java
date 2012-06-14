@@ -161,7 +161,7 @@ public final class ClusterServer {
 
     _serverDomainId = _serverClusterId + "." + clusterId.replace('.', '_');
 
-    _bamAddress = _serverDomainId + ".admin.resin";
+    _bamAddress = getBamAdminName(cloudServer);
     
     if (! isExternal()) {
       _address = cloudServer.getAddress();
@@ -172,6 +172,20 @@ public final class ClusterServer {
     else {
       _address = "127.0.0.2";
     }
+  }
+  
+  public static String getBamAdminName(CloudServer server)
+  {
+    String serverClusterId = getServerAddress(server.getIndex(), 
+                                              server.getPod().getIndex());
+
+    String clusterId = server.getCluster().getId();
+    if (clusterId.equals(""))
+      clusterId = "default";
+
+    String serverDomainId = serverClusterId + "." + clusterId.replace('.', '_');
+
+    return serverDomainId + ".admin.resin";
   }
   
   public static ClusterServer getCurrent()

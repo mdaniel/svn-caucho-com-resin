@@ -63,14 +63,8 @@ public final class HttpBufferStore
   {
     _uri = new byte[urlLengthMax];
 
-    if (TempBuffer.isSmallmem()) {
-      _headerBuffer = new char[4 * 1024];
-      _headerCapacity = 64;
-    }
-    else {
-      _headerBuffer = new char[headerSizeMax];
-      _headerCapacity = headerCountMax;
-    }
+    _headerBuffer = new char[headerSizeMax];
+    _headerCapacity = headerCountMax;
 
     _headerKeys = new CharSegment[_headerCapacity];
     _headerValues = new CharSegment[_headerCapacity];
