@@ -249,6 +249,10 @@ public class InterceptorBean<X> extends InterceptorRuntimeBean<X>
     }
   }
 
+  public AnnotatedType getAnnotatedType() {
+    return _bean.getAnnotatedType();
+  }
+
   @Override
   public String toString()
   {

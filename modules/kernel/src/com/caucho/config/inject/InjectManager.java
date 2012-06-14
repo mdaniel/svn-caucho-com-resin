@@ -1250,9 +1250,18 @@ public final class InjectManager
   @Module
   <T> void addBeanDiscover(Bean<T> bean, Annotated ann)
   {
-    if (ann == null && bean instanceof AbstractBean<?>)
+    if (ann != null) {
+    }
+    else if (bean instanceof AbstractBean<?>) {
       ann = ((AbstractBean<T>) bean).getAnnotatedType();
-    
+    }
+    else if (bean instanceof InjectionPointStandardBean) {
+      ann = ((InjectionPointStandardBean) bean).getAnnotated();
+    }
+    else if (bean instanceof InterceptorBean) {
+      ann = ((InterceptorBean)bean).getAnnotatedType();
+    }
+
     if (bean instanceof ManagedBeanImpl<?>) {
       ManagedBeanImpl<T> managedBean = (ManagedBeanImpl<T>) bean;
       
@@ -1471,7 +1480,7 @@ public final class InjectManager
    * Returns the beans matching a class and annotation set
    *
    * @param type the bean's class
-   * @param qualifiers required @Qualifier annotations
+   * @param qualifierSet required @Qualifier annotations
    */
   private Set<Bean<?>> getBeans(Type type,
                                 Set<Annotation> qualifierSet)
@@ -2797,8 +2806,8 @@ public final class InjectManager
   /**
    * Returns the observers listening for an event
    *
-   * @param eventType event to resolve
-   * @param bindings the binding set for the event
+   * @param event to resolve
+   * @param qualifiers the binding set for the event
    */
   @Override
   public <T> Set<ObserverMethod<? super T>>
