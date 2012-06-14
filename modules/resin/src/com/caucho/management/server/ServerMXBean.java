@@ -171,6 +171,18 @@ public interface ServerMXBean extends ManagedObjectMXBean {
   @Description("The HTTP maximum URL length")
   public int getUrlLengthMax();
 
+  /**
+   * Returns the HTTP header maximum length
+   */
+  @Description("The HTTP header maximum size in bytes")
+  public int getHeaderSizeMax();
+
+  /**
+   * Returns the HTTP header maximum count
+   */
+  @Description("The HTTP header maximum count")
+  public int getHeaderCountMax();
+
   //
   // state
   //

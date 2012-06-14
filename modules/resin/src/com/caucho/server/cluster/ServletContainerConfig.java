@@ -453,6 +453,24 @@ public class ServletContainerConfig implements EnvironmentBean, SchemaBean
   }
 
   /**
+   * Sets the header-size-max
+   */
+  @Configurable
+  public void setHeaderSizeMax(int max)
+  {
+    _servletContainer.setHeaderSizeMax(max);
+  }
+
+  /**
+   * Sets the header-count-max
+   */
+  @Configurable
+  public void setHeaderCountMax(int max)
+  {
+    _servletContainer.setHeaderCountMax(max);
+  }
+
+  /**
    * Sets the url-length-max
    */
   @Configurable

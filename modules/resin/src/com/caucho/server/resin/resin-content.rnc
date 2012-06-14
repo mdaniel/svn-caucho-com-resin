@@ -69,6 +69,12 @@ r_cluster-Content =
 
   & r_error-page*
 
+  & (attribute header-size-max { r_int-Type }
+     | element header-size-max { r_int-Type })?
+
+  & (attribute header-count-max { r_int-Type }
+     | element header-count-max { r_int-Type })?
+
   & r_host*
 
   & r_host-default*

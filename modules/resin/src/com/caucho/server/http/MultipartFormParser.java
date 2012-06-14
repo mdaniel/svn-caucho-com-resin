@@ -123,13 +123,11 @@ class MultipartFormParser {
         if (uploadMax > 0 && uploadMax < tempFile.getLength()) {
           String msg = L.l("multipart form data '{0}' too large",
                            "" + tempFile.getLength());
-          request.setAttribute("caucho.multipart.form.error", msg);
-          request.setAttribute("caucho.multipart.form.error.size",
-                               new Long(tempFile.getLength()));
           
+          long fileLength = tempFile.getLength();
           tempFile.remove();
-          
-          throw new IOException(msg);
+
+          throw formError(msg, fileLength, request);
         } else if (fileUploadMax > 0 && fileUploadMax < tempFile.getLength()){
           String msg = L.l("multipart form data part '{0}':'{1}' is greater then the accepted value of '{2}'",
                            name, "" + tempFile.getLength(), fileUploadMax);
@@ -140,14 +138,11 @@ class MultipartFormParser {
         }
         else if (tempFile.getLength() != totalLength) {
           String msg = L.l("multipart form upload failed (possibly due to full disk).");
-
-          request.setAttribute("caucho.multipart.form.error", msg);
-          request.setAttribute("caucho.multipart.form.error.size",
-                               new Long(tempFile.getLength()));
           
+          long fileLength = tempFile.getLength();
           tempFile.remove();
           
-          throw new IOException(msg);
+          throw formError(msg, fileLength, request);
         }
 
         WebApp webapp = request.getWebApp();
@@ -182,11 +177,7 @@ class MultipartFormParser {
             String msg = L.l("multipart form upload failed because field '{0}' exceeds max length {1}",
                              name, lengthMax);
 
-            request.setAttribute("caucho.multipart.form.error", msg);
-            request.setAttribute("caucho.multipart.form.error.size",
-                                 new Long(totalLength));
-            
-            throw new IOException(msg);
+            throw formError(msg, totalLength, request);
           }
         }
 
@@ -209,8 +200,22 @@ class MultipartFormParser {
     }
 
     if (! ms.isComplete()) {
-      throw new IOException("Incomplete form");
+      throw formError(L.l("End of post before multipart-mime boundary"),
+                      -1, request);
     }
+  }
+  
+  private static IOException formError(String msg, long length,
+                                       AbstractCauchoRequest request)
+    throws IOException
+  {
+    log.fine(request.getRequestURI() + ": " + msg);
+    
+    request.setAttribute("caucho.multipart.form.error", msg);
+    request.setAttribute("caucho.multipart.form.error.size",
+                         new Long(length));
+    
+    throw new IOException(msg);
   }
 
   private static void addTable(HashMapImpl<String,String[]> table, String name, String value)

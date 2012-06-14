@@ -12,6 +12,9 @@
 
 <s2 title="4.0.29 - snapshot">
 <ul>
+<li>servlet: add header-size-max and header-count-max (#4986, rep by Deepak Ramaprasad)</li>
+<li>deploy: web-socket issue causing large deployment problems (#5113, rep by Alexey Abashev)</li>
+<li>servlet: multipart-mime with forward parameters was double-parsing (#4896)</li>
 <li>deploy: ear-deploy allows dependency-check-interval (#4901)</li>
 <li>cli: "start" message with no -server and multiple ids (#4898)</li>
 <li>cli: "restart" needs to re-read configuration file (#4788)</li>

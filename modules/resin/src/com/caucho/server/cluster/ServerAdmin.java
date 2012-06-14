@@ -237,6 +237,18 @@ public class ServerAdmin extends AbstractEmitterObject
     return _server.getUrlLengthMax();
   }
 
+  @Override
+  public int getHeaderSizeMax()
+  {
+    return _server.getHeaderSizeMax();
+  }
+
+  @Override
+  public int getHeaderCountMax()
+  {
+    return _server.getHeaderCountMax();
+  }
+
   //
   // state
   //

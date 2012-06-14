@@ -102,6 +102,7 @@ import com.caucho.util.FreeRing;
 import com.caucho.util.L10N;
 import com.caucho.vfs.Dependency;
 import com.caucho.vfs.Path;
+import com.caucho.vfs.TempBuffer;
 import com.caucho.vfs.Vfs;
 
 public class ServletService
@@ -144,6 +145,8 @@ public class ServletService
   private String _serverHeader;
 
   private int _urlLengthMax = 8192;
+  private int _headerSizeMax = TempBuffer.isSmallmem() ? 4 * 1024 : 16 * 1024;
+  private int _headerCountMax = TempBuffer.isSmallmem() ? 32 : 256;
 
   private long _waitForActiveTime = 10000L;
 
@@ -677,6 +680,38 @@ public class ServletService
   }
 
   /**
+   * Sets the header-size-max
+   */
+  public void setHeaderSizeMax(int length)
+  {
+    _headerSizeMax = length;
+  }
+
+  /**
+   * Gets the header-size-max
+   */
+  public int getHeaderSizeMax()
+  {
+    return _headerSizeMax;
+  }
+
+  /**
+   * Sets the header-size-max
+   */
+  public void setHeaderCountMax(int length)
+  {
+    _headerCountMax = length;
+  }
+
+  /**
+   * Gets the header-count-max
+   */
+  public int getHeaderCountMax()
+  {
+    return _headerCountMax;
+  }
+
+  /**
    * Adds a WebAppDefault.
    */
   public void addWebAppDefault(WebAppConfig init)
@@ -1131,7 +1166,9 @@ public class ServletService
     HttpBufferStore buffer = _httpBufferFreeList.allocate();
 
     if (buffer == null) {
-      buffer = new HttpBufferStore(getUrlLengthMax());
+      buffer = new HttpBufferStore(getUrlLengthMax(),
+                                   getHeaderSizeMax(),
+                                   getHeaderCountMax());
     }
 
     return buffer;

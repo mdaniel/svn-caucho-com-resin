@@ -312,6 +312,7 @@ public class MultipartStream extends StreamImpl {
   /**
    * Reads from the multipart mime buffer.
    */
+  @Override
   public int read(byte []buffer, int offset, int length) throws IOException
   {
     int b = -1;
@@ -369,7 +370,7 @@ public class MultipartStream extends StreamImpl {
           _peekOffset = 0;
           _peekLength = 1;
         }
-
+        
         return i > 0 ? i : -1;
       }
 

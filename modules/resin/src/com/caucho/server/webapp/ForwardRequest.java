@@ -364,6 +364,12 @@ public class ForwardRequest extends CauchoDispatchRequest {
     return form;
   }
 
+  @Override
+  protected void parsePostQueryImpl(HashMapImpl<String,String[]> form)
+  {
+    // server/1637
+  }
+
   static {
     _forwardAttributeMap.put(RequestDispatcher.FORWARD_REQUEST_URI,
                              REQUEST_URI_CODE);
