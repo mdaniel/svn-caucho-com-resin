@@ -101,17 +101,17 @@ public interface ClientSocketFactoryApi
   /**
    * Called when the socket read/write fails.
    */
-  public void failSocket();
+  public void failSocket(long time);
 
   /**
    * Called when the socket read/write fails.
    */
-  public void failConnect();
+  public void failConnect(long time);
 
   /**
    * Called when the server responds with "busy", e.g. HTTP 503
    */
-  public void busy();
+  public void busy(long time);
 
   /**
    * Called when the server has a successful response

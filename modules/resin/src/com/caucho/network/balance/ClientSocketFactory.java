@@ -554,6 +554,43 @@ public class ClientSocketFactory implements ClientSocketFactoryApi
     return ! isActive();
   }
 
+  public boolean isFailed(long now)
+  {
+    if (now <= _failTime + _dynamicFailRecoverTime) {
+      // we are in a possible failure and recover time has not yet expired
+      
+      if (_lastFailConnectTime >= _failTime) {
+        // it was a connect failure, fail immediately
+        logFinest("isFailed TRUE: prior connect failure");
+        return true;
+      }
+      
+      if (_failTime >= _lastSuccessTime) {
+        // only fail for a read if there were no more recent successful reads
+        logFinest("isFailed TRUE: prior read failure with no recent successes");
+        return true;  
+      }
+      
+      logFinest("isFailed FALSE: because there were recent successes");
+    } else if (_failTime > 0) {
+      logFinest(L.l("isFailed FALSE: not in window ({0} < {1} + {2})",
+                    now, _failTime, _dynamicFailRecoverTime));
+    }
+    
+    return false;
+  }
+  
+  private void logFinest(String msg)
+  {
+    if (log.isLoggable(Level.FINEST))
+      log.finest(getDebugId() + " " + msg);
+  }
+
+  public boolean isBusy(long now)
+  {
+    return (now < _lastBusyTime + _dynamicFailRecoverTime);
+  }
+  
   /**
    * Enable the client
    */
@@ -601,7 +638,7 @@ public class ClientSocketFactory implements ClientSocketFactoryApi
     else {
       long now = CurrentTime.getCurrentTime();
 
-      if (now < _lastFailConnectTime + _dynamicFailRecoverTime) {
+      if (isFailed(now)) {
         return false;
       }
 
@@ -630,7 +667,7 @@ public class ClientSocketFactory implements ClientSocketFactoryApi
     else if (state.isEnabled()) {
       long now = CurrentTime.getCurrentTime();
 
-      if (now < _lastFailConnectTime + _dynamicFailRecoverTime) {
+      if (isFailed(now)) {
         return false;
       }
 
@@ -705,28 +742,29 @@ public class ClientSocketFactory implements ClientSocketFactoryApi
    * Called when the socket read/write fails.
    */
   @Override
-  public void failSocket()
+  public void failSocket(long time)
   {
     getRequestFailProbe().start();
 
     _failCountTotal.incrementAndGet();
     
+    logFinest(L.l("failSocket: time={0}, _failTime={1}",
+                  time, _failTime));
+    
     synchronized (this) {
-      long now = CurrentTime.getCurrentTime();
-      _firstSuccessTime = 0;
-
-      // only degrade one per 100ms
-      if (now - _failTime >= 100) {
-        _currentFailCount++;
-        _warmupState--;
-        _failTime = now;
+      if (time > _failTime) {
+        degrade(time);
+        
+        _firstSuccessTime = 0;
+        _failTime = time;
         _lastFailTime = _failTime;
+
+        _dynamicFailRecoverTime *= 2;
+        if (_loadBalanceRecoverTime < _dynamicFailRecoverTime)
+          _dynamicFailRecoverTime = _loadBalanceRecoverTime;
+  
+        _state = _state.toFail();
       }
-
-      if (_warmupState < WARMUP_MIN)
-        _warmupState = WARMUP_MIN;
-
-      _state = _state.toFail();
     }
   }
 
@@ -734,30 +772,30 @@ public class ClientSocketFactory implements ClientSocketFactoryApi
    * Called when the socket read/write fails.
    */
   @Override
-  public void failConnect()
+  public void failConnect(long time)
   {
     getConnectionFailProbe().start();
 
     _failCountTotal.incrementAndGet();
+    
+    logFinest(L.l("failConnect: time={0}, _failTime={1}",
+                  time, _failTime));
 
     synchronized (this) {
-      _firstSuccessTime = 0;
-
-      // only degrade one per 100ms
-      _currentFailCount++;
-      _warmupState--;
-      long now = CurrentTime.getCurrentTime();
-      _failTime = now;
-      _lastFailTime = now;
-      _lastFailConnectTime = now;
-      _dynamicFailRecoverTime *= 2;
-      if (_loadBalanceRecoverTime < _dynamicFailRecoverTime)
-        _dynamicFailRecoverTime = _loadBalanceRecoverTime;
-
-      if (_warmupState < WARMUP_MIN)
-        _warmupState = WARMUP_MIN;
-
-      _state = _state.toFail();
+      if (time > _failTime) {
+        degrade(time);
+        
+        _firstSuccessTime = 0;
+        _failTime = time;
+        _lastFailTime = time;
+        _lastFailConnectTime = time;
+        
+        _dynamicFailRecoverTime *= 2;
+        if (_loadBalanceRecoverTime < _dynamicFailRecoverTime)
+          _dynamicFailRecoverTime = _loadBalanceRecoverTime;
+  
+        _state = _state.toFail();
+      }
     }
   }
 
@@ -765,22 +803,33 @@ public class ClientSocketFactory implements ClientSocketFactoryApi
    * Called when the server responds with "busy", e.g. HTTP 503
    */
   @Override
-  public void busy()
+  public void busy(long time)
   {
     getRequestBusyProbe().start();
 
     synchronized (this) {
-      _lastBusyTime = CurrentTime.getCurrentTime();
+      degrade(time);
+      
+      _lastBusyTime = time;
       _firstSuccessTime = 0;
 
       _currentFailCount++;
-      _warmupState--;
-      if (_warmupState < 0)
-        _warmupState = 0;
 
       _busyCountTotal++;
 
       _state = _state.toBusy();
+    }
+  }
+  
+  private void degrade(long time)
+  {
+    // only degrade once per 100ms
+    if (time - _failTime >= 100) {
+      _currentFailCount++;
+      _warmupState--;
+
+      if (_warmupState < WARMUP_MIN)
+        _warmupState = WARMUP_MIN;
     }
   }
 
@@ -791,11 +840,13 @@ public class ClientSocketFactory implements ClientSocketFactoryApi
   public void success()
   {
     _currentFailCount = 0;
+    
+    long now = CurrentTime.getCurrentTime();
 
     if (_firstSuccessTime <= 0) {
-      _firstSuccessTime = CurrentTime.getCurrentTime();
+      _firstSuccessTime = now;
     }
-
+    
     // reset the connection fail recover time
     _dynamicFailRecoverTime = 1000L;
   }
@@ -885,7 +936,7 @@ public class ClientSocketFactory implements ClientSocketFactoryApi
 
     long now = CurrentTime.getCurrentTime();
 
-    if (now <= _failTime + _loadBalanceRecoverTime)
+    if (isFailed(now))
       return null;
     else if (_state == State.FAIL && _startingCount.get() > 0) {
       // if in fail state, only one thread should try to connect
@@ -937,11 +988,11 @@ public class ClientSocketFactory implements ClientSocketFactoryApi
 
     long now = CurrentTime.getCurrentTime();
 
-    if (now < _failTime + _loadBalanceRecoverTime) {
+    if (isFailed(now)) {
       return null;
     }
 
-    if (now < _lastBusyTime + _loadBalanceRecoverTime) {
+    if (isBusy(now)) {
       return null;
     }
 
@@ -1048,6 +1099,8 @@ public class ClientSocketFactory implements ClientSocketFactoryApi
     if (getPort() <= 0) {
       return null;
     }
+    
+    long connectionStartTime = CurrentTime.getCurrentTime();
 
     try {
       ReadWritePair pair = openTCPPair();
@@ -1087,7 +1140,7 @@ public class ClientSocketFactory implements ClientSocketFactoryApi
       else
         log.finer(this + " " + e.toString());
 
-      failConnect();
+      failConnect(connectionStartTime);
 
       return null;
     } finally {
@@ -1148,6 +1201,9 @@ public class ClientSocketFactory implements ClientSocketFactoryApi
         _prevSuccessTime = 0;
 
       _lastSuccessTime = now;
+      
+      logFinest(L.l("free: _lastSuccessTime={0}, _failTime={1}",
+                    now, _failTime));
     }
 
     updateWarmup();
