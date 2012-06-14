@@ -291,7 +291,7 @@ class WatchdogManager implements AlarmListener {
         factory.type(AdminAuthenticator.class);
         factory.qualifier(DefaultLiteral.DEFAULT);
 
-        cdiManager.addBean(factory.singleton(auth));
+        cdiManager.addBeanDiscover(factory.singleton(auth));
       }
 
       DependencyCheckInterval depend = new DependencyCheckInterval();

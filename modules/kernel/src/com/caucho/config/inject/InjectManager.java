@@ -432,10 +432,10 @@ public final class InjectManager
       factory.type(InjectManager.class);
       factory.type(BeanManager.class);
       factory.annotation(ModulePrivateLiteral.create());
-      addBean(factory.singleton(this));
+      addBeanDiscover(factory.singleton(this));
       
       // ioc/0162
-      addBean(new InjectionPointStandardBean());
+      addBeanDiscover(new InjectionPointStandardBean());
 
       _xmlExtension = new XmlStandardPlugin(this);
       addExtension(_xmlExtension);
@@ -934,7 +934,7 @@ public final class InjectManager
     
     Bean<T> bean = builder.singleton(obj);
     
-    addBean(bean);
+    addBeanDiscover(bean);
     
     return bean;
   }
@@ -1225,6 +1225,17 @@ public final class InjectManager
   /**
    * Processes the discovered bean
    */
+  public <T> void addBeanDiscover(Bean<T> bean)
+  {
+    if (bean == null)
+      throw new NullPointerException(L.l("null bean passed to addBean"));
+    
+    addBeanDiscover(bean, (Annotated) null);
+  }
+
+  /**
+   * Processes the discovered bean
+   */
   public <T> void addBean(Bean<T> bean)
   {
     if (bean == null)
@@ -1237,7 +1248,7 @@ public final class InjectManager
    * Processes the discovered bean
    */
   @Module
-  public <T> void addBean(Bean<T> bean, Annotated ann)
+  <T> void addBeanDiscover(Bean<T> bean, Annotated ann)
   {
     if (ann == null && bean instanceof AbstractBean<?>)
       ann = ((AbstractBean<T>) bean).getAnnotatedType();
@@ -1259,7 +1270,13 @@ public final class InjectManager
     }
     else
       bean = getExtensionManager().processBean(bean, ann);
-    
+
+    addBean(bean, ann);
+  }
+  
+  @Module
+  public <T> void addBean(Bean<T> bean, Annotated ann)
+  {
     addBeanImpl(bean, ann);
   }
   
@@ -3360,7 +3377,7 @@ public final class InjectManager
     if (annType.isAnnotationPresent(javax.interceptor.Interceptor.class)) {
       InterceptorBean interceptorBean = new InterceptorBean(this, annType.getJavaClass());
       
-      addBean(interceptorBean);
+      addBeanDiscover(interceptorBean);
       return;
     }
     
@@ -3392,7 +3409,7 @@ public final class InjectManager
     // ioc/0680
     if (! managedBean.isAlternative() || isEnabled(managedBean)) {
       // ioc/0680
-      addBean(managedBean);
+      addBeanDiscover(managedBean);
 
       // ioc/0b0f
       if (! _specializedMap.containsKey(managedBean.getBeanClass()))
@@ -3467,7 +3484,7 @@ public final class InjectManager
 
   public <X> void addManagedBean(ManagedBeanImpl<X> managedBean)
   {
-    addBean(managedBean);
+    addBeanDiscover(managedBean);
     
     managedBean.introspectProduces();
   }

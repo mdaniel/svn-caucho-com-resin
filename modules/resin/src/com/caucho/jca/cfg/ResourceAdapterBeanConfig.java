@@ -122,7 +122,7 @@ public class ResourceAdapterBeanConfig extends BeanConfig {
     
     Bean<T> bean = factory.injection(producer);
 
-    beanManager.addBean(bean);
+    beanManager.addBeanDiscover(bean);
     
     ((InjectionBean) bean).introspectProduces();
   }

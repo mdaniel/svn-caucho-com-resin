@@ -57,7 +57,7 @@ public class AfterBeanDiscoveryImpl implements AfterBeanDiscovery
   
   public void addBean(Bean<?> bean)
   {
-    _cdiManager.addBean(bean);
+    _cdiManager.addBeanDiscover(bean);
   }
 
   @Override

@@ -306,7 +306,7 @@ public class EnvEntry extends ResourceGroupConfig implements Validator {
     
     builder.type(types);
 
-    cdiManager.addBean(builder.singleton(value));
+    cdiManager.addBeanDiscover(builder.singleton(value));
   }
 
   /**

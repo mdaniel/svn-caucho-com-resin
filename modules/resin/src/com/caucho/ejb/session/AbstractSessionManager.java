@@ -292,7 +292,7 @@ abstract public class AbstractSessionManager<X> extends AbstractEjbBeanManager<X
 
     // XXX: separate additions?
     if (injectManager.getBeans(SessionContext.class).size() == 0)
-      injectManager.addBean(factory.singleton(context));
+      injectManager.addBeanDiscover(factory.singleton(context));
    
     _contextMap.put(context.getApi(), context);
     
@@ -313,7 +313,7 @@ abstract public class AbstractSessionManager<X> extends AbstractEjbBeanManager<X
         = injectManager.createBeanFactory(TimerService.class);
       
       if (injectManager.getBeans(TimerService.class).size() == 0)
-        injectManager.addBean(timerBuilder.singleton(timer));
+        injectManager.addBeanDiscover(timerBuilder.singleton(timer));
     } catch (Exception e) {
       log.log(Level.ALL, e.toString(), e);
     }

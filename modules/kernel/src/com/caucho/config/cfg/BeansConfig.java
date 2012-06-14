@@ -221,7 +221,7 @@ public class BeansConfig implements EnvironmentBean {
           
           bean = injectManager.createManagedBean(cl);
 
-          injectManager.addBean(bean);
+          injectManager.addBeanDiscover(bean);
 
           bean.introspectProduces();
         }

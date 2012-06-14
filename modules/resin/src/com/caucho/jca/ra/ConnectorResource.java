@@ -339,7 +339,7 @@ public class ConnectorResource implements EnvironmentListener {
       beanFactory.name(_resourceAdapter.getName());
     }
 
-    manager.addBean(beanFactory.singleton(_ra));
+    manager.addBeanDiscover(beanFactory.singleton(_ra));
 
     // create a default outbound factory
     if (_outboundList.size() == 0 && _jndiName != null && _rar != null) {
@@ -682,11 +682,11 @@ public class ConnectorResource implements EnvironmentListener {
       if (getName() != null) {
         Jndi.bindDeepShort(getName(), connectionFactory);
 
-        beanManager.addBean(factory.name(getName())
+        beanManager.addBeanDiscover(factory.name(getName())
                             .singleton(connectionFactory));
       }
       else
-        beanManager.addBean(factory.singleton(connectionFactory));
+        beanManager.addBeanDiscover(factory.singleton(connectionFactory));
     }
   }
 
@@ -910,10 +910,10 @@ public class ConnectorResource implements EnvironmentListener {
       if (getName() != null) {
         Jndi.bindDeepShort(getName(), resourceObject);
 
-        beanManager.addBean(factory.name(getName()).singleton(resourceObject));
+        beanManager.addBeanDiscover(factory.name(getName()).singleton(resourceObject));
       }
       else {
-        beanManager.addBean(factory.singleton(resourceObject));
+        beanManager.addBeanDiscover(factory.singleton(resourceObject));
       }
     }
   }

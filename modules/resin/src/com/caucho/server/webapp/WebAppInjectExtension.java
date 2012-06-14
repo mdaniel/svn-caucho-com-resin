@@ -123,7 +123,7 @@ public class WebAppInjectExtension implements Extension
               builder.qualifier(binding);
           }
 
-          _beanManager.addBean(builder.singleton(proxy));
+          _beanManager.addBeanDiscover(builder.singleton(proxy));
 
           event.veto();
         }

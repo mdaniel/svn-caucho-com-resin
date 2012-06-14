@@ -416,7 +416,7 @@ public class PersistenceManager
 
       emfFactory.qualifier(CurrentLiteral.CURRENT);
       emfFactory.qualifier(Names.create(pUnit.getName()));
-      beanManager.addBean(emfFactory.singleton(pUnit.getEntityManagerFactoryProxy()));
+      beanManager.addBeanDiscover(emfFactory.singleton(pUnit.getEntityManagerFactoryProxy()));
 
       if (pUnit.getTransactionType() == PersistenceUnitTransactionType.JTA) {
         log.finer(L.l("register persistent-unit `{0}' with transaction-type JTA", pUnit.getName()));
@@ -425,7 +425,7 @@ public class PersistenceManager
 
         emFactory.qualifier(CurrentLiteral.CURRENT);
         emFactory.qualifier(Names.create(pUnit.getName()));
-        beanManager.addBean(emFactory.singleton(pUnit.getEntityManagerJtaProxy()));
+        beanManager.addBeanDiscover(emFactory.singleton(pUnit.getEntityManagerJtaProxy()));
       } else {
         log.finer(L.l("register persistent-unit `{0}' with transaction-type RESOURCE_LOCAL", pUnit.getName()));
       }

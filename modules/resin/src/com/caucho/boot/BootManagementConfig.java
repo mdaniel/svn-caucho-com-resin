@@ -116,7 +116,7 @@ public class BootManagementConfig
         factory.type(Authenticator.class);
         factory.type(AdminAuthenticator.class);
 
-        manager.addBean(factory.singleton(_auth));
+        manager.addBeanDiscover(factory.singleton(_auth));
       }
     } catch (Exception e) {
       e.printStackTrace();

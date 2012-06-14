@@ -212,7 +212,7 @@ public class EjbInjectionTarget<T> {
 
       if (_timerService != null) {
         BeanBuilder<TimerService> factory = cdiManager.createBeanFactory(TimerService.class);
-        cdiManager.addBean(factory.singleton(_timerService));
+        cdiManager.addBeanDiscover(factory.singleton(_timerService));
       }
     } finally {
       thread.setContextClassLoader(loader);

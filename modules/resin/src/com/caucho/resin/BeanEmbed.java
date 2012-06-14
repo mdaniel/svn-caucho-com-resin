@@ -161,7 +161,7 @@ public class BeanEmbed
         if (_name != null)
           factory.name(_name);
 
-        cdiManager.addBean(factory.singleton(_value));
+        cdiManager.addBeanDiscover(factory.singleton(_value));
       }
       else if (_className == null)
         throw new ConfigException(L.l("BeanEmbed must either have a value or a class"));
@@ -180,7 +180,7 @@ public class BeanEmbed
         if (_init != null)
           factory.init(_init);
 
-        cdiManager.addBean(factory.bean());
+        cdiManager.addBeanDiscover(factory.bean());
       }
     } catch (Exception e) {
       throw ConfigException.create(e);

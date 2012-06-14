@@ -206,7 +206,7 @@ public class ConnectionFactoryConfig extends BeanConfig {
 
       Bean bean = factory.singleton(connectionFactory);
 
-      cdiManager.addBean(bean);
+      cdiManager.addBeanDiscover(bean);
     } catch (Exception e) {
       throw ConfigException.create(e);
     }

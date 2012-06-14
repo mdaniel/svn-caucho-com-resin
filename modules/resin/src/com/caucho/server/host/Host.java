@@ -712,7 +712,7 @@ public class Host
 
     InjectManager cdiManager = InjectManager.getCurrent();
 
-    cdiManager.addBean(cdiManager.createBeanFactory(ManagedBroker.class)
+    cdiManager.addBeanDiscover(cdiManager.createBeanFactory(ManagedBroker.class)
                        .name("bamBroker").singleton(_bamBroker));
 
     // webBeans.addExtension(_bamBroker);

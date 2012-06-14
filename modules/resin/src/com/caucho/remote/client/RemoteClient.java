@@ -108,7 +108,7 @@ public class RemoteClient extends BeanConfig
 
     _bean = builder.singleton(proxy);
 
-    beanManager.addBean(_bean);
+    beanManager.addBeanDiscover(_bean);
   }
 }
 

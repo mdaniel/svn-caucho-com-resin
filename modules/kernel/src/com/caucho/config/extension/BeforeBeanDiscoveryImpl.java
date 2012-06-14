@@ -39,6 +39,7 @@ import javax.enterprise.inject.spi.ProcessBean;
 
 import com.caucho.config.ConfigException;
 import com.caucho.config.inject.InjectManager;
+import com.caucho.config.inject.ManagedBeanImpl;
 import com.caucho.inject.Module;
 
 @Module
@@ -54,7 +55,10 @@ public class BeforeBeanDiscoveryImpl implements BeforeBeanDiscovery
   @Override
   public void addAnnotatedType(AnnotatedType<?> annType)
   {
-    // _cdiManager.addAnnotatedType(annType);
+    // ioc/0069
+    ManagedBeanImpl bean = _cdiManager.createManagedBean(annType);
+    
+    _cdiManager.addBean(bean, annType);
   }
   
   @Override

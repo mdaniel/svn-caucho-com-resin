@@ -231,7 +231,7 @@ public class MessageManager<X> extends AbstractEjbBeanManager<X>
     InjectManager manager = InjectManager.create();
     BeanBuilder<?> factory = manager.createBeanFactory(_context.getClass());
 
-    manager.addBean(factory.singleton(_context));
+    manager.addBeanDiscover(factory.singleton(_context));
   }
 
   /**

@@ -240,7 +240,7 @@ public class Management
         factory.qualifier(DefaultLiteral.DEFAULT);
         factory.qualifier(new AdminLiteral());
 
-        cdiManager.addBean(factory.singleton(_auth));
+        cdiManager.addBeanDiscover(factory.singleton(_auth));
       }
 
       if (_transactionManager != null)

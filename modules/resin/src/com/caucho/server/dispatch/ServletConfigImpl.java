@@ -929,7 +929,7 @@ public class ServletConfigImpl
       if (_var != null)
         factory.name(_var);
 
-      cdiManager.addBean(factory.singleton(servlet));
+      cdiManager.addBeanDiscover(factory.singleton(servlet));
     }
   }
 

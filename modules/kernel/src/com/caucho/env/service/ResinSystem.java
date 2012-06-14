@@ -137,7 +137,7 @@ public class ResinSystem
         = _injectManager.createBeanFactory(ResinSystem.class);
       // factory.deployment(Standard.class);
       beanFactory.type(ResinSystem.class);
-      _injectManager.addBean(beanFactory.singleton(this));
+      _injectManager.addBeanDiscover(beanFactory.singleton(this));
     } finally {
       thread.setContextClassLoader(oldLoader);
     }

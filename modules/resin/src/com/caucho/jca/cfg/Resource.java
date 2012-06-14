@@ -461,9 +461,9 @@ public class Resource {
     factory.scope(Singleton.class);
 
     if (_object != null)
-      beanManager.addBean(factory.singleton(_object));
+      beanManager.addBeanDiscover(factory.singleton(_object));
     else
-      beanManager.addBean(factory.bean());
+      beanManager.addBeanDiscover(factory.bean());
 
     if (log.isLoggable(Level.CONFIG))
       logConfig();

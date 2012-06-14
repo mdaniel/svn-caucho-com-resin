@@ -923,7 +923,7 @@ public class Resin
     }
 
     CloudSystem cloudSystem = bootResin.initTopology();
-    
+
     if (_bootServerConfig != null) {
     }
     else if (isEmbedded()) { 
@@ -945,7 +945,7 @@ public class Resin
     if (_bootServerConfig == null && getHomeCluster() != null) {
       _bootServerConfig = joinCluster(cloudSystem);
     }
-    
+
     if (_bootServerConfig == null) {
       throw new ConfigException(L().l("unknown server {0} in unknown cluster",
                                       _serverId));
@@ -1062,7 +1062,16 @@ public class Resin
     }
     else if (bootCluster.getPodList().get(0).getServerList().size() == 1) {
       // server/1e06
-      return bootCluster.getPodList().get(0).getServerList().get(0);
+      BootServerConfig server
+        = bootCluster.getPodList().get(0).getServerList().get(0);
+      
+      if (! server.isRequireExplicitId()) {
+        return server;
+      }
+      else {
+        // cloud/12c0
+        return null;
+      }
     }
     else if (bootCluster.getPodList().get(0).getServerList().size() > 0) {
       // server/0342

@@ -253,11 +253,11 @@ abstract public class AbstractBeanConfig {
 
     if (value != null) {
       bean = builder.singleton(value);
-      beanManager.addBean(bean);
+      beanManager.addBeanDiscover(bean);
     }
     else {
       bean = builder.bean();
-      beanManager.addBean(bean);
+      beanManager.addBeanDiscover(bean);
     }
 
 
