@@ -32,7 +32,12 @@ def die (msg, code) :
 def read_tag(line, f, tag):
 	content = " "	 
 	endtag = "</%s>" % tag
-
+	starttag = "<%s>" % tag
+	
+	if endtag in line:
+		content = line.replace(endtag, " ") 
+		content = content.replace(starttag, " ")
+		return content.strip()
 	while line:
 		if endtag in line:
 			break
@@ -180,9 +185,9 @@ class Section:
 			if "<s2" in line or "<s3" in line: 
 				title = read_title(line)
 				if "<s2" in line:
-					content = content + "==%s==\n" % title
-				if "<s3" in line:
 					content = content + "===%s===\n" % title
+				if "<s3" in line:
+					content = content + "====%s====\n" % title
 				content = content + "\n"
 
 				while line:
@@ -266,12 +271,15 @@ class FileProcessor:
 			else:
 				print (it)
 
-		printit (doc.header.title)
+		if verbose: print ("\n" * 5)
+		if verbose: print ("DOC:", doc.header.title, file)
+
+		printit ("=%s=" % doc.header.title)
 		if doc.header.description:
 			printit(doc.header.description)
 		for section in doc.body.sections:
 			if section.title:
-				printit("=%s=" % section.title)
+				printit("==%s==" % section.title)
 			printit (section.content)
 			
 		
