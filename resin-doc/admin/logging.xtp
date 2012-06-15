@@ -388,7 +388,7 @@ recognizes EL-expressions. The EL variable <var>log</var> is a
 <example title="Example: log format string">
 
 &lt;log-handler name='' level='all' path='stderr:' timestamp="[%H:%M:%S.%s]"
-     format=" ${log.level} ${log.loggerName} ${log.message}"/&gt;
+     format=" ${log.level} ${log.name} ${log.message}"/&gt;
 
 </example>
 
