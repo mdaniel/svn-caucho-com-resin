@@ -140,7 +140,24 @@ public class LogSystem extends AbstractResinSubSystem
     throw new UnsupportedOperationException(getClass().getName());
   }
 
+  public LogMessage []findMessages(String []fullTypes, 
+                                   String levelName,
+                                   long minTime, 
+                                   long maxTime)
+  {
+    throw new UnsupportedOperationException(getClass().getName());
+  }
+
   public LogMessage []findMessagesByName(String fullType,
+                                         String logName,
+                                         String levelName,
+                                         long minTime, 
+                                         long maxTime)
+  {
+    throw new UnsupportedOperationException(getClass().getName());
+  }
+  
+  public LogMessage []findMessagesByName(String []fullTypes,
                                          String logName,
                                          String levelName,
                                          long minTime, 

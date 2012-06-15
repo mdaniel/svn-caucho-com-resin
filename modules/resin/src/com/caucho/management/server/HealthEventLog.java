@@ -162,6 +162,10 @@ public class HealthEventLog
     long thisVal = getTimestamp();
     long anotherVal = o.getTimestamp();
     
-    return (thisVal<anotherVal ? 1 : (thisVal==anotherVal ? 0 : -1));
+    
+    if (thisVal == anotherVal)
+      return this.getType().compareTo(o.getType());
+    else
+      return (thisVal<anotherVal ? 1 : -1);
   }
 }
