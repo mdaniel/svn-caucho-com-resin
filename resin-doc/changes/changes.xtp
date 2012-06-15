@@ -12,6 +12,8 @@
 
 <s2 title="4.0.29 - snapshot">
 <ul>
+<li>config: app-inf in cluster wasn't picked up properly (#5004)</li>
+<li>cloud: EC2elastic server with "ext:" address and missing cluster-system-key (#5015)</li.
 <li>servlet: add header-size-max and header-count-max (#4986, rep by Deepak Ramaprasad)</li>
 <li>deploy: web-socket issue causing large deployment problems (#5113, rep by Alexey Abashev)</li>
 <li>servlet: multipart-mime with forward parameters was double-parsing (#4896)</li>

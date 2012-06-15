@@ -37,6 +37,7 @@ import java.util.logging.Logger;
 
 import com.caucho.VersionFactory;
 import com.caucho.cloud.security.SecurityService;
+import com.caucho.config.Config;
 import com.caucho.config.ConfigException;
 import com.caucho.config.Configurable;
 import com.caucho.config.program.ConfigProgram;
@@ -585,9 +586,17 @@ public class BootResinConfig // implements EnvironmentBean
     if (cluster == null) {
       cluster = new BootClusterConfig(_system, this);
       cluster.setId(proxy.getId());
-
-      for (int i = 0; i < _clusterDefaultList.size(); i++) {
-        _clusterDefaultList.get(i).configure(cluster);
+      
+      Object oldCluster = Config.getProperty("cluster");
+      
+      try {
+        Config.setProperty("cluster", new ConfigVar(cluster));
+        
+        for (int i = 0; i < _clusterDefaultList.size(); i++) {
+          _clusterDefaultList.get(i).configure(cluster);
+        }
+      } finally {
+        Config.setProperty("cluster", oldCluster);
       }
 
       _clusterList.add(cluster);
@@ -616,5 +625,19 @@ public class BootResinConfig // implements EnvironmentBean
    */
   public void addContentProgram(ConfigProgram program)
   {
+  }
+  
+  public static class ConfigVar {
+    private BootClusterConfig _cluster;
+
+    public ConfigVar(BootClusterConfig cluster)
+    {
+      _cluster = cluster;
+    }
+    
+    public String getId()
+    {
+      return _cluster.getId();
+    }
   }
 }

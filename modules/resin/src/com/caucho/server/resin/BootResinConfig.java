@@ -37,6 +37,7 @@ import java.util.logging.Logger;
 import com.caucho.cloud.topology.CloudCluster;
 import com.caucho.cloud.topology.CloudSystem;
 import com.caucho.cloud.topology.TopologyService;
+import com.caucho.config.Config;
 import com.caucho.config.ConfigException;
 import com.caucho.config.Configurable;
 import com.caucho.config.DependencyBean;
@@ -163,11 +164,25 @@ public class BootResinConfig implements SchemaBean, DependencyBean
       cluster.setId(id);
     
       _clusters.add(cluster);
-
-      for (int i = 0; i < _clusterDefaults.size(); i++)
-        _clusterDefaults.get(i).configure(cluster);
       
-      cluster.init();
+      Thread thread = Thread.currentThread();
+      ClassLoader loader = thread.getContextClassLoader();
+      Object oldCluster = null;
+      
+      try {
+        oldCluster = Config.getProperty("cluster");
+        Config.setProperty("cluster", new ClusterConfigVar(cluster));
+        
+        for (int i = 0; i < _clusterDefaults.size(); i++) {
+          _clusterDefaults.get(i).configure(cluster);
+        }
+      
+        cluster.init();
+      } finally {
+        Config.setProperty("cluster", oldCluster);
+        
+        thread.setContextClassLoader(loader);
+      }
     }
     
     return cluster;
@@ -280,5 +295,19 @@ public class BootResinConfig implements SchemaBean, DependencyBean
     }
     
     return null;
+  }
+  
+  static class ClusterConfigVar {
+    private BootClusterConfig _cluster;
+
+    public ClusterConfigVar(BootClusterConfig cluster)
+    {
+      _cluster = cluster;
+    }
+    
+    public String getId()
+    {
+      return _cluster.getId();
+    }
   }
 }
