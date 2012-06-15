@@ -838,7 +838,7 @@ public class PDO implements EnvCleanup {
     // XXX: more robust to get attribute values as is done in getPgsqlDataSource
 
     String host = "localhost";
-    int port = 3306;
+    int port = -1;
     String dbName = null;
 
     for (Map.Entry<String,String> entry : attrMap.entrySet()) {

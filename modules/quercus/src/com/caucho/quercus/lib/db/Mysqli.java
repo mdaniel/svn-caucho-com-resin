@@ -37,7 +37,6 @@ import com.caucho.quercus.env.ConnectionEntry;
 import com.caucho.quercus.env.Env;
 import com.caucho.quercus.env.LongValue;
 import com.caucho.quercus.env.StringValue;
-import com.caucho.quercus.env.UnsetValue;
 import com.caucho.quercus.env.Value;
 import com.caucho.util.L10N;
 import com.caucho.util.SQLExceptionWrapper;
@@ -53,7 +52,6 @@ import java.sql.SQLException;
 import java.sql.SQLWarning;
 import java.sql.Statement;
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.Locale;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -65,17 +63,6 @@ public class Mysqli extends JdbcConnectionResource
 {
   private static final Logger log = Logger.getLogger(Mysqli.class.getName());
   private static final L10N L = new L10N(Mysqli.class);
-
-  protected static final String DEFAULT_DRIVER = "com.mysql.jdbc.Driver";
-
-  private static HashMap<String,String> _DEFAULT_JDBC_DRIVER_MAP
-    = new HashMap<String,String>();
-
-  static {
-    _DEFAULT_JDBC_DRIVER_MAP.put("mysql", DEFAULT_DRIVER);
-    _DEFAULT_JDBC_DRIVER_MAP.put("google:rdbms",
-                                 "com.google.appengine.api.rdbms.AppEngineDriver");
-  }
 
   // Because _checkedDriverVersion is static, it affects spy output
   // for various qa's.  If running them individually, there is an
@@ -185,9 +172,7 @@ public class Mysqli extends JdbcConnectionResource
       return null;
     }
 
-    if (port <= 0) {
-      port = 3306;
-    }
+    JdbcDriverContext driverContext = env.getQuercus().getJdbcDriverContext();
 
     try {
       if (host == null || host.equals("")) {
@@ -199,21 +184,11 @@ public class Mysqli extends JdbcConnectionResource
         if (slashPos > 5) {
           String protocol = host.substring(5, slashPos);
 
-          Value driverMap = env.getConfigVar("quercus.jdbc_drivers");
+          driver = driverContext.getDriver(protocol);
 
-          if (driverMap.isArray()) {
-            Value driverValue = driverMap.get(env.createString(protocol));
-
-            if (driverValue != UnsetValue.UNSET) {
-              driver = driverValue.toString();
-            }
+          if (driver != null) {
+            url = host;
           }
-
-          if (driver == null) {
-            driver = _DEFAULT_JDBC_DRIVER_MAP.get(protocol);
-          }
-
-          url = host;
         }
       }
 
@@ -222,12 +197,12 @@ public class Mysqli extends JdbcConnectionResource
           driver = "com.caucho.quercus.mysql.QuercusMysqlDriver";
         }
         else {
-          driver = DEFAULT_DRIVER;
+          driver = driverContext.getDefaultDriver();
         }
       }
 
-      if (url == null || url.equals("")) {
-        url = getUrl(host, port, dbname, ENCODING,
+      if (url == null || url.length() == 0) {
+        url = getUrl(env, host, port, dbname, driverContext.getDefaultEncoding(),
                      (flags & MysqliModule.MYSQL_CLIENT_INTERACTIVE) != 0,
                      (flags & MysqliModule.MYSQL_CLIENT_COMPRESS) != 0,
                      (flags & MysqliModule.MYSQL_CLIENT_SSL) != 0);
@@ -252,7 +227,6 @@ public class Mysqli extends JdbcConnectionResource
     } catch (SQLException e) {
       env.warning(L.l("A link to the server could not be established.\n  "
                       + "url={0}\n  driver={1}\n  {2}", url, driver, e.toString()), e);
-      
 
       env.setSpecialValue("mysqli.connectErrno", LongValue.create(e.getErrorCode()));
       env.setSpecialValue("mysqli.connectError", env.createString(e.getMessage()));
@@ -267,7 +241,8 @@ public class Mysqli extends JdbcConnectionResource
     }
   }
 
-  protected static String getUrl(String host,
+  protected static String getUrl(Env env,
+                                 String host,
                                  int port,
                                  String dbname,
                                  String encoding,
@@ -277,12 +252,21 @@ public class Mysqli extends JdbcConnectionResource
   {
     StringBuilder urlBuilder = new StringBuilder();
 
-    urlBuilder.append("jdbc:mysql://");
+    JdbcDriverContext driverContext = env.getQuercus().getJdbcDriverContext();
+    String jdbcUrlPrefix = driverContext.getDefaultUrlPrefix();
+
+    urlBuilder.append(jdbcUrlPrefix);
     urlBuilder.append(host);
-    urlBuilder.append(":");
-    urlBuilder.append(port);
-    urlBuilder.append("/");
-    urlBuilder.append(dbname);
+
+    if (port > 0) {
+      urlBuilder.append(":");
+      urlBuilder.append(port);
+    }
+
+    if (dbname.length() > 0) {
+      urlBuilder.append("/");
+      urlBuilder.append(dbname);
+    }
 
     // Ignore MYSQL_CLIENT_LOCAL_FILES and MYSQL_CLIENT_IGNORE_SPACE flags.
 

@@ -30,6 +30,7 @@
 package com.caucho.quercus.expr;
 
 import com.caucho.quercus.env.Env;
+import com.caucho.quercus.env.QuercusClass;
 import com.caucho.quercus.env.StringValue;
 import com.caucho.quercus.env.Value;
 import com.caucho.quercus.env.Var;
@@ -43,7 +44,7 @@ public class ThisExpr extends AbstractVarExpr {
   private static final L10N L = new L10N(ThisExpr.class);
 
   protected final InterpretedClassDef _quercusClass;
-  
+
   public ThisExpr(InterpretedClassDef quercusClass)
   {
     _quercusClass = quercusClass;
@@ -53,7 +54,7 @@ public class ThisExpr extends AbstractVarExpr {
   {
     return _quercusClass;
   }
-  
+
   /**
    * Creates a field ref
    */
@@ -73,7 +74,7 @@ public class ThisExpr extends AbstractVarExpr {
   {
     return factory.createThisField(this, name);
   }
-  
+
   /**
    * Evaluates the expression.
    *
@@ -85,7 +86,7 @@ public class ThisExpr extends AbstractVarExpr {
   {
     return env.getThis();
   }
-  
+
   /**
    * Evaluates the expression.
    *
@@ -98,7 +99,7 @@ public class ThisExpr extends AbstractVarExpr {
   {
     return env.getThis();
   }
-  
+
   /**
    * Evaluates the expression.
    *
@@ -111,7 +112,7 @@ public class ThisExpr extends AbstractVarExpr {
   {
     return env.getThis().toVar();
   }
-  
+
   /**
    * Evaluates the expression.
    *
@@ -123,10 +124,10 @@ public class ThisExpr extends AbstractVarExpr {
   public Value evalAssignValue(Env env, Value value)
   {
     env.error(getLocation(), "can't assign $this");
-    
+
     return value;
   }
-  
+
   /**
    * Evaluates the expression.
    *
@@ -138,10 +139,10 @@ public class ThisExpr extends AbstractVarExpr {
   public Value evalAssignRef(Env env, Value value)
   {
     env.error(getLocation(), "can't assign $this");
-    
+
     return value;
   }
-  
+
   /**
    * Evaluates the expression.
    *
@@ -153,7 +154,15 @@ public class ThisExpr extends AbstractVarExpr {
   {
     env.error(getLocation(), "can't unset $this");
   }
-  
+
+  /**
+   * Evaluates as a QuercusClass.
+   */
+  public QuercusClass evalQuercusClass(Env env)
+  {
+    return env.getThis().getQuercusClass();
+  }
+
   public String toString()
   {
     return "$this";

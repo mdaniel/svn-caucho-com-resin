@@ -69,6 +69,7 @@ import com.caucho.quercus.env.Value;
 import com.caucho.quercus.expr.ExprFactory;
 import com.caucho.quercus.function.AbstractFunction;
 import com.caucho.quercus.lib.db.JavaSqlDriverWrapper;
+import com.caucho.quercus.lib.db.JdbcDriverContext;
 import com.caucho.quercus.lib.file.FileModule;
 import com.caucho.quercus.lib.regexp.RegexpModule;
 import com.caucho.quercus.lib.session.QuercusSessionManager;
@@ -240,6 +241,8 @@ public class QuercusContext
   private long _dependencyCheckInterval = 2000L;
 
   private boolean _isClosed;
+
+  private JdbcDriverContext _jdbcDriverContext;
 
   /**
    * Constructor.
@@ -626,6 +629,15 @@ public class QuercusContext
   public DataSource getDatabase()
   {
     return _database;
+  }
+
+  public JdbcDriverContext getJdbcDriverContext()
+  {
+    if (_jdbcDriverContext == null) {
+      _jdbcDriverContext = new JdbcDriverContext();
+    }
+
+    return _jdbcDriverContext;
   }
 
   /**

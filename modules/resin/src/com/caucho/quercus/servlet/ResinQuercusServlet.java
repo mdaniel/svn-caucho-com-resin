@@ -92,32 +92,6 @@ public class ResinQuercusServlet extends QuercusServletImpl
     return ws;
   }
 
-  /*
-  @Override
-  Path getPath(HttpServletRequest req)
-  {
-    String scriptPath = QuercusRequestAdapter.getPageServletPath(req);
-    String pathInfo = QuercusRequestAdapter.getPagePathInfo(req);
-
-    Path pwd = Vfs.lookup();
-
-    Path path = pwd.lookup(req.getRealPath(scriptPath));
-
-    if (path.isFile())
-      return path;
-
-    // XXX: include
-
-    String fullPath;
-    if (pathInfo != null)
-      fullPath = scriptPath + pathInfo;
-    else
-      fullPath = scriptPath;
-
-    return Vfs.lookup().lookup(req.getRealPath(fullPath));
-  }
-  */
-
   /**
    * Returns the Quercus instance.
    */

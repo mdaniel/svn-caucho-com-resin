@@ -90,9 +90,6 @@ public abstract class JdbcConnectionResource
 
   protected SqlParseToken _sqlParseToken = new SqlParseToken();
 
-  // php/144b, php/1464, php/1465
-  protected static final String ENCODING = "ISO8859_1";
-
   protected JdbcConnectionResource(Env env)
   {
     env.addCleanup(this);
@@ -171,9 +168,9 @@ public abstract class JdbcConnectionResource
                                           String url,
                                           boolean isNewLink)
   {
-    if (_conn != null)
-      throw new IllegalStateException(
-        getClass().getSimpleName() + " attempt to open multiple connections");
+    if (_conn != null) {
+      throw new IllegalStateException(getClass().getSimpleName() + " attempt to open multiple connections");
+    }
 
     _host = host;
     _userName = userName;

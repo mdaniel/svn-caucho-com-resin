@@ -55,9 +55,6 @@ import com.caucho.vfs.WriteStream;
 
 /**
  * Represents a PHP expression value.
- *
- * XXX: nam: 2012-05-14 make Value an interface that Var, ArgVar, and
- *      AbstractValue extends
  */
 abstract public class Value implements java.io.Serializable
 {

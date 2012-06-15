@@ -1105,7 +1105,7 @@ public class MysqlModule extends AbstractQuercusModule {
                                     @Optional StringValue password,
                                     @Optional boolean isNewLink,
                                     @Optional int flags) {
-    int port = 3306;
+    int port = -1;
     String socketStr = "";
 
     String hostStr;

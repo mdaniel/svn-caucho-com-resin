@@ -531,8 +531,7 @@ public class ErrorModule extends AbstractQuercusModule {
     } else {
       // message sent to PHP's system logger
       String dest = ErrorModule.INI_ERROR_LOG.getAsString(env);
-      if("syslog".equals(dest))
-      {
+      if("syslog".equals(dest)) {
         log.warning(message.toString());
         return true;
       } else {

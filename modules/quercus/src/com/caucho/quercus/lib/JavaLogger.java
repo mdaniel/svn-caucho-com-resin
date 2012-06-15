@@ -26,36 +26,58 @@
  *
  * @author Nam Nguyen
  */
-package com.caucho.quercus.lib.file;
 
-import java.io.IOException;
+package com.caucho.quercus.lib;
 
-/*
- * STDERR, php://stderr
- */
-public class PhpStderr extends AbstractBinaryOutput {
+import java.util.logging.Logger;
 
-  public PhpStderr()
+public class JavaLogger
+{
+  private Logger _log;
+
+  public JavaLogger(String name)
   {
+    _log = Logger.getLogger(name);
   }
 
-  /**
-   * Writes a buffer.
-   */
-  public void write(byte []buffer, int offset, int length)
-    throws IOException
+  public void info(String msg)
   {
-    System.err.write(buffer, offset, length);
+    _log.info(msg);
   }
 
-  public void write(int b)
-    throws IOException
+  public void severe(String msg)
   {
-    System.err.write(b);
+    _log.severe(msg);
   }
 
+  public void warning(String msg)
+  {
+    _log.warning(msg);
+  }
+
+  public void config(String msg)
+  {
+    _log.config(msg);
+  }
+
+  public void fine(String msg)
+  {
+    _log.fine(msg);
+  }
+
+  public void finer(String msg)
+  {
+    _log.finer(msg);
+  }
+
+  public void finest(String msg)
+  {
+    _log.finest(msg);
+  }
+
+  @Override
   public String toString()
   {
-    return getClass().getSimpleName() + "[]";
+    return getClass().getName() + "[" + _log + "]";
   }
 }

@@ -480,7 +480,6 @@ public class Env
       pageInit(page);
     }
 
-    /* php/815d, nam: not sure why we're setting the pwd here */
     // we need it for running scripts like the PDF generation
     if (request != null && page != null) {
       setPwd(page.getPwd(null));

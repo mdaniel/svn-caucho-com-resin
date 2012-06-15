@@ -42,7 +42,7 @@ public class GoogleQuercusServlet extends QuercusServlet
 {
   private static final Logger log
     = Logger.getLogger(GoogleQuercusServlet.class.getName());
-  
+
   private String _gsBucket;
 
   public GoogleQuercusServlet()
@@ -54,21 +54,19 @@ public class GoogleQuercusServlet extends QuercusServlet
   {
     QuercusServletImpl impl = null;
 
-    if (isResin) {
-      try {
-        Class<?> cls = Class.forName("com.caucho.quercus.servlet.ProGoogleQuercusServlet");
-        
-        Constructor<?> ctor = cls.getConstructor(String.class);
+    try {
+      Class<?> cls = Class.forName("com.caucho.quercus.servlet.ProGoogleQuercusServlet");
 
-        impl = (QuercusServletImpl) ctor.newInstance(_gsBucket);
-      }
-      catch (Exception e) {
-        log.finest(e.getMessage());
-      }
+      Constructor<?> ctor = cls.getConstructor(String.class);
+
+      impl = (QuercusServletImpl) ctor.newInstance(_gsBucket);
+    }
+    catch (Exception e) {
+      log.finest(e.getMessage());
     }
 
     if (impl == null) {
-      impl = new GoogleQuercusServletImpl(_gsBucket);
+      impl = new GoogleQuercusServletImpl();
     }
 
     return impl;

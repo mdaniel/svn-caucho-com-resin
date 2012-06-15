@@ -123,7 +123,7 @@ public class ClassesModule extends AbstractQuercusModule {
     }
   }
 
-  /*
+  /**
    * Returns the calling class name.
    */
   @ReturnNullAsFalse

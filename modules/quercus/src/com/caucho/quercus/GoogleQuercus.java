@@ -29,14 +29,9 @@
 
 package com.caucho.quercus;
 
-import com.caucho.quercus.env.ArrayValueImpl;
 import com.caucho.quercus.env.Env;
 import com.caucho.quercus.env.GoogleEnv;
-import com.caucho.quercus.env.Value;
 import com.caucho.quercus.page.QuercusPage;
-import com.caucho.vfs.GoogleMergePath;
-import com.caucho.vfs.MergePath;
-import com.caucho.vfs.Path;
 import com.caucho.vfs.WriteStream;
 
 import javax.servlet.http.HttpServletRequest;
@@ -55,69 +50,6 @@ public class GoogleQuercus extends QuercusContext
   }
 
   @Override
-  public void init()
-  {
-    String mode
-      = System.getProperty("com.google.appengine.tools.development.ApplicationPreparationMode");
-
-    boolean isGsDisabled = "true".equals(mode);
-
-    if (! isGsDisabled) {
-      String gsBucket = getIniString("google.cloud_storage_bucket");
-
-      if (gsBucket != null) {
-        Path stdPwd = getPwd();
-
-        GoogleMergePath mergePwd = new GoogleMergePath(stdPwd, gsBucket, true);
-        setPwd(mergePwd);
-
-        Path webInfDir = getWebInfDir();
-        Path gsWebInfDir = mergePwd.getGooglePath().lookup("WEB-INF");
-        MergePath mergeWebInf = new MergePath(gsWebInfDir, webInfDir);
-
-        setWebInfDir(mergeWebInf);
-      }
-    }
-
-    super.init();
-
-    Value array = getIniValue("quercus.jdbc_drivers");
-    Value key = createString("google:rdbms");
-
-    if (array.isArray()) {
-      if (! array.isset(key)) {
-        array.put(key, createString("com.google.appengine.api.rdbms.AppEngineDriver"));
-      }
-    }
-    else {
-      array = new ArrayValueImpl();
-
-      array.put(key, createString("com.google.appengine.api.rdbms.AppEngineDriver"));
-
-      setIni("quercus.jdbc_drivers", array);
-    }
-  }
-
-  /*
-  @Override
-  public ModuleContext getLocalContext(ClassLoader loader)
-  {
-    Thread thread = Thread.currentThread();
-    ClassLoader currentLoader = thread.getContextClassLoader();
-
-    synchronized (this) {
-      if (_localModuleContext == null) {
-        _localModuleContext = createModuleContext(null, currentLoader);
-
-        _localModuleContext.init();
-      }
-    }
-
-    return _localModuleContext;
-  }
-  */
-
-  @Override
   public Env createEnv(QuercusPage page,
                        WriteStream out,
                        HttpServletRequest request,
@@ -125,19 +57,5 @@ public class GoogleQuercus extends QuercusContext
   {
     return new GoogleEnv(this, page, out, request, response);
   }
-
-  /*
-  @Override
-  public String getVersion()
-  {
-    return com.caucho.Version.VERSION;
-  }
-
-  @Override
-  public String getVersionDate()
-  {
-    return com.caucho.Version.VERSION_DATE;
-  }
-  */
 }
 

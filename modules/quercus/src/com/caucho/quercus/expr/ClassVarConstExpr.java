@@ -53,7 +53,7 @@ public class ClassVarConstExpr extends Expr {
     _className = className;
     _name = name.intern();
   }
-  
+
   //
   // function call creation
   //
@@ -68,7 +68,7 @@ public class ClassVarConstExpr extends Expr {
     throws IOException
   {
     ExprFactory factory = parser.getExprFactory();
-    
+
     return factory.createClassMethodCall(location, _className, _name, args);
   }
 
@@ -81,9 +81,10 @@ public class ClassVarConstExpr extends Expr {
    */
   public Value eval(Env env)
   {
-    String className = _className.evalString(env);
+    // php/09d2
+    QuercusClass cls = _className.evalQuercusClass(env);
 
-    return env.getClass(className).getConstant(env, _name);
+    return cls.getConstant(env, _name);
   }
 
   public String toString()
