@@ -629,7 +629,7 @@ custom-configured just like the handlers.</p>
   xmlns:mypkg="urn:java:com.mycom.mypkg">
 
   &lt;log-handler name="com.foo" level="warning" path="WEB-INF/log.log"&gt;
-    &lt;mypkg:MyFormatter/>
+    &lt;formatter>&lt;mypkg:MyFormatter/>&lt;/formatter>
   &lt;/log-handler>
   
 &lt;/web-app>
