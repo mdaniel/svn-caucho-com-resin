@@ -30,22 +30,12 @@
 package com.caucho.quercus.servlet;
 
 import com.caucho.config.ConfigException;
-import com.caucho.loader.DynamicClassLoader;
-import com.caucho.loader.Loader;
-import com.caucho.quercus.GoogleQuercusClassLoader;
 import com.caucho.quercus.QuercusContext;
 import com.caucho.quercus.QuercusRuntimeException;
 import com.caucho.quercus.lib.db.QuercusDataSource;
 import com.caucho.quercus.module.QuercusModule;
 import com.caucho.util.CurrentTime;
-import com.caucho.util.IoUtil;
 import com.caucho.util.L10N;
-import com.caucho.vfs.JarPath;
-import com.caucho.vfs.MemoryPath;
-import com.caucho.vfs.Path;
-import com.caucho.vfs.ReadStream;
-import com.caucho.vfs.Vfs;
-import com.caucho.vfs.WriteStream;
 
 import javax.naming.Context;
 import javax.naming.InitialContext;
