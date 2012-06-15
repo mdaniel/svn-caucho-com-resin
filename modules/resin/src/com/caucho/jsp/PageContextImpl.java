@@ -618,6 +618,7 @@ public class PageContextImpl extends PageContext
   /**
    * Pushes a new BodyContent onto the JspWriter stack.
    */
+  @Override
   public BodyContent pushBody()
   {
     BodyContentImpl body;
@@ -650,6 +651,7 @@ public class PageContextImpl extends PageContext
   /**
    * Pushes a new writer onto the JspWriter stack.
    */
+  @Override
   public JspWriter pushBody(Writer writer)
   {
     if (writer == _out)
@@ -680,7 +682,7 @@ public class PageContextImpl extends PageContext
   @Override
   public JspWriter popBody()
   {
-    BodyContentImpl bodyOut = (BodyContentImpl) _out;
+    AbstractBodyContent bodyOut = (AbstractBodyContent) _out;
     _out = bodyOut.getEnclosingWriter();
 
     try {

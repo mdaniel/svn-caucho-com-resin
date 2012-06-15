@@ -364,6 +364,11 @@ class WatchdogConfig
     _watchdogAddress = addr;
   }
   
+  public void addWatchdogArg(String arg)
+  {
+    addWatchdogJvmArg(arg);
+  }
+  
   public void addWatchdogJvmArg(String arg)
   {
     _watchdogJvmArgs.add(arg);

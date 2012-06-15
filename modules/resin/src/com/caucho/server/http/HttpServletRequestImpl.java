@@ -216,7 +216,9 @@ public final class HttpServletRequestImpl extends AbstractCauchoRequest
   @Override
   public String getRemoteAddr()
   {
-    return _request.getRemoteAddr();
+    AbstractHttpRequest request = _request;
+
+    return request != null ? request.getRemoteAddr() : null;
   }
 
   /**

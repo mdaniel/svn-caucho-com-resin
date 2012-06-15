@@ -12,6 +12,12 @@
 
 <s2 title="4.0.29 - snapshot">
 <ul>
+<li>admin: both health.xml and resin-admin use "Restart" as the PDF name (#4935)</li>
+<li>load-balance: clear DNS lookup when connect fails (#4902, rep by B. Plump)</li>
+<li>jsp: issues with pushBody(Writer) (#4964, rep by mcamca)</li>
+<li>cli: watchdog-arg was not working properly with start-all (#4978)</li>
+<li>deploy: undeploy needs to remove webapps directory (#4875, rep by jafr)</li>
+<li>alarm: allow Alarm to be instantiated in maven context (#4796, #5112 rep by Alexey Abashev)</li>
 <li>config: app-inf in cluster wasn't picked up properly (#5004)</li>
 <li>cloud: EC2elastic server with "ext:" address and missing cluster-system-key (#5015)</li.
 <li>servlet: add header-size-max and header-count-max (#4986, rep by Deepak Ramaprasad)</li>

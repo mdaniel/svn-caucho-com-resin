@@ -310,6 +310,29 @@ abstract public class ExpandDeployController<I extends DeployInstance>
     }
   }
 
+  /**
+   * Deploys the controller
+   */
+  public void undeploy()
+  {
+    undeployImpl();
+  }
+  
+  /**
+   * Deploys the controller
+   */
+  protected void undeployImpl()
+  {
+    if (log.isLoggable(Level.FINER))
+      log.finer(this + " undeploying");
+    
+    try {
+      removeExpandDirectory();
+    } catch (Exception e) {
+      throw new RuntimeException(e);
+    }
+  }
+
   @Override
   protected void preConfigureInstance(I deployInstance)
     throws Exception
@@ -649,6 +672,15 @@ abstract public class ExpandDeployController<I extends DeployInstance>
     _versionDependency = versionDependency;
   }
 
+  protected void removeExpandDirectory()
+  {
+    Path pwd = getRootDirectory();
+
+    if (pwd.isDirectory()) {
+      removeExpandDirectory(pwd);
+    }
+  }
+
   /**
    * Recursively remove all files in a directory.  Used for wars when
    * they change.
@@ -740,8 +772,18 @@ abstract public class ExpandDeployController<I extends DeployInstance>
   {
     super.onDestroy();
     
-    if (_deployItem != null)
+    if (_deployItem != null) {
       _deployItem.removeNotificationListener(_deployListener);
+    }
+    
+    // server/6b0e
+    String tag = getId();
+    String treeHash = _repositorySpi.getTagContentHash(tag);
+    String rootHash = _rootHash;
+    
+    if (treeHash == null && rootHash != null) {
+      undeploy();
+    }
   }
 
   /**

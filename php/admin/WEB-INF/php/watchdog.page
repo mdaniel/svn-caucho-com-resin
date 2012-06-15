@@ -377,7 +377,7 @@ function print_pdf_select()
   echo "</h2>\n";
 
   echo "<form action='pdf-gen.php' method='get' style='display:inline;'>";
-  echo "<input type='hidden' name='report' value='Watchdog'/>\n";
+  echo "<input type='hidden' name='report' value='Restart'/>\n";
   echo "<input type='hidden' name='time' value='${g_time}'/>\n";
   
   echo "<label for='period'>";

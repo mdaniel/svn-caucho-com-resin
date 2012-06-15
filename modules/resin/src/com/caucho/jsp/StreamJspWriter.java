@@ -66,6 +66,8 @@ class StreamJspWriter extends AbstractBodyContent {
     _parent = parent;
     _writer = writer;
     _isClosed = false;
+    
+    setParent(parent);
   }
 
   /**

@@ -183,17 +183,46 @@ public class TcpPath extends Path {
 
     return _address;
   }
+  
+  private void clearSocketAddress()
+  {
+    _socketAddressExpireTime = 0;
+  }
 
   @Override
   public StreamImpl openReadImpl() throws IOException
   {
-    return TcpStream.openRead(this, _connectTimeout, _socketTimeout, _noDelay);
+    boolean isValid = false;
+    
+    try {
+      StreamImpl stream = TcpStream.openRead(this, _connectTimeout, _socketTimeout, _noDelay);
+      
+      isValid = true;
+      
+      return stream;
+    } finally {
+      if (! isValid) {
+        clearSocketAddress();
+      }
+    }
   }
 
   @Override
   public StreamImpl openReadWriteImpl() throws IOException
   {
-    return TcpStream.openReadWrite(this, _connectTimeout, _socketTimeout, _noDelay);
+    boolean isValid = false;
+    
+    try {
+      StreamImpl stream = TcpStream.openReadWrite(this, _connectTimeout, _socketTimeout, _noDelay);
+      
+      isValid = true;
+      
+      return stream;
+    } finally {
+      if (! isValid) {
+        clearSocketAddress();
+      }
+    }
   }
 
   @Override

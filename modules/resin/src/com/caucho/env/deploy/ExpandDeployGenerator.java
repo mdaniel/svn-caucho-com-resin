@@ -599,8 +599,9 @@ abstract public class ExpandDeployGenerator<E extends ExpandDeployController<?>>
         }
 
         for (String key : newKeys) {
-          if (! oldKeys.contains(key))
+          if (! oldKeys.contains(key)) {
             updatedKeys.add(key);
+          }
         }
 
         for (String key : updatedKeys) {

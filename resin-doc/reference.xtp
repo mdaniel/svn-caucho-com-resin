@@ -7881,6 +7881,7 @@ to configure a password decoder.</p>
 </description>
 </defun>
 
+<!--
 <defun title="&lt;persistent-store>" version="Resin 3.0.8">
 <parents>cluster</parents>
 
@@ -7920,6 +7921,7 @@ element persistent-store {
 }
 </def>
 </defun>
+-->
 
 <defun title="&lt;ping>" occur="*" version="Resin 3.0" name="ping">
 <parents>cluster</parents>

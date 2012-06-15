@@ -104,9 +104,11 @@ public class Alarm implements ThreadTask, ClassLoaderListener {
 
   protected Alarm(String name)
   {
-    if (_coordinatorThread == null)
+    if (_coordinatorThread == null) {
       throw new IllegalStateException("Alarm cannot be instantiated because Resin is running inside a foreign classloader."
                                       + "\n  " + Alarm.class.getClassLoader());
+    }
+    
     _name = name;
 
     addEnvironmentListener();
@@ -744,32 +746,13 @@ public class Alarm implements ThreadTask, ClassLoaderListener {
   }
 
   static {
-    ClassLoader systemLoader = null;
     // AlarmThread alarmThread = null;
     CoordinatorThread coordinator = null;
     ClassLoader loader = Alarm.class.getClassLoader();
 
     try {
-      systemLoader = ClassLoader.getSystemClassLoader();
-    } catch (Throwable e) {
-    }
-
-    try {
-      boolean isAlarmStart = System.getProperty("caucho.alarm.enable") != null;
-
-      if (isAlarmStart
-          || loader == null
-          || loader instanceof DynamicClassLoader
-          || loader == systemLoader
-          || systemLoader != null && loader == systemLoader.getParent()) {
-        /*
-        alarmThread = new AlarmThread();
-        alarmThread.start();
-        */
-
-        coordinator = new CoordinatorThread();
-        coordinator.wake();
-      }
+      coordinator = new CoordinatorThread();
+      coordinator.wake();
     } catch (Throwable e) {
       // should display for security manager issues
       log.fine("Alarm not started: " + e);

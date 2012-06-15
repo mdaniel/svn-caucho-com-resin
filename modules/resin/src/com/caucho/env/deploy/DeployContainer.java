@@ -237,8 +237,9 @@ public class DeployContainer<C extends DeployControllerApi<?>>
   {
     C newController = updateImpl(name);
     
-    if (_lifecycle.isActive() && newController != null)
+    if (_lifecycle.isActive() && newController != null) {
       newController.startOnInit();
+    }
 
     return newController;
   }
@@ -285,8 +286,9 @@ public class DeployContainer<C extends DeployControllerApi<?>>
   {
     C oldController = _controllerList.remove(name, getControllerNameMatch());
 
-    if (oldController != null)
+    if (oldController != null) {
       oldController.close();
+    }
   }
 
   /**
