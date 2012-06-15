@@ -31,6 +31,8 @@ public class TestServlet extends HttpServlet {
 
       try {
         readConfigFile(inputFile, out);
+      } catch (FileNotFoundException ex) {
+        throw new ServletException(inputFile + " is an unknown file");
       } catch (Exception ex) {
         throw new ServletException(ex);
       }
@@ -40,6 +42,8 @@ public class TestServlet extends HttpServlet {
       out.println("outputFile: " + outputFile);
       try {
         writeConfigFile(outputFile);
+      } catch (FileNotFoundException ex) {
+        throw new ServletException(outputFile + " is an unknown file");
       } catch (Exception ex) {
         throw new ServletException(ex);
       }
@@ -61,7 +65,7 @@ public class TestServlet extends HttpServlet {
     final int bufsz = 1024;
     char[] buf = new char[bufsz];
     int l;
-    
+
     Reader in = new BufferedReader(new InputStreamReader(is));
 
     while ((l = in.read(buf,0,bufsz)) > 0) {

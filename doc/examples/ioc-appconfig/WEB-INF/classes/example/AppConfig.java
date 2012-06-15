@@ -68,7 +68,7 @@ public class AppConfig {
   public static class ConfigFilesLocation {
     Path _path;  // com.caucho.vfs.Path
 
-    public void setLocation(String location) 
+    public void setLocation(String location)
     {
       _path = Vfs.lookup().lookup(location);
     }
@@ -79,8 +79,11 @@ public class AppConfig {
       Path p = _path.lookup(file);
 
       if (! p.getFullPath().startsWith(_path.getFullPath()))
-	throw new IllegalStateException();
-      
+        throw new IllegalStateException();
+      else if (p.canRead()) {
+        throw new FileNotFoundException(file);
+      }
+
       return p.openRead();
     }
 
@@ -90,8 +93,11 @@ public class AppConfig {
       Path p = _path.lookup(file);
 
       if (! p.getFullPath().startsWith(_path.getFullPath()))
-	throw new IllegalStateException();
-      
+        throw new IllegalStateException();
+      else if (p.getParent().canWrite()) {
+        throw new FileNotFoundException(file);
+      }
+
       return p.openWrite();
     }
   }

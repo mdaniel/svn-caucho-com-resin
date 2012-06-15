@@ -520,7 +520,7 @@ public class TransactionImpl implements Transaction, AlarmListener {
     throws SystemException
   {
     if (_status != Status.STATUS_ACTIVE
-	&& _status != Status.STATUS_MARKED_ROLLBACK)
+        && _status != Status.STATUS_MARKED_ROLLBACK)
       throw new IllegalStateException(L.l("can't set rollback-only"));
 
     _status = Status.STATUS_MARKED_ROLLBACK;
@@ -537,7 +537,7 @@ public class TransactionImpl implements Transaction, AlarmListener {
   public void setRollbackOnly(Throwable exn)
   {
     if (_status != Status.STATUS_ACTIVE
-	&& _status != Status.STATUS_MARKED_ROLLBACK)
+        && _status != Status.STATUS_MARKED_ROLLBACK)
       throw new IllegalStateException(L.l("can't set rollback-only"));
 
     _status = Status.STATUS_MARKED_ROLLBACK;
@@ -564,7 +564,7 @@ public class TransactionImpl implements Transaction, AlarmListener {
       if (_status != Status.STATUS_ACTIVE) {
         switch (_status) {
         case Status.STATUS_MARKED_ROLLBACK:
-	  break;
+          break;
 
         case Status.STATUS_NO_TRANSACTION:
           throw new IllegalStateException(L.l("Can't commit outside of a transaction.  Either the UserTransaction.begin() is missing or the transaction has already been committed or rolled back."));
@@ -579,26 +579,26 @@ public class TransactionImpl implements Transaction, AlarmListener {
         log.fine(this + " committing");
 
       try {
-	callBeforeCompletion();
+        callBeforeCompletion();
       } catch (RollbackException e) {
-	rollbackInt();
-      
-	throw e;
-      } catch (Throwable e) {
-	setRollbackOnly(e);
+        rollbackInt();
 
-	rollbackInt();
-      
-	throw new RollbackException(e);
+        throw e;
+      } catch (Throwable e) {
+        setRollbackOnly(e);
+
+        rollbackInt();
+
+        throw new RollbackException(e);
       }
 
       if (_status == Status.STATUS_MARKED_ROLLBACK) {
-	rollbackInt();
-	
-	if (_rollbackException != null)
-	  throw new RollbackExceptionWrapper(_rollbackException);
-	else
-	  throw new RollbackException(L.l("Transaction has been marked rolled back."));
+        rollbackInt();
+
+        if (_rollbackException != null)
+          throw new RollbackExceptionWrapper(_rollbackException);
+        else
+          throw new RollbackException(L.l("Transaction has been marked rolled back."));
       }
 
       if (_resourceCount > 0) {
@@ -842,8 +842,8 @@ public class TransactionImpl implements Transaction, AlarmListener {
       try {
         sync.beforeCompletion();
       } catch (RuntimeException e) {
-	setRollbackOnly(e);
-	
+        setRollbackOnly(e);
+
         throw new RollbackException(e);
       } catch (Throwable e) {
         log.log(Level.FINE, e.toString(), e);
@@ -954,7 +954,7 @@ public class TransactionImpl implements Transaction, AlarmListener {
     try {
       log.warning(L.l("{0}: timed out after {1} seconds.",
                       this,
-                      String.valueOf(getTransactionTimeout())));
+                      String.valueOf(getTransactionTimeout() + EXTRA_TIMEOUT)));
 
       setRollbackOnly();
 

@@ -12,6 +12,8 @@
 
 <s2 title="3.1.13 snapshot">
 <ul>
+<li>xa: change timeout message to include EXTRA_TIMEOUT (#4927, rep by Shinomiya Nobuaki)</li>
+<li>i18n: utf8 parser should replace errors with an error character (#4957, rep by S. Nobuaki)</li>
 <li>session: load-balance response is delayed for session persistence (#5055, rep by IHG)</li>
 <li>load-balance: the load-balancer should not fail-over for a read timeout if there are other more recent successful reads (#5054, rep by IHG)</li>
 <li>performance: fixed occasional 60s startup delay (#5069)</li>
