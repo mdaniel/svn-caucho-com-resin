@@ -74,7 +74,13 @@
 		</a>
 		</li>
 		<li>
-		<a href
+		<a href="http://wiki4.caucho.com/Understanding_WebSockets_versus_Ajax/REST_for_Java_EE_Developers">Understanding WebSockets versus Ajax/REST for Java EE Developers"</a>
+		</li>
+		<li>
+		<a href="http://wiki4.caucho.com/Resin_4_Java_EE_Java_Application_Server_JMS_Support_Tutorial">JMS: Resin the Java Application Server | Java EE | Java Messaging Service Tutorial</a>
+		</li>
+		<li>
+		<a href="http://wiki4.caucho.com/Resin_4_built-in_fast_PHP_support_called_Quercus_:_covers_Java_integration,_JSON_support_and_more>Resin 4 built-in fast PHP support called Quercus : Covers Java integration, JSON support and more</a>
 		</li>
 	    </ol>
 	</s2>
