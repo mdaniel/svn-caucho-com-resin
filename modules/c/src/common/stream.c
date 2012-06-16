@@ -422,6 +422,7 @@ cse_open(stream_t *s, cluster_t *cluster, cluster_srun_t *cluster_srun,
   config_t *config = cluster->config;
   struct sockaddr_in sin;
   srun_t *srun = cluster_srun->srun;
+  struct timeval timeout;
 
   if (! srun)
     return 0;
@@ -489,6 +490,19 @@ cse_open(stream_t *s, cluster_t *cluster, cluster_srun_t *cluster_srun,
 	 __FILE__, __LINE__,
 	 srun->send_buffer_size));
   }
+
+#ifdef HAS_SOCK_TIMEOUT
+  timeout.tv_sec = srun->read_timeout / 1000;
+  timeout.tv_usec = srun->read_timeout % 1000 * 1000;
+  
+  setsockopt(s->socket, SOL_SOCKET, SO_RCVTIMEO,
+             (char *) &timeout, sizeof(timeout));
+
+  timeout.tv_sec = srun->read_timeout / 1000;
+  timeout.tv_usec = srun->read_timeout % 1000 * 1000;
+  setsockopt(s->socket, SOL_SOCKET, SO_SNDTIMEO,
+	     (char *) &timeout, sizeof(timeout));
+#endif
   
   LOG(("%s:%d:cse_open(): open new connection %d %x:%d\n",
        __FILE__, __LINE__,

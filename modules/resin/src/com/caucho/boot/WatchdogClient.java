@@ -599,8 +599,8 @@ class WatchdogClient
     if (("".equals(args.getServerId()) || args.getServerId() == null)
         && ! args.isDynamicServer()) {
       list.add("-server");
-      if ((getId() == null || "".equals(getId())) && CauchoSystem.isWindows())
-        list.add("\"\"");
+      if (getId() == null || "".equals(getId()))
+        list.add("default");
       else
         list.add(getId());
     }

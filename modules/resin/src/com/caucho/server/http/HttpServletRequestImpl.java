@@ -227,7 +227,9 @@ public final class HttpServletRequestImpl extends AbstractCauchoRequest
   @Override
   public String getRemoteHost()
   {
-    return _request.getRemoteHost();
+    AbstractHttpRequest request = _request;
+
+    return request != null ? request.getRemoteHost() : null;
   }
 
   /**
@@ -238,7 +240,9 @@ public final class HttpServletRequestImpl extends AbstractCauchoRequest
   @Override
   public int getRemotePort()
   {
-    return _request.getRemotePort();
+    AbstractHttpRequest request = _request;
+
+    return request != null ? request.getRemotePort() : 0;
   }
 
   /**

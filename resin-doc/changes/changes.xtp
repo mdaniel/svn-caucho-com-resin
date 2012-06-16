@@ -12,6 +12,8 @@
 
 <s2 title="4.0.29 - snapshot">
 <ul>
+<li>mod_caucho: add TCP/OS SND/RCV timeouts to sockets (#4988)</li>
+<li>cli: handle -server "" by renaming to -server "default" (#5005, rep by K. Ding)</li>
 <li>admin: both health.xml and resin-admin use "Restart" as the PDF name (#4935)</li>
 <li>load-balance: clear DNS lookup when connect fails (#4902, rep by B. Plump)</li>
 <li>jsp: issues with pushBody(Writer) (#4964, rep by mcamca)</li>

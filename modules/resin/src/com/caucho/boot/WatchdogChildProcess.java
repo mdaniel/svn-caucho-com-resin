@@ -788,8 +788,8 @@ class WatchdogChildProcess
     if (_watchdog.getId() != null
         && ! _watchdog.isDynamicServer()) {
       resinArgs.add("-server");
-      if ("".equals(_watchdog.getId()) && CauchoSystem.isWindows())
-        resinArgs.add("\"\"");
+      if ("".equals(_watchdog.getId()) || _watchdog.getId() == null)
+        resinArgs.add("default");
       else
         resinArgs.add(_watchdog.getId());
     }
