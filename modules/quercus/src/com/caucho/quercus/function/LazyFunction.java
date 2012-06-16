@@ -35,7 +35,6 @@ import com.caucho.quercus.env.Value;
 import com.caucho.util.L10N;
 
 import java.util.logging.Logger;
-import java.lang.reflect.Constructor;
 
 /**
  * Lazily load a compiled function.
@@ -83,14 +82,14 @@ public class LazyFunction extends AbstractFunction
       ClassLoader loader = _pageClass.getClassLoader();
 
       String className = _pageClass.getName() + "$" + _className;
-      
+
       Class<?> cl = Class.forName(className, false, loader);
 
       /*
       Constructor ctor = cl.getConstructors()[0];
       ctor.setAccessible(true);
       */
-      
+
       _fun = (AbstractFunction) cl.newInstance();
 
       int id = _quercus.findFunctionId(_name);
@@ -102,7 +101,7 @@ public class LazyFunction extends AbstractFunction
       throw new RuntimeException(e);
     }
   }
-  
+
   @Override
   public String getComment()
   {
@@ -111,7 +110,7 @@ public class LazyFunction extends AbstractFunction
     else
       return getFun(Env.getInstance()).getComment();
   }
-  
+
   //
   // call
   //

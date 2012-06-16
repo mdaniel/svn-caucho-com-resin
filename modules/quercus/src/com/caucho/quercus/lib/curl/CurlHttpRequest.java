@@ -29,10 +29,12 @@
 
 package com.caucho.quercus.lib.curl;
 
+import com.caucho.quercus.QuercusException;
 import com.caucho.quercus.QuercusModuleException;
 import com.caucho.quercus.env.BooleanValue;
 import com.caucho.quercus.env.Env;
 import com.caucho.quercus.env.EnvCleanup;
+import com.caucho.quercus.env.NullValue;
 import com.caucho.quercus.env.StringValue;
 import com.caucho.quercus.env.Value;
 import com.caucho.util.L10N;
@@ -146,7 +148,7 @@ public class CurlHttpRequest
     timeout = _curl.getReadTimeout();
     if (timeout >= 0)
       _conn.setReadTimeout(timeout);
-    
+
     return true;
   }
 
@@ -178,21 +180,21 @@ public class CurlHttpRequest
   {
     if (_curl == null || _conn == null)
       return false;
-    
+
     _curl.setResponseCode(_conn.getResponseCode());
 
     Value header = getHeader(env, env.createBinaryBuilder());
-    
+
     if (header == BooleanValue.FALSE)
       return false;
-    
+
     _curl.setHeader(header.toStringValue());
-    
+
     Value body = getBody(env, env.createBinaryBuilder());
-    
+
     if (body == BooleanValue.FALSE)
       return false;
-    
+
     _curl.setBody(body.toStringValue());
 
     _curl.setContentLength(_conn.getContentLength());
@@ -200,7 +202,7 @@ public class CurlHttpRequest
     _curl.setCookie(_conn.getHeaderField("Set-Cookie"));
 
     _conn.close();
-    
+
     return true;
   }
 
@@ -223,18 +225,18 @@ public class CurlHttpRequest
     }
     catch (MalformedURLException e) {
       error(env, CurlModule.CURLE_URL_MALFORMAT, e.getMessage(), e);
-      
+
       return false;
     }
     catch (SocketTimeoutException e) {
       error(
         env, CurlModule.CURLE_OPERATION_TIMEOUTED, "connection timed out", e);
-      
+
       return false;
     }
     catch (ConnectException e) {
       error(env, CurlModule.CURLE_COULDNT_CONNECT, e.getMessage(), e);
-      
+
       return false;
     }
     catch (ProtocolException e) {
@@ -244,12 +246,12 @@ public class CurlHttpRequest
     catch (UnknownHostException e) {
       error(env, CurlModule.CURLE_COULDNT_RESOLVE_HOST,
             "unknown host: " + e.getMessage(), e);
-      
+
       return false;
     }
     catch (IOException e) {
       error(env, CurlModule.CURLE_RECV_ERROR, e.getMessage(), e);
-      
+
       return false;
     }
   }
@@ -258,7 +260,7 @@ public class CurlHttpRequest
   {
     return _curl;
   }
-  
+
   protected final CurlHttpConnection getHttpConnection()
   {
     return _conn;
@@ -294,7 +296,7 @@ public class CurlHttpRequest
   {
     if (urlString == null)
       return null;
-    
+
     URL url;
 
     if (urlString.indexOf("://") < 0)
@@ -313,19 +315,38 @@ public class CurlHttpRequest
    */
   private final Value getHeader(Env env, StringValue bb)
   {
-    // Append server response to the very top
-    bb.append(_conn.getHeaderField(0));
-    
+    String httpStatus = _conn.getHeaderField(0);
+
+    int i = 0;
+
+    if (_conn.getHeaderFieldKey(0) == null && httpStatus != null) {
+      i++;
+    }
+    else {
+      // according to the JDK docs, implementations may or may not return the
+      // status as the first header (Google's URLFetch doesn't)
+
+      try {
+        int responseCode = _conn.getResponseCode();
+
+        httpStatus = "HTTP/1.1 " + responseCode + " " + _conn.getResponseMessage();
+      }
+      catch (IOException e) {
+        throw new QuercusException(e);
+      }
+    }
+
+    bb.append(httpStatus);
     bb.append("\r\n");
-    
+
     if (_curl.getHeaderCallback() != null) {
       StringValue sb = env.createUnicodeBuilder();
-      
-      sb.append(_conn.getHeaderField(0));
+
+      sb.append(httpStatus);
       sb.append("\r\n");
-      
+
       Value len = _curl.getHeaderCallback().call(env, env.wrapJava(_curl), sb);
-      
+
       if (len.toInt() != sb.length()) {
         _curl.setErrorCode(CurlModule.CURLE_WRITE_ERROR);
         return BooleanValue.FALSE;
@@ -333,46 +354,45 @@ public class CurlHttpRequest
     }
 
     String key;
-    int i = 1;
 
     while ((key = _conn.getHeaderFieldKey(i)) != null) {
       bb.append(key);
       bb.append(": ");
       bb.append(_conn.getHeaderField(i));
       bb.append("\r\n");
-      
+
       if (_curl.getHeaderCallback() != null) {
         StringValue sb = env.createUnicodeBuilder();
-        
+
         sb.append(key);
         sb.append(": ");
         sb.append(_conn.getHeaderField(i));
         sb.append("\r\n");
-        
+
         Value len = _curl.getHeaderCallback().call(env,
                                                    env.wrapJava(_curl),
                                                    sb);
-        
+
         if (len.toInt() != sb.length()) {
           _curl.setErrorCode(CurlModule.CURLE_WRITE_ERROR);
           return BooleanValue.FALSE;
         }
       }
-      
+
       i++;
     }
 
     bb.append("\r\n");
-    
+
     if (_curl.getHeaderCallback() != null) {
       StringValue sb = env.createUnicodeBuilder();
-      
+
       sb.append("\r\n");
-      
+
       Value len = _curl.getHeaderCallback().call(env,
                                                  env.wrapJava(_curl),
                                                  sb);
-      
+
       if (len.toInt() != sb.length()) {
         _curl.setErrorCode(CurlModule.CURLE_WRITE_ERROR);
         return BooleanValue.FALSE;
@@ -415,7 +435,7 @@ public class CurlHttpRequest
     }
 
     int ch;
-    
+
     try {
       while ((ch = in.read()) >= 0) {
         bb.appendByte(ch);
@@ -424,10 +444,10 @@ public class CurlHttpRequest
     catch (IOException e) {
       throw new QuercusModuleException(e);
     }
-    
+
     if (_curl.getReadCallback() != null) {
       Value len = _curl.getReadCallback().call(env, env.wrapJava(_curl), bb);
-      
+
       if (len.toInt() != bb.length()) {
         _curl.setErrorCode(CurlModule.CURLE_WRITE_ERROR);
         return BooleanValue.FALSE;
