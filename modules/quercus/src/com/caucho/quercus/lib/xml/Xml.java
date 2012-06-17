@@ -104,7 +104,7 @@ public class Xml {
   private Value _obj;
 
   SAXParserFactory _factory = SAXParserFactory.newInstance();
-  
+
   private StringValue _xmlString;
   private XmlHandler _xmlHandler;
 
@@ -164,27 +164,27 @@ public class Xml {
       if (! startElementHandler.isEmpty()) {
         _startElementHandler = startElementHandler.toCallable(env);
       }
-      
+
       if (! endElementHandler.isEmpty()) {
         _endElementHandler = endElementHandler.toCallable(env);
       }
-    } 
+    }
     else {
       if (! startElementHandler.isEmpty()) {
-        Value value = new ArrayValueImpl();
-        value.put(_obj);
-        value.put(startElementHandler);
-        _startElementHandler = value.toCallable(env);
+        StringValue name = startElementHandler.toStringValue(env);
+        CallbackObjectMethod callback = new CallbackObjectMethod(_obj, name);
+
+        _startElementHandler = callback;
       }
 
-      if (! endElementHandler.isEmpty() && ! endElementHandler.toBoolean()) {
-        Value value = new ArrayValueImpl();
-        value.put(_obj);
-        value.put(endElementHandler);
-        _endElementHandler = value.toCallable(env);
+      if (! endElementHandler.isEmpty()) {
+        StringValue name = endElementHandler.toStringValue(env);
+        CallbackObjectMethod callback = new CallbackObjectMethod(_obj, name);
+
+        _endElementHandler = callback;
       }
     }
-    
+
     return true;
   }
 
@@ -372,15 +372,15 @@ public class Xml {
   {
     if (_xmlString == null)
       _xmlString = data.createStringBuilder();
-    
+
     _xmlString.append(data);
 
     if (isFinal) {
       InputSource is;
-      
+
       if (_xmlString.isUnicode()) {
         is = new InputSource(_xmlString.toReader("utf-8"));
-        
+
         _xmlOptionTargetEncoding = is.getEncoding();
       }
       else if (_xmlOptionTargetEncoding != null
@@ -388,10 +388,10 @@ public class Xml {
         is = new InputSource(_xmlString.toReader(_xmlOptionTargetEncoding));
       else {
         is = new InputSource(_xmlString.toInputStream());
-        
+
         _xmlOptionTargetEncoding = is.getEncoding();
       }
-      
+
       try {
         _errorCode = XmlModule.XML_ERROR_NONE;
         _errorString = null;
@@ -415,13 +415,13 @@ public class Xml {
       } catch (Exception e) {
         _errorCode = XmlModule.XML_ERROR_SYNTAX;
         _errorString = e.toString();
-        
+
         log.log(Level.FINE, e.toString(), e);
         return 0;
       } finally {
         _xmlHandler = null;
       }
-      
+
     }
 
     return 1;
@@ -443,10 +443,10 @@ public class Xml {
   {
     ArrayValueImpl valueArray = new ArrayValueImpl();
     ArrayValueImpl indexArray = new ArrayValueImpl();
-    
+
     valsV.set(valueArray);
     indexV.set(indexArray);
-    
+
     if (data == null || data.length() == 0)
       return 0;
 
@@ -454,7 +454,7 @@ public class Xml {
       _xmlString = data.toStringBuilder(env);
 
     InputSource is;
-    
+
     if (_xmlString.isUnicode())
       is = new InputSource(_xmlString.toReader("utf-8"));
     else
@@ -466,23 +466,23 @@ public class Xml {
     } catch (SAXException e) {
       _errorCode = XmlModule.XML_ERROR_SYNTAX;
       _errorString = e.toString();
-      
+
       log.log(Level.FINE, e.toString(), e);
-      
+
       return 0;
     } catch (IOException e) {
       _errorCode = XmlModule.XML_ERROR_SYNTAX;
       _errorString = e.toString();
-      
+
       log.log(Level.FINE, e.toString(), e);
-      
+
       return 0;
     } catch (Exception e) {
       _errorCode = XmlModule.XML_ERROR_SYNTAX;
       _errorString = e.toString();
-      
+
       log.log(Level.FINE, e.toString(), e);
-      
+
       return 0;
     }
 
@@ -574,7 +574,7 @@ public class Xml {
     private int _valueArrayIndex = 0;
 
     private Locator _locator;
-    
+
     private Env _env;
 
     public StructHandler(Env env,
@@ -582,7 +582,7 @@ public class Xml {
                          ArrayValueImpl indexArray)
     {
       _env = env;
-      
+
       _valueArray = valueArray;
       _indexArray = indexArray;
     }
@@ -655,7 +655,7 @@ public class Xml {
       _paramHashMap.put(_level, eName);
 
       if (attrs.getLength() > 0) {
-        elementArray.put(_env.createString("attributes"), 
+        elementArray.put(_env.createString("attributes"),
                          createAttributeArray(_env, attrs));
       }
 
@@ -749,9 +749,9 @@ public class Xml {
 
   class XmlHandler extends DefaultHandler {
     private Locator _locator;
-    
+
     private Env _env;
-    
+
     XmlHandler(Env env)
     {
       _env = env;
@@ -809,10 +809,10 @@ public class Xml {
       String eName = lName; // element name
       if ("".equals(eName))
         eName = qName;
-      
+
       if (_xmlOptionCaseFolding)
         eName = eName.toUpperCase(Locale.ENGLISH);
-      
+
       args[1] = _env.createString(eName);
 
       // turn attrs into an array of name, value pairs
@@ -859,10 +859,10 @@ public class Xml {
     {
       try {
         String eName = sName; // element name
-        
+
         if ("".equals(eName))
           eName = qName;
-        
+
         if (_xmlOptionCaseFolding)
             eName = eName.toUpperCase(Locale.ENGLISH);
 
@@ -892,20 +892,20 @@ public class Xml {
       throws SAXException
     {
       StringValue value;
-      
+
       if (_env.isUnicodeSemantics()) {
         value = _env.createString(buf, start, length);
       }
       else {
         String encoding = _xmlOptionTargetEncoding;
-        
+
         if (encoding == null)
           encoding = "UTF-8";
-        
+
         String s = new String(buf, start, length);
-        
+
         byte[] bytes;
-        
+
         try {
           bytes = s.getBytes(encoding);
         } catch (UnsupportedEncodingException e) {
@@ -913,7 +913,7 @@ public class Xml {
         }
 
         value = _env.createStringBuilder();
-        
+
         value.append(bytes);
       }
 

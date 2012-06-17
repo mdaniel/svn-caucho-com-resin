@@ -229,8 +229,7 @@ public class CurlHttpRequest
       return false;
     }
     catch (SocketTimeoutException e) {
-      error(
-        env, CurlModule.CURLE_OPERATION_TIMEOUTED, "connection timed out", e);
+      error(env, CurlModule.CURLE_OPERATION_TIMEOUTED, "connection timed out", e);
 
       return false;
     }
@@ -324,7 +323,7 @@ public class CurlHttpRequest
     }
     else {
       // according to the JDK docs, implementations may or may not return the
-      // status as the first header (Google's URLFetch doesn't)
+      // status as the first header (Google's URLFetch choose not to do so)
 
       try {
         int responseCode = _conn.getResponseCode();

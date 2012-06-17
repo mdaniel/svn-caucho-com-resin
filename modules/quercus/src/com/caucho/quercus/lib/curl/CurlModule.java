@@ -29,6 +29,7 @@
 
 package com.caucho.quercus.lib.curl;
 
+import com.caucho.quercus.QuercusContext;
 import com.caucho.quercus.QuercusModuleException;
 import com.caucho.quercus.UnimplementedException;
 import com.caucho.quercus.annotation.NotNull;
@@ -361,8 +362,9 @@ public class CurlModule
   public static Value curl_exec(Env env,
                                 @NotNull CurlResource curl)
   {
-    if (curl == null)
+    if (curl == null) {
       return BooleanValue.FALSE;
+    }
 
     return curl.execute(env);
   }
@@ -496,13 +498,12 @@ public class CurlModule
    * @param url
    */
   public static CurlResource curl_init(Env env,
-                                       @Optional("") String url)
+                                       @Optional String url)
   {
     CurlResource curl = new CurlResource();
 
-    if (url != null && url.length() > 0) {
+    if (url != null) {
       setURL(curl, url);
-      //curl.setURL(url);
     }
 
     return curl;

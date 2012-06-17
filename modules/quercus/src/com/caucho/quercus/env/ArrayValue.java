@@ -490,7 +490,7 @@ abstract public class ArrayValue extends Value {
         return new CallbackClassMethod(cls, env.createString(name), obj);
       }
 
-      return new CallbackObjectMethod(env, obj, env.createString(name));
+      return new CallbackObjectMethod(obj, env.createString(name));
     }
     else {
       QuercusClass cl = env.findClass(obj.toString());
@@ -503,7 +503,7 @@ abstract public class ArrayValue extends Value {
         return super.toCallable(env);
       }
 
-      return new CallbackObjectMethod(env, cl, env.createString(name));
+      return new CallbackObjectMethod(cl, env.createString(name));
     }
   }
 

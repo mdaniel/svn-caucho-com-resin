@@ -138,9 +138,9 @@ public class CurlHttpConnection
   }
 
   public final static CurlHttpConnection createConnection(URL url,
-                                                      String username,
-                                                      String password,
-                                                      CurlResource curl)
+                                                          String username,
+                                                          String password,
+                                                          CurlResource curl)
     throws IOException
   {
     CurlHttpConnection conn;

@@ -85,8 +85,8 @@ public class CurlResource extends ResourceValue
   private boolean _failOnError = false;
   private boolean _isVerbose = false;
 
-  private int _readTimeout = -1;
-  private int _connectTimeout = -1;
+  private int _readTimeoutMs = -1;
+  private int _connectTimeoutMs = -1;
 
   private HashMap<String,String> _requestProperties
     = new HashMap<String, String>();
@@ -136,15 +136,15 @@ public class CurlResource extends ResourceValue
    */
   public int getConnectTimeout()
   {
-    return _connectTimeout;
+    return _connectTimeoutMs;
   }
 
   /**
    * Sets the max time until timeout while establishing a connection.
    */
-  public void setConnectTimeout(int timeout)
+  public void setConnectTimeout(int timeoutMs)
   {
-    _connectTimeout = timeout;
+    _connectTimeoutMs = timeoutMs;
   }
 
   /**
@@ -251,7 +251,7 @@ public class CurlResource extends ResourceValue
     _header = header;
   }
 
-  /*
+  /**
    * Returns the header callback.
    */
   public Callable getHeaderCallback()
@@ -538,7 +538,7 @@ public class CurlResource extends ResourceValue
     _proxyUsername = user;
   }
 
-  /*
+  /**
    * Returns the callback to read the body.
    */
   public Callable getReadCallback()
@@ -559,15 +559,15 @@ public class CurlResource extends ResourceValue
    */
   public int getReadTimeout()
   {
-    return _readTimeout;
+    return _readTimeoutMs;
   }
 
   /**
    * Sets the max time until timeout while reading body.
    */
-  public void setReadTimeout(int timeout)
+  public void setReadTimeout(int timeoutMs)
   {
-    _readTimeout = timeout;
+    _readTimeoutMs = timeoutMs;
   }
 
   /**
@@ -873,7 +873,7 @@ public class CurlResource extends ResourceValue
     CurlResource curl = new CurlResource();
 
     curl.setBody(_body);
-    curl.setConnectTimeout(_connectTimeout);
+    curl.setConnectTimeout(_connectTimeoutMs);
     curl.setContentLength(_contentLength);
     curl.setContentType(_contentType);
     curl.setCookie(_cookie);
@@ -903,7 +903,7 @@ public class CurlResource extends ResourceValue
     curl.setProxyURL(_proxyURL);
     curl.setProxyUsername(_proxyUsername);
     curl.setReadCallback(_readCallback);
-    curl.setReadTimeout(_readTimeout);
+    curl.setReadTimeout(_readTimeoutMs);
     curl.setRequestMethod(_requestMethod);
 
     for (Map.Entry<String,String> entry : _requestProperties.entrySet()) {

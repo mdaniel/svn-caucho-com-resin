@@ -46,8 +46,7 @@ public class CallbackObjectMethod extends Callback {
   private final StringValue _methodName;
   private final int _hash;
 
-  public CallbackObjectMethod(Env env,
-                              Value obj,
+  public CallbackObjectMethod(Value obj,
                               StringValue methodName)
   {
     // XXX: obj and fun should not be mixed
