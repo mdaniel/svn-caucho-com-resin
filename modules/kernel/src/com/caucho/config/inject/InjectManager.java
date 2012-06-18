@@ -330,6 +330,7 @@ public final class InjectManager
     = new ConcurrentHashMap<Long,InjectionTarget<?>>();
 
   private boolean _isBeforeBeanDiscoveryComplete;
+  private boolean _isBeforeBeanDiscoverFired;
   private boolean _isAfterBeanDiscoveryComplete;
   
   private final AtomicLong _xmlCookieSequence
@@ -3089,8 +3090,12 @@ public final class InjectManager
       }
 
       _isBeforeBeanDiscoveryComplete = true;
-      getExtensionManager().fireBeforeBeanDiscovery();
-      
+
+      if (! _isBeforeBeanDiscoverFired)
+        getExtensionManager().fireBeforeBeanDiscovery();
+
+      _isBeforeBeanDiscoverFired = true;
+
       /*
       // ioc/0061
       if (rootContextList.size() == 0)
@@ -3473,8 +3478,9 @@ public final class InjectManager
     producer = getExtensionManager().processProducer(producesMethod, producer);
     
     bean.setProducer(producer);
-    
-    addBean(bean, producesMethod);
+
+    //addBean(bean, producesMethod);
+     addBeanDiscover(bean, producesMethod);
   }
   
   public <X,T> void addProducesFieldBean(ProducesFieldBean<X,T> bean)
@@ -3488,7 +3494,8 @@ public final class InjectManager
     
     bean.setProducer(producer);
     
-    addBean(bean, producesField);
+    //addBean(bean, producesField);
+    addBeanDiscover(bean, producesField);
   }
 
   public <X> void addManagedBean(ManagedBeanImpl<X> managedBean)
