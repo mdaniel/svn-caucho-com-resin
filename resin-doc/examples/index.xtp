@@ -6,25 +6,11 @@
 
   <body>
     <s1 title="Tutorials and Examples">
+    	<p>
+	<a href="http://wiki4.caucho.com/Java_EE_Tutorial_covering_JSP_2.2,_and_Servlets_3.0">
+        Java EE Tutorial covering JSP and Servlet development</a>
+	</p>
 
-	<a href="http://wiki4.caucho.com/Java_EE_Tutorial_covering_JSP_2.2,_and_Servlets_3.0">Java EE Tutorial covering JSP and Servlet development</a>
-
-    	<s2 title="Remoting and Hessian">
-	    <ol>
-	    <li>
-    	    <a href="http://wiki4.caucho.com/Hessian_Service_Example">Hessian Service Example</a>
-	    </li>
-	    <li>
-    	    <a href="http://wiki4.caucho.com/Hessian_Add_Example">Hessian Math Service Example</a>
-	    </li>
-	    </li>
-	    <a href="http://wiki4.caucho.com/Hessian_Serialize_Example">Hessian Serialize Example</a>
-	    </li>
-	    <li>
-	    <a href="http://wiki4.caucho.com/Does_Resin_4_Support_Remoting">Does Resin 4 support EJB remoting?</a>
-	    </li>
-	    </ol>
-	</s2>
 
 
     	<s2 title="Candi: Java EE 6 | CDI and Java Dependency Injection (a.k.a. IoC)">
@@ -32,7 +18,7 @@
 	    <li>
     	    <a href="http://wiki4.caucho.com/Resin_4_CDI_Dependency_Injection_Application_Configuration_Example">CDI Dependency Injection Application Configuration Example</a>
 	    </li>
-	    </li>
+	    <li>
 	    <a href="http://wiki4.caucho.com/Resin_4_CDI_Dependency_Injection_Basic_Example">CDI Dependency Injection Basic Example</a>
 	    </li>
 
@@ -80,10 +66,30 @@
 		<a href="http://wiki4.caucho.com/Resin_4_Java_EE_Java_Application_Server_JMS_Support_Tutorial">JMS: Resin the Java Application Server | Java EE | Java Messaging Service Tutorial</a>
 		</li>
 		<li>
-		<a href="http://wiki4.caucho.com/Resin_4_built-in_fast_PHP_support_called_Quercus_:_covers_Java_integration,_JSON_support_and_more>Resin 4 built-in fast PHP support called Quercus : Covers Java integration, JSON support and more</a>
+		<a href="http://wiki4.caucho.com/Resin_4_built-in_fast_PHP_support_called_Quercus_:_covers_Java_integration,_JSON_support_and_more">Resin 4 built-in fast PHP support called Quercus : Covers Java integration, JSON support and more</a>
 		</li>
 	    </ol>
 	</s2>
+
+    	<s2 title="Remoting and Hessian">
+	    <ol>
+	    <li>
+    	    <a href="http://wiki4.caucho.com/Hessian_Service_Example">Hessian Service Example</a>
+	    </li>
+	    <li>
+    	    <a href="http://wiki4.caucho.com/Hessian_Add_Example">Hessian Math Service Example</a>
+	    </li>
+	    <li>
+	    <a href="http://wiki4.caucho.com/Hessian_Serialize_Example">Hessian Serialize Example</a>
+	    </li>
+	    <li>
+	    <a href="http://wiki4.caucho.com/Does_Resin_4_Support_Remoting">Does Resin 4 support EJB remoting?</a>
+	    </li>
+	    </ol>
+	</s2>
+
     </s1>
+
+
   </body>
 </document>
