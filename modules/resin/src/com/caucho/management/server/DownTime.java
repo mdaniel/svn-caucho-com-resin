@@ -44,6 +44,7 @@ public class DownTime implements Serializable
   private long _endTime = -1;
   
   private boolean _estimated = true;
+  private boolean _dataAbsent = false;
 
   public DownTime()
   {
@@ -90,6 +91,16 @@ public class DownTime implements Serializable
     return _estimated;
   }
   
+  public void setDataAbsent(boolean dataAbsent)
+  {
+    _dataAbsent = dataAbsent;
+  }
+  
+  public boolean isDataAbsent()
+  {
+    return _dataAbsent;
+  }
+
   public long getET()
   {
     return _startTime == -1 ? -1 : (_endTime - _startTime);

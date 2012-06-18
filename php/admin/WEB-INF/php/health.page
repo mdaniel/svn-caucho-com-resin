@@ -397,22 +397,31 @@ function display_health_availability()
   echo "<thead>\n";
   echo "<tr><th scope='col'>" . gettext('Start Time') . "</th>";
   echo "    <th scope='col'>" . gettext('End Time') . "</th>";
-  echo "    <th scope='col'>" . gettext('Elapsed Time') . "</th></tr>";
+  echo "    <th scope='col'>" . gettext('Elapsed Time') . "</th>";
+  echo "    <th scope='col'>" . gettext('Notes') . "</th></tr>";
   echo "</thead>\n";
   
   echo "<tbody class='scroll'>\n";
   foreach($downtimes as $downtime) {
     echo "<tr>\n";
     $et = $downtime->ET/1000;
-    if ($et > 0)
-      echo "  <td>" . strftime("%Y-%m-%d&nbsp;%H:%M:%S", $downtime->startTime / 1000) . " </td>\n";
-    else
-      echo "  <td>-</td>\n";
+    if ($downtime->isDataAbsent()) {
+      $note = gettext('* No data: using report start time');
+    } else if ($downtime->isEstimated()) {
+      $note = gettext('* Estimated: due to hard shutdown');
+    } else {
+      note = '';
+    }
+    
+    echo "  <td>" . strftime("%Y-%m-%d&nbsp;%H:%M:%S", $downtime->startTime / 1000);
+    if ($note) {
+      echo " *";
+    }
+    echo " </td>\n";
     echo "  <td>" . strftime("%Y-%m-%d&nbsp;%H:%M:%S", $downtime->endTime / 1000) . " </td>\n";
-    if ($et > 0) 
-      echo "  <td>" . format_seconds($et) . " </td>\n";
-    else
-      echo "  <td>&nbsp;</td>\n";
+    echo "  <td>" . format_seconds($et) . " </td>\n";
+    echo "  <td>" . $note . " </td>\n";
+      
     echo "</tr>\n";
   }
   echo "</tbody>\n";

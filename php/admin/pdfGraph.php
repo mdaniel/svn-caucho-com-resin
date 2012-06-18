@@ -643,13 +643,15 @@ function pdf_availability()
   
   $col1 = 120;
   $col2 = 120;
-  $col3 = 285;
+  $col3 = 100;
+  $col4 = 185;
   
   $g_canvas->setFont("Courier-Bold", 9);
   
   $g_canvas->writeTextColumnHeader($col1, 'l', "Start Time");
   $g_canvas->writeTextColumnHeader($col2, 'l', "End Time");
   $g_canvas->writeTextColumnHeader($col3, 'l', "Elapsed Time");
+  $g_canvas->writeTextColumnHeader($col3, 'l', "Notes");
   $g_canvas->newLine();
   $g_canvas->newLine();
   
@@ -658,15 +660,18 @@ function pdf_availability()
   foreach($downtimes as $downtime) {
     $et = $downtime->ET/1000;
     
-    if ($et > 0)
-      $g_canvas->writeTextColumn($col1, 'l', date("Y-m-d H:i:s", $downtime->startTime / 1000));
-    else
-      $g_canvas->writeTextColumn($col1, 'l', "-");
-      
-    $g_canvas->writeTextColumn($col2, 'l', date("Y-m-d H:i:s", $downtime->endTime / 1000));
+    if ($downtime->isDataAbsent()) {
+      $note = '* No data: using report start time';
+    } else if ($downtime->isEstimated()) {
+      $note = '* Estimated: due to hard shutdown';
+    } else {
+      note = '';
+    }
     
-    if ($et > 0) 
-      $g_canvas->writeTextColumn($col3, 'l', format_seconds($et));
+    $g_canvas->writeTextColumn($col1, 'l', date("Y-m-d H:i:s", $downtime->startTime / 1000) . ($note ? " *" : ""));
+    $g_canvas->writeTextColumn($col2, 'l', date("Y-m-d H:i:s", $downtime->endTime / 1000));
+    $g_canvas->writeTextColumn($col3, 'l', format_seconds($et));
+    $g_canvas->writeTextColumn($col4, 'l', $note);      
       
     $g_canvas->newLine();
   }
