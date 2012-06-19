@@ -602,6 +602,23 @@ class WatchdogManager implements AlarmListener {
   }
 
   /**
+   * Called from the hessian API to forcibly kill a Resin instance
+   *
+   * @param serverId the server id to kill
+   */
+  void shutdown()
+  {
+    ArrayList<String> keys = new ArrayList<String>();
+    
+    keys.addAll(_watchdogMap.keySet());
+    
+    for (String serverId : keys) {
+      stopServer(serverId);
+      killServer(serverId);
+    }
+  }
+  
+  /**
    * Called from the HMTP API to restart a Resin instance.
    *
    * @param serverId the server identifier to restart
@@ -668,6 +685,7 @@ class WatchdogManager implements AlarmListener {
       serverConfig = client.getConfig();
     else
       serverConfig = resin.findServer(serverId);
+    
 
     if (serverConfig == null && resin.isDynamicServer(args)) {
       String clusterId = resin.getClusterId(args);
@@ -691,7 +709,7 @@ class WatchdogManager implements AlarmListener {
     }
 
     WatchdogChild watchdog = _watchdogMap.get(serverId);
-
+    
     if (watchdog != null) {
       if (watchdog.isActive()) {
         throw new ConfigException(L().l("server '{0}' cannot be started because a running instance already exists.  stop or restart the old server first.",

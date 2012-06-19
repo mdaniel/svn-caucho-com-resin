@@ -50,7 +50,7 @@ class WatchdogConfig
 {
   private static final int WATCHDOG_PORT_DEFAULT = 6600;
   
-  private String _id = "";
+  private String _id = "default";
   private int _index;
   
   private final BootClusterConfig _cluster;
@@ -118,6 +118,9 @@ class WatchdogConfig
 
   public void setId(String id)
   {
+    if (id == null || "".equals(id))
+      id = "default";
+    
     _id = id;
   }
 

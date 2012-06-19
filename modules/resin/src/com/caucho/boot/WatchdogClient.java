@@ -69,7 +69,7 @@ class WatchdogClient
   public static final String WATCHDOG_ADDRESS = "watchdog@admin.resin.caucho";
 
   private final BootResinConfig _bootManager;
-  private String _id = "";
+  private final String _id;
 
   private ResinSystem _system;
   private WatchdogConfig _config;

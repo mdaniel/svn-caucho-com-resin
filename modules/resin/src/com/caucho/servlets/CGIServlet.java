@@ -100,6 +100,7 @@ public class CGIServlet extends GenericServlet {
   /**
    * Handle the request.
    */
+  @Override
   public void service(ServletRequest request, ServletResponse response)
     throws ServletException, IOException
   {
@@ -583,8 +584,9 @@ public class CGIServlet extends GenericServlet {
 
         if (status < 304)
           res.setStatus(status);
-        else
-          res.sendError(status, valueStr.substring(i));
+        else {
+          res.setStatus(status, valueStr.substring(i));
+        }
       }
       else if (keyStr.equalsIgnoreCase("Location")) {
         String uri;

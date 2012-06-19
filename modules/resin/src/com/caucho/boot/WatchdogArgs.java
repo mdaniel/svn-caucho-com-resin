@@ -516,6 +516,9 @@ class WatchdogArgs
       }
       else if ("--server".equals(resinArg)) {
         _serverId = argv[i + 1];
+        
+        if ("".equals(_serverId))
+          _serverId = "default";
 
         i++;
       }

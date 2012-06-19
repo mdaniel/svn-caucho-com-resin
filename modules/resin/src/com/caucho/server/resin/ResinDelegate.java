@@ -387,12 +387,16 @@ public class ResinDelegate
   }
   
   static class BlockManagerMemoryFreeTask implements Runnable {
-    private BlockManager _blockManager = BlockManager.getBlockManager();
+    private BlockManager _blockManager = BlockManager.create();
     
     @Override
     public void run()
     {
-      _blockManager.clear();
+      BlockManager blockManager = _blockManager;
+      
+      if (blockManager != null) {
+        blockManager.clear();
+      }
     }
   }
 }

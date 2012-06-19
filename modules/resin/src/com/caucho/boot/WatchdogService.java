@@ -213,6 +213,8 @@ class WatchdogService
 
       String msg = L.l("{0}: shutdown", this);
     
+      _manager.shutdown();
+      
       new Thread(new Shutdown()).start();
       
       return new ResultStatus(true, msg);

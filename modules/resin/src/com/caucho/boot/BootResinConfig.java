@@ -290,7 +290,7 @@ public class BootResinConfig // implements EnvironmentBean
     
     // backward-compat default behavior
     if (serverId == null)
-      client = findClient("");
+      client = findClient("default");
     
     if (client != null)
       return client;
