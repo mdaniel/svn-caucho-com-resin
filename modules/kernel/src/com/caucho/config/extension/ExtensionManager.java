@@ -304,6 +304,9 @@ public class ExtensionManager
   public <T> Bean<T> processBean(Bean<T> bean, Annotated ann)
   {
     InjectManager cdi = _cdiManager;
+
+    if (ann == null)
+      ann = cdi.createAnnotatedType(bean.getBeanClass());
     
     ProcessBeanImpl<T> event = new ProcessBeanImpl<T>(_cdiManager, bean, ann);
     

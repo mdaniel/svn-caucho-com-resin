@@ -50,7 +50,10 @@ public class ProcessBeanImpl<X> implements ProcessBean<X>
   {
     _cdiManager = manager;
     _bean = bean;
-    
+
+    if (annotated == null)
+      throw new NullPointerException();
+
     _annotated = annotated;
   }
 
