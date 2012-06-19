@@ -12,6 +12,12 @@
 
 <s2 title="4.0.29 - snapshot">
 <ul>
+<li>ext: upgrade to slf4j 1.6.6 (#4853)</li>
+<li>config: ~/.resin not properly read by Resin (#4947)</li>
+<li>resin-admin: lazy lookup of server id for dynamic server (#4790)</li>
+<li>resin-admin: update server selection param (#4789)</li>
+<li>jsp: scanning for ok:foo.tld issues (#4960, rep by Sean Moore)</li>
+<li>servlet: add &lt;env> to CgiServlet (#4915, rep by William Au)</li>
 <li>mod_caucho: add TCP/OS SND/RCV timeouts to sockets (#4988)</li>
 <li>cli: handle -server "" by renaming to -server "default" (#5005, rep by K. Ding)</li>
 <li>admin: both health.xml and resin-admin use "Restart" as the PDF name (#4935)</li>

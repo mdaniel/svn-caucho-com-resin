@@ -50,8 +50,10 @@ import com.caucho.cloud.topology.CloudServer;
 import com.caucho.cloud.topology.CloudSystem;
 import com.caucho.config.Config;
 import com.caucho.config.ConfigException;
+import com.caucho.config.core.ResinProperties;
 import com.caucho.config.inject.WebBeansAddLoaderListener;
 import com.caucho.config.program.ConfigProgram;
+import com.caucho.db.block.BlockManager;
 import com.caucho.ejb.manager.EjbEnvironmentListener;
 import com.caucho.env.deploy.DeployControllerService;
 import com.caucho.env.git.GitSystem;
@@ -684,6 +686,8 @@ public class Resin
         Environment.addChildLoaderListener(new EjbEnvironmentListener());
       }
 
+      readUserProperties();
+      
       _bootConfig
         = new BootConfig(_resinSystem,
                          getServerId(),
@@ -705,7 +709,24 @@ public class Resin
       thread.setContextClassLoader(oldLoader);
     }
   }
-  
+
+  // read $HOME/.resin
+  private void readUserProperties()
+  {
+    if (_args.getUserProperties() != null && _args.getUserProperties().canRead()) {
+      ResinProperties properties = new ResinProperties();
+      properties.setPath(_args.getUserProperties());
+    
+      properties.setMode(_args.getMode());
+    
+      try {
+        properties.init();
+      } catch (Exception e) {
+        log().info(e.toString());
+      }
+    }
+  }
+
   /*
   private String findLocalServerId()
   {
@@ -1361,5 +1382,15 @@ public class Resin
       _log = Logger.getLogger(Resin.class.getName());
 
     return _log;
+  }
+  
+  static class BLockManagerMemoryFreeTask implements Runnable {
+    private BlockManager _blockManager = BlockManager.getBlockManager();
+    
+    @Override
+    public void run()
+    {
+      _blockManager.clear();
+    }
   }
 }

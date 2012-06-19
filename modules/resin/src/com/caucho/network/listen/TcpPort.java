@@ -480,8 +480,12 @@ public class TcpPort
   public void setAcceptThreadMin(int minSpare)
     throws ConfigException
   {
+    /*
     if (minSpare < 1)
       throw new ConfigException(L.l("accept-thread-min must be at least 1."));
+      */
+    if (minSpare < 1)
+      return;
     
     _launcher.setIdleMin(minSpare);
   }
@@ -501,8 +505,12 @@ public class TcpPort
   public void setAcceptThreadMax(int maxSpare)
     throws ConfigException
   {
+    /*
     if (maxSpare < 1)
       throw new ConfigException(L.l("accept-thread-max must be at least 1."));
+      */
+    if (maxSpare < 1)
+      return;
 
     _launcher.setIdleMax(maxSpare);
   }

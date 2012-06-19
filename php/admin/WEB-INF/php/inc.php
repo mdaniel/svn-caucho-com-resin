@@ -78,13 +78,20 @@ function mbean_init()
   
   $is_valid = 1;
 
-  $g_server_index = $_GET["s"];
+  $server_id = $_GET["s"];
 
   if (isset($_REQUEST["new_s"])) {
-    $g_server_index = $_REQUEST["new_s"];
+    $server_id = $_REQUEST["new_s"];
+  }
+  
+  $g_mbean_server = new MBeanServer();
+  
+  $server = server_find_by_id($g_mbean_server, $server_id);
+
+  if ($server) {
+    $g_server_index = $server->ClusterIndex;
   }
 
-  $g_mbean_server = new MBeanServer();
   if (! isset($g_server_index)) {
     $g_server = $g_mbean_server->lookup("resin:type=Server");
     $g_server_index = $g_server->SelfServer->ClusterIndex;
@@ -672,9 +679,9 @@ function display_header($script, $title, $server,
   
   $title = $title . " for server " . $g_server_id;
 
-  $server_id = $server->Id;
-  
-  $next_url = "?q=${g_page}&s=${g_server_index}${query}";
+//  $server_id = $server->Name;
+
+  $next_url = "?q=${g_page}&s=${g_server_id}${query}";
   
   foreach ($_GET as $key => $value) {
     if (! preg_match("/^[sq]{1}$/", $key)) {
@@ -1024,7 +1031,7 @@ function display_servers($server)
     if ($cluster_server->ClusterIndex == $g_server_index)
       echo " selected='selected'";
 
-    echo " value=\"" . $cluster_server->ClusterIndex ."\">";
+    echo " value=\"" . $id . "\">";
     printf("%02d - %s\n", $cluster_server->ClusterIndex, $id);
     echo "  </option>";
   }
@@ -1220,6 +1227,42 @@ function server_find_by_index($g_mbean_server, $index)
 
   foreach ($server->Cluster->Servers as $cluster_server) {
     if ($cluster_server->ClusterIndex == $index) {
+      return $cluster_server;
+    }
+  }
+  
+  return null;
+}
+
+function server_find_by_index($g_mbean_server, $index)
+{
+  $server = $g_mbean_server->lookup("resin:type=Server");
+
+  foreach ($server->Cluster->Servers as $cluster_server) {
+    if ($cluster_server->ClusterIndex == $index) {
+      return $cluster_server;
+    }
+  }
+  
+  return null;
+}
+
+function server_find_by_id($mbean_server, $id)
+{
+  $server = $mbean_server->lookup("resin:type=Server");
+
+  if (! $id) {
+    $id = "default";
+  }
+
+  foreach ($server->Cluster->Servers as $cluster_server) {
+    $server_id = $cluster_server->Name;
+
+    if (! $server_id) {
+      $server_id = "default";
+    }
+    
+    if ($server_id == $id) {
       return $cluster_server;
     }
   }

@@ -333,7 +333,7 @@ class EnvironmentLogger extends Logger implements ClassLoaderListener {
 
     if (! isLoggable(recordLevel))
       return;
-
+    
     for (Logger ptr = this; ptr != null; ptr = ptr.getParent()) {
       Handler handlers[] = ptr.getHandlers();
 

@@ -44,6 +44,7 @@ import com.caucho.cloud.topology.CloudServer;
 import com.caucho.cloud.topology.CloudSystem;
 import com.caucho.cloud.topology.TopologyService;
 import com.caucho.config.ConfigException;
+import com.caucho.db.block.BlockManager;
 import com.caucho.env.health.HealthStatusService;
 import com.caucho.env.log.LogSystem;
 import com.caucho.env.repository.AbstractRepository;
@@ -369,7 +370,14 @@ public class ResinDelegate
 
     if (! getResin().isWatchdog()) {
       createDistCacheService();
+      
+      ShutdownSystem.getCurrent().addMemoryFreeTask(new BlockManagerMemoryFreeTask());
     }
+  }
+
+  public LicenseCheck getLicenseCheck()
+  {
+    return null;
   }
 
   @Override
@@ -377,9 +385,14 @@ public class ResinDelegate
   {
     return getClass().getSimpleName() + "[]";
   }
-
-  public LicenseCheck getLicenseCheck()
-  {
-    return null;
+  
+  static class BlockManagerMemoryFreeTask implements Runnable {
+    private BlockManager _blockManager = BlockManager.getBlockManager();
+    
+    @Override
+    public void run()
+    {
+      _blockManager.clear();
+    }
   }
 }

@@ -217,7 +217,8 @@ public class FileSetType {
           if (".".equals(name) || "..".equals(name))
             continue;
           
-          Path subpath = path.lookup(name);
+          // jsp/187j
+          Path subpath = path.lookup("./" + name);
           
           getPaths(paths, subpath, prefix);
         }

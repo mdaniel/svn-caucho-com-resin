@@ -196,8 +196,11 @@ public class LongKeyLruCache<V> {
       
       synchronized (lock) {
         CacheItem<V> item = _entries[i];
+        CacheItem<V> nextItem = null;
 
-        for (; item != null; item = item._nextHash) {
+        for (; item != null; item = nextItem) {
+          nextItem = item._nextHash;
+
           removeLruItem(item);
           if (item._value instanceof CacheListener) {
             if (listeners == null)

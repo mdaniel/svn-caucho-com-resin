@@ -30,26 +30,26 @@
 
 package com.caucho.quercus.lib.resin;
 
+import java.io.IOException;
+import java.util.Comparator;
+import java.util.Set;
+import java.util.TreeSet;
+import java.util.logging.Level;
+import java.util.logging.Logger;
+
+import javax.management.MBeanServerConnection;
+import javax.management.MalformedObjectNameException;
+import javax.management.ObjectName;
+
 import com.caucho.jmx.Jmx;
 import com.caucho.quercus.QuercusModuleException;
 import com.caucho.quercus.annotation.Optional;
 import com.caucho.quercus.env.ArrayValue;
 import com.caucho.quercus.env.ArrayValueImpl;
 import com.caucho.quercus.env.Env;
-import com.caucho.server.cluster.Cluster;
-import com.caucho.server.cluster.ServletService;
-import com.caucho.server.resin.Resin;
 import com.caucho.server.admin.RemoteMBeanConnectionFactory;
+import com.caucho.server.cluster.ServletService;
 import com.caucho.util.L10N;
-
-import javax.management.MBeanServerConnection;
-import javax.management.MalformedObjectNameException;
-import javax.management.ObjectName;
-import java.io.IOException;
-import java.util.Comparator;
-import java.util.Set;
-import java.util.TreeSet;
-import java.util.logging.*;
 
 public class MBeanServer {
   private static final L10N L = new L10N(MBeanServer.class);
@@ -58,7 +58,9 @@ public class MBeanServer {
 
   private static final Comparator<ObjectName> OBJECTNAME_COMPARATOR;
 
-  private final MBeanServerConnection _server;
+  private final String _serverId;
+  
+  private MBeanServerConnection _server;
 
   /**
    * Create an MBeanServer that connects to a remote server.
@@ -68,14 +70,9 @@ public class MBeanServer {
    */
   public MBeanServer(@Optional String serverId)
   {
-    if (serverId == null
-        || "".equals(serverId)
-        || ServletService.getCurrent().getServerId().equals(serverId)) {
-      _server = Jmx.getGlobalMBeanServer();
-    }
-    else {
-      _server = RemoteMBeanConnectionFactory.create(serverId);
-    }
+    _serverId = serverId;
+    
+    getServer();
   }
 
   /**
@@ -102,7 +99,7 @@ public class MBeanServer {
 
       ObjectName objectName = Jmx.getObjectName(name);
 
-      if (_server.isRegistered(objectName))
+      if (getServer().isRegistered(objectName))
         return new MBean(_server, objectName);
       else
         return null;
@@ -135,7 +132,7 @@ public class MBeanServer {
 
       Set<ObjectName> objectNames;
 
-      objectNames = _server.queryNames(patternObjectName, null);
+      objectNames = getServer().queryNames(patternObjectName, null);
 
       if (objectNames == null)
         return values;
@@ -157,7 +154,33 @@ public class MBeanServer {
       throw new QuercusModuleException(e);
     }
   }
+  
+  private final MBeanServerConnection getServer()
+  {
+    if (_server == null) {
+      try {
+        _server = lookupServer(_serverId);
+      } catch (Exception e) {
+        log.log(Level.FINER, e.toString(), e);
+      }
+    }
+    
+    return _server;
+  }
+  
+  private MBeanServerConnection lookupServer(String serverId)
+  {
+    if (serverId == null
+        || "".equals(serverId)
+        || ServletService.getCurrent().getServerId().equals(serverId)) {
+      return Jmx.getGlobalMBeanServer();
+    }
+    else {
+      return RemoteMBeanConnectionFactory.create(serverId);
+    }
+  }
 
+  @Override
   public String toString()
   {
     return "MBeanServer[" + _server + "]";

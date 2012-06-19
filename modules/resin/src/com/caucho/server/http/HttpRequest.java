@@ -915,11 +915,11 @@ public class HttpRequest extends AbstractHttpRequest
       
       return false;
     } catch (ArrayIndexOutOfBoundsException e) {
-      log.log(Level.FINER, e.toString(), e);
+      log.log(Level.FINEST, e.toString(), e);
       
       throw new BadRequestException(L.l("Invalid request: URL or headers are too long"), e);
     } catch (Throwable e) {
-      log.log(Level.FINER, e.toString(), e);
+      log.log(Level.FINEST, e.toString(), e);
       
       throw new BadRequestException(String.valueOf(e), e);
     }

@@ -34,6 +34,7 @@ import java.lang.reflect.Method;
 import com.caucho.cloud.topology.CloudSystem;
 import com.caucho.config.Config;
 import com.caucho.config.ConfigException;
+import com.caucho.config.core.ResinProperties;
 import com.caucho.config.functions.FmtFunctions;
 import com.caucho.config.inject.InjectManager;
 import com.caucho.config.lib.ResinConfigLibrary;
@@ -184,7 +185,7 @@ public class BootConfig
     
     ResinServerConfigLibrary.configure(null);
   }
-  
+
   public CloudSystem initTopolopy()
   {
     synchronized (this) {
