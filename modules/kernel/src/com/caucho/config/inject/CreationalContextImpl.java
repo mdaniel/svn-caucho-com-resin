@@ -256,7 +256,7 @@ public class CreationalContextImpl<T> implements CreationalContext<T> {
     T value = _value;
     _value = null;
 
-    if (value != null)
+    if (_bean != null && value != null)
       _bean.destroy(value, this);
     else {
       CreationalContextImpl<?> next = getNext();
