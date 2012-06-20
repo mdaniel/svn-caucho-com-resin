@@ -1879,6 +1879,9 @@ public class StringBuilderValue
 
       return true;
     }
+    else if (rValue.isObject()) {
+      return super.eq(rValue);
+    }
     else {
       String rString = rValue.toString();
 

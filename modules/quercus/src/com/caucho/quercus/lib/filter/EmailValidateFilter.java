@@ -29,6 +29,7 @@
 
 package com.caucho.quercus.lib.filter;
 
+import com.caucho.quercus.env.BooleanValue;
 import com.caucho.quercus.env.Env;
 import com.caucho.quercus.env.StringValue;
 import com.caucho.quercus.env.Value;
@@ -39,7 +40,7 @@ import com.caucho.quercus.env.Value;
 public class EmailValidateFilter extends ValidateFilter
 {
   @Override
-  protected boolean isValid(Env env, Value value, Value flagV)
+  public Value filter(Env env, Value value, Value flagV)
   {
     StringValue str = value.toStringValue(env);
 
@@ -47,7 +48,12 @@ public class EmailValidateFilter extends ValidateFilter
 
     boolean isValid = parser.parse();
 
-    return isValid;
+    if (isValid) {
+      return value;
+    }
+    else {
+      return BooleanValue.FALSE;
+    }
   }
 
   static class EmailParser

@@ -32,22 +32,27 @@ package com.caucho.quercus.lib.filter;
 import com.caucho.quercus.UnimplementedException;
 import com.caucho.quercus.annotation.Optional;
 import com.caucho.quercus.annotation.ReadOnly;
+import com.caucho.quercus.env.ArrayValue;
 import com.caucho.quercus.env.BooleanValue;
 import com.caucho.quercus.env.Env;
+import com.caucho.quercus.env.StringValue;
 import com.caucho.quercus.env.Value;
 import com.caucho.quercus.module.AbstractQuercusModule;
 import com.caucho.util.L10N;
 
 import java.util.HashMap;
-import java.util.logging.Logger;
 
 public class FilterModule extends AbstractQuercusModule
 {
-  private static final Logger log
-    = Logger.getLogger(FilterModule.class.getName());
-
   private static final L10N L = new L10N(FilterModule.class);
 
+  public static final int INPUT_POST = 0;
+  public static final int INPUT_GET = 1;
+  public static final int INPUT_COOKIE = 2;
+  public static final int INPUT_ENV = 4;
+  public static final int INPUT_SERVER = 5;
+
+  public static final int FILTER_VALIDATE_INT = 256 + 1; //257
   public static final int FILTER_VALIDATE_EMAIL = 256 + 16 + 2; // 274
   public static final int FILTER_VALIDATE_IP = 256 + 16 + 2 + 1; // 275
   public static final int FILTER_DEFAULT = 512 + 4; // 516
@@ -56,7 +61,6 @@ public class FilterModule extends AbstractQuercusModule
   public static final int FILTER_FLAG_IPV6 = FILTER_FLAG_IPV4 * 2;
   public static final int FILTER_FLAG_NO_RES_RANGE = FILTER_FLAG_IPV4 * 4;
   public static final int FILTER_FLAG_NO_PRIV_RANGE = FILTER_FLAG_IPV4 * 8;
-
 
   public static HashMap<Integer,Filter> _filterMap
    =  new HashMap<Integer,Filter>();
@@ -78,14 +82,51 @@ public class FilterModule extends AbstractQuercusModule
     Filter filter = _filterMap.get(filterId);
 
     if (filter == null) {
-      throw new UnimplementedException(L.l("filter not implemented: {0}"));
+      throw new UnimplementedException(L.l("filter not implemented: {0}", filterId));
     }
+
+    return filter.filter(env, value, flagV);
+  }
+
+  public static Value filter_input(Env env,
+                                   int type,
+                                   StringValue name,
+                                   @Optional("FILTER_DEFAULT") int filterId,
+                                   @Optional Value flagV)
+  {
+    ArrayValue array;
+
+    switch (type) {
+      case INPUT_POST:
+        array = env.getInputPostArray();
+        break;
+      case INPUT_GET:
+        array = env.getInputGetArray();
+        break;
+      case INPUT_COOKIE:
+        array = env.getInputCookieArray();
+        break;
+      case INPUT_ENV:
+        array = env.getInputEnvArray();
+        break;
+      default:
+        return env.warning(L.l("filter input type is unknown: {0}", type));
+    }
+
+    Filter filter = _filterMap.get(filterId);
+
+    if (filter == null) {
+      throw new UnimplementedException(L.l("filter not implemented: {0}", filterId));
+    }
+
+    Value value = array.get(name);
 
     return filter.filter(env, value, flagV);
   }
 
   static {
     _filterMap.put(FILTER_DEFAULT, new DefaultFilter());
+    _filterMap.put(FILTER_VALIDATE_INT, new IntValidateFilter());
     _filterMap.put(FILTER_VALIDATE_EMAIL, new EmailValidateFilter());
     _filterMap.put(FILTER_VALIDATE_IP, new IpValidateFilter());
   }

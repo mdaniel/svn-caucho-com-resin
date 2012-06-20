@@ -1505,6 +1505,9 @@ abstract public class ArrayValue extends Value {
     else if (rValue == null) {
       return false;
     }
+    else if (! rValue.isArray()) {
+      return rValue.eq(this);
+    }
     else if (getSize() != rValue.getSize()) {
       return false;
     }

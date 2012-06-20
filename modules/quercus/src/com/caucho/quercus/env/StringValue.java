@@ -436,6 +436,9 @@ abstract public class StringValue
 
       return l == r;
     }
+    else if (rValue.isObject()) {
+      return super.eq(rValue);
+    }
     else {
       return toString().equals(rValue.toString());
     }
@@ -1899,10 +1902,10 @@ abstract public class StringValue
     try {
       int readLength = 0;
       byte []buffer = tBuf.getBuffer();
-      
+
       while (length > 0) {
         int sublen = Math.min((int) length, buffer.length);
-        
+
         if (readLength > 0 && is.getAvailable() <= 0) {
           return readLength;
         }
@@ -1918,7 +1921,7 @@ abstract public class StringValue
           return readLength > 0 ? readLength: sublen;
         }
       }
-      
+
       return readLength;
     } catch (IOException e) {
       throw new QuercusModuleException(e);

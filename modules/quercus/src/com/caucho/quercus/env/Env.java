@@ -187,6 +187,9 @@ public class Env
   private static final StringValue S_SERVER
     = new ConstStringValue("_SERVER");
 
+  private static final StringValue S_ENV
+    = new ConstStringValue("_ENV");
+
   private static final StringValue S_COOKIE
     = new ConstStringValue("_COOKIE");
 
@@ -340,8 +343,14 @@ public class Env
   private HttpServletRequest _request;
   private HttpServletResponse _response;
 
-  private ArrayValue _postArray = new ArrayValueImpl();
+  private ArrayValue _inputGet;
+  private ArrayValue _inputCookie;
+  private ArrayValue _inputEnv;
+  private ArrayValue _inputServer;
+
+  private ArrayValue _inputPost = new ArrayValueImpl();
   private ArrayValue _files = new ArrayValueImpl();
+
   private StringValue _inputData;
 
   private SessionArrayValue _session;
@@ -909,7 +918,7 @@ public class Env
     _defaultTimeZone = zone;
   }
 
-  /*
+  /**
    * Returns the ServletContext.
    */
   public ServletContext getServletContext()
@@ -917,7 +926,7 @@ public class Env
     return _quercus.getServletContext();
   }
 
-  /*
+  /**
    * Sets the ScriptContext.
    */
   public void setScriptContext(ScriptContext context)
@@ -925,7 +934,64 @@ public class Env
     _scriptContext = context;
   }
 
-  /*
+  public ArrayValue getInputGetArray()
+  {
+    ArrayValue array = _inputGet;
+
+    if (array == null) {
+      array = new ArrayValueImpl();
+      fillGet(array, getIniBoolean("magic_quotes_gpc"));
+
+      _inputGet = array;
+    }
+
+    return array;
+  }
+
+  public ArrayValue getInputPostArray()
+  {
+    return _inputPost;
+  }
+
+  public ArrayValue getInputCookieArray()
+  {
+    ArrayValue array = _inputCookie;
+
+    if (array == null) {
+      array = new ArrayValueImpl();
+      fillCookies(array, _request.getCookies(), getIniBoolean("magic_quotes_gpc"));
+
+      _inputCookie = array;
+    }
+
+    return array;
+  }
+
+  public ArrayValue getInputEnvArray()
+  {
+    ArrayValue array = _inputEnv;
+
+    if (array == null) {
+      array = new ArrayValueImpl();
+      _inputEnv = array;
+    }
+
+    return array;
+  }
+
+  public ArrayValue getInputServerArray()
+  {
+    ArrayValue array = _inputServer;
+
+    if (array == null) {
+      array = new ServerArrayValue(this);
+      _inputServer = array;
+    }
+
+    return array;
+  }
+
+  /**
    * Returns the input (POST, PUT) data.
    */
   public StringValue getInputData()
@@ -933,7 +999,7 @@ public class Env
     return _inputData;
   }
 
-  /*
+  /**
    * Sets the post data.
    */
   public void setInputData(StringValue data)
@@ -957,7 +1023,7 @@ public class Env
     return _isAllowUrlInclude;
   }
 
-  /*
+  /**
    * Returns true if allowed to fopen urls.
    */
   public boolean isAllowUrlFopen()
@@ -988,7 +1054,7 @@ public class Env
 
     _threadEnv.set(this);
 
-    fillPost(_postArray,
+    fillPost(_inputPost,
              _files,
              _request,
              getIniBoolean("magic_quotes_gpc"));
@@ -2420,8 +2486,9 @@ public class Env
   {
     value = value.toValue();
 
-    if (var instanceof Var)
+    if (var instanceof Var) {
       var.set(value);
+    }
 
     return value;
   }
@@ -2456,7 +2523,8 @@ public class Env
 
         _globalMap.put(name, envVar);
 
-        envVar.set(new ArrayValueImpl());
+        ArrayValue array = new ArrayValueImpl(getInputEnvArray());
+        envVar.set(array);
 
         return envVar;
       }
@@ -2515,8 +2583,8 @@ public class Env
         envVar.set(post);
 
         if (_variablesOrder.indexOf('P') >= 0
-            && _postArray.getSize() > 0) {
-          for (Map.Entry<Value, Value> entry : _postArray.entrySet()) {
+            && _inputPost.getSize() > 0) {
+          for (Map.Entry<Value, Value> entry : _inputPost.entrySet()) {
             post.put(entry.getKey(), entry.getValue());
           }
         }
@@ -2572,12 +2640,16 @@ public class Env
 
         _globalMap.put(name, envVar);
 
-        ArrayValue array = new ArrayValueImpl();
-        envVar.set(array);
+        ArrayValue array;
 
         if (_variablesOrder.indexOf('G') >= 0) {
-          fillGet(array, getIniBoolean("magic_quotes_gpc"));
+          array = new ArrayValueImpl(getInputGetArray());
         }
+        else {
+          array = new ArrayValueImpl();
+        }
+
+        envVar.set(array);
 
         return envVar;
       }
@@ -2595,21 +2667,19 @@ public class Env
         if (_request == null)
           return envVar;
 
-        boolean isMagicQuotes = getIniBoolean("magic_quotes_gpc");
-
         int orderLen = _variablesOrder.length();
 
         for (int i = 0; i < orderLen; i++) {
           switch (_variablesOrder.charAt(i)) {
             case 'G':
-              fillGet(array, isMagicQuotes);
+              array.putAll(getInputGetArray());
               break;
             case 'P':
-              if (_postArray.getSize() > 0)
-                fillPost(array, _postArray);
+              if (_inputPost.getSize() > 0)
+                fillPost(array, _inputPost);
               break;
             case 'C':
-              fillCookies(array, _request.getCookies(), isMagicQuotes);
+              array.putAll(getInputCookieArray());
               break;
           }
         }
@@ -2618,8 +2688,7 @@ public class Env
       }
 
       case HTTP_RAW_POST_DATA: {
-        if (!QuercusContext.INI_ALWAYS_POPULATE_RAW_POST_DATA
-          .getAsBoolean(this)) {
+        if (! QuercusContext.INI_ALWAYS_POPULATE_RAW_POST_DATA.getAsBoolean(this)) {
           String contentType = getContentType();
 
           if (contentType == null || ! contentType.startsWith("unknown/type"))
@@ -2655,7 +2724,7 @@ public class Env
         Value serverEnv;
 
         if (_variablesOrder.indexOf('S') >= 0) {
-          serverEnv = new ServerArrayValue(this);
+          serverEnv = getInputServerArray().copy();
 
           if (_quercus.isRegisterArgv()) {
             ArrayValue argv = createArgv();
@@ -2666,8 +2735,9 @@ public class Env
             serverEnv.put(createString("argv"), argv);
           }
         }
-        else
+        else {
           serverEnv = new ArrayValueImpl();
+        }
 
         var.set(serverEnv);
 

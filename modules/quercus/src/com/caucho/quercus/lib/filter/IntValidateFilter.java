@@ -29,36 +29,50 @@
 
 package com.caucho.quercus.lib.filter;
 
-import com.caucho.quercus.env.ArrayValue;
+import com.caucho.quercus.env.BooleanValue;
 import com.caucho.quercus.env.Env;
+import com.caucho.quercus.env.LongValue;
+import com.caucho.quercus.env.UnsetValue;
 import com.caucho.quercus.env.Value;
 
-import java.util.Map;
-
-public abstract class ValidateFilter implements Filter
+public class IntValidateFilter extends ValidateFilter
 {
+  @Override
   public Value filter(Env env, Value value, Value flagsV)
   {
-    int flags = 0;
+    long min = Long.MIN_VALUE;
+    long max = Long.MAX_VALUE;
 
-    if (flagsV.isNull()) {
-    }
-    else if (flagsV.isArray()) {
-      ArrayValue array = flagsV.toArrayValue(env);
+    if (flagsV.isArray() && flagsV.getSize() > 0) {
+      Value options = flagsV.get(env.createString("options"));
 
-      for (Map.Entry<Value,Value> entry : array.entrySet()) {
-        flags |= entry.getValue().toInt();
+      if (options.isArray()) {
+        Value minV = options.get(env.createString("min_range"));
+        Value maxV = options.get(env.createString("max_range"));
+
+        if (minV != UnsetValue.UNSET) {
+          min = minV.toLong();
+        }
+
+        if (maxV != UnsetValue.UNSET) {
+          max = maxV.toLong();
+        }
       }
+
+    }
+
+    if (! value.isLongConvertible() && value != BooleanValue.TRUE) {
+      return BooleanValue.FALSE;
+    }
+
+    LongValue val =  value.toLongValue();
+    long v = val.toLong();
+
+    if (min <= v && v <= max) {
+      return val;
     }
     else {
-      flags = flagsV.toInt();
+      return BooleanValue.FALSE;
     }
-
-    return filterImpl(env, value, flags);
-  }
-
-  protected Value filterImpl(Env env, Value value, int flags)
-  {
-    throw new UnsupportedOperationException();
   }
 }

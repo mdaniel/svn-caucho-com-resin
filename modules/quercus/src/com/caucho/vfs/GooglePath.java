@@ -38,8 +38,6 @@ import java.util.Map;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
-import com.caucho.hessian.io.Hessian2Input;
-import com.caucho.hessian.io.Hessian2Output;
 import com.caucho.util.IoUtil;
 import com.caucho.vfs.GoogleInode.FileType;
 import com.google.appengine.api.files.AppEngineFile;

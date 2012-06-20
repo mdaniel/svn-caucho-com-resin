@@ -420,10 +420,10 @@ public class BinaryBuilderValue
   public final StringValue append(BinaryBuilderValue sb, int head, int tail)
   {
     int length = tail - head;
-    
+
     byte []buffer = getBuffer();
     byte []sbBuffer = sb.getBuffer();
-    
+
     int offset = length();
 
     if (buffer.length < offset + length)
@@ -627,6 +627,9 @@ public class BinaryBuilderValue
       }
 
       return true;
+    }
+    else if (rValue.isObject()) {
+      return super.eq(rValue);
     }
     else {
       return toString().equals(rValue.toString());

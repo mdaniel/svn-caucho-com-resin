@@ -5752,9 +5752,9 @@ public class StringModule extends AbstractQuercusModule {
       _index = index;
     }
 
-    protected String toValue(Value []args)
+    protected StringValue toValue(Env env, Value []args)
     {
-      return args[_index].toString();
+      return args[_index].toStringValue(env);
     }
 
     @Override
@@ -5762,10 +5762,11 @@ public class StringModule extends AbstractQuercusModule {
     {
       sb.append(_prefix, 0, _prefix.length);
 
-      String value;
+      StringValue value;
 
-      if (_index < args.length)
-        value = toValue(args);
+      if (_index < args.length) {
+        value = toValue(env, args);
+      }
       else {
         env.warning(L.l("printf(): not enough arguments to match format."));
 
@@ -5779,8 +5780,9 @@ public class StringModule extends AbstractQuercusModule {
         len = _max;
       }
 
-      if (_isUpper)
-        value = value.toUpperCase(Locale.ENGLISH);
+      if (_isUpper) {
+        value = value.toUpperCase();
+      }
 
       if (! _isLeft) {
         for (int i = len; i < _min; i++) {
@@ -5810,17 +5812,17 @@ public class StringModule extends AbstractQuercusModule {
     }
 
     @Override
-    protected String toValue(Value []args)
+    protected StringValue toValue(Env env, Value []args)
     {
       if (args.length <= _index)
-        return "";
+        return env.getEmptyString();
 
       Value v = args[_index];
 
       if (v.isLongConvertible())
-        return String.valueOf((char) v.toLong());
+        return env.createString((char) v.toLong());
       else
-        return v.charValueAt(0).toString();
+        return v.charValueAt(0).toStringValue(env);
     }
   }
 

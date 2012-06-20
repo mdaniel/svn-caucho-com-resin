@@ -166,6 +166,56 @@ public class GoogleStorePath extends GooglePath
     return new GoogleWriteStream(this, os, getGoogleInode());
   }
 
+  public StreamImpl openAppendImpl() throws IOException
+  {
+    long longLength = getLength();
+
+    if (longLength > Integer.MAX_VALUE) {
+      return super.openAppendImpl();
+    }
+
+    int len = (int) longLength;
+    if (len <= 0) {
+      return openWriteImpl();
+    }
+
+    byte[] buffer = new byte[(int) len];
+
+    ReadStream is = openRead();
+    int totalRead = 0;
+
+    try {
+      int index = 0;
+      int subLen;
+      while ((subLen = is.read(buffer, index, len - totalRead)) >= 0) {
+        index += subLen;
+        totalRead += subLen;
+      }
+    }
+    finally {
+      is.close();
+    }
+
+    if (totalRead != len) {
+      throw new IOException(L.l("expected {0} bytes but read only {0} bytes",
+                                len, totalRead));
+    }
+
+    StreamImpl stream = openWriteImpl();
+    GoogleWriteStream os = (GoogleWriteStream) stream;
+
+    try {
+      os.write(buffer, 0, totalRead, false);
+    }
+    catch (IOException e) {
+      os.close();
+
+      throw e;
+    }
+
+    return os;
+  }
+
   @Override
   public Path copy()
   {

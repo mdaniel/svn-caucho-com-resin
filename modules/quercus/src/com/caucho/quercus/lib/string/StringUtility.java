@@ -83,9 +83,11 @@ public class StringUtility
              i++) {
         }
 
-        for (; i < len && (ch = str.charAt(i)) != '='
-             && ! isSeparator(querySeparatorMap, ch); i++) {
-          i = addQueryChar(byteToChar, str, len, i, ch);
+        for (; i < len
+               && (ch = str.charAt(i)) != '='
+               && ! isSeparator(querySeparatorMap, ch);
+            i++) {
+          i = addQueryChar(byteToChar, str, len, i, ch, querySeparatorMap);
         }
 
         String key = byteToChar.getConvertedString();
@@ -96,25 +98,38 @@ public class StringUtility
         if (ch == '=') {
           for (i++; i < len
                && ! isSeparator(querySeparatorMap, (ch = str.charAt(i))); i++) {
-            i = addQueryChar(byteToChar, str, len, i, ch);
+            i = addQueryChar(byteToChar, str, len, i, ch, querySeparatorMap);
           }
 
           value = byteToChar.getConvertedString();
         }
-        else
+        else {
           value = "";
+        }
 
-        if (isRef) {
+        if (key.length() == 0) {
+          // php/php/080d
+          // http://bugs.caucho.com/view.php?id=4998
+
+          continue;
+        }
+        else if (isRef) {
           Post.addFormValue(env, result, key,
                             new String[] { value }, isMagicQuotes);
-        } else {
+        }
+        else {
           // If key is an exsiting array, then append
           // this value to existing array
           // Only use extract(EXTR_OVERWRITE) on non-array variables or
           // non-existing arrays
           int openBracketIndex = key.indexOf('[');
           int closeBracketIndex = key.indexOf(']');
-          if (openBracketIndex > 0) {
+          if (openBracketIndex == 0) {
+            // http://bugs.caucho.com/view.php?id=4998
+
+            continue;
+          }
+          else if (openBracketIndex > 0) {
             String arrayName = key.substring(0, openBracketIndex);
             arrayName = arrayName.replaceAll("\\.", "_");
 
@@ -165,7 +180,8 @@ public class StringUtility
                                     CharSequence str,
                                     int len,
                                     int i,
-                                    int ch)
+                                    int ch,
+                                    int[] querySeparatorMap)
     throws IOException
   {
     if (str == null)
@@ -177,9 +193,16 @@ public class StringUtility
       return i;
 
     case '%':
-      if (i + 2 < len) {
-        int d1 = StringModule.hexToDigit(str.charAt(i + 1));
-        int d2 = StringModule.hexToDigit(str.charAt(i + 2));
+      char ch1;
+      char ch2;
+
+      if (i + 2 < len
+          && (ch1 = str.charAt(i + 1)) != '='
+          && ! isSeparator(querySeparatorMap, ch1)
+          && (ch2 = str.charAt(i + 2)) != '='
+          && ! isSeparator(querySeparatorMap, ch2)) {
+        int d1 = StringModule.hexToDigit(ch1);
+        int d2 = StringModule.hexToDigit(ch2);
 
         // XXX: d1 and d2 may be -1 if not valid hex chars
         byteToChar.addByte(d1 * 16 + d2);

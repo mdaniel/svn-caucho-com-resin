@@ -53,13 +53,10 @@ import java.util.Map;
 public class Post
 {
   private static final L10N L = new L10N(Post.class);
-  
+
   private static StringValue MAX_FILE_SIZE
     = new ConstStringValue("MAX_FILE_SIZE");
-  
-  private static StringValue MAX_FILE_SIZE_U
-    = new UnicodeBuilderValue("MAX_FILE_SIZE");
-  
+
   static void fillPost(Env env,
                        ArrayValue postArray,
                        ArrayValue files,
@@ -90,18 +87,21 @@ public class Post
         putRequestMap(env, postArray, files, request,
                       addSlashesToValues, isAllowUploads);
       }
-
-    } catch (IOException e) {
+    }
+    catch (IOException e) {
       env.warning(e);
-    } finally {
+    }
+    finally {
       try {
-        if (is != null)
+        if (is != null) {
           is.close();
-      } catch (IOException e) {
+        }
+      }
+      catch (IOException e) {
       }
     }
   }
-  
+
   static void fillPost(Env env,
                        ArrayValue postArray,
                        ArrayValue files,
@@ -117,7 +117,7 @@ public class Post
     try {
       if (encoding == null)
         encoding = env.getHttpInputEncoding();
-      
+
       if (contentType != null
           && contentType.startsWith("multipart/form-data")) {
 
@@ -127,12 +127,12 @@ public class Post
 
         if (boundary == null) {
           env.warning(L.l("multipart/form-data POST is missing boundary"));
-          
+
           return;
         }
-        
+
         MultipartStream ms = new MultipartStream(rs, boundary);
-        
+
         if (encoding != null)
           ms.setEncoding(encoding);
 
@@ -140,21 +140,21 @@ public class Post
                             addSlashesToValues, isAllowUploads);
 
         rs.close();
-        
+
         if (rs.getLength() > maxPostSize) {
           env.warning(L.l("POST length of {0} exceeds max size of {1}",
                           rs.getLength(),
                           maxPostSize));
-          
+
           postArray.clear();
           files.clear();
-          
+
           return;
         }
       }
       else {
         StringValue bb = env.createBinaryBuilder();
-        
+
         bb.appendReadAll(is, Integer.MAX_VALUE);
 
         if (bb.length() > maxPostSize) {
@@ -163,17 +163,17 @@ public class Post
                           maxPostSize));
           return;
         }
-        
+
         env.setInputData(bb);
-        
+
         if (contentType != null
             && contentType.startsWith("application/x-www-form-urlencoded"))
-          StringUtility.parseStr(env, bb, postArray, false, encoding);
+          StringUtility.parseStr(env, bb, postArray, true, encoding);
       }
-      
-    } catch (IOException e) {
+
+    }
+    catch (IOException e) {
       env.warning(e);
-    } finally {
     }
   }
 
@@ -197,22 +197,22 @@ public class Post
 
       String name = getAttribute(attr, "name", addSlashesToValues);
       String filename = getAttribute(attr, "filename", addSlashesToValues);
-      
+
       if (filename != null) {
         int slashIndex = filename.lastIndexOf('/');
         int slashIndex2 = filename.lastIndexOf('\\');
-        
+
         slashIndex = Math.max(slashIndex, slashIndex2);
-        
+
         if (slashIndex >= 0)
           filename = filename.substring(slashIndex + 1);
       }
 
       int bracketIndex = -1;
-      
+
       if (name != null)
         bracketIndex = name.lastIndexOf(']');
-      
+
       if (bracketIndex >= 0 && bracketIndex < name.length() - 1) {
         // php/085c
       }
@@ -232,7 +232,7 @@ public class Post
         if (! isAllowUploads) {
           continue;
         }
-        
+
         String tmpName = "";
         long tmpLength = 0;
 
@@ -263,7 +263,7 @@ public class Post
         String mimeType = getAttribute(attr, "mime-type", addSlashesToValues);
         if (mimeType == null) {
           mimeType = (String) ms.getAttribute("content-type");
-          
+
           // php/085f
           if (mimeType != null && mimeType.endsWith(";"))
             mimeType = mimeType.substring(0, mimeType.length() - 1);
@@ -278,7 +278,7 @@ public class Post
         }
 
         long maxFileSize = Long.MAX_VALUE;
-        
+
         Value maxFileSizeV = postArray.get(MAX_FILE_SIZE);
         if (! maxFileSizeV.isNull())
           maxFileSize = maxFileSizeV.toLong();
@@ -310,6 +310,9 @@ public class Post
     // php/1667
     long uploadMaxFilesize
       = env.getIniBytes("upload_max_filesize", 2 * 1024 * 1024);
+
+    // php/085j
+    fileName = fileName.replaceAll("\u0000", "");
 
     if (fileName.length() == 0)
       // php/0864
@@ -350,10 +353,10 @@ public class Post
 
     addFormValue(env, entry, "size", LongValue.create(size),
                  null, addSlashesToValues);
-    
+
     addFormValue(env, files, null, entry, null, addSlashesToValues);
   }
-  
+
   private static void addFormFile(Env env,
                                   ArrayValue files,
                                   String name,
@@ -388,6 +391,9 @@ public class Post
     long uploadMaxFilesize
       = env.getIniBytes("upload_max_filesize", 2 * 1024 * 1024);
 
+    // php/085j
+    fileName = fileName.replaceAll("\u0000", "");
+
     if (fileName.length() == 0)
       // php/0864
       error = FileModule.UPLOAD_ERR_NO_FILE;
@@ -403,7 +409,7 @@ public class Post
 
     long size;
 
-    
+
     if (error == FileModule.UPLOAD_ERR_OK) {
       size = fileLength;
     }
@@ -429,7 +435,7 @@ public class Post
 
     addFormValue(env, files, name, entry, null, addSlashesToValues);
   }
-  
+
   public static void addFormValue(Env env,
                                   ArrayValue array,
                                   String key,
@@ -450,7 +456,7 @@ public class Post
                  formValueList,
                  addSlashesToValues);
   }
-  
+
   public static void addFormValue(Env env,
                                   ArrayValue array,
                                   String key,
@@ -460,46 +466,63 @@ public class Post
   {
     int p = -1;
     int q = -1;
-    
+
     if (key != null) {
       p = key.indexOf('[');
       q = key.indexOf(']', p);
     }
 
     if (p >= 0 && p < q) {
+      if (p == 0) {
+        // php/080e
+        return;
+      }
+
       String index = key;
-      
+
       Value keyValue;
       Value existingValue;
 
-      if (p > 0) {
-        key = key.substring(0, p);
-        
-        key = key.replaceAll("\\.", "_");
-        
-        keyValue = env.createString(key);
-        existingValue = array.get(keyValue);
+      key = key.substring(0, p);
+      key = key.replaceAll("\\.", "_");
+      // php/080h
+      key = key.replaceAll(" ", "_");
 
-        if (existingValue == null || ! existingValue.isset()) {
-          existingValue = new ArrayValueImpl();
-          array.put(keyValue, existingValue);
-        }
-        else if (! existingValue.isArray()) {
-          //existing is overwritten
-          // php/115g
+      keyValue = env.createString(key);
+      existingValue = array.get(keyValue);
 
-          existingValue = new ArrayValueImpl();
-          array.put(keyValue, existingValue);
-        }
+      if (existingValue == null || ! existingValue.isset()) {
+        existingValue = new ArrayValueImpl();
+        array.put(keyValue, existingValue);
+      }
+      else if (! existingValue.isArray()) {
+        // existing is overwritten
+        // php/115g
 
-        array = (ArrayValue) existingValue;
+        existingValue = new ArrayValueImpl();
+        array.put(keyValue, existingValue);
       }
 
-      int p1;
-      while ((p1 = index.indexOf('[', q)) > 0) {
-        key = index.substring(p + 1, q);
+      array = (ArrayValue) existingValue;
 
-        if (key.equals("")) {
+      int q1 = q;
+
+      while (true) {
+        int p1 = index.indexOf('[', q1);
+
+        if (p1 < 0) {
+          break;
+        }
+
+        q1 = index.indexOf(']', p1);
+
+        if (q1 < 0) {
+          break;
+        }
+
+        key = index.substring(p1 + 1, q1);
+
+        if (key.length() == 0) {
           existingValue = new ArrayValueImpl();
           array.put(existingValue);
         }
@@ -518,9 +541,6 @@ public class Post
         }
 
         array = (ArrayValue) existingValue;
-
-        p = p1;
-        q = index.indexOf(']', p);
       }
 
       if (q > 0)
@@ -528,7 +548,7 @@ public class Post
       else
         index = index.substring(p + 1);
 
-      if (index.equals("")) {
+      if (index.length() == 0) {
         if (formValueList != null) {
           for (int i = 0; i < formValueList.length; i++) {
             Value value;
@@ -555,6 +575,9 @@ public class Post
     else {
       if (key != null) {
         key = key.replaceAll("\\.", "_");
+
+        // php/080h
+        key = key.replaceAll(" ", "_");
         put(array, env.createString(key), formValue, addSlashesToValues);
       }
       else {
@@ -639,10 +662,10 @@ public class Post
 
     int length = attr.length();
     int i = attr.indexOf(name);
-    
+
     if (i < 0)
       return null;
-    
+
     while (true) {
       char ch = attr.charAt(i - 1);
 
@@ -651,7 +674,7 @@ public class Post
       }
       else
         break;
-      
+
       if (i < 0)
         return null;
     }
@@ -667,20 +690,20 @@ public class Post
     if (i < length && attr.charAt(i) == '\'') {
       for (i++; i < length && attr.charAt(i) != '\''; i++) {
         char ch = attr.charAt(i);
-        
+
         if (ch == '"' && addSlashesToValues)
           break;
-        
+
         value.append(ch);
       }
     }
     else if (i < length && attr.charAt(i) == '"') {
       for (i++; i < length && attr.charAt(i) != '"'; i++) {
         char ch = attr.charAt(i);
-        
+
         if (ch == '\'' && addSlashesToValues)
           break;
-        
+
         value.append(ch);
       }
     }
@@ -692,7 +715,7 @@ public class Post
 
     return value.toString();
   }
-  
+
   private static void putRequestMap(Env env,
                                     ArrayValue post,
                                     ArrayValue files,
@@ -705,13 +728,13 @@ public class Post
 
     if (map == null)
       return;
-    
+
     long maxFileSize = Long.MAX_VALUE;
-    
+
     Value maxFileSizeV = post.get(MAX_FILE_SIZE);
     if (maxFileSizeV.isNull())
       maxFileSize = maxFileSizeV.toLong();
-      
+
     if (isAllowUploads) {
       for (Map.Entry<String,String[]> entry : map.entrySet()) {
         String key = entry.getKey();
@@ -746,9 +769,9 @@ public class Post
 
     Collections.sort(keys);
 
-    for (String key : keys) {   
+    for (String key : keys) {
       String []value = request.getParameterValues(key);
-      
+
       Post.addFormValue(env, post, key, value, addSlashesToValues);
     }
   }

@@ -268,9 +268,12 @@ public class SessionModule extends AbstractQuercusModule
     String sessionId = env.generateSessionId();
 
     if (deleteOld) {
+      SessionArrayValue session = env.getSession();
+
       session_destroy(env);
 
-      SessionArrayValue session = env.createSession(sessionId, true);
+      // php/1k6z
+      env.setSession(session);
     }
     else {
       SessionArrayValue session = env.getSession();

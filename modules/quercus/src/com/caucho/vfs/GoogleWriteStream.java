@@ -68,7 +68,7 @@ class GoogleWriteStream extends StreamImpl {
 
   @Override
   public void write(byte []buffer, int offset, int length, boolean isEnd)
-      throws IOException
+    throws IOException
   {
     // String s = new String(buffer, offset, length);
 

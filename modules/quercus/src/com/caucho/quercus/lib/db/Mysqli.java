@@ -29,6 +29,7 @@
 
 package com.caucho.quercus.lib.db;
 
+import com.caucho.quercus.QuercusContext;
 import com.caucho.quercus.QuercusException;
 import com.caucho.quercus.annotation.Optional;
 import com.caucho.quercus.annotation.ReturnNullAsFalse;
@@ -46,7 +47,6 @@ import java.lang.reflect.Method;
 import java.sql.Connection;
 import java.sql.DataTruncation;
 import java.sql.Driver;
-import java.sql.DriverManager;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.SQLWarning;
@@ -63,15 +63,6 @@ public class Mysqli extends JdbcConnectionResource
 {
   private static final Logger log = Logger.getLogger(Mysqli.class.getName());
   private static final L10N L = new L10N(Mysqli.class);
-
-  // Because _checkedDriverVersion is static, it affects spy output
-  // for various qa's.  If running them individually, there is an
-  // extra call to getMetaData in the log, but if a Mysqli object
-  // is created in a non-spy qa before the spy qa in question, there
-  // is no getMetaData call logged.  The spy qa's are written with
-  // the assumption that _checkedDriverVersion has already been set,
-  // i.e. without the getMetaData call.
-  private static volatile String _checkedDriverVersion = null;
 
   private static MysqlMetaDataMethod _lastMetaDataMethod;
 
@@ -459,7 +450,9 @@ public class Mysqli extends JdbcConnectionResource
 
   static StringValue getClientInfo(Env env)
   {
-    String version = env.getQuercus().getMysqlVersion();
+    QuercusContext quercus = env.getQuercus();
+
+    String version = quercus.getMysqlVersion();
 
     if (version != null) {
       // php/1f2h
@@ -467,30 +460,24 @@ public class Mysqli extends JdbcConnectionResource
       // Initialized to a specific version via:
       // <init mysql-version="X.X.X">
     } else {
-      // php/142h
+      try {
+        JdbcDriverContext jdbcDriverContext = quercus.getJdbcDriverContext();
 
-      if (_checkedDriverVersion != null && _checkedDriverVersion != "") {
-        // A connection has already been made and the driver
-        // version has been validated.
+        ClassLoader loader = Thread.currentThread().getContextClassLoader();
+        Class<?> cls = loader.loadClass(jdbcDriverContext.getDefaultDriver());
 
-        version = _checkedDriverVersion;
-      } else {
-        // A connection has not been made or a valid driver
-        // version was not found. The JDBC API provides no
-        // way to get the release number without a connection,
-        // so just grab the major and minor number and use
-        // zero for the release number.
+        Driver driver = (Driver) cls.newInstance();
 
-        try {
-          Driver driver = DriverManager.getDriver("jdbc:mysql://localhost/");
-
-          version = driver.getMajorVersion() + "."
-              + driver.getMinorVersion() + ".00";
-        }
-        catch (SQLException e) {
-          version = "0.00.00";
-        }
+        version = driver.getMajorVersion() + "."
+                  + driver.getMinorVersion() + ".00";
       }
+      catch (Exception e) {
+        log.log(Level.FINE, e.getMessage(), e);
+      }
+    }
+
+    if (version == null) {
+      version = "0.00.00";
     }
 
     return env.createString(version);
@@ -1338,7 +1325,7 @@ public class Mysqli extends JdbcConnectionResource
       }
     } catch (SQLException e) {
       saveErrors(e);
-      log.log(Level.WARNING, e.toString(), e);
+      log.log(Level.FINE, e.toString(), e);
       return null;
     }
   }
@@ -1412,12 +1399,12 @@ public class Mysqli extends JdbcConnectionResource
         setWarnings(stmt.getWarnings());
       } catch (SQLException e) {
         saveErrors(e);
-        log.log(Level.WARNING, e.toString(), e);
+        log.log(Level.FINE, e.toString(), e);
         return false;
       }
     } catch (SQLException e) {
       saveErrors(e);
-      log.log(Level.WARNING, e.toString(), e);
+      log.log(Level.FINE, e.toString(), e);
       return false;
     }
 

@@ -639,8 +639,7 @@ public class MysqliModule extends AbstractQuercusModule {
    */
    public static int mysqli_get_client_version(Env env)
    {
-     return Mysqli.infoToVersion(
-       mysqli_get_client_info(env).toString());
+     return Mysqli.infoToVersion(mysqli_get_client_info(env).toString());
    }
 
   /**
@@ -1440,6 +1439,14 @@ public class MysqliModule extends AbstractQuercusModule {
     return conn.kill(env, threadId);
   }
 
+  public static boolean mysqli_report(Env env, int flags)
+  {
+    // stubbed for phpMyAdmin 3.5.1
+    env.stub("mysqli_report");
+
+    return false;
+  }
+
   // Undocumented
   //
   // mysqli_enable_reads_from_master
@@ -1469,7 +1476,6 @@ public class MysqliModule extends AbstractQuercusModule {
   //@todo mysqli_debug
   //@todo mysqli_dump_debug_info
   //@todo mysqli_kill
-  //@todo mysqli_report
   //@todo mysqli_send_long_data (alias for mysqli_stmt_send_long_data)
   //@todo mysqli_set_charset
   //@todo mysqli_ssl_set

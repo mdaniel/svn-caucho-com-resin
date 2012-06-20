@@ -233,7 +233,7 @@ abstract public class ObjectValue extends Value {
   {
     return this;
   }
-  
+
   /**
    * Returns the array value with the given key.
    */
@@ -494,10 +494,13 @@ abstract public class ObjectValue extends Value {
   {
     rValue = rValue.toValue();
 
-    if (rValue instanceof ObjectValue)
+    if (rValue.isObject())
       return cmpObject((ObjectValue) rValue) == 0;
-    else
-      return super.eq(rValue);
+    else {
+      Env env = Env.getInstance();
+
+      return toString(env).equals(rValue.toString(env));
+    }
   }
 
   /**

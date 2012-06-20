@@ -30,6 +30,7 @@
 package com.caucho.quercus.lib.filter;
 
 import com.caucho.quercus.UnimplementedException;
+import com.caucho.quercus.env.BooleanValue;
 import com.caucho.quercus.env.Env;
 import com.caucho.quercus.env.StringValue;
 import com.caucho.quercus.env.Value;
@@ -40,10 +41,10 @@ import java.io.InputStream;
 public class IpValidateFilter extends ValidateFilter
 {
   @Override
-  protected boolean isValid(Env env, Value value, int flags)
+  protected Value filterImpl(Env env, Value value, int flags)
   {
     if (! value.isString()) {
-      return false;
+      return BooleanValue.FALSE;
     }
 
     boolean isIpV4 = (flags & FilterModule.FILTER_FLAG_IPV4) > 0;
@@ -63,7 +64,12 @@ public class IpValidateFilter extends ValidateFilter
       int pos = str.indexOf('.');
 
       if (pos >= 0) {
-        return isValidIp4(str, isRejectReserved, isRejectPrivate);
+        if (isValidIp4(str, isRejectReserved, isRejectPrivate)) {
+          return value;
+        }
+        else {
+          return BooleanValue.FALSE;
+        }
       }
     }
 
@@ -71,11 +77,16 @@ public class IpValidateFilter extends ValidateFilter
       int pos = str.indexOf(':');
 
       if (pos >= 0) {
-        return isValidIp6(str, isRejectReserved, isRejectPrivate);
+        if (isValidIp6(str, isRejectReserved, isRejectPrivate)) {
+          return value;
+        }
+        else {
+          return BooleanValue.FALSE;
+        }
       }
     }
 
-    return false;
+    return BooleanValue.FALSE;
   }
 
   private boolean isValidIp4(StringValue str,

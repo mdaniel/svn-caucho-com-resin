@@ -153,11 +153,11 @@ public class UnicodeBuilderValue
   {
     byte []vBuffer = v.getBuffer();
     int vOffset = v.length();
-    
+
     _buffer = new char[vBuffer.length];
-    
+
     System.arraycopy(vBuffer, 0, _buffer, 0, vOffset);
-    
+
     _length = vOffset;
   }
 
@@ -556,7 +556,7 @@ public class UnicodeBuilderValue
     if (ch == '-') {
       if (len == 1)
         return this;
-      
+
       sign = -1;
       i++;
     }
@@ -1272,17 +1272,20 @@ public class UnicodeBuilderValue
 
       return true;
     }
+    else if (rValue.isObject()) {
+      return super.eq(rValue);
+    }
     else {
       String rString = rValue.toString();
 
       int len = rString.length();
 
       if (_length != len)
-    return false;
+        return false;
 
       for (int i = len - 1; i >= 0; i--) {
-    if (_buffer[i] != rString.charAt(i))
-      return false;
+        if (_buffer[i] != rString.charAt(i))
+          return false;
       }
 
       return true;

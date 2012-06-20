@@ -46,9 +46,6 @@ import com.caucho.util.RandomUtil;
 public class ArrayValueImpl extends ArrayValue
   implements Serializable
 {
-  private static final Logger log
-    = Logger.getLogger(ArrayValueImpl.class.getName());
-
   private static final StringValue KEY = new ConstStringValue("key");
   private static final StringValue VALUE = new ConstStringValue("value");
 

@@ -435,8 +435,11 @@ abstract public class Value implements java.io.Serializable
   public boolean eq(Value rValue)
   {
     if (rValue.isArray())
+      return false;
+    else if (rValue.isObject()) {
       return rValue.eq(this);
-    else if (rValue instanceof BooleanValue)
+    }
+    else if (rValue.isBoolean())
       return toBoolean() == rValue.toBoolean();
     else if (isLongConvertible() && rValue.isLongConvertible())
       return toLong() == rValue.toLong();
