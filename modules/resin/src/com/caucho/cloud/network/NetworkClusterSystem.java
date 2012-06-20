@@ -85,7 +85,7 @@ public class NetworkClusterSystem extends AbstractResinSubSystem
     ClusterServer clusterServer = selfServer.getData(ClusterServer.class);
     
     if (clusterServer.getPort() >= 0) {
-      _clusterListener = new ClusterListener(clusterServer);
+      _clusterListener = new ClusterTcpPort(clusterServer);
      }
   }
 
@@ -374,7 +374,7 @@ public class NetworkClusterSystem extends AbstractResinSubSystem
       
       listener.setKeepaliveConnectionTimeMaxMillis(CLUSTER_IDLE_TIME_MAX);
       listener.setKeepaliveTimeoutMillis(idleTime);
-      listener.setSocketTimeoutMillis(idleTime);
+      listener.setSocketTimeoutMillis(clusterServer.getClusterSocketTimeout());
       
       listener.setProtocol(HmuxProtocol.create());
       listener.init();

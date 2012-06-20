@@ -30,11 +30,16 @@
 package com.caucho.boot;
 
 import java.net.InetAddress;
+import java.net.UnknownHostException;
+import java.util.logging.Logger;
 
 import com.caucho.config.ConfigException;
+import com.caucho.config.Configurable;
 import com.caucho.config.annotation.NoAspect;
 import com.caucho.config.program.ConfigProgram;
 import com.caucho.network.listen.TcpPort;
+import com.caucho.vfs.JsseSSLFactory;
+import com.caucho.vfs.QJniServerSocket;
 import com.caucho.vfs.QServerSocket;
 import com.caucho.vfs.SSLFactory;
 
@@ -42,9 +47,16 @@ import com.caucho.vfs.SSLFactory;
  * Represents a protocol connection.
  */
 @NoAspect
-public class OpenPort extends TcpPort
+public class OpenPort
 {
+  private static final Logger log = Logger.getLogger(OpenPort.class.getName());
+  
   private String _protocol;
+  
+  private String _address;
+  private InetAddress _socketAddress;
+  private int _port;
+  private boolean _isJsse;
   
   public OpenPort()
   {
@@ -57,7 +69,6 @@ public class OpenPort extends TcpPort
   }
   */
   
-  @Override
   public String getProtocolName()
   {
     return _protocol;
@@ -67,14 +78,105 @@ public class OpenPort extends TcpPort
   {
     _protocol = protocol;
   }
+  
+  public void setPort(int port)
+  {
+    _port = port;
+  }
+  
+  public int getPort()
+  {
+    return _port;
+  }
+
+  /**
+   * Sets the address
+   */
+  @Configurable
+  public void setAddress(String address)
+    throws UnknownHostException
+  {
+    if ("*".equals(address))
+      address = null;
+
+    _address = address;
+
+    if (address != null)
+      _socketAddress = InetAddress.getByName(address);
+  }
+  
+  public String getAddress()
+  {
+    return _address;
+  }
 
   /**
    * Sets the SSL factory
    */
-  public SSLFactory createOpenssl()
-    throws ConfigException
+  public void addOpenssl(ConfigProgram program)
   {
-    return new DummyOpenSSLFactory();
+  }
+
+  public void addJsse(ConfigProgram program)
+  {
+    _isJsse = true;
+  }
+
+  /**
+   * binds for the watchdog.
+   */
+  public QServerSocket bindForWatchdog()
+    throws java.io.IOException
+  {
+    QServerSocket ss;
+
+    // use same method for ports for testability reasons
+    /*
+    if (_port >= 1024)
+      return null;
+    else
+    */
+    
+    if (_isJsse) {
+      if (_port < 1024) {
+        log.warning(this + " cannot bind jsse in watchdog");
+      }
+      
+      return null;
+    }
+
+    if (_socketAddress != null) {
+      ss = QJniServerSocket.createJNI(_socketAddress, _port);
+
+      if (ss == null)
+        return null;
+
+      log.fine(this + " watchdog binding to " + _socketAddress.getHostName() + ":" + _port);
+    }
+    else {
+      ss = QJniServerSocket.createJNI(null, _port);
+
+      if (ss == null)
+        return null;
+
+      log.fine(this + " watchdog binding to *:" + _port);
+    }
+
+    if (! ss.isJni()) {
+      ss.close();
+
+      return ss;
+    }
+
+    /*
+    ss.setTcpNoDelay(_isTcpNoDelay);
+    ss.setTcpKeepalive(_isTcpKeepalive);
+    ss.setTcpCork(_isTcpCork);
+
+    ss.setConnectionSocketTimeout((int) getSocketTimeout());
+    */
+
+    return ss;
   }
 
   public void addBuilderProgram(ConfigProgram program)

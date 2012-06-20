@@ -49,9 +49,14 @@ if ! test -f "${RESIN_EXE}"; then
 fi
 
 #
-# Set to the server id to start
+# Set to the server id to start and use "start" command instead of
+# "start-all"
 #
 #SERVER="-server app-a"
+#START_CMD="start"
+
+START_CMD="start-all"
+
 #
 # -resin-root /var/resin         -- the main data directory
 #
@@ -114,9 +119,9 @@ case "$1" in
   start)
 	log_daemon_msg "Starting resin"
 	if test -n "$USER"; then
-  	  su $USER -c """$RESIN_EXE $ARGS start-all""" 1>> $CONSOLE 2>> $CONSOLE
+  	  su $USER -c """$RESIN_EXE $ARGS $START_CMD""" 1>> $CONSOLE 2>> $CONSOLE
 	else
-	    errors=`$RESIN_EXE $ARGS start-all 2>&1`
+	    errors=`$RESIN_EXE $ARGS $START_CMD 2>&1`
 	    if [ $? != 0 ]; then
 		log_daemon_msg $errors
 	    fi

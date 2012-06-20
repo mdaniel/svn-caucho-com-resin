@@ -236,7 +236,7 @@ class WatchdogChild
     return _config.getWatchdogAddress();
   }
 
-  Iterable<TcpPort> getPorts()
+  Iterable<OpenPort> getPorts()
   {
     return _config.getPorts();
   }

@@ -1383,14 +1383,4 @@ public class Resin
 
     return _log;
   }
-  
-  static class BLockManagerMemoryFreeTask implements Runnable {
-    private BlockManager _blockManager = BlockManager.getBlockManager();
-    
-    @Override
-    public void run()
-    {
-      _blockManager.clear();
-    }
-  }
 }

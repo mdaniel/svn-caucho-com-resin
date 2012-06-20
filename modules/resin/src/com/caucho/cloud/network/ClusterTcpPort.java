@@ -35,9 +35,10 @@ import com.caucho.network.listen.TcpPort;
 /**
  * Represents a protocol connection.
  */
-public class ClusterListener extends TcpPort {
-  public ClusterListener(ClusterServer server)
+public class ClusterTcpPort extends TcpPort {
+  public ClusterTcpPort(ClusterServer server)
   {
+    Thread.dumpStack();
     try {
       setAddress(server.getAddress());
       

@@ -228,7 +228,7 @@ public class JniStream extends StreamImpl {
       return new ClientDisconnectException("connection reset by peer");
 
     case TIMEOUT_EXN:
-      return new SocketTimeoutException("client timeout");
+      return new ClientTimeoutException("client timeout");
 
     default:
       return new ClientDisconnectException("unknown exception=" + result);

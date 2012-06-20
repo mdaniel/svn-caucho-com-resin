@@ -12,6 +12,11 @@
 
 <s2 title="4.0.29 - snapshot">
 <ul>
+<li>watchdog: OOM issue with startup of multiple servers (#5096, rep by chiefgeek)</li>
+<li>init.d: add START_CMD to /etc/init.d/resin to allow changes to start-all (#5022)</li>
+<li>config: cluster-socket-timeout is configurable (#5096)</li>
+<li>client socket: modify client timeout to extend from ClientDisconnect (#4975, rep by Y. Hsu)</li>
+<li>watchdog: shutdown was killing processes, not stopping them, skipping graceful shutdown (#4969, rep by aiman_a)</li>
 <li>cgi: error codes above 400 did not allow custom bodies from cgi (#4953)</li>
 <li>ext: upgrade to slf4j 1.6.6 (#4853)</li>
 <li>config: ~/.resin not properly read by Resin (#4947)</li>

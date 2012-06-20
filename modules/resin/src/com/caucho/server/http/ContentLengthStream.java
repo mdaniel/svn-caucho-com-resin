@@ -28,7 +28,9 @@
 
 package com.caucho.server.http;
 
+import com.caucho.vfs.ClientDisconnectException;
 import com.caucho.vfs.ReadStream;
+import com.caucho.vfs.SocketTimeoutException;
 import com.caucho.vfs.StreamImpl;
 
 import java.io.IOException;
@@ -63,9 +65,11 @@ public class ContentLengthStream extends StreamImpl {
    *
    * @return the number of bytes read or -1 for the end of the file.
    */
+  @Override
   public int read(byte []buffer, int offset, int length)
     throws IOException
   {
+    try {
     if (_length < length)
       length = (int) _length;
 
@@ -77,10 +81,14 @@ public class ContentLengthStream extends StreamImpl {
     if (len > 0) {
       _length -= len;
     }
-    else
+    else {
       _length = -1;
+    }
 
     return len;
+    } catch (SocketTimeoutException e) {
+      throw new ClientDisconnectException(e);
+    }
   }
 
   public int getAvailable()

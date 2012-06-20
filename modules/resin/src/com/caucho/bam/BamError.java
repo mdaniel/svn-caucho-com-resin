@@ -278,9 +278,7 @@ public class BamError implements Serializable {
   public BamError(String type,
                     String group)
   {
-    this.type = type;
-    this.group = group;
-    this.text = null;
+    this(type, group, null);
   }
 
   /**
@@ -311,9 +309,8 @@ public class BamError implements Serializable {
                   String text,
                   Serializable data)
   {
-    this.type = type;
-    this.group = group;
-    this.text = text;
+    this(type, group, text);
+
     this.data = data;
   }
 

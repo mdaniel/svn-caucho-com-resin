@@ -100,6 +100,7 @@ public final class ClusterServer {
   private boolean _isBackup;
   
   private long _clusterIdleTime = 3 * 60000L;
+  private long _clusterSocketTimeout = 10 * 60000L;
   
   private ConfigProgram _portDefaults = new ContainerProgram();
 
@@ -414,6 +415,20 @@ public final class ClusterServer {
   public long getClusterIdleTime()
   {
     return _clusterIdleTime;
+  }
+  
+  @Configurable
+  public void setClusterSocketTimeout(Period period)
+  {
+    _clusterSocketTimeout = period.getPeriod();
+  }
+
+  /**
+   * The cluster socket-timeout
+   */
+  public long getClusterSocketTimeout()
+  {
+    return _clusterSocketTimeout;
   }
 
   

@@ -525,7 +525,7 @@ class WatchdogChildProcess
 
       try {
         if (_watchdog.getUserName() != null) {
-          for (TcpPort port : _watchdog.getPorts()) {
+          for (OpenPort port : _watchdog.getPorts()) {
             QServerSocket ss = port.bindForWatchdog();
 
             if (ss == null)

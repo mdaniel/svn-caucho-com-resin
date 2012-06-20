@@ -89,7 +89,7 @@ class WatchdogConfig
   private String _userName;
   private String _groupName;
 
-  private ArrayList<TcpPort> _ports = new ArrayList<TcpPort>();
+  private ArrayList<OpenPort> _ports = new ArrayList<OpenPort>();
   
   private long _shutdownWaitTime = 60000L;
 
@@ -242,7 +242,7 @@ class WatchdogConfig
   /**
    * Adds a custom-protocol port.
    */
-  public TcpPort createProtocol()
+  public OpenPort createProtocol()
     throws ConfigException
   {
     OpenPort port = new OpenPort();
@@ -255,7 +255,7 @@ class WatchdogConfig
   /**
    * Adds a watchdog managed port
    */
-  public void addOpenPort(TcpPort port)
+  public void addOpenPort(OpenPort port)
   {
     _ports.add(port);
   }
@@ -438,7 +438,7 @@ class WatchdogConfig
     return _args;
   }
 
-  Iterable<TcpPort> getPorts()
+  Iterable<OpenPort> getPorts()
   {
     return _ports;
   }

@@ -78,15 +78,14 @@ public class NetworkServerConfig {
   @Configurable
   public void setClusterIdleTime(Period period)
   {
-    // XXX: non-configurable
-    // getClusterListener().setKeepaliveTimeout(period);
+    getClusterListener().setKeepaliveTimeout(period);
   }
   
   @Configurable
   public void setClusterSocketTimeout(Period period)
   {
-    // XXX: non-configurable
-    // getClusterListener().setSocketTimeout(period);
+    // server/0651
+    getClusterListener().setSocketTimeout(period);
   }
   
   @Configurable

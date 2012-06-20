@@ -69,7 +69,7 @@ public class QueryFutureCallback extends AbstractQueryCallback {
   {
     _error = error;
     _state = ResultStateEnum.ERROR;
-    
+
     Thread thread = _thread;
     
     if (thread != null) {

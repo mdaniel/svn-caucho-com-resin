@@ -109,7 +109,7 @@ public class BootClusterConfig {
       = new WatchdogConfig(this, _resin.getArgs(), 
                            _resin.getRootDirectory(),
                            _serverList.size());
-
+    
     for (int i = 0; i < _serverDefaultList.size(); i++) {
       _serverDefaultList.get(i).configure(config);
     }

@@ -287,6 +287,12 @@ public class ResinBoot
 
     if (System.getProperty("log.level") != null) {
       Logger.getLogger("").setLevel(Level.FINER);
+      
+      for (Handler handler : Logger.getLogger("").getHandlers()) {
+        if (handler instanceof ConsoleHandler) {
+          handler.setLevel(Level.FINER);
+        }
+      }
     }
     else {
       for (Handler handler : Logger.getLogger("").getHandlers()) {

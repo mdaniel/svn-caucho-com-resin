@@ -103,13 +103,9 @@ public abstract class AbstractScalingCommand extends AbstractBootCommand
 
   private int findPort(WatchdogClient client)
   {
-    for (TcpPort listener : client.getConfig().getPorts()) {
-      if (listener instanceof OpenPort) {
-        OpenPort openPort = (OpenPort) listener;
-
-        if ("http".equals(openPort.getProtocolName()))
-          return openPort.getPort();
-      }
+    for (OpenPort openPort : client.getConfig().getPorts()) {
+      if ("http".equals(openPort.getProtocolName()))
+        return openPort.getPort();
     }
 
     return 0;
