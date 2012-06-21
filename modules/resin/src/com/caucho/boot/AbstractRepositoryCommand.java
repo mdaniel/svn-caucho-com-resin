@@ -34,16 +34,11 @@ import java.net.Socket;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
-import com.caucho.bam.BamException;
-import com.caucho.bam.NotAuthorizedException;
-import com.caucho.bam.RemoteConnectionFailedException;
-import com.caucho.bam.RemoteListenerUnavailableException;
+import com.caucho.bam.*;
 import com.caucho.bam.actor.ActorSender;
 import com.caucho.bam.actor.RemoteActorSender;
 import com.caucho.config.ConfigException;
-import com.caucho.env.repository.CommitBuilder;
 import com.caucho.hmtp.HmtpClient;
-import com.caucho.network.listen.TcpPort;
 import com.caucho.server.admin.HmuxClientFactory;
 import com.caucho.server.admin.WebAppDeployClient;
 import com.caucho.util.L10N;
@@ -69,40 +64,32 @@ public abstract class AbstractRepositoryCommand extends AbstractRemoteCommand {
       deployClient = getDeployClient(args, client);
 
       return doCommand(args, client, deployClient);
-    } catch (ConfigException e) {
-      if (args.isVerbose()) {
-        e.printStackTrace();
-      }
-      
-      System.out.println(e.toString());
-      
-      return 2;
-    } catch (NotAuthorizedException e) {
-      if (args.isVerbose()) {
-        e.printStackTrace();
-      }
-      
-      System.out.println(e.toString());
-      
-      return 1;
-    } catch (BamException e) {
-      if (args.isVerbose()) {
-        e.printStackTrace();
-      }
-      
-      System.out.println(e.toString());
-      
-      return 2;
     } catch (Exception e) {
-      /*
+      Throwable cause = e;
+
+      if (cause instanceof ConfigException || 
+        cause instanceof ErrorPacketException) {
+        System.out.println(cause.getMessage());
+      } else if (cause instanceof BamException) {
+        BamException bamException = (BamException) cause;
+        if (bamException.getActorError() != null) 
+          System.out.println(bamException.getActorError().getText());
+        else
+          System.out.println(bamException.getMessage());
+      } else {
+        while (cause.getCause() != null)
+          cause = cause.getCause();
+        
+        System.out.println(cause.toString());
+      }
+
       if (args.isVerbose())
         e.printStackTrace();
-      else
-        System.out.println(e.toString());
-        */
-      e.printStackTrace();
 
-      return 2;
+      if (e instanceof NotAuthorizedException)
+        return 1;
+      else
+        return 2;
     } finally {
       if (deployClient != null)
         deployClient.close();
@@ -225,13 +212,11 @@ public abstract class AbstractRepositoryCommand extends AbstractRemoteCommand {
 
       return client;
     } catch (RemoteConnectionFailedException e) {
-      throw new RemoteConnectionFailedException(L.l("Connection to '{0}' failed for remote deploy. Check the server has started and make sure <resin:RemoteAdminService> is enabled in the resin.xml.\n  {1}",
-                                                    url, e.getMessage()),
-                                                e);
+      throw new RemoteConnectionFailedException(L.l("Connection to '{0}' failed for remote deploy.\n  Ensure the local server has started, or include --server and --port parameters to connect to a remote server.",
+                                                    url), e);
     } catch (RemoteListenerUnavailableException e) {
-      throw new RemoteListenerUnavailableException(L.l("Connection to '{0}' failed for remote deploy because no RemoteAdminService (HMTP) was configured. Check the server has started and make sure <resin:RemoteAdminService> is enabled in the resin.xml.\n  {1}",
-                                                    url, e.getMessage()),
-                                                e);
+      throw new RemoteListenerUnavailableException(L.l("Connection to '{0}' failed for remote deploy because RemoteAdminService (HMTP) is not enabled.\n  Ensure <resin:RemoteAdminService> is enabled in resin.xml.",
+                                                       url), e);
     }
   }
   
@@ -255,13 +240,11 @@ public abstract class AbstractRepositoryCommand extends AbstractRemoteCommand {
     try {
       return hmuxFactory.create();
     } catch (RemoteConnectionFailedException e) {
-      throw new RemoteConnectionFailedException(L.l("Connection to '{0}' failed for remote deploy. Check the server has started and make sure <resin:RemoteAdminService> is enabled in the resin.xml.\n  {1}",
-                                                    triad, e.getMessage()),
-                                                e);
+      throw new RemoteConnectionFailedException(L.l("Connection to '{0}' failed for remote deploy.\n  Ensure the local server has started, or include --server and --port parameters to connect to a remote server.",
+                                                    triad), e);
     } catch (RemoteListenerUnavailableException e) {
-      throw new RemoteListenerUnavailableException(L.l("Connection to '{0}' failed for remote deploy because the RemoteAdminService (HMTP) is not enabled. Check the server to sure <resin:RemoteAdminService> is enabled in the resin.xml.\n  {1}",
-                                                       triad, e.getMessage()),
-                                                e);
+      throw new RemoteListenerUnavailableException(L.l("Connection to '{0}' failed for remote deploy because RemoteAdminService (HMTP) is not enabled.\n  Ensure <resin:RemoteAdminService> is enabled in resin.xml.",
+                                                       triad), e);
     }
   }
   

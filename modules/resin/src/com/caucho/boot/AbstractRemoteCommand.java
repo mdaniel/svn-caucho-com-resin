@@ -36,13 +36,10 @@ import java.net.UnknownHostException;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
-import com.caucho.bam.RemoteConnectionFailedException;
-import com.caucho.bam.RemoteListenerUnavailableException;
-import com.caucho.bam.actor.ActorSender;
+import com.caucho.bam.*;
 import com.caucho.bam.actor.RemoteActorSender;
 import com.caucho.config.ConfigException;
 import com.caucho.hmtp.HmtpClient;
-import com.caucho.network.listen.TcpPort;
 import com.caucho.server.admin.HmuxClientFactory;
 import com.caucho.util.L10N;
 
@@ -136,13 +133,11 @@ public abstract class AbstractRemoteCommand extends AbstractBootCommand {
 
       return client;
     } catch (RemoteConnectionFailedException e) {
-      throw new RemoteConnectionFailedException(L.l("Connection to '{0}' failed for remote deploy. Check the server has started and make sure <resin:RemoteAdminService> is enabled in the resin.xml.\n  {1}",
-                                                    url, e.getMessage()),
-                                                e);
+      throw new RemoteConnectionFailedException(L.l("Connection to '{0}' failed for remote administration.\n  Ensure the local server has started, or include --server and --port parameters to connect to a remote server.",
+                                                    url), e);
     } catch (RemoteListenerUnavailableException e) {
-      throw new RemoteListenerUnavailableException(L.l("Connection to '{0}' failed for remote deploy because no RemoteAdminService (HMTP) was configured. Check the server has started and make sure <resin:RemoteAdminService> is enabled in the resin.xml.\n  {1}",
-                                                    url, e.getMessage()),
-                                                e);
+      throw new RemoteListenerUnavailableException(L.l("Connection to '{0}' failed for remote administration because RemoteAdminService (HMTP) is not enabled.\n  Ensure <resin:RemoteAdminService> is enabled in resin.xml.",
+                                                       url), e);
     }
   }
   
@@ -171,13 +166,11 @@ public abstract class AbstractRemoteCommand extends AbstractBootCommand {
     try {
       return hmuxFactory.create();
     } catch (RemoteConnectionFailedException e) {
-      throw new RemoteConnectionFailedException(L.l("Connection to '{0}' failed for remote deploy. Check the server has started and make sure <resin:RemoteAdminService> is enabled in the resin.xml.\n  {1}",
-                                                    triad, e.getMessage()),
-                                                e);
+      throw new RemoteConnectionFailedException(L.l("Connection to '{0}' failed for remote administration.\n  Ensure the local server has started, or include --server and --port parameters to connect to a remote server.",
+                                                    triad), e);
     } catch (RemoteListenerUnavailableException e) {
-      throw new RemoteListenerUnavailableException(L.l("Connection to '{0}' failed for remote deploy because the RemoteAdminService (HMTP) is not enabled. Check the server to sure <resin:RemoteAdminService> is enabled in the resin.xml.\n  {1}",
-                                                       triad, e.getMessage()),
-                                                e);
+      throw new RemoteListenerUnavailableException(L.l("Connection to '{0}' failed for remote administration because RemoteAdminService (HMTP) is not enabled.\n  Ensure <resin:RemoteAdminService> is enabled in resin.xml.",
+                                                       triad), e);
     }
   }
   

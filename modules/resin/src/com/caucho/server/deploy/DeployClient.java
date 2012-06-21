@@ -159,13 +159,11 @@ public class DeployClient implements Repository
                                              _deployAddress, 
                                              _bamClient);
     } catch (RemoteConnectionFailedException e) {
-      throw new RemoteConnectionFailedException(L.l("Connection to '{0}' failed for remote deploy. Check the server and make sure the server has started and that <resin:RemoteAdminService> is enabled in the resin.xml.\n  {1}",
-                                                    url, e.getMessage()),
-                                                e);
+      throw new RemoteConnectionFailedException(L.l("Connection to '{0}' failed for remote administration.\n  Ensure the local server has started, or include --server and --port parameters to connect to a remote server.",
+                                                    url), e);
     } catch (RemoteListenerUnavailableException e) {
-      throw new RemoteListenerUnavailableException(L.l("Connection to '{0}' failed for remote deploy. Check the server and make sure <resin:RemoteAdminService> is enabled in the resin.xml.\n  {1}",
-                                                    url, e.getMessage()),
-                                                e);
+      throw new RemoteListenerUnavailableException(L.l("Connection to '{0}' failed for remote administration because RemoteAdminService (HMTP) is not enabled.\n  Ensure <resin:RemoteAdminService> is enabled in resin.xml.",
+                                                       url), e);
     }
   }
   
@@ -388,8 +386,9 @@ public class DeployClient implements Repository
     try {
       return _deployProxy.getCommitList(commitList);
     } catch (ServiceUnavailableException e) {
-      throw new ServiceUnavailableException(L.l("Deploy service is not available, possibly because the resin.xml is missing a <resin:AdminServices> or a <resin:DeployService> tag.\n  {0}",
-                                                e.getMessage()));
+      throw new ServiceUnavailableException(L.l("Deploy service is not available.\n  Ensure <resin:AdminServices> or a <resin:DeployService> is enabled in resin.xml."),
+                                            e);
+                                                
     }
   }
 

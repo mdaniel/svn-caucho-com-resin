@@ -29,7 +29,7 @@
 
 package com.caucho.boot;
 
-import com.caucho.bam.NotAuthorizedException;
+import com.caucho.bam.*;
 import com.caucho.bam.actor.ActorSender;
 import com.caucho.config.ConfigException;
 import com.caucho.server.admin.ManagerClient;
@@ -53,19 +53,24 @@ public abstract class AbstractManagementCommand extends AbstractRemoteCommand {
     } catch (Exception e) {
       Throwable cause = e;
 
-      if ((cause instanceof ConfigException) && ! args.isVerbose()) {
+      if (cause instanceof ConfigException || 
+          cause instanceof ErrorPacketException) {
         System.out.println(cause.getMessage());
-      }
-      else {
-        while (cause.getCause() != null) {
-          cause = cause.getCause();
-        }
-
-        if (args.isVerbose())
-          e.printStackTrace();
+      } else if (cause instanceof BamException) {
+        BamException bamException = (BamException) cause;
+        if (bamException.getActorError() != null) 
+          System.out.println(bamException.getActorError().getText());
         else
-          System.out.println(cause.toString());
+          System.out.println(bamException.getMessage());
+      } else {
+        while (cause.getCause() != null)
+          cause = cause.getCause();
+        
+        System.out.println(cause.toString());
       }
+
+      if (args.isVerbose())
+        e.printStackTrace();
 
       if (e instanceof NotAuthorizedException)
         return 1;

@@ -665,7 +665,7 @@ function pdf_availability()
     } else if ($downtime->isEstimated()) {
       $note = '* Estimated: due to hard shutdown';
     } else {
-      note = '';
+      $note = '';
     }
     
     $g_canvas->writeTextColumn($col1, 'l', date("Y-m-d H:i:s", $downtime->startTime / 1000) . ($note ? " *" : ""));
