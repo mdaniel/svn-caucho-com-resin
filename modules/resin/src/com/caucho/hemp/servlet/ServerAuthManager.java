@@ -143,10 +143,9 @@ public class ServerAuthManager {
       else if (_security.isSystemAuthKey() || ! _isAuthenticationRequired)
         serverSignature = _security.signSystem(uid, nonce);
       else {
-        log.info("Authentication failed because no resin-system-auth-key");
+        log.info("Authentication failed because cluster-system-key is not configured");
         
-        throw new NotAuthorizedException(L.l("'{0}' has invalid credentials",
-                                             uid));
+        throw new NotAuthorizedException(L.l("cluster-system-key is not configured"));
       }
       
       if (! serverSignature.equals(signature)) {

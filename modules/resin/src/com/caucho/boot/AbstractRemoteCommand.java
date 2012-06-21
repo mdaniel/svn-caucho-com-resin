@@ -136,7 +136,7 @@ public abstract class AbstractRemoteCommand extends AbstractBootCommand {
       throw new RemoteConnectionFailedException(L.l("Connection to '{0}' failed for remote administration.\n  Ensure the local server has started, or include --server and --port parameters to connect to a remote server.",
                                                     url), e);
     } catch (RemoteListenerUnavailableException e) {
-      throw new RemoteListenerUnavailableException(L.l("Connection to '{0}' failed for remote administration because RemoteAdminService (HMTP) is not enabled.\n  Ensure <resin:RemoteAdminService> is enabled in resin.xml.",
+      throw new RemoteListenerUnavailableException(L.l("Connection to '{0}' failed for remote administration because RemoteAdminService (HMTP) is not enabled.\n  Ensure 'remote_cli_enable' is set true in resin.properties.",
                                                        url), e);
     }
   }
@@ -169,7 +169,7 @@ public abstract class AbstractRemoteCommand extends AbstractBootCommand {
       throw new RemoteConnectionFailedException(L.l("Connection to '{0}' failed for remote administration.\n  Ensure the local server has started, or include --server and --port parameters to connect to a remote server.",
                                                     triad), e);
     } catch (RemoteListenerUnavailableException e) {
-      throw new RemoteListenerUnavailableException(L.l("Connection to '{0}' failed for remote administration because RemoteAdminService (HMTP) is not enabled.\n  Ensure <resin:RemoteAdminService> is enabled in resin.xml.",
+      throw new RemoteListenerUnavailableException(L.l("Connection to '{0}' failed for remote administration because RemoteAdminService (HMTP) is not enabled.\n  Ensure 'remote_cli_enable' is set true in resin.properties.",
                                                        triad), e);
     }
   }
