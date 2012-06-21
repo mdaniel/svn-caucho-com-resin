@@ -29,13 +29,13 @@
 
 package com.caucho.config.scope;
 
-import java.io.Serializable;
+import com.caucho.config.inject.InjectManager;
+import com.caucho.inject.Module;
 
 import javax.enterprise.context.spi.Contextual;
 import javax.enterprise.context.spi.CreationalContext;
-
-import com.caucho.config.inject.InjectManager;
-import com.caucho.inject.Module;
+import javax.enterprise.inject.spi.BeanManager;
+import java.io.Serializable;
 
 /**
  * Serializable container for a bean scope.
@@ -83,7 +83,16 @@ public class ContextContainer implements Serializable, ScopeRemoveListener
   {
     close();
   }
-  
+
+  public synchronized BeanManager getBeanManager()
+  {
+    if (_beanManager == null) {
+      _beanManager = InjectManager.create();
+    }
+
+    return _beanManager;
+  }
+
   public void close()
   {
     ContextItem<?> entry = _values;
@@ -94,14 +103,17 @@ public class ContextContainer implements Serializable, ScopeRemoveListener
       Object id = entry.getId();
       Object value = entry.getObject();
 
-      if (bean == null && id instanceof String)
-        bean = _beanManager.getPassivationCapableBean((String) id);
+      if (bean == null && id instanceof String) {
+        BeanManager beanManager = getBeanManager();
+        bean = beanManager.getPassivationCapableBean((String) id);
+      }
       
       CreationalContext<?> env = entry.getEnv();
 
       bean.destroy(value, env);
-      
-      env.release();
+
+      if (env != null)
+        env.release();
     }
   }
   
