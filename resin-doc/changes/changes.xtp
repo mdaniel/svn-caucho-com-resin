@@ -12,6 +12,8 @@
 
 <s2 title="4.0.29 - snapshot">
 <ul>
+<li>cloud: validate that no two servers have the same IP:address (#5122)</li>
+<li>cdi: Serialization with bean with writeReplace in parent (#4992, rep by guus)</li>
 <li>servlet: add JMX ServletManager.getStickySessionServer (#5072)</li>
 <li>mod_caucho: update ./configure detection of mod_caucho (#5117)</li>
 <li>cli: validate that watchdog resin.home matches CLI resin.home (#5099)</li>

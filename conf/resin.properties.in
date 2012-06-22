@@ -9,7 +9,8 @@
 # log_level : info
 # app-0.log_level : finest
 #
-# Like Resin XML configuration, modification of this file will trigger a restart.
+# Like Resin XML configuration, modification of this file will trigger
+# a restart.
 #
 
 # General log level (modify resin.xml for more granular log level adjustments)
@@ -22,7 +23,8 @@ dev_mode      : true
 resin_doc     : true
 
 # List Triad server ip-addresses:hmux-port for each tier, space separated
-# App tier Triad servers must be listed to enable web-tier to app-tier load-balancing
+# App tier Triad servers must be listed to enable web-tier to 
+# app-tier load-balancing
 
 # web-tier Triad servers: web-0 web-1 web-2
 # web_servers      : 127.0.0.1:6810
@@ -47,8 +49,14 @@ home_cluster : app
 
 # Set HTTP and HTTPS ports.
 # Use overrides for individual server control, for example: app-0.http : 8081
-http          : @HTTP_PORT@
-# https         : @HTTPS_PORT@
+app.http          : @HTTP_PORT@
+# app.https         : @HTTPS_PORT@
+
+web.http          : @HTTP_PORT@
+# web.https         : @HTTPS_PORT@
+
+# memcached.http      : @HTTP_PORT@
+# memcached.https     : @HTTPS_PORT@
 
 # For security, Resin can switch to a non-root user after binding to port 80
 setuid_user   : @SETUID_USER@
@@ -57,7 +65,8 @@ setuid_group  : @SETUID_GROUP@
 # Arg passed directly to the JVM
 # jvm_args  : -Xmx2048m -XX:MaxPermSize=256m
 
-# Local URLs for the watchdog to check to ensure the server is up, space separated
+# Local URLs for the watchdog to check to ensure the server is up,
+# space separated
 # http_ping_urls : http://127.0.0.1/test.jsp
 
 # Throttle the number of active threads for a port
@@ -93,10 +102,11 @@ proxy_cache_enable: false
 # Enable clustered persistent sessions (for failover)
 session_store : true
 
-# Web-apps named with numeric suffixes, e.g. foo-10.0.war and can be browsed as 
-# /foo. When a new version of the web-app is deployed, Resin continues to route 
-# active session requests to the previous web-app version while new sessions 
-# go to the new version, so users will not be aware of the application upgrade.
+# Web-apps named with numeric suffixes, e.g. foo-10.0.war and can be browsed
+# as /foo. When a new version of the web-app is deployed, Resin continues
+# to route active session requests to the previous web-app version while
+# new sessions go to the new version, so users will not be aware of the
+# application upgrade.
 # webapp_multiversion_routing : true
 
 # Set the email address to receive weekly and restart PDF reports

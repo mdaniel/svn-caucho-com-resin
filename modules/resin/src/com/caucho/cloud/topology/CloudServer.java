@@ -148,6 +148,13 @@ public class CloudServer {
       throw new ConfigException(L.l("'{0}' is not a valid cluster IP address because it is not a private network IP address.",
                                     getAddress()));
     }
+    
+    CloudServer oldServer = pod.getSystem().findServer(address, port);
+    
+    if (oldServer != null) {
+      throw new IllegalArgumentException(L.l("'{0}' is an invalid server because it has the same IP:port as '{1}",
+                                             this, oldServer));
+    }
   }
   
   private boolean isLocalAddress(String address)

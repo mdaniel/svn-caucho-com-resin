@@ -355,7 +355,7 @@ public class CandiBeanGenerator<X> extends BeanGenerator<X> {
     generatePostConstruct(out, map);
     
     generateWriteReplace(out);
-    
+
     generateDestroy(out, map);
   }
 
@@ -395,21 +395,26 @@ public class CandiBeanGenerator<X> extends BeanGenerator<X> {
     out.println("{");
     out.println("  _serializationHandle = handle;");
     out.println("}");
-    out.println();
-    out.println("private Object writeReplace()");
-    out.println("{");
-    out.println("  return _serializationHandle;");
-    out.println("}");
+    
+    generateSerialize(out, "_serializationHandle");
   }
 
   protected void generateSerialize(JavaWriter out)
-    throws IOException
+      throws IOException
   {
-    out.println();
-    out.println("private Object writeReplace()");
-    out.println("{");
-    out.println("  return _bean;");
-    out.println("}");
+    generateSerialize(out, "_bean");
+    
+  }
+  protected void generateSerialize(JavaWriter out, String var)
+      throws IOException
+    {
+    if (! findWriteReplace(_beanClass.getJavaClass())) {
+      out.println();
+      out.println("private Object writeReplace()");
+      out.println("{");
+      out.println("  return " + var + ";");
+      out.println("}");
+    }
   }
 
   protected void generateReadResolve(JavaWriter out)
@@ -425,9 +430,10 @@ public class CandiBeanGenerator<X> extends BeanGenerator<X> {
   protected void generateWriteReplace(JavaWriter out)
     throws IOException
   {
-    if (_isSingleton) {
+    if (_isSingleton && ! findWriteReplace(_beanClass.getJavaClass())) {
       out.println("private transient Object __caucho_handle;");
       out.println();
+
       out.println("private Object writeReplace()");
       out.println("{");
       out.println("  return __caucho_handle;");
@@ -436,6 +442,22 @@ public class CandiBeanGenerator<X> extends BeanGenerator<X> {
     else {
       // XXX: need a handle or serialize to the base class (?)
     }
+  }
+  
+  protected boolean findWriteReplace(Class<?> cl)
+  {
+    if (cl == null || Object.class.equals(cl)) {
+      return false;
+    }
+    
+    for (Method method : cl.getDeclaredMethods()) {
+      if (method.getName().equals("writeReplace")
+          && method.getParameterTypes().length == 0) {
+        return true;
+      }
+    }
+    
+    return findWriteReplace(cl.getSuperclass());
   }
 
   protected void generateConstructor(JavaWriter out, Constructor<?> ctor)

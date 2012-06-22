@@ -157,6 +157,7 @@ abstract public class ToCharResponseStream extends AbstractResponseStream {
   /**
    * Converts the char buffer.
    */
+  @Override
   public char []nextCharBuffer(int offset)
     throws IOException
   {
@@ -171,6 +172,7 @@ abstract public class ToCharResponseStream extends AbstractResponseStream {
   /**
    * Writes a character to the output.
    */
+  @Override
   public void print(int ch)
     throws IOException
   {
@@ -224,6 +226,7 @@ abstract public class ToCharResponseStream extends AbstractResponseStream {
   /**
    * Returns the buffer offset.
    */
+  @Override
   public int getBufferOffset()
   {
     return 0;
@@ -232,6 +235,7 @@ abstract public class ToCharResponseStream extends AbstractResponseStream {
   /**
    * Sets the byte buffer offset.
    */
+  @Override
   public void setBufferOffset(int offset)
   {
     if (offset > 0) {
@@ -246,6 +250,7 @@ abstract public class ToCharResponseStream extends AbstractResponseStream {
   /**
    * Gets the byte buffer
    */
+  @Override
   public byte []getBuffer()
   {
     return _byteBuffer;
@@ -254,6 +259,7 @@ abstract public class ToCharResponseStream extends AbstractResponseStream {
   /**
    * Returns the next buffer.
    */
+  @Override
   public byte []nextBuffer(int offset)
     throws IOException
   {
@@ -270,6 +276,7 @@ abstract public class ToCharResponseStream extends AbstractResponseStream {
    * @param offset start offset into the buffer
    * @param length length of the data in the buffer
    */
+  @Override
   public void write(byte []buf, int offset, int length)
     throws IOException
   {
@@ -307,6 +314,7 @@ abstract public class ToCharResponseStream extends AbstractResponseStream {
    * @param offset start offset into the buffer
    * @param length length of the data in the buffer
    */
+  @Override
   public void write(int ch)
     throws IOException
   {

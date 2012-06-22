@@ -119,7 +119,7 @@
     </host>
   </cluster>
 
-  <cluster id="memcached" xmlns:memcache="urn:java:com.caucho.memcache">
+  <cluster id="memcached" xmlns:memcache="urn:java:com.caucho.memcached">
     <!-- define the servers in the cluster -->
     <server-multi id-prefix="memcached-" address-list="${memcached_servers}" port="6820">
       <!-- listen for the memcache protocol -->

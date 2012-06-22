@@ -174,6 +174,7 @@ public class MultiworkerMailbox implements Mailbox, Closeable
   @Override
   public void message(String to, String from, Serializable value)
   {
+    Thread.dumpStack();
     enqueue(new Message(to, from, value));
   }
 
