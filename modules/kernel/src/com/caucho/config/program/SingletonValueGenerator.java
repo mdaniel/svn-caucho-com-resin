@@ -51,4 +51,10 @@ public class SingletonValueGenerator extends ValueGenerator {
   {
     return _value;
   }
+
+  @Override
+  public String toString()
+  {
+    return getClass().getSimpleName() + "[" + _value + "]";
+  }
 }

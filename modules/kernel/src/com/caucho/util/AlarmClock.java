@@ -286,7 +286,7 @@ public class AlarmClock {
   {
     long nextTime = _nextAlarmTime.get();
     
-    long delta = nextTime - now;
+    long delta = Math.min(nextTime - now, CLOCK_PERIOD);
 
     for (int i = 0; i < delta; i++) {
       long time = now + i;

@@ -12,6 +12,14 @@
 
 <s2 title="4.0.29 - snapshot">
 <ul>
+<li>servlet: add JMX ServletManager.getStickySessionServer (#5072)</li>
+<li>mod_caucho: update ./configure detection of mod_caucho (#5117)</li>
+<li>cli: validate that watchdog resin.home matches CLI resin.home (#5099)</li>
+<li>deploy: update repository failure message (#4051, rep by spance)</li>
+<li>json: Double.NaN needs to print as 0.0 (#5111, rep by Alexey Abashev)</li>
+<li>health: HttpStatusHealthCheck must configure a singleton (#5019)</li>
+<li>cdi: BeforeBeanDiscovery must occur before any ProcessAnnotatedType (#5103)</li>
+<li>openssl: on openssl read, need to check SSL_pending before poll (#5120, rep by Mattias Jiderhamn)</li>
 <li>watchdog: OOM issue with startup of multiple servers (#5096, rep by chiefgeek)</li>
 <li>init.d: add START_CMD to /etc/init.d/resin to allow changes to start-all (#5022)</li>
 <li>config: cluster-socket-timeout is configurable (#5096)</li>

@@ -433,9 +433,20 @@ class WatchdogClient
     
     BamActorRef toRef = bamManager.createActorRef(to);
 
-    return bamManager.createProxy(WatchdogProxy.class, 
-                                  toRef,
-                                  conn);
+    WatchdogProxy proxy = bamManager.createProxy(WatchdogProxy.class, 
+                                                 toRef,
+                                                 conn);
+    
+    String cliResinHome = _bootManager.getResinHome().getFullPath();
+    String watchdogResinHome = proxy.getResinHome();
+    
+    if (watchdogResinHome == null || ! watchdogResinHome.equals(cliResinHome)) {
+      throw new ConfigException(L.l("Unexpected resin.home mismatch:\n  CLI resin.home: {0}\n  watchdog resin.home: {1}",
+                                    cliResinHome,
+                                    watchdogResinHome));
+    }
+    
+    return proxy;
   }
   
   private ActorSender getConnection()

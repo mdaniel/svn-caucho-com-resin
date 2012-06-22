@@ -72,6 +72,7 @@ import com.caucho.server.distcache.PersistentStoreConfig;
 import com.caucho.server.webapp.WebApp;
 import com.caucho.util.Alarm;
 import com.caucho.util.AlarmListener;
+import com.caucho.util.Crc64;
 import com.caucho.util.CurrentTime;
 import com.caucho.util.L10N;
 import com.caucho.util.LruCache;
@@ -87,8 +88,8 @@ import com.caucho.vfs.TempOutputStream;
  */
 public final class SessionManager implements SessionCookieConfig, AlarmListener
 {
-  static protected final L10N L = new L10N(SessionManager.class);
-  static protected final Logger log
+  private static final L10N L = new L10N(SessionManager.class);
+  private static final Logger log
     = Logger.getLogger(SessionManager.class.getName());
 
   private static final int FALSE = 0;
@@ -103,6 +104,8 @@ public final class SessionManager implements SessionCookieConfig, AlarmListener
   private static final int SAVE_BEFORE_FLUSH = 0x2;
   private static final int SAVE_AFTER_REQUEST = 0x4;
   private static final int SAVE_ON_SHUTDOWN = 0x8;
+  
+  private static final int []DECODE;
 
   private final WebApp _webApp;
   private final SessionManagerAdmin _admin;
@@ -1929,10 +1932,39 @@ public final class SessionManager implements SessionCookieConfig, AlarmListener
     else
       return '-';
   }
+  
+  static int getServerCode(String id, int count)
+  {
+    if (id == null)
+      return -1;
+    
+    if (count == 0) {
+      return decode(id.charAt(0));
+    }
+    
+    long hash = Crc64.generate(id);
+    
+    for (int i = 0; i < count; i++) {
+      hash >>= 6;
+    }
+    
+    return (int) (hash & 0x3f);
+  }
+
+  private static int decode(int code)
+  {
+    return DECODE[code & 0x7f];
+  }
 
   @Override
   public String toString()
   {
     return getClass().getSimpleName() + "[" + _webApp.getContextPath() + "]";
+  }
+
+  static {
+    DECODE = new int[128];
+    for (int i = 0; i < 64; i++)
+      DECODE[(int) convert(i)] = i;
   }
 }

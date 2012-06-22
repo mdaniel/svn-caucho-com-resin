@@ -225,7 +225,8 @@ abstract public class AbstractCauchoRequest implements CauchoRequest {
       throw new ServletException("multipart-form is disabled; check <multipart-form> configuration tag.");
       */
 
-    if (! getContentType().startsWith("multipart/form-data"))
+    String contentType = getContentType();
+    if (contentType == null || ! getContentType().startsWith("multipart/form-data"))
       throw new ServletException("Content-Type must be of 'multipart/form-data'.");
 
     if (_filledForm == null)

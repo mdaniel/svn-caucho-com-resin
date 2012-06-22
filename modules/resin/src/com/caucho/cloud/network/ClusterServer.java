@@ -175,6 +175,16 @@ public final class ClusterServer {
     }
   }
   
+  public static CloudServer getSelfServer()
+  {
+    NetworkClusterSystem system = NetworkClusterSystem.getCurrent();
+    
+    if (system == null)
+      throw new IllegalStateException();
+    
+    return system.getSelfServer();
+  }
+  
   public static String getBamAdminName(CloudServer server)
   {
     String serverClusterId = getServerAddress(server.getIndex(), 

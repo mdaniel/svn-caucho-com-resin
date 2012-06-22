@@ -38,9 +38,24 @@ public class DoubleSerializer extends AbstractJsonSerializer<Number> {
 
   private DoubleSerializer() {}
   
+  @Override
   public void write(JsonOutput out, Number value, boolean annotated)
     throws IOException
   {
-    out.writeDouble(value.doubleValue());
+    double dValue = value.doubleValue();
+    
+    if (Double.isNaN(dValue)) {
+      // hessian/5070
+      out.writeDouble(0.0);
+    }
+    else if (Double.isInfinite(dValue)) {
+      if (dValue > 0)
+        out.writeDouble(Double.MAX_VALUE);
+      else
+        out.writeDouble(-Double.MAX_VALUE);
+    }
+    else {
+      out.writeDouble(value.doubleValue());
+    }
   }
 }

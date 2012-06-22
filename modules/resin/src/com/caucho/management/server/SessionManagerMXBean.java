@@ -226,4 +226,7 @@ public interface SessionManagerMXBean extends ManagedObjectMXBean
 
   @Description("Estimated Memory Size")
   public long getEstimatedMemorySize();
+  
+  @Description("The server for a session")
+  public int getStickySessionServer(String sessionId, int n);
 }

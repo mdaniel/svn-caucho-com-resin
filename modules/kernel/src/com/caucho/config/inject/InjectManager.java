@@ -1165,6 +1165,22 @@ public final class InjectManager
    */
   public <T> InjectionTarget<T> createInjectionTarget(Class<T> type)
   {
+    // ioc/0062 (vs discover)
+    try {
+      AnnotatedType<T> annType = ReflectionAnnotatedFactory.introspectType(type);
+      
+      // special call from servlet, etc.
+      return createInjectionTarget(annType);
+    } catch (Exception e) {
+      throw ConfigException.createConfig(e);
+    }
+  }
+
+  /**
+   * Creates a managed bean.
+   */
+  public <T> InjectionTarget<T> discoverInjectionTarget(Class<T> type)
+  {
     try {
       AnnotatedType<T> annType = ReflectionAnnotatedFactory.introspectType(type);
       
@@ -1209,6 +1225,19 @@ public final class InjectManager
    * Creates a managed bean.
    */
   public <T> ManagedBeanImpl<T> createManagedBean(Class<T> cl)
+  {
+    if (cl == null)
+      throw new NullPointerException();
+    
+    AnnotatedType<T> type = createAnnotatedType(cl);
+    
+    return createManagedBean(type);
+  }
+
+  /**
+   * Creates a managed bean.
+   */
+  public <T> ManagedBeanImpl<T> discoverManagedBean(Class<T> cl)
   {
     if (cl == null)
       throw new NullPointerException();

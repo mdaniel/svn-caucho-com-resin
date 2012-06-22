@@ -363,6 +363,11 @@ class WatchdogManager implements AlarmListener {
     return _args.getRootDirectory();
   }
 
+  Path getResinHome()
+  {
+    return _args.getResinHome();
+  }
+
   Path getLogDirectory()
   {
     Path logDirectory = _args.getLogDirectory();

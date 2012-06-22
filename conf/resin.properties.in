@@ -25,14 +25,14 @@ resin_doc     : true
 # App tier Triad servers must be listed to enable web-tier to app-tier load-balancing
 
 # web-tier Triad servers: web-0 web-1 web-2
-# web_servers      :
+# web_servers      : 127.0.0.1:6810
 
 # app-tier Triad servers: app-0 app-1 app-2
 app_servers      : 127.0.0.1:6800
 
 # Configures Resin for a memcached server tier
 # memcached-tier Triad servers: memcached-0 memcached-1 memcached-2
-# memcached_servers    :
+# memcached_servers    : 127.0.0.1:6820
 # memcached_port : 11211
 
 # Allow elastic nodes to join the cluster (enable for cloud mode)

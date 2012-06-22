@@ -319,9 +319,11 @@ abstract public class AbstractRepository implements Repository, RepositorySpi
 
       Map<String,RepositoryTagEntry> tagMap = repositoryTagMap.getTagMap();
 
-      if (! validateHash(contentHash))
-        throw new RepositoryException(L.l("'{0}' has invalid or missing repository content",
-                                          contentHash));
+      ValidateHashResult validResult = validateHash(tagName, contentHash);
+      if (! validResult.isValid()) {
+        throw new RepositoryException(L.l("'{0}' with sha1='{0}' has invalid or missing repository content",
+                                          validResult.getName(), contentHash));
+      }
       
       if (log.isLoggable(Level.FINE)) {
         log.fine(this + " committing " + tagName + "\n  '"
@@ -581,7 +583,7 @@ abstract public class AbstractRepository implements Repository, RepositorySpi
    * Validates a file, checking that it and its dependencies exist.
    */
   @Override
-  public boolean validateHash(String sha1)
+  public ValidateHashResult validateHash(String name, String sha1)
     throws IOException
   {
     //GitType type = getType(sha1);
@@ -592,38 +594,42 @@ abstract public class AbstractRepository implements Repository, RepositorySpi
       if (log.isLoggable(Level.FINEST))
         log.finest(this + " valid " + type + " " + sha1);
 
-      return true;
+      return new ValidateHashResult(name, sha1, true);
     }
     else if (type == GitType.COMMIT) {
       GitCommit commit = readCommit(sha1);
 
-      if (commit == null)
-        return false;
+      if (commit == null) {
+        return new ValidateHashResult(name, sha1, false);
+      }
 
-      return validateHash(commit.getTree());
+      return validateHash(name, commit.getTree()).updateIfTrue(name);
     }
     else if (type == GitType.TREE) {
       GitTree tree = readTree(sha1);
 
       for (GitTree.Entry entry : tree.entries()) {
-        if (! validateHash(entry.getSha1())) {
+        ValidateHashResult result = validateHash(entry.getName(),
+                                                 entry.getSha1());
+        
+        if (! result.isValid()) { 
           if (log.isLoggable(Level.FINE))
             log.fine(this + " invalid " + entry);
 
-          return false;
+          return result;
         }
       }
 
       if (log.isLoggable(Level.FINEST))
         log.finest(this + " valid " + type + " " + sha1);
 
-      return true;
+      return new ValidateHashResult(name, sha1, true);
     }
     else {
       if (log.isLoggable(Level.FINE))
         log.fine(this + " invalid " + sha1);
 
-      return false;
+      return new ValidateHashResult(name, sha1, false);
     }
   }
 

@@ -81,8 +81,9 @@ public class RepositoryTagMap
       throw new NullPointerException();
 
     // force loading and validation from backend
-    if (isValidate)
-      repository.validateHash(commitHash);
+    if (isValidate) {
+      repository.validateHash(commitHash, commitHash);
+    }
 
     _commit = repository.readCommit(commitHash);
     

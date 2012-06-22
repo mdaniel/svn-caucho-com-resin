@@ -66,6 +66,14 @@ class WatchdogService
     return _address;
   }
   */
+  
+  /**
+   * Returns the home directory of the watchdog for validation.
+   */
+  public String getResinHome()
+  {
+    return _manager.getResinHome().getFullPath();
+  }
 
   /**
    * Start queries

@@ -325,7 +325,7 @@ public class TldManager {
     throws JspParseException, IOException
   {
     for (Path path : fileSet.getPaths()) {
-      System.out.println("FS: " + path);
+
       if (path.getPath().startsWith(".")) {
       }
       else if ((path.getPath().endsWith(".tld")

@@ -372,10 +372,14 @@ AC_ARG_WITH(apache,
 apache_dir=${withval}
 
 if test "${apache_dir}" = "yes"; then
-  apache_dir=/usr/local/apache
+  if test -d /usr/local/apache; then
+    apache_dir=/usr/local/apache
+  else
+    apxs=`which apxs2`
+  fi
 fi
 
-if test ! -d "${apache_dir}"; then
+if test ! -d "${apache_dir}" -a ! -x "${apxs}"; then
   AC_MSG_ERROR([--with-apache=${apache_dir} is not a valid Apache directory])
 fi
 
@@ -392,7 +396,20 @@ AC_ARG_WITH(apxs,
 apxs=${withval}
 
 if test "${apxs}" = "yes"; then
-  apxs=apxs
+
+  apxs=`which apxs2` 2>/dev/null
+  if test -z "$apxs"; then
+    apxs=`which apxs` 2>/dev/null
+  fi
+
+  if test -z "$apxs"; then
+    apxs=apxs2
+  fi
+  
+  if test ! -x "$apxs"; then
+    AC_ERROR("'$apxs' is not a valid apxs")
+  fi   
+
 fi
 
 apache=1
@@ -474,7 +491,7 @@ apache=1
 if test -n "${apxs}"; then
   ${apxs} -q PREFIX >/dev/null 2>/dev/null
   if test "$?" -ne 0; then
-    AC_MSG_ERROR(bad apxs ${apxs})
+    AC_MSG_ERROR(Apache ${apxs} is not a valid apxs script)
   fi
 elif test -x "${apache_bin}/apxs"; then
   apxs=${apache_bin}/apxs

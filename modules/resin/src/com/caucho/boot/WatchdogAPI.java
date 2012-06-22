@@ -37,6 +37,7 @@ import com.caucho.config.ConfigException;
  * Process responsible for watching a backend server.
  */
 public interface WatchdogAPI {
+
   /**
    * Returns the status of the watchdog manager
    * 

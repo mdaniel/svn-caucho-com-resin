@@ -30,10 +30,14 @@
 
 package com.caucho.server.session;
 
+import com.caucho.cloud.network.ClusterServer;
 import com.caucho.management.server.AbstractManagedObject;
 import com.caucho.management.server.PersistentStoreMXBean;
 import com.caucho.management.server.SessionManagerMXBean;
 import com.caucho.management.server.WebAppMXBean;
+import com.caucho.server.cluster.Cluster;
+import com.caucho.server.cluster.ServletService;
+import com.caucho.server.webapp.WebApp;
 
 import java.util.logging.Logger;
 
@@ -43,9 +47,6 @@ import java.util.logging.Logger;
 public class SessionManagerAdmin extends AbstractManagedObject
   implements SessionManagerMXBean
 {
-  private static final Logger log
-    = Logger.getLogger(SessionManagerAdmin.class.getName());
-  
   private final SessionManager _manager;
 
   public SessionManagerAdmin(SessionManager manager)
@@ -312,6 +313,20 @@ public class SessionManagerAdmin extends AbstractManagedObject
   public long getEstimatedMemorySize()
   {
     return _manager.getEstimatedMemorySize();
+  }
+  
+  @Override
+  public int getStickySessionServer(String sessionId, int count)
+  {
+    int hash = SessionManager.getServerCode(sessionId, count);
+    
+    WebApp webApp = _manager.getWebApp();
+    
+    ServletService servlet = webApp.getServer();
+    
+    ClusterServer server = servlet.getSelfServer();
+    
+    return hash % server.getCloudPod().getServerLength();
   }
 
   /**
